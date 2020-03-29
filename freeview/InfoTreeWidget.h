@@ -65,13 +65,13 @@ protected:
   void mousePressEvent(QMouseEvent *event);
 
 private:
-  double m_dRAS[3];
-  bool m_bShowSurfaceNormal;
-  bool m_bShowSurfaceCurvature;
-  bool m_bShowTkRegRAS;
-  QLineEdit *m_editor;
+  double           m_dRAS[3];
+  bool             m_bShowSurfaceNormal;
+  bool             m_bShowSurfaceCurvature;
+  bool             m_bShowTkRegRAS;
+  QLineEdit *      m_editor;
   QTreeWidgetItem *m_itemEdited;
-  bool m_bForCursor;
+  bool             m_bForCursor;
 };
 
 #endif // INFOTREEWIDGET_H

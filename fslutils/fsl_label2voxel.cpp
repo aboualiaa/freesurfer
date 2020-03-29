@@ -30,12 +30,11 @@
 #include "mri.h"
 const char *Progname = "fsl_label2voxel";
 
-using namespace std;
-
 void usage() {
-  cout << "Usage: fsl_label2voxel <labelval> <labeled volume> <src volume> "
-          "<output filename>"
-       << endl;
+  std::cout
+      << "Usage: fsl_label2voxel <labelval> <labeled volume> <src volume> "
+         "<output filename>"
+      << std::endl;
 }
 
 class Row {
@@ -43,15 +42,16 @@ public:
   Row(int id, int x, int y, int z, double val)
       : id_(id), x_(x), y_(y), z_(z), val_(val) {}
 
-  void print(ostream &o) {
-    o << id_ << "\t" << x_ << "\t" << y_ << "\t" << z_ << "\t" << val_ << endl;
+  void print(std::ostream &o) {
+    o << id_ << "\t" << x_ << "\t" << y_ << "\t" << z_ << "\t" << val_
+      << std::endl;
   }
 
 private:
-  int id_;
-  int x_;
-  int y_;
-  int z_;
+  int    id_;
+  int    x_;
+  int    y_;
+  int    z_;
   double val_;
 };
 
@@ -61,31 +61,31 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  double label_val = atof(argv[1]);
-  string labelVol = argv[2];
-  string srcVol = argv[3];
-  string outFile = argv[4];
+  double      label_val = atof(argv[1]);
+  std::string labelVol  = argv[2];
+  std::string srcVol    = argv[3];
+  std::string outFile   = argv[4];
 
   MRI *labelMRI = MRIread(const_cast<char *>(labelVol.c_str()));
   if (!labelMRI) {
-    cerr << "Could not open " << labelVol.c_str() << endl;
+    std::cerr << "Could not open " << labelVol.c_str() << std::endl;
     return -1;
   }
   MRI *srcMRI = MRIread(const_cast<char *>(srcVol.c_str()));
   if (!srcMRI) {
-    cerr << "Could not open " << srcVol.c_str() << endl;
+    std::cerr << "Could not open " << srcVol.c_str() << std::endl;
     return -1;
   }
   // check the size
   if ((labelMRI->width != srcMRI->width) ||
       (labelMRI->height != srcMRI->height) ||
       (labelMRI->depth != srcMRI->depth)) {
-    cerr << "src and label volume sizes differ" << endl;
+    std::cerr << "src and label volume sizes differ" << std::endl;
     return -1;
   }
 
-  vector<Row> list;
-  int counter = 0;
+  std::vector<Row> list;
+  int              counter = 0;
   for (int z = 0; z < srcMRI->depth; z++)
     for (int y = 0; y < srcMRI->height; y++)
       for (int x = 0; x < srcMRI->width; x++) {
@@ -98,10 +98,11 @@ int main(int argc, char *argv[]) {
       }
 
   // now printout the file
-  ofstream ofile(const_cast<char *>(const_cast<char *>(outFile.c_str())));
-  ofile << "#!ascii label " << argv[2] << ", from subject " << argv[3] << endl;
-  ofile << counter << endl;
-  vector<Row>::iterator iter;
+  std::ofstream ofile(const_cast<char *>(const_cast<char *>(outFile.c_str())));
+  ofile << "#!ascii label " << argv[2] << ", from subject " << argv[3]
+        << std::endl;
+  ofile << counter << std::endl;
+  std::vector<Row>::iterator iter;
   for (iter = list.begin(); iter != list.end(); iter++)
     iter->print(ofile);
 

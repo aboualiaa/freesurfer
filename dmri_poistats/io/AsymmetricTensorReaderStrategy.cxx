@@ -10,7 +10,7 @@ AsymmetricTensorReaderStrategy::~AsymmetricTensorReaderStrategy() {}
 AsymmetricTensorReaderStrategy::TensorImageType::Pointer
 AsymmetricTensorReaderStrategy::GetTensors() {
 
-  typedef itk::Image<float, 4> FullTensorImageType;
+  typedef itk::Image<float, 4>                      FullTensorImageType;
   typedef itk::ImageFileReader<FullTensorImageType> FullTensorReaderType;
   FullTensorReaderType::Pointer tensorReader = FullTensorReaderType::New();
 
@@ -39,14 +39,14 @@ AsymmetricTensorReaderStrategy::GetTensors() {
       fullTensors->GetLargestPossibleRegion();
   TensorImageType::SizeType size;
   double origin[TensorImageType::RegionType::GetImageDimension()];
-  TensorImageType::IndexType start;
+  TensorImageType::IndexType   start;
   TensorImageType::SpacingType spacing;
 
   for (unsigned int cDim = 0;
        cDim < TensorImageType::RegionType::GetImageDimension(); cDim++) {
-    size[cDim] = dtiRegion.GetSize()[cDim];
-    origin[cDim] = fullTensors->GetOrigin()[cDim];
-    start[cDim] = 0;
+    size[cDim]    = dtiRegion.GetSize()[cDim];
+    origin[cDim]  = fullTensors->GetOrigin()[cDim];
+    start[cDim]   = 0;
     spacing[cDim] = fullTensors->GetSpacing()[cDim];
   }
 

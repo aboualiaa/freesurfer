@@ -24,11 +24,11 @@
  */
 
 #include <cmath>
-#include <ctype.h>
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctype.h>
+#include <math.h>
 
 #define USE_SVM_LIB 0
 
@@ -60,9 +60,9 @@ SVM *SVMalloc(int ninputs, char *c1_name, char *c2_name) {
   strcpy(svm->class2_name, c2_name);
 
   svm->ninputs = ninputs;
-  svm->type = SVM_KERNEL_LINEAR;
-  svm->sigma = DEFAULT_SVM_SIGMA;
-  svm->w = (double *)calloc(ninputs, sizeof(double));
+  svm->type    = SVM_KERNEL_LINEAR;
+  svm->sigma   = DEFAULT_SVM_SIGMA;
+  svm->w       = (double *)calloc(ninputs, sizeof(double));
   if (nullptr == svm->w)
     ErrorExit(ERROR_NOMEMORY, "SVMalloc(%d, %s, %s) - calloc failed", ninputs,
               c1_name, c2_name);
@@ -74,11 +74,11 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
              int max_iter) {
   SVMparam *svmp;
   SVMreal **data, *alpha;
-  int posCount, negCount, i, j, *indices, k;
+  int       posCount, negCount, i, j, *indices, k;
 
   svm->ntraining = ntraining;
-  svm->C = C;
-  svmp = (SVMparam *)calloc(1, sizeof(SVMparam));
+  svm->C         = C;
+  svmp           = (SVMparam *)calloc(1, sizeof(SVMparam));
   if (!svmp)
     ErrorExit(ERROR_NOMEMORY,
               "SVMtrain(%d): could not allocate internal buffers", ntraining);
@@ -119,7 +119,7 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
     negCount++;
   }
 
-  svmp->C = C;
+  svmp->C             = C;
   svmp->maxIterations = max_iter;
   switch (svm->type) {
   default:
@@ -133,14 +133,14 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
   svmp->alphaEpsilon = tol;
   //  svmp->alphaEpsilon = 1e-4 ;
   svmp->classEpsilon = tol;
-  svmp->optEpsilon = .05 /*tol*/;
-  svmp->sigDig = 8;
-  svmp->verbose = 1;
+  svmp->optEpsilon   = .05 /*tol*/;
+  svmp->sigDig       = 8;
+  svmp->verbose      = 1;
 
   svmp->alphaEpsilon = -1;
   svmp->classEpsilon = 1e-6;
-  svmp->optEpsilon = 1e-4;
-  svmp->sigDig = 12;
+  svmp->optEpsilon   = 1e-4;
+  svmp->sigDig       = 12;
 
   SVMsetParam(svmp);
   SVMLtrain(data, posCount, negCount, svm->ninputs);
@@ -207,16 +207,16 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
       constraint, ai, aj, dai, daj, min_step_size;
 
   permutation = (int *)calloc(ntraining, sizeof(int));
-  moved = (int *)calloc(ntraining, sizeof(int));
-  failed = (int *)calloc(ntraining, sizeof(int));
+  moved       = (int *)calloc(ntraining, sizeof(int));
+  failed      = (int *)calloc(ntraining, sizeof(int));
   if (!permutation || !moved || !failed)
     ErrorExit(ERROR_NOMEMORY,
               "SVMtrain(%d): could not allocate internal buffers", ntraining);
 
-  svm->C = C;
+  svm->C         = C;
   svm->ntraining = ntraining;
-  dot_matrix = (double **)calloc(ntraining, sizeof(double *));
-  keep_alpha = svm->alpha != nullptr;
+  dot_matrix     = (double **)calloc(ntraining, sizeof(double *));
+  keep_alpha     = svm->alpha != nullptr;
   if (!svm->alpha)
     svm->alpha = (double *)calloc(ntraining, sizeof(double));
   da_old = (double *)calloc(ntraining, sizeof(double));
@@ -244,12 +244,13 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
         break;
       }
 
-      if (!std::isfinite(dot)) DiagBreak();
+      if (!std::isfinite(dot))
+        DiagBreak();
       dot_matrix[i][j] = dot_matrix[j][i] = dot;
     }
   }
 
-  step_size = 0.1 / svm->ninputs;
+  step_size     = 0.1 / svm->ninputs;
   min_step_size = step_size / 10000;
 
   /* use gradient ascent to maximize lagrangian */
@@ -265,7 +266,8 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
 
       da_old[k] = step_size * da;
     }
-    if (!std::isfinite(da_old[k])) DiagBreak();
+    if (!std::isfinite(da_old[k]))
+      DiagBreak();
 
     /* build permutation */
     for (i = 0; i < ntraining; i++)
@@ -278,7 +280,7 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
       j = (int)random() % ntraining;
 #endif
 
-      tmp = permutation[i];
+      tmp            = permutation[i];
       permutation[i] = permutation[j];
       permutation[j] = tmp;
     }
@@ -352,12 +354,14 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
       if (ai >= C)
         ai = C;
       dai = ai - svm->alpha[i];
-      if (!std::isfinite(dai)) DiagBreak();
+      if (!std::isfinite(dai))
+        DiagBreak();
 
       /* move i and j by equal and opposite amounts */
       daj = -dai * y[i] / y[j];
 
-      if (!std::isfinite(daj)) DiagBreak();
+      if (!std::isfinite(daj))
+        DiagBreak();
       /* update jth alpha and make sure it stays in the feasible region */
       aj = svm->alpha[j] + daj;
       if (aj < 0)
@@ -397,7 +401,7 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
 
       /* Lagrangian increased */
       nmoved += 2;
-      Lprev = L;
+      Lprev      = L;
       constraint = SVMconstraint(svm, y, ntraining);
       if (!DZERO(constraint))
         DiagBreak();
@@ -468,7 +472,7 @@ int SVMtrain(SVM *svm, float **x, float *y, int ntraining, double C, double tol,
 
 static double SVMlagrangian(SVM *svm, int ntraining, float **x, float *y,
                             double **dot_matrix) {
-  int i, j;
+  int    i, j;
   double L;
 
   L = 0;
@@ -485,7 +489,7 @@ static double SVMlagrangian(SVM *svm, int ntraining, float **x, float *y,
 #endif
 int SVMwrite(SVM *svm, char *fname) {
   FILE *fp;
-  int i, j;
+  int   i, j;
 
   fp = fopen(fname, "w");
   if (!fp)
@@ -534,9 +538,9 @@ int SVMwrite(SVM *svm, char *fname) {
 
 SVM *SVMread(char *fname) {
   FILE *fp;
-  int i, ninputs, retval, j, ntraining;
-  SVM *svm;
-  char class1_name[STRLEN], class2_name[STRLEN], token[STRLEN], line[STRLEN],
+  int   i, ninputs, retval, j, ntraining;
+  SVM * svm;
+  char  class1_name[STRLEN], class2_name[STRLEN], token[STRLEN], line[STRLEN],
       *cp;
 
   fp = fopen(fname, "r");
@@ -575,11 +579,11 @@ SVM *SVMread(char *fname) {
                   svm->ntraining);
 
       for (i = 0; i < svm->ntraining; i++) {
-        cp = fgetl(line, STRLEN - 1, fp);
+        cp     = fgetl(line, STRLEN - 1, fp);
         retval = sscanf(cp, "%le\n", &svm->alpha[i]);
       }
     } else if (stricmp(token, "NEXTRA") == 0) {
-      retval = sscanf(cp, "%*s\t%d", &svm->extra_args);
+      retval    = sscanf(cp, "%*s\t%d", &svm->extra_args);
       svm->args = (char **)calloc(svm->extra_args, sizeof(char *));
       if (!svm->args)
         ErrorExit(ERROR_BADPARM,
@@ -601,7 +605,7 @@ SVM *SVMread(char *fname) {
     } else if (stricmp(token, "THRESHOLD") == 0) {
       retval = sscanf(cp, "%*s\t%le", &svm->threshold);
     } else if (stricmp(token, "NSUPPORT") == 0) {
-      retval = sscanf(cp, "%*s\t%d", &svm->nsupport);
+      retval        = sscanf(cp, "%*s\t%d", &svm->nsupport);
       svm->asupport = (double *)calloc(svm->nsupport, sizeof(double));
       svm->ysupport = (float *)calloc(svm->nsupport, sizeof(double));
       svm->xsupport = (float **)calloc(svm->nsupport, sizeof(float *));
@@ -629,9 +633,9 @@ SVM *SVMread(char *fname) {
 }
 int SVMfree(SVM **psvm) {
   SVM *svm;
-  int i;
+  int  i;
 
-  svm = *psvm;
+  svm   = *psvm;
   *psvm = nullptr;
 
   if (svm->alpha)
@@ -650,7 +654,7 @@ int SVMfree(SVM **psvm) {
 }
 
 double SVMclassify(SVM *svm, float *x) {
-  int i;
+  int    i;
   double classification, dot;
 #if USE_SMV_LIB
   double c2;
@@ -685,18 +689,19 @@ double SVMclassify(SVM *svm, float *x) {
 }
 
 static double svm_linear_dot(int ninputs, float *xi, float *xj) {
-  int k;
+  int    k;
   double dot;
 
   for (dot = 0.0, k = 0; k < ninputs; k++) {
     dot += xi[k] * xj[k];
-    if (!std::isfinite(dot)) DiagBreak();
+    if (!std::isfinite(dot))
+      DiagBreak();
   }
   return (1 + dot);
 }
 
 static double svm_rbf_dot(int ninputs, float *xi, float *xj, double sigma) {
-  int k;
+  int    k;
   double norm, two_sigma_squared, xdiff, dot;
 
   two_sigma_squared = 2 * sigma * sigma;
@@ -710,7 +715,7 @@ static double svm_rbf_dot(int ninputs, float *xi, float *xj, double sigma) {
 }
 double SVMconstraint(SVM *svm, float *y, int ntraining) {
   double constraint;
-  int i;
+  int    i;
 
   for (constraint = 0.0, i = 0; i < ntraining; i++)
     constraint += y[i] * svm->alpha[i];

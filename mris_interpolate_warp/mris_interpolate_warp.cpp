@@ -25,21 +25,21 @@
  */
 
 #include "diag.h"
+#include "gcamorph.h"
+#include "mri_circulars.h"
+#include "mrinorm.h"
 #include "timer.h"
 #include "version.h"
-#include "gcamorph.h"
-#include "mrinorm.h"
-#include "mri_circulars.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 static char *like_vol_name;
 
-const char *Progname;
-static void usage_exit(int code);
-static int niter = 500;
-static MRI *mri_in = nullptr;
+const char * Progname;
+static void  usage_exit(int code);
+static int   niter  = 500;
+static MRI * mri_in = nullptr;
 static char *out_fname;
 
 static int no_write = 0;
@@ -48,11 +48,11 @@ static int pad = 20;
 
 static int write_surface_warp_into_volume(MRI_SURFACE *mris, MRI *mri,
                                           int niter) {
-  int vno, xvi, yvi, zvi, frame;
+  int     vno, xvi, yvi, zvi, frame;
   VERTEX *v;
-  double dx, dy, dz, xv, yv, zv, xv1, yv1, zv1;
-  MRI *mri_weights, *mri_ctrl, *mri_frame;
-  float wt;
+  double  dx, dy, dz, xv, yv, zv, xv1, yv1, zv1;
+  MRI *   mri_weights, *mri_ctrl, *mri_frame;
+  float   wt;
 
   mri_weights =
       MRIallocSequence(mri->width, mri->height, mri->depth, MRI_FLOAT, 1);
@@ -70,9 +70,9 @@ static int write_surface_warp_into_volume(MRI_SURFACE *mris, MRI *mri,
     MRISsurfaceRASToVoxelCached(mris, mri, v->origx, v->origy, v->origz, &xv,
                                 &yv, &zv);
     MRISsurfaceRASToVoxelCached(mris, mri, v->x, v->y, v->z, &xv1, &yv1, &zv1);
-    dx = xv1 - xv;
-    dy = yv1 - yv;
-    dz = zv1 - zv;
+    dx  = xv1 - xv;
+    dy  = yv1 - yv;
+    dz  = zv1 - zv;
     xvi = nint(xv);
     yvi = nint(yv);
     zvi = nint(zv);
@@ -211,7 +211,7 @@ static int write_surface_warp_into_volume(MRI_SURFACE *mris, MRI *mri,
 }
 
 static MRI *expand_mri_to_fit_surface(MRI_SURFACE *mris, MRI *mri) {
-  int vno;
+  int     vno;
   VERTEX *v;
   double xv, yv, zv, xmin, ymin, zmin, xmax, ymax, zmax, x0, y0, z0, x1, y1, z1,
       dx_dx, dx_dy, dx_dz, dy_dx, dy_dy, dy_dz, dz_dx, dz_dy, dz_dz;
@@ -280,18 +280,17 @@ static MRI *expand_mri_to_fit_surface(MRI_SURFACE *mris, MRI *mri) {
 }
 
 int main(int argc, char *argv[]) {
-  char **av, *out_name;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
+  char **      av, *out_name;
+  int          ac, nargs;
+  int          msec, minutes, seconds;
+  Timer        start;
   MRI_SURFACE *mris;
-  GCA_MORPH *gcam;
-  MRI *mri = nullptr;
+  GCA_MORPH *  gcam;
+  MRI *        mri = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mris_interpolate_warp");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -345,7 +344,7 @@ int main(int argc, char *argv[]) {
     MRIfree(&mri_tmp);
   }
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
-    double xv, yv, zv;
+    double  xv, yv, zv;
     VERTEX *v = &mris->vertices[0];
     MRISsurfaceRASToVoxel(mris, mri, v->x, v->y, v->z, &xv, &yv, &zv);
     printf("v 0: sras (%f, %f, %f) --> vox (%f, %f, %f)\n", v->x, v->y, v->z,
@@ -387,12 +386,12 @@ int main(int argc, char *argv[]) {
     printf("applying warp to %s and writing to %s\n", mri_in->fname, out_fname);
     mri_tmp = MRIextractRegionAndPad(mri_in, nullptr, nullptr, pad);
     MRIfree(&mri_in);
-    mri_in = mri_tmp;
+    mri_in     = mri_tmp;
     mri_warped = GCAMmorphToAtlas(mri_in, gcam, nullptr, -1, SAMPLE_TRILINEAR);
     MRIwrite(mri_warped, out_fname);
     if (Gdiag_no >= 0) {
-      double xi, yi, zi, xo, yo, zo, val;
-      int xp, yp, zp;
+      double          xi, yi, zi, xo, yo, zo, val;
+      int             xp, yp, zp;
       GCA_MORPH_NODE *gcamn;
 
       VERTEX *v = &mris->vertices[Gdiag_no];
@@ -403,9 +402,9 @@ int main(int argc, char *argv[]) {
              "%2.0f, %2.0f)\n",
              Gdiag_no, xi, yi, zi, xo, yo, zo);
       MRIsampleVolume(mri_in, xo, yo, zo, &val);
-      xp = nint(xi);
-      yp = nint(yi);
-      zp = nint(zi);
+      xp    = nint(xi);
+      yp    = nint(yi);
+      zp    = nint(zi);
       gcamn = &gcam->nodes[xp][yp][zp];
       printf(
           "warp = (%2.1f, %2.1f, %2.1f), orig (%2.1f %2.1f %2.1f) = %2.1f \n",
@@ -418,7 +417,7 @@ int main(int argc, char *argv[]) {
     out_name = argv[3];
     GCAMwrite(gcam, out_name);
   }
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -433,7 +432,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -448,11 +447,11 @@ static int get_option(int argc, char *argv[]) {
       ErrorExit(ERROR_NOFILE, "%s: could not read volume %s", Progname,
                 argv[2]);
     out_fname = argv[3];
-    nargs = 2;
+    nargs     = 2;
     break;
   case 'V':
     Gdiag_no = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     break;
   case 'I':
     niter = atoi(argv[2]);

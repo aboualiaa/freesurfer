@@ -34,21 +34,19 @@
 #ifndef __C_MPMOVERLAY_H__
 #define __C_MPMOVERLAY_H__
 
-#include "mri.h"
-#include "mrisurf.h"
-#include "label.h"
 #include "error.h"
 #include "fio.h"
+#include "label.h"
+#include "mri.h"
+#include "mrisurf.h"
 
 #include "env.h"
 #include "general.h"
 #include <string>
 #include <vector>
 
-using namespace std;
-
 const int MPMOVERLAYSTACKDEPTH = 64;
-const int STRBUF = 65536;
+const int STRBUF               = 65536;
 
 // enum typedef for the overlays relevant to FreeSurfer
 typedef enum _e_overlay {
@@ -66,11 +64,11 @@ typedef enum _e_overlay {
   eoverlay
 } EOVERLAY;
 
-static string mstr_curvSuffix[] = {"K1.crv", "K2.crv", "K.crv",  "S.crv",
-                                   "BE.crv", "C.crv",  "FI.crv", "thickness",
-                                   "curv",   "sulc"};
+static std::string mstr_curvSuffix[] = {
+    "K1.crv", "K2.crv", "K.crv",     "S.crv", "BE.crv",
+    "C.crv",  "FI.crv", "thickness", "curv",  "sulc"};
 
-static string mstr_curvPrefixTemplate[] = {
+static std::string mstr_curvPrefixTemplate[] = {
     "HEMI.SURF.", "HEMI.SURF.", "HEMI.SURF.", "HEMI.SURF.", "HEMI.SURF.",
     "HEMI.SURF.", "HEMI.SURF.", "HEMI.",      "HEMI.",      "HEMI."};
 
@@ -82,13 +80,13 @@ class C_mpmOverlay {
 
 public:
   // type and var info
-  string mstr_obj;  // name of object class
-  string mstr_name; // name of object variable
-  int mid;          // id of socket
-  int mverbosity;   // Debug related value
-  int mwarnings;    // Show warnings
-  int mstackDepth;  // Current procedure stackDepth
-  string mstr_proc[MPMOVERLAYSTACKDEPTH];
+  std::string mstr_obj;    // name of object class
+  std::string mstr_name;   // name of object variable
+  int         mid;         // id of socket
+  int         mverbosity;  // Debug related value
+  int         mwarnings;   // Show warnings
+  int         mstackDepth; // Current procedure stackDepth
+  std::string mstr_proc[MPMOVERLAYSTACKDEPTH];
   // Used to track the current
   //+ procedure being executed
 protected:
@@ -96,13 +94,13 @@ protected:
 
   s_env *mps_env; // Pointer to the main
                   //+ environment
-  bool mb_created;
-  string mstr_surface;
+  bool        mb_created;
+  std::string mstr_surface;
 
-  vector<float> mv_costWeight;    // vector of cost weights
-  vector<float> mv_costWeightDel; // delta weights for vector
-  string mstr_costWeightFile;     // contains weights and del
-                                  // weights
+  std::vector<float> mv_costWeight;       // vector of cost weights
+  std::vector<float> mv_costWeightDel;    // delta weights for vector
+  std::string        mstr_costWeightFile; // contains weights and del
+                                          // weights
 
   //
   // Method members
@@ -112,9 +110,9 @@ public:
   //
   // Constructor / destructor block
   //
-  void core_construct(string astr_name = "unnamed", int a_id = -1,
+  void core_construct(std::string astr_name = "unnamed", int a_id = -1,
                       int a_verbosity = 0, int a_warnings = 0,
-                      int a_stackDepth = 0, string astr_proc = "noproc");
+                      int a_stackDepth = 0, std::string astr_proc = "noproc");
   C_mpmOverlay(s_env *aps_env);
   virtual ~C_mpmOverlay();
   C_mpmOverlay(const C_mpmOverlay &C_mpmOverlay);
@@ -123,48 +121,51 @@ public:
   //
   // Error / warn /  print block
   //
-  void debug_push(string astr_currentProc);
+  void debug_push(std::string astr_currentProc);
   void debug_pop();
-  void error(string astr_msg = "", int code = 1);
-  void warn(string astr_msg = "", int code = 1);
-  void function_trace(string astr_msg = "", string astr_separator = "");
+  void error(std::string astr_msg = "", int code = 1);
+  void warn(std::string astr_msg = "", int code = 1);
+  void function_trace(std::string astr_msg       = "",
+                      std::string astr_separator = "");
   void print();
 
   //
   // Access "housekeeping" state info
   //
 
-  const string str_obj_get() const { return mstr_obj; };
-  const string str_name_get() const { return mstr_name; };
-  int id_get() const { return mid; };
-  int verbosity_get() const { return mverbosity; };
-  int warnings_get() const { return mwarnings; };
-  int stackDepth_get() const { return mstackDepth; };
+  const std::string str_obj_get() const { return mstr_obj; };
+  const std::string str_name_get() const { return mstr_name; };
+  int               id_get() const { return mid; };
+  int               verbosity_get() const { return mverbosity; };
+  int               warnings_get() const { return mwarnings; };
+  int               stackDepth_get() const { return mstackDepth; };
 
-  void str_obj_set(string astr_val) { mstr_obj = astr_val; };
-  void str_name_set(string astr_val) { mstr_name = astr_val; };
-  void str_proc_set(int depth, string astr_proc) {
+  void str_obj_set(std::string astr_val) { mstr_obj = astr_val; };
+  void str_name_set(std::string astr_val) { mstr_name = astr_val; };
+  void str_proc_set(int depth, std::string astr_proc) {
     mstr_proc[depth] = astr_proc;
   };
-  void id_set(int value) { mid = value; };
-  void verbosity_set(int value) { mverbosity = value; };
-  void warnings_set(int value) { mwarnings = value; };
-  void stackDepth_set(int value) { mstackDepth = value; };
-  const string str_proc_get() const { return mstr_proc[stackDepth_get()]; };
-  const string str_proc_get(int i) { return mstr_proc[i]; };
+  void              id_set(int value) { mid = value; };
+  void              verbosity_set(int value) { mverbosity = value; };
+  void              warnings_set(int value) { mwarnings = value; };
+  void              stackDepth_set(int value) { mstackDepth = value; };
+  const std::string str_proc_get() const {
+    return mstr_proc[stackDepth_get()];
+  };
+  const std::string str_proc_get(int i) { return mstr_proc[i]; };
 
   //
   // Core class methods
   //
 
-  const string strSurface_get() const { return mstr_surface; };
+  const std::string strSurface_get() const { return mstr_surface; };
 
-  bool costVector_read(string astr_fileName = "");
-  bool costVector_write(string astr_fileName = "");
+  bool          costVector_read(std::string astr_fileName = "");
+  bool          costVector_write(std::string astr_fileName = "");
   virtual float costEdge_calc(int i, int j) = 0;
-  string curvFileName_get(EOVERLAY ae_overlay);
-  e_FILEACCESS CURV_fileRead(string astr_curvFileName, float *apf_curv[],
-                             int *api_size);
+  std::string   curvFileName_get(EOVERLAY ae_overlay);
+  e_FILEACCESS  CURV_fileRead(std::string astr_curvFileName, float *apf_curv[],
+                              int *api_size);
 };
 
 //
@@ -184,7 +185,7 @@ public:
   //
   // Functional block
   //
-  void costWeightVector_init();
+  void          costWeightVector_init();
   virtual float costEdge_calc(int i, int j);
 };
 
@@ -206,7 +207,7 @@ public:
   //
   // Functional block
   //
-  void costWeightVector_init();
+  void          costWeightVector_init();
   virtual float costEdge_calc(int i, int j);
 };
 
@@ -228,7 +229,7 @@ public:
   //
   // Functional block
   //
-  void costWeightVector_init();
+  void          costWeightVector_init();
   virtual float costEdge_calc(int i, int j);
 };
 
@@ -250,7 +251,7 @@ public:
   //
   // Functional block
   //
-  void costWeightVector_init();
+  void          costWeightVector_init();
   virtual float costEdge_calc(int i, int j);
 };
 
@@ -268,7 +269,7 @@ protected:
   int mv_size;
 
 public:
-  C_mpmOverlay_FScurvs(s_env *aps_env, string astr_costWeightVector = "");
+  C_mpmOverlay_FScurvs(s_env *aps_env, std::string astr_costWeightVector = "");
   ~C_mpmOverlay_FScurvs();
 
   //
@@ -279,7 +280,7 @@ public:
   //
   // Functional block
   //
-  void costWeightVector_init();
+  void          costWeightVector_init();
   virtual float costEdge_calc(int i, int j);
 };
 
@@ -295,13 +296,13 @@ class C_mpmOverlay_curvature : public C_mpmOverlay {
   //
 
 protected:
-  int mv_size;
-  float *mpf_curvatureData;
+  int     mv_size;
+  float * mpf_curvatureData;
   e_stats mes_curvStats;
 
 public:
-  C_mpmOverlay_curvature(s_env *aps_env, string astr_curvFileStem,
-                         string astr_costWeightFile = "");
+  C_mpmOverlay_curvature(s_env *aps_env, std::string astr_curvFileStem,
+                         std::string astr_costWeightFile = "");
   ~C_mpmOverlay_curvature();
 
   //
@@ -311,7 +312,7 @@ public:
   //
   // Functional block
   //
-  void costWeightVector_init();
+  void          costWeightVector_init();
   virtual float costEdge_calc(int i, int j);
 };
 

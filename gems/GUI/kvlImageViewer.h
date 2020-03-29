@@ -14,7 +14,6 @@
 #include "vtkImageMapToColors.h"
 #include "vtkLookupTable.h"
 #include "vtkOutlineFilter.h"
-#include "vtkOutlineFilter.h"
 #include "vtkPlane.h"
 #include "vtkSmartPointer.h"
 #include "vtkUnstructuredGrid.h"
@@ -31,8 +30,8 @@ namespace kvl {
 
 class ImageViewer : public vtkFlRenderWindowInteractor {
 public:
-  typedef itk::ImageBase<3> ImageBaseType;
-  typedef itk::Image<unsigned char, 3> ImageType;
+  typedef itk::ImageBase<3>                            ImageBaseType;
+  typedef itk::Image<unsigned char, 3>                 ImageType;
   typedef itk::Image<itk::RGBAPixel<unsigned char>, 3> RGBAImageType;
 
   ImageViewer(int x, int y, int w, int h, const char *l = 0);
@@ -48,7 +47,9 @@ public:
 
   void SetOverlayImage(const ImageBaseType *overlayImage);
 
-  [[nodiscard]] const ImageBaseType *GetOverlayImage() const { return m_OverlayImage; }
+  [[nodiscard]] const ImageBaseType *GetOverlayImage() const {
+    return m_OverlayImage;
+  }
 
   void SetOverlayScale(float overlayScale);
 
@@ -70,11 +71,13 @@ public:
                         unsigned int &coronalSliceNumber,
                         unsigned int &axialSliceNumber) {
     sagittalSliceNumber = m_SagittalSliceNumber;
-    coronalSliceNumber = m_CoronalSliceNumber;
-    axialSliceNumber = m_AxialSliceNumber;
+    coronalSliceNumber  = m_CoronalSliceNumber;
+    axialSliceNumber    = m_AxialSliceNumber;
   }
 
-  [[nodiscard]] const int *GetMaximumImageIndex() const { return m_MaximumImageIndex; }
+  [[nodiscard]] const int *GetMaximumImageIndex() const {
+    return m_MaximumImageIndex;
+  }
 
   void SetPositionGradient(
       const AtlasPositionGradientContainerType *positionGradient) {}
@@ -93,7 +96,7 @@ protected:
   float CalculateMaximum(const ImageType *image) const;
 
   //
-  typedef itk::VTKImageExport<ImageType> ExporterType;
+  typedef itk::VTKImageExport<ImageType>     ExporterType;
   typedef itk::VTKImageExport<RGBAImageType> RGBAExporterType;
 
   //
@@ -103,7 +106,7 @@ protected:
 private:
   ImageBaseType::ConstPointer m_Image;
   ImageBaseType::ConstPointer m_OverlayImage;
-  AtlasMesh::ConstPointer m_Mesh;
+  AtlasMesh::ConstPointer     m_Mesh;
 
   float m_OverlayColor[3];
   float m_OverlayAlpha;
@@ -114,16 +117,16 @@ private:
   unsigned int m_AxialSliceNumber;
   unsigned int m_CoronalSliceNumber;
 
-  ExporterType::Pointer m_ImageExporter;
+  ExporterType::Pointer     m_ImageExporter;
   RGBAExporterType::Pointer m_RGBAImageExporter;
-  ExporterType::Pointer m_OverlayImageExporter;
+  ExporterType::Pointer     m_OverlayImageExporter;
   RGBAExporterType::Pointer m_RGBAOverlayImageExporter;
 
   vtkSmartPointer<vtkImageImport> m_Importer;
   vtkSmartPointer<vtkImageImport> m_OverlayImporter;
 
   vtkSmartPointer<vtkOutlineFilter> m_OutlineFilter;
-  vtkSmartPointer<vtkExtractEdges> m_EdgeExtracter;
+  vtkSmartPointer<vtkExtractEdges>  m_EdgeExtracter;
 
   vtkSmartPointer<vtkCutter> m_SagittalCutter;
   vtkSmartPointer<vtkCutter> m_CoronalCutter;

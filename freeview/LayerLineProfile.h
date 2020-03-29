@@ -2,8 +2,8 @@
 #define LAYERLINEPROFILE_H
 
 #include "Layer.h"
-#include "vtkSmartPointer.h"
 #include "LineProf.h"
+#include "vtkSmartPointer.h"
 
 class vtkActor;
 class vtkPolyDataMapper;
@@ -45,7 +45,7 @@ public:
 
   bool Export(const QString &filename, LayerMRI *mri, int nSample);
 
-  bool ExportThickness(const QString &filename,
+  bool ExportThickness(const QString &               filename,
                        const QList<LayerPointSet *> &layers, int nSample = 100);
 
   bool Save(const QString &filename);
@@ -82,27 +82,27 @@ private:
   std::vector<std::vector<double>> Points3DToSpline2D(std::vector<double> pts3d,
                                                       double distance);
   std::vector<std::vector<double>>
-  Points2DToSpline3D(std::vector<std::vector<double>> pts2d, int nSample);
+       Points2DToSpline3D(std::vector<std::vector<double>> pts2d, int nSample);
   void MakeFlatTube(vtkPoints *points, vtkCellArray *lines, vtkActor *actor_in,
                     double radius);
   QList<double>
   ComputeThicknessAlongLineProfile(std::vector<std::vector<double>> &line2d,
-                                   const QList<LayerPointSet *> &splines,
-                                   int nSample);
+                                   const QList<LayerPointSet *> &    splines,
+                                   int                               nSample);
 
-  LayerPointSet *m_spline0;
-  LayerPointSet *m_spline1;
-  vtkSmartPointer<vtkActor> m_endLines;
-  vtkSmartPointer<vtkActor> m_profileLines;
-  vtkSmartPointer<vtkActor> m_activeLine;
-  int m_nPlane;
+  LayerPointSet *                               m_spline0;
+  LayerPointSet *                               m_spline1;
+  vtkSmartPointer<vtkActor>                     m_endLines;
+  vtkSmartPointer<vtkActor>                     m_profileLines;
+  vtkSmartPointer<vtkActor>                     m_activeLine;
+  int                                           m_nPlane;
   std::vector<std::vector<std::vector<double>>> m_ptsProfile;
-  double m_dSliceLocation;
-  double m_dResolution;
-  double m_dSpacing;
-  double m_dOffset;
-  int m_nSamples;
-  double m_dReferenceSize;
+  double                                        m_dSliceLocation;
+  double                                        m_dResolution;
+  double                                        m_dSpacing;
+  double                                        m_dOffset;
+  int                                           m_nSamples;
+  double                                        m_dReferenceSize;
 
   int m_nActiveLineId;
 };

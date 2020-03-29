@@ -11,14 +11,14 @@ public:
 
   explicit BusyIndicator(QWidget *parent = 0);
 
-  void showEvent(QShowEvent *e);
-  void hideEvent(QHideEvent *e);
-  void paintEvent(QPaintEvent *);
+  void  showEvent(QShowEvent *e);
+  void  hideEvent(QHideEvent *e);
+  void  paintEvent(QPaintEvent *);
   QSize minimumSizeHint() const;
   QSize sizeHint() const;
 
-  void setIndicatorStyle(IndicatorStyle);
-  void setColor(QColor color);
+  void           setIndicatorStyle(IndicatorStyle);
+  void           setColor(QColor color);
   IndicatorStyle indicatorStyle() const;
 
 signals:
@@ -28,12 +28,12 @@ private slots:
 
 private:
   QPixmap generatePixmap(int sideLength);
-  void drawRectStyle(QPainter *painter);
-  void drawEllipseStyle(QPainter *painter);
-  void drawArcStyle(QPainter *painter);
+  void    drawRectStyle(QPainter *painter);
+  void    drawEllipseStyle(QPainter *painter);
+  void    drawArcStyle(QPainter *painter);
 
   QTimer timer;
-  int startAngle;
+  int    startAngle;
 
   IndicatorStyle m_style;
 

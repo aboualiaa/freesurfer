@@ -26,8 +26,8 @@
 #ifndef VolumeFilter_h
 #define VolumeFilter_h
 
-#include <QObject>
 #include "CommonDataStruct.h"
+#include <QObject>
 
 #include "mri.h"
 
@@ -69,11 +69,11 @@ protected slots:
 protected:
   virtual bool Execute() = 0;
 
-  int m_nKernelSize;
+  int       m_nKernelSize;
   LayerMRI *m_volumeInput;
   LayerMRI *m_volumeOutput;
-  int m_nTimerCount;
-  QTimer *m_timerProgress;
+  int       m_nTimerCount;
+  QTimer *  m_timerProgress;
 };
 
 #endif

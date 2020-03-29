@@ -1,33 +1,33 @@
-#include <iostream>
-#include <string>
-#include "itkImageFileReader.h"
 #include "GetPot.h"
+#include "itkDefaultStaticMeshTraits.h"
 #include "itkImage.h"
-#include <map>
-#include <queue>
+#include "itkImageFileReader.h"
+#include "itkMesh.h"
+#include "itkPolylineCell.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
-#include "itkDefaultStaticMeshTraits.h"
-#include "itkMesh.h"
-#include "itkPolylineCell.h"
+#include <iostream>
+#include <map>
+#include <queue>
+#include <string>
 #define PI 3.14159265
-#include "itkRigid3DTransform.h"
-#include "NormalizedCutsFilter.h"
-#include "TrkVTKPolyDataFilter.txx"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "itkImageDuplicator.h"
-#include "itkNeighborhoodIterator.h"
-#include <ctime>
-#include "vtkSplineFilter.h"
-#include "VTKPolyDataToPolylineMeshFilter.h"
 #include "EuclideanMembershipFunction.h"
 #include "HausdorffMembershipFunction.h"
 #include "LabelPerPointMembershipFunction.h"
+#include "LabelPerPointVariableLengthVector.h"
 #include "LabelsEntropyAndIntersectionMembershipFunction.h"
 #include "LabelsPointToPointMembershipFunction.h"
-#include "LabelPerPointVariableLengthVector.h"
+#include "NormalizedCutsFilter.h"
+#include "PolylineMeshToVTKPolyDataFilter.h"
+#include "TrkVTKPolyDataFilter.txx"
+#include "VTKPolyDataToPolylineMeshFilter.h"
+#include "itkImageDuplicator.h"
+#include "itkNeighborhoodIterator.h"
+#include "itkRigid3DTransform.h"
 #include "vtkDirectory.h"
+#include "vtkSplineFilter.h"
+#include <ctime>
 
 typedef struct {
   unsigned char r;
@@ -35,9 +35,9 @@ typedef struct {
   unsigned char b;
 } color_triplet2;
 
-using Node = std::pair<int, int>;
+using Node        = std::pair<int, int>;
 using Adjacencies = std::vector<Node>;
-using Graph = std::vector<Node>;
+using Graph       = std::vector<Node>;
 
 int main(int narg, char *arg[]) {
   enum { Dimension = 3 };
@@ -57,25 +57,25 @@ int main(int narg, char *arg[]) {
     return -1;
   }
 
-  const char *segFile = cl.follow("", "-s");
-  const char *fiberFile = cl.follow("", "-f");
-  const char *outputFolder = cl.follow("", "-o");
-  const char *neighbors = cl.follow("a", "-d");
-  int numberOfClusters = cl.follow(200, "-c");
-  int numberOfPoints = cl.follow(10, "-n");
-  int numberOfFibers = cl.follow(500, "-e");
+  const char *segFile          = cl.follow("", "-s");
+  const char *fiberFile        = cl.follow("", "-f");
+  const char *outputFolder     = cl.follow("", "-o");
+  const char *neighbors        = cl.follow("a", "-d");
+  int         numberOfClusters = cl.follow(200, "-c");
+  int         numberOfPoints   = cl.follow(10, "-n");
+  int         numberOfFibers   = cl.follow(500, "-e");
   vtkDirectory::MakeDirectory(outputFolder);
-  std::vector<std::string> labels;
+  std::vector<std::string>                         labels;
   std::vector<std::pair<std::string, std::string>> clusterIdHierarchy;
-  ImageType::Pointer segmentation;
+  ImageType::Pointer                               segmentation;
   std::cout << "number of points  " << numberOfPoints << std::endl;
   const unsigned int PointDimension = 3;
   {
 
-    using PointDataType = std::vector<int>;
+    using PointDataType                        = std::vector<int>;
     const unsigned int MaxTopologicalDimension = 3;
-    using CoordinateType = double;
-    using InterpolationWeightType = double;
+    using CoordinateType                       = double;
+    using InterpolationWeightType              = double;
     using MeshTraits =
         itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                      MaxTopologicalDimension, CoordinateType,
@@ -92,9 +92,9 @@ int main(int narg, char *arg[]) {
       for (int k = 0; k < 3; k++) {
         for (int j = 0; j < 3; j++) {
           IndexType index;
-          index[0] = possibles[i];
-          index[1] = possibles[j];
-          index[2] = possibles[k];
+          index[0]         = possibles[i];
+          index[1]         = possibles[j];
+          index[2]         = possibles[k];
           int howManyZeros = 0;
           if (i == 0)
             howManyZeros++;
@@ -121,14 +121,14 @@ int main(int narg, char *arg[]) {
         MeshType::CellsAllocatedDynamicallyCellByCell);
     // Copy meshes
     {
-      using ImageReaderType = itk::ImageFileReader<ImageType>;
+      using ImageReaderType           = itk::ImageFileReader<ImageType>;
       ImageReaderType::Pointer reader = ImageReaderType::New();
       reader->SetFileName(segFile);
       reader->Update();
       segmentation = reader->GetOutput();
 
       // write a filter
-      using DuplicatorType = itk::ImageDuplicator<ImageType>;
+      using DuplicatorType               = itk::ImageDuplicator<ImageType>;
       DuplicatorType::Pointer duplicator = DuplicatorType::New();
       duplicator->SetInputImage(segmentation);
       duplicator->Update();
@@ -137,7 +137,7 @@ int main(int narg, char *arg[]) {
       ImageType::SizeType radius;
       radius.Fill(1);
       int leftWrongPixels = 1;
-      int iteration = 0;
+      int iteration       = 0;
       while (leftWrongPixels > 0 && iteration < 10) {
         // std::cout << " iteration " << iteration <<" leftWrongPixels "<<
         // leftWrongPixels << std::endl;
@@ -152,7 +152,7 @@ int main(int narg, char *arg[]) {
             int newPixel = -1;
             for (unsigned int i = 0; i < iter.Size(); i++) {
               bool IsInBounds;
-              int pixel = iter.GetPixel(i, IsInBounds);
+              int  pixel = iter.GetPixel(i, IsInBounds);
               if (pixel != 0 && pixel != 5001 && pixel != 5002) {
                 newPixel = pixel;
               }
@@ -241,8 +241,8 @@ int main(int narg, char *arg[]) {
       // std::cout << " finish sampling "<< std::endl;
 
       using CellIterator = MeshBasicType::CellsContainer::ConstIterator;
-      int globalIndex = 0;
-      int indexCell = 0;
+      int globalIndex    = 0;
+      int indexCell      = 0;
       // typedef MeshType::PointIdentifier PointIdentifier;
       using PointDataContainerType = MeshType::PointDataContainer;
       // int outsidePoints = 0;
@@ -252,8 +252,8 @@ int main(int narg, char *arg[]) {
            cellIt != basicMesh->GetCells()->End(); cellIt++) {
         PointDataContainerType::Pointer dataContainer =
             PointDataContainerType::New();
-        int withinIndex = 0;
-        MeshType::CellAutoPointer line;
+        int                                        withinIndex = 0;
+        MeshType::CellAutoPointer                  line;
         MeshBasicType::CellTraits::PointIdIterator pointIdIt =
             cellIt.Value()->PointIdsBegin();
 
@@ -261,7 +261,7 @@ int main(int narg, char *arg[]) {
         ptMean.Fill(0.0);
 
         MeshBasicType::PointType pt;
-        int jota = 0;
+        int                      jota = 0;
         numCellsPase++;
         for (pointIdIt = cellIt.Value()->PointIdsBegin();
              pointIdIt != cellIt.Value()->PointIdsEnd() &&
@@ -282,13 +282,13 @@ int main(int narg, char *arg[]) {
             segmentation->TransformPhysicalPointToIndex(pt, index);
 
             PointDataType *pointData = new PointDataType();
-            PixelType label = segmentation->GetPixel(index);
+            PixelType      label     = segmentation->GetPixel(index);
             pointData->push_back(label);
 
             for (unsigned int i = 1; i < direcciones.size(); i++) {
-              PixelType vecino = label;
-              IndexType ind = index;
-              MeshBasicType::PointType point = pt;
+              PixelType                vecino = label;
+              IndexType                ind    = index;
+              MeshBasicType::PointType point  = pt;
               while (vecino == label) {
                 for (int j = 0; j < 3; j++)
                   ind[j] += direcciones[i][j];
@@ -468,7 +468,7 @@ int main(int narg, char *arg[]) {
     normalizeCuts->SetInput(mesh);
     normalizeCuts->Update();
 
-    labels = normalizeCuts->GetLabels();
+    labels             = normalizeCuts->GetLabels();
     clusterIdHierarchy = normalizeCuts->GetClusterIdHierarchy();
     time(&timer2); /* get current time; same as: timer = time(NULL)  */
     seconds = difftime(timer1, timer2);
@@ -497,16 +497,16 @@ int main(int narg, char *arg[]) {
 
   MeshBasicType::Pointer originalMesh = converter->GetOutput();
 
-  std::map<std::string, MeshBasicType::Pointer> newMeshes;
+  std::map<std::string, MeshBasicType::Pointer>         newMeshes;
   std::map<std::string, MeshBasicType::PointIdentifier> pointIndices;
-  std::map<std::string, MeshBasicType::CellIdentifier> cellIndices;
+  std::map<std::string, MeshBasicType::CellIdentifier>  cellIndices;
   // int noClusterFibers=0;
 
   // typedef itk::PolylineCell<MeshBasicType::CellType> PolylineCellType;
   for (unsigned int i = 0; i < labels.size(); i++) {
     MeshBasicType::CellAutoPointer line;
     line.TakeOwnership(new itk::PolylineCell<MeshBasicType::CellType>);
-    int k = 0;
+    int                            k = 0;
     MeshBasicType::CellAutoPointer cell;
     originalMesh->GetCell(i, cell);
     MeshBasicType::CellPixelType pixelType = 0;
@@ -517,9 +517,9 @@ int main(int narg, char *arg[]) {
       om->SetCellsAllocationMethod(
           MeshBasicType::CellsAllocatedDynamicallyCellByCell);
 
-      newMeshes[labels[i]] = om;
+      newMeshes[labels[i]]    = om;
       pointIndices[labels[i]] = 0;
-      cellIndices[labels[i]] = 0;
+      cellIndices[labels[i]]  = 0;
     }
 
     for (MeshBasicType::CellType::PointIdIterator it = cell->PointIdsBegin();
@@ -545,14 +545,14 @@ int main(int narg, char *arg[]) {
   }
   // std::cout << " Fibers without clusters  " << noClusterFibers <<std::endl;
 
-  int i;
-  int red, green, blue;
+  int            i;
+  int            red, green, blue;
   color_triplet2 table[256] = {{0, 0, 0}}; /* Initialize to all black */
 
   const color_triplet2 black = {0, 0, 0};
   const color_triplet2 white = {255, 255, 255};
 
-  table[0] = white;
+  table[0]   = white;
   table[255] = black;
 
   i = 20;                                /* first 20 and last 20 are reserved */
@@ -566,7 +566,7 @@ int main(int narg, char *arg[]) {
       }
     }
   }
-  table[0] = white;
+  table[0]   = white;
   table[255] = black;
 
   i = 0;
@@ -574,7 +574,7 @@ int main(int narg, char *arg[]) {
            newMeshes.begin();
        it != newMeshes.end(); ++it) {
     int index = ((int)47. * ((i % newMeshes.size()) % (150))) % 197 + 5;
-    index = (int)(13 * (i % newMeshes.size())) % 150 + 65;
+    index     = (int)(13 * (i % newMeshes.size())) % 150 + 65;
     // std::cout << "index " << index << std::endl;
     unsigned char color[3] = {table[index].r, table[index].g, table[index].b};
     // std::cout << color[0] << " " <<color[1] << " "<<color[2] <<std::endl;

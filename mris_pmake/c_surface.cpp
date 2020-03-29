@@ -33,7 +33,7 @@ void surface_vertexFunction_do(
     void (*vertex_function)(VERTEX *pvertex, void *pv_extra),
     void *apv_functional) {
 
-  int i;
+  int     i;
   VERTEX *pvertex;
 
   for (i = 0; i < st_env.pMS_active->nvertices; i++) {
@@ -45,11 +45,11 @@ void surface_vertexFunction_do(
 }
 
 void surface_annotation_do(s_env &st_env) {
-  int i;
+  int     i;
   VERTEX *pvertex;
 
   for (i = 0; i < st_env.pMS_active->nvertices; i++) {
-    pvertex = &st_env.pMS_active->vertices[i];
+    pvertex             = &st_env.pMS_active->vertices[i];
     pvertex->annotation = i;
   }
 }
@@ -74,7 +74,7 @@ void surface_vertexPatternCopy(
   //   by (*vertex_pattern) is left untouched.
   //
 
-  int i;
+  int     i;
   VERTEX *pvertex_source;
   VERTEX *pvertex_target;
 
@@ -90,10 +90,10 @@ void surface_vertexPatternCopy(
 void surface_rawCurveMinMax_do(s_env &st_env) {
 
   s_minMax sMM;
-  void *pv_sMM = (void *)&sMM;
-  void *pv_dummy = nullptr;
+  void *   pv_sMM   = (void *)&sMM;
+  void *   pv_dummy = nullptr;
 
-  stringstream sout("");
+  std::stringstream sout("");
 
   sMM.f_min = 1;
   sMM.f_max = -1;
@@ -101,8 +101,10 @@ void surface_rawCurveMinMax_do(s_env &st_env) {
   surface_vertexFunction_do(st_env, vertex_alwaysTrue, pv_dummy,
                             vertex_rawCurveMinMax, pv_sMM);
 
-  sout << "Min:\t" << sMM.f_min << " (at vertex) " << sMM.minVertex << endl;
-  sout << "Max:\t" << sMM.f_max << " (at vertex) " << sMM.maxVertex << endl;
+  sout << "Min:\t" << sMM.f_min << " (at vertex) " << sMM.minVertex
+       << std::endl;
+  sout << "Max:\t" << sMM.f_max << " (at vertex) " << sMM.maxVertex
+       << std::endl;
 
   nRLOUT(sout.str());
 }
@@ -110,10 +112,10 @@ void surface_rawCurveMinMax_do(s_env &st_env) {
 void surface_rawCurveSum_do(s_env &st_env) {
 
   s_rawCurve sRC;
-  void *pv_sRC = (void *)&sRC;
-  void *pv_dummy = nullptr;
+  void *     pv_sRC   = (void *)&sRC;
+  void *     pv_dummy = nullptr;
 
-  stringstream sout("");
+  std::stringstream sout("");
 
   sRC.f_posCount = 0;
   sRC.f_negCount = 0;
@@ -121,8 +123,8 @@ void surface_rawCurveSum_do(s_env &st_env) {
   surface_vertexFunction_do(st_env, vertex_alwaysTrue, pv_dummy,
                             vertex_rawCurveSum, pv_sRC);
 
-  sout << "Positive sum: " << sRC.f_posCount << endl;
-  sout << "Negative sum: " << sRC.f_negCount << endl;
+  sout << "Positive sum: " << sRC.f_posCount << std::endl;
+  sout << "Negative sum: " << sRC.f_negCount << std::endl;
 
   nRLOUT(sout.str());
 }
@@ -130,26 +132,26 @@ void surface_rawCurveSum_do(s_env &st_env) {
 void surface_signumFunction_do(s_env &st_env) {
 
   s_signumFunctional sgnf;
-  void *pv_sgnf = (void *)&sgnf;
-  void *pv_dummy = nullptr;
+  void *             pv_sgnf  = (void *)&sgnf;
+  void *             pv_dummy = nullptr;
 
-  stringstream sout("");
+  std::stringstream sout("");
 
-  sgnf.posCount = 0;
-  sgnf.negCount = 0;
+  sgnf.posCount  = 0;
+  sgnf.negCount  = 0;
   sgnf.zeroCount = 0;
 
   surface_vertexFunction_do(st_env, vertex_alwaysTrue, pv_dummy,
                             vertex_signumFunctional, pv_sgnf);
 
-  sout << "Positive count: " << sgnf.posCount << endl;
-  sout << "Negative count: " << sgnf.negCount << endl;
-  sout << "Zero     count: " << sgnf.zeroCount << endl;
+  sout << "Positive count: " << sgnf.posCount << std::endl;
+  sout << "Negative count: " << sgnf.negCount << std::endl;
+  sout << "Zero     count: " << sgnf.zeroCount << std::endl;
 
   nRLOUT(sout.str());
 }
 
-void surface_averageIntegratedCurveArea_do(s_env &st_env,
+void surface_averageIntegratedCurveArea_do(s_env &     st_env,
                                            e_CURVATURE ae_curvature) {
   //
   // PRECONDITIONS
@@ -163,14 +165,14 @@ void surface_averageIntegratedCurveArea_do(s_env &st_env,
   //
 
   s_integratedCurve sIC;
-  void *pv_sIC = (void *)&sIC;
-  void *pv_dummy = nullptr;
-  static int calls = 0;
+  void *            pv_sIC   = (void *)&sIC;
+  void *            pv_dummy = nullptr;
+  static int        calls    = 0;
 
-  stringstream sout("");
+  std::stringstream sout("");
 
   sIC.e_curvature = ae_curvature;
-  sIC.f_sum = 0.0;
+  sIC.f_sum       = 0.0;
 
   if (!calls) {
     ULOUT("Computing Second Fundamental Form on primary\t\t\t");
@@ -187,9 +189,9 @@ void surface_averageIntegratedCurveArea_do(s_env &st_env,
                             vertex_curveAreaSum, pv_sIC);
 
   float f_avIC = 0.0;
-  f_avIC = sIC.f_sum / st_env.pMS_active->nvertices;
+  f_avIC       = sIC.f_sum / st_env.pMS_active->nvertices;
 
-  string str_curvature;
+  std::string str_curvature;
   switch (ae_curvature) {
   case e_gaussian:
     str_curvature = "Gaussian";
@@ -199,7 +201,7 @@ void surface_averageIntegratedCurveArea_do(s_env &st_env,
     break;
   }
   sout << "Average integrated rectified " << str_curvature << " curvature:";
-  sout << endl << f_avIC << endl;
+  sout << std::endl << f_avIC << std::endl;
 
   nRLOUT(sout.str());
   calls++;
@@ -219,11 +221,11 @@ void surface_correlationFunction_do(s_env &st_env) {
   //   surface. This denotes an error state.
   //
 
-  float f_correl = 0.0;
-  int denom = 0;
-  int membership = 0;
-  VERTEX *pvertex = nullptr;
-  void *pv_void = nullptr;
+  float   f_correl   = 0.0;
+  int     denom      = 0;
+  int     membership = 0;
+  VERTEX *pvertex    = nullptr;
+  void *  pv_void    = nullptr;
 
   for (int i = 0; i < st_env.pMS_primary->nvertices; i++) {
     pvertex = &st_env.pMS_primary->vertices[i];
@@ -245,22 +247,22 @@ void surface_correlationFunction_do(s_env &st_env) {
   else
     f_correl = (float)membership / (float)denom;
 
-  cout << "Correlation: " << f_correl << endl;
+  std::cout << "Correlation: " << f_correl << std::endl;
 
-  stringstream sout("");
+  std::stringstream sout("");
   sout << f_correl;
   nRLOUT(sout.str());
 }
 
 void surface_primaryToSecondary_ripTrueCopy(s_env &st_env) {
 
-  char ch_rip;
+  char  ch_rip;
   char *pch_rip;
   void *pv_rip;
 
-  ch_rip = (char)TRUE;
+  ch_rip  = (char)TRUE;
   pch_rip = &ch_rip;
-  pv_rip = (void *)pch_rip;
+  pv_rip  = (void *)pch_rip;
 
   surface_vertexPatternCopy(st_env, st_env.pMS_primary, st_env.pMS_secondary,
                             vertex_ripFlagIsTrue, pv_rip, vertex_ripFlagMark,
@@ -293,15 +295,15 @@ float surface_ripMark(s_env &st_env) {
   //
 
   //    s_iterInfo  st_iterInfo;
-  string str_costFile = st_env.str_workingDir + st_env.str_costFileName;
-  int i;
-  int ii, jj;
-  float f_cost = 0.;
-  float f_costSum = 0.;
+  std::string str_costFile = st_env.str_workingDir + st_env.str_costFileName;
+  int         i;
+  int         ii, jj;
+  float       f_cost    = 0.;
+  float       f_costSum = 0.;
   //    bool        b_relNextReference    = false;
 
-  ofstream ofs(str_costFile.c_str(), ios::out);
-  ofs.flags(ios::fixed);
+  std::ofstream ofs(str_costFile.c_str(), std::ios::out);
+  ofs.flags(std::ios::fixed);
 
   for (i = st_env.endVertex; i != st_env.startVertex;
        i = st_env.pMS_active->vertices[i].old_undefval) {
@@ -309,7 +311,7 @@ float surface_ripMark(s_env &st_env) {
     jj = i;
     //        f_cost = st_env.costFunc_do(st_env, &st_iterInfo, ii, jj,
     //                                    b_relNextReference);
-    f_cost = s_env_edgeCostFind(st_env, ii, jj);
+    f_cost                                 = s_env_edgeCostFind(st_env, ii, jj);
     st_env.pMS_active->vertices[i].ripflag = TRUE;
     f_costSum += f_cost;
     if (st_env.b_costPathSave) {
@@ -320,7 +322,7 @@ float surface_ripMark(s_env &st_env) {
       ofs << "\t" << st_env.pst_iterInfo->f_curvature;
       ofs << "\t" << st_env.pst_iterInfo->f_sulcalHeight;
       ofs << "\t" << st_env.pst_iterInfo->f_dir;
-      ofs << endl;
+      ofs << std::endl;
     }
   }
   st_env.pMS_active->vertices[i].ripflag = TRUE;
@@ -375,14 +377,14 @@ void surface_ripClear(s_env &st_env, bool b_wholeSurfaceForce) {
     for (i = st_env.endVertex; i != st_env.startVertex;
          i = st_env.pMS_active->vertices[i].old_undefval) {
       st_env.pMS_active->vertices[i].ripflag = FALSE;
-      st_env.pMS_active->vertices[i].val = -1.0;
+      st_env.pMS_active->vertices[i].val     = -1.0;
     }
     st_env.pMS_active->vertices[i].ripflag = FALSE;
-    st_env.pMS_active->vertices[i].val = -1.0;
+    st_env.pMS_active->vertices[i].val     = -1.0;
   } else {
     for (i = 0; i < st_env.pMS_active->nvertices; i++) {
       st_env.pMS_active->vertices[i].ripflag = FALSE;
-      st_env.pMS_active->vertices[i].val = -1.0;
+      st_env.pMS_active->vertices[i].val     = -1.0;
     }
   }
 }

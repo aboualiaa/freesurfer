@@ -38,11 +38,11 @@
 // Constructors/Destructors
 //
 
-QdecContrast::QdecContrast(vector<double> iaVector, string isName,
-                           string isQuestion) {
+QdecContrast::QdecContrast(std::vector<double> iaVector, std::string isName,
+                           std::string isQuestion) {
   assert(iaVector.size());
-  this->maVector = iaVector;
-  this->msName = isName;
+  this->maVector   = iaVector;
+  this->msName     = isName;
   this->msQuestion = isQuestion;
 }
 
@@ -55,18 +55,18 @@ QdecContrast::~QdecContrast() {}
 /**
  * @return string
  */
-string QdecContrast::GetName() { return this->msName; }
+std::string QdecContrast::GetName() { return this->msName; }
 
 /**
  * @return string
  */
-string QdecContrast::GetQuestion() { return this->msQuestion; }
+std::string QdecContrast::GetQuestion() { return this->msQuestion; }
 
 /**
  * @return string
  */
-string QdecContrast::GetContrastStr() {
-  string contrast = "";
+std::string QdecContrast::GetContrastStr() {
+  std::string contrast = "";
   for (unsigned int i = 0; i < this->maVector.size();) {
     char tmpstr[1000];
     sprintf(tmpstr, "% 2.3f", this->maVector[i]);
@@ -85,9 +85,9 @@ string QdecContrast::GetContrastStr() {
  * @return int
  * @param string ifnWorkingDir
  */
-int QdecContrast::WriteDotMatFile(string ifnWorkingDir) {
-  string dirName = ifnWorkingDir + "/contrasts/";
-  int err = mkdir(dirName.c_str(), 0777);
+int QdecContrast::WriteDotMatFile(std::string ifnWorkingDir) {
+  std::string dirName = ifnWorkingDir + "/contrasts/";
+  int         err     = mkdir(dirName.c_str(), 0777);
   if (err != 0 && errno != EEXIST) {
     fprintf(stderr,
             "ERROR: QdecContrast::WriteDotMatFile: "
@@ -121,4 +121,6 @@ int QdecContrast::WriteDotMatFile(string ifnWorkingDir) {
 /**
  * @return string
  */
-string QdecContrast::GetDotMatFileName() { return this->mfnDotMatFileName; }
+std::string QdecContrast::GetDotMatFileName() {
+  return this->mfnDotMatFileName;
+}

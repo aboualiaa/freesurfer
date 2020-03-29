@@ -1,7 +1,7 @@
 #include "kvlAtlasMeshCollectionModelLikelihoodCalculator.h"
 
-#include "kvlAtlasMeshLabelImageStatisticsCollector.h"
 #include "itkTimeProbe.h"
+#include "kvlAtlasMeshLabelImageStatisticsCollector.h"
 
 namespace kvl {
 
@@ -10,7 +10,7 @@ namespace kvl {
 //
 AtlasMeshCollectionModelLikelihoodCalculator ::
     AtlasMeshCollectionModelLikelihoodCalculator() {
-  m_MeshCollection = 0;
+  m_MeshCollection         = 0;
   m_CompressionLookupTable = 0;
 }
 
@@ -25,8 +25,8 @@ AtlasMeshCollectionModelLikelihoodCalculator ::
 //
 void AtlasMeshCollectionModelLikelihoodCalculator ::SetLabelImages(
     const std::vector<LabelImageType::ConstPointer> &labelImages,
-    const CompressionLookupTable *compressionLookupTable) {
-  m_LabelImages = labelImages;
+    const CompressionLookupTable *                   compressionLookupTable) {
+  m_LabelImages            = labelImages;
   m_CompressionLookupTable = compressionLookupTable;
 }
 
@@ -50,7 +50,7 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
   }
 
   typedef itk::MapContainer<AtlasMesh::PointIdentifier, double>
-      PixelCountContainerType;
+                                   PixelCountContainerType;
   PixelCountContainerType::Pointer pixelCounts = PixelCountContainerType::New();
   for (AtlasMesh::PointDataContainer::ConstIterator pointParamIt =
            m_MeshCollection->GetPointParameters()->Begin();
@@ -68,7 +68,7 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
   // cost and to the total amount of pixels assigned to each vertex
   dataCost = 0;
   typedef AtlasMeshLabelImageStatisticsCollector::StatisticsContainerType
-      StatisticsContainerType;
+                                                  StatisticsContainerType;
   AtlasMeshLabelImageStatisticsCollector::Pointer statisticsCollector =
       AtlasMeshLabelImageStatisticsCollector::New();
   for (int labelImageNumber = 0; labelImageNumber < m_LabelImages.size();

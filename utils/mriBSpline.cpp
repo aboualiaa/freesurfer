@@ -31,10 +31,10 @@
  */
 
 #include <cfloat>
-#include <math.h>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
 #include "romp_support.h"
 
@@ -43,16 +43,16 @@
 #include "mriBSpline.h"
 
 static double
-InitialCausalCoefficient(double c[],      /* coefficients */
-                         long DataLength, /* number of coefficients */
-                         double z,        /* actual pole */
-                         double Tolerance /* admissible relative error */
+InitialCausalCoefficient(double c[],        /* coefficients */
+                         long   DataLength, /* number of coefficients */
+                         double z,          /* actual pole */
+                         double Tolerance   /* admissible relative error */
 )
 
 { /* begin InitialCausalCoefficient */
 
   double Sum, zn, z2n, iz;
-  long n, Horizon;
+  long   n, Horizon;
 
   /* this initialization corresponds to mirror boundaries */
   Horizon = DataLength;
@@ -61,7 +61,7 @@ InitialCausalCoefficient(double c[],      /* coefficients */
   }
   if (Horizon < DataLength) {
     /* accelerated loop */
-    zn = z;
+    zn  = z;
     Sum = c[0];
     for (n = 1L; n < Horizon; n++) {
       Sum += zn * c[n];
@@ -70,8 +70,8 @@ InitialCausalCoefficient(double c[],      /* coefficients */
     return (Sum);
   } else {
     /* full loop */
-    zn = z;
-    iz = 1.0 / z;
+    zn  = z;
+    iz  = 1.0 / z;
     z2n = pow(z, (double)(DataLength - 1L));
     Sum = c[0] + z2n * c[DataLength - 1L];
     z2n *= z2n * iz;
@@ -85,9 +85,9 @@ InitialCausalCoefficient(double c[],      /* coefficients */
 } /* end InitialCausalCoefficient */
 
 static double InitialAntiCausalCoefficient(
-    double c[],      /* coefficients */
-    long DataLength, /* number of samples or coefficients */
-    double z         /* actual pole */
+    double c[],        /* coefficients */
+    long   DataLength, /* number of samples or coefficients */
+    double z           /* actual pole */
 )
 
 { /* begin InitialAntiCausalCoefficient */
@@ -97,17 +97,17 @@ static double InitialAntiCausalCoefficient(
 } /* end InitialAntiCausalCoefficient */
 
 static void ConvertToInterpolationCoefficients(
-    double c[],      /* input samples --> output coefficients */
-    long DataLength, /* number of samples or coefficients */
-    double z[],      /* poles */
-    long NbPoles,    /* number of poles */
-    double Tolerance /* admissible relative error */
+    double c[],        /* input samples --> output coefficients */
+    long   DataLength, /* number of samples or coefficients */
+    double z[],        /* poles */
+    long   NbPoles,    /* number of poles */
+    double Tolerance   /* admissible relative error */
 )
 
 { /* begin ConvertToInterpolationCoefficients */
 
   double Lambda = 1.0;
-  long n, k;
+  long   n, k;
 
   /* special case required by mirror boundaries */
   if (DataLength == 1L) {
@@ -315,52 +315,52 @@ static void BsplineWeights(int SplineDegree, const double *val,
   double w, w2, w4, t, t0, t1;
   switch (SplineDegree) {
   case 2:
-    w = *val - (double)index[1];
+    w          = *val - (double)index[1];
     weights[1] = 3.0 / 4.0 - w * w;
     weights[2] = (1.0 / 2.0) * (w - weights[1] + 1.0);
     weights[0] = 1.0 - weights[1] - weights[2];
     break;
   case 3:
-    w = *val - (double)index[1];
+    w          = *val - (double)index[1];
     weights[3] = (1.0 / 6.0) * w * w * w;
     weights[0] = (1.0 / 6.0) + (1.0 / 2.0) * w * (w - 1.0) - weights[3];
     weights[2] = w + weights[0] - 2.0 * weights[3];
     weights[1] = 1.0 - weights[0] - weights[2] - weights[3];
     break;
   case 4:
-    w = *val - (double)index[2];
-    w2 = w * w;
-    t = (1.0 / 6.0) * w2;
+    w          = *val - (double)index[2];
+    w2         = w * w;
+    t          = (1.0 / 6.0) * w2;
     weights[0] = 1.0 / 2.0 - w;
     weights[0] *= weights[0];
     weights[0] *= (1.0 / 24.0) * weights[0];
-    t0 = w * (t - 11.0 / 24.0);
-    t1 = 19.0 / 96.0 + w2 * (1.0 / 4.0 - t);
+    t0         = w * (t - 11.0 / 24.0);
+    t1         = 19.0 / 96.0 + w2 * (1.0 / 4.0 - t);
     weights[1] = t1 + t0;
     weights[3] = t1 - t0;
     weights[4] = weights[0] + t0 + (1.0 / 2.0) * w;
     weights[2] = 1.0 - weights[0] - weights[1] - weights[3] - weights[4];
     break;
   case 5:
-    w = *val - (double)index[2];
-    w2 = w * w;
+    w          = *val - (double)index[2];
+    w2         = w * w;
     weights[5] = (1.0 / 120.0) * w * w2 * w2;
     w2 -= w;
     w4 = w2 * w2;
     w -= 1.0 / 2.0;
-    t = w2 * (w2 - 3.0);
+    t          = w2 * (w2 - 3.0);
     weights[0] = (1.0 / 24.0) * (1.0 / 5.0 + w2 + w4) - weights[5];
-    t0 = (1.0 / 24.0) * (w2 * (w2 - 5.0) + 46.0 / 5.0);
-    t1 = (-1.0 / 12.0) * w * (t + 4.0);
+    t0         = (1.0 / 24.0) * (w2 * (w2 - 5.0) + 46.0 / 5.0);
+    t1         = (-1.0 / 12.0) * w * (t + 4.0);
     weights[2] = t0 + t1;
     weights[3] = t0 - t1;
-    t0 = (1.0 / 16.0) * (9.0 / 5.0 - t);
-    t1 = (1.0 / 24.0) * w * (w4 - w2 - 5.0);
+    t0         = (1.0 / 16.0) * (9.0 / 5.0 - t);
+    t1         = (1.0 / 24.0) * w * (w4 - w2 - 5.0);
     weights[1] = t0 + t1;
     weights[4] = t0 - t1;
     break;
   case 6:
-    w = *val - (double)index[3];
+    w          = *val - (double)index[3];
     weights[0] = 1.0 / 2.0 - w;
     weights[0] *= weights[0] * weights[0];
     weights[0] *= weights[0] / 720.0;
@@ -392,7 +392,7 @@ static void BsplineWeights(int SplineDegree, const double *val,
                  weights[4] - weights[6];
     break;
   case 7:
-    w = *val - (double)index[3];
+    w          = *val - (double)index[3];
     weights[0] = 1.0 - w;
     weights[0] *= weights[0];
     weights[0] *= weights[0] * weights[0];
@@ -427,7 +427,7 @@ static void BsplineWeights(int SplineDegree, const double *val,
                  weights[4] - weights[5] - weights[7];
     break;
   case 8:
-    w = *val - (double)index[4];
+    w          = *val - (double)index[4];
     weights[0] = 1.0 / 2.0 - w;
     weights[0] *= weights[0];
     weights[0] *= weights[0];
@@ -477,7 +477,7 @@ static void BsplineWeights(int SplineDegree, const double *val,
                  weights[4] - weights[5] - weights[7] - weights[8];
     break;
   case 9:
-    w = *val - (double)index[4];
+    w          = *val - (double)index[4];
     weights[0] = 1.0 - w;
     weights[0] *= weights[0];
     weights[0] *= weights[0];
@@ -586,52 +586,52 @@ static void PyramidFilterSplinel2(double g[], long *ng, double *h, long *nh,
     g[6] = -0.00357134;
     g[7] = -0.0014793;
     g[8] = 0.000612745;
-    *ng = 9L;
+    *ng  = 9L;
     h[0] = 1.;
     h[1] = 0.5;
-    *nh = 2L;
+    *nh  = 2L;
     break;
   case 2L:
-    g[0] = 0.617317;
-    g[1] = 0.310754;
-    g[2] = -0.0949641;
-    g[3] = -0.0858654;
-    g[4] = 0.0529153;
-    g[5] = 0.0362437;
-    g[6] = -0.0240408;
-    g[7] = -0.0160987;
-    g[8] = 0.0107498;
-    g[9] = 0.00718418;
+    g[0]  = 0.617317;
+    g[1]  = 0.310754;
+    g[2]  = -0.0949641;
+    g[3]  = -0.0858654;
+    g[4]  = 0.0529153;
+    g[5]  = 0.0362437;
+    g[6]  = -0.0240408;
+    g[7]  = -0.0160987;
+    g[8]  = 0.0107498;
+    g[9]  = 0.00718418;
     g[10] = -0.00480004;
     g[11] = -0.00320734;
     g[12] = 0.00214306;
     g[13] = 0.00143195;
     g[14] = -0.0009568;
     g[15] = -0.000639312;
-    *ng = 16L;
-    h[0] = 1.;
-    h[1] = 0.585786;
-    h[2] = 0;
-    h[3] = -0.100505;
-    h[4] = 0;
-    h[5] = 0.0172439;
-    h[6] = 0;
-    h[7] = -0.00295859;
-    h[8] = 0;
-    h[9] = 0.000507614;
-    *nh = 10L;
+    *ng   = 16L;
+    h[0]  = 1.;
+    h[1]  = 0.585786;
+    h[2]  = 0;
+    h[3]  = -0.100505;
+    h[4]  = 0;
+    h[5]  = 0.0172439;
+    h[6]  = 0;
+    h[7]  = -0.00295859;
+    h[8]  = 0;
+    h[9]  = 0.000507614;
+    *nh   = 10L;
     break;
   case 3L:
-    g[0] = 0.596797;
-    g[1] = 0.313287;
-    g[2] = -0.0827691;
-    g[3] = -0.0921993;
-    g[4] = 0.0540288;
-    g[5] = 0.0436996;
-    g[6] = -0.0302508;
-    g[7] = -0.0225552;
-    g[8] = 0.0162251;
-    g[9] = 0.0118738;
+    g[0]  = 0.596797;
+    g[1]  = 0.313287;
+    g[2]  = -0.0827691;
+    g[3]  = -0.0921993;
+    g[4]  = 0.0540288;
+    g[5]  = 0.0436996;
+    g[6]  = -0.0302508;
+    g[7]  = -0.0225552;
+    g[8]  = 0.0162251;
+    g[9]  = 0.0118738;
     g[10] = -0.00861788;
     g[11] = -0.00627964;
     g[12] = 0.00456713;
@@ -642,20 +642,20 @@ static void PyramidFilterSplinel2(double g[], long *ng, double *h, long *nh,
     g[17] = 0.000932349;
     g[18] = -0.000678643;
     g[19] = -0.000493682;
-    *ng = 20L;
-    h[0] = 1.;
-    h[1] = 0.600481;
-    h[2] = 0;
-    h[3] = -0.127405;
-    h[4] = 0;
-    h[5] = 0.034138;
-    h[6] = 0;
-    h[7] = -0.00914725;
-    h[8] = 0;
-    h[9] = 0.002451;
+    *ng   = 20L;
+    h[0]  = 1.;
+    h[1]  = 0.600481;
+    h[2]  = 0;
+    h[3]  = -0.127405;
+    h[4]  = 0;
+    h[5]  = 0.034138;
+    h[6]  = 0;
+    h[7]  = -0.00914725;
+    h[8]  = 0;
+    h[9]  = 0.002451;
     h[10] = 0;
     h[11] = -0.000656743;
-    *nh = 12L;
+    *nh   = 12L;
     break;
   default:
     *ng = -1L;
@@ -685,37 +685,37 @@ static void PyramidFilterSplineL2(double g[], long *ng, double h[], long *nh,
     break;
 
   case 1L:
-    g[0] = 0.683013;
-    g[1] = 0.316987;
-    g[2] = -0.116025;
-    g[3] = -0.0849365;
-    g[4] = 0.0310889;
-    g[5] = 0.0227587;
-    g[6] = -0.00833025;
-    g[7] = -0.00609817;
-    g[8] = 0.00223208;
-    g[9] = 0.001634;
+    g[0]  = 0.683013;
+    g[1]  = 0.316987;
+    g[2]  = -0.116025;
+    g[3]  = -0.0849365;
+    g[4]  = 0.0310889;
+    g[5]  = 0.0227587;
+    g[6]  = -0.00833025;
+    g[7]  = -0.00609817;
+    g[8]  = 0.00223208;
+    g[9]  = 0.001634;
     g[10] = -0.000598085;
     g[11] = -0.000437829;
     g[12] = 0.000160256;
     g[13] = 0.000117316;
-    *ng = 14L;
-    h[0] = 1.;
-    h[1] = 0.5;
-    *nh = 2L;
+    *ng   = 14L;
+    h[0]  = 1.;
+    h[1]  = 0.5;
+    *nh   = 2L;
     break;
 
   case 3L:
-    g[0] = 0.594902;
-    g[1] = 0.31431;
-    g[2] = -0.0816632;
-    g[3] = -0.0942586;
-    g[4] = 0.0541374;
-    g[5] = 0.0454105;
-    g[6] = -0.0307778;
-    g[7] = -0.0236728;
-    g[8] = 0.0166858;
-    g[9] = 0.0125975;
+    g[0]  = 0.594902;
+    g[1]  = 0.31431;
+    g[2]  = -0.0816632;
+    g[3]  = -0.0942586;
+    g[4]  = 0.0541374;
+    g[5]  = 0.0454105;
+    g[6]  = -0.0307778;
+    g[7]  = -0.0236728;
+    g[8]  = 0.0166858;
+    g[9]  = 0.0125975;
     g[10] = -0.00895838;
     g[11] = -0.00673388;
     g[12] = 0.00479847;
@@ -731,33 +731,33 @@ static void PyramidFilterSplineL2(double g[], long *ng, double h[], long *nh,
     g[22] = -0.00021091;
     g[23] = -0.000158335;
     g[24] = 0.000112896;
-    *ng = 25L;
-    h[0] = 1.;
-    h[1] = 0.600481;
-    h[2] = 0.0;
-    h[3] = -0.127405;
-    h[4] = 0;
-    h[5] = 0.034138;
-    h[6] = 0;
-    h[7] = -0.00914725;
-    h[8] = 0;
-    h[9] = 0.002451;
+    *ng   = 25L;
+    h[0]  = 1.;
+    h[1]  = 0.600481;
+    h[2]  = 0.0;
+    h[3]  = -0.127405;
+    h[4]  = 0;
+    h[5]  = 0.034138;
+    h[6]  = 0;
+    h[7]  = -0.00914725;
+    h[8]  = 0;
+    h[9]  = 0.002451;
     h[10] = 0;
     h[11] = -0.000656743;
-    *nh = 12L;
+    *nh   = 12L;
     break;
 
   case 5L:
-    g[0] = 0.564388;
-    g[1] = 0.316168;
-    g[2] = -0.0597634;
-    g[3] = -0.0998708;
-    g[4] = 0.0484525;
-    g[5] = 0.0539099;
-    g[6] = -0.0355614;
-    g[7] = -0.033052;
-    g[8] = 0.0246347;
-    g[9] = 0.0212024;
+    g[0]  = 0.564388;
+    g[1]  = 0.316168;
+    g[2]  = -0.0597634;
+    g[3]  = -0.0998708;
+    g[4]  = 0.0484525;
+    g[5]  = 0.0539099;
+    g[6]  = -0.0355614;
+    g[7]  = -0.033052;
+    g[8]  = 0.0246347;
+    g[9]  = 0.0212024;
     g[10] = -0.0166097;
     g[11] = -0.0138474;
     g[12] = 0.0110719;
@@ -783,17 +783,17 @@ static void PyramidFilterSplineL2(double g[], long *ng, double h[], long *nh,
     g[32] = 0.000178;
     g[33] = 0.00014512;
     g[34] = -0.000117706;
-    *ng = 35L;
-    h[0] = 1.;
-    h[1] = 0.619879;
-    h[2] = 0.0;
-    h[3] = -0.167965;
-    h[4] = 0;
-    h[5] = 0.0686374;
-    h[6] = 0;
-    h[7] = -0.0293948;
-    h[8] = 0.0;
-    h[9] = 0.0126498;
+    *ng   = 35L;
+    h[0]  = 1.;
+    h[1]  = 0.619879;
+    h[2]  = 0.0;
+    h[3]  = -0.167965;
+    h[4]  = 0;
+    h[5]  = 0.0686374;
+    h[6]  = 0;
+    h[7]  = -0.0293948;
+    h[8]  = 0.0;
+    h[9]  = 0.0126498;
     h[10] = 0;
     h[11] = -0.00544641;
     h[12] = 0.0;
@@ -804,7 +804,7 @@ static void PyramidFilterSplineL2(double g[], long *ng, double h[], long *nh,
     h[17] = 0.000434766;
     h[18] = 0;
     h[19] = -0.000187199;
-    *nh = 20L;
+    *nh   = 20L;
     break;
 
   default:
@@ -839,22 +839,22 @@ static void PyramidFilterCentered(double g[], long *ng, double h[], long *nh,
   switch (Order) {
   case 0:
     g[0] = 1;
-    *ng = 1;
+    *ng  = 1;
     h[0] = 2;
-    *nh = 1;
+    *nh  = 1;
     break;
 
   case 1:
-    g[0] = 1.;
-    g[1] = 0.333333;
-    g[2] = -0.333333;
-    g[3] = -0.111111;
-    g[4] = 0.111111;
-    g[5] = 0.037037;
-    g[6] = -0.037037;
-    g[7] = -0.0123457;
-    g[8] = 0.0123457;
-    g[9] = 0.00411523;
+    g[0]  = 1.;
+    g[1]  = 0.333333;
+    g[2]  = -0.333333;
+    g[3]  = -0.111111;
+    g[4]  = 0.111111;
+    g[5]  = 0.037037;
+    g[6]  = -0.037037;
+    g[7]  = -0.0123457;
+    g[8]  = 0.0123457;
+    g[9]  = 0.00411523;
     g[10] = -0.00411523;
     g[11] = -0.00137174;
     g[12] = 0.00137174;
@@ -866,23 +866,23 @@ static void PyramidFilterCentered(double g[], long *ng, double h[], long *nh,
     g[18] = -0.0000508053;
     g[19] = -0.0000169351;
     g[20] = 0.0000169351;
-    *ng = 21;
-    h[0] = 1;
-    h[1] = 0.5;
-    *nh = 2;
+    *ng   = 21;
+    h[0]  = 1;
+    h[1]  = 0.5;
+    *nh   = 2;
     break;
 
   case 2:
-    g[0] = 0.738417;
-    g[1] = 0.307916;
-    g[2] = -0.171064;
-    g[3] = -0.0799199;
-    g[4] = 0.0735791;
-    g[5] = 0.03108;
-    g[6] = -0.0307862;
-    g[7] = -0.0128561;
-    g[8] = 0.0128425;
-    g[9] = 0.00535611;
+    g[0]  = 0.738417;
+    g[1]  = 0.307916;
+    g[2]  = -0.171064;
+    g[3]  = -0.0799199;
+    g[4]  = 0.0735791;
+    g[5]  = 0.03108;
+    g[6]  = -0.0307862;
+    g[7]  = -0.0128561;
+    g[8]  = 0.0128425;
+    g[9]  = 0.00535611;
     g[10] = -0.00535548;
     g[11] = -0.00223325;
     g[12] = 0.00223322;
@@ -894,32 +894,32 @@ static void PyramidFilterCentered(double g[], long *ng, double h[], long *nh,
     g[18] = -0.000161928;
     g[19] = -0.0000675233;
     g[20] = 0.0000675233;
-    *ng = 21;
-    h[0] = 1.20711;
-    h[1] = 0.585786;
-    h[2] = -0.12132;
-    h[3] = -0.100505;
-    h[4] = 0.0208153;
-    h[5] = 0.0172439;
-    h[6] = -0.00357134;
-    h[7] = -0.00295859;
-    h[8] = 0.000612745;
-    h[9] = 0.000507614;
+    *ng   = 21;
+    h[0]  = 1.20711;
+    h[1]  = 0.585786;
+    h[2]  = -0.12132;
+    h[3]  = -0.100505;
+    h[4]  = 0.0208153;
+    h[5]  = 0.0172439;
+    h[6]  = -0.00357134;
+    h[7]  = -0.00295859;
+    h[8]  = 0.000612745;
+    h[9]  = 0.000507614;
     h[10] = -0.00010513;
-    *nh = 11;
+    *nh   = 11;
     break;
 
   case 3:
-    g[0] = 0.708792;
-    g[1] = 0.328616;
-    g[2] = -0.165157;
-    g[3] = -0.114448;
-    g[4] = 0.0944036;
-    g[5] = 0.0543881;
-    g[6] = -0.05193;
-    g[7] = -0.0284868;
-    g[8] = 0.0281854;
-    g[9] = 0.0152877;
+    g[0]  = 0.708792;
+    g[1]  = 0.328616;
+    g[2]  = -0.165157;
+    g[3]  = -0.114448;
+    g[4]  = 0.0944036;
+    g[5]  = 0.0543881;
+    g[6]  = -0.05193;
+    g[7]  = -0.0284868;
+    g[8]  = 0.0281854;
+    g[9]  = 0.0152877;
     g[10] = -0.0152508;
     g[11] = -0.00825077;
     g[12] = 0.00824629;
@@ -931,37 +931,37 @@ static void PyramidFilterCentered(double g[], long *ng, double h[], long *nh,
     g[18] = -0.00130313;
     g[19] = -0.000704109;
     g[20] = 0.000704784;
-    *ng = 21;
-    h[0] = 1.13726;
-    h[1] = 0.625601;
-    h[2] = -0.0870191;
-    h[3] = -0.159256;
-    h[4] = 0.0233167;
-    h[5] = 0.0426725;
-    h[6] = -0.00624769;
-    h[7] = -0.0114341;
-    h[8] = 0.00167406;
-    h[9] = 0.00306375;
+    *ng   = 21;
+    h[0]  = 1.13726;
+    h[1]  = 0.625601;
+    h[2]  = -0.0870191;
+    h[3]  = -0.159256;
+    h[4]  = 0.0233167;
+    h[5]  = 0.0426725;
+    h[6]  = -0.00624769;
+    h[7]  = -0.0114341;
+    h[8]  = 0.00167406;
+    h[9]  = 0.00306375;
     h[10] = -0.000448564;
     h[11] = -0.000820929;
     h[12] = 0.000120192;
     h[13] = 0.000219967;
     h[14] = -0.0000322054;
     h[15] = -0.00005894;
-    *nh = 16;
+    *nh   = 16;
     break;
 
   case 4:
-    g[0] = 0.673072;
-    g[1] = 0.331218;
-    g[2] = -0.139359;
-    g[3] = -0.12051;
-    g[4] = 0.086389;
-    g[5] = 0.0611801;
-    g[6] = -0.0542989;
-    g[7] = -0.034777;
-    g[8] = 0.033388;
-    g[9] = 0.0206275;
+    g[0]  = 0.673072;
+    g[1]  = 0.331218;
+    g[2]  = -0.139359;
+    g[3]  = -0.12051;
+    g[4]  = 0.086389;
+    g[5]  = 0.0611801;
+    g[6]  = -0.0542989;
+    g[7]  = -0.034777;
+    g[8]  = 0.033388;
+    g[9]  = 0.0206275;
     g[10] = -0.0203475;
     g[11] = -0.0124183;
     g[12] = 0.0123625;
@@ -973,17 +973,17 @@ static void PyramidFilterCentered(double g[], long *ng, double h[], long *nh,
     g[18] = -0.00276406;
     g[19] = -0.00167279;
     g[20] = 0.00167938;
-    *ng = 21;
-    h[0] = 1.14324;
-    h[1] = 0.643609;
-    h[2] = -0.0937888;
-    h[3] = -0.194993;
-    h[4] = 0.030127;
-    h[5] = 0.0699433;
-    h[6] = -0.0108345;
-    h[7] = -0.0252663;
-    h[8] = 0.00391424;
-    h[9] = 0.00912967;
+    *ng   = 21;
+    h[0]  = 1.14324;
+    h[1]  = 0.643609;
+    h[2]  = -0.0937888;
+    h[3]  = -0.194993;
+    h[4]  = 0.030127;
+    h[5]  = 0.0699433;
+    h[6]  = -0.0108345;
+    h[7]  = -0.0252663;
+    h[8]  = 0.00391424;
+    h[9]  = 0.00912967;
     h[10] = -0.00141437;
     h[11] = -0.00329892;
     h[12] = 0.000511068;
@@ -994,14 +994,14 @@ static void PyramidFilterCentered(double g[], long *ng, double h[], long *nh,
     h[17] = 0.000155641;
     h[18] = -0.0000241119;
     h[19] = -0.0000562395;
-    *nh = 20;
+    *nh   = 20;
     break;
 
   default:
     g[0] = 1.;
-    *ng = 1;
+    *ng  = 1;
     h[0] = 2.;
-    *nh = 1;
+    *nh  = 1;
     printf("Spline filters only defined for n=0,1,2,3,4\n");
     exit(1);
   }
@@ -1030,22 +1030,22 @@ static void PyramidFilterCenteredL2(double g[], long *ng, double h[], long *nh,
   switch (Order) {
   case 0:
     g[0] = 1.;
-    *ng = 1;
+    *ng  = 1;
     h[0] = 2.;
-    *nh = 1;
+    *nh  = 1;
     break;
 
   case 1:
-    g[0] = 0.820272;
-    g[1] = 0.316987;
-    g[2] = -0.203044;
-    g[3] = -0.0849365;
-    g[4] = 0.0544056;
-    g[5] = 0.0227587;
-    g[6] = -0.0145779;
-    g[7] = -0.00609817;
-    g[8] = 0.00390615;
-    g[9] = 0.001634;
+    g[0]  = 0.820272;
+    g[1]  = 0.316987;
+    g[2]  = -0.203044;
+    g[3]  = -0.0849365;
+    g[4]  = 0.0544056;
+    g[5]  = 0.0227587;
+    g[6]  = -0.0145779;
+    g[7]  = -0.00609817;
+    g[8]  = 0.00390615;
+    g[9]  = 0.001634;
     g[10] = -0.00104665;
     g[11] = -0.000437829;
     g[12] = 0.000280449;
@@ -1053,30 +1053,30 @@ static void PyramidFilterCenteredL2(double g[], long *ng, double h[], long *nh,
     g[14] = -0.000075146;
     g[15] = -0.0000314347;
     g[16] = 0.0000201353;
-    *ng = 17;
-    h[0] = 1.20096;
-    h[1] = 0.473076;
-    h[2] = -0.0932667;
-    h[3] = 0.0249907;
-    h[4] = -0.00669625;
-    h[5] = 0.00179425;
-    h[6] = -0.000480769;
-    h[7] = 0.000128822;
-    h[8] = -0.0000345177;
-    *nh = 9;
+    *ng   = 17;
+    h[0]  = 1.20096;
+    h[1]  = 0.473076;
+    h[2]  = -0.0932667;
+    h[3]  = 0.0249907;
+    h[4]  = -0.00669625;
+    h[5]  = 0.00179425;
+    h[6]  = -0.000480769;
+    h[7]  = 0.000128822;
+    h[8]  = -0.0000345177;
+    *nh   = 9;
     break;
 
   case 2:
-    g[0] = 0.727973;
-    g[1] = 0.314545;
-    g[2] = -0.167695;
-    g[3] = -0.0893693;
-    g[4] = 0.0768426;
-    g[5] = 0.0354175;
-    g[6] = -0.0331015;
-    g[7] = -0.0151496;
-    g[8] = 0.0142588;
-    g[9] = 0.00651781;
+    g[0]  = 0.727973;
+    g[1]  = 0.314545;
+    g[2]  = -0.167695;
+    g[3]  = -0.0893693;
+    g[4]  = 0.0768426;
+    g[5]  = 0.0354175;
+    g[6]  = -0.0331015;
+    g[7]  = -0.0151496;
+    g[8]  = 0.0142588;
+    g[9]  = 0.00651781;
     g[10] = -0.00613959;
     g[11] = -0.00280621;
     g[12] = 0.00264356;
@@ -1088,32 +1088,32 @@ static void PyramidFilterCenteredL2(double g[], long *ng, double h[], long *nh,
     g[18] = -0.000211028;
     g[19] = -0.0000964507;
     g[20] = 0.0000908666;
-    *ng = 21;
-    h[0] = 1.20711;
-    h[1] = 0.585786;
-    h[2] = -0.12132;
-    h[3] = -0.100505;
-    h[4] = 0.0208153;
-    h[5] = 0.0172439;
-    h[6] = -0.00357134;
-    h[7] = -0.00295859;
-    h[8] = 0.000612745;
-    h[9] = 0.000507614;
+    *ng   = 21;
+    h[0]  = 1.20711;
+    h[1]  = 0.585786;
+    h[2]  = -0.12132;
+    h[3]  = -0.100505;
+    h[4]  = 0.0208153;
+    h[5]  = 0.0172439;
+    h[6]  = -0.00357134;
+    h[7]  = -0.00295859;
+    h[8]  = 0.000612745;
+    h[9]  = 0.000507614;
     h[10] = -0.00010513;
-    *nh = 11;
+    *nh   = 11;
     break;
 
   case 3:
-    g[0] = 0.70222;
-    g[1] = 0.328033;
-    g[2] = -0.159368;
-    g[3] = -0.113142;
-    g[4] = 0.0902447;
-    g[5] = 0.0530861;
-    g[6] = -0.0492084;
-    g[7] = -0.0274987;
-    g[8] = 0.0264529;
-    g[9] = 0.0146073;
+    g[0]  = 0.70222;
+    g[1]  = 0.328033;
+    g[2]  = -0.159368;
+    g[3]  = -0.113142;
+    g[4]  = 0.0902447;
+    g[5]  = 0.0530861;
+    g[6]  = -0.0492084;
+    g[7]  = -0.0274987;
+    g[8]  = 0.0264529;
+    g[9]  = 0.0146073;
     g[10] = -0.0141736;
     g[11] = -0.0078052;
     g[12] = 0.00758856;
@@ -1125,36 +1125,36 @@ static void PyramidFilterCenteredL2(double g[], long *ng, double h[], long *nh,
     g[18] = -0.00116412;
     g[19] = -0.000640258;
     g[20] = 0.000623379;
-    *ng = 21;
-    h[0] = 1.15089;
-    h[1] = 0.623278;
-    h[2] = -0.0961988;
-    h[3] = -0.155743;
-    h[4] = 0.0259827;
-    h[5] = 0.041346;
-    h[6] = -0.0067263;
-    h[7] = -0.0112084;
-    h[8] = 0.00187221;
-    h[9] = 0.00296581;
+    *ng   = 21;
+    h[0]  = 1.15089;
+    h[1]  = 0.623278;
+    h[2]  = -0.0961988;
+    h[3]  = -0.155743;
+    h[4]  = 0.0259827;
+    h[5]  = 0.041346;
+    h[6]  = -0.0067263;
+    h[7]  = -0.0112084;
+    h[8]  = 0.00187221;
+    h[9]  = 0.00296581;
     h[10] = -0.000481593;
     h[11] = -0.000805427;
     h[12] = 0.000134792;
     h[13] = 0.000212736;
     h[14] = -0.00003447;
-    *nh = 15;
+    *nh   = 15;
     break;
 
   case 4:
-    g[0] = 0.672101;
-    g[1] = 0.331667;
-    g[2] = -0.138779;
-    g[3] = -0.121385;
-    g[4] = 0.0864024;
-    g[5] = 0.0618776;
-    g[6] = -0.0545165;
-    g[7] = -0.0352403;
-    g[8] = 0.0335951;
-    g[9] = 0.0209537;
+    g[0]  = 0.672101;
+    g[1]  = 0.331667;
+    g[2]  = -0.138779;
+    g[3]  = -0.121385;
+    g[4]  = 0.0864024;
+    g[5]  = 0.0618776;
+    g[6]  = -0.0545165;
+    g[7]  = -0.0352403;
+    g[8]  = 0.0335951;
+    g[9]  = 0.0209537;
     g[10] = -0.0205211;
     g[11] = -0.0126439;
     g[12] = 0.0124959;
@@ -1166,17 +1166,17 @@ static void PyramidFilterCenteredL2(double g[], long *ng, double h[], long *nh,
     g[18] = -0.00281055;
     g[19] = -0.00172137;
     g[20] = 0.00170884;
-    *ng = 21;
-    h[0] = 1.14324;
-    h[1] = 0.643609;
-    h[2] = -0.0937888;
-    h[3] = -0.194993;
-    h[4] = 0.030127;
-    h[5] = 0.0699433;
-    h[6] = -0.0108345;
-    h[7] = -0.0252663;
-    h[8] = 0.00391424;
-    h[9] = 0.00912967;
+    *ng   = 21;
+    h[0]  = 1.14324;
+    h[1]  = 0.643609;
+    h[2]  = -0.0937888;
+    h[3]  = -0.194993;
+    h[4]  = 0.030127;
+    h[5]  = 0.0699433;
+    h[6]  = -0.0108345;
+    h[7]  = -0.0252663;
+    h[8]  = 0.00391424;
+    h[9]  = 0.00912967;
     h[10] = -0.00141437;
     h[11] = -0.00329892;
     h[12] = 0.000511068;
@@ -1187,14 +1187,14 @@ static void PyramidFilterCenteredL2(double g[], long *ng, double h[], long *nh,
     h[17] = 0.000155641;
     h[18] = -0.0000241119;
     h[19] = -0.0000562396;
-    *nh = 20;
+    *nh   = 20;
     break;
 
   default:
     g[0] = 1.;
-    *ng = 1;
+    *ng  = 1;
     h[0] = 2.;
-    *nh = 1;
+    *nh  = 1;
     printf("Spline filters only defined for n=0,1,2,3,4\n");
     exit(1);
   }
@@ -1424,8 +1424,8 @@ filter
 ---------------------------------------------------------------------------- */
 static int GetPyramidFilter(const char *Filter, long Order, double g[],
                             long *ng, double h[], long *nh, short *IsCentered) {
-  ng[0] = -1L;
-  nh[0] = -1L;
+  ng[0]       = -1L;
+  nh[0]       = -1L;
   *IsCentered = FALSE;
 
   if (!strcmp(Filter, "Spline")) {
@@ -1479,12 +1479,12 @@ static void ReduceStandard_1D(double In[], long NxIn, double Out[], double g[],
   long kk, kn, nred, n;
 
   nred = NxIn / 2L;
-  n = nred * 2L;
-  kn = n - 1L; /* kn=n-2; DS Modified */
+  n    = nred * 2L;
+  kn   = n - 1L; /* kn=n-2; DS Modified */
 
   if (ng < 2L) { /* length filter < 2 */
     for (kk = 0L; kk < nred; kk++) {
-      k = 2L * kk;
+      k  = 2L * kk;
       i2 = k + 1L;
       if (i2 > n - 1L)
         i2 = kn - i2;
@@ -1494,7 +1494,7 @@ static void ReduceStandard_1D(double In[], long NxIn, double Out[], double g[],
 
   else {
     for (kk = 0L; kk < nred; kk++) {
-      k = 2L * kk;
+      k       = 2L * kk;
       Out[kk] = In[k] * g[0];
       for (i = 1L; i < ng; i++) {
         i1 = k - i;
@@ -1539,13 +1539,13 @@ static void ExpandStandard_1D(double In[], long NxIn, double Out[], double h[],
   long kn, nexp, n;
 
   nexp = NxIn * 2L;
-  n = NxIn;
-  kn = n - 1;
+  n    = NxIn;
+  kn   = n - 1;
 
   if (nh < 2L) {
     for (i = 0L; i < NxIn; i++) {
-      j = i * 2L;
-      Out[j] = In[i];
+      j          = i * 2L;
+      Out[j]     = In[i];
       Out[j + 1] = In[i];
     }
   }
@@ -1598,12 +1598,12 @@ coefficients of the filter
 static void ReduceCentered_1D(double In[], long NxIn, double Out[], double g[],
                               long ng) {
   double *y_tmp;
-  long k, i, i1, i2;
-  long kk, kn, nred, n;
+  long    k, i, i1, i2;
+  long    kk, kn, nred, n;
 
   nred = NxIn / 2L;
-  n = nred * 2L;
-  kn = 2L * n;
+  n    = nred * 2L;
+  kn   = 2L * n;
 
   /* --- Allocated memory for a temporary buffer --- */
   y_tmp = (double *)malloc((size_t)(n * (long)sizeof(double)));
@@ -1634,7 +1634,7 @@ static void ReduceCentered_1D(double In[], long NxIn, double Out[], double g[],
 
   /* --- Now apply the Haar and perform downsampling --- */
   for (kk = 0L; kk < nred; kk++) {
-    k = 2L * kk;
+    k       = 2L * kk;
     Out[kk] = (y_tmp[k] + y_tmp[k + 1]) / 2.;
   }
 
@@ -1670,12 +1670,12 @@ static void ExpandCentered_1D(double In[], long NxIn, double Out[], double h[],
   long kk, kn, nexp, n;
 
   nexp = NxIn * 2L;
-  n = NxIn;
-  kn = 2L * n;
-  k0 = (nh / 2L) * 2 - 1L;
+  n    = NxIn;
+  kn   = 2L * n;
+  k0   = (nh / 2L) * 2 - 1L;
 
   for (i = 0L; i < NxIn; i++) {
-    j = i * 2L;
+    j      = i * 2L;
     Out[j] = In[i] * h[0];
     for (k = 2L; k < nh; k = k + 2L) {
       i1 = i - k / 2L;
@@ -1759,7 +1759,7 @@ extern MRI_BSPLINE *MRIallocBSpline(int width, int height, int depth,
   bspline->coeff = MRIallocSequence(width, height, depth, MRI_FLOAT, nframes);
   if (!bspline->coeff)
     ErrorExit(ERROR_NO_MEMORY, "MRIalloc: could not allocate MRI_BSPLINE\n");
-  bspline->degree = -1;
+  bspline->degree  = -1;
   bspline->srctype = -1;
   return bspline;
 }
@@ -1781,14 +1781,14 @@ extern MRI_BSPLINE *MRItoBSpline(const MRI *mri_src, MRI_BSPLINE *bspline,
   printf("MRItoBSpline degree %i\n", degree);
 
   double *Lines[_MAX_FS_THREADS];
-  double Pole[4];
-  int NbPoles;
-  int x, y, z, f;
-  int Width = mri_src->width;
-  int Height = mri_src->height;
-  int Depth = mri_src->depth;
-  int Frames = mri_src->nframes;
-  int nthreads = 1, tid = 0, i;
+  double  Pole[4];
+  int     NbPoles;
+  int     x, y, z, f;
+  int     Width    = mri_src->width;
+  int     Height   = mri_src->height;
+  int     Depth    = mri_src->depth;
+  int     Frames   = mri_src->nframes;
+  int     nthreads = 1, tid = 0, i;
 
   //  double eps = 1e-5;
   //   if (fabs(mri_src->xsize - mri_src->ysize) > eps || fabs(mri_src->xsize =
@@ -1801,20 +1801,20 @@ extern MRI_BSPLINE *MRItoBSpline(const MRI *mri_src, MRI_BSPLINE *bspline,
   if (!bspline) {
     bspline = MRIallocBSpline(Width, Height, Depth, Frames);
     MRIcopyHeader(mri_src, bspline->coeff);
-    bspline->coeff->type = MRI_FLOAT;
+    bspline->coeff->type        = MRI_FLOAT;
     bspline->coeff->outside_val = mri_src->outside_val;
   }
 
   if (!bspline->coeff) {
     bspline->coeff = MRIallocSequence(Width, Height, Depth, MRI_FLOAT, Frames);
     MRIcopyHeader(mri_src, bspline->coeff);
-    bspline->coeff->type = MRI_FLOAT;
+    bspline->coeff->type        = MRI_FLOAT;
     bspline->coeff->outside_val = mri_src->outside_val;
   }
 
-  bspline->degree = degree;
+  bspline->degree  = degree;
   bspline->srctype = mri_src->type;
-  bspline->srcneg = FALSE;
+  bspline->srcneg  = FALSE;
 
   if (bspline->coeff->type != MRI_FLOAT) {
     printf("ERROR MRItoBSpline: BSpline Coeff MRI needs to be float!\n");
@@ -1982,23 +1982,23 @@ extern MRI_BSPLINE *MRItoBSpline(const MRI *mri_src, MRI_BSPLINE *bspline,
 
 extern int MRIsampleBSpline(
     const MRI_BSPLINE *bspline, /* input B-spline array of coefficients */
-    double x,                   /* x coordinate where to interpolate */
-    double y,                   /* y coordinate where to interpolate */
-    double z,                   /* y coordinate where to interpolate */
+    double             x,       /* x coordinate where to interpolate */
+    double             y,       /* y coordinate where to interpolate */
+    double             z,       /* y coordinate where to interpolate */
     const int frame, double *pval)
 
 {
-  int Width = bspline->coeff->width;
-  int Height = bspline->coeff->height;
-  int Depth = bspline->coeff->depth;
+  int Width        = bspline->coeff->width;
+  int Height       = bspline->coeff->height;
+  int Depth        = bspline->coeff->depth;
   int SplineDegree = bspline->degree;
 
-  int OutOfBounds;
+  int    OutOfBounds;
   double w, w2;
   double xWeight[10], yWeight[10], zWeight[10];
   double interpolated;
-  int xIndex[10], yIndex[10], zIndex[10];
-  int Width2 = 2 * Width - 2, Height2 = 2 * Height - 2, Depth2 = 2 * Depth - 2;
+  int    xIndex[10], yIndex[10], zIndex[10];
+  int  Width2 = 2 * Width - 2, Height2 = 2 * Height - 2, Depth2 = 2 * Depth - 2;
   long i, j, k, l;
 
   if (frame >= bspline->coeff->nframes || frame < 0) {
@@ -2086,9 +2086,9 @@ extern int MRIsampleBSpline(
 
   /* perform interpolation */
   interpolated = 0.0;
-  int sdk = SplineDegree;
-  int sdj = SplineDegree;
-  int sdi = SplineDegree;
+  int sdk      = SplineDegree;
+  int sdj      = SplineDegree;
+  int sdi      = SplineDegree;
   if (Width == 1)
     sdi = 0;
   if (Height == 1)
@@ -2150,16 +2150,16 @@ extern int MRIsampleSeqBSpline(const MRI_BSPLINE *bspline, double x, double y,
     return (NO_ERROR);
   }
 
-  int Width = bspline->coeff->width;
-  int Height = bspline->coeff->height;
-  int Depth = bspline->coeff->depth;
+  int Width        = bspline->coeff->width;
+  int Height       = bspline->coeff->height;
+  int Depth        = bspline->coeff->depth;
   int SplineDegree = bspline->degree;
 
   double w, w2;
   double xWeight[10], yWeight[10], zWeight[10];
   double interpolated;
-  int xIndex[10], yIndex[10], zIndex[10];
-  int Width2 = 2 * Width - 2, Height2 = 2 * Height - 2, Depth2 = 2 * Depth - 2;
+  int    xIndex[10], yIndex[10], zIndex[10];
+  int  Width2 = 2 * Width - 2, Height2 = 2 * Height - 2, Depth2 = 2 * Depth - 2;
   long i, j, k, l;
 
   /* compute the interpolation indexes */
@@ -2270,8 +2270,8 @@ MRI *MRIlinearTransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst,
   VECTOR *v_X[_MAX_FS_THREADS],
       *v_Y[_MAX_FS_THREADS]; /* original and transformed coordinate systems */
   MATRIX *mAinv;             /* inverse of mA */
-  double val, x1, x2, x3;
-  int nthreads = 1, tid = 0;
+  double  val, x1, x2, x3;
+  int     nthreads = 1, tid = 0;
 #ifdef HAVE_OPENMP
   nthreads = omp_get_max_threads();
 #endif
@@ -2287,9 +2287,9 @@ MRI *MRIlinearTransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst,
   } else
     MRIclear(mri_dst);
 
-  width = mri_dst->width;
+  width  = mri_dst->width;
   height = mri_dst->height;
-  depth = mri_dst->depth;
+  depth  = mri_dst->depth;
 
   for (tid = 0; tid < nthreads; tid++) {
     v_X[tid] = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
@@ -2297,13 +2297,13 @@ MRI *MRIlinearTransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst,
     v_Y[tid]->rptr[4][1] = 1.0f;
   }
 
-  y2 = 0;
-  y1 = 0;
-  x1 = 0;
-  x2 = 0;
-  x3 = 0;
+  y2    = 0;
+  y1    = 0;
+  x1    = 0;
+  x2    = 0;
+  x3    = 0;
   frame = 0;
-  val = 0;
+  val   = 0;
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
 #pragma omp parallel for if_ROMP(experimental)                                 \
@@ -2375,10 +2375,10 @@ MRI *LTAtransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst, LTA *lta)
   // VECTOR      *v_X, *v_Y ;/* original and transformed coordinate systems */
   // double        x1, x2, x3 ;
   // MATRIX      *m_L, *m_L_inv ;
-  LT *tran = &lta->xforms[0];
-  MATRIX *r2i = nullptr;
-  MATRIX *i2r = nullptr;
-  MATRIX *tmp = nullptr;
+  LT *    tran = &lta->xforms[0];
+  MATRIX *r2i  = nullptr;
+  MATRIX *i2r  = nullptr;
+  MATRIX *tmp  = nullptr;
   // MATRIX *v2v = 0;
   MRI *resMRI = nullptr;
 
@@ -2449,10 +2449,10 @@ MRI *LTAtransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst, LTA *lta)
         mri_dst = MRIcloneDifferentType(bspline->coeff, bspline->srctype);
         // reset talairach transform file name:
         mri_dst->transform_fname[0] = '\0';
-        mri_dst->c_r = -0.0950;
-        mri_dst->c_a = -16.5100;
-        mri_dst->c_s = 9.7500;
-        mri_dst->ras_good_flag = 1;
+        mri_dst->c_r                = -0.0950;
+        mri_dst->c_a                = -16.5100;
+        mri_dst->c_s                = 9.7500;
+        mri_dst->ras_good_flag      = 1;
         // maye one should set also the other geometry entries
         // from the average ???
         //
@@ -2558,23 +2558,23 @@ MRI *LTAtransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst, LTA *lta)
 //
 //--------------------------------------------------------------------------------
 
-#define MAXF 200L                     /* Maximum size of the filter */
-#define SPLINE "Spline"               /* Spline filter (l2-norm) */
-#define SPLINE_L2 "Spline L2"         /* Spline filter (L2-norm) */
+#define MAXF        200L              /* Maximum size of the filter */
+#define SPLINE      "Spline"          /* Spline filter (l2-norm) */
+#define SPLINE_L2   "Spline L2"       /* Spline filter (L2-norm) */
 #define SPLINE_CENT "Centered Spline" /* Centered Spline filter (l2-norm) */
 #define SPLINE_CENT_L2                                                         \
   "Centered Spline L2" /* Centered Spline filter (L2-norm) */
 
 extern MRI *MRIdownsample2BSpline(const MRI *mri_src, MRI *mri_dst) {
-  double *InBuffer;  /* Input buffer to 1D process */
-  double *OutBuffer; /* Output buffer to 1D process */
-  double g[MAXF];    /* Coefficients of the reduce filter */
-  long ng;           /* Number of coefficients of the reduce filter */
-  double h[MAXF];    /* Coefficients of the expansion filter */
-  long nh;           /* Number of coefficients of the expansion filter */
-  short IsCentered;  /* Equal TRUE if the filter is a centered spline, FALSE
+  double *InBuffer;   /* Input buffer to 1D process */
+  double *OutBuffer;  /* Output buffer to 1D process */
+  double  g[MAXF];    /* Coefficients of the reduce filter */
+  long    ng;         /* Number of coefficients of the reduce filter */
+  double  h[MAXF];    /* Coefficients of the expansion filter */
+  long    nh;         /* Number of coefficients of the expansion filter */
+  short   IsCentered; /* Equal TRUE if the filter is a centered spline, FALSE
                         otherwise */
-  int kx, ky, kz, kf;
+  int     kx, ky, kz, kf;
 
   /* Get the filter coefficients for the Spline (order = 3) filter*/
   if (!GetPyramidFilter(SPLINE_CENT, 3, g, &ng, h, &nh, &IsCentered)) {
@@ -2583,10 +2583,10 @@ extern MRI *MRIdownsample2BSpline(const MRI *mri_src, MRI *mri_dst) {
     exit(1);
   }
 
-  int NxIn = mri_src->width;
-  int NyIn = mri_src->height;
-  int NzIn = mri_src->depth;
-  int NfIn = mri_src->nframes;
+  int NxIn  = mri_src->width;
+  int NyIn  = mri_src->height;
+  int NzIn  = mri_src->depth;
+  int NfIn  = mri_src->nframes;
   int NxOut = NxIn / 2;
   if (NxOut < 1)
     NxOut = 1;
@@ -2723,7 +2723,7 @@ extern MRI *MRIdownsample2BSpline(const MRI *mri_src, MRI *mri_dst) {
   mri_dst->ysize = mri_src->ysize * 2;
   mri_dst->zsize = mri_src->zsize * 2;
   mri_dst->thick = mri_src->thick * 2;
-  mri_dst->ps = mri_src->ps * 2;
+  mri_dst->ps    = mri_src->ps * 2;
 
   // adjust cras
   // printf("COMPUTING new CRAS\n") ;
@@ -2733,11 +2733,11 @@ extern MRI *MRIdownsample2BSpline(const MRI *mri_src, MRI *mri_dst) {
   VECTOR_ELT(C, 2) = mri_src->height / 2 + 0.5;
   VECTOR_ELT(C, 3) = mri_src->depth / 2 + 0.5;
   VECTOR_ELT(C, 4) = 1.0;
-  MATRIX *V2R = extract_i_to_r(mri_src);
-  MATRIX *P = MatrixMultiply(V2R, C, NULL);
-  mri_dst->c_r = P->rptr[1][1];
-  mri_dst->c_a = P->rptr[2][1];
-  mri_dst->c_s = P->rptr[3][1];
+  MATRIX *V2R      = extract_i_to_r(mri_src);
+  MATRIX *P        = MatrixMultiply(V2R, C, NULL);
+  mri_dst->c_r     = P->rptr[1][1];
+  mri_dst->c_a     = P->rptr[2][1];
+  mri_dst->c_s     = P->rptr[3][1];
   MatrixFree(&P);
   MatrixFree(&V2R);
   VectorFree(&C);
@@ -2753,15 +2753,15 @@ extern MRI *MRIdownsample2BSpline(const MRI *mri_src, MRI *mri_dst) {
 }
 
 extern MRI *MRIupsample2BSpline(const MRI *mri_src, MRI *mri_dst) {
-  double *InBuffer;  /* Input buffer to 1D process */
-  double *OutBuffer; /* Output buffer to 1D process */
-  double g[MAXF];    /* Coefficients of the reduce filter */
-  long ng;           /* Number of coefficients of the reduce filter */
-  double h[MAXF];    /* Coefficients of the expansion filter */
-  long nh;           /* Number of coefficients of the expansion filter */
-  short IsCentered;  /* Equal TRUE if the filter is a centered spline, FALSE
+  double *InBuffer;   /* Input buffer to 1D process */
+  double *OutBuffer;  /* Output buffer to 1D process */
+  double  g[MAXF];    /* Coefficients of the reduce filter */
+  long    ng;         /* Number of coefficients of the reduce filter */
+  double  h[MAXF];    /* Coefficients of the expansion filter */
+  long    nh;         /* Number of coefficients of the expansion filter */
+  short   IsCentered; /* Equal TRUE if the filter is a centered spline, FALSE
                         otherwise */
-  int kx, ky, kz, kf;
+  int     kx, ky, kz, kf;
 
   /* Get the filter coefficients for the Spline (order = 3) filter*/
   if (!GetPyramidFilter(SPLINE_CENT, 3, g, &ng, h, &nh, &IsCentered)) {
@@ -2909,11 +2909,11 @@ extern MRI *MRIupsample2BSpline(const MRI *mri_src, MRI *mri_dst) {
   VECTOR_ELT(C, 2) = mri_src->height / 2.0 - 0.25;
   VECTOR_ELT(C, 3) = mri_src->depth / 2.0 - 0.25;
   VECTOR_ELT(C, 4) = 1.0;
-  MATRIX *V2R = extract_i_to_r(mri_src);
-  MATRIX *P = MatrixMultiply(V2R, C, NULL);
-  mri_dst->c_r = P->rptr[1][1];
-  mri_dst->c_a = P->rptr[2][1];
-  mri_dst->c_s = P->rptr[3][1];
+  MATRIX *V2R      = extract_i_to_r(mri_src);
+  MATRIX *P        = MatrixMultiply(V2R, C, NULL);
+  mri_dst->c_r     = P->rptr[1][1];
+  mri_dst->c_a     = P->rptr[2][1];
+  mri_dst->c_s     = P->rptr[3][1];
   MatrixFree(&P);
   MatrixFree(&V2R);
   VectorFree(&C);

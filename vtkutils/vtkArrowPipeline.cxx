@@ -24,8 +24,8 @@
  *
  */
 
-#include <limits>
 #include <cassert>
+#include <limits>
 
 #include "vtkArrowPipeline.h"
 
@@ -52,7 +52,7 @@ vtkArrowPipeline::vtkArrowPipeline() {
 
   // Initial points.
   mStartPoint[0] = mStartPoint[1] = mStartPoint[2] = 0;
-  mEndPoint[0] = 1;
+  mEndPoint[0]                                     = 1;
   mEndPoint[1] = mEndPoint[2] = 0;
 
   // This will be how we transform the source to go from point a to

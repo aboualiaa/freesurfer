@@ -26,7 +26,7 @@
 /************/
 /* imgpad.f */
 /************/
-int npad_(int *n, int *m);
+int  npad_(int *n, int *m);
 void imgpad_(float *imag, int *nx, int *ny, int *nz, float *imagp, int *nxp,
              int *nyp, int *nzp);
 void imgdap_(float *imag, int *nx, int *ny, int *nz, float *imagp, int *nxp,

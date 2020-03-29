@@ -25,32 +25,31 @@
 
 /* Given a white and pial surface, compute the thickness are every point
  */
-#include <iostream>
-#include <fstream>
 #include "ANN.h"
+#include <fstream>
+#include <iostream>
 
 extern "C" {
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
-#include "mrishash.h"
-#include "mri_identify.h"
+#include "error.h"
 #include "icosahedron.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_identify.h"
+#include "mrishash.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 }
 
 #define MAX_DATA_NUMBERS 200
-#define DEBUG 0
+#define DEBUG            0
 
 typedef struct _double_3d {
   double x;
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]);
 
 int framesave = 0;
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -79,10 +78,10 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
                        int debug);
 
 const char *trgtypestring = "paint";
-int trgtype = MRI_VOLUME_TYPE_UNKNOWN;
+int         trgtype       = MRI_VOLUME_TYPE_UNKNOWN;
 
 int debugflag = 0;
-int debugvtx = 0;
+int debugvtx  = 0;
 
 char *middle_name = NULL; /* compute a middle surface */
 
@@ -92,11 +91,9 @@ const char *Progname;
 
 MRI *ComputeThickness(MRI_SURFACE *Mesh1, MRI_SURFACE *Mesh2, MRI *mri_res);
 
-using namespace std;
-
 int main(int argc, char *argv[]) {
   char **av, *surf1_name, *surf2_name;
-  char *out_name;
+  char * out_name;
 
   int nargs, ac;
   int total, index, fno, vno0, vno1, vno2;
@@ -108,7 +105,7 @@ int main(int argc, char *argv[]) {
   MRI_SURFACE *Surf1, *Surf2, *mris;
 
   VERTEX *vertex;
-  FACE *face;
+  FACE *  face;
 
   nargs = handleVersionOption(argc, argv, "mris_compute_thickness");
   if (nargs && argc - nargs == 1)
@@ -136,7 +133,7 @@ int main(int argc, char *argv[]) {
 
   surf1_name = argv[1];
   surf2_name = argv[2];
-  out_name = argv[3];
+  out_name   = argv[3];
 
   if (trgtypestring == NULL) {
     printf("Please specify output data type!\n");
@@ -192,11 +189,11 @@ int main(int argc, char *argv[]) {
   resVal = ComputeThickness(Surf2, Surf1, NULL);
 
   printf("Compute statistics \n");
-  maxV = -1000.0;
-  minV = 1000.0;
-  meanV = 0.0;
+  maxV    = -1000.0;
+  minV    = 1000.0;
+  meanV   = 0.0;
   absMean = 0.0;
-  total = 0;
+  total   = 0;
   for (index = 0; index < Surf1->nvertices; index++) {
     scalar = MRIgetVoxVal(resVal1, index, 0, 0, 0);
     scalar = 0.5 * (MRIgetVoxVal(resVal, index, 0, 0, 0) + scalar);
@@ -332,7 +329,7 @@ static void print_version(void) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -342,18 +339,18 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "trg_type")) {
     trgtypestring = argv[2];
-    trgtype = string_to_type(trgtypestring);
-    nargs = 1;
+    trgtype       = string_to_type(trgtypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "debug")) {
     debugflag = 1;
-    debugvtx = atoi(argv[2]);
-    nargs = 1;
+    debugvtx  = atoi(argv[2]);
+    nargs     = 1;
   } else if (!stricmp(option, "face")) {
     tflag = 1;
     printf("Using vertex-to-face distance to compute thickness\n");
   } else if (!stricmp(option, "middle")) {
     middle_name = argv[2];
-    nargs = 1;
+    nargs       = 1;
     printf("Output a middle surface to file %s\n", middle_name);
   } else {
     fprintf(stderr, "unknown option %s\n", argv[1]);
@@ -365,7 +362,7 @@ static int get_option(int argc, char *argv[]) {
 }
 
 MRI *ComputeThickness(MRI_SURFACE *Mesh1, MRI_SURFACE *Mesh2, MRI *mri_res) {
-  int index, k, facenumber;
+  int    index, k, facenumber;
   double value, distance;
   VERTEX vertex;
 
@@ -378,9 +375,9 @@ MRI *ComputeThickness(MRI_SURFACE *Mesh1, MRI_SURFACE *Mesh2, MRI *mri_res) {
   }
 
   // construct and initialize the tree
-  ANNkd_tree *annkdTree = new ANNkd_tree(pa, Mesh2->nvertices, 3);
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNkd_tree * annkdTree = new ANNkd_tree(pa, Mesh2->nvertices, 3);
+  ANNidxArray  annIndex  = new ANNidx[1];
+  ANNdistArray annDist   = new ANNdist[1];
   //  ANNpoint query_pt = annAllocPt(3);
   ANNpointArray QueryPt;
 
@@ -414,9 +411,9 @@ MRI *ComputeThickness(MRI_SURFACE *Mesh1, MRI_SURFACE *Mesh2, MRI *mri_res) {
         0);                // error bound
 
     if (tflag == 0) { /* compute vertex-to-vertex distance */
-      value = QueryPt[0][0] - Mesh2->vertices[annIndex[0]].x;
+      value    = QueryPt[0][0] - Mesh2->vertices[annIndex[0]].x;
       distance = value * value;
-      value = QueryPt[0][1] - Mesh2->vertices[annIndex[0]].y;
+      value    = QueryPt[0][1] - Mesh2->vertices[annIndex[0]].y;
       distance += value * value;
       value = QueryPt[0][2] - Mesh2->vertices[annIndex[0]].z;
       distance += value * value;
@@ -463,17 +460,17 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
                        int debug) {
   /* Compute the distance from point P0 to a face of the surface mesh */
 
-  double a, b, c, d, e, f, det, s, t, invDet;
-  double numer, denom, tmp0, tmp1;
+  double  a, b, c, d, e, f, det, s, t, invDet;
+  double  numer, denom, tmp0, tmp1;
   VERTEX *V1, *V2, *V3;
-  FACE *face;
+  FACE *  face;
 
   VERTEX E0, E1, D;
 
   face = &mri_surf->faces[face_number];
-  V1 = &mri_surf->vertices[face->v[0]];
-  V2 = &mri_surf->vertices[face->v[1]];
-  V3 = &mri_surf->vertices[face->v[2]];
+  V1   = &mri_surf->vertices[face->v[0]];
+  V2   = &mri_surf->vertices[face->v[1]];
+  V3   = &mri_surf->vertices[face->v[2]];
 
   E0.x = V2->x - V1->x;
   E0.y = V2->y - V1->y;
@@ -481,9 +478,9 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   E1.x = V3->x - V1->x;
   E1.y = V3->y - V1->y;
   E1.z = V3->z - V1->z;
-  D.x = V1->x - P0->x;
-  D.y = V1->y - P0->y;
-  D.z = V1->z - P0->z;
+  D.x  = V1->x - P0->x;
+  D.y  = V1->y - P0->y;
+  D.z  = V1->z - P0->z;
 
   a = E0.x * E0.x + E0.y * E0.y + E0.z * E0.z;
   b = E0.x * E1.x + E0.y * E1.y + E0.z * E1.z;
@@ -493,8 +490,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   f = D.x * D.x + D.y * D.y + D.z * D.z;
 
   det = a * c - b * b;
-  s = b * e - c * d;
-  t = b * d - a * e;
+  s   = b * e - c * d;
+  t   = b * d - a * e;
 
   if (debug)
     printf("det = %g\n", det);
@@ -544,8 +541,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
       if (tmp1 > tmp0) {
         numer = tmp1 - tmp0;
         denom = a - b - b + c;
-        s = (numer >= denom ? 1 : numer / denom);
-        t = 1 - s;
+        s     = (numer >= denom ? 1 : numer / denom);
+        t     = 1 - s;
 
       } else {
         s = 0;
@@ -561,8 +558,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
       if (tmp1 > tmp0) {     /* Minimum at line s + t = 1 */
         numer = tmp1 - tmp0; /* Positive */
         denom = a + c - b - b;
-        t = (numer >= denom ? 1 : (numer / denom));
-        s = 1 - t;
+        t     = (numer >= denom ? 1 : (numer / denom));
+        s     = 1 - t;
       } else { /* Minimum at line t = 0 */
         s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
         t = 0;
@@ -576,7 +573,7 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
         s = 0;
       } else {
         denom = a + c - b - b; /* denom is positive */
-        s = (numer >= denom ? 1 : (numer / denom));
+        s     = (numer >= denom ? 1 : (numer / denom));
       }
       t = 1 - s;
       if (debug)
@@ -604,8 +601,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
 ------------------------------------------------------*/
 static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
   VERTEX *v;
-  FACE *f;
-  int n, i;
+  FACE *  f;
+  int     n, i;
 
   v = &mris->vertices[vno];
   f = &mris->faces[fno];

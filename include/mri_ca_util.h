@@ -26,30 +26,28 @@
 #ifndef util_h
 #define util_h
 
-#include <stdio.h>
-#include <math.h>
-#include <string>
-#include <iostream>
 #include <fstream>
-#include <vector>
-#include <set>
+#include <iostream>
 #include <map>
+#include <math.h>
+#include <set>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 #include "mri.h"
 
-using namespace std;
+typedef std::vector<double>           TypeVectorDouble;
+typedef std::vector<TypeVectorDouble> TypeMatrixDouble;
 
-typedef vector<double> TypeVectorDouble;
-typedef vector<TypeVectorDouble> TypeMatrixDouble;
+typedef std::vector<float>           TypeVectorFloat;
+typedef std::vector<TypeVectorFloat> TypeMatrixFloat;
 
-typedef vector<float> TypeVectorFloat;
-typedef vector<TypeVectorFloat> TypeMatrixFloat;
+typedef std::vector<int>           TypeVectorInt;
+typedef std::vector<TypeVectorInt> TypeMatrixInt;
 
-typedef vector<int> TypeVectorInt;
-typedef vector<TypeVectorInt> TypeMatrixInt;
-
-typedef vector<string> TypeVectorString;
-typedef vector<TypeVectorString> TypeMatrixString;
+typedef std::vector<std::string>      TypeVectorString;
+typedef std::vector<TypeVectorString> TypeMatrixString;
 
 void printType(TypeVectorDouble vectorDouble, ostream &ofs = cout) {
   char strMsg[500];
@@ -192,7 +190,7 @@ void printType(TypeMatrixInt matrixInt, ostream &ofs = cout) {
   }
 }
 
-void printType(string strString, ostream &ofs = cout) {
+void printType(std::string strString, ostream &ofs = cout) {
   char strMsg[500];
 
   sprintf(strMsg, "%s", strString.c_str());

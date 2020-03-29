@@ -1,7 +1,7 @@
 #include "MRISOBBTree.h"
-#include <string>
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <string>
 
 #include "fsenv.h"
 
@@ -24,8 +24,8 @@ public:
     fullpath1.append("/bert/surf/lh.white");
     fullpath2.append("/bert/mri/aseg.mgz");
 
-    mris = MRISread(fullpath1.c_str());
-    tmp = MRIread(fullpath2.c_str());
+    mris    = MRISread(fullpath1.c_str());
+    tmp     = MRIread(fullpath2.c_str());
     OBBTree = new MRISOBBTree(mris);
     Math::ConvertSurfaceRASToVoxel(mris, tmp);
   }
@@ -36,7 +36,7 @@ public:
     std::cerr << "TestComputeOBB (tests whether the root node created ( the "
                  "biggest OBB) has the given orientation and size)."
               << std::endl;
-    OBBNode *pOBB = new OBBNode;
+    OBBNode *        pOBB = new OBBNode;
     std::vector<int> faceidlist;
     faceidlist.reserve(mris->nfaces);
     for (int i = 0; i < mris->nfaces; i++)
@@ -81,8 +81,8 @@ public:
 
 private:
   MRISOBBTree *OBBTree;
-  MRIS *mris;
-  MRI *tmp;
+  MRIS *       mris;
+  MRI *        tmp;
 };
 
 int main(int argc, char **argv) {
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   Progname = argv[0];
 
   const int SUCCESS = 0;
-  const int FAIL = 1;
+  const int FAIL    = 1;
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(TestMRISOBBTree::suite());

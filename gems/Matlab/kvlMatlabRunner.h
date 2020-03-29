@@ -16,9 +16,9 @@ namespace kvl {
 class MatlabRunner : public itk::Object {
 public:
   /** Smart pointer typedef support. */
-  typedef MatlabRunner Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef MatlabRunner                  Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -37,7 +37,7 @@ public:
   }
 
 protected:
-  MatlabRunner() = default;
+  MatlabRunner()           = default;
   ~MatlabRunner() override = default;
 
   MatlabRunner(const Self &);   // purposely not implemented

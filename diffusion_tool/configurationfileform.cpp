@@ -1,6 +1,8 @@
-#include <QTextStream>
+#include <iostream>
+
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTextStream>
 
 #include "configurationfileform.h"
 
@@ -12,7 +14,7 @@ ConfigurationFileForm::ConfigurationFileForm(QDialog *parent)
   this->setMinimumWidth(783);
   this->setMaximumWidth(783);
 
-  original_dcm = "";
+  original_dcm  = "";
   original_bvec = "";
   original_bval = "";
 }
@@ -22,9 +24,9 @@ void ConfigurationFileForm::loadDefaults(QString fileName) {
   // QTextStream(stdout) << (file_info.dir()).dirName() << " is the name of the
   // directory" << endl;
 
-  QDir parent_directory = file_info.dir();
-  QString parent_dir_name = parent_directory.dirName();
-  original_directory_path = parent_directory.absolutePath();
+  QDir    parent_directory = file_info.dir();
+  QString parent_dir_name  = parent_directory.dirName();
+  original_directory_path  = parent_directory.absolutePath();
 
   ui.dtrootLineEdit->setText(original_directory_path);
   ui.subjectNameLineEdit->setText(parent_dir_name);
@@ -95,8 +97,8 @@ void ConfigurationFileForm::loadDefaults2(QString fileName) {
   QDir temp_directory = file_info.dir();
 
   QFileInfoList temp_list;
-  bool found = false;
-  QString end_of_file;
+  bool          found = false;
+  QString       end_of_file;
 
   temp_list = temp_directory.entryInfoList(QDir::Files | QDir::Dirs |
                                            QDir::NoDotAndDotDot);
@@ -148,7 +150,7 @@ void ConfigurationFileForm::on_checkBox_26_stateChanged(int state) {
   if (state == 2) {
     ui.dtrootLineEdit->setText(original_parent_path);
 
-    original_dcm = ui.subjectDcmFileLineEdit->text();
+    original_dcm  = ui.subjectDcmFileLineEdit->text();
     original_bvec = ui.subjectBvecFileLineEdit->text();
     original_bval = ui.subjectBvalFileLineEdit->text();
 
@@ -188,7 +190,7 @@ void ConfigurationFileForm::on_pushButton_clicked(bool checked) {
 }
 
 void ConfigurationFileForm::on_pushButton_3_clicked(bool checked) {
-  QString full_name = QFileDialog::getOpenFileName(this);
+  QString   full_name = QFileDialog::getOpenFileName(this);
   QFileInfo full_path(full_name);
 
   if (validDcm(full_path)) {
@@ -206,7 +208,7 @@ void ConfigurationFileForm::on_pushButton_3_clicked(bool checked) {
 void ConfigurationFileForm::on_pushButton_2_clicked(bool checked) {
   QFileInfo dcm_info(ui.testingLineEdit->text());
   QFileInfo trk_info(ui.testingLineEdit_2->text());
-  QDir output_dir(ui.outputDirectoryLineEdit->text());
+  QDir      output_dir(ui.outputDirectoryLineEdit->text());
 
   if (!validDcm(dcm_info)) {
     QMessageBox msgBox;
@@ -246,9 +248,9 @@ void ConfigurationFileForm::on_pushButton_2_clicked(bool checked) {
 }
 
 void ConfigurationFileForm::on_pushButton_4_clicked(bool checked) {
-  QString full_name = QFileDialog::getOpenFileName(this);
+  QString   full_name = QFileDialog::getOpenFileName(this);
   QFileInfo full_path(full_name);
-  QString file_name = full_path.fileName();
+  QString   file_name = full_path.fileName();
 
   if (validDcm(full_path)) {
     loadDefaults2(full_name);
@@ -708,7 +710,7 @@ bool ConfigurationFileForm::validDcm(QFileInfo file) {
 
   QString name = file.fileName();
   QString end_of_file;
-  int length = name.length();
+  int     length = name.length();
 
   if (length <= 4) {
     return false;
@@ -742,11 +744,11 @@ bool ConfigurationFileForm::validDcm(QFileInfo file) {
 }
 
 bool ConfigurationFileForm::replace_subject_dcm() {
-  QString full_line = ui.subjectDcmFileLineEdit->text();
+  QString full_line    = ui.subjectDcmFileLineEdit->text();
   QString query_string = ui.subjectNameLineEdit->text();
-  int query_length = query_string.size();
+  int     query_length = query_string.size();
 
-  int pos = 0;
+  int pos   = 0;
   int index = full_line.indexOf(query_string, pos);
 
   if (index == -1) {
@@ -765,11 +767,11 @@ bool ConfigurationFileForm::replace_subject_dcm() {
 }
 
 bool ConfigurationFileForm::replace_subject_bvec() {
-  QString full_line = ui.subjectBvecFileLineEdit->text();
+  QString full_line    = ui.subjectBvecFileLineEdit->text();
   QString query_string = ui.subjectNameLineEdit->text();
-  int query_length = query_string.size();
+  int     query_length = query_string.size();
 
-  int pos = 0;
+  int pos   = 0;
   int index = full_line.indexOf(query_string, pos);
 
   if (index == -1) {
@@ -788,11 +790,11 @@ bool ConfigurationFileForm::replace_subject_bvec() {
 }
 
 bool ConfigurationFileForm::replace_subject_bval() {
-  QString full_line = ui.subjectBvalFileLineEdit->text();
+  QString full_line    = ui.subjectBvalFileLineEdit->text();
   QString query_string = ui.subjectNameLineEdit->text();
-  int query_length = query_string.size();
+  int     query_length = query_string.size();
 
-  int pos = 0;
+  int pos   = 0;
   int index = full_line.indexOf(query_string, pos);
 
   if (index == -1) {
@@ -815,11 +817,11 @@ void ConfigurationFileForm::matcher(QDir directory, QString pattern,
       directory.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
   // QTextStream(stdout) << "about to peep " << directory.absolutePath() << "
   // and its length is " << directory_contents.length() << endl;
-  QDir *temp = nullptr;
+  QDir *  temp = nullptr;
   QRegExp rx(pattern);
   rx.setPatternSyntax(QRegExp::Wildcard);
   QString subject_name;
-  int temp_index;
+  int     temp_index;
 
   for (int i = 0; i < directory_contents.length(); i++) {
     if (directory_contents[i].isDir()) {
@@ -840,7 +842,7 @@ void ConfigurationFileForm::matcher(QDir directory, QString pattern,
         if (vector == dcms) {
           // removing the stuff that comes after the subject name
           subject_name = directory_contents[i].absoluteFilePath();
-          temp_index = subject_name.indexOf("/", length_of_root_directory);
+          temp_index   = subject_name.indexOf("/", length_of_root_directory);
           subject_name.remove(temp_index, subject_name.size() - temp_index);
 
           // removing the stuff that comes before the subject name
@@ -862,7 +864,7 @@ bool validBval(QFileInfo file) {
 
   QString name = file.fileName();
   QString end_of_file;
-  int length = name.length();
+  int     length = name.length();
 
   if (length <= 6) {
     return false;
@@ -898,7 +900,7 @@ bool validBvec(QFileInfo file) {
 
   QString name = file.fileName();
   QString end_of_file;
-  int length = name.length();
+  int     length = name.length();
 
   if (length <= 6) {
     return false;
@@ -934,7 +936,7 @@ bool validTrk(QFileInfo file) {
 
   QString name = file.fileName();
   QString end_of_file;
-  int length = name.length();
+  int     length = name.length();
 
   if (length <= 4) {
     return false;

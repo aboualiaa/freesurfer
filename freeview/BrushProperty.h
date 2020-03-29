@@ -47,28 +47,28 @@ public:
   LayerVolumeBase *GetReferenceLayer();
 
   double *GetDrawRange();
-  void SetDrawRange(double *range);
-  void SetDrawRange(double low, double high);
+  void    SetDrawRange(double *range);
+  void    SetDrawRange(double low, double high);
 
   bool GetDrawRangeEnabled();
 
   double *GetExcludeRange();
-  void SetExcludeRange(double *range);
-  void SetExcludeRange(double low, double high);
+  void    SetExcludeRange(double *range);
+  void    SetExcludeRange(double low, double high);
 
   bool GetExcludeRangeEnabled();
 
   bool GetDrawConnectedOnly();
 
   double *GetEraseRange();
-  void SetEraseRange(double *range);
-  void SetEraseRange(double low, double high);
+  void    SetEraseRange(double *range);
+  void    SetEraseRange(double low, double high);
 
   bool GetEraseRangeEnabled();
 
   double *GetEraseExcludeRange();
-  void SetEraseExcludeRange(double *range);
-  void SetEraseExcludeRange(double low, double high);
+  void    SetEraseExcludeRange(double *range);
+  void    SetEraseExcludeRange(double low, double high);
 
   bool GetEraseExcludeRangeEnabled();
 
@@ -108,19 +108,19 @@ public slots:
   void SetEraseExcludeRangeEnabled(bool bEnable);
 
 protected:
-  int m_nBrushSize;
-  int m_nBrushTolerance;
+  int    m_nBrushSize;
+  int    m_nBrushTolerance;
   double m_dDrawRange[2];
-  bool m_bEnableDrawRange;
+  bool   m_bEnableDrawRange;
   double m_dExcludeRange[2];
-  bool m_bEnableExcludeRange;
+  bool   m_bEnableExcludeRange;
   double m_dEraseRange[2];
-  bool m_bEnableEraseRange;
+  bool   m_bEnableEraseRange;
   double m_dEraseExcludeRange[2];
-  bool m_bEnableEraseExcludeRange;
-  bool m_bDrawConnectedOnly;
-  bool m_bFill3D;
-  bool m_bIsCloning;
+  bool   m_bEnableEraseExcludeRange;
+  bool   m_bDrawConnectedOnly;
+  bool   m_bFill3D;
+  bool   m_bIsCloning;
 
   double m_dFillValue;
   double m_dEraseValue;

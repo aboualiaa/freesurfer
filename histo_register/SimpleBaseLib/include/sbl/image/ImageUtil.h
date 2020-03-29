@@ -1,8 +1,8 @@
 #ifndef _SBL_IMAGE_UTIL_H_
 #define _SBL_IMAGE_UTIL_H_
 #include <sbl/core/Pointer.h>
-#include <sbl/other/TaggedFile.h>
 #include <sbl/image/Image.h>
+#include <sbl/other/TaggedFile.h>
 namespace sbl {
 
 /*! \file ImageUtil.h
@@ -26,14 +26,14 @@ aptr<ImageGrayU> toGray(const ImageColorU &img);
 aptr<ImageColorU> toColor(const ImageGrayU &img);
 
 /// convert 8-bit image to float image
-aptr<ImageGrayF> toFloat(const ImageGrayU &input, float scaleFactor);
+aptr<ImageGrayF>  toFloat(const ImageGrayU &input, float scaleFactor);
 aptr<ImageColorF> toFloat(const ImageColorU &input, float scaleFactor);
 
 /// convert float image to 8-bit image, automatically scaling values
 aptr<ImageGrayU> toUChar(const ImageGrayF &img);
 
 /// convert float image to 8-bit image, using a fixed scale factor
-aptr<ImageGrayU> toUChar(const ImageGrayF &input, float scaleFactor);
+aptr<ImageGrayU>  toUChar(const ImageGrayF &input, float scaleFactor);
 aptr<ImageColorU> toUChar(const ImageColorF &input, float scaleFactor);
 
 //-------------------------------------------
@@ -81,9 +81,9 @@ void multiply(const ImageGrayF &input, float factor, ImageGrayF &output);
 
 /// perform local brightness normalization
 aptr<ImageColorU> normalizeLocalBrightness(const ImageColorU &input,
-                                           int windowSize);
-aptr<ImageGrayU> normalizeLocalBrightness(const ImageGrayU &input,
-                                          int windowSize);
+                                           int                windowSize);
+aptr<ImageGrayU>  normalizeLocalBrightness(const ImageGrayU &input,
+                                           int               windowSize);
 
 //-------------------------------------------
 // IMAGE STATISTICS
@@ -171,7 +171,7 @@ void drawMaskBoundary(ImageColorU &output, const ImageGrayU &mask, int thresh,
 
 /// join images horizontally
 aptr<ImageColorU> joinHoriz(const ImageColorU &img1, const ImageColorU &img2);
-aptr<ImageGrayU> joinHoriz(const ImageGrayU &img1, const ImageGrayU &img2);
+aptr<ImageGrayU>  joinHoriz(const ImageGrayU &img1, const ImageGrayU &img2);
 
 /// blend two images, apply alpha weight to each image (alpha values typically
 /// in [0, 1])

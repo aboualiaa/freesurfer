@@ -26,10 +26,12 @@
 #ifndef MRI_CONFORM_H
 #define MRI_CONFORM_H
 
-MRI *MRIconform(MRI *mri);
+#include "mri.h"
+
+MRI *   MRIconform(MRI *mri);
 MATRIX *MRIgetConformMatrix(MRI *mri);
-MRI *MRIconformedTemplate(MRI *mri, int conform_width, double conform_size,
-                          int KeepDC);
+MRI *   MRIconformedTemplate(MRI *mri, int conform_width, double conform_size,
+                             int KeepDC);
 
 /*  EOF  */
 

@@ -29,35 +29,34 @@
 #include "compilerdefs.h"
 const char *Progname = "mri_modify";
 
-using namespace std;
-
 static double gflip_angle = 0;
-static float gte = 0;
-static float gtr = 0;
-static float gti = 0;
-static char new_transform_fname[STRLEN];
+static float  gte         = 0;
+static float  gtr         = 0;
+static float  gti         = 0;
+static char   new_transform_fname[STRLEN];
 
-static int tr_specified = 0;
-static int te_specified = 0;
-static int ti_specified = 0;
-static int fa_specified = 0;
+static int tr_specified   = 0;
+static int te_specified   = 0;
+static int ti_specified   = 0;
+static int fa_specified   = 0;
 static int cras_specified = 0;
 
 void print_usage() {
-  cout << "Usage: mri_modify <-xras xr xa xs> <-yras yr ya ys> <-zras zr za "
-          "zs> <-cras cr ca cs> \\ "
-       << endl;
-  cout << "                  <-xsize size> <-ysize size> <-zsize size> \\ "
-       << endl;
-  cout << "                  <-tr recoverytime> <-te echotime> <-ti "
-          "inversiontime> <-fa angledegree> \\ "
-       << endl;
-  cout << "                  <-xform new_file_name> \\ " << endl;
-  cout << "                  involume outvolume" << endl;
+  std::cout
+      << "Usage: mri_modify <-xras xr xa xs> <-yras yr ya ys> <-zras zr za "
+         "zs> <-cras cr ca cs> \\ "
+      << std::endl;
+  std::cout << "                  <-xsize size> <-ysize size> <-zsize size> \\ "
+            << std::endl;
+  std::cout << "                  <-tr recoverytime> <-te echotime> <-ti "
+               "inversiontime> <-fa angledegree> \\ "
+            << std::endl;
+  std::cout << "                  <-xform new_file_name> \\ " << std::endl;
+  std::cout << "                  involume outvolume" << std::endl;
 }
 
 int get_option(int argc, char *argv[], VOL_GEOM &vg) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
   option = argv[1] + 1; /* past '-' */
   if (!strcmp(option, "-help")) {
@@ -67,49 +66,49 @@ int get_option(int argc, char *argv[], VOL_GEOM &vg) {
     vg.x_r = atof(argv[2]);
     vg.x_a = atof(argv[3]);
     vg.x_s = atof(argv[4]);
-    nargs = 3;
+    nargs  = 3;
   } else if (!stricmp(option, (char *)"yras")) {
     vg.y_r = atof(argv[2]);
     vg.y_a = atof(argv[3]);
     vg.y_s = atof(argv[4]);
-    nargs = 3;
+    nargs  = 3;
   } else if (!stricmp(option, (char *)"zras")) {
     vg.z_r = atof(argv[2]);
     vg.z_a = atof(argv[3]);
     vg.z_s = atof(argv[4]);
-    nargs = 3;
+    nargs  = 3;
   } else if (!stricmp(option, (char *)"cras")) {
-    vg.c_r = atof(argv[2]);
-    vg.c_a = atof(argv[3]);
-    vg.c_s = atof(argv[4]);
+    vg.c_r         = atof(argv[2]);
+    vg.c_a         = atof(argv[3]);
+    vg.c_s         = atof(argv[4]);
     cras_specified = 1;
-    nargs = 3;
+    nargs          = 3;
   } else if (!stricmp(option, (char *)"xsize")) {
     vg.xsize = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
   } else if (!stricmp(option, (char *)"ysize")) {
     vg.ysize = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
   } else if (!stricmp(option, (char *)"zsize")) {
     vg.zsize = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
   } else if (!stricmp(option, (char *)"tr")) {
-    gtr = atof(argv[2]);
+    gtr          = atof(argv[2]);
     tr_specified = 1;
-    nargs = 1;
+    nargs        = 1;
   } else if (!stricmp(option, (char *)"te")) {
-    gte = atof(argv[2]);
+    gte          = atof(argv[2]);
     te_specified = 1;
-    nargs = 1;
+    nargs        = 1;
   } else if (!stricmp(option, (char *)"ti")) {
-    gti = atof(argv[2]);
+    gti          = atof(argv[2]);
     ti_specified = 1;
-    nargs = 1;
+    nargs        = 1;
   } else if (!stricmp(option, (char *)"fa")) {
     // mri stores it as radian
-    gflip_angle = RADIANS(atof(argv[2]));
+    gflip_angle  = RADIANS(atof(argv[2]));
     fa_specified = 1;
-    nargs = 1;
+    nargs        = 1;
   } else if (!stricmp(option, (char *)"xform")) {
     // get new transform file name
     strcpy(new_transform_fname, argv[2]);
@@ -151,15 +150,15 @@ int main(int argc, char *argv[]) {
     exit(-1);
   }
 
-  char *invol = argv[argc - 2];
+  char *invol  = argv[argc - 2];
   char *outvol = argv[argc - 1];
 
-  cerr << "Input volume  is : " << invol << endl;
-  cerr << "Output volume is : " << outvol << endl;
+  std::cerr << "Input volume  is : " << invol << std::endl;
+  std::cerr << "Output volume is : " << outvol << std::endl;
 
   MRI *mri = MRIread(invol);
   if (!mri) {
-    cerr << "could not open " << invol << endl;
+    std::cerr << "could not open " << invol << std::endl;
     exit(-1);
   }
   //////////////////////////////////////////////
@@ -172,7 +171,7 @@ int main(int argc, char *argv[]) {
   if (!FZERO(vg.x_r) || !FZERO(vg.x_a) || !FZERO(vg.x_s)) {
     // check consistency
     if (!FZERO(vg.x_r * vg.x_r + vg.x_a * vg.x_a + vg.x_s * vg.x_s - 1)) {
-      cerr << "x_(ras) must have the unit length" << endl;
+      std::cerr << "x_(ras) must have the unit length" << std::endl;
       exit(-1);
     }
     vgOut.x_r = vg.x_r;
@@ -183,7 +182,7 @@ int main(int argc, char *argv[]) {
   if (!FZERO(vg.y_r) || !FZERO(vg.y_a) || !FZERO(vg.y_s)) {
     // check consistency
     if (!FZERO(vg.y_r * vg.y_r + vg.y_a * vg.y_a + vg.y_s * vg.y_s - 1)) {
-      cerr << "y_(ras) must have the unit length" << endl;
+      std::cerr << "y_(ras) must have the unit length" << std::endl;
       exit(-1);
     }
     vgOut.y_r = vg.y_r;
@@ -194,7 +193,7 @@ int main(int argc, char *argv[]) {
   if (!FZERO(vg.z_r) || !FZERO(vg.z_a) || !FZERO(vg.z_s)) {
     // check consistency
     if (!FZERO(vg.z_r * vg.z_r + vg.z_a * vg.z_a + vg.z_s * vg.z_s - 1)) {
-      cerr << "z_(ras) must have the unit length" << endl;
+      std::cerr << "z_(ras) must have the unit length" << std::endl;
       exit(-1);
     }
     vgOut.z_r = vg.z_r;

@@ -27,13 +27,13 @@
 /* struct dsr--the ANALYZE .hdr struct */
 /***************************************/
 struct header_key {
-  int sizeof_hdr; /*required--byte size of header file*/
-  char data_type[10];
-  char db_name[18];
-  int extents; /*required--16384*/
+  int       sizeof_hdr; /*required--byte size of header file*/
+  char      data_type[10];
+  char      db_name[18];
+  int       extents; /*required--16384*/
   short int session_error;
-  char regular; /*required--'r'=regular*/
-  char hkey_un0;
+  char      regular; /*required--'r'=regular*/
+  char      hkey_un0;
 };
 struct image_dimension {
   short int dim[8]; /*required*/
@@ -49,16 +49,16 @@ struct image_dimension {
                       /*32=64 bits (2 floats),64=64 bits (double)     */
   short int bitpix;   /*bits/pixel*/
   short int dim_un0;
-  float pixdim[8]; /*real world values of dimensions mm ms*/
-  float funused8;
-  float funused9;
-  float funused10;
-  float funused11;
-  float funused12;
-  float funused13;
-  float compressed;
-  float verified;
-  int glmax, glmin; /*required*/
+  float     pixdim[8]; /*real world values of dimensions mm ms*/
+  float     funused8;
+  float     funused9;
+  float     funused10;
+  float     funused11;
+  float     funused12;
+  float     funused13;
+  float     compressed;
+  float     verified;
+  int       glmax, glmin; /*required*/
 };
 struct data_history {
   char descrip[80]; /*Will be displayed when loading*/
@@ -71,15 +71,15 @@ struct data_history {
   char exp_date[10];
   char exp_time[10];
   char hist_un0[3];
-  int views;
-  int vols_added;
-  int start_field;
-  int field_skip;
-  int omax, omin;
-  int smax, smin;
+  int  views;
+  int  vols_added;
+  int  start_field;
+  int  field_skip;
+  int  omax, omin;
+  int  smax, smin;
 };
 struct dsr {
-  struct header_key hk;
+  struct header_key      hk;
   struct image_dimension dime;
-  struct data_history hist;
+  struct data_history    hist;
 };

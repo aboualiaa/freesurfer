@@ -36,9 +36,9 @@
 #endif
 #endif
 
-#include "rgb.h"
 #include "diag.h"
 #include "oglutil.h"
+#include "rgb.h"
 #include "tiffio.h"
 #include "version.h"
 
@@ -46,18 +46,18 @@ static char vcid[] = "$Id: mris2rgb.c,v 1.38 2011/03/02 00:04:26 nicks Exp $";
 
 /*-------------------------------- CONSTANTS -----------------------------*/
 
-#define MAX_MARKED 20000
+#define MAX_MARKED             20000
 #define RIGHT_HEMISPHERE_ANGLE 90.0
-#define LEFT_HEMISPHERE_ANGLE -90.0
-#define BIG_FOV 300 /* for unfolded hemispheres */
-#define SMALL_FOV 200
+#define LEFT_HEMISPHERE_ANGLE  -90.0
+#define BIG_FOV                300 /* for unfolded hemispheres */
+#define SMALL_FOV              200
 
 #define ORIG_SURFACE_LIST 1
 
-#define FILE_CURVATURE 0
-#define MEAN_CURVATURE 1
+#define FILE_CURVATURE     0
+#define MEAN_CURVATURE     1
 #define GAUSSIAN_CURVATURE 2
-#define AREA_ERRORS 3
+#define AREA_ERRORS        3
 
 static int which_norm = NORM_MEAN;
 
@@ -65,7 +65,7 @@ static int which_norm = NORM_MEAN;
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -78,7 +78,7 @@ static void save_TIFF(char *fname, int width, int height, unsigned char *rgb);
 static void grabPixelsTIFF(unsigned int width, unsigned int height,
                            unsigned char *rgb);
 
-int MRISsoapBubble(MRI_SURFACE *mris, int niter);
+int         MRISsoapBubble(MRI_SURFACE *mris, int niter);
 static void grabPixels(unsigned int width, unsigned int height,
                        unsigned short *red, unsigned short *green,
                        unsigned short *blue);
@@ -88,36 +88,36 @@ static void xinit();
 static void xend();
 
 #define MAX_CENTROIDS 100
-static int centroid_files = 0;
+static int   centroid_files = 0;
 static char *centroid_fnames[MAX_CENTROIDS];
-static int centroid_colors[MAX_CENTROIDS];
-static int mark_centroids(MRI_SURFACE *mris, char *centroid_fnames[],
-                          int *centroid_colors, int centroid_files);
+static int   centroid_colors[MAX_CENTROIDS];
+static int   mark_centroids(MRI_SURFACE *mris, char *centroid_fnames[],
+                            int *centroid_colors, int centroid_files);
 
 static float rescale = 1.0f;
 
 /*-------------------------------- DATA ----------------------------*/
 
-const char *Progname;
+const char *        Progname;
 static MRI_SURFACE *mris;
 
 static long frame_xdim = 600;
 static long frame_ydim = 600;
 
 static int talairach_flag = 0;
-static int medial_flag = 0;
-static int lateral_flag = 0;
+static int medial_flag    = 0;
+static int lateral_flag   = 0;
 static int posterior_flag = 0;
-static int ventral_flag = 0;
-static int frontal_flag = 0;
-static int dorsal_flag = 0;
+static int ventral_flag   = 0;
+static int frontal_flag   = 0;
+static int dorsal_flag    = 0;
 
-static int normalize_flag = 0;
-static int zero_flag = 0;
-static float angle_offset = 0.0f;
-static float x_angle = 0.0f;
-static float y_angle = 0.0f;
-static float z_angle = 0.0f;
+static int   normalize_flag = 0;
+static int   zero_flag      = 0;
+static float angle_offset   = 0.0f;
+static float x_angle        = 0.0f;
+static float y_angle        = 0.0f;
+static float z_angle        = 0.0f;
 
 static float x_trans = 0.0f;
 static float y_trans = 0.0f;
@@ -135,45 +135,45 @@ static int curvature_flag = 0;
 // static void *buffer = NULL ;
 
 //#else
-static Display *display = nullptr;
+static Display *    display = nullptr;
 static XVisualInfo *visual;
-static Pixmap pixmap;
-static GLXPixmap glxpixmap;
-static GLXContext context;
-static int configuration[] = {
+static Pixmap       pixmap;
+static GLXPixmap    glxpixmap;
+static GLXContext   context;
+static int          configuration[] = {
     GLX_DOUBLEBUFFER, GLX_RGBA, GLX_DEPTH_SIZE, 16, GLX_RED_SIZE, 1,
     GLX_GREEN_SIZE,   1,        GLX_BLUE_SIZE,  1,  None};
 // #endif
 static char *curvature_fname = nullptr;
-static char *coord_fname = nullptr;
-static char *canon_fname = nullptr;
-static float cslope = 10.0f;
-static int patch_flag = 0;
+static char *coord_fname     = nullptr;
+static char *canon_fname     = nullptr;
+static float cslope          = 10.0f;
+static int   patch_flag      = 0;
 
 static int compile_flags = 0;
 
-static int nmarked = 0;
-static int marked_vertices[MAX_MARKED] = {-1};
-static int marked_colors[MAX_MARKED] = {1};
-static int noscale = 1;
-static int fov = -1;
-static MRI_SURFACE_PARAMETERIZATION *mrisp = nullptr;
-static int tiff_flag = 0;
-static int param_no = -1;
-static int normalize_param = 0;
+static int                           nmarked                     = 0;
+static int                           marked_vertices[MAX_MARKED] = {-1};
+static int                           marked_colors[MAX_MARKED]   = {1};
+static int                           noscale                     = 1;
+static int                           fov                         = -1;
+static MRI_SURFACE_PARAMETERIZATION *mrisp                       = nullptr;
+static int                           tiff_flag                   = 0;
+static int                           param_no                    = -1;
+static int                           normalize_param             = 0;
 
-static char *wfile_name = nullptr;
-static int soap_bubble_iterations = 0;
-static char *output_name = nullptr;
+static char *wfile_name             = nullptr;
+static int   soap_bubble_iterations = 0;
+static char *output_name            = nullptr;
 
 #define MAX_POINTS 100
 static double x_tpoint[MAX_POINTS], y_tpoint[MAX_POINTS], z_tpoint[MAX_POINTS];
-static int num_tpoints = 0;
+static int    num_tpoints = 0;
 
 static float phi_spoint[MAX_POINTS], theta_spoint[MAX_POINTS];
-static int num_spoints = 0;
-static int mark_color = 1;
-static float light = 0.0f;
+static int   num_spoints = 0;
+static int   mark_color  = 1;
+static float light       = 0.0f;
 
 extern double fthresh, pre_fthresh, fmid, fslope, time_fthresh;
 
@@ -182,10 +182,10 @@ extern double fthresh, pre_fthresh, fmid, fslope, time_fthresh;
 int main(int argc, char *argv[]) {
   char **av, *in_fname, *out_prefix, out_fname[100], name[100], path[100], *cp,
       hemi[100], fname[100], *surf_fname;
-  int ac, nargs, size, ino, i, drawn, is_flat;
-  float angle = 0.0f;
+  int             ac, nargs, size, ino, i, drawn, is_flat;
+  float           angle = 0.0f;
   unsigned short *red = nullptr, *green = nullptr, *blue = nullptr;
-  unsigned char *rgb = nullptr;
+  unsigned char * rgb = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mris2rgb");
   if (nargs && argc - nargs == 1)
@@ -211,9 +211,9 @@ int main(int argc, char *argv[]) {
 
   size = frame_xdim * frame_ydim;
   if (!tiff_flag) {
-    red = (unsigned short *)calloc(size, sizeof(unsigned short));
+    red   = (unsigned short *)calloc(size, sizeof(unsigned short));
     green = (unsigned short *)calloc(size, sizeof(unsigned short));
-    blue = (unsigned short *)calloc(size, sizeof(unsigned short));
+    blue  = (unsigned short *)calloc(size, sizeof(unsigned short));
   } else
     rgb = (unsigned char *)calloc(frame_xdim * frame_ydim * 3,
                                   sizeof(unsigned char));
@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
     lateral_flag = 1; /* default view if no other specified */
 
   for (ino = 1; ino < argc - 1; ino++) {
-    drawn = 0;
+    drawn      = 0;
     surf_fname = in_fname = argv[ino];
     FileNameOnly(surf_fname, name);
     cp = strchr(name, '.');
@@ -289,19 +289,19 @@ int main(int argc, char *argv[]) {
 
     /* mark the nearest vertex to talairach position */
     for (i = 0; i < num_tpoints; i++) {
-      int vno, n;
-      VERTEX *v, *vn;
+      int              vno, n;
+      VERTEX *         v, *vn;
       VERTEX_TOPOLOGY *vt;
 
       MRISreadOriginalProperties(mris, nullptr);
       vno = MRIStalairachToVertex(mris, x_tpoint[i], y_tpoint[i], z_tpoint[i]);
       if (vno >= 0) {
         fprintf(stderr, "marking talairach vertex %d\n", vno);
-        v = &mris->vertices[vno];
-        vt = &mris->vertices_topology[vno];
+        v         = &mris->vertices[vno];
+        vt        = &mris->vertices_topology[vno];
         v->marked = i + 1;
         for (n = 0; n < vt->vnum; n++) {
-          vn = &mris->vertices[vt->v[n]];
+          vn         = &mris->vertices[vt->v[n]];
           vn->marked = i + 1;
         }
       }
@@ -309,8 +309,8 @@ int main(int argc, char *argv[]) {
 
     /* mark the nearest vertex to talairach position */
     for (i = 0; i < num_spoints; i++) {
-      int vno, n;
-      VERTEX *v, *vn;
+      int              vno, n;
+      VERTEX *         v, *vn;
       VERTEX_TOPOLOGY *vt;
 
       if (!coord_fname)
@@ -322,12 +322,12 @@ int main(int argc, char *argv[]) {
       vno = MRIScanonicalToVertex(mris, phi_spoint[i], theta_spoint[i]);
       if (vno >= 0) {
         fprintf(stderr, "marking spherical vertex %d\n", vno);
-        v = &mris->vertices[vno];
-        vt = &mris->vertices_topology[vno];
+        v         = &mris->vertices[vno];
+        vt        = &mris->vertices_topology[vno];
         v->marked = i + 1;
 #if 1
         for (n = 0; n < vt->vnum; n++) {
-          vn = &mris->vertices[vt->v[n]];
+          vn         = &mris->vertices[vt->v[n]];
           vn->marked = i + 1;
         }
 #endif
@@ -348,7 +348,7 @@ int main(int argc, char *argv[]) {
     else /* try and pick an appropriate one */
     {
       if (patch_flag || is_flat) {
-        int ngood, vno;
+        int   ngood, vno;
         float pct_vertices;
 
         for (vno = ngood = 0; vno < mris->nvertices; vno++)
@@ -403,7 +403,7 @@ int main(int argc, char *argv[]) {
     case AREA_ERRORS: {
       MRISstoreCurrentPositions(mris);
       auto const old_status = mris->status;
-      mris->status = MRIS_SURFACE;
+      mris->status          = MRIS_SURFACE;
       MRISreadVertexPositions(mris, "smoothwm");
       MRIScomputeMetricProperties(mris);
       MRISstoreMetricProperties(mris);
@@ -654,7 +654,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -678,10 +678,10 @@ static int get_option(int argc, char *argv[]) {
     if (cp) /* # explicitly given */
     {
       param_no = atoi(cp + 1);
-      *cp = 0;
+      *cp      = 0;
     } else
       param_no = 0;
-    mrisp = MRISPread(argv[2]);
+    mrisp           = MRISPread(argv[2]);
     normalize_param = 1;
     if (!mrisp)
       ErrorExit(ERROR_NOFILE, "%s: could not read parameterization file %s",
@@ -693,7 +693,7 @@ static int get_option(int argc, char *argv[]) {
   else if (!strcmp(option, "centroids")) {
     centroid_fnames[centroid_files] = argv[2];
     centroid_colors[centroid_files] = atoi(argv[3]);
-    nargs = 2;
+    nargs                           = 2;
     fprintf(stderr, "marking all vertices in file %s with %d\n",
             centroid_fnames[centroid_files], centroid_colors[centroid_files]);
     centroid_files++;
@@ -725,7 +725,7 @@ static int get_option(int argc, char *argv[]) {
     compile_flags |= NOBORDER_FLAG;
   else if (!stricmp(option, "cparms")) {
     double coord_thickness;
-    int num_coord_lines;
+    int    num_coord_lines;
 
     coord_thickness = atof(argv[2]);
     num_coord_lines = atoi(argv[3]);
@@ -778,7 +778,7 @@ static int get_option(int argc, char *argv[]) {
     num_tpoints++;
   } else if (!stricmp(option, "mark")) {
     mark_color = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
   } else if (!stricmp(option, "light")) {
     light = atof(argv[2]);
     nargs = 1;
@@ -788,7 +788,7 @@ static int get_option(int argc, char *argv[]) {
     if (num_spoints >= MAX_POINTS)
       ErrorExit(ERROR_NOMEMORY, "%s: too many points defined (%d)\n", Progname,
                 MAX_POINTS + 1);
-    phi_spoint[num_spoints] = atof(argv[2]);
+    phi_spoint[num_spoints]   = atof(argv[2]);
     theta_spoint[num_spoints] = atof(argv[3]);
     fprintf(stderr, "marking spherical point (%2.3f, %2.3f)\n",
             phi_spoint[num_spoints], theta_spoint[num_spoints]);
@@ -803,35 +803,35 @@ static int get_option(int argc, char *argv[]) {
     compile_flags |= LIN_FLAG;
     fprintf(stderr, "Processing linear estimation results ...\n");
   } else if (!stricmp(option, "fthresh")) {
-    nargs = 1;
+    nargs   = 1;
     fthresh = atof(argv[2]);
     fprintf(stderr, "fthresh = %f \n", fthresh);
   } else if (!stricmp(option, "xtrans")) {
-    nargs = 1;
+    nargs   = 1;
     x_trans = atof(argv[2]);
     fprintf(stderr, "x_trans = %2.2f \n", x_trans);
   } else if (!stricmp(option, "ytrans")) {
-    nargs = 1;
+    nargs   = 1;
     y_trans = atof(argv[2]);
     fprintf(stderr, "y_trans = %2.2f \n", y_trans);
   } else if (!stricmp(option, "ztrans")) {
-    nargs = 1;
+    nargs   = 1;
     y_trans = atof(argv[2]);
     fprintf(stderr, "z_trans = %2.2f \n", z_trans);
   } else if (!stricmp(option, "pre_fthresh")) {
-    nargs = 1;
+    nargs       = 1;
     pre_fthresh = atof(argv[2]);
     fprintf(stderr, "pre_fthresh = %f \n", pre_fthresh);
   } else if (!stricmp(option, "fmid")) {
     nargs = 1;
-    fmid = atof(argv[2]);
+    fmid  = atof(argv[2]);
     fprintf(stderr, "fmid = %f \n", fmid);
   } else if (!stricmp(option, "fslope")) {
-    nargs = 1;
+    nargs  = 1;
     fslope = atof(argv[2]);
     fprintf(stderr, "fslope = %f \n", fslope);
   } else if (!stricmp(option, "t_fthresh")) {
-    nargs = 1;
+    nargs        = 1;
     time_fthresh = atof(argv[2]);
     fprintf(stderr, "time_fthresh = %f \n", time_fthresh);
   } else if (!stricmp(option, "cscale")) {
@@ -850,15 +850,15 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'L': {
       LABEL *area;
-      int i;
+      int    i;
 
       fprintf(stderr, "reading label file %s\n", argv[2]);
       nargs = 1;
-      area = LabelRead(nullptr, argv[2]);
+      area  = LabelRead(nullptr, argv[2]);
       if (nmarked + area->n_points >= MAX_MARKED)
         area->n_points = MAX_MARKED - nmarked;
       for (i = 0; i < area->n_points; i++) {
-        marked_colors[nmarked] = mark_color;
+        marked_colors[nmarked]     = mark_color;
         marked_vertices[nmarked++] = area->lv[i].vno;
       }
       mark_color++; /* so next label will have different color */
@@ -894,7 +894,7 @@ static int get_option(int argc, char *argv[]) {
                   nmarked);
       sscanf(argv[2], "%d", &marked_vertices[nmarked++]);
       marked_vertices[nmarked] = -1; /* terminate list */
-      nargs = 1;
+      nargs                    = 1;
       break;
     case 'E':
       curvature_flag = AREA_ERRORS;
@@ -937,7 +937,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'C':
       curvature_fname = argv[2];
-      nargs = 1;
+      nargs           = 1;
       break;
     default:
       fprintf(stderr, "unknown option %s\n", argv[1]);
@@ -1019,7 +1019,7 @@ static void xinit() {
   if (!context)
     ErrorExit(ERROR_UNSUPPORTED, "could not create a drawing context");
 
-  pixmap = XCreatePixmap(display, RootWindow(display, visual->screen),
+  pixmap    = XCreatePixmap(display, RootWindow(display, visual->screen),
                          frame_xdim, frame_ydim, visual->depth);
   glxpixmap = glXCreateGLXPixmap(display, visual, pixmap);
   glXMakeCurrent(display, glxpixmap, context);
@@ -1028,8 +1028,8 @@ static void xinit() {
 
 static void save_rgb(char *fname, int width, int height, unsigned short *red,
                      unsigned short *green, unsigned short *blue) {
-  RGB_IMAGE *image;
-  int y;
+  RGB_IMAGE *     image;
+  int             y;
   unsigned short *r, *g, *b;
 
 #ifdef IRIX
@@ -1073,10 +1073,10 @@ static void save_TIFF(char *fname, int width, int height, unsigned char *rgb) {
 
 static void grabPixelsTIFF(unsigned int width, unsigned int height,
                            unsigned char *rgb) {
-  GLint swapbytes, lsbfirst, rowlength;
-  GLint skiprows, skippixels, alignment;
+  GLint          swapbytes, lsbfirst, rowlength;
+  GLint          skiprows, skippixels, alignment;
   unsigned char *tmp, *ttmp, *trgb;
-  int i;
+  int            i;
 
   tmp = (unsigned char *)malloc(sizeof(unsigned char) * width * height * 3);
   if (!tmp)
@@ -1162,11 +1162,11 @@ static void clear_pixmaps(MRI_SURFACE *mris) {
 }
 static int mark_centroids(MRI_SURFACE *mris, char *centroid_fnames[],
                           int *centroid_colors, int centroid_files) {
-  FILE *fp;
-  int cno, vno, color;
-  float x, y, z;
+  FILE *  fp;
+  int     cno, vno, color;
+  float   x, y, z;
   VERTEX *v;
-  char line[100];
+  char    line[100];
 
   for (cno = 0; cno < centroid_files; cno++) {
     fp = fopen(centroid_fnames[cno], "r");
@@ -1178,9 +1178,9 @@ static int mark_centroids(MRI_SURFACE *mris, char *centroid_fnames[],
     if (sscanf(line, "%f  %f  %f\n", &x, &y, &z) != 3)
       ErrorExit(ERROR_BADFILE, "%s: could not scan area centroid from %s\n",
                 Progname, line);
-    vno = MRISfindClosestCanonicalVertex(mris, x, y, z);
-    v = &mris->vertices[vno];
-    color = centroid_colors[cno];
+    vno       = MRISfindClosestCanonicalVertex(mris, x, y, z);
+    v         = &mris->vertices[vno];
+    color     = centroid_colors[cno];
     v->marked = color;
     color++; /* mark the individuals in a different color than the group */
     while (fgetl(line, 99, fp)) {
@@ -1188,7 +1188,7 @@ static int mark_centroids(MRI_SURFACE *mris, char *centroid_fnames[],
         ErrorExit(ERROR_BADFILE, "%s: could not scan area centroid from %s\n",
                   Progname, line);
       vno = MRISfindClosestCanonicalVertex(mris, x, y, z);
-      v = &mris->vertices[vno];
+      v   = &mris->vertices[vno];
       if (!v->marked)
         v->marked = color;
     }
@@ -1200,10 +1200,10 @@ static int mark_centroids(MRI_SURFACE *mris, char *centroid_fnames[],
 }
 
 int MRISsoapBubble(MRI_SURFACE *mris, int niter) {
-  int vno, n, i, cmpt;
-  VERTEX *v, *vn;
+  int              vno, n, i, cmpt;
+  VERTEX *         v, *vn;
   VERTEX_TOPOLOGY *vt;
-  double mean;
+  double           mean;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -1218,7 +1218,7 @@ int MRISsoapBubble(MRI_SURFACE *mris, int niter) {
     if (!(i % niter / 10))
       fprintf(stderr, ".");
     for (vno = 0; vno < mris->nvertices; vno++) {
-      v = &mris->vertices[vno];
+      v  = &mris->vertices[vno];
       vt = &mris->vertices_topology[vno];
       if (v->ripflag || (v->marked == 1))
         continue;
@@ -1235,12 +1235,12 @@ int MRISsoapBubble(MRI_SURFACE *mris, int niter) {
       }
       if (compile_flags & TIME_FLAG) {
         if (cmpt > (i / 2)) {
-          v->val = mean / (double)(cmpt);
+          v->val    = mean / (double)(cmpt);
           v->marked = 1;
         }
       } else {
         if (cmpt > (i / 2)) {
-          v->val = mean / (double)(cmpt);
+          v->val    = mean / (double)(cmpt);
           v->marked = 2;
         }
       }

@@ -36,11 +36,11 @@ _Pragma("GCC diagnostic ignored \"-Wunused-function\"") static bool int_le(
 
 // Usage
 //
-#define SORT_NAME sort_int
+#define SORT_NAME           sort_int
 #define SORT_NAME_partition sort_int_partition
-#define SORT_NAME_isSorted sort_int_isSorted
-#define SORT_NAME_small sort_int_small
+#define SORT_NAME_isSorted  sort_int_isSorted
+#define SORT_NAME_small     sort_int_small
 
 #define SORT_ELEMENT int
-#define SORT_LE int_le
+#define SORT_LE      int_le
 #include "sort_definition.h"

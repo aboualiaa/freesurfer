@@ -1,8 +1,8 @@
 #include "kvlAtlasMeshSmoother.h"
-#include "kvlAtlasMeshProbabilityImageStatisticsCollector.h"
-#include "kvlAtlasMeshMultiAlphaDrawer.h"
-#include "itkImageRegionIterator.h"
 #include "itkDiscreteGaussianImageFilter.h"
+#include "itkImageRegionIterator.h"
+#include "kvlAtlasMeshMultiAlphaDrawer.h"
+#include "kvlAtlasMeshProbabilityImageStatisticsCollector.h"
 
 namespace kvl {
 
@@ -11,9 +11,9 @@ namespace kvl {
 //
 AtlasMeshSmoother ::AtlasMeshSmoother() {
   m_MeshCollection = nullptr;
-  m_Sigma0 = 1.0f;
-  m_Sigma1 = 1.0f;
-  m_Sigma2 = 1.0f;
+  m_Sigma0         = 1.0f;
+  m_Sigma1         = 1.0f;
+  m_Sigma2         = 1.0f;
 }
 
 //
@@ -58,7 +58,7 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
 
     // First determine size of template image for the alpha rasterizor
     using MultiAlphasImageType = AtlasMeshMultiAlphaDrawer::ImageType;
-    using SizeType = MultiAlphasImageType::SizeType;
+    using SizeType             = MultiAlphasImageType::SizeType;
     SizeType size;
     size[0] = 0;
     size[1] = 0;
@@ -91,7 +91,7 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
         const_cast<MultiAlphasImageType *>(alphasImage.GetPointer());
 
     // Create an image holding one component of the probability vector image
-    using ComponentImageType = itk::Image<float, 3>;
+    using ComponentImageType                   = itk::Image<float, 3>;
     ComponentImageType::Pointer componentImage = ComponentImageType::New();
     componentImage->SetRegions(size);
     componentImage->Allocate();
@@ -120,7 +120,7 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
 
       std::cout << "Smoothing class: " << *(classIt) << std::endl;
       // Extract the probability image
-      using ComponentImageType = itk::Image<float, 3>;
+      using ComponentImageType                   = itk::Image<float, 3>;
       ComponentImageType::Pointer componentImage = ComponentImageType::New();
       componentImage->SetRegions(size);
       componentImage->Allocate();

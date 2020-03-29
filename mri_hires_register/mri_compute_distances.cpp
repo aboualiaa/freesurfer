@@ -36,14 +36,14 @@
 //
 ////////////////////////////////////////////////////////////////////
 
-#include "timer.h"
+#include "cma.h"
 #include "diag.h"
 #include "mrisegment.h"
-#include "cma.h"
+#include "timer.h"
 
-const char *Progname;
-static void usage_exit(int ecode);
-static int get_option(int argc, char *argv[]);
+const char * Progname;
+static void  usage_exit(int ecode);
+static int   get_option(int argc, char *argv[]);
 static float MRIcomputeAverageHausdorffDistance(MRI *mri1, MRI *mri2, int label,
                                                 double *psigma);
 static float MRIcomputeSegmentPairHausdorffDistance(MRI *mri1, MRI *mri2,
@@ -56,15 +56,15 @@ static float MRIcomputeSegmentPairCentroidDistance(MRI *mri1, MRI *mri2,
 #define MAX_TRANS 1000
 static int translate_in[MAX_TRANS];
 static int translate_out[MAX_TRANS];
-static int ntrans = 0;
+static int ntrans   = 0;
 static int centroid = 0;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  MRI *mri1, *mri2;
-  Timer start;
-  int msec, minutes, seconds, i, label;
+  int    ac, nargs;
+  MRI *  mri1, *mri2;
+  Timer  start;
+  int    msec, minutes, seconds, i, label;
   double dist, sigma = 0;
 
   start.reset();
@@ -73,8 +73,8 @@ int main(int argc, char *argv[]) {
   ErrorInit(NULL, NULL, NULL);
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
             dist, sigma);
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -124,15 +124,15 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   StrUpper(option);
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else
@@ -142,9 +142,9 @@ static int get_option(int argc, char *argv[]) {
       nargs = 1;
       break;
     case 'T':
-      translate_in[ntrans] = atoi(argv[2]);
+      translate_in[ntrans]  = atoi(argv[2]);
       translate_out[ntrans] = atoi(argv[3]);
-      nargs = 2;
+      nargs                 = 2;
       fprintf(stderr, "translating label %s (%d) to %s (%d)\n",
               cma_label_to_name(translate_in[ntrans]), translate_in[ntrans],
               cma_label_to_name(translate_out[ntrans]), translate_out[ntrans]);
@@ -173,10 +173,10 @@ static void usage_exit(int ecode) {
 
 static float MRIcomputeAverageHausdorffDistance(MRI *mri1, MRI *mri2, int label,
                                                 double *psigma) {
-  double total_dist, min_dist, dist, dsq, sigma;
+  double            total_dist, min_dist, dist, dsq, sigma;
   MRI_SEGMENTATION *mriseg1, *mriseg2;
-  MRI_SEGMENT *mseg1, *mseg2;
-  int s1, s2;
+  MRI_SEGMENT *     mseg1, *mseg2;
+  int               s1, s2;
 
   mriseg1 = MRIsegment(mri1, label, label);
   mriseg2 = MRIsegment(mri2, label, label);
@@ -223,19 +223,19 @@ static float MRIcomputeAverageHausdorffDistance(MRI *mri1, MRI *mri2, int label,
 static float MRIcomputeSegmentPairHausdorffDistance(MRI *mri1, MRI *mri2,
                                                     MRI_SEGMENT *mseg1,
                                                     MRI_SEGMENT *mseg2) {
-  double hdist = 0.0, dist, min_dist, dx, dy, dz, x1, y1, z1, x2, y2, z2;
-  int i1, i2;
+  double  hdist = 0.0, dist, min_dist, dx, dy, dz, x1, y1, z1, x2, y2, z2;
+  int     i1, i2;
   MATRIX *m_vox2ras1, *m_vox2ras2, *vvox, *vras;
 
-  m_vox2ras1 = MRIgetVoxelToRasXform(mri1);
-  m_vox2ras2 = MRIgetVoxelToRasXform(mri2);
-  vvox = VectorAlloc(4, MATRIX_REAL);
-  vras = VectorAlloc(4, MATRIX_REAL);
+  m_vox2ras1               = MRIgetVoxelToRasXform(mri1);
+  m_vox2ras2               = MRIgetVoxelToRasXform(mri2);
+  vvox                     = VectorAlloc(4, MATRIX_REAL);
+  vras                     = VectorAlloc(4, MATRIX_REAL);
   *MATRIX_RELT(vvox, 4, 1) = 1.0;
   *MATRIX_RELT(vras, 4, 1) = 1.0;
 
   for (i1 = 0; i1 < mseg1->nvoxels; i1++) {
-    min_dist = -1;
+    min_dist   = -1;
     V3_X(vvox) = mseg1->voxels[i1].x;
     V3_Y(vvox) = mseg1->voxels[i1].y;
     V3_Z(vvox) = mseg1->voxels[i1].z;
@@ -248,12 +248,12 @@ static float MRIcomputeSegmentPairHausdorffDistance(MRI *mri1, MRI *mri2,
       V3_Y(vvox) = mseg2->voxels[i2].y;
       V3_Z(vvox) = mseg2->voxels[i2].z;
       MatrixMultiply(m_vox2ras2, vvox, vras);
-      x2 = V3_X(vras);
-      y2 = V3_Y(vras);
-      z2 = V3_Z(vras);
-      dx = x2 - x1;
-      dy = y2 - y1;
-      dz = z2 - z1;
+      x2   = V3_X(vras);
+      y2   = V3_Y(vras);
+      z2   = V3_Z(vras);
+      dx   = x2 - x1;
+      dy   = y2 - y1;
+      dz   = z2 - z1;
       dist = dx * dx + dy * dy + dz * dz;
       if (dist < min_dist || i2 == 0)
         min_dist = dist;
@@ -271,13 +271,13 @@ static float MRIcomputeSegmentPairHausdorffDistance(MRI *mri1, MRI *mri2,
 static float MRIcomputeSegmentPairCentroidDistance(MRI *mri1, MRI *mri2,
                                                    MRI_SEGMENT *mseg1,
                                                    MRI_SEGMENT *mseg2) {
-  double dist, dx, dy, dz, x1, y1, z1, x2, y2, z2;
+  double  dist, dx, dy, dz, x1, y1, z1, x2, y2, z2;
   MATRIX *m_vox2ras1, *m_vox2ras2, *vvox, *vras;
 
-  m_vox2ras1 = MRIgetVoxelToRasXform(mri1);
-  m_vox2ras2 = MRIgetVoxelToRasXform(mri2);
-  vvox = VectorAlloc(4, MATRIX_REAL);
-  vras = VectorAlloc(4, MATRIX_REAL);
+  m_vox2ras1               = MRIgetVoxelToRasXform(mri1);
+  m_vox2ras2               = MRIgetVoxelToRasXform(mri2);
+  vvox                     = VectorAlloc(4, MATRIX_REAL);
+  vras                     = VectorAlloc(4, MATRIX_REAL);
   *MATRIX_RELT(vvox, 4, 1) = 1.0;
   *MATRIX_RELT(vras, 4, 1) = 1.0;
 
@@ -293,12 +293,12 @@ static float MRIcomputeSegmentPairCentroidDistance(MRI *mri1, MRI *mri2,
   V3_Y(vvox) = mseg2->cy;
   V3_Z(vvox) = mseg2->cz;
   MatrixMultiply(m_vox2ras2, vvox, vras);
-  x2 = V3_X(vras);
-  y2 = V3_Y(vras);
-  z2 = V3_Z(vras);
-  dx = x2 - x1;
-  dy = y2 - y1;
-  dz = z2 - z1;
+  x2   = V3_X(vras);
+  y2   = V3_Y(vras);
+  z2   = V3_Z(vras);
+  dx   = x2 - x1;
+  dy   = y2 - y1;
+  dz   = z2 - z1;
   dist = dx * dx + dy * dy + dz * dz;
 
   MatrixFree(&m_vox2ras1);

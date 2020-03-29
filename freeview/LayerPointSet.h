@@ -26,9 +26,9 @@
 #ifndef LayerPointSet_h
 #define LayerPointSet_h
 
+#include "FSPointSet.h"
 #include "LayerEditable.h"
 #include "vtkSmartPointer.h"
-#include "FSPointSet.h"
 
 class LayerMRI;
 class vtkActor;
@@ -120,7 +120,7 @@ signals:
 protected:
   virtual void OnSlicePositionChanged(int nPlane);
 
-  PointSet m_points;
+  PointSet  m_points;
   vtkActor *m_actorBalls;
   vtkActor *m_actorSpline;
   vtkActor *m_actorSlice[3];
@@ -128,7 +128,7 @@ protected:
 
   vtkSmartPointer<vtkPolyDataMapper> m_mapper;
 
-  LayerMRI *m_layerRef;
+  LayerMRI *      m_layerRef;
   QList<PointSet> m_bufferUndo;
   QList<PointSet> m_bufferRedo;
 

@@ -36,13 +36,13 @@
 #include "colortab.h"
 #include "surfcluster.h"
 
-#include "vtkKWWindow.h"
+#include "FsgdfPlot.h"
 #include "ProgressUpdateGUI.h"
 #include "QdecProject.h"
 #include "QdecVertexAnnotationLookup.h"
 #include "vtkKWQdecView.h"
+#include "vtkKWWindow.h"
 #include "vtkSmartPointer.h"
-#include "FsgdfPlot.h"
 
 class vtkFSSurfaceSource;
 class vtkFSSurfaceLabelSource;
@@ -326,7 +326,7 @@ public:
   // This is called by vtkQdecBltGraphObserver when an element is
   // right-clicked and a contextual menu is about to pop up.
   void ScatterPlotGraphSetUpContextualMenu(const char *isElement,
-                                           vtkKWMenu *iMenu);
+                                           vtkKWMenu * iMenu);
 
   // Callbacks for the continuous element graph.
   static void ScatterPlotGraphMouseoverEnterElementCallback(vtkObject *,
@@ -375,9 +375,9 @@ protected:
   static const char *ksDesignPanelName;
   static const char *ksContrastPanelName;
   static const char *ksDisplayPanelName;
-  static const int kMaxDiscreteFactors;
-  static const int kMaxContinuousFactors;
-  const char *mCurrentNotebookPanelName;
+  static const int   kMaxDiscreteFactors;
+  static const int   kMaxContinuousFactors;
+  const char *       mCurrentNotebookPanelName;
 
   // Enable or disable buttons and menu items based on program state.
   void UpdateCommandStatus();
@@ -409,11 +409,11 @@ protected:
   // Use MRISreadValuesIntoArray to load in a file and initialize a
   // vtkFloatArray.
   vtkFloatArray *NewScalarsFromSurfaceScalarsFile(char const *ifn,
-                                                  int inIndex = 0);
+                                                  int         inIndex = 0);
 
   // Our callback for UserSelectedVertex events. Calls the member
   // function with the SurfaceVertexInformation structure.
-  static void UserSelectedVertexCallback(vtkObject *iCaller,
+  static void UserSelectedVertexCallback(vtkObject *   iCaller,
                                          unsigned long iEventId,
                                          void *iClientData, void *iCallData);
 
@@ -426,21 +426,21 @@ protected:
   // adds it to the toolbar. It returns a pointer to the button so it
   // can be enabled/disabled later.
   vtkKWPushButton *MakeToolbarButton(vtkKWToolbar *iToolbar,
-                                     const char *isBalloonHelpText,
-                                     vtkObject *iCommandObject,
-                                     const char *isCommand,
-                                     const char *isIconKey);
+                                     const char *  isBalloonHelpText,
+                                     vtkObject *   iCommandObject,
+                                     const char *  isCommand,
+                                     const char *  isIconKey);
 
   vtkKWCheckButton *MakeToolbarCheckButton(vtkKWToolbar *iToolbar,
-                                           const char *isBalloonHelpText,
-                                           vtkObject *iCommandObject,
-                                           const char *isCommand,
-                                           const char *isIconKey);
+                                           const char *  isBalloonHelpText,
+                                           vtkObject *   iCommandObject,
+                                           const char *  isCommand,
+                                           const char *  isIconKey);
 
   // Inserts a 5 pixel wide spacer into the toolbar.
   enum { kToolbarSpacerWidth = 5 };
   void AddSpacerToToolbar(vtkKWToolbar *iToolbar,
-                          int iWidth = kToolbarSpacerWidth);
+                          int           iWidth = kToolbarSpacerWidth);
 
   // Mini class for creating a menu item and enabling/disabling
   // it. Parameters are self explanatory.
@@ -464,14 +464,14 @@ protected:
 
     // Set/get the check value if it's a check button.
     void SetSelectedState(int ibOn);
-    int GetSelectedState();
+    int  GetSelectedState();
 
     // Get the index of the menu item.
     int GetIndex() const;
 
   protected:
     vtkSmartPointer<vtkKWMenu> mMenu;
-    int mnItem;
+    int                        mnItem;
   };
 
   // Return a list of vertex indices that are inside the closed path
@@ -516,44 +516,44 @@ protected:
   MenuItem *mMenuGraphAverageROI;
 
   // The toolbar button associated with each command.
-  vtkSmartPointer<vtkKWPushButton> mBtnLoadDataTable;
-  vtkSmartPointer<vtkKWPushButton> mBtnLoadProjectFile;
-  vtkSmartPointer<vtkKWPushButton> mBtnLoadLabel;
-  vtkSmartPointer<vtkKWPushButton> mBtnSaveTIFF;
-  vtkSmartPointer<vtkKWPushButton> mBtnSaveLabel;
-  vtkSmartPointer<vtkKWPushButton> mBtnRestoreView;
-  vtkSmartPointer<vtkKWPushButton> mBtnZoomOut;
-  vtkSmartPointer<vtkKWPushButton> mBtnZoomIn;
-  vtkSmartPointer<vtkKWPushButton> mBtnCameraElevatePositive;
-  vtkSmartPointer<vtkKWPushButton> mBtnCameraElevateNegative;
-  vtkSmartPointer<vtkKWPushButton> mBtnCameraAzimuthPositive;
-  vtkSmartPointer<vtkKWPushButton> mBtnCameraAzimuthNegative;
-  vtkSmartPointer<vtkKWPushButton> mBtnCameraRollPositive;
-  vtkSmartPointer<vtkKWPushButton> mBtnCameraRollNegative;
+  vtkSmartPointer<vtkKWPushButton>  mBtnLoadDataTable;
+  vtkSmartPointer<vtkKWPushButton>  mBtnLoadProjectFile;
+  vtkSmartPointer<vtkKWPushButton>  mBtnLoadLabel;
+  vtkSmartPointer<vtkKWPushButton>  mBtnSaveTIFF;
+  vtkSmartPointer<vtkKWPushButton>  mBtnSaveLabel;
+  vtkSmartPointer<vtkKWPushButton>  mBtnRestoreView;
+  vtkSmartPointer<vtkKWPushButton>  mBtnZoomOut;
+  vtkSmartPointer<vtkKWPushButton>  mBtnZoomIn;
+  vtkSmartPointer<vtkKWPushButton>  mBtnCameraElevatePositive;
+  vtkSmartPointer<vtkKWPushButton>  mBtnCameraElevateNegative;
+  vtkSmartPointer<vtkKWPushButton>  mBtnCameraAzimuthPositive;
+  vtkSmartPointer<vtkKWPushButton>  mBtnCameraAzimuthNegative;
+  vtkSmartPointer<vtkKWPushButton>  mBtnCameraRollPositive;
+  vtkSmartPointer<vtkKWPushButton>  mBtnCameraRollNegative;
   vtkSmartPointer<vtkKWCheckButton> mBtnShowCursor;
   vtkSmartPointer<vtkKWCheckButton> mBtnShowCurvature;
-  vtkSmartPointer<vtkKWEntry> mEntrySelectVertex;
-  vtkSmartPointer<vtkKWPushButton> mBtnAddSelectionToROI;
-  vtkSmartPointer<vtkKWPushButton> mBtnRemoveSelectionFromROI;
+  vtkSmartPointer<vtkKWEntry>       mEntrySelectVertex;
+  vtkSmartPointer<vtkKWPushButton>  mBtnAddSelectionToROI;
+  vtkSmartPointer<vtkKWPushButton>  mBtnRemoveSelectionFromROI;
 
   // GUI panel.
   vtkSmartPointer<vtkKWUserInterfacePanel> mPanel;
 
   // Widgets in the Subjects panel.
-  vtkSmartPointer<vtkKWEntry> mEntrySubjectsDir;
-  vtkSmartPointer<vtkKWEntry> mEntryAverageSubject;
-  vtkSmartPointer<vtkKWEntry> mEntryDataTable;
-  vtkSmartPointer<vtkKWEntry> mEntryNumberOfSubjects;
-  vtkSmartPointer<vtkKWListBox> mListScatterPlot;
-  vtkSmartPointer<vtkKWLabel> mLabelScatterPlotLegend;
+  vtkSmartPointer<vtkKWEntry>      mEntrySubjectsDir;
+  vtkSmartPointer<vtkKWEntry>      mEntryAverageSubject;
+  vtkSmartPointer<vtkKWEntry>      mEntryDataTable;
+  vtkSmartPointer<vtkKWEntry>      mEntryNumberOfSubjects;
+  vtkSmartPointer<vtkKWListBox>    mListScatterPlot;
+  vtkSmartPointer<vtkKWLabel>      mLabelScatterPlotLegend;
   vtkSmartPointer<vtkKWPushButton> mBtnFactorRemove;
 
-  vtkSmartPointer<vtkKWFrameWithLabel> mFrameStatsImport;
-  vtkSmartPointer<vtkKWPushButton> mBtnStatsGenerate;
-  vtkSmartPointer<vtkKWMenuButton> mMenuStatsData;
+  vtkSmartPointer<vtkKWFrameWithLabel>                 mFrameStatsImport;
+  vtkSmartPointer<vtkKWPushButton>                     mBtnStatsGenerate;
+  vtkSmartPointer<vtkKWMenuButton>                     mMenuStatsData;
   vtkSmartPointer<vtkKWListBoxWithScrollbarsWithLabel> mListBoxStatsImport;
-  vtkSmartPointer<vtkKWListBox> mListStatsImportFactors;
-  vtkSmartPointer<vtkKWPushButton> mBtnStatsAddToDataTable;
+  vtkSmartPointer<vtkKWListBox>                        mListStatsImportFactors;
+  vtkSmartPointer<vtkKWPushButton>                     mBtnStatsAddToDataTable;
 
   vtkSmartPointer<vtkKWEntry> mEntryExcludeFactor;
   vtkSmartPointer<vtkKWEntry> mEntryExcludeSubjectGT;
@@ -561,46 +561,46 @@ protected:
   vtkSmartPointer<vtkKWEntry> mEntryExcludeSubjectET;
 
   // Widgets in the Design panel.
-  vtkSmartPointer<vtkKWListBox> mListDiscreteFactors;
-  vtkSmartPointer<vtkKWListBox> mListContinuousFactors;
-  vtkSmartPointer<vtkKWListBox> mListNuisanceFactors;
+  vtkSmartPointer<vtkKWListBox>        mListDiscreteFactors;
+  vtkSmartPointer<vtkKWListBox>        mListContinuousFactors;
+  vtkSmartPointer<vtkKWListBox>        mListNuisanceFactors;
   vtkSmartPointer<vtkKWRadioButtonSet> mRadBtnSetMeasure;
   vtkSmartPointer<vtkKWRadioButtonSet> mRadBtnSetSurfaceMeasure;
-  vtkSmartPointer<vtkKWMenuButton> mMenuMorphMeasure;
-  vtkSmartPointer<vtkKWMenuButton> mMenuMorphHemisphere;
-  vtkSmartPointer<vtkKWMenuButton> mMenuMorphSmoothness;
-  vtkSmartPointer<vtkKWEntry> mEntryDesignName;
+  vtkSmartPointer<vtkKWMenuButton>     mMenuMorphMeasure;
+  vtkSmartPointer<vtkKWMenuButton>     mMenuMorphHemisphere;
+  vtkSmartPointer<vtkKWMenuButton>     mMenuMorphSmoothness;
+  vtkSmartPointer<vtkKWEntry>          mEntryDesignName;
   vtkSmartPointer<vtkKWFrameWithLabel> mFrameMeasures;
-  vtkSmartPointer<vtkKWFrame> mFrameSurfaceMeasures;
-  vtkSmartPointer<vtkKWFrame> mFrameMorphMeasures;
-  vtkSmartPointer<vtkKWFrame> mFrameFunctionalMeasures;
-  vtkSmartPointer<vtkKWFrame> mFrameVolumeMeasures;
-  vtkSmartPointer<vtkKWEntry> mEntryDegreesOfFreedom;
+  vtkSmartPointer<vtkKWFrame>          mFrameSurfaceMeasures;
+  vtkSmartPointer<vtkKWFrame>          mFrameMorphMeasures;
+  vtkSmartPointer<vtkKWFrame>          mFrameFunctionalMeasures;
+  vtkSmartPointer<vtkKWFrame>          mFrameVolumeMeasures;
+  vtkSmartPointer<vtkKWEntry>          mEntryDegreesOfFreedom;
 
-#if 0 // HACK 
+#if 0 // HACK
   // Widgets in the Contrast panel.
   vtkSmartPointer<vtkKWListBoxWithScrollbarsWithLabel> mListNuisanceFactors;
 #endif
 
   // Widgets for the Display panel.
-  vtkSmartPointer<vtkKWFrame> mFrameSurface;
-  vtkSmartPointer<vtkKWRadioButtonSet> mRadBtnSetSurface;
-  vtkSmartPointer<vtkKWFrame> mFrameCurvature;
-  vtkSmartPointer<vtkKWCheckButton> mCheckShowCurvature;
-  vtkSmartPointer<vtkKWCheckButton> mCheckDrawCurvatureGreenRed;
-  vtkSmartPointer<vtkKWFrame> mFrameOverlay;
-  vtkSmartPointer<vtkKWScale> mScaleOverlay;
-  vtkSmartPointer<vtkKWFrame> mFrameSurfaceScalars;
+  vtkSmartPointer<vtkKWFrame>           mFrameSurface;
+  vtkSmartPointer<vtkKWRadioButtonSet>  mRadBtnSetSurface;
+  vtkSmartPointer<vtkKWFrame>           mFrameCurvature;
+  vtkSmartPointer<vtkKWCheckButton>     mCheckShowCurvature;
+  vtkSmartPointer<vtkKWCheckButton>     mCheckDrawCurvatureGreenRed;
+  vtkSmartPointer<vtkKWFrame>           mFrameOverlay;
+  vtkSmartPointer<vtkKWScale>           mScaleOverlay;
+  vtkSmartPointer<vtkKWFrame>           mFrameSurfaceScalars;
   vtkSmartPointer<vtkKWMultiColumnList> mTableSurfaceScalars;
-  vtkSmartPointer<vtkKWCheckButton> mCheckSurfaceScalarsColorReverse;
-  vtkSmartPointer<vtkKWCheckButton> mCheckSurfaceScalarsColorShowPositive;
-  vtkSmartPointer<vtkKWCheckButton> mCheckSurfaceScalarsColorShowNegative;
+  vtkSmartPointer<vtkKWCheckButton>     mCheckSurfaceScalarsColorReverse;
+  vtkSmartPointer<vtkKWCheckButton>     mCheckSurfaceScalarsColorShowPositive;
+  vtkSmartPointer<vtkKWCheckButton>     mCheckSurfaceScalarsColorShowNegative;
   vtkSmartPointer<vtkKWRGBATransferFunctionEditor> mEditorSurfaceScalarColors;
   vtkSmartPointer<vtkKWHistogram> mHistogramSurfaceScalarColors;
-  vtkSmartPointer<vtkKWEntry> mEntrySurfaceScalarsColorMin;
-  vtkSmartPointer<vtkKWEntry> mEntrySurfaceScalarsColorMid;
-  vtkSmartPointer<vtkKWEntry> mEntrySurfaceScalarsColorMax;
-  vtkSmartPointer<vtkKWEntry> mEntrySurfaceScalarsColorOffset;
+  vtkSmartPointer<vtkKWEntry>     mEntrySurfaceScalarsColorMin;
+  vtkSmartPointer<vtkKWEntry>     mEntrySurfaceScalarsColorMid;
+  vtkSmartPointer<vtkKWEntry>     mEntrySurfaceScalarsColorMax;
+  vtkSmartPointer<vtkKWEntry>     mEntrySurfaceScalarsColorOffset;
 
   vtkSmartPointer<vtkKWMenuButton> mMenuButtonSimulationThresh;
   vtkSmartPointer<vtkKWMenuButton> mMenuButtonSimulationSign;
@@ -621,33 +621,33 @@ protected:
 
   // The factor selected to plot in the scatter plot from
   // the Subjects panel.
-  int mScatterPlotSelection;
-  string mScatterPlotLegend;
+  int         mScatterPlotSelection;
+  std::string mScatterPlotLegend;
 
   // The struct for a scalars object.
   typedef struct {
-    int mnEntry;
+    int                            mnEntry;
     vtkSmartPointer<vtkFloatArray> mValues;
-    std::string mfnSource;
-    std::string msLabel;
-    std::string msLabel2;
+    std::string                    mfnSource;
+    std::string                    msLabel;
+    std::string                    msLabel2;
   } SurfaceScalar;
 
   // Data objects.
-  FsgdfPlot *mVertexPlot;
-  QdecProject *mQdecProject;
+  FsgdfPlot *    mVertexPlot;
+  QdecProject *  mQdecProject;
   QdecDataTable *mStatsImportDataTable;
-  int mcVertices;
+  int            mcVertices;
   std::map<std::string, vtkSmartPointer<vtkFSSurfaceSource>> maSurfaceSource;
-  std::string msCurrentSurfaceSource;
-  vtkSmartPointer<vtkFloatArray> mCurvatureScalars;
-  std::map<int, SurfaceScalar> maSurfaceScalars;
-  int mnCurrentSurfaceScalars;
-  std::map<int, SurfaceScalar> maSavedSurfaceScalars;
-  int *maAnnotationIndicies;
-  COLOR_TABLE *mAnnotationTable;
-  vtkSmartPointer<vtkFloatArray> mOverlayScalars;
-  vtkSmartPointer<vtkScalarsToColors> mOverlayColors;
+  std::string                              msCurrentSurfaceSource;
+  vtkSmartPointer<vtkFloatArray>           mCurvatureScalars;
+  std::map<int, SurfaceScalar>             maSurfaceScalars;
+  int                                      mnCurrentSurfaceScalars;
+  std::map<int, SurfaceScalar>             maSavedSurfaceScalars;
+  int *                                    maAnnotationIndicies;
+  COLOR_TABLE *                            mAnnotationTable;
+  vtkSmartPointer<vtkFloatArray>           mOverlayScalars;
+  vtkSmartPointer<vtkScalarsToColors>      mOverlayColors;
   vtkSmartPointer<vtkFSSurfaceLabelSource> mROISource;
 
   // Indices into the scalars colors editor for our color points.
@@ -655,14 +655,14 @@ protected:
   int mnPositiveMinValue, mnPositiveMidValue, mnPositiveMaxValue;
 
   // For scalars color scale drawing.
-  bool mbShowCurvature;
+  bool   mbShowCurvature;
   double mSurfaceScalarsColorMin;
   double mSurfaceScalarsColorMid;
   double mSurfaceScalarsColorMax;
   double mSurfaceScalarsColorOffset;
-  bool mbSurfaceScalarsColorReverse;
-  bool mbSurfaceScalarsColorShowPositive;
-  bool mbSurfaceScalarsColorShowNegative;
+  bool   mbSurfaceScalarsColorReverse;
+  bool   mbSurfaceScalarsColorShowPositive;
+  bool   mbSurfaceScalarsColorShowNegative;
 
   double mnNegativeMaxRedValue;
   double mnNegativeMaxGreenValue;
@@ -690,8 +690,8 @@ protected:
 
   // cluster stats info
   SCS *mClusterStats;
-  int mnClusters;      // number of clusters in mClusterStats array
-  int mCurrentCluster; // index of cluster in the cross-hairs
+  int  mnClusters;      // number of clusters in mClusterStats array
+  int  mCurrentCluster; // index of cluster in the cross-hairs
 
   // If true, this will draw the curvature with green/red when there
   // is no scalar up. Otherwise, it will be drawn in binary gray, as

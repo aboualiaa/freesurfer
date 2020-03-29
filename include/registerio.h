@@ -30,10 +30,10 @@ Routines for handling register.dat files
 #ifndef REGISTERIO_H_INC
 #define REGISTERIO_H_INC
 
-#include <cstdio>
 #include "matrix.h"
 #include "mri.h"
 #include "mrisurf.h"
+#include <cstdio>
 
 int regio_read_register(const char *regfile, char **subject, float *inplaneres,
                         float *betplaneres, float *intensity, MATRIX **R,
@@ -55,15 +55,15 @@ int regio_read_xfm4(const char *xfmfile, MATRIX **R);
 int regio_read_xfm(const char *xfmfile, MATRIX **R);
 int regio_write_surfacexform_to_register_dat(const MATRIX *B, const char *fname,
                                              const MRI_SURFACE *mris,
-                                             const MRI *mri,
-                                             const char *subject,
-                                             int float2int);
-MATRIX *regio_read_surfacexform_from_register_dat(const char *fname,
+                                             const MRI *        mri,
+                                             const char *       subject,
+                                             int                float2int);
+MATRIX *regio_read_surfacexform_from_register_dat(const char *       fname,
                                                   const MRI_SURFACE *mris,
-                                                  const MRI *mri,
-                                                  char **subject);
+                                                  const MRI *        mri,
+                                                  char **            subject);
 
 MATRIX *regio_read_registermat(const char *regfile);
-char *regio_read_subject(const char *regfile);
+char *  regio_read_subject(const char *regfile);
 
 #endif /*BF_H_INC*/

@@ -61,16 +61,16 @@ protected slots:
 
 private:
   Ui::DialogWriteMovieFrames *ui;
-  RenderView *m_view;
-  QTimer m_timer;
-  int m_nStepSize;
-  double m_dStepSize;
-  int m_nStartNumber;
-  QString m_strOutputDir;
-  QString m_strPrefix;
-  int m_nStepCount;
-  int m_nTotalSteps;
-  bool m_b3D;
+  RenderView *                m_view;
+  QTimer                      m_timer;
+  int                         m_nStepSize;
+  double                      m_dStepSize;
+  int                         m_nStartNumber;
+  QString                     m_strOutputDir;
+  QString                     m_strPrefix;
+  int                         m_nStepCount;
+  int                         m_nTotalSteps;
+  bool                        m_b3D;
 };
 
 #endif // DIALOGWRITEMOVIEFRAMES_H

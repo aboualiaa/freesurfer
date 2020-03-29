@@ -1,7 +1,7 @@
 namespace Existence {
 struct Face : public Repr_Elt {
   using Surface = Existence::Surface;
-  using Vertex = Existence::Vertex;
+  using Vertex  = Existence::Vertex;
   inline Face();
   inline Face(Face const &src);
   inline Face(Representation *representation, size_t idx);
@@ -25,7 +25,7 @@ struct Face : public Repr_Elt {
 
 struct Vertex : public Repr_Elt {
   using Surface = Existence::Surface;
-  using Face = Existence::Face;
+  using Face    = Existence::Face;
   inline Vertex();
   inline Vertex(Vertex const &src);
   inline Vertex(Representation *representation, size_t idx);
@@ -52,8 +52,8 @@ struct Vertex : public Repr_Elt {
 
 struct MRIS_MP : public Repr_Elt {
   using Surface = Existence::Surface;
-  using Face = Existence::Face;
-  using Vertex = Existence::Vertex;
+  using Face    = Existence::Face;
+  using Vertex  = Existence::Vertex;
   inline MRIS_MP();
   inline MRIS_MP(MRIS_MP const &src);
   inline MRIS_MP(Representation *representation, size_t idx);
@@ -72,7 +72,7 @@ struct MRIS_MP : public Repr_Elt {
 }; // MRIS_MP
 
 struct Surface : public Repr_Elt {
-  using Face = Existence::Face;
+  using Face   = Existence::Face;
   using Vertex = Existence::Vertex;
   inline Surface();
   inline Surface(Surface const &src);
@@ -89,7 +89,7 @@ struct Surface : public Repr_Elt {
   inline Surface(Analysis::Surface const &src);
   inline Surface(AllM::Surface const &src);
 
-  inline double radius() const;      //  radius (if status==MRIS_SPHERE)
+  inline double      radius() const; //  radius (if status==MRIS_SPHERE)
   inline MRIS_Status status() const; //  type of surface (e.g. sphere, plane)
   inline MRIS_Status
   origxyz_status() const;     //  type of surface (e.g. sphere, plane) that this

@@ -1,6 +1,6 @@
+#include "error.h"
 #include <clocale>
 #include <cstdlib>
-#include "error.h"
 
 #ifdef HAVE_OPENMP
 #include "romp_support.h"

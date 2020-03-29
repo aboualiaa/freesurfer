@@ -27,31 +27,31 @@
 #include "mrisurf.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 static Transform *load_transform(char *subject_name, General_transform *xform);
 
 static void print_usage();
-void print_help();
+void        print_help();
 
 const char *Progname;
 
 static int verbose = 0;
 
 static int no_talairach = 0; /* use talairach coords by default */
-static int ndilate = 0;
-static int nerode = 0;
-static int nclose = 0;
+static int ndilate      = 0;
+static int nerode       = 0;
+static int nclose       = 0;
 
-#define MAX_AREAS 100
+#define MAX_AREAS    100
 #define MAX_SUBJECTS 1000
-#define NAME_LEN 100
+#define NAME_LEN     100
 
 static char subjects_dir[NAME_LEN] = "";
 
 static General_transform transform;
-static Transform *linear_transform;
+static Transform *       linear_transform;
 
 static char *output_subject = nullptr;
 
@@ -81,10 +81,10 @@ int LabelToFlat(LABEL *area, MRI_SURFACE *mris) ;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  char *cp, label_fname[100], *subject_name, *label_name, *out_fname,
+  int    ac, nargs;
+  char * cp, label_fname[100], *subject_name, *label_name, *out_fname,
       *patch_name, surf_fname[100], hemi[10];
-  LABEL *area;
+  LABEL *      area;
   MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "label2flat");
@@ -109,10 +109,10 @@ int main(int argc, char *argv[]) {
     print_usage();
 
   subject_name = argv[1];
-  label_name = argv[2];
-  patch_name = argv[3];
-  out_fname = argv[4];
-  cp = getenv("SUBJECTS_DIR");
+  label_name   = argv[2];
+  patch_name   = argv[3];
+  out_fname    = argv[4];
+  cp           = getenv("SUBJECTS_DIR");
   if (!cp)
     ErrorExit(ERROR_BADPARM, "no subjects directory in environment.\n");
   strcpy(subjects_dir, cp);
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -213,15 +213,15 @@ static int get_option(int argc, char *argv[]) {
     nclose = atoi(argv[2]);
     printf("closing label %d times before generating patch\n", nclose);
     ndilate = nclose;
-    nerode = nclose;
-    nargs = 1;
+    nerode  = nclose;
+    nargs   = 1;
   } else
     switch (toupper(*option)) {
     case 'C':
       canon_name = argv[2];
       fprintf(stderr, "using surface %s as canonical coordinate system.\n",
               canon_name);
-      nargs = 1;
+      nargs        = 1;
       no_talairach = 1;
       break;
     case 'V':
@@ -249,7 +249,7 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static Transform *load_transform(char *subject_name,
+static Transform *load_transform(char *             subject_name,
                                  General_transform *transform) {
   char xform_fname[100];
 

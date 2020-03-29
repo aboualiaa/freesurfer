@@ -520,33 +520,33 @@ ENDHELP --------------------------------------------------------------
 #include <sys/stat.h>
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
-#include "fmriutils.h"
 #include "cmdargs.h"
-#include "pdf.h"
-#include "fsgdf.h"
-#include "timer.h"
-#include "matfile.h"
-#include "volcluster.h"
-#include "surfcluster.h"
-#include "randomfields.h"
+#include "diag.h"
 #include "dti.h"
+#include "fio.h"
+#include "fmriutils.h"
+#include "fsgdf.h"
+#include "matfile.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "pdf.h"
+#include "randomfields.h"
 #include "stats.h"
+#include "surfcluster.h"
+#include "timer.h"
+#include "version.h"
+#include "volcluster.h"
 
 int MRISmaskByLabel(MRI *y, MRIS *surf, LABEL *lb, int invflag);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-static int SmoothSurfOrVol(MRIS *surf, MRI *mri, MRI *mask, double SmthLevel);
+static int  SmoothSurfOrVol(MRIS *surf, MRI *mri, MRI *mask, double SmthLevel);
 
 int main(int argc, char *argv[]);
 
@@ -561,85 +561,85 @@ char *yFile = nullptr, *XFile = nullptr, *betaFile = nullptr,
 char *yhatFile = nullptr, *eresFile = nullptr, *maskFile = nullptr;
 char *wgFile = nullptr, *wFile = nullptr;
 char *eresSCMFile = nullptr;
-char *condFile = nullptr;
+char *condFile    = nullptr;
 char *yffxvarFile = nullptr;
-char *GLMDir = nullptr;
+char *GLMDir      = nullptr;
 char *pvrFiles[50];
-int yhatSave = 0;
-int eresSave = 0;
-int SaveFWHMMap = 0;
-int eresSCMSave = 0;
-int condSave = 0;
+int   yhatSave    = 0;
+int   eresSave    = 0;
+int   SaveFWHMMap = 0;
+int   eresSCMSave = 0;
+int   condSave    = 0;
 
-char *labelFile = nullptr;
-LABEL *clabel = nullptr;
-int maskinv = 0;
-int nmask, nvoxels;
-float maskfraction, voxelsize;
-int prunemask = 1;
+char * labelFile = nullptr;
+LABEL *clabel    = nullptr;
+int    maskinv   = 0;
+int    nmask, nvoxels;
+float  maskfraction, voxelsize;
+int    prunemask = 1;
 
 MRI *mritmp = nullptr, *mritmp2 = nullptr, *sig = nullptr, *rstd, *fsnr;
 
-int debug = 0, checkoptsonly = 0;
+int  debug = 0, checkoptsonly = 0;
 char tmpstr[2000];
 
-int nContrasts = 0;
-char *CFile[100];
-int err, c, r, s;
+int    nContrasts = 0;
+char * CFile[100];
+int    err, c, r, s;
 double Xcond;
 
-int npvr = 0;
+int     npvr   = 0;
 MRIGLM *mriglm = nullptr, *mriglmtmp = nullptr;
 
-double FWHM = 0;
-double SmoothLevel = 0;
-double VarFWHM = 0;
-double VarSmoothLevel = 0;
-int UseMaskWithSmoothing = 1;
+double FWHM                 = 0;
+double SmoothLevel          = 0;
+double VarFWHM              = 0;
+double VarSmoothLevel       = 0;
+int    UseMaskWithSmoothing = 1;
 double ResFWHM;
 
 char voxdumpdir[1000];
-int voxdump[3];
-int voxdumpflag = 0;
+int  voxdump[3];
+int  voxdumpflag = 0;
 
-char *fsgdfile = nullptr;
-FSGD *fsgd = nullptr;
+char *fsgdfile      = nullptr;
+FSGD *fsgd          = nullptr;
 char *gd2mtx_method = "none";
-int fsgdReScale = 0;
-int ReScaleX = 1;
+int   fsgdReScale   = 0;
+int   ReScaleX      = 1;
 
-int nSelfReg = 0;
-int crsSelfReg[100][3];
-char *SUBJECTS_DIR;
-int cmax, rmax, smax;
+int    nSelfReg = 0;
+int    crsSelfReg[100][3];
+char * SUBJECTS_DIR;
+int    cmax, rmax, smax;
 double Fmax, sigmax;
 
-int pcaSave = 0;
-int npca = -1;
+int     pcaSave = 0;
+int     npca    = -1;
 MATRIX *Upca = nullptr, *Spca = nullptr;
-MRI *Vpca = nullptr;
+MRI *   Vpca = nullptr;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 char *MaxVoxBase = nullptr;
-int DontSave = 0;
-int DontSaveWn = 0;
+int   DontSave   = 0;
+int   DontSaveWn = 0;
 
-int DoSim = 0;
-int synth = 0;
-int PermForce = 0;
-int UseUniform = 0;
+int    DoSim      = 0;
+int    synth      = 0;
+int    PermForce  = 0;
+int    UseUniform = 0;
 double UniformMin = 0;
 double UniformMax = 0;
 
 SURFCLUSTERSUM *SurfClustList;
-int nClusters;
-char *subject = nullptr, *hemi = nullptr, *simbase = nullptr;
-MRI_SURFACE *surf = nullptr;
-int nsim, nthsim;
-double csize;
-MRI *fwhmmap = nullptr;
+int             nClusters;
+char *          subject = nullptr, *hemi = nullptr, *simbase = nullptr;
+MRI_SURFACE *   surf = nullptr;
+int             nsim, nthsim;
+double          csize;
+MRI *           fwhmmap = nullptr;
 
 VOLCLUSTER **VolClustList;
 
@@ -649,120 +649,121 @@ double InterVertexDistAvg, InterVertexDistStdDev, avgvtxarea;
 double ar1mn, ar1std, ar1max;
 double eresgstd, eresfwhm, searchspace;
 double car1mn, rar1mn, sar1mn, cfwhm, rfwhm, sfwhm;
-MRI *ar1 = nullptr, *tar1 = nullptr, *z = nullptr, *zabs = nullptr,
+MRI *  ar1 = nullptr, *tar1 = nullptr, *z = nullptr, *zabs = nullptr,
     *cnr = nullptr;
 
 CSD *csd;
 RFS *rfs;
-int weightinv = 0, weightsqrt = 0;
+int  weightinv = 0, weightsqrt = 0;
 
-int OneSamplePerm = 0;
-int OneSampleGroupMean = 0;
-int PermNonStatCor = 0;
+int   OneSamplePerm      = 0;
+int   OneSampleGroupMean = 0;
+int   PermNonStatCor     = 0;
 Timer mytimer;
-int ReallyUseAverage7 = 0;
-int logflag = 0; // natural log
-float prune_thr = FLT_MIN;
+int   ReallyUseAverage7 = 0;
+int   logflag           = 0; // natural log
+float prune_thr         = FLT_MIN;
 
-DTI *dti;
-int usedti = 0;
-int usepruning = 0;
-MRI *lowb, *tensor, *evals, *evec1, *evec2, *evec3;
-MRI *fa, *ra, *vr, *adc, *dwi, *dwisynth, *dwires, *dwirvar;
-MRI *ivc, *k, *pk;
+DTI * dti;
+int   usedti     = 0;
+int   usepruning = 0;
+MRI * lowb, *tensor, *evals, *evec1, *evec2, *evec3;
+MRI * fa, *ra, *vr, *adc, *dwi, *dwisynth, *dwires, *dwirvar;
+MRI * ivc, *k, *pk;
 char *bvalfile = nullptr, *bvecfile = nullptr;
 
-int useasl = 0;
+int    useasl  = 0;
 double asl1val = 1, asl2val = 0;
 
 int useqa = 0;
 
-char *format = "mgh";
+char *format   = "mgh";
 char *surfname = "white";
 
-int SubSample = 0;
+int SubSample    = 0;
 int SubSampStart = 0;
 int SubSampDelta = 0;
 
 int DoDistance = 0;
 
-int DoTemporalAR1 = 0;
-int DoFFx = 0;
+int    DoTemporalAR1 = 0;
+int    DoFFx         = 0;
 IMAGE *I;
 
-int IllCondOK = 0;
+int IllCondOK     = 0;
 int NoContrastsOK = 0;
-int ComputeFWHM = 1;
+int ComputeFWHM   = 1;
 
-int UseStatTable = 0;
+int         UseStatTable = 0;
 STAT_TABLE *StatTable = nullptr, *OutStatTable = nullptr,
            *GammaStatTable = nullptr;
-int UseCortexLabel = 1;
+int UseCortexLabel         = 1;
 
 char *SimDoneFile = nullptr;
-int tSimSign = 0;
-int FWHMSet = 0;
-int DoKurtosis = 0;
-int DoSkew = 0;
+int   tSimSign    = 0;
+int   FWHMSet     = 0;
+int   DoKurtosis  = 0;
+int   DoSkew      = 0;
 
-char *Gamma0File[GLMMAT_NCONTRASTS_MAX];
+char *  Gamma0File[GLMMAT_NCONTRASTS_MAX];
 MATRIX *Xtmp = nullptr, *Xnorm = nullptr;
-char *XOnlyFile = nullptr;
-char *yOutFile = nullptr;
+char *  XOnlyFile = nullptr;
+char *  yOutFile  = nullptr;
 
 char *frameMaskFile = nullptr;
 
-int DoSimThreshLoop = 0;
-int nThreshList = 4, nthThresh;
-float ThreshList[4] = {1.3, 2.0, 2.3, 3.0};
-int nSignList = 3, nthSign;
-int SignList[3] = {-1, 0, 1};
-CSD *csdList[5][3][20];
+int   DoSimThreshLoop = 0;
+int   nThreshList     = 4, nthThresh;
+float ThreshList[4]   = {1.3, 2.0, 2.3, 3.0};
+int   nSignList       = 3, nthSign;
+int   SignList[3]     = {-1, 0, 1};
+CSD * csdList[5][3][20];
 
 MATRIX *RTM_Cr, *RTM_intCr, *RTM_TimeSec, *RTM_TimeMin;
-int DoMRTM1 = 0;
-int DoMRTM2 = 0;
-double MRTM2_k2p = 0;
+int     DoMRTM1   = 0;
+int     DoMRTM2   = 0;
+double  MRTM2_k2p = 0;
 MATRIX *MRTM2_x1;
 
-int nRandExclude = 0, *ExcludeFrames = nullptr, nExclude = 0;
-char *ExcludeFrameFile = nullptr;
+int     nRandExclude = 0, *ExcludeFrames = nullptr, nExclude = 0;
+char *  ExcludeFrameFile = nullptr;
 MATRIX *MatrixExcludeFrames(MATRIX *Src, int *ExcludeFrames, int nExclude);
-MRI *fMRIexcludeFrames(MRI *f, int *ExcludeFrames, int nExclude, MRI *fex);
-int AllowZeroDOF = 0;
-MRI *BindingPotential(MRI *k2, MRI *k2a, MRI *mask, MRI *bp);
-int DoReshape = 0;
-MRI *MRIconjunct3(MRI *sig1, MRI *sig2, MRI *sig3, MRI *mask, MRI *c123);
+MRI *   fMRIexcludeFrames(MRI *f, int *ExcludeFrames, int nExclude, MRI *fex);
+int     AllowZeroDOF = 0;
+MRI *   BindingPotential(MRI *k2, MRI *k2a, MRI *mask, MRI *bp);
+int     DoReshape = 0;
+MRI *   MRIconjunct3(MRI *sig1, MRI *sig2, MRI *sig3, MRI *mask, MRI *c123);
 
 int NSplits = 0, SplitNo = 0;
 int SplitMin, SplitMax, nPerSplit, RandSplit;
-int DoFisher = 0;
-int DoPCC = 1;
+int DoFisher      = 0;
+int DoPCC         = 1;
 int RmSpatialMean = 0;
 
 double GLMEfficiency(MATRIX *X, MATRIX *C);
-int GLMdiagnoseDesignMatrix(MATRIX *X);
-MRI *fMRIskew(MRI *y, MRI *mask);
-MRI *MRIpskew(MRI *kvals, int dof, MRI *mask, int nsamples);
-MRI *MRIremoveSpatialMean(MRI *vol, MRI *mask, MRI *out);
+int    GLMdiagnoseDesignMatrix(MATRIX *X);
+MRI *  fMRIskew(MRI *y, MRI *mask);
+MRI *  MRIpskew(MRI *kvals, int dof, MRI *mask, int nsamples);
+MRI *  MRIremoveSpatialMean(MRI *vol, MRI *mask, MRI *out);
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, n, m;
-  int msecFitTime;
+  int     nargs, n, m;
+  int     msecFitTime;
   MATRIX *wvect = nullptr, *Mtmp = nullptr, *Xselfreg = nullptr, *Ex = nullptr,
          *XgNew = nullptr;
   MATRIX *Ct, *CCt;
-  FILE *fp;
-  double Ccond, dtmp, threshadj, eff;
-  char *tmpstr2 = nullptr;
+  FILE *  fp;
+  double  Ccond, dtmp, threshadj, eff;
+  char *  tmpstr2 = nullptr;
 
-  eresfwhm = -1;
-  csd = CSDalloc();
+  eresfwhm        = -1;
+  csd             = CSDalloc();
   csd->threshsign = 0; // 0=abs,+1,-1
 
   nargs = handleVersionOption(argc, argv, "mri_glmfit");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -773,8 +774,8 @@ int main(int argc, char **argv) {
   argv++;
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
-  mriglm = (MRIGLM *)calloc(sizeof(MRIGLM), 1);
-  mriglm->glm = GLMalloc();
+  mriglm         = (MRIGLM *)calloc(sizeof(MRIGLM), 1);
+  mriglm->glm    = GLMalloc();
   mriglm->ffxdof = 0;
 
   if (argc == 0)
@@ -785,7 +786,7 @@ int main(int argc, char **argv) {
   if (checkoptsonly)
     return (0);
 
-  mriglm->glm->DoPCC = DoPCC;
+  mriglm->glm->DoPCC    = DoPCC;
   mriglm->glm->ReScaleX = ReScaleX;
 
   // Seed the random number generator just in case
@@ -795,9 +796,9 @@ int main(int argc, char **argv) {
 
   if (surf != nullptr) {
     MRIScomputeMetricProperties(surf);
-    InterVertexDistAvg = surf->avg_vertex_dist;
+    InterVertexDistAvg    = surf->avg_vertex_dist;
     InterVertexDistStdDev = surf->std_vertex_dist;
-    avgvtxarea = surf->avg_vertex_area;
+    avgvtxarea            = surf->avg_vertex_area;
     printf("Number of vertices %d\n", surf->nvertices);
     printf("Number of faces    %d\n", surf->nfaces);
     printf("Total area         %lf\n", surf->total_area);
@@ -845,7 +846,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  mriglm->npvr = npvr;
+  mriglm->npvr     = npvr;
   mriglm->yhatsave = yhatSave;
   mriglm->condsave = condSave;
 
@@ -948,7 +949,7 @@ int main(int argc, char **argv) {
         exit(1);
       }
       if (usedti == 3) {
-        dti = (DTI *)calloc(sizeof(DTI), 1);
+        dti    = (DTI *)calloc(sizeof(DTI), 1);
         dti->B = mriglm->Xg;
       }
     } else {
@@ -979,25 +980,25 @@ int main(int argc, char **argv) {
     }
     for (n = 0; n < mriglm->y->nframes; n++)
       mriglm->Xg->rptr[n + 1][3] = n - mriglm->y->nframes / 2.0;
-    nContrasts = 3;
-    mriglm->glm->ncontrasts = nContrasts;
-    mriglm->glm->Cname[0] = "perfusion";
-    mriglm->glm->C[0] = MatrixConstVal(0.0, 1, 3, nullptr);
+    nContrasts                    = 3;
+    mriglm->glm->ncontrasts       = nContrasts;
+    mriglm->glm->Cname[0]         = "perfusion";
+    mriglm->glm->C[0]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[0]->rptr[1][1] = 0;
     mriglm->glm->C[0]->rptr[1][2] = 1;
-    mriglm->glm->Cname[1] = "control";
-    mriglm->glm->C[1] = MatrixConstVal(0.0, 1, 3, nullptr);
+    mriglm->glm->Cname[1]         = "control";
+    mriglm->glm->C[1]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[1]->rptr[1][1] = 1;
     mriglm->glm->C[1]->rptr[1][2] = 0;
-    mriglm->glm->Cname[2] = "label";
-    mriglm->glm->C[2] = MatrixConstVal(0.0, 1, 3, nullptr);
+    mriglm->glm->Cname[2]         = "label";
+    mriglm->glm->C[2]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[2]->rptr[1][1] = 1;
     mriglm->glm->C[2]->rptr[1][2] = 1;
   }
   if (useqa) {
     // Set up a model with const, linear, and quad
     mriglm->Xg = MatrixConstVal(1.0, mriglm->y->nframes, 3, nullptr);
-    dtmp = 0;
+    dtmp       = 0;
     for (n = 0; n < mriglm->y->nframes; n += 1) {
       mriglm->Xg->rptr[n + 1][2] = n - (mriglm->y->nframes - 1.0) / 2.0;
       mriglm->Xg->rptr[n + 1][3] = n * n;
@@ -1008,20 +1009,20 @@ int main(int argc, char **argv) {
     }
     // Test mean, linear and quad
     // mean is not an important test, but snr = cnr
-    nContrasts = 3;
-    mriglm->glm->ncontrasts = nContrasts;
-    mriglm->glm->Cname[0] = "mean";
-    mriglm->glm->C[0] = MatrixConstVal(0.0, 1, 3, nullptr);
+    nContrasts                    = 3;
+    mriglm->glm->ncontrasts       = nContrasts;
+    mriglm->glm->Cname[0]         = "mean";
+    mriglm->glm->C[0]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[0]->rptr[1][1] = 1;
     mriglm->glm->C[0]->rptr[1][2] = 0;
     mriglm->glm->C[0]->rptr[1][3] = 0;
-    mriglm->glm->Cname[1] = "linear";
-    mriglm->glm->C[1] = MatrixConstVal(0.0, 1, 3, nullptr);
+    mriglm->glm->Cname[1]         = "linear";
+    mriglm->glm->C[1]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[1]->rptr[1][1] = 0;
     mriglm->glm->C[1]->rptr[1][2] = 1;
     mriglm->glm->C[1]->rptr[1][3] = 0;
-    mriglm->glm->Cname[2] = "quad";
-    mriglm->glm->C[2] = MatrixConstVal(0.0, 1, 3, nullptr);
+    mriglm->glm->Cname[2]         = "quad";
+    mriglm->glm->C[2]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[2]->rptr[1][1] = 0;
     mriglm->glm->C[2]->rptr[1][2] = 0;
     mriglm->glm->C[2]->rptr[1][3] = 1;
@@ -1038,8 +1039,8 @@ int main(int argc, char **argv) {
 
   if (NSplits > 0) {
     nPerSplit = floor((double)mriglm->y->nframes / NSplits);
-    SplitMin = SplitNo * nPerSplit;
-    SplitMax = SplitMin + nPerSplit;
+    SplitMin  = SplitNo * nPerSplit;
+    SplitMax  = SplitMin + nPerSplit;
     if ((SplitNo == NSplits - 1) && (SplitMax < mriglm->y->nframes - 1))
       SplitMax = mriglm->y->nframes - 1;
     nExclude = mriglm->y->nframes - (SplitMax - SplitMin);
@@ -1063,7 +1064,7 @@ int main(int argc, char **argv) {
     }
 
     ExcludeFrames = (int *)calloc(sizeof(int), nExclude);
-    m = 0;
+    m             = 0;
     for (n = 0; n < mriglm->y->nframes; n++) {
       if (n < SplitMin || n >= SplitMax) {
         ExcludeFrames[m] = Ex->rptr[n + 1][1];
@@ -1075,7 +1076,7 @@ int main(int argc, char **argv) {
   // Randomly create frames to exclude
   if (nRandExclude > 0) {
     ExcludeFrames = (int *)calloc(sizeof(int), nRandExclude);
-    Ex = MatrixConstVal(0, mriglm->y->nframes, 1, nullptr);
+    Ex            = MatrixConstVal(0, mriglm->y->nframes, 1, nullptr);
     for (n = 0; n < nRandExclude; n++)
       Ex->rptr[n + 1][1] = 1;
     MatrixRandPermRows(Ex);
@@ -1098,7 +1099,7 @@ int main(int argc, char **argv) {
     XgNew = MatrixExcludeFrames(mriglm->Xg, ExcludeFrames, nExclude);
     MatrixFree(&mriglm->Xg);
     mriglm->Xg = XgNew;
-    mritmp = fMRIexcludeFrames(mriglm->y, ExcludeFrames, nExclude, nullptr);
+    mritmp     = fMRIexcludeFrames(mriglm->y, ExcludeFrames, nExclude, nullptr);
     MRIfree(&mriglm->y);
     mriglm->y = mritmp;
     if (mriglm->w) {
@@ -1118,30 +1119,30 @@ int main(int argc, char **argv) {
   if (DoMRTM1) {
     printf("Performing MRTM1\n");
     fflush(stdout);
-    mriglm->Xg = MatrixHorCat(RTM_Cr, RTM_intCr, nullptr);
+    mriglm->Xg   = MatrixHorCat(RTM_Cr, RTM_intCr, nullptr);
     mriglm->npvr = 1;
     printf("Computing integral of input ...");
     fflush(stdout);
     mriglm->pvr[0] = fMRIcumTrapZ(mriglm->y, RTM_TimeMin, nullptr, nullptr);
     printf("done.\n");
     fflush(stdout);
-    nContrasts = 4;
+    nContrasts              = 4;
     mriglm->glm->ncontrasts = nContrasts;
     //------------------------------------------
-    mriglm->glm->Cname[0] = "R1";
-    mriglm->glm->C[0] = MatrixConstVal(0.0, 1, 3, nullptr);
+    mriglm->glm->Cname[0]         = "R1";
+    mriglm->glm->C[0]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[0]->rptr[1][1] = 1;
     //------------------------------------------
-    mriglm->glm->Cname[1] = "k2";
-    mriglm->glm->C[1] = MatrixConstVal(0.0, 1, 3, nullptr);
+    mriglm->glm->Cname[1]         = "k2";
+    mriglm->glm->C[1]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[1]->rptr[1][2] = 1;
     //------------------------------------------
-    mriglm->glm->Cname[2] = "k2a";
-    mriglm->glm->C[2] = MatrixConstVal(0.0, 1, 3, nullptr);
+    mriglm->glm->Cname[2]         = "k2a";
+    mriglm->glm->C[2]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[2]->rptr[1][3] = -1;
     //------------------------------------------
-    mriglm->glm->Cname[3] = "k2-k2a";
-    mriglm->glm->C[3] = MatrixConstVal(0.0, 1, 3, nullptr);
+    mriglm->glm->Cname[3]         = "k2-k2a";
+    mriglm->glm->C[3]             = MatrixConstVal(0.0, 1, 3, nullptr);
     mriglm->glm->C[3]->rptr[1][2] = +1;
     mriglm->glm->C[3]->rptr[1][3] = +1;
     //------------------------------------------
@@ -1152,8 +1153,8 @@ int main(int argc, char **argv) {
   if (DoMRTM2) {
     printf("Performing MRTM2\n");
     fflush(stdout);
-    mriglm->Xg = MRTM2_x1;
-    mriglm->wg = nullptr;
+    mriglm->Xg   = MRTM2_x1;
+    mriglm->wg   = nullptr;
     mriglm->npvr = 1;
     printf("Computing integral of input ...");
     fflush(stdout);
@@ -1161,19 +1162,19 @@ int main(int argc, char **argv) {
     printf("done.\n");
     fflush(stdout);
     mriglm->pvr[0] = MRImultiplyConst(mriglm->pvr[0], -1, mriglm->pvr[0]);
-    nContrasts = 3;
+    nContrasts     = 3;
     mriglm->glm->ncontrasts = nContrasts;
     //------------------------------------------
-    mriglm->glm->Cname[0] = "k2";
-    mriglm->glm->C[0] = MatrixConstVal(0.0, 1, 2, nullptr);
+    mriglm->glm->Cname[0]         = "k2";
+    mriglm->glm->C[0]             = MatrixConstVal(0.0, 1, 2, nullptr);
     mriglm->glm->C[0]->rptr[1][1] = 1;
     //------------------------------------------
-    mriglm->glm->Cname[1] = "k2a";
-    mriglm->glm->C[1] = MatrixConstVal(0.0, 1, 2, nullptr);
+    mriglm->glm->Cname[1]         = "k2a";
+    mriglm->glm->C[1]             = MatrixConstVal(0.0, 1, 2, nullptr);
     mriglm->glm->C[1]->rptr[1][2] = 1;
     //------------------------------------------
-    mriglm->glm->Cname[2] = "k2-k2a";
-    mriglm->glm->C[2] = MatrixConstVal(0.0, 1, 2, nullptr);
+    mriglm->glm->Cname[2]         = "k2-k2a";
+    mriglm->glm->C[2]             = MatrixConstVal(0.0, 1, 2, nullptr);
     mriglm->glm->C[2]->rptr[1][1] = +1;
     mriglm->glm->C[2]->rptr[1][2] = -1;
     //------------------------------------------
@@ -1292,7 +1293,7 @@ int main(int argc, char **argv) {
       if (!usepruning)
         prune_thr = 50; // needs to be larger than 0 to get meaningful mask!
       firstFrameVol = MRIcopyFrame(mriglm->y, nullptr, 0, 0);
-      mriglm->mask = MRIframeBinarize(firstFrameVol, prune_thr, mriglm->mask);
+      mriglm->mask  = MRIframeBinarize(firstFrameVol, prune_thr, mriglm->mask);
       MRIfree(&firstFrameVol);
     } else {
       mriglm->mask = MRIframeBinarize(mriglm->y, prune_thr, mriglm->mask);
@@ -1350,7 +1351,7 @@ int main(int argc, char **argv) {
     if (surf->group_avg_surface_area > 0)
       searchspace *= (surf->group_avg_surface_area / surf->total_area);
   } else {
-    voxelsize = mriglm->y->xsize * mriglm->y->ysize * mriglm->y->zsize;
+    voxelsize   = mriglm->y->xsize * mriglm->y->ysize * mriglm->y->zsize;
     searchspace = nmask * voxelsize;
   }
   printf("search space = %lf\n", searchspace);
@@ -1398,7 +1399,7 @@ int main(int argc, char **argv) {
       exit(1);
     }
   } else if (!DoMRTM1 && !DoMRTM2) {
-    mriglm->w = nullptr;
+    mriglm->w  = nullptr;
     mriglm->wg = nullptr;
   }
 
@@ -1459,11 +1460,11 @@ int main(int argc, char **argv) {
     }
 
     // Need new mriglm, so alloc and copy the old one
-    mriglmtmp = (MRIGLM *)calloc(sizeof(MRIGLM), 1);
+    mriglmtmp      = (MRIGLM *)calloc(sizeof(MRIGLM), 1);
     mriglmtmp->glm = GLMalloc();
-    mriglmtmp->y = mriglm->y;
-    mriglmtmp->w = mriglm->w;
-    mriglmtmp->Xg = MatrixHorCat(mriglm->Xg, Xselfreg, nullptr);
+    mriglmtmp->y   = mriglm->y;
+    mriglmtmp->w   = mriglm->w;
+    mriglmtmp->Xg  = MatrixHorCat(mriglm->Xg, Xselfreg, nullptr);
     for (n = 0; n < mriglm->npvr; n++)
       mriglmtmp->pvr[n] = mriglmtmp->pvr[n];
     // MRIglmFree(&mriglm);
@@ -1516,7 +1517,7 @@ int main(int argc, char **argv) {
         }
       }
       if (fsgd && fsgd->nContrasts != 0) {
-        mriglm->glm->C[n] = MatrixCopy(fsgd->C[n], nullptr);
+        mriglm->glm->C[n]     = MatrixCopy(fsgd->C[n], nullptr);
         mriglm->glm->Cname[n] = strcpyalloc(fsgd->ContrastName[n]);
       }
       // Check it's dimension
@@ -1527,8 +1528,8 @@ int main(int argc, char **argv) {
         exit(1);
       }
       // Check it's condition
-      Ct = MatrixTranspose(mriglm->glm->C[n], nullptr);
-      CCt = MatrixMultiplyD(mriglm->glm->C[n], Ct, nullptr);
+      Ct    = MatrixTranspose(mriglm->glm->C[n], nullptr);
+      CCt   = MatrixMultiplyD(mriglm->glm->C[n], Ct, nullptr);
       Ccond = MatrixConditionNumber(CCt);
       if (Ccond > 1000) {
         printf("ERROR: contrast %s is ill-conditioned (%g)\n",
@@ -1542,10 +1543,10 @@ int main(int argc, char **argv) {
   }
 
   if (OneSampleGroupMean) {
-    nContrasts = 1;
+    nContrasts              = 1;
     mriglm->glm->ncontrasts = nContrasts;
-    mriglm->glm->Cname[0] = strcpyalloc("osgm");
-    mriglm->glm->C[0] = MatrixConstVal(1.0, 1, 1, nullptr);
+    mriglm->glm->Cname[0]   = strcpyalloc("osgm");
+    mriglm->glm->C[0]       = MatrixConstVal(1.0, 1, 1, nullptr);
   }
 
   // Check for one-sample group mean with permutation simulation
@@ -1580,7 +1581,7 @@ int main(int argc, char **argv) {
           exit(1);
         } else {
           mriglm->glm->AllowZeroDOF = 1;
-          mriglm->glm->dof = 1;
+          mriglm->glm->dof          = 1;
         }
       } else
         printf("WARNING: DOF = %g\n", mriglm->glm->dof);
@@ -1622,13 +1623,13 @@ int main(int argc, char **argv) {
   }
 
   if (UseStatTable) {
-    OutStatTable = AllocStatTable(StatTable->ncols, nContrasts);
+    OutStatTable          = AllocStatTable(StatTable->ncols, nContrasts);
     OutStatTable->measure = strcpyalloc(StatTable->measure);
     for (n = 0; n < StatTable->ncols; n++)
       OutStatTable->rownames[n] = strcpyalloc(StatTable->colnames[n]);
     for (n = 0; n < nContrasts; n++)
       OutStatTable->colnames[n] = strcpyalloc(mriglm->glm->Cname[n]);
-    GammaStatTable = AllocStatTable(StatTable->ncols, nContrasts);
+    GammaStatTable          = AllocStatTable(StatTable->ncols, nContrasts);
     GammaStatTable->measure = strcpyalloc(StatTable->measure);
     for (n = 0; n < StatTable->ncols; n++)
       GammaStatTable->rownames[n] = strcpyalloc(StatTable->colnames[n]);
@@ -1672,33 +1673,33 @@ int main(int argc, char **argv) {
     } else
       strcpy(csd->anattype, "volume");
     csd->searchspace = searchspace;
-    csd->nreps = nsim;
+    csd->nreps       = nsim;
     CSDallocData(csd);
     if (!strcmp(csd->simtype, "mc-z")) {
-      rfs = RFspecInit(SynthSeed, nullptr);
-      rfs->name = strcpyalloc("gaussian");
+      rfs            = RFspecInit(SynthSeed, nullptr);
+      rfs->name      = strcpyalloc("gaussian");
       rfs->params[0] = 0;
       rfs->params[1] = 1;
       // z =
       // MRIalloc(mriglm->y->width,mriglm->y->height,mriglm->y->depth,MRI_FLOAT);
-      z = MRIcloneBySpace(mriglm->y, MRI_FLOAT, 1);
+      z    = MRIcloneBySpace(mriglm->y, MRI_FLOAT, 1);
       zabs = MRIcloneBySpace(mriglm->y, MRI_FLOAT, 1);
     }
     if (!strcmp(csd->simtype, "mc-t")) {
-      rfs = RFspecInit(SynthSeed, nullptr);
-      rfs->name = strcpyalloc("t");
+      rfs            = RFspecInit(SynthSeed, nullptr);
+      rfs->name      = strcpyalloc("t");
       rfs->params[0] = mriglm->glm->dof;
-      z = MRIcloneBySpace(mriglm->y, MRI_FLOAT, 1);
-      zabs = MRIcloneBySpace(mriglm->y, MRI_FLOAT, 1);
+      z              = MRIcloneBySpace(mriglm->y, MRI_FLOAT, 1);
+      zabs           = MRIcloneBySpace(mriglm->y, MRI_FLOAT, 1);
     }
     printf("thresh = %g, threshadj = %g \n", csd->thresh,
            csd->thresh - log10(2.0));
 
     if (!DoSimThreshLoop) {
-      nThreshList = 1;
-      ThreshList[0] = csd->thresh;
-      nSignList = 1;
-      SignList[0] = tSimSign;
+      nThreshList     = 1;
+      ThreshList[0]   = csd->thresh;
+      nSignList       = 1;
+      SignList[0]     = tSimSign;
       DoSimThreshLoop = 1;
     }
 
@@ -1706,10 +1707,10 @@ int main(int argc, char **argv) {
       for (nthThresh = 0; nthThresh < nThreshList; nthThresh++) {
         for (nthSign = 0; nthSign < nSignList; nthSign++) {
           for (n = 0; n < mriglm->glm->ncontrasts; n++) {
-            csdList[nthThresh][nthSign][n] = CSDcopy(csd, nullptr);
-            csdList[nthThresh][nthSign][n]->thresh = ThreshList[nthThresh];
+            csdList[nthThresh][nthSign][n]             = CSDcopy(csd, nullptr);
+            csdList[nthThresh][nthSign][n]->thresh     = ThreshList[nthThresh];
             csdList[nthThresh][nthSign][n]->threshsign = SignList[nthSign];
-            csdList[nthThresh][nthSign][n]->seed = csd->seed;
+            csdList[nthThresh][nthSign][n]->seed       = csd->seed;
           }
         }
       }
@@ -1774,7 +1775,7 @@ int main(int argc, char **argv) {
               MRIfree(&ar1);
             if (fwhmmap)
               MRIfree(&fwhmmap);
-            ar1 = MRISar1(surf, mriglm->eres, mriglm->mask, nullptr);
+            ar1     = MRISar1(surf, mriglm->eres, mriglm->mask, nullptr);
             fwhmmap = MRISfwhmFromAR1Map(surf, mriglm->mask, ar1);
             // MRISsmoothMRI(surf, fwhmmap, SmthLevel, mriglm->mask, fwhmmap)
           }
@@ -1786,7 +1787,7 @@ int main(int argc, char **argv) {
           // Go through each contrast.
           for (n = 0; n < mriglm->glm->ncontrasts; n++) {
             if (DoSimThreshLoop) {
-              csd = csdList[nthThresh][nthSign][n];
+              csd      = csdList[nthThresh][nthSign][n];
               tSimSign = SignList[nthSign];
             }
             if (debug)
@@ -1847,7 +1848,7 @@ int main(int argc, char **argv) {
               //   RFstat2P() computes one-sided, but I handle sidedness
               //   during thresholding.
               // First, use zabs to get a two-sided pval bet 0 and 0.5
-              zabs = MRIabs(z, zabs);
+              zabs         = MRIabs(z, zabs);
               mriglm->p[n] = RFstat2P(zabs, rfs, mriglm->mask, 0, mriglm->p[n]);
               // Next, mult pvals by 2 to get two-sided bet 0 and 1
               MRIscalarMul(mriglm->p[n], mriglm->p[n], 2);
@@ -1859,7 +1860,7 @@ int main(int argc, char **argv) {
 
               sigmax = MRIframeMax(sig, 0, mriglm->mask, csd->threshsign, &cmax,
                                    &rmax, &smax);
-              Fmax = MRIgetVoxVal(z, cmax, rmax, smax, 0);
+              Fmax   = MRIgetVoxVal(z, cmax, rmax, smax, 0);
               if (csd->threshsign == 0)
                 Fmax = fabs(Fmax);
             }
@@ -1932,11 +1933,11 @@ int main(int argc, char **argv) {
             fprintf(fp, "# num_dof %d\n", mriglm->glm->C[n]->rows);
             fprintf(fp, "# den_dof %g\n", mriglm->glm->dof);
             fprintf(fp, "# SmoothLevel %g\n", SmoothLevel);
-            csd->nreps = nthsim + 1;
-            csd->nClusters[nthsim] = nClusters;
+            csd->nreps                  = nthsim + 1;
+            csd->nClusters[nthsim]      = nClusters;
             csd->MaxClusterSize[nthsim] = csize;
-            csd->MaxSig[nthsim] = sigmax;
-            csd->MaxStat[nthsim] = Fmax;
+            csd->MaxSig[nthsim]         = sigmax;
+            csd->MaxStat[nthsim]        = Fmax;
             CSDprint(fp, csd);
             fclose(fp);
             if (debug)
@@ -1967,9 +1968,9 @@ int main(int argc, char **argv) {
 
   if (MaxVoxBase != nullptr) {
     for (n = 0; n < mriglm->glm->ncontrasts; n++) {
-      sig = MRIlog10(mriglm->p[n], nullptr, sig, 1);
+      sig    = MRIlog10(mriglm->p[n], nullptr, sig, 1);
       sigmax = MRIframeMax(sig, 0, mriglm->mask, 0, &cmax, &rmax, &smax);
-      Fmax = MRIgetVoxVal(mriglm->F[n], cmax, rmax, smax, 0);
+      Fmax   = MRIgetVoxVal(mriglm->F[n], cmax, rmax, smax, 0);
       sprintf(tmpstr, "%s-%s", MaxVoxBase, mriglm->glm->Cname[n]);
       fp = fopen(tmpstr, "a");
       fprintf(fp, "%e  %e    %d %d %d     %d\n", sigmax, Fmax, cmax, rmax, smax,
@@ -2010,9 +2011,9 @@ int main(int argc, char **argv) {
       sprintf(tmpstr, "%s/sar1.%s", GLMDir, format);
       MRIwrite(ar1, tmpstr);
       fMRIspatialAR1Mean(ar1, mriglm->mask, &car1mn, &rar1mn, &sar1mn);
-      cfwhm = RFar1ToFWHM(car1mn, mriglm->eres->xsize);
-      rfwhm = RFar1ToFWHM(rar1mn, mriglm->eres->ysize);
-      sfwhm = RFar1ToFWHM(sar1mn, mriglm->eres->zsize);
+      cfwhm    = RFar1ToFWHM(car1mn, mriglm->eres->xsize);
+      rfwhm    = RFar1ToFWHM(rar1mn, mriglm->eres->ysize);
+      sfwhm    = RFar1ToFWHM(sar1mn, mriglm->eres->zsize);
       eresfwhm = sqrt((cfwhm * cfwhm + rfwhm * rfwhm + sfwhm * sfwhm) / 3.0);
       printf("Residual: ar1mn = (%lf,%lf,%lf) fwhm = (%lf,%lf,%lf) %lf\n",
              car1mn, rar1mn, sar1mn, cfwhm, rfwhm, sfwhm, eresfwhm);
@@ -2165,7 +2166,7 @@ int main(int argc, char **argv) {
 
     // Find and save the max sig
     sigmax = MRIframeMax(sig, 0, mriglm->mask, 0, &cmax, &rmax, &smax);
-    Fmax = MRIgetVoxVal(mriglm->F[n], cmax, rmax, smax, 0);
+    Fmax   = MRIgetVoxVal(mriglm->F[n], cmax, rmax, smax, 0);
     printf("    maxvox sig=%g  F=%g  at  index %d %d %d    seed=%d\n", sigmax,
            Fmax, cmax, rmax, smax, SynthSeed);
 
@@ -2369,7 +2370,7 @@ int main(int argc, char **argv) {
     sprintf(fsgd->DesignMatFile, "X.mat");
     sprintf(tmpstr, "%s/y.fsgd", GLMDir);
     fsgd->ResFWHM = eresfwhm;
-    fsgd->LogY = logflag;
+    fsgd->LogY    = logflag;
 
     fp = fopen(tmpstr, "w");
     gdfPrintHeader(fp, fsgd);
@@ -2451,10 +2452,10 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused, msec, niters, frameno, k;
+  int    nargc, nargsused, msec, niters, frameno, k;
   char **pargv, *option;
   double rvartmp;
-  FILE *fp;
+  FILE * fp;
 
   if (argc < 1)
     usage_exit();
@@ -2518,7 +2519,7 @@ static int parse_commandline(int argc, char **argv) {
       OneSamplePerm = 1;
     else if (!strcasecmp(option, "--osgm")) {
       OneSampleGroupMean = 1;
-      DoPCC = 0;
+      DoPCC              = 0;
     } else if (!strcasecmp(option, "--diag-cluster"))
       DiagCluster = 1;
     else if (!strcasecmp(option, "--perm-force"))
@@ -2542,7 +2543,7 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%f", &prune_thr);
       usepruning = 1;
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--nii"))
       format = "nii";
     else if (!strcasecmp(option, "--nii.gz"))
@@ -2570,7 +2571,7 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--no-tar1"))
       DoTemporalAR1 = 0;
     else if (!strcasecmp(option, "--qa")) {
-      useqa = 1;
+      useqa         = 1;
       DoTemporalAR1 = 1;
     } else if (!strcasecmp(option, "--no-mask-smooth"))
       UseMaskWithSmoothing = 0;
@@ -2583,7 +2584,7 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--asl"))
       useasl = 1;
     else if (!strcasecmp(option, "--asl-rev")) {
-      useasl = 1;
+      useasl  = 1;
       asl1val = 0;
       asl2val = 1;
     } else if (!strcasecmp(option, "--no-contrasts-ok"))
@@ -2614,24 +2615,24 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[2], "%lf", &csd->thresh);
       simbase = pargv[3]; // basename
       printf("simbase %s\n", simbase);
-      DoSim = 1;
-      DontSave = 1;
+      DoSim     = 1;
+      DontSave  = 1;
       prunemask = 0;
-      DoPCC = 0;
+      DoPCC     = 0;
       nargsused = 4;
     } else if (!strcasecmp(option, "--sim-thresh-loop"))
       DoSimThreshLoop = 1;
     else if (!strcasecmp(option, "--sim-thresh-loop-pos")) {
       DoSimThreshLoop = 1;
-      nSignList = 1;
-      SignList[0] = +1; // pos
+      nSignList       = 1;
+      SignList[0]     = +1; // pos
     } else if (!strcasecmp(option, "--uniform")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
       sscanf(pargv[0], "%lf", &UniformMin);
       sscanf(pargv[1], "%lf", &UniformMax);
       UseUniform = 1;
-      nargsused = 2;
+      nargsused  = 2;
     } else if (!strcasecmp(option, "--sim-sign")) {
       // this applies only to t-tests
       if (nargc < 1)
@@ -2656,16 +2657,16 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &frameno);
-      nExclude = 1;
-      ExcludeFrames = (int *)calloc(1, sizeof(int));
+      nExclude         = 1;
+      ExcludeFrames    = (int *)calloc(1, sizeof(int));
       ExcludeFrames[0] = frameno;
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--exclude-frame-file")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       ExcludeFrameFile = pargv[0];
-      ExcludeFrames = (int *)calloc(1000, sizeof(int));
-      fp = fopen(ExcludeFrameFile, "r");
+      ExcludeFrames    = (int *)calloc(1000, sizeof(int));
+      fp               = fopen(ExcludeFrameFile, "r");
       if (fp == nullptr)
         exit(1);
       nExclude = 0;
@@ -2723,7 +2724,7 @@ static int parse_commandline(int argc, char **argv) {
           MRISsetFixVertexAreaValue(0);
         }
       }
-      hemi = pargv[1];
+      hemi      = pargv[1];
       nargsused = 2;
       if (nargc > 2 && !CMDisFlag(pargv[2])) {
         surfname = pargv[2];
@@ -2747,17 +2748,17 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &FWHM);
       csd->nullfwhm = FWHM;
-      printf("FWHM = %f\n",FWHM);
-      if(std::isnan(FWHM)){
-	printf("ERROR: input FWHM is NaN (not a number).\n");
-	printf("  Check the mask in the glm directory.\n");
-	exit(1);
+      printf("FWHM = %f\n", FWHM);
+      if (std::isnan(FWHM)) {
+        printf("ERROR: input FWHM is NaN (not a number).\n");
+        printf("  Check the mask in the glm directory.\n");
+        exit(1);
       }
       if (FWHM < 0) {
         printf("ERROR: input FWHM = %f < 0.\n", FWHM);
         exit(1);
       }
-      FWHMSet = 1;
+      FWHMSet   = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--no-fwhm-est"))
       ComputeFWHM = 0;
@@ -2769,7 +2770,7 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &VarFWHM);
       csd->varfwhm = VarFWHM;
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--voxdump")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
@@ -2777,7 +2778,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[1], "%d", &voxdump[1]);
       sscanf(pargv[2], "%d", &voxdump[2]);
       voxdumpflag = 1;
-      nargsused = 3;
+      nargsused   = 3;
     } else if (!strcasecmp(option, "--selfreg")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
@@ -2819,32 +2820,32 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--y")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      yFile = fio_fullpath(pargv[0]);
+      yFile     = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--y-out")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      yOutFile = fio_fullpath(pargv[0]);
+      yOutFile  = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--table")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      yFile = fio_fullpath(pargv[0]);
+      yFile        = fio_fullpath(pargv[0]);
       UseStatTable = 1;
-      ComputeFWHM = 0;
-      prunemask = 0;
-      nargsused = 1;
+      ComputeFWHM  = 0;
+      prunemask    = 0;
+      nargsused    = 1;
     } else if (!strcmp(option, "--yffxvar")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       yffxvarFile = fio_fullpath(pargv[0]);
-      DoFFx = 1;
-      nargsused = 1;
+      DoFFx       = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--ffxdof")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &mriglm->ffxdof);
-      DoFFx = 1;
+      DoFFx     = 1;
       nargsused = 1;
     } else if (!strcmp(option, "--ffxdofdat")) {
       if (nargc < 1)
@@ -2856,85 +2857,85 @@ static int parse_commandline(int argc, char **argv) {
       }
       fscanf(fp, "%d", &mriglm->ffxdof);
       fclose(fp);
-      DoFFx = 1;
+      DoFFx     = 1;
       nargsused = 1;
     } else if (!strcmp(option, "--frame-mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       frameMaskFile = pargv[0];
-      DoPCC = 0;
-      nargsused = 1;
+      DoPCC         = 0;
+      nargsused     = 1;
     } else if (!strcmp(option, "--mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      maskFile = pargv[0];
-      labelFile = nullptr;
+      maskFile       = pargv[0];
+      labelFile      = nullptr;
       UseCortexLabel = 0;
-      nargsused = 1;
+      nargsused      = 1;
     } else if (!strcmp(option, "--label")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      labelFile = pargv[0];
-      maskFile = nullptr;
+      labelFile      = pargv[0];
+      maskFile       = nullptr;
       UseCortexLabel = 0;
-      nargsused = 1;
+      nargsused      = 1;
     } else if (!strcmp(option, "--cortex"))
       UseCortexLabel = 1;
     else if (!strcmp(option, "--no-mask") || !strcmp(option, "--no-cortex")) {
-      labelFile = nullptr;
-      maskFile = nullptr;
+      labelFile      = nullptr;
+      maskFile       = nullptr;
       UseCortexLabel = 0;
     } else if (!strcmp(option, "--w")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      wFile = pargv[0];
+      wFile     = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--wg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      wgFile = pargv[0];
+      wgFile    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--wls")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      wFile = pargv[0];
-      weightinv = 1;
+      wFile      = pargv[0];
+      weightinv  = 1;
       weightsqrt = 1;
-      nargsused = 1;
-      DoPCC = 0;
+      nargsused  = 1;
+      DoPCC      = 0;
     } else if (!strcmp(option, "--X")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      XFile = pargv[0];
+      XFile     = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--dti-X")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      XFile = pargv[0];
-      usedti = 3;
-      DoPCC = 0;
-      logflag = 1;
-      format = "nii.gz";
+      XFile       = pargv[0];
+      usedti      = 3;
+      DoPCC       = 0;
+      logflag     = 1;
+      format      = "nii.gz";
       ComputeFWHM = 0;
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--dti")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       if (CMDnthIsArg(nargc, pargv, 1)) {
-        bvalfile = pargv[0];
-        bvecfile = pargv[1];
-        DoPCC = 0;
-        usedti = 1;
+        bvalfile  = pargv[0];
+        bvecfile  = pargv[1];
+        DoPCC     = 0;
+        usedti    = 1;
         nargsused = 2;
       } else {
         // file with siemens ascii header
-        XFile = pargv[0];
-        usedti = 2;
+        XFile     = pargv[0];
+        usedti    = 2;
         nargsused = 1;
       }
-      DoPCC = 0;
-      logflag = 1;
-      format = "nii.gz";
+      DoPCC       = 0;
+      logflag     = 1;
+      format      = "nii.gz";
       ComputeFWHM = 0;
     } else if (!strcmp(option, "--mrtm1")) {
       // --mrtm1 cr.dat time.sec.dat
@@ -2943,7 +2944,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 2)
         CMDargNErr(option, 1);
       DoMRTM1 = 1;
-      RTM_Cr = MatrixReadTxt(pargv[0], nullptr);
+      RTM_Cr  = MatrixReadTxt(pargv[0], nullptr);
       if (RTM_Cr == nullptr)
         exit(1);
       RTM_TimeSec = MatrixReadTxt(pargv[1], nullptr);
@@ -2952,11 +2953,11 @@ static int parse_commandline(int argc, char **argv) {
       RTM_TimeMin = MatrixAlloc(RTM_TimeSec->rows, 1, MATRIX_REAL);
       for (k = 0; k < RTM_TimeSec->rows; k++)
         RTM_TimeMin->rptr[k + 1][1] = RTM_TimeSec->rptr[k + 1][1] / 60;
-      RTM_intCr = MatrixCumTrapZ(RTM_Cr, RTM_TimeMin, nullptr);
-      prunemask = 0;
+      RTM_intCr     = MatrixCumTrapZ(RTM_Cr, RTM_TimeMin, nullptr);
+      prunemask     = 0;
       NoContrastsOK = 1;
-      DoPCC = 0;
-      nargsused = 2;
+      DoPCC         = 0;
+      nargsused     = 2;
     } else if (!strcmp(option, "--mrtm2")) {
       // --mrtm2 cr.dat time.sec.dat k2pmin
       // PET Kinetic Modeling, multilinear reference tissue model 2
@@ -2965,7 +2966,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 3)
         CMDargNErr(option, 1);
       DoMRTM2 = 1;
-      RTM_Cr = MatrixReadTxt(pargv[0], nullptr);
+      RTM_Cr  = MatrixReadTxt(pargv[0], nullptr);
       if (RTM_Cr == nullptr)
         exit(1);
       RTM_TimeSec = MatrixReadTxt(pargv[1], nullptr);
@@ -2977,52 +2978,52 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[2], "%lf", &MRTM2_k2p);
       printf("MRTM2 k2p %g\n", MRTM2_k2p);
       RTM_intCr = MatrixCumTrapZ(RTM_Cr, RTM_TimeMin, nullptr);
-      MRTM2_x1 = MatrixAlloc(RTM_Cr->rows, 1, MATRIX_REAL);
+      MRTM2_x1  = MatrixAlloc(RTM_Cr->rows, 1, MATRIX_REAL);
       for (k = 0; k < RTM_Cr->rows; k++)
         MRTM2_x1->rptr[k + 1][1] =
             (RTM_Cr->rptr[k + 1][1] / MRTM2_k2p + RTM_intCr->rptr[k + 1][1]);
-      prunemask = 0;
+      prunemask     = 0;
       NoContrastsOK = 1;
-      DoPCC = 0;
-      nargsused = 3;
+      DoPCC         = 0;
+      nargsused     = 3;
     } else if (!strcmp(option, "--pvr")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       pvrFiles[npvr] = pargv[0];
-      DoPCC = 0;
+      DoPCC          = 0;
       npvr++;
       nargsused = 1;
     } else if (!strcmp(option, "--glmdir") || !strcmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      GLMDir = pargv[0];
+      GLMDir    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--beta")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      betaFile = pargv[0];
+      betaFile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--rvar")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      rvarFile = pargv[0];
+      rvarFile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--yhat")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      yhatFile = pargv[0];
+      yhatFile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--eres")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      eresFile = pargv[0];
+      eresFile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--C")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      CFile[nContrasts] = pargv[0];
+      CFile[nContrasts]      = pargv[0];
       Gamma0File[nContrasts] = nullptr;
-      nargsused = 1;
+      nargsused              = 1;
       if (CMDnthIsArg(nargc, pargv, 1)) {
         Gamma0File[nContrasts] = pargv[1];
         nargsused++;
@@ -3037,9 +3038,9 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--fsgd")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      fsgdfile = pargv[0];
+      fsgdfile  = pargv[0];
       nargsused = 1;
-      fsgd = gdfRead(fsgdfile, 0);
+      fsgd      = gdfRead(fsgdfile, 0);
       if (fsgd == nullptr)
         exit(1);
       if (CMDnthIsArg(nargc, pargv, 1)) {
@@ -3065,7 +3066,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       MaxVoxBase = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--subsample")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
@@ -3077,7 +3078,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       SimDoneFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))
@@ -3950,10 +3951,10 @@ static void dump_options(FILE *fp) {
 
 /*--------------------------------------------------------------------*/
 static int SmoothSurfOrVol(MRIS *surf, MRI *mri, MRI *mask, double SmthLevel) {
-  extern int DoSim;
+  extern int   DoSim;
   extern Timer mytimer;
-  extern int UseMaskWithSmoothing;
-  double gstd;
+  extern int   UseMaskWithSmoothing;
+  double       gstd;
 
   if (surf == nullptr) {
     gstd = SmthLevel / sqrt(log(256.0));
@@ -3988,7 +3989,7 @@ int MRISmaskByLabel(MRI *y, MRIS *surf, LABEL *lb, int invflag) {
 
   // Set each label vertex in lbmask to 1
   for (n = 0; n < lb->n_points; n++) {
-    vtxno = lb->lv[n].vno;
+    vtxno         = lb->lv[n].vno;
     lbmask[vtxno] = 1;
   }
 
@@ -4012,7 +4013,7 @@ int MRISmaskByLabel(MRI *y, MRIS *surf, LABEL *lb, int invflag) {
 
 /*--------------------------------------------------------------*/
 MRI *BindingPotential(MRI *k2, MRI *k2a, MRI *mask, MRI *bp) {
-  int c, r, s;
+  int    c, r, s;
   double k2v, k2av, bpv;
 
   if (bp == nullptr) {
@@ -4031,9 +4032,9 @@ MRI *BindingPotential(MRI *k2, MRI *k2a, MRI *mask, MRI *bp) {
           MRIsetVoxVal(bp, c, r, s, 0, 0.0);
           continue;
         }
-        k2v = MRIgetVoxVal(k2, c, r, s, 0);
+        k2v  = MRIgetVoxVal(k2, c, r, s, 0);
         k2av = MRIgetVoxVal(k2a, c, r, s, 0);
-        bpv = k2v / (k2av + DBL_EPSILON) - 1.0;
+        bpv  = k2v / (k2av + DBL_EPSILON) - 1.0;
         MRIsetVoxVal(bp, c, r, s, 0, bpv);
       }
     }
@@ -4044,8 +4045,8 @@ MRI *BindingPotential(MRI *k2, MRI *k2a, MRI *mask, MRI *bp) {
 
 /*--------------------------------------------------------------*/
 MRI *MRIconjunct3(MRI *sig1, MRI *sig2, MRI *sig3, MRI *mask, MRI *c123) {
-  int c, r, s;
-  MRI *f3;
+  int    c, r, s;
+  MRI *  f3;
   double sigv;
 
   f3 = MRIallocSequence(sig1->width, sig1->height, sig1->depth, MRI_FLOAT, 3);
@@ -4072,13 +4073,13 @@ MRI *MRIconjunct3(MRI *sig1, MRI *sig2, MRI *sig3, MRI *mask, MRI *c123) {
 
 /*--------------------------------------------------------------*/
 double GLMEfficiency(MATRIX *X, MATRIX *C) {
-  double efficiency;
+  double  efficiency;
   MATRIX *Xt, *Ct, *XtX, *iXtX, *A, *M;
 
   Xt = MatrixTranspose(X, nullptr);
   Ct = MatrixTranspose(C, nullptr);
 
-  XtX = MatrixMultiplyD(Xt, X, nullptr);
+  XtX  = MatrixMultiplyD(Xt, X, nullptr);
   iXtX = MatrixInverse(XtX, nullptr);
   // M = C*inv(X'*X)*C'
   A = MatrixMultiplyD(C, iXtX, nullptr);
@@ -4102,17 +4103,17 @@ double GLMEfficiency(MATRIX *X, MATRIX *C) {
   because of some common mistakes.
  */
 int GLMdiagnoseDesignMatrix(MATRIX *X) {
-  int ret, r, c, c2, all0;
+  int    ret, r, c, c2, all0;
   float *Xsumsq;
-  float XsumsqMin, XsumsqMax;
-  int cXsumsqMin, cXsumsqMax;
+  float  XsumsqMin, XsumsqMax;
+  int    cXsumsqMin, cXsumsqMax;
 
   ret = 0;
 
   // Check the scale
-  Xsumsq = (float *)calloc(X->cols, sizeof(float));
-  XsumsqMin = 10e10;
-  XsumsqMax = 0;
+  Xsumsq     = (float *)calloc(X->cols, sizeof(float));
+  XsumsqMin  = 10e10;
+  XsumsqMax  = 0;
   cXsumsqMin = 0;
   cXsumsqMax = 0;
   for (c = 1; c <= X->cols; c++) {
@@ -4120,11 +4121,11 @@ int GLMdiagnoseDesignMatrix(MATRIX *X) {
       Xsumsq[c - 1] += (X->rptr[r][c] * X->rptr[r][c]);
     Xsumsq[c - 1] = sqrt(Xsumsq[c - 1]);
     if (XsumsqMax < Xsumsq[c - 1]) {
-      XsumsqMax = Xsumsq[c - 1];
+      XsumsqMax  = Xsumsq[c - 1];
       cXsumsqMax = c;
     }
     if (XsumsqMin > Xsumsq[c - 1]) {
-      XsumsqMin = Xsumsq[c - 1];
+      XsumsqMin  = Xsumsq[c - 1];
       cXsumsqMin = c;
     }
   }
@@ -4181,8 +4182,8 @@ int GLMdiagnoseDesignMatrix(MATRIX *X) {
   See also MRIkurtosis()
 */
 MRI *fMRIskew(MRI *y, MRI *mask) {
-  MRI *k;
-  int c, r, s, f;
+  MRI *  k;
+  int    c, r, s, f;
   double v, mn, m3 = 0, m2 = 0, delta, skew;
   k = MRIallocSequence(y->width, y->height, y->depth, MRI_FLOAT, 1);
   MRIcopyHeader(y, k);
@@ -4230,9 +4231,9 @@ MRI *fMRIskew(MRI *y, MRI *mask) {
   See also MRIpkurtosis()
 */
 MRI *MRIpskew(MRI *kvals, int dof, MRI *mask, int nsamples) {
-  MRI *nmri, *kmri, *pkmri;
+  MRI *   nmri, *kmri, *pkmri;
   double *ksynth, pk, kvox, v;
-  int m, c, r, s, f, ind;
+  int     m, c, r, s, f, ind;
 
   nmri = MRIrandn(nsamples, 1, 1, dof, 0, 1, nullptr);
   kmri = fMRIskew(nmri, nullptr);
@@ -4257,8 +4258,8 @@ MRI *MRIpskew(MRI *kvals, int dof, MRI *mask, int nsamples) {
         }
         for (f = 0; f < pkmri->nframes; f++) {
           kvox = MRIgetVoxVal(kvals, c, r, s, f);
-          ind = PDFsearchOrderedTable(kvox, ksynth, nsamples);
-          pk = 1.0 - (double)ind / nsamples;
+          ind  = PDFsearchOrderedTable(kvox, ksynth, nsamples);
+          pk   = 1.0 - (double)ind / nsamples;
           MRIsetVoxVal(pkmri, c, r, s, f, -log10(pk));
         }
       }
@@ -4271,8 +4272,8 @@ MRI *MRIpskew(MRI *kvals, int dof, MRI *mask, int nsamples) {
 }
 
 MRI *MRIremoveSpatialMean(MRI *vol, MRI *mask, MRI *out) {
-  int c, r, s, f;
-  long nhits;
+  int    c, r, s, f;
+  long   nhits;
   double v, vmean;
 
   if (out == nullptr) {
@@ -4285,7 +4286,7 @@ MRI *MRIremoveSpatialMean(MRI *vol, MRI *mask, MRI *out) {
   for (f = 0; f < vol->nframes; f++) {
     // Sum the values for this frame
     nhits = 0;
-    v = 0;
+    v     = 0;
     for (c = 0; c < vol->width; c++) {
       for (r = 0; r < vol->height; r++) {
         for (s = 0; s < vol->depth; s++) {

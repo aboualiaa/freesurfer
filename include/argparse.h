@@ -12,10 +12,10 @@ using IndexMap = std::unordered_map<std::string, size_t>;
 #include <map>
 using IndexMap = std::map<std::string, size_t>;
 #endif
-#include <string>
-#include <vector>
-#include <typeinfo>
 #include <stdexcept>
+#include <string>
+#include <typeinfo>
+#include <vector>
 
 #include "log.h"
 
@@ -101,11 +101,11 @@ private:
   class PlaceHolder;
   class Holder;
   struct Argument;
-  using String = std::string;
-  using AnyVector = std::vector<Any>;
-  using StringVector = std::vector<String>;
-  using IntVector = std::vector<int>;
-  using FloatVector = std::vector<float>;
+  using String         = std::string;
+  using AnyVector      = std::vector<Any>;
+  using StringVector   = std::vector<String>;
+  using IntVector      = std::vector<int>;
+  using FloatVector    = std::vector<float>;
   using ArgumentVector = std::vector<Argument>;
 
   // --------------------- type-erasure internal storage ----------------------
@@ -159,7 +159,7 @@ private:
     public:
       virtual ~PlaceHolder() {}
       virtual const std::type_info &type_info() const = 0;
-      virtual PlaceHolder *clone() const = 0;
+      virtual PlaceHolder *         clone() const     = 0;
     };
     // Inner template concrete instantiation of PlaceHolder
     template <typename ValueType> class Holder : public PlaceHolder {
@@ -181,21 +181,21 @@ private:
     Argument(const String &short_name, const String &name, char nargs,
              ArgType argtype, bool required);
 
-    String short_name;
-    String name;
-    ArgType argtype;
+    String       short_name;
+    String       name;
+    ArgType      argtype;
     unsigned int min_args;
     unsigned int consumed;
-    bool fixed;
-    bool required;
-    bool positional;
-    bool valid;
+    bool         fixed;
+    bool         required;
+    bool         positional;
+    bool         valid;
     union {
       size_t fixed_nargs;
-      char variable_nargs;
+      char   variable_nargs;
     };
 
-    void validate();
+    void   validate();
     String canonicalName() const;
     String typeName() const;
   };
@@ -216,7 +216,7 @@ public:
 
   void addHelp(const unsigned char *text, unsigned int size);
 
-  void parse(size_t argc, char** argv);
+  void parse(size_t argc, char **argv);
 
   bool exists(const String &name);
 
@@ -229,7 +229,7 @@ public:
     if (index.count(unstripped) == 0)
       logFatal(1) << "'" << unstripped << "' is not a known argument";
     size_t N = index[unstripped];
-    T retrieved{};
+    T      retrieved{};
     // try to cast the arguments
     try {
       retrieved = variables[N].castTo<T>();
@@ -237,10 +237,10 @@ public:
       // if casting fails, print out a VERY detailed debug message
       String fulltype, sentence_starter;
       if (arguments[N].fixed && (arguments[N].fixed_nargs <= 1)) {
-        fulltype = arguments[N].typeName();
+        fulltype         = arguments[N].typeName();
         sentence_starter = "This input is";
       } else {
-        fulltype = "std::vector<" + arguments[N].typeName() + ">";
+        fulltype         = "std::vector<" + arguments[N].typeName() + ">";
         sentence_starter = "These inputs are";
       }
       logFatal(1) << "invalid cast of argument '" << name << "'. "
@@ -257,18 +257,18 @@ public:
 private:
   // utility
   String unstrip(const String &name);
-  void insertArgument(const Argument &arg);
+  void   insertArgument(const Argument &arg);
 
   // member variables
-  IndexMap index;
-  bool variable_positional;
-  bool variable_flag;
-  String app_name;
-  ArgumentVector arguments;
-  ArgumentVector positionals;
-  AnyVector variables;
+  IndexMap             index;
+  bool                 variable_positional;
+  bool                 variable_flag;
+  String               app_name;
+  ArgumentVector       arguments;
+  ArgumentVector       positionals;
+  AnyVector            variables;
   const unsigned char *helptext;
-  unsigned int helptextsize = 0;
+  unsigned int         helptextsize = 0;
 };
 
 #endif

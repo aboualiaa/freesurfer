@@ -25,10 +25,10 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
+#include <memory.h>
 
 #include "diag.h"
 #include "error.h"
@@ -43,7 +43,7 @@
                     MACROS AND CONSTANTS
 -------------------------------------------------------*/
 
-#define POLV_WSIZE 5
+#define POLV_WSIZE           5
 #define DEBUG_POINT(x, y, z) (((x) == 35) && ((y) == 4) && ((z) == 31))
 
 #define MAX_FILES 100
@@ -54,9 +54,9 @@
 
 typedef struct {
   FILE *fp;
-  int npixels[MAX_INPUTS];
+  int   npixels[MAX_INPUTS];
   MRIC *mric;
-  int round;
+  int   round;
 } GET_INPUT_PARMS;
 
 /*-----------------------------------------------------
@@ -101,9 +101,9 @@ static int mricFillInputParms(MRIC *mric, FILE *fp, int round,
 ------------------------------------------------------*/
 int MRICfree(MRIC **pmric) {
   MRIC *mric;
-  int round;
+  int   round;
 
-  mric = *pmric;
+  mric   = *pmric;
   *pmric = nullptr;
   if (mric) {
     for (round = 0; round < mric->nrounds; round++) {
@@ -130,9 +130,9 @@ int MRICfree(MRIC **pmric) {
         Description
 ------------------------------------------------------*/
 MRIC *MRICalloc(int nrounds, int *types, int *features, void *parms) {
-  MRIC *mric;
+  MRIC *   mric;
   unsigned f;
-  int ninputs, round;
+  int      ninputs, round;
 
   mric = (MRIC *)calloc(1, sizeof(MRIC));
   if (!mric)
@@ -149,8 +149,8 @@ MRIC *MRICalloc(int nrounds, int *types, int *features, void *parms) {
       ErrorReturn(NULL, (ERROR_BADPARM, "MRICalloc(%d): bad # of inputs %d",
                          round, ninputs));
 
-    mric->type[round] = types[round];
-    mric->ninputs[round] = ninputs;
+    mric->type[round]     = types[round];
+    mric->ninputs[round]  = ninputs;
     mric->features[round] = features[round];
     switch (types[round]) {
     case CLASSIFIER_RBF: {
@@ -189,9 +189,9 @@ MRIC *MRICalloc(int nrounds, int *types, int *features, void *parms) {
         Description
 ------------------------------------------------------*/
 int MRICretrain(MRIC *mric, char *file_name) {
-  char line[300], *cp;
+  char  line[300], *cp;
   FILE *fp;
-  int nfiles, round;
+  int   nfiles, round;
 
   /* first figure out the total # of files */
   fp = fopen(file_name, "r");
@@ -228,9 +228,9 @@ int MRICretrain(MRIC *mric, char *file_name) {
         Description
 ------------------------------------------------------*/
 int MRICtrain(MRIC *mric, char *file_name, char *prior_fname) {
-  char line[300], *cp;
+  char  line[300], *cp;
   FILE *fp;
-  int nfiles, round;
+  int   nfiles, round;
 
   if (prior_fname) {
     FileNameAbsolute(prior_fname, mric->prior_fname);
@@ -279,9 +279,9 @@ int MRICtrain(MRIC *mric, char *file_name, char *prior_fname) {
 ------------------------------------------------------*/
 MRIC *MRICread(char *fname) {
   MRIC *mric;
-  int ninputs, type[MAX_ROUNDS], features[MAX_ROUNDS], round, nrounds;
+  int   ninputs, type[MAX_ROUNDS], features[MAX_ROUNDS], round, nrounds;
   FILE *fp;
-  char prior_fname[100], line[100], *cp;
+  char  prior_fname[100], line[100], *cp;
 
   fp = fopen(fname, "r");
   if (!fp)
@@ -289,7 +289,7 @@ MRIC *MRICread(char *fname) {
                 (ERROR_NO_FILE, "MRICread(%s): could not open file", fname));
 
   prior_fname[0] = 0;
-  cp = fgetl(line, 99, fp);
+  cp             = fgetl(line, 99, fp);
   if (sscanf(cp, "%d %s", &nrounds, prior_fname) < 1) {
     fclose(fp);
     ErrorReturn(NULL,
@@ -336,9 +336,9 @@ MRIC *MRICread(char *fname) {
 ------------------------------------------------------*/
 MRIC *MRICquickRead(char *fname) {
   MRIC *mric;
-  int ninputs, type[MAX_ROUNDS], features[MAX_ROUNDS], round, nrounds;
+  int   ninputs, type[MAX_ROUNDS], features[MAX_ROUNDS], round, nrounds;
   FILE *fp;
-  char line[100], *cp, prior_fname[100];
+  char  line[100], *cp, prior_fname[100];
 
   fp = fopen(fname, "r");
   if (!fp)
@@ -346,7 +346,7 @@ MRIC *MRICquickRead(char *fname) {
                 (ERROR_NO_FILE, "MRICread(%s): could not open file", fname));
 
   prior_fname[0] = 0;
-  cp = fgetl(line, 99, fp);
+  cp             = fgetl(line, 99, fp);
   if (sscanf(cp, "%d %s", &nrounds, prior_fname) < 1) {
     fclose(fp);
     ErrorReturn(NULL,
@@ -389,7 +389,7 @@ MRIC *MRICquickRead(char *fname) {
 ------------------------------------------------------*/
 int MRICwrite(MRIC *mric, char *fname) {
   FILE *fp;
-  int round;
+  int   round;
 
   fp = fopen(fname, "wb");
   if (!fp)
@@ -433,19 +433,19 @@ int MRICwrite(MRIC *mric, char *fname) {
 
 MRI *MRICclassify(MRIC *mric, MRI *mri_src, MRI *mri_dst, float conf,
                   MRI *mri_probs, MRI *mri_classes) {
-  MATRIX *m_priors;
-  VECTOR *v_inputs;
+  MATRIX *   m_priors;
+  VECTOR *   v_inputs;
   GCLASSIFY *gc;
   int x, y, z, classno, nclasses, xt, yt, zt, type, round, x1, y1, z1, x0, c,
       bg, max_white_class, max_non_white_class;
   // int width, depth, height;
   BUFTYPE *psrc, src, *pdst, *pclasses;
-  float prob, *pprobs = nullptr, total, min_output, fmin, fmax, white_prob,
+  float    prob, *pprobs = nullptr, total, min_output, fmin, fmax, white_prob,
               non_white_prob, max_white_prob, max_non_white_prob, p;
-  double xrt, yrt, zrt;
-  MRI *mri_priors, *mri_in;
+  double     xrt, yrt, zrt;
+  MRI *      mri_priors, *mri_in;
   MRI_REGION bounding_box;
-  RBF *rbf;
+  RBF *      rbf;
 
   max_white_class = max_non_white_class = -1;
 #if 0
@@ -480,9 +480,9 @@ MRI *MRICclassify(MRIC *mric, MRI *mri_src, MRI *mri_dst, float conf,
 
   mri_in = mri_src;
   for (round = 0; round < mric->nrounds; round++) {
-    type = mric->type[round];
-    gc = mric->classifier[round].gc;
-    rbf = mric->classifier[round].rbf;
+    type     = mric->type[round];
+    gc       = mric->classifier[round].gc;
+    rbf      = mric->classifier[round].rbf;
     nclasses = gc->nclasses;
     v_inputs = VectorAlloc(mric->ninputs[round], MATRIX_REAL);
 
@@ -525,7 +525,7 @@ MRI *MRICclassify(MRIC *mric, MRI *mri_src, MRI *mri_dst, float conf,
             classno = GCclassify(gc, v_inputs, m_priors, &prob);
             break;
           case CLASSIFIER_RBF:
-            classno = RBFclassify(rbf, v_inputs);
+            classno    = RBFclassify(rbf, v_inputs);
             min_output = RVECTOR_ELT(rbf->v_outputs, 1);
             for (c = 2; c <= rbf->noutputs; c++)
               if (RVECTOR_ELT(rbf->v_outputs, c) < min_output)
@@ -545,13 +545,13 @@ MRI *MRICclassify(MRIC *mric, MRI *mri_src, MRI *mri_dst, float conf,
               p = RVECTOR_ELT(rbf->v_outputs, c + 1);
               if (ISWHITE(c)) {
                 if (p > max_white_prob) {
-                  max_white_prob = p;
+                  max_white_prob  = p;
                   max_white_class = c;
                 }
                 white_prob += p;
               } else {
                 if (p > max_non_white_prob) {
-                  max_non_white_prob = p;
+                  max_non_white_prob  = p;
                   max_non_white_class = c;
                 }
                 non_white_prob += p;
@@ -559,10 +559,10 @@ MRI *MRICclassify(MRIC *mric, MRI *mri_src, MRI *mri_dst, float conf,
             }
             if (white_prob > non_white_prob) {
               classno = max_white_class;
-              prob = white_prob;
+              prob    = white_prob;
             } else {
               classno = max_non_white_class;
-              prob = non_white_prob;
+              prob    = non_white_prob;
             }
 
             if (!FZERO(total))
@@ -613,15 +613,15 @@ MRI *MRICclassify(MRIC *mric, MRI *mri_src, MRI *mri_dst, float conf,
 
 ------------------------------------------------------*/
 #define DEFAULT_REGION_SIZE 8
-static int region_size = DEFAULT_REGION_SIZE;
+static int region_size   = DEFAULT_REGION_SIZE;
 static int region_height = 0;
-static int region_width = 0;
+static int region_width  = 0;
 
 int MRICsetRegionSize(MRIC *mric, int rwidth, int rheight, int rdepth) {
   int old_rsize = region_size;
-  region_size = rdepth;
+  region_size   = rdepth;
   region_height = rheight;
-  region_width = rwidth;
+  region_width  = rwidth;
   return (old_rsize);
 }
 /*-----------------------------------------------------
@@ -634,7 +634,7 @@ int MRICsetRegionSize(MRIC *mric, int rwidth, int rheight, int rdepth) {
 ------------------------------------------------------*/
 int MRICresetRegionSize(MRIC *mric) {
   int old_rsize = region_size;
-  region_size = DEFAULT_REGION_SIZE;
+  region_size   = DEFAULT_REGION_SIZE;
   region_height = region_width = 0;
   return (old_rsize);
 }
@@ -648,9 +648,9 @@ int MRICresetRegionSize(MRIC *mric) {
 ------------------------------------------------------*/
 int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
                       VECTOR *v_inputs, int features) {
-  static int old_features = 0;
-  static MRI_REGION region = {0, 0, 0, 0, 0, 0};
-  static MRI *mri_prev = nullptr, *mri_zscore3 = nullptr,
+  static int        old_features = 0;
+  static MRI_REGION region       = {0, 0, 0, 0, 0, 0};
+  static MRI *      mri_prev = nullptr, *mri_zscore3 = nullptr,
              *mri_zscore5 = nullptr, *mri_direction = nullptr,
              *mri_mean3 = nullptr, *mri_mean5 = nullptr, *mri_cpolv = nullptr,
              *mri_cpolv_mean3 = nullptr, *mri_cpolv_mean5 = nullptr,
@@ -660,7 +660,7 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
              *mri_cpolv_curv5 = nullptr, *mri_cpolv_curv7 = nullptr,
              *mri_cpolv_order = nullptr;
 
-  int x0, y0, z0, index;
+  int   x0, y0, z0, index;
   char *cp;
 
   if (mri != mri_prev) /* reset counters */
@@ -700,16 +700,16 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
      */
   if (!mri_prev || mri_prev != mri || (old_features != features) ||
       (REGIONinside(&region, x, y, z) == REGION_OUTSIDE)) {
-    MRI *mri_std, *mri_mean, *mri_region, *mri_grad, *mri_big = nullptr;
+    MRI *      mri_std, *mri_mean, *mri_region, *mri_grad, *mri_big = nullptr;
     MRI_REGION rbig;
-    int x0, y0, z0; /* starting coords in mri_region */
+    int        x0, y0, z0; /* starting coords in mri_region */
 
     old_features = features;
 
     /* compute clip region with border */
-    region.x = x;
-    region.y = y;
-    region.z = z;
+    region.x  = x;
+    region.y  = y;
+    region.z  = z;
     region.dx = region_width > 0 ? region_width : mri->width;
     region.dy = region_height > 0 ? region_height : mri->height;
     region.dz = region_size;
@@ -719,9 +719,9 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
     REGIONexpand(&region, &rbig, 2);
     MRIclipRegion(mri, &rbig, &rbig);
     mri_region = MRIextractRegion(mri, nullptr, &rbig);
-    x0 = region.x - rbig.x;
-    y0 = region.y - rbig.y;
-    z0 = region.z - rbig.z;
+    x0         = region.x - rbig.x;
+    y0         = region.y - rbig.y;
+    z0         = region.z - rbig.z;
 
     mri_prev = mri;
     if (mri_cpolv_curv5)
@@ -779,14 +779,14 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
     }
 
     if (features & FEATURE_CPOLV_ZSCORE5) {
-      mri_big = MRIpolvZscore(mri_region, nullptr, mri_cpolv, 5);
+      mri_big           = MRIpolvZscore(mri_region, nullptr, mri_cpolv, 5);
       mri_cpolv_zscore5 = MRIextract(mri_big, nullptr, x0, y0, z0, region.dx,
                                      region.dy, region.dz);
       MRIfree(&mri_big);
     }
 
     if (features & FEATURE_CPOLV_ZSCORE7) {
-      mri_big = MRIpolvZscore(mri_region, nullptr, mri_cpolv, 7);
+      mri_big           = MRIpolvZscore(mri_region, nullptr, mri_cpolv, 7);
       mri_cpolv_zscore7 = MRIextract(mri_big, nullptr, x0, y0, z0, region.dx,
                                      region.dy, region.dz);
       MRIfree(&mri_big);
@@ -808,8 +808,8 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
 
     if (features & FEATURE_ZSCORE3) {
       static int first = 1;
-      mri_mean = MRImeanRegion(mri, nullptr, 3, &region);
-      mri_std = MRIstdRegion(mri, nullptr, mri_mean, 3, &region);
+      mri_mean         = MRImeanRegion(mri, nullptr, 3, &region);
+      mri_std          = MRIstdRegion(mri, nullptr, mri_mean, 3, &region);
       mri_zscore3 = MRIzScoreRegion(mri, nullptr, mri_mean, mri_std, &region);
       if (Gdiag & DIAG_WRITE && first) {
         first = 0;
@@ -822,8 +822,8 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
     }
     if (features & FEATURE_ZSCORE5) {
       static int first = 1;
-      mri_mean = MRImeanRegion(mri, nullptr, 5, &region);
-      mri_std = MRIstdRegion(mri, nullptr, mri_mean, 5, &region);
+      mri_mean         = MRImeanRegion(mri, nullptr, 5, &region);
+      mri_std          = MRIstdRegion(mri, nullptr, mri_mean, 5, &region);
       mri_zscore5 = MRIzScoreRegion(mri, nullptr, mri_mean, mri_std, &region);
       if (Gdiag & DIAG_WRITE && first) {
         first = 0;
@@ -839,7 +839,7 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
 
       /* expand region by 2 voxels to avoid border effects */
       mri_grad = MRIsobel(mri_region, nullptr, nullptr);
-      mri_big = MRIdirectionMap(mri_grad, nullptr, 3);
+      mri_big  = MRIdirectionMap(mri_grad, nullptr, 3);
 
       mri_direction = MRIextract(mri_big, nullptr, x0, y0, z0, region.dx,
                                  region.dy, region.dz);
@@ -894,9 +894,9 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
     buffered++;
 
   /* x0,y0,z0 are coordinates in region based images (not input mri or polv) */
-  x0 = x - region.x;
-  y0 = y - region.y;
-  z0 = z - region.z;
+  x0    = x - region.x;
+  y0    = y - region.y;
+  z0    = z - region.z;
   index = 1; /* inputs are 1-based because of NRC */
   if (features & FEATURE_INTENSITY)
     VECTOR_ELT(v_inputs, index++) = (float)MRIvox(mri, x, y, z);
@@ -939,8 +939,8 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
     VECTOR_ELT(v_inputs, index++) = (float)z;
   if ((features & FEATURE_PRIORS) && mric->mri_priors) {
     double xrt, yrt, zrt;
-    int xt, yt, zt;
-    MRI *mri_priors;
+    int    xt, yt, zt;
+    MRI *  mri_priors;
 
     mri_priors = mric->mri_priors;
     MRIvoxelToVoxel(mri, mri_priors, (double)x, (double)y, (double)z, &xrt,
@@ -973,9 +973,9 @@ int MRICcomputeInputs(MRIC *mric, MRI *mri, int x, int y, int z,
 ------------------------------------------------------*/
 MRI *MRICbuildTargetImage(MRI *mri_src, MRI *mri_target, MRI *mri_wm,
                           int lo_lim, int hi_lim) {
-  int x, y, z, width, height, depth;
+  int      x, y, z, width, height, depth;
   BUFTYPE *psrc, *pwm, *ptarget, src, wm, target, *pthin, thin;
-  MRI *mri_thin;
+  MRI *    mri_thin;
 
   mri_thin = MRIfindThinWMStrands(mri_wm, nullptr, 2);
   if (lo_lim <= 0)
@@ -986,19 +986,19 @@ MRI *MRICbuildTargetImage(MRI *mri_src, MRI *mri_target, MRI *mri_wm,
   if (!mri_target)
     mri_target = MRIclone(mri_wm, nullptr);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      psrc = &MRIvox(mri_src, 0, y, z);
+      psrc    = &MRIvox(mri_src, 0, y, z);
       ptarget = &MRIvox(mri_target, 0, y, z);
-      pwm = &MRIvox(mri_wm, 0, y, z);
-      pthin = &MRIvox(mri_thin, 0, y, z);
+      pwm     = &MRIvox(mri_wm, 0, y, z);
+      pthin   = &MRIvox(mri_thin, 0, y, z);
       for (x = 0; x < width; x++) {
-        src = *psrc++;
-        wm = *pwm++;
+        src  = *psrc++;
+        wm   = *pwm++;
         thin = *pthin++;
         if (thin)
           target = THIN_STRAND;
@@ -1040,16 +1040,16 @@ MRI *MRICbuildTargetImage(MRI *mri_src, MRI *mri_target, MRI *mri_wm,
 #define COUNT_IMAGE GAUSSIAN_NCLASSES
 
 MRI *MRICupdatePriors(MRI *mri_target, MRI *mri_priors, int scale) {
-  int width, height, depth, x, y, z, classnum, w, h, d, xt, yt, zt;
+  int      width, height, depth, x, y, z, classnum, w, h, d, xt, yt, zt;
   BUFTYPE *ptarget;
-  double xrt, yrt, zrt;
+  double   xrt, yrt, zrt;
 
-  width = mri_target->width;
+  width  = mri_target->width;
   height = mri_target->height;
-  depth = mri_target->depth;
-  w = (int)(((float)width / (float)scale) + 0.99f);
-  h = (int)(((float)height / (float)scale) + 0.99f);
-  d = (int)(((float)depth / (float)scale) + 0.99f);
+  depth  = mri_target->depth;
+  w      = (int)(((float)width / (float)scale) + 0.99f);
+  h      = (int)(((float)height / (float)scale) + 0.99f);
+  d      = (int)(((float)depth / (float)scale) + 0.99f);
 
   /*
      allocate one image for each class, plus one to keep track of the
@@ -1071,9 +1071,9 @@ MRI *MRICupdatePriors(MRI *mri_target, MRI *mri_priors, int scale) {
       for (x = 0; x < width; x++) {
         MRIvoxelToTalairachVoxel(mri_target, (double)x, (double)y, (double)z,
                                  &xrt, &yrt, &zrt);
-        xt = mri_priors->xi[nint(xrt / scale)];
-        yt = mri_priors->yi[nint(yrt / scale)];
-        zt = mri_priors->zi[nint(zrt / scale)];
+        xt       = mri_priors->xi[nint(xrt / scale)];
+        yt       = mri_priors->yi[nint(yrt / scale)];
+        zt       = mri_priors->zi[nint(zrt / scale)];
         classnum = *ptarget++;
         MRIFseq_vox(mri_priors, xt, yt, zt, classnum) =
             MRIFseq_vox(mri_priors, xt, yt, zt, classnum) + 1.0f;
@@ -1094,12 +1094,12 @@ MRI *MRICupdatePriors(MRI *mri_target, MRI *mri_priors, int scale) {
            times each pixel has been mapped.
 ------------------------------------------------------*/
 int MRInormalizePriors(MRI *mri_priors) {
-  int width, height, depth, x, y, z, classnum;
+  int    width, height, depth, x, y, z, classnum;
   float *pnorm, norm;
 
-  width = mri_priors->width;
+  width  = mri_priors->width;
   height = mri_priors->height;
-  depth = mri_priors->depth;
+  depth  = mri_priors->depth;
 
   /*
      allocate one image for each class, plus one to keep track of the
@@ -1130,17 +1130,17 @@ int MRInormalizePriors(MRI *mri_priors) {
 int MRICupdateStatistics(MRIC *mric, int round, MRI *mri_src, MRI *mri_wm,
                          MRI_REGION *box) {
   GCLASSIFY *gc;
-  GCLASS *gcl;
-  int x, y, z, classno, row, col, x1, y1, z1;
-  BUFTYPE *ptarget;
+  GCLASS *   gcl;
+  int        x, y, z, classno, row, col, x1, y1, z1;
+  BUFTYPE *  ptarget;
   // BUFTYPE *psrc;
   // int width, height, depth, src, nclasses;
-  float covariance;
+  float   covariance;
   VECTOR *v_inputs;
-  MRI *mri_target;
+  MRI *   mri_target;
 
   mri_target = MRICbuildTargetImage(mri_src, nullptr, mri_wm, LO_LIM, HI_LIM);
-  v_inputs = VectorAlloc(mric->ninputs[round], MATRIX_REAL);
+  v_inputs   = VectorAlloc(mric->ninputs[round], MATRIX_REAL);
 
   // nclasses = mric->classifier[round].gc->nclasses;
   gc = mric->classifier[round].gc;
@@ -1162,7 +1162,7 @@ int MRICupdateStatistics(MRIC *mric, int round, MRI *mri_src, MRI *mri_wm,
         // psrc is not used for anything, so commented out /clarsen
         // src = *psrc++;
         classno = (int)*ptarget++;
-        gcl = &gc->classes[classno];
+        gcl     = &gc->classes[classno];
         gcl->nobs++;
 
         MRICcomputeInputs(mric, mri_src, x, y, z, v_inputs,
@@ -1195,14 +1195,14 @@ int MRICupdateStatistics(MRIC *mric, int round, MRI *mri_src, MRI *mri_wm,
 ------------------------------------------------------*/
 int MRICcomputeStatistics(MRIC *mric, int round) {
   GCLASSIFY *gc;
-  GCLASS *gcl;
-  int classno, nclasses, nobs, row, col;
-  float mean_a, mean_b, covariance;
+  GCLASS *   gcl;
+  int        classno, nclasses, nobs, row, col;
+  float      mean_a, mean_b, covariance;
 
-  gc = mric->classifier[round].gc;
+  gc       = mric->classifier[round].gc;
   nclasses = gc->nclasses;
   for (classno = 0; classno < nclasses; classno++) {
-    gcl = &gc->classes[classno];
+    gcl  = &gc->classes[classno];
     nobs = gcl->nobs;
     if (nobs) {
       for (row = 1; row <= gcl->m_u->rows; row++)
@@ -1256,13 +1256,13 @@ const char *MRICclassName(MRIC *mric, int round, int classno) {
 ------------------------------------------------------*/
 int MRICdump(FILE *fp, MRIC *mric) {
   GCLASSIFY *gc;
-  GCLASS *gcl;
-  int classno, nclasses, fno, round;
+  GCLASS *   gcl;
+  int        classno, nclasses, fno, round;
 
   fprintf(stderr, "mric with %d round, prior file %s\n", mric->nrounds,
           mric->mri_priors ? mric->prior_fname : "(none)");
   for (round = 0; round < mric->nrounds; round++) {
-    gc = mric->classifier[round].gc;
+    gc       = mric->classifier[round].gc;
     nclasses = gc->nclasses;
     for (classno = 0; classno < nclasses; classno++) {
       gcl = &gc->classes[classno];
@@ -1286,7 +1286,7 @@ int MRICdump(FILE *fp, MRIC *mric) {
 ------------------------------------------------------*/
 const char *MRICfeatureName(MRIC *mric, int round, int feature_number) {
   unsigned f;
-  int fno;
+  int      fno;
 
   /* first ninputs-1 correspond to inputs #s, rest to frames in priors */
 
@@ -1346,7 +1346,7 @@ const char *MRICfeatureName(MRIC *mric, int round, int feature_number) {
 ------------------------------------------------------*/
 const char *MRICfeatureNumberToName(int feature_number) {
   unsigned f;
-  int fno;
+  int      fno;
 
   /* find bit which corresponds to this # */
   for (f = 0x001, fno = 0; f != MAX_FEATURE; f <<= 1)
@@ -1414,7 +1414,7 @@ const char *MRICfeatureNumberToName(int feature_number) {
 ------------------------------------------------------*/
 int MRICfeatureNumberCode(int feature_number) {
   unsigned f;
-  int fno;
+  int      fno;
 
   /* find bit which corresponds to this # */
   for (f = 0x001, fno = 0; f != MAX_FEATURE; f <<= 1)
@@ -1436,7 +1436,7 @@ int MRICfeatureNumberCode(int feature_number) {
 ------------------------------------------------------*/
 int MRICfeatureCode(MRIC *mric, int round, int feature_number) {
   unsigned f;
-  int fno;
+  int      fno;
 
   /* first ninputs-1 correspond to inputs #s, rest to frames in priors */
 
@@ -1457,7 +1457,7 @@ int MRICfeatureCode(MRIC *mric, int round, int feature_number) {
 ------------------------------------------------------*/
 int MRICfeatureNumber(MRIC *mric, int round, int feature_code) {
   unsigned f;
-  int fno;
+  int      fno;
 
   /* first ninputs-1 correspond to inputs #s, rest to frames in priors */
 
@@ -1482,9 +1482,9 @@ int MRICfeatureNumber(MRIC *mric, int round, int feature_code) {
 ------------------------------------------------------*/
 static int mricComputeGCStatistics(MRIC *mric, FILE *fp, int nfiles,
                                    int round) {
-  char source_fname[100], target_fname[100], line[300], *cp;
-  int fno;
-  MRI *mri_src, *mri_target;
+  char       source_fname[100], target_fname[100], line[300], *cp;
+  int        fno;
+  MRI *      mri_src, *mri_target;
   MRI_REGION bounding_box;
 
   /* now calculate statistics */
@@ -1529,20 +1529,20 @@ static int mricComputeGCStatistics(MRIC *mric, FILE *fp, int nfiles,
           Train a Radial Basis Function classifier.
 ------------------------------------------------------*/
 static int mricTrainRBF(MRIC *mric, FILE *fp, int nfiles, int round) {
-  char *cp, source_fname[100], line[100];
+  char *          cp, source_fname[100], line[100];
   GET_INPUT_PARMS parms;
-  int fno;
-  MRI *mri;
+  int             fno;
+  MRI *           mri;
 
-  parms.fp = fp;
-  parms.mric = mric;
+  parms.fp    = fp;
+  parms.mric  = mric;
   parms.round = round;
 
   fno = 0;
   rewind(fp);
   while ((cp = fgetl(line, 299, fp)) != nullptr) {
     sscanf(cp, "%s %*s", source_fname);
-    mri = MRIreadInfo(source_fname);
+    mri                = MRIreadInfo(source_fname);
     parms.npixels[fno] = mri->width * mri->height * mri->depth;
     fno++;
     MRIfree(&mri);
@@ -1564,20 +1564,20 @@ static int mricTrainRBF(MRIC *mric, FILE *fp, int nfiles, int round) {
           Train a Radial Basis Function classifier.
 ------------------------------------------------------*/
 static int mricRetrainRBF(MRIC *mric, FILE *fp, int nfiles, int round) {
-  char *cp, source_fname[100], line[100];
+  char *          cp, source_fname[100], line[100];
   GET_INPUT_PARMS parms;
-  int fno;
-  MRI *mri;
+  int             fno;
+  MRI *           mri;
 
-  parms.fp = fp;
-  parms.mric = mric;
+  parms.fp    = fp;
+  parms.mric  = mric;
   parms.round = round;
 
   fno = 0;
   rewind(fp);
   while ((cp = fgetl(line, 299, fp)) != nullptr) {
     sscanf(cp, "%s %*s", source_fname);
-    mri = MRIreadInfo(source_fname);
+    mri                = MRIreadInfo(source_fname);
     parms.npixels[fno] = mri->width * mri->height * mri->depth;
     fno++;
     MRIfree(&mri);
@@ -1601,18 +1601,18 @@ static int mricRetrainRBF(MRIC *mric, FILE *fp, int nfiles, int round) {
 static int mricFillInputParms(MRIC *mric, FILE *fp, int round,
                               GET_INPUT_PARMS *parms) {
   char *cp, source_fname[100], line[100];
-  int fno;
-  MRI *mri;
+  int   fno;
+  MRI * mri;
 
-  parms->fp = fp;
-  parms->mric = mric;
+  parms->fp    = fp;
+  parms->mric  = mric;
   parms->round = round;
 
   fno = 0;
   rewind(fp);
   while ((cp = fgetl(line, 299, fp)) != nullptr) {
     sscanf(cp, "%s %*s", source_fname);
-    mri = MRIreadInfo(source_fname);
+    mri                 = MRIreadInfo(source_fname);
     parms->npixels[fno] = mri->width * mri->height * mri->depth;
     fno++;
     MRIfree(&mri);
@@ -1631,22 +1631,22 @@ static int mricFillInputParms(MRIC *mric, FILE *fp, int round,
 ------------------------------------------------------*/
 static int mricGetClassifierInput(VECTOR *v_inputs, int no, void *parm,
                                   int same_class, int *pclass) {
-  char *cp, source_fname[100], line[100], wm_fname[100];
-  int ino, x, y, z, obs_no, width, height, depth, fno, round;
+  char *           cp, source_fname[100], line[100], wm_fname[100];
+  int              ino, x, y, z, obs_no, width, height, depth, fno, round;
   GET_INPUT_PARMS *parms;
-  MRI *mri_wm;
-  MRIC *mric;
-  FILE *fp;
-  static MRI *mri_src = nullptr, *mri_target = nullptr;
-  static int current_ino = -1;
+  MRI *            mri_wm;
+  MRIC *           mric;
+  FILE *           fp;
+  static MRI *     mri_src = nullptr, *mri_target = nullptr;
+  static int       current_ino = -1;
 
   parms = (GET_INPUT_PARMS *)parm;
   round = parms->round;
-  mric = parms->mric;
-  fp = parms->fp;
+  mric  = parms->mric;
+  fp    = parms->fp;
 
   /* find appropriate image # */
-  ino = 0;
+  ino    = 0;
   obs_no = no;
   while (obs_no > parms->npixels[ino]) {
     obs_no -= parms->npixels[ino];
@@ -1700,10 +1700,10 @@ static int mricGetClassifierInput(VECTOR *v_inputs, int no, void *parm,
     MRIfree(&mri_wm);
   }
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  z = obs_no / (width * height);
+  depth  = mri_src->depth;
+  z      = obs_no / (width * height);
   if (z >= depth)
     return (ERROR_BADPARM);
   y = (obs_no - z * width * height) / width;
@@ -1723,33 +1723,33 @@ static int mricGetClassifierInput(VECTOR *v_inputs, int no, void *parm,
           clustering analysis.
 ------------------------------------------------------*/
 int MRICexamineTrainingSet(MRIC *mric, char *file_name, int round) {
-  char *cp, source_fname[100], line[100];
+  char *          cp, source_fname[100], line[100];
   GET_INPUT_PARMS parms;
-  int fno;
-  MRI *mri;
-  FILE *fp;
+  int             fno;
+  MRI *           mri;
+  FILE *          fp;
 
   fp = fopen(file_name, "r");
   if (!fp)
     ErrorReturn(ERROR_NO_FILE,
                 (ERROR_NO_FILE,
                  "MRICexamineTrainingSet(%s): could not open file", file_name));
-  parms.fp = fp;
-  parms.mric = mric;
+  parms.fp    = fp;
+  parms.mric  = mric;
   parms.round = round;
 
   fno = 0;
   rewind(fp);
   while ((cp = fgetl(line, 299, fp)) != nullptr) {
     sscanf(cp, "%s %*s", source_fname);
-    mri = MRIreadInfo(source_fname);
+    mri                = MRIreadInfo(source_fname);
     parms.npixels[fno] = mri->width * mri->height * mri->depth;
     fno++;
   }
   rewind(fp);
 
-  parms.fp = fp;
-  parms.mric = mric;
+  parms.fp    = fp;
+  parms.mric  = mric;
   parms.round = round;
   RBFexamineTrainingSet(mric->classifier[round].rbf, mricGetClassifierInput,
                         &parms);
@@ -1777,10 +1777,10 @@ int MRICbuildScatterPlot(MRIC *mric, int classnum, MATRIX *m_scatter,
   static int       first = 0 ;
   float            *means, *stds, mean, std ;
 #endif
-  float v, z[2] = {0, 0}, *mins, *maxs, mn, mx;
-  RBF *rbf;
+  float           v, z[2] = {0, 0}, *mins, *maxs, mn, mx;
+  RBF *           rbf;
   GET_INPUT_PARMS parms;
-  FILE *fp;
+  FILE *          fp;
 
   nbins = m_scatter->rows;
 // half_bins = (nbins - 1) / 2;
@@ -1820,9 +1820,9 @@ int MRICbuildScatterPlot(MRIC *mric, int classnum, MATRIX *m_scatter,
   while (mricGetClassObservation(&parms, v_obs, obs_no++, classnum) ==
          NO_ERROR) {
     for (i = 0; i < rbf->ninputs; i++) {
-      mn = mins[i];
-      mx = maxs[i];
-      v = VECTOR_ELT(v_obs, i + 1);
+      mn   = mins[i];
+      mx   = maxs[i];
+      v    = VECTOR_ELT(v_obs, i + 1);
       z[i] = (v - mn) / (mx - mn); /* scale it to 0 --> 1 */
     }
 
@@ -1847,17 +1847,17 @@ int MRICbuildScatterPlot(MRIC *mric, int classnum, MATRIX *m_scatter,
 ------------------------------------------------------*/
 static int mricGetClassObservation(GET_INPUT_PARMS *parms, VECTOR *v_obs,
                                    int desired_class_obs_no, int classnum) {
-  int ret, classno, obs_no, class_obs_no;
-  static int last_class = -1;
+  int        ret, classno, obs_no, class_obs_no;
+  static int last_class     = -1;
   static int last_class_obs = -1;
-  static int last_obs = -1;
+  static int last_obs       = -1;
 
   desired_class_obs_no++; /* it is a count - not an index */
   classno = classnum;
   if (classno == last_class && desired_class_obs_no > last_class_obs) {
     /* start at one past previous observation, not at start */
     class_obs_no = last_class_obs;
-    obs_no = last_obs + 1;
+    obs_no       = last_obs + 1;
   } else
     class_obs_no = obs_no = 0;
 
@@ -1868,8 +1868,8 @@ static int mricGetClassObservation(GET_INPUT_PARMS *parms, VECTOR *v_obs,
   } while ((ret == NO_ERROR) && (class_obs_no < desired_class_obs_no));
 
   if (ret == NO_ERROR) {
-    last_class = classno;
-    last_obs = obs_no - 1;
+    last_class     = classno;
+    last_obs       = obs_no - 1;
     last_class_obs = desired_class_obs_no;
   } else
     last_class = last_obs = last_class_obs = -1;

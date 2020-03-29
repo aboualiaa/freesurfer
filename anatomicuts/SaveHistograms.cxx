@@ -1,22 +1,24 @@
 #include <iostream>
+#include <set>
+#include <string>
+
 #include "itkImage.h"
-#include "itkVector.h"
 #include "itkMesh.h"
+#include "itkVector.h"
 
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 
+#include "PolylineMeshToVTKPolyDataFilter.h"
 #include "TrkVTKPolyDataFilter.txx"
+#include "VTKPolyDataToPolylineMeshFilter.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "VTKPolyDataToPolylineMeshFilter.h"
-#include <set>
-#include "GetPot.h"
-#include <string>
-#include "OrientationPlanesFromParcellationFilter.h"
 #include "vtkSplineFilter.h"
+
+#include "GetPot.h"
+#include "OrientationPlanesFromParcellationFilter.h"
 
 int main(int narg, char *arg[]) {
 
@@ -37,7 +39,7 @@ int main(int narg, char *arg[]) {
     return -1;
   }
   const unsigned int PointDimension = 3;
-  using MeshType = itk::Mesh<PixelType, PointDimension>;
+  using MeshType                    = itk::Mesh<PixelType, PointDimension>;
   // typedef PolylineMeshToVTKPolyDataFilter<MeshType> VTKConverterType;
   using MeshConverterType = VTKPolyDataToPolylineMeshFilter<MeshType>;
 
@@ -45,10 +47,10 @@ int main(int narg, char *arg[]) {
   std::cout << "Output histogram file " << filename << std::endl;
   std::ofstream csv_file;
   csv_file.open(filename);
-  bool bb = cl.search("-bb");
+  bool        bb      = cl.search("-bb");
   const char *segFile = cl2.follow("", "-p");
 
-  using ImageReaderType = itk::ImageFileReader<ImageType>;
+  using ImageReaderType            = itk::ImageFileReader<ImageType>;
   ImageReaderType::Pointer readerS = ImageReaderType::New();
   readerS->SetFileName(segFile);
   readerS->Update();
@@ -64,11 +66,11 @@ int main(int narg, char *arg[]) {
   orientations.push_back(orientationFilter->GetFrontBack());
   orientations.push_back(orientationFilter->GetLeftRight());
 
-  std::vector<IndexType> indeces;
+  std::vector<IndexType>          indeces;
   std::vector<itk::Vector<float>> direcciones;
-  int possibles[3] = {0, 1, -1};
-  int numFiles = cl.follow(0, 2, "-f", "-F");
-  const char *fiberFile = cl.next("");
+  int                             possibles[3] = {0, 1, -1};
+  int                             numFiles     = cl.follow(0, 2, "-f", "-F");
+  const char *                    fiberFile    = cl.next("");
   for (int i = 0; i < 3; i++) {
     for (int k = 0; k < 3; k++) {
       for (int j = 0; j < 3; j++) {
@@ -102,7 +104,7 @@ int main(int narg, char *arg[]) {
   }
 
   while (numFiles) {
-    MeshConverterType::Pointer converter = MeshConverterType::New();
+    MeshConverterType::Pointer       converter = MeshConverterType::New();
     vtkSmartPointer<vtkSplineFilter> spline =
         vtkSmartPointer<vtkSplineFilter>::New();
     spline->SetNumberOfSubdivisions(10);
@@ -159,10 +161,10 @@ int main(int narg, char *arg[]) {
           histograms[0][label] = 1;
 
         for (unsigned int i = 0; i < direcciones.size(); i++) {
-          PixelType vecino = label;
+          PixelType                      vecino          = label;
           itk::ContinuousIndex<float, 3> continuousIndex = index;
-          IndexType roundedIndex;
-          MeshType::PointType point = pt;
+          IndexType                      roundedIndex;
+          MeshType::PointType            point = pt;
           while (vecino == label) {
             for (int j = 0; j < 3; j++)
               continuousIndex[j] += direcciones[i][j];
@@ -194,7 +196,7 @@ int main(int narg, char *arg[]) {
       csv_file << std::endl;
     }
     fiberFile = cl.next("");
-    segFile = cl2.next("");
+    segFile   = cl2.next("");
     numFiles--;
     std::cout << fiberFile << " " << numFiles << std::endl;
   }

@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "hips.h"
 
 int hips_cplxtor = 0;
@@ -86,7 +87,7 @@ double h_entropy(int *table, int count, int pairflag) HIPS_DEP_ERROR
                     int *hgram, int hsize, int *actual_hthresh,
                     int *actual_lthresh) HIPS_DEP_ERROR_VOID
     void follow_edges(unsigned char *edgemapptr,
-                      short *edgemagptr) HIPS_DEP_ERROR_VOID
+                      short *        edgemagptr) HIPS_DEP_ERROR_VOID
     void clear_borders(unsigned char *charimage, int xsize,
                        int ysize) HIPS_DEP_ERROR_VOID
     void gauss_filter(short *inimage, int inx, int iny, int direction,

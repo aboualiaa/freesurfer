@@ -39,21 +39,20 @@
 #include "c_SSocket.h"
 #include "scanopt.h"
 
+#include "error.h"
+#include "label.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "label.h"
-#include "error.h"
 
 #include <string>
 #include <vector>
-using namespace std;
 
 // Forward declaration
 class C_mpmProg;
 class C_mpmOverlay;
 
 // For legacy handling...
-using s_weights = struct _weights;
+using s_weights  = struct _weights;
 using s_Dweights = struct _Dweights;
 
 /// s_iterInfo contains information pertaining to a particular iteration
@@ -61,7 +60,7 @@ using s_Dweights = struct _Dweights;
 /// cost function, and is populated with per-call information.
 ///
 typedef struct _iterInfo {
-  int iter;
+  int   iter;
   float f_distance;
   float f_curvature;
   float f_sulcalHeight;
@@ -182,13 +181,13 @@ typedef enum _e_MODULE { e_mpmProg, e_mpmOverlay, emodule } e_MODULE;
 //      o help::mpmProg_check()
 
 typedef enum _e_mpmProg {
-  emp_NULL = 0,
-  emp_NOP = 1,
-  emp_pathFind = 2,
-  emp_autodijk = 3,
+  emp_NULL          = 0,
+  emp_NOP           = 1,
+  emp_pathFind      = 2,
+  emp_autodijk      = 3,
   emp_autodijk_fast = 4,
-  emp_ROI = 5,
-  emp_externalMesh = 6,
+  emp_ROI           = 5,
+  emp_externalMesh  = 6,
   empmprog
 } e_MPMPROG;
 
@@ -206,12 +205,12 @@ typedef enum _e_mpmProg {
 typedef enum _e_mpmOverlay {
   emo_LEGACY = 0,    // LEGACY overlay -- toggles cost calc to legacy
                      // engine.
-  emo_NULL = 1,      // NULL overlay -- for debugging
-  emo_NOP = 2,       // NOP overlay -- for debugging
-  emo_unity = 3,     // returns '1' for each internode distance
+  emo_NULL      = 1, // NULL overlay -- for debugging
+  emo_NOP       = 2, // NOP overlay -- for debugging
+  emo_unity     = 3, // returns '1' for each internode distance
   emo_euclidean = 4, // returns distance between nodes (calculated)
-  emo_distance = 5,  // returns distance between nodes (read)
-  emo_fscurvs = 6,   // returns weighted cost function of curvs
+  emo_distance  = 5, // returns distance between nodes (read)
+  emo_fscurvs   = 6, // returns weighted cost function of curvs
   emo_curvature = 7, // returns curvature between nodes
   empmoverlay
 } e_MPMOVERLAY;
@@ -238,17 +237,17 @@ typedef struct _env {
   int lw; // left width (for stdout format)
   int rw; // right width (for stdout format)
 
-  bool b_syslogPrepend; // prepend syslog style
-  string str_stdout;
-  string str_userMsgLog;
-  string str_sysMsgLog;
-  string str_resultMsgLog;
-  C_SMessage *pcsm_stdout;    // stdout C_SMessage object
-  C_SMessage *pcsm_syslog;    // log file for "sys" events
-  C_SMessage *pcsm_userlog;   // log file for "user" events
-  C_SMessage *pcsm_resultlog; // log file for "result" event
-  int serverControlPort;      // port on which internal server
-                              //+ listens
+  bool        b_syslogPrepend; // prepend syslog style
+  std::string str_stdout;
+  std::string str_userMsgLog;
+  std::string str_sysMsgLog;
+  std::string str_resultMsgLog;
+  C_SMessage *pcsm_stdout;       // stdout C_SMessage object
+  C_SMessage *pcsm_syslog;       // log file for "sys" events
+  C_SMessage *pcsm_userlog;      // log file for "user" events
+  C_SMessage *pcsm_resultlog;    // log file for "result" event
+  int         serverControlPort; // port on which internal server
+                                 //+ listens
 
   bool b_labelFile_save;      // flag: save label file
   bool b_patchFile_save;      // flag: save patch file?
@@ -256,51 +255,51 @@ typedef struct _env {
                               // penalties
   bool b_useAbsCurvs;         // flag: if true, use abs(curv)
                               //+ for cost function calculations
-  string str_workingDir;      // directory containing input
+  std::string str_workingDir; // directory containing input
                               //+ and output files
-  string str_patchFileStem;
-  string str_labelFileStem;
-  string str_patchFileName;   // file to contain path "patch"
-  string str_labelFileName;   // file to contain path "label"
-  string str_labelFileNameOS; // aux file to contain path "label"
-                              //+ projected back onto
-                              //+ the "Original Surface"
-  bool b_optionsFileUse;      // Initialize from options file
-                              //+ or command line arguments
-  string str_optionsFileName; // file containing meta options
-  string str_costFileName;    // file containing final costs
-  bool b_costPathSave;        // toggle for creating the costFile
-                              //+ by turning OFF, extra speed
-                              //+ is available for cases when
-                              //+ system running in tight
-                              //+ loops, typically when executing
-                              //+ mpmProgs
+  std::string str_patchFileStem;
+  std::string str_labelFileStem;
+  std::string str_patchFileName;   // file to contain path "patch"
+  std::string str_labelFileName;   // file to contain path "label"
+  std::string str_labelFileNameOS; // aux file to contain path "label"
+                                   //+ projected back onto
+                                   //+ the "Original Surface"
+  bool b_optionsFileUse;           // Initialize from options file
+                                   //+ or command line arguments
+  std::string str_optionsFileName; // file containing meta options
+  std::string str_costFileName;    // file containing final costs
+  bool        b_costPathSave;      // toggle for creating the costFile
+                                   //+ by turning OFF, extra speed
+                                   //+ is available for cases when
+                                   //+ system running in tight
+                                   //+ loops, typically when executing
+                                   //+ mpmProgs
 
-  int startVertex; // index of the start vertex
-  int endVertex;   // index of the end vertex
-  float plyDepth;  // ply depth around a core path
+  int   startVertex; // index of the start vertex
+  int   endVertex;   // index of the end vertex
+  float plyDepth;    // ply depth around a core path
 
-  e_SURFACE esf_active;    // the current active surface
-  string *pstr_activeName; // names of each surface
-  int totalNumSurfaces;    // total number of surfaces
-  MRIS *pMS_active;        // a pointer (used by several
-                           // functions) to specifiy
-                           // a particular surface to
-                           // process
-  string str_subject;
-  string str_hemi;
-  string str_surface;
+  e_SURFACE    esf_active;       // the current active surface
+  std::string *pstr_activeName;  // names of each surface
+  int          totalNumSurfaces; // total number of surfaces
+  MRIS *       pMS_active;       // a pointer (used by several
+                                 // functions) to specifiy
+                                 // a particular surface to
+                                 // process
+  std::string str_subject;
+  std::string str_hemi;
+  std::string str_surface;
 
-  MRIS *pMS_primary; // primary surface
-  string str_primarySurfaceFileName;
-  string str_primaryCurvatureFileName;
-  bool b_primaryCurvature;
+  MRIS *      pMS_primary; // primary surface
+  std::string str_primarySurfaceFileName;
+  std::string str_primaryCurvatureFileName;
+  bool        b_primaryCurvature;
 
-  MRIS *pMS_secondary; // secondary (optional) surface
-  string str_secondarySurfaceFileName;
-  bool b_secondarySurface;
-  string str_secondaryCurvatureFileName;
-  bool b_secondaryCurvature;
+  MRIS *      pMS_secondary; // secondary (optional) surface
+  std::string str_secondarySurfaceFileName;
+  bool        b_secondarySurface;
+  std::string str_secondaryCurvatureFileName;
+  bool        b_secondaryCurvature;
 
   MRIS *pMS_auxillary; // auxillary surface
 
@@ -331,17 +330,17 @@ typedef struct _env {
 
   //
   // LEGACY CODE
-  s_weights *pSTw;   // weight structure
+  s_weights * pSTw;  // weight structure
   s_Dweights *pSTDw; // Del weight structure
 
-  int totalNumFunctions;      // total number of cost
-                              // functions
-  s_iterInfo *pst_iterInfo;   // structure that houses
-                              //+ per-iteration information
-  e_COSTFUNCTION ecf_current; // the current cost function
-  string *pstr_functionName;  // names of each cost function
-  float(*costFunc_do)         // a cost function to operate
-      (                       //+ on this environment
+  int totalNumFunctions;            // total number of cost
+                                    // functions
+  s_iterInfo *pst_iterInfo;         // structure that houses
+                                    //+ per-iteration information
+  e_COSTFUNCTION ecf_current;       // the current cost function
+  std::string *  pstr_functionName; // names of each cost function
+  float(*costFunc_do)               // a cost function to operate
+      (                             //+ on this environment
           s_env &st_env, s_iterInfo *pst_iterInfo, int vno_c, int j,
           bool b_relNextReference);
   // LEGACY CODE
@@ -351,42 +350,42 @@ typedef struct _env {
   // Modules
   //
 
-  vector<string> vstr_mpm; // contains list of all module
-                           // type names
+  std::vector<std::string> vstr_mpm; // contains list of all module
+                                     // type names
 
   // mpmProgs
-  int totalmpmProgs;               // total number of mpmProgs
-  vector<string> vstr_mpmProgName; // names of each mpmProg
-  bool b_mpmProgUse;               // flag toggle on using mpm's
-  e_MPMPROG empmProg_current;      // mpm program index to run
-  C_mpmProg *pCmpmProg;            // handle to mpmProg object to run
-  string str_mpmArgs;              // User spec'd, semi-colon delimited
-                                   //+ arg string
-  bool b_exitOnDone;               // if true, terminate the main
-                                   //+ mris_pmake process when an
-                                   //+ mpmProg is finished.
+  int                      totalmpmProgs;    // total number of mpmProgs
+  std::vector<std::string> vstr_mpmProgName; // names of each mpmProg
+  bool                     b_mpmProgUse;     // flag toggle on using mpm's
+  e_MPMPROG                empmProg_current; // mpm program index to run
+  C_mpmProg *              pCmpmProg;        // handle to mpmProg object to run
+  std::string              str_mpmArgs; // User spec'd, semi-colon delimited
+                                        //+ arg string
+  bool b_exitOnDone;                    // if true, terminate the main
+                                        //+ mris_pmake process when an
+                                        //+ mpmProg is finished.
   // autodijk options
-  string str_costCurvFile; // file containing per vertex costs
-                           //+ for 'autodijk'
+  std::string str_costCurvFile; // file containing per vertex costs
+                                //+ for 'autodijk'
 
   // mpmOverlays
-  bool b_mpmOverlayUse;               // debugging flag to maintain
-                                      //+ legacy compatibility. If true,
-                                      //+ use overlay engine, else use
-                                      //+ legacy engine. This flag will
-                                      //+ probably go away (along with the
-                                      //+ old engine code!)
-  int totalmpmOverlays;               // total number of mpmOverlays
-  vector<string> vstr_mpmOverlayName; // names of each mpmOverlay
-  e_MPMOVERLAY empmOverlay_current;   // mpmOverlay program index to use
-  C_mpmOverlay *pCmpmOverlay;         // handle to mpmProg object to use
-  string str_mpmOverlayArgs;          // User spec'd, semi-colon delimited
-                                      //+ arg string
+  bool b_mpmOverlayUse; // debugging flag to maintain
+                        //+ legacy compatibility. If true,
+                        //+ use overlay engine, else use
+                        //+ legacy engine. This flag will
+                        //+ probably go away (along with the
+                        //+ old engine code!)
+  int                      totalmpmOverlays;    // total number of mpmOverlays
+  std::vector<std::string> vstr_mpmOverlayName; // names of each mpmOverlay
+  e_MPMOVERLAY  empmOverlay_current; // mpmOverlay program index to use
+  C_mpmOverlay *pCmpmOverlay;        // handle to mpmProg object to use
+  std::string   str_mpmOverlayArgs;  // User spec'd, semi-colon delimited
+                                     //+ arg string
 } s_env;
 
 float s_env_edgeCostFind(s_env &ast_env, int avertexi, int avertexj);
 
-void s_env_mpmPrint(s_env &ast_env, string astr_msg = "",
+void s_env_mpmPrint(s_env &ast_env, std::string astr_msg = "",
                     e_MODULE ae_module = e_mpmProg);
 
 void s_env_defaultsSet(s_env &st_env);
@@ -395,7 +394,7 @@ void s_env_optionsFile_write(s_env &st_env, bool ab_setToDefaults = false);
 
 void s_env_scan(s_env &st_env);
 
-string s_env_HUP(s_env &st_env, c_SSocket_UDP_receive **pCSSocketReceive);
+std::string s_env_HUP(s_env &st_env, c_SSocket_UDP_receive **pCSSocketReceive);
 
 /// \fn void s_env_nullify( s_env& st_env);
 /// \brief Initialise (nullify, i.e. primitive constructor) a passed
@@ -418,17 +417,19 @@ float s_env_plyIncrement_get(s_env &ast_env);
 
 void s_env_plyIncrement_set(s_env &ast_env, float af_val);
 
-bool s_env_surfaceFile_set(s_env &st_env, string astr_fileName);
+bool s_env_surfaceFile_set(s_env &st_env, std::string astr_fileName);
 
-bool s_env_surfaceCurvature_set(s_env &st_env, string astr_fileName);
+bool s_env_surfaceCurvature_set(s_env &st_env, std::string astr_fileName);
 
-bool s_env_secondarySurface_setCurvature(s_env &st_env, string astr_fileName);
+bool s_env_secondarySurface_setCurvature(s_env &     st_env,
+                                         std::string astr_fileName);
 
-bool s_env_auxSurfaceFile_set(s_env &st_env, string astr_fileName);
+bool s_env_auxSurfaceFile_set(s_env &st_env, std::string astr_fileName);
 
-bool s_env_auxSurfaceCurvature_set(s_env &st_env, string astr_fileName);
+bool s_env_auxSurfaceCurvature_set(s_env &st_env, std::string astr_fileName);
 
-void s_env_log_file_changeTo(s_env &ast_env, e_LOG ae_log, string astr_newName);
+void s_env_log_file_changeTo(s_env &ast_env, e_LOG ae_log,
+                             std::string astr_newName);
 
 void s_env_activeSurfaceList(s_env &ast_env);
 

@@ -1,8 +1,8 @@
+#include <cstdarg>
+#include <cstring>
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <fstream>
-#include <cstring>
-#include <cstdarg>
 #include <vector>
 
 #include "log.h"
@@ -49,8 +49,8 @@ const char *reset() { return termAllowsColor() ? "\e[0m" : ""; }
 } // namespace term
 
 // static logging options
-static std::string errorlog = std::string();
-static bool exceptions = false;
+static std::string errorlog   = std::string();
+static bool        exceptions = false;
 
 int Gerror = NO_ERROR;
 

@@ -23,28 +23,28 @@
  *
  */
 
-#include "error.h"
 #include "diag.h"
-#include "version.h"
-#include "tags.h"
+#include "error.h"
 #include "flash.h"
+#include "tags.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mri_synthesize.c,v 1.19 2015/02/05 23:34:40 zkaufman Exp $";
 
 int main(int argc, char *argv[]);
 
-static int saturate_PD(MRI *mri_PD, float PDsat);
-static int normalize_PD(MRI *mri_PD, float target);
-static int discard_PD(MRI *mri_PD, short thresh, short target);
-static int get_option(int argc, char *argv[]);
+static int  saturate_PD(MRI *mri_PD, float PDsat);
+static int  normalize_PD(MRI *mri_PD, float target);
+static int  discard_PD(MRI *mri_PD, short thresh, short target);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
-static int transform_T1_values_using_joint_pdf(MRI *mri_T1, char *jpdf_name,
-                                               int invert);
+static int  transform_T1_values_using_joint_pdf(MRI *mri_T1, char *jpdf_name,
+                                                int invert);
 static void print_version();
-static int apply_bias_field(MRI *mri, int nbias, float *bias_coefs[3][2]);
+static int  apply_bias_field(MRI *mri, int nbias, float *bias_coefs[3][2]);
 #if 0
 static double FLASHforwardModel(double flip_angle, double TR, double PD,
                                 double T1) ;
@@ -58,25 +58,25 @@ MRI *MRIsynthesizeWeightedVolume(MRI *mri_T1, MRI *mri_PD, float w5, float TR5,
                                  float TE);
 static MRI *MRIsynthesize(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2star,
                           MRI *mri_dst, double TR, double alpha, double TE);
-static int remap_T1(MRI *mri_T1, float mean, float scale);
+static int  remap_T1(MRI *mri_T1, float mean, float scale);
 
-const char *Progname;
-static int normalize = 0;
-static int discard = 0;
-static int nl_remap_T1 = 0;
-static float nl_scale = 0.01;
-static float nl_mean = 950;
-static char *jpdf_name = nullptr;
-static int invert = 0;
-static float PDsat = 0.0;
+const char * Progname;
+static int   normalize    = 0;
+static int   discard      = 0;
+static int   nl_remap_T1  = 0;
+static float nl_scale     = 0.01;
+static float nl_mean      = 950;
+static char *jpdf_name    = nullptr;
+static int   invert       = 0;
+static float PDsat        = 0.0;
 static char *T2star_fname = nullptr;
 
 static int extract = 0;
 
-static int nbias = 0;
+static int    nbias = 0;
 static float *bias_coefs[3][2];
 
-static int nfaf = 0;
+static int    nfaf = 0;
 static float *faf_coefs[3][2];
 
 /* optimal class separation (sort of) */
@@ -85,17 +85,16 @@ static double w30 = 0.7718 ;
 static double w5 = -0.6359 ;
 #else
 static double w30 = 2 * 0.9527;
-static double w5 = 2 * -0.3039;
+static double w5  = 2 * -0.3039;
 #endif
 
 static int use_weighting = 0;
 
 int main(int argc, char *argv[]) {
   char **av, *out_fname, *T1_fname, *PD_fname;
-  int ac, nargs;
-  MRI *mri_T1, *mri_PD, *mri_out, *mri_T2star = nullptr;
-  float TR, TE, alpha;
-
+  int    ac, nargs;
+  MRI *  mri_T1, *mri_PD, *mri_out, *mri_T2star = nullptr;
+  float  TR, TE, alpha;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_synthesize");
 
@@ -119,11 +118,11 @@ int main(int argc, char *argv[]) {
   if (argc < 7)
     usage_exit();
 
-  TR = atof(argv[1]);
-  alpha = atof(argv[2]);
-  TE = atof(argv[3]);
-  T1_fname = argv[4];
-  PD_fname = argv[5];
+  TR        = atof(argv[1]);
+  alpha     = atof(argv[2]);
+  TE        = atof(argv[3]);
+  T1_fname  = argv[4];
+  PD_fname  = argv[5];
   out_fname = argv[6];
 
   printf("reading T1 volume from %s...\n", T1_fname);
@@ -133,7 +132,7 @@ int main(int argc, char *argv[]) {
               T1_fname);
   if (extract) {
     MRI *mri_tmp;
-    int dx, dy, dz;
+    int  dx, dy, dz;
 
     dx = mri_T1->width / 2;
     dy = mri_T1->height / 2;
@@ -165,11 +164,11 @@ int main(int argc, char *argv[]) {
     saturate_PD(mri_PD, PDsat);
   if (extract) {
     MRI *mri_tmp;
-    int dx, dy, dz;
+    int  dx, dy, dz;
 
-    dx = mri_PD->width / 2;
-    dy = mri_PD->height / 2;
-    dz = mri_PD->depth / 2;
+    dx      = mri_PD->width / 2;
+    dy      = mri_PD->height / 2;
+    dz      = mri_PD->depth / 2;
     mri_tmp = MRIextract(mri_PD, nullptr, dx / 2, dy / 2, dz / 2, dx, dy, dz);
     MRIfree(&mri_PD);
     mri_PD = mri_tmp;
@@ -211,7 +210,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -221,8 +220,8 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "remap")) {
     nl_remap_T1 = 1;
-    nl_mean = atof(argv[2]);
-    nl_scale = atof(argv[3]);
+    nl_mean     = atof(argv[2]);
+    nl_scale    = atof(argv[3]);
     printf("remapping T1 with %2.0f * (tanh(%2.4f * (T1-%2.0f))+1.5)\n",
            nl_mean, nl_scale, nl_mean);
     nargs = 2;
@@ -232,7 +231,7 @@ static int get_option(int argc, char *argv[]) {
     printf("saturating PD with tanh(PD/(%2.1f*(max-min)))\n", PDsat);
   } else if (!stricmp(option, "T2") || !stricmp(option, "T2star")) {
     T2star_fname = argv[2];
-    nargs = 1;
+    nargs        = 1;
     printf("using T2* volume %s for synthesis\n", T2star_fname);
   } else if (!stricmp(option, "bias")) {
     int i, j;
@@ -269,7 +268,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "faf")) {
     int i, j;
 
-    nfaf = atoi(argv[2]);
+    nfaf  = atoi(argv[2]);
     nargs = 2 * 3 * nfaf + 1;
     for (i = 0; i < 3; i++)
       for (j = 0; j < 2; j++) {
@@ -325,18 +324,18 @@ static int get_option(int argc, char *argv[]) {
 #endif
   else if (!stricmp(option, "jpdf")) {
     jpdf_name = argv[2];
-    nargs = 1;
+    nargs     = 1;
     printf("remapping T1 values using joint pdf file %s...\n", jpdf_name);
   } else if (!stricmp(option, "ijpdf")) {
     jpdf_name = argv[2];
-    nargs = 1;
-    invert = 1;
+    nargs     = 1;
+    invert    = 1;
     printf("remapping T1 values using inverse of joint pdf file %s...\n",
            jpdf_name);
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "w5")) {
@@ -366,7 +365,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -428,19 +427,19 @@ FLASHforwardModel(double flip_angle, double TR, double PD, double T1) {
 #endif
 static MRI *MRIsynthesize(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2star,
                           MRI *mri_dst, double TR, double alpha, double TE) {
-  int x, y, z, width, height, depth;
+  int    x, y, z, width, height, depth;
   double flash, T1, PD;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_T1, nullptr);
 
-  mri_dst->tr = TR;
+  mri_dst->tr         = TR;
   mri_dst->flip_angle = alpha;
-  mri_dst->te = TE;
-  mri_dst->ti = 0;
-  width = mri_T1->width;
-  height = mri_T1->height;
-  depth = mri_T1->depth;
+  mri_dst->te         = TE;
+  mri_dst->ti         = 0;
+  width               = mri_T1->width;
+  height              = mri_T1->height;
+  depth               = mri_T1->depth;
   for (x = 0; x < width; x++) {
     for (y = 0; y < height; y++) {
       for (z = 0; z < depth; z++) {
@@ -457,10 +456,10 @@ static MRI *MRIsynthesize(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2star,
           MRIsampleVolume(mri_T2star, x, y, z, &T2star);
           flash = FLASHforwardModelT2star(T1, PD, T2star, TR, alpha, TE);
         } else
-          flash = FLASHforwardModel(T1, PD, TR, alpha, TE) ;
-        MRIsetVoxVal(mri_dst, x, y, z, 0, flash) ;
+          flash = FLASHforwardModel(T1, PD, TR, alpha, TE);
+        MRIsetVoxVal(mri_dst, x, y, z, 0, flash);
         if (!std::isfinite(flash))
-          DiagBreak() ;
+          DiagBreak();
       }
     }
   }
@@ -470,7 +469,7 @@ static MRI *MRIsynthesize(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2star,
 
 static int normalize_PD(MRI *mri_PD, float target) {
   double mean_PD, scale, val;
-  int x, y, z;
+  int    x, y, z;
 
   for (mean_PD = 0.0, x = 0; x < mri_PD->width; x++) {
     for (y = 0; y < mri_PD->height; y++) {
@@ -496,7 +495,7 @@ static int normalize_PD(MRI *mri_PD, float target) {
 }
 
 static int discard_PD(MRI *mri_PD, short thresh, short target) {
-  int x, y, z;
+  int    x, y, z;
   double val;
 
   for (x = 0; x < mri_PD->width; x++) {
@@ -513,7 +512,7 @@ static int discard_PD(MRI *mri_PD, short thresh, short target) {
   return (NO_ERROR);
 }
 static int remap_T1(MRI *mri_T1, float mean, float scale) {
-  int x, y, z;
+  int   x, y, z;
   float val;
 
   for (x = 0; x < mri_T1->width; x++) {
@@ -530,13 +529,13 @@ static int remap_T1(MRI *mri_T1, float mean, float scale) {
   return (NO_ERROR);
 }
 #define MIN_REAL_VAL 100 /* with PD scaled to be 1000 */
-#define MIN_BIN 50
+#define MIN_BIN      50
 MRI *MRIsynthesizeWeightedVolume(MRI *mri_T1, MRI *mri_PD, float w5, float TR5,
                                  float w30, float TR30, float target_wm,
                                  float TE) {
-  MRI *mri_dst;
-  int x, y, z, width, height, depth;
-  MRI *mri30, *mri5;
+  MRI *  mri_dst;
+  int    x, y, z, width, height, depth;
+  MRI *  mri30, *mri5;
   double val30, val5, val, min_val;
 #if 0
   int        mri_peak, n, min_real_bin ;
@@ -546,9 +545,9 @@ MRI *MRIsynthesizeWeightedVolume(MRI *mri_T1, MRI *mri_PD, float w5, float TR5,
   float      x0, y0, z0, min_real_val ;
 #endif
 
-  width = mri_T1->width;
-  height = mri_T1->height;
-  depth = mri_T1->depth;
+  width   = mri_T1->width;
+  height  = mri_T1->height;
+  depth   = mri_T1->depth;
   mri_dst = MRIalloc(width, height, depth, MRI_FLOAT);
   MRIcopyHeader(mri_T1, mri_dst);
   mri30 =
@@ -610,7 +609,7 @@ MRI *MRIsynthesizeWeightedVolume(MRI *mri_T1, MRI *mri_PD, float w5, float TR5,
           DiagBreak();
         MRIsampleVolumeType(mri30, x, y, z, &val30, SAMPLE_NEAREST);
         MRIsampleVolumeType(mri5, x, y, z, &val5, SAMPLE_NEAREST);
-        val = w30 * val30 + w5 * val5;
+        val                       = w30 * val30 + w5 * val5;
         MRIFvox(mri_dst, x, y, z) = val;
         if (val < min_val)
           min_val = val;
@@ -634,17 +633,17 @@ MRI *MRIsynthesizeWeightedVolume(MRI *mri_T1, MRI *mri_PD, float w5, float TR5,
 }
 static int transform_T1_values_using_joint_pdf(MRI *mri_T1, char *jpdf_name,
                                                int invert) {
-  int x, y, z, nbins, i, j, **jpdf, max_j, max_count;
+  int    x, y, z, nbins, i, j, **jpdf, max_j, max_count;
   double T1;
-  FILE *fp;
-  float fstep, fmin, fmax, val;
-  char line[STRLEN], *cp, var_name[STRLEN];
+  FILE * fp;
+  float  fstep, fmin, fmax, val;
+  char   line[STRLEN], *cp, var_name[STRLEN];
 
   fstep = 10;
-  fmin = 10;
-  fmax = 5000;
+  fmin  = 10;
+  fmax  = 5000;
   nbins = 500;
-  fp = fopen(jpdf_name, "r");
+  fp    = fopen(jpdf_name, "r");
   if (fp == nullptr)
     ErrorExit(ERROR_BADPARM, "%s: could not read joint pdf file %s\n", Progname,
               jpdf_name);
@@ -705,7 +704,7 @@ static int transform_T1_values_using_joint_pdf(MRI *mri_T1, char *jpdf_name,
           for (j = 1; j < nbins; j++) {
             if (jpdf[i][j] > max_count) {
               max_count = jpdf[i][j];
-              max_j = j;
+              max_j     = j;
             }
           }
         } else {
@@ -718,7 +717,7 @@ static int transform_T1_values_using_joint_pdf(MRI *mri_T1, char *jpdf_name,
           for (j = 1; j < nbins; j++) {
             if (jpdf[i][j] > max_count) {
               max_count = jpdf[j][i];
-              max_j = j;
+              max_j     = j;
             }
           }
         }
@@ -733,13 +732,13 @@ static int transform_T1_values_using_joint_pdf(MRI *mri_T1, char *jpdf_name,
 }
 
 static int apply_bias_field(MRI *mri, int nbias, float *bias_coefs[3][2]) {
-  int x, y, z, n;
+  int    x, y, z, n;
   double xb, yb, zb, x0, y0, z0, w0x, w0y, w0z;
-  float val;
+  float  val;
 
-  x0 = mri->width / 2;
-  y0 = mri->height / 2;
-  z0 = mri->depth / 2;
+  x0  = mri->width / 2;
+  y0  = mri->height / 2;
+  z0  = mri->depth / 2;
   w0x = 2 / x0;
   w0y = 2 / y0;
   w0z = 2 / z0;
@@ -768,13 +767,13 @@ static int apply_bias_field(MRI *mri, int nbias, float *bias_coefs[3][2]) {
 static MRI *MRIsynthesizeWithFAF(MRI *mri_T1, MRI *mri_PD, MRI *mri_dst,
                                  double TR, double alpha, double TE, int nfaf,
                                  float *faf_coefs[3][2]) {
-  int x, y, z, width, height, depth, n;
+  int    x, y, z, width, height, depth, n;
   double flash, T1, PD;
   double xb, yb, zb, x0, y0, z0, w0x, w0y, w0z;
 
-  x0 = mri_T1->width / 2;
-  y0 = mri_T1->height / 2;
-  z0 = mri_PD->depth / 2;
+  x0  = mri_T1->width / 2;
+  y0  = mri_T1->height / 2;
+  z0  = mri_PD->depth / 2;
   w0x = 2 / x0;
   w0y = 2 / y0;
   w0z = 2 / z0;
@@ -782,13 +781,13 @@ static MRI *MRIsynthesizeWithFAF(MRI *mri_T1, MRI *mri_PD, MRI *mri_dst,
   if (!mri_dst)
     mri_dst = MRIclone(mri_T1, nullptr);
 
-  mri_dst->tr = TR;
+  mri_dst->tr         = TR;
   mri_dst->flip_angle = alpha;
-  mri_dst->te = TE;
-  mri_dst->ti = 0;
-  width = mri_T1->width;
-  height = mri_T1->height;
-  depth = mri_T1->depth;
+  mri_dst->te         = TE;
+  mri_dst->ti         = 0;
+  width               = mri_T1->width;
+  height              = mri_T1->height;
+  depth               = mri_T1->depth;
   for (x = 0; x < width; x++) {
     for (xb = 1.0, n = 1; n <= nfaf; n++)
       xb += faf_coefs[0][0][n - 1] * cos(w0x * n * (x - x0)) +
@@ -818,7 +817,7 @@ static MRI *MRIsynthesizeWithFAF(MRI *mri_T1, MRI *mri_PD, MRI *mri_dst,
   return (mri_dst);
 }
 static int saturate_PD(MRI *mri, float PDsat) {
-  int x, y, z;
+  int   x, y, z;
   float mx, mn, val;
 
   printf("saturating PD (%2.3f)\n", PDsat);

@@ -1,8 +1,8 @@
 #include "kvlAtlasMeshPositionCostAndGradientCalculator.h"
 
-#include <itkMath.h>
-#include "vnl/vnl_matrix_fixed.h"
 #include "vnl/vnl_inverse.h"
+#include "vnl/vnl_matrix_fixed.h"
+#include <itkMath.h>
 
 namespace kvl {
 
@@ -13,11 +13,11 @@ AtlasMeshPositionCostAndGradientCalculator ::
     AtlasMeshPositionCostAndGradientCalculator() {
 
   m_MinLogLikelihoodTimesPrior = 0;
-  m_IgnoreDeformationPrior = false;
-  m_OnlyDeformationPrior = false;
-  m_PositionGradient = nullptr;
-  m_Abort = false;
-  m_BoundaryCondition = SLIDING;
+  m_IgnoreDeformationPrior     = false;
+  m_OnlyDeformationPrior       = false;
+  m_PositionGradient           = nullptr;
+  m_Abort                      = false;
+  m_BoundaryCondition          = SLIDING;
 
   this->SetMeshToImageTransform(TransformType::New());
 }
@@ -35,8 +35,8 @@ void AtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     const AtlasMesh *mesh) {
 
   // Initialize from a clean slate
-  m_Abort = false;
-  m_PositionGradient = nullptr;
+  m_Abort                      = false;
+  m_PositionGradient           = nullptr;
   m_MinLogLikelihoodTimesPrior = 0;
   m_ThreadSpecificPositionGradients.clear();
   m_ThreadSpecificMinLogLikelihoodTimesPriors.clear();
@@ -88,9 +88,9 @@ void AtlasMeshPositionCostAndGradientCalculator ::Rasterize(
   clock.Stop();
   std::cout << "Time taken by actual rasterization: " << clock.GetMean()
             << std::endl;
-  double dataTermRasterizationTime = 0.0;
+  double dataTermRasterizationTime  = 0.0;
   double priorTermRasterizationTime = 0.0;
-  double otherRasterizationTime = 0.0;
+  double otherRasterizationTime     = 0.0;
   for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
        threadNumber++) {
     dataTermRasterizationTime +=
@@ -182,7 +182,7 @@ void AtlasMeshPositionCostAndGradientCalculator ::SetMeshToImageTransform(
   TransformType::Pointer inScopeHolder = nullptr;
   if (!meshToImageTransform) {
     // meshToImageTransform = TransformType::New();
-    inScopeHolder = TransformType::New();
+    inScopeHolder        = TransformType::New();
     meshToImageTransform = inScopeHolder;
   }
 
@@ -761,7 +761,7 @@ void AtlasMeshPositionCostAndGradientCalculator ::
   // C^{-1} = I, so no need to invert matrices anymore
 
   // Let's first construct X and G
-  const int numberOfRows = mesh->GetPoints()->Size();
+  const int          numberOfRows = mesh->GetPoints()->Size();
   vnl_matrix<double> G(numberOfRows, 3);
   AtlasPositionGradientContainerType::Iterator gradientIt =
       m_PositionGradient->Begin();
@@ -829,7 +829,7 @@ void AtlasMeshPositionCostAndGradientCalculator ::
   // of ones)
 
   // Let's first construct X and G
-  const int numberOfRows = mesh->GetPoints()->Size();
+  const int          numberOfRows = mesh->GetPoints()->Size();
   vnl_matrix<double> X(numberOfRows, 1);
   vnl_matrix<double> G(numberOfRows, 3);
   AtlasMesh::PointsContainer::ConstIterator pointIt =

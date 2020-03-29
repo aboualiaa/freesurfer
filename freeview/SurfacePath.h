@@ -2,9 +2,9 @@
 #define SURFACEPATH_H
 
 #include "vtkSmartPointer.h"
-#include <QObject>
 #include <QColor>
 #include <QList>
+#include <QObject>
 #include <QVector>
 
 class vtkRenderer;
@@ -36,7 +36,7 @@ public:
   void Clear();
 
   QColor GetColor();
-  void SetColor(const QColor &color);
+  void   SetColor(const QColor &color);
 
   void Update();
 
@@ -76,20 +76,20 @@ public slots:
   void Reset();
 
 private:
-  void RebuildActor();
+  void         RebuildActor();
   QVector<int> DoMakePath(const QVector<int> &verts);
-  void UpdatePoints();
+  void         UpdatePoints();
 
-  vtkSmartPointer<vtkActor> m_actorOutline;
+  vtkSmartPointer<vtkActor>  m_actorOutline;
   vtkSmartPointer<vtkPoints> m_points;
-  QVector<int> m_listVertices;
-  QVector<int> m_undoVertices;
-  bool m_bPathMade;
-  bool m_bCutLineMade;
-  bool m_bClosed;
+  QVector<int>               m_listVertices;
+  QVector<int>               m_undoVertices;
+  bool                       m_bPathMade;
+  bool                       m_bCutLineMade;
+  bool                       m_bClosed;
 
   LayerSurface *m_mris;
-  QColor m_color;
+  QColor        m_color;
 };
 
 #endif // SURFACEPATH_H

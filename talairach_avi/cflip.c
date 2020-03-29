@@ -23,12 +23,12 @@
  *
  */
 
-#include <stdlib.h>
 #include <endianio.h>
+#include <stdlib.h>
 
 void flipx(float *imgf, int *pnx, int *pny, int *pnz) {
   float *vector;
-  int ix, iy, iz, vecdim, index;
+  int    ix, iy, iz, vecdim, index;
 
   vecdim = *pnx;
   if (!(vector = (float *)malloc(vecdim * sizeof(float))))
@@ -37,11 +37,11 @@ void flipx(float *imgf, int *pnx, int *pny, int *pnz) {
   for (iz = 0; iz < *pnz; iz++) {
     for (iy = 0; iy < *pny; iy++) {
       for (ix = 0; ix < *pnx; ix++) {
-        index = ix + *pnx * (iy + *pny * iz);
+        index      = ix + *pnx * (iy + *pny * iz);
         vector[ix] = imgf[index];
       }
       for (ix = 0; ix < *pnx; ix++) {
-        index = ix + *pnx * (iy + *pny * iz);
+        index       = ix + *pnx * (iy + *pny * iz);
         imgf[index] = vector[*pnx - 1 - ix];
       }
     }
@@ -51,7 +51,7 @@ void flipx(float *imgf, int *pnx, int *pny, int *pnz) {
 
 void flipy(float *imgf, int *pnx, int *pny, int *pnz) {
   float *vector;
-  int ix, iy, iz, vecdim, index;
+  int    ix, iy, iz, vecdim, index;
 
   vecdim = *pny;
   if (!(vector = (float *)malloc(vecdim * sizeof(float))))
@@ -60,11 +60,11 @@ void flipy(float *imgf, int *pnx, int *pny, int *pnz) {
   for (iz = 0; iz < *pnz; iz++) {
     for (ix = 0; ix < *pnx; ix++) {
       for (iy = 0; iy < *pny; iy++) {
-        index = ix + *pnx * (iy + *pny * iz);
+        index      = ix + *pnx * (iy + *pny * iz);
         vector[iy] = imgf[index];
       }
       for (iy = 0; iy < *pny; iy++) {
-        index = ix + *pnx * (iy + *pny * iz);
+        index       = ix + *pnx * (iy + *pny * iz);
         imgf[index] = vector[*pny - 1 - iy];
       }
     }
@@ -74,7 +74,7 @@ void flipy(float *imgf, int *pnx, int *pny, int *pnz) {
 
 void flipz(float *imgf, int *pnx, int *pny, int *pnz) {
   float *vector;
-  int ix, iy, iz, vecdim, index;
+  int    ix, iy, iz, vecdim, index;
 
   vecdim = *pnz;
   if (!(vector = (float *)malloc(vecdim * sizeof(float))))
@@ -83,11 +83,11 @@ void flipz(float *imgf, int *pnx, int *pny, int *pnz) {
   for (iy = 0; iy < *pny; iy++) {
     for (ix = 0; ix < *pnx; ix++) {
       for (iz = 0; iz < *pnz; iz++) {
-        index = ix + *pnx * (iy + *pny * iz);
+        index      = ix + *pnx * (iy + *pny * iz);
         vector[iz] = imgf[index];
       }
       for (iz = 0; iz < *pnz; iz++) {
-        index = ix + *pnx * (iy + *pny * iz);
+        index       = ix + *pnx * (iy + *pny * iz);
         imgf[index] = vector[*pnz - 1 - iz];
       }
     }

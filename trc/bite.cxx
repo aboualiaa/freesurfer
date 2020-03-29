@@ -22,20 +22,18 @@
 
 #include <bite.h>
 
-using namespace std;
-
-int Bite::mNumDir, Bite::mNumB0, Bite::mNumTract, Bite::mNumBedpost;
+int   Bite::mNumDir, Bite::mNumB0, Bite::mNumTract, Bite::mNumBedpost;
 float Bite::mFminPath;
-vector<unsigned int> Bite::mBaselineImages;
-vector<float> Bite::mGradients, Bite::mBvalues;
+std::vector<unsigned int> Bite::mBaselineImages;
+std::vector<float>        Bite::mGradients, Bite::mBvalues;
 
 Bite::Bite(MRI *Dwi, MRI **Phi, MRI **Theta, MRI **F, MRI **V0, MRI **F0,
            MRI *D0, int CoordX, int CoordY, int CoordZ)
     : mCoordX(CoordX), mCoordY(CoordY), mCoordZ(CoordZ) {
   float fsum;
-float vx;
-float vy;
-float vz;
+  float vx;
+  float vy;
+  float vz;
 
   mDwi.clear();
   mPhiSamples.clear();
@@ -48,14 +46,14 @@ float vz;
   // DWI intensity values
   for (int idir = 0; idir < mNumDir; idir++) {
     mDwi.push_back(MRIgetVoxVal(Dwi, mCoordX, mCoordY, mCoordZ, idir));
-}
+  }
 
   // Initialize s0
   mS0 = 0;
-  for (auto ibase = mBaselineImages.begin();
-       ibase < mBaselineImages.end(); ibase++) {
+  for (auto ibase = mBaselineImages.begin(); ibase < mBaselineImages.end();
+       ibase++) {
     mS0 += mDwi[*ibase];
-}
+  }
   mS0 /= mNumB0;
 
   // Samples of phi, theta, f
@@ -68,7 +66,7 @@ float vz;
       mFSamples.push_back(
           MRIgetVoxVal(F[itract], mCoordX, mCoordY, mCoordZ, isamp));
     }
-}
+  }
 
   fsum = 0;
   for (int itract = 0; itract < mNumTract; itract++) {
@@ -96,62 +94,61 @@ Bite::~Bite() = default;
 //
 void Bite::SetStatic(const char *GradientFile, const char *BvalueFile,
                      int NumTract, int NumBedpost, float FminPath) {
-  float val;
-  ifstream gfile(GradientFile, ios::in);
-  ifstream bfile(BvalueFile, ios::in);
+  float         val;
+  std::ifstream gfile(GradientFile, std::ios::in);
+  std::ifstream bfile(BvalueFile, std::ios::in);
 
   if (!gfile) {
-    cout << "ERROR: Could not open " << GradientFile << endl;
+    std::cout << "ERROR: Could not open " << GradientFile << std::endl;
     exit(1);
   }
   if (!bfile) {
-    cout << "ERROR: Could not open " << BvalueFile << endl;
+    std::cout << "ERROR: Could not open " << BvalueFile << std::endl;
     exit(1);
   }
 
-  cout << "Loading b-values from " << BvalueFile << endl;
+  std::cout << "Loading b-values from " << BvalueFile << std::endl;
   mBvalues.clear();
   while (bfile >> val) {
     mBvalues.push_back(val);
-}
+  }
 
   mNumDir = mBvalues.size();
 
   // Find baseline images (the ones with the lowest b-value)
   val = *min_element(mBvalues.begin(), mBvalues.end());
   mBaselineImages.clear();
-  for (auto ival = mBvalues.begin();
-       ival < mBvalues.end(); ival++) {
+  for (auto ival = mBvalues.begin(); ival < mBvalues.end(); ival++) {
     if (*ival == val) {
       mBaselineImages.push_back(ival - mBvalues.begin());
-}
-}
+    }
+  }
 
   mNumB0 = mBaselineImages.size();
 
-  cout << "Loading gradients from " << GradientFile << endl;
+  std::cout << "Loading gradients from " << GradientFile << std::endl;
   mGradients.clear();
   mGradients.resize(3 * mNumDir);
   for (int ii = 0; ii < 3; ii++) {
     for (int idir = 0; idir < mNumDir; idir++) {
       if (!(gfile >> val)) {
-        cout << "ERROR: Dimensions of " << BvalueFile << " and " << GradientFile
-             << " do not match" << endl;
+        std::cout << "ERROR: Dimensions of " << BvalueFile << " and "
+                  << GradientFile << " do not match" << std::endl;
         exit(1);
       }
       mGradients.at(ii + 3 * idir) = val;
     }
-}
+  }
 
   if (gfile >> val) {
-    cout << "ERROR: Dimensions of " << BvalueFile << " and " << GradientFile
-         << " do not match" << endl;
+    std::cout << "ERROR: Dimensions of " << BvalueFile << " and "
+              << GradientFile << " do not match" << std::endl;
     exit(1);
   }
 
-  mNumTract = NumTract;
+  mNumTract   = NumTract;
   mNumBedpost = NumBedpost;
-  mFminPath = FminPath;
+  mFminPath   = FminPath;
 }
 
 int Bite::GetNumTract() { return mNumTract; }
@@ -168,8 +165,9 @@ float Bite::GetLowBvalue() { return mBvalues[mBaselineImages[0]]; }
 // Draw samples from marginal posteriors of diffusion parameters
 //
 void Bite::SampleParameters() {
-  const int isamp = static_cast<int>(round(drand48() * (mNumBedpost - 1))) * mNumTract;
-  vector<float>::const_iterator samples;
+  const int isamp =
+      static_cast<int>(round(drand48() * (mNumBedpost - 1))) * mNumTract;
+  std::vector<float>::const_iterator samples;
 
   samples = mPhiSamples.begin() + isamp;
   copy(samples, samples + mNumTract, mPhi.begin());
@@ -186,17 +184,17 @@ void Bite::SampleParameters() {
 //
 void Bite::ComputeLikelihoodOffPath() {
   double like = 0;
-  auto ri = mGradients.begin();
-  auto bi = mBvalues.begin();
-  auto sij = mDwi.begin();
+  auto   ri   = mGradients.begin();
+  auto   bi   = mBvalues.begin();
+  auto   sij  = mDwi.begin();
 
   for (int idir = mNumDir; idir > 0; idir--) {
-    double sbar = 0;
-double fsum = 0;
-    const double bidj = (*bi) * mD;
-    auto fjl = mF.begin();
-    auto phijl = mPhi.begin();
-    auto thetajl = mTheta.begin();
+    double       sbar    = 0;
+    double       fsum    = 0;
+    const double bidj    = (*bi) * mD;
+    auto         fjl     = mF.begin();
+    auto         phijl   = mPhi.begin();
+    auto         thetajl = mTheta.begin();
 
     for (int itract = mNumTract; itract > 0; itract--) {
       const double iprod =
@@ -228,21 +226,21 @@ double fsum = 0;
 //
 void Bite::ComputeLikelihoodOnPath(float PathPhi, float PathTheta) {
   double like = 0;
-  auto ri = mGradients.begin();
-  auto bi = mBvalues.begin();
-  auto sij = mDwi.begin();
+  auto   ri   = mGradients.begin();
+  auto   bi   = mBvalues.begin();
+  auto   sij  = mDwi.begin();
 
   // Choose which anisotropic compartment in voxel corresponds to path
   ChoosePathTractAngle(PathPhi, PathTheta);
 
   // Calculate likelihood by replacing the chosen tract orientation from path
   for (int idir = mNumDir; idir > 0; idir--) {
-    double sbar = 0;
-double fsum = 0;
-    const double bidj = (*bi) * mD;
-    auto fjl = mF.begin();
-    auto phijl = mPhi.begin();
-    auto thetajl = mTheta.begin();
+    double       sbar    = 0;
+    double       fsum    = 0;
+    const double bidj    = (*bi) * mD;
+    auto         fjl     = mF.begin();
+    auto         phijl   = mPhi.begin();
+    auto         thetajl = mTheta.begin();
 
     for (int itract = 0; itract < mNumTract; itract++) {
       double iprod;
@@ -252,7 +250,7 @@ double fsum = 0;
       } else {
         iprod = (ri[0] * cos(*phijl) + ri[1] * sin(*phijl)) * sin(*thetajl) +
                 ri[2] * cos(*thetajl);
-}
+      }
 
       sbar += *fjl * exp(-bidj * iprod * iprod);
       fsum += *fjl;
@@ -279,9 +277,9 @@ double fsum = 0;
 //
 void Bite::ChoosePathTractAngle(float PathPhi, float PathTheta) {
   double maxprod = 0;
-  auto fjl = mF.begin();
-  auto phijl = mPhi.begin();
-  auto thetajl = mTheta.begin();
+  auto   fjl     = mF.begin();
+  auto   phijl   = mPhi.begin();
+  auto   thetajl = mTheta.begin();
 
   for (int itract = 0; itract < mNumTract; itract++) {
     if (*fjl > mFminPath) {
@@ -292,7 +290,7 @@ void Bite::ChoosePathTractAngle(float PathPhi, float PathTheta) {
 
       if (iprod > maxprod) {
         mPathTract = itract;
-        maxprod = iprod;
+        maxprod    = iprod;
       }
     }
 
@@ -303,32 +301,32 @@ void Bite::ChoosePathTractAngle(float PathPhi, float PathTheta) {
 
   if (maxprod == 0) {
     mPathTract = 0;
-}
+  }
 }
 
 //
 // Find tract that changes the likelihood the least
 //
 void Bite::ChoosePathTractLike(float PathPhi, float PathTheta) {
-  double mindlike = numeric_limits<double>::max();
+  double mindlike = std::numeric_limits<double>::max();
 
   for (int jtract = 0; jtract < mNumTract; jtract++) {
     if (mF[jtract] > mFminPath) {
       double dlike;
-double like = 0;
-      auto ri = mGradients.begin();
-      auto bi = mBvalues.begin();
-      auto sij = mDwi.begin();
+      double like = 0;
+      auto   ri   = mGradients.begin();
+      auto   bi   = mBvalues.begin();
+      auto   sij  = mDwi.begin();
 
       // Calculate likelihood by replacing the chosen tract orientation from
       // path
       for (int idir = mNumDir; idir > 0; idir--) {
-        double sbar = 0;
-double fsum = 0;
-        const double bidj = (*bi) * mD;
-        auto fjl = mF.begin();
-        auto phijl = mPhi.begin();
-        auto thetajl = mTheta.begin();
+        double       sbar    = 0;
+        double       fsum    = 0;
+        const double bidj    = (*bi) * mD;
+        auto         fjl     = mF.begin();
+        auto         phijl   = mPhi.begin();
+        auto         thetajl = mTheta.begin();
 
         for (int itract = 0; itract < mNumTract; itract++) {
           double iprod;
@@ -340,7 +338,7 @@ double fsum = 0;
             iprod =
                 (ri[0] * cos(*phijl) + ri[1] * sin(*phijl)) * sin(*thetajl) +
                 ri[2] * cos(*thetajl);
-}
+          }
 
           sbar += *fjl * exp(-bidj * iprod * iprod);
           fsum += *fjl;
@@ -359,7 +357,7 @@ double fsum = 0;
         sij++;
       }
 
-      like = log(like / 2) * mNumDir / 2;
+      like  = log(like / 2) * mNumDir / 2;
       dlike = fabs(like - static_cast<double>(mLikelihood0));
 
       if (dlike < mindlike) {
@@ -368,9 +366,9 @@ double fsum = 0;
         mindlike = dlike;
       }
     }
-}
+  }
 
-  if (mindlike == numeric_limits<double>::max()) {
+  if (mindlike == std::numeric_limits<double>::max()) {
     mPathTract = 0;
     //    mLikelihood1 =
   }
@@ -380,7 +378,7 @@ double fsum = 0;
 // Compute prior given that voxel is off path
 //
 void Bite::ComputePriorOffPath() {
-  auto fjl = mF.begin() + mPathTract;
+  auto fjl     = mF.begin() + mPathTract;
   auto thetajl = mTheta.begin() + mPathTract;
 
   // cout << (*fjl) << " " << log((*fjl - 1) * log(1 - *fjl)) << " "
@@ -390,7 +388,7 @@ void Bite::ComputePriorOffPath() {
     mPrior0 = log((*fjl - 1) * log(1 - *fjl)) - log(fabs(sin(*thetajl)));
   } else {
     mPrior0 = 0;
-}
+  }
 }
 
 //

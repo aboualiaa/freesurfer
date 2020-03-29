@@ -28,8 +28,8 @@
 
 #include "LayerVolumeBase.h"
 #include "vtkSmartPointer.h"
-#include <QString>
 #include <QList>
+#include <QString>
 
 #include "colortab.h"
 #include "nifti1.h"
@@ -88,7 +88,7 @@ public:
 
   virtual void Append2DProps(vtkRenderer *renderer, int nPlane);
   virtual void Append3DProps(vtkRenderer *renderer,
-                             bool *bPlaneVisibility = NULL);
+                             bool *       bPlaneVisibility = NULL);
   virtual bool HasProp(vtkProp *prop);
 
   void Remove2DProps(vtkRenderer *render, int nPlane);
@@ -99,16 +99,16 @@ public:
   virtual double GetVoxelValue(double *pos);
   double GetVoxelValueByOriginalIndex(int i, int j, int k, int frame = -1);
   QList<double> GetVoxelValueByOriginalIndexAllFrames(int i, int j, int k);
-  void GetVoxelValueByOriginalIndexAllFrames(int i, int j, int k,
-                                             float *buffer);
-  double GetSampledVoxelValueByRAS(double *ras, int frame = -1);
+  void          GetVoxelValueByOriginalIndexAllFrames(int i, int j, int k,
+                                                      float *buffer);
+  double        GetSampledVoxelValueByRAS(double *ras, int frame = -1);
 
   std::vector<double>
   GetSampledVoxelValues(std::vector<std::vector<double>> &line3d,
-                        int frame = -1);
+                        int                               frame = -1);
   std::vector<double>
   GetMeanSegmentValues(std::vector<std::vector<double>> &line3d,
-                       int frame = -1);
+                       int                               frame = -1);
 
   virtual QString GetLabelName(double value);
 
@@ -243,7 +243,7 @@ public:
 
   void SetGotoLabel(int nOrientation, const QString &name) {
     m_nGotoLabelOrientation = nOrientation;
-    m_strGotoLabelName = name;
+    m_strGotoLabelName      = name;
   }
 
   int GetGotoLabelSlice() { return m_nGotoLabelSlice; }
@@ -308,11 +308,11 @@ public:
 
 public slots:
   virtual void SetModified();
-  void SetActiveFrame(int nFrame);
-  void SetActiveFrameOneBase(int nFrame) { SetActiveFrame(nFrame - 1); }
-  void UpdateResliceInterpolation();
-  void UpdateMRIToImage();
-  void SetMaskThreshold(double val);
+  void         SetActiveFrame(int nFrame);
+  void         SetActiveFrameOneBase(int nFrame) { SetActiveFrame(nFrame - 1); }
+  void         UpdateResliceInterpolation();
+  void         UpdateMRIToImage();
+  void         SetMaskThreshold(double val);
 
 Q_SIGNALS:
   void ResampleFactorChanged();
@@ -330,17 +330,17 @@ Q_SIGNALS:
   void GeodesicSegmentationProgress(double percentage);
 
 protected slots:
-  void UpdateDisplayMode();
+  void         UpdateDisplayMode();
   virtual void UpdateOpacity();
-  void UpdateTextureSmoothing();
-  void UpdateContour(int nSegIndex = -1);
-  void UpdateContourActor(int nSegIndex);
-  void UpdateContourColor();
-  void ShowContour();
-  void UpdateVolumeRendering();
-  void UpdateVectorActor();
-  void UpdateVectorActor(int nPlane, vtkImageData *imagedata,
-                         vtkImageData *scaledata = NULL);
+  void         UpdateTextureSmoothing();
+  void         UpdateContour(int nSegIndex = -1);
+  void         UpdateContourActor(int nSegIndex);
+  void         UpdateContourColor();
+  void         ShowContour();
+  void         UpdateVolumeRendering();
+  void         UpdateVectorActor();
+  void         UpdateVectorActor(int nPlane, vtkImageData *imagedata,
+                                 vtkImageData *scaledata = NULL);
   virtual void UpdateVectorActor(int nPlane);
 
   void ResetSurfaceRegionIds();
@@ -349,7 +349,7 @@ protected slots:
   void UpdateUpSampleMethod();
   void UpdateProjectionMap();
 
-  void UpdateTensorActor();
+  void         UpdateTensorActor();
   virtual void UpdateColorMap();
 
   void OnContourThreadFinished(int thread_id);
@@ -388,20 +388,20 @@ protected:
   virtual void OnSlicePositionChanged(int nPlane);
 
   // Pipeline ------------------------------------------------------------
-  vtkSmartPointer<vtkImageReslice> mReslice[3];
-  vtkSmartPointer<vtkImageMapToColors> mColorMap[3];
-  vtkSmartPointer<vtkImageMapToColors> mColorMapMaxProjection[3];
+  vtkSmartPointer<vtkImageReslice>          mReslice[3];
+  vtkSmartPointer<vtkImageMapToColors>      mColorMap[3];
+  vtkSmartPointer<vtkImageMapToColors>      mColorMapMaxProjection[3];
   vtkSmartPointer<vtkSimpleLabelEdgeFilter> mEdgeFilter[3];
-  vtkSmartPointer<vtkImageReslice> mResample[3];
+  vtkSmartPointer<vtkImageReslice>          mResample[3];
 
   FSVolume *m_volumeSource;
   FSVolume *m_volumeRef;
-  bool m_bResampleToRAS;
-  bool m_bReorient;
-  int m_nSampleMethod;
-  bool m_bConform;
-  bool m_bWriteResampled;
-  bool m_bIgnoreHeader;
+  bool      m_bResampleToRAS;
+  bool      m_bReorient;
+  int       m_nSampleMethod;
+  bool      m_bConform;
+  bool      m_bWriteResampled;
+  bool      m_bIgnoreHeader;
 
   vtkImageActor *m_sliceActor2D[3];
   vtkImageActor *m_sliceActor3D[3];
@@ -412,41 +412,41 @@ protected:
 
   vtkImageActor *m_projectionMapActor[3];
 
-  vtkSmartPointer<vtkActor> m_actorContour;
+  vtkSmartPointer<vtkActor>  m_actorContour;
   vtkSmartPointer<vtkVolume> m_propVolume;
-  QMap<int, vtkActor *> m_labelActors;
+  QMap<int, vtkActor *>      m_labelActors;
 
-  int m_nThreadID;
+  int                       m_nThreadID;
   vtkSmartPointer<vtkActor> m_actorContourTemp;
-  QMap<int, vtkActor *> m_labelActorsTemp;
+  QMap<int, vtkActor *>     m_labelActorsTemp;
 
   QList<SurfaceRegion *> m_surfaceRegions;
-  SurfaceRegion *m_currentSurfaceRegion;
-  SurfaceRegionGroups *m_surfaceRegionGroups;
+  SurfaceRegion *        m_currentSurfaceRegion;
+  SurfaceRegionGroups *  m_surfaceRegionGroups;
 
   int m_nOrientationIndex[3];
 
-  int m_nGotoLabelSlice;
-  int m_nGotoLabelOrientation;
+  int     m_nGotoLabelSlice;
+  int     m_nGotoLabelOrientation;
   QString m_strGotoLabelName;
 
   vtkSmartPointer<vtkImageData> m_imageDataBackup;
-  LayerMRI *m_layerMask;
+  LayerMRI *                    m_layerMask;
 
   vtkSmartPointer<vtkImageData> m_imageRawDisplay;
-  LayerSurface *m_correlationSurface;
+  LayerSurface *                m_correlationSurface;
 
 private:
   double **private_buf1_3x3;
   double **private_buf2_3x3;
 
-  LayerMRIWorkerThread *m_worker;
-  QList<int> m_nAvailableLabels;
-  QMap<int, QList<double>> m_listLabelCenters;
+  LayerMRIWorkerThread *     m_worker;
+  QList<int>                 m_nAvailableLabels;
+  QMap<int, QList<double>>   m_listLabelCenters;
   QMap<int, QVector<double>> m_voxelLists;
 
   QMap<QObject *, double> m_mapMaskThresholds;
-  double m_dMaskThreshold;
+  double                  m_dMaskThreshold;
 
   nifti_1_header m_niftiHeader;
 

@@ -23,36 +23,36 @@
  */
 #include "RenderView.h"
 #include "Interactor.h"
-#include "MainWindow.h"
 #include "LayerMRI.h"
-#include "LayerPropertyMRI.h"
 #include "LayerPointSet.h"
+#include "LayerPropertyMRI.h"
 #include "LayerPropertyPointSet.h"
 #include "LayerSurface.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "MyVTKUtils.h"
 #include "SurfaceOverlay.h"
 #include "SurfaceOverlayProperty.h"
-#include <QTimer>
-#include <QApplication>
-#include "MyVTKUtils.h"
-#include <QDebug>
 #include "vtkActor2D.h"
+#include "vtkCamera.h"
 #include "vtkCellArray.h"
+#include "vtkLookupTable.h"
+#include "vtkMath.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper2D.h"
 #include "vtkProperty2D.h"
-#include "vtkRenderer.h"
-#include "vtkCamera.h"
-#include "vtkMath.h"
-#include "vtkScalarBarActor.h"
-#include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"
-#include <QPainter>
+#include "vtkRenderer.h"
+#include "vtkScalarBarActor.h"
 #include <QAction>
-#include <vtkCellPicker.h>
-#include <vtkRenderWindow.h>
-#include "MyUtils.h"
+#include <QApplication>
+#include <QDebug>
 #include <QDir>
 #include <QFileInfo>
+#include <QPainter>
+#include <QTimer>
+#include <vtkCellPicker.h>
+#include <vtkRenderWindow.h>
 
 #define SCALE_FACTOR 200
 
@@ -259,7 +259,7 @@ void RenderView::SetWorldCoordinateInfo(const double *origin,
                                         const double *size, bool bResetView) {
   for (int i = 0; i < 3; i++) {
     m_dWorldOrigin[i] = origin[i];
-    m_dWorldSize[i] = size[i];
+    m_dWorldSize[i]   = size[i];
   }
   if (bResetView)
     UpdateViewByWorldCoordinate();
@@ -310,7 +310,7 @@ void RenderView::ScreenToWorld(int x, int y, int z, double &world_x,
 
 void RenderView::MoveLeft() {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double viewup[3], proj[3], v[3];
+  double     viewup[3], proj[3], v[3];
   cam->GetViewUp(viewup);
   cam->GetDirectionOfProjection(proj);
   vtkMath::Cross(viewup, proj, v);
@@ -332,7 +332,7 @@ void RenderView::MoveLeft() {
 
 void RenderView::MoveRight() {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double viewup[3], proj[3], v[3];
+  double     viewup[3], proj[3], v[3];
   cam->GetViewUp(viewup);
   cam->GetDirectionOfProjection(proj);
   vtkMath::Cross(viewup, proj, v);
@@ -354,7 +354,7 @@ void RenderView::MoveRight() {
 
 void RenderView::MoveUp() {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double v[3];
+  double     v[3];
   cam->GetViewUp(v);
   double focal_pt[3], cam_pos[3];
   cam->GetFocalPoint(focal_pt);
@@ -374,7 +374,7 @@ void RenderView::MoveUp() {
 
 void RenderView::MoveDown() {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double v[3];
+  double     v[3];
   cam->GetViewUp(v);
   double focal_pt[3], cam_pos[3];
   cam->GetFocalPoint(focal_pt);
@@ -401,7 +401,7 @@ void RenderView::Zoom(double dFactor) {
 }
 
 void RenderView::PanToWorld(double *pos) {
-  double focalPt[3], camPos[3], vproj[3];
+  double     focalPt[3], camPos[3], vproj[3];
   vtkCamera *cam = m_renderer->GetActiveCamera();
   cam->GetFocalPoint(focalPt);
   cam->GetPosition(camPos);
@@ -415,7 +415,7 @@ void RenderView::PanToWorld(double *pos) {
 
   for (int i = 0; i < 3; i++) {
     focalPt[i] = pos[i] + vproj[i] * dist;
-    camPos[i] = focalPt[i] - vproj[i] * camDist;
+    camPos[i]  = focalPt[i] - vproj[i] * camDist;
   }
 
   cam->SetFocalPoint(focalPt);
@@ -424,7 +424,7 @@ void RenderView::PanToWorld(double *pos) {
 
 void RenderView::CenterAtWorldPosition(double *pos) {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double v[3], cam_pos[3];
+  double     v[3], cam_pos[3];
   cam->GetDirectionOfProjection(v);
   double dist = cam->GetDistance();
   for (int i = 0; i < 3; i++) {
@@ -440,7 +440,7 @@ void RenderView::CenterAtWorldPosition(double *pos) {
 
 void RenderView::AlignViewToNormal(double *v) {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double f_pos[3], dist;
+  double     f_pos[3], dist;
   cam->GetFocalPoint(f_pos);
   dist = cam->GetDistance();
   for (int i = 0; i < 3; i++)

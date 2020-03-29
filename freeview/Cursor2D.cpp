@@ -24,22 +24,22 @@
  */
 
 #include "Cursor2D.h"
-#include "vtkRenderer.h"
-#include "vtkActor2D.h"
-#include "vtkProperty.h"
-#include "vtkPolyDataMapper2D.h"
-#include "vtkPolyData.h"
-#include "MainWindow.h"
-#include "RenderView2D.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkFloatArray.h"
-#include <vtkProperty2D.h>
-#include <vtkCursor2D.h>
-#include "MyUtils.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "RenderView2D.h"
+#include "vtkActor2D.h"
+#include "vtkCellArray.h"
+#include "vtkFloatArray.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper2D.h"
+#include "vtkProperty.h"
+#include "vtkRenderer.h"
 #include <QDebug>
+#include <vtkCursor2D.h>
+#include <vtkProperty2D.h>
 
 Cursor2D::Cursor2D(RenderView2D *view)
     : QObject(view), m_view(view), m_nSize(5) {
@@ -83,9 +83,9 @@ void Cursor2D::Update(bool bConnectPrevious) {
   dLen *= m_view->devicePixelRatio();
 #endif
 
-  int n = 0;
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+  int                           n      = 0;
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
 
   double pos[3];
   if (bConnectPrevious) {
@@ -122,8 +122,8 @@ void Cursor2D::Update(bool bConnectPrevious) {
   lines->InsertCellPoint(n++);
   if (m_nSize < 100) {
     int w, h;
-    w = m_view->rect().width();
-    h = m_view->rect().height();
+    w      = m_view->rect().width();
+    h      = m_view->rect().height();
     int nd = 9;
 #if VTK_MAJOR_VERSION > 7
     if (m_view->devicePixelRatio() > 1) {

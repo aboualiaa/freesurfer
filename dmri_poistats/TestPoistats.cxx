@@ -1,11 +1,11 @@
 #include <iostream>
-#include <math.h>
 #include <itkArray2D.h>
+#include <math.h>
 
 #include <itkMesh.h>
 
-#include <itkImageSeriesReader.h>
 #include <itkImageFileWriter.h>
+#include <itkImageSeriesReader.h>
 
 #include <fstream>
 #include <string>
@@ -196,14 +196,14 @@ void TestPoistats::TestOptimalEnergy() {
   // convert the path from matlab (switch x and z, and subtract 1 )
   for (int i = 0; i < 100; i++) {
     const double tmp = path[i][2];
-    path[i][2] = path[i][0];
-    path[i][0] = tmp;
+    path[i][2]       = path[i][0];
+    path[i][0]       = tmp;
     for (int j = 0; j < 3; j++) {
       path[i][j] -= 1;
     }
   }
 
-  typedef itk::Image<float, 3> FloatImage3DType;
+  typedef itk::Image<float, 3>                  FloatImage3DType;
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
   typedef itk::PoistatsFilter<TensorImageType, FloatImage3DType>
@@ -242,7 +242,7 @@ void TestPoistats::TestOptimalEnergy() {
   poistatsFilter->ConstructOdfList();
 
   // for each point, get the energy
-  vnl_matrix<double> pathVnl(*path, 100, 3);
+  vnl_matrix<double>             pathVnl(*path, 100, 3);
   PoistatsFilterType::MatrixType trialPath(pathVnl);
 
   itk::Array2D<int> roundedPath(trialPath.rows(), trialPath.cols());
@@ -269,13 +269,13 @@ void TestPoistats::TestGenerateRotationMatrix3u2v() {
 
   // input: vector, vector
   // output: 3x3 rotation matrix
-  typedef itk::Image<float, 3> FloatImage3DType;
+  typedef itk::Image<float, 3>                  FloatImage3DType;
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
   typedef itk::PoistatsFilter<TensorImageType, FloatImage3DType>
       PoistatsFilterType;
 
-  const int arraySize = 3;
+  const int                     arraySize = 3;
   PoistatsFilterType::ArrayType u(arraySize);
   u[0] = 1.0;
   u[1] = 0.0;
@@ -298,7 +298,7 @@ void TestPoistats::TestGenerateRotationMatrix3u2v() {
   for (unsigned int cRow = 0; cRow < actualRotation.rows(); cRow++) {
     for (unsigned int cCol = 0; cCol < actualRotation.cols(); cCol++) {
       double expected = expectedRotation[cRow][cCol];
-      double result = actualRotation[cRow][cCol];
+      double result   = actualRotation[cRow][cCol];
       CPPUNIT_ASSERT_DOUBLES_EQUAL(expected, result, tolerance);
     }
   }
@@ -313,13 +313,13 @@ void TestPoistats::TestGetMagnetToSliceFrameRotation() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 3> OutputImageType;
+  typedef itk::Image<float, 3>                  OutputImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
       PoistatsFilterType;
 
   PoistatsFilterType::Pointer poistatsFilter = PoistatsFilterType::New();
 
-  TensorImageType::Pointer tensors = TensorImageType::New();
+  TensorImageType::Pointer       tensors   = TensorImageType::New();
   TensorImageType::DirectionType direction = tensors->GetDirection();
 
   direction(2, 2) = 0.990816;
@@ -335,7 +335,7 @@ void TestPoistats::TestGetMagnetToSliceFrameRotation() {
   for (unsigned int cRow = 0; cRow < actualRotation.rows(); cRow++) {
     for (unsigned int cCol = 0; cCol < actualRotation.cols(); cCol++) {
       const double expected = expectedRotation[cRow][cCol];
-      const double result = actualRotation[cRow][cCol];
+      const double result   = actualRotation[cRow][cCol];
       CPPUNIT_ASSERT_DOUBLES_EQUAL(expected, result, tolerance);
     }
   }
@@ -434,7 +434,7 @@ void TestPoistats::TestCalculateTensor2Odf() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 3> FloatImage3DType;
+  typedef itk::Image<float, 3>                  FloatImage3DType;
   typedef itk::PoistatsFilter<TensorImageType, FloatImage3DType>
       PoistatsFilterType;
 
@@ -453,7 +453,7 @@ void TestPoistats::TestCalculateTensor2Odf() {
   tensor[2][1] = -0.000147431448568;
   tensor[2][2] = -0.000592902826611;
 
-  const int nDirections = 252;
+  const int                     nDirections = 252;
   PoistatsFilterType::ArrayType odf(nDirections);
 
   PoistatsFilterType::Pointer filter = PoistatsFilterType::New();
@@ -477,23 +477,23 @@ void TestPoistats::TestCalculateOdfPathEnergy() {
 
   std::cerr << "TestCalculateOdfPathEnergy" << std::endl;
 
-  const int nSpatialDimensions = 3;
-  const int nPoints = 3;
-  const double path[][3] = {{13.2382, 62.6763, 55.9057},
+  const int            nSpatialDimensions = 3;
+  const int            nPoints            = 3;
+  const double         path[][3]          = {{13.2382, 62.6763, 55.9057},
                             {13.9912, 62.3570, 55.9779},
                             {14.7504, 62.0503, 56.0416}};
-  vnl_matrix<double> pathVnl(*path, nPoints, nSpatialDimensions);
+  vnl_matrix<double>   pathVnl(*path, nPoints, nSpatialDimensions);
   itk::Array2D<double> pathItk(pathVnl);
 
-  const int nDirections = 256;
+  const int          nDirections = 256;
   itk::Array<double> odf(nDirections);
   odf.Fill(1e-200);
 
-  typedef itk::Image<float, 3> FloatImage3DType;
+  typedef itk::Image<float, 3>                  FloatImage3DType;
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
   typedef itk::PoistatsFilter<TensorImageType, FloatImage3DType>
-      PoistatsFilterType;
+                              PoistatsFilterType;
   PoistatsFilterType::Pointer poistatsFilter = PoistatsFilterType::New();
 
   itk::Array2D<int> roundedPath(pathItk.rows(), pathItk.cols());
@@ -505,11 +505,11 @@ void TestPoistats::TestCalculateOdfPathEnergy() {
   }
 
   PoistatsFilterType::ArrayType energy(nPoints - 1);
-  const double actualMeanEnergy =
+  const double                  actualMeanEnergy =
       poistatsFilter->CalculateOdfPathEnergy(&pathItk, odfs, &energy);
 
   const double expectedMeanEnergy = 460.517;
-  const double tolerance = 0.001;
+  const double tolerance          = 0.001;
   CPPUNIT_ASSERT(!isnan(actualMeanEnergy));
   CPPUNIT_ASSERT_DOUBLES_EQUAL(expectedMeanEnergy, actualMeanEnergy, tolerance);
 }
@@ -592,7 +592,7 @@ void TestPoistats::TestCalculateOdfPathEnergy() {
 //}
 
 void TestPoistats::GetOdfs(itk::Array2D<double> *odfs) {
-  std::string s;
+  std::string   s;
   std::ifstream odfFile("odflist.mat");
 
   std::cerr << "reading odfs" << std::endl;
@@ -604,7 +604,7 @@ void TestPoistats::GetOdfs(itk::Array2D<double> *odfs) {
     for (unsigned int cColumns = 0; cColumns < odfs->cols(); cColumns++) {
       odfFile >> s;
       std::stringstream stream;
-      double odf;
+      double            odf;
       stream << s;
       stream >> odf;
 
@@ -615,7 +615,7 @@ void TestPoistats::GetOdfs(itk::Array2D<double> *odfs) {
 }
 
 void TestPoistats::GetOdfLookUpTable(itk::Array<double> *table) {
-  std::string s;
+  std::string   s;
   std::ifstream odfFile("flatlook.mat");
 
   std::cerr << "reading lookup table" << std::endl;
@@ -623,7 +623,7 @@ void TestPoistats::GetOdfLookUpTable(itk::Array<double> *table) {
   for (unsigned int cRows = 0; cRows < table->size(); cRows++) {
     odfFile >> s;
     std::stringstream stream;
-    double index;
+    double            index;
     stream << s;
     stream >> index;
 
@@ -638,11 +638,11 @@ void TestPoistats::TestRoundPath() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 3> FloatImage3DType;
+  typedef itk::Image<float, 3>                  FloatImage3DType;
   typedef itk::PoistatsFilter<TensorImageType, FloatImage3DType>
       PoistatsFilterType;
 
-  const int numberOfRows = 2;
+  const int numberOfRows    = 2;
   const int numberOfColumns = 3;
 
   itk::Array2D<int> roundedArray(numberOfRows, numberOfColumns);
@@ -847,7 +847,7 @@ void TestPoistats::TestGetDistance() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 4> FloatImage4DType;
+  typedef itk::Image<float, 4>                  FloatImage4DType;
   typedef itk::PoistatsFilter<TensorImageType, FloatImage4DType>
       PoistatsFilterType;
 
@@ -875,7 +875,7 @@ void TestPoistats::TestGetPointClosestToCenter() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 4> FloatImage4DType;
+  typedef itk::Image<float, 4>                  FloatImage4DType;
   typedef itk::PoistatsFilter<TensorImageType, FloatImage4DType>
       PoistatsFilterType;
 
@@ -908,7 +908,7 @@ void TestPoistats::TestGetCenterOfMass() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 4> FloatImage4DType;
+  typedef itk::Image<float, 4>                  FloatImage4DType;
   typedef itk::PoistatsFilter<TensorImageType, FloatImage4DType>
       PoistatsFilterType;
 
@@ -944,7 +944,7 @@ void TestPoistats::TestConvertPointsToImage() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 3> OutputImageType;
+  typedef itk::Image<float, 3>                  OutputImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
       PoistatsFilterType;
 
@@ -964,7 +964,7 @@ void TestPoistats::TestConvertPointsToImage() {
   points[2][1] = 5.5;
   points[2][2] = 12.5;
 
-  OutputImageType::Pointer image = OutputImageType::New();
+  OutputImageType::Pointer  image = OutputImageType::New();
   OutputImageType::SizeType size;
   size[0] = 15; // x direction
   size[1] = 15; // y direction
@@ -976,7 +976,7 @@ void TestPoistats::TestConvertPointsToImage() {
   start[2] = 0; // z direction
 
   typedef itk::ImageFileReader<OutputImageType> ReaderType;
-  ReaderType::Pointer reader = ReaderType::New();
+  ReaderType::Pointer                           reader = ReaderType::New();
   reader->SetFileName("test/data/Path.nii.gz");
   reader->Update();
 
@@ -1003,13 +1003,13 @@ void TestPoistats::TestConvertPointsToImage() {
 
   const double tolerance = 0.0005;
   for (expectedIterator = expectedIterator.Begin(),
-      actualIterator = actualIterator.Begin();
+      actualIterator    = actualIterator.Begin();
 
        !expectedIterator.IsAtEnd() && !actualIterator.IsAtEnd();
 
        ++expectedIterator, ++actualIterator) {
 
-    const float actual = actualIterator.Value();
+    const float actual   = actualIterator.Value();
     const float expected = expectedIterator.Value();
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(expected, actual, tolerance);
@@ -1022,7 +1022,7 @@ void TestPoistats::TestGetPositiveMinimumInt() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 3> OutputImageType;
+  typedef itk::Image<float, 3>                  OutputImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
       PoistatsFilterType;
 
@@ -1043,7 +1043,7 @@ void TestPoistats::TestGetPositiveMinimumInt() {
   //  const double expected[] = { 2.5, 2.5, 0.4 };
   const int expected[] = {2, 2, 0};
 
-  const int radius = 3;
+  const int       radius = 3;
   itk::Array<int> minimumPoint(points.cols());
 
   PoistatsFilterType::GetPositiveMinimumInt(&points, radius, &minimumPoint);
@@ -1059,7 +1059,7 @@ void TestPoistats::TestGetPositiveMaximumInt() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 3> OutputImageType;
+  typedef itk::Image<float, 3>                  OutputImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
       PoistatsFilterType;
 
@@ -1078,7 +1078,7 @@ void TestPoistats::TestGetPositiveMaximumInt() {
 
   const int expected[] = {14, 14, 7};
 
-  const int radius = 3;
+  const int       radius = 3;
   itk::Array<int> maximumPoint(points.cols());
 
   OutputImageType::SizeType imageSize;
@@ -1126,7 +1126,7 @@ void TestPoistats::TestSetSeedVolume() {
 
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
-  typedef itk::Image<float, 3> OutputImageType;
+  typedef itk::Image<float, 3>                  OutputImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
       PoistatsFilterType;
 
@@ -1150,7 +1150,7 @@ void TestPoistats::TestSetSeedVolume() {
   for (unsigned int cRow = 0; cRow < expectedStart.rows(); cRow++) {
     for (unsigned int cColumn = 0; cColumn < expectedStart.cols(); cColumn++) {
       const int expected = expectedStart[cRow][cColumn];
-      const int actual = static_cast<int>((*startSeeds)[cRow][cColumn]);
+      const int actual   = static_cast<int>((*startSeeds)[cRow][cColumn]);
 
       CPPUNIT_ASSERT_EQUAL(expected, actual);
     }
@@ -1161,7 +1161,7 @@ void TestPoistats::TestSetSeedVolume() {
   for (unsigned int cRow = 0; cRow < expectedEnd.rows(); cRow++) {
     for (unsigned int cColumn = 0; cColumn < expectedEnd.cols(); cColumn++) {
       const int expected = expectedEnd[cRow][cColumn];
-      const int actual = static_cast<int>((*endSeeds)[cRow][cColumn]);
+      const int actual   = static_cast<int>((*endSeeds)[cRow][cColumn]);
 
       CPPUNIT_ASSERT_EQUAL(expected, actual);
     }
@@ -1172,7 +1172,7 @@ void TestPoistats::TestGetPathProbabilities() {
 
   std::cerr << "TestGetPathProbabilities" << std::endl;
 
-  typedef itk::Image<float, 3> OutputImageType;
+  typedef itk::Image<float, 3>                  OutputImageType;
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
@@ -1203,9 +1203,9 @@ void TestPoistats::TestGetPathProbabilities() {
 
   poistatsFilter->ConstructOdfList();
 
-  const int nPoints = 50;
-  const int nSpatialDimensions = 3;
-  const double path[][3] = {
+  const int    nPoints            = 50;
+  const int    nSpatialDimensions = 3;
+  const double path[][3]          = {
       {30.238207245810667, 74.67626614449462, 57.905706213062096},
       {30.35043846192207, 74.79646260269392, 57.15780040696919},
       {30.446150599791526, 74.92983488573512, 56.4096366749613},
@@ -1256,7 +1256,7 @@ void TestPoistats::TestGetPathProbabilities() {
       {26.251795907551443, 81.90850285837088, 73.38781955710253},
       {26.84073126784129, 81.91118496977424, 72.89804252907413},
       {27.41690443991341, 81.91027020699094, 72.39364953091354}};
-  vnl_matrix<double> pathVnl(*path, nPoints, nSpatialDimensions);
+  vnl_matrix<double>             pathVnl(*path, nPoints, nSpatialDimensions);
   PoistatsFilterType::MatrixType pathItk(pathVnl);
 
   PoistatsFilterType::ArrayType probabilities(
@@ -1305,7 +1305,7 @@ void TestPoistats::TestGetPathProbabilities() {
   const double tolerance = 5e-152;
   for (unsigned int cProbability = 0; cProbability < probabilities.size();
        cProbability++) {
-    const double actual = probabilities[cProbability];
+    const double actual   = probabilities[cProbability];
     const double expected = expectedProbabilities[cProbability];
 
     // TODO:      std::cerr << cProbability << std::endl;
@@ -1318,7 +1318,7 @@ void TestPoistats::TestGetAggregateReplicaDensities() {
 
   std::cerr << "TestGetAggregateReplicaDensities" << std::endl;
 
-  typedef itk::Image<float, 3> OutputImageType;
+  typedef itk::Image<float, 3>                  OutputImageType;
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
@@ -1335,7 +1335,7 @@ void TestPoistats::TestGetAggregateReplicaDensities() {
 
   const int nReplica = 3;
 
-  PoistatsFilterType::ArrayType replicaEnergies(nReplica);
+  PoistatsFilterType::ArrayType      replicaEnergies(nReplica);
   PoistatsFilterType::MatrixListType replicaPaths;
 
   for (int cReplica = 0; cReplica < nReplica; cReplica++) {
@@ -1351,7 +1351,7 @@ void TestPoistats::TestGetAggregateReplicaDensities() {
     replicaPaths.push_back(path);
   }
 
-  OutputImageType::Pointer aggregateDensities = OutputImageType::New();
+  OutputImageType::Pointer  aggregateDensities = OutputImageType::New();
   OutputImageType::SizeType size;
   size[0] = 128; // x direction
   size[1] = 128; // y direction
@@ -1377,7 +1377,7 @@ void TestPoistats::TestGetAggregateReplicaDensities() {
                                                aggregateDensities);
 
   typedef itk::ImageFileReader<OutputImageType> AggregateDensityReaderType;
-  AggregateDensityReaderType::Pointer aggregateReader =
+  AggregateDensityReaderType::Pointer           aggregateReader =
       AggregateDensityReaderType::New();
   aggregateReader->SetFileName("data/AggregateDensity.nii");
   aggregateReader->Update();
@@ -1392,14 +1392,14 @@ void TestPoistats::TestGetAggregateReplicaDensities() {
       expectedAggregateDensity->GetLargestPossibleRegion());
 
   const double tolerance = 0.0000005;
-  for (aggregateIterator = aggregateIterator.Begin(),
+  for (aggregateIterator        = aggregateIterator.Begin(),
       expectedAggregateIterator = expectedAggregateIterator.Begin();
 
        !aggregateIterator.IsAtEnd() && !expectedAggregateIterator.IsAtEnd();
 
        ++aggregateIterator, ++expectedAggregateIterator) {
 
-    const float actual = aggregateIterator.Value();
+    const float actual   = aggregateIterator.Value();
     const float expected = expectedAggregateIterator.Value();
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(expected, actual, tolerance);
@@ -1422,7 +1422,7 @@ void TestPoistats::TestMask() {
 
                               1, 0, 1, 1, 1, 0, 0, 0, 1};
 
-  typedef itk::Image<float, 3> OutputImageType;
+  typedef itk::Image<float, 3>                  OutputImageType;
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
@@ -1470,17 +1470,17 @@ void TestPoistats::TestMask() {
   for (actualMaskIterator = actualMaskIterator.Begin();
        !actualMaskIterator.IsAtEnd(); ++actualMaskIterator) {
 
-    const PoistatsFilterType::MaskType actual = actualMaskIterator.Value();
-    const int expected = expectedMask[cValue++];
+    const PoistatsFilterType::MaskType actual   = actualMaskIterator.Value();
+    const int                          expected = expectedMask[cValue++];
     CPPUNIT_ASSERT_EQUAL(actual, expected);
   }
 
-  PoistatsFilterType::SizeType inputSize;
+  PoistatsFilterType::SizeType  inputSize;
   PoistatsFilterType::IndexType inputStart;
-  double inputOrigin[3];
+  double                        inputOrigin[3];
   for (int cDim = 0; cDim < 3; cDim++) {
-    inputSize[cDim] = 3;
-    inputStart[cDim] = 0;
+    inputSize[cDim]   = 3;
+    inputStart[cDim]  = 0;
     inputOrigin[cDim] = 0;
   }
   inputSize[2] = 9;
@@ -1498,7 +1498,7 @@ void TestPoistats::TestMask() {
 
   poistatsFilter->SetInput(inputImage);
 
-  const double sliceUpData[] = {1, 0, 0};
+  const double                  sliceUpData[] = {1, 0, 0};
   PoistatsFilterType::ArrayType sliceUp(sliceUpData, 3);
 
   // TODO: create an image with this cosine direction
@@ -1516,14 +1516,14 @@ void TestPoistats::TestMask() {
   const int invalidIndex = -1;
 
   // assert that the odfs are masked
-  for (odfTableIterator = odfTableIterator.Begin(),
+  for (odfTableIterator  = odfTableIterator.Begin(),
       actualMaskIterator = actualMaskIterator.Begin();
 
        !odfTableIterator.IsAtEnd(), !actualMaskIterator.IsAtEnd();
 
        ++odfTableIterator, ++actualMaskIterator) {
 
-    const int odfLookUp = odfTableIterator.Value();
+    const int                          odfLookUp = odfTableIterator.Value();
     const PoistatsFilterType::MaskType maskValue = actualMaskIterator.Value();
 
     if (maskValue == 0) {
@@ -1545,8 +1545,8 @@ void TestPoistats::TestCalculateDensityMatrix() {
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
       PoistatsFilterType;
 
-  const int nAngleRows = 49;
-  const int nAngleColumns = 252;
+  const int    nAngleRows                   = 49;
+  const int    nAngleColumns                = 252;
   const double angleValues[][nAngleColumns] = {
       {1.5302077103,   1.29368202241,   1.3361279731,    1.49287046405,
        1.56996893133,  1.43871356051,   1.40191357856,   1.08811105356,
@@ -8766,7 +8766,7 @@ void TestPoistats::TestCalculateDensityMatrix() {
   for (unsigned int cRow = 0; cRow < actualDensityMatrix.rows(); cRow++) {
     for (unsigned int cCol = 0; cCol < actualDensityMatrix.cols(); cCol++) {
       const double expected = expectedDensityMatrix[cRow][cCol];
-      const double actual = actualDensityMatrix[cRow][cCol];
+      const double actual   = actualDensityMatrix[cRow][cCol];
 
       CPPUNIT_ASSERT_DOUBLES_EQUAL(expected, actual, tolerance);
     }
@@ -8779,7 +8779,7 @@ int main(int argc, char **argv) {
   Progname = argv[0];
 
   const int SUCCESS = 0;
-  const int FAIL = 1;
+  const int FAIL    = 1;
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(TestPoistats::suite());

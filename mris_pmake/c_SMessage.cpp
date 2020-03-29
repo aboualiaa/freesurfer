@@ -30,9 +30,8 @@
  *
  */
 
-#include <sstream>
 #include <cstring>
-using namespace std;
+#include <sstream>
 
 #include <c_SMessage.h>
 
@@ -42,7 +41,7 @@ using namespace std;
 /////***
 //
 
-void C_SMessage::debug_push(string astr_currentProc) {
+void C_SMessage::debug_push(std::string astr_currentProc) {
   //
   // ARGS
   // astr_currentProc         in      method name to
@@ -72,7 +71,7 @@ void C_SMessage::debug_pop() {
   stackDepth_set(stackDepth_get() - 1);
 }
 
-void C_SMessage::error(string astr_msg, int code) {
+void C_SMessage::error(std::string astr_msg, int code) {
   //
   // ARGS
   // atr_msg          in              message to dump to stderr
@@ -84,17 +83,17 @@ void C_SMessage::error(string astr_msg, int code) {
   // error flagging.
   //
 
-  cerr << "\nFatal error encountered.\n";
-  cerr << "\tC_SMessage object `" << str_name;
-  cerr << "' (id: " << id << ")\n";
-  cerr << "\tCurrent function: " << str_obj << "::";
-  cerr << str_proc_get() << "\n";
-  cerr << "\t" << astr_msg << "\n";
-  cerr << "Throwing an exception to (this) with code " << code << "\n\n";
+  std::cerr << "\nFatal error encountered.\n";
+  std::cerr << "\tC_SMessage object `" << str_name;
+  std::cerr << "' (id: " << id << ")\n";
+  std::cerr << "\tCurrent function: " << str_obj << "::";
+  std::cerr << str_proc_get() << "\n";
+  std::cerr << "\t" << astr_msg << "\n";
+  std::cerr << "Throwing an exception to (this) with code " << code << "\n\n";
   throw(this);
 }
 
-void C_SMessage::warn(string astr_msg, int code) {
+void C_SMessage::warn(std::string astr_msg, int code) {
   //
   // ARGS
   // atr_msg          in              message to dump to stderr
@@ -105,15 +104,16 @@ void C_SMessage::warn(string astr_msg, int code) {
   // the `error' method, but no expection is thrown.
   //
 
-  cerr << "\nWarning.\n";
-  cerr << "\tC_SMessage object `" << str_name;
-  cerr << "' (id: " << id << ")\n";
-  cerr << "\tCurrent function: " << str_obj << "::";
-  cerr << str_proc_get() << "\n";
-  cerr << "\t" << astr_msg << "(code: " << code << ")\n";
+  std::cerr << "\nWarning.\n";
+  std::cerr << "\tC_SMessage object `" << str_name;
+  std::cerr << "' (id: " << id << ")\n";
+  std::cerr << "\tCurrent function: " << str_obj << "::";
+  std::cerr << str_proc_get() << "\n";
+  std::cerr << "\t" << astr_msg << "(code: " << code << ")\n";
 }
 
-void C_SMessage::function_trace(string astr_msg, string astr_separator) {
+void C_SMessage::function_trace(std::string astr_msg,
+                                std::string astr_separator) {
   //
   // ARGS
   // astr_msg         in      message to print
@@ -124,32 +124,32 @@ void C_SMessage::function_trace(string astr_msg, string astr_separator) {
   // in a particular class and method to be displayed to stderr.
   //
 
-  string str_tab = "";
-  static string str_objectName = "";
-  static string str_funcName = "";
+  std::string        str_tab        = "";
+  static std::string str_objectName = "";
+  static std::string str_funcName   = "";
 
   if (verbosity_get() >= stackDepth_get()) {
-    cerr << astr_separator;
+    std::cerr << astr_separator;
     for (int i = 0; i < stackDepth_get(); i++)
       str_tab += "\t";
     if (str_objectName != str_name_get())
-      cerr << "\nC_SMessage`" << str_name_get();
-    cerr << "' (id: " << id_get() << ")\n";
+      std::cerr << "\nC_SMessage`" << str_name_get();
+    std::cerr << "' (id: " << id_get() << ")\n";
     if (str_funcName != str_proc_get()) {
-      cerr << "\n" << str_tab << "Current function: " << str_obj;
-      cerr << "::" << str_proc_get() << endl;
-      cerr << "\tverbosity = " << verbosity_get();
-      cerr << ", stackDepth = " << stackDepth_get() << endl;
+      std::cerr << "\n" << str_tab << "Current function: " << str_obj;
+      std::cerr << "::" << str_proc_get() << std::endl;
+      std::cerr << "\tverbosity = " << verbosity_get();
+      std::cerr << ", stackDepth = " << stackDepth_get() << std::endl;
     }
-    cerr << "\n" << str_tab << astr_msg;
+    std::cerr << "\n" << str_tab << astr_msg;
   }
   str_objectName = str_name_get();
-  str_funcName = str_proc_get();
+  str_funcName   = str_proc_get();
 }
 
-void C_SMessage::core_construct(string astr_name, int a_id, int a_iter,
+void C_SMessage::core_construct(std::string astr_name, int a_id, int a_iter,
                                 int a_verbosity, int a_warnings,
-                                int a_stackDepth, string astr_proc) {
+                                int a_stackDepth, std::string astr_proc) {
   //
   // ARGS
   // astr_name        in              name of object
@@ -169,31 +169,31 @@ void C_SMessage::core_construct(string astr_name, int a_id, int a_iter,
   //  o Added syslogID
   //
 
-  str_obj = "C_SMessage";
-  str_name = astr_name;
-  id = a_id;
-  iter = a_iter;
-  verbosity = a_verbosity;
-  warnings = a_warnings;
-  stackDepth = a_stackDepth;
+  str_obj              = "C_SMessage";
+  str_name             = astr_name;
+  id                   = a_id;
+  iter                 = a_iter;
+  verbosity            = a_verbosity;
+  warnings             = a_warnings;
+  stackDepth           = a_stackDepth;
   str_proc[stackDepth] = astr_proc;
 
-  b_canPrint = true;
+  b_canPrint      = true;
   b_syslogPrepend = false;
 
-  str_syslogID = "";
+  str_syslogID    = "";
   b_fileSpecified = false;
-  pFILE_out = nullptr;
+  pFILE_out       = nullptr;
 
   b_socketCreated = false;
-  pcSS = nullptr;
+  pcSS            = nullptr;
 
   lw = 40;
   rw = 40;
   cw = 40;
 }
 
-C_SMessage::C_SMessage(string astr_body, e_SMessageFormat ae_format,
+C_SMessage::C_SMessage(std::string astr_body, e_SMessageFormat ae_format,
                        FILE *apFILE_out, e_SMessageIO ae_IO) {
   //
   // ARGS
@@ -240,13 +240,13 @@ C_SMessage::C_SMessage(string astr_body, e_SMessageFormat ae_format,
           -1);
 
   str_payload.assign(astr_body);
-  e_format = ae_format;
+  e_format  = ae_format;
   pFILE_out = apFILE_out;
-  e_IO = ae_IO;
+  e_IO      = ae_IO;
 }
 
-C_SMessage::C_SMessage(string astr_body, e_SMessageFormat ae_format,
-                       string astr_filename, e_SMessageIO ae_IO,
+C_SMessage::C_SMessage(std::string astr_body, e_SMessageFormat ae_format,
+                       std::string astr_filename, e_SMessageIO ae_IO,
                        e_FileMode ae_fileMode) {
   //
   // ARGS
@@ -293,25 +293,25 @@ C_SMessage::C_SMessage(string astr_body, e_SMessageFormat ae_format,
   debug_push("C_SMessage");
 
   FILE *pFILE_stream;
-  str_filename = astr_filename;
-  string str_fileMode = "";
-  b_fileSpecified = false;
+  str_filename             = astr_filename;
+  std::string str_fileMode = "";
+  b_fileSpecified          = false;
 
   if (str_filename == "/dev/null")
     e_format = eSM_devnull;
   else {
     str_payload.assign(astr_body);
     e_format = ae_format;
-    e_IO = ae_IO;
+    e_IO     = ae_IO;
 
     switch (e_IO) {
     case eSM_cpp:
       pFILE_out = nullptr;
       if ((str_filename != "stdout") && str_filename != "stderr") {
         if (ae_fileMode == eAppend)
-          ofs_out.open(astr_filename.c_str(), ios::app);
+          ofs_out.open(astr_filename.c_str(), std::ios::app);
         else
-          ofs_out.open(astr_filename.c_str(), ios::out);
+          ofs_out.open(astr_filename.c_str(), std::ios::out);
         if (!ofs_out)
           error("Could not create output file:" + astr_filename, -1);
         b_fileSpecified = true;
@@ -330,7 +330,7 @@ C_SMessage::C_SMessage(string astr_body, e_SMessageFormat ae_format,
           str_fileMode = "w";
         if ((pFILE_stream = fopen(astr_filename.c_str(),
                                   str_fileMode.c_str())) == nullptr) {
-          string str_error = "Cannot open file " + astr_filename;
+          std::string str_error = "Cannot open file " + astr_filename;
           error(str_error, -1);
         }
         pFILE_out = pFILE_stream;
@@ -338,20 +338,20 @@ C_SMessage::C_SMessage(string astr_body, e_SMessageFormat ae_format,
       break;
 
     case eSS:
-      string str_remotehost; // host to receive UDP transmission
-      string str_remoteport; // port on remote hostname
-      int pos;               // position of separating ":"
-      int port;
-      pos = astr_filename.find_first_of(":");
-      string str_msg = "For SSocket-type target, destination string ";
+      std::string str_remotehost; // host to receive UDP transmission
+      std::string str_remoteport; // port on remote hostname
+      int         pos;            // position of separating ":"
+      int         port;
+      pos                 = astr_filename.find_first_of(":");
+      std::string str_msg = "For SSocket-type target, destination string ";
       str_msg += "must be '<hostname>:<port>'.\n";
       str_msg += "\tThe ':' char has to be present.";
-      if ((unsigned)pos == (unsigned)string::npos)
+      if ((unsigned)pos == (unsigned)std::string::npos)
         error(str_msg);
-      str_remotehost = astr_filename.substr(0, pos);
-      str_remoteport = astr_filename.substr(pos + 1);
-      port = atoi(str_remoteport.c_str());
-      pcSS = new c_SSocket_UDP_transmit(str_remotehost, port);
+      str_remotehost  = astr_filename.substr(0, pos);
+      str_remoteport  = astr_filename.substr(pos + 1);
+      port            = atoi(str_remoteport.c_str());
+      pcSS            = new c_SSocket_UDP_transmit(str_remotehost, port);
       b_socketCreated = true;
       break;
     }
@@ -379,7 +379,7 @@ C_SMessage::~C_SMessage() {
   }
 }
 
-void C_SMessage::dump(bool ab_syslogPrepend, string astr_outOfBand) {
+void C_SMessage::dump(bool ab_syslogPrepend, std::string astr_outOfBand) {
   //
   // ARGS
   // ab_syslogPrepend   in              bool flag. If true
@@ -430,8 +430,8 @@ void C_SMessage::dump(bool ab_syslogPrepend, string astr_outOfBand) {
   // o Added c_SSocket.
   //
 
-  string str_syslogPrepend = "";
-  std::ostream &sout = (b_fileSpecified) ? ofs_out
+  std::string   str_syslogPrepend = "";
+  std::ostream &sout              = (b_fileSpecified) ? ofs_out
                                          : (str_filename == "stdout")
                                                ? (std::ostream &)std::cout
                                                : (std::ostream &)std::cerr;
@@ -465,8 +465,7 @@ void C_SMessage::dump(bool ab_syslogPrepend, string astr_outOfBand) {
     }
   }
 }
-
-string C_SMessage::syslog_prepend() {
+std::string C_SMessage::syslog_prepend() {
   //
   // DESC
   // Returns a string that conforms (roughly) to the first few
@@ -501,10 +500,10 @@ string C_SMessage::syslog_prepend() {
   //   Rewrote using gethostname().
   //
 
-  time_t time_now = time(nullptr);
-  stringstream sstream("");
-  string str_hostname("");
-  char pch_buffer[65536];
+  time_t            time_now = time(nullptr);
+  std::stringstream sstream("");
+  std::string       str_hostname("");
+  char              pch_buffer[65536];
   // int                 ret                     = 0;
 
   try {
@@ -516,7 +515,7 @@ string C_SMessage::syslog_prepend() {
   }
 
   // Time stamp issues
-  string str_time = ctime(&time_now);
+  std::string str_time = ctime(&time_now);
   // strip out trailing `YYYY\n'
   str_time.erase(str_time.length() - 5);
   sstream << str_time << " ";
@@ -553,28 +552,28 @@ bool C_SMessage::timer(e_SMTimerAction e_timerAction) {
   // o Fixed up bug with time issues (used wrong underlying structures).
   //
 
-  static time_t tt_begin, tt_end;
-  float f_processtime;
-  stringstream sstream("");
+  static time_t     tt_begin, tt_end;
+  float             f_processtime;
+  std::stringstream sstream("");
 
   switch (e_timerAction) {
   case eSM_start:
     time(&tt_begin);
-    sstream << "Timer START." << endl;
+    sstream << "Timer START." << std::endl;
     dump(true, sstream.str());
     break;
   case eSM_stop:
     time(&tt_end);
     sstream << "Timer STOP. ";
     f_processtime = difftime(tt_end, tt_begin);
-    sstream << "Total number of seconds: " << f_processtime << endl;
+    sstream << "Total number of seconds: " << f_processtime << std::endl;
     dump(true, sstream.str());
     break;
   }
   return true;
 }
 
-bool C_SMessage::file_changeTo(string astr_filename, e_SMessageIO ae_IO) {
+bool C_SMessage::file_changeTo(std::string astr_filename, e_SMessageIO ae_IO) {
   //
   // ARGS
   //  astr_filename           in              new filename to channel output
@@ -631,7 +630,7 @@ bool C_SMessage::file_changeTo(string astr_filename, e_SMessageIO ae_IO) {
   }
   b_fileSpecified = false;
 
-  e_IO = ae_IO;
+  e_IO         = ae_IO;
   str_filename = astr_filename;
 
   switch (e_IO) {
@@ -645,7 +644,7 @@ bool C_SMessage::file_changeTo(string astr_filename, e_SMessageIO ae_IO) {
       e_format = eSM_devnull;
     else {
       if ((pFILE_stream = fopen(astr_filename.c_str(), "a")) == nullptr) {
-        string str_error = "Cannot open file " + astr_filename;
+        std::string str_error = "Cannot open file " + astr_filename;
         error(str_error);
       }
       pFILE_out = pFILE_stream;
@@ -656,26 +655,26 @@ bool C_SMessage::file_changeTo(string astr_filename, e_SMessageIO ae_IO) {
       e_format = eSM_devnull;
 
     if ((str_filename != "stdout") && str_filename != "stderr") {
-      ofs_out.open(astr_filename.c_str(), ios::app);
+      ofs_out.open(astr_filename.c_str(), std::ios::app);
       if (!ofs_out)
         error("Could not create output file:" + astr_filename, -1);
       b_fileSpecified = true;
     }
     break;
   case eSS:
-    string str_remotehost; // host to receive UDP transmission
-    string str_remoteport; // port on remote hostname
-    int pos;               // position of separating ":"
-    int port;
-    pos = astr_filename.find_first_of(":");
-    string str_msg = "For SSocket-type target, destination string ";
+    std::string str_remotehost; // host to receive UDP transmission
+    std::string str_remoteport; // port on remote hostname
+    int         pos;            // position of separating ":"
+    int         port;
+    pos                 = astr_filename.find_first_of(":");
+    std::string str_msg = "For SSocket-type target, destination string ";
     str_msg += "must be '<hostname>:<port>'.\n";
     str_msg += "\tThe ':' char has to be present.";
-    if ((unsigned)pos == (unsigned)string::npos)
+    if ((unsigned)pos == (unsigned)std::string::npos)
       error(str_msg);
     str_remotehost = astr_filename.substr(0, pos);
     str_remoteport = astr_filename.substr(pos + 1);
-    port = atoi(str_remoteport.c_str());
+    port           = atoi(str_remoteport.c_str());
     if (b_socketCreated)
       delete pcSS;
     pcSS = new c_SSocket_UDP_transmit(str_remotehost, port);
@@ -686,29 +685,29 @@ bool C_SMessage::file_changeTo(string astr_filename, e_SMessageIO ae_IO) {
 }
 
 int C_SMessage::printf(const char *format, ...) {
-  char pch_buffer[65536];
-  int ret = 0;
-  va_list vp_arg;
-  string str_syslog = "";
-  string str_buffer = "";
+  char        pch_buffer[65536];
+  int         ret = 0;
+  va_list     vp_arg;
+  std::string str_syslog = "";
+  std::string str_buffer = "";
 
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
   va_end(vp_arg);
   if (b_canPrint) {
     str_buffer = pch_buffer;
-    ret = fprintf(pFILE_out, "%s", str_buffer.c_str());
+    ret        = fprintf(pFILE_out, "%s", str_buffer.c_str());
   }
   fflush(pFILE_out);
   return ret;
 }
 
 int C_SMessage::lprintf(const char *format, ...) {
-  char pch_buffer[65536];
-  int ret = 0;
-  va_list vp_arg;
-  string str_syslog = "";
-  string str_buffer = "";
+  char        pch_buffer[65536];
+  int         ret = 0;
+  va_list     vp_arg;
+  std::string str_syslog = "";
+  std::string str_buffer = "";
 
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -726,12 +725,12 @@ int C_SMessage::lprintf(const char *format, ...) {
 }
 
 int C_SMessage::pprintf(const char *format, ...) {
-  char pch_buffer[65536];
-  char pch_bufferOut[131072];
-  int ret;
-  va_list vp_arg;
-  string str_syslog = "";
-  string str_buffer = "";
+  char        pch_buffer[65536];
+  char        pch_bufferOut[131072];
+  int         ret;
+  va_list     vp_arg;
+  std::string str_syslog = "";
+  std::string str_buffer = "";
 
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -747,12 +746,12 @@ int C_SMessage::pprintf(const char *format, ...) {
 }
 
 int C_SMessage::plprintf(const char *format, ...) {
-  char pch_buffer[65536];
-  char pch_bufferOut[131072];
-  int ret;
-  va_list vp_arg;
-  string str_syslog = "";
-  string str_buffer = "";
+  char        pch_buffer[65536];
+  char        pch_bufferOut[131072];
+  int         ret;
+  va_list     vp_arg;
+  std::string str_syslog = "";
+  std::string str_buffer = "";
 
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -767,13 +766,13 @@ int C_SMessage::plprintf(const char *format, ...) {
   return ret;
 }
 
-int C_SMessage::lprintf(string &str_bufferOut, const char *format, ...) {
-  char pch_buffer[65536];
-  char pch_bufferOut[131072];
-  int ret;
-  va_list vp_arg;
-  string str_syslog = "";
-  string str_buffer = "";
+int C_SMessage::lprintf(std::string &str_bufferOut, const char *format, ...) {
+  char        pch_buffer[65536];
+  char        pch_bufferOut[131072];
+  int         ret;
+  va_list     vp_arg;
+  std::string str_syslog = "";
+  std::string str_buffer = "";
 
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -783,19 +782,19 @@ int C_SMessage::lprintf(string &str_bufferOut, const char *format, ...) {
     str_buffer = str_syslog + " " + pch_buffer;
   } else
     str_buffer = pch_buffer;
-  ret = sprintf(pch_bufferOut, "%-*s", lw, str_buffer.c_str());
+  ret           = sprintf(pch_bufferOut, "%-*s", lw, str_buffer.c_str());
   str_bufferOut = pch_bufferOut;
   return ret;
 }
 
 int C_SMessage::pcolprintf(const char *pch_lstr, const char *format, ...) {
-  char pch_buffer[65536];
-  char pch_bufferOut[131072];
-  int retlw, retrw;
-  int len;
-  va_list vp_arg;
-  string str_syslog = "";
-  string str_buffer = "";
+  char        pch_buffer[65536];
+  char        pch_bufferOut[131072];
+  int         retlw, retrw;
+  int         len;
+  va_list     vp_arg;
+  std::string str_syslog = "";
+  std::string str_buffer = "";
 
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -810,22 +809,22 @@ int C_SMessage::pcolprintf(const char *pch_lstr, const char *format, ...) {
   len = strlen(pch_buffer);
   if (pch_buffer[len - 1] == '\n') {
     pch_buffer[len - 1] = '\0';
-    retrw = sprintf(pch_bufferOut, "%-*s\n", rw, pch_buffer);
+    retrw               = sprintf(pch_bufferOut, "%-*s\n", rw, pch_buffer);
   } else
     retrw = sprintf(pch_bufferOut, "%-*s", rw, pch_buffer);
   str_payload.append(pch_bufferOut);
   return retlw + retrw;
 }
 
-int C_SMessage::colprintf(string &str_bufferOut, const char *pch_lstr,
+int C_SMessage::colprintf(std::string &str_bufferOut, const char *pch_lstr,
                           const char *format, ...) {
-  char pch_buffer[65536];
-  char pch_bufferOut[131072];
-  int retlw, retrw;
-  int len = 0;
-  va_list vp_arg;
-  string str_syslog = "";
-  string str_buffer = "";
+  char        pch_buffer[65536];
+  char        pch_bufferOut[131072];
+  int         retlw, retrw;
+  int         len = 0;
+  va_list     vp_arg;
+  std::string str_syslog = "";
+  std::string str_buffer = "";
 
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -835,12 +834,12 @@ int C_SMessage::colprintf(string &str_bufferOut, const char *pch_lstr,
     str_buffer = str_syslog + " " + pch_lstr;
   } else
     str_buffer = pch_lstr;
-  retlw = sprintf(pch_bufferOut, "%-*s", lw, str_buffer.c_str());
+  retlw         = sprintf(pch_bufferOut, "%-*s", lw, str_buffer.c_str());
   str_bufferOut = pch_bufferOut;
-  len = strlen(pch_buffer);
+  len           = strlen(pch_buffer);
   if (pch_buffer[len - 1] == '\n') {
     pch_buffer[len - 1] = '\0';
-    retrw = sprintf(pch_bufferOut, "%-*s\n", rw, pch_buffer);
+    retrw               = sprintf(pch_bufferOut, "%-*s\n", rw, pch_buffer);
   } else
     retrw = sprintf(pch_bufferOut, "%-*s", rw, pch_buffer);
   str_bufferOut += pch_bufferOut;
@@ -848,13 +847,13 @@ int C_SMessage::colprintf(string &str_bufferOut, const char *pch_lstr,
 }
 
 int C_SMessage::colprintf(const char *pch_lstr, const char *format, ...) {
-  char pch_buffer[65536];
-  int retlw = 0;
-  int retrw = 0;
-  int len = 0;
-  va_list vp_arg;
-  string str_syslog = "";
-  string str_buffer = "";
+  char        pch_buffer[65536];
+  int         retlw = 0;
+  int         retrw = 0;
+  int         len   = 0;
+  va_list     vp_arg;
+  std::string str_syslog = "";
+  std::string str_buffer = "";
 
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -866,10 +865,10 @@ int C_SMessage::colprintf(const char *pch_lstr, const char *format, ...) {
     } else
       str_buffer = pch_lstr;
     retlw = fprintf(pFILE_out, "%-*s", lw, str_buffer.c_str());
-    len = strlen(pch_buffer);
+    len   = strlen(pch_buffer);
     if (pch_buffer[len - 1] == '\n') {
       pch_buffer[len - 1] = '\0';
-      retrw = fprintf(pFILE_out, "%-*s\n", rw, pch_buffer);
+      retrw               = fprintf(pFILE_out, "%-*s\n", rw, pch_buffer);
     } else
       retrw = fprintf(pFILE_out, "%-*s", rw, pch_buffer);
   }

@@ -27,12 +27,12 @@
 #define LayerVolumeBase_h
 
 #include "LayerEditable.h"
-#include "vtkSmartPointer.h"
 #include "vtkImageData.h"
-#include <vector>
+#include "vtkSmartPointer.h"
 #include <QFile>
 #include <QVariantMap>
 #include <QVector>
+#include <vector>
 
 class vtkImageData;
 class BrushProperty;
@@ -58,7 +58,7 @@ public:
 
   bool BorderFillByRAS(double *ras, int nPlane, bool b3D = false);
 
-  void SetLiveWireByRAS(double *ras1, double *raw2, int nPlane);
+  void                SetLiveWireByRAS(double *ras1, double *raw2, int nPlane);
   std::vector<double> GetLiveWirePointsByRAS(double *pt1, double *pt2,
                                              int nPlane);
 
@@ -119,13 +119,13 @@ protected:
   QVector<int> SetVoxelByIndex(int *n1, int *n2, int nPlane, bool bAdd = true,
                                bool ignore_brush_size = false);
   QVector<int> FloodFillByIndex(int *n, int nPlane, bool bAdd = true,
-                                bool ignore_overflow = true,
-                                char *mask_out = NULL,
-                                bool ignore_exclusion = false);
+                                bool  ignore_overflow  = true,
+                                char *mask_out         = NULL,
+                                bool  ignore_exclusion = false);
   QVector<int> BorderFillByRAS(int *n, int nPlane);
-  bool SetLiveWireByIndex(int *n1, int *n2, int nPlane);
-  bool CloneVoxelByIndex(int *n, int nPlane);
-  bool CloneVoxelByIndex(int *n1, int *n2, int nPlane);
+  bool         SetLiveWireByIndex(int *n1, int *n2, int nPlane);
+  bool         CloneVoxelByIndex(int *n, int nPlane);
+  bool         CloneVoxelByIndex(int *n1, int *n2, int nPlane);
 
   bool GetConnectedToOld(vtkImageData *img, int nFrame, int *n, int nPlane);
 
@@ -144,12 +144,12 @@ protected:
       }
     }
 
-    int plane; // -1 means whole 3d volume
-    int slice;
+    int   plane; // -1 means whole 3d volume
+    int   slice;
     char *data;
-    int frame;
+    int   frame;
     QString
-        cache_filename; // if not empty, ignore data and read from cache file.
+                cache_filename; // if not empty, ignore data and read from cache file.
     QVariantMap mri_settings;
   };
 
@@ -166,7 +166,7 @@ protected:
 
   std::vector<UndoRedoBufferItem> m_bufferUndo;
   std::vector<UndoRedoBufferItem> m_bufferRedo;
-  UndoRedoBufferItem m_bufferClipboard;
+  UndoRedoBufferItem              m_bufferClipboard;
 
   int m_nBrushRadius;
 

@@ -34,19 +34,19 @@
 
 #include <GL/gl.h>
 
-#define TXF_FORMAT_BYTE 0
+#define TXF_FORMAT_BYTE   0
 #define TXF_FORMAT_BITMAP 1
 
 typedef struct {
   unsigned short c; /* Potentially support 16-bit glyphs. */
-  unsigned char width;
-  unsigned char height;
-  signed char xoffset;
-  signed char yoffset;
-  signed char advance;
-  char dummy; /* Space holder for alignment reasons. */
-  short x;
-  short y;
+  unsigned char  width;
+  unsigned char  height;
+  signed char    xoffset;
+  signed char    yoffset;
+  signed char    advance;
+  char           dummy; /* Space holder for alignment reasons. */
+  short          x;
+  short          y;
 } TexGlyphInfo;
 
 typedef struct {
@@ -62,17 +62,17 @@ typedef struct {
 } TexGlyphVertexInfo;
 
 typedef struct {
-  GLuint texobj;
-  int tex_width;
-  int tex_height;
-  int max_ascent;
-  int max_descent;
-  int num_glyphs;
-  int min_glyph;
-  int range;
-  unsigned char *teximage;
-  TexGlyphInfo *tgi;
-  TexGlyphVertexInfo *tgvi;
+  GLuint               texobj;
+  int                  tex_width;
+  int                  tex_height;
+  int                  max_ascent;
+  int                  max_descent;
+  int                  num_glyphs;
+  int                  min_glyph;
+  int                  range;
+  unsigned char *      teximage;
+  TexGlyphInfo *       tgi;
+  TexGlyphVertexInfo * tgvi;
   TexGlyphVertexInfo **lut;
 } TexFont;
 

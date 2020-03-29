@@ -53,7 +53,7 @@ protected:
 
   static bool IsWhitespace(const char x);
 
-  static std::string FormatString(std::string toBeFormated,
+  static std::string FormatString(std::string       toBeFormated,
                                   const std::string spacing);
 
 public:
@@ -69,7 +69,7 @@ public:
   void SetNextOptionalArgument(std::string iFlag, std::string iShortDescription,
                                std::string iLongDescription);
 
-  void SetName(std::string iName, std::string iDescription);
+  void        SetName(std::string iName, std::string iDescription);
   std::string GetName();
 
   std::string GetSynposis();
@@ -78,7 +78,7 @@ public:
 
   std::string GetExampleUsage();
 
-  void SetVersion(std::string iVersion);
+  void        SetVersion(std::string iVersion);
   std::string GetVersion();
 
   void SetBugEmail(std::string iEmail);
@@ -117,7 +117,7 @@ public:
   std::string *GetRequiredArguments();
 
   virtual bool FillArguments() = 0;
-  virtual void Run() = 0;
+  virtual void Run()           = 0;
 };
 
 #endif

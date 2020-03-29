@@ -36,53 +36,52 @@
 ////////////////////////////////////////////
 #include "ANN.h"
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <ctype.h>
-#include "mri.h"
-#include "mrisurf.h"
-#include "icosahedron.h"
+#include "cma.h"
 #include "const.h"
 #include "diag.h"
 #include "error.h"
+#include "icosahedron.h"
 #include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mrinorm.h"
+#include "mrisurf.h"
 #include "proto.h"
 #include "timer.h"
-#include "mrinorm.h"
-#include "cma.h"
 #include "version.h"
-#include "error.h"
-#include "matrix.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 // static char vcid[] = "$Id: mris_spharm.c,v 1.7 2011/03/02 00:04:34 nicks Exp
 // $";
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-const char *Progname;
-static int SphericalHarmonics(int L, int M, float theta, float phi);
-static double legendre(int l, int m, float x);
-static double factorial(int L, int M);
-static MATRIX *ComplexMatrixTranspose(MATRIX *mIn, MATRIX *mOut);
-static MATRIX *ComplexMatrixPseudoInverse(MATRIX *m, MATRIX *m_pseudo_inv);
+int                 main(int argc, char *argv[]);
+static int          get_option(int argc, char *argv[]);
+const char *        Progname;
+static int          SphericalHarmonics(int L, int M, float theta, float phi);
+static double       legendre(int l, int m, float x);
+static double       factorial(int L, int M);
+static MATRIX *     ComplexMatrixTranspose(MATRIX *mIn, MATRIX *mOut);
+static MATRIX *     ComplexMatrixPseudoInverse(MATRIX *m, MATRIX *m_pseudo_inv);
 static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst);
 static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
                                         MRI_SURFACE *mris_dst);
-static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
-                              int face_number, int debug);
-static int LEVEL = 7;
-static double REAL, IMAG;
-static float threshold = 1;
-static int COMPARE = 0;
-static char *cfname;
+static double       v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
+                                    int face_number, int debug);
+static int          LEVEL = 7;
+static double       REAL, IMAG;
+static float        threshold = 1;
+static int          COMPARE   = 0;
+static char *       cfname;
 
 int main(int argc, char *argv[]) {
-  char fname[STRLEN];
-  int nargs, msec, order, i, j, k, nvertices, dimension, count, fno;
+  char  fname[STRLEN];
+  int   nargs, msec, order, i, j, k, nvertices, dimension, count, fno;
   float phi, d, theta, area;
   Timer then;
   MRIS *mris_in, *mris_out;
@@ -158,22 +157,22 @@ int main(int argc, char *argv[]) {
   /*Initialize Matrix*/
   dimension = (order + 1) * (order + 1);
   nvertices = mris_out->nvertices;
-  m_c = MatrixAlloc(dimension, 3, MATRIX_COMPLEX);
-  m_Z = MatrixAlloc(nvertices, dimension, MATRIX_COMPLEX);
-  m_V = MatrixAlloc(nvertices, 3, MATRIX_REAL);
-  m_Z_inv = MatrixAlloc(dimension, nvertices, MATRIX_COMPLEX);
-  m_V_new = MatrixAlloc(nvertices, 3, MATRIX_COMPLEX);
+  m_c       = MatrixAlloc(dimension, 3, MATRIX_COMPLEX);
+  m_Z       = MatrixAlloc(nvertices, dimension, MATRIX_COMPLEX);
+  m_V       = MatrixAlloc(nvertices, 3, MATRIX_REAL);
+  m_Z_inv   = MatrixAlloc(dimension, nvertices, MATRIX_COMPLEX);
+  m_V_new   = MatrixAlloc(nvertices, 3, MATRIX_COMPLEX);
 
   for (i = 0; i < nvertices; i++) {
-    v = &mris_out->vertices[i];
+    v   = &mris_out->vertices[i];
     phi = atan2(v->y, v->x);
     if (phi < 0.0)
       phi = 2 * M_PI + phi;
     d = 100 * 100 - v->z * v->z;
     if (d < 0.0)
       d = 0;
-    theta = atan2(sqrt(d), v->z);
-    count = 0;
+    theta                       = atan2(sqrt(d), v->z);
+    count                       = 0;
     *MATRIX_RELT(m_V, i + 1, 1) = v->origx;
     *MATRIX_RELT(m_V, i + 1, 2) = v->origy;
     *MATRIX_RELT(m_V, i + 1, 3) = v->origz;
@@ -193,9 +192,9 @@ int main(int argc, char *argv[]) {
 
   if (COMPARE) {
     MATRIX *m_cc;
-    double r1, r2, m1, m2, diff;
+    double  r1, r2, m1, m2, diff;
     fprintf(stdout, "%s\n", cfname);
-    m_cc = MatrixAlloc(dimension, 3, MATRIX_COMPLEX);
+    m_cc     = MatrixAlloc(dimension, 3, MATRIX_COMPLEX);
     mris_out = ReadIcoByOrder(LEVEL, 100);
     for (i = 0; i < mris_out->nvertices; i++)
       mris_out->vertices[i].nsize = 1;
@@ -229,15 +228,15 @@ int main(int argc, char *argv[]) {
 #endif
 
     for (i = 0; i < nvertices; i++) {
-      v = &mris_out->vertices[i];
+      v   = &mris_out->vertices[i];
       phi = atan2(v->y, v->x);
       if (phi < 0.0)
         phi = 2 * M_PI + phi;
       d = 100 * 100 - v->z * v->z;
       if (d < 0.0)
         d = 0;
-      theta = atan2(sqrt(d), v->z);
-      count = 0;
+      theta                       = atan2(sqrt(d), v->z);
+      count                       = 0;
       *MATRIX_RELT(m_V, i + 1, 1) = v->origx;
       *MATRIX_RELT(m_V, i + 1, 2) = v->origy;
       *MATRIX_RELT(m_V, i + 1, 3) = v->origz;
@@ -290,7 +289,7 @@ int main(int argc, char *argv[]) {
   MatrixMultiply(m_Z, m_c, m_V_new);
 
   for (i = 0; i < nvertices; i++) {
-    v = &mris_out->vertices[i];
+    v        = &mris_out->vertices[i];
     v->origx = MATRIX_CELT_REAL(m_V_new, i + 1, 1);
     v->origy = MATRIX_CELT_REAL(m_V_new, i + 1, 2);
     v->origz = MATRIX_CELT_REAL(m_V_new, i + 1, 3);
@@ -320,10 +319,10 @@ int main(int argc, char *argv[]) {
 static int SphericalHarmonics(int L, int M, float theta, float phi) {
   double P, factor;
 
-  P = legendre(L, abs(M), cos(theta));
+  P      = legendre(L, abs(M), cos(theta));
   factor = sqrt((L + 0.5) * factorial(L, abs(M)));
-  REAL = factor * P * cos(abs(M) * phi) / sqrt(2 * M_PI);
-  IMAG = factor * P * sin(abs(M) * phi) / sqrt(2 * M_PI);
+  REAL   = factor * P * cos(abs(M) * phi) / sqrt(2 * M_PI);
+  IMAG   = factor * P * sin(abs(M) * phi) / sqrt(2 * M_PI);
   if (M < 0) {
     REAL = pow(-1, abs(M)) * REAL;
     IMAG = pow(-1, abs(M)) * (-1) * IMAG;
@@ -333,14 +332,14 @@ static int SphericalHarmonics(int L, int M, float theta, float phi) {
 
 static double legendre(int l, int m, float x) {
   double fact, pll, pmm, pmmp1, somx2;
-  int i, ll;
+  int    i, ll;
 
   if (m < 0 || m > l || fabs(x) > 1.0)
     fprintf(stdout, "Bad arguments in routine legendre");
   pmm = 1.0;
   if (m > 0) {
     somx2 = sqrt((1.0 - x) * (1.0 + x));
-    fact = 1.0;
+    fact  = 1.0;
     for (i = 1; i <= m; i++) {
       pmm *= -fact * somx2;
       fact += 2.0;
@@ -355,8 +354,8 @@ static double legendre(int l, int m, float x) {
       return pmmp1;
     else {
       for (ll = m + 2; ll <= l; ll++) {
-        pll = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
-        pmm = pmmp1;
+        pll   = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
+        pmm   = pmmp1;
         pmmp1 = pll;
       }
       return pll;
@@ -366,7 +365,7 @@ static double legendre(int l, int m, float x) {
 
 static double factorial(int L, int M) {
   double ratio = 1;
-  int i;
+  int    i;
 
   for (i = L + M; i > L - M; i--)
     ratio *= (double)1 / i;
@@ -377,8 +376,8 @@ MATRIX *ComplexMatrixPseudoInverse(MATRIX *m, MATRIX *m_pseudo_inv) {
   MATRIX *mT, *mTm, *mTm_inv;
 
   /* build (mT m)-1 mT */
-  mT = ComplexMatrixTranspose(m, NULL);
-  mTm = MatrixMultiply(mT, m, NULL);
+  mT      = ComplexMatrixTranspose(m, NULL);
+  mTm     = MatrixMultiply(mT, m, NULL);
   mTm_inv = MatrixInverse(mTm, NULL);
   if (!mTm_inv) {
     MatrixFree(&mT);
@@ -416,10 +415,10 @@ MATRIX *ComplexMatrixTranspose(MATRIX *mIn, MATRIX *mOut) {
 }
 
 static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
-  int fno, vno;
-  FACE *face;
+  int     fno, vno;
+  FACE *  face;
   VERTEX *vdst;
-  float x, y, z, x0, y0, z0;
+  float   x, y, z, x0, y0, z0;
 
   if (!mris_dst)
     mris_dst = MRISclone(mris_src);
@@ -467,9 +466,9 @@ static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
 
 static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
                                         MRI_SURFACE *mris_dst) {
-  int index, vno, fno, fnum;
-  VERTEX *vertex;
-  double nearest, dist, x1, y1, z1, x2, y2, z2, r, s, t;
+  int           index, vno, fno, fnum;
+  VERTEX *      vertex;
+  double        nearest, dist, x1, y1, z1, x2, y2, z2, r, s, t;
   ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
 
   for (index = 0; index < mris_src->nvertices; index++) {
@@ -478,9 +477,9 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
     pa[index][2] = mris_src->vertices[index].z;
   }
 
-  ANNkd_tree *annkdTree = new ANNkd_tree(pa, mris_src->nvertices, 3);
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNkd_tree * annkdTree = new ANNkd_tree(pa, mris_src->nvertices, 3);
+  ANNidxArray  annIndex  = new ANNidx[1];
+  ANNdistArray annDist   = new ANNdist[1];
   //  ANNpoint query_pt = annAllocPt(3);
   ANNpointArray QueryPt;
 
@@ -504,14 +503,14 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
         annDist,           // distance (returned)
         0);                // error bound
 
-    vertex = &mris_src->vertices[annIndex];
+    vertex  = &mris_src->vertices[annIndex];
     nearest = 100000;
     for (i = 0; i < vertex->num; i++) {
-      fno = vertex->f[i];
+      fno  = vertex->f[i];
       dist = v_to_f_distance(mris_dst->vertices[index], mris_src, fno, 0);
       if (dist < nearest) {
         nearest = dist;
-        fnum = fno;
+        fnum    = fno;
       }
     }
 
@@ -581,17 +580,17 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
 
 static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
                               int face_number, int debug) {
-  double a, b, c, d, e, f, det, s, t, invDet;
-  double numer, denom, tmp0, tmp1;
+  double  a, b, c, d, e, f, det, s, t, invDet;
+  double  numer, denom, tmp0, tmp1;
   VERTEX *V1, *V2, *V3;
-  FACE *face;
+  FACE *  face;
 
   VERTEX E0, E1, D;
 
   face = &mri_surf->faces[face_number];
-  V1 = &mri_surf->vertices[face->v[0]];
-  V2 = &mri_surf->vertices[face->v[1]];
-  V3 = &mri_surf->vertices[face->v[2]];
+  V1   = &mri_surf->vertices[face->v[0]];
+  V2   = &mri_surf->vertices[face->v[1]];
+  V3   = &mri_surf->vertices[face->v[2]];
 
   E0.x = V2->x - V1->x;
   E0.y = V2->y - V1->y;
@@ -599,9 +598,9 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
   E1.x = V3->x - V1->x;
   E1.y = V3->y - V1->y;
   E1.z = V3->z - V1->z;
-  D.x = V1->x - P0->x;
-  D.y = V1->y - P0->y;
-  D.z = V1->z - P0->z;
+  D.x  = V1->x - P0->x;
+  D.y  = V1->y - P0->y;
+  D.z  = V1->z - P0->z;
 
   a = E0.x * E0.x + E0.y * E0.y + E0.z * E0.z;
   b = E0.x * E1.x + E0.y * E1.y + E0.z * E1.z;
@@ -611,8 +610,8 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
   f = D.x * D.x + D.y * D.y + D.z * D.z;
 
   det = a * c - b * b;
-  s = b * e - c * d;
-  t = b * d - a * e;
+  s   = b * e - c * d;
+  t   = b * d - a * e;
 
   if (debug)
     printf("det = %g\n", det);
@@ -625,8 +624,8 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
         if (tmp1 > tmp0) {
           numer = tmp1 - tmp0;
           denom = a - b - b + c;
-          s = (numer >= denom ? 1 : numer / denom);
-          t = 1 - s;
+          s     = (numer >= denom ? 1 : numer / denom);
+          t     = 1 - s;
 
         } else {
           s = 0;
@@ -679,8 +678,8 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
       if (tmp1 > tmp0) {     /* Minimum at line s + t = 1 */
         numer = tmp1 - tmp0; /* Positive */
         denom = a + c - b - b;
-        t = (numer >= denom ? 1 : (numer / denom));
-        s = 1 - t;
+        t     = (numer >= denom ? 1 : (numer / denom));
+        s     = 1 - t;
       } else { /* Minimum at line t = 0 */
         s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
         t = 0;
@@ -694,7 +693,7 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
         s = 0;
       } else {
         denom = a + c - b - b; /* denom is positive */
-        s = (numer >= denom ? 1 : (numer / denom));
+        s     = (numer >= denom ? 1 : (numer / denom));
       }
       t = 1 - s;
       if (debug)
@@ -719,7 +718,7 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
  ----------------------------------------------------------------------*/
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -729,7 +728,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stdout, "Use %d order icosahedron \n", LEVEL);
     nargs = 1;
   } else if (!stricmp(option, "C")) {
-    cfname = argv[2];
+    cfname  = argv[2];
     COMPARE = 1;
     fprintf(stdout, "Compare with %s \n", cfname);
     nargs = 1;

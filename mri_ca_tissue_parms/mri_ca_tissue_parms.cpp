@@ -23,13 +23,13 @@
  *
  */
 
-#include "error.h"
 #include "diag.h"
-#include "timer.h"
+#include "error.h"
 #include "gca.h"
+#include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 #if 0
 static int test(MRI *mri1, MRI *mri2, MRI *mri3, MATRIX *m_vol1_to_vol2_ras) ;
@@ -39,11 +39,11 @@ const char *Progname;
 static void usage_exit(int code);
 
 static char *histo_parms = nullptr;
-static int write_flag = 0;
-static char *log_fname = nullptr;
-static char *parc_dir = "parc";
-static char *T1_name = "flash/T1.mgh";
-static char *PD_name = "flash/PD.mgh";
+static int   write_flag  = 0;
+static char *log_fname   = nullptr;
+static char *parc_dir    = "parc";
+static char *T1_name     = "flash/T1.mgh";
+static char *PD_name     = "flash/PD.mgh";
 
 static char *xform_name = nullptr;
 
@@ -51,13 +51,13 @@ static char subjects_dir[STRLEN];
 
 int main(int argc, char *argv[]) {
   TRANSFORM *transform = nullptr;
-  char **av, fname[STRLEN], *gca_fname, *subject_name, *cp;
-  int ac, nargs, i, n;
-  int msec, minutes, seconds, nsubjects;
-  Timer start;
-  GCA *gca;
-  MRI *mri_parc, *mri_T1, *mri_PD;
-  FILE *fp;
+  char **    av, fname[STRLEN], *gca_fname, *subject_name, *cp;
+  int        ac, nargs, i, n;
+  int        msec, minutes, seconds, nsubjects;
+  Timer      start;
+  GCA *      gca;
+  MRI *      mri_parc, *mri_T1, *mri_PD;
+  FILE *     fp;
 
   nargs = handleVersionOption(argc, argv, "mri_ca_tissue_parms");
   if (nargs && argc - nargs == 1)
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
   if (write_flag)
     GCAwrite(gca, gca_fname);
   GCAfree(&gca);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -204,17 +204,17 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "T1")) {
     T1_name = argv[2];
-    nargs = 1;
+    nargs   = 1;
     printf("reading T1 data from subject's mri/%s directory\n", T1_name);
   } else if (!stricmp(option, "PD")) {
     PD_name = argv[2];
-    nargs = 1;
+    nargs   = 1;
     printf("reading PD map from subject's mri/%s directory\n", PD_name);
   } else if (!stricmp(option, "SDIR")) {
     strcpy(subjects_dir, argv[2]);
@@ -222,11 +222,11 @@ static int get_option(int argc, char *argv[]) {
     printf("using %s as SUBJECTS_DIR\n", subjects_dir);
   } else if (!stricmp(option, "xform")) {
     xform_name = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("reading and applying xform from %s for each subject\n", xform_name);
   } else if (!stricmp(option, "PARC_DIR")) {
     parc_dir = argv[2];
-    nargs = 1;
+    nargs    = 1;
     printf("reading parcellation from subject's mri/%s directory\n", parc_dir);
   } else if (!stricmp(option, "SDIR")) {
     strcpy(subjects_dir, argv[2]);
@@ -236,13 +236,13 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'H':
       histo_parms = argv[2];
-      nargs = 1;
+      nargs       = 1;
       printf("writing T1/PD histograms to %s...\n", histo_parms);
       break;
       break;
     case 'L':
       log_fname = argv[2];
-      nargs = 1;
+      nargs     = 1;
       printf("writing T1/PD class info to %s...\n", log_fname);
       break;
     case '?':

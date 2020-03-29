@@ -22,20 +22,20 @@
  *
  */
 #include "WindowConfigureOverlay.h"
-#include "ui_WindowConfigureOverlay.h"
-#include "LayerSurface.h"
-#include "SurfaceOverlayProperty.h"
-#include "SurfaceOverlay.h"
-#include "SurfaceLabel.h"
-#include "LayerPropertySurface.h"
-#include "MainWindow.h"
+#include "DialogScreenshotOverlay.h"
 #include "LayerCollection.h"
 #include "LayerMRI.h"
+#include "LayerPropertySurface.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
+#include "SurfaceLabel.h"
+#include "SurfaceOverlay.h"
+#include "SurfaceOverlayProperty.h"
+#include "ui_WindowConfigureOverlay.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
 #include <QTimer>
-#include "DialogScreenshotOverlay.h"
 
 WindowConfigureOverlay::WindowConfigureOverlay(QWidget *parent)
     : QWidget(parent), UIUpdateHelper(), ui(new Ui::WindowConfigureOverlay),
@@ -52,18 +52,24 @@ WindowConfigureOverlay::WindowConfigureOverlay(QWidget *parent)
   ui->widgetColorPicker->setCurrentColor(Qt::green);
   m_rangeOverall[0] = 0;
   m_rangeOverall[1] = 1;
-  connect(ui->widgetHistogram, SIGNAL(MarkerChanged()), this, SLOT(OnHistogramMarkerChanged()));
-  connect(ui->checkBoxAutoApply, SIGNAL(toggled(bool)), this, SLOT(CheckApply(bool)));
-  connect(ui->checkBoxApplyToAll, SIGNAL(toggled(bool)), this, SLOT(CheckApply(bool)));
-  connect(ui->checkBoxAutoFrame, SIGNAL(toggled(bool)), this, SLOT(OnCheckAutoFrameByVertex(bool)));
+  connect(ui->widgetHistogram, SIGNAL(MarkerChanged()), this,
+          SLOT(OnHistogramMarkerChanged()));
+  connect(ui->checkBoxAutoApply, SIGNAL(toggled(bool)), this,
+          SLOT(CheckApply(bool)));
+  connect(ui->checkBoxApplyToAll, SIGNAL(toggled(bool)), this,
+          SLOT(CheckApply(bool)));
+  connect(ui->checkBoxAutoFrame, SIGNAL(toggled(bool)), this,
+          SLOT(OnCheckAutoFrameByVertex(bool)));
   connect(ui->pushButtonApply, SIGNAL(clicked(bool)), SLOT(OnButtonClicked()));
   connect(ui->pushButtonCancel, SIGNAL(clicked(bool)), SLOT(OnButtonClicked()));
-  connect(ui->pushButtonScreenshot, SIGNAL(clicked(bool)), SLOT(OnButtonClicked()));
+  connect(ui->pushButtonScreenshot, SIGNAL(clicked(bool)),
+          SLOT(OnButtonClicked()));
   connect(ui->pushButtonHelp, SIGNAL(clicked(bool)), SLOT(OnButtonClicked()));
-  connect(ui->checkBoxFixedAxes, SIGNAL(toggled(bool)), SLOT(OnCheckFixedAxes(bool)));
+  connect(ui->checkBoxFixedAxes, SIGNAL(toggled(bool)),
+          SLOT(OnCheckFixedAxes(bool)));
   m_layerSurface = NULL;
   QSettings settings;
-  QVariant v = settings.value("WindowConfigureOverlay/Geometry");
+  QVariant  v = settings.value("WindowConfigureOverlay/Geometry");
   if (v.isValid()) {
     this->restoreGeometry(v.toByteArray());
   }
@@ -71,13 +77,16 @@ WindowConfigureOverlay::WindowConfigureOverlay(QWidget *parent)
   if (!v.isValid())
     v = true;
   ui->checkBoxAutoApply->setChecked(v.toBool());
-  ui->checkBoxAutoFrame->setChecked(settings.value("WindowConfigureOverlay/AutoFrame").toBool());
-  ui->checkBoxFixedAxes->setChecked(settings.value("WindowConfigureOverlay/FixedAxes", true).toBool());
+  ui->checkBoxAutoFrame->setChecked(
+      settings.value("WindowConfigureOverlay/AutoFrame").toBool());
+  ui->checkBoxFixedAxes->setChecked(
+      settings.value("WindowConfigureOverlay/FixedAxes", true).toBool());
 
-  LayerCollection* lc = MainWindow::GetMainWindow()->GetLayerCollection("MRI");
-  connect(lc, SIGNAL(LayerAdded(Layer*)), this, SLOT(UpdateUI()));
-  connect(lc, SIGNAL(LayerRemoved(Layer*)), this, SLOT(UpdateUI()));
-  connect(MainWindow::GetMainWindow(), SIGNAL(CycleOverlayRequested()), SLOT(OnCycleOverlay()));
+  LayerCollection *lc = MainWindow::GetMainWindow()->GetLayerCollection("MRI");
+  connect(lc, SIGNAL(LayerAdded(Layer *)), this, SLOT(UpdateUI()));
+  connect(lc, SIGNAL(LayerRemoved(Layer *)), this, SLOT(UpdateUI()));
+  connect(MainWindow::GetMainWindow(), SIGNAL(CycleOverlayRequested()),
+          SLOT(OnCycleOverlay()));
 
   m_dlgScreenshot = new DialogScreenshotOverlay(this);
   m_dlgScreenshot->hide();
@@ -90,9 +99,12 @@ WindowConfigureOverlay::~WindowConfigureOverlay() {
 
   QSettings settings;
   settings.setValue("WindowConfigureOverlay/Geometry", this->saveGeometry());
-  settings.setValue("WindowConfigureOverlay/AutoApply", ui->checkBoxAutoApply->isChecked());
-  settings.setValue("WindowConfigureOverlay/AutoFrame", ui->checkBoxAutoFrame->isChecked());
-  settings.setValue("WindowConfigureOverlay/FixedAxes", ui->checkBoxFixedAxes->isChecked());
+  settings.setValue("WindowConfigureOverlay/AutoApply",
+                    ui->checkBoxAutoApply->isChecked());
+  settings.setValue("WindowConfigureOverlay/AutoFrame",
+                    ui->checkBoxAutoFrame->isChecked());
+  settings.setValue("WindowConfigureOverlay/FixedAxes",
+                    ui->checkBoxFixedAxes->isChecked());
 
   delete ui;
 }
@@ -103,15 +115,11 @@ void WindowConfigureOverlay::showEvent(QShowEvent *) {
   UpdateGeometry();
 }
 
-void WindowConfigureOverlay::hideEvent(QHideEvent *)
-{
+void WindowConfigureOverlay::hideEvent(QHideEvent *) {
   m_dlgScreenshot->hide();
 }
 
-void WindowConfigureOverlay::resizeEvent(QResizeEvent *e)
-{
-  UpdateGeometry();
-}
+void WindowConfigureOverlay::resizeEvent(QResizeEvent *e) { UpdateGeometry(); }
 
 void WindowConfigureOverlay::UpdateGeometry() {
   QRect rc = ui->labelShortCut->geometry();
@@ -128,23 +136,22 @@ void WindowConfigureOverlay::OnActiveSurfaceChanged(Layer *layer) {
   m_layerSurface = qobject_cast<LayerSurface *>(layer);
   if (m_layerSurface) {
     disconnect(m_layerSurface, 0, this, 0);
-    connect(m_layerSurface, SIGNAL(SurfaceOverlyDataUpdated()),
-            this, SLOT(UpdateUI()), Qt::UniqueConnection);
-    connect(m_layerSurface, SIGNAL(SurfaceOverlyDataUpdated()),
-            this, SLOT(UpdateGraph()), Qt::QueuedConnection);
-    connect(m_layerSurface, SIGNAL(ActiveOverlayChanged(int)),
-            this, SLOT(OnActiveOverlayChanged()), Qt::UniqueConnection);
-    connect(m_layerSurface, SIGNAL(SurfaceLabelAdded(SurfaceLabel*)),
-            this, SLOT(OnSurfaceLabelAdded(SurfaceLabel*)), Qt::UniqueConnection);
-    connect(m_layerSurface, SIGNAL(SurfaceLabelDeleted(SurfaceLabel*)),
-            this, SLOT(UpdateUI()), Qt::UniqueConnection);
+    connect(m_layerSurface, SIGNAL(SurfaceOverlyDataUpdated()), this,
+            SLOT(UpdateUI()), Qt::UniqueConnection);
+    connect(m_layerSurface, SIGNAL(SurfaceOverlyDataUpdated()), this,
+            SLOT(UpdateGraph()), Qt::QueuedConnection);
+    connect(m_layerSurface, SIGNAL(ActiveOverlayChanged(int)), this,
+            SLOT(OnActiveOverlayChanged()), Qt::UniqueConnection);
+    connect(m_layerSurface, SIGNAL(SurfaceLabelAdded(SurfaceLabel *)), this,
+            SLOT(OnSurfaceLabelAdded(SurfaceLabel *)), Qt::UniqueConnection);
+    connect(m_layerSurface, SIGNAL(SurfaceLabelDeleted(SurfaceLabel *)), this,
+            SLOT(UpdateUI()), Qt::UniqueConnection);
   }
 
   OnActiveOverlayChanged();
 }
 
-void WindowConfigureOverlay::OnActiveOverlayChanged()
-{
+void WindowConfigureOverlay::OnActiveOverlayChanged() {
   if (m_fDataCache)
     delete[] m_fDataCache;
   m_fDataCache = 0;
@@ -161,8 +168,8 @@ void WindowConfigureOverlay::UpdateUI() {
       allwidgets[i]->blockSignals(true);
     }
 
-    SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
-    SurfaceOverlayProperty *p = overlay->GetProperty();
+    SurfaceOverlay *        overlay = m_layerSurface->GetActiveOverlay();
+    SurfaceOverlayProperty *p       = overlay->GetProperty();
 
     ui->comboBoxOverlayList->clear();
     for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++) {
@@ -240,7 +247,7 @@ void WindowConfigureOverlay::UpdateUI() {
     for (int i = 0; i < stops.size(); i++) {
       LineMarker m;
       m.position = stops[i].first;
-      m.color = stops[i].second;
+      m.color    = stops[i].second;
       m_markers << m;
     }
 
@@ -293,22 +300,18 @@ void WindowConfigureOverlay::UpdateUI() {
   }
 }
 
-void WindowConfigureOverlay::OnButtonClicked()
-{
-  if (sender() == ui->pushButtonHelp)
-  {
-    QMessageBox::information(this, "Help", "Drag the handle to move point.\n\nAt Custom mode:\nDouble-click on the handle to change point color.\nShift+Click on the handle to remove point.");
-  }
-  else if (sender() == ui->pushButtonApply)
-  {
+void WindowConfigureOverlay::OnButtonClicked() {
+  if (sender() == ui->pushButtonHelp) {
+    QMessageBox::information(
+        this, "Help",
+        "Drag the handle to move point.\n\nAt Custom mode:\nDouble-click on "
+        "the handle to change point color.\nShift+Click on the handle to "
+        "remove point.");
+  } else if (sender() == ui->pushButtonApply) {
     OnApply();
-  }
-  else if (sender() == ui->pushButtonCancel)
-  {
+  } else if (sender() == ui->pushButtonCancel) {
     close();
-  }
-  else if (sender() == ui->pushButtonScreenshot)
-  {
+  } else if (sender() == ui->pushButtonScreenshot) {
     m_dlgScreenshot->show();
     m_dlgScreenshot->raise();
   }
@@ -320,7 +323,7 @@ void WindowConfigureOverlay::OnApply() {
   }
 
   SurfaceOverlayProperty *p = m_layerSurface->GetActiveOverlay()->GetProperty();
-  bool smooth_changed =
+  bool                    smooth_changed =
       (p->GetSmooth() != ui->checkBoxEnableSmooth->isChecked() ||
        p->GetSmoothSteps() != ui->spinBoxSmoothSteps->value());
   if (UpdateOverlayProperty(p)) {
@@ -328,15 +331,14 @@ void WindowConfigureOverlay::OnApply() {
       m_layerSurface->GetActiveOverlay()->UpdateSmooth();
     else
       p->EmitColorMapChanged();
-    if (ui->checkBoxApplyToAll->isChecked())
-    {
-      for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++)
-      {
-        SurfaceOverlay* so = m_layerSurface->GetOverlay(i);
-        if (so != m_layerSurface->GetActiveOverlay())
-        {
-          smooth_changed = (so->GetProperty()->GetSmooth() != ui->checkBoxEnableSmooth->isChecked() ||
-                so->GetProperty()->GetSmoothSteps() != ui->spinBoxSmoothSteps->value() );
+    if (ui->checkBoxApplyToAll->isChecked()) {
+      for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++) {
+        SurfaceOverlay *so = m_layerSurface->GetOverlay(i);
+        if (so != m_layerSurface->GetActiveOverlay()) {
+          smooth_changed = (so->GetProperty()->GetSmooth() !=
+                                ui->checkBoxEnableSmooth->isChecked() ||
+                            so->GetProperty()->GetSmoothSteps() !=
+                                ui->spinBoxSmoothSteps->value());
           so->GetProperty()->Copy(p);
           if (smooth_changed)
             so->UpdateSmooth();
@@ -362,8 +364,8 @@ bool WindowConfigureOverlay::UpdateOverlayProperty(SurfaceOverlayProperty *p) {
   p->SetUsePercentile(ui->checkBoxUsePercentile->isChecked());
   p->SetIgnoreZeros(ui->checkBoxUseNonZeroVertices->isChecked());
 
-  bool bOK;
-  double dValue = ui->lineEditMin->text().toDouble(&bOK);
+  bool            bOK;
+  double          dValue  = ui->lineEditMin->text().toDouble(&bOK);
   SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
   if (bOK) {
     if (ui->checkBoxUsePercentile->isChecked())
@@ -441,15 +443,12 @@ void WindowConfigureOverlay::UpdateGraph(bool bApply) {
     SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
     if (overlay) {
       double range[2];
-      if (ui->checkBoxFixedAxes->isChecked())
-      {
+      if (ui->checkBoxFixedAxes->isChecked()) {
         range[0] = m_rangeOverall[0];
         range[1] = m_rangeOverall[1];
-      }
-      else
-        overlay->GetDisplayRange( range );
-      if (range[0] == range[1])
-      {
+      } else
+        overlay->GetDisplayRange(range);
+      if (range[0] == range[1]) {
         return;
       }
 
@@ -466,19 +465,19 @@ void WindowConfigureOverlay::UpdateGraph(bool bApply) {
       ui->widgetHistogram->SetMarkerEditable(p->GetColorScale() ==
                                              SurfaceOverlayProperty::CS_Custom);
 
-      int nBins = ui->widgetHistogram->GetNumberOfBins();
-      float *fData = new float[nBins];
+      int            nBins       = ui->widgetHistogram->GetNumberOfBins();
+      float *        fData       = new float[nBins];
       unsigned char *nColorTable = new unsigned char[nBins * 4];
 
       ui->widgetHistogram->GetOutputRange(range);
-      double bin_width = (range[1] - range[0]) / nBins;
-      int rgb[3];
+      double  bin_width = (range[1] - range[0]) / nBins;
+      int     rgb[3];
       double *dColor = m_layerSurface->GetProperty()->GetBinaryColor();
-      rgb[0] = (int)(dColor[0] * 255);
-      rgb[1] = (int)(dColor[1] * 255);
-      rgb[2] = (int)(dColor[2] * 255);
+      rgb[0]         = (int)(dColor[0] * 255);
+      rgb[1]         = (int)(dColor[1] * 255);
+      rgb[2]         = (int)(dColor[2] * 255);
       for (int i = 0; i < nBins; i++) {
-        nColorTable[i * 4] = rgb[0];
+        nColorTable[i * 4]     = rgb[0];
         nColorTable[i * 4 + 1] = rgb[1];
         nColorTable[i * 4 + 2] = rgb[2];
         nColorTable[i * 4 + 3] = 255;
@@ -497,18 +496,18 @@ void WindowConfigureOverlay::UpdateGraph(bool bApply) {
         // rebuild marker lines for display
         LineMarker marker;
         marker.position = p->GetMinPoint() + p->GetOffset();
-        marker.color = QColor(255, 0, 0);
-        marker.movable = true;
+        marker.color    = QColor(255, 0, 0);
+        marker.movable  = true;
         markers.push_back(marker);
 
         if (p->GetColorMethod() == SurfaceOverlayProperty::CM_Piecewise) {
           marker.position = p->GetMidPoint() + p->GetOffset();
-          marker.color = QColor(0, 0, 255);
+          marker.color    = QColor(0, 0, 255);
           markers.push_back(marker);
         }
 
         marker.position = p->GetMaxPoint() + p->GetOffset();
-        marker.color = QColor(0, 215, 0);
+        marker.color    = QColor(0, 215, 0);
         markers.push_back(marker);
       }
       ui->widgetHistogram->SetMarkers(markers);
@@ -537,7 +536,7 @@ void WindowConfigureOverlay::UpdateThresholdChanges() {
   if (!ui->radioButtonPiecewise->isChecked()) // do not adjust mid point
                                               // automatically in Piecewise mode
   {
-    bool bOK;
+    bool   bOK;
     double dmin = ui->lineEditMin->text().trimmed().toDouble(&bOK);
     double dmax = ui->lineEditMax->text().trimmed().toDouble(&bOK);
 
@@ -550,7 +549,7 @@ void WindowConfigureOverlay::UpdateThresholdChanges() {
   UpdateGraph(true);
 }
 
-void WindowConfigureOverlay::OnHistogramMouseButtonPressed(int button,
+void WindowConfigureOverlay::OnHistogramMouseButtonPressed(int    button,
                                                            double value) {
   if (!m_layerSurface || !m_layerSurface->GetActiveOverlay())
     return;
@@ -584,7 +583,7 @@ void WindowConfigureOverlay::OnHistogramMarkerChanged() {
     UpdateGraph(true);
   } else {
     bool bUsePercentile = ui->checkBoxUsePercentile->isChecked();
-    bool bIgnoreZeros = ui->checkBoxUseNonZeroVertices->isChecked();
+    bool bIgnoreZeros   = ui->checkBoxUseNonZeroVertices->isChecked();
     for (int i = 0; i < markers.size(); i++) {
       if (i == 0) {
         if (bUsePercentile)
@@ -628,7 +627,7 @@ void WindowConfigureOverlay::OnHistogramMarkerChanged() {
 }
 
 void WindowConfigureOverlay::OnButtonAdd() {
-  bool bOK;
+  bool   bOK;
   double pos = ui->lineEditNewPoint->text().toDouble(&bOK);
   if (!bOK) {
     QMessageBox::warning(this, "Error",
@@ -637,21 +636,19 @@ void WindowConfigureOverlay::OnButtonAdd() {
   }
   double range[2];
   ui->widgetHistogram->GetOutputRange(range);
-  if (pos < range[0] || pos > range[1])
-  {
+  if (pos < range[0] || pos > range[1]) {
     if (pos < range[0])
       range[0] = pos;
     else
       range[1] = pos;
-    if (m_layerSurface)
-    {
-      SurfaceOverlay* overlay = m_layerSurface->GetActiveOverlay();
+    if (m_layerSurface) {
+      SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
       if (overlay)
         overlay->SetDisplayRange(range);
       OnCheckFixedAxes(ui->checkBoxFixedAxes->isChecked(), false);
     }
-//    QMessageBox::warning(this, "Error", "New point out of range.");
-//    return;
+    //    QMessageBox::warning(this, "Error", "New point out of range.");
+    //    return;
   }
   ui->widgetHistogram->AddMarker(pos, ui->widgetColorPicker->currentColor());
 }
@@ -680,13 +677,13 @@ void WindowConfigureOverlay::OnTextThresholdChanged(const QString &strg) {
 
   SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
 
-  bool ok;
+  bool   ok;
   double val = strg.toDouble(&ok);
   if (!ok)
     return;
 
-  bool bIgnoreZeros = ui->checkBoxUseNonZeroVertices->isChecked();
-  double dOffset = ui->lineEditOffset->text().trimmed().toDouble(&ok);
+  bool   bIgnoreZeros = ui->checkBoxUseNonZeroVertices->isChecked();
+  double dOffset      = ui->lineEditOffset->text().trimmed().toDouble(&ok);
   if (!ok)
     dOffset = m_dSavedOffset;
 
@@ -702,7 +699,7 @@ void WindowConfigureOverlay::OnTextThresholdChanged(const QString &strg) {
     else
       marker.position = val + dOffset;
     markers[markers.size() - 1] = marker;
-    double val2 = ui->lineEditMin->text().toDouble(&ok);
+    double val2                 = ui->lineEditMin->text().toDouble(&ok);
     if (markers.size() == 2 && ok) {
       this->ChangeLineEditNumber(ui->lineEditMid, (val + val2) / 2);
     }
@@ -713,7 +710,7 @@ void WindowConfigureOverlay::OnTextThresholdChanged(const QString &strg) {
           overlay->PercentileToPosition(val, bIgnoreZeros) + dOffset;
     else
       marker.position = val + dOffset;
-    markers[0] = marker;
+    markers[0]  = marker;
     double val2 = ui->lineEditMax->text().toDouble(&ok);
     if (markers.size() == 2 && ok) {
       this->ChangeLineEditNumber(ui->lineEditMid, (val + val2) / 2);
@@ -792,7 +789,7 @@ void WindowConfigureOverlay::OnCheckComputeCorrelation(bool bChecked) {
 void WindowConfigureOverlay::OnComboCorrelationVolume(int n) {
   if (m_layerSurface && m_layerSurface->GetActiveOverlay()) {
     SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
-    LayerMRI *mri = qobject_cast<LayerMRI *>(
+    LayerMRI *      mri     = qobject_cast<LayerMRI *>(
         ui->comboBoxVolumes->itemData(n).value<QObject *>());
     overlay->SetCorrelationSourceVolume(mri);
   }
@@ -881,22 +878,20 @@ void WindowConfigureOverlay::OnCycleOverlay() {
   }
 }
 
-void WindowConfigureOverlay::OnCheckFixedAxes(bool bChecked, bool bUpdateGraph)
-{
-  if (bChecked && m_layerSurface)
-  {
-      m_rangeOverall[0] = 1e10;
-      m_rangeOverall[1] = -1e10;
-      for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++)
-      {
-        SurfaceOverlay* ol = m_layerSurface->GetOverlay(i);
-        double range[2];
-        ol->GetDisplayRange(range);
-        if (range[0] < m_rangeOverall[0])
-          m_rangeOverall[0] = range[0];
-        if (range[1] > m_rangeOverall[1])
-          m_rangeOverall[1] = range[1];
-      }
+void WindowConfigureOverlay::OnCheckFixedAxes(bool bChecked,
+                                              bool bUpdateGraph) {
+  if (bChecked && m_layerSurface) {
+    m_rangeOverall[0] = 1e10;
+    m_rangeOverall[1] = -1e10;
+    for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++) {
+      SurfaceOverlay *ol = m_layerSurface->GetOverlay(i);
+      double          range[2];
+      ol->GetDisplayRange(range);
+      if (range[0] < m_rangeOverall[0])
+        m_rangeOverall[0] = range[0];
+      if (range[1] > m_rangeOverall[1])
+        m_rangeOverall[1] = range[1];
+    }
   }
   if (bUpdateGraph)
     UpdateGraph();

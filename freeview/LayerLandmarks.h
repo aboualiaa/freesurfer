@@ -27,10 +27,10 @@
 #define LAYERLANDMARKS_H
 
 #include "LayerEditable.h"
+#include "vtkSmartPointer.h"
 #include <QColor>
 #include <QList>
 #include <QPointer>
-#include "vtkSmartPointer.h"
 
 class vtkActor;
 class LayerMRI;
@@ -38,9 +38,9 @@ class LayerMRI;
 struct Landmark {
   Landmark();
 
-  double pos[3];
-  QColor color;
-  bool valid;
+  double                    pos[3];
+  QColor                    color;
+  bool                      valid;
   vtkSmartPointer<vtkActor> actorSphere;
   vtkSmartPointer<vtkActor> actorSlice[3];
 };
@@ -86,9 +86,9 @@ private:
   bool MakeSureLandmarkExist(int n);
   void UpdateActors(bool bBuild3D = true);
 
-  QList<Landmark> m_landmarks;
-  QList<Landmark> m_landmarksOriginal;
-  double m_dRadius;
+  QList<Landmark>    m_landmarks;
+  QList<Landmark>    m_landmarksOriginal;
+  double             m_dRadius;
   QPointer<LayerMRI> m_mriRef;
 };
 

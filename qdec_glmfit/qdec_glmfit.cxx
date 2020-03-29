@@ -31,8 +31,6 @@
 
 #include "QdecProject.h"
 
-using namespace std;
-
 const char *Progname = "qdec_glmfit";
 
 void PrintUsage();
@@ -41,19 +39,19 @@ int main(int argc, char **argv) {
 
   // The input params that we need to read in. The ones that have
   // default values are not required.
-  string fnDataTable;
-  string sWorkingDir = "/tmp";
-  string sSubjectsDir;
-  string sSubjectName = "fsaverage";
-  string sAnalysisName;
-  string sDiscreteFactor1 = "none";
-  string sDiscreteFactor2 = "none";
-  string sContinuousFactor1 = "none";
-  string sContinuousFactor2 = "none";
-  string sMeasurement;
-  string sHemisphere;
-  int smoothness = -1;
-  string fnProject;
+  std::string fnDataTable;
+  std::string sWorkingDir = "/tmp";
+  std::string sSubjectsDir;
+  std::string sSubjectName = "fsaverage";
+  std::string sAnalysisName;
+  std::string sDiscreteFactor1   = "none";
+  std::string sDiscreteFactor2   = "none";
+  std::string sContinuousFactor1 = "none";
+  std::string sContinuousFactor2 = "none";
+  std::string sMeasurement;
+  std::string sHemisphere;
+  int         smoothness = -1;
+  std::string fnProject;
 
   // Try to get SUBJECTS_DIR.
   if (getenv("SUBJECTS_DIR")) {
@@ -101,7 +99,8 @@ int main(int argc, char **argv) {
       else if (1 == cDiscreteFactor)
         sDiscreteFactor2 = optarg;
       else {
-        cerr << "Only two discrete factors allowed; ignoring the rest." << endl;
+        std::cerr << "Only two discrete factors allowed; ignoring the rest."
+                  << std::endl;
         continue;
       }
       cDiscreteFactor++;
@@ -111,8 +110,8 @@ int main(int argc, char **argv) {
       else if (1 == cContinuousFactor)
         sContinuousFactor2 = optarg;
       else {
-        cerr << "Only two continuous factors allowed; ignoring the rest."
-             << endl;
+        std::cerr << "Only two continuous factors allowed; ignoring the rest."
+                  << std::endl;
         continue;
       }
       cContinuousFactor++;
@@ -121,7 +120,7 @@ int main(int argc, char **argv) {
     } else if ('h' == rOption) {
       sHemisphere = optarg;
     } else if ('t' == rOption) {
-      stringstream ssSmoothness;
+      std::stringstream ssSmoothness;
       ssSmoothness << optarg;
       ssSmoothness >> smoothness;
     } else if ('o' == rOption) {
@@ -131,43 +130,49 @@ int main(int argc, char **argv) {
 
   // Make sure they set our params.
   if (fnDataTable == "") {
-    cerr << "Error: no data table specified. Use --data-table <filename>."
-         << endl;
+    std::cerr << "Error: no data table specified. Use --data-table <filename>."
+              << std::endl;
     PrintUsage();
     exit(1);
   }
   if (sSubjectsDir == "") {
-    cerr << "Error: no subjects directory specified. Use --subjects-dir "
-         << "<directory> or set the SUBJECTS_DIR environment variable." << endl;
+    std::cerr << "Error: no subjects directory specified. Use --subjects-dir "
+              << "<directory> or set the SUBJECTS_DIR environment variable."
+              << std::endl;
     PrintUsage();
     exit(1);
   }
   if (sAnalysisName == "") {
-    cerr << "Error: no analysis name specified. Use --analysis-name <name>."
-         << endl;
+    std::cerr
+        << "Error: no analysis name specified. Use --analysis-name <name>."
+        << std::endl;
     PrintUsage();
     exit(1);
   }
   if (sMeasurement == "") {
-    cerr << "Error: no measurement specified. Use --measurement <filename>."
-         << endl;
+    std::cerr
+        << "Error: no measurement specified. Use --measurement <filename>."
+        << std::endl;
     PrintUsage();
     exit(1);
   }
   if (sHemisphere == "") {
-    cerr << "Error: no hemisphere specified. Use --hemisphere lh|rh." << endl;
+    std::cerr << "Error: no hemisphere specified. Use --hemisphere lh|rh."
+              << std::endl;
     PrintUsage();
     exit(1);
   }
   if (-1 == smoothness) {
-    cerr << "Error: no smoothness specified. Use --smoothness <smoothness>."
-         << endl;
+    std::cerr
+        << "Error: no smoothness specified. Use --smoothness <smoothness>."
+        << std::endl;
     PrintUsage();
     exit(1);
   }
   if (fnProject == "") {
-    cerr << "Error: no .qdec output file specified. Use --output <filename>."
-         << endl;
+    std::cerr
+        << "Error: no .qdec output file specified. Use --output <filename>."
+        << std::endl;
     PrintUsage();
     exit(1);
   }
@@ -181,7 +186,8 @@ int main(int argc, char **argv) {
     // Load the data table.
     QdecProject project;
     if (project.LoadDataTable(fnDataTable.c_str())) {
-      cerr << "Error: Couldn't load data table " << fnDataTable << endl;
+      std::cerr << "Error: Couldn't load data table " << fnDataTable
+                << std::endl;
       exit(1);
     }
 
@@ -196,51 +202,52 @@ int main(int argc, char **argv) {
             sDiscreteFactor2.c_str(), sContinuousFactor1.c_str(),
             sContinuousFactor2.c_str(), nullptr, 0, sMeasurement.c_str(),
             sHemisphere.c_str(), smoothness, nullptr)) {
-      cerr << "Error: Couldn't create design. Make sure your parameters are "
-           << "valid, including that your factors exist in the data table and "
-           << "are of the right type, and that the subject exists in the "
-           << "given subjects directory." << endl;
+      std::cerr
+          << "Error: Couldn't create design. Make sure your parameters are "
+          << "valid, including that your factors exist in the data table and "
+          << "are of the right type, and that the subject exists in the "
+          << "given subjects directory." << std::endl;
 
-      cerr << "Input:" << endl;
-      cerr << " Data table: " << fnDataTable << endl;
-      cerr << " Working dir: " << sWorkingDir << endl;
-      cerr << " Subjects dir: " << sSubjectsDir << endl;
-      cerr << " Subject name: " << sSubjectName << endl;
-      cerr << " Analysis name: " << sAnalysisName << endl;
-      cerr << " Discrete factor 1: " << sDiscreteFactor1 << endl;
-      cerr << " Discrete factor 2: " << sDiscreteFactor2 << endl;
-      cerr << " Continuous factor 1: " << sContinuousFactor1 << endl;
-      cerr << " Continuous factor 2: " << sContinuousFactor2 << endl;
-      cerr << " Measurement: " << sMeasurement << endl;
-      cerr << " Hemisphere: " << sHemisphere << endl;
-      cerr << " Smoothness: " << smoothness << endl;
-      cerr << " Output: " << fnProject << endl;
+      std::cerr << "Input:" << std::endl;
+      std::cerr << " Data table: " << fnDataTable << std::endl;
+      std::cerr << " Working dir: " << sWorkingDir << std::endl;
+      std::cerr << " Subjects dir: " << sSubjectsDir << std::endl;
+      std::cerr << " Subject name: " << sSubjectName << std::endl;
+      std::cerr << " Analysis name: " << sAnalysisName << std::endl;
+      std::cerr << " Discrete factor 1: " << sDiscreteFactor1 << std::endl;
+      std::cerr << " Discrete factor 2: " << sDiscreteFactor2 << std::endl;
+      std::cerr << " Continuous factor 1: " << sContinuousFactor1 << std::endl;
+      std::cerr << " Continuous factor 2: " << sContinuousFactor2 << std::endl;
+      std::cerr << " Measurement: " << sMeasurement << std::endl;
+      std::cerr << " Hemisphere: " << sHemisphere << std::endl;
+      std::cerr << " Smoothness: " << smoothness << std::endl;
+      std::cerr << " Output: " << fnProject << std::endl;
       exit(1);
     }
 
     // Run the GLM fit.
     if (project.RunGlmFit()) {
-      cerr << "Error: mri_glmfit did not return successfully. "
-           << "Check the output for details." << endl;
+      std::cerr << "Error: mri_glmfit did not return successfully. "
+                << "Check the output for details." << std::endl;
       exit(1);
     }
 
     // Save the results.
     if (project.SaveProjectFile(fnProject.c_str())) {
-      cerr << "Error: Couldn't save the results to the project file "
-           << fnProject << endl;
+      std::cerr << "Error: Couldn't save the results to the project file "
+                << fnProject << std::endl;
       exit(1);
     }
 
     // Delete our working directory.
-    string sCommand = "rm -rf " + sWorkingDir;
-    int rSystem = system(sCommand.c_str());
+    std::string sCommand = "rm -rf " + sWorkingDir;
+    int         rSystem  = system(sCommand.c_str());
     if (0 != rSystem)
-      cerr << "Warning: Couldn't remove temp working directory " << sWorkingDir
-           << endl;
-  } catch (exception &e) {
+      std::cerr << "Warning: Couldn't remove temp working directory "
+                << sWorkingDir << std::endl;
+  } catch (std::exception &e) {
 
-    cerr << "Error: " << e.what() << endl;
+    std::cerr << "Error: " << e.what() << std::endl;
     exit(1);
   }
 
@@ -249,40 +256,49 @@ int main(int argc, char **argv) {
 
 void PrintUsage() {
 
-  cout << "USAGE: qdec_glmfit [options...]" << endl;
-  cout << endl;
-  cout << "Options:" << endl;
-  cout << endl;
-  cout << "  --data-table, -d <filename>      Input qdec.table.dat file (reqd)"
-       << endl
-       << endl;
-  cout << "  --working-dir, -w <path>         Directory in which to generate "
-       << endl
-       << "                                   temporary data (default /tmp)"
-       << endl
-       << endl;
-  cout << "  --subjects-dir, -s <path>        Directory in which to find the "
-       << endl
-       << "                                   average subject (default " << endl
-       << "                                   SUBJECTS_DIR env var)" << endl
-       << endl;
-  cout << "  --average-subject, -a <string>   Average subject name (reqd)"
-       << endl
-       << endl;
-  cout << "  --analysis-name, -n <string>     Name for analysis (reqd)" << endl
-       << endl;
-  cout << "  --discrete-factor, -f <string>   Discrete factor (up to 2)" << endl
-       << endl;
-  cout << "  --continuous-factor, -c <string> Continuous factor (up to 2)"
-       << endl
-       << endl;
-  cout << "  --measurement, -m <string>       Measurement name (reqd)" << endl
-       << endl;
-  cout << "  --hemisphere, -h lh|rh           Hemisphere to use (reqd)" << endl
-       << endl;
-  cout << "  --smoothness, -t <integer>       Smoothness to use (reqd)" << endl
-       << endl;
-  cout << "  --output, -o <filename>          Output .qdec filename (reqd)"
-       << endl
-       << endl;
+  std::cout << "USAGE: qdec_glmfit [options...]" << std::endl;
+  std::cout << std::endl;
+  std::cout << "Options:" << std::endl;
+  std::cout << std::endl;
+  std::cout
+      << "  --data-table, -d <filename>      Input qdec.table.dat file (reqd)"
+      << std::endl
+      << std::endl;
+  std::cout
+      << "  --working-dir, -w <path>         Directory in which to generate "
+      << std::endl
+      << "                                   temporary data (default /tmp)"
+      << std::endl
+      << std::endl;
+  std::cout
+      << "  --subjects-dir, -s <path>        Directory in which to find the "
+      << std::endl
+      << "                                   average subject (default "
+      << std::endl
+      << "                                   SUBJECTS_DIR env var)" << std::endl
+      << std::endl;
+  std::cout << "  --average-subject, -a <string>   Average subject name (reqd)"
+            << std::endl
+            << std::endl;
+  std::cout << "  --analysis-name, -n <string>     Name for analysis (reqd)"
+            << std::endl
+            << std::endl;
+  std::cout << "  --discrete-factor, -f <string>   Discrete factor (up to 2)"
+            << std::endl
+            << std::endl;
+  std::cout << "  --continuous-factor, -c <string> Continuous factor (up to 2)"
+            << std::endl
+            << std::endl;
+  std::cout << "  --measurement, -m <string>       Measurement name (reqd)"
+            << std::endl
+            << std::endl;
+  std::cout << "  --hemisphere, -h lh|rh           Hemisphere to use (reqd)"
+            << std::endl
+            << std::endl;
+  std::cout << "  --smoothness, -t <integer>       Smoothness to use (reqd)"
+            << std::endl
+            << std::endl;
+  std::cout << "  --output, -o <filename>          Output .qdec filename (reqd)"
+            << std::endl
+            << std::endl;
 }

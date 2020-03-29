@@ -34,53 +34,53 @@
 /* Revision       : $Revision: 1.4 $                                  */
 /***********************************************************************/
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "gcaboundary.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "utils.h"
-#include "timer.h"
-#include "gca.h"
-#include "gcamorph.h"
-#include "transform.h"
 #include "cma.h"
+#include "diag.h"
+#include "error.h"
 #include "flash.h"
+#include "gca.h"
+#include "gcaboundary.h"
+#include "gcamorph.h"
+#include "macros.h"
+#include "proto.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static int replaceLabels(MRI *mri_seg);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
+static int  replaceLabels(MRI *mri_seg);
 static void modify_transform(TRANSFORM *transform, MRI *mri, GCA *gca);
 
-static int binarize = 0;
-static int binarize_in = 0;
+static int binarize     = 0;
+static int binarize_in  = 0;
 static int binarize_out = 0;
 
 static int gca_flags = GCA_NO_FLAGS;
 
-const char *Progname;
-static void usage_exit(int code);
-static char *mask_fname = NULL;
+const char * Progname;
+static void  usage_exit(int code);
+static char *mask_fname   = NULL;
 static char *insert_fname = NULL;
-static int insert_label = 0;
-static char *histo_fname = NULL;
+static int   insert_label = 0;
+static char *histo_fname  = NULL;
 
 static float scale = 0;
 
 static GCA_PARMS parms;
-static char *seg_dir = "seg";
-static char T1_name[STRLEN] = "orig";
-static char *xform_name = NULL;
-static float smooth = -1;
-static double TRs[MAX_GCA_INPUTS];
-static double TEs[MAX_GCA_INPUTS];
-static double FAs[MAX_GCA_INPUTS];
+static char *    seg_dir         = "seg";
+static char      T1_name[STRLEN] = "orig";
+static char *    xform_name      = NULL;
+static float     smooth          = -1;
+static double    TRs[MAX_GCA_INPUTS];
+static double    TEs[MAX_GCA_INPUTS];
+static double    FAs[MAX_GCA_INPUTS];
 
 static int navgs = 0;
 
@@ -88,17 +88,17 @@ static char subjects_dir[STRLEN];
 
 static char *input_names[MAX_GCA_INPUTS] = {T1_name};
 
-static int target_label = Left_Hippocampus;
-static float spacing = 8.0;
-int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN], *out_fname, *subject_name, *cp;
-  int ac, nargs, i, n, noint = 0, options;
-  int msec, minutes, seconds, nsubjects, input;
-  Timer start;
-  GCA *gca;
-  MRI *mri_seg, *mri_tmp, *mri_inputs;
-  TRANSFORM *transform;
-  LTA *lta;
+static int   target_label = Left_Hippocampus;
+static float spacing      = 8.0;
+int          main(int argc, char *argv[]) {
+  char **       av, fname[STRLEN], *out_fname, *subject_name, *cp;
+  int           ac, nargs, i, n, noint = 0, options;
+  int           msec, minutes, seconds, nsubjects, input;
+  Timer         start;
+  GCA *         gca;
+  MRI *         mri_seg, *mri_tmp, *mri_inputs;
+  TRANSFORM *   transform;
+  LTA *         lta;
   GCA_BOUNDARY *gcab;
 
   Progname = argv[0];
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
   start.reset();
 
   parms.use_gradient = 0;
-  spacing = 8;
+  spacing            = 8;
 
   nargs = handleVersionOption(argc, argv, "mri_gcab_train");
   if (nargs && argc - nargs == 1)
@@ -366,8 +366,8 @@ int main(int argc, char *argv[]) {
   }
 
   if (histo_fname) {
-    FILE *fp;
-    int histo_counts[10000], xn, yn, zn, max_count;
+    FILE *    fp;
+    int       histo_counts[10000], xn, yn, zn, max_count;
     GCA_NODE *gcan;
 
     memset(histo_counts, 0, sizeof(histo_counts));
@@ -398,7 +398,7 @@ int main(int argc, char *argv[]) {
   }
 
   GCAfree(&gca);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -414,23 +414,23 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "SPACING")) {
     spacing = atof(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("spacing pdfs every %2.1f mm\n", spacing);
   } else if (!stricmp(option, "NODE_SPACING")) {
     parms.node_spacing = atof(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     printf("spacing nodes every %2.1f mm\n", parms.node_spacing);
   } else if (!stricmp(option, "BINARIZE")) {
-    binarize = 1;
-    binarize_in = atoi(argv[2]);
+    binarize     = 1;
+    binarize_in  = atoi(argv[2]);
     binarize_out = atoi(argv[3]);
-    nargs = 2;
+    nargs        = 2;
     printf("binarizing segmentation values, setting input %d to output %d\n",
            binarize_in, binarize_out);
   } else if (!stricmp(option, "NOMRF")) {
@@ -438,34 +438,34 @@ static int get_option(int argc, char *argv[]) {
     printf("not computing MRF statistics...\n");
   } else if (!stricmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else if (!stricmp(option, "DEBUG_NODE")) {
     Ggca_x = atoi(argv[2]);
     Ggca_y = atoi(argv[3]);
     Ggca_z = atoi(argv[4]);
-    nargs = 3;
+    nargs  = 3;
     printf("debugging node (%d, %d, %d)\n", Ggca_x, Ggca_y, Ggca_z);
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "DEBUG_LABEL")) {
     Ggca_label = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("debugging label %s (%d)\n", cma_label_to_name(Ggca_label),
            Ggca_label);
   } else if (!stricmp(option, "DEBUG_NBR")) {
     Ggca_nbr_label = atoi(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("debugging nbr label %s (%d)\n", cma_label_to_name(Ggca_nbr_label),
            Ggca_nbr_label);
   } else if (!stricmp(option, "INSERT")) {
     insert_fname = argv[2];
     insert_label = atoi(argv[3]);
-    nargs = 2;
+    nargs        = 2;
     printf("inserting non-zero vals from %s as label %d...\n", insert_fname,
            insert_label);
   } else if (!stricmp(option, "T1")) {
@@ -475,11 +475,11 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "PARC_DIR") || !stricmp(option, "SEG_DIR") ||
              !stricmp(option, "SEG") || !stricmp(option, "SEGMENTATION")) {
     seg_dir = argv[2];
-    nargs = 1;
+    nargs   = 1;
     printf("reading segmentation from subject's mri/%s directory\n", seg_dir);
   } else if (!stricmp(option, "XFORM")) {
     xform_name = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("reading xform from %s\n", xform_name);
   } else if (!stricmp(option, "NOXFORM")) {
     xform_name = NULL;
@@ -510,12 +510,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'H':
       histo_fname = argv[2];
-      nargs = 1;
+      nargs       = 1;
       printf("writing histogram of classes/voxel to %s\n", histo_fname);
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -573,11 +573,11 @@ static int replaceLabels(MRI *mri_seg) {
 
 // modify transform to vox-to-vox
 static void modify_transform(TRANSFORM *transform, MRI *mri_inputs, GCA *gca) {
-  LTA *lta = 0;
-  MATRIX *i_to_r = 0, *r_to_i = 0, *tmpmat = 0, *vox2vox;
-  MRI *mri_buf = 0;
-  GCA_MORPH *gcam = 0;
-  static int warned = 0;
+  LTA *      lta    = 0;
+  MATRIX *   i_to_r = 0, *r_to_i = 0, *tmpmat = 0, *vox2vox;
+  MRI *      mri_buf = 0;
+  GCA_MORPH *gcam    = 0;
+  static int warned  = 0;
 
   // temp buf to get the transform
   mri_buf = MRIallocHeader(mri_inputs->width, mri_inputs->height,

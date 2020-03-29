@@ -60,12 +60,12 @@ void BSplineKernelFunction<VSplineOrder>::GenerateBSplineShapeFunctions(
 template <unsigned int VSplineOrder>
 typename BSplineKernelFunction<VSplineOrder>::PolynomialType
 BSplineKernelFunction<VSplineOrder>::CoxDeBoor(unsigned short order,
-                                               VectorType knots,
+                                               VectorType     knots,
                                                unsigned int whichBasisFunction,
                                                unsigned int whichPiece) {
-  VectorType tmp(2);
+  VectorType     tmp(2);
   PolynomialType poly1(0.0), poly2(0.0);
-  RealType den;
+  RealType       den;
   unsigned short p = order - 1;
   unsigned short i = whichBasisFunction;
 
@@ -105,9 +105,9 @@ BSplineKernelFunction<VSplineOrder>::CoxDeBoor(unsigned short order,
 template <unsigned int VSplineOrder>
 typename BSplineKernelFunction<VSplineOrder>::MatrixType
 BSplineKernelFunction<VSplineOrder>::GetShapeFunctionsInZeroToOneInterval() {
-  int order = this->m_SplineOrder + 1;
+  int          order          = this->m_SplineOrder + 1;
   unsigned int NumberOfPieces = static_cast<unsigned int>(order);
-  MatrixType ShapeFunctions(NumberOfPieces, order);
+  MatrixType   ShapeFunctions(NumberOfPieces, order);
 
   VectorType knots(2 * order);
   for (unsigned int i = 0; i < knots.size(); i++) {

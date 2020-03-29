@@ -26,9 +26,9 @@
  *
  */
 
-#include <pwd.h>
 #include <cstdio>
 #include <cstring>
+#include <pwd.h>
 #include <unistd.h>
 
 #include "error.h" // return codes
@@ -395,8 +395,8 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
     }
     memset(ct, 0, sizeof(COLOR_TABLE));
     ct->nentries = image->labeltable.length;
-    ct->version = 2;
-    ct->entries = (COLOR_TABLE_ENTRY **)calloc(ct->nentries + 1,
+    ct->version  = 2;
+    ct->entries  = (COLOR_TABLE_ENTRY **)calloc(ct->nentries + 1,
                                                sizeof(COLOR_TABLE_ENTRY *));
     if (ct->entries == nullptr) {
       fprintf(stderr,
@@ -494,8 +494,8 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
    * so that we can create our mris structure
    */
   giiDataArray *coords = nullptr;
-  giiDataArray *faces = nullptr;
-  int numDA;
+  giiDataArray *faces  = nullptr;
+  int           numDA;
   for (numDA = 0; numDA < image->numDA; numDA++) {
     if (image->darray[numDA]->intent == NIFTI_INTENT_POINTSET) {
       coords = image->darray[numDA];
@@ -510,7 +510,7 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
   if (coords && faces) {
     /* Check the number of vertices and faces. */
     long long num_vertices = 0;
-    long long num_cols = 0;
+    long long num_cols     = 0;
     if (coords->ind_ord == GIFTI_IND_ORD_ROW_MAJOR) {
       // RowMajorOrder
       gifti_DA_rows_cols(coords, &num_vertices, &num_cols);
@@ -527,7 +527,7 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
       return nullptr;
     }
     long long num_faces = 0;
-    num_cols = 0;
+    num_cols            = 0;
     if (faces->ind_ord == GIFTI_IND_ORD_ROW_MAJOR) {
       // RowMajorOrder
       gifti_DA_rows_cols(faces, &num_faces, &num_cols);
@@ -573,8 +573,8 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
 
     /* retrieve volume geometry info */
     {
-      int vgvalid = 0; // there are a total of 18 values
-      char *stmp = gifti_get_meta_value(&coords->meta, "VolGeomWidth");
+      int   vgvalid = 0; // there are a total of 18 values
+      char *stmp    = gifti_get_meta_value(&coords->meta, "VolGeomWidth");
       if (stmp && (1 == sscanf(stmp, "%d", &mris->vg.width))) {
         vgvalid++; // track valid volgeom values found
       }
@@ -705,7 +705,7 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
     }
     for (face_index = 0; face_index < mris->nfaces; face_index++) {
       FACE *face = &mris->faces[face_index];
-      int n;
+      int   n;
       for (n = 0; n < VERTICES_PER_FACE; n++)
         mris->vertices_topology[face->v[n]]
             .f[mris->vertices_topology[face->v[n]].num++] =
@@ -789,16 +789,16 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
    * Now re-parse the DataArrays looking for all the other data type (except
    * coordinate and face data arrays) and fill-in mris structure as needed.
    */
-  int found_curv_data = 0;    // track if multiple shape data arrays exist
-  int found_statval_data = 0; // track if multiple stat/val data arrays exist
+  int found_curv_data      = 0; // track if multiple shape data arrays exist
+  int found_statval_data   = 0; // track if multiple stat/val data arrays exist
   giiDataArray *node_index = nullptr; // support for sparse data storage
-  long long num_index_nodes = 0;      // support for sparse data storage
-  int startDAnum = 0;
-  int endDAnum = image->numDA;
+  long long     num_index_nodes = 0;  // support for sparse data storage
+  int           startDAnum      = 0;
+  int           endDAnum        = image->numDA;
   if (daNum != -1) // support for extracting one particular data array
   {
     startDAnum = daNum;
-    endDAnum = daNum + 1;
+    endDAnum   = daNum + 1;
   }
   for (numDA = startDAnum; numDA < endDAnum; numDA++) {
     giiDataArray *darray = image->darray[numDA];
@@ -840,8 +840,8 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
       continue;
     } else {
       /* Check the number of vertices, so we dont trounce the mris struct */
-      long long num_vertices = 0;
-      long long num_cols = 0;
+      long long num_vertices      = 0;
+      long long num_cols          = 0;
       long long expected_num_cols = 1;
       if (darray->intent == NIFTI_INTENT_VECTOR) {
         expected_num_cols = 3;
@@ -913,11 +913,11 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
       unsigned int *label_data = (unsigned int *)darray->data;
       int nindex = 0; // index into node_index (if sparse data storage is used)
       int da_index = 0; // index into the data array at hand
-      int vno = 0;      // index into the mris struct (vertex number)
+      int vno      = 0; // index into the mris struct (vertex number)
       while (vno < mris->nvertices) {
         if (node_index) // sparse data storage support
         {
-          vno = gifti_get_DA_value_2D(node_index, nindex, 0);
+          vno      = gifti_get_DA_value_2D(node_index, nindex, 0);
           da_index = nindex;
         } else // regular indexing
         {
@@ -927,7 +927,7 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
         if (mris->vertices[vno].ripflag) {
           continue;
         }
-        int table_key = *(label_data + da_index);
+        int table_key   = *(label_data + da_index);
         int table_index = 0;
         for (table_index = 0; table_index < ct->nentries; table_index++) {
           if (table_key == image->labeltable.key[table_index]) {
@@ -946,7 +946,7 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
         mris->vertices[vno].annotation = annotation;
 
         // cross-check:
-        int index = -1;
+        int index  = -1;
         int result = CTABfindAnnotation(mris->ct,
                                         mris->vertices[vno].annotation, &index);
         if ((result != NO_ERROR) || (index < 0) ||
@@ -990,9 +990,9 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
         }
         int r, g, b;
 
-        float red = (float)gifti_get_DA_value_2D(darray, vno, 0);
+        float red   = (float)gifti_get_DA_value_2D(darray, vno, 0);
         float green = (float)gifti_get_DA_value_2D(darray, vno, 0);
-        float blue = (float)gifti_get_DA_value_2D(darray, vno, 0);
+        float blue  = (float)gifti_get_DA_value_2D(darray, vno, 0);
 
         if (red > 1) {
           r = (int)red;
@@ -1105,15 +1105,15 @@ MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume) {
   }
 
   /* check for overlay data */
-  giiDataArray *scalars = nullptr;
-  int frame_count = 0;
-  long long num_vertices = -1;
-  long long num_cols = 0;
+  giiDataArray *scalars      = nullptr;
+  int           frame_count  = 0;
+  long long     num_vertices = -1;
+  long long     num_cols     = 0;
 #define INTENT_CODE_MAX_IDX 4
   int intent_code[INTENT_CODE_MAX_IDX] = {NIFTI_INTENT_TIME_SERIES,
                                           NIFTI_INTENT_SHAPE, NIFTI_INTENT_NONE,
                                           NIFTI_INTENT_NORMAL};
-  int intent_code_idx = 0;
+  int intent_code_idx                  = 0;
   // search all DAs for time series, then shape, then none, then normal.
   // if time series found, check all DAs to make sure all the same size.
   for (intent_code_idx = 0; intent_code_idx < INTENT_CODE_MAX_IDX;
@@ -1133,7 +1133,7 @@ MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume) {
       gifti_DA_rows_cols(scalars, &nvertices, &ncols);
       if (num_vertices == -1) {
         num_vertices = nvertices;
-        num_cols = ncols;
+        num_cols     = ncols;
       } else {
         if (num_vertices <= 0 || num_vertices != nvertices || ncols != 1) {
           fprintf(
@@ -1171,7 +1171,7 @@ MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume) {
   /* if we don't need to read the volume, just return a header */
   MRI *mri;
   if (!read_volume) {
-    mri = MRIallocHeader(num_vertices, 1, 1, MRI_FLOAT, frame_count);
+    mri          = MRIallocHeader(num_vertices, 1, 1, MRI_FLOAT, frame_count);
     mri->nframes = frame_count;
     // not sure this is the best way to do this (dng, 4/4/17)
     if (image->numDA > 0) {
@@ -1183,7 +1183,7 @@ MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume) {
   }
 
   /* Copy in each scalar frame to 'volume' frame. */
-  mri = MRIallocSequence(num_vertices, 1, 1, MRI_FLOAT, frame_count);
+  mri         = MRIallocSequence(num_vertices, 1, 1, MRI_FLOAT, frame_count);
   frame_count = 0;
   int da_num;
   for (da_num = 0; da_num < image->numDA; da_num++) {
@@ -1281,17 +1281,17 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
     }
 
     /* Set its attributes. */
-    coords->intent = NIFTI_INTENT_POINTSET;
+    coords->intent   = NIFTI_INTENT_POINTSET;
     coords->datatype = NIFTI_TYPE_FLOAT32;
-    coords->ind_ord = GIFTI_IND_ORD_ROW_MAJOR;
-    coords->num_dim = 2;
-    coords->dims[0] = mris->nvertices;       /* In highest first, dim0 = rows */
-    coords->dims[1] = 3;                     /* In highest first, dim1 = cols */
+    coords->ind_ord  = GIFTI_IND_ORD_ROW_MAJOR;
+    coords->num_dim  = 2;
+    coords->dims[0]  = mris->nvertices;      /* In highest first, dim0 = rows */
+    coords->dims[1]  = 3;                    /* In highest first, dim1 = cols */
     coords->encoding = GIFTI_ENCODING_B64GZ; // data stored in gzip'd base64
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     coords->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    coords->endian = GIFTI_ENDIAN_BIG;
+    coords->endian  = GIFTI_ENDIAN_BIG;
 #endif
 
     coords->coordsys = nullptr; // empty, unless we find something here...
@@ -1301,11 +1301,11 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
       int idx;
       // found a valid xform, so use it...
       gifti_add_empty_CS(coords);
-      idx = coords->numCS - 1;
-      coords->coordsys[idx]->dataspace = strcpyalloc("NIFTI_XFORM_UNKNOWN");
+      idx                               = coords->numCS - 1;
+      coords->coordsys[idx]->dataspace  = strcpyalloc("NIFTI_XFORM_UNKNOWN");
       coords->coordsys[idx]->xformspace = strcpyalloc("NIFTI_XFORM_TALAIRACH");
-      MATRIX *xform = mris->SRASToTalSRAS_;
-      int r, c;
+      MATRIX *xform                     = mris->SRASToTalSRAS_;
+      int     r, c;
       for (r = 1; r <= 4; r++)
         for (c = 1; c <= 4; c++) {
           coords->coordsys[idx]->xform[r - 1][c - 1] = xform->rptr[r][c];
@@ -1369,20 +1369,20 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
     }
 
     /* Set its attributes. */
-    faces->intent = NIFTI_INTENT_TRIANGLE;
+    faces->intent   = NIFTI_INTENT_TRIANGLE;
     faces->datatype = NIFTI_TYPE_INT32;
-    faces->ind_ord = GIFTI_IND_ORD_ROW_MAJOR;
-    faces->num_dim = 2;
-    faces->dims[0] = numFaces;              /* In highest first, dim0 = rows */
-    faces->dims[1] = 3;                     /* In highest first, dim1 = cols */
+    faces->ind_ord  = GIFTI_IND_ORD_ROW_MAJOR;
+    faces->num_dim  = 2;
+    faces->dims[0]  = numFaces;             /* In highest first, dim0 = rows */
+    faces->dims[1]  = 3;                    /* In highest first, dim1 = cols */
     faces->encoding = GIFTI_ENCODING_B64GZ; // data stored in gzip'd base64
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     faces->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    faces->endian = GIFTI_ENDIAN_BIG;
+    faces->endian   = GIFTI_ENDIAN_BIG;
 #endif
     faces->coordsys = nullptr;
-    faces->nvals = gifti_darray_nvals(faces);
+    faces->nvals    = gifti_darray_nvals(faces);
     gifti_datatype_sizes(faces->datatype, &faces->nbyper, nullptr);
 
     /* Allocate the data array. */
@@ -1420,7 +1420,7 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
     /* standard meta data for surfaces */
     if (strlen(mris->fname) != 0) {
       const char *primary = nullptr, *secondary = nullptr, *geotype = nullptr;
-      char *name = mris->fname;
+      char *      name = mris->fname;
       if (strstr(name, "lh.")) {
         primary = "CortexLeft";
       }
@@ -1477,7 +1477,7 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
       }
       const char *topotype;
       if (mris->patch) {
-        geotype = "Flat";
+        geotype  = "Flat";
         topotype = "Cut";
       } else {
         topotype = "Closed";
@@ -1569,20 +1569,20 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
     }
 
     /* Set its attributes. */
-    shape->intent = NIFTI_INTENT_SHAPE;
+    shape->intent   = NIFTI_INTENT_SHAPE;
     shape->datatype = NIFTI_TYPE_FLOAT32;
-    shape->ind_ord = GIFTI_IND_ORD_ROW_MAJOR;
-    shape->num_dim = 1;
-    shape->dims[0] = mris->nvertices;
-    shape->dims[1] = 0;
+    shape->ind_ord  = GIFTI_IND_ORD_ROW_MAJOR;
+    shape->num_dim  = 1;
+    shape->dims[0]  = mris->nvertices;
+    shape->dims[1]  = 0;
     shape->encoding = GIFTI_ENCODING_B64GZ; // data stored in gzip'd base64
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     shape->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    shape->endian = GIFTI_ENDIAN_BIG;
+    shape->endian   = GIFTI_ENDIAN_BIG;
 #endif
     shape->coordsys = nullptr;
-    shape->nvals = gifti_darray_nvals(shape);
+    shape->nvals    = gifti_darray_nvals(shape);
     gifti_datatype_sizes(shape->datatype, &shape->nbyper, nullptr);
 
     /* include some metadata describing this shape */
@@ -1651,16 +1651,16 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
       fprintf(stderr, "MRISwriteGIFTI: colortable is empty!\n");
       return ERROR_BADFILE;
     }
-    labeltable.key = (int *)calloc(labeltable.length, sizeof(int *));
+    labeltable.key   = (int *)calloc(labeltable.length, sizeof(int *));
     labeltable.label = (char **)calloc(labeltable.length, sizeof(char *));
-    labeltable.rgba = (float *)calloc(labeltable.length, 4 * sizeof(float *));
+    labeltable.rgba  = (float *)calloc(labeltable.length, 4 * sizeof(float *));
     if ((nullptr == labeltable.key) || (nullptr == labeltable.label) ||
         (nullptr == labeltable.rgba)) {
       fprintf(stderr, "MRISwriteGIFTI: couldn't allocate giftiLabelTable\n");
       return ERROR_NOMEMORY;
     }
     float *rgba = labeltable.rgba;
-    int idx;
+    int    idx;
     for (idx = 0; idx < labeltable.length; idx++) {
       // the key could be the freesurfer 'annotation' value, which is
       // supposed to be unique to the FreeSurferColorLUT, but for gifti
@@ -1725,20 +1725,20 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
     }
 
     /* Set its attributes. */
-    labels->intent = NIFTI_INTENT_LABEL;
+    labels->intent   = NIFTI_INTENT_LABEL;
     labels->datatype = NIFTI_TYPE_INT32;
-    labels->ind_ord = GIFTI_IND_ORD_ROW_MAJOR;
-    labels->num_dim = 1;
-    labels->dims[0] = mris->nvertices;
-    labels->dims[1] = 0;
+    labels->ind_ord  = GIFTI_IND_ORD_ROW_MAJOR;
+    labels->num_dim  = 1;
+    labels->dims[0]  = mris->nvertices;
+    labels->dims[1]  = 0;
     labels->encoding = GIFTI_ENCODING_B64GZ; // data stored in gzip'd base64
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     labels->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    labels->endian = GIFTI_ENDIAN_BIG;
+    labels->endian  = GIFTI_ENDIAN_BIG;
 #endif
     labels->coordsys = nullptr;
-    labels->nvals = gifti_darray_nvals(labels);
+    labels->nvals    = gifti_darray_nvals(labels);
     gifti_datatype_sizes(labels->datatype, &labels->nbyper, nullptr);
 
     /* include some metadata describing this as a label */
@@ -1764,7 +1764,7 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
 
     /* Copy our 'annotation' data for each vertex (actually an index) */
     unsigned int *label_data = (unsigned int *)labels->data;
-    int label_index, theIdx, result;
+    int           label_index, theIdx, result;
     for (label_index = 0; label_index < mris->nvertices; label_index++) {
       if (mris->vertices[label_index].ripflag) {
         continue;
@@ -1809,20 +1809,20 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
     }
 
     /* Set its attributes. */
-    stats->intent = intent_code;
+    stats->intent   = intent_code;
     stats->datatype = NIFTI_TYPE_FLOAT32;
-    stats->ind_ord = GIFTI_IND_ORD_ROW_MAJOR;
-    stats->num_dim = 1;
-    stats->dims[0] = mris->nvertices;
-    stats->dims[1] = 0;
+    stats->ind_ord  = GIFTI_IND_ORD_ROW_MAJOR;
+    stats->num_dim  = 1;
+    stats->dims[0]  = mris->nvertices;
+    stats->dims[1]  = 0;
     stats->encoding = GIFTI_ENCODING_B64GZ; // data stored in gzip'd base64
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     stats->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    stats->endian = GIFTI_ENDIAN_BIG;
+    stats->endian   = GIFTI_ENDIAN_BIG;
 #endif
     stats->coordsys = nullptr;
-    stats->nvals = gifti_darray_nvals(stats);
+    stats->nvals    = gifti_darray_nvals(stats);
     gifti_datatype_sizes(stats->datatype, &stats->nbyper, nullptr);
 
     /* include some metadata describing this thing */
@@ -1923,10 +1923,10 @@ int mriWriteGifti(MRI *mri, const char *out_fname) {
       gifti_add_to_meta(&scalars->meta, "TimeStep", buf, 1);
     }
     scalars->datatype = NIFTI_TYPE_FLOAT32;
-    scalars->ind_ord = GIFTI_IND_ORD_ROW_MAJOR;
-    scalars->num_dim = 1;
-    scalars->dims[0] = mri->width;
-    scalars->dims[1] = 0;
+    scalars->ind_ord  = GIFTI_IND_ORD_ROW_MAJOR;
+    scalars->num_dim  = 1;
+    scalars->dims[0]  = mri->width;
+    scalars->dims[1]  = 0;
     scalars->encoding = GIFTI_ENCODING_B64GZ; // data stored in gzip'd base64
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     scalars->endian = GIFTI_ENDIAN_LITTLE;
@@ -1934,7 +1934,7 @@ int mriWriteGifti(MRI *mri, const char *out_fname) {
     scalars->endian = GIFTI_ENDIAN_BIG;
 #endif
     scalars->coordsys = nullptr;
-    scalars->nvals = gifti_darray_nvals(scalars);
+    scalars->nvals    = gifti_darray_nvals(scalars);
     gifti_datatype_sizes(scalars->datatype, &scalars->nbyper, nullptr);
 
     /* Allocate the data array. */

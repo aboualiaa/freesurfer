@@ -37,22 +37,22 @@ const char *Progname;
 int MRIaddEdgeVoxel(MRI *mri, int SetVal);
 
 static void print_help();
-static int get_option(int argc, char *argv[]);
-static int corners = 1, keep_edits = 0, test_edge = 0, test_edge_added;
+static int  get_option(int argc, char *argv[]);
+static int  corners = 1, keep_edits = 0, test_edge = 0, test_edge_added;
 
 /*-------------------------------------------------------------------*/
 static int mriRemoveEdgeConfiguration(MRI *mri_seg, MRI *mri_orig, int label) {
   static int niter = 0;
-  int i, j, k;
-  int ntotal = 0, nmodified, nfound, npass;
+  int        i, j, k;
+  int        ntotal = 0, nmodified, nfound, npass;
 
   niter++;
   fprintf(stderr, "\nIteration Number : %d", niter);
 
   /* dealing with xy-plane */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -85,9 +85,9 @@ static int mriRemoveEdgeConfiguration(MRI *mri_seg, MRI *mri_orig, int label) {
             npass, nfound, nmodified, ntotal);
   }
   /* dealing with xy-plane */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -121,9 +121,9 @@ static int mriRemoveEdgeConfiguration(MRI *mri_seg, MRI *mri_orig, int label) {
   }
 
   /* dealing with yz-plane */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -156,9 +156,9 @@ static int mriRemoveEdgeConfiguration(MRI *mri_seg, MRI *mri_orig, int label) {
             npass, nfound, nmodified, ntotal);
   }
   /* dealing with yz-plane */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -192,9 +192,9 @@ static int mriRemoveEdgeConfiguration(MRI *mri_seg, MRI *mri_orig, int label) {
   }
 
   /* dealing with xz-plane */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -227,9 +227,9 @@ static int mriRemoveEdgeConfiguration(MRI *mri_seg, MRI *mri_orig, int label) {
             npass, nfound, nmodified, ntotal);
   }
   /* dealing with xz-plane */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -269,16 +269,16 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
   static int niter = 0;
   int i, j, k, p, refp, ind1_i[6], ind1_j[6], ind1_k[6], ind2_i[6], ind2_j[6],
       ind2_k[6];
-  int ntotal = 0, nmodified, nfound, npass;
+  int   ntotal = 0, nmodified, nfound, npass;
   float dist[6], maxdist;
 
   niter++;
   fprintf(stderr, "\nIteration Number : %d", niter);
 
   /* dealing with i+1,j+1,k+1 */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -361,12 +361,12 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
           ind2_k[5] = k + 1;
 
           /* find max path */
-          refp = 0;
+          refp    = 0;
           maxdist = dist[0];
           for (p = 1; p < 6; p++) {
             if (maxdist < dist[p]) {
               maxdist = dist[p];
-              refp = p;
+              refp    = p;
             }
           }
           /* assign value */
@@ -394,9 +394,9 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
             npass, nfound, nmodified, ntotal);
   }
   /* dealing with i+1,j+1,k-1 */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -479,12 +479,12 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
           ind2_k[5] = k - 1;
 
           /* find max path */
-          refp = 0;
+          refp    = 0;
           maxdist = dist[0];
           for (p = 1; p < 6; p++) {
             if (maxdist < dist[p]) {
               maxdist = dist[p];
-              refp = p;
+              refp    = p;
             }
           }
           /* assign value */
@@ -513,9 +513,9 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
   }
 
   /* dealing with i+1,j-1,k-1 */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -598,12 +598,12 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
           ind2_k[5] = k - 1;
 
           /* find max path */
-          refp = 0;
+          refp    = 0;
           maxdist = dist[0];
           for (p = 1; p < 6; p++) {
             if (maxdist < dist[p]) {
               maxdist = dist[p];
-              refp = p;
+              refp    = p;
             }
           }
           /* assign value */
@@ -632,9 +632,9 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
   }
 
   /* dealing with i+1,j-1,k+1 */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -717,12 +717,12 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
           ind2_k[5] = k + 1;
 
           /* find max path */
-          refp = 0;
+          refp    = 0;
           maxdist = dist[0];
           for (p = 1; p < 6; p++) {
             if (maxdist < dist[p]) {
               maxdist = dist[p];
-              refp = p;
+              refp    = p;
             }
           }
           /* assign value */
@@ -756,16 +756,16 @@ static int mriRemoveCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
 static int mriRemoveBackgroundCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
                                                   int label) {
   static int niter = 0;
-  int i, j, k;
-  int ntotal = 0, nmodified, nfound, npass;
+  int        i, j, k;
+  int        ntotal = 0, nmodified, nfound, npass;
 
   niter++;
   fprintf(stderr, "\nIteration Number : %d", niter);
 
   /* dealing with i+1,j+1,k+1 */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -801,9 +801,9 @@ static int mriRemoveBackgroundCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
             npass, nfound, nmodified, ntotal);
   }
   /* dealing with i+1,j+1,k-1 */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -839,9 +839,9 @@ static int mriRemoveBackgroundCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
             npass, nfound, nmodified, ntotal);
   }
   /* dealing with i+1,j-1,k-1 */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -877,9 +877,9 @@ static int mriRemoveBackgroundCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
             npass, nfound, nmodified, ntotal);
   }
   /* dealing with i+1,j-1,k+1 */
-  nfound = 1;
+  nfound    = 1;
   nmodified = 0;
-  npass = 0;
+  npass     = 0;
   while (nfound) {
     nfound = 0;
     npass++;
@@ -919,31 +919,28 @@ static int mriRemoveBackgroundCornerConfiguration(MRI *mri_seg, MRI *mri_orig,
 }
 
 /*--------------------------------------------------------------------------*/
-int main(int argc, char *argv[])
-{
-  MRI *mri_seg,*mri_orig, *mri_seg_orig, *mri_old = NULL;
-  int niter=100,ntotal=0,nmodified,i,j,k,nvoxels, ac ;
-  int label, nargs,nvox;
-  char **av ;
-  int x, y, z ,convert=0;
+int main(int argc, char *argv[]) {
+  MRI *  mri_seg, *mri_orig, *mri_seg_orig, *mri_old = NULL;
+  int    niter = 100, ntotal = 0, nmodified, i, j, k, nvoxels, ac;
+  int    label, nargs, nvox;
+  char **av;
+  int    x, y, z, convert = 0;
 
   nargs = handleVersionOption(argc, argv, "mri_pretess");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
 
   std::string cmdline = getAllInfo(argc, argv, "mri_pretess");
 
-  Progname=argv[0];
+  Progname = argv[0];
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++)
-  {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 5) {
@@ -989,15 +986,15 @@ int main(int argc, char *argv[])
               mri_seg->width, mri_seg->height, mri_seg->depth);
   if (label == USE_WM) {
     printf("binarizing input wm segmentation...\n");
-    label = 128;
+    label        = 128;
     mri_seg_orig = mri_seg;
-    mri_seg = MRIalloc(mri_seg_orig->width, mri_seg_orig->height,
+    mri_seg      = MRIalloc(mri_seg_orig->width, mri_seg_orig->height,
                        mri_seg_orig->depth, MRI_UCHAR);
     MRIbinarize(mri_seg_orig, mri_seg, WM_MIN_VAL, 0, label);
   } else if (mri_seg->type != MRI_UCHAR) {
     printf("converting input segmentation to MRI_UCHAR...\n");
     mri_seg_orig = mri_seg;
-    mri_seg = MRIalloc(mri_seg_orig->width, mri_seg_orig->height,
+    mri_seg      = MRIalloc(mri_seg_orig->width, mri_seg_orig->height,
                        mri_seg_orig->depth, MRI_UCHAR);
     for (x = 0; x < mri_seg->width; x++)
       for (y = 0; y < mri_seg->height; y++)
@@ -1102,15 +1099,15 @@ int main(int argc, char *argv[])
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   StrUpper(option);
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "-help") || !stricmp(option, "-usage")) {
@@ -1158,7 +1155,7 @@ static void print_help() {
   found a voxel to add, 0 otherwise.
   ------------------------------------------------------------------------*/
 int MRIaddEdgeVoxel(MRI *mri, int SetVal) {
-  int set, c, r, s;
+  int    set, c, r, s;
   double v;
 
   for (c = 1; c < mri->width - 1; c++) {

@@ -21,43 +21,43 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
-#include "timer.h"
-#include "version.h"
+#include "error.h"
 #include "histo.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
-static int adaptive_normalize = 0;
+static int  adaptive_normalize = 0;
 
-static char *mask_fname = NULL;
-static char *xform_fname = NULL;
-static char sdir[STRLEN] = "";
+static char * mask_fname   = NULL;
+static char * xform_fname  = NULL;
+static char   sdir[STRLEN] = "";
 static double tol = 0.5; // avg rms change in vox intensities to terminate
 
 #define MAX_SUBJECTS 100
 
 int main(int argc, char *argv[]) {
-  char **av, *out_vol_name, *in_vol_name, *cp, fname[STRLEN], *subject;
-  int ac, nargs, n, done, niter;
-  int msec, minutes, seconds, nsubjects;
-  Timer start;
-  MRI *mri_inputs[MAX_SUBJECTS], *mri;
+  char **    av, *out_vol_name, *in_vol_name, *cp, fname[STRLEN], *subject;
+  int        ac, nargs, n, done, niter;
+  int        msec, minutes, seconds, nsubjects;
+  Timer      start;
+  MRI *      mri_inputs[MAX_SUBJECTS], *mri;
   HISTOGRAM *histos[MAX_SUBJECTS], *htemplate;
-  double rms, rms_avg;
+  double     rms, rms_avg;
 
   nargs = handleVersionOption(argc, argv, "mri_histo_normalize");
   if (nargs && argc - nargs == 1)
@@ -89,16 +89,16 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
 
-  in_vol_name = argv[1];
+  in_vol_name  = argv[1];
   out_vol_name = argv[argc - 1];
-  nsubjects = argc - 3;
+  nsubjects    = argc - 3;
   printf("argc=%d, out name %s, nsubjects = %d\n", argc, out_vol_name,
          nsubjects);
 
-  htemplate = HISTOalloc(256);
+  htemplate           = HISTOalloc(256);
   htemplate->bin_size = 1;
-  htemplate->min = 0;
-  htemplate->max = 255;
+  htemplate->min      = 0;
+  htemplate->max      = 255;
   for (n = 0; n < 256; n++)
     htemplate->bins[n] = n;
 
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
       done = 1;
   } while (!done);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -203,12 +203,12 @@ static int get_option(int argc, char *argv[]) {
     printf("using %s as SUBJECTS_DIR...\n", sdir);
     nargs = 1;
   } else if (!stricmp(option, "tol")) {
-    tol = atof(argv[2]);
+    tol   = atof(argv[2]);
     nargs = 1;
     printf("setting stopping tolerance to %2.3f rms intensity change\n", tol);
   } else if (!stricmp(option, "mask")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using %s as mask volume\n", mask_fname);
   } else
     switch (toupper(*option)) {
@@ -217,7 +217,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       xform_fname = argv[2];
-      nargs = 1;
+      nargs       = 1;
     case '?':
     case 'U':
       usage_exit(0);

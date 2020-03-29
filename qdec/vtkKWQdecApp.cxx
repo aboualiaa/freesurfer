@@ -29,24 +29,22 @@
 
 #include <stdexcept>
 
+#include "FsgdfPlot.h"
 #include "IconLoader.h"
-#include "vtkKWQdecApp.h"
-#include "vtkKWQdecWindow.h"
-#include "vtkObjectFactory.h"
+#include "QdecUtilities.h"
 #include "vtkKWDialog.h"
 #include "vtkKWMessageDialog.h"
 #include "vtkKWOptionDataBase.h"
 #include "vtkKWPushButton.h"
+#include "vtkKWQdecApp.h"
+#include "vtkKWQdecWindow.h"
 #include "vtkKWSplashScreen.h"
 #include "vtkKWText.h"
 #include "vtkKWTextWithScrollbars.h"
+#include "vtkObjectFactory.h"
 #include "vtkSmartPointer.h"
 #include "vtksys/CommandLineArguments.hxx"
 #include "vtksys/SystemTools.hxx"
-#include "QdecUtilities.h"
-#include "FsgdfPlot.h"
-
-using namespace std;
 
 vtkStandardNewMacro(vtkKWQdecApp);
 vtkCxxRevisionMacro(vtkKWQdecApp, "$Revision: 1.13 $");
@@ -67,13 +65,13 @@ vtkKWQdecApp::vtkKWQdecApp() : vtkKWApplication() {
     } catch (...) {
       char *pfnFreesurferDir = getenv("FREESURFER_HOME");
       if (NULL != pfnFreesurferDir) {
-        string fnIcons =
+        std::string fnIcons =
             string(pfnFreesurferDir) + "/lib/resource/QdecIcons.txt";
         IconLoader::LoadIconsFromFile(fnIcons.c_str());
       }
     }
   } catch (exception &e) {
-    cerr << "Error loading icons: " << e.what() << endl;
+    std::cerr << "Error loading icons: " << e.what() << std::endl;
   }
 
   // Set some application stuff.
@@ -98,10 +96,11 @@ vtkKWQdecApp::~vtkKWQdecApp() {
 
 void vtkKWQdecApp::Start(int argc, char *argv[]) {
 
-  vtkKWSplashScreen *pSplash = this->GetSplashScreen();
-  char *pfnFreesurferDir = getenv("FREESURFER_HOME");
+  vtkKWSplashScreen *pSplash          = this->GetSplashScreen();
+  char *             pfnFreesurferDir = getenv("FREESURFER_HOME");
   if (NULL != pfnFreesurferDir) {
-    string fSplash = string(pfnFreesurferDir) + "/lib/images/qdec_splash.png";
+    std::string fSplash =
+        string(pfnFreesurferDir) + "/lib/images/qdec_splash.png";
     pSplash->ReadImage(fSplash.c_str());
     pSplash->Display();
   }
@@ -115,71 +114,71 @@ void vtkKWQdecApp::Start(int argc, char *argv[]) {
   args.AddArgument("--help", args.NO_ARGUMENT, &bHelp,
                    "Print option information");
 
-  string fnTable;
+  std::string fnTable;
   args.AddArgument("--table", args.SPACE_ARGUMENT, &fnTable,
                    "Data table to load");
 
-  string fnProject;
+  std::string fnProject;
   args.AddArgument("--project", args.SPACE_ARGUMENT, &fnProject,
                    "Project file (*.qdec) to load");
 
-  vector<string> lfnSurfaces;
+  std::vector<std::string> lfnSurfaces;
 #if ((VTK_MAJOR_VERSION == 5) && (VTK_MINOR_VERSION > 0))
   args.AddArgument("--surface", args.MULTI_ARGUMENT, &lfnSurfaces,
                    "A surface file or list of files to load");
 #else
-  string fnSurface;
+  std::string fnSurface;
   args.AddArgument("--surface", args.SPACE_ARGUMENT, &fnSurface,
                    "A surface file to load");
 #endif
 
-  string fnGDF;
+  std::string fnGDF;
   args.AddArgument("--gdf", args.SPACE_ARGUMENT, &fnGDF, "FSGDF file to load");
   args.AddArgument("--fsgd", args.SPACE_ARGUMENT, &fnGDF, "FSGDF file to load");
 
-  vector<string> lfnScalars;
+  std::vector<std::string> lfnScalars;
 #if ((VTK_MAJOR_VERSION == 5) && (VTK_MINOR_VERSION > 0))
   args.AddArgument("--scalar", args.MULTI_ARGUMENT, &lfnScalars,
                    "A scalar file or list of files to load");
 #else
-  string fnScalar;
+  std::string fnScalar;
   args.AddArgument("--scalar", args.SPACE_ARGUMENT, &fnScalar,
                    "A scalar file to load");
 #endif
 
-  string fnCurvature;
+  std::string fnCurvature;
   args.AddArgument("--curvature", args.SPACE_ARGUMENT, &fnCurvature,
                    "Curvature file to load");
 
-  string fnAnnotation;
+  std::string fnAnnotation;
   args.AddArgument("--annotation", args.SPACE_ARGUMENT, &fnAnnotation,
                    "Annotation file to load");
 
-  vector<string> lfnOverlay;
+  std::vector<std::string> lfnOverlay;
 #if ((VTK_MAJOR_VERSION == 5) && (VTK_MINOR_VERSION > 0))
   args.AddArgument("--overlay", args.MULTI_ARGUMENT, &lfnOverlay,
                    "Overlay file and color file to load");
 #endif
 
-  string fnLabel;
+  std::string fnLabel;
   args.AddArgument("--label", args.SPACE_ARGUMENT, &fnLabel,
                    "Label file to load");
 
-  string sAverageSubject;
+  std::string sAverageSubject;
   args.AddArgument("--average", args.SPACE_ARGUMENT, &sAverageSubject,
                    "Name of average (common-space) subject");
 
   // Try and parse the arguments. If there was an error, print our
   // help message and quit.
   if (!args.Parse()) {
-    cerr << "Error parsing arguments." << endl;
-    cerr << args.GetHelp() << endl;
+    std::cerr << "Error parsing arguments." << std::endl;
+    std::cerr << args.GetHelp() << std::endl;
     exit(1);
   }
   if (bHelp) {
-    cerr << "USAGE: qdec [options...]" << endl << endl;
-    cerr << "Options:" << endl;
-    cerr << args.GetHelp() << endl;
+    std::cerr << "USAGE: qdec [options...]" << std::endl << std::endl;
+    std::cerr << "Options:" << std::endl;
+    std::cerr << args.GetHelp() << std::endl;
     exit(1);
   }
 
@@ -193,8 +192,9 @@ void vtkKWQdecApp::Start(int argc, char *argv[]) {
 
   // Check results.
   if (lfnOverlay.size() != 0 && lfnOverlay.size() != 2) {
-    cerr << "Error parsing --overlay option; needs two arguments" << endl;
-    cerr << args.GetHelp() << endl;
+    std::cerr << "Error parsing --overlay option; needs two arguments"
+              << std::endl;
+    std::cerr << args.GetHelp() << std::endl;
     exit(1);
   }
 
@@ -230,7 +230,7 @@ void vtkKWQdecApp::Start(int argc, char *argv[]) {
     if (!fnProject.empty())
       this->LoadProjectFile(fnProject.c_str());
 
-    vector<string>::iterator tfn;
+    std::vector<std::string>::iterator tfn;
     for (tfn = lfnSurfaces.begin(); tfn != lfnSurfaces.end(); ++tfn)
       this->LoadSurface(tfn->c_str());
 
@@ -269,7 +269,7 @@ void vtkKWQdecApp::AddAboutText(ostream &os) {
 
   this->Superclass::AddAboutText(os);
 
-  string buildStamp = "Build: ";
+  std::string buildStamp = "Build: ";
   buildStamp += __DATE__;
   buildStamp += " ";
   buildStamp += __TIME__;
@@ -293,9 +293,10 @@ void vtkKWQdecApp::LoadProjectFile(const char *ifnProject) {
 void vtkKWQdecApp::LoadSurface(const char *ifnSurface) {
   if (mWindow.GetPointer()) {
 
-    string fnSurface = ifnSurface;
-    string::size_type lastSlash = fnSurface.rfind("/");
-    string sLabel = fnSurface.substr(lastSlash + 1, string::npos).c_str();
+    std::string            fnSurface = ifnSurface;
+    std::string::size_type lastSlash = fnSurface.rfind("/");
+    std::string            sLabel =
+        fnSurface.substr(lastSlash + 1, std::string::npos).c_str();
 
     mWindow->LoadSurface(ifnSurface, sLabel.c_str());
   }

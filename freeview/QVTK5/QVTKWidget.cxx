@@ -44,8 +44,8 @@
 
 #include "QVTKPaintEngine.h"
 
-#include "qevent.h"
 #include "qapplication.h"
+#include "qevent.h"
 #include "qpainter.h"
 #include "qsignalmapper.h"
 #include "qtimer.h"
@@ -57,20 +57,20 @@
 #endif
 #endif
 
-#include <map>
 #include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkRenderWindow.h"
+#include <map>
 #if defined(QVTK_USE_CARBON)
 #include "vtkCarbonRenderWindow.h"
 #endif
+#include "vtkCallbackCommand.h"
 #include "vtkCommand.h"
+#include "vtkConfigure.h"
+#include "vtkImageData.h"
 #include "vtkOStrStreamWrapper.h"
 #include "vtkObjectFactory.h"
-#include "vtkCallbackCommand.h"
-#include "vtkConfigure.h"
-#include "vtkUnsignedCharArray.h"
-#include "vtkImageData.h"
 #include "vtkPointData.h"
+#include "vtkUnsignedCharArray.h"
 #include <QDebug>
 
 // function to get VTK keysyms from ascii characters
@@ -113,7 +113,7 @@ QVTKWidget::QVTKWidget(QWidget *p, Qt::WindowFlags f)
   this->mCachedImage->SetSpacing(1, 1, 1);
 
 #if defined(QVTK_USE_CARBON)
-  this->DirtyRegionHandler = 0;
+  this->DirtyRegionHandler    = 0;
   this->DirtyRegionHandlerUPP = 0;
 #endif
 }
@@ -253,7 +253,7 @@ void QVTKWidget::SetRenderWindow(vtkRenderWindow *w) {
   } else if (!mRenWin && this->DirtyRegionHandlerUPP) {
     RemoveEventHandler(this->DirtyRegionHandler);
     DisposeEventHandlerUPP(this->DirtyRegionHandlerUPP);
-    this->DirtyRegionHandler = 0;
+    this->DirtyRegionHandler    = 0;
     this->DirtyRegionHandlerUPP = 0;
   }
 #endif
@@ -419,9 +419,9 @@ void QVTKWidget::paintEvent(QPaintEvent *) {
   // if redirected, let's grab the image from VTK, and paint it to the device
   QPaintDevice *device = QPainter::redirected(this);
   if (device != NULL && device != this) {
-    int w = this->width();
-    int h = this->height();
-    QImage img(w, h, QImage::Format_RGB32);
+    int                   w = this->width();
+    int                   h = this->height();
+    QImage                img(w, h, QImage::Format_RGB32);
     vtkUnsignedCharArray *pixels = vtkUnsignedCharArray::New();
     pixels->SetArray(img.bits(), w * h * 4, 1);
     this->mRenWin->GetRGBACharPixelData(0, 0, w - 1, h - 1, 1, pixels);
@@ -576,7 +576,7 @@ void QVTKWidget::keyPressEvent(QKeyEvent *e) {
   }
 
   // get key and keysym information
-  int ascii_key = e->text().length() ? e->text().unicode()->toLatin1() : 0;
+  int ascii_key      = e->text().length() ? e->text().unicode()->toLatin1() : 0;
   const char *keysym = ascii_to_key_sym(ascii_key);
   if (!keysym) {
     // get virtual keys
@@ -615,7 +615,7 @@ void QVTKWidget::keyReleaseEvent(QKeyEvent *e) {
   }
 
   // get key and keysym info
-  int ascii_key = e->text().length() ? e->text().unicode()->toLatin1() : 0;
+  int ascii_key      = e->text().length() ? e->text().unicode()->toLatin1() : 0;
   const char *keysym = ascii_to_key_sym(ascii_key);
   if (!keysym) {
     // get virtual keys
@@ -789,9 +789,9 @@ public:
     this->SignalMapper = new QSignalMapper(this);
   }
   ~QVTKInteractorInternal() {}
-  QSignalMapper *SignalMapper;
+  QSignalMapper *                 SignalMapper;
   typedef std::map<int, QTimer *> TimerMap;
-  TimerMap Timers;
+  TimerMap                        Timers;
 };
 
 /*! allocation method for Qt/VTK interactor
@@ -1323,7 +1323,7 @@ const char *qt_key_to_key_sym(Qt::Key i) {
 #endif
 #endif
 
-void QVTKWidget::x11_setup_window() {
+void        QVTKWidget::x11_setup_window() {
 #if defined Q_OS_LINUX
 
   // this whole function is to allow this window to have a
@@ -1332,17 +1332,17 @@ void QVTKWidget::x11_setup_window() {
   // not enough to get a decent graphics window
 
   // save widget states
-  bool tracking = this->hasMouseTracking();
+  bool            tracking     = this->hasMouseTracking();
   Qt::FocusPolicy focus_policy = focusPolicy();
-  bool visible = isVisible();
+  bool            visible      = isVisible();
   if (visible) {
     hide();
   }
 
   // get visual and colormap from VTK
-  XVisualInfo *vi = 0;
-  Colormap cmap = 0;
-  Display *display =
+  XVisualInfo *vi   = 0;
+  Colormap     cmap = 0;
+  Display *    display =
       reinterpret_cast<Display *>(mRenWin->GetGenericDisplayId());
 
   // check ogl and mesa and get information we need to create a decent window
@@ -1350,7 +1350,7 @@ void QVTKWidget::x11_setup_window() {
   vtkXOpenGLRenderWindow *ogl_win =
       vtkXOpenGLRenderWindow::SafeDownCast(mRenWin);
   if (ogl_win) {
-    vi = ogl_win->GetDesiredVisualInfo();
+    vi   = ogl_win->GetDesiredVisualInfo();
     cmap = ogl_win->GetDesiredColormap();
   }
 #endif
@@ -1358,7 +1358,7 @@ void QVTKWidget::x11_setup_window() {
   if (!vi) {
     vtkXMesaRenderWindow *mgl_win = vtkXMesaRenderWindow::SafeDownCast(mRenWin);
     if (mgl_win) {
-      vi = mgl_win->GetDesiredVisualInfo();
+      vi   = mgl_win->GetDesiredVisualInfo();
       cmap = mgl_win->GetDesiredColormap();
     }
   }
@@ -1375,8 +1375,8 @@ void QVTKWidget::x11_setup_window() {
 
   // create the X window based on information VTK gave us
   XSetWindowAttributes attrib;
-  attrib.colormap = cmap;
-  attrib.border_pixel = 0;
+  attrib.colormap         = cmap;
+  attrib.border_pixel     = 0;
   attrib.background_pixel = 0;
 
   Window p = RootWindow(display, DefaultScreen(display));
@@ -1394,7 +1394,7 @@ void QVTKWidget::x11_setup_window() {
   // backup colormap stuff
   Window *cmw;
   Window *cmwret;
-  int count;
+  int     count;
   if (XGetWMColormapWindows(display, topLevelWidget()->winId(), &cmwret,
                             &count)) {
     cmw = new Window[count + 1];
@@ -1411,8 +1411,8 @@ void QVTKWidget::x11_setup_window() {
       cmw[count++] = win;
     }
   } else {
-    count = 1;
-    cmw = new Window[count];
+    count  = 1;
+    cmw    = new Window[count];
     cmw[0] = win;
   }
 
@@ -1442,9 +1442,9 @@ void QVTKWidget::x11_setup_window() {
 #if defined(QVTK_USE_CARBON)
 OSStatus QVTKWidget::DirtyRegionProcessor(EventHandlerCallRef, EventRef event,
                                           void *wid) {
-  QVTKWidget *widget = reinterpret_cast<QVTKWidget *>(wid);
-  UInt32 event_kind = GetEventKind(event);
-  UInt32 event_class = GetEventClass(event);
+  QVTKWidget *widget      = reinterpret_cast<QVTKWidget *>(wid);
+  UInt32      event_kind  = GetEventKind(event);
+  UInt32      event_class = GetEventClass(event);
   if ((event_class == 'cute' || event_class == 'Cute') && event_kind == 20) {
     static_cast<vtkCarbonRenderWindow *>(widget->GetRenderWindow())
         ->UpdateGLRegion();

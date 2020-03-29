@@ -31,17 +31,17 @@
 #define COLORTAB_H
 
 #include "const.h"
-#include <cstdio>
 #include "znzlib.h"
+#include <cstdio>
 
 /* A color table entry. The index of the entry in the table itself is
    the structure index. */
 typedef struct {
-  char name[STRLEN];    /* Structure name. */
-  int ri, gi, bi, ai;   /* 0-255 range. */
+  char  name[STRLEN];   /* Structure name. */
+  int   ri, gi, bi, ai; /* 0-255 range. */
   float rf, gf, bf, af; /* 0-1 range.  */
-  int TissueType;
-  int count; // Number of voxels for this entry
+  int   TissueType;
+  int   count; // Number of voxels for this entry
 } COLOR_TABLE_ENTRY, CTE;
 
 /* The color table. Has an arry of entries. A structure index maps to
@@ -49,12 +49,12 @@ typedef struct {
    entry for every structure. An entry may be NULL if the entry
    doesn't exist in the table. */
 typedef struct COLOR_TABLE {
-  CTE **entries;      /* Array of CTE ptrs; some may be NULL */
-  int nentries;       /* Size of entries array. */
-  char fname[STRLEN]; /* Original file name. */
-  int version;        /* Version number, if read from binary */
-  int idbase;         // Add this to structure number when writing
-  char TissueTypeSchema[STRLEN];
+  CTE **              entries;       /* Array of CTE ptrs; some may be NULL */
+  int                 nentries;      /* Size of entries array. */
+  char                fname[STRLEN]; /* Original file name. */
+  int                 version;       /* Version number, if read from binary */
+  int                 idbase; // Add this to structure number when writing
+  char                TissueTypeSchema[STRLEN];
   struct COLOR_TABLE *ctabTissueType;
 } COLOR_TABLE, CT;
 
@@ -74,11 +74,11 @@ extern int ctabDuplicates;
    format, a negative version number is written (see special case in
    code) and then binary information for each entry. */
 COLOR_TABLE *CTABreadFromBinary(FILE *fp);
-int CTABwriteIntoBinary(COLOR_TABLE *ct, FILE *fp);
+int          CTABwriteIntoBinary(COLOR_TABLE *ct, FILE *fp);
 
 /* zlib support */
 COLOR_TABLE *znzCTABreadFromBinary(znzFile fp);
-int znzCTABwriteIntoBinary(COLOR_TABLE *ct, znzFile fp);
+int          znzCTABwriteIntoBinary(COLOR_TABLE *ct, znzFile fp);
 
 /* Allocates an empty table. Here, all entries are allocated and
    filled with random colors. */
@@ -176,10 +176,10 @@ COLOR_TABLE *TissueTypeSchema(COLOR_TABLE *ct, const char *schema);
 COLOR_TABLE *TissueTypeSchemaDefault(COLOR_TABLE *ct);
 COLOR_TABLE *TissueTypeSchemaDefaultHead(COLOR_TABLE *ct);
 COLOR_TABLE *TissueTypeSchemaLat(COLOR_TABLE *ct);
-int CTABprintASCIItt(COLOR_TABLE *ct, FILE *fp);
-int CTABwriteFileASCIItt(COLOR_TABLE *ct, const char *fname);
+int          CTABprintASCIItt(COLOR_TABLE *ct, FILE *fp);
+int          CTABwriteFileASCIItt(COLOR_TABLE *ct, const char *fname);
 COLOR_TABLE *CTABreadASCIIttHeader(const char *fname);
-int CTABmerge(COLOR_TABLE *ct, const COLOR_TABLE *merge);
-int CTABaddUniqueEntry(COLOR_TABLE *ct, char *name, int min_dist);
+int          CTABmerge(COLOR_TABLE *ct, const COLOR_TABLE *merge);
+int          CTABaddUniqueEntry(COLOR_TABLE *ct, char *name, int min_dist);
 
 #endif

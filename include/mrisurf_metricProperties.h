@@ -20,10 +20,10 @@
 // The positions of the vertices and the immediate consequences of that
 //
 #include "mrisurf_topology.h"
-#include "topo_parms.h"
 #include "realm.h"
+#include "topo_parms.h"
 
-int mrisCheckSurface(MRIS *mris);
+int  mrisCheckSurface(MRIS *mris);
 bool mrisCheckDist(MRIS const *mris);
 bool mrisCheckDistOrig(MRIS const *mris);
 
@@ -31,19 +31,19 @@ void MRISmakeDist(MRIS *mris, int vno);
 
 typedef struct PerThreadMRIDistance {
   MRI const *mri_distance;
-  int heightTimesDepth, depth;
-  float *elts;
+  int        heightTimesDepth, depth;
+  float *    elts;
 } PerThreadMRIDistance;
 PerThreadMRIDistance *makePerThreadMRIDistance(MRI const *const mri_distance);
-void freePerThreadMRIDistance(PerThreadMRIDistance **ptdp);
+void                  freePerThreadMRIDistance(PerThreadMRIDistance **ptdp);
 float *perThreadMRIDistanceElt(PerThreadMRIDistance *ptd, int i, int j, int k);
-void updateDistanceElt(volatile float *f, float distance, bool lockNeeded);
-void updateDistanceEltFromSignArgAndSquareLockNeeded(volatile float *f,
-                                                     float distanceSignArg,
-                                                     float distanceSquared);
-void updateDistanceEltFromSignArgAndSquareNoLockNeeded(
-    volatile float *f, float distanceSignArg, float distanceSquared,
-    float sqrtfDistanceSquared);
+void   updateDistanceElt(volatile float *f, float distance, bool lockNeeded);
+void   updateDistanceEltFromSignArgAndSquareLockNeeded(volatile float *f,
+                                                       float distanceSignArg,
+                                                       float distanceSquared);
+void   updateDistanceEltFromSignArgAndSquareNoLockNeeded(
+      volatile float *f, float distanceSignArg, float distanceSquared,
+      float sqrtfDistanceSquared);
 
 int mrisFindAllOverlappingFaces(MRIS *mris, MHT *mht, int fno, int *flist);
 
@@ -94,26 +94,26 @@ void mrisurf_undeferSetFaceNorms(MRIS *mris);
 
 int mrisMarkIntersections(MRIS *mris);
 
-constexpr auto OUTSIDE_VERTEX = 0;
-constexpr auto INSIDE_VERTEX = 1;   /* not yet used */
-constexpr auto EDGE_VERTEX = 2;     /* part of an edge */
+constexpr auto OUTSIDE_VERTEX  = 0;
+constexpr auto INSIDE_VERTEX   = 1; /* not yet used */
+constexpr auto EDGE_VERTEX     = 2; /* part of an edge */
 constexpr auto TRIANGLE_VERTEX = 3; /* part of a triangle */
 constexpr auto DISCARDED_VERTEX =
     4; /* excluded from the current tessellation */
 constexpr auto BORDER_VERTEX = TRIANGLE_VERTEX; /* part of a triangle! */
-constexpr auto USED_VERTEX = 5; /* used in the final tessellation */
+constexpr auto USED_VERTEX   = 5; /* used in the final tessellation */
 
 void mrisDumpFace(MRIS const *mris, int fno, FILE *fp);
 
-int MRIScomputeAllDistances(MRIS *mris);
+int  MRIScomputeAllDistances(MRIS *mris);
 void MRIScomputeAvgInterVertexDist(MRIS *Surf, double *StdDev);
 void mrisSetAvgInterVertexDist(MRIS *Surf, double to);
-int mrisTrackTotalDistance(MRIS *mris);
-int mrisTrackTotalDistanceNew(MRIS *mris);
+int  mrisTrackTotalDistance(MRIS *mris);
+int  mrisTrackTotalDistanceNew(MRIS *mris);
 
 float mrisComputeArea(MRIS *mris, int fac, int n);
 float MRIScomputeOrigArea(MRIS *mris);
-void MRISsetOrigArea(MRIS *mris);
+void  MRISsetOrigArea(MRIS *mris);
 
 FaceNormCacheEntry const *getFaceNorm(MRIS const *const mris, int fno);
 FaceNormCacheEntry const *getFaceNorm(MRIS_MP const *const mris, int fno);
@@ -163,7 +163,7 @@ int mrisFindUnambiguousFace(MRIS *mris, MHT *mht, VERTEX *v, int *pnfound);
 
 typedef struct ComputeDefectContext {
   RealmTree *realmTree;
-  MRIS *mris_deferred_norms;
+  MRIS *     mris_deferred_norms;
 } ComputeDefectContext;
 
 static void
@@ -179,5 +179,5 @@ constructComputeDefectContext(ComputeDefectContext *computeDefectContext) {
 #define VERTEX_CANONICAL_EDGE(vec, v0, v1)                                     \
   VECTOR_LOAD(vec, v1->cx - v0->cx, v1->cy - v0->cy, v1->cz - v0->cz)
 
-void MRIScomputeMetricProperties(MRIS_MP* mris);
+void MRIScomputeMetricProperties(MRIS_MP *mris);
 void MRIScomputeMetricPropertiesFaster(MRIS *mris);

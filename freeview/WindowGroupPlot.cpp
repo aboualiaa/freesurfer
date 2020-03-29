@@ -23,11 +23,11 @@
  */
 
 #include "WindowGroupPlot.h"
-#include "ui_WindowGroupPlot.h"
-#include <QSettings>
 #include "FSGroupDescriptor.h"
+#include "ui_WindowGroupPlot.h"
 #include <QListWidgetItem>
 #include <QPainter>
+#include <QSettings>
 
 WindowGroupPlot::WindowGroupPlot(QWidget *parent)
     : QWidget(parent), ui(new Ui::WindowGroupPlot) {
@@ -49,7 +49,7 @@ WindowGroupPlot::WindowGroupPlot(QWidget *parent)
           SLOT(OnCurrentDataIndexChanged(int)));
 
   QSettings s;
-  QVariant v = s.value("WindowPlot/Geomerty");
+  QVariant  v = s.value("WindowPlot/Geomerty");
   if (v.isValid())
     this->restoreGeometry(v.toByteArray());
 }
@@ -88,7 +88,7 @@ void WindowGroupPlot::SetFsgdData(FSGroupDescriptor *fsgd) {
 }
 
 void WindowGroupPlot::UpdateCurrentConfig(const QString &shape,
-                                          const QColor &c) {
+                                          const QColor & c) {
   ui->comboBoxConfigShape->blockSignals(true);
   ui->widgetConfigColor->blockSignals(true);
   for (int i = 0; i < ui->comboBoxConfigShape->count(); i++) {
@@ -159,7 +159,7 @@ void WindowGroupPlot::OnComboConfigClass(int nIndex) {
 }
 
 void WindowGroupPlot::OnComboConfigShape(const QString &strg) {
-  int n = ui->comboBoxConfigClass->currentIndex();
+  int n                       = ui->comboBoxConfigClass->currentIndex();
   m_fsgd->m_classes[n].marker = strg;
   ui->widgetPlot->update();
   UpdateStockPixmaps();
@@ -167,7 +167,7 @@ void WindowGroupPlot::OnComboConfigShape(const QString &strg) {
 }
 
 void WindowGroupPlot::OnConfigColor(const QColor &c) {
-  int n = ui->comboBoxConfigClass->currentIndex();
+  int n                      = ui->comboBoxConfigClass->currentIndex();
   m_fsgd->m_classes[n].color = c;
   ui->widgetPlot->update();
   UpdateStockPixmaps();

@@ -8,9 +8,9 @@ namespace kvl {
 class AtlasMeshSmoother : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshSmoother;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshSmoother;
+  using Superclass   = itk::Object;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -63,10 +63,10 @@ private:
 
   // Data members
   AtlasMeshCollection::Pointer m_MeshCollection;
-  float m_Sigma0;
-  float m_Sigma1;
-  float m_Sigma2;
-  std::vector<int> m_ClassesToSmooth;
+  float                        m_Sigma0;
+  float                        m_Sigma1;
+  float                        m_Sigma2;
+  std::vector<int>             m_ClassesToSmooth;
 };
 
 } // end namespace kvl

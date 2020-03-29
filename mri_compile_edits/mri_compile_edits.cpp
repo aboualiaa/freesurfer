@@ -24,12 +24,12 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -37,22 +37,22 @@ static void usage_exit(int code);
 
 static char sdir[STRLEN] = "";
 
-#define EDIT_WM_OFF 1
-#define EDIT_WM_ON 2
-#define EDIT_BRAIN_OFF 3
-#define EDIT_BRAIN_ON 4
-#define EDIT_BM_CHANGED 5 // brainmask.mgz changed
+#define EDIT_WM_OFF         1
+#define EDIT_WM_ON          2
+#define EDIT_BRAIN_OFF      3
+#define EDIT_BRAIN_ON       4
+#define EDIT_BM_CHANGED     5 // brainmask.mgz changed
 #define EDIT_FINALSURFS_OFF 6
-#define EDIT_FINALSURFS_ON 7
-#define EDIT_ASEG_CHANGED 8
-#define CTAB_ENTRIES EDIT_ASEG_CHANGED + 1
+#define EDIT_FINALSURFS_ON  7
+#define EDIT_ASEG_CHANGED   8
+#define CTAB_ENTRIES        EDIT_ASEG_CHANGED + 1
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN];
-  int ac, nargs, i;
-  char *subject, *cp, mdir[STRLEN], *out_fname, *name;
-  int r, g, b, nedits = 0;
-  MRI *mri = nullptr, *mri_edits = nullptr, *mri_aseg_auto = nullptr,
+  int    ac, nargs, i;
+  char * subject, *cp, mdir[STRLEN], *out_fname, *name;
+  int    r, g, b, nedits = 0;
+  MRI *  mri = nullptr, *mri_edits = nullptr, *mri_aseg_auto = nullptr,
       *mri_bm_auto = nullptr;
   FILE *ctfp;
 
@@ -213,57 +213,57 @@ int main(int argc, char *argv[]) {
       switch (i) {
       case EDIT_WM_OFF:
         name = "wm-OFF";
-        r = 0;
-        g = 0;
-        b = 255;
+        r    = 0;
+        g    = 0;
+        b    = 255;
         break;
       case EDIT_WM_ON:
         name = "wm-ON";
-        r = 255;
-        g = 0;
-        b = 0;
+        r    = 255;
+        g    = 0;
+        b    = 0;
         break;
       case EDIT_BRAIN_OFF:
         name = "brain-OFF";
-        r = 0;
-        g = 255;
-        b = 255;
+        r    = 0;
+        g    = 255;
+        b    = 255;
         break;
       case EDIT_BRAIN_ON:
         name = "brain-ON";
-        r = 255;
-        g = 255;
-        b = 0;
+        r    = 255;
+        g    = 255;
+        b    = 0;
         break;
       case EDIT_BM_CHANGED:
         name = "brainmask-CHANGED";
-        r = 0;
-        g = 64;
-        b = 255;
+        r    = 0;
+        g    = 64;
+        b    = 255;
         break;
       case EDIT_FINALSURFS_OFF:
         name = "brain.finalsurf-OFF";
-        r = 0;
-        g = 128;
-        b = 255;
+        r    = 0;
+        g    = 128;
+        b    = 255;
         break;
       case EDIT_FINALSURFS_ON:
         name = "brain.finalsurfs-ON";
-        r = 255;
-        g = 128;
-        b = 0;
+        r    = 255;
+        g    = 128;
+        b    = 0;
         break;
       case EDIT_ASEG_CHANGED:
         name = "aseg-CHANGED";
-        r = 255;
-        g = 255;
-        b = 128;
+        r    = 255;
+        g    = 255;
+        b    = 128;
         break;
       default:
         name = "Unknown";
-        r = 0;
-        g = 0;
-        b = 0;
+        r    = 0;
+        g    = 0;
+        b    = 0;
         break;
         continue;
       }
@@ -321,7 +321,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

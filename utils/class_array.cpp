@@ -26,9 +26,6 @@
   INCLUDE FILES
   -------------------------------------------------------*/
 #include "class_array.h"
-#include <math.h>
-#include <cstdio>
-#include <cstdlib>
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
@@ -36,15 +33,18 @@
 #include "mri.h"
 #include "mrinorm.h"
 #include "voxlist.h"
+#include <cstdio>
+#include <cstdlib>
+#include <math.h>
 
 extern const char *Progname;
 
 static MATRIX *compute_ras_basis_vectors(MRI *mri_aseg_orig, MRI *mri_aseg_edit,
                                          int target_label, int width,
                                          int height, int depth, int pad);
-static int clUpdateStatistics(CA *ca, CLASSIFIER *cl, float *inputs,
-                              int output);
-static int clCompleteTraining(CA *ca, CLASSIFIER *cl);
+static int     clUpdateStatistics(CA *ca, CLASSIFIER *cl, float *inputs,
+                                  int output);
+static int     clCompleteTraining(CA *ca, CLASSIFIER *cl);
 static MRI *caComputeSurfaceNormals(MRI *mri_aseg, MRI *mri_normals, int label);
 
 float **CAbuildTrainingData(VOXEL_LIST *vl_total, int target_label,
@@ -53,8 +53,8 @@ float **CAbuildTrainingData(VOXEL_LIST *vl_total, int target_label,
                             MRI **mri_2nd_deriv_s, int wsize, int nscales,
                             int which_inputs) {
   float **ca_inputs;
-  int i, ninputs;
-  MRI *mri_dtrans_grad;
+  int     i, ninputs;
+  MRI *   mri_dtrans_grad;
 
   ca_inputs = (float **)calloc(vl_total->nvox, sizeof(float *));
   if (ca_inputs == nullptr)
@@ -89,7 +89,7 @@ float *CAbuildInputsAtVoxel(VOXEL_LIST *vl, int i, MRI **mri_smooth,
                             float *svm_inputs, int which_inputs) {
   int s, xk, yk, zk, xi, yi, zi, x, y, z, ninputs, whalf, input;
 
-  whalf = (wsize - 1) / 2;
+  whalf   = (wsize - 1) / 2;
   ninputs = NINPUTS(which_inputs, wsize, nscales);
   if (svm_inputs == nullptr) {
     svm_inputs = (float *)calloc(ninputs, sizeof(float));
@@ -103,15 +103,20 @@ float *CAbuildInputsAtVoxel(VOXEL_LIST *vl, int i, MRI **mri_smooth,
   z = vl->zi[i];
 
   input = 0;
-  if (which_inputs & CA_INPUT_DTRANS) svm_inputs[input++] = MRIgetVoxVal(mri_dtrans, x, y, z, 0);
-  if (!std::isfinite(svm_inputs[input - 1])) DiagBreak();
+  if (which_inputs & CA_INPUT_DTRANS)
+    svm_inputs[input++] = MRIgetVoxVal(mri_dtrans, x, y, z, 0);
+  if (!std::isfinite(svm_inputs[input - 1]))
+    DiagBreak();
   if (which_inputs & CA_INPUT_DTRANS_GRAD) {
     svm_inputs[input++] = MRIgetVoxVal(mri_dtrans_grad, x, y, z, 0);
-    if (!std::isfinite(svm_inputs[input - 1])) DiagBreak();
+    if (!std::isfinite(svm_inputs[input - 1]))
+      DiagBreak();
     svm_inputs[input++] = MRIgetVoxVal(mri_dtrans_grad, x, y, z, 1);
-    if (!std::isfinite(svm_inputs[input - 1])) DiagBreak();
+    if (!std::isfinite(svm_inputs[input - 1]))
+      DiagBreak();
     svm_inputs[input++] = MRIgetVoxVal(mri_dtrans_grad, x, y, z, 2);
-    if (!std::isfinite(svm_inputs[input - 1])) DiagBreak();
+    if (!std::isfinite(svm_inputs[input - 1]))
+      DiagBreak();
   }
   for (xk = -whalf; xk <= whalf; xk++)
     for (yk = -whalf; yk <= whalf; yk++)
@@ -122,7 +127,8 @@ float *CAbuildInputsAtVoxel(VOXEL_LIST *vl, int i, MRI **mri_smooth,
           zi = mri_smooth[s]->zi[z + zk];
           if (which_inputs & CA_INPUT_INTENSITY) {
             svm_inputs[input++] = MRIgetVoxVal(mri_smooth[s], xi, yi, zi, 0);
-            if (!std::isfinite(svm_inputs[input - 1])) DiagBreak();
+            if (!std::isfinite(svm_inputs[input - 1]))
+              DiagBreak();
           }
           if (which_inputs & CA_INPUT_GRADIENT) {
             svm_inputs[input++] = MRIgetVoxVal(mri_grad[s], xi, yi, zi, 0);
@@ -132,17 +138,21 @@ float *CAbuildInputsAtVoxel(VOXEL_LIST *vl, int i, MRI **mri_smooth,
 
           if (which_inputs & CA_INPUT_LAPLACIAN) {
             svm_inputs[input++] = MRIgetVoxVal(mri_laplacian[s], xi, yi, zi, 0);
-            if (!std::isfinite(svm_inputs[input - 1])) DiagBreak();
+            if (!std::isfinite(svm_inputs[input - 1]))
+              DiagBreak();
           }
           if (which_inputs & CA_INPUT_D2I_S) {
-            svm_inputs[input++] = MRIgetVoxVal(mri_2nd_deriv_s[s], xi, yi, zi, 0);
-            if (!std::isfinite(svm_inputs[input - 1])) DiagBreak();
+            svm_inputs[input++] =
+                MRIgetVoxVal(mri_2nd_deriv_s[s], xi, yi, zi, 0);
+            if (!std::isfinite(svm_inputs[input - 1]))
+              DiagBreak();
           }
         }
       }
 
   for (input = 0; input < ninputs; input++)
-    if (!std::isfinite(svm_inputs[input])) DiagBreak();
+    if (!std::isfinite(svm_inputs[input]))
+      DiagBreak();
   return (svm_inputs);
 }
 #define MAX_SCALES 50
@@ -150,7 +160,7 @@ float **CAbuildInputs(VOXEL_LIST *vl_total, MRI *mri_intensity, MRI *mri_labels,
                       int target_label, int which_inputs, int wsize,
                       int nscales, float *sigmas) {
   float **svm_inputs;
-  MRI *mri_grad[MAX_SCALES], *mri_kernel, *mri_smooth[MAX_SCALES],
+  MRI *   mri_grad[MAX_SCALES], *mri_kernel, *mri_smooth[MAX_SCALES],
       *mri_laplacian[MAX_SCALES], *mri_dtrans, *mri_2nd_deriv_s[MAX_SCALES];
   int i;
 
@@ -158,7 +168,7 @@ float **CAbuildInputs(VOXEL_LIST *vl_total, MRI *mri_intensity, MRI *mri_labels,
     mri_dtrans = MRIdistanceTransform(mri_labels, nullptr, target_label, 10,
                                       DTRANS_MODE_SIGNED, nullptr);
   for (i = 0; i < nscales; i++) {
-    mri_kernel = MRIgaussian1d(sigmas[i], -1);
+    mri_kernel    = MRIgaussian1d(sigmas[i], -1);
     mri_smooth[i] = MRIconvolveGaussian(mri_intensity, nullptr, mri_kernel);
     if (which_inputs & CA_INPUT_GRADIENT)
       mri_grad[i] = MRIsobel(mri_smooth[i], nullptr, nullptr);
@@ -213,21 +223,21 @@ CA *CAalloc(int width, int height, int depth, MATRIX *m_vox2index, int type,
             int which_inputs, int wsize, int nscales, char *c1_name,
             char *c2_name, float *sigmas) {
   CLASSIFIER_ATLAS *ca;
-  int x, y, z, o, ninputs;
+  int               x, y, z, o, ninputs;
 
   ninputs = NINPUTS(which_inputs, wsize, nscales);
 
   ca = (CA *)calloc(1, sizeof(CLASSIFIER_ATLAS));
   if (ca == nullptr)
     ErrorExit(ERROR_NOMEMORY, "CAalloc: could not allocate CA");
-  ca->ninputs = ninputs;
-  ca->width = width;
-  ca->height = height;
-  ca->depth = depth;
-  ca->type = type;
-  ca->wsize = wsize;
-  ca->nscales = nscales;
-  ca->sigmas = (float *)calloc(nscales, sizeof(float));
+  ca->ninputs      = ninputs;
+  ca->width        = width;
+  ca->height       = height;
+  ca->depth        = depth;
+  ca->type         = type;
+  ca->wsize        = wsize;
+  ca->nscales      = nscales;
+  ca->sigmas       = (float *)calloc(nscales, sizeof(float));
   ca->which_inputs = which_inputs;
   memmove(sigmas, ca->sigmas, nscales * sizeof(float));
   ca->m_vox2index = MatrixCopy(m_vox2index, nullptr);
@@ -291,9 +301,9 @@ CA *CAalloc(int width, int height, int depth, MATRIX *m_vox2index, int type,
 
 int CAtrain(CA *ca, VOXEL_LIST *vl, MRI *mri_norm, MRI *mri_aseg,
             int source_label, int target_label) {
-  float *classes, **inputs, nx, ny, nz, mag;
-  int i, xi, yi, zi, o, vertices[3], v;
-  MRI *mri_normals;
+  float *     classes, **inputs, nx, ny, nz, mag;
+  int         i, xi, yi, zi, o, vertices[3], v;
+  MRI *       mri_normals;
   CLASSIFIER *cl;
 
   classes = (float *)calloc(vl->nvox, sizeof(float));
@@ -324,9 +334,9 @@ int CAtrain(CA *ca, VOXEL_LIST *vl, MRI *mri_norm, MRI *mri_aseg,
         zi >= ca->depth)
       continue;
 
-    nx = MRIgetVoxVal(mri_normals, vl->xi[i], vl->yi[i], vl->zi[i], 0);
-    ny = MRIgetVoxVal(mri_normals, vl->xi[i], vl->yi[i], vl->zi[i], 1);
-    nz = MRIgetVoxVal(mri_normals, vl->xi[i], vl->yi[i], vl->zi[i], 2);
+    nx  = MRIgetVoxVal(mri_normals, vl->xi[i], vl->yi[i], vl->zi[i], 0);
+    ny  = MRIgetVoxVal(mri_normals, vl->xi[i], vl->yi[i], vl->zi[i], 1);
+    nz  = MRIgetVoxVal(mri_normals, vl->xi[i], vl->yi[i], vl->zi[i], 2);
     mag = sqrt(nx * nx + ny * ny + nz * nz);
     if (FZERO(mag))
       nz = 1; // arbitrary
@@ -373,8 +383,8 @@ int CAtrain(CA *ca, VOXEL_LIST *vl, MRI *mri_norm, MRI *mri_aseg,
 }
 
 int CAsetSVMparms(CA *ca, double svm_C, double svm_tol, int svm_max_iter) {
-  ca->svm_C = svm_C;
-  ca->tol = svm_tol;
+  ca->svm_C    = svm_C;
+  ca->tol      = svm_tol;
   ca->max_iter = svm_max_iter;
   return (NO_ERROR);
 }
@@ -383,8 +393,8 @@ int CAvoxelToIndex(CA *ca, double x, double y, double z, double *pxd,
   static VECTOR *v1 = nullptr, *v2;
 
   if (v1 == nullptr) {
-    v1 = VectorAlloc(4, MATRIX_REAL);
-    v2 = VectorAlloc(4, MATRIX_REAL);
+    v1                = VectorAlloc(4, MATRIX_REAL);
+    v2                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
   }
 
@@ -404,11 +414,11 @@ static int clUpdateStatistics(CA *ca, CLASSIFIER *cl, float *inputs,
 
   if (cl->c1_means == nullptr) {
     cl->c1_means = (double *)calloc(ca->ninputs, sizeof(double));
-    cl->c1_vars = (double *)calloc(ca->ninputs, sizeof(double));
+    cl->c1_vars  = (double *)calloc(ca->ninputs, sizeof(double));
     if (cl->c1_means == nullptr || cl->c1_vars == nullptr)
       ErrorExit(ERROR_NOMEMORY, "clUpdateStatistics: couldn't allocate array");
     cl->c2_means = (double *)calloc(ca->ninputs, sizeof(double));
-    cl->c2_vars = (double *)calloc(ca->ninputs, sizeof(double));
+    cl->c2_vars  = (double *)calloc(ca->ninputs, sizeof(double));
     if (cl->c2_means == nullptr || cl->c2_vars == nullptr)
       ErrorExit(ERROR_NOMEMORY, "clUpdateStatistics: couldn't allocate array");
   }
@@ -452,8 +462,8 @@ static int clCompleteTraining(CA *ca, CLASSIFIER *cl) {
 
 #define MAX_INPUTS 10000
 int CAcompleteTraining(CA *ca) {
-  int x, y, z, o, i, nvars;
-  double vars[MAX_INPUTS];
+  int         x, y, z, o, i, nvars;
+  double      vars[MAX_INPUTS];
   CLASSIFIER *cl;
 
   memset(vars, 0, sizeof(vars));
@@ -515,8 +525,8 @@ int CAcompleteTraining(CA *ca) {
   return (NO_ERROR);
 }
 int CAwrite(CA *ca, char *fname) {
-  FILE *fp;
-  int i, x, y, z, o;
+  FILE *      fp;
+  int         i, x, y, z, o;
   CLASSIFIER *cl;
 
   fp = fopen(fname, "wb");
@@ -585,11 +595,11 @@ CA *CAread(char *fname) {
 
 MRI *CAclassifyBorder(CA *ca, MRI *mri_norm, MRI *mri_aseg, MRI *mri_output,
                       int border, int label) {
-  MRI *mri_border, *mri_tmp = nullptr, *mri_normals;
-  int i;
+  MRI *       mri_border, *mri_tmp = nullptr, *mri_normals;
+  int         i;
   VOXEL_LIST *vl;
-  float **ca_inputs, out;
-  MATRIX *m_xform;
+  float **    ca_inputs, out;
+  MATRIX *    m_xform;
 
   m_xform = compute_ras_basis_vectors(mri_aseg, mri_aseg, label, ca->width,
                                       ca->height, ca->depth, 4);
@@ -623,17 +633,17 @@ MRI *CAclassifyBorder(CA *ca, MRI *mri_norm, MRI *mri_aseg, MRI *mri_output,
 
 float CAclassifyVoxel(CA *ca, MRI *mri_normals, int x, int y, int z,
                       float *inputs) {
-  double xd, yd, zd, nx, ny, nz, mag, output, c1d, c2d;
-  int xi, yi, zi, o, i;
+  double      xd, yd, zd, nx, ny, nz, mag, output, c1d, c2d;
+  int         xi, yi, zi, o, i;
   CLASSIFIER *cl;
 
   CAvoxelToIndex(ca, x, y, z, &xd, &yd, &zd);
-  xi = nint(xd);
-  yi = nint(yd);
-  zi = nint(zd);
-  nx = MRIgetVoxVal(mri_normals, x, y, z, 0);
-  ny = MRIgetVoxVal(mri_normals, x, y, z, 1);
-  nz = MRIgetVoxVal(mri_normals, x, y, z, 2);
+  xi  = nint(xd);
+  yi  = nint(yd);
+  zi  = nint(zd);
+  nx  = MRIgetVoxVal(mri_normals, x, y, z, 0);
+  ny  = MRIgetVoxVal(mri_normals, x, y, z, 1);
+  nz  = MRIgetVoxVal(mri_normals, x, y, z, 2);
   mag = sqrt(nx * nx + ny * ny + nz * nz);
   if (FZERO(mag))
     o = 0;
@@ -667,14 +677,14 @@ float CAclassifyVoxel(CA *ca, MRI *mri_normals, int x, int y, int z,
 static MRI *caComputeSurfaceNormals(MRI *mri_aseg, MRI *mri_normals,
                                     int label) {
   MRI *mri_tmp, *mri_tmp2, *mri_ctrl;
-  int i;
+  int  i;
 
   mri_ctrl = MRIcloneDifferentType(mri_aseg, MRI_UCHAR);
   mri_normals =
       MRIsegmentationSurfaceNormals(mri_aseg, nullptr, label, &mri_ctrl);
   for (i = 0; i < 3; i++) // dx, dy, dz
   {
-    mri_tmp = MRIcopyFrame(mri_normals, nullptr, i, 0);
+    mri_tmp  = MRIcopyFrame(mri_normals, nullptr, i, 0);
     mri_tmp2 = MRIsoapBubble(mri_tmp, mri_ctrl, nullptr, 50, -1);
     MRIsoapBubble(mri_tmp2, mri_ctrl, mri_tmp, 50, -1);
 #if 0
@@ -693,25 +703,25 @@ static MATRIX *compute_ras_basis_vectors(MRI *mri_aseg_orig, MRI *mri_aseg_edit,
                                          int label, int width, int height,
                                          int depth, int pad) {
   MRI_REGION box1, box2, box;
-  MRI *mri_aligned, *mri_tmp;
-  MATRIX *m_xform, *m_trans, *m_tmp, *m_id, *m_inv, *m_targ, *m_src, *m_tmp2,
+  MRI *      mri_aligned, *mri_tmp;
+  MATRIX *   m_xform, *m_trans, *m_tmp, *m_id, *m_inv, *m_targ, *m_src, *m_tmp2,
       *m_evectors;
-  int i, j, max_col;
+  int    i, j, max_col;
   double dot, max_dot, means[3];
-  float evalues[3];
+  float  evalues[3];
 
   m_evectors = MatrixAlloc(3, 3, MATRIX_REAL); /* eigenvectors of label */
   MRIprincipleComponentsRange(mri_aseg_orig, m_evectors, evalues, means, label,
                               label);
-  m_xform = MatrixIdentity(4, nullptr);
-  m_trans = MatrixIdentity(4, nullptr);
+  m_xform                     = MatrixIdentity(4, nullptr);
+  m_trans                     = MatrixIdentity(4, nullptr);
   *MATRIX_RELT(m_trans, 1, 4) = -means[0];
   *MATRIX_RELT(m_trans, 2, 4) = -means[1];
   *MATRIX_RELT(m_trans, 3, 4) = -means[2];
-  m_inv = MatrixInverse(m_evectors, nullptr);
+  m_inv                       = MatrixInverse(m_evectors, nullptr);
 
   // rearrange vectors to be as close to RAS as possible
-  m_id = MatrixIdentity(3, nullptr);
+  m_id  = MatrixIdentity(3, nullptr);
   m_tmp = MatrixMultiply(m_id, m_inv, NULL); // matrix of dot products
   for (i = 1; i <= 3; i++) {
     // find col in the ithrow that is max
@@ -731,7 +741,7 @@ static MATRIX *compute_ras_basis_vectors(MRI *mri_aseg_orig, MRI *mri_aseg_edit,
   }
   MatrixFree(&m_tmp);
   MatrixFree(&m_inv);
-  m_tmp = MatrixMultiply(m_xform, m_trans, NULL);
+  m_tmp                       = MatrixMultiply(m_xform, m_trans, NULL);
   *MATRIX_RELT(m_trans, 1, 4) = means[0];
   *MATRIX_RELT(m_trans, 2, 4) = means[1];
   *MATRIX_RELT(m_trans, 3, 4) = means[2];
@@ -755,58 +765,58 @@ static MATRIX *compute_ras_basis_vectors(MRI *mri_aseg_orig, MRI *mri_aseg_edit,
   MRIfree(&mri_aligned);
   MRIfree(&mri_tmp);
 
-  box.x = MIN(box1.x, box2.x);
-  box.y = MIN(box1.y, box2.y);
-  box.z = MIN(box1.z, box2.z);
+  box.x  = MIN(box1.x, box2.x);
+  box.y  = MIN(box1.y, box2.y);
+  box.z  = MIN(box1.z, box2.z);
   box.dx = MAX(box1.dx + box1.x, box2.dx + box2.x) - box.x;
   box.dy = MAX(box1.dy + box1.y, box2.dy + box2.y) - box.y;
   box.dz = MAX(box1.dz + box1.z, box2.dz + box2.z) - box.z;
 
   // now compute transform that takes corners of bounding box to corners of
   // atlas
-  m_targ = MatrixAlloc(4, 5, MATRIX_REAL);
-  m_src = MatrixAlloc(4, 5, MATRIX_REAL);
+  m_targ                     = MatrixAlloc(4, 5, MATRIX_REAL);
+  m_src                      = MatrixAlloc(4, 5, MATRIX_REAL);
   *MATRIX_RELT(m_targ, 1, 1) = 0;
   *MATRIX_RELT(m_targ, 2, 1) = 0;
   *MATRIX_RELT(m_targ, 3, 1) = 0;
-  *MATRIX_RELT(m_src, 1, 1) = box.x;
-  *MATRIX_RELT(m_src, 2, 1) = box.y;
-  *MATRIX_RELT(m_src, 3, 1) = box.z;
+  *MATRIX_RELT(m_src, 1, 1)  = box.x;
+  *MATRIX_RELT(m_src, 2, 1)  = box.y;
+  *MATRIX_RELT(m_src, 3, 1)  = box.z;
 
   *MATRIX_RELT(m_targ, 1, 2) = 0;
   *MATRIX_RELT(m_targ, 2, 2) = 0;
   *MATRIX_RELT(m_targ, 3, 2) = depth;
-  *MATRIX_RELT(m_src, 1, 2) = box.x;
-  *MATRIX_RELT(m_src, 2, 2) = box.y;
-  *MATRIX_RELT(m_src, 3, 2) = box.z + box.dz;
+  *MATRIX_RELT(m_src, 1, 2)  = box.x;
+  *MATRIX_RELT(m_src, 2, 2)  = box.y;
+  *MATRIX_RELT(m_src, 3, 2)  = box.z + box.dz;
 
   *MATRIX_RELT(m_targ, 1, 3) = 0;
   *MATRIX_RELT(m_targ, 2, 3) = height;
   *MATRIX_RELT(m_targ, 3, 3) = 0;
-  *MATRIX_RELT(m_src, 1, 3) = box.x;
-  *MATRIX_RELT(m_src, 2, 3) = box.y + box.dy;
-  *MATRIX_RELT(m_src, 3, 3) = box.z;
+  *MATRIX_RELT(m_src, 1, 3)  = box.x;
+  *MATRIX_RELT(m_src, 2, 3)  = box.y + box.dy;
+  *MATRIX_RELT(m_src, 3, 3)  = box.z;
 
   *MATRIX_RELT(m_targ, 1, 4) = width;
   *MATRIX_RELT(m_targ, 2, 4) = 0;
   *MATRIX_RELT(m_targ, 3, 4) = 0;
-  *MATRIX_RELT(m_src, 1, 4) = box.x + box.dx;
-  *MATRIX_RELT(m_src, 2, 4) = box.y;
-  *MATRIX_RELT(m_src, 3, 4) = box.z;
+  *MATRIX_RELT(m_src, 1, 4)  = box.x + box.dx;
+  *MATRIX_RELT(m_src, 2, 4)  = box.y;
+  *MATRIX_RELT(m_src, 3, 4)  = box.z;
 
   *MATRIX_RELT(m_targ, 1, 5) = width;
   *MATRIX_RELT(m_targ, 2, 5) = height;
   *MATRIX_RELT(m_targ, 3, 5) = depth;
-  *MATRIX_RELT(m_src, 1, 5) = box.x + box.dx;
-  *MATRIX_RELT(m_src, 2, 5) = box.y + box.dy;
-  *MATRIX_RELT(m_src, 3, 5) = box.z + box.dz;
+  *MATRIX_RELT(m_src, 1, 5)  = box.x + box.dx;
+  *MATRIX_RELT(m_src, 2, 5)  = box.y + box.dy;
+  *MATRIX_RELT(m_src, 3, 5)  = box.z + box.dz;
 
   for (i = 1; i <= m_src->cols; i++) {
     *MATRIX_RELT(m_src, 4, i) = *MATRIX_RELT(m_targ, 4, i) = 1.0;
   }
 
-  m_inv = MatrixSVDPseudoInverse(m_src, nullptr);
-  m_tmp = MatrixMultiply(m_targ, m_inv, NULL);
+  m_inv  = MatrixSVDPseudoInverse(m_src, nullptr);
+  m_tmp  = MatrixMultiply(m_targ, m_inv, NULL);
   m_tmp2 = MatrixMultiply(m_tmp, m_xform, NULL);
   MatrixCopy(m_tmp2, m_xform);
 

@@ -23,17 +23,17 @@
  *
  */
 
-#include <sys/stat.h>
-#include "mri.h"
 #include "error.h"
+#include "mri.h"
 #include "mri_identify.h"
 #include "version.h"
+#include <sys/stat.h>
 
 char *get_base_name(char *fullpath);
-int fix_genesis(char *fname, char *dname);
-int fix_siemens(char *fname, char *dname);
+int   fix_genesis(char *fname, char *dname);
+int   fix_siemens(char *fname, char *dname);
 
-extern int errno;
+extern int  errno;
 const char *Progname;
 
 void usage() {
@@ -45,8 +45,8 @@ void usage() {
 int main(int argc, char *argv[]) {
 
   struct stat stat_buf;
-  int i;
-  int nargs;
+  int         i;
+  int         nargs;
 
   nargs = handleVersionOption(argc, argv, "mri_strip_subject_info");
   if (nargs && argc - nargs == 1)
@@ -104,10 +104,10 @@ int fix_genesis(char *fname, char *dname) {
 
   FILE *fp;
   char *basename;
-  char out_fname[STRLEN];
+  char  out_fname[STRLEN];
   char *buf;
-  int file_length;
-  int exam_header_offset;
+  int   file_length;
+  int   exam_header_offset;
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {
@@ -179,9 +179,9 @@ int fix_siemens(char *fname, char *dname) {
 
   FILE *fp;
   char *basename;
-  char out_fname[STRLEN];
+  char  out_fname[STRLEN];
   char *buf;
-  int file_length;
+  int   file_length;
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {

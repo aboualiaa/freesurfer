@@ -47,7 +47,7 @@ protected:
   void UpdateCursor(QEvent *event, QWidget *wnd);
 
   bool m_bEditing;
-  int m_nCurrentLandmark;
+  int  m_nCurrentLandmark;
 };
 
 #endif

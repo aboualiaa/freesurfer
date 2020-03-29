@@ -27,9 +27,9 @@
 
 #include <sys/resource.h>
 
+#include "diag.h"
 #include "mrisurf_project.h"
 #include "tags.h"
-#include "diag.h"
 #include "timer.h"
 #include "version.h"
 
@@ -42,36 +42,36 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-int MRISscaleUp(MRI_SURFACE *mris);
+int         MRISscaleUp(MRI_SURFACE *mris);
 
 const char *Progname;
 
 static INTEGRATION_PARMS parms;
 #define BASE_DT_SCALE 1.0
-static float base_dt_scale = BASE_DT_SCALE;
-static int nbrs = 2;
-static int do_inflate = 0;
-static double disturb = 0;
-static int max_passes = 1;
-static int randomly_project = 0;
-static int talairach = 0;
-static float scale = 1.0;
-static int quick = 0;
-static int load = 0;
-static float inflate_area = 0.0f;
-static float inflate_dt = 0.9;
-static float inflate_tol = 1.0f;
-static float inflate_nlarea = 0.0f;
-static float inflate_spring = 0.0f;
-static float inflate_tspring = 0;
+static float  base_dt_scale    = BASE_DT_SCALE;
+static int    nbrs             = 2;
+static int    do_inflate       = 0;
+static double disturb          = 0;
+static int    max_passes       = 1;
+static int    randomly_project = 0;
+static int    talairach        = 0;
+static float  scale            = 1.0;
+static int    quick            = 0;
+static int    load             = 0;
+static float  inflate_area     = 0.0f;
+static float  inflate_dt       = 0.9;
+static float  inflate_tol      = 1.0f;
+static float  inflate_nlarea   = 0.0f;
+static float  inflate_spring   = 0.0f;
+static float  inflate_tspring  = 0;
 
 static float ralpha = 0.0;
-static float rbeta = 0.0;
+static float rbeta  = 0.0;
 static float rgamma = 0.0;
 
 static double target_radius = DEFAULT_RADIUS;
@@ -82,36 +82,35 @@ static float l_convex = 1.0 ;
 static float l_spring_norm = .1 ;
 static float l_sphere = 0.25 ;
 #else
-static int inflate_avgs = 0;
-static int inflate_iterations = 1000;
-static float l_convex = 1.0;
-static float l_expand = 0.0;
-static float l_spring_norm = 1.0;
-static float l_sphere = 0.025;
+static int   inflate_avgs       = 0;
+static int   inflate_iterations = 1000;
+static float l_convex           = 1.0;
+static float l_expand           = 0.0;
+static float l_spring_norm      = 1.0;
+static float l_sphere           = 0.025;
 #endif
 
-static char *orig_name = "smoothwm";
-static int smooth_avgs = 0;
+static char *orig_name   = "smoothwm";
+static int   smooth_avgs = 0;
 
 static char *xform_fname = nullptr;
-static char *vol_fname = nullptr;
+static char *vol_fname   = nullptr;
 
 static int remove_negative = 1;
-char *rusage_file = nullptr;
+char *     rusage_file     = nullptr;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_surf_fname, *out_fname, fname[STRLEN], *cp;
-  int ac, nargs, msec, err;
+  char **      av, *in_surf_fname, *out_fname, fname[STRLEN], *cp;
+  int          ac, nargs, msec, err;
   MRI_SURFACE *mris;
-  Timer then;
-  float max_dim;
+  Timer        then;
+  float        max_dim;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_sphere");
 
   nargs = handleVersionOption(argc, argv, "mris_sphere");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -121,32 +120,32 @@ int main(int argc, char *argv[]) {
   DiagInit(nullptr, nullptr, nullptr);
 
   memset(&parms, 0, sizeof(parms));
-  parms.dt = .05;
-  parms.projection = PROJECT_ELLIPSOID;
-  parms.tol = .5 /*1e-1*/;
-  parms.n_averages = 1024;
-  parms.min_averages = 0;
-  parms.l_angle = 0.0 /* L_ANGLE */;
-  parms.l_area = 0.0 /* L_AREA */;
-  parms.l_neg = 0.0;
-  parms.l_dist = 1.0;
-  parms.l_spring = 0.0;
-  parms.l_area = 1.0;
-  parms.l_boundary = 0.0;
-  parms.l_curv = 0.0;
-  parms.niterations = 25;
+  parms.dt               = .05;
+  parms.projection       = PROJECT_ELLIPSOID;
+  parms.tol              = .5 /*1e-1*/;
+  parms.n_averages       = 1024;
+  parms.min_averages     = 0;
+  parms.l_angle          = 0.0 /* L_ANGLE */;
+  parms.l_area           = 0.0 /* L_AREA */;
+  parms.l_neg            = 0.0;
+  parms.l_dist           = 1.0;
+  parms.l_spring         = 0.0;
+  parms.l_area           = 1.0;
+  parms.l_boundary       = 0.0;
+  parms.l_curv           = 0.0;
+  parms.niterations      = 25;
   parms.write_iterations = 1000;
   parms.a = parms.b = parms.c = 0.0f; /* ellipsoid parameters */
-  parms.dt_increase = 1.01 /* DT_INCREASE */;
-  parms.dt_decrease = 0.99 /* DT_DECREASE*/;
-  parms.error_ratio = 1.03 /*ERROR_RATIO */;
-  parms.integration_type = INTEGRATE_LINE_MINIMIZE;
-  parms.momentum = 0.9;
-  parms.desired_rms_height = -1.0;
-  parms.base_name[0] = 0;
-  parms.Hdesired = 0.0; /* a flat surface */
-  parms.nbhd_size = 7;
-  parms.max_nbrs = 8;
+  parms.dt_increase           = 1.01 /* DT_INCREASE */;
+  parms.dt_decrease           = 0.99 /* DT_DECREASE*/;
+  parms.error_ratio           = 1.03 /*ERROR_RATIO */;
+  parms.integration_type      = INTEGRATE_LINE_MINIMIZE;
+  parms.momentum              = 0.9;
+  parms.desired_rms_height    = -1.0;
+  parms.base_name[0]          = 0;
+  parms.Hdesired              = 0.0; /* a flat surface */
+  parms.nbhd_size             = 7;
+  parms.max_nbrs              = 8;
 
   ac = argc;
   av = argv;
@@ -165,7 +164,7 @@ int main(int argc, char *argv[]) {
 
   parms.base_dt = base_dt_scale * parms.dt;
   in_surf_fname = argv[1];
-  out_fname = argv[2];
+  out_fname     = argv[2];
 
   printf("%s\n", vcid);
   printf("  %s\n", MRISurfSrcVersion());
@@ -173,7 +172,7 @@ int main(int argc, char *argv[]) {
 #ifdef HAVE_OPENMP
   {
     int n_omp_threads = 1;
-    n_omp_threads = omp_get_max_threads();
+    n_omp_threads     = omp_get_max_threads();
     printf("\n== Number of threads available to %s for OpenMP = %d == \n",
            Progname, n_omp_threads);
   }
@@ -261,8 +260,8 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
     fflush(stderr);
 
-    LTA *lta;
-    MRI *mri;
+    LTA *     lta;
+    MRI *     mri;
     TRANSFORM transform;
 
     lta = LTAread(xform_fname);
@@ -273,7 +272,7 @@ int main(int argc, char *argv[]) {
     if (mri == nullptr) {
       ErrorExit(ERROR_NOFILE, "%s: could not load %s", vol_fname);
     }
-    transform.type = lta->type;
+    transform.type  = lta->type;
     transform.xform = (void *)lta;
     MRIStransform(mris, mri, &transform, mri);
     MRIfree(&mri);
@@ -317,22 +316,22 @@ int main(int argc, char *argv[]) {
     memset(&inflation_parms, 0, sizeof(INTEGRATION_PARMS));
     strcpy(inflation_parms.base_name, parms.base_name);
     inflation_parms.write_iterations = parms.write_iterations;
-    inflation_parms.niterations = inflate_iterations;
-    inflation_parms.l_spring_norm = l_spring_norm;
-    inflation_parms.l_spring = inflate_spring;
-    inflation_parms.l_nlarea = inflate_nlarea;
-    inflation_parms.l_area = inflate_area;
-    inflation_parms.n_averages = inflate_avgs;
-    inflation_parms.l_expand = l_expand;
-    inflation_parms.l_tspring = inflate_tspring;
-    inflation_parms.l_sphere = l_sphere;
-    inflation_parms.l_convex = l_convex;
+    inflation_parms.niterations      = inflate_iterations;
+    inflation_parms.l_spring_norm    = l_spring_norm;
+    inflation_parms.l_spring         = inflate_spring;
+    inflation_parms.l_nlarea         = inflate_nlarea;
+    inflation_parms.l_area           = inflate_area;
+    inflation_parms.n_averages       = inflate_avgs;
+    inflation_parms.l_expand         = l_expand;
+    inflation_parms.l_tspring        = inflate_tspring;
+    inflation_parms.l_sphere         = l_sphere;
+    inflation_parms.l_convex         = l_convex;
 #define SCALE_UP 2
-    inflation_parms.a = SCALE_UP * DEFAULT_RADIUS;
-    inflation_parms.tol = inflate_tol;
+    inflation_parms.a                = SCALE_UP * DEFAULT_RADIUS;
+    inflation_parms.tol              = inflate_tol;
     inflation_parms.integration_type = INTEGRATE_MOMENTUM;
-    inflation_parms.momentum = 0.9;
-    inflation_parms.dt = inflate_dt;
+    inflation_parms.momentum         = 0.9;
+    inflation_parms.dt               = inflate_dt;
 
     /* store the inflated positions in the v->c? field so that they can
       be used in the repulsive term.
@@ -389,7 +388,7 @@ int main(int argc, char *argv[]) {
 
   MRISsetNeighborhoodSize(mris, nbrs);
 
-  int const countNegativeFaces = MRIScountNegativeFaces(mris);
+  int const countNegativeFaces   = MRIScountNegativeFaces(mris);
   int const allowedNegativeFaces = nint(.8 * mris->nfaces);
   if (countNegativeFaces > allowedNegativeFaces) {
     printf("!!!!!!!!!  everted surface detected (countNegativeFaces:%d > "
@@ -460,7 +459,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
   float f;
 
@@ -484,30 +483,30 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "rotate")) {
     ralpha = atof(argv[2]);
-    rbeta = atof(argv[3]);
+    rbeta  = atof(argv[3]);
     rgamma = atof(argv[4]);
-    nargs = 3;
+    nargs  = 3;
     fprintf(stderr, "rotating brain by (%2.1f, %2.1f, %2.1f)\n", ralpha, rbeta,
             rgamma);
   } else if (!stricmp(option, "rusage")) {
     // resource usage
     rusage_file = argv[2];
-    nargs = 1;
+    nargs       = 1;
   } else if (!stricmp(option, "talairach")) {
     talairach = 1;
     fprintf(stderr, "transforming surface into Talairach space.\n");
   } else if (!stricmp(option, "remove_negative")) {
     remove_negative = atoi(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "%sremoving negative triangles with iterative smoothing\n",
             remove_negative ? "" : "not ");
   } else if (!stricmp(option, "notal")) {
     talairach = 0;
     fprintf(stderr, "transforming surface into Talairach space.\n");
   } else if (!stricmp(option, "dt")) {
-    parms.dt = atof(argv[2]);
+    parms.dt      = atof(argv[2]);
     parms.base_dt = base_dt_scale * parms.dt;
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "momentum with dt = %2.2f\n", parms.dt);
   } else if (!stricmp(option, "curv")) {
     sscanf(argv[2], "%f", &parms.l_curv);
@@ -519,37 +518,37 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "using l_area = %2.3f\n", parms.l_area);
   } else if (!stricmp(option, "iarea")) {
     inflate_area = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "inflation l_area = %2.3f\n", inflate_area);
   } else if (!stricmp(option, "itol")) {
     inflate_tol = atof(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "inflation tol = %2.3f\n", inflate_tol);
   } else if (!stricmp(option, "in")) {
     inflate_iterations = atoi(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     fprintf(stderr, "inflation iterations = %d\n", inflate_iterations);
   } else if (!stricmp(option, "idt")) {
     inflate_dt = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "inflation dt = %f\n", inflate_dt);
   } else if (!stricmp(option, "iavgs")) {
     inflate_avgs = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "inflation averages = %d\n", inflate_avgs);
   } else if (!stricmp(option, "inlarea")) {
     inflate_nlarea = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "inflation l_nlarea = %2.3f\n", inflate_nlarea);
   } else if (!stricmp(option, "ispring")) {
     inflate_spring = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "inflation l_spring = %2.3f\n", inflate_spring);
   } else if (!stricmp(option, "adaptive")) {
     parms.integration_type = INTEGRATE_ADAPTIVE;
     fprintf(stderr, "using adaptive time step integration\n");
   } else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size=%d\n", nbrs);
   } else if (!stricmp(option, "spring")) {
@@ -597,27 +596,27 @@ static int get_option(int argc, char *argv[]) {
       ErrorExit(ERROR_BADPARM, "%s: could not scan tol from %s", Progname,
                 argv[2]);
     parms.tol = (double)f;
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "using tol = %2.2e\n", (float)parms.tol);
   } else if (!stricmp(option, "error_ratio")) {
     parms.error_ratio = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "error_ratio=%2.3f\n", parms.error_ratio);
   } else if (!stricmp(option, "dt_inc")) {
     parms.dt_increase = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "dt_increase=%2.3f\n", parms.dt_increase);
   } else if (!stricmp(option, "NLAREA")) {
     parms.l_nlarea = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "nlarea = %2.3f\n", parms.l_nlarea);
   } else if (!stricmp(option, "PAREA")) {
     parms.l_parea = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "parea = %2.3f\n", parms.l_parea);
   } else if (!stricmp(option, "RADIUS")) {
     target_radius = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "target radius = %2.3f\n", target_radius);
   } else if (!stricmp(option, "RA")) {
     target_radius = -1;
@@ -627,17 +626,17 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "enabling DIAG_SHOW for debug\n");
   } else if (!stricmp(option, "NLDIST")) {
     parms.l_nldist = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "nldist = %2.3f\n", parms.l_nldist);
   } else if (!stricmp(option, "vnum") || !stricmp(option, "distances")) {
     parms.nbhd_size = atof(argv[2]);
-    parms.max_nbrs = atof(argv[3]);
-    nargs = 2;
+    parms.max_nbrs  = atof(argv[3]);
+    nargs           = 2;
     fprintf(stderr, "nbr size = %d, max neighbors = %d\n", parms.nbhd_size,
             parms.max_nbrs);
   } else if (!stricmp(option, "dt_dec")) {
     parms.dt_decrease = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "dt_decrease=%2.3f\n", parms.dt_decrease);
   } else if (!stricmp(option, "seed")) {
     setRandomSeed(atol(argv[2]));
@@ -648,8 +647,8 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'T':
       xform_fname = argv[2];
-      vol_fname = argv[3];
-      nargs = 2;
+      vol_fname   = argv[3];
+      nargs       = 2;
       break;
     case 'O':
       orig_name = argv[2];
@@ -662,17 +661,17 @@ static int get_option(int argc, char *argv[]) {
       nargs = 1;
       break;
     case 'Q':
-      remove_negative = 0;
-      quick = 1;
-      do_inflate = 1;
+      remove_negative    = 0;
+      quick              = 1;
+      do_inflate         = 1;
       inflate_iterations = 300;
-      max_passes = 3;
+      max_passes         = 3;
       fprintf(stderr, "doing quick spherical unfolding.\n");
-      nbrs = 1;
+      nbrs           = 1;
       parms.l_spring = parms.l_dist = parms.l_parea = parms.l_area = 0.0;
-      parms.l_nlarea = 1.0;
-      parms.tol = 1e-1;
-      parms.n_averages = 32;
+      parms.l_nlarea                                               = 1.0;
+      parms.tol                                                    = 1e-1;
+      parms.n_averages                                             = 32;
       /*    parms.tol = 10.0f / (sqrt(33.0/1024.0)) ;*/
       break;
     case 'L':
@@ -681,7 +680,7 @@ static int get_option(int argc, char *argv[]) {
     case 'B':
       base_dt_scale = atof(argv[2]);
       parms.base_dt = base_dt_scale * parms.dt;
-      nargs = 1;
+      nargs         = 1;
       break;
     case 'S':
       scale = atof(argv[2]);
@@ -690,11 +689,11 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'D':
       disturb = atof(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       fprintf(stderr, "disturbing vertex positions by %2.3f\n", (float)disturb);
       break;
     case 'R':
@@ -703,8 +702,8 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'M':
       parms.integration_type = INTEGRATE_MOMENTUM;
-      parms.momentum = atof(argv[2]);
-      nargs = 1;
+      parms.momentum         = atof(argv[2]);
+      nargs                  = 1;
       fprintf(stderr, "momentum = %2.2f\n", (float)parms.momentum);
       break;
     case 'W':
@@ -763,14 +762,14 @@ static void print_version() {
 }
 
 int MRISscaleUp(MRI_SURFACE *mris) {
-  int vno, n, max_v, max_n;
+  int   vno, n, max_v, max_n;
   float ratio, max_ratio;
 
   max_ratio = 0.0f;
   max_v = max_n = 0;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX const *const v = &mris->vertices[vno];
+    VERTEX const *const          v  = &mris->vertices[vno];
     if (v->ripflag) {
       continue;
     }
@@ -784,8 +783,8 @@ int MRISscaleUp(MRI_SURFACE *mris) {
       }
       ratio = v->dist_orig[n] / v->dist[n];
       if (ratio > max_ratio) {
-        max_v = vno;
-        max_n = n;
+        max_v     = vno;
+        max_n     = n;
         max_ratio = ratio;
       }
     }
@@ -798,7 +797,7 @@ int MRISscaleUp(MRI_SURFACE *mris) {
 #else
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->ripflag) {
       continue;
     }

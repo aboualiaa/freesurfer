@@ -28,9 +28,10 @@
 #ifndef Darwin
 #include <malloc.h>
 #endif
+
+#include "DICOMRead.h"
 #include "diag.h"
 #include "error.h"
-#include "DICOMRead.h"
 #include "fio.h"
 #include "version.h"
 
@@ -52,40 +53,40 @@ static char vcid[] =
     "$Id: mri_parse_sdcmdir.c,v 1.22 2015/05/21 16:37:12 greve Exp $";
 const char *Progname = nullptr;
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 
-static int strip_leading_slashes(char *s);
+static int   strip_leading_slashes(char *s);
 static char *strip_white_space(char *s);
 
-int debug, verbose;
+int   debug, verbose;
 char *sdicomdir = nullptr;
 char *outfile;
 FILE *outstream;
-int summarize = 0;
-int sortbyrun = 0;
-int TRSlice = 0;
+int   summarize = 0;
+int   sortbyrun = 0;
+int   TRSlice   = 0;
 char *tmpstring;
-int Maj, Min, MinMin;
+int   Maj, Min, MinMin;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
   SDCMFILEINFO **sdfi_list;
-  SDCMFILEINFO *sdfi = nullptr;
-  int nlist;
-  int NRuns;
-  int nthfile;
-  char *fname, *psname, *protoname, *pc;
-  int PrevRunNo;
+  SDCMFILEINFO * sdfi = nullptr;
+  int            nlist;
+  int            NRuns;
+  int            nthfile;
+  char *         fname, *psname, *protoname, *pc;
+  int            PrevRunNo;
 
   // no need to try to load dwi here
   pc = getenv("FS_LOAD_DWI");
@@ -189,8 +190,8 @@ int main(int argc, char **argv) {
     if (sdfi->IsMosaic && TRSlice)
       sdfi->RepetitionTime *= sdfi->VolDim[2];
 
-    fname = fio_basename(sdfi->FileName, nullptr);
-    psname = strip_white_space(sdfi->PulseSequence);
+    fname     = fio_basename(sdfi->FileName, nullptr);
+    psname    = strip_white_space(sdfi->PulseSequence);
     protoname = strip_white_space(sdfi->ProtocolName);
 
     fprintf(outstream,
@@ -236,10 +237,10 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  FILE *fptmp;
-  int nargs;
+  FILE * fptmp;
+  int    nargs;
 
   nargs = handleVersionOption(argc, argv, "mri_parse_sdcmdir");
   if (nargs && argc - nargs == 1)
@@ -279,7 +280,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--o")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outfile = pargv[0];
+      outfile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--summarize") || !strcmp(option, "--sum")) {
       summarize = 1;
@@ -448,12 +449,12 @@ static int strip_leading_slashes(char *s) {
 ---------------------------------------------------------------*/
 static char *strip_white_space(char *s) {
   char *s2;
-  int l, n, m;
+  int   l, n, m;
 
   if (s == nullptr)
     return (nullptr);
 
-  l = strlen(s);
+  l  = strlen(s);
   s2 = (char *)calloc(l + 1, sizeof(char));
 
   m = 0;

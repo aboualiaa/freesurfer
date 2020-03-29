@@ -9,9 +9,9 @@ namespace kvl {
 class WriteImage : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef WriteImage Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef WriteImage                    Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -32,8 +32,8 @@ public:
     }
 
     // Retrieve input arguments
-    const int imageHandle = *(static_cast<int *>(mxGetData(prhs[0])));
-    const std::string fileName = mxArrayToString(prhs[1]);
+    const int         imageHandle = *(static_cast<int *>(mxGetData(prhs[0])));
+    const std::string fileName    = mxArrayToString(prhs[1]);
 
     // Retrieve the image
     itk::Object::Pointer object =
@@ -41,7 +41,8 @@ public:
     typedef itk::Image<float, 3> FloatImageType;
     // if ( typeid( *object ) != typeid( FloatImageType ) )
     if (strcmp(typeid(*object).name(),
-               typeid(FloatImageType).name()) != 0) // Eugenio: MAC compatibility
+               typeid(FloatImageType).name()) !=
+        0) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("image doesn't refer to the correct ITK object type");
     }
@@ -60,7 +61,8 @@ public:
           kvl::MatlabObjectArray::GetInstance()->GetObject(transformHandle);
       // if ( typeid( *object ) != typeid( TransformType ) )
       if (strcmp(typeid(*object).name(),
-                 typeid(TransformType).name()) != 0) // Eugenio: MAC compatibility
+                 typeid(TransformType).name()) !=
+          0) // Eugenio: MAC compatibility
       {
         mexErrMsgTxt("transform doesn't refer to the correct ITK object type");
       }
@@ -98,8 +100,8 @@ public:
       image = caster->GetOutput();
 
       // Apply the transform
-      FloatImageType::PointType newOrigin;
-      FloatImageType::SpacingType newSpacing;
+      FloatImageType::PointType     newOrigin;
+      FloatImageType::SpacingType   newSpacing;
       FloatImageType::DirectionType newDirection;
       for (int i = 0; i < 3; i++) {
         // Offset part
@@ -111,7 +113,7 @@ public:
         for (int j = 0; j < 3; j++) {
           normOfColumn += pow(transform->GetMatrix()[j][i], 2);
         }
-        normOfColumn = sqrt(normOfColumn);
+        normOfColumn  = sqrt(normOfColumn);
         newSpacing[i] = normOfColumn;
         for (int j = 0; j < 3; j++) {
           newDirection[j][i] = transform->GetMatrix()[j][i] / normOfColumn;
@@ -125,7 +127,7 @@ public:
 
     // Write it out
     typedef itk::ImageFileWriter<FloatImageType> WriterType;
-    WriterType::Pointer writer = WriterType::New();
+    WriterType::Pointer                          writer = WriterType::New();
     writer->SetFileName(fileName.c_str());
     writer->SetInput(image);
     writer->Update();
@@ -133,8 +135,10 @@ public:
   }
 
 protected:
-  WriteImage()= default;;
-  ~WriteImage() override= default;;
+  WriteImage() = default;
+  ;
+  ~WriteImage() override = default;
+  ;
 
   WriteImage(const Self &);     // purposely not implemented
   void operator=(const Self &); // purposely not implemented

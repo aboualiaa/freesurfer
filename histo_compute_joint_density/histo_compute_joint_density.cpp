@@ -23,44 +23,44 @@
  *
  */
 
-#include "error.h"
-#include "diag.h"
-#include "version.h"
 #include "density.h"
+#include "diag.h"
+#include "error.h"
 #include "mrisegment.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: histo_compute_joint_density.c,v 1.4 2011/03/02 00:04:09 nicks Exp $";
 const char *Progname;
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static int nbins = 256;
-static int valid1_min = -1;
-static int valid1_max = -1;
-static int valid2_min = -1;
-static int valid2_max = -1;
-static float sigma = 2.0;
+static int   nbins      = 256;
+static int   valid1_min = -1;
+static int   valid1_max = -1;
+static int   valid2_min = -1;
+static int   valid2_max = -1;
+static float sigma      = 2.0;
 
 static int nlevels = 1;
 
 #define MAX_LEVELS 10
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs, i, level;
-  MRI *mri1, *mri2, *mri_tmp;
-  DENSITY *pdf;
-  float min_val1, min_val2, max_val1, max_val2;
-  int *valid1 = nullptr;
-  int *valid2 = nullptr;
+  char **           av;
+  int               ac, nargs, i, level;
+  MRI *             mri1, *mri2, *mri_tmp;
+  DENSITY *         pdf;
+  float             min_val1, min_val2, max_val1, max_val2;
+  int *             valid1 = nullptr;
+  int *             valid2 = nullptr;
   MRI_SEGMENTATION *mriseg;
-  char fname[STRLEN];
-  MRI *mri1_pyramid[MAX_LEVELS], *mri2_pyramid[MAX_LEVELS];
+  char              fname[STRLEN];
+  MRI *             mri1_pyramid[MAX_LEVELS], *mri2_pyramid[MAX_LEVELS];
 
   nargs = handleVersionOption(argc, argv, "histo_compute_joint_density");
   if (nargs && argc - nargs == 1)
@@ -95,14 +95,14 @@ int main(int argc, char *argv[]) {
     MRIvalRange(mri1, &min_val1, &max_val1);
     valid1_min = MAX(valid1_min, min_val1);
     valid1_max = MIN(valid1_max, max_val1);
-    valid1 = (int *)calloc(256, sizeof(int));
+    valid1     = (int *)calloc(256, sizeof(int));
     for (i = valid1_min; i <= valid1_max; i++)
       valid1[i] = 1;
 
-    mriseg = MRImaxsegment(mri1, valid1_min, valid1_max);
+    mriseg  = MRImaxsegment(mri1, valid1_min, valid1_max);
     mri_tmp = MRIsegmentToImage(mri1, nullptr, mriseg, 0);
     MRIfree(&mri1);
-    mri1 = mri_tmp;
+    mri1    = mri_tmp;
     mri_tmp = MRIsegmentToImage(mri2, nullptr, mriseg, 0);
     MRIfree(&mri2);
     mri2 = mri_tmp;
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     MRIvalRange(mri2, &min_val2, &max_val2);
     valid2_min = MAX(valid2_min, min_val2);
     valid2_max = MIN(valid2_max, max_val2);
-    valid2 = (int *)calloc(256, sizeof(int));
+    valid2     = (int *)calloc(256, sizeof(int));
     for (i = valid2_min; i <= valid2_max; i++)
       valid2[i] = 1;
   } else {
@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -166,18 +166,18 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "valid1")) {
     valid1_min = atoi(argv[2]);
     valid1_max = atoi(argv[3]);
-    nargs = 2;
+    nargs      = 2;
     printf("limiting histogram to intensity in range [%d, %d]\n", valid1_min,
            valid1_max);
   } else if (!stricmp(option, "valid2")) {
     valid2_min = atoi(argv[2]);
     valid2_max = atoi(argv[3]);
-    nargs = 2;
+    nargs      = 2;
     printf("limiting histogram to intensity in range [%d, %d]\n", valid2_min,
            valid2_max);
   } else if (!stricmp(option, "nlevels")) {
     nlevels = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("computing %d levels of gaussian pyramid\n", nlevels);
   } else
     switch (toupper(*option)) {

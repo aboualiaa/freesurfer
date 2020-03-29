@@ -131,72 +131,73 @@
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
-#include "cmdargs.h"
 #include "cma.h"
+#include "cmdargs.h"
+#include "diag.h"
+#include "fio.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_diff.c,v 1.37 2017/01/11 18:15:33 greve Exp $";
+static char vcid[]   = "$Id: mri_diff.c,v 1.37 2017/01/11 18:15:33 greve Exp $";
 const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int verbose = 0;
-int checkoptsonly = 0;
+char *      cmdline, cwd[2000];
+int         debug         = 0;
+int         verbose       = 0;
+int         checkoptsonly = 0;
 struct utsname uts;
 
-char *InVol1File = nullptr;
-char *InVol2File = nullptr;
-char *subject, *hemi, *SUBJECTS_DIR;
+char * InVol1File = nullptr;
+char * InVol2File = nullptr;
+char * subject, *hemi, *SUBJECTS_DIR;
 double pixthresh = 0, resthresh = 0, geothresh = 0;
-char *DiffFile = nullptr;
-int DiffAbs = 0, AbsDiff = 1, DiffPct = 0;
-char *AvgDiffFile = nullptr;
+char * DiffFile = nullptr;
+int    DiffAbs = 0, AbsDiff = 1, DiffPct = 0;
+char * AvgDiffFile = nullptr;
 
 MRI *InVol1 = nullptr, *InVol2 = nullptr, *DiffVol = nullptr,
-    *DiffLabelVol = nullptr;
-char *DiffVolFile = nullptr;
+    *DiffLabelVol      = nullptr;
+char *DiffVolFile      = nullptr;
 char *DiffLabelVolFile = nullptr;
 
-int CheckResolution = 1;
-int CheckAcqParams = 1;
-int CheckPixVals = 1;
-int CheckGeo = 1;
-int CheckOrientation = 1;
-int CheckPrecision = 1;
-int SegDiff = -2;
-char *SegDiffFile = nullptr;
+int     CheckResolution  = 1;
+int     CheckAcqParams   = 1;
+int     CheckPixVals     = 1;
+int     CheckGeo         = 1;
+int     CheckOrientation = 1;
+int     CheckPrecision   = 1;
+int     SegDiff          = -2;
+char *  SegDiffFile      = nullptr;
 MATRIX *vox2ras1, *vox2ras2;
-char Orient1[4], Orient2[4];
+char    Orient1[4], Orient2[4];
 
 int ExitOnDiff = 1;
 int ExitStatus = 0;
-int DoRSS = 0;    // Compute sqrt of sum squares
-int PrintSSD = 0; // Print sum of squared differences over all voxel
-int PrintRMS = 0; // Print root mean squared differences over all voxel
+int DoRSS      = 0; // Compute sqrt of sum squares
+int PrintSSD   = 0; // Print sum of squared differences over all voxel
+int PrintRMS   = 0; // Print root mean squared differences over all voxel
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, r, c, s, f;
-  int rmax, cmax, smax, fmax, navg, notzero, ndiff;
+  int    nargs, r, c, s, f;
+  int    rmax, cmax, smax, fmax, navg, notzero, ndiff;
   double diff, maxdiff;
   double val1, val2, SumSqErr;
   double AvgDiff = 0.0, SumDiff = 0.0, SumSqDiff = 0.0;
-  FILE *fp = nullptr;
+  FILE * fp = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mri_diff");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -404,13 +405,13 @@ int main(int argc, char *argv[]) {
     }
     SumDiff = 0.0;
     c = r = s = f = 0;
-    notzero = 0;
-    val1 = MRIgetVoxVal(InVol1, c, r, s, f);
-    val2 = MRIgetVoxVal(InVol2, c, r, s, f);
-    maxdiff = fabs(val1 - val2);
+    notzero       = 0;
+    val1          = MRIgetVoxVal(InVol1, c, r, s, f);
+    val2          = MRIgetVoxVal(InVol2, c, r, s, f);
+    maxdiff       = fabs(val1 - val2);
     cmax = rmax = smax = fmax = 0;
-    SumSqDiff = 0.0; // over all voxel
-    ndiff = 0;
+    SumSqDiff                 = 0.0; // over all voxel
+    ndiff                     = 0;
     for (c = 0; c < InVol1->width; c++) {
       for (r = 0; r < InVol1->height; r++) {
         for (s = 0; s < InVol1->depth; s++) {
@@ -448,10 +449,10 @@ int main(int argc, char *argv[]) {
             }
             if (maxdiff < diff) {
               maxdiff = diff;
-              cmax = c;
-              rmax = r;
-              smax = s;
-              fmax = f;
+              cmax    = c;
+              rmax    = r;
+              smax    = s;
+              fmax    = f;
             }
           }
           if (DiffVolFile && DoRSS)
@@ -518,10 +519,10 @@ int main(int argc, char *argv[]) {
                                        InVol1->depth, MRI_INT, InVol1->nframes);
     MRIcopyHeader(InVol1, SegDiffVol);
     int same = 0;
-    int n1 = 0;
-    int n2 = 0;
-    int l1 = 0;
-    int l2 = 0;
+    int n1   = 0;
+    int n2   = 0;
+    int l1   = 0;
+    int l2   = 0;
     printf("\nComputing difference for label %d ...\n", SegDiff);
     for (c = 0; c < InVol1->width; c++) {
       for (r = 0; r < InVol1->height; r++) {
@@ -568,7 +569,7 @@ int main(int argc, char *argv[]) {
                                        InVol1->depth, MRI_INT, InVol1->nframes);
     MRIcopyHeader(InVol1, SegDiffVol);
     printf("\nComputing difference for all labels ...\n");
-    int same = 0;
+    int same      = 0;
     int different = 0;
     for (c = 0; c < InVol1->width; c++) {
       for (r = 0; r < InVol1->height; r++) {
@@ -622,7 +623,7 @@ int main(int argc, char *argv[]) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -682,32 +683,32 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--ssd"))
       PrintSSD = 1;
     else if (!strcasecmp(option, "--rms")) {
-      PrintRMS = 1;
+      PrintRMS     = 1;
       CheckPixVals = 1;
     } else if (!strcasecmp(option, "--count")) {
       CheckPixVals = 1;
     } else if (!strcasecmp(option, "--qa")) {
       CheckPixVals = 0;
-      CheckGeo = 0;
+      CheckGeo     = 0;
     } else if (!strcasecmp(option, "--pix-only") ||
                !strcasecmp(option, "--po") ||
                !strcasecmp(option, "--pixonly")) {
-      CheckPixVals = 1;
-      CheckResolution = 0;
-      CheckAcqParams = 0;
-      CheckGeo = 0;
-      CheckPrecision = 0;
+      CheckPixVals     = 1;
+      CheckResolution  = 0;
+      CheckAcqParams   = 0;
+      CheckGeo         = 0;
+      CheckPrecision   = 0;
       CheckOrientation = 0;
     } else if (!strcasecmp(option, "--v1")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       InVol1File = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--v2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       InVol2File = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--thresh")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -718,47 +719,47 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &resthresh);
       CheckResolution = 1;
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcasecmp(option, "--geo-thresh")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &geothresh);
       CheckResolution = 1;
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcasecmp(option, "--diff-file") ||
                !strcasecmp(option, "--log")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      DiffFile = pargv[0];
+      DiffFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--diff")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      DiffVolFile = pargv[0];
+      DiffVolFile  = pargv[0];
       CheckPixVals = 1;
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--avg-diff")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       AvgDiffFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--diff_label_suspicious")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       DiffLabelVolFile = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--segdiff")) {
       if (nargc < 2)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &SegDiff);
-      SegDiffFile = pargv[1];
-      CheckPixVals = 0;
-      CheckResolution = 1;
-      CheckAcqParams = 1;
-      CheckGeo = 0;
-      CheckPrecision = 1;
+      SegDiffFile      = pargv[1];
+      CheckPixVals     = 0;
+      CheckResolution  = 1;
+      CheckAcqParams   = 1;
+      CheckGeo         = 0;
+      CheckPrecision   = 1;
       CheckOrientation = 1;
-      nargsused = 2;
+      nargsused        = 2;
     } else {
       if (InVol1File == nullptr)
         InVol1File = option;

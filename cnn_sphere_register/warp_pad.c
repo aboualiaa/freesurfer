@@ -46,41 +46,41 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/utsname.h>
 #include <string.h>
+#include <sys/utsname.h>
+#include <unistd.h>
 //#include <fstream>
 
+#include "cmdargs.h"
+#include "diag.h"
+#include "error.h"
+#include "fio.h"
 #include "macros.h"
 #include "utils.h"
-#include "fio.h"
 #include "version.h"
-#include "cmdargs.h"
-#include "error.h"
-#include "diag.h"
 
-#include "mrisurf.h"
-#include "mri.h"
 #include "matfile.h"
 #include "matrix.h"
+#include "mri.h"
+#include "mrisurf.h"
 //#include <direct.h>
 
-// using namespace std;
+//
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
 static void usage_exit(void);
 static void print_help(void);
 static void print_version(void);
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: dummy.c,v 1.10 2011/03/02 00:04:01 nicks Exp $";
-char *Progname = NULL;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+static char    vcid[]   = "$Id: dummy.c,v 1.10 2011/03/02 00:04:01 nicks Exp $";
+char *         Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 bool flag = false;
@@ -93,7 +93,7 @@ char *subject, *hemi, *SUBJECTS_DIR;
 
 float resampleatpolarcoord(float **mtx, float theta, float phi) {
   float uf, vf, du, dv, val;
-  int u0, u1, v0, v1;
+  int   u0, u1, v0, v1;
 
   uf = 256.0f * phi / PHI_MAX;
   vf = 512.0f * theta / THETA_MAX;
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
 
   // deformation field by rotate 90 around y
 
-  int vno;
+  int   vno;
   float x, y, z, radius, a, b, c, d, delta_theta, delta_phi, theta, phi,
       newtheta, newphi;
   VERTEX *vertex /*, *ver_distheta, *ver_disphi*/;
@@ -221,9 +221,9 @@ int main(int argc, char *argv[]) {
     if (vno == 100)
       flag = true;
 
-    x = vertex->x;
-    y = vertex->y;
-    z = vertex->z;
+    x     = vertex->x;
+    y     = vertex->y;
+    z     = vertex->z;
     theta = atan2(vertex->y / b, vertex->x / a);
     if (theta < 0.0f)
       theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
@@ -235,10 +235,10 @@ int main(int argc, char *argv[]) {
     // if (fabsf(phi-M_PI/2.0f)<1.4f)
     if (1) {
       delta_theta = resampleatpolarcoord(ux, theta, phi);
-      delta_phi = resampleatpolarcoord(uy, theta, phi);
+      delta_phi   = resampleatpolarcoord(uy, theta, phi);
 
       newtheta = theta + delta_theta * 2.0f * M_PI / 512.0f;
-      newphi = phi + delta_phi * M_PI / 256.0f;
+      newphi   = phi + delta_phi * M_PI / 256.0f;
 
       // enforce spherical topology
       if (newphi < 0.0f)
@@ -266,9 +266,9 @@ int main(int argc, char *argv[]) {
     {
       float x1, y1, z1, theta1, phi1, delta_theta1, delta_phi1, newtheta1,
           newphi1;
-      x1 = -z;
-      y1 = y;
-      z1 = x; // rotate 90 degree around y axis
+      x1     = -z;
+      y1     = y;
+      z1     = x; // rotate 90 degree around y axis
       theta1 = atan2(y1 / b, x1 / a);
       if (theta1 < 0.0f)
         theta1 = 2 * M_PI + theta1;
@@ -278,10 +278,10 @@ int main(int argc, char *argv[]) {
       phi1 = atan2(sqrt(d), z1);
 
       delta_theta1 = resampleatpolarcoord(ux, theta1, phi1);
-      delta_phi1 = resampleatpolarcoord(uy, theta1, phi1);
+      delta_phi1   = resampleatpolarcoord(uy, theta1, phi1);
 
       newtheta1 = theta1 + delta_theta1 * 2.0f * M_PI / 512.0f;
-      newphi1 = phi1 + delta_phi1 * M_PI / 256.0f;
+      newphi1   = phi1 + delta_phi1 * M_PI / 256.0f;
 
       // enforce spherical topology
       if (newphi1 < 0.0f)
@@ -330,7 +330,7 @@ int main(int argc, char *argv[]) {
 */
 /* ------ Doxygen markup ends on the line above ---- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -363,7 +363,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       TempVolFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))

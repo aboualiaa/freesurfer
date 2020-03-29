@@ -55,10 +55,10 @@
 //----------------------------------------------------------------------
 //  basic includes
 //----------------------------------------------------------------------
-#include <stdlib.h>   // standard libaries
-#include <stdio.h>    // standard I/O
 #include <iostream.h> // C++ I/O streams
 #include <math.h>     // math routines
+#include <stdio.h>    // standard I/O
+#include <stdlib.h>   // standard libaries
 #include <values.h>
 
 //----------------------------------------------------------------------
@@ -69,21 +69,21 @@
 
 class ANNkdStats { // stats on kd-tree
 public:
-  int dim;      // dimension of space
-  int n_pts;    // no. of points
-  int bkt_size; // bucket size
-  int n_lf;     // no. of leaves
-  int n_tl;     // no. of trivial leaves (no points)
-  int n_spl;    // no. of splitting nodes
-  int n_shr;    // no. of shrinking nodes (for bd-trees)
-  int depth;    // depth of tree
-  float sum_ar; // sum of leaf aspect ratios
-  float avg_ar; // average leaf aspect ratio
-                //
+  int   dim;      // dimension of space
+  int   n_pts;    // no. of points
+  int   bkt_size; // bucket size
+  int   n_lf;     // no. of leaves
+  int   n_tl;     // no. of trivial leaves (no points)
+  int   n_spl;    // no. of splitting nodes
+  int   n_shr;    // no. of shrinking nodes (for bd-trees)
+  int   depth;    // depth of tree
+  float sum_ar;   // sum of leaf aspect ratios
+  float avg_ar;   // average leaf aspect ratio
+                  //
   // reset stats
   void reset(int d = 0, int n = 0, int bs = 0) {
-    dim = d;
-    n_pts = n;
+    dim      = d;
+    n_pts    = n;
     bkt_size = bs;
     n_lf = n_tl = n_spl = n_shr = depth = 0;
     sum_ar = avg_ar = 0.0;
@@ -113,17 +113,17 @@ public:
 //  max()  Return maximum of samples.
 //----------------------------------------------------------------------
 class SampStat {
-  int n;                 // number of samples
+  int    n;              // number of samples
   double sum;            // sum
   double sum2;           // sum of squares
   double minVal, maxVal; // min and max
 public:
   void reset() // reset everything
   {
-    n = 0;
+    n   = 0;
     sum = sum2 = 0;
-    minVal = MAXDOUBLE;
-    maxVal = -MAXDOUBLE;
+    minVal     = MAXDOUBLE;
+    maxVal     = -MAXDOUBLE;
   }
 
   SampStat() { reset(); } // constructor
@@ -227,13 +227,13 @@ public:
 //    a counter, but used in stats computation.
 //----------------------------------------------------------------------
 
-extern int N_data_pts;       // number of data points
-extern int N_visit_lfs;      // number of leaf nodes visited
-extern int N_visit_spl;      // number of splitting nodes visited
-extern int N_visit_shr;      // number of shrinking nodes visited
-extern int N_visit_pts;      // visited points for one query
-extern int N_coord_hts;      // coordinate hits for one query
-extern int N_float_ops;      // floating ops for one query
+extern int      N_data_pts;  // number of data points
+extern int      N_visit_lfs; // number of leaf nodes visited
+extern int      N_visit_spl; // number of splitting nodes visited
+extern int      N_visit_shr; // number of shrinking nodes visited
+extern int      N_visit_pts; // visited points for one query
+extern int      N_coord_hts; // coordinate hits for one query
+extern int      N_float_ops; // floating ops for one query
 extern SampStat visit_lfs;   // stats on leaf nodes visits
 extern SampStat visit_spl;   // stats on splitting nodes visits
 extern SampStat visit_shr;   // stats on shrinking nodes visits

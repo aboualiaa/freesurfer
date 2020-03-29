@@ -24,8 +24,8 @@
 #ifndef ThreadBuildContour_H
 #define ThreadBuildContour_H
 
-#include <QThread>
 #include <QMutex>
+#include <QThread>
 #include <QVariantMap>
 
 class LayerMRI;
@@ -46,8 +46,8 @@ protected:
   void run();
 
   LayerMRI *m_mri;
-  int m_nSegValue;
-  int m_nThreadID;
+  int       m_nSegValue;
+  int       m_nThreadID;
 };
 
 #endif // ThreadBuildContour_H

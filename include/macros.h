@@ -28,16 +28,17 @@
 #include "base.h"
 
 #include "const.h"
-#include "utils.h"
 #include "proto.h"
+#include "utils.h"
 #include <math.h>
 
-#define DEFINE_LOG2 static double log2(double x) { return log(x) / log(2.0); }
-	// defining log2 as a macro has problems with other header files that also define it as a function taking an integer arg 
-	
+#define DEFINE_LOG2                                                            \
+  static double log2(double x) { return log(x) / log(2.0); }
+// defining log2 as a macro has problems with other header files that also define it as a function taking an integer arg
+
 #ifdef _MSDOS
 #include <math.h>
-#define exp2(f)     pow(2.0,(f))
+#define exp2(f) pow(2.0, (f))
 DEFINE_LOG2
 #ifndef M_E
 #define M_E 2.718282 /* exp(1) */
@@ -74,27 +75,27 @@ DEFINE_LOG2
 #endif
 
 #define EVEN(n) ((((n) / 2) * 2) == n)
-#define ODD(n) (!EVEN(n))
-#define ISEVEN EVEN
-#define ISODD ODD
+#define ODD(n)  (!EVEN(n))
+#define ISEVEN  EVEN
+#define ISODD   ODD
 
-#define RADIANS(deg) ((2.0 * M_PI * (double)(deg)) / (360.0))
-#define DEGREES(rad) ((360.0 * (double)(rad)) / (2.0 * M_PI))
+#define RADIANS(deg)  ((2.0 * M_PI * (double)(deg)) / (360.0))
+#define DEGREES(rad)  ((360.0 * (double)(rad)) / (2.0 * M_PI))
 #define NDEGREES(rad) (DEGREES(normAngle(rad)))
 
 #define ISSMALL(f) (fabs(f) < 0.000001f)
-#define ISTINY(f) (fabs(f) < 0.00000001f)
+#define ISTINY(f)  (fabs(f) < 0.00000001f)
 
 #ifndef FLT_EPSILON
 #define FLT_EPSILON 1e-5
 #endif
 
-#define FZERO(f) (fabs(f) < FLT_EPSILON)
+#define FZERO(f)         (fabs(f) < FLT_EPSILON)
 #define FZEROTHR(f, thr) (fabs(f) < thr)
-#define DZERO(d) (fabs(d) < 1e-15)
-#define iszero(f) (FZERO(f))
-#define FEQUAL(f1, f2) (FZERO(f1 - f2))
-#define DEQUAL(d1, d2) (DZERO(d1 - d2))
+#define DZERO(d)         (fabs(d) < 1e-15)
+#define iszero(f)        (FZERO(f))
+#define FEQUAL(f1, f2)   (FZERO(f1 - f2))
+#define DEQUAL(d1, d2)   (DZERO(d1 - d2))
 
 #define ISINT(f) ((float)((int)f) == f)
 
@@ -108,23 +109,23 @@ DEFINE_LOG2
 #include <cstdlib>
 #include <cstring>
 
-#define STRALLOC(str) ((char *)calloc(strlen(str) + 1, sizeof(char)))
+#define STRALLOC(str)   ((char *)calloc(strlen(str) + 1, sizeof(char)))
 #define STRCPALLOC(str) strcpy(STRALLOC(str), str)
 
 #ifdef Linux
-#define exp2(f)     pow(2.0,(f))
+#define exp2(f) pow(2.0, (f))
 #endif
 
 #ifdef IRIX
-#define exp2(f)     pow(2.0,(f))
+#define exp2(f) pow(2.0, (f))
 DEFINE_LOG2
 #endif
 
 #ifdef SunOS
-#define exp2(f)     pow(2.0,(f))
+#define exp2(f) pow(2.0, (f))
 DEFINE_LOG2
-#define ceilf(f)    (int)ceil((double)f)
-#define floorf(f)   (int)floor((double)f)
+#define ceilf(f)  (int)ceil((double)f)
+#define floorf(f) (int)floor((double)f)
 #endif
 
 #define ISPOW2(n) (exp2((float)nint(log2((float)n))) == (float)n)

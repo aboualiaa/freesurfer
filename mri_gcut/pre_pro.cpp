@@ -26,26 +26,26 @@
 #include "gcut.h"
 
 CCubeNode::CCubeNode() {
-  thisSubX = 0;
-  thisSubY = 0;
-  thisSubZ = 0;
+  thisSubX  = 0;
+  thisSubY  = 0;
+  thisSubZ  = 0;
   thisIndex = 0;
 
-  thisMean = 0;
-  thisVariance = 0;
+  thisMean       = 0;
+  thisVariance   = 0;
   thisVariance8V = 0;
 
   thisPtrNextNode = NULL;
 }
 
 CCubeNode::CCubeNode(int subX, int subY, int subZ, int index, double mean) {
-  thisSubX = subX;
-  thisSubY = subY;
-  thisSubZ = subZ;
+  thisSubX  = subX;
+  thisSubY  = subY;
+  thisSubZ  = subZ;
   thisIndex = index;
 
-  thisMean = mean;
-  thisVariance = 0;
+  thisMean       = mean;
+  thisVariance   = 0;
   thisVariance8V = 0;
 
   thisPtrNextNode = NULL;
@@ -53,13 +53,13 @@ CCubeNode::CCubeNode(int subX, int subY, int subZ, int index, double mean) {
 
 CCubeNode::CCubeNode(int subX, int subY, int subZ, int index, double mean,
                      double variance, double variance8V) {
-  thisSubX = subX;
-  thisSubY = subY;
-  thisSubZ = subZ;
+  thisSubX  = subX;
+  thisSubY  = subY;
+  thisSubZ  = subZ;
   thisIndex = index;
 
-  thisMean = mean;
-  thisVariance = variance;
+  thisMean       = mean;
+  thisVariance   = variance;
   thisVariance8V = variance8V;
 
   thisPtrNextNode = NULL;
@@ -157,13 +157,13 @@ double Variance3x3x3(int startX, int startY, int startZ, int iSizeX, int iSizeY,
                      double mean, unsigned char ***Mat);
 void SetRegion3x3x3(int startX, int startY, int startZ, int iSizeX, int iSizeY,
                     unsigned char ***Mat, short value);
-int Sub2Ind3D(int sX, int sY, int sZ, int iSizeX, int iSizeY);
+int  Sub2Ind3D(int sX, int sY, int sZ, int iSizeX, int iSizeY);
 
 // -- Main function
 int AutoSelectSeed(gc_POS *iSeed, unsigned char ***Mat, int xVol, int yVol,
                    int zVol, double mT, double vT) {
   // -- Get the pointer to the input argument(s)
-  double MeanThreshold = mT;
+  double MeanThreshold     = mT;
   double VarianceThreshold = vT;
 
   // -- Get the size of the image
@@ -171,27 +171,27 @@ int AutoSelectSeed(gc_POS *iSeed, unsigned char ***Mat, int xVol, int yVol,
   int iSizeY = yVol;
   int iSizeZ = zVol;
 
-  double mean = 0;
-  double variance = 0;
-  double variance8V = 0;
+  double mean             = 0;
+  double variance         = 0;
+  double variance8V       = 0;
   double weightedVariance = 100000;
 
-  int tempX = 0;
-  int tempY = 0;
-  int tempZ = 0;
-  double tempMean = 0;
+  int    tempX        = 0;
+  int    tempY        = 0;
+  int    tempZ        = 0;
+  double tempMean     = 0;
   double tempVariance = 0;
 
   bool qualifiedFlag = true;
 
   const int size = 5;
 
-  double shortListMean[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  double shortListMean[10]     = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   double shortListVariance[10] = {100000, 100000, 100000, 100000, 100000,
                                   100000, 100000, 100000, 100000, 100000};
-  int shortListSeedX[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-  int shortListSeedY[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-  int shortListSeedZ[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+  int    shortListSeedX[10]    = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+  int    shortListSeedY[10]    = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+  int    shortListSeedZ[10]    = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
   int neighbor6[6][3] = {{size, 0, 0},  {-size, 0, 0}, {0, size, 0},
                          {0, -size, 0}, {0, 0, size},  {0, 0, -size}};
@@ -200,8 +200,8 @@ int AutoSelectSeed(gc_POS *iSeed, unsigned char ***Mat, int xVol, int yVol,
   for (int sX = size; sX < (iSizeX - size); sX = sX + size) {
     for (int sY = size; sY < (iSizeY - size); sY = sY + size) {
       for (int sZ = size; sZ < (iSizeZ - size); sZ = sZ + size) {
-        mean = Mean5x5x5(sX, sY, sZ, iSizeX, iSizeY, Mat);
-        variance = Variance5x5x5(sX, sY, sZ, iSizeX, iSizeY, mean, Mat);
+        mean       = Mean5x5x5(sX, sY, sZ, iSizeX, iSizeY, Mat);
+        variance   = Variance5x5x5(sX, sY, sZ, iSizeX, iSizeY, mean, Mat);
         variance8V = Variance8V(sX, sY, sZ, iSizeX, iSizeY, Mat, 5);
 
         if ((mean > MeanThreshold) && (variance < VarianceThreshold)) {
@@ -216,7 +216,7 @@ int AutoSelectSeed(gc_POS *iSeed, unsigned char ***Mat, int xVol, int yVol,
               qualifiedFlag = false;
               break;
             }
-            tempMean = Mean5x5x5(tempX, tempY, tempZ, iSizeX, iSizeY, Mat);
+            tempMean     = Mean5x5x5(tempX, tempY, tempZ, iSizeX, iSizeY, Mat);
             tempVariance = Variance5x5x5(tempX, tempY, tempZ, iSizeX, iSizeY,
                                          tempMean, Mat);
 
@@ -235,17 +235,17 @@ int AutoSelectSeed(gc_POS *iSeed, unsigned char ***Mat, int xVol, int yVol,
             for (int i = 0; i < 10; i++) {
               if (shortListVariance[i] >= weightedVariance) {
                 for (int j = 9; j > i; j--) {
-                  shortListMean[j] = shortListMean[j - 1];
+                  shortListMean[j]     = shortListMean[j - 1];
                   shortListVariance[j] = shortListVariance[j - 1];
-                  shortListSeedX[j] = shortListSeedX[j - 1];
-                  shortListSeedY[j] = shortListSeedY[j - 1];
-                  shortListSeedZ[j] = shortListSeedZ[j - 1];
+                  shortListSeedX[j]    = shortListSeedX[j - 1];
+                  shortListSeedY[j]    = shortListSeedY[j - 1];
+                  shortListSeedZ[j]    = shortListSeedZ[j - 1];
                 }
-                shortListMean[i] = mean;
+                shortListMean[i]     = mean;
                 shortListVariance[i] = weightedVariance;
-                shortListSeedX[i] = sX;
-                shortListSeedY[i] = sY;
-                shortListSeedZ[i] = sZ;
+                shortListSeedX[i]    = sX;
+                shortListSeedY[i]    = sY;
+                shortListSeedZ[i]    = sZ;
                 break;
               }
             }
@@ -257,11 +257,11 @@ int AutoSelectSeed(gc_POS *iSeed, unsigned char ***Mat, int xVol, int yVol,
 
   // -- choose the one with lowest intensity
   double lowestMean = 10000000;
-  int target = 0;
+  int    target     = 0;
   for (int k = 0; k < 10; k++) {
     if (shortListMean[k] < lowestMean) {
       lowestMean = shortListMean[k];
-      target = k;
+      target     = k;
     }
   }
 
@@ -285,7 +285,7 @@ int RegionGrowing(gc_POS iSeed, unsigned char ***MImage,
   double ptrLMeanDiffThreshold = lmdT;
   double ptrUMeanDiffThreshold = umdT;
   double ptrNMeanDiffThreshold = nmdT;
-  double ptrVarianceThreshold = vT;
+  double ptrVarianceThreshold  = vT;
 
   // -- Get the size of the image
   int iSizeX = xVol;
@@ -348,13 +348,13 @@ int RegionGrowing(gc_POS iSeed, unsigned char ***MImage,
   int subZCurrentNode = 0;
   // int indexCurrentNode = 0;
 
-  double meanNeighborNode = 0;
-  double varianceNeighborNode = 0;
+  double meanNeighborNode       = 0;
+  double varianceNeighborNode   = 0;
   double variance8VNeighborNode = 0;
-  int subXNeighborNode = 0;
-  int subYNeighborNode = 0;
-  int subZNeighborNode = 0;
-  int indexNeighborNode = 0;
+  int    subXNeighborNode       = 0;
+  int    subYNeighborNode       = 0;
+  int    subZNeighborNode       = 0;
+  int    indexNeighborNode      = 0;
 
   // double weightedVariance = 0;
   // int loopControlCount = 0;
@@ -407,7 +407,7 @@ int RegionGrowing(gc_POS iSeed, unsigned char ***MImage,
             //&& weightedVariance < *ptrVarianceThreshold
             && meanNeighborNode > minMean && meanNeighborNode < maxMean) {
           meanNeighborNode = (meanNeighborNode + meanCurrentNode) / 2;
-          ptrCurrentNode = new CCubeNode(subXNeighborNode, subYNeighborNode,
+          ptrCurrentNode   = new CCubeNode(subXNeighborNode, subYNeighborNode,
                                          subZNeighborNode, indexNeighborNode,
                                          meanNeighborNode, varianceNeighborNode,
                                          variance8VNeighborNode);
@@ -447,7 +447,7 @@ int RegionGrowing(gc_POS iSeed, unsigned char ***MImage,
 double pre_processing(unsigned char ***image, unsigned char ***label, int xVol,
                       int yVol, int zVol) {
   gc_POS iSeed;
-  double meanThreshold = 0.45 * 160;
+  double meanThreshold     = 0.45 * 160;
   double varianceThreshold = 0.004 * 160 * 160;
 
   AutoSelectSeed(&iSeed, image, xVol, yVol, zVol, meanThreshold,
@@ -468,15 +468,15 @@ double pre_processing(unsigned char ***image, unsigned char ***label, int xVol,
   iSeed.y += 2;
   iSeed.z += 2;
   // -- grow
-  double meanDiffThreshold = 0.03 * 160;
+  double meanDiffThreshold     = 0.03 * 160;
   double varianceDiffThreshold = 0.004 * 160 * 160;
-  double lmdT = 0.05 * 160;
-  double umdT = 0.25 * 160;
+  double lmdT                  = 0.05 * 160;
+  double umdT                  = 0.25 * 160;
   RegionGrowing(iSeed, image, label, xVol, yVol, zVol, lmdT, umdT,
                 meanDiffThreshold, varianceDiffThreshold);
   // mean of white matte
   double whitemean = 0;
-  int numSeed = 0;
+  int    numSeed   = 0;
   for (int z = 0; z < zVol; z++) {
     for (int y = 0; y < yVol; y++) {
       for (int x = 0; x < xVol; x++) {
@@ -499,9 +499,9 @@ double pre_processing(unsigned char ***image, unsigned char ***label, int xVol,
 // direction map function: 3-dimensional 3*3*3
 void map(lc_Component p, int &x, int &y, int &z) {
   int sign = p.current_child;
-  z = sign / 9;
-  y = (sign - z * 9) / 3;
-  x = (sign - z * 9 - y * 3);
+  z        = sign / 9;
+  y        = (sign - z * 9) / 3;
+  x        = (sign - z * 9 - y * 3);
   z--;
   y--;
   x--;
@@ -512,9 +512,9 @@ void map(lc_Component p, int &x, int &y, int &z) {
 
 void push(lc_Component *p, int &current, int x, int y, int z) {
   current++;
-  p[current].x = x;
-  p[current].y = y;
-  p[current].z = z;
+  p[current].x             = x;
+  p[current].y             = y;
+  p[current].z             = z;
   p[current].current_child = 0; // 0~26, skip 13
 }
 
@@ -552,7 +552,7 @@ bool IsLeaf(lc_Component *p, int current, int &x, int &y, int &z,
 int locateSeedfromLCC(gc_POS &iSeed, unsigned char ***label, int xVol, int yVol,
                       int zVol) {
   // int xStart, yStart, zStart, xEnd, yEnd, zEnd;
-  int bExit = 0;
+  int bExit  = 0;
   int offset = 10;
   // start
   for (int z = offset; z < zVol - offset && bExit == 0; z++) {
@@ -562,7 +562,7 @@ int locateSeedfromLCC(gc_POS &iSeed, unsigned char ***label, int xVol, int yVol,
           iSeed.x = x;
           iSeed.y = y;
           iSeed.z = z;
-          bExit = 1;
+          bExit   = 1;
         }
       }
     }
@@ -609,10 +609,10 @@ int LCC_function(unsigned char ***image, unsigned char ***label, int xVol,
   }
   // extract components
   lc_Component *component_list = new lc_Component[voxelCount];
-  int current_comNum = -1;
-  int group_id = 0;
-  int xPos = -1, yPos = -1, zPos = -1;
-  int _limit = 10;
+  int           current_comNum = -1;
+  int           group_id       = 0;
+  int           xPos = -1, yPos = -1, zPos = -1;
+  int           _limit = 10;
   for (int z = 1; z < zVol - 1; z++) {
     for (int y = 1; y < yVol - 1; y++) {
       for (int x = 1; x < xVol - 1; x++) {
@@ -646,12 +646,12 @@ int LCC_function(unsigned char ***image, unsigned char ***label, int xVol,
       }
     }
   }
-  int temp = -1;
+  int temp      = -1;
   int max_group = 0;
   // find max
   for (int i = 1; i <= group_id; i++) {
     if (max_array[i] > temp) {
-      temp = max_array[i];
+      temp      = max_array[i];
       max_group = i;
     }
   }
@@ -686,10 +686,10 @@ int LCC_function(unsigned char ***image, unsigned char ***label, int xVol,
     iSeed.x = iSeed.y = iSeed.z = 0;
     if (locateSeedfromLCC(iSeed, label, xVol, yVol, zVol) == 1) {
       // -- grow
-      double meanDiffThreshold = 0.03 * 160;
+      double meanDiffThreshold     = 0.03 * 160;
       double varianceDiffThreshold = 0.004 * 160 * 160;
-      double lmdT = 0.05 * 160;
-      double umdT = 0.25 * 160;
+      double lmdT                  = 0.05 * 160;
+      double umdT                  = 0.25 * 160;
       RegionGrowing(iSeed, image, label, xVol, yVol, zVol, lmdT, umdT,
                     meanDiffThreshold, varianceDiffThreshold);
       // mean of white matte
@@ -720,7 +720,7 @@ int LCC_function(unsigned char ***image, unsigned char ***label, int xVol,
 double Mean5x5x5(int startX, int startY, int startZ, int iSizeX, int iSizeY,
                  unsigned char ***Mat) {
   const int size = 5;
-  double sum = 0;
+  double    sum  = 0;
   // int ind = 0;
 
   for (int x = startX; x < (startX + size); x++) {
@@ -739,7 +739,7 @@ double Mean5x5x5(int startX, int startY, int startZ, int iSizeX, int iSizeY,
 double Variance5x5x5(int startX, int startY, int startZ, int iSizeX, int iSizeY,
                      double mean, unsigned char ***Mat) {
   const int size = 5;
-  double sum = 0;
+  double    sum  = 0;
   // int ind = 0;
   double pixel = 0;
 
@@ -747,7 +747,7 @@ double Variance5x5x5(int startX, int startY, int startZ, int iSizeX, int iSizeY,
     for (int y = startY; y < (startY + size); y++) {
       for (int z = startZ; z < (startZ + size); z++) {
         pixel = Mat[z][y][x];
-        sum = sum + ((pixel - mean) * (pixel - mean));
+        sum   = sum + ((pixel - mean) * (pixel - mean));
       }
     }
   }
@@ -761,9 +761,9 @@ double Variance8V(int startX, int startY, int startZ, int iSizeX, int iSizeY,
                   unsigned char ***Mat, int size) {
   // const int size = 5;
   double sum = 0;
-  int i;
+  int    i;
 
-  int ind[8];
+  int    ind[8];
   double pixel[8];
 
   ind[0] = Mat[startZ][startY][startX];
@@ -780,7 +780,7 @@ double Variance8V(int startX, int startY, int startZ, int iSizeX, int iSizeY,
 
   for (i = 0; i < 8; i++) {
     pixel[i] = ind[i];
-    sum = sum + pixel[i];
+    sum      = sum + pixel[i];
   }
 
   double mean = sum / 8;
@@ -797,7 +797,7 @@ double Variance8V(int startX, int startY, int startZ, int iSizeX, int iSizeY,
 double Mean3x3x3(int startX, int startY, int startZ, int iSizeX, int iSizeY,
                  unsigned char ***Mat) {
   const int size = 3;
-  double sum = 0;
+  double    sum  = 0;
   // int ind = 0;
 
   for (int x = startX; x < (startX + size); x++) {
@@ -816,7 +816,7 @@ double Mean3x3x3(int startX, int startY, int startZ, int iSizeX, int iSizeY,
 double Variance3x3x3(int startX, int startY, int startZ, int iSizeX, int iSizeY,
                      double mean, unsigned char ***Mat) {
   const int size = 3;
-  double sum = 0;
+  double    sum  = 0;
   // int ind = 0;
   double pixel = 0;
 
@@ -824,7 +824,7 @@ double Variance3x3x3(int startX, int startY, int startZ, int iSizeX, int iSizeY,
     for (int y = startY; y < (startY + size); y++) {
       for (int z = startZ; z < (startZ + size); z++) {
         pixel = Mat[z][y][x];
-        sum = sum + ((pixel - mean) * (pixel - mean));
+        sum   = sum + ((pixel - mean) * (pixel - mean));
       }
     }
   }

@@ -79,7 +79,7 @@ void QVTKOpenGLWidgetMacOSCheck(QWidget *window) {
 // #define DEBUG_QVTKOPENGL_WIDGET
 #ifdef DEBUG_QVTKOPENGL_WIDGET
 #define vtkQVTKOpenGLNativeWidgetDebugMacro(msg)                               \
-  cout << this << ": " msg << endl;                                            \
+  std::cout << this << ": " msg << std::endl;                                  \
   if (this->Logger) {                                                          \
     this->Logger->logMessage(QOpenGLDebugMessage::createApplicationMessage(    \
         QStringLiteral("QVTKOpenGLNativeWidget::" msg)));                      \
@@ -110,8 +110,8 @@ public:
         // QOpenGLContext have been called makeCurrent() previously so we
         // can get to the surface that was used to do that. We simply
         // reactivate on that surface.
-        QOpenGLContext *ctxt = this->Target->context();
-        QSurface *surface = ctxt ? ctxt->surface() : nullptr;
+        QOpenGLContext *ctxt    = this->Target->context();
+        QSurface *      surface = ctxt ? ctxt->surface() : nullptr;
         if (surface) {
           ctxt->makeCurrent(surface);
         }
@@ -150,7 +150,7 @@ protected:
 const double QVTKOpenGLNativeWidget::DevicePixelRatioTolerance = 1e-5;
 
 //-----------------------------------------------------------------------------
-QVTKOpenGLNativeWidget::QVTKOpenGLNativeWidget(QWidget *parentWdg,
+QVTKOpenGLNativeWidget::QVTKOpenGLNativeWidget(QWidget *       parentWdg,
                                                Qt::WindowFlags f)
     : Superclass(parentWdg, f), InteractorAdapter(nullptr), EnableHiDPI(false),
       OriginalDPI(0), FBO(nullptr), InPaintGL(false),
@@ -275,7 +275,7 @@ QVTKInteractor *QVTKOpenGLNativeWidget::GetInteractor() {
 
 //-----------------------------------------------------------------------------
 void QVTKOpenGLNativeWidget::copyFromFormat(const QSurfaceFormat &format,
-                                            vtkRenderWindow *win) {
+                                            vtkRenderWindow *     win) {
   if (vtkOpenGLRenderWindow *oglWin =
           vtkOpenGLRenderWindow::SafeDownCast(win)) {
     oglWin->SetStereoCapableWindow(format.stereo() ? 1 : 0);
@@ -289,7 +289,7 @@ void QVTKOpenGLNativeWidget::copyFromFormat(const QSurfaceFormat &format,
 
 //-----------------------------------------------------------------------------
 void QVTKOpenGLNativeWidget::copyToFormat(vtkRenderWindow *win,
-                                          QSurfaceFormat &format) {
+                                          QSurfaceFormat & format) {
   if (vtkOpenGLRenderWindow *oglWin =
           vtkOpenGLRenderWindow::SafeDownCast(win)) {
     format.setStereo(oglWin->GetStereoCapableWindow());
@@ -352,7 +352,7 @@ void QVTKOpenGLNativeWidget::recreateFBO() {
   // Since QVTKOpenGLNativeWidget::initializeGL() cannot set multi-samples
   // state on the RenderWindow correctly, we do it here.
   QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-  GLint samples;
+  GLint             samples;
   f->glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES,
                                   &samples);
 
@@ -655,7 +655,9 @@ bool QVTKOpenGLNativeWidget::event(QEvent *evt) {
   case QEvent::WindowActivate:
   case QEvent::PolishRequest: {
     QWidget *window = this->window();
-    QTimer::singleShot(1, [window]() { ::QVTKOpenGLWidgetMacOSCheck(window); });
+    QTimer::singleShot(1, [window]() {
+      ::QVTKOpenGLWidgetMacOSCheck(window);
+    });
   } break;
 #endif // __APPLE__
 

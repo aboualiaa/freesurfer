@@ -42,7 +42,7 @@ float sx[9] = {-0.25f, 0.0f, 0.25f, -0.5f, 0.0f, 0.5f, -0.25f, 0.0f, 0.25f};
            Description:
 ----------------------------------------------------------------------*/
 #define g(I, k) exp((-1.0 / (k)) * fabs((double)(I)))
-#define LAMBDA 0.25
+#define LAMBDA  0.25
 int ImageDiffuse(IMAGE *inImage, IMAGE *outImage, double k, int niter,
                  int which, double slope, KIMAGE *kimage) {
   IMAGE *fSrcImage, *fDstImage;
@@ -101,10 +101,10 @@ int ImageDiffuse(IMAGE *inImage, IMAGE *outImage, double k, int niter,
 
 int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter,
                           double slope, KIMAGE *kimage) {
-  int x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
-  float c[9], fvals[9], dst_val;
-  FILE *fp;
-  KIMAGE *ksrc = nullptr;
+  int           x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
+  float         c[9], fvals[9], dst_val;
+  FILE *        fp;
+  KIMAGE *      ksrc     = nullptr;
   static IMAGE *tmpImage = nullptr, *gradImage = nullptr;
 
   rows = inImage->rows;
@@ -145,13 +145,13 @@ int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter,
 
   xW[0] = 0;
   for (x = 1; x < cols; x++) {
-    xW[x] = x - 1;
+    xW[x]     = x - 1;
     xE[x - 1] = x;
   }
   xE[cols - 1] = cols - 1;
-  yS[0] = 0;
+  yS[0]        = 0;
   for (y = 1; y < rows; y++) {
-    yN[y] = y - 1;
+    yN[y]     = y - 1;
     yS[y - 1] = y;
   }
   yS[rows - 1] = rows - 1;
@@ -306,22 +306,22 @@ static float ykernel[KSIZE * 3];
 
 int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter,
                    double slope, KIMAGE *kimage) {
-  int x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
-  float c[9], fvals[9], dst_val;
-  FILE *fp;
-  KIMAGE *ksrc = nullptr;
+  int           x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
+  float         c[9], fvals[9], dst_val;
+  FILE *        fp;
+  KIMAGE *      ksrc   = nullptr;
   static IMAGE *xImage = nullptr, *yImage = nullptr, *tmpImage;
-  IMAGE xKernelImage, yKernelImage;
+  IMAGE         xKernelImage, yKernelImage;
 
   yKernelImage.cols = yKernelImage.ocols = xKernelImage.cols =
-      xKernelImage.ocols = 3;
+      xKernelImage.ocols                 = 3;
   yKernelImage.cols = yKernelImage.ocols = xKernelImage.cols =
-      xKernelImage.ocols = 3;
+      xKernelImage.ocols                 = 3;
   yKernelImage.image = yKernelImage.firstpix = (hips_byte *)ykernel;
   xKernelImage.image = xKernelImage.firstpix = (hips_byte *)xkernel;
   if (tmpImage == nullptr) /* initialize kernels */
   {
-    int row, col;
+    int    row, col;
     float *kptr;
 
     kptr = xkernel;
@@ -331,8 +331,8 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter,
       *(kptr + KSIZE) = 0.0f ;
       *(kptr + 2*KSIZE) = -1.0f/(float)KSIZE ;
 #else
-      *kptr = 1.0f;
-      *(kptr + KSIZE) = 0.0f;
+      *kptr               = 1.0f;
+      *(kptr + KSIZE)     = 0.0f;
       *(kptr + 2 * KSIZE) = -1.0f;
 #endif
     }
@@ -343,9 +343,9 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter,
       *(kptr + 1) = 0.0f ;
       *(kptr + 2) = -1.0f/(float)KSIZE ;
 #else
-      *kptr = 1.0f;
-      *(kptr + 1) = 0.0f;
-      *(kptr + 2) = -1.0f;
+      *kptr               = 1.0f;
+      *(kptr + 1)         = 0.0f;
+      *(kptr + 2)         = -1.0f;
 #endif
     }
   }
@@ -401,13 +401,13 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter,
 
   xW[0] = 0;
   for (x = 1; x < cols; x++) {
-    xW[x] = x - 1;
+    xW[x]     = x - 1;
     xE[x - 1] = x;
   }
   xE[cols - 1] = cols - 1;
-  yS[0] = 0;
+  yS[0]        = 0;
   for (y = 1; y < rows; y++) {
-    yN[y] = y - 1;
+    yN[y]     = y - 1;
     yS[y - 1] = y;
   }
   yS[rows - 1] = rows - 1;
@@ -539,10 +539,10 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter,
 
 int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
                        double slope, KIMAGE *kimage) {
-  int x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
-  float c[9], fvals[9], dst_val;
-  FILE *fp;
-  KIMAGE *ksrc = nullptr;
+  int           x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
+  float         c[9], fvals[9], dst_val;
+  FILE *        fp;
+  KIMAGE *      ksrc     = nullptr;
   static IMAGE *tmpImage = nullptr, *gradImage = nullptr;
 
   rows = inImage->rows;
@@ -584,13 +584,13 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
 
   xW[0] = 0;
   for (x = 1; x < cols; x++) {
-    xW[x] = x - 1;
+    xW[x]     = x - 1;
     xE[x - 1] = x;
   }
   xE[cols - 1] = cols - 1;
-  yS[0] = 0;
+  yS[0]        = 0;
   for (y = 1; y < rows; y++) {
-    yN[y] = y - 1;
+    yN[y]     = y - 1;
     yS[y - 1] = y;
   }
   yS[rows - 1] = rows - 1;
@@ -705,11 +705,11 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
 
 int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
                        double slope, KIMAGE *kimage) {
-  UCHAR *csrc, *cdst;
-  float *fsrc, *fdst, fcval, feval, fwval, fnval, fsval, fdval;
-  int x, y, cval, eval, wval, nval, sval, i, dval;
-  double deltaN, deltaE, deltaW, deltaS, gnval, gsval, geval, gwval;
-  FILE *fp;
+  UCHAR *       csrc, *cdst;
+  float *       fsrc, *fdst, fcval, feval, fwval, fnval, fsval, fdval;
+  int           x, y, cval, eval, wval, nval, sval, i, dval;
+  double        deltaN, deltaE, deltaW, deltaS, gnval, gsval, geval, gwval;
+  FILE *        fp;
   static IMAGE *tmpImage = NULL;
 
   if ((outImage->pixel_format != inImage->pixel_format) ||
@@ -743,7 +743,7 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
   for (i = 0; i < niter; i++) {
     for (x = 0; x < tmpImage->cols; x++) {
       for (y = 0; y < tmpImage->rows; y++) {
-        fsrc = IMAGEFpix(tmpImage, x, y);
+        fsrc  = IMAGEFpix(tmpImage, x, y);
         fcval = *fsrc;
         if (x > 0)
           fwval = *(fsrc - 1);
@@ -791,7 +791,7 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
                   fcval + fdval);
         }
 
-        fcval = fcval + fdval;
+        fcval                      = fcval + fdval;
         *IMAGEFpix(outImage, x, y) = fcval;
       }
     }
@@ -812,8 +812,8 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
 ----------------------------------------------------------------------*/
 int ImageCurvature(IMAGE *inImage, float A, IMAGE *gradImage) {
   static IMAGE *xImage = nullptr, *yImage = nullptr;
-  int x, y, rows, cols;
-  float *xpix, *ypix, *gradpix, xval, yval, gval, Asq;
+  int           x, y, rows, cols;
+  float *       xpix, *ypix, *gradpix, xval, yval, gval, Asq;
 
   rows = inImage->rows;
   cols = inImage->cols;
@@ -837,10 +837,10 @@ int ImageCurvature(IMAGE *inImage, float A, IMAGE *gradImage) {
   ImageConvolve3x3(inImage, sx, xImage);
   ImageConvolve3x3(inImage, sy, yImage);
 
-  xpix = IMAGEFpix(xImage, 0, 0);
-  ypix = IMAGEFpix(yImage, 0, 0);
+  xpix    = IMAGEFpix(xImage, 0, 0);
+  ypix    = IMAGEFpix(yImage, 0, 0);
   gradpix = IMAGEFpix(gradImage, 0, 0);
-  Asq = A * A;
+  Asq     = A * A;
   for (y = 0; y < rows; y++) {
     for (x = 0; x < cols; x++) {
       xval = *xpix++;

@@ -22,26 +22,26 @@
  *
  */
 
-#include "timer.h"
+#include "cma.h"
 #include "diag.h"
 #include "gca.h"
-#include "cma.h"
+#include "timer.h"
 #include "version.h"
 
 const char *Progname;
 
 static int fill_val = 0;
-static int radius = 25;
+static int radius   = 25;
 
-static double TR = 0.0;
-static double TE = 0.0;
+static double TR    = 0.0;
+static double TE    = 0.0;
 static double alpha = 0.0;
 
 static MRI *fill_brain_volume(MRI *mri, GCA *gca, TRANSFORM *transform,
                               int radius);
-MRI *MRIremoveNonBrain(MRI *mri_src, MRI *mri_dst, TRANSFORM *transform,
-                       GCA *gca, int radius, int fill_val);
-static int get_option(int argc, char *argv[]);
+MRI *       MRIremoveNonBrain(MRI *mri_src, MRI *mri_dst, TRANSFORM *transform,
+                              GCA *gca, int radius, int fill_val);
+static int  get_option(int argc, char *argv[]);
 
 static void usage_exit(int code);
 
@@ -53,28 +53,24 @@ static void usage_exit(int code);
    argv[3]  - directory in which to write out registered brain.
 */
 
+int main(int argc, char *argv[]) {
+  char *     gca_fname, *in_fname, *out_fname, **av, *transform_fname;
+  MRI *      mri_in, *mri_out;
+  GCA *      gca;
+  int        ac, nargs;
+  int        msec, minutes, seconds, err;
+  Timer      start;
+  TRANSFORM *transform;
 
-int
-main(int argc, char *argv[])
-{
-  char         *gca_fname, *in_fname, *out_fname, **av, *transform_fname ;
-  MRI          *mri_in, *mri_out ;
-  GCA          *gca ;
-  int          ac, nargs ;
-  int          msec, minutes, seconds,err ;
-  Timer start ;
-  TRANSFORM    *transform ;
-
-  Progname = argv[0] ;
-  setRandomSeed(-1L) ;
-  DiagInit(NULL, NULL, NULL) ;
-  ErrorInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  setRandomSeed(-1L);
+  DiagInit(NULL, NULL, NULL);
+  ErrorInit(NULL, NULL, NULL);
 
   nargs = handleVersionOption(argc, argv, "mri_remove_neck");
-  argc -= nargs ;
-  if (1 == argc)
-  {
-    exit (0);
+  argc -= nargs;
+  if (1 == argc) {
+    exit(0);
   }
 
   ac = argc;
@@ -89,10 +85,10 @@ main(int argc, char *argv[])
     usage_exit(0);
   }
 
-  in_fname = argv[1];
+  in_fname        = argv[1];
   transform_fname = argv[2];
-  gca_fname = argv[3];
-  out_fname = argv[4];
+  gca_fname       = argv[3];
+  out_fname       = argv[4];
 
   start.reset();
   printf("reading atlas '%s'...\n", gca_fname);
@@ -136,7 +132,7 @@ main(int argc, char *argv[])
   }
 
   MRIfree(&mri_out);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -152,20 +148,20 @@ main(int argc, char *argv[])
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   StrUpper(option);
   if (!stricmp(option, "FILL")) {
     fill_val = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("filling defaced regions with %d\n", fill_val);
   } else if (!stricmp(option, "-help") || !stricmp(option, "-usage")) {
     usage_exit(0);
   } else if (!stricmp(option, "RADIUS")) {
     radius = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("erasing everything more than %d mm from possible brain\n", radius);
   } else if (!stricmp(option, "DEBUG_LABEL")) {
     Ggca_label = atoi(argv[2]);
@@ -173,17 +169,17 @@ static int get_option(int argc, char *argv[]) {
            Ggca_label);
     nargs = 1;
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "TR")) {
-    TR = atof(argv[2]);
+    TR    = atof(argv[2]);
     nargs = 1;
     printf("using TR=%2.1f msec\n", TR);
   } else if (!stricmp(option, "TE")) {
-    TE = atof(argv[2]);
+    TE    = atof(argv[2]);
     nargs = 1;
     printf("using TE=%2.1f msec\n", TE);
   } else if (!stricmp(option, "ALPHA")) {
@@ -194,7 +190,7 @@ static int get_option(int argc, char *argv[]) {
     switch (*option) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':
@@ -212,7 +208,7 @@ static int get_option(int argc, char *argv[]) {
 
 MRI *MRIremoveNonBrain(MRI *mri_src, MRI *mri_dst, TRANSFORM *transform,
                        GCA *gca, int radius, int fill_val) {
-  int x, y, z, frame, nerased = 0;
+  int  x, y, z, frame, nerased = 0;
   MRI *mri_brain;
 
   mri_dst = MRIcopy(mri_src, mri_dst);
@@ -244,8 +240,8 @@ MRI *MRIremoveNonBrain(MRI *mri_src, MRI *mri_dst, TRANSFORM *transform,
 
 static MRI *fill_brain_volume(MRI *mri, GCA *gca, TRANSFORM *transform,
                               int radius) {
-  int i, x, y, z, n;
-  MRI *mri_brain;
+  int        i, x, y, z, n;
+  MRI *      mri_brain;
   GCA_PRIOR *gcap;
 
   mri_brain = MRIclone(mri, nullptr);
@@ -257,7 +253,7 @@ static MRI *fill_brain_volume(MRI *mri, GCA *gca, TRANSFORM *transform,
           DiagBreak();
         }
         MRIvox(mri_brain, x, y, z) = 0;
-        gcap = getGCAP(gca, mri, transform, x, y, z);
+        gcap                       = getGCAP(gca, mri, transform, x, y, z);
         if (gcap == nullptr) {
           continue;
         }

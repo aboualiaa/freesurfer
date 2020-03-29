@@ -46,8 +46,8 @@
 
 typedef enum MallocAction {
   MA_insert = 1,
-  MA_clear = 2,
-  MA_copy = 4,
+  MA_clear  = 2,
+  MA_copy   = 4,
   MA_remove = 8
 } MallocAction;
 
@@ -56,14 +56,14 @@ typedef enum MallocAction {
 typedef struct MallocStats {
   const char *file;
   const char *function;
-  int line;
-  size_t size;
-  size_t inserted;
-  size_t cleared;
-  size_t copied;
-  size_t removed;
-  size_t sumCurrentAllocs;
-  size_t maxSumCurrentAllocs;
+  int         line;
+  size_t      size;
+  size_t      inserted;
+  size_t      cleared;
+  size_t      copied;
+  size_t      removed;
+  size_t      sumCurrentAllocs;
+  size_t      maxSumCurrentAllocs;
 } MallocStats;
 
 static void clearMallocStatsAllocCounters();
@@ -101,16 +101,16 @@ static void noteWhereAllocated(void *ptr, MallocStats *mallocStats) {}
 // __wrap_name
 //
 void *__real_malloc(size_t size);
-void __real_free(void *ptr);
+void  __real_free(void *ptr);
 void *__real_calloc(size_t nmemb, size_t size);
 void *__real_realloc(void *ptr, size_t size);
-int __real_posix_memalign(void **memptr, size_t alignment, size_t size);
+int   __real_posix_memalign(void **memptr, size_t alignment, size_t size);
 
 // The code here is only thread-safe because it is all done inside a critical
 // section protected by this lock
 //
 #ifdef HAVE_OPENMP
-static int lock_inited;
+static int        lock_inited;
 static omp_lock_t lock;
 #endif
 
@@ -141,18 +141,18 @@ typedef struct Page {
   size_t size; // also available on not-first page
   size_t loGuard;
   size_t mostRecentlyAllocationClock;
-  char available[4096 - sizeof(size_t) * 3];
+  char   available[4096 - sizeof(size_t) * 3];
 } Page;
 
 size_t const pagesCapacity = 8000000;
-size_t pagesSize = 0;
-Page *pages;
+size_t       pagesSize     = 0;
+Page *       pages;
 
-Page *pageChains[100];
+Page * pageChains[100];
 size_t pageChainsGet[100];
 size_t pageChainsPut[100];
 
-size_t maxPageChainsIndexSeen = 10;
+size_t      maxPageChainsIndexSeen = 10;
 static void updatedMaxPageChainsIndexSeen() {
   fprintf(stderr, "pageChainsIndex:%ld\n", maxPageChainsIndexSeen);
 }
@@ -160,8 +160,8 @@ static void updatedMaxPageChainsIndexSeen() {
 static void getPageChainsIndexAndCount(size_t *index, size_t *count,
                                        size_t size) {
   size_t availablePerPage = sizeof(((Page *)0)->available);
-  size_t neededPages = (size + availablePerPage - 1) / availablePerPage;
-  size_t pageChainsIndex = 0;
+  size_t neededPages      = (size + availablePerPage - 1) / availablePerPage;
+  size_t pageChainsIndex  = 0;
   while ((1L << pageChainsIndex) < neededPages)
     pageChainsIndex++;
   if (maxPageChainsIndexSeen < pageChainsIndex) {
@@ -173,16 +173,16 @@ static void getPageChainsIndexAndCount(size_t *index, size_t *count,
 }
 
 static size_t computePageHash(Page *loPage, size_t pageCount) {
-  size_t count = pageCount * (4096 / sizeof(size_t));
-  size_t *p = (size_t *)loPage;
-  size_t hash = 0, i;
+  size_t  count = pageCount * (4096 / sizeof(size_t));
+  size_t *p     = (size_t *)loPage;
+  size_t  hash  = 0, i;
   for (i = 0; i < count; i++)
     hash = (hash * 123) ^ (*p++);
   return hash;
 }
 
 static void checkNotUsed(Page *nLoPage, size_t npcPageCount) {
-  size_t loGuard = nLoPage->loGuard;
+  size_t loGuard   = nLoPage->loGuard;
   nLoPage->loGuard = 0;
   if (loGuard != computePageHash(nLoPage, npcPageCount)) {
     *(int *)-1 = 0; // has been changed when should not be available
@@ -191,7 +191,7 @@ static void checkNotUsed(Page *nLoPage, size_t npcPageCount) {
 }
 
 static size_t const memProtected_mostRecentlyAllocationClock = 12000221200L;
-static Page *memProtected_loPage = NULL;
+static Page *       memProtected_loPage                      = NULL;
 
 static void canUse(Page *nLoPage, size_t npcPageCount) {
 
@@ -241,21 +241,21 @@ static void shouldNotUse(Page *oLoPage, size_t opcPageCount) {
 // for overruns
 //
 typedef struct Malloced {
-  size_t size;
-  size_t padding;
-  void *ptr;
+  size_t       size;
+  size_t       padding;
+  void *       ptr;
   MallocStats *whereAllocated;
 } Malloced;
 
 #define mallocedSizeLog2 23
-#define mallocedSize (1 << mallocedSizeLog2)
+#define mallocedSize     (1 << mallocedSizeLog2)
 #define mallocedSizeMask (mallocedSize - 1)
 
 static Malloced *malloced = NULL;
-static size_t countAlloc[_MAX_FS_THREADS];
-static size_t countFrees[_MAX_FS_THREADS];
-static size_t sumAlloc;
-static size_t sumAllocLimit = 1000000;
+static size_t    countAlloc[_MAX_FS_THREADS];
+static size_t    countFrees[_MAX_FS_THREADS];
+static size_t    sumAlloc;
+static size_t    sumAllocLimit = 1000000;
 
 static int doMallocAction(MallocAction action, void **ptr, size_t size) {
 
@@ -278,10 +278,10 @@ static int doMallocAction(MallocAction action, void **ptr, size_t size) {
     pages = (Page *)alignedPage;
   }
 
-  char *op = (action & MA_remove) ? (char *)*ptr : NULL;
+  char *op      = (action & MA_remove) ? (char *)*ptr : NULL;
   Page *oLoPage = (Page *)((size_t)op & ~(4096 - 1));
   Page *nLoPage = NULL;
-  char *np = NULL;
+  char *np      = NULL;
 
   size_t opci = 0, opcPageCount = 0;
   if (action & MA_remove)
@@ -300,12 +300,12 @@ static int doMallocAction(MallocAction action, void **ptr, size_t size) {
       size_t newPagesSize = pagesSize + (1L << npci);
       if (newPagesSize > pagesCapacity)
         *(int *)-1 = 0; // out of memory
-      nLoPage = &pages[pagesSize];
+      nLoPage   = &pages[pagesSize];
       pagesSize = newPagesSize;
     }
     pageChainsGet[npci]++;
-    nLoPage->size = size;
-    nLoPage->loGuard = 0xFEEDBABEFEEDBABE;
+    nLoPage->size                        = size;
+    nLoPage->loGuard                     = 0xFEEDBABEFEEDBABE;
     nLoPage->mostRecentlyAllocationClock = ROMP_countGoParallel() * 100000000L +
                                            saveCountAlloc * 100 +
                                            omp_get_thread_num();
@@ -324,7 +324,7 @@ static int doMallocAction(MallocAction action, void **ptr, size_t size) {
   if (action & MA_remove) {
     countFrees[omp_get_thread_num()]++;
 
-    oLoPage->size = (size_t)pageChains[opci]; // put the old pages
+    oLoPage->size    = (size_t)pageChains[opci]; // put the old pages
     pageChains[opci] = oLoPage;
     pageChainsPut[opci]++;
     shouldNotUse(oLoPage, opcPageCount);
@@ -343,9 +343,9 @@ static Malloced *noteMallocAction(MallocAction action, void *ptr, size_t size,
     malloced = (Malloced *)__real_calloc(mallocedSize, sizeof(Malloced));
   }
 
-  size_t stabs = 0;
-  size_t hash = ((((size_t)ptr) >> 5) * 75321) & mallocedSizeMask;
-  Malloced *m = &malloced[hash];
+  size_t    stabs = 0;
+  size_t    hash  = ((((size_t)ptr) >> 5) * 75321) & mallocedSizeMask;
+  Malloced *m     = &malloced[hash];
   while (m->ptr != ptr) {
     if (m->ptr == 0)
       break; // reached the end of the chain, some items on which may have been
@@ -381,9 +381,9 @@ static Malloced *noteMallocAction(MallocAction action, void *ptr, size_t size,
       size = 1; // special case, can malloc a 0 sized object!
     m->size = size;
     sumAlloc += m->size;
-    m->ptr = ptr;
+    m->ptr     = ptr;
     m->padding = padding;
-    char *pad = (char *)ptr + size - padding;
+    char *pad  = (char *)ptr + size - padding;
     while (padding--)
       *pad++ = 0x5c;
   }
@@ -411,7 +411,7 @@ static void showCurrentAllocs() {
 }
 
 static void noteWhereAllocated(void *ptr, MallocStats *mallocStats) {
-  Malloced *malloced = noteMallocAction(0, ptr, 0, 0);
+  Malloced *malloced       = noteMallocAction(0, ptr, 0, 0);
   malloced->whereAllocated = mallocStats;
   if (sumAllocLimit < sumAlloc) {
     sumAllocLimit = sumAlloc + 10000000L;
@@ -499,14 +499,14 @@ int __wrap_posix_memalign(void **memptr, size_t alignment, size_t size) {
 // happening.  This mechanism allows that to happen.
 //
 #define mallocStatsSizeLog2 13
-#define mallocStatsSize (1 << mallocStatsSizeLog2)
+#define mallocStatsSize     (1 << mallocStatsSizeLog2)
 #define mallocStatsSizeMask (mallocStatsSize - 1)
 
 static MallocStats *mallocStats = NULL;
 
 static int stats_compare(const void *lhs_ptr, const void *rhs_ptr) {
-  int lhs = *(int *)lhs_ptr;
-  int rhs = *(int *)rhs_ptr;
+  int    lhs         = *(int *)lhs_ptr;
+  int    rhs         = *(int *)rhs_ptr;
   size_t lhsPriority = mallocStats[lhs].inserted + mallocStats[lhs].removed;
   size_t rhsPriority = mallocStats[rhs].inserted + mallocStats[rhs].removed;
   if (lhsPriority < rhsPriority)
@@ -530,7 +530,7 @@ static void mallocStatsExitHandler(void) {
   }
 
   int *indexs = (int *)malloc(count * sizeof(int));
-  count = 0;
+  count       = 0;
   for (i = 0; i < mallocStatsSize; i++) {
     MallocStats *m = &mallocStats[i];
     if (!m->line)
@@ -562,23 +562,23 @@ static MallocStats *noteMallocStatsAction(MallocAction action, size_t size,
   }
 
   size_t stabs = 0;
-  size_t hash = (((size_t)line ^ (size_t)file ^ (size_t)function) * 75321) &
+  size_t hash  = (((size_t)line ^ (size_t)file ^ (size_t)function) * 75321) &
                 mallocStatsSizeMask;
   MallocStats *m = &mallocStats[hash];
   while (m->line != line || m->function != function || m->file != file) {
     if (m->line == 0)
       break; // not in chain
     hash = (hash * 327 + 1) & mallocStatsSizeMask;
-    m = &mallocStats[hash];
+    m    = &mallocStats[hash];
     if (++stabs > 1000)
       *(int *)-1 = 0; // table too full
   }
 
   if (m->line == 0) { // There is a slight chance this might find the same empty
                       // cell as another thread - who cares?
-    m->line = line;
+    m->line     = line;
     m->function = function;
-    m->file = file;
+    m->file     = file;
   }
 
   if (action & MA_insert) {
@@ -625,7 +625,7 @@ _Pragma("GCC diagnostic ignored "
 
 void *mallocHere(size_t size, const char *file, const char *function,
                  int line) {
-  void *r = malloc(size);
+  void *       r = malloc(size);
   MallocStats *m = noteMallocStatsAction(MA_insert, size, file, function, line);
   noteWhereAllocated(r, m);
   return r;
@@ -638,7 +638,7 @@ void freeHere(void *ptr, const char *file, const char *function, int line) {
 
 void *callocHere(size_t nmemb, size_t size, const char *file,
                  const char *function, int line) {
-  void *r = calloc(nmemb, size);
+  void *       r = calloc(nmemb, size);
   MallocStats *m =
       noteMallocStatsAction(MA_insert | MA_clear, size, file, function, line);
   noteWhereAllocated(r, m);
@@ -647,7 +647,7 @@ void *callocHere(size_t nmemb, size_t size, const char *file,
 
 void *reallocHere(void *ptr, size_t size, const char *file,
                   const char *function, int line) {
-  void *r = realloc(ptr, size);
+  void *       r = realloc(ptr, size);
   MallocStats *m =
       noteMallocStatsAction(MA_insert | MA_remove, size, file, function, line);
   noteWhereAllocated(r, m);
@@ -656,7 +656,7 @@ void *reallocHere(void *ptr, size_t size, const char *file,
 
 int posix_memalignHere(void **memptr, size_t alignment, size_t size,
                        const char *file, const char *function, int line) {
-  int r = posix_memalign(memptr, alignment, size);
+  int          r = posix_memalign(memptr, alignment, size);
   MallocStats *m = noteMallocStatsAction(MA_insert, size, file, function, line);
   noteWhereAllocated(*memptr, m);
   return r;

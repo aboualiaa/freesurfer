@@ -78,7 +78,6 @@
  */
 
 #include <fstream>
-using namespace std;
 
 #include <scanopt.h>
 
@@ -88,7 +87,7 @@ using namespace std;
 /////***
 //
 
-void C_scanopt::debug_push(string astr_currentProc) {
+void C_scanopt::debug_push(std::string astr_currentProc) {
   //
   // ARGS
   //  astr_currentProc        in      method name to
@@ -118,8 +117,8 @@ void C_scanopt::debug_pop() {
   stackDepth_set(stackDepth_get() - 1);
 }
 
-void C_scanopt::error(string astr_msg /*= "Some error has occurred"    */,
-                      int code /*= -1                          */) {
+void C_scanopt::error(std::string astr_msg /*= "Some error has occurred"    */,
+                      int         code /*= -1                          */) {
   //
   // ARGS
   //  astr_class              in              name of the current class
@@ -132,16 +131,17 @@ void C_scanopt::error(string astr_msg /*= "Some error has occurred"    */,
   //  error flagging.
   //
 
-  cerr << "\nFatal error encountered.\n";
-  cerr << "\tscanopt object `" << str_name << "' (id: " << id << ")\n";
-  cerr << "\tCurrent function: " << str_obj << "::" << str_proc_get() << "\n";
-  cerr << "\t" << astr_msg << "\n";
-  cerr << "Throwing an exception to (this) with code " << code << "\n\n";
+  std::cerr << "\nFatal error encountered.\n";
+  std::cerr << "\tscanopt object `" << str_name << "' (id: " << id << ")\n";
+  std::cerr << "\tCurrent function: " << str_obj << "::" << str_proc_get()
+            << "\n";
+  std::cerr << "\t" << astr_msg << "\n";
+  std::cerr << "Throwing an exception to (this) with code " << code << "\n\n";
   throw(this);
 }
 
-void C_scanopt::warn(string astr_class /*= "C_scanopt::"       */,
-                     string astr_msg, int code /*= -1                  */
+void C_scanopt::warn(std::string astr_class /*= "C_scanopt::"       */,
+                     std::string astr_msg, int code /*= -1                  */
 ) {
   //
   // ARGS
@@ -154,14 +154,14 @@ void C_scanopt::warn(string astr_class /*= "C_scanopt::"       */,
   //  the `error' method, but no expection is thrown.
   //
 
-  cerr << "\nWarning.\n";
-  cerr << "\tWorld `" << str_name << "' (id: " << id << ")\n";
-  cerr << "\tCurrent function: " << astr_class << str_proc_get() << "\n";
-  cerr << "\t" << astr_msg << "(code: " << code << ")\n";
+  std::cerr << "\nWarning.\n";
+  std::cerr << "\tWorld `" << str_name << "' (id: " << id << ")\n";
+  std::cerr << "\tCurrent function: " << astr_class << str_proc_get() << "\n";
+  std::cerr << "\t" << astr_msg << "(code: " << code << ")\n";
 }
 
-void C_scanopt::function_trace(string astr_class, string astr_msg,
-                               string astr_separator) {
+void C_scanopt::function_trace(std::string astr_class, std::string astr_msg,
+                               std::string astr_separator) {
   //
   // ARGS
   //  astr_class       in      current class (or derivative)
@@ -173,36 +173,36 @@ void C_scanopt::function_trace(string astr_class, string astr_msg,
   //  in a particular class and method to be displayed to stderr.
   //
 
-  string str_tab = "";
-  static string str_objectName = "";
-  static string str_funcName = "";
+  std::string        str_tab        = "";
+  static std::string str_objectName = "";
+  static std::string str_funcName   = "";
 
   if (verbosity_get() >= stackDepth_get()) {
-    cerr << astr_separator;
+    std::cerr << astr_separator;
     for (int i = 0; i < stackDepth_get(); i++)
       str_tab += "\t";
     if (str_objectName != str_name_get())
-      cerr << "\nC_scanopt `" << str_name_get();
-    cerr << "' (id: " << id_get() << ")\n";
+      std::cerr << "\nC_scanopt `" << str_name_get();
+    std::cerr << "' (id: " << id_get() << ")\n";
     if (str_funcName != str_proc_get()) {
-      cerr << "\n" << str_tab << "Current function: " << astr_class;
-      cerr << "::" << str_proc_get() << endl;
-      cerr << "\tverbosity = " << verbosity_get();
-      cerr << ", stackDepth = " << stackDepth_get() << endl;
+      std::cerr << "\n" << str_tab << "Current function: " << astr_class;
+      std::cerr << "::" << str_proc_get() << std::endl;
+      std::cerr << "\tverbosity = " << verbosity_get();
+      std::cerr << ", stackDepth = " << stackDepth_get() << std::endl;
     }
-    cerr << "\n" << str_tab << astr_msg;
+    std::cerr << "\n" << str_tab << astr_msg;
   }
   str_objectName = str_name_get();
-  str_funcName = str_proc_get();
+  str_funcName   = str_proc_get();
 }
 
-void C_scanopt::core_construct(string astr_name /*= "unnamed"           */,
-                               int a_id /*= -1                  */,
-                               int a_iter /*= 0                   */,
+void C_scanopt::core_construct(std::string astr_name /*= "unnamed"           */,
+                               int         a_id /*= -1                  */,
+                               int         a_iter /*= 0                   */,
                                int a_verbosity /*= 0                   */,
                                int a_warnings /*= 0                   */,
                                int a_stackDepth /*= 0                   */,
-                               string astr_proc /*= "noproc"            */
+                               std::string astr_proc /*= "noproc"            */
 ) {
   //
   // ARGS
@@ -221,18 +221,18 @@ void C_scanopt::core_construct(string astr_name /*= "unnamed"           */,
   //  o Initial design and coding
   //
 
-  str_name = astr_name;
-  id = a_id;
-  iter = a_iter;
-  verbosity = a_verbosity;
-  warnings = a_warnings;
-  stackDepth = a_stackDepth;
+  str_name             = astr_name;
+  id                   = a_id;
+  iter                 = a_iter;
+  verbosity            = a_verbosity;
+  warnings             = a_warnings;
+  stackDepth           = a_stackDepth;
   str_proc[stackDepth] = astr_proc;
 
   str_obj = "C_scanopt";
 
   str_optDes = "--";
-  str_equ = "=";
+  str_equ    = "=";
 }
 
 void C_scanopt::map_opt_build(e_SCANOPT_tokType e_tokType /*= e_DesTag*/
@@ -260,20 +260,20 @@ void C_scanopt::map_opt_build(e_SCANOPT_tokType e_tokType /*= e_DesTag*/
   //  o Expanded to accommodate e_EquLink format.
   //
 
-  int i;
-  string str_argvA;
-  string str_argvB;
-  string str_Equ;
-  string str_opt;
-  string str_val;
-  const bool b_found = false; // if a search string
-                              //+ is found at the
-                              //+ beginning of a
-                              //+ search, index is
-                              //+ zero, which means
-                              //+ that the bool of
-                              //+ a positive find
-                              //+ is false :-P
+  int         i;
+  std::string str_argvA;
+  std::string str_argvB;
+  std::string str_Equ;
+  std::string str_opt;
+  std::string str_val;
+  const bool  b_found = false; // if a search string
+                               //+ is found at the
+                               //+ beginning of a
+                               //+ search, index is
+                               //+ zero, which means
+                               //+ that the bool of
+                               //+ a positive find
+                               //+ is false :-P
 
   switch (e_tokType) {
   case e_DesTag:
@@ -288,9 +288,11 @@ void C_scanopt::map_opt_build(e_SCANOPT_tokType e_tokType /*= e_DesTag*/
       if (str_argvA.find(str_optDes) == b_found) {
         str_argvA.erase(0, str_optDes.length());
         if (str_argvB.find(str_optDes) == b_found)
-          map_opt.insert(pair<string, string>(str_argvA, str_NONCOUPLET));
+          map_opt.insert(
+              std::pair<std::string, std::string>(str_argvA, str_NONCOUPLET));
         else
-          map_opt.insert(pair<string, string>(str_argvA, str_argvB));
+          map_opt.insert(
+              std::pair<std::string, std::string>(str_argvA, str_argvB));
       }
     }
     // Now we still have the very last appch_argv left, which may be
@@ -298,14 +300,15 @@ void C_scanopt::map_opt_build(e_SCANOPT_tokType e_tokType /*= e_DesTag*/
     str_argvA = *(Lstr_iter);
     if (str_argvA.find(str_optDes) == b_found) {
       str_argvA.erase(0, str_optDes.length());
-      map_opt.insert(pair<string, string>(str_trim(str_argvA), str_NONCOUPLET));
+      map_opt.insert(std::pair<std::string, std::string>(str_trim(str_argvA),
+                                                         str_NONCOUPLET));
     }
     break;
   case e_EquLink:
     Lstr_iter = Lstr_body.begin();
     for (i = 0; i < argc_get() - 2; i++) {
       str_argvA = *(Lstr_iter);   // read in three options
-      str_Equ = *(++Lstr_iter);   // that may be a couplet
+      str_Equ   = *(++Lstr_iter); // that may be a couplet
       str_argvB = *(++Lstr_iter); // linked by an equal sign
       // cout << i << "\t" << argc << "\t" << str_argvA << "\t" << str_Equ <<
       // "\t" << str_argvB << endl;
@@ -313,8 +316,8 @@ void C_scanopt::map_opt_build(e_SCANOPT_tokType e_tokType /*= e_DesTag*/
         // Strip the str_optDes tag from the first string (if found)
         if (str_argvA.find(str_optDes) == b_found)
           str_argvA.erase(0, str_optDes.length());
-        map_opt.insert(
-            pair<string, string>(str_trim(str_argvA), str_trim(str_argvB)));
+        map_opt.insert(std::pair<std::string, std::string>(
+            str_trim(str_argvA), str_trim(str_argvB)));
       }
       --Lstr_iter;
     }
@@ -323,7 +326,7 @@ void C_scanopt::map_opt_build(e_SCANOPT_tokType e_tokType /*= e_DesTag*/
 }
 
 C_scanopt::C_scanopt(int a_argc, char **appch_argv,
-                     string astr_optDes /*= "--"                */
+                     std::string astr_optDes /*= "--"                */
 ) {
   //
   // ARGS
@@ -361,10 +364,10 @@ C_scanopt::C_scanopt(int a_argc, char **appch_argv,
   map_opt_build(e_DesTag);
 }
 
-C_scanopt::C_scanopt(string astr_filename,
+C_scanopt::C_scanopt(std::string       astr_filename,
                      e_SCANOPT_tokType e_tokType /*= e_DesTag    */,
-                     string astr_optDes /*= "--"        */,
-                     string astr_equ /*= "="         */
+                     std::string       astr_optDes /*= "--"        */,
+                     std::string       astr_equ /*= "="         */
 ) {
   //
   // ARGS
@@ -389,13 +392,13 @@ C_scanopt::C_scanopt(string astr_filename,
   core_construct();
 
   debug_push("C_scanopt");
-  int size = 0;
-  string str_word;
+  int         size = 0;
+  std::string str_word;
 
   str_optDes_set(astr_optDes);
   str_equ_set(astr_equ);
 
-  ifstream istream_optFile(astr_filename.c_str());
+  std::ifstream istream_optFile(astr_filename.c_str());
   if (!istream_optFile) {
     error("Cannot find input file: " + astr_filename);
   }
@@ -414,16 +417,16 @@ C_scanopt::C_scanopt(string astr_filename,
   debug_pop();
 }
 
-int str_tokenize(const string &str, vector<string> &tokens,
-                 const string &delimiters) {
+int str_tokenize(const std::string &str, std::vector<std::string> &tokens,
+                 const std::string &delimiters) {
   int tokenCount = 0;
 
   // Skip delimiters at beginning.
-  string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
   // Find first "non-delimiter".
-  string::size_type pos = str.find_first_of(delimiters, lastPos);
+  std::string::size_type pos = str.find_first_of(delimiters, lastPos);
 
-  while (string::npos != pos || string::npos != lastPos) {
+  while (std::string::npos != pos || std::string::npos != lastPos) {
     // Found a token, add it to the vector.
     tokens.push_back(str.substr(lastPos, pos - lastPos));
     // Skip delimiters.  Note the "not_of"
@@ -434,23 +437,23 @@ int str_tokenize(const string &str, vector<string> &tokens,
   }
   return tokenCount;
 }
-
-string str_trim(string astr_toTrim) {
+std::string str_trim(std::string astr_toTrim) {
 
   size_t found;
   found = astr_toTrim.find(" ");
 
-  while (astr_toTrim.length() != 0 && found != string::npos) {
+  while (astr_toTrim.length() != 0 && found != std::string::npos) {
     astr_toTrim.erase(found, 1);
     found = astr_toTrim.find(" ");
   }
   return astr_toTrim;
 }
 
-C_scanopt::C_scanopt(string astr_options, string astr_delimiter /*= ";" */,
+C_scanopt::C_scanopt(std::string       astr_options,
+                     std::string       astr_delimiter /*= ";" */,
                      e_SCANOPT_tokType e_tokType /*= e_EquLink   */,
-                     string astr_optDes /*= "--"        */,
-                     string astr_equ /*= "="         */
+                     std::string       astr_optDes /*= "--"        */,
+                     std::string       astr_equ /*= "="         */
 ) {
   //
   // ARGS
@@ -487,11 +490,11 @@ C_scanopt::C_scanopt(string astr_options, string astr_delimiter /*= ";" */,
   core_construct();
 
   debug_push("C_scanopt");
-  int pairLines = 0;
-  int size = 0;
-  vector<string> v_lines;
-  vector<string> v_option;
-  string str_token("");
+  int                      pairLines = 0;
+  int                      size      = 0;
+  std::vector<std::string> v_lines;
+  std::vector<std::string> v_option;
+  std::string              str_token("");
 
   str_optDes_set(astr_optDes);
   str_equ_set(astr_equ);
@@ -500,8 +503,8 @@ C_scanopt::C_scanopt(string astr_options, string astr_delimiter /*= ";" */,
   if ((pairLines = str_tokenize(astr_options, v_lines, astr_delimiter)) != 0) {
     // First loop over each "line" of options...
     //+ each line is separated by <astr_delimiter>
-    for (vector<string>::iterator i = v_lines.begin(); i != v_lines.end();
-         i++) {
+    for (std::vector<std::string>::iterator i = v_lines.begin();
+         i != v_lines.end(); i++) {
       // Now tokenizing each line on the <astr_eq>
       // cout << "Tokenizing " << *i << endl;
       v_option.clear();
@@ -516,7 +519,7 @@ C_scanopt::C_scanopt(string astr_options, string astr_delimiter /*= ";" */,
             b_canPush = false;
         }
         if (b_canPush) {
-          for (vector<string>::iterator j = v_option.begin();
+          for (std::vector<std::string>::iterator j = v_option.begin();
                j != v_option.end(); j++) {
             // cout << "\tPushing " << *j << endl;
             Lstr_body.push_back(*j);
@@ -554,33 +557,33 @@ void C_scanopt::print() {
   //  o Initial design and coding
   //
 
-  cout << " **** " << str_obj_get() << " data dump **** " << endl;
-  cout << "\tname\t" << str_name_get() << endl;
-  cout << "\tid\t" << id_get() << endl;
-  cout << endl;
-  cout << "\tRaw argument list\n\t\t";
+  std::cout << " **** " << str_obj_get() << " data dump **** " << std::endl;
+  std::cout << "\tname\t" << str_name_get() << std::endl;
+  std::cout << "\tid\t" << id_get() << std::endl;
+  std::cout << std::endl;
+  std::cout << "\tRaw argument list\n\t\t";
   Lstr_iter = Lstr_body.begin();
   for (int i = 0; i < argc_get(); i++)
-    cout << ">" << *(Lstr_iter++) << "< ";
-  cout << endl;
+    std::cout << ">" << *(Lstr_iter++) << "< ";
+  std::cout << std::endl;
 
-  cout << "\tList length\t" << argc << endl;
+  std::cout << "\tList length\t" << argc << std::endl;
 
-  cout << "\tSTL option map" << endl;
+  std::cout << "\tSTL option map" << std::endl;
   map_iter = map_opt.begin();
   while (map_iter != map_opt.end()) {
-    cout << "\t\t" << map_iter->first;
-    cout << "\t\t\t" << map_iter->second << endl;
+    std::cout << "\t\t" << map_iter->first;
+    std::cout << "\t\t\t" << map_iter->second << std::endl;
     map_iter++;
   }
-  cout << endl;
-  cout << "\tstr_optDes\t"
-       << "->" << str_optDes_get() << "<-" << endl;
-  cout << "\tstr_equ\t\t"
-       << "->" << str_equ_get() << "<-" << endl;
+  std::cout << std::endl;
+  std::cout << "\tstr_optDes\t"
+            << "->" << str_optDes_get() << "<-" << std::endl;
+  std::cout << "\tstr_equ\t\t"
+            << "->" << str_equ_get() << "<-" << std::endl;
 }
 
-bool C_scanopt::scanFor(string astr_target, string *apstr_value) {
+bool C_scanopt::scanFor(std::string astr_target, std::string *apstr_value) {
   //
   // ARGS
   //  astr_target              in              map key to search for

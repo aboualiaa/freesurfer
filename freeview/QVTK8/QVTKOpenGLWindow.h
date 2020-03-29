@@ -84,13 +84,13 @@ public:
 
   QVTKOpenGLWindow(
       vtkGenericOpenGLRenderWindow *w,
-      QOpenGLContext *shareContext = QOpenGLContext::currentContext(),
-      UpdateBehavior updateBehavior = NoPartialUpdate,
-      QWindow *parent = Q_NULLPTR);
+      QOpenGLContext *shareContext   = QOpenGLContext::currentContext(),
+      UpdateBehavior  updateBehavior = NoPartialUpdate,
+      QWindow *       parent         = Q_NULLPTR);
 
   QVTKOpenGLWindow(QOpenGLContext *shareContext,
-                   UpdateBehavior updateBehavior = NoPartialUpdate,
-                   QWindow *parent = Q_NULLPTR);
+                   UpdateBehavior  updateBehavior = NoPartialUpdate,
+                   QWindow *       parent         = Q_NULLPTR);
 
   ~QVTKOpenGLWindow();
 
@@ -108,7 +108,7 @@ public:
    * Sets up vtkRenderWindow ivars using QSurfaceFormat.
    */
   static void copyFromFormat(const QSurfaceFormat &format,
-                             vtkRenderWindow *win);
+                             vtkRenderWindow *     win);
 
   /**
    * Using the vtkRenderWindow, setup QSurfaceFormat.
@@ -244,12 +244,12 @@ private:
   vtkSmartPointer<vtkGenericOpenGLRenderWindow> RenderWindow;
 
   bool EnableHiDPI;
-  int OriginalDPI;
+  int  OriginalDPI;
 
   /**
    * interaction binding
    */
-  QVTKInteractorAdapter *IrenAdapter;
+  QVTKInteractorAdapter *                IrenAdapter;
   vtkSmartPointer<vtkEventQtSlotConnect> EventSlotConnector;
 
   QOffscreenSurface *OffscreenSurface;

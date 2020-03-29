@@ -44,7 +44,7 @@ public:
 protected:
   bool Execute();
 
-  bool m_bSmoothing;
+  bool   m_bSmoothing;
   double m_dSD;
 };
 

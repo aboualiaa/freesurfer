@@ -26,16 +26,16 @@
 #ifndef FSVolume_h
 #define FSVolume_h
 
-#include <QObject>
-#include "vtkSmartPointer.h"
+#include "CommonDataStruct.h"
 #include "vtkImageData.h"
 #include "vtkMatrix4x4.h"
-#include "CommonDataStruct.h"
+#include "vtkSmartPointer.h"
+#include <QObject>
 #include <vector>
 
-#include "mri.h"
-#include "histo.h"
 #include "colortab.h"
+#include "histo.h"
+#include "mri.h"
 #include "transform.h"
 
 class vtkTransform;
@@ -208,14 +208,14 @@ protected:
   MRI *m_MRITarget; // target space. header only
   MRI *m_MRIRef; // reference target space, can also serve as the registration
                  // target. header only
-  MRI *m_MRIOrigTarget; // orignal target space, header only
-  MRI *m_MRITemp;       // temp mri for saving
-  LTA *m_lta;
-  MATRIX *m_matReg;
+  MRI *        m_MRIOrigTarget; // orignal target space, header only
+  MRI *        m_MRITemp;       // temp mri for saving
+  LTA *        m_lta;
+  MATRIX *     m_matReg;
   COLOR_TABLE *m_ctabEmbedded;
-  HISTOGRAM *m_histoCDF;
-  int m_nHistoFrame;
-  bool m_bValidHistogram;
+  HISTOGRAM *  m_histoCDF;
+  int          m_nHistoFrame;
+  bool         m_bValidHistogram;
 
   FSVolume *m_volumeRef;
 
@@ -229,21 +229,21 @@ protected:
   float m_fMaxValue;
   float m_fMaxValueFull;
 
-  bool m_bResampleToRAS;
-  bool m_bIgnoreHeader;
+  bool   m_bResampleToRAS;
+  bool   m_bIgnoreHeader;
   double m_MRIToImageMatrix[16];
 
   // RAS bounds.
-  bool m_bBoundsCacheDirty;
+  bool  m_bBoundsCacheDirty;
   float m_RASBounds[6];
 
-  int m_nInterpolationMethod;
+  int  m_nInterpolationMethod;
   bool m_bConform;
   char m_strOrientation[4];
 
   double m_dBounds[6];
-  bool m_bCrop;
-  bool m_bCropToOriginal;
+  bool   m_bCrop;
+  bool   m_bCropToOriginal;
 
   bool m_bSharedMRI;
 };

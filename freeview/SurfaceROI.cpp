@@ -24,20 +24,20 @@
  */
 
 #include "SurfaceROI.h"
-#include "vtkRenderer.h"
-#include "vtkActor2D.h"
-#include "vtkProperty.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkPolyData.h"
-#include "MainWindow.h"
-#include "RenderView3D.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkBox.h"
-#include "vtkMath.h"
-#include "MyUtils.h"
-#include "LayerSurface.h"
 #include "LayerPropertySurface.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "RenderView3D.h"
+#include "vtkActor2D.h"
+#include "vtkBox.h"
+#include "vtkCellArray.h"
+#include "vtkMath.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkRenderer.h"
 #include <QFile>
 
 SurfaceROI::SurfaceROI(LayerSurface *owner) : QObject(owner) {
@@ -50,7 +50,7 @@ SurfaceROI::SurfaceROI(LayerSurface *owner) : QObject(owner) {
   m_actorOutline->GetProperty()->SetLineWidth(4 * ratio);
 
   m_points = vtkSmartPointer<vtkPoints>::New();
-  m_mris = owner;
+  m_mris   = owner;
   SetColor(Qt::yellow);
 }
 
@@ -60,15 +60,15 @@ void SurfaceROI::InitializeOutline(double *pos) {
   m_actorOutline->VisibilityOn();
   m_points->Reset();
   double *offset = m_mris->GetProperty()->GetPosition();
-  double pt[3];
+  double  pt[3];
   for (int i = 0; i < 3; i++)
     pt[i] = pos[i] - offset[i];
   m_points->InsertNextPoint(pt);
 }
 
 void SurfaceROI::RebuildOutline(bool bClose) {
-  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+  vtkSmartPointer<vtkPolyData>  polydata = vtkSmartPointer<vtkPolyData>::New();
+  vtkSmartPointer<vtkCellArray> lines    = vtkSmartPointer<vtkCellArray>::New();
   lines->InsertNextCell(m_points->GetNumberOfPoints() + (bClose ? 1 : 0));
   for (int i = 0; i < m_points->GetNumberOfPoints(); i++) {
     lines->InsertCellPoint(i);
@@ -89,7 +89,7 @@ void SurfaceROI::RebuildOutline(bool bClose) {
 
 void SurfaceROI::AddPoint(double *pos) {
   double *offset = m_mris->GetProperty()->GetPosition();
-  double pt[3];
+  double  pt[3];
   for (int i = 0; i < 3; i++)
     pt[i] = pos[i] - offset[i];
   m_points->InsertNextPoint(pt);

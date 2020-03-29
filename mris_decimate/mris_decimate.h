@@ -64,7 +64,7 @@ typedef struct {
 
   ///	The minimum angle between two neighboring triangles allowed by
   /// the decimation
-  bool setMinimumAngle;
+  bool  setMinimumAngle;
   float minimumAngle;
 
   // Run code to sort output vertices. This was needed when compiling
@@ -96,9 +96,9 @@ using DECIMATE_PROGRESS_FUNC = void (*)(float, const char *, void *);
 /// \param userData If decimateProgressFn is non-NULL, argument passed into
 /// decimateProgressFn \return 0 on success, 1 on failure
 ///
-int decimateSurface(MRI_SURFACE **mris,
+int decimateSurface(MRI_SURFACE **            mris,
                     const DECIMATION_OPTIONS &decimationOptions,
-                    DECIMATE_PROGRESS_FUNC decimateProgressFn = nullptr,
-                    void *userData = nullptr);
+                    DECIMATE_PROGRESS_FUNC    decimateProgressFn = nullptr,
+                    void *                    userData           = nullptr);
 
 #endif // MRIS_DECIMATE_H

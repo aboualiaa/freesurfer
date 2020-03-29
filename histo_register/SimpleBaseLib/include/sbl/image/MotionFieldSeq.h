@@ -1,7 +1,7 @@
 #ifndef _SBL_MOTION_FIELD_SEQ_H_
 #define _SBL_MOTION_FIELD_SEQ_H_
-#include <sbl/core/String.h>
 #include <sbl/core/Pointer.h>
+#include <sbl/core/String.h>
 #include <sbl/image/MotionField.h>
 namespace sbl {
 

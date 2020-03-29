@@ -24,16 +24,16 @@
  */
 
 #include "Interactor3D.h"
-#include "RenderView3D.h"
-#include "MainWindow.h"
-#include "LayerCollection.h"
 #include "CursorFactory.h"
-#include "LayerPropertyMRI.h"
+#include "LayerCollection.h"
 #include "LayerMRI.h"
-#include "VolumeCropper.h"
+#include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "RenderView3D.h"
 #include "SurfaceROI.h"
-#include <vtkRenderer.h>
+#include "VolumeCropper.h"
 #include <QDebug>
+#include <vtkRenderer.h>
 
 Interactor3D::Interactor3D(QObject *parent)
     : Interactor(parent), m_nMousePosX(-1), m_nMousePosY(-1),
@@ -42,7 +42,7 @@ Interactor3D::Interactor3D(QObject *parent)
 Interactor3D::~Interactor3D() {}
 
 bool Interactor3D::ProcessMouseWheelEvent(QWheelEvent *event,
-                                          RenderView *renderview) {
+                                          RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
   view->CancelUpdateMouseRASPosition();
 
@@ -50,7 +50,7 @@ bool Interactor3D::ProcessMouseWheelEvent(QWheelEvent *event,
 }
 
 bool Interactor3D::ProcessMouseDownEvent(QMouseEvent *event,
-                                         RenderView *renderview) {
+                                         RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   m_nMousePosX = m_nPressedPosX = event->x();
@@ -80,7 +80,7 @@ bool Interactor3D::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor3D::ProcessMouseUpEvent(QMouseEvent *event,
-                                       RenderView *renderview) {
+                                       RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   if (m_surfaceROI &&
@@ -110,7 +110,7 @@ bool Interactor3D::ProcessMouseUpEvent(QMouseEvent *event,
   }
 
   m_bWindowLevel = false;
-  m_bMoveSlice = false;
+  m_bMoveSlice   = false;
 
   m_surfaceROI = NULL;
 
@@ -118,7 +118,7 @@ bool Interactor3D::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor3D::ProcessMouseMoveEvent(QMouseEvent *event,
-                                         RenderView *renderview) {
+                                         RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   MainWindow *mainwnd = MainWindow::GetMainWindow();
@@ -132,10 +132,10 @@ bool Interactor3D::ProcessMouseMoveEvent(QMouseEvent *event,
   if (m_bWindowLevel) {
     LayerMRI *layer = (LayerMRI *)mainwnd->GetActiveLayer("MRI");
     if (layer && layer->IsVisible()) {
-      double scaleX = 0.002;
-      double scaleY = 0.002;
-      double w = (posX - m_nMousePosX) * scaleX;
-      double l = (posY - m_nMousePosY) * scaleY;
+      double scaleX       = 0.002;
+      double scaleY       = 0.002;
+      double w            = (posX - m_nMousePosX) * scaleX;
+      double l            = (posY - m_nMousePosY) * scaleY;
       double scaleOverall = layer->GetProperty()->GetMaxValue() -
                             layer->GetProperty()->GetMinValue();
       w *= scaleOverall;
@@ -171,7 +171,7 @@ bool Interactor3D::ProcessMouseMoveEvent(QMouseEvent *event,
   return false;
 }
 
-bool Interactor3D::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor3D::ProcessKeyDownEvent(QKeyEvent * event,
                                        RenderView *renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 

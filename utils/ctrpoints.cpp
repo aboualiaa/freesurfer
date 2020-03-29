@@ -23,31 +23,31 @@
  */
 
 #include "ctrpoints.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <pwd.h>
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
 #include "label.h"
 #include "mri.h"
 #include "proto.h"
-#include "transform.h"
 #include "timer.h"
+#include "transform.h"
 #include "utils.h" //  fgetl
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <pwd.h>
 
 MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS) {
   FILE *fp;
   char *cp, line[STRLEN];
-  int i = 0;
+  int   i = 0;
   float xw, yw, zw;
-  char text[256];
-  int val;
+  char  text[256];
+  int   val;
   // int numpoints;
-  int num_control_points, nargs;
+  int     num_control_points, nargs;
   MPoint *pointArray = nullptr;
-  char extension[STRLEN];
+  char    extension[STRLEN];
 
   FileNameExtension(fname, extension);
   if (!stricmp(extension, "label")) {
@@ -120,7 +120,7 @@ MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS) {
               num_control_points);
   rewind(fp);
   for (i = 0; i < num_control_points; i++) {
-    cp = fgetl(line, 199, fp);
+    cp    = fgetl(line, 199, fp);
     nargs = sscanf(cp, "%f %f %f", &xw, &yw, &zw);
     if (nargs != 3) {
       i--; // not a control point
@@ -138,8 +138,8 @@ MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS) {
 int MRIwriteControlPoints(const MPoint *pointArray, int count, int useRealRAS,
                           const char *fname) {
   FILE *fp;
-  int i;
-  int res;
+  int   i;
+  int   res;
 
   if (Gdiag & DIAG_SHOW)
     fprintf(stderr, "Writing control points to %s...\n", fname);
@@ -169,7 +169,7 @@ int MRIwriteControlPoints(const MPoint *pointArray, int count, int useRealRAS,
   res = fprintf(fp, "numpoints %d\n", count);
   res = fprintf(fp, "useRealRAS %d\n", useRealRAS);
   // get user id
-  char user[1024];
+  char           user[1024];
   struct passwd *pw = getpwuid(geteuid());
   if ((pw != nullptr) && (pw->pw_name != nullptr)) {
     strcpy(user, pw->pw_name);
@@ -224,8 +224,8 @@ MPoint *MRImapControlPoints(const MPoint *pointArray, int count, int useRealRAS,
 
   // concatenate transforms:
   MATRIX *M = nullptr;
-  M = MatrixMultiply(lta->xforms[0].m_L, src_ras2vox, M);
-  M = MatrixMultiply(trg_vox2ras, M, M);
+  M         = MatrixMultiply(lta->xforms[0].m_L, src_ras2vox, M);
+  M         = MatrixMultiply(trg_vox2ras, M, M);
 
   if (Gdiag_no > 0) {
     printf("MRImapControlPoints(): M -------------------\n");
@@ -240,10 +240,10 @@ MPoint *MRImapControlPoints(const MPoint *pointArray, int count, int useRealRAS,
   MatrixFree(&trg_vox2ras);
 
   // map point array
-  VECTOR *p = VectorAlloc(4, MATRIX_REAL);
+  VECTOR *p        = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(p, 4) = 1.0;
-  VECTOR *p2 = VectorAlloc(4, MATRIX_REAL);
-  int i;
+  VECTOR *p2       = VectorAlloc(4, MATRIX_REAL);
+  int     i;
   for (i = 0; i < count; i++) {
     VECTOR_ELT(p, 1) = pointArray[i].x;
     VECTOR_ELT(p, 2) = pointArray[i].y;
@@ -271,7 +271,7 @@ MPoint *MRImapControlPoints(const MPoint *pointArray, int count, int useRealRAS,
  */
 MPoint *ControlPoints2Vox(MPoint *ras, int npoints, int UseRealRAS, MRI *vol) {
   MPoint *crs;
-  int n;
+  int     n;
   MATRIX *vox2ras, *ras2vox, *vras, *vcrs = nullptr;
 
   crs = (MPoint *)calloc(sizeof(MPoint), npoints);
@@ -283,17 +283,17 @@ MPoint *ControlPoints2Vox(MPoint *ras, int npoints, int UseRealRAS, MRI *vol) {
   ras2vox = MatrixInverse(vox2ras, nullptr);
   MatrixFree(&vox2ras);
 
-  vras = MatrixAlloc(4, 1, MATRIX_REAL);
+  vras             = MatrixAlloc(4, 1, MATRIX_REAL);
   vras->rptr[4][1] = 1;
 
   for (n = 0; n < npoints; n++) {
     vras->rptr[1][1] = ras[n].x;
     vras->rptr[1][2] = ras[n].y;
     vras->rptr[1][3] = ras[n].z;
-    vcrs = MatrixMultiply(ras2vox, vras, vcrs);
-    crs[n].x = vcrs->rptr[1][1];
-    crs[n].y = vcrs->rptr[2][1];
-    crs[n].z = vcrs->rptr[3][1];
+    vcrs             = MatrixMultiply(ras2vox, vras, vcrs);
+    crs[n].x         = vcrs->rptr[1][1];
+    crs[n].y         = vcrs->rptr[2][1];
+    crs[n].z         = vcrs->rptr[3][1];
     // printf("%4.1f %4.1f %4.1f   %4.1f %4.1f %4.1f\n",
     //	   ras[n].x,ras[n].y,ras[n].z,crs[n].x,crs[n].y,crs[n].z);
   }
@@ -312,23 +312,23 @@ MPoint *ControlPoints2Vox(MPoint *ras, int npoints, int UseRealRAS, MRI *vol) {
  */
 MPoint *ControlPointsApplyMatrix(MPoint *srcctr, int nctrpoints, MATRIX *M,
                                  MPoint *outctr) {
-  int n;
+  int     n;
   MATRIX *srcras = nullptr, *outras = nullptr;
 
   if (outctr == nullptr)
     outctr = (MPoint *)calloc(sizeof(MPoint), nctrpoints);
 
-  srcras = MatrixAlloc(4, 1, MATRIX_REAL);
+  srcras             = MatrixAlloc(4, 1, MATRIX_REAL);
   srcras->rptr[4][1] = 1;
 
   for (n = 0; n < nctrpoints; n++) {
     srcras->rptr[1][1] = srcctr[n].x;
     srcras->rptr[1][2] = srcctr[n].y;
     srcras->rptr[1][3] = srcctr[n].z;
-    outras = MatrixMultiply(M, srcras, outras);
-    outctr[n].x = outras->rptr[1][1];
-    outctr[n].y = outras->rptr[2][1];
-    outctr[n].z = outras->rptr[3][1];
+    outras             = MatrixMultiply(M, srcras, outras);
+    outctr[n].x        = outras->rptr[1][1];
+    outctr[n].y        = outras->rptr[2][1];
+    outctr[n].z        = outras->rptr[3][1];
     // printf("%4.1f %4.1f %4.1f   %4.1f %4.1f %4.1f\n",
     //	   srcctr[n].x,srcctr[n].y,srcctr[n].z,
     //	   outctr[n].x,outctr[n].y,outctr[n].z);
@@ -345,9 +345,9 @@ MPoint *ControlPointsApplyMatrix(MPoint *srcctr, int nctrpoints, MATRIX *M,
  */
 MATRIX *ControlPoints2TalMatrix(char *subject) {
   MATRIX *Ta, *Na, *Tv, *Nv, *invNa, *invTv, *XFM, *M;
-  char *SUBJECTS_DIR, tmpstr[2000];
-  MRI *fsa, *vol;
-  LTA *lta;
+  char *  SUBJECTS_DIR, tmpstr[2000];
+  MRI *   fsa, *vol;
+  LTA *   lta;
 
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
 
@@ -356,8 +356,8 @@ MATRIX *ControlPoints2TalMatrix(char *subject) {
   fsa = MRIreadHeader(tmpstr, MRI_VOLUME_TYPE_UNKNOWN);
   if (fsa == nullptr)
     return (nullptr);
-  Na = MRIxfmCRS2XYZ(fsa, 0);
-  Ta = MRIxfmCRS2XYZtkreg(fsa);
+  Na    = MRIxfmCRS2XYZ(fsa, 0);
+  Ta    = MRIxfmCRS2XYZtkreg(fsa);
   invNa = MatrixInverse(Na, nullptr);
 
   sprintf(tmpstr, "%s/%s/mri/orig.mgz", SUBJECTS_DIR, subject);
@@ -365,8 +365,8 @@ MATRIX *ControlPoints2TalMatrix(char *subject) {
   vol = MRIreadHeader(tmpstr, MRI_VOLUME_TYPE_UNKNOWN);
   if (vol == nullptr)
     return (nullptr);
-  Nv = MRIxfmCRS2XYZ(vol, 0);
-  Tv = MRIxfmCRS2XYZtkreg(vol);
+  Nv    = MRIxfmCRS2XYZ(vol, 0);
+  Tv    = MRIxfmCRS2XYZtkreg(vol);
   invTv = MatrixInverse(Tv, nullptr);
 
   sprintf(tmpstr, "%s/%s/mri/transforms/talairach.xfm", SUBJECTS_DIR, subject);
@@ -406,9 +406,9 @@ MATRIX *ControlPoints2TalMatrix(char *subject) {
   have a control.dat then it is skipped.
  */
 MPoint *GetTalControlPoints(char **subjectlist, int nsubjects, int *pnctrtot) {
-  int nthsubject, nc, nctot, CPUseRealRAS, k;
+  int     nthsubject, nc, nctot, CPUseRealRAS, k;
   MPoint *subjctr, *fsactr, *ctr = nullptr;
-  char *SUBJECTS_DIR, tmpstr[2000];
+  char *  SUBJECTS_DIR, tmpstr[2000];
   MATRIX *M;
 
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
@@ -438,8 +438,8 @@ MPoint *GetTalControlPoints(char **subjectlist, int nsubjects, int *pnctrtot) {
     if (!fio_FileExistsReadable(tmpstr))
       continue;
     subjctr = MRIreadControlPoints(tmpstr, &nc, &CPUseRealRAS);
-    M = ControlPoints2TalMatrix(subjectlist[nthsubject]);
-    fsactr = ControlPointsApplyMatrix(subjctr, nc, M, nullptr);
+    M       = ControlPoints2TalMatrix(subjectlist[nthsubject]);
+    fsactr  = ControlPointsApplyMatrix(subjctr, nc, M, nullptr);
     for (k = 0; k < nc; k++) {
       ctr[nctot + k].x = fsactr[k].x;
       ctr[nctot + k].y = fsactr[k].y;
@@ -466,9 +466,9 @@ MPoint *GetTalControlPoints(char **subjectlist, int nsubjects, int *pnctrtot) {
  */
 MPoint *GetTalControlPointsSFile(const char *subjectlistfile, int *pnctrtot) {
   MPoint *ctr;
-  FILE *fp;
-  int nsubjects, r;
-  char tmpstr[2000], **subjectlist;
+  FILE *  fp;
+  int     nsubjects, r;
+  char    tmpstr[2000], **subjectlist;
 
   printf("  GetTalControlPointsSFile(): opening %s\n", subjectlistfile);
   fp = fopen(subjectlistfile, "r");
@@ -492,7 +492,7 @@ MPoint *GetTalControlPointsSFile(const char *subjectlistfile, int *pnctrtot) {
   }
   subjectlist = (char **)calloc(sizeof(char *), nsubjects);
 
-  fp = fopen(subjectlistfile, "r");
+  fp        = fopen(subjectlistfile, "r");
   nsubjects = 0;
   while (true) {
     r = fscanf(fp, "%s", tmpstr);

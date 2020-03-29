@@ -23,92 +23,93 @@
  *
  */
 
-#include "version.h"
 #include "cmdargs.h"
 #include "diag.h"
 #include "mri2.h"
+#include "version.h"
 #ifdef _OPENMP
 #include "romp_support.h"
 #endif
-#include "timer.h"
 #include "fsenv.h"
 #include "randomfields.h"
+#include "timer.h"
 
 double round(double x);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_fdr.c,v 1.2 2016/01/07 22:23:57 greve Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+static char    vcid[] = "$Id: mri_fdr.c,v 1.2 2016/01/07 22:23:57 greve Exp $";
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 typedef struct {
-  int ninputs;
-  char *inputlist[100];
-  char *masklist[100];
-  char *outputlist[100];
-  int defaultframe, framelist[100];
-  int log10flag, signid;
+  int    ninputs;
+  char * inputlist[100];
+  char * masklist[100];
+  char * outputlist[100];
+  int    defaultframe, framelist[100];
+  int    log10flag, signid;
   double fdr;
-  char *vthfile;
+  char * vthfile;
 } CMDARGS;
 
 CMDARGS *cmdargs;
 
-MRI *MRIrescaleToUChar(MRI *mri, MRI *ucmri, double sat);
+MRI *          MRIrescaleToUChar(MRI *mri, MRI *ucmri, double sat);
 unsigned char *MRItoUCharVect(MRI *mri, RFS *rfs);
-MATRIX *MRIgetVoxelToVoxelXformBase(MRI *mri_src, MRI *mri_dst,
-                                    MATRIX *SrcRAS2DstRAS,
-                                    MATRIX *SrcVox2DstVox, int base);
+MATRIX *       MRIgetVoxelToVoxelXformBase(MRI *mri_src, MRI *mri_dst,
+                                           MATRIX *SrcRAS2DstRAS,
+                                           MATRIX *SrcVox2DstVox, int base);
 
 double **conv1dmat(double **M, int rows, int cols, double *v, int nv, int dim,
                    double **C, int *pcrows, int *pcols);
-int conv1dmatTest();
-double *conv1d(double *v1, int n1, double *v2, int n2, double *vc);
+int      conv1dmatTest();
+double * conv1d(double *v1, int n1, double *v2, int n2, double *vc);
 
 double **AllocDoubleMatrix(int rows, int cols);
-int FreeDoubleMatrix(double **M, int rows, int cols);
+int      FreeDoubleMatrix(double **M, int rows, int cols);
 int WriteDoubleMatrix(char *fname, char *fmt, double **M, int rows, int cols);
 int PrintDoubleMatrix(FILE *fp, char *fmt, double **M, int rows, int cols);
 double *SumVectorDoubleMatrix(double **M, int rows, int cols, int dim,
                               double *sumvect, int *nv);
 
 FSENV *fsenv;
-MRI *inputlist[100], *masklist[100], *outputlist[100];
+MRI *  inputlist[100], *masklist[100], *outputlist[100];
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, err, n;
-  Timer timer;
+  int    nargs, err, n;
+  Timer  timer;
   double vthresh;
 
   timer.reset();
 
-  cmdargs = (CMDARGS *)calloc(sizeof(CMDARGS), 1);
+  cmdargs          = (CMDARGS *)calloc(sizeof(CMDARGS), 1);
   cmdargs->ninputs = 0;
   for (n = 0; n < 100; n++) {
-    cmdargs->inputlist[n] = nullptr;
-    cmdargs->framelist[n] = -1;
-    cmdargs->masklist[n] = nullptr;
+    cmdargs->inputlist[n]  = nullptr;
+    cmdargs->framelist[n]  = -1;
+    cmdargs->masklist[n]   = nullptr;
     cmdargs->outputlist[n] = nullptr;
   }
   cmdargs->defaultframe = 0;
-  cmdargs->fdr = -1;
-  cmdargs->log10flag = 1;
-  cmdargs->signid = 0;
+  cmdargs->fdr          = -1;
+  cmdargs->log10flag    = 1;
+  cmdargs->signid       = 0;
 
   nargs = handleVersionOption(argc, argv, "mri_fdr");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -179,7 +180,7 @@ int main(int argc, char *argv[]) {
 
 /* -------------------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -218,9 +219,9 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--i")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      int k = cmdargs->ninputs;
+      int k                 = cmdargs->ninputs;
       cmdargs->inputlist[k] = pargv[0];
-      nargsused = 1;
+      nargsused             = 1;
       if (CMDnthIsArg(nargc, pargv, 1)) {
         if (strcmp(pargv[1], "nomask") != 0)
           cmdargs->masklist[k] = pargv[1];
@@ -240,7 +241,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->vthfile = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--fdr")) {
       if (nargc < 1)
         CMDargNErr(option, 1);

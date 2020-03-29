@@ -23,39 +23,39 @@
  *
  */
 
-#include "timer.h"
 #include "diag.h"
 #include "mrimorph.h"
+#include "timer.h"
 #include "version.h"
 
-const char *Progname;
+const char *       Progname;
 static MORPH_PARMS parms;
 
-static int invert_flag = 0;
+static int invert_flag  = 0;
 static int voxel_coords = 0;
-static int nopca = 0;
-static int full_res = 0;
+static int nopca        = 0;
+static int full_res     = 0;
 
-static double tx = 0.0;
-static double ty = 0.0;
-static double tz = 0.0;
+static double tx    = 0.0;
+static double ty    = 0.0;
+static double tz    = 0.0;
 static double rzrot = 0.0;
 static double rxrot = 0.0;
 static double ryrot = 0.0;
 
 static MATRIX *initialize_transform(MRI *mri_in, MRI *mri_ref, MP *parms);
-static MRI *find_cropping(MRI *mri_in, MRI *mri_ref, MP *parms);
-static int get_option(int argc, char *argv[]);
-static int register_mri(MRI *mri_in, MRI *mri_ref, MP *parms, MATRIX *m_L);
-static int order_eigenvectors(MATRIX *m_src_evectors, MATRIX *m_dst_evectors);
-static float window_size = 0;
-static unsigned char thresh_low = 40;
-static int binarize = 1;
-static int check_crop_flag = 0;
-static int use_gradient = 1;
+static MRI *   find_cropping(MRI *mri_in, MRI *mri_ref, MP *parms);
+static int     get_option(int argc, char *argv[]);
+static int     register_mri(MRI *mri_in, MRI *mri_ref, MP *parms, MATRIX *m_L);
+static int   order_eigenvectors(MATRIX *m_src_evectors, MATRIX *m_dst_evectors);
+static float window_size             = 0;
+static unsigned char thresh_low      = 40;
+static int           binarize        = 1;
+static int           check_crop_flag = 0;
+static int           use_gradient    = 1;
 
-static char *var_fname = nullptr;
-static char *xform_mean_fname = nullptr;
+static char *var_fname              = nullptr;
+static char *xform_mean_fname       = nullptr;
 static char *xform_covariance_fname = nullptr;
 
 #if 0
@@ -65,17 +65,17 @@ static unsigned char thresh_hi = 120 ;
 static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
                           MATRIX *m_ref_evectors, double ref_means[3]);
 static MATRIX *compute_pca(MRI *mri_in, MRI *mri_ref);
-static int init_scaling(MRI *mri_in, MRI *mri_ref, MATRIX *m_L);
+static int     init_scaling(MRI *mri_in, MRI *mri_ref, MATRIX *m_L);
 #if 0
 static int init_translation(MRI *mri_in, MRI *mri_ref, MATRIX *m_L);
 #endif
 
-static int nreductions = 1;
-static int num_xforms = 1;
+static int nreductions      = 1;
+static int num_xforms       = 1;
 static int transform_loaded = 0;
 
 static double blur_sigma = 2.0f;
-static double l_priors = 1; /* weighting for prior term (if used) */
+static double l_priors   = 1; /* weighting for prior term (if used) */
 
 /*
    command line consists of three inputs:
@@ -87,10 +87,10 @@ static double l_priors = 1; /* weighting for prior term (if used) */
 
 int main(int argc, char *argv[]) {
   char *ref_fname, *in_fname, *out_fname, fname[STRLEN], **av;
-  MRI *mri_ref, *mri_in, *mri_orig, *mri_in_red, *mri_ref_red, *mri_in_tmp,
+  MRI * mri_ref, *mri_in, *mri_orig, *mri_in_red, *mri_ref_red, *mri_in_tmp,
       *mri_ref_tmp, *mri_ref_orig, *mri_in_orig;
-  int ac, nargs, i, msec, minutes, seconds;
-  Timer start;
+  int     ac, nargs, i, msec, minutes, seconds;
+  Timer   start;
   MATRIX *m_L;
 
   nargs = handleVersionOption(argc, argv, "mri_linear_register");
@@ -98,20 +98,20 @@ int main(int argc, char *argv[]) {
     exit(0);
   argc -= nargs;
 
-  parms.mri_crop = nullptr;
+  parms.mri_crop    = nullptr;
   parms.l_intensity = 1.0f;
   parms.niterations = 100;
-  parms.levels = -1; /* use default */
-  parms.dt = 1e-6;   /* was 5e-6 */
-  parms.tol = INTEGRATION_TOL * 5;
+  parms.levels      = -1;   /* use default */
+  parms.dt          = 1e-6; /* was 5e-6 */
+  parms.tol         = INTEGRATION_TOL * 5;
 
-  parms.dt = 5e-6; /* was 5e-6 */
-  parms.tol = 1e-3;
-  parms.momentum = 0.8;
-  parms.max_levels = MAX_LEVELS;
-  parms.factor = 1.0;
+  parms.dt          = 5e-6; /* was 5e-6 */
+  parms.tol         = 1e-3;
+  parms.momentum    = 0.8;
+  parms.max_levels  = MAX_LEVELS;
+  parms.factor      = 1.0;
   parms.niterations = 25;
-  Progname = argv[0];
+  Progname          = argv[0];
 
   DiagInit(nullptr, nullptr, nullptr);
   ErrorInit(NULL, NULL, NULL);
@@ -128,10 +128,10 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_BADPARM,
               "usage: %s <in brain> <template> <output file name>\n", Progname);
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   ref_fname = argv[2];
   if (xform_mean_fname) {
-    int sno, nsubjects;
+    int   sno, nsubjects;
     FILE *fp;
 
     parms.m_xform_mean = MatrixAsciiRead(xform_mean_fname, nullptr);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
                 Progname, xform_covariance_fname);
     fclose(fp);
     parms.l_priors = l_priors;
-    parms.nxforms = nsubjects;
+    parms.nxforms  = nsubjects;
   }
   out_fname = argv[3];
   FileNameOnly(out_fname, fname);
@@ -217,12 +217,12 @@ int main(int argc, char *argv[]) {
   /* make sure they are the same size */
   if (mri_in->width != mri_ref->width || mri_in->height != mri_ref->height ||
       mri_in->depth != mri_ref->depth) {
-    int width, height, depth;
+    int  width, height, depth;
     MRI *mri_tmp;
 
-    width = MAX(mri_in->width, mri_ref->width);
-    height = MAX(mri_in->height, mri_ref->height);
-    depth = MAX(mri_in->depth, mri_ref->depth);
+    width   = MAX(mri_in->width, mri_ref->width);
+    height  = MAX(mri_in->height, mri_ref->height);
+    depth   = MAX(mri_in->depth, mri_ref->depth);
     mri_tmp = MRIalloc(width, height, depth, MRI_UCHAR);
     MRIextractInto(mri_in, mri_tmp, 0, 0, 0, mri_in->width, mri_in->height,
                    mri_in->depth, 0, 0, 0);
@@ -290,35 +290,35 @@ int main(int argc, char *argv[]) {
     MRI *mri_kernel, *mri_tmp;
 
     mri_kernel = MRIgaussian1d(blur_sigma, 100);
-    mri_tmp = MRIconvolveGaussian(mri_in, nullptr, mri_kernel);
-    mri_in = mri_tmp;
+    mri_tmp    = MRIconvolveGaussian(mri_in, nullptr, mri_kernel);
+    mri_in     = mri_tmp;
     MRIfree(&mri_kernel);
   }
   MRIscaleMeanIntensities(mri_in, mri_ref, mri_in);
 
   mri_ref_orig = mri_ref;
-  mri_in_orig = mri_in;
+  mri_in_orig  = mri_in;
   if (nreductions > 0) {
     mri_in_red = mri_in_tmp = MRIcopy(mri_in, nullptr);
     mri_ref_red = mri_ref_tmp = MRIcopy(mri_ref, nullptr);
     for (i = 0; i < nreductions; i++) {
-      mri_in_red = MRIreduceByte(mri_in_tmp, nullptr);
+      mri_in_red  = MRIreduceByte(mri_in_tmp, nullptr);
       mri_ref_red = MRIreduceMeanAndStdByte(mri_ref_tmp, nullptr);
       MRIfree(&mri_in_tmp);
       MRIfree(&mri_ref_tmp);
-      mri_in_tmp = mri_in_red;
+      mri_in_tmp  = mri_in_red;
       mri_ref_tmp = mri_ref_red;
     }
-    mri_in = mri_in_red;
+    mri_in  = mri_in_red;
     mri_ref = mri_ref_red;
   }
   /* for diagnostics */
   if (full_res) {
     parms.mri_ref = mri_ref;
-    parms.mri_in = mri_in;
+    parms.mri_in  = mri_in;
   } else {
     parms.mri_ref = mri_ref_orig;
-    parms.mri_in = mri_in_orig;
+    parms.mri_in  = mri_in_orig;
   }
 
   m_L = initialize_transform(mri_in, mri_ref, &parms);
@@ -399,7 +399,7 @@ int main(int argc, char *argv[]) {
     MRIfree(&mri_ref);
   if (mri_in)
     MRIfree(&mri_in);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -415,48 +415,48 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   StrUpper(option);
   if (!stricmp(option, "DIST") || !stricmp(option, "DISTANCE")) {
     parms.l_dist = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_dist = %2.2f\n", parms.l_dist);
   } else if (!stricmp(option, "DT")) {
     parms.dt = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "dt = %2.2e\n", parms.dt);
   } else if (!stricmp(option, "INVERT")) {
     invert_flag = 1;
     fprintf(stderr, "inverting transform before writing...\n");
   } else if (!stricmp(option, "crop")) {
     check_crop_flag = 1;
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "checking for cropping....\n");
   } else if (!stricmp(option, "nlevels")) {
     parms.max_levels = atoi(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     fprintf(stderr, "nlevels = %d\n", parms.max_levels);
   } else if (!stricmp(option, "image_size")) {
     IMAGE_SIZE = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "setting default image size to %d\n", IMAGE_SIZE);
   } else if (!stricmp(option, "TOL")) {
     parms.tol = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "tol = %2.2e\n", parms.tol);
   } else if (!stricmp(option, "NUM")) {
     num_xforms = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "finding a total of %d linear transforms\n", num_xforms);
   } else if (!stricmp(option, "SCOUT")) {
     parms.scout_flag = 1;
     printf("limitting domain of integration to central slices...\n");
   } else if (!stricmp(option, "AREA")) {
     parms.l_area = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_area = %2.2f\n", parms.l_area);
   } else if (!stricmp(option, "WINDOW")) {
     window_size = atof(argv[2]);
@@ -465,15 +465,15 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "NLAREA")) {
     parms.l_nlarea = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "l_nlarea = %2.2f\n", parms.l_nlarea);
   } else if (!stricmp(option, "LEVELS")) {
     parms.levels = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "levels = %d\n", parms.levels);
   } else if (!stricmp(option, "INTENSITY") || !stricmp(option, "CORR")) {
     parms.l_intensity = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "l_intensity = %2.2f\n", parms.l_intensity);
   } else if (!stricmp(option, "thresh")) {
     thresh_low = atoi(argv[2]);
@@ -481,18 +481,18 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "setting threshold to %d\n", thresh_low);
     nargs = 1;
 #else
-    thresh_hi = atoi(argv[3]);
+    thresh_hi    = atoi(argv[3]);
     fprintf(stderr, "thresholds set to %d --> %d\n", thresh_low, thresh_hi);
     nargs = 2;
 #endif
   } else if (!stricmp(option, "reduce")) {
     nreductions = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "reducing input images %d times before aligning...\n",
             nreductions);
   } else if (!stricmp(option, "priors")) {
     l_priors = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "using %2.2f as weight for prior term\n", l_priors);
   } else if (!stricmp(option, "voxel")) {
     voxel_coords = 1;
@@ -505,21 +505,21 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "disabling pca\n");
   } else if (!stricmp(option, "factor")) {
     parms.factor = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "using time step factor of %2.2f\n", parms.factor);
   } else
     switch (*option) {
     case 'X':
-      xform_mean_fname = argv[2];
+      xform_mean_fname       = argv[2];
       xform_covariance_fname = argv[3];
       printf("reading means (%s) and covariances (%s) of xforms\n",
              xform_mean_fname, xform_covariance_fname);
       nargs = 2;
       break;
     case 'D':
-      tx = atof(argv[2]);
-      ty = atof(argv[3]);
-      tz = atof(argv[4]);
+      tx    = atof(argv[2]);
+      ty    = atof(argv[3]);
+      tz    = atof(argv[4]);
       nargs = 3;
       break;
     case 'R':
@@ -539,7 +539,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'B':
       blur_sigma = atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       fprintf(stderr, "blurring input image with sigma=%2.3f\n", blur_sigma);
       break;
     case 'S':
@@ -561,18 +561,18 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'N':
       parms.niterations = atoi(argv[2]);
-      nargs = 1;
+      nargs             = 1;
       fprintf(stderr, "niterations = %d\n", parms.niterations);
       break;
     case 'W':
       parms.write_iterations = atoi(argv[2]);
-      nargs = 1;
+      nargs                  = 1;
       fprintf(stderr, "write iterations = %d\n", parms.write_iterations);
       Gdiag |= DIAG_WRITE;
       break;
     case 'M':
       parms.momentum = atof(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       fprintf(stderr, "momentum = %2.2f\n", parms.momentum);
       break;
     default:
@@ -605,7 +605,7 @@ static int register_mri(MRI *mri_in, MRI *mri_ref, MORPH_PARMS *parms,
     mri_ref_windowed =
         MRIwindow(mri_ref, nullptr, WINDOW_HANNING, nint(ref_means[0]),
                   nint(ref_means[1]), nint(ref_means[2]), window_size);
-    mri_in = mri_in_windowed;
+    mri_in  = mri_in_windowed;
     mri_ref = mri_ref_windowed;
   }
 
@@ -628,11 +628,11 @@ static int register_mri(MRI *mri_in, MRI *mri_ref, MORPH_PARMS *parms,
   return (NO_ERROR);
 }
 static MATRIX *compute_pca(MRI *mri_in, MRI *mri_ref) {
-  int row, col, i;
-  float dot;
+  int     row, col, i;
+  float   dot;
   MATRIX *m_ref_evectors = nullptr, *m_in_evectors = nullptr;
-  float in_evalues[3], ref_evalues[3];
-  double ref_means[3], in_means[3];
+  float   in_evalues[3], ref_evalues[3];
+  double  ref_means[3], in_means[3];
 
   if (!m_ref_evectors)
     m_ref_evectors = MatrixAlloc(3, 3, MATRIX_REAL);
@@ -689,35 +689,35 @@ static MATRIX *compute_pca(MRI *mri_in, MRI *mri_ref) {
 }
 
 static int order_eigenvectors(MATRIX *m_src_evectors, MATRIX *m_dst_evectors) {
-  int row, col, xcol, ycol, zcol;
+  int    row, col, xcol, ycol, zcol;
   double mx;
 
   if (m_src_evectors == m_dst_evectors)
     m_src_evectors = MatrixCopy(m_src_evectors, nullptr);
 
   /* find columx with smallest dot product with unit x vector */
-  mx = fabs(*MATRIX_RELT(m_src_evectors, 1, 1));
+  mx   = fabs(*MATRIX_RELT(m_src_evectors, 1, 1));
   xcol = 1;
   for (col = 2; col <= 3; col++)
     if (fabs(*MATRIX_RELT(m_src_evectors, 1, col)) > mx) {
       xcol = col;
-      mx = fabs(*MATRIX_RELT(m_src_evectors, 1, col));
+      mx   = fabs(*MATRIX_RELT(m_src_evectors, 1, col));
     }
 
-  mx = fabs(*MATRIX_RELT(m_src_evectors, 2, 1));
+  mx   = fabs(*MATRIX_RELT(m_src_evectors, 2, 1));
   ycol = 1;
   for (col = 2; col <= 3; col++)
     if (*MATRIX_RELT(m_src_evectors, 2, col) > mx) {
       ycol = col;
-      mx = fabs(*MATRIX_RELT(m_src_evectors, 2, col));
+      mx   = fabs(*MATRIX_RELT(m_src_evectors, 2, col));
     }
 
-  mx = fabs(*MATRIX_RELT(m_src_evectors, 3, 1));
+  mx   = fabs(*MATRIX_RELT(m_src_evectors, 3, 1));
   zcol = 1;
   for (col = 2; col <= 3; col++)
     if (fabs(*MATRIX_RELT(m_src_evectors, 3, col)) > mx) {
       zcol = col;
-      mx = fabs(*MATRIX_RELT(m_src_evectors, 3, col));
+      mx   = fabs(*MATRIX_RELT(m_src_evectors, 3, col));
     }
 
   for (row = 1; row <= 3; row++) {
@@ -733,21 +733,21 @@ static int order_eigenvectors(MATRIX *m_src_evectors, MATRIX *m_dst_evectors) {
 
 static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
                           MATRIX *m_ref_evectors, double ref_means[3]) {
-  float dx, dy, dz;
+  float   dx, dy, dz;
   MATRIX *mRot, *m_in_T, *mOrigin, *m_L, *m_R, *m_T, *m_tmp;
-  double x_angle, y_angle, z_angle, r11, r21, r31, r32, r33, cosy;
-  int row, col;
+  double  x_angle, y_angle, z_angle, r11, r21, r31, r32, r33, cosy;
+  int     row, col;
 
   m_in_T = MatrixTranspose(m_in_evectors, nullptr);
-  mRot = MatrixMultiply(m_ref_evectors, m_in_T, NULL);
+  mRot   = MatrixMultiply(m_ref_evectors, m_in_T, NULL);
 
-  r11 = mRot->rptr[1][1];
-  r21 = mRot->rptr[2][1];
-  r31 = mRot->rptr[3][1];
-  r32 = mRot->rptr[3][2];
-  r33 = mRot->rptr[3][3];
+  r11     = mRot->rptr[1][1];
+  r21     = mRot->rptr[2][1];
+  r31     = mRot->rptr[3][1];
+  r32     = mRot->rptr[3][2];
+  r33     = mRot->rptr[3][3];
   y_angle = atan2(-r31, sqrt(r11 * r11 + r21 * r21));
-  cosy = cos(y_angle);
+  cosy    = cos(y_angle);
   z_angle = atan2(r21 / cosy, r11 / cosy);
   x_angle = atan2(r32 / cosy, r33 / cosy);
 
@@ -770,7 +770,7 @@ static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
     x_angle = y_angle = z_angle = 0.0;
   }
 
-  mOrigin = VectorAlloc(3, MATRIX_REAL);
+  mOrigin             = VectorAlloc(3, MATRIX_REAL);
   mOrigin->rptr[1][1] = ref_means[0];
   mOrigin->rptr[2][1] = ref_means[1];
   mOrigin->rptr[3][1] = ref_means[2];
@@ -799,23 +799,23 @@ static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
   *MATRIX_RELT(m_R, 4, 4) = 1.0;
 
   /* translation so that origin is at ref eigenvector origin */
-  dx = -ref_means[0];
-  dy = -ref_means[1];
-  dz = -ref_means[2];
+  dx                      = -ref_means[0];
+  dy                      = -ref_means[1];
+  dz                      = -ref_means[2];
   *MATRIX_RELT(m_T, 1, 4) = dx;
   *MATRIX_RELT(m_T, 2, 4) = dy;
   *MATRIX_RELT(m_T, 3, 4) = dz;
   *MATRIX_RELT(m_T, 4, 4) = 1;
-  m_tmp = MatrixMultiply(m_R, m_T, NULL);
+  m_tmp                   = MatrixMultiply(m_R, m_T, NULL);
   *MATRIX_RELT(m_T, 1, 4) = -dx;
   *MATRIX_RELT(m_T, 2, 4) = -dy;
   *MATRIX_RELT(m_T, 3, 4) = -dz;
   MatrixMultiply(m_T, m_tmp, m_R);
 
   /* now apply translation to take in centroid to ref centroid */
-  dx = ref_means[0] - in_means[0];
-  dy = ref_means[1] - in_means[1];
-  dz = ref_means[2] - in_means[2];
+  dx                      = ref_means[0] - in_means[0];
+  dy                      = ref_means[1] - in_means[1];
+  dz                      = ref_means[2] - in_means[2];
   *MATRIX_RELT(m_T, 1, 4) = dx;
   *MATRIX_RELT(m_T, 2, 4) = dy;
   *MATRIX_RELT(m_T, 3, 4) = dz;
@@ -890,17 +890,17 @@ static int register_mri(MRI *mri_in, MRI *mri_ref, MORPH_PARMS *parms) {
 
         Description
 ------------------------------------------------------*/
-#define MAX_DX 1.2
-#define MAX_DY 1.2
-#define MAX_DZ 1.2
-#define MIN_DX (1.0 / MAX_DX)
-#define MIN_DY (1.0 / MAX_DY)
-#define MIN_DZ (1.0 / MAX_DZ)
+#define MAX_DX    1.2
+#define MAX_DY    1.2
+#define MAX_DZ    1.2
+#define MIN_DX    (1.0 / MAX_DX)
+#define MIN_DY    (1.0 / MAX_DY)
+#define MIN_DZ    (1.0 / MAX_DZ)
 #define MAX_RATIO 1.2
 
 static int init_scaling(MRI *mri_in, MRI *mri_ref, MATRIX *m_L) {
-  MATRIX *m_scaling;
-  float sx, sy, sz, dx, dy, dz;
+  MATRIX *   m_scaling;
+  float      sx, sy, sz, dx, dy, dz;
   MRI_REGION in_bbox, ref_bbox;
 
   m_scaling = MatrixIdentity(4, nullptr);
@@ -981,24 +981,24 @@ init_translation(MRI *mri_in, MRI *mri_ref, MATRIX *m_L) {
 #endif
 
 #define BORDER_LABEL 1
-#define CROP_LABEL 2
+#define CROP_LABEL   2
 
 static MRI *find_cropping(MRI *mri_in, MRI *mri_ref, MP *parms) {
   MRI *mri_crop, *mri_tmp;
-  int x, y, z, xi, yi, zi, xk, yk, zk, width, height, depth, num_on, ncropped,
+  int  x, y, z, xi, yi, zi, xk, yk, zk, width, height, depth, num_on, ncropped,
       nfilled;
 
   ncropped = 0;
   mri_crop = MRIclone(mri_in, nullptr);
-  mri_tmp = MRIapplyRASinverseLinearTransform(mri_ref, nullptr,
+  mri_tmp  = MRIapplyRASinverseLinearTransform(mri_ref, nullptr,
                                               parms->lta->xforms[0].m_L);
   if (!mri_tmp)
     return (nullptr);
   mri_ref = mri_tmp; /* reference volume transformed into input space */
 
-  width = mri_in->width;
+  width  = mri_in->width;
   height = mri_in->height;
-  depth = mri_in->depth;
+  depth  = mri_in->depth;
 
   /*
      first find regions in which the source image has 0s next to non-zeros

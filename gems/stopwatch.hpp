@@ -8,7 +8,7 @@ class Stopwatch {
 public:
   Stopwatch() : running(false), startCount(0), start(), elapsed() {}
 
-  typedef long long CountType;
+  typedef long long                                    CountType;
   typedef std::chrono::duration<CountType, std::micro> TimeSpan;
 
   void Start() {
@@ -46,15 +46,15 @@ public:
   }
 
   void Reset() {
-    this->running = false;
+    this->running    = false;
     this->startCount = 0;
-    this->elapsed = TimeSpan::zero();
+    this->elapsed    = TimeSpan::zero();
   }
 
 private:
-  bool running;
-  unsigned int startCount;
+  bool                                           running;
+  unsigned int                                   startCount;
   std::chrono::high_resolution_clock::time_point start;
-  TimeSpan elapsed;
+  TimeSpan                                       elapsed;
 };
 } // namespace kvl

@@ -23,55 +23,55 @@
  *
  */
 
-#include "timer.h"
+#include "cma.h"
 #include "diag.h"
 #include "gca.h"
-#include "tags.h"
-#include "cma.h"
 #include "mrinorm.h"
+#include "tags.h"
+#include "timer.h"
 #include "version.h"
 
 const char *Progname;
 
 static int remove_cerebellum = 0;
-static int remove_lh = 0;
-static int remove_rh = 0;
+static int remove_lh         = 0;
+static int remove_rh         = 0;
 
-static char *ctl_point_fname = nullptr;
-static char *sample_fname = nullptr;
+static char *ctl_point_fname                     = nullptr;
+static char *sample_fname                        = nullptr;
 static char *normalized_transformed_sample_fname = nullptr;
 
-static int file_only = 0;
+static int   file_only  = 0;
 static char *mask_fname = nullptr;
-static int novar = 0;
+static int   novar      = 0;
 
 static double bias_sigma = 4.0;
-static float min_prior = 0.6;
-static FILE *diag_fp = nullptr;
+static float  min_prior  = 0.6;
+static FILE * diag_fp    = nullptr;
 
 static MRI *scale_all_images(MRI *mri_in, MRI *mri_out);
 static MRI *normalize_timepoints_with_parzen_window(MRI *mri_in, MRI *mri_out,
                                                     double cross_time_sigma);
 // static int normalize_timepoints_with_samples(MRI *mri, GCA_SAMPLE *gcas, int
 // nsamples, int nsoap) ;
-static int normalize_timepoints(MRI *mri, double thresh,
-                                double cross_time_sigma);
+static int  normalize_timepoints(MRI *mri, double thresh,
+                                 double cross_time_sigma);
 static void usage_exit(int code);
-static int get_option(int argc, char *argv[]);
-static int copy_ctrl_points_to_volume(GCA_SAMPLE *gcas, int nsamples,
-                                      MRI *mri_ctrl, int frame);
-static int discard_control_points_with_different_labels(GCA_SAMPLE *gcas,
-                                                        int nsamples,
-                                                        MRI *mri_aseg);
+static int  get_option(int argc, char *argv[]);
+static int  copy_ctrl_points_to_volume(GCA_SAMPLE *gcas, int nsamples,
+                                       MRI *mri_ctrl, int frame);
+static int  discard_control_points_with_different_labels(GCA_SAMPLE *gcas,
+                                                         int         nsamples,
+                                                         MRI *       mri_aseg);
 
-static char *aseg_fname = "aseg.mgz";
-static char *renormalization_fname = nullptr;
-static double TR = 0.0, TE = 0.0, alpha = 0.0;
-static char *tissue_parms_fname = nullptr;
-static char *example_T1 = nullptr;
-static char *example_segmentation = nullptr;
-static double min_region_prior(GCA *gca, int xp, int yp, int zp, int wsize,
-                               int label);
+static char *      aseg_fname            = "aseg.mgz";
+static char *      renormalization_fname = nullptr;
+static double      TR = 0.0, TE = 0.0, alpha = 0.0;
+static char *      tissue_parms_fname   = nullptr;
+static char *      example_T1           = nullptr;
+static char *      example_segmentation = nullptr;
+static double      min_region_prior(GCA *gca, int xp, int yp, int zp, int wsize,
+                                    int label);
 static GCA_SAMPLE *find_control_points(GCA *gca, GCA_SAMPLE *gcas,
                                        int total_nsamples, int *pnorm_samples,
                                        int nregions, int label, MRI *mri_in,
@@ -80,9 +80,9 @@ static GCA_SAMPLE *find_control_points(GCA *gca, GCA_SAMPLE *gcas,
 
 static GCA_SAMPLE *gcas_concatenate(GCA_SAMPLE *gcas1, GCA_SAMPLE *gcas2,
                                     int n1, int n2);
-static int gcas_bounding_box(GCA_SAMPLE *gcas, int nsamples, int *pxmin,
-                             int *pymin, int *pzmin, int *pxmax, int *pymax,
-                             int *pzmax, int label);
+static int         gcas_bounding_box(GCA_SAMPLE *gcas, int nsamples, int *pxmin,
+                                     int *pymin, int *pzmin, int *pxmax, int *pymax,
+                                     int *pzmax, int label);
 static int uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform, int x,
                           int y, int z, int wsize, GCA_SAMPLE *gcas,
                           float nsigma);
@@ -114,26 +114,24 @@ static double cross_time_sigma = 1.0;
 
 static int nregions = 3; /* divide each struct into 3x3x3 regions */
 
-static char *ctrl_point_fname = nullptr;
+static char *ctrl_point_fname      = nullptr;
 static char *read_ctrl_point_fname = nullptr;
 
 static int longinput = 0;
 
 #define MAX_TIMEPOINTS 2000
-static char *subjects[MAX_TIMEPOINTS] ;
-int
-main(int argc, char *argv[])
-{
-  char         *gca_fname, *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN] ;
-  MRI          *mri_in, *mri_norm = NULL, *mri_tmp, *mri_ctrl = NULL, *mri_aseg = NULL ;
-  GCA          *gca ;
-  int          ac, nargs, nsamples, msec, minutes, seconds;
-  int          i, struct_samples, norm_samples = 0, n, input, ninputs ;
-  Timer start ;
-  GCA_SAMPLE   *gcas, *gcas_norm = NULL, *gcas_struct ;
-  TRANSFORM    *transform = NULL ;
-  char         line[STRLEN], *cp, sdir[STRLEN], base_name[STRLEN] ;
-  FILE         *fp ;
+static char *subjects[MAX_TIMEPOINTS];
+int          main(int argc, char *argv[]) {
+  char *gca_fname, *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN];
+  MRI * mri_in, *mri_norm = NULL, *mri_tmp, *mri_ctrl = NULL, *mri_aseg = NULL;
+  GCA * gca;
+  int   ac, nargs, nsamples, msec, minutes, seconds;
+  int   i, struct_samples, norm_samples = 0, n, input, ninputs;
+  Timer start;
+  GCA_SAMPLE *gcas, *gcas_norm = NULL, *gcas_struct;
+  TRANSFORM * transform = NULL;
+  char        line[STRLEN], *cp, sdir[STRLEN], base_name[STRLEN];
+  FILE *      fp;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_cal_normalize");
 
@@ -161,10 +159,10 @@ main(int argc, char *argv[])
               "usage: %s [<options>] <longitudinal time point file> <in vol "
               "name> <atlas> <transform file> <out vol name> \n",
               Progname);
-  in_fname = argv[2];
-  gca_fname = argv[3];
+  in_fname    = argv[2];
+  gca_fname   = argv[3];
   xform_fname = argv[4];
-  out_fname = argv[5];
+  out_fname   = argv[5];
 
   transform = TransformRead(xform_fname);
   if (transform == nullptr)
@@ -194,7 +192,7 @@ main(int argc, char *argv[])
     *cp = 0; // remove last component of path, which is base subject name
   }
   ninputs = 0;
-  fp = fopen(argv[1], "r");
+  fp      = fopen(argv[1], "r");
   if (fp == nullptr)
     ErrorExit(ERROR_NOFILE, "%s: could not read time point file %s", Progname,
               argv[1]);
@@ -245,7 +243,7 @@ main(int argc, char *argv[])
     }
 
     if (mask_fname) {
-      int i;
+      int  i;
       MRI *mri_mask;
 
       mri_mask = MRIread(mask_fname);
@@ -319,7 +317,7 @@ main(int argc, char *argv[])
             norm_samples += struct_samples;
             gcas_norm = gcas_tmp;
           } else {
-            gcas_norm = gcas_struct;
+            gcas_norm    = gcas_struct;
             norm_samples = struct_samples;
           }
         }
@@ -385,7 +383,7 @@ main(int argc, char *argv[])
   // try to bring the images closer to each other at each voxel where they seem
   // to come from the same distribution
   if (mri_in->nframes > 1) {
-    MRI *mri_frame1, *mri_frame2;
+    MRI *  mri_frame1, *mri_frame2;
     double rms_after;
 
     if (false)
@@ -399,7 +397,7 @@ main(int argc, char *argv[])
 
     mri_frame1 = MRIcopyFrame(mri_in, nullptr, 0, 0);
     mri_frame2 = MRIcopyFrame(mri_in, nullptr, 1, 0);
-    rms_after = MRIrmsDiff(mri_frame1, mri_frame2);
+    rms_after  = MRIrmsDiff(mri_frame1, mri_frame2);
     MRIfree(&mri_frame1);
     MRIfree(&mri_frame2);
     printf("RMS (first 2 inputs) after intensity cohering  = %2.2f "
@@ -431,7 +429,7 @@ main(int argc, char *argv[])
   if (gca)
     GCAfree(&gca);
   printf("done.\n");
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -448,24 +446,24 @@ main(int argc, char *argv[])
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   StrUpper(option);
   if (!strcmp(option, "FSAMPLES")) {
     sample_fname = argv[2];
-    nargs = 1;
+    nargs        = 1;
     printf("writing control points to %s...\n", sample_fname);
   } else if (!strcmp(option, "-HELP") || !strcmp(option, "-USAGE"))
     usage_exit(0);
   else if (!strcmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else if (!strcmp(option, "ASEG")) {
     aseg_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using segmentation volume %s to generate control points...\n",
            aseg_fname);
   } else if (!stricmp(option, "LH")) {
@@ -479,19 +477,19 @@ static int get_option(int argc, char *argv[]) {
     printf("removing cerebellum from atlas\n");
   } else if (!strcmp(option, "FONLY")) {
     ctl_point_fname = argv[2];
-    nargs = 1;
-    file_only = 1;
+    nargs           = 1;
+    file_only       = 1;
     printf("only using control points from file %s\n", ctl_point_fname);
   } else if (!strcmp(option, "LONGINPUT")) {
     longinput = 1;
     printf("reading inputs from longitudinal directories\n");
   } else if (!strcmp(option, "SIGMA")) {
     bias_sigma = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("smoothing bias field with sigma = %2.1f\n", bias_sigma);
   } else if (!stricmp(option, "cross_time_sigma")) {
     cross_time_sigma = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     printf("smoothing temporal bias field with sigma = %2.1f\n",
            cross_time_sigma);
   } else if (!strcmp(option, "DIAG")) {
@@ -514,17 +512,17 @@ static int get_option(int argc, char *argv[]) {
     printf("debugging node (%d, %d, %d)\n", Ggca_x, Ggca_y, Ggca_z);
     nargs = 3;
   } else if (!strcmp(option, "TR")) {
-    TR = atof(argv[2]);
+    TR    = atof(argv[2]);
     nargs = 1;
     printf("using TR=%2.1f msec\n", TR);
   } else if (!strcmp(option, "EXAMPLE")) {
-    example_T1 = argv[2];
+    example_T1           = argv[2];
     example_segmentation = argv[3];
     printf("using %s and %s as example T1 and segmentations respectively.\n",
            example_T1, example_segmentation);
     nargs = 2;
   } else if (!strcmp(option, "TE")) {
-    TE = atof(argv[2]);
+    TE    = atof(argv[2]);
     nargs = 1;
     printf("using TE=%2.1f msec\n", TE);
   } else if (!strcmp(option, "ALPHA")) {
@@ -533,23 +531,23 @@ static int get_option(int argc, char *argv[]) {
     printf("using alpha=%2.0f degrees\n", DEGREES(alpha));
   } else if (!strcmp(option, "NSAMPLES")) {
     normalized_transformed_sample_fname = argv[2];
-    nargs = 1;
+    nargs                               = 1;
     printf("writing  transformed normalization control points to %s...\n",
            normalized_transformed_sample_fname);
   } else if (!strcmp(option, "RENORM")) {
     renormalization_fname = argv[2];
-    nargs = 1;
+    nargs                 = 1;
     printf("renormalizing using predicted intensity values in %s...\n",
            renormalization_fname);
   } else if (!strcmp(option, "FLASH")) {
     tissue_parms_fname = argv[2];
-    nargs = 1;
+    nargs              = 1;
     printf("using FLASH forward model and tissue parms in %s to predict"
            " intensity values...\n",
            tissue_parms_fname);
   } else if (!strcmp(option, "PRIOR")) {
     min_prior = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("using prior threshold %2.2f\n", min_prior);
   } else if (!stricmp(option, "NOVAR")) {
     novar = 1;
@@ -558,12 +556,12 @@ static int get_option(int argc, char *argv[]) {
     switch (*option) {
     case 'R':
       read_ctrl_point_fname = argv[2];
-      nargs = 1;
+      nargs                 = 1;
       printf("reading control point volume from %s\n", read_ctrl_point_fname);
       break;
     case 'C':
       ctrl_point_fname = argv[2];
-      nargs = 1;
+      nargs            = 1;
       printf("writing control point volume to %s\n", ctrl_point_fname);
       break;
     case 'W':
@@ -576,13 +574,13 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'F':
       ctl_point_fname = argv[2];
-      nargs = 1;
+      nargs           = 1;
       printf("reading manually defined control points from %s\n",
              ctl_point_fname);
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':
@@ -591,7 +589,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'P':
       ctl_point_pct = atof(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       printf("using top %2.1f%% wm points as control points....\n",
              100.0 * ctl_point_pct);
       break;
@@ -613,18 +611,18 @@ static GCA_SAMPLE *find_control_points(GCA *gca, GCA_SAMPLE *gcas_total,
       yv, zv, x, y, z, xi, yi, zi, region_samples, used_in_region,
       prior_wsize = 5, image_wsize = 3, histo_peak, n, nbins;
   GCA_SAMPLE *gcas, *gcas_region, *gcas_norm;
-  double means[MAX_GCA_INPUTS], vars[MAX_GCA_INPUTS], val, nsigma;
-  HISTOGRAM *histo, *hsmooth;
-  GC1D *gc;
-  float fmin, fmax;
-  MRI *mri_T1 = nullptr;
+  double      means[MAX_GCA_INPUTS], vars[MAX_GCA_INPUTS], val, nsigma;
+  HISTOGRAM * histo, *hsmooth;
+  GC1D *      gc;
+  float       fmin, fmax;
+  MRI *       mri_T1 = nullptr;
 
   if (label == Gdiag_no)
     DiagBreak();
 
   MRIvalRange(mri_in, &fmin, &fmax);
-  nbins = (int)(fmax - fmin + 1);
-  histo = HISTOalloc(nbins);
+  nbins   = (int)(fmax - fmin + 1);
+  histo   = HISTOalloc(nbins);
   hsmooth = HISTOalloc(nbins);
   for (nsamples = i = 0; i < total_samples; i++) {
     if (gcas_total[i].label != label)
@@ -638,9 +636,9 @@ static GCA_SAMPLE *find_control_points(GCA *gca, GCA_SAMPLE *gcas_total,
     DiagBreak();
     return (NO_ERROR);
   }
-  gcas = (GCA_SAMPLE *)calloc(nsamples, sizeof(GCA_SAMPLE));
+  gcas        = (GCA_SAMPLE *)calloc(nsamples, sizeof(GCA_SAMPLE));
   gcas_region = (GCA_SAMPLE *)calloc(nsamples, sizeof(GCA_SAMPLE));
-  gcas_norm = (GCA_SAMPLE *)calloc(nsamples, sizeof(GCA_SAMPLE));
+  gcas_norm   = (GCA_SAMPLE *)calloc(nsamples, sizeof(GCA_SAMPLE));
   if (!gcas || !gcas_region || !gcas_norm)
     ErrorExit(ERROR_NOMEMORY,
               "find_control_points: could not allocate %d samples\n", nsamples);
@@ -791,7 +789,7 @@ static GCA_SAMPLE *find_control_points(GCA *gca, GCA_SAMPLE *gcas_total,
 
       for (v = r = 0; r < gca->ninputs; r++) {
         for (c = r; c < gca->ninputs; c++, v++) {
-          gcas_norm[i].means[v] = gc->means[v];
+          gcas_norm[i].means[v]  = gc->means[v];
           gcas_norm[i].covars[v] = gc->covars[v];
         }
       }
@@ -809,7 +807,7 @@ static GCA_SAMPLE *find_control_points(GCA *gca, GCA_SAMPLE *gcas_total,
 static GCA_SAMPLE *gcas_concatenate(GCA_SAMPLE *gcas1, GCA_SAMPLE *gcas2,
                                     int n1, int n2) {
   GCA_SAMPLE *gcas;
-  int i;
+  int         i;
 
   gcas = (GCA_SAMPLE *)calloc(n1 + n2, sizeof(GCA_SAMPLE));
   if (!gcas)
@@ -858,13 +856,13 @@ static int gcas_bounding_box(GCA_SAMPLE *gcas, int nsamples, int *pxmin,
 
 static double min_region_prior(GCA *gca, int xp, int yp, int zp, int wsize,
                                int label) {
-  int whalf, xi, yi, zi, xk, yk, zk;
-  double min_prior, prior;
+  int        whalf, xi, yi, zi, xk, yk, zk;
+  double     min_prior, prior;
   GCA_PRIOR *gcap;
 
-  gcap = &gca->priors[xp][yp][zp];
+  gcap      = &gca->priors[xp][yp][zp];
   min_prior = getPrior(gcap, label);
-  whalf = (wsize - 1) / (gca->prior_spacing * 2);
+  whalf     = (wsize - 1) / (gca->prior_spacing * 2);
   for (xi = -whalf; xi <= whalf; xi++) {
     xk = xp + xi;
     if (xk < 0 || xk >= gca->prior_width)
@@ -877,7 +875,7 @@ static double min_region_prior(GCA *gca, int xp, int yp, int zp, int wsize,
         zk = zp + zi;
         if (zk < 0 || zk >= gca->prior_depth)
           continue;
-        gcap = &gca->priors[xk][yk][zk];
+        gcap  = &gca->priors[xk][yk][zk];
         prior = getPrior(gcap, label);
         if (prior < min_prior)
           min_prior = prior;
@@ -891,10 +889,10 @@ static double min_region_prior(GCA *gca, int xp, int yp, int zp, int wsize,
 static int uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform, int x,
                           int y, int z, int wsize, GCA_SAMPLE *gcas,
                           float nsigma) {
-  int xk, yk, zk, whalf, xi, yi, zi, n, frame;
-  double val0, val, sigma, min_val, max_val, thresh;
+  int     xk, yk, zk, whalf, xi, yi, zi, n, frame;
+  double  val0, val, sigma, min_val, max_val, thresh;
   MATRIX *m;
-  GC1D *gc;
+  GC1D *  gc;
 
   gc = GCAfindSourceGC(gca, mri, transform, x, y, z, gcas->label);
   if (!gc)
@@ -910,7 +908,7 @@ static int uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform, int x,
     if (sigma > 0.1 * val0) /* don't let it be too big */
       sigma = 0.1 * val0;
     min_val = max_val = val0;
-    thresh = nsigma * sigma;
+    thresh            = nsigma * sigma;
 
     for (frame = 0; frame < mri->nframes; frame++)
       for (xk = -whalf; xk <= whalf; xk++) {
@@ -939,9 +937,9 @@ static int uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform, int x,
 static int discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas,
                                            int nsamples, MRI *mri_in,
                                            TRANSFORM *transform, char *name) {
-  int i, xv, yv, zv, n, peak, start, end, num;
+  int    i, xv, yv, zv, n, peak, start, end, num;
   HISTO *h, *hsmooth;
-  float fmin, fmax;
+  float  fmin, fmax;
   double val, mean_ratio;
 
   if (nsamples == 0)
@@ -950,7 +948,7 @@ static int discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas,
   for (num = n = 0; n < mri_in->nframes; n++) {
     int niter = 0;
     MRIvalRangeFrame(mri_in, &fmin, &fmax, n);
-    h = HISTOalloc(nint(fmax - fmin) + 1);
+    h           = HISTOalloc(nint(fmax - fmin) + 1);
     h->bin_size = (fmax - fmin) / (float)h->nbins;
     for (i = 0; i < h->nbins; i++)
       h->bins[i] = (i + 1) * h->bin_size + fmin;
@@ -976,7 +974,7 @@ static int discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas,
       else
         peak = HISTOfindHighestPeakInRegion(hsmooth, 0, h->nbins - 1);
 
-      end = HISTOfindEndOfPeak(hsmooth, peak, 0.01);
+      end   = HISTOfindEndOfPeak(hsmooth, peak, 0.01);
       start = HISTOfindStartOfPeak(hsmooth, peak, 0.01);
       if (gca->ninputs == 1) {
         int opeak;
@@ -1150,12 +1148,12 @@ normalize_timepoints_with_samples(MRI *mri, GCA_SAMPLE *gcas, int nsamples, int 
 #endif
 static int normalize_timepoints(MRI *mri, double thresh,
                                 double cross_time_sigma) {
-  int frame, x, y, z, skip, nvox;
+  int    frame, x, y, z, skip, nvox;
   double target, val;
-  MRI *mri_ctrl, *mri_bias, *mri_target, *mri_frame, *mri_kernel;
+  MRI *  mri_ctrl, *mri_bias, *mri_target, *mri_frame, *mri_kernel;
 
-  mri_ctrl = MRIcloneDifferentType(mri, MRI_UCHAR);
-  mri_bias = MRIcloneDifferentType(mri, MRI_FLOAT);
+  mri_ctrl   = MRIcloneDifferentType(mri, MRI_UCHAR);
+  mri_bias   = MRIcloneDifferentType(mri, MRI_FLOAT);
   mri_target = MRIcloneDifferentType(mri, MRI_FLOAT);
   mri_kernel = MRIgaussian1d(cross_time_sigma, -1);
 
@@ -1193,7 +1191,7 @@ static int normalize_timepoints(MRI *mri, double thresh,
       for (y = 0; y < mri->height; y++)
         for (z = 0; z < mri->depth; z++) {
           target = MRIgetVoxVal(mri_target, x, y, z, 0);
-          val = MRIgetVoxVal(mri, x, y, z, frame);
+          val    = MRIgetVoxVal(mri, x, y, z, frame);
           if (FZERO(val))
             val = 1.0;
           MRIsetVoxVal(mri_bias, x, y, z, 0, target / val);
@@ -1223,7 +1221,7 @@ static int normalize_timepoints(MRI *mri, double thresh,
 
 static MRI *normalize_timepoints_with_parzen_window(MRI *mri_in, MRI *mri_out,
                                                     double cross_time_sigma) {
-  int frame1, frame2, x, y, z;
+  int    frame1, frame2, x, y, z;
   double val0, val, total, g, total_norm;
   double s;
   // if sigma is zero, skip smoothing
@@ -1246,7 +1244,7 @@ static MRI *normalize_timepoints_with_parzen_window(MRI *mri_in, MRI *mri_out,
           for (total = total_norm = 0.0, frame2 = 0; frame2 < mri_in->nframes;
                frame2++) {
             val = MRIgetVoxVal(mri_in, x, y, z, frame2);
-            g = exp(SQR(val - val0) * s);
+            g   = exp(SQR(val - val0) * s);
             total += g * val;
             total_norm += g;
           }
@@ -1262,9 +1260,9 @@ static MRI *normalize_timepoints_with_parzen_window(MRI *mri_in, MRI *mri_out,
 
 static MRI *scale_all_images(MRI *mri_in, MRI *mri_out) {
   HISTOGRAM *h;
-  int t, b;
-  MRI *mri_ratio, *mri_f0, *mri_f;
-  float scale;
+  int        t, b;
+  MRI *      mri_ratio, *mri_f0, *mri_f;
+  float      scale;
 
   if (mri_out == nullptr)
     mri_out = MRIclone(mri_in, nullptr);
@@ -1273,11 +1271,11 @@ static MRI *scale_all_images(MRI *mri_in, MRI *mri_out) {
   MRIthresholdRangeInto(mri_f0, mri_f0, 50, 120);
 
   for (t = 1; t < mri_in->nframes; t++) {
-    mri_f = MRIcopyFrame(mri_in, nullptr, t, 0);
+    mri_f     = MRIcopyFrame(mri_in, nullptr, t, 0);
     mri_ratio = MRIdivide(mri_f0, mri_f, nullptr);
-    h = MRIhistogram(mri_ratio, HBINS);
-    b = HISTOfindHighestPeakInRegion(h, 1, h->nbins); // ignore zero bin
-    scale = h->bins[b];
+    h         = MRIhistogram(mri_ratio, HBINS);
+    b         = HISTOfindHighestPeakInRegion(h, 1, h->nbins); // ignore zero bin
+    scale     = h->bins[b];
     printf("scaling image %d by %2.3f\n", t + 1, scale);
     MRIscalarMul(mri_f, mri_f, scale);
     MRIcopyFrame(mri_f, mri_out, 0, t);
@@ -1292,15 +1290,15 @@ static MRI *scale_all_images(MRI *mri_in, MRI *mri_out) {
 }
 
 static int discard_control_points_with_different_labels(GCA_SAMPLE *gcas,
-                                                        int nsamples,
-                                                        MRI *mri_aseg) {
+                                                        int         nsamples,
+                                                        MRI *       mri_aseg) {
   int i, x, y, z, f, delete_this_sample, deleted = 0, label, label2;
 
   for (i = 0; i < nsamples; i++) {
-    x = nint(gcas[i].x);
-    y = nint(gcas[i].y);
-    z = nint(gcas[i].z);
-    label = MRIgetVoxVal(mri_aseg, x, y, z, 0);
+    x                  = nint(gcas[i].x);
+    y                  = nint(gcas[i].y);
+    z                  = nint(gcas[i].z);
+    label              = MRIgetVoxVal(mri_aseg, x, y, z, 0);
     delete_this_sample = IS_HYPO(label);
     for (f = 1; f < mri_aseg->nframes; f++) {
       label2 = MRIgetVoxVal(mri_aseg, x, y, z, f);

@@ -77,15 +77,13 @@
 //----------------------------------------------------------------------
 //  basic includes
 //----------------------------------------------------------------------
-#include <stdlib.h> // standard libs
-#include <stdio.h>  // standard I/O (for NULL)
 #include <iostream> // I/O streams
 #include <math.h>   // math includes
+#include <stdio.h>  // standard I/O (for NULL)
+#include <stdlib.h> // standard libs
 #include <values.h> // special values
 
 #define ANNversion "0.1" // ANN version number
-
-using namespace std;
 
 //----------------------------------------------------------------------
 //  ANNbool
@@ -136,7 +134,7 @@ enum ANNbool { ANNfalse = 0, ANNtrue = 1 };
 
 typedef double ANNcoord; // coordinate data type
 typedef double ANNdist;  // distance data type
-typedef int ANNidx;      // point index
+typedef int    ANNidx;   // point index
 
 // largest possible distance
 const ANNdist ANN_DIST_INF = MAXDOUBLE;
@@ -249,9 +247,9 @@ const ANNbool ANN_ALLOW_SELF_MATCH = ANNtrue;
 //----------------------------------------------------------------------
 // Use the following for the Euclidean norm
 //----------------------------------------------------------------------
-#define ANN_POW(v) ((v) * (v))
-#define ANN_ROOT(x) sqrt(x)
-#define ANN_SUM(x, y) ((x) + (y))
+#define ANN_POW(v)     ((v) * (v))
+#define ANN_ROOT(x)    sqrt(x)
+#define ANN_SUM(x, y)  ((x) + (y))
 #define ANN_DIFF(x, y) ((y) - (x))
 
 //----------------------------------------------------------------------
@@ -297,8 +295,8 @@ const ANNbool ANN_ALLOW_SELF_MATCH = ANNtrue;
 
 typedef ANNcoord *ANNpoint;      // a point
 typedef ANNpoint *ANNpointArray; // an array of points
-typedef ANNdist *ANNdistArray;   // an array of distances
-typedef ANNidx *ANNidxArray;     // an array of point indices
+typedef ANNdist * ANNdistArray;  // an array of distances
+typedef ANNidx *  ANNidxArray;   // an array of point indices
 
 //----------------------------------------------------------------------
 //  Point operations:
@@ -329,11 +327,11 @@ typedef ANNidx *ANNidxArray;     // an array of point indices
 // annCopyPt() allocates space and makes a copy of a given point.
 //----------------------------------------------------------------------
 
-ANNdist annDist(int dim,    // dimension of space
-                ANNpoint p, // points
+ANNdist annDist(int      dim, // dimension of space
+                ANNpoint p,   // points
                 ANNpoint q);
 
-ANNpoint annAllocPt(int dim,         // dimension
+ANNpoint annAllocPt(int      dim,    // dimension
                     ANNcoord c = 0); // coordinate value (all equal)
 
 ANNpointArray annAllocPts(int n,    // number of points
@@ -344,7 +342,7 @@ void annDeallocPt(ANNpoint &p); // deallocate 1 point
 void annDeallocPts(ANNpointArray &pa); // point array
 
 ANNpoint annCopyPt(   // copy point
-    int dim,          // dimension
+    int      dim,     // dimension
     ANNpoint source); // point to copy
 
 //----------------------------------------------------------------------
@@ -360,13 +358,13 @@ class ANNpointSet {
 public:
   virtual ~ANNpointSet() {} // virtual distroyer
 
-  virtual void annkSearch( // approx k near neighbor search
-      ANNpoint q,          // query point
-      int k,               // number of near neighbors to return
-      ANNidxArray nn_idx,  // nearest neighbor array (returned)
-      ANNdistArray dd,     // dist to near neighbors (returned)
-      double eps = 0.0     // error bound
-      ) = 0;               // pure virtual (defined elsewhere)
+  virtual void annkSearch(   // approx k near neighbor search
+      ANNpoint     q,        // query point
+      int          k,        // number of near neighbors to return
+      ANNidxArray  nn_idx,   // nearest neighbor array (returned)
+      ANNdistArray dd,       // dist to near neighbors (returned)
+      double       eps = 0.0 // error bound
+      ) = 0;                 // pure virtual (defined elsewhere)
 };
 
 //----------------------------------------------------------------------
@@ -385,23 +383,23 @@ public:
 //----------------------------------------------------------------------
 
 class ANNbruteForce : public ANNpointSet {
-  int dim;           // dimension
-  int n_pts;         // number of points
-  ANNpointArray pts; // point array
+  int           dim;   // dimension
+  int           n_pts; // number of points
+  ANNpointArray pts;   // point array
 public:
   ANNbruteForce(        // constructor from point array
       ANNpointArray pa, // point array
-      int n,            // number of points
-      int dd);          // dimension
+      int           n,  // number of points
+      int           dd);          // dimension
 
   ~ANNbruteForce(); // destructor
 
   virtual void annkSearch( // approx k near neighbor search
-      ANNpoint q,          // query point
-      int k,               // number of near neighbors to return
-      ANNidxArray nn_idx,  // nearest neighbor array (returned)
+      ANNpoint     q,      // query point
+      int          k,      // number of near neighbors to return
+      ANNidxArray  nn_idx, // nearest neighbor array (returned)
       ANNdistArray dd,     // dist to near neighbors (returned)
-      double eps = 0.0);   // error bound
+      double       eps = 0.0);   // error bound
 };
 
 //----------------------------------------------------------------------
@@ -468,14 +466,14 @@ enum ANNsplitRule {
 
 class ANNkd_tree : public ANNpointSet {
 protected:
-  int dim;             // dimension of space
-  int n_pts;           // number of points in tree
-  int bkt_size;        // bucket size
-  ANNpointArray pts;   // the points
-  ANNidxArray pidx;    // point indices (to pts)
-  ANNkd_ptr root;      // root of kd-tree
-  ANNpoint bnd_box_lo; // bounding box low point
-  ANNpoint bnd_box_hi; // bounding box high point
+  int           dim;        // dimension of space
+  int           n_pts;      // number of points in tree
+  int           bkt_size;   // bucket size
+  ANNpointArray pts;        // the points
+  ANNidxArray   pidx;       // point indices (to pts)
+  ANNkd_ptr     root;       // root of kd-tree
+  ANNpoint      bnd_box_lo; // bounding box low point
+  ANNpoint      bnd_box_hi; // bounding box high point
 
   void SkeletonTree( // construct skeleton tree
       int n,         // number of points
@@ -490,37 +488,37 @@ public:
 
   ANNkd_tree(                               // build from point array
       ANNpointArray pa,                     // point array
-      int n,                                // number of points
-      int dd,                               // dimension
-      int bs = 1,                           // bucket size
-      ANNsplitRule split = ANN_KD_SUGGEST); // splitting method
+      int           n,                      // number of points
+      int           dd,                     // dimension
+      int           bs    = 1,              // bucket size
+      ANNsplitRule  split = ANN_KD_SUGGEST); // splitting method
 
   ~ANNkd_tree(); // tree destructor
 
   virtual void annkSearch( // approx k near neighbor search
-      ANNpoint q,          // query point
-      int k,               // number of near neighbors to return
-      ANNidxArray nn_idx,  // nearest neighbor array (returned)
+      ANNpoint     q,      // query point
+      int          k,      // number of near neighbors to return
+      ANNidxArray  nn_idx, // nearest neighbor array (returned)
       ANNdistArray dd,     // dist to near neighbors (returned)
-      double eps = 0.0);   // error bound
+      double       eps = 0.0);   // error bound
 
   virtual void annkPriSearch( // priority k near neighbor search
-      ANNpoint q,             // query point
-      int k,                  // number of near neighbors to return
-      ANNidxArray nn_idx,     // nearest neighbor array (returned)
+      ANNpoint     q,         // query point
+      int          k,         // number of near neighbors to return
+      ANNidxArray  nn_idx,    // nearest neighbor array (returned)
       ANNdistArray dd,        // dist to near neighbors (returned)
-      double eps = 0.0);      // error bound
+      double       eps = 0.0);      // error bound
 
   virtual void getStats( // compute tree statistics
       ANNkdStats &st);   // the statistics (returned)
 
-  virtual void Print(   // print the tree (for debugging)
-      ANNbool with_pts, // print points as well?
-      ostream &out);    // output stream
+  virtual void Print(    // print the tree (for debugging)
+      ANNbool  with_pts, // print points as well?
+      ostream &out);     // output stream
 
-  virtual void Dump(    // dump entire tree
-      ANNbool with_pts, // print points as well?
-      ostream &out);    // output stream
+  virtual void Dump(     // dump entire tree
+      ANNbool  with_pts, // print points as well?
+      ostream &out);     // output stream
 };
 
 //----------------------------------------------------------------------
@@ -555,10 +553,10 @@ public:
 
   ANNbd_tree(                                 // build from point array
       ANNpointArray pa,                       // point array
-      int n,                                  // number of points
-      int dd,                                 // dimension
-      int bs = 1,                             // bucket size
-      ANNsplitRule split = ANN_KD_SUGGEST,    // splitting rule
+      int           n,                        // number of points
+      int           dd,                       // dimension
+      int           bs     = 1,               // bucket size
+      ANNsplitRule  split  = ANN_KD_SUGGEST,  // splitting rule
       ANNshrinkRule shrink = ANN_BD_SUGGEST); // shrinking rule
 };
 

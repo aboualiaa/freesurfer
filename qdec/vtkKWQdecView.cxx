@@ -25,10 +25,10 @@
  *
  */
 
-#include <stdexcept>
-#include <sstream>
-#include <assert.h>
 #include "vtkKWQdecView.h"
+#include <assert.h>
+#include <sstream>
+#include <stdexcept>
 
 #include "QdecEvents.h"
 #include "QdecUtilities.h"
@@ -43,12 +43,12 @@
 #include "vtkCornerAnnotation.h"
 #include "vtkCursor3D.h"
 #include "vtkDataArray.h"
-#include "vtkFloatArray.h"
-#include "vtkFSSurfaceSource.h"
 #include "vtkFSSurfaceScalarsReader.h"
+#include "vtkFSSurfaceSource.h"
+#include "vtkFloatArray.h"
+#include "vtkInflatePolyData.h"
 #include "vtkKWApplication.h"
 #include "vtkKWProgressDialog.h"
-#include "vtkInflatePolyData.h"
 #include "vtkLODProp3D.h"
 #include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
@@ -66,16 +66,14 @@
 #include "vtkTransform.h"
 #include "vtkTransformPolyDataFilter.h"
 
-using namespace std;
-
 vtkStandardNewMacro(vtkKWQdecView);
 vtkCxxRevisionMacro(vtkKWQdecView, "$Revision: 1.12 $");
 
 // these control the amount and speed of rotation
 // with AnimateSteps=1, it doesnt animate, and its instaneous
 // old values shown for the slow rotation animation when Rotate buttons pushed
-double const vtkKWQdecView::kAnimationDegrees = 90.0;
-double const vtkKWQdecView::kcAnimateSteps = 1;          // was 10.0
+double const vtkKWQdecView::kAnimationDegrees     = 90.0;
+double const vtkKWQdecView::kcAnimateSteps        = 1;   // was 10.0
 double const vtkKWQdecView::kAnimateTimeInSeconds = 0.1; // was 1.0
 
 vtkKWQdecView::vtkKWQdecView()
@@ -83,14 +81,14 @@ vtkKWQdecView::vtkKWQdecView()
       mOverlayOpacity(0.3), mAnnotationLookup(NULL), mbInSelection(false),
       mnFirstVertexInPath(-1), mnLastVertexInPath(-1) {
   for (int n = 0; n < 3; n++) {
-    mDefaultPosition[n] = 0;
+    mDefaultPosition[n]   = 0;
     mDefaultFocalPoint[n] = 0;
-    mDefaultViewUp[n] = 0;
+    mDefaultViewUp[n]     = 0;
   }
   mDefaultZoom = 1.2; // make the default just a little bigger than normal
 
   mSurfaceSelectionPoints = vtkPoints::New();
-  mSurfaceSelectionLines = vtkCellArray::New();
+  mSurfaceSelectionLines  = vtkCellArray::New();
 }
 
 vtkKWQdecView::~vtkKWQdecView() { this->GetRenderer()->RemoveAllViewProps(); }
@@ -142,9 +140,9 @@ void vtkKWQdecView::ViewInteractor::OnLeftButtonDown() {
     if (-1 == nVertex) // We may not be able to find a point. It happens.
       return;
 
-    mView->mbInSelection = true;
+    mView->mbInSelection       = true;
     mView->mnFirstVertexInPath = nVertex;
-    mView->mnLastVertexInPath = nVertex;
+    mView->mnLastVertexInPath  = nVertex;
 
     // Clear the path.
     mView->ResetPath();
@@ -180,7 +178,7 @@ void vtkKWQdecView::ViewInteractor::OnLeftButtonUp() {
   if (mView->mbInSelection) {
 
     // Join the last vertex to the first vertex.
-    vector<int> lVertices;
+    std::vector<int> lVertices;
     try {
       mView->mCurrentSurfaceSource->FindPath(
           mView->mnLastVertexInPath, mView->mnFirstVertexInPath, lVertices);
@@ -205,7 +203,7 @@ void vtkKWQdecView::ViewInteractor::OnLeftButtonUp() {
 
     // Clear the first and last vertex.
     mView->mnFirstVertexInPath = mView->mnLastVertexInPath = -1;
-    mView->mbInSelection = false;
+    mView->mbInSelection                                   = false;
   }
 }
 void vtkKWQdecView::ViewInteractor::OnMouseMove() {
@@ -223,7 +221,7 @@ void vtkKWQdecView::ViewInteractor::OnMouseMove() {
     if (nVertex != mView->mnLastVertexInPath) {
 
       // Make a path from the last clicked vertex to this one.
-      vector<int> lVertices;
+      std::vector<int> lVertices;
       try {
         mView->mCurrentSurfaceSource->FindPath(mView->mnLastVertexInPath,
                                                nVertex, lVertices);
@@ -293,7 +291,7 @@ int vtkKWQdecView::ViewInteractor::GetVertexAtPicker() {
 
       // Find the surface vertex at this point.
       float distance;
-      int nVertex =
+      int   nVertex =
           mView->mCurrentSurfaceSource->FindVertexAtRAS(RAS, &distance);
 
       return nVertex;
@@ -467,7 +465,7 @@ void vtkKWQdecView::SetSurface(vtkFSSurfaceSource *iSurface) {
   // If we had a cursor vertex, find the corresponding RAS point and
   // set the cursor axes.
   if (mCursor && -1 != mnCursorVertexIndex) {
-    float surfaceRAS[3];
+    float  surfaceRAS[3];
     double surfaceRASd[3];
     mCurrentSurfaceSource->GetSurfaceRASAtVertex(mnCursorVertexIndex,
                                                  surfaceRAS);
@@ -597,7 +595,7 @@ void vtkKWQdecView::SetSurfaceOverlayScalarsAndColors(
 
   // Save the pointers.
   mCurrentOverlayScalars = iScalars;
-  mCurrentOverlayColors = iColors;
+  mCurrentOverlayColors  = iColors;
 
   // Set up the mapper and source.
   if (mSurfaceOverlayInflator.GetPointer() &&
@@ -688,10 +686,10 @@ vtkPoints *vtkKWQdecView::GetSurfaceSelectionPoints() {
 void vtkKWQdecView::SelectSurfaceVertex(int inVertex) {
 
   if (NULL == mCurrentSurfaceSource.GetPointer())
-    throw runtime_error("No surface loaded.");
+    throw std::runtime_error("No surface loaded.");
 
   if (inVertex >= mCurrentSurfaceSource->GetNumberOfVertices())
-    throw runtime_error("Invalid vertex number.");
+    throw std::runtime_error("Invalid vertex number.");
 
   // If this is -1, just unselect whatever is current.
   if (-1 == inVertex) {
@@ -708,7 +706,7 @@ void vtkKWQdecView::SelectSurfaceVertex(int inVertex) {
   } else {
 
     // Start building a label for the annotation.
-    stringstream ssLabel;
+    std::stringstream ssLabel;
 
     // Put the location in the label.
     float surfaceRAS[3];

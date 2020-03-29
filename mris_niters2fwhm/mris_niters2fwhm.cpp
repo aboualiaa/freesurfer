@@ -32,56 +32,57 @@ ENDHELP
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "fmriutils.h"
-#include "mri2.h"
-#include "version.h"
-#include "cmdargs.h"
-#include "randomfields.h"
 #include "icosahedron.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "randomfields.h"
+#include "version.h"
 double MRISmeanInterVertexDist(MRIS *surf);
 
 MRI *MRISgaussianSmooth2(MRIS *Surf, MRI *Src, double GStd, MRI *Targ,
                          double TruncFactor);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mris_niters2fwhm.c,v 1.14 2011/03/02 00:04:33 nicks Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 char *subject = nullptr, *hemi = nullptr, *SUBJECTS_DIR = nullptr;
 char *surfname = "white";
 char *surfpath = nullptr;
-char tmpstr[2000];
+char  tmpstr[2000];
 
 MRIS *surf;
-int dof = 100;
-int nitersmax = 100;
+int   dof       = 100;
+int   nitersmax = 100;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, nthiter;
-  MRI *mri, *var, *mri0, *delta, *deltasm, *xyz;
+  int    nargs, nthiter;
+  MRI *  mri, *var, *mri0, *delta, *deltasm, *xyz;
   double gmax, vrfmn, vrfstd, gstd, fwhm;
 
   nthiter = 0;
   mri = var = mri0 = delta = deltasm = xyz = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mris_niters2fwhm");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -143,7 +144,7 @@ int main(int argc, char *argv[]) {
   printf("\n\n");
 
   mri0 = MRIrandn(surf->nvertices, 1, 1, dof, 0, 1, nullptr);
-  mri = MRIcopy(mri0, nullptr);
+  mri  = MRIcopy(mri0, nullptr);
 
   for (nthiter = 2; nthiter <= nitersmax; nthiter++) {
     // MRISsmoothMRI(surf, mri, 1, NULL, mri);
@@ -162,7 +163,7 @@ int main(int argc, char *argv[]) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -194,17 +195,17 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--s")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--h")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      surfname = pargv[0];
+      surfname  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--dof")) {
       if (nargc < 1)
@@ -291,26 +292,26 @@ static void dump_options(FILE *fp) {
 }
 /*---------------------------------------------------------------------*/
 double MRISmeanInterVertexDist(MRIS *surf) {
-  int vtx, nbrvtx, nnbrs, nthnbr;
+  int    vtx, nbrvtx, nnbrs, nthnbr;
   double dx, dy, dz, x0, y0, z0, xn, yn, zn, d;
   double dnbrsum, dnbrmn, dsum;
 
   dsum = 0.0;
   for (vtx = 0; vtx < surf->nvertices; vtx++) {
-    nnbrs = surf->vertices_topology[vtx].vnum;
-    x0 = surf->vertices[vtx].x;
-    y0 = surf->vertices[vtx].y;
-    z0 = surf->vertices[vtx].z;
+    nnbrs   = surf->vertices_topology[vtx].vnum;
+    x0      = surf->vertices[vtx].x;
+    y0      = surf->vertices[vtx].y;
+    z0      = surf->vertices[vtx].z;
     dnbrsum = 0.0;
     for (nthnbr = 0; nthnbr < nnbrs; nthnbr++) {
       nbrvtx = surf->vertices_topology[vtx].v[nthnbr];
-      xn = surf->vertices[nbrvtx].x;
-      yn = surf->vertices[nbrvtx].y;
-      zn = surf->vertices[nbrvtx].z;
-      dx = x0 - xn;
-      dy = y0 - yn;
-      dz = z0 - zn;
-      d = sqrt(dx * dx + dy * dy + dz * dz);
+      xn     = surf->vertices[nbrvtx].x;
+      yn     = surf->vertices[nbrvtx].y;
+      zn     = surf->vertices[nbrvtx].z;
+      dx     = x0 - xn;
+      dy     = y0 - yn;
+      dz     = z0 - zn;
+      d      = sqrt(dx * dx + dy * dy + dz * dz);
       dnbrsum += d;
     } /* end loop over neighbor */
     dnbrmn = dnbrsum / nnbrs;
@@ -327,15 +328,15 @@ double MRISmeanInterVertexDist(MRIS *surf) {
   -------------------------------------------------------------------*/
 MRI *MRISgaussianSmooth2(MRIS *Surf, MRI *Src, double GStd, MRI *Targ,
                          double TruncFactor) {
-  int vtxno1, vtxno2;
-  float val;
-  MRI *SrcTmp, *GSum, *GSum2, *nXNbrsMRI, *AreaSum;
+  int     vtxno1, vtxno2;
+  float   val;
+  MRI *   SrcTmp, *GSum, *GSum2, *nXNbrsMRI, *AreaSum;
   VERTEX *vtx1;
-  double Radius, Radius2, dmax, GVar2, f, d, costheta, theta, g, dotprod, ga;
-  int n, err, nXNbrs, *XNbrVtxNo, frame;
+  double  Radius, Radius2, dmax, GVar2, f, d, costheta, theta, g, dotprod, ga;
+  int     n, err, nXNbrs, *XNbrVtxNo, frame;
   double *XNbrDotProd, DotProdThresh;
-  double InterVertexDistAvg, InterVertexDistStdDev;
-  double VertexRadiusAvg, VertexRadiusStdDev;
+  double  InterVertexDistAvg, InterVertexDistStdDev;
+  double  VertexRadiusAvg, VertexRadiusStdDev;
 
   if (Surf->nvertices != Src->width) {
     printf("ERROR: MRISgaussianSmooth: Surf/Src dimension mismatch\n");
@@ -384,20 +385,20 @@ MRI *MRISgaussianSmooth2(MRIS *Surf, MRI *Src, double GStd, MRI *Targ,
   nXNbrsMRI =
       MRIallocSequence(Src->width, Src->height, Src->depth, MRI_FLOAT, 1);
 
-  vtx1 = &Surf->vertices[0];
+  vtx1    = &Surf->vertices[0];
   Radius2 = (vtx1->x * vtx1->x) + (vtx1->y * vtx1->y) + (vtx1->z * vtx1->z);
-  Radius = sqrt(Radius2);
-  dmax = TruncFactor * GStd; // truncate after TruncFactor stddevs
-  GVar2 = 2 * (GStd * GStd);
-  f = pow(1 / (sqrt(2 * M_PI) * GStd), 2.0); // squared for 2D
+  Radius  = sqrt(Radius2);
+  dmax    = TruncFactor * GStd; // truncate after TruncFactor stddevs
+  GVar2   = 2 * (GStd * GStd);
+  f       = pow(1 / (sqrt(2 * M_PI) * GStd), 2.0); // squared for 2D
   DotProdThresh = Radius2 * cos(dmax / Radius) * (1.0001);
 
   printf("Radius = %g, gstd = %g, dmax = %g, GVar2 = %g, f = %g, dpt = %g\n",
          Radius, GStd, dmax, GVar2, f, DotProdThresh);
 
-  InterVertexDistAvg = Surf->avg_vertex_dist;
+  InterVertexDistAvg    = Surf->avg_vertex_dist;
   InterVertexDistStdDev = Surf->std_vertex_dist;
-  VertexRadiusAvg = MRISavgVetexRadius(Surf, &VertexRadiusStdDev);
+  VertexRadiusAvg       = MRISavgVetexRadius(Surf, &VertexRadiusStdDev);
 
   printf("Total Area = %g \n", Surf->total_area);
   printf("Dist   = %g +/- %g\n", InterVertexDistAvg, InterVertexDistStdDev);
@@ -407,15 +408,15 @@ MRI *MRISgaussianSmooth2(MRIS *Surf, MRI *Src, double GStd, MRI *Targ,
   /* Initialize */
   for (vtxno1 = 0; vtxno1 < Surf->nvertices; vtxno1++) {
     MRIFseq_vox(AreaSum, vtxno1, 0, 0, 0) = 0; // dng
-    MRIFseq_vox(GSum, vtxno1, 0, 0, 0) = 0;
-    MRIFseq_vox(GSum2, vtxno1, 0, 0, 0) = 0;
+    MRIFseq_vox(GSum, vtxno1, 0, 0, 0)    = 0;
+    MRIFseq_vox(GSum2, vtxno1, 0, 0, 0)   = 0;
     for (frame = 0; frame < Targ->nframes; frame++)
       MRIFseq_vox(Targ, vtxno1, 0, 0, frame) = 0;
     Surf->vertices[vtxno1].val2bak = -1;
   }
 
   /* These are needed by MRISextendedNeighbors()*/
-  XNbrVtxNo = (int *)calloc(Surf->nvertices, sizeof(int));
+  XNbrVtxNo   = (int *)calloc(Surf->nvertices, sizeof(int));
   XNbrDotProd = (double *)calloc(Surf->nvertices, sizeof(double));
 
   if (false) {
@@ -443,8 +444,8 @@ MRI *MRISgaussianSmooth2(MRIS *Surf, MRI *Src, double GStd, MRI *Targ,
 
     // ------- Loop over neighbors of target voxel --------------
     for (n = 0; n < nXNbrs; n++) {
-      vtxno2 = XNbrVtxNo[n];
-      dotprod = XNbrDotProd[n];
+      vtxno2   = XNbrVtxNo[n];
+      dotprod  = XNbrDotProd[n];
       costheta = dotprod / Radius2;
 
       // cos theta might be slightly > 1 due to precision
@@ -460,7 +461,7 @@ MRI *MRISgaussianSmooth2(MRIS *Surf, MRI *Src, double GStd, MRI *Targ,
       d = Radius * theta;
 
       /* Compute weighting factor for this distance */
-      g = f * exp(-(d * d) / (GVar2));
+      g  = f * exp(-(d * d) / (GVar2));
       ga = g * Surf->vertices[vtxno2].area;
 
       if (vtxno2 == 81921 && false) {
@@ -488,7 +489,7 @@ MRI *MRISgaussianSmooth2(MRIS *Surf, MRI *Src, double GStd, MRI *Targ,
   if (false) {
     for (vtxno1 = 0; vtxno1 < Surf->nvertices; vtxno1++) {
       vtx1 = &Surf->vertices[vtxno1];
-      g = MRIFseq_vox(GSum, vtxno1, 0, 0, 0);
+      g    = MRIFseq_vox(GSum, vtxno1, 0, 0, 0);
       MRIFseq_vox(GSum2, vtxno1, 0, 0, 0) /= (g * g);
       for (frame = 0; frame < Targ->nframes; frame++) {
         val = MRIFseq_vox(Targ, vtxno1, 0, 0, frame);

@@ -35,12 +35,12 @@ BrushProperty::BrushProperty(QObject *parent)
       m_bDrawConnectedOnly(false), m_bEnableEraseRange(false),
       m_bEnableEraseExcludeRange(false), m_bFill3D(false), m_layerRef(NULL),
       m_dFillValue(1.0), m_dEraseValue(0.0), m_bIsCloning(false) {
-  m_dDrawRange[0] = 0;
-  m_dDrawRange[1] = 1000000;
-  m_dExcludeRange[0] = 0;
-  m_dExcludeRange[1] = 0;
-  m_dEraseRange[0] = 0;
-  m_dEraseRange[1] = 1000000;
+  m_dDrawRange[0]         = 0;
+  m_dDrawRange[1]         = 1000000;
+  m_dExcludeRange[0]      = 0;
+  m_dExcludeRange[1]      = 0;
+  m_dEraseRange[0]        = 0;
+  m_dEraseRange[1]        = 1000000;
   m_dEraseExcludeRange[0] = 0;
   m_dEraseExcludeRange[1] = 0;
   QSettings settings;

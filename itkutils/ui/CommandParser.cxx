@@ -1,7 +1,7 @@
-#include <string>
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
+#include <string>
 
 #include "CommandParser.h"
 
@@ -23,8 +23,8 @@ char **CommandParser::GetArguments() { return m_aArgs; }
 int CommandParser::GetPosition(const char *iFlag) {
   std::string flag = std::string(iFlag);
 
-  bool isFound = false;
-  int position = -1;
+  bool isFound  = false;
+  int  position = -1;
 
   for (int cArgs = 0; cArgs < m_nArgs && isFound == false; cArgs++) {
     if (flag == m_aArgs[cArgs]) {
@@ -64,7 +64,7 @@ std::vector<int> CommandParser::GetArgumentIntVector(const char *iFlag) {
 
   const char delimiter = ',';
 
-  char *argument = this->GetArgument(iFlag);
+  char *           argument = this->GetArgument(iFlag);
   std::vector<int> argumentVector;
 
   if (argument != NULL) {

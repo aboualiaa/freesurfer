@@ -29,26 +29,26 @@ IEEE Transaction on Pattern Analysis and Machine Intelligence, 2012.
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
+#include "autoencoder.h"
+#include "const.h"
+#include "diag.h"
 #include "error.h"
 #include "macros.h"
-#include "diag.h"
-#include "proto.h"
+#include "mri.h"
 #include "mrimorph.h"
-#include "utils.h"
-#include "const.h"
+#include "proto.h"
 #include "timer.h"
+#include "utils.h"
 #include "version.h"
-#include "autoencoder.h"
 
 // static VECTOR *extract_neighborhood(MRI *mri, int  whalf, int x0, int y0, int
 // z0, VECTOR *v)  ;
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -71,24 +71,24 @@ static int nlevels = 4;
 
 static MRI *mri_train;
 
-static int ras_point_set = 0;
-static double Gr = -1;
-static double Ga = -1;
-static double Gs = -1;
-static int read_flag = 0;
+static int    ras_point_set = 0;
+static double Gr            = -1;
+static double Ga            = -1;
+static double Gs            = -1;
+static int    read_flag     = 0;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  char *in_fname, *out_fname, *sae_fname;
-  int msec, minutes, seconds, n;
-  Timer start;
-  MRI *mri, *mri_orig, *mri_scaled, *mri_ae_out, *mri_dot_out,
+  int    ac, nargs;
+  char * in_fname, *out_fname, *sae_fname;
+  int    msec, minutes, seconds, n;
+  Timer  start;
+  MRI *  mri, *mri_orig, *mri_scaled, *mri_ae_out, *mri_dot_out,
       *mri_orig_cropped, *mri_pyramid[MAX_PYR_LEVELS],
       *mri_train_pyramid[MAX_PYR_LEVELS];
-  SAE *sae;
+  SAE *  sae;
   double mean, train_mean;
-  AE *ae_last; // deepest layer
+  AE *   ae_last; // deepest layer
 
   nargs = handleVersionOption(argc, argv, "mri_apply_autoencoder");
   if (nargs && argc - nargs == 1)
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     argv += nargs;
   }
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   sae_fname = argv[2];
   out_fname = argv[3];
   if (argc < 4)
@@ -133,12 +133,12 @@ int main(int argc, char *argv[]) {
 
   if (read_flag) {
     LABEL *area;
-    char fname[STRLEN];
+    char   fname[STRLEN];
     //    HISTOGRAM *h, *hcdf ;
-    int bin;
+    int    bin;
     double thresh, xv, yv, zv;
-    float fmin, fmax;
-    MRI *mri_ae_p;
+    float  fmin, fmax;
+    MRI *  mri_ae_p;
 
     sprintf(fname, "%s.AE.p.mgz", out_fname);
     printf("reading AE p-val product from  %s\n", fname);
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
                 "%s: could not read precomputed AE p-value map from %s\n",
                 Progname, fname);
 
-    in_fname = "cube.inputs.label";
+    in_fname  = "cube.inputs.label";
     out_fname = "cube.outputs.label";
     if (FileExists(in_fname) == 0) {
       area = LabelAlloc(1, NULL, in_fname);
@@ -164,13 +164,13 @@ int main(int argc, char *argv[]) {
       area = LabelRealloc(area, area->n_points + 1);
     }
 
-    bin = area->n_points++;
-    area->lv[bin].vno = -1;
+    bin                   = area->n_points++;
+    area->lv[bin].vno     = -1;
     area->lv[bin].deleted = 0;
-    area->lv[bin].stat = 0;
-    area->lv[bin].x = Gx;
-    area->lv[bin].y = Gy;
-    area->lv[bin].z = Gz;
+    area->lv[bin].stat    = 0;
+    area->lv[bin].x       = Gx;
+    area->lv[bin].y       = Gy;
+    area->lv[bin].z       = Gz;
     printf("writing label file with %d points\n", area->n_points);
     LabelWrite(area, in_fname);
 
@@ -200,13 +200,13 @@ int main(int argc, char *argv[]) {
     MRIcomputeCentroid(mri_ae_p, &xv, &yv, &zv);
     printf("thresholding SAE output at %f, centroid at (%2.1f, %2.1f, %2.1f)\n",
            thresh, xv, yv, zv);
-    bin = area->n_points++;
+    bin                   = area->n_points++;
     area->lv[bin].deleted = 0;
-    area->lv[bin].stat = thresh;
-    area->lv[bin].vno = -1;
-    area->lv[bin].x = xv;
-    area->lv[bin].y = yv;
-    area->lv[bin].z = zv;
+    area->lv[bin].stat    = thresh;
+    area->lv[bin].vno     = -1;
+    area->lv[bin].x       = xv;
+    area->lv[bin].y       = yv;
+    area->lv[bin].z       = zv;
     LabelWrite(area, out_fname);
     exit(0);
   }
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
     mri = mri_tmp;
   }
   mri_scaled = MRIcopy(mri, NULL);
-  mean = MRImeanFrame(mri, 0);
+  mean       = MRImeanFrame(mri, 0);
   MRIaddScalar(mri, mri, -mean);
 
   if (x0 >= 0) {
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
     mri_tmp = MRIextract(mri, NULL, x0, y0_, z0, x1 - x0 + 1, y1_ - y0_ + 1,
                          z1 - z0 + 1);
     MRIfree(&mri);
-    mri = mri_tmp;
+    mri              = mri_tmp;
     mri_orig_cropped = MRIextract(mri, NULL, x0, y0_, z0, x1 - x0 + 1,
                                   y1_ - y0_ + 1, z1 - z0 + 1);
   } else
@@ -253,11 +253,11 @@ int main(int argc, char *argv[]) {
     ErrorExit(Gerror, "");
   ae_last = SAEfindLastLayer(sae, NULL);
   {
-    int x, y, z;
+    int     x, y, z;
     VECTOR *v_src, *v_dst, *v_ae_src, *v_ae_dst, *v_src_orig, *v_ae_src_orig;
-    char fname[STRLEN];
-    double rms;
-    MRI *mri_ae_p, *mri_p;
+    char    fname[STRLEN];
+    double  rms;
+    MRI *   mri_ae_p, *mri_p;
 
     if (x0 >= 0) {
       Gx -= x0;
@@ -265,23 +265,23 @@ int main(int argc, char *argv[]) {
       Gz -= z0;
     }
 
-    mri_ae_out = MRIclone(mri, NULL);
+    mri_ae_out  = MRIclone(mri, NULL);
     mri_dot_out = MRIclone(mri, NULL);
-    mri_ae_p = MRIclone(mri, NULL);
-    mri_p = MRIclone(mri, NULL);
+    mri_ae_p    = MRIclone(mri, NULL);
+    mri_p       = MRIclone(mri, NULL);
     printf("computing feature similarity using auto-encoder...\n");
 
     SAEfillInputVector(mri_train_pyramid, sae->nlevels, Gx, Gy, Gz, sae->whalf,
                        sae->first->v_input);
     SAEactivateNetwork(sae);
     v_ae_src_orig = VectorCopy(ae_last->v_hidden, NULL);
-    v_ae_src = VectorZeroMean(v_ae_src_orig, NULL);
+    v_ae_src      = VectorZeroMean(v_ae_src_orig, NULL);
 
     v_src_orig = SAEfillInputVector(mri_train_pyramid, sae->nlevels, Gx, Gy, Gz,
                                     sae->whalf, NULL);
-    v_src = VectorZeroMean(v_src_orig, NULL);
-    v_dst = VectorClone(v_src);
-    v_ae_dst = VectorClone(v_ae_src);
+    v_src      = VectorZeroMean(v_src_orig, NULL);
+    v_dst      = VectorClone(v_src);
+    v_ae_dst   = VectorClone(v_ae_src);
 
     for (x = sae->whalf; x < mri->width - sae->whalf; x++)
       for (y = sae->whalf; y < mri->height - sae->whalf; y++)
@@ -319,9 +319,9 @@ int main(int argc, char *argv[]) {
     VectorFree(&v_ae_dst);
     if (x0 < 0) {
       x0 = y0_ = z0 = 0;
-      x1 = mri->width - 1;
-      y1_ = mri->height - 1;
-      z1 = mri->depth - 1;
+      x1            = mri->width - 1;
+      y1_           = mri->height - 1;
+      z1            = mri->depth - 1;
     }
     if (x0 >= 0) {
       MRI *mri_tmp = MRIclone(mri_scaled, NULL);
@@ -351,17 +351,17 @@ int main(int argc, char *argv[]) {
     MRIwrite(mri_ae_p, fname);
   }
   if (synthesize) {
-    int x, y, z, wsize = 2 * sae->whalf + 1, ind;
-    MRI *mri_tmp, *mri_total, *mri_tmp2;
+    int     x, y, z, wsize = 2 * sae->whalf + 1, ind;
+    MRI *   mri_tmp, *mri_total, *mri_tmp2;
     VECTOR *v;
-    char path[STRLEN], fname[STRLEN];
+    char    path[STRLEN], fname[STRLEN];
 
     printf("synthesizing output volume using auto-encoder...\n");
 
     ind = wsize * wsize * wsize / 2 + 1;
     FileNameRemoveExtension(out_fname, path);
-    mri_tmp = MRIalloc(wsize, wsize, wsize, mri->type);
-    mri_tmp2 = MRIclone(mri, NULL);
+    mri_tmp   = MRIalloc(wsize, wsize, wsize, mri->type);
+    mri_tmp2  = MRIclone(mri, NULL);
     mri_total = MRIcopy(mri, NULL);
     //    MRIscalarMul(mri_total, mri_total, (float)(wsize*wsize*wsize)) ;
     for (x = sae->whalf; x < mri->width - sae->whalf; x++)
@@ -385,9 +385,9 @@ int main(int argc, char *argv[]) {
     //   MRIscalarMul(mri_total, mri_total, 1.0/(float)(wsize*wsize*wsize)) ;
     if (x0 < 0) {
       x0 = y0_ = z0 = 0;
-      x1 = mri->width - 1;
-      y1_ = mri->height - 1;
-      z1 = mri->depth - 1;
+      x1            = mri->width - 1;
+      y1_           = mri->height - 1;
+      z1            = mri->depth - 1;
     }
     if (mri_orig->type == MRI_UCHAR) {
       MRIwrite(mri_total, "t1.mgz");
@@ -407,7 +407,7 @@ int main(int argc, char *argv[]) {
   }
 
   SAEfree(&sae);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -422,22 +422,22 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "RAS")) {
     ras_point_set = 1;
-    Gr = atoi(argv[2]);
-    Ga = atoi(argv[3]);
-    Gs = atoi(argv[4]);
-    nargs = 3;
+    Gr            = atoi(argv[2]);
+    Ga            = atoi(argv[3]);
+    Gs            = atoi(argv[4]);
+    nargs         = 3;
     printf("applying SAE at TK RAS point (%2.1f, %2.1f, %2.1f)\n", Gr, Ga, Gs);
   } else
     switch (toupper(*option)) {
@@ -458,12 +458,12 @@ static int get_option(int argc, char *argv[]) {
       printf("synthesizing volume using autoencoder\n");
       break;
     case 'X':
-      x0 = atoi(argv[2]);
-      x1 = atoi(argv[3]);
-      y0_ = atoi(argv[4]);
-      y1_ = atoi(argv[5]);
-      z0 = atoi(argv[6]);
-      z1 = atoi(argv[7]);
+      x0    = atoi(argv[2]);
+      x1    = atoi(argv[3]);
+      y0_   = atoi(argv[4]);
+      y1_   = atoi(argv[5]);
+      z0    = atoi(argv[6]);
+      z1    = atoi(argv[7]);
       nargs = 6;
       printf("extracting subregion X %d -->%d, y %d --> %d, z %d --> %d\n", x0,
              x1, y0_, y1_, z0, z1);

@@ -37,7 +37,7 @@ CommandEdit::CommandEdit(QWidget *parent) : QTextEdit(parent) {
   this->setWordWrapMode(QTextOption::WrapAnywhere);
   connect(this, SIGNAL(selectionChanged()), this, SLOT(OnSelectionChanged()));
   QSettings settings;
-  m_listHistory = settings.value("/CommandConsole/History").toStringList();
+  m_listHistory   = settings.value("/CommandConsole/History").toStringList();
   m_nPosInHistory = m_listHistory.size();
   this->setAcceptRichText(false);
 }
@@ -120,7 +120,7 @@ void CommandEdit::mouseMoveEvent(QMouseEvent *e) {
 
 void CommandEdit::ProcessCommandInput() {
   m_strTempCommand.clear();
-  QString strg = this->toPlainText();
+  QString     strg = this->toPlainText();
   QStringList list = strg.mid(m_strPrompt.size())
                          .split(QRegExp("\\s+"), QString::SkipEmptyParts);
   if (!list.isEmpty() &&
@@ -138,17 +138,17 @@ void CommandEdit::ProcessCommandInput() {
 }
 
 void CommandEdit::OnSelectionChanged() {
-  QTextCursor cursor = this->textCursor();
-  bool bToMove = false;
-  int nStart = cursor.selectionStart();
-  int nEnd = cursor.selectionEnd();
+  QTextCursor cursor  = this->textCursor();
+  bool        bToMove = false;
+  int         nStart  = cursor.selectionStart();
+  int         nEnd    = cursor.selectionEnd();
   if (nStart < m_strPrompt.size()) {
     bToMove = true;
-    nStart = m_strPrompt.size();
+    nStart  = m_strPrompt.size();
   }
   if (nEnd < m_strPrompt.size()) {
     bToMove = true;
-    nEnd = m_strPrompt.size();
+    nEnd    = m_strPrompt.size();
   }
   if (bToMove) {
     cursor.setPosition(nStart, QTextCursor::MoveAnchor);

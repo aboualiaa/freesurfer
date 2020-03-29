@@ -77,7 +77,7 @@ public:
 private:
   // tensor data at this level
   float *m_data;
-  int m_size;
+  int    m_size;
 
   // disable copy constructor
   Tensor1F(const Tensor1F &x);
@@ -167,7 +167,7 @@ public:
 
 private:
   // tensor data at this level
-  T *m_data;
+  T * m_data;
   int m_size;
 
   // disable copy constructor

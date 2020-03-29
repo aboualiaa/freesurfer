@@ -24,11 +24,11 @@
 #ifndef TRACKDATA_H
 #define TRACKDATA_H
 
-#include <QObject>
-#include <QStringList>
 #include "Track.h"
-#include <QPair>
 #include <QColor>
+#include <QObject>
+#include <QPair>
+#include <QStringList>
 
 class TrackData : public QObject {
   friend class LayerTrack;
@@ -51,13 +51,13 @@ public slots:
   void Clear();
 
 protected:
-  int m_nDim[3];
-  float m_dVoxelSize[3];
-  int m_nNumberOfScalars;
+  int         m_nDim[3];
+  float       m_dVoxelSize[3];
+  int         m_nNumberOfScalars;
   QStringList m_scalarNames;
-  int m_nNumberOfProperties;
+  int         m_nNumberOfProperties;
   QStringList m_propertyNames;
-  double m_dVoxToRas[4][4];
+  double      m_dVoxToRas[4][4];
 
   int m_nNumberOfTracks;
   int m_nNumberOfPoints;
@@ -66,7 +66,7 @@ protected:
   bool m_bValidVoxToRas;
   bool m_bHasEmbeddedColor;
 
-  QList<Track> m_tracks;
+  QList<Track>                 m_tracks;
   QList<QPair<double, double>> m_rangeScalar;
   QList<QPair<double, double>> m_rangeProperty;
 };

@@ -22,11 +22,11 @@
  *
  */
 #include "DialogNewPointSet.h"
-#include "ui_DialogNewPointSet.h"
-#include "LayerMRI.h"
 #include "LayerCollection.h"
-#include "MainWindow.h"
+#include "LayerMRI.h"
 #include "LayerPropertyPointSet.h"
+#include "MainWindow.h"
+#include "ui_DialogNewPointSet.h"
 #include <QMessageBox>
 
 DialogNewPointSet::DialogNewPointSet(QWidget *parent)
@@ -35,7 +35,7 @@ DialogNewPointSet::DialogNewPointSet(QWidget *parent)
   LayerCollection *col_mri =
       MainWindow::GetMainWindow()->GetLayerCollection("MRI");
   QList<Layer *> layers = col_mri->GetLayers();
-  int nSel = 0;
+  int            nSel   = 0;
   for (int i = 0; i < layers.size(); i++) {
     ui->comboBoxTemplate->addItem(layers[i]->GetName(),
                                   QVariant::fromValue((QObject *)layers[i]));

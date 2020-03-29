@@ -1,37 +1,37 @@
-#include "itkListSample.h"
-#include "itkWeightedCentroidKdTreeGenerator.h"
 #include "itkKdTreeBasedKmeansEstimator.h"
+#include "itkListSample.h"
 #include "itkMinimumDecisionRule.h"
 #include "itkSampleClassifierFilter.h"
+#include "itkWeightedCentroidKdTreeGenerator.h"
 
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 
-#include "fsSurface.h"
 #include "GetPot.h"
+#include "fsSurface.h"
 #include <vnl/vnl_cross.h>
 
 int main(int narg, char *arg[]) {
   constexpr unsigned int Dimension = 3;
-  using CoordType = float;
-  using ImageType = itk::Image<CoordType, Dimension>;
-  using OutputImageType = itk::Image<CoordType, 4>;
-  using ReaderType = itk::ImageFileReader<ImageType>;
-  using MeasurementVectorType = itk::VariableLengthVector<CoordType>;
-  using SampleType = itk::Statistics::ListSample<MeasurementVectorType>;
+  using CoordType                  = float;
+  using ImageType                  = itk::Image<CoordType, Dimension>;
+  using OutputImageType            = itk::Image<CoordType, 4>;
+  using ReaderType                 = itk::ImageFileReader<ImageType>;
+  using MeasurementVectorType      = itk::VariableLengthVector<CoordType>;
+  using SampleType  = itk::Statistics::ListSample<MeasurementVectorType>;
   using SurfaceType = fs::Surface<CoordType, Dimension>;
   using TreeGeneratorType =
       itk::Statistics::WeightedCentroidKdTreeGenerator<SampleType>;
-  using TreeType = TreeGeneratorType::KdTreeType;
+  using TreeType      = TreeGeneratorType::KdTreeType;
   using EstimatorType = itk::Statistics::KdTreeBasedKmeansEstimator<TreeType>;
   using MembershipFunctionType =
       itk::Statistics::DistanceToCentroidMembershipFunction<
           MeasurementVectorType>;
   using MembershipFunctionPointer = MembershipFunctionType::Pointer;
-  using DecisionRuleType = itk::Statistics::MinimumDecisionRule;
+  using DecisionRuleType          = itk::Statistics::MinimumDecisionRule;
   using ClassifierType = itk::Statistics::SampleClassifierFilter<SampleType>;
   using ClassLabelVectorObjectType = ClassifierType::ClassLabelVectorObjectType;
-  using ClassLabelVectorType = ClassifierType::ClassLabelVectorType;
+  using ClassLabelVectorType       = ClassifierType::ClassLabelVectorType;
   using MembershipFunctionVectorObjectType =
       ClassifierType::MembershipFunctionVectorObjectType;
   using MembershipFunctionVectorType =
@@ -47,14 +47,14 @@ int main(int narg, char *arg[]) {
     return -1;
   }
 
-  const char *surfFilename = cl.follow("", "-s");
-  const char *outputImageFilename = cl.follow("", "-o");
-  const char *outputSurfaceFilename = cl.follow("", "-b");
-  const char *annotationFilename = cl.follow("", "-a");
-  unsigned int numClusters = cl.follow(10, "-c");
-  unsigned int deep = cl.follow(10, "-d");
-  unsigned int imageNumber = cl.follow(1, "-i");
-  std::vector<const char *> imageFilenames;
+  const char *                    surfFilename          = cl.follow("", "-s");
+  const char *                    outputImageFilename   = cl.follow("", "-o");
+  const char *                    outputSurfaceFilename = cl.follow("", "-b");
+  const char *                    annotationFilename    = cl.follow("", "-a");
+  unsigned int                    numClusters           = cl.follow(10, "-c");
+  unsigned int                    deep                  = cl.follow(10, "-d");
+  unsigned int                    imageNumber           = cl.follow(1, "-i");
+  std::vector<const char *>       imageFilenames;
   std::vector<ImageType::Pointer> images;
   for (unsigned int i = 0; i < imageNumber; i++) {
     imageFilenames.push_back(cl.next(""));
@@ -75,35 +75,35 @@ int main(int narg, char *arg[]) {
 
   MRI *imageFS = MRIread(imageFilenames[0]);
 
-  SampleType::Pointer sample = SampleType::New();
-  unsigned int vectorLenght = (deep * 2 + 1) * imageNumber;
+  SampleType::Pointer sample       = SampleType::New();
+  unsigned int        vectorLenght = (deep * 2 + 1) * imageNumber;
   std::cout << vectorLenght << std::endl;
   sample->SetMeasurementVectorSize(vectorLenght);
 
   std::vector<SurfaceType::PointType> points;
-  ImageType::RegionType region3D = image->GetLargestPossibleRegion();
+  ImageType::RegionType    region3D    = image->GetLargestPossibleRegion();
   ImageType::DirectionType direction3D = image->GetDirection();
-  ImageType::SpacingType spacing3D = image->GetSpacing();
+  ImageType::SpacingType   spacing3D   = image->GetSpacing();
 
-  OutputImageType::Pointer output = OutputImageType::New();
-  OutputImageType::RegionType region4D;
+  OutputImageType::Pointer       output = OutputImageType::New();
+  OutputImageType::RegionType    region4D;
   OutputImageType::DirectionType direction;
-  OutputImageType::SpacingType spacing;
-  OutputImageType::PointType origin;
+  OutputImageType::SpacingType   spacing;
+  OutputImageType::PointType     origin;
 
-  OutputImageType::SizeType size;
+  OutputImageType::SizeType  size;
   OutputImageType::IndexType start;
   direction.SetIdentity();
   for (int i = 0; i < 3; i++) {
-    size[i] = region3D.GetSize()[i];
-    start[i] = region3D.GetIndex()[i];
+    size[i]    = region3D.GetSize()[i];
+    start[i]   = region3D.GetIndex()[i];
     spacing[i] = spacing3D[i];
-    origin[i] = image->GetOrigin()[i];
+    origin[i]  = image->GetOrigin()[i];
     for (int j = 0; j < 3; j++)
       direction[j][i] = direction3D[j][i];
   }
   start[3] = 0;
-  size[3] = vectorLenght;
+  size[3]  = vectorLenght;
   // spacing[3]=vol/3;
   origin[3] = 0;
   region4D.SetSize(size);
@@ -122,9 +122,9 @@ int main(int narg, char *arg[]) {
        itCells != surface->GetCells()->End(); itCells++) {
     SurfaceType::CellType::PointIdIterator pointsIt =
         itCells.Value()->PointIdsBegin();
-    SurfaceType::PointType p1 = surface->GetPoint(*pointsIt);
-    SurfaceType::PointType p2 = surface->GetPoint(*(++pointsIt));
-    SurfaceType::PointType p3 = surface->GetPoint(*(++pointsIt));
+    SurfaceType::PointType p1    = surface->GetPoint(*pointsIt);
+    SurfaceType::PointType p2    = surface->GetPoint(*(++pointsIt));
+    SurfaceType::PointType p3    = surface->GetPoint(*(++pointsIt));
     SurfaceType::PointType edge1 = p1 - p2;
     SurfaceType::PointType edge2 = p1 - p3;
     // std::cout << p1 << std::endl;
@@ -149,9 +149,9 @@ int main(int narg, char *arg[]) {
 
         double x, y, z;
         MRISsurfaceRASToVoxel(surf, imageFS, pt[0], pt[1], pt[2], &x, &y, &z);
-        index[0] = x;
-        index[1] = y;
-        index[2] = z;
+        index[0]                          = x;
+        index[1]                          = y;
+        index[2]                          = z;
         mv[j * (deep * 2 + 1) + d + deep] = images[j]->GetPixel(index);
       }
     }
@@ -164,7 +164,7 @@ int main(int narg, char *arg[]) {
   treeGenerator->SetBucketSize(160);
   treeGenerator->Update();
 
-  EstimatorType::Pointer estimator = EstimatorType::New();
+  EstimatorType::Pointer        estimator = EstimatorType::New();
   EstimatorType::ParametersType initialMeans(vectorLenght * numClusters);
   for (unsigned int c = 0; c < numClusters; c++) {
     for (unsigned int i = 0; i <= vectorLenght; i++)
@@ -187,7 +187,7 @@ int main(int narg, char *arg[]) {
   }
   */
   DecisionRuleType::Pointer decisionRule = DecisionRuleType::New();
-  ClassifierType::Pointer classifier = ClassifierType::New();
+  ClassifierType::Pointer   classifier   = ClassifierType::New();
   classifier->SetDecisionRule(decisionRule);
   classifier->SetInput(sample);
   classifier->SetNumberOfClasses(numClusters);
@@ -209,9 +209,9 @@ int main(int narg, char *arg[]) {
 
   MembershipFunctionType::CentroidType centroid(
       sample->GetMeasurementVectorSize());
-  int index = 0;
+  int                                    index = 0;
   std::vector<MembershipFunctionPointer> functions;
-  std::vector<MeasurementVectorType> clusterMeans;
+  std::vector<MeasurementVectorType>     clusterMeans;
   for (unsigned int i = 0; i < numClusters; i++) {
     MembershipFunctionPointer membershipFunction =
         MembershipFunctionType::New();
@@ -244,13 +244,13 @@ int main(int narg, char *arg[]) {
       clusterMeans[i] /= norm[i];
   }
 
-  iter = membershipSample->Begin();
+  iter  = membershipSample->Begin();
   int i = 0;
 
   COLOR_TABLE *ct;
-  int annot;
+  int          annot;
 
-  ct = CTABalloc(numClusters + 1);
+  ct       = CTABalloc(numClusters + 1);
   surf->ct = ct;
 
   while (iter != membershipSample->End()) {
@@ -280,7 +280,7 @@ int main(int narg, char *arg[]) {
   std::cout << " i " << i << " " << surf->nvertices << "  " << surf->nfaces
             << std::endl;
 
-  using WriterType = itk::ImageFileWriter<OutputImageType>;
+  using WriterType           = itk::ImageFileWriter<OutputImageType>;
   WriterType::Pointer writer = WriterType::New();
   writer->SetFileName(outputImageFilename);
   writer->SetInput(output);

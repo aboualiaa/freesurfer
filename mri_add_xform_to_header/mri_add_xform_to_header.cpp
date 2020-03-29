@@ -22,27 +22,27 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
-#include "version.h"
+#include "error.h"
 #include "fio.h"
+#include "mri.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 static void usage_exit();
 
 const char *Progname;
 
-int verbose = 0;
+int verbose      = 0;
 int CopyNameOnly = 0;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  MRI *mri = nullptr;
-  char *xform_fname = nullptr, *in_fname = nullptr, *out_fname = nullptr;
+  int    ac, nargs;
+  MRI *  mri         = nullptr;
+  char * xform_fname = nullptr, *in_fname = nullptr, *out_fname = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mri_add_xform_to_header");
 
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
   Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

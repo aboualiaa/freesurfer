@@ -1,8 +1,8 @@
 #ifndef __kvlConditionalGaussianEntropyCostAndGradientCalculator_h
 #define __kvlConditionalGaussianEntropyCostAndGradientCalculator_h
 
-#include "kvlAtlasMeshPositionCostAndGradientCalculator.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshPositionCostAndGradientCalculator.h"
 
 namespace kvl {
 
@@ -134,9 +134,9 @@ class ConditionalGaussianEntropyCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self = ConditionalGaussianEntropyCostAndGradientCalculator;
-  using Superclass = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = ConditionalGaussianEntropyCostAndGradientCalculator;
+  using Superclass   = AtlasMeshPositionCostAndGradientCalculator;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -160,9 +160,9 @@ protected:
   virtual ~ConditionalGaussianEntropyCostAndGradientCalculator();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
   ConditionalGaussianEntropyCostAndGradientCalculator(

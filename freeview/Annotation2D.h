@@ -26,9 +26,9 @@
 #ifndef Annotation2D_h
 #define Annotation2D_h
 
-#include <QObject>
-#include <QColor>
 #include "vtkSmartPointer.h"
+#include <QColor>
+#include <QObject>
 
 class vtkTextActor;
 class vtkActor2D;
@@ -67,9 +67,9 @@ Q_SIGNALS:
 private:
   void UpdateScaleActors(double length, int nNumOfTicks, const char *title);
 
-  vtkSmartPointer<vtkTextActor> m_actorCoordinates[6];
-  vtkSmartPointer<vtkActor2D> m_actorScaleLine;
-  vtkSmartPointer<vtkTextActor> m_actorScaleTitle;
+  vtkSmartPointer<vtkTextActor>      m_actorCoordinates[6];
+  vtkSmartPointer<vtkActor2D>        m_actorScaleLine;
+  vtkSmartPointer<vtkTextActor>      m_actorScaleTitle;
   vtkSmartPointer<vtkPropCollection> m_actorsAll;
 };
 

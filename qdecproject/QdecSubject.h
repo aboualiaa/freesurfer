@@ -31,14 +31,12 @@
 
 #include "QdecFactor.h"
 
-using namespace std;
-
 class QdecSubject {
 public:
   // Constructors/Destructors
   //
 
-  QdecSubject(string isId, vector<QdecFactor *> iFactors);
+  QdecSubject(std::string isId, std::vector<QdecFactor *> iFactors);
 
   virtual ~QdecSubject();
 
@@ -49,13 +47,13 @@ public:
    * @return the value of msId
    * @return string
    */
-  string GetId() { return this->msId; }
+  std::string GetId() { return this->msId; }
 
   /**
    * @return string
    * @param  isFactorName
    */
-  string GetDiscreteFactorValue(const char *isFactorName);
+  std::string GetDiscreteFactorValue(const char *isFactorName);
 
   /**
    * @return double
@@ -66,12 +64,12 @@ public:
   /**
    * @return vector < QdecFactor* >
    */
-  vector<QdecFactor *> GetContinuousFactors();
+  std::vector<QdecFactor *> GetContinuousFactors();
 
   /**
    * @return vector < QdecFactor* >
    */
-  vector<QdecFactor *> GetFactors() { return this->mFactors; }
+  std::vector<QdecFactor *> GetFactors() { return this->mFactors; }
 
   /**
    * @return QdecFactor
@@ -93,11 +91,11 @@ private:
 
   // the subject identifier, as found in the 'fsid' column
   // of the table.dat input file.
-  string msId;
+  std::string msId;
 
   // Stores factor values (either discrete or continous)
   // pertaining to this subject.
-  vector<QdecFactor *> mFactors;
+  std::vector<QdecFactor *> mFactors;
 };
 
 #endif // QDECSUBJECT_H

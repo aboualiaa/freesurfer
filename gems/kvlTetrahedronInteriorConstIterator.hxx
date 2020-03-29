@@ -23,11 +23,11 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
   // region, the bounding box is clipped accordingly
   //
   // ============================================================================================
-  typedef typename ImageType::RegionType RegionType;
-  typedef typename RegionType::IndexType IndexType;
+  typedef typename ImageType::RegionType     RegionType;
+  typedef typename RegionType::IndexType     IndexType;
   typedef typename IndexType::IndexValueType IndexValueType;
-  typedef typename RegionType::SizeType SizeType;
-  typedef typename SizeType::SizeValueType SizeValueType;
+  typedef typename RegionType::SizeType      SizeType;
+  typedef typename SizeType::SizeValueType   SizeValueType;
 
   // Compute the coordinates of the lower corner of the bounding box around the
   // tetradron
@@ -103,7 +103,7 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
   Superclass::operator=(Superclass(
       ptr, region)); // Workaround for non-existing this->SetRegion( region )
 
-  m_SliceBeginPosition = this->m_Position;
+  m_SliceBeginPosition  = this->m_Position;
   m_ColumnBeginPosition = this->m_Position;
 
   // ============================================================================================
@@ -363,7 +363,7 @@ void TetrahedronInteriorConstIterator<TPixel>::MoveOnePixel() {
     // Update the data pointer
     m_SliceBeginPosition += this->m_OffsetTable[2];
     m_ColumnBeginPosition = m_SliceBeginPosition;
-    this->m_Position = m_SliceBeginPosition;
+    this->m_Position      = m_SliceBeginPosition;
 
     //  Update the baricentric coordinates
     for (int loadingNumber = 0; loadingNumber < numberOfLoadings;

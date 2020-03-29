@@ -23,22 +23,22 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
-int reductions = 1;
+int         reductions = 1;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs, i;
-  MRI *mri_src, *mri_dst = nullptr;
-  char *in_fname, *out_fname;
+  int    ac, nargs, i;
+  MRI *  mri_src, *mri_dst = nullptr;
+  char * in_fname, *out_fname;
 
   nargs = handleVersionOption(argc, argv, "mri_reduce");
   if (nargs && argc - nargs == 1)
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

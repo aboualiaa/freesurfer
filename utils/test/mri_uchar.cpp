@@ -29,8 +29,8 @@
 // purpose: convert data to uchar value without scaling
 //
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 extern "C" {
 #include "mri.h"
@@ -38,25 +38,24 @@ extern "C" {
 const char *Progname = "mri_uchar";
 }
 
-using namespace std;
-
 int main(int argc, char *argv[]) {
   if (argc < 1) {
-    cerr << "Usage: mri_uchar <involume> <outvolume>" << endl;
-    cerr << "       any involume val is set to uchar volume " << endl;
-    cerr << "       i.e. -0.5 <= val < 0.5 becomes 0. " << endl;
-    cerr << "       make sure that involume does not have values more than 255 "
-         << endl;
+    std::cerr << "Usage: mri_uchar <involume> <outvolume>" << std::endl;
+    std::cerr << "       any involume val is set to uchar volume " << std::endl;
+    std::cerr << "       i.e. -0.5 <= val < 0.5 becomes 0. " << std::endl;
+    std::cerr
+        << "       make sure that involume does not have values more than 255 "
+        << std::endl;
     return -1;
   }
   MRI *src = MRIread(argv[1]);
   if (!src) {
-    cerr << "could not open " << argv[1] << endl;
+    std::cerr << "could not open " << argv[1] << std::endl;
     return -1;
   }
   MRI *dst = MRIalloc(src->width, src->height, src->depth, MRI_UCHAR);
   if (!dst) {
-    cerr << "could not allocate memory for the target" << endl;
+    std::cerr << "could not allocate memory for the target" << std::endl;
     return -1;
   }
   // copy geometry information
@@ -74,6 +73,6 @@ int main(int argc, char *argv[]) {
             count++;
           MRIsetVoxVal(dst, i, j, k, f, fapp);
         }
-  cout << "non-zero value count = " << count << endl;
+  std::cout << "non-zero value count = " << count << std::endl;
   MRIwrite(dst, argv[2]);
 }

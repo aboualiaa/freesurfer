@@ -7,9 +7,9 @@ namespace kvl {
 class GetAlphasInMeshNodes : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef GetAlphasInMeshNodes Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef GetAlphasInMeshNodes          Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -18,7 +18,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(GetAlphasInMeshNodes, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -35,7 +36,8 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) != 0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name()) !=
+        0) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
@@ -49,9 +51,9 @@ public:
     // std::cout << "numberOfNodes :" << numberOfNodes << std::endl;
     // std::cout << "numberOfLabels:" << numberOfLabels << std::endl;
     mwSize dims[2];
-    dims[0] = numberOfNodes;
-    dims[1] = numberOfLabels;
-    plhs[0] = mxCreateNumericArray(2, dims, mxSINGLE_CLASS, mxREAL);
+    dims[0]    = numberOfNodes;
+    dims[1]    = numberOfLabels;
+    plhs[0]    = mxCreateNumericArray(2, dims, mxSINGLE_CLASS, mxREAL);
     auto *data = static_cast<float *>(mxGetData(plhs[0]));
 
     for (AtlasMesh::PointDataContainer::ConstIterator it =
@@ -65,8 +67,10 @@ public:
   }
 
 protected:
-  GetAlphasInMeshNodes()= default;;
-  ~GetAlphasInMeshNodes() override= default;;
+  GetAlphasInMeshNodes() = default;
+  ;
+  ~GetAlphasInMeshNodes() override = default;
+  ;
 
   GetAlphasInMeshNodes(const Self &); // purposely not implemented
   void operator=(const Self &);       // purposely not implemented

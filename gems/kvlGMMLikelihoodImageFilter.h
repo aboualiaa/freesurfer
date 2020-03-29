@@ -1,8 +1,8 @@
 #ifndef kvlGMMLikelihoodImageFilter_h
 #define kvlGMMLikelihoodImageFilter_h
 
-#include "itkImageToImageFilter.h"
 #include "itkArray.h"
+#include "itkImageToImageFilter.h"
 #include <vector>
 
 namespace kvl {
@@ -27,8 +27,8 @@ class GMMLikelihoodImageFilter
           TInputImage, itk::Image<itk::Array<typename TInputImage::PixelType>,
                                   TInputImage::ImageDimension>> {
 public:
-  using Self = GMMLikelihoodImageFilter<TInputImage>;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = GMMLikelihoodImageFilter<TInputImage>;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
   itkNewMacro(Self);
 
@@ -49,7 +49,7 @@ public:
   /** */
   void SetParameters(const std::vector<vnl_vector<double>> &means,
                      const std::vector<vnl_matrix<double>> &variances,
-                     const std::vector<double> &mixtureWeights,
+                     const std::vector<double> &            mixtureWeights,
                      const std::vector<int> &numberOfGaussiansPerClass);
 
 protected:
@@ -64,12 +64,12 @@ private:
   GMMLikelihoodImageFilter(const Self &);
   void operator=(const Self &);
 
-  std::vector<vnl_vector<double>> m_Means;
+  std::vector<vnl_vector<double>>              m_Means;
   std::vector<std::vector<vnl_matrix<double>>> m_Precisions;
-  std::vector<double> m_piTermMultiv;
-  std::vector<std::vector<double>> m_OneOverSqrtDetCov;
-  std::vector<double> m_MixtureWeights;
-  std::vector<int> m_NumberOfGaussiansPerClass;
+  std::vector<double>                          m_piTermMultiv;
+  std::vector<std::vector<double>>             m_OneOverSqrtDetCov;
+  std::vector<double>                          m_MixtureWeights;
+  std::vector<int>                             m_NumberOfGaussiansPerClass;
 };
 
 } // namespace kvl

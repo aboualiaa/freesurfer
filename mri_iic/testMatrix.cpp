@@ -22,12 +22,12 @@
  *
  */
 
-#include <iostream>
 #include "matrix3d.h"
+#include <iostream>
 
 int main() {
-  int rows = 0;
-  int cols = 0;
+  int rows   = 0;
+  int cols   = 0;
   int slices = 0;
   std::cout << "Enter matrix dimensions:\n"
             << "Rows: ";

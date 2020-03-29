@@ -33,9 +33,7 @@
 #include "timer.h"
 #include "version.h"
 
-using namespace std;
-
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -47,7 +45,7 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
+static char vcid[]   = "";
 const char *Progname = "dmri_group";
 
 int nSection = 0;
@@ -55,65 +53,66 @@ int nSection = 0;
 char *inListFile = nullptr, *outRefFile = nullptr, *outBase = nullptr;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
-  unsigned int nmeas;
-  unsigned int npt;
-  unsigned int narc;
-  unsigned int nsubjmin;
-  unsigned int ntot;
-  float distmin;
-  float darc;
-  float arcmin;
-  float arcmax;
-  float arc1m;
-  float arc2m;
-  float arc1s;
-  float arc2s;
-  float lthresh1;
-  float lthresh2;
-  float uthresh1;
-  float uthresh2;
-  string listline;
-  string filename;
-  vector<bool>::const_iterator iout;
-  vector<unsigned int>::const_iterator insubj;
-  vector<float>::const_iterator icenter;
-  vector<float>::const_iterator iarc1;
-  vector<float>::const_iterator iarc2;
-  vector<vector<unsigned int>>::const_iterator iallk;
-  vector<vector<float>>::const_iterator itemplate;
-  vector<vector<float>>::const_iterator iallm;
-  vector<vector<float>>::const_iterator iallp;
-  vector<vector<float>>::iterator ialla;
-  vector<bool> isout;
-  vector<unsigned int> lengths;
-  vector<unsigned int> nsubj;
-  vector<float> meanpath;
-  vector<float> arcend1;
-  vector<float> arcend2;
-  vector<string> subjlist;
-  vector<string> measlist;
-  vector<vector<unsigned int>> allknots;
-  vector<vector<float>> allarc;
-  vector<vector<float>> allpaths;
-  vector<vector<float>> allmeas;
-  vector<vector<float>> allmeasint;
-  vector<vector<float>> allmeassec;
-  ifstream listfile;
-  ofstream pathfile;
-  ofstream pathrasfile;
-  MATRIX *outv2r;
-  MRI *outref = nullptr;
+  int                                                    nargs;
+  int                                                    cputime;
+  unsigned int                                           nmeas;
+  unsigned int                                           npt;
+  unsigned int                                           narc;
+  unsigned int                                           nsubjmin;
+  unsigned int                                           ntot;
+  float                                                  distmin;
+  float                                                  darc;
+  float                                                  arcmin;
+  float                                                  arcmax;
+  float                                                  arc1m;
+  float                                                  arc2m;
+  float                                                  arc1s;
+  float                                                  arc2s;
+  float                                                  lthresh1;
+  float                                                  lthresh2;
+  float                                                  uthresh1;
+  float                                                  uthresh2;
+  std::string                                            listline;
+  std::string                                            filename;
+  std::vector<bool>::const_iterator                      iout;
+  std::vector<unsigned int>::const_iterator              insubj;
+  std::vector<float>::const_iterator                     icenter;
+  std::vector<float>::const_iterator                     iarc1;
+  std::vector<float>::const_iterator                     iarc2;
+  std::vector<std::vector<unsigned int>>::const_iterator iallk;
+  std::vector<std::vector<float>>::const_iterator        itemplate;
+  std::vector<std::vector<float>>::const_iterator        iallm;
+  std::vector<std::vector<float>>::const_iterator        iallp;
+  std::vector<std::vector<float>>::iterator              ialla;
+  std::vector<bool>                                      isout;
+  std::vector<unsigned int>                              lengths;
+  std::vector<unsigned int>                              nsubj;
+  std::vector<float>                                     meanpath;
+  std::vector<float>                                     arcend1;
+  std::vector<float>                                     arcend2;
+  std::vector<std::string>                               subjlist;
+  std::vector<std::string>                               measlist;
+  std::vector<std::vector<unsigned int>>                 allknots;
+  std::vector<std::vector<float>>                        allarc;
+  std::vector<std::vector<float>>                        allpaths;
+  std::vector<std::vector<float>>                        allmeas;
+  std::vector<std::vector<float>>                        allmeasint;
+  std::vector<std::vector<float>>                        allmeassec;
+  std::ifstream                                          listfile;
+  std::ofstream                                          pathfile;
+  std::ofstream                                          pathrasfile;
+  MATRIX *                                               outv2r;
+  MRI *                                                  outref = nullptr;
 
   nargs = handleVersionOption(argc, argv, "dmri_group");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -141,10 +140,11 @@ int main(int argc, char **argv) {
 
   // Read output reference volume
   if (outRefFile != nullptr) {
-    cout << "Loading output reference volume from " << outRefFile << endl;
+    std::cout << "Loading output reference volume from " << outRefFile
+              << std::endl;
     outref = MRIread(outRefFile);
     if (outref == nullptr) {
-      cout << "ERROR: Could not read " << outRefFile << endl;
+      std::cout << "ERROR: Could not read " << outRefFile << std::endl;
       exit(1);
     }
 
@@ -152,25 +152,26 @@ int main(int argc, char **argv) {
   }
 
   // Read list of inputs
-  cout << "Loading list of inputs from " << inListFile << endl;
-  listfile.open(inListFile, ios::in);
+  std::cout << "Loading list of inputs from " << inListFile << std::endl;
+  listfile.open(inListFile, std::ios::in);
   if (!listfile) {
-    cout << "ERROR: Could not open " << inListFile << " for reading" << endl;
+    std::cout << "ERROR: Could not open " << inListFile << " for reading"
+              << std::endl;
     exit(1);
   }
 
   while (getline(listfile, listline)) {
-    string measline;
-    string subjid;
-    vector<unsigned int> knots;
-    vector<float> arc;
-    vector<float> path;
-    vector<float> meas;
-    vector<string> inputs;
-    ifstream infile;
-    istringstream liststr(listline);
-    MRI *inref = nullptr;
-    AffineReg affinereg;
+    std::string               measline;
+    std::string               subjid;
+    std::vector<unsigned int> knots;
+    std::vector<float>        arc;
+    std::vector<float>        path;
+    std::vector<float>        meas;
+    std::vector<std::string>  inputs;
+    std::ifstream             infile;
+    std::istringstream        liststr(listline);
+    MRI *                     inref = nullptr;
+    AffineReg                 affinereg;
 #ifndef NO_CVS_UP_IN_HERE
     NonlinReg nonlinreg;
 #endif
@@ -186,21 +187,23 @@ int main(int argc, char **argv) {
     // First input on each line is the path directory
     filename = inputs[0] + "/pathstats.byvoxel.txt";
 
-    cout << "Loading measures along the path from " << filename << endl;
-    infile.open(filename.c_str(), ios::in);
+    std::cout << "Loading measures along the path from " << filename
+              << std::endl;
+    infile.open(filename.c_str(), std::ios::in);
     if (!infile) {
-      cout << "WARN: Could not open " << filename << endl
-           << "WARN: Skipping ahead" << endl;
+      std::cout << "WARN: Could not open " << filename << std::endl
+                << "WARN: Skipping ahead" << std::endl;
       continue;
     }
 
     // Second input on each line is an input reference volume
     if (inputs.size() > 1) {
       // Read reference volumes
-      cout << "Loading input reference volume from " << inputs[1] << endl;
+      std::cout << "Loading input reference volume from " << inputs[1]
+                << std::endl;
       inref = MRIread(inputs[1].c_str());
       if (inref == nullptr) {
-        cout << "ERROR: Could not read " << inputs[1] << endl;
+        std::cout << "ERROR: Could not read " << inputs[1] << std::endl;
         exit(1);
       }
     }
@@ -220,8 +223,8 @@ int main(int argc, char **argv) {
     // Read measures along the path
     while (getline(infile, measline)) {
       if (measline.substr(0, 1).compare("#") == 0) { // Comment line
-        string word;
-        istringstream linestr(measline);
+        std::string        word;
+        std::istringstream linestr(measline);
 
         linestr >> word;
         linestr >> word;
@@ -230,8 +233,8 @@ int main(int argc, char **argv) {
           linestr >> subjid;
         }
       } else if (measline.substr(0, 1).compare("x") == 0) { // Header line
-        string word;
-        istringstream linestr(measline);
+        std::string        word;
+        std::istringstream linestr(measline);
 
         // The first three column headers are "x", "y", "z"
         linestr >> word;
@@ -244,10 +247,10 @@ int main(int argc, char **argv) {
           measlist.push_back(word);
         }
       } else { // Value line
-        float val;
-        vector<float> point;
-        vector<float> valpoint;
-        istringstream linestr(measline);
+        float              val;
+        std::vector<float> point;
+        std::vector<float> valpoint;
+        std::istringstream linestr(measline);
 
         // The first three columns are the x, y, z coordinates of this point
         linestr >> val;
@@ -273,9 +276,9 @@ int main(int argc, char **argv) {
         if (path.empty()) {
           arc.push_back(0.0);
         } else {
-          const float dx = *(path.end() - 3) - point[0];
-          const float dy = *(path.end() - 2) - point[1];
-          const float dz = *(path.end() - 1) - point[2];
+          const float dx     = *(path.end() - 3) - point[0];
+          const float dy     = *(path.end() - 2) - point[1];
+          const float dz     = *(path.end() - 1) - point[2];
           const float seglen = sqrt(dx * dx + dy * dy + dz * dz);
 
           arc.push_back(*(arc.end() - 1) + seglen);
@@ -313,8 +316,8 @@ int main(int argc, char **argv) {
     // Points that are a quarter of the way or half way along the path
     for (int k = 1; k < 4; k++) {
       const float arcpart = *(arc.end() - 1) * 0.25 * k;
-      float dmin = numeric_limits<float>::infinity();
-      auto imin = arc.begin();
+      float       dmin    = std::numeric_limits<float>::infinity();
+      auto        imin    = arc.begin();
 
       for (auto iarc = arc.begin(); iarc < arc.end(); iarc++) {
         const float darc = fabs(arcpart - *iarc);
@@ -339,14 +342,14 @@ int main(int argc, char **argv) {
   nmeas = measlist.size();
 
   // Find the most representative path
-  iallk = allknots.begin();
+  iallk     = allknots.begin();
   itemplate = allpaths.begin();
-  icenter = itemplate->begin() + (allknots[0][2] * 3);
-  distmin = numeric_limits<float>::infinity();
+  icenter   = itemplate->begin() + (allknots[0][2] * 3);
+  distmin   = std::numeric_limits<float>::infinity();
 
   for (auto iallp = allpaths.begin(); iallp < allpaths.end(); iallp++) {
-    float dist = 0.0;
-    auto jallk = allknots.begin();
+    float dist  = 0.0;
+    auto  jallk = allknots.begin();
 
     for (auto jallp = allpaths.begin(); jallp < allpaths.end(); jallp++) {
       if (jallp != iallp) {
@@ -355,7 +358,7 @@ int main(int argc, char **argv) {
         for (auto jknot = jallk->begin(); jknot < jallk->end(); jknot++) {
           const unsigned int ioffset = (*iknot) * 3;
           const unsigned int joffset = (*jknot) * 3;
-          const float dx = iallp->at(ioffset) - jallp->at(joffset);
+          const float        dx      = iallp->at(ioffset) - jallp->at(joffset);
           const float dy = iallp->at(ioffset + 1) - jallp->at(joffset + 1);
           const float dz = iallp->at(ioffset + 2) - jallp->at(joffset + 2);
 
@@ -369,9 +372,9 @@ int main(int argc, char **argv) {
     }
 
     if (dist < distmin) {
-      itemplate = iallp;                             // Most representative path
-      icenter = iallp->begin() + (iallk->at(2) * 3); // Mid-point on path
-      distmin = dist;
+      itemplate = iallp; // Most representative path
+      icenter   = iallp->begin() + (iallk->at(2) * 3); // Mid-point on path
+      distmin   = dist;
     }
 
     iallk++;
@@ -381,22 +384,22 @@ int main(int argc, char **argv) {
   darc = *(allarc[itemplate - allpaths.begin()].end() - 1) /
          lengths[itemplate - allpaths.begin()];
 
-  cout << "INFO: Sampling interval along path is ";
+  std::cout << "INFO: Sampling interval along path is ";
   if (outref != nullptr) {
-    cout << darc * outref->xsize << " mm" << endl;
+    std::cout << darc * outref->xsize << " mm" << std::endl;
   } else {
-    cout << darc << " voxels" << endl;
+    std::cout << darc << " voxels" << std::endl;
   }
 
   if (0) {
     // Write points of most representative path to file as RAS coords
     filename = string(outBase) + ".median.txt";
 
-    cout << "Writing median path to " << filename << endl;
-    pathrasfile.open(filename.c_str(), ios::out);
+    std::cout << "Writing median path to " << filename << std::endl;
+    pathrasfile.open(filename.c_str(), std::ios::out);
 
-    pathrasfile << "#!ascii label, vox2ras=scanner" << endl
-                << itemplate->size() / 3 << endl;
+    pathrasfile << "#!ascii label, vox2ras=scanner" << std::endl
+                << itemplate->size() / 3 << std::endl;
 
     npt = 1;
 
@@ -410,7 +413,7 @@ int main(int argc, char **argv) {
                            ipt[2] * outv2r->rptr[k][3] + outv2r->rptr[k][4];
       }
 
-      pathrasfile << " 0" << endl;
+      pathrasfile << " 0" << std::endl;
 
       npt++;
     }
@@ -422,15 +425,15 @@ int main(int argc, char **argv) {
   ialla = allarc.begin();
 
   for (auto iallp = allpaths.begin(); iallp < allpaths.end(); iallp++) {
-    float dmin = numeric_limits<float>::infinity();
+    float dmin = std::numeric_limits<float>::infinity();
     float arc0 = 0;
-    auto iarc = ialla->begin();
+    auto  iarc = ialla->begin();
 
     // Find the closest point to the mid-point of the most representative path
     for (auto ipath = iallp->begin(); ipath < iallp->end(); ipath += 3) {
-      const float dx = ipath[0] - icenter[0];
-      const float dy = ipath[1] - icenter[1];
-      const float dz = ipath[2] - icenter[2];
+      const float dx   = ipath[0] - icenter[0];
+      const float dy   = ipath[1] - icenter[1];
+      const float dz   = ipath[2] - icenter[2];
       const float dist = dx * dx + dy * dy + dz * dz;
       //...
 
@@ -482,7 +485,8 @@ int main(int argc, char **argv) {
     if (*iarc1 < lthresh1 || *iarc1 > uthresh1 || *iarc2 < lthresh2 ||
         *iarc2 > uthresh2) {
       *iout = true;
-      cout << "Found outlier path: " << subjlist[iout - isout.begin()] << endl;
+      std::cout << "Found outlier path: " << subjlist[iout - isout.begin()]
+                << std::endl;
     }
 
     iarc1++;
@@ -503,23 +507,23 @@ int main(int argc, char **argv) {
 
   iallm = allmeas.begin();
   iallp = allpaths.begin();
-  iout = isout.begin();
+  iout  = isout.begin();
 
   for (auto ialla = allarc.begin(); ialla < allarc.end(); ialla++) {
-    float larc = arcmin + darc;
-    auto insubj = nsubj.begin();
-    auto imean = meanpath.begin();
-    vector<float> meas;
+    float              larc   = arcmin + darc;
+    auto               insubj = nsubj.begin();
+    auto               imean  = meanpath.begin();
+    std::vector<float> meas;
 
     for (unsigned int ilen = 0; ilen < narc; ilen++) {
-      float slope;
-      vector<float>::const_iterator iarc = ialla->begin();
-      vector<float>::const_iterator imeas1;
-      vector<float>::const_iterator imeas0;
+      float                              slope;
+      std::vector<float>::const_iterator iarc = ialla->begin();
+      std::vector<float>::const_iterator imeas1;
+      std::vector<float>::const_iterator imeas0;
 
       if (*iarc > larc) { // No points in this segment, skip ahead
         for (int k = static_cast<int>(nmeas); k > 0; k--) {
-          meas.push_back(numeric_limits<float>::infinity());
+          meas.push_back(std::numeric_limits<float>::infinity());
         }
       } else {
         while (*iarc < larc && iarc < ialla->end()) {
@@ -528,7 +532,7 @@ int main(int argc, char **argv) {
 
         if (iarc == ialla->end()) { // No points in this segment, skip ahead
           for (int k = static_cast<int>(nmeas); k > 0; k--) {
-            meas.push_back(numeric_limits<float>::infinity());
+            meas.push_back(std::numeric_limits<float>::infinity());
           }
         } else {
           // Linear interpolation
@@ -611,22 +615,22 @@ int main(int argc, char **argv) {
   // Write points of mean path to file as voxel and RAS coords
   filename = string(outBase) + ".coords.mean.txt";
 
-  cout << "Writing mean path voxel coords to " << filename << endl;
-  pathfile.open(filename.c_str(), ios::out);
+  std::cout << "Writing mean path voxel coords to " << filename << std::endl;
+  pathfile.open(filename.c_str(), std::ios::out);
 
   filename = string(outBase) + ".path.mean.txt";
 
-  cout << "Writing mean path RAS coords to " << filename << endl;
-  pathrasfile.open(filename.c_str(), ios::out);
+  std::cout << "Writing mean path RAS coords to " << filename << std::endl;
+  pathrasfile.open(filename.c_str(), std::ios::out);
 
-  pathrasfile << "#!ascii label, vox2ras=scanner" << endl
-              << meanpath.size() / 3 << endl;
+  pathrasfile << "#!ascii label, vox2ras=scanner" << std::endl
+              << meanpath.size() / 3 << std::endl;
 
   npt = 1;
 
   for (auto ipt = meanpath.begin(); ipt < meanpath.end(); ipt += 3) {
     // Write voxel coordinates
-    pathfile << ipt[0] << " " << ipt[1] << " " << ipt[2] << endl;
+    pathfile << ipt[0] << " " << ipt[1] << " " << ipt[2] << std::endl;
 
     // Write RAS coordinates (in freeview waypoint file format)
     pathrasfile << npt;
@@ -637,7 +641,7 @@ int main(int argc, char **argv) {
                          ipt[2] * outv2r->rptr[k][3] + outv2r->rptr[k][4];
     }
 
-    pathrasfile << " 0" << endl;
+    pathrasfile << " 0" << std::endl;
 
     npt++;
   }
@@ -649,32 +653,32 @@ int main(int argc, char **argv) {
   ntot = allmeasint[0].size();
 
   for (auto imeas = measlist.begin(); imeas < measlist.end(); imeas++) {
-    string outname = string(outBase) + "." + *imeas + ".txt";
-    ofstream outfile;
+    std::string   outname = string(outBase) + "." + *imeas + ".txt";
+    std::ofstream outfile;
 
-    cout << "Writing group table to " << outname << endl;
-    outfile.open(outname.c_str(), ios::out);
+    std::cout << "Writing group table to " << outname << std::endl;
+    outfile.open(outname.c_str(), std::ios::out);
 
     // Write subject names
     for (auto isubj = subjlist.begin(); isubj < subjlist.end(); isubj++) {
       outfile << *isubj << " ";
     }
 
-    outfile << endl;
+    outfile << std::endl;
 
     // Write interpolated values of this measure
     for (unsigned ipt = imeas - measlist.begin(); ipt < ntot; ipt += nmeas) {
       for (iallm = allmeasint.begin(); iallm < allmeasint.end(); iallm++) {
         auto ival = iallm->begin() + ipt;
 
-        if (*ival == numeric_limits<float>::infinity()) {
+        if (*ival == std::numeric_limits<float>::infinity()) {
           outfile << "NaN ";
         } else {
           outfile << *ival << " ";
         }
       }
 
-      outfile << endl;
+      outfile << std::endl;
     }
 
     outfile.close();
@@ -691,14 +695,14 @@ int main(int argc, char **argv) {
     iallm = allmeas.begin();
 
     for (auto ialla = allarc.begin(); ialla < allarc.end(); ialla++) {
-      float larc = arcmin + darc;
-      vector<float>::const_iterator iarc = ialla->begin();
-      vector<float>::const_iterator imeas = iallm->begin();
-      vector<float> meas;
+      float                              larc  = arcmin + darc;
+      std::vector<float>::const_iterator iarc  = ialla->begin();
+      std::vector<float>::const_iterator imeas = iallm->begin();
+      std::vector<float>                 meas;
 
       while (larc <= arcmax) {
-        int nsamp = 0;
-        vector<float> avg(nmeas, 0);
+        int                nsamp = 0;
+        std::vector<float> avg(nmeas, 0);
 
         while (*iarc < larc && iarc < ialla->end()) {
           for (auto iavg = avg.begin(); iavg < avg.end(); iavg++) {
@@ -717,7 +721,7 @@ int main(int argc, char **argv) {
           }
         } else { // No points in this section
           for (auto iavg = avg.begin(); iavg < avg.end(); iavg++) {
-            *iavg = numeric_limits<float>::infinity();
+            *iavg = std::numeric_limits<float>::infinity();
           }
         }
 
@@ -735,32 +739,33 @@ int main(int argc, char **argv) {
     ntot = nSection * nmeas;
 
     for (auto imeas = measlist.begin(); imeas < measlist.end(); imeas++) {
-      string outname = string(outBase) + "." + *imeas + "." + nsec + ".txt";
-      ofstream outfile;
+      std::string outname =
+          string(outBase) + "." + *imeas + "." + nsec + ".txt";
+      std::ofstream outfile;
 
-      cout << "Writing group table to " << outname << endl;
-      outfile.open(outname.c_str(), ios::out);
+      std::cout << "Writing group table to " << outname << std::endl;
+      outfile.open(outname.c_str(), std::ios::out);
 
       // Write subject names
       for (auto isubj = subjlist.begin(); isubj < subjlist.end(); isubj++) {
         outfile << *isubj << " ";
       }
 
-      outfile << endl;
+      outfile << std::endl;
 
       // Write section averages of values of this measure
       for (unsigned ipt = imeas - measlist.begin(); ipt < ntot; ipt += nmeas) {
         for (iallm = allmeassec.begin(); iallm < allmeassec.end(); iallm++) {
           auto ival = iallm->begin() + ipt;
 
-          if (*ival == numeric_limits<float>::infinity()) {
+          if (*ival == std::numeric_limits<float>::infinity()) {
             outfile << "NaN ";
           } else {
             outfile << *ival << " ";
           }
         }
 
-        outfile << endl;
+        outfile << std::endl;
       }
 
       outfile.close();
@@ -773,19 +778,19 @@ int main(int argc, char **argv) {
   }
 
   cputime = cputimer.milliseconds();
-  cout << "Done in " << cputime / 1000.0 << " sec." << endl;
+  std::cout << "Done in " << cputime / 1000.0 << " sec." << std::endl;
 
-  cout << "dmri_group done" << endl;
+  std::cout << "dmri_group done" << std::endl;
   return (0);
   exit(0);
 }
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
+  int    nargc;
+  int    nargsused;
   char **pargv;
-  char *option;
+  char * option;
 
   if (argc < 1) {
     usage_exit();
@@ -818,18 +823,18 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       }
       inListFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (strcmp(option, "--ref") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       outRefFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      outBase = fio_fullpath(pargv[0]);
+      outBase   = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--sec") == 0) {
       if (nargc < 1) {
@@ -852,38 +857,39 @@ static int parse_commandline(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static void print_usage() {
-  cout << endl
-       << "USAGE: " << Progname << endl
-       << endl
-       << "Required arguments" << endl
-       << "   --list <file>:" << endl
-       << "     Text file with list of individual inputs" << endl
-       << "   --ref <file>:" << endl
-       << "     Reference volume for output path" << endl
-       << "   --out <base>:" << endl
-       << "     Base name of output text files" << endl
-       << endl
-       << "Optional arguments" << endl
-       << "   --sec <num>:" << endl
-       << "     Divide the pathway into a number of sections and output "
-       << endl
-       << "     average measures for each section" << endl
-       << endl
-       << "Other options" << endl
-       << "   --debug:     turn on debugging" << endl
-       << "   --checkopts: don't run anything, just check options and exit"
-       << endl
-       << "   --help:      print out information on how to use this program"
-       << endl
-       << "   --version:   print out version and exit" << endl
-       << endl;
+  std::cout
+      << std::endl
+      << "USAGE: " << Progname << std::endl
+      << std::endl
+      << "Required arguments" << std::endl
+      << "   --list <file>:" << std::endl
+      << "     Text file with list of individual inputs" << std::endl
+      << "   --ref <file>:" << std::endl
+      << "     Reference volume for output path" << std::endl
+      << "   --out <base>:" << std::endl
+      << "     Base name of output text files" << std::endl
+      << std::endl
+      << "Optional arguments" << std::endl
+      << "   --sec <num>:" << std::endl
+      << "     Divide the pathway into a number of sections and output "
+      << std::endl
+      << "     average measures for each section" << std::endl
+      << std::endl
+      << "Other options" << std::endl
+      << "   --debug:     turn on debugging" << std::endl
+      << "   --checkopts: don't run anything, just check options and exit"
+      << std::endl
+      << "   --help:      print out information on how to use this program"
+      << std::endl
+      << "   --version:   print out version and exit" << std::endl
+      << std::endl;
 }
 
 /* --------------------------------------------- */
 static void print_help() {
   print_usage();
 
-  cout << endl << "..." << endl << endl;
+  std::cout << std::endl << "..." << std::endl << std::endl;
 
   exit(1);
 }
@@ -896,32 +902,33 @@ static void usage_exit() {
 
 /* --------------------------------------------- */
 static void print_version() {
-  cout << vcid << endl;
+  std::cout << vcid << std::endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
 static void check_options() {
   if (outBase == nullptr) {
-    cout << "ERROR: must specify base name for output files" << endl;
+    std::cout << "ERROR: must specify base name for output files" << std::endl;
     exit(1);
   }
   if (inListFile == nullptr) {
-    cout << "ERROR: must specify input list file" << endl;
+    std::cout << "ERROR: must specify input list file" << std::endl;
     exit(1);
   }
 }
 
 static void dump_options(FILE *fp) {
-  cout << endl
-       << vcid << endl
-       << "cwd " << cwd << endl
-       << "cmdline " << cmdline << endl
-       << "sysname  " << uts.sysname << endl
-       << "hostname " << uts.nodename << endl
-       << "machine  " << uts.machine << endl
-       << "user     " << VERuser() << endl;
+  std::cout << std::endl
+            << vcid << std::endl
+            << "cwd " << cwd << std::endl
+            << "cmdline " << cmdline << std::endl
+            << "sysname  " << uts.sysname << std::endl
+            << "hostname " << uts.nodename << std::endl
+            << "machine  " << uts.machine << std::endl
+            << "user     " << VERuser() << std::endl;
 
-  cout << "Base name of output files: " << outBase << endl;
-  cout << "Text file with list of individual inputs: " << inListFile << endl;
+  std::cout << "Base name of output files: " << outBase << std::endl;
+  std::cout << "Text file with list of individual inputs: " << inListFile
+            << std::endl;
 }

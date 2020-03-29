@@ -24,14 +24,14 @@
  */
 
 #include "LayerDTI.h"
+#include "FSVolume.h"
 #include "LayerPropertyDTI.h"
 #include "MyUtils.h"
-#include "FSVolume.h"
 #include "vtkFloatArray.h"
-#include "vtkPointData.h"
 #include "vtkImageMapToColors.h"
 #include "vtkLookupTable.h"
 #include "vtkMath.h"
+#include "vtkPointData.h"
 #include <QDebug>
 
 LayerDTI::LayerDTI(LayerMRI *ref, QObject *parent)
@@ -102,10 +102,10 @@ bool LayerDTI::LoadDTIFromFile() {
 
 void LayerDTI::InitializeDTIColorMap() {
   vtkImageData *rasDTI = m_vectorSource->GetImageOutput();
-  int *dim = rasDTI->GetDimensions();
-  long long nSize = ((long long)dim[0]) * dim[1] * dim[2];
-  double v[4] = {0, 0, 0, 1};
-  int c[3];
+  int *         dim    = rasDTI->GetDimensions();
+  long long     nSize  = ((long long)dim[0]) * dim[1] * dim[2];
+  double        v[4]   = {0, 0, 0, 1};
+  int           c[3];
   vtkDataArray *vectors = rasDTI->GetPointData()->GetScalars();
   //  qDebug() << vectors->GetDataTypeAsString();
   m_vectorData->DeepCopy(vectors);
@@ -146,7 +146,7 @@ void LayerDTI::InitializeDTIColorMap() {
     //    int z = i/(dim[0]*dim[1]);
     //    m_imageData->SetScalarComponentFromFloat( x, y, z, 0, fa );
     //    m_imageData->SetScalarComponentFromFloat( x, y, z, 1, scalar );
-    *(ptr + i * 2) = fa;
+    *(ptr + i * 2)     = fa;
     *(ptr + i * 2 + 1) = scalar;
   }
   rotation_mat->Delete();
@@ -161,13 +161,13 @@ void LayerDTI::UpdateColorMap() {
     }
     if (m_imageData.GetPointer() &&
         m_imageData->GetNumberOfScalarComponents() > 1) {
-      int *dim = m_imageData->GetDimensions();
+      int *     dim   = m_imageData->GetDimensions();
       long long nSize = ((long long)dim[0]) * dim[1] * dim[2];
-      float *ptr = (float *)m_imageData->GetScalarPointer();
-      double v[4] = {0, 0, 0, 1};
-      int c[3];
-      double dMin = GetProperty()->GetMinGenericThreshold(),
-             dMax = GetProperty()->GetMaxGenericThreshold();
+      float *   ptr   = (float *)m_imageData->GetScalarPointer();
+      double    v[4]  = {0, 0, 0, 1};
+      int       c[3];
+      double    dMin = GetProperty()->GetMinGenericThreshold(),
+             dMax    = GetProperty()->GetMaxGenericThreshold();
       if (dMax > dMin) {
         for (long long i = 0; i < nSize; i++) {
           m_vectorData->GetTuple(i, v);
@@ -178,7 +178,7 @@ void LayerDTI::UpdateColorMap() {
               c[j] = 63;
             }
           }
-          float scalar = c[0] * 64 * 64 + c[1] * 64 + c[2];
+          float scalar       = c[0] * 64 * 64 + c[1] * 64 + c[2];
           *(ptr + i * 2 + 1) = scalar;
         }
       }
@@ -197,9 +197,9 @@ bool LayerDTI::GetVectorValue(double *pos, double *v_out) {
     return 0;
   }
 
-  double *orig = rasDTI->GetOrigin();
+  double *orig  = rasDTI->GetOrigin();
   double *vsize = rasDTI->GetSpacing();
-  int *ext = rasDTI->GetExtent();
+  int *   ext   = rasDTI->GetExtent();
 
   int n[3];
   for (int i = 0; i < 3; i++) {

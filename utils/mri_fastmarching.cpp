@@ -84,8 +84,8 @@ MRI *MRIextractDistanceMap(MRI *mri_src, MRI *mri_dst, int label,
           MRIFvox(mri_dst, x, y, z) = 0.0f;
 
     const int outside = 1;
-    const int inside = 2;
-    const int both = 3;
+    const int inside  = 2;
+    const int both    = 3;
 
     // positive inside and positive outside
     const int bothUnsigned = 4;

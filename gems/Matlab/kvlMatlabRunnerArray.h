@@ -18,9 +18,9 @@ namespace kvl {
 class MatlabRunnerArray : public itk::Object {
 public:
   /** Smart pointer typedef support. */
-  typedef MatlabRunnerArray Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef MatlabRunnerArray             Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Run-time type information (and related methods). */
@@ -39,14 +39,15 @@ public:
 
 protected:
   MatlabRunnerArray();
-  ~MatlabRunnerArray() override= default;;
+  ~MatlabRunnerArray() override = default;
+  ;
 
   MatlabRunnerArray(const Self &); // purposely not implemented
   void operator=(const Self &);    // purposely not implemented
 
 private:
   std::vector<MatlabRunner::Pointer> m_Array;
-  static Pointer m_Instance;
+  static Pointer                     m_Instance;
 };
 
 } // end namespace kvl

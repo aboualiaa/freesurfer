@@ -69,10 +69,10 @@ protected:
   virtual void UpdateVectorActor(int nPlane);
 
   FSVolume *m_vectorSource;
-  QString m_sVectorFileName;
+  QString   m_sVectorFileName;
 
-  FSVolume *m_eigenvalueSource; // eigen values
-  QString m_sEigenvalueFileName;
+  FSVolume *    m_eigenvalueSource; // eigen values
+  QString       m_sEigenvalueFileName;
   vtkDataArray *m_vectorData;
 };
 

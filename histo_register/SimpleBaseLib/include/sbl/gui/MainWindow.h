@@ -1,20 +1,20 @@
 #ifndef _SBL_MAIN_WINDOW_H_
 #define _SBL_MAIN_WINDOW_H_
-#include <wx/wx.h>
-#include <wx/notebook.h>
-#include <sbl/core/String.h>
 #include <sbl/core/Dict.h>
+#include <sbl/core/String.h>
 #include <sbl/gui/MiscWidgets.h>
+#include <wx/notebook.h>
+#include <wx/wx.h>
 namespace sbl {
 
 /// The KeyboardShortcut struct holds a command associated with a keyboard code.
 struct KeyboardShortcut {
   KeyboardShortcut(const String &_command, int _modifier) {
-    command = _command;
+    command  = _command;
     modifier = _modifier;
   }
   String command;
-  int modifier;
+  int    modifier;
 };
 
 /// The TimerEvent struct represents a callback to be run periodically by the
@@ -102,12 +102,12 @@ public:
 
 private:
   // internal data
-  wxNotebook *m_notebook;
-  wxTextCtrl *m_commandInputText;
-  wxListBox *m_commandOutputList;
-  wxTimer *m_timer;
+  wxNotebook *           m_notebook;
+  wxTextCtrl *           m_commandInputText;
+  wxListBox *            m_commandOutputList;
+  wxTimer *              m_timer;
   Dict<KeyboardShortcut> m_keyboardShortcuts;
-  Array<TimerEvent> m_timerEvents;
+  Array<TimerEvent>      m_timerEvents;
 
   // current (single, global) instance of MainWindow
   static MainWindow *s_instance;

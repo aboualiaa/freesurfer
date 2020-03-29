@@ -52,53 +52,53 @@ const char *Progname = nullptr;
 
 static void print_usage();
 static void print_help();
-static int guess_file_type(char *fname, int *is_path, int *is_label);
-static int convert_path_to_label(char *fname, char *ofname);
-static int convert_label_to_path(char *fname, char *ofname);
-static int convert_single_path_to_label(char *fname, char *ofname);
-static int convert_single_label_to_path(char *fname, char *ofname);
-static int connect_path(char *fname, char *ofname, char *subject, char *hemi);
-static int fill_path(char *fname, char *ofname, char *subject, char *hemi,
-                     int seed);
-static int fill_pathx(char *fname, char *ofname, char *surfacefname, int seed);
-static int con_and_fill_path(char *fname, char *ofname, char *subject,
-                             char *hemi, int seed);
-static int con_and_fill_pathx(char *fname, char *ofname, char *surfaceFname,
-                              int seed);
-static int con_and_fill_pathy(char *fname, char *ofname, MRIS *mris, int seed);
-static int parse_commandline(int argc, char **argv);
+static int  guess_file_type(char *fname, int *is_path, int *is_label);
+static int  convert_path_to_label(char *fname, char *ofname);
+static int  convert_label_to_path(char *fname, char *ofname);
+static int  convert_single_path_to_label(char *fname, char *ofname);
+static int  convert_single_label_to_path(char *fname, char *ofname);
+static int  connect_path(char *fname, char *ofname, char *subject, char *hemi);
+static int  fill_path(char *fname, char *ofname, char *subject, char *hemi,
+                      int seed);
+static int  fill_pathx(char *fname, char *ofname, char *surfacefname, int seed);
+static int  con_and_fill_path(char *fname, char *ofname, char *subject,
+                              char *hemi, int seed);
+static int  con_and_fill_pathx(char *fname, char *ofname, char *surfaceFname,
+                               int seed);
+static int  con_and_fill_pathy(char *fname, char *ofname, MRIS *mris, int seed);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void usage_exit();
 static void print_version();
-static int MRISfill(MRIS *mris, int seedvtxno);
+static int  MRISfill(MRIS *mris, int seedvtxno);
 
 static char vcid[] =
     "$Id: mri_path2label.c,v 1.23 2011/03/02 00:04:23 nicks Exp $";
 
-char *source_file = nullptr;
-char *dest_file = nullptr;
+char *source_file         = nullptr;
+char *dest_file           = nullptr;
 char *con_and_fillx_fname = nullptr;
-int path_to_label = 0;
-int label_to_path = 0;
-int single_path = 0;
-int connect = 0;
-int fill = 0, con_and_fill = 0, con_and_fillx = 0, fillseed = -1;
+int   path_to_label       = 0;
+int   label_to_path       = 0;
+int   single_path         = 0;
+int   connect             = 0;
+int   fill = 0, con_and_fill = 0, con_and_fillx = 0, fillseed = -1;
 char *subject = nullptr, *hemi = nullptr;
-char *surfacefname = nullptr;
-int debug = 0;
-int checkoptsonly = 0;
+char *surfacefname  = nullptr;
+int   debug         = 0;
+int   checkoptsonly = 0;
 
 /*-------------------------------------------------------------*/
-int main(int argc, char *argv[]) 
-{
+int main(int argc, char *argv[]) {
   int   nargs;
-  int   source_is_label      = 0;
-  int   source_is_path       = 0;
-  int   err                  = 0;
-  FILE* fp                   = NULL;
+  int   source_is_label = 0;
+  int   source_is_path  = 0;
+  int   err             = 0;
+  FILE *fp              = NULL;
 
   nargs = handleVersionOption(argc, argv, "mri_path2label");
-  if(nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
 
   Progname = argv[0];
@@ -174,8 +174,8 @@ int main(int argc, char *argv[])
         exit(1);
       }
       size_t n = 2000;
-      char tmpstr[2000];
-      char *tmps = &tmpstr[0];
+      char   tmpstr[2000];
+      char * tmps = &tmpstr[0];
       while (0 < getline(&tmps, &n, fp2)) {
         char srcfn[2000];
         char dstfn[2000];
@@ -232,10 +232,10 @@ int main(int argc, char *argv[])
 /*--------------------------------------------------------------------*/
 /*-----------------------------------------------------------*/
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
+  int    nargc;
+  int    nargsused;
   char **pargv;
-  char *option;
+  char * option;
 
   if (argc < 1) {
     usage_exit();
@@ -275,17 +275,17 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 2) {
         CMDargNErr(option, 2);
       }
-      connect = 1;
-      subject = pargv[0];
-      hemi = pargv[1];
+      connect   = 1;
+      subject   = pargv[0];
+      hemi      = pargv[1];
       nargsused = 2;
     } else if (strcasecmp(option, "--fill") == 0) {
       if (nargc < 3) {
         CMDargNErr(option, 3);
       }
-      fill = 1;
+      fill    = 1;
       subject = pargv[0];
-      hemi = pargv[1];
+      hemi    = pargv[1];
       sscanf(pargv[2], "%d", &fillseed);
       nargsused = 3;
     } else if (strcasecmp(option, "--confillx") == 0) {
@@ -293,25 +293,25 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 3);
       }
       con_and_fillx = 1;
-      surfacefname = pargv[0];
+      surfacefname  = pargv[0];
       sscanf(pargv[1], "%d", &fillseed);
       nargsused = 2;
     } else if (strcasecmp(option, "--confillxfn") == 0) {
       if (nargc < 2) {
         CMDargNErr(option, 3);
       }
-      con_and_fillx = 1;
-      surfacefname = pargv[0];
+      con_and_fillx       = 1;
+      surfacefname        = pargv[0];
       con_and_fillx_fname = pargv[1];
-      path_to_label = 1;
-      nargsused = 2;
+      path_to_label       = 1;
+      nargsused           = 2;
     } else if (strcasecmp(option, "--confill") == 0) {
       if (nargc < 3) {
         CMDargNErr(option, 3);
       }
       con_and_fill = 1;
-      subject = pargv[0];
-      hemi = pargv[1];
+      subject      = pargv[0];
+      hemi         = pargv[1];
       sscanf(pargv[2], "%d", &fillseed);
       nargsused = 3;
     } else if (strcasecmp(option, "--i") == 0) {
@@ -319,7 +319,7 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       }
       source_file = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (strcasecmp(option, "--o") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
@@ -399,15 +399,15 @@ static void print_help() {
 
 /*--------------------------------------------------------------------*/
 static int guess_file_type(char *fname, int *is_path, int *is_label) {
-  FILE *fp = nullptr;
-  char *line = nullptr;
-  size_t size = 1024;
-  char *needle = nullptr;
-  int found = 0;
+  FILE * fp     = nullptr;
+  char * line   = nullptr;
+  size_t size   = 1024;
+  char * needle = nullptr;
+  int    found  = 0;
 
-  *is_path = 0;
+  *is_path  = 0;
   *is_label = 0;
-  found = 0;
+  found     = 0;
 
   /* First just check the path checker. */
   if (PathIsPathFile(fname) != 0) {
@@ -435,7 +435,7 @@ static int guess_file_type(char *fname, int *is_path, int *is_label) {
       needle = strstr(line, "label");
       if (nullptr != needle) {
         *is_label = 1;
-        found = 1;
+        found     = 1;
         break;
       }
     }
@@ -452,14 +452,14 @@ static int guess_file_type(char *fname, int *is_path, int *is_label) {
 }
 /*--------------------------------------------------------------------*/
 static int convert_path_to_label(char *fname, char *ofname) {
-  int err;
-  int num_paths;
+  int    err;
+  int    num_paths;
   PATH **paths = nullptr;
-  int path_index;
-  int label_size;
-  int pno;
+  int    path_index;
+  int    label_size;
+  int    pno;
   LABEL *label = nullptr;
-  int label_vno;
+  int    label_vno;
 
   /* Read the paths file. */
   err = PathReadMany(fname, &num_paths, &paths);
@@ -472,7 +472,7 @@ static int convert_path_to_label(char *fname, char *ofname) {
   /* Go through the paths we can and build a sum of number of points
      we'll need to write to the label, including an extra one per path
      for the sentinel value. */
-  label_vno = 0;
+  label_vno  = 0;
   label_size = 0;
   for (path_index = 0; path_index < num_paths; path_index++) {
     label_size += paths[path_index]->n_points + 1;
@@ -491,17 +491,17 @@ static int convert_path_to_label(char *fname, char *ofname) {
   for (path_index = 0; path_index < num_paths; path_index++) {
     /* Write all the path points to the label. */
     for (pno = 0; pno < paths[path_index]->n_points; pno++) {
-      label->lv[label_vno].x = paths[path_index]->points[pno].x;
-      label->lv[label_vno].y = paths[path_index]->points[pno].y;
-      label->lv[label_vno].z = paths[path_index]->points[pno].z;
+      label->lv[label_vno].x   = paths[path_index]->points[pno].x;
+      label->lv[label_vno].y   = paths[path_index]->points[pno].y;
+      label->lv[label_vno].z   = paths[path_index]->points[pno].z;
       label->lv[label_vno].vno = paths[path_index]->points[pno].vno;
       label_vno++;
     }
 
     /* Write the sentinel value. */
-    label->lv[label_vno].x = -99999;
-    label->lv[label_vno].y = -99999;
-    label->lv[label_vno].z = -99999;
+    label->lv[label_vno].x   = -99999;
+    label->lv[label_vno].y   = -99999;
+    label->lv[label_vno].z   = -99999;
     label->lv[label_vno].vno = -99999;
     label_vno++;
 
@@ -523,14 +523,14 @@ static int convert_path_to_label(char *fname, char *ofname) {
 /*--------------------------------------------------------------------*/
 static int convert_label_to_path(char *fname, char *ofname) {
   LABEL *label = nullptr;
-  int label_vno;
-  int num_paths;
+  int    label_vno;
+  int    num_paths;
   PATH **paths = nullptr;
-  int label_vno_test;
-  int path_size;
-  int path_index;
-  int pno;
-  int err;
+  int    label_vno_test;
+  int    path_size;
+  int    path_index;
+  int    pno;
+  int    err;
 
   /* Read the label file. */
   label = LabelRead(nullptr, fname);
@@ -565,11 +565,11 @@ static int convert_label_to_path(char *fname, char *ofname) {
 
   /* For each path we're goint o read.. */
   path_index = 0;
-  label_vno = 0;
+  label_vno  = 0;
   for (path_index = 0; path_index < num_paths; path_index++) {
     /* Count the size of the path, the number of points between here
     and the next sentinel. */
-    path_size = 0;
+    path_size      = 0;
     label_vno_test = label_vno;
     while (-99999 != label->lv[label_vno_test].vno) {
       path_size++;
@@ -587,9 +587,9 @@ static int convert_label_to_path(char *fname, char *ofname) {
     /* Read points into the path from the label. */
     pno = 0;
     while (-99999 != label->lv[label_vno].vno) {
-      paths[path_index]->points[pno].x = label->lv[label_vno].x;
-      paths[path_index]->points[pno].y = label->lv[label_vno].y;
-      paths[path_index]->points[pno].z = label->lv[label_vno].z;
+      paths[path_index]->points[pno].x   = label->lv[label_vno].x;
+      paths[path_index]->points[pno].y   = label->lv[label_vno].y;
+      paths[path_index]->points[pno].z   = label->lv[label_vno].z;
       paths[path_index]->points[pno].vno = label->lv[label_vno].vno;
       label_vno++;
       pno++;
@@ -610,11 +610,11 @@ static int convert_label_to_path(char *fname, char *ofname) {
 
 /*--------------------------------------------------------------------*/
 static int convert_single_path_to_label(char *fname, char *ofname) {
-  int err;
-  int num_paths;
+  int    err;
+  int    num_paths;
   PATH **paths = nullptr;
   LABEL *label = nullptr;
-  int path_index;
+  int    path_index;
 
   /* Read the paths file. */
   err = PathReadMany(fname, &num_paths, &paths);
@@ -658,10 +658,10 @@ static int convert_single_path_to_label(char *fname, char *ofname) {
 
 static int convert_single_label_to_path(char *fname, char *ofname) {
   LABEL *label = nullptr;
-  int label_vno;
-  int num_paths;
+  int    label_vno;
+  int    num_paths;
   PATH **paths = nullptr;
-  int err;
+  int    err;
 
   /* Read the label file. */
   label = LabelRead(nullptr, fname);
@@ -713,17 +713,17 @@ static int convert_single_label_to_path(char *fname, char *ofname) {
 
 /*-------------------------------------------------------------------------*/
 static int connect_path(char *fname, char *ofname, char *subject, char *hemi) {
-  int err;
-  int num_paths;
+  int    err;
+  int    num_paths;
   PATH **paths = nullptr;
-  PATH *newpath;
+  PATH * newpath;
 
-  int *vtxnolist;
-  int *final_path;
-  int path_length;
-  int k;
-  int vtxno;
-  char tmpstr[2000];
+  int * vtxnolist;
+  int * final_path;
+  int   path_length;
+  int   k;
+  int   vtxno;
+  char  tmpstr[2000];
   MRIS *mris;
 
   /* Read the paths file. */
@@ -747,7 +747,7 @@ static int connect_path(char *fname, char *ofname, char *subject, char *hemi) {
   }
 
   final_path = static_cast<int *>(calloc(mris->nvertices, sizeof(int)));
-  vtxnolist = static_cast<int *>(calloc(paths[0]->n_points, sizeof(int)));
+  vtxnolist  = static_cast<int *>(calloc(paths[0]->n_points, sizeof(int)));
   for (k = 0; k < paths[0]->n_points; k++) {
     vtxnolist[k] = paths[0]->points[k].vno;
   }
@@ -755,16 +755,16 @@ static int connect_path(char *fname, char *ofname, char *subject, char *hemi) {
   MRISfindPath(vtxnolist, paths[0]->n_points, mris->nvertices, final_path,
                &path_length, mris);
 
-  newpath = PathAlloc(path_length, "");
+  newpath           = PathAlloc(path_length, "");
   newpath->n_points = path_length;
   newpath->points =
       static_cast<PATH_POINT *>(calloc(path_length, sizeof(PATH_POINT)));
   for (k = 0; k < path_length; k++) {
-    vtxno = final_path[k];
+    vtxno                  = final_path[k];
     newpath->points[k].vno = vtxno;
-    newpath->points[k].x = mris->vertices[vtxno].x;
-    newpath->points[k].y = mris->vertices[vtxno].y;
-    newpath->points[k].z = mris->vertices[vtxno].z;
+    newpath->points[k].x   = mris->vertices[vtxno].x;
+    newpath->points[k].y   = mris->vertices[vtxno].y;
+    newpath->points[k].z   = mris->vertices[vtxno].z;
   }
 
   /* Write the path file. */
@@ -802,17 +802,17 @@ static int con_and_fill_pathx(char *fname, char *ofname, char *surfaceFname,
 }
 
 static int con_and_fill_pathy(char *fname, char *ofname, MRIS *mris, int seed) {
-  int err;
-  int num_paths;
+  int    err;
+  int    num_paths;
   PATH **paths = nullptr;
   LABEL *label;
-  int *vtxnolist;
-  int *final_path;
-  int path_length;
-  int k;
-  int vtxno;
-  int nlabel;
-  int nth;
+  int *  vtxnolist;
+  int *  final_path;
+  int    path_length;
+  int    k;
+  int    vtxno;
+  int    nlabel;
+  int    nth;
 
   /* Read the paths file. */
   err = PathReadMany(fname, &num_paths, &paths);
@@ -828,7 +828,7 @@ static int con_and_fill_pathy(char *fname, char *ofname, MRIS *mris, int seed) {
   }
 
   final_path = static_cast<int *>(calloc(mris->nvertices, sizeof(int)));
-  vtxnolist = static_cast<int *>(calloc(paths[0]->n_points, sizeof(int)));
+  vtxnolist  = static_cast<int *>(calloc(paths[0]->n_points, sizeof(int)));
   for (k = 0; k < paths[0]->n_points; k++) {
     vtxnolist[k] = paths[0]->points[k].vno;
   }
@@ -844,7 +844,7 @@ static int con_and_fill_pathy(char *fname, char *ofname, MRIS *mris, int seed) {
   }
 
   for (k = 0; k < path_length; k++) {
-    vtxno = final_path[k];
+    vtxno                     = final_path[k];
     mris->vertices[vtxno].val = 1;
   }
 
@@ -859,17 +859,17 @@ static int con_and_fill_pathy(char *fname, char *ofname, MRIS *mris, int seed) {
   }
 
   printf("nlabel %d\n", nlabel);
-  label = LabelAlloc(nlabel, subject, "");
+  label           = LabelAlloc(nlabel, subject, "");
   label->n_points = nlabel;
-  nth = 0;
+  nth             = 0;
   for (k = 0; k < mris->nvertices; k++) {
     if (mris->vertices[k].val < 0.5) {
       continue;
     }
-    label->lv[nth].vno = k;
-    label->lv[nth].x = mris->vertices[k].x;
-    label->lv[nth].y = mris->vertices[k].y;
-    label->lv[nth].z = mris->vertices[k].z;
+    label->lv[nth].vno  = k;
+    label->lv[nth].x    = mris->vertices[k].x;
+    label->lv[nth].y    = mris->vertices[k].y;
+    label->lv[nth].z    = mris->vertices[k].z;
     label->lv[nth].stat = 0;
     nth++;
   }
@@ -895,14 +895,14 @@ static int fill_path(char *fname, char *ofname, char *subject, char *hemi,
 }
 
 static int fill_pathx(char *fname, char *ofname, char *surfaceFname, int seed) {
-  int err;
-  int num_paths;
+  int    err;
+  int    num_paths;
   PATH **paths = nullptr;
   LABEL *label;
-  int k;
-  int nlabel;
-  int nth;
-  MRIS *mris;
+  int    k;
+  int    nlabel;
+  int    nth;
+  MRIS * mris;
 
   /* Read the paths file. */
   err = PathReadMany(fname, &num_paths, &paths);
@@ -943,17 +943,17 @@ static int fill_pathx(char *fname, char *ofname, char *surfaceFname, int seed) {
   }
 
   printf("nlabel %d\n", nlabel);
-  label = LabelAlloc(nlabel, subject, "");
+  label           = LabelAlloc(nlabel, subject, "");
   label->n_points = nlabel;
-  nth = 0;
+  nth             = 0;
   for (k = 0; k < mris->nvertices; k++) {
     if (mris->vertices[k].val < 0.5) {
       continue;
     }
-    label->lv[nth].vno = k;
-    label->lv[nth].x = mris->vertices[k].x;
-    label->lv[nth].y = mris->vertices[k].y;
-    label->lv[nth].z = mris->vertices[k].z;
+    label->lv[nth].vno  = k;
+    label->lv[nth].x    = mris->vertices[k].x;
+    label->lv[nth].y    = mris->vertices[k].y;
+    label->lv[nth].z    = mris->vertices[k].z;
     label->lv[nth].stat = 0;
     nth++;
   }

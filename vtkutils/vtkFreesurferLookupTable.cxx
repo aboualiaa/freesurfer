@@ -27,8 +27,6 @@
 #include "vtkFreesurferLookupTable.h"
 #include "vtkObjectFactory.h"
 
-using namespace std;
-
 vtkStandardNewMacro(vtkFreesurferLookupTable);
 // vtkCxxRevisionMacro( vtkFreesurferLookupTable, "$Revision: 1.4 $" );
 
@@ -44,7 +42,7 @@ vtkFreesurferLookupTable::vtkFreesurferLookupTable() {
 vtkFreesurferLookupTable::~vtkFreesurferLookupTable() {}
 
 void vtkFreesurferLookupTable::BuildFromCTAB(COLOR_TABLE *iCtab,
-                                             bool bClearZero) {
+                                             bool         bClearZero) {
 
   // Go through and make entries for each valid entry we got.
   int cEntries;

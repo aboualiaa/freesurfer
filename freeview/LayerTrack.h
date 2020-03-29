@@ -89,11 +89,11 @@ protected:
                            vtkUnsignedCharArray *scalars);
   void VectorToColor(float *pt1, float *pt2, float *c_out, int nMappingType);
 
-  FSTrack *m_trackData;
-  LayerMRI *m_layerMRIRef;
+  FSTrack *         m_trackData;
+  LayerMRI *        m_layerMRIRef;
   QList<vtkActor *> m_actors;
-  QStringList m_listFilenames;
-  QVariantMap m_mapCluster;
+  QStringList       m_listFilenames;
+  QVariantMap       m_mapCluster;
 };
 
 #endif // LAYERTRACK_H

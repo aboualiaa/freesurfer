@@ -24,40 +24,40 @@
  *
  */
 
-#include "timer.h"
-#include "diag.h"
-#include "mrimorph.h"
 #include "cma.h"
-#include "numerics.h"
-#include "gcamorph.h"
 #include "dct.h"
+#include "diag.h"
+#include "gcamorph.h"
+#include "mrimorph.h"
+#include "numerics.h"
+#include "timer.h"
 
 #define NONMAX 0
-#define PAD 10
+#define PAD    10
 
 static VOXEL_LIST *Gvl_source, *Gvl_target;
-static MRI *Gmri_source;
-static int PADVOX = 1;
+static MRI *       Gmri_source;
+static int         PADVOX = 1;
 
-static float compute_powell_sse(float *p);
-static int powell_minimize(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
-                           DCT *dct, MRI *mri_orig_source);
-static int binary_label = 128;
-static int check_angio_labels(MRI *mri_source, MRI *mri_target);
+static float  compute_powell_sse(float *p);
+static int    powell_minimize(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
+                              DCT *dct, MRI *mri_orig_source);
+static int    binary_label = 128;
+static int    check_angio_labels(MRI *mri_source, MRI *mri_target);
 static double compute_recursive_optimum(DCT *dct, double scale,
                                         VOXEL_LIST *vl_source,
                                         VOXEL_LIST *vl_target, int which_coord,
                                         int k, double best_overlap);
 
 static float smooth_intensities = -1.0;
-static int morph_to = 0;
-static int find_label = -1;
-static float x_ras = 0.0;
-static float y_ras = 0.0;
-static float z_ras = 0.0;
-static int mode_filters = 0;
+static int   morph_to           = 0;
+static int   find_label         = -1;
+static float x_ras              = 0.0;
+static float y_ras              = 0.0;
+static float z_ras              = 0.0;
+static int   mode_filters       = 0;
 
-static int upsample = 0;
+static int upsample        = 0;
 static int apply_transform = 1;
 
 static double compute_global_dct_optimum(DCT *dct, MRI *mri_source,
@@ -70,21 +70,21 @@ static double compute_overlap(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
 static double (*pf_overlap)(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
                             DCT *dct) = compute_overlap;
 
-static int write_snapshot(DCT *dct, MRI *mri_source, MRI *mri_target,
-                          char *fname);
+static int  write_snapshot(DCT *dct, MRI *mri_source, MRI *mri_target,
+                           char *fname);
 static DCT *find_optimal_dct(DCT *dct, MRI *mri_source, MRI *mri_target,
                              VOXEL_LIST *vl_source, VOXEL_LIST *vl_target,
                              int ncoef, int skip);
 int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box);
 
 static void usage_exit(int ecode);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
 static char *source_intensity_fname = nullptr;
-const char *Progname;
-static int target_label = 128;
+const char * Progname;
+static int   target_label = 128;
 
-static int skip = 2;
+static int    skip     = 2;
 static double distance = 1.0;
 
 static int Gncoef = 10;
@@ -144,28 +144,28 @@ static int non_hippo_labels[] =
 
 static int target_aseg_label = Right_Hippocampus;
 
-static TRANSFORM *transform = nullptr;
+static TRANSFORM *     transform = nullptr;
 static GCA_MORPH_PARMS mp;
 
-#define NONE 0
+#define NONE  0
 #define ANGIO 1
 #define HIPPO 2
-#define WM 3
+#define WM    3
 #define LABEL 4
 
 static int which = ANGIO;
 
 int main(int argc, char *argv[]) {
   char **av, *source_fname, *target_fname, *out_fname, fname[STRLEN];
-  int ac, nargs, i, new_transform = 0, pad;
-  MRI *mri_target, *mri_source, *mri_tmp, *mri_orig_source, *mri_orig_target;
-  MRI *mri_dist_target = nullptr, *mri_dist_source = nullptr;
-  MRI_REGION box;
-  Timer start;
-  int msec, hours, minutes, seconds, label, j;
-  MATRIX *m_L /*, *m_I*/;
-  LTA *lta;
-  DCT *dct = nullptr;
+  int    ac, nargs, i, new_transform = 0, pad;
+  MRI *  mri_target, *mri_source, *mri_tmp, *mri_orig_source, *mri_orig_target;
+  MRI *  mri_dist_target = nullptr, *mri_dist_source = nullptr;
+  MRI_REGION  box;
+  Timer       start;
+  int         msec, hours, minutes, seconds, label, j;
+  MATRIX *    m_L /*, *m_I*/;
+  LTA *       lta;
+  DCT *       dct = nullptr;
   VOXEL_LIST *vl_target, *vl_source;
 
   mp.npasses = 2;
@@ -176,8 +176,8 @@ int main(int argc, char *argv[]) {
   ErrorInit(NULL, NULL, NULL);
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
 
   source_fname = argv[1];
   target_fname = argv[2];
-  out_fname = argv[3];
+  out_fname    = argv[3];
   printf("source = %s\ntarget = %s\noutput = %s\n", source_fname, target_fname,
          out_fname);
   FileNameOnly(out_fname, fname);
@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
     mri_tmp = MRIclone(mri_target, nullptr);
     MRIcopyLabel(mri_target, mri_tmp, target_aseg_label);
     MRIfree(&mri_target);
-    mri_target = mri_tmp;
+    mri_target      = mri_tmp;
     mp.target_label = target_label = target_aseg_label;
   } else if (which == ANGIO) {
     MRIbinarize(mri_target, mri_target, 1, 0, binary_label);
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
   mri_tmp = MRIextractRegionAndPad(mri_target, nullptr, &box, pad);
   MRIfree(&mri_target);
   mri_target = mri_tmp;
-  mri_tmp = MRIextractRegionAndPad(mri_orig_target, nullptr, &box, pad);
+  mri_tmp    = MRIextractRegionAndPad(mri_orig_target, nullptr, &box, pad);
   MRIfree(&mri_orig_target);
   mri_orig_target = mri_tmp;
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
   }
 
   new_transform = 1;
-  lta = ((LTA *)(transform->xform));
+  lta           = ((LTA *)(transform->xform));
   m_L = MRIrasXformToVoxelXform(mri_source, mri_target, lta->xforms[0].m_L,
                                 nullptr);
   MatrixFree(&lta->xforms[0].m_L);
@@ -384,7 +384,7 @@ int main(int argc, char *argv[]) {
                            Gncoef, skip);
 
     VLSTfree(&vl_source);
-    vl_source = VLSTcreate(mri_source, 1, 255, nullptr, skip / 4, 0);
+    vl_source       = VLSTcreate(mri_source, 1, 255, nullptr, skip / 4, 0);
     vl_source->mri2 = mri_dist_source;
 
     for (j = dct->ncoef; j <= dct->ncoef; j++) // don't loop for now
@@ -400,8 +400,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (apply_transform) {
-      MRI *mri_aligned;
-      char fname[STRLEN];
+      MRI *  mri_aligned;
+      char   fname[STRLEN];
       double overlap;
 
       FileNameRemoveExtension(out_fname, fname);
@@ -449,9 +449,9 @@ int main(int argc, char *argv[]) {
   }
   DCTfree(&dct);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
-  hours = seconds / (60 * 60);
+  hours   = seconds / (60 * 60);
   minutes = (seconds / 60) % 60;
   seconds = seconds % 60;
   printf("registration took %d hours, %d minutes and %d seconds.\n", hours,
@@ -461,22 +461,22 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   StrUpper(option);
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "CJ")) {
     mp.constrain_jacobian = 1;
-    mp.l_jacobian = 0;
-    mp.ratio_thresh = .25;
-    mp.noneg = False;
+    mp.l_jacobian         = 0;
+    mp.ratio_thresh       = .25;
+    mp.noneg              = False;
     printf("constraining jacobian to be in [%2.2f %2.2f]\n", mp.ratio_thresh,
            1 / mp.ratio_thresh);
   } else if (!stricmp(option, "neg")) {
@@ -487,10 +487,10 @@ static int get_option(int argc, char *argv[]) {
     printf("morphing to atlas...\n");
   } else if (!stricmp(option, "find_label")) {
     find_label = atoi(argv[2]);
-    x_ras = atof(argv[3]);
-    y_ras = atof(argv[4]);
-    z_ras = atof(argv[5]);
-    nargs = 4;
+    x_ras      = atof(argv[3]);
+    y_ras      = atof(argv[4]);
+    z_ras      = atof(argv[5]);
+    nargs      = 4;
     printf("finding label %s (%d) at (%2.1f, %2.1f, %2.1f)\n",
            cma_label_to_name(find_label), find_label, x_ras, y_ras, z_ras);
   } else if (!stricmp(option, "distance")) {
@@ -498,7 +498,7 @@ static int get_option(int argc, char *argv[]) {
     printf("using distance transform for SSE\n");
   } else if (!stricmp(option, "scale_smoothness")) {
     mp.scale_smoothness = atoi(argv[2]);
-    mp.npasses = 2;
+    mp.npasses          = 2;
     printf("%sscaling smooothness coefficient (default=1), and setting "
            "npasses=%d\n",
            mp.scale_smoothness ? "" : "not ", mp.npasses);
@@ -508,37 +508,37 @@ static int get_option(int argc, char *argv[]) {
     printf("using optimal time-step integration\n");
   } else if (!stricmp(option, "distance")) {
     distance = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("expanding border by %2.1f mm every outer cycle\n", distance);
   } else if (!stricmp(option, "view")) {
-    Gsx = atoi(argv[2]);
-    Gsy = atoi(argv[3]);
-    Gsz = atoi(argv[4]);
+    Gsx   = atoi(argv[2]);
+    Gsy   = atoi(argv[3]);
+    Gsz   = atoi(argv[4]);
     nargs = 3;
     printf("viewing voxel (%d, %d, %d)\n", Gsx, Gsy, Gsz);
   } else if (!stricmp(option, "LEVELS")) {
     mp.levels = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("levels = %d\n", mp.levels);
   } else if (!stricmp(option, "area")) {
     mp.l_area = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("using l_area=%2.3f\n", mp.l_area);
   } else if (!stricmp(option, "tol")) {
     mp.tol = atof(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("using tol=%2.3f\n", mp.tol);
   } else if (!stricmp(option, "si")) {
     smooth_intensities = atof(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     printf("smoothing gcam intensities with sigma=%2.2f\n", smooth_intensities);
   } else if (!stricmp(option, "sigma")) {
     mp.sigma = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("using sigma=%2.3f\n", mp.sigma);
   } else if (!stricmp(option, "rthresh")) {
     mp.ratio_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     printf("using compression ratio threshold = %2.3f...\n", mp.ratio_thresh);
   } else if (!stricmp(option, "dt")) {
     mp.dt = atof(argv[2]);
@@ -546,16 +546,16 @@ static int get_option(int argc, char *argv[]) {
     printf("using dt = %2.3f\n", mp.dt);
   } else if (!stricmp(option, "passes")) {
     mp.npasses = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("integrating in %d passes (default=3)\n", mp.npasses);
   } else if (!stricmp(option, "skip")) {
     skip = atoi(argv[2]);
     printf("skipping %d voxels in source data...\n", skip);
     nargs = 1;
   } else if (!stricmp(option, "hippo")) {
-    which = HIPPO;
-    mp.navgs = 1024;
-    mp.sigma = 0;
+    which         = HIPPO;
+    mp.navgs      = 1024;
+    mp.sigma      = 0;
     mp.l_distance = 0;
     printf("assuming source is hires hippo and dst is aseg volume\n");
   } else if (!stricmp(option, "wm")) {
@@ -572,21 +572,21 @@ static int get_option(int argc, char *argv[]) {
     switch (*option) {
     case 'P':
       PADVOX = atoi(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       printf("padding gcam with %d voxels\n", PADVOX);
       break;
     case 'M':
       mp.momentum = atof(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("momentum = %2.2f\n", mp.momentum);
       break;
     case 'N':
       Gncoef = atoi(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       printf("using %d coefficients\n", Gncoef);
       break;
     case 'L':
-      which = LABEL;
+      which             = LABEL;
       target_aseg_label = atoi(argv[2]);
       printf("using %s %d as target label from source and destination\n",
              cma_label_to_name(target_aseg_label), target_aseg_label);
@@ -602,36 +602,36 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'I':
       source_intensity_fname = argv[2];
-      nargs = 1;
+      nargs                  = 1;
       printf("reading intensity image from %s for debugging...\n",
              source_intensity_fname);
       break;
     case 'F':
       mode_filters = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       printf("applying %d mode filters before writing out transformed volume\n",
              mode_filters);
       break;
     case 'B':
       mp.l_binary = atof(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("using l_binary=%2.3f\n", mp.l_binary);
       break;
     case 'J':
       mp.l_jacobian = atof(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       printf("using l_jacobian=%2.3f\n", mp.l_jacobian);
       break;
     case 'A':
       mp.navgs = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("smoothing gradient with %d averages...\n", mp.navgs);
       break;
     case 'K':
       printf("setting exp_k to %2.2f (default=%2.2f)\n", atof(argv[2]),
              mp.exp_k);
       mp.exp_k = atof(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'W':
       mp.write_iterations = atoi(argv[2]);
@@ -657,7 +657,7 @@ static void usage_exit(int ecode) {
 }
 
 static int check_angio_labels(MRI *mri_source, MRI *mri_target) {
-  int label, imin, imax, scount, tcount;
+  int   label, imin, imax, scount, tcount;
   float smin, smax, tmin, tmax;
 
   MRInonzeroValRange(mri_source, &smin, &smax);
@@ -687,7 +687,7 @@ static int check_angio_labels(MRI *mri_source, MRI *mri_target) {
 int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box) {
   VECTOR *v1, *v2 = nullptr;
   MATRIX *m_vox2vox;
-  int xs[NCORNERS], ys[NCORNERS], zs[NCORNERS];
+  int     xs[NCORNERS], ys[NCORNERS], zs[NCORNERS];
   int xd[NCORNERS], yd[NCORNERS], zd[NCORNERS], xmin, xmax, ymin, ymax, zmin,
       zmax, i;
 
@@ -716,22 +716,22 @@ int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box) {
   ys[7] = box->y + box->dy - 1;
   zs[7] = box->z + box->dz - 1;
 
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_src, mri_dst);
-  v1 = VectorAlloc(4, MATRIX_REAL);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_src, mri_dst);
+  v1                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
 
   xmax = ymax = zmax = 0;
-  xmin = mri_dst->width;
-  ymin = mri_dst->height;
-  zmin = mri_dst->depth;
+  xmin               = mri_dst->width;
+  ymin               = mri_dst->height;
+  zmin               = mri_dst->depth;
   for (i = 0; i < NCORNERS; i++) {
     V3_X(v1) = xs[i];
     V3_Y(v1) = ys[i];
     V3_Z(v1) = zs[i];
-    v2 = MatrixMultiply(m_vox2vox, v1, v2);
-    xd[i] = nint(V3_X(v2));
-    yd[i] = nint(V3_Y(v2));
-    zd[i] = nint(V3_Z(v2));
+    v2       = MatrixMultiply(m_vox2vox, v1, v2);
+    xd[i]    = nint(V3_X(v2));
+    yd[i]    = nint(V3_Y(v2));
+    zd[i]    = nint(V3_Z(v2));
     if (xd[i] > xmax)
       xmax = xd[i];
     if (xd[i] < xmin)
@@ -748,9 +748,9 @@ int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box) {
       zmin = zd[i];
   }
 
-  box->x = xmin;
-  box->y = ymin;
-  box->z = zmin;
+  box->x  = xmin;
+  box->y  = ymin;
+  box->z  = zmin;
   box->dx = xmax - xmin + 1;
   box->dy = ymax - ymin + 1;
   box->dz = zmax - zmin + 1;
@@ -764,8 +764,8 @@ int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box) {
 static DCT *find_optimal_dct(DCT *dct, MRI *mri_source, MRI *mri_target,
                              VOXEL_LIST *vl_source, VOXEL_LIST *vl_target,
                              int ncoef, int skip) {
-  DCT *dct_tmp;
-  int i, global_coefs = 0;
+  DCT *  dct_tmp;
+  int    i, global_coefs = 0;
   double sse;
 
   if (dct == nullptr) {
@@ -779,7 +779,7 @@ static DCT *find_optimal_dct(DCT *dct, MRI *mri_source, MRI *mri_target,
     for (i = 1; i <= global_coefs; i++) {
       printf("***** searching DCT space with %d coefficients *******\n", i);
       dct_tmp = DCTalloc(i, mri_source);
-      sse = compute_global_dct_optimum(dct_tmp, mri_source, mri_target,
+      sse     = compute_global_dct_optimum(dct_tmp, mri_source, mri_target,
                                        vl_source, vl_target);
       DCTcopy(dct_tmp, dct);
       DCTfree(&dct_tmp);
@@ -804,34 +804,34 @@ static int write_snapshot(DCT *dct, MRI *mri_source, MRI *mri_target,
 
 static double compute_distance_transform_sse(VOXEL_LIST *vl_target,
                                              VOXEL_LIST *vl_source, DCT *dct) {
-  int width, height, depth, hwidth, hheight, hdepth, i;
+  int     width, height, depth, hwidth, hheight, hdepth, i;
   VECTOR *v1, *v2;
-  MRI *mri_target, *mri_source;
-  double sse, error;
-  double d1, d2, xd, yd, zd;
+  MRI *   mri_target, *mri_source;
+  double  sse, error;
+  double  d1, d2, xd, yd, zd;
   MATRIX *m_L_inv, *m_L;
-  float xf, yf, zf;
+  float   xf, yf, zf;
 
   mri_target = vl_target->mri2;
   mri_source = vl_source->mri2;
   DCTtransformVoxlist(dct, vl_source);
-  m_L = MRIgetVoxelToVoxelXform(mri_source, mri_target);
+  m_L     = MRIgetVoxelToVoxelXform(mri_source, mri_target);
   m_L_inv = MatrixInverse(m_L, nullptr);
   if (m_L_inv == nullptr)
     ErrorExit(ERROR_BADPARM,
               "compute_distance_transform_sse: singular matrix.");
 
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  v1                     = VectorAlloc(4, MATRIX_REAL);
+  v2                     = VectorAlloc(4, MATRIX_REAL);
   *MATRIX_RELT(v1, 4, 1) = 1.0;
   *MATRIX_RELT(v2, 4, 1) = 1.0;
 
-  width = mri_target->width;
-  height = mri_target->height;
-  depth = mri_target->depth;
-  hwidth = mri_source->width;
+  width   = mri_target->width;
+  height  = mri_target->height;
+  depth   = mri_target->depth;
+  hwidth  = mri_source->width;
   hheight = mri_source->height;
-  hdepth = mri_source->depth;
+  hdepth  = mri_source->depth;
 
   /* go through both voxel lists and compute the sse
      map it to the source, and if the source hasn't been counted yet, count it.
@@ -910,21 +910,21 @@ static double compute_distance_transform_sse(VOXEL_LIST *vl_target,
 
 static double compute_overlap(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
                               DCT *dct) {
-  int x = 0, y = 0, z = 0, i;
-  MRI *mri_target, *mri_source;
-  double val, source_vox, target_vox, xr, yr, zr, overlap;
-  float xf, yf, zf;
+  int            x = 0, y = 0, z = 0, i;
+  MRI *          mri_target, *mri_source;
+  double         val, source_vox, target_vox, xr, yr, zr, overlap;
+  float          xf, yf, zf;
   static VECTOR *v1 = nullptr, *v2;
-  MATRIX *m_L;
+  MATRIX *       m_L;
 
   DCTupdate(dct);
   mri_target = vl_target->mri;
   mri_source = vl_source->mri;
-  m_L = MRIgetVoxelToVoxelXform(mri_source, mri_target);
+  m_L        = MRIgetVoxelToVoxelXform(mri_source, mri_target);
 
   if (v1 == nullptr) {
-    v1 = VectorAlloc(4, MATRIX_REAL);
-    v2 = VectorAlloc(4, MATRIX_REAL);
+    v1                     = VectorAlloc(4, MATRIX_REAL);
+    v2                     = VectorAlloc(4, MATRIX_REAL);
     *MATRIX_RELT(v1, 4, 1) = 1.0;
     *MATRIX_RELT(v2, 4, 1) = 1.0;
   }
@@ -978,7 +978,7 @@ static double compute_global_dct_optimum(DCT *dct, MRI *mri_source,
                                          MRI *mri_target, VOXEL_LIST *vl_source,
                                          VOXEL_LIST *vl_target) {
   double overlap, scale;
-  int i;
+  int    i;
 
   for (i = 0; i < NSCALES; i++) {
     scale = scales[i];
@@ -1027,7 +1027,7 @@ static double compute_recursive_optimum(DCT *dct, double scale,
       overlap = (*pf_overlap)(vl_target, vl_source, dct);
     if (overlap > best_overlap) {
       best_overlap = overlap;
-      best_coef = coef;
+      best_coef    = coef;
       printf("new optimum found at (%d, %d): %2.9f\n", which_coord, k,
              best_overlap);
     }
@@ -1042,11 +1042,11 @@ static double compute_recursive_optimum(DCT *dct, double scale,
 static int powell_minimize(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
                            DCT *dct, MRI *mri_orig_source) {
   float *p, **xi, fret, fstart;
-  int i, k, iter, nparms, r, c, start_t = 0;
+  int    i, k, iter, nparms, r, c, start_t = 0;
 
-  p = vector(1, 3 * dct->ncoef);
+  p      = vector(1, 3 * dct->ncoef);
   nparms = 3 * dct->ncoef;
-  xi = matrix(1, nparms, 1, nparms);
+  xi     = matrix(1, nparms, 1, nparms);
   for (i = k = 1; k <= dct->ncoef; k++)
     p[i++] = VECTOR_ELT(dct->v_xk, k);
   for (k = 1; k <= dct->ncoef; k++)
@@ -1054,7 +1054,7 @@ static int powell_minimize(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
   for (k = 1; k <= dct->ncoef; k++)
     p[i++] = VECTOR_ELT(dct->v_zk, k);
 
-  Gncoef = dct->ncoef;
+  Gncoef     = dct->ncoef;
   Gvl_target = vl_target;
   Gvl_source = vl_source;
   for (r = 1; r <= nparms; r++)
@@ -1098,8 +1098,8 @@ static int powell_minimize(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
 
 static float compute_powell_sse(float *p) {
   static DCT *dct = nullptr;
-  double error;
-  int i, k;
+  double      error;
+  int         i, k;
 
   if (dct && dct->ncoef != Gncoef)
     DCTfree(&dct);

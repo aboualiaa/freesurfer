@@ -13,11 +13,11 @@
 #ifndef Spline3_H
 #define Spline3_H
 
-#include <vector>
-#include <iostream>
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
+#include <iostream>
+#include <vector>
 
 /** \class Spline3
  * \brief A simple class representing cubic splines
@@ -67,7 +67,7 @@ public:
 
   //! Evaluate spline at locations in xnew (from cache)
   const std::vector<T> &eval(const std::vector<T> &yold);
-  T *eval(unsigned int N, const T yold[], T ynew[]);
+  T *                   eval(unsigned int N, const T yold[], T ynew[]);
 
   const std::vector<T> &getYPP() { return ypp; };
 
@@ -90,7 +90,7 @@ private:
 
   //! Cache (computed from x in preCacheX and subfunctions)
   std::vector<T>
-      xc; // size n   (allocated and set in preCacheX as copy of input x)
+                 xc; // size n   (allocated and set in preCacheX as copy of input x)
   std::vector<T> h;  // size n-1 (allocated and set in computeHi)
   std::vector<T> hi; // size n-1 (allocated and set in computeHi)
   std::vector<T> M0; // size n   (allocated and set in computeM)
@@ -108,8 +108,8 @@ private:
   //! Cache (computed from xnew in preCacheXnew)
   unsigned int m;
   std::vector<unsigned int>
-      intervals;    // size m=length(xnew) (allocated and set in preCacheXnew)
-  std::vector<T> d; // size m  (allocated and set in preCacheXnew)
+                 intervals; // size m=length(xnew) (allocated and set in preCacheXnew)
+  std::vector<T> d;         // size m  (allocated and set in preCacheXnew)
   std::vector<T> ynew; // size m  (allocated empty in preCacheXnew)
 };
 
@@ -179,15 +179,15 @@ template <class T> void Spline3<T>::preCacheX(unsigned int N, const T x[]) {
 template <class T> void Spline3<T>::interp(const std::vector<T> &y) {
   assert(y.size() == n);
   // bcond: spline quadratic in first and last interval
-  b[0] = 0.0;
+  b[0]     = 0.0;
   b[n - 1] = 0.0;
   // avoid re-computation of stuff
-  yd[0] = y[1] - y[0];
+  yd[0]   = y[1] - y[0];
   ydhi[0] = yd[0] * hi[0];
   for (unsigned int i = 1; i < n - 1; i++) {
-    yd[i] = y[i + 1] - y[i];
+    yd[i]   = y[i + 1] - y[i];
     ydhi[i] = yd[i] * hi[i];
-    b[i] = ydhi[i] - ydhi[i - 1];
+    b[i]    = ydhi[i] - ydhi[i - 1];
   }
 
   // now we should have Mi (from cache) and b, time to compute ypp:
@@ -196,15 +196,15 @@ template <class T> void Spline3<T>::interp(const std::vector<T> &y) {
 template <class T> void Spline3<T>::interp(unsigned int N, const T y[]) {
   assert(n == N);
   // bcond: spline quadratic in first and last interval
-  b[0] = 0.0;
+  b[0]     = 0.0;
   b[n - 1] = 0.0;
   // avoid re-computation of stuff
-  yd[0] = y[1] - y[0];
+  yd[0]   = y[1] - y[0];
   ydhi[0] = yd[0] * hi[0];
   for (unsigned int i = 1; i < n - 1; i++) {
-    yd[i] = y[i + 1] - y[i];
+    yd[i]   = y[i + 1] - y[i];
     ydhi[i] = yd[i] * hi[i];
-    b[i] = ydhi[i] - ydhi[i - 1];
+    b[i]    = ydhi[i] - ydhi[i - 1];
   }
 
   // now we should have Mi (from cache) and b, time to compute ypp:
@@ -280,8 +280,8 @@ template <class T>
 const std::vector<T> &Spline3<T>::eval(const std::vector<T> &yold) {
   for (unsigned int j = 0; j < m; j++) {
     unsigned int &ival = intervals[j];
-    T &dval = d[j];
-    T &hval = h[ival];
+    T &           dval = d[j];
+    T &           hval = h[ival];
     // T & hival = hi[ival];
     T &ydhiival = ydhi[ival];
 
@@ -308,8 +308,8 @@ T *Spline3<T>::eval(unsigned int N, const T yold[], T ynew[]) {
     ynew = (T *)malloc(m * sizeof(T));
   for (unsigned int j = 0; j < m; j++) {
     unsigned int &ival = intervals[j];
-    T &dval = d[j];
-    T &hval = h[ival];
+    T &           dval = d[j];
+    T &           hval = h[ival];
     // T & hival = hi[ival];
     T &ydhiival = ydhi[ival];
 
@@ -337,7 +337,7 @@ template <class T> void Spline3<T>::computeHi(const std::vector<T> &x) {
   hi.resize(nm1);
   h.resize(nm1);
   for (unsigned int i = 0; i < nm1; i++) {
-    h[i] = x[i + 1] - x[i];
+    h[i]  = x[i + 1] - x[i];
     hi[i] = 1.0 / h[i];
   }
 }
@@ -351,9 +351,9 @@ template <class T> void Spline3<T>::computeM(const std::vector<T> &x) {
   M2.resize(n);
 
   // boundary conditions (quadratic over first and last interval)
-  M0[0] = 0.0;
-  M1[0] = 1.0;
-  M2[0] = -1.0;
+  M0[0]   = 0.0;
+  M1[0]   = 1.0;
+  M2[0]   = -1.0;
   M0[nm1] = -1.0;
   M1[nm1] = 1.0;
   M2[nm1] = 0.0;
@@ -375,7 +375,7 @@ template <class T> void Spline3<T>::cacheMi() {
 
   for (unsigned int i = 1; i < n - 1; i++) {
     xm[i - 1] = M0[i] / M1[i - 1];
-    M1[i] = M1[i] - xm[i - 1] * M2[i - 1];
+    M1[i]     = M1[i] - xm[i - 1] * M2[i - 1];
     // Mi1[i] = 1.0 / (M1[i] - xm[i-1] * M2[i-1]);
   }
 }
@@ -388,8 +388,8 @@ template <class T> void Spline3<T>::computeYpp() {
     b[i] = b[i] - xm[i - 1] * b[i - 1];
   }
 
-  T xmult = M0[n - 1] / M1[n - 2];
-  M1[n - 1] = M1[n - 1] - xmult * M2[n - 2];
+  T xmult    = M0[n - 1] / M1[n - 2];
+  M1[n - 1]  = M1[n - 1] - xmult * M2[n - 2];
   ypp[n - 1] = (b[n - 1] - xmult * b[n - 2]) / M1[n - 1];
   ypp[n - 2] = (b[n - 2] - M2[n - 2] * ypp[n - 1]) / M1[n - 2];
   for (i = (int)n - 3; 0 <= i; i--) {

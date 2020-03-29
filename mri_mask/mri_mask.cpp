@@ -30,10 +30,10 @@
  *
  */
 
-#include "diag.h"
-#include "version.h"
-#include "region.h"
 #include "cma.h"
+#include "diag.h"
+#include "region.h"
+#include "version.h"
 
 static char vcid[] = "$Id: mri_mask.c,v 1.24 2016/11/28 20:30:57 fischl Exp $";
 
@@ -43,8 +43,8 @@ const char *Progname;
 
 static int get_option(int argc, char *argv[]);
 
-static int   InterpMethod = SAMPLE_NEAREST;
-static int dilate = 0 ;
+static int InterpMethod = SAMPLE_NEAREST;
+static int dilate       = 0;
 
 /* The following specifies the src and dst volumes
    of the input FSL/LTA transform */
@@ -52,33 +52,32 @@ MRI *lta_src = nullptr;
 MRI *lta_dst = nullptr;
 
 static int no_cerebellum = 0;
-static int DoLH = 0;
-static int DoRH = 0;
+static int DoLH          = 0;
+static int DoRH          = 0;
 
-static int samseg = 0 ;
-static  float out_val=0;
-static int invert = 0 ;
-static char *xform_fname = NULL;
-static float threshold = -1e10;
-int ThresholdSet = 0;
-static int do_transfer = 0;
+static int   samseg       = 0;
+static float out_val      = 0;
+static int   invert       = 0;
+static char *xform_fname  = NULL;
+static float threshold    = -1e10;
+int          ThresholdSet = 0;
+static int   do_transfer  = 0;
 static float transfer_val;
 static int keep_mask_deletion_edits = 0; // if 1, keep mask voxels with value=1
-int DoAbs = 0;
-int DoBB = 0, nPadBB = 0;
+int        DoAbs                    = 0;
+int        DoBB = 0, nPadBB = 0;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  MRI *mri_in, *mri_mask, *mri_out, *mri_mask_orig, *mri_tmp;
-  int nargs, ac, nmask;
-  int x, y, z;
-  float value;
+  char **     av;
+  MRI *       mri_in, *mri_mask, *mri_out, *mri_mask_orig, *mri_tmp;
+  int         nargs, ac, nmask;
+  int         x, y, z;
+  float       value;
   MRI_REGION *region;
 
   nargs = handleVersionOption(argc, argv, "mri_mask");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -153,7 +152,7 @@ int main(int argc, char *argv[]) {
       }
 
       LTAchangeType(lta, LINEAR_VOX_TO_VOX); // Support more types.
-      transform->type = LINEAR_VOX_TO_VOX;
+      transform->type  = LINEAR_VOX_TO_VOX;
       transform->xform = (void *)lta;
     } /* if (transform->type != MORPH_3D_TYPE) */
 
@@ -209,37 +208,37 @@ int main(int argc, char *argv[]) {
            100.0 * nmask /
                (mri_mask->width * mri_mask->height * mri_mask->depth));
   }
-  if(samseg){
+  if (samseg) {
     nmask = 0;
-    for (z = 0 ; z <mri_mask->depth ; z++) {
-      for (y = 0 ; y < mri_mask->height ; y++) {
-	for (x = 0 ; x < mri_mask->width ; x++) {
-	  value = MRIgetVoxVal(mri_mask, x, y, z, 0);
-	  switch ((int)value)
-	  {
-	  case Unknown:
-	  case CSF:
-	  case Skull:
-	  case Air:
-	  case Head_ExtraCerebral:
-	  case CSF_ExtraCerebral:
-	    MRIsetVoxVal(mri_mask,x,y,z,0,0);
-	    break;
-	  default:
-	    MRIsetVoxVal(mri_mask,x,y,z,0,1);
-	    nmask ++;
-	  }
-	}
+    for (z = 0; z < mri_mask->depth; z++) {
+      for (y = 0; y < mri_mask->height; y++) {
+        for (x = 0; x < mri_mask->width; x++) {
+          value = MRIgetVoxVal(mri_mask, x, y, z, 0);
+          switch ((int)value) {
+          case Unknown:
+          case CSF:
+          case Skull:
+          case Air:
+          case Head_ExtraCerebral:
+          case CSF_ExtraCerebral:
+            MRIsetVoxVal(mri_mask, x, y, z, 0, 0);
+            break;
+          default:
+            MRIsetVoxVal(mri_mask, x, y, z, 0, 1);
+            nmask++;
+          }
+        }
       }
     }
-    printf("Found %d voxels in mask (pct=%6.2f)\n",nmask,
-	   100.0*nmask/(mri_mask->width*mri_mask->height*mri_mask->depth));
+    printf("Found %d voxels in mask (pct=%6.2f)\n", nmask,
+           100.0 * nmask /
+               (mri_mask->width * mri_mask->height * mri_mask->depth));
   }
 
   if (DoLH || DoRH) // mri_mask is an aseg - convert it to a mask
   {
     MRI *mri_aseg = mri_mask;
-    int label;
+    int  label;
 
     mri_mask = MRIclone(mri_aseg, nullptr);
 
@@ -270,7 +269,7 @@ int main(int argc, char *argv[]) {
       exit(1);
     MRIfree(&mri_mask);
     mri_mask = mri_tmp;
-    mri_tmp = MRIextractRegion(mri_in, nullptr, region);
+    mri_tmp  = MRIextractRegion(mri_in, nullptr, region);
     if (mri_tmp == nullptr)
       exit(1);
     MRIfree(&mri_in);
@@ -279,20 +278,18 @@ int main(int argc, char *argv[]) {
 
   int mask = 0;
   if (do_transfer) {
-    mask = (int)transfer_val;
+    mask    = (int)transfer_val;
     out_val = transfer_val;
   }
-  if (dilate > 0)
-  {
-    int i ;
-    for (i = 0 ; i < dilate ; i++)
+  if (dilate > 0) {
+    int i;
+    for (i = 0; i < dilate; i++)
       MRIdilate(mri_mask, mri_mask);
   }
 
-  mri_out = MRImask(mri_in, mri_mask, NULL, mask, out_val) ;
-  if (!mri_out)
-  {
-    ErrorExit(Gerror, "%s: stripping failed", Progname) ;
+  mri_out = MRImask(mri_in, mri_mask, NULL, mask, out_val);
+  if (!mri_out) {
+    ErrorExit(Gerror, "%s: stripping failed", Progname);
   }
 
   if (keep_mask_deletion_edits) {
@@ -332,25 +329,18 @@ static void print_version() {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
-  if (!stricmp(option, "-help")||!stricmp(option, "-usage"))
-  {
-    usage(1) ;
-  }
-  else if (!stricmp(option, "version"))
-  {
-    print_version() ;
-  }
-  else if (!stricmp(option, "samseg"))
-  {
-    samseg = 1 ;
-    printf("masking nonbrain using samseg segmentation\n") ;
-  }
-  else if (!stricmp(option, "abs"))
-  {
+  option = argv[1] + 1; /* past '-' */
+  if (!stricmp(option, "-help") || !stricmp(option, "-usage")) {
+    usage(1);
+  } else if (!stricmp(option, "version")) {
+    print_version();
+  } else if (!stricmp(option, "samseg")) {
+    samseg = 1;
+    printf("masking nonbrain using samseg segmentation\n");
+  } else if (!stricmp(option, "abs")) {
     DoAbs = 1;
   } else if (!stricmp(option, "lh")) {
     DoLH = 1;
@@ -358,39 +348,35 @@ static int get_option(int argc, char *argv[]) {
     no_cerebellum = 1;
   } else if (!stricmp(option, "rh")) {
     DoRH = 1;
-  }
-  else if (!stricmp(option, "dilate"))
-  {
-    dilate = atoi(argv[2]) ;
-    nargs = 1 ;
+  } else if (!stricmp(option, "dilate")) {
+    dilate = atoi(argv[2]);
+    nargs  = 1;
     printf("dilating mask %d times before applying\n", dilate);
-  }
-  else if (!stricmp(option, "xform"))
-  {
+  } else if (!stricmp(option, "xform")) {
     xform_fname = argv[2];
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "transform file name is %s\n", xform_fname);
   } else if (!stricmp(option, "T") || !stricmp(option, "threshold")) {
     threshold = (float)atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "threshold mask volume at %g\n", threshold);
     ThresholdSet = 1;
   } else if (!stricmp(option, "BB") || !stricmp(option, "boundingbox")) {
     nPadBB = (int)atoi(argv[2]);
-    DoBB = 1;
-    nargs = 1;
+    DoBB   = 1;
+    nargs  = 1;
     printf("bounding box npad = %d\n", nPadBB);
   } else if (!stricmp(option, "transfer")) {
-    do_transfer = 1;
+    do_transfer  = 1;
     transfer_val = (float)atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "transfer mask voxels=%g to dst vol\n", transfer_val);
   } else if (!stricmp(option, "invert")) {
     invert = 1;
     fprintf(stderr, "Inversely apply the given transform\n");
   } else if (!stricmp(option, "oval")) {
     out_val = atof(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     fprintf(stderr, "setting masked output voxels to %2.1f instead of 0\n",
             out_val);
   } else if (!stricmp(option, "lta_src") || !stricmp(option, "src")) {
@@ -418,20 +404,16 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "keep_mask_deletion_edits")) {
     keep_mask_deletion_edits = 1;
     fprintf(stderr, "Transferring mask edits ('1' voxels) to dst vol\n");
-  }
-  else if (!stricmp(option, "DEBUG_VOXEL"))
-  {
-    Gx = atoi(argv[2]) ;
-    Gy = atoi(argv[3]) ;
-    Gz = atoi(argv[4]) ;
-    nargs = 3 ;
-    printf("debugging node (%d, %d, %d)\n", Gx,Gy,Gz) ;
-  }
-  else
-  {
-    fprintf(stderr, "unknown option %s\n", argv[1]) ;
-    usage(1) ;
-    exit(1) ;
+  } else if (!stricmp(option, "DEBUG_VOXEL")) {
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
+    nargs = 3;
+    printf("debugging node (%d, %d, %d)\n", Gx, Gy, Gz);
+  } else {
+    fprintf(stderr, "unknown option %s\n", argv[1]);
+    usage(1);
+    exit(1);
   }
 
   return (nargs);

@@ -32,15 +32,15 @@
 
 #include <sys/resource.h>
 
-#include "mrisutils.h"
 #include "diag.h"
-#include "mri2.h"
 #include "fio.h"
 #include "fmriutils.h"
-#include "version.h"
+#include "mri2.h"
 #include "mri_identify.h"
+#include "mrisutils.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -54,89 +54,88 @@ int main(int argc, char *argv[]);
 
 static char vcid[] = "$Id: mri_concat.c,v 1.67 2017/02/16 19:49:35 greve Exp $";
 const char *Progname = nullptr;
-int debug = 0;
+int         debug    = 0;
 #define NInMAX 400000 // such a large number may break valgrind
 char *inlist[NInMAX];
-int ninputs = 0;
-char flist[NInMAX][2000];
-int nthf = 0;
-char *out = nullptr;
-MRI *mritmp, *mritmp0, *mriout, *mask = nullptr;
-char *maskfile = nullptr;
-int DoMean = 0;
-int DoNormMean = 0;
-int DoNorm1 = 0;
-int DoMeanDivN = 0;
-int DoMedian = 0;
-int DoSum = 0;
-int DoVar = 0;
-int DoStd = 0;
-int DoMax = 0;
-int DoMaxIndex = 0;
-int DoMaxIndexPrune = 0;
-int DoMaxIndexAdd = 0;
-int MaxIndexAdd = 0;
-int DoMin = 0;
-int DoConjunction = 0;
-int DoPaired = 0;
-int DoPairedAvg = 0;
-int DoPairedSum = 0;
-int DoPairedDiff = 0;
-int DoPairedDiffNorm = 0;
-int DoPairedDiffNorm1 = 0;
-int DoPairedDiffNorm2 = 0;
-int DoASL = 0;
-int DoVote = 0;
-int DoSort = 0;
-int DoCombine = 0;
-int DoKeepDatatype = 0;
+int   ninputs = 0;
+char  flist[NInMAX][2000];
+int   nthf = 0;
+char *out  = nullptr;
+MRI * mritmp, *mritmp0, *mriout, *mask = nullptr;
+char *maskfile          = nullptr;
+int   DoMean            = 0;
+int   DoNormMean        = 0;
+int   DoNorm1           = 0;
+int   DoMeanDivN        = 0;
+int   DoMedian          = 0;
+int   DoSum             = 0;
+int   DoVar             = 0;
+int   DoStd             = 0;
+int   DoMax             = 0;
+int   DoMaxIndex        = 0;
+int   DoMaxIndexPrune   = 0;
+int   DoMaxIndexAdd     = 0;
+int   MaxIndexAdd       = 0;
+int   DoMin             = 0;
+int   DoConjunction     = 0;
+int   DoPaired          = 0;
+int   DoPairedAvg       = 0;
+int   DoPairedSum       = 0;
+int   DoPairedDiff      = 0;
+int   DoPairedDiffNorm  = 0;
+int   DoPairedDiffNorm1 = 0;
+int   DoPairedDiffNorm2 = 0;
+int   DoASL             = 0;
+int   DoVote            = 0;
+int   DoSort            = 0;
+int   DoCombine         = 0;
+int   DoKeepDatatype    = 0;
 
-int DoMultiply = 0;
+int    DoMultiply  = 0;
 double MultiplyVal = 0;
 
-int DoAdd = 0;
-double AddVal = 0;
-int DoBonfCor = 0;
-int DoAbs = 0;
-int DoPos = 0;
-int DoNeg = 0;
+int    DoAdd     = 0;
+double AddVal    = 0;
+int    DoBonfCor = 0;
+int    DoAbs     = 0;
+int    DoPos     = 0;
+int    DoNeg     = 0;
 
-char *matfile = nullptr;
-MATRIX *M = nullptr;
-int ngroups = 0;
+char *  matfile = nullptr;
+MATRIX *M       = nullptr;
+int     ngroups = 0;
 MATRIX *GroupedMeanMatrix(int ngroups, int ntotal);
-char tmpstr[2000];
+char    tmpstr[2000];
 
-int DoPCA = 0;
-MRI *PCAMask = nullptr;
+int   DoPCA       = 0;
+MRI * PCAMask     = nullptr;
 char *PCAMaskFile = nullptr;
-int DoSCM = 0; // spat cor matrix
-int DoCheck = 1;
-int DoTAR1 = 0, TAR1DOFAdjust = 1;
-int NReplications = 0;
+int   DoSCM       = 0; // spat cor matrix
+int   DoCheck     = 1;
+int   DoTAR1 = 0, TAR1DOFAdjust = 1;
+int   NReplications = 0;
 
-int DoPrune = 0;
+int  DoPrune   = 0;
 MRI *PruneMask = nullptr;
 
-int DoRMS = 0; // compute root-mean-square on multi-frame input
-int DoCumSum = 0;
-int DoFNorm = 0;
+int   DoRMS       = 0; // compute root-mean-square on multi-frame input
+int   DoCumSum    = 0;
+int   DoFNorm     = 0;
 char *rusage_file = nullptr;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, nthin, nframestot = 0, nr = 0, nc = 0, ns = 0, fout;
-  int r, c, s, f, outf, nframes, err, nthrep, AllZero;
-  double v, v1, v2, vavg, vsum;
-  int inputDatatype = MRI_UCHAR;
+  int     nargs, nthin, nframestot = 0, nr = 0, nc = 0, ns = 0, fout;
+  int     r, c, s, f, outf, nframes, err, nthrep, AllZero;
+  double  v, v1, v2, vavg, vsum;
+  int     inputDatatype = MRI_UCHAR;
   MATRIX *Upca = nullptr, *Spca = nullptr;
-  MRI *Vpca = nullptr;
-  char *stem;
+  MRI *   Vpca = nullptr;
+  char *  stem;
 
   nargs = handleVersionOption(argc, argv, "mri_concat");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -193,7 +192,7 @@ int main(int argc, char **argv) {
   } else {
     printf("NOT Checking inputs, assuming nframestot = ninputs\n");
     nframestot = ninputs;
-    mritmp = MRIreadHeader(inlist[0], MRI_VOLUME_TYPE_UNKNOWN);
+    mritmp     = MRIreadHeader(inlist[0], MRI_VOLUME_TYPE_UNKNOWN);
     if (mritmp == nullptr) {
       printf("ERROR: reading %s\n", inlist[0]);
       exit(1);
@@ -321,7 +320,7 @@ int main(int argc, char **argv) {
       for (r = 0; r < nr; r++) {
         for (s = 0; s < ns; s++) {
           nhits = 0;
-          vsum = 0;
+          vsum  = 0;
           for (f = 0; f < mriout->nframes; f++) {
             v = MRIgetVoxVal(mriout, c, r, s, f);
             if (v > 0) {
@@ -380,7 +379,7 @@ int main(int argc, char **argv) {
           for (f = 0; f < mriout->nframes; f += 2) {
             v1 = MRIgetVoxVal(mriout, c, r, s, f);
             v2 = MRIgetVoxVal(mriout, c, r, s, f + 1);
-            v = 0;
+            v  = 0;
             if (DoPairedAvg)
               v = (v1 + v2) / 2.0;
             if (DoPairedSum)
@@ -388,7 +387,7 @@ int main(int argc, char **argv) {
             if (DoPairedDiff)
               v = v1 - v2; // difference
             if (DoPairedDiffNorm) {
-              v = v1 - v2; // difference
+              v    = v1 - v2; // difference
               vavg = (v1 + v2) / 2.0;
               if (vavg != 0.0)
                 v = v / vavg;
@@ -422,7 +421,7 @@ int main(int argc, char **argv) {
   printf("nframes = %d\n", nframes);
 
   if (DoBonfCor) {
-    DoAdd = 1;
+    DoAdd  = 1;
     AddVal = -log10(mriout->nframes);
   }
 
@@ -661,9 +660,9 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused, rt;
+  int    nargc, nargsused, rt;
   char **pargv, *option, listfile[2000];
-  FILE *fp0;
+  FILE * fp0;
 
   if (argc < 1) {
     usage_exit();
@@ -719,7 +718,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--max-index")) {
       DoMaxIndex = 1;
     } else if (!strcasecmp(option, "--max-index-prune")) {
-      DoMaxIndex = 1;
+      DoMaxIndex      = 1;
       DoMaxIndexPrune = 1;
     } else if (!strcasecmp(option, "--max-index-add")) {
       if (nargc < 1)
@@ -732,7 +731,7 @@ static int parse_commandline(int argc, char **argv) {
       }
       sscanf(pargv[0], "%d", &MaxIndexAdd);
       DoMaxIndexAdd = 1;
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--min")) {
       DoMin = 1;
     } else if (!strcasecmp(option, "--conjunct")) {
@@ -751,31 +750,31 @@ static int parse_commandline(int argc, char **argv) {
       DoPrune = 0;
 
     else if (!strcasecmp(option, "--max-bonfcor")) {
-      DoMax = 1;
+      DoMax     = 1;
       DoBonfCor = 1;
     } else if (!strcasecmp(option, "--asl")) {
       DoASL = 1;
     } else if (!strcasecmp(option, "--paired-avg")) {
-      DoPaired = 1;
+      DoPaired    = 1;
       DoPairedAvg = 1;
     } else if (!strcasecmp(option, "--paired-sum")) {
-      DoPaired = 1;
+      DoPaired    = 1;
       DoPairedSum = 1;
     } else if (!strcasecmp(option, "--paired-diff")) {
-      DoPaired = 1;
+      DoPaired     = 1;
       DoPairedDiff = 1;
     } else if (!strcasecmp(option, "--paired-diff-norm")) {
-      DoPairedDiff = 1;
+      DoPairedDiff     = 1;
       DoPairedDiffNorm = 1;
-      DoPaired = 1;
+      DoPaired         = 1;
     } else if (!strcasecmp(option, "--paired-diff-norm1")) {
-      DoPairedDiff = 1;
+      DoPairedDiff      = 1;
       DoPairedDiffNorm1 = 1;
-      DoPaired = 1;
+      DoPaired          = 1;
     } else if (!strcasecmp(option, "--paired-diff-norm2")) {
-      DoPairedDiff = 1;
+      DoPairedDiff      = 1;
       DoPairedDiffNorm2 = 1;
-      DoPaired = 1;
+      DoPaired          = 1;
     } else if (!strcasecmp(option, "--combine")) {
       DoCombine = 1;
     } else if (!strcasecmp(option, "--cumsum"))
@@ -798,7 +797,7 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       PCAMaskFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--i")) {
       if (nargc < 1) {
         argnerr(option, 1);
@@ -811,7 +810,7 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       matfile = pargv[0];
-      M = MatrixReadTxt(matfile, nullptr);
+      M       = MatrixReadTxt(matfile, nullptr);
       if (M == nullptr) {
         printf("ERROR: reading %s\n", matfile);
         exit(1);
@@ -833,18 +832,18 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      out = pargv[0];
+      out       = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--rusage")) {
       if (nargc < 1)
         argnerr(option, 1);
       rusage_file = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--mask")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      maskfile = pargv[0];
+      maskfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--mul")) {
       if (nargc < 1)
@@ -857,7 +856,7 @@ static int parse_commandline(int argc, char **argv) {
       }
       sscanf(pargv[0], "%lf", &MultiplyVal);
       DoMultiply = 1;
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--add")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -867,14 +866,14 @@ static int parse_commandline(int argc, char **argv) {
         exit(1);
       }
       sscanf(pargv[0], "%lf", &AddVal);
-      DoAdd = 1;
+      DoAdd     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--tar1")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       sscanf(pargv[0], "%d", &TAR1DOFAdjust);
-      DoTAR1 = 1;
+      DoTAR1    = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--f")) {
       if (nargc < 1) {
@@ -1084,7 +1083,7 @@ static void check_options() {
 static void dump_options(FILE *fp) { return; }
 
 MATRIX *GroupedMeanMatrix(int ngroups, int ntotal) {
-  int nper, r, c;
+  int     nper, r, c;
   MATRIX *M;
 
   nper = ntotal / ngroups;

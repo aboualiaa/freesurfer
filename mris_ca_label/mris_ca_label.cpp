@@ -28,18 +28,18 @@
  *
  */
 
-#include "mrisurf_project.h"
-#include "diag.h"
-#include "timer.h"
-#include "gcsa.h"
 #include "annotation.h"
+#include "diag.h"
+#include "gcsa.h"
 #include "icosahedron.h"
+#include "mrisurf_project.h"
+#include "timer.h"
 #include "version.h"
 
 static char vcid[] =
     "$Id: mris_ca_label.c,v 1.37 2014/02/04 17:46:42 fischl Exp $";
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 static int postprocess(GCSA *gcsa, MRI_SURFACE *mris);
 
@@ -48,15 +48,15 @@ static void usage_exit(int code);
 static void print_help();
 static void print_version();
 
-static int which_norm = NORM_MEAN;
+static int    which_norm   = NORM_MEAN;
 static double MIN_AREA_PCT = 0.1;
-static char *read_fname = nullptr;
-static char *prob_fname = nullptr;
-static int nbrs = 2;
-static int filter = 10;
-static char *orig_name = "smoothwm";
-static MRI *mri_aseg;
-static char *surf_dir = "surf";
+static char * read_fname   = nullptr;
+static char * prob_fname   = nullptr;
+static int    nbrs         = 2;
+static int    filter       = 10;
+static char * orig_name    = "smoothwm";
+static MRI *  mri_aseg;
+static char * surf_dir = "surf";
 
 #if 0
 static int normalize_flag = 0 ;
@@ -66,30 +66,29 @@ static char *thickness_name = "thickness" ;
 static char *sulc_name = "sulc" ;
 #endif
 
-static char subjects_dir[STRLEN];
+static char  subjects_dir[STRLEN];
 extern char *gcsa_write_fname;
-extern int gcsa_write_iterations;
+extern int   gcsa_write_iterations;
 
-static int novar = 0;
+static int novar  = 0;
 static int refine = 0;
 
 static LABEL *cortex_label = nullptr;
-static int relabel_unknowns_with_cortex_label(GCSA *gcsa, MRI_SURFACE *mris,
-                                              LABEL *cortex_label);
+static int    relabel_unknowns_with_cortex_label(GCSA *gcsa, MRI_SURFACE *mris,
+                                                 LABEL *cortex_label);
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN], *out_fname, *subject_name, *cp, *hemi,
       *canon_surf_name;
-  int ac, nargs, i;
-  int msec, minutes, seconds;
-  Timer start;
+  int          ac, nargs, i;
+  int          msec, minutes, seconds;
+  Timer        start;
   MRI_SURFACE *mris;
-  GCSA *gcsa;
+  GCSA *       gcsa;
 
   nargs = handleVersionOption(argc, argv, "mris_ca_label");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -119,10 +118,10 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
   }
 
-  subject_name = argv[1];
-  hemi = argv[2];
+  subject_name    = argv[1];
+  hemi            = argv[2];
   canon_surf_name = argv[3];
-  out_fname = argv[5];
+  out_fname       = argv[5];
 
   printf("%s\n", vcid);
   printf("  %s\n", MRISurfSrcVersion());
@@ -299,7 +298,7 @@ int main(int argc, char *argv[]) {
 
   MRISfree(&mris);
   GCSAfree(&gcsa);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -314,11 +313,11 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
   char *gcsfile, *fsh, *outannot;
-  int icoorder, err;
-  char tmpstr[2000];
+  int   icoorder, err;
+  char  tmpstr[2000];
   GCSA *gcsa;
   MRIS *ico;
 
@@ -368,18 +367,18 @@ static int get_option(int argc, char *argv[]) {
     printf("using %s as subjects directory\n", subjects_dir);
   } else if (!stricmp(option, "aseg")) {
     mri_aseg = MRIread(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     if (mri_aseg == nullptr) {
       ErrorExit(ERROR_BADFILE, "%s: could not open %s", Progname, argv[2]);
     }
     printf("using %s aseg volume to correct midline\n", argv[2]);
   } else if (!stricmp(option, "surf_dir")) {
     surf_dir = argv[2];
-    nargs = 1;
+    nargs    = 1;
     printf("using %s instead of surf for subdirectory search\n", argv[2]);
   } else if (!stricmp(option, "MINAREA")) {
     MIN_AREA_PCT = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("setting minimum area threshold for connectivity to %2.2f\n",
            MIN_AREA_PCT);
     if (MIN_AREA_PCT < 0 || MIN_AREA_PCT > 1) {
@@ -387,7 +386,7 @@ static int get_option(int argc, char *argv[]) {
     }
   } else if (!stricmp(option, "ORIG")) {
     orig_name = argv[2];
-    nargs = 1;
+    nargs     = 1;
     printf("using %s as original surface\n", orig_name);
   } else if (!stricmp(option, "LONG")) {
     refine = 1;
@@ -409,7 +408,7 @@ static int get_option(int argc, char *argv[]) {
   }
 #endif
   else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size=%d\n", nbrs);
   } else if (!stricmp(option, "seed")) {
@@ -427,7 +426,7 @@ static int get_option(int argc, char *argv[]) {
 #endif
     case 'F':
       filter = atoi(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       printf("applying mode filter %d times before writing...\n", filter);
       break;
     case 'L':
@@ -445,25 +444,25 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("printing diagnostic information about vertex %d\n", Gdiag_no);
       break;
     case 'W':
       gcsa_write_iterations = atoi(argv[2]);
-      gcsa_write_fname = argv[3];
-      nargs = 2;
+      gcsa_write_fname      = argv[3];
+      nargs                 = 2;
       printf("writing out snapshots of gibbs process every %d "
              "iterations to %s\n",
              gcsa_write_iterations, gcsa_write_fname);
       break;
     case 'R':
       read_fname = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("reading precomputed parcellation from %s...\n", read_fname);
       break;
     case 'P':
       prob_fname = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("saving vertex label probability to %s...\n", prob_fname);
       break;
     case 'H':
@@ -502,8 +501,8 @@ static void print_version() {
 
 static int postprocess(GCSA *gcsa, MRI_SURFACE *mris) {
   LABEL **larray, *area;
-  int nlabels, i, j, annotation, n, nchanged, niter = 0, deleted;
-  double max_area, label_area;
+  int     nlabels, i, j, annotation, n, nchanged, niter = 0, deleted;
+  double  max_area, label_area;
 
 #define MAX_ITER 5
 
@@ -569,14 +568,14 @@ static int postprocess(GCSA *gcsa, MRI_SURFACE *mris) {
 #define MAX_EXCLUDED 100
 static int relabel_unknowns_with_cortex_label(GCSA *gcsa, MRI_SURFACE *mris,
                                               LABEL *cortex_label) {
-  int vno, n, annot;
-  int nexcluded, exclude_list[MAX_EXCLUDED];
-  int num_marked_for_relabel;
+  int     vno, n, annot;
+  int     nexcluded, exclude_list[MAX_EXCLUDED];
+  int     num_marked_for_relabel;
   VERTEX *v;
 
   printf("rationalizing unknown annotations with cortex label\n");
 
-  nexcluded = 0;
+  nexcluded              = 0;
   num_marked_for_relabel = 0;
 
   // Medial_wall label is in Christophe atlas

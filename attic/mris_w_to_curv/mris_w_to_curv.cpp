@@ -23,17 +23,17 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
+#include "macros.h"
 #include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 
 static char vcid[] =
@@ -41,22 +41,22 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
 const char *Progname;
 
-static int navgs = 0;
+static int  navgs = 0;
 static char sdir[STRLEN];
-static int normalize_flag = 0;
+static int  normalize_flag = 0;
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN], *subject_name, *wfile_name, *cp, *curv_name, *hemi;
-  int ac, nargs, vno;
+  int    ac, nargs, vno;
   MRI_SURFACE *mris;
-  VERTEX *v;
+  VERTEX *     v;
 
   nargs = handleVersionOption(argc, argv, "mris_w_to_curv");
   if (nargs && argc - nargs == 1)
@@ -79,9 +79,9 @@ int main(int argc, char *argv[]) {
     print_help();
 
   subject_name = argv[1];
-  hemi = argv[2];
-  wfile_name = argv[3];
-  curv_name = argv[4];
+  hemi         = argv[2];
+  wfile_name   = argv[3];
+  curv_name    = argv[4];
 
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

@@ -6,7 +6,8 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_Window_i(Fl_Double_Window *, void *) {
   exit(0);
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_Window(Fl_Double_Window *o, void *v) {
-  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->user_data()))->cb_m_Window_i(o, v);
+  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->user_data()))
+      ->cb_m_Window_i(o, v);
 }
 
 void kvlAtlasMeshViewingConsoleGUI::cb_m_ImageViewer_i(kvl::ImageViewer *,
@@ -15,7 +16,7 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_ImageViewer_i(kvl::ImageViewer *,
   // Fl::event_y() );
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_ImageViewer(kvl::ImageViewer *o,
-                                                     void *v) {
+                                                     void *            v) {
   (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->parent()->user_data()))
       ->cb_m_ImageViewer_i(o, v);
 }
@@ -72,7 +73,7 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_AxialSliceNumber_i(Fl_Value_Slider *,
   m_CoronalSliceNumber->do_callback();
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_AxialSliceNumber(Fl_Value_Slider *o,
-                                                          void *v) {
+                                                          void *           v) {
   (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->parent()->user_data()))
       ->cb_m_AxialSliceNumber_i(o, v);
 }
@@ -82,7 +83,7 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_ShowSummary_i(Fl_Check_Button *,
   this->Draw();
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_ShowSummary(Fl_Check_Button *o,
-                                                     void *v) {
+                                                     void *           v) {
   (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->parent()->user_data()))
       ->cb_m_ShowSummary_i(o, v);
 }
@@ -91,7 +92,8 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewOne_i(Fl_Round_Button *, void *) {
   this->ShowSelectedView();
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewOne(Fl_Round_Button *o, void *v) {
-  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->parent()->parent()->user_data()))
+  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(
+       o->parent()->parent()->user_data()))
       ->cb_m_ViewOne_i(o, v);
 }
 
@@ -99,7 +101,8 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewTwo_i(Fl_Round_Button *, void *) {
   this->ShowSelectedView();
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewTwo(Fl_Round_Button *o, void *v) {
-  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->parent()->parent()->user_data()))
+  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(
+       o->parent()->parent()->user_data()))
       ->cb_m_ViewTwo_i(o, v);
 }
 
@@ -107,7 +110,8 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewFour_i(Fl_Round_Button *, void *) {
   this->ShowSelectedView();
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewFour(Fl_Round_Button *o, void *v) {
-  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->parent()->parent()->user_data()))
+  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(
+       o->parent()->parent()->user_data()))
       ->cb_m_ViewFour_i(o, v);
 }
 
@@ -116,8 +120,9 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewThree_i(Fl_Round_Button *,
   this->ShowSelectedView();
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewThree(Fl_Round_Button *o,
-                                                   void *v) {
-  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->parent()->parent()->user_data()))
+                                                   void *           v) {
+  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(
+       o->parent()->parent()->user_data()))
       ->cb_m_ViewThree_i(o, v);
 }
 
@@ -125,7 +130,8 @@ void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewFive_i(Fl_Round_Button *, void *) {
   this->ShowSelectedView();
 }
 void kvlAtlasMeshViewingConsoleGUI::cb_m_ViewFive(Fl_Round_Button *o, void *v) {
-  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(o->parent()->parent()->user_data()))
+  (static_cast<kvlAtlasMeshViewingConsoleGUI *>(
+       o->parent()->parent()->user_data()))
       ->cb_m_ViewFive_i(o, v);
 }
 
@@ -180,7 +186,8 @@ void kvlAtlasMeshViewingConsoleGUI::cb_Screen4(Fl_Button *o, void *v) {
 kvlAtlasMeshViewingConsoleGUI::kvlAtlasMeshViewingConsoleGUI() {
   {
     m_Window = new Fl_Double_Window(1280, 1030, "kvlAtlasMeshViewingConsole");
-    m_Window->callback(reinterpret_cast<Fl_Callback *>(cb_m_Window), (void *)(this));
+    m_Window->callback(reinterpret_cast<Fl_Callback *>(cb_m_Window),
+                       (void *)(this));
     {
       m_ImageViewer = new kvl::ImageViewer(10, 10, 1000, 1000);
       m_ImageViewer->box(FL_FLAT_BOX);
@@ -190,7 +197,8 @@ kvlAtlasMeshViewingConsoleGUI::kvlAtlasMeshViewingConsoleGUI() {
       m_ImageViewer->labelfont(0);
       m_ImageViewer->labelsize(14);
       m_ImageViewer->labelcolor(FL_FOREGROUND_COLOR);
-      m_ImageViewer->callback(reinterpret_cast<Fl_Callback *>(cb_m_ImageViewer));
+      m_ImageViewer->callback(
+          reinterpret_cast<Fl_Callback *>(cb_m_ImageViewer));
       m_ImageViewer->align(Fl_Align(FL_ALIGN_TOP));
       m_ImageViewer->when(FL_WHEN_RELEASE);
       m_ImageViewer->end();
@@ -210,7 +218,8 @@ kvlAtlasMeshViewingConsoleGUI::kvlAtlasMeshViewingConsoleGUI() {
     {
       m_LabelNumber = new Fl_Choice(1145, 75, 110, 25, "Label number:");
       m_LabelNumber->down_box(FL_BORDER_BOX);
-      m_LabelNumber->callback(reinterpret_cast<Fl_Callback *>(cb_m_LabelNumber));
+      m_LabelNumber->callback(
+          reinterpret_cast<Fl_Callback *>(cb_m_LabelNumber));
     } // Fl_Choice* m_LabelNumber
     {
       m_CoronalSliceNumber =
@@ -218,7 +227,8 @@ kvlAtlasMeshViewingConsoleGUI::kvlAtlasMeshViewingConsoleGUI() {
       m_CoronalSliceNumber->type(1);
       m_CoronalSliceNumber->step(1);
       m_CoronalSliceNumber->textsize(14);
-      m_CoronalSliceNumber->callback(reinterpret_cast<Fl_Callback *>(cb_m_CoronalSliceNumber));
+      m_CoronalSliceNumber->callback(
+          reinterpret_cast<Fl_Callback *>(cb_m_CoronalSliceNumber));
       m_CoronalSliceNumber->align(Fl_Align(FL_ALIGN_TOP));
       m_CoronalSliceNumber->when(FL_WHEN_RELEASE);
     } // Fl_Value_Slider* m_CoronalSliceNumber
@@ -228,7 +238,8 @@ kvlAtlasMeshViewingConsoleGUI::kvlAtlasMeshViewingConsoleGUI() {
       m_SagittalSliceNumber->type(1);
       m_SagittalSliceNumber->step(1);
       m_SagittalSliceNumber->textsize(14);
-      m_SagittalSliceNumber->callback(reinterpret_cast<Fl_Callback *>(cb_m_SagittalSliceNumber));
+      m_SagittalSliceNumber->callback(
+          reinterpret_cast<Fl_Callback *>(cb_m_SagittalSliceNumber));
       m_SagittalSliceNumber->align(Fl_Align(FL_ALIGN_TOP));
       m_SagittalSliceNumber->when(FL_WHEN_RELEASE);
     } // Fl_Value_Slider* m_SagittalSliceNumber
@@ -238,14 +249,16 @@ kvlAtlasMeshViewingConsoleGUI::kvlAtlasMeshViewingConsoleGUI() {
       m_AxialSliceNumber->type(1);
       m_AxialSliceNumber->step(1);
       m_AxialSliceNumber->textsize(14);
-      m_AxialSliceNumber->callback(reinterpret_cast<Fl_Callback *>(cb_m_AxialSliceNumber));
+      m_AxialSliceNumber->callback(
+          reinterpret_cast<Fl_Callback *>(cb_m_AxialSliceNumber));
       m_AxialSliceNumber->align(Fl_Align(FL_ALIGN_TOP));
       m_AxialSliceNumber->when(FL_WHEN_RELEASE);
     } // Fl_Value_Slider* m_AxialSliceNumber
     {
       m_ShowSummary = new Fl_Check_Button(1230, 170, 25, 25, "Show summary:");
       m_ShowSummary->down_box(FL_DOWN_BOX);
-      m_ShowSummary->callback(reinterpret_cast<Fl_Callback *>(cb_m_ShowSummary));
+      m_ShowSummary->callback(
+          reinterpret_cast<Fl_Callback *>(cb_m_ShowSummary));
       m_ShowSummary->align(Fl_Align(FL_ALIGN_LEFT));
     } // Fl_Check_Button* m_ShowSummary
     {

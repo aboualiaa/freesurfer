@@ -17,9 +17,9 @@
 #ifndef __itkBSplineDataPointSetToImageFilter_h
 #define __itkBSplineDataPointSetToImageFilter_h
 
-#include "itkPointSetToImageFilter.h"
 #include "itkBSplineKernelFunction.h"
 #include "itkFixedArray.h"
+#include "itkPointSetToImageFilter.h"
 #include "itkVector.h"
 #include "itkVectorContainer.h"
 
@@ -69,10 +69,10 @@ template <class TInputPointSet, class TOutputImage>
 class BSplineDataPointSetToImageFilter
     : public PointSetToImageFilter<TInputPointSet, TOutputImage> {
 public:
-  typedef BSplineDataPointSetToImageFilter Self;
+  typedef BSplineDataPointSetToImageFilter                    Self;
   typedef PointSetToImageFilter<TInputPointSet, TOutputImage> Superclass;
-  typedef SmartPointer<Self> Pointer;
-  typedef SmartPointer<const Self> ConstPointer;
+  typedef SmartPointer<Self>                                  Pointer;
+  typedef SmartPointer<const Self>                            ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -81,27 +81,27 @@ public:
   itkStaticConstMacro(ImageDimension, unsigned int,
                       TOutputImage::ImageDimension);
 
-  typedef TOutputImage ImageType;
+  typedef TOutputImage   ImageType;
   typedef TInputPointSet PointSetType;
 
   /** Image typedef support. */
-  typedef typename ImageType::PixelType PixelType;
+  typedef typename ImageType::PixelType  PixelType;
   typedef typename ImageType::RegionType RegionType;
-  typedef typename ImageType::SizeType SizeType;
-  typedef typename ImageType::IndexType IndexType;
-  typedef typename ImageType::PointType ContinuousIndexType;
+  typedef typename ImageType::SizeType   SizeType;
+  typedef typename ImageType::IndexType  IndexType;
+  typedef typename ImageType::PointType  ContinuousIndexType;
 
   /** PointSet typedef support. */
-  typedef typename PointSetType::PointType PointType;
-  typedef typename PointSetType::PixelType PointDataType;
+  typedef typename PointSetType::PointType          PointType;
+  typedef typename PointSetType::PixelType          PointDataType;
   typedef typename PointSetType::PointDataContainer PointDataContainerType;
 
   /** Other typedef */
-  typedef double RealType;
+  typedef double                              RealType;
   typedef VectorContainer<unsigned, RealType> WeightsContainerType;
   typedef FixedArray<unsigned, itkGetStaticConstMacro(ImageDimension)>
-      ArrayType;
-  typedef vnl_matrix<RealType> GradientType;
+                                                                  ArrayType;
+  typedef vnl_matrix<RealType>                                    GradientType;
   typedef Image<RealType, itkGetStaticConstMacro(ImageDimension)> RealImageType;
   typedef Image<PointDataType, itkGetStaticConstMacro(ImageDimension)>
       PointDataImageType;
@@ -181,21 +181,21 @@ private:
   /** Interpolation kernel type (default spline order = 3) */
   typedef BSplineKernelFunction<3> KernelType;
 
-  bool m_DoMultilevel;
-  bool m_GenerateOutputImage;
-  bool m_UsePointWeights;
-  unsigned int m_MaximumNumberOfLevels;
-  unsigned int m_CurrentLevel;
-  ArrayType m_NumberOfControlPoints;
-  ArrayType m_CurrentNumberOfControlPoints;
-  ArrayType m_CloseDimension;
-  ArrayType m_SplineOrder;
-  ArrayType m_NumberOfLevels;
+  bool                                   m_DoMultilevel;
+  bool                                   m_GenerateOutputImage;
+  bool                                   m_UsePointWeights;
+  unsigned int                           m_MaximumNumberOfLevels;
+  unsigned int                           m_CurrentLevel;
+  ArrayType                              m_NumberOfControlPoints;
+  ArrayType                              m_CurrentNumberOfControlPoints;
+  ArrayType                              m_CloseDimension;
+  ArrayType                              m_SplineOrder;
+  ArrayType                              m_NumberOfLevels;
   typename WeightsContainerType::Pointer m_PointWeights;
-  typename KernelType::Pointer m_Kernel[ImageDimension];
+  typename KernelType::Pointer           m_Kernel[ImageDimension];
   typename KernelType::MatrixType m_RefinedLatticeCoefficients[ImageDimension];
-  typename PointDataImageType::Pointer m_PhiLattice;
-  typename PointDataImageType::Pointer m_PsiLattice;
+  typename PointDataImageType::Pointer     m_PhiLattice;
+  typename PointDataImageType::Pointer     m_PsiLattice;
   typename PointDataContainerType::Pointer m_InputPointData;
   typename PointDataContainerType::Pointer m_OutputPointData;
 

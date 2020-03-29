@@ -50,24 +50,24 @@
  ENDUSAGE
  */
 
+#include "mrisurf.h"
+#include "tags.h"
 #include <glob.h>
 #include <libgen.h>
-#include "tags.h"
-#include "mrisurf.h"
 
-#define MAX_NB (6)             // the reasonable number of neighbors (tan size)
-#define MAX_SURF (20)          // max number of surfaces
+#define MAX_NB       (6)       // the reasonable number of neighbors (tan size)
+#define MAX_SURF     (20)      // max number of surfaces
 #define MAX_VERTICES (1000000) // max number of vertices
-#define SEP "/"
+#define SEP          "/"
 
 #ifndef GLOB_PERIOD
 #define GLOB_PERIOD 0
 #endif
 
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 static void calculate_nb_weights(float *nb_weights, int nb_num, int *hops);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void print_help();
 static void check_options();
 static void print_usage();
@@ -86,7 +86,7 @@ int surf_num = 0, over_num = 0, nb_rad = 0, ic_size = 1, ic_start = 0,
 int main(int argc, char *argv[]) {
   Progname = argv[0];
 
-  int f, v, n, t;
+  int     f, v, n, t;
   clock_t begin;
   begin = clock();
 
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
   check_options();
 
   MRI_SURFACE *surf[ic_size];
-  MRI *over[ic_size], *output[ic_size];
+  MRI *        over[ic_size], *output[ic_size];
 
   // read only surfaces/overlays that are included in the radial extent of the
   // kernel
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
   if (strlen(out_name) == 0) {
     char *dot, *name;
     name = basename(over_list.gl_pathv[0]);
-    dot = strrchr(name, '.');
+    dot  = strrchr(name, '.');
     strncpy(out_name, name, dot - name);
     sprintf(out_name, "%s.nb%d_rad%d-%d.mgz", out_name, nb_rad, ic_start,
             (ic_start + ic_size - 1));
@@ -172,10 +172,10 @@ int main(int argc, char *argv[]) {
   // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   if (nb_rad > 0) {
-    static int neighbors[MAX_NEIGHBORS];
-    static int hops[MAX_NEIGHBORS];
+    static int   neighbors[MAX_NEIGHBORS];
+    static int   hops[MAX_NEIGHBORS];
     static float nb_weights[MAX_NEIGHBORS];
-    static int nb_num;
+    static int   nb_num;
 
     // initializing the output with 0s
     for (f = 0; f < ic_size; f++)
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
         // for each frame in the overlay corresponding to this surface
         for (t = 0; t < over[f]->nframes; t++) {
           // for center vertex always weight 1.0
-          val = MRIgetVoxVal(over[f], v, 0, 0, t);
+          val   = MRIgetVoxVal(over[f], v, 0, 0, t);
           count = 1.0;
           for (n = 0; n < nb_num; n++) {
             val +=
@@ -273,7 +273,7 @@ static void calculate_nb_weights(float *nb_weights, int nb_num, int *hops) {
 \param argv - pointer to a character pointer
 */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
   if (argc <= 9)
     print_help();
@@ -318,17 +318,17 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!stricmp(option, "--tan-size")) {
       if (nargc < 1)
         ErrorExit(ERROR_BADPARM, "Flag %s needs an argument\n", option);
-      nb_rad = atoi(pargv[0]);
+      nb_rad    = atoi(pargv[0]);
       nargsused = 1;
     } else if (!stricmp(option, "--rad-size")) {
       if (nargc < 1)
         ErrorExit(ERROR_BADPARM, "Flag %s needs an argument\n", option);
-      ic_size = atoi(pargv[0]);
+      ic_size   = atoi(pargv[0]);
       nargsused = 1;
     } else if (!stricmp(option, "--rad-start")) {
       if (nargc < 1)
         ErrorExit(ERROR_BADPARM, "Flag %s needs an argument\n", option);
-      ic_start = atoi(pargv[0]);
+      ic_start  = atoi(pargv[0]);
       nargsused = 1;
       // nb weights
     } else if (!stricmp(option, "--tan-weights")) {

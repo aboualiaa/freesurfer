@@ -1,5 +1,5 @@
-#include <map>
 #include <iomanip>
+#include <map>
 
 #include "mri2.h"
 
@@ -11,21 +11,21 @@ static void printHelp(int exit_val) {
 
 // structure to represent the centroid of each label
 struct Centroid {
-  int id;
+  int         id;
   std::string labelname;
-  float mass, x, y, z;
+  float       mass, x, y, z;
 };
 
 // command line inpute parser
 class InputParser {
 public:
   std::string segfile, weightsfile, ltafile, outfile, ctabfile;
-  bool include_zero;
-  int precision;
+  bool        include_zero;
+  int         precision;
 
   InputParser(int &argc, char **argv) {
-    include_zero = false;
-    int i = 1;
+    include_zero  = false;
+    int         i = 1;
     std::string opt;
     while (i < argc) {
       std::string opt(argv[i]);
@@ -178,19 +178,19 @@ int main(int argc, char **argv) {
   // -------------------- compute centroids --------------------
 
   std::map<int, Centroid> centroids;
-  int numids, label_chars, id_chars, valid_id;
-  char char_name[500];
-  double x, y, z, wx, wy, wz, weight;
-  float fx, fy, fz;
+  int                     numids, label_chars, id_chars, valid_id;
+  char                    char_name[500];
+  double                  x, y, z, wx, wy, wz, weight;
+  float                   fx, fy, fz;
   int max_id_chars = 2, max_label_chars = 10; // used for table formatting
 
-  int *idlist = MRIsegIdList(seg, &numids, 0);
+  int *            idlist = MRIsegIdList(seg, &numids, 0);
   std::vector<int> ids(idlist, idlist + numids);
 
   for (int i = 0; i < numids; i++) {
     // create centroid for each label
     Centroid centroid = Centroid();
-    centroid.id = ids[i];
+    centroid.id       = ids[i];
 
     if ((!input.include_zero) && (centroid.id == 0))
       continue;
@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
     if (id_chars > max_id_chars)
       max_id_chars = id_chars;
 
-    centroid.mass = 0;
+    centroid.mass          = 0;
     centroids[centroid.id] = centroid;
   }
 
@@ -284,7 +284,7 @@ int main(int argc, char **argv) {
   std::cout << "writing results to " << input.outfile << std::endl;
 
   int precision = 4;
-  int cwidth = precision + 8;
+  int cwidth    = precision + 8;
 
   // table header
 

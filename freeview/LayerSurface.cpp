@@ -23,50 +23,50 @@
  *
  */
 
-#include "MainWindow.h"
 #include "LayerSurface.h"
-#include "vtkRenderer.h"
-#include "vtkImageActor.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkSmartPointer.h"
-#include "vtkImageMapToColors.h"
-#include "vtkActor.h"
-#include "vtkRGBAColorTransferFunction.h"
-#include "vtkLookupTable.h"
-#include "vtkProperty.h"
-#include "vtkImageReslice.h"
-#include "vtkFreesurferLookupTable.h"
-#include "vtkPlane.h"
-#include "vtkCutter.h"
-#include "vtkDecimatePro.h"
-#include "vtkTubeFilter.h"
-#include "vtkPointData.h"
-#include "vtkCellArray.h"
-#include "vtkSTLWriter.h"
-#include "vtkTransformPolyDataFilter.h"
-#include "vtkTransform.h"
 #include "FSSurface.h"
 #include "LayerMRI.h"
+#include "LayerPropertyROI.h"
+#include "LayerPropertySurface.h"
+#include "LayerROI.h"
+#include "MainWindow.h"
 #include "SurfaceAnnotation.h"
 #include "SurfaceLabel.h"
-#include "LayerPropertySurface.h"
-#include "SurfaceROI.h"
-#include <QFileInfo>
-#include <QDir>
-#include <QTextStream>
-#include <QFile>
-#include <QDebug>
-#include "SurfaceOverlayProperty.h"
 #include "SurfaceOverlay.h"
-#include "SurfaceSpline.h"
-#include "vtkMaskPoints.h"
-#include "vtkExtractPolyDataGeometry.h"
-#include "vtkBox.h"
-#include "vtkDoubleArray.h"
-#include "LayerROI.h"
-#include "LayerPropertyROI.h"
+#include "SurfaceOverlayProperty.h"
 #include "SurfacePath.h"
+#include "SurfaceROI.h"
+#include "SurfaceSpline.h"
+#include "vtkActor.h"
+#include "vtkBox.h"
+#include "vtkCellArray.h"
+#include "vtkCutter.h"
+#include "vtkDecimatePro.h"
+#include "vtkDoubleArray.h"
+#include "vtkExtractPolyDataGeometry.h"
+#include "vtkFreesurferLookupTable.h"
+#include "vtkImageActor.h"
+#include "vtkImageMapToColors.h"
+#include "vtkImageReslice.h"
+#include "vtkLookupTable.h"
+#include "vtkMaskPoints.h"
+#include "vtkPlane.h"
+#include "vtkPointData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkRGBAColorTransferFunction.h"
+#include "vtkRenderer.h"
+#include "vtkSTLWriter.h"
+#include "vtkSmartPointer.h"
+#include "vtkTransform.h"
+#include "vtkTransformPolyDataFilter.h"
+#include "vtkTubeFilter.h"
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QSet>
+#include <QTextStream>
 
 LayerSurface::LayerSurface(LayerMRI *ref, QObject *parent)
     : LayerEditable(parent), m_surfaceSource(NULL), m_bResampleToRAS(true),
@@ -81,15 +81,15 @@ LayerSurface::LayerSurface(LayerMRI *ref, QObject *parent)
   m_sPrimaryType = "Surface";
 
   m_sMappingSurfaceName = "white";
-  m_sSphereFilename = "sphere.reg";
+  m_sSphereFilename     = "sphere.reg";
 
   // create property before actors!
   mProperty = new LayerPropertySurface(this);
 
   for (int i = 0; i < 3; i++) {
     // m_nSliceNumber[i] = 0;
-    m_sliceActor2D[i] = vtkSmartPointer<vtkActor>::New();
-    m_sliceActor3D[i] = vtkSmartPointer<vtkActor>::New();
+    m_sliceActor2D[i]  = vtkSmartPointer<vtkActor>::New();
+    m_sliceActor3D[i]  = vtkSmartPointer<vtkActor>::New();
     m_vectorActor2D[i] = vtkSmartPointer<vtkActor>::New();
     m_vertexActor2D[i] = vtkSmartPointer<vtkActor>::New();
     m_vertexActor2D[i]->SetProperty(m_vertexActor2D[i]->MakeProperty());
@@ -193,23 +193,17 @@ void LayerSurface::SetRefVolume(LayerMRI *ref) {
             Qt::UniqueConnection);
 }
 
-bool LayerSurface::LoadSurfaceFromFile(bool bIgnoreVG)
-{
-  if ( m_surfaceSource )
-  {
+bool LayerSurface::LoadSurfaceFromFile(bool bIgnoreVG) {
+  if (m_surfaceSource) {
     delete m_surfaceSource;
   }
 
-  m_surfaceSource = new FSSurface( m_volumeRef ? m_volumeRef->GetSourceVolume() : NULL );
+  m_surfaceSource =
+      new FSSurface(m_volumeRef ? m_volumeRef->GetSourceVolume() : NULL);
   m_surfaceSource->SetIgnoreVolumeGeometry(bIgnoreVG);
-  if ( !m_surfaceSource->MRISRead( m_sFilename,
-                                   m_sVectorFilename,
-                                   m_sPatchFilename,
-                                   m_sTargetFilename,
-                                   m_sSphereFilename,
-                                   m_listSupFiles)
-       )
-  {
+  if (!m_surfaceSource->MRISRead(m_sFilename, m_sVectorFilename,
+                                 m_sPatchFilename, m_sTargetFilename,
+                                 m_sSphereFilename, m_listSupFiles)) {
     return false;
   }
 
@@ -249,8 +243,8 @@ bool LayerSurface::CreateFromMRIS(void *mris_ptr) {
 
 bool LayerSurface::SaveSurface(const QString &filename) {
   if (!m_surfaceSource->MRISWrite(filename)) {
-    cerr << "MRISWrite failed: Unable to write to " << qPrintable(filename)
-         << ".\n";
+    std::cerr << "MRISWrite failed: Unable to write to " << qPrintable(filename)
+              << ".\n";
     return false;
   } else {
     ResetModified();
@@ -282,7 +276,7 @@ bool LayerSurface::SaveSurfaceAsSTL(const QString &fn) {
 
 bool LayerSurface::SaveSurface() {
   if (m_sFilename.size() == 0) {
-    cerr << "No filename provided to save surface.\n";
+    std::cerr << "No filename provided to save surface.\n";
     return false;
   }
 
@@ -298,23 +292,22 @@ bool LayerSurface::WriteIntersection(const QString &filename, int nPlane,
   }
 
   vtkCellArray *lines = polydata->GetLines();
-  vtkIdType nPts, *pts;
-  vtkPoints *points = polydata->GetPoints();
+  vtkIdType     nPts, *pts;
+  vtkPoints *   points = polydata->GetPoints();
 
   if (lines && points) {
     QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-      cerr << "Cannot write file " << qPrintable(filename) << endl;
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+      std::cerr << "Cannot write file " << qPrintable(filename) << std::endl;
       return false;
     }
     QTextStream out(&file);
-    QString str[3] = {"sag", "cor", "hor"};
+    QString     str[3] = {"sag", "cor", "hor"};
     out << "#orientation " << str[nPlane] << "\n";
     out << "#points " << points->GetNumberOfPoints() << "\n";
     for (int i = 0; i < points->GetNumberOfPoints(); i++) {
       double *pt = points->GetPoint(i);
-      double ras[3];
+      double  ras[3];
       mri_ref->TargetToRAS(pt, ras);
       mri_ref->RASToOriginalIndex(ras, ras);
       out << ras[0] << " " << ras[1] << " " << ras[2] << "\n";
@@ -326,7 +319,8 @@ bool LayerSurface::WriteIntersection(const QString &filename, int nPlane,
         out << pts[i] << " ";
       out << "\n";
     }
-    cout << "Intersection data written to " << qPrintable(filename) << "\n";
+    std::cout << "Intersection data written to " << qPrintable(filename)
+              << "\n";
   }
   return true;
 }
@@ -404,9 +398,9 @@ bool LayerSurface::LoadOverlayFromFile(const QString &filename,
 
 bool LayerSurface::LoadGenericOverlayFromFile(const QString &filename,
                                               const QString &fn_reg,
-                                              bool bSecondHalfData) {
+                                              bool           bSecondHalfData) {
   float *data = NULL;
-  int nframes, nvertices;
+  int    nframes, nvertices;
   if (!m_surfaceSource->LoadOverlay(filename, fn_reg, &data, &nvertices,
                                     &nframes, bSecondHalfData)) {
     return false;
@@ -474,7 +468,7 @@ bool LayerSurface::LoadAnnotationFromFile(const QString &filename) {
 
   // create annotation
   SurfaceAnnotation *annot = new SurfaceAnnotation(this);
-  bool ret = annot->LoadAnnotation(fn);
+  bool               ret   = annot->LoadAnnotation(fn);
   if (!ret) {
     delete annot;
     return false;
@@ -492,7 +486,7 @@ bool LayerSurface::LoadAnnotationFromFile(const QString &filename) {
     names << m_annotations[i]->GetName();
 
   QString basename = name;
-  int n = 0;
+  int     n        = 0;
   while (names.contains(name)) {
     n++;
     name = QString("%1_%2").arg(basename).arg(n);
@@ -518,7 +512,7 @@ bool LayerSurface::LoadLabelFromFile(const QString &filename) {
   if (fn.left(2) == "~/")
     fn.replace("~", QDir::homePath());
   QFileInfo fi(fn);
-  bool ret = label->LoadLabel(fn);
+  bool      ret = label->LoadLabel(fn);
   if (!ret) {
     delete label;
     return false;
@@ -553,7 +547,7 @@ void LayerSurface::InitializeLabel(SurfaceLabel *label) {
 
 SurfaceLabel *LayerSurface::CreateNewLabel(const QString &name_in) {
   static int ncount = 1;
-  QString name = name_in;
+  QString    name   = name_in;
   if (name.isEmpty()) {
     name = QString("label_%1").arg(ncount++);
   }
@@ -690,7 +684,7 @@ void LayerSurface::InitializeActors() {
     double bounds[6];
     m_surfaceSource->GetPolyData()->GetBounds(bounds);
     {
-      bounds[i * 2] = (bounds[i * 2] + bounds[i * 2 + 1]) / 2 - 0;
+      bounds[i * 2]     = (bounds[i * 2] + bounds[i * 2 + 1]) / 2 - 0;
       bounds[i * 2 + 1] = bounds[i * 2] + 20;
     }
     m_box[i] = vtkSmartPointer<vtkBox>::New();
@@ -725,7 +719,7 @@ void LayerSurface::InitializeActors() {
     //
 
     double line_w = GetProperty()->GetEdgeThickness();
-    double ratio = 1;
+    double ratio  = 1;
 #if VTK_MAJOR_VERSION > 7
     ratio = MainWindow::GetMainWindow()->devicePixelRatio();
 #endif
@@ -875,7 +869,7 @@ void LayerSurface::Append2DProps(vtkRenderer *renderer, int nPlane) {
 }
 
 void LayerSurface::Append3DProps(vtkRenderer *renderer,
-                                 bool *bSliceVisibility) {
+                                 bool *       bSliceVisibility) {
   if (!m_bVisibleIn3D)
     return;
 
@@ -937,7 +931,7 @@ void LayerSurface::OnSlicePositionChanged(int nPlane) {
   }
 
   double *pos = GetProperty()->GetPosition();
-  double bounds[6];
+  double  bounds[6];
   m_surfaceSource->GetPolyData()->GetBounds(bounds);
   switch (nPlane) {
   case 0:
@@ -959,8 +953,8 @@ void LayerSurface::OnSlicePositionChanged(int nPlane) {
     m_vectorActor2D[2]->SetPosition(pos[0], pos[1], -1.0);
     break;
   }
-  double dLen = m_surfaceSource->GetMaxSegmentLength();
-  bounds[nPlane * 2] = m_dSlicePosition[nPlane] - dLen / 2;
+  double dLen            = m_surfaceSource->GetMaxSegmentLength();
+  bounds[nPlane * 2]     = m_dSlicePosition[nPlane] - dLen / 2;
   bounds[nPlane * 2 + 1] = bounds[nPlane * 2] + dLen / 2;
   m_box[nPlane]->SetBounds(bounds);
 
@@ -1067,7 +1061,7 @@ int LayerSurface::GetVertexIndexAtTarget(double *pos, double *distance,
     return -1;
   }
 
-  double pos_o[3];
+  double  pos_o[3];
   double *offset = GetProperty()->GetPosition();
   for (int i = 0; i < 3; i++) {
     pos_o[i] = pos[i] - offset[i];
@@ -1102,7 +1096,7 @@ void LayerSurface::GetSurfaceRASAtTarget(double *pos_in, double *ras_out) {
     return;
   }
 
-  double pos_o[3];
+  double  pos_o[3];
   double *offset = GetProperty()->GetPosition();
   for (int i = 0; i < 3; i++) {
     pos_o[i] = pos_in[i] - offset[i];
@@ -1129,7 +1123,7 @@ void LayerSurface::GetRASAtTarget(double *pos_in, double *ras_out) {
     return;
   }
 
-  double pos_o[3];
+  double  pos_o[3];
   double *offset = GetProperty()->GetPosition();
   for (int i = 0; i < 3; i++) {
     pos_o[i] = pos_in[i] - offset[i];
@@ -1362,7 +1356,7 @@ void LayerSurface::UpdateOverlay(bool bAskRedraw, bool pre_cached) {
     mapper->Update();
     wf_mapper->Update();
   }
-  vtkPolyData *polydata = mapper->GetInput();
+  vtkPolyData *polydata          = mapper->GetInput();
   vtkPolyData *polydataWireframe = wf_mapper->GetInput();
   if ((GetProperty()->GetShowOverlay() && m_nActiveOverlay >= 0) ||
       (GetProperty()->GetShowAnnotation() && m_nActiveAnnotation >= 0)) {
@@ -1400,11 +1394,11 @@ void LayerSurface::UpdateOverlay(bool bAskRedraw, bool pre_cached) {
         } else {
           if (m_nActiveRGBMap < 0) {
             double *c = GetProperty()->GetBinaryColor();
-            int r = (int)(c[0] * 255);
-            int g = (int)(c[1] * 255);
-            int b = (int)(c[2] * 255);
+            int     r = (int)(c[0] * 255);
+            int     g = (int)(c[1] * 255);
+            int     b = (int)(c[2] * 255);
             for (int i = 0; i < nCount; i++) {
-              data[i * 4] = r;
+              data[i * 4]     = r;
               data[i * 4 + 1] = g;
               data[i * 4 + 2] = b;
               data[i * 4 + 3] = 255;
@@ -1412,7 +1406,7 @@ void LayerSurface::UpdateOverlay(bool bAskRedraw, bool pre_cached) {
           } else {
             QList<int> &rgb = m_rgbMaps[m_nActiveRGBMap].data;
             for (int i = 0; i < nCount; i++) {
-              data[i * 4] = rgb[i * 3];
+              data[i * 4]     = rgb[i * 3];
               data[i * 4 + 1] = rgb[i * 3 + 1];
               data[i * 4 + 2] = rgb[i * 3 + 2];
               data[i * 4 + 3] = 255;
@@ -1489,7 +1483,7 @@ void LayerSurface::UpdateOverlay(bool bAskRedraw, bool pre_cached) {
                 VTK_RGBA);
           else {
             if (m_nActiveRGBMap < 0) {
-              double *dColor = GetProperty()->GetBinaryColor();
+              double *      dColor  = GetProperty()->GetBinaryColor();
               unsigned char rgba[4] = {(unsigned char)(dColor[0] * 255),
                                        (unsigned char)(dColor[1] * 255),
                                        (unsigned char)(dColor[2] * 255), 255};
@@ -1498,7 +1492,7 @@ void LayerSurface::UpdateOverlay(bool bAskRedraw, bool pre_cached) {
             } else {
               QList<int> &rgb = m_rgbMaps[m_nActiveRGBMap].data;
               for (vtkIdType i = 0; i < nCount; i++) {
-                data[i * 4] = rgb[i * 3];
+                data[i * 4]     = rgb[i * 3];
                 data[i * 4 + 1] = rgb[i * 3 + 1];
                 data[i * 4 + 2] = rgb[i * 3 + 2];
                 data[i * 4 + 3] = 255;
@@ -1564,13 +1558,13 @@ void LayerSurface::SetActiveAnnotation(int n) {
             LayerPropertySurface::CM_Threshold) {
       this->GetProperty()->SetCurvatureMap(LayerPropertySurface::CM_Binary);
     }
-    m_nActiveAnnotation = n;
+    m_nActiveAnnotation      = n;
     SurfaceAnnotation *annot = GetActiveAnnotation();
     if (annot) {
       MRIS *mris = GetSourceSurface()->GetMRIS();
       if (mris->ct)
         CTABfree(&mris->ct);
-      mris->ct = CTABdeepCopy(annot->GetColorTable());
+      mris->ct  = CTABdeepCopy(annot->GetColorTable());
       int *data = annot->GetAnnotationData();
       for (int i = 0; i < mris->nvertices; i++)
         mris->vertices[i].annotation = data[i];
@@ -1643,7 +1637,7 @@ void LayerSurface::UpdateVertexRender() {
 void LayerSurface::UpdateMeshRender() {
   vtkPolyDataMapper *mapper =
       vtkPolyDataMapper::SafeDownCast(m_mainActor->GetMapper());
-  vtkPolyData *polydata = mapper->GetInput();
+  vtkPolyData *      polydata = mapper->GetInput();
   vtkPolyDataMapper *mapperWireframe =
       vtkPolyDataMapper::SafeDownCast(m_wireframeActor->GetMapper());
   vtkPolyData *polydataWireframe = mapperWireframe->GetInput();
@@ -1987,8 +1981,8 @@ bool LayerSurface::IsInflated() {
 
 bool LayerSurface::GetActiveLabelCentroidPosition(double *pos) {
   SurfaceLabel *label = GetActiveLabel();
-  int vno;
-  double x, y, z;
+  int           vno;
+  double        x, y, z;
   if (label && label->GetCentroid(&x, &y, &z, &vno)) {
     return GetTargetAtVertex(vno, pos);
   }
@@ -2029,7 +2023,7 @@ bool LayerSurface::LoadRGBFromFile(const QString &filename) {
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
       return false;
     while (!file.atEnd()) {
-      QString line = file.readLine();
+      QString     line = file.readLine();
       QStringList list = line.split(",", QString::SkipEmptyParts);
       if (list.size() < 3)
         list = line.split(" ", QString::SkipEmptyParts);
@@ -2038,18 +2032,16 @@ bool LayerSurface::LoadRGBFromFile(const QString &filename) {
           map.data << (int)list[i].toDouble();
       }
     }
-    if (map.data.size() != GetNumberOfVertices()*3)
-    {
-      cout << "data size does not match" << endl;
+    if (map.data.size() != GetNumberOfVertices() * 3) {
+      std::cout << "data size does not match" << std::endl;
       return false;
     }
   } else {
     MRI *mri = ::MRIread(filename.toLatin1().data());
     if (!mri)
       return false;
-    else if (mri->width != GetNumberOfVertices() || mri->height != 3)
-    {
-      cout << "data size does not match" << endl;
+    else if (mri->width != GetNumberOfVertices() || mri->height != 3) {
+      std::cout << "data size does not match" << std::endl;
       MRIfree(&mri);
       return false;
     }
@@ -2160,7 +2152,7 @@ QVector<int> LayerSurface::FindPath(const QVector<int> &seeds) {
   for (int i = 0; i < seeds.size(); i++)
     vert_vno[i] = seeds[i];
 
-  int path[1000], path_length = 0;
+  int          path[1000], path_length = 0;
   QVector<int> out_vno;
   if (m_surfaceSource->FindPath(vert_vno, seeds.size(), path, &path_length)) {
     for (int i = 0; i < path_length; i++)
@@ -2179,9 +2171,9 @@ void LayerSurface::SetNeighborhoodSize(int nSize) {
 }
 
 QVector<int> LayerSurface::GetVertexNeighbors(int vno) {
-  QVector<int> vno_list;
-  MRIS *mris = m_surfaceSource->GetMRIS();
-  VERTEX_TOPOLOGY *vt = &mris->vertices_topology[vno];
+  QVector<int>     vno_list;
+  MRIS *           mris = m_surfaceSource->GetMRIS();
+  VERTEX_TOPOLOGY *vt   = &mris->vertices_topology[vno];
   for (int i = 0; i < vt->vtotal; i++)
     vno_list << vt->v[i];
   return vno_list;
@@ -2189,8 +2181,8 @@ QVector<int> LayerSurface::GetVertexNeighbors(int vno) {
 
 void LayerSurface::ResetContralateralInfo() {
   m_surfaceContralateral = NULL;
-  m_surfaceSphere1 = NULL;
-  m_surfaceSphere2 = NULL;
+  m_surfaceSphere1       = NULL;
+  m_surfaceSphere2       = NULL;
 }
 
 void LayerSurface::SetContralateralLayer(LayerSurface *layer,
@@ -2220,7 +2212,7 @@ bool LayerSurface::IsContralateralPossible() {
   if (IsContralateralReady())
     return true;
 
-  QString fn = GetFileName();
+  QString fn       = GetFileName();
   QString fullpath = QFileInfo(fn).absolutePath();
   if (GetHemisphere() == 0)
     fn.replace("lh.", "rh.");
@@ -2261,15 +2253,13 @@ void LayerSurface::EditPathPoint(int vno, bool remove) {
     m_marks->AddPoint(vno);
 }
 
-void LayerSurface::RemoveLastPathPoint()
-{
+void LayerSurface::RemoveLastPathPoint() {
   if (m_marks)
     m_marks->RemoveLastPoint();
 }
 
-void LayerSurface::SetActivePath(int n)
-{
-  if (m_nActivePath >=0)
+void LayerSurface::SetActivePath(int n) {
+  if (m_nActivePath >= 0)
     m_paths[m_nActivePath]->SetColor(Qt::red);
 
   if (n >= 0) {
@@ -2375,21 +2365,21 @@ void LayerSurface::UndoCut() {
   }
 }
 
-QVector<int> LayerSurface::FloodFillFromSeed(int seed_vno,
+QVector<int> LayerSurface::FloodFillFromSeed(int                seed_vno,
                                              const QVariantMap &options) {
   MRIS *mris = m_surfaceSource->GetMRIS();
   char *filled;
-  int num_filled_this_iter;
-  int num_filled;
-  int iter;
-  int min_vno, max_vno, step_vno;
-  int vno;
+  int   num_filled_this_iter;
+  int   num_filled;
+  int   iter;
+  int   min_vno, max_vno, step_vno;
+  int   vno;
   //  int this_label = 0;
-  int neighbor_index;
-  int neighbor_vno;
-  VERTEX *v;
+  int              neighbor_index;
+  int              neighbor_vno;
+  VERTEX *         v;
   VERTEX_TOPOLOGY *vt;
-  VERTEX *neighbor_v;
+  VERTEX *         neighbor_v;
   //  float fvalue = 0;
   //  float seed_curv = 0;
   //  float seed_fvalue = 0;
@@ -2421,26 +2411,26 @@ QVector<int> LayerSurface::FloodFillFromSeed(int seed_vno,
   //                    sclv_current_field, &seed_fvalue);
 
   /* while we're still filling stuff in a pass... */
-  num_filled_this_iter = 1;
-  num_filled = 0;
-  iter = 0;
-  bool bDoNotCrossPaths = options["DoNotCrossPaths"].toBool();
-  bool bDoNotCrossLabels = options["DoNotCrossLabels"].toBool();
-  bool bDoNotFillUnlabeled = options["DoNotFillUnlabeled"].toBool();
+  num_filled_this_iter      = 1;
+  num_filled                = 0;
+  iter                      = 0;
+  bool bDoNotCrossPaths     = options["DoNotCrossPaths"].toBool();
+  bool bDoNotCrossLabels    = options["DoNotCrossLabels"].toBool();
+  bool bDoNotFillUnlabeled  = options["DoNotFillUnlabeled"].toBool();
   bool bDoNotCrossThreshold = options["DoNotCrossThreshold"].toBool();
   bool bDoNotCrossCurv =
       (HasCurvature() && options["FillToCurvature"].toBool());
-  bool bNewLabel = options["CreateLabel"].toBool();
-  bool bAsAnnotation = options["AsAnnotation"].toBool();
-  double seed_curv = 0;
-  double seed_value = 0;
-  SurfaceOverlay *overlay = GetActiveOverlay();
+  bool            bNewLabel     = options["CreateLabel"].toBool();
+  bool            bAsAnnotation = options["AsAnnotation"].toBool();
+  double          seed_curv     = 0;
+  double          seed_value    = 0;
+  SurfaceOverlay *overlay       = GetActiveOverlay();
   if (!overlay)
     bDoNotCrossThreshold = false;
   double fthresh = 0;
   if (bDoNotCrossThreshold && overlay) {
     seed_value = overlay->GetDataAtVertex(seed_vno);
-    fthresh = overlay->GetProperty()->GetMinPoint();
+    fthresh    = overlay->GetProperty()->GetMinPoint();
   }
   if (bDoNotCrossCurv)
     seed_curv = mris->vertices[seed_vno].curv;
@@ -2450,12 +2440,12 @@ QVector<int> LayerSurface::FloodFillFromSeed(int seed_vno,
 
     /* switch between iterating forward and backwards. */
     if ((iter % 2) == 0) {
-      min_vno = 0;
-      max_vno = mris->nvertices - 1;
+      min_vno  = 0;
+      max_vno  = mris->nvertices - 1;
       step_vno = 1;
     } else {
-      min_vno = mris->nvertices - 1;
-      max_vno = 0;
+      min_vno  = mris->nvertices - 1;
+      max_vno  = 0;
       step_vno = -1;
     }
 
@@ -2467,7 +2457,7 @@ QVector<int> LayerSurface::FloodFillFromSeed(int seed_vno,
       if (filled[vno]) {
 
         /* check the neighbors... */
-        v = &mris->vertices[vno];
+        v  = &mris->vertices[vno];
         vt = &mris->vertices_topology[vno];
 
         /* if this vert is ripped, move on. */
@@ -2497,7 +2487,7 @@ QVector<int> LayerSurface::FloodFillFromSeed(int seed_vno,
 
         for (neighbor_index = 0; neighbor_index < vt->vnum; neighbor_index++) {
           neighbor_vno = vt->v[neighbor_index];
-          neighbor_v = &mris->vertices[neighbor_vno];
+          neighbor_v   = &mris->vertices[neighbor_vno];
 
           /* if the neighbor is filled, move on. */
           if (filled[neighbor_vno])
@@ -2512,8 +2502,8 @@ QVector<int> LayerSurface::FloodFillFromSeed(int seed_vno,
           if (bDoNotCrossLabels || bDoNotFillUnlabeled) {
             bool bFound = false, bSkip = false;
             if (bAsAnnotation) {
-              SurfaceAnnotation *annot = GetActiveAnnotation();
-              int nIndex = annot->GetIndexAtVertex(neighbor_vno);
+              SurfaceAnnotation *annot  = GetActiveAnnotation();
+              int                nIndex = annot->GetIndexAtVertex(neighbor_vno);
               if (nIndex >= 0) {
                 bFound = true;
                 if (nIndex != annot->GetIndexAtVertex(seed_vno)) {
@@ -2632,11 +2622,10 @@ bool LayerSurface::IsVertexOnPath(int vno) {
 }
 
 bool LayerSurface::FillPath(int nvo, const QVariantMap &options) {
-  bool bAsAnnotation = options["AsAnnotation"].toBool();
-  QVector<int> verts = FloodFillFromSeed(nvo, options);
-  if (verts.size() == 0)
-  {
-    cout << "Did not fill/remove any vertices" << endl;
+  bool         bAsAnnotation = options["AsAnnotation"].toBool();
+  QVector<int> verts         = FloodFillFromSeed(nvo, options);
+  if (verts.size() == 0) {
+    std::cout << "Did not fill/remove any vertices" << std::endl;
     return false;
   }
 
@@ -2658,13 +2647,13 @@ bool LayerSurface::FillPath(int nvo, const QVariantMap &options) {
   return true;
 }
 
-int LayerSurface::FillPath(const QVector<int> &verts, const QVariantMap &options)
-{
+int LayerSurface::FillPath(const QVector<int> &verts,
+                           const QVariantMap & options) {
   QVariantMap opt = options;
   foreach (int nvo, verts) {
     if (FillPath(nvo, opt) && opt["CreateLabel"].toBool()) {
       opt["CreateLabel"] = false;
-      opt["AddToLabel"] = true;
+      opt["AddToLabel"]  = true;
     }
   }
   return opt.value("FillAnnotationIndex").toInt();
@@ -2689,12 +2678,12 @@ QVector<int> LayerSurface::GetAllMarks() {
 
 bool LayerSurface::LoadParameterization(const QString &filename) {
   MRIS *mris = m_surfaceSource->GetMRIS();
-  MRI *mri =
+  MRI * mri =
       ::MRISreadParameterizationToSurface(mris, filename.toLatin1().data());
   if (mri) {
-    int nPerFrame = mri->width * mri->height * mri->depth;
-    int nframes = nPerFrame * mri->nframes / mris->nvertices;
-    float *data = new float[nPerFrame * mri->nframes];
+    int    nPerFrame = mri->width * mri->height * mri->depth;
+    int    nframes   = nPerFrame * mri->nframes / mris->nvertices;
+    float *data      = new float[nPerFrame * mri->nframes];
     for (int nx = 0; nx < mri->width; nx++) {
       for (int ny = 0; ny < mri->height; ny++) {
         for (int nz = 0; nz < mri->depth; nz++) {
@@ -2715,8 +2704,9 @@ bool LayerSurface::LoadParameterization(const QString &filename) {
     SetActiveOverlay(m_overlays.size() - 1);
 
     emit Modified();
-    emit SurfaceOverlayAdded( overlay );
-    connect(overlay, SIGNAL(DataUpdated()), this, SIGNAL(SurfaceOverlyDataUpdated()), Qt::UniqueConnection);
+    emit SurfaceOverlayAdded(overlay);
+    connect(overlay, SIGNAL(DataUpdated()), this,
+            SIGNAL(SurfaceOverlyDataUpdated()), Qt::UniqueConnection);
     MRIfree(&mri);
     return true;
   } else
@@ -2724,7 +2714,7 @@ bool LayerSurface::LoadParameterization(const QString &filename) {
 }
 
 bool LayerSurface::LoadCoordsFromParameterization(const QString &filename) {
-  MRIS *mris = m_surfaceSource->GetMRIS();
+  MRIS *  mris  = m_surfaceSource->GetMRIS();
   MRI_SP *mrisp = ::MRISPread(filename.toLatin1().data());
   if (mrisp) {
     ::MRIScoordsFromParameterization(
@@ -2734,7 +2724,7 @@ bool LayerSurface::LoadCoordsFromParameterization(const QString &filename) {
     emit ActorUpdated();
     return true;
   } else {
-    cerr << "Failed to load " << qUtf8Printable(filename) << endl;
+    std::cerr << "Failed to load " << qUtf8Printable(filename) << std::endl;
     return false;
   }
 }

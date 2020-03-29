@@ -51,10 +51,10 @@ protected slots:
 
 private:
   Ui::DialogCropVolume *ui;
-  QSpinBox *m_spinRange[6];
+  QSpinBox *            m_spinRange[6];
 
   LayerMRI *m_mri;
-  bool m_bShowSliceFrame;
+  bool      m_bShowSliceFrame;
 };
 
 #endif // DIALOGCROPVOLUME_H

@@ -118,7 +118,7 @@ void PolylineCell<TCellInterface>::SetPointIds(PointIdConstIterator first) {
 template <typename TCellInterface>
 void PolylineCell<TCellInterface>::SetPointIds(PointIdConstIterator first,
                                                PointIdConstIterator last) {
-  int localId = 0;
+  int                  localId = 0;
   PointIdConstIterator ii(first);
 
   m_PointIds->Initialize();
@@ -133,7 +133,7 @@ void PolylineCell<TCellInterface>::SetPointIds(PointIdConstIterator first,
  * Set an individual point identifier in the cell.
  */
 template <typename TCellInterface>
-void PolylineCell<TCellInterface>::SetPointId(int localId,
+void PolylineCell<TCellInterface>::SetPointId(int             localId,
                                               PointIdentifier ptId) {
   m_PointIds->CreateIndex(localId);
   m_PointIds->SetElement(localId, ptId);

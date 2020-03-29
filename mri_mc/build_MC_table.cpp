@@ -23,15 +23,15 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
 static int gNb(int *tab) {
   int nb, n;
   nb = 0;
-  n = 0;
+  n  = 0;
   while (tab[n] >= 0) {
     switch (tab[n]) {
     case 0:
@@ -76,9 +76,9 @@ static int Reverse(int *f, int *v, int *fd, int *vd) {
   int n, p, test, k;
   int tb[8][3] = {{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {1, 1, 0},
                   {0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {1, 1, 1}};
-  n = 0;
+  n            = 0;
   while (f[n] >= 0) {
-    fd[n] = f[n + 2];
+    fd[n]     = f[n + 2];
     fd[n + 1] = f[n + 1];
     fd[n + 2] = f[n];
     n += 3;
@@ -86,7 +86,7 @@ static int Reverse(int *f, int *v, int *fd, int *vd) {
 
   n = 0;
   for (k = 0; k < 8; k++) {
-    p = 0;
+    p    = 0;
     test = 0;
     while (v[p] >= 0) {
       if (v[p] == tb[k][0] && v[p + 1] == tb[k][1] && v[p + 2] == tb[k][2])
@@ -94,7 +94,7 @@ static int Reverse(int *f, int *v, int *fd, int *vd) {
       p += 3;
     }
     if (!test) {
-      vd[n] = tb[k][0];
+      vd[n]     = tb[k][0];
       vd[n + 1] = tb[k][1];
       vd[n + 2] = tb[k][2];
       n += 3;
@@ -104,11 +104,11 @@ static int Reverse(int *f, int *v, int *fd, int *vd) {
 }
 
 static const int RfOx[12] = {2, 6, 10, 7, 1, 3, 9, 11, 0, 4, 8, 5};
-static int ROx(int *f, int *v, int *fd, int *vd) {
+static int       ROx(int *f, int *v, int *fd, int *vd) {
   int n;
   n = 0;
   while (f[n] >= 0) {
-    fd[n] = RfOx[f[n]];
+    fd[n]     = RfOx[f[n]];
     fd[n + 1] = RfOx[f[n + 1]];
     fd[n + 2] = RfOx[f[n + 2]];
     n += 3;
@@ -134,11 +134,11 @@ static int ROx(int *f, int *v, int *fd, int *vd) {
   return gNb(vd);
 }
 static const int RfOy[12] = {4, 9, 6, 1, 8, 0, 10, 2, 5, 11, 7, 3};
-static int ROy(int *f, int *v, int *fd, int *vd) {
+static int       ROy(int *f, int *v, int *fd, int *vd) {
   int n;
   n = 0;
   while (f[n] >= 0) {
-    fd[n] = RfOy[f[n]];
+    fd[n]     = RfOy[f[n]];
     fd[n + 1] = RfOy[f[n + 1]];
     fd[n + 2] = RfOy[f[n + 2]];
     n += 3;
@@ -146,16 +146,16 @@ static int ROy(int *f, int *v, int *fd, int *vd) {
   n = 0;
   while (v[n] >= 0) {
     if (v[n] == 0 && v[n + 2] == 0) {
-      vd[n] = 0;
+      vd[n]     = 0;
       vd[n + 2] = 1;
     } else if (v[n] == 0 && v[n + 2] == 1) {
-      vd[n] = 1;
+      vd[n]     = 1;
       vd[n + 2] = 1;
     } else if (v[n] == 1 && v[n + 2] == 1) {
-      vd[n] = 1;
+      vd[n]     = 1;
       vd[n + 2] = 0;
     } else {
-      vd[n] = 0;
+      vd[n]     = 0;
       vd[n + 2] = 0;
     }
     vd[n + 1] = v[n + 1];
@@ -165,11 +165,11 @@ static int ROy(int *f, int *v, int *fd, int *vd) {
 }
 
 static const int RfOz[12] = {3, 0, 1, 2, 5, 7, 4, 6, 11, 8, 9, 10};
-static int ROz(int *f, int *v, int *fd, int *vd) {
+static int       ROz(int *f, int *v, int *fd, int *vd) {
   int n;
   n = 0;
   while (f[n] >= 0) {
-    fd[n] = RfOz[f[n]];
+    fd[n]     = RfOz[f[n]];
     fd[n + 1] = RfOz[f[n + 1]];
     fd[n + 2] = RfOz[f[n + 2]];
     n += 3;
@@ -177,16 +177,16 @@ static int ROz(int *f, int *v, int *fd, int *vd) {
   n = 0;
   while (v[n] >= 0) {
     if (v[n] == 0 && v[n + 1] == 0) {
-      vd[n] = 1;
+      vd[n]     = 1;
       vd[n + 1] = 0;
     } else if (v[n] == 1 && v[n + 1] == 0) {
-      vd[n] = 1;
+      vd[n]     = 1;
       vd[n + 1] = 1;
     } else if (v[n] == 1 && v[n + 1] == 1) {
-      vd[n] = 0;
+      vd[n]     = 0;
       vd[n + 1] = 1;
     } else {
-      vd[n] = 0;
+      vd[n]     = 0;
       vd[n + 1] = 0;
     }
     vd[n + 2] = v[n + 2];
@@ -292,11 +292,11 @@ static void copy(int *s, int *d) {
 }
 
 #define NB_TRIANGLES 6
-#define NB_VERTICES (3 * NB_TRIANGLES + 1)
-#define NV NB_VERTICES
+#define NB_VERTICES  (3 * NB_TRIANGLES + 1)
+#define NV           NB_VERTICES
 
 #define NB_POINTS 25
-#define NP NB_POINTS
+#define NP        NB_POINTS
 
 static int Case6[15][NV], Case18[15][NV], Case26[15][NV];
 static int Pt[15][NP];
@@ -316,13 +316,13 @@ static void initCases(void) {
   // nothing to do
 
   // case 1: 1 face
-  k = 1;
+  k           = 1;
   Case6[k][0] = 4;
   Case6[k][1] = 0;
   Case6[k][2] = 1;
 
   // case 2: 2 faces
-  k = 2;
+  k           = 2;
   Case6[k][0] = 4;
   Case6[k][1] = 5;
   Case6[k][2] = 1;
@@ -331,7 +331,7 @@ static void initCases(void) {
   Case6[k][5] = 3;
 
   // case 3: 2 faces (6-connectivity)
-  k = 3;
+  k           = 3;
   Case6[k][0] = 4;
   Case6[k][1] = 0;
   Case6[k][2] = 1;
@@ -340,7 +340,7 @@ static void initCases(void) {
   Case6[k][5] = 11;
 
   // case 4: 2 faces (6,18-connectivity)
-  k = 4;
+  k           = 4;
   Case6[k][0] = 4;
   Case6[k][1] = 0;
   Case6[k][2] = 1;
@@ -349,7 +349,7 @@ static void initCases(void) {
   Case6[k][5] = 10;
 
   // case 5: 3 faces
-  k = 5;
+  k           = 5;
   Case6[k][0] = 5;
   Case6[k][1] = 7;
   Case6[k][2] = 6;
@@ -361,7 +361,7 @@ static void initCases(void) {
   Case6[k][8] = 0;
 
   // case 6: 3 faces (6-connectivity)
-  k = 6;
+  k           = 6;
   Case6[k][0] = 4;
   Case6[k][1] = 5;
   Case6[k][2] = 1;
@@ -373,7 +373,7 @@ static void initCases(void) {
   Case6[k][8] = 10;
 
   // case 7: 3 faces (6-connectivity)
-  k = 7;
+  k           = 7;
   Case6[k][0] = 7;
   Case6[k][1] = 11;
   Case6[k][2] = 10;
@@ -385,7 +385,7 @@ static void initCases(void) {
   Case6[k][8] = 3;
 
   // case 8: 2 faces
-  k = 8;
+  k           = 8;
   Case6[k][0] = 4;
   Case6[k][1] = 5;
   Case6[k][2] = 6;
@@ -394,92 +394,92 @@ static void initCases(void) {
   Case6[k][5] = 7;
 
   // case 9: 4 faces
-  k = 9;
-  Case6[k][0] = 4;
-  Case6[k][1] = 0;
-  Case6[k][2] = 9;
-  Case6[k][3] = 0;
-  Case6[k][4] = 10;
-  Case6[k][5] = 9;
-  Case6[k][6] = 0;
-  Case6[k][7] = 3;
-  Case6[k][8] = 10;
-  Case6[k][9] = 10;
+  k            = 9;
+  Case6[k][0]  = 4;
+  Case6[k][1]  = 0;
+  Case6[k][2]  = 9;
+  Case6[k][3]  = 0;
+  Case6[k][4]  = 10;
+  Case6[k][5]  = 9;
+  Case6[k][6]  = 0;
+  Case6[k][7]  = 3;
+  Case6[k][8]  = 10;
+  Case6[k][9]  = 10;
   Case6[k][10] = 3;
   Case6[k][11] = 7;
 
   // case 10: 4 faces (6-connectivity)
-  k = 10;
-  Case6[k][0] = 0;
-  Case6[k][1] = 9;
-  Case6[k][2] = 8;
-  Case6[k][3] = 0;
-  Case6[k][4] = 1;
-  Case6[k][5] = 9;
-  Case6[k][6] = 3;
-  Case6[k][7] = 11;
-  Case6[k][8] = 10;
-  Case6[k][9] = 3;
+  k            = 10;
+  Case6[k][0]  = 0;
+  Case6[k][1]  = 9;
+  Case6[k][2]  = 8;
+  Case6[k][3]  = 0;
+  Case6[k][4]  = 1;
+  Case6[k][5]  = 9;
+  Case6[k][6]  = 3;
+  Case6[k][7]  = 11;
+  Case6[k][8]  = 10;
+  Case6[k][9]  = 3;
   Case6[k][10] = 10;
   Case6[k][11] = 2;
 
   // case 11: 4 faces
-  k = 11;
-  Case6[k][0] = 4;
-  Case6[k][1] = 0;
-  Case6[k][2] = 6;
-  Case6[k][3] = 0;
-  Case6[k][4] = 3;
-  Case6[k][5] = 6;
-  Case6[k][6] = 6;
-  Case6[k][7] = 3;
-  Case6[k][8] = 10;
-  Case6[k][9] = 10;
+  k            = 11;
+  Case6[k][0]  = 4;
+  Case6[k][1]  = 0;
+  Case6[k][2]  = 6;
+  Case6[k][3]  = 0;
+  Case6[k][4]  = 3;
+  Case6[k][5]  = 6;
+  Case6[k][6]  = 6;
+  Case6[k][7]  = 3;
+  Case6[k][8]  = 10;
+  Case6[k][9]  = 10;
   Case6[k][10] = 3;
   Case6[k][11] = 11;
 
   // case 12: 4 faces (6-connectivity)
-  k = 12;
-  Case6[k][0] = 4;
-  Case6[k][1] = 9;
-  Case6[k][2] = 8;
-  Case6[k][3] = 0;
-  Case6[k][4] = 6;
-  Case6[k][5] = 1;
-  Case6[k][6] = 0;
-  Case6[k][7] = 5;
-  Case6[k][8] = 6;
-  Case6[k][9] = 6;
+  k            = 12;
+  Case6[k][0]  = 4;
+  Case6[k][1]  = 9;
+  Case6[k][2]  = 8;
+  Case6[k][3]  = 0;
+  Case6[k][4]  = 6;
+  Case6[k][5]  = 1;
+  Case6[k][6]  = 0;
+  Case6[k][7]  = 5;
+  Case6[k][8]  = 6;
+  Case6[k][9]  = 6;
   Case6[k][10] = 5;
   Case6[k][11] = 7;
 
   // case 13: 4 faces (6-connectivity)
-  k = 13;
-  Case6[k][0] = 0;
-  Case6[k][1] = 1;
-  Case6[k][2] = 4;
-  Case6[k][3] = 3;
-  Case6[k][4] = 7;
-  Case6[k][5] = 2;
-  Case6[k][6] = 5;
-  Case6[k][7] = 8;
-  Case6[k][8] = 11;
-  Case6[k][9] = 9;
+  k            = 13;
+  Case6[k][0]  = 0;
+  Case6[k][1]  = 1;
+  Case6[k][2]  = 4;
+  Case6[k][3]  = 3;
+  Case6[k][4]  = 7;
+  Case6[k][5]  = 2;
+  Case6[k][6]  = 5;
+  Case6[k][7]  = 8;
+  Case6[k][8]  = 11;
+  Case6[k][9]  = 9;
   Case6[k][10] = 6;
   Case6[k][11] = 10;
 
   // case 14: 4 faces
-  k = 14;
-  Case6[k][0] = 0;
-  Case6[k][1] = 9;
-  Case6[k][2] = 1;
-  Case6[k][3] = 0;
-  Case6[k][4] = 5;
-  Case6[k][5] = 9;
-  Case6[k][6] = 5;
-  Case6[k][7] = 10;
-  Case6[k][8] = 9;
-  Case6[k][9] = 5;
+  k            = 14;
+  Case6[k][0]  = 0;
+  Case6[k][1]  = 9;
+  Case6[k][2]  = 1;
+  Case6[k][3]  = 0;
+  Case6[k][4]  = 5;
+  Case6[k][5]  = 9;
+  Case6[k][6]  = 5;
+  Case6[k][7]  = 10;
+  Case6[k][8]  = 9;
+  Case6[k][9]  = 5;
   Case6[k][10] = 7;
   Case6[k][11] = 10;
 
@@ -495,13 +495,13 @@ static void initCases(void) {
   // nothing to do
 
   // case 1: 1 face
-  k = 1;
+  k            = 1;
   Case18[k][0] = 4;
   Case18[k][1] = 0;
   Case18[k][2] = 1;
 
   // case 2: 2 faces
-  k = 2;
+  k            = 2;
   Case18[k][0] = 4;
   Case18[k][1] = 5;
   Case18[k][2] = 1;
@@ -510,22 +510,22 @@ static void initCases(void) {
   Case18[k][5] = 3;
 
   // case 3: 4 faces (18-26 connectivity)
-  k = 3;
-  Case18[k][0] = 1;
-  Case18[k][1] = 4;
-  Case18[k][2] = 8;
-  Case18[k][3] = 1;
-  Case18[k][4] = 8;
-  Case18[k][5] = 11;
-  Case18[k][6] = 0;
-  Case18[k][7] = 1;
-  Case18[k][8] = 11;
-  Case18[k][9] = 5;
+  k             = 3;
+  Case18[k][0]  = 1;
+  Case18[k][1]  = 4;
+  Case18[k][2]  = 8;
+  Case18[k][3]  = 1;
+  Case18[k][4]  = 8;
+  Case18[k][5]  = 11;
+  Case18[k][6]  = 0;
+  Case18[k][7]  = 1;
+  Case18[k][8]  = 11;
+  Case18[k][9]  = 5;
   Case18[k][10] = 0;
   Case18[k][11] = 11;
 
   // case 4: 2 faces (6,18-connectivity)
-  k = 4;
+  k            = 4;
   Case18[k][0] = 4;
   Case18[k][1] = 0;
   Case18[k][2] = 1;
@@ -534,7 +534,7 @@ static void initCases(void) {
   Case18[k][5] = 10;
 
   // case 5: 3 faces
-  k = 5;
+  k            = 5;
   Case18[k][0] = 5;
   Case18[k][1] = 7;
   Case18[k][2] = 6;
@@ -546,17 +546,17 @@ static void initCases(void) {
   Case18[k][8] = 0;
 
   // case 6: 5 faces (18-26-connectivity)
-  k = 6;
-  Case18[k][0] = 4;
-  Case18[k][1] = 10;
-  Case18[k][2] = 1;
-  Case18[k][3] = 4;
-  Case18[k][4] = 5;
-  Case18[k][5] = 10;
-  Case18[k][6] = 5;
-  Case18[k][7] = 11;
-  Case18[k][8] = 10;
-  Case18[k][9] = 1;
+  k             = 6;
+  Case18[k][0]  = 4;
+  Case18[k][1]  = 10;
+  Case18[k][2]  = 1;
+  Case18[k][3]  = 4;
+  Case18[k][4]  = 5;
+  Case18[k][5]  = 10;
+  Case18[k][6]  = 5;
+  Case18[k][7]  = 11;
+  Case18[k][8]  = 10;
+  Case18[k][9]  = 1;
   Case18[k][10] = 10;
   Case18[k][11] = 3;
   Case18[k][12] = 3;
@@ -564,17 +564,17 @@ static void initCases(void) {
   Case18[k][14] = 7;
 
   // case 7: 15 faces (18-26-connectivity)
-  k = 7;
-  Case18[k][0] = 5;
-  Case18[k][1] = 11;
-  Case18[k][2] = 8;
-  Case18[k][3] = 0;
-  Case18[k][4] = 4;
-  Case18[k][5] = 9;
-  Case18[k][6] = 0;
-  Case18[k][7] = 9;
-  Case18[k][8] = 10;
-  Case18[k][9] = 0;
+  k             = 7;
+  Case18[k][0]  = 5;
+  Case18[k][1]  = 11;
+  Case18[k][2]  = 8;
+  Case18[k][3]  = 0;
+  Case18[k][4]  = 4;
+  Case18[k][5]  = 9;
+  Case18[k][6]  = 0;
+  Case18[k][7]  = 9;
+  Case18[k][8]  = 10;
+  Case18[k][9]  = 0;
   Case18[k][10] = 10;
   Case18[k][11] = 3;
   Case18[k][12] = 3;
@@ -582,7 +582,7 @@ static void initCases(void) {
   Case18[k][14] = 7;
 
   // case 8: 2 faces
-  k = 8;
+  k            = 8;
   Case18[k][0] = 4;
   Case18[k][1] = 5;
   Case18[k][2] = 6;
@@ -591,92 +591,92 @@ static void initCases(void) {
   Case18[k][5] = 7;
 
   // case 9: 4 faces
-  k = 9;
-  Case18[k][0] = 4;
-  Case18[k][1] = 0;
-  Case18[k][2] = 9;
-  Case18[k][3] = 0;
-  Case18[k][4] = 10;
-  Case18[k][5] = 9;
-  Case18[k][6] = 0;
-  Case18[k][7] = 3;
-  Case18[k][8] = 10;
-  Case18[k][9] = 10;
+  k             = 9;
+  Case18[k][0]  = 4;
+  Case18[k][1]  = 0;
+  Case18[k][2]  = 9;
+  Case18[k][3]  = 0;
+  Case18[k][4]  = 10;
+  Case18[k][5]  = 9;
+  Case18[k][6]  = 0;
+  Case18[k][7]  = 3;
+  Case18[k][8]  = 10;
+  Case18[k][9]  = 10;
   Case18[k][10] = 3;
   Case18[k][11] = 7;
 
   // case 10: 4 faces (18-26-connectivity)
-  k = 10;
-  Case18[k][0] = 1;
-  Case18[k][1] = 9;
-  Case18[k][2] = 10;
-  Case18[k][3] = 1;
-  Case18[k][4] = 10;
-  Case18[k][5] = 2;
-  Case18[k][6] = 0;
-  Case18[k][7] = 11;
-  Case18[k][8] = 8;
-  Case18[k][9] = 0;
+  k             = 10;
+  Case18[k][0]  = 1;
+  Case18[k][1]  = 9;
+  Case18[k][2]  = 10;
+  Case18[k][3]  = 1;
+  Case18[k][4]  = 10;
+  Case18[k][5]  = 2;
+  Case18[k][6]  = 0;
+  Case18[k][7]  = 11;
+  Case18[k][8]  = 8;
+  Case18[k][9]  = 0;
   Case18[k][10] = 3;
   Case18[k][11] = 11;
 
   // case 11: 4 faces
-  k = 11;
-  Case18[k][0] = 4;
-  Case18[k][1] = 0;
-  Case18[k][2] = 6;
-  Case18[k][3] = 0;
-  Case18[k][4] = 3;
-  Case18[k][5] = 6;
-  Case18[k][6] = 6;
-  Case18[k][7] = 3;
-  Case18[k][8] = 10;
-  Case18[k][9] = 10;
+  k             = 11;
+  Case18[k][0]  = 4;
+  Case18[k][1]  = 0;
+  Case18[k][2]  = 6;
+  Case18[k][3]  = 0;
+  Case18[k][4]  = 3;
+  Case18[k][5]  = 6;
+  Case18[k][6]  = 6;
+  Case18[k][7]  = 3;
+  Case18[k][8]  = 10;
+  Case18[k][9]  = 10;
   Case18[k][10] = 3;
   Case18[k][11] = 11;
 
   // case 12: 4 faces (18-26-connectivity)
-  k = 12;
-  Case18[k][0] = 0;
-  Case18[k][1] = 4;
-  Case18[k][2] = 1;
-  Case18[k][3] = 6;
-  Case18[k][4] = 9;
-  Case18[k][5] = 8;
-  Case18[k][6] = 6;
-  Case18[k][7] = 8;
-  Case18[k][8] = 5;
-  Case18[k][9] = 6;
+  k             = 12;
+  Case18[k][0]  = 0;
+  Case18[k][1]  = 4;
+  Case18[k][2]  = 1;
+  Case18[k][3]  = 6;
+  Case18[k][4]  = 9;
+  Case18[k][5]  = 8;
+  Case18[k][6]  = 6;
+  Case18[k][7]  = 8;
+  Case18[k][8]  = 5;
+  Case18[k][9]  = 6;
   Case18[k][10] = 5;
   Case18[k][11] = 7;
 
   // case 13: 4 faces (18-26-connectivity)
-  k = 13;
-  Case18[k][0] = 7;
-  Case18[k][1] = 10;
-  Case18[k][2] = 11;
-  Case18[k][3] = 4;
-  Case18[k][4] = 8;
-  Case18[k][5] = 9;
-  Case18[k][6] = 0;
-  Case18[k][7] = 3;
-  Case18[k][8] = 5;
-  Case18[k][9] = 1;
+  k             = 13;
+  Case18[k][0]  = 7;
+  Case18[k][1]  = 10;
+  Case18[k][2]  = 11;
+  Case18[k][3]  = 4;
+  Case18[k][4]  = 8;
+  Case18[k][5]  = 9;
+  Case18[k][6]  = 0;
+  Case18[k][7]  = 3;
+  Case18[k][8]  = 5;
+  Case18[k][9]  = 1;
   Case18[k][10] = 6;
   Case18[k][11] = 2;
 
   // case 14: 4 faces
-  k = 14;
-  Case18[k][0] = 0;
-  Case18[k][1] = 9;
-  Case18[k][2] = 1;
-  Case18[k][3] = 0;
-  Case18[k][4] = 5;
-  Case18[k][5] = 9;
-  Case18[k][6] = 5;
-  Case18[k][7] = 10;
-  Case18[k][8] = 9;
-  Case18[k][9] = 5;
+  k             = 14;
+  Case18[k][0]  = 0;
+  Case18[k][1]  = 9;
+  Case18[k][2]  = 1;
+  Case18[k][3]  = 0;
+  Case18[k][4]  = 5;
+  Case18[k][5]  = 9;
+  Case18[k][6]  = 5;
+  Case18[k][7]  = 10;
+  Case18[k][8]  = 9;
+  Case18[k][9]  = 5;
   Case18[k][10] = 7;
   Case18[k][11] = 10;
 
@@ -692,13 +692,13 @@ static void initCases(void) {
   // nothing to do
 
   // case 1: 1 face
-  k = 1;
+  k            = 1;
   Case26[k][0] = 4;
   Case26[k][1] = 0;
   Case26[k][2] = 1;
 
   // case 2: 2 faces
-  k = 2;
+  k            = 2;
   Case26[k][0] = 4;
   Case26[k][1] = 5;
   Case26[k][2] = 1;
@@ -707,32 +707,32 @@ static void initCases(void) {
   Case26[k][5] = 3;
 
   // case 3: 4 faces (18-26 connectivity)
-  k = 3;
-  Case26[k][0] = 1;
-  Case26[k][1] = 4;
-  Case26[k][2] = 8;
-  Case26[k][3] = 1;
-  Case26[k][4] = 8;
-  Case26[k][5] = 11;
-  Case26[k][6] = 0;
-  Case26[k][7] = 1;
-  Case26[k][8] = 11;
-  Case26[k][9] = 5;
+  k             = 3;
+  Case26[k][0]  = 1;
+  Case26[k][1]  = 4;
+  Case26[k][2]  = 8;
+  Case26[k][3]  = 1;
+  Case26[k][4]  = 8;
+  Case26[k][5]  = 11;
+  Case26[k][6]  = 0;
+  Case26[k][7]  = 1;
+  Case26[k][8]  = 11;
+  Case26[k][9]  = 5;
   Case26[k][10] = 0;
   Case26[k][11] = 11;
 
   // case 4: 6 faces (26-connectivity)
-  k = 4;
-  Case26[k][0] = 1;
-  Case26[k][1] = 4;
-  Case26[k][2] = 10;
-  Case26[k][3] = 4;
-  Case26[k][4] = 11;
-  Case26[k][5] = 10;
-  Case26[k][6] = 0;
-  Case26[k][7] = 7;
-  Case26[k][8] = 11;
-  Case26[k][9] = 4;
+  k             = 4;
+  Case26[k][0]  = 1;
+  Case26[k][1]  = 4;
+  Case26[k][2]  = 10;
+  Case26[k][3]  = 4;
+  Case26[k][4]  = 11;
+  Case26[k][5]  = 10;
+  Case26[k][6]  = 0;
+  Case26[k][7]  = 7;
+  Case26[k][8]  = 11;
+  Case26[k][9]  = 4;
   Case26[k][10] = 0;
   Case26[k][11] = 11;
   Case26[k][12] = 0;
@@ -743,7 +743,7 @@ static void initCases(void) {
   Case26[k][17] = 7;
 
   // case 5: 3 faces
-  k = 5;
+  k            = 5;
   Case26[k][0] = 5;
   Case26[k][1] = 7;
   Case26[k][2] = 6;
@@ -755,17 +755,17 @@ static void initCases(void) {
   Case26[k][8] = 0;
 
   // case 6: 5 faces (18-26-connectivity)
-  k = 6;
-  Case26[k][0] = 4;
-  Case26[k][1] = 10;
-  Case26[k][2] = 1;
-  Case26[k][3] = 4;
-  Case26[k][4] = 5;
-  Case26[k][5] = 10;
-  Case26[k][6] = 5;
-  Case26[k][7] = 11;
-  Case26[k][8] = 10;
-  Case26[k][9] = 1;
+  k             = 6;
+  Case26[k][0]  = 4;
+  Case26[k][1]  = 10;
+  Case26[k][2]  = 1;
+  Case26[k][3]  = 4;
+  Case26[k][4]  = 5;
+  Case26[k][5]  = 10;
+  Case26[k][6]  = 5;
+  Case26[k][7]  = 11;
+  Case26[k][8]  = 10;
+  Case26[k][9]  = 1;
   Case26[k][10] = 10;
   Case26[k][11] = 3;
   Case26[k][12] = 3;
@@ -773,17 +773,17 @@ static void initCases(void) {
   Case26[k][14] = 7;
 
   // case 7: 15 faces (18-26-connectivity)
-  k = 7;
-  Case26[k][0] = 5;
-  Case26[k][1] = 11;
-  Case26[k][2] = 8;
-  Case26[k][3] = 0;
-  Case26[k][4] = 4;
-  Case26[k][5] = 9;
-  Case26[k][6] = 0;
-  Case26[k][7] = 9;
-  Case26[k][8] = 10;
-  Case26[k][9] = 0;
+  k             = 7;
+  Case26[k][0]  = 5;
+  Case26[k][1]  = 11;
+  Case26[k][2]  = 8;
+  Case26[k][3]  = 0;
+  Case26[k][4]  = 4;
+  Case26[k][5]  = 9;
+  Case26[k][6]  = 0;
+  Case26[k][7]  = 9;
+  Case26[k][8]  = 10;
+  Case26[k][9]  = 0;
   Case26[k][10] = 10;
   Case26[k][11] = 3;
   Case26[k][12] = 3;
@@ -791,7 +791,7 @@ static void initCases(void) {
   Case26[k][14] = 7;
 
   // case 8: 2 faces
-  k = 8;
+  k            = 8;
   Case26[k][0] = 4;
   Case26[k][1] = 5;
   Case26[k][2] = 6;
@@ -800,92 +800,92 @@ static void initCases(void) {
   Case26[k][5] = 7;
 
   // case 9: 4 faces
-  k = 9;
-  Case26[k][0] = 4;
-  Case26[k][1] = 0;
-  Case26[k][2] = 9;
-  Case26[k][3] = 0;
-  Case26[k][4] = 10;
-  Case26[k][5] = 9;
-  Case26[k][6] = 0;
-  Case26[k][7] = 3;
-  Case26[k][8] = 10;
-  Case26[k][9] = 10;
+  k             = 9;
+  Case26[k][0]  = 4;
+  Case26[k][1]  = 0;
+  Case26[k][2]  = 9;
+  Case26[k][3]  = 0;
+  Case26[k][4]  = 10;
+  Case26[k][5]  = 9;
+  Case26[k][6]  = 0;
+  Case26[k][7]  = 3;
+  Case26[k][8]  = 10;
+  Case26[k][9]  = 10;
   Case26[k][10] = 3;
   Case26[k][11] = 7;
 
   // case 10: 4 faces (18-26-connectivity)
-  k = 10;
-  Case26[k][0] = 1;
-  Case26[k][1] = 9;
-  Case26[k][2] = 10;
-  Case26[k][3] = 1;
-  Case26[k][4] = 10;
-  Case26[k][5] = 2;
-  Case26[k][6] = 0;
-  Case26[k][7] = 11;
-  Case26[k][8] = 8;
-  Case26[k][9] = 0;
+  k             = 10;
+  Case26[k][0]  = 1;
+  Case26[k][1]  = 9;
+  Case26[k][2]  = 10;
+  Case26[k][3]  = 1;
+  Case26[k][4]  = 10;
+  Case26[k][5]  = 2;
+  Case26[k][6]  = 0;
+  Case26[k][7]  = 11;
+  Case26[k][8]  = 8;
+  Case26[k][9]  = 0;
   Case26[k][10] = 3;
   Case26[k][11] = 11;
 
   // case 11: 4 faces
-  k = 11;
-  Case26[k][0] = 4;
-  Case26[k][1] = 0;
-  Case26[k][2] = 6;
-  Case26[k][3] = 0;
-  Case26[k][4] = 3;
-  Case26[k][5] = 6;
-  Case26[k][6] = 6;
-  Case26[k][7] = 3;
-  Case26[k][8] = 10;
-  Case26[k][9] = 10;
+  k             = 11;
+  Case26[k][0]  = 4;
+  Case26[k][1]  = 0;
+  Case26[k][2]  = 6;
+  Case26[k][3]  = 0;
+  Case26[k][4]  = 3;
+  Case26[k][5]  = 6;
+  Case26[k][6]  = 6;
+  Case26[k][7]  = 3;
+  Case26[k][8]  = 10;
+  Case26[k][9]  = 10;
   Case26[k][10] = 3;
   Case26[k][11] = 11;
 
   // case 12: 4 faces (18-26-connectivity)
-  k = 12;
-  Case26[k][0] = 0;
-  Case26[k][1] = 4;
-  Case26[k][2] = 1;
-  Case26[k][3] = 6;
-  Case26[k][4] = 9;
-  Case26[k][5] = 8;
-  Case26[k][6] = 6;
-  Case26[k][7] = 8;
-  Case26[k][8] = 5;
-  Case26[k][9] = 6;
+  k             = 12;
+  Case26[k][0]  = 0;
+  Case26[k][1]  = 4;
+  Case26[k][2]  = 1;
+  Case26[k][3]  = 6;
+  Case26[k][4]  = 9;
+  Case26[k][5]  = 8;
+  Case26[k][6]  = 6;
+  Case26[k][7]  = 8;
+  Case26[k][8]  = 5;
+  Case26[k][9]  = 6;
   Case26[k][10] = 5;
   Case26[k][11] = 7;
 
   // case 13: 4 faces (18-26-connectivity)
-  k = 13;
-  Case26[k][0] = 7;
-  Case26[k][1] = 10;
-  Case26[k][2] = 11;
-  Case26[k][3] = 4;
-  Case26[k][4] = 8;
-  Case26[k][5] = 9;
-  Case26[k][6] = 0;
-  Case26[k][7] = 3;
-  Case26[k][8] = 5;
-  Case26[k][9] = 1;
+  k             = 13;
+  Case26[k][0]  = 7;
+  Case26[k][1]  = 10;
+  Case26[k][2]  = 11;
+  Case26[k][3]  = 4;
+  Case26[k][4]  = 8;
+  Case26[k][5]  = 9;
+  Case26[k][6]  = 0;
+  Case26[k][7]  = 3;
+  Case26[k][8]  = 5;
+  Case26[k][9]  = 1;
   Case26[k][10] = 6;
   Case26[k][11] = 2;
 
   // case 14: 4 faces
-  k = 14;
-  Case26[k][0] = 0;
-  Case26[k][1] = 9;
-  Case26[k][2] = 1;
-  Case26[k][3] = 0;
-  Case26[k][4] = 5;
-  Case26[k][5] = 9;
-  Case26[k][6] = 5;
-  Case26[k][7] = 10;
-  Case26[k][8] = 9;
-  Case26[k][9] = 5;
+  k             = 14;
+  Case26[k][0]  = 0;
+  Case26[k][1]  = 9;
+  Case26[k][2]  = 1;
+  Case26[k][3]  = 0;
+  Case26[k][4]  = 5;
+  Case26[k][5]  = 9;
+  Case26[k][6]  = 5;
+  Case26[k][7]  = 10;
+  Case26[k][8]  = 9;
+  Case26[k][9]  = 5;
   Case26[k][10] = 7;
   Case26[k][11] = 10;
 }
@@ -908,14 +908,14 @@ static void initPoints(void) {
   k = 2;
   // 2 points
   Pt[k][0] = Pt[k][1] = Pt[k][2] = 0;
-  Pt[k][3] = 1;
+  Pt[k][3]                       = 1;
   Pt[k][4] = Pt[k][5] = 0;
 
   // case 3: 2 faces (6-connectivity)
   k = 3;
   // 2 points
   Pt[k][0] = Pt[k][1] = Pt[k][2] = 0;
-  Pt[k][4] = 0;
+  Pt[k][4]                       = 0;
   Pt[k][3] = Pt[k][5] = 1;
 
   // case 4: 2 faces (6,18-connectivity)
@@ -966,112 +966,112 @@ static void initPoints(void) {
   // case 8: 2 faces
   k = 8;
   // 4 points
-  Pt[k][0] = 0;
-  Pt[k][1] = 0;
-  Pt[k][2] = 0;
-  Pt[k][3] = 1;
-  Pt[k][4] = 0;
-  Pt[k][5] = 0;
-  Pt[k][6] = 0;
-  Pt[k][7] = 1;
-  Pt[k][8] = 0;
-  Pt[k][9] = 1;
+  Pt[k][0]  = 0;
+  Pt[k][1]  = 0;
+  Pt[k][2]  = 0;
+  Pt[k][3]  = 1;
+  Pt[k][4]  = 0;
+  Pt[k][5]  = 0;
+  Pt[k][6]  = 0;
+  Pt[k][7]  = 1;
+  Pt[k][8]  = 0;
+  Pt[k][9]  = 1;
   Pt[k][10] = 1;
   Pt[k][11] = 0;
 
   // case 9: 4 faces
   k = 9;
   // 4 points
-  Pt[k][0] = 0;
-  Pt[k][1] = 0;
-  Pt[k][2] = 0;
-  Pt[k][3] = 0;
-  Pt[k][4] = 1;
-  Pt[k][5] = 0;
-  Pt[k][6] = 1;
-  Pt[k][7] = 1;
-  Pt[k][8] = 0;
-  Pt[k][9] = 0;
+  Pt[k][0]  = 0;
+  Pt[k][1]  = 0;
+  Pt[k][2]  = 0;
+  Pt[k][3]  = 0;
+  Pt[k][4]  = 1;
+  Pt[k][5]  = 0;
+  Pt[k][6]  = 1;
+  Pt[k][7]  = 1;
+  Pt[k][8]  = 0;
+  Pt[k][9]  = 0;
   Pt[k][10] = 1;
   Pt[k][11] = 1;
 
   // case 10: 4 faces
   k = 10;
   // 4 points
-  Pt[k][0] = 0;
-  Pt[k][1] = 0;
-  Pt[k][2] = 0;
-  Pt[k][3] = 0;
-  Pt[k][4] = 0;
-  Pt[k][5] = 1;
-  Pt[k][6] = 1;
-  Pt[k][7] = 1;
-  Pt[k][8] = 1;
-  Pt[k][9] = 1;
+  Pt[k][0]  = 0;
+  Pt[k][1]  = 0;
+  Pt[k][2]  = 0;
+  Pt[k][3]  = 0;
+  Pt[k][4]  = 0;
+  Pt[k][5]  = 1;
+  Pt[k][6]  = 1;
+  Pt[k][7]  = 1;
+  Pt[k][8]  = 1;
+  Pt[k][9]  = 1;
   Pt[k][10] = 1;
   Pt[k][11] = 0;
 
   // case 11: 4 faces
   k = 11;
   // 4 points
-  Pt[k][0] = 0;
-  Pt[k][1] = 0;
-  Pt[k][2] = 0;
-  Pt[k][3] = 0;
-  Pt[k][4] = 1;
-  Pt[k][5] = 0;
-  Pt[k][6] = 1;
-  Pt[k][7] = 1;
-  Pt[k][8] = 0;
-  Pt[k][9] = 1;
+  Pt[k][0]  = 0;
+  Pt[k][1]  = 0;
+  Pt[k][2]  = 0;
+  Pt[k][3]  = 0;
+  Pt[k][4]  = 1;
+  Pt[k][5]  = 0;
+  Pt[k][6]  = 1;
+  Pt[k][7]  = 1;
+  Pt[k][8]  = 0;
+  Pt[k][9]  = 1;
   Pt[k][10] = 1;
   Pt[k][11] = 1;
 
   // case 12: 4 faces
   k = 12;
   // 4 points
-  Pt[k][0] = 1;
-  Pt[k][1] = 0;
-  Pt[k][2] = 0;
-  Pt[k][3] = 0;
-  Pt[k][4] = 1;
-  Pt[k][5] = 0;
-  Pt[k][6] = 1;
-  Pt[k][7] = 1;
-  Pt[k][8] = 0;
-  Pt[k][9] = 0;
+  Pt[k][0]  = 1;
+  Pt[k][1]  = 0;
+  Pt[k][2]  = 0;
+  Pt[k][3]  = 0;
+  Pt[k][4]  = 1;
+  Pt[k][5]  = 0;
+  Pt[k][6]  = 1;
+  Pt[k][7]  = 1;
+  Pt[k][8]  = 0;
+  Pt[k][9]  = 0;
   Pt[k][10] = 0;
   Pt[k][11] = 1;
 
   // case 13: 4 faces
   k = 13;
   // 4 points
-  Pt[k][0] = 0;
-  Pt[k][1] = 0;
-  Pt[k][2] = 0;
-  Pt[k][3] = 0;
-  Pt[k][4] = 1;
-  Pt[k][5] = 1;
-  Pt[k][6] = 1;
-  Pt[k][7] = 1;
-  Pt[k][8] = 0;
-  Pt[k][9] = 1;
+  Pt[k][0]  = 0;
+  Pt[k][1]  = 0;
+  Pt[k][2]  = 0;
+  Pt[k][3]  = 0;
+  Pt[k][4]  = 1;
+  Pt[k][5]  = 1;
+  Pt[k][6]  = 1;
+  Pt[k][7]  = 1;
+  Pt[k][8]  = 0;
+  Pt[k][9]  = 1;
   Pt[k][10] = 0;
   Pt[k][11] = 1;
 
   // case 14: 4 faces
   k = 14;
   // 4 points
-  Pt[k][0] = 1;
-  Pt[k][1] = 0;
-  Pt[k][2] = 0;
-  Pt[k][3] = 0;
-  Pt[k][4] = 1;
-  Pt[k][5] = 0;
-  Pt[k][6] = 1;
-  Pt[k][7] = 1;
-  Pt[k][8] = 0;
-  Pt[k][9] = 0;
+  Pt[k][0]  = 1;
+  Pt[k][1]  = 0;
+  Pt[k][2]  = 0;
+  Pt[k][3]  = 0;
+  Pt[k][4]  = 1;
+  Pt[k][5]  = 0;
+  Pt[k][6]  = 1;
+  Pt[k][7]  = 1;
+  Pt[k][8]  = 0;
+  Pt[k][9]  = 0;
   Pt[k][10] = 1;
   Pt[k][11] = 1;
 }
@@ -1375,7 +1375,7 @@ int main(int argc, char *argv[]) {
 
     {
       FILE *f;
-      char fname[100];
+      char  fname[100];
       sprintf(fname, "./MC%d", con);
       f = fopen(fname, "w");
       for (k = 0; k < 256; k++) {

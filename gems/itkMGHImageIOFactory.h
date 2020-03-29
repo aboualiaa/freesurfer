@@ -2,17 +2,17 @@
 #ifndef H_ITK_MGH_IMAGE_IO_FACTORY_H
 #define H_ITK_MGH_IMAGE_IO_FACTORY_H
 
-#include "itkObjectFactoryBase.h"
 #include "itkImageIOBase.h"
+#include "itkObjectFactoryBase.h"
 
 namespace itk {
 
 class ITK_EXPORT MGHImageIOFactory : public ObjectFactoryBase {
 public:
   /** Standard class typedefs **/
-  using Self = MGHImageIOFactory;
-  using Superclass = ObjectFactoryBase;
-  using Pointer = SmartPointer<Self>;
+  using Self         = MGHImageIOFactory;
+  using Superclass   = ObjectFactoryBase;
+  using Pointer      = SmartPointer<Self>;
   using ConstPointer = SmartPointer<const Self>;
 
   /** Class methods used to interface with the registered factories **/

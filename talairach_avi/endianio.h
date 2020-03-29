@@ -29,22 +29,22 @@
 extern void swab2(char *a);
 extern void swab4(char *a);
 extern void swab_hdr(struct dsr *phdr);
-extern int CPU_is_bigendian(void);
+extern int  CPU_is_bigendian(void);
 extern void errf(char *program);
 extern void errm(char *program);
 extern void errr(char *program, char *filespc);
 extern void errw(char *program, char *filespc);
 extern void getroot(char *filespc, char *imgroot);
-extern int eread(float *imgt, int n, int isbig, FILE *fp);
-extern int ewrite(float *imgt, int n, char control, FILE *fp);
-extern int gread(char *imgt, size_t bytes, int n, FILE *fp, int isbig);
-extern int gwrite(char *imgt, size_t bytes, int n, FILE *fp, char control);
+extern int  eread(float *imgt, int n, int isbig, FILE *fp);
+extern int  ewrite(float *imgt, int n, char control, FILE *fp);
+extern int  gread(char *imgt, size_t bytes, int n, FILE *fp, int isbig);
+extern int  gwrite(char *imgt, size_t bytes, int n, FILE *fp, char control);
 extern void load_4dfp_frame(char *fileroot, int *imgdim, int frame, int isbig,
                             float *fimg);
-extern int get_4dfp_dimoe(char *fileroot, int *imgdim, float *voxsiz,
-                          int *orient, int *isbig);
-extern int get_4dfp_dimoe_quiet(char *fileroot, int *imgdim, float *voxsiz,
-                                int *orient, int *isbig);
+extern int  get_4dfp_dimoe(char *fileroot, int *imgdim, float *voxsiz,
+                           int *orient, int *isbig);
+extern int  get_4dfp_dimoe_quiet(char *fileroot, int *imgdim, float *voxsiz,
+                                 int *orient, int *isbig);
 
 /***************************************************************************************************************
 swab2	 		byte swaps.

@@ -1,12 +1,12 @@
 #include <vector>
 
-#include <boost/test/unit_test.hpp>
-#include <boost/test/data/monomorphic.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/test/data/monomorphic.hpp>
+#include <boost/test/unit_test.hpp>
 
 // This will only be compiled if CUDA_FOUND is defined
-#include "dimensioncuda.hpp"
 #include "cudaimage.hpp"
+#include "dimensioncuda.hpp"
 
 #include "cudaimagetests.hpp"
 

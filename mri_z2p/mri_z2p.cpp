@@ -43,47 +43,48 @@
 
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "mri2.h"
-#include "version.h"
-#include "cmdargs.h"
-#include "randomfields.h"
 #include "mri_identify.h"
+#include "mrisutils.h"
+#include "randomfields.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_z2p.c,v 1.12 2011/03/02 00:04:26 nicks Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+static char    vcid[] = "$Id: mri_z2p.c,v 1.12 2011/03/02 00:04:26 nicks Exp $";
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *ZVolFile = nullptr;
-char *PVolFile = nullptr;
+char *ZVolFile      = nullptr;
+char *PVolFile      = nullptr;
 char *Log10PVolFile = nullptr;
-char *MaskVolFile = nullptr;
-int TwoSided = 1;
+char *MaskVolFile   = nullptr;
+int   TwoSided      = 1;
 
-MRI *z, *p, *sig, *mask = nullptr;
+MRI * z, *p, *sig, *mask = nullptr;
 char *featdir = nullptr;
 char *fmt;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, nthzstat;
+  int  nargs, nthzstat;
   char tmpstr[1000];
 
   nargs = handleVersionOption(argc, argv, "mri_z2p");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -166,8 +167,8 @@ int main(int argc, char *argv[]) {
       exit(1);
 
     TwoSided = 1; // Use 2-sided for t
-    p = RFz2p(z, mask, TwoSided, nullptr);
-    sig = MRIlog10(p, mask, sig, 1);
+    p        = RFz2p(z, mask, TwoSided, nullptr);
+    sig      = MRIlog10(p, mask, sig, 1);
     sprintf(tmpstr, "%s/stats/zsig%d.%s", featdir, nthzstat, fmt);
     printf("Writing sig to %s\n", tmpstr);
     MRIwrite(sig, tmpstr);
@@ -193,8 +194,8 @@ int main(int argc, char *argv[]) {
       exit(1);
 
     TwoSided = 0; // Use 1-sided for F
-    p = RFz2p(z, mask, TwoSided, nullptr);
-    sig = MRIlog10(p, mask, sig, 1);
+    p        = RFz2p(z, mask, TwoSided, nullptr);
+    sig      = MRIlog10(p, mask, sig, 1);
     sprintf(tmpstr, "%s/stats/zfsig%d.%s", featdir, nthzstat, fmt);
     printf("Writing sig to %s\n", tmpstr);
     MRIwrite(sig, tmpstr);
@@ -218,7 +219,7 @@ int main(int argc, char *argv[]) {
 */
 /* ------ Doxygen markup ends on the line above ---- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -258,32 +259,32 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--z")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      ZVolFile = pargv[0];
+      ZVolFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--p")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      PVolFile = pargv[0];
+      PVolFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--log10p")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       Log10PVolFile = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       MaskVolFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--feat")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      featdir = pargv[0];
+      featdir   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--featfmt")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      fmt = pargv[0];
+      fmt       = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--nii"))
       fmt = "nii";

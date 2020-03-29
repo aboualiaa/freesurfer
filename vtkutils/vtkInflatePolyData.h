@@ -36,7 +36,7 @@ class vtkInflatePolyData : public vtkPolyDataAlgorithm {
 
 public:
   static vtkInflatePolyData *New();
-  void PrintSelf(ostream &os, vtkIndent indent);
+  void                       PrintSelf(ostream &os, vtkIndent indent);
   vtkTypeMacro(vtkInflatePolyData, vtkPolyDataAlgorithm);
 
   // Description:

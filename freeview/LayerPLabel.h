@@ -58,10 +58,10 @@ protected:
   //  wxCommandEvent& event );
   void UpdateColorMap();
 
-  FSVolume *m_volumeTemp;
-  QStringList m_sFilenames;
-  QString m_sFilenamePrefix;
-  QString m_sLUT;
+  FSVolume *                    m_volumeTemp;
+  QStringList                   m_sFilenames;
+  QString                       m_sFilenamePrefix;
+  QString                       m_sLUT;
   vtkSmartPointer<vtkImageData> m_imageIndex;
 };
 

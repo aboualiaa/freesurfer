@@ -8,10 +8,10 @@ namespace kvl {
 AtlasMeshDeformationGradientDescentOptimizer ::
     AtlasMeshDeformationGradientDescentOptimizer() {
 
-  m_OldCost = 0;
-  m_OldGradient = nullptr;
+  m_OldCost            = 0;
+  m_OldGradient        = nullptr;
   m_OldSearchDirection = nullptr;
-  m_AlphaUsedLastTime = 0.0;
+  m_AlphaUsedLastTime  = 0.0;
 
   m_StartDistance = 1.0; // Measured in voxels
 }
@@ -27,8 +27,8 @@ AtlasMeshDeformationGradientDescentOptimizer ::
 //
 void AtlasMeshDeformationGradientDescentOptimizer ::Initialize() {
 
-  m_OldCost = 0;
-  m_OldGradient = nullptr;
+  m_OldCost            = 0;
+  m_OldGradient        = nullptr;
   m_OldSearchDirection = nullptr;
 
   Superclass::Initialize();
@@ -79,10 +79,10 @@ double AtlasMeshDeformationGradientDescentOptimizer ::
   //
   // Part III: Line Search
   //
-  const double c1 = 1e-4;
-  const double c2 = 0.9;
-  m_OldCost = m_Cost;
-  m_OldGradient = m_Gradient;
+  const double c1      = 1e-4;
+  const double c2      = 0.9;
+  m_OldCost            = m_Cost;
+  m_OldGradient        = m_Gradient;
   m_OldSearchDirection = searchDirection;
   // [ x, cost, gradient, alphaUsed ] = tryLineSearch( x, cost, gradient, p,
   // alpha1, c1, c2 );

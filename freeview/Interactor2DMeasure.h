@@ -49,9 +49,9 @@ signals:
 protected:
   void UpdateCursor(QEvent *event, QWidget *wnd);
 
-  bool m_bEditing;
-  bool m_bDrawing;
-  int m_nPointIndex;
+  bool      m_bEditing;
+  bool      m_bDrawing;
+  int       m_nPointIndex;
   Region2D *m_region;
 };
 

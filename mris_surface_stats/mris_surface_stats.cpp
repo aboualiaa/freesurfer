@@ -27,44 +27,44 @@
  *
  */
 
+#include "diag.h"
 #include "mri_identify.h"
 #include "mrisurf.h"
-#include "diag.h"
 #include "timer.h"
 #include "version.h"
 #define DEBUG 0
 
 #define SWAP(a, b)                                                             \
   itemp = (a);                                                                 \
-  (a) = (b);                                                                   \
-  (b) = itemp;
+  (a)   = (b);                                                                 \
+  (b)   = itemp;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
-MRI *MyMRISsmoothMRI(MRIS *Surf, MRI *Src, int nSmoothSteps, MRI *Targ);
+MRI *      MyMRISsmoothMRI(MRIS *Surf, MRI *Src, int nSmoothSteps, MRI *Targ);
 
 const char *Progname;
 
 static char *stat_fname = nullptr; /* filename for output stat */
 static char *surf_fname = nullptr; /* filename for underlying surface */
 
-static char *mean_fname = nullptr;    /* filename for output stat */
+static char *mean_fname    = nullptr; /* filename for output stat */
 static char *absmean_fname = nullptr; /* filename for output stat */
-static char *absstd_fname = nullptr;  /* filename for output stat */
-static char *mask_fname = nullptr;    /* filename for subcortical mask */
+static char *absstd_fname  = nullptr; /* filename for output stat */
+static char *mask_fname    = nullptr; /* filename for subcortical mask */
 
-static char *zscore_fname = nullptr; /* filename for output stat */
-static int first_group_size = 0;     /* number of subjects for first group */
+static char *zscore_fname     = nullptr; /* filename for output stat */
+static int   first_group_size = 0; /* number of subjects for first group */
 
 char *srctypestring = "";
-int srctype = MRI_VOLUME_TYPE_UNKNOWN;
+int   srctype       = MRI_VOLUME_TYPE_UNKNOWN;
 char *trgtypestring = "";
-int trgtype = MRI_VOLUME_TYPE_UNKNOWN;
+int   trgtype       = MRI_VOLUME_TYPE_UNKNOWN;
 
 static void usage_exit(int code);
 
 int debugflag = 0;
-int debugvtx = 0;
+int debugvtx  = 0;
 
 static int nSmoothSteps = 0;
 
@@ -77,18 +77,18 @@ static char vcid[] =
     "$Id: mris_surface_stats.c,v 1.10 2011/03/02 00:04:34 nicks Exp $";
 
 int main(int argc, char *argv[]) {
-  char **av, *in_fname;
-  int ac, nargs, i, index, total;
-  MRIS *mri_surf;
-  MRI *surfVal[MAX_SURFACES];
-  MRI *mriMean, *mriStd, *mriAbsMean, *mriAbsStd;
-  MRI *mriMean2, *mriStd2, *mriAbsMean2, *mriAbsStd2;
-  MRI *Zscore;
-  double mean, std, scalar, absmean, absstd;
-  LABEL *masklabel = nullptr;
+  char ** av, *in_fname;
+  int     ac, nargs, i, index, total;
+  MRIS *  mri_surf;
+  MRI *   surfVal[MAX_SURFACES];
+  MRI *   mriMean, *mriStd, *mriAbsMean, *mriAbsStd;
+  MRI *   mriMean2, *mriStd2, *mriAbsMean2, *mriAbsStd2;
+  MRI *   Zscore;
+  double  mean, std, scalar, absmean, absstd;
+  LABEL * masklabel = nullptr;
   VERTEX *v;
 
-  int msec, minutes, seconds, nsurfaces, nsurfaces_total;
+  int   msec, minutes, seconds, nsurfaces, nsurfaces_total;
   Timer start;
 
   nargs = handleVersionOption(argc, argv, "mris_surface_stats");
@@ -146,12 +146,12 @@ int main(int argc, char *argv[]) {
     }
 
     for (index = 0; index < mri_surf->nvertices; index++) {
-      v = &mri_surf->vertices[index];
+      v          = &mri_surf->vertices[index];
       v->ripflag = 1;
     }
 
     for (index = 0; index < masklabel->n_points; index++) {
-      v = &mri_surf->vertices[masklabel->lv[index].vno];
+      v          = &mri_surf->vertices[masklabel->lv[index].vno];
       v->ripflag = 0;
     }
     LabelFree(&masklabel);
@@ -201,10 +201,10 @@ int main(int argc, char *argv[]) {
   if (nsurfaces_total == 1) {
     // printf("Only one surface, compute the stats across the "
     // "whole surface (excluding the masked areas if mask is given) \n");
-    mean = 0;
+    mean    = 0;
     absmean = 0;
-    std = 0;
-    total = 0;
+    std     = 0;
+    total   = 0;
     for (index = 0; index < mri_surf->nvertices; index++) {
       if (mri_surf->vertices[index].ripflag)
         continue;
@@ -242,17 +242,17 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
 
-  mriMean = MRIclone(surfVal[0], nullptr);
+  mriMean    = MRIclone(surfVal[0], nullptr);
   mriAbsMean = MRIclone(surfVal[0], nullptr);
-  mriStd = MRIclone(surfVal[0], nullptr);
-  mriAbsStd = MRIclone(surfVal[0], nullptr);
+  mriStd     = MRIclone(surfVal[0], nullptr);
+  mriAbsStd  = MRIclone(surfVal[0], nullptr);
 
   if (first_group_size <= 0)
     first_group_size = nsurfaces_total;
 
   for (index = 0; index < mri_surf->nvertices; index++) {
-    mean = 0;
-    std = 0;
+    mean    = 0;
+    std     = 0;
     absmean = 0;
     for (i = 0; i < first_group_size; i++) {
       scalar = MRIgetVoxVal(surfVal[i], index, 0, 0, 0);
@@ -291,15 +291,15 @@ int main(int argc, char *argv[]) {
   if (first_group_size < nsurfaces_total - 1) {
     // compute the stats for the 2nd group; at least two subjects
 
-    mriMean2 = MRIclone(surfVal[0], nullptr);
+    mriMean2    = MRIclone(surfVal[0], nullptr);
     mriAbsMean2 = MRIclone(surfVal[0], nullptr);
-    mriStd2 = MRIclone(surfVal[0], nullptr);
-    mriAbsStd2 = MRIclone(surfVal[0], nullptr);
-    Zscore = MRIclone(surfVal[0], nullptr);
+    mriStd2     = MRIclone(surfVal[0], nullptr);
+    mriAbsStd2  = MRIclone(surfVal[0], nullptr);
+    Zscore      = MRIclone(surfVal[0], nullptr);
 
     for (index = 0; index < mri_surf->nvertices; index++) {
-      mean = 0;
-      std = 0;
+      mean    = 0;
+      std     = 0;
       absmean = 0;
       for (i = first_group_size; i < nsurfaces_total; i++) {
         scalar = MRIgetVoxVal(surfVal[i], index, 0, 0, 0);
@@ -437,7 +437,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -467,7 +467,7 @@ static void print_version() {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -502,34 +502,34 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "src_type")) {
     srctypestring = argv[2];
-    srctype = string_to_type(srctypestring);
-    nargs = 1;
+    srctype       = string_to_type(srctypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "surf") || !stricmp(option, "surf_name") ||
              !stricmp(option, "surf_file")) {
     surf_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     //    printf("underlying surface is %s\n", surf_fname);
   } else if (!stricmp(option, "nsmooth")) {
     nSmoothSteps = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("Perform %d steps of smoothing of input data\n", nSmoothSteps);
   } else if (!stricmp(option, "first_group_size")) {
     first_group_size = atoi(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     printf("The first %d of input data belongs to one group. \n",
            first_group_size);
   } else if (!stricmp(option, "zscore")) {
     zscore_fname = argv[2];
-    nargs = 1;
+    nargs        = 1;
     printf("Output zscore to file %s \n", zscore_fname);
   } else if (!stricmp(option, "trg_type")) {
     trgtypestring = argv[2];
-    trgtype = string_to_type(trgtypestring);
-    nargs = 1;
+    trgtype       = string_to_type(trgtypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "debug")) {
     debugflag = 1;
-    debugvtx = atoi(argv[2]);
-    nargs = 1;
+    debugvtx  = atoi(argv[2]);
+    nargs     = 1;
   } else {
     fprintf(stderr, "unknown option %s\n", argv[1]);
     usage_exit(0);
@@ -623,10 +623,10 @@ static void usage_exit(int code) {
 /*-------------------------------------------------------------------*/
 MRI *MyMRISsmoothMRI(MRIS *Surf, MRI *Src, int nSmoothSteps, MRI *Targ) {
   // In this version, vertex flagged won't be included in the smoothing
-  int nnbrs, nthstep, frame, vtx, nbrvtx, nthnbr;
+  int   nnbrs, nthstep, frame, vtx, nbrvtx, nthnbr;
   float val;
-  MRI *SrcTmp;
-  int truenbr;
+  MRI * SrcTmp;
+  int   truenbr;
 
   if (Surf->nvertices != Src->width) {
     printf("ERROR: MyMRISsmooth: Surf/Src dimension mismatch\n");
@@ -660,7 +660,7 @@ MRI *MyMRISsmoothMRI(MRIS *Surf, MRI *Src, int nSmoothSteps, MRI *Targ) {
       nnbrs = Surf->vertices_topology[vtx].vnum;
 
       for (frame = 0; frame < Targ->nframes; frame++) {
-        val = MRIFseq_vox(SrcTmp, vtx, 0, 0, frame);
+        val     = MRIFseq_vox(SrcTmp, vtx, 0, 0, frame);
         truenbr = 0;
         for (nthnbr = 0; nthnbr < nnbrs; nthnbr++) {
           nbrvtx = Surf->vertices_topology[vtx].v[nthnbr];

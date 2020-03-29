@@ -11,27 +11,27 @@ static float compute_powell_cost(float *p);
 //
 
 PointsContainerType *g_container;
-Energy_pointer g_fpointer;
-float *g_transf; // data buffer for the transformation
+Energy_pointer       g_fpointer;
+float *              g_transf; // data buffer for the transformation
 
 float powell_minimize(PointsContainerType &container, float *iotransform,
                       Energy_pointer fun_pointer) {
-  float *p;
+  float * p;
   float **xi;
-  float fret;
-  float fstart;
-  int r, c;
-  int iter;
+  float   fret;
+  float   fstart;
+  int     r, c;
+  int     iter;
 
   // assign global vars
   g_container = &container;
-  g_fpointer = fun_pointer;
+  g_fpointer  = fun_pointer;
 
   int npars = 12;
 
   g_transf = new float[npars];
 
-  p = vector(1, npars);
+  p  = vector(1, npars);
   xi = matrix(1, npars, 1, npars);
 
   for (int i = 0; i < npars; i++)

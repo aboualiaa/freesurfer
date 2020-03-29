@@ -36,39 +36,38 @@
 //
 ////////////////////////////////////////////////////////////////////
 
+#include "diag.h"
+#include "error.h"
+#include "label.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mri_conform.h"
+#include "mrimorph.h"
+#include "mrinorm.h"
+#include "numerics.h"
+#include "proto.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include "numerics.h"
-#include "mri.h"
-#include "matrix.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mrimorph.h"
-#include "mri_conform.h"
-#include "utils.h"
-#include "timer.h"
-#include "matrix.h"
-#include "transform.h"
-#include "version.h"
-#include "label.h"
-#include "mrinorm.h"
 
 #define SWAP(a, b)                                                             \
   itemp = (a);                                                                 \
-  (a) = (b);                                                                   \
-  (b) = itemp;
+  (a)   = (b);                                                                 \
+  (b)   = itemp;
 #define MAX_IMAGES 200
-#define DEBUG 0
+#define DEBUG      0
 
 static int xoff[6] = {1, -1, 0, 0, 0, 0};
 static int yoff[6] = {0, 0, 1, -1, 0, 0};
 static int zoff[6] = {0, 0, 0, 0, 1, -1};
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 /*
@@ -105,22 +104,22 @@ static int MAXLABEL = 250;
 /* Compute LDA only in a local neighborhood of the
  * specified debug voxel
  */
-static int debug_flag = 0;
+static int debug_flag  = 0;
 static int window_flag = 0;
 static int window_size = 30;
 
-static int conform = 0;
+static int conform      = 0;
 static int whole_volume = 0;
-static int have_weight = 0; /* read in weights */
-static int just_test = 0;   /* if 1, try SW = Identity */
+static int have_weight  = 0; /* read in weights */
+static int just_test    = 0; /* if 1, try SW = Identity */
 static int compute_m_distance =
     0; /* if 1, compute distance in original space */
 
 /* LDA is performed only within ROI */
-static char *mask_fname = NULL;   /* filename for ROI mask */
-static char *label_fname = NULL;  /* filename for segmentation */
+static char *mask_fname   = NULL; /* filename for ROI mask */
+static char *label_fname  = NULL; /* filename for segmentation */
 static char *weight_fname = NULL; /* filename for storing LDA weights */
-static char *synth_fname = NULL;  /* filename for synthesized LDA volume */
+static char *synth_fname  = NULL; /* filename for synthesized LDA volume */
 
 static char *fname = NULL; /* filename to record CNR values */
 
@@ -130,9 +129,9 @@ void input_weights_to_file(float *weights, char *weight_fname, int VN);
 
 void output_weights_to_file(float *weights, char *weight_fname, int VN);
 
-void computeClassStats(float *LDAmean, MATRIX *SW, float *classsize,
-                       MRI **mri_flash, MRI *mri_label, MRI *mri_mask,
-                       int nvolumes_total, int classID);
+void    computeClassStats(float *LDAmean, MATRIX *SW, float *classsize,
+                          MRI **mri_flash, MRI *mri_label, MRI *mri_mask,
+                          int nvolumes_total, int classID);
 MATRIX *ComputeAdjMatrix(MRI *mri_label, MRI *mri_mask, int minlabel,
                          int maxlabel);
 
@@ -140,29 +139,28 @@ float computePairCNR(float *LDAmean1, float *LDAmean2, MATRIX *SW1, MATRIX *SW2,
                      float classSize1, float classSize2, int nvolumes_total,
                      float *weights, int flag);
 
-static int class1 = 0;
-static int class2 = 0;
+static int class1  = 0;
+static int class2  = 0;
 static int ldaflag = 0;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_fname;
-  int ac, nargs, i, j, x, y, z, width, height, depth;
-  MRI *mri_flash[MAX_IMAGES], *mri_label, *mri_mask;
-  int index;
-  int msec, minutes, seconds, nvolumes, nvolumes_total;
-  Timer start;
-  float max_val, min_val, value;
-  float *LDAweight = NULL;
-  float **LDAmeans = NULL; /* Centroid for each considered class */
-  float *classSize = NULL; /* relative size of each class */
-  MATRIX **SWs;      /* Within class scatter-matrix for each considered class */
-  MATRIX *AdjMatrix; /* Adjacency matrix of all classes */
+  char **  av, *in_fname;
+  int      ac, nargs, i, j, x, y, z, width, height, depth;
+  MRI *    mri_flash[MAX_IMAGES], *mri_label, *mri_mask;
+  int      index;
+  int      msec, minutes, seconds, nvolumes, nvolumes_total;
+  Timer    start;
+  float    max_val, min_val, value;
+  float *  LDAweight = NULL;
+  float ** LDAmeans  = NULL; /* Centroid for each considered class */
+  float *  classSize = NULL; /* relative size of each class */
+  MATRIX **SWs; /* Within class scatter-matrix for each considered class */
+  MATRIX * AdjMatrix; /* Adjacency matrix of all classes */
 
   FILE *fp;
 
-  int num_classes;
+  int    num_classes;
   double cnr;
-
 
   nargs = handleVersionOption(argc, argv, "mri_ms_compute_CNR");
   if (nargs && argc - nargs == 1)
@@ -236,7 +234,7 @@ int main(int argc, char *argv[]) {
       MRI *mri_tmp;
 
       printf("embedding and interpolating volume\n");
-      mri_tmp = MRIconform(mri_flash[nvolumes]);
+      mri_tmp             = MRIconform(mri_flash[nvolumes]);
       mri_flash[nvolumes] = mri_tmp;
     }
 
@@ -273,9 +271,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  width = mri_flash[0]->width;
+  width  = mri_flash[0]->width;
   height = mri_flash[0]->height;
-  depth = mri_flash[0]->depth;
+  depth  = mri_flash[0]->depth;
 
   if (label_fname != NULL) {
     mri_label = MRIread(label_fname);
@@ -342,8 +340,8 @@ int main(int argc, char *argv[]) {
   LDAweight = (float *)calloc(nvolumes_total, sizeof(float));
 
   /* Allocate memory */
-  LDAmeans = (float **)malloc(num_classes * sizeof(float *));
-  SWs = (MATRIX **)malloc(num_classes * sizeof(MATRIX *));
+  LDAmeans  = (float **)malloc(num_classes * sizeof(float *));
+  SWs       = (MATRIX **)malloc(num_classes * sizeof(MATRIX *));
   classSize = (float *)malloc(num_classes * sizeof(float));
   for (i = 0; i < num_classes; i++) {
     LDAmeans[i] = (float *)malloc(nvolumes_total * sizeof(float));
@@ -628,7 +626,7 @@ int main(int argc, char *argv[]) {
 
   free(LDAweight);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -650,35 +648,35 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "window")) {
     window_flag = 1;
     window_size = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("compute CNR withing a window\n");
   } else if (!stricmp(option, "lda")) {
     ldaflag = 1;
-    class1 = atoi(argv[2]);
-    class2 = atoi(argv[3]);
-    nargs = 2;
+    class1  = atoi(argv[2]);
+    class2  = atoi(argv[3]);
+    nargs   = 2;
     printf("Evaluate CNR for two classes (%d, %d) \n", class1, class2);
   } else if (!stricmp(option, "min_label")) {
     MINLABEL = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("Label range starts at %d\n", MINLABEL);
   } else if (!stricmp(option, "max_label")) {
     MAXLABEL = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("Label range ends at %d\n", MAXLABEL);
   } else if (!stricmp(option, "conform")) {
     conform = 1;
@@ -761,19 +759,19 @@ float computePairCNR(float *LDAmean1, float *LDAmean2, MATRIX *SW1, MATRIX *SW2,
                      float classSize1, float classSize2, int nvolumes_total,
                      float *weights, int flag) {
   /* if flag == 1, output the optimal weights to weights */
-  float cnr;
-  int m1, m2;
+  float   cnr;
+  int     m1, m2;
   MATRIX *SW, *SB, *InvSW;
-  float *weight;
-  double value1, value2;
+  float * weight;
+  double  value1, value2;
 
   if (classSize1 < 0.5 || classSize2 < 0.5) {
     printf("One of the two classes is empty\n");
     return 0;
   }
 
-  SW = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
-  SB = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
+  SW     = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
+  SB     = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
   weight = (float *)malloc(nvolumes_total * sizeof(float));
 
   /* initialize all */
@@ -813,7 +811,7 @@ float computePairCNR(float *LDAmean1, float *LDAmean2, MATRIX *SW1, MATRIX *SW2,
   }
 
   /* compute CNR */
-  cnr = 0;
+  cnr    = 0;
   value1 = 0.0;
   value2 = 0.0; /* borrowed */
   for (m1 = 0; m1 < nvolumes_total; m1++) {
@@ -849,13 +847,13 @@ void computeClassStats(float *LDAmean, MATRIX *SW, float *classsize,
                        int nvolumes_total, int classID) {
   /* Compute LDAmean and SW from given data and label */
 
-  int m1, m2, x, y, z, depth, height, width;
-  int denom;
+  int    m1, m2, x, y, z, depth, height, width;
+  int    denom;
   double data1, data2;
-  int label;
+  int    label;
 
-  depth = mri_flash[0]->depth;
-  width = mri_flash[0]->width;
+  depth  = mri_flash[0]->depth;
+  width  = mri_flash[0]->width;
   height = mri_flash[0]->height;
 
   if (!LDAmean)
@@ -937,14 +935,14 @@ void computeClassStats(float *LDAmean, MATRIX *SW, float *classsize,
 MATRIX *ComputeAdjMatrix(MRI *mri_label, MRI *mri_mask, int minlabel,
                          int maxlabel) {
   MATRIX *AdjMatrix;
-  int i, j, label1, label2, offset, numLabels;
-  int depth, width, height;
-  int x, y, z, cx, cy, cz;
+  int     i, j, label1, label2, offset, numLabels;
+  int     depth, width, height;
+  int     x, y, z, cx, cy, cz;
 
   numLabels = maxlabel - minlabel + 1;
 
-  depth = mri_label->depth;
-  width = mri_label->width;
+  depth  = mri_label->depth;
+  width  = mri_label->width;
   height = mri_label->height;
 
   AdjMatrix = (MATRIX *)MatrixAlloc(numLabels, numLabels, MATRIX_REAL);
@@ -989,7 +987,7 @@ MATRIX *ComputeAdjMatrix(MRI *mri_label, MRI *mri_mask, int minlabel,
 }
 
 void input_weights_to_file(float *weights, char *weight_fname, int VN) {
-  int i;
+  int   i;
   FILE *infile = NULL;
 
   infile = fopen(weight_fname, "r");
@@ -1013,7 +1011,7 @@ void input_weights_to_file(float *weights, char *weight_fname, int VN) {
 }
 
 void output_weights_to_file(float *weights, char *weight_fname, int VN) {
-  int i;
+  int   i;
   FILE *fp = NULL;
 
   fp = fopen(weight_fname, "w");

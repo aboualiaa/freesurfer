@@ -1,7 +1,7 @@
 #ifndef _SIMPLE_PARTICLE_BUILD_H_
 #define _SIMPLE_PARTICLE_BUILD_H_
-#include <sbl/image/MotionField.h>
 #include <pvl/SimpleParticleData.h>
+#include <sbl/image/MotionField.h>
 namespace pvl {
 
 /*! \file SimpleParticleBuild.h

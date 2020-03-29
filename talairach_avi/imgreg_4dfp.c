@@ -24,12 +24,12 @@
  *
  */
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <math.h>
-#include <endianio.h>
 #include <Getifh.h>
+#include <endianio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #define MAXL 256
 #define FIND 4096
@@ -51,9 +51,9 @@ extern void fimgreg_(float *img1, short *msk1, int *nx1, int *ny1, int *nz1,
                      float *mmppix1, float *center1, float *img2, short *msk2,
                      int *nx2, int *ny2, int *nz2, float *mmppix2,
                      float *center2, float *params, int *mode);
-extern void flipx(float *imag, int *nx, int *ny, int *nz);     /* cflip.c */
-extern void flipz(float *imag, int *nx, int *ny, int *nz);     /* cflip.c */
-extern int x4dfp2ecat(float *imag, int *dim, int orientation); /* below */
+extern void flipx(float *imag, int *nx, int *ny, int *nz);      /* cflip.c */
+extern void flipz(float *imag, int *nx, int *ny, int *nz);      /* cflip.c */
+extern int  x4dfp2ecat(float *imag, int *dim, int orientation); /* below */
 
 void setprog(char *program, char **argv) {
   char *ptr;
@@ -81,21 +81,21 @@ int main(int argc, char **argv) {
   /* imag I/O */
   /************/
   FILE *fp;
-  IFH ifh[2], ifhm;
-  char command[MAXL];
-  char t4file[MAXL], program[MAXL];
-  char filespc[MAXL], imgroot[2][MAXL], mskroot[2][MAXL];
+  IFH   ifh[2], ifhm;
+  char  command[MAXL];
+  char  t4file[MAXL], program[MAXL];
+  char  filespc[MAXL], imgroot[2][MAXL], mskroot[2][MAXL];
 
   /**************/
   /* processing */
   /**************/
-  float param[13], t4[16];
-  float voxdim[3];
+  float  param[13], t4[16];
+  float  voxdim[3];
   float *imag[2];
   short *mask[2];
-  int mode;
-  int imgdim[4], mskdim[4], isbig, isbigm;
-  int nx[2], ny[2], nz[2], dimension, orientation, orientm;
+  int    mode;
+  int    imgdim[4], mskdim[4], isbig, isbigm;
+  int    nx[2], ny[2], nz[2], dimension, orientation, orientm;
 
   /***********/
   /* utility */
@@ -179,8 +179,8 @@ int main(int argc, char **argv) {
            ifh[j].center[2]);
 
     dimension = nx[j] * ny[j] * nz[j];
-    imag[j] = (float *)malloc(dimension * sizeof(float));
-    mask[j] = (short *)malloc(dimension * sizeof(short));
+    imag[j]   = (float *)malloc(dimension * sizeof(float));
+    mask[j]   = (short *)malloc(dimension * sizeof(short));
     if (!imag[j] || !mask[j])
       errm(program);
 

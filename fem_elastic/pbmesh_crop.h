@@ -32,10 +32,10 @@ template <class Cstr, int n> class TPbMeshCrop {
 public:
   typedef TMesh<Cstr, n> MeshType;
 
-  typedef typename MeshType::tNode NodeType;
+  typedef typename MeshType::tNode    NodeType;
   typedef typename MeshType::tElement ElementType;
-  typedef typename MeshType::tCoords CoordsType;
-  typedef std::set<unsigned int> IndexSetType;
+  typedef typename MeshType::tCoords  CoordsType;
+  typedef std::set<unsigned int>      IndexSetType;
 
   typedef std::map<unsigned int, unsigned int> MapType;
 
@@ -72,7 +72,7 @@ TPbMeshCrop<Cstr, n>::TPbMeshCrop(const MeshType *pmesh) {
 
 template <class Cstr, int n>
 void TPbMeshCrop<Cstr, n>::Crop(MeshType *outMesh, MapType &nodeMap,
-                                MapType &elementMap,
+                                MapType &     elementMap,
                                 IndexSetType &boundaryNodes, unsigned int seed,
                                 unsigned int radius) {
   m_leafElements.clear();
@@ -88,7 +88,7 @@ void TPbMeshCrop<Cstr, n>::Crop(MeshType *outMesh, MapType &nodeMap,
   IndexSetType allNodes;
   for (typename IndexSetType::const_iterator cit = eltVisited.begin();
        cit != eltVisited.end(); ++cit) {
-    NodeType *pnode = NULL;
+    NodeType *         pnode = NULL;
     const ElementType *cpelt = m_pmesh->get_elt(*cit);
     for (unsigned int ui(0), nnodes(cpelt->no_nodes()); ui < nnodes; ++ui) {
       cpelt->get_node(ui, &pnode);
@@ -97,10 +97,10 @@ void TPbMeshCrop<Cstr, n>::Crop(MeshType *outMesh, MapType &nodeMap,
   }   // next cit
 
   // populate nodes
-  NodeType *pnodeIn;
-  NodeType *pnodeOut;
+  NodeType *   pnodeIn;
+  NodeType *   pnodeOut;
   unsigned int index = 0;
-  MapType internalMap;
+  MapType      internalMap;
   for (typename IndexSetType::const_iterator cit = allNodes.begin();
        cit != allNodes.end(); ++cit, ++index) {
     m_pmesh->get_node(*cit, &pnodeIn);
@@ -109,14 +109,14 @@ void TPbMeshCrop<Cstr, n>::Crop(MeshType *outMesh, MapType &nodeMap,
                           pnodeIn->is_active());
     outMesh->add_node(pnodeOut);
     internalMap[*cit] = index;
-    nodeMap[index] = *cit;
+    nodeMap[index]    = *cit;
   } // next cit, index
 
   // setup elements
   index = 0;
   typename MapType::const_iterator mapCiter;
-  const ElementType *cpelt;
-  std::vector<NodeType *> vpnodes;
+  const ElementType *              cpelt;
+  std::vector<NodeType *>          vpnodes;
   for (typename IndexSetType::const_iterator cit = eltVisited.begin();
        cit != eltVisited.end(); ++cit, ++index) {
     vpnodes.clear();
@@ -140,7 +140,7 @@ void TPbMeshCrop<Cstr, n>::Crop(MeshType *outMesh, MapType &nodeMap,
 
   // fill the boundary nodes structure
   typedef std::vector<unsigned int> VectorType;
-  VectorType boundaryInitial;
+  VectorType                        boundaryInitial;
   std::insert_iterator<VectorType> ii(boundaryInitial, boundaryInitial.begin());
   std::set_difference(allNodes.begin(), allNodes.end(), nodeVisited.begin(),
                       nodeVisited.end(), ii);
@@ -160,13 +160,13 @@ template <class Cstr, int n>
 void TPbMeshCrop<Cstr, n>::bfs(unsigned int seed, unsigned int radius,
                                unsigned int maxRadius, IndexSetType &eltVisited,
                                IndexSetType &nodeVisited) {
-  IndexSetType tetSet; // used to populate the neighbor list
-  NodeType *pnode = NULL;
+  IndexSetType       tetSet; // used to populate the neighbor list
+  NodeType *         pnode  = NULL;
   const ElementType *cpseed = NULL;
   // unused: const ElementType* cpelt = NULL;
 
   typename IndexSetType::const_iterator cit;
-  typename NodeType::tElt_citer eltBegin, eltEnd;
+  typename NodeType::tElt_citer         eltBegin, eltEnd;
 
   // if element was already visited, return
   if (eltVisited.find(seed) != eltVisited.end()) {

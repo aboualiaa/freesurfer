@@ -26,8 +26,8 @@
 /* Convert an transformation matrix from flirt output to lta format */
 
 #include "error.h"
-#include "version.h"
 #include "transform.h"
+#include "version.h"
 
 void usage(int exit_val);
 
@@ -40,14 +40,14 @@ static int get_option(int argc, char *argv[]);
 static int invert_flag = 0;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  char *fslfn, *ltafn;
-  MRI *mri_src, *mri_tgt;
-  int ac, nargs;
-  LTA *mylta = nullptr;
-  FILE *fo;
+  char **  av;
+  char *   fslfn, *ltafn;
+  MRI *    mri_src, *mri_tgt;
+  int      ac, nargs;
+  LTA *    mylta = nullptr;
+  FILE *   fo;
   VOL_GEOM srcG, dstG;
-  MATRIX *invTgt, *Dsrc, *V_to_V;
+  MATRIX * invTgt, *Dsrc, *V_to_V;
 
   Progname = argv[0];
 
@@ -97,13 +97,13 @@ int main(int argc, char *argv[]) {
     mylta->xforms[0].dst = dstG;
   }
 
-  invTgt = MatrixAlloc(4, 4, MATRIX_REAL);
+  invTgt             = MatrixAlloc(4, 4, MATRIX_REAL);
   invTgt->rptr[1][1] = 1.0 / dstG.xsize;
   invTgt->rptr[2][2] = 1.0 / dstG.ysize;
   invTgt->rptr[3][3] = 1.0 / dstG.zsize;
   invTgt->rptr[4][4] = 1.0;
 
-  Dsrc = MatrixAlloc(4, 4, MATRIX_REAL);
+  Dsrc             = MatrixAlloc(4, 4, MATRIX_REAL);
   Dsrc->rptr[1][1] = srcG.xsize;
   Dsrc->rptr[2][2] = srcG.ysize;
   Dsrc->rptr[3][3] = srcG.zsize;
@@ -162,20 +162,20 @@ void usage(int exit_val) {
 } /*  end usage()  */
 
 static LTA *ltaFSLread(const char *fname) {
-  LTA *lta;
+  LTA *             lta;
   LINEAR_TRANSFORM *lt;
-  char *cp, line[1000];
-  FILE *fp;
-  int row;
-  MATRIX *m_L;
+  char *            cp, line[1000];
+  FILE *            fp;
+  int               row;
+  MATRIX *          m_L;
 
   fp = fopen(fname, "r");
   if (!fp)
     ErrorReturn(NULL,
                 (ERROR_NOFILE, "ltFSLread: could not open file %s", fname));
 
-  lta = LTAalloc(1, nullptr);
-  lt = &lta->xforms[0];
+  lta       = LTAalloc(1, nullptr);
+  lt        = &lta->xforms[0];
   lt->sigma = 1.0f;
   lt->x0 = lt->y0 = lt->z0 = 0;
 
@@ -203,7 +203,7 @@ static LTA *ltaFSLread(const char *fname) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

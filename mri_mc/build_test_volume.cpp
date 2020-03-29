@@ -23,8 +23,8 @@
  *
  */
 
-#include <stdio.h>
 #include "mri.h"
+#include <stdio.h>
 
 const char *Progname;
 

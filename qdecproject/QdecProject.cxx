@@ -25,13 +25,13 @@
  *
  */
 
-#include <unistd.h>
 #include <cmath>
+#include <unistd.h>
 
-#include <sstream>
-#include <iostream>
-#include <fstream>
 #include <cstring>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 #include "QdecProject.h"
 
@@ -70,12 +70,12 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
                                  const char *ifnDataDir) {
 
   // If the project file name doesn't have a path, give it one.
-  string fnProject(ifnProject);
-  if (fnProject.find('/') == string::npos) {
+  std::string fnProject(ifnProject);
+  if (fnProject.find('/') == std::string::npos) {
     char sCWD[1024];
     if (getcwd(sCWD, sizeof(sCWD))) {
-      string fnProjectFull = string(sCWD) + "/" + fnProject;
-      fnProject = fnProjectFull;
+      std::string fnProjectFull = std::string(sCWD) + "/" + fnProject;
+      fnProject                 = fnProjectFull;
     } else {
       fprintf(stderr,
               "WARNING: QdecProject::LoadProjectFile: Can't add "
@@ -84,37 +84,37 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
   }
 
   // Find the base name of the project file.
-  string fnProjectBase(fnProject);
-  string::size_type nPreLastSlash = fnProject.rfind('/');
-  if (string::npos != nPreLastSlash)
+  std::string            fnProjectBase(fnProject);
+  std::string::size_type nPreLastSlash = fnProject.rfind('/');
+  if (std::string::npos != nPreLastSlash)
     fnProjectBase = fnProject.substr(nPreLastSlash + 1, fnProject.size());
 
   // Make a target dir for the expanded file in the data dir, with a
   // directory name of the project file.
-  string fnExpandedProjectBase = "qdec_project_archive";
-  string fnExpandedProjectDir =
-      string(ifnDataDir) + "/" + fnExpandedProjectBase;
+  std::string fnExpandedProjectBase = "qdec_project_archive";
+  std::string fnExpandedProjectDir =
+      std::string(ifnDataDir) + "/" + fnExpandedProjectBase;
 
-  string sSubject;
-  string sHemisphere;
-  string sAnalysisName;
-  string fnDataTableBase;
-  string sDiscreteFactor1 = "none";
-  string sDiscreteFactor2 = "none";
-  string sContinuousFactor1 = "none";
-  string sContinuousFactor2 = "none";
-  string sMeasure;
-  int smoothness = -1;
+  std::string sSubject;
+  std::string sHemisphere;
+  std::string sAnalysisName;
+  std::string fnDataTableBase;
+  std::string sDiscreteFactor1   = "none";
+  std::string sDiscreteFactor2   = "none";
+  std::string sContinuousFactor1 = "none";
+  std::string sContinuousFactor2 = "none";
+  std::string sMeasure;
+  int         smoothness = -1;
 
   // Check the file.
-  ifstream fInput(fnProject.c_str(), std::ios::in);
+  std::ifstream fInput(fnProject.c_str(), std::ios::in);
   if (!fInput || fInput.bad())
-    throw runtime_error(string("Couldn't open file ") + fnProject);
+    throw std::runtime_error(std::string("Couldn't open file ") + fnProject);
   fInput.close();
 
   // Erase old working directory if present.
-  string sCommand = "rm -rf " + fnExpandedProjectDir;
-  int rSystem = system(sCommand.c_str());
+  std::string sCommand = "rm -rf " + fnExpandedProjectDir;
+  int         rSystem  = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
             "ERROR: QdecProject::LoadProjectFile: Couldn't "
@@ -137,8 +137,8 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
   }
 
   // Look for and check the version file.
-  string fnVersion = fnExpandedProjectDir + "/Version.txt";
-  ifstream fVersion(fnVersion.c_str(), ios::out);
+  std::string   fnVersion = fnExpandedProjectDir + "/Version.txt";
+  std::ifstream fVersion(fnVersion.c_str(), std::ios::out);
   if (!fVersion || fVersion.bad()) {
     fprintf(stderr,
             "ERROR: QdecProject::LoadProjectFile: Couldn't "
@@ -158,8 +158,9 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
   }
 
   // Parse the meta data file.
-  string fnMetadata = fnExpandedProjectDir + "/" + this->GetMetadataFileName();
-  ifstream fMetadata(fnMetadata.c_str(), ios::in);
+  std::string fnMetadata =
+      fnExpandedProjectDir + "/" + this->GetMetadataFileName();
+  std::ifstream fMetadata(fnMetadata.c_str(), std::ios::in);
   if (!fMetadata || fMetadata.bad()) {
     fprintf(stderr,
             "ERROR: QdecProject::LoadProjectFile: Couldn't "
@@ -169,8 +170,8 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
   }
   // Make sure the first token is QdecProjectMetadata, and then the
   // next line is Version 1.
-  string sToken;
-  string asCorrectTokens[] = {"QdecProjectMetadata", "Version", "1"};
+  std::string sToken;
+  std::string asCorrectTokens[] = {"QdecProjectMetadata", "Version", "1"};
   for (int nToken = 0; nToken < 3; nToken++) {
     fMetadata >> sToken;
     if (sToken != asCorrectTokens[nToken]) {
@@ -245,8 +246,8 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
 
   // Load our data table. Note that this might set the subjects dir,
   // but we'll set it later to our data dir.
-  string fnDataTable = fnExpandedProjectDir + "/" + fnDataTableBase;
-  int errorCode;
+  std::string fnDataTable = fnExpandedProjectDir + "/" + fnDataTableBase;
+  int         errorCode;
   errorCode = this->LoadDataTable(fnDataTable.c_str());
   if (errorCode)
     return errorCode;
@@ -256,7 +257,7 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
   this->SetSubjectsDir(fnExpandedProjectDir.c_str());
 
   // Set the working dir to isDataDir/sAnalysisName.
-  string fnWorkingDir = fnExpandedProjectDir + "/" + sAnalysisName;
+  std::string fnWorkingDir = fnExpandedProjectDir + "/" + sAnalysisName;
   this->SetWorkingDir(fnWorkingDir.c_str());
 
   // We're generating design and results here so that we can access it
@@ -275,7 +276,7 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
   // Create fit results data.
   delete this->mGlmFitter;
   this->mGlmFitter = new QdecGlmFit();
-  errorCode = mGlmFitter->CreateResultsFromCachedData(this->mGlmDesign);
+  errorCode        = mGlmFitter->CreateResultsFromCachedData(this->mGlmDesign);
   if (errorCode)
     return errorCode;
 
@@ -291,15 +292,15 @@ int QdecProject::LoadProjectFile(const char *ifnProject,
 int QdecProject::SaveProjectFile(const char *ifnProject,
                                  const char *ifnDataDir) {
 
-  cout << "Saving project file...\n";
+  std::cout << "Saving project file...\n";
 
   // If the project file name doesn't have a path, give it one.
-  string fnProject(ifnProject);
-  if (fnProject.find('/') == string::npos) {
+  std::string fnProject(ifnProject);
+  if (fnProject.find('/') == std::string::npos) {
     char sCWD[1024];
     if (getcwd(sCWD, sizeof(sCWD))) {
-      string fnProjectFull = string(sCWD) + "/" + fnProject;
-      fnProject = fnProjectFull;
+      std::string fnProjectFull = std::string(sCWD) + "/" + fnProject;
+      fnProject                 = fnProjectFull;
     } else {
       fprintf(stderr,
               "WARNING: QdecProject::LoadProjectFile: Can't add "
@@ -325,26 +326,26 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
      Version.txt
   */
 
-  string fnSubjectsDir = this->GetSubjectsDir();
-  string sSubjectName = this->GetAverageSubject();
-  string fnWorkingDir = this->GetWorkingDir();
-  string fnDefaultWorkingDir = this->GetDefaultWorkingDir();
+  std::string fnSubjectsDir       = this->GetSubjectsDir();
+  std::string sSubjectName        = this->GetAverageSubject();
+  std::string fnWorkingDir        = this->GetWorkingDir();
+  std::string fnDefaultWorkingDir = this->GetDefaultWorkingDir();
 
   // Find the base name of the project file.
-  string fnProjectBase(fnProject);
-  string::size_type nPreLastSlash = fnProject.rfind('/');
-  if (string::npos != nPreLastSlash)
+  std::string            fnProjectBase(fnProject);
+  std::string::size_type nPreLastSlash = fnProject.rfind('/');
+  if (std::string::npos != nPreLastSlash)
     fnProjectBase = fnProject.substr(nPreLastSlash + 1, fnProject.size());
 
   // Make a target dir for the expanded file in the data dir, with a
   // directory name of the project file.
-  string fnExpandedProjectBase = "qdec_project_archive";
-  string fnExpandedProjectDir =
-      string(ifnDataDir) + "/" + fnExpandedProjectBase;
+  std::string fnExpandedProjectBase = "qdec_project_archive";
+  std::string fnExpandedProjectDir =
+      std::string(ifnDataDir) + "/" + fnExpandedProjectBase;
 
   // Erase old working directory if present.
-  string sCommand = "rm -rf " + fnExpandedProjectDir;
-  cout << sCommand << endl;
+  std::string sCommand = "rm -rf " + fnExpandedProjectDir;
+  std::cout << sCommand << std::endl;
   int rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -356,7 +357,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
 
   // Make a temporary directory for our data.
   sCommand = "mkdir " + fnExpandedProjectDir;
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -367,16 +368,16 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
   }
 
   // Write a version file to it.
-  string fnVersion = fnExpandedProjectDir + "/Version.txt";
-  ofstream fVersion(fnVersion.c_str(), ios::out);
-  fVersion << "1" << endl;
+  std::string   fnVersion = fnExpandedProjectDir + "/Version.txt";
+  std::ofstream fVersion(fnVersion.c_str(), std::ios::out);
+  fVersion << "1" << std::endl;
   fVersion.close();
 
   // Make the average subject dir structure.
   sCommand = "mkdir -p " + fnExpandedProjectDir + "/" + sSubjectName +
              "/mri/transforms " + fnExpandedProjectDir + "/" + sSubjectName +
              "/surf " + fnExpandedProjectDir + "/" + sSubjectName + "/label";
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -390,7 +391,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
   sCommand = "ln -s " + fnSubjectsDir + "/" + sSubjectName +
              "/mri/transforms/talairach.xfm " + fnExpandedProjectDir + "/" +
              sSubjectName + "/mri/transforms";
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -403,7 +404,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
   // orig.mgz
   sCommand = "ln -s " + fnSubjectsDir + "/" + sSubjectName + "/mri/orig.mgz " +
              fnExpandedProjectDir + "/" + sSubjectName + "/mri";
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -419,7 +420,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
              fnSubjectsDir + "/" + sSubjectName + "/surf/*.pial " +
              fnSubjectsDir + "/" + sSubjectName + "/surf/*.white " +
              fnExpandedProjectDir + "/" + sSubjectName + "/surf";
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -433,7 +434,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
   sCommand = "ln -s " + fnSubjectsDir + "/" + sSubjectName +
              "/label/*.aparc.annot " + fnExpandedProjectDir + "/" +
              sSubjectName + "/label";
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -445,7 +446,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
 
   // The whole working dir.
   sCommand = "ln -s " + fnWorkingDir + " " + fnExpandedProjectDir;
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -456,11 +457,11 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
   }
 
   // Data table and levels files.
-  string fnDataTable = this->GetDataTable()->GetFileName();
-  string fnDataTablePath(fnDataTable);
-  string fnDataTableBase(fnDataTable);
+  std::string fnDataTable = this->GetDataTable()->GetFileName();
+  std::string fnDataTablePath(fnDataTable);
+  std::string fnDataTableBase(fnDataTable);
   nPreLastSlash = fnDataTable.rfind('/');
-  if (string::npos != nPreLastSlash) {
+  if (std::string::npos != nPreLastSlash) {
     fnDataTableBase = fnDataTable.substr(nPreLastSlash + 1, fnDataTable.size());
     fnDataTablePath = fnDataTable.substr(0, nPreLastSlash + 1);
   }
@@ -472,7 +473,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
   // so the files are linked/copied singly
   sCommand = "ln -s " + fnDefaultWorkingDir + "/" + fnDataTableBase + " " +
              fnExpandedProjectDir;
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -482,7 +483,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
     return -1;
   }
   sCommand = "cp " + fnDefaultWorkingDir + "/*.levels " + fnExpandedProjectDir;
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   /* .levels files may not exist, so don't check for copy error:
      if( 0 != rSystem ) {
@@ -493,8 +494,9 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
   */
 
   // Generate the meta data file.
-  string fnMetadata = fnExpandedProjectDir + "/" + this->GetMetadataFileName();
-  ofstream fMetadata(fnMetadata.c_str(), ios::out);
+  std::string fnMetadata =
+      fnExpandedProjectDir + "/" + this->GetMetadataFileName();
+  std::ofstream fMetadata(fnMetadata.c_str(), std::ios::out);
   if (!fMetadata || fMetadata.bad()) {
     fprintf(stderr,
             "ERROR: QdecProject::SaveProjectFile: Couldn't "
@@ -502,34 +504,35 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
             fnMetadata.c_str());
     return -1;
   }
-  fMetadata << "QdecProjectMetadata" << endl;
-  fMetadata << "Version 1" << endl;
-  fMetadata << "Subject " << this->GetAverageSubject() << endl;
-  fMetadata << "Hemisphere " << this->GetHemi() << endl;
-  fMetadata << "AnalysisName " << this->GetGlmDesign()->GetName() << endl;
-  fMetadata << "DataTable " << fnDataTableBase << endl;
-  fMetadata << "Measure " << this->GetGlmDesign()->GetMeasure() << endl;
-  fMetadata << "Smoothness " << this->GetGlmDesign()->GetSmoothness() << endl;
+  fMetadata << "QdecProjectMetadata" << std::endl;
+  fMetadata << "Version 1" << std::endl;
+  fMetadata << "Subject " << this->GetAverageSubject() << std::endl;
+  fMetadata << "Hemisphere " << this->GetHemi() << std::endl;
+  fMetadata << "AnalysisName " << this->GetGlmDesign()->GetName() << std::endl;
+  fMetadata << "DataTable " << fnDataTableBase << std::endl;
+  fMetadata << "Measure " << this->GetGlmDesign()->GetMeasure() << std::endl;
+  fMetadata << "Smoothness " << this->GetGlmDesign()->GetSmoothness()
+            << std::endl;
 
   // We only support the two factors of each kind, so get the vectors
   // and just write the first and second ones if they are present.
-  vector<QdecFactor *> const &lDiscreteFactors =
+  std::vector<QdecFactor *> const &lDiscreteFactors =
       this->GetGlmDesign()->GetDiscreteFactors();
   if (lDiscreteFactors.size() > 0)
     fMetadata << "DiscreteFactor1 " << lDiscreteFactors[0]->GetFactorName()
-              << endl;
+              << std::endl;
   if (lDiscreteFactors.size() > 1)
     fMetadata << "DiscreteFactor2 " << lDiscreteFactors[1]->GetFactorName()
-              << endl;
+              << std::endl;
 
-  vector<QdecFactor *> const &lContinuousFactors =
+  std::vector<QdecFactor *> const &lContinuousFactors =
       this->GetGlmDesign()->GetContinuousFactors();
   if (lContinuousFactors.size() > 0)
     fMetadata << "ContinuousFactor1 " << lContinuousFactors[0]->GetFactorName()
-              << endl;
+              << std::endl;
   if (lContinuousFactors.size() > 1)
     fMetadata << "ContinuousFactor2 " << lContinuousFactors[1]->GetFactorName()
-              << endl;
+              << std::endl;
 
   fMetadata.close();
 
@@ -537,7 +540,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
   // destination location with the .qdec filename.
   this->FormatCommandString(fnProject.c_str(), fnExpandedProjectBase.c_str(),
                             ifnDataDir, msZipCommandFormat.c_str(), sCommand);
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -549,7 +552,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
 
   // Delete the temp directory.
   sCommand = "rm -rf " + fnExpandedProjectDir;
-  cout << sCommand << endl;
+  std::cout << sCommand << std::endl;
   rSystem = system(sCommand.c_str());
   if (0 != rSystem) {
     fprintf(stderr,
@@ -559,7 +562,7 @@ int QdecProject::SaveProjectFile(const char *ifnProject,
     return -1;
   }
 
-  cout << "Saving project file done.\n";
+  std::cout << "Saving project file done.\n";
 
   return 0;
 }
@@ -593,11 +596,11 @@ int QdecProject::LoadDataTable(const char *isFileName) {
   if (this->mDataTable)
     delete this->mDataTable;
   this->mDataTable = new QdecDataTable();
-  int ret = 0;
+  int ret          = 0;
   try {
     ret = this->mDataTable->Load(isFileName, subjectsDir);
-  } catch (exception &e) {
-    cerr << e.what() << endl;
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
     exit(1); // shutdown the whole shootin' match
   }
   if (ret)
@@ -628,13 +631,13 @@ int QdecProject::LoadDataTable(const char *isFileName) {
  */
 int QdecProject::VerifySubjects() {
   fprintf(stdout, "Verifying subject data");
-  int errs = 0;
-  vector<QdecSubject *> theSubjects = this->mDataTable->GetSubjects();
+  int                        errs        = 0;
+  std::vector<QdecSubject *> theSubjects = this->mDataTable->GetSubjects();
   for (unsigned int i = 0; i < theSubjects.size(); i++) {
     fprintf(stdout, ".");
     fflush(stdout);
-    string id = theSubjects[i]->GetId();
-    string sCommand =
+    std::string id = theSubjects[i]->GetId();
+    std::string sCommand =
         "ls " + this->GetSubjectsDir() + "/" + id + " >& /dev/null";
     int rSystem = system(sCommand.c_str());
     if (0 != rSystem) {
@@ -690,7 +693,7 @@ QdecDataTable *QdecProject::GetDataTable() { return this->mDataTable; }
 /**
  * @return string
  */
-string QdecProject::GetSubjectsDir() {
+std::string QdecProject::GetSubjectsDir() {
   return this->mGlmDesign->GetSubjectsDir();
 }
 
@@ -704,7 +707,7 @@ int QdecProject::SetSubjectsDir(const char *ifnSubjectsDir) {
 /**
  * @return string
  */
-string QdecProject::GetAverageSubject() {
+std::string QdecProject::GetAverageSubject() {
   return this->mGlmDesign->GetAverageSubject();
 }
 
@@ -718,14 +721,14 @@ void QdecProject::SetAverageSubject(const char *isSubjectName) {
 /**
  * @return string
  */
-string QdecProject::GetDefaultWorkingDir() {
+std::string QdecProject::GetDefaultWorkingDir() {
   return this->mGlmDesign->GetDefaultWorkingDir();
 }
 
 /**
  * @return string
  */
-string QdecProject::GetWorkingDir() {
+std::string QdecProject::GetWorkingDir() {
   return this->mGlmDesign->GetWorkingDir();
 }
 
@@ -740,28 +743,28 @@ int QdecProject::SetWorkingDir(const char *isWorkingDir) {
 /**
  * @return vector< string >
  */
-vector<string> QdecProject::GetSubjectIDs() {
+std::vector<std::string> QdecProject::GetSubjectIDs() {
   return this->mDataTable->GetSubjectIDs();
 }
 
 /**
  * @return vector< string >
  */
-vector<string> QdecProject::GetDiscreteFactorNames() {
+std::vector<std::string> QdecProject::GetDiscreteFactorNames() {
   return this->mDataTable->GetDiscreteFactorNames();
 }
 
 /**
  * @return vector< string >
  */
-vector<string> QdecProject::GetContinousFactorNames() {
+std::vector<std::string> QdecProject::GetContinousFactorNames() {
   return this->mDataTable->GetContinuousFactorNames();
 }
 
 /**
  * @return string
  */
-string QdecProject::GetHemi() { return this->mGlmDesign->GetHemi(); }
+std::string QdecProject::GetHemi() { return this->mGlmDesign->GetHemi(); }
 
 /**
  * From the given design parameters, this creates the input data required by
@@ -846,11 +849,11 @@ int QdecProject::CreateGlmDesign(
  * @param  isMeasure
  * @param  iProgressUpdateGUI
  */
-int QdecProject::CreateGlmDesign(const char *isName,
-                                 const char *isFirstDiscreteFactor,
-                                 const char *isSecondDiscreteFactor,
-                                 const char *isFirstContinuousFactor,
-                                 const char *isSecondContinuousFactor,
+int QdecProject::CreateGlmDesign(const char * isName,
+                                 const char * isFirstDiscreteFactor,
+                                 const char * isSecondDiscreteFactor,
+                                 const char * isFirstContinuousFactor,
+                                 const char * isSecondContinuousFactor,
                                  const char **isNuisanceFactors,
                                  int iNumNuisanceFactors, const char *isMeasure,
                                  ProgressUpdateGUI *iProgressUpdateGUI) {
@@ -914,13 +917,13 @@ QdecGlmFitResults *QdecProject::GetGlmFitResults() {
  */
 int QdecProject::GenerateMappedLabelForAllSubjects(
     const char *ifnLabel, ProgressUpdateGUI *iProgressUpdateGUI) {
-  vector<string> subjects = this->GetSubjectIDs();
-  int numSubjects = this->GetSubjectIDs().size();
-  float stepIncrement = 100.0 / numSubjects - 1;
-  int nStep = 1;
+  std::vector<std::string> subjects      = this->GetSubjectIDs();
+  int                      numSubjects   = this->GetSubjectIDs().size();
+  float                    stepIncrement = 100.0 / numSubjects - 1;
+  int                      nStep         = 1;
 
   if (0 == numSubjects)
-    throw runtime_error("Zero subjects! Cannot run mri_label2label\n");
+    throw std::runtime_error("Zero subjects! Cannot run mri_label2label\n");
 
   if (iProgressUpdateGUI) {
     iProgressUpdateGUI->BeginActionWithProgress("Running mri_label2label...");
@@ -928,7 +931,7 @@ int QdecProject::GenerateMappedLabelForAllSubjects(
 
   for (int i = 0; i < numSubjects; i++) {
     // build a command line for this subject
-    stringstream ssCommand;
+    std::stringstream ssCommand;
     ssCommand << "mri_label2label"
               << " --srclabel " << ifnLabel << " --srcsubject "
               << this->GetAverageSubject() << " --trgsubject " << subjects[i]
@@ -937,7 +940,7 @@ int QdecProject::GenerateMappedLabelForAllSubjects(
 
     // Now run the command.
     if (iProgressUpdateGUI) {
-      string status = "Running mri_label2label on subject '";
+      std::string status = "Running mri_label2label on subject '";
       status += subjects[i];
       status += "'...";
       iProgressUpdateGUI->UpdateProgressMessage(status.c_str());
@@ -950,9 +953,9 @@ int QdecProject::GenerateMappedLabelForAllSubjects(
     fflush(stderr);
     int rRun = system(sCommand);
     if (-1 == rRun)
-      throw runtime_error("system call failed: " + ssCommand.str());
+      throw std::runtime_error("system call failed: " + ssCommand.str());
     if (rRun > 0)
-      throw runtime_error("command failed: " + ssCommand.str());
+      throw std::runtime_error("command failed: " + ssCommand.str());
     free(sCommand);
   }
 
@@ -976,11 +979,11 @@ const char *QdecProject::GetMetadataFileName() const {
   return fnMetadata;
 }
 
-void QdecProject::FormatCommandString(const char *ifnProject,
-                                      const char *isExpandedProjectBaseName,
-                                      const char *isWorkingDir,
-                                      const char *isFormat,
-                                      string &iosCommand) const {
+void QdecProject::FormatCommandString(const char * ifnProject,
+                                      const char * isExpandedProjectBaseName,
+                                      const char * isWorkingDir,
+                                      const char * isFormat,
+                                      std::string &iosCommand) const {
   assert(ifnProject);
   assert(isExpandedProjectBaseName);
   assert(isWorkingDir);
@@ -990,12 +993,12 @@ void QdecProject::FormatCommandString(const char *ifnProject,
   iosCommand = isFormat;
 
   // Make our substitutions.
-  string::size_type n;
-  while (string::npos != (n = iosCommand.find("%1")))
+  std::string::size_type n;
+  while (std::string::npos != (n = iosCommand.find("%1")))
     iosCommand.replace(n, 2, ifnProject);
-  while (string::npos != (n = iosCommand.find("%2")))
+  while (std::string::npos != (n = iosCommand.find("%2")))
     iosCommand.replace(n, 2, isExpandedProjectBaseName);
-  while (string::npos != (n = iosCommand.find("%3")))
+  while (std::string::npos != (n = iosCommand.find("%3")))
     iosCommand.replace(n, 2, isWorkingDir);
 }
 
@@ -1009,34 +1012,34 @@ void QdecProject::FormatCommandString(const char *ifnProject,
  *
  * @return vector< string >
  */
-vector<string> QdecProject::CreateStatsDataTables() {
+std::vector<std::string> QdecProject::CreateStatsDataTables() {
   // to be returned with names of stats data categories (files) created
-  vector<string> statsDataNames;
+  std::vector<std::string> statsDataNames;
 
   if (!this->HaveDataTable())
     return statsDataNames;
 
-  vector<string> subjects = this->GetSubjectIDs();
-  int numSubjects = this->GetSubjectIDs().size();
+  std::vector<std::string> subjects    = this->GetSubjectIDs();
+  int                      numSubjects = this->GetSubjectIDs().size();
 
   if (0 == numSubjects)
-    throw runtime_error("Zero subjects! Cannot run asegstats2table\n");
+    throw std::runtime_error("Zero subjects! Cannot run asegstats2table\n");
 
   // Make the sure the storage dir (/stats_tables) exists
   {
-    string sCommand = "mkdir -p " + this->msStatsDataTablesDir;
-    cout << sCommand << endl;
+    std::string sCommand = "mkdir -p " + this->msStatsDataTablesDir;
+    std::cout << sCommand << std::endl;
     int rRun = system(sCommand.c_str());
     if (-1 == rRun)
-      throw runtime_error("system call failed: " + sCommand);
+      throw std::runtime_error("system call failed: " + sCommand);
     if (rRun > 0)
-      throw runtime_error("command failed: " + sCommand);
+      throw std::runtime_error("command failed: " + sCommand);
   }
 
   /*
    * start by running asegstats2table
    */
-  vector<string> segs;
+  std::vector<std::string> segs;
   segs.push_back("aseg");
   if (nullptr == getenv("QDEC_SKIP_WMPARC_STAT")) {
     segs.push_back("wmparc");
@@ -1045,9 +1048,9 @@ vector<string> QdecProject::CreateStatsDataTables() {
   unsigned int s;
   for (s = 0; s < segs.size(); s++) {
     // build a command line
-    stringstream name;
+    std::stringstream name;
     name << segs[s] << ".volume";
-    stringstream ssCommand;
+    std::stringstream ssCommand;
     ssCommand << "asegstats2table --common-segs --meas volume --tablefile "
               << this->msStatsDataTablesDir << name.str() << ".stats.dat "
               << "--statsfile=" << segs[s] << ".stats "
@@ -1064,9 +1067,9 @@ vector<string> QdecProject::CreateStatsDataTables() {
     fflush(stderr);
     int rRun = system(sCommand);
     if (-1 == rRun)
-      throw runtime_error("system call failed: " + ssCommand.str());
+      throw std::runtime_error("system call failed: " + ssCommand.str());
     if (rRun > 0)
-      throw runtime_error("command failed: " + ssCommand.str());
+      throw std::runtime_error("command failed: " + ssCommand.str());
     free(sCommand);
 
     // save the name of this file
@@ -1077,9 +1080,9 @@ vector<string> QdecProject::CreateStatsDataTables() {
    * now the variants of aparctats2table
    */
 
-  vector<string> hemi;
-  vector<string> parc;
-  vector<string> meas;
+  std::vector<std::string> hemi;
+  std::vector<std::string> parc;
+  std::vector<std::string> meas;
   hemi.push_back("lh");
   hemi.push_back("rh");
   parc.push_back("aparc");
@@ -1096,11 +1099,11 @@ vector<string> QdecProject::CreateStatsDataTables() {
       for (m = 0; m < meas.size(); m++) // for each measure
       {
         // construct name of output file
-        stringstream ssFname;
+        std::stringstream ssFname;
         ssFname << hemi[h] << "." << parc[p] << "." << meas[m];
 
         // build a command line
-        stringstream ssCommand;
+        std::stringstream ssCommand;
         ssCommand << "aparcstats2table"
                   << " --hemi " << hemi[h] << " --parc " << parc[p]
                   << " --meas " << meas[m] << " --tablefile "
@@ -1133,7 +1136,8 @@ vector<string> QdecProject::CreateStatsDataTables() {
     }
   }
 
-  cout << "Completed creation of aseg and aparc stats data tables." << endl;
+  std::cout << "Completed creation of aseg and aparc stats data tables."
+            << std::endl;
 
   return statsDataNames;
 }
@@ -1148,39 +1152,39 @@ vector<string> QdecProject::CreateStatsDataTables() {
  * @param  isSign - one of: abs, pos, neg
  * @param  isContrast - name of contrast from which to use sig.mgh
  */
-int QdecProject::RunMonteCarloSimulation(const char *isThreshold,
-                                         const char *isSign,
-                                         const char *isContrast,
+int QdecProject::RunMonteCarloSimulation(const char * isThreshold,
+                                         const char * isSign,
+                                         const char * isContrast,
                                          const char **osClusterSigFileName) {
-  stringstream ssWorkDir;
+  std::stringstream ssWorkDir;
   ssWorkDir << this->GetDefaultWorkingDir() << "/"
             << this->GetGlmDesign()->GetName().c_str();
   char *sWorkDir = strdup(ssWorkDir.str().c_str());
 
   // read fwhm.dat file, extract the value from it, and round up
-  float fwhm = 0;
-  stringstream fnFwhm;
+  float             fwhm = 0;
+  std::stringstream fnFwhm;
   fnFwhm << sWorkDir << "/fwhm.dat";
-  ifstream ifsFwhmFile(fnFwhm.str().c_str(), ios::in);
+  std::ifstream ifsFwhmFile(fnFwhm.str().c_str(), std::ios::in);
   if (ifsFwhmFile.good()) {
     char tmpstr[1000];
     ifsFwhmFile.getline(tmpstr, 1000);
-    cout << "fwhm.dat: " << tmpstr;
+    std::cout << "fwhm.dat: " << tmpstr;
     sscanf(tmpstr, "%f", &fwhm);
     fwhm = ceil(fwhm);
-    cout << ", rounded to " << fwhm << endl;
+    std::cout << ", rounded to " << fwhm << std::endl;
   } else {
-    cout << "ERROR: could not open " << fnFwhm.str().c_str() << endl;
+    std::cout << "ERROR: could not open " << fnFwhm.str().c_str() << std::endl;
     return 1;
   }
   if ((fwhm < 1) || (fwhm > 30)) {
-    cout << "ERROR: fwhm out-of-range (< 1 or > 30)!" << endl;
+    std::cout << "ERROR: fwhm out-of-range (< 1 or > 30)!" << std::endl;
     return 1;
   }
 
   // build mri_surfcluster command line
-  stringstream ssCommand;
-  stringstream ssClusterSigFileName;
+  std::stringstream ssCommand;
+  std::stringstream ssClusterSigFileName;
   ssClusterSigFileName << sWorkDir << "/" << isContrast << "/mc-z." << isSign
                        << "." << isThreshold << ".sig.cluster.mgh";
   ssCommand << "mri_surfcluster"
@@ -1214,15 +1218,15 @@ int QdecProject::RunMonteCarloSimulation(const char *isThreshold,
   free(sCommand);
 
   if (rRun) {
-    cout << "\nERROR!\n" << endl;
+    std::cout << "\nERROR!\n" << std::endl;
   } else {
     // print cluster summary
-    stringstream ssCat;
+    std::stringstream ssCat;
     ssCat << "cat " << sWorkDir << "/" << isContrast << "/mc-z." << isSign
           << "." << isThreshold << ".sig.cluster.summary";
     system(ssCat.str().c_str());
 
-    cout << "\nSimulation complete.\n" << endl;
+    std::cout << "\nSimulation complete.\n" << std::endl;
 
     // save path to results sig file
     if (osClusterSigFileName) {

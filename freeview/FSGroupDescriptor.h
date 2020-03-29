@@ -26,31 +26,31 @@
 #ifndef FSGroupDescriptor_h
 #define FSGroupDescriptor_h
 
+#include <QColor>
+#include <QMap>
 #include <QObject>
 #include <QStringList>
-#include <QMap>
-#include <QColor>
 
 #include "fsgdf.h"
 
 class FSVolume;
 
 struct FSGDDataItem {
-  QString subject_id;
-  int class_id;
+  QString       subject_id;
+  int           class_id;
   QList<double> variable_values;
-  double measurement;
+  double        measurement;
 };
 
 struct FSGDVariable {
   QString label;
-  double range[2];
+  double  range[2];
 };
 
 struct FSGDClass {
   QString label;
   QString marker;
-  QColor color;
+  QColor  color;
 };
 
 class FSGroupDescriptor : public QObject {
@@ -63,16 +63,16 @@ public:
 
   void UpdateData(int nVertex);
 
-  FSGD *m_fsgd;
-  double m_dXStart;
-  double m_dXDelta;
-  QList<FSGDClass> m_classes;
+  FSGD *              m_fsgd;
+  double              m_dXStart;
+  double              m_dXDelta;
+  QList<FSGDClass>    m_classes;
   QList<FSGDVariable> m_variables;
   QList<FSGDDataItem> m_data;
-  int m_nVertexNum;
-  QString m_title;
-  QString m_measureName;
-  double m_dMeasurementRange[2];
+  int                 m_nVertexNum;
+  QString             m_title;
+  QString             m_measureName;
+  double              m_dMeasurementRange[2];
 };
 
 #endif

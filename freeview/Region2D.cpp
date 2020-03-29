@@ -25,10 +25,10 @@
 
 #include "Region2D.h"
 #include "RenderView2D.h"
+#include <QApplication>
+#include <QClipboard>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
-#include <QClipboard>
-#include <QApplication>
 
 Region2D::Region2D(RenderView2D *view) : QObject(view), m_view(view) {
   m_actorText = vtkSmartPointer<vtkTextActor>::New();

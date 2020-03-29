@@ -56,7 +56,7 @@ public:
 
   virtual void Append2DProps(vtkRenderer *renderer, int nPlane);
   virtual void Append3DProps(vtkRenderer *renderer,
-                             bool *bSliceVisibility = NULL);
+                             bool *       bSliceVisibility = NULL);
 
   bool HasProp(vtkProp *prop);
 
@@ -95,20 +95,20 @@ public:
 public slots:
 
   virtual void SetModified();
-  void UpdateOpacity();
-  void UpdateColorMap();
-  void UpdateThreshold();
-  void SetMappedSurface(LayerSurface *s);
-  void OnUpdateLabelRequested();
-  void EditVertex(int nvo, bool bAdd);
-  void EditVertex(const QVector<int> list_nvo, bool bAdd);
-  void Dilate(int nTimes = 1);
-  void Erode(int nTimes = 1);
-  void Open(int nTimes = 1);
-  void Close(int nTimes = 1);
-  void Resample();
-  void Clear();
-  void OnSurfaceDestroyed(QObject *obj);
+  void         UpdateOpacity();
+  void         UpdateColorMap();
+  void         UpdateThreshold();
+  void         SetMappedSurface(LayerSurface *s);
+  void         OnUpdateLabelRequested();
+  void         EditVertex(int nvo, bool bAdd);
+  void         EditVertex(const QVector<int> list_nvo, bool bAdd);
+  void         Dilate(int nTimes = 1);
+  void         Erode(int nTimes = 1);
+  void         Open(int nTimes = 1);
+  void         Close(int nTimes = 1);
+  void         Resample();
+  void         Clear();
+  void         OnSurfaceDestroyed(QObject *obj);
 
 protected slots:
   void OnBaseVoxelEdited(const QVector<int> &voxel_list, bool bAdd);
@@ -125,16 +125,16 @@ protected:
   virtual void OnSlicePositionChanged(int nPlane);
 
   // Pipeline ------------------------------------------------------------
-  vtkSmartPointer<vtkImageReslice> mReslice[3];
+  vtkSmartPointer<vtkImageReslice>     mReslice[3];
   vtkSmartPointer<vtkImageMapToColors> mColorMap[3];
 
-  LayerMRI *m_layerSource;
-  FSLabel *m_label;
+  LayerMRI *    m_layerSource;
+  FSLabel *     m_label;
   LayerSurface *m_layerMappedSurface;
 
   vtkImageActor *m_sliceActor2D[3];
   vtkImageActor *m_sliceActor3D[3];
-  int *m_nVertexCache;
+  int *          m_nVertexCache;
 };
 
 #endif

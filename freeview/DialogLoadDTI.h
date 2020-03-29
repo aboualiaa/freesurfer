@@ -57,7 +57,7 @@ protected slots:
 
 private:
   Ui::DialogLoadDTI *ui;
-  QString m_strLastDir;
+  QString            m_strLastDir;
 };
 
 #endif // DIALOGLOADDTI_H

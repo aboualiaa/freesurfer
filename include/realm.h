@@ -59,17 +59,17 @@
 #include "mrisurf.h"
 #else
 typedef struct VERTEX VERTEX;
-typedef struct MRIS MRIS;
+typedef struct MRIS   MRIS;
 #endif
 
-using RealmTree = struct RealmTree;
+using RealmTree           = struct RealmTree;
 using GetXYZ_FunctionType = void (*)(const VERTEX *, float *, float *, float *);
 void freeRealmTree(RealmTree **realmTreePtr);
-RealmTree *makeRealmTree(
-    MRIS const *mris,
-    GetXYZ_FunctionType getXYZ // This lets realms be on x,y,z,
-                               // origx,origy,origz, or anything else...
-);
+RealmTree *
+    makeRealmTree(MRIS const *        mris,
+                  GetXYZ_FunctionType getXYZ // This lets realms be on x,y,z,
+                  // origx,origy,origz, or anything else...
+    );
 int checkRealmTree(RealmTree const *realmTree, MRIS const *mris,
                    GetXYZ_FunctionType getXYZ);
 //
@@ -89,7 +89,7 @@ void getRealmTreeBnds(RealmTree *realmTree, float *xLo, float *xHi, float *yLo,
                       float *yHi, float *zLo, float *zHi);
 
 using Realm = struct Realm;
-void freeRealm(Realm **realmPtr);
+void   freeRealm(Realm **realmPtr);
 Realm *makeRealm(RealmTree const *realmTree, float xLo, float xHi, float yLo,
                  float yHi, float zLo, float zHi);
 //
@@ -98,7 +98,7 @@ Realm *makeRealm(RealmTree const *realmTree, float xLo, float xHi, float yLo,
 
 typedef struct RealmIterator { // can be assigned safely
   unsigned long i;
-  void *p;
+  void *        p;
 } RealmIterator;
 void initRealmIterator(RealmIterator *realmIterator, Realm *realm);
 // no fini needed
@@ -124,11 +124,11 @@ void summarizeRealmTreeVno(RealmTree const *realmTree, int vno);
 //
 using GreatArcSet = struct GreatArcSet;
 
-void freeGreatArcSet(GreatArcSet **setPtr);
+void         freeGreatArcSet(GreatArcSet **setPtr);
 GreatArcSet *makeGreatArcSet(MRIS *mris);
 
 void insertGreatArc(GreatArcSet *set,
-                    int key, // key must not be in the set already
+                    int          key, // key must not be in the set already
                     int vno0, int vno1);
 
 void possiblyIntersectingGreatArcs(

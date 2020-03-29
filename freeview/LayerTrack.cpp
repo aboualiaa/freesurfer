@@ -23,24 +23,24 @@
  */
 #include "LayerTrack.h"
 #include "FSTrack.h"
-#include "LayerMRI.h"
 #include "FSVolume.h"
+#include "LayerMRI.h"
 #include "LayerPropertyTrack.h"
-#include <QFileInfo>
-#include <QDir>
+#include "MyUtils.h"
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
 #include <vtkActor.h>
-#include <vtkPolyData.h>
 #include <vtkCellArray.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkSmartPointer.h>
+#include <vtkPointData.h>
 #include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
 #include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
 #include <vtkTubeFilter.h>
 #include <vtkUnsignedCharArray.h>
-#include <vtkPointData.h>
-#include <vtkProperty.h>
-#include "MyUtils.h"
 
 LayerTrack::LayerTrack(LayerMRI *ref, QObject *parent, bool bCluster)
     : Layer(parent), m_trackData(0), m_layerMRIRef(ref) {
@@ -82,7 +82,8 @@ bool LayerTrack::LoadTrackFromFiles() {
   if (!m_trackData->LoadFromFiles(m_listFilenames)) {
     delete m_trackData;
     m_trackData = 0;
-    cerr << "Failed to load from file " << qPrintable(m_sFilename) << endl;
+    std::cerr << "Failed to load from file " << qPrintable(m_sFilename)
+              << std::endl;
     return false;
   }
   if (IsCluster())
@@ -100,12 +101,12 @@ bool LayerTrack::LoadTrackFromFiles() {
 
   double dval[6];
   m_trackData->GetRASBounds(dval);
-  m_dWorldOrigin[0] = dval[0];
-  m_dWorldOrigin[1] = dval[2];
-  m_dWorldOrigin[2] = dval[4];
-  m_dWorldSize[0] = dval[1] - dval[0];
-  m_dWorldSize[1] = dval[3] - dval[2];
-  m_dWorldSize[2] = dval[5] - dval[4];
+  m_dWorldOrigin[0]    = dval[0];
+  m_dWorldOrigin[1]    = dval[2];
+  m_dWorldOrigin[2]    = dval[4];
+  m_dWorldSize[0]      = dval[1] - dval[0];
+  m_dWorldSize[1]      = dval[3] - dval[2];
+  m_dWorldSize[2]      = dval[5] - dval[4];
   m_dWorldVoxelSize[0] = m_trackData->m_dVoxelSize[0];
   m_dWorldVoxelSize[1] = m_trackData->m_dVoxelSize[1];
   m_dWorldVoxelSize[2] = m_trackData->m_dVoxelSize[2];
@@ -140,15 +141,15 @@ void LayerTrack::RebuildActors() {
     actor->Delete();
   m_actors.clear();
 
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
   vtkSmartPointer<vtkUnsignedCharArray> scalars =
       vtkSmartPointer<vtkUnsignedCharArray>::New();
   scalars->SetNumberOfComponents(4);
-  int nLimit = 1000000;
-  int nCount = 0;
-  float vals[4] = {0, 0, 0, 255};
-  LayerPropertyTrack *p = GetProperty();
+  int                 nLimit  = 1000000;
+  int                 nCount  = 0;
+  float               vals[4] = {0, 0, 0, 255};
+  LayerPropertyTrack *p       = GetProperty();
   for (int i = 0; i < m_trackData->m_tracks.size(); i++) {
     Track &t = m_trackData->m_tracks[i];
     lines->InsertNextCell(t.nNum);
@@ -180,8 +181,8 @@ void LayerTrack::RebuildActors() {
     if (nCount > nLimit) {
       vtkActor *actor = ConstructActor(points, lines, scalars);
       m_actors << actor;
-      points = vtkSmartPointer<vtkPoints>::New();
-      lines = vtkSmartPointer<vtkCellArray>::New();
+      points  = vtkSmartPointer<vtkPoints>::New();
+      lines   = vtkSmartPointer<vtkCellArray>::New();
       scalars = vtkSmartPointer<vtkUnsignedCharArray>::New();
       scalars->SetNumberOfComponents(4);
       nCount = 0;
@@ -198,7 +199,7 @@ void LayerTrack::RebuildActors() {
 }
 
 void LayerTrack::UpdateColor(bool emitSignal) {
-  QColor qc = GetProperty()->GetSolidColor();
+  QColor qc   = GetProperty()->GetSolidColor();
   double c[3] = {qc.redF(), qc.greenF(), qc.blueF()};
   foreach (vtkActor *actor, m_actors) {
     actor->GetProperty()->SetColor(c);
@@ -215,28 +216,28 @@ void LayerTrack::VectorToColor(float *pt1, float *pt2, float *c_out,
   MyUtils::GetVector(pt1, pt2, v);
   switch (nMappingType) {
   case LayerPropertyTrack::RBG:
-    t = v[1];
+    t    = v[1];
     v[1] = v[2];
     v[2] = t;
     break;
   case LayerPropertyTrack::GBR:
-    t = v[0];
+    t    = v[0];
     v[0] = v[1];
     v[1] = v[2];
     v[2] = t;
     break;
   case LayerPropertyTrack::GRB:
-    t = v[0];
+    t    = v[0];
     v[0] = v[1];
     v[1] = t;
     break;
   case LayerPropertyTrack::BGR:
-    t = v[0];
+    t    = v[0];
     v[0] = v[2];
     v[2] = t;
     break;
   case LayerPropertyTrack::BRG:
-    t = v[2];
+    t    = v[2];
     v[2] = v[1];
     v[1] = v[0];
     v[0] = t;

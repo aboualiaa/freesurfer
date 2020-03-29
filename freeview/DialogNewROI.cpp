@@ -22,10 +22,10 @@
  *
  */
 #include "DialogNewROI.h"
-#include "ui_DialogNewROI.h"
 #include "LayerCollection.h"
 #include "LayerMRI.h"
 #include "MainWindow.h"
+#include "ui_DialogNewROI.h"
 #include <QMessageBox>
 
 DialogNewROI::DialogNewROI(QWidget *parent)
@@ -35,7 +35,7 @@ DialogNewROI::DialogNewROI(QWidget *parent)
   LayerCollection *col_mri =
       MainWindow::GetMainWindow()->GetLayerCollection("MRI");
   QList<Layer *> layers = col_mri->GetLayers();
-  int nSel = 0;
+  int            nSel   = 0;
   for (int i = 0; i < layers.size(); i++) {
     ui->comboBoxTemplate->addItem(layers[i]->GetName(),
                                   QVariant::fromValue((QObject *)layers[i]));

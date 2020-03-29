@@ -13,10 +13,10 @@ namespace FragmentProcessor {
 class CalculateMinLogLikelihood {
 public:
   CalculateMinLogLikelihood() {
-    m_SourcePointer = 0;
-    m_Mesh = 0;
+    m_SourcePointer    = 0;
+    m_Mesh             = 0;
     m_MinLogLikelihood = 0.0f;
-    m_mapCompToComp = 0;
+    m_mapCompToComp    = 0;
   }
 
   ~CalculateMinLogLikelihood(){};
@@ -124,8 +124,8 @@ public:
   /** Standard class typedefs */
   typedef AtlasMeshMinLogLikelihoodCalculator Self;
   typedef AtlasMeshRasterizor<FragmentProcessor::CalculateMinLogLikelihood>
-      Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+                                        Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -136,7 +136,7 @@ public:
 
   /** Some typedefs */
   typedef Superclass::FragmentProcessorType FragmentProcessorType;
-  typedef Superclass::LabelImageType LabelImageType;
+  typedef Superclass::LabelImageType        LabelImageType;
 
   /** */
   float GetMinLogLikelihood() const {

@@ -72,7 +72,7 @@ struct Q_JSONRPC_EXPORT QJsonParseError {
 
   QString errorString() const;
 
-  int offset;
+  int        offset;
   ParseError error;
 };
 
@@ -98,19 +98,19 @@ public:
 
   static QJsonDocument fromRawData(const char *data, int size,
                                    DataValidation validation = Validate);
-  const char *rawData(int *size) const;
+  const char *         rawData(int *size) const;
 
   static QJsonDocument fromBinaryData(const QByteArray &data,
-                                      DataValidation validation = Validate);
-  QByteArray toBinaryData() const;
+                                      DataValidation    validation = Validate);
+  QByteArray           toBinaryData() const;
 
   static QJsonDocument fromVariant(const QVariant &variant);
-  QVariant toVariant() const;
+  QVariant             toVariant() const;
 
   enum JsonFormat { Indented, Compact };
 
   static QJsonDocument fromJson(const QByteArray &json,
-                                QJsonParseError *error = 0);
+                                QJsonParseError * error = 0);
 
 #ifdef Q_QDOC
   QByteArray toJson(JsonFormat format = Indented) const;
@@ -124,7 +124,7 @@ public:
   bool isObject() const;
 
   QJsonObject object() const;
-  QJsonArray array() const;
+  QJsonArray  array() const;
 
   void setObject(const QJsonObject &object);
   void setArray(const QJsonArray &array);

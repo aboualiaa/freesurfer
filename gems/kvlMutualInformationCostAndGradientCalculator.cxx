@@ -1,7 +1,7 @@
 #include "kvlMutualInformationCostAndGradientCalculator.h"
 
-#include <itkMath.h>
 #include "kvlTetrahedronInteriorConstIterator.h"
+#include <itkMath.h>
 
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
@@ -15,7 +15,7 @@ namespace kvl {
 MutualInformationCostAndGradientCalculator ::
     MutualInformationCostAndGradientCalculator() {
 
-  m_Histogrammer = Histogrammer::New();
+  m_Histogrammer   = Histogrammer::New();
   m_NumberOfVoxels = 0.0;
 
   // this->SetNumberOfThreads( 1 );
@@ -52,7 +52,7 @@ void MutualInformationCostAndGradientCalculator ::Rasterize(
   m_Histogrammer->SetConditionalIntensityDistributions(
       conditionalIntensityDistributions);
   const int maximumNumberOfIterations = 10; // 10;
-  double minLogLikelihood = itk::NumericTraits<double>::max();
+  double    minLogLikelihood          = itk::NumericTraits<double>::max();
   for (int iterationNumber = 0; iterationNumber < maximumNumberOfIterations;
        iterationNumber++) {
     // E-step
@@ -127,7 +127,7 @@ void MutualInformationCostAndGradientCalculator ::Rasterize(
   }
 
   const Histogrammer::HistogramType &histogram = m_Histogrammer->GetHistogram();
-  double negativeMutualInformation = 0.0;
+  double                             negativeMutualInformation = 0.0;
   std::vector<double> marginalIntensityDistribution(numberOfBins, 0.0);
   for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
     double marginalProbabilityOfClass = 0.0;
@@ -188,7 +188,7 @@ void MutualInformationCostAndGradientCalculator ::
     }
 
     //
-    double likelihood = 1e-15;
+    double likelihood     = 1e-15;
     double xGradientBasis = 0.0;
     double yGradientBasis = 0.0;
     double zGradientBasis = 0.0;

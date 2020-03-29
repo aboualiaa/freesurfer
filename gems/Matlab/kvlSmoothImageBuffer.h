@@ -15,7 +15,7 @@ public:
   static mxArray *Smooth(const mxArray *matlabObject, const double *sigmas) {
     // Check if we can handle this type
     ImageConverter<ImageType> converter;
-    itk::Object::Pointer object = converter.Convert(matlabObject);
+    itk::Object::Pointer      object = converter.Convert(matlabObject);
     if (object == nullptr) {
       return nullptr;
     }
@@ -29,7 +29,7 @@ public:
     typedef itk::CastImageFilter<ImageType, InternalImageType> CasterType;
     typedef itk::DiscreteGaussianImageFilter<InternalImageType,
                                              InternalImageType>
-        SmootherType;
+                                                               SmootherType;
     typedef itk::CastImageFilter<InternalImageType, ImageType> BackCasterType;
 
     typename CasterType::Pointer caster = CasterType::New();
@@ -56,9 +56,9 @@ public:
 class SmoothImageBuffer : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef SmoothImageBuffer Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef SmoothImageBuffer             Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -67,7 +67,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SmoothImageBuffer, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -84,9 +85,9 @@ public:
     }
 
     // Retrieve the smoothing sigmas
-    double sigmas[3];
-    double *tmp = mxGetPr(prhs[1]);
-    const int numberOfRows = *(mxGetDimensions(prhs[1]));
+    double    sigmas[3];
+    double *  tmp             = mxGetPr(prhs[1]);
+    const int numberOfRows    = *(mxGetDimensions(prhs[1]));
     const int numberOfColumns = *(mxGetDimensions(prhs[1]) + 1);
     // std::cout << "numberOfRows: " << numberOfRows << std::endl;
     // std::cout << "numberOfColumns: " << numberOfColumns << std::endl;
@@ -130,8 +131,10 @@ public:
   }
 
 protected:
-  SmoothImageBuffer()= default;;
-  ~SmoothImageBuffer() override= default;;
+  SmoothImageBuffer() = default;
+  ;
+  ~SmoothImageBuffer() override = default;
+  ;
 
   SmoothImageBuffer(const Self &); // purposely not implemented
   void operator=(const Self &);    // purposely not implemented

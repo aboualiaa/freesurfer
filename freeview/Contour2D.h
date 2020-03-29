@@ -26,8 +26,8 @@
 #ifndef Contour2D_h
 #define Contour2D_h
 
-#include <QObject>
 #include <QColor>
+#include <QObject>
 #include <vtkSmartPointer.h>
 
 class RenderView2D;
@@ -100,24 +100,24 @@ protected:
   void DrawPatchLineOnMask(vtkImageData *image, double *ras1, double *ras2,
                            int nDrawValue);
 
-  RenderView2D *m_view;
-  int m_nPlane;
-  double m_dSliceLocation;
-  double m_dContourValue;
-  bool m_bSmooth;
+  RenderView2D *                m_view;
+  int                           m_nPlane;
+  double                        m_dSliceLocation;
+  double                        m_dContourValue;
+  bool                          m_bSmooth;
   vtkSmartPointer<vtkImageData> m_imageInput;
-  double m_dContourColor[3];
+  double                        m_dContourColor[3];
 
-  vtkSmartPointer<vtkImageActor> m_actorContour;
-  vtkSmartPointer<vtkImageThreshold> m_filterThreshold;
-  vtkSmartPointer<vtkImageReslice> m_filterResample;
+  vtkSmartPointer<vtkImageActor>            m_actorContour;
+  vtkSmartPointer<vtkImageThreshold>        m_filterThreshold;
+  vtkSmartPointer<vtkImageReslice>          m_filterResample;
   vtkSmartPointer<vtkSimpleLabelEdgeFilter> m_filterEdge;
-  vtkSmartPointer<vtkImageMapToColors> m_colormap;
-  vtkSmartPointer<vtkImageGaussianSmooth> m_filterSmooth;
-  vtkSmartPointer<vtkImageMask> m_filterMask;
-  vtkSmartPointer<vtkImageLogic> m_filterLogic;
-  vtkSmartPointer<vtkImageData> m_imageMaskAdd;    // to add pixels
-  vtkSmartPointer<vtkImageData> m_imageMaskRemove; // to remove pixels
+  vtkSmartPointer<vtkImageMapToColors>      m_colormap;
+  vtkSmartPointer<vtkImageGaussianSmooth>   m_filterSmooth;
+  vtkSmartPointer<vtkImageMask>             m_filterMask;
+  vtkSmartPointer<vtkImageLogic>            m_filterLogic;
+  vtkSmartPointer<vtkImageData>             m_imageMaskAdd; // to add pixels
+  vtkSmartPointer<vtkImageData> m_imageMaskRemove;          // to remove pixels
 };
 
 #endif

@@ -22,40 +22,40 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "timer.h"
-#include "cma.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char *Progname;
+const char * Progname;
 static char *log_fname = nullptr;
-static void usage_exit(int code);
+static void  usage_exit(int code);
 
-static int quiet = 0;
-static int spread_sheet = 0;
-static int partial_volume = 0;
-static MRI *mri_vals; /* for use in partial volume calculation */
-static int in_label = -1;
-static int out_label = -1;
+static int   quiet          = 0;
+static int   spread_sheet   = 0;
+static int   partial_volume = 0;
+static MRI * mri_vals; /* for use in partial volume calculation */
+static int   in_label     = -1;
+static int   out_label    = -1;
 static char *subject_name = nullptr;
-static int all_flag = 0;
-static int compute_pct = 0;
-static char *brain_fname = nullptr;
-static char *icv_fname = nullptr;
+static int   all_flag     = 0;
+static int   compute_pct  = 0;
+static char *brain_fname  = nullptr;
+static char *icv_fname    = nullptr;
 #define MAX_COLS 10000
-static char *col_strings[MAX_COLS];
-static int ncols = 0;
+static char * col_strings[MAX_COLS];
+static int    ncols     = 0;
 static double atlas_icv = -1;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs, msec, minutes, label, volume, seconds, i;
-  Timer start;
-  MRI *mri;
-  FILE *log_fp;
+  int    ac, nargs, msec, minutes, label, volume, seconds, i;
+  Timer  start;
+  MRI *  mri;
+  FILE * log_fp;
   double vox_volume, brain_volume;
 
   nargs = handleVersionOption(argc, argv, "mri_label_volume");
@@ -95,9 +95,9 @@ int main(int argc, char *argv[]) {
 
   // This looks like it is for debugging
   if (all_flag) {
-    int nvox;
+    int   nvox;
     float volume;
-    nvox = MRItotalVoxelsOn(mri, WM_MIN_VAL);
+    nvox   = MRItotalVoxelsOn(mri, WM_MIN_VAL);
     volume = nvox * mri->xsize * mri->ysize * mri->zsize;
     printf("total volume = %d voxels, %2.1f mm^3\n", nvox, volume);
     exit(0);
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
     fclose(log_fp);
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -285,16 +285,16 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "PV")) {
     partial_volume = 1;
-    nargs = 1;
-    mri_vals = MRIread(argv[2]);
+    nargs          = 1;
+    mri_vals       = MRIread(argv[2]);
     if (mri_vals == nullptr)
       ErrorExit(ERROR_NOFILE, "%s: could not read intensity volume %s",
                 Progname, argv[3]);
     printf("including partial volume effects in calculations\n");
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
   } else if (!stricmp(option, "atlas_icv") || !stricmp(option, "eTIV") ||
              !stricmp(option, "eTIV_matdat")) {
@@ -325,7 +325,7 @@ static int get_option(int argc, char *argv[]) {
         ErrorExit(ERROR_NOMEMORY, "%s: too many columns specified (max=%d)\n",
                   Progname, ncols);
       col_strings[ncols++] = argv[2];
-      nargs = 1;
+      nargs                = 1;
       break;
     case 'Q':
       quiet = 1;
@@ -333,27 +333,27 @@ static int get_option(int argc, char *argv[]) {
     case 'S':
       spread_sheet = 1;
       subject_name = argv[2];
-      nargs = 1;
+      nargs        = 1;
       break;
     case 'A':
       all_flag = 1;
       printf("computing volume of all non-zero voxels\n");
       break;
     case 'T':
-      in_label = atoi(argv[2]);
+      in_label  = atoi(argv[2]);
       out_label = atoi(argv[3]);
-      nargs = 2;
+      nargs     = 2;
       printf("translating label %d to label %d\n", in_label, out_label);
       break;
     case 'B':
       brain_fname = argv[2];
       compute_pct = 1;
-      nargs = 1;
+      nargs       = 1;
       printf("reading brain volume from %s...\n", brain_fname);
       break;
     case 'L':
       log_fname = argv[2];
-      nargs = 1;
+      nargs     = 1;
       /*    fprintf(stderr, "logging results to %s\n", log_fname) ;*/
       break;
     case 'P':

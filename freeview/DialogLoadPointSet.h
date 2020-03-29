@@ -48,7 +48,7 @@ protected slots:
 
 private:
   Ui::DialogLoadPointSet *ui;
-  QString m_strLastDir;
+  QString                 m_strLastDir;
 };
 
 #endif // DIALOGLOADPOINTSET_H

@@ -28,23 +28,23 @@
  *
  */
 
-#include <assert.h>
 #include "LayerPropertyMRI.h"
-#include "vtkFreesurferLookupTable.h"
-#include "vtkRGBAColorTransferFunction.h"
-#include "vtkLookupTable.h"
-#include "vtkImageReslice.h"
-#include "vtkPointData.h"
-#include "vtkImageData.h"
 #include "FSVolume.h"
 #include "LayerMRI.h"
 #include "StockColorMap.h"
-#include <QtGlobal>
+#include "vtkFreesurferLookupTable.h"
+#include "vtkImageData.h"
+#include "vtkImageReslice.h"
+#include "vtkLookupTable.h"
+#include "vtkPointData.h"
+#include "vtkRGBAColorTransferFunction.h"
+#include <QDebug>
 #include <QSettings>
 #include <QVariantMap>
-#include <QDebug>
+#include <QtGlobal>
+#include <assert.h>
 
-// using namespace std;
+//
 
 LayerPropertyMRI::LayerPropertyMRI(QObject *parent)
     : LayerProperty(parent), mColorMapType(LayerPropertyMRI::Grayscale),
@@ -72,7 +72,7 @@ LayerPropertyMRI::LayerPropertyMRI(QObject *parent)
       m_nVectorSkip(0), m_dVectorNormThreshold(0), m_colorBinary(Qt::white) {
   mGrayScaleTable = vtkSmartPointer<vtkRGBAColorTransferFunction>::New();
   mHeatScaleTable = vtkSmartPointer<vtkRGBAColorTransferFunction>::New();
-  mColorMapTable = vtkSmartPointer<vtkRGBAColorTransferFunction>::New();
+  mColorMapTable  = vtkSmartPointer<vtkRGBAColorTransferFunction>::New();
   mGrayScaleTable->ClampingOn();
   mHeatScaleTable->ClampingOn();
   mColorMapTable->ClampingOn();
@@ -81,7 +81,7 @@ LayerPropertyMRI::LayerPropertyMRI(QObject *parent)
   m_rgbContour[2] = 0.54;
 
   for (int i = 0; i < 3; i++) {
-    m_nProjectionMapRange[i * 2] = 0;
+    m_nProjectionMapRange[i * 2]     = 0;
     m_nProjectionMapRange[i * 2 + 1] = -1;
   }
 
@@ -112,35 +112,35 @@ LayerPropertyMRI::~LayerPropertyMRI() {}
 
 void LayerPropertyMRI::CopySettings(const LayerPropertyMRI *p) {
   blockSignals(true);
-  mColorMapType = p->mColorMapType;
-  mOpacity = p->mOpacity;
-  mResliceInterpolation = p->mResliceInterpolation;
-  mTextureSmoothing = p->mTextureSmoothing;
-  mMinVisibleValue = p->mMinVisibleValue;
-  mMaxVisibleValue = p->mMaxVisibleValue;
-  mMinGrayscaleWindow = p->mMinGrayscaleWindow;
-  mMaxGrayscaleWindow = p->mMaxGrayscaleWindow;
-  mHeatScaleMinThreshold = p->mHeatScaleMinThreshold;
-  mHeatScaleMidThreshold = p->mHeatScaleMidThreshold;
-  mHeatScaleMaxThreshold = p->mHeatScaleMaxThreshold;
-  mHeatScaleOffset = p->mHeatScaleOffset;
-  mbReverseHeatScale = p->mbReverseHeatScale;
+  mColorMapType                 = p->mColorMapType;
+  mOpacity                      = p->mOpacity;
+  mResliceInterpolation         = p->mResliceInterpolation;
+  mTextureSmoothing             = p->mTextureSmoothing;
+  mMinVisibleValue              = p->mMinVisibleValue;
+  mMaxVisibleValue              = p->mMaxVisibleValue;
+  mMinGrayscaleWindow           = p->mMinGrayscaleWindow;
+  mMaxGrayscaleWindow           = p->mMaxGrayscaleWindow;
+  mHeatScaleMinThreshold        = p->mHeatScaleMinThreshold;
+  mHeatScaleMidThreshold        = p->mHeatScaleMidThreshold;
+  mHeatScaleMaxThreshold        = p->mHeatScaleMaxThreshold;
+  mHeatScaleOffset              = p->mHeatScaleOffset;
+  mbReverseHeatScale            = p->mbReverseHeatScale;
   mbShowPositiveHeatScaleValues = p->mbShowPositiveHeatScaleValues;
   mbShowNegativeHeatScaleValues = p->mbShowNegativeHeatScaleValues;
-  mbClearBackground = p->mbClearBackground;
-  mClearBackgroundValue = p->mClearBackgroundValue;
-  mMinGenericThreshold = p->mMinGenericThreshold;
-  mMaxGenericThreshold = p->mMaxGenericThreshold;
-  m_bDisplayVector = p->m_bDisplayVector;
-  m_nVectorInversion = p->m_nVectorInversion;
-  m_nVectorRepresentation = p->m_nVectorRepresentation;
-  m_bHeatScaleClearHigh = p->m_bHeatScaleClearHigh;
-  m_bHeatScaleTruncate = p->m_bHeatScaleTruncate;
-  m_bHeatScaleInvert = p->m_bHeatScaleInvert;
-  m_bRememberFrameSettings = p->m_bRememberFrameSettings;
-  m_dVectorLineWidth = p->m_dVectorLineWidth;
-  m_dVectorNormThreshold = p->m_dVectorNormThreshold;
-  m_colorBinary = p->m_colorBinary;
+  mbClearBackground             = p->mbClearBackground;
+  mClearBackgroundValue         = p->mClearBackgroundValue;
+  mMinGenericThreshold          = p->mMinGenericThreshold;
+  mMaxGenericThreshold          = p->mMaxGenericThreshold;
+  m_bDisplayVector              = p->m_bDisplayVector;
+  m_nVectorInversion            = p->m_nVectorInversion;
+  m_nVectorRepresentation       = p->m_nVectorRepresentation;
+  m_bHeatScaleClearHigh         = p->m_bHeatScaleClearHigh;
+  m_bHeatScaleTruncate          = p->m_bHeatScaleTruncate;
+  m_bHeatScaleInvert            = p->m_bHeatScaleInvert;
+  m_bRememberFrameSettings      = p->m_bRememberFrameSettings;
+  m_dVectorLineWidth            = p->m_dVectorLineWidth;
+  m_dVectorNormThreshold        = p->m_dVectorNormThreshold;
+  m_colorBinary                 = p->m_colorBinary;
 
   SetLUTCTAB(p->mFreeSurferCTAB);
 
@@ -150,7 +150,7 @@ void LayerPropertyMRI::CopySettings(const LayerPropertyMRI *p) {
 }
 
 void LayerPropertyMRI::RestoreSettings(const QString &filename) {
-  QSettings settings;
+  QSettings   settings;
   QVariantMap rootmap = settings.value("VolumeProperties").toMap();
   if (!rootmap.contains(filename)) {
     return;
@@ -276,48 +276,48 @@ void LayerPropertyMRI::RestoreSettings(const QVariantMap &map) {
 }
 
 void LayerPropertyMRI::SaveSettings(const QString &filename) {
-  QSettings settings;
+  QSettings   settings;
   QVariantMap rootmap = settings.value("VolumeProperties").toMap();
-  rootmap[filename] = GetSettings();
+  rootmap[filename]   = GetSettings();
   settings.setValue("VolumeProperties", rootmap);
 }
 
 QVariantMap LayerPropertyMRI::GetSettings() {
   QVariantMap map;
-  map["MinGrayscaleWindow"] = mMinGrayscaleWindow;
-  map["MaxGrayscaleWindow"] = mMaxGrayscaleWindow;
+  map["MinGrayscaleWindow"]    = mMinGrayscaleWindow;
+  map["MaxGrayscaleWindow"]    = mMaxGrayscaleWindow;
   map["HeatScaleMinThreshold"] = mHeatScaleMinThreshold;
   map["HeatScaleMidThreshold"] = mHeatScaleMidThreshold;
   map["HeatScaleMaxThreshold"] = mHeatScaleMaxThreshold;
-  map["HeatScaleOffset"] = mHeatScaleOffset;
-  map["MinGenericThreshold"] = mMinGenericThreshold;
-  map["MaxGenericThreshold"] = mMaxGenericThreshold;
-  map["MinContourThreshold"] = mMinContourThreshold;
-  map["MaxContourThreshold"] = mMaxContourThreshold;
+  map["HeatScaleOffset"]       = mHeatScaleOffset;
+  map["MinGenericThreshold"]   = mMinGenericThreshold;
+  map["MaxGenericThreshold"]   = mMaxGenericThreshold;
+  map["MinContourThreshold"]   = mMinContourThreshold;
+  map["MaxContourThreshold"]   = mMaxContourThreshold;
   map["RememberFrameSettings"] = m_bRememberFrameSettings;
-  map["FrameSettings"] = m_frameSettings;
-  map["ClearBackground"] = mbClearBackground;
-  map["ClearBackgroundValue"] = mClearBackgroundValue;
-  map["UsePercentile"] = m_bUsePercentile;
-  map["AutoAdjustFrameLevel"] = m_bAutoAdjustFrameLevel;
+  map["FrameSettings"]         = m_frameSettings;
+  map["ClearBackground"]       = mbClearBackground;
+  map["ClearBackgroundValue"]  = mClearBackgroundValue;
+  map["UsePercentile"]         = m_bUsePercentile;
+  map["AutoAdjustFrameLevel"]  = m_bAutoAdjustFrameLevel;
   return map;
 }
 
 QVariantMap LayerPropertyMRI::GetFullSettings() {
-  QVariantMap map = GetSettings();
-  map["ColorMapType"] = mColorMapType;
+  QVariantMap map            = GetSettings();
+  map["ColorMapType"]        = mColorMapType;
   map["MinContourThreshold"] = mMinContourThreshold;
   map["MaxContourThreshold"] = mMaxContourThreshold;
 
-  map["DisplayVector"] = m_bDisplayVector;
-  map["VectorInversion"] = m_nVectorInversion;
+  map["DisplayVector"]        = m_bDisplayVector;
+  map["VectorInversion"]      = m_nVectorInversion;
   map["VectorRepresentation"] = m_nVectorRepresentation;
-  map["VectorLengthScale"] = m_dVectorDisplayScale;
-  map["VectorWidthScale"] = m_dVectorLineWidth;
-  map["VectorNormalize"] = m_bNormalizeVector;
+  map["VectorLengthScale"]    = m_dVectorDisplayScale;
+  map["VectorWidthScale"]     = m_dVectorLineWidth;
+  map["VectorNormalize"]      = m_bNormalizeVector;
 
-  map["DisplayTensor"] = m_bDisplayTensor;
-  map["TensorInversion"] = m_nTensorInversion;
+  map["DisplayTensor"]        = m_bDisplayTensor;
+  map["TensorInversion"]      = m_nTensorInversion;
   map["TensorRepresentation"] = m_nTensorRepresentation;
 
   map["Opacity"] = this->mOpacity;
@@ -370,7 +370,7 @@ void LayerPropertyMRI::RestoreFullSettings(const QVariantMap &map) {
 
 QVariantMap LayerPropertyMRI::GetActiveSettings() {
   QVariantMap map;
-  LayerMRI *mri = qobject_cast<LayerMRI *>(parent());
+  LayerMRI *  mri = qobject_cast<LayerMRI *>(parent());
   switch (mColorMapType) {
   case Grayscale:
     map["MinGrayscaleWindow"] = mMinGrayscaleWindow;
@@ -386,7 +386,7 @@ QVariantMap LayerPropertyMRI::GetActiveSettings() {
     map["HeatScaleMinThreshold"] = mHeatScaleMinThreshold;
     map["HeatScaleMidThreshold"] = mHeatScaleMidThreshold;
     map["HeatScaleMaxThreshold"] = mHeatScaleMaxThreshold;
-    map["HeatScaleOffset"] = mHeatScaleOffset;
+    map["HeatScaleOffset"]       = mHeatScaleOffset;
     if (m_bUsePercentile) {
       map["HeatScaleMinThresholdInPercentile"] =
           mri->GetHistoPercentileFromValue(mHeatScaleMinThreshold);
@@ -521,14 +521,14 @@ void LayerPropertyMRI::OnColorMapChanged() {
     return;
   }
 
-  double MinGrayscaleWindow = mMinGrayscaleWindow;
-  double MaxGrayscaleWindow = mMaxGrayscaleWindow;
+  double MinGrayscaleWindow    = mMinGrayscaleWindow;
+  double MaxGrayscaleWindow    = mMaxGrayscaleWindow;
   double HeatScaleMinThreshold = mHeatScaleMinThreshold;
   double HeatScaleMidThreshold = mHeatScaleMidThreshold;
   double HeatScaleMaxThreshold = mHeatScaleMaxThreshold;
-  double HeatScaleOffset = mHeatScaleOffset;
-  double MinGenericThreshold = mMinGenericThreshold;
-  double MaxGenericThreshold = mMaxGenericThreshold;
+  double HeatScaleOffset       = mHeatScaleOffset;
+  double MinGenericThreshold   = mMinGenericThreshold;
+  double MaxGenericThreshold   = mMaxGenericThreshold;
   if (m_bRememberFrameSettings) {
     QVariantMap map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
     if (map.contains("MinGrayscaleWindow"))
@@ -724,12 +724,12 @@ void LayerPropertyMRI::BuildGenericLUT(const int colors[256][3]) {
 
 void LayerPropertyMRI::SetDisplayVector(bool b) {
   m_bDisplayVector = b;
-  m_bDisplayRGB = false;
+  m_bDisplayRGB    = false;
   emit DisplayModeChanged();
 }
 
 void LayerPropertyMRI::SetDisplayRGB(bool b) {
-  m_bDisplayRGB = b;
+  m_bDisplayRGB    = b;
   m_bDisplayVector = false;
   emit DisplayModeChanged();
 }
@@ -896,8 +896,8 @@ void LayerPropertyMRI::SetMinMaxGrayscaleWindow(double iMin, double iMax) {
     if (m_bRememberFrameSettings) {
       QVariantMap map =
           m_frameSettings[QString::number(m_nActiveFrame)].toMap();
-      map["MinGrayscaleWindow"] = iMin;
-      map["MaxGrayscaleWindow"] = iMax;
+      map["MinGrayscaleWindow"]                        = iMin;
+      map["MaxGrayscaleWindow"]                        = iMax;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mMinGrayscaleWindow = iMin;
@@ -922,7 +922,7 @@ void LayerPropertyMRI::SetMinGrayscaleWindow(double iMin) {
     if (m_bRememberFrameSettings) {
       QVariantMap map =
           m_frameSettings[QString::number(m_nActiveFrame)].toMap();
-      map["MinGrayscaleWindow"] = iMin;
+      map["MinGrayscaleWindow"]                        = iMin;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mMinGrayscaleWindow = iMin;
@@ -935,7 +935,7 @@ void LayerPropertyMRI::SetMinGrayscaleWindow(double iMin) {
 }
 
 void LayerPropertyMRI::SetMaxGrayscaleWindow(double iMax) {
-  double MaxGrayscaleWindow = mMaxGrayscaleWindow;
+  double      MaxGrayscaleWindow = mMaxGrayscaleWindow;
   QVariantMap map;
   if (m_bRememberFrameSettings) {
     map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
@@ -945,7 +945,7 @@ void LayerPropertyMRI::SetMaxGrayscaleWindow(double iMax) {
 
   if (MaxGrayscaleWindow != iMax) {
     if (m_bRememberFrameSettings) {
-      map["MaxGrayscaleWindow"] = iMax;
+      map["MaxGrayscaleWindow"]                        = iMax;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mMaxGrayscaleWindow = iMax;
@@ -970,7 +970,7 @@ void LayerPropertyMRI::SetHeatScaleAutoMid(bool bAutoMid, bool bAutoMidToMin) {
 }
 
 void LayerPropertyMRI::SetHeatScaleMinThreshold(double iValue, bool bMidToMin) {
-  double HeatScaleMinThreshold = mHeatScaleMinThreshold;
+  double      HeatScaleMinThreshold = mHeatScaleMinThreshold;
   QVariantMap map;
   if (m_bRememberFrameSettings) {
     map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
@@ -979,7 +979,7 @@ void LayerPropertyMRI::SetHeatScaleMinThreshold(double iValue, bool bMidToMin) {
   }
   if (HeatScaleMinThreshold != iValue) {
     if (m_bRememberFrameSettings) {
-      map["HeatScaleMinThreshold"] = iValue;
+      map["HeatScaleMinThreshold"]                     = iValue;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mHeatScaleMinThreshold = iValue;
@@ -1005,7 +1005,7 @@ double LayerPropertyMRI::GetHeatScaleMinThreshold() {
 }
 
 void LayerPropertyMRI::SetHeatScaleMidThreshold(double iValue) {
-  double HeatScaleMidThreshold = mHeatScaleMidThreshold;
+  double      HeatScaleMidThreshold = mHeatScaleMidThreshold;
   QVariantMap map;
   if (m_bRememberFrameSettings) {
     map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
@@ -1014,7 +1014,7 @@ void LayerPropertyMRI::SetHeatScaleMidThreshold(double iValue) {
   }
   if (HeatScaleMidThreshold != iValue) {
     if (m_bRememberFrameSettings) {
-      map["HeatScaleMidThreshold"] = iValue;
+      map["HeatScaleMidThreshold"]                     = iValue;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mHeatScaleMidThreshold = iValue;
@@ -1033,7 +1033,7 @@ double LayerPropertyMRI::GetHeatScaleMidThreshold() {
 }
 
 void LayerPropertyMRI::SetHeatScaleMaxThreshold(double iValue, bool bMidToMin) {
-  double HeatScaleMaxThreshold = mHeatScaleMaxThreshold;
+  double      HeatScaleMaxThreshold = mHeatScaleMaxThreshold;
   QVariantMap map;
   if (m_bRememberFrameSettings) {
     map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
@@ -1042,7 +1042,7 @@ void LayerPropertyMRI::SetHeatScaleMaxThreshold(double iValue, bool bMidToMin) {
   }
   if (HeatScaleMaxThreshold != iValue) {
     if (m_bRememberFrameSettings) {
-      map["HeatScaleMaxThreshold"] = iValue;
+      map["HeatScaleMaxThreshold"]                     = iValue;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mHeatScaleMaxThreshold = iValue;
@@ -1066,9 +1066,9 @@ double LayerPropertyMRI::GetHeatScaleMaxThreshold() {
 void LayerPropertyMRI::SetHeatScale(double dMin, double dMid, double dMax) {
   if (m_bRememberFrameSettings) {
     QVariantMap map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
-    map["HeatScaleMinThreshold"] = dMin;
-    map["HeatScaleMidThreshold"] = dMid;
-    map["HeatScaleMaxThreshold"] = dMax;
+    map["HeatScaleMinThreshold"]                     = dMin;
+    map["HeatScaleMidThreshold"]                     = dMid;
+    map["HeatScaleMaxThreshold"]                     = dMax;
     m_frameSettings[QString::number(m_nActiveFrame)] = map;
   } else {
     mHeatScaleMinThreshold = dMin;
@@ -1079,7 +1079,7 @@ void LayerPropertyMRI::SetHeatScale(double dMin, double dMid, double dMax) {
 }
 
 void LayerPropertyMRI::SetHeatScaleOffset(double iValue) {
-  double HeatScaleOffset = mHeatScaleOffset;
+  double      HeatScaleOffset = mHeatScaleOffset;
   QVariantMap map;
   if (m_bRememberFrameSettings) {
     map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
@@ -1088,7 +1088,7 @@ void LayerPropertyMRI::SetHeatScaleOffset(double iValue) {
   }
   if (HeatScaleOffset != iValue) {
     if (m_bRememberFrameSettings) {
-      map["HeatScaleOffset"] = iValue;
+      map["HeatScaleOffset"]                           = iValue;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mHeatScaleOffset = iValue;
@@ -1194,10 +1194,10 @@ bool LayerPropertyMRI::UpdateValueRange(double dValue) {
 
   mMinVisibleValue = mMinVoxelValue - (mMaxVoxelValue - mMinVoxelValue);
   mMaxVisibleValue = mMaxVoxelValue + (mMaxVoxelValue - mMinVoxelValue);
-  mWindowRange[0] = 0;
-  mWindowRange[1] = (mMaxVoxelValue - mMinVoxelValue) * 2;
-  mLevelRange[0] = mMinVoxelValue;
-  mLevelRange[1] = mMaxVoxelValue;
+  mWindowRange[0]  = 0;
+  mWindowRange[1]  = (mMaxVoxelValue - mMinVoxelValue) * 2;
+  mLevelRange[0]   = mMinVoxelValue;
+  mLevelRange[1]   = mMaxVoxelValue;
 
   //  this->OnColorMapChanged();
   return true;
@@ -1222,7 +1222,7 @@ void LayerPropertyMRI::SetVolumeSource(FSVolume *source) {
   mColorMapTable->ClampingOn();
 
   mDirectionCodedTable = vtkSmartPointer<vtkLookupTable>::New();
-  int ns = 64;
+  int ns               = 64;
   mDirectionCodedTable->SetNumberOfTableValues(ns * ns * ns);
   mDirectionCodedTable->ForceBuild();
   mDirectionCodedTable->SetTableRange(0, ns * ns * ns - 1);
@@ -1277,8 +1277,8 @@ void LayerPropertyMRI::UpdateMinMaxValues() {
   if (mSource->HasValidHistogram()) {
     if (m_mapMinMaxValues.contains(m_nActiveFrame)) {
       QPair<double, double> pair = m_mapMinMaxValues[m_nActiveFrame];
-      mMinGrayscaleWindow = pair.first;
-      mMaxGrayscaleWindow = pair.second;
+      mMinGrayscaleWindow        = pair.first;
+      mMaxGrayscaleWindow        = pair.second;
     } else {
       mMinGrayscaleWindow =
           mSource->GetHistoValueFromPercentile(0.05, m_nActiveFrame);
@@ -1291,18 +1291,18 @@ void LayerPropertyMRI::UpdateMinMaxValues() {
         mMaxGrayscaleWindow = mMaxVoxelValue;
       }
       QPair<double, double> pair;
-      pair.first = mMinGrayscaleWindow;
-      pair.second = mMaxGrayscaleWindow;
+      pair.first                        = mMinGrayscaleWindow;
+      pair.second                       = mMaxGrayscaleWindow;
       m_mapMinMaxValues[m_nActiveFrame] = pair;
     }
   }
 
   mMinVisibleValue = mMinVoxelValue - (mMaxVoxelValue - mMinVoxelValue);
   mMaxVisibleValue = mMaxVoxelValue + (mMaxVoxelValue - mMinVoxelValue);
-  mWindowRange[0] = 0;
-  mWindowRange[1] = (mMaxVoxelValue - mMinVoxelValue) * 2;
-  mLevelRange[0] = mMinVoxelValue;
-  mLevelRange[1] = mMaxVoxelValue;
+  mWindowRange[0]  = 0;
+  mWindowRange[1]  = (mMaxVoxelValue - mMinVoxelValue) * 2;
+  mLevelRange[0]   = mMinVoxelValue;
+  mLevelRange[1]   = mMaxVoxelValue;
 
   double oneTenth;
   double highestAbsValue;
@@ -1310,21 +1310,21 @@ void LayerPropertyMRI::UpdateMinMaxValues() {
   if (mSource->HasValidHistogram()) {
     highestAbsValue = mMaxGrayscaleWindow;
   }
-  oneTenth = highestAbsValue / 10.0;
+  oneTenth               = highestAbsValue / 10.0;
   mHeatScaleMinThreshold = mMinGrayscaleWindow;
   if (mHeatScaleMinThreshold < 0)
     mHeatScaleMinThreshold = 0;
   mHeatScaleMidThreshold = highestAbsValue / 2.0;
   mHeatScaleMaxThreshold = highestAbsValue - oneTenth;
-  mHeatScaleOffset = 0;
+  mHeatScaleOffset       = 0;
 
   // Init the colors in the heat scale. The editor will handle the
   // editing from here.
 
-  mMinGenericThreshold = mMinGrayscaleWindow;
-  mMaxGenericThreshold = mMaxGrayscaleWindow;
-  mMinContourThreshold = mHeatScaleMidThreshold;
-  mMaxContourThreshold = mMaxGrayscaleWindow;
+  mMinGenericThreshold  = mMinGrayscaleWindow;
+  mMaxGenericThreshold  = mMaxGrayscaleWindow;
+  mMinContourThreshold  = mHeatScaleMidThreshold;
+  mMaxContourThreshold  = mMaxGrayscaleWindow;
   mClearBackgroundValue = mMinGrayscaleWindow;
 }
 
@@ -1334,8 +1334,8 @@ void LayerPropertyMRI::ResetWindowLevel() {
 }
 
 void LayerPropertyMRI::SetMinMaxGenericThreshold(double iMin, double iMax) {
-  double MinGenericThreshold = mMinGenericThreshold;
-  double MaxGenericThreshold = mMaxGenericThreshold;
+  double      MinGenericThreshold = mMinGenericThreshold;
+  double      MaxGenericThreshold = mMaxGenericThreshold;
   QVariantMap map;
   if (m_bRememberFrameSettings) {
     map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
@@ -1347,8 +1347,8 @@ void LayerPropertyMRI::SetMinMaxGenericThreshold(double iMin, double iMax) {
 
   if (MinGenericThreshold != iMin || MaxGenericThreshold != iMax) {
     if (m_bRememberFrameSettings) {
-      map["MinGenericThreshold"] = iMin;
-      map["MaxGenericThreshold"] = iMax;
+      map["MinGenericThreshold"]                       = iMin;
+      map["MaxGenericThreshold"]                       = iMax;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mMinGenericThreshold = iMin;
@@ -1368,7 +1368,7 @@ double LayerPropertyMRI::GetMinGenericThreshold() {
 }
 
 void LayerPropertyMRI::SetMinGenericThreshold(double iMin) {
-  double MinGenericThreshold = mMinGenericThreshold;
+  double      MinGenericThreshold = mMinGenericThreshold;
   QVariantMap map;
   if (m_bRememberFrameSettings) {
     map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
@@ -1377,7 +1377,7 @@ void LayerPropertyMRI::SetMinGenericThreshold(double iMin) {
   }
   if (MinGenericThreshold != iMin) {
     if (m_bRememberFrameSettings) {
-      map["MinGenericThreshold"] = iMin;
+      map["MinGenericThreshold"]                       = iMin;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mMinGenericThreshold = iMin;
@@ -1396,7 +1396,7 @@ double LayerPropertyMRI::GetMaxGenericThreshold() {
 }
 
 void LayerPropertyMRI::SetMaxGenericThreshold(double iMax) {
-  double MaxGenericThreshold = mMaxGenericThreshold;
+  double      MaxGenericThreshold = mMaxGenericThreshold;
   QVariantMap map;
   if (m_bRememberFrameSettings) {
     map = m_frameSettings[QString::number(m_nActiveFrame)].toMap();
@@ -1405,7 +1405,7 @@ void LayerPropertyMRI::SetMaxGenericThreshold(double iMax) {
   }
   if (MaxGenericThreshold != iMax) {
     if (m_bRememberFrameSettings) {
-      map["MaxGenericThreshold"] = iMax;
+      map["MaxGenericThreshold"]                       = iMax;
       m_frameSettings[QString::number(m_nActiveFrame)] = map;
     } else {
       mMaxGenericThreshold = iMax;
@@ -1529,7 +1529,7 @@ void LayerPropertyMRI::SetProjectionMapType(int nType) {
 }
 
 void LayerPropertyMRI::SetProjectionMapRange(int n, int start, int end) {
-  m_nProjectionMapRange[n * 2] = start;
+  m_nProjectionMapRange[n * 2]     = start;
   m_nProjectionMapRange[n * 2 + 1] = end;
   emit ProjectionMapChanged();
 }

@@ -1,8 +1,8 @@
 #include "PolylineMeshToVTKPolyDataFilter.h"
 
-#include <vtkPolyData.h>
-#include <vtkPoints.h>
 #include <vtkFieldData.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
 
 template <class TMesh>
@@ -10,7 +10,7 @@ PolylineMeshToVTKPolyDataFilter<TMesh>::PolylineMeshToVTKPolyDataFilter() {
   m_Output = vtkPolyData::New();
   // this->SetNumberOfInputs (1);
   unsigned char color[3] = {219, 112, 147};
-  this->m_color = color;
+  this->m_color          = color;
 }
 
 template <class TMesh>
@@ -49,8 +49,8 @@ void PolylineMeshToVTKPolyDataFilter<TMesh>::GenerateData() {
   typedef typename MeshType::CellsContainer::ConstIterator ConstCellIterator;
   ConstCellIterator itCell = input->GetCells()->Begin();
   while (itCell != input->GetCells()->End()) {
-    CellType *cell = itCell.Value();
-    vtkIdType *ids = new vtkIdType[cell->GetNumberOfPoints()];
+    CellType * cell = itCell.Value();
+    vtkIdType *ids  = new vtkIdType[cell->GetNumberOfPoints()];
     //      std::cout << " num " << cell->GetNumberOfPoints() << std::endl;
     int index = 0;
     for (typename CellType::PointIdIterator it = cell->PointIdsBegin();

@@ -259,12 +259,12 @@ int vtkFlRenderWindowInteractor::handle(int event) {
 
   case FL_KEYBOARD: // keypress
 #if (VTK_MAJOR_VERSION >= 4)
-                    // new style
+      // new style
     this->InvokeEvent(vtkCommand::MouseMoveEvent, nullptr);
     this->InvokeEvent(vtkCommand::KeyPressEvent, nullptr);
     this->InvokeEvent(vtkCommand::CharEvent, nullptr);
 #else
-                    // old style
+      // old style
     InteractorStyle->OnChar(Fl::event_state(FL_CTRL), Fl::event_state(FL_SHIFT),
                             Fl::event_key(), 1);
 #endif

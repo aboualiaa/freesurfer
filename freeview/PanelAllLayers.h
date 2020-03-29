@@ -1,8 +1,8 @@
 #ifndef PANELALLLAYERS_H
 #define PANELALLLAYERS_H
 
-#include <QScrollArea>
 #include <QList>
+#include <QScrollArea>
 
 namespace Ui {
 class PanelAllLayers;
@@ -33,7 +33,7 @@ public slots:
   void OnLayerRemoved(Layer *added_layer);
   void OnLayerAdded(Layer *removed_layer);
   void RefreshLayerList(const QList<Layer *> &selectedLayers = QList<Layer *>(),
-                        Layer *curLayer = NULL);
+                        Layer *               curLayer       = NULL);
   void OnCurrentItemChanged(QTreeWidgetItem *item);
   void OnItemDoubleClicked(QTreeWidgetItem *item);
   void OnItemChanged(QTreeWidgetItem *item);
@@ -48,11 +48,11 @@ public slots:
   PanelLayer *GetPanel(const QString &layer_type);
 
 private:
-  void AddLayers(QList<Layer *> layers, const QString &cat_name,
-                 Layer *activeLayer, const QList<Layer *> &selectedLayers,
-                 Layer *curLayer = NULL);
+  void        AddLayers(QList<Layer *> layers, const QString &cat_name,
+                        Layer *activeLayer, const QList<Layer *> &selectedLayers,
+                        Layer *curLayer = NULL);
   PanelLayer *SetCurrentPanel(const QString &layerType);
-  void SetItemColor(QTreeWidgetItem *item, double *rgb);
+  void        SetItemColor(QTreeWidgetItem *item, double *rgb);
 
   Ui::PanelAllLayers *ui;
 };

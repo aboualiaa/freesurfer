@@ -23,10 +23,10 @@
  *
  */
 
-#include <stdlib.h>
-#include <string.h>
 #include <Getifh.h>
 #include <endianio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define MAXL 256
 
@@ -35,7 +35,7 @@ void getrange(char *string, float *minval, float *maxval) {
 
   str = strstr(string, "to");
   if (str) {
-    *str = '\0';
+    *str    = '\0';
     *minval = atof(string);
     *maxval = atof(str + 2);
   } else {
@@ -48,21 +48,21 @@ extern int Inithdr(struct dsr *phdr, int *imgdim, float *voxdim,
                    char *proto_imgfile);
 
 static char rcsid[] = "$Id: ifh2hdr.c,v 1.3 2007/05/05 10:45:03 nicks Exp $";
-int main(int argc, char *argv[]) {
-  FILE *fp;
+int         main(int argc, char *argv[]) {
+  FILE *     fp;
   struct dsr hdr;
-  IFH ifh;
+  IFH        ifh;
 
-  char filespc[MAXL], imgroot[MAXL];
+  char  filespc[MAXL], imgroot[MAXL];
   float voxsiz[3];
   float fmin = 0.0, fmax = 0.0;
-  int imgdim[4];
+  int   imgdim[4];
 
   /***********/
   /* utility */
   /***********/
   char *str, command[MAXL], program[MAXL];
-  int c, i, k;
+  int   c, i, k;
 
   /*********/
   /* flags */
@@ -123,14 +123,14 @@ int main(int argc, char *argv[]) {
 
   Inithdr(&hdr, imgdim, voxsiz, "");
   hdr.dime.datatype = 16; /* float */
-  hdr.dime.bitpix = 32;
-  hdr.hist.orient = ifh.orientation - 2;
+  hdr.dime.bitpix   = 32;
+  hdr.hist.orient   = ifh.orientation - 2;
   if (range_flag) {
     hdr.dime.glmin = fmin;
     hdr.dime.glmax = fmax;
   }
 
-  isbig = !strcmp(ifh.imagedata_byte_order, "bigendian");
+  isbig     = !strcmp(ifh.imagedata_byte_order, "bigendian");
   swab_flag = (CPU_is_bigendian() != 0) != (isbig != 0);
   if (swab_flag)
     swab_hdr(&hdr);

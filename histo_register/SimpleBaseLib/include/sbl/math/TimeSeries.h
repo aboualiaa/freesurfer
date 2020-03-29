@@ -1,8 +1,8 @@
 #ifndef _SBL_TIME_SERIES_H_
 #define _SBL_TIME_SERIES_H_
-#include <sbl/math/Vector.h>
 #include <sbl/core/Array.h>
 #include <sbl/core/File.h>
+#include <sbl/math/Vector.h>
 namespace sbl {
 
 //-------------------------------------------
@@ -74,11 +74,11 @@ private:
 //-------------------------------------------
 
 /// load a set of TimeSeries objects from a raw data file
-void loadTimeSeriesSet(const String &fileName,
+void loadTimeSeriesSet(const String &     fileName,
                        Array<TimeSeries> &timeSeriesSet);
 
 /// save a set of TimeSeries objects to a raw data file
-void saveTimeSeriesSet(const String &fileName,
+void saveTimeSeriesSet(const String &           fileName,
                        const Array<TimeSeries> &timeSeriesSet);
 
 } // end namespace sbl

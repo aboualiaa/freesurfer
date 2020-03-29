@@ -29,11 +29,9 @@
 
 #include <iostream>
 
-using namespace std;
-
 #define CONSOLE_WIDTH 78
 
-MyCmdLineParser::MyCmdLineParser(const char *ProgramName,
+MyCmdLineParser::MyCmdLineParser(const char *  ProgramName,
                                  CmdLineEntry *entries) {
   SetProgramName(ProgramName);
   m_nNumberOfPureArguments = 0;
@@ -50,7 +48,7 @@ MyCmdLineParser::~MyCmdLineParser() {
 
 void MyCmdLineParser::SetValidCmdLineEntries(CmdLineEntry *entries) {
   m_cmdLineEntriesValid.clear();
-  int n = 0;
+  int  n        = 0;
   bool bHasHelp = false;
   while (entries[n].type != CMD_LINE_NONE) {
     if (strcmp(entries[n].shortName, "h") == 0)
@@ -73,9 +71,11 @@ void MyCmdLineParser::AddValidCmdLineEntry(int nType, const char *shortname,
   m_cmdLineEntriesValid.push_back(e);
 }
 
-void MyCmdLineParser::SetProgramName(string name) { m_strProgramName = name; }
+void MyCmdLineParser::SetProgramName(std::string name) {
+  m_strProgramName = name;
+}
 
-void MyCmdLineParser::SetProgramDescription(string text) {
+void MyCmdLineParser::SetProgramDescription(std::string text) {
   m_strProgramDescription = text;
 }
 
@@ -106,7 +106,7 @@ bool MyCmdLineParser::Found( const char* ch, int* value )
 {
   if ( Found( ch ) )
 {
-    string strg = GetArgument( ch, 0 );
+   std::stringstrg = GetArgument( ch, 0 );
     *value = atoi( strg.c_str() );
     return true;
 }
@@ -118,7 +118,7 @@ bool MyCmdLineParser::Found( const char* ch, double* value )
 {
   if ( Found( ch ) )
 {
-    string strg = GetArgument( ch, 0 );
+   std::string trg = GetArgument( ch, 0 );
     *value = atof( strg.c_str() );
     return true;
 }
@@ -182,9 +182,8 @@ int MyCmdLineParser::GetNumberOfArguments(const char *ch) {
 
   return 0;
 }
-
-string MyCmdLineParser::GetArgument(const char *ch, int n,
-                                    const char *chDefault) {
+std::string MyCmdLineParser::GetArgument(const char *ch, int n,
+                                         const char *chDefault) {
   CmdLineEntry e;
   if (Found(ch, &e)) {
     if ((int)e.arguments.size() > n)
@@ -205,25 +204,25 @@ string_array MyCmdLineParser::GetArguments(const char *ch, int nIndex) {
 }
 
 void MyCmdLineParser::PrintHelp() {
-  cout << endl
-       << "Usage: " << m_strProgramName.c_str()
-       << " [OPTION <ARGUMENT:SUB-OPTION>]..." << endl;
+  std::cout << std::endl
+            << "Usage: " << m_strProgramName.c_str()
+            << " [OPTION <ARGUMENT:SUB-OPTION>]..." << std::endl;
 
-  string desc = m_strProgramDescription;
+  std::string desc = m_strProgramDescription;
   while (desc.length() > CONSOLE_WIDTH) {
     int n = desc.rfind(" ", CONSOLE_WIDTH);
     if (n >= 0)
-      cout << desc.substr(0, n).c_str() << endl;
+      std::cout << desc.substr(0, n).c_str() << std::endl;
     desc = desc.substr(n + 1);
   }
   if (desc.length() > 0)
-    cout << desc.c_str() << endl;
-  cout << endl;
+    std::cout << desc.c_str() << std::endl;
+  std::cout << std::endl;
 
   size_t nLen = 0;
   for (size_t i = 0; i < m_cmdLineEntriesValid.size(); i++) {
-    CmdLineEntry e = m_cmdLineEntriesValid[i];
-    string strg = string(e.shortName) + e.longName + e.arguName;
+    CmdLineEntry e    = m_cmdLineEntriesValid[i];
+    std::string  strg = std::string(e.shortName) + e.longName + e.arguName;
     if (nLen < strg.length())
       nLen = strg.length();
   }
@@ -232,60 +231,60 @@ void MyCmdLineParser::PrintHelp() {
     nLen = 7;
   for (size_t i = 0; i < m_cmdLineEntriesValid.size(); i++) {
     CmdLineEntry e = m_cmdLineEntriesValid[i];
-    string strg("-");
+    std::string  strg("-");
     strg = strg + e.shortName + ", --" + e.longName + " " + e.arguName;
-    cout << strg.c_str();
+    std::cout << strg.c_str();
     if (m_bNewLineStyle) {
-      cout << endl;
+      std::cout << std::endl;
       for (size_t j = 0; j < nLen; j++)
-        cout << " ";
+        std::cout << " ";
     } else {
       int nCnt = nLen - strg.length();
       for (int j = 0; j < nCnt; j++)
-        cout << " ";
+        std::cout << " ";
     }
     desc = e.description;
     while (desc.length() > CONSOLE_WIDTH - nLen ||
-           desc.find("\n") != string::npos) {
+           desc.find("\n") != std::string::npos) {
       size_t n = desc.rfind(" ", CONSOLE_WIDTH - nLen);
       size_t m = desc.substr(0, CONSOLE_WIDTH - nLen).find("\n");
-      if (m != string::npos)
+      if (m != std::string::npos)
         n = m;
-      if (n != string::npos) {
-        cout << desc.substr(0, n).c_str() << endl;
+      if (n != std::string::npos) {
+        std::cout << desc.substr(0, n).c_str() << std::endl;
         desc = desc.substr(n + 1);
       }
       if (desc.size() > 0) {
         for (size_t j = 0; j < nLen; j++)
-          cout << " ";
+          std::cout << " ";
       } else
-        cout << endl;
+        std::cout << std::endl;
     }
     if (desc.length() > 0)
-      cout << desc.c_str() << endl;
+      std::cout << desc.c_str() << std::endl;
   }
-  cout << endl;
+  std::cout << std::endl;
 }
 
-void MyCmdLineParser::PrintErrorMessage(string msg) {
+void MyCmdLineParser::PrintErrorMessage(std::string msg) {
   PrintHelp();
 
-  cout << msg.c_str() << endl << endl;
+  std::cout << msg.c_str() << std::endl << std::endl;
 }
 
 bool MyCmdLineParser::Parse(int argc, char *argv[]) {
   // first parse the input command line into entries, don't care if they are
   // valid or not
-  vector<string_array *> entries;
-  string_array pureArgs;
-  string_array *sa = NULL;
+  std::vector<string_array *> entries;
+  string_array                pureArgs;
+  string_array *              sa = NULL;
 
   for (int i = 1; i < argc; i++) {
-    if (argv[i][0] == '-' && string(argv[i]).length() > 1 &&
+    if (argv[i][0] == '-' && std::string(argv[i]).length() > 1 &&
         !IsNumber(argv[i][1]) && argv[i][1] != '.') {
       sa = new string_array;
       sa->clear();
-      if (string(argv[i]).length() > 2 && argv[i][1] == '-') // long name
+      if (std::string(argv[i]).length() > 2 && argv[i][1] == '-') // long name
         sa->push_back(argv[i] + 2);
       else
         sa->push_back(argv[i] + 1);
@@ -299,8 +298,8 @@ bool MyCmdLineParser::Parse(int argc, char *argv[]) {
   //
   m_cmdLineEntries.clear();
   CmdLineEntry e;
-  bool bSucceed = true;
-  string error_msg = "";
+  bool         bSucceed  = true;
+  std::string  error_msg = "";
   for (size_t i = 0; i < entries.size(); i++) {
     string_array strgs = *entries[i];
 
@@ -321,7 +320,7 @@ bool MyCmdLineParser::Parse(int argc, char *argv[]) {
       }
       if ((int)e.arguments.size() < e.minArguments) {
         bSucceed = false;
-        cout << e.arguments.size() << " " << e.minArguments << endl;
+        std::cout << e.arguments.size() << " " << e.minArguments << std::endl;
         error_msg += "Argument missing for option '" + strgs[0] + "'.";
       }
     } else if (e.type == CMD_LINE_SWITCH) {

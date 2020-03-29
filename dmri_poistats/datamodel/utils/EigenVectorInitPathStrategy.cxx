@@ -106,7 +106,7 @@ void EigenVectorInitPathStrategy::CalculateInitialPath() {
 
     // pick a random starting point within the starting seed region
     const int startSeedLabel = (*seedValues)[cSeeds];
-    int currentPointInt[3];
+    int       currentPointInt[3];
     this->GetRandomSeedPoint(currentPointInt, startSeedLabel);
 
     // pick a random end point.  This will be used for determining the initial
@@ -155,7 +155,7 @@ void EigenVectorInitPathStrategy::CalculateInitialPath() {
 
       // this random number between 0 and 1 will be the percentage that the
       // point is moved along the eigenvector or toward the destination point
-      const float pixelJump = 1;
+      const float pixelJump    = 1;
       const float randomNumber = OpenRan1(&m_RandomTimeSeed) * pixelJump;
 
       // get the next point in the path

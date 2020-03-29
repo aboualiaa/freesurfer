@@ -1,8 +1,8 @@
 #ifndef __kvlHistogrammer_h
 #define __kvlHistogrammer_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 namespace kvl {
 
@@ -12,9 +12,9 @@ namespace kvl {
 class Histogrammer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = Histogrammer;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = Histogrammer;
+  using Superclass   = AtlasMeshRasterizor;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -24,15 +24,15 @@ public:
   itkTypeMacro(Histogrammer, itk::Object);
 
   /** Some typedefs */
-  using ImageType = itk::Image<float, 3>;
-  using BinnedImageType = itk::Image<int, 3>;
-  using HistogramType = std::vector<std::vector<double>>;
+  using ImageType                            = itk::Image<float, 3>;
+  using BinnedImageType                      = itk::Image<int, 3>;
+  using HistogramType                        = std::vector<std::vector<double>>;
   using ConditionalIntensityDistributionType = std::vector<double>;
 
   /** */
   void SetImage(const ImageType *image) {
-    m_Image = image;
-    m_BinnedImage = nullptr;
+    m_Image        = image;
+    m_BinnedImage  = nullptr;
     m_NumberOfBins = 0;
   }
 
@@ -46,7 +46,7 @@ public:
     if (m_BinnedImage) {
       // Check if number of bins has changed. If so, forgot cached binned image
       if (conditionalIntensityDistributions[0].size() != m_NumberOfBins) {
-        m_BinnedImage = nullptr;
+        m_BinnedImage  = nullptr;
         m_NumberOfBins = 0;
       }
     }
@@ -77,9 +77,9 @@ protected:
   virtual ~Histogrammer();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
   Histogrammer(const Self &);   // purposely not implemented
@@ -95,15 +95,15 @@ private:
   //
   ImageType::ConstPointer m_Image;
   std::vector<ConditionalIntensityDistributionType>
-      m_ConditionalIntensityDistributions;
+                           m_ConditionalIntensityDistributions;
   BinnedImageType::Pointer m_BinnedImage;
-  int m_NumberOfBins;
-  HistogramType m_Histogram;
-  double m_MinLogLikelihood;
+  int                      m_NumberOfBins;
+  HistogramType            m_Histogram;
+  double                   m_MinLogLikelihood;
 
   //
   std::vector<HistogramType> m_ThreadSpecificHistograms;
-  std::vector<double> m_ThreadSpecificMinLogLikelihoods;
+  std::vector<double>        m_ThreadSpecificMinLogLikelihoods;
 };
 
 } // end namespace kvl

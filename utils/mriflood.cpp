@@ -22,9 +22,6 @@
  *
  */
 
-#include <math.h>
-#include <cstdio>
-#include <cstdlib>
 #include "cma.h"
 #include "diag.h"
 #include "fsenv.h"
@@ -34,6 +31,9 @@
 #include "mrisurf_metricProperties.h"
 #include "region.h"
 #include "timer.h"
+#include <cstdio>
+#include <cstdlib>
+#include <math.h>
 
 #define IMGSIZE 256
 
@@ -46,19 +46,19 @@ int checky = 127;
 int checkz = 133;
 
 unsigned char SubFill(unsigned char vox, int i, int j, int k);
-MRI *MRIbitwiseand(MRI *mri1, MRI *mri2, MRI *mri_dst);
-MRI *MRIbitwiseor(MRI *mri1, MRI *mri2, MRI *mri_dst);
-MRI *MRIbitwisenot(MRI *mri_src, MRI *mri_dst);
-MRI *MRImajority(MRI *mri_src, MRI *mri_dst);
-MRI *MRImergecortexwhitecma(MRI *mri_cortex, MRI *mri_white, MRI *mri_cma,
-                            MRI *mri_left, MRI *mri_dst);
-int HemisphereVote(MRI *mri_cma, int i, int j, int k, int halfside);
+MRI *         MRIbitwiseand(MRI *mri1, MRI *mri2, MRI *mri_dst);
+MRI *         MRIbitwiseor(MRI *mri1, MRI *mri2, MRI *mri_dst);
+MRI *         MRIbitwisenot(MRI *mri_src, MRI *mri_dst);
+MRI *         MRImajority(MRI *mri_src, MRI *mri_dst);
+MRI * MRImergecortexwhitecma(MRI *mri_cortex, MRI *mri_white, MRI *mri_cma,
+                             MRI *mri_left, MRI *mri_dst);
+int   HemisphereVote(MRI *mri_cma, int i, int j, int k, int halfside);
 float distance(float x, float y, float z);
-void MRIerodecerebralcortex(MRI *mri_masked, MRI *mri_cma, MRI *mri_white,
-                            MRI *mri_left);
-int IllegalCorticalNeighbour(MRI *mri_masked, MRI *mri_white, int i, int j,
-                             int k);
-void MRIcorrecthippocampus(MRI *mri_masked, MRI *mri_dst);
+void  MRIerodecerebralcortex(MRI *mri_masked, MRI *mri_cma, MRI *mri_white,
+                             MRI *mri_left);
+int   IllegalCorticalNeighbour(MRI *mri_masked, MRI *mri_white, int i, int j,
+                               int k);
+void  MRIcorrecthippocampus(MRI *mri_masked, MRI *mri_dst);
 
 // return number of bits on ( possible values are 0 through 8 )
 static int countBits(MRI *mri, int i, int j, int k) {
@@ -77,7 +77,7 @@ static int likely(MRI *mri, int i, int j, int k) {
 }
 
 static void likelinessHistogram(MRI *mri, const char *msg) {
-  int i, j, k;
+  int  i, j, k;
   long Hist[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   for (k = 0; k < mri->depth; ++k)
@@ -170,11 +170,11 @@ MRI *MRISshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst, int clearflag) {
   int width, height, depth, i, j, imnr, fno, numu, numv, u, v;
   // int imnr0;
   // float ps, st, xx0, xx1, yy0, yy1, zz0, zz1;
-  float x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax;
-  float px0, py0, pz0, px1, py1, pz1, px, py, pz;
-  double fi, fj, fimnr;
+  float   x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax;
+  float   px0, py0, pz0, px1, py1, pz1, px, py, pz;
+  double  fi, fj, fimnr;
   VERTEX *v_0, *v_1, *v_2;
-  FACE *f;
+  FACE *  f;
 
   // imnr0 =  mri_src->imnr0;
   // st = mri_src->thick; /* slice thickness */
@@ -187,9 +187,9 @@ MRI *MRISshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst, int clearflag) {
   // zz1 = mri_src->zend;
 
   /* Create new blank MRI or clear existing destination MRI */
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst) {
     /*    printf("MRISshell: Creating new (_dst)MRI...\n");*/
     mri_dst = MRIalloc(width, height, depth, mri_src->type);
@@ -202,7 +202,7 @@ MRI *MRISshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst, int clearflag) {
   /* Fill each face in MRI volume */
   for (fno = 0; fno < mris->nfaces; fno++) {
     /* Calculate (x,y,z) for each vertex for face */
-    f = &mris->faces[fno];
+    f   = &mris->faces[fno];
     v_0 = &mris->vertices[f->v[0]];
     v_1 = &mris->vertices[f->v[1]];
     v_2 = &mris->vertices[f->v[2]];
@@ -252,8 +252,8 @@ MRI *MRISshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst, int clearflag) {
         MRISsurfaceRASToVoxelCached(mris, mri_src, px, py, pz, &fi, &fj,
                                     &fimnr);
 #endif
-        i = nint(fi);
-        j = nint(fj);
+        i    = nint(fi);
+        j    = nint(fj);
         imnr = nint(fimnr);
         if (i >= 0 && i < mri_dst->width && j >= 0 && j < mri_dst->height &&
             imnr >= 0 && imnr < mri_dst->depth)
@@ -274,9 +274,9 @@ MRI *MRISfloodoutside(MRI *mri_src, MRI *mri_dst) {
   mri_dst = MRIcopy(mri_src, mri_dst);
 
   /* Set MRI size */
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   /* Set seed voxel in corner of box */
   /*  MRIvox(mri_dst,1,1,1)=1;
@@ -480,12 +480,12 @@ MRI *MRISfloodoutside(MRI *mri_src, MRI *mri_dst) {
 }
 
 MRI *MRISaccentuate(MRI *mri_src, MRI *mri_dst, int lo_thresh, int hi_thresh) {
-  int width, height, depth, i, j, k;
+  int   width, height, depth, i, j, k;
   float val;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst) {
     /*    printf("MRISaccentuate: Creating new (_dst)MRI...\n");*/
     mri_dst = MRIalloc(width, height, depth, mri_src->type);
@@ -496,7 +496,7 @@ MRI *MRISaccentuate(MRI *mri_src, MRI *mri_dst, int lo_thresh, int hi_thresh) {
     for (j = 0; j < height; j++)
       for (i = 0; i < width; i++) {
         int vox = (int)MRIgetVoxVal(mri_src, i, j, k, 0);
-        val = ((vox >= lo_thresh) && (vox <= hi_thresh)) ? 255 : 0;
+        val     = ((vox >= lo_thresh) && (vox <= hi_thresh)) ? 255 : 0;
         MRIsetVoxVal(mri_dst, i, j, k, 0, val);
       }
   return mri_dst;
@@ -505,13 +505,13 @@ MRI *MRISaccentuate(MRI *mri_src, MRI *mri_dst, int lo_thresh, int hi_thresh) {
 /* Set mri_dst voxel to 255 for every mri_src voxel for which the majority
    of subvoxels is set. */
 MRI *MRImajority(MRI *mri_src, MRI *mri_dst) {
-  int width, height, depth, i, j, k, vox;
-  long counts[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int   width, height, depth, i, j, k, vox;
+  long  counts[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   float val;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst) {
     mri_dst = MRIalloc(width, height, depth, mri_src->type);
     MRIcopyHeader(mri_src, mri_dst);
@@ -540,9 +540,9 @@ MRI *MRImajority(MRI *mri_src, MRI *mri_dst) {
 MRI *MRIbitwisenot(MRI *mri_src, MRI *mri_dst) {
   int width, height, depth, i, j, k, vox;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst) {
     mri_dst = MRIalloc(width, height, depth, mri_src->type);
     MRIcopyHeader(mri_src, mri_dst);
@@ -569,12 +569,12 @@ MRI *MRISpartialshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst,
       v;
   // int imnr0;
   // float ps, st, xx0, xx1, yy0, yy1, zz0, zz1;
-  float x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax;
-  float px0, py0, pz0, px1, py1, pz1, px, py, pz;
-  double fi, fj, fimnr;
+  float   x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax;
+  float   px0, py0, pz0, px1, py1, pz1, px, py, pz;
+  double  fi, fj, fimnr;
   VERTEX *v_0, *v_1, *v_2;
-  FACE *f;
-  int val;
+  FACE *  f;
+  int     val;
 
   // imnr0 = mri_src->imnr0;
   // st = mri_src->thick; /* slice thickness */
@@ -587,9 +587,9 @@ MRI *MRISpartialshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst,
   // zz1 = mri_src->zend;
 
   /* Create new blank MRI or clear existing destination MRI */
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst) {
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
       printf("MRISshell: Creating new (_dst)MRI...\n");
@@ -602,19 +602,19 @@ MRI *MRISpartialshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst,
   /* Fill each face in MRI volume */
   for (fno = 0; fno < mris->nfaces; fno++) {
     /* Calculate (x,y,z) for each vertex for face */
-    f = &mris->faces[fno];
+    f   = &mris->faces[fno];
     v_0 = &mris->vertices[f->v[0]];
     v_1 = &mris->vertices[f->v[1]];
     v_2 = &mris->vertices[f->v[2]];
-    x0 = v_0->x;
-    y0 = v_0->y;
-    z0 = v_0->z;
-    x1 = v_1->x;
-    y1 = v_1->y;
-    z1 = v_1->z;
-    x2 = v_2->x;
-    y2 = v_2->y;
-    z2 = v_2->z;
+    x0  = v_0->x;
+    y0  = v_0->y;
+    z0  = v_0->z;
+    x1  = v_1->x;
+    y1  = v_1->y;
+    z1  = v_1->z;
+    x2  = v_2->x;
+    y2  = v_2->y;
+    z2  = v_2->z;
 
     /* Calculate triangle side lengths */
     d0 = sqrt(SQR(x1 - x0) + SQR(y1 - y0) + SQR(z1 - z0));
@@ -649,8 +649,8 @@ MRI *MRISpartialshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst,
         // MRIworldToVoxel(mri_src,px,py,pz,&fi,&fj,&fimnr);
         MRISsurfaceRASToVoxelCached(mris, mri_src, px, py, pz, &fi, &fj,
                                     &fimnr);
-        i = nint(fi);
-        j = nint(fj);
+        i    = nint(fi);
+        j    = nint(fj);
         imnr = nint(fimnr);
         if (i >= 0 && i < IMGSIZE && j >= 0 && j < IMGSIZE && imnr >= 0 &&
             imnr < depth) {
@@ -663,8 +663,8 @@ MRI *MRISpartialshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst,
           //          jsub =
           //          ((int)(((zz1-pz)/ps+1.0)*2))-((int)((zz1-pz)/ps+1.0))*2;
           isubmnr = (int)((fimnr - nint(fimnr)) * 2 + 1);
-          isub = (int)((fi - nint(fi)) * 2 + 1);
-          jsub = (int)((fj - nint(fj)) * 2 + 1);
+          isub    = (int)((fi - nint(fi)) * 2 + 1);
+          jsub    = (int)((fj - nint(fj)) * 2 + 1);
           /* (isubmnr, isub, jsub) should be in the range (0..1, 0..1, 0..1) */
           /* Assume that the initial value for all voxels is zero */
           val = (int)MRIgetVoxVal(mri_dst, i, j, imnr, 0) |
@@ -683,9 +683,9 @@ MRI *MRIbitwiseor(MRI *mri1, MRI *mri2, MRI *mri_dst) {
   // BUFTYPE *p1, *p2, *pdst;
   BUFTYPE v1, v2;
 
-  width = mri1->width;
+  width  = mri1->width;
   height = mri1->height;
-  depth = mri1->depth;
+  depth  = mri1->depth;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri1, nullptr);
@@ -710,9 +710,9 @@ MRI *MRIbitwiseand(MRI *mri1, MRI *mri2, MRI *mri_dst) {
   // BUFTYPE *p1, *p2, *pdst;
   BUFTYPE v1, v2;
 
-  width = mri1->width;
+  width  = mri1->width;
   height = mri1->height;
-  depth = mri1->depth;
+  depth  = mri1->depth;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri1, nullptr);
@@ -740,9 +740,9 @@ MRI *MRISpartialfloodoutside(MRI *mri_src, MRI *mri_dst) {
   int val;
 
   /* Set MRI size */
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   /* Set seed voxel in corner of voxel in corner of box */
   if (mri_dst == nullptr)
@@ -758,9 +758,9 @@ MRI *MRISpartialfloodoutside(MRI *mri_src, MRI *mri_dst) {
     for (is = 2; is < 2 * width - 1; is++) {
       for (js = 2; js < 2 * height - 1; js++)
         for (ks = 2; ks < 2 * depth - 1; ks++) {
-          i = is / 2;
-          j = js / 2;
-          k = ks / 2;
+          i    = is / 2;
+          j    = js / 2;
+          k    = ks / 2;
           isub = is % 2;
           jsub = js % 2;
           ksub = ks % 2;
@@ -795,9 +795,9 @@ MRI *MRISpartialfloodoutside(MRI *mri_src, MRI *mri_dst) {
     for (is = 2 * width - 2; is >= 1; is--) {
       for (js = 2 * height - 2; js >= 1; js--)
         for (ks = 2 * depth - 2; ks >= 1; ks--) {
-          i = is / 2;
-          j = js / 2;
-          k = ks / 2;
+          i    = is / 2;
+          j    = js / 2;
+          k    = ks / 2;
           isub = is % 2;
           jsub = js % 2;
           ksub = ks % 2;
@@ -1027,14 +1027,14 @@ MRI *MRImergecortexwhitecma(MRI *mri_cortex, MRI *mri_white, MRI *mri_cma,
   int countBitsCortex;
   int likelyCortex;
   int likelyWhite;
-  countunknownwhite = 0;
-  countunknowncortex = 0;
+  countunknownwhite   = 0;
+  countunknowncortex  = 0;
   countunknownunknown = 0;
-  countcortexunknown = 0;
-  countwhiteunknown = 0;
-  width = mri_cma->width;
-  height = mri_cma->height;
-  depth = mri_cma->depth;
+  countcortexunknown  = 0;
+  countwhiteunknown   = 0;
+  width               = mri_cma->width;
+  height              = mri_cma->height;
+  depth               = mri_cma->depth;
   if (!mri_dst) {
     mri_dst = MRIalloc(width, height, depth, mri_cma->type);
     MRIcopyHeader(mri_cma, mri_dst);
@@ -1048,9 +1048,9 @@ MRI *MRImergecortexwhitecma(MRI *mri_cortex, MRI *mri_white, MRI *mri_cma,
         MRIsetVoxVal(mri_dst, i, j, k, 0, vox);
         // cache the values
         countBitsCortex = countBits(mri_cortex, i, j, k);
-        countBitsWhite = countBits(mri_white, i, j, k);
-        likelyCortex = likely(mri_cortex, i, j, k);
-        likelyWhite = likely(mri_white, i, j, k);
+        countBitsWhite  = countBits(mri_white, i, j, k);
+        likelyCortex    = likely(mri_cortex, i, j, k);
+        likelyWhite     = likely(mri_white, i, j, k);
         ///////////////////////////////////////////////////////////
         if ((vox == Left_Cerebral_Cortex) ||
             (vox == Left_Cerebral_White_Matter)) {
@@ -1148,15 +1148,15 @@ MRI *MRImergecortexwhitecma(MRI *mri_cortex, MRI *mri_white, MRI *mri_cma,
 /* Return 1 for left,
    0 for right (searched a cube of sidelength halfside*2+1). */
 int HemisphereVote(MRI *mri_cma, int i, int j, int k, int halfside) {
-  int x, y, z, vox;
+  int   x, y, z, vox;
   float leftvote, rightvote;
-  int width, height, depth;
+  int   width, height, depth;
 
-  width = mri_cma->width;
+  width  = mri_cma->width;
   height = mri_cma->height;
-  depth = mri_cma->depth;
+  depth  = mri_cma->depth;
 
-  leftvote = 0.;
+  leftvote  = 0.;
   rightvote = 0.;
 
   for (x = i - halfside; x <= i + halfside; x++)
@@ -1227,19 +1227,19 @@ void MRIerodecerebralcortex(MRI *mri_masked, MRI *mri_cma, MRI *mri_white,
   int erodewhitecount;
   int erodecortexcma;
 
-  width = mri_cma->width;
+  width  = mri_cma->width;
   height = mri_cma->height;
-  depth = mri_cma->depth;
+  depth  = mri_cma->depth;
 
   olderodedvoxelcount = 0;
-  erodecortexcma = 0;
-  erodedvoxelcount = -1;
-  unknowncount = 0;
-  erodewhitecount = 0;
+  erodecortexcma      = 0;
+  erodedvoxelcount    = -1;
+  unknowncount        = 0;
+  erodewhitecount     = 0;
   // repreat danger
   while ((erodedvoxelcount != 0) && (erodedvoxelcount != olderodedvoxelcount)) {
     olderodedvoxelcount = erodedvoxelcount;
-    erodedvoxelcount = 0;
+    erodedvoxelcount    = 0;
     for (k = 0; k < depth; k++)
       for (j = 0; j < height; j++)
         for (i = 0; i < width; i++) {
@@ -1303,9 +1303,9 @@ int IllegalCorticalNeighbour(MRI *mri_masked, MRI *mri_white, int i, int j,
                              int k) {
   int width, height, depth, x, y, z, vox, illegalflag;
   int nvox, ii, jj, kk;
-  width = mri_masked->width;
+  width  = mri_masked->width;
   height = mri_masked->height;
-  depth = mri_masked->depth;
+  depth  = mri_masked->depth;
 
   illegalflag = 0;
   for (x = i - 2; x <= i + 2; x++)
@@ -1385,9 +1385,9 @@ void MRIcorrecthippocampus(MRI *mri_masked, MRI *mri_dst) {
   /* mri_dst must differ from mri_masked. */
   int width, height, depth, i, j, k, vox, hippocount;
 
-  width = mri_masked->width;
-  height = mri_masked->height;
-  depth = mri_masked->depth;
+  width      = mri_masked->width;
+  height     = mri_masked->height;
+  depth      = mri_masked->depth;
   hippocount = 0;
 
   for (k = 0; k < depth; k++)
@@ -1439,10 +1439,10 @@ MRI *MRISfillInteriorOld(MRI_SURFACE *mris, double resolution,
                          MRI *mri_interior) {
   int width, height, depth, x, y, z, val, saved_use_Real_RAS, interior_alloced;
   MATRIX *m_vox2ras;
-  MRI *mri_shell, *mri_outside;
+  MRI *   mri_shell, *mri_outside;
 
   saved_use_Real_RAS = mris->useRealRAS;
-  mris->useRealRAS = 1; // MRISshell needs this
+  mris->useRealRAS   = 1; // MRISshell needs this
 
   MRIScomputeMetricProperties(mris);
 
@@ -1453,14 +1453,14 @@ MRI *MRISfillInteriorOld(MRI_SURFACE *mris, double resolution,
     mri_shell = MRIcloneDifferentType(mri_interior, MRI_FLOAT);
   } else {
     interior_alloced = 1;
-    width = ceil((mris->xhi - mris->xlo) / resolution);
-    height = ceil((mris->yhi - mris->ylo) / resolution);
-    depth = ceil((mris->zhi - mris->zlo) / resolution);
+    width            = ceil((mris->xhi - mris->xlo) / resolution);
+    height           = ceil((mris->yhi - mris->ylo) / resolution);
+    depth            = ceil((mris->zhi - mris->zlo) / resolution);
 
     mri_shell = MRIalloc(width, height, depth, MRI_FLOAT);
     MRIsetResolution(mri_shell, resolution, resolution, resolution);
 
-    m_vox2ras = MatrixIdentity(4, nullptr);
+    m_vox2ras                     = MatrixIdentity(4, nullptr);
     *MATRIX_RELT(m_vox2ras, 1, 1) = resolution;
     *MATRIX_RELT(m_vox2ras, 2, 2) = resolution;
     *MATRIX_RELT(m_vox2ras, 3, 3) = resolution;
@@ -1489,17 +1489,17 @@ MRI *MRISfillInteriorOld(MRI_SURFACE *mris, double resolution,
   mris->useRealRAS = saved_use_Real_RAS;
 
   if (interior_alloced) {
-    MRI *mri_tmp;
+    MRI *   mri_tmp;
     MATRIX *m, *m_invertz;
-    double val;
+    double  val;
 
     // invert one dimension (z) so that ras2vox xform has negative determinant
     // (standard)
-    m_invertz = MatrixIdentity(4, nullptr);
+    m_invertz                     = MatrixIdentity(4, nullptr);
     *MATRIX_RELT(m_invertz, 3, 3) = -1;
     *MATRIX_RELT(m_invertz, 3, 4) = (mri_interior->depth - 1);
-    mri_tmp = MRIclone(mri_interior, nullptr);
-    m = MatrixMultiply(m_vox2ras, m_invertz, NULL);
+    mri_tmp                       = MRIclone(mri_interior, nullptr);
+    m                             = MatrixMultiply(m_vox2ras, m_invertz, NULL);
     MRIsetVoxelToRasXform(mri_tmp, m);
     MatrixFree(&m);
     MatrixFree(&m_invertz);
@@ -1519,39 +1519,39 @@ MRI *MRISfillInteriorOld(MRI_SURFACE *mris, double resolution,
   return (mri_interior);
 }
 
-
 /*!
   \brief Creates a bounding volume that encompasses a surface.
 
   \param mris        Input surface
   \param resolution  Resolution of bounding volume
 */
-MRI *MRISmakeBoundingVolume(MRIS *mris, double resolution)
-{
+MRI *MRISmakeBoundingVolume(MRIS *mris, double resolution) {
   // make surface source volume for reference
   MRI *src = MRIallocFromVolGeom(&mris->vg, MRI_UCHAR, 1, 1);
 
   // get crop coordinates of surface in the "source" voxel space
   double clo, rlo, slo, chi, rhi, shi;
-  MRISsurfaceRASToVoxel(mris, src, mris->xlo, mris->ylo, mris->zlo, &clo, &rlo, &slo);
-  MRISsurfaceRASToVoxel(mris, src, mris->xhi, mris->yhi, mris->zhi, &chi, &rhi, &shi);
+  MRISsurfaceRASToVoxel(mris, src, mris->xlo, mris->ylo, mris->zlo, &clo, &rlo,
+                        &slo);
+  MRISsurfaceRASToVoxel(mris, src, mris->xhi, mris->yhi, mris->zhi, &chi, &rhi,
+                        &shi);
 
   // the low surf ras coordinate might not map directly to the voxel low coordinate
-  int real_clo = floor(std::min(clo, chi));
-  int real_rlo = floor(std::min(rlo, rhi));
-  int real_slo = floor(std::min(slo, shi));
-  int real_chi = ceil(std::max(clo, chi));
-  int real_rhi = ceil(std::max(rlo, rhi));
-  int real_shi = ceil(std::max(slo, shi));
+  int real_clo       = floor(std::min(clo, chi));
+  int real_rlo       = floor(std::min(rlo, rhi));
+  int real_slo       = floor(std::min(slo, shi));
+  int real_chi       = ceil(std::max(clo, chi));
+  int real_rhi       = ceil(std::max(rlo, rhi));
+  int real_shi       = ceil(std::max(slo, shi));
   int cropped_width  = real_chi - real_clo + 1;
   int cropped_height = real_rhi - real_rlo + 1;
   int cropped_depth  = real_shi - real_slo + 1;
 
   // make bounding volume with correct shape
-  int width  = ceil(src->xsize * cropped_width  / resolution);
-  int height = ceil(src->ysize * cropped_height / resolution);
-  int depth  = ceil(src->zsize * cropped_depth  / resolution);
-  MRI *dst = MRIalloc(width, height, depth, MRI_FLOAT);
+  int  width  = ceil(src->xsize * cropped_width / resolution);
+  int  height = ceil(src->ysize * cropped_height / resolution);
+  int  depth  = ceil(src->zsize * cropped_depth / resolution);
+  MRI *dst    = MRIalloc(width, height, depth, MRI_FLOAT);
 
   // set voxel size
   dst->x_r = src->x_r;
@@ -1570,16 +1570,16 @@ MRI *MRISmakeBoundingVolume(MRIS *mris, double resolution)
   dst->zsize = resolution;
 
   // get ras at center of original bounding box and set as center ras
-  MATRIX *vox2ras = MRIxfmCRS2XYZ(src, 0);
-  MATRIX *c_crs = MatrixAlloc(4, 1, MATRIX_REAL);
-  c_crs->rptr[1][1] = real_clo + cropped_width  / 2.0;
+  MATRIX *vox2ras   = MRIxfmCRS2XYZ(src, 0);
+  MATRIX *c_crs     = MatrixAlloc(4, 1, MATRIX_REAL);
+  c_crs->rptr[1][1] = real_clo + cropped_width / 2.0;
   c_crs->rptr[2][1] = real_rlo + cropped_height / 2.0;
-  c_crs->rptr[3][1] = real_slo + cropped_depth  / 2.0;
+  c_crs->rptr[3][1] = real_slo + cropped_depth / 2.0;
   c_crs->rptr[4][1] = 1;
-  MATRIX *c_ras = MatrixMultiply(vox2ras, c_crs, nullptr);
-  dst->c_r = c_ras->rptr[1][1];
-  dst->c_a = c_ras->rptr[2][1];
-  dst->c_s = c_ras->rptr[3][1];
+  MATRIX *c_ras     = MatrixMultiply(vox2ras, c_crs, nullptr);
+  dst->c_r          = c_ras->rptr[1][1];
+  dst->c_a          = c_ras->rptr[2][1];
+  dst->c_s          = c_ras->rptr[3][1];
 
   MatrixFree(&vox2ras);
   MatrixFree(&c_crs);
@@ -1588,7 +1588,6 @@ MRI *MRISmakeBoundingVolume(MRIS *mris, double resolution)
 
   return dst;
 }
-
 
 /*!
 \fn MRI *MRISfillInterior(MRI_SURFACE *mris, double resolution, MRI *mri_dst)
@@ -1601,17 +1600,17 @@ MRISfillInteriorOld() and MRISfillInteriorRibbonTest().
 \param mri_dst - output
 */
 MRI *MRISfillInterior(MRI_SURFACE *mris, double resolution, MRI *mri_dst) {
-  int col, row, slc, fno, numu, numv, u, v, nhits, width, height, depth;
-  double x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax;
-  double px0, py0, pz0, px1, py1, pz1, px, py, pz;
-  double fcol, frow, fslc, dcol, drow, dslc, val, val2;
-  double vx, vy, vz, vlen, ux, uy, uz, cosa;
-  VERTEX *v_0, *v_1, *v_2;
-  FACE *f;
-  MATRIX *crs, *xyz = nullptr, *vox2sras = nullptr, *m_vox2ras;
-  MRI *mri_cosa, *mri_vlen, *mri_shell, *shellbb, *outsidebb;
+  int         col, row, slc, fno, numu, numv, u, v, nhits, width, height, depth;
+  double      x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax;
+  double      px0, py0, pz0, px1, py1, pz1, px, py, pz;
+  double      fcol, frow, fslc, dcol, drow, dslc, val, val2;
+  double      vx, vy, vz, vlen, ux, uy, uz, cosa;
+  VERTEX *    v_0, *v_1, *v_2;
+  FACE *      f;
+  MATRIX *    crs, *xyz = nullptr, *vox2sras = nullptr, *m_vox2ras;
+  MRI *       mri_cosa, *mri_vlen, *mri_shell, *shellbb, *outsidebb;
   MRI_REGION *region;
-  Timer start;
+  Timer       start;
 
   MRIScomputeMetricProperties(mris);
 
@@ -1621,12 +1620,12 @@ MRI *MRISfillInterior(MRI_SURFACE *mris, double resolution, MRI *mri_dst) {
     // from resolution or when geometry is not LIA. In the future,
     // this whole section should be replaced by MRISmakeBoundingVolume(),
     // which just needs to be tested more first
-    width = ceil((mris->xhi - mris->xlo) / resolution);
-    height = ceil((mris->yhi - mris->ylo) / resolution);
-    depth = ceil((mris->zhi - mris->zlo) / resolution);
+    width   = ceil((mris->xhi - mris->xlo) / resolution);
+    height  = ceil((mris->yhi - mris->ylo) / resolution);
+    depth   = ceil((mris->zhi - mris->zlo) / resolution);
     mri_dst = MRIalloc(width, height, depth, MRI_FLOAT);
     MRIsetResolution(mri_dst, resolution, resolution, resolution);
-    m_vox2ras = MatrixIdentity(4, nullptr);
+    m_vox2ras                     = MatrixIdentity(4, nullptr);
     *MATRIX_RELT(m_vox2ras, 1, 1) = resolution;
     *MATRIX_RELT(m_vox2ras, 2, 2) = resolution;
     *MATRIX_RELT(m_vox2ras, 3, 3) = resolution;
@@ -1641,7 +1640,7 @@ MRI *MRISfillInterior(MRI_SURFACE *mris, double resolution, MRI *mri_dst) {
   drow = mri_dst->ysize;
   dslc = mri_dst->zsize;
 
-  crs = MatrixAlloc(4, 1, MATRIX_REAL);
+  crs             = MatrixAlloc(4, 1, MATRIX_REAL);
   crs->rptr[4][1] = 1;
 
   mri_cosa =
@@ -1744,16 +1743,16 @@ MRI *MRISfillInterior(MRI_SURFACE *mris, double resolution, MRI *mri_dst) {
           crs->rptr[1][1] = col;
           crs->rptr[2][1] = row;
           crs->rptr[3][1] = slc;
-          xyz = MatrixMultiply(vox2sras, crs, xyz); // xyz in surface space
-          vx = xyz->rptr[1][1];
-          vy = xyz->rptr[2][1];
-          vz = xyz->rptr[3][1];
+          xyz  = MatrixMultiply(vox2sras, crs, xyz); // xyz in surface space
+          vx   = xyz->rptr[1][1];
+          vy   = xyz->rptr[2][1];
+          vz   = xyz->rptr[3][1];
           vlen = sqrt(SQR(px - vx) + SQR(py - vy) + SQR(pz - vz));
           if (vlen > MRIgetVoxVal(mri_vlen, col, row, slc, 0))
             continue; // closest?
-          ux = (px - vx) / vlen;
-          uy = (py - vy) / vlen;
-          uz = (pz - vz) / vlen;
+          ux   = (px - vx) / vlen;
+          uy   = (py - vy) / vlen;
+          uz   = (pz - vz) / vlen;
           cosa = ux * fNorm->nx + uy * fNorm->ny + uz * fNorm->nz;
           MRIsetVoxVal(mri_cosa, col, row, slc, 0, cosa);
           MRIsetVoxVal(mri_vlen, col, row, slc, 0, vlen);
@@ -1764,7 +1763,8 @@ MRI *MRISfillInterior(MRI_SURFACE *mris, double resolution, MRI *mri_dst) {
   MRIS_freeRAS2VoxelMap(&map);
   MatrixFree(&crs);
   MatrixFree(&xyz);
-  if (vox2sras != NULL) MatrixFree(&vox2sras);
+  if (vox2sras != NULL)
+    MatrixFree(&vox2sras);
   MRIfree(&mri_vlen);
 
   // Reduce the volume size to speed things up
@@ -1815,7 +1815,7 @@ MRI *MRISfillInterior(MRI_SURFACE *mris, double resolution, MRI *mri_dst) {
   for (col = region->x; col < region->x + region->dx; col++) {
     for (row = region->y; row < region->y + region->dy; row++) {
       for (slc = region->z; slc < region->z + region->dz; slc++) {
-        val = MRIgetVoxVal(shellbb, col - region->x, row - region->y,
+        val  = MRIgetVoxVal(shellbb, col - region->x, row - region->y,
                            slc - region->z, 0);
         val2 = MRIgetVoxVal(outsidebb, col - region->x, row - region->y,
                             slc - region->z, 0);
@@ -1851,13 +1851,13 @@ new MRISfillInterior() will overlap ribbon.mgz to better than 99.5%
 but is on the order of 20 times faster.
 */
 int MRISfillInteriorRibbonTest(char *subject, int UseNew, FILE *fp) {
-  FSENV *fsenv;
-  char tmpstr[4000];
+  FSENV *     fsenv;
+  char        tmpstr[4000];
   const char *hemistr = nullptr, *surfname = nullptr;
-  MRI *ribbon;
-  int hemi, surftype, c, r, s, nfp, nfn, ntp, v, vrib, wmval = 0, ctxval = 0;
+  MRI *       ribbon;
+  int   hemi, surftype, c, r, s, nfp, nfn, ntp, v, vrib, wmval = 0, ctxval = 0;
   MRIS *surf;
-  MRI *mri;
+  MRI * mri;
 
   if (UseNew)
     setenv("USE_NEW_FILL_INTERIOR", "1", 1);
@@ -1887,13 +1887,13 @@ int MRISfillInteriorRibbonTest(char *subject, int UseNew, FILE *fp) {
     for (hemi = 0; hemi < 2; hemi++) {
       if (hemi == 0) {
         hemistr = "lh";
-        wmval = 2;
-        ctxval = 3;
+        wmval   = 2;
+        ctxval  = 3;
       }
       if (hemi == 1) {
         hemistr = "rh";
-        wmval = 41;
-        ctxval = 42;
+        wmval   = 41;
+        ctxval  = 42;
       }
 
       // printf("%s %s %s\n",subject,hemistr,surfname); fflush(stdout);
@@ -1917,7 +1917,7 @@ int MRISfillInteriorRibbonTest(char *subject, int UseNew, FILE *fp) {
         for (r = 0; r < mri->height; r++) {
           for (s = 0; s < mri->depth; s++) {
             vrib = MRIgetVoxVal(ribbon, c, r, s, 0);
-            v = MRIgetVoxVal(mri, c, r, s, 0);
+            v    = MRIgetVoxVal(mri, c, r, s, 0);
             if (surftype == 0) { // white
               // only look for ribbon voxels that are wmval (2 or 41)
               if (vrib == wmval)

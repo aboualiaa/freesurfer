@@ -23,48 +23,48 @@
  *
  */
 
-#include "numerics.h"
-#include "diag.h"
-#include "version.h"
 #include "density.h"
-#include "mrisegment.h"
+#include "diag.h"
 #include "mri_circulars.h"
+#include "mrisegment.h"
+#include "numerics.h"
+#include "version.h"
 
 #define RGB_SIZE 500
 
 static char vcid[] =
     "$Id: histo_register_block.c,v 1.9 2011/03/02 00:04:09 nicks Exp $";
 
-static int powell_minimize(MRI *mri_block, MRI *mri_histo, MRI *mri_seg,
-                           DENSITY *pdf, MATRIX *mat, int cost_type);
+static int    powell_minimize(MRI *mri_block, MRI *mri_histo, MRI *mri_seg,
+                              DENSITY *pdf, MATRIX *mat, int cost_type);
 static double compute_overlap(MRI *mri_src, MRI *mri_dst, MATRIX *m_total);
 
 static double min_overlap = 0.8;
 
-static int align = 1;
+static int   align     = 1;
 static float min_angle = -RADIANS(30);
 static float max_angle = RADIANS(30);
-static int nangles = 7;
+static int   nangles   = 7;
 
-static int snapshots = 0;
-static char base[STRLEN] = "nissl";
-static float min_scale = .5;
-static float max_scale = 1.5;
-static int nscales = 7;
+static int   snapshots    = 0;
+static char  base[STRLEN] = "nissl";
+static float min_scale    = .5;
+static float max_scale    = 1.5;
+static int   nscales      = 7;
 
-static int probe = 0;
+static int probe     = 0;
 static int max_trans = 150;
-static int ntrans = 7;
-static int skip = 0;
+static int ntrans    = 7;
+static int skip      = 0;
 
 static int nlevels = 1;
 
 static double rotate_radians = 0;
 
-static int probe_cost_function(MRI *mri_histo, MRI *mri_block, MRI *mri_seg,
-                               DENSITY *pdf, MATRIX *mat, int cost_type,
-                               char *out_name);
-int MRIeraseImageBorder(MRI *mri, int width);
+static int  probe_cost_function(MRI *mri_histo, MRI *mri_block, MRI *mri_seg,
+                                DENSITY *pdf, MATRIX *mat, int cost_type,
+                                char *out_name);
+int         MRIeraseImageBorder(MRI *mri, int width);
 static MRI *rotate_image(MRI *mri_src, MRI *mri_dst, double rotate_radians);
 static int compute_optimal_translation(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                                        MATRIX *m_best, DENSITY *pdf, int level,
@@ -73,14 +73,14 @@ static int compute_optimal_translation(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
 static int align_pyramid_level(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                                MATRIX *xform, DENSITY *pdf, int level,
                                MRI *mri_fullres_src, int cost_type, int skip);
-static MRI *mri_apply_slice_xform(MRI *mri_src, MRI *mri_dst, MATRIX *m,
-                                  int slice);
-static int write_snapshot(MRI *mri, MRI *mri_src, MRI *mri_dst, MATRIX *m,
-                          char *base, int n, int level, DENSITY *density,
-                          MRI *mri_seg);
-int main(int argc, char *argv[]);
-static int mriWriteImageView(MRI *mri, char *base_name, int target_size,
-                             int view, int slice, MRI *mri_template);
+static MRI *  mri_apply_slice_xform(MRI *mri_src, MRI *mri_dst, MATRIX *m,
+                                    int slice);
+static int    write_snapshot(MRI *mri, MRI *mri_src, MRI *mri_dst, MATRIX *m,
+                             char *base, int n, int level, DENSITY *density,
+                             MRI *mri_seg);
+int           main(int argc, char *argv[]);
+static int    mriWriteImageView(MRI *mri, char *base_name, int target_size,
+                                int view, int slice, MRI *mri_template);
 static double compute_ml_alignment_error(MRI *mri_src, MRI *mri_dst,
                                          MRI *mri_seg, DENSITY *pdf,
                                          MATRIX *m_total, int skip, int level);
@@ -90,28 +90,28 @@ static double compute_cr_alignment_error(MRI *mri_src, MRI *mri_dst,
 static double compute_alignment_error(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                                       DENSITY *pdf, MATRIX *m_total, int skip,
                                       int level, int cost_type);
-static MRI *align_block_to_histo(MRI *mri_histo, MRI *mri_block, MRI *mri_seg,
-                                 DENSITY **pdfs, int nlevels, MATRIX *mat,
-                                 int cost_type);
-static int compute_optimal_xform(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
-                                 DENSITY **pdfs, int nlevels, MATRIX *xform,
-                                 int cost_type, int skip);
+static MRI *  align_block_to_histo(MRI *mri_histo, MRI *mri_block, MRI *mri_seg,
+                                   DENSITY **pdfs, int nlevels, MATRIX *mat,
+                                   int cost_type);
+static int    compute_optimal_xform(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
+                                    DENSITY **pdfs, int nlevels, MATRIX *xform,
+                                    int cost_type, int skip);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
 
-const char *Progname;
+const char * Progname;
 static float slice_thickness = 1.0;
-static float in_plane = 1.0;
+static float in_plane        = 1.0;
 
 #define MAX_SLICES 10000
 
 #define COST_MAXIMUM_LIKELIHOOD 0
-#define COST_KULLABACK_LEIBLER 1
-#define COST_CORRELATION_RATIO 2
+#define COST_KULLABACK_LEIBLER  1
+#define COST_CORRELATION_RATIO  2
 
 static int cost_type = COST_MAXIMUM_LIKELIHOOD;
 
@@ -119,10 +119,10 @@ static int cost_type = COST_MAXIMUM_LIKELIHOOD;
 
 int main(int argc, char *argv[]) {
   char **av, *out_name;
-  int ac, nargs, max_width, max_height, n, i, min_val, max_val, max_vox, level;
+  int  ac, nargs, max_width, max_height, n, i, min_val, max_val, max_vox, level;
   MRI *mri_block, *mri_histo, *mri_tmp, *mri_template, *mri_aligned, *mri_seg;
-  DENSITY *pdfs[MAX_LEVELS], *pdf;
-  MATRIX *mat;
+  DENSITY *         pdfs[MAX_LEVELS], *pdf;
+  MATRIX *          mat;
   MRI_SEGMENTATION *mriseg;
 
   nargs = handleVersionOption(argc, argv, "histo_register_block");
@@ -175,17 +175,17 @@ int main(int argc, char *argv[]) {
                 fname);
   }
 
-  pdf = pdfs[0];
+  pdf      = pdfs[0];
   out_name = argv[argc - 1];
   FileNameRemoveExtension(out_name, base);
-  max_width = MAX(mri_block->width, mri_histo->width);
+  max_width  = MAX(mri_block->width, mri_histo->width);
   max_height = MAX(mri_block->height, mri_histo->height);
-  max_vox = max_width * max_height / 4;
+  max_vox    = max_width * max_height / 4;
 
   /* max_trans = MAX(2*max_width/3, 2*max_height/3) ;*/
 
   /* find range to do segmentation over */
-  n = ceil(pdf->max_val1 - pdf->min_val1 + 1);
+  n       = ceil(pdf->max_val1 - pdf->min_val1 + 1);
   min_val = n;
   max_val = 0;
   for (i = 1; i < n; i++)
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
   if (max_val == 255)
     max_val = 199;
 
-  mriseg = MRImaxsegment(mri_histo, min_val, max_val);
+  mriseg  = MRImaxsegment(mri_histo, min_val, max_val);
   mri_seg = MRIsegmentToImage(mri_histo, nullptr, mriseg, 0);
   MRIbinarize(mri_seg, mri_seg, 0, 0, 1);
 #if 0
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
   mri_tmp = MRIresampleFill(mri_histo, mri_template, SAMPLE_NEAREST, 255);
   MRIfree(&mri_histo);
   mri_histo = mri_tmp;
-  mri_tmp = MRIresampleFill(mri_block, mri_template, SAMPLE_NEAREST, 255);
+  mri_tmp   = MRIresampleFill(mri_block, mri_template, SAMPLE_NEAREST, 255);
   MRIfree(&mri_block);
   mri_block = mri_tmp;
   MRIfree(&mri_template);
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -272,15 +272,15 @@ static int get_option(int argc, char *argv[]) {
 #endif
   } else if (!stricmp(option, "inplane")) {
     in_plane = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("setting in-plane resolution to be %2.3f\n", in_plane);
   } else if (!stricmp(option, "nlevels")) {
     nlevels = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("setting nlevels=%d...\n", nlevels);
   } else if (!stricmp(option, "overlap")) {
     min_overlap = atof(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("setting minimum fov overlap to %2.3f\n", min_overlap);
   } else if (!stricmp(option, "noalign")) {
     align = 0;
@@ -288,39 +288,39 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "max_angle")) {
     max_angle = RADIANS(atof(argv[2]));
     min_angle = -max_angle;
-    nargs = 1;
+    nargs     = 1;
     printf("searching angles from %2.1f to %2.1f\n", DEGREES(min_angle),
            DEGREES(max_angle));
   } else if (!stricmp(option, "max_scale")) {
     max_scale = atof(argv[2]);
     min_scale = 1 / max_scale;
-    nargs = 1;
+    nargs     = 1;
     printf("searching scales from %2.3f to %2.3f\n", min_scale, max_scale);
   } else if (!stricmp(option, "max_trans")) {
     max_trans = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("searching translations from %d to %d\n", -max_trans, max_trans);
   } else if (!stricmp(option, "skip")) {
-    skip = atoi(argv[2]);
+    skip  = atoi(argv[2]);
     nargs = 1;
     printf("sampling every %dth voxel...\n", skip);
     if (skip < 0)
       ErrorExit(ERROR_BADPARM, "%s: skip %d must be >= 0\n", skip);
   } else if (!stricmp(option, "ntrans")) {
     ntrans = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("searching %d translations at each step...\n", ntrans);
   } else if (!stricmp(option, "nscales")) {
     nscales = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("searching %d scales at each step...\n", nscales);
   } else if (!stricmp(option, "nangles")) {
     nangles = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("searching %d angles at each step...\n", nangles);
   } else if (!stricmp(option, "slice")) {
     slice_thickness = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     printf("setting slice thickness to be %2.3f\n", slice_thickness);
   } else
     switch (toupper(*option)) {
@@ -335,7 +335,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'C':
       if (!stricmp(argv[2], "cr")) {
@@ -434,10 +434,10 @@ static MRI *align_block_to_histo(MRI *mri_histo, MRI *mri_block, MRI *mri_seg,
 static int compute_optimal_xform(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                                  DENSITY **pdfs, int nlevels, MATRIX *xform,
                                  int cost_type, int skip) {
-  int level;
+  int  level;
   MRI *mri_src_pyramid[MAX_LEVELS], *mri_dst_pyramid[MAX_LEVELS],
       *mri_seg_pyramid[MAX_LEVELS];
-  char fname[STRLEN];
+  char     fname[STRLEN];
   DENSITY *pdf;
 
   pdf = pdfs[0];
@@ -483,16 +483,16 @@ static int align_pyramid_level(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
   printf("***********  aligning pyramid level %d... **************\n", level);
   m_start = m_delta = nullptr;
 
-  m_rot = MatrixAlloc(3, 3, MATRIX_REAL);
-  m_trans = MatrixIdentity(3, nullptr);
-  m_scale = MatrixAlloc(3, 3, MATRIX_REAL);
-  m_origin = MatrixIdentity(3, nullptr);
+  m_rot                        = MatrixAlloc(3, 3, MATRIX_REAL);
+  m_trans                      = MatrixIdentity(3, nullptr);
+  m_scale                      = MatrixAlloc(3, 3, MATRIX_REAL);
+  m_origin                     = MatrixIdentity(3, nullptr);
   *MATRIX_RELT(m_origin, 1, 3) = mri_fullres_src->width / 2;
   *MATRIX_RELT(m_origin, 2, 3) = mri_fullres_src->height / 2;
-  *MATRIX_RELT(m_rot, 3, 3) = 1.0;
-  *MATRIX_RELT(m_scale, 3, 3) = 1.0;
-  m_origin_inv = MatrixInverse(m_origin, nullptr);
-  m_best = MatrixCopy(xform, nullptr);
+  *MATRIX_RELT(m_rot, 3, 3)    = 1.0;
+  *MATRIX_RELT(m_scale, 3, 3)  = 1.0;
+  m_origin_inv                 = MatrixInverse(m_origin, nullptr);
+  m_best                       = MatrixCopy(xform, nullptr);
   min_error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf, m_best,
                                       skip, level, cost_type);
   printf("starting error: %2.4f\n", min_error);
@@ -500,12 +500,12 @@ static int align_pyramid_level(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                  level, pdf, mri_seg);
   for (scale = 1; scale >= 0.005; scale /= 2) {
     m_start = MatrixCopy(m_best, m_start);
-    mins = 1 - scale * (1 - min_scale);
-    maxs = 1 + scale * (max_scale - 1);
-    mina = min_angle * scale;
-    maxa = max_angle * scale;
-    maxt = max_trans * scale / thick;
-    astep = (maxa - mina) / (nangles - 1);
+    mins    = 1 - scale * (1 - min_scale);
+    maxs    = 1 + scale * (max_scale - 1);
+    mina    = min_angle * scale;
+    maxa    = max_angle * scale;
+    maxt    = max_trans * scale / thick;
+    astep   = (maxa - mina) / (nangles - 1);
     if (astep < 0.000000001)
       astep = 1;
     tstep = (2 * maxt) / (ntrans - 1);
@@ -538,7 +538,7 @@ static int align_pyramid_level(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                      snapshots++, level, pdf, mri_seg);
     min_error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf, m_best,
                                         skip, level, cost_type);
-    mint = -maxt;
+    mint      = -maxt;
     maxs += 0.5 * sstep;
     maxa += 0.5 * astep;
     maxt += 0.5 * tstep;
@@ -554,8 +554,8 @@ static int align_pyramid_level(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
           *MATRIX_RELT(m_rot, 2, 1) = sin(a);
           *MATRIX_RELT(m_rot, 1, 2) = -sin(a);
           *MATRIX_RELT(m_rot, 2, 2) = cos(a);
-          m = MatrixMultiply(m_scale, m_origin_inv, m);
-          m_tmp = MatrixMultiply(m_rot, m, m_tmp);
+          m                         = MatrixMultiply(m_scale, m_origin_inv, m);
+          m_tmp                     = MatrixMultiply(m_rot, m, m_tmp);
           MatrixMultiply(m_origin, m_tmp, m);
           for (dx = mint; dx <= maxt; dx += tstep) {
             *MATRIX_RELT(m_trans, 1, 3) = dx;
@@ -567,14 +567,14 @@ static int align_pyramid_level(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
               if (fabs(dy) < tstep && fabs(dx) < tstep)
                 DiagBreak();
               *MATRIX_RELT(m_trans, 2, 3) = dy;
-              m_delta = MatrixMultiply(m_trans, m, m_delta);
+              m_delta                     = MatrixMultiply(m_trans, m, m_delta);
               m_total = MatrixMultiply(m_delta, m_start, m_total);
-              error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf,
+              error   = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf,
                                               m_total, skip, level, cost_type);
               if (error < min_error) {
-                double e;
+                double  e;
                 MATRIX *m_id = MatrixIdentity(3, nullptr);
-                min_error = error;
+                min_error    = error;
                 MatrixCopy(m_total, m_best);
                 printf("%3.3d: best alignment at (%2.3f deg, %2.3f vox, %2.3f "
                        "vox, %2.5f): %2.3f\n",
@@ -583,7 +583,7 @@ static int align_pyramid_level(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                 write_snapshot(mri_fullres_src, mri_src, mri_dst, m_total, base,
                                snapshots++, level, pdf, mri_seg);
                 found = 1;
-                e = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf,
+                e     = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf,
                                             m_id, skip, level, cost_type);
                 MatrixFree(&m_id);
               }
@@ -634,9 +634,9 @@ static double compute_alignment_error(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
 static double compute_ml_alignment_error(MRI *mri_src, MRI *mri_dst,
                                          MRI *mri_seg, DENSITY *pdf,
                                          MATRIX *m_total, int skip, int level) {
-  double sse, num, error;
-  double val_src, val_dst, xs, ys, thick;
-  int x, y, oob, nseg;
+  double  sse, num, error;
+  double  val_src, val_dst, xs, ys, thick;
+  int     x, y, oob, nseg;
   VECTOR *v_src, *v_dst;
   MATRIX *m_inv;
 
@@ -743,9 +743,9 @@ static double compute_ml_alignment_error(MRI *mri_src, MRI *mri_dst,
 ------------------------------------------------------*/
 static int mriWriteImageView(MRI *mri, char *base_name, int target_size,
                              int view, int slice, MRI *mri_template) {
-  char fname[STRLEN], *prefix;
+  char   fname[STRLEN], *prefix;
   IMAGE *I;
-  float scale;
+  float  scale;
 
   mri = MRIresampleFill(mri, mri_template, SAMPLE_NEAREST, 255);
 
@@ -800,7 +800,7 @@ static int write_snapshot(MRI *mri, MRI *mri1, MRI *mri2, MATRIX *m, char *base,
   MRI *mri_xformed, *mri_ll;
   char fname[STRLEN];
 
-  mri = MRIresampleFill(mri, mri2, SAMPLE_NEAREST, 255);
+  mri         = MRIresampleFill(mri, mri2, SAMPLE_NEAREST, 255);
   mri_xformed = mri_apply_slice_xform(mri, nullptr, m, 0);
 
   sprintf(fname, "%s%3.3d", base, n);
@@ -833,8 +833,8 @@ static int write_snapshot(MRI *mri, MRI *mri1, MRI *mri2, MATRIX *m, char *base,
 
 static MRI *mri_apply_slice_xform(MRI *mri_src, MRI *mri_dst, MATRIX *m,
                                   int slice) {
-  double val, xs, ys;
-  int x, y;
+  double  val, xs, ys;
+  int     x, y;
   VECTOR *v_src, *v_dst;
 
   if (!mri_dst)
@@ -845,7 +845,7 @@ static MRI *mri_apply_slice_xform(MRI *mri_src, MRI *mri_dst, MATRIX *m,
 
   VECTOR_ELT(v_src, 3) = 1.0;
   VECTOR_ELT(v_dst, 3) = 1.0;
-  mri_dst = MRIclone(mri_src, nullptr);
+  mri_dst              = MRIclone(mri_src, nullptr);
   for (x = 0; x < mri_dst->width; x++) {
     VECTOR_ELT(v_dst, 1) = (double)x;
     for (y = 0; y < mri_dst->height; y++) {
@@ -868,8 +868,8 @@ static int compute_optimal_translation(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                                        int ntrans, int level, int skip,
                                        MRI *mri_fullres_src, int cost_type) {
   MATRIX *m_trans, *m_start, *m_total;
-  double thick, tstep, dx, dy, error, min_error, mint;
-  int found = 0;
+  double  thick, tstep, dx, dy, error, min_error, mint;
+  int     found = 0;
 
   m_trans = MatrixIdentity(3, nullptr);
 
@@ -885,17 +885,17 @@ static int compute_optimal_translation(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
 
   printf("computing optimal translations from %d --> %d in %2.1f voxel steps\n",
          -maxt, maxt, tstep);
-  m_start = MatrixCopy(m_best, nullptr);
-  m_total = nullptr;
+  m_start   = MatrixCopy(m_best, nullptr);
+  m_total   = nullptr;
   min_error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf, m_best,
                                       skip, level, cost_type);
-  mint = -maxt;
+  mint      = -maxt;
   maxt += 0.5 * tstep;
   for (dx = mint; dx <= maxt; dx += tstep) {
     *MATRIX_RELT(m_trans, 1, 3) = dx;
     for (dy = mint; dy <= maxt; dy += tstep) {
       *MATRIX_RELT(m_trans, 2, 3) = dy;
-      m_total = MatrixMultiply(m_trans, m_start, m_total);
+      m_total                     = MatrixMultiply(m_trans, m_start, m_total);
       error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf, m_total,
                                       skip, level, cost_type);
       if (error < min_error) {
@@ -920,12 +920,12 @@ static int compute_optimal_translation(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
 static double compute_cr_alignment_error(MRI *mri_src, MRI *mri_dst,
                                          MRI *mri_seg, DENSITY *pdf,
                                          MATRIX *m_total, int skip, int level) {
-  double val_src, val_dst, xs, ys, thick;
-  int x, y, oob, i;
+  double  val_src, val_dst, xs, ys, thick;
+  int     x, y, oob, i;
   VECTOR *v_src, *v_dst;
   MATRIX *m_inv;
-  int nvox[256], nseg;
-  double means[256], vars[256], cr, mean, var, num /*, cr2*/;
+  int     nvox[256], nseg;
+  double  means[256], vars[256], cr, mean, var, num /*, cr2*/;
 
   skip++;
   m_inv = MatrixInverse(m_total, nullptr);
@@ -1047,9 +1047,9 @@ static double compute_cr_alignment_error(MRI *mri_src, MRI *mri_dst,
 static MRI *rotate_image(MRI *mri_src, MRI *mri_dst, double rotate_radians) {
   MATRIX *m_rot, *m_total, *m_origin, *m_origin_inv;
   VECTOR *v_src, *v_dst;
-  float xs, ys;
-  double val_src;
-  int x, y;
+  float   xs, ys;
+  double  val_src;
+  int     x, y;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, nullptr);
@@ -1057,19 +1057,19 @@ static MRI *rotate_image(MRI *mri_src, MRI *mri_dst, double rotate_radians) {
   v_src = VectorAlloc(3, MATRIX_REAL);
   v_dst = VectorAlloc(3, MATRIX_REAL);
 
-  VECTOR_ELT(v_src, 3) = 1.0;
-  VECTOR_ELT(v_dst, 3) = 1.0;
-  m_origin = MatrixIdentity(3, nullptr);
+  VECTOR_ELT(v_src, 3)         = 1.0;
+  VECTOR_ELT(v_dst, 3)         = 1.0;
+  m_origin                     = MatrixIdentity(3, nullptr);
   *MATRIX_RELT(m_origin, 1, 3) = mri_src->width / 2;
   *MATRIX_RELT(m_origin, 2, 3) = mri_src->height / 2;
-  m_rot = MatrixAlloc(3, 3, MATRIX_REAL);
-  *MATRIX_RELT(m_rot, 1, 1) = cos(rotate_radians);
-  *MATRIX_RELT(m_rot, 2, 1) = sin(rotate_radians);
-  *MATRIX_RELT(m_rot, 1, 2) = -sin(rotate_radians);
-  *MATRIX_RELT(m_rot, 2, 2) = cos(rotate_radians);
-  *MATRIX_RELT(m_rot, 3, 3) = 1.0;
-  m_origin_inv = MatrixInverse(m_origin, nullptr);
-  m_total = MatrixMultiply(m_rot, m_origin_inv, NULL);
+  m_rot                        = MatrixAlloc(3, 3, MATRIX_REAL);
+  *MATRIX_RELT(m_rot, 1, 1)    = cos(rotate_radians);
+  *MATRIX_RELT(m_rot, 2, 1)    = sin(rotate_radians);
+  *MATRIX_RELT(m_rot, 1, 2)    = -sin(rotate_radians);
+  *MATRIX_RELT(m_rot, 2, 2)    = cos(rotate_radians);
+  *MATRIX_RELT(m_rot, 3, 3)    = 1.0;
+  m_origin_inv                 = MatrixInverse(m_origin, nullptr);
+  m_total                      = MatrixMultiply(m_rot, m_origin_inv, NULL);
   MatrixMultiply(m_origin, m_total, m_origin_inv);
   MatrixCopy(m_origin_inv, m_total);
 
@@ -1114,8 +1114,8 @@ int MRIeraseImageBorder(MRI *mri, int width) {
   return (NO_ERROR);
 }
 static double compute_overlap(MRI *mri_src, MRI *mri_dst, MATRIX *m_total) {
-  double xs, ys, thick;
-  int x, y, nvox, ntotal;
+  double  xs, ys, thick;
+  int     x, y, nvox, ntotal;
   VECTOR *v_src, *v_dst;
   MATRIX *m_inv;
   BUFTYPE val;
@@ -1178,20 +1178,20 @@ static double compute_overlap(MRI *mri_src, MRI *mri_dst, MATRIX *m_total) {
 static int probe_cost_function(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
                                DENSITY *pdf, MATRIX *mat, int cost_type,
                                char *out_name) {
-  double s, a, dx, dy, maxt, astep, tstep, error, sstep;
+  double  s, a, dx, dy, maxt, astep, tstep, error, sstep;
   MATRIX *m_rot, *m_total = nullptr, *m = nullptr, *m_scale, *m_origin,
                  *m_origin_inv;
   FILE *fp;
-  char fname[STRLEN];
+  char  fname[STRLEN];
 
-  m_rot = MatrixAlloc(3, 3, MATRIX_REAL);
-  m_scale = MatrixAlloc(3, 3, MATRIX_REAL);
-  m_origin = MatrixIdentity(3, nullptr);
+  m_rot                        = MatrixAlloc(3, 3, MATRIX_REAL);
+  m_scale                      = MatrixAlloc(3, 3, MATRIX_REAL);
+  m_origin                     = MatrixIdentity(3, nullptr);
   *MATRIX_RELT(m_origin, 1, 3) = mri_src->width / 2;
   *MATRIX_RELT(m_origin, 2, 3) = mri_src->height / 2;
-  *MATRIX_RELT(m_rot, 3, 3) = 1.0;
-  *MATRIX_RELT(m_scale, 3, 3) = 1.0;
-  m_origin_inv = MatrixInverse(m_origin, nullptr);
+  *MATRIX_RELT(m_rot, 3, 3)    = 1.0;
+  *MATRIX_RELT(m_scale, 3, 3)  = 1.0;
+  m_origin_inv                 = MatrixInverse(m_origin, nullptr);
 
   printf("probing scales...\n");
   sstep = (max_scale - min_scale) / (PROBE_SAMPLES - 1);
@@ -1199,7 +1199,7 @@ static int probe_cost_function(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
   fp = fopen(fname, "w");
   for (s = min_scale; s <= max_scale + .5 * sstep; s += sstep) {
     *MATRIX_RELT(m_scale, 1, 1) = *MATRIX_RELT(m_scale, 2, 2) = s;
-    m = MatrixMultiply(m_scale, m_origin_inv, m);
+    m       = MatrixMultiply(m_scale, m_origin_inv, m);
     m_total = MatrixMultiply(m_origin, m, m_total);
     error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf, m_total, 0,
                                     0, cost_type);
@@ -1210,14 +1210,14 @@ static int probe_cost_function(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
 
   printf("probing rotations...\n");
   sprintf(fname, "%s_rot.dat", out_name);
-  fp = fopen(fname, "w");
+  fp    = fopen(fname, "w");
   astep = (2 * max_angle) / (PROBE_SAMPLES - 1);
   for (a = min_angle; a <= max_angle + .5 * astep; a += astep) {
     *MATRIX_RELT(m_rot, 1, 1) = cos(a);
     *MATRIX_RELT(m_rot, 2, 1) = sin(a);
     *MATRIX_RELT(m_rot, 1, 2) = -sin(a);
     *MATRIX_RELT(m_rot, 2, 2) = cos(a);
-    m = MatrixMultiply(m_rot, m_origin_inv, m);
+    m                         = MatrixMultiply(m_rot, m_origin_inv, m);
     MatrixMultiply(m_origin, m, m_total);
     error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf, m_total, 0,
                                     0, cost_type);
@@ -1232,8 +1232,8 @@ static int probe_cost_function(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
   MatrixIdentity(3, m_total);
   *MATRIX_RELT(m_total, 2, 3) = 0;
   *MATRIX_RELT(m_total, 3, 3) = 1.0;
-  maxt = mri_src->width;
-  tstep = 1;
+  maxt                        = mri_src->width;
+  tstep                       = 1;
   for (dx = -max_trans; dx <= max_trans + .5 * tstep; dx += tstep) {
     *MATRIX_RELT(m_total, 1, 3) = dx;
     error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf, m_total, 0,
@@ -1245,11 +1245,11 @@ static int probe_cost_function(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
 
   printf("probing y translations...\n");
   sprintf(fname, "%s_dy.dat", out_name);
-  fp = fopen(fname, "w");
+  fp                          = fopen(fname, "w");
   *MATRIX_RELT(m_total, 1, 3) = 0;
   *MATRIX_RELT(m_total, 3, 3) = 1.0;
-  maxt = mri_src->height;
-  tstep = 1;
+  maxt                        = mri_src->height;
+  tstep                       = 1;
   for (dy = -max_trans; dy <= max_trans + .5 * tstep; dy += tstep) {
     *MATRIX_RELT(m_total, 2, 3) = dy;
     error = compute_alignment_error(mri_src, mri_dst, mri_seg, pdf, m_total, 0,
@@ -1272,17 +1272,17 @@ static int probe_cost_function(MRI *mri_src, MRI *mri_dst, MRI *mri_seg,
 #endif
 #define TOL 1e-12
 
-static MRI *Gmri_histo, *Gmri_block, *Gmri_seg;
+static MRI *    Gmri_histo, *Gmri_block, *Gmri_seg;
 static DENSITY *Gpdf;
-static int Gcost_type;
+static int      Gcost_type;
 
 static float compute_powell_sse(float *p);
-static int powell_minimize(MRI *mri_block, MRI *mri_histo, MRI *mri_seg,
-                           DENSITY *pdf, MATRIX *mat, int cost_type) {
+static int   powell_minimize(MRI *mri_block, MRI *mri_histo, MRI *mri_seg,
+                             DENSITY *pdf, MATRIX *mat, int cost_type) {
   float *p, **xi, fret, fstart;
-  int i, r, c, iter;
+  int    i, r, c, iter;
 
-  p = vector(1, NPARMS);
+  p  = vector(1, NPARMS);
   xi = matrix(1, NPARMS, 1, NPARMS);
   for (i = r = 1; r <= 3; r++) {
     for (c = 1; c <= 3; c++) {
@@ -1292,8 +1292,8 @@ static int powell_minimize(MRI *mri_block, MRI *mri_histo, MRI *mri_seg,
 
   Gmri_block = mri_block;
   Gmri_histo = mri_histo;
-  Gmri_seg = mri_seg;
-  Gpdf = pdf;
+  Gmri_seg   = mri_seg;
+  Gpdf       = pdf;
   Gcost_type = cost_type;
   for (r = 1; r <= NPARMS; r++) {
     for (c = 1; c <= NPARMS; c++) {
@@ -1329,8 +1329,8 @@ static int powell_minimize(MRI *mri_block, MRI *mri_histo, MRI *mri_seg,
 
 static float compute_powell_sse(float *p) {
   static MATRIX *mat = nullptr;
-  float error;
-  int i, r, c;
+  float          error;
+  int            i, r, c;
 
   if (mat == nullptr)
     mat = MatrixAlloc(3, 3, MATRIX_REAL);

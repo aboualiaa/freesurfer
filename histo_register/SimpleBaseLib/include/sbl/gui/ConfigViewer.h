@@ -56,7 +56,7 @@ public:
 
 private:
   // internal data
-  wxBoxSizer *m_sizer;
+  wxBoxSizer *  m_sizer;
   ConfigViewer *m_configViewer;
 };
 

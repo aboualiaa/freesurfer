@@ -1,94 +1,114 @@
-#include "mrisurf_base.h"
 #include "surface.h"
+#include "mrisurf_base.h"
 #include "xform.h"
 
 namespace surf {
 
-
 /*
   Builds a python Surface object from the internal MRIS instance.
 */
-py::object Bridge::python()
-{
+py::object Bridge::python() {
   // sanity check on the MRIS instance
-  if (!p_mris) throw std::runtime_error("cannot bridge to python as MRIS instance is null");
+  if (!p_mris)
+    throw std::runtime_error(
+        "cannot bridge to python as MRIS instance is null");
 
   // extract the vertex and face arrays in order to construct the surface object
-  py::array vertices = makeArray({p_mris->nvertices, 3}, MemoryOrder::C, MRISgetVertexArray(p_mris.get()));
-  py::array faces = makeArray({p_mris->nfaces, 3}, MemoryOrder::C, MRISgetFaceArray(p_mris.get()));
+  py::array  vertices = makeArray({p_mris->nvertices, 3}, MemoryOrder::C,
+                                 MRISgetVertexArray(p_mris.get()));
+  py::array  faces    = makeArray({p_mris->nfaces, 3}, MemoryOrder::C,
+                              MRISgetFaceArray(p_mris.get()));
   py::module fsmodule = py::module::import("freesurfer");
-  py::object surf = fsmodule.attr("Surface")(vertices, faces);
+  py::object surf     = fsmodule.attr("Surface")(vertices, faces);
 
   // transfer the rest of the parameters
   transferParameters(surf);
   return surf;
 }
 
-
 /*
   Transfers parameters (not vertices and faces) from the internal MRIS
   to the provided surface instance.
 */
-void Bridge::transferParameters(py::object& surf)
-{
+void Bridge::transferParameters(py::object &surf) {
   // pass along face and vertex normals
-  surf.attr("vertex_normals") = makeArray({p_mris->nvertices, 3}, MemoryOrder::C, MRISgetVertexNormalArray(p_mris.get()));
-  surf.attr("face_normals") = makeArray({p_mris->nfaces, 3}, MemoryOrder::C, MRISgetFaceNormalArray(p_mris.get()));
+  surf.attr("vertex_normals") =
+      makeArray({p_mris->nvertices, 3}, MemoryOrder::C,
+                MRISgetVertexNormalArray(p_mris.get()));
+  surf.attr("face_normals") = makeArray({p_mris->nfaces, 3}, MemoryOrder::C,
+                                        MRISgetFaceNormalArray(p_mris.get()));
 
   // pass along hemi info
   switch (p_mris->hemisphere) {
-    case LEFT_HEMISPHERE:  surf.attr("hemi") = "left";  break;
-    case RIGHT_HEMISPHERE: surf.attr("hemi") = "right"; break;
-    case BOTH_HEMISPHERES: surf.attr("hemi") = "both";  break;
-    default:               surf.attr("hemi") = py::none(); break;
+  case LEFT_HEMISPHERE:
+    surf.attr("hemi") = "left";
+    break;
+  case RIGHT_HEMISPHERE:
+    surf.attr("hemi") = "right";
+    break;
+  case BOTH_HEMISPHERES:
+    surf.attr("hemi") = "both";
+    break;
+  default:
+    surf.attr("hemi") = py::none();
+    break;
   }
 
   // transfer source volume geometry
   surf.attr("geom") = transform::volGeomToPython(&p_mris->vg);
 }
 
-
 /*
   Updates the cached python surface object with the internal MRIS instance.
 */
-void Bridge::updateSource()
-{
+void Bridge::updateSource() {
   // sanity check on the MRIS instance and python source
-  if (!p_mris) throw std::runtime_error("cannot bridge to python as MRIS instance is null");
-  if (source.is(py::none())) throw py::value_error("cannot update source if it does not exist");
+  if (!p_mris)
+    throw std::runtime_error(
+        "cannot bridge to python as MRIS instance is null");
+  if (source.is(py::none()))
+    throw py::value_error("cannot update source if it does not exist");
 
   // update the extracted vertex and face arrays and let transferParameters() do the rest
-  source.attr("vertices") = makeArray({p_mris->nvertices, 3}, MemoryOrder::C, MRISgetVertexArray(p_mris.get()));
-  source.attr("faces") = makeArray({p_mris->nfaces, 3}, MemoryOrder::C, MRISgetFaceArray(p_mris.get()));
+  source.attr("vertices") = makeArray({p_mris->nvertices, 3}, MemoryOrder::C,
+                                      MRISgetVertexArray(p_mris.get()));
+  source.attr("faces")    = makeArray({p_mris->nfaces, 3}, MemoryOrder::C,
+                                   MRISgetFaceArray(p_mris.get()));
   transferParameters(source);
 }
-
 
 /*
   Returns the internal MRIS instance. If one does not exist, it will be created
   from the cached python source surface.
 */
-MRIS* Bridge::mris()
-{
+MRIS *Bridge::mris() {
   // return if the MRI instance has already been set or created
-  if (p_mris) return p_mris.get();
+  if (p_mris)
+    return p_mris.get();
 
   // make sure the source python object has been provided
-  if (source.is(py::none())) throw py::value_error("cannot generate MRIS instance without source object");
+  if (source.is(py::none()))
+    throw py::value_error(
+        "cannot generate MRIS instance without source object");
 
   // construct the MRIS from vertex and face arrays
   arrayc<float> vertices = source.attr("vertices").cast<arrayc<float>>();
-  arrayc<int> faces = source.attr("faces").cast<arrayc<int>>();
-  MRIS *mris = MRISfromVerticesAndFaces(vertices.data(), vertices.shape(0), faces.data(), faces.shape(0));
+  arrayc<int>   faces    = source.attr("faces").cast<arrayc<int>>();
+  MRIS *mris = MRISfromVerticesAndFaces(vertices.data(), vertices.shape(0),
+                                        faces.data(), faces.shape(0));
 
   // transfer hemisphere info
-  mris->hemisphere = NO_HEMISPHERE;
+  mris->hemisphere  = NO_HEMISPHERE;
   py::object pyhemi = source.attr("hemi");
   if (!pyhemi.is(py::none())) {
     std::string hemi = pyhemi.cast<std::string>();
-    if      (hemi == "left")  { mris->hemisphere = LEFT_HEMISPHERE; }
-    else if (hemi == "right") { mris->hemisphere = RIGHT_HEMISPHERE; }
-    else if (hemi == "both")  { mris->hemisphere = BOTH_HEMISPHERES; }
+    if (hemi == "left") {
+      mris->hemisphere = LEFT_HEMISPHERE;
+    } else if (hemi == "right") {
+      mris->hemisphere = RIGHT_HEMISPHERE;
+    } else if (hemi == "both") {
+      mris->hemisphere = BOTH_HEMISPHERES;
+    }
   }
 
   // transfer vol geometry info
@@ -99,34 +119,27 @@ MRIS* Bridge::mris()
   return mris;
 }
 
-
 /*
   Reads a python surface from file via the MRIS bridge.
 */
-py::object read(const std::string& filename)
-{
+py::object read(const std::string &filename) {
   return Bridge(MRISread(filename.c_str()));
 }
-
 
 /*
   Writes a python surface to file via the MRIS bridge.
 */
-void write(Bridge surf, const std::string& filename)
-{
+void write(Bridge surf, const std::string &filename) {
   MRISwrite(surf, filename.c_str());
 }
-
 
 /*
   Runs MRIScomputeMetricProperties() to compute face and vertex normals.
 */
-void computeNormals(Bridge surf)
-{
+void computeNormals(Bridge surf) {
   MRIScomputeMetricProperties(surf);
   surf.updateSource();
 }
-
 
 /*
   Runs MRIScomputeSecondFundamentalForm() to compute vertex tangents along the
@@ -135,17 +148,16 @@ void computeNormals(Bridge surf)
   that might not be defined in the surface (so they shouldn't be handled in
   the transferParameters() function anyway).
 */
-void computeTangents(Bridge surf)
-{
+void computeTangents(Bridge surf) {
   MRIScomputeSecondFundamentalForm(surf);
 
   // pass along tangent vectors
-  MRIS *mris = surf.mris();
-  float * const e1_buffer = new float[mris->nvertices * 3];
-  float * const e2_buffer = new float[mris->nvertices * 3];
-  float * e1_ptr = e1_buffer;
-  float * e2_ptr = e2_buffer;
-  for (int n = 0 ; n < mris->nvertices ; n++) {
+  MRIS *       mris      = surf.mris();
+  float *const e1_buffer = new float[mris->nvertices * 3];
+  float *const e2_buffer = new float[mris->nvertices * 3];
+  float *      e1_ptr    = e1_buffer;
+  float *      e2_ptr    = e2_buffer;
+  for (int n = 0; n < mris->nvertices; n++) {
     VERTEX *v = &mris->vertices[n];
     *e1_ptr++ = v->e1x;
     *e1_ptr++ = v->e1y;
@@ -154,21 +166,19 @@ void computeTangents(Bridge surf)
     *e2_ptr++ = v->e2y;
     *e2_ptr++ = v->e2z;
   }
-  surf.source.attr("vertex_tangents_1") = makeArray({mris->nvertices, 3}, MemoryOrder::C, e1_buffer);
-  surf.source.attr("vertex_tangents_2") = makeArray({mris->nvertices, 3}, MemoryOrder::C, e2_buffer);
+  surf.source.attr("vertex_tangents_1") =
+      makeArray({mris->nvertices, 3}, MemoryOrder::C, e1_buffer);
+  surf.source.attr("vertex_tangents_2") =
+      makeArray({mris->nvertices, 3}, MemoryOrder::C, e2_buffer);
 }
-
 
 /*
   Computes the mesh euler number.
 */
-int computeEulerNumber(Bridge surf)
-{
+int computeEulerNumber(Bridge surf) {
   int unused;
   return MRIScomputeEulerNumber(surf, &unused, &unused, &unused);
 }
-
-
 
 /*
 
@@ -305,4 +315,4 @@ py::object read_directly(const std::string& filename)
 
 */
 
-}  // end namespace surf
+} // end namespace surf

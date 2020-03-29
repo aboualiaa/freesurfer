@@ -29,9 +29,9 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <cstdlib>
-#include <cstdio>
 #include <cfloat>
+#include <cstdio>
+#include <cstdlib>
 #include <math.h>
 #include <strings.h>
 
@@ -74,11 +74,11 @@ typedef struct FACE {
 } FACE;
 
 struct MRIS {
-  int nvertices;
+  int              nvertices;
   VERTEX_TOPOLOGY *vertices_topology;
-  VERTEX *vertices;
-  int nfaces;
-  FACE *faces;
+  VERTEX *         vertices;
+  int              nfaces;
+  FACE *           faces;
 };
 
 MRIS *MRISoverAlloc(int max_vertices, int max_faces, int nvertices,
@@ -108,18 +108,18 @@ static int int_compare(const void *lhs_ptr, const void *rhs_ptr) {
   return lhs - rhs;
 }
 
-void *qsort_ctx;
+void *     qsort_ctx;
 static int vno_compare(const void *lhs_ptr, const void *rhs_ptr) {
-  int lhs = *(int *)lhs_ptr;
-  int rhs = *(int *)rhs_ptr;
+  int    lhs = *(int *)lhs_ptr;
+  int    rhs = *(int *)rhs_ptr;
   float *ctx = (float *)qsort_ctx;
 
   return ctx[lhs] - ctx[rhs];
 }
 
 typedef struct PossiblyIntersectingGreatArcs_callback_context {
-  int capacity;
-  int size;
+  int  capacity;
+  int  size;
   int *keys;
 } PossiblyIntersectingGreatArcs_callback_context;
 
@@ -134,7 +134,7 @@ static bool possiblyIntersectingGreatArcs_callback(void *void_ctx, int key,
     ctx->keys = (int *)realloc(ctx->keys, ctx->capacity * sizeof(int));
   }
   ctx->keys[ctx->size++] = key;
-  *isHit = false;
+  *isHit                 = false;
   return true; // keep sending them to me
 }
 
@@ -151,43 +151,43 @@ void test(int nvertices, int useDuplicates) {
   //
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
-    int key = vno > useDuplicates ? vno : 936;
-    VERTEX *v = &mris->vertices[vno];
-    v->cx = (key * 321) % 51;
-    v->cy = (key * 7321) % 71;
-    v->cz = (key * 17321) % 91;
+    int     key = vno > useDuplicates ? vno : 936;
+    VERTEX *v   = &mris->vertices[vno];
+    v->cx       = (key * 321) % 51;
+    v->cy       = (key * 7321) % 71;
+    v->cz       = (key * 17321) % 91;
   }
-  vno = 0;
+  vno        = 0;
   float xMin = mris->vertices[vno].cx, xMax = xMin,
         yMin = mris->vertices[vno].cy, yMax = yMin,
         zMin = mris->vertices[vno].cz, zMax = zMin;
   for (vno = 1; vno < mris->nvertices; vno++) {
     VERTEX *v = &mris->vertices[vno];
-    xMin = MIN(xMin, v->cx);
-    yMin = MIN(yMin, v->cy);
-    zMin = MIN(zMin, v->cz);
-    xMax = MAX(xMax, v->cx);
-    yMax = MAX(yMax, v->cy);
-    zMax = MAX(zMax, v->cz);
+    xMin      = MIN(xMin, v->cx);
+    yMin      = MIN(yMin, v->cy);
+    zMin      = MIN(zMin, v->cz);
+    xMax      = MAX(xMax, v->cx);
+    yMax      = MAX(yMax, v->cy);
+    zMax      = MAX(zMax, v->cz);
   }
 
   // add mostly small faces
   //
   mris->nfaces = (nvertices > 2) ? nvertices - 2 : 0; // see below
-  mris->faces = (FACE *)calloc(mris->nfaces, sizeof(FACE));
+  mris->faces  = (FACE *)calloc(mris->nfaces, sizeof(FACE));
 
   const float delta_x = MAX(2, (xMax - xMin) / 30);
   const float delta_y = MAX(2, (yMax - yMin) / 30);
   const float delta_z = MAX(2, (zMax - zMin) / 30);
 
-  int *vnos = (int *)calloc(nvertices, sizeof(int));
+  int *  vnos  = (int *)calloc(nvertices, sizeof(int));
   float *ctx_x = (float *)calloc(nvertices, sizeof(float));
   float *ctx_y = (float *)calloc(nvertices, sizeof(float));
   float *ctx_z = (float *)calloc(nvertices, sizeof(float));
   {
     int i;
     for (i = 0; i < nvertices; i++) {
-      vnos[i] = i;
+      vnos[i]  = i;
       ctx_x[i] = mris->vertices[i].cx;
       ctx_y[i] = mris->vertices[i].cy;
       ctx_z[i] = mris->vertices[i].cz;
@@ -199,7 +199,7 @@ void test(int nvertices, int useDuplicates) {
   qsort(vnos, nvertices, sizeof(int), vno_compare);
 
   int fno = 0;
-  int i = 0;
+  int i   = 0;
   while (i + 2 < nvertices) {
     int iLo = i;
     i++;
@@ -254,8 +254,8 @@ void test(int nvertices, int useDuplicates) {
           face->v[2] = vnos[v2];
           int vi;
           for (vi = 0; vi < 3; vi++) {
-            int vno = face->v[vi];
-            VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
+            int                    vno = face->v[vi];
+            VERTEX_TOPOLOGY *const vt  = &mris->vertices_topology[vno];
             if (vt->num >= MAX_FACES_PER_VERTEX)
               *(int *)-1 = 0;
             ;
@@ -277,7 +277,7 @@ void test(int nvertices, int useDuplicates) {
   if (1) {
     fprintf(stderr, "Testing GreatArcSet\n");
 
-    int size;
+    int  size;
     int *keys;
 
     if (1) {
@@ -303,7 +303,7 @@ void test(int nvertices, int useDuplicates) {
         possiblyIntersectingGreatArcs(gas, &context,
                                       possiblyIntersectingGreatArcs_callback, 0,
                                       1, 1, 0, -1.2, 1, 0, -1.1, false);
-        int size = context.size;
+        int  size = context.size;
         int *keys = context.keys;
         if (size != 1)
           fprintf(stderr, "same lines failed, size:%d\n", size);
@@ -430,35 +430,35 @@ void test(int nvertices, int useDuplicates) {
     // Be nasty, deliberately go outside in all the different directions
     //
     if (mris->nvertices >= 6) {
-      int vno;
+      int     vno;
       VERTEX *v;
-      vno = 0;
-      v = &mris->vertices[vno];
+      vno   = 0;
+      v     = &mris->vertices[vno];
       v->cx = xMin - 0.1;
       noteIfXYZChangedRealmTree(realmTree, mris, getSomeXYZ, vno);
       updateRealmTree(realmTree, mris, getSomeXYZ);
-      vno = 1;
-      v = &mris->vertices[vno];
+      vno   = 1;
+      v     = &mris->vertices[vno];
       v->cy = yMin - 0.1;
       noteIfXYZChangedRealmTree(realmTree, mris, getSomeXYZ, vno);
       updateRealmTree(realmTree, mris, getSomeXYZ);
-      vno = 2;
-      v = &mris->vertices[vno];
+      vno   = 2;
+      v     = &mris->vertices[vno];
       v->cz = zMin - 0.1;
       noteIfXYZChangedRealmTree(realmTree, mris, getSomeXYZ, vno);
       updateRealmTree(realmTree, mris, getSomeXYZ);
-      vno = 3;
-      v = &mris->vertices[vno];
+      vno   = 3;
+      v     = &mris->vertices[vno];
       v->cx = xMax + 0.1;
       noteIfXYZChangedRealmTree(realmTree, mris, getSomeXYZ, vno);
       updateRealmTree(realmTree, mris, getSomeXYZ);
-      vno = 4;
-      v = &mris->vertices[vno];
+      vno   = 4;
+      v     = &mris->vertices[vno];
       v->cy = yMax + 0.1;
       noteIfXYZChangedRealmTree(realmTree, mris, getSomeXYZ, vno);
       updateRealmTree(realmTree, mris, getSomeXYZ);
-      vno = 5;
-      v = &mris->vertices[vno];
+      vno   = 5;
+      v     = &mris->vertices[vno];
       v->cz = zMax + 0.1;
       noteIfXYZChangedRealmTree(realmTree, mris, getSomeXYZ, vno);
       updateRealmTree(realmTree, mris, getSomeXYZ);
@@ -466,8 +466,8 @@ void test(int nvertices, int useDuplicates) {
 
     // Check varous realms
     //
-    int fLimit = 1;
-    int fCount = 0;
+    int   fLimit = 1;
+    int   fCount = 0;
     float xfLo, xfHi;
     float yfLo, yfHi;
     float zfLo, zfHi;
@@ -544,9 +544,9 @@ void test(int nvertices, int useDuplicates) {
                 // Check that at least the needed fno's are reported and that
                 // none is reported twice
                 //
-                int fnosCapacity = realmNumberOfMightTouchFno(realm);
-                int *fnos = (int *)calloc(fnosCapacity, sizeof(int));
-                int fnosSize = realmMightTouchFno(realm, fnos, fnosCapacity);
+                int  fnosCapacity = realmNumberOfMightTouchFno(realm);
+                int *fnos         = (int *)calloc(fnosCapacity, sizeof(int));
+                int  fnosSize = realmMightTouchFno(realm, fnos, fnosCapacity);
 
                 qsort(fnos, fnosSize, sizeof(int), int_compare);
 
@@ -561,8 +561,8 @@ void test(int nvertices, int useDuplicates) {
                 fnosI = 0;
                 int fno;
                 for (fno = 0; fno < mris->nfaces; fno++) {
-                  FACE const *face = &mris->faces[fno];
-                  int vi = 0;
+                  FACE const *  face   = &mris->faces[fno];
+                  int           vi     = 0;
                   VERTEX const *vertex = &mris->vertices[face->v[vi]];
                   float fxLo = vertex->cx, fxHi = fxLo, fyLo = vertex->cy,
                         fyHi = fyLo, fzLo = vertex->cz, fzHi = fzLo;
@@ -654,12 +654,12 @@ int main() {
 //
 using RealmTreeNode = struct RealmTreeNode;
 struct RealmTreeNode {
-  float xLo, xMid, xHi, yLo, yMid, yHi, zLo, zMid, zHi;
+  float          xLo, xMid, xHi, yLo, yMid, yHi, zLo, zMid, zHi;
   RealmTreeNode *parent;
-  int depth;
+  int            depth;
 #define childrenSizeLog2 3 // 2x 2y 2z
-#define childrenSize (1 << childrenSizeLog2)
-#define maxVnosSizeLog2 20 // only support 1M vno's
+#define childrenSize     (1 << childrenSizeLog2)
+#define maxVnosSizeLog2  20 // only support 1M vno's
 #define vnosBuffSize                                                           \
   ((sizeof(RealmTreeNode *) * childrenSize / sizeof(int)) -                    \
    2)        // 2 for vnosSize and vnosCapacity
@@ -679,8 +679,8 @@ struct RealmTreeNode {
 };
 static const unsigned long childIndexBits = childrenSizeLog2;
 static const unsigned long childIndexMask = ((1 << childrenSizeLog2) - 1);
-static const unsigned long leafIndexBits = maxVnosSizeLog2;
-static const unsigned long leafIndexMask = ((1 << maxVnosSizeLog2) - 1);
+static const unsigned long leafIndexBits  = maxVnosSizeLog2;
+static const unsigned long leafIndexMask  = ((1 << maxVnosSizeLog2) - 1);
 
 typedef struct Captured_VERTEX_xyz {
   float x, y, z;
@@ -688,12 +688,12 @@ typedef struct Captured_VERTEX_xyz {
 
 struct RealmTree {
   MRIS const *mris;
-  int saved_nvertices; // detect if these mris change
-  int saved_nfaces;
+  int         saved_nvertices; // detect if these mris change
+  int         saved_nfaces;
 
   Captured_VERTEX_xyz *captured_VERTEX_xyz;
-  RealmTreeNode **vnoToRealmTreeNode;
-  RealmTreeNode **fnoToRealmTreeNode;
+  RealmTreeNode **     vnoToRealmTreeNode;
+  RealmTreeNode **     fnoToRealmTreeNode;
 
   // links in chains of fno off each RealmTreeNode
   //      nextFnoPlus1[fno]         == 0   means end of chain
@@ -703,7 +703,7 @@ struct RealmTree {
   // links in chains of vno's whose update is pending
   //      nextVnoToUpdatePlus1[vno] ==  0  means vno not in chain
   //                                   -1  means it is the last in the chain
-  int firstVnoToUpdatePlus1;
+  int  firstVnoToUpdatePlus1;
   int *nextVnoToUpdatePlus1;
 
   // links in chains of fno's whose update are pending
@@ -726,9 +726,9 @@ struct RealmTree {
 
 static void constructRealmTreeNode(RealmTreeNode *child,
                                    RealmTreeNode *parent) {
-  child->parent = parent;
-  child->depth = parent ? parent->depth + 1 : 0;
-  child->vnos = child->vnosBuff;
+  child->parent       = parent;
+  child->depth        = parent ? parent->depth + 1 : 0;
+  child->vnos         = child->vnosBuff;
   child->vnosCapacity = vnosBuffSize;
 }
 
@@ -870,8 +870,8 @@ static void widenSubtree_wkr(RealmTreeNode *n, float xLo, float xHi, float yLo,
 
 static void widenSubtree(RealmTree *realmTree, float xLo, float xHi, float yLo,
                          float yHi, float zLo, float zHi) {
-  RealmTreeNode *n = &realmTree->root;
-  unsigned widen_Mask = 0;
+  RealmTreeNode *n          = &realmTree->root;
+  unsigned       widen_Mask = 0;
   if (xLo < n->xLo)
     widen_Mask |= Widen_xLo;
   if (xHi > n->xHi)
@@ -887,12 +887,12 @@ static void widenSubtree(RealmTree *realmTree, float xLo, float xHi, float yLo,
   widenSubtree_wkr(n, xLo, xHi, yLo, yHi, zLo, zHi, widen_Mask);
 }
 
-static RealmTreeNode *insertVnoIntoNode(RealmTree *const realmTree,
+static RealmTreeNode *insertVnoIntoNode(RealmTree *const     realmTree,
                                         RealmTreeNode *const n, int const vno);
 
 static RealmTreeNode *getChild(RealmTreeNode *const n, int c) {
-  RealmTreeNode volatile *const nv = n;
-  RealmTreeNode *child = nv->childIfPresent[c];
+  RealmTreeNode volatile *const nv    = n;
+  RealmTreeNode *               child = nv->childIfPresent[c];
 
   if (!child)
 #pragma omp critical
@@ -942,7 +942,7 @@ static RealmTreeNode const *deepestContainingNode(RealmTreeNode const *n,
                                                   float const z) {
   n = upUntilContainsNode(n, x, y, z);
   while (n && !n->vnos) {
-    int c = chooseChild(n, x, y, z);
+    int                  c     = chooseChild(n, x, y, z);
     RealmTreeNode const *child = n->childIfPresent[c];
     if (!child)
       break;
@@ -958,11 +958,11 @@ static RealmTreeNode *insertIntoChild(RealmTree *realmTree, RealmTreeNode *n,
   Captured_VERTEX_xyz const *const captured_xyz =
       &realmTree->captured_VERTEX_xyz[vno];
   float const x = captured_xyz->x, y = captured_xyz->y, z = captured_xyz->z;
-  int c = chooseChild(n, x, y, z);
+  int         c = chooseChild(n, x, y, z);
   return insertVnoIntoNode(realmTree, getChild(n, c), vno);
 }
 
-static RealmTreeNode *insertVnoIntoNode(RealmTree *const realmTree,
+static RealmTreeNode *insertVnoIntoNode(RealmTree *const     realmTree,
                                         RealmTreeNode *const n, int const vno) {
   chkBnd(0, vno, realmTree->saved_nvertices);
 
@@ -971,8 +971,8 @@ static RealmTreeNode *insertVnoIntoNode(RealmTree *const realmTree,
       &realmTree->captured_VERTEX_xyz[vno];
   float const x = captured_xyz->x, y = captured_xyz->y, z = captured_xyz->z;
 
-  MRIS const *mris = realmTree->mris;
-  VERTEX const *v = &mris->vertices[vno];
+  MRIS const *  mris = realmTree->mris;
+  VERTEX const *v    = &mris->vertices[vno];
   if (x != v->cx || y != v->cy || z != v->cz)
     fprintf(stderr, "vertex moved\n");
 #endif
@@ -986,7 +986,7 @@ static RealmTreeNode *insertVnoIntoNode(RealmTree *const realmTree,
     if (n->vnosSize == n->vnosCapacity && n->depth + 1 == maxDepth) {
       n->vnosCapacity *= 2;
       int *p = (int *)calloc(n->vnosCapacity, sizeof(int));
-      int i;
+      int  i;
       for (i = 0; i < n->vnosSize; i++)
         p[i] = n->vnos[i];
       if (n->vnos != n->vnosBuff)
@@ -1001,7 +1001,7 @@ static RealmTreeNode *insertVnoIntoNode(RealmTree *const realmTree,
       if (!nodeContains(n, x, y, z))
         *(int *)-1 = 0;
 #endif
-      n->vnos[n->vnosSize++] = vno;
+      n->vnos[n->vnosSize++]             = vno;
       realmTree->vnoToRealmTreeNode[vno] = n;
       return n;
     }
@@ -1079,7 +1079,7 @@ static int countXYZChanges(RealmTree const *realmTree, MRIS const *mris,
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX const *vertex = &mris->vertices[vno];
-    float x, y, z;
+    float         x, y, z;
     getXYZ(vertex, &x, &y, &z);
     Captured_VERTEX_xyz *c = &realmTree->captured_VERTEX_xyz[vno];
     if (x != c->x || y != c->y || z != c->z)
@@ -1112,26 +1112,26 @@ static float widenHi(float hi) {
   return hi + step;
 }
 
-static RealmTreeNode *chooseRealmTreeNodeForFno(MRIS const *const mris,
+static RealmTreeNode *chooseRealmTreeNodeForFno(MRIS const *const      mris,
                                                 RealmTree const *const rt,
-                                                int const fno) {
+                                                int const              fno) {
   chkBnd(0, fno, rt->saved_nfaces);
 
   FACE const *face = &mris->faces[fno];
 
   RealmTreeNode *n;
   RealmTreeNode *vertexNode;
-  int vi, vno;
+  int            vi, vno;
 
-  vi = 0;
-  vno = face->v[vi];
+  vi         = 0;
+  vno        = face->v[vi];
   vertexNode = rt->vnoToRealmTreeNode[vno];
-  n = vertexNode;
+  n          = vertexNode;
 
   for (vi = 1; vi < VERTICES_PER_FACE; vi++) {
-    vno = face->v[vi];
+    vno        = face->v[vi];
     vertexNode = rt->vnoToRealmTreeNode[vno];
-    n = deepestCommonNode(n, vertexNode);
+    n          = deepestCommonNode(n, vertexNode);
   }
 
   return n;
@@ -1159,7 +1159,7 @@ static void insertFnoIntoRealmTreeNode(RealmTree *realmTree, RealmTreeNode *n,
                                        int fno) {
   realmTree->fnoToRealmTreeNode[chkBnd(0, fno, realmTree->saved_nfaces)] = n;
   realmTree->nextFnoPlus1[fno] = n->firstFnoPlus1;
-  n->firstFnoPlus1 = fno + 1;
+  n->firstFnoPlus1             = fno + 1;
   // adjust the count
   n->nFaces++;
 
@@ -1319,15 +1319,15 @@ RealmTree *makeRealmTree(MRIS const *mris, GetXYZ_FunctionType getXYZ) {
 
   // Capture the xyz and calculate the outer box
   //
-  int vno = 0;
-  VERTEX const *vertex0 = &mris->vertices[vno];
+  int                  vno          = 0;
+  VERTEX const *       vertex0      = &mris->vertices[vno];
   Captured_VERTEX_xyz *captured_xyz = &rt->captured_VERTEX_xyz[vno];
   getXYZ(vertex0, &captured_xyz->x, &captured_xyz->y, &captured_xyz->z);
   float xLo = captured_xyz->x, yLo = captured_xyz->y, zLo = captured_xyz->z;
   float xHi = xLo, yHi = yLo, zHi = zLo;
   for (vno = 1; vno < mris->nvertices; vno++) {
     VERTEX const *vertex = &mris->vertices[vno];
-    captured_xyz = &rt->captured_VERTEX_xyz[vno];
+    captured_xyz         = &rt->captured_VERTEX_xyz[vno];
     getXYZ(vertex, &captured_xyz->x, &captured_xyz->y, &captured_xyz->z);
     float x = captured_xyz->x, y = captured_xyz->y, z = captured_xyz->z;
     xLo = MIN(xLo, x);
@@ -1348,12 +1348,12 @@ RealmTree *makeRealmTree(MRIS const *mris, GetXYZ_FunctionType getXYZ) {
   zHi = widenHi(zHi);
 
   RealmTreeNode *recentNode = &rt->root;
-  recentNode->xLo = xLo;
-  recentNode->yLo = yLo;
-  recentNode->zLo = zLo;
-  recentNode->xHi = xHi;
-  recentNode->yHi = yHi;
-  recentNode->zHi = zHi;
+  recentNode->xLo           = xLo;
+  recentNode->yLo           = yLo;
+  recentNode->zLo           = zLo;
+  recentNode->xHi           = xHi;
+  recentNode->yHi           = yHi;
+  recentNode->zHi           = zHi;
 
   // Place all the vertices into nodes.  recentNode tries to speed up by
   // assuming some locality.
@@ -1430,16 +1430,16 @@ static int addFnoFaceSet(int firstFnoToUpdatePlus1, RealmTree *realmTree,
                          int fno) {
   if (realmTree->nextFnoToUpdatePlus1[fno] == 0) {
     realmTree->nextFnoToUpdatePlus1[fno] = firstFnoToUpdatePlus1; // add to list
-    firstFnoToUpdatePlus1 = fno + 1;
+    firstFnoToUpdatePlus1                = fno + 1;
   }
   return firstFnoToUpdatePlus1;
 }
 
 static int addFacesToFaceSet(int firstFnoToUpdatePlus1, RealmTree *realmTree,
                              MRIS const *mris, int vno) {
-  VERTEX_TOPOLOGY const *vt = &mris->vertices_topology[vno];
-  int const numFaces = vt->num;
-  int fi;
+  VERTEX_TOPOLOGY const *vt       = &mris->vertices_topology[vno];
+  int const              numFaces = vt->num;
+  int                    fi;
   for (fi = 0; fi < numFaces; fi++) {
     firstFnoToUpdatePlus1 =
         addFnoFaceSet(firstFnoToUpdatePlus1, realmTree, vt->f[fi]);
@@ -1451,7 +1451,7 @@ void updateRealmTree(RealmTree *realmTree, MRIS const *mris,
                      GetXYZ_FunctionType getXYZ) {
 
   int previous_saved_nvertices = realmTree->saved_nvertices;
-  int previous_saved_nfaces = realmTree->saved_nfaces;
+  int previous_saved_nfaces    = realmTree->saved_nfaces;
 
   resizeRealmTree(realmTree, mris);
 
@@ -1469,7 +1469,7 @@ void updateRealmTree(RealmTree *realmTree, MRIS const *mris,
   // locality.
   //
   RealmTreeNode *recentNode = &realmTree->root;
-  int vno;
+  int            vno;
   for (vno = previous_saved_nvertices; vno < mris->nvertices; vno++) {
     recentNode = insertVnoNear(realmTree, recentNode, vno);
     firstFnoToUpdatePlus1 =
@@ -1498,7 +1498,7 @@ void updateRealmTree(RealmTree *realmTree, MRIS const *mris,
 
     // Has it changed nodes?
     //
-    RealmTreeNode *n = realmTree->vnoToRealmTreeNode[vno];
+    RealmTreeNode *      n         = realmTree->vnoToRealmTreeNode[vno];
     RealmTreeNode const *shouldBeN = deepestContainingNode(
         n, captured_xyz->x, captured_xyz->y, captured_xyz->z);
 
@@ -1523,7 +1523,7 @@ void updateRealmTree(RealmTree *realmTree, MRIS const *mris,
     int next_vno =
         realmTree->nextVnoToUpdatePlus1[vno] - 1; // get the next vno, if any
     realmTree->nextVnoToUpdatePlus1[vno] = 0; // clear the link for next time
-    vno = next_vno;
+    vno                                  = next_vno;
   }
   realmTree->firstVnoToUpdatePlus1 = -1; // mark the list as empty
 
@@ -1544,7 +1544,7 @@ void updateRealmTree(RealmTree *realmTree, MRIS const *mris,
     int next_fno =
         realmTree->nextFnoToUpdatePlus1[fno] - 1; // get the next fno, if any
     realmTree->nextFnoToUpdatePlus1[fno] = 0; // clear the link for next time
-    fno = next_fno;
+    fno                                  = next_fno;
   }
 }
 
@@ -1571,9 +1571,9 @@ void getRealmTreeBnds(RealmTree *realmTree, float *xLo, float *xHi, float *yLo,
 // Realm construction and destruction
 //
 struct Realm {
-  RealmTree const *realmTree;
+  RealmTree const *    realmTree;
   RealmTreeNode const *deepestContainingNode;
-  float xLo, xHi, yLo, yHi, zLo, zHi;
+  float                xLo, xHi, yLo, yHi, zLo, zHi;
 };
 
 void freeRealm(Realm **realmPtr) {
@@ -1595,7 +1595,7 @@ Realm *makeRealm(RealmTree const *realmTree, float xLo, float xHi, float yLo,
   // inhabitants might be but aren't outside those bounds would not have any
   // containingNode!
 
-  Realm *r = (Realm *)calloc(1, sizeof(Realm));
+  Realm *r     = (Realm *)calloc(1, sizeof(Realm));
   r->realmTree = realmTree;
   r->xLo = xLo = MAX(realmTree->root.xLo, xLo);
   r->yLo = yLo = MAX(realmTree->root.yLo, yLo);
@@ -1643,7 +1643,7 @@ static bool nodeIntersectsRealm(RealmTreeNode const *c, Realm *r) {
 static void moveToNext(RealmIterator *realmIterator, Realm *realm) {
 
   RealmTreeNode const *n = (RealmTreeNode const *)realmIterator->p;
-  unsigned long i = realmIterator->i;
+  unsigned long        i = realmIterator->i;
 
   // More in same leaf?
   //
@@ -1769,9 +1769,9 @@ int realmNextMightTouchVno(Realm *realm, RealmIterator *realmIterator) {
 
   // Get this one
   //
-  unsigned long i = realmIterator->i;
-  unsigned long c = i & leafIndexMask;
-  int const vno = n->vnos[c];
+  unsigned long i   = realmIterator->i;
+  unsigned long c   = i & leafIndexMask;
+  int const     vno = n->vnos[c];
 
   // Step to the next one
   //
@@ -1814,7 +1814,7 @@ static int fnosHere(RealmTree const *rt, RealmTreeNode const *n, int *fnos,
     }
 #endif
     fnos[fnosSize++] = fno;
-    fno = rt->nextFnoPlus1[fno] - 1;
+    fno              = rt->nextFnoPlus1[fno] - 1;
   }
   return fnosSize;
 }
@@ -1851,7 +1851,7 @@ static void summarizeRealmTreeNodeIndent(RealmTreeNode const *n) {
     fprintf(stdout, "   |");
 }
 
-static void summarizeRealmTreeNode(RealmTree const *realmTree,
+static void summarizeRealmTreeNode(RealmTree const *    realmTree,
                                    RealmTreeNode const *n) {
   if (!n) {
     fprintf(stdout, "not in the tree\n");
@@ -1881,7 +1881,7 @@ static void summarizeRealmTreeNode(RealmTree const *realmTree,
   }
 }
 
-static int summarizeRealmTreeSubtree(RealmTree const *realmTree,
+static int summarizeRealmTreeSubtree(RealmTree const *    realmTree,
                                      RealmTreeNode const *n, int targetDepth) {
   int hasUnreachedChildren = 0;
   if (n) {
@@ -1934,16 +1934,16 @@ void summarizeRealmTreeFno(RealmTree const *realmTree, int fno) {
 static void sortIntSoFirstLo(int *a, int *b) {
   if (*a > *b) {
     int temp = *a;
-    *a = *b;
-    *b = temp;
+    *a       = *b;
+    *b       = temp;
   }
 }
 
 static void sortFloatSoFirstLo(float *a, float *b) {
   if (*a > *b) {
     float temp = *a;
-    *a = *b;
-    *b = temp;
+    *a         = *b;
+    *b         = temp;
   }
 }
 
@@ -1960,7 +1960,7 @@ static void growCapacity(int *p_capacity, int minCapacity) {
 }
 
 static void growInts(int **p_old, int old_capacity, int new_capacity) {
-  int *old = *p_old;
+  int *old  = *p_old;
   int *curr = (int *)realloc(old, new_capacity * sizeof(int));
   bzero(&curr[old_capacity], (new_capacity - old_capacity) * sizeof(int));
   *p_old = curr;
@@ -1975,15 +1975,16 @@ static void growCapacityAndInts(int **p_old, int *p_capacity, int minCapacity) {
 // The cells of the projection plane that contain the indexs for the great arcs
 // that might intersect the cell
 //
-#define GRID_WIDTH 16
+#define GRID_WIDTH  16
 #define GRID_HEIGHT 16
 #define CELLS_SIZE                                                             \
-  (GRID_WIDTH * GRID_HEIGHT + 1) // Need a grid, plus one cell for everything
+  (GRID_WIDTH * GRID_HEIGHT +                                                  \
+   1) // Need a grid, plus one cell for everything  \
                                  // that has at least partial exceeds the grid
 #define UNIVERSAL_CELL (CELLS_SIZE - 1)
 
 typedef struct Cell {
-  int size, capacity;
+  int  size, capacity;
   int *indexs;
 } Cell;
 
@@ -2015,7 +2016,7 @@ struct GreatArcSet {
   int *loVnos; // beginning vno of the great arc
   int *hiVnos; // ending vno of the great arc
 
-  int passedClock;
+  int  passedClock;
   int *passed; // used during one callback to note those passed to de-duplicate
                // the multiple cells
                //
@@ -2026,9 +2027,9 @@ struct GreatArcSet {
 
   IntersectionSupport *intersectionSupport;
 
-  int pairHeadsPlus1[PAIRS_HEADS_SIZE]; // a hash table, indexs into pairs
-  int pairsSize, pairsCapacity;         // chains off the hash table
-  Pair *pairs;                          //      the entries in the chains
+  int   pairHeadsPlus1[PAIRS_HEADS_SIZE]; // a hash table, indexs into pairs
+  int   pairsSize, pairsCapacity;         // chains off the hash table
+  Pair *pairs;                            //      the entries in the chains
 
   float ax, ay, az, bx, by, bz, cx, cy,
       cz; // used to project the vno into the rectangle h,w
@@ -2080,8 +2081,8 @@ static void greatArcSet_project(GreatArcSet *set, float x, float y, float z,
   }
 
   *universal_cell = false;
-  *w = pz / px;
-  *h = py / px;
+  *w              = pz / px;
+  *h              = py / px;
 
   if (trace) {
     fprintf(stdout, "  w:%g h:%g\n", *w, *h);
@@ -2119,8 +2120,8 @@ static void greatArcSet_getCellCoords(GreatArcSet *set, float x, float y,
       }
     }
     *universal_cell = true;
-    *p_wI = -1;
-    *p_hI = -1;
+    *p_wI           = -1;
+    *p_hI           = -1;
   } else {
     *p_wI = wI;
     *p_hI = hI;
@@ -2135,7 +2136,7 @@ static void greatArcSet_cellInsert(GreatArcSet *set, Cell *cell, int index) {
 
 void freeGreatArcSet(GreatArcSet **setPtr) {
   GreatArcSet *set = *setPtr;
-  *setPtr = nullptr;
+  *setPtr          = nullptr;
   if (!set)
     return;
   {
@@ -2154,7 +2155,7 @@ void freeGreatArcSet(GreatArcSet **setPtr) {
 
 GreatArcSet *makeGreatArcSet(MRIS *mris) {
   GreatArcSet *set = (GreatArcSet *)calloc(1, sizeof(GreatArcSet));
-  set->mris = mris;
+  set->mris        = mris;
   set->passedClock = 1;
   return set;
 }
@@ -2206,10 +2207,10 @@ void insertGreatArc(GreatArcSet *set, int key, int vno0, int vno1) {
         set->pairs, set->pairsCapacity * sizeof(Pair)); // note: not zeroed
   }
 
-  Pair *pair = &set->pairs[set->pairsSize++];
+  Pair *pair      = &set->pairs[set->pairsSize++];
   pair->nextPlus1 = set->pairHeadsPlus1[pairHeadsIndex];
-  pair->loVno = vno0;
-  pair->hiVno = vno1;
+  pair->loVno     = vno0;
+  pair->hiVno     = vno1;
 
   set->pairHeadsPlus1[pairHeadsIndex] =
       set->pairsSize; // +1 has been done by the set->pairsSize++
@@ -2217,8 +2218,8 @@ void insertGreatArc(GreatArcSet *set, int key, int vno0, int vno1) {
   if (set->size == set->capacity)
     growGreatArcBuffer(set);
 
-  int i = set->size++;
-  set->keys[i] = key;
+  int i          = set->size++;
+  set->keys[i]   = key;
   set->loVnos[i] = vno0;
   set->hiVnos[i] = vno1;
 }
@@ -2321,7 +2322,7 @@ static void decideProjection(GreatArcSet *set) {
       for (index = 0; index < set->size; index++) {
         VERTEX const *v =
             &set->mris->vertices[chkBnd(0, vnos[index], set->mris->nvertices)];
-        bool universal_cell;
+        bool  universal_cell;
         float h, w;
         greatArcSet_project(set, v->cx, v->cy, v->cz, &h, &w, &universal_cell,
                             false);
@@ -2354,7 +2355,7 @@ static void decideProjection(GreatArcSet *set) {
   if (maxH == minH)
     maxH = minH + 1;
   set->scaleH = GRID_HEIGHT / (maxH - minH);
-  set->minW = minW;
+  set->minW   = minW;
   if (maxW == minW)
     maxW = minW + 1;
   set->scaleW = GRID_WIDTH / (maxW - minW);
@@ -2382,9 +2383,9 @@ static void disperseGreatArcsIntoCells(GreatArcSet *set) {
     VERTEX const *v1 =
         &set->mris->vertices[chkBnd(0, vno1, set->mris->nvertices)];
 
-    bool universal_cell0, universal_cell1;
+    bool  universal_cell0, universal_cell1;
     float w0, w1, h0, h1;
-    int wI0, wI1, hI0, hI1;
+    int   wI0, wI1, hI0, hI1;
 
     greatArcSet_getCellCoords(set, v0->cx, v0->cy, v0->cz, &w0, &h0, &wI0, &hI0,
                               &universal_cell0, trace);
@@ -2392,10 +2393,10 @@ static void disperseGreatArcsIntoCells(GreatArcSet *set) {
                               &universal_cell1, trace);
 
     IntersectionSupport *is = &set->intersectionSupport[index];
-    is->w0 = w0;
-    is->w1MinusW0 = w1 - w0;
-    is->h0 = h0;
-    is->h1MinusH0 = h1 - h0;
+    is->w0                  = w0;
+    is->w1MinusW0           = w1 - w0;
+    is->h0                  = h0;
+    is->h1MinusH0           = h1 - h0;
 
     if (trace) {
       fprintf(
@@ -2477,8 +2478,8 @@ static bool possiblyIntersectingCell(
       // against all mapping onto the viewing plane
       //
       IntersectionSupport *is = &set->intersectionSupport[index];
-      float const w0 = is->w0;
-      float const h0 = is->h0;
+      float const          w0 = is->w0;
+      float const          h0 = is->h0;
 
       // The  great arc being tested against has projected to be the straight
       // line segment (w0,h0)..(w1,h1) This great arc                      has
@@ -2562,7 +2563,7 @@ static bool possiblyIntersectingCell(
         //
         float const halfADBC = adbc * 0.5;
 
-        approachOneDone = true;
+        approachOneDone   = true;
         approachOneAnswer = (fabsf(halfADBC) >= fabsf(debf - halfADBC)) &
                             (fabsf(halfADBC) >= fabsf(afce - halfADBC));
       }
@@ -2617,11 +2618,11 @@ static bool possiblyIntersectingCell(
         //
         if (p2w > p3w) {
           float tmp = p2h;
-          p2h = p3h;
-          p3h = tmp;
-          tmp = p2w;
-          p2w = p3w;
-          p3w = tmp;
+          p2h       = p3h;
+          p3h       = tmp;
+          tmp       = p2w;
+          p2w       = p3w;
+          p3w       = tmp;
         }
 
         // Whether they overlap in the h dimension
@@ -2807,9 +2808,9 @@ void possiblyIntersectingGreatArcs(
 
   // Once placed, they can be looked for in the cells...
   //
-  bool universal_cell0, universal_cell1;
+  bool  universal_cell0, universal_cell1;
   float w0, w1, h0, h1;
-  int wI0, wI1, hI0, hI1;
+  int   wI0, wI1, hI0, hI1;
   greatArcSet_getCellCoords(set, x0, y0, z0, &w0, &h0, &wI0, &hI0,
                             &universal_cell0, false);
   greatArcSet_getCellCoords(set, x1, y1, z1, &w1, &h1, &wI1, &hI1,
@@ -2930,9 +2931,9 @@ void possiblyIntersectingGreatArcs_Debug( // show how vno0..vno1 interacts with
     return;
   }
 
-  bool universal_cell0, universal_cell1;
+  bool  universal_cell0, universal_cell1;
   float w0, w1, h0, h1;
-  int wI0, wI1, hI0, hI1;
+  int   wI0, wI1, hI0, hI1;
   greatArcSet_getCellCoords(set, x0, y0, z0, &w0, &h0, &wI0, &hI0,
                             &universal_cell0, true);
   greatArcSet_getCellCoords(set, x1, y1, z1, &w1, &h1, &wI1, &hI1,
@@ -2954,7 +2955,7 @@ void possiblyIntersectingGreatArcs_Debug( // show how vno0..vno1 interacts with
   for (w = 0; w < GRID_WIDTH; w++)
     for (h = 0; h < GRID_HEIGHT; h++) {
       Cell *cell = getCell(set, w, h);
-      int i;
+      int   i;
       for (i = 0; i < cell->size; i++) {
         int index = chkBnd(0, cell->indexs[i], set->size);
         if (target_index == index) {
@@ -2963,7 +2964,7 @@ void possiblyIntersectingGreatArcs_Debug( // show how vno0..vno1 interacts with
       }
     }
   Cell *cell = &set->cells[UNIVERSAL_CELL];
-  int i;
+  int   i;
   for (i = 0; i < cell->size; i++) {
     int index = chkBnd(0, cell->indexs[i], set->size);
     if (target_index == index) {

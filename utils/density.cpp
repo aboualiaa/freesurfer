@@ -36,15 +36,15 @@
 DENSITY *DensityHistogramEstimate(MRI *mri1, MRI *mri2, int nbins, float sigma,
                                   int *valid1, int *valid2) {
   DENSITY *pdf;
-  int x, y, bin1, bin2, nvox, n1, n2, n;
-  float val1, val2, scale1, scale2;
+  int      x, y, bin1, bin2, nvox, n1, n2, n;
+  float    val1, val2, scale1, scale2;
 
   pdf = (DENSITY *)calloc(1, sizeof(DENSITY));
   if (!pdf)
     ErrorExit(ERROR_NOMEMORY,
               "DensityHistogramEstimate(%d): could not allocate pdf", nbins);
   pdf->sigma = sigma;
-  pdf->Ipdf = ImageAlloc(nbins, nbins, PFFLOAT, 1);
+  pdf->Ipdf  = ImageAlloc(nbins, nbins, PFFLOAT, 1);
   if (pdf->Ipdf == nullptr)
     ErrorExit(ERROR_NOMEMORY,
               "DensityHistogramEstimate(%d): could not allocate density image",
@@ -55,13 +55,13 @@ DENSITY *DensityHistogramEstimate(MRI *mri1, MRI *mri2, int nbins, float sigma,
 
   pdf->max_val1 = MAX(255, pdf->max_val1);
   pdf->max_val2 = MAX(255, pdf->max_val2);
-  scale1 = (float)(nbins - 1) / (pdf->max_val1 - pdf->min_val1);
-  scale2 = (float)(nbins - 1) / (pdf->max_val2 - pdf->min_val2);
+  scale1        = (float)(nbins - 1) / (pdf->max_val1 - pdf->min_val1);
+  scale2        = (float)(nbins - 1) / (pdf->max_val2 - pdf->min_val2);
 
   strcpy(pdf->fname1, mri1->fname);
   strcpy(pdf->fname2, mri2->fname);
-  n1 = ceil(pdf->max_val1 - pdf->min_val1 + 1);
-  n2 = ceil(pdf->max_val2 - pdf->min_val2 + 1);
+  n1          = ceil(pdf->max_val1 - pdf->min_val1 + 1);
+  n2          = ceil(pdf->max_val2 - pdf->min_val2 + 1);
   pdf->valid1 = (int *)calloc(n1, sizeof(int));
   pdf->valid2 = (int *)calloc(n2, sizeof(int));
   if (!pdf->valid1 || !pdf->valid2)
@@ -128,7 +128,7 @@ DENSITY *DensityHistogramEstimate(MRI *mri1, MRI *mri2, int nbins, float sigma,
 }
 int DensityWrite(DENSITY *pdf, char *fname) {
   FILE *fp;
-  int i, j, n;
+  int   i, j, n;
 #if 0
   char buf[STRLEN] ;
   sprintf(buf, "%s.tif", fname) ;
@@ -171,9 +171,9 @@ int DensityWrite(DENSITY *pdf, char *fname) {
 }
 DENSITY *DensityRead(char *fname) {
   DENSITY *pdf;
-  FILE *fp;
-  int i, j, nbins, n;
-  char *cp, line[MAX_LINE_LEN];
+  FILE *   fp;
+  int      i, j, nbins, n;
+  char *   cp, line[MAX_LINE_LEN];
 
   pdf = (DENSITY *)calloc(1, sizeof(DENSITY));
   if (!pdf)
@@ -184,8 +184,8 @@ DENSITY *DensityRead(char *fname) {
     ErrorReturn(NULL,
                 (ERROR_BADPARM, "DensityRead(%s): could not open file", fname));
 
-  cp = fgetl(line, MAX_LINE_LEN, fp);
-  i = sscanf(cp, "%*s %d\n", &nbins);
+  cp        = fgetl(line, MAX_LINE_LEN, fp);
+  i         = sscanf(cp, "%*s %d\n", &nbins);
   pdf->Ipdf = ImageAlloc(nbins, nbins, PFFLOAT, 1);
   if (pdf->Ipdf == nullptr)
     ErrorExit(ERROR_NOMEMORY,
@@ -199,7 +199,7 @@ DENSITY *DensityRead(char *fname) {
                 fname);
   }
 
-  n = ceil(pdf->max_val1 - pdf->min_val1 + 1);
+  n           = ceil(pdf->max_val1 - pdf->min_val1 + 1);
   pdf->valid1 = (int *)calloc(n, sizeof(int));
   if (!pdf->valid1)
     ErrorExit(
@@ -215,7 +215,7 @@ DENSITY *DensityRead(char *fname) {
     ErrorPrintf(ERROR_BAD_FILE, "DensityRead(%s): could not read expected line",
                 fname);
   }
-  n = ceil(pdf->max_val2 - pdf->min_val2 + 1);
+  n           = ceil(pdf->max_val2 - pdf->min_val2 + 1);
   pdf->valid2 = (int *)calloc(n, sizeof(int));
   if (!pdf->valid2)
     ErrorExit(
@@ -254,11 +254,11 @@ DENSITY *DensityRead(char *fname) {
 }
 #define BIG_AND_NEGATIVE -1000000
 double DensityLogLikelihood(DENSITY *pdf, float val1, float val2) {
-  int bin1, bin2, nbins;
+  int    bin1, bin2, nbins;
   double p;
 
   nbins = pdf->Ipdf->rows;
-  bin1 = (val1 - pdf->min_val1) * (float)(nbins - 1) /
+  bin1  = (val1 - pdf->min_val1) * (float)(nbins - 1) /
          (pdf->max_val1 - pdf->min_val1);
   bin2 = (val2 - pdf->min_val2) * (float)(nbins - 1) /
          (pdf->max_val2 - pdf->min_val2);
@@ -277,8 +277,8 @@ double DensityLogLikelihood(DENSITY *pdf, float val1, float val2) {
 
 MRI *DensityLikelihoodImage(MRI *mri1, MRI *mri2, MRI *mri_ll, MATRIX *m,
                             DENSITY *pdf, MRI *mri_seg, int inverse) {
-  double val_src, val_dst, xs, ys, thick, ll;
-  int x, y;
+  double  val_src, val_dst, xs, ys, thick, ll;
+  int     x, y;
   VECTOR *v_src, *v_dst;
 
   thick = mri1->xsize;

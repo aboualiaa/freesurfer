@@ -55,23 +55,23 @@
 
 */
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "version.h"
-#include "cma.h"
-#include "gca.h"
-#include "fsenv.h"
 #include "annotation.h"
-#include "registerio.h"
+#include "cma.h"
 #include "cmdargs.h"
-#include "fio.h"
 #include "ctrpoints.h"
+#include "diag.h"
+#include "fio.h"
+#include "fsenv.h"
+#include "gca.h"
 #include "gtm.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "registerio.h"
+#include "version.h"
 
 #include "romp_support.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -79,135 +79,134 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 
-int MRIsegCount(MRI *seg, int id, int frame);
+int           MRIsegCount(MRI *seg, int id, int frame);
 STATSUMENTRY *LoadStatSumFile(char *fname, int *nsegid);
-int DumpStatSumTable(STATSUMENTRY *StatSumTable, int nsegid);
-int CountEdits(char *subject, char *outfile);
-float *WMAnatStats(char *subject, char *volname, int nErodes, float Pct);
+int           DumpStatSumTable(STATSUMENTRY *StatSumTable, int nsegid);
+int           CountEdits(char *subject, char *outfile);
+float *       WMAnatStats(char *subject, char *volname, int nErodes, float Pct);
 
 int main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mri_segstats.c,v 1.122 2017/01/23 18:23:14 greve Exp $";
-const char *Progname = nullptr;
-char *SUBJECTS_DIR = nullptr, *FREESURFER_HOME = nullptr;
-char *SegVolFile = nullptr;
-char *InVolFile = nullptr;
-char *InVolRegFile = nullptr;
-MATRIX *InVolReg = nullptr;
-int InVolRegHeader = 0;
-char *InIntensityName = "";
-char *InIntensityUnits = "unknown";
-char *MaskVolFile = nullptr;
-char *PVVolFile = nullptr;
-char *BrainMaskFile = nullptr;
-char *StatTableFile = nullptr;
-char *FrameAvgFile = nullptr;
-char *FrameAvgVolFile = nullptr;
-char *SpatFrameAvgFile = nullptr;
-int DoFrameAvg = 0;
-int DoFrameSum = 0;
-int RmFrameAvgMn = 0;
-int DoAccumulate = 0;
-int frame = 0;
-int synth = 0;
-int debug = 0;
-int dontrun = 0;
-long seed = 0;
+const char *Progname     = nullptr;
+char *      SUBJECTS_DIR = nullptr, *FREESURFER_HOME = nullptr;
+char *      SegVolFile       = nullptr;
+char *      InVolFile        = nullptr;
+char *      InVolRegFile     = nullptr;
+MATRIX *    InVolReg         = nullptr;
+int         InVolRegHeader   = 0;
+char *      InIntensityName  = "";
+char *      InIntensityUnits = "unknown";
+char *      MaskVolFile      = nullptr;
+char *      PVVolFile        = nullptr;
+char *      BrainMaskFile    = nullptr;
+char *      StatTableFile    = nullptr;
+char *      FrameAvgFile     = nullptr;
+char *      FrameAvgVolFile  = nullptr;
+char *      SpatFrameAvgFile = nullptr;
+int         DoFrameAvg       = 0;
+int         DoFrameSum       = 0;
+int         RmFrameAvgMn     = 0;
+int         DoAccumulate     = 0;
+int         frame            = 0;
+int         synth            = 0;
+int         debug            = 0;
+int         dontrun          = 0;
+long        seed             = 0;
 MRI *seg, *invol, *famri, *maskvol, *pvvol, *brainvol, *mri_aseg, *mri_ribbon,
     *mritmp;
-int nsegid0, *segidlist0;
-int nsegid, *segidlist;
-int NonEmptyOnly = 1;
-int UserSegIdList[1000];
-int nUserSegIdList = 0;
-int nErodeSeg = 0;
-int DoExclSegId = 0, nExcl = 0, ExclSegIdList[1000], ExclSegId;
-int DoExclCtxGMWM = 0;
-int DoSurfCtxVol = 0;
-int DoSurfWMVol = 0;
-int DoSupraTent = 0;
+int    nsegid0, *segidlist0;
+int    nsegid, *segidlist;
+int    NonEmptyOnly = 1;
+int    UserSegIdList[1000];
+int    nUserSegIdList = 0;
+int    nErodeSeg      = 0;
+int    DoExclSegId = 0, nExcl = 0, ExclSegIdList[1000], ExclSegId;
+int    DoExclCtxGMWM = 0;
+int    DoSurfCtxVol  = 0;
+int    DoSurfWMVol   = 0;
+int    DoSupraTent   = 0;
 double SupraTentVol, SupraTentVolCor;
 
 char *gcafile = nullptr;
-GCA *gca;
+GCA * gca;
 
 float maskthresh = 0.5;
-int maskinvert = 0, maskframe = 0;
-char *masksign = nullptr;
-int maskerode = 0;
-int nmaskhits;
-int DoSubCortGrayVol = 0;
-int DoTotalGrayVol = 0;
-int BrainVolFromSeg = 0;
-int DoETIV = 0;
-int DoETIVonly = 0;
-int DoOldETIVonly = 0;
-char *talxfmfile = nullptr;
-int SegFromInput = 0;
+int   maskinvert = 0, maskframe = 0;
+char *masksign  = nullptr;
+int   maskerode = 0;
+int   nmaskhits;
+int   DoSubCortGrayVol = 0;
+int   DoTotalGrayVol   = 0;
+int   BrainVolFromSeg  = 0;
+int   DoETIV           = 0;
+int   DoETIVonly       = 0;
+int   DoOldETIVonly    = 0;
+char *talxfmfile       = nullptr;
+int   SegFromInput     = 0;
 
-char *ctabfile = nullptr;
-COLOR_TABLE *ctab = nullptr;
-STATSUMENTRY *StatSumTable = nullptr;
+char *        ctabfile      = nullptr;
+COLOR_TABLE * ctab          = nullptr;
+STATSUMENTRY *StatSumTable  = nullptr;
 STATSUMENTRY *StatSumTable2 = nullptr;
-char *ctabfileOut = nullptr;
+char *        ctabfileOut   = nullptr;
 
 MRIS *mris;
-char *subject = nullptr;
-char *hemi = nullptr;
-char *annot = nullptr;
+char *subject       = nullptr;
+char *hemi          = nullptr;
+char *annot         = nullptr;
 char *whitesurfname = "white";
 
 int Vox[3], DoVox = 0;
 int segbase = -1000;
 
-int DoSquare = 0;
-int DoSquareRoot = 0;
-char *LabelFile = nullptr;
-double LabelThresh = 0;
-int UseLabelThresh = 0;
+int    DoSquare       = 0;
+int    DoSquareRoot   = 0;
+char * LabelFile      = nullptr;
+double LabelThresh    = 0;
+int    UseLabelThresh = 0;
 
-int DoMultiply = 0;
-double MultVal = 0;
+int    DoMultiply = 0;
+double MultVal    = 0;
 
-int DoSNR = 0;
-int UseRobust = 0;
-float RobustPct = 5.0;
+int            DoSNR     = 0;
+int            UseRobust = 0;
+float          RobustPct = 5.0;
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 int DoEuler = 0;
 int lheno, rheno;
-int DoAbs = 0;
+int DoAbs           = 0;
 int UsePrintSegStat = 1; // use new way to print
 
 int nReplace, SrcReplace[1000], TrgReplace[1000]; // for replacing segs
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, n, nx, n0, skip, nhits, f, nsegidrep, ind, nthsegid;
-  int c, r, s, err, DoContinue, nvox;
-  float voxelvolume, vol;
-  float min, max, range, mean, std, snr;
-  FILE *fp;
+  int      nargs, n, nx, n0, skip, nhits, f, nsegidrep, ind, nthsegid;
+  int      c, r, s, err, DoContinue, nvox;
+  float    voxelvolume, vol;
+  float    min, max, range, mean, std, snr;
+  FILE *   fp;
   double **favg, *favgmn;
-  char tmpstr[1000];
-  double atlas_icv = 0;
-  int ntotalsegid = 0;
-  int valid;
-  int usersegid = 0;
-  LABEL *label;
-  MRI *tmp;
-  MATRIX *vox2vox = nullptr;
-  nhits = 0;
-  vol = 0;
+  char     tmpstr[1000];
+  double   atlas_icv   = 0;
+  int      ntotalsegid = 0;
+  int      valid;
+  int      usersegid = 0;
+  LABEL *  label;
+  MRI *    tmp;
+  MATRIX * vox2vox = nullptr;
+  nhits            = 0;
+  vol              = 0;
 
   nargs = handleVersionOption(argc, argv, "mri_segstats");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -432,7 +431,7 @@ int main(int argc, char **argv) {
   } else {
     printf("Creating a segmentation of all 1s from %s\n", InVolFile);
     mritmp = MRIreadHeader(InVolFile, MRI_VOLUME_TYPE_UNKNOWN);
-    seg = MRIconst(mritmp->width, mritmp->height, mritmp->depth,
+    seg    = MRIconst(mritmp->width, mritmp->height, mritmp->depth,
                    mritmp->nframes, 1, nullptr);
     MRIfree(&mritmp);
   }
@@ -466,10 +465,10 @@ int main(int argc, char **argv) {
       printf("Warning: cannot find %s, not computing whole brain stats\n",
              tmpstr);
       DoSurfWMVol = DoSurfCtxVol = DoSupraTent = BrainVolFromSeg =
-          DoSubCortGrayVol = 0;
-      DoTotalGrayVol = 0;
-      DoSupraTent = 0;
-      DoETIV = 0;
+          DoSubCortGrayVol                     = 0;
+      DoTotalGrayVol                           = 0;
+      DoSupraTent                              = 0;
+      DoETIV                                   = 0;
     }
   }
 
@@ -622,8 +621,8 @@ int main(int argc, char **argv) {
 
   if (ctab == nullptr && nUserSegIdList == 0) {
     /* Must get list of segmentation ids from segmentation itself*/
-    segidlist = segidlist0;
-    nsegid = nsegid0;
+    segidlist    = segidlist0;
+    nsegid       = nsegid0;
     StatSumTable = (STATSUMENTRY *)calloc(sizeof(STATSUMENTRY), nsegid);
     for (n = 0; n < nsegid; n++) {
       StatSumTable[n].id = segidlist[n];
@@ -644,7 +643,7 @@ int main(int argc, char **argv) {
         CTABgetNumberOfValidEntries(ctab, &nsegid);
         CTABgetNumberOfTotalEntries(ctab, &ntotalsegid);
         StatSumTable = (STATSUMENTRY *)calloc(sizeof(STATSUMENTRY), nsegid);
-        usersegid = 0;
+        usersegid    = 0;
         for (n = 0; n < ntotalsegid; n++) {
           CTABisEntryValid(ctab, n, &valid);
           if (!valid) {
@@ -660,7 +659,7 @@ int main(int argc, char **argv) {
         }
       } else {
         /* User has specified --id, use those and get names from ctab */
-        nsegid = nUserSegIdList;
+        nsegid       = nUserSegIdList;
         StatSumTable = (STATSUMENTRY *)calloc(sizeof(STATSUMENTRY), nsegid);
         for (n = 0; n < nsegid; n++) {
           StatSumTable[n].id = UserSegIdList[n];
@@ -681,7 +680,7 @@ int main(int argc, char **argv) {
       }
     } else /* User specified ids, but no color table */
     {
-      nsegid = nUserSegIdList;
+      nsegid       = nUserSegIdList;
       StatSumTable = (STATSUMENTRY *)calloc(sizeof(STATSUMENTRY), nsegid);
       for (n = 0; n < nsegid; n++) {
         StatSumTable[n].id = UserSegIdList[n];
@@ -699,18 +698,18 @@ int main(int argc, char **argv) {
   fflush(stdout);
 
   DoContinue = 0;
-  nx = 0;
-  skip = 0;
-  n0 = 0;
-  vol = 0;
-  nhits = 0;
-  c = 0;
-  min = 0.0;
-  max = 0.0;
-  range = 0.0;
-  mean = 0.0;
-  std = 0.0;
-  snr = 0.0;
+  nx         = 0;
+  skip       = 0;
+  n0         = 0;
+  vol        = 0;
+  nhits      = 0;
+  c          = 0;
+  min        = 0.0;
+  max        = 0.0;
+  range      = 0.0;
+  mean       = 0.0;
+  std        = 0.0;
+  snr        = 0.0;
 
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
@@ -746,7 +745,7 @@ int main(int argc, char **argv) {
       if (!mris) {
         if (pvvol == nullptr) {
           nhits = MRIsegCount(seg, StatSumTable[n].id, 0);
-          vol = nhits * voxelvolume;
+          vol   = nhits * voxelvolume;
         } else {
           vol = MRIvoxelsInLabelWithPartialVolumeEffects(
               seg, pvvol, StatSumTable[n].id, nullptr, nullptr);
@@ -756,7 +755,7 @@ int main(int argc, char **argv) {
       } else {
         // Compute area here
         nhits = 0;
-        vol = 0;
+        vol   = 0;
         for (c = 0; c < mris->nvertices; c++) {
           if (MRIgetVoxVal(seg, c, 0, 0, 0) == StatSumTable[n].id) {
             nhits++;
@@ -773,7 +772,7 @@ int main(int argc, char **argv) {
     }
 
     StatSumTable[n].nhits = nhits;
-    StatSumTable[n].vol = vol;
+    StatSumTable[n].vol   = vol;
     if (InVolFile != nullptr && !dontrun) {
       if (nhits > 0) {
         if (UseRobust == 0)
@@ -785,15 +784,15 @@ int main(int argc, char **argv) {
 
         snr = mean / std;
       } else {
-        min = 0;
-        max = 0;
+        min   = 0;
+        max   = 0;
         range = 0;
-        mean = 0;
-        std = 0;
-        snr = 0;
+        mean  = 0;
+        std   = 0;
+        snr   = 0;
       }
-      StatSumTable[n].min = min;
-      StatSumTable[n].max = max;
+      StatSumTable[n].min   = min;
+      StatSumTable[n].max   = max;
       StatSumTable[n].range = range;
       if (DoAccumulate == 0)
         StatSumTable[n].mean = mean;
@@ -851,7 +850,7 @@ int main(int argc, char **argv) {
       nsegidrep++;
     }
     StatSumTable2 = (STATSUMENTRY *)calloc(sizeof(STATSUMENTRY), nsegidrep);
-    nthsegid = 0;
+    nthsegid      = 0;
     for (n = 0; n < nsegid; n++) {
       if (NonEmptyOnly && StatSumTable[n].nhits == 0) {
         continue;
@@ -870,24 +869,24 @@ int main(int argc, char **argv) {
         }
       }
 
-      StatSumTable2[nthsegid].id = StatSumTable[n].id;
+      StatSumTable2[nthsegid].id    = StatSumTable[n].id;
       StatSumTable2[nthsegid].nhits = StatSumTable[n].nhits;
-      StatSumTable2[nthsegid].vol = StatSumTable[n].vol;
-      StatSumTable2[nthsegid].min = StatSumTable[n].min;
-      StatSumTable2[nthsegid].max = StatSumTable[n].max;
+      StatSumTable2[nthsegid].vol   = StatSumTable[n].vol;
+      StatSumTable2[nthsegid].min   = StatSumTable[n].min;
+      StatSumTable2[nthsegid].max   = StatSumTable[n].max;
       StatSumTable2[nthsegid].range = StatSumTable[n].range;
-      StatSumTable2[nthsegid].mean = StatSumTable[n].mean;
-      StatSumTable2[nthsegid].std = StatSumTable[n].std;
-      StatSumTable2[nthsegid].snr = StatSumTable[n].snr;
-      StatSumTable2[nthsegid].red = StatSumTable[n].red;
+      StatSumTable2[nthsegid].mean  = StatSumTable[n].mean;
+      StatSumTable2[nthsegid].std   = StatSumTable[n].std;
+      StatSumTable2[nthsegid].snr   = StatSumTable[n].snr;
+      StatSumTable2[nthsegid].red   = StatSumTable[n].red;
       StatSumTable2[nthsegid].green = StatSumTable[n].green;
-      StatSumTable2[nthsegid].blue = StatSumTable[n].blue;
+      StatSumTable2[nthsegid].blue  = StatSumTable[n].blue;
       strcpy(StatSumTable2[nthsegid].name, StatSumTable[n].name);
       nthsegid++;
     }
     free(StatSumTable);
     StatSumTable = StatSumTable2;
-    nsegid = nsegidrep;
+    nsegid       = nsegidrep;
   }
   printf("Reporting on %3d segmentations\n", nsegid);
 
@@ -1126,9 +1125,9 @@ int main(int argc, char **argv) {
     if (UsePrintSegStat) {
       printf("Using PrintSegStat\n");
       SEGSTAT *segstat;
-      segstat = (SEGSTAT *)calloc(sizeof(SEGSTAT), 1);
+      segstat           = (SEGSTAT *)calloc(sizeof(SEGSTAT), 1);
       segstat->nentries = nsegid;
-      segstat->entry = StatSumTable;
+      segstat->entry    = StatSumTable;
       if (!mris)
         segstat->IsSurf = 0;
       else
@@ -1141,9 +1140,9 @@ int main(int argc, char **argv) {
         segstat->DoIntensity = 1;
       else
         segstat->DoIntensity = 0;
-      segstat->InIntensityName = InIntensityName;
+      segstat->InIntensityName  = InIntensityName;
       segstat->InIntensityUnits = InIntensityUnits;
-      segstat->DoSNR = DoSNR;
+      segstat->DoSNR            = DoSNR;
       PrintSegStat(fp, segstat);
     } else {
       printf("Not using PrintSegStat\n");
@@ -1274,7 +1273,7 @@ int main(int argc, char **argv) {
       if (n % 20 == 19)
         printf("\n");
       fflush(stdout);
-      nvox = MRIsegFrameAvg(seg, StatSumTable[n].id, invol, favg[n]);
+      nvox      = MRIsegFrameAvg(seg, StatSumTable[n].id, invol, favg[n]);
       favgmn[n] = 0.0;
       for (f = 0; f < invol->nframes; f++) {
         if (DoFrameSum)
@@ -1342,7 +1341,7 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused, nth, err;
+  int    nargc, nargsused, nth, err;
   char **pargv, *option;
 
   if (argc < 1) {
@@ -1432,7 +1431,7 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       DoMultiply = 1;
       sscanf(pargv[0], "%lf", &MultVal);
-      MultVal = 1.0 / MultVal;
+      MultVal   = 1.0 / MultVal;
       nargsused = 1;
     } else if (!strcasecmp(option, "--robust")) {
       if (nargc < 1)
@@ -1445,7 +1444,7 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       talxfmfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--sd")) {
       if (nargc < 1) {
         argnerr(option, 1);
@@ -1454,25 +1453,25 @@ static int parse_commandline(int argc, char **argv) {
       nargsused = 1;
     } else if (!strcmp(option, "--ctab-default")) {
       FREESURFER_HOME = getenv("FREESURFER_HOME");
-      ctabfile = (char *)calloc(sizeof(char), 1000);
+      ctabfile        = (char *)calloc(sizeof(char), 1000);
       sprintf(ctabfile, "%s/FreeSurferColorLUT.txt", FREESURFER_HOME);
       printf("Using defalt ctab %s\n", ctabfile);
     } else if (!strcmp(option, "--ctab-gca")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      gcafile = pargv[0];
+      gcafile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--seg")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       SegVolFile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--seg-from-input")) {
-      SegFromInput = 1;
+      SegFromInput     = 1;
       UserSegIdList[0] = 1;
-      nUserSegIdList = 1;
+      nUserSegIdList   = 1;
     } else if (!strcmp(option, "--seg-erode")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -1485,7 +1484,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%d", &Vox[0]);
       sscanf(pargv[1], "%d", &Vox[1]);
       sscanf(pargv[2], "%d", &Vox[2]);
-      DoVox = 1;
+      DoVox     = 1;
       nargsused = 3;
     } else if (!strcmp(option, "--in") || !strcmp(option, "--i")) {
       if (nargc < 1) {
@@ -1498,7 +1497,7 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       InVolRegFile = pargv[0];
-      InVolReg = regio_read_registermat(InVolRegFile);
+      InVolReg     = regio_read_registermat(InVolRegFile);
       if (InVolReg == nullptr) {
         exit(1);
       }
@@ -1510,19 +1509,19 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       InIntensityName = pargv[0];
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcmp(option, "--in-intensity-units")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       InIntensityUnits = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcmp(option, "--brainmask")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       BrainMaskFile = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--id")) {
       if (nargc < 1) {
         argnerr(option, 1);
@@ -1535,8 +1534,8 @@ static int parse_commandline(int argc, char **argv) {
       }
       nargsused = nth;
     } else if (!strcmp(option, "--excl-ctxgmwm")) {
-      DoExclSegId = 1;
-      DoExclCtxGMWM = 1;
+      DoExclSegId          = 1;
+      DoExclCtxGMWM        = 1;
       ExclSegIdList[nExcl] = 2;
       nExcl++;
       ExclSegIdList[nExcl] = 3;
@@ -1556,18 +1555,18 @@ static int parse_commandline(int argc, char **argv) {
         nth++;
       }
       DoExclSegId = 1;
-      nargsused = nth;
+      nargsused   = nth;
     } else if (!strcmp(option, "--mask")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       MaskVolFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--masksign")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      masksign = pargv[0];
+      masksign  = pargv[0];
       nargsused = 1;
       if (strncasecmp(masksign, "abs", 3) && strncasecmp(masksign, "pos", 3) &&
           strncasecmp(masksign, "neg", 3)) {
@@ -1605,13 +1604,13 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       StatTableFile = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--sum-in")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       StatTableFile = pargv[0];
-      StatSumTable = LoadStatSumFile(StatTableFile, &nsegid);
+      StatSumTable  = LoadStatSumFile(StatTableFile, &nsegid);
       printf("Found %d\n", nsegid);
       DumpStatSumTable(StatSumTable, nsegid);
       exit(1);
@@ -1621,43 +1620,43 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       FrameAvgFile = pargv[0];
-      DoFrameAvg = 1;
-      nargsused = 1;
+      DoFrameAvg   = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--avgwf-remove-mean"))
       RmFrameAvgMn = 1;
     else if (!strcmp(option, "--sumwf")) {
       if (nargc < 1)
         argnerr(option, 1);
       FrameAvgFile = pargv[0];
-      DoFrameAvg = 1;
-      DoFrameSum = 1;
-      nargsused = 1;
+      DoFrameAvg   = 1;
+      DoFrameSum   = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--sfavg")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       SpatFrameAvgFile = pargv[0];
-      DoFrameAvg = 1;
-      nargsused = 1;
+      DoFrameAvg       = 1;
+      nargsused        = 1;
     } else if (!strcmp(option, "--avgwfvol")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       FrameAvgVolFile = pargv[0];
-      DoFrameAvg = 1;
-      nargsused = 1;
+      DoFrameAvg      = 1;
+      nargsused       = 1;
     } else if (!strcmp(option, "--ctab")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      ctabfile = pargv[0];
+      ctabfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--ctab-out")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       ctabfileOut = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--frame")) {
       if (nargc < 1) {
         argnerr(option, 1);
@@ -1668,43 +1667,43 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--qa-stats")) {
       if (nargc < 2)
         argnerr(option, 2);
       subject = pargv[0];
-      err = CountEdits(subject, pargv[1]);
+      err     = CountEdits(subject, pargv[1]);
       exit(err);
       nargsused = 2;
     } else if (!strcmp(option, "--annot")) {
       if (nargc < 3) {
         argnerr(option, 1);
       }
-      subject = pargv[0];
-      hemi = pargv[1];
-      annot = pargv[2];
+      subject   = pargv[0];
+      hemi      = pargv[1];
+      annot     = pargv[2];
       nargsused = 3;
     } else if (!strcmp(option, "--surf")) {
       if (nargc < 1)
         argnerr(option, 1);
       whitesurfname = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--slabel")) {
       if (nargc < 3)
         argnerr(option, 3);
-      subject = pargv[0];
-      hemi = pargv[1];
-      LabelFile = pargv[2];
-      ExclSegId = 0;
+      subject     = pargv[0];
+      hemi        = pargv[1];
+      LabelFile   = pargv[2];
+      ExclSegId   = 0;
       DoExclSegId = 1;
-      nargsused = 3;
+      nargsused   = 3;
     } else if (!strcmp(option, "--label-thresh")) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%lf", &LabelThresh);
       UseLabelThresh = 1;
-      nargsused = 1;
+      nargsused      = 1;
     } else if (!strcmp(option, "--segbase")) {
       if (nargc < 1) {
         argnerr(option, 1);
@@ -1716,7 +1715,7 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       sscanf(pargv[0], "%ld", &seed);
-      synth = 1;
+      synth     = 1;
       nargsused = 1;
     } else if (!strcmp(option, "--pv")) {
       if (nargc < 1) {
@@ -1904,8 +1903,8 @@ int MRIsegCount(MRI *seg, int id, int frame) {
 }
 /*------------------------------------------------------------*/
 STATSUMENTRY *LoadStatSumFile(char *fname, int *nsegid) {
-  FILE *fp;
-  char tmpstr[1000];
+  FILE *        fp;
+  char          tmpstr[1000];
   STATSUMENTRY *StatSumTable, *e;
 
   fp = fopen(fname, "r");
@@ -1927,7 +1926,7 @@ STATSUMENTRY *LoadStatSumFile(char *fname, int *nsegid) {
   StatSumTable = (STATSUMENTRY *)calloc(sizeof(STATSUMENTRY), *nsegid);
 
   // Now actually read it in
-  fp = fopen(fname, "r");
+  fp      = fopen(fname, "r");
   *nsegid = 0;
   while (fgets(tmpstr, 1000, fp) != nullptr) {
     if (tmpstr[0] == '#') {
@@ -1968,15 +1967,15 @@ to have this in the aseg.stats file at some point.
 \param outfile saves results in outfile
 */
 int CountEdits(char *subject, char *outfile) {
-  char *SUBJECTS_DIR;
-  char sd[4000], tmpstr[4000];
+  char *  SUBJECTS_DIR;
+  char    sd[4000], tmpstr[4000];
   MPoint *pArray = nullptr;
-  int count = 0, useRealRAS = 0;
-  int c, r, s;
-  MRI *mri, *mri2;
-  int nWMErase, nWMFill, nBMErase, nBMClone, nASegChanges;
-  double v1, v2;
-  FILE *fp;
+  int     count = 0, useRealRAS = 0;
+  int     c, r, s;
+  MRI *   mri, *mri2;
+  int     nWMErase, nWMFill, nBMErase, nBMClone, nASegChanges;
+  double  v1, v2;
+  FILE *  fp;
 
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
   sprintf(sd, "%s/%s", SUBJECTS_DIR, subject);
@@ -1993,7 +1992,7 @@ int CountEdits(char *subject, char *outfile) {
   if (mri == nullptr)
     return (1);
   nWMErase = 0;
-  nWMFill = 0;
+  nWMFill  = 0;
   for (c = 0; c < mri->width; c++) {
     for (r = 0; r < mri->height; r++) {
       for (s = 0; s < mri->depth; s++) {
@@ -2057,8 +2056,8 @@ int CountEdits(char *subject, char *outfile) {
   MRIfree(&mri);
   MRIfree(&mri2);
 
-  int nvertices, nfaces, nedges;
-  int lheno, rheno, lhholes, rhholes, totholes;
+  int   nvertices, nfaces, nedges;
+  int   lheno, rheno, lhholes, rhholes, totholes;
   MRIS *mris;
   sprintf(tmpstr, "%s/%s/surf/lh.orig.nofix", SUBJECTS_DIR, subject);
   mris = MRISread(tmpstr);
@@ -2072,13 +2071,13 @@ int CountEdits(char *subject, char *outfile) {
     exit(1);
   rheno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges);
   MRISfree(&mris);
-  lhholes = 1 - lheno / 2;
-  rhholes = 1 - rheno / 2;
+  lhholes  = 1 - lheno / 2;
+  rhholes  = 1 - rheno / 2;
   totholes = lhholes + rhholes;
 
-  double determinant = 0;
+  double determinant       = 0;
   double etiv_scale_factor = 1948.106;
-  double atlas_icv = 0;
+  double atlas_icv         = 0;
   sprintf(tmpstr, "%s/%s/mri/transforms/talairach.xfm", SUBJECTS_DIR, subject);
   atlas_icv = MRIestimateTIV(tmpstr, etiv_scale_factor, &determinant);
 
@@ -2114,13 +2113,13 @@ int CountEdits(char *subject, char *outfile) {
 }
 
 float *WMAnatStats(char *subject, char *volname, int nErodes, float Pct) {
-  char sd[4000], tmpstr[4000];
-  float *stats, val;
+  char    sd[4000], tmpstr[4000];
+  float * stats, val;
   MATRIX *v;
-  int wmids[12] = {2, 41, 7, 46, 251, 252, 253, 254, 255, 77, 78, 79};
-  int nwmids = 12;
-  int c, r, s, n, Matched, nhits;
-  MRI *apas, *wmvol;
+  int     wmids[12] = {2, 41, 7, 46, 251, 252, 253, 254, 255, 77, 78, 79};
+  int     nwmids    = 12;
+  int     c, r, s, n, Matched, nhits;
+  MRI *   apas, *wmvol;
 
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
   sprintf(sd, "%s/%s", SUBJECTS_DIR, subject);
@@ -2137,7 +2136,7 @@ float *WMAnatStats(char *subject, char *volname, int nErodes, float Pct) {
   for (c = 0; c < apas->width; c++) {
     for (r = 0; r < apas->height; r++) {
       for (s = 0; s < apas->depth; s++) {
-        val = MRIgetVoxVal(apas, c, r, s, 0);
+        val     = MRIgetVoxVal(apas, c, r, s, 0);
         Matched = 0;
         for (n = 0; n < nwmids; n++) {
           if (fabs(val - wmids[n]) < 2 * FLT_MIN) {
@@ -2170,7 +2169,7 @@ float *WMAnatStats(char *subject, char *volname, int nErodes, float Pct) {
     }
   }
 
-  v = MatrixAlloc(nhits, 1, MATRIX_REAL);
+  v     = MatrixAlloc(nhits, 1, MATRIX_REAL);
   nhits = 0;
   for (c = 0; c < apas->width; c++) {
     for (r = 0; r < apas->height; r++) {

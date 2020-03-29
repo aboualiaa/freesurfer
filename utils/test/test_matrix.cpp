@@ -22,17 +22,17 @@
  *
  */
 
-#include <stdexcept>
-#include <sstream>
 #include <iostream>
-#include <string>
 #include <math.h>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 // testing
-#include <cppunit/TestCase.h>
 #include <cppunit/TestCaller.h>
-#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/ui/text/TestRunner.h>
 
 #include "numerics.h"
 
@@ -89,7 +89,7 @@ private:
   bool AreMatricesEqual(MATRIX *m1, MATRIX *m2, float tolerance);
   bool AreInversesEqual(MATRIX *matrix, const std::string inverseFile);
   void DeleteMatrix(MATRIX *m);
-  int DoesCreateValidEigenSystem(MATRIX *matrix);
+  int  DoesCreateValidEigenSystem(MATRIX *matrix);
 
 public:
   static const std::string TESTING_DIR;
@@ -150,8 +150,8 @@ public:
   void TestMatrixSVDPseudoInverse();
 };
 
-const int MatrixTest::EIGENSYSTEM_VALID = 0;
-const int MatrixTest::EIGENSYSTEM_INVALID = 1;
+const int MatrixTest::EIGENSYSTEM_VALID          = 0;
+const int MatrixTest::EIGENSYSTEM_INVALID        = 1;
 const int MatrixTest::EIGENSYSTEM_NOT_DESCENDING = 2;
 
 const std::string MatrixTest::TESTING_DIR = "test_matrix_data/";
@@ -160,7 +160,7 @@ const std::string MatrixTest::PASCAL_MATRIX = TESTING_DIR + "Pascal.mat";
 const std::string MatrixTest::PASCAL_INVERSE =
     TESTING_DIR + "PascalInverse.mat";
 
-const std::string MatrixTest::BUCKY_MATRIX = TESTING_DIR + "Bucky.mat";
+const std::string MatrixTest::BUCKY_MATRIX  = TESTING_DIR + "Bucky.mat";
 const std::string MatrixTest::BUCKY_INVERSE = TESTING_DIR + "BuckyInverse.mat";
 
 const std::string MatrixTest::ZEROES_MATRIX = TESTING_DIR + "Zeroes.mat";
@@ -177,7 +177,7 @@ const std::string MatrixTest::SQUARE_MATRIX = TESTING_DIR + "Square.mat";
 const std::string MatrixTest::SQUARE_MATRIX_PSEUDO_INVERSE =
     TESTING_DIR + "SvdPseudoInverse.mat";
 
-const std::string MatrixTest::ONE_MATRIX = TESTING_DIR + "One.mat";
+const std::string MatrixTest::ONE_MATRIX  = TESTING_DIR + "One.mat";
 const std::string MatrixTest::ONE_INVERSE = TESTING_DIR + "OneInverse.mat";
 
 const std::string MatrixTest::ONE_SMALL_MATRIX = TESTING_DIR + "OneSmall.mat";
@@ -197,16 +197,16 @@ const std::string MatrixTest::SVD_V_MATRIX = TESTING_DIR + "SVD_V.mat";
 const std::string MatrixTest::SVD_S_VECTOR = TESTING_DIR + "SVD_S.mat";
 
 void MatrixTest::setUp() {
-  mPascalMatrix = MatrixRead((char *)(PASCAL_MATRIX.c_str()));
-  mBuckyMatrix = MatrixRead((char *)(BUCKY_MATRIX.c_str()));
-  mZeroesMatrix = MatrixRead((char *)(ZEROES_MATRIX.c_str()));
-  mIdentityMatrix = MatrixRead((char *)(IDENTITY_MATRIX.c_str()));
-  mSingularMatrix = MatrixRead((char *)(SINGULAR_MATRIX.c_str()));
-  mNonSquareMatrix = MatrixRead((char *)(NON_SQUARE_MATRIX.c_str()));
-  mSquareMatrix = MatrixRead((char *)(SQUARE_MATRIX.c_str()));
-  mOneMatrix = MatrixRead((char *)(ONE_MATRIX.c_str()));
-  mOneSmallMatrix = MatrixRead((char *)(ONE_SMALL_MATRIX.c_str()));
-  mTransformMatrix = MatrixRead((char *)(TRANSFORM_MATRIX.c_str()));
+  mPascalMatrix       = MatrixRead((char *)(PASCAL_MATRIX.c_str()));
+  mBuckyMatrix        = MatrixRead((char *)(BUCKY_MATRIX.c_str()));
+  mZeroesMatrix       = MatrixRead((char *)(ZEROES_MATRIX.c_str()));
+  mIdentityMatrix     = MatrixRead((char *)(IDENTITY_MATRIX.c_str()));
+  mSingularMatrix     = MatrixRead((char *)(SINGULAR_MATRIX.c_str()));
+  mNonSquareMatrix    = MatrixRead((char *)(NON_SQUARE_MATRIX.c_str()));
+  mSquareMatrix       = MatrixRead((char *)(SQUARE_MATRIX.c_str()));
+  mOneMatrix          = MatrixRead((char *)(ONE_MATRIX.c_str()));
+  mOneSmallMatrix     = MatrixRead((char *)(ONE_SMALL_MATRIX.c_str()));
+  mTransformMatrix    = MatrixRead((char *)(TRANSFORM_MATRIX.c_str()));
   mNonSymmetricMatrix = MatrixRead((char *)(NON_SYMMETRIC_MATRIX.c_str()));
 }
 
@@ -227,13 +227,13 @@ bool MatrixTest::AreMatricesEqual(MATRIX *m1, MATRIX *m2,
 
   if (m1->rows == m2->rows && m2->cols == m2->cols) {
 
-    int numberOfRows = m1->rows;
+    int numberOfRows    = m1->rows;
     int numberOfColumns = m1->cols;
 
     for (int row = 0; row < numberOfRows; row++) {
       for (int column = 0; column < numberOfColumns; column++) {
 
-        int index = column + row * numberOfColumns;
+        int   index      = column + row * numberOfColumns;
         float difference = fabs(m1->data[index] - m2->data[index]);
 
         if (difference > tolerance) {
@@ -261,14 +261,14 @@ bool MatrixTest::AreMatricesEqual(MATRIX *m1, MATRIX *m2,
   return areEqual;
 }
 
-bool MatrixTest::AreInversesEqual(MATRIX *matrix,
+bool MatrixTest::AreInversesEqual(MATRIX *          matrix,
                                   const std::string inverseFile) {
 
   // NJS: had to change the tolerance for the test case to pass with VXL
   float tolerance = 0.0022;
 
   MATRIX *expectedInverse = MatrixRead((char *)(inverseFile.c_str()));
-  MATRIX *actualInverse = MatrixInverse(matrix, NULL);
+  MATRIX *actualInverse   = MatrixInverse(matrix, NULL);
 
   CPPUNIT_ASSERT(expectedInverse != NULL);
   CPPUNIT_ASSERT(actualInverse != NULL);
@@ -395,7 +395,7 @@ int MatrixTest::DoesCreateValidEigenSystem(MATRIX *matrix) {
   int size = matrix->rows;
   int cols = matrix->cols;
 
-  float *eigenValues = new float[size];
+  float * eigenValues  = new float[size];
   MATRIX *eigenVectors = MatrixAlloc(size, cols, MATRIX_REAL);
 
   MATRIX *eigenSystem = MatrixEigenSystem(matrix, eigenValues, eigenVectors);
@@ -420,7 +420,7 @@ int MatrixTest::DoesCreateValidEigenSystem(MATRIX *matrix) {
 
   for (int i = 0; i < size; i++) {
     // index of the diagonal
-    int index = i + i * size;
+    int index                      = i + i * size;
     eigenValuesMatrix->data[index] = eigenValues[i];
   }
 
@@ -500,7 +500,7 @@ void MatrixTest::TestMatrixSVDPseudoInverse() {
       MatrixRead((char *)(NON_SQUARE_MATRIX_PSEUDO_INVERSE.c_str()));
   CPPUNIT_ASSERT(AreMatricesEqual(actualInverse, expectedInverse));
 
-  actualInverse = MatrixSVDPseudoInverse(mSquareMatrix, NULL);
+  actualInverse   = MatrixSVDPseudoInverse(mSquareMatrix, NULL);
   expectedInverse = MatrixRead((char *)(SQUARE_MATRIX_PSEUDO_INVERSE.c_str()));
   CPPUNIT_ASSERT(AreMatricesEqual(actualInverse, expectedInverse, tolerance));
 }
@@ -508,7 +508,7 @@ void MatrixTest::TestMatrixSVDPseudoInverse() {
 int main(int argc, char **argv) {
 
   int SUCCESS = 0;
-  int FAIL = 1;
+  int FAIL    = 1;
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(MatrixTest::suite());

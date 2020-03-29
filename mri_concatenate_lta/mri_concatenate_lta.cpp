@@ -27,47 +27,46 @@
  */
 
 #include "error.h"
-#include "version.h"
 #include "transform.h"
+#include "version.h"
 
 static void usage(int exit_val);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 // static LTA *ltaReadFileEx(const char *fname);
 static LTA *ltaMNIreadEx(const char *fname);
-static int ltaMNIwrite(LTA *lta, char *fname);
+static int  ltaMNIwrite(LTA *lta, char *fname);
 
-static int invert1 = 0;
-static int invert2 = 0;
+static int invert1   = 0;
+static int invert2   = 0;
 static int invertout = 0;
 
 static int out_type = 0;
 
-const char *Progname;
-static char *tal_src_file = nullptr;
-static char *tal_dst_file = nullptr;
-static MRI *tal_src = nullptr;
-static MRI *tal_dst = nullptr;
-static int DoRMSDiff = 0;
-static double RMSDiffRad = 0;
-static char *RMSDiffFile = nullptr;
-static char *subject = nullptr;
+const char *  Progname;
+static char * tal_src_file = nullptr;
+static char * tal_dst_file = nullptr;
+static MRI *  tal_src      = nullptr;
+static MRI *  tal_dst      = nullptr;
+static int    DoRMSDiff    = 0;
+static double RMSDiffRad   = 0;
+static char * RMSDiffFile  = nullptr;
+static char * subject      = nullptr;
 
 int main(int argc, char *argv[]) {
 
-  char **av, *ltafn1, *ltafn2, *ltafn_total;
-  LTA *lta1, *lta2, *lta_total;
-  FILE *fo;
+  char ** av, *ltafn1, *ltafn2, *ltafn_total;
+  LTA *   lta1, *lta2, *lta_total;
+  FILE *  fo;
   MATRIX *r_to_i_1, *i_to_r_1, *i_to_r_2, *r_to_i_2;
   MATRIX *RAS_1_to_1, *RAS_2_to_2, *m_tmp;
-  int nargs, ac;
-  int type = 0;
+  int     nargs, ac;
+  int     type = 0;
 
   Progname = argv[0];
 
   nargs = handleVersionOption(argc, argv, "mri_concatenate_lta");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -82,14 +81,14 @@ int main(int argc, char *argv[]) {
   if ((DoRMSDiff == 0 && argc != 4) || (DoRMSDiff == 1 && argc != 3))
     usage(1);
 
-  ltafn1 = argv[1];
-  ltafn2 = argv[2];
+  ltafn1      = argv[1];
+  ltafn2      = argv[2];
   ltafn_total = argv[3];
 
   printf("Read individual LTAs\n");
   // lta1 = ltaReadFileEx(ltafn1);
   TRANSFORM *trans = TransformRead(ltafn1);
-  lta1 = (LTA *)trans->xform;
+  lta1             = (LTA *)trans->xform;
 
   if (!lta1) {
     ErrorExit(ERROR_BADFILE, "%s: can't read file %s", Progname, ltafn1);
@@ -97,8 +96,8 @@ int main(int argc, char *argv[]) {
 
   if (invert1) {
     VOL_GEOM vgtmp;
-    LT *lt;
-    MATRIX *m_tmp = lta1->xforms[0].m_L;
+    LT *     lt;
+    MATRIX * m_tmp      = lta1->xforms[0].m_L;
     lta1->xforms[0].m_L = MatrixInverse(lta1->xforms[0].m_L, nullptr);
     MatrixFree(&m_tmp);
     lt = &lta1->xforms[0];
@@ -174,7 +173,7 @@ int main(int argc, char *argv[]) {
     }
   } else {
     TRANSFORM *trans = TransformRead(ltafn2);
-    lta2 = (LTA *)trans->xform;
+    lta2             = (LTA *)trans->xform;
     // lta2 = ltaReadFileEx(ltafn2);
   }
 
@@ -184,8 +183,8 @@ int main(int argc, char *argv[]) {
 
   if (invert2) {
     VOL_GEOM vgtmp;
-    LT *lt;
-    MATRIX *m_tmp = lta2->xforms[0].m_L;
+    LT *     lt;
+    MATRIX * m_tmp      = lta2->xforms[0].m_L;
     lta2->xforms[0].m_L = MatrixInverse(lta2->xforms[0].m_L, nullptr);
     MatrixFree(&m_tmp);
     lt = &lta2->xforms[0];
@@ -206,7 +205,7 @@ int main(int argc, char *argv[]) {
 
   if (DoRMSDiff) {
     double rms;
-    FILE *fp;
+    FILE * fp;
     LTAchangeType(lta1, REGISTER_DAT);
     LTAchangeType(lta2, REGISTER_DAT);
     rms = RMSregDiffMJ(lta1->xforms[0].m_L, lta2->xforms[0].m_L, RMSDiffRad);
@@ -241,7 +240,7 @@ int main(int argc, char *argv[]) {
     if (!r_to_i_1 || !i_to_r_1)
       ErrorExit(ERROR_BADFILE, "%s: failed to convert LTA1 to RAS_to_RAS",
                 Progname);
-    m_tmp = MatrixMultiply(lta1->xforms[0].m_L, r_to_i_1, NULL);
+    m_tmp      = MatrixMultiply(lta1->xforms[0].m_L, r_to_i_1, NULL);
     RAS_1_to_1 = MatrixMultiply(i_to_r_1, m_tmp, NULL);
     MatrixFree(&m_tmp);
   } else {
@@ -256,21 +255,21 @@ int main(int argc, char *argv[]) {
     if (!r_to_i_2 || !i_to_r_2)
       ErrorExit(ERROR_BADFILE, "%s: failed to convert LTA1 to RAS_to_RAS",
                 Progname);
-    m_tmp = MatrixMultiply(lta2->xforms[0].m_L, r_to_i_2, NULL);
+    m_tmp      = MatrixMultiply(lta2->xforms[0].m_L, r_to_i_2, NULL);
     RAS_2_to_2 = MatrixMultiply(i_to_r_2, m_tmp, NULL);
     MatrixFree(&m_tmp);
   } else {
     ErrorExit(ERROR_BADFILE, "%s: unknown transform type for LTA1", Progname);
   }
 
-  lta_total = LTAalloc(1, nullptr);
+  lta_total       = LTAalloc(1, nullptr);
   lta_total->type = LINEAR_RAS_TO_RAS;
   MatrixMultiply(RAS_2_to_2, RAS_1_to_1, lta_total->xforms[0].m_L);
-  lta_total->xforms[0].src = lta1->xforms[0].src;
-  lta_total->xforms[0].dst = lta2->xforms[0].dst;
-  lta_total->xforms[0].x0 = 0;
-  lta_total->xforms[0].y0 = 0;
-  lta_total->xforms[0].z0 = 0;
+  lta_total->xforms[0].src   = lta1->xforms[0].src;
+  lta_total->xforms[0].dst   = lta2->xforms[0].dst;
+  lta_total->xforms[0].x0    = 0;
+  lta_total->xforms[0].y0    = 0;
+  lta_total->xforms[0].z0    = 0;
   lta_total->xforms[0].sigma = 1.0f;
   if (strlen(lta1->subject) > 0 &&
       strcmp(lta1->subject, "subject-unknown") != 0)
@@ -425,7 +424,7 @@ static void usage(int exit_val) {
 }
  */
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -436,12 +435,12 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "invert the first LTA before applying it \n");
   } else if (!stricmp(option, "out_type")) {
     out_type = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "set final LTA type to %d\n", out_type);
   } else if (!stricmp(option, "tal")) {
     tal_src_file = argv[2];
     tal_dst_file = argv[3];
-    nargs = 2;
+    nargs        = 2;
     fprintf(stderr, "Talairach xfrm src file is %s\n", tal_src_file);
     fprintf(stderr, "Talairach xfrm dst file is %s\n", tal_dst_file);
     tal_src = MRIreadHeader(argv[2], MRI_VOLUME_TYPE_UNKNOWN);
@@ -466,7 +465,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 2;
   } else if (!stricmp(option, "subject")) {
     subject = argv[2];
-    nargs = 1;
+    nargs   = 1;
   } else {
     fprintf(stderr, "unknown option %s\n", argv[1]);
     usage(1);
@@ -477,21 +476,21 @@ static int get_option(int argc, char *argv[]) {
 }
 
 static LTA *ltaMNIreadEx(const char *fname) {
-  LTA *lta = nullptr;
+  LTA *             lta = nullptr;
   LINEAR_TRANSFORM *lt;
-  char *cp, line[1000], infoline[1024], infoline2[1024];
-  FILE *fp;
-  int row;
-  MATRIX *m_L;
-  int no_volinfo = 0;
+  char *            cp, line[1000], infoline[1024], infoline2[1024];
+  FILE *            fp;
+  int               row;
+  MATRIX *          m_L;
+  int               no_volinfo = 0;
 
   fp = fopen(fname, "r");
   if (!fp)
     ErrorReturn(NULL,
                 (ERROR_NOFILE, "ltMNIreadEx: could not open file %s", fname));
 
-  lta = LTAalloc(1, nullptr);
-  lt = &lta->xforms[0];
+  lta       = LTAalloc(1, nullptr);
+  lt        = &lta->xforms[0];
   lt->sigma = 1.0f;
   lt->x0 = lt->y0 = lt->z0 = 0;
 
@@ -562,8 +561,8 @@ get_transform:
 }
 
 static int ltaMNIwrite(LTA *lta, char *fname) {
-  FILE *fp;
-  int row;
+  FILE *  fp;
+  int     row;
   MATRIX *m_L;
 
   fp = fopen(fname, "w");
@@ -592,24 +591,24 @@ static int ltaMNIwrite(LTA *lta, char *fname) {
     }
   } else if (lta->type == LINEAR_VOX_TO_VOX) {
     // we use src and dst info to create RAS_TO_RAS xfm
-    MATRIX *voxFromRAS = nullptr;
+    MATRIX *voxFromRAS   = nullptr;
     MATRIX *rasFromVoxel = nullptr;
-    MATRIX *tmp = nullptr;
-    MATRIX *rasToRAS = nullptr;
-    MRI *src = nullptr;
-    MRI *dst = nullptr;
-    LT *lt = nullptr;
-    lt = &lta->xforms[0];
+    MATRIX *tmp          = nullptr;
+    MATRIX *rasToRAS     = nullptr;
+    MRI *   src          = nullptr;
+    MRI *   dst          = nullptr;
+    LT *    lt           = nullptr;
+    lt                   = &lta->xforms[0];
     src = MRIallocHeader(lt->src.width, lt->src.height, lt->src.depth,
                          MRI_UCHAR, 1);
     useVolGeomToMRI(&lt->src, src);
     dst = MRIallocHeader(lt->dst.width, lt->dst.height, lt->dst.depth,
                          MRI_UCHAR, 1);
     useVolGeomToMRI(&lt->dst, dst);
-    voxFromRAS = extract_r_to_i(src);
-    tmp = MatrixMultiply(lta->xforms[0].m_L, voxFromRAS, NULL);
+    voxFromRAS   = extract_r_to_i(src);
+    tmp          = MatrixMultiply(lta->xforms[0].m_L, voxFromRAS, NULL);
     rasFromVoxel = extract_i_to_r(dst);
-    rasToRAS = MatrixMultiply(rasFromVoxel, tmp, NULL);
+    rasToRAS     = MatrixMultiply(rasFromVoxel, tmp, NULL);
     for (row = 1; row <= 3; row++) {
       fprintf(fp, "      %f       %f       %f       %f",
               *MATRIX_RELT(rasToRAS, row, 1), *MATRIX_RELT(rasToRAS, row, 2),

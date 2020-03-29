@@ -23,15 +23,15 @@
  */
 
 #include "WidgetGroupPlot.h"
-#include <QPainter>
-#include <QMouseEvent>
-#include <QDebug>
-#include "MyUtils.h"
 #include "FSGroupDescriptor.h"
+#include "MyUtils.h"
+#include <QDebug>
+#include <QMouseEvent>
+#include <QPainter>
 #include <QSettings>
 
 #define DISTANCE_THRESHOLD2 36
-#define POINT_RADIUS 7
+#define POINT_RADIUS        7
 
 WidgetGroupPlot::WidgetGroupPlot(QWidget *parent)
     : QWidget(parent), m_bAutoScale(true), m_fsgd(NULL),
@@ -49,7 +49,7 @@ WidgetGroupPlot::~WidgetGroupPlot() {
 
 void WidgetGroupPlot::SetFsgdData(FSGroupDescriptor *fsgd) {
   m_fsgd = fsgd;
-  m_dTR = fsgd->m_dXDelta;
+  m_dTR  = fsgd->m_dXDelta;
   if (m_dTR <= 0)
     m_dTR = 1;
   m_nCurrentVariableIndex = 0;
@@ -63,8 +63,8 @@ void WidgetGroupPlot::paintEvent(QPaintEvent *e) {
   }
 
   QPainter p(this);
-  QRectF rc_plot = rect();
-  int nMargin = 0;
+  QRectF   rc_plot = rect();
+  int      nMargin = 0;
   rc_plot.adjust(nMargin, nMargin, -nMargin, -nMargin);
   rc_plot.adjust(25, 15, -15, -32);
 
@@ -98,8 +98,8 @@ void WidgetGroupPlot::paintEvent(QPaintEvent *e) {
   if (m_nCurrentVariableIndex >= 0)
     nStart = nEnd = m_nCurrentVariableIndex;
   for (int n = nStart; n <= nEnd; n++) {
-    double dMin = m_fsgd->m_dMeasurementRange[0],
-           dMax = m_fsgd->m_dMeasurementRange[1],
+    double dMin   = m_fsgd->m_dMeasurementRange[0],
+           dMax   = m_fsgd->m_dMeasurementRange[1],
            dMin_x = m_fsgd->m_variables[n].range[0],
            dMax_x = m_fsgd->m_variables[n].range[1];
     if (m_bAutoScale) {
@@ -123,9 +123,9 @@ void WidgetGroupPlot::paintEvent(QPaintEvent *e) {
     }
 
     QPointF *pts = new QPointF[data_y.size()];
-    QString tooltip_strg;
+    QString  tooltip_strg;
     for (int i = 0; i < data_y.size(); i++) {
-      pts[i] = QPointF(rc_plot.left() + (data_x[i] - dMin_x) /
+      pts[i]   = QPointF(rc_plot.left() + (data_x[i] - dMin_x) /
                                             (dMax_x - dMin_x) * rc_plot.width(),
                        rc_plot.bottom() - (data_y[i] - dMin) / (dMax - dMin) *
                                               rc_plot.height());
@@ -166,9 +166,9 @@ void WidgetGroupPlot::paintEvent(QPaintEvent *e) {
     p.setFont(fnt);
     double nMetricInterval = 40;
     double dMetricStep = (dMax - dMin) / (rc_plot.height() / nMetricInterval);
-    dMetricStep = MyUtils::RoundToGrid(dMetricStep);
-    double dMetricPos = (int)(dMin / dMetricStep) * dMetricStep;
-    double y = rc_plot.bottom() -
+    dMetricStep        = MyUtils::RoundToGrid(dMetricStep);
+    double dMetricPos  = (int)(dMin / dMetricStep) * dMetricStep;
+    double y           = rc_plot.bottom() -
                (dMetricPos - dMin) / (dMax - dMin) * rc_plot.height();
     while (y > rc_plot.top()) {
       if (y <= rc_plot.bottom()) {
@@ -194,9 +194,9 @@ void WidgetGroupPlot::paintEvent(QPaintEvent *e) {
     // draw X metrics
     if (true) {
       nMetricInterval = 60;
-      dMetricStep = (dMax_x - dMin_x) / (rc_plot.width() / nMetricInterval);
-      dMetricStep = MyUtils::RoundToGrid(dMetricStep);
-      dMetricPos = (int)(dMin_x / dMetricStep) * dMetricStep;
+      dMetricStep     = (dMax_x - dMin_x) / (rc_plot.width() / nMetricInterval);
+      dMetricStep     = MyUtils::RoundToGrid(dMetricStep);
+      dMetricPos      = (int)(dMin_x / dMetricStep) * dMetricStep;
       ;
       double x = rc_plot.left() +
                  (dMetricPos - dMin_x) / (dMax_x - dMin_x) * rc_plot.width();
@@ -237,7 +237,7 @@ void WidgetGroupPlot::paintEvent(QPaintEvent *e) {
       rc.adjust(-bw, -bw, bw, bw);
       rc.moveTo(pts[m_nCurrentDataIndex] + QPoint(6, 10));
       QPointF pt_c = rc.center();
-      qreal w = rc.width() + 4, h = rc.height() + 4;
+      qreal   w = rc.width() + 4, h = rc.height() + 4;
       pt_c.rx() = qMin(rc_plot.right() - w / 2,
                        qMax(pt_c.rx(), rc_plot.left() + w / 2));
       pt_c.ry() = qMin(rc_plot.bottom() - h / 2,
@@ -284,7 +284,7 @@ void WidgetGroupPlot::DrawMarker(QPainter *p, const QPointF &pt,
   } else if (marker == "triangle") {
     p->setRenderHint(QPainter::Antialiasing);
     r += 1;
-    double d1 = r * 0.866, d2 = r / 2;
+    double  d1 = r * 0.866, d2 = r / 2;
     QPointF pts[3];
     pts[0] = pt + QPointF(0, -r);
     pts[1] = pt + QPointF(d1, d2);
@@ -347,13 +347,13 @@ void WidgetGroupPlot::SetPlotType(int n) {
 
 void WidgetGroupPlot::mousePressEvent(QMouseEvent *e) {
   if (m_rectPlot.contains(e->pos())) {
-    QPointF c_pt = e->pos();
+    QPointF c_pt        = e->pos();
     m_nCurrentDataIndex = -1;
-    int n = m_nCurrentVariableIndex;
-    double dMin = m_fsgd->m_dMeasurementRange[0],
-           dMax = m_fsgd->m_dMeasurementRange[1],
-           dMin_x = m_fsgd->m_variables[n].range[0],
-           dMax_x = m_fsgd->m_variables[n].range[1];
+    int    n            = m_nCurrentVariableIndex;
+    double dMin         = m_fsgd->m_dMeasurementRange[0],
+           dMax         = m_fsgd->m_dMeasurementRange[1],
+           dMin_x       = m_fsgd->m_variables[n].range[0],
+           dMax_x       = m_fsgd->m_variables[n].range[1];
     if (m_bAutoScale) {
       double val = (dMax - dMin) / 20;
       dMin -= val;

@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-#include <fstream>
 #include "HausdorffMembershipFunction.h"
+#include <fstream>
 
 template <class TVector>
 HausdorffMembershipFunction<TVector>::HausdorffMembershipFunction()
@@ -14,15 +14,15 @@ double HausdorffMembershipFunction<TVector>::Evaluate(
     const MeasurementVectorType *m1, const MeasurementVectorType *m2) const {
   //	std::cout << " hausdorff " << std::endl;
   typedef typename MeasurementVectorType::CellType CellType;
-  const std::vector<CellType> *labels1 = m1->GetLabels();
+  const std::vector<CellType> *                    labels1 = m1->GetLabels();
   // const std::vector<CellType>* labels2 =m2->GetLabels();
   double max1 = 0.0, max2 = 0.0;
-  int numPoints = labels1->size() - 1;
+  int    numPoints = labels1->size() - 1;
   for (int i = 0; i < numPoints; i++) {
     double min1 = std::numeric_limits<double>::max();
     double min2 = std::numeric_limits<double>::max();
     for (int j = 0; j < numPoints; j++) {
-      double euclid = 0;
+      double euclid  = 0;
       double euclid2 = 0;
       for (int k = 0; k < 3; k++) {
         euclid += pow((*m1)[i * 3 + k] - (*m2)[j * 3 + k], 2);

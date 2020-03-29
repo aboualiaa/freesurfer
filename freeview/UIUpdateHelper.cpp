@@ -22,8 +22,8 @@
  *
  */
 #include "UIUpdateHelper.h"
-#include <QLineEdit>
 #include <QDoubleSpinBox>
+#include <QLineEdit>
 
 UIUpdateHelper::UIUpdateHelper() {}
 
@@ -56,7 +56,7 @@ void UIUpdateHelper::ChangeLineEditNumber(QLineEdit *w, double val, int precise,
   if (w->hasFocus() && !ignoreFocus)
     return;
 
-  bool bOK;
+  bool   bOK;
   double temp_val = w->text().toDouble(&bOK);
   if (bOK && temp_val == val) {
     return;

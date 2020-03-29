@@ -32,7 +32,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -42,25 +42,25 @@ const char *Progname;
 
 static int which_norm = NORM_MEAN;
 
-static const char *surface_names[] = {"hippocampus"};
+static const char *surface_names[]   = {"hippocampus"};
 static const char *curvature_names[] = {"hippocampus.curv"};
 
 #define IMAGES_PER_SURFACE 3 /* mean, variance, and dof */
-#define SURFACES sizeof(curvature_names) / sizeof(curvature_names[0])
-#define PARAM_IMAGES (IMAGES_PER_SURFACE * SURFACES)
+#define SURFACES           sizeof(curvature_names) / sizeof(curvature_names[0])
+#define PARAM_IMAGES       (IMAGES_PER_SURFACE * SURFACES)
 
-static int nbrs = 1;
-static int navgs = 0;
-static float scale = 1;
-static int no_rot = 0;
-static char subjects_dir[STRLEN];
+static int   nbrs   = 1;
+static int   navgs  = 0;
+static float scale  = 1;
+static int   no_rot = 0;
+static char  subjects_dir[STRLEN];
 
 int main(int argc, char *argv[]) {
   char **av, surf_fname[STRLEN], *template_fname, *hemi, *sphere_name, *cp,
       *subject, fname[STRLEN];
-  int ac, nargs, ino, sno;
-  MRI_SURFACE *mris;
-  MRI_SP *mrisp, *mrisp_aligned, *mrisp_template;
+  int               ac, nargs, ino, sno;
+  MRI_SURFACE *     mris;
+  MRI_SP *          mrisp, *mrisp_aligned, *mrisp_template;
   INTEGRATION_PARMS parms;
 
   memset(&parms, 0, sizeof(parms));
@@ -87,8 +87,8 @@ int main(int argc, char *argv[]) {
                 Progname);
     strcpy(subjects_dir, cp);
   }
-  hemi = argv[1];
-  sphere_name = argv[2];
+  hemi           = argv[1];
+  sphere_name    = argv[2];
   template_fname = argv[argc - 1];
   if (true || !FileExists(template_fname)) /* first time - create it */
   {
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
   } else {
     fprintf(stderr, "reading template parameterization from %s...\n",
             template_fname);
-    mrisp_aligned = nullptr;
+    mrisp_aligned  = nullptr;
     mrisp_template = MRISPread(template_fname);
     if (!mrisp_template)
       ErrorExit(ERROR_NOFILE, "%s: could not open template file %s", Progname,
@@ -199,10 +199,10 @@ int main(int argc, char *argv[]) {
       if (MRISreadCurvatureFile(mris, surf_fname) != NO_ERROR)
         ErrorExit(Gerror, "%s: could not read curvature file '%s'\n", Progname,
                   surf_fname);
-      parms.frame_no = 3;
-      parms.mrisp = MRIStoParameterization(mris, nullptr, scale, 0);
+      parms.frame_no       = 3;
+      parms.mrisp          = MRIStoParameterization(mris, nullptr, scale, 0);
       parms.mrisp_template = mrisp_template;
-      parms.l_corr = 1.0f;
+      parms.l_corr         = 1.0f;
 
       MRISrigidBodyAlignGlobal(mris, &parms, 4.0, 32.0, 8);
       MRISPfree(&parms.mrisp);
@@ -253,8 +253,8 @@ int main(int argc, char *argv[]) {
     if (Gdiag & DIAG_WRITE)
       fclose(parms.fp);
 
-    mrisp_tmp = mrisp_aligned;
-    mrisp_aligned = mrisp_template;
+    mrisp_tmp      = mrisp_aligned;
+    mrisp_aligned  = mrisp_template;
     mrisp_template = mrisp_tmp;
     MRISPfree(&mrisp_aligned);
   }
@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -280,7 +280,7 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "-version"))
     print_version();
   else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size = %d\n", nbrs);
   } else if (!stricmp(option, "sdir")) {

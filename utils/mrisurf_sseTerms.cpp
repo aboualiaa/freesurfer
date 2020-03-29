@@ -15,16 +15,16 @@
 #include "mrisurf_sseTerms.h"
 #include "mrisurf_project.h"
 
-#include "mrisurf_base.h"
 #include "mrisurf_MRIS_MP.h"
 #include "mrisurf_SurfaceFromMRIS_MP_generated.h"
+#include "mrisurf_base.h"
 
 #include "mrishash_SurfaceFromMRIS.h"
 
-#define MAX_VOXELS mrisurf_sse_MAX_VOXELS
-#define MAX_DISPLACEMENT mrisurf_sse_MAX_DISPLACEMENT
+#define MAX_VOXELS         mrisurf_sse_MAX_VOXELS
+#define MAX_DISPLACEMENT   mrisurf_sse_MAX_DISPLACEMENT
 #define DISPLACEMENT_DELTA mrisurf_sse_DISPLACEMENT_DELTA
-#define DEFAULT_STD mrisurf_sse_DEFAULT_STD
+#define DEFAULT_STD        mrisurf_sse_DEFAULT_STD
 
 // The SSE terms are either computed by iterating over the vertices or the faces
 // Ideally there would be one pass over each, to
@@ -50,8 +50,8 @@ struct SseTermsBase {
 template <class _Surface>
 struct SseTerms_DistortedSurfaces : public SseTermsBase {
   using Surface = _Surface;
-  using Face = typename Surface::Face;
-  using Vertex = typename Surface::Vertex;
+  using Face    = typename Surface::Face;
+  using Vertex  = typename Surface::Vertex;
 
   Surface surface;
 #if METRIC_SCALE
@@ -159,9 +159,9 @@ struct SseTerms_DistortedSurfaces : public SseTermsBase {
 
       double const vx = v.x() - v.t2x(), vy = v.y() - v.t2y(),
                    vz = v.z() - v.t2z();
-      double v_sse = 0.0;
+      double v_sse    = 0.0;
       for (int n = 0; n < v.vnum(); n++) {
-        auto const vn = v.v(n);
+        auto const   vn  = v.v(n);
         double const vnx = vn.x() - vn.t2x(), vny = vn.y() - vn.t2y(),
                      vnz = vn.z() - vn.t2z();
         double const dx = vnx - vx, dy = vny - vy, dz = vnz - vz;
@@ -248,13 +248,13 @@ struct SseTerms_DistortedSurfaces : public SseTermsBase {
     double sse = 0.0;
 
 #define ROMP_VARIABLE fno
-#define ROMP_LO fnoBegin
-#define ROMP_HI fnoEnd
+#define ROMP_LO       fnoBegin
+#define ROMP_HI       fnoEnd
 
 #define ROMP_SUMREDUCTION0 sse
 
 #define ROMP_FOR_LEVEL                                                         \
-  ROMP_level_fast // it is ROMP_level_assume_reproducible but that might change
+  ROMP_level_fast // it is ROMP_level_assume_reproducible but that might change \
                   // results
 
 #ifdef ROMP_SUPPORT_ENABLED
@@ -285,7 +285,7 @@ struct SseTerms_DistortedSurfaces : public SseTermsBase {
 
 // Choose the Surface et al to be used for MRIS and for MRIS_MP
 //
-using SSE_Surface_type_MRIS = SurfaceFromMRIS::Distort::Surface;
+using SSE_Surface_type_MRIS     = SurfaceFromMRIS::Distort::Surface;
 using SSE_Surface_types_MRIS_MP = SurfaceFromMRIS_MP::Distort::Surface;
 
 // This maps the MRIS and MRIS_MP to the set of functions that are implemented
@@ -417,8 +417,8 @@ double SseTerms_MRIS::QuadraticCurvatureSSE(
 #ifdef BEVIN_MRISCOMPUTEQUADRATICCURVATURESSE_REPRODUCIBLE
 
 #define ROMP_VARIABLE vno
-#define ROMP_LO 0
-#define ROMP_HI mris->nvertices
+#define ROMP_LO       0
+#define ROMP_HI       mris->nvertices
 
 #define ROMP_SUMREDUCTION0 sse
 
@@ -464,7 +464,7 @@ double SseTerms_MRIS::QuadraticCurvatureSSE(
 #undef REUSE
 
   VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-  VERTEX const *const v = &mris->vertices[vno];
+  VERTEX const *const          v  = &mris->vertices[vno];
   if (v->ripflag)
     continue;
 
@@ -477,14 +477,14 @@ double SseTerms_MRIS::QuadraticCurvatureSSE(
   VECTOR_LOAD(v_e2, v->e2x, v->e2y, v->e2z);
 
   MATRIX *m_X = MatrixAlloc(vt->vtotal, 5, MATRIX_REAL); /* 2-d quadratic fit */
-  int n;
+  int     n;
   for (n = 0; n < vt->vtotal; n++) /* build data matrices */
   {
     VERTEX const *const vn = &mris->vertices[vt->v[n]];
     VERTEX_EDGE(v_nbr, v, vn);
     VECTOR_ELT(v_Y, n + 1) = V3_DOT(v_nbr, v_n);
-    float ui = V3_DOT(v_e1, v_nbr);
-    float vi = V3_DOT(v_e2, v_nbr);
+    float ui               = V3_DOT(v_e1, v_nbr);
+    float vi               = V3_DOT(v_e2, v_nbr);
 
     *MATRIX_RELT(m_X, n + 1, 1) = ui * ui;
     *MATRIX_RELT(m_X, n + 1, 2) = vi * vi;
@@ -553,9 +553,9 @@ double SseTerms_MRIS::QuadraticCurvatureSSE(
   ------------------------------------------------------*/
 double SseTerms_MRIS::ThicknessMinimizationEnergy(double l_thick_min,
                                                   INTEGRATION_PARMS *parms) {
-  int vno;
-  double sse_tmin;
-  static int cno = 0;
+  int           vno;
+  double        sse_tmin;
+  static int    cno = 0;
   static double last_sse[MAXVERTICES];
 
   if (FZERO(l_thick_min)) {
@@ -576,7 +576,7 @@ double SseTerms_MRIS::ThicknessMinimizationEnergy(double l_thick_min,
     ROMP_PFLB_begin
 
         float thick_sq;
-    VERTEX *v;
+    VERTEX *  v;
     v = &mris->vertices[vno];
     if (v->ripflag)
       continue;
@@ -610,9 +610,9 @@ double SseTerms_MRIS::ThicknessMinimizationEnergy(double l_thick_min,
 
 double SseTerms_MRIS::ThicknessParallelEnergy(double l_thick_parallel,
                                               INTEGRATION_PARMS *parms) {
-  int vno, max_vno;
-  double sse_tparallel, max_inc;
-  static int cno = 0;
+  int           vno, max_vno;
+  double        sse_tparallel, max_inc;
+  static int    cno = 0;
   static double last_sse[MAXVERTICES];
 
   if (FZERO(l_thick_parallel)) {
@@ -626,8 +626,8 @@ double SseTerms_MRIS::ThicknessParallelEnergy(double l_thick_parallel,
   mrisAssignFaces(mris, (MHT *)(parms->mht),
                   CANONICAL_VERTICES); // don't look it up every time
 
-  max_inc = 0;
-  max_vno = 0;
+  max_inc       = 0;
+  max_vno       = 0;
   sse_tparallel = 0.0;
   ROMP_PF_begin
       // ifdef HAVE_OPENMP
@@ -671,11 +671,11 @@ double SseTerms_MRIS::ThicknessParallelEnergy(double l_thick_parallel,
   return (sse_tparallel);
 }
 
-double SseTerms_MRIS::ThicknessSmoothnessEnergy(double l_tsmooth,
+double SseTerms_MRIS::ThicknessSmoothnessEnergy(double             l_tsmooth,
                                                 INTEGRATION_PARMS *parms) {
-  int vno, n;
+  int    vno, n;
   double sse_tsmooth, v_sse, dn, dx, dy, dz, d0;
-  float xp, yp, zp;
+  float  xp, yp, zp;
 
   if (FZERO(l_tsmooth)) {
     return (0.0);
@@ -683,7 +683,7 @@ double SseTerms_MRIS::ThicknessSmoothnessEnergy(double l_tsmooth,
 
   for (sse_tsmooth = 0.0, vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX const *const v = &mris->vertices[vno];
+    VERTEX const *const          v  = &mris->vertices[vno];
     if (v->ripflag) {
       continue;
     }
@@ -711,11 +711,11 @@ double SseTerms_MRIS::ThicknessSmoothnessEnergy(double l_tsmooth,
 }
 
 static double big_sse = 10.0;
-double SseTerms_MRIS::ThicknessNormalEnergy(double l_thick_normal,
+double        SseTerms_MRIS::ThicknessNormalEnergy(double             l_thick_normal,
                                             INTEGRATION_PARMS *parms) {
-  int vno;
-  double sse_tnormal;
-  static int cno = 0;
+  int           vno;
+  double        sse_tnormal;
+  static int    cno = 0;
   static double last_sse[MAXVERTICES];
 
   if (FZERO(l_thick_normal))
@@ -735,7 +735,7 @@ double SseTerms_MRIS::ThicknessNormalEnergy(double l_thick_normal,
     ROMP_PFLB_begin
 
         double sse;
-    VERTEX *v;
+    VERTEX *   v;
 
     v = &mris->vertices[vno];
     if (vno == Gdiag_no)
@@ -763,13 +763,13 @@ double SseTerms_MRIS::ThicknessNormalEnergy(double l_thick_normal,
       cx = v->x;
       cy = v->y;
       cz = v->z;
-      E = mrisSampleNormalEnergy(mris, vno, parms, v->x, v->y, v->z);
+      E  = mrisSampleNormalEnergy(mris, vno, parms, v->x, v->y, v->z);
       MRISvertexCoord2XYZ_float(v, WHITE_VERTICES, &xw, &yw, &zw);
       MRISsampleFaceCoordsCanonical((MHT *)(parms->mht), mris, cx, cy, cz,
                                     PIAL_VERTICES, &xp, &yp, &zp);
-      dx = xp - xw;
-      dy = yp - yw;
-      dz = zp - zw;
+      dx  = xp - xw;
+      dy  = yp - yw;
+      dz  = zp - zw;
       len = sqrt(dx * dx + dy * dy + dz * dz);
       if (FZERO(len) == 0) {
         dx /= len;
@@ -789,10 +789,10 @@ double SseTerms_MRIS::ThicknessNormalEnergy(double l_thick_normal,
   return (sse_tnormal);
 }
 
-double SseTerms_MRIS::ThicknessSpringEnergy(double l_thick_spring,
+double SseTerms_MRIS::ThicknessSpringEnergy(double             l_thick_spring,
                                             INTEGRATION_PARMS *parms) {
-  int vno;
-  double sse_spring, sse;
+  int     vno;
+  double  sse_spring, sse;
   VERTEX *v;
 
   if (FZERO(l_thick_spring)) {
@@ -817,13 +817,13 @@ double SseTerms_MRIS::ThicknessSpringEnergy(double l_thick_spring,
       cx = v->x;
       cy = v->y;
       cz = v->z;
-      E = mrisSampleSpringEnergy(mris, vno, v->x, v->y, v->z, parms);
+      E  = mrisSampleSpringEnergy(mris, vno, v->x, v->y, v->z, parms);
       MRISvertexCoord2XYZ_float(v, WHITE_VERTICES, &xw, &yw, &zw);
       MRISsampleFaceCoordsCanonical((MHT *)(parms->mht), mris, cx, cy, cz,
                                     PIAL_VERTICES, &xp, &yp, &zp);
-      dx = xp - xw;
-      dy = yp - yw;
-      dz = zp - zw;
+      dx  = xp - xw;
+      dy  = yp - yw;
+      dz  = zp - zw;
       len = sqrt(dx * dx + dy * dy + dz * dz);
       if (FZERO(len) == 0) {
         dx /= len;
@@ -854,8 +854,8 @@ double SseTerms_MRIS::ThicknessSpringEnergy(double l_thick_spring,
 */
 double SseTerms_MRIS::RepulsiveEnergy(double l_repulse, MHT *mht,
                                       MHT *mht_faces) {
-  int vno, num, min_vno, i, n;
-  float dist, dx, dy, dz, x, y, z, min_d;
+  int    vno, num, min_vno, i, n;
+  float  dist, dx, dy, dz, x, y, z, min_d;
   double sse_repulse, v_sse;
 
   if (FZERO(l_repulse)) {
@@ -864,14 +864,14 @@ double SseTerms_MRIS::RepulsiveEnergy(double l_repulse, MHT *mht,
 
   long hash_count = -32768 - 11000 - 8192 - 1101 - 105, hash_limit = 1,
        hash_limit_max = 10;
-  auto hash = fnv_init();
+  auto hash           = fnv_init();
 
-  min_d = 1000.0;
-  min_vno = 0;
+  min_d       = 1000.0;
+  min_vno     = 0;
   sse_repulse = 0;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX const *const v = &mris->vertices[vno];
+    VERTEX const *const          v  = &mris->vertices[vno];
     if (v->ripflag)
       continue;
 
@@ -914,9 +914,9 @@ double SseTerms_MRIS::RepulsiveEnergy(double l_repulse, MHT *mht,
 
       VERTEX const *const vn = &mris->vertices[bin->fno];
       if (!vn->ripflag) {
-        dx = vn->x - x;
-        dy = vn->y - y;
-        dz = vn->z - z;
+        dx   = vn->x - x;
+        dy   = vn->y - y;
+        dz   = vn->z - z;
         dist = sqrt(dx * dx + dy * dy + dz * dz) + REPULSE_E;
         if (debugBin) {
           fprintf(stdout, "%s:%d sse_repulse bin->fno:%d n:%d dist:%f \n",
@@ -926,7 +926,7 @@ double SseTerms_MRIS::RepulsiveEnergy(double l_repulse, MHT *mht,
         if (vno == Gdiag_no) {
           if (dist - REPULSE_E < min_d) {
             min_vno = bin->fno;
-            min_d = dist - REPULSE_E;
+            min_d   = dist - REPULSE_E;
           }
         }
 
@@ -969,9 +969,9 @@ double SseTerms_MRIS::RepulsiveEnergy(double l_repulse, MHT *mht,
 }
 
 double SseTerms_MRIS::NonlinearSpringEnergy(INTEGRATION_PARMS *parms) {
-  int vno, n;
+  int    vno, n;
   double area_scale, sse_spring, E, F, f, rmin, rmax, ftotal;
-  float dx, dy, dz, nc, r, lsq, mean_vdist;
+  float  dx, dy, dz, nc, r, lsq, mean_vdist;
 
   mean_vdist = MRIScomputeVertexSpacingStats(
       mris, nullptr, nullptr, nullptr, nullptr, nullptr, CURRENT_VERTICES);
@@ -997,23 +997,23 @@ double SseTerms_MRIS::NonlinearSpringEnergy(INTEGRATION_PARMS *parms) {
   E = (1.0 / rmin + 1.0 / rmax) / 2;
   for (sse_spring = 0.0, vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX const *const v = &mris->vertices[vno];
+    VERTEX const *const          v  = &mris->vertices[vno];
     if (v->ripflag) {
       continue;
     }
 
     for (ftotal = r = 0.0, n = 0; n < vt->vnum; n++) {
       VERTEX const *const vn = &mris->vertices[vt->v[n]];
-      dx = vn->x - v->x;
-      dy = vn->y - v->y;
-      dz = vn->z - v->z;
+      dx                     = vn->x - v->x;
+      dy                     = vn->y - v->y;
+      dz                     = vn->z - v->z;
       //      lsq = dx*dx + dy*dy + dz*dz ;
       nc = dx * v->nx + dy * v->ny + dz * v->nz;
       dx = nc * v->nx;
       dy = nc * v->ny;
       dz = nc * v->nz; // sn
-      r = lsq / fabs(2.0 * nc);
-      f = (1 + tanh(F * (1.0 / r - E)));
+      r  = lsq / fabs(2.0 * nc);
+      f  = (1 + tanh(F * (1.0 / r - E)));
       ftotal += f * f;
     }
     if (vno == Gdiag_no) {
@@ -1025,10 +1025,10 @@ double SseTerms_MRIS::NonlinearSpringEnergy(INTEGRATION_PARMS *parms) {
 }
 
 double SseTerms_MRIS::SurfaceRepulsionEnergy(double l_repulse, MHT *mht) {
-  int vno, max_vno, i;
-  float dx, dy, dz, x, y, z, sx, sy, sz, norm[3], dot;
-  float max_scale, max_dot;
-  double scale, sse;
+  int     vno, max_vno, i;
+  float   dx, dy, dz, x, y, z, sx, sy, sz, norm[3], dot;
+  float   max_scale, max_dot;
+  double  scale, sse;
   VERTEX *v, *vn;
 
   if (FZERO(l_repulse)) {
@@ -1043,17 +1043,17 @@ double SseTerms_MRIS::SurfaceRepulsionEnergy(double l_repulse, MHT *mht) {
     if (vno == Gdiag_no) {
       DiagBreak();
     }
-    x = v->x;
-    y = v->y;
-    z = v->z;
+    x            = v->x;
+    y            = v->y;
+    z            = v->z;
     MHBT *bucket = MHTacqBucket(mht, x, y, z);
     if (!bucket) {
       continue;
     }
     sx = sy = sz = 0.0;
     max_dot = max_scale = 0.0;
-    max_vno = 0;
-    MHB *bin = bucket->bins;
+    max_vno             = 0;
+    MHB *bin            = bucket->bins;
     for (i = 0; i < bucket->nused; i++, bin++) {
       vn = &mris->vertices[bin->fno];
       if (bin->fno == Gdiag_no) {
@@ -1085,8 +1085,8 @@ double SseTerms_MRIS::SurfaceRepulsionEnergy(double l_repulse, MHT *mht) {
 #endif
       if (scale > max_scale) {
         max_scale = scale;
-        max_vno = bin->fno;
-        max_dot = dot;
+        max_vno   = bin->fno;
+        max_dot   = dot;
       }
       sx += (scale * v->nx);
       sy += (scale * v->ny);
@@ -1105,7 +1105,7 @@ double SseTerms_MRIS::SurfaceRepulsionEnergy(double l_repulse, MHT *mht) {
 
 double SseTerms_MRIS::AshburnerTriangleEnergy(double l_ashburner_triangle,
                                               INTEGRATION_PARMS *parms) {
-  int vno;
+  int    vno;
   double sse_ashburner;
 
   if (FZERO(l_ashburner_triangle))
@@ -1123,7 +1123,7 @@ double SseTerms_MRIS::AshburnerTriangleEnergy(double l_ashburner_triangle,
     ROMP_PFLB_begin
 
         double sse;
-    VERTEX *v;
+    VERTEX *   v;
 
     v = &mris->vertices[vno];
     if (vno == Gdiag_no)
@@ -1148,19 +1148,19 @@ double SseTerms_MRIS::AshburnerTriangleEnergy(double l_ashburner_triangle,
 }
 
 double SseTerms_MRIS::HistoNegativeLikelihood(INTEGRATION_PARMS *parms) {
-  double likelihood, entropy;
-  int x, y, z, label;
+  double  likelihood, entropy;
+  int     x, y, z, label;
   VECTOR *v_brain, *v_hires;
   MATRIX *m_brain_to_hires;
-  double xv, yv, zv, val, pval;
+  double  xv, yv, zv, val, pval;
 
   if (DZERO(parms->l_histo))
     return (NO_ERROR);
 
   mrisCreateLikelihoodHistograms(mris, parms);
 
-  v_brain = VectorAlloc(4, MATRIX_REAL);
-  v_hires = VectorAlloc(4, MATRIX_REAL);
+  v_brain                = VectorAlloc(4, MATRIX_REAL);
+  v_hires                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v_brain, 4) = VECTOR_ELT(v_hires, 4) = 1.0;
   m_brain_to_hires =
       MRIgetVoxelToVoxelXform(parms->mri_brain, parms->mri_labels);
@@ -1208,13 +1208,13 @@ double SseTerms_MRIS::HistoNegativeLikelihood(INTEGRATION_PARMS *parms) {
 }
 
 double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
-                                           int *pnvox) {
-  MRI *mri = parms->mri_brain;
-  double sse = 0.0, ll, wm_frac, gm_frac, out_frac, Ig, Ic, pval;
-  float vmin, vmax, val;
-  HISTOGRAM *hin, *hout;
-  int x, y, z, nvox, label;
-  MRI *mri_ll = nullptr;
+                                           int *              pnvox) {
+  MRI *         mri = parms->mri_brain;
+  double        sse = 0.0, ll, wm_frac, gm_frac, out_frac, Ig, Ic, pval;
+  float         vmin, vmax, val;
+  HISTOGRAM *   hin, *hout;
+  int           x, y, z, nvox, label;
+  MRI *         mri_ll   = nullptr;
   static double last_sse = 0.0;
 
   if (Gdiag & DIAG_WRITE) {
@@ -1232,7 +1232,7 @@ double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
   if (parms->hgm == nullptr) {
     printf("creating intensity histograms\n");
     parms->hgm = hin = HISTOinit(parms->hgm, 256, (double)vmin, (double)vmax);
-    parms->hout = hout =
+    parms->hout      = hout =
         HISTOinit(parms->hout, 256, (double)vmin, (double)vmax);
     MRISclearMarks(mris);
 
@@ -1248,8 +1248,8 @@ double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
           if (FZERO(val))
             continue;
 
-          wm_frac = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 0);
-          gm_frac = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 1);
+          wm_frac  = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 0);
+          gm_frac  = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 1);
           out_frac = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 2);
           if (parms->mri_aseg) {
             label = MRIgetVoxVal(parms->mri_aseg, x, y, z, 0);
@@ -1273,7 +1273,7 @@ double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
     }
   } else // use previously computed ones
   {
-    hin = parms->hgm;
+    hin  = parms->hgm;
     hout = parms->hout;
   }
 
@@ -1291,7 +1291,7 @@ double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
         if (wm_frac > 0)
           continue;
 
-        gm_frac = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 1);
+        gm_frac  = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 1);
         out_frac = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 2);
 
         if (FZERO(out_frac)) // all gm
@@ -1341,29 +1341,29 @@ double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
 }
 
 double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
-                                             int *pnvox) {
-  MRI *mri = parms->mri_brain;
-  MHT *mht;
-  double sse = 0.0, ll, wm_frac, pval, dist, vdist, xs, ys, zs;
-  float vmin, vmax, val;
-  int x, y, z, nvox, label, xd, yd, zd, vno;
-  VERTEX *v;
-  MRI *mri_ll = nullptr;
+                                             int *              pnvox) {
+  MRI *         mri = parms->mri_brain;
+  MHT *         mht;
+  double        sse = 0.0, ll, wm_frac, pval, dist, vdist, xs, ys, zs;
+  float         vmin, vmax, val;
+  int           x, y, z, nvox, label, xd, yd, zd, vno;
+  VERTEX *      v;
+  MRI *         mri_ll   = nullptr;
   static double last_sse = 0.0;
-  HISTOGRAM2D *hs;
-  MATRIX *m_vox2vox;
-  VECTOR *v1, *v2;
+  HISTOGRAM2D * hs;
+  MATRIX *      m_vox2vox;
+  VECTOR *      v1, *v2;
 
   mht = MHTcreateVertexTable_Resolution(mris, CURRENT_VERTICES, 10);
 
   if (parms->mri_dtrans == nullptr) {
-    int nvox;
+    int  nvox;
     MRI *mri_tmp;
 
-    nvox = nint(MAX(
+    nvox              = nint(MAX(
         MAX((mri->xsize / parms->resolution), (mri->ysize / parms->resolution)),
         (mri->zsize / parms->resolution)));
-    mri_tmp = MRIcloneDifferentType(mri, MRI_FLOAT);
+    mri_tmp           = MRIcloneDifferentType(mri, MRI_FLOAT);
     parms->mri_dtrans = MRIupsampleN(mri_tmp, nullptr, nvox);
     MRIfree(&mri_tmp);
     MRIScomputeDistanceToSurface(mris, parms->mri_dtrans, parms->resolution);
@@ -1372,9 +1372,9 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
     DiagBreak();
   }
 
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri, parms->mri_dtrans);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri, parms->mri_dtrans);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
 
@@ -1405,7 +1405,7 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
             DiagBreak();
           if (Gx2 == x && Gy2 == y && Gz2 == z)
             DiagBreak();
-          val = MRIgetVoxVal(mri, x, y, z, 0);
+          val     = MRIgetVoxVal(mri, x, y, z, 0);
           wm_frac = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 0);
           if (wm_frac > 0)
             continue;
@@ -1437,9 +1437,9 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
           {
             double dx, dy, dz;
 
-            dx = xs - v->x;
-            dy = ys - v->y;
-            dz = zs - v->z;
+            dx   = xs - v->x;
+            dy   = ys - v->y;
+            dz   = zs - v->z;
             dist = dx * v->nx + dy * v->ny + dz * v->nz;
           }
 
@@ -1484,12 +1484,12 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
     parms->h2d = hs;
 
     if (Gx > 0) {
-      int b1, b2;
+      int   b1, b2;
       float val, c;
 
-      x = Gx;
-      y = Gy;
-      z = Gz;
+      x        = Gx;
+      y        = Gy;
+      z        = Gz;
       V3_X(v1) = x;
       V3_Y(v1) = y;
       V3_Z(v1) = z;
@@ -1502,9 +1502,9 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
       else
         dist = MRIgetVoxVal(parms->mri_dtrans, xd, yd, zd, 0);
       val = MRIgetVoxVal(mri, x, y, z, 0);
-      b1 = HISTO2DfindBin1(parms->h2d, val);
-      b2 = HISTO2DfindBin2(parms->h2d, dist);
-      c = HISTO2DgetCount(parms->h2d, val, dist);
+      b1  = HISTO2DfindBin1(parms->h2d, val);
+      b2  = HISTO2DfindBin2(parms->h2d, dist);
+      c   = HISTO2DgetCount(parms->h2d, val, dist);
       printf("voxel (%d, %d, %d) = %2.0f, dist=%2.2f, bin=%d,%d, count=%f\n",
              Gx, Gy, Gz, val, dist, b1, b2, c);
 
@@ -1521,7 +1521,7 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
           DiagBreak();
         if (Gx2 == x && Gy2 == y && Gz2 == z)
           DiagBreak();
-        val = MRIgetVoxVal(mri, x, y, z, 0);
+        val     = MRIgetVoxVal(mri, x, y, z, 0);
         wm_frac = MRIgetVoxVal(parms->mri_volume_fractions, x, y, z, 0);
         if (wm_frac > 0)
           continue;
@@ -1550,7 +1550,8 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
         if (DZERO(pval))
           pval = 1e-20;
         ll = -log10(pval);
-        if (!std::isfinite(ll)) DiagBreak();
+        if (!std::isfinite(ll))
+          DiagBreak();
         sse += ll;
         nvox++;
         if (mri_ll)
@@ -1615,9 +1616,9 @@ double SseTerms_MRIS::DistanceError(INTEGRATION_PARMS *parms) {
       fprintf(stdout, "  failed mrisCheckDistOrig\n");
   }
 
-  int max_v, max_n, err_cnt, max_errs;
+  int          max_v, max_n, err_cnt, max_errs;
   volatile int count_dist_orig_zeros = 0;
-  double dist_scale, sse_dist, max_del;
+  double       dist_scale, sse_dist, max_del;
 
 #if METRIC_SCALE
   if (mris->patch) {
@@ -1635,11 +1636,11 @@ double SseTerms_MRIS::DistanceError(INTEGRATION_PARMS *parms) {
   max_del = -1.0;
   max_v = max_n = -1;
 
-  err_cnt = 0;
+  err_cnt  = 0;
   max_errs = 100;
 
 #ifdef BEVIN_MRISCOMPUTEDISTANCEERROR_CHECK
-  int trial;
+  int    trial;
   double sse_dist_trial0;
   for (trial = 0; trial < 2; trial++) {
 #endif
@@ -1660,8 +1661,8 @@ double SseTerms_MRIS::DistanceError(INTEGRATION_PARMS *parms) {
 #ifdef BEVIN_MRISCOMPUTEDISTANCEERROR_REPRODUCIBLE
 
 #define ROMP_VARIABLE vno
-#define ROMP_LO 0
-#define ROMP_HI mris->nvertices
+#define ROMP_LO       0
+#define ROMP_HI       mris->nvertices
 
 #define ROMP_SUMREDUCTION0 sse_dist
 
@@ -1693,7 +1694,7 @@ double SseTerms_MRIS::DistanceError(INTEGRATION_PARMS *parms) {
 #endif
 
         VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX const *const v = &mris->vertices[vno];
+    VERTEX const *const              v  = &mris->vertices[vno];
     if (v->ripflag)
       ROMP_PF_continue;
 
@@ -1769,7 +1770,8 @@ double SseTerms_MRIS::DistanceError(INTEGRATION_PARMS *parms) {
       else
         v_sse += delta * delta;
 
-      if (!std::isfinite(delta) || !std::isfinite(v_sse)) DiagBreak();
+      if (!std::isfinite(delta) || !std::isfinite(v_sse))
+        DiagBreak();
     }
     if (v_sse > 10000)
       DiagBreak();
@@ -1778,8 +1780,9 @@ double SseTerms_MRIS::DistanceError(INTEGRATION_PARMS *parms) {
       parms->dist_error[vno] = v_sse;
 
     sse_dist += v_sse;
-    if (!std::isfinite(sse_dist) || !std::isfinite(v_sse)) DiagBreak();
-    
+    if (!std::isfinite(sse_dist) || !std::isfinite(v_sse))
+      DiagBreak();
+
 #ifdef BEVIN_MRISCOMPUTEDISTANCEERROR_REPRODUCIBLE
 #undef sse_dist
 #include "romp_for_end.h"
@@ -1811,7 +1814,7 @@ double SseTerms_MRIS::DistanceError(INTEGRATION_PARMS *parms) {
 double MRIScomputeCorrelationError(MRI_SURFACE *mris, MRI_SP *mrisp_template,
                                    int fno) {
   INTEGRATION_PARMS parms;
-  float error;
+  float             error;
 
   if (!mrisp_template) {
     return (0.0);
@@ -1819,9 +1822,9 @@ double MRIScomputeCorrelationError(MRI_SURFACE *mris, MRI_SP *mrisp_template,
 
   memset(&parms, 0, sizeof(parms));
   parms.mrisp_template = mrisp_template;
-  parms.l_corr = 1.0f;
-  parms.frame_no = fno;
-  error = mrisComputeCorrelationError(mris, &parms, 1);
+  parms.l_corr         = 1.0f;
+  parms.frame_no       = fno;
+  error                = mrisComputeCorrelationError(mris, &parms, 1);
   return (sqrt(error / (double)MRISvalidVertices(mris)));
 }
 
@@ -1838,8 +1841,8 @@ double SseTerms_MRIS::CorrelationError(INTEGRATION_PARMS *parms, int use_stds) {
 #ifdef BEVIN_MRISCOMPUTECORRELATIONERROR_REPRODUCIBLE
 
 #define ROMP_VARIABLE vno
-#define ROMP_LO 0
-#define ROMP_HI mris->nvertices
+#define ROMP_LO       0
+#define ROMP_HI       mris->nvertices
 
 #define ROMP_SUMREDUCTION0 sse
 
@@ -1878,7 +1881,7 @@ double SseTerms_MRIS::CorrelationError(INTEGRATION_PARMS *parms, int use_stds) {
   }
 
   double src, target, delta, std;
-  float x, y, z;
+  float  x, y, z;
 
   x = v->x;
   y = v->y;
@@ -1905,19 +1908,18 @@ double SseTerms_MRIS::CorrelationError(INTEGRATION_PARMS *parms, int use_stds) {
       std = 1.0f;
     }
 #endif
-    delta = (src - target) / std;
-    if (!std::isfinite(target) || !std::isfinite(delta)) {
-      DiagBreak();
-    }
-    if (parms->geometry_error) {
-      parms->geometry_error[vno] = (delta * delta);
-    }
-    if (parms->abs_norm) {
-      sse += fabs(delta);
-    }
-    else {
-      sse += delta * delta;
-    }
+  delta = (src - target) / std;
+  if (!std::isfinite(target) || !std::isfinite(delta)) {
+    DiagBreak();
+  }
+  if (parms->geometry_error) {
+    parms->geometry_error[vno] = (delta * delta);
+  }
+  if (parms->abs_norm) {
+    sse += fabs(delta);
+  } else {
+    sse += delta * delta;
+  }
 #ifdef BEVIN_MRISCOMPUTECORRELATIONERROR_REPRODUCIBLE
 
 #undef sse
@@ -1940,10 +1942,10 @@ double SseTerms_MRIS::CorrelationError(INTEGRATION_PARMS *parms, int use_stds) {
   that func does normalize.
 */
 double SseTerms_MRIS::IntensityError(INTEGRATION_PARMS *parms) {
-  int vno, nhits;
+  int     vno, nhits;
   VERTEX *v;
-  double val0, xw, yw, zw;
-  double sse, del0;
+  double  val0, xw, yw, zw;
+  double  sse, del0;
 
   if (FZERO(parms->l_intensity))
     return (0.0f);
@@ -1965,18 +1967,18 @@ double SseTerms_MRIS::IntensityError(INTEGRATION_PARMS *parms) {
 }
 
 double SseTerms_MRIS::TargetLocationError(INTEGRATION_PARMS *parms) {
-  int vno, max_vno;
-  VERTEX *v;
-  double dx, dy, dz;
-  double sse, mag, max_mag, last_mag;
+  int           vno, max_vno;
+  VERTEX *      v;
+  double        dx, dy, dz;
+  double        sse, mag, max_mag, last_mag;
   static double last_error[500000];
 
   if (FZERO(parms->l_location))
     return (0.0f);
 
   last_mag = max_mag = 0;
-  max_vno = -1;
-  sse = 0.0;
+  max_vno            = -1;
+  sse                = 0.0;
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     if (v->ripflag)
@@ -2003,8 +2005,8 @@ double SseTerms_MRIS::TargetLocationError(INTEGRATION_PARMS *parms) {
     if (mag > last_error[vno]) {
       if (mag > max_mag) {
         last_mag = last_error[vno];
-        max_mag = mag;
-        max_vno = vno;
+        max_mag  = mag;
+        max_vno  = vno;
       }
     }
     last_error[vno] = mag;
@@ -2018,20 +2020,20 @@ double SseTerms_MRIS::TargetLocationError(INTEGRATION_PARMS *parms) {
 
 double SseTerms_MRIS::RmsDistanceError() {
   INTEGRATION_PARMS parms;
-  double rms;
+  double            rms;
 
   memset(&parms, 0, sizeof(parms));
   parms.l_location = 1;
-  rms = mrisComputeTargetLocationError(mris, &parms);
+  rms              = mrisComputeTargetLocationError(mris, &parms);
   return (sqrt(rms / MRISvalidVertices(mris)));
 }
 
 double SseTerms_MRIS::IntensityGradientError(INTEGRATION_PARMS *parms) {
-  int vno;
+  int     vno;
   VERTEX *v;
-  float x, y, z;
-  double mag0, xw, yw, zw, dx, dy, dz;
-  double sse, del0;
+  float   x, y, z;
+  double  mag0, xw, yw, zw, dx, dy, dz;
+  double  sse, del0;
 
   if (FZERO(parms->l_grad)) {
     return (0.0f);
@@ -2068,7 +2070,7 @@ double SseTerms_MRIS::IntensityGradientError(INTEGRATION_PARMS *parms) {
 }
 
 double SseTerms_MRIS::SphereError(double l_sphere, double r0) {
-  int vno;
+  int    vno;
   double sse, x0, y0, z0;
 
   if (FZERO(l_sphere)) {
@@ -2097,7 +2099,7 @@ double SseTerms_MRIS::SphereError(double l_sphere, double r0) {
     ROMP_PFLB_begin
 
         VERTEX *v;
-    double del, x, y, z, r;
+    double      del, x, y, z, r;
 
     v = &mris->vertices[vno];
     if (v->ripflag) {
@@ -2127,12 +2129,12 @@ double SseTerms_MRIS::SphereError(double l_sphere, double r0) {
 }
 
 double SseTerms_MRIS::DuraError(INTEGRATION_PARMS *parms) {
-  double dura_thresh = parms->dura_thresh, sse;
-  MRI *mri_dura = parms->mri_dura;
-  int vno;
+  double  dura_thresh = parms->dura_thresh, sse;
+  MRI *   mri_dura    = parms->mri_dura;
+  int     vno;
   VERTEX *v;
-  float x, y, z;
-  double val0, xw, yw, zw, delV;
+  float   x, y, z;
+  double  val0, xw, yw, zw, delV;
 
   if (FZERO(parms->l_dura)) {
     return (0.0);
@@ -2165,14 +2167,14 @@ double SseTerms_MRIS::DuraError(INTEGRATION_PARMS *parms) {
 }
 
 double SseTerms_MRIS::VectorCorrelationError(INTEGRATION_PARMS *parms,
-                                             int use_stds) {
-  double src, target, sse, delta, std;
+                                             int                use_stds) {
+  double  src, target, sse, delta, std;
   VERTEX *v;
-  int n, vno, fno;
-  float x, y, z, l_corr;
+  int     n, vno, fno;
+  float   x, y, z, l_corr;
 
   double *vals, *corrs, *sses;
-  int nframes, *frames, *ind;
+  int     nframes, *frames, *ind;
 
   for (nframes = n = 0; n < parms->nfields; n++) {
     l_corr = parms->fields[n].l_corr + parms->fields[n].l_pcorr;
@@ -2186,10 +2188,10 @@ double SseTerms_MRIS::VectorCorrelationError(INTEGRATION_PARMS *parms,
   }
 
   corrs = (double *)malloc(nframes * sizeof(double));
-  sses = (double *)malloc(nframes * sizeof(double));
-  ind = (int *)malloc(nframes * sizeof(int));
+  sses  = (double *)malloc(nframes * sizeof(double));
+  ind   = (int *)malloc(nframes * sizeof(int));
 
-  vals = (double *)malloc(2 * nframes *
+  vals   = (double *)malloc(2 * nframes *
                           sizeof(double)); /* include the variances */
   frames = (int *)malloc(2 * nframes * sizeof(int));
   for (nframes = n = 0; n < parms->nfields; n++) {
@@ -2197,11 +2199,11 @@ double SseTerms_MRIS::VectorCorrelationError(INTEGRATION_PARMS *parms,
     if (FZERO(l_corr)) {
       continue;
     }
-    fno = parms->fields[n].frame * IMAGES_PER_SURFACE;
-    frames[2 * nframes] = fno;
+    fno                     = parms->fields[n].frame * IMAGES_PER_SURFACE;
+    frames[2 * nframes]     = fno;
     frames[2 * nframes + 1] = fno + 1;
-    ind[nframes] = n;
-    corrs[nframes] = l_corr;
+    ind[nframes]            = n;
+    corrs[nframes]          = l_corr;
     nframes++;
   }
 
@@ -2219,17 +2221,17 @@ double SseTerms_MRIS::VectorCorrelationError(INTEGRATION_PARMS *parms,
                             2 * nframes, vals);
 #if DISABLE_STDS
     for (n = 0; n < nframes; n++) {
-      src = ((VALS_VP *)v->vp)->vals[ind[n]];
+      src    = ((VALS_VP *)v->vp)->vals[ind[n]];
       target = vals[2 * n];
-      std = 1.0f;
-      delta = (src - target) / std;
+      std    = 1.0f;
+      delta  = (src - target) / std;
       sses[n] += delta * delta;
     }
 #else
     for (n = 0; n < nframes; n++) {
-      src = ((VALS_VP *)v->vp)->vals[ind[n]];
+      src    = ((VALS_VP *)v->vp)->vals[ind[n]];
       target = vals[2 * n];
-      std = sqrt(vals[2 * n + 1]);
+      std    = sqrt(vals[2 * n + 1]);
       if (FZERO(std)) {
         std = DEFAULT_STD /*FSMALL*/; /* to be checked */
       }
@@ -2325,10 +2327,10 @@ double SseTerms_MRIS::VectorCorrelationError(INTEGRATION_PARMS *parms,
 
 double SseTerms_MRIS::ExpandwrapError(MRI *mri_brain, double l_expandwrap,
                                       double target_radius) {
-  int vno;
-  double xw, yw, zw, x, y, z, val, dx, dy, dz, sse, error, dist;
+  int     vno;
+  double  xw, yw, zw, x, y, z, val, dx, dy, dz, sse, error, dist;
   VERTEX *v;
-  float min_val, max_val, target_val, delta;
+  float   min_val, max_val, target_val, delta;
 
   if (FZERO(l_expandwrap)) {
     return (NO_ERROR);
@@ -2338,19 +2340,19 @@ double SseTerms_MRIS::ExpandwrapError(MRI *mri_brain, double l_expandwrap,
   MRIvalRange(mri_brain, &min_val, &max_val);
   target_val = (min_val + max_val) / 2;
   for (sse = 0.0, vno = 0; vno < mris->nvertices; vno++) {
-    v = &mris->vertices[vno];
+    v          = &mris->vertices[vno];
     target_val = v->val;
-    x = v->x;
-    y = v->y;
-    z = v->z;
+    x          = v->x;
+    y          = v->y;
+    z          = v->z;
     MRISsurfaceRASToVoxelCached(mris, mri_brain, x, y, z, &xw, &yw, &zw);
     MRIsampleVolume(mri_brain, xw, yw, zw, &val);
     delta = (val - target_val);
     if (val < 0.25 * target_val) {
-      dx = x - mris->xctr;
-      dy = y - mris->yctr;
-      dz = z - mris->zctr;
-      dist = sqrt(dx * dx + dy * dy + dz * dz);
+      dx    = x - mris->xctr;
+      dy    = y - mris->yctr;
+      dz    = z - mris->zctr;
+      dist  = sqrt(dx * dx + dy * dy + dz * dz);
       error = (target_radius - dist);
       sse += error * error;
     } else {
@@ -2395,7 +2397,7 @@ double SseTerms_MRIS::Error(INTEGRATION_PARMS *parms, float *parea_rms,
                             float *pdist_rms, float *pcorr_rms) {
   double rms, sse_area, sse_angle, sse_curv, delta, area_scale, sse_dist,
       sse_corr;
-  int ano, fno, ntriangles, total_neighbors;
+  int   ano, fno, ntriangles, total_neighbors;
   FACE *face;
   float nv;
 
@@ -2424,7 +2426,8 @@ double SseTerms_MRIS::Error(INTEGRATION_PARMS *parms, float *parea_rms,
       sse_angle += delta * delta;
     }
     if (!std::isfinite(sse_area) || !std::isfinite(sse_angle))
-      ErrorExit(ERROR_BADPARM, "sse (%f, %f) is not finite at face %d!\n", sse_area, sse_angle, fno);
+      ErrorExit(ERROR_BADPARM, "sse (%f, %f) is not finite at face %d!\n",
+                sse_area, sse_angle, fno);
   }
 
   sse_corr = mrisComputeCorrelationError(mris, parms, 1);
@@ -2476,7 +2479,7 @@ double SseTerms_MRIS::Error(INTEGRATION_PARMS *parms, float *parea_rms,
 }
 
 int MRIScomputeDistanceErrors(MRI_SURFACE *mris, int nbhd_size, int max_nbrs) {
-  int vno, n, nvertices;
+  int    vno, n, nvertices;
   double dist_scale, pct, dist, odist, mean, mean_error, smean,
       total_mean_error, total_mean;
 
@@ -2490,14 +2493,14 @@ int MRIScomputeDistanceErrors(MRI_SURFACE *mris, int nbhd_size, int max_nbrs) {
   total_mean = total_mean_error = mean = 0.0;
   for (pct = 0.0, nvertices = vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->ripflag) {
       v->val = 0.0f;
       continue;
     }
     for (smean = mean_error = mean = 0.0, n = 0; n < vt->vtotal; n++) {
       nvertices++;
-      dist = dist_scale * v->dist[n];
+      dist  = dist_scale * v->dist[n];
       odist = v->dist_orig[n];
 #if 0
       mean += (dist - odist) * (dist - odist) ;
@@ -2552,11 +2555,11 @@ int mrisCreateLikelihoodHistograms(MRIS *mris, INTEGRATION_PARMS *parms) {
   // Hard to convert to Surface because of saving an restoring vertex positions,
   // cloning, etc.
   //
-  int x, y, z, wlabel, plabel;
+  int     x, y, z, wlabel, plabel;
   VECTOR *v_brain, *v_hires;
   MATRIX *m_hires_to_brain;
-  MRI *mri_pial;
-  double xv, yv, zv, val, dist;
+  MRI *   mri_pial;
+  double  xv, yv, zv, val, dist;
 
   if (parms->mri_white ==
       nullptr) // white isn't moving, so only have to do it once
@@ -2576,14 +2579,14 @@ int mrisCreateLikelihoodHistograms(MRIS *mris, INTEGRATION_PARMS *parms) {
       MRIdistanceTransform(mri_pial, parms->mri_dist, 1, 5 / mri_pial->xsize,
                            DTRANS_MODE_SIGNED, nullptr);
 
-  parms->h_wm = HISTOinit(parms->h_wm, 256, 0, 255);
-  parms->h_gm = HISTOinit(parms->h_gm, 256, 0, 255);
+  parms->h_wm       = HISTOinit(parms->h_wm, 256, 0, 255);
+  parms->h_gm       = HISTOinit(parms->h_gm, 256, 0, 255);
   parms->h_nonbrain = HISTOinit(parms->h_nonbrain, 256, 0, 255);
   m_hires_to_brain =
       MRIgetVoxelToVoxelXform(parms->mri_labels, parms->mri_brain);
 
-  v_brain = VectorAlloc(4, MATRIX_REAL);
-  v_hires = VectorAlloc(4, MATRIX_REAL);
+  v_brain                = VectorAlloc(4, MATRIX_REAL);
+  v_hires                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v_brain, 4) = VECTOR_ELT(v_hires, 4) = 1.0;
   for (x = 0; x < mri_pial->width; x++) {
     V3_X(v_hires) = x;
@@ -2603,7 +2606,7 @@ int mrisCreateLikelihoodHistograms(MRIS *mris, INTEGRATION_PARMS *parms) {
 
         wlabel = MRIgetVoxVal(parms->mri_white, x, y, z, 0);
         plabel = MRIgetVoxVal(mri_pial, x, y, z, 0);
-        dist = MRIgetVoxVal(parms->mri_dist, x, y, z, 0);
+        dist   = MRIgetVoxVal(parms->mri_dist, x, y, z, 0);
         if (dist > 3) {
           continue; // don't consider the millions of voxels far from the
                     // surface
@@ -2634,30 +2637,30 @@ int mrisCreateLikelihoodHistograms(MRIS *mris, INTEGRATION_PARMS *parms) {
 
 double vlst_loglikelihood(MRIS *mris, MRI *mri, int vno, double displacement,
                           VOXEL_LIST *vl, HISTOGRAM *hin, HISTOGRAM *hout) {
-  double ll = 0.0, dot, dx, dy, dz, pval, dist, Ig, Ic, gm_frac, out_frac;
-  int i;
-  float val;
+  double  ll = 0.0, dot, dx, dy, dz, pval, dist, Ig, Ic, gm_frac, out_frac;
+  int     i;
+  float   val;
   VERTEX *v;
-  double xs, ys, zs;
+  double  xs, ys, zs;
 
-  v = &mris->vertices[vno];
+  v  = &mris->vertices[vno];
   xs = v->x + displacement * v->nx;
   ys = v->y + displacement * v->ny;
   zs = v->z + displacement * v->nz;
   for (i = 0; i < vl->nvox; i++) {
-    dx = vl->xd[i] - xs;
-    dy = vl->yd[i] - ys;
-    dz = vl->zd[i] - zs;
+    dx   = vl->xd[i] - xs;
+    dy   = vl->yd[i] - ys;
+    dz   = vl->zd[i] - zs;
     dist = sqrt(dx * dx + dy * dy + dz * dz);
-    dot = dx * v->nx + dy * v->ny + dz * v->nz;
-    val = MRIgetVoxVal(mri, vl->xi[i], vl->yi[i], vl->zi[i], 0);
+    dot  = dx * v->nx + dy * v->ny + dz * v->nz;
+    val  = MRIgetVoxVal(mri, vl->xi[i], vl->yi[i], vl->zi[i], 0);
     if (dist < .5) // distance to center<.5 --> distance to edge <1
     {
       if (dot > 0) {
         out_frac = dist + .5;
-        gm_frac = 1 - out_frac;
+        gm_frac  = 1 - out_frac;
       } else {
-        gm_frac = dist + .5;
+        gm_frac  = dist + .5;
         out_frac = 1 - gm_frac;
       }
       for (pval = 0.0, Ig = 0; Ig <= 256; Ig++) {
@@ -2678,26 +2681,26 @@ double vlst_loglikelihood(MRIS *mris, MRI *mri, int vno, double displacement,
 
 double vlst_loglikelihood2D(MRIS *mris, MRI *mri, int vno, double displacement,
                             VOXEL_LIST *vl, HISTOGRAM2D *h, FILE *fp) {
-  double ll = 0.0, dot, dx, dy, dz, pval, dist;
-  int i;
-  float val;
+  double  ll = 0.0, dot, dx, dy, dz, pval, dist;
+  int     i;
+  float   val;
   VERTEX *v;
-  double xs, ys, zs;
+  double  xs, ys, zs;
 
   if (fp)
     fprintf(fp, "%f ", displacement);
 
-  v = &mris->vertices[vno];
+  v  = &mris->vertices[vno];
   xs = v->x + displacement * v->nx;
   ys = v->y + displacement * v->ny;
   zs = v->z + displacement * v->nz;
   for (i = 0; i < vl->nvox; i++) {
-    dx = vl->xd[i] - xs;
-    dy = vl->yd[i] - ys;
-    dz = vl->zd[i] - zs;
+    dx   = vl->xd[i] - xs;
+    dy   = vl->yd[i] - ys;
+    dz   = vl->zd[i] - zs;
     dist = sqrt(dx * dx + dy * dy + dz * dz);
-    dot = dx * v->nx + dy * v->ny + dz * v->nz;
-    val = MRIgetVoxVal(mri, vl->xi[i], vl->yi[i], vl->zi[i], 0);
+    dot  = dx * v->nx + dy * v->ny + dz * v->nz;
+    val  = MRIgetVoxVal(mri, vl->xi[i], vl->yi[i], vl->zi[i], 0);
     pval = HISTO2DgetCount(h, val, dot);
     if (DZERO(pval))
       pval = 1e-10;
@@ -2819,9 +2822,9 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
                                INTEGRATION_PARMS *parms) {
   bool const debug = debugNonDeterminism;
 
-  bool const use_multiframes = !!(parms->flags & IP_USE_MULTIFRAMES);
-  double const l_corr = (double)(parms->l_corr + parms->l_pcorr);
-  double const l_curv_scaled = (double)parms->l_curv * CURV_SCALE;
+  bool const   use_multiframes = !!(parms->flags & IP_USE_MULTIFRAMES);
+  double const l_corr          = (double)(parms->l_corr + parms->l_pcorr);
+  double const l_curv_scaled   = (double)parms->l_curv * CURV_SCALE;
   double const area_scale =
 #if METRIC_SCALE
       (surface.patch() || surface.noscale())
@@ -2837,24 +2840,24 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
       (!FZERO(parms->l_parea))) {
 
 #ifdef BEVIN_MRISCOMPUTESSE_CHECK
-    int trial;
+    int    trial;
     double relevant_angle_trial0, computed_neg_area_trial0,
         computed_area_trial0;
     for (trial = 0; trial < 2; trial++) {
 
 #endif
 
-      relevant_angle = 0;
+      relevant_angle    = 0;
       computed_neg_area = 0;
-      computed_area = 0;
+      computed_area     = 0;
 
       auto const nfaces = surface.nfaces();
 
 #ifdef BEVIN_MRISCOMPUTESSE_REPRODUCIBLE
 
 #define ROMP_VARIABLE fno
-#define ROMP_LO 0
-#define ROMP_HI nfaces
+#define ROMP_LO       0
+#define ROMP_HI       nfaces
 
 #define ROMP_SUMREDUCTION0 relevant_angle
 #define ROMP_SUMREDUCTION1 computed_neg_area
@@ -2868,9 +2871,9 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
 #include "romp_for_begin.h"
       ROMP_for_begin
 
-#define relevant_angle ROMP_PARTIALSUM(0)
+#define relevant_angle    ROMP_PARTIALSUM(0)
 #define computed_neg_area ROMP_PARTIALSUM(1)
-#define computed_area ROMP_PARTIALSUM(2)
+#define computed_area     ROMP_PARTIALSUM(2)
 
 #else
 
@@ -2895,7 +2898,7 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
       FaceNormCacheEntry const *const fNorm = getFaceNorm(mris, fno);
 
       {
-        auto const area = face.area();
+        auto const   area  = face.area();
         double const delta = (double)(area_scale * area - fNorm->orig_area);
 #if ONLY_NEG_AREA_TERM
         if (area < 0.0f)
@@ -2907,7 +2910,7 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
       int ano;
       for (ano = 0; ano < ANGLES_PER_TRIANGLE; ano++) {
         auto const angle = face.angle()[ano];
-        double delta = deltaAngle(angle, face.orig_angle()[ano]);
+        double     delta = deltaAngle(angle, face.orig_angle()[ano]);
 #if ONLY_NEG_AREA_TERM
         if (angle >= 0.0f)
           delta = 0.0f;
@@ -2915,7 +2918,7 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
 #endif
         relevant_angle += delta * delta;
       }
-      
+
       if (!std::isfinite(computed_area) || !std::isfinite(relevant_angle)) {
         ErrorExit(ERROR_BADPARM, "sse not finite at face %d!\n", fno);
       }
@@ -2937,9 +2940,9 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
 
       if (trial == 0) {
 
-        relevant_angle_trial0 = relevant_angle;
+        relevant_angle_trial0    = relevant_angle;
         computed_neg_area_trial0 = computed_neg_area;
-        computed_area_trial0 = computed_area;
+        computed_area_trial0     = computed_area;
       } else {
         if (relevant_angle_trial0 != relevant_angle) {
           fprintf(stderr, "%s:%d diff thread count, diff result %g %g %g\n",
@@ -3046,10 +3049,10 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
       ELT(dist_avail)
       if (dist_avail) {
         VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[0];
-        VERTEX const *const v = &mris->vertices[0];
-        int n;
+        VERTEX const *const          v  = &mris->vertices[0];
+        int                          n;
         for (n = 0; n < vt->vtotal; n++) {
-          float const dist_n = !v->dist ? 0.0 : v->dist[n];
+          float const dist_n      = !v->dist ? 0.0 : v->dist[n];
           float const dist_orig_n = !v->dist_orig ? 0.0 : v->dist_orig[n];
           ELT(dist_n);
           ELT(dist_orig_n);
@@ -3092,7 +3095,7 @@ double MRIScomputeSSE_template(Surface surface, Some_MRIS *mris,
   return sse;
 }
 
-bool MRIScomputeSSE_canDo(MRIS *usedOnlyForOverloadingResolution,
+bool MRIScomputeSSE_canDo(MRIS *             usedOnlyForOverloadingResolution,
                           INTEGRATION_PARMS *parms) {
   return true;
 }
@@ -3102,13 +3105,13 @@ double MRIScomputeSSE(MRIS *mris, INTEGRATION_PARMS *parms) {
   return MRIScomputeSSE_template(surface, mris, parms);
 }
 
-bool MRIScomputeSSE_canDo(MRIS_MP *usedOnlyForOverloadingResolution,
+bool MRIScomputeSSE_canDo(MRIS_MP *          usedOnlyForOverloadingResolution,
                           INTEGRATION_PARMS *parms) {
 #if 1
   return false;
 #else
-  bool const use_multiframes = !!(parms->flags & IP_USE_MULTIFRAMES);
-  double const l_corr = (double)(parms->l_corr + parms->l_pcorr);
+  bool const   use_multiframes = !!(parms->flags & IP_USE_MULTIFRAMES);
+  double const l_corr          = (double)(parms->l_corr + parms->l_pcorr);
 
   bool result = true;
 #define ELTS(NAME, MULTIPLIER, COND, EXPR)
@@ -3152,7 +3155,7 @@ double MRIScomputeSSEExternal(MRIS *mris, INTEGRATION_PARMS *parms,
     sse = 0;
   }
   *ext_sse = sse;
-  sse = MRIScomputeSSE(mris, parms); /* throw out ext_sse
+  sse      = MRIScomputeSSE(mris, parms); /* throw out ext_sse
                                         as it will be recomputed */
 
   return (sse);
@@ -3160,14 +3163,14 @@ double MRIScomputeSSEExternal(MRIS *mris, INTEGRATION_PARMS *parms,
 
 // Generate all the jackets
 //
-#define MRIS_PARAMETER MRIS *mris
+#define MRIS_PARAMETER       MRIS *mris
 #define MRIS_PARAMETER_COMMA MRIS_PARAMETER,
-#define NOCOMMA_SELECTOR int selector
-#define COMMA_SELECTOR , NOCOMMA_SELECTOR
+#define NOCOMMA_SELECTOR     int selector
+#define COMMA_SELECTOR       , NOCOMMA_SELECTOR
 #define SEP
 #define ELT(NAME, SIGNATURE, CALL)                                             \
   double mrisCompute##NAME SIGNATURE {                                         \
-    SseTerms_MRIS sseTerms(mris, selector);                                    \
+    SseTerms_MRIS        sseTerms(mris, selector);                             \
     return sseTerms.NAME CALL;                                                 \
   }
 LIST_OF_SSETERMS
@@ -3178,14 +3181,14 @@ LIST_OF_SSETERMS
 #undef MRIS_PARAMETER_COMMA
 #undef MRIS_PARAMETER
 
-#define MRIS_PARAMETER MRIS_MP *mris
+#define MRIS_PARAMETER       MRIS_MP *mris
 #define MRIS_PARAMETER_COMMA MRIS_PARAMETER,
-#define NOCOMMA_SELECTOR int selector
-#define COMMA_SELECTOR , NOCOMMA_SELECTOR
+#define NOCOMMA_SELECTOR     int selector
+#define COMMA_SELECTOR       , NOCOMMA_SELECTOR
 #define SEP
 #define ELT(NAME, SIGNATURE, CALL)                                             \
   double mrisCompute##NAME SIGNATURE {                                         \
-    SseTerms_MRIS_MP sseTerms(mris, selector);                                 \
+    SseTerms_MRIS_MP     sseTerms(mris, selector);                             \
     return sseTerms.NAME CALL;                                                 \
   }
 LIST_OF_SSETERMS

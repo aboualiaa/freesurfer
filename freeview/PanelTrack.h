@@ -39,8 +39,8 @@ public:
   ~PanelTrack();
 
 protected:
-  void DoUpdateWidgets();
-  void DoIdle();
+  void         DoUpdateWidgets();
+  void         DoIdle();
   virtual void ConnectLayer(Layer *layer);
 
 protected slots:

@@ -38,7 +38,7 @@ protected:
   void flush() override;
   void draw() override;
   void resize(int x, int y, int w, int h);
-  int handle(int event) override;
+  int  handle(int event) override;
 
 public:
   // ctors
@@ -56,8 +56,8 @@ public:
   void Start();
   void SetRenderWindow(vtkRenderWindow *aren);
   void UpdateSize(int x, int y) override;
-  int CreateTimer(int timertype) override;
-  int DestroyTimer() override;
+  int  CreateTimer(int timertype) override;
+  int  DestroyTimer() override;
   void OnTimer();
   void TerminateApp();
 };

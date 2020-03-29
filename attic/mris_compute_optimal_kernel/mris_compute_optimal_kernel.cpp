@@ -27,22 +27,22 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "version.h"
+#include "error.h"
 #include "label.h"
+#include "macros.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "version.h"
 
 static int MRIScomputeOptimalGaussianKernel(MRI_SURFACE *mris,
-                                            LABEL *subject_label,
+                                            LABEL *      subject_label,
                                             LABEL *group_label, int step_size,
                                             int max_avgs, int *pavgs);
 
@@ -51,7 +51,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -60,18 +60,18 @@ static void print_version(void);
 const char *Progname;
 static char orig_name[STRLEN] = ORIG_NAME;
 
-static char sdir[STRLEN] = "";
-static int step_size = 10;
-static int max_avgs = 1000;
+static char sdir[STRLEN]        = "";
+static int  step_size           = 10;
+static int  max_avgs            = 1000;
 static char write_fname[STRLEN] = "";
 
 int main(int argc, char *argv[]) {
   char **av, *subject, *cp, fname[STRLEN], *hemi, *subject_label_name,
       *group_label_name;
-  int ac, nargs, avgs;
+  int          ac, nargs, avgs;
   MRI_SURFACE *mris;
-  LABEL *subject_label, *group_label;
-  double sigma;
+  LABEL *      subject_label, *group_label;
+  double       sigma;
 
   nargs = handleVersionOption(argc, argv, "mris_compute_optimal_kernel");
   if (nargs && argc - nargs == 1)
@@ -93,10 +93,10 @@ int main(int argc, char *argv[]) {
   if (argc < 5)
     usage_exit();
 
-  subject = argv[1];
-  hemi = argv[2];
+  subject            = argv[1];
+  hemi               = argv[2];
   subject_label_name = argv[3];
-  group_label_name = argv[4];
+  group_label_name   = argv[4];
   if (!strlen(sdir)) {
     cp = getenv("SUBJECTS_DIR");
     if (!cp)
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -209,17 +209,17 @@ static void print_version(void) {
 }
 
 static int MRIScomputeOptimalGaussianKernel(MRI_SURFACE *mris,
-                                            LABEL *subject_label,
+                                            LABEL *      subject_label,
                                             LABEL *group_label, int step_size,
                                             int max_avgs, int *pnavgs) {
-  int n, vno;
-  double rms, min_rms, min_navgs;
-  VERTEX *v;
+  int           n, vno;
+  double        rms, min_rms, min_navgs;
+  VERTEX *      v;
   LABEL_VERTEX *lv;
 
   // write individual subject label into v->val field
   for (n = 0; n < subject_label->n_points; n++) {
-    lv = &subject_label->lv[n];
+    lv  = &subject_label->lv[n];
     vno = lv->vno;
     if (lv->vno < 0 || lv->vno >= mris->nvertices)
       ErrorExit(ERROR_BADFILE,
@@ -235,7 +235,7 @@ static int MRIScomputeOptimalGaussianKernel(MRI_SURFACE *mris,
 
   // write group stats into v->val2 field
   for (n = 0; n < group_label->n_points; n++) {
-    lv = &group_label->lv[n];
+    lv  = &group_label->lv[n];
     vno = lv->vno;
     if (lv->vno < 0 || lv->vno >= mris->nvertices)
       ErrorExit(ERROR_BADFILE,
@@ -250,7 +250,7 @@ static int MRIScomputeOptimalGaussianKernel(MRI_SURFACE *mris,
   }
 
   min_navgs = 0;
-  min_rms = mris->nvertices * 1e6;
+  min_rms   = mris->nvertices * 1e6;
 
   for (n = 0; n < max_avgs; n += step_size) {
     for (rms = 0.0, vno = 0; vno < mris->nvertices; vno++) {
@@ -262,7 +262,7 @@ static int MRIScomputeOptimalGaussianKernel(MRI_SURFACE *mris,
       rms += SQR(v->val - v->val2);
     }
     if (rms < min_rms) {
-      min_rms = rms;
+      min_rms   = rms;
       min_navgs = n;
       fprintf(stderr, "new optimum %2.3f found at avgs = %d\n",
               sqrt(min_rms / mris->nvertices), n);

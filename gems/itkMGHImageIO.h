@@ -6,39 +6,39 @@
 // STL includes
 
 // ITK includes
-#include "itkImageIOBase.h"
 #include "itkIOCommon.h"
+#include "itkImageIOBase.h"
 //#include "itkExceptionObject.h"
-#include "itkMacro.h"
 #include "itkByteSwapper.h"
-#include "itkMetaDataObject.h"
+#include "itkMacro.h"
 #include "itkMatrix.h"
+#include "itkMetaDataObject.h"
 
+#include <vnl/vnl_cross.h>
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_vector.h>
-#include <vnl/vnl_cross.h>
 
 #include <itk_zlib.h>
 
 #define KVL_ORIENTATION_HACK                                                   \
-  1 // This MGH reader/writer IO class seems to swap x and y-axis compared
-    // to NIFTI. Hard-coded a correction here; this really should be
-    // investigated further.
+  1 // This MGH reader/writer IO class seems to swap x and y-axis compared   \
+      // to NIFTI. Hard-coded a correction here; this really should be         \
+      // investigated further.
 
 // variables used in the IO
 //
 // because of the templated functions, need to declare them here
 // try to avoid name scoping
 namespace fs {
-const int MRI_UCHAR = 0;
-const int MRI_INT = 1;
-const int MRI_FLOAT = 3;
-const int MRI_SHORT = 4;
+const int MRI_UCHAR  = 0;
+const int MRI_INT    = 1;
+const int MRI_FLOAT  = 3;
+const int MRI_SHORT  = 4;
 const int MRI_TENSOR = 6;
 
 const int FS_DIMENSION_HEADER_SIZE = sizeof(int) * 7;
-const int FS_RAS_HEADER_SIZE = (sizeof(float) * 15) + sizeof(short);
-const int FS_UNUSED_HEADER_SIZE = 256 - FS_RAS_HEADER_SIZE;
+const int FS_RAS_HEADER_SIZE       = (sizeof(float) * 15) + sizeof(short);
+const int FS_UNUSED_HEADER_SIZE    = 256 - FS_RAS_HEADER_SIZE;
 const int FS_WHOLE_HEADER_SIZE =
     FS_RAS_HEADER_SIZE + FS_DIMENSION_HEADER_SIZE + FS_UNUSED_HEADER_SIZE;
 
@@ -50,9 +50,9 @@ class OutputStreamWrapper;
 
 class ITK_EXPORT MGHImageIO : public ImageIOBase {
 public:
-  using Self = MGHImageIO;
+  using Self       = MGHImageIO;
   using Superclass = ImageIOBase;
-  using Pointer = SmartPointer<Self>;
+  using Pointer    = SmartPointer<Self>;
 
   /** Method for creation through the object factory **/
   itkNewMacro(Self);
@@ -159,8 +159,8 @@ template <class Writer> void MGHImageIO::WriteHeader(Writer &writer) {
 #if KVL_ORIENTATION_HACK
   for (unsigned int ui = 0; ui < 3; ++ui) {
     std::vector<double> direction = GetDirection(ui);
-    direction[0] = -direction[0];
-    direction[1] = -direction[1];
+    direction[0]                  = -direction[0];
+    direction[1]                  = -direction[1];
     vvRas.push_back(direction);
   }
 #else

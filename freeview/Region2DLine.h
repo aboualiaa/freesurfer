@@ -69,9 +69,9 @@ protected:
   void UpdateWorldCoords();
 
   vtkSmartPointer<vtkActor2D> m_actorLine;
-  int m_nX1, m_nX2, m_nY1, m_nY2;
-  double m_dPt1[3];
-  double m_dPt2[3];
+  int                         m_nX1, m_nX2, m_nY1, m_nY2;
+  double                      m_dPt1[3];
+  double                      m_dPt2[3];
 };
 
 #endif

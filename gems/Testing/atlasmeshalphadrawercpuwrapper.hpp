@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kvlAtlasMeshAlphaDrawer.h"
 #include "atlasmeshalphadrawer.hpp"
+#include "kvlAtlasMeshAlphaDrawer.h"
 
 #include "stopwatch.hpp"
 
@@ -15,7 +15,7 @@ public:
   virtual void SetRegions(const ImageType::RegionType &region) override;
   virtual void Interpolate(const kvl::AtlasMesh *mesh) override;
   virtual const AtlasMeshAlphaDrawerCPUWrapper::ImageType *
-  GetImage() const override;
+               GetImage() const override;
   virtual void SetClassNumber(const int classNumber) override;
 
   Stopwatch tSetRegions, tInterpolate;

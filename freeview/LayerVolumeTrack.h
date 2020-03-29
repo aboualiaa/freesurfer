@@ -45,7 +45,7 @@ public:
   void SetVisible(bool bVisible);
 
   virtual void Append3DProps(vtkRenderer *renderer,
-                             bool *bPlaneVisibility = NULL);
+                             bool *       bPlaneVisibility = NULL);
 
   virtual COLOR_TABLE *GetEmbeddedColorTable() { return m_ctabStripped; }
 
@@ -77,9 +77,9 @@ protected slots:
   void RebuildActors();
 
 protected:
-  QList< vtkSmartPointer<vtkActor> >  m_actors;
-  QList< bool > m_bVisiblities;
-  COLOR_TABLE* m_ctabStripped;
+  QList<vtkSmartPointer<vtkActor>> m_actors;
+  QList<bool>                      m_bVisiblities;
+  COLOR_TABLE *                    m_ctabStripped;
 };
 
 #endif // LAYERVOLUMETRACK_H

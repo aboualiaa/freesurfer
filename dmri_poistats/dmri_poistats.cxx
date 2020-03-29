@@ -22,24 +22,24 @@
  *
  */
 
+#include <cstddef>
+#include <cstdlib>
 #include <iostream>
 #include <string>
-#include <cstdlib>
-#include <cstddef>
 
 // for reading in the cosine directions because itk doesn't do it properly
 #include <nifti1_io.h>
 
-#include <itkImageSeriesReader.h>
-#include <itkImageFileWriter.h>
 #include <itkBSplineInterpolateImageFunction.h>
+#include <itkImageFileWriter.h>
+#include <itkImageSeriesReader.h>
 #include <itkNiftiImageIO.h>
 #include <itkOrientedImage.h>
 
-#include "itkMGHImageIOFactory.h" // itkio
-#include "io/SymmetricTensorReaderStrategy.h"
 #include "io/AsymmetricTensorReaderStrategy.h"
 #include "io/AsymmetricTensorVectorReaderStrategy.h"
+#include "io/SymmetricTensorReaderStrategy.h"
+#include "itkMGHImageIOFactory.h" // itkio
 
 #include "datamodel/utils/itkPoistatsFilter.h"
 
@@ -72,7 +72,7 @@ public:
   static const std::string FLAG_NUM_SAMPLES;
   static const std::string FLAG_SEED_VALUES;
   static const std::string FLAG_NUM_REPLICAS;
-  static const int DEFAULT_NUM_SEEDS = 100;
+  static const int         DEFAULT_NUM_SEEDS = 100;
   static const std::string FLAG_REPLICA_EXCHANGE_PROBABILITY;
   static const std::string FLAG_SIGMA_TIME_CONSTANT;
   static const std::string FLAG_POINTS_TO_IMAGE_GAMMA;
@@ -97,14 +97,14 @@ private:
   const char *m_OutputDir;
   const char *m_Seeds;
   const char *m_SampleStem;
-  int m_nControlPoints;
-  int m_Sigma;
+  int         m_nControlPoints;
+  int         m_Sigma;
 
   // optional arguments
-  char *m_MaskStem;
-  int m_nSamples;
+  char *           m_MaskStem;
+  int              m_nSamples;
   std::vector<int> m_SeedValues;
-  int m_nReplicas;
+  int              m_nReplicas;
 
   double m_ReplicaExchangeProbability;
   double m_SigmaTimeConstant;
@@ -139,7 +139,7 @@ const std::string Poistats::FLAG_NUM_CONTROL_POINTS =
 const std::string Poistats::FLAG_SIGMA = Poistats::FLAG_DELIMITER + "sigma";
 
 // optional flags
-const std::string Poistats::FLAG_MASK_STEM = Poistats::FLAG_DELIMITER + "m";
+const std::string Poistats::FLAG_MASK_STEM   = Poistats::FLAG_DELIMITER + "m";
 const std::string Poistats::FLAG_NUM_SAMPLES = Poistats::FLAG_DELIMITER + "ns";
 const std::string Poistats::FLAG_SEED_VALUES =
     Poistats::FLAG_DELIMITER + "seednums";
@@ -259,13 +259,13 @@ bool Poistats::FillArguments() {
 
   try {
     std::string *requiredArguments = GetRequiredArguments();
-    m_InputStem = requiredArguments[0].c_str();
-    m_OutputDir = requiredArguments[1].c_str();
-    m_Seeds = requiredArguments[2].c_str();
-    m_SampleStem = requiredArguments[3].c_str();
+    m_InputStem                    = requiredArguments[0].c_str();
+    m_OutputDir                    = requiredArguments[1].c_str();
+    m_Seeds                        = requiredArguments[2].c_str();
+    m_SampleStem                   = requiredArguments[3].c_str();
 
     m_nControlPoints = atoi(requiredArguments[4].c_str());
-    m_Sigma = atoi(requiredArguments[5].c_str());
+    m_Sigma          = atoi(requiredArguments[5].c_str());
 
     isFilled = true;
   } catch (...) {
@@ -338,7 +338,7 @@ bool Poistats::IsMGH(std::string fileExtension) {
 }
 
 mat44 Poistats::GetNiftiTransform(const char *filename) {
-  mat44 rval;
+  mat44        rval;
   nifti_image *img = nifti_image_read(filename, false);
   if (img == 0) {
     return rval;
@@ -421,7 +421,7 @@ void Poistats::Run() {
 
   typedef itk::OrientedImage<float, 3> OutputImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
-      PoistatsFilterType;
+                              PoistatsFilterType;
   PoistatsFilterType::Pointer poistatsFilter = PoistatsFilterType::New();
 
   poistatsFilter->AddObserver(itk::AnyEvent(), observer);
@@ -450,7 +450,7 @@ void Poistats::Run() {
   observer->PostMessage("reading seed volume...\n");
   // read seed volume
   typedef itk::ImageFileReader<PoistatsFilterType::SeedVolumeType>
-      SeedReaderType;
+                          SeedReaderType;
   SeedReaderType::Pointer seedReader = SeedReaderType::New();
   seedReader->SetFileName(m_Seeds);
   try {
@@ -495,7 +495,7 @@ void Poistats::Run() {
 
   // read sampling volume
   typedef itk::ImageFileReader<PoistatsFilterType::SamplingVolumeType>
-      SamplingReaderType;
+                              SamplingReaderType;
   SamplingReaderType::Pointer samplingReader = SamplingReaderType::New();
   samplingReader->SetFileName(m_SampleStem);
   try {
@@ -515,7 +515,7 @@ void Poistats::Run() {
   if (m_MaskStem != NULL) {
     observer->PostMessage("reading mask...\n");
     typedef itk::ImageFileReader<PoistatsFilterType::MaskVolumeType>
-        MaskReaderType;
+                            MaskReaderType;
     MaskReaderType::Pointer maskReader = MaskReaderType::New();
     maskReader->SetFileName(m_MaskStem);
     try {
@@ -625,7 +625,7 @@ void Poistats::Run() {
   writer->Update();
 
   PoistatsFilterType::MatrixType finalPath = poistatsFilter->GetFinalPath();
-  const std::string finalPathFileName((std::string)m_OutputDir +
+  const std::string              finalPathFileName((std::string)m_OutputDir +
                                       (std::string) "/OptimalPath.txt");
   WriteData(finalPathFileName, finalPath.data_array(), finalPath.rows(),
             finalPath.cols());
@@ -670,8 +670,8 @@ void Poistats::Run() {
       } else {
 
         // only write out the delimiter if this is not the first path
-        const float delimiter = -999;
-        float delimiterPoint[] = {delimiter, delimiter, delimiter};
+        const float delimiter        = -999;
+        float       delimiterPoint[] = {delimiter, delimiter, delimiter};
         WriteDataAppend(pathFileName, delimiterPoint, 1, 3);
 
         // write the pathway appended

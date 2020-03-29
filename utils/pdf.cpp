@@ -23,9 +23,9 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 #include <sys/time.h>
 
 #include "pdf.h"
@@ -39,7 +39,7 @@ double round(double x);
   -------------------------------------------------------------------*/
 unsigned long PDFtodSeed() {
   struct timeval tv;
-  unsigned long seed;
+  unsigned long  seed;
   gettimeofday(&tv, nullptr);
   // seed = ((unsigned long) 1000000)*tv.tv_sec + tv.tv_usec;
   seed = (unsigned long)(tv.tv_sec + tv.tv_usec);
@@ -89,7 +89,7 @@ double PDFerlang(int order) {
   -------------------------------------------------------------------*/
 double PDFsampleCDF(double *xcdf, double *cdf, int ncdf) {
   double u;
-  int n;
+  int    n;
 
   u = drand48();
   n = PDFsearchOrderedTable(u, cdf, ncdf);
@@ -147,8 +147,8 @@ int PDFsearchOrderedTable(double u, double *y, int ny) {
   ----------------------------------------------------------------*/
 int PDFloadCDF(char *fname, double **xcdf, double **cdf, int *ncdf) {
   FILE *fp;
-  int n;
-  char tmpstring[1000];
+  int   n;
+  char  tmpstring[1000];
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {
@@ -165,7 +165,7 @@ int PDFloadCDF(char *fname, double **xcdf, double **cdf, int *ncdf) {
   // printf("ncdf = %d\n",*ncdf);
 
   *xcdf = (double *)calloc(*ncdf, sizeof(double));
-  *cdf = (double *)calloc(*ncdf, sizeof(double));
+  *cdf  = (double *)calloc(*ncdf, sizeof(double));
 
   for (n = 0; n < *ncdf; n++) {
     if (fscanf(fp, "%lf %lf", (*xcdf + n), (*cdf + n)) != 2) {

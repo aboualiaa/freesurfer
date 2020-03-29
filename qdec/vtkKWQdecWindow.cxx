@@ -26,27 +26,27 @@
  *
  */
 
-#include <limits>
 #include <fstream>
-#include <vector>
-#include <stdexcept>
+#include <limits>
 #include <sstream>
+#include <stdexcept>
+#include <vector>
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "vtkKWQdecWindow.h"
 #include "IconLoader.h"
 #include "QdecEvents.h"
+#include "QdecProject.h"
 #include "QdecUtilities.h"
 #include "vtkCallbackCommand.h"
 #include "vtkCellArray.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkDataArray.h"
-#include "vtkFreesurferLookupTable.h"
-#include "vtkFSSurfaceSource.h"
 #include "vtkFSSurfaceLabelSource.h"
+#include "vtkFSSurfaceSource.h"
 #include "vtkFloatArray.h"
+#include "vtkFreesurferLookupTable.h"
 #include "vtkKWApplication.h"
 #include "vtkKWBltGraph.h"
 #include "vtkKWCheckButton.h"
@@ -64,8 +64,8 @@
 #include "vtkKWListBox.h"
 #include "vtkKWListBoxWithScrollbars.h"
 #include "vtkKWListBoxWithScrollbarsWithLabel.h"
-#include "vtkKWLoadSaveDialog.h"
 #include "vtkKWLoadSaveButton.h"
+#include "vtkKWLoadSaveDialog.h"
 #include "vtkKWMenu.h"
 #include "vtkKWMenuButton.h"
 #include "vtkKWMessageDialog.h"
@@ -74,9 +74,10 @@
 #include "vtkKWNotebook.h"
 #include "vtkKWProgressGauge.h"
 #include "vtkKWPushButton.h"
+#include "vtkKWQdecWindow.h"
+#include "vtkKWRGBATransferFunctionEditor.h"
 #include "vtkKWRadioButton.h"
 #include "vtkKWRadioButtonSet.h"
-#include "vtkKWRGBATransferFunctionEditor.h"
 #include "vtkKWScale.h"
 #include "vtkKWScaleWithLabel.h"
 #include "vtkKWSimpleEntryDialog.h"
@@ -86,28 +87,25 @@
 #include "vtkKWUserInterfacePanel.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
-#include "vtkRenderLargeImage.h"
 #include "vtkRGBATransferFunction.h"
+#include "vtkRenderLargeImage.h"
 #include "vtkSelectPolyData.h"
 #include "vtkSmartPointer.h"
 #include "vtkTIFFWriter.h"
 #include "vtkWindowToImageFilter.h"
-#include "QdecProject.h"
 
-#include "mrisutils.h"
 #include "fsenv.h"
-
-using namespace std;
+#include "mrisutils.h"
 
 vtkStandardNewMacro(vtkKWQdecWindow);
 vtkCxxRevisionMacro(vtkKWQdecWindow, "$Revision: 1.69 $");
 
 const char *vtkKWQdecWindow::ksSubjectsPanelName = "Subjects";
-const char *vtkKWQdecWindow::ksDesignPanelName = "Design";
+const char *vtkKWQdecWindow::ksDesignPanelName   = "Design";
 const char *vtkKWQdecWindow::ksContrastPanelName = "Contrast";
-const char *vtkKWQdecWindow::ksDisplayPanelName = "Display";
+const char *vtkKWQdecWindow::ksDisplayPanelName  = "Display";
 
-const int vtkKWQdecWindow::kMaxDiscreteFactors = 2;
+const int vtkKWQdecWindow::kMaxDiscreteFactors   = 2;
 const int vtkKWQdecWindow::kMaxContinuousFactors = 1;
 
 // if USE_MID is 1, then enable usage of the 'mid' threshold value (entry
@@ -161,8 +159,8 @@ vtkKWQdecWindow::vtkKWQdecWindow()
       mCurrentCluster(0), mbDrawCurvatureGreenRedIfNoScalars(false),
       mSurfaceScalarsColorsFDRRate(0.05), msOverlayDescription("") {
 
-  maDiscreteFactorSelection[0] = -1;
-  maDiscreteFactorSelection[1] = -1;
+  maDiscreteFactorSelection[0]   = -1;
+  maDiscreteFactorSelection[1]   = -1;
   maContinuousFactorSelection[0] = -1;
   maContinuousFactorSelection[1] = -1;
 }
@@ -359,7 +357,7 @@ void vtkKWQdecWindow::CreateWidget() {
   // Build the menus. File menu.
   // Load Data table..
   //  this->GetFileMenu()->SetFont( "helvetica 12" );
-  int nItem = this->GetFileMenuInsertPosition();
+  int nItem          = this->GetFileMenuInsertPosition();
   mMenuLoadDataTable = new MenuItem();
   mMenuLoadDataTable->MakeCommand(
       this->GetFileMenu(), nItem++, "L&oad Data Table...", this,
@@ -503,7 +501,7 @@ void vtkKWQdecWindow::CreateWidget() {
 
   // View menu.
   // Restore view.
-  nItem = this->GetViewMenuInsertPosition();
+  nItem            = this->GetViewMenuInsertPosition();
   mMenuRestoreView = new MenuItem();
   mMenuRestoreView->MakeCommand(this->GetViewMenu(), nItem++, "Restore &View",
                                 this, "RestoreView", "Ctrl+V", "RestoreView");
@@ -593,7 +591,7 @@ void vtkKWQdecWindow::CreateWidget() {
                                    "ValueCallback");
   mEntrySubjectsDir->SetCommand(this, "SetSubjectsDir");
   if (this->mQdecProject) {
-    string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
+    std::string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
     mEntrySubjectsDir->SetValue(sSubjectsDir.c_str());
   }
   mEntrySubjectsDir->SetReadOnly(0);
@@ -823,13 +821,13 @@ void vtkKWQdecWindow::CreateWidget() {
   this->Script("pack %s -side top -fill both",
                mRadBtnSetMeasure->GetWidgetName());
 
-  int nButton = 0;
+  int                               nButton = 0;
   vtkSmartPointer<vtkKWRadioButton> radBtn;
   // first category is Surface-based measures
   radBtn.TakeReference(mRadBtnSetMeasure->AddWidget(nButton++));
   radBtn->SetText("Surface-based");
   radBtn->SelectedStateOn(); // this one is the default, so its on
-  string sCmd = string("SetCurrentMeasure ") + radBtn->GetText();
+  std::string sCmd = string("SetCurrentMeasure ") + radBtn->GetText();
   radBtn->SetCommand(this, sCmd.c_str());
   // second category is Volume-based measures
   radBtn.TakeReference(mRadBtnSetMeasure->AddWidget(nButton++));
@@ -899,9 +897,9 @@ void vtkKWQdecWindow::CreateWidget() {
   designMatrixTypeFrame->Create();
   designMatrixTypeFrame->SetLabelText( "Design Matrix Type" );
   this->Script( "pack %s -fill x", designMatrixTypeFrame->GetWidgetName() );
-  
+
   // radio-buttons selecting type
-  vtkSmartPointer<vtkKWRadioButtonSet> radBtnSet = 
+  vtkSmartPointer<vtkKWRadioButtonSet> radBtnSet =
     vtkSmartPointer<vtkKWRadioButtonSet>::New();
   radBtnSet->SetParent(  designMatrixTypeFrame->GetFrame() );
   radBtnSet->Create();
@@ -967,7 +965,7 @@ void vtkKWQdecWindow::CreateWidget() {
   this->Script( "pack %s -fill x", factorsFrame->GetWidgetName() );
 
   // List box is inside the Nuisance Factors frame.
-  mListNuisanceFactors = 
+  mListNuisanceFactors =
     vtkSmartPointer<vtkKWListBoxWithScrollbarsWithLabel>::New();
   mListNuisanceFactors->SetParent( factorsFrame->GetFrame() );
   mListNuisanceFactors->Create();
@@ -978,7 +976,7 @@ void vtkKWQdecWindow::CreateWidget() {
   mListNuisanceFactors->GetWidget()->GetWidget()->SetSelectionModeToMultiple();
   mListNuisanceFactors->GetWidget()->GetWidget()->SetSelectionCommand
     ( this, "NuisanceFactorsListBoxCallback" );
-  this->Script( "pack %s -fill x -expand y", 
+  this->Script( "pack %s -fill x -expand y",
                 mListNuisanceFactors->GetWidgetName() );
 #endif
 
@@ -1133,13 +1131,13 @@ void vtkKWQdecWindow::SetCurrentMeasure(const char *isMeasure) {
     this->Script("pack %s -side top -fill both",
                  mRadBtnSetSurfaceMeasure->GetWidgetName());
 
-    int nButton = 0;
+    int                               nButton = 0;
     vtkSmartPointer<vtkKWRadioButton> radBtn;
     // first category is Morphometric measures
     radBtn.TakeReference(mRadBtnSetSurfaceMeasure->AddWidget(nButton++));
     radBtn->SetText("Morphometric");
     radBtn->SelectedStateOn(); // this one is the default, so its on
-    string sCmd = string("SetCurrentSurfaceMeasure ") + radBtn->GetText();
+    std::string sCmd = string("SetCurrentSurfaceMeasure ") + radBtn->GetText();
     radBtn->SetCommand(this, sCmd.c_str());
     // second category is Functional measures
     radBtn.TakeReference(mRadBtnSetSurfaceMeasure->AddWidget(nButton++));
@@ -1160,7 +1158,7 @@ void vtkKWQdecWindow::SetCurrentMeasure(const char *isMeasure) {
     this->Script("pack %s -fill x", mFrameVolumeMeasures->GetWidgetName());
 
     // temporary message:
-    int nRow = 0;
+    int                         nRow  = 0;
     vtkSmartPointer<vtkKWLabel> label = vtkSmartPointer<vtkKWLabel>::New();
     label->SetParent(mFrameVolumeMeasures);
     label->Create();
@@ -1191,7 +1189,7 @@ void vtkKWQdecWindow::SetCurrentSurfaceMeasure(const char *isMeasure) {
     mFrameMorphMeasures->Create();
     this->Script("pack %s -fill x", mFrameMorphMeasures->GetWidgetName());
 
-    int nRow = 0;
+    int                         nRow  = 0;
     vtkSmartPointer<vtkKWLabel> label = vtkSmartPointer<vtkKWLabel>::New();
     label->SetParent(mFrameMorphMeasures);
     label->Create();
@@ -1306,7 +1304,7 @@ void vtkKWQdecWindow::SetCurrentSurfaceMeasure(const char *isMeasure) {
     mFrameFunctionalMeasures->Create();
     this->Script("pack %s -fill x", mFrameFunctionalMeasures->GetWidgetName());
     // temporary message:
-    int nRow = 0;
+    int                         nRow  = 0;
     vtkSmartPointer<vtkKWLabel> label = vtkSmartPointer<vtkKWLabel>::New();
     label->SetParent(mFrameFunctionalMeasures);
     label->Create();
@@ -1342,13 +1340,13 @@ void vtkKWQdecWindow::LoadDataTableFromDlog() {
   dialog->SetTitle("Load Data Table");
   dialog->SetFileTypes("{{Data file} {*.dat}} {{All} {*}}");
   if (this->mQdecProject) {
-    string sWorkingDir = this->mQdecProject->GetWorkingDir();
+    std::string sWorkingDir = this->mQdecProject->GetWorkingDir();
     dialog->SetLastPath(sWorkingDir.c_str());
-    string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
+    std::string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
     mEntrySubjectsDir->SetValue(sSubjectsDir.c_str());
   }
   if (dialog->Invoke()) {
-    string fnDataTable(dialog->GetFileName());
+    std::string fnDataTable(dialog->GetFileName());
     try {
       this->LoadDataTable(fnDataTable.c_str());
     } catch (exception &e) {
@@ -1367,11 +1365,11 @@ void vtkKWQdecWindow::LoadProjectFileFromDlog() {
   dialog->SetFileTypes("{{Qdec Project file} {*.qdec}} {{All} {*}}");
 
   // Set the default dir to the subjects dir / qdec.
-  string sQdecDir = this->mQdecProject->GetSubjectsDir() + "/qdec";
+  std::string sQdecDir = this->mQdecProject->GetSubjectsDir() + "/qdec";
   dialog->SetLastPath(sQdecDir.c_str());
 
   if (dialog->Invoke()) {
-    string fnProject(dialog->GetFileName());
+    std::string fnProject(dialog->GetFileName());
     this->LoadProjectFile(fnProject.c_str());
   }
 
@@ -1389,7 +1387,7 @@ void vtkKWQdecWindow::LoadLabelFromDlog() {
   dialog->RetrieveLastPathFromRegistry("LoadLabel");
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("LoadLabel");
-    string fnLabel(dialog->GetFileName());
+    std::string fnLabel(dialog->GetFileName());
     this->LoadLabel(fnLabel.c_str());
   }
 }
@@ -1406,13 +1404,13 @@ void vtkKWQdecWindow::LoadSurfaceFromDlog() {
 
   // Set the default dir to the fsaverage subject surf dir,
   // because more often than not the fsaverage inflated surf is desired
-  string sQdecDir = this->mQdecProject->GetSubjectsDir() + +"/" +
-                    this->mQdecProject->GetAverageSubject() + "/surf";
+  std::string sQdecDir = this->mQdecProject->GetSubjectsDir() + +"/" +
+                         this->mQdecProject->GetAverageSubject() + "/surf";
   dialog->SetLastPath(sQdecDir.c_str());
 
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("LoadSurface");
-    string fn(dialog->GetFileName());
+    std::string fn(dialog->GetFileName());
     this->LoadSurface(fn.c_str());
   }
 }
@@ -1428,7 +1426,7 @@ void vtkKWQdecWindow::LoadGDFFromDlog() {
   dialog->RetrieveLastPathFromRegistry("LoadGDF");
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("LoadGDF");
-    string fn(dialog->GetFileName());
+    std::string fn(dialog->GetFileName());
     this->LoadGDFFile(fn.c_str());
   }
 }
@@ -1443,12 +1441,12 @@ void vtkKWQdecWindow::LoadSurfaceScalarsFromDlog() {
   dialog->SetFileTypes("{{Volume encoded scalars} {*.mgh *.mgz}} {{All} {*}}");
 
   // Set the default dir to the subjects dir / qdec.
-  string sQdecDir = this->mQdecProject->GetSubjectsDir() + "/qdec";
+  std::string sQdecDir = this->mQdecProject->GetSubjectsDir() + "/qdec";
   dialog->SetLastPath(sQdecDir.c_str());
 
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("LoadSurfaceScalars");
-    string fn(dialog->GetFileName());
+    std::string fn(dialog->GetFileName());
     this->LoadSurfaceScalars(fn.c_str());
   }
 }
@@ -1463,12 +1461,12 @@ void vtkKWQdecWindow::LoadCurvatureFromDlog() {
   dialog->SetFileTypes("{{Curvature} {*.curv}} {{All} {*}}");
 
   // Set the default dir to the subjects dir.
-  string sQdecDir = this->mQdecProject->GetSubjectsDir();
+  std::string sQdecDir = this->mQdecProject->GetSubjectsDir();
   dialog->SetLastPath(sQdecDir.c_str());
 
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("LoadCurvature");
-    string fn(dialog->GetFileName());
+    std::string fn(dialog->GetFileName());
     this->LoadSurfaceCurvatureScalars(fn.c_str());
   }
 }
@@ -1483,12 +1481,12 @@ void vtkKWQdecWindow::LoadAnnotationFromDlog() {
   dialog->SetFileTypes("{{Annotation} {*.annot}} {{All} {*}}");
 
   // Set the default dir to the subjects dir
-  string sQdecDir = this->mQdecProject->GetSubjectsDir();
+  std::string sQdecDir = this->mQdecProject->GetSubjectsDir();
   dialog->SetLastPath(sQdecDir.c_str());
 
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("LoadAnnotation");
-    string fn(dialog->GetFileName());
+    std::string fn(dialog->GetFileName());
     this->LoadAnnotation(fn.c_str());
   }
 }
@@ -1507,15 +1505,15 @@ void vtkKWQdecWindow::SaveDataTableFromDlog() {
   dialog->SetDefaultExtension(".dat");
 
   // Make the file name the currently loaded data table filename
-  string fnDefault = this->mQdecProject->GetDataTable()->GetFileName();
+  std::string fnDefault = this->mQdecProject->GetDataTable()->GetFileName();
   dialog->SetInitialFileName(fnDefault.c_str());
 
   // Set the default dir to the subjects dir / qdec.
-  string sQdecDir = this->mQdecProject->GetSubjectsDir() + "/qdec";
+  std::string sQdecDir = this->mQdecProject->GetSubjectsDir() + "/qdec";
   dialog->SetLastPath(sQdecDir.c_str());
 
   if (dialog->Invoke()) {
-    string fnProject(dialog->GetFileName());
+    std::string fnProject(dialog->GetFileName());
     this->mQdecProject->GetDataTable()->Save(fnProject.c_str());
   }
 }
@@ -1535,15 +1533,15 @@ void vtkKWQdecWindow::SaveProjectFileFromDlog() {
   dialog->SetDefaultExtension(".qdec");
 
   // Make a file name based on the analysis name.
-  string fnDefault = mQdecProject->GetGlmDesign()->GetName() + ".qdec";
+  std::string fnDefault = mQdecProject->GetGlmDesign()->GetName() + ".qdec";
   dialog->SetInitialFileName(fnDefault.c_str());
 
   // Set the default dir to the subjects dir / qdec.
-  string sQdecDir = this->mQdecProject->GetSubjectsDir() + "/qdec";
+  std::string sQdecDir = this->mQdecProject->GetSubjectsDir() + "/qdec";
   dialog->SetLastPath(sQdecDir.c_str());
 
   if (dialog->Invoke()) {
-    string fnProject(dialog->GetFileName());
+    std::string fnProject(dialog->GetFileName());
     this->SaveProjectFile(fnProject.c_str());
   }
 }
@@ -1561,7 +1559,7 @@ void vtkKWQdecWindow::SaveScatterPlotPostscriptFromDlog() {
   dialog->RetrieveLastPathFromRegistry("SaveScatterPlot");
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("SaveScatterPlot");
-    string fnPostscript(dialog->GetFileName());
+    std::string fnPostscript(dialog->GetFileName());
     mGraph->SavePostscript(fnPostscript.c_str());
   }
 }
@@ -1590,9 +1588,9 @@ void vtkKWQdecWindow::SaveTIFFImageFromDlog() {
   vtkSmartPointer<vtkKWLabel> sizeLabel = vtkSmartPointer<vtkKWLabel>::New();
   sizeLabel->SetParent(labeledFrame->GetFrame());
   sizeLabel->Create();
-  stringstream ssCurrentSize;
+  std::stringstream ssCurrentSize;
   ssCurrentSize << "Current size: " << mView->GetWidth() << ", "
-                << mView->GetHeight() << endl;
+                << mView->GetHeight() << std::endl;
   sizeLabel->SetText(ssCurrentSize.str().c_str());
 
   vtkSmartPointer<vtkKWEntryWithLabel> labeledEntry =
@@ -1610,7 +1608,7 @@ void vtkKWQdecWindow::SaveTIFFImageFromDlog() {
 
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("SaveTIFFImage");
-    string fnTIFF(dialog->GetFileName());
+    std::string fnTIFF(dialog->GetFileName());
     this->SaveTIFFImage(fnTIFF.c_str(),
                         labeledEntry->GetWidget()->GetValueAsInt());
   }
@@ -1626,7 +1624,7 @@ void vtkKWQdecWindow::QuickSnapsTIFF() {
     if (maSurfaceSource.find(msCurrentSurfaceSource) == maSurfaceSource.end() ||
         maSurfaceScalars.find(mnCurrentSurfaceScalars) ==
             maSurfaceScalars.end()) {
-      throw runtime_error("Must select from analysis results first.");
+      throw std::runtime_error("Must select from analysis results first.");
     }
   } catch (exception &e) {
     this->GetApplication()->ErrorMessage(e.what());
@@ -1634,7 +1632,7 @@ void vtkKWQdecWindow::QuickSnapsTIFF() {
   }
 
   // pop-up box stating what it will do
-  string sPopUpMsg =
+  std::string sPopUpMsg =
       "This operation will perform the following time-saver steps:\n"
       "\n"
       " - Find the maximum value and move cursor to that vertex\n"
@@ -1671,17 +1669,17 @@ void vtkKWQdecWindow::QuickSnapsTIFF() {
     this->ShowCursor(false);
 
     // formulate a base filename composed of relevant parameters
-    string sBaseFileName = this->mQdecProject->GetWorkingDir() + "/";
+    std::string sBaseFileName = this->mQdecProject->GetWorkingDir() + "/";
     if (maSurfaceScalars[mnCurrentSurfaceScalars].msLabel2.length() > 0) {
       sBaseFileName += maSurfaceScalars[mnCurrentSurfaceScalars].msLabel2;
 
       // append nuisance factors, if any
-      QdecGlmDesign *design = mQdecProject->GetGlmDesign();
-      vector<QdecFactor *> const &lNuisanceFactors =
+      QdecGlmDesign *                  design = mQdecProject->GetGlmDesign();
+      std::vector<QdecFactor *> const &lNuisanceFactors =
           design->GetNuisanceFactors();
       for (unsigned int j = 0; j < lNuisanceFactors.size(); j++) {
         if (lNuisanceFactors[j]) {
-          string factorName = "_";
+          std::string factorName = "_";
           factorName += lNuisanceFactors[j]->GetFactorName();
           sBaseFileName += factorName;
         }
@@ -1693,7 +1691,7 @@ void vtkKWQdecWindow::QuickSnapsTIFF() {
     }
 
     // - Save TIFF image
-    string sFileName = sBaseFileName + "-inflated-lateral.tiff";
+    std::string sFileName = sBaseFileName + "-inflated-lateral.tiff";
     this->SaveTIFFImage(sFileName.c_str(), 1);
     sPopUpMsg = "\nCreated file: " + sFileName + "\n";
 
@@ -1758,7 +1756,7 @@ void vtkKWQdecWindow::SaveGDFPostscriptFromDlog() {
   dialog->RetrieveLastPathFromRegistry("SaveGDF");
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("SaveGDF");
-    string fn = dialog->GetFileName();
+    std::string fn = dialog->GetFileName();
     mVertexPlot->SaveToPostscript(fn.c_str());
   }
 }
@@ -1774,16 +1772,16 @@ void vtkKWQdecWindow::SaveLabelFromDlog() {
   dialog->Create();
   dialog->SetTitle("Save Label");
 
-  string fnLabel(mROISource->GetLabelFileName());
-  string::size_type lastSlash = fnLabel.rfind("/");
-  fnLabel = fnLabel.substr(lastSlash + 1, string::npos);
+  std::string            fnLabel(mROISource->GetLabelFileName());
+  std::string::size_type lastSlash = fnLabel.rfind("/");
+  fnLabel = fnLabel.substr(lastSlash + 1, std::string::npos);
 
   dialog->SetInitialFileName(fnLabel.c_str());
   dialog->SetFileTypes("{{All} {*}}");
   dialog->RetrieveLastPathFromRegistry("LoadLabel");
   if (dialog->Invoke()) {
     dialog->SaveLastPathToRegistry("LoadLabel");
-    string fnLabel(dialog->GetFileName());
+    std::string fnLabel(dialog->GetFileName());
     this->SaveLabel(fnLabel.c_str());
   }
 }
@@ -1805,7 +1803,7 @@ void vtkKWQdecWindow::MapLabelFromDlog() {
   dialog->GetEntry()->SetLabelText("Label name: ");
 
   if (dialog->Invoke()) {
-    string fnLabel = dialog->GetEntry()->GetWidget()->GetValue();
+    std::string fnLabel = dialog->GetEntry()->GetWidget()->GetValue();
     this->MapLabelToSubjects(fnLabel.c_str());
   }
 }
@@ -1864,14 +1862,14 @@ void vtkKWQdecWindow::LoadDataTable(const char *ifnDataTable) {
     try {
 
       if (this->mQdecProject->LoadDataTable(ifnDataTable))
-        throw runtime_error("Error loading the data table.");
+        throw std::runtime_error("Error loading the data table.");
       else {
         this->mQdecProject->DumpDataTable(stdout);
-        cout << "Data table loading completed successfully." << endl;
+        std::cout << "Data table loading completed successfully." << std::endl;
       }
 
       // data table may have set SUBJECTS_DIR, so update our mEntry display
-      string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
+      std::string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
       this->mEntrySubjectsDir->SetValue(sSubjectsDir.c_str());
 
       // new data table means any prior stats data is invalid
@@ -1905,11 +1903,11 @@ void vtkKWQdecWindow::LoadProjectFile(const char *ifnProject) {
         this->SetStatusText("Loading project file...");
 
         if (this->mQdecProject->LoadProjectFile(ifnProject))
-          throw runtime_error("Error loading the project file.");
+          throw std::runtime_error("Error loading the project file.");
 
         // the project file always has a subjects dir, so make sure the GUI
         // Subjects Display panel has that updated info
-        string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
+        std::string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
         this->mEntrySubjectsDir->SetValue(sSubjectsDir.c_str());
 
         QdecGlmFitResults *results = mQdecProject->GetGlmFitResults();
@@ -1944,7 +1942,7 @@ void vtkKWQdecWindow::SaveProjectFile(const char *ifnProject) {
         this->SetStatusText("Saving project file...");
 
         if (this->mQdecProject->SaveProjectFile(ifnProject))
-          throw runtime_error("Error saving the project file.");
+          throw std::runtime_error("Error saving the project file.");
 
         this->SetStatusText("Project file saved.");
         this->AddRecentFile(ifnProject, this, "SaveProjectFile");
@@ -1962,22 +1960,23 @@ void vtkKWQdecWindow::LoadAnalyzedData(QdecGlmFitResults *iGlmResults) {
     try {
 
       if (NULL == iGlmResults) {
-        throw runtime_error("No results have been generated!");
+        throw std::runtime_error("No results have been generated!");
       }
 
       // We'll run a progress bar that just tracks steps.
-      const float cSteps = 8.0;
-      float stepIncrement = 100.0 / cSteps;
-      int nStep = 1;
+      const float cSteps        = 8.0;
+      float       stepIncrement = 100.0 / cSteps;
+      int         nStep         = 1;
 
       // Get SUBJECTS_DIR and average subj
-      string sSubjectsDir = iGlmResults->GetGlmDesign()->GetSubjectsDir();
-      string sAverageSubj = iGlmResults->GetGlmDesign()->GetAverageSubject();
-      string sHemisphere = iGlmResults->GetGlmDesign()->GetHemi();
+      std::string sSubjectsDir = iGlmResults->GetGlmDesign()->GetSubjectsDir();
+      std::string sAverageSubj =
+          iGlmResults->GetGlmDesign()->GetAverageSubject();
+      std::string sHemisphere = iGlmResults->GetGlmDesign()->GetHemi();
 
       // Load the white surface at
       // SUBJECTS_DIR/fsaverage/surf/$hemi.white if it's available.
-      string fnWhite =
+      std::string fnWhite =
           sSubjectsDir + "/" + sAverageSubj + "/surf/" + sHemisphere + ".white";
       if (QdecUtilities::IsFileReadable(fnWhite)) {
         this->SetStatusText("Loading white surface...");
@@ -1987,7 +1986,7 @@ void vtkKWQdecWindow::LoadAnalyzedData(QdecGlmFitResults *iGlmResults) {
 
       // Load the pial surface at
       // SUBJECTS_DIR/fsaverage/surf/$hemi.pial if it's available.
-      string fnPial =
+      std::string fnPial =
           sSubjectsDir + "/" + sAverageSubj + "/surf/" + sHemisphere + ".pial";
       if (QdecUtilities::IsFileReadable(fnPial)) {
         this->SetStatusText("Loading pial surface...");
@@ -1999,8 +1998,8 @@ void vtkKWQdecWindow::LoadAnalyzedData(QdecGlmFitResults *iGlmResults) {
       // SUBJECTS_DIR/fsaverage/surf/$hemi.inflated
       this->SetStatusText("Loading inflated surface...");
       this->GetProgressGauge()->SetValue((float)nStep++ * stepIncrement);
-      string fnInflated = sSubjectsDir + "/" + sAverageSubj + "/surf/" +
-                          sHemisphere + ".inflated";
+      std::string fnInflated = sSubjectsDir + "/" + sAverageSubj + "/surf/" +
+                               sHemisphere + ".inflated";
       QdecUtilities::AssertFileIsReadable(fnInflated);
       this->LoadSurface(fnInflated.c_str(), "inflated");
 
@@ -2008,7 +2007,7 @@ void vtkKWQdecWindow::LoadAnalyzedData(QdecGlmFitResults *iGlmResults) {
       // SUBJECTS_DIR/fsaverage/surf/$hemi.curv.
       this->SetStatusText("Loading curvature...");
       this->GetProgressGauge()->SetValue((float)nStep++ * stepIncrement);
-      string fnCurvature =
+      std::string fnCurvature =
           sSubjectsDir + "/" + sAverageSubj + "/surf/" + sHemisphere + ".curv";
       QdecUtilities::AssertFileIsReadable(fnCurvature);
       this->LoadSurfaceCurvatureScalars(fnCurvature.c_str());
@@ -2016,8 +2015,8 @@ void vtkKWQdecWindow::LoadAnalyzedData(QdecGlmFitResults *iGlmResults) {
       // Try to load the annot file if it's available.
       this->SetStatusText("Trying to load annotation...");
       this->GetProgressGauge()->SetValue((float)nStep++ * stepIncrement);
-      string fnAnnot = sSubjectsDir + "/" + sAverageSubj + "/label/" +
-                       sHemisphere + ".aparc.annot";
+      std::string fnAnnot = sSubjectsDir + "/" + sAverageSubj + "/label/" +
+                            sHemisphere + ".aparc.annot";
       if (QdecUtilities::IsFileReadable(fnAnnot)) {
         this->LoadAnnotation(fnAnnot.c_str());
       }
@@ -2027,9 +2026,11 @@ void vtkKWQdecWindow::LoadAnalyzedData(QdecGlmFitResults *iGlmResults) {
       // contrast question and make it the label.
       this->SetStatusText("Loading contrasts...");
       this->GetProgressGauge()->SetValue((float)nStep++ * stepIncrement);
-      vector<string> fnContrastSigFiles = iGlmResults->GetContrastSigFiles();
-      vector<string> sContrastQuestions = iGlmResults->GetContrastQuestions();
-      vector<string> sContrastNames = iGlmResults->GetContrastNames();
+      std::vector<std::string> fnContrastSigFiles =
+          iGlmResults->GetContrastSigFiles();
+      std::vector<std::string> sContrastQuestions =
+          iGlmResults->GetContrastQuestions();
+      std::vector<std::string> sContrastNames = iGlmResults->GetContrastNames();
       assert(fnContrastSigFiles.size() == sContrastQuestions.size());
       assert(sContrastQuestions.size() == sContrastNames.size());
       for (unsigned int i = 0; i < iGlmResults->GetContrastSigFiles().size();
@@ -2039,34 +2040,36 @@ void vtkKWQdecWindow::LoadAnalyzedData(QdecGlmFitResults *iGlmResults) {
                                                sContrastQuestions[i].c_str(),
                                                sContrastNames[i].c_str());
         if (nScalar < 0)
-          throw runtime_error(string("Couldn't load scalars from ") +
-                              fnContrastSigFiles[i]);
+          throw std::runtime_error(string("Couldn't load scalars from ") +
+                                   fnContrastSigFiles[i]);
       }
 
       // The second is the "Residual Error StdDev" in fnWorkingDir/rstd.mgh.
       this->SetStatusText("Loading error stddev...");
       this->GetProgressGauge()->SetValue((float)nStep++ * stepIncrement);
-      string fnRSTD = iGlmResults->GetResidualErrorStdDevFile();
+      std::string fnRSTD = iGlmResults->GetResidualErrorStdDevFile();
       QdecUtilities::AssertFileIsReadable(fnRSTD);
       int nScalar =
           this->LoadSurfaceScalars(fnRSTD.c_str(), "Residual Error StdDev");
       if (nScalar < 0)
-        throw runtime_error(string("Couldn't load scalars from ") + fnRSTD);
+        throw std::runtime_error(string("Couldn't load scalars from ") +
+                                 fnRSTD);
 
       // The third is the "Regression Coefficients" in fnWorkingDir/beta.mgh.
       this->SetStatusText("Loading regression coefficients...");
       this->GetProgressGauge()->SetValue((float)nStep++ * stepIncrement);
-      string fnBeta = iGlmResults->GetRegressionCoefficientsFile();
+      std::string fnBeta = iGlmResults->GetRegressionCoefficientsFile();
       QdecUtilities::AssertFileIsReadable(fnBeta);
       nScalar =
           this->LoadSurfaceScalars(fnBeta.c_str(), "Regression Coefficients");
       if (nScalar < 0)
-        throw runtime_error(string("Couldn't load scalars from ") + fnBeta);
+        throw std::runtime_error(string("Couldn't load scalars from ") +
+                                 fnBeta);
 
       // The GDF to load is fnWorkingDir/y.fsgd.
       this->SetStatusText("Loading GDF...");
       this->GetProgressGauge()->SetValue((float)nStep++ * stepIncrement);
-      string fnGDF = iGlmResults->GetFsgdFile();
+      std::string fnGDF = iGlmResults->GetFsgdFile();
       QdecUtilities::AssertFileIsReadable(fnGDF);
       this->LoadGDFFile(fnGDF.c_str());
 
@@ -2108,7 +2111,7 @@ void vtkKWQdecWindow::LoadSurface(const char *ifnSurface, const char *isLabel) {
       // save this as the number of vertices.
       if (-1 != mcVertices) {
         if (mcVertices != surface->GetNumberOfVertices()) {
-          throw runtime_error(
+          throw std::runtime_error(
               "Multiple surfaces must have the same number of vertices");
         }
       } else {
@@ -2116,7 +2119,7 @@ void vtkKWQdecWindow::LoadSurface(const char *ifnSurface, const char *isLabel) {
       }
 
       // Get a good label.
-      string sLabel;
+      std::string sLabel;
       if (NULL == isLabel) {
         sLabel = "user";
       } else {
@@ -2134,14 +2137,14 @@ void vtkKWQdecWindow::LoadSurface(const char *ifnSurface, const char *isLabel) {
       this->SetCurrentSurface(sLabel.c_str());
 
       // determine whether this is the lh or rh, and set our var
-      string str(ifnSurface);
-      size_t found = str.find("rh.");
-      if (found != string::npos) {
+      std::string str(ifnSurface);
+      size_t      found = str.find("rh.");
+      if (found != std::string::npos) {
         mMenuMorphHemisphere->SetValue("rh");
         mQdecProject->GetGlmDesign()->SetHemi("rh");
       } else {
         found = str.find("lh.");
-        if (found != string::npos) {
+        if (found != std::string::npos) {
           mMenuMorphHemisphere->SetValue("lh");
           mQdecProject->GetGlmDesign()->SetHemi("lh");
         }
@@ -2191,7 +2194,7 @@ int vtkKWQdecWindow::LoadSurfaceScalars(const char *ifnScalars,
   try {
 
     if (maSurfaceSource.size() < 1)
-      throw runtime_error("Must load a surface before loading scalars.");
+      throw std::runtime_error("Must load a surface before loading scalars.");
 
     // Try to load the scalars.
     vtkSmartPointer<vtkFloatArray> scalars;
@@ -2202,17 +2205,17 @@ int vtkKWQdecWindow::LoadSurfaceScalars(const char *ifnScalars,
     int nEntry = 0;
     while (maSurfaceScalars.find(nEntry) != maSurfaceScalars.end())
       nEntry++;
-    maSurfaceScalars[nEntry].mValues = scalars;
-    maSurfaceScalars[nEntry].mnEntry = nEntry;
+    maSurfaceScalars[nEntry].mValues   = scalars;
+    maSurfaceScalars[nEntry].mnEntry   = nEntry;
     maSurfaceScalars[nEntry].mfnSource = ifnScalars;
     if (isLabel) {
       maSurfaceScalars[nEntry].msLabel = isLabel;
     } else {
       // if a label was not supplied, just use the filename
-      string fnScalars = ifnScalars;
-      string::size_type lastSlash = fnScalars.rfind("/");
+      std::string            fnScalars = ifnScalars;
+      std::string::size_type lastSlash = fnScalars.rfind("/");
       maSurfaceScalars[nEntry].msLabel =
-          fnScalars.substr(lastSlash + 1, string::npos).c_str();
+          fnScalars.substr(lastSlash + 1, std::string::npos).c_str();
     }
     if (isLabel2) {
       maSurfaceScalars[nEntry].msLabel2 = isLabel2;
@@ -2240,7 +2243,7 @@ void vtkKWQdecWindow::LoadSurfaceCurvatureScalars(const char *ifnScalars) {
   try {
 
     if (maSurfaceSource.size() < 1)
-      throw runtime_error("Must load a surface before loading scalars.");
+      throw std::runtime_error("Must load a surface before loading scalars.");
 
     // Try to load the scalars.
     vtkSmartPointer<vtkFloatArray> scalars;
@@ -2267,10 +2270,10 @@ void vtkKWQdecWindow::LoadAnnotation(const char *ifnAnnotation) {
 
   assert(ifnAnnotation);
   if (maSurfaceSource.size() < 1)
-    throw runtime_error("Must load a surface before loading annotation.");
+    throw std::runtime_error("Must load a surface before loading annotation.");
 
-  int *indices = NULL;
-  COLOR_TABLE *table = NULL;
+  int *        indices = NULL;
+  COLOR_TABLE *table   = NULL;
 
   try {
 
@@ -2279,23 +2282,23 @@ void vtkKWQdecWindow::LoadAnnotation(const char *ifnAnnotation) {
     // Try to read the annotation.
     int eRead = MRISreadAnnotationIntoArray(ifnAnnotation, cValues, &indices);
     if (0 != eRead)
-      throw runtime_error("Could not read annotation file");
+      throw std::runtime_error("Could not read annotation file");
 
     // Try to read a color table too.
     eRead = MRISreadCTABFromAnnotationIfPresent(ifnAnnotation, &table);
     if (0 != eRead)
-      throw runtime_error("Could not read color table file");
+      throw std::runtime_error("Could not read color table file");
 
     // If we got both, save the new ones.
     if (maAnnotationIndicies)
       free(maAnnotationIndicies);
     maAnnotationIndicies = indices;
-    indices = NULL;
+    indices              = NULL;
 
     if (mAnnotationTable)
       CTABfree(&mAnnotationTable);
     mAnnotationTable = table;
-    table = NULL;
+    table            = NULL;
 
     // Set us as a lookup object in the view.
     mView->SetVertexAnnotationLookup(this);
@@ -2323,10 +2326,10 @@ void vtkKWQdecWindow::LoadSurfaceOverlayScalars(const char *ifnScalars,
 
   assert(ifnScalars);
   if (maSurfaceSource.size() < 1)
-    throw runtime_error("Must load a surface before loading annotation.");
+    throw std::runtime_error("Must load a surface before loading annotation.");
 
-  int *lookupTable = NULL;
-  COLOR_TABLE *table = NULL;
+  int *        lookupTable = NULL;
+  COLOR_TABLE *table       = NULL;
 
   try {
 
@@ -2335,7 +2338,7 @@ void vtkKWQdecWindow::LoadSurfaceOverlayScalars(const char *ifnScalars,
     // Try to read the annotation.
     int eRead = MRISreadAnnotationIntoArray(ifnScalars, cValues, &lookupTable);
     if (0 != eRead)
-      throw runtime_error("Could not read annotation file");
+      throw std::runtime_error("Could not read annotation file");
 
     // Try to read a color table too.
     eRead = MRISreadCTABFromAnnotationIfPresent(ifnScalars, &table);
@@ -2344,16 +2347,17 @@ void vtkKWQdecWindow::LoadSurfaceOverlayScalars(const char *ifnScalars,
       // If we didn't get a table, they have to have passed in a file
       // name for one.
       if (ifnColors == NULL) {
-        throw runtime_error("No color table present in overlay file; "
-                            "need to specify an external file.");
+        throw std::runtime_error("No color table present in overlay file; "
+                                 "need to specify an external file.");
       }
 
       //  Try to load the table.
       char *fnColors = strdup(ifnColors);
-      table = CTABreadASCII(fnColors);
+      table          = CTABreadASCII(fnColors);
       free(fnColors);
       if (NULL == table)
-        throw runtime_error(string("Couldn't read color table ") + ifnColors);
+        throw std::runtime_error(string("Couldn't read color table ") +
+                                 ifnColors);
     }
 
     // Init a float array.
@@ -2378,20 +2382,20 @@ void vtkKWQdecWindow::LoadSurfaceOverlayScalars(const char *ifnScalars,
 
     // Save pointers.
     mOverlayScalars = scalars;
-    mOverlayColors = colors;
+    mOverlayColors  = colors;
 
     // Set it in the view.
     mView->SetSurfaceOverlayScalarsAndColors(mOverlayScalars, mOverlayColors);
 
     // If the suffix is .annot, use "annotation" as a label, otherwise
     // use its name as the label.
-    string fnScalars = ifnScalars;
-    if (fnScalars.find(".annot") != string::npos) {
+    std::string fnScalars = ifnScalars;
+    if (fnScalars.find(".annot") != std::string::npos) {
       msOverlayDescription = "Annotation";
     } else {
-      string::size_type lastSlash = fnScalars.rfind("/");
+      std::string::size_type lastSlash = fnScalars.rfind("/");
       msOverlayDescription =
-          fnScalars.substr(lastSlash + 1, string::npos).c_str();
+          fnScalars.substr(lastSlash + 1, std::string::npos).c_str();
     }
 
   } catch (exception &e) {
@@ -2412,7 +2416,7 @@ void vtkKWQdecWindow::LoadLabel(const char *ifnLabel) {
 
   assert(ifnLabel);
   if (maSurfaceSource.size() < 1)
-    throw runtime_error("Must load a surface before loading labels.");
+    throw std::runtime_error("Must load a surface before loading labels.");
 
   try {
 
@@ -2489,7 +2493,7 @@ void vtkKWQdecWindow::MapLabelToSubjects(const char *ifnLabel) {
 }
 
 void vtkKWQdecWindow::SaveTIFFImage(const char *ifnTIFF,
-                                    int iMagnificationLevel) {
+                                    int         iMagnificationLevel) {
 
   assert(iMagnificationLevel >= 1);
 
@@ -2508,7 +2512,7 @@ void vtkKWQdecWindow::SaveTIFFImage(const char *ifnTIFF,
       // takes a normal screenshot, while vtkRenderLargeImage actually
       // does an offscreen render.
       vtkSmartPointer<vtkWindowToImageFilter> shot;
-      vtkSmartPointer<vtkRenderLargeImage> imageMag;
+      vtkSmartPointer<vtkRenderLargeImage>    imageMag;
 
       // If we have a magnification level, make the imageMag,
       // otherwise make the shot.
@@ -2589,7 +2593,7 @@ void vtkKWQdecWindow::SetCurrentSurfaceScalars(int inEntry) {
   if (mClusterStats)
     free(mClusterStats);
   mClusterStats = NULL;
-  mnClusters = 0;
+  mnClusters    = 0;
 }
 
 void vtkKWQdecWindow::ClearSurfaceScalars() {
@@ -2614,7 +2618,7 @@ void vtkKWQdecWindow::ClearSurfaceScalars() {
   if (mClusterStats)
     free(mClusterStats);
   mClusterStats = NULL;
-  mnClusters = 0;
+  mnClusters    = 0;
 }
 
 void vtkKWQdecWindow::UnloadSurfaceScalars() {
@@ -2645,7 +2649,7 @@ void vtkKWQdecWindow::UnloadSurfaceScalars() {
   if (mClusterStats)
     free(mClusterStats);
   mClusterStats = NULL;
-  mnClusters = 0;
+  mnClusters    = 0;
 }
 
 void vtkKWQdecWindow::ClearCurvature() {
@@ -2727,7 +2731,8 @@ void vtkKWQdecWindow::SetCurrentSurface(const char *isLabel) {
 
     // Make sure it exists.
     if (maSurfaceSource.find(string(isLabel)) == maSurfaceSource.end())
-      throw runtime_error("SetCurrentSurface: isLabel surface was not found");
+      throw std::runtime_error(
+          "SetCurrentSurface: isLabel surface was not found");
 
     // Save this is the current label.
     msCurrentSurfaceSource = isLabel;
@@ -2748,7 +2753,7 @@ void vtkKWQdecWindow::SetSurfaceOverlayOpacity(double iOpacity) {
   assert(mView.GetPointer());
 
   if (iOpacity < 0.0 || iOpacity > 1.0)
-    throw runtime_error("Invalid opacity");
+    throw std::runtime_error("Invalid opacity");
 
   // Set our scale if we have it.
   if (mScaleOverlay) {
@@ -2777,7 +2782,7 @@ void vtkKWQdecWindow::ScatterPlotListBoxCallback() {
       mEntryExcludeSubjectGT && mEntryExcludeSubjectLT &&
       mEntryExcludeSubjectET) {
     // Get the name of the selected factor.
-    string sFactor(mListScatterPlot->GetItem(mScatterPlotSelection));
+    std::string sFactor(mListScatterPlot->GetItem(mScatterPlotSelection));
     // and update the Subject Exclusions box
     mEntryExcludeFactor->SetValue(sFactor.c_str());
     mEntryExcludeSubjectGT->SetValue("");
@@ -2788,12 +2793,12 @@ void vtkKWQdecWindow::ScatterPlotListBoxCallback() {
     QdecFactor *lFactor =
         this->mQdecProject->GetDataTable()->GetFactor(sFactor.c_str());
     if (lFactor->IsDiscrete()) {
-      vector<string> lLevelNames = lFactor->GetLevelNames();
-      mScatterPlotLegend = "Legend:  ";
+      std::vector<std::string> lLevelNames = lFactor->GetLevelNames();
+      mScatterPlotLegend                   = "Legend:  ";
       for (unsigned int i = 0; i < lLevelNames.size(); i++) {
         mScatterPlotLegend += lLevelNames[i];
         mScatterPlotLegend += "=";
-        stringstream val;
+        std::stringstream val;
         val << lFactor->GetContinuousValue(lLevelNames[i].c_str());
         mScatterPlotLegend += val.str().c_str();
         mScatterPlotLegend += "  ";
@@ -2941,7 +2946,7 @@ void vtkKWQdecWindow::UpdateSubjectsPage() {
 
   mListScatterPlot->DeleteAll();
 
-  vector<string> factors =
+  std::vector<std::string> factors =
       this->mQdecProject->GetDataTable()->GetDiscreteFactorNames();
   for (unsigned int i = 0; i < factors.size(); i++) {
     mListScatterPlot->Append(factors[i].c_str());
@@ -2984,7 +2989,7 @@ void vtkKWQdecWindow::UpdateDesignPage() {
   if (mFrameMorphMeasures) {
     mMenuMorphMeasure->SetValue(design->GetMeasure().c_str());
     mMenuMorphHemisphere->SetValue(design->GetHemi().c_str());
-    stringstream ssSmoothness;
+    std::stringstream ssSmoothness;
     ssSmoothness << design->GetSmoothness();
     mMenuMorphSmoothness->SetValue(ssSmoothness.str().c_str());
   }
@@ -2995,14 +3000,16 @@ void vtkKWQdecWindow::UpdateDesignPage() {
   mListNuisanceFactors->DeleteAll();
 
   // Get the current factors selected for this design.
-  vector<QdecFactor *> const &lDiscreteFactors = design->GetDiscreteFactors();
-  vector<QdecFactor *> const &lContinuousFactors =
+  std::vector<QdecFactor *> const &lDiscreteFactors =
+      design->GetDiscreteFactors();
+  std::vector<QdecFactor *> const &lContinuousFactors =
       design->GetContinuousFactors();
-  vector<QdecFactor *> const &lNuisanceFactors = design->GetNuisanceFactors();
-  int nDiscreteSelection = 0;
+  std::vector<QdecFactor *> const &lNuisanceFactors =
+      design->GetNuisanceFactors();
+  int nDiscreteSelection   = 0;
   int nContinuousSelection = 0;
 
-  vector<string> factors =
+  std::vector<std::string> factors =
       this->mQdecProject->GetDataTable()->GetDiscreteFactorNames();
 
   for (unsigned int i = 0; i < factors.size(); i++) {
@@ -3013,7 +3020,7 @@ void vtkKWQdecWindow::UpdateDesignPage() {
     // item.
     for (unsigned int j = 0; j < lDiscreteFactors.size(); j++) {
       if (lDiscreteFactors[j]) {
-        string factorName = lDiscreteFactors[j]->GetFactorName();
+        std::string factorName = lDiscreteFactors[j]->GetFactorName();
         if (factorName == factors[i]) {
           maDiscreteFactorSelection[nDiscreteSelection++] = i;
           mListDiscreteFactors->SetSelectState(i, 1);
@@ -3031,7 +3038,7 @@ void vtkKWQdecWindow::UpdateDesignPage() {
     // item.
     for (unsigned int j = 0; j < lContinuousFactors.size(); j++) {
       if (lContinuousFactors[j]) {
-        string factorName = lContinuousFactors[j]->GetFactorName();
+        std::string factorName = lContinuousFactors[j]->GetFactorName();
         if (factorName == factors[i]) {
           maContinuousFactorSelection[nContinuousSelection++] = i;
           mListContinuousFactors->SetSelectState(i, 1);
@@ -3048,7 +3055,7 @@ void vtkKWQdecWindow::UpdateDesignPage() {
     // design, select this item.
     for (unsigned int j = 0; j < lNuisanceFactors.size(); j++) {
       if (lNuisanceFactors[j]) {
-        string factorName = lNuisanceFactors[j]->GetFactorName();
+        std::string factorName = lNuisanceFactors[j]->GetFactorName();
         if (factorName == factors[i]) {
           mListNuisanceFactors->SetSelectState(i, 1);
         }
@@ -3075,13 +3082,13 @@ vtkKWQdecWindow::UpdateContrastPage () {
 
    // Get the current factors selected for this design.
   mListNuisanceFactors->GetWidget()->GetWidget()->DeleteAll();
-  vector<QdecFactor*> const& lDiscreteFactors =
+  std::vector<QdecFactor*> const& lDiscreteFactors =
     design->GetDiscreteFactors();
   for(unsigned int j=0; j < lDiscreteFactors.size(); j++) {
     mListNuisanceFactors->GetWidget()->GetWidget()->Append
       ( lDiscreteFactors[j]->GetFactorName().c_str() );
   }
-  vector<QdecFactor*> const& lContinuousFactors = 
+  std::vector<QdecFactor*> const& lContinuousFactors =
     design->GetContinuousFactors();
   for(unsigned int j=0; j < lContinuousFactors.size(); j++) {
     mListNuisanceFactors->GetWidget()->GetWidget()->Append
@@ -3120,12 +3127,12 @@ void vtkKWQdecWindow::UpdateDisplayPage() {
     this->Script("pack %s -side top -fill both",
                  mRadBtnSetSurface->GetWidgetName());
 
-    int nButton = 0;
+    int                                                        nButton = 0;
     map<string, vtkSmartPointer<vtkFSSurfaceSource>>::iterator tSurface;
     for (tSurface = maSurfaceSource.begin(); tSurface != maSurfaceSource.end();
          ++tSurface) {
 
-      string sSurface = tSurface->first;
+      std::string sSurface = tSurface->first;
 
       // Make a button for this surface.
       vtkSmartPointer<vtkKWRadioButton> radBtn;
@@ -3133,7 +3140,7 @@ void vtkKWQdecWindow::UpdateDisplayPage() {
       radBtn->SetText(sSurface.c_str());
 
       // Make the command for this button.
-      string sCmd = string("SetCurrentSurface ") + sSurface;
+      std::string sCmd = string("SetCurrentSurface ") + sSurface;
       radBtn->SetCommand(this, sCmd.c_str());
 
       // If this is our currently displayed surface, select the button.
@@ -3146,12 +3153,12 @@ void vtkKWQdecWindow::UpdateDisplayPage() {
 
   // Make sure our currently displayed surface's button is selected
   if (maSurfaceSource.size() > 1 && mbFrameSurfaceInited) {
-    int nButton = 0;
-    vtkSmartPointer<vtkKWRadioButton> radBtn = NULL;
+    int                               nButton = 0;
+    vtkSmartPointer<vtkKWRadioButton> radBtn  = NULL;
     do {
       radBtn = mRadBtnSetSurface->GetWidget(nButton++);
       if (radBtn) {
-        string sSurface = radBtn->GetText();
+        std::string sSurface = radBtn->GetText();
         // If this is our currently displayed surface, select the button.
         if (sSurface == msCurrentSurfaceSource)
           radBtn->SelectedStateOn();
@@ -3164,7 +3171,7 @@ void vtkKWQdecWindow::UpdateDisplayPage() {
   if (maSurfaceSource.size() <= 1 && mbFrameSurfaceInited) {
     mFrameSurface->UnpackChildren();
     mFrameSurface->SetHeight(1);
-    mRadBtnSetSurface = NULL;
+    mRadBtnSetSurface    = NULL;
     mbFrameSurfaceInited = false;
   }
 
@@ -3201,7 +3208,7 @@ void vtkKWQdecWindow::UpdateDisplayPage() {
   if (NULL == mOverlayScalars.GetPointer() && mbFrameOverlayInited) {
     mFrameOverlay->UnpackChildren();
     mFrameOverlay->SetHeight(1);
-    mScaleOverlay = NULL;
+    mScaleOverlay        = NULL;
     mbFrameOverlayInited = false;
   }
 
@@ -3624,18 +3631,18 @@ void vtkKWQdecWindow::UpdateDisplayPage() {
   if (maSurfaceScalars.size() == 0 && mbFrameSurfaceScalarsInited) {
     mFrameSurfaceScalars->UnpackChildren();
     mFrameSurfaceScalars->SetHeight(1);
-    mTableSurfaceScalars = NULL;
+    mTableSurfaceScalars                  = NULL;
     mCheckSurfaceScalarsColorShowPositive = NULL;
     mCheckSurfaceScalarsColorShowNegative = NULL;
-    mEditorSurfaceScalarColors = NULL;
-    mHistogramSurfaceScalarColors = NULL;
-    mEntrySurfaceScalarsColorMin = NULL;
+    mEditorSurfaceScalarColors            = NULL;
+    mHistogramSurfaceScalarColors         = NULL;
+    mEntrySurfaceScalarsColorMin          = NULL;
 #if USE_MID
     mEntrySurfaceScalarsColorMid = NULL;
 #endif
-    mEntrySurfaceScalarsColorMax = NULL;
+    mEntrySurfaceScalarsColorMax    = NULL;
     mEntrySurfaceScalarsColorOffset = NULL;
-    mbFrameSurfaceScalarsInited = false;
+    mbFrameSurfaceScalarsInited     = false;
   }
 
   // If we have our table of scalars, refresh the table of scalars
@@ -3791,7 +3798,7 @@ void vtkKWQdecWindow::CreateScalarTableEntry(const char *iTable, int iRow,
   mTableSurfaceScalars->AddBindingsToWidgetName(iWidget);
 
   // Set the string. The row is the scalar index.
-  string sLabel = mTableSurfaceScalars->GetCellText(iRow, iColumn);
+  std::string sLabel = mTableSurfaceScalars->GetCellText(iRow, iColumn);
   label->SetText(sLabel.c_str());
 
   // Set wrapping and font.
@@ -3828,33 +3835,33 @@ void vtkKWQdecWindow::SurfaceScalarColorsEditorChanged() {
   vtkSmartPointer<vtkRGBATransferFunction> colors =
       mEditorSurfaceScalarColors->GetRGBATransferFunction();
 
-  mnNegativeMaxRedValue = colors->GetRedValue(-mSurfaceScalarsColorMax);
+  mnNegativeMaxRedValue   = colors->GetRedValue(-mSurfaceScalarsColorMax);
   mnNegativeMaxGreenValue = colors->GetGreenValue(-mSurfaceScalarsColorMax);
-  mnNegativeMaxBlueValue = colors->GetBlueValue(-mSurfaceScalarsColorMax);
+  mnNegativeMaxBlueValue  = colors->GetBlueValue(-mSurfaceScalarsColorMax);
 
 #if USE_MID
-  mnNegativeMidRedValue = colors->GetRedValue(-mSurfaceScalarsColorMid);
+  mnNegativeMidRedValue   = colors->GetRedValue(-mSurfaceScalarsColorMid);
   mnNegativeMidGreenValue = colors->GetGreenValue(-mSurfaceScalarsColorMid);
-  mnNegativeMidBlueValue = colors->GetBlueValue(-mSurfaceScalarsColorMid);
+  mnNegativeMidBlueValue  = colors->GetBlueValue(-mSurfaceScalarsColorMid);
 #endif
 
-  mnNegativeMinRedValue = colors->GetRedValue(-mSurfaceScalarsColorMin);
+  mnNegativeMinRedValue   = colors->GetRedValue(-mSurfaceScalarsColorMin);
   mnNegativeMinGreenValue = colors->GetGreenValue(-mSurfaceScalarsColorMin);
-  mnNegativeMinBlueValue = colors->GetBlueValue(-mSurfaceScalarsColorMin);
+  mnNegativeMinBlueValue  = colors->GetBlueValue(-mSurfaceScalarsColorMin);
 
-  mnPositiveMaxRedValue = colors->GetRedValue(mSurfaceScalarsColorMax);
+  mnPositiveMaxRedValue   = colors->GetRedValue(mSurfaceScalarsColorMax);
   mnPositiveMaxGreenValue = colors->GetGreenValue(mSurfaceScalarsColorMax);
-  mnPositiveMaxBlueValue = colors->GetBlueValue(mSurfaceScalarsColorMax);
+  mnPositiveMaxBlueValue  = colors->GetBlueValue(mSurfaceScalarsColorMax);
 
 #if USE_MID
-  mnPositiveMidRedValue = colors->GetRedValue(mSurfaceScalarsColorMid);
+  mnPositiveMidRedValue   = colors->GetRedValue(mSurfaceScalarsColorMid);
   mnPositiveMidGreenValue = colors->GetGreenValue(mSurfaceScalarsColorMid);
-  mnPositiveMidBlueValue = colors->GetBlueValue(mSurfaceScalarsColorMid);
+  mnPositiveMidBlueValue  = colors->GetBlueValue(mSurfaceScalarsColorMid);
 #endif
 
-  mnPositiveMinRedValue = colors->GetRedValue(mSurfaceScalarsColorMin);
+  mnPositiveMinRedValue   = colors->GetRedValue(mSurfaceScalarsColorMin);
   mnPositiveMinGreenValue = colors->GetGreenValue(mSurfaceScalarsColorMin);
-  mnPositiveMinBlueValue = colors->GetBlueValue(mSurfaceScalarsColorMin);
+  mnPositiveMinBlueValue  = colors->GetBlueValue(mSurfaceScalarsColorMin);
 
   // Draw with the new values.
   this->ComposeSurfaceScalarsAndShow();
@@ -3865,15 +3872,15 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorMin(double iMin) {
   assert(mEntrySurfaceScalarsColorMin.GetPointer());
 
   // If not already equal...
-  if (fabs(iMin - mSurfaceScalarsColorMin) >
-      numeric_limits<double>::epsilon()) {
+  if (fabs(iMin - mSurfaceScalarsColorMin) > std::numeric_limitsdouble >
+      ::epsilon()) {
 
     // Save our new value.
     mSurfaceScalarsColorMin = iMin;
 
     // Set the value in the entry if not equal.
     if (fabs(mEntrySurfaceScalarsColorMin->GetValueAsDouble() -
-             mSurfaceScalarsColorMin) > numeric_limits<double>::epsilon())
+             mSurfaceScalarsColorMin) > std::numeric_limitsdouble > ::epsilon())
       mEntrySurfaceScalarsColorMin->SetValueAsDouble(mSurfaceScalarsColorMin);
 
 #if USE_MID
@@ -3897,15 +3904,15 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorMid(double iMid) {
   assert(mEntrySurfaceScalarsColorMin.GetPointer());
 
   // If not already equal...
-  if (fabs(iMid - mSurfaceScalarsColorMid) >
-      numeric_limits<double>::epsilon()) {
+  if (fabs(iMid - mSurfaceScalarsColorMid) > std::numeric_limitsdouble >
+      ::epsilon()) {
 
     // Save our new value.
     mSurfaceScalarsColorMid = iMid;
 
     // Set the value in the entry if not equal.
     if (fabs(mEntrySurfaceScalarsColorMid->GetValueAsDouble() -
-             mSurfaceScalarsColorMid) > numeric_limits<double>::epsilon())
+             mSurfaceScalarsColorMid) > std::numeric_limitsdouble > ::epsilon())
       mEntrySurfaceScalarsColorMid->SetValueAsDouble(mSurfaceScalarsColorMid);
 
     // Update the editor.
@@ -3922,15 +3929,15 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorMax(double iMax) {
   assert(mEntrySurfaceScalarsColorMax.GetPointer());
 
   // If not already equal...
-  if (fabs(iMax - mSurfaceScalarsColorMax) >
-      numeric_limits<double>::epsilon()) {
+  if (fabs(iMax - mSurfaceScalarsColorMax) > std::numeric_limitsdouble >
+      ::epsilon()) {
 
     // Save our new value.
     mSurfaceScalarsColorMax = iMax;
 
     // Set the value in the entry if not equal.
     if (fabs(mEntrySurfaceScalarsColorMax->GetValueAsDouble() -
-             mSurfaceScalarsColorMax) > numeric_limits<double>::epsilon())
+             mSurfaceScalarsColorMax) > std::numeric_limitsdouble > ::epsilon())
       mEntrySurfaceScalarsColorMax->SetValueAsDouble(mSurfaceScalarsColorMax);
 
     // Update the editor.
@@ -3955,15 +3962,15 @@ void vtkKWQdecWindow::SetSurfaceScalarsColors(double iMin, double iMid,
   bool bChanged = false;
 
   // If not already equal...
-  if (fabs(iMin - mSurfaceScalarsColorMin) >
-      numeric_limits<double>::epsilon()) {
+  if (fabs(iMin - mSurfaceScalarsColorMin) > std::numeric_limitsdouble >
+      ::epsilon()) {
 
     // Save our new value.
     mSurfaceScalarsColorMin = iMin;
 
     // Set the value in the entry if not equal.
     if (fabs(mEntrySurfaceScalarsColorMin->GetValueAsDouble() -
-             mSurfaceScalarsColorMin) > numeric_limits<double>::epsilon())
+             mSurfaceScalarsColorMin) > std::numeric_limitsdouble > ::epsilon())
       mEntrySurfaceScalarsColorMin->SetValueAsDouble(mSurfaceScalarsColorMin);
 
     bChanged = true;
@@ -3971,15 +3978,15 @@ void vtkKWQdecWindow::SetSurfaceScalarsColors(double iMin, double iMid,
 
 #if USE_MID
   // If not already equal...
-  if (fabs(iMid - mSurfaceScalarsColorMid) >
-      numeric_limits<double>::epsilon()) {
+  if (fabs(iMid - mSurfaceScalarsColorMid) > std::numeric_limitsdouble >
+      ::epsilon()) {
 
     // Save our new value.
     mSurfaceScalarsColorMid = iMid;
 
     // Set the value in the entry if not equal.
     if (fabs(mEntrySurfaceScalarsColorMid->GetValueAsDouble() -
-             mSurfaceScalarsColorMid) > numeric_limits<double>::epsilon())
+             mSurfaceScalarsColorMid) > std::numeric_limitsdouble > ::epsilon())
       mEntrySurfaceScalarsColorMid->SetValueAsDouble(mSurfaceScalarsColorMid);
 
     bChanged = true;
@@ -3987,15 +3994,15 @@ void vtkKWQdecWindow::SetSurfaceScalarsColors(double iMin, double iMid,
 #endif
 
   // If not already equal...
-  if (fabs(iMax - mSurfaceScalarsColorMax) >
-      numeric_limits<double>::epsilon()) {
+  if (fabs(iMax - mSurfaceScalarsColorMax) > std::numeric_limitsdouble >
+      ::epsilon()) {
 
     // Save our new value.
     mSurfaceScalarsColorMax = iMax;
 
     // Set the value in the entry if not equal.
     if (fabs(mEntrySurfaceScalarsColorMax->GetValueAsDouble() -
-             mSurfaceScalarsColorMax) > numeric_limits<double>::epsilon())
+             mSurfaceScalarsColorMax) > std::numeric_limitsdouble > ::epsilon())
       mEntrySurfaceScalarsColorMax->SetValueAsDouble(mSurfaceScalarsColorMax);
 
     bChanged = true;
@@ -4016,15 +4023,16 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorOffset(double iOffset) {
   assert(mEntrySurfaceScalarsColorOffset.GetPointer());
 
   // If not already equal...
-  if (fabs(iOffset - mSurfaceScalarsColorOffset) >
-      numeric_limits<double>::epsilon()) {
+  if (fabs(iOffset - mSurfaceScalarsColorOffset) > std::numeric_limitsdouble >
+      ::epsilon()) {
 
     // Save our new value.
     mSurfaceScalarsColorOffset = iOffset;
 
     // Set the value in the entry if not equal.
     if (fabs(mEntrySurfaceScalarsColorOffset->GetValueAsDouble() -
-             mSurfaceScalarsColorOffset) > numeric_limits<double>::epsilon())
+             mSurfaceScalarsColorOffset) > std::numeric_limitsdouble >
+        ::epsilon())
       mEntrySurfaceScalarsColorOffset->SetValueAsDouble(
           mSurfaceScalarsColorOffset);
 
@@ -4041,18 +4049,20 @@ void vtkKWQdecWindow::GenerateClusterStats() {
     if (maSurfaceSource.find(msCurrentSurfaceSource) == maSurfaceSource.end() ||
         maSurfaceScalars.find(mnCurrentSurfaceScalars) ==
             maSurfaceScalars.end()) {
-      throw runtime_error("Must have a surface loaded and results selected.");
+      throw std::runtime_error(
+          "Must have a surface loaded and results selected.");
     }
 
     // get white surface struct, and insert current scalars into its val slots
     // but first make sure it exists.
     if (maSurfaceSource.find("white") == maSurfaceSource.end()) {
-      throw runtime_error("GenerateClusterStats: white surface was not found");
+      throw std::runtime_error(
+          "GenerateClusterStats: white surface was not found");
     }
-    MRIS *mris = maSurfaceSource["white"]->GetMRIS();
+    MRIS *         mris    = maSurfaceSource["white"]->GetMRIS();
     vtkFloatArray *scalars = maSurfaceScalars[mnCurrentSurfaceScalars].mValues;
     for (int nVertex = 0; nVertex < mris->nvertices; nVertex++) {
-      mris->vertices[nVertex].val = scalars->GetTuple1(nVertex);
+      mris->vertices[nVertex].val     = scalars->GetTuple1(nVertex);
       mris->vertices[nVertex].ripflag = 0;
     }
 
@@ -4065,8 +4075,8 @@ void vtkKWQdecWindow::GenerateClusterStats() {
     mnClusters = 0;
     fprintf(stdout,
             "============================================================\n");
-    cout << "Generating cluster stats using min threshold of "
-         << mSurfaceScalarsColorMin << "...\n";
+    std::cout << "Generating cluster stats using min threshold of "
+              << mSurfaceScalarsColorMin << "...\n";
     mClusterStats =
         sclustMapSurfClusters(mris,
                               mSurfaceScalarsColorMin, // threshold min
@@ -4076,14 +4086,15 @@ void vtkKWQdecWindow::GenerateClusterStats() {
                               &mnClusters,             // return
                               XFM);                    // tal transform
     if (NULL == mClusterStats)
-      throw runtime_error("Unable to generate cluster stats\n");
+      throw std::runtime_error("Unable to generate cluster stats\n");
     else
       this->SetStatusText("Completed generation of cluster stats");
-    cout << "Found " << mnClusters << " clusters" << endl;
-    cout << "Contrast: '" << maSurfaceScalars[mnCurrentSurfaceScalars].msLabel2
-         << "', " << mQdecProject->GetGlmDesign()->GetSmoothness()
-         << "fwhm, DOF: " << mQdecProject->GetGlmDesign()->GetDegreesOfFreedom()
-         << endl;
+    std::cout << "Found " << mnClusters << " clusters" << std::endl;
+    std::cout << "Contrast: '"
+              << maSurfaceScalars[mnCurrentSurfaceScalars].msLabel2 << "', "
+              << mQdecProject->GetGlmDesign()->GetSmoothness() << "fwhm, DOF: "
+              << mQdecProject->GetGlmDesign()->GetDegreesOfFreedom()
+              << std::endl;
 
     // screen dump cluster info
     fprintf(stdout, "ClusterNo  Max   VtxMax  Size(mm2)   "
@@ -4107,7 +4118,7 @@ void vtkKWQdecWindow::GenerateClusterStats() {
     }
 
   } catch (exception &e) {
-    stringstream ssError;
+    std::stringstream ssError;
     ssError << "Error generating cluster stats\n" << e.what();
     this->GetApplication()->ErrorMessage(ssError.str().c_str());
     this->SetStatusText("Error generating cluster stats");
@@ -4139,15 +4150,16 @@ void vtkKWQdecWindow::GotoCluster(int iCurrentCluster) {
     if (maSurfaceSource.find(msCurrentSurfaceSource) == maSurfaceSource.end() ||
         maSurfaceScalars.find(mnCurrentSurfaceScalars) ==
             maSurfaceScalars.end()) {
-      throw runtime_error("Must have a surface loaded and scalar selected.");
+      throw std::runtime_error(
+          "Must have a surface loaded and scalar selected.");
     }
 
     if (NULL == mClusterStats) {
-      throw runtime_error("Must generate cluster stats first.");
+      throw std::runtime_error("Must generate cluster stats first.");
     }
 
     if (0 == mnClusters) {
-      throw runtime_error("There are zero clusters.");
+      throw std::runtime_error("There are zero clusters.");
     }
 
     // screen dump cluster info
@@ -4166,7 +4178,7 @@ void vtkKWQdecWindow::GotoCluster(int iCurrentCluster) {
     }
 
   } catch (exception &e) {
-    stringstream ssError;
+    std::stringstream ssError;
     ssError << "Error advancing to next cluster\n" << e.what();
     this->GetApplication()->ErrorMessage(ssError.str().c_str());
   }
@@ -4180,7 +4192,8 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorsUsingFDR() {
     if (maSurfaceSource.find(msCurrentSurfaceSource) == maSurfaceSource.end() ||
         maSurfaceScalars.find(mnCurrentSurfaceScalars) ==
             maSurfaceScalars.end()) {
-      throw runtime_error("\nMust have a surface loaded and overlay selected.");
+      throw std::runtime_error(
+          "\nMust have a surface loaded and overlay selected.");
     }
 
     // If they are only looking at positive or negative values, set the
@@ -4196,10 +4209,10 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorsUsingFDR() {
     // The FDR function will look at values in the val field of the
     // surface. Get the MRIS and write our current scalar values into
     // the val field.
-    MRIS *mris = maSurfaceSource[msCurrentSurfaceSource]->GetMRIS();
+    MRIS *         mris    = maSurfaceSource[msCurrentSurfaceSource]->GetMRIS();
     vtkFloatArray *scalars = maSurfaceScalars[mnCurrentSurfaceScalars].mValues;
     for (int nVertex = 0; nVertex < mris->nvertices; nVertex++) {
-      mris->vertices[nVertex].val = scalars->GetTuple1(nVertex);
+      mris->vertices[nVertex].val     = scalars->GetTuple1(nVertex);
       mris->vertices[nVertex].ripflag = 0;
     }
 
@@ -4207,12 +4220,12 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorsUsingFDR() {
     // got before, FALSE for only_marked (not supported), and get the
     // threshold back.
     double threshold;
-    int err = MRISfdr2vwth(mris, mSurfaceScalarsColorsFDRRate, sign,
+    int    err = MRISfdr2vwth(mris, mSurfaceScalarsColorsFDRRate, sign,
                            true,  // log10flag
                            false, // maskflag
                            &threshold);
     if (err)
-      throw runtime_error("Error from MRISfdr2vwth");
+      throw std::runtime_error("Error from MRISfdr2vwth");
     else
       this->SetStatusText("Completed FDR threshold set");
 
@@ -4223,9 +4236,9 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorsUsingFDR() {
         nVerticesBelowThreshold++; // found a vertex below FDR threshold
       }
     }
-    cout << "Found " << nVerticesBelowThreshold << " of " << mris->nvertices
-         << " vertices "
-         << "above FDR threshold (of " << threshold << ")\n";
+    std::cout << "Found " << nVerticesBelowThreshold << " of "
+              << mris->nvertices << " vertices "
+              << "above FDR threshold (of " << threshold << ")\n";
 
     // Set our min to the threshold, and calculate good values for mid
     // and max.
@@ -4233,7 +4246,7 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorsUsingFDR() {
                                   threshold + 2.25);
 
   } catch (exception &e) {
-    stringstream ssError;
+    std::stringstream ssError;
     ssError << "Error in calculating FDR: " << e.what();
     this->GetApplication()->ErrorMessage(ssError.str().c_str());
     this->SetStatusText("Error during FDR calculation");
@@ -4242,7 +4255,7 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorsUsingFDR() {
 
 void vtkKWQdecWindow::SetSurfaceScalarsColorsFDRRate(const char *isValue) {
 
-  stringstream ssValue(isValue);
+  std::stringstream ssValue(isValue);
   ssValue >> mSurfaceScalarsColorsFDRRate;
 }
 
@@ -4256,25 +4269,26 @@ void vtkKWQdecWindow::RunSimulation() {
     if (maSurfaceSource.find(msCurrentSurfaceSource) == maSurfaceSource.end() ||
         maSurfaceScalars.find(mnCurrentSurfaceScalars) ==
             maSurfaceScalars.end()) {
-      throw runtime_error("\nMust have a surface loaded and "
-                          "overlay selected.");
+      throw std::runtime_error("\nMust have a surface loaded and "
+                               "overlay selected.");
     }
 
     if (0 !=
         strcmp(this->mQdecProject->GetAverageSubject().c_str(), "fsaverage")) {
-      throw runtime_error("\nThis function only works when using fsaverage "
-                          "as the common-space subject");
+      throw std::runtime_error(
+          "\nThis function only works when using fsaverage "
+          "as the common-space subject");
     }
 
     const char *contrast =
         maSurfaceScalars[mnCurrentSurfaceScalars].msLabel2.c_str();
 
     if (0 == strlen(contrast)) {
-      throw runtime_error("Select an Analysis Result corresponding to a "
-                          "contrast");
+      throw std::runtime_error("Select an Analysis Result corresponding to a "
+                               "contrast");
     }
 
-    string threshold;
+    std::string threshold;
     if (0 == strcmp(mMenuButtonSimulationThresh->GetValue(), "1.3 (0.05)")) {
       threshold = "th13";
     } else if (0 ==
@@ -4298,14 +4312,14 @@ void vtkKWQdecWindow::RunSimulation() {
     if (this->mQdecProject->RunMonteCarloSimulation(
             threshold.c_str(), mMenuButtonSimulationSign->GetValue(), contrast,
             &fnClusterSigFile)) {
-      throw runtime_error("Error running mri_surfcluster!");
+      throw std::runtime_error("Error running mri_surfcluster!");
     }
     int nScalar = this->LoadSurfaceScalars(fnClusterSigFile,
                                            NULL, // will show filename
                                            contrast);
     if (nScalar < 0) {
-      throw runtime_error(string("Could not load results file ") +
-                          fnClusterSigFile);
+      throw std::runtime_error(string("Could not load results file ") +
+                               fnClusterSigFile);
     }
 
     this->SetCurrentSurfaceScalars(nScalar);
@@ -4313,7 +4327,7 @@ void vtkKWQdecWindow::RunSimulation() {
     this->SetStatusText("Completed Monte Carlo simulation");
 
   } catch (exception &e) {
-    stringstream ssError;
+    std::stringstream ssError;
     ssError << "Error in Monte Carlo simulation: " << e.what();
     this->GetApplication()->ErrorMessage(ssError.str().c_str());
     this->SetStatusText("Error during Monte Carlo simulation");
@@ -4330,14 +4344,14 @@ void vtkKWQdecWindow::UpdateScatterPlot() {
   if (mScatterPlotSelection != -1) {
 
     // Start a list of points for our data to graph.
-    vector<double> lPoints;
+    std::vector<double> lPoints;
 
     // Get the name of the factor.
-    string sFactor(mListScatterPlot->GetItem(mScatterPlotSelection));
+    std::string sFactor(mListScatterPlot->GetItem(mScatterPlotSelection));
 
     // For each subject...
-    vector<QdecSubject *>::iterator tSubject;
-    vector<QdecSubject *> lSubjects =
+    std::vector<QdecSubject *>::iterator tSubject;
+    std::vector<QdecSubject *>           lSubjects =
         mQdecProject->GetDataTable()->GetSubjects();
     int nIndex = 0;
     for (tSubject = lSubjects.begin(); tSubject != lSubjects.end();
@@ -4348,9 +4362,10 @@ void vtkKWQdecWindow::UpdateScatterPlot() {
 
       // dont plot it if its NaN (ie. no data for that subject)
       if (isnan(value)) {
-        cout << endl
-             << "WARNING: Excluding subject " << (*tSubject)->GetId().c_str()
-             << " from plot due to NaN data point!" << endl;
+        std::cout << std::endl
+                  << "WARNING: Excluding subject "
+                  << (*tSubject)->GetId().c_str()
+                  << " from plot due to NaN data point!" << std::endl;
         mGraph->DeleteElement((*tSubject)->GetId().c_str());
         continue;
       }
@@ -4364,13 +4379,13 @@ void vtkKWQdecWindow::UpdateScatterPlot() {
       // so.
       QdecGlmDesign *design = mQdecProject->GetGlmDesign();
       assert(design);
-      string sSymbol;
-      float color[3] = {0, 0, 0};
+      std::string sSymbol;
+      float       color[3] = {0, 0, 0};
       if (design->GetExcludeSubjectID((*tSubject)->GetId().c_str())) {
-        sSymbol = "cross";
+        sSymbol  = "cross";
         color[0] = 1.0; // red
       } else {
-        sSymbol = "plus";
+        sSymbol  = "plus";
         color[2] = 1.0; // blue
       }
 
@@ -4382,7 +4397,7 @@ void vtkKWQdecWindow::UpdateScatterPlot() {
 
       // and the axis labels
       mGraph->SetYAxisTitle(sFactor.c_str());
-      string sXaxis = "Subject";
+      std::string sXaxis = "Subject";
       mGraph->SetXAxisTitle(sXaxis.c_str());
 
       // and un-gray the Save Factor Plot to Postscript menu item
@@ -4421,8 +4436,8 @@ void vtkKWQdecWindow::AddSelectionToROI() {
 
   assert(mView.GetPointer());
   if (maSurfaceSource.size() < 1)
-    throw runtime_error("Must load a surface before "
-                        "working on the selection.");
+    throw std::runtime_error("Must load a surface before "
+                             "working on the selection.");
 
   // Get the list of selected points. This is a closed loop.
   vtkPoints *points = mView->GetSurfaceSelectionPoints();
@@ -4436,8 +4451,8 @@ void vtkKWQdecWindow::AddSelectionToROI() {
 
   // If we don't have a label source, create one now.
   if (!mROISource.GetPointer()) {
-    mROISource = vtkSmartPointer<vtkFSSurfaceLabelSource>::New();
-    string sLabelName = mMenuMorphHemisphere->GetValue();
+    mROISource             = vtkSmartPointer<vtkFSSurfaceLabelSource>::New();
+    std::string sLabelName = mMenuMorphHemisphere->GetValue();
     sLabelName += ".untitled.label";
     mROISource->SetLabelFileName(sLabelName.c_str());
     vtkFSSurfaceSource *surface = maSurfaceSource[msCurrentSurfaceSource];
@@ -4462,8 +4477,8 @@ void vtkKWQdecWindow::RemoveSelectionFromROI() {
 
   assert(mView.GetPointer());
   if (maSurfaceSource.size() < 1)
-    throw runtime_error("Must load a surface "
-                        "before working on the selection.");
+    throw std::runtime_error("Must load a surface "
+                             "before working on the selection.");
 
   // Get the list of selected points. This is a closed loop.
   vtkPoints *points = mView->GetSurfaceSelectionPoints();
@@ -4477,8 +4492,8 @@ void vtkKWQdecWindow::RemoveSelectionFromROI() {
 
   // If we don't have a label source, create one now.
   if (!mROISource.GetPointer()) {
-    mROISource = vtkSmartPointer<vtkFSSurfaceLabelSource>::New();
-    string sLabelName = mMenuMorphHemisphere->GetValue();
+    mROISource             = vtkSmartPointer<vtkFSSurfaceLabelSource>::New();
+    std::string sLabelName = mMenuMorphHemisphere->GetValue();
     sLabelName += ".untitled.label";
     mROISource->SetLabelFileName(sLabelName.c_str());
     vtkFSSurfaceSource *surface = maSurfaceSource.begin()->second;
@@ -4519,7 +4534,7 @@ void vtkKWQdecWindow::GraphAverageROIInGDF() {
   assert(mVertexPlot->IsLoaded());
 
   // Create a vertex vector.
-  vector<int> lVertices;
+  std::vector<int> lVertices;
 
   // Get it filled out.
   mROISource->GetLabeledVertices(lVertices);
@@ -4543,7 +4558,7 @@ void vtkKWQdecWindow::GraphAverageROIInGDF() {
   mVertexPlot->BeginPointList();
 
   // For each vertex, add it to the point list.
-  vector<int>::iterator tVertex;
+  std::vector<int>::iterator tVertex;
   for (tVertex = lVertices.begin(); tVertex != lVertices.end(); ++tVertex) {
     int nVertex = *tVertex;
     mVertexPlot->AddPoint(nVertex);
@@ -4553,7 +4568,7 @@ void vtkKWQdecWindow::GraphAverageROIInGDF() {
   mVertexPlot->EndPointList();
 
   // Set the info string.
-  string info = "\"Average of ROI\"";
+  std::string info = "\"Average of ROI\"";
   mVertexPlot->SetInfo(info.c_str());
 }
 
@@ -4621,10 +4636,10 @@ void vtkKWQdecWindow::NotebookPageRaised(const char *isTitle) {
   this->UpdateCommandStatus();
 }
 
-void vtkKWQdecWindow::NotebookRaisePageCallback(vtkObject *iCaller,
+void vtkKWQdecWindow::NotebookRaisePageCallback(vtkObject *   iCaller,
                                                 unsigned long iEventId,
-                                                void *iClientData,
-                                                void *iCallData) {
+                                                void *        iClientData,
+                                                void *        iCallData) {
 
   assert(vtkKWEvent::NotebookRaisePageEvent == iEventId);
   assert(iCallData);
@@ -4634,15 +4649,16 @@ void vtkKWQdecWindow::NotebookRaisePageCallback(vtkObject *iCaller,
   // ScatterPlotGraphMouseoverEnterElement function.
   try {
 
-    char **args = static_cast<char **>(iCallData);
-    char *sTitle = args[0];
+    char **args   = static_cast<char **>(iCallData);
+    char * sTitle = args[0];
 
     vtkKWQdecWindow *window = static_cast<vtkKWQdecWindow *>(iClientData);
 
     if (window)
       window->NotebookPageRaised(sTitle);
   } catch (...) {
-    cerr << "Invalid call or client data in NotebookRaisePageCallback" << endl;
+    std::cerr << "Invalid call or client data in NotebookRaisePageCallback"
+              << std::endl;
   }
 }
 
@@ -4660,7 +4676,7 @@ void vtkKWQdecWindow::ScatterPlotGraphMouseoverExitElement() {
 }
 
 void vtkKWQdecWindow::ScatterPlotGraphSetUpContextualMenu(const char *isElement,
-                                                          vtkKWMenu *iMenu) {
+                                                          vtkKWMenu * iMenu) {
 
   assert(isElement);
   assert(iMenu);
@@ -4678,11 +4694,11 @@ void vtkKWQdecWindow::ScatterPlotGraphSetUpContextualMenu(const char *isElement,
   QdecGlmDesign *design = mQdecProject->GetGlmDesign();
   assert(design);
   if (design->GetExcludeSubjectID(isElement)) {
-    stringstream ssCommand;
+    std::stringstream ssCommand;
     ssCommand << "SetExcludeSubjectID " << isElement << " 0";
     iMenu->AddCommand("Don't exclude", this, ssCommand.str().c_str());
   } else {
-    stringstream ssCommand;
+    std::stringstream ssCommand;
     ssCommand << "SetExcludeSubjectID " << isElement << " 1";
     iMenu->AddCommand("Exclude", this, ssCommand.str().c_str());
   }
@@ -4693,8 +4709,8 @@ void vtkKWQdecWindow::ScatterPlotGraphSetUpContextualMenu(const char *isElement,
 
     // Add commands to load this subject's data in tksurfer and tkmedit.
     iMenu->AddSeparator();
-    stringstream ssTkmeditCmd;
-    stringstream ssTkmeditCommand;
+    std::stringstream ssTkmeditCmd;
+    std::stringstream ssTkmeditCommand;
     // catch { exec tkmedit $s norm.mgz $hemi.white -segmentation aseg.mgz }
     ssTkmeditCmd << envVars->FREESURFER_HOME << "/tktools/tkmedit " << isElement
                  << " norm.mgz -aux T1.mgz -surfs "
@@ -4708,8 +4724,8 @@ void vtkKWQdecWindow::ScatterPlotGraphSetUpContextualMenu(const char *isElement,
     iMenu->AddCommand("Open in tkmedit ", NULL, ssTkmeditCommand.str().c_str());
 
     // tksurfer, left hemi
-    stringstream ssTksurferCmd;
-    stringstream ssTksurferCommand;
+    std::stringstream ssTksurferCmd;
+    std::stringstream ssTksurferCommand;
     // catch { exec tksurfer $s $hemi inflated -annotation aparc.annot }
     ssTksurferCmd << envVars->FREESURFER_HOME << "/tktools/tksurfer "
                   << isElement << " "
@@ -4722,8 +4738,8 @@ void vtkKWQdecWindow::ScatterPlotGraphSetUpContextualMenu(const char *isElement,
                       ssTksurferCommand.str().c_str());
 
     // tksurfer, right hemi
-    stringstream ssTksurferCmd2;
-    stringstream ssTksurferCommand2;
+    std::stringstream ssTksurferCmd2;
+    std::stringstream ssTksurferCommand2;
     ssTksurferCmd2 << envVars->FREESURFER_HOME << "/tktools/tksurfer "
                    << isElement << " "
                    << "rh inflated "
@@ -4764,8 +4780,8 @@ void vtkKWQdecWindow::ScatterPlotGraphMouseoverEnterElementCallback(
     if (window)
       window->ScatterPlotGraphMouseoverEnterElement(foundElement->msLabel);
   } catch (...) {
-    cerr << "Invalid call or client data in "
-         << "ScatterPlotGraphMouseoverEnterElementCallback" << endl;
+    std::cerr << "Invalid call or client data in "
+              << "ScatterPlotGraphMouseoverEnterElementCallback" << std::endl;
   }
 }
 
@@ -4785,8 +4801,8 @@ void vtkKWQdecWindow::ScatterPlotGraphMouseoverExitElementCallback(
     if (window)
       window->ScatterPlotGraphMouseoverExitElement();
   } catch (...) {
-    cerr << "Invalid call or client data in "
-         << "ScatterPlotGraphMouseoverExitElementCallback" << endl;
+    std::cerr << "Invalid call or client data in "
+              << "ScatterPlotGraphMouseoverExitElementCallback" << std::endl;
   }
 }
 
@@ -4811,13 +4827,13 @@ void vtkKWQdecWindow::ScatterPlotGraphContextualMenuOpeningCallback(
       window->ScatterPlotGraphSetUpContextualMenu(clickedElement->msElement,
                                                   clickedElement->mMenu);
   } catch (...) {
-    cerr << "Invalid call or client data in "
-         << "ScatterPlotGraphContextualMenuOpeningCallback" << endl;
+    std::cerr << "Invalid call or client data in "
+              << "ScatterPlotGraphContextualMenuOpeningCallback" << std::endl;
   }
 }
 
 void vtkKWQdecWindow::SetExcludeSubjectID(const char *isElement,
-                                          int ibExclude) {
+                                          int         ibExclude) {
 
   assert(isElement);
   assert(mQdecProject);
@@ -4836,7 +4852,7 @@ void vtkKWQdecWindow::SetExcludeSubjectID(const char *isElement,
 void vtkKWQdecWindow::SetExcludeSubjectGT(double inExcludeGT) {
 
   if (this->mQdecProject) {
-    string value = this->mEntryExcludeSubjectGT->GetValue();
+    std::string value = this->mEntryExcludeSubjectGT->GetValue();
     if (value == "")
       return;
 
@@ -4886,7 +4902,7 @@ void vtkKWQdecWindow::SetExcludeSubjectLT(const char *isExcludeLT) {
 void vtkKWQdecWindow::SetExcludeSubjectET(double inExcludeET) {
 
   if (this->mQdecProject) {
-    string value = this->mEntryExcludeSubjectET->GetValue();
+    std::string value = this->mEntryExcludeSubjectET->GetValue();
     if (value == "")
       return;
 
@@ -4986,7 +5002,8 @@ void vtkKWQdecWindow::GenerateStatsDataTables() {
     }
 
     // run asegstats2table and aparcstats2table scripts
-    vector<string> statsNames = this->mQdecProject->CreateStatsDataTables();
+    std::vector<std::string> statsNames =
+        this->mQdecProject->CreateStatsDataTables();
 
     if (statsNames.size()) { // it sppears to have given us some data
       // remove the generate button...
@@ -4996,7 +5013,8 @@ void vtkKWQdecWindow::GenerateStatsDataTables() {
       // ...and replace with a menu button containing names of the generated
       // stats tables
       for (unsigned int i = 0; i < statsNames.size(); i++) {
-        string sCmd = string("SetStatsImportItem ") + statsNames[i].c_str();
+        std::string sCmd =
+            string("SetStatsImportItem ") + statsNames[i].c_str();
         mMenuStatsData->GetMenu()->AddRadioButton(statsNames[i].c_str(), this,
                                                   sCmd.c_str());
       }
@@ -5014,12 +5032,12 @@ void vtkKWQdecWindow::SetStatsImportItem(const char *isStatsImportItem) {
     return;
 
   // load from file
-  stringstream ssFname;
+  std::stringstream ssFname;
   ssFname << this->mQdecProject->GetStatsDataTablesDir() << "/"
           << isStatsImportItem << ".stats.dat";
 
   // kluge: aseg.vol.stats.dat file uses word 'volume' as is fsid column name
-  stringstream ssFsIdColName;
+  std::stringstream ssFsIdColName;
   if (!strcmp(isStatsImportItem, "aseg.vol"))
     ssFsIdColName << "volume";
   else
@@ -5036,7 +5054,8 @@ void vtkKWQdecWindow::SetStatsImportItem(const char *isStatsImportItem) {
   }
 
   // fill our menu list with the factors from this data table
-  vector<string> factors = mStatsImportDataTable->GetContinuousFactorNames();
+  std::vector<std::string> factors =
+      mStatsImportDataTable->GetContinuousFactorNames();
   for (unsigned int i = 0; i < factors.size(); i++) {
     mListStatsImportFactors->Append(factors[i].c_str());
   }
@@ -5054,7 +5073,7 @@ void vtkKWQdecWindow::AddStatsToDataTable() {
        nItem++) {
     if (this->mListStatsImportFactors->GetSelectState(nItem)) {
       // Get the name of the factor.
-      string sFactor(this->mListStatsImportFactors->GetItem(nItem));
+      std::string sFactor(this->mListStatsImportFactors->GetItem(nItem));
 
       // and merge it into our Data Table
       this->mQdecProject->MergeFactorIntoDataTable(sFactor.c_str(),
@@ -5083,9 +5102,9 @@ void vtkKWQdecWindow::RemoveFactorFromDataTable() {
     return; // nothing selected
 
   // Get the name of the selected factor.
-  string sFactor(mListScatterPlot->GetItem(mScatterPlotSelection));
+  std::string sFactor(mListScatterPlot->GetItem(mScatterPlotSelection));
 
-  string sPopUpMsg = "Remove factor '" + sFactor + "'?";
+  std::string sPopUpMsg = "Remove factor '" + sFactor + "'?";
 
   // pop-up an 'are you really really really really really sure' box
   if (vtkKWMessageDialog::PopupOkCancel(this->GetApplication(), this, "",
@@ -5138,7 +5157,7 @@ char const *vtkKWQdecWindow::GetAnnotationForVertex(int inVertex) {
   return NULL;
 }
 
-void vtkKWQdecWindow::FindVerticesInsidePath(vtkPoints *iPath,
+void vtkKWQdecWindow::FindVerticesInsidePath(vtkPoints *  iPath,
                                              vtkIntArray *ioVertices) {
 
   assert(iPath);
@@ -5175,10 +5194,10 @@ void vtkKWQdecWindow::FindVerticesInsidePath(vtkPoints *iPath,
 
 vtkFloatArray *
 vtkKWQdecWindow::NewScalarsFromSurfaceScalarsFile(const char *ifnScalars,
-                                                  int inIndex) {
+                                                  int         inIndex) {
 
   if (maSurfaceSource.size() < 1)
-    throw runtime_error("Must load a surface before loading scalars.");
+    throw std::runtime_error("Must load a surface before loading scalars.");
 
   // Try to load the scalars.
 
@@ -5192,11 +5211,11 @@ vtkKWQdecWindow::NewScalarsFromSurfaceScalarsFile(const char *ifnScalars,
 
   // Try to read the scalars.
   float *values = NULL;
-  int eRead = MRISreadValuesIntoArray(ifnScalars, cValues, &values);
+  int    eRead  = MRISreadValuesIntoArray(ifnScalars, cValues, &values);
   if (0 != eRead) {
     if (values)
       free(values);
-    throw runtime_error("Could not read scalar file");
+    throw std::runtime_error("Could not read scalar file");
   }
 
   // Allocate our scalars.
@@ -5261,7 +5280,7 @@ void vtkKWQdecWindow::ComposeSurfaceScalarsAndShow() {
     // NOTE: epsilon is actually a bit too small here, as adding an
     // entry to the table and then another entry EPS bigger will
     // sometimes make the table think it's the same value.
-    const double EPS = numeric_limits<double>::epsilon() * 2.0;
+    const double EPS = std::numeric_limitsdouble > ::epsilon() * 2.0;
 
     // For each value, check the surface scalar value. If it's < min,
     // use the background value. If we're reversing, reverse the
@@ -5319,13 +5338,13 @@ void vtkKWQdecWindow::ComposeSurfaceScalarsAndShow() {
       double range[2];
       mCurvatureScalars->GetRange(range);
       double highestAbs = MAX(fabs(range[0]), fabs(range[1]));
-      curvatureMin = highestAbs;
+      curvatureMin      = highestAbs;
     }
 
     bool bUseGray = true;
     if (mSurfaceScalarsColorMin <= curvatureMin) {
       curvatureMin = mSurfaceScalarsColorMin - EPS;
-      bUseGray = false;
+      bUseGray     = false;
     }
 
     // This is the negative scalar range.
@@ -5403,13 +5422,14 @@ void vtkKWQdecWindow::ComposeSurfaceScalarsAndShow() {
 
       // Show the label in the annoation (by annotation, here we mean the
       // text printed at the top of the black view screen).
-      stringstream ssLabel;
+      std::stringstream ssLabel;
       ssLabel << maSurfaceScalars[mnCurrentSurfaceScalars].msLabel;
       if ("" != maSurfaceScalars[mnCurrentSurfaceScalars].msLabel2) {
         this->UpdateNumberOfSubjects();
-        ssLabel << endl
+        ssLabel << std::endl
                 << "Contrast: "
-                << maSurfaceScalars[mnCurrentSurfaceScalars].msLabel2 << endl
+                << maSurfaceScalars[mnCurrentSurfaceScalars].msLabel2
+                << std::endl
                 << "n=" << mEntryNumberOfSubjects->GetValue() << ", DOF="
                 << mQdecProject->GetGlmDesign()->GetDegreesOfFreedom();
       }
@@ -5495,10 +5515,10 @@ void vtkKWQdecWindow::ComposeSurfaceScalarsAndShow() {
   }
 }
 
-void vtkKWQdecWindow::UserSelectedVertexCallback(vtkObject *iCaller,
+void vtkKWQdecWindow::UserSelectedVertexCallback(vtkObject *   iCaller,
                                                  unsigned long iEventId,
-                                                 void *iClientData,
-                                                 void *iCallData) {
+                                                 void *        iClientData,
+                                                 void *        iCallData) {
 
   assert(QdecEvents::UserSelectedVertex == iEventId);
   assert(iClientData);
@@ -5515,7 +5535,8 @@ void vtkKWQdecWindow::UserSelectedVertexCallback(vtkObject *iCaller,
     if (window)
       window->UserSelectedVertex(*info);
   } catch (...) {
-    cerr << "Invalid client data in UserTransformChanged callback" << endl;
+    std::cerr << "Invalid client data in UserTransformChanged callback"
+              << std::endl;
   }
 }
 
@@ -5727,17 +5748,17 @@ void vtkKWQdecWindow::AnalyzeDesign() {
     // then update them
     assert(this->mQdecProject);
     this->mQdecProject->SetAverageSubject(mEntryAverageSubject->GetValue());
-    string fnWorkingDir = this->mQdecProject->GetDefaultWorkingDir();
+    std::string fnWorkingDir = this->mQdecProject->GetDefaultWorkingDir();
     fnWorkingDir += "/";
     fnWorkingDir += mEntryDesignName->GetValue();
     this->mQdecProject->SetWorkingDir(fnWorkingDir.c_str());
 
     // Gather-up our selected design parameters, from user menu selections
-    const char *name = strdup(mEntryDesignName->GetValue());
-    const char *measure = strdup(mMenuMorphMeasure->GetValue());
-    int smoothness = atoi(mMenuMorphSmoothness->GetValue());
-    const char *hemi = strdup(mMenuMorphHemisphere->GetValue());
-    const char sNone[10] = "none";
+    const char *name       = strdup(mEntryDesignName->GetValue());
+    const char *measure    = strdup(mMenuMorphMeasure->GetValue());
+    int         smoothness = atoi(mMenuMorphSmoothness->GetValue());
+    const char *hemi       = strdup(mMenuMorphHemisphere->GetValue());
+    const char  sNone[10]  = "none";
     const char *df1;
     if (-1 != maDiscreteFactorSelection[0]) {
       df1 = strdup(mListDiscreteFactors->GetItem(maDiscreteFactorSelection[0]));
@@ -5764,7 +5785,7 @@ void vtkKWQdecWindow::AnalyzeDesign() {
     } else {
       cf2 = strdup(sNone);
     }
-    int numNuisanceFactors = 0;
+    int         numNuisanceFactors = 0;
     const char *nuisanceFactors[1000];
     for (int nItem = 0; nItem < mListNuisanceFactors->GetNumberOfItems();
          nItem++) {
@@ -5811,7 +5832,7 @@ void vtkKWQdecWindow::AnalyzeDesign() {
       this->NotebookPageRaised(ksDisplayPanelName);
     }
   } catch (exception &e) {
-    stringstream ssError;
+    std::stringstream ssError;
     ssError << "Error in Analyze: " << e.what();
     this->GetApplication()->ErrorMessage(ssError.str().c_str());
     this->SetStatusText("Error during design analysis");
@@ -5822,7 +5843,7 @@ void vtkKWQdecWindow::SetSubjectsDir(const char *isSubjectsDir) {
 
   if (this->mQdecProject) {
     this->mQdecProject->SetSubjectsDir(isSubjectsDir);
-    string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
+    std::string sSubjectsDir = this->mQdecProject->GetSubjectsDir();
     this->mEntrySubjectsDir->SetValue(sSubjectsDir.c_str());
   }
 }
@@ -5831,7 +5852,7 @@ void vtkKWQdecWindow::SetAverageSubject(const char *isAverageSubject) {
 
   if (this->mQdecProject) {
     this->mQdecProject->SetAverageSubject(isAverageSubject);
-    string sAverageSubject = this->mQdecProject->GetAverageSubject();
+    std::string sAverageSubject = this->mQdecProject->GetAverageSubject();
     this->mEntryAverageSubject->SetValue(sAverageSubject.c_str());
   }
 }
@@ -5863,8 +5884,8 @@ void vtkKWQdecWindow::SetDrawCurvatureGreenRed(int ibDraw) {
 
 void vtkKWQdecWindow::SetSurfaceScalarsColorMin(const char *isMin) {
 
-  double value;
-  stringstream ssMin(isMin);
+  double            value;
+  std::stringstream ssMin(isMin);
   ssMin >> value;
 
   this->SetSurfaceScalarsColorMin(value);
@@ -5872,8 +5893,8 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorMin(const char *isMin) {
 
 void vtkKWQdecWindow::SetSurfaceScalarsColorMid(const char *isMid) {
 #if USE_MID
-  double value;
-  stringstream ssMid(isMid);
+  double            value;
+  std::stringstream ssMid(isMid);
   ssMid >> value;
 
   this->SetSurfaceScalarsColorMid(value);
@@ -5882,8 +5903,8 @@ void vtkKWQdecWindow::SetSurfaceScalarsColorMid(const char *isMid) {
 
 void vtkKWQdecWindow::SetSurfaceScalarsColorMax(const char *isMax) {
 
-  double value;
-  stringstream ssMax(isMax);
+  double            value;
+  std::stringstream ssMax(isMax);
   ssMax >> value;
 
   this->SetSurfaceScalarsColorMax(value);
@@ -5912,7 +5933,7 @@ vtkKWPushButton *vtkKWQdecWindow::MakeToolbarButton(
     vtkObject *iCommandObject, const char *isCommand, const char *isIconKey) {
 
   if (NULL == iToolbar)
-    throw runtime_error("MakeToolbarButton: iToolbar was NULL");
+    throw std::runtime_error("MakeToolbarButton: iToolbar was NULL");
 
   // Create the button in the toolbar.
   vtkKWPushButton *button = vtkKWPushButton::New();
@@ -5933,7 +5954,7 @@ vtkKWPushButton *vtkKWQdecWindow::MakeToolbarButton(
     try {
       IconLoader::SetPushButtonIcon(isIconKey, button);
     } catch (exception &e) {
-      stringstream ssError;
+      std::stringstream ssError;
       ssError << "Error loading icon: " << e.what();
       this->GetApplication()->ErrorMessage(ssError.str().c_str());
       button->SetImageToPredefinedIcon(vtkKWIcon::IconQuestion);
@@ -5952,7 +5973,7 @@ vtkKWCheckButton *vtkKWQdecWindow::MakeToolbarCheckButton(
     vtkObject *iCommandObject, const char *isCommand, const char *isIconKey) {
 
   if (NULL == iToolbar)
-    throw runtime_error("MakeCheckToolbarButton: iToolbar was NULL");
+    throw std::runtime_error("MakeCheckToolbarButton: iToolbar was NULL");
 
   // Create the button in the toolbar.
   vtkKWCheckButton *button = vtkKWCheckButton::New();
@@ -5976,7 +5997,7 @@ vtkKWCheckButton *vtkKWQdecWindow::MakeToolbarCheckButton(
     try {
       IconLoader::SetCheckButtonIcon(isIconKey, button);
     } catch (exception &e) {
-      stringstream ssError;
+      std::stringstream ssError;
       ssError << "Error loading icon: " << e.what();
       this->GetApplication()->ErrorMessage(ssError.str().c_str());
       button->SetImageToPredefinedIcon(vtkKWIcon::IconQuestion);
@@ -6017,10 +6038,10 @@ void vtkKWQdecWindow::MenuItem::MakeCommand(
   int nIndex = iMenu->InsertCommand(inItem, isText, iCommandObject, isCommand);
 
   if (-1 == nIndex)
-    throw runtime_error("Couldn't create menu item");
+    throw std::runtime_error("Couldn't create menu item");
 
   // It's in. Save the info.
-  mMenu = iMenu;
+  mMenu  = iMenu;
   mnItem = nIndex;
 
   // Set the accelerator if available.
@@ -6034,7 +6055,7 @@ void vtkKWQdecWindow::MenuItem::MakeCommand(
       mMenu->SetItemCompoundModeToLeft(mnItem);
       IconLoader::SetMenuItemIcon(isIconKey, mMenu, mnItem);
     } catch (exception &e) {
-      stringstream ssError;
+      std::stringstream ssError;
       ssError << "Error loading icon: " << e.what();
       mMenu->GetApplication()->ErrorMessage(ssError.str().c_str());
       mMenu->SetItemImageToPredefinedIcon(mnItem, vtkKWIcon::IconQuestion);
@@ -6058,10 +6079,10 @@ void vtkKWQdecWindow::MenuItem::MakeCheckButton(
       iMenu->InsertCheckButton(inItem, isText, iCommandObject, isCommand);
 
   if (-1 == nIndex)
-    throw runtime_error("Couldn't create menu item");
+    throw std::runtime_error("Couldn't create menu item");
 
   // It's in. Save the info.
-  mMenu = iMenu;
+  mMenu  = iMenu;
   mnItem = nIndex;
 
   // Set the accelerator if available.
@@ -6075,7 +6096,7 @@ void vtkKWQdecWindow::MenuItem::MakeCheckButton(
       mMenu->SetItemCompoundModeToLeft(mnItem);
       IconLoader::SetMenuItemIcon(isIconKey, mMenu, mnItem);
     } catch (exception &e) {
-      stringstream ssError;
+      std::stringstream ssError;
       ssError << "Error loading icon: " << e.what();
       mMenu->GetApplication()->ErrorMessage(ssError.str().c_str());
       mMenu->SetItemImageToPredefinedIcon(mnItem, vtkKWIcon::IconQuestion);
@@ -6086,9 +6107,9 @@ void vtkKWQdecWindow::MenuItem::MakeCheckButton(
 void vtkKWQdecWindow::MenuItem::SetStateToDisabled() {
 
   if (NULL == mMenu.GetPointer())
-    throw runtime_error("MenuItem::SetStateToDisabled: mMenu was NULL");
+    throw std::runtime_error("MenuItem::SetStateToDisabled: mMenu was NULL");
   if (-1 == mnItem)
-    throw runtime_error("MenuItem::SetStateToDisabled: mnItem was -1");
+    throw std::runtime_error("MenuItem::SetStateToDisabled: mnItem was -1");
 
   mMenu->SetItemStateToDisabled(mnItem);
 }
@@ -6096,9 +6117,9 @@ void vtkKWQdecWindow::MenuItem::SetStateToDisabled() {
 void vtkKWQdecWindow::MenuItem::SetStateToNormal() {
 
   if (NULL == mMenu.GetPointer())
-    throw runtime_error("MenuItem::SetStateToNormal: mMenu was NULL");
+    throw std::runtime_error("MenuItem::SetStateToNormal: mMenu was NULL");
   if (-1 == mnItem)
-    throw runtime_error("MenuItem::SetStateToNormal: mnItem was -1");
+    throw std::runtime_error("MenuItem::SetStateToNormal: mnItem was -1");
 
   mMenu->SetItemStateToNormal(mnItem);
 }
@@ -6106,9 +6127,9 @@ void vtkKWQdecWindow::MenuItem::SetStateToNormal() {
 void vtkKWQdecWindow::MenuItem::SetSelectedState(int ibOn) {
 
   if (NULL == mMenu.GetPointer())
-    throw runtime_error("MenuItem::SetSelectedState: mMenu was NULL");
+    throw std::runtime_error("MenuItem::SetSelectedState: mMenu was NULL");
   if (-1 == mnItem)
-    throw runtime_error("MenuItem::SetSelectedState: mnItem was -1");
+    throw std::runtime_error("MenuItem::SetSelectedState: mnItem was -1");
 
   mMenu->SetItemSelectedState(mnItem, ibOn);
 }
@@ -6116,9 +6137,9 @@ void vtkKWQdecWindow::MenuItem::SetSelectedState(int ibOn) {
 int vtkKWQdecWindow::MenuItem::GetSelectedState() {
 
   if (NULL == mMenu.GetPointer())
-    throw runtime_error("MenuItem::GetSelectedState: mMenu was NULL");
+    throw std::runtime_error("MenuItem::GetSelectedState: mMenu was NULL");
   if (-1 == mnItem)
-    throw runtime_error("MenuItem::GetSelectedState: mnItem was -1");
+    throw std::runtime_error("MenuItem::GetSelectedState: mnItem was -1");
 
   return mMenu->GetItemSelectedState(mnItem);
 }

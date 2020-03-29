@@ -36,17 +36,16 @@ bool FSTrack::LoadFromFile(const QString &filename, const QString &ref_fn) {
 }
 
 bool FSTrack::LoadFromFiles(const QStringList &filenames,
-                            const QString &ref_fn) {
+                            const QString &    ref_fn) {
   if (!TrackData::LoadFromFiles(filenames)) {
     return false;
   }
 
-  if (!ref_fn.isEmpty())
-  {
-    MRI* mri_ref = ::MRIreadHeader(qPrintable(ref_fn), MRI_VOLUME_TYPE_UNKNOWN);
-    if (!mri_ref)
-    {
-      cout << "Could not read reference volume " << qPrintable(ref_fn) << endl;
+  if (!ref_fn.isEmpty()) {
+    MRI *mri_ref = ::MRIreadHeader(qPrintable(ref_fn), MRI_VOLUME_TYPE_UNKNOWN);
+    if (!mri_ref) {
+      std::cout << "Could not read reference volume " << qPrintable(ref_fn)
+                << std::endl;
       return false;
     }
     MATRIX *m = MRIgetVoxelToRasXform(mri_ref);
@@ -57,7 +56,7 @@ bool FSTrack::LoadFromFiles(const QStringList &filenames,
     ::MatrixFree(&m);
   }
 
-  float pt[4] = {0, 0, 0, 1};
+  float  pt[4] = {0, 0, 0, 1};
   double mat[16];
   for (int i = 0; i < 16; i++)
     mat[i] = m_dVoxToRas[i / 4][i % 4];
@@ -69,7 +68,7 @@ bool FSTrack::LoadFromFiles(const QStringList &filenames,
       vtkMatrix4x4::MultiplyPoint(mat, pt, pt);
       if (m_volumeRef)
         m_volumeRef->RASToTarget(pt, pt);
-      m_tracks[i].fPts[j * 3] = pt[0];
+      m_tracks[i].fPts[j * 3]     = pt[0];
       m_tracks[i].fPts[j * 3 + 1] = pt[1];
       m_tracks[i].fPts[j * 3 + 2] = pt[2];
     }

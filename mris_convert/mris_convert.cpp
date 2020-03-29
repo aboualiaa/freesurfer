@@ -24,10 +24,10 @@
  */
 
 #include "diag.h"
-#include "mrisutils.h"
 #include "fio.h"
-#include "version.h"
 #include "gifti.h"
+#include "mrisutils.h"
+#include "version.h"
 
 #include "compilerdefs.h"
 
@@ -43,8 +43,8 @@ static char vcid[] = "$Id$";
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #endif
-static const COLOR_TABLE_ENTRY unknown = {"unknown", 0, 0, 0, 0, 0, 0, 0, 0};
-static COLOR_TABLE_ENTRY userLabel = {
+static const COLOR_TABLE_ENTRY unknown   = {"unknown", 0, 0, 0, 0, 0, 0, 0, 0};
+static COLOR_TABLE_ENTRY       userLabel = {
     "user label name gets copied here                   ",
     220,
     20,
@@ -54,7 +54,7 @@ static COLOR_TABLE_ENTRY userLabel = {
     0.08,
     0.08,
     1};
-static const CTE *entries[2] = {&unknown, &userLabel};
+static const CTE *       entries[2]     = {&unknown, &userLabel};
 static const COLOR_TABLE miniColorTable = {(CTE **)entries, 2, "miniColorTable",
                                            2};
 #if defined(FS_COMP_GNUC)
@@ -67,56 +67,56 @@ static const COLOR_TABLE miniColorTable = {(CTE **)entries, 2, "miniColorTable",
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-static int convertToWFile(char *in_fname, char *out_fname);
-static int convertFromWFile(char *in_fname, char *out_fname);
-static int writeAsciiCurvFile(MRI_SURFACE *mris, char *out_fname);
+static int  convertToWFile(char *in_fname, char *out_fname);
+static int  convertFromWFile(char *in_fname, char *out_fname);
+static int  writeAsciiCurvFile(MRI_SURFACE *mris, char *out_fname);
 static MRI *computeAngles(MRIS *surf);
 
 /*-------------------------------- DATA ----------------------------*/
 
 const char *Progname;
 
-static int center_surface = 0;
-static int talairach_flag = 0;
-static char *talxfmsubject = nullptr;
-static int patch_flag = 0;
-static int read_orig_positions = 0;
-static int w_file_dst_flag = 0;
-static int w_file_src_flag = 0;
-static int curv_file_flag = 0;
-static char *curv_fname;
-static int func_file_flag = 0;
-static char *func_fname;
-static int annot_file_flag = 0;
-static char *annot_fname;
-static int gifti_da_num = -1;
-static int label_file_flag = 0;
-static char *label_fname;
-static char *label_name;
-static int labelstats_file_flag = 0;
-static char *labelstats_fname;
-static int parcstats_file_flag = 0;
-static char *parcstats_fname;
-static char *orig_surf_name = nullptr;
-static double scale = 0;
-static int rescale = 0; // for rescaling group average surfaces
-static int output_normals = 0;
-static int PrintXYZOnly = 0;
-static MATRIX *XFM = nullptr;
-static int write_vertex_neighbors = 0;
-static int combinesurfs_flag = 0;
-static int userealras_flag = 0;
-static MRI *VolGeomMRI = nullptr;
-static int cras_add = 0;
-static int cras_subtract = 0;
-static int ToScanner = 0;
-static int ToTkr = 0;
-int WriteArea = 0;
+static int     center_surface      = 0;
+static int     talairach_flag      = 0;
+static char *  talxfmsubject       = nullptr;
+static int     patch_flag          = 0;
+static int     read_orig_positions = 0;
+static int     w_file_dst_flag     = 0;
+static int     w_file_src_flag     = 0;
+static int     curv_file_flag      = 0;
+static char *  curv_fname;
+static int     func_file_flag = 0;
+static char *  func_fname;
+static int     annot_file_flag = 0;
+static char *  annot_fname;
+static int     gifti_da_num    = -1;
+static int     label_file_flag = 0;
+static char *  label_fname;
+static char *  label_name;
+static int     labelstats_file_flag = 0;
+static char *  labelstats_fname;
+static int     parcstats_file_flag = 0;
+static char *  parcstats_fname;
+static char *  orig_surf_name = nullptr;
+static double  scale          = 0;
+static int     rescale        = 0; // for rescaling group average surfaces
+static int     output_normals = 0;
+static int     PrintXYZOnly   = 0;
+static MATRIX *XFM            = nullptr;
+static int     write_vertex_neighbors = 0;
+static int     combinesurfs_flag      = 0;
+static int     userealras_flag        = 0;
+static MRI *   VolGeomMRI             = nullptr;
+static int     cras_add               = 0;
+static int     cras_subtract          = 0;
+static int     ToScanner              = 0;
+static int     ToTkr                  = 0;
+int            WriteArea              = 0;
 
 int DeleteCommands = 0;
 int MRISwriteVertexNeighborsAscii(MRIS *mris, char *out_fname);
@@ -127,15 +127,14 @@ int main(int argc, char *argv[]) {
   MRI_SURFACE *mris;
   char **av, *in_fname, *out_fname, fname[STRLEN], hemi[10], *cp, path[STRLEN],
       *dot, ext[STRLEN];
-  int ac, nargs, nthvtx, n;
-  FILE *fp = nullptr;
-  char *in2_fname = nullptr;
-  MRI_SURFACE *mris2 = nullptr;
+  int          ac, nargs, nthvtx, n;
+  FILE *       fp        = nullptr;
+  char *       in2_fname = nullptr;
+  MRI_SURFACE *mris2     = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mris_convert");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -165,7 +164,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   out_fname = argv[2];
 
   if (combinesurfs_flag) {
@@ -354,7 +353,7 @@ int main(int argc, char *argv[]) {
       }
       char line[STRLEN];
       while (fgets(line, STRLEN, fp) != nullptr) {
-        char label[STRLEN];
+        char  label[STRLEN];
         float val;
         sscanf(line, "%s %f", label, &val);
         // get the annotation value for this label from the colortable
@@ -415,7 +414,7 @@ int main(int argc, char *argv[]) {
     // try to find this label in the FreeSurferColorLUT, so we have a unique
     // color (annotation) for it (otherwise, just use default miniColorTable)
     COLOR_TABLE *ct0;
-    char ctabfile[2000];
+    char         ctabfile[2000];
     sprintf(ctabfile, "%s/FreeSurferColorLUT.txt", getenv("FREESURFER_HOME"));
     ct0 = CTABreadASCII(ctabfile);
     if (ct0) {
@@ -436,7 +435,7 @@ int main(int argc, char *argv[]) {
                                         miniColorTable.entries[1]->bi);
     int lno;
     for (lno = 0; lno < label->n_points; lno++) {
-      int vno = label->lv[lno].vno;
+      int vno                        = label->lv[lno].vno;
       mris->vertices[vno].annotation = annotation;
       mris->vertices[vno].stat = label->lv[lno].stat; // in case --labelstats
     }
@@ -546,7 +545,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -558,9 +557,9 @@ static int get_option(int argc, char *argv[]) {
     center_surface = 1;
     printf("centering surface\n");
   } else if (!stricmp(option, "-annot")) {
-    annot_fname = argv[2];
+    annot_fname     = argv[2];
     annot_file_flag = 1;
-    nargs = 1;
+    nargs           = 1;
   } else if (!stricmp(option, "-label2mask")) {
     MRIS *surf = MRISread(argv[2]);
     if (surf == nullptr)
@@ -600,7 +599,7 @@ static int get_option(int argc, char *argv[]) {
     if (!surf)
       exit(1);
     MRI *angles = computeAngles(surf);
-    int error = MRIwrite(angles, argv[3]);
+    int  error  = MRIwrite(angles, argv[3]);
     MRIfree(&angles);
     MRISfree(&surf);
     exit(error);
@@ -616,18 +615,18 @@ static int get_option(int argc, char *argv[]) {
     sscanf(argv[2], "%d", &gifti_da_num);
     nargs = 1;
   } else if (!stricmp(option, "-label")) {
-    label_fname = argv[2];
-    label_name = argv[3];
+    label_fname     = argv[2];
+    label_name      = argv[3];
     label_file_flag = 1;
-    nargs = 2;
+    nargs           = 2;
   } else if (!stricmp(option, "-labelstats")) {
-    labelstats_fname = argv[2];
+    labelstats_fname     = argv[2];
     labelstats_file_flag = 1;
-    nargs = 1;
+    nargs                = 1;
   } else if (!stricmp(option, "-parcstats")) {
-    parcstats_fname = argv[2];
+    parcstats_fname     = argv[2];
     parcstats_file_flag = 1;
-    nargs = 1;
+    nargs               = 1;
   } else if (!stricmp(option, "-combinesurfs")) {
     combinesurfs_flag = 1;
   } else if (!stricmp(option, "-delete-cmds")) {
@@ -636,25 +635,25 @@ static int get_option(int argc, char *argv[]) {
     userealras_flag = 1;
   } else if (!stricmp(option, "-cras_correction") ||
              !stricmp(option, "-cras_add")) {
-    cras_add = 1;
+    cras_add      = 1;
     cras_subtract = 0;
-    ToScanner = 0;
-    ToTkr = 0;
+    ToScanner     = 0;
+    ToTkr         = 0;
   } else if (!stricmp(option, "-cras_remove") ||
              !stricmp(option, "-cras_subtract")) {
-    cras_add = 0;
+    cras_add      = 0;
     cras_subtract = 1;
-    ToScanner = 0;
-    ToTkr = 0;
+    ToScanner     = 0;
+    ToTkr         = 0;
   } else if (!stricmp(option, "-to-scanner")) {
-    ToScanner = 1;
-    ToTkr = 0;
-    cras_add = 0;
+    ToScanner     = 1;
+    ToTkr         = 0;
+    cras_add      = 0;
     cras_subtract = 0;
   } else if (!stricmp(option, "-to-tkr")) {
-    ToScanner = 0;
-    ToTkr = 1;
-    cras_add = 0;
+    ToScanner     = 0;
+    ToTkr         = 1;
+    cras_add      = 0;
     cras_subtract = 0;
   } else if (!stricmp(option, "-vol-geom")) {
     VolGeomMRI = MRIreadHeader(argv[2], MRI_VOLUME_TYPE_UNKNOWN);
@@ -669,21 +668,21 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'F':
       func_file_flag = 1;
-      func_fname = argv[2];
-      nargs = 1;
+      func_fname     = argv[2];
+      nargs          = 1;
       break;
     case 'C':
       curv_file_flag = 1;
-      curv_fname = argv[2];
-      nargs = 1;
+      curv_fname     = argv[2];
+      nargs          = 1;
       break;
     case 'N':
       output_normals = 1;
       break;
     case 'O':
       read_orig_positions = 1;
-      orig_surf_name = argv[2];
-      nargs = 1;
+      orig_surf_name      = argv[2];
+      nargs               = 1;
       break;
     case 'S':
       sscanf(argv[2], "%lf", &scale);
@@ -694,16 +693,16 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'P':
       patch_flag = 1;
-      nargs = 0;
+      nargs      = 0;
       break;
     case 'T':
       talairach_flag = 1;
-      talxfmsubject = argv[2];
-      nargs = 1;
+      talxfmsubject  = argv[2];
+      nargs          = 1;
       break;
     case 'V':
       write_vertex_neighbors = 1;
-      nargs = 0;
+      nargs                  = 0;
       break;
     case '?':
     case 'U':
@@ -849,8 +848,8 @@ static void print_version() {
 
 static int convertToWFile(char *in_fname, char *out_fname) {
   FILE *infp, *outfp;
-  char line[300], *cp;
-  int vno, l = 0, num, ilat;
+  char  line[300], *cp;
+  int   vno, l = 0, num, ilat;
   float val;
 
   fprintf(stderr, "writing w file %s...\n", out_fname);
@@ -864,10 +863,10 @@ static int convertToWFile(char *in_fname, char *out_fname) {
     ErrorExit(ERROR_NOFILE, "%s: Can't create file %s\n", Progname, in_fname);
   }
 
-  cp = fgetl(line, 299, infp);
+  cp   = fgetl(line, 299, infp);
   ilat = atoi(cp); /* not used at the moment */
-  cp = fgetl(line, 299, infp);
-  num = atoi(cp);
+  cp   = fgetl(line, 299, infp);
+  num  = atoi(cp);
   fwrite2(0, outfp);
   fwrite3(num, outfp);
 
@@ -888,7 +887,7 @@ static int convertToWFile(char *in_fname, char *out_fname) {
 
 static int convertFromWFile(char *in_fname, char *out_fname) {
   FILE *infp, *outfp;
-  int vno, num, ilat, i;
+  int   vno, num, ilat, i;
   float val, lat;
 
   fprintf(stderr, "writing ascii w file %s...\n", out_fname);
@@ -919,8 +918,8 @@ static int convertFromWFile(char *in_fname, char *out_fname) {
 }
 
 static int writeAsciiCurvFile(MRI_SURFACE *mris, char *out_fname) {
-  FILE *fp;
-  int vno;
+  FILE *  fp;
+  int     vno;
   VERTEX *v;
 
   fp = fopen(out_fname, "w");
@@ -949,7 +948,7 @@ static int writeAsciiCurvFile(MRI_SURFACE *mris, char *out_fname) {
 */
 
 int MRISwriteVertexNeighborsAscii(MRIS *mris, char *out_fname) {
-  int vno, nnbrs, nbrvno;
+  int   vno, nnbrs, nbrvno;
   FILE *fp;
 
   fp = fopen(out_fname, "w");

@@ -31,15 +31,15 @@
 #include <stdlib.h>
 
 #include <tcl.h>
-#include <tk.h>
 #include <tix.h>
+#include <tk.h>
 
 extern int Tix_Init(Tcl_Interp *interp);
 extern int Itcl_Init(Tcl_Interp *interp);
 extern int Itk_Init(Tcl_Interp *interp);
 
 int main(int argc, char *argv[]) {
-  int eTcl = TCL_OK;
+  int         eTcl   = TCL_OK;
   Tcl_Interp *interp = 0;
 
   interp = Tcl_CreateInterp();

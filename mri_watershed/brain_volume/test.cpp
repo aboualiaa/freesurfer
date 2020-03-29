@@ -24,18 +24,16 @@
 
 #include "TVector.h"
 
-using namespace std;
-
 void callfunc(int i, void (*func)(const TVector &a)) {
   TVector a(1, 2, 3);
   func(a);
 }
 
 void calc(const TVector &a) {
-  cout << a << endl;
+  std::cout << a << std::endl;
   double c = 5.0;
-  cout << "\t c*a = " << c * a << endl;
-  cout << "\t a*c = " << a * c << endl;
+  std::cout << "\t c*a = " << c * a << std::endl;
+  std::cout << "\t a*c = " << a * c << std::endl;
 }
 
 int main() {
@@ -44,57 +42,58 @@ int main() {
   TVector VC(3, 1, 1);
 
   TVector v = VA + VB;
-  cout << "Testing the sum of two vectors" << endl;
-  cout << "\t VA " << VA << endl;
-  cout << "\t VB " << VB << endl;
-  cout << "\t VA+VB " << v << endl;
+  std::cout << "Testing the sum of two vectors" << std::endl;
+  std::cout << "\t VA " << VA << std::endl;
+  std::cout << "\t VB " << VB << std::endl;
+  std::cout << "\t VA+VB " << v << std::endl;
 
-  cout << "Multiplying double and vector" << endl;
+  std::cout << "Multiplying double and vector" << std::endl;
   double c = 5.0;
   double d = 6.0;
 
-  cout << "\t VA = " << VA << "  c= " << c << endl;
-  cout << "\t VA*c " << VA * c << endl;
-  cout << "\t VA = " << VA << "  c= " << c << endl;
-  cout << "\t c*VA " << c * VA << endl;
-  cout << "Testing == operator" << endl;
-  cout << "\tusing VA " << VA << ", VB " << VB << endl;
-  cout << "\t check VA==VB (true=1, false = 0) : " << (VA == VB) << endl;
+  std::cout << "\t VA = " << VA << "  c= " << c << std::endl;
+  std::cout << "\t VA*c " << VA * c << std::endl;
+  std::cout << "\t VA = " << VA << "  c= " << c << std::endl;
+  std::cout << "\t c*VA " << c * VA << std::endl;
+  std::cout << "Testing == operator" << std::endl;
+  std::cout << "\tusing VA " << VA << ", VB " << VB << std::endl;
+  std::cout << "\t check VA==VB (true=1, false = 0) : " << (VA == VB)
+            << std::endl;
 
-  cout << "Inner product and outer product of two vectors " << endl;
-  cout << "\t VA*VB " << VA * VB << " (VA^VB) " << (VA ^ VB) << endl;
+  std::cout << "Inner product and outer product of two vectors " << std::endl;
+  std::cout << "\t VA*VB " << VA * VB << " (VA^VB) " << (VA ^ VB) << std::endl;
 
-  cout << "Testing the combination" << endl;
-  cout << "\tVA = " << VA << " c = " << c << "  d = " << d << endl;
-  cout << "\t\t\tc*d*VA = " << c * d * VA << endl;
-  cout << "\tVA = " << VA << " c = " << c << "  d = " << d << endl;
-  cout << "\t\t\tc*VA*d = " << c * VA * d << endl;
-  cout << "\tVA = " << VA << " c = " << c << "  d = " << d << endl;
-  cout << "\t\t\tVA*c*d = " << VA * c * d << endl;
-  cout << "\tVA = " << VA << " c = " << c << "  d = " << d << endl;
+  std::cout << "Testing the combination" << std::endl;
+  std::cout << "\tVA = " << VA << " c = " << c << "  d = " << d << std::endl;
+  std::cout << "\t\t\tc*d*VA = " << c * d * VA << std::endl;
+  std::cout << "\tVA = " << VA << " c = " << c << "  d = " << d << std::endl;
+  std::cout << "\t\t\tc*VA*d = " << c * VA * d << std::endl;
+  std::cout << "\tVA = " << VA << " c = " << c << "  d = " << d << std::endl;
+  std::cout << "\t\t\tVA*c*d = " << VA * c * d << std::endl;
+  std::cout << "\tVA = " << VA << " c = " << c << "  d = " << d << std::endl;
 
-  cout << "Testing interesting combination" << endl;
-  cout << "\tVA = " << VA << "  VB = " << VB << "  VC = " << VC << endl;
-  cout << "\t\t\tVA*VB = " << VA * VB << endl;
-  cout << "\t\t\tVB*VC = " << VB * VC << endl;
-  cout << "\t\t\tVA*VB*VC = " << VA * VB * VC << endl;
-  cout << "\t\t\tVA*(VB*VC) = " << VA * (VB * VC) << endl;
-  cout << "\tVA = " << VA << " VB = " << VB << endl;
-  cout << "\t\t\t(VA*VB)*VC = " << (VA * VB) * VC << endl;
+  std::cout << "Testing interesting combination" << std::endl;
+  std::cout << "\tVA = " << VA << "  VB = " << VB << "  VC = " << VC
+            << std::endl;
+  std::cout << "\t\t\tVA*VB = " << VA * VB << std::endl;
+  std::cout << "\t\t\tVB*VC = " << VB * VC << std::endl;
+  std::cout << "\t\t\tVA*VB*VC = " << VA * VB * VC << std::endl;
+  std::cout << "\t\t\tVA*(VB*VC) = " << VA * (VB * VC) << std::endl;
+  std::cout << "\tVA = " << VA << " VB = " << VB << std::endl;
+  std::cout << "\t\t\t(VA*VB)*VC = " << (VA * VB) * VC << std::endl;
 
-  cout << "Testing the composite operator" << endl;
-  cout << "\tVA = " << VA << "  c = " << c << endl;
-  cout << "\t\t\t(VA*=c)" << (VA *= c) << endl;
-  cout << "\tVA = " << VA << "  c = " << c << endl;
-  cout << "\t\t\t(VA/=c) " << (VA /= c) << endl;
+  std::cout << "Testing the composite operator" << std::endl;
+  std::cout << "\tVA = " << VA << "  c = " << c << std::endl;
+  std::cout << "\t\t\t(VA*=c)" << (VA *= c) << std::endl;
+  std::cout << "\tVA = " << VA << "  c = " << c << std::endl;
+  std::cout << "\t\t\t(VA/=c) " << (VA /= c) << std::endl;
+  std::cout << "\tVA = " << VA << "  VB = " << VB << std::endl;
+  std::cout << "\t\t\t(VA+=VB) " << (VA += VB) << std::endl;
+  std::cout << "\tVA = " << VA << "  VB = " << VB << std::endl;
+  std::cout << "\t\t\t(VA-=VB) " << (VA -= VB) << std::endl;
+  std::cout << "\tVA = " << VA << "  VB = " << VB << std::endl;
 
-  cout << "\tVA = " << VA << "  VB = " << VB << endl;
-  cout << "\t\t\t(VA+=VB) " << (VA += VB) << endl;
-  cout << "\tVA = " << VA << "  VB = " << VB << endl;
-  cout << "\t\t\t(VA-=VB) " << (VA -= VB) << endl;
-  cout << "\tVA = " << VA << "  VB = " << VB << endl;
-
-  cout << "\nTesting the functional with TVector argument" << endl;
+  std::cout << "\nTesting the functional with TVector argument" << std::endl;
   callfunc(1, calc);
 
   return 0;

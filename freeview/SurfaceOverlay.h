@@ -123,22 +123,17 @@ public:
 
   double PositionToPercentile(double dPos, bool ignore_zeros);
 
-  void GetDisplayRange(double* range)
-  {
+  void GetDisplayRange(double *range) {
     range[0] = m_dDisplayRange[0];
     range[1] = m_dDisplayRange[1];
   }
 
-  void SetDisplayRange(double* range)
-  {
+  void SetDisplayRange(double *range) {
     m_dDisplayRange[0] = range[0];
     m_dDisplayRange[1] = range[1];
   }
 
-  qint64 GetID()
-  {
-    return m_nID;
-  }
+  qint64 GetID() { return m_nID; }
 
 signals:
   void DataUpdated();
@@ -150,36 +145,36 @@ public slots:
   void EmitDataUpdated() { emit DataUpdated(); }
 
 private:
-  float*        m_fData;
-  float*        m_fDataRaw;
-  float*        m_fDataUnsmoothed;
-  qlonglong     m_nDataSize;
-  double        m_dMaxValue;
-  double        m_dMinValue;
-  double        m_dNonZeroMinValue;
-  double        m_dRawMaxValue;
-  double        m_dRawMinValue;
-  double        m_dDisplayRange[2];
+  float *   m_fData;
+  float *   m_fDataRaw;
+  float *   m_fDataUnsmoothed;
+  qlonglong m_nDataSize;
+  double    m_dMaxValue;
+  double    m_dMinValue;
+  double    m_dNonZeroMinValue;
+  double    m_dRawMaxValue;
+  double    m_dRawMinValue;
+  double    m_dDisplayRange[2];
 
   QString       m_strName;
   QString       m_strFileName;
   QString       m_strRegFileName;
-  LayerSurface* m_surface;
+  LayerSurface *m_surface;
 
-  bool        m_bCorrelationData;
-  bool        m_bCorrelationDataReady;
-  bool        m_bComputeCorrelation;
+  bool m_bCorrelationData;
+  bool m_bCorrelationDataReady;
+  bool m_bComputeCorrelation;
 
-  MRI*      m_mriCorrelation;
-  SurfaceOverlayProperty* m_property;
+  MRI *                   m_mriCorrelation;
+  SurfaceOverlayProperty *m_property;
   // indicate there is a paired overlay sharing correlation data and property
   SurfaceOverlay *m_overlayPaired;
 
-  int m_nActiveFrame;
-  int m_nNumOfFrames;
+  int       m_nActiveFrame;
+  int       m_nNumOfFrames;
   LayerMRI *m_volumeCorrelationSource;
-  float *m_fCorrelationSourceData;
-  float *m_fCorrelationDataBuffer;
+  float *   m_fCorrelationSourceData;
+  float *   m_fCorrelationDataBuffer;
 
   qint64 m_nID;
 };

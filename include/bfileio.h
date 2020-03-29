@@ -33,20 +33,20 @@
 /* for communicating error messages */
 #define BFMSGLEN 2000
 #ifdef BFILEIO_SRC
-int bferr = 0;
+int  bferr           = 0;
 char bfmsg[BFMSGLEN] = {0};
 #else
-extern int bferr;
+extern int  bferr;
 extern char bfmsg[BFMSGLEN];
 #endif
 
 typedef struct {
-  int nrows;
-  int ncols;
-  int nslcs;
-  int nfrms;
-  float **slcdata; /* all data are represented as floats */
-  int nrowcols;    /* rows*cols -- precompute for speed */
+  int     nrows;
+  int     ncols;
+  int     nslcs;
+  int     nfrms;
+  float **slcdata;  /* all data are represented as floats */
+  int     nrowcols; /* rows*cols -- precompute for speed */
 } BF_DATA;
 
 #ifdef BF_DEBUG
@@ -63,11 +63,11 @@ typedef struct {
 
 /* --------- these are the most useful functions -----------------*/
 BF_DATA *bf_ldvolume(char *stem);
-int bf_svvolume(BF_DATA *bfd, char *stem, int svendian, int svtype);
-int bf_iswritable(char *fname);
+int      bf_svvolume(BF_DATA *bfd, char *stem, int svendian, int svtype);
+int      bf_iswritable(char *fname);
 
 float bf_getval(BF_DATA *bfd, int r, int c, int s, int f);
-int bf_setval(float val, BF_DATA *bfd, int r, int c, int s, int f);
+int   bf_setval(float val, BF_DATA *bfd, int r, int c, int s, int f);
 /* see also BF_SETVAL/BF_GETVAL for bf_setval/bf_getval  */
 
 int bf_freebfd(BF_DATA **bfd);
@@ -81,8 +81,8 @@ BF_DATA *bf_ldslice(char *stem, int slice);
 int bf_svslice(BF_DATA *bfd, char *stem, int slice, int svendian, int svtype);
 
 float *bf_ldbfile(char *bfname, int *nrows, int *ncols, int *nfrms);
-int bf_svbfile(float *bfdata, char *bfname, int nrows, int ncols, int nfrms,
-               int svendian);
+int    bf_svbfile(float *bfdata, char *bfname, int nrows, int ncols, int nfrms,
+                  int svendian);
 
 int bf_getnslices(char *stem);
 
@@ -101,7 +101,7 @@ int bf_getvoldim(char *stem, int *nrows, int *ncols, int *nslcs, int *nfrms,
 
 BF_DATA *bf_preallocbfd(int nrows, int ncols, int nslcs, int nfrms);
 
-int bf_gettypefromname(char *bfname);
+int   bf_gettypefromname(char *bfname);
 char *bf_getstemfromname(char *bfname);
 
 int bf_dumpvolinfo(FILE *fp, BF_DATA *bfd);

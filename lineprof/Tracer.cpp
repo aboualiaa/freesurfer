@@ -30,11 +30,11 @@ void Tracer::SetInputData(ImagePointer image) {
 
   // set the stepSize
   ImageType::SpacingType spacing = image->GetSpacing();
-  stepSize = std::min(spacing[0], spacing[1]) * 2;
+  stepSize                       = std::min(spacing[0], spacing[1]) * 2;
 
   // set interpolators
   typedef itk::DerivativeImageFilter<ImageType, ImageType> FilterType;
-  FilterType::Pointer filter[Dimension];
+  FilterType::Pointer                                      filter[Dimension];
 
   for (unsigned int ui = 0; ui < Dimension; ++ui) {
     filter[ui] = FilterType::New();
@@ -58,7 +58,7 @@ void Tracer::SetInputMask(MaskImagePointer inputMask) {
 /** Creates a vtkPointLocator object from the polydata points */
 void Tracer::SetInputContours(vtkPolyData *data) {
   std::cout << "Set input contours\n";
-  pts = data->GetPoints();
+  pts     = data->GetPoints();
   locator = vtkPointLocator::New();
 
   locator->SetDataSet(data);
@@ -75,7 +75,7 @@ Tracer::LineType Tracer::ComputeMidline() const {
 Tracer::LineType Tracer::ComputeIsoline(double dval) const {
   // start by recovering a seed
   PointType seed = this->GetClosestPoint(dval);
-  LineType line;
+  LineType  line;
   line.push_back(seed);
 
   bool activeBegin(true), activeEnd(true);
@@ -127,7 +127,7 @@ Tracer::LineType Tracer::ComputeProfile(double x, double y) const {
   LineType line;
   line.push_back(seed);
 
-  bool activeBegin(true), activeEnd(true);
+  bool      activeBegin(true), activeEnd(true);
   PointType ptBuf;
   while ((activeBegin || activeEnd) && line.size() < 500) {
     if (activeBegin) {
@@ -241,7 +241,7 @@ bool Tracer::StepTangent(const PointType &pt, PointType &returnedPoint,
                          double dval, bool negative) const {
   FrameType frame = this->GetLocalFrame(pt);
 
-  VectorType &tangent = frame.first;
+  VectorType &tangent  = frame.first;
   VectorType &gradient = frame.second;
   if (negative)
     tangent *= -1;
@@ -253,7 +253,7 @@ bool Tracer::StepTangent(const PointType &pt, PointType &returnedPoint,
     return false;
 
   // corect the trajectory - use the gradient and a first order aproximation
-  double dbuf;
+  double                 dbuf;
   ImageSOType::PointType ptBuf = returnedPoint;
   this->ValueAt(ptBuf, dbuf);
   double dif = dbuf - dval;
@@ -269,21 +269,21 @@ bool Tracer::StepTangent(const PointType &pt, PointType &returnedPoint,
 
 Tracer::PointType Tracer::GetClosestPoint(double val) const {
   typedef itk::ImageRegionConstIteratorWithIndex<ImageType>
-      ImageConstIteratorWithIndex;
+                                                       ImageConstIteratorWithIndex;
   typedef itk::ImageRegionConstIterator<MaskImageType> ImageConstIterator;
-  ImageConstIteratorWithIndex cit(data->GetImage(),
+  ImageConstIteratorWithIndex                          cit(data->GetImage(),
                                   data->GetImage()->GetRequestedRegion());
-  ImageConstIterator citMask(mask->GetImage(),
+  ImageConstIterator                                   citMask(mask->GetImage(),
                              mask->GetImage()->GetRequestedRegion());
 
   cit.GoToBegin();
   ImageType::IndexType argMin(cit.GetIndex());
-  double dMin = 10.0;
+  double               dMin = 10.0;
 
   for (cit.GoToBegin(), citMask.GoToBegin(); !cit.IsAtEnd(); ++cit, ++citMask) {
     if (citMask.Get())
       if (std::abs(val - cit.Get()) < dMin) {
-        dMin = std::abs(val - cit.Get());
+        dMin   = std::abs(val - cit.Get());
         argMin = cit.GetIndex();
       }
   } // next cit, citMask

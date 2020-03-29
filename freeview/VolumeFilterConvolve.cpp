@@ -24,13 +24,13 @@
  */
 
 #include "VolumeFilterConvolve.h"
-#include <math.h>
 #include "LayerMRI.h"
-#include <vtkImageData.h>
 #include "ProgressCallback.h"
-#include <vtkImageGaussianSmooth.h>
-#include <QDebug>
 #include "utils.h"
+#include <QDebug>
+#include <math.h>
+#include <vtkImageData.h>
+#include <vtkImageGaussianSmooth.h>
 
 VolumeFilterConvolve::VolumeFilterConvolve(LayerMRI *input, LayerMRI *output,
                                            QObject *parent)
@@ -54,7 +54,7 @@ bool VolumeFilterConvolve::Execute() {
   } else {
     ::SetProgressCallback(ProgressCallback, 0, 50);
     MRI *mri_src = CreateMRIFromVolume(m_volumeInput);
-    MRI *mri_g = MRIgaussian1d(m_dSigma, m_nKernelSize);
+    MRI *mri_g   = MRIgaussian1d(m_dSigma, m_nKernelSize);
     if (!mri_src || !mri_g) {
       return false;
     }

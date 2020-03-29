@@ -1,18 +1,17 @@
-#include "kvlAtlasMesh.h"
-#include <pybind11/pybind11.h>
-#include <itkImageRegionConstIterator.h>
-#include "itkMacro.h"
 #include "pyKvlMesh.h"
-#include "pyKvlTransform.h"
-#include "pyKvlNumpy.h"
-#include "vnl/vnl_det.h"
 #include "itkCellInterface.h"
+#include "itkImageRegionIterator.h"
+#include "itkMacro.h"
+#include "kvlAtlasMesh.h"
 #include "kvlAtlasMeshAlphaDrawer.h"
 #include "kvlAtlasMeshMultiAlphaDrawer.h"
-#include "kvlAtlasMeshValueDrawer.h"
 #include "kvlAtlasMeshProbabilityImageStatisticsCollector.h"
-#include "itkImageRegionIterator.h"
-
+#include "kvlAtlasMeshValueDrawer.h"
+#include "pyKvlNumpy.h"
+#include "pyKvlTransform.h"
+#include "vnl/vnl_det.h"
+#include <itkImageRegionConstIterator.h>
+#include <pybind11/pybind11.h>
 
 #define XYZ_DIMENSIONS 3
 
@@ -96,7 +95,7 @@ void TransformCellData(MeshPointer mesh, const double *scaling) {
 }
 
 void KvlMesh::Scale(const SCALE_3D &scaling) {
-  auto scaleShape = scaling.size();
+  auto   scaleShape = scaling.size();
   double scaleFactor[XYZ_DIMENSIONS];
   if (scaleShape == 1) {
     scaleFactor[0] = scaleFactor[1] = scaleFactor[2] = scaling[0];
@@ -118,9 +117,9 @@ KvlMeshCollection::KvlMeshCollection() {
 
 void KvlMeshCollection::Construct(const SHAPE_3D &meshSize,
                                   const SHAPE_3D &domainSize,
-                                  double initialStiffness,
-                                  unsigned int numberOfClasses,
-                                  unsigned int numberOfMeshes) {
+                                  double          initialStiffness,
+                                  unsigned int    numberOfClasses,
+                                  unsigned int    numberOfMeshes) {
   if (meshSize.size() != 3) {
     itkExceptionMacro("meshSize must have 3 values not " << meshSize.size());
   }
@@ -131,7 +130,7 @@ void KvlMeshCollection::Construct(const SHAPE_3D &meshSize,
   unsigned int meshShape[3];
   unsigned int domainShape[3];
   for (int index = 0; index < 3; index++) {
-    meshShape[index] = meshSize[index];
+    meshShape[index]   = meshSize[index];
     domainShape[index] = domainSize[index];
   }
   meshCollection->Construct(meshShape, domainShape, initialStiffness,
@@ -146,7 +145,7 @@ void KvlMeshCollection::Read(const std::string &meshCollectionFileName) {
   std::cout << "Read mesh collection: " << meshCollectionFileName << std::endl;
 }
 
-void ApplyTransformToMeshes(MeshCollectionPointer meshCollection,
+void ApplyTransformToMeshes(MeshCollectionPointer  meshCollection,
                             const TransformPointer transform) {
   meshCollection->Transform(-1, transform);
   for (unsigned int i = 0; i < meshCollection->GetNumberOfMeshes(); i++) {
@@ -173,12 +172,12 @@ void ReverseTetrahedronSidedness(MeshCollectionPointer meshCollection) {
     // Swap points assigned to first two vertices. This will readily turn
     // negative tetrahedra
     // into positives ones.
-    kvl::AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-    const kvl::AtlasMesh::PointIdentifier p0Id = *pit;
+    kvl::AtlasMesh::CellType::PointIdIterator pit  = cell->PointIdsBegin();
+    const kvl::AtlasMesh::PointIdentifier     p0Id = *pit;
     ++pit;
     const kvl::AtlasMesh::PointIdentifier p1Id = *pit;
 
-    pit = cell->PointIdsBegin();
+    pit  = cell->PointIdsBegin();
     *pit = p1Id;
     ++pit;
     *pit = p0Id;
@@ -220,7 +219,7 @@ void KvlMeshCollection::SetReferencePosition(
 }
 
 void KvlMeshCollection::SetPositions(
-    const py::array_t<double> &reference,
+    const py::array_t<double> &             reference,
     const std::vector<py::array_t<double>> &positions) {
 
   // set the reference position
@@ -231,8 +230,8 @@ void KvlMeshCollection::SetPositions(
       pointsVector;
   for (auto &pos : positions) {
     // Create a new Points container
-    using PointsContainerType = kvl::AtlasMesh::PointsContainer;
-    PointsContainerType::Pointer target = PointsContainerType::New();
+    using PointsContainerType                = kvl::AtlasMesh::PointsContainer;
+    PointsContainerType::Pointer      target = PointsContainerType::New();
     PointsContainerType::ConstPointer sourcePosition =
         meshCollection->GetReferencePosition();
     PointsContainerType::ConstIterator sourceIt = sourcePosition->Begin();
@@ -276,10 +275,10 @@ unsigned int KvlMeshCollection::MeshCount() const {
 }
 
 py::array_t<uint16_t> KvlMesh::RasterizeMesh(std::vector<size_t> size,
-                                             int classNumber) {
+                                             int                 classNumber) {
   // Some typedefs
-  using AlphaImageType = kvl::AtlasMeshAlphaDrawer::ImageType;
-  using SizeType = AlphaImageType::SizeType;
+  using AlphaImageType       = kvl::AtlasMeshAlphaDrawer::ImageType;
+  using SizeType             = AlphaImageType::SizeType;
   using MultiAlphasImageType = kvl::AtlasMeshMultiAlphaDrawer::ImageType;
 
   // Retrieve input arguments
@@ -330,7 +329,7 @@ py::array_t<uint16_t> KvlMesh::RasterizeMesh(std::vector<size_t> size,
     //        ); unsigned short*  data = static_cast< unsigned short* >(
     //        mxGetData( plhs[ 0 ] ) );
     auto const buffer = new uint16_t[shape[0] * shape[1] * shape[2]];
-    auto data = buffer;
+    auto       data   = buffer;
     //
     itk::ImageRegionConstIterator<AlphaImageType> it(
         alphaDrawer->GetImage(), alphaDrawer->GetImage()->GetBufferedRegion());
@@ -367,7 +366,7 @@ py::array_t<uint16_t> KvlMesh::RasterizeMesh(std::vector<size_t> size,
                                  numberOfClasses};
 
     auto const buffer = new uint16_t[shape[0] * shape[1] * shape[2] * shape[3]];
-    auto data = buffer;
+    auto       data   = buffer;
 
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
       // Loop over all voxels
@@ -401,7 +400,7 @@ py::array_t<uint16_t> KvlMesh::RasterizeMesh(std::vector<size_t> size,
 }
 
 py::array KvlMesh::RasterizeValues(
-    std::vector<size_t> size,
+    std::vector<size_t>                                            size,
     py::array_t<double, py::array::c_style | py::array::forcecast> values) {
 
   int nframes = (values.ndim() > 1) ? values.shape(1) : 1;
@@ -411,7 +410,7 @@ py::array KvlMesh::RasterizeValues(
       static_cast<const kvl::AtlasMesh *>(mesh);
 
   // make value drawer
-  using ValueDrawer = kvl::AtlasMeshValueDrawer;
+  using ValueDrawer                = kvl::AtlasMeshValueDrawer;
   ValueDrawer::Pointer valueDrawer = kvl::AtlasMeshValueDrawer::New();
 
   // set image size
@@ -426,7 +425,7 @@ py::array KvlMesh::RasterizeValues(
 
   // copy to numpy array
   double *const buffer = new double[size[0] * size[1] * size[2] * nframes];
-  double *data = buffer;
+  double *      data   = buffer;
   for (int frame = 0; frame < nframes; frame++) {
     itk::ImageRegionConstIterator<ValueDrawer::ImageType> it(
         valueDrawer->GetImage(), valueDrawer->GetImage()->GetBufferedRegion());
@@ -439,136 +438,120 @@ py::array KvlMesh::RasterizeValues(
   return createNumpyArrayFStyle(size, buffer);
 }
 
+py::array_t<double> KvlMesh::FitAlphas(
+    const py::array_t<uint16_t, py::array::f_style | py::array::forcecast>
+        &probabilityImageBuffer) const {
 
-
-py::array_t<double> KvlMesh::FitAlphas( const py::array_t< uint16_t, 
-                                                           py::array::f_style | py::array::forcecast >& 
-                                        probabilityImageBuffer ) const
-{
-  
   // Retrieve size of image and number of number of classes
-  if ( probabilityImageBuffer.ndim() != 4 ) 
-    {
-    itkGenericExceptionMacro( "probability image buffer must have four dimensions" );
-    }
-      
-  typedef kvl::AtlasMeshProbabilityImageStatisticsCollector::ProbabilityImageType  ProbabilityImageType; 
-  typedef ProbabilityImageType::SizeType  SizeType;
-  SizeType  imageSize;
-  for ( int i = 0; i < 3; i++ )
-    {
-    imageSize[ i ] = probabilityImageBuffer.shape( i );
+  if (probabilityImageBuffer.ndim() != 4) {
+    itkGenericExceptionMacro(
+        "probability image buffer must have four dimensions");
+  }
+
+  typedef kvl::AtlasMeshProbabilityImageStatisticsCollector::
+      ProbabilityImageType               ProbabilityImageType;
+  typedef ProbabilityImageType::SizeType SizeType;
+  SizeType                               imageSize;
+  for (int i = 0; i < 3; i++) {
+    imageSize[i] = probabilityImageBuffer.shape(i);
     //std::cout << "imageSize[ i ]: " << imageSize[ i ] << std::endl;
-    }
-  const int  numberOfClasses = probabilityImageBuffer.shape( 3 );
+  }
+  const int numberOfClasses = probabilityImageBuffer.shape(3);
   std::cout << "imageSize: " << imageSize << std::endl;
   std::cout << "numberOfClasses: " << numberOfClasses << std::endl;
 
-
   // Allocate an image of that size
-  ProbabilityImageType::Pointer  probabilityImage = ProbabilityImageType::New();
-  probabilityImage->SetRegions( imageSize );
+  ProbabilityImageType::Pointer probabilityImage = ProbabilityImageType::New();
+  probabilityImage->SetRegions(imageSize);
   probabilityImage->Allocate();
-  ProbabilityImageType::PixelType  emptyEntry( numberOfClasses );
-  emptyEntry.Fill( 0.0f );
-  probabilityImage->FillBuffer( emptyEntry );
-  
-  
+  ProbabilityImageType::PixelType emptyEntry(numberOfClasses);
+  emptyEntry.Fill(0.0f);
+  probabilityImage->FillBuffer(emptyEntry);
+
   // Fill in -- relying on the fact that we've guaranteed a F-style Numpy array input
-  auto  data = probabilityImageBuffer.data(); 
-  for ( int classNumber = 0; classNumber < numberOfClasses; classNumber++ )
-    {
+  auto data = probabilityImageBuffer.data();
+  for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
     // Loop over all voxels
-    itk::ImageRegionIterator< ProbabilityImageType >  it( probabilityImage,
-                                                          probabilityImage->GetBufferedRegion() );
-    for ( ;!it.IsAtEnd(); ++it, ++data )
-      {
-      it.Value()[ classNumber ] = static_cast< float >( *data ) / 65535.0;
-      }
-    
+    itk::ImageRegionIterator<ProbabilityImageType> it(
+        probabilityImage, probabilityImage->GetBufferedRegion());
+    for (; !it.IsAtEnd(); ++it, ++data) {
+      it.Value()[classNumber] = static_cast<float>(*data) / 65535.0;
     }
-  std::cout << "Created and filled probabilityImage" << std::endl;  
-  
+  }
+  std::cout << "Created and filled probabilityImage" << std::endl;
 
   // EM estimation of probability image in mesh representation. First we create a private mesh
   // to play with - we initialize with a flat prior (alphas)
-  
-  // Create a flat alpha entry  
-  kvl::AtlasAlphasType   flatAlphasEntry( numberOfClasses );
-  flatAlphasEntry.Fill( 1.0f / static_cast< float >( numberOfClasses ) );
+
+  // Create a flat alpha entry
+  kvl::AtlasAlphasType flatAlphasEntry(numberOfClasses);
+  flatAlphasEntry.Fill(1.0f / static_cast<float>(numberOfClasses));
 
   // Create a border alphas entry (only first class is possible)
-  kvl::AtlasAlphasType   borderAlphasEntry( numberOfClasses );
-  borderAlphasEntry.Fill( 0.0f );
-  borderAlphasEntry[ 0 ] = 1.0f;
-  
+  kvl::AtlasAlphasType borderAlphasEntry(numberOfClasses);
+  borderAlphasEntry.Fill(0.0f);
+  borderAlphasEntry[0] = 1.0f;
+
   // Initialize point params with flat alphas (unless at border)
-  kvl::AtlasMesh::PointDataContainer::Pointer  privateParameters 
-                                                 = kvl::AtlasMesh::PointDataContainer::New();
-  for ( kvl::AtlasMesh::PointDataContainer::ConstIterator  it = mesh->GetPointData()->Begin();
-        it != mesh->GetPointData()->End(); ++it )
-    {
-    kvl::PointParameters  params = it.Value(); // Copy
-    if ( params.m_CanChangeAlphas )
-      {
+  kvl::AtlasMesh::PointDataContainer::Pointer privateParameters =
+      kvl::AtlasMesh::PointDataContainer::New();
+  for (kvl::AtlasMesh::PointDataContainer::ConstIterator it =
+           mesh->GetPointData()->Begin();
+       it != mesh->GetPointData()->End(); ++it) {
+    kvl::PointParameters params = it.Value(); // Copy
+    if (params.m_CanChangeAlphas) {
       params.m_Alphas = flatAlphasEntry;
-      }
-    else
-      {
+    } else {
       params.m_Alphas = borderAlphasEntry;
-      }
-      
-    privateParameters->InsertElement( it.Index(), params );     
-    }  
+    }
+
+    privateParameters->InsertElement(it.Index(), params);
+  }
 
   // Create actual private mesh
-  kvl::AtlasMesh::Pointer  privateMesh = kvl::AtlasMesh::New();
-  kvl::AtlasMesh::Pointer  nonConstMesh = const_cast< kvl::AtlasMesh* >( mesh.GetPointer() );
-  privateMesh->SetPoints( nonConstMesh->GetPoints() );
-  privateMesh->SetCells( nonConstMesh->GetCells() );
-  privateMesh->SetPointData( privateParameters );
-  privateMesh->SetCellData( nonConstMesh->GetCellData() );
-
+  kvl::AtlasMesh::Pointer privateMesh = kvl::AtlasMesh::New();
+  kvl::AtlasMesh::Pointer nonConstMesh =
+      const_cast<kvl::AtlasMesh *>(mesh.GetPointer());
+  privateMesh->SetPoints(nonConstMesh->GetPoints());
+  privateMesh->SetCells(nonConstMesh->GetCells());
+  privateMesh->SetPointData(privateParameters);
+  privateMesh->SetCellData(nonConstMesh->GetCellData());
 
   // Do the actual EM algorithm using (an updating the alphas in) our private mesh
-  for ( int iterationNumber = 0; iterationNumber < 10; iterationNumber++ )
-    {
+  for (int iterationNumber = 0; iterationNumber < 10; iterationNumber++) {
     // E-step: assign voxels to mesh nodes
-    kvl::AtlasMeshProbabilityImageStatisticsCollector::Pointer  statisticsCollector = 
-                                            kvl::AtlasMeshProbabilityImageStatisticsCollector::New();
-    statisticsCollector->SetProbabilityImage( probabilityImage );
-    statisticsCollector->Rasterize( privateMesh );
-    double  cost = statisticsCollector->GetMinLogLikelihood();
-    std::cout << "   EM iteration " << iterationNumber << " -> " << cost << std::endl;
-    
+    kvl::AtlasMeshProbabilityImageStatisticsCollector::Pointer
+        statisticsCollector =
+            kvl::AtlasMeshProbabilityImageStatisticsCollector::New();
+    statisticsCollector->SetProbabilityImage(probabilityImage);
+    statisticsCollector->Rasterize(privateMesh);
+    double cost = statisticsCollector->GetMinLogLikelihood();
+    std::cout << "   EM iteration " << iterationNumber << " -> " << cost
+              << std::endl;
+
     // M-step: normalize class counts in mesh nodes
-    kvl::AtlasMesh::PointDataContainer::Iterator  pointParamIt = privateParameters->Begin();
-    kvl::AtlasMeshProbabilityImageStatisticsCollector::StatisticsContainerType::ConstIterator  statIt = statisticsCollector->GetLabelStatistics()->Begin();
-    for ( ; pointParamIt != privateParameters->End(); ++pointParamIt, ++statIt )
-      {
-      if ( pointParamIt.Value().m_CanChangeAlphas )
-        {
+    kvl::AtlasMesh::PointDataContainer::Iterator pointParamIt =
+        privateParameters->Begin();
+    kvl::AtlasMeshProbabilityImageStatisticsCollector::StatisticsContainerType::
+        ConstIterator statIt =
+            statisticsCollector->GetLabelStatistics()->Begin();
+    for (; pointParamIt != privateParameters->End(); ++pointParamIt, ++statIt) {
+      if (pointParamIt.Value().m_CanChangeAlphas) {
         pointParamIt.Value().m_Alphas = statIt.Value();
-        pointParamIt.Value().m_Alphas /= ( statIt.Value().sum() + 1e-12 );
-        }
-        
+        pointParamIt.Value().m_Alphas /= (statIt.Value().sum() + 1e-12);
       }
-  
-    } // End loop over EM iteration numbers
-   
-  // 
-  return AlphasToNumpy( privateParameters.GetPointer() ); // Makes a copy
-  
+    }
+
+  } // End loop over EM iteration numbers
+
+  //
+  return AlphasToNumpy(privateParameters.GetPointer()); // Makes a copy
 }
-
-
-
-
 
 py::array_t<double> PointSetToNumpy(PointSetConstPointer points) {
   const unsigned int numberOfNodes = points->Size();
-  auto *data = new double[numberOfNodes * XYZ_DIMENSIONS];
-  auto dataIterator = data;
+  auto *             data          = new double[numberOfNodes * XYZ_DIMENSIONS];
+  auto               dataIterator  = data;
   for (auto pointsIterator = points->Begin(); pointsIterator != points->End();
        ++pointsIterator) {
     for (int xyzAxisSelector = 0; xyzAxisSelector < XYZ_DIMENSIONS;
@@ -579,15 +562,15 @@ py::array_t<double> PointSetToNumpy(PointSetConstPointer points) {
   return createNumpyArrayCStyle({numberOfNodes, XYZ_DIMENSIONS}, data);
 }
 
-void CopyNumpyToPointSet(PointSetPointer points,
+void CopyNumpyToPointSet(PointSetPointer            points,
                          const py::array_t<double> &source) {
   if (source.ndim() != 2) {
     itkGenericExceptionMacro("point source shape must have two dimensions");
   }
   const unsigned int currentNumberOfNodes = points->Size();
-  auto sourceShape = source.shape();
-  const unsigned int sourceNumberOfNodes = *sourceShape++;
-  const unsigned int sourceXYZDimensions = *sourceShape++;
+  auto               sourceShape          = source.shape();
+  const unsigned int sourceNumberOfNodes  = *sourceShape++;
+  const unsigned int sourceXYZDimensions  = *sourceShape++;
   if (sourceXYZDimensions != 3) {
     itkGenericExceptionMacro("source points must have 3 coordinates not "
                              << sourceXYZDimensions);
@@ -609,13 +592,13 @@ void CopyNumpyToPointSet(PointSetPointer points,
   }
 }
 
-void CreatePointSetFromNumpy(PointSetPointer targetPoints,
+void CreatePointSetFromNumpy(PointSetPointer            targetPoints,
                              const py::array_t<double> &source) {
 
   if (source.ndim() != 2) {
     itkGenericExceptionMacro("point source shape must have two dimensions");
   }
-  auto sourceShape = source.shape();
+  auto               sourceShape         = source.shape();
   const unsigned int sourceNumberOfNodes = *sourceShape++;
   const unsigned int sourceXYZDimensions = *sourceShape++;
   if (sourceXYZDimensions != 3) {
@@ -634,10 +617,10 @@ void CreatePointSetFromNumpy(PointSetPointer targetPoints,
 }
 
 py::array_t<double> AlphasToNumpy(PointDataConstPointer alphas) {
-  const unsigned int numberOfNodes = alphas->Size();
+  const unsigned int numberOfNodes  = alphas->Size();
   const unsigned int numberOfLabels = alphas->Begin().Value().m_Alphas.Size();
-  auto *data = new double[numberOfNodes * numberOfLabels];
-  auto dataIterator = data;
+  auto *             data         = new double[numberOfNodes * numberOfLabels];
+  auto               dataIterator = data;
   for (auto alphasIterator = alphas->Begin(); alphasIterator != alphas->End();
        ++alphasIterator) {
     for (int label = 0; label < numberOfLabels; label++) {
@@ -647,16 +630,16 @@ py::array_t<double> AlphasToNumpy(PointDataConstPointer alphas) {
   return createNumpyArrayCStyle({numberOfNodes, numberOfLabels}, data);
 }
 
-void CopyNumpyToPointDataSet(PointDataPointer destinationAlphas,
+void CopyNumpyToPointDataSet(PointDataPointer           destinationAlphas,
                              const py::array_t<double> &source) {
   if (source.ndim() != 2) {
     itkGenericExceptionMacro(
         "data point source shape must have two dimensions");
   }
   const unsigned int currentNumberOfNodes = destinationAlphas->Size();
-  auto sourceShape = source.shape();
-  const unsigned int sourceNumberOfNodes = *sourceShape++;
-  const unsigned int numberOfLabels = *sourceShape++;
+  auto               sourceShape          = source.shape();
+  const unsigned int sourceNumberOfNodes  = *sourceShape++;
+  const unsigned int numberOfLabels       = *sourceShape++;
   if (sourceNumberOfNodes != currentNumberOfNodes) {
     itkGenericExceptionMacro("source data point count of "
                              << sourceNumberOfNodes

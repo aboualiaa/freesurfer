@@ -3,10 +3,10 @@
 
 #include <QGraphicsView>
 
+#include <QThread>
+#include <QVariantMap>
 #include <fstream>
 #include <iostream>
-#include <QVariantMap>
-#include <QThread>
 
 class BinaryTreeNode;
 class BinaryTreeView;
@@ -59,15 +59,15 @@ protected:
   void ScaleView(qreal scaleFactor);
 
 private:
-  QVariantMap m_mapData;
+  QVariantMap                     m_mapData;
   QMap<QString, BinaryTreeNode *> m_mapNode;
-  BinaryTreeNode *m_selectedNode;
-  BinaryTreeNode *m_nodeStart;
+  BinaryTreeNode *                m_selectedNode;
+  BinaryTreeNode *                m_nodeStart;
 
   QGraphicsScene *m_scene;
   TreeDataLoader *m_dataLoader;
-  QThread m_threadLoad;
-  QString m_strDataDir;
+  QThread         m_threadLoad;
+  QString         m_strDataDir;
 };
 
 #endif // BINARYTREEVIEW_H

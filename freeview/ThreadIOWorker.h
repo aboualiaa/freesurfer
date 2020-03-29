@@ -24,8 +24,8 @@
 #ifndef ThreadIOWorker_H
 #define ThreadIOWorker_H
 
-#include <QThread>
 #include <QMutex>
+#include <QThread>
 #include <QVariantMap>
 
 class Layer;
@@ -52,10 +52,10 @@ public:
   void SaveVolume(Layer *layer, const QVariantMap &args = QVariantMap());
   void LoadSurface(Layer *layer, const QVariantMap &args = QVariantMap());
   void SaveSurface(Layer *layer, const QVariantMap &args = QVariantMap());
-  void LoadSurfaceOverlay(Layer *layer,
+  void LoadSurfaceOverlay(Layer *            layer,
                           const QVariantMap &args = QVariantMap());
   void LoadTrack(Layer *layer, const QVariantMap &args = QVariantMap());
-  void LoadConnectomeMatrix(Layer *layer,
+  void LoadConnectomeMatrix(Layer *            layer,
                             const QVariantMap &args = QVariantMap());
   void LoadFCD(Layer *layer, const QVariantMap &args = QVariantMap());
   void TransformVolume(Layer *layer, const QVariantMap &args = QVariantMap());
@@ -74,8 +74,8 @@ protected:
 private:
   QMutex mutex;
   // to abort
-  int m_nJobType;
-  Layer *m_layer;
+  int         m_nJobType;
+  Layer *     m_layer;
   QVariantMap m_args;
 };
 

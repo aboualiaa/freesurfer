@@ -29,20 +29,20 @@
 #ifndef LayerPropertyPointSet_h
 #define LayerPropertyPointSet_h
 
-#include "vtkSmartPointer.h"
 #include "LayerProperty.h"
+#include "vtkSmartPointer.h"
 #include <QColor>
-#include <vector>
 #include <QVariantMap>
+#include <vector>
 
 #include "colortab.h"
 
 struct ScalarValues {
   QString strName;
-  int nNum;
+  int     nNum;
   double *dValue;
-  double dMin;
-  double dMax;
+  double  dMin;
+  double  dMax;
 };
 
 class vtkRGBAColorTransferFunction;
@@ -84,7 +84,7 @@ public:
 
   double GetHeatScaleOffset() { return m_dHeatScaleOffset; }
 
-  void SetScalarLayer(LayerMRI *layer);
+  void      SetScalarLayer(LayerMRI *layer);
   LayerMRI *GetScalarLayer() { return m_layerScalar; }
 
   vtkRGBAColorTransferFunction *GetHeatScaleLUT();
@@ -100,7 +100,7 @@ public:
 
   int GetScalarType() { return m_nScalarType; }
 
-  int GetScalarSet() { return m_nScalarSet; }
+  int          GetScalarSet() { return m_nScalarSet; }
   ScalarValues GetActiveScalarSet() { return m_scalarSets[m_nScalarSet]; }
 
   bool GetSnapToVoxelCenter() { return m_bSnapToVoxelCenter; }
@@ -164,25 +164,25 @@ private:
   double mRGB[3];
   double mRGBSpline[3];
 
-  int m_nColorMap;
+  int                                           m_nColorMap;
   vtkSmartPointer<vtkRGBAColorTransferFunction> m_lutHeatScale;
-  double m_dHeatScaleMin;
-  double m_dHeatScaleMid;
-  double m_dHeatScaleMax;
-  double m_dHeatScaleOffset;
+  double                                        m_dHeatScaleMin;
+  double                                        m_dHeatScaleMid;
+  double                                        m_dHeatScaleMax;
+  double                                        m_dHeatScaleOffset;
 
   double m_dStatMin;
   double m_dStatMax;
 
-  int m_nType;
+  int  m_nType;
   bool m_bSnapToVoxelCenter;
   bool m_bShowSpline;
 
-  int m_nScalarType;
-  LayerMRI *m_layerScalar;
-  int m_nScalarSet;
+  int                       m_nScalarType;
+  LayerMRI *                m_layerScalar;
+  int                       m_nScalarSet;
   std::vector<ScalarValues> m_scalarSets;
-  QVariantMap m_mapHeatscaleSettings;
+  QVariantMap               m_mapHeatscaleSettings;
 };
 
 #endif

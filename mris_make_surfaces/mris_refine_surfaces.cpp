@@ -29,10 +29,10 @@
  */
 
 #include "diag.h"
-#include "timer.h"
 #include "mrinorm.h"
-#include "version.h"
 #include "registerio.h"
+#include "timer.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mris_refine_surfaces.c,v 1.23 2016/12/10 22:57:53 fischl Exp $";
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]);
 // float *pwhite_mean, float *pwhite_std, float *pgray_mean, float *pgray_std) ;
 // static int compute_border_gradients(MRI_SURFACE *mris, MRI *mri, double
 // thresh) ;
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -59,35 +59,35 @@ MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_hires, float thresh,
 
 int LocalMRISfindExpansionRegions(MRI_SURFACE *mris);
 
-static double pial_errfunc_gradient(MRI_SURFACE *mris,
+static double pial_errfunc_gradient(MRI_SURFACE *      mris,
                                     INTEGRATION_PARMS *parms);
 static double pial_errfunc_sse(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
 static double pial_errfunc_rms(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
 
-static MRI *make_pial_location_mask(MRI_SURFACE *mris, MRI *mri_hires,
-                                    float max_thickness, MRI *mri_dst);
-static LABEL *hires_label = nullptr;
+static MRI *      make_pial_location_mask(MRI_SURFACE *mris, MRI *mri_hires,
+                                          float max_thickness, MRI *mri_dst);
+static LABEL *    hires_label = nullptr;
 static TRANSFORM *hires_xform = nullptr;
-static LTA *hires_lta = nullptr;
+static LTA *      hires_lta   = nullptr;
 
 static char *orig_white = "white";
-static char *orig_pial = nullptr;
+static char *orig_pial  = nullptr;
 
 const char *Progname;
 
-static char *reg_fname = nullptr;
-static int graymid = 0;
-static int curvature_avgs = 10;
-static int create = 1;
-static int smoothwm = 0;
-static int white_only = 0;
-static int inverted_contrast = 0;
-static int auto_detect_stats = 0;
-static int apply_median_filter = 0;
-static int nbhd_size = 20;
+static char *reg_fname           = nullptr;
+static int   graymid             = 0;
+static int   curvature_avgs      = 10;
+static int   create              = 1;
+static int   smoothwm            = 0;
+static int   white_only          = 0;
+static int   inverted_contrast   = 0;
+static int   auto_detect_stats   = 0;
+static int   apply_median_filter = 0;
+static int   nbhd_size           = 20;
 
 #define MAX_OTHER_LABELS 100
-static int num_other_labels = 0;
+static int   num_other_labels = 0;
 static char *other_label_names[MAX_OTHER_LABELS];
 
 static INTEGRATION_PARMS parms;
@@ -95,22 +95,22 @@ static INTEGRATION_PARMS parms;
 
 static int add = 0;
 
-static double l_tsmooth = 0.0;
+static double l_tsmooth      = 0.0;
 static double l_surf_repulse = 5.0;
 
 static int smooth = 0;
-static int vavgs = 5;
+static int vavgs  = 5;
 static int nwhite = 50 /*5*/;
-static int ngray = 50 /*45*/;
+static int ngray  = 50 /*45*/;
 
-static int nowhite = 0;
-static int nbrs = 2;
+static int nowhite    = 0;
+static int nbrs       = 2;
 static int write_vals = 0;
 
 static char *orig_name = ORIG_NAME;
 
-static char output_suffix[STRLEN] = "hires";
-static char pial_name[STRLEN] = "pial";
+static char output_suffix[STRLEN]     = "hires";
+static char pial_name[STRLEN]         = "pial";
 static char white_matter_name[STRLEN] = WHITE_MATTER_NAME;
 
 #if 0
@@ -118,47 +118,47 @@ static int lh_label = LH_LABEL ;
 static int rh_label = RH_LABEL ;
 #endif
 
-static int max_pial_averages = 16;
-static int min_pial_averages = 2;
-static int max_white_averages = 4;
-static int min_white_averages = 0;
-static float pial_sigma = 2.0f;
-static float white_sigma = 1.0;
-static float max_thickness = 5.0;
+static int   max_pial_averages  = 16;
+static int   min_pial_averages  = 2;
+static int   max_white_averages = 4;
+static int   min_white_averages = 0;
+static float pial_sigma         = 2.0f;
+static float white_sigma        = 1.0;
+static float max_thickness      = 5.0;
 
 static int num_dilate = 0;
 
-#define MAX_WHITE 120
-#define MAX_BORDER_WHITE 105
-#define MIN_BORDER_WHITE 85
+#define MAX_WHITE                120
+#define MAX_BORDER_WHITE         105
+#define MIN_BORDER_WHITE         85
 #define MIN_GRAY_AT_WHITE_BORDER 70
 
-#define MAX_GRAY 95
+#define MAX_GRAY               95
 #define MIN_GRAY_AT_CSF_BORDER 40
-#define MID_GRAY ((max_gray + min_gray_at_csf_border) / 2)
+#define MID_GRAY               ((max_gray + min_gray_at_csf_border) / 2)
 #define MAX_GRAY_AT_CSF_BORDER 75
-#define MIN_CSF 10
-#define MAX_CSF 40
+#define MIN_CSF                10
+#define MAX_CSF                40
 
-static MRI *find_wm(MRI_SURFACE *mris, MRI *mri, MRI *mri_wm);
-static double max_white = MAX_WHITE;
-static int max_border_white_set = 0, min_border_white_set = 0,
+static MRI *  find_wm(MRI_SURFACE *mris, MRI *mri, MRI *mri_wm);
+static double max_white            = MAX_WHITE;
+static int    max_border_white_set = 0, min_border_white_set = 0,
            min_gray_at_white_border_set = 0, max_gray_set = 0,
            max_gray_at_csf_border_set = 0, min_gray_at_csf_border_set = 0,
            min_csf_set = 0, max_csf_set = 0;
 
-static float max_border_white = MAX_BORDER_WHITE,
-             min_border_white = MIN_BORDER_WHITE,
+static float max_border_white         = MAX_BORDER_WHITE,
+             min_border_white         = MIN_BORDER_WHITE,
              min_gray_at_white_border = MIN_GRAY_AT_WHITE_BORDER,
-             max_gray = MAX_GRAY,
-             max_gray_at_csf_border = MAX_GRAY_AT_CSF_BORDER,
+             max_gray                 = MAX_GRAY,
+             max_gray_at_csf_border   = MAX_GRAY_AT_CSF_BORDER,
              min_gray_at_csf_border = MIN_GRAY_AT_CSF_BORDER, min_csf = MIN_CSF,
              max_csf = MAX_CSF;
 
-static char sdir[STRLEN] = "";
+static char sdir[STRLEN]   = "";
 static char suffix[STRLEN] = "";
 
-static int MGZ = 1; // for use with MGZ format
+static int   MGZ = 1; // for use with MGZ format
 static float check_contrast_direction(MRI_SURFACE *mris,
                                       MRI *mri_hires); // defined at the end
 
@@ -166,15 +166,15 @@ static float check_contrast_direction(MRI_SURFACE *mris,
 
 int main(int argc, char *argv[]) {
   char *hemi, *sname, *cp = nullptr, fname[STRLEN], med_fname[STRLEN], *dot;
-  int nargs, i /*, label_val, replace_val*/, msec, n_averages, j;
+  int   nargs, i /*, label_val, replace_val*/, msec, n_averages, j;
   MRI_SURFACE *mris;
   MRI *mri_wm = nullptr, *mri_smooth = nullptr, *mri_hires, *mri_hires_pial,
       *mri_mask = nullptr, *mri_hires_orig;
   /*  MRI           *mri_tran = NULL;*/
-  float max_len;
-  float white_mean, white_std, gray_mean, gray_std;
-  double current_sigma;
-  Timer then;
+  float   max_len;
+  float   white_mean, white_std, gray_mean, gray_std;
+  double  current_sigma;
+  Timer   then;
   MATRIX *m_reg = nullptr;
   /*  LT            *lt =0;*/
 
@@ -192,28 +192,28 @@ int main(int argc, char *argv[]) {
   parms.projection = NO_PROJECTION;
   parms.fill_interior =
       0; // don't let gradient use exterior information (slows things down)
-  parms.tol = 1e-4;
-  parms.dt = 0.5f;
-  parms.base_dt = BASE_DT_SCALE * parms.dt;
-  parms.l_spring = 1.0f;
-  parms.l_curv = 1.0;
+  parms.tol         = 1e-4;
+  parms.dt          = 0.5f;
+  parms.base_dt     = BASE_DT_SCALE * parms.dt;
+  parms.l_spring    = 1.0f;
+  parms.l_curv      = 1.0;
   parms.l_intensity = 0.1;
-  parms.l_spring = 0.0f;
-  parms.l_curv = 1.0;
+  parms.l_spring    = 0.0f;
+  parms.l_curv      = 1.0;
   parms.l_intensity = 0.2;
-  parms.l_tspring = 1.0f;
-  parms.l_nspring = 1;
+  parms.l_tspring   = 1.0f;
+  parms.l_nspring   = 1;
 
-  parms.niterations = 0;
+  parms.niterations      = 0;
   parms.write_iterations = 0 /*WRITE_ITERATIONS */;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.momentum = 0.0 /*0.8*/;
-  parms.dt_increase = 1.0 /* DT_INCREASE */;
-  parms.dt_decrease = 0.50 /* DT_DECREASE*/;
-  parms.error_ratio = 50.0 /*ERROR_RATIO */;
+  parms.momentum         = 0.0 /*0.8*/;
+  parms.dt_increase      = 1.0 /* DT_INCREASE */;
+  parms.dt_decrease      = 0.50 /* DT_DECREASE*/;
+  parms.error_ratio      = 50.0 /*ERROR_RATIO */;
   /*  parms.integration_type = INTEGRATE_LINE_MINIMIZE ;*/
   parms.l_surf_repulse = 0.0;
-  parms.l_repulse = 1;
+  parms.l_repulse      = 1;
 #if 0
   parms.l_grad = 1 ;
   parms.l_intensity = 0 ;
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
   // arg5 = lowtohires.xfm is an option
   /////////////////////////////////////////////////////////////////////////////
   sname = argv[1];
-  hemi = argv[2];
+  hemi  = argv[2];
 
   ///////////////////////////////////////////////////////////////////////
   // read orig surface
@@ -286,22 +286,22 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "reading hires volume %s...\n", fname);
 
   strcpy(med_fname, fname);
-  dot = strchr(med_fname, '.');
+  dot  = strchr(med_fname, '.');
   *dot = 0;
   strcat(med_fname, ".median.mgz");
   if (0) {
     MRI_REGION box;
-    double dist = MIN_BORDER_DIST - .5;
-    MRI *mri_tmp;
+    double     dist = MIN_BORDER_DIST - .5;
+    MRI *      mri_tmp;
 
     mri_hires = mri_hires_orig = MRIread(fname);
     if (!mri_hires)
       ErrorExit(ERROR_NOFILE, "%s: could not read input volume %s", Progname,
                 fname);
 
-    box.x = nint(dist / mri_hires->xsize);
-    box.y = nint(dist / mri_hires->ysize);
-    box.z = nint(dist / mri_hires->zsize);
+    box.x  = nint(dist / mri_hires->xsize);
+    box.y  = nint(dist / mri_hires->ysize);
+    box.z  = nint(dist / mri_hires->zsize);
     box.dx = mri_hires->width - 2 * nint(dist / mri_hires->xsize);
     box.dy = mri_hires->height - 2 * nint(dist / mri_hires->ysize);
     box.dz = mri_hires->depth - 2 * nint(dist / mri_hires->zsize);
@@ -343,8 +343,8 @@ int main(int argc, char *argv[]) {
   // read or setup lowrestohires transform
   /////////////////////////////////////////////////////////////////////////////
   if (argc <= 5) {
-    LINEAR_TRANSFORM *lt = nullptr;
-    MATRIX *m_L = nullptr;
+    LINEAR_TRANSFORM *lt  = nullptr;
+    MATRIX *          m_L = nullptr;
     fprintf(stderr, "allocating identity RAS-to-RAS xform...\n");
     // allocate hires_xform->xform
     hires_xform = TransformAlloc(MNI_TRANSFORM_TYPE, nullptr);
@@ -352,11 +352,11 @@ int main(int argc, char *argv[]) {
       ErrorExit(ERROR_NOFILE, "%s: could not allocate hires xform %s", Progname,
                 argv[3]);
     hires_lta = (LTA *)(hires_xform->xform);
-    lt = &hires_lta->xforms[0];
+    lt        = &hires_lta->xforms[0];
     lt->sigma = 1.0f;
     lt->x0 = lt->y0 = lt->z0 = 0;
-    hires_lta->type = LINEAR_RAS_TO_RAS;
-    m_L = lt->m_L;
+    hires_lta->type          = LINEAR_RAS_TO_RAS;
+    m_L                      = lt->m_L;
     MatrixIdentity(4, m_L);
     // geometry for src and dst are not specified yet
   } else if (argc == 6) {
@@ -384,8 +384,8 @@ int main(int argc, char *argv[]) {
   printf("reading initial white vertex positions from %s...\n", orig_white);
   if (reg_fname && mri_hires_orig) {
     char *subject;
-    int type;
-    LTA *lta;
+    int   type;
+    LTA * lta;
 
     type = TransformFileNameType(reg_fname);
     printf("reading registration from %s (type = %d)\n", reg_fname, type);
@@ -399,7 +399,7 @@ int main(int argc, char *argv[]) {
     case LINEAR_VOX_TO_VOX:
     case LINEAR_RAS_TO_RAS:
     case TRANSFORM_ARRAY_TYPE:
-      lta = LTAreadEx(reg_fname);
+      lta   = LTAreadEx(reg_fname);
       m_reg = MatrixCopy(lta->xforms[0].m_L, nullptr);
       LTAfree(&lta);
       break;
@@ -624,7 +624,7 @@ int main(int argc, char *argv[]) {
     }
     if (i == 0) {
       parms.niterations = 15;
-      parms.grad_dir = 1;
+      parms.grad_dir    = 1;
       MRISpositionSurface(mris, mri_hires, mri_smooth, &parms);
       MRIScomputeMaxGradBorderValues(mris, mri_hires, mri_smooth, current_sigma,
                                      max_thickness, 1, parms.fp, mri_wm, i);
@@ -645,8 +645,8 @@ int main(int argc, char *argv[]) {
 
       printf(
           "enabling interior filling and gradient direction calculation...\n");
-      parms.niterations = nwhite;
-      parms.grad_dir = 0;
+      parms.niterations   = nwhite;
+      parms.grad_dir      = 0;
       parms.fill_interior = 1;
     }
     MRISpositionSurface(mris, mri_hires, mri_smooth, &parms);
@@ -758,7 +758,7 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "smoothing hires volume with sigma = %2.3f\n",
               current_sigma);
       parms.n_averages = n_averages;
-      parms.l_tsmooth = l_tsmooth;
+      parms.l_tsmooth  = l_tsmooth;
       /*
         replace bright stuff such as eye sockets with 255.
         Simply zeroing it out
@@ -793,14 +793,14 @@ int main(int argc, char *argv[]) {
 
       if (i == 0) {
         gMRISexternalGradient = pial_errfunc_gradient;
-        gMRISexternalSSE = pial_errfunc_sse;
-        gMRISexternalRMS = pial_errfunc_rms;
-        parms.l_external = parms.l_intensity;
-        parms.l_intensity = 0;
+        gMRISexternalSSE      = pial_errfunc_sse;
+        gMRISexternalRMS      = pial_errfunc_rms;
+        parms.l_external      = parms.l_intensity;
+        parms.l_intensity     = 0;
       } else {
         gMRISexternalGradient = gMRISexternalSSE = gMRISexternalRMS = nullptr;
         parms.l_intensity = parms.l_external;
-        parms.l_external = 0;
+        parms.l_external  = 0;
       }
 
       if (vavgs) {
@@ -881,7 +881,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -930,8 +930,8 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "min_border_white")) {
     min_border_white_set = 1;
-    min_border_white = atof(argv[2]);
-    nargs = 1;
+    min_border_white     = atof(argv[2]);
+    nargs                = 1;
   } else if (!stricmp(option, "wsigma")) {
     white_sigma = atof(argv[2]);
     fprintf(stderr, "smoothing volume with Gaussian sigma = %2.1f\n",
@@ -944,28 +944,28 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "min_gray_at_white_border")) {
     min_gray_at_white_border_set = 1;
-    min_gray_at_white_border = atof(argv[2]);
-    nargs = 1;
+    min_gray_at_white_border     = atof(argv[2]);
+    nargs                        = 1;
   } else if (!stricmp(option, "max_gray")) {
     max_gray_set = 1;
-    max_gray = atof(argv[2]);
-    nargs = 1;
+    max_gray     = atof(argv[2]);
+    nargs        = 1;
   } else if (!stricmp(option, "max_gray_at_csf_border")) {
     max_gray_at_csf_border_set = 1;
-    max_gray_at_csf_border = atof(argv[2]);
-    nargs = 1;
+    max_gray_at_csf_border     = atof(argv[2]);
+    nargs                      = 1;
   } else if (!stricmp(option, "min_gray_at_csf_border")) {
     min_gray_at_csf_border_set = 1;
-    min_gray_at_csf_border = atof(argv[2]);
-    nargs = 1;
+    min_gray_at_csf_border     = atof(argv[2]);
+    nargs                      = 1;
   } else if (!stricmp(option, "min_csf")) {
     min_csf_set = 1;
-    min_csf = atof(argv[2]);
-    nargs = 1;
+    min_csf     = atof(argv[2]);
+    nargs       = 1;
   } else if (!stricmp(option, "max_csf")) {
     max_csf_set = 1;
-    max_csf = atof(argv[2]);
-    nargs = 1;
+    max_csf     = atof(argv[2]);
+    nargs       = 1;
   } else if (!stricmp(option, "noauto")) {
     auto_detect_stats = 0;
     fprintf(stderr, "disabling auto-detection of border ranges...\n");
@@ -975,31 +975,31 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "intensity")) {
     parms.l_intensity = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "l_intensity = %2.3f\n", parms.l_intensity);
   } else if (!stricmp(option, "spring")) {
     parms.l_spring = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "l_spring = %2.3f\n", parms.l_spring);
   } else if (!stricmp(option, "tspring")) {
     parms.l_tspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_tspring = %2.3f\n", parms.l_tspring);
   } else if (!stricmp(option, "smooth")) {
     smooth = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     fprintf(stderr, "smoothing for %d iterations\n", smooth);
   } else if (!stricmp(option, "tsmooth")) {
     l_tsmooth = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "l_tsmooth = %2.3f\n", l_tsmooth);
   } else if (!stricmp(option, "nspring")) {
     parms.l_nspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_nspring = %2.3f\n", parms.l_nspring);
   } else if (!stricmp(option, "curv")) {
     parms.l_curv = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_curv = %2.3f\n", parms.l_curv);
   } else if (!stricmp(option, "MGZ")) {
     MGZ = 1;
@@ -1015,11 +1015,11 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'L':
       other_label_names[num_other_labels++] = argv[2];
-      nargs = 1;
+      nargs                                 = 1;
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'W':
       sscanf(argv[2], "%d", &parms.write_iterations);
@@ -1077,14 +1077,14 @@ static void print_version() {
 MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_hires, float thresh,
                       int out_label, MRI *mri_dst) {
   BUFTYPE *pdst, *pinv_lv, out_val, inv_lv_val, *pT1;
-  int width, height, depth, x, y, z, ventricle_voxels;
+  int      width, height, depth, x, y, z, ventricle_voxels;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_hires, nullptr);
 
-  width = mri_hires->width;
+  width  = mri_hires->width;
   height = mri_hires->height;
-  depth = mri_hires->depth;
+  depth  = mri_hires->depth;
   /* now apply the inverse morph to build an average wm representation
      of the input volume
   */
@@ -1092,13 +1092,13 @@ MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_hires, float thresh,
   ventricle_voxels = 0;
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pdst = &MRIvox(mri_dst, 0, y, z);
-      pT1 = &MRIvox(mri_hires, 0, y, z);
+      pdst    = &MRIvox(mri_dst, 0, y, z);
+      pT1     = &MRIvox(mri_hires, 0, y, z);
       pinv_lv = &MRIvox(mri_inv_lv, 0, y, z);
       for (x = 0; x < width; x++) {
         pT1++;
         inv_lv_val = *pinv_lv++;
-        out_val = 0;
+        out_val    = 0;
         if (inv_lv_val >= thresh) {
           ventricle_voxels++;
           out_val = out_label;
@@ -1117,7 +1117,7 @@ MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_hires, float thresh,
 }
 
 int LocalMRISfindExpansionRegions(MRI_SURFACE *mris) {
-  int vno, num, n, num_long, total;
+  int   vno, num, n, num_long, total;
   float d, dsq, mean, std, dist;
 
   d = dsq = 0.0f;
@@ -1132,13 +1132,13 @@ int LocalMRISfindExpansionRegions(MRI_SURFACE *mris) {
   }
 
   mean = d / num;
-  std = sqrt(dsq / num - mean * mean);
+  std  = sqrt(dsq / num - mean * mean);
   fprintf(stderr, "mean absolute distance = %2.2f +- %2.2f\n", mean, std);
 
   for (num = vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
-    v->curv = 0;
+    VERTEX *const                v  = &mris->vertices[vno];
+    v->curv                         = 0;
     if (v->ripflag || v->val <= 0)
       continue;
     if (fabs(v->d) < mean + 2 * std)
@@ -1169,9 +1169,9 @@ int LocalMRISfindExpansionRegions(MRI_SURFACE *mris) {
 
 // mris here is the one in mri_hires space
 static float check_contrast_direction(MRI_SURFACE *mris, MRI *mri_hires) {
-  int vno, n;
+  int     vno, n;
   VERTEX *v;
-  double x, y, z, xw, yw, zw, val, mean_inside, mean_outside;
+  double  x, y, z, xw, yw, zw, val, mean_inside, mean_outside;
 
   mean_inside = mean_outside = 0.0;
   for (n = vno = 0; vno < mris->nvertices; vno++) {
@@ -1324,15 +1324,15 @@ compute_border_gradients(MRI_SURFACE *mris, MRI *mri, double thresh)
 }
 #endif
 static MRI *find_wm(MRI_SURFACE *mris, MRI *mri, MRI *mri_wm) {
-  MRI *mri_interior, *mri_ctrl, *mri_kernel;
-  int vno, x, y, z;
+  MRI *   mri_interior, *mri_ctrl, *mri_kernel;
+  int     vno, x, y, z;
   VERTEX *v;
-  double xv, yv, zv, val;
+  double  xv, yv, zv, val;
 
   return (nullptr);
 #define SDIST 0.5
   mri_interior = MRIclone(mri, nullptr);
-  mri_ctrl = MRIalloc(mri->width, mri->height, mri->depth, MRI_UCHAR);
+  mri_ctrl     = MRIalloc(mri->width, mri->height, mri->depth, MRI_UCHAR);
   MRIcopyHeader(mri, mri_ctrl);
 
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1361,7 +1361,7 @@ static MRI *find_wm(MRI_SURFACE *mris, MRI *mri, MRI *mri_wm) {
   MRIwrite(mri_interior, "i2.mgz");
   MRIwrite(mri_ctrl, "c.mgz");
   mri_kernel = MRIgaussian1d(.25 / mri->xsize, 0);
-  mri_wm = MRIconvolveGaussian(mri_interior, nullptr, mri_kernel);
+  mri_wm     = MRIconvolveGaussian(mri_interior, nullptr, mri_kernel);
   //  MRIsoapBubble(mri_interior, mri_ctrl, mri_interior, 5) ;
   printf("writing 3...\n");
   MRIwrite(mri_wm, "i3.mgz");
@@ -1372,11 +1372,11 @@ static MRI *find_wm(MRI_SURFACE *mris, MRI *mri, MRI *mri_wm) {
   return (mri_wm);
 }
 
-static double pial_errfunc_gradient(MRI_SURFACE *mris,
+static double pial_errfunc_gradient(MRI_SURFACE *      mris,
                                     INTEGRATION_PARMS *parms) {
-  int vno;
+  int     vno;
   VERTEX *v;
-  double dist, sse, dx, dy, dz, l_external;
+  double  dist, sse, dx, dy, dz, l_external;
 
   l_external = parms->l_external;
   for (sse = 0, vno = 0; vno < mris->nvertices; vno++) {
@@ -1385,9 +1385,9 @@ static double pial_errfunc_gradient(MRI_SURFACE *mris,
       DiagBreak();
     if (v->marked == 0 || v->ripflag)
       continue;
-    dx = v->tx - v->x;
-    dy = v->ty - v->y;
-    dz = v->tz - v->z;
+    dx   = v->tx - v->x;
+    dy   = v->ty - v->y;
+    dz   = v->tz - v->z;
     dist = sqrt(dx * dx + dy * dy + dz * dz);
     if (vno == Gdiag_no)
       printf("v %d: pial_grad d = (%2.3f, %2.3f, %2.3f)\n", vno, dx, dy, dz);
@@ -1400,9 +1400,9 @@ static double pial_errfunc_gradient(MRI_SURFACE *mris,
 }
 
 static double pial_errfunc_sse(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
-  int vno;
+  int     vno;
   VERTEX *v;
-  double dist, sse, dx, dy, dz;
+  double  dist, sse, dx, dy, dz;
 
   for (sse = 0, vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -1410,9 +1410,9 @@ static double pial_errfunc_sse(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
       DiagBreak();
     if (v->marked == 0 || v->ripflag)
       continue;
-    dx = v->tx - v->x;
-    dy = v->ty - v->y;
-    dz = v->tz - v->z;
+    dx   = v->tx - v->x;
+    dy   = v->ty - v->y;
+    dz   = v->tz - v->z;
     dist = sqrt(dx * dx + dy * dy + dz * dz);
     sse += dist;
   }
@@ -1421,10 +1421,10 @@ static double pial_errfunc_sse(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
 }
 static double pial_errfunc_rms(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
   double sse;
-  int nv;
+  int    nv;
 
   sse = pial_errfunc_gradient(mris, parms);
-  nv = MRISmarkedVertices(mris);
+  nv  = MRISmarkedVertices(mris);
   if (nv == 0)
     nv = 1;
   return (sqrt(sse) / nv);

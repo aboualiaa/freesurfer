@@ -31,15 +31,15 @@ void CFFTbackward(float *re, float *im, int length);
 
 void RFFTforward(float *data, int length, float *re, float *im);
 
-void RFFT(float *data, int data_length, int length, int direction);
-void FFTdebugAssert(int b, const char *string);
-int FFTisPowerOf2(int x);
-int FFTpow2(int exponent);
-float FFTdist(int x, int y, int z, int len);
-int FFTlog2(int x);
-void FFTswitch_with_z(float ***vect, int dimension, int is_y);
-void FFTmodarg_to_reim(float ***re_mod, float ***im_arg, int l);
+void     RFFT(float *data, int data_length, int length, int direction);
+void     FFTdebugAssert(int b, const char *string);
+int      FFTisPowerOf2(int x);
+int      FFTpow2(int exponent);
+float    FFTdist(int x, int y, int z, int len);
+int      FFTlog2(int x);
+void     FFTswitch_with_z(float ***vect, int dimension, int is_y);
+void     FFTmodarg_to_reim(float ***re_mod, float ***im_arg, int l);
 float ***FFTinv_quarter(float ***vect, int dimension);
-void FFTreim_to_modarg(float ***re_mod, float ***im_arg, int l);
+void     FFTreim_to_modarg(float ***re_mod, float ***im_arg, int l);
 
 #endif

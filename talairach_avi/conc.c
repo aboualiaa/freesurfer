@@ -23,17 +23,17 @@
  *
  */
 
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include <ctype.h>
 #include <Getifh.h>
-#include <endianio.h>
-#include <rec.h>
 #include <conc.h>
+#include <ctype.h>
+#include <endianio.h>
+#include <math.h>
+#include <rec.h>
+#include <stdlib.h>
+#include <string.h>
 
 int split(char *string, char *srgv[], int maxp) {
-  int i, m;
+  int   i, m;
   char *ptr;
 
   if ((ptr = strchr(string, '#')))
@@ -63,7 +63,7 @@ void conc_init_quiet(CONC_BLOCK *conc_block, char *program) {
   strcpy(conc_block->program, program);
   conc_block->rnfile = conc_block->wnfile = conc_block->imgfp_open = 0;
   *conc_block->lstroot = *conc_block->lstfile = *conc_block->outroot =
-      *conc_block->outfile = '\0';
+      *conc_block->outfile                    = '\0';
 }
 
 void conc_init(CONC_BLOCK *conc_block, char *program) {
@@ -71,13 +71,13 @@ void conc_init(CONC_BLOCK *conc_block, char *program) {
   strcpy(conc_block->program, program);
   conc_block->rnfile = conc_block->wnfile = conc_block->imgfp_open = 0;
   *conc_block->lstroot = *conc_block->lstfile = *conc_block->outroot =
-      *conc_block->outfile = '\0';
+      *conc_block->outfile                    = '\0';
 }
 
 void conc_open_quiet(CONC_BLOCK *conc_block, char *lstfile) {
   char *ptr, string[MAXL], *srgv[MAXL];
-  int i, k, status = 0;
-  IFH ifh;
+  int   i, k, status = 0;
+  IFH   ifh;
 
   getroot(lstfile, conc_block->lstroot);
   sprintf(conc_block->lstfile, "%s.conc", conc_block->lstroot);
@@ -116,12 +116,12 @@ void conc_open_quiet(CONC_BLOCK *conc_block, char *lstfile) {
       errr(conc_block->program, conc_block->imgfile0[i]);
     if (!i) {
       conc_block->orient = ifh.orientation;
-      conc_block->isbig = strcmp(ifh.imagedata_byte_order, "littleendian");
+      conc_block->isbig  = strcmp(ifh.imagedata_byte_order, "littleendian");
       for (conc_block->vdim = 1, k = 0; k < 3; k++) {
         conc_block->vdim *= conc_block->imgdim[k] = ifh.matrix_size[k];
-        conc_block->voxdim[k] = ifh.scaling_factor[k];
-        conc_block->mmppix[k] = ifh.mmppix[k];
-        conc_block->center[k] = ifh.center[k];
+        conc_block->voxdim[k]                     = ifh.scaling_factor[k];
+        conc_block->mmppix[k]                     = ifh.mmppix[k];
+        conc_block->center[k]                     = ifh.center[k];
       }
     } else {
       status |= (conc_block->orient != ifh.orientation);
@@ -149,8 +149,8 @@ void conc_open_quiet(CONC_BLOCK *conc_block, char *lstfile) {
 
 void conc_open(CONC_BLOCK *conc_block, char *lstfile) {
   char *ptr, string[MAXL], *srgv[MAXL];
-  int i, k, status = 0;
-  IFH ifh;
+  int   i, k, status = 0;
+  IFH   ifh;
 
   getroot(lstfile, conc_block->lstroot);
   sprintf(conc_block->lstfile, "%s.conc", conc_block->lstroot);
@@ -190,12 +190,12 @@ void conc_open(CONC_BLOCK *conc_block, char *lstfile) {
       errr(conc_block->program, conc_block->imgfile0[i]);
     if (!i) {
       conc_block->orient = ifh.orientation;
-      conc_block->isbig = strcmp(ifh.imagedata_byte_order, "littleendian");
+      conc_block->isbig  = strcmp(ifh.imagedata_byte_order, "littleendian");
       for (conc_block->vdim = 1, k = 0; k < 3; k++) {
         conc_block->vdim *= conc_block->imgdim[k] = ifh.matrix_size[k];
-        conc_block->voxdim[k] = ifh.scaling_factor[k];
-        conc_block->mmppix[k] = ifh.mmppix[k];
-        conc_block->center[k] = ifh.center[k];
+        conc_block->voxdim[k]                     = ifh.scaling_factor[k];
+        conc_block->mmppix[k]                     = ifh.mmppix[k];
+        conc_block->center[k]                     = ifh.center[k];
       }
     } else {
       status |= (conc_block->orient != ifh.orientation);
@@ -239,7 +239,7 @@ void conc_rewind(CONC_BLOCK *conc_block) {
   }
   if (conc_block->imgfp_open)
     fclose(conc_block->imgfp);
-  conc_block->rivol = 0;
+  conc_block->rivol  = 0;
   conc_block->rifile = 0;
 }
 
@@ -291,7 +291,7 @@ void conc_newe(CONC_BLOCK *conc_block, char *trailer, char control) {
 
 void conc_new(CONC_BLOCK *conc_block, char *trailer) {
   char imgroot[MAXL];
-  int i;
+  int  i;
 
   if (!strlen(conc_block->lstfile) || !conc_block->rnfile) {
     fprintf(stderr,
@@ -326,8 +326,8 @@ void conc_new(CONC_BLOCK *conc_block, char *trailer) {
 int conc_ifh_hdr_rec(CONC_BLOCK *conc_block, int argc, char *argv[],
                      char *recstr) {
   char command[MAXL];
-  int i, status = 0;
-  int imgdim[4];
+  int  i, status = 0;
+  int  imgdim[4];
 
   if (!conc_block->wnfile) {
     fprintf(stderr, "%s: conc output not initialized\n", conc_block->program);

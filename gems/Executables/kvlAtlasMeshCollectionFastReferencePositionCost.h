@@ -1,6 +1,6 @@
 #include "itkSingleValuedCostFunction.h"
-#include "kvlAtlasParameterEstimator.h"
 #include "kvlAtlasMeshCollectionModelLikelihoodCalculator.h"
+#include "kvlAtlasParameterEstimator.h"
 
 namespace kvl {
 
@@ -10,9 +10,9 @@ class AtlasMeshCollectionFastReferencePositionCost
 public:
   /** Standard class typedefs. */
   typedef AtlasMeshCollectionFastReferencePositionCost Self;
-  typedef itk::SingleValuedCostFunction Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
-  typedef itk::SmartPointer<const Self> ConstPointer;
+  typedef itk::SingleValuedCostFunction                Superclass;
+  typedef itk::SmartPointer<Self>                      Pointer;
+  typedef itk::SmartPointer<const Self>                ConstPointer;
 
   /** Run-time type information (and related methods). */
   itkTypeMacro(AtlasMeshCollectionFastReferencePositionCost,
@@ -23,7 +23,7 @@ public:
 
   // Some typedefs
   typedef Superclass::ParametersType ParametersType;
-  typedef Superclass::MeasureType MeasureType;
+  typedef Superclass::MeasureType    MeasureType;
   typedef Superclass::DerivativeType DerivativeType;
 
   //
@@ -31,7 +31,7 @@ public:
 
   //
   virtual void GetDerivative(const ParametersType &parameters,
-                             DerivativeType &derivative) const {}
+                             DerivativeType &      derivative) const {}
 
   virtual unsigned int GetNumberOfParameters() const { return 3; }
 
@@ -78,12 +78,12 @@ private:
   AtlasMeshCollectionModelLikelihoodCalculator::Pointer
       m_DataAndAlphasCostCalculator;
 
-  AtlasMesh::PointIdentifier m_PointId;
+  AtlasMesh::PointIdentifier                       m_PointId;
   std::vector<AtlasMesh::PointsContainer::Pointer> m_InitialPositions;
-  AtlasMesh::PointDataContainer::Pointer m_InitialPointParameters;
-  AtlasMesh::CellsContainer::Pointer m_Cells;
+  AtlasMesh::PointDataContainer::Pointer           m_InitialPointParameters;
+  AtlasMesh::CellsContainer::Pointer               m_Cells;
   AtlasMesh::PointsContainer::Pointer
-      m_ReferencePosition; // This is actually what we're gonna change
+         m_ReferencePosition; // This is actually what we're gonna change
   double m_K;
 
   //
@@ -109,7 +109,7 @@ private:
   };
 
   mutable std::vector<VertexNeighboringTetrahedronInfo>
-      m_VertexNeighborhood; // Cache
+                                       m_VertexNeighborhood; // Cache
   mutable AtlasMeshCollection::Pointer m_CostCalculationMeshCollection;
 };
 

@@ -27,8 +27,8 @@
 #include "mrisurf.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 
 const char *Progname;
@@ -38,21 +38,20 @@ const char *Progname;
 static char subjects_dir[NAME_LEN] = "";
 
 int main(int argc, char *argv[]) {
-  int ac, nargs;
+  int   ac, nargs;
   char *cp, *subject_name, *hemi, *surface, *annot_file, *color_file,
       *output_file;
   MRI_SURFACE *mris;
-  MRI *mri;
-  int err;
+  MRI *        mri;
+  int          err;
   COLOR_TABLE *ctab;
-  char surf_name[NAME_LEN];
-  char mri_name[NAME_LEN];
-  int vno;
-  VERTEX *v;
-  int structure;
-  float dx, dy, dz, len, d;
-  double idxx, idxy, idxz;
-
+  char         surf_name[NAME_LEN];
+  char         mri_name[NAME_LEN];
+  int          vno;
+  VERTEX *     v;
+  int          structure;
+  float        dx, dy, dz, len, d;
+  double       idxx, idxy, idxz;
 
   nargs = handleVersionOption(argc, argv, "mris_annot_to_segmentation");
   if (nargs && argc - nargs == 1)
@@ -75,11 +74,11 @@ int main(int argc, char *argv[]) {
     print_usage();
 
   subject_name = argv[1];
-  hemi = argv[2];
-  surface = argv[3];
-  annot_file = argv[4];
-  color_file = argv[5];
-  output_file = argv[6];
+  hemi         = argv[2];
+  surface      = argv[3];
+  annot_file   = argv[4];
+  color_file   = argv[5];
+  output_file  = argv[6];
 
   /* Read the surface first. */
   cp = getenv("SUBJECTS_DIR");
@@ -188,7 +187,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

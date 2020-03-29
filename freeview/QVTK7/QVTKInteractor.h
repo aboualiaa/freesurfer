@@ -36,11 +36,11 @@
 #ifndef Q_VTK_INTERACTOR_H
 #define Q_VTK_INTERACTOR_H
 
-#include "vtkGUISupportQtModule.h" // For export macro
 #include "QVTKWin32Header.h"
-#include <vtkRenderWindowInteractor.h>
-#include <vtkCommand.h>
+#include "vtkGUISupportQtModule.h" // For export macro
 #include <QtCore/QObject>
+#include <vtkCommand.h>
+#include <vtkRenderWindowInteractor.h>
 
 #include "vtkTDxConfigure.h" // defines VTK_USE_TDX
 #if defined(VTK_USE_TDX) && defined(Q_OS_WIN)
@@ -100,7 +100,7 @@ public:
 
 #if defined(VTK_USE_TDX) && defined(Q_WS_X11)
   virtual vtkTDxUnixDevice *GetDevice();
-  virtual void SetDevice(vtkTDxDevice *device);
+  virtual void              SetDevice(vtkTDxDevice *device);
 #endif
 
 protected:
@@ -148,10 +148,10 @@ public Q_SLOTS:
   void TimerEvent(int id);
 
 public:
-  QSignalMapper *SignalMapper;
+  QSignalMapper *                 SignalMapper;
   typedef std::map<int, QTimer *> TimerMap;
-  TimerMap Timers;
-  QVTKInteractor *Parent;
+  TimerMap                        Timers;
+  QVTKInteractor *                Parent;
 };
 
 #endif

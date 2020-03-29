@@ -1,6 +1,6 @@
-#include <boost/test/unit_test.hpp>
-#include <boost/test/data/monomorphic.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/test/data/monomorphic.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "randomsupply.hpp"
 #include "testiosupport.hpp"
@@ -195,8 +195,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(testElementCount, LengthType, TestLengthTypes) {
                           static_cast<size_t>(n2);
 
     d1[0] = d3[0] = n0;
-    d3[1] = n1;
-    d3[2] = n2;
+    d3[1]         = n1;
+    d3[2]         = n2;
 
     BOOST_CHECK_EQUAL(total1, d1.ElementCount());
     BOOST_CHECK_EQUAL(total3, d3.ElementCount());
@@ -208,8 +208,8 @@ template <typename LengthType, int nDims> void checkLinearIndexToLocation() {
 
   LengthType n[nDims];
 
-  long double exponent = 1.0 / nDims;
-  long double base = std::numeric_limits<size_t>::max();
+  long double exponent  = 1.0 / nDims;
+  long double base      = std::numeric_limits<size_t>::max();
   long double maxLength = pow(base, exponent);
 
   LengthType maxVal = std::numeric_limits<LengthType>::max() - 1;
@@ -224,7 +224,7 @@ template <typename LengthType, int nDims> void checkLinearIndexToLocation() {
 
   // Basic checks
   LengthType result[nDims];
-  size_t elementCount = 1;
+  size_t     elementCount = 1;
   for (unsigned char i = 0; i < nDims; i++) {
     elementCount *= n[i];
   }

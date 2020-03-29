@@ -1,9 +1,9 @@
 #ifndef kvlGMMLikelihoodImageFilter_hxx
 #define kvlGMMLikelihoodImageFilter_hxx
 
-#include "kvlGMMLikelihoodImageFilter.h"
 #include "itkImageRegionIterator.h"
 #include "itkProgressReporter.h"
+#include "kvlGMMLikelihoodImageFilter.h"
 #include "vnl/vnl_inverse.h"
 //#include <iomanip>
 
@@ -19,8 +19,8 @@ template <typename TInputImage>
 void GMMLikelihoodImageFilter<TInputImage>::SetParameters(
     const std::vector<vnl_vector<double>> &means,
     const std::vector<vnl_matrix<double>> &variances,
-    const std::vector<double> &mixtureWeights,
-    const std::vector<int> &numberOfGaussiansPerClass) {
+    const std::vector<double> &            mixtureWeights,
+    const std::vector<int> &               numberOfGaussiansPerClass) {
 
   // Sanity check on the input parameters
   const int numberOfGaussians = means.size();
@@ -46,8 +46,8 @@ void GMMLikelihoodImageFilter<TInputImage>::SetParameters(
   }
 
   // All parameters except for variances are simply copied
-  m_Means = means;
-  m_MixtureWeights = mixtureWeights;
+  m_Means                     = means;
+  m_MixtureWeights            = mixtureWeights;
   m_NumberOfGaussiansPerClass = numberOfGaussiansPerClass;
 
   // Now the variances -- we compute and store precisions instead of variances.
@@ -61,7 +61,7 @@ void GMMLikelihoodImageFilter<TInputImage>::SetParameters(
   // representation for this. For instance, 6 = [1 1 0] means that we have
   // channel 1 not available, but channels 2 and 3 available.
   m_OneOverSqrtDetCov.resize(numberOfGaussians);
-  int nCombos = (int)(pow(2, numberOfContrasts));
+  int               nCombos = (int)(pow(2, numberOfContrasts));
   std::vector<bool> presentChannels(numberOfContrasts);
   for (int gaussianNumber = 0; gaussianNumber < numberOfGaussians;
        gaussianNumber++) {
@@ -71,7 +71,7 @@ void GMMLikelihoodImageFilter<TInputImage>::SetParameters(
     m_OneOverSqrtDetCov[gaussianNumber][0] = 0;
     for (int n = 1; n < nCombos; n++) {
       // decode integer -> binary vector of present channels
-      int k = n;
+      int k        = n;
       int nPresent = 0;
       for (int c = 0; c < numberOfContrasts; c++) {
         if (k & 1) {
@@ -85,7 +85,7 @@ void GMMLikelihoodImageFilter<TInputImage>::SetParameters(
 
       // Extract sub-matrix
       vnl_matrix<double> PartialCov(nPresent, nPresent);
-      int r = 0;
+      int                r = 0;
       for (int i = 0; i < numberOfContrasts; i++) {
         if (presentChannels[i]) {
           // copy from row i to row r
@@ -153,7 +153,7 @@ void GMMLikelihoodImageFilter<TInputImage>::BeforeThreadedGenerateData() {
   // Check to verify all inputs are specified and have the same metadata,
   // spacing etc...
   const unsigned int numberOfInputs = this->GetNumberOfIndexedInputs();
-  RegionType region;
+  RegionType         region;
 
   for (unsigned int i = 0; i < numberOfInputs; i++) {
     InputImageType *input = itkDynamicCastInDebugMode<InputImageType *>(
@@ -183,7 +183,7 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
 
   //
   const int numberOfGaussians = m_Means.size();
-  const int numberOfClasses = m_NumberOfGaussiansPerClass.size();
+  const int numberOfClasses   = m_NumberOfGaussiansPerClass.size();
   const int numberOfContrasts = this->GetNumberOfIndexedInputs();
   // std::cout << "numberOfGaussians: " << numberOfGaussians << std::endl;
   // std::cout << "numberOfClasses: " << numberOfClasses << std::endl;
@@ -205,7 +205,7 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
   // Als initialize iterator over each input
   typedef itk::ImageRegionConstIterator<InputImageType> InputIteratorType;
   typedef std::vector<InputIteratorType> InputIteratorContainerType;
-  InputIteratorContainerType inputItContainer;
+  InputIteratorContainerType             inputItContainer;
   for (int contrastNumber = 0; contrastNumber < numberOfContrasts;
        contrastNumber++) {
     const InputImageType *inputImage = this->GetInput(contrastNumber);
@@ -220,10 +220,10 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
     // Retrieve the input intensity. At the same time, detect the number and
     // pattern of zeroes (interpreted as missing intensities) in the various
     // input channels
-    std::vector<bool> isThere(numberOfContrasts);
-    int nPresent = 0;
-    int index = 0;
-    int aux = 1;
+    std::vector<bool>          isThere(numberOfContrasts);
+    int                        nPresent = 0;
+    int                        index    = 0;
+    int                        aux      = 1;
     vnl_vector<InputPixelType> aux_v(numberOfContrasts, 0.0);
     for (int contrastNumber = 0; contrastNumber < numberOfContrasts;
          contrastNumber++) {
@@ -232,7 +232,7 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
 
       if (p != 0) {
         isThere[contrastNumber] = true;
-        aux_v[nPresent] = p;
+        aux_v[nPresent]         = p;
         nPresent++;
         index += aux;
       } else {
@@ -252,18 +252,18 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
     }
 
     // Move on with what we actually have
-    OutputPixelType pix(numberOfClasses);
+    OutputPixelType            pix(numberOfClasses);
     vnl_vector<InputPixelType> intensity_v = aux_v.extract(nPresent);
-    int shift = 0;
+    int                        shift       = 0;
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
       // Evaluate the Gaussian mixture model likelihood of this class at the
       // intensity of this pixel
-      double likelihood = 0.0;
+      double    likelihood         = 0.0;
       const int numberOfComponents = m_NumberOfGaussiansPerClass[classNumber];
       for (int componentNumber = 0; componentNumber < numberOfComponents;
            componentNumber++) {
         const int gaussianNumber = shift + componentNumber;
-        double gauss = 0.0;
+        double    gauss          = 0.0;
         if (numberOfContrasts == 1) {
           gauss =
               exp(-0.5 * m_Precisions[gaussianNumber][1][0][0] *
@@ -272,7 +272,7 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
         } else {
 
           vnl_vector<double> dataV(intensity_v.size());
-          int c = 0;
+          int                c = 0;
           for (int contrastNumber = 0; contrastNumber < numberOfContrasts;
                contrastNumber++) {
             if (isThere[contrastNumber]) {

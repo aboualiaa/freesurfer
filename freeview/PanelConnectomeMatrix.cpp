@@ -1,8 +1,8 @@
 #include "PanelConnectomeMatrix.h"
-#include "ui_PanelConnectomeMatrix.h"
 #include "LayerConnectomeMatrix.h"
 #include "LayerPropertyConnectomeMatrix.h"
 #include "MainWindow.h"
+#include "ui_PanelConnectomeMatrix.h"
 
 PanelConnectomeMatrix::PanelConnectomeMatrix(QWidget *parent)
     : PanelLayer("CMAT", parent), ui(new Ui::PanelConnectomeMatrix),
@@ -115,8 +115,8 @@ void PanelConnectomeMatrix::PopulateColorTable() {
   ui->treeWidgetTo->clear();
   QList<int> labels = layer->GetLabelList();
   foreach (int n, labels) {
-    QString name = layer->GetLabelName(n);
-    QColor color = layer->GetLabelColor(n);
+    QString name  = layer->GetLabelName(n);
+    QColor  color = layer->GetLabelColor(n);
     AddColorTableItem(n, name, color, ui->treeWidgetFrom);
     AddColorTableItem(n, name, color, ui->treeWidgetTo);
   }
@@ -125,7 +125,7 @@ void PanelConnectomeMatrix::PopulateColorTable() {
 
 void PanelConnectomeMatrix::UpdateToLabelVisibility() {
   QList<QTreeWidgetItem *> items = ui->treeWidgetFrom->selectedItems();
-  QList<int> indices;
+  QList<int>               indices;
   foreach (QTreeWidgetItem *item, items)
     indices << ui->treeWidgetFrom->indexOfTopLevelItem(item);
   LayerConnectomeMatrix *layer = GetCurrentLayer<LayerConnectomeMatrix *>();
@@ -147,7 +147,7 @@ void PanelConnectomeMatrix::UpdateToLabelVisibility() {
 
 void PanelConnectomeMatrix::AddColorTableItem(int value, const QString &name,
                                               const QColor &color,
-                                              QTreeWidget *treeWidget) {
+                                              QTreeWidget * treeWidget) {
   QTreeWidgetItem *item = new QTreeWidgetItem(treeWidget);
   item->setText(0, QString("%1 %2").arg(value).arg(name));
   QPixmap pix(13, 13);
@@ -163,7 +163,7 @@ void PanelConnectomeMatrix::OnCurrentFromChanged() {
     return;
 
   QList<QTreeWidgetItem *> items = ui->treeWidgetFrom->selectedItems();
-  QList<int> indices;
+  QList<int>               indices;
   foreach (QTreeWidgetItem *item, items)
     indices << ui->treeWidgetFrom->indexOfTopLevelItem(item);
   layer->SetFromLabelIndices(indices);
@@ -177,7 +177,7 @@ void PanelConnectomeMatrix::OnCurrentToChanged() {
     return;
 
   QList<QTreeWidgetItem *> items = ui->treeWidgetTo->selectedItems();
-  QList<int> indices;
+  QList<int>               indices;
   foreach (QTreeWidgetItem *item, items)
     indices << ui->treeWidgetTo->indexOfTopLevelItem(item);
   layer->SetToLabelIndices(indices);
@@ -207,8 +207,8 @@ void PanelConnectomeMatrix::OnSliderToOpacity(int val) {
 
 void PanelConnectomeMatrix::OnLineEditSplineRadius(const QString &strg) {
   LayerConnectomeMatrix *layer = GetCurrentLayer<LayerConnectomeMatrix *>();
-  bool bOK;
-  double val = strg.toDouble(&bOK);
+  bool                   bOK;
+  double                 val = strg.toDouble(&bOK);
   if (layer && bOK && val > 0) {
     layer->GetProperty()->SetSplineRadius(val);
   }

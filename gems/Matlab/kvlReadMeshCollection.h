@@ -9,9 +9,9 @@ namespace kvl {
 class ReadMeshCollection : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef ReadMeshCollection Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef ReadMeshCollection            Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -20,7 +20,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(ReadMeshCollection, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -37,8 +38,8 @@ public:
     const std::string meshCollectionFileName = mxArrayToString(prhs[0]);
 
     typedef CroppedImageReader::TransformType TransformType;
-    TransformType::ConstPointer transform = nullptr;
-    float K = -1.0f;
+    TransformType::ConstPointer               transform = nullptr;
+    float                                     K         = -1.0f;
 
     if (nrhs > 1) {
       if (!mxIsInt64(prhs[1])) {
@@ -51,7 +52,8 @@ public:
 
       // if ( typeid( *object ) != typeid( TransformType ) )
       if (strcmp(typeid(*object).name(),
-                 typeid(TransformType).name()) != 0) // Eugenio: MAC compatibility
+                 typeid(TransformType).name()) !=
+          0) // Eugenio: MAC compatibility
       {
         mexErrMsgTxt("transform doesn't refer to the correct ITK object type");
       }
@@ -111,11 +113,11 @@ public:
           // negative tetrahedra
           // into positives ones.
           kvl::AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-          const kvl::AtlasMesh::PointIdentifier p0Id = *pit;
+          const kvl::AtlasMesh::PointIdentifier     p0Id = *pit;
           ++pit;
           const kvl::AtlasMesh::PointIdentifier p1Id = *pit;
 
-          pit = cell->PointIdsBegin();
+          pit  = cell->PointIdsBegin();
           *pit = p1Id;
           ++pit;
           *pit = p0Id;
@@ -138,8 +140,10 @@ public:
   }
 
 protected:
-  ReadMeshCollection()= default;;
-  ~ReadMeshCollection() override= default;;
+  ReadMeshCollection() = default;
+  ;
+  ~ReadMeshCollection() override = default;
+  ;
 
   ReadMeshCollection(const Self &); // purposely not implemented
   void operator=(const Self &);     // purposely not implemented

@@ -120,96 +120,97 @@ ENDHELP
 #include "romp_support.h"
 #endif
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "fmriutils.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
-#include "matfile.h"
-#include "randomfields.h"
-#include "pdf.h"
+#include "diag.h"
+#include "fio.h"
+#include "fmriutils.h"
 #include "fsenv.h"
+#include "matfile.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "pdf.h"
+#include "randomfields.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 static char vcid[] = "$Id: mris_fwhm.c,v 1.45 2016/12/08 19:25:38 greve Exp $";
 const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+char *      cmdline, cwd[2000];
+int         debug         = 0;
+int         checkoptsonly = 0;
 struct utsname uts;
 
 char *subject = nullptr, *hemi = nullptr, *SUBJECTS_DIR = nullptr;
-char *surfname = "white";
-char *surfpath = nullptr;
-char *inpath = nullptr;
-char *outpath = nullptr;
-char *sumfile = nullptr;
-char *datfile = nullptr;
+char *surfname   = "white";
+char *surfpath   = nullptr;
+char *inpath     = nullptr;
+char *outpath    = nullptr;
+char *sumfile    = nullptr;
+char *datfile    = nullptr;
 char *ar1datfile = nullptr;
-char tmpstr[2000];
-MRI *InVals = nullptr;
+char  tmpstr[2000];
+MRI * InVals = nullptr;
 
-char *maskpath = nullptr;
-char *labelpath = nullptr;
-MRI *mask = nullptr;
-LABEL *label = nullptr;
-int maskinv = 0;
+char * maskpath  = nullptr;
+char * labelpath = nullptr;
+MRI *  mask      = nullptr;
+LABEL *label     = nullptr;
+int    maskinv   = 0;
 
 MRI *mritmp = nullptr;
 
-MRIS *surf;
+MRIS * surf;
 double infwhm = 0, ingstd = 0;
-int synth = 0, nframes = 10;
-int SynthSeed = -1;
-int nitersonly = 0;
+int    synth = 0, nframes = 10;
+int    SynthSeed  = -1;
+int    nitersonly = 0;
 
-char *Xfile = nullptr;
-MATRIX *X = nullptr;
-int DetrendOrder = -1;
-int DoDetrend = 1;
-int SmoothOnly = 0;
-int DoSqr = 0; // take square of input before smoothing
+char *  Xfile        = nullptr;
+MATRIX *X            = nullptr;
+int     DetrendOrder = -1;
+int     DoDetrend    = 1;
+int     SmoothOnly   = 0;
+int     DoSqr        = 0; // take square of input before smoothing
 
-char *ar1fname = nullptr;
-char *arNfname = nullptr;
+char *ar1fname    = nullptr;
+char *arNfname    = nullptr;
 char *fwhmmapname = nullptr;
 
-int FixGroupAreaTest(MRIS *surf, char *outfile);
-char *GroupAreaTestFile = nullptr;
-char *nitersfile = nullptr;
+int    FixGroupAreaTest(MRIS *surf, char *outfile);
+char * GroupAreaTestFile = nullptr;
+char * nitersfile        = nullptr;
 double DHiters2fwhm(MRIS *surf, int vtxno, int niters, char *outfile);
-int DHvtxno = 0, DHniters = 0;
-char *DHfile = nullptr;
-int UseCortexLabel = 0;
-int prunemask = 0;
-float prune_thr = FLT_MIN;
-char *outmaskpath = nullptr;
-int arNHops = 0;
-int nthreads = 1;
-int DoSpatialINorm = 0;
-double fwhm = 0;
-int niters = -1;
+int    DHvtxno = 0, DHniters = 0;
+char * DHfile         = nullptr;
+int    UseCortexLabel = 0;
+int    prunemask      = 0;
+float  prune_thr      = FLT_MIN;
+char * outmaskpath    = nullptr;
+int    arNHops        = 0;
+int    nthreads       = 1;
+int    DoSpatialINorm = 0;
+double fwhm           = 0;
+int    niters         = -1;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, Ntp, n, err;
+  int    nargs, Ntp, n, err;
   double ar1mn, ar1std, ar1max, avgvtxarea, ftmp, fwhmDH;
   double InterVertexDistAvg, InterVertexDistStdDev;
-  MRI *ar1 = nullptr;
-  FILE *fp;
+  MRI *  ar1 = nullptr;
+  FILE * fp;
 
   nargs = handleVersionOption(argc, argv, "mris_fwhm");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -242,9 +243,9 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   MRIScomputeMetricProperties(surf);
-  InterVertexDistAvg = surf->avg_vertex_dist;
+  InterVertexDistAvg    = surf->avg_vertex_dist;
   InterVertexDistStdDev = surf->std_vertex_dist;
-  avgvtxarea = surf->avg_vertex_area;
+  avgvtxarea            = surf->avg_vertex_area;
 
   printf("%s %s %s\n", subject, hemi, surfname);
   printf("Number of vertices %d\n", surf->nvertices);
@@ -307,7 +308,7 @@ int main(int argc, char *argv[]) {
       printf("ERROR reading %s\n", labelpath);
       exit(1);
     }
-    mask = MRISlabel2Mask(surf, label, nullptr);
+    mask   = MRISlabel2Mask(surf, label, nullptr);
     mritmp = mri_reshape(mask, InVals->width, InVals->height, InVals->depth, 1);
     MRIfree(&mask);
     mask = mritmp;
@@ -476,7 +477,7 @@ int main(int argc, char *argv[]) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -527,7 +528,7 @@ static int parse_commandline(int argc, char **argv) {
       setenv("USE_FAST_SURF_SMOOTHER", "0", 1);
     else if (!strcasecmp(option, "--smooth-only") ||
              !strcasecmp(option, "--so")) {
-      DoDetrend = 0;
+      DoDetrend  = 0;
       SmoothOnly = 1;
     } else if (!strcasecmp(option, "--mask-inv"))
       maskinv = 1;
@@ -535,7 +536,7 @@ static int parse_commandline(int argc, char **argv) {
       DoSpatialINorm = 1;
     else if (!strcasecmp(option, "--niters-only")) {
       nitersonly = 1;
-      synth = 1;
+      synth      = 1;
       if (nargc > 0 && !CMDisFlag(pargv[0])) {
         nitersfile = pargv[0];
         nargsused++;
@@ -543,7 +544,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--s") || !strcasecmp(option, "--subject")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
       if (CMDnthIsArg(nargc, pargv, 1)) {
         hemi = pargv[1];
@@ -559,12 +560,12 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 3);
       sscanf(pargv[0], "%d", &DHvtxno);
       sscanf(pargv[1], "%d", &DHniters);
-      DHfile = pargv[2];
+      DHfile    = pargv[2];
       nargsused = 3;
     } else if (!strcasecmp(option, "--h") || !strcasecmp(option, "--hemi")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--lh"))
       hemi = "lh";
@@ -574,23 +575,23 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      surfname = pargv[0];
+      surfname  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--i")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      inpath = pargv[0];
+      inpath    = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      maskpath = pargv[0];
+      maskpath  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--out-mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       outmaskpath = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--label")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -604,40 +605,40 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--sum")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      sumfile = pargv[0];
+      sumfile   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--dat")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      datfile = pargv[0];
+      datfile   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--ar1dat")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       ar1datfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--ar1")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      ar1fname = pargv[0];
+      ar1fname  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--arN")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
       sscanf(pargv[0], "%d", &arNHops);
-      arNfname = pargv[1];
+      arNfname  = pargv[1];
       nargsused = 2;
     } else if (!strcasecmp(option, "--fwhm")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &infwhm);
-      ingstd = infwhm / sqrt(log(256.0));
+      ingstd    = infwhm / sqrt(log(256.0));
       nargsused = 1;
     } else if (!strcasecmp(option, "--fwhm-map")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       fwhmmapname = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     }
 
     else if (!strcasecmp(option, "--niters")) {
@@ -649,7 +650,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &nframes);
-      synth = 1;
+      synth     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--threads") ||
                !strcasecmp(option, "--nthreads")) {
@@ -681,7 +682,7 @@ static int parse_commandline(int argc, char **argv) {
         mask = MRIread(pargv[1]);
       else
         mask = nullptr;
-      surf = MRISread(pargv[2]);
+      surf     = MRISread(pargv[2]);
       globkern = MatrixReadTxt(pargv[3], nullptr);
       // for(n = 0; n < globkern->rows; n++)  globkern->rptr[n+1][1] =
       // globkern->rptr[n+1][1]*globkern->rptr[n+1][1];
@@ -696,21 +697,21 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      outpath = pargv[0];
+      outpath   = pargv[0];
       DoDetrend = 0;
       nargsused = 1;
     } else if (!strcasecmp(option, "--group-area-test")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       GroupAreaTestFile = pargv[0];
-      synth = 1;
-      nargsused = 1;
+      synth             = 1;
+      nargsused         = 1;
     } else if (!strcasecmp(option, "--X")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       Xfile = pargv[0];
       // X = MatrixReadTxt(Xfile, NULL);
-      X = MatlabRead(Xfile);
+      X         = MatlabRead(Xfile);
       DoDetrend = 0;
       nargsused = 1;
     } else if (!strcasecmp(option, "--detrend")) {
@@ -992,8 +993,8 @@ static void dump_options(FILE *fp) {
   -------------------------------------------------------------*/
 int FixGroupAreaTest(MRIS *surf, char *outfile) {
   double fwhm, fwhmfix;
-  int niters;
-  FILE *fp;
+  int    niters;
+  FILE * fp;
 
   fp = fopen(outfile, "w");
   if (fp == nullptr) {
@@ -1025,23 +1026,23 @@ int FixGroupAreaTest(MRIS *surf, char *outfile) {
   Also fits to fwhm = beta*sqrt(k) model.
 */
 double DHiters2fwhm(MRIS *surf, int vtxno, int niters, char *outfile) {
-  int k, nhits, c;
-  MRI *mri;
+  int    k, nhits, c;
+  MRI *  mri;
   double XtX, Xty, vXty, b, bv;
   double f, fn, areasum, fwhmRet;
   double fwhm[1000], fwhmv[1000], fn2sum[1000], fwhmdng;
-  FILE *fp;
+  FILE * fp;
 
   mri = MRIalloc(surf->nvertices, 1, 1, MRI_FLOAT);
   MRIsetVoxVal(mri, vtxno, 0, 0, 0, 100);
-  XtX = 0;
-  Xty = 0;
+  XtX  = 0;
+  Xty  = 0;
   vXty = 0;
   for (k = 0; k < niters; k++) {
     MRISsmoothMRI(surf, mri, 1, nullptr, mri);
-    f = MRIgetVoxVal(mri, vtxno, 0, 0, 0); // = max
-    nhits = 0;                             // number of vertices over max/2
-    areasum = 0.0;                         // area of vertices over max/2
+    f         = MRIgetVoxVal(mri, vtxno, 0, 0, 0); // = max
+    nhits     = 0;   // number of vertices over max/2
+    areasum   = 0.0; // area of vertices over max/2
     fn2sum[k] = 0;
     for (c = 0; c < surf->nvertices; c++) {
       fn = MRIgetVoxVal(mri, c, 0, 0, 0);
@@ -1052,8 +1053,8 @@ double DHiters2fwhm(MRIS *surf, int vtxno, int niters, char *outfile) {
       }
     }
     fn2sum[k] /= (100.0 * 100.0);
-    fwhm[k] = 2 * sqrt(areasum / M_PI); // fwhm in mm
-    fwhmv[k] = 2 * sqrt(nhits / M_PI);  // fwhm in vertices
+    fwhm[k]  = 2 * sqrt(areasum / M_PI); // fwhm in mm
+    fwhmv[k] = 2 * sqrt(nhits / M_PI);   // fwhm in vertices
     if (k > 3) {
       // Accumulate for fitting
       XtX += (k + 1);
@@ -1064,7 +1065,7 @@ double DHiters2fwhm(MRIS *surf, int vtxno, int niters, char *outfile) {
   fwhmRet = fwhm[k - 1];
 
   // Fit
-  b = Xty / XtX;
+  b  = Xty / XtX;
   bv = vXty / XtX;
   printf("#DH %6d %7.4f %7.4f %lf %lf\n", vtxno, b, bv, surf->total_area,
          surf->avg_vertex_dist);

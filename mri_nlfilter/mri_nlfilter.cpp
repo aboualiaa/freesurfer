@@ -23,44 +23,44 @@
  *
  */
 
-#include "error.h"
 #include "diag.h"
+#include "error.h"
 #include "region.h"
 #include "version.h"
 
 static char vcid[] =
     "$Id: mri_nlfilter.c,v 1.17 2016/12/08 17:27:53 fischl Exp $";
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
 
 #define GAUSSIAN_SIGMA 2.0f
-#define BLUR_SIGMA 0.5f
-#define MAX_LEN 6
-#define OFFSET_WSIZE 3
-#define FILTER_WSIZE 3
+#define BLUR_SIGMA     0.5f
+#define MAX_LEN        6
+#define OFFSET_WSIZE   3
+#define FILTER_WSIZE   3
 
 const char *Progname;
 
 static char *histo_template_fname;
-static int crop = 1;
-static int no_offset = 0;
-static int filter_type = FILTER_MINMAX;
-static float gaussian_sigma = GAUSSIAN_SIGMA;
-static float blur_sigma = BLUR_SIGMA;
-static int offset_search_len = MAX_LEN;
-static int offset_window_size = OFFSET_WSIZE;
-static int filter_window_size = FILTER_WSIZE;
+static int   crop               = 1;
+static int   no_offset          = 0;
+static int   filter_type        = FILTER_MINMAX;
+static float gaussian_sigma     = GAUSSIAN_SIGMA;
+static float blur_sigma         = BLUR_SIGMA;
+static int   offset_search_len  = MAX_LEN;
+static int   offset_window_size = OFFSET_WSIZE;
+static int   filter_window_size = FILTER_WSIZE;
 
 static MRI *mri_gaussian;
 
-static int mean_mask_niter = 100;
+static int   mean_mask_niter  = 100;
 static float mean_mask_thresh = 10;
-static MRI *mri_mean_mask = nullptr;
+static MRI * mri_mean_mask    = nullptr;
 
 #define REGION_SIZE 16
 
@@ -70,11 +70,11 @@ static MRI *mri_mean_mask = nullptr;
 #endif
 
 static int region_size = REGION_SIZE;
-int main(int argc, char *argv[]) {
+int        main(int argc, char *argv[]) {
   int nargs, width, height, depth, x, y, z, xborder, yborder, zborder, xrborder,
       yrborder, zrborder;
   char *in_fname, *out_fname;
-  MRI *mri_smooth, *mri_grad, *mri_filter_src, *mri_filter_dst, *mri_dst,
+  MRI * mri_smooth, *mri_grad, *mri_filter_src, *mri_filter_dst, *mri_dst,
       *mri_tmp, *mri_blur, *mri_src, *mri_filtered, *mri_direction, *mri_offset,
       *mri_up, *mri_polv, *mri_dir, *mri_clip, *mri_full;
   MRI_REGION region, clip_region;
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
   if (argc < 3)
     usage_exit();
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   out_fname = argv[2];
 
   mri_full = mri_src = MRIread(in_fname);
@@ -117,17 +117,17 @@ int main(int argc, char *argv[]) {
     MRIboundingBox(mri_full, 0, &clip_region);
   else {
     clip_region.x = clip_region.y = clip_region.z = 0;
-    clip_region.dx = mri_full->width - 1;
-    clip_region.dy = mri_full->height - 1;
-    clip_region.dz = mri_full->depth - 1;
+    clip_region.dx                                = mri_full->width - 1;
+    clip_region.dy                                = mri_full->height - 1;
+    clip_region.dz                                = mri_full->depth - 1;
   }
   REGIONexpand(&clip_region, &clip_region, (filter_window_size + 1) / 2);
   if (mri_full->depth == 1)
     clip_region.dz = 1;
   mri_src = MRIextractRegion(mri_full, nullptr, &clip_region);
-  width = mri_src->width;
-  height = mri_src->height;
-  depth = mri_src->depth;
+  width   = mri_src->width;
+  height  = mri_src->height;
+  depth   = mri_src->depth;
   mri_dst = MRIclone(mri_src, nullptr);
   if (!mri_dst)
     ErrorExit(ERROR_NOFILE, "%s: could allocate space for destination image",
@@ -149,12 +149,12 @@ int main(int argc, char *argv[]) {
     exit(Gerror);
   } else if (filter_type == FILTER_MEAN_MASKED) {
     char *mask_fname = argv[2];
-    int f, x, y, z, n, xi, yi, zi, xk, yk, zk, num;
+    int   f, x, y, z, n, xi, yi, zi, xk, yk, zk, num;
     float mask_val, total;
 
-    mean_mask_niter = atoi(argv[3]);
+    mean_mask_niter  = atoi(argv[3]);
     mean_mask_thresh = atof(argv[4]);
-    out_fname = argv[5];
+    out_fname        = argv[5];
     printf("computing mean in mask with thresh = %2.1f, %d avgs and mask vol "
            "%s, and writing output to %s\n",
            mean_mask_thresh, mean_mask_niter, mask_fname, out_fname);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
       ErrorExit(ERROR_NOFILE, "%s: could not load mask volume %s", Progname,
                 mask_fname);
     mri_smooth = MRIcopy(mri_src, nullptr);
-    mri_dst = MRIcopy(mri_src, nullptr);
+    mri_dst    = MRIcopy(mri_src, nullptr);
     for (n = 0; n < mean_mask_niter; n++) {
       for (f = 0; f < mri_smooth->nframes; f++)
         for (x = 0; x < mri_smooth->width; x++)
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
                 for (yk = -1; yk <= 1; yk++) {
                   yi = mri_smooth->yi[y + yk];
                   for (zk = -1; zk <= 1; zk++) {
-                    zi = mri_smooth->zi[z + zk];
+                    zi       = mri_smooth->zi[z + zk];
                     mask_val = MRIgetVoxVal(mri_mean_mask, xi, yi, zi, 0);
                     if (mask_val < mean_mask_thresh)
                       continue;
@@ -221,9 +221,9 @@ int main(int argc, char *argv[]) {
       for (y = 0; y < height; y += region_size) {
         DiagHeartbeat((float)(z * height + y) / (float)(height * (depth - 1)));
         for (x = 0; x < width; x += region_size) {
-          region.x = x;
-          region.y = y;
-          region.z = z;
+          region.x  = x;
+          region.y  = y;
+          region.z  = z;
           region.dx = region.dy = region.dz = region_size;
           if (region.x == 142)
             DiagBreak();
@@ -233,9 +233,9 @@ int main(int argc, char *argv[]) {
             DiagBreak();
 
           /* check for < 0 width regions */
-          xborder = x - region.x;
-          yborder = y - region.y;
-          zborder = z - region.z;
+          xborder  = x - region.x;
+          yborder  = y - region.y;
+          zborder  = z - region.z;
           xrborder = MAX(0, (region.dx - xborder) - region_size);
           yrborder = MAX(0, (region.dy - yborder) - region_size);
           zrborder = MAX(0, (region.dz - zborder) - region_size);
@@ -269,8 +269,8 @@ int main(int argc, char *argv[]) {
           if (DIAG_VERBOSE_ON && (Gdiag & DIAG_SHOW))
             fprintf(stderr, "done.\n");
           mri_smooth = mri_up;
-          mri_grad = MRIsobel(mri_smooth, nullptr, nullptr);
-          mri_dir = MRIclone(mri_smooth, nullptr);
+          mri_grad   = MRIsobel(mri_smooth, nullptr, nullptr);
+          mri_dir    = MRIclone(mri_smooth, nullptr);
           MRIfree(&mri_smooth);
           if (DIAG_VERBOSE_ON && (Gdiag & DIAG_SHOW))
             fprintf(stderr, "computing direction map...");
@@ -418,7 +418,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -431,16 +431,16 @@ static int get_option(int argc, char *argv[]) {
     if (gaussian_sigma <= 0.0f)
       ErrorExit(ERROR_BADPARM, "%s: Gaussian sigma must be positive", Progname);
     mri_gaussian = MRIgaussian1d(gaussian_sigma, 0);
-    filter_type = FILTER_GAUSSIAN;
-    nargs = 1;
+    filter_type  = FILTER_GAUSSIAN;
+    nargs        = 1;
   } else if (!stricmp(option, "cpolv"))
     filter_type = FILTER_CPOLV_MEDIAN;
   else if (!stricmp(option, "minmax"))
     filter_type = FILTER_MINMAX;
   else if (!stricmp(option, "hmatch")) {
-    filter_type = FILTER_HISTO_MATCH;
+    filter_type          = FILTER_HISTO_MATCH;
     histo_template_fname = argv[2];
-    nargs = 1;
+    nargs                = 1;
     printf("histogram matching input image to %s\n", histo_template_fname);
   } else if (!stricmp(option, "meanmask"))
     filter_type = FILTER_MEAN_MASKED;

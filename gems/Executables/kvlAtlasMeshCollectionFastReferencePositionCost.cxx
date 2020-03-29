@@ -21,11 +21,11 @@ AtlasMeshCollectionFastReferencePositionCost ::
   m_DataAndAlphasCostCalculator =
       AtlasMeshCollectionModelLikelihoodCalculator::New();
 
-  m_PointId = 0;
+  m_PointId                = 0;
   m_InitialPointParameters = 0;
-  m_Cells = 0;
-  m_ReferencePosition = 0;
-  m_K = 1;
+  m_Cells                  = 0;
+  m_ReferencePosition      = 0;
+  m_K                      = 1;
 
   m_CostCalculationMeshCollection = 0;
 }
@@ -43,11 +43,11 @@ void AtlasMeshCollectionFastReferencePositionCost ::SetInitialMeshCollection(
     AtlasMeshCollection *meshCollection) {
 
   //
-  m_InitialPositions = meshCollection->GetPositions();
+  m_InitialPositions       = meshCollection->GetPositions();
   m_InitialPointParameters = meshCollection->GetPointParameters();
-  m_Cells = meshCollection->GetCells();
-  m_ReferencePosition = meshCollection->GetReferencePosition();
-  m_K = meshCollection->GetK();
+  m_Cells                  = meshCollection->GetCells();
+  m_ReferencePosition      = meshCollection->GetReferencePosition();
+  m_K                      = meshCollection->GetK();
 
   // Any existing vertex neighborhood is no longer valid
   m_VertexNeighborhood.clear();
@@ -60,7 +60,7 @@ void AtlasMeshCollectionFastReferencePositionCost ::SetInitialMeshCollection(
 //
 void AtlasMeshCollectionFastReferencePositionCost ::SetLabelImages(
     const std::vector<LabelImageType::ConstPointer> &labelImages,
-    const CompressionLookupTable *compressionLookupTable) {
+    const CompressionLookupTable *                   compressionLookupTable) {
   m_Estimator->SetLabelImages(labelImages, compressionLookupTable);
   m_DataAndAlphasCostCalculator->SetLabelImages(labelImages,
                                                 compressionLookupTable);
@@ -90,8 +90,8 @@ void AtlasMeshCollectionFastReferencePositionCost ::
     }
 
     // Retrieve point id's of the four vertices
-    AtlasMesh::CellType::PointIdConstIterator pointIt = cell->PointIdsBegin();
-    AtlasMesh::PointIdentifier point0Id = *pointIt;
+    AtlasMesh::CellType::PointIdConstIterator pointIt  = cell->PointIdsBegin();
+    AtlasMesh::PointIdentifier                point0Id = *pointIt;
     ++pointIt;
     AtlasMesh::PointIdentifier point1Id = *pointIt;
     ++pointIt;
@@ -137,57 +137,57 @@ void AtlasMeshCollectionFastReferencePositionCost ::
       // Add this tetrahedron to the neighborhood of vertex 0
       VertexNeighboringTetrahedronInfo vertex0Info;
       vertex0Info.m_TetrahedronId = cellIt.Index();
-      vertex0Info.m_X1 = x1;
-      vertex0Info.m_Y1 = y1;
-      vertex0Info.m_Z1 = z1;
-      vertex0Info.m_X2 = x2;
-      vertex0Info.m_Y2 = y2;
-      vertex0Info.m_Z2 = z2;
-      vertex0Info.m_X3 = x3;
-      vertex0Info.m_Y3 = y3;
-      vertex0Info.m_Z3 = z3;
+      vertex0Info.m_X1            = x1;
+      vertex0Info.m_Y1            = y1;
+      vertex0Info.m_Z1            = z1;
+      vertex0Info.m_X2            = x2;
+      vertex0Info.m_Y2            = y2;
+      vertex0Info.m_Z2            = z2;
+      vertex0Info.m_X3            = x3;
+      vertex0Info.m_Y3            = y3;
+      vertex0Info.m_Z3            = z3;
       m_VertexNeighborhood.push_back(vertex0Info);
     } else if (point1Id == m_PointId) {
       // Add this tetrahedron to the neighborhood of vertex 1
       VertexNeighboringTetrahedronInfo vertex1Info;
       vertex1Info.m_TetrahedronId = cellIt.Index();
-      vertex1Info.m_X1 = x2;
-      vertex1Info.m_Y1 = y2;
-      vertex1Info.m_Z1 = z2;
-      vertex1Info.m_X2 = x0;
-      vertex1Info.m_Y2 = y0;
-      vertex1Info.m_Z2 = z0;
-      vertex1Info.m_X3 = x3;
-      vertex1Info.m_Y3 = y3;
-      vertex1Info.m_Z3 = z3;
+      vertex1Info.m_X1            = x2;
+      vertex1Info.m_Y1            = y2;
+      vertex1Info.m_Z1            = z2;
+      vertex1Info.m_X2            = x0;
+      vertex1Info.m_Y2            = y0;
+      vertex1Info.m_Z2            = z0;
+      vertex1Info.m_X3            = x3;
+      vertex1Info.m_Y3            = y3;
+      vertex1Info.m_Z3            = z3;
       m_VertexNeighborhood.push_back(vertex1Info);
     } else if (point2Id == m_PointId) {
       // Add this tetrahedron to the neighborhood of vertex 2
       VertexNeighboringTetrahedronInfo vertex2Info;
       vertex2Info.m_TetrahedronId = cellIt.Index();
-      vertex2Info.m_X1 = x0;
-      vertex2Info.m_Y1 = y0;
-      vertex2Info.m_Z1 = z0;
-      vertex2Info.m_X2 = x1;
-      vertex2Info.m_Y2 = y1;
-      vertex2Info.m_Z2 = z1;
-      vertex2Info.m_X3 = x3;
-      vertex2Info.m_Y3 = y3;
-      vertex2Info.m_Z3 = z3;
+      vertex2Info.m_X1            = x0;
+      vertex2Info.m_Y1            = y0;
+      vertex2Info.m_Z1            = z0;
+      vertex2Info.m_X2            = x1;
+      vertex2Info.m_Y2            = y1;
+      vertex2Info.m_Z2            = z1;
+      vertex2Info.m_X3            = x3;
+      vertex2Info.m_Y3            = y3;
+      vertex2Info.m_Z3            = z3;
       m_VertexNeighborhood.push_back(vertex2Info);
     } else {
       // Add this tetrahedron to the neighborhood of vertex 3
       VertexNeighboringTetrahedronInfo vertex3Info;
       vertex3Info.m_TetrahedronId = cellIt.Index();
-      vertex3Info.m_X1 = x2;
-      vertex3Info.m_Y1 = y2;
-      vertex3Info.m_Z1 = z2;
-      vertex3Info.m_X2 = x1;
-      vertex3Info.m_Y2 = y1;
-      vertex3Info.m_Z2 = z1;
-      vertex3Info.m_X3 = x0;
-      vertex3Info.m_Y3 = y0;
-      vertex3Info.m_Z3 = z0;
+      vertex3Info.m_X1            = x2;
+      vertex3Info.m_Y1            = y2;
+      vertex3Info.m_Z1            = z2;
+      vertex3Info.m_X2            = x1;
+      vertex3Info.m_Y2            = y1;
+      vertex3Info.m_Z2            = z1;
+      vertex3Info.m_X3            = x0;
+      vertex3Info.m_Y3            = y0;
+      vertex3Info.m_Z3            = z0;
       m_VertexNeighborhood.push_back(vertex3Info);
     }
 

@@ -24,20 +24,20 @@
  */
 
 #include "Region2DLine.h"
+#include "LayerMRI.h"
 #include "RenderView2D.h"
 #include <vtkActor2D.h>
-#include <vtkProperty2D.h>
-#include <vtkRenderer.h>
-#include <vtkPlaneSource.h>
-#include <vtkPolyDataMapper2D.h>
-#include <vtkPoints.h>
 #include <vtkCellArray.h>
 #include <vtkCoordinate.h>
+#include <vtkLine.h>
+#include <vtkMath.h>
+#include <vtkPlaneSource.h>
+#include <vtkPoints.h>
+#include <vtkPolyDataMapper2D.h>
+#include <vtkProperty2D.h>
+#include <vtkRenderer.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
-#include <vtkMath.h>
-#include <vtkLine.h>
-#include "LayerMRI.h"
 
 Region2DLine::Region2DLine(RenderView2D *view) : Region2D(view) {
   m_actorLine = vtkSmartPointer<vtkActor2D>::New();
@@ -99,7 +99,7 @@ void Region2DLine::Update() {
     pt3[i] = (pt1[i] + pt2[i]) / 2.0;
   }
 
-  vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkPoints>    pts   = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
   pts->InsertNextPoint(pt1);
   pts->InsertNextPoint(pt2);
@@ -128,7 +128,7 @@ void Region2DLine::Update() {
 }
 
 void Region2DLine::UpdateStats() {
-  char ch[1000];
+  char   ch[1000];
   double d = sqrt(vtkMath::Distance2BetweenPoints(m_dPt1, m_dPt2));
   if (d < 0.0001)
     sprintf(ch, "%.2f nm", d * 1000000);
@@ -141,9 +141,9 @@ void Region2DLine::UpdateStats() {
 
   LayerMRI *layer = m_view->GetFirstNonLabelVolume();
   if (layer) {
-    double *values = NULL;
-    int *indices = NULL;
-    int count = 0;
+    double *values  = NULL;
+    int *   indices = NULL;
+    int     count   = 0;
     layer->GetVoxelsOnLine(m_dPt1, m_dPt2, m_view->GetViewPlane(), indices,
                            values, &count);
     char ch[1000];
@@ -260,7 +260,7 @@ QString Region2DLine::DataToString() {
       .arg(m_dPt2[2]);
 }
 
-Region2D *Region2DLine::ObjectFromString(RenderView2D *view,
+Region2D *Region2DLine::ObjectFromString(RenderView2D * view,
                                          const QString &text) {
   QString head = "FreeView:Region2DLine:";
   if (text.indexOf(head) != 0)
@@ -271,16 +271,16 @@ Region2D *Region2DLine::ObjectFromString(RenderView2D *view,
     return NULL;
 
   double dval[6];
-  bool bOK = true;
-  dval[0] = list[0].toDouble(&bOK);
-  int i = 1;
+  bool   bOK = true;
+  dval[0]    = list[0].toDouble(&bOK);
+  int i      = 1;
   while (bOK && i < 6) {
     dval[i] = list[i].toDouble(&bOK);
     i++;
   }
   Region2DLine *reg = NULL;
   if (bOK) {
-    reg = new Region2DLine(view);
+    reg            = new Region2DLine(view);
     reg->m_dPt1[0] = dval[0];
     reg->m_dPt1[1] = dval[1];
     reg->m_dPt1[2] = dval[2];

@@ -27,12 +27,12 @@
 #include "romp_support.h"
 #endif
 
-#include "diag.h"
-#include "version.h"
-#include "gcamorph.h"
-#include "cmat.h"
 #include "cma.h"
+#include "cmat.h"
+#include "diag.h"
+#include "gcamorph.h"
 #include "mrinorm.h"
+#include "version.h"
 
 double MRIcomputeLinearTransformLabelDist(MRI *mri_src, MATRIX *mA, int label);
 static char vcid[] =
@@ -52,39 +52,39 @@ static MATRIX *MT_CoronalRasXformToVoxelXform(MRI *mri_in, MRI *mri_out,
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
 
-const char *Progname;
-static int quiet_mode = 0;
+const char * Progname;
+static int   quiet_mode = 0;
 static char *subject_name;
 static char *out_like_fname = nullptr;
-static char *in_like_fname = nullptr; // for cmat stuff
-static int invert_flag = 0;
-static int resample_type = SAMPLE_TRILINEAR;
-static int nlabels = 0;
-static int labels[1000];
+static char *in_like_fname  = nullptr; // for cmat stuff
+static int   invert_flag    = 0;
+static int   resample_type  = SAMPLE_TRILINEAR;
+static int   nlabels        = 0;
+static int   labels[1000];
 
 static int cmat_output_coords = LABEL_COORDS_VOXEL;
 
-static char *in_surf_name = nullptr;
+static char *in_surf_name  = nullptr;
 static char *out_surf_name = nullptr;
-MRI *MRIScreateVolumeWarpFromSurface(MRI *mri_in, MRI *mri_out,
-                                     MRI_SURFACE *mris, int which_in,
-                                     int which_out, double res_scale);
-static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
-                                           MRI_SURFACE *mris, int which_in,
-                                           int which_out, double res_scale);
+MRI *        MRIScreateVolumeWarpFromSurface(MRI *mri_in, MRI *mri_out,
+                                             MRI_SURFACE *mris, int which_in,
+                                             int which_out, double res_scale);
+static MRI * MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
+                                            MRI_SURFACE *mris, int which_in,
+                                            int which_out, double res_scale);
 
 int main(int argc, char *argv[]) {
-  char **av, *in_vol, *out_vol, *xform_fname;
-  int ac, nargs, i, ras_flag = 0, nxform_args;
-  MRI *mri_in, *mri_out, *mri_tmp;
-  LTA *lta;
-  MATRIX *m, *m_total;
+  char **    av, *in_vol, *out_vol, *xform_fname;
+  int        ac, nargs, i, ras_flag = 0, nxform_args;
+  MRI *      mri_in, *mri_out, *mri_tmp;
+  LTA *      lta;
+  MATRIX *   m, *m_total;
   TRANSFORM *transform = nullptr;
 
   VECTOR *mine;
@@ -121,15 +121,15 @@ int main(int argc, char *argv[]) {
       usage_exit();
   }
 
-  in_vol = argv[1];
+  in_vol  = argv[1];
   out_vol = argv[argc - 1];
 
   xform_fname = argv[argc - 2];
   if ((strcmp(in_vol + strlen(in_vol) - 5, ".cmat") == 0) ||
       (strcmp(in_vol + strlen(in_vol) - 5, ".CMAT") == 0)) {
     CMAT *cmat_in, *cmat_out;
-    MRI *mri_in, *mri_out;
-    LTA *lta;
+    MRI * mri_in, *mri_out;
+    LTA * lta;
 
     if (in_like_fname == nullptr)
       ErrorExit(ERROR_NOFILE,
@@ -283,8 +283,8 @@ int main(int argc, char *argv[]) {
   if (in_surf_name) // create transform based on surface correspondences
   {
     MRI_SURFACE *mris;
-    MRI *mri_warp;
-    char fname[STRLEN];
+    MRI *        mri_warp;
+    char         fname[STRLEN];
 
     mris = MRISread(in_surf_name);
     if (mris == nullptr)
@@ -307,7 +307,7 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
 
-  m_total = MatrixIdentity(4, nullptr);
+  m_total     = MatrixIdentity(4, nullptr);
   nxform_args = nlabels > 0 ? argc : argc - 1;
   for (i = 2; i < nxform_args; i++) {
     xform_fname = argv[i];
@@ -325,7 +325,7 @@ int main(int argc, char *argv[]) {
 
     if (transform->type != MORPH_3D_TYPE) {
       lta = (LTA *)(transform->xform);
-      m = MatrixCopy(lta->xforms[0].m_L, nullptr);
+      m   = MatrixCopy(lta->xforms[0].m_L, nullptr);
       // E/ mri_rigid_register writes out m as src2trg
 
       if (lta->type == LINEAR_RAS_TO_RAS ||
@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
         if (!m_tmp)
           ErrorExit(ERROR_BADPARM, "%s: transform is singular!");
         MatrixFree(&m);
-        m = m_tmp;
+        m           = m_tmp;
         invert_flag = 0;
       }
       MatrixMultiply(m, m_total, m_total);
@@ -363,12 +363,12 @@ int main(int argc, char *argv[]) {
 
         //////////////////////////////////////////////////////////////
         MatrixPrint(stdout, m_tmp);
-        c = VectorAlloc(4, MATRIX_REAL);
+        c             = VectorAlloc(4, MATRIX_REAL);
         c->rptr[1][1] = (mri_in->width) / 2.;
         c->rptr[2][1] = (mri_in->height) / 2.;
         c->rptr[3][1] = (mri_in->depth) / 2.;
         c->rptr[4][1] = 1.;
-        mine = MatrixMultiply(m_tmp, c, NULL);
+        mine          = MatrixMultiply(m_tmp, c, NULL);
         MatrixPrint(stdout, mine);
         fprintf(stderr, "voxel pos = %.2f, %.2f, %.2f for %.2f, %.2f, %.2f\n",
                 mine->rptr[1][1], mine->rptr[2][1], mine->rptr[3][1],
@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
   if (transform->type != MORPH_3D_TYPE) {
     if (nlabels > 0) {
       double dist;
-      int n;
+      int    n;
 
       if (subject_name)
         printf("%s  ", subject_name);
@@ -468,7 +468,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -477,15 +477,15 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "-version"))
     print_version();
   else if (!stricmp(option, "debug_voxel") || !stricmp(option, "debug-voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "in_like") || !stricmp(option, "in-like") ||
              !stricmp(option, "il")) {
     in_like_fname = argv[2];
-    nargs = 1;
+    nargs         = 1;
     printf("shaping output to be like %s...\n", out_like_fname);
   } else if (!stricmp(option, "voxel")) {
     cmat_output_coords = LABEL_COORDS_VOXEL;
@@ -499,12 +499,12 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "out_like") || !stricmp(option, "out-like") ||
              !stricmp(option, "ol")) {
     out_like_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("shaping output to be like %s...\n", out_like_fname);
   } else if (!stricmp(option, "surf") || !stricmp(option, "surface")) {
-    in_surf_name = argv[2];
+    in_surf_name  = argv[2];
     out_surf_name = argv[3];
-    nargs = 2;
+    nargs         = 2;
     printf("creating volume mapping from %s-->%s surface map\n", in_surf_name,
            out_surf_name);
   } else
@@ -514,20 +514,20 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'S':
       subject_name = argv[2];
-      nargs = 1;
+      nargs        = 1;
       break;
     case 'D':
       if (nlabels >= 1000)
         ErrorExit(ERROR_NOMEMORY, "%s: too many labels (%d)", Progname,
                   nlabels);
       labels[nlabels] = atoi(argv[2]);
-      nargs = 1;
+      nargs           = 1;
       fprintf(stderr, "computing average distance traversed by label %d\n",
               labels[nlabels]);
       nlabels++;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'I':
       invert_flag = 1;
@@ -619,8 +619,8 @@ MATRIX *MT_CoronalRasXformToVoxelXform(MRI *mri_in, MRI *mri_out,
   // E/ D's are the vox2coronalras matrices generated by
   // MRIxfmCRS2XYZtkreg().  Thanks, Doug.
 
-  D_src = MRIxfmCRS2XYZtkreg(mri_in);
-  D_trg = MRIxfmCRS2XYZtkreg(mri_out);
+  D_src     = MRIxfmCRS2XYZtkreg(mri_in);
+  D_trg     = MRIxfmCRS2XYZtkreg(mri_out);
   D_trg_inv = MatrixInverse(D_trg, nullptr);
 
   // E/ m_vox_s2vox_t = D_trg_inv * m_corras_s2corras_t * D_src
@@ -654,23 +654,23 @@ MATRIX *MT_CoronalRasXformToVoxelXform(MRI *mri_in, MRI *mri_out,
   return (m_vox_s2vox_t);
 }
 double MRIcomputeLinearTransformLabelDist(MRI *mri_src, MATRIX *mA, int label) {
-  int x1, x2, x3, width, height, depth, nvox;
+  int     x1, x2, x3, width, height, depth, nvox;
   VECTOR *v_X, *v_Y; /* original and transformed coordinate systems */
-  double y1, y2, y3, total_dist, dist;
+  double  y1, y2, y3, total_dist, dist;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  v_X = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
-  v_Y = VectorAlloc(4, MATRIX_REAL); /* transformed (dst) coordinates */
+  depth  = mri_src->depth;
+  v_X    = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
+  v_Y    = VectorAlloc(4, MATRIX_REAL); /* transformed (dst) coordinates */
 
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
     printf("MRIlinearTransformInterp: Applying transform\n");
 
-  total_dist = 0.0;
+  total_dist      = 0.0;
   v_Y->rptr[4][1] = 1.0f;
   v_X->rptr[4][1] = 1.0f;
-  nvox = 0;
+  nvox            = 0;
   for (x3 = 0; x3 < depth; x3++) {
     V3_Z(v_X) = x3;
     for (x2 = 0; x2 < height; x2++) {
@@ -700,7 +700,7 @@ double MRIcomputeLinearTransformLabelDist(MRI *mri_src, MATRIX *mA, int label) {
 
   return (total_dist / (float)nvox);
 }
-static int niter = 0000;
+static int    niter      = 0000;
 static double min_change = 0.001;
 
 MRI *MRIScreateVolumeWarpFromSurface(MRI *mri_in, MRI *mri_out,
@@ -708,12 +708,12 @@ MRI *MRIScreateVolumeWarpFromSurface(MRI *mri_in, MRI *mri_out,
                                      int which_out, double res_scale) {
   MRI *mri_warp, *mri_ctrl, *mri_warp_x, *mri_warp_y, *mri_warp_z,
       *mri_warp_x_smooth, *mri_warp_y_smooth, *mri_warp_z_smooth;
-  int vno;
+  int     vno;
   VERTEX *v;
-  double xi, yi, zi, xo, yo, zo, xiv, yiv, ziv, xov, yov, zov;
-  int xv, yv, zv;
+  double  xi, yi, zi, xo, yo, zo, xiv, yiv, ziv, xov, yov, zov;
+  int     xv, yv, zv;
 
-  mri_ctrl = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
+  mri_ctrl   = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
                               MRI_UCHAR, 1);
   mri_warp_x = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
                                 MRI_FLOAT, 1);
@@ -721,7 +721,7 @@ MRI *MRIScreateVolumeWarpFromSurface(MRI *mri_in, MRI *mri_out,
                                 MRI_FLOAT, 1);
   mri_warp_z = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
                                 MRI_FLOAT, 1);
-  mri_warp = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
+  mri_warp   = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
                               MRI_FLOAT, 3);
   MRIcopyHeader(mri_in, mri_warp);
 
@@ -788,17 +788,17 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
       *mri_warp_x_smooth, *mri_warp_y_smooth, *mri_warp_z_smooth;
   MRI *mri_interior, *mri_x = nullptr, *mri_y = nullptr, *mri_z = nullptr,
                      *mri_c = nullptr, *mri_dilated = nullptr;
-  int vno;
+  int     vno;
   VERTEX *v;
   double xi, yi, zi, xo, yo, zo, xiv, yiv, ziv, xov, yov, zov, r, cnx, cny, cnz,
       sample_dist = 0.25, radius;
   double cx0, cy0, cz0;
-  int xv, yv, zv, inside, xvi, yvi, zvi, was_inside, was_outside, nchanged,
+  int    xv, yv, zv, inside, xvi, yvi, zvi, was_inside, was_outside, nchanged,
       iter, nbrs;
 
   mri_interior = MRIclone(mri_in, nullptr);
   MRISfillInterior(mris, mri_in->xsize, mri_interior);
-  mri_ctrl = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
+  mri_ctrl   = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
                               MRI_UCHAR, 1);
   mri_warp_x = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
                                 MRI_FLOAT, 1);
@@ -806,7 +806,7 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
                                 MRI_FLOAT, 1);
   mri_warp_z = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
                                 MRI_FLOAT, 1);
-  mri_warp = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
+  mri_warp   = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
                               MRI_FLOAT, 3);
   MRIcopyHeader(mri_in, mri_warp);
 
@@ -814,20 +814,20 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
   MRIsetValues(mri_warp_y, -1000);
   MRIsetValues(mri_warp_z, -1000);
 
-  v = &mris->vertices[0];
+  v      = &mris->vertices[0];
   radius = sqrt(SQR(v->cx - mris->x0) + SQR(v->cy - mris->y0) +
                 SQR(v->cz - mris->z0));
 
   // traverse each neighbor vector and search outwards along the interpolated
   // normal
   for (vno = 0; vno < mris->nvertices; vno++) {
-    int n;
+    int    n;
     double dist, clen, len, cnx0, cny0, cnz0, cnx1, cny1, cnz1, dx, dy, dz, dcx,
         dcy, dcz, xi0, yi0, zi0;
     double nx, ny, nz;
 
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
 
     if (v->ripflag)
       continue;
@@ -837,7 +837,7 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
     cnx0 = v->cx - mris->x0;
     cny0 = v->cy - mris->y0;
     cnz0 = v->cz - mris->z0;
-    r = sqrt(cnx0 * cnx0 + cny0 * cny0 + cnz0 * cnz0);
+    r    = sqrt(cnx0 * cnx0 + cny0 * cny0 + cnz0 * cnz0);
     cnx0 /= r;
     cny0 /= r;
     cnz0 /= r;
@@ -849,18 +849,18 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
       if (vt->v[n] == Gdiag_no)
         DiagBreak();
 
-      dx = vn->x - v->x;
-      dy = vn->y - v->y;
-      dz = vn->z - v->z;
-      dcx = vn->cx - v->cx;
-      dcy = vn->cy - v->cy;
-      dcz = vn->cz - v->cz;
-      len = sqrt(dx * dx + dy * dy + dz * dz);
+      dx   = vn->x - v->x;
+      dy   = vn->y - v->y;
+      dz   = vn->z - v->z;
+      dcx  = vn->cx - v->cx;
+      dcy  = vn->cy - v->cy;
+      dcz  = vn->cz - v->cz;
+      len  = sqrt(dx * dx + dy * dy + dz * dz);
       clen = sqrt(dcx * dcx + dcy * dcy + dcz * dcz);
       cnx1 = vn->cx - mris->x0;
       cny1 = vn->cy - mris->y0;
       cnz1 = vn->cz - mris->z0;
-      r = sqrt(cnx1 * cnx1 + cny1 * cny1 + cnz1 * cnz1);
+      r    = sqrt(cnx1 * cnx1 + cny1 * cny1 + cnz1 * cnz1);
       cnx1 /= r;
       cny1 /= r;
       cnz1 /= r;
@@ -870,9 +870,9 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
         cnx = dist * cnx1 + (1.0 - dist) * cnx0;
         cny = dist * cny1 + (1.0 - dist) * cny0;
         cnz = dist * cnz1 + (1.0 - dist) * cnz0;
-        nx = dist * vn->nx + (1.0 - dist) * v->nx;
-        ny = dist * vn->ny + (1.0 - dist) * v->ny;
-        nz = dist * vn->nz + (1.0 - dist) * v->nz;
+        nx  = dist * vn->nx + (1.0 - dist) * v->nx;
+        ny  = dist * vn->ny + (1.0 - dist) * v->ny;
+        nz  = dist * vn->nz + (1.0 - dist) * v->nz;
 
         // compute point along edge on white and sphere
         cx0 = v->cx + dcx * dist;
@@ -885,10 +885,10 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
         // add points moving inwards
         MRISsurfaceRASToVoxelCached(mris, mri_in, xi0, yi0, zi0, &xiv, &yiv,
                                     &ziv);
-        xvi = nint(xiv);
-        yvi = nint(yiv);
-        zvi = nint(ziv);
-        inside = MRIgetVoxVal(mri_interior, xvi, yvi, zvi, 0);
+        xvi        = nint(xiv);
+        yvi        = nint(yiv);
+        zvi        = nint(ziv);
+        inside     = MRIgetVoxVal(mri_interior, xvi, yvi, zvi, 0);
         was_inside = inside;
         for (r = -sample_dist; r >= -MAX_SAMPLE_DIST; r -= sample_dist) {
           xi = xi0 + r * nx;
@@ -909,9 +909,9 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
           if (xv < 0 || yv < 0 || zv < 0 || xv >= mri_warp->width ||
               yv >= mri_warp->height || zv >= mri_warp->depth)
             continue;
-          xvi = nint(xiv);
-          yvi = nint(yiv);
-          zvi = nint(ziv);
+          xvi    = nint(xiv);
+          yvi    = nint(yiv);
+          zvi    = nint(ziv);
           inside = MRIgetVoxVal(mri_interior, xvi, yvi, zvi, 0);
 
           if (was_inside && inside == 0) // was in the wm but have now left
@@ -937,11 +937,11 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
         // add points moving outwards
         MRISsurfaceRASToVoxelCached(mris, mri_in, xi0, yi0, zi0, &xiv, &yiv,
                                     &ziv);
-        xvi = nint(xiv);
-        yvi = nint(yiv);
-        zvi = nint(ziv);
-        inside = MRIgetVoxVal(mri_interior, xvi, yvi, zvi, 0);
-        was_inside = inside;
+        xvi         = nint(xiv);
+        yvi         = nint(yiv);
+        zvi         = nint(ziv);
+        inside      = MRIgetVoxVal(mri_interior, xvi, yvi, zvi, 0);
+        was_inside  = inside;
         was_outside = !inside;
         for (r = sample_dist; r <= MAX_SAMPLE_DIST; r += sample_dist) {
           xi = xi0 + r * nx;
@@ -962,9 +962,9 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
           if (xv < 0 || yv < 0 || zv < 0 || xv >= mri_warp->width ||
               yv >= mri_warp->height || zv >= mri_warp->depth)
             continue;
-          xvi = nint(xiv);
-          yvi = nint(yiv);
-          zvi = nint(ziv);
+          xvi    = nint(xiv);
+          yvi    = nint(yiv);
+          zvi    = nint(ziv);
           inside = MRIgetVoxVal(mri_interior, xvi, yvi, zvi, 0);
           if (was_outside &&
               inside > 0) // found exterior of surface and went back in
@@ -1041,13 +1041,13 @@ static MRI *MRIScreateVolumeWarpFromSphere(MRI *mri_in, MRI *mri_out,
                               &cy0, &cz0);
   for (nbrs = 3 * 3 * 3 - 1; nbrs > 0; nbrs--) {
     mri_dilated = MRIdilate(mri_ctrl, mri_dilated);
-    iter = 0;
+    iter        = 0;
     do {
       nchanged = 0;
-      mri_x = MRIcopy(mri_warp_x, mri_x);
-      mri_y = MRIcopy(mri_warp_y, mri_y);
-      mri_z = MRIcopy(mri_warp_z, mri_z);
-      mri_c = MRIcopy(mri_ctrl, mri_c);
+      mri_x    = MRIcopy(mri_warp_x, mri_x);
+      mri_y    = MRIcopy(mri_warp_y, mri_y);
+      mri_z    = MRIcopy(mri_warp_z, mri_z);
+      mri_c    = MRIcopy(mri_ctrl, mri_c);
 
       for (xv = 0; xv < mri_ctrl->width; xv++)
         for (yv = 0; yv < mri_ctrl->height; yv++)

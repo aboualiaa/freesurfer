@@ -34,14 +34,14 @@ private slots:
   void DoApply();
 
 private:
-  LayerMRI *m_seeds;
-  LayerMRI *m_mri;
-  LayerMRI *m_seg;
-  LayerMRI *m_filled;
-  LayerMRI *m_mask;
-  int m_nMaxDistance;
-  double m_dSmoothing;
-  double m_dFillValue;
+  LayerMRI *       m_seeds;
+  LayerMRI *       m_mri;
+  LayerMRI *       m_seg;
+  LayerMRI *       m_filled;
+  LayerMRI *       m_mask;
+  int              m_nMaxDistance;
+  double           m_dSmoothing;
+  double           m_dFillValue;
   GeodesicMatting *m_geos;
 
   QThread m_thread;

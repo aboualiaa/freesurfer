@@ -25,38 +25,38 @@
  *
  */
 
+#include <cctype>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-#include <cctype>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mrimorph.h"
-#include "mri_conform.h"
-#include "utils.h"
 #include "const.h"
-#include "timer.h"
-#include "version.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_conform.h"
+#include "mrimorph.h"
 #include "mrinorm.h"
+#include "proto.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
-MRI *MRIconvertToUchar(MRI *mri_in, LTA *tal_xform, MRI *mri_out);
+MRI *      MRIconvertToUchar(MRI *mri_in, LTA *tal_xform, MRI *mri_out);
 
 const char *Progname;
 static void usage_exit(int code);
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
-  MRI *mri_in, *mri_out;
-  LTA *tal_xform;
+  int    ac, nargs;
+  int    msec, minutes, seconds;
+  Timer  start;
+  MRI *  mri_in, *mri_out;
+  LTA *  tal_xform;
 
   nargs = handleVersionOption(argc, argv, "mri_make_uchar");
   if (nargs && argc - nargs == 1)
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
   mri_out = MRIconvertToUchar(mri_in, tal_xform, nullptr);
   MRIwrite(mri_out, argv[3]);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -143,12 +143,12 @@ static void usage_exit(int code) {
 }
 
 #define FIRST_PERCENTILE 0.01
-#define WM_PERCENTILE 0.90
+#define WM_PERCENTILE    0.90
 
 MRI *MRIconvertToUchar(MRI *mri_in, LTA *tal_xform, MRI *mri_out) {
-  int x, y, z, i1, i2;
-  double xt, yt, zt, r, bin_size, x1, y1, x2, y2, m, b, val;
-  VECTOR *v_X, *v_Y;
+  int        x, y, z, i1, i2;
+  double     xt, yt, zt, r, bin_size, x1, y1, x2, y2, m, b, val;
+  VECTOR *   v_X, *v_Y;
   HISTOGRAM *h, *hcum;
 
   v_X = MatrixAlloc(4, 1, MATRIX_REAL);
@@ -178,7 +178,7 @@ MRI *MRIconvertToUchar(MRI *mri_in, LTA *tal_xform, MRI *mri_out) {
         xt = V3_X(v_Y);
         yt = V3_Y(v_Y);
         zt = V3_Z(v_Y);
-        r = sqrt(xt * xt + yt * yt + zt * zt);
+        r  = sqrt(xt * xt + yt * yt + zt * zt);
         if (r < MAX_R)
           MRIsetVoxVal(mri_out, x, y, z, 0, MRIgetVoxVal(mri_in, x, y, z, 0));
       }
@@ -195,8 +195,8 @@ MRI *MRIconvertToUchar(MRI *mri_in, LTA *tal_xform, MRI *mri_out) {
   hcum = HISTOmakeCDF(h, nullptr);
 
   bin_size = h->bins[2] - h->bins[1];
-  i1 = HISTOfindBinWithCount(hcum, FIRST_PERCENTILE);
-  i2 = HISTOfindBinWithCount(hcum, WM_PERCENTILE);
+  i1       = HISTOfindBinWithCount(hcum, FIRST_PERCENTILE);
+  i2       = HISTOfindBinWithCount(hcum, WM_PERCENTILE);
 
   x1 = h->bins[i1];
   x2 = h->bins[i2];
@@ -208,8 +208,8 @@ MRI *MRIconvertToUchar(MRI *mri_in, LTA *tal_xform, MRI *mri_out) {
     the uchar range so that wm winds up around 110
   */
   y2 = DEFAULT_DESIRED_WHITE_MATTER_VALUE;
-  m = (y2 - y1) / (x2 - x1);
-  b = y2 - m * x2;
+  m  = (y2 - y1) / (x2 - x1);
+  b  = y2 - m * x2;
   printf("mapping (%2.0f, %2.0f) to (%2.0f, %2.0f)\n", x1, x2, y1, y2);
 
   for (x = 0; x < mri_in->width; x++) {

@@ -25,9 +25,9 @@
 #ifndef WINDOWGROUPPLOT_H
 #define WINDOWGROUPPLOT_H
 
-#include <QWidget>
 #include <QPixmap>
 #include <QVariantMap>
+#include <QWidget>
 
 namespace Ui {
 class WindowGroupPlot;
@@ -61,8 +61,8 @@ private:
   void UpdateCurrentConfig(const QString &shape, const QColor &c);
 
   Ui::WindowGroupPlot *ui;
-  FSGroupDescriptor *m_fsgd;
-  QList<QPixmap> m_listMarkerPixmaps;
+  FSGroupDescriptor *  m_fsgd;
+  QList<QPixmap>       m_listMarkerPixmaps;
 };
 
 #endif // WINDOWGROUPPLOT_H

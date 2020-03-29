@@ -26,9 +26,9 @@
 #ifndef SurfaceRegionGroups_h
 #define SurfaceRegionGroups_h
 
-#include <QObject>
 #include <QColor>
 #include <QList>
+#include <QObject>
 
 class LayerMRI;
 class SurfaceRegion;
@@ -40,12 +40,12 @@ public:
   virtual ~SurfaceRegionGroups();
 
   QColor GetGroupColor(int nGroup);
-  void SetGroupColor(int nGroup, const QColor &color);
+  void   SetGroupColor(int nGroup, const QColor &color);
 
   int GetGroupIdRange(SurfaceRegion *reg);
 
 private:
-  LayerMRI *m_mri;
+  LayerMRI *    m_mri;
   QList<QColor> m_colors;
 };
 

@@ -24,15 +24,15 @@
  */
 
 #include "Interactor2D.h"
-#include "RenderView2D.h"
-#include "MainWindow.h"
 #include "LayerCollection.h"
-#include "LayerPropertyMRI.h"
 #include "LayerMRI.h"
-#include <vtkRenderer.h>
+#include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "RenderView2D.h"
+#include <QApplication>
 #include <QDebug>
 #include <QTimer>
-#include <QApplication>
+#include <vtkRenderer.h>
 
 Interactor2D::Interactor2D(QObject *parent)
     : Interactor(parent), m_nMousePosX(-1), m_nMousePosY(-1),
@@ -42,7 +42,7 @@ Interactor2D::Interactor2D(QObject *parent)
 Interactor2D::~Interactor2D() {}
 
 bool Interactor2D::ProcessMouseDownEvent(QMouseEvent *event,
-                                         RenderView *renderview) {
+                                         RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   m_nMousePosX = event->x();
@@ -130,7 +130,7 @@ bool Interactor2D::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor2D::ProcessMouseUpEvent(QMouseEvent *event,
-                                       RenderView *renderview) {
+                                       RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   view->releaseMouse();
 
@@ -139,12 +139,12 @@ bool Interactor2D::ProcessMouseUpEvent(QMouseEvent *event,
     view->RequestRedraw();
   }
 
-  m_nMousePosX = event->x();
-  m_nMousePosY = event->y();
-  m_bWindowLevel = false;
-  m_bChangeSlice = false;
+  m_nMousePosX    = event->x();
+  m_nMousePosY    = event->y();
+  m_bWindowLevel  = false;
+  m_bChangeSlice  = false;
   m_bMovingCursor = false;
-  m_bSelecting = false;
+  m_bSelecting    = false;
 
   view->UpdateAnnotation();
   view->Update2DOverlay();
@@ -158,7 +158,7 @@ bool Interactor2D::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor2D::ProcessMouseMoveEvent(QMouseEvent *event,
-                                         RenderView *renderview) {
+                                         RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   MainWindow *mainwnd = MainWindow::GetMainWindow();
@@ -171,9 +171,9 @@ bool Interactor2D::ProcessMouseMoveEvent(QMouseEvent *event,
 
   if (m_bChangeSlice) {
     double *voxelSize = mainwnd->GetLayerCollection("MRI")->GetWorldVoxelSize();
-    int nPlane = view->GetViewPlane();
-    double dPixelPer = -0.25;
-    double dPosDiff =
+    int     nPlane    = view->GetViewPlane();
+    double  dPixelPer = -0.25;
+    double  dPosDiff =
         (((int)(dPixelPer * (posY - m_nDownPosY))) / dPixelPer -
          ((int)(dPixelPer * (m_nMousePosY - m_nDownPosY))) / dPixelPer) *
         dPixelPer * voxelSize[nPlane];
@@ -186,7 +186,7 @@ bool Interactor2D::ProcessMouseMoveEvent(QMouseEvent *event,
     view->RequestRedraw();
   } else if (m_bWindowLevel) {
     QList<Layer *> layers = mainwnd->GetLayerCollection("MRI")->GetLayers();
-    LayerMRI *layer = (LayerMRI *)mainwnd->GetActiveLayer("MRI");
+    LayerMRI *     layer  = (LayerMRI *)mainwnd->GetActiveLayer("MRI");
     if (layer && !layer->IsWindowAdjustable()) {
       layer = NULL;
     }
@@ -200,10 +200,10 @@ bool Interactor2D::ProcessMouseMoveEvent(QMouseEvent *event,
       }
     }
     if (layer) {
-      double scaleX = 0.002;
-      double scaleY = 0.002;
-      double w = (posX - m_nMousePosX) * scaleX;
-      double l = (posY - m_nMousePosY) * scaleY;
+      double scaleX       = 0.002;
+      double scaleY       = 0.002;
+      double w            = (posX - m_nMousePosX) * scaleX;
+      double l            = (posY - m_nMousePosY) * scaleY;
       double scaleOverall = layer->GetProperty()->GetMaxValue() -
                             layer->GetProperty()->GetMinValue();
       w *= scaleOverall;
@@ -267,7 +267,7 @@ bool Interactor2D::ProcessMouseMoveEvent(QMouseEvent *event,
 }
 
 void Interactor2D::ProcessPostMouseWheelEvent(QWheelEvent *event,
-                                              RenderView *renderview) {
+                                              RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   view->UpdateAnnotation();
   view->Update2DOverlay();
@@ -278,7 +278,7 @@ void Interactor2D::ProcessPostMouseWheelEvent(QWheelEvent *event,
 }
 
 void Interactor2D::ProcessPostMouseMoveEvent(QMouseEvent *event,
-                                             RenderView *renderview) {
+                                             RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   if (event->buttons() & Qt::RightButton) {
     view->Update2DOverlay();
@@ -288,7 +288,7 @@ void Interactor2D::ProcessPostMouseMoveEvent(QMouseEvent *event,
   Interactor::ProcessPostMouseMoveEvent(event, renderview);
 }
 
-bool Interactor2D::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor2D::ProcessKeyDownEvent(QKeyEvent * event,
                                        RenderView *renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 

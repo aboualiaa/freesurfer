@@ -26,24 +26,22 @@
 #ifndef labelLUT_h
 #define labelLUT_h
 
-#include <map>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
 #include "mri_ca_configFile.h"
 #include "mri_ca_util.h"
-
-using namespace std;
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
 
 typedef map<int, string> TypeMapLUT;
 
 class CLabelLUT {
 public:
   // default dtor, copy , assign OK
-  CLabelLUT(string strFilepath, int nProt = 0) {
+  CLabelLUT(std::string strFilepath, int nProt = 0) {
     labelLUTConfigFile.init(strFilepath, nProt);
     mapLut.clear();
     read();
@@ -57,9 +55,9 @@ public:
     labelLUTConfigFile.get(arr2DLUTStrings, "LabelLUT", "");
     for (int i = 0; i < (int)arr2DLUTStrings.size(); i++) {
       if (arr2DLUTStrings[i].size() >= 2) {
-        int nKey = atoi(arr2DLUTStrings[i][0].c_str());
-        string strLabel = arr2DLUTStrings[i][1];
-        mapLut[nKey] = strLabel;
+        int         nKey     = atoi(arr2DLUTStrings[i][0].c_str());
+        std::string strLabel = arr2DLUTStrings[i][1];
+        mapLut[nKey]         = strLabel;
       }
     }
   }
@@ -69,11 +67,11 @@ public:
 
     TypeMapLUT::iterator it;
     for (it = mapLut.begin(); it != mapLut.end(); it++) {
-      int nKey = it->first;
-      string strLabel = it->second;
-      char cstrKey[500];
+      int         nKey     = it->first;
+      std::string strLabel = it->second;
+      char        cstrKey[500];
       sprintf(cstrKey, "%d", nKey);
-      string strKey = cstrKey;
+      std::string      strKey = cstrKey;
       TypeVectorString vectorString;
       vectorString.push_back(strKey);
       vectorString.push_back(strLabel);
@@ -87,7 +85,7 @@ public:
 
   int size() { return (mapLut.size()); }
 
-  string label(int nKey) { return (mapLut[nKey]); }
+  std::string label(int nKey) { return (mapLut[nKey]); }
 
   TypeMapLUT &getMapLUT() { return (mapLut); }
 

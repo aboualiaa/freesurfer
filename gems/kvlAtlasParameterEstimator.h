@@ -18,9 +18,9 @@ itkEventMacro(PositionEstimationEndEvent, itk::UserEvent);
 class AtlasParameterEstimator : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self = AtlasParameterEstimator;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasParameterEstimator;
+  using Superclass   = itk::Object;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -35,7 +35,7 @@ public:
   // Set label images.
   void
   SetLabelImages(const std::vector<LabelImageType::ConstPointer> &labelImages,
-                 const CompressionLookupTable *lookupTable);
+                 const CompressionLookupTable *                   lookupTable);
 
   //
   const CompressionLookupTable *GetCompressionLookupTable() const {
@@ -210,22 +210,22 @@ private:
   void operator=(const Self &);          // purposely not implemented
 
   // Some typedefs
-  using PointsContainerType = AtlasMesh::PointsContainer;
-  using PointIdentifierType = AtlasMesh::PointIdentifier;
-  using PointType = AtlasMesh::PointType;
+  using PointsContainerType    = AtlasMesh::PointsContainer;
+  using PointIdentifierType    = AtlasMesh::PointIdentifier;
+  using PointType              = AtlasMesh::PointType;
   using PointDataContainerType = AtlasMesh::PointDataContainer;
-  using AlphasType = AtlasMesh::PixelType;
+  using AlphasType             = AtlasMesh::PixelType;
 
-  using CellsContainerType = AtlasMesh::CellsContainer;
-  using CellIdentifierType = AtlasMesh::CellIdentifier;
-  using CellType = AtlasMesh::CellType;
+  using CellsContainerType    = AtlasMesh::CellsContainer;
+  using CellIdentifierType    = AtlasMesh::CellIdentifier;
+  using CellType              = AtlasMesh::CellType;
   using CellDataContainerType = AtlasMesh::CellDataContainer;
 
   // Data members
   AtlasMeshCollection::Pointer m_MeshCollection;
 
   std::vector<LabelImageType::ConstPointer> m_LabelImages;
-  CompressionLookupTable::ConstPointer m_CompressionLookupTable;
+  CompressionLookupTable::ConstPointer      m_CompressionLookupTable;
 
   unsigned int m_IterationNumber;
   unsigned int m_MaximumNumberOfIterations;
@@ -236,13 +236,13 @@ private:
   unsigned int m_PositionEstimationIterationNumber;
   unsigned int m_PositionEstimationMaximumNumberOfIterations;
   unsigned int m_PositionEstimationIterationEventResolution;
-  double m_CurrentMinLogLikelihoodTimesPrior;
-  double m_AlphaEstimationStopCriterion;
-  double m_AlphasSmoothingFactor;
-  double m_StopCriterion;
+  double       m_CurrentMinLogLikelihoodTimesPrior;
+  double       m_AlphaEstimationStopCriterion;
+  double       m_AlphasSmoothingFactor;
+  double       m_StopCriterion;
 
   PositionOptimizerType m_PositionOptimizer;
-  int m_NumberOfThreads;
+  int                   m_NumberOfThreads;
 };
 
 } // end namespace kvl

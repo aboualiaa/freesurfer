@@ -1,7 +1,7 @@
 #include "PoistatsReplica.h"
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 PoistatsReplica::PoistatsReplica() { Init(); }
 
@@ -21,10 +21,10 @@ PoistatsReplica::~PoistatsReplica() {
 }
 
 void PoistatsReplica::Init() {
-  m_BasePath = NULL;
-  m_PreviousTrialPath = NULL;
-  m_CurrentTrialPath = NULL;
-  m_BestTrialPath = NULL;
+  m_BasePath                   = NULL;
+  m_PreviousTrialPath          = NULL;
+  m_CurrentTrialPath           = NULL;
+  m_BestTrialPath              = NULL;
   m_BestTrialPathProbabilities = NULL;
 }
 
@@ -76,7 +76,7 @@ bool PoistatsReplica::ShouldUpdateEnergy() {
   }
 
   const double randomNumber = m_PoistatsModel->GetRandomNumber();
-  const bool shouldUpdate = (randomNumber <= updateProbability);
+  const bool   shouldUpdate = (randomNumber <= updateProbability);
 
   return shouldUpdate;
 }
@@ -145,7 +145,7 @@ void PoistatsReplica::GetPerturbedBasePath(
 
   this->GenerateUnitSphereRandom(&randomUnitSphere);
 
-  const int nBasePoints = m_BasePath->rows();
+  const int          nBasePoints = m_BasePath->rows();
   vnl_matrix<double> randomPoints(nBasePoints, nBasePoints);
   randomPoints.fill(0.0);
 
@@ -241,9 +241,9 @@ void PoistatsReplica::GenerateConstrainedRandomPoint3D(
 
   if (isPointFound) {
 
-    int min = 0;
-    int max = indicesOfPointsWithinRadius.size() - 1;
-    int randomIndex = m_PoistatsModel->GetRandomInt(min, max);
+    int       min              = 0;
+    int       max              = indicesOfPointsWithinRadius.size() - 1;
+    int       randomIndex      = m_PoistatsModel->GetRandomInt(min, max);
     const int randomPointIndex = indicesOfPointsWithinRadius[randomIndex];
 
     for (unsigned int cColumn = 0; cColumn < newRandomPoint->size();
@@ -276,9 +276,9 @@ void PoistatsReplica::GenerateConstrainedRandomPoint3D(
  * point.
  */
 bool PoistatsReplica::FindPointsWithinRadius(vnl_vector<double> *center,
-                                             MatrixPointer points,
-                                             const double sigma,
-                                             std::vector<int> *indices) {
+                                             MatrixPointer       points,
+                                             const double        sigma,
+                                             std::vector<int> *  indices) {
 
   bool isPointFound = false;
 
@@ -310,7 +310,7 @@ bool PoistatsReplica::FindPointsWithinRadius(vnl_vector<double> *center,
 }
 
 void PoistatsReplica::CopyPath(const MatrixPointer source,
-                               MatrixPointer destination) {
+                               MatrixPointer       destination) {
 
   for (unsigned int cRow = 0; cRow < source->rows(); cRow++) {
     for (unsigned int cColumn = 0; cColumn < source->cols(); cColumn++) {

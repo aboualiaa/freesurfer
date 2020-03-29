@@ -27,19 +27,17 @@
 #include "mri_circulars.h"
 #include "version.h"
 
-using namespace std;
-
 namespace filetypes {
 enum FileType { UNKNOWN, M3Z, FSL, ITK, VOX };
 }
 
 struct Parameters {
-  string in_warp;
-  string out_warp;
-  string in_src_geom;
+  std::string         in_warp;
+  std::string         out_warp;
+  std::string         in_src_geom;
   filetypes::FileType in_type;
   filetypes::FileType out_type;
-  bool downsample;
+  bool                downsample;
 };
 
 static struct Parameters P = {
@@ -52,19 +50,19 @@ static char vcid[] =
     "$Id: mri_warp_convert.cpp,v 1.1 2016/06/16 19:57:06 ohinds Exp $";
 const char *Progname = nullptr;
 
-GCAM *readM3Z(const string &warp_file)
+GCAM *readM3Z(const std::string &warp_file)
 // Read an m3z file. Just calls down to GCAMread
 {
   GCAM *gcam = GCAMread(warp_file.c_str());
   if (gcam == nullptr) {
-    cerr << "ERROR readM3Z: cannot read " << warp_file << endl;
+    std::cerr << "ERROR readM3Z: cannot read " << warp_file << std::endl;
     exit(1);
   }
 
   return gcam;
 }
 
-GCAM *readFSL(const string &warp_file)
+GCAM *readFSL(const std::string &warp_file)
 // Read in an FSL warp. This is the code that used to reside in
 // mri_warp_convert.c.
 {
@@ -86,8 +84,8 @@ GCAM *readFSL(const string &warp_file)
   {
     // 2012/feb/08: tested with anisotropic voxel sizes
 
-    MRI *mri2 = nullptr;
-    int c = 0, r = 0, s = 0;
+    MRI * mri2 = nullptr;
+    int   c = 0, r = 0, s = 0;
     float v;
 
     mri2 = MRIcopy(mri, nullptr);
@@ -128,20 +126,22 @@ GCAM *readFSL(const string &warp_file)
   return gcam;
 }
 
-GCAM *readITK(const string &warp_file, const string &src_geom)
+GCAM *readITK(const std::string &warp_file, const std::string &src_geom)
 // Write an ITK warp file. ITK (and Ants) uses Left Posterior Superior
 // coordinates.
 {
 
   MRI *itk = MRIread(warp_file.c_str());
   if (itk == nullptr) {
-    cerr << "ERROR: couldn't read input ITK warp from " << warp_file << endl;
+    std::cerr << "ERROR: couldn't read input ITK warp from " << warp_file
+              << std::endl;
     return nullptr;
   }
 
   MRI *src = MRIread(src_geom.c_str());
   if (src == nullptr) {
-    cerr << "ERROR: couldn't read source geometry from " << src_geom << endl;
+    std::cerr << "ERROR: couldn't read source geometry from " << src_geom
+              << std::endl;
     return nullptr;
   }
 
@@ -149,7 +149,7 @@ GCAM *readITK(const string &warp_file, const string &src_geom)
   GCAMinitVolGeom(gcam, src, itk);
   gcam->type = GCAM_VOX;
 
-  MATRIX *ras2lps = MatrixIdentity(4, nullptr);
+  MATRIX *ras2lps     = MatrixIdentity(4, nullptr);
   ras2lps->rptr[1][1] = -1;
   ras2lps->rptr[2][2] = -1;
 
@@ -171,12 +171,12 @@ GCAM *readITK(const string &warp_file, const string &src_geom)
     for (int c = 0; c < itk->width; c++) {
       for (int r = 0; r < itk->height; r++) {
         GCA_MORPH_NODE *node = &gcam->nodes[c][r][s];
-        node->origx = c;
-        node->origy = r;
-        node->origz = s;
-        node->xn = c;
-        node->yn = r;
-        node->zn = s;
+        node->origx          = c;
+        node->origy          = r;
+        node->origz          = s;
+        node->xn             = c;
+        node->yn             = r;
+        node->zn             = s;
 
         VECTOR3_LOAD(orig_ind, c, r, s);
         orig_lps = MatrixMultiplyD(ref_vox2lps, orig_ind, orig_lps);
@@ -209,13 +209,14 @@ GCAM *readITK(const string &warp_file, const string &src_geom)
   return gcam;
 }
 
-GCAM *readVOX(const string &warp_file)
+GCAM *readVOX(const std::string &warp_file)
 // Read a warp file with same-geometry image-space displacements.
 {
 
   MRI *vox = MRIread(warp_file.c_str());
   if (vox == nullptr) {
-    cerr << "ERROR: couldn't read input VOX warp from " << warp_file << endl;
+    std::cerr << "ERROR: couldn't read input VOX warp from " << warp_file
+              << std::endl;
     return nullptr;
   }
 
@@ -227,15 +228,15 @@ GCAM *readVOX(const string &warp_file)
     for (int c = 0; c < vox->width; c++) {
       for (int r = 0; r < vox->height; r++) {
         GCA_MORPH_NODE *node = &gcam->nodes[c][r][s];
-        node->origx = c;
-        node->origy = r;
-        node->origz = s;
-        node->xn = c;
-        node->yn = r;
-        node->zn = s;
-        node->x = c + MRIgetVoxVal(vox, c, r, s, 0);
-        node->y = r + MRIgetVoxVal(vox, c, r, s, 1);
-        node->z = s + MRIgetVoxVal(vox, c, r, s, 2);
+        node->origx          = c;
+        node->origy          = r;
+        node->origz          = s;
+        node->xn             = c;
+        node->yn             = r;
+        node->zn             = s;
+        node->x              = c + MRIgetVoxVal(vox, c, r, s, 0);
+        node->y              = r + MRIgetVoxVal(vox, c, r, s, 1);
+        node->z              = s + MRIgetVoxVal(vox, c, r, s, 2);
       }
     }
   }
@@ -243,7 +244,7 @@ GCAM *readVOX(const string &warp_file)
   return gcam;
 }
 
-void writeM3Z(const string &fname, GCAM *gcam, bool downsample = false)
+void writeM3Z(const std::string &fname, GCAM *gcam, bool downsample = false)
 // Write an m3z file. Just calls down to GCAMwrite
 {
   GCA_MORPH *out = downsample ? GCAMdownsample2(gcam) : gcam;
@@ -253,20 +254,20 @@ void writeM3Z(const string &fname, GCAM *gcam, bool downsample = false)
   }
 }
 
-void writeFSL(const string &fname, const GCAM *gcam)
+void writeFSL(const std::string &fname, const GCAM *gcam)
 // Write an FSL warp file.
 // NOT IMPLEMENTED
 {
-  cerr << "ERROR writeFSL is not implemented, sorry!" << endl;
+  std::cerr << "ERROR writeFSL is not implemented, sorry!" << std::endl;
   exit(1);
 
   return;
 }
 
-void writeITK(const string &fname, GCAM *gcam)
+void writeITK(const std::string &fname, GCAM *gcam)
 // Write an ITK warp file format.
 {
-  MATRIX *ras2lps = MatrixIdentity(4, nullptr);
+  MATRIX *ras2lps     = MatrixIdentity(4, nullptr);
   ras2lps->rptr[1][1] = -1;
   ras2lps->rptr[2][2] = -1;
 
@@ -282,15 +283,15 @@ void writeITK(const string &fname, GCAM *gcam)
   MRIsetVox2RASFromMatrix(itk, ref_vox2ras);
   MRIcopyVolGeomToMRI(itk, &gcam->atlas);
 
-  int x, y, z;
-  float xw, yw, zw;
-  MATRIX *orig_ind = VectorAlloc(4, MATRIX_REAL);
-  MATRIX *dest_ind = VectorAlloc(4, MATRIX_REAL);
+  int     x, y, z;
+  float   xw, yw, zw;
+  MATRIX *orig_ind        = VectorAlloc(4, MATRIX_REAL);
+  MATRIX *dest_ind        = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(orig_ind, 4) = 1;
   VECTOR_ELT(dest_ind, 4) = 1;
-  MATRIX *orig_wld_lps = VectorAlloc(4, MATRIX_REAL);
-  MATRIX *dest_wld_lps = VectorAlloc(4, MATRIX_REAL);
-  bool samesize = itk->width == gcam->width && itk->height == gcam->height &&
+  MATRIX *orig_wld_lps    = VectorAlloc(4, MATRIX_REAL);
+  MATRIX *dest_wld_lps    = VectorAlloc(4, MATRIX_REAL);
+  bool    samesize = itk->width == gcam->width && itk->height == gcam->height &&
                   itk->depth == gcam->depth;
   for (x = 0; x < itk->width; x++)
     for (y = 0; y < itk->height; y++)
@@ -299,9 +300,9 @@ void writeITK(const string &fname, GCAM *gcam)
         MatrixMultiplyD(ref_vox2lps, orig_ind, orig_wld_lps);
         if (samesize) {
           GCA_MORPH_NODE *node = &gcam->nodes[x][y][z];
-          xw = node->x;
-          yw = node->y;
-          zw = node->z;
+          xw                   = node->x;
+          yw                   = node->y;
+          zw                   = node->z;
         } else {
           GCAMsampleMorph(gcam, x, y, z, &xw, &yw, &zw);
         }
@@ -321,7 +322,7 @@ void writeITK(const string &fname, GCAM *gcam)
   MatrixFree(&dest_wld_lps);
 
   if (MRIwriteType(itk, fname.c_str(), ITK_MORPH) != 0) {
-    cerr << "Error writing ITK warp to " << fname << endl;
+    std::cerr << "Error writing ITK warp to " << fname << std::endl;
   }
   MRIfree(&itk);
 
@@ -334,11 +335,11 @@ void writeITK(const string &fname, GCAM *gcam)
   return;
 }
 
-void writeVOX(const string &fname, GCAM *gcam)
+void writeVOX(const std::string &fname, GCAM *gcam)
 // Write a warp file with same-geometry image-space displacements.
 {
   MATRIX *ref_vox2ras = VGgetVoxelToRasXform(&gcam->atlas, nullptr, 0);
-  MRI *out = MRIallocSequence(gcam->atlas.width, gcam->atlas.height,
+  MRI *   out         = MRIallocSequence(gcam->atlas.width, gcam->atlas.height,
                               gcam->atlas.depth, MRI_FLOAT, 3);
   MRIsetResolution(out, gcam->atlas.xsize, gcam->atlas.ysize,
                    gcam->atlas.zsize);
@@ -353,9 +354,9 @@ void writeVOX(const string &fname, GCAM *gcam)
       for (int s = 0; s < out->depth; s++) {
         if (samesize) {
           GCA_MORPH_NODE *node = &gcam->nodes[c][r][s];
-          x = node->x;
-          y = node->y;
-          z = node->z;
+          x                    = node->x;
+          y                    = node->y;
+          z                    = node->z;
         } else {
           GCAMsampleMorph(gcam, c, r, s, &x, &y, &z);
         }
@@ -364,19 +365,18 @@ void writeVOX(const string &fname, GCAM *gcam)
         MRIsetVoxVal(out, c, r, s, 2, z - s);
       }
   if (MRIwrite(out, fname.c_str()) != 0) {
-    cerr << "Error writing VOX warp to " << fname << endl;
+    std::cerr << "Error writing VOX warp to " << fname << std::endl;
   }
   MRIfree(&out);
   MatrixFree(&ref_vox2ras);
 }
 
 int main(int argc, char *argv[]) {
-  cout << vcid << endl << endl;
+  std::cout << vcid << std::endl << std::endl;
 
   // Default initialization
   int nargs = handleVersionOption(argc, argv, "mri_warp_convert");
-  if (nargs && argc - nargs == 1)
-  {
+  if (nargs && argc - nargs == 1) {
     exit(0);
   }
   argc -= nargs;
@@ -453,10 +453,10 @@ static void printUsage() {
  \returns       number of used arguments for this command
  */
 static int parseNextCommand(int argc, char *argv[], Parameters &P) {
-  bool have_input = false;
+  bool have_input  = false;
   bool have_output = false;
 
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[0] + 1; // remove '-'
@@ -467,142 +467,144 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
 
   if (!strcmp(option, "INM3Z")) {
     if (have_input) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one input warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one input warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_input = true;
 
-    P.in_warp = string(argv[1]);
+    P.in_warp = std::string(argv[1]);
     P.in_type = filetypes::M3Z;
-    nargs = 1;
-    cout << "--inm3z: " << P.in_warp << " input M3Z warp." << endl;
+    nargs     = 1;
+    std::cout << "--inm3z: " << P.in_warp << " input M3Z warp." << std::endl;
   } else if (!strcmp(option, "INFSL")) {
     if (have_input) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one input warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one input warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_input = true;
 
-    P.in_warp = string(argv[1]);
+    P.in_warp = std::string(argv[1]);
     P.in_type = filetypes::FSL;
-    nargs = 1;
-    cout << "--infsl: " << P.in_warp << " input FSL warp." << endl;
+    nargs     = 1;
+    std::cout << "--infsl: " << P.in_warp << " input FSL warp." << std::endl;
   } else if (!strcmp(option, "INITK")) {
     if (have_input) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one input warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one input warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_input = true;
 
-    P.in_warp = string(argv[1]);
+    P.in_warp = std::string(argv[1]);
     P.in_type = filetypes::ITK;
-    nargs = 1;
-    cout << "--initk: " << P.in_warp << " input ITK warp." << endl;
+    nargs     = 1;
+    std::cout << "--initk: " << P.in_warp << " input ITK warp." << std::endl;
   } else if (!strcmp(option, "INVOX")) {
     if (have_input) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one input warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one input warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_input = true;
 
-    P.in_warp = string(argv[1]);
+    P.in_warp = std::string(argv[1]);
     P.in_type = filetypes::VOX;
-    nargs = 1;
-    cout << "--invox: " << P.in_warp << " input VOX warp." << endl;
+    nargs     = 1;
+    std::cout << "--invox: " << P.in_warp << " input VOX warp." << std::endl;
   } else if (!strcmp(option, "OUTM3Z")) {
     if (have_output) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one output warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one output warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_output = true;
 
-    P.out_warp = string(argv[1]);
+    P.out_warp = std::string(argv[1]);
     P.out_type = filetypes::M3Z;
-    nargs = 1;
-    cout << "--outm3z: " << P.out_warp << " output M3Z." << endl;
+    nargs      = 1;
+    std::cout << "--outm3z: " << P.out_warp << " output M3Z." << std::endl;
   } else if (!strcmp(option, "OUTFSL")) {
     if (have_output) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one output warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one output warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_output = true;
 
-    P.out_warp = string(argv[1]);
+    P.out_warp = std::string(argv[1]);
     P.out_type = filetypes::FSL;
-    nargs = 1;
-    cout << "--outfsl: " << P.out_warp << " output FSL warp." << endl;
+    nargs      = 1;
+    std::cout << "--outfsl: " << P.out_warp << " output FSL warp." << std::endl;
   } else if (!strcmp(option, "OUTITK")) {
     if (have_output) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one output warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one output warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_output = true;
 
-    P.out_warp = string(argv[1]);
+    P.out_warp = std::string(argv[1]);
     P.out_type = filetypes::ITK;
-    nargs = 1;
-    cout << "--outitk: " << P.out_warp << " output ITK warp." << endl;
+    nargs      = 1;
+    std::cout << "--outitk: " << P.out_warp << " output ITK warp." << std::endl;
   } else if (!strcmp(option, "OUTVOX")) {
     if (have_output) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one output warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one output warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_output = true;
 
-    P.out_warp = string(argv[1]);
+    P.out_warp = std::string(argv[1]);
     P.out_type = filetypes::VOX;
-    nargs = 1;
-    cout << "--outvox: " << P.out_warp << " output VOX warp." << endl;
+    nargs      = 1;
+    std::cout << "--outvox: " << P.out_warp << " output VOX warp." << std::endl;
   } else if (!strcmp(option, "INSRCGEOM")) {
-    P.in_src_geom = string(argv[1]);
-    nargs = 1;
-    cout << "--insrcgeom: " << P.in_src_geom << " src image (geometry)."
-         << endl;
+    P.in_src_geom = std::string(argv[1]);
+    nargs         = 1;
+    std::cout << "--insrcgeom: " << P.in_src_geom << " src image (geometry)."
+              << std::endl;
   } else if (!strcmp(option, "DOWNSAMPLE")) {
     if (!P.downsample)
-      cout << "--downsample: save M3Z warp at half resolution." << endl;
+      std::cout << "--downsample: save M3Z warp at half resolution."
+                << std::endl;
     P.downsample = true;
-    nargs = 0;
+    nargs        = 0;
   } else if (!strcmp(option, "HELP")) {
     printUsage();
     exit(1);
   } else {
-    cerr << endl
-         << endl
-         << "ERROR: Option: " << argv[0] << " unknown (see --help) !! " << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Option: " << argv[0] << " unknown (see --help) !! "
+              << std::endl
+              << std::endl;
     exit(1);
   }
 
@@ -635,16 +637,17 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
 
   // validate src geom exists if input type is ITK
   if (P.in_type == filetypes::ITK && P.in_src_geom.empty()) {
-    cerr << endl
-         << endl
-         << "ERROR: ITK input warp requires --insrcgeom" << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: ITK input warp requires --insrcgeom" << std::endl
+              << std::endl;
     return false;
   }
   if (P.out_type != filetypes::M3Z && P.downsample) {
-    cerr << endl << endl;
-    cerr << "ERROR: --downsample flag only valid for output type M3Z" << endl
-         << endl;
+    std::cerr << std::endl << std::endl;
+    std::cerr << "ERROR: --downsample flag only valid for output type M3Z"
+              << std::endl
+              << std::endl;
     return false;
   }
 

@@ -25,8 +25,8 @@
 #define TOOLWINDOWMEASURE_H
 
 #include "UIUpdateHelper.h"
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 
 namespace Ui {
 class ToolWindowMeasure;
@@ -71,9 +71,9 @@ private:
 
   QList<QWidget *> m_widgets2D;
   QList<QWidget *> m_widgets3D;
-  Region2D *m_region;
-  SurfaceRegion *m_surfaceRegion;
-  bool m_bToUpdateWidgets;
+  Region2D *       m_region;
+  SurfaceRegion *  m_surfaceRegion;
+  bool             m_bToUpdateWidgets;
 };
 
 #endif // TOOLWINDOWMEASURE_H

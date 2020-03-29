@@ -33,11 +33,11 @@
 
 MRI *MRIcomputeVolumeFractionFromSurface(MRI_SURFACE *mris, double acc,
                                          MRI *mri_src, MRI *mri_fractions) {
-  const int width = mri_src->width;
-  const int height = mri_src->height;
-  const int depth = mri_src->depth;
-  int x, y, z, vno;
-  double xs, ys, zs, dist;
+  const int        width  = mri_src->width;
+  const int        height = mri_src->height;
+  const int        depth  = mri_src->depth;
+  int              x, y, z, vno;
+  double           xs, ys, zs, dist;
   MRIS_HASH_TABLE *mht;
 
   /* preparing the output */
@@ -61,9 +61,9 @@ MRI *MRIcomputeVolumeFractionFromSurface(MRI_SURFACE *mris, double acc,
   mht = MHTcreateVertexTable_Resolution(mris, CURRENT_VERTICES, 10);
   /* looping over the nonzero elements of the shell */
   printf("computing the fractions\n");
-  volFraction frac;
+  volFraction  frac;
   octTreeVoxel V;
-  double vox[3], vsize[3];
+  double       vox[3], vsize[3];
   vsize[0] = mri_src->xsize;
   vsize[1] = mri_src->ysize;
   vsize[2] = mri_src->zsize;
@@ -79,7 +79,7 @@ MRI *MRIcomputeVolumeFractionFromSurface(MRI_SURFACE *mris, double acc,
           vox[0] = xs - vsize[0] / 2.0;
           vox[1] = ys - vsize[1] / 2.0;
           vox[2] = zs - vsize[2] / 2.0;
-          V = octTreeVoxelCreate(vox, vsize);
+          V      = octTreeVoxelCreate(vox, vsize);
           /* compute the volume fraction of this voxel */
           frac = MRIcomputeVoxelFractions(V, vno, acc, 1, mris);
           MRIsetVoxVal(mri_fractions, x, y, z, 0, frac.frac);
@@ -103,9 +103,9 @@ volFraction MRIcomputeVoxelFractions(octTreeVoxel V, int vno, double acc,
   // HACK until the caller can provide the vno.  Can't right now.
   //
   VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-  VERTEX const *const v = &mris->vertices[vno];
+  VERTEX const *const          v  = &mris->vertices[vno];
 
-  int fnum, fiter, j, k;
+  int    fnum, fiter, j, k;
   double meanNorm[3], meanVert[3];
   /* get the faces the closest vertex to the point (xs,ys,zs) is a part of */
   fnum = vt->num;
@@ -128,8 +128,8 @@ volFraction MRIcomputeVoxelFractions(octTreeVoxel V, int vno, double acc,
   /* detemining if the voxel is completely in or out */
   /* completely in means all the corners and the center of the voxel is inside
    * the surface */
-  int allin = 1;
-  int allout = 1;
+  int    allin  = 1;
+  int    allout = 1;
   double dotProduct;
   for (j = 0; j < 8; j++) {
     dotProduct = meanNorm[0] * (V.corn[j][0] - meanVert[0]) +
@@ -144,7 +144,7 @@ volFraction MRIcomputeVoxelFractions(octTreeVoxel V, int vno, double acc,
 
   volFraction frac;
   frac.frac = 0;
-  frac.err = 0;
+  frac.err  = 0;
   /* relative volume of the voxel to the whole */
   double relativeVolume =
       1.0 / (double)(pow(2.0, current_depth - 1) * pow(2.0, current_depth - 1) *
@@ -153,17 +153,17 @@ volFraction MRIcomputeVoxelFractions(octTreeVoxel V, int vno, double acc,
       1) /* all corners are in return the relative volume of the voxel */
   {
     frac.frac = relativeVolume;
-    frac.err = 0;
+    frac.err  = 0;
   } else if (allout == 1) /* all corners are out return 0 */
   {
     frac.frac = 0;
-    frac.err = 0;
+    frac.err  = 0;
   } else /* some in some out */
   {
     if (relativeVolume < acc) /* the error we are making is small enough */
     {
       frac.frac = relativeVolume / 2;
-      frac.err = relativeVolume / 2;
+      frac.err  = relativeVolume / 2;
     } else /* the error we are making is too big we will redivide and recurse */
     {
       for (k = 0; k < 8; k++) {
@@ -178,13 +178,13 @@ volFraction MRIcomputeVoxelFractions(octTreeVoxel V, int vno, double acc,
 }
 octTreeVoxel octTreeVoxelCreate(double *vox, double *vsize) {
   octTreeVoxel v;
-  int k;
+  int          k;
   /*
   for (k = 0; k < 3; k++)
     { v.vox[k] = vox[k]; v.vsize[k] = vsize[k]; }
   */
   for (k = 0; k < 3; k++) {
-    v.vox[k] = vox[k];
+    v.vox[k]   = vox[k];
     v.vsize[k] = vsize[k];
   }
   /*center*/
@@ -229,9 +229,9 @@ octTreeVoxel octTreeVoxelCreate(double *vox, double *vsize) {
 octTreeVoxel octTreeVoxelDivide(int type, octTreeVoxel v) {
   double vsize_new[3];
   double vox_new[3] = {0, 0, 0};
-  vsize_new[0] = v.vsize[0] / 2.0;
-  vsize_new[1] = v.vsize[1] / 2.0;
-  vsize_new[2] = v.vsize[2] / 2.0;
+  vsize_new[0]      = v.vsize[0] / 2.0;
+  vsize_new[1]      = v.vsize[1] / 2.0;
+  vsize_new[2]      = v.vsize[2] / 2.0;
   switch (type) {
   case 1: /* 000 */
     vox_new[0] = v.vox[0];

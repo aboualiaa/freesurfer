@@ -25,27 +25,26 @@
 #include "ANN.h"
 
 extern "C" {
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <ctype.h>
-#include "mri.h"
-#include "mrisurf.h"
-#include "icosahedron.h"
+#include "cma.h"
 #include "const.h"
 #include "diag.h"
 #include "error.h"
+#include "icosahedron.h"
 #include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mrinorm.h"
+#include "mrisurf.h"
 #include "proto.h"
 #include "timer.h"
-#include "mrinorm.h"
-#include "cma.h"
 #include "version.h"
-#include "error.h"
-#include "matrix.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 }
 
 static char vcid[] =
@@ -60,22 +59,22 @@ typedef struct _double_3d {
 
 #define TINY 1.0e-20;
 #define ROTATE(a, i, j, k, l)                                                  \
-  g = a[i][j];                                                                 \
-  h = a[k][l];                                                                 \
+  g       = a[i][j];                                                           \
+  h       = a[k][l];                                                           \
   a[i][j] = g - s * (h + g * tau);                                             \
   a[k][l] = h + s * (g - h * tau);
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-const char *Progname;
+int                 main(int argc, char *argv[]);
+static int          get_option(int argc, char *argv[]);
+const char *        Progname;
 static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst);
 static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
                                         MRI_SURFACE *mris_dst);
 static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
                                          MRI_SURFACE *mris_dst);
-static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
-                              int face_number, int debug);
-static double brain_volume(MRI_SURFACE *mris);
+static double       v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
+                                    int face_number, int debug);
+static double       brain_volume(MRI_SURFACE *mris);
 // static int      sort(double **array, int order, int number, int
 // total_number);
 /* ICP functions */
@@ -100,21 +99,21 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order);
 static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order);
 static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order);
 
-static int ANALYSIS = 0;
-static int SYNTHESIS = 0;
-static int COMPARE = 0;
-static int CURV = 0;
-static int RADIUS = 0;
+static int   ANALYSIS  = 0;
+static int   SYNTHESIS = 0;
+static int   COMPARE   = 0;
+static int   CURV      = 0;
+static int   RADIUS    = 0;
 static char *outs_fname;
 static char *inc_fname;
-static int SAMPLE_OUT = 0;
-static float threshold = 0;
-static float shrink = 0;
+static int   SAMPLE_OUT = 0;
+static float threshold  = 0;
+static float shrink     = 0;
 
 int main(int argc, char *argv[]) {
-  int nargs, msec, order, i, number;
-  Timer then;
-  MRIS *mris_in, *mris_out;
+  int    nargs, msec, order, i, number;
+  Timer  then;
+  MRIS * mris_in, *mris_out;
   double volume; // T[5][5] the transformation matrx (using index 1-4)
 
   Progname = argv[0];
@@ -145,13 +144,13 @@ int main(int argc, char *argv[]) {
     ANALYSIS = 1;
   } else if (atoi(argv[3]) == 1) {
     ANALYSIS = 1;
-    CURV = 1;
+    CURV     = 1;
   } else if (atoi(argv[3]) == 2) {
     SYNTHESIS = 1;
-    CURV = 0;
+    CURV      = 0;
   } else if (atoi(argv[3]) == 3) {
     SYNTHESIS = 1;
-    CURV = 1;
+    CURV      = 1;
   } else {
     fprintf(stdout, "Set mode to 1\n");
     ANALYSIS = 1;
@@ -187,7 +186,7 @@ int main(int argc, char *argv[]) {
     {
       MRI *mri = 0, *mri_dst = 0;
       LTA *lta = 0;
-      int transform_type;
+      int  transform_type;
 
       sprintf(afname, "%s/%s/mri/transforms/talairach.lta", path, sname);
       printf("Apply the given LTA xfrom to align input surface\n ...");
@@ -374,7 +373,7 @@ int main(int argc, char *argv[]) {
     MRISfree(&mris_in);
     /*End of Analysis*/
   } else if (ANALYSIS && RADIUS) {
-    MRI *mri_out;
+    MRI * mri_out;
     float rad;
 
 #if 1
@@ -771,14 +770,14 @@ int main(int argc, char *argv[]) {
 }
 
 static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
-  int i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
-  MRIS *mris_high;
+  int     i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *  mris_high;
   VERTEX *vm_out, *vm_high, *v;
-  double s_jkm;
+  double  s_jkm;
 
   /* Initialize Ij,k*/
   for (vno = 0; vno < mris_out->nvertices; vno++) {
-    vm_out = &mris_out->vertices[vno];
+    vm_out      = &mris_out->vertices[vno];
     vm_out->val = 1;
   }
 
@@ -790,9 +789,9 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag = 0;
+      flag    = 0;
       for (nnum = 0; nnum < vm_high->vnum; nnum++)
         if (vm_high->v[nnum] < number) // A(j,m)
         {
@@ -815,7 +814,7 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
       for (; nnum < vm_high->v3num; nnum++)
         if (vm_high->v[nnum] < number) // C(j,m)
         {
-          k = vm_high->v[nnum];
+          k    = vm_high->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
           for (cno = mris_high->vertices[b1].vnum;
                cno < mris_high->vertices[b1].v2num; cno++)
@@ -843,9 +842,9 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     /* compute Yj,m for each m vertices */
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag = 0;
+      flag    = 0;
       for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
         if (vm_high->v[nnum] < number)             // neighbor A(j,m)
         {
@@ -872,7 +871,7 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
       for (; nnum < vm_high->v3num; nnum++)
         if (vm_high->v[nnum] < number) // neighbor C(j,m)
         {
-          k = vm_high->v[nnum];
+          k    = vm_high->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
           for (cno = mris_high->vertices[b1].vnum;
                cno < mris_high->vertices[b1].v2num; cno++)
@@ -894,13 +893,13 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
     /*Analysis Stage II: */
     /*Compute Lamda(j,k) using the Yita(j,m)*/
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       for (nnum = 0; nnum < vm_high->vnum; nnum++)
         if (vm_high->v[nnum] < number) // A(j,m)
         {
-          k = vm_high->v[nnum];
-          v = &mris_out->vertices[k];
+          k     = vm_high->v[nnum];
+          v     = &mris_out->vertices[k];
           s_jkm = vm_out->val / 2 / v->val;
           // if(k==6642) fprintf(stdout, "%f, %f, %f, %f, %d\n", vm_out->val,
           // v->val, s_jkm, vm_out->curv, m);
@@ -913,14 +912,14 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
 }
 
 static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
-  int i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
-  MRIS *mris_high;
+  int     i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *  mris_high;
   VERTEX *vm_out, *vm_high, *v;
-  double s_jkm;
+  double  s_jkm;
 
   /* Initialize Ij,k*/
   for (vno = 0; vno < mris_out->nvertices; vno++) {
-    vm_out = &mris_out->vertices[vno];
+    vm_out      = &mris_out->vertices[vno];
     vm_out->val = 1;
   }
 
@@ -932,9 +931,9 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag = 0;
+      flag    = 0;
       for (nnum = 0; nnum < vm_high->vnum; nnum++)
         if (vm_high->v[nnum] < number) // A(j,m)
         {
@@ -957,7 +956,7 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
       for (; nnum < vm_high->v3num; nnum++)
         if (vm_high->v[nnum] < number) // C(j,m)
         {
-          k = vm_high->v[nnum];
+          k    = vm_high->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
           for (cno = mris_high->vertices[b1].vnum;
                cno < mris_high->vertices[b1].v2num; cno++)
@@ -985,9 +984,9 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     /* compute Yj,m for each m vertices */
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag = 0;
+      flag    = 0;
       for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
         if (vm_high->v[nnum] < number)             // neighbor A(j,m)
         {
@@ -1014,7 +1013,7 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
       for (; nnum < vm_high->v3num; nnum++)
         if (vm_high->v[nnum] < number) // neighbor C(j,m)
         {
-          k = vm_high->v[nnum];
+          k    = vm_high->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
           for (cno = mris_high->vertices[b1].vnum;
                cno < mris_high->vertices[b1].v2num; cno++)
@@ -1036,13 +1035,13 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
     /*Analysis Stage II: */
     /*Compute Lamda(j,k) using the Yita(j,m)*/
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       for (nnum = 0; nnum < vm_high->vnum; nnum++)
         if (vm_high->v[nnum] < number) // A(j,m)
         {
-          k = vm_high->v[nnum];
-          v = &mris_out->vertices[k];
+          k     = vm_high->v[nnum];
+          v     = &mris_out->vertices[k];
           s_jkm = vm_out->val / 2 / v->val;
           v->origx += s_jkm * vm_out->origx;
           v->origy += s_jkm * vm_out->origy;
@@ -1055,14 +1054,14 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
 }
 
 static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
-  int i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
-  MRIS *mris_high;
+  int     i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *  mris_high;
   VERTEX *vm_out, *vm_high, *v;
-  double s_jkm;
+  double  s_jkm;
 
   /*Initialize Ij,k*/
   for (vno = 0; vno < mris_out->nvertices; vno++) {
-    vm_out = &mris_out->vertices[vno];
+    vm_out      = &mris_out->vertices[vno];
     vm_out->val = 1;
   }
 
@@ -1074,9 +1073,9 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag = 0;
+      flag    = 0;
       for (nnum = 0; nnum < vm_high->vnum; nnum++)
         if (vm_high->v[nnum] < number) // A(j,m)
         {
@@ -1099,7 +1098,7 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
       for (; nnum < vm_high->v3num; nnum++)
         if (vm_high->v[nnum] < number) // C(j,m)
         {
-          k = vm_high->v[nnum];
+          k    = vm_high->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
           for (cno = mris_high->vertices[b1].vnum;
                cno < mris_high->vertices[b1].v2num; cno++)
@@ -1127,13 +1126,13 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
     /* Synthesis Stage I */
     /* Compute Lamda(j+1,k) using the Yita(j,m) */
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       for (nnum = 0; nnum < vm_high->vnum; nnum++)
         if (vm_high->v[nnum] < number) // A(j,m)
         {
-          k = vm_high->v[nnum];
-          v = &mris_out->vertices[k];
+          k     = vm_high->v[nnum];
+          v     = &mris_out->vertices[k];
           s_jkm = vm_out->val / 2 / v->val;
           v->curv -= s_jkm * vm_out->curv;
         }
@@ -1141,9 +1140,9 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
 
     /* compute Lamda(j+1,m) for each m vertices */
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag = 0;
+      flag    = 0;
       for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
         if (vm_high->v[nnum] < number)             // neighbor A(j,m)
         {
@@ -1166,7 +1165,7 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
       for (; nnum < vm_high->v3num; nnum++) // third order neighborhood
         if (vm_high->v[nnum] < number)      // neighbor C(j,m)
         {
-          k = vm_high->v[nnum];
+          k    = vm_high->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
           for (cno = mris_high->vertices[b1].vnum;
                cno < mris_high->vertices[b1].v2num; cno++)
@@ -1188,14 +1187,14 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
 }
 
 static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
-  int i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
-  MRIS *mris_high;
+  int     i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *  mris_high;
   VERTEX *vm_out, *vm_high, *v;
-  double s_jkm;
+  double  s_jkm;
 
   /*Initialize Ij,k*/
   for (vno = 0; vno < mris_out->nvertices; vno++) {
-    vm_out = &mris_out->vertices[vno];
+    vm_out      = &mris_out->vertices[vno];
     vm_out->val = 1;
   }
 
@@ -1207,9 +1206,9 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag = 0;
+      flag    = 0;
       for (nnum = 0; nnum < vm_high->vnum; nnum++)
         if (vm_high->v[nnum] < number) // A(j,m)
         {
@@ -1232,7 +1231,7 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
       for (; nnum < vm_high->v3num; nnum++)
         if (vm_high->v[nnum] < number) // C(j,m)
         {
-          k = vm_high->v[nnum];
+          k    = vm_high->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
           for (cno = mris_high->vertices[b1].vnum;
                cno < mris_high->vertices[b1].v2num; cno++)
@@ -1260,13 +1259,13 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
     /* Synthesis Stage I */
     /* Compute Lamda(j+1,k) using the Yita(j,m) */
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       for (nnum = 0; nnum < vm_high->vnum; nnum++)
         if (vm_high->v[nnum] < number) // A(j,m)
         {
-          k = vm_high->v[nnum];
-          v = &mris_out->vertices[k];
+          k     = vm_high->v[nnum];
+          v     = &mris_out->vertices[k];
           s_jkm = vm_out->val / 2 / v->val;
           v->origx -= s_jkm * vm_out->origx;
           v->origy -= s_jkm * vm_out->origy;
@@ -1276,9 +1275,9 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
 
     /* compute Lamda(j+1,m) for each m vertices */
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out = &mris_out->vertices[m];
+      vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag = 0;
+      flag    = 0;
       for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
         if (vm_high->v[nnum] < number)             // neighbor A(j,m)
         {
@@ -1305,7 +1304,7 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
       for (; nnum < vm_high->v3num; nnum++) // third order neighborhood
         if (vm_high->v[nnum] < number)      // neighbor C(j,m)
         {
-          k = vm_high->v[nnum];
+          k    = vm_high->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
           for (cno = mris_high->vertices[b1].vnum;
                cno < mris_high->vertices[b1].v2num; cno++)
@@ -1329,15 +1328,15 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
 }
 
 double brain_volume(MRI_SURFACE *mris) {
-  int fno;
-  FACE *face;
-  double total_volume, face_area;
+  int     fno;
+  FACE *  face;
+  double  total_volume, face_area;
   VECTOR *v_a, *v_b, *v_n, *v_cen;
   VERTEX *v0, *v1, *v2;
 
-  v_a = VectorAlloc(3, MATRIX_REAL);
-  v_b = VectorAlloc(3, MATRIX_REAL);
-  v_n = VectorAlloc(3, MATRIX_REAL);   /* normal vector */
+  v_a   = VectorAlloc(3, MATRIX_REAL);
+  v_b   = VectorAlloc(3, MATRIX_REAL);
+  v_n   = VectorAlloc(3, MATRIX_REAL); /* normal vector */
   v_cen = VectorAlloc(3, MATRIX_REAL); /* centroid vector */
 
   total_volume = 0;
@@ -1373,10 +1372,10 @@ double brain_volume(MRI_SURFACE *mris) {
 }
 
 static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
-  int fno, vno;
-  FACE *face;
+  int     fno, vno;
+  FACE *  face;
   VERTEX *vdst;
-  double x, y, z, x0, y0, z0;
+  double  x, y, z, x0, y0, z0;
 
   if (!mris_dst)
     mris_dst = MRISclone(mris_src);
@@ -1433,10 +1432,10 @@ static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
 
 static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
                                         MRI_SURFACE *mris_dst) {
-  int index, fno, fnum = 0, i;
-  VERTEX *vertex;
-  double nearest, dist, r, s, t;
-  double a, b, c, p;
+  int           index, fno, fnum = 0, i;
+  VERTEX *      vertex;
+  double        nearest, dist, r, s, t;
+  double        a, b, c, p;
   ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
 
   for (index = 0; index < mris_src->nvertices; index++) {
@@ -1445,9 +1444,9 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
     pa[index][2] = mris_src->vertices[index].z;
   }
 
-  ANNkd_tree *annkdTree = new ANNkd_tree(pa, mris_src->nvertices, 3);
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNkd_tree * annkdTree = new ANNkd_tree(pa, mris_src->nvertices, 3);
+  ANNidxArray  annIndex  = new ANNidx[1];
+  ANNdistArray annDist   = new ANNdist[1];
   //  ANNpoint query_pt = annAllocPt(3);
   ANNpointArray QueryPt;
 
@@ -1472,14 +1471,14 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
         0);                // error bound
 
 #if 1
-    vertex = &mris_src->vertices[annIndex[0]];
+    vertex  = &mris_src->vertices[annIndex[0]];
     nearest = 100000;
     for (i = 0; i < vertex->num; i++) {
-      fno = vertex->f[i];
+      fno  = vertex->f[i];
       dist = v_to_f_distance(&mris_dst->vertices[index], mris_src, fno, 0);
       if (dist < nearest) {
         nearest = dist;
-        fnum = fno;
+        fnum    = fno;
       }
     }
 
@@ -1604,10 +1603,10 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
 
 static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
                                          MRI_SURFACE *mris_dst) {
-  int index, fno, fnum = 0, i;
-  VERTEX *vertex;
-  double nearest, dist, r, s, t;
-  double a, b, c, p;
+  int           index, fno, fnum = 0, i;
+  VERTEX *      vertex;
+  double        nearest, dist, r, s, t;
+  double        a, b, c, p;
   ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
 
   for (index = 0; index < mris_src->nvertices; index++) {
@@ -1616,9 +1615,9 @@ static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
     pa[index][2] = mris_src->vertices[index].z;
   }
 
-  ANNkd_tree *annkdTree = new ANNkd_tree(pa, mris_src->nvertices, 3);
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNkd_tree * annkdTree = new ANNkd_tree(pa, mris_src->nvertices, 3);
+  ANNidxArray  annIndex  = new ANNidx[1];
+  ANNdistArray annDist   = new ANNdist[1];
   //  ANNpoint query_pt = annAllocPt(3);
   ANNpointArray QueryPt;
 
@@ -1643,14 +1642,14 @@ static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
         0);                // error bound
 
 #if 1
-    vertex = &mris_src->vertices[annIndex[0]];
+    vertex  = &mris_src->vertices[annIndex[0]];
     nearest = 100000;
     for (i = 0; i < vertex->num; i++) {
-      fno = vertex->f[i];
+      fno  = vertex->f[i];
       dist = v_to_f_distance(&mris_dst->vertices[index], mris_src, fno, 0);
       if (dist < nearest) {
         nearest = dist;
-        fnum = fno;
+        fnum    = fno;
       }
     }
 
@@ -2587,17 +2586,17 @@ lubksb(double** a,int n,int* indx,double* b)
 #endif
 static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
                               int face_number, int debug) {
-  double a, b, c, d, e, f, det, s, t, invDet;
-  double numer, denom, tmp0, tmp1;
+  double  a, b, c, d, e, f, det, s, t, invDet;
+  double  numer, denom, tmp0, tmp1;
   VERTEX *V1, *V2, *V3;
-  FACE *face;
+  FACE *  face;
 
   VERTEX E0, E1, D;
 
   face = &mri_surf->faces[face_number];
-  V1 = &mri_surf->vertices[face->v[0]];
-  V2 = &mri_surf->vertices[face->v[1]];
-  V3 = &mri_surf->vertices[face->v[2]];
+  V1   = &mri_surf->vertices[face->v[0]];
+  V2   = &mri_surf->vertices[face->v[1]];
+  V3   = &mri_surf->vertices[face->v[2]];
 
   E0.x = V2->x - V1->x;
   E0.y = V2->y - V1->y;
@@ -2605,9 +2604,9 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
   E1.x = V3->x - V1->x;
   E1.y = V3->y - V1->y;
   E1.z = V3->z - V1->z;
-  D.x = V1->x - P0->x;
-  D.y = V1->y - P0->y;
-  D.z = V1->z - P0->z;
+  D.x  = V1->x - P0->x;
+  D.y  = V1->y - P0->y;
+  D.z  = V1->z - P0->z;
 
   a = E0.x * E0.x + E0.y * E0.y + E0.z * E0.z;
   b = E0.x * E1.x + E0.y * E1.y + E0.z * E1.z;
@@ -2617,8 +2616,8 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
   f = D.x * D.x + D.y * D.y + D.z * D.z;
 
   det = a * c - b * b;
-  s = b * e - c * d;
-  t = b * d - a * e;
+  s   = b * e - c * d;
+  t   = b * d - a * e;
 
   if (debug)
     printf("det = %g\n", det);
@@ -2631,8 +2630,8 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
         if (tmp1 > tmp0) {
           numer = tmp1 - tmp0;
           denom = a - b - b + c;
-          s = (numer >= denom ? 1 : numer / denom);
-          t = 1 - s;
+          s     = (numer >= denom ? 1 : numer / denom);
+          t     = 1 - s;
 
         } else {
           s = 0;
@@ -2685,8 +2684,8 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
       if (tmp1 > tmp0) {     /* Minimum at line s + t = 1 */
         numer = tmp1 - tmp0; /* Positive */
         denom = a + c - b - b;
-        t = (numer >= denom ? 1 : (numer / denom));
-        s = 1 - t;
+        t     = (numer >= denom ? 1 : (numer / denom));
+        s     = 1 - t;
       } else { /* Minimum at line t = 0 */
         s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
         t = 0;
@@ -2700,7 +2699,7 @@ static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
         s = 0;
       } else {
         denom = a + c - b - b; /* denom is positive */
-        s = (numer >= denom ? 1 : (numer / denom));
+        s     = (numer >= denom ? 1 : (numer / denom));
       }
       t = 1 - s;
       if (debug)
@@ -2763,7 +2762,7 @@ sort(double **array, int order, int number, int total_number)
  ----------------------------------------------------------------------*/
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -2775,7 +2774,7 @@ static int get_option(int argc, char *argv[]) {
     SYNTHESIS = 1;
     fprintf(stdout, "Spherical wavelet synthesis\n");
   } else if (!stricmp(option, "C")) {
-    COMPARE = 1;
+    COMPARE   = 1;
     inc_fname = argv[2];
     threshold = atof(argv[3]);
     fprintf(stdout, "Reconstruct the surface using only coefs changes %f\n",

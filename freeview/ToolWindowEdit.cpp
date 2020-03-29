@@ -22,18 +22,18 @@
  *
  */
 #include "ToolWindowEdit.h"
-#include "ui_ToolWindowEdit.h"
-#include "Interactor2DVoxelEdit.h"
-#include "MainWindow.h"
-#include "Contour2D.h"
 #include "BrushProperty.h"
+#include "Contour2D.h"
+#include "DialogReplaceLabel.h"
+#include "Interactor2DVoxelEdit.h"
 #include "LayerCollection.h"
 #include "LayerMRI.h"
-#include "RenderView2D.h"
-#include "DialogReplaceLabel.h"
-#include <QTimer>
-#include <QSettings>
 #include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "RenderView2D.h"
+#include "ui_ToolWindowEdit.h"
+#include <QSettings>
+#include <QTimer>
 
 ToolWindowEdit::ToolWindowEdit(QWidget *parent)
     : QWidget(parent), UIUpdateHelper(), ui(new Ui::ToolWindowEdit) {
@@ -69,8 +69,8 @@ ToolWindowEdit::ToolWindowEdit(QWidget *parent)
   ui->widgetBusyIndicator->setColor(Qt::darkGray);
   ui->widgetBusyIndicator->setFixedSize(QSize(20, 20));
   connect(ag, SIGNAL(triggered(QAction *)), this, SLOT(OnEditMode(QAction *)));
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  BrushProperty *bp = mainwnd->GetBrushProperty();
+  MainWindow *   mainwnd = MainWindow::GetMainWindow();
+  BrushProperty *bp      = mainwnd->GetBrushProperty();
   connect(ui->spinBoxBrushSize, SIGNAL(valueChanged(int)), bp,
           SLOT(SetBrushSize(int)));
   connect(ui->spinBoxTolerance, SIGNAL(valueChanged(int)), bp,
@@ -195,7 +195,7 @@ void ToolWindowEdit::showEvent(QShowEvent *event) {
 
 void ToolWindowEdit::UpdateReconMode() {
   MainWindow *wnd = MainWindow::GetMainWindow();
-  bool bReconEdit =
+  bool        bReconEdit =
       wnd->GetRenderView(0)->GetInteractionMode() == RenderView::IM_ReconEdit;
   ui->checkBoxReconEditing->setChecked(bReconEdit);
   this->setWindowTitle(bReconEdit ? "Recon Edit" : "Voxel Edit");
@@ -216,8 +216,8 @@ void ToolWindowEdit::OnIdle() {
     allwidgets[i]->blockSignals(true);
   }
 
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  bool bReconEdit = mainwnd->GetRenderView(0)->GetInteractionMode() ==
+  MainWindow *mainwnd    = MainWindow::GetMainWindow();
+  bool        bReconEdit = mainwnd->GetRenderView(0)->GetInteractionMode() ==
                     RenderView::IM_ReconEdit;
   int nViewId = mainwnd->GetActiveViewId();
   if (nViewId > 2) {
@@ -246,13 +246,13 @@ void ToolWindowEdit::OnIdle() {
   ui->spinBoxTolerance->setEnabled(view->GetAction() ==
                                    Interactor2DVoxelEdit::EM_Fill);
 
-  BrushProperty *bp = mainwnd->GetBrushProperty();
+  BrushProperty *  bp    = mainwnd->GetBrushProperty();
   LayerVolumeBase *layer = bp->GetReferenceLayer();
 
   ui->comboBoxReference->clear();
   ui->comboBoxReference->addItem("None");
-  LayerCollection *lc = mainwnd->GetLayerCollection("MRI");
-  int nSel = 0;
+  LayerCollection *lc   = mainwnd->GetLayerCollection("MRI");
+  int              nSel = 0;
   for (int i = 0; i < lc->GetNumberOfLayers(); i++) {
     LayerMRI *mri = (LayerMRI *)lc->GetLayer(i);
     if (layer == mri) {
@@ -327,7 +327,8 @@ void ToolWindowEdit::OnIdle() {
   ui->lineEditGeoLambda->hide();
   ui->spinBoxGeoWsize->hide();
 
-  ui->checkBoxFill3D->setVisible(nAction != Interactor2DVoxelEdit::EM_GeoSeg && nAction != Interactor2DVoxelEdit::EM_Contour);
+  ui->checkBoxFill3D->setVisible(nAction != Interactor2DVoxelEdit::EM_GeoSeg &&
+                                 nAction != Interactor2DVoxelEdit::EM_Contour);
 
   for (int i = 0; i < allwidgets.size(); i++) {
     allwidgets[i]->blockSignals(false);
@@ -372,11 +373,11 @@ void ToolWindowEdit::OnEditMode(QAction *act) {
 }
 
 void ToolWindowEdit::OnLineEditContourValue(const QString &strg) {
-  bool bOK;
+  bool   bOK;
   double value = strg.toDouble(&bOK);
   if (bOK && value > 0) {
-    BrushProperty *bp = MainWindow::GetMainWindow()->GetBrushProperty();
-    LayerMRI *mri = (LayerMRI *)bp->GetReferenceLayer();
+    BrushProperty *bp  = MainWindow::GetMainWindow()->GetBrushProperty();
+    LayerMRI *     mri = (LayerMRI *)bp->GetReferenceLayer();
     for (int i = 0; i < 3; i++) {
       RenderView2D *view =
           (RenderView2D *)MainWindow::GetMainWindow()->GetRenderView(i);
@@ -394,7 +395,7 @@ void ToolWindowEdit::OnLineEditContourValue(const QString &strg) {
 }
 
 void ToolWindowEdit::OnLineEditSmoothSD(const QString &strg) {
-  bool bOK;
+  bool   bOK;
   double value = strg.toDouble(&bOK);
   if (bOK && value > 0) {
     for (int i = 0; i < 3; i++) {
@@ -408,7 +409,7 @@ void ToolWindowEdit::OnLineEditSmoothSD(const QString &strg) {
 }
 
 void ToolWindowEdit::OnLineEditFillValue(const QString &strg) {
-  bool bOK;
+  bool   bOK;
   double value = strg.toDouble(&bOK);
   if (bOK) {
     MainWindow::GetMainWindow()->GetBrushProperty()->SetFillValue(value);
@@ -416,7 +417,7 @@ void ToolWindowEdit::OnLineEditFillValue(const QString &strg) {
 }
 
 void ToolWindowEdit::OnLineEditEraseValue(const QString &strg) {
-  bool bOK;
+  bool   bOK;
   double value = strg.toDouble(&bOK);
   if (bOK) {
     MainWindow::GetMainWindow()->GetBrushProperty()->SetEraseValue(value);
@@ -424,11 +425,11 @@ void ToolWindowEdit::OnLineEditEraseValue(const QString &strg) {
 }
 
 void ToolWindowEdit::OnDrawRangeChanged(const QString &strg) {
-  bool bOK;
+  bool   bOK;
   double value = strg.toDouble(&bOK);
   if (bOK) {
-    BrushProperty *bp = MainWindow::GetMainWindow()->GetBrushProperty();
-    double *range = bp->GetDrawRange();
+    BrushProperty *bp    = MainWindow::GetMainWindow()->GetBrushProperty();
+    double *       range = bp->GetDrawRange();
     if (sender() == ui->lineEditDrawRangeLow) {
       bp->SetDrawRange(value, range[1]);
     } else if (sender() == ui->lineEditDrawRangeHigh) {
@@ -439,11 +440,11 @@ void ToolWindowEdit::OnDrawRangeChanged(const QString &strg) {
 }
 
 void ToolWindowEdit::OnExcludeRangeChanged(const QString &strg) {
-  bool bOK;
+  bool   bOK;
   double value = strg.toDouble(&bOK);
   if (bOK) {
-    BrushProperty *bp = MainWindow::GetMainWindow()->GetBrushProperty();
-    double *range = bp->GetExcludeRange();
+    BrushProperty *bp    = MainWindow::GetMainWindow()->GetBrushProperty();
+    double *       range = bp->GetExcludeRange();
     if (sender() == ui->lineEditExcludeRangeLow) {
       bp->SetExcludeRange(value, range[1]);
     } else if (sender() == ui->lineEditExcludeRangeHigh) {
@@ -454,11 +455,11 @@ void ToolWindowEdit::OnExcludeRangeChanged(const QString &strg) {
 }
 
 void ToolWindowEdit::OnEraseRangeChanged(const QString &strg) {
-  bool bOK;
+  bool   bOK;
   double value = strg.toDouble(&bOK);
   if (bOK) {
-    BrushProperty *bp = MainWindow::GetMainWindow()->GetBrushProperty();
-    double *range = bp->GetEraseRange();
+    BrushProperty *bp    = MainWindow::GetMainWindow()->GetBrushProperty();
+    double *       range = bp->GetEraseRange();
     if (sender() == ui->lineEditEraseRangeLow) {
       bp->SetEraseRange(value, range[1]);
     } else if (sender() == ui->lineEditEraseRangeHigh) {
@@ -469,11 +470,11 @@ void ToolWindowEdit::OnEraseRangeChanged(const QString &strg) {
 }
 
 void ToolWindowEdit::OnEraseExcludeRangeChanged(const QString &strg) {
-  bool bOK;
+  bool   bOK;
   double value = strg.toDouble(&bOK);
   if (bOK) {
-    BrushProperty *bp = MainWindow::GetMainWindow()->GetBrushProperty();
-    double *range = bp->GetEraseExcludeRange();
+    BrushProperty *bp    = MainWindow::GetMainWindow()->GetBrushProperty();
+    double *       range = bp->GetEraseExcludeRange();
     if (sender() == ui->lineEditEraseExcludeRangeLow) {
       bp->SetEraseExcludeRange(value, range[1]);
     } else if (sender() == ui->lineEditEraseExcludeRangeHigh) {
@@ -504,9 +505,9 @@ void ToolWindowEdit::OnReplaceLabel() {
 }
 
 void ToolWindowEdit::OnCheckReconEditing(bool bRecon) {
-  static int old_erase_value = 0;
-  static bool exclude_enabled = false;
-  static double exclude_range[2] = {0, 0};
+  static int     old_erase_value  = 0;
+  static bool    exclude_enabled  = false;
+  static double  exclude_range[2] = {0, 0};
   BrushProperty *bp = MainWindow::GetMainWindow()->GetBrushProperty();
   if (bRecon) {
     /*
@@ -521,11 +522,11 @@ void ToolWindowEdit::OnCheckReconEditing(bool bRecon) {
             }
         }
         */
-    old_erase_value = bp->GetEraseValue();
-    double *r = bp->GetExcludeRange();
+    old_erase_value  = bp->GetEraseValue();
+    double *r        = bp->GetExcludeRange();
     exclude_range[0] = r[0];
     exclude_range[1] = r[1];
-    exclude_enabled = bp->GetExcludeRangeEnabled();
+    exclude_enabled  = bp->GetExcludeRangeEnabled();
     bp->SetFillValue(255);
     bp->SetEraseValue(1);
     bp->SetExcludeRangeEnabled(true);
@@ -575,11 +576,11 @@ void ToolWindowEdit::OnButtonGeoSegGo() {
     LayerMRI *mri_fill = qobject_cast<LayerMRI *>(
         MainWindow::GetMainWindow()->FindSupplementLayer("GEOS_FILL"));
     if (mri_draw && mri_fill) {
-      double lambda = ui->lineEditGeoLambda->text().trimmed().toDouble();
+      double lambda   = ui->lineEditGeoLambda->text().trimmed().toDouble();
       double max_dist = ui->lineEditGeoMaxDistance->text().trimmed().toDouble();
-      int wsize = ui->spinBoxGeoWsize->value();
+      int    wsize    = ui->spinBoxGeoWsize->value();
       mri_fill->ClearVoxels();
-      bool ok = false;
+      bool   ok  = false;
       double std = 0;
       if (ui->checkBoxApplySmoothing->isChecked())
         std = ui->lineEditSmoothingStd->text().toDouble(&ok);

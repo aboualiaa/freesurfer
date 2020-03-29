@@ -25,43 +25,43 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "utils.h"
-#include "timer.h"
-#include "version.h"
 #include "cma.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
-MRI *MRIsimulateAtrophy(MRI *mri_norm, MRI *mri_aseg, int target_label,
-                        int *border_labels, int nlabels, float atrophy_pct,
-                        MRI *mri_norm_atrophy);
+MRI *       MRIsimulateAtrophy(MRI *mri_norm, MRI *mri_aseg, int target_label,
+                               int *border_labels, int nlabels, float atrophy_pct,
+                               MRI *mri_norm_atrophy);
 
 static float noise_sigma = 4;
 static float atrophy_pct = 0.05;
-static int nlabels = 1;
-static int nlabels_set = 0;
+static int   nlabels     = 1;
+static int   nlabels_set = 0;
 #define MAX_LABELS 100
 static int target_labels[MAX_LABELS] = {Left_Hippocampus};
 static int border_labels[MAX_LABELS][MAX_LABELS];
 
 int main(int argc, char *argv[]) {
   char **av, *out_fname;
-  int ac, nargs, msec, minutes, seconds;
-  Timer start;
-  MRI *mri_aseg, *mri_norm, *mri_norm_atrophy, *mri_noise;
+  int    ac, nargs, msec, minutes, seconds;
+  Timer  start;
+  MRI *  mri_aseg, *mri_norm, *mri_norm_atrophy, *mri_noise;
 
   nargs = handleVersionOption(argc, argv, "mri_simulate_atrophy");
   if (nargs && argc - nargs == 1)
@@ -78,9 +78,9 @@ int main(int argc, char *argv[]) {
   border_labels[0][0] = Left_Lateral_Ventricle;
   border_labels[0][1] = Left_Inf_Lat_Vent;
   border_labels[0][2] = Unknown;
-  nlabels = 3;
-  ac = argc;
-  av = argv;
+  nlabels             = 3;
+  ac                  = argc;
+  av                  = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
   MRIadd(mri_norm_atrophy, mri_noise, mri_norm_atrophy);
   printf("writing simulated atrophy image to %s\n", out_fname);
   MRIwrite(mri_norm_atrophy, out_fname);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -183,13 +183,13 @@ MRI *MRIsimulateAtrophy(MRI *mri_norm, MRI *mri_aseg, int target_label,
                         int *border_labels, int nlabels, float atrophy_pct,
                         MRI *mri_norm_atrophy) {
   float total_volume, pv, border_volume, vox_vol, pct_border_reduction;
-  MRI *mri_mixing = MRIcloneDifferentType(mri_aseg, MRI_FLOAT),
+  MRI * mri_mixing    = MRIcloneDifferentType(mri_aseg, MRI_FLOAT),
       *mri_nbr_labels = MRIclone(mri_aseg, NULL);
-  int x, y, z;
-  int nbr_label, vox_label, i;
+  int   x, y, z;
+  int   nbr_label, vox_label, i;
   float mean_label, mean_nbr, val;
 
-  vox_vol = mri_norm->xsize * mri_norm->ysize * mri_norm->zsize;
+  vox_vol          = mri_norm->xsize * mri_norm->ysize * mri_norm->zsize;
   mri_norm_atrophy = MRIcopy(mri_norm, NULL);
 
   MRIsetValues(mri_nbr_labels, Left_undetermined);
@@ -241,13 +241,13 @@ MRI *MRIsimulateAtrophy(MRI *mri_norm, MRI *mri_aseg, int target_label,
           continue; // not an allowable border label
 
         // compute mean of this label
-        pv = MRIgetVoxVal(mri_mixing, x, y, z, 0);
+        pv         = MRIgetVoxVal(mri_mixing, x, y, z, 0);
         mean_label = MRImeanInLabelInRegion(mri_norm, mri_aseg, target_label, x,
                                             y, z, 7, NULL);
-        mean_nbr = MRImeanInLabelInRegion(mri_norm, mri_aseg, nbr_label, x, y,
+        mean_nbr   = MRImeanInLabelInRegion(mri_norm, mri_aseg, nbr_label, x, y,
                                           z, 7, NULL);
-        val = MRIgetVoxVal(mri_norm, x, y, z, 0);
-        pv = (val - mean_nbr) / (mean_label - mean_nbr);
+        val        = MRIgetVoxVal(mri_norm, x, y, z, 0);
+        pv         = (val - mean_nbr) / (mean_label - mean_nbr);
         if (pv <= 0)
           continue;
         if (pv > 1)

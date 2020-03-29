@@ -25,10 +25,10 @@
 
 #include "diag.h"
 #include "mrimorph.h"
-#include "version.h"
 #include "romp_support.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -37,29 +37,29 @@ static void usage_exit(int code);
 static char sdir[STRLEN];
 
 static float min_area = 10;
-static int dilate = 0;
-static int erode = 0;
+static int   dilate   = 0;
+static int   erode    = 0;
 
 #define MAX_SUBJECTS 100
 static int compute_segmentation_stats(MRI_SURFACE *mris, LABEL *true_label,
                                       LABEL **segments, int nsegments, int *ptp,
                                       int *ptn, int *pfp, int *pfn);
 static int write_roc_curve(MRI_SURFACE *mris[MAX_SUBJECTS],
-                           LABEL *labels[MAX_SUBJECTS],
+                           LABEL *      labels[MAX_SUBJECTS],
                            MRI *mri_overlays[MAX_SUBJECTS], float min_area,
                            int dilate, int erode, char *out_fname,
                            int nsubjects);
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN], *subject;
-  int ac, nargs, i;
-  const char *hemi;
-  char         *out_fname, *cp, *true_label_name, *segmentation_name ;
-  int          msec, minutes, seconds, nsubjects ;
-  Timer start ;
-  LABEL        *labels[MAX_SUBJECTS] ;
-  MRI          *mri_overlays[MAX_SUBJECTS] ;
-  MRI_SURFACE  *mris[MAX_SUBJECTS] ;
+  char **      av, fname[STRLEN], *subject;
+  int          ac, nargs, i;
+  const char * hemi;
+  char *       out_fname, *cp, *true_label_name, *segmentation_name;
+  int          msec, minutes, seconds, nsubjects;
+  Timer        start;
+  LABEL *      labels[MAX_SUBJECTS];
+  MRI *        mri_overlays[MAX_SUBJECTS];
+  MRI_SURFACE *mris[MAX_SUBJECTS];
 
   nargs = handleVersionOption(argc, argv, "mris_segmentation_stats");
   if (nargs && argc - nargs == 1)
@@ -91,8 +91,8 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
   segmentation_name = argv[1];
-  true_label_name = argv[2];
-  nsubjects = argc - 4;
+  true_label_name   = argv[2];
+  nsubjects         = argc - 4;
   for (i = 0; i < nsubjects; i++) {
     subject = argv[i + 3];
     sprintf(fname, "%s/%s/label/lh.%s.label", sdir, subject, true_label_name);
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
                   out_fname, nsubjects);
   printf("writing outputs to %s\n", out_fname);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -195,7 +195,7 @@ static void usage_exit(int code) {
 static int compute_segmentation_stats(MRI_SURFACE *mris, LABEL *true_label,
                                       LABEL **segments, int nsegments, int *ptp,
                                       int *ptn, int *pfp, int *pfn) {
-  int n, vno, tp, fp, tn, fn;
+  int     n, vno, tp, fp, tn, fn;
   VERTEX *v;
 
   MRISclearMarks(mris);
@@ -232,15 +232,15 @@ static int compute_segmentation_stats(MRI_SURFACE *mris, LABEL *true_label,
   return (NO_ERROR);
 }
 static int write_roc_curve(MRI_SURFACE *mris[MAX_SUBJECTS],
-                           LABEL *labels[MAX_SUBJECTS],
+                           LABEL *      labels[MAX_SUBJECTS],
                            MRI *mri_overlays[MAX_SUBJECTS], float min_area,
                            int dilate, int erode, char *out_fname,
                            int nsubjects) {
-  FILE *fp;
-  float min_val, max_val, total_min, total_max, step, thresh;
-  int n, nlabels = 0;
+  FILE *  fp;
+  float   min_val, max_val, total_min, total_max, step, thresh;
+  int     n, nlabels = 0;
   LABEL **segments = NULL;
-  int tpos, fpos, tneg, fneg, tps[MAX_SUBJECTS], fps[MAX_SUBJECTS],
+  int     tpos, fpos, tneg, fneg, tps[MAX_SUBJECTS], fps[MAX_SUBJECTS],
       tns[MAX_SUBJECTS], fns[MAX_SUBJECTS], i;
 
   fp = fopen(out_fname, "w");
@@ -258,7 +258,7 @@ static int write_roc_curve(MRI_SURFACE *mris[MAX_SUBJECTS],
   for (thresh = total_max + step; thresh >= total_min - step; thresh -= step) {
     printf("setting thresh = %2.4f\n", thresh);
     fpos = fneg = tpos = tneg = 0;
-    i = 0;
+    i                         = 0;
     ROMP_PF_begin
 #ifdef HAVE_OPENMP
 #pragma omp parallel for if_ROMP(experimental)                                 \

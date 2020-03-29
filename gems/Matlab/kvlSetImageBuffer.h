@@ -9,7 +9,7 @@ template <class ImageType> class SetImageBufferHelper {
 public:
   //
   static bool AssignImageBuffer(const mxArray *matlabObject,
-                                itk::Object *imageObject) {
+                                itk::Object *  imageObject) {
     itk::Object::Pointer itkObject =
         ImageConverter<ImageType>::Convert(matlabObject);
     if (itkObject == nullptr) {
@@ -30,9 +30,9 @@ public:
 class SetImageBuffer : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef SetImageBuffer Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef SetImageBuffer                Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -41,7 +41,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SetImageBuffer, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -53,7 +54,7 @@ public:
     }
 
     // Get the object the image is pointing to
-    const int imageHandle = *(static_cast<int *>(mxGetData(prhs[0])));
+    const int    imageHandle = *(static_cast<int *>(mxGetData(prhs[0])));
     itk::Object *imageObject =
         kvl::MatlabObjectArray::GetInstance()->GetObject(imageHandle);
 
@@ -85,8 +86,10 @@ public:
   }
 
 protected:
-  SetImageBuffer()= default;;
-  ~SetImageBuffer() override= default;;
+  SetImageBuffer() = default;
+  ;
+  ~SetImageBuffer() override = default;
+  ;
 
   SetImageBuffer(const Self &); // purposely not implemented
   void operator=(const Self &); // purposely not implemented

@@ -24,19 +24,19 @@
  */
 
 #include "LayerLandmarks.h"
-#include <QDebug>
+#include "LayerMRI.h"
 #include "vtkActor.h"
+#include "vtkCutter.h"
+#include "vtkMatrix4x4.h"
+#include "vtkPlane.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
-#include "vtkSphereSource.h"
 #include "vtkRenderer.h"
-#include "vtkCutter.h"
+#include "vtkSphereSource.h"
 #include "vtkStripper.h"
 #include "vtkTriangleFilter.h"
-#include "vtkPlane.h"
-#include "LayerMRI.h"
-#include "vtkMatrix4x4.h"
+#include <QDebug>
 
 Landmark::Landmark() {
   actorSphere = vtkSmartPointer<vtkActor>::New();
@@ -68,7 +68,7 @@ void LayerLandmarks::Append2DProps(vtkRenderer *renderer, int nPlane) {
 }
 
 void LayerLandmarks::Append3DProps(vtkRenderer *renderer,
-                                   bool *bPlaneVisibility) {
+                                   bool *       bPlaneVisibility) {
   Q_UNUSED(bPlaneVisibility);
   for (int i = 0; i < m_landmarks.size(); i++)
     renderer->AddViewProp(m_landmarks[i].actorSphere);
@@ -129,7 +129,7 @@ void LayerLandmarks::SetLandmarkPosition(int n, double x, double y, double z) {
   m_landmarks[n].pos[0] = x;
   m_landmarks[n].pos[1] = y;
   m_landmarks[n].pos[2] = z;
-  m_landmarks[n].valid = true;
+  m_landmarks[n].valid  = true;
   UpdateActors();
 }
 
@@ -150,7 +150,7 @@ bool LayerLandmarks::MakeSureLandmarkExist(int n) {
 }
 
 void LayerLandmarks::UpdateActors(bool bBuild3D) {
-  double scale = 1;
+  double scale         = 1;
   double voxel_size[3] = {1, 1, 1};
   if (m_mriRef) {
     m_mriRef->GetImageData()->GetSpacing(voxel_size);
@@ -177,7 +177,7 @@ void LayerLandmarks::UpdateActors(bool bBuild3D) {
             vtkSmartPointer<vtkSphereSource>::New();
         double point[3] = {m_landmarks[i].pos[0], m_landmarks[i].pos[1],
                            m_landmarks[i].pos[2]};
-        point[j] = m_dSlicePosition[j];
+        point[j]        = m_dSlicePosition[j];
         sphere->SetCenter(point);
         sphere->SetRadius(m_dRadius * scale);
         sphere->SetThetaResolution(12);

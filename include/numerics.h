@@ -28,8 +28,8 @@
 
 MATRIX *MatrixSqrt(MATRIX *m, MATRIX *sqrtm);
 
-#define SPLINE_USE_QUADRATIC 0
-#define SPLINE_USE_FIRST_DERIVATIVE 1
+#define SPLINE_USE_QUADRATIC         0
+#define SPLINE_USE_FIRST_DERIVATIVE  1
 #define SPLINE_USE_SECOND_DERIVATIVE 2
 
 float OpenBetaIncomplete(float a, float b, float x);
@@ -47,9 +47,9 @@ int OpenLUMatrixInverse(MATRIX *matrix, MATRIX *inverse);
 
 void OpenPowell(float p[], float **ioInitialDirection, int n, float ftol,
                 int *iter, float *fret, float (*func)(float[]));
-int OpenPowell2(float p[], float **ioInitialDirection, int n, float ftol,
-                float linmintol, int maxiters, int *iter, float *fret,
-                float (*func)(float[]));
+int  OpenPowell2(float p[], float **ioInitialDirection, int n, float ftol,
+                 float linmintol, int maxiters, int *iter, float *fret,
+                 float (*func)(float[]));
 
 int OpenEigenSystem(float *iaData, int icData, float *oEigenValues,
                     float *oEigenVectors);
@@ -75,10 +75,10 @@ float SplineCubicValue(int n, float t[], float tval, float y[], float ypp[],
 
 float *d3_np_fs(int n, float a[], float b[]);
 
-float *vector(long nl, long nh);
+float * vector(long nl, long nh);
 float **matrix(long nrl, long nrh, long ncl, long nch);
-void free_vector(float *v, long nl, long nh);
-void free_matrix(float **m, long nrl, long nrh, long ncl, long nch);
+void    free_vector(float *v, long nl, long nh);
+void    free_matrix(float **m, long nrl, long nrh, long ncl, long nch);
 
 #ifdef INFINITY
 #define SC_POSINF INFINITY
@@ -91,24 +91,24 @@ void free_matrix(float **m, long nrl, long nrh, long ncl, long nch);
 //########################### RNG #####################
 
 typedef struct {
-  unsigned int i;
-  unsigned int j;
-  unsigned int n;
-  unsigned int skip;
-  unsigned int carry;
+  unsigned int      i;
+  unsigned int      j;
+  unsigned int      n;
+  unsigned int      skip;
+  unsigned int      carry;
   unsigned long int u[24];
 } sc_status_t;
 
 typedef struct {
-  const char *name;
+  const char *      name;
   unsigned long int min;
   unsigned long int max;
-  int size;
+  int               size;
 } sc_rng_type;
 
 typedef struct {
   const sc_rng_type *type;
-  void *status;
+  void *             status;
 } sc_rng;
 
 static const sc_rng_type intern_rng_type = {"rng_generator", 0x00ffffffUL, 0,
@@ -120,9 +120,9 @@ int sc_linalg_cholesky_decomp(MATRIX *U);
 
 //##########
 sc_rng *sc_rng_alloc(const sc_rng_type *T);
-void sc_rng_free(sc_rng *r);
+void    sc_rng_free(sc_rng *r);
 
-void sc_rng_set(sc_rng *r, unsigned long int seed);
+void              sc_rng_set(sc_rng *r, unsigned long int seed);
 unsigned long int sc_rng_get(const sc_rng *R);
 
 //##########

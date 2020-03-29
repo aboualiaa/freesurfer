@@ -38,10 +38,10 @@ typedef struct {
 } IC_FACE;
 
 typedef struct {
-  int nvertices;
-  int nfaces;
+  int        nvertices;
+  int        nfaces;
   IC_VERTEX *vertices;
-  IC_FACE *faces;
+  IC_FACE *  faces;
 } ICOSAHEDRON;
 
 MRI_SURFACE *ic642_make_surface(int max_vertices, int max_faces);
@@ -59,17 +59,17 @@ MRI_SURFACE *ICOreadOverAlloc(const char *fname, double nVFMultiplier,
 int ICOreadVertexPositions(MRI_SURFACE *mris, const char *fname, int which);
 MRI_SURFACE *ReadIcoByOrder(int IcoOrder, float RescaleFactor);
 MRI_SURFACE *ReadIcoByNVtxs(int nIcoVtxs, float RescaleFactor);
-int IcoOrderFromNVtxs(int nIcoVtxs);
-int IcoNVtxsFromOrder(int IcoOrder);
+int          IcoOrderFromNVtxs(int nIcoVtxs);
+int          IcoNVtxsFromOrder(int IcoOrder);
 
 #define ICO4_NVERTICES 2562
-#define ICO4_NFACES 5120
+#define ICO4_NFACES    5120
 #define ICO0_NVERTICES 12
 
 extern IC_VERTEX ic2562_vertices[];
-extern IC_FACE ic2562_faces[];
+extern IC_FACE   ic2562_faces[];
 extern IC_VERTEX ic0_vertices[12];
-extern IC_FACE ic0_faces[20];
+extern IC_FACE   ic0_faces[20];
 
 // version of ic2562 used for testing mrishash.c, contributed by G. Wideman
 MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
@@ -84,20 +84,20 @@ int IcoFindNClosestVertices(IC_VERTEX *vertices, int nvertices, float nx,
 
 #define MAX_ICP_LEVELS 8
 typedef struct {
-  int nfaces;   // total # of faces (first dimension of faces)
-  int *nmapped; // # of finer scale faces within this face
+  int   nfaces;  // total # of faces (first dimension of faces)
+  int * nmapped; // # of finer scale faces within this face
   int **faces;
 } ICO_FACE_LIST, ICF;
 
 typedef struct {
-  int min_level;
-  int nlevels;
+  int          min_level;
+  int          nlevels;
   MRI_SURFACE *icos[MAX_ICP_LEVELS];
-  ICF *icfs[MAX_ICP_LEVELS];
+  ICF *        icfs[MAX_ICP_LEVELS];
 } ICO_PYRAMID, ICP;
 
 ICO_PYRAMID *ICPread(int min_level, int max_level);
-int ICPfree(ICP **picp);
+int          ICPfree(ICP **picp);
 
 MRIS *ICOtoMRIS(ICOSAHEDRON const *const ico, int max_vertices, int max_faces);
 

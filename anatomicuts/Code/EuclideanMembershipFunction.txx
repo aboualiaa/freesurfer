@@ -8,7 +8,7 @@
 template <class TVector>
 EuclideanMembershipFunction<TVector>::EuclideanMembershipFunction()
     : Superclass() {
-  this->m_Variance = 0;
+  this->m_Variance   = 0;
   this->m_withCosine = false;
 }
 template <class TVector>
@@ -20,9 +20,9 @@ template <class TVector>
 double EuclideanMembershipFunction<TVector>::Evaluate(
     const MeasurementVectorType *m1, const MeasurementVectorType *m2) const {
   typedef typename MeasurementVectorType::CellType CellType;
-  const std::vector<CellType> *labels1 = m1->GetLabels();
-  const std::vector<CellType> *labels2 = m2->GetLabels();
-  double dist = 0.0, dist_inv = 0.0;
+  const std::vector<CellType> *                    labels1 = m1->GetLabels();
+  const std::vector<CellType> *                    labels2 = m2->GetLabels();
+  double                                           dist = 0.0, dist_inv = 0.0;
   // double cos=1, cos_inv=1;
   // std::cout << labels1->size() << std::endl;
 
@@ -54,10 +54,10 @@ double EuclideanMembershipFunction<TVector>::Evaluate(
         cos += vec[k] * vec2[k];
         cos_inv += vec[k] * vec2_inv[k];
       }
-      norm2 = (sqrt(norm) * sqrt(norm2));
+      norm2     = (sqrt(norm) * sqrt(norm2));
       norm2_inv = (sqrt(norm) * sqrt(norm2_inv));
-      cos = abs(cos / norm2);
-      cos_inv = abs(cos_inv / norm2_inv);
+      cos       = abs(cos / norm2);
+      cos_inv   = abs(cos_inv / norm2_inv);
     }
     // dist+= (1/sqrt(euclid+1.0))*cos;
     // dist_inv+= (1/sqrt(euclid_inv+1.0))*cos_inv;
@@ -83,8 +83,8 @@ void EuclideanMembershipFunction<TVector>::AddChild(
 }
 template <class TVector>
 void EuclideanMembershipFunction<TVector>::RecalculateCentroid() {
-  this->m_Variance = 0;
-  int numPoints = this->GetCentroid()->GetLabels()->size();
+  this->m_Variance                = 0;
+  int                   numPoints = this->GetCentroid()->GetLabels()->size();
   MeasurementVectorType averageMv(numPoints * 3);
 
   for (int i = 0; i < this->childs.size(); i++) {

@@ -27,12 +27,12 @@
 
 #include <sys/time.h>
 
-#include "error.h"
 #include "diag.h"
-#include "matfile.h"
+#include "error.h"
 #include "evschutils.h"
-#include "version.h"
+#include "matfile.h"
 #include "numerics.h"
+#include "version.h"
 
 /* Things to do:
    1. Automatically compute Ntp such that Null has as much time
@@ -68,107 +68,107 @@ Can something be done to affect the off-diagonals?
 #undef X
 #endif
 
-static char vcid[] = "$Id: optseq2.c,v 2.22 2011/04/21 19:48:51 greve Exp $";
+static char vcid[]   = "$Id: optseq2.c,v 2.22 2011/04/21 19:48:51 greve Exp $";
 const char *Progname = nullptr;
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
-static void argnerr(char *option, int n);
-static void dump_options(FILE *fp);
-static int isflag(char *flag);
-static int nth_is_arg(int nargc, char **argv, int nth);
-static int singledash(char *flag);
-static int stringmatch(char *str1, char *str2);
-static int PrintUpdate(FILE *fp, int n);
-static int CheckIntMult(float val, float res, float tol);
+static int     parse_commandline(int argc, char **argv);
+static void    check_options();
+static void    print_usage();
+static void    usage_exit();
+static void    print_help();
+static void    print_version();
+static void    argnerr(char *option, int n);
+static void    dump_options(FILE *fp);
+static int     isflag(char *flag);
+static int     nth_is_arg(int nargc, char **argv, int nth);
+static int     singledash(char *flag);
+static int     stringmatch(char *str1, char *str2);
+static int     PrintUpdate(FILE *fp, int n);
+static int     CheckIntMult(float val, float res, float tol);
 static MATRIX *ContrastMatrix(float *EVContrast, int nEVs, int nPer, int nNuis,
                               int SumDelays);
 static MATRIX *AR1WhitenMatrix(double rho, int N);
-int debug = 0;
+int            debug = 0;
 
-int Ntp = -1;
-float TR = -1.0;
+int   Ntp      = -1;
+float TR       = -1.0;
 float TPreScan = 0.0;
 
-int PSDSpeced = 0;
+int   PSDSpeced = 0;
 float PSDMin;
 float PSDMax;
 float dPSD = -1;
 float PSDWindow;
-int nPSDWindow;
+int   nPSDWindow;
 
-int nEvTypes = 0;
+int   nEvTypes = 0;
 float EvDuration[500];
-int EvReps[500];
-int EvRepsNom[500];
-float PctVarEvReps = 0.0;
-int VarEvRepsPerCond = 0;
+int   EvReps[500];
+int   EvRepsNom[500];
+float PctVarEvReps     = 0.0;
+int   VarEvRepsPerCond = 0;
 char *EvLabel[500];
 float TStimTot;
 float TScanTot;
 
-int PolyOrder = -1;
-char *outstem = nullptr;
-char *mtxstem = nullptr;
+int   PolyOrder = -1;
+char *outstem   = nullptr;
+char *mtxstem   = nullptr;
 char *infilelist[1000];
-int nInFiles = 0;
+int   nInFiles = 0;
 
-int nSearch = -1; /* target number */
-int nSearched;    /* actual number */
-int NoSearch = 0;
-float tSearch = -1;
+int   nSearch = -1; /* target number */
+int   nSearched;    /* actual number */
+int   NoSearch = 0;
+float tSearch  = -1;
 float tSearched;
 float PctUpdate = 10;
-int Update = 1;
-long seed = -1;
-int nKeep = -1;
-int nCB1Opt = 0;
-float tNullMin = 0.0;
-float tNullMax = -1;
+int   Update    = 1;
+long  seed      = -1;
+int   nKeep     = -1;
+int   nCB1Opt   = 0;
+float tNullMin  = 0.0;
+float tNullMax  = -1;
 
 EVSCH **EvSchList;
-char *SvAllFile = nullptr;
-FILE *fpSvAll;
+char *  SvAllFile = nullptr;
+FILE *  fpSvAll;
 
-int nTaskAvgs;
-int CostId = EVS_COST_EFF;
+int         nTaskAvgs;
+int         CostId = EVS_COST_EFF;
 const char *CostString;
-float CostSum, CostSum2, CostAvg, CostStd, SumCorrect, Sum2Correct;
-float EffMax, VRFAvgMax;
-float VRFAvgStd_Cost_Ratio;
+float       CostSum, CostSum2, CostAvg, CostStd, SumCorrect, Sum2Correct;
+float       EffMax, VRFAvgMax;
+float       VRFAvgStd_Cost_Ratio;
 int nSince; /* niterations since one of the kept schedules  has changed */
 
-char *SumFile = nullptr;
-char *LogFile = nullptr;
-float PctDone, PctDoneLast, PctDoneSince;
-int UpdateNow;
+char *  SumFile = nullptr;
+char *  LogFile = nullptr;
+float   PctDone, PctDoneLast, PctDoneSince;
+int     UpdateNow;
 MATRIX *C = nullptr;
-float EVContrast[1000];
-int ContrastSumDelays = 0, nEVContrast = 0;
-char *CMtxFile = nullptr;
-double ar1rho = 0;
+float   EVContrast[1000];
+int     ContrastSumDelays = 0, nEVContrast = 0;
+char *  CMtxFile = nullptr;
+double  ar1rho   = 0;
 
-int penalize = 0;
+int    penalize = 0;
 double penalpha = 0, penT = 0, pendtmin = 0;
 
 /*-------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  EVSCH *EvSch;
+  EVSCH * EvSch;
   MATRIX *Xfir = nullptr, *Xpoly = nullptr, *X = nullptr, *Xt = nullptr,
          *XtX = nullptr, *XtXIdeal = nullptr, *W = nullptr;
-  int m, n, nthhit = 0;
+  int m, n, nthhit                               = 0;
   // float eff, cb1err, vrfavg, vrfstd, vrfmin, vrfmax, vrfrange;
-  char fname[2000];
-  FILE *fpsum, *fplog;
+  char           fname[2000];
+  FILE *         fpsum, *fplog;
   struct timeval tod;
-  long tNow, tStart;
-  float ftmp = 0, effxtxideal = 0;
-  int Singular;
-  int nargs;
+  long           tNow, tStart;
+  float          ftmp = 0, effxtxideal = 0;
+  int            Singular;
+  int            nargs;
 
   nargs = handleVersionOption(argc, argv, "optseq2");
   if (nargs && argc - nargs == 1)
@@ -240,9 +240,9 @@ int main(int argc, char **argv) {
   }
 
   /* Check DOF constraint */
-  PSDWindow = PSDMax - PSDMin;
+  PSDWindow  = PSDMax - PSDMin;
   nPSDWindow = rint(PSDWindow / dPSD);
-  nTaskAvgs = nPSDWindow * nEvTypes; /* for FIR only */
+  nTaskAvgs  = nPSDWindow * nEvTypes; /* for FIR only */
   printf("nTaskAvgs = %d\n", nTaskAvgs);
   if (nTaskAvgs >= Ntp) {
     printf("\nERROR: DOF Constraint Violation: number of estimates (%d)\n"
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
     for (n = 0; n < nInFiles; n++) {
       // printf("INFO: reading %s\n",infilelist[n]);
       EvSchList[n] = EVSreadPar(infilelist[n]);
-      Xfir = EVSfirMtxAll(EvSchList[n], 0, TR, Ntp, PSDMin, PSDMax, dPSD);
+      Xfir     = EVSfirMtxAll(EvSchList[n], 0, TR, Ntp, PSDMin, PSDMax, dPSD);
       Singular = EVSdesignMtxStats(Xfir, Xpoly, EvSchList[n], C, W);
       MatrixFree(&Xfir);
       if (Singular)
@@ -326,20 +326,20 @@ int main(int argc, char **argv) {
       1.0 / MatrixTrace(MatrixInverse(XtXIdeal, nullptr)); /* need dealloc */
 
   /* --------- Prep for Search --------------*/
-  nthhit = 0;
+  nthhit    = 0;
   nSearched = 0;
   gettimeofday(&tod, nullptr);
-  tStart = tod.tv_sec;
-  nSince = 0;
-  CostSum = 0.0;
-  CostSum2 = 0.0;
-  SumCorrect = 0.0;
+  tStart      = tod.tv_sec;
+  nSince      = 0;
+  CostSum     = 0.0;
+  CostSum2    = 0.0;
+  SumCorrect  = 0.0;
   Sum2Correct = 0.0;
-  EffMax = 0.0;
-  VRFAvgMax = 0.0;
-  PctDone = 0.0;
+  EffMax      = 0.0;
+  VRFAvgMax   = 0.0;
+  PctDone     = 0.0;
   PctDoneLast = 0.0;
-  UpdateNow = 1;
+  UpdateNow   = 1;
   if (SvAllFile != nullptr) {
     fpSvAll = fopen(SvAllFile, "w");
     if (fpSvAll == nullptr) {
@@ -364,7 +364,7 @@ int main(int argc, char **argv) {
 
     /* Termination Condition */
     gettimeofday(&tod, nullptr);
-    tNow = tod.tv_sec;
+    tNow      = tod.tv_sec;
     tSearched = (tNow - tStart) / 3600.0;
     if ((tSearch > 0) && (tSearched >= tSearch))
       break;
@@ -401,7 +401,7 @@ int main(int argc, char **argv) {
     Xfir = EVSfirMtxAll(EvSch, 0, TR, Ntp, PSDMin, PSDMax, dPSD);
 
     /* Compute XtXIdeal Error */
-    Xt = MatrixTranspose(Xfir, Xt);
+    Xt  = MatrixTranspose(Xfir, Xt);
     XtX = MatrixMultiply(Xt, Xfir, XtX);
 
     EvSch->idealxtxerr = 0;
@@ -424,17 +424,17 @@ int main(int argc, char **argv) {
     //  CostSum += EvSch->cost;
     { // Kahan summation algorithm for correction of sum error accumulation:
       // http://en.wikipedia.org/wiki/Kahan_summation_algorithm
-      float y = EvSch->cost - SumCorrect;
-      float t = CostSum + y;
+      float y    = EvSch->cost - SumCorrect;
+      float t    = CostSum + y;
       SumCorrect = (t - CostSum) - y;
-      CostSum = t;
+      CostSum    = t;
     }
     //  CostSum2 += (EvSch->cost * EvSch->cost);
     { // Kahan summation algorithm for correction of sum error accumulation:
-      float y = (EvSch->cost * EvSch->cost) - Sum2Correct;
-      float t = CostSum2 + y;
+      float y     = (EvSch->cost * EvSch->cost) - Sum2Correct;
+      float t     = CostSum2 + y;
       Sum2Correct = (t - CostSum2) - y;
-      CostSum2 = t;
+      CostSum2    = t;
     }
     if (EffMax < EvSch->eff)
       EffMax = EvSch->eff;
@@ -486,7 +486,7 @@ int main(int argc, char **argv) {
       PrintUpdate(fplog, 0);
       PrintUpdate(stdout, 0);
       PctDoneLast = PctDone;
-      UpdateNow = 0;
+      UpdateNow   = 0;
     }
 
     nthhit++;
@@ -610,7 +610,7 @@ PastSearch:
     if (mtxstem != nullptr) {
       sprintf(fname, "%s_%03d.mat", mtxstem, n + 1);
       Xfir = EVSfirMtxAll(EvSchList[n], 0, TR, Ntp, PSDMin, PSDMax, dPSD);
-      X = MatrixHorCat(Xfir, Xpoly, nullptr);
+      X    = MatrixHorCat(Xfir, Xpoly, nullptr);
       MatlabWrite(X, fname, "X");
       MatrixFree(&Xfir);
       MatrixFree(&X);
@@ -636,10 +636,10 @@ PastSearch:
 /*-------------------------------------------------------------*/
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  char fname[2000], *instem;
-  FILE *fp;
+  char   fname[2000], *instem;
+  FILE * fp;
 
   if (argc < 1)
     usage_exit();
@@ -814,27 +814,27 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--o")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outstem = pargv[0];
+      outstem   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--cmtx")) {
       if (nargc < 1)
         argnerr(option, 1);
-      CMtxFile = pargv[0];
+      CMtxFile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--mtx")) {
       if (nargc < 1)
         argnerr(option, 1);
-      mtxstem = pargv[0];
+      mtxstem   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--sum")) {
       if (nargc < 1)
         argnerr(option, 1);
-      SumFile = pargv[0];
+      SumFile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--log")) {
       if (nargc < 1)
         argnerr(option, 1);
-      LogFile = pargv[0];
+      LogFile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--sviter")) {
       if (nargc < 1)
@@ -850,7 +850,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--i")) {
       if (nargc < 1)
         argnerr(option, 1);
-      instem = pargv[0];
+      instem    = pargv[0];
       nargsused = 1;
 
       nInFiles = 0;
@@ -868,8 +868,8 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       CostString = pargv[0];
-      nargsused = 1;
-      CostId = EVScostId(CostString);
+      nargsused  = 1;
+      CostId     = EVScostId(CostString);
       if (CostId == EVS_COST_UNKNOWN) {
         printf("ERROR: Cost %s unrecognized\n", CostString);
         exit(1);
@@ -1521,8 +1521,8 @@ static void argnerr(char *option, int n) {
 /* --------------------------------------------- */
 static void check_options() {
   struct timeval tod;
-  FILE *fp;
-  char ctmp[2000];
+  FILE *         fp;
+  char           ctmp[2000];
 
   if (NoSearch && nInFiles == 0) {
     printf("ERROR: must specify input files with --nosearch\n");
@@ -1785,7 +1785,7 @@ static MATRIX *ContrastMatrix(float *EVContrast, int nEVs, int nPer, int nNuis,
     for (n = 0; n < nEVs; n++) {
       for (d = 0; d < nPer; d++) {
         C->rptr[1][m + 1] = EVContrast[n];
-        m = m + 1;
+        m                 = m + 1;
       }
     }
     return (C);
@@ -1795,7 +1795,7 @@ static MATRIX *ContrastMatrix(float *EVContrast, int nEVs, int nPer, int nNuis,
 
   for (n = 0; n < nEVs; n++) {
     for (d = 0; d < nPer; d++) {
-      m = d + n * nPer;
+      m                     = d + n * nPer;
       C->rptr[d + 1][m + 1] = EVContrast[n];
     }
   }
@@ -1803,8 +1803,8 @@ static MATRIX *ContrastMatrix(float *EVContrast, int nEVs, int nPer, int nNuis,
 }
 /*------------------------------------------------------------*/
 static MATRIX *AR1WhitenMatrix(double rho, int N) {
-  int m, n, d;
-  double v;
+  int     m, n, d;
+  double  v;
   MATRIX *W, *M;
   MATRIX *G = nullptr;
 
@@ -1812,8 +1812,8 @@ static MATRIX *AR1WhitenMatrix(double rho, int N) {
   M = MatrixAlloc(N, N, MATRIX_REAL);
   for (m = 0; m < N; m++) {
     for (n = 0; n < N; n++) {
-      d = abs(m - n);
-      v = pow(rho, (double)d);
+      d                     = abs(m - n);
+      v                     = pow(rho, (double)d);
       M->rptr[m + 1][n + 1] = v;
       // gsl_matrix_set(M,m,n,v);
     }

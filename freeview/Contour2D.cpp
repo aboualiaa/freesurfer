@@ -25,26 +25,26 @@
 
 #include "Contour2D.h"
 #include "RenderView2D.h"
-#include "vtkImageData.h"
 #include "vtkImageActor.h"
+#include "vtkImageData.h"
+#include "vtkImageExtractComponents.h"
+#include "vtkImageGaussianSmooth.h"
+#include "vtkImageLogic.h"
+#include "vtkImageMapToColors.h"
+#include "vtkImageMapper3D.h"
+#include "vtkImageMask.h"
 #include "vtkImageReslice.h"
 #include "vtkImageThreshold.h"
-#include "vtkSimpleLabelEdgeFilter.h"
-#include "vtkImageMapToColors.h"
-#include "vtkRGBAColorTransferFunction.h"
-#include "vtkImageGaussianSmooth.h"
-#include "vtkImageExtractComponents.h"
 #include "vtkMatrix4x4.h"
-#include "vtkImageMask.h"
-#include "vtkImageLogic.h"
-#include "vtkImageMapper3D.h"
+#include "vtkRGBAColorTransferFunction.h"
+#include "vtkSimpleLabelEdgeFilter.h"
 #include <QDebug>
 
 #define IMAGE_RESAMPLE_FACTOR 4.0 // must be multiples of 2
 
 Contour2D::Contour2D(RenderView2D *view) : QObject(view), m_view(view) {
-  m_nPlane = view->GetViewPlane();
-  m_imageInput = vtkSmartPointer<vtkImageData>::New();
+  m_nPlane        = view->GetViewPlane();
+  m_imageInput    = vtkSmartPointer<vtkImageData>::New();
   m_dContourValue = 0;
 
   m_actorContour = vtkSmartPointer<vtkImageActor>::New();
@@ -62,7 +62,7 @@ Contour2D::Contour2D(RenderView2D *view) : QObject(view), m_view(view) {
   m_filterThreshold->ReplaceOutOn();
   m_filterThreshold->SetInValue(1);
   m_filterThreshold->SetOutValue(0);
-  m_filterMask = vtkSmartPointer<vtkImageMask>::New();
+  m_filterMask  = vtkSmartPointer<vtkImageMask>::New();
   m_filterLogic = vtkSmartPointer<vtkImageLogic>::New();
   m_filterLogic->SetOperationToOr();
   m_filterResample = vtkSmartPointer<vtkImageReslice>::New();
@@ -71,7 +71,7 @@ Contour2D::Contour2D(RenderView2D *view) : QObject(view), m_view(view) {
   //  m_filterResample->SetAxisMagnificationFactor( 2, IMAGE_RESAMPLE_FACTOR );
   m_filterResample->SetInterpolationModeToNearestNeighbor();
   m_filterEdge = vtkSmartPointer<vtkSimpleLabelEdgeFilter>::New();
-  m_colormap = vtkSmartPointer<vtkImageMapToColors>::New();
+  m_colormap   = vtkSmartPointer<vtkImageMapToColors>::New();
   m_colormap->SetOutputFormatToRGBA();
   m_colormap->PassAlphaToOutputOn();
 
@@ -120,11 +120,11 @@ void Contour2D::SetInput(vtkImageData *imagedata, double dContourValue,
   SetContourValue(dContourValue);
 
   // create two masks and initialize them.
-  m_imageMaskAdd = vtkSmartPointer<vtkImageData>::New();
+  m_imageMaskAdd    = vtkSmartPointer<vtkImageData>::New();
   m_imageMaskRemove = vtkSmartPointer<vtkImageData>::New();
   m_imageMaskAdd->DeepCopy(m_filterThreshold->GetOutput());
   m_imageMaskRemove->DeepCopy(m_imageMaskAdd);
-  int *dim = m_imageMaskAdd->GetDimensions();
+  int *     dim  = m_imageMaskAdd->GetDimensions();
   long long size = ((long long)dim[0]) * dim[1] * dim[2];
   memset(m_imageMaskAdd->GetScalarPointer(), 0, size);
   unsigned char *ptr = (unsigned char *)m_imageMaskRemove->GetScalarPointer();
@@ -176,10 +176,10 @@ void Contour2D::DrawPatchLineOnMask(vtkImageData *image, double *ras1,
     return;
   }
 
-  int n1[2], n2[2];
+  int     n1[2], n2[2];
   double *origin = image->GetOrigin(); // 2D image!
-  double *vsize = image->GetSpacing();
-  int *dim = image->GetDimensions();
+  double *vsize  = image->GetSpacing();
+  int *   dim    = image->GetDimensions();
 
   int nx = 0, ny = 1;
   switch (m_nPlane) {
@@ -197,14 +197,14 @@ void Contour2D::DrawPatchLineOnMask(vtkImageData *image, double *ras1,
   n2[0] = (int)((ras2[nx] - origin[0]) / vsize[0] + 0.5);
   n2[1] = (int)((ras2[ny] - origin[1]) / vsize[1] + 0.5);
 
-  nx = 0;
-  ny = 1;
+  nx                 = 0;
+  ny                 = 1;
   unsigned char *ptr = (unsigned char *)image->GetScalarPointer();
-  int x0 = n1[nx], y0 = n1[ny], x1 = n2[nx], y1 = n2[ny];
-  int dx = x1 - x0;
-  int dy = y1 - y0;
-  double t = 0.5;
-  int n[2];
+  int            x0 = n1[nx], y0 = n1[ny], x1 = n2[nx], y1 = n2[ny];
+  int            dx = x1 - x0;
+  int            dy = y1 - y0;
+  double         t  = 0.5;
+  int            n[2];
   ptr[n1[ny] * dim[0] + n1[nx]] = nDrawValue;
   if (abs(dx) > abs(dy)) {
     double m = (double)dy / (double)dx;
@@ -214,8 +214,8 @@ void Contour2D::DrawPatchLineOnMask(vtkImageData *image, double *ras1,
     while (x0 != x1) {
       x0 += dx;
       t += m;
-      n[nx] = x0;
-      n[ny] = (int)t;
+      n[nx]                       = x0;
+      n[ny]                       = (int)t;
       ptr[n[ny] * dim[0] + n[nx]] = nDrawValue;
     }
   } else {
@@ -226,8 +226,8 @@ void Contour2D::DrawPatchLineOnMask(vtkImageData *image, double *ras1,
     while (y0 != y1) {
       y0 += dy;
       t += m;
-      n[nx] = (int)t;
-      n[ny] = y0;
+      n[nx]                       = (int)t;
+      n[ny]                       = y0;
       ptr[n[ny] * dim[0] + n[nx]] = nDrawValue;
     }
   }
@@ -246,11 +246,11 @@ void Contour2D::UpdateSliceLocation(double dSliceLocation, bool bForced) {
     return;
   }
 
-  m_dSliceLocation = dSliceLocation;
+  m_dSliceLocation                     = dSliceLocation;
   vtkSmartPointer<vtkMatrix4x4> matrix = vtkSmartPointer<vtkMatrix4x4>::New();
   matrix->Identity();
-  double *vsize = imagedata->GetSpacing(); // 2D spacing!
-  double pos[2] = {vsize[0] / IMAGE_RESAMPLE_FACTOR / 2,
+  double *vsize  = imagedata->GetSpacing(); // 2D spacing!
+  double  pos[2] = {vsize[0] / IMAGE_RESAMPLE_FACTOR / 2,
                    vsize[1] / IMAGE_RESAMPLE_FACTOR / 2};
   switch (m_nPlane) {
   case 0:

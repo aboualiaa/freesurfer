@@ -27,7 +27,7 @@ public:
   //
   void SetPositionsAndKs(
       std::vector<AtlasMesh::PointsContainer::ConstPointer> positions,
-      std::vector<double> Ks) {
+      std::vector<double>                                   Ks) {
     m_Positions = positions;
     m_Ks        = Ks;
     m_CachedInternalMeshes.clear();
@@ -47,7 +47,7 @@ private:
 
   //
   std::vector<AtlasMesh::PointsContainer::ConstPointer> m_Positions;
-  std::vector<double> m_Ks;
+  std::vector<double>                                   m_Ks;
 
   std::vector<AtlasMesh::Pointer> m_CachedInternalMeshes;
 };

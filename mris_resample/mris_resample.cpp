@@ -70,17 +70,15 @@ struct IoParams {
   std::string strSubjectReg;
   std::string strSubjectSurf;
   std::string strSubjectAnnot;
-  bool annotation;
+  bool        annotation;
 
   std::string strOutput;
   std::string strOutAnnotation;
 
-  void parse(int ac, char** av);
+  void parse(int ac, char **av);
 };
 
-int
-main(int ac, char** av)
-{
+int main(int ac, char **av) {
   // parse cmd-line
   IoParams params;
   try {
@@ -118,9 +116,7 @@ main(int ac, char** av)
   return 0;
 }
 
-void
-IoParams::parse(int ac, char** av)
-{
+void IoParams::parse(int ac, char **av) {
   ArgumentParser parser;
   // required
   parser.addArgument("--atlas_reg", 1, String, true);
@@ -134,12 +130,12 @@ IoParams::parse(int ac, char** av)
   parser.addHelp(mris_resample_help_xml, mris_resample_help_xml_len);
   parser.parse(ac, av);
 
-  strAtlasReg = parser.retrieve<std::string>("atlas_reg");
-  strSubjectReg = parser.retrieve<std::string>("subject_reg");
+  strAtlasReg    = parser.retrieve<std::string>("atlas_reg");
+  strSubjectReg  = parser.retrieve<std::string>("subject_reg");
   strSubjectSurf = parser.retrieve<std::string>("subject_surf");
-  strOutput = parser.retrieve<std::string>("out");
+  strOutput      = parser.retrieve<std::string>("out");
 
-  std::string strAnnotationIn = parser.retrieve<std::string>("annot_in");
+  std::string strAnnotationIn  = parser.retrieve<std::string>("annot_in");
   std::string strAnnotationOut = parser.retrieve<std::string>("annot_out");
 
   annotation = false;
@@ -150,8 +146,8 @@ IoParams::parse(int ac, char** av)
     logFatal(1) << "missing --annot_in flag";
 
   if (!strAnnotationOut.empty() && !strAnnotationIn.empty()) {
-    annotation = true;
-    strSubjectAnnot = strAnnotationIn;
+    annotation       = true;
+    strSubjectAnnot  = strAnnotationIn;
     strOutAnnotation = strAnnotationOut;
   }
 }
@@ -196,22 +192,22 @@ void resampleSurface(MRIS *mrisAtlasReg, MRIS *mrisSubject,
   /* this function assumes the mapping function is stored
      as the "INFLATED vertex" of mris_template */
 
-  int index, k, facenumber, closestface = -1;
-  double tmps, tmpt; /* triangle parametrization parameters */
-  double value, distance;
-  double Radius, length, scale;
-  double sumx, sumy, sumz, sumweight, weight;
-  VERTEX *vertex, *V1, *V2, *V3;
-  FACE *face;
+  int           index, k, facenumber, closestface = -1;
+  double        tmps, tmpt; /* triangle parametrization parameters */
+  double        value, distance;
+  double        Radius, length, scale;
+  double        sumx, sumy, sumz, sumweight, weight;
+  VERTEX *      vertex, *V1, *V2, *V3;
+  FACE *        face;
   ANNpointArray QueryPt;
 
   VERTEX *pvtx;
-  int numVertices;
+  int     numVertices;
 
   ANNpointArray pa = annAllocPts(mrisSubject->nvertices, 3);
 
   // populate the ANN point array
-  pvtx = &(mrisSubject->vertices[0]);
+  pvtx        = &(mrisSubject->vertices[0]);
   numVertices = mrisSubject->nvertices;
   for (index = 0; index < numVertices; ++pvtx, ++index) {
     pa[index][0] = pvtx->x;
@@ -220,9 +216,9 @@ void resampleSurface(MRIS *mrisAtlasReg, MRIS *mrisSubject,
   }
 
   // construct and initialize the tree
-  ANNkd_tree *annkdTree = new ANNkd_tree(pa, mrisSubject->nvertices, 3);
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNkd_tree * annkdTree = new ANNkd_tree(pa, mrisSubject->nvertices, 3);
+  ANNidxArray  annIndex  = new ANNidx[1];
+  ANNdistArray annDist   = new ANNdist[1];
 
   QueryPt = annAllocPts(1, 3);
 
@@ -271,7 +267,7 @@ void resampleSurface(MRIS *mrisAtlasReg, MRIS *mrisSubject,
       value = v_to_f_distance(vertex, mrisSubject, facenumber, 0, &tmps, &tmpt);
 
       if (distance > value) {
-        distance = value;
+        distance    = value;
         closestface = facenumber;
       }
     }
@@ -283,15 +279,15 @@ void resampleSurface(MRIS *mrisAtlasReg, MRIS *mrisSubject,
     v_to_f_distance() to see how V1, V2, V3 is defined
     */
     /* Use the orig_vertex to store the interpolated cooridnate function */
-    face = &mrisSubject->faces[closestface];
-    V1 = &mrisSubject->vertices[face->v[0]];
-    V2 = &mrisSubject->vertices[face->v[1]];
-    V3 = &mrisSubject->vertices[face->v[2]];
-    sumx = 0.0;
-    sumy = 0.0;
-    sumz = 0.0;
+    face      = &mrisSubject->faces[closestface];
+    V1        = &mrisSubject->vertices[face->v[0]];
+    V2        = &mrisSubject->vertices[face->v[1]];
+    V3        = &mrisSubject->vertices[face->v[2]];
+    sumx      = 0.0;
+    sumy      = 0.0;
+    sumz      = 0.0;
     sumweight = 0.0;
-    weight = 1.0 / (1e-20 + sqr(V1->x - vertex->x) + sqr(V1->y - vertex->y) +
+    weight    = 1.0 / (1e-20 + sqr(V1->x - vertex->x) + sqr(V1->y - vertex->y) +
                     sqr(V1->z - vertex->z));
     sumx += weight * V1->origx;
     sumy += weight * V1->origy;
@@ -316,7 +312,7 @@ void resampleSurface(MRIS *mrisAtlasReg, MRIS *mrisSubject,
 
     if (normflag) {
       length = sqrt(origx * origx + origy * origy + origz * origz);
-      scale = Radius / (length + 1e-20);
+      scale  = Radius / (length + 1e-20);
       origx *= scale;
       origy *= scale;
       origz *= scale;
@@ -342,19 +338,19 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   /* Compute the distance from point P0 to a face of the surface mesh */
   /* (sopt, topt) determines the closest point inside the triangle from P0 */
 
-  double a, b, c, d, e, f, det, s, t, invDet;
-  double numer, denom, tmp0, tmp1;
+  double  a, b, c, d, e, f, det, s, t, invDet;
+  double  numer, denom, tmp0, tmp1;
   VERTEX *V1, *V2, *V3;
-  FACE *face;
+  FACE *  face;
 
   struct {
     float x, y, z;
   } E0, E1, D;
 
   face = &mri_surf->faces[face_number];
-  V1 = &mri_surf->vertices[face->v[0]];
-  V2 = &mri_surf->vertices[face->v[1]];
-  V3 = &mri_surf->vertices[face->v[2]];
+  V1   = &mri_surf->vertices[face->v[0]];
+  V2   = &mri_surf->vertices[face->v[1]];
+  V3   = &mri_surf->vertices[face->v[2]];
 
   E0.x = V2->x - V1->x;
   E0.y = V2->y - V1->y;
@@ -362,9 +358,9 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   E1.x = V3->x - V1->x;
   E1.y = V3->y - V1->y;
   E1.z = V3->z - V1->z;
-  D.x = V1->x - P0->x;
-  D.y = V1->y - P0->y;
-  D.z = V1->z - P0->z;
+  D.x  = V1->x - P0->x;
+  D.y  = V1->y - P0->y;
+  D.z  = V1->z - P0->z;
 
   a = E0.x * E0.x + E0.y * E0.y + E0.z * E0.z;
   b = E0.x * E1.x + E0.y * E1.y + E0.z * E1.z;
@@ -374,8 +370,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   f = D.x * D.x + D.y * D.y + D.z * D.z;
 
   det = a * c - b * b;
-  s = b * e - c * d;
-  t = b * d - a * e;
+  s   = b * e - c * d;
+  t   = b * d - a * e;
 
   if (debug)
     std::cout << " det = " << det << std::endl;
@@ -426,8 +422,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
       if (tmp1 > tmp0) {
         numer = tmp1 - tmp0;
         denom = a - b - b + c;
-        s = (numer >= denom ? 1 : numer / denom);
-        t = 1 - s;
+        s     = (numer >= denom ? 1 : numer / denom);
+        t     = 1 - s;
 
       } else {
         s = 0;
@@ -443,8 +439,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
       if (tmp1 > tmp0) {     /* Minimum at line s + t = 1 */
         numer = tmp1 - tmp0; /* Positive */
         denom = a + c - b - b;
-        t = (numer >= denom ? 1 : (numer / denom));
-        s = 1 - t;
+        t     = (numer >= denom ? 1 : (numer / denom));
+        s     = 1 - t;
       } else { /* Minimum at line t = 0 */
         s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
         t = 0;
@@ -458,7 +454,7 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
         s = 0;
       } else {
         denom = a + c - b - b; /* denom is positive */
-        s = (numer >= denom ? 1 : (numer / denom));
+        s     = (numer >= denom ? 1 : (numer / denom));
       }
       t = 1 - s;
       if (debug)

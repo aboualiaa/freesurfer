@@ -36,17 +36,17 @@
  *
  */
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
 #include "annotation.h"
-#include "version.h"
-#include "mrisegment.h"
 #include "cma.h"
+#include "diag.h"
+#include "fio.h"
 #include "gca.h"
+#include "mri2.h"
+#include "mrisegment.h"
+#include "mrisutils.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -54,7 +54,7 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 int FindClosestLRWPVertexNo(int c, int r, int s, int *lhwvtx, int *lhpvtx,
                             int *rhwvtx, int *rhpvtx, MATRIX *Vox2RAS,
                             MRIS *lhwite, MRIS *lhpial, MRIS *rhwhite,
@@ -66,75 +66,74 @@ int main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mri_aparc2aseg.c,v 1.54 2016/12/26 15:29:30 fischl Exp $";
-const char *Progname = nullptr;
-static char *relabel_gca_name = nullptr;
-static char *relabel_norm_name = nullptr;
-static char *relabel_xform_name = nullptr;
+const char * Progname                       = nullptr;
+static char *relabel_gca_name               = nullptr;
+static char *relabel_norm_name              = nullptr;
+static char *relabel_xform_name             = nullptr;
 static char *relabel_label_intensities_name = nullptr;
 
 static char *SUBJECTS_DIR = nullptr;
-static char *subject = nullptr;
-static char *OutASegFile = nullptr;
+static char *subject      = nullptr;
+static char *OutASegFile  = nullptr;
 static char *OutAParcFile = nullptr;
-static char *OutDistFile = nullptr;
-static int debug = 0;
-static int UseRibbon = 0;
-static int UseNewRibbon = 1;
-static MRI *ASeg, *filled, *mritmp;
-static MRI *AParc;
-static MRI *Dist;
-static MRI *lhRibbon = nullptr, *rhRibbon = nullptr, *RibbonSeg;
+static char *OutDistFile  = nullptr;
+static int   debug        = 0;
+static int   UseRibbon    = 0;
+static int   UseNewRibbon = 1;
+static MRI * ASeg, *filled, *mritmp;
+static MRI * AParc;
+static MRI * Dist;
+static MRI * lhRibbon = nullptr, *rhRibbon = nullptr, *RibbonSeg;
 static MRIS *lhwhite, *rhwhite;
 static MRIS *lhpial, *rhpial;
-static MHT *lhwhite_hash, *rhwhite_hash;
-static MHT *lhpial_hash, *rhpial_hash;
+static MHT * lhwhite_hash, *rhwhite_hash;
+static MHT * lhpial_hash, *rhpial_hash;
 static struct { float x, y, z; } vtx;
-static int lhwvtx, lhpvtx, rhwvtx, rhpvtx;
+static int     lhwvtx, lhpvtx, rhwvtx, rhpvtx;
 static MATRIX *Vox2RAS, *CRS, *RAS;
-static float dlhw, dlhp, drhw, drhp;
-static float dmaxctx = 5.0;
-static int LabelWM = 0;
-static int LabelHypoAsWM = 0;
-static int RipUnknown = 0;
+static float   dlhw, dlhp, drhw, drhp;
+static float   dmaxctx       = 5.0;
+static int     LabelWM       = 0;
+static int     LabelHypoAsWM = 0;
+static int     RipUnknown    = 0;
 
-static char tmpstr[2000];
-static char annotfile[1000];
-static char *annotname = "aparc";
-static char *asegname = "aseg";
-static int baseoffset = 0;
-static float hashres = 16;
+static char  tmpstr[2000];
+static char  annotfile[1000];
+static char *annotname  = "aparc";
+static char *asegname   = "aseg";
+static int   baseoffset = 0;
+static float hashres    = 16;
 
 static int normal_smoothing_iterations = 10;
-int crsTest = 0, ctest = 0, rtest = 0, stest = 0;
-int UseHash = 1;
-int DoLH = 1, DoRH = 1, LHOnly = 0, RHOnly = 0;
+int        crsTest = 0, ctest = 0, rtest = 0, stest = 0;
+int        UseHash = 1;
+int        DoLH = 1, DoRH = 1, LHOnly = 0, RHOnly = 0;
 
 char *CtxSegFile = nullptr;
-MRI *CtxSeg = nullptr;
+MRI * CtxSeg     = nullptr;
 
-int FixParaHipWM = 1;
+int    FixParaHipWM = 1;
 double BRFdotCheck(MRIS *surf, int vtxno, int c, int r, int s, MRI *AParc);
 static double mrisFindMinDistanceVertexWithDotCheck(MRI_SURFACE *mris, int c,
                                                     int r, int s, MRI *AParc,
                                                     double dot_dir,
-                                                    int *pvtxno);
+                                                    int *  pvtxno);
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, err, asegid, c, r, s, nctx, annot, vtxno, nripped;
-  int annotid, IsCortex = 0, IsWM = 0, IsHypo = 0, hemi = 0, segval = 0;
-  int IsCblumCtx = 0;
-  int RibbonVal = 0, nbrute = 0;
-  float dmin = 0.0, lhRibbonVal = 0, rhRibbonVal = 0, dist, dthresh;
+  int    nargs, err, asegid, c, r, s, nctx, annot, vtxno, nripped;
+  int    annotid, IsCortex = 0, IsWM = 0, IsHypo = 0, hemi = 0, segval = 0;
+  int    IsCblumCtx = 0;
+  int    RibbonVal = 0, nbrute = 0;
+  float  dmin = 0.0, lhRibbonVal = 0, rhRibbonVal = 0, dist, dthresh;
   double dot;
-  MRI *mri_fixed = nullptr, *mri_lh_dist, *mri_rh_dist, *mri_dist = nullptr;
+  MRI *  mri_fixed = nullptr, *mri_lh_dist, *mri_rh_dist, *mri_dist = nullptr;
   TRANSFORM *xform = nullptr;
-  GCA *gca = nullptr;
+  GCA *      gca   = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mri_aparc2aseg");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -212,7 +211,7 @@ int main(int argc, char **argv) {
         // annotid = -1. We interpret this as "unknown".
         if (annotid == 0 || annotid == -1) {
           lhwhite->vertices[vtxno].ripflag = 1;
-          lhpial->vertices[vtxno].ripflag = 1;
+          lhpial->vertices[vtxno].ripflag  = 1;
           nripped++;
         }
       }
@@ -280,7 +279,7 @@ int main(int argc, char **argv) {
         CTABfindAnnotation(rhwhite->ct, annot, &annotid);
         if (annotid == 0 || annotid == -1) {
           rhwhite->vertices[vtxno].ripflag = 1;
-          rhpial->vertices[vtxno].ripflag = 1;
+          rhpial->vertices[vtxno].ripflag  = 1;
           nripped++;
         }
       }
@@ -321,7 +320,7 @@ int main(int argc, char **argv) {
     int MatchList[2];
     MatchList[0] = 2;
     MatchList[1] = 41;
-    mritmp = MRIbinarizeMatch(filled, MatchList, 2, 0, nullptr);
+    mritmp       = MRIbinarizeMatch(filled, MatchList, 2, 0, nullptr);
     MRIfree(&filled);
     filled = mritmp;
   }
@@ -387,7 +386,7 @@ int main(int argc, char **argv) {
 
   AParc = MRIclone(ASeg, nullptr);
   if (OutDistFile != nullptr) {
-    Dist = MRIclone(ASeg, nullptr);
+    Dist   = MRIclone(ASeg, nullptr);
     mritmp = MRIchangeType(Dist, MRI_FLOAT, 0, 0, 0);
     if (mritmp == nullptr) {
       printf("ERROR: could change type\n");
@@ -401,9 +400,9 @@ int main(int argc, char **argv) {
   printf("ASeg Vox2RAS: -----------\n");
   MatrixPrint(stdout, Vox2RAS);
   printf("-------------------------\n");
-  CRS = MatrixAlloc(4, 1, MATRIX_REAL);
+  CRS             = MatrixAlloc(4, 1, MATRIX_REAL);
   CRS->rptr[4][1] = 1;
-  RAS = MatrixAlloc(4, 1, MATRIX_REAL);
+  RAS             = MatrixAlloc(4, 1, MATRIX_REAL);
   RAS->rptr[4][1] = 1;
 
   if (crsTest) {
@@ -418,10 +417,10 @@ int main(int argc, char **argv) {
   }
 
   printf("\nLabeling Slice\n");
-  nctx = 0;
-  annot = 0;
+  nctx    = 0;
+  annot   = 0;
   annotid = 0;
-  nbrute = 0;
+  nbrute  = 0;
 
   if (DoLH) {
     MRISsmoothSurfaceNormals(lhwhite, normal_smoothing_iterations);
@@ -435,11 +434,11 @@ int main(int argc, char **argv) {
   if (relabel_gca_name != nullptr) // reclassify voxels interior to white that
                                    // are likely to be something else
   {
-    MRI *mri_norm;
-    FILE *fp;
-    int *labels, nlines, i, mean, label;
+    MRI *  mri_norm;
+    FILE * fp;
+    int *  labels, nlines, i, mean, label;
     float *intensities;
-    char *cp, line[STRLEN], label_name[STRLEN];
+    char * cp, line[STRLEN], label_name[STRLEN];
 
     printf("relabeling unlikely voxels in interior of white matter\n");
 
@@ -482,7 +481,7 @@ int main(int argc, char **argv) {
     if (!fp)
       ErrorExit(ERROR_NOFILE, "%s: could not read %s", Progname,
                 relabel_label_intensities_name);
-    cp = fgetl(line, 199, fp);
+    cp     = fgetl(line, 199, fp);
     nlines = 0;
     while (cp) {
       nlines++;
@@ -491,12 +490,12 @@ int main(int argc, char **argv) {
     rewind(fp);
     printf("reading %d labels from %s\n", nlines,
            relabel_label_intensities_name);
-    labels = (int *)calloc(nlines, sizeof(int));
+    labels      = (int *)calloc(nlines, sizeof(int));
     intensities = (float *)calloc(nlines, sizeof(float));
-    cp = fgetl(line, 199, fp);
+    cp          = fgetl(line, 199, fp);
     for (i = 0; i < nlines; i++) {
       sscanf(cp, "%d %s %*f %*f %d", &label, label_name, &mean);
-      labels[i] = label;
+      labels[i]      = label;
       intensities[i] = mean;
       if (labels[i] == Left_Cerebral_White_Matter) {
         DiagBreak();
@@ -511,7 +510,7 @@ int main(int argc, char **argv) {
     // edit GCA to disallow cortical labels at points interior to white that we
     // are relabeling
     {
-      int x, y, z, n;
+      int        x, y, z, n;
       GCA_PRIOR *gcap;
 
       for (x = 0; x < mri_norm->width; x++)
@@ -526,7 +525,7 @@ int main(int argc, char **argv) {
               continue;
             for (n = 0; n < gcap->nlabels; n++)
               if (IS_CORTEX(gcap->labels[n])) {
-                int n2;
+                int    n2;
                 double total_p;
                 gcap->priors[n] = 1e-5;
                 for (total_p = 0.0, n2 = 0; n2 < gcap->nlabels; n2++)
@@ -560,7 +559,7 @@ int main(int argc, char **argv) {
                        asegid == Left_Cerebral_White_Matter))
           continue;
         IsCortex = IS_CORTEX(asegid);
-        IsHypo = IS_HYPO(asegid);
+        IsHypo   = IS_HYPO(asegid);
         if (asegid == Left_Cerebral_White_Matter ||
             asegid == Right_Cerebral_White_Matter)
           IsWM = 1;
@@ -592,19 +591,19 @@ int main(int argc, char **argv) {
             if (RibbonVal == Left_Cerebral_White_Matter ||
                 RibbonVal == Right_Cerebral_White_Matter) {
               // Ribbon says it is WM
-              IsWM = 1;
+              IsWM     = 1;
               IsCortex = 0;
             } else if (RibbonVal == Left_Cerebral_Cortex ||
                        RibbonVal == Right_Cerebral_Cortex) {
               // Ribbon says it is Ctx
-              IsWM = 0;
+              IsWM     = 0;
               IsCortex = 1;
               if (IsCblumCtx)
                 MRIsetVoxVal(ASeg, c, r, s, 0, RibbonVal);
             }
             if (RibbonVal == Unknown) {
               // Ribbon says it is unknown
-              IsWM = 0;
+              IsWM     = 0;
               IsCortex = 0;
             }
           }
@@ -657,10 +656,10 @@ int main(int argc, char **argv) {
         CRS->rptr[1][1] = c;
         CRS->rptr[2][1] = r;
         CRS->rptr[3][1] = s;
-        RAS = MatrixMultiply(Vox2RAS, CRS, RAS);
-        vtx.x = RAS->rptr[1][1];
-        vtx.y = RAS->rptr[2][1];
-        vtx.z = RAS->rptr[3][1];
+        RAS             = MatrixMultiply(Vox2RAS, CRS, RAS);
+        vtx.x           = RAS->rptr[1][1];
+        vtx.y           = RAS->rptr[2][1];
+        vtx.z           = RAS->rptr[3][1];
 
         // Get the index of the closest vertex in the
         // lh.white, lh.pial, rh.white, rh.pial
@@ -791,7 +790,7 @@ int main(int argc, char **argv) {
 
         if (dlhw <= dlhp && dlhw < drhw && dlhw < drhp && lhwvtx >= 0) {
           annot = lhwhite->vertices[lhwvtx].annotation;
-          hemi = 1;
+          hemi  = 1;
           if (lhwhite->ct)
             CTABfindAnnotation(lhwhite->ct, annot, &annotid);
           else
@@ -800,7 +799,7 @@ int main(int argc, char **argv) {
         }
         if (dlhp < dlhw && dlhp < drhw && dlhp < drhp && lhpvtx >= 0) {
           annot = lhwhite->vertices[lhpvtx].annotation;
-          hemi = 1;
+          hemi  = 1;
           if (lhwhite->ct)
             CTABfindAnnotation(lhwhite->ct, annot, &annotid);
           else
@@ -810,7 +809,7 @@ int main(int argc, char **argv) {
 
         if (drhw < dlhp && drhw < dlhw && drhw <= drhp && rhwvtx >= 0) {
           annot = rhwhite->vertices[rhwvtx].annotation;
-          hemi = 2;
+          hemi  = 2;
           if (rhwhite->ct)
             CTABfindAnnotation(rhwhite->ct, annot, &annotid);
           else
@@ -819,7 +818,7 @@ int main(int argc, char **argv) {
         }
         if (drhp < dlhp && drhp < drhw && drhp < dlhw && rhpvtx >= 0) {
           annot = rhwhite->vertices[rhpvtx].annotation;
-          hemi = 2;
+          hemi  = 2;
           if (rhwhite->ct)
             CTABfindAnnotation(rhwhite->ct, annot, &annotid);
           else
@@ -959,7 +958,7 @@ int main(int argc, char **argv) {
                                    // are likely to be something else
   {
     MRI *mri_norm;
-    int nchanged = 0;
+    int  nchanged = 0;
 
     printf("relabeling unlikely voxels in interior of white matter\n");
 
@@ -969,13 +968,13 @@ int main(int argc, char **argv) {
                 relabel_norm_name);
 
     {
-      int x, y, z, i;
+      int  x, y, z, i;
       MRI *mri_tmp = nullptr, *mri_aseg_orig = nullptr;
 
       mri_aseg_orig = MRIcopy(ASeg, nullptr);
-      Ggca_x = Gx;
-      Ggca_y = Gy;
-      Ggca_z = Gz; // diagnostics
+      Ggca_x        = Gx;
+      Ggca_y        = Gy;
+      Ggca_z        = Gz; // diagnostics
       GCAregularizeCovariance(
           gca, 1.0); // don't use covariances for this classification
       GCAreclassifyUsingGibbsPriors(mri_norm, gca, ASeg, xform, 10, mri_fixed,
@@ -999,11 +998,11 @@ int main(int argc, char **argv) {
                                    Right_Lateral_Ventricle) >
                    0)) // neighbors a ventricular label
               {
-                GCA_NODE *gcan;
+                GCA_NODE * gcan;
                 GCA_PRIOR *gcap;
-                int xn, yn, zn, n, max_label = -1, label, xp, yp, zp;
-                double mah_dist, min_mah_dist, prior;
-                float vals[MAX_GCA_INPUTS];
+                int        xn, yn, zn, n, max_label = -1, label, xp, yp, zp;
+                double     mah_dist, min_mah_dist, prior;
+                float      vals[MAX_GCA_INPUTS];
 
 #define REGION_WSIZE 3
                 if (x == Gx && y == Gy && z == Gz)
@@ -1028,10 +1027,10 @@ int main(int argc, char **argv) {
                     continue; // only if another voxel with this label exists
                               // nearby
                   mah_dist = GCAmahDist(&gcan->gcs[n], vals, mri_norm->nframes);
-                  prior = getPrior(gcap, label);
+                  prior    = getPrior(gcap, label);
                   if (mah_dist + log(prior) < min_mah_dist) {
                     min_mah_dist = mah_dist + log(prior);
-                    max_label = gcan->labels[n];
+                    max_label    = gcan->labels[n];
                   }
                 }
                 if (max_label < 0) {
@@ -1046,7 +1045,7 @@ int main(int argc, char **argv) {
                     prior = getPrior(gcap, label);
                     if (mah_dist + log(prior) < min_mah_dist) {
                       min_mah_dist = mah_dist + log(prior);
-                      max_label = gcan->labels[n];
+                      max_label    = gcan->labels[n];
                     }
                   }
                 }
@@ -1076,7 +1075,7 @@ int main(int argc, char **argv) {
       for (i = 2; i < 10; i++) {
         int xi, yi, zi, xk, yk, zk;
         nchanged = 0;
-        mri_tmp = MRIcopy(ASeg, mri_tmp);
+        mri_tmp  = MRIcopy(ASeg, mri_tmp);
         for (x = 0; x < mri_norm->width; x++)
           for (y = 0; y < mri_norm->height; y++)
             for (z = 0; z < mri_norm->depth; z++) {
@@ -1097,11 +1096,11 @@ int main(int argc, char **argv) {
                                    Right_Lateral_Ventricle) >
                    4)) // neighbors a bunch of ventricular labels
               {
-                GCA_NODE *gcan;
+                GCA_NODE * gcan;
                 GCA_PRIOR *gcap;
-                int xn, yn, zn, n, max_label = -1, label, xp, yp, zp;
-                double mah_dist, min_mah_dist, prior;
-                float vals[MAX_GCA_INPUTS];
+                int        xn, yn, zn, n, max_label = -1, label, xp, yp, zp;
+                double     mah_dist, min_mah_dist, prior;
+                float      vals[MAX_GCA_INPUTS];
 
 #define REGION_WSIZE 3
                 if (x == Gx && y == Gy && z == Gz)
@@ -1122,10 +1121,10 @@ int main(int argc, char **argv) {
                       IS_CEREBELLAR_GM(label) || IS_CEREBELLAR_WM(label))
                     continue; // prohibited interior to white
                   mah_dist = GCAmahDist(&gcan->gcs[n], vals, mri_norm->nframes);
-                  prior = getPrior(gcap, label);
+                  prior    = getPrior(gcap, label);
                   if (mah_dist + log(prior) < min_mah_dist) {
                     min_mah_dist = mah_dist + log(prior);
-                    max_label = gcan->labels[n];
+                    max_label    = gcan->labels[n];
                   }
                 }
                 // if the max label is vent AND every neighboring vent is itself
@@ -1136,9 +1135,9 @@ int main(int argc, char **argv) {
                   for (xk = -1; xk <= 1; xk++)
                     for (yk = -1; yk <= 1; yk++)
                       for (zk = -1; zk <= 1; zk++) {
-                        xi = mri_tmp->xi[x + xk];
-                        yi = mri_tmp->yi[y + yk];
-                        zi = mri_tmp->zi[z + zk];
+                        xi     = mri_tmp->xi[x + xk];
+                        yi     = mri_tmp->yi[y + yk];
+                        zi     = mri_tmp->zi[z + zk];
                         olabel = MRIgetVoxVal(mri_tmp, xi, yi, zi, 0);
                         if (IS_VENTRICLE(olabel)) {
                           if (olabel == Right_Lateral_Ventricle)
@@ -1191,7 +1190,7 @@ int main(int argc, char **argv) {
               continue;
 
             label_orig = MRIgetVoxVal(mri_aseg_orig, x, y, z, 0);
-            label_new = MRIgetVoxVal(ASeg, x, y, z, 0);
+            label_new  = MRIgetVoxVal(ASeg, x, y, z, 0);
             if (label_orig == label_new)
               continue;
             if (MRIlabelsInNbhd(ASeg, x, y, z, 1, label_new) <= 1) {
@@ -1263,7 +1262,7 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1) {
@@ -1291,18 +1290,18 @@ static int parse_commandline(int argc, char **argv) {
       debug = 1;
     else if (!strcasecmp(option, "--lh")) {
       LHOnly = 1;
-      DoLH = 1;
+      DoLH   = 1;
       RHOnly = 0;
-      DoRH = 0;
+      DoRH   = 0;
     } else if (!strcasecmp(option, "--rh")) {
       LHOnly = 0;
-      DoLH = 0;
+      DoLH   = 0;
       RHOnly = 1;
-      DoRH = 1;
+      DoRH   = 1;
     } else if (!strcasecmp(option, "--relabel")) {
-      relabel_norm_name = pargv[0];
-      relabel_xform_name = pargv[1];
-      relabel_gca_name = pargv[2];
+      relabel_norm_name              = pargv[0];
+      relabel_xform_name             = pargv[1];
+      relabel_gca_name               = pargv[2];
       relabel_label_intensities_name = pargv[3];
       printf("relabeling unlikely voxels interior to white matter "
              "surface:\n\tnorm: %s\n\t XFORM: %s\n\tGCA: %s\n\tlabel "
@@ -1311,34 +1310,34 @@ static int parse_commandline(int argc, char **argv) {
              relabel_label_intensities_name);
       nargsused = 4;
     } else if (!strcasecmp(option, "--no-relabel")) {
-      relabel_norm_name = nullptr;
-      relabel_xform_name = nullptr;
-      relabel_gca_name = nullptr;
+      relabel_norm_name              = nullptr;
+      relabel_xform_name             = nullptr;
+      relabel_gca_name               = nullptr;
       relabel_label_intensities_name = nullptr;
     } else if (!strcasecmp(option, "--debug_voxel")) {
       if (nargc < 3) {
         argnerr(option, 3);
       }
-      Gx = atoi(pargv[0]);
-      Gy = atoi(pargv[1]);
-      Gz = atoi(pargv[2]);
+      Gx        = atoi(pargv[0]);
+      Gy        = atoi(pargv[1]);
+      Gz        = atoi(pargv[2]);
       nargsused = 3;
     } else if (!strcasecmp(option, "--smooth_normals")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       normal_smoothing_iterations = atoi(pargv[0]);
-      nargsused = 1;
+      nargsused                   = 1;
     }
     // This was --ribbon, but changed to --old-ribbon 4/17/08 DNG
     else if (!strcasecmp(option, "--old-ribbon")) {
-      UseRibbon = 1;
+      UseRibbon    = 1;
       UseNewRibbon = 0;
     } else if (!strcasecmp(option, "--volmask") ||
                !strcasecmp(option, "--new-ribbon")) {
       UseNewRibbon = 1;
     } else if (!strcasecmp(option, "--noribbon")) {
-      UseRibbon = 0;
+      UseRibbon    = 0;
       UseNewRibbon = 0;
     } else if (!strcasecmp(option, "--labelwm")) {
       LabelWM = 1;
@@ -1363,19 +1362,19 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--oaseg") || !strcmp(option, "--o")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       OutASegFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--a2005s")) {
-      annotname = "aparc.a2005s";
+      annotname  = "aparc.a2005s";
       baseoffset = 100;
     } else if (!strcmp(option, "--a2009s")) {
-      annotname = "aparc.a2009s";
+      annotname  = "aparc.a2009s";
       baseoffset = 10100;
     } else if (!strcmp(option, "--base-offset")) {
       if (nargc < 1)
@@ -1386,7 +1385,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      asegname = pargv[0];
+      asegname  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--annot")) {
       if (nargc < 1) {
@@ -1401,25 +1400,25 @@ static int parse_commandline(int argc, char **argv) {
       // annotation_table_file is declared in annotation.h
       // default is $FREESURFER_HOME/Simple_surface_labels2009.txt
       annotation_table_file = pargv[0];
-      nargsused = 1;
+      nargsused             = 1;
     } else if (!strcmp(option, "--oaparc")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       OutAParcFile = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--ctxseg")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       CtxSegFile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--dist")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       OutDistFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--hashres")) {
       if (nargc < 1) {
         argnerr(option, 1);
@@ -1439,7 +1438,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%d", &ctest);
       sscanf(pargv[1], "%d", &rtest);
       sscanf(pargv[2], "%d", &stest);
-      crsTest = 1;
+      crsTest   = 1;
       nargsused = 3;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
@@ -1561,22 +1560,22 @@ int FindClosestLRWPVertexNo(int c, int r, int s, int *lhwvtx, int *lhpvtx,
   static MATRIX *RAS = nullptr;
   static struct { float x, y, z; } vtx;
   static float dlhw, dlhp, drhw, drhp, dmin;
-  int annot, hemi, annotid;
+  int          annot, hemi, annotid;
 
   if (CRS == nullptr) {
-    CRS = MatrixAlloc(4, 1, MATRIX_REAL);
+    CRS             = MatrixAlloc(4, 1, MATRIX_REAL);
     CRS->rptr[4][1] = 1;
-    RAS = MatrixAlloc(4, 1, MATRIX_REAL);
+    RAS             = MatrixAlloc(4, 1, MATRIX_REAL);
     RAS->rptr[4][1] = 1;
   }
 
   CRS->rptr[1][1] = c;
   CRS->rptr[2][1] = r;
   CRS->rptr[3][1] = s;
-  RAS = MatrixMultiply(Vox2RAS, CRS, RAS);
-  vtx.x = RAS->rptr[1][1];
-  vtx.y = RAS->rptr[2][1];
-  vtx.z = RAS->rptr[3][1];
+  RAS             = MatrixMultiply(Vox2RAS, CRS, RAS);
+  vtx.x           = RAS->rptr[1][1];
+  vtx.y           = RAS->rptr[2][1];
+  vtx.z           = RAS->rptr[3][1];
 
   *lhwvtx = MHTfindClosestVertexNoXYZ(lhwhite_hash, lhwhite, vtx.x, vtx.y,
                                       vtx.z, &dlhw);
@@ -1615,7 +1614,7 @@ int FindClosestLRWPVertexNo(int c, int r, int s, int *lhwvtx, int *lhpvtx,
   }
   if (dlhw <= dlhp && dlhw < drhw && dlhw < drhp && (*lhwvtx >= 0)) {
     annot = lhwhite->vertices[*lhwvtx].annotation;
-    hemi = 1;
+    hemi  = 1;
     if (lhwhite->ct) {
       CTABfindAnnotation(lhwhite->ct, annot, &annotid);
     } else {
@@ -1625,7 +1624,7 @@ int FindClosestLRWPVertexNo(int c, int r, int s, int *lhwvtx, int *lhpvtx,
   }
   if (dlhp < dlhw && dlhp < drhw && dlhp < drhp && (*lhpvtx >= 0)) {
     annot = lhwhite->vertices[*lhpvtx].annotation;
-    hemi = 1;
+    hemi  = 1;
     if (lhwhite->ct) {
       CTABfindAnnotation(lhwhite->ct, annot, &annotid);
     } else {
@@ -1636,7 +1635,7 @@ int FindClosestLRWPVertexNo(int c, int r, int s, int *lhwvtx, int *lhpvtx,
 
   if (drhw < dlhp && drhw < dlhw && drhw <= drhp && (*rhwvtx >= 0)) {
     annot = rhwhite->vertices[*rhwvtx].annotation;
-    hemi = 2;
+    hemi  = 2;
     if (rhwhite->ct) {
       CTABfindAnnotation(lhwhite->ct, annot, &annotid);
     } else {
@@ -1646,7 +1645,7 @@ int FindClosestLRWPVertexNo(int c, int r, int s, int *lhwvtx, int *lhpvtx,
   }
   if (drhp < dlhp && drhp < drhw && drhp < dlhw && (*rhpvtx >= 0)) {
     annot = rhwhite->vertices[*rhpvtx].annotation;
-    hemi = 2;
+    hemi  = 2;
     if (rhwhite->ct) {
       CTABfindAnnotation(lhwhite->ct, annot, &annotid);
     } else {
@@ -1670,7 +1669,7 @@ int FindClosestLRWPVertexNo(int c, int r, int s, int *lhwvtx, int *lhpvtx,
 */
 int CCSegment(MRI *seg, int segid, int segidunknown) {
   MRI_SEGMENTATION *sgmnt;
-  int k, kmax, index, c, r, s;
+  int               k, kmax, index, c, r, s;
 
   sgmnt = MRIsegment(seg, segid - .5, segid + .5);
   printf("  Found %d clusters\n", sgmnt->nsegments);
@@ -1702,7 +1701,7 @@ int CCSegment(MRI *seg, int segid, int segidunknown) {
    through a thin white matter strand. This removes inaccurate voxels
    that used to speckle the aparc+aseg */
 double BRFdotCheck(MRIS *surf, int vtxno, int c, int r, int s, MRI *AParc) {
-  double dx, dy, dz, nx, ny, nz, xv, yv, zv, x1, y1, z1, dot;
+  double  dx, dy, dz, nx, ny, nz, xv, yv, zv, x1, y1, z1, dot;
   VERTEX *v;
   v = &surf->vertices[vtxno];
   MRISvertexToVoxel(surf, v, AParc, &xv, &yv, &zv);
@@ -1713,9 +1712,9 @@ double BRFdotCheck(MRIS *surf, int vtxno, int c, int r, int s, MRI *AParc) {
   nx -= xv;
   ny -= yv;
   nz -= zv; // normal in voxel coords
-  dx = c - xv;
-  dy = r - yv;
-  dz = s - zv;
+  dx  = c - xv;
+  dy  = r - yv;
+  dz  = s - zv;
   dot = dx * nx + dy * ny + dz * nz;
   return (dot);
 }
@@ -1723,12 +1722,12 @@ double BRFdotCheck(MRIS *surf, int vtxno, int c, int r, int s, MRI *AParc) {
 static double mrisFindMinDistanceVertexWithDotCheck(MRI_SURFACE *mris, int c,
                                                     int r, int s, MRI *AParc,
                                                     double dot_dir,
-                                                    int *pvtxno) {
-  int vno, min_vno;
+                                                    int *  pvtxno) {
+  int     vno, min_vno;
   VERTEX *v;
-  double dist, dot, min_dist, xs, ys, zs, dx, dy, dz;
+  double  dist, dot, min_dist, xs, ys, zs, dx, dy, dz;
 
-  min_vno = -1;
+  min_vno  = -1;
   min_dist = 1e10;
   MRIvoxelToSurfaceRAS(AParc, c, r, s, &xs, &ys, &zs);
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1738,9 +1737,9 @@ static double mrisFindMinDistanceVertexWithDotCheck(MRI_SURFACE *mris, int c,
 
     if (vno == Gdiag_no)
       DiagBreak();
-    dx = xs - v->x;
-    dy = ys - v->y;
-    dz = zs - v->z;
+    dx  = xs - v->x;
+    dy  = ys - v->y;
+    dz  = zs - v->z;
     dot = v->nx * dx + v->ny * dy + v->nz * dz;
     //    dot = BRFdotCheck(mris, vno,c,r,s,AParc);
     if (dot * dot_dir < 0)
@@ -1749,7 +1748,7 @@ static double mrisFindMinDistanceVertexWithDotCheck(MRI_SURFACE *mris, int c,
     dist = sqrt(SQR(xs - v->x) + SQR(ys - v->y) + SQR(zs - v->z));
     if (dist < min_dist) {
       min_dist = dist;
-      min_vno = vno;
+      min_vno  = vno;
     }
   }
   *pvtxno = min_vno;

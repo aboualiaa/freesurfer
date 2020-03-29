@@ -55,7 +55,7 @@ protected:
   virtual ~vtkArrowPipeline();
 
   vtkSmartPointer<vtkLandmarkTransform> mTransform;
-  vtkSmartPointer<vtkActor> mActor;
+  vtkSmartPointer<vtkActor>             mActor;
 
   double mStartPoint[3];
   double mEndPoint[3];

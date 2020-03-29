@@ -66,7 +66,8 @@ void ZlibStringCompressor::checkZlibResult(const int result, const char *file,
   }
 }
 
-const string ZlibStringCompressor::compress(const string &s_in, int level) {
+const std::string ZlibStringCompressor::compress(const std::string &s_in,
+                                                 int                level) {
   // find minimum buffer size for compressed string
   unsigned long required_length = findRequiredBufferSize(findSizeInBytes(s_in));
   // make sure buffer is at least that size - if its too small add a factor of 2
@@ -76,38 +77,38 @@ const string ZlibStringCompressor::compress(const string &s_in, int level) {
   }
 
   // reinterpret input string as an array of bytes.
-  const char *input_char = s_in.c_str();
+  const char * input_char  = s_in.c_str();
   const Bytef *input_bytes = reinterpret_cast<const Bytef *>(input_char);
 
   // make sure level is in the range 1->9
   int checked_level = (level < 1) ? 1 : (level > 9) ? 9 : level;
 
   unsigned long output_length = getBufferSize();
-  int result = compress2(m_buffer, &output_length, input_bytes,
+  int           result        = compress2(m_buffer, &output_length, input_bytes,
                          findSizeInBytes(s_in), checked_level);
 
   checkZlibResult(result, __FILE__, __LINE__);
-  const char *result_char = reinterpret_cast<const char *>(m_buffer);
-  unsigned long char_length = output_length / sizeof(char);
-  const string s_out(result_char, char_length);
+  const char *      result_char = reinterpret_cast<const char *>(m_buffer);
+  unsigned long     char_length = output_length / sizeof(char);
+  const std::string s_out(result_char, char_length);
   return s_out;
 }
 
-const string ZlibStringCompressor::inflate(const string &s) {
+const std::string ZlibStringCompressor::inflate(const std::string &s) {
   long unsigned compressed_length = findSizeInBytes(s);
   if (compressed_length * 3 > getBufferSize()) {
     setBufferSize(compressed_length * m_bufferAllocationMultiplier);
   }
 
-  long unsigned inflated_length = 0;
-  const char *compressed_c_str = s.c_str();
-  const Bytef *compressed_bytes =
+  long unsigned inflated_length  = 0;
+  const char *  compressed_c_str = s.c_str();
+  const Bytef * compressed_bytes =
       reinterpret_cast<const Bytef *>(compressed_c_str);
 
   int result = Z_OK;
   do {
     inflated_length = getBufferSize();
-    result = uncompress(m_buffer, &inflated_length, compressed_bytes,
+    result          = uncompress(m_buffer, &inflated_length, compressed_bytes,
                         findSizeInBytes(s));
     if (result == Z_BUF_ERROR)
       setBufferSize(getBufferSize() * 2);
@@ -115,8 +116,8 @@ const string ZlibStringCompressor::inflate(const string &s) {
 
   checkZlibResult(result, __FILE__, __LINE__);
 
-  unsigned long inflated_char_length = inflated_length / sizeof(char);
-  const string s_inflated((char *)m_buffer, inflated_char_length);
+  unsigned long     inflated_char_length = inflated_length / sizeof(char);
+  const std::string s_inflated((char *)m_buffer, inflated_char_length);
 
   return s_inflated;
 }

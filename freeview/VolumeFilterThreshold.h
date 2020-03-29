@@ -53,8 +53,8 @@ public:
 protected:
   bool Execute();
 
-  bool m_bReplaceIn;
-  bool m_bReplaceOut;
+  bool   m_bReplaceIn;
+  bool   m_bReplaceOut;
   double m_dThreshold[2];
   double m_dInValue;
   double m_dOutValue;

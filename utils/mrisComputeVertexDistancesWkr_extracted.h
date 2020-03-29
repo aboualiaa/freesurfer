@@ -59,7 +59,7 @@ static bool FUNCTION_NAME(
       if (mris->v_ripflag[vno])
         continue;
       float const vx = mris->INPUT_X[vno], vy = mris->INPUT_Y[vno],
-                  vz = mris->INPUT_Z[vno];
+                  vz           = mris->INPUT_Z[vno];
 #endif
 
       if (!check)
@@ -91,7 +91,7 @@ static bool FUNCTION_NAME(
         float xd = vx - vnx;
         float yd = vy - vny;
         float zd = vz - vnz;
-        float d = xd * xd + yd * yd + zd * zd;
+        float d  = xd * xd + yd * yd + zd * zd;
 
         if (!check)
           output_dist[n] = sqrt(d);
@@ -110,11 +110,11 @@ static bool FUNCTION_NAME(
     // structure!
     //
     struct PerVertexInfo {
-      char ripped;
-      int rippedOrZeroLength;
-      XYZ xyz_unnormalized;
+      char  ripped;
+      int   rippedOrZeroLength;
+      XYZ   xyz_unnormalized;
       float xyz_length;
-      XYZ xyz_normalized;
+      XYZ   xyz_normalized;
     } *vertexInfo =
         (struct PerVertexInfo *)malloc(mris->nvertices * sizeof(*vertexInfo));
 
@@ -128,15 +128,15 @@ static bool FUNCTION_NAME(
       ROMP_PFLB_begin
 
 #ifndef COMPILING_MRIS_MP
-          VERTEX const *const v = &mris->vertices[vno];
-      char const v_ripflag = (char)v->ripflag;
-      float const vx = v->INPUT_X, vy = v->INPUT_Y, vz = v->INPUT_Z;
+          VERTEX const *const v         = &mris->vertices[vno];
+      char const              v_ripflag = (char)v->ripflag;
+      float const             vx = v->INPUT_X, vy = v->INPUT_Y, vz = v->INPUT_Z;
 #else
           char const v_ripflag = (char)mris->v_ripflag[vno];
-      float const vx = mris->INPUT_X[vno], vy = mris->INPUT_Y[vno],
-                  vz = mris->INPUT_Z[vno];
+      float const    vx = mris->INPUT_X[vno], vy = mris->INPUT_Y[vno],
+                  vz           = mris->INPUT_Z[vno];
 #endif
-      vertexInfo[vno].ripped = v_ripflag;
+      vertexInfo[vno].ripped             = v_ripflag;
       vertexInfo[vno].rippedOrZeroLength = v_ripflag;
 
       if (v_ripflag)
@@ -197,10 +197,10 @@ static bool FUNCTION_NAME(
       float const radius = vi->xyz_length;
 
       int const vtotal = check ? VERTEXvnum(vt, new_dist_nsize) : vt->vtotal;
-      int n;
+      int       n;
       for (n = 0; n < vtotal; n++) {
-        int const vno2 = vt->v[n];
-        struct PerVertexInfo *vi2 = &vertexInfo[vno2];
+        int const             vno2 = vt->v[n];
+        struct PerVertexInfo *vi2  = &vertexInfo[vno2];
 
         float d = 0.0;
 

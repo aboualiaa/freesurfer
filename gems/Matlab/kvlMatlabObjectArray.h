@@ -16,9 +16,9 @@ namespace kvl {
 class MatlabObjectArray : public itk::Object {
 public:
   /** Smart pointer typedef support. */
-  typedef MatlabObjectArray Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef MatlabObjectArray             Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Run-time type information (and related methods). */
@@ -62,7 +62,7 @@ protected:
 
 private:
   std::map<int, itk::Object::Pointer> m_Array;
-  static Pointer m_Instance;
+  static Pointer                      m_Instance;
 };
 
 } // end namespace kvl

@@ -35,22 +35,22 @@
 //
 ////////////////////////////////////////////////////////////////////
 
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mri_conform.h"
+#include "proto.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include "mri.h"
-#include "matrix.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mri_conform.h"
-#include "utils.h"
-#include "timer.h"
-#include "version.h"
-#define DEBUG 0
-#define TEST 1
+#define DEBUG    0
+#define TEST     1
 #define normflag 0
 
 /* Ignore the off-diagonal elements of SW */
@@ -63,15 +63,15 @@
 
 #define SWAP(a, b)                                                             \
   itemp = (a);                                                                 \
-  (a) = (b);                                                                   \
-  (b) = itemp;
+  (a)   = (b);                                                                 \
+  (b)   = itemp;
 
-static int USE_ONE = 0;              /* use SW from WM only */
-static int out_type = 3;             /* MRI_FLOAT */
+static int    USE_ONE         = 0;   /* use SW from WM only */
+static int    out_type        = 3;   /* MRI_FLOAT */
 static double noise_threshold = 0.1; /* threshold for background noise */
 
-MRI *MRInormalizeXH(MRI *mri_src, MRI *mri_dst, MRI *mri_mask);
-int main(int argc, char *argv[]);
+MRI *      MRInormalizeXH(MRI *mri_src, MRI *mri_dst, MRI *mri_mask);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -79,25 +79,25 @@ const char *Progname;
 /* Compute LDA only in a local neighborhood of the
  * specified debug voxel
  */
-static int debug_flag = 0;
+static int debug_flag  = 0;
 static int window_flag = 0;
 static int window_size = 30;
 
 static float shift_value = -1;
 
-static int ldaflag = 0;
-static int conform = 0;
+static int ldaflag      = 0;
+static int conform      = 0;
 static int whole_volume = 0;
-static int have_weight = 0; /* read in weights */
-static int just_test = 0;   /* if 1, try SW = Identity */
+static int have_weight  = 0; /* read in weights */
+static int just_test    = 0; /* if 1, try SW = Identity */
 static int compute_m_distance =
     0; /* if 1, compute distance in original space */
 
 /* LDA is performed only within ROI */
-static char *mask_fname = NULL;   /* filename for ROI mask */
-static char *label_fname = NULL;  /* filename for segmentation */
+static char *mask_fname   = NULL; /* filename for ROI mask */
+static char *label_fname  = NULL; /* filename for segmentation */
 static char *weight_fname = NULL; /* filename for storing LDA weights */
-static char *synth_fname = NULL;  /* filename for synthesized LDA volume */
+static char *synth_fname  = NULL; /* filename for synthesized LDA volume */
 
 static void usage_exit(int code);
 
@@ -117,23 +117,23 @@ static int class1 = 0; /* to be used for LDA */
 static int class2 = 0; /* to be used for LDA */
 
 /* eps and lambda are used for covariance regularization */
-static double eps = 1e-20;
-static double lambda = 0.1;
-static int regularize = 0;
+static double eps        = 1e-20;
+static double lambda     = 0.1;
+static int    regularize = 0;
 
 #define MAX_IMAGES 200
 
 int main(int argc, char *argv[]) {
   char **av, *in_fname;
-  int ac, nargs, i, j, x, y, z, width, height, depth;
-  MRI *mri_flash[MAX_IMAGES], *mri_label, *mri_mask, *mri_tmp;
-  int msec, minutes, seconds, nvolumes, nvolumes_total;
-  Timer start;
-  float max_val, min_val, value;
+  int    ac, nargs, i, j, x, y, z, width, height, depth;
+  MRI *  mri_flash[MAX_IMAGES], *mri_label, *mri_mask, *mri_tmp;
+  int    msec, minutes, seconds, nvolumes, nvolumes_total;
+  Timer  start;
+  float  max_val, min_val, value;
   float *LDAmean1, *LDAmean2, *LDAweight;
-  int label;
+  int    label;
   double sum_white, sum_gray;
-  int count_white, count_gray;
+  int    count_white, count_gray;
 
   nargs = handleVersionOption(argc, argv, "mri_ms_LDA");
   if (nargs && argc - nargs == 1)
@@ -233,9 +233,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  width = mri_flash[0]->width;
+  width  = mri_flash[0]->width;
   height = mri_flash[0]->height;
-  depth = mri_flash[0]->depth;
+  depth  = mri_flash[0]->depth;
 
   if (label_fname != NULL) {
     mri_label = MRIread(label_fname);
@@ -332,8 +332,8 @@ int main(int argc, char *argv[]) {
         }
   }
 
-  LDAmean1 = (float *)malloc(nvolumes_total * sizeof(float));
-  LDAmean2 = (float *)malloc(nvolumes_total * sizeof(float));
+  LDAmean1  = (float *)malloc(nvolumes_total * sizeof(float));
+  LDAmean2  = (float *)malloc(nvolumes_total * sizeof(float));
   LDAweight = (float *)malloc(nvolumes_total * sizeof(float));
 
   if (have_weight) {
@@ -393,10 +393,10 @@ int main(int argc, char *argv[]) {
 
     /* Check to make sure class1 has higher intensity than class2 */
     if (have_weight == 0) {
-      sum_white = 0;
+      sum_white   = 0;
       count_white = 0;
-      sum_gray = 0;
-      count_gray = 0;
+      sum_gray    = 0;
+      count_gray  = 0;
       for (z = 0; z < depth; z++) {
         if (count_white > 300 && count_gray > 300)
           break;
@@ -421,7 +421,7 @@ int main(int argc, char *argv[]) {
               for (x = 0; x < width; x++) {
                 if (whole_volume == 0 && MRIvox(mri_mask, x, y, z) == 0)
                   continue;
-                value = MRIFvox(mri_flash[0], x, y, z);
+                value                          = MRIFvox(mri_flash[0], x, y, z);
                 MRIFvox(mri_flash[0], x, y, z) = max_val - value;
               }
           max_val = max_val - min_val;
@@ -486,7 +486,7 @@ int main(int argc, char *argv[]) {
   free(LDAmean2);
   free(LDAweight);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -509,29 +509,29 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "window")) {
     window_flag = 1;
     window_size = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("interpolating volume to be isotropic 1mm^3\n");
   } else if (!stricmp(option, "shift")) {
     shift_value = atof(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("shift output by %g before truncating at zero \n", shift_value);
   } else if (!stricmp(option, "out_type")) {
     out_type = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("Output type is %d\n", out_type);
   } else if (!stricmp(option, "conform")) {
     conform = 1;
@@ -544,9 +544,9 @@ static int get_option(int argc, char *argv[]) {
     printf("Synthesize background region too (if LDA)\n");
   } else if (!stricmp(option, "lda")) {
     ldaflag = 1;
-    class1 = atoi(argv[2]);
-    class2 = atoi(argv[3]);
-    nargs = 2;
+    class1  = atoi(argv[2]);
+    class2  = atoi(argv[3]);
+    nargs   = 2;
     printf("Using LDA method to generate synthesized volume (%d, %d) \n",
            class1, class2);
   } else if (!stricmp(option, "mask")) {
@@ -573,8 +573,8 @@ static int get_option(int argc, char *argv[]) {
     printf("Test: set Sw to identity matrix.\n");
   } else if (!stricmp(option, "regularize")) {
     regularize = 1;
-    lambda = atof(argv[2]);
-    nargs = 1;
+    lambda     = atof(argv[2]);
+    nargs      = 1;
     printf("regularization for covarinace matrix, lambda = %g\n", lambda);
   } else if (!stricmp(option, "distance")) {
     compute_m_distance = 1;
@@ -630,13 +630,13 @@ void update_LDAmeans(MRI **mri_flash, MRI *mri_label, MRI *mri_mask,
                      float *LDAmean1, float *LDAmean2, int nvolumes_total,
                      int classID1, int classID2) {
 
-  int m, x, y, z, depth, height, width;
-  float numer1, numer2; /* just to be consistent with LDA_all */
+  int    m, x, y, z, depth, height, width;
+  float  numer1, numer2; /* just to be consistent with LDA_all */
   double denom1, denom2;
-  int label;
+  int    label;
 
-  depth = mri_flash[0]->depth;
-  width = mri_flash[0]->width;
+  depth  = mri_flash[0]->depth;
+  width  = mri_flash[0]->width;
   height = mri_flash[0]->height;
 
   for (m = 0; m < nvolumes_total; m++) {
@@ -677,16 +677,16 @@ void computeLDAweights(float *weights, MRI **mri_flash, MRI *mri_label,
                        int nvolumes_total, int classID1, int classID2) {
   /* To make it consistent with later CNR computation */
 
-  int m1, m2, x, y, z, depth, height, width;
+  int    m1, m2, x, y, z, depth, height, width;
   double denom, denom1, denom2, sumw;
-  float data1, data2;
-  int label;
+  float  data1, data2;
+  int    label;
   double Mdistance;
 
   MATRIX *InvSW, *SW1, *SW2;
 
-  depth = mri_flash[0]->depth;
-  width = mri_flash[0]->width;
+  depth  = mri_flash[0]->depth;
+  width  = mri_flash[0]->width;
   height = mri_flash[0]->height;
 
   SW1 = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
@@ -844,7 +844,7 @@ void computeLDAweights(float *weights, MRI **mri_flash, MRI *mri_label,
   }
   /* Compute weights */
   denom = 0.0;
-  sumw = 0.0;
+  sumw  = 0.0;
   if (CHOICE == 1) {
     /* Do not use invSW, assume SW is diagonal */
     printf("Ignore off-diagonal of SW\n");
@@ -893,7 +893,7 @@ void computeLDAweights(float *weights, MRI **mri_flash, MRI *mri_label,
 }
 
 void input_weights_to_file(float *weights, char *weight_fname, int VN) {
-  int i;
+  int   i;
   FILE *infile = NULL;
 
   infile = fopen(weight_fname, "r");
@@ -917,7 +917,7 @@ void input_weights_to_file(float *weights, char *weight_fname, int VN) {
 }
 
 void output_weights_to_file(float *weights, char *weight_fname, int VN) {
-  int i;
+  int   i;
   FILE *fp = NULL;
 
   fp = fopen(weight_fname, "w");
@@ -938,7 +938,7 @@ MRI *MRInormalizeXH(MRI *mri_src, MRI *mri_dst, MRI *mri_mask) {
   /* Normalize the source volume to be zero mean and variance 1*/
   /* mri_dst and mri_src can be the same */
 
-  int width, height, depth, x, y, z;
+  int   width, height, depth, x, y, z;
   float mean, variance, total, tmpval;
 
   if (mri_src->type != MRI_FLOAT) {
@@ -947,14 +947,14 @@ MRI *MRInormalizeXH(MRI *mri_src, MRI *mri_dst, MRI *mri_mask) {
     return (mri_dst);
   }
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, NULL);
 
   /* compute mean */
-  mean = 0.0;
+  mean  = 0.0;
   total = 0.0;
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
@@ -999,7 +999,7 @@ MRI *MRInormalizeXH(MRI *mri_src, MRI *mri_dst, MRI *mri_mask) {
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
       for (x = 0; x < width; x++) {
-        tmpval = MRIFvox(mri_src, x, y, z) - mean;
+        tmpval                    = MRIFvox(mri_src, x, y, z) - mean;
         MRIFvox(mri_dst, x, y, z) = tmpval * variance;
       }
 

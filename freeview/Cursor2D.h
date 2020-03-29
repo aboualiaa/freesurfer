@@ -46,7 +46,7 @@ public:
   void SetPosition2(double *pos);
 
   double *GetPosition();
-  void GetPosition(double *pos);
+  void    GetPosition(double *pos);
 
   void SetInterpolationPoints(std::vector<double> pts);
 
@@ -86,8 +86,8 @@ private:
 
   RenderView2D *m_view;
 
-  double m_dPosition[3];
-  double m_dPosition2[3];
+  double              m_dPosition[3];
+  double              m_dPosition2[3];
   std::vector<double> m_dInterpolationPoints;
 
   int m_nSize;

@@ -30,24 +30,24 @@
 #include "colortab.h"
 
 struct FSENV {
-  char *FREESURFER_HOME;
-  char *SUBJECTS_DIR;
-  char *user;             // current user
-  char *date;             // current date and time
-  char *cwd;              // current working directory
-  char *hostname;         // eg, icebox (same as nodename)
-  char *sysname;          // eg, Linux
-  char *machine;          // eg, i686
-  char *tmpdir;           // folder for temporary files
-  COLOR_TABLE *ctab;      // FREESURFER_HOME/FreeSurferColorLUT.txt
-  int desired_bvec_space; // for DWI
+  char *       FREESURFER_HOME;
+  char *       SUBJECTS_DIR;
+  char *       user;               // current user
+  char *       date;               // current date and time
+  char *       cwd;                // current working directory
+  char *       hostname;           // eg, icebox (same as nodename)
+  char *       sysname;            // eg, Linux
+  char *       machine;            // eg, i686
+  char *       tmpdir;             // folder for temporary files
+  COLOR_TABLE *ctab;               // FREESURFER_HOME/FreeSurferColorLUT.txt
+  int          desired_bvec_space; // for DWI
 };
 
 const char *FSENVsrcVersion();
-FSENV *FSENVgetenv();
-int FSENVprintenv(FILE *fp, FSENV *env);
-int FSENVsetSUBJECTS_DIR(char *SUBJECTS_DIR);
-char *FSENVgetSUBJECTS_DIR();
-int FSENVfree(FSENV **ppenv);
+FSENV *     FSENVgetenv();
+int         FSENVprintenv(FILE *fp, FSENV *env);
+int         FSENVsetSUBJECTS_DIR(char *SUBJECTS_DIR);
+char *      FSENVgetSUBJECTS_DIR();
+int         FSENVfree(FSENV **ppenv);
 
 #endif // FSENV_H

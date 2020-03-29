@@ -23,21 +23,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
+#include "cma.h"
 #include "diag.h"
+#include "error.h"
+#include "gcamorph.h"
+#include "macros.h"
 #include "mri.h"
 #include "proto.h"
 #include "transform.h"
 #include "version.h"
-#include "cma.h"
-#include "gcamorph.h"
 
 static char vcid[] =
     "$Id: mri_map_atrophy.c,v 1.4 2011/03/02 00:04:22 nicks Exp $";
@@ -49,28 +49,28 @@ static MRI *make_atrophy_map(MRI *mri_time1, MRI *mri_time2, MRI *mri_dst,
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
-const char *Progname;
+const char * Progname;
 static char *out_like_fname = NULL;
-static int invert_flag = 0;
+static int   invert_flag    = 0;
 
 static int gray_labels[] = {Left_Hippocampus,  Left_Amygdala,  Left_Caudate,
                             Right_Hippocampus, Right_Amygdala, Right_Caudate};
-static int csf_labels[] = {Left_Lateral_Ventricle, Left_Inf_Lat_Vent,
+static int csf_labels[]  = {Left_Lateral_Ventricle, Left_Inf_Lat_Vent,
                            Right_Lateral_Ventricle, Right_Inf_Lat_Vent,
                            Unknown};
-static int ncsf = (sizeof(csf_labels) / sizeof(csf_labels[0]));
-static int ngray = (sizeof(gray_labels) / sizeof(gray_labels[0]));
+static int ncsf          = (sizeof(csf_labels) / sizeof(csf_labels[0]));
+static int ngray         = (sizeof(gray_labels) / sizeof(gray_labels[0]));
 
 int main(int argc, char *argv[]) {
-  char **av, *out_vol;
-  int ac, nargs;
-  MRI *mri_time1, *mri_time2, *mri_tmp, *mri_atrophy;
+  char **    av, *out_vol;
+  int        ac, nargs;
+  MRI *      mri_time1, *mri_time2, *mri_tmp, *mri_atrophy;
   TRANSFORM *transform1, *transform2;
 
   nargs = handleVersionOption(argc, argv, "mri_map_atrophy");
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
   mri_tmp = TransformApplyType(transform1, mri_time1, NULL, SAMPLE_NEAREST);
   MRIfree(&mri_time1);
   mri_time1 = mri_tmp;
-  mri_tmp = TransformApplyType(transform2, mri_time2, NULL, SAMPLE_NEAREST);
+  mri_tmp   = TransformApplyType(transform2, mri_time2, NULL, SAMPLE_NEAREST);
   MRIfree(&mri_time2);
   mri_time2 = mri_tmp;
   mri_atrophy =
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -147,13 +147,13 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "out_like") || !stricmp(option, "ol")) {
     out_like_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("shaping output to be like %s...\n", out_like_fname);
   } else
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'I':
       invert_flag = 1;
@@ -207,10 +207,10 @@ static MRI *make_atrophy_map(MRI *mri_time1, MRI *mri_time2, MRI *mri_dst,
                              TRANSFORM *transform1, TRANSFORM *transform2,
                              int *gray_labels, int ngray, int *csf_labels,
                              int ncsf) {
-  int x, y, z, label1, label2, n, found, xp, yp, zp, spacing;
+  int             x, y, z, label1, label2, n, found, xp, yp, zp, spacing;
   GCA_MORPH_NODE *gcamn1, *gcamn2;
-  GCA_MORPH *gcam1, *gcam2;
-  float volume;
+  GCA_MORPH *     gcam1, *gcam2;
+  float           volume;
 
   if (mri_dst == NULL) {
     mri_dst = MRIalloc(mri_time1->width, mri_time1->height, mri_time1->depth,
@@ -218,8 +218,8 @@ static MRI *make_atrophy_map(MRI *mri_time1, MRI *mri_time2, MRI *mri_dst,
     MRIcopyHeader(mri_time1, mri_dst);
   }
 
-  gcam1 = (GCA_MORPH *)transform1->xform;
-  gcam2 = (GCA_MORPH *)transform2->xform;
+  gcam1   = (GCA_MORPH *)transform1->xform;
+  gcam2   = (GCA_MORPH *)transform2->xform;
   spacing = gcam1->spacing;
 
   for (x = 0; x < mri_time1->width; x++) {
@@ -250,7 +250,7 @@ static MRI *make_atrophy_map(MRI *mri_time1, MRI *mri_time2, MRI *mri_dst,
           }
         if (found == 0)
           continue;
-        zp = z / spacing;
+        zp     = z / spacing;
         gcamn1 = &gcam1->nodes[xp][yp][zp];
         gcamn2 = &gcam2->nodes[xp][yp][zp];
         volume = 0;

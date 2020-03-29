@@ -30,18 +30,18 @@
 //
 //--------------------------------------------------------------------------*/
 
+#include "myutil.h"
+#include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <memory.h>
-#include "myutil.h"
 
 /*---------------------------------------------------------------------------
 // Construct an empty MYlist with specified capacity and capacity increment
 //-------------------------------------------------------------------------*/
 MYlist myList2(int elementSize, int capacity, int capacityIncrement) {
   MYlist list;
-  void *data;
+  void * data;
 
   if (elementSize < 1) {
     fprintf(stderr, "myList(): elementSize must be a postive integer!\n");
@@ -98,18 +98,18 @@ MYlist myList(int elementSize) {
 //-------------------------------------------------------------------------*/
 MYlist myListOfSize(int size, int elementSize) {
   MYlist list;
-  char *data;
-  int i;
-  int capacity, capacityIncrement;
+  char * data;
+  int    i;
+  int    capacity, capacityIncrement;
 
   if (size < 0) {
     fprintf(stderr, "myListOfSize(): size must not be negative!\n");
     exit(1);
   }
 
-  capacity = size;
+  capacity          = size;
   capacityIncrement = 100;
-  list = myList2(elementSize, capacity, capacityIncrement);
+  list              = myList2(elementSize, capacity, capacityIncrement);
   myListSetSize(list, size);
   data = (char *)myListData(list);
   for (i = 0; i < elementSize * size; i++)
@@ -133,13 +133,13 @@ void myListDelete(MYlist list) {
 // Add an element to this list
 //-------------------------------------------------------------------------*/
 void myListAddElement(MYlist list, void *element) {
-  int size, capacity, elementSize, capacityIncrement;
+  int   size, capacity, elementSize, capacityIncrement;
   void *data;
 
-  size = myListSize(list);
-  capacity = myListCapacity(list);
+  size        = myListSize(list);
+  capacity    = myListCapacity(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
   if (size >= capacity) {
     capacityIncrement = myListCapacityIncrement(list);
     capacity += capacityIncrement;
@@ -162,13 +162,13 @@ void myListAddElement(MYlist list, void *element) {
 // Add an integer to this list (must be a list consists of only integers)
 //-------------------------------------------------------------------------*/
 void myListAddInt(MYlist list, int element) {
-  int size, capacity, elementSize, capacityIncrement;
+  int  size, capacity, elementSize, capacityIncrement;
   int *data;
 
-  size = myListSize(list);
-  capacity = myListCapacity(list);
+  size        = myListSize(list);
+  capacity    = myListCapacity(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   if (size >= capacity) {
     capacityIncrement = myListCapacityIncrement(list);
@@ -192,16 +192,16 @@ void myListAddInt(MYlist list, int element) {
 // Add an array to this list
 //-------------------------------------------------------------------------*/
 void myListAddArray(MYlist list, void *array, int num) {
-  int size, capacity, elementSize, capacityIncrement, actualIncrement;
+  int   size, capacity, elementSize, capacityIncrement, actualIncrement;
   void *data;
 
-  size = myListSize(list);
-  capacity = myListCapacity(list);
+  size        = myListSize(list);
+  capacity    = myListCapacity(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
   if (size + num > capacity) {
     capacityIncrement = myListCapacityIncrement(list);
-    actualIncrement = (capacityIncrement > num) ? capacityIncrement : num;
+    actualIncrement   = (capacityIncrement > num) ? capacityIncrement : num;
     capacity += actualIncrement;
     myListSetCapacity(list, capacity);
 
@@ -223,13 +223,13 @@ void myListAddArray(MYlist list, void *array, int num) {
 // Insert an element into the list at the specified index
 //-------------------------------------------------------------------------*/
 int myListInsertElementAt(MYlist list, int index, void *element) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
   void *tempPtr;
   char *currentPtr, *nextPtr;
-  int i;
+  int   i;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
 
   if (index < 0 || index > size - 1) {
@@ -243,7 +243,7 @@ int myListInsertElementAt(MYlist list, int index, void *element) {
 
   for (i = size - 1; i >= index; i--) {
     currentPtr = (char *)data + i * elementSize;
-    nextPtr = (char *)currentPtr + elementSize;
+    nextPtr    = (char *)currentPtr + elementSize;
     memcpy(nextPtr, currentPtr, elementSize);
   }
 
@@ -256,12 +256,12 @@ int myListInsertElementAt(MYlist list, int index, void *element) {
 // Retrieve an element from this list at a given index
 //-------------------------------------------------------------------------*/
 int myListElementAt(MYlist list, int index, void *element) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   if (index < 0 || index > size - 1) {
     return (-1); /* out of bound error */
@@ -275,12 +275,12 @@ int myListElementAt(MYlist list, int index, void *element) {
 // Sets a list element at a given index
 //-------------------------------------------------------------------------*/
 int myListSetElementAt(MYlist list, int index, void *element) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   if (index < 0 || index > size - 1) {
     return (-1); /* out of bound error */
@@ -295,14 +295,14 @@ int myListSetElementAt(MYlist list, int index, void *element) {
 // Removes all elements from this list and sets its size to zero
 //-------------------------------------------------------------------------*/
 int myListRemoveElementAt(MYlist list, int index) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
   char *currentPtr, *nextPtr;
-  int i;
+  int   i;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   if (index < 0 || index > size - 1) {
     return (-1); /* out of bound error */
@@ -310,7 +310,7 @@ int myListRemoveElementAt(MYlist list, int index) {
 
   for (i = index; i < size - 1; i++) {
     currentPtr = (char *)data + i * elementSize;
-    nextPtr = (char *)currentPtr + elementSize;
+    nextPtr    = (char *)currentPtr + elementSize;
     memcpy(currentPtr, nextPtr, elementSize);
   }
 
@@ -329,11 +329,11 @@ void myListRemoveAllElements(MYlist list) { myListSetSize(list, 0); }
 //-------------------------------------------------------------------------*/
 void myListTrim(MYlist list) {
   void *data;
-  int size, elementSize;
+  int   size, elementSize;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   data = (void *)myRealloc(data, elementSize * size);
   myListSetData(list, data);
@@ -343,9 +343,9 @@ void myListTrim(MYlist list) {
 void myListInfo(MYlist list) {
   int elementSize, size, capacity, capacityIncrement;
 
-  elementSize = myListElementSize(list);
-  size = myListSize(list);
-  capacity = myListCapacity(list);
+  elementSize       = myListElementSize(list);
+  size              = myListSize(list);
+  capacity          = myListCapacity(list);
   capacityIncrement = myListCapacityIncrement(list);
 
   printf("         elementSize = %d\n", elementSize);
@@ -359,12 +359,12 @@ void myListInfo(MYlist list) {
 // pop out the top element from the stack
 //-------------------------------------------------------------------------*/
 void myStackPop(MYstack stack, void *element) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
 
-  size = myListSize(stack);
+  size        = myListSize(stack);
   elementSize = myListElementSize(stack);
-  data = myListData(stack);
+  data        = myListData(stack);
 
   memcpy((char *)element, (char *)data + (size - 1) * elementSize, elementSize);
   myListSetSize(stack, size - 1);
@@ -376,10 +376,10 @@ void myStackPop(MYstack stack, void *element) {
 MYqueue myQueue2(int elementSize, int capacity, int capacityIncrement) {
   MYqueue queue;
 
-  queue = (MYqueue)myMalloc(sizeof(MYqueueStruct));
+  queue        = (MYqueue)myMalloc(sizeof(MYqueueStruct));
   queue->start = 0;
-  queue->end = -1;
-  queue->list = myList2(elementSize, capacity, capacityIncrement);
+  queue->end   = -1;
+  queue->list  = myList2(elementSize, capacity, capacityIncrement);
 
   return (queue);
 }
@@ -426,7 +426,7 @@ void myQueueDelete(MYqueue queue) {
 //-------------------------------------------------------------------------*/
 void myQueueRemoveAllElements(MYqueue queue) {
   queue->start = 0;
-  queue->end = -1;
+  queue->end   = -1;
   myQueueEnsureSize(queue);
 }
 
@@ -434,16 +434,16 @@ void myQueueRemoveAllElements(MYqueue queue) {
 void myQueueMoveToFront(MYqueue queue) {
   void *data;
   void *s1, *s2;
-  int elementSize, start, end;
+  int   elementSize, start, end;
 
   elementSize = myListElementSize(queue->list);
-  data = myListData(queue->list);
-  start = queue->start;
-  end = queue->end;
-  s2 = (char *)data + start * elementSize;
-  s1 = data;
+  data        = myListData(queue->list);
+  start       = queue->start;
+  end         = queue->end;
+  s2          = (char *)data + start * elementSize;
+  s1          = data;
   memmove(s1, s2, (end - start + 1) * elementSize);
-  queue->end = end - start;
+  queue->end   = end - start;
   queue->start = 0;
   myQueueEnsureSize(queue);
 }
@@ -458,7 +458,7 @@ void myQueuePush(MYqueue queue, void *element) {
   /* a factor of n denotes that (n-1)*memory(queue) will be
   wasted */
 
-  size = myQueueSize(queue);
+  size     = myQueueSize(queue);
   capacity = myListCapacity(queue->list);
 
   if (queue->end >= (capacity - 1) && q * size < capacity)
@@ -480,7 +480,7 @@ void myQueuePushArray(MYqueue queue, void *array, int num) {
   /* a factor of n denotes that (n-1)*memory(queue) will be
   wasted */
 
-  size = myQueueSize(queue);
+  size     = myQueueSize(queue);
   capacity = myListCapacity(queue->list);
 
   if (queue->end >= (capacity - 1) && q * size < capacity)
@@ -522,16 +522,16 @@ void myQueueTrim(MYqueue queue) {
 //-------------------------------------------------------------------------*/
 void *myQueueToArray(MYqueue queue) {
   void *arr, *data;
-  int size, elementSize;
+  int   size, elementSize;
 
-  size = myQueueSize(queue);
+  size        = myQueueSize(queue);
   elementSize = myListElementSize(queue->list);
 
   if (size == 0) {
     arr = NULL;
   } else {
     data = myListData(queue->list);
-    arr = (void *)myMalloc(elementSize * size);
+    arr  = (void *)myMalloc(elementSize * size);
     memcpy(arr, (char *)data + queue->start * elementSize, size * elementSize);
   }
 

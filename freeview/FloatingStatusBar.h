@@ -24,8 +24,8 @@
 #ifndef FLOATINGSTATUSBAR_H
 #define FLOATINGSTATUSBAR_H
 
-#include <QWidget>
 #include <QTimer>
+#include <QWidget>
 
 namespace Ui {
 class FloatingStatusBar;
@@ -52,7 +52,7 @@ private slots:
 
 private:
   Ui::FloatingStatusBar *ui;
-  QTimer *m_timer;
+  QTimer *               m_timer;
 };
 
 #endif // FLOATINGSTATUSBAR_H

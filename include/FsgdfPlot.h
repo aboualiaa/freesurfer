@@ -25,8 +25,8 @@
 #ifndef FSGDFPLOT_H
 #define FSGDFPLOT_H
 
-#include "tix.h"
 #include "fsgdf_wrap.h"
+#include "tix.h"
 
 #if NEEDS_ITCL_ITK
 #ifndef Itcl_Init
@@ -129,8 +129,8 @@ private:
 
   // private attributes
   //
-  int mGDFID;
-  int mbGDFLoaded;
+  int         mGDFID;
+  int         mbGDFLoaded;
   Tcl_Interp *mInterp;
 };
 

@@ -1,10 +1,10 @@
 #ifndef _SBL_IMAGE_TRANSFORM_H_
 #define _SBL_IMAGE_TRANSFORM_H_
-#include <sbl/core/Pointer.h>
 #include <sbl/core/File.h>
-#include <sbl/math/Vector.h>
-#include <sbl/math/Geometry.h>
+#include <sbl/core/Pointer.h>
 #include <sbl/image/Image.h>
+#include <sbl/math/Geometry.h>
+#include <sbl/math/Vector.h>
 namespace sbl {
 
 /*! \file ImageTransform.h
@@ -121,8 +121,8 @@ public:
   aptr<ImageTransform> inverse() const;
 
   /// map an image forward according to the transformation
-  aptr<ImageGrayU> mapForward(const ImageGrayU &img, int outputWidth,
-                              int outputHeight, int fillColor) const;
+  aptr<ImageGrayU>  mapForward(const ImageGrayU &img, int outputWidth,
+                               int outputHeight, int fillColor) const;
   aptr<ImageColorU> mapForward(const ImageColorU &img, int outputWidth,
                                int outputHeight, int fillColor) const;
 

@@ -36,10 +36,10 @@ MRI *MRIcropVolumeToLabel(MRI *mri_src, MRI *mri_dst, LABEL *area,
 
 int main(int argc, char *argv[]) {
   char *inner_mris_fname, *outer_mris_fname, *input_mri_pref, *output_mri_pref;
-  MRI *mri = nullptr, *mri_src = nullptr;
+  MRI * mri = nullptr, *mri_src = nullptr;
   MRI_SURFACE *inner_mris = nullptr, *outer_mris = nullptr;
-  int nargs;
-  LABEL *area = nullptr;
+  int          nargs;
+  LABEL *      area = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mri_ribbon");
   if (nargs && argc - nargs == 1)
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
       case 'L':
         printf("cropping ribbon to label file %s\n", argv[2]);
         nargs = 1;
-        area = LabelRead(nullptr, argv[2]);
+        area  = LabelRead(nullptr, argv[2]);
         if (area == nullptr)
           ErrorExit(ERROR_NOFILE, "%s: could not read label file %s\n",
                     argv[2]);
@@ -80,8 +80,8 @@ int main(int argc, char *argv[]) {
 
   inner_mris_fname = argv[1];
   outer_mris_fname = argv[2];
-  input_mri_pref = argv[3];
-  output_mri_pref = argv[4];
+  input_mri_pref   = argv[3];
+  output_mri_pref  = argv[4];
 
   /* Read surface information from inner surface file */
   printf("Reading surface file %s.\n", inner_mris_fname);
@@ -127,10 +127,10 @@ int main(int argc, char *argv[]) {
 
 MRI *MRIcropVolumeToLabel(MRI *mri_src, MRI *mri_dst, LABEL *area,
                           MRI_SURFACE *mris_white, MRI_SURFACE *mris_pial) {
-  MHT *mht_white, *mht_pial;
-  int x, y, z;
+  MHT *   mht_white, *mht_pial;
+  int     x, y, z;
   VERTEX *v_white, *v_pial;
-  double xs, ys, zs;
+  double  xs, ys, zs;
 
   mht_white =
       MHTcreateVertexTable_Resolution(mris_white, CURRENT_VERTICES, 5.0);

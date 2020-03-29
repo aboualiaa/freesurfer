@@ -34,7 +34,7 @@ double round(double); // why is this never defined?!?
 extern int errno;
 
 MATRIX *MRIgetConformMatrix(MRI *mri) {
-  MRI *templ;
+  MRI *   templ;
   MATRIX *m_resample;
 
   if (mri->ras_good_flag == 0) {
@@ -46,20 +46,20 @@ MATRIX *MRIgetConformMatrix(MRI *mri) {
   templ->imnr0 = 1;
   templ->imnr1 = 256;
   templ->thick = 1.0;
-  templ->ps = 1.0;
+  templ->ps    = 1.0;
   templ->xsize = templ->ysize = templ->zsize = 1.0;
   templ->xstart = templ->ystart = templ->zstart = -128.0;
   templ->xend = templ->yend = templ->zend = 128.0;
   setDirectionCosine(templ, MRI_CORONAL); // sets c_(r,a,s) = 0
   // retain the src c_(r,a,s)
-  templ->c_r = mri->c_r;
-  templ->c_a = mri->c_a;
-  templ->c_s = mri->c_s;
+  templ->c_r           = mri->c_r;
+  templ->c_a           = mri->c_a;
+  templ->c_s           = mri->c_s;
   templ->ras_good_flag = 1; // use c_(r,a,s)
-  templ->tr = mri->tr;
-  templ->te = mri->te;
-  templ->flip_angle = mri->flip_angle;
-  templ->ti = mri->ti;
+  templ->tr            = mri->tr;
+  templ->te            = mri->te;
+  templ->flip_angle    = mri->flip_angle;
+  templ->ti            = mri->ti;
 
   m_resample = MRIgetResampleMatrix(mri, templ);
 
@@ -86,24 +86,24 @@ MRI *MRIconform(MRI *mri) {
 #if 0
   templ = MRIconformedTemplate(mri, conform_width, conform_size, KeepDC);
 #else
-  templ = MRIallocHeader(256, 256, 256, MRI_UCHAR, mri->nframes);
+  templ        = MRIallocHeader(256, 256, 256, MRI_UCHAR, mri->nframes);
   templ->imnr0 = 1;
   templ->imnr1 = 256;
   templ->thick = 1.0;
-  templ->ps = 1.0;
+  templ->ps    = 1.0;
   templ->xsize = templ->ysize = templ->zsize = 1.0;
   templ->xstart = templ->ystart = templ->zstart = -128.0;
   templ->xend = templ->yend = templ->zend = 128.0;
   setDirectionCosine(templ, MRI_CORONAL); // sets c_(r,a,s) = 0
   // retain the c_(r,a,s)
-  templ->c_r = res->c_r;
-  templ->c_a = res->c_a;
-  templ->c_s = res->c_s;
+  templ->c_r           = res->c_r;
+  templ->c_a           = res->c_a;
+  templ->c_s           = res->c_s;
   templ->ras_good_flag = 1; // use c_(r,a,s)
-  templ->tr = mri->tr;
-  templ->te = mri->te;
-  templ->flip_angle = mri->flip_angle;
-  templ->ti = mri->ti;
+  templ->tr            = mri->tr;
+  templ->te            = mri->te;
+  templ->flip_angle    = mri->flip_angle;
+  templ->ti            = mri->ti;
 #endif
 
   /* ----- change type if necessary ----- */
@@ -140,10 +140,10 @@ MRI *MRIconform(MRI *mri) {
 
 MRI *MRIconformedTemplate(MRI *mri, int conform_width, double conform_size,
                           int KeepDC) {
-  MRI *mri_template;
-  char ostr[4];
-  int iLR, iIS, iAP, Nvox[3], FoV[3], conform_FoV, c;
-  double delta[3], pad, step;
+  MRI *   mri_template;
+  char    ostr[4];
+  int     iLR, iIS, iAP, Nvox[3], FoV[3], conform_FoV, c;
+  double  delta[3], pad, step;
   MATRIX *K, *invK, *Smri, *Stemp;
 
   mri_template = MRIallocHeader(conform_width, conform_width, conform_width,
@@ -153,7 +153,7 @@ MRI *MRIconformedTemplate(MRI *mri, int conform_width, double conform_size,
   mri_template->imnr0 = 1;
   mri_template->imnr1 = conform_width;
   mri_template->thick = conform_size;
-  mri_template->ps = conform_size;
+  mri_template->ps    = conform_size;
   mri_template->xsize = mri_template->ysize = mri_template->zsize =
       conform_size;
   mri_template->xstart = mri_template->ystart = mri_template->zstart =
@@ -176,9 +176,9 @@ MRI *MRIconformedTemplate(MRI *mri, int conform_width, double conform_size,
     printf("keeping DC %d %d %d\n", iLR, iIS, iAP);
     printf("ostr %s, width %d, size %g\n", ostr, conform_width, conform_size);
 
-    Nvox[0] = mri->width;
-    Nvox[1] = mri->height;
-    Nvox[2] = mri->depth;
+    Nvox[0]  = mri->width;
+    Nvox[1]  = mri->height;
+    Nvox[2]  = mri->depth;
     delta[0] = mri->xsize;
     delta[1] = mri->ysize;
     delta[2] = mri->zsize;
@@ -186,7 +186,7 @@ MRI *MRIconformedTemplate(MRI *mri, int conform_width, double conform_size,
       FoV[c] = Nvox[c] * delta[c];
 
     // K maps voxels in mri to voxels in mri_template
-    K = MatrixAlloc(4, 4, MATRIX_REAL);
+    K             = MatrixAlloc(4, 4, MATRIX_REAL);
     K->rptr[4][4] = 1;
 
     // If the delta=conform_size, then no interpolation will result
@@ -197,37 +197,37 @@ MRI *MRIconformedTemplate(MRI *mri, int conform_width, double conform_size,
     // general conditions
 
     step = delta[iLR] / conform_size;
-    pad = round(((conform_FoV - FoV[iLR]) / 2.0) / conform_size);
+    pad  = round(((conform_FoV - FoV[iLR]) / 2.0) / conform_size);
     if (ostr[iLR] == 'L') {
       K->rptr[1][iLR + 1] = step;
-      K->rptr[1][4] = pad;
+      K->rptr[1][4]       = pad;
     } else {
       K->rptr[1][iLR + 1] = -step;
-      K->rptr[1][4] = conform_width - pad;
+      K->rptr[1][4]       = conform_width - pad;
     }
 
     step = delta[iIS] / conform_size;
-    pad = round(((conform_FoV - FoV[iIS]) / 2.0) / conform_size);
+    pad  = round(((conform_FoV - FoV[iIS]) / 2.0) / conform_size);
     if (ostr[iIS] == 'I') {
       K->rptr[2][iIS + 1] = step;
-      K->rptr[2][4] = pad;
+      K->rptr[2][4]       = pad;
     } else {
       K->rptr[2][iIS + 1] = -step;
-      K->rptr[2][4] = conform_width - pad;
+      K->rptr[2][4]       = conform_width - pad;
     }
 
     step = delta[iAP] / conform_size;
-    pad = round(((conform_FoV - FoV[iAP]) / 2.0) / conform_size);
+    pad  = round(((conform_FoV - FoV[iAP]) / 2.0) / conform_size);
     if (ostr[iAP] == 'A') {
       K->rptr[3][iAP + 1] = step;
-      K->rptr[3][4] = pad;
+      K->rptr[3][4]       = pad;
     } else {
       K->rptr[3][iAP + 1] = -step;
-      K->rptr[3][4] = conform_width - pad;
+      K->rptr[3][4]       = conform_width - pad;
     }
 
-    invK = MatrixInverse(K, nullptr);
-    Smri = MRIxfmCRS2XYZ(mri, 0);
+    invK  = MatrixInverse(K, nullptr);
+    Smri  = MRIxfmCRS2XYZ(mri, 0);
     Stemp = MatrixMultiplyD(Smri, invK, nullptr);
     MRIsetVox2RASFromMatrix(mri_template, Stemp);
 

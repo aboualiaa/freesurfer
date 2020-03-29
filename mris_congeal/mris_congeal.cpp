@@ -24,79 +24,79 @@
  *
  */
 
-#include "timer.h"
 #include "diag.h"
-#include "tags.h"
-#include "version.h"
 #include "gcsa.h"
+#include "tags.h"
+#include "timer.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mris_congeal.c,v 1.4 2011/03/02 00:04:30 nicks Exp $";
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static int    get_option(int argc, char *argv[]);
+static void   usage_exit();
+static void   print_usage();
+static void   print_help();
+static void   print_version();
 static double gcsaSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
 
-static char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
+static char *surface_names[]   = {"inflated", "smoothwm", "smoothwm"};
 static char *curvature_names[] = {"inflated.H", "sulc", nullptr};
 
 #define MAX_SIGMAS 10
-static int nsigmas = 0;
-static int navgs = 0;
+static int   nsigmas = 0;
+static int   navgs   = 0;
 static float sigmas[MAX_SIGMAS];
-static int Gsno = 0;
-static int Giter = 0;
+static int   Gsno  = 0;
+static int   Giter = 0;
 
 static double max_angle = 16.0;
 #define IMAGE_PER_SURFACE 3 /* mean, variance, and dof */
-#define SURFACES sizeof(curvature_names) / sizeof(curvature_names[0])
-#define PARAM_IMAGES (IMAGES_PER_SURFACE * SURFACES)
+#define SURFACES          sizeof(curvature_names) / sizeof(curvature_names[0])
+#define PARAM_IMAGES      (IMAGES_PER_SURFACE * SURFACES)
 
-static char *starting_reg_fname = nullptr;
-static int multi_scale = 0;
-static int which_norm = NORM_MEAN;
-static int single_surf = 0;
-static double l_ocorr = 1.0;
-static char *annot_name = nullptr;
-static int atlas_size = 3;
-static int max_passes = 4;
-static float min_degrees = 0.5;
-static float max_degrees = 64.0;
-static int nangles = 8;
-static int nbrs = 1;
-static float scale = 1.0f;
+static char * starting_reg_fname = nullptr;
+static int    multi_scale        = 0;
+static int    which_norm         = NORM_MEAN;
+static int    single_surf        = 0;
+static double l_ocorr            = 1.0;
+static char * annot_name         = nullptr;
+static int    atlas_size         = 3;
+static int    max_passes         = 4;
+static float  min_degrees        = 0.5;
+static float  max_degrees        = 64.0;
+static int    nangles            = 8;
+static int    nbrs               = 1;
+static float  scale              = 1.0f;
 
 static int reverse_flag = 0;
 
 static float dalpha = 0.0f;
-static float dbeta = 0.0f;
+static float dbeta  = 0.0f;
 static float dgamma = 0.0f;
 
 #define MAX_OVERLAYS 1000
-static int noverlays = 0;
+static int   noverlays = 0;
 static char *overlays[MAX_OVERLAYS];
-const char *Progname;
-static char curvature_fname[STRLEN] = "";
-static char *orig_name = "smoothwm";
-static char *canon_name = "sphere";
-static char *jacobian_fname = nullptr;
-static char *inflated_name = nullptr;
+const char * Progname;
+static char  curvature_fname[STRLEN] = "";
+static char *orig_name               = "smoothwm";
+static char *canon_name              = "sphere";
+static char *jacobian_fname          = nullptr;
+static char *inflated_name           = nullptr;
 
 #define MAX_LABELS 100
-static int nlabels = 0;
+static int    nlabels = 0;
 static LABEL *labels[MAX_LABELS];
-static char *label_names[MAX_LABELS];
-static GCSA *label_gcsa[MAX_LABELS];
-static int label_indices[MAX_LABELS];
-static int label_annots[MAX_LABELS];
+static char * label_names[MAX_LABELS];
+static GCSA * label_gcsa[MAX_LABELS];
+static int    label_indices[MAX_LABELS];
+static int    label_annots[MAX_LABELS];
 
 /* multiframe registration */
-static int multiframes = 0;
+static int multiframes              = 0;
 static int use_initial_registration = 0;
 
 static void initParms();
@@ -104,20 +104,19 @@ static void initParms();
 static int use_defaults = 1;
 
 static INTEGRATION_PARMS parms;
-static int remove_negative = 1;
+static int               remove_negative = 1;
 
-static int ico_order = 7;
+static int  ico_order    = 7;
 static char sdir[STRLEN] = "";
 #define MAX_SUBJECTS 200
 
 MRI_SP *MRIScongeal(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
                     int nsubjects, MRI_SP *mrisp, INTEGRATION_PARMS *parms);
-int main(int argc, char *argv[]) {
-  char **av, *surf_name, *out_fname, fname[STRLEN], *cp, *hemi, *fs_home;
-  int ac, nargs, msec, nsubjects, i;
+int     main(int argc, char *argv[]) {
+  char **      av, *surf_name, *out_fname, fname[STRLEN], *cp, *hemi, *fs_home;
+  int          ac, nargs, msec, nsubjects, i;
   MRI_SURFACE *mris_array[MAX_SUBJECTS], *mris_ico;
-  MRI_SP *mrisp_template;
-
+  MRI_SP *     mrisp_template;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_congeal");
 
@@ -127,7 +126,7 @@ int main(int argc, char *argv[]) {
   argc -= nargs;
 
   Timer start;
-  Gdiag = DIAG_SHOW;
+  Gdiag    = DIAG_SHOW;
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
@@ -135,32 +134,32 @@ int main(int argc, char *argv[]) {
   memset(&parms, 0, sizeof(parms));
   parms.projection = PROJECT_SPHERE;
   parms.flags |= IP_USE_CURVATURE;
-  parms.tol = 0.5; // was 1e-0*2.5
-  parms.min_averages = 0;
-  parms.l_area = 0.0;
-  parms.l_parea = 0.1f; // used to be 0.2
-  parms.l_dist = 5.0;   // used to be 0.5, and before that 0.1
-  parms.l_corr = 1.0f;
-  parms.l_nlarea = 1;
-  parms.l_pcorr = 0.0f;
-  parms.niterations = 25;
-  parms.n_averages = 1024; // used to be 256
-  parms.write_iterations = 100;
-  parms.dt_increase = 1.01 /* DT_INCREASE */;
-  parms.dt_decrease = 0.99 /* DT_DECREASE*/;
-  parms.error_ratio = 1.03 /*ERROR_RATIO */;
-  parms.dt_increase = 1.0;
-  parms.dt_decrease = 1.0;
-  parms.l_external = 10000; /* in case manual label is specified */
-  parms.error_ratio = 1.1 /*ERROR_RATIO */;
-  parms.integration_type = INTEGRATE_ADAPTIVE;
-  parms.integration_type = INTEGRATE_MOMENTUM /*INTEGRATE_LINE_MINIMIZE*/;
-  parms.integration_type = INTEGRATE_LINE_MINIMIZE;
-  parms.dt = 0.9;
-  parms.momentum = 0.95;
+  parms.tol                = 0.5; // was 1e-0*2.5
+  parms.min_averages       = 0;
+  parms.l_area             = 0.0;
+  parms.l_parea            = 0.1f; // used to be 0.2
+  parms.l_dist             = 5.0;  // used to be 0.5, and before that 0.1
+  parms.l_corr             = 1.0f;
+  parms.l_nlarea           = 1;
+  parms.l_pcorr            = 0.0f;
+  parms.niterations        = 25;
+  parms.n_averages         = 1024; // used to be 256
+  parms.write_iterations   = 100;
+  parms.dt_increase        = 1.01 /* DT_INCREASE */;
+  parms.dt_decrease        = 0.99 /* DT_DECREASE*/;
+  parms.error_ratio        = 1.03 /*ERROR_RATIO */;
+  parms.dt_increase        = 1.0;
+  parms.dt_decrease        = 1.0;
+  parms.l_external         = 10000; /* in case manual label is specified */
+  parms.error_ratio        = 1.1 /*ERROR_RATIO */;
+  parms.integration_type   = INTEGRATE_ADAPTIVE;
+  parms.integration_type   = INTEGRATE_MOMENTUM /*INTEGRATE_LINE_MINIMIZE*/;
+  parms.integration_type   = INTEGRATE_LINE_MINIMIZE;
+  parms.dt                 = 0.9;
+  parms.momentum           = 0.95;
   parms.desired_rms_height = -1.0;
-  parms.nbhd_size = -10;
-  parms.max_nbrs = 10;
+  parms.nbhd_size          = -10;
+  parms.max_nbrs           = 10;
 
   ac = argc;
   av = argv;
@@ -197,7 +196,7 @@ int main(int argc, char *argv[]) {
   printf("  %s\n", MRISurfSrcVersion());
   fflush(stdout);
 
-  hemi = argv[1];
+  hemi      = argv[1];
   surf_name = argv[2];
 
   if (parms.base_name[0] == 0) {
@@ -242,7 +241,7 @@ int main(int argc, char *argv[]) {
   Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int n, nargs = 0;
+  int   n, nargs = 0;
   char *option;
   float f;
 
@@ -256,8 +255,8 @@ static int get_option(int argc, char *argv[]) {
     printf("using median normalization\n");
   } else if (!stricmp(option, "vnum") || !stricmp(option, "distances")) {
     parms.nbhd_size = atof(argv[2]);
-    parms.max_nbrs = atof(argv[3]);
-    nargs = 2;
+    parms.max_nbrs  = atof(argv[3]);
+    nargs           = 2;
     fprintf(stderr, "nbr size = %d, max neighbors = %d\n", parms.nbhd_size,
             parms.max_nbrs);
   } else if (!stricmp(option, "nonorm")) {
@@ -275,7 +274,7 @@ static int get_option(int argc, char *argv[]) {
       ErrorExit(ERROR_NOMEMORY, "%s: too many sigmas specified (%d)\n",
                 Progname, nsigmas);
     sigmas[nsigmas] = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     nsigmas++;
   } else if (!stricmp(option, "vector")) {
     fprintf(stderr, "\nMultiframe Mode:\n");
@@ -295,7 +294,7 @@ static int get_option(int argc, char *argv[]) {
     use_initial_registration = 1;
     fprintf(stderr, "use initial registration\n");
   } else if (!stricmp(option, "addframe")) {
-    int which_field, where_in_atlas;
+    int   which_field, where_in_atlas;
     float l_corr, l_pcorr;
 
     if (multiframes == 0) { /* activate multiframes mode */
@@ -303,10 +302,10 @@ static int get_option(int argc, char *argv[]) {
       multiframes = 1;
     }
 
-    which_field = atoi(argv[2]);
+    which_field    = atoi(argv[2]);
     where_in_atlas = atoi(argv[3]);
-    l_corr = atof(argv[4]);
-    l_pcorr = atof(argv[5]);
+    l_corr         = atof(argv[4]);
+    l_pcorr        = atof(argv[5]);
 
     fprintf(stderr, "adding field %d (%s) with location %d in the atlas\n",
             which_field, ReturnFieldName(which_field), where_in_atlas);
@@ -342,13 +341,13 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "preserving the topology of positive area triangles\n");
   } else if (!stricmp(option, "vnum") || !stricmp(option, "distances")) {
     parms.nbhd_size = atof(argv[2]);
-    parms.max_nbrs = atof(argv[3]);
-    nargs = 2;
+    parms.max_nbrs  = atof(argv[3]);
+    nargs           = 2;
     fprintf(stderr, "nbr size = %d, max neighbors = %d\n", parms.nbhd_size,
             parms.max_nbrs);
   } else if (!stricmp(option, "rotate")) {
     dalpha = atof(argv[2]);
-    dbeta = atof(argv[3]);
+    dbeta  = atof(argv[3]);
     dgamma = atof(argv[4]);
     fprintf(stderr, "rotating brain by (%2.2f, %2.2f, %2.2f)\n", dalpha, dbeta,
             dgamma);
@@ -372,11 +371,11 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "jacobian")) {
     jacobian_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("writing out jacobian of mapping to %s\n", jacobian_fname);
   } else if (!stricmp(option, "dist")) {
     sscanf(argv[2], "%f", &parms.l_dist);
-    nargs = 1;
+    nargs        = 1;
     use_defaults = 0;
     fprintf(stderr, "l_dist = %2.3f\n", parms.l_dist);
   } else if (!stricmp(option, "norot")) {
@@ -391,14 +390,14 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "nsurfaces")) {
     parms.nsurfaces = atoi(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "using %d surfaces/curvatures for alignment\n",
             parms.nsurfaces);
   } else if (!stricmp(option, "infname")) {
     char fname[STRLEN];
-    inflated_name = argv[2];
+    inflated_name    = argv[2];
     surface_names[0] = argv[2];
-    nargs = 1;
+    nargs            = 1;
     printf("using %s as inflated surface name, "
            "and using it for initial alignment\n",
            inflated_name);
@@ -422,9 +421,9 @@ static int get_option(int argc, char *argv[]) {
     parms.integration_type = INTEGRATE_LM_SEARCH;
     fprintf(stderr, "integrating with binary search line minimization\n");
   } else if (!stricmp(option, "dt")) {
-    parms.dt = atof(argv[2]);
+    parms.dt      = atof(argv[2]);
     parms.base_dt = .2 * parms.dt;
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "momentum with dt = %2.2f\n", parms.dt);
   } else if (!stricmp(option, "area")) {
     use_defaults = 0;
@@ -453,7 +452,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "using l_corr = %2.3f\n", parms.l_corr);
   } else if (!stricmp(option, "remove_negative")) {
     remove_negative = atoi(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "%sremoving negative triangles with iterative smoothing\n",
             remove_negative ? "" : "not ");
   } else if (!stricmp(option, "curv")) {
@@ -464,14 +463,14 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "NOT using smoothwm curvature for final alignment\n");
   } else if (!stricmp(option, "sreg")) {
     starting_reg_fname = argv[2];
-    nargs = 1;
+    nargs              = 1;
     fprintf(stderr, "starting registration with coordinates in  %s\n",
             starting_reg_fname);
   } else if (!stricmp(option, "adaptive")) {
     parms.integration_type = INTEGRATE_ADAPTIVE;
     fprintf(stderr, "using adaptive time step integration\n");
   } else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size=%d\n", nbrs);
   } else if (!stricmp(option, "tol")) {
@@ -479,29 +478,29 @@ static int get_option(int argc, char *argv[]) {
       ErrorExit(ERROR_BADPARM, "%s: could not scan tol from %s", Progname,
                 argv[2]);
     parms.tol = (double)f;
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "using tol = %2.2e\n", (float)parms.tol);
   } else if (!stricmp(option, "error_ratio")) {
     parms.error_ratio = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "error_ratio=%2.3f\n", parms.error_ratio);
   } else if (!stricmp(option, "dt_inc")) {
     parms.dt_increase = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "dt_increase=%2.3f\n", parms.dt_increase);
   } else if (!stricmp(option, "lap") || !stricmp(option, "lap")) {
     parms.l_lap = atof(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "l_laplacian = %2.3f\n", parms.l_lap);
   } else if (!stricmp(option, "vnum")) {
     parms.nbhd_size = atof(argv[2]);
-    parms.max_nbrs = atof(argv[3]);
-    nargs = 2;
+    parms.max_nbrs  = atof(argv[3]);
+    nargs           = 2;
     fprintf(stderr, "nbr size = %d, max neighbors = %d\n", parms.nbhd_size,
             parms.max_nbrs);
   } else if (!stricmp(option, "dt_dec")) {
     parms.dt_decrease = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "dt_decrease=%2.3f\n", parms.dt_decrease);
   } else if (!stricmp(option, "ocorr")) {
     l_ocorr = atof(argv[2]);
@@ -517,7 +516,7 @@ static int get_option(int argc, char *argv[]) {
       multiframes = 1;
     }
     overlays[noverlays++] = argv[2];
-    navgs = atof(argv[3]);
+    navgs                 = atof(argv[3]);
     printf("reading overlay from %s and smoothing it %d times\n", argv[2],
            navgs);
     n = parms.nfields++;
@@ -535,7 +534,7 @@ static int get_option(int argc, char *argv[]) {
       multiframes = 1;
     }
     overlays[noverlays++] = argv[2];
-    navgs = atof(argv[3]);
+    navgs                 = atof(argv[3]);
     printf("reading overlay from %s and smoothing it %d times\n", argv[2],
            navgs);
     n = parms.nfields++;
@@ -550,24 +549,24 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "canon")) {
     canon_name = argv[2];
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "using %s for canonical properties...\n", canon_name);
   } else if (!stricmp(option, "overlay-dir")) {
     parms.overlay_dir = strcpyalloc(argv[2]);
-    nargs = 1;
+    nargs             = 1;
   } else
     switch (toupper(*option)) {
     case 'M':
       parms.integration_type = INTEGRATE_MOMENTUM;
-      parms.momentum = atof(argv[2]);
-      nargs = 1;
+      parms.momentum         = atof(argv[2]);
+      nargs                  = 1;
       fprintf(stderr, "momentum = %2.2f\n", (float)parms.momentum);
       break;
     case 'L':
       if (nlabels >= MAX_LABELS - 1)
         ErrorExit(ERROR_NO_MEMORY, "%s: too many labels specified (%d max)",
                   Progname, MAX_LABELS);
-      nargs = 3;
+      nargs           = 3;
       labels[nlabels] = LabelRead(nullptr, argv[2]);
       if (labels[nlabels] == nullptr)
         ErrorExit(ERROR_NOFILE, "%s: could not read label file %s", Progname,
@@ -589,7 +588,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'E':
       parms.l_external = atof(argv[2]);
-      nargs = 1;
+      nargs            = 1;
       printf("setting l_external = %2.1f\n", parms.l_external);
       break;
     case 'C':
@@ -623,11 +622,11 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'O':
       orig_name = argv[2];
-      nargs = 1;
+      nargs     = 1;
       fprintf(stderr, "using %s for original properties...\n", orig_name);
       break;
     case 'P':
@@ -691,13 +690,13 @@ static void print_version() {
 }
 
 static double gcsaSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
-  int vno, ano, lno, vno_prior, n, found;
-  VERTEX *v, *v_prior;
-  double sse;
-  LABEL *area;
+  int      vno, ano, lno, vno_prior, n, found;
+  VERTEX * v, *v_prior;
+  double   sse;
+  LABEL *  area;
   CP_NODE *cpn;
-  CP *cp;
-  GCSA *gcsa;
+  CP *     cp;
+  GCSA *   gcsa;
 
   for (sse = 0.0, ano = 0; ano < nlabels; ano++) {
     area = labels[ano];
@@ -706,11 +705,11 @@ static double gcsaSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
       vno = area->lv[lno].vno;
       if (vno < 0)
         continue;
-      v = &mris->vertices[vno];
-      found = 0;
-      v_prior = GCSAsourceToPriorVertex(gcsa, v);
+      v         = &mris->vertices[vno];
+      found     = 0;
+      v_prior   = GCSAsourceToPriorVertex(gcsa, v);
       vno_prior = v_prior - gcsa->mris_priors->vertices;
-      cpn = &gcsa->cp_nodes[vno_prior];
+      cpn       = &gcsa->cp_nodes[vno_prior];
       for (n = 0; n < cpn->nlabels; n++) {
         cp = &cpn->cps[n];
         if (cpn->labels[n] == label_annots[ano]) {
@@ -743,16 +742,16 @@ static int mrisWriteSnapshot(MRI_SURFACE *mris, INTEGRATION_PARMS *parms,
                              int t);
 double MRIScongealComputeSurfaceError(MRI_SURFACE *mris_ico, MRI_SURFACE *mris,
                                       MHT *mht, INTEGRATION_PARMS *parms);
-int MRIScongealRigidBodyAlignGlobal(MRI_SURFACE *mris_ico, MRI_SURFACE *mris,
-                                    MHT *mht, INTEGRATION_PARMS *parms,
-                                    float min_degrees, float max_degrees,
-                                    int nangles);
+int    MRIScongealRigidBodyAlignGlobal(MRI_SURFACE *mris_ico, MRI_SURFACE *mris,
+                                       MHT *mht, INTEGRATION_PARMS *parms,
+                                       float min_degrees, float max_degrees,
+                                       int nangles);
 double MRIScongealComputeSSE(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
                              MHT **mht_array, int nsubjects,
                              INTEGRATION_PARMS *parms) {
-  int vno, i;
+  int     vno, i;
   VERTEX *v, *vsurf;
-  double mean, var, sse;
+  double  mean, var, sse;
 
   // for each vertex in the ico, find matching vertices and compute mean of them
   for (sse = 0.0, vno = 0; vno < mris_ico->nvertices; vno++) {
@@ -771,7 +770,7 @@ double MRIScongealComputeSSE(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
     }
     mean /= nsubjects;
     v->curv = mean;
-    v->val = var / nsubjects - mean * mean;
+    v->val  = var / nsubjects - mean * mean;
     if (vno == Gdiag_no)
       printf("ico v %d: %2.2f +- %2.2f\n", vno, v->curv, v->val);
     sse += v->val;
@@ -779,13 +778,13 @@ double MRIScongealComputeSSE(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
 
   return (sse);
 }
-double MRIScongealEstimateTemplate(MRI_SURFACE *mris_ico,
+double MRIScongealEstimateTemplate(MRI_SURFACE * mris_ico,
                                    MRI_SURFACE **mris_array, MHT **mht_array,
                                    int nsubjects, INTEGRATION_PARMS *parms,
                                    int exclude_i) {
-  int vno, i;
+  int     vno, i;
   VERTEX *v, *vsurf;
-  double mean, var, sse;
+  double  mean, var, sse;
 
   // for each vertex in the ico, find matching vertices and compute mean of them
   for (sse = 0.0, vno = 0; vno < mris_ico->nvertices; vno++) {
@@ -820,7 +819,7 @@ double MRIScongealEstimateTemplate(MRI_SURFACE *mris_ico,
   return (sse);
 }
 
-double MRIScongealUpdateRegistration(MRI_SURFACE *mris_ico,
+double MRIScongealUpdateRegistration(MRI_SURFACE * mris_ico,
                                      MRI_SURFACE **mris_array, MHT **mht_array,
                                      int nsubjects, INTEGRATION_PARMS *parms) {
   double sse;
@@ -830,13 +829,13 @@ double MRIScongealUpdateRegistration(MRI_SURFACE *mris_ico,
   return (sse);
 }
 
-double MRIScongealUpdateRigidRegistration(MRI_SURFACE *mris_ico,
+double MRIScongealUpdateRigidRegistration(MRI_SURFACE * mris_ico,
                                           MRI_SURFACE **mris_array,
                                           MHT **mht_array, MHT *mht_ico,
                                           int nsubjects, double degrees,
                                           INTEGRATION_PARMS *parms) {
-  double sse;
-  int i;
+  double     sse;
+  int        i;
   static int start_t = 0;
 
   MRIScopyCurvatureToImagValues(mris_ico);
@@ -860,9 +859,9 @@ double MRIScongealUpdateRigidRegistration(MRI_SURFACE *mris_ico,
 
 MRI_SP *MRIScongeal(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
                     int nsubjects, MRI_SP *mrisp, INTEGRATION_PARMS *parms) {
-  int done = 0, i, sno, iter;
+  int    done = 0, i, sno, iter;
   double sse, last_sse = -1, pct_change, angle;
-  MHT *mht_array[MAX_SUBJECTS], *mht_ico;
+  MHT *  mht_array[MAX_SUBJECTS], *mht_ico;
 
   if (Gdiag & DIAG_WRITE) {
     char fname[STRLEN];
@@ -883,7 +882,7 @@ MRI_SP *MRIScongeal(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
     mht_array[i] = MHTcreateVertexTable(mris_array[i], CURRENT_VERTICES);
 
   for (sno = parms->flags & IP_USE_INFLATED ? 0 : 1; sno < nsurfaces; sno++) {
-    Gsno = sno; // diagnostics
+    Gsno  = sno; // diagnostics
     Giter = iter = 0;
     if (curvature_names[sno]) {
       fprintf(stderr, "reading source curvature from %s\n",
@@ -917,10 +916,10 @@ MRI_SP *MRIScongeal(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
       }
       MRIScongealUpdateRigidRegistration(mris_ico, mris_array, mht_array,
                                          mht_ico, nsubjects, angle, parms);
-      sse = MRIScongealEstimateTemplate(mris_ico, mris_array, mht_array,
+      sse        = MRIScongealEstimateTemplate(mris_ico, mris_array, mht_array,
                                         nsubjects, parms, -1);
       pct_change = 100 * (last_sse - sse) / last_sse;
-      done = (last_sse >= 0) && (pct_change < parms->tol);
+      done       = (last_sse >= 0) && (pct_change < parms->tol);
       iter++;
       printf("iter %d: sse = %2.2f, last_sse = %2.2f, (%2.2f%%)\n", iter, sse,
              last_sse, pct_change);
@@ -934,10 +933,10 @@ MRI_SP *MRIScongeal(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
     do {
       MRIScongealUpdateRegistration(mris_ico, mris_array, mht_array, nsubjects,
                                     parms);
-      sse = MRIScongealEstimateTemplate(mris_ico, mris_array, mht_array,
+      sse        = MRIScongealEstimateTemplate(mris_ico, mris_array, mht_array,
                                         nsubjects, parms, -1);
       pct_change = 100 * (last_sse - sse) / last_sse;
-      done = (last_sse >= 0) && (pct_change < parms->tol);
+      done       = (last_sse >= 0) && (pct_change < parms->tol);
       for (i = 0; i < nsubjects; i++) {
         MHTfree(&mht_array[i]);
         MHTcreateVertexTable(mris_array[i], CURRENT_VERTICES);
@@ -955,13 +954,13 @@ MRI_SP *MRIScongeal(MRI_SURFACE *mris_ico, MRI_SURFACE **mris_array,
 }
 
 #define STARTING_ANGLE RADIANS(16.0f)
-#define ENDING_ANGLE RADIANS(4.0f)
-#define NANGLES 8
+#define ENDING_ANGLE   RADIANS(4.0f)
+#define NANGLES        8
 
 double MRIScongealComputeSurfaceError(MRI_SURFACE *mris_ico, MRI_SURFACE *mris,
                                       MHT *mht_ico, INTEGRATION_PARMS *parms) {
-  double sse, error;
-  int vno;
+  double  sse, error;
+  int     vno;
   VERTEX *v, *vsurf;
 
   for (sse = 0.0, vno = 0; vno < mris->nvertices; vno++) {
@@ -988,11 +987,11 @@ int MRIScongealRigidBodyAlignGlobal(MRI_SURFACE *mris_ico, MRI_SURFACE *mris,
   double alpha, beta, gamma, degrees, delta, mina, minb, ming, sse, min_sse,
       ext_sse;
   auto const old_status = mris->status;
-  auto const old_norm = parms->abs_norm;
+  auto const old_norm   = parms->abs_norm;
 
   parms->abs_norm = 1;
-  min_degrees = RADIANS(min_degrees);
-  max_degrees = RADIANS(max_degrees);
+  min_degrees     = RADIANS(min_degrees);
+  max_degrees     = RADIANS(max_degrees);
 #if 0
   mrisOrientSurface(mris) ;
   mrisOrientSurface(mris_ico) ;
@@ -1039,9 +1038,9 @@ int MRIScongealRigidBodyAlignGlobal(MRI_SURFACE *mris_ico, MRI_SURFACE *mris,
           }
           MRISrestoreVertexPositions(mris, TMP_VERTICES);
           if (sse < min_sse) {
-            mina = alpha;
-            minb = beta;
-            ming = gamma;
+            mina    = alpha;
+            minb    = beta;
+            ming    = gamma;
             min_sse = sse;
           }
 #if 0
@@ -1082,7 +1081,7 @@ int MRIScongealRigidBodyAlignGlobal(MRI_SURFACE *mris_ico, MRI_SURFACE *mris,
       mrisWriteSnapshot(mris, parms, parms->start_t);
   }
 
-  mris->status = old_status;
+  mris->status    = old_status;
   parms->abs_norm = old_norm;
   return (NO_ERROR);
 }

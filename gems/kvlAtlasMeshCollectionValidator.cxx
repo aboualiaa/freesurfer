@@ -16,7 +16,7 @@ AtlasMeshCollectionValidator ::~AtlasMeshCollectionValidator() {}
 //
 //
 void AtlasMeshCollectionValidator ::PrintSelf(std::ostream &os,
-                                              itk::Indent indent) const {}
+                                              itk::Indent   indent) const {}
 
 //
 //
@@ -63,8 +63,8 @@ bool AtlasMeshCollectionValidator ::Validate(
     ++pointIt;
     AtlasMesh::PointIdentifier p3 = *pointIt;
 
-    int numberOfVerticesFound = 0;
-    int numberOfLinesFound = 0;
+    int numberOfVerticesFound  = 0;
+    int numberOfLinesFound     = 0;
     int numberOfTrianglesFound = 0;
 
     // Loop over all cells, and check
@@ -135,7 +135,7 @@ bool AtlasMeshCollectionValidator ::Validate(
     AtlasMesh::PointIdentifier p2 = *pointIt;
 
     int numberOfVerticesFound = 0;
-    int numberOfLinesFound = 0;
+    int numberOfLinesFound    = 0;
 
     // Loop over all cells, and check
     for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt2 =

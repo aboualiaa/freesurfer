@@ -2,8 +2,8 @@
 #define LAYERCONNECTOMEMATRIX_H
 
 #include "Layer.h"
-#include <QVariantMap>
 #include <QList>
+#include <QVariantMap>
 #include <vtkSmartPointer.h>
 
 #include "cmat.h"
@@ -35,7 +35,7 @@ public:
   QList<int> GetLabelList();
 
   QString GetLabelName(int n);
-  QColor GetLabelColor(int n);
+  QColor  GetLabelColor(int n);
 
   bool HasConnection(int i, int j);
 
@@ -62,20 +62,20 @@ private:
   void BuildLabelActors();
   void UpdateLabelActors();
 
-  LayerMRI *m_mriRef;
-  LayerMRI *m_mriParcel;
-  CMAT *m_cmat;
+  LayerMRI *   m_mriRef;
+  LayerMRI *   m_mriParcel;
+  CMAT *       m_cmat;
   COLOR_TABLE *m_ctab;
-  QString m_sFilenameParcel;
-  QList<int> m_listLabels;
-  QList<int> m_listFromLabelIndices;
-  QList<int> m_listToLabelIndices;
-  bool m_bToAllLabels;
+  QString      m_sFilenameParcel;
+  QList<int>   m_listLabels;
+  QList<int>   m_listFromLabelIndices;
+  QList<int>   m_listToLabelIndices;
+  bool         m_bToAllLabels;
 
-  vtkSmartPointer<vtkActor> m_actorSplines;
-  vtkSmartPointer<vtkActor> m_actorSlice[3];
+  vtkSmartPointer<vtkActor>        m_actorSplines;
+  vtkSmartPointer<vtkActor>        m_actorSlice[3];
   QList<vtkSmartPointer<vtkActor>> m_actorLabels;
-  bool m_bVisible;
+  bool                             m_bVisible;
 };
 
 #endif // LAYERCONNECTOMEMATRIX_H

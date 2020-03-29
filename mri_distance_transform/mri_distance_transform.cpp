@@ -31,22 +31,22 @@ const char *Progname;
 
 static float remove_csf_from_paths(MRI *mri_distance, MRI *mri_area,
                                    MRI *mri_csf);
-static int get_option(int argc, char *argv[]);
-static int MRIexpandDistancesIntoGrayMatter(MRI *mri_distance, MRI *mri_aseg,
-                                            MRI *mri_white, int target_label);
+static int   get_option(int argc, char *argv[]);
+static int   MRIexpandDistancesIntoGrayMatter(MRI *mri_distance, MRI *mri_aseg,
+                                              MRI *mri_white, int target_label);
 
-static MRI *mri_area = nullptr;
-static MRI *mri_white = nullptr, *mri_aseg = nullptr;
-static char *surf_name = nullptr;
-static char *csf_name = nullptr;
-static float normalize = -1.0;
-static float wthresh = -1;
-static MRI *mri_thresh = nullptr;
-static float anterior_dist = -1;
+static MRI * mri_area  = nullptr;
+static MRI * mri_white = nullptr, *mri_aseg = nullptr;
+static char *surf_name      = nullptr;
+static char *csf_name       = nullptr;
+static float normalize      = -1.0;
+static float wthresh        = -1;
+static MRI * mri_thresh     = nullptr;
+static float anterior_dist  = -1;
 static float posterior_dist = -1;
 
 static float binarize = 0.0;
-static int percent = 0;
+static int   percent  = 0;
 
 static int ndilations = 0;
 MRI *MRIthresholdPosterior(MRI *mri_src, MRI *mri_dst, float posterior_dist);
@@ -54,15 +54,15 @@ MRI *MRIthresholdAnterior(MRI *mri_src, MRI *mri_dst, float anterior_dist);
 MRI *MRIscaleDistanceTransformToPercentMax(MRI *mri_in, MRI *mri_out);
 
 int main(int argc, char *argv[]) {
-  MRI *mri, *mri_distance;
-  int label, mode;
-  float max_distance;
-  int nargs;
-  MRI_SURFACE *mris = nullptr;
-  MRI *mri_csf = nullptr;
+  MRI *        mri, *mri_distance;
+  int          label, mode;
+  float        max_distance;
+  int          nargs;
+  MRI_SURFACE *mris    = nullptr;
+  MRI *        mri_csf = nullptr;
 
   max_distance = 10;
-  mode = 1;
+  mode         = 1;
 
   Progname = argv[0];
 
@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
   if (mri == nullptr)
     ErrorExit(ERROR_NOFILE, "%s: could not read volume from %s", Progname,
               argv[1]);
-  label = atoi(argv[2]);
+  label        = atoi(argv[2]);
   max_distance = atof(argv[3]);
-  mode = atoi(argv[4]);
+  mode         = atoi(argv[4]);
 
   if (binarize > 0)
     MRIbinarize(mri, mri, binarize, 0, label);
@@ -272,14 +272,14 @@ static int wm_labels[] = {Left_Cerebral_White_Matter,
 #define NWM_LABELS (int)((sizeof(wm_labels) / sizeof(wm_labels[0])))
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   /*  StrUpper(option) ;*/
   if (!stricmp(option, "wm")) {
     int i;
-    nargs = 1;
+    nargs    = 1;
     mri_aseg = MRIread(argv[2]);
     if (mri_aseg == nullptr)
       ErrorExit(ERROR_NOFILE, "%s: could not read aseg volume from %s",
@@ -291,7 +291,7 @@ static int get_option(int argc, char *argv[]) {
       MRIwrite(mri_white, "white.mgz");
   } else if (!stricmp(option, "anterior")) {
     anterior_dist = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("using anterior-most %2.3f mm of label only\n", anterior_dist);
   } else if (!stricmp(option, "aseg")) {
     mri_aseg = MRIread(argv[2]);
@@ -310,19 +310,19 @@ static int get_option(int argc, char *argv[]) {
            argv[2]);
   } else if (!stricmp(option, "posterior")) {
     posterior_dist = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("using posterior-most %2.3f mm of label only\n", posterior_dist);
   } else if (!stricmp(option, "wsurf")) {
-    nargs = 1;
+    nargs     = 1;
     surf_name = argv[2];
   } else if (!stricmp(option, "csf")) {
-    nargs = 1;
+    nargs    = 1;
     csf_name = argv[2];
   } else if (!stricmp(option, "normalize")) {
     normalize = 1;
     printf("normalizing distances by sqrt(surface area)\n");
   } else if (!stricmp(option, "wthresh")) {
-    nargs = 2;
+    nargs      = 2;
     mri_thresh = MRIread(argv[2]);
     if (mri_thresh == nullptr)
       ErrorExit(ERROR_NOFILE, "%s: could not read threshold volume %s",
@@ -333,13 +333,13 @@ static int get_option(int argc, char *argv[]) {
            argv[2], wthresh);
   } else if (!stricmp(option, "dilate")) {
     ndilations = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("performing %d dilations on labeled volume before computing "
            "distance transform\n",
            ndilations);
   } else if (!stricmp(option, "b")) {
     binarize = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("binarizing input data with thresh = %2.1f\n", binarize);
   } else if (!stricmp(option, "p")) {
     percent = 1;
@@ -350,7 +350,7 @@ static int get_option(int argc, char *argv[]) {
 
 static int MRIexpandDistancesIntoGrayMatter(MRI *mri_distance, MRI *mri_aseg,
                                             MRI *mri_white, int target_label) {
-  int x, y, z, xi, yi, zi, xk, yk, zk, label;
+  int   x, y, z, xi, yi, zi, xk, yk, zk, label;
   float dist, min_dist, vdist;
 
   for (x = 0; x < mri_aseg->width; x++)
@@ -386,8 +386,8 @@ static int MRIexpandDistancesIntoGrayMatter(MRI *mri_distance, MRI *mri_aseg,
               if (MRIgetVoxVal(mri_white, xi, yi, zi, 0) == 0)
                 continue;
               vdist = sqrt(xk * xk + yk * yk + zk * zk);
-              zi = mri_aseg->zi[z + zk];
-              dist = MRIgetVoxVal(mri_distance, xi, yi, zi, 0) + vdist;
+              zi    = mri_aseg->zi[z + zk];
+              dist  = MRIgetVoxVal(mri_distance, xi, yi, zi, 0) + vdist;
               if (dist < min_dist)
                 min_dist = dist;
             }
@@ -402,12 +402,12 @@ static int MRIexpandDistancesIntoGrayMatter(MRI *mri_distance, MRI *mri_aseg,
 MRI *MRIthresholdAnterior(MRI *mri_src, MRI *mri_dst, float anterior_dist) {
   MATRIX *m_vox2ras;
   VECTOR *v_vox, *v_ras;
-  int x, y, z, f;
-  float amax;
+  int     x, y, z, f;
+  float   amax;
 
-  m_vox2ras = MRIgetVoxelToRasXform(mri_src);
-  v_vox = VectorAlloc(4, MATRIX_REAL);
-  v_ras = VectorAlloc(4, MATRIX_REAL);
+  m_vox2ras            = MRIgetVoxelToRasXform(mri_src);
+  v_vox                = VectorAlloc(4, MATRIX_REAL);
+  v_ras                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v_vox, 4) = VECTOR_ELT(v_ras, 4) = 1.0;
 
   if (mri_dst == nullptr)
@@ -461,12 +461,12 @@ MRI *MRIthresholdAnterior(MRI *mri_src, MRI *mri_dst, float anterior_dist) {
 MRI *MRIthresholdPosterior(MRI *mri_src, MRI *mri_dst, float posterior_dist) {
   MATRIX *m_vox2ras;
   VECTOR *v_vox, *v_ras;
-  int x, y, z, f;
-  float amin;
+  int     x, y, z, f;
+  float   amin;
 
-  m_vox2ras = MRIgetVoxelToRasXform(mri_src);
-  v_vox = VectorAlloc(4, MATRIX_REAL);
-  v_ras = VectorAlloc(4, MATRIX_REAL);
+  m_vox2ras            = MRIgetVoxelToRasXform(mri_src);
+  v_vox                = VectorAlloc(4, MATRIX_REAL);
+  v_ras                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v_vox, 4) = VECTOR_ELT(v_ras, 4) = 1.0;
 
   if (mri_dst == nullptr)
@@ -519,15 +519,15 @@ MRI *MRIthresholdPosterior(MRI *mri_src, MRI *mri_dst, float posterior_dist) {
 
 static float remove_csf_from_paths(MRI *mri_distance, MRI *mri_area,
                                    MRI *mri_csf) {
-  int x, y, z, steps, xk, yk, zk, xi, yi, zi, csf_nbr, total_label_vox;
-  float xf, yf, zf, mean_csf_len, csf_len, total_csf_len;
+  int    x, y, z, steps, xk, yk, zk, xi, yi, zi, csf_nbr, total_label_vox;
+  float  xf, yf, zf, mean_csf_len, csf_len, total_csf_len;
   double dx, dy, dz, distance;
-  MRI *mri_orig_csf;
+  MRI *  mri_orig_csf;
 
   mri_orig_csf = MRIcopy(mri_csf, nullptr);
 
   total_label_vox = 0;
-  total_csf_len = 0.0;
+  total_csf_len   = 0.0;
   for (x = 0; x < mri_area->width; x++)
     for (y = 0; y < mri_area->height; y++)
       for (z = 0; z < mri_area->depth; z++) {
@@ -541,10 +541,10 @@ static float remove_csf_from_paths(MRI *mri_distance, MRI *mri_area,
         */
 #define STEP_SIZE 0.1
 #define MAX_STEPS (1000 / STEP_SIZE)
-        xf = x;
-        yf = y;
-        zf = z;
-        steps = 0;
+        xf      = x;
+        yf      = y;
+        zf      = z;
+        steps   = 0;
         csf_len = 0.0;
         do {
           csf_nbr = 0;
@@ -602,7 +602,7 @@ static float remove_csf_from_paths(MRI *mri_distance, MRI *mri_area,
 
 MRI *MRIscaleDistanceTransformToPercentMax(MRI *mri_in, MRI *mri_out) {
   float min_val, max_val, val;
-  int x, y, z;
+  int   x, y, z;
 
   MRIvalRange(mri_in, &min_val, &max_val);
   printf("scaling distance transforms by [%2.1f, %2.1f]\n", min_val, max_val);

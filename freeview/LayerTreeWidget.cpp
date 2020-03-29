@@ -25,20 +25,20 @@
 #include "Layer.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
-#include "LayerSurface.h"
 #include "LayerPropertySurface.h"
-#include <QPainter>
-#include <QContextMenuEvent>
-#include <QMenu>
-#include <QDebug>
+#include "LayerSurface.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include <QContextMenuEvent>
+#include <QDebug>
+#include <QMenu>
+#include <QPainter>
 
 QRect MyItemDelegate::GetCheckBoxRect(
     const QModelIndex &index, const QStyleOptionViewItem &option) const {
   QRect CheckBox = rect(option, index, Qt::CheckStateRole);
-  QRect Icon = rect(option, index, Qt::DecorationRole);
-  QRect Text = rect(option, index, Qt::DisplayRole);
+  QRect Icon     = rect(option, index, Qt::DecorationRole);
+  QRect Text     = rect(option, index, Qt::DisplayRole);
 
   doLayout(option, &CheckBox, &Icon, &Text, true);
 
@@ -65,16 +65,16 @@ LayerTreeWidget::LayerTreeWidget(QWidget *parent) : QTreeWidget(parent) {
   setDragDropMode(QAbstractItemView::InternalMove);
 }
 
-void LayerTreeWidget::drawRow(QPainter *painter,
+void LayerTreeWidget::drawRow(QPainter *                  painter,
                               const QStyleOptionViewItem &option,
-                              const QModelIndex &index) const {
+                              const QModelIndex &         index) const {
   QTreeWidget::drawRow(painter, option, index);
 
   Layer *layer =
       reinterpret_cast<Layer *>(index.data(Qt::UserRole).value<quintptr>());
   if (layer && layer->IsLocked()) {
     QImage img(":resource/icons/volume_lock.png");
-    QRect rc = option.rect;
+    QRect  rc = option.rect;
     rc.setLeft(rc.right() - 20);
     int nsize = qMin(16, rc.height());
     painter->drawImage(rc.topLeft(),
@@ -132,7 +132,7 @@ void LayerTreeWidget::mouseMoveEvent(QMouseEvent *event) {
 
 void LayerTreeWidget::contextMenuEvent(QContextMenuEvent *e) {
   QList<QTreeWidgetItem *> items = selectedItems();
-  QList<Layer *> layers;
+  QList<Layer *>           layers;
   foreach (QTreeWidgetItem *item, items) {
     Layer *layer = reinterpret_cast<Layer *>(
         item->data(0, Qt::UserRole).value<quintptr>());
@@ -140,9 +140,9 @@ void LayerTreeWidget::contextMenuEvent(QContextMenuEvent *e) {
       layers << layer;
   }
 
-  QString type;
-  QTreeWidgetItem *item = itemAt(e->pos());
-  Layer *layer = NULL;
+  QString          type;
+  QTreeWidgetItem *item  = itemAt(e->pos());
+  Layer *          layer = NULL;
   if (item) {
     layer = reinterpret_cast<Layer *>(
         item->data(0, Qt::UserRole).value<quintptr>());
@@ -153,8 +153,8 @@ void LayerTreeWidget::contextMenuEvent(QContextMenuEvent *e) {
     }
   }
 
-  MainWindow *wnd = MainWindow::GetMainWindow();
-  QMenu *menu = new QMenu(this);
+  MainWindow *wnd  = MainWindow::GetMainWindow();
+  QMenu *     menu = new QMenu(this);
 
   //  if (layer)
   //  {
@@ -244,7 +244,7 @@ void LayerTreeWidget::contextMenuEvent(QContextMenuEvent *e) {
       QMenu *submenu = new QMenu("Color Map", this);
       menu->addMenu(submenu);
       int nColorMap = ((LayerMRI *)layers[0])->GetProperty()->GetColorMap();
-      act = new QAction("Grayscale", this);
+      act           = new QAction("Grayscale", this);
       act->setData(LayerPropertyMRI::Grayscale);
       act->setCheckable(true);
       act->setChecked(nColorMap == LayerPropertyMRI::Grayscale);
@@ -393,7 +393,7 @@ void LayerTreeWidget::OnEditName() {
 }
 
 void LayerTreeWidget::OnSetColorMap() {
-  QAction *act = qobject_cast<QAction *>(sender());
+  QAction *                act   = qobject_cast<QAction *>(sender());
   QList<QTreeWidgetItem *> items = this->selectedItems();
   foreach (QTreeWidgetItem *item, items) {
     LayerMRI *layer = reinterpret_cast<LayerMRI *>(
@@ -465,14 +465,14 @@ void LayerTreeWidget::dropEvent(QDropEvent *event) {
   QModelIndex droppedIndex = indexAt(event->pos());
 
   if (droppedIndex.isValid()) {
-    DropIndicatorPosition drop_pos = dropIndicatorPosition();
-    QTreeWidgetItem *itemTo = itemAt(event->pos());
-    QList<QTreeWidgetItem *> items = this->selectedItems(), itemsFrom;
-    QTreeWidgetItem *itemCur = this->currentItem();
-    QString type;
+    DropIndicatorPosition    drop_pos = dropIndicatorPosition();
+    QTreeWidgetItem *        itemTo   = itemAt(event->pos());
+    QList<QTreeWidgetItem *> items    = this->selectedItems(), itemsFrom;
+    QTreeWidgetItem *        itemCur  = this->currentItem();
+    QString                  type;
     if (itemCur && itemCur->parent()) {
       QTreeWidgetItem *parent = itemCur->parent();
-      type = parent->data(0, Qt::UserRole).toString();
+      type                    = parent->data(0, Qt::UserRole).toString();
       foreach (QTreeWidgetItem *item, items) {
         Layer *layer = reinterpret_cast<Layer *>(
             item->data(0, Qt::UserRole).value<quintptr>());
@@ -512,8 +512,8 @@ void LayerTreeWidget::dropEvent(QDropEvent *event) {
         itemTo = itemTo->parent();
       QList<Layer *> layers;
       for (int i = 0; i < itemTo->childCount(); i++) {
-        QTreeWidgetItem *item = itemTo->child(i);
-        Layer *layer = reinterpret_cast<Layer *>(
+        QTreeWidgetItem *item  = itemTo->child(i);
+        Layer *          layer = reinterpret_cast<Layer *>(
             item->data(0, Qt::UserRole).value<quintptr>());
         if (layer) {
           layers << layer;

@@ -36,16 +36,16 @@ extern const char *Progname;
 VOXEL_LABELS_IMAGE *VLalloc(int width, int height, int depth,
                             float resolution) {
   VOXEL_LABELS_IMAGE *vli;
-  VOXEL_LABELS ***vl;
-  int x, y, z;
-  VL *v;
+  VOXEL_LABELS ***    vl;
+  int                 x, y, z;
+  VL *                v;
 
   vli = (VLI *)calloc(1, sizeof(VLI));
   if (!vli)
     ErrorExit(ERROR_NOMEMORY, "%s: could not allocate VLI *", Progname);
-  vli->width = width;
-  vli->height = height;
-  vli->depth = depth;
+  vli->width      = width;
+  vli->height     = height;
+  vli->depth      = depth;
   vli->resolution = resolution;
   vl = vli->vl = (VL ***)calloc(width, sizeof(VL **));
   if (!vl)
@@ -67,7 +67,7 @@ VOXEL_LABELS_IMAGE *VLalloc(int width, int height, int depth,
   for (x = 0; x < vli->width; x++)
     for (y = 0; y < vli->height; y++)
       for (z = 0; z < vli->depth; z++) {
-        v = &vli->vl[x][y][z];
+        v         = &vli->vl[x][y][z];
         v->labels = nullptr;
         v->counts = nullptr;
       }
@@ -76,14 +76,14 @@ VOXEL_LABELS_IMAGE *VLalloc(int width, int height, int depth,
 }
 
 int VLfree(VLI **pvli) {
-  VLI *vli;
-  int x, y, z;
+  VLI * vli;
+  int   x, y, z;
   VL ***vl;
-  VL *v;
+  VL *  v;
 
-  vli = *pvli;
+  vli   = *pvli;
   *pvli = nullptr;
-  vl = vli->vl;
+  vl    = vli->vl;
 
   // freeup labels and counts first
   for (x = 0; x < vli->width; x++)
@@ -110,9 +110,9 @@ int VLfree(VLI **pvli) {
 
 int VLwrite(VLI *vli, char *fname) {
   FILE *fp;
-  int x, y, z, n;
-  long here, there;
-  VL *vl;
+  int   x, y, z, n;
+  long  here, there;
+  VL *  vl;
 
   fp = fopen(fname, "wb");
   if (!fp)
@@ -150,10 +150,10 @@ int VLwrite(VLI *vli, char *fname) {
 }
 VLI *VLread(char *fname) {
   FILE *fp;
-  int x, y, z, n, width, height, depth, magic;
+  int   x, y, z, n, width, height, depth, magic;
   float resolution;
-  VL *vl;
-  VLI *vli;
+  VL *  vl;
+  VLI * vli;
 
   fp = fopen(fname, "rb");
   if (!fp)
@@ -164,11 +164,11 @@ VLI *VLread(char *fname) {
                 (ERROR_BADFILE, "VLread(%s): not a VL file (magic %x != %x)",
                  fname, magic, VL_MAGIC));
 
-  width = freadInt(fp);
-  height = freadInt(fp);
-  depth = freadInt(fp);
+  width      = freadInt(fp);
+  height     = freadInt(fp);
+  depth      = freadInt(fp);
   resolution = freadFloat(fp);
-  vli = VLalloc(width, height, depth, resolution);
+  vli        = VLalloc(width, height, depth, resolution);
   if (!vli)
     ErrorReturn(NULL, (Gerror, "VLread(%s) failed", fname));
 
@@ -178,7 +178,7 @@ VLI *VLread(char *fname) {
   for (x = 0; x < vli->width; x++) {
     for (y = 0; y < vli->height; y++) {
       for (z = 0; z < vli->depth; z++) {
-        vl = &vli->vl[x][y][z];
+        vl          = &vli->vl[x][y][z];
         vl->nlabels = freadShort(fp);
         vl->labels =
             (unsigned char *)calloc(vl->nlabels, sizeof(unsigned char));
@@ -204,8 +204,8 @@ VLI *VLread(char *fname) {
 VL *VLreadVoxel(char *fname, int x, int y, int z, VL *vl) { return (vl); }
 
 int VLnormalize(VLI *vli) {
-  int x, y, z, n;
-  VL *vl;
+  int   x, y, z, n;
+  VL *  vl;
   float pct, total;
 
   for (x = 0; x < vli->width; x++) {
@@ -216,7 +216,7 @@ int VLnormalize(VLI *vli) {
           total += (float)vl->counts[n];
 
         for (n = 0; n < vl->nlabels; n++) {
-          pct = 100.0f * (float)vl->counts[n] / total;
+          pct           = 100.0f * (float)vl->counts[n] / total;
           vl->counts[n] = nint(pct);
         }
       }

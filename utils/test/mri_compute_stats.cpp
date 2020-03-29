@@ -25,20 +25,20 @@
 
 /* Compute the mean and std of a labeled region */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
 #include "fio.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "version.h"
 
 void usage(int exit_val);
@@ -51,7 +51,7 @@ static int label2 = 0;
 
 /* Compute CNR inside a window only */
 
-static int debug_flag = 0;
+static int debug_flag  = 0;
 static int window_flag = 0;
 static int window_size = 30;
 
@@ -60,15 +60,15 @@ static int get_option(int argc, char *argv[]);
 int main(int argc, char *argv[]) {
 
   char **av;
-  MRI *mri_src, *mri_label, *mri_mask;
-  int ac, nargs;
-  int width, height, depth, x, y, z;
-  int cnrflag = 0;
-  int count;
+  MRI *  mri_src, *mri_label, *mri_mask;
+  int    ac, nargs;
+  int    width, height, depth, x, y, z;
+  int    cnrflag = 0;
+  int    count;
 
-  float v1, v2;
+  float  v1, v2;
   double meanV1, stdV1, meanV2, stdV2;
-  int total1, total2;
+  int    total1, total2;
 
   Progname = argv[0];
 
@@ -111,9 +111,9 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_BADPARM, "%s: could not read label volume %s", Progname,
               argv[2]);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   mri_mask = MRIclone(mri_label, NULL);
 
@@ -147,15 +147,15 @@ int main(int argc, char *argv[]) {
   printf("Region of interest has label = %d\n", label1);
 
   if (argc == 5) {
-    label2 = atoi(argv[4]);
+    label2  = atoi(argv[4]);
     cnrflag = 1;
     printf("Second region has label = %d\n", label2);
   } else
     cnrflag = 0;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   mri_mask =
       MRIalloc(mri_src->width, mri_src->height, mri_src->depth, MRI_UCHAR);
@@ -270,21 +270,21 @@ int main(int argc, char *argv[]) {
 } /*  end main()  */
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "window")) {
     window_flag = 1;
     window_size = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("interpolating volume to be isotropic 1mm^3\n");
   }
 

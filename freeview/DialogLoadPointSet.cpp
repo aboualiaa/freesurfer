@@ -22,12 +22,12 @@
  *
  */
 #include "DialogLoadPointSet.h"
-#include "ui_DialogLoadPointSet.h"
 #include "LayerPropertyPointSet.h"
 #include "MyUtils.h"
-#include <QMessageBox>
+#include "ui_DialogLoadPointSet.h"
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 
 DialogLoadPointSet::DialogLoadPointSet(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogLoadPointSet) {

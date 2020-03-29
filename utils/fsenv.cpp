@@ -23,13 +23,13 @@
  */
 
 #include "fsenv.h"
+#include "mri.h"
+#include "utils.h"
+#include "version.h"
 #include <cstdio>
 #include <cstdlib>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include "mri.h"
-#include "utils.h"
-#include "version.h"
 
 /* --------------------------------------------- */
 // Return the CVS version of this file.
@@ -38,8 +38,8 @@ const char *FSENVsrcVersion() {
 }
 
 FSENV *FSENVgetenv() {
-  FSENV *fsenv;
-  char *pc, tmpstr[2000];
+  FSENV *        fsenv;
+  char *         pc, tmpstr[2000];
   struct utsname uts;
 
   fsenv = (FSENV *)calloc(sizeof(FSENV), 1);
@@ -57,7 +57,7 @@ FSENV *FSENVgetenv() {
     return (nullptr);
   }
   fsenv->SUBJECTS_DIR = strcpyalloc(pc);
-  fsenv->user = strcpyalloc(VERuser());
+  fsenv->user         = strcpyalloc(VERuser());
 
   // Current working directory
   if (!getcwd(tmpstr, 2000)) {
@@ -67,8 +67,8 @@ FSENV *FSENVgetenv() {
 
   // Kernel information
   uname(&uts);
-  fsenv->sysname = strcpyalloc(uts.sysname);
-  fsenv->machine = strcpyalloc(uts.machine);
+  fsenv->sysname  = strcpyalloc(uts.sysname);
+  fsenv->machine  = strcpyalloc(uts.machine);
   fsenv->hostname = strcpyalloc(uts.nodename);
 
   // Load the default color table

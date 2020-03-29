@@ -33,10 +33,10 @@
 #include "matrix.h"
 #include "mri.h"
 
-#include <utility>
-#include <string>
-#include <vector>
 #include "Registration.h"
+#include <string>
+#include <utility>
+#include <vector>
 
 /** \class RegPowell
  * \brief Class for registration using Powell method
@@ -55,7 +55,7 @@ public:
 
   //! The Powell way of doing iterative registration
   virtual void computeIterativeRegistrationFull(int n, double epsit, MRI *mriS,
-                                                MRI *mriT,
+                                                MRI *                     mriT,
                                                 const vnl_matrix<double> &Minit,
                                                 double iscaleinit);
 
@@ -69,18 +69,18 @@ public:
   virtual std::string getClassName() { return "RegPowell"; }
 
 protected:
-  virtual void setTransformation(bool is2d);
-  static RegPowell *tocurrent;
-  static MRI *scf;
-  static MRI *tcf;
-  static int pcount;
+  virtual void                          setTransformation(bool is2d);
+  static RegPowell *                    tocurrent;
+  static MRI *                          scf;
+  static MRI *                          tcf;
+  static int                            pcount;
   static vnl_matrix_fixed<double, 4, 4> mh1;
   static vnl_matrix_fixed<double, 4, 4> mh2;
-  static int icount;
-  static int subsamp;
-  static bool is2d;
-  double xtol;
-  double ftol;
+  static int                            icount;
+  static int                            subsamp;
+  static bool                           is2d;
+  double                                xtol;
+  double                                ftol;
 };
 
 #endif

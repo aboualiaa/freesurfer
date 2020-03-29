@@ -29,23 +29,21 @@
 #define QDECFACTOR_H
 
 #include <cassert>
-#include <vector>
 #include <string>
-
-using namespace std;
+#include <vector>
 
 class QdecFactor {
 public:
-  static const int qdecDiscreteFactorType = 1;
+  static const int qdecDiscreteFactorType   = 1;
   static const int qdecContinuousFactorType = 2;
-  static const int qdecIgnoreType = 3;
+  static const int qdecIgnoreType           = 3;
 
   // Constructors/Destructors
   //
 
   QdecFactor(const char *isName, int iType);
   QdecFactor(const char *isName, int iType, const char *iValue,
-             vector<string> iLevelNames);
+             std::vector<std::string> iLevelNames);
   QdecFactor(const char *isName, int iType, double iValue);
   QdecFactor(const char *isName, int iType, const char *iValue);
   QdecFactor(const QdecFactor *iFactor); // Copy constructor
@@ -87,20 +85,20 @@ public:
   /**
    * @return string
    */
-  string GetFactorName() { return msName; };
+  std::string GetFactorName() { return msName; };
 
   /**
    * GetFactorTypeName() - returns the string name of the
    * type of the given factor: 'continuous' or 'discrete'
    * @return string
    */
-  string GetFactorTypeName();
+  std::string GetFactorTypeName();
 
   /**
    * @return int
    * @param  isLevelName
    */
-  void AddLevelName(string isLevelName);
+  void AddLevelName(std::string isLevelName);
 
   /**
    *
@@ -115,7 +113,7 @@ public:
   /**
    * @return vector< string >
    */
-  vector<string> GetLevelNames() { return mLevelNames; };
+  std::vector<std::string> GetLevelNames() { return mLevelNames; };
 
   /**
    * Returns true if the given levelName is in our list of known level names
@@ -132,7 +130,7 @@ public:
    * Returns the value of the discrete factor stored in this instance
    * @return string
    */
-  string GetDiscreteValue() {
+  std::string GetDiscreteValue() {
     assert(mType == qdecDiscreteFactorType);
     return msDiscreteValue;
   };
@@ -155,7 +153,7 @@ public:
    * Returns the value of the 'ignore' factor stored in this instance
    * @return string
    */
-  string GetIgnoreValue() {
+  std::string GetIgnoreValue() {
     assert(mType == qdecIgnoreType);
     return msIgnoreValue;
   };
@@ -178,20 +176,20 @@ private:
 
   // This is the name of column in the table.dat file containing
   // this factor data for each subject.
-  string msName;
+  std::string msName;
 
   // discrete, continuous or ignore
   int mType;
 
-  string msDiscreteValue;
+  std::string msDiscreteValue;
 
   double mContinuousValue;
 
-  string msIgnoreValue;
+  std::string msIgnoreValue;
 
   // Names of possible levels (for instance, if this factor is 'gender',
   // then the two possible names are 'Female' and 'Male').
-  vector<string> mLevelNames;
+  std::vector<std::string> mLevelNames;
 
   // true if user create a factor.levels file containing the valid level names
   bool mHaveDotLevelsFile;

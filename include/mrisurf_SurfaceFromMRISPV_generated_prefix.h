@@ -1,4 +1,3 @@
-
 #pragma once
 // GENERATED SOURCE - DO NOT DIRECTLY EDIT
 //
@@ -95,7 +94,7 @@ struct Repr_Elt {
 
 protected:
   Representation *repr;
-  size_t idx;
+  size_t          idx;
   Repr_Elt() : repr(nullptr), idx(0) {}
   Repr_Elt(Representation *repr, size_t idx) : repr(repr), idx(idx) {}
   Repr_Elt(Repr_Elt const &src) : repr(src.repr), idx(src.idx) {}

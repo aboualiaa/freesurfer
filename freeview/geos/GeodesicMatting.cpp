@@ -1,13 +1,11 @@
 #include "GeodesicMatting.h"
-#include "stdlib.h"
-#include <cstring>
 #include "kde.h"
-#include <QtDebug>
+#include "stdlib.h"
 #include <QMutexLocker>
+#include <QtDebug>
+#include <cstring>
 
 #define LARGENUMBER 1e12
-
-using namespace std;
 
 GeodesicMatting::GeodesicMatting(QObject *parent) : QObject(parent) {
   m_bAbort = false;
@@ -26,7 +24,7 @@ double GeodesicMatting::Interpolate(const std::vector<double> &v,
     return hf[hf.size() - 1];
   else {
     double interval = v[1] - v[0];
-    int n = (int)((val - v[0]) / interval);
+    int    n        = (int)((val - v[0]) / interval);
     return (val - v[n]) / interval * hf[n + 1] +
            (v[n + 1] - val) / interval * hf[n];
   }
@@ -171,25 +169,27 @@ int GeodesicMatting::GetMinValIndexInSorted(
 
 int GeodesicMatting::GetMinValIndex(const std::vector<double> &vals) {
   double d_min = 1e10;
-  int idx = 0;
+  int    idx   = 0;
   for (size_t i = 0; i < vals.size(); i++) {
     if (d_min > vals[i]) {
       d_min = vals[i];
-      idx = i;
+      idx   = i;
     }
   }
   return idx;
 }
 
-template <typename T> vector<size_t> sort_indexes(const vector<T> &v) {
+template <typename T>
+std::vector<size_t> sort_indexes(const std::vector<T> &v) {
 
   // initialize original index locations
-  vector<size_t> idx(v.size());
+  std::vector<size_t> idx(v.size());
   iota(idx.begin(), idx.end(), 0);
 
   // sort indexes based on comparing values in v
-  sort(idx.begin(), idx.end(),
-       [&v](size_t i1, size_t i2) { return v[i1] < v[i2]; });
+  sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) {
+    return v[i1] < v[i2];
+  });
 
   return idx;
 }
@@ -516,13 +516,13 @@ qMin(TRIALVALS[idx+dim[0]*dim[1]],mini+step);
 
 bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
                                          double *mri_in, double *mri_range_in,
-                                         unsigned char *seeds_in,
+                                         unsigned char *             seeds_in,
                                          std::vector<unsigned char> &label_list,
                                          unsigned char *seeds_out) {
-  m_bAbort = false;
-  double **lHood = new double *[label_list.size()];
-  double **DISTS = new double *[label_list.size()];
-  size_t vol_size = ((size_t)dim[0]) * dim[1] * dim[2];
+  m_bAbort          = false;
+  double **lHood    = new double *[label_list.size()];
+  double **DISTS    = new double *[label_list.size()];
+  size_t   vol_size = ((size_t)dim[0]) * dim[1] * dim[2];
   for (size_t i = 0; i < label_list.size(); i++) {
     lHood[i] = new double[vol_size];
     memset(lHood[i], 0, vol_size * sizeof(double));
@@ -530,16 +530,16 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
     memset(DISTS[i], 0, vol_size * sizeof(double));
   }
 
-  int n_steps = 15;
+  int                 n_steps = 15;
   std::vector<double> v;
-  double step_size = (mri_range_in[1] - mri_range_in[0]) / n_steps;
+  double              step_size = (mri_range_in[1] - mri_range_in[0]) / n_steps;
   for (int i = 0; i <= n_steps; i++)
     v.push_back(mri_range_in[0] + i * step_size);
 
   m_strErrorMessage.clear();
   // compute probabilities
   for (size_t l = 0; l < label_list.size(); l++) {
-    KDE kde;
+    KDE  kde;
     bool bFound = false;
     for (size_t i = 0; i < vol_size; i++) {
       if (seeds_in[i] == label_list[l]) {
@@ -580,11 +580,11 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
     }
   }
 
-  double *D = new double[vol_size];
-  double *TRIALVALS = new double[vol_size];
-  unsigned char *KNOWN = new unsigned char[vol_size];
-  unsigned char *TRIAL = new unsigned char[vol_size];
-  qlonglong total_prog = vol_size * label_list.size();
+  double *       D          = new double[vol_size];
+  double *       TRIALVALS  = new double[vol_size];
+  unsigned char *KNOWN      = new unsigned char[vol_size];
+  unsigned char *TRIAL      = new unsigned char[vol_size];
+  qlonglong      total_prog = vol_size * label_list.size();
   for (size_t l = 0; l < label_list.size(); l++) {
     if (m_bAbort)
       break;
@@ -610,12 +610,12 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
     }
 
     // fast marching
-    bool ready = false;
-    double delta = 0.001;
-    int nBins = (int)qMin(1000000.0, max_size / delta);
+    bool                        ready = false;
+    double                      delta = 0.001;
+    int                         nBins = (int)qMin(1000000.0, max_size / delta);
     QVector<QVector<long long>> bins;
     bins.resize(nBins);
-    int nCurBin = 0;
+    int    nCurBin       = 0;
     double bin_step_size = max_size * 2 / nBins;
     for (size_t i = 0; i < vol_size; i++) {
       if (TRIAL[i]) {
@@ -630,11 +630,11 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
       if (npix % 20000 == 0)
         emit Progress((npix + l * vol_size) * 100.0 / total_prog);
 
-      double mini = LARGENUMBER;
-      long long idx = -1;
+      double    mini = LARGENUMBER;
+      long long idx  = -1;
       for (int i = nCurBin; i < nBins; i++) {
         if (!bins[i].isEmpty()) {
-          idx = bins[i].first();
+          idx  = bins[i].first();
           mini = TRIALVALS[idx];
           bins[i].removeFirst();
           break;
@@ -644,18 +644,18 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
       if (idx < 0 || mini >= LARGENUMBER)
         break;
 
-      KNOWN[idx] = 1;
-      TRIAL[idx] = 0;
+      KNOWN[idx]     = 1;
+      TRIAL[idx]     = 0;
       TRIALVALS[idx] = LARGENUMBER;
-      D[idx] = mini;
+      D[idx]         = mini;
 
-      size_t i = idx % dim[0];
-      size_t j = (idx / dim[0]) % dim[1];
-      size_t k = idx / (dim[0] * dim[1]);
+      size_t    i        = idx % dim[0];
+      size_t    j        = (idx / dim[0]) % dim[1];
+      size_t    k        = idx / (dim[0] * dim[1]);
       long long next_idx = idx - 1;
       if (i > 0 && KNOWN[next_idx] == 0) {
         if (TRIAL[next_idx] == 0) {
-          TRIAL[next_idx] = 1;
+          TRIAL[next_idx]     = 1;
           TRIALVALS[next_idx] = ComputeNeighDist(
               lHood, label_list.size(), KNOWN, D, dim, i - 1, j, k, voxel_size);
           int nBinIdx =
@@ -680,7 +680,7 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
       next_idx = idx + 1;
       if (i < dim[0] - 1 && KNOWN[next_idx] == 0) {
         if (TRIAL[next_idx] == 0) {
-          TRIAL[next_idx] = 1;
+          TRIAL[next_idx]     = 1;
           TRIALVALS[next_idx] = ComputeNeighDist(
               lHood, label_list.size(), KNOWN, D, dim, i + 1, j, k, voxel_size);
           int nBinIdx =
@@ -705,7 +705,7 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
       next_idx = idx - dim[0];
       if (j > 0 && KNOWN[next_idx] == 0) {
         if (TRIAL[next_idx] == 0) {
-          TRIAL[next_idx] = 1;
+          TRIAL[next_idx]     = 1;
           TRIALVALS[next_idx] = ComputeNeighDist(
               lHood, label_list.size(), KNOWN, D, dim, i, j - 1, k, voxel_size);
           int nBinIdx =
@@ -730,7 +730,7 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
       next_idx = idx + dim[0];
       if (j < dim[1] - 1 && KNOWN[next_idx] == 0) {
         if (TRIAL[next_idx] == 0) {
-          TRIAL[next_idx] = 1;
+          TRIAL[next_idx]     = 1;
           TRIALVALS[next_idx] = ComputeNeighDist(
               lHood, label_list.size(), KNOWN, D, dim, i, j + 1, k, voxel_size);
           int nBinIdx =
@@ -755,7 +755,7 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
       next_idx = idx - dim[0] * dim[1];
       if (k > 0 && KNOWN[next_idx] == 0) {
         if (TRIAL[next_idx] == 0) {
-          TRIAL[next_idx] = 1;
+          TRIAL[next_idx]     = 1;
           TRIALVALS[next_idx] = ComputeNeighDist(
               lHood, label_list.size(), KNOWN, D, dim, i, j, k - 1, voxel_size);
           int nBinIdx =
@@ -780,7 +780,7 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
       next_idx = idx + dim[0] * dim[1];
       if (k < dim[2] - 1 && KNOWN[next_idx] == 0) {
         if (TRIAL[next_idx] == 0) {
-          TRIAL[next_idx] = 1;
+          TRIAL[next_idx]     = 1;
           TRIALVALS[next_idx] = ComputeNeighDist(
               lHood, label_list.size(), KNOWN, D, dim, i, j, k + 1, voxel_size);
           int nBinIdx =
@@ -813,11 +813,11 @@ bool GeodesicMatting::ComputeWithBinning(int *dim, double *voxel_size,
     memset(seeds_out, 0, vol_size);
     for (size_t i = 0; i < vol_size; i++) {
       double dmin = 1e10;
-      int n = 0;
+      int    n    = 0;
       for (size_t l = 0; l < label_list.size(); l++) {
         if (DISTS[l][i] < dmin) {
           dmin = DISTS[l][i];
-          n = l;
+          n    = l;
         }
       }
       if (n != label_list.size() - 1)

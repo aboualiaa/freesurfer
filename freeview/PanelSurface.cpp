@@ -22,31 +22,31 @@
  *
  */
 #include "PanelSurface.h"
-#include "MainWindow.h"
-#include "ui_PanelSurface.h"
-#include "ui_MainWindow.h"
-#include "ui_WindowEditAnnotation.h"
-#include <QToolBar>
-#include "LayerSurface.h"
-#include "LayerPropertySurface.h"
-#include "LayerCollection.h"
+#include "DialogCustomFill.h"
+#include "DialogNewAnnotation.h"
+#include "DialogSurfaceLabelOperations.h"
 #include "FSSurface.h"
+#include "LayerCollection.h"
+#include "LayerMRI.h"
+#include "LayerPropertySurface.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
 #include "SurfaceAnnotation.h"
-#include "SurfaceOverlay.h"
 #include "SurfaceLabel.h"
+#include "SurfaceOverlay.h"
+#include "SurfacePath.h"
 #include "SurfaceSpline.h"
 #include "WindowConfigureOverlay.h"
-#include "MyUtils.h"
-#include <QMessageBox>
-#include <QDebug>
-#include "SurfacePath.h"
-#include <QToolButton>
-#include "LayerMRI.h"
-#include "DialogCustomFill.h"
-#include <QFileDialog>
-#include "DialogSurfaceLabelOperations.h"
 #include "WindowEditAnnotation.h"
-#include "DialogNewAnnotation.h"
+#include "ui_MainWindow.h"
+#include "ui_PanelSurface.h"
+#include "ui_WindowEditAnnotation.h"
+#include <QDebug>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QToolBar>
+#include <QToolButton>
 
 PanelSurface::PanelSurface(QWidget *parent)
     : PanelLayer("Surface", parent), ui(new Ui::PanelSurface) {
@@ -161,21 +161,34 @@ PanelSurface::PanelSurface(QWidget *parent)
 
   m_wndEditAnnotation = new WindowEditAnnotation(this);
   m_wndEditAnnotation->hide();
-  connect(mainwnd->GetLayerCollection("Surface"), SIGNAL(ActiveLayerChanged(Layer*)),
-           m_wndEditAnnotation, SLOT(OnActiveSurfaceChanged(Layer*)));
-  connect(m_wndEditAnnotation->ui->actionMakePath, SIGNAL(triggered(bool)), ui->actionMakePath, SLOT(trigger()));
-  connect(m_wndEditAnnotation->ui->actionMakeClosedPath, SIGNAL(triggered(bool)), ui->actionMakeClosedPath, SLOT(trigger()));
-  connect(m_wndEditAnnotation->ui->actionDeletePath, SIGNAL(triggered(bool)), ui->actionDeletePath, SLOT(trigger()));
-  connect(m_wndEditAnnotation->ui->actionClearMarks, SIGNAL(triggered(bool)), ui->actionClearMarks, SLOT(trigger()));
-  connect(m_wndEditAnnotation->ui->actionPathFill, SIGNAL(triggered(bool)), ui->actionPathFill, SLOT(trigger()));
-  connect(m_wndEditAnnotation->ui->actionSave, SIGNAL(triggered(bool)), ui->pushButtonSaveAnnotation, SLOT(click()));
+  connect(mainwnd->GetLayerCollection("Surface"),
+          SIGNAL(ActiveLayerChanged(Layer *)), m_wndEditAnnotation,
+          SLOT(OnActiveSurfaceChanged(Layer *)));
+  connect(m_wndEditAnnotation->ui->actionMakePath, SIGNAL(triggered(bool)),
+          ui->actionMakePath, SLOT(trigger()));
+  connect(m_wndEditAnnotation->ui->actionMakeClosedPath,
+          SIGNAL(triggered(bool)), ui->actionMakeClosedPath, SLOT(trigger()));
+  connect(m_wndEditAnnotation->ui->actionDeletePath, SIGNAL(triggered(bool)),
+          ui->actionDeletePath, SLOT(trigger()));
+  connect(m_wndEditAnnotation->ui->actionClearMarks, SIGNAL(triggered(bool)),
+          ui->actionClearMarks, SLOT(trigger()));
+  connect(m_wndEditAnnotation->ui->actionPathFill, SIGNAL(triggered(bool)),
+          ui->actionPathFill, SLOT(trigger()));
+  connect(m_wndEditAnnotation->ui->actionSave, SIGNAL(triggered(bool)),
+          ui->pushButtonSaveAnnotation, SLOT(click()));
 
-  connect(ui->checkBoxLabelOutline, SIGNAL(toggled(bool)), this, SLOT(OnCheckBoxLabelOutline(bool)));
-  connect(ui->colorpickerLabelColor, SIGNAL(colorChanged(QColor)), this, SLOT(OnColorPickerLabelColor(QColor)));
-  connect(ui->treeWidgetLabels, SIGNAL(MenuGoToCentroid()), mainwnd, SLOT(OnGoToSurfaceLabel()));
-  connect(ui->treeWidgetLabels, SIGNAL(MenuResample()), this, SLOT(OnLabelResample()));
-  connect(ui->treeWidgetLabels, SIGNAL(MenuMoreOps()), this, SLOT(OnLabelMoreOps()));
-  connect(ui->treeWidgetLabels, SIGNAL(MenuSaveAs()), this, SLOT(OnSaveLabelAs()));
+  connect(ui->checkBoxLabelOutline, SIGNAL(toggled(bool)), this,
+          SLOT(OnCheckBoxLabelOutline(bool)));
+  connect(ui->colorpickerLabelColor, SIGNAL(colorChanged(QColor)), this,
+          SLOT(OnColorPickerLabelColor(QColor)));
+  connect(ui->treeWidgetLabels, SIGNAL(MenuGoToCentroid()), mainwnd,
+          SLOT(OnGoToSurfaceLabel()));
+  connect(ui->treeWidgetLabels, SIGNAL(MenuResample()), this,
+          SLOT(OnLabelResample()));
+  connect(ui->treeWidgetLabels, SIGNAL(MenuMoreOps()), this,
+          SLOT(OnLabelMoreOps()));
+  connect(ui->treeWidgetLabels, SIGNAL(MenuSaveAs()), this,
+          SLOT(OnSaveLabelAs()));
 
   connect(ui->actionCut, SIGNAL(toggled(bool)), SLOT(OnButtonEditCut(bool)));
   connect(ui->actionPath, SIGNAL(toggled(bool)), SLOT(OnButtonEditPath(bool)));
@@ -338,7 +351,7 @@ void PanelSurface::DoIdle() {
   // update action status
   BlockAllSignals(true);
   LayerSurface *layer = GetCurrentLayer<LayerSurface *>();
-  FSSurface *surf = (layer ? layer->GetSourceSurface() : NULL);
+  FSSurface *   surf  = (layer ? layer->GetSourceSurface() : NULL);
   ui->actionLockLayer->setEnabled(layer);
   ui->actionLockLayer->setChecked(layer && layer->IsLocked());
   ui->actionSurfaceMain->setEnabled(layer);
@@ -583,8 +596,8 @@ void PanelSurface::DoUpdateWidgets() {
   ui->treeWidgetLabels->clear();
   if (layer) {
     for (int i = 0; i < layer->GetNumberOfLabels(); i++) {
-      SurfaceLabel *label = layer->GetLabel(i);
-      QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeWidgetLabels);
+      SurfaceLabel *   label = layer->GetLabel(i);
+      QTreeWidgetItem *item  = new QTreeWidgetItem(ui->treeWidgetLabels);
       item->setText(0, label->GetName());
       item->setData(0, Qt::UserRole, QVariant::fromValue((QObject *)label));
       item->setCheckState(0, label->IsVisible() ? Qt::Checked : Qt::Unchecked);
@@ -606,8 +619,8 @@ void PanelSurface::DoUpdateWidgets() {
   ui->treeWidgetSplines->clear();
   if (layer) {
     for (int i = 0; i < layer->GetNumberOfSplines(); i++) {
-      SurfaceSpline *spline = layer->GetSpline(i);
-      QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeWidgetSplines);
+      SurfaceSpline *  spline = layer->GetSpline(i);
+      QTreeWidgetItem *item   = new QTreeWidgetItem(ui->treeWidgetSplines);
       item->setText(0, spline->GetName());
       item->setData(0, Qt::UserRole,
                     QVariant::fromValue(reinterpret_cast<quintptr>(spline)));
@@ -668,7 +681,7 @@ void PanelSurface::UpdateLabelWidgets(bool block_signals) {
       BlockAllSignals(true);
 
     SurfaceLabel *label = layer->GetActiveLabel();
-    double *rgb = label->GetColor();
+    double *      rgb   = label->GetColor();
     ui->colorpickerLabelColor->setCurrentColor(
         QColor((int)(rgb[0] * 255), (int)(rgb[1] * 255), (int)(rgb[2] * 255)));
     ui->checkBoxLabelOutline->setChecked(label->GetShowOutline());
@@ -732,7 +745,7 @@ void PanelSurface::UpdateSplineWidgets() {
 }
 
 QList<SurfaceLabel *> PanelSurface::GetSelectedLabels() {
-  QList<SurfaceLabel *> selected_labels;
+  QList<SurfaceLabel *>    selected_labels;
   QList<QTreeWidgetItem *> selected_items =
       ui->treeWidgetLabels->selectedItems();
   foreach (QTreeWidgetItem *item, selected_items) {
@@ -743,7 +756,7 @@ QList<SurfaceLabel *> PanelSurface::GetSelectedLabels() {
 }
 
 QList<SurfaceSpline *> PanelSurface::GetSelectedSplines() {
-  QList<SurfaceSpline *> selected_splines;
+  QList<SurfaceSpline *>   selected_splines;
   QList<QTreeWidgetItem *> selected_items =
       ui->treeWidgetSplines->selectedItems();
   foreach (QTreeWidgetItem *item, selected_items) {
@@ -802,7 +815,7 @@ void PanelSurface::OnComboCurvature(int nSel) {
 void PanelSurface::OnLineEditMidPoint(const QString &text) {
   QList<LayerSurface *> layers = GetSelectedLayers<LayerSurface *>();
   foreach (LayerSurface *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dval = text.toDouble(&bOK);
     if (layer && dval && dval != layer->GetProperty()->GetThresholdMidPoint()) {
       layer->GetProperty()->SetThresholdMidPoint(dval);
@@ -813,7 +826,7 @@ void PanelSurface::OnLineEditMidPoint(const QString &text) {
 void PanelSurface::OnLineEditSlope(const QString &text) {
   QList<LayerSurface *> layers = GetSelectedLayers<LayerSurface *>();
   foreach (LayerSurface *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dval = text.toDouble(&bOK);
     if (layer && dval && dval != layer->GetProperty()->GetThresholdSlope()) {
       layer->GetProperty()->SetThresholdSlope(dval);
@@ -823,8 +836,8 @@ void PanelSurface::OnLineEditSlope(const QString &text) {
 
 void PanelSurface::OnLineEditLabelThreshold(const QString &text) {
   LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
-  bool bOK;
-  double dval = text.toDouble(&bOK);
+  bool          bOK;
+  double        dval = text.toDouble(&bOK);
   /*
   if (surf && surf->GetActiveLabel() && bOK)
   {
@@ -868,8 +881,7 @@ void PanelSurface::OnComboAnnotation(int nSel_in) {
     } else {
       DialogNewAnnotation dlg(this,
                               QFileInfo(surf->GetFileName()).dir().path());
-      if (dlg.exec() == QDialog::Accepted)
-      {
+      if (dlg.exec() == QDialog::Accepted) {
         surf->CreateNewAnnotation(dlg.GetColorTableFile(), dlg.GetName());
         QTimer::singleShot(100, this, SLOT(OnButtonEditAnnotation()));
       }
@@ -917,7 +929,7 @@ void PanelSurface::OnButtonSaveLabel() {
       QString fn = label->GetFileName();
       if (fn.isEmpty()) {
         QString def_fn = label->GetName() + ".label";
-        def_fn = dir.absoluteFilePath(def_fn);
+        def_fn         = dir.absoluteFilePath(def_fn);
         fn = QFileDialog::getSaveFileName(this, "Select label file", def_fn,
                                           "Label files (*)");
       }
@@ -938,7 +950,7 @@ void PanelSurface::OnSaveLabelAs() {
         OnButtonSaveLabel();
       } else {
         QString def_fn = label->GetName() + ".label";
-        def_fn = QFileInfo(fn).absolutePath() + "/" + def_fn;
+        def_fn         = QFileInfo(fn).absolutePath() + "/" + def_fn;
         fn = QFileDialog::getSaveFileName(this, "Select label file", def_fn,
                                           "Label files (*)");
         if (!fn.isEmpty()) {
@@ -982,8 +994,7 @@ void PanelSurface::OnComboSpline(int nSel) {
 
 void PanelSurface::OnButtonConfigureOverlay() { m_wndConfigureOverlay->show(); }
 
-void PanelSurface::OnButtonEditAnnotation()
-{
+void PanelSurface::OnButtonEditAnnotation() {
   m_wndEditAnnotation->show();
   m_wndEditAnnotation->raise();
   ui->actionPath->setChecked(true);
@@ -1006,7 +1017,7 @@ void PanelSurface::OnEditPositionOffset() {
     args << "n/a"
          << "n/a"
          << "n/a";
-    bool bOK;
+    bool   bOK;
     double pos[3];
     pos[0] = args[0].toDouble(&bOK);
     if (bOK) {
@@ -1107,8 +1118,8 @@ void PanelSurface::OnComboLabelColorCode(int nSel) {
 
 void PanelSurface::OnLineEditLabelHeatscaleMin(const QString &text) {
   LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
-  bool bOK;
-  double dval = text.toDouble(&bOK);
+  bool          bOK;
+  double        dval = text.toDouble(&bOK);
   if (surf && bOK) {
     QList<SurfaceLabel *> labels = GetSelectedLabels();
     foreach (SurfaceLabel *label, labels) {
@@ -1122,8 +1133,8 @@ void PanelSurface::OnLineEditLabelHeatscaleMin(const QString &text) {
 
 void PanelSurface::OnLineEditLabelHeatscaleMax(const QString &text) {
   LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
-  bool bOK;
-  double dval = text.toDouble(&bOK);
+  bool          bOK;
+  double        dval = text.toDouble(&bOK);
   if (surf && bOK) {
     QList<SurfaceLabel *> labels = GetSelectedLabels();
     foreach (SurfaceLabel *label, labels) {
@@ -1295,7 +1306,7 @@ void PanelSurface::OnButtonUndoCut() {
 
 void PanelSurface::OnLabelResample() {
   LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
-  LayerMRI *mri = qobject_cast<LayerMRI *>(
+  LayerMRI *    mri  = qobject_cast<LayerMRI *>(
       MainWindow::GetMainWindow()->GetActiveLayer("MRI"));
   if (!mri) {
     QMessageBox::warning(this, "Error",
@@ -1318,9 +1329,9 @@ void PanelSurface::OnLabelMoreOps() {
 }
 
 void PanelSurface::OnLabelOperation(const QVariantMap &op) {
-  QString op_str = op["operation"].toString();
-  int nTimes = op["times"].toInt();
-  LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
+  QString       op_str = op["operation"].toString();
+  int           nTimes = op["times"].toInt();
+  LayerSurface *surf   = GetCurrentLayer<LayerSurface *>();
   if (surf && surf->GetActiveLabel()) {
     SurfaceLabel *label = surf->GetActiveLabel();
     if (op_str == "dilate")
@@ -1381,8 +1392,8 @@ void PanelSurface::OnButtonCustomFillPath() {
 }
 
 void PanelSurface::OnCustomFillTriggered(const QVariantMap &options_in) {
-  QVariantMap options = options_in;
-  LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
+  QVariantMap   options = options_in;
+  LayerSurface *surf    = GetCurrentLayer<LayerSurface *>();
   if (surf) {
     int vno = surf->GetLastMark();
     if (vno < 0)
@@ -1394,7 +1405,7 @@ void PanelSurface::OnCustomFillTriggered(const QVariantMap &options_in) {
       verts = surf->GetAllMarks();
 
     if (m_wndEditAnnotation->isVisible() || surf->GetActiveAnnotation()) {
-      options["AsAnnotation"] = true;
+      options["AsAnnotation"]        = true;
       options["FillAnnotationIndex"] = m_wndEditAnnotation->GetCurrentIndex();
     }
 
@@ -1404,12 +1415,12 @@ void PanelSurface::OnCustomFillTriggered(const QVariantMap &options_in) {
     else if (surf->IsVertexRipped(vno))
       QMessageBox::information(this->parentWidget(), "Fill Cut Area",
                                "Please move cursor to an uncut vertex");
-    else
-    {
+    else {
       surf->FillPath(verts, options);
-      if (m_wndEditAnnotation->isVisible())
-      {
-        m_wndEditAnnotation->UpdateUI(surf->GetActiveAnnotation()->property("current_fill_index").toInt());
+      if (m_wndEditAnnotation->isVisible()) {
+        m_wndEditAnnotation->UpdateUI(surf->GetActiveAnnotation()
+                                          ->property("current_fill_index")
+                                          .toInt());
       }
     }
   }
@@ -1423,8 +1434,8 @@ void PanelSurface::OnButtonClearMarks() {
 
 void PanelSurface::OnLineEditLabelOpacity(const QString &text) {
   LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
-  bool bOK;
-  double dval = text.toDouble(&bOK);
+  bool          bOK;
+  double        dval = text.toDouble(&bOK);
   if (surf && bOK && dval >= 0 && dval <= 1) {
     QList<SurfaceLabel *> labels = GetSelectedLabels();
     foreach (SurfaceLabel *label, labels) {
@@ -1437,7 +1448,7 @@ void PanelSurface::OnLineEditLabelOpacity(const QString &text) {
 }
 
 void PanelSurface::OnButtonLabelUp() {
-  LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
+  LayerSurface *   surf    = GetCurrentLayer<LayerSurface *>();
   QTreeWidgetItem *curItem = ui->treeWidgetLabels->currentItem();
   if (curItem && surf) {
     int n = ui->treeWidgetLabels->indexOfTopLevelItem(curItem);
@@ -1451,7 +1462,7 @@ void PanelSurface::OnButtonLabelUp() {
 }
 
 void PanelSurface::OnButtonLabelDown() {
-  LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
+  LayerSurface *   surf    = GetCurrentLayer<LayerSurface *>();
   QTreeWidgetItem *curItem = ui->treeWidgetLabels->currentItem();
   if (curItem) {
     int n = ui->treeWidgetLabels->indexOfTopLevelItem(curItem);
@@ -1492,7 +1503,8 @@ void PanelSurface::OnButtonSaveAnnotation() {
     }
     if (!fn.isEmpty()) {
       if (!annot->SaveToFile(fn)) {
-        cerr << "Failed to save annotation file at " << qPrintable(fn) << "\n";
+        std::cerr << "Failed to save annotation file at " << qPrintable(fn)
+                  << "\n";
       }
     }
   }

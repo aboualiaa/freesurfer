@@ -1,8 +1,8 @@
 #ifndef __kvlCroppedImageReader_h
 #define __kvlCroppedImageReader_h
 
-#include "itkImage.h"
 #include "itkAffineTransform.h"
+#include "itkImage.h"
 
 namespace kvl {
 
@@ -20,9 +20,9 @@ namespace kvl {
 class CroppedImageReader : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self = CroppedImageReader;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = CroppedImageReader;
+  using Superclass   = itk::Object;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -33,7 +33,7 @@ public:
 
   /** Some typedefs */
   // typedef itk::Image< unsigned short, 3 >  ImageType;
-  using ImageType = itk::Image<float, 3>;
+  using ImageType     = itk::Image<float, 3>;
   using TransformType = itk::AffineTransform<double, 3>;
 
   // Read
@@ -97,13 +97,13 @@ private:
   static TransformType::Pointer
   GetTransformOfFileName(const std::string &filename);
 
-  ImageType::Pointer m_Image;
+  ImageType::Pointer     m_Image;
   TransformType::Pointer m_Transform;
   TransformType::Pointer m_WorldToImageTransform;
 
   float m_ExtraFraction;
-  int m_DownSamplingFactor;
-  int m_BoundingBoxSize[3];
+  int   m_DownSamplingFactor;
+  int   m_BoundingBoxSize[3];
 
   ImageType::RegionType m_CroppedImageRegion;
   ImageType::RegionType m_OriginalImageRegion;

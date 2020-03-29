@@ -26,14 +26,14 @@
  */
 
 #include "diag.h"
-#include "timer.h"
 #include "gcamorph.h"
+#include "mri_identify.h"
 #include "registerio.h"
 #include "resample.h"
-#include "mri_identify.h"
+#include "timer.h"
 
 const char *Progname = nullptr;
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void print_usage();
 static void usage_exit();
 static void print_help();
@@ -42,21 +42,21 @@ static void print_version();
 static void argnerr(char *, int);
 
 static int mris_warp__check_deformation(MRI **, unsigned short int);
-MATRIX *mris_warp__TkReg2vox(MRI_SURFACE *);
+MATRIX *   mris_warp__TkReg2vox(MRI_SURFACE *);
 
 static int debug = 0;
 
 static char vcid[] = "$Id: mris_warp.c,v 1.3 2012/02/29 15:59:46 nicks Exp $";
 
-static char *hemi = nullptr;
+static char *hemi       = nullptr;
 static char *srcsubject = nullptr;
 
-static char *surf_filename = "white";
-static char *deformvol_filename = "deform_vol_abs.nii.gz";
+static char *surf_filename       = "white";
+static char *deformvol_filename  = "deform_vol_abs.nii.gz";
 static char *deformsurf_filename = "deform_surf_abs.mgz";
-static char *m3z_filename = "deform_vol_rel.m3z";
-static char *reg_filename = "register.dat";
-static char *warpsurf_filename = "white.warp";
+static char *m3z_filename        = "deform_vol_rel.m3z";
+static char *reg_filename        = "register.dat";
+static char *warpsurf_filename   = "white.warp";
 
 int FLAG__abs = 0;
 
@@ -70,16 +70,16 @@ char *fs_basename(char *path) {
 }
 
 static MATRIX *Qsrc, *Fsrc, *Wsrc, *Dsrc, *vox2ras;
-static float ProjFrac = 0.0;
+static float   ProjFrac = 0.0;
 //
 // static char  *interpmethod_string = "nearest";
 static int interpmethod = -1;
 //
 static int float2int_src;
 // static char *float2int_string = "round";
-static int float2int = -1;
+static int  float2int = -1;
 static MRI *SrcHitVol;
-static int ProjDistFlag = 0;
+static int  ProjDistFlag = 0;
 //
 // static MRI *SrcVol, *SurfVals, *SurfVals2, *overlay;
 static MRI *overlay;
@@ -90,9 +90,9 @@ int main(int argc, char *argv[]) {
   int err;
 
   MRI_SURFACE *mris = nullptr;
-  MRI *mri = nullptr;
+  MRI *        mri  = nullptr;
 
-  int msec, minutes, seconds;
+  int   msec, minutes, seconds;
   Timer start;
 
   float ipr, bpr, intensity;
@@ -101,11 +101,9 @@ int main(int argc, char *argv[]) {
 
   GCA_MORPH *gcam1, *gcam2;
 
-
   // nargs = handleVersionOption(argc, argv, "mris_warp");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -150,9 +148,9 @@ int main(int argc, char *argv[]) {
   // check input surface for intersections
   {
     MRIS_HASH_TABLE *mht;
-    int fno;
-    int count_input = 0;
-    float grid = 1.0;
+    int              fno;
+    int              count_input = 0;
+    float            grid        = 1.0;
 
     mht = MHTcreateFaceTable_Resolution(mris, CURRENT_VERTICES, grid);
 
@@ -213,7 +211,7 @@ int main(int argc, char *argv[]) {
 
   // TODO: provide user command line option to specify this
   // (although not sure that they would want to change this)
-  ProjFrac = 0.0;
+  ProjFrac     = 0.0;
   ProjDistFlag = 0;
 
   unsigned short int bIsAbsoluteDeform = 1;
@@ -289,7 +287,7 @@ int main(int argc, char *argv[]) {
 
   iM = mris_warp__TkReg2vox(mris);
 
-  p_vox = MatrixAlloc(4, 1, MATRIX_REAL);
+  p_vox                     = MatrixAlloc(4, 1, MATRIX_REAL);
   *MATRIX_RELT(p_vox, 4, 1) = 1;
 
   // TODO: identify vertices that are outside of deformation volume
@@ -371,8 +369,8 @@ int main(int argc, char *argv[]) {
 
   {
     MRIS_HASH_TABLE *mht;
-    int fno;
-    float grid = 1.0;
+    int              fno;
+    float            grid = 1.0;
 
     //
     mht = MHTcreateFaceTable_Resolution(mris, CURRENT_VERTICES, grid);
@@ -415,7 +413,7 @@ int main(int argc, char *argv[]) {
   MRIfree(&mri);
   MRISfree(&mris);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -428,7 +426,7 @@ int main(int argc, char *argv[]) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1) {
@@ -462,25 +460,25 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       deformvol_filename = pargv[0];
-      nargsused = 1;
+      nargsused          = 1;
     } else if (!strcasecmp(option, "--m3z")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       m3z_filename = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--deformsurf")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       deformsurf_filename = pargv[0];
-      nargsused = 1;
+      nargsused           = 1;
     } else if (!strcasecmp(option, "--out")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       warpsurf_filename = pargv[0];
-      nargsused = 1;
+      nargsused         = 1;
     } else if (!strcasecmp(option, "--rel")) {
       FLAG__abs = 0;
       nargsused = 0;
@@ -492,7 +490,7 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       reg_filename = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--regheader")) {
       printf("currently unsupported\n");
       exit(1);
@@ -514,7 +512,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     }
 
@@ -583,7 +581,7 @@ static void print_version() {
 }
 
 /* --------------------------------------------- */
-static int mris_warp__check_deformation(MRI **pmri,
+static int mris_warp__check_deformation(MRI **             pmri,
                                         unsigned short int bIsAbsoluteDeform) {
   /*
    * FSL uses a hybrid convention for the deformations produced by
@@ -599,8 +597,8 @@ static int mris_warp__check_deformation(MRI **pmri,
 
   MATRIX *m;
 
-  MRI *mri2 = nullptr;
-  int c = 0, r = 0, s = 0;
+  MRI * mri2 = nullptr;
+  int   c = 0, r = 0, s = 0;
   float val, det = 0.0;
 
   MRI *mri;
@@ -673,11 +671,11 @@ MATRIX *mris_warp__TkReg2vox(MRI_SURFACE *mris) {
                               MRI_UCHAR, 1);
 
     useVolGeomToMRI(&mris->vg, tmp);
-    MATRIX *vox2rasScanner = MRIxfmCRS2XYZ(tmp, 0);
-    MATRIX *vo2rasTkReg = MRIxfmCRS2XYZtkreg(tmp);
+    MATRIX *vox2rasScanner   = MRIxfmCRS2XYZ(tmp, 0);
+    MATRIX *vo2rasTkReg      = MRIxfmCRS2XYZtkreg(tmp);
     MATRIX *vox2rasTkReg_inv = MatrixInverse(vo2rasTkReg, nullptr);
     MATRIX *M = MatrixMultiply(vox2rasScanner, vox2rasTkReg_inv, NULL);
-    iM = MatrixInverse(M, nullptr);
+    iM        = MatrixInverse(M, nullptr);
 
     MRIfree(&tmp);
     MatrixFree(&vox2rasScanner);

@@ -56,8 +56,8 @@
 #ifndef ANNx_H
 #define ANNx_H
 
-#include <iomanip.h> // I/O manipulators
 #include <ANN/ANN.h> // ANN includes
+#include <iomanip.h> // I/O manipulators
 
 //----------------------------------------------------------------------
 //  Our own assertion checking
@@ -100,12 +100,12 @@ extern int ANNptsVisited;    // number of pts visited in search
 //----------------------------------------------------------------------
 
 void annError(     // ANN error routine
-    char *msg,     // error message
+    char * msg,    // error message
     ANNerr level); // level of error
 
 void annPrintPt(   // print a point
     ANNpoint pt,   // the point
-    int dim,       // the dimension
+    int      dim,  // the dimension
     ostream &out); // output stream
 
 //----------------------------------------------------------------------
@@ -131,25 +131,25 @@ public:
   ANNpoint hi;        // rectangle upper bounds
                       //
   ANNorthRect(        // basic constructor
-      int dd,         // dimension of space
+      int      dd,    // dimension of space
       ANNcoord l = 0, // default is empty
       ANNcoord h = 0) {
     lo = annAllocPt(dd, l);
     hi = annAllocPt(dd, h);
   }
 
-  ANNorthRect(              // (almost a) copy constructor
-      int dd,               // dimension
-      const ANNorthRect &r) // rectangle to copy
+  ANNorthRect(               // (almost a) copy constructor
+      int                dd, // dimension
+      const ANNorthRect &r)  // rectangle to copy
   {
     lo = annCopyPt(dd, r.lo);
     hi = annCopyPt(dd, r.hi);
   }
 
-  ANNorthRect(    // construct from points
-      int dd,     // dimension
-      ANNpoint l, // low point
-      ANNpoint h) // hight point
+  ANNorthRect(     // construct from points
+      int      dd, // dimension
+      ANNpoint l,  // low point
+      ANNpoint h)  // hight point
   {
     lo = annCopyPt(dd, l);
     hi = annCopyPt(dd, h);
@@ -166,8 +166,8 @@ public:
 };
 
 void annAssignRect(             // assign one rect to another
-    int dim,                    // dimension (both must be same)
-    ANNorthRect &dest,          // destination (modified)
+    int                dim,     // dimension (both must be same)
+    ANNorthRect &      dest,    // destination (modified)
     const ANNorthRect &source); // source
 
 //----------------------------------------------------------------------
@@ -180,9 +180,9 @@ void annAssignRect(             // assign one rect to another
 
 class ANNorthHalfSpace {
 public:
-  int cd;            // cutting dimension
+  int      cd;       // cutting dimension
   ANNcoord cv;       // cutting value
-  int sd;            // which side
+  int      sd;       // which side
                      //
   ANNorthHalfSpace() // default constructor
   {
@@ -192,9 +192,9 @@ public:
   }
 
   ANNorthHalfSpace( // basic constructor
-      int cdd,      // dimension of space
+      int      cdd, // dimension of space
       ANNcoord cvv, // cutting value
-      int sdd)      // side
+      int      sdd)      // side
   {
     cd = cdd;
     cv = cvv;

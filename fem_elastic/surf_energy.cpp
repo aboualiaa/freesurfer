@@ -2,11 +2,11 @@
 
 void add_to_container(const MRI_SURFACE *mris_x, const MRI_SURFACE *mris_fx,
                       PointsContainerType &container) {
-  const VERTEX *pvtx_x = NULL;
+  const VERTEX *pvtx_x  = NULL;
   const VERTEX *pvtx_fx = NULL;
-  Coords3d pt_x, pt_fx;
+  Coords3d      pt_x, pt_fx;
 
-  pvtx_x = &(mris_x->vertices[0]);
+  pvtx_x  = &(mris_x->vertices[0]);
   pvtx_fx = &(mris_fx->vertices[0]);
 
   for (unsigned int ui(0), nvertices(mris_x->nvertices); ui < nvertices;

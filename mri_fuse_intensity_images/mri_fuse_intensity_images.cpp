@@ -22,12 +22,12 @@
  *
  */
 
-#include "error.h"
-#include "timer.h"
 #include "diag.h"
+#include "error.h"
 #include "gca.h"
-#include "tags.h"
 #include "mrinorm.h"
+#include "tags.h"
+#include "timer.h"
 #include "version.h"
 
 const char *Progname;
@@ -35,14 +35,14 @@ const char *Progname;
 static char *mask_fname = nullptr;
 
 static double bias_sigma = 4.0;
-static FILE *diag_fp = nullptr;
+static FILE * diag_fp    = nullptr;
 
-static int normalize_timepoints_with_parzen_window(MRI *mri,
-                                                   double cross_time_sigma);
-static int normalize_timepoints(MRI *mri, double thresh,
-                                double cross_time_sigma);
+static int  normalize_timepoints_with_parzen_window(MRI *  mri,
+                                                    double cross_time_sigma);
+static int  normalize_timepoints(MRI *mri, double thresh,
+                                 double cross_time_sigma);
 static void usage_exit(int code);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
 /*
   command line consists of these inputs:
@@ -55,18 +55,16 @@ static int get_option(int argc, char *argv[]);
 static double cross_time_sigma = 1.0;
 
 #define MAX_TIMEPOINTS 2000
-static char *subjects[MAX_TIMEPOINTS] ;
-int
-main(int argc, char *argv[])
-{
-  char         *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN] ;
-  MRI          *mri_in, *mri_tmp ;
-  int          ac, nargs, msec, minutes, seconds;
-  int          input, ninputs ;
-  Timer start ;
-  TRANSFORM    *transform = NULL ;
-  char         line[STRLEN], *cp, subject[STRLEN], sdir[STRLEN], base_name[STRLEN] ;
-  FILE         *fp ;
+static char *subjects[MAX_TIMEPOINTS];
+int          main(int argc, char *argv[]) {
+  char *     in_fname, *out_fname, **av, *xform_fname, fname[STRLEN];
+  MRI *      mri_in, *mri_tmp;
+  int        ac, nargs, msec, minutes, seconds;
+  int        input, ninputs;
+  Timer      start;
+  TRANSFORM *transform = NULL;
+  char  line[STRLEN], *cp, subject[STRLEN], sdir[STRLEN], base_name[STRLEN];
+  FILE *fp;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_fuse_intensity_images");
 
@@ -94,9 +92,9 @@ main(int argc, char *argv[])
               "usage: %s [<options>] <longitudinal time point file> <in vol> "
               "<transform file> <out vol> \n",
               Progname);
-  in_fname = argv[2];
+  in_fname    = argv[2];
   xform_fname = argv[3];
-  out_fname = argv[4];
+  out_fname   = argv[4];
 
   transform = TransformRead(xform_fname);
   if (transform == nullptr)
@@ -111,7 +109,7 @@ main(int argc, char *argv[])
     *cp = 0; // remove last component of path, which is base subject name
   }
   ninputs = 0;
-  fp = fopen(argv[1], "r");
+  fp      = fopen(argv[1], "r");
   if (fp == nullptr)
     ErrorExit(ERROR_NOFILE, "%s: could not read time point file %s", Progname,
               argv[1]);
@@ -146,7 +144,7 @@ main(int argc, char *argv[])
     }
 
     if (mask_fname) {
-      int i;
+      int  i;
       MRI *mri_mask;
 
       mri_mask = MRIread(mask_fname);
@@ -167,12 +165,12 @@ main(int argc, char *argv[])
   // try to bring the images closer to each other at each voxel where they seem
   // to come from the same distribution
   {
-    MRI *mri_frame1, *mri_frame2;
+    MRI *  mri_frame1, *mri_frame2;
     double rms_after;
 
     mri_frame1 = MRIcopyFrame(mri_in, nullptr, 0, 0);
     mri_frame2 = MRIcopyFrame(mri_in, nullptr, 1, 0);
-    rms_after = MRIrmsDiff(mri_frame1, mri_frame2);
+    rms_after  = MRIrmsDiff(mri_frame1, mri_frame2);
     printf("RMS before intensity cohering  = %2.2f\n", rms_after);
     MRIfree(&mri_frame1);
     MRIfree(&mri_frame2);
@@ -183,7 +181,7 @@ main(int argc, char *argv[])
 
     mri_frame1 = MRIcopyFrame(mri_in, nullptr, 0, 0);
     mri_frame2 = MRIcopyFrame(mri_in, nullptr, 1, 0);
-    rms_after = MRIrmsDiff(mri_frame1, mri_frame2);
+    rms_after  = MRIrmsDiff(mri_frame1, mri_frame2);
     MRIfree(&mri_frame1);
     MRIfree(&mri_frame2);
     printf("RMS after intensity cohering  = %2.2f (sigma=%2.2f)\n", rms_after,
@@ -202,7 +200,7 @@ main(int argc, char *argv[])
   MRIfree(&mri_in);
 
   printf("done.\n");
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -219,7 +217,7 @@ main(int argc, char *argv[])
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -228,16 +226,16 @@ static int get_option(int argc, char *argv[]) {
     usage_exit(0);
   else if (!strcmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else if (!strcmp(option, "SIGMA")) {
     bias_sigma = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("smoothing bias field with sigma = %2.1f\n", bias_sigma);
   } else if (!stricmp(option, "cross_time_sigma") ||
              !stricmp(option, "cross-time-sigma")) {
     cross_time_sigma = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     printf("smoothing temporal bias field with sigma = %2.1f\n",
            cross_time_sigma);
   } else if (!strcmp(option, "DIAG")) {
@@ -266,7 +264,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':
@@ -308,12 +306,12 @@ static void usage_exit(int code) {
 
 static int normalize_timepoints(MRI *mri, double thresh,
                                 double cross_time_sigma) {
-  int frame, x, y, z, skip, nvox;
+  int    frame, x, y, z, skip, nvox;
   double target, val;
-  MRI *mri_ctrl, *mri_bias, *mri_target, *mri_frame, *mri_kernel;
+  MRI *  mri_ctrl, *mri_bias, *mri_target, *mri_frame, *mri_kernel;
 
-  mri_ctrl = MRIcloneDifferentType(mri, MRI_UCHAR);
-  mri_bias = MRIcloneDifferentType(mri, MRI_FLOAT);
+  mri_ctrl   = MRIcloneDifferentType(mri, MRI_UCHAR);
+  mri_bias   = MRIcloneDifferentType(mri, MRI_FLOAT);
   mri_target = MRIcloneDifferentType(mri, MRI_FLOAT);
   mri_kernel = MRIgaussian1d(cross_time_sigma, -1);
 
@@ -351,7 +349,7 @@ static int normalize_timepoints(MRI *mri, double thresh,
       for (y = 0; y < mri->height; y++)
         for (z = 0; z < mri->depth; z++) {
           target = MRIgetVoxVal(mri_target, x, y, z, 0);
-          val = MRIgetVoxVal(mri, x, y, z, frame);
+          val    = MRIgetVoxVal(mri, x, y, z, frame);
           if (FZERO(val))
             val = 1.0;
           MRIsetVoxVal(mri_bias, x, y, z, 0, target / val);
@@ -379,9 +377,9 @@ static int normalize_timepoints(MRI *mri, double thresh,
   return (NO_ERROR);
 }
 
-static int normalize_timepoints_with_parzen_window(MRI *mri,
+static int normalize_timepoints_with_parzen_window(MRI *  mri,
                                                    double cross_time_sigma) {
-  int frame1, frame2, x, y, z;
+  int    frame1, frame2, x, y, z;
   double val0, val, total, g, norm, total_norm;
 
   norm = 1 / sqrt(2 * M_PI * SQR(cross_time_sigma));
@@ -395,7 +393,7 @@ static int normalize_timepoints_with_parzen_window(MRI *mri,
           for (total = total_norm = 0.0, frame2 = 0; frame2 < mri->nframes;
                frame2++) {
             val = MRIgetVoxVal(mri, x, y, z, frame2);
-            g = norm * exp(-SQR(val - val0) / (2 * SQR(cross_time_sigma)));
+            g   = norm * exp(-SQR(val - val0) / (2 * SQR(cross_time_sigma)));
             total += g * val;
             total_norm += g;
           }

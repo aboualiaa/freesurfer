@@ -35,7 +35,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -44,15 +44,15 @@ static void print_version();
 /*-------------------------------- DATA ----------------------------*/
 
 const char *Progname;
-static int voxval = 1;
+static int  voxval = 1;
 
 /*-------------------------------- FUNCTIONS ----------------------------*/
 
 int main(int argc, char *argv[]) {
   MRI_SURFACE *mris;
-  char **av, *in_label_fname, *out_label_fname, *surf_fname, ext[STRLEN];
+  char **      av, *in_label_fname, *out_label_fname, *surf_fname, ext[STRLEN];
   ;
-  int ac, nargs;
+  int    ac, nargs;
   LABEL *label, *label_out;
 
   Progname = argv[0];
@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit();
 
-  in_label_fname = argv[1];
-  surf_fname = argv[2];
+  in_label_fname  = argv[1];
+  surf_fname      = argv[2];
   out_label_fname = argv[3];
 
   printf("reading label from %s...\n", in_label_fname);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

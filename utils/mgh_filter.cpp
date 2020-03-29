@@ -23,16 +23,16 @@
  *
  */
 
-#include <math.h>
 #include <cstdlib>
+#include <math.h>
 
 #include "matrix.h"
 #include "typedefs.h"
 
 #define SWAP(a, b)                                                             \
   tempr = (a);                                                                 \
-  (a) = (b);                                                                   \
-  (b) = tempr
+  (a)   = (b);                                                                 \
+  (b)   = tempr
 
 /* Prototypes     */
 static void four1(float data[], int nn, int isign);
@@ -41,9 +41,9 @@ void bpfilter(FLOATTYPE **data, int nchan, int nsamp, float lo, float hi);
 /* End prototypes */
 
 static void four1(float data[], int nn, int isign) {
-  int n, mmax, m, j, istep, i;
+  int    n, mmax, m, j, istep, i;
   double wtemp, wr, wpr, wpi, wi, theta;
-  float tempr, tempi;
+  float  tempr, tempi;
 
   n = nn << 1;
   j = 1;
@@ -64,16 +64,16 @@ static void four1(float data[], int nn, int isign) {
     istep = 2 * mmax;
     theta = 6.28318530717959 / (isign * mmax);
     wtemp = sin(0.5 * theta);
-    wpr = -2.0 * wtemp * wtemp;
-    wpi = sin(theta);
-    wr = 1.0;
-    wi = 0.0;
+    wpr   = -2.0 * wtemp * wtemp;
+    wpi   = sin(theta);
+    wr    = 1.0;
+    wi    = 0.0;
     for (m = 1; m < mmax; m += 2) {
       for (i = m; i <= n; i += istep) {
-        j = i + mmax;
-        tempr = wr * data[j] - wi * data[j + 1];
-        tempi = wr * data[j + 1] + wi * data[j];
-        data[j] = data[i] - tempr;
+        j           = i + mmax;
+        tempr       = wr * data[j] - wi * data[j + 1];
+        tempi       = wr * data[j + 1] + wi * data[j];
+        data[j]     = data[i] - tempr;
         data[j + 1] = data[i + 1] - tempi;
         data[i] += tempr;
         data[i + 1] += tempi;
@@ -110,7 +110,7 @@ static void lowpass(float data[],int nn,float hi)
 static void bandpass(float data[], int nn, float lo, float hi) {
   // float norm,
   float f, fl, fh, w, wh, wl;
-  int i;
+  int   i;
 
   // norm = 1 / (sqrt(2 * M_PI) * hi);
   wh = hi;
@@ -122,7 +122,7 @@ static void bandpass(float data[], int nn, float lo, float hi) {
     /*    f = 1/(1+pow(wl/(w+0.001),3.0))*1/(1+pow(w/wh,3.0)); */
     fl = (wl > 0) ? 1 - 1 / (1 + pow(w / wl, 6.0)) : 1;
     fh = (wh > 0) ? 1 / (1 + pow(w / wh, 6.0)) : 0;
-    f = sqrt(fl * fh);
+    f  = sqrt(fl * fh);
     data[i] *= f;
     data[i + 1] *= f;
   }
@@ -131,12 +131,12 @@ static void bandpass(float data[], int nn, float lo, float hi) {
 
 void bpfilter(FLOATTYPE **data, int nchan, int nsamp, float lo, float hi) {
   float *tmpvec;
-  int i, j;
+  int    i, j;
 
   tmpvec = (float *)malloc(nsamp * 2 * sizeof(float));
   for (i = 0; i < nchan; i++) {
     for (j = 0; j < nsamp; j++) {
-      tmpvec[2 * j] = data[i][j];
+      tmpvec[2 * j]     = data[i][j];
       tmpvec[2 * j + 1] = 0;
     }
     bandpass(tmpvec, nsamp, lo, hi);

@@ -29,7 +29,7 @@
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -39,12 +39,12 @@ const char *Progname;
 
 static void usage_exit(int code);
 
-static char *log_fname = nullptr;
+static char *log_fname    = nullptr;
 static float smooth_sigma = 0.0;
-static int mean_filter = 0;
-static int erode = 0;
-static int nbhd_size = 0;
-static int bonferroni = 0;
+static int   mean_filter  = 0;
+static int   erode        = 0;
+static int   nbhd_size    = 0;
+static int   bonferroni   = 0;
 
 MRI *MRIcomputeChangeMap(MRI *mri1, MRI *mri2, TRANSFORM *transform,
                          MRI *mri_change, float *pstd);
@@ -55,14 +55,14 @@ int MRImaskRegisteredPair(MRI *mri1, MRI *mri2, TRANSFORM *transform,
                           MRI *mri_mask);
 
 static MRI *mri_mask = nullptr;
-int main(int argc, char *argv[]) {
-  char *out_fname, **av;
-  int ac, nargs;
-  MRI *mri1, *mri2, *mri_change;
-  int msec, minutes, seconds, i;
-  Timer start;
+int         main(int argc, char *argv[]) {
+  char *     out_fname, **av;
+  int        ac, nargs;
+  MRI *      mri1, *mri2, *mri_change;
+  int        msec, minutes, seconds, i;
+  Timer      start;
   TRANSFORM *transform;
-  float std;
+  float      std;
 
   nargs = handleVersionOption(argc, argv, "mri_compute_change_map");
   if (nargs && argc - nargs == 1)
@@ -107,8 +107,8 @@ int main(int argc, char *argv[]) {
   // is needed below (avoid conversion)
   if (0 == strcmp(argv[3], "identity.nofile")) {
     transform->type = LINEAR_VOX_TO_VOX;
-    LTA *lta = (LTA *)transform->xform;
-    lta->type = LINEAR_VOX_TO_VOX;
+    LTA *lta        = (LTA *)transform->xform;
+    lta->type       = LINEAR_VOX_TO_VOX;
     getVolGeom(mri2, &lta->xforms[0].src);
     getVolGeom(mri1, &lta->xforms[0].dst);
     // LTAwrite(lta,"identity.lta");
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 
   if (smooth_sigma > 0) {
     MRI *mri_smooth, *mri_kernel = MRIgaussian1d(smooth_sigma, 100), *mri_mask;
-    int i, erodes;
+    int  i, erodes;
 
     erodes = MAX((int)ceil(smooth_sigma * 2), 1);
     printf("eroding input images %d times to remove border effects\n", erodes);
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
 
   if (mean_filter) {
     MRI *mri_smooth, *mri_mask;
-    int i;
+    int  i;
     mri_smooth = MRImean(mri1, nullptr, mean_filter);
     MRIbinarize(mri1, mri1, 1, 0, 1);
     for (i = 0; i < (mean_filter - 1) / 2; i++) {
@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
     }
     MRImask(mri_smooth, mri1, mri_smooth, 0, 0);
     MRIfree(&mri1);
-    mri1 = mri_smooth;
+    mri1       = mri_smooth;
     mri_smooth = MRImean(mri2, nullptr, mean_filter);
     MRIbinarize(mri2, mri2, 1, 0, 1);
     for (i = 0; i < (mean_filter - 1) / 2; i++) {
@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
   }
   MRIwrite(mri_change, out_fname);
   MRIfree(&mri_change);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -271,9 +271,9 @@ static int get_option(int argc, char *argv[]) {
     MRIbinarize(mri_mask, mri_mask, 1, 0, 1);
     nargs = 1;
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else
@@ -287,13 +287,13 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'M':
       mean_filter = atoi(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("smoothing difference image with mean filter w/wsize=%d\n",
              mean_filter);
       break;
     case 'L':
       log_fname = argv[2];
-      nargs = 1;
+      nargs     = 1;
       printf("logging results to %s\n", log_fname);
       break;
     case 'S':
@@ -341,8 +341,8 @@ static void usage_exit(int code) {
 
 int MRImaskRegisteredPair(MRI *mri1, MRI *mri2, TRANSFORM *transform,
                           MRI *mri_mask) {
-  int x1, y1, z1, x2, y2, z2;
-  float xf, yf, zf;
+  int    x1, y1, z1, x2, y2, z2;
+  float  xf, yf, zf;
   double val;
 
   for (x1 = 0; x1 < mri1->width; x1++)
@@ -370,27 +370,27 @@ int MRImaskRegisteredPair(MRI *mri1, MRI *mri2, TRANSFORM *transform,
 }
 MRI *MRIcomputeChangeMap(MRI *mri1, MRI *mri2, TRANSFORM *transform,
                          MRI *mri_change, float *pstd) {
-  int x1, y1, z1, nvox;
+  int   x1, y1, z1, nvox;
   float x2, y2, z2, val1, min1, max1, min2, max2, min_change, max_change, dif,
       mask1;
-  double val2, p, logp, mask2, sigma, mean;
-  MRI *mri_dif, *mri_mean, *mri_used, *mri_mask1, *mri_mask2, *mri_big;
+  double     val2, p, logp, mask2, sigma, mean;
+  MRI *      mri_dif, *mri_mean, *mri_used, *mri_mask1, *mri_mask2, *mri_big;
   HISTOGRAM *h, *hs, *hg;
-  MRI *mri_xformed;
+  MRI *      mri_xformed;
 
   MRIvalRange(mri1, &min1, &max1);
   MRIvalRange(mri2, &min2, &max2);
   TransformInvert(transform, mri1);
   mri_change = MRIcloneDifferentType(mri1, MRI_FLOAT);
-  mri_dif = MRIcloneDifferentType(mri1, MRI_FLOAT);
-  mri_mean = MRIcloneDifferentType(mri1, MRI_FLOAT);
-  mri_used = MRIcloneDifferentType(mri1, MRI_UCHAR);
-  mri_big = MRIcloneDifferentType(
+  mri_dif    = MRIcloneDifferentType(mri1, MRI_FLOAT);
+  mri_mean   = MRIcloneDifferentType(mri1, MRI_FLOAT);
+  mri_used   = MRIcloneDifferentType(mri1, MRI_UCHAR);
+  mri_big    = MRIcloneDifferentType(
       mri1, MRI_UCHAR); // for keeping track of underflow values
 
   mri_mask1 = MRIerodeZero(mri1, nullptr);
   mri_mask2 = MRIerodeZero(mri2, nullptr);
-  nvox = 0;
+  nvox      = 0;
 
   mri_xformed = MRIclone(mri1, nullptr);
   // compute mode of distribution and use it for centering
@@ -459,13 +459,13 @@ MRI *MRIcomputeChangeMap(MRI *mri1, MRI *mri2, TRANSFORM *transform,
         MRIsampleVolume(mri_mask2, x2, y2, z2, &mask2);
         if (!FZERO(val1) && !FZERO(val2)) {
           dif = ((val2 - mean) - val1);
-          p = (1.0 / (sqrt(2 * M_PI) * sigma)) *
+          p   = (1.0 / (sqrt(2 * M_PI) * sigma)) *
               exp(-0.5 * (dif * dif) / (2 * sigma * sigma));
-          p = HISTOgetCount(hg, fabs(dif));
-          p = 1.0 - 1.0*p ;
-          logp = -log10(p) ;
+          p    = HISTOgetCount(hg, fabs(dif));
+          p    = 1.0 - 1.0 * p;
+          logp = -log10(p);
           if (std::isfinite(logp) == 0 || (DZERO(logp) && p < .1))
-            MRIsetVoxVal(mri_big, x1, y1, z1, 0, 1) ;
+            MRIsetVoxVal(mri_big, x1, y1, z1, 0, 1);
           else
             MRIsetVoxVal(mri_change, x1, y1, z1, 0, logp);
         }
@@ -492,7 +492,7 @@ MRI *MRIcomputeChangeMap(MRI *mri1, MRI *mri2, TRANSFORM *transform,
 }
 
 MRI *MRIcomputeNbhdPvalues(MRI *mri_src, int nbhd_size, MRI *mri_dst) {
-  int x, y, z, xk, yk, zk, xi, yi, zi;
+  int    x, y, z, xk, yk, zk, xi, yi, zi;
   double pval, log_pnbhd, logp;
 
   mri_dst = MRIclone(mri_src, mri_dst);
@@ -508,7 +508,7 @@ MRI *MRIcomputeNbhdPvalues(MRI *mri_src, int nbhd_size, MRI *mri_dst) {
           for (yk = -nbhd_size; yk <= nbhd_size; yk++) {
             yi = mri_src->yi[y + yk];
             for (zk = -nbhd_size; zk <= nbhd_size; zk++) {
-              zi = mri_src->zi[z + zk];
+              zi   = mri_src->zi[z + zk];
               logp = MRIgetVoxVal(mri_src, xi, yi, zi, 0);
               pval = pow(10.0, -logp);
               logp = -log10(1.0 - pval);
@@ -525,7 +525,7 @@ MRI *MRIcomputeNbhdPvalues(MRI *mri_src, int nbhd_size, MRI *mri_dst) {
   return (mri_dst);
 }
 MRI *MRIbonferroniCorrect(MRI *mri_src, MRI *mri_dst, int is_log) {
-  int x, y, z, nvox;
+  int    x, y, z, nvox;
   double logp, pval;
 
   if (mri_dst == nullptr)

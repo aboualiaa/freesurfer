@@ -4,19 +4,19 @@
 
 #include <cmath>
 #include <fstream>
-#include <sstream>
 #include <list>
 #include <map>
 #include <numeric>
 #include <set>
-#include <string>
-#include <vector>
+#include <sstream>
 #include <stack>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "coords.h"
-#include "material.h"
 #include "element.h"
+#include "material.h"
 
 #include "gmpError.h"
 
@@ -48,13 +48,13 @@ typedef std::stack<int> tStack;
 // provide a static operator() that will return a pointer to objects.
 template <class Cstr, int n> class TMesh {
 public:
-  typedef TCoords<int, n> tIntCoords;
-  typedef TNode<n> tNode;
-  typedef TElement<n> tElement;
+  typedef TCoords<int, n>    tIntCoords;
+  typedef TNode<n>           tNode;
+  typedef TElement<n>        tElement;
   typedef TCoords<double, n> tCoords;
 
-  typedef std::vector<tNode *> NodeContainerType;
-  typedef std::vector<tElement *> ElementContainerType;
+  typedef std::vector<tNode *>               NodeContainerType;
+  typedef std::vector<tElement *>            ElementContainerType;
   typedef std::map<std::string, VMaterial *> MaterialContainerType;
 
   TMesh();
@@ -89,48 +89,48 @@ public:
   void get_material_iterators(MaterialIteratorType &begin,
                               MaterialIteratorType &end) {
     begin = m_mpMaterial.begin();
-    end = m_mpMaterial.end();
+    end   = m_mpMaterial.end();
   }
 
   void get_material_iterators(MaterialConstIteratorType &begin,
                               MaterialConstIteratorType &end) const {
     begin = m_mpMaterial.begin();
-    end = m_mpMaterial.end();
+    end   = m_mpMaterial.end();
   }
   unsigned int get_no_materials() const { return m_mpMaterial.size(); }
 
   //--------------------------
 
   // nodes management
-  typedef typename NodeContainerType::iterator NodeIterator;
+  typedef typename NodeContainerType::iterator       NodeIterator;
   typedef typename NodeContainerType::const_iterator NodeConstIterator;
   void get_node_citer(NodeConstIterator &begin, NodeConstIterator &end) {
     begin = m_vpNodes.begin();
-    end = m_vpNodes.end();
+    end   = m_vpNodes.end();
   }
   void get_node_iter(NodeIterator &begin, NodeIterator &end) {
     begin = m_vpNodes.begin();
-    end = m_vpNodes.end();
+    end   = m_vpNodes.end();
   }
 
-  unsigned int get_no_nodes() const { return m_vpNodes.size(); }
-  tNode *node(unsigned int i) const { return m_vpNodes[i]; }
-  bool get_node(unsigned int i, tNode **ppNode) const;
-  virtual const tNode *closest_node(const tCoords &c) const = 0;
+  unsigned int            get_no_nodes() const { return m_vpNodes.size(); }
+  tNode *                 node(unsigned int i) const { return m_vpNodes[i]; }
+  bool                    get_node(unsigned int i, tNode **ppNode) const;
+  virtual const tNode *   closest_node(const tCoords &c) const     = 0;
   virtual const tElement *element_at_point(const tCoords &c) const = 0;
 
-  virtual tNode *closest_node(const tCoords &c) = 0;
+  virtual tNode *   closest_node(const tCoords &c)     = 0;
   virtual tElement *element_at_point(const tCoords &c) = 0;
 
   unsigned int add_node(tNode *pnode);
   //---------------------------
 
-  typedef typename ElementContainerType::iterator ElementIterator;
+  typedef typename ElementContainerType::iterator       ElementIterator;
   typedef typename ElementContainerType::const_iterator ElementConstIterator;
 
   // elements management
-  int add_elt(tElement *elt);
-  unsigned int get_no_elts() const { return m_vpElements.size(); }
+  int             add_elt(tElement *elt);
+  unsigned int    get_no_elts() const { return m_vpElements.size(); }
   const tElement *get_elt(unsigned int i) const {
     assert(i < m_vpElements.size());
     return m_vpElements[i];
@@ -147,7 +147,7 @@ public:
                            ElementIndexContainer &eltIndex) const;
 
   template <class In> void remove_elts(In begin, In end) throw(gmpErr);
-  bool check_elt_id() const;
+  bool                     check_elt_id() const;
   //---------------------------
 
   // Mapping functionality
@@ -188,7 +188,7 @@ protected:
   void clone(const TMesh &mesh); // copy constructor and = operator
   void free();
 
-  NodeContainerType m_vpNodes;
+  NodeContainerType    m_vpNodes;
   ElementContainerType m_vpElements;
 
   MaterialContainerType m_mpMaterial;
@@ -273,8 +273,8 @@ template <class Cstr, int n> void TMesh<Cstr, n>::load(const char *fname) {
     throw "TMesh::load - failed opening input stream";
 
   ifs.seekg(0, std::ios::end);
-  unsigned int size = ifs.tellg();
-  char *dataBuffer = new char[size];
+  unsigned int size       = ifs.tellg();
+  char *       dataBuffer = new char[size];
   ifs.seekg(0, std::ios::beg);
   ifs.read(dataBuffer, size);
 
@@ -305,15 +305,15 @@ template <class Cstr, int n> void TMesh<Cstr, n>::load(std::istream &is) {
   // read actual materials
   for (unsigned int ui = 0; ui < noItems; ++ui) {
     double de, dnu;
-    uilen = TRead<unsigned int>(is);
+    uilen        = TRead<unsigned int>(is);
     char *buffer = new char[uilen];
 
     is.read(buffer, uilen);
-    de = TRead<double>(is);
+    de  = TRead<double>(is);
     dnu = TRead<double>(is);
 
     std::string label(buffer, uilen);
-    VMaterial *pmaterial = Cstr::material(label, de, dnu);
+    VMaterial * pmaterial = Cstr::material(label, de, dnu);
 
     m_mpMaterial[label] = pmaterial;
     delete[] buffer;
@@ -341,7 +341,7 @@ template <class Cstr, int n> void TMesh<Cstr, n>::load(std::istream &is) {
   typedef typename std::map<int, tNode *> NodeMapType;
   //  typedef typename NodeMapType::iterator NodeMapIterator;
   typedef typename NodeMapType::const_iterator NodeMapConstIterator;
-  NodeMapType node_map;
+  NodeMapType                                  node_map;
 
   noItems = TRead<unsigned int>(is);
   tCoords coords, delta;
@@ -364,13 +364,13 @@ template <class Cstr, int n> void TMesh<Cstr, n>::load(std::istream &is) {
 
   // elements
   noItems = TRead<unsigned int>(is);
-  int node[n + 1];
+  int                       node[n + 1];
   MaterialConstIteratorType materialIter;
 
   for (unsigned int ui = 0; ui < noItems; ++ui) {
     int id = TRead<int>(is);
     // material label
-    uilen = TRead<unsigned int>(is);
+    uilen        = TRead<unsigned int>(is);
     char *buffer = new char[uilen];
 
     is.read(buffer, uilen);
@@ -417,9 +417,9 @@ template <class Cstr, int n> void TMesh<Cstr, n>::clone(const TMesh &mesh) {
 
   // 3. process nodes
   unsigned int no_of_nodes = mesh.get_no_nodes();
-  tNode *pnode;
-  tNode *cpnode;
-  bool isActive[n];
+  tNode *      pnode;
+  tNode *      cpnode;
+  bool         isActive[n];
   for (unsigned int i = 0; i < no_of_nodes; ++i) {
     if (!mesh.get_node(i, &cpnode))
       std::cerr << "TMesh::clone - didn't find node\n";
@@ -431,10 +431,10 @@ template <class Cstr, int n> void TMesh<Cstr, n>::clone(const TMesh &mesh) {
   }
 
   // 4. process elements
-  unsigned int no_of_elts = mesh.get_no_elts();
+  unsigned int         no_of_elts = mesh.get_no_elts();
   std::vector<tNode *> vpNodes;
-  const tElement *cpelt;
-  tElement *pelt;
+  const tElement *     cpelt;
+  tElement *           pelt;
   for (unsigned int i = 0; i < no_of_elts; ++i) {
     cpelt = mesh.get_elt(i);
     vpNodes.clear();
@@ -880,8 +880,8 @@ struct FunctorClearElementTies {
 // use a mutable data member to avoid the overhead of
 // constantly re-declaring this
 template <class Cstr, int n> struct FunctorUpdateNodesFromElements {
-  typedef TNode<n> tNode;
-  mutable tNode *pnode;
+  typedef TNode<n>     tNode;
+  mutable tNode *      pnode;
   template <class T> T operator()(T v) const {
     for (unsigned int ui = 0, nnodes(v->no_nodes()); ui < nnodes; ++ui) {
       if (!v->get_node(ui, &pnode))
@@ -916,7 +916,7 @@ void TMesh<Cstr, n>::remove_elts(In begin, In end) throw(gmpErr) {
   // finally, update the nodes
 
   typedef std::vector<int> IntVector;
-  IntVector vecIdx;
+  IntVector                vecIdx;
   std::copy(begin, end, std::back_inserter(vecIdx));
 
   std::sort(vecIdx.begin(), vecIdx.end());
@@ -1034,9 +1034,9 @@ template <int n> bool positive(const TCoords<int, n> &pt) {
 // use the closest_node method -> it should do the trick most of the times
 template <class Cstr, int n>
 TCoords<double, n> TMesh<Cstr, n>::dir_img(const tCoords &c_src,
-                                           bool signalTopology) const
+                                           bool           signalTopology) const
     throw(gmpErr) {
-  tCoords img;
+  tCoords         img;
   const tElement *pelt = this->element_at_point(c_src);
 
   if (!pelt)
@@ -1062,7 +1062,7 @@ template <class Cstr, int n> bool TMesh<Cstr, n>::check_elt_id() const {
 
   // got through all the elts and check the back-cor
   typedef typename tNode::tElt_citer EltConstIterator;
-  EltConstIterator cit_begin, cit_end;
+  EltConstIterator                   cit_begin, cit_end;
   for (typename std::vector<tNode *>::const_iterator cit = m_vpNodes.begin();
        cit != m_vpNodes.end(); ++cit) {
     (*cit)->get_elt_citer(cit_begin, cit_end);
@@ -1124,12 +1124,12 @@ std::pair<TCoords<double, n>, TCoords<double, n>> TMesh<Cstr, n>::invert() {
 template <class Cstr, int n>
 int TMesh<Cstr, n>::get_neighboring_elts(
     unsigned int i, int radius, ElementIndexContainer &eltIndex) const {
-  typedef std::set<unsigned int> IndexSetType;
+  typedef std::set<unsigned int>   IndexSetType;
   typedef std::stack<unsigned int> IndexStackType;
-  IndexStackType nodeStack; // used to find new elements
-  IndexStackType eltStack;  // used to find new nodes
-  IndexSetType nodeSet;
-  IndexSetType eltSet;
+  IndexStackType                   nodeStack; // used to find new elements
+  IndexStackType                   eltStack;  // used to find new nodes
+  IndexSetType                     nodeSet;
+  IndexSetType                     eltSet;
 
   eltStack.push(i);
   eltSet.insert(i);

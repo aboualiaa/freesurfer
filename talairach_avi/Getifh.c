@@ -23,23 +23,23 @@
  *
  */
 
+#include <ctype.h>
+#include <endianio.h>
+#include <ifh.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <ifh.h>
-#include <endianio.h>
 
 #define MAXL 256
 
 static char rcsid[] = "$Id: Getifh.c,v 1.3 2007/08/04 02:23:35 nicks Exp $";
-void Getifh_rcs(void) { printf("%s\n", rcsid); }
+void        Getifh_rcs(void) { printf("%s\n", rcsid); }
 
 int Getifh(char *imgfile, IFH *ifhdr) {
   FILE *fp;
   char *str, ifhfile[MAXL], line[MAXL], parameter[MAXL];
-  int i;
-  int mmppix_flag = 0, center_flag = 0, endian_flag = 0;
-  int debug = 0;
+  int   i;
+  int   mmppix_flag = 0, center_flag = 0, endian_flag = 0;
+  int   debug = 0;
 
   getroot(imgfile, ifhfile);
   strcat(ifhfile, ".4dfp.ifh");
@@ -150,8 +150,8 @@ ERR:
 
 int Writeifh(char *program, char *outfile, IFH *ifhdr, char control) {
   FILE *ifhfp;
-  char ifhfile[MAXL];
-  int i, osbig;
+  char  ifhfile[MAXL];
+  int   i, osbig;
 
   osbig = (CPU_is_bigendian()) ? !(control == 'l' || control == 'L')
                                : (control == 'b' || control == 'B');
@@ -193,8 +193,8 @@ int Writeifh(char *program, char *outfile, IFH *ifhdr, char control) {
 int writeifhe(char *program, char *outfile, int *imgdim, float *voxdim,
               int orient, char control) {
   FILE *ifhfp;
-  char ifhfile[MAXL];
-  int osbig;
+  char  ifhfile[MAXL];
+  int   osbig;
 
   osbig = (CPU_is_bigendian()) ? !(control == 'l' || control == 'L')
                                : (control == 'b' || control == 'B');
@@ -269,8 +269,8 @@ int writeifhmc(char *program, char *outfile, int *imgdim, float *voxdim,
 int writeifhmce(char *program, char *outfile, int *imgdim, float *voxdim,
                 int orient, float *mmppix, float *center, char control) {
   FILE *ifhfp;
-  char ifhfile[MAXL];
-  int osbig;
+  char  ifhfile[MAXL];
+  int   osbig;
 
   osbig = (CPU_is_bigendian()) ? !(control == 'l' || control == 'L')
                                : (control == 'b' || control == 'B');

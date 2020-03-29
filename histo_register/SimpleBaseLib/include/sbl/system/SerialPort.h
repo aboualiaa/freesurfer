@@ -54,7 +54,7 @@ public:
 
 private:
   // the serial port connection
-  bool m_comOpened;
+  bool  m_comOpened;
   void *m_comFile;
 
   // configuration
@@ -62,8 +62,8 @@ private:
 
   // a buffer of received data
   unsigned char *m_buffer;
-  int m_bufferPos;
-  int m_bufferLen;
+  int            m_bufferPos;
+  int            m_bufferLen;
 
   // disable copy constructor and assignment operator
   SerialPort(const SerialPort &x);

@@ -235,22 +235,22 @@ void TestPoistatsReplicas::TestRethreadPath() {
                                           {-0.7286, -0.7286, 3.9579},
                                           {-0.7568, -0.7568, 4.0000}};
 
-  const int nInputMatrixRows = 41;
+  const int nInputMatrixRows    = 41;
   const int nInputMatrixColumns = 3;
 
   originalPath = MatrixType(nInputMatrixRows, nInputMatrixColumns);
 
   // set up our 3d path
   const double step = 0.1;
-  double t = 0.0;
+  double       t    = 0.0;
   for (int cRow = 0; cRow < nInputMatrixRows; cRow++) {
 
-    double y = sin(t);
-    int cColumn = 0;
+    double y       = sin(t);
+    int    cColumn = 0;
 
     originalPath[cRow][cColumn++] = y;
     originalPath[cRow][cColumn++] = y;
-    originalPath[cRow][cColumn] = t;
+    originalPath[cRow][cColumn]   = t;
 
     t = t + step;
   }
@@ -278,7 +278,7 @@ void TestPoistatsReplicas::TestRethreadPath() {
   delete resultRethreadedPath;
   resultRethreadedPath = NULL;
 
-  originalPath = MatrixType(4, 3);
+  originalPath       = MatrixType(4, 3);
   originalPath[0][0] = 14.985982468709299;
   originalPath[0][1] = 63.3912989661489;
   originalPath[0][2] = 55.26209683302739;
@@ -305,7 +305,7 @@ void TestPoistatsReplicas::TestCopyCurrentToPreviousEnergy() {
 
   for (int cReplica = 0; cReplica < m_Replicas->GetNumberOfReplicas();
        cReplica++) {
-    const double current = m_Replicas->GetCurrentMeanEnergy(cReplica);
+    const double current  = m_Replicas->GetCurrentMeanEnergy(cReplica);
     const double previous = m_Replicas->GetPreviousMeanEnergy(cReplica);
     CPPUNIT_ASSERT(current != previous);
   }
@@ -314,7 +314,7 @@ void TestPoistatsReplicas::TestCopyCurrentToPreviousEnergy() {
 
   for (int cReplica = 0; cReplica < m_Replicas->GetNumberOfReplicas();
        cReplica++) {
-    const double current = m_Replicas->GetCurrentMeanEnergy(cReplica);
+    const double current  = m_Replicas->GetCurrentMeanEnergy(cReplica);
     const double previous = m_Replicas->GetPreviousMeanEnergy(cReplica);
     CPPUNIT_ASSERT_EQUAL(current, previous);
   }
@@ -341,7 +341,7 @@ void TestPoistatsReplicas::TestSortArray() {
 
   for (int cIndex = 0; cIndex < arraySize; cIndex++) {
     int expected = expectedIndices[cIndex];
-    int result = sortedIndices[cIndex];
+    int result   = sortedIndices[cIndex];
 
     CPPUNIT_ASSERT_EQUAL(expected, result);
   }
@@ -351,7 +351,7 @@ void TestPoistatsReplicas::TestGetMinimumCurrentEnergy() {
 
   std::cerr << "TestGetMinimumCurrentEnergy" << std::endl;
 
-  const double actual = m_Replicas->GetMinimumCurrentEnergy();
+  const double actual   = m_Replicas->GetMinimumCurrentEnergy();
   const double expected = 0;
 
   CPPUNIT_ASSERT_EQUAL(expected, actual);
@@ -361,7 +361,7 @@ void TestPoistatsReplicas::TestGetCurrentMeanOfEnergies() {
 
   std::cerr << "TestGetCurrentMeanOfEnergies" << std::endl;
 
-  const double actual = m_Replicas->GetCurrentMeanOfEnergies();
+  const double actual   = m_Replicas->GetCurrentMeanOfEnergies();
   const double expected = 2.0;
 
   CPPUNIT_ASSERT_EQUAL(expected, actual);
@@ -384,10 +384,10 @@ void TestPoistatsReplicas::TestGetRandomSortedFirstSecondReplicas() {
 
   std::cerr << "TestGetRandomSortedFirstSecondReplicas" << std::endl;
 
-  int firstActual;
+  int       firstActual;
   const int firstExpected = 2;
 
-  int secondActual;
+  int       secondActual;
   const int secondExpected = 3;
 
   m_PoistatsModel->SetRandomSeed(0);
@@ -405,7 +405,7 @@ void TestPoistatsReplicas::TestCoolTemperatures() {
 
   for (int cReplica = 0; cReplica < m_Replicas->GetNumberOfReplicas();
        cReplica++) {
-    const double actualTemperature = m_Replicas->GetTemperature(cReplica);
+    const double actualTemperature   = m_Replicas->GetTemperature(cReplica);
     const double expectedTemperature = cReplica;
     CPPUNIT_ASSERT_EQUAL(expectedTemperature, actualTemperature);
   }
@@ -441,7 +441,7 @@ void TestPoistatsReplicas::TestSetInitialPoints() {
       for (unsigned int cCol = 0; cCol < expectedBasePath->cols(); cCol++) {
 
         const double expectedBase = (*expectedBasePath)[cRow][cCol];
-        const double actualBase = (*actualBasePath)[cRow][cCol];
+        const double actualBase   = (*actualBasePath)[cRow][cCol];
 
         CPPUNIT_ASSERT_EQUAL(expectedBase, actualBase);
       }
@@ -460,7 +460,7 @@ void TestPoistatsReplicas::TestSetInitialPoints() {
       for (unsigned int cCol = 0; cCol < expectedPreviousPath->cols(); cCol++) {
 
         const double expectedPrevious = (*expectedPreviousPath)[cRow][cCol];
-        const double actualPrevious = (*actualPreviousPath)[cRow][cCol];
+        const double actualPrevious   = (*actualPreviousPath)[cRow][cCol];
 
         CPPUNIT_ASSERT_EQUAL(expectedPrevious, actualPrevious);
 
@@ -484,7 +484,7 @@ void TestPoistatsReplicas::TestGetBestTrialPaths() {
   PoistatsReplicas::MatrixListType bestPaths = m_Replicas->GetBestTrialPaths();
 
   const int expected = m_Replicas->GetNumberOfReplicas();
-  const int actual = bestPaths.size();
+  const int actual   = bestPaths.size();
   CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
@@ -494,7 +494,7 @@ int main(int argc, char **argv) {
   Progname = argv[0];
 
   const int SUCCESS = 0;
-  const int FAIL = 1;
+  const int FAIL    = 1;
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(TestPoistatsReplicas::suite());

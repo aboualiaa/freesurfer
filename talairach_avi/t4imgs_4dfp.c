@@ -23,17 +23,17 @@
  *
  */
 
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h> /* R_OK */
-#include <rec.h>
-#include <endianio.h>
 #include <Getifh.h>
+#include <ctype.h>
+#include <endianio.h>
+#include <math.h>
+#include <rec.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h> /* R_OK */
 
 #define FLT_MAX 1e37
-#define MAXL 256
+#define MAXL    256
 
 /*************/
 /* externals */
@@ -70,14 +70,14 @@ extern void spliney_(float *imgt, int *nx, int *ny, int *nz,
                      float *d2yi);  /* spline3dvgh.f */
 extern float t4scale(char *t4file); /* t4scale.c */
 
-extern void flipx(float *imag, int *nx, int *ny, int *nz);     /* cflip.c */
-extern void flipz(float *imag, int *nx, int *ny, int *nz);     /* cflip.c */
-extern int x4dfp2ecat(float *imag, int *dim, int orientation); /* below */
-extern void spline3d(float *imgt, int *dim);                   /* below */
+extern void flipx(float *imag, int *nx, int *ny, int *nz);      /* cflip.c */
+extern void flipz(float *imag, int *nx, int *ny, int *nz);      /* cflip.c */
+extern int  x4dfp2ecat(float *imag, int *dim, int orientation); /* below */
+extern void spline3d(float *imgt, int *dim);                    /* below */
 
 float rnan(void) {
   union {
-    float r;
+    float         r;
     unsigned long j;
   } word;
   word.j = 0x7fffffff;
@@ -85,15 +85,15 @@ float rnan(void) {
 }
 
 typedef struct {
-  char imgfile[MAXL];
-  char t4file[MAXL];
-  char mskfile[MAXL];
+  char  imgfile[MAXL];
+  char  t4file[MAXL];
+  char  mskfile[MAXL];
   float scale;
   float weight;
-  int lo_slice, hi_slice;
-  int orient; /* ifh convention: 2 = TRA; 3 = COR; 4 = SAG; */
-  int isbig;
-  int shift;
+  int   lo_slice, hi_slice;
+  int   orient; /* ifh convention: 2 = TRA; 3 = COR; 4 = SAG; */
+  int   isbig;
+  int   shift;
 } RUN_INFO;
 
 static char rcsid[] =
@@ -101,32 +101,32 @@ static char rcsid[] =
 int main(int argc, char *argv[]) {
   FILE *lstfp;         /* input image list */
   FILE *imgfp, *mskfp; /* input image and mask file pointers */
-  char lstfile[MAXL], dimfile[MAXL] = "";
-  char imgroot[MAXL];
-  char outroot[MAXL], outfile[MAXL];
+  char  lstfile[MAXL], dimfile[MAXL] = "";
+  char  imgroot[MAXL];
+  char  outroot[MAXL], outfile[MAXL];
 
   /***********/
   /* utility */
   /***********/
   char *ptr, string[2 * MAXL], command[MAXL], program[MAXL];
-  int c, i, j, k, m;
+  int   c, i, j, k, m;
 
   /**************/
   /* stack list */
   /**************/
-  char *srgv[256]; /* input string field pointers */
+  char *    srgv[256]; /* input string field pointers */
   RUN_INFO *stackspc;
-  int nstack;
+  int       nstack;
 
   /***************/
   /* input image */
   /***************/
-  IFH ifh;
+  IFH    ifh;
   float *imgt, *imgm = NULL;
-  float voxdim[3], voxdimm[3];
-  int imgdim[4], imgdimm[4], outdim[4];
-  int xdim, ydim, zdim, vdim, idim, isbig, isbigm, orientm;
-  int jstart, jend; /* j is accumulator frame counter */
+  float  voxdim[3], voxdimm[3];
+  int    imgdim[4], imgdimm[4], outdim[4];
+  int    xdim, ydim, zdim, vdim, idim, isbig, isbigm, orientm;
+  int    jstart, jend; /* j is accumulator frame counter */
 
   /***************/
   /* computation */
@@ -140,11 +140,11 @@ int main(int argc, char *argv[]) {
   /* output image */
   /****************/
   float *imgo, *imgw, *imgs;
-  float mmppixo[3], centero[3];
-  float maxo, mino;
-  int nxo, nyo, nzo, odim, nframe;
-  int orio = 2, yshift = 0;
-  char control = '\0';
+  float  mmppixo[3], centero[3];
+  float  maxo, mino;
+  int    nxo, nyo, nzo, odim, nframe;
+  int    orio = 2, yshift = 0;
+  char   control = '\0';
 
   /*********/
   /* flags */
@@ -152,12 +152,12 @@ int main(int argc, char *argv[]) {
   int mode = 2048; /* ENDSLICE enabled */
   int status;
 
-  int B_flag = 0;      /* comwrp=to_711-2B_t4 */
-  int odim_flag = 3;   /* output image dimension control switch */
+  int B_flag      = 0; /* comwrp=to_711-2B_t4 */
+  int odim_flag   = 3; /* output image dimension control switch */
   int spline_flag = 0; /* use spline3dvgh to interpolate instead of imgvalx */
   int sqrt_flag =
       0; /* divide summmed image by sqrt (n) as for z-img averaging */
-  int NaN_flag = 0;         /* enable NaN output if value undefined */
+  int NaN_flag         = 0; /* enable NaN output if value undefined */
   int nearest_neighbor = 0; /* interpolate */
 
   printf("%s\n", rcsid);
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
           break;
         case '@':
           control = *ptr++;
-          *ptr = '\0';
+          *ptr    = '\0';
           break;
         case 'O':
           if (!strncmp(ptr, "333", 3)) {
@@ -280,8 +280,8 @@ int main(int argc, char *argv[]) {
 
     strcpy(stackspc[nstack].t4file, "");
     strcpy(stackspc[nstack].mskfile, "");
-    stackspc[nstack].scale = 1.0;
-    stackspc[nstack].weight = 1.0;
+    stackspc[nstack].scale    = 1.0;
+    stackspc[nstack].weight   = 1.0;
     stackspc[nstack].lo_slice = stackspc[nstack].hi_slice = 0;
     stackspc[nstack].shift = 0; /* right frame shift count */
 
@@ -303,7 +303,7 @@ int main(int argc, char *argv[]) {
       if ((ptr = strstr(srgv[i], "slices="))) {
         if ((ptr = strstr(srgv[i], "to"))) {
           stackspc[nstack].hi_slice = atoi(ptr + 2);
-          *ptr = '\0';
+          *ptr                      = '\0';
         }
         stackspc[nstack].lo_slice = atof(srgv[i] + 7);
         if (!stackspc[nstack].hi_slice)
@@ -353,9 +353,9 @@ int main(int argc, char *argv[]) {
     orio = ifh.orientation;
     break;
   case 1:
-    nxo = 176;
-    nyo = 208;
-    nzo = 176;
+    nxo        = 176;
+    nyo        = 208;
+    nzo        = 176;
     mmppixo[0] = 1.0;
     mmppixo[1] = -1.0;
     mmppixo[2] = -1.0;
@@ -364,9 +364,9 @@ int main(int argc, char *argv[]) {
     centero[2] = -101.;
     break;
   case 2:
-    nxo = 128;
-    nyo = 128;
-    nzo = 75;
+    nxo        = 128;
+    nyo        = 128;
+    nzo        = 75;
     mmppixo[0] = 2.0;
     mmppixo[1] = -2.0;
     mmppixo[2] = -2.0;
@@ -375,9 +375,9 @@ int main(int argc, char *argv[]) {
     centero[2] = mmppixo[2] * 41;
     break;
   case 3:
-    nxo = 48;
-    nyo = 64;
-    nzo = 48;
+    nxo        = 48;
+    nyo        = 64;
+    nzo        = 48;
     mmppixo[0] = 3.0;
     mmppixo[1] = -3.0;
     mmppixo[2] = -3.0;
@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
     centero[2] = -84.0;                      /*  -28 * 3.0 */
     break;
   }
-  odim = nxo * nyo * nzo; /* output frame voxel count */
+  odim      = nxo * nyo * nzo; /* output frame voxel count */
   outdim[0] = nxo;
   outdim[1] = nyo;
   outdim[2] = nzo;
@@ -508,10 +508,10 @@ int main(int argc, char *argv[]) {
     if (stackspc[i].shift < 0) {
       fseek(imgfp, (long)-stackspc[i].shift * idim * sizeof(float), SEEK_SET);
       jstart = 0;
-      jend = imgdim[3] + stackspc[i].shift;
+      jend   = imgdim[3] + stackspc[i].shift;
     } else {
       jstart = stackspc[i].shift;
-      jend = imgdim[3];
+      jend   = imgdim[3];
     }
 
     printf("frame:");

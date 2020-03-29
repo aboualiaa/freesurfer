@@ -34,9 +34,9 @@
 #include <cstdlib> // calloc and free
 
 #include <cassert>
+#include <itkMath.h>
 #include <vnl/algo/vnl_brent.h>
 #include <vnl/vnl_math.h>
-#include <itkMath.h>
 
 #ifdef FS_LEGACY_DEBUG
 #include <vcl_iostream.h>
@@ -45,9 +45,9 @@
 
 class fs_powell_1dfun : public vnl_cost_function {
 public:
-  fs_powell *powell_;
+  fs_powell *        powell_;
   vnl_cost_function *f_;
-  unsigned int n_;
+  unsigned int       n_;
   vnl_vector<double> x0_;
   vnl_vector<double> dx_;
   vnl_vector<double> tmpx_;
@@ -103,7 +103,7 @@ vnl_nonlinear_minimizer::ReturnCodes fs_powell::minimize(vnl_vector<double> &p,
 // double p[], double **xi, int n
 {
   // verbose_ = true;
-  int n = p.size();
+  int             n = p.size();
   fs_powell_1dfun f1d(n, functor_, this);
 
   // This line below was replaced by the if block
@@ -114,7 +114,7 @@ vnl_nonlinear_minimizer::ReturnCodes fs_powell::minimize(vnl_vector<double> &p,
 
   vnl_vector<double> ptt(n);
   vnl_vector<double> xit(n);
-  double fret = functor_->f(p);
+  double             fret = functor_->f(p);
   report_eval(fret);
   vnl_vector<double> pt = p;
   printf("fs_powell::minimize\n");
@@ -124,9 +124,9 @@ vnl_nonlinear_minimizer::ReturnCodes fs_powell::minimize(vnl_vector<double> &p,
   printf("  linmin_xtol_   %lf\n", (double)linmin_xtol_);
 
   while (num_iterations_ < unsigned(maxfev)) {
-    double fp = fret;
-    int ibig = 0;
-    double del = 0.0;
+    double fp   = fret;
+    int    ibig = 0;
+    double del  = 0.0;
     printf("  powell nthiter %d: fret = %f\n", (int)num_iterations_, fret);
     if (powell_iteration_func) {
       float *float_parms = (float *)calloc(n + 1, sizeof(float));
@@ -150,9 +150,9 @@ vnl_nonlinear_minimizer::ReturnCodes fs_powell::minimize(vnl_vector<double> &p,
       // 1D minimization along xi
       f1d.init(p, xit);
       vnl_brent brent(&f1d);
-      double ax = 0.0;
-      double xx = initial_step_;
-      double bx = 0;
+      double    ax = 0.0;
+      double    xx = initial_step_;
+      double    bx = 0;
       if (verbose_)
         printf("  bracketing\n");
       brent.bracket_minimum(&ax, &xx, &bx);
@@ -165,7 +165,7 @@ vnl_nonlinear_minimizer::ReturnCodes fs_powell::minimize(vnl_vector<double> &p,
       // Now p is minimizer along xi
 
       if (fabs(fptt - fret) > del) {
-        del = fabs(fptt - fret);
+        del  = fabs(fptt - fret);
         ibig = i;
       }
       if (verbose_)
@@ -195,7 +195,7 @@ vnl_nonlinear_minimizer::ReturnCodes fs_powell::minimize(vnl_vector<double> &p,
     for (int j = 0; j < n; ++j) {
       ptt[j] = 2.0 * p[j] - pt[j];
       xit[j] = p[j] - pt[j];
-      pt[j] = p[j];
+      pt[j]  = p[j];
     }
 
     double fptt = functor_->f(ptt);
@@ -207,15 +207,15 @@ vnl_nonlinear_minimizer::ReturnCodes fs_powell::minimize(vnl_vector<double> &p,
       if (t < 0.0) {
         f1d.init(p, xit);
         vnl_brent brent(&f1d);
-        double ax = 0.0;
-        double xx = 1.0;
-        double bx = 0.0;
+        double    ax = 0.0;
+        double    xx = 1.0;
+        double    bx = 0.0;
         brent.bracket_minimum(&ax, &xx, &bx);
         fret = brent.minimize_given_bounds(bx, xx, ax, linmin_xtol_, &xx);
         f1d.uninit(xx, p);
 
         for (int j = 0; j < n; j++) {
-          (*xi)[j][ibig] = (*xi)[j][n - 1];
+          (*xi)[j][ibig]  = (*xi)[j][n - 1];
           (*xi)[j][n - 1] = xit[j];
         }
       }

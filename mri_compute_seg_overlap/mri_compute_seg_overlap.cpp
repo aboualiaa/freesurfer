@@ -24,23 +24,23 @@
  *
  */
 
-#include "version.h"
 #include "cma.h"
+#include "version.h"
 
 static int do_cortex = 1;
-static int do_wm = 1;
+static int do_wm     = 1;
 
 static void usage(int exit_val);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
 const char *Progname;
 
-static char *log_fname = NULL;  // dice coeff of individual structures
+static char *log_fname  = NULL; // dice coeff of individual structures
 static char *mlog_fname = NULL; // mean of individual dice
 static char *slog_fname = NULL; // std of individual dice
 static char *olog_fname = NULL; // overall dice for subcortical structures
 
-static const int num_labels = 24;
+static const int num_labels             = 24;
 static const int labels_of_interest[24] = {Left_Cerebral_White_Matter,
                                            Right_Cerebral_White_Matter,
                                            Left_Cerebral_Cortex,
@@ -95,24 +95,24 @@ static int isOverallDiceLabel(int volVal) {
    large enough to handle the maximum label value
    in FreeSurferColorLUT.txt
 */
-#define MAX_CLASSES 15000
+#define MAX_CLASSES   15000
 #define MAX_CLASS_NUM 14999
 
-int all_labels_flag = FALSE;
-int num_all_labels = 0;
-int all_labels_of_interest[MAX_CLASSES];
+int          all_labels_flag = FALSE;
+int          num_all_labels  = 0;
+int          all_labels_of_interest[MAX_CLASSES];
 COLOR_TABLE *ctab = NULL;
-char *table_fname;
-FILE *tablefp;
+char *       table_fname;
+FILE *       tablefp;
 
 int main(int argc, char *argv[]) {
-  MRI *mri_seg1, *mri_seg2;
-  int nargs, ac;
+  MRI *  mri_seg1, *mri_seg2;
+  int    nargs, ac;
   char **av;
-  int width, height, depth, x, y, z, f, nframes;
-  int v1, v2;
-  int i, skipped;
-  FILE *log_fp;
+  int    width, height, depth, x, y, z, f, nframes;
+  int    v1, v2;
+  int    i, skipped;
+  FILE * log_fp;
 
   int Volume_union[MAX_CLASSES];
   int Volume_from1[MAX_CLASSES];
@@ -129,9 +129,8 @@ int main(int argc, char *argv[]) {
   Progname = argv[0];
 
   nargs = handleVersionOption(argc, argv, "mri_compute_seg_overlap");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -164,23 +163,23 @@ int main(int argc, char *argv[]) {
               "%s: two input label volumes have different sizes \n", Progname);
 
   for (i = 0; i < MAX_CLASSES; i++) {
-    Volume_union[i] = 0;
+    Volume_union[i]   = 0;
     Volume_overlap[i] = 0;
-    Volume_from1[i] = 0;
-    Volume_from2[i] = 0;
+    Volume_from1[i]   = 0;
+    Volume_from2[i]   = 0;
   }
 
-  width = mri_seg1->width;
-  height = mri_seg1->height;
-  depth = mri_seg1->depth;
+  width   = mri_seg1->width;
+  height  = mri_seg1->height;
+  depth   = mri_seg1->depth;
   nframes = mri_seg1->nframes;
   if (nframes == 0) {
     nframes = 1;
   }
 
   subcorvolume_overlap = 0;
-  subcorvolume1 = 0;
-  subcorvolume2 = 0;
+  subcorvolume1        = 0;
+  subcorvolume2        = 0;
 
   for (f = 0; f < nframes; f++) {
     for (z = 0; z < depth; z++) {
@@ -239,7 +238,7 @@ int main(int argc, char *argv[]) {
 
   printf("Jaccard Coefficients:\n");
   mean1 = 0;
-  std1 = 0;
+  std1  = 0;
   if (all_labels_flag) {
     num_all_labels = 0;
     for (i = 0; i < MAX_CLASSES; i++) {
@@ -288,7 +287,7 @@ int main(int argc, char *argv[]) {
   printf("Dice Coefficients:\n");
   // printf("ratio of overlap to volume of input1:\n");
   mean2 = 0;
-  std2 = 0;
+  std2  = 0;
   if (all_labels_flag) {
     num_all_labels = 0;
     for (i = 0; i < MAX_CLASSES; i++) {
@@ -322,7 +321,7 @@ int main(int argc, char *argv[]) {
         skipped++;
         continue;
       }
-      int j = labels_of_interest[i];
+      int    j = labels_of_interest[i];
       double voldiff;
       voldiff = 100 * (Volume_from1[j] - Volume_from2[j]) /
                 (0.5 * ((Volume_from1[j] + Volume_from2[j])));
@@ -420,7 +419,7 @@ static void usage(int exit_val) {
 } /*  end usage()  */
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -432,11 +431,11 @@ static int get_option(int argc, char *argv[]) {
             "Computing overlap measures for all commonly existing labels. \n");
   } else if (!stricmp(option, "mlog")) {
     mlog_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "logging mean Dice to %s\n", mlog_fname);
   } else if (!stricmp(option, "log") || !stricmp(option, "L")) {
     log_fname = argv[2];
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "logging individual Dice to %s\n", log_fname);
   } else if (!stricmp(option, "default-ctab")) {
     char tmpstr[2000];
@@ -446,17 +445,17 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "table")) {
     char tmpstr[2000];
     table_fname = argv[2];
-    nargs = 1;
+    nargs       = 1;
     sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", getenv("FREESURFER_HOME"));
     ctab = CTABreadASCII(tmpstr);
     printf("Using ctab %s\n", tmpstr);
   } else if (!stricmp(option, "slog")) {
     slog_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "logging std Dice to %s\n", slog_fname);
   } else if (!stricmp(option, "olog")) {
     olog_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "logging overall Dice to %s\n", olog_fname);
   } else if (!stricmp(option, "wm")) {
     do_wm = atoi(argv[2]);
@@ -464,7 +463,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "%sincluding cerebral white matter\n", do_wm ? "" : "NOT ");
   } else if (!stricmp(option, "cortex")) {
     do_cortex = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "%sincluding cerebral cortex\n", do_cortex ? "" : "NOT ");
   } else {
     fprintf(stderr, "unknown option %s\n", argv[1]);

@@ -37,43 +37,44 @@
   ENDUSAGE
 */
 
-#include "version.h"
 #include "cmdargs.h"
 #include "diag.h"
-#include "mri2.h"
 #include "fsenv.h"
+#include "mri2.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 int PrintSegIds(int nsegs, int *segidlist, int *outsegidlist);
 int DefaultSegIds(int *segidlist, int *outsegidlist);
 
 static char vcid[] =
     "$Id: mri_relabel_nonwm_hypos.c,v 1.2 2014/04/17 18:03:22 greve Exp $";
-const char *Progname = NULL;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 char *InputSegFile = NULL, *OutputSegFile = NULL;
-int nsegs;
-int segidlist[1000], outsegidlist[1000];
+int   nsegs;
+int   segidlist[1000], outsegidlist[1000];
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, err;
+  int  nargs, err;
   MRI *seg, *newseg;
 
   nargs = handleVersionOption(argc, argv, "mri_relabel_nonwm_hypos");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -111,7 +112,7 @@ int main(int argc, char *argv[]) {
 /* ---------------------------------------------------------------*/
 /* ---------------------------------------------------------------*/
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -144,12 +145,12 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       InputSegFile = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       OutputSegFile = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--seg")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
@@ -258,48 +259,48 @@ static void dump_options(FILE *fp) {
 /*-------------------------------------------------------*/
 int DefaultSegIds(int *segidlist, int *outsegidlist) {
   int n;
-  n = 0;
-  segidlist[n] = 11;
+  n               = 0;
+  segidlist[n]    = 11;
   outsegidlist[n] = 270;
   n++;
-  segidlist[n] = 12;
+  segidlist[n]    = 12;
   outsegidlist[n] = 271;
   n++;
-  segidlist[n] = 13;
+  segidlist[n]    = 13;
   outsegidlist[n] = 272;
   n++;
-  segidlist[n] = 17;
+  segidlist[n]    = 17;
   outsegidlist[n] = 273;
   n++;
-  segidlist[n] = 18;
+  segidlist[n]    = 18;
   outsegidlist[n] = 274;
   n++;
-  segidlist[n] = 26;
+  segidlist[n]    = 26;
   outsegidlist[n] = 275;
   n++;
-  segidlist[n] = 10;
+  segidlist[n]    = 10;
   outsegidlist[n] = 276;
   n++;
 
-  segidlist[n] = 50;
+  segidlist[n]    = 50;
   outsegidlist[n] = 280;
   n++;
-  segidlist[n] = 51;
+  segidlist[n]    = 51;
   outsegidlist[n] = 281;
   n++;
-  segidlist[n] = 52;
+  segidlist[n]    = 52;
   outsegidlist[n] = 282;
   n++;
-  segidlist[n] = 53;
+  segidlist[n]    = 53;
   outsegidlist[n] = 283;
   n++;
-  segidlist[n] = 54;
+  segidlist[n]    = 54;
   outsegidlist[n] = 284;
   n++;
-  segidlist[n] = 58;
+  segidlist[n]    = 58;
   outsegidlist[n] = 285;
   n++;
-  segidlist[n] = 49;
+  segidlist[n]    = 49;
   outsegidlist[n] = 286;
   n++;
 
@@ -308,10 +309,10 @@ int DefaultSegIds(int *segidlist, int *outsegidlist) {
 
 /*-------------------------------------------------------*/
 int PrintSegIds(int nsegs, int *segidlist, int *outsegidlist) {
-  FSENV *fsenv;
+  FSENV *      fsenv;
   COLOR_TABLE *ct;
-  char tmpstr[50000];
-  int n, segid;
+  char         tmpstr[50000];
+  int          n, segid;
 
   fsenv = FSENVgetenv();
   sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);

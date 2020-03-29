@@ -78,7 +78,7 @@ void vtkSimpleLabelEdgeFilterExecute(vtkImageData *input, vtkImageData *output,
 
 void vtkSimpleLabelEdgeFilter::SimpleExecute(vtkImageData *input,
                                              vtkImageData *output) {
-  void *inPtr = input->GetScalarPointer();
+  void *inPtr  = input->GetScalarPointer();
   void *outPtr = output->GetScalarPointer();
 
   switch (output->GetScalarType()) {

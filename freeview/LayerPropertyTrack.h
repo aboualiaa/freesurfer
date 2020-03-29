@@ -72,12 +72,12 @@ public slots:
   void SetOpacity(double val);
 
 private:
-  int m_nColorCode;
-  int m_nDirectionScheme;
-  int m_nDirectionMapping;
-  int m_nRenderRep;
+  int    m_nColorCode;
+  int    m_nDirectionScheme;
+  int    m_nDirectionMapping;
+  int    m_nRenderRep;
   double m_dTubeRadius;
-  int m_nNumberOfSides;
+  int    m_nNumberOfSides;
   double m_dOpacity;
   QColor m_color;
 };

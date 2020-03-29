@@ -28,33 +28,21 @@
  */
 
 #include "SurfaceOverlayProperty.h"
-#include "vtkLookupTable.h"
-#include "vtkRGBAColorTransferFunction.h"
-#include "vtkMath.h"
 #include "FSSurface.h"
-#include "SurfaceOverlay.h"
 #include "SurfaceLabel.h"
+#include "SurfaceOverlay.h"
+#include "vtkLookupTable.h"
+#include "vtkMath.h"
+#include "vtkRGBAColorTransferFunction.h"
 #include <QDebug>
 
-SurfaceOverlayProperty::SurfaceOverlayProperty ( SurfaceOverlay* overlay) :
-  QObject( ),
-  m_dOpacity( 1 ),
-  m_bColorInverse( false ),
-  m_bColorTruncate( false ),
-  m_bClearLower(true),
-  m_bClearHigher(false),
-  m_bSmooth(false),
-  m_nSmoothSteps(1),
-  m_overlay( overlay ),
-  m_bUsePercentile(false),
-  m_dOffset(0),
-  m_mask(NULL),
-  m_maskData(NULL),
-  m_bInverseMask(false),
-  m_bIgnoreZeros(false),
-  m_nColorScale(CS_Heat),
-  m_nColorMethod(CM_LinearOpaque)
-{
+SurfaceOverlayProperty::SurfaceOverlayProperty(SurfaceOverlay *overlay)
+    : QObject(), m_dOpacity(1), m_bColorInverse(false), m_bColorTruncate(false),
+      m_bClearLower(true), m_bClearHigher(false), m_bSmooth(false),
+      m_nSmoothSteps(1), m_overlay(overlay), m_bUsePercentile(false),
+      m_dOffset(0), m_mask(NULL), m_maskData(NULL), m_bInverseMask(false),
+      m_bIgnoreZeros(false), m_nColorScale(CS_Heat),
+      m_nColorMethod(CM_LinearOpaque) {
   m_lut = vtkRGBAColorTransferFunction::New();
 }
 
@@ -66,18 +54,18 @@ SurfaceOverlayProperty::~SurfaceOverlayProperty() {
 }
 
 void SurfaceOverlayProperty::Copy(SurfaceOverlayProperty *p) {
-  m_dOpacity = p->m_dOpacity;
-  m_bColorInverse = p->m_bColorInverse;
+  m_dOpacity       = p->m_dOpacity;
+  m_bColorInverse  = p->m_bColorInverse;
   m_bColorTruncate = p->m_bColorTruncate;
-  m_bClearLower = p->m_bClearLower;
-  m_bClearHigher = p->m_bClearHigher;
-  m_bSmooth = p->m_bSmooth;
-  m_nSmoothSteps = p->m_nSmoothSteps;
+  m_bClearLower    = p->m_bClearLower;
+  m_bClearHigher   = p->m_bClearHigher;
+  m_bSmooth        = p->m_bSmooth;
+  m_nSmoothSteps   = p->m_nSmoothSteps;
   m_bUsePercentile = p->m_bUsePercentile;
-  m_bIgnoreZeros = p->m_bIgnoreZeros;
-  m_dOffset = p->m_dOffset;
-  m_nColorScale = p->m_nColorScale;
-  m_nColorMethod = p->m_nColorMethod;
+  m_bIgnoreZeros   = p->m_bIgnoreZeros;
+  m_dOffset        = p->m_dOffset;
+  m_nColorScale    = p->m_nColorScale;
+  m_nColorMethod   = p->m_nColorMethod;
   if (m_bUsePercentile) {
     m_dMinPoint = m_overlay->PercentileToPosition(
         p->m_overlay->PositionToPercentile(p->m_dMinPoint));
@@ -91,8 +79,8 @@ void SurfaceOverlayProperty::Copy(SurfaceOverlayProperty *p) {
     m_dMaxPoint = p->m_dMaxPoint;
   }
   m_customScale = p->m_customScale;
-  m_dMinStop = p->m_dMinStop;
-  m_dMaxStop = p->m_dMaxStop;
+  m_dMinStop    = p->m_dMinStop;
+  m_dMaxStop    = p->m_dMaxStop;
   for (int i = 0; i < 3; i++) {
     m_colorMin[i] = p->m_colorMin[i];
     m_colorMid[i] = p->m_colorMid[i];
@@ -100,7 +88,7 @@ void SurfaceOverlayProperty::Copy(SurfaceOverlayProperty *p) {
   }
   SetColorScale(m_nColorScale);
   m_bInverseMask = p->m_bInverseMask;
-  m_mask = p->m_mask;
+  m_mask         = p->m_mask;
   if (p->m_maskData) {
     if (!m_maskData)
       m_maskData = new unsigned char[m_overlay->GetDataSize()];
@@ -108,22 +96,20 @@ void SurfaceOverlayProperty::Copy(SurfaceOverlayProperty *p) {
   }
 }
 
-void SurfaceOverlayProperty::Reset()
-{
-  if ( m_overlay )
-  {
+void SurfaceOverlayProperty::Reset() {
+  if (m_overlay) {
     m_dMinPoint = m_overlay->PercentileToPosition(50);
     m_dMaxPoint = m_overlay->PercentileToPosition(99);
     if (m_dMinPoint < 0 && m_dMaxPoint > fabs(m_dMinPoint))
-        m_dMinPoint = fabs(m_dMinPoint);
-    m_dMidPoint = ( m_dMinPoint + m_dMaxPoint ) / 2;
-    m_dOffset = 0;
+      m_dMinPoint = fabs(m_dMinPoint);
+    m_dMidPoint = (m_dMinPoint + m_dMaxPoint) / 2;
+    m_dOffset   = 0;
     m_customScale.clear();
     m_customScale << QGradientStop(m_dMinPoint, Qt::red);
     m_dMinStop = m_dMinPoint;
     m_dMaxStop = m_dMaxPoint;
-    SetColorScale( m_nColorScale );
-    SetColorMethod( m_nColorMethod );
+    SetColorScale(m_nColorScale);
+    SetColorMethod(m_nColorMethod);
   }
 }
 
@@ -269,8 +255,8 @@ void SurfaceOverlayProperty::SetColorScale(int nScale) {
 
 void SurfaceOverlayProperty::SetCustomColorScale(QGradientStops stops) {
   m_customScale = stops;
-  m_dMinStop = stops[0].first;
-  m_dMaxStop = m_dMinStop;
+  m_dMinStop    = stops[0].first;
+  m_dMaxStop    = m_dMinStop;
   for (int i = 0; i < stops.size(); i++) {
     if (m_dMinStop > stops[i].first) {
       m_dMinStop = stops[i].first;
@@ -336,19 +322,19 @@ void SurfaceOverlayProperty::SetColorTruncate(bool bTruncate) {
   SetColorScale(m_nColorScale);
 }
 
-void SurfaceOverlayProperty::MapOverlayColor( float* data, unsigned char* colordata, int nPoints )
-{
-  if ( m_nColorScale <= CS_BlueRed )
-  {
+void SurfaceOverlayProperty::MapOverlayColor(float *        data,
+                                             unsigned char *colordata,
+                                             int            nPoints) {
+  if (m_nColorScale <= CS_BlueRed) {
     MapOverlayColorSymmetric(data, colordata, nPoints);
   } else {
     MapOverlayColorFullScale(data, colordata, nPoints);
   }
 }
 
-void SurfaceOverlayProperty::MapOverlayColorSymmetric(float *data,
+void SurfaceOverlayProperty::MapOverlayColorSymmetric(float *        data,
                                                       unsigned char *colordata,
-                                                      int nPoints) {
+                                                      int            nPoints) {
   double c[3];
   double dMidPoint = m_dMidPoint;
   if (m_nColorMethod != CM_Piecewise)
@@ -546,9 +532,9 @@ void SurfaceOverlayProperty::MapOverlayColorSymmetric(float *data,
   }
 }
 
-void SurfaceOverlayProperty::MapOverlayColorFullScale(float *data,
+void SurfaceOverlayProperty::MapOverlayColorFullScale(float *        data,
                                                       unsigned char *colordata,
-                                                      int nPoints) {
+                                                      int            nPoints) {
   if (!m_overlay) {
     LABEL *label = NULL;
     if (m_mask)
@@ -556,7 +542,7 @@ void SurfaceOverlayProperty::MapOverlayColorFullScale(float *data,
     return;
   }
   double c[4];
-  double dThLow = m_dMinPoint + m_dOffset;
+  double dThLow  = m_dMinPoint + m_dOffset;
   double dThHigh = m_overlay->m_dMaxValue + 1e10;
   if (m_nColorScale == CS_Custom) {
     if (m_bClearLower) {

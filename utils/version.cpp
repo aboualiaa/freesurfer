@@ -1,54 +1,53 @@
-#include <pwd.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
+#include <pwd.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
-#include <ctime>
 #include <unistd.h>
 #include <vector>
 
-#include "version.h"
-#include "version_info.h"
 #include "const.h"
 #include "error.h"
 #include "utils.h"
-
+#include "version.h"
+#include "version_info.h"
 
 // set the platform
 #if defined(Linux) || defined(linux) || defined(__linux)
-  #define PLATFORM "Linux"
+#define PLATFORM "Linux"
 #endif
 #if defined(Darwin) || defined(__MACOSX__) || defined(__APPLE__)
-  #define PLATFORM "Darwin"
+#define PLATFORM "Darwin"
 #endif
 #if defined(IRIX) || defined(sgi) || defined(mips) || defined(_SGI_SOURCE)
-  #define PLATFORM "IRIX"
+#define PLATFORM "IRIX"
 #endif
 #if defined(sun) || defined(__sun)
-  #if defined(__SVR4) || defined(__svr4__)
-    #define PLATFORM "Solaris"
-  #else
-    #define PLATFORM "SunOS"
-  #endif
+#if defined(__SVR4) || defined(__svr4__)
+#define PLATFORM "Solaris"
+#else
+#define PLATFORM "SunOS"
+#endif
 #endif
 #if defined(Windows_NT)
-  #define PLATFORM "Windows"
+#define PLATFORM "Windows"
 #endif
 #ifndef PLATFORM
-  #error "PLATFORM not defined!"
+#error "PLATFORM not defined!"
 #endif
 
 // set the compiler name
 #if defined(__INTEL_COMPILER)
-  #undef __GNUC__
-  #define COMPILER_NAME "Intel"
+#undef __GNUC__
+#define COMPILER_NAME "Intel"
 #elif defined(__clang__)
-  #define COMPILER_NAME "Clang"
+#define COMPILER_NAME "Clang"
 #elif defined(__GNUC__)
-  #define COMPILER_NAME "GCC"
+#define COMPILER_NAME "GCC"
 #else
-  #define COMPILER_NAME "Unknown"
+#define COMPILER_NAME "Unknown"
 #endif
 
 static std::string ver_string(int a, int b, int c) {
@@ -59,17 +58,18 @@ static std::string ver_string(int a, int b, int c) {
 
 // set the compiler version
 #if defined(__clang__)
-  #define COMPILER_VERSION ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__)
+#define COMPILER_VERSION                                                       \
+  ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__)
 #elif defined(__GNUC__)
-  #if defined(__GNU_PATCHLEVEL__)
-    #define COMPILER_VERSION ver_string(__GNUC__, __GNUC_MINOR__)
-  #else
-    #define COMPILER_VERSION ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
-  #endif
+#if defined(__GNU_PATCHLEVEL__)
+#define COMPILER_VERSION ver_string(__GNUC__, __GNUC_MINOR__)
 #else
-  #define COMPILER_VERSION 0
+#define COMPILER_VERSION                                                       \
+  ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
 #endif
-
+#else
+#define COMPILER_VERSION 0
+#endif
 
 int handle_version_option(bool all_info, std::vector<char *> args,
                           const std::string id_string,
@@ -80,16 +80,16 @@ int handle_version_option(bool all_info, std::vector<char *> args,
     return 0;
   }
 
-  time_t seconds;
-  struct tm broken_time = {0};
-  struct utsname kernel_info = {0};
-  std::string arguments = argv2cmdline(args, false);
+  time_t            seconds;
+  struct tm         broken_time = {0};
+  struct utsname    kernel_info = {0};
+  std::string       arguments   = argv2cmdline(args, false);
   std::stringstream curr_time_stamp;
-  std::string user = "UNKNOWN";
-  std::string hostname = "UNKNOWN";
-  std::string arch = "UNKNOWN";
-  std::string platform_version = "UNKNOWN";
-  struct passwd *pw;
+  std::string       user             = "UNKNOWN";
+  std::string       hostname         = "UNKNOWN";
+  std::string       arch             = "UNKNOWN";
+  std::string       platform_version = "UNKNOWN";
+  struct passwd *   pw;
 
   // TODO: build_timestamp really ought to be passed-in as a parameter
   // from the calling binary, to get a more accurate build time, but for
@@ -117,9 +117,9 @@ int handle_version_option(bool all_info, std::vector<char *> args,
 
   /* Call uname to get the hostname. */
   if (uname(&kernel_info) == 0) {
-    hostname = kernel_info.nodename;
+    hostname         = kernel_info.nodename;
     platform_version = kernel_info.release;
-    arch = kernel_info.machine;
+    arch             = kernel_info.machine;
   }
 
   /* Build the info string. */
@@ -144,7 +144,7 @@ int handle_version_option(bool all_info, std::vector<char *> args,
   ------------------------------------------------------------------------*/
 // TODO: Deprecate
 char *argv2cmdline(int argc, char *argv[]) {
-  int len, n;
+  int   len, n;
   char *cmdline;
 
   len = 0;
@@ -181,7 +181,7 @@ std::string argv2cmdline(std::vector<char *> args, bool progname) {
   char, so caller must free.
   *----------------------------------------------------------*/
 char *VERuser() {
-  char *user;
+  char *         user;
   struct passwd *pw;
 
   /* As suggested by the getlogin() manpage, use getpwuid(geteuid())
@@ -204,9 +204,9 @@ char *VERuser() {
   *----------------------------------------------------------*/
 char *VERfileTimeStamp(char *fname) {
   struct stat buf;
-  struct tm *lt = nullptr;
-  int err;
-  char *timestamp, tmpstr[1000];
+  struct tm * lt = nullptr;
+  int         err;
+  char *      timestamp, tmpstr[1000];
 
   err = stat(fname, &buf);
   if (err) {
@@ -227,8 +227,8 @@ char *VERfileTimeStamp(char *fname) {
   is called.
   *----------------------------------------------------------*/
 char *VERcurTimeStamp() {
-  char tmpstr[2000], *current_time_stamp;
-  time_t seconds;
+  char      tmpstr[2000], *current_time_stamp;
+  time_t    seconds;
   struct tm broken_time;
   seconds = time(nullptr);
   gmtime_r(&seconds, &broken_time);
@@ -242,25 +242,15 @@ char *VERcurTimeStamp() {
   return (current_time_stamp);
 }
 
-
-
 /*
   Returns the freesurfer version string.
 */
-std::string getVersion()
-{
-  return FS_VERSION;
-}
-
+std::string getVersion() { return FS_VERSION; }
 
 /*
   Returns the freesurfer build stamp ID.
 */
-std::string getBuildStamp()
-{
-  return FS_BUILD_STAMP;
-}
-
+std::string getBuildStamp() { return FS_BUILD_STAMP; }
 
 /*
   This function looks for the --version, or -version tag in the
@@ -289,21 +279,19 @@ std::string getBuildStamp()
   if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
 */
-int handleVersionOption(int argc, char **argv, const char *progname)
-{
+int handleVersionOption(int argc, char **argv, const char *progname) {
   char *myarg;
-  int num_processed_args = 0;
+  int   num_processed_args = 0;
 
   for (int narg = 1; narg < argc; narg++) {
     char *option = argv[narg];
 
     if (!strncmp(option, "--version", 9) || !strncmp(option, "-version", 8)) {
       std::cout << progname << " freesurfer " << FS_VERSION << std::endl;
-    }
-    else if (!strncmp(option, "--all-info", 11) || !strncmp(option, "-all-info", 10)) {
+    } else if (!strncmp(option, "--all-info", 11) ||
+               !strncmp(option, "-all-info", 10)) {
       std::cout << getAllInfo(argc, argv, progname) << std::endl;
-    }
-    else {
+    } else {
       continue;
     }
 
@@ -320,22 +308,16 @@ int handleVersionOption(int argc, char **argv, const char *progname)
   return num_processed_args;
 }
 
-
-std::string getAllInfo(int argc, char **argv, const std::string& progname)
-{
+std::string getAllInfo(int argc, char **argv, const std::string &progname) {
   // get current time
-  char current_time_stamp[1024];
+  char      current_time_stamp[1024];
   struct tm broken_time;
-  time_t seconds = time(NULL);
+  time_t    seconds = time(NULL);
   gmtime_r(&seconds, &broken_time);
-  sprintf(current_time_stamp,
-    "20%02d/%02d/%02d-%02d:%02d:%02d-GMT",
-    broken_time.tm_year % 100,
-    broken_time.tm_mon + 1,
-    broken_time.tm_mday,
-    broken_time.tm_hour,
-    broken_time.tm_min,
-    broken_time.tm_sec);
+  sprintf(current_time_stamp, "20%02d/%02d/%02d-%02d:%02d:%02d-GMT",
+          broken_time.tm_year % 100, broken_time.tm_mon + 1,
+          broken_time.tm_mday, broken_time.tm_hour, broken_time.tm_min,
+          broken_time.tm_sec);
 
   // TODO this timestamp really ought to be passed-in as a parameter
   // from the calling binary, to get a more accurate build time, but for
@@ -343,7 +325,7 @@ std::string getAllInfo(int argc, char **argv, const std::string& progname)
   char build_time[] = __DATE__ " " __TIME__;
 
   // get username
-  char username[1024];
+  char           username[1024];
   struct passwd *pw = getpwuid(geteuid());
   if ((pw != NULL) && (pw->pw_name != NULL)) {
     strcpy(username, pw->pw_name);
@@ -352,8 +334,8 @@ std::string getAllInfo(int argc, char **argv, const std::string& progname)
   }
 
   // get current machine name and platform version
-  char machine[1024];
-  char platform_version[1024];
+  char           machine[1024];
+  char           platform_version[1024];
   struct utsname kernel_info;
   if (uname(&kernel_info) != 0) {
     strcpy(machine, "UNKNOWN");
@@ -366,17 +348,16 @@ std::string getAllInfo(int argc, char **argv, const std::string& progname)
   // get args as string
   std::ostringstream argvss;
   argvss << argv[0];
-  for (int i = 1; i < argc ; i++) argvss << " " << argv[i];
+  for (int i = 1; i < argc; i++)
+    argvss << " " << argv[i];
 
   std::ostringstream infoss;
   infoss << "ProgramName: " << progname
          << "  ProgramArguments: " << argvss.str()
          << "  ProgramVersion: " << getVersion()
          << "  TimeStamp: " << current_time_stamp
-         << "  BuildTime: " << build_time
-         << "  BuildStamp: " << getBuildStamp()
-         << "  User: " << username
-         << "  Machine: " << machine
+         << "  BuildTime: " << build_time << "  BuildStamp: " << getBuildStamp()
+         << "  User: " << username << "  Machine: " << machine
          << "  Platform: " << PLATFORM
          << "  PlatformVersion: " << platform_version
          << "  CompilerName: " << COMPILER_NAME

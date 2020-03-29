@@ -1,8 +1,8 @@
 #ifndef __kvlAtlasMeshPositionCostAndGradientCalculator_h
 #define __kvlAtlasMeshPositionCostAndGradientCalculator_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkAffineTransform.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 #define KVL_ENABLE_TIME_PROBE 0
 
@@ -18,9 +18,9 @@ namespace kvl {
 class AtlasMeshPositionCostAndGradientCalculator : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshPositionCostAndGradientCalculator;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshPositionCostAndGradientCalculator;
+  using Superclass   = AtlasMeshRasterizor;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -83,9 +83,9 @@ protected:
   virtual ~AtlasMeshPositionCostAndGradientCalculator();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
   virtual void AddDataContributionOfTetrahedron(
       const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
@@ -126,11 +126,11 @@ protected:
 
   //
   AtlasPositionGradientContainerType::Pointer m_PositionGradient;
-  bool m_IgnoreDeformationPrior;
-  bool m_OnlyDeformationPrior;
-  double m_MinLogLikelihoodTimesPrior;
-  bool m_Abort;
-  BoundaryConditionType m_BoundaryCondition;
+  bool                                        m_IgnoreDeformationPrior;
+  bool                                        m_OnlyDeformationPrior;
+  double                                      m_MinLogLikelihoodTimesPrior;
+  bool                                        m_Abort;
+  BoundaryConditionType                       m_BoundaryCondition;
 
   //
   vnl_matrix<double> m_AffineProjectionMatrix;
@@ -146,7 +146,7 @@ private:
 
   //
   std::vector<AtlasPositionGradientContainerType::Pointer>
-      m_ThreadSpecificPositionGradients;
+                      m_ThreadSpecificPositionGradients;
   std::vector<double> m_ThreadSpecificMinLogLikelihoodTimesPriors;
 
 #if KVL_ENABLE_TIME_PROBE

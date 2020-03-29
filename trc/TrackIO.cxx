@@ -89,7 +89,7 @@ bool CTrackIO::Close() {
   if (m_pFile != nullptr) {
     if (fclose(m_pFile) == EOF) {
       m_nErrorCode = TE_CAN_NOT_CLOSE;
-      ret = false;
+      ret          = false;
     }
     m_pFile = nullptr;
   }
@@ -104,7 +104,7 @@ bool CTrackIO::Close() {
 ///// CTrackReader reference //////////////////
 
 CTrackReader::CTrackReader() {
-  m_bByteSwap = false;
+  m_bByteSwap       = false;
   m_bAllowOldFormat = true;
 }
 
@@ -112,7 +112,7 @@ bool CTrackReader::Open(const char *filename, TRACK_HEADER *header) {
   Close();
   m_nErrorCode = TE_NO_ERROR;
   m_bOldFormat = false;
-  m_pFile = fopen(filename, "rb");
+  m_pFile      = fopen(filename, "rb");
   if (m_pFile == nullptr) {
     m_nErrorCode = TE_CAN_NOT_OPEN;
     return false;
@@ -124,14 +124,14 @@ bool CTrackReader::Open(const char *filename, TRACK_HEADER *header) {
 
   if (fread(&m_header, sizeof(TRACK_HEADER), 1, m_pFile) != 1) {
     m_nErrorCode = TE_NOT_TRACK_FILE;
-}
+  }
 
   if (m_header.voxel_order[0] == 0) {
     strcpy(m_header.voxel_order, DEFAULT_VOXEL_ORDER);
-}
+  }
   if (m_header.voxel_order_original[0] == 0) {
     strcpy(m_header.voxel_order_original, m_header.voxel_order);
-}
+  }
 
   // could be old preliminary format from old MGH data.
   // in most cases ignored
@@ -152,18 +152,18 @@ bool CTrackReader::Open(const char *filename, TRACK_HEADER *header) {
 
     if (bBigEndian) {
       SWAP_INT(dim, 3);
-}
+    }
 
     for (int i = 0; i < 3; i++) {
       m_header.dim[i] = dim[i];
-}
+    }
 
     if (bBigEndian) {
       SWAP_SHORT(m_header.dim, 3);
-}
+    }
 
     fread(m_header.voxel_size, sizeof(float) * 3, 1, m_pFile);
-    m_header.n_scalars = 0;
+    m_header.n_scalars    = 0;
     m_header.n_properties = 0;
 
     m_bByteSwap = bBigEndian;
@@ -174,7 +174,7 @@ bool CTrackReader::Open(const char *filename, TRACK_HEADER *header) {
       m_bByteSwap = bBigEndian;
     } else {
       m_bByteSwap = (m_header.hdr_size != sizeof(struct TRACK_HEADER));
-}
+    }
   }
   ///////////////////////////////////////////////////////////
 
@@ -202,7 +202,7 @@ bool CTrackReader::Open(const char *filename, TRACK_HEADER *header) {
 
   if (header != nullptr) {
     *header = m_header;
-}
+  }
 
   m_bOldFormat = bOldFormat;
 
@@ -217,7 +217,7 @@ bool CTrackReader::Open(const char *filename, TRACK_HEADER *header) {
 bool CTrackReader::Open(const char *filename, int *dim, float *voxel_size) {
   bool ret = Open(filename);
   for (int i = 0; i < 3; i++) {
-    dim[i] = m_header.dim[i];
+    dim[i]        = m_header.dim[i];
     voxel_size[i] = m_header.voxel_size[i];
   }
 
@@ -228,25 +228,25 @@ bool CTrackReader::Open(const char *filename, int *dim, float *voxel_size) {
 int CTrackReader::GetProgress() {
   if ((m_pFile != nullptr) && m_nSize > 0) {
     return static_cast<int>(ftell(m_pFile) * 100.0 / m_nSize);
-}
+  }
   return 0;
 }
 
 bool CTrackReader::GetNextPointCount(int *n) {
   if (m_pFile == nullptr) {
     m_nErrorCode = TE_NOT_INITIALIZED;
-    n = nullptr;
+    n            = nullptr;
     return false;
   }
   if (fread(n, sizeof(int), 1, m_pFile) != 1) {
     m_nErrorCode = TE_CAN_NOT_READ;
   } else {
     m_nErrorCode = TE_NO_ERROR;
-}
+  }
 
   if (m_bByteSwap) {
     SWAP_INT(*n);
-}
+  }
 
   return m_nErrorCode == TE_NO_ERROR;
 }
@@ -268,11 +268,11 @@ bool CTrackReader::GetNextRawData(int nCount, float *data) {
     m_nErrorCode = TE_CAN_NOT_READ;
   } else {
     m_nErrorCode = TE_NO_ERROR;
-}
+  }
 
   if ((m_nErrorCode == 0) && m_bByteSwap) {
     SWAP_FLOAT(data, nSize);
-}
+  }
 
   return m_nErrorCode == TE_NO_ERROR;
 }
@@ -287,7 +287,7 @@ bool CTrackReader::GetNextTrackData(int nCount, float *pt_data, float *scalars,
 
   if (m_header.n_scalars == 0 && m_header.n_properties == 0) {
     return GetNextRawData(nCount, pt_data);
-}
+  }
 
   // read point and scalar data
   for (int i = 0; i < nCount; i++) {
@@ -309,7 +309,7 @@ bool CTrackReader::GetNextTrackData(int nCount, float *pt_data, float *scalars,
     SWAP_FLOAT(pt_data, nCount * 3);
     if (scalars != nullptr) {
       SWAP_FLOAT(scalars, nCount * m_header.n_scalars);
-}
+    }
   }
 
   // read property data
@@ -322,7 +322,7 @@ bool CTrackReader::GetNextTrackData(int nCount, float *pt_data, float *scalars,
   if ((m_nErrorCode == 0) && m_bByteSwap) {
     if (properties != nullptr) {
       SWAP_FLOAT(properties, m_header.n_properties);
-}
+    }
   }
 
   return m_nErrorCode == TE_NO_ERROR;
@@ -331,7 +331,7 @@ bool CTrackReader::GetNextTrackData(int nCount, float *pt_data, float *scalars,
 // Static function. Get header info from a given track file directly
 bool CTrackReader::GetHeader(const char *filename, TRACK_HEADER *header) {
   CTrackReader reader;
-  bool ret = reader.Open(filename, header);
+  bool         ret = reader.Open(filename, header);
   reader.Close();
 
   return ret;
@@ -342,7 +342,7 @@ bool CTrackReader::GetHeader(const char *filename, TRACK_HEADER *header) {
 bool CTrackReader::GetNumberOfTracks(int *cnt) {
   if (m_pFile == nullptr) {
     m_nErrorCode = TE_NOT_INITIALIZED;
-    *cnt = 0;
+    *cnt         = 0;
     return false;
   }
   if (m_header.n_count == 0) {
@@ -388,7 +388,7 @@ bool CTrackWriter::Initialize(const char *filename, short int *dim,
   float org[3] = {0, 0, 0};
   if (origin != nullptr) {
     memcpy(org, origin, 3 * sizeof(float));
-}
+  }
 
   TRACK_HEADER header(dim, voxel_size, org, n_scalars);
 
@@ -400,7 +400,7 @@ bool CTrackWriter::Initialize(const char *filename, int *dim, float *voxel_size,
   short int ndim[3];
   for (int i = 0; i < 3; i++) {
     ndim[i] = dim[i];
-}
+  }
 
   return Initialize(filename, ndim, voxel_size, origin, n_scalars);
 }
@@ -415,16 +415,16 @@ bool CTrackWriter::Initialize(const char *filename, TRACK_HEADER header) {
 
   if (header.hdr_size != sizeof(TRACK_HEADER)) {
     header.ByteSwap();
-}
-  m_header = header;
-  m_header.version = HEADER_VERSION;
+  }
+  m_header          = header;
+  m_header.version  = HEADER_VERSION;
   m_header.hdr_size = sizeof(struct TRACK_HEADER);
 
   if (fwrite(&m_header, sizeof(struct TRACK_HEADER), 1, m_pFile) == 1) {
     m_nErrorCode = TE_NO_ERROR;
   } else {
     m_nErrorCode = TE_CAN_NOT_WRITE;
-}
+  }
 
   m_header.n_count = 0;
   return m_nErrorCode == TE_NO_ERROR;
@@ -440,17 +440,17 @@ bool CTrackWriter::WriteNextTrack(int ncount, float *data) {
 
   if (fwrite(&ncount, sizeof(int), 1, m_pFile) != 1) {
     m_nErrorCode = TE_CAN_NOT_WRITE;
-}
+  }
   long nSize = (ncount * (3 + m_header.n_scalars) + m_header.n_properties) *
                sizeof(float);
 
   if (fwrite(data, nSize, 1, m_pFile) != 1) {
     m_nErrorCode = TE_CAN_NOT_WRITE;
-}
+  }
 
   if (m_nErrorCode == 0) {
     m_header.n_count++;
-}
+  }
   return m_nErrorCode == TE_NO_ERROR;
 }
 
@@ -464,28 +464,28 @@ bool CTrackWriter::WriteNextTrack(int ncount, float *pts, float *scalars,
 
   if (fwrite(&ncount, sizeof(int), 1, m_pFile) != 1) {
     m_nErrorCode = TE_CAN_NOT_WRITE;
-}
+  }
 
   for (int i = 0; i < ncount; i++) {
     if (fwrite(pts + i * 3, sizeof(float) * 3, 1, m_pFile) != 1) {
       m_nErrorCode = TE_CAN_NOT_WRITE;
-}
+    }
     if ((m_header.n_scalars != 0) &&
         fwrite(scalars + i * m_header.n_scalars,
                sizeof(float) * m_header.n_scalars, 1, m_pFile) != 1) {
       m_nErrorCode = TE_CAN_NOT_WRITE;
-}
+    }
   }
 
   if ((m_header.n_properties != 0) &&
       fwrite(properties, sizeof(float) * m_header.n_properties, 1, m_pFile) !=
           1) {
     m_nErrorCode = TE_CAN_NOT_WRITE;
-}
+  }
 
   if (m_nErrorCode == 0) {
     m_header.n_count++;
-}
+  }
   return m_nErrorCode == TE_NO_ERROR;
 }
 
@@ -497,9 +497,9 @@ bool CTrackWriter::UpdateHeader(TRACK_HEADER header) {
 
   if (header.hdr_size != sizeof(TRACK_HEADER)) {
     header.ByteSwap();
-}
+  }
 
-  m_header = header;
+  m_header          = header;
   m_header.hdr_size = sizeof(struct TRACK_HEADER);
 
   long pos = ftell(m_pFile);
@@ -509,7 +509,7 @@ bool CTrackWriter::UpdateHeader(TRACK_HEADER header) {
     m_nErrorCode = TE_CAN_NOT_WRITE;
   } else {
     m_nErrorCode = TE_NO_ERROR;
-}
+  }
   fseek(m_pFile, pos, SEEK_SET);
 
   return m_nErrorCode == TE_NO_ERROR;
@@ -522,23 +522,23 @@ bool CTrackWriter::Close() {
 // Write the given header to a existing track file.
 bool CTrackWriter::UpdateHeader(const char *filename, TRACK_HEADER header) {
   TRACK_HEADER hdr;
-  FILE *fp = fopen(filename, "r+b");
+  FILE *       fp = fopen(filename, "r+b");
   if (fp == nullptr) {
     return false;
-}
+  }
 
   if (fread(&hdr, sizeof(TRACK_HEADER), 1, fp) != 1) {
     fclose(fp);
     return false;
   }
 
-  bool bswap = (hdr.hdr_size != sizeof(struct TRACK_HEADER));
-  hdr = header;
+  bool bswap   = (hdr.hdr_size != sizeof(struct TRACK_HEADER));
+  hdr          = header;
   hdr.hdr_size = sizeof(struct TRACK_HEADER);
 
   if (bswap) {
     hdr.ByteSwap();
-}
+  }
 
   fseek(fp, 0, SEEK_SET);
   if (fwrite(&hdr, sizeof(TRACK_HEADER), 1, fp) != 1) {

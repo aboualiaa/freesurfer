@@ -31,12 +31,12 @@ const char *Progname = "tridec";
 int main(int argc, char *argv[]) {
 
   FILE *fp1, *fp2, *fp3;
-  char fname[STRLEN], fpref[STRLEN], pname[STRLEN];
-  int vnum1, vnum2, cnum2;
-  char line[STRLEN];
+  char  fname[STRLEN], fpref[STRLEN], pname[STRLEN];
+  int   vnum1, vnum2, cnum2;
+  char  line[STRLEN];
   char *data_dir, *mri_dir;
-  int i;
-  int nargs;
+  int   i;
+  int   nargs;
 
   nargs = handleVersionOption(argc, argv, "tridec");
   if (nargs && argc - nargs == 1)

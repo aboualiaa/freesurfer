@@ -15,25 +15,25 @@
 
   ----------------------------------------------*/
 
-#define TestRepetitions 10
+#define TestRepetitions  10
 #define ProbeRepetitions 100
-#define PURPOSE purpose_Test
+#define PURPOSE          purpose_Test
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
+#include "error.h"
+#include "macros.h"
 #include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 
 #include "gw_utils.h"
@@ -41,10 +41,10 @@
 #include "mrishash.h"
 
 const char *Progname;
-char progver[] = "V1.11";
-char logfilepath[1000];
-char surffilepath[1000];
-char mrifilepath[1000];
+char        progver[] = "V1.11";
+char        logfilepath[1000];
+char        surffilepath[1000];
+char        mrifilepath[1000];
 
 //------------------------------
 void init_various(char *AProgname) {
@@ -54,7 +54,8 @@ void init_various(char *AProgname) {
   sprintf(surffilepath, "lh.%s_.tri", Progname);
   sprintf(mrifilepath, "%s_mri.mgz", Progname);
 
-  rslt = gw_log_init(const_cast<char*>(Progname), progver, logfilepath, 1); // empty file
+  rslt = gw_log_init(const_cast<char *>(Progname), progver, logfilepath,
+                     1); // empty file
   if (rslt) {
     printf("Couldn't open log file %s", logfilepath);
     exit(-1);
@@ -66,20 +67,20 @@ typedef enum { purpose_Test = 0, purpose_ListResults } purpose_t;
 //---------------------------------------
 int TestNearestVtxInConcentricIcos(int surfacenum, purpose_t purpose) {
   //---------------------------------------
-  int errnum, rslt = 0; // default OK
-  int pick, probeix;
-  char msg[1000];
-  double radius1, radius2, radiusdif, mhtres = 0.0, searchrange = 0.0;
-  double probedistance, probex, probey, probez;
-  double vecx, vecy, vecz, veclen;
-  MRI_SURFACE *mris = NULL;
+  int          errnum, rslt = 0; // default OK
+  int          pick, probeix;
+  char         msg[1000];
+  double       radius1, radius2, radiusdif, mhtres = 0.0, searchrange = 0.0;
+  double       probedistance, probex, probey, probez;
+  double       vecx, vecy, vecz, veclen;
+  MRI_SURFACE *mris           = NULL;
   struct MRIS_HASH_TABLE *mht = NULL;
   VERTEX probe_vtx, *brute_vtx, *fcv_vtx, *fcvit_vtx, *gnrc_vtx;
-  int brute_vno, fcvn_vno;
-  int LegacyAnswerExpected, GenericAnswerExpected;
-  int gnrc_vno;
+  int    brute_vno, fcvn_vno;
+  int    LegacyAnswerExpected, GenericAnswerExpected;
+  int    gnrc_vno;
   double gnrc_dist;
-  float brute_dist, fcvn_dist, fcv_dist, fcvit_dist;
+  float  brute_dist, fcvn_dist, fcv_dist, fcvit_dist;
 
   //------------------------------------------
   // pick some initial random dimensions
@@ -120,9 +121,9 @@ int TestNearestVtxInConcentricIcos(int surfacenum, purpose_t purpose) {
     break;
   }
 
-  radius1 = 10 + 64 * ((double)rand() / RAND_MAX);
+  radius1   = 10 + 64 * ((double)rand() / RAND_MAX);
   radiusdif = 2.3 * searchrange; // so sometimes nearest vertex is out-of-range
-  radius2 = radius1 + radiusdif;
+  radius2   = radius1 + radiusdif;
 
   if (mris)
     MRISfree(&mris);
@@ -134,9 +135,9 @@ int TestNearestVtxInConcentricIcos(int surfacenum, purpose_t purpose) {
     probedistance = radius1 + radiusdif * ((double)rand() / RAND_MAX);
 
     // unit random vector
-    vecx = ((double)rand() / RAND_MAX);
-    vecy = ((double)rand() / RAND_MAX);
-    vecz = ((double)rand() / RAND_MAX);
+    vecx   = ((double)rand() / RAND_MAX);
+    vecy   = ((double)rand() / RAND_MAX);
+    vecz   = ((double)rand() / RAND_MAX);
     veclen = sqrt(vecx * vecx + vecy * vecy + vecz * vecz);
     vecx /= veclen;
     vecy /= veclen;
@@ -152,18 +153,18 @@ int TestNearestVtxInConcentricIcos(int surfacenum, purpose_t purpose) {
     //------------------------------------
     // Init some variables
     //------------------------------------
-    brute_vtx = NULL;
-    fcv_vtx = NULL;
-    fcvit_vtx = NULL;
-    gnrc_vtx = NULL;
-    brute_vno = -2;
-    fcvn_vno = -2;
-    gnrc_vno = -2;
+    brute_vtx  = NULL;
+    fcv_vtx    = NULL;
+    fcvit_vtx  = NULL;
+    gnrc_vtx   = NULL;
+    brute_vno  = -2;
+    fcvn_vno   = -2;
+    gnrc_vno   = -2;
     brute_dist = 999.9;
-    fcvn_dist = 999.9;
-    fcv_dist = 999.9;
+    fcvn_dist  = 999.9;
+    fcv_dist   = 999.9;
     fcvit_dist = 999.9;
-    gnrc_dist = 999.9;
+    gnrc_dist  = 999.9;
 
     //------------------------------------
     // brute force
@@ -174,7 +175,7 @@ int TestNearestVtxInConcentricIcos(int surfacenum, purpose_t purpose) {
       brute_vtx = &(mris->vertices[brute_vno]);
 
     // Should distance be returned?
-    LegacyAnswerExpected = (brute_dist <= mhtres) ? 1 : 0;
+    LegacyAnswerExpected  = (brute_dist <= mhtres) ? 1 : 0;
     GenericAnswerExpected = (brute_dist <= searchrange) ? 1 : 0;
 
     //------------------------------------
@@ -335,10 +336,10 @@ char listhead2[] = "func correct vno dist";
 //-----------------------------------
 int main(int argc, char *argv[]) {
   //-----------------------------------
-  char msg[1000];
-  int n;
-  char *cp;
-  int rslt = 0; // default to OK
+  char      msg[1000];
+  int       n;
+  char *    cp;
+  int       rslt    = 0; // default to OK
   purpose_t purpose = PURPOSE;
 
   msg[0] = 0;

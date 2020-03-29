@@ -28,43 +28,43 @@
 #ifndef RANDOMFIELDS_H
 #define RANDOMFIELDS_H
 
-#include "numerics.h"
 #include "mri.h"
+#include "numerics.h"
 
-#define RF_UNIFORM 1
+#define RF_UNIFORM  1
 #define RF_GAUSSIAN 2
-#define RF_Z 3
-#define RF_T 4
-#define RF_F 5
-#define RF_CHI2 6
+#define RF_Z        3
+#define RF_T        4
+#define RF_F        5
+#define RF_CHI2     6
 
 typedef struct {
-  char *name;
-  int code;
-  int nparams;
-  double params[20];
-  double mean, stddev;
-  sc_rng *rng;
+  char *             name;
+  int                code;
+  int                nparams;
+  double             params[20];
+  double             mean, stddev;
+  sc_rng *           rng;
   const sc_rng_type *rngtype;
-  unsigned long int seed;
+  unsigned long int  seed;
 } RANDOM_FIELD_SPEC, RFS;
 
 const char *RFSrcVersion();
-RFS *RFspecInit(unsigned long int seed, sc_rng_type *rngtype);
-int RFspecFree(RFS **prfs);
-int RFname2Code(RFS *rfs);
+RFS *       RFspecInit(unsigned long int seed, sc_rng_type *rngtype);
+int         RFspecFree(RFS **prfs);
+int         RFname2Code(RFS *rfs);
 const char *RFcode2Name(RFS *rfs);
-int RFprint(FILE *fp, RFS *rfs);
-int RFspecSetSeed(RFS *rfs, unsigned long int seed);
-int RFnparams(RFS *rfs);
-int RFexpectedMeanStddev(RFS *rfs);
-int RFsynth(MRI *rf, RFS *rfs, MRI *binmask);
-MRI *RFstat2P(MRI *rf, RFS *rfs, MRI *binmask, int TwoSided, MRI *p);
-MRI *RFz2p(MRI *z, MRI *mask, int TwoSided, MRI *p);
-MRI *RFp2Stat(MRI *rf, RFS *rfs, MRI *binmask, MRI *p);
+int         RFprint(FILE *fp, RFS *rfs);
+int         RFspecSetSeed(RFS *rfs, unsigned long int seed);
+int         RFnparams(RFS *rfs);
+int         RFexpectedMeanStddev(RFS *rfs);
+int         RFsynth(MRI *rf, RFS *rfs, MRI *binmask);
+MRI *       RFstat2P(MRI *rf, RFS *rfs, MRI *binmask, int TwoSided, MRI *p);
+MRI *       RFz2p(MRI *z, MRI *mask, int TwoSided, MRI *p);
+MRI *       RFp2Stat(MRI *rf, RFS *rfs, MRI *binmask, MRI *p);
 MRI *RFstat2Stat(MRI *rfin, RFS *rfsin, RFS *rfsout, MRI *binmask, MRI *rfout);
-int RFglobalStats(MRI *rf, MRI *binmask, double *gmean, double *gstddev,
-                  double *max);
+int  RFglobalStats(MRI *rf, MRI *binmask, double *gmean, double *gstddev,
+                   double *max);
 MRI *RFrescale(MRI *rf, RFS *rfs, MRI *binmask, MRI *rfout);
 
 double RFdrawVal(RFS *rfs);

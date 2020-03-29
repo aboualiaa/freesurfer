@@ -46,8 +46,8 @@ void applyBlur(int *ind, int level, const T &source, T &dest, int blurRadius) {
 
 /// apply a box filter to the tensor
 template <typename T> void blurBox(const T &source, T &dest, int blurSize) {
-  int blurRadius = (blurSize - 1) / 2;
-  int *ind = new int[source.dimCount()];
+  int  blurRadius = (blurSize - 1) / 2;
+  int *ind        = new int[source.dimCount()];
   for (int i = 0; i < source.dimCount(); i++)
     ind[i] = 0;
   applyBlur(ind, 0, source, dest, blurRadius);

@@ -27,7 +27,7 @@
 #define TOPOLOGY_PATCHDISK_H
 
 #define MAX_EXTRA_VERTICES 100 // 66
-#define MAX_EXTRA_FACES 150    // 128
+#define MAX_EXTRA_FACES    150 // 128
 
 #include "surface.h"
 
@@ -37,13 +37,13 @@ class PatchDisk {
 
 public:
   Surface disk;
-  Loop ring, init_ring;
-  int *vtrans;
-  int *ftrans;
+  Loop    ring, init_ring;
+  int *   vtrans;
+  int *   ftrans;
 
   PatchDisk();
   PatchDisk(int which_patch);
-  PatchDisk(const string s) : disk(s), init_ring(10) {
+  PatchDisk(const std::string s) : disk(s), init_ring(10) {
     vtrans = new int[disk.nvertices];
     ftrans = new int[disk.nfaces];
     _Init();

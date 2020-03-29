@@ -25,18 +25,16 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "vtkObjectFactory.h"
-#include "vtkKWApplication.h"
 #include "IconLoader.h"
 #include "IconLoaderTest.h"
+#include "vtkKWApplication.h"
+#include "vtkObjectFactory.h"
 
 extern "C" {
-#include "unistd.h" // getcwd
 #include "tix.h"
+#include "unistd.h" // getcwd
 extern int Blt_Init(Tcl_Interp *iInterp);
 }
-
-using namespace std;
 
 static int errs = 0;
 
@@ -53,18 +51,18 @@ IconLoaderTest::IconLoaderTest() : vtkKWApplication() {
     } catch (...) {
       char *pfnFreesurferDir = getenv("FREESURFER_HOME");
       if (NULL != pfnFreesurferDir) {
-        string fnIcons =
+        std::string fnIcons =
             string(pfnFreesurferDir) + "/lib/resource/QdecIcons.txt";
         errs += IconLoader::LoadIconsFromFile(fnIcons.c_str());
       }
     }
   } catch (exception &e) {
-    cerr << "Error loading icons: " << e.what() << endl;
+    std::cerr << "Error loading icons: " << e.what() << std::endl;
     errs++;
   }
 
   if (0 == errs)
-    cout << "Success loading icons" << endl;
+    std::cout << "Success loading icons" << std::endl;
 };
 
 IconLoaderTest::~IconLoaderTest() { IconLoader::ShutDown(); }
@@ -74,7 +72,7 @@ int main(int argc, char **argv) {
   // Initialize Tcl.
   Tcl_Interp *interp = vtkKWApplication::InitializeTcl(argc, argv, &cerr);
   if (!interp) {
-    cerr << "Error initializing Tcl." << endl;
+    std::cerr << "Error initializing Tcl." << std::endl;
     return 1;
   }
 
@@ -82,7 +80,7 @@ int main(int argc, char **argv) {
   int rTcl = Tix_Init(interp);
   if (TCL_OK != rTcl) {
     const char *sResult = Tcl_GetStringResult(interp);
-    cerr << "Tix_Init returned not TCL_OK: " << sResult << endl;
+    std::cerr << "Tix_Init returned not TCL_OK: " << sResult << std::endl;
     return 1;
   }
 
@@ -90,7 +88,7 @@ int main(int argc, char **argv) {
   rTcl = Blt_Init(interp);
   if (TCL_OK != rTcl) {
     const char *sResult = Tcl_GetStringResult(interp);
-    cerr << "Blt_Init returned not TCL_OK: " << sResult << endl;
+    std::cerr << "Blt_Init returned not TCL_OK: " << sResult << std::endl;
     return 1;
   }
 

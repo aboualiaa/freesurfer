@@ -9,39 +9,37 @@
  */
 
 #include <iostream>
-#include <string>
 #include <map>
+#include <string>
 
 #include <itkImage.h>
 #include <itkImageFileReader.h>
 
+#include "ClusterTools.h"
+#include "GetPot.h"
+#include "PolylineMeshToVTKPolyDataFilter.h"
+#include "TrkVTKPolyDataFilter.txx"
 #include "itkMesh.h"
-#include <vtkPolyData.h>
-#include <vtkPolyDataReader.h>
-#include <vtkPolyDataWriter.h>
 #include "itkPolylineCell.h"
 #include <vtkCellArray.h>
 #include <vtkPoints.h>
-#include "GetPot.h"
-#include "TrkVTKPolyDataFilter.txx"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "ClusterTools.h"
+#include <vtkPolyData.h>
+#include <vtkPolyDataReader.h>
+#include <vtkPolyDataWriter.h>
 
-#include <vtkVersion.h>
-#include <vtkSmartPointer.h>
-#include <vtkPoints.h>
 #include <vtkPointData.h>
-#include <vtkUnsignedCharArray.h>
+#include <vtkPoints.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkVertexGlyphFilter.h>
 #include <vtkProperty.h>
+#include <vtkSmartPointer.h>
+#include <vtkUnsignedCharArray.h>
+#include <vtkVersion.h>
+#include <vtkVertexGlyphFilter.h>
 
 // For compatibility with new VTK generic data arrays
 #ifdef vtkGenericDataArray_h
 #define InsertNextTupleValue InsertNextTypedTuple
 #endif
-
-using namespace std;
 
 int main(int narg, char *arg[]) {
   // Receive inputs
@@ -50,29 +48,31 @@ int main(int narg, char *arg[]) {
   // Usage error
   // Want to have a directory for streamline inputs?
   if (c1.size() == 1 || c1.search(2, "--help", "-h")) {
-    cout << "Usage: " << endl;
-    cout << arg[0] << " -s streamlines -i imageFile -d outputDirectory" << endl;
+    std::cout << "Usage: " << std::endl;
+    std::cout << arg[0] << " -s streamlines -i imageFile -d outputDirectory"
+              << std::endl;
     return -1;
   }
 
   // Take in information
   const char *image_file = c1.follow("image_file.nii.gz", "-i");
-  const char *output = c1.follow("output_directory", "-d");
+  const char *output     = c1.follow("output_directory", "-d");
 
-  vector<string> inputFiles;
-  for (string inputName = string(c1.follow("", 2, "-s", "-S"));
-       access(inputName.c_str(), 0) == 0; inputName = string(c1.next(""))) {
+  std::vector<std::string> inputFiles;
+  for (std::string inputName = std::string(c1.follow("", 2, "-s", "-S"));
+       access(inputName.c_str(), 0) == 0;
+       inputName = std::string(c1.next(""))) {
     inputFiles.push_back(inputName);
   }
 
   // Variable definitions
   enum { Dimension = 3 };
-  using PixelType = float;
-  const unsigned int PointDimension = 3;
-  using PointDataType = std::vector<int>;
+  using PixelType                            = float;
+  const unsigned int PointDimension          = 3;
+  using PointDataType                        = std::vector<int>;
   const unsigned int MaxTopologicalDimension = 3;
-  using CoordinateType = double;
-  using InterpolationWeightType = double;
+  using CoordinateType                       = double;
+  using InterpolationWeightType              = double;
   using MeshTraits =
       itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                    MaxTopologicalDimension, CoordinateType,
@@ -81,20 +81,20 @@ int main(int narg, char *arg[]) {
 
   using ImageType = itk::Image<float, 3>;
 
-  using ColorMeshType = itk::Mesh<PixelType, PointDimension>;
-  using PointType = ColorMeshType::PointType;
-  using CellType = ColorMeshType::CellType;
+  using ColorMeshType    = itk::Mesh<PixelType, PointDimension>;
+  using PointType        = ColorMeshType::PointType;
+  using CellType         = ColorMeshType::CellType;
   using PolylineCellType = itk::PolylineCell<CellType>;
-  using CellAutoPointer = ColorMeshType::CellAutoPointer;
+  using CellAutoPointer  = ColorMeshType::CellAutoPointer;
 
-  vector<ColorMeshType::Pointer> *meshes;
+  std::vector<ColorMeshType::Pointer> *meshes;
   // vector<ColorMeshType::Pointer>* colored_meshes;
-  vector<vtkSmartPointer<vtkPolyData>> polydatas;
+  std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
   // vector<vtkSmartPointer<vtkPolyData>> colored_polydatas;
   ImageType::Pointer inputImage;
 
   // Variable to read in the image file
-  using ImageReaderType = ImageFileReader<ImageType>;
+  using ImageReaderType           = itk::ImageFileReader<ImageType>;
   ImageReaderType::Pointer reader = ImageReaderType::New();
   reader->SetFileName(c1.next(""));
   reader->Update();
@@ -110,7 +110,7 @@ int main(int narg, char *arg[]) {
   meshes = clusterTools->PolydataToMesh(polydatas);
 
   // Values and color association
-  vector<float> FA_value;
+  std::vector<float> FA_value;
   // vtkSmartPointer<vtkPolyData> pointsPolyData =
   // vtkSmartPointer<vtkPolyData>::New(); vtkSmartPointer<vtkPolyData> polydata
   // = vtkSmartPointer<vtkPolyData>::New();
@@ -118,15 +118,15 @@ int main(int narg, char *arg[]) {
       vtkSmartPointer<vtkUnsignedCharArray>::New();
 
   // Test colors
-  unsigned char red[3] = {255, 0, 0};
+  unsigned char red[3]   = {255, 0, 0};
   unsigned char green[3] = {0, 255, 0};
-  unsigned char blue[3] = {0, 0, 255};
+  unsigned char blue[3]  = {0, 0, 255};
 
   colors->SetNumberOfComponents(3);
   colors->SetName("Colors");
 
   for (int i = 0; i < meshes->size(); i++) {
-    ColorMeshType::Pointer input = (*meshes)[i];
+    ColorMeshType::Pointer                  input = (*meshes)[i];
     ColorMeshType::CellsContainer::Iterator inputCellIt =
         input->GetCells()->Begin();
 
@@ -177,7 +177,7 @@ int main(int narg, char *arg[]) {
   // colored_meshes = clusterTools->PolydataToMesh(colored_polydatas);
   for (int i = 0; i < polydatas.size(); i++) {
     // Create an output file for each mesh
-    string outputName = string(output) + "/";
+    std::string outputName = std::string(output) + "/";
 
     // string fileName;
     int place;
@@ -191,14 +191,14 @@ int main(int narg, char *arg[]) {
       outputName += inputFiles[i][j];
     }
 
-    cerr << outputName << endl;
+    std::cerr << outputName << std::endl;
 
     // typedef PolylineMeshToVTKPolyDataFilter<ColorMeshType> VTKConverterType;
     // typename VTKConverterType::Pointer vtkConverter =
     // VTKConverterType::New(); vtkConverter->SetInput(input);
     // vtkConverter->Update();
 
-    SmartPointer<TrkVTKPolyDataFilter<ImageType>> trkReader =
+    itk::SmartPointer<TrkVTKPolyDataFilter<ImageType>> trkReader =
         TrkVTKPolyDataFilter<ImageType>::New();
     trkReader->SetInput(polydatas[i]); //(vtkConverter->GetOutputPolyData());
     trkReader->SetReferenceTrack(inputFiles[i]);

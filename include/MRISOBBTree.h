@@ -27,24 +27,24 @@
 #ifndef MRISOBBTree_h
 #define MRISOBBTree_h
 
-#include "mri.h"
-#include "mrisurf.h"
 #include "diag.h"
 #include "error.h"
+#include "mri.h"
+#include "mrisurf.h"
 
-#include <list>
 #include <iostream>
-#include <vector>
-#include <stack>
 #include <limits>
+#include <list>
+#include <stack>
+#include <vector>
 
-#define export // These headers use a deprecated / obsolete "export template"
-               // feature and gcc 5 and higher emit error messages
-               // https://stackoverflow.com/questions/5416872/using-export-keyword-with-templates
+#define export // These headers use a deprecated / obsolete "export template"  \
+               // feature and gcc 5 and higher emit error messages             \
+    // https://stackoverflow.com/questions/5416872/using-export-keyword-with-templates
+#include "utilsmath.h"
+#include <vnl/algo/vnl_symmetric_eigensystem.h>
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_vector.h>
-#include <vnl/algo/vnl_symmetric_eigensystem.h>
-#include "utilsmath.h"
 #undef export
 
 using Pointf = Math::Point<double>;
@@ -59,15 +59,15 @@ public:
   OBBNode *left;     // both left and right are NULL implies leaf node
   OBBNode *right;    //
 
-  int *faceidlist; // list of faces in the OBBnode
-  Pointf *normals; // corresponding normals to the face
-  int numfaces;    // number of faces in the OBBnode ( length of above )
+  int *   faceidlist; // list of faces in the OBBnode
+  Pointf *normals;    // corresponding normals to the face
+  int     numfaces;   // number of faces in the OBBnode ( length of above )
 
   OBBNode() {
-    this->left = nullptr;
-    this->right = nullptr;
+    this->left       = nullptr;
+    this->right      = nullptr;
     this->faceidlist = nullptr;
-    this->normals = nullptr;
+    this->normals    = nullptr;
   }
   ~OBBNode() {
     if (faceidlist)
@@ -82,18 +82,18 @@ public:
  * and point inclusion methods */
 class MRISOBBTree {
 private:
-  int level;        // used for bookkeeping
-  int DeepestLevel; // the deepest level of the tree
-  int maxlevel;     // the maximum level allowed during the creation of OBBTree
-  int OBBcount;     // number of OBB nodes in the trees
-  int *InsertedPoints;
+  int    level;        // used for bookkeeping
+  int    DeepestLevel; // the deepest level of the tree
+  int    maxlevel; // the maximum level allowed during the creation of OBBTree
+  int    OBBcount; // number of OBB nodes in the trees
+  int *  InsertedPoints;
   double Tolerance; // the epslion. usually it's zero
   using PointsList = std::vector<Pointf>;
   PointsList pointslist; // the list of verts temporarily used while
                          // constructing the tree
 
-  MRIS *mris;       // the surface
-  OBBNode *tree;    // Root node
+  MRIS *      mris; // the surface
+  OBBNode *   tree; // Root node
   Math::AABB *aabb; // the Axis Aligned bounding box for the surface
 
 public:
@@ -101,9 +101,9 @@ public:
     this->level = 4; // start with an arbit level more than deepest level ( for
                      // recursive building )
     this->DeepestLevel = 0;
-    this->maxlevel = 12; // just an intelligent guess
-    this->OBBcount = 0;
-    this->Tolerance = 0.0;
+    this->maxlevel     = 12; // just an intelligent guess
+    this->OBBcount     = 0;
+    this->Tolerance    = 0.0;
     // init lists
     this->InsertedPoints = new int[mris->nvertices];
     for (int i = 0; i < mris->nvertices; i++)
@@ -179,7 +179,7 @@ public:
     }*/
 
     // root node
-    this->tree = new OBBNode;
+    this->tree         = new OBBNode;
     this->DeepestLevel = 0;
     // Recursive building of the tree
     this->BuildTreeRecursively(faceidlistvector, this->tree, 0);
@@ -219,20 +219,20 @@ public:
       L_faceids.reserve(numfaces / 2);
       std::vector<int> R_faceids;
       R_faceids.reserve(numfaces / 2);
-      double n[3], p[3], c[3], x[3], val, ratio, bestratio;
-      int negative, positive, splitacceptable, splitplane;
-      int foundbestsplit, bestplane = 0;
-      int numinLnode, numinRnode, i;
-      FACE *face;
+      double  n[3], p[3], c[3], x[3], val, ratio, bestratio;
+      int     negative, positive, splitacceptable, splitplane;
+      int     foundbestsplit, bestplane = 0;
+      int     numinLnode, numinRnode, i;
+      FACE *  face;
       VERTEX *vertex;
 
       // loop over the 3 split planes to find the best one for division
       for (i = 0; i < 3; i++)
         p[i] = pOBB->corner[i] + pOBB->axes[0][i] / 2.0 +
                pOBB->axes[1][i] / 2.0 + pOBB->axes[2][i] / 2.0;
-      bestratio = 1.0;    // worst case ratio
-      foundbestsplit = 0; // not yet found
-      splitplane = 0;
+      bestratio       = 1.0; // worst case ratio
+      foundbestsplit  = 0;   // not yet found
+      splitplane      = 0;
       splitacceptable = 0;
       while (!splitacceptable && splitplane < 3) {
         for (i = 0; i < 3; i++) {
@@ -248,10 +248,10 @@ public:
           negative = positive = 0;
           for (i = 0; i < 3; i++) {
             vertex = &mris->vertices[face->v[i]];
-            x[0] = vertex->x;
-            x[1] = vertex->y;
-            x[2] = vertex->z;
-            val = n[0] * (x[0] - p[0]) + n[1] * (x[1] - p[1]) +
+            x[0]   = vertex->x;
+            x[1]   = vertex->y;
+            x[2]   = vertex->z;
+            val    = n[0] * (x[0] - p[0]) + n[1] * (x[1] - p[1]) +
                   n[2] * (x[2] - p[2]);
             c[0] += x[0];
             c[1] += x[1];
@@ -284,7 +284,7 @@ public:
         // evaluate the split
         numinLnode = L_faceids.size();
         numinRnode = R_faceids.size();
-        ratio = fabs(((double)numinRnode - numinLnode) / numfaces);
+        ratio      = fabs(((double)numinRnode - numinLnode) / numfaces);
         // did we find acceptable split plane?
         if (ratio < 0.6 || foundbestsplit) // yes, so accept this
         {
@@ -302,7 +302,7 @@ public:
           if (splitplane == 3 &&
               bestratio <
                   0.95) { // simply choose the best plane of the 3 split planes
-            splitplane = bestplane;
+            splitplane     = bestplane;
             foundbestsplit = 1;
           }
         } // try next split
@@ -311,8 +311,8 @@ public:
       if (splitacceptable) {
         OBBNode *LNode = new OBBNode;
         OBBNode *RNode = new OBBNode;
-        pOBB->left = LNode;
-        pOBB->right = RNode;
+        pOBB->left     = LNode;
+        pOBB->right    = RNode;
 
         faceids.clear(); // don't need them anymore
 
@@ -326,25 +326,25 @@ public:
       }
     }
 
-    FACE *face;
+    FACE *  face;
     VERTEX *v;
-    double v1[3], v2[3], v3[3];
-    pOBB->numfaces = faceids.size();
+    double  v1[3], v2[3], v3[3];
+    pOBB->numfaces   = faceids.size();
     pOBB->faceidlist = new int[numfaces];
-    pOBB->normals = new Pointf[numfaces];
+    pOBB->normals    = new Pointf[numfaces];
     for (int i = 0; i < numfaces; i++) {
       pOBB->faceidlist[i] = faceids[i];
       // Precalculate normals and store in every node
-      face = &mris->faces[faceids[i]];
-      v = &mris->vertices[face->v[0]];
+      face  = &mris->faces[faceids[i]];
+      v     = &mris->vertices[face->v[0]];
       v1[0] = v->x;
       v1[1] = v->y;
       v1[2] = v->z;
-      v = &mris->vertices[face->v[1]];
+      v     = &mris->vertices[face->v[1]];
       v2[0] = v->x;
       v2[1] = v->y;
       v2[2] = v->z;
-      v = &mris->vertices[face->v[2]];
+      v     = &mris->vertices[face->v[2]];
       v3[0] = v->x;
       v3[1] = v->y;
       v3[2] = v->z;
@@ -361,16 +361,16 @@ public:
    computed
    */
   void ComputeOBB(std::vector<int> faceids, OBBNode *pOBB) {
-    int i, j, k; // counter vars
+    int    i, j, k; // counter vars
     double tri_mass, tot_mass, t;
     double mean[3], a0[3], a1[3], a2[3], c[3], p[3], q[3], r[3];
     double dp0[3], dp1[3], xp[3], evalues[3], tMin[3], tMax[3];
     double max[3], mid[3],
         min[3]; // store the axis of max, mid and min direction resp.
     vnl_matrix<double> a(3, 3);
-    VERTEX *v, *vertex;
-    Pointf vp;
-    FACE *face = nullptr;
+    VERTEX *           v, *vertex;
+    Pointf             vp;
+    FACE *             face = nullptr;
 
     tot_mass = 0.0;
     this->OBBcount++;
@@ -379,7 +379,7 @@ public:
 
     // Compute mean & moments
     mean[0] = mean[1] = mean[2] = 0.0;
-    tot_mass = 0.0;
+    tot_mass                    = 0.0;
     for (i = 0; i < 3; i++)
       a0[i] = a1[i] = a2[i] = 0.0;
 
@@ -387,15 +387,15 @@ public:
     std::vector<int>::iterator fv;
     for (fv = faceids.begin(); fv != faceids.end(); ++fv) {
       face = &mris->faces[*fv];
-      v = &mris->vertices[face->v[0]];
+      v    = &mris->vertices[face->v[0]];
       p[0] = v->x;
       p[1] = v->y;
       p[2] = v->z;
-      v = &mris->vertices[face->v[1]];
+      v    = &mris->vertices[face->v[1]];
       q[0] = v->x;
       q[1] = v->y;
       q[2] = v->z;
-      v = &mris->vertices[face->v[2]];
+      v    = &mris->vertices[face->v[2]];
       r[0] = v->x;
       r[1] = v->y;
       r[2] = v->z;
@@ -431,10 +431,10 @@ public:
       for (j = 0; j < 3; j++) {
         if (this->InsertedPoints[face->v[j]] != this->OBBcount) {
           this->InsertedPoints[face->v[j]] = this->OBBcount;
-          vertex = &mris->vertices[face->v[j]];
-          vp.v[0] = vertex->x;
-          vp.v[1] = vertex->y;
-          vp.v[2] = vertex->z;
+          vertex                           = &mris->vertices[face->v[j]];
+          vp.v[0]                          = vertex->x;
+          vp.v[1]                          = vertex->y;
+          vp.v[2]                          = vertex->z;
           this->pointslist.push_back(vp);
         }
       } // end insert points
@@ -516,19 +516,19 @@ public:
     // the idea is to construct a ray that is guaranteed to hit one of the faces
     // and use that as pointinclusion test
     VERTEX *v;
-    FACE *face;
-    double pt1[3], pt2[3], pt3[3];
+    FACE *  face;
+    double  pt1[3], pt2[3], pt3[3];
     for (int fno = 0; fno < mris->nfaces; fno++) {
-      face = &mris->faces[fno];
-      v = &mris->vertices[face->v[0]];
+      face   = &mris->faces[fno];
+      v      = &mris->vertices[face->v[0]];
       pt1[0] = v->x;
       pt1[1] = v->y;
       pt1[2] = v->z;
-      v = &mris->vertices[face->v[1]];
+      v      = &mris->vertices[face->v[1]];
       pt2[0] = v->x;
       pt2[1] = v->y;
       pt2[2] = v->z;
-      v = &mris->vertices[face->v[2]];
+      v      = &mris->vertices[face->v[2]];
       pt3[0] = v->x;
       pt3[1] = v->y;
       pt3[2] = v->z;
@@ -570,15 +570,15 @@ public:
    \return -1 if segment doesn't intersect
    */
   int DoesLineIntersectOBBTree(double x, double y, double z, double pt[3]) {
-    int returnval = 0, faceno;
+    int       returnval = 0, faceno;
     OBBNode **obbstack;
-    OBBNode *node;
-    FACE *face;
-    VERTEX *v;
-    double v1[3], v2[3], v3[3];
-    int sense, listsize = 0, listmaxsize = 10;
-    double *distancelist = new double[listmaxsize]; // stores the parameter t
-                                                    // from the point to faces
+    OBBNode * node;
+    FACE *    face;
+    VERTEX *  v;
+    double    v1[3], v2[3], v3[3];
+    int       sense, listsize = 0, listmaxsize = 10;
+    double *  distancelist = new double[listmaxsize]; // stores the parameter t
+                                                      // from the point to faces
     int *senselist = new int[listmaxsize]; // stores the sense ( 1 if entering
                                            // or -1 if exiting )
     double distance;
@@ -587,9 +587,9 @@ public:
     obbstack = new OBBNode *[this->maxlevel + 1];
     // compute vector from pt to (x,y,z)
     double v12[3], p1[3];
-    p1[0] = x;
-    p1[1] = y;
-    p1[2] = z;
+    p1[0]  = x;
+    p1[1]  = y;
+    p1[2]  = z;
     v12[0] = pt[0] - x;
     v12[1] = pt[1] - y;
     v12[2] = pt[2] - z;
@@ -597,7 +597,7 @@ public:
     // preorder traversal of the OBBTree
     // simulate recursion
     obbstack[0] = this->tree;
-    int depth = 1;
+    int depth   = 1;
 
     while (depth > 0) {
       --depth;
@@ -609,19 +609,19 @@ public:
         if (node->left == nullptr && node->right == nullptr) {
           for (int fv = 0; fv < node->numfaces; ++fv) {
             faceno = node->faceidlist[fv];
-            face = &mris->faces[faceno];
-            v = &mris->vertices[face->v[0]];
-            v1[0] = v->x;
-            v1[1] = v->y;
-            v1[2] = v->z;
-            v = &mris->vertices[face->v[1]];
-            v2[0] = v->x;
-            v2[1] = v->y;
-            v2[2] = v->z;
-            v = &mris->vertices[face->v[2]];
-            v3[0] = v->x;
-            v3[1] = v->y;
-            v3[2] = v->z;
+            face   = &mris->faces[faceno];
+            v      = &mris->vertices[face->v[0]];
+            v1[0]  = v->x;
+            v1[1]  = v->y;
+            v1[2]  = v->z;
+            v      = &mris->vertices[face->v[1]];
+            v2[0]  = v->x;
+            v2[1]  = v->y;
+            v2[2]  = v->z;
+            v      = &mris->vertices[face->v[2]];
+            v3[0]  = v->x;
+            v3[1]  = v->y;
+            v3[2]  = v->z;
 
             if (LineIntersectsTriangle(p1, pt, v1, v2, v3, node->normals[fv].v,
                                        distance, sense) <= 0)
@@ -631,10 +631,10 @@ public:
             if (listsize >= listmaxsize) {
               listmaxsize *= 2;
               double *tmpdistancelist = new double[listmaxsize];
-              int *tmpsenselist = new int[listmaxsize];
+              int *   tmpsenselist    = new int[listmaxsize];
               for (int k = 0; k < listsize; k++) {
                 tmpdistancelist[k] = distancelist[k];
-                tmpsenselist[k] = senselist[k];
+                tmpsenselist[k]    = senselist[k];
               }
               delete[] distancelist;
               distancelist = tmpdistancelist;
@@ -642,11 +642,11 @@ public:
               senselist = tmpsenselist;
             }
             distancelist[listsize] = distance;
-            senselist[listsize] = sense;
+            senselist[listsize]    = sense;
             ++listsize;
           }
         } else {
-          obbstack[depth] = node->left;
+          obbstack[depth]     = node->left;
           obbstack[depth + 1] = node->right;
           depth += 2;
         }
@@ -654,10 +654,10 @@ public:
     } // end traversal of the tree
 
     if (listsize != 0) {
-      double ptol = this->Tolerance / Math::Norm(v12);
-      double lastdistance = 0.0;
-      double lastsense = 0;
-      int listremainder = listsize;
+      double ptol          = this->Tolerance / Math::Norm(v12);
+      double lastdistance  = 0.0;
+      double lastsense     = 0;
+      int    listremainder = listsize;
       while (listremainder) {
         int minIdx = 0;
         for (int j = 1; j < listremainder; j++) {
@@ -666,17 +666,17 @@ public:
             minIdx = j;
         }
         distance = distancelist[minIdx];
-        sense = senselist[minIdx];
+        sense    = senselist[minIdx];
         listremainder--;
         distancelist[minIdx] = distancelist[listremainder];
-        senselist[minIdx] = senselist[listremainder];
+        senselist[minIdx]    = senselist[listremainder];
 
         if (distance > lastdistance - ptol && sense != lastsense) {
           // return value according to the sense of the first intersection
           if (returnval == 0)
             returnval = sense;
           lastdistance = distance;
-          lastsense = sense;
+          lastsense    = sense;
         }
       }
     } // if distancelist is not empty
@@ -707,7 +707,7 @@ public:
       rangeAmax = rangeAmin + Math::Dot(pOBB->axes[i], pOBB->axes[i]);
       rangePmin = Math::Dot(p0, pOBB->axes[i]);
       rangePmax = rangePmin;
-      dotP = Math::Dot(p1, pOBB->axes[i]);
+      dotP      = Math::Dot(p1, pOBB->axes[i]);
       if (dotP < rangePmin)
         rangePmin = dotP;
       else
@@ -757,9 +757,9 @@ public:
       return 0; // triangle and the line are really parallel
 
     double fabsden = den;
-    sense = -1;
+    sense          = -1;
     if (fabsden < 0.0) {
-      sense = 1;
+      sense   = 1;
       fabsden = -fabsden;
     }
     if (fabsden > 1e-6 + this->Tolerance) {
@@ -795,12 +795,12 @@ public:
       double area = (v2 * u1 - u2 * v1);
       // sub-areas that must sum to less than the total area
       double alpha = (v2 * u0 - u2 * v0);
-      double beta = (v0 * u1 - u0 * v1);
+      double beta  = (v0 * u1 - u0 * v1);
       double gamma = area - alpha - beta;
       if (area < 0) {
-        area = -area;
+        area  = -area;
         alpha = -alpha;
-        beta = -beta;
+        beta  = -beta;
         gamma = -gamma;
       }
 

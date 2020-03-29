@@ -31,34 +31,34 @@
 #include "mrisurf.h"
 #include "version.h"
 
-#define STRBUF 65536
+#define STRBUF    65536
 #define MAX_FILES 1000
-#define CO(x) fprintf(stdout, (x))
-#define CE(x) fprintf(stderr, (x))
-#define START_i 3
+#define CO(x)     fprintf(stdout, (x))
+#define CE(x)     fprintf(stderr, (x))
+#define START_i   3
 
 // Calculations performed on the curvature surface
 typedef enum _secondOrderType {
-  e_Raw = 0,          // "Raw" (native) curvature - no calcuation
-  e_Gaussian = 1,     // Gaussian curvature   = k1*k2
-  e_Mean = 2,         // Mean curvature = 0.5*(k1+k2))
-  e_K1 = 3,           // k1 curvature
-  e_K2 = 4,           // k2 curvature
-  e_S = 5,            // "sharpness"    = (k1-k2)^2
-  e_C = 6,            // "curvedness"   = sqrt(0.5*(k1^2+k2^2))
-  e_SI = 7,           // "shape index"  = atan((k1+k2)/(k2-k1))
-  e_BE = 8,           // "bending energy" = k1^2 + k2^2
-  e_Normal = 9,       // Normalised curvature
-  e_Scaled = 10,      // "Raw" scaled curvature
+  e_Raw         = 0,  // "Raw" (native) curvature - no calcuation
+  e_Gaussian    = 1,  // Gaussian curvature   = k1*k2
+  e_Mean        = 2,  // Mean curvature = 0.5*(k1+k2))
+  e_K1          = 3,  // k1 curvature
+  e_K2          = 4,  // k2 curvature
+  e_S           = 5,  // "sharpness"    = (k1-k2)^2
+  e_C           = 6,  // "curvedness"   = sqrt(0.5*(k1^2+k2^2))
+  e_SI          = 7,  // "shape index"  = atan((k1+k2)/(k2-k1))
+  e_BE          = 8,  // "bending energy" = k1^2 + k2^2
+  e_Normal      = 9,  // Normalised curvature
+  e_Scaled      = 10, // "Raw" scaled curvature
   e_ScaledTrans = 11, // Scaled and translated curvature
-  e_FI = 12           // Folding Index
+  e_FI          = 12  // Folding Index
 } e_secondOrderType;
 
 typedef enum _surfaceIntegrals {
-  e_natural = 0,   // "Natural" (native) integral - no conditions
+  e_natural   = 0, // "Natural" (native) integral - no conditions
   e_rectified = 1, // curvature is first rectified
-  e_pos = 2,       // only positive curvatures are considered
-  e_neg = 3        // only negative curvatures are considered
+  e_pos       = 2, // only positive curvatures are considered
+  e_neg       = 3  // only negative curvatures are considered
 } e_surfaceIntegral;
 
 // Set of possible output curvature files
@@ -79,8 +79,8 @@ typedef enum _OFSP {
 typedef struct _minMax {
   float f_min;          // The minimum curvature value
   float f_max;          // The maximum curvature value
-  int vertexMin;        // The vertex where min lives
-  int vertexMax;        // The vertex where max lives
+  int   vertexMin;      // The vertex where min lives
+  int   vertexMax;      // The vertex where max lives
   short b_minTest;      // If true, perform explicit min test
   short b_maxTest;      // If true, perform explicit max test
   short b_minViolation; // If true, min value != explicit min
@@ -92,7 +92,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -177,156 +177,156 @@ int MRIS_surfaceRipFlags_filter(MRI_SURFACE *apmris, float *apf_notRippedArea);
 // Global variables
 
 const char *Progname;
-char *hemi;
+char *      hemi;
 
-static int navgs = 0;
-static int normalize_flag = 0;
-static int condition_no = 0;
-static int stat_flag = 0;
-static char *label_name = nullptr;
-static char *output_fname = nullptr;
-static char *curv_fname = nullptr;
-static char surf_name[STRBUF];
+static int   navgs          = 0;
+static int   normalize_flag = 0;
+static int   condition_no   = 0;
+static int   stat_flag      = 0;
+static char *label_name     = nullptr;
+static char *output_fname   = nullptr;
+static char *curv_fname     = nullptr;
+static char  surf_name[STRBUF];
 // Additional global variables (prefixed by 'G') added by RP.
 // Flags are prefixed with Gb_ and are used to track
 // user spec'd command line flags.
-static int Gb_shapeIndex = 0;
-static int Gb_discreteCurvaturesUse = 1;
-static int Gb_minMaxShow = 0;
-static int Gb_histogram = 0;
-static int Gb_histogramPercent = 0;
-static int Gb_binSizeOverride = 0;
-static double Gf_binSize = 0.;
-static int Gb_histStartOverride = 0;
-static float Gf_histStart = 0.;
-static int Gb_histEndOverride = 0;
-static float Gf_histEnd = 0.;
-static int Gb_gaussianAndMean = 0;
-static int Gb_output2File = 0;
-static int Gb_scale = 0;
-static int Gb_scaleMin = 0;
-static int Gb_scaleMax = 0;
-static int Gb_zeroVertex = 0;
-static int G_zeroVertex = 0;
-static int G_nbrs = 2;
-static int G_bins = 1;
-static int Gb_maxUlps = 0;
-static int G_maxUlps = 0;
+static int    Gb_shapeIndex            = 0;
+static int    Gb_discreteCurvaturesUse = 1;
+static int    Gb_minMaxShow            = 0;
+static int    Gb_histogram             = 0;
+static int    Gb_histogramPercent      = 0;
+static int    Gb_binSizeOverride       = 0;
+static double Gf_binSize               = 0.;
+static int    Gb_histStartOverride     = 0;
+static float  Gf_histStart             = 0.;
+static int    Gb_histEndOverride       = 0;
+static float  Gf_histEnd               = 0.;
+static int    Gb_gaussianAndMean       = 0;
+static int    Gb_output2File           = 0;
+static int    Gb_scale                 = 0;
+static int    Gb_scaleMin              = 0;
+static int    Gb_scaleMax              = 0;
+static int    Gb_zeroVertex            = 0;
+static int    G_zeroVertex             = 0;
+static int    G_nbrs                   = 2;
+static int    G_bins                   = 1;
+static int    Gb_maxUlps               = 0;
+static int    G_maxUlps                = 0;
 
 static float Gf_regionalTotalSurfaceArea = 0;
-static int G_regionalTotalVertexCount = 0;
-static int Gb_regionalPercentages = 0;
-static int Gb_vertexAreaNormalize = 0;
-static int Gb_vertexAreaWeigh = 0;
-static int Gb_vertexAreaNormalizeFrac = 0;
-static int Gb_vertexAreaWeighFrac = 0;
-static int Gb_postScale = 0;
-static float Gf_postScale = 0.;
-static int Gb_filter = 0;
-static int Gb_lowPassFilter = 0;
-static float Gf_lowPassFilter = 0.;
-static int Gb_lowPassFilterGaussian = 0;
-static float Gf_lowPassFilterGaussian = 0.;
-static int Gb_highPassFilter = 0;
-static float Gf_highPassFilter = 0.;
-static int Gb_highPassFilterGaussian = 0;
-static float Gf_highPassFilterGaussian = 0.;
+static int   G_regionalTotalVertexCount  = 0;
+static int   Gb_regionalPercentages      = 0;
+static int   Gb_vertexAreaNormalize      = 0;
+static int   Gb_vertexAreaWeigh          = 0;
+static int   Gb_vertexAreaNormalizeFrac  = 0;
+static int   Gb_vertexAreaWeighFrac      = 0;
+static int   Gb_postScale                = 0;
+static float Gf_postScale                = 0.;
+static int   Gb_filter                   = 0;
+static int   Gb_lowPassFilter            = 0;
+static float Gf_lowPassFilter            = 0.;
+static int   Gb_lowPassFilterGaussian    = 0;
+static float Gf_lowPassFilterGaussian    = 0.;
+static int   Gb_highPassFilter           = 0;
+static float Gf_highPassFilter           = 0.;
+static int   Gb_highPassFilterGaussian   = 0;
+static float Gf_highPassFilterGaussian   = 0.;
 
 static short Gb_signedPrincipals = 0;
-static char Gpch_filterLabel[STRBUF];
+static char  Gpch_filterLabel[STRBUF];
 static short Gb_filterLabel = 0;
 
-static float Gf_foldingIndex = 0.;
+static float Gf_foldingIndex          = 0.;
 static float Gf_intrinsicCurvaturePos = 0.;
 static float Gf_intrinsicCurvatureNeg = 0.;
 static float Gf_intrinsicCurvatureNat = 0.;
 
 // All possible output file name and suffixes
-static FILE *GpSTDOUT = nullptr;
+static FILE *GpSTDOUT               = nullptr;
 static short Gb_writeCurvatureFiles = 0;
-static char Gpch_log[STRBUF];
-static char Gpch_logS[] = "log";
-static FILE *GpFILE_log = nullptr;
-static char Gpch_rawHist[STRBUF];
-static char Gpch_rawHistS[] = "raw.hist";
-static FILE *GpFILE_rawHist = nullptr;
-static char Gpch_normCurv[STRBUF];
-static char Gpch_normHist[STRBUF];
-static char Gpch_normHistS[] = "norm.hist";
-static FILE *GpFILE_normHist = nullptr;
-static char Gpch_normCurvS[] = "norm.crv";
-static char Gpch_KHist[STRBUF];
-static char Gpch_KHistS[] = "K.hist";
-static FILE *GpFILE_KHist = nullptr;
-static char Gpch_KCurv[STRBUF];
-static char Gpch_KCurvS[] = "K.crv";
-static char Gpch_HHist[STRBUF];
-static char Gpch_HHistS[] = "H.hist";
-static FILE *GpFILE_HHist = nullptr;
-static char Gpch_HCurv[STRBUF];
-static char Gpch_HCurvS[] = "H.crv";
-static char Gpch_scaledHist[STRBUF];
-static char Gpch_scaledHistS[] = "scaled.hist";
-static FILE *GpFILE_scaledHist = nullptr;
-static char Gpch_scaledCurv[STRBUF];
-static char Gpch_scaledCurvS[] = "scaled.crv";
+static char  Gpch_log[STRBUF];
+static char  Gpch_logS[] = "log";
+static FILE *GpFILE_log  = nullptr;
+static char  Gpch_rawHist[STRBUF];
+static char  Gpch_rawHistS[] = "raw.hist";
+static FILE *GpFILE_rawHist  = nullptr;
+static char  Gpch_normCurv[STRBUF];
+static char  Gpch_normHist[STRBUF];
+static char  Gpch_normHistS[] = "norm.hist";
+static FILE *GpFILE_normHist  = nullptr;
+static char  Gpch_normCurvS[] = "norm.crv";
+static char  Gpch_KHist[STRBUF];
+static char  Gpch_KHistS[] = "K.hist";
+static FILE *GpFILE_KHist  = nullptr;
+static char  Gpch_KCurv[STRBUF];
+static char  Gpch_KCurvS[] = "K.crv";
+static char  Gpch_HHist[STRBUF];
+static char  Gpch_HHistS[] = "H.hist";
+static FILE *GpFILE_HHist  = nullptr;
+static char  Gpch_HCurv[STRBUF];
+static char  Gpch_HCurvS[] = "H.crv";
+static char  Gpch_scaledHist[STRBUF];
+static char  Gpch_scaledHistS[] = "scaled.hist";
+static FILE *GpFILE_scaledHist  = nullptr;
+static char  Gpch_scaledCurv[STRBUF];
+static char  Gpch_scaledCurvS[] = "scaled.crv";
 
-static char Gpch_K1Hist[STRBUF];
-static char Gpch_K1HistS[] = "K1.hist";
-static FILE *GpFILE_K1Hist = nullptr;
-static char Gpch_K1Curv[STRBUF];
-static char Gpch_K1CurvS[] = "K1.crv";
+static char  Gpch_K1Hist[STRBUF];
+static char  Gpch_K1HistS[] = "K1.hist";
+static FILE *GpFILE_K1Hist  = nullptr;
+static char  Gpch_K1Curv[STRBUF];
+static char  Gpch_K1CurvS[] = "K1.crv";
 
-static char Gpch_K2Hist[STRBUF];
-static char Gpch_K2HistS[] = "K2.hist";
-static FILE *GpFILE_K2Hist = nullptr;
-static char Gpch_K2Curv[STRBUF];
-static char Gpch_K2CurvS[] = "K2.crv";
+static char  Gpch_K2Hist[STRBUF];
+static char  Gpch_K2HistS[] = "K2.hist";
+static FILE *GpFILE_K2Hist  = nullptr;
+static char  Gpch_K2Curv[STRBUF];
+static char  Gpch_K2CurvS[] = "K2.crv";
 
-static char Gpch_SHist[STRBUF];
-static char Gpch_SHistS[] = "S.hist";
-static FILE *GpFILE_SHist = nullptr;
-static char Gpch_SCurv[STRBUF];
-static char Gpch_SCurvS[] = "S.crv";
+static char  Gpch_SHist[STRBUF];
+static char  Gpch_SHistS[] = "S.hist";
+static FILE *GpFILE_SHist  = nullptr;
+static char  Gpch_SCurv[STRBUF];
+static char  Gpch_SCurvS[] = "S.crv";
 
-static char Gpch_CHist[STRBUF];
-static char Gpch_CHistS[] = "C.hist";
-static FILE *GpFILE_CHist = nullptr;
-static char Gpch_CCurv[STRBUF];
-static char Gpch_CCurvS[] = "C.crv";
+static char  Gpch_CHist[STRBUF];
+static char  Gpch_CHistS[] = "C.hist";
+static FILE *GpFILE_CHist  = nullptr;
+static char  Gpch_CCurv[STRBUF];
+static char  Gpch_CCurvS[] = "C.crv";
 
-static char Gpch_BEHist[STRBUF];
-static char Gpch_BEHistS[] = "BE.hist";
-static FILE *GpFILE_BEHist = nullptr;
-static char Gpch_BECurv[STRBUF];
-static char Gpch_BECurvS[] = "BE.crv";
+static char  Gpch_BEHist[STRBUF];
+static char  Gpch_BEHistS[] = "BE.hist";
+static FILE *GpFILE_BEHist  = nullptr;
+static char  Gpch_BECurv[STRBUF];
+static char  Gpch_BECurvS[] = "BE.crv";
 
-static char Gpch_SIHist[STRBUF];
-static char Gpch_SIHistS[] = "SI.hist";
-static FILE *GpFILE_SIHist = nullptr;
-static char Gpch_SICurv[STRBUF];
-static char Gpch_SICurvS[] = "SI.crv";
+static char  Gpch_SIHist[STRBUF];
+static char  Gpch_SIHistS[] = "SI.hist";
+static FILE *GpFILE_SIHist  = nullptr;
+static char  Gpch_SICurv[STRBUF];
+static char  Gpch_SICurvS[] = "SI.crv";
 
-static char Gpch_FIHist[STRBUF];
-static char Gpch_FIHistS[] = "FI.hist";
-static FILE *GpFILE_FIHist = nullptr;
-static char Gpch_FICurv[STRBUF];
-static char Gpch_FICurvS[] = "FI.crv";
+static char  Gpch_FIHist[STRBUF];
+static char  Gpch_FIHistS[] = "FI.hist";
+static FILE *GpFILE_FIHist  = nullptr;
+static char  Gpch_FICurv[STRBUF];
+static char  Gpch_FICurvS[] = "FI.crv";
 
 // These are used for tabular output
-const int G_leftCols = 10;
+const int G_leftCols  = 10;
 const int G_rightCols = 40;
 
 // Mean / sigma tracking and scaling
 static double Gpf_means[MAX_FILES];
-static double Gf_mean = 0.;
-static double Gf_sigma = 0.;
-static double Gf_n = 0.;
-static double Gf_total = 0.;
-static double Gf_total_sq = 0.;
+static double Gf_mean        = 0.;
+static double Gf_sigma       = 0.;
+static double Gf_n           = 0.;
+static double Gf_total       = 0.;
+static double Gf_total_sq    = 0.;
 static double Gf_scaleFactor = 1.;
-static double Gf_scaleMin = 0.;
-static double Gf_scaleMax = 0.;
+static double Gf_scaleMin    = 0.;
+static double Gf_scaleMax    = 0.;
 
 static int which_norm = NORM_MEAN;
 
@@ -374,12 +374,12 @@ int LABEL_RipSurface(MRI_SURFACE *apmris, LABEL *aplbl) {
   //    setting the ripflag value.
   //
 
-  int vno, n;
+  int     vno, n;
   VERTEX *v;
 
   LabelToFlat(aplbl, apmris);
   for (vno = 0; vno < apmris->nvertices; vno++) {
-    v = &apmris->vertices[vno];
+    v          = &apmris->vertices[vno];
     v->ripflag = 1;
   }
 
@@ -391,26 +391,24 @@ int LABEL_RipSurface(MRI_SURFACE *apmris, LABEL *aplbl) {
     if (vno == Gdiag_no) {
       DiagBreak();
     }
-    v = &apmris->vertices[vno];
+    v          = &apmris->vertices[vno];
     v->ripflag = 0;
   }
   return (NO_ERROR);
 }
 
-int
-main(int argc, char *argv[])
-{
-  char          **av, fname[STRBUF], *sdir ;
-  char          *subject_name;
-  char    pch_surface[16384];
-  char    pch_tmp[1024];
-  int           ac, nargs;
-  int   i       = START_i;
-  MRI_SURFACE   *mris;
-  int   b_surfaceFiltered   = 0;
+int main(int argc, char *argv[]) {
+  char **      av, fname[STRBUF], *sdir;
+  char *       subject_name;
+  char         pch_surface[16384];
+  char         pch_tmp[1024];
+  int          ac, nargs;
+  int          i = START_i;
+  MRI_SURFACE *mris;
+  int          b_surfaceFiltered = 0;
 
-  GpSTDOUT  = stdout;
-//  InitDebugging( "mris_curvature_stats" );
+  GpSTDOUT = stdout;
+  //  InitDebugging( "mris_curvature_stats" );
   nargs = handleVersionOption(argc, argv, "mris_curvature_stats");
   if (nargs && argc - nargs == 1) {
     exit(0);
@@ -457,7 +455,7 @@ main(int argc, char *argv[])
   // calculated.
 
   subject_name = argv[1];
-  hemi = argv[2];
+  hemi         = argv[2];
   sprintf(fname, "%s/%s/surf/%s.%s", sdir, subject_name, hemi, surf_name);
   sprintf(pch_surface, "%s/%s.%s", subject_name, hemi, surf_name);
   cprints("Setting surface", pch_surface);
@@ -635,7 +633,7 @@ main(int argc, char *argv[])
   }
 
   if (Gf_n > 1.8) {
-    Gf_mean = Gf_total / Gf_n;
+    Gf_mean  = Gf_total / Gf_n;
     Gf_sigma = sqrt(Gf_total_sq / Gf_n - Gf_mean * Gf_mean);
     fprintf(GpSTDOUT, "\nMean across %d curvatures: %8.4e +- %8.4e\n",
             (int)Gf_n, Gf_mean, Gf_sigma);
@@ -711,8 +709,8 @@ int MRIS_minMaxCurvature_analyze(MRIS *apmris, e_secondOrderType aesot,
   //    is set by the <s_MINMAX> boolean control flags.
   //
 
-  int vmin = 0;
-  int vmax = 0;
+  int   vmin          = 0;
+  int   vmax          = 0;
   float f_minExplicit = 0.;
   float f_maxExplicit = 0.;
   //  char* pch_function  = "MRIS_minMaxCurvature_analyze";
@@ -730,7 +728,7 @@ int MRIS_minMaxCurvature_analyze(MRIS *apmris, e_secondOrderType aesot,
     fprintf(stderr, "WARN:%5s%-40s%f\tvertex = %d\n", Gppch[aesot],
             " explicit min:", f_minExplicit, vmin);
     aps_minMax->b_minViolation = 1;
-    aps_minMax->f_min = f_minExplicit;
+    aps_minMax->f_min          = f_minExplicit;
   }
   if (aps_minMax->b_maxTest && aps_minMax->f_max != f_maxExplicit) {
     fprintf(stderr, "\nWARN:%5s%-40s%f\n", Gppch[aesot],
@@ -738,7 +736,7 @@ int MRIS_minMaxCurvature_analyze(MRIS *apmris, e_secondOrderType aesot,
     fprintf(stderr, "WARN:%5s%-40s%f\tvertex = %d\n", Gppch[aesot],
             " explicit max:", f_maxExplicit, vmax);
     aps_minMax->b_maxViolation = 1;
-    aps_minMax->f_max = f_maxExplicit;
+    aps_minMax->f_max          = f_maxExplicit;
   }
   return 1;
 }
@@ -844,12 +842,12 @@ short MRIS_minMaxCurve_report(MRIS *apmris, e_secondOrderType aesot,
 
   //  DebugEnterFunction (( pch_function ));
 
-  s_minMax.f_min = apmris->min_curv;
-  s_minMax.f_max = apmris->max_curv;
-  s_minMax.vertexMin = -1;
-  s_minMax.vertexMax = -1;
-  s_minMax.b_minTest = 1;
-  s_minMax.b_maxTest = 1;
+  s_minMax.f_min          = apmris->min_curv;
+  s_minMax.f_max          = apmris->max_curv;
+  s_minMax.vertexMin      = -1;
+  s_minMax.vertexMax      = -1;
+  s_minMax.b_minTest      = 1;
+  s_minMax.b_maxTest      = 1;
   s_minMax.b_minViolation = 0;
   s_minMax.b_maxViolation = 0;
 
@@ -930,33 +928,33 @@ short MRIS_surfaceIntegrals_report(MRIS *apmris, e_secondOrderType aesot,
   char pch_processedArea[65536];
   char pch_misc[65536];
   // Surface integral variables
-  float f_SInatural = 0.0;
-  float f_SIabs = 0.0;
-  float f_SIpos = 0.0;
-  float f_SIneg = 0.0;
-  float f_SInaturalMean = 0.0;
-  int SInaturalVertices = 0;
-  float f_SIabsMean = 0.0;
-  int SIabsVertices = 0;
-  float f_SIposMean = 0.0;
-  int SIposVertices = 0;
-  float f_SInegMean = 0.0;
-  int SInegVertices = 0;
+  float f_SInatural       = 0.0;
+  float f_SIabs           = 0.0;
+  float f_SIpos           = 0.0;
+  float f_SIneg           = 0.0;
+  float f_SInaturalMean   = 0.0;
+  int   SInaturalVertices = 0;
+  float f_SIabsMean       = 0.0;
+  int   SIabsVertices     = 0;
+  float f_SIposMean       = 0.0;
+  int   SIposVertices     = 0;
+  float f_SInegMean       = 0.0;
+  int   SInegVertices     = 0;
 
   float f_SInaturalAreaNorm = 0.0;
-  float f_SInaturalArea = 0.0;
-  float f_SIabsAreaNorm = 0.0;
-  float f_SIabsArea = 0.0;
-  float f_SIposAreaNorm = 0.0;
-  float f_SIposArea = 0.0;
-  float f_SInegAreaNorm = 0.0;
-  float f_SInegArea = 0.0;
-  char pch_curveName[1024];
+  float f_SInaturalArea     = 0.0;
+  float f_SIabsAreaNorm     = 0.0;
+  float f_SIabsArea         = 0.0;
+  float f_SIposAreaNorm     = 0.0;
+  float f_SIposArea         = 0.0;
+  float f_SInegAreaNorm     = 0.0;
+  float f_SInegArea         = 0.0;
+  char  pch_curveName[1024];
   //  char* pch_function    = "MRIS_surfaceIntegrals_report";
   char tmp[1024];
 
   float f_totalSurfaceArea = apmris->total_area;
-  int totalVertices = apmris->nvertices;
+  int   totalVertices      = apmris->nvertices;
 
   //  DebugEnterFunction (( pch_function ));
   sprintf(pch_curveName, "%s", Gppch[aesot]);
@@ -1066,7 +1064,7 @@ short MRIS_surfaceIntegrals_report(MRIS *apmris, e_secondOrderType aesot,
     strcat(apch_report, tmp);
 
     if (Gb_regionalPercentages) {
-      totalVertices = G_regionalTotalVertexCount;
+      totalVertices      = G_regionalTotalVertexCount;
       f_totalSurfaceArea = Gf_regionalTotalSurfaceArea;
     }
   }
@@ -1181,9 +1179,9 @@ int MRIS_curvatureStats_analyze(MRIS *apmris, e_secondOrderType aesot) {
   char pch_minMaxReport[65536];
   char pch_surfaceIntegralReport[65536];
   //  char* pch_function  = "MRIS_curvatureStats_analyze";
-  char *pch_unitsmm = "mm^-1";
+  char *pch_unitsmm  = "mm^-1";
   char *pch_unitsmm2 = "mm^-2";
-  char pch_units[256];
+  char  pch_units[256];
 
   //  DebugEnterFunction (( pch_function ));
 
@@ -1255,21 +1253,21 @@ int MRISvertexCurvature_set(MRI_SURFACE *apmris, int aindex, float af_val) {
   //
 
   VERTEX *pvertex;
-  int vno;
-  float f_maxCurv = 0.;
-  float f_minCurv = 0.;
-  float f_maxCurvK = 0.;
-  float f_minCurvK = 0.;
-  float f_maxCurvH = 0.;
-  float f_minCurvH = 0.;
+  int     vno;
+  float   f_maxCurv  = 0.;
+  float   f_minCurv  = 0.;
+  float   f_maxCurvK = 0.;
+  float   f_minCurvK = 0.;
+  float   f_maxCurvH = 0.;
+  float   f_minCurvH = 0.;
 
   if (aindex > apmris->nvertices) {
     ErrorExit(ERROR_SIZE, "%s: target vertex is out of range.", Progname);
   }
 
   apmris->vertices[aindex].curv = af_val;
-  apmris->vertices[aindex].K = af_val;
-  apmris->vertices[aindex].H = af_val;
+  apmris->vertices[aindex].K    = af_val;
+  apmris->vertices[aindex].H    = af_val;
 
   f_maxCurv = f_minCurv = apmris->vertices[0].curv;
   f_maxCurvK = f_minCurvK = apmris->vertices[0].K;
@@ -1300,10 +1298,10 @@ int MRISvertexCurvature_set(MRI_SURFACE *apmris, int aindex, float af_val) {
   }
   apmris->max_curv = f_maxCurv;
   apmris->min_curv = f_minCurv;
-  apmris->Kmax = f_maxCurvK;
-  apmris->Kmin = f_minCurvK;
-  apmris->Hmax = f_maxCurvH;
-  apmris->Hmin = f_minCurvH;
+  apmris->Kmax     = f_maxCurvK;
+  apmris->Kmin     = f_minCurvK;
+  apmris->Hmax     = f_maxCurvH;
+  apmris->Hmin     = f_minCurvH;
 
   return (NO_ERROR);
 }
@@ -1323,10 +1321,10 @@ int MRISminMaxCurvaturesSearchSOT(MRI_SURFACE *apmris, int *ap_vertexMin,
   //
 
   VERTEX *pvertex;
-  int vno;
+  int     vno;
 
-  float f_min = 1e6;
-  float f_max = -1e6;
+  float f_min  = 1e6;
+  float f_max  = -1e6;
   float f_curv = 0.;
 
   for (vno = 0; vno < apmris->nvertices; vno++) {
@@ -1364,11 +1362,11 @@ int MRISminMaxCurvaturesSearchSOT(MRI_SURFACE *apmris, int *ap_vertexMin,
       continue;
     }
     if (f_curv > f_max) {
-      f_max = f_curv;
+      f_max         = f_curv;
       *ap_vertexMax = vno;
     }
     if (f_curv < f_min) {
-      f_min = f_curv;
+      f_min         = f_curv;
       *ap_vertexMin = vno;
     }
   }
@@ -1392,9 +1390,9 @@ int MRISminMaxCurvatureIndicesLookup(MRI_SURFACE *apmris, int *ap_vertexMin,
   //
 
   VERTEX *pvertex;
-  int vno;
-  float f_min = apmris->min_curv;
-  float f_max = apmris->max_curv;
+  int     vno;
+  float   f_min = apmris->min_curv;
+  float   f_max = apmris->max_curv;
 
   for (vno = 0; vno < apmris->nvertices; vno++) {
     pvertex = &apmris->vertices[vno];
@@ -1423,9 +1421,9 @@ int MRISvertexAreaPostProcess(MRI_SURFACE *pmris) {
   //  o Reset the min_curv and max_curv values if necessary.
   //
 
-  int vno;
+  int     vno;
   VERTEX *pvertex;
-  float f_surfaceArea = pmris->total_area;
+  float   f_surfaceArea = pmris->total_area;
 
   float f_min = pmris->vertices[0].curv;
   float f_max = f_min;
@@ -1491,15 +1489,15 @@ short LABEL_save(MRI_SURFACE *apmris, int a_labelSize, int *ap_labelMark,
   //
 
   LABEL *pLBL = nullptr;
-  int vno = 0;
+  int    vno  = 0;
 
   pLBL = LabelAlloc(a_labelSize, "", apch_filename);
   for (vno = 0; vno < apmris->nvertices; vno++) {
     if (ap_labelMark[vno]) {
       pLBL->lv[pLBL->n_points].vno = vno;
-      pLBL->lv[pLBL->n_points].x = apmris->vertices[vno].x;
-      pLBL->lv[pLBL->n_points].y = apmris->vertices[vno].y;
-      pLBL->lv[pLBL->n_points].z = apmris->vertices[vno].z;
+      pLBL->lv[pLBL->n_points].x   = apmris->vertices[vno].x;
+      pLBL->lv[pLBL->n_points].y   = apmris->vertices[vno].y;
+      pLBL->lv[pLBL->n_points].z   = apmris->vertices[vno].z;
       pLBL->n_points++;
     }
   }
@@ -1534,7 +1532,7 @@ int MRIS_surfaceRipFlags_filterVertex(MRI_SURFACE *apmris, int avno) {
   //
 
   VERTEX *pv;
-  short b_canProcess = 1;
+  short   b_canProcess = 1;
 
   pv = &apmris->vertices[avno];
   // Check if vertex might have been ripped by a label load...
@@ -1606,9 +1604,9 @@ int MRIS_surfaceRipFlags_filter(MRI_SURFACE *apmris, float *apf_notRippedArea) {
   //  o Returns the sum area of valid vertices in <apf_notRippedArea>.
   //
 
-  int vno;
-  int ripped = 0;
-  int notRipped = 0;
+  int   vno;
+  int   ripped       = 0;
+  int   notRipped    = 0;
   float f_rippedArea = 0;
 
   for (vno = 0; vno < apmris->nvertices; vno++) {
@@ -1671,15 +1669,15 @@ short MRIS_surfaceIntegral_compute(MRI_SURFACE *pmris, int *p_verticesCounted,
   //    <Gb_lowPassFilterGaussian>.
   //
 
-  VERTEX *pv;
-  int vno;
-  double f_total, f_n, f_totalArea;
-  short b_ret = 0;
-  int *p_labelMark = nullptr;
+  VERTEX *     pv;
+  int          vno;
+  double       f_total, f_n, f_totalArea;
+  short        b_ret              = 0;
+  int *        p_labelMark        = nullptr;
   static short b_labelFileCreated = 0;
 
   *p_verticesCounted = 0;
-  p_labelMark = (int *)xmalloc(pmris->nvertices * sizeof(int));
+  p_labelMark        = (int *)xmalloc(pmris->nvertices * sizeof(int));
   if (Gb_filterLabel && !b_labelFileCreated)
     for (vno = 0; vno < pmris->nvertices; vno++) {
       p_labelMark[vno] = 0;
@@ -1704,9 +1702,9 @@ short MRIS_surfaceIntegral_compute(MRI_SURFACE *pmris, int *p_verticesCounted,
     }
   }
   if (f_n > 1) {
-    *pf_meanIntegral = f_total / f_n;
+    *pf_meanIntegral           = f_total / f_n;
     *pf_areaNormalizedIntegral = f_total / (*pf_areaCounted);
-    b_ret = 1;
+    b_ret                      = 1;
   }
   if (Gb_postScale) {
     *pf_meanIntegral *= Gf_postScale;
@@ -1730,7 +1728,7 @@ int MRISzeroCurvature(MRI_SURFACE *apmris) {
   //
 
   VERTEX *pvertex;
-  int vno;
+  int     vno;
 
   for (vno = 0; vno < apmris->nvertices; vno++) {
     pvertex = &apmris->vertices[vno];
@@ -1738,8 +1736,8 @@ int MRISzeroCurvature(MRI_SURFACE *apmris) {
       continue;
     }
     pvertex->curv = 0.;
-    pvertex->K = 0.;
-    pvertex->H = 0.;
+    pvertex->K    = 0.;
+    pvertex->H    = 0.;
   }
   return (NO_ERROR);
 }
@@ -1787,14 +1785,14 @@ void histogram_wrapper(MRIS *amris, e_secondOrderType aesot) {
   //  o histogram_create() is called.
   //
 
-  int i;
+  int    i;
   float *pf_histogram;
-  float f_maxCurv = amris->max_curv;
-  float f_minCurv = amris->min_curv;
-  double f_binSize = 0.;
-  int b_error = 0;
-  short b_writeToFile = 0;
-  FILE *pFILE = nullptr;
+  float  f_maxCurv     = amris->max_curv;
+  float  f_minCurv     = amris->min_curv;
+  double f_binSize     = 0.;
+  int    b_error       = 0;
+  short  b_writeToFile = 0;
+  FILE * pFILE         = nullptr;
 
   if (Gb_binSizeOverride) {
     f_binSize = Gf_binSize;
@@ -1842,74 +1840,74 @@ void histogram_wrapper(MRIS *amris, e_secondOrderType aesot) {
     case e_Raw:
       if (GpFILE_rawHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_rawHist;
+        pFILE         = GpFILE_rawHist;
       }
       break;
     case e_Gaussian:
       if (GpFILE_KHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_KHist;
+        pFILE         = GpFILE_KHist;
       }
       break;
     case e_Mean:
       if (GpFILE_HHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_HHist;
+        pFILE         = GpFILE_HHist;
       }
       break;
     case e_K1:
       if (GpFILE_K1Hist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_K1Hist;
+        pFILE         = GpFILE_K1Hist;
       }
       break;
     case e_K2:
       if (GpFILE_K2Hist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_K2Hist;
+        pFILE         = GpFILE_K2Hist;
       }
       break;
     case e_S:
       if (GpFILE_SHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_SHist;
+        pFILE         = GpFILE_SHist;
       }
       break;
     case e_C:
       if (GpFILE_CHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_CHist;
+        pFILE         = GpFILE_CHist;
       }
       break;
     case e_BE:
       if (GpFILE_BEHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_BEHist;
+        pFILE         = GpFILE_BEHist;
       }
       break;
     case e_SI:
       if (GpFILE_SIHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_SIHist;
+        pFILE         = GpFILE_SIHist;
       }
       break;
     case e_FI:
       if (GpFILE_FIHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_FIHist;
+        pFILE         = GpFILE_FIHist;
       }
       break;
     case e_Normal:
       if (GpFILE_normHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_normHist;
+        pFILE         = GpFILE_normHist;
       }
       break;
     case e_ScaledTrans:
     case e_Scaled:
       if (GpFILE_scaledHist != nullptr) {
         b_writeToFile = 1;
-        pFILE = GpFILE_scaledHist;
+        pFILE         = GpFILE_scaledHist;
       }
       break;
     }
@@ -1924,9 +1922,9 @@ void histogram_wrapper(MRIS *amris, e_secondOrderType aesot) {
 // Bruce Dawson, see
 //  http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
 int AlmostEqual2sComplement(float A, float B, int maxUlps) {
-  int aInt;
-  int bInt;
-  int intDiff;
+  int   aInt;
+  int   bInt;
+  int   intDiff;
   void *ptrA = (void *)&A;
   void *ptrB = (void *)&B;
 
@@ -1971,16 +1969,16 @@ void histogram_create(MRIS *amris_curvature, float af_minCurv,
 
   // char* pch_function = "histogram_create()";
 
-  int vno = 0;
+  int    vno          = 0;
   float *pf_curvature = nullptr;
-  int i = 0;
-  int j = 0;
-  int start = 0;
-  int count = 0;
-  int totalCount = 0;
-  int nvertices = 0;
+  int    i            = 0;
+  int    j            = 0;
+  int    start        = 0;
+  int    count        = 0;
+  int    totalCount   = 0;
+  int    nvertices    = 0;
 
-  int b_onLeftBound = 0;  // Don't trigger higher order float
+  int b_onLeftBound  = 0; // Don't trigger higher order float
   int b_onRightBound = 0; // comparison on left/right bounds
 
   double l_curvature;  // These three variables
@@ -2006,8 +2004,8 @@ void histogram_create(MRIS *amris_curvature, float af_minCurv,
   for (i = 0; i < abins; i++) {
     count = 0;
     for (j = start; j < nvertices; j++) {
-      l_curvature = (double)(pf_curvature[j]);
-      l_leftBound = (double)((i * af_binSize + af_minCurv));
+      l_curvature  = (double)(pf_curvature[j]);
+      l_leftBound  = (double)((i * af_binSize + af_minCurv));
       l_rightBound = (double)((((i + 1) * af_binSize) + af_minCurv));
       if (Gb_maxUlps) {
         b_onRightBound =
@@ -2041,16 +2039,16 @@ void histogram_create(MRIS *amris_curvature, float af_minCurv,
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
   char *pch_text;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "-lowPassFilter")) {
-    Gb_filter = 1;
+    Gb_filter        = 1;
     Gb_lowPassFilter = 1;
     Gf_lowPassFilter = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     cprintf("Setting rectified low pass filter to", Gf_lowPassFilter);
   } else if (!stricmp(option, "-regionalPercentages")) {
     Gb_regionalPercentages = 1;
@@ -2071,33 +2069,33 @@ static int get_option(int argc, char *argv[]) {
     Gb_vertexAreaWeighFrac = 1;
     cprints("Toggling fractional vertex area weighing on", "ok");
   } else if (!stricmp(option, "-lowPassFilterGaussian")) {
-    Gb_filter = 1;
+    Gb_filter                = 1;
     Gb_lowPassFilterGaussian = 1;
     Gf_lowPassFilterGaussian = atof(argv[2]);
-    nargs = 1;
+    nargs                    = 1;
     cprintf("Setting rectified low pass Gaussian filter",
             Gf_lowPassFilterGaussian);
   } else if (!stricmp(option, "-highPassFilterGaussian")) {
-    Gb_filter = 1;
+    Gb_filter                 = 1;
     Gb_highPassFilterGaussian = 1;
     Gf_highPassFilterGaussian = atof(argv[2]);
-    nargs = 1;
+    nargs                     = 1;
     cprintf("Setting rectified high pass Gaussian filter",
             Gf_highPassFilterGaussian);
   } else if (!stricmp(option, "-highPassFilter")) {
-    Gb_filter = 1;
+    Gb_filter         = 1;
     Gb_highPassFilter = 1;
     Gf_highPassFilter = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     cprintf("Setting rectified high pass filter", Gf_highPassFilter);
   } else if (!stricmp(option, "-postScale")) {
     Gb_postScale = 1;
     Gf_postScale = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     cprintf("Setting post scale factor", Gf_postScale);
   } else if (!stricmp(option, "-filterLabel")) {
     Gb_filterLabel = 1;
-    pch_text = argv[2];
+    pch_text       = argv[2];
     strcpy(Gpch_filterLabel, pch_text);
     nargs = 1;
     cprints("Filter hits saved to ", Gpch_filterLabel);
@@ -2116,10 +2114,10 @@ static int get_option(int argc, char *argv[]) {
   } else
     switch (toupper(*option)) {
     case 'O':
-      output_fname = argv[2];
-      Gb_output2File = 1;
+      output_fname           = argv[2];
+      Gb_output2File         = 1;
       Gb_writeCurvatureFiles = 1;
-      nargs = 1;
+      nargs                  = 1;
       cprints("Outputting results using filestem", output_fname);
       cprints("Toggling save flag on curvature files", "ok");
       break;
@@ -2139,7 +2137,7 @@ static int get_option(int argc, char *argv[]) {
       nargs = 1;
       break;
     case 'C':
-      Gb_scale = 1;
+      Gb_scale       = 1;
       Gf_scaleFactor = atof(argv[2]);
       cprintf("Setting raw scale factor", Gf_scaleFactor);
       nargs = 1;
@@ -2160,61 +2158,61 @@ static int get_option(int argc, char *argv[]) {
       Gb_gaussianAndMean = 1;
       break;
     case 'S': /* write out stats */
-      stat_flag = 1;
+      stat_flag    = 1;
       condition_no = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       cprintd("Setting out summary statistics as condition", condition_no);
       break;
     case 'H': /* histogram */
       if (argc == 2) {
         print_usage();
       }
-      Gb_histogram = 1;
+      Gb_histogram        = 1;
       Gb_histogramPercent = 0;
-      Gb_minMaxShow = 1;
-      G_bins = atoi(argv[2]);
-      nargs = 1;
+      Gb_minMaxShow       = 1;
+      G_bins              = atoi(argv[2]);
+      nargs               = 1;
       cprintf("Setting curvature histogram bins", G_bins);
       if (G_bins <= 0) {
         ErrorExit(ERROR_BADPARM, "%s: Invalid bin number.\n", Progname);
       }
       break;
     case 'P': /* percentage histogram */
-      Gb_histogram = 1;
+      Gb_histogram        = 1;
       Gb_histogramPercent = 1;
-      Gb_minMaxShow = 1;
-      G_bins = atoi(argv[2]);
-      nargs = 1;
+      Gb_minMaxShow       = 1;
+      G_bins              = atoi(argv[2]);
+      nargs               = 1;
       cprintd("Creating percentage curvature histogram bins", G_bins);
       break;
     case 'B': /* binSize override*/
       Gb_binSizeOverride = 1;
-      Gf_binSize = (double)atof(argv[2]);
-      nargs = 1;
+      Gf_binSize         = (double)atof(argv[2]);
+      nargs              = 1;
       cprintf("Setting curvature histogram binSize", Gf_binSize);
       break;
     case 'I': /* histogram start */
       Gb_histStartOverride = 1;
-      Gf_histStart = atof(argv[2]);
-      nargs = 1;
+      Gf_histStart         = atof(argv[2]);
+      nargs                = 1;
       cprintf("Setting histogram start point", Gf_histStart);
       break;
     case 'J': /* histogram end */
       Gb_histEndOverride = 1;
-      Gf_histEnd = atof(argv[2]);
-      nargs = 1;
+      Gf_histEnd         = atof(argv[2]);
+      nargs              = 1;
       cprintf("Setting histogram end point", Gf_histEnd);
       break;
     case 'Z': /* zero a target vertex */
       Gb_zeroVertex = 1;
-      G_zeroVertex = atoi(argv[2]);
-      nargs = 1;
+      G_zeroVertex  = atoi(argv[2]);
+      nargs         = 1;
       cprintd("Setting zero vertex index", G_zeroVertex);
       break;
     case 'Q': /* set maxUlps */
       Gb_maxUlps = 1;
-      G_maxUlps = atoi(argv[2]);
-      nargs = 1;
+      G_maxUlps  = atoi(argv[2]);
+      nargs      = 1;
       cprintd("Setting maxUlps", G_maxUlps);
       break;
     case 'N':

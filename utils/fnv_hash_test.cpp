@@ -25,8 +25,8 @@
 
 #include "fnv_hash.h"
 
-#include <stdio.h>
 #include <malloc.h>
+#include <stdio.h>
 
 int main() {
 
@@ -35,15 +35,15 @@ int main() {
   double LO = 0;
   double HI = 1000;
 
-  int bucketsSize = 1000;
-  long *buckets = (long *)calloc(bucketsSize, sizeof(long));
+  int   bucketsSize = 1000;
+  long *buckets     = (long *)calloc(bucketsSize, sizeof(long));
 
   for (i = 0; i < bucketsSize; i++) {
     for (k = 0; k < 100; k++) {
       int random_counter = 0;
       for (r = 0; r < 3; r++) {
-        float f = fnv_hash(i, k, &random_counter, LO, HI);
-        int index = (int)f;
+        float f     = fnv_hash(i, k, &random_counter, LO, HI);
+        int   index = (int)f;
         if (index < 0 || index >= bucketsSize) {
           fprintf(stderr, "Bad index\n");
           return 1;
@@ -53,8 +53,8 @@ int main() {
     }
   }
 
-  int histogramsSize = 1000;
-  int *histograms = (int *)calloc(histogramsSize, sizeof(int));
+  int  histogramsSize = 1000;
+  int *histograms     = (int *)calloc(histogramsSize, sizeof(int));
 
   for (i = 0; i < bucketsSize; i++) {
     int index = (int)buckets[i];

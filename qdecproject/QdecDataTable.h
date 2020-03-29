@@ -33,8 +33,6 @@
 #include "QdecFactor.h"
 #include "QdecSubject.h"
 
-using namespace std;
-
 class QdecDataTable {
 public:
   // Constructors/Destructors
@@ -64,17 +62,17 @@ public:
   /**
    * @return string
    */
-  string GetFileName();
+  std::string GetFileName();
 
   /**
    * @return vector< string >
    */
-  vector<string> GetSubjectIDs();
+  std::vector<std::string> GetSubjectIDs();
 
   /**
    * @return vector< QdecSubject* >
    */
-  vector<QdecSubject *> GetSubjects();
+  std::vector<QdecSubject *> GetSubjects();
 
   /**
    * @return QdecFactor*
@@ -92,12 +90,12 @@ public:
   /**
    * @return vector< string >
    */
-  vector<string> GetDiscreteFactorNames();
+  std::vector<std::string> GetDiscreteFactorNames();
 
   /**
    * @return vector< string >
    */
-  vector<string> GetContinuousFactorNames();
+  std::vector<std::string> GetContinuousFactorNames();
 
   /**
    * GetNumberOfClasses( ) - returns the number of subjects in the table
@@ -128,7 +126,7 @@ public:
    * @return vector< double > - first element is mean, second is the stddev
    * @param isFactorName
    */
-  vector<double> GetMeanAndStdDev(const char *isFactorName);
+  std::vector<double> GetMeanAndStdDev(const char *isFactorName);
 
   /**
    * deletes all continuous factors that have a zero mean and zero stddev.
@@ -159,13 +157,13 @@ private:
   //
 
   // name of the text file from which this data is loaded
-  string mfnFileName;
+  std::string mfnFileName;
 
   // discrete and continuous factors as found on first line of data table
-  vector<QdecFactor *> mFactors;
+  std::vector<QdecFactor *> mFactors;
 
   // Stores subject data (id and factors) as read from table.dat input file.
-  vector<QdecSubject *> mSubjects;
+  std::vector<QdecSubject *> mSubjects;
 };
 
 #endif // QDECDATATABLE_H

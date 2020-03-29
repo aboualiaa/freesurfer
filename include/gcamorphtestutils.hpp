@@ -27,10 +27,10 @@
 #ifndef GCAMORPH_TEST_UTILS_HPP
 #define GCAMORPH_TEST_UTILS_HPP
 
-#include <string>
-#include <map>
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
+#include <map>
+#include <string>
 
 #include "netcdf.h"
 

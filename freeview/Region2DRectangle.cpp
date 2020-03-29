@@ -24,20 +24,20 @@
  */
 
 #include "Region2DRectangle.h"
+#include "LayerMRI.h"
 #include "RenderView2D.h"
+#include <QDebug>
 #include <vtkActor2D.h>
-#include <vtkProperty2D.h>
-#include <vtkRenderer.h>
-#include <vtkPolyDataMapper2D.h>
-#include <vtkPoints.h>
 #include <vtkCellArray.h>
 #include <vtkCoordinate.h>
-#include <vtkPolyData.h>
 #include <vtkMath.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper2D.h>
+#include <vtkProperty2D.h>
+#include <vtkRenderer.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
-#include "LayerMRI.h"
-#include <QDebug>
 
 Region2DRectangle::Region2DRectangle(RenderView2D *view) : Region2D(view) {
   m_bEnableStats = true;
@@ -101,7 +101,7 @@ void Region2DRectangle::Update() {
   m_view->WorldToViewport(m_dPt[3][0], m_dPt[3][1], m_dPt[3][2], pt3[0], pt3[1],
                           pt3[2]);
 
-  vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkPoints>    pts  = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> poly = vtkSmartPointer<vtkCellArray>::New();
   pts->InsertNextPoint(pt0);
   pts->InsertNextPoint(pt1);
@@ -142,7 +142,7 @@ void Region2DRectangle::UpdateStats() {
   LayerMRI *layer = m_view->GetFirstNonLabelVolume();
   if (layer) {
     double mean, sd;
-    int count;
+    int    count;
     layer->GetVoxelStatsRectangle(m_dPt[0], m_dPt[2], m_view->GetViewPlane(),
                                   &mean, &sd, &count);
     char ch[1000];
@@ -310,7 +310,7 @@ QString Region2DRectangle::DataToString() {
   return strg;
 }
 
-Region2D *Region2DRectangle::ObjectFromString(RenderView2D *view,
+Region2D *Region2DRectangle::ObjectFromString(RenderView2D * view,
                                               const QString &text) {
   QString head = "FreeView:Region2DRectangle:";
   if (text.indexOf(head) != 0)
@@ -321,9 +321,9 @@ Region2D *Region2DRectangle::ObjectFromString(RenderView2D *view,
     return NULL;
 
   double dval[12];
-  bool bOK = true;
-  dval[0] = list[0].toDouble(&bOK);
-  int i = 1;
+  bool   bOK = true;
+  dval[0]    = list[0].toDouble(&bOK);
+  int i      = 1;
   while (bOK && i < 12) {
     dval[i] = list[i].toDouble(&bOK);
     i++;

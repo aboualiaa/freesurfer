@@ -22,16 +22,14 @@
  *
  */
 
-#include <stdexcept>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 extern "C" {
-#include "mri.h"
 #include "NrrdIO.h"
+#include "mri.h"
 }
-
-using namespace std;
 
 const char *Progname = NULL;
 
@@ -39,7 +37,7 @@ const char *Progname = NULL;
   if (!(x)) {                                                                  \
     stringstream ss;                                                           \
     ss << "Line " << __LINE__ << ": " << s;                                    \
-    throw runtime_error(ss.str());                                             \
+    throw std::runtime_error(ss.str());                                        \
   }
 
 class MriioTester {
@@ -48,16 +46,16 @@ public:
 };
 
 void MriioTester::TestNrrdIO() {
-  cerr << "Check that mriNrrdRead reads foolc.nrrd...";
+  std::cerr << "Check that mriNrrdRead reads foolc.nrrd...";
   Assert(MRIreadType("test_mriio_data/foolc.nrrd", NRRD_FILE) != NULL,
          "failed.");
-  cerr << "passed." << endl;
+  std::cerr << "passed." << std::endl;
 }
 
 int main(int argc, char **argv) {
   // Progname = argv[0];
 
-  cerr << "Beginning tests..." << endl;
+  std::cerr << "Beginning tests..." << std::endl;
 
   try {
 
@@ -65,14 +63,15 @@ int main(int argc, char **argv) {
     tester.TestNrrdIO();
 
   } catch (runtime_error &e) {
-    cerr << "failed " << endl << "exception: " << e.what() << endl;
+    std::cerr << "failed " << std::endl
+              << "exception: " << e.what() << std::endl;
     exit(1);
   } catch (...) {
-    cerr << "failed" << endl;
+    std::cerr << "failed" << std::endl;
     exit(1);
   }
 
-  cerr << "Success" << endl;
+  std::cerr << "Success" << std::endl;
 
   exit(0);
 }

@@ -36,7 +36,7 @@
 #define NULL 0
 #endif
 
-using tBoolean = unsigned char;
+using tBoolean   = unsigned char;
 using tSignature = long;
 
 typedef struct {
@@ -69,16 +69,16 @@ typedef enum {
   xColr_knNumComponents
 } xColr_tComponent;
 
-void xColr_SetFloat(xColor3fRef iColor, float ifRed, float ifGreen,
-                    float ifBlue);
-void xColr_SetFloatComponent(xColor3fRef iColor, xColr_tComponent iComponent,
-                             float ifValue);
+void  xColr_SetFloat(xColor3fRef iColor, float ifRed, float ifGreen,
+                     float ifBlue);
+void  xColr_SetFloatComponent(xColor3fRef iColor, xColr_tComponent iComponent,
+                              float ifValue);
 float xColr_GetFloatComponent(xColor3fRef iColor, xColr_tComponent iComponent);
-void xColr_SetInt(xColor3nRef iColor, int ifRed, int ifGreen, int ifBlue);
-void xColr_SetIntComponent(xColor3nRef iColor, xColr_tComponent iComponent,
-                           int inValue);
-int xColr_GetIntComponent(xColor3nRef iColor, xColr_tComponent iComponent);
-void xColr_PackFloatArray(xColor3fRef iColor, float *iafColor);
+void  xColr_SetInt(xColor3nRef iColor, int ifRed, int ifGreen, int ifBlue);
+void  xColr_SetIntComponent(xColor3nRef iColor, xColr_tComponent iComponent,
+                            int inValue);
+int   xColr_GetIntComponent(xColor3nRef iColor, xColr_tComponent iComponent);
+void  xColr_PackFloatArray(xColor3fRef iColor, float *iafColor);
 
 void xColr_HilightComponent(xColor3fRef iColor, xColr_tComponent iComponent);
 

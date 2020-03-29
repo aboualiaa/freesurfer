@@ -26,12 +26,12 @@
 
 #include <sys/utsname.h>
 
-#include "version.h"
 #include "cmdargs.h"
 #include "diag.h"
 #include "mris_compVolFrac.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -41,17 +41,17 @@ static void dump_options(FILE *fp);
 
 static char vcid[] = "$Id: mris_compute_volume_fractions.c,v 1.4 2013/05/17 "
                      "15:19:06 enderk Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *VolFile = nullptr;
-char *SurfFile = nullptr;
-char *OutFile = nullptr;
+char * VolFile  = nullptr;
+char * SurfFile = nullptr;
+char * OutFile  = nullptr;
 double Accuracy = -1000.0;
-int main(int argc, char *argv[]) {
+int    main(int argc, char *argv[]) {
 
   printf("working!\n");
   int nargs;
@@ -83,9 +83,9 @@ int main(int argc, char *argv[]) {
 
   dump_options(stdout);
   volFraction v;
-  v.frac = 0.0;
-  v.err = 0.0;
-  MRI *mri = MRIread(VolFile);
+  v.frac            = 0.0;
+  v.err             = 0.0;
+  MRI *        mri  = MRIread(VolFile);
   MRI_SURFACE *mris = MRISread(SurfFile);
   printf("running the computation...\n");
   MRI *mri_fractions =
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -129,22 +129,22 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--vol")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      VolFile = pargv[0];
+      VolFile   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      SurfFile = pargv[0];
+      SurfFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--acc")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      Accuracy = atof(pargv[0]);
+      Accuracy  = atof(pargv[0]);
       nargsused = 1;
     } else if (!strcasecmp(option, "--out")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      OutFile = pargv[0];
+      OutFile   = pargv[0];
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);

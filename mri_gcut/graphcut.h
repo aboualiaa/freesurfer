@@ -18,8 +18,8 @@
  *
  */
 
-#define NODE_BLOCK_SIZE 512
-#define ARC_BLOCK_SIZE 1024
+#define NODE_BLOCK_SIZE    512
+#define ARC_BLOCK_SIZE     1024
 #define NODEPTR_BLOCK_SIZE 128
 
 template <class Type> class Block {
@@ -29,8 +29,8 @@ public:
      will be called if allocation failed; the message
      passed to this function is "Not enough memory!" */
   Block(int size, void (*err_function)(char *) = NULL) {
-    first = last = NULL;
-    block_size = size;
+    first = last   = NULL;
+    block_size     = size;
     error_function = err_function;
   }
 
@@ -64,10 +64,10 @@ public:
           last->next = next;
         else
           first = next;
-        last = next;
+        last          = next;
         last->current = &(last->data[0]);
-        last->last = last->current + block_size;
-        last->next = NULL;
+        last->last    = last->current + block_size;
+        last->next    = NULL;
       }
     }
 
@@ -115,17 +115,17 @@ public:
 
 private:
   typedef struct block_st {
-    Type *current, *last;
+    Type *           current, *last;
     struct block_st *next;
-    Type data[1];
+    Type             data[1];
   } block;
 
-  int block_size;
+  int    block_size;
   block *first;
   block *last;
 
   block *scan_current_block;
-  Type *scan_current_data;
+  Type * scan_current_data;
 
   void (*error_function)(char *);
 };
@@ -141,9 +141,9 @@ public:
      will be called if allocation failed; the message
      passed to this function is "Not enough memory!" */
   DBlock(int size, void (*err_function)(char *) = NULL) {
-    first = NULL;
-    first_free = NULL;
-    block_size = size;
+    first          = NULL;
+    first_free     = NULL;
+    block_size     = size;
     error_function = err_function;
   }
 
@@ -162,7 +162,7 @@ public:
 
     if (!first_free) {
       block *next = first;
-      first = (block *)new char[sizeof(block) +
+      first       = (block *)new char[sizeof(block) +
                                 (block_size - 1) * sizeof(block_item)];
       if (!first) {
         if (error_function)
@@ -173,10 +173,10 @@ public:
       for (item = first_free; item < first_free + block_size - 1; item++)
         item->next_free = item + 1;
       item->next_free = NULL;
-      first->next = next;
+      first->next     = next;
     }
 
-    item = first_free;
+    item       = first_free;
     first_free = item->next_free;
     return (Type *)item;
   }
@@ -184,24 +184,24 @@ public:
   /* Deletes an item allocated previously */
   void Delete(Type *t) {
     ((block_item *)t)->next_free = first_free;
-    first_free = (block_item *)t;
+    first_free                   = (block_item *)t;
   }
 
   /***********************************************************************/
 
 private:
   typedef union block_item_st {
-    Type t;
+    Type           t;
     block_item_st *next_free;
   } block_item;
 
   typedef struct block_st {
     struct block_st *next;
-    block_item data[1];
+    block_item       data[1];
   } block;
 
-  int block_size;
-  block *first;
+  int         block_size;
+  block *     first;
   block_item *first_free;
 
   void (*error_function)(char *);
@@ -267,12 +267,12 @@ private:
   typedef struct node_st {
     arc_st *first; /* first outcoming arc */
 
-    arc_st *parent; /* node's parent */
-    node_st *next;  /* pointer to the next active node
+    arc_st * parent;     /* node's parent */
+    node_st *next;       /* pointer to the next active node
                   (or to itself if it is the last node in the list) */
-    int mark_count; /* d is valid if mark_count == ::mark_count */
-    int mark_d;     /* distance to the terminal */
-    short is_sink;  /* flag showing whether the node is in the source or in the
+    int      mark_count; /* d is valid if mark_count == ::mark_count */
+    int      mark_d;     /* distance to the terminal */
+    short is_sink; /* flag showing whether the node is in the source or in the
                        sink tree */
 
     captype tr_cap; /* if tr_cap > 0 then tr_cap is residual capacity of the arc
@@ -283,21 +283,21 @@ private:
 
   /* arc structure */
   typedef struct arc_st {
-    node_st *head;  /* node the arc points to */
-    arc_st *next;   /* next arc with the same originating node */
-    arc_st *sister; /* reverse arc */
+    node_st *head;   /* node the arc points to */
+    arc_st * next;   /* next arc with the same originating node */
+    arc_st * sister; /* reverse arc */
 
     captype r_cap; /* residual capacity */
   } arc;
 
   /* 'pointer to node' structure */
   typedef struct nodeptr_st {
-    node_st *ptr;
+    node_st *   ptr;
     nodeptr_st *next;
   } nodeptr;
 
-  Block<node> *node_block;
-  Block<arc> *arc_block;
+  Block<node> *    node_block;
+  Block<arc> *     arc_block;
   DBlock<nodeptr> *nodeptr_block;
 
   void (*error_function)(char *); /* this function is called if a error occurs,
@@ -308,14 +308,14 @@ private:
 
   /***********************************************************************/
 
-  node *queue_first[2], *queue_last[2]; /* list of active nodes */
-  nodeptr *orphan_first, *orphan_last;  /* list of pointers to orphans */
-  int mark_count; /* monotonically increasing global counter */
+  node *   queue_first[2], *queue_last[2]; /* list of active nodes */
+  nodeptr *orphan_first, *orphan_last;     /* list of pointers to orphans */
+  int      mark_count; /* monotonically increasing global counter */
 
   /***********************************************************************/
 
   /* functions for processing active list */
-  void set_active(node *i);
+  void  set_active(node *i);
   node *next_active();
 
   void maxflow_init();

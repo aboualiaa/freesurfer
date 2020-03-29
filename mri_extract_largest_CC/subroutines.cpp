@@ -25,14 +25,14 @@
 
 /* subroutines.c */
 
+#include "subroutines.h"
+#include "mri.h"
+#include "myutil.h"
+#include <math.h>
+#include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
-#include <memory.h>
-#include "mri.h"
-#include "subroutines.h"
-#include "myutil.h"
 
 static int xoff6[6] = {1, 0, 0, -1, 0, 0};
 static int yoff6[6] = {0, 1, 0, 0, -1, 0};
@@ -52,12 +52,12 @@ void RemoveHoles(MRI *orivol) {
      CC.
    */
 
-  MRI *tmpvol;
-  MRI *Label;
-  int i, j, k, curSize;
+  MRI *  tmpvol;
+  MRI *  Label;
+  int    i, j, k, curSize;
   POINTI seed;
-  int minX, minY, minZ, maxX, maxY, maxZ;
-  int XN, YN, ZN;
+  int    minX, minY, minZ, maxX, maxY, maxZ;
+  int    XN, YN, ZN;
 
   XN = orivol->width;
   YN = orivol->height;
@@ -117,11 +117,11 @@ void GrassFire(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
      If a point has LABEL = 0, then it's a unlabelled point or bkground point.
    */
 
-  POINTI cPt, nPt;
+  POINTI  cPt, nPt;
   MYqueue NeiQ;
-  int ci, cj, ck, ni, nj, nk;
-  int ioff, joff, koff;
-  int XN, YN, ZN;
+  int     ci, cj, ck, ni, nj, nk;
+  int     ioff, joff, koff;
+  int     XN, YN, ZN;
 
   XN = orivol->width;
   YN = orivol->height;
@@ -134,7 +134,7 @@ void GrassFire(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
   (*minZ) = Pt->z;
   (*maxZ) = Pt->z;
 
-  NeiQ = myQueue(sizeof(POINTI));
+  NeiQ                                = myQueue(sizeof(POINTI));
   MRIIvox(Label, Pt->x, Pt->y, Pt->z) = label;
 
   myQueuePush(NeiQ, Pt);
@@ -171,9 +171,9 @@ void GrassFire(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
             if (MRIIvox(Label, nj, ni, nk) == 0 &&
                 MRIgetVoxVal(orivol, nj, ni, nk, 0) > 0) {
               /* Unlabelled object point found */
-              nPt.x = nj;
-              nPt.y = ni;
-              nPt.z = nk;
+              nPt.x                      = nj;
+              nPt.y                      = ni;
+              nPt.z                      = nk;
               MRIIvox(Label, nj, ni, nk) = label;
               myQueuePush(NeiQ, &nPt);
             }
@@ -196,11 +196,11 @@ void GrassFire6(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
      If a point has LABEL = 0, then it's a unlabelled point or bkground point.
    */
 
-  POINTI cPt, nPt;
+  POINTI  cPt, nPt;
   MYqueue NeiQ;
-  int ci, cj, ck, ni, nj, nk;
-  int XN, YN, ZN;
-  int index;
+  int     ci, cj, ck, ni, nj, nk;
+  int     XN, YN, ZN;
+  int     index;
 
   XN = orivol->width;
   YN = orivol->height;
@@ -213,7 +213,7 @@ void GrassFire6(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
   (*minZ) = Pt->z;
   (*maxZ) = Pt->z;
 
-  NeiQ = myQueue(sizeof(POINTI));
+  NeiQ                                = myQueue(sizeof(POINTI));
   MRIIvox(Label, Pt->x, Pt->y, Pt->z) = label;
 
   myQueuePush(NeiQ, Pt);
@@ -249,9 +249,9 @@ void GrassFire6(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
         if (MRIIvox(Label, nj, ni, nk) == 0 &&
             MRIgetVoxVal(orivol, nj, ni, nk, 0) > 0) {
           /* Unlabelled object point found */
-          nPt.x = nj;
-          nPt.y = ni;
-          nPt.z = nk;
+          nPt.x                      = nj;
+          nPt.y                      = ni;
+          nPt.z                      = nk;
           MRIIvox(Label, nj, ni, nk) = label;
           myQueuePush(NeiQ, &nPt);
         }
@@ -274,11 +274,11 @@ void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
      If a point has LABEL = 0, then it's a unlabelled point or bkground point.
    */
 
-  POINTI cPt, nPt;
+  POINTI  cPt, nPt;
   MYqueue NeiQ;
-  int ci, cj, ck, ni, nj, nk;
-  int XN, YN, ZN;
-  int index;
+  int     ci, cj, ck, ni, nj, nk;
+  int     XN, YN, ZN;
+  int     index;
 
   XN = orivol->width;
   YN = orivol->height;
@@ -291,7 +291,7 @@ void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
   (*minZ) = Pt->z;
   (*maxZ) = Pt->z;
 
-  NeiQ = myQueue(sizeof(POINTI));
+  NeiQ                                = myQueue(sizeof(POINTI));
   MRIIvox(Label, Pt->x, Pt->y, Pt->z) = label;
 
   myQueuePush(NeiQ, Pt);
@@ -327,9 +327,9 @@ void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
         if (MRIIvox(Label, nj, ni, nk) == 0 &&
             MRIgetVoxVal(orivol, nj, ni, nk, 0) > 0) {
           /* Unlabelled object point found */
-          nPt.x = nj;
-          nPt.y = ni;
-          nPt.z = nk;
+          nPt.x                      = nj;
+          nPt.y                      = ni;
+          nPt.z                      = nk;
           MRIIvox(Label, nj, ni, nk) = label;
           myQueuePush(NeiQ, &nPt);
         }
@@ -344,11 +344,11 @@ void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
 void GetLargestCC6(MRI *orivol) {
   /* This function keeps the largest CC, and reset all other CC to bgvalue (0)
    */
-  MRI *Label;
-  int i, j, k;
-  int maxSize, maxLabel, curSize, curLabel;
-  int minX, minY, minZ, maxX, maxY, maxZ;
-  int XN, YN, ZN;
+  MRI *  Label;
+  int    i, j, k;
+  int    maxSize, maxLabel, curSize, curLabel;
+  int    minX, minY, minZ, maxX, maxY, maxZ;
+  int    XN, YN, ZN;
   POINTI Pt;
 
   XN = orivol->width;
@@ -364,7 +364,7 @@ void GetLargestCC6(MRI *orivol) {
         MRIIvox(Label, j, i, k) = 0;
 
   curLabel = 1;
-  maxSize = 0;
+  maxSize  = 0;
   maxLabel = 1;
 
   for (i = 0; i < YN; i++)
@@ -378,7 +378,7 @@ void GetLargestCC6(MRI *orivol) {
           GrassFire6(orivol, Label, curLabel, &Pt, &curSize, &minX, &maxX,
                      &minY, &maxY, &minZ, &maxZ);
           if (maxSize < curSize) {
-            maxSize = curSize;
+            maxSize  = curSize;
             maxLabel = curLabel;
           }
           curLabel++;
@@ -399,11 +399,11 @@ void GetLargestCC6(MRI *orivol) {
 void GetLargestCC18(MRI *orivol) {
   /* This function keeps the largest CC, and reset all other CC to bgvalue (0)
    */
-  MRI *Label;
-  int i, j, k;
-  int maxSize, maxLabel, curSize, curLabel;
-  int minX, minY, minZ, maxX, maxY, maxZ;
-  int XN, YN, ZN;
+  MRI *  Label;
+  int    i, j, k;
+  int    maxSize, maxLabel, curSize, curLabel;
+  int    minX, minY, minZ, maxX, maxY, maxZ;
+  int    XN, YN, ZN;
   POINTI Pt;
 
   XN = orivol->width;
@@ -419,7 +419,7 @@ void GetLargestCC18(MRI *orivol) {
         MRIIvox(Label, j, i, k) = 0;
 
   curLabel = 1;
-  maxSize = 0;
+  maxSize  = 0;
   maxLabel = 1;
 
   for (i = 0; i < YN; i++)
@@ -433,7 +433,7 @@ void GetLargestCC18(MRI *orivol) {
           GrassFire18(orivol, Label, curLabel, &Pt, &curSize, &minX, &maxX,
                       &minY, &maxY, &minZ, &maxZ);
           if (maxSize < curSize) {
-            maxSize = curSize;
+            maxSize  = curSize;
             maxLabel = curLabel;
           }
           curLabel++;
@@ -452,7 +452,7 @@ void GetLargestCC18(MRI *orivol) {
 }
 
 MRI *Dilation6(MRI *ori, MRI *out, int R) {
-  int i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
+  int  i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
   MRI *tmpvol;
 
   XN = ori->width;
@@ -510,7 +510,7 @@ MRI *Dilation6(MRI *ori, MRI *out, int R) {
 }
 
 MRI *Erosion6(MRI *ori, MRI *out, int R) {
-  int i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
+  int  i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
   MRI *tmpvol;
 
   XN = ori->width;
@@ -569,7 +569,7 @@ MRI *Erosion6(MRI *ori, MRI *out, int R) {
 }
 
 MRI *Dilation26(MRI *ori, MRI *out, int R) {
-  int i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
+  int  i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
   MRI *tmpvol;
 
   XN = ori->width;
@@ -631,7 +631,7 @@ MRI *Dilation26(MRI *ori, MRI *out, int R) {
 }
 
 MRI *Erosion26(MRI *ori, MRI *out, int R) {
-  int i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
+  int  i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
   MRI *tmpvol;
 
   XN = ori->width;
@@ -698,7 +698,7 @@ MRI *BinaryOpen6(MRI *ori, MRI *out, int R) {
   MRI *tmpvol = NULL;
 
   tmpvol = Erosion6(ori, tmpvol, R);
-  out = Dilation6(tmpvol, out, R);
+  out    = Dilation6(tmpvol, out, R);
 
   MRIfree(&tmpvol);
 
@@ -732,7 +732,7 @@ MRI *BinaryClose6(MRI *ori, MRI *out, int R) {
   MRI *tmpvol = NULL;
 
   tmpvol = Dilation6(ori, tmpvol, R);
-  out = Erosion6(tmpvol, out, R);
+  out    = Erosion6(tmpvol, out, R);
 
   MRIfree(&tmpvol);
 
@@ -748,7 +748,7 @@ MRI *BinaryClose26(MRI *ori, MRI *out, int R) {
   MRI *tmpvol = NULL;
 
   tmpvol = Dilation26(ori, tmpvol, R);
-  out = Erosion26(tmpvol, out, R);
+  out    = Erosion26(tmpvol, out, R);
 
   MRIfree(&tmpvol);
 

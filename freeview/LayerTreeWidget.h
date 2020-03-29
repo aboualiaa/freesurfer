@@ -24,8 +24,8 @@
 #ifndef LAYERTREEWIDGET_H
 #define LAYERTREEWIDGET_H
 
-#include <QTreeWidget>
 #include <QItemDelegate>
+#include <QTreeWidget>
 
 class Layer;
 class QDropEvent;
@@ -38,7 +38,7 @@ public:
       : QItemDelegate(parent), ParentView(parent) {}
   ~MyItemDelegate() {}
 
-  QRect GetCheckBoxRect(const QModelIndex &index,
+  QRect GetCheckBoxRect(const QModelIndex &         index,
                         const QStyleOptionViewItem &option) const;
 
 private:
@@ -76,14 +76,14 @@ public slots:
   void SetSelectedLayers(const QList<int> &layer_ids);
 
 protected:
-  bool event(QEvent *e);
-  void drawRow(QPainter *painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const;
+  bool         event(QEvent *e);
+  void         drawRow(QPainter *painter, const QStyleOptionViewItem &option,
+                       const QModelIndex &index) const;
   virtual void dropEvent(QDropEvent *event);
 
   MyItemDelegate *m_itemDelegate;
-  QRect rectCheckbox;
-  bool m_bCheckBoxClicked;
+  QRect           rectCheckbox;
+  bool            m_bCheckBoxClicked;
 };
 
 #endif // LAYERTREEWIDGET_H

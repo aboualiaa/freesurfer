@@ -35,7 +35,7 @@
 
 typedef struct Cell {
   unsigned char type;
-  void *next;
+  void *        next;
 } Cell;
 
 typedef struct Basincell {
@@ -72,13 +72,13 @@ typedef struct STRIP_PARMS {
   int cx, cy, cz, rb;
 
   char *surfname;
-  int h_shk;
-  int skull_type;
-  int watershed_analyze;
-  int threshold_analyze;
+  int   h_shk;
+  int   skull_type;
+  int   watershed_analyze;
+  int   threshold_analyze;
 
-  int seed_coord[30][4];
-  int nb_seed_points /*=0*/;
+  int           seed_coord[30][4];
+  int           nb_seed_points /*=0*/;
   unsigned char hpf;
 
   int manual_params;
@@ -91,15 +91,15 @@ typedef struct {
   MRIS *mrisphere, *mris, *mris_curv, *mris_var_curv, *mris_dCOG,
       *mris_var_dCOG;
 
-  double xCOG, yCOG, zCOG, rad_Brain;
-  double xsCOG, ysCOG, zsCOG;
-  int i_global_min /*=0*/, j_global_min, k_global_min, int_global_min;
+  double        xCOG, yCOG, zCOG, rad_Brain;
+  double        xsCOG, ysCOG, zsCOG;
+  int           i_global_min /*=0*/, j_global_min, k_global_min, int_global_min;
   unsigned long estimated_size /*=0*/, main_basin_size /*=0*/;
   unsigned long brain_size /*=0*/;
   unsigned long basinnumber, basinsize;
 
   MRI *mri_src, *mri_dst, *mri_orig;
-  int width, height, depth;
+  int  width, height, depth;
 
   unsigned char Imax;
   int WM_INTENSITY, WM_VARIANCE, WM_HALF_MAX, WM_HALF_MIN, WM_MAX, WM_MIN;
@@ -128,9 +128,9 @@ typedef struct {
   unsigned long count[256];
 
   Coord *T1Table;
-  long T1nbr;
+  long   T1nbr;
 
-  int decision;
+  int   decision;
   float scale;
 
   int atlas;

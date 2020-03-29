@@ -31,21 +31,21 @@
 //
 
 QdecGlmFitResults::QdecGlmFitResults(
-    QdecGlmDesign *iGlmDesign,
-    vector<string> iContrastSigFiles,     /* /<contrast>/sig.mgh */
-    string iConcatContrastSigFile,        /* contrast.sig.mgh */
-    string ifnResidualErrorStdDevFile,    /* rstd.mgh */
-    string ifnRegressionCoefficientsFile, /* beta.mgh */
-    string ifnFsgdFile /* y.fsgd */) {
+    QdecGlmDesign *          iGlmDesign,
+    std::vector<std::string> iContrastSigFiles,      /* /<contrast>/sig.mgh */
+    std::string              iConcatContrastSigFile, /* contrast.sig.mgh */
+    std::string              ifnResidualErrorStdDevFile,    /* rstd.mgh */
+    std::string              ifnRegressionCoefficientsFile, /* beta.mgh */
+    std::string              ifnFsgdFile /* y.fsgd */) {
   assert(iGlmDesign);
   assert(iContrastSigFiles.size());
 
-  this->mGlmDesign = iGlmDesign;
-  this->mfnContrastSigFiles = iContrastSigFiles;
-  this->mfnConcatContrastSigFile = iConcatContrastSigFile;
-  this->mfnResidualErrorStdDevFile = ifnResidualErrorStdDevFile;
+  this->mGlmDesign                    = iGlmDesign;
+  this->mfnContrastSigFiles           = iContrastSigFiles;
+  this->mfnConcatContrastSigFile      = iConcatContrastSigFile;
+  this->mfnResidualErrorStdDevFile    = ifnResidualErrorStdDevFile;
   this->mfnRegressionCoefficientsFile = ifnRegressionCoefficientsFile;
-  this->mfnFsgdFile = ifnFsgdFile;
+  this->mfnFsgdFile                   = ifnFsgdFile;
 }
 
 QdecGlmFitResults::~QdecGlmFitResults() {}
@@ -65,7 +65,7 @@ QdecGlmDesign *QdecGlmFitResults::GetGlmDesign() { return this->mGlmDesign; }
  * Example of one of the possible names: "Avg-thickness-Age-Cor"
  * @return vector< string >
  */
-vector<string> QdecGlmFitResults::GetContrastNames() {
+std::vector<std::string> QdecGlmFitResults::GetContrastNames() {
   return this->mGlmDesign->GetContrastNames();
 }
 
@@ -75,7 +75,7 @@ vector<string> QdecGlmFitResults::GetContrastNames() {
  * "Does the correlation between thickness and Age differ from zero?".
  * @return vector< string >
  */
-vector<string> QdecGlmFitResults::GetContrastQuestions() {
+std::vector<std::string> QdecGlmFitResults::GetContrastQuestions() {
   return this->mGlmDesign->GetContrastQuestions();
 }
 
@@ -84,7 +84,7 @@ vector<string> QdecGlmFitResults::GetContrastQuestions() {
  * ie sig.mgh for all contrasts.
  * @return string
  */
-string QdecGlmFitResults::GetConcatContrastSigFile() {
+std::string QdecGlmFitResults::GetConcatContrastSigFile() {
   return this->mfnConcatContrastSigFile;
 }
 
@@ -93,7 +93,7 @@ string QdecGlmFitResults::GetConcatContrastSigFile() {
  * contrast.
  * @return vector< string >
  */
-vector<string> QdecGlmFitResults::GetContrastSigFiles() {
+std::vector<std::string> QdecGlmFitResults::GetContrastSigFiles() {
   return this->mfnContrastSigFiles;
 }
 
@@ -102,8 +102,8 @@ vector<string> QdecGlmFitResults::GetContrastSigFiles() {
  * that contrast.
  * @return vector< string >
  */
-vector<string> QdecGlmFitResults::GetContrastGammaFiles() {
-  vector<string> tmp;
+std::vector<std::string> QdecGlmFitResults::GetContrastGammaFiles() {
+  std::vector<std::string> tmp;
   return tmp; // TODO
 }
 
@@ -111,8 +111,8 @@ vector<string> QdecGlmFitResults::GetContrastGammaFiles() {
  * Returns pathnames to the contrast F-test file, ie F.mgh for that contrast.
  * @return vector< string >
  */
-vector<string> QdecGlmFitResults::GetContrast_F_Files() {
-  vector<string> tmp;
+std::vector<std::string> QdecGlmFitResults::GetContrast_F_Files() {
+  std::vector<std::string> tmp;
   return tmp; // TODO
 }
 
@@ -120,7 +120,7 @@ vector<string> QdecGlmFitResults::GetContrast_F_Files() {
  * Returns pathname to the beta.mgh file.
  * @return string
  */
-string QdecGlmFitResults::GetRegressionCoefficientsFile() {
+std::string QdecGlmFitResults::GetRegressionCoefficientsFile() {
   return this->mfnRegressionCoefficientsFile;
 }
 
@@ -128,7 +128,7 @@ string QdecGlmFitResults::GetRegressionCoefficientsFile() {
  * Returns pathname to eres.mgh
  * @return string
  */
-string QdecGlmFitResults::GetResidualErrorFile() {
+std::string QdecGlmFitResults::GetResidualErrorFile() {
   return this->mfnResidualErrorFile;
 }
 
@@ -136,7 +136,7 @@ string QdecGlmFitResults::GetResidualErrorFile() {
  * Returns pathname to rstd.mgh
  * @return string
  */
-string QdecGlmFitResults::GetResidualErrorStdDevFile() {
+std::string QdecGlmFitResults::GetResidualErrorStdDevFile() {
   return this->mfnResidualErrorStdDevFile;
 }
 
@@ -144,4 +144,4 @@ string QdecGlmFitResults::GetResidualErrorStdDevFile() {
  * Returns pathname to y.fsgd
  * @return string
  */
-string QdecGlmFitResults::GetFsgdFile() { return this->mfnFsgdFile; }
+std::string QdecGlmFitResults::GetFsgdFile() { return this->mfnFsgdFile; }

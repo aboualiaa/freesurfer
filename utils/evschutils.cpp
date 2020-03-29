@@ -23,9 +23,9 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
 #include "diag.h"
 
@@ -42,17 +42,17 @@ static int EVScompare(const void *evsch1, const void *evsch2);
 EVENT_SCHEDULE *EVSAlloc(int nevents, int allocweight) {
   EVENT_SCHEDULE *EvSch;
 
-  EvSch = (EVENT_SCHEDULE *)calloc(sizeof(EVENT_SCHEDULE), 1);
+  EvSch          = (EVENT_SCHEDULE *)calloc(sizeof(EVENT_SCHEDULE), 1);
   EvSch->nevents = nevents;
 
-  EvSch->tevent = (float *)calloc(sizeof(float), nevents);
+  EvSch->tevent  = (float *)calloc(sizeof(float), nevents);
   EvSch->eventid = (int *)calloc(sizeof(int), nevents);
   if (allocweight)
     EvSch->weight = (float *)calloc(sizeof(float), nevents);
 
   EvSch->nEvTypes = 0;
-  EvSch->nEvReps = nullptr;
-  EvSch->EvDur = nullptr;
+  EvSch->nEvReps  = nullptr;
+  EvSch->EvDur    = nullptr;
 
   return (EvSch);
 }
@@ -87,11 +87,11 @@ int EVSfree(EVENT_SCHEDULE **ppEvSch) {
 MATRIX *EVS2FIRmtx(int EvId, EVSCH *EvSch, float tDelay, float TR, int Ntps,
                    float PSDMin, float PSDMax, float dPSD, MATRIX *X) {
   float tMax, tmp, PSDWindow, tPSD, PSD;
-  int RSR, Npsds, nthPSD, n, rA, rB;
+  int   RSR, Npsds, nthPSD, n, rA, rB;
 
   /* Compute number of PSDs in the window */
   PSDWindow = PSDMax - PSDMin;
-  tmp = rint(PSDWindow / dPSD) - PSDWindow / dPSD;
+  tmp       = rint(PSDWindow / dPSD) - PSDWindow / dPSD;
   if (tmp > .0001) {
     printf("ERROR: EVS2FIRmtx: PSDWindow (%g) is not an integer multiple of "
            "dPSD (%g)\n",
@@ -169,7 +169,7 @@ uniformly in time. */
   ---------------------------------------------------------------------*/
 MATRIX *EVSfirMtxAll(EVSCH *EvSch, float tDelay, float TR, int Ntps,
                      float PSDMin, float PSDMax, float dPSD) {
-  int ev;
+  int     ev;
   MATRIX *Xevfir = nullptr, *Xtmp = nullptr, *Xfir = nullptr;
 
   for (ev = 1; ev <= EvSch->nEvTypes; ev++) {
@@ -213,7 +213,7 @@ int EVSwritePar(char *parfile, EVENT_SCHEDULE *EvSch, char **labels,
                 float tPreScan, float tMax) {
   FILE *fp;
   float NullDur = 0.0, tNull = 0.0, t = 0.0;
-  int n, id;
+  int   n, id;
 
   fp = fopen(parfile, "w");
   if (fp == nullptr) {
@@ -281,13 +281,13 @@ int EVSwritePar(char *parfile, EVENT_SCHEDULE *EvSch, char **labels,
 EVENT_SCHEDULE *EVSsynth(int nEvTypes, int *nPer, float *tPer, float tRes,
                          float tMax, float tPreScan, int nCB1Search,
                          float tNullMin, float tNullMax) {
-  int id, m, n, nevents, nSlotsNull, nSlotsTot, *EvSeq, nNullMax;
-  float tStimTot, t, tScanTot, tNullTot;
+  int             id, m, n, nevents, nSlotsNull, nSlotsTot, *EvSeq, nNullMax;
+  float           tStimTot, t, tScanTot, tNullTot;
   EVENT_SCHEDULE *EvSch;
 
   /* Compute the total amount of stimulation time */
   tStimTot = 0.0;
-  nevents = 0;
+  nevents  = 0;
   for (n = 0; n < nEvTypes; n++) {
     nevents += nPer[n];
     tStimTot += nPer[n] * (tPer[n] + tNullMin);
@@ -362,7 +362,7 @@ EVENT_SCHEDULE *EVSsynth(int nEvTypes, int *nPer, float *tPer, float tRes,
   for (n = 0; n < nSlotsTot; n++) {
     // printf("%6.2f %d\n",t,EvSeq[n]);
     if (EvSeq[n] != 0) {
-      id = EvSch->eventid[m];
+      id               = EvSch->eventid[m];
       EvSch->tevent[m] = t;
       t += tPer[id - 1];
       t += tNullMin;
@@ -385,7 +385,7 @@ EVENT_SCHEDULE *EVSsynth(int nEvTypes, int *nPer, float *tPer, float tRes,
 -----------------------------------------------------------*/
 EVSCH *EVScb1Optimize(int nEvTypes, int *nEvReps, int nSearch) {
   EVSCH *EvSch, *EvSchBest = nullptr;
-  int n;
+  int    n;
 
   /* Loop over the number of search iterations */
   for (n = 0; n < nSearch; n++) {
@@ -416,13 +416,13 @@ EVSCH *EVScb1Optimize(int nEvTypes, int *nEvReps, int nSearch) {
   -----------------------------------------------------------*/
 EVSCH *EVSRandSequence(int nEvTypes, int *nEvReps) {
   EVSCH *EvSch;
-  int nevents, m, n, nthev;
+  int    nevents, m, n, nthev;
 
   nevents = 0;
   for (n = 0; n < nEvTypes; n++)
     nevents += nEvReps[n];
 
-  EvSch = EVSAlloc(nevents, 0);
+  EvSch           = EVSAlloc(nevents, 0);
   EvSch->nEvTypes = nEvTypes;
 
   /* Alloc and fill the number of reps (but not the duration) */
@@ -464,11 +464,11 @@ int EVSmaxId(EVSCH *EvSch) {
   file format.
 -------------------------------------------------------------*/
 EVENT_SCHEDULE *EVSreadPar(char *parfile) {
-  FILE *fp;
+  FILE *          fp;
   EVENT_SCHEDULE *EvSch;
-  int nevents, id, ev;
-  char tmpstring[2001];
-  float tev;
+  int             nevents, id, ev;
+  char            tmpstring[2001];
+  float           tev;
 
   fp = fopen(parfile, "r");
   if (fp == nullptr) {
@@ -489,12 +489,12 @@ EVENT_SCHEDULE *EVSreadPar(char *parfile) {
   EvSch = EVSAlloc(nevents, 0);
 
   /* Close/Open to rewind */
-  fp = fopen(parfile, "r");
+  fp      = fopen(parfile, "r");
   nevents = 0;
   while (fgets(tmpstring, 2000, fp) != nullptr) {
     sscanf(tmpstring, "%f %d", &tev, &id);
     if (id != 0) {
-      EvSch->tevent[nevents] = tev;
+      EvSch->tevent[nevents]  = tev;
       EvSch->eventid[nevents] = id;
       nevents++;
     }
@@ -525,9 +525,9 @@ int *RandPerm(int N, int *v) {
     v[n] = n;
 
   for (n = 0; n < N; n++) {
-    n2 = (int)floor(drand48() * N);
-    tmp = v[n];
-    v[n] = v[n2];
+    n2    = (int)floor(drand48() * N);
+    tmp   = v[n];
+    v[n]  = v[n2];
     v[n2] = tmp;
   }
 
@@ -549,7 +549,7 @@ int RandPermListLimit0(int N, int *v, int lim, int nitersmax) {
     RandPermList(N, v); // permute the list
     // Count the max run length of items whose val is 0
     runlenmax = 0;
-    runlen = 0;
+    runlen    = 0;
     for (n = 0; n < N; n++) {
       if (v[n] == 0)
         runlen++;
@@ -582,7 +582,7 @@ int RandPermList(int N, int *v) {
     return (1);
   }
 
-  p = RandPerm(N, nullptr);
+  p  = RandPerm(N, nullptr);
   vp = (int *)calloc(sizeof(int), N);
   for (n = 0; n < N; n++)
     vp[n] = v[n];
@@ -631,7 +631,7 @@ static int EVScompare(const void *evsch1, const void *evsch2) {
   --------------------------------------------------------------*/
 MATRIX *EVScb1Matrix(EVSCH *EvSch) {
   MATRIX *Ncb1;
-  int nthev, i, j;
+  int     nthev, i, j;
 
   Ncb1 = MatrixZero(EvSch->nEvTypes, EvSch->nEvTypes, nullptr);
 
@@ -655,7 +655,7 @@ MATRIX *EVScb1Matrix(EVSCH *EvSch) {
   --------------------------------------------------------------*/
 MATRIX *EVScb1ProbMatrix(EVSCH *EvSch) {
   MATRIX *Ncb1, *Pcb1 = nullptr;
-  int i, j;
+  int     i, j;
 
   Ncb1 = EVScb1Matrix(EvSch);
   Pcb1 = MatrixZero(EvSch->nEvTypes, EvSch->nEvTypes, nullptr);
@@ -679,7 +679,7 @@ MATRIX *EVScb1ProbMatrix(EVSCH *EvSch) {
   --------------------------------------------------------------*/
 MATRIX *EVScb1IdealProbMatrix(EVSCH *EvSch) {
   MATRIX *IdealPcb1;
-  int i, j;
+  int     i, j;
 
   IdealPcb1 = MatrixZero(EvSch->nEvTypes, EvSch->nEvTypes, nullptr);
 
@@ -703,11 +703,11 @@ MATRIX *EVScb1IdealProbMatrix(EVSCH *EvSch) {
   ------------------------------------------------------------*/
 float EVScb1Error(EVSCH *EvSch) {
   MATRIX *IdealPcb1, *Pcb1;
-  int i, j;
-  float cb1err;
+  int     i, j;
+  float   cb1err;
 
   IdealPcb1 = EVScb1IdealProbMatrix(EvSch);
-  Pcb1 = EVScb1ProbMatrix(EvSch);
+  Pcb1      = EVScb1ProbMatrix(EvSch);
 
   cb1err = 0;
   for (i = 1; i <= EvSch->nEvTypes; i++) {
@@ -829,12 +829,12 @@ int EVSdesignMtxStats(MATRIX *Xtask, MATRIX *Xnuis, EVSCH *EvSch, MATRIX *C,
          *CiXtXCt = nullptr;
   int r, m, nTaskAvgs, nAvgs, Cfree, J;
   // int nNuisAvgs;
-  float diagsum;
-  double dtmp = 0;
+  float  diagsum;
+  double dtmp  = 0;
   double dtmp1 = 0;
   double dtmp2 = 0;
 
-  X = MatrixHorCat(Xtask, Xnuis, nullptr);
+  X         = MatrixHorCat(Xtask, Xnuis, nullptr);
   nTaskAvgs = Xtask->cols;
   // if (Xnuis != NULL)
   //   nNuisAvgs = Xnuis->cols;
@@ -845,7 +845,7 @@ int EVSdesignMtxStats(MATRIX *Xtask, MATRIX *Xnuis, EVSCH *EvSch, MATRIX *C,
   if (W != nullptr)
     X = MatrixMultiply(W, X, NULL);
 
-  Xt = MatrixTranspose(X, Xt);
+  Xt  = MatrixTranspose(X, Xt);
   XtX = MatrixMultiply(Xt, X, XtX);
 
   /* Compute the Inverse */
@@ -858,14 +858,14 @@ int EVSdesignMtxStats(MATRIX *Xtask, MATRIX *Xnuis, EVSCH *EvSch, MATRIX *C,
       C->rptr[m + 1][m + 1] = 1;
     Cfree = 1;
   }
-  J = C->rows;
+  J  = C->rows;
   Ct = MatrixTranspose(C, nullptr);
 
   /* Make sure that it was actually inverted */
   if (iXtX != nullptr) {
     r = 0;
 
-    CiXtX = MatrixMultiply(C, iXtX, NULL);
+    CiXtX   = MatrixMultiply(C, iXtX, NULL);
     CiXtXCt = MatrixMultiply(CiXtX, Ct, NULL);
 
     VRF = MatrixAlloc(J, 1, MATRIX_REAL);
@@ -880,10 +880,10 @@ int EVSdesignMtxStats(MATRIX *Xtask, MATRIX *Xnuis, EVSCH *EvSch, MATRIX *C,
       EvSch->vrfstd = VectorStdDev(VRF, &dtmp);
     else
       EvSch->vrfstd = 0.0;
-    EvSch->vrfavg = dtmp;
+    EvSch->vrfavg   = dtmp;
     EvSch->vrfrange = VectorRange(VRF, &dtmp1, &dtmp2);
-    EvSch->vrfmin = dtmp1;
-    EvSch->vrfmax = dtmp2;
+    EvSch->vrfmin   = dtmp1;
+    EvSch->vrfmax   = dtmp2;
 
     MatrixFree(&iXtX);
     MatrixFree(&CiXtX);
@@ -927,13 +927,13 @@ int EVSdesignMtxStats(MATRIX *Xtask, MATRIX *Xnuis, EVSCH *EvSch, MATRIX *C,
 MATRIX *EVSfirXtXIdeal(int nEvTypes, int *nEvReps, float *EvDur, float TR,
                        int Ntp, float PSDMin, float PSDMax, float dPSD) {
   MATRIX *XtX = nullptr;
-  int Npsd, Navgs, npsd1, npsd2, nevt1, nevt2;
-  int n, nslots, nshift;
-  int r, c;
-  int *EvDur_dPSD;
-  float vx;
+  int     Npsd, Navgs, npsd1, npsd2, nevt1, nevt2;
+  int     n, nslots, nshift;
+  int     r, c;
+  int *   EvDur_dPSD;
+  float   vx;
 
-  Npsd = (int)(rint((PSDMax - PSDMin) / dPSD));
+  Npsd  = (int)(rint((PSDMax - PSDMin) / dPSD));
   Navgs = nEvTypes * Npsd;
 
   EvDur_dPSD = (int *)calloc(sizeof(int), nEvTypes);
@@ -953,8 +953,8 @@ MATRIX *EVSfirXtXIdeal(int nEvTypes, int *nEvReps, float *EvDur, float TR,
 
           /* nshift is the number of dPSDs that EVT1 follows EVT2*/
           nshift = npsd2 - npsd1; /* n-m */
-          r = nevt1 * Npsd + npsd1 + 1;
-          c = nevt2 * Npsd + npsd2 + 1;
+          r      = nevt1 * Npsd + npsd1 + 1;
+          c      = nevt2 * Npsd + npsd2 + 1;
 
           if (nevt1 == nevt2) {
             /* diagonal block */
@@ -987,7 +987,7 @@ MATRIX *EVSfirXtXIdeal(int nEvTypes, int *nEvReps, float *EvDur, float TR,
   This penalizes based on a refractory model.
   --------------------------------------------------------*/
 int EVSrefractory(EVSCH *sch, double alpha, double T, double dtmin) {
-  int n, idprev;
+  int    n, idprev;
   double tonprev, durprev, tonev, dt = 0.0, toffprev;
 
   if (sch->weight == nullptr)
@@ -995,12 +995,12 @@ int EVSrefractory(EVSCH *sch, double alpha, double T, double dtmin) {
 
   sch->weight[0] = 1;
   for (n = 1; n < sch->nevents; n++) {
-    idprev = sch->eventid[n - 1];
-    tonprev = sch->tevent[n - 1];
-    durprev = sch->EvDur[idprev - 1];
+    idprev   = sch->eventid[n - 1];
+    tonprev  = sch->tevent[n - 1];
+    durprev  = sch->EvDur[idprev - 1];
     toffprev = tonprev + durprev;
-    tonev = sch->tevent[n];
-    dt = tonev - toffprev + dtmin;
+    tonev    = sch->tevent[n];
+    dt       = tonev - toffprev + dtmin;
     if (dt < 0)
       dt = 0;
     sch->weight[n] = 1 - alpha * exp(-dt / T);

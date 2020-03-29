@@ -1,8 +1,8 @@
 #include "kvlCompressionLookupTable.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 
 namespace kvl {
 
@@ -20,7 +20,7 @@ CompressionLookupTable ::~CompressionLookupTable() {}
 //
 //
 void CompressionLookupTable ::PrintSelf(std::ostream &os,
-                                        itk::Indent indent) const {}
+                                        itk::Indent   indent) const {}
 
 //
 //
@@ -45,12 +45,12 @@ CompressionLookupTable ::ReadCollapsedLabelFile() const {
     std::cout << "Reading collapsedLabelFile: " << collapsedLabelFile
               << std::endl;
 
-    std::string line;
+    std::string    line;
     unsigned short comp, lab;
     while (std::getline(clfs, line)) {
       std::ostringstream inputParserStream;
       inputParserStream << line;
-      std::istringstream inputStream(inputParserStream.str().c_str());
+      std::istringstream   inputStream(inputParserStream.str().c_str());
       ImageType::PixelType collapsedLabel;
       if (!(inputStream >> collapsedLabel)) {
         std::cerr << "Error reading collapsed label file" << std::endl;
@@ -141,13 +141,13 @@ void CompressionLookupTable ::Construct(
   // Read the labels from FreeSurferColorLUT.txt if that file is found, and
   // figure out their names and RGBA colors
   const std::string colorLUTFileName = "FreeSurferColorLUT.txt";
-  std::ifstream in(colorLUTFileName.c_str());
+  std::ifstream     in(colorLUTFileName.c_str());
   if (in.good()) {
     std::cout << "Found FreeSurferColorLUT.txt; reading its relevant contents"
               << std::endl;
 
     const int size = 255;
-    char buffer[size];
+    char      buffer[size];
     while (in.getline(buffer, size)) {
       if ((buffer[0] == 0) || (buffer[0] == '#') || (buffer[0] == 10) ||
           (buffer[0] ==
@@ -158,13 +158,13 @@ void CompressionLookupTable ::Construct(
       }
 
       // Parse the line
-      const std::string line = buffer;
+      const std::string  line = buffer;
       std::istringstream lineStream(line);
-      unsigned int labelNumber;
-      std::string labelString;
-      unsigned int R;
-      unsigned int G;
-      unsigned int B;
+      unsigned int       labelNumber;
+      std::string        labelString;
+      unsigned int       R;
+      unsigned int       G;
+      unsigned int       B;
       lineStream >> labelNumber >> labelString >> R >> G >> B;
       unsigned int A = 255;
       if (labelNumber == 0) {
@@ -201,7 +201,7 @@ void CompressionLookupTable ::Construct(
           std::cout << "        -> maps to classNumber: " << classNumber
                     << std::endl;
           m_LabelStringLookupTable[classNumber] = labelString;
-          m_ColorLookupTable[classNumber] = color;
+          m_ColorLookupTable[classNumber]       = color;
         }
       }
 
@@ -282,18 +282,18 @@ bool CompressionLookupTable ::Read(const std::string &fileName) {
 
   // Loop over all lines in the file
   const int size = 255;
-  char buffer[size];
+  char      buffer[size];
   while (in.getline(buffer, size)) {
     // Parse the line
-    const std::string line = buffer;
+    const std::string  line = buffer;
     std::istringstream lineStream(line);
-    unsigned int labelNumber;
-    unsigned int classNumber;
-    std::string labelString;
-    unsigned int R;
-    unsigned int G;
-    unsigned int B;
-    unsigned int A;
+    unsigned int       labelNumber;
+    unsigned int       classNumber;
+    std::string        labelString;
+    unsigned int       R;
+    unsigned int       G;
+    unsigned int       B;
+    unsigned int       A;
     lineStream >> labelNumber >> classNumber >> labelString >> R >> G >> B >> A;
 
     ColorType color;
@@ -305,7 +305,7 @@ bool CompressionLookupTable ::Read(const std::string &fileName) {
     // Now fill in the entries in the lookup tables
     m_CompressionLookupTable[labelNumber] = std::vector<int>(1, classNumber);
     m_LabelStringLookupTable[classNumber] = labelString;
-    m_ColorLookupTable[classNumber] = color;
+    m_ColorLookupTable[classNumber]       = color;
     m_NumberOfClasses++;
   }
 

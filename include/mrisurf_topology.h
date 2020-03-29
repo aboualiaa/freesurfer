@@ -18,8 +18,8 @@
  *
  */
 
-#include "mrisurf_aaa.h"
 #include "mrisurf.h"
+#include "mrisurf_aaa.h"
 
 // MRIS code dealing with the existence and connectedness of the vertices,
 // edges, and faces
@@ -37,8 +37,8 @@ int mrisRemoveLink(MRIS *mris, int vno1, int vno2);
 
 typedef struct MRIS_VertexNeighbourInfo {
   size_t hops;
-  int vnum[MRIS_VertexNeighbourInfo_MAX_HOPS + 1];
-  int v[MAX_NEIGHBORS];
+  int    vnum[MRIS_VertexNeighbourInfo_MAX_HOPS + 1];
+  int    v[MAX_NEIGHBORS];
 } MRIS_VertexNeighbourInfo;
 
 void MRIS_VertexNeighbourInfo_check(MRIS_VertexNeighbourInfo *lhs,
@@ -66,8 +66,8 @@ int findOtherEdgeFace(MRIS const *mris, int fno, int vno, int vn1);
 int mrisCountTotalNeighbors(MRIS *mris);
 
 bool triangleMarked(MRIS *mris,
-                    int fno); // are any of the face's vertices marked?
-int findNonMarkedFace(MRIS *mris, int vno, int vn1);
+                    int   fno); // are any of the face's vertices marked?
+int  findNonMarkedFace(MRIS *mris, int vno, int vn1);
 
 int computeOrientation(MRIS *mris, int f, int v0, int v1);
 

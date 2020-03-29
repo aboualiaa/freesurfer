@@ -30,15 +30,15 @@
 
 #include "diag.h"
 #include "mrimorph.h"
-#include "version.h"
 #include "numerics.h"
+#include "version.h"
 
-#define DX_I 1
-#define DY_I 2
-#define D_I 3
-#define B_I 4
-#define C_I 5
-#define A_I 6
+#define DX_I  1
+#define DY_I  2
+#define D_I   3
+#define B_I   4
+#define C_I   5
+#define A_I   6
 #define AX0_I 7
 #define AY0_I 8
 #define AX1_I 9
@@ -46,29 +46,29 @@
 //#define NPARMS 10
 #define NPARMS 2
 
-static int downsample = 0;
-static int undistort = 0;
-static char Gout_name[STRLEN];
+static int    downsample = 0;
+static int    undistort  = 0;
+static char   Gout_name[STRLEN];
 static double blur_sigma = 0.0;
 
 static int pad = 0;
 
-static float intensity_tolerance = 0.1;
+static float intensity_tolerance   = 0.1;
 static float translation_tolerance = 0.025;
 
 static MRI *mosaic_images_with_xforms(MRI **mri, int nimages, MRI *mri_weights,
                                       int pad);
-static int insert_image_into_mosaic(MRI *mri_mosaic, MRI *mri, double x0,
-                                    double y0);
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+static int  insert_image_into_mosaic(MRI *mri_mosaic, MRI *mri, double x0,
+                                     double y0);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static MRI *mosaic_images(MRI **mri, int *x0, int *y0, int nimages, int pad);
 // static MRI *add_image_to_mosaic(MRI *mri_orig_mosaic, MRI *mri, double x0,
 // double y0, double ax, double ay, double a, double b, double c, double d) ;
-static MRI *undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
-                                        int nimages, double *ax, double *ay,
-                                        double a, double b, double c, double d,
-                                        double *penergy);
+static MRI *  undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
+                                          int nimages, double *ax, double *ay,
+                                          double a, double b, double c, double d,
+                                          double *penergy);
 static double compute_mosaic_energy(MRI *mri_mosaic, int nimages);
 
 #if 0
@@ -83,13 +83,13 @@ static double compute_pairwise_deformation_energy(MRI *mri1, MRI *mri2,
                                                   double *ax, double *ay,
                                                   double a, double b, double c,
                                                   double d);
-static int undistorted_coords(MRI *mri, double x, double ax, double ay,
-                              double y, double a, double b, double c, double d,
-                              double *px, double *py);
-static float compute_powell_sse(float *p);
-static float compute_powell_global_sse(float *p);
-static MRI *build_best_mosaic(MRI **mri, MRI **mri_smooth, double *x0d,
-                              double *y0d, int nimages);
+static int    undistorted_coords(MRI *mri, double x, double ax, double ay,
+                                 double y, double a, double b, double c, double d,
+                                 double *px, double *py);
+static float  compute_powell_sse(float *p);
+static float  compute_powell_global_sse(float *p);
+static MRI *  build_best_mosaic(MRI **mri, MRI **mri_smooth, double *x0d,
+                                double *y0d, int nimages);
 static int powell_minimize(MRI *mri1, MRI *mri2, double dx, double dy, double a,
                            double b, double c, double d, double *ax, double *ay,
                            double *pa, double *pb, double *pc, double *pd,
@@ -102,23 +102,23 @@ static double xsize = 0, ysize = 0, zsize = 0;
 static int niters = 100;
 
 #define MAX_IMAGES 10000
-#define MAX_TRANS 3
+#define MAX_TRANS  3
 
 static char *weight_fname = nullptr;
 
 int main(int argc, char *argv[]) {
   char **av, *mosaic_input_fname, *out_fname;
-  int ac, nargs, msec, minutes, seconds, nimages, i;
-  int dx, dy, n, *image_numbers, frame, dx_best, dy_best, skip;
+  int    ac, nargs, msec, minutes, seconds, nimages, i;
+  int    dx, dy, n, *image_numbers, frame, dx_best, dy_best, skip;
 #ifdef HAVE_OPENMP
   Timer start;
 #endif
 
   MRI *mri[MAX_IMAGES], *mri_orig[MAX_IMAGES], *mri_mosaic,
       *mri_smooth[MAX_IMAGES], *mri_weights;
-  FILE *fp = nullptr;
+  FILE * fp = nullptr;
   double energy, best_energy, prev_best_energy, dxd, dyd;
-  int x0[MAX_IMAGES], y0[MAX_IMAGES], xbest[MAX_IMAGES], ybest[MAX_IMAGES];
+  int    x0[MAX_IMAGES], y0[MAX_IMAGES], xbest[MAX_IMAGES], ybest[MAX_IMAGES];
   double x0d[MAX_IMAGES], y0d[MAX_IMAGES], ax[MAX_IMAGES], ay[MAX_IMAGES];
   //  HISTOGRAM    *h0 = NULL, *h1 ;
 
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
   }
 
   mosaic_input_fname = argv[1];
-  out_fname = argv[argc - 1];
+  out_fname          = argv[argc - 1];
   if (argc < 2)
     usage_exit(1);
 
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
 #endif
 
         VOL_GEOM vg;
-    char *cp, fname[STRLEN], line[STRLEN];
+    char *       cp, fname[STRLEN], line[STRLEN];
     if (fp) {
       cp = fgetl(line, 199, fp);
       sscanf(cp, "%d %d %s", &x0[i], &y0[i], fname);
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
 
     xbest[i] = x0[i];
     ybest[i] = y0[i];
-    mri[i] = MRIread(fname);
+    mri[i]   = MRIread(fname);
     if (mri[i] == nullptr)
       ErrorExit(ERROR_NOFILE, "%s: could not open input volume %s\n", Progname,
                 fname);
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
 
     if (downsample) {
       MRI *mri_tmp;
-      int d;
+      int  d;
 
       for (d = 0; d < downsample; d++) {
 #if 0
@@ -254,9 +254,9 @@ int main(int argc, char *argv[]) {
     } else
       mri_smooth[i] = MRIcopy(mri[i], nullptr);
 
-    //    MRIwrite(mri[i], fname) ;
+      //    MRIwrite(mri[i], fname) ;
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_end
+    ROMP_PFLB_end
 #endif
   }
 #ifdef HAVE_OPENMP
@@ -355,7 +355,7 @@ int main(int argc, char *argv[]) {
                                            c, d, nullptr);
   MRIwrite(mri_mosaic, out_fname);
 #ifdef HAVE_OPENMP
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -364,30 +364,30 @@ int main(int argc, char *argv[]) {
 #endif
   exit(0);
 
-  mri_mosaic = mosaic_images(mri, x0, y0, nimages, 0);
+  mri_mosaic  = mosaic_images(mri, x0, y0, nimages, 0);
   best_energy = energy = compute_mosaic_energy(mri_mosaic, nimages);
   printf("original mosaic energy = %2.3f\n", energy);
   for (skip = 1; skip > 0; skip--) {
     int max_trans = skip * MAX_TRANS;
     for (n = 0; n < 10; n++) {
-      image_numbers = compute_permutation(nimages, nullptr);
+      image_numbers    = compute_permutation(nimages, nullptr);
       prev_best_energy = best_energy;
       for (i = 0; i < nimages; i++) {
-        frame = image_numbers[i];
-        frame = i;
+        frame   = image_numbers[i];
+        frame   = i;
         dx_best = dy_best = 0;
         for (dx = -max_trans; dx <= max_trans; dx += skip)
           for (dy = -max_trans; dy <= max_trans; dy += skip) {
-            x0[frame] = xbest[frame] + dx;
-            y0[frame] = ybest[frame] + dy;
+            x0[frame]  = xbest[frame] + dx;
+            y0[frame]  = ybest[frame] + dy;
             mri_mosaic = mosaic_images(mri, x0, y0, nimages, 0);
-            energy = compute_mosaic_energy(mri_mosaic, nimages);
+            energy     = compute_mosaic_energy(mri_mosaic, nimages);
             if (energy < best_energy) {
               printf("new best energy %2.5f found for image %d at (%d, %d)\n",
                      energy, frame, dx, dy);
               best_energy = energy;
-              dx_best = dx;
-              dy_best = dy;
+              dx_best     = dx;
+              dy_best     = dy;
             }
             MRIfree(&mri_mosaic);
           }
@@ -429,14 +429,14 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   }
@@ -485,7 +485,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'D':
       downsample = atoi(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("downsampling input volumes %d times (a factor of %d) before "
              "mosaicing\n",
              downsample, (int)exp2(downsample));
@@ -506,11 +506,11 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'I':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("debugging image # %d\n", Gdiag_no);
       break;
     case 'P':
-      pad = atoi(argv[2]);
+      pad   = atoi(argv[2]);
       nargs = 1;
       printf("padding final mosaic with %d voxels\n", pad);
       break;
@@ -545,9 +545,9 @@ static void usage_exit(int code) {
   exit(code);
 }
 static MRI *mosaic_images(MRI **mri, int *x0, int *y0, int nimages, int pad) {
-  int xmin, ymin, xmax, ymax, x1, y1, x2, y2;
+  int  xmin, ymin, xmax, ymax, x1, y1, x2, y2;
   MRI *mri_mosaic, *mri_counts;
-  int i, width, height, x;
+  int  i, width, height, x;
 
   ymin = xmin = 10000000;
   ymax = xmax = -ymin;
@@ -567,8 +567,8 @@ static MRI *mosaic_images(MRI **mri, int *x0, int *y0, int nimages, int pad) {
       ymax = y2;
   }
 
-  width = xmax - xmin + 1;
-  height = ymax - ymin + 1;
+  width      = xmax - xmin + 1;
+  height     = ymax - ymin + 1;
   mri_mosaic = MRIallocSequence(width, height, 1, MRI_FLOAT, nimages + 1);
   MRIcopyHeader(mri[0], mri_mosaic);
 
@@ -579,17 +579,18 @@ static MRI *mosaic_images(MRI **mri, int *x0, int *y0, int nimages, int pad) {
 #endif
       for (i = 0; i < nimages; i++) {
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_begin
+    ROMP_PFLB_begin
 #endif
 
-        int x, y, count, xm, ym;
+        int x,
+        y, count, xm, ym;
     float val, sum;
     for (x = 0; x < mri[i]->width; x++) {
       xm = x + x0[i] - xmin;
       for (y = 0; y < mri[i]->height; y++) {
         if (x == Gx && y == Gy)
           DiagBreak();
-        ym = y + y0[i] - ymin;
+        ym    = y + y0[i] - ymin;
         count = (int)MRIgetVoxVal(mri_counts, xm, ym, 0, 0);
         count++;
         MRIsetVoxVal(mri_counts, xm, ym, 0, 0, count);
@@ -600,14 +601,12 @@ static MRI *mosaic_images(MRI **mri, int *x0, int *y0, int nimages, int pad) {
       }
     }
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_end
+    ROMP_PFLB_end
 #endif
-
   }
 #ifdef HAVE_OPENMP
   ROMP_PF_end
 #endif
-
 
 #ifdef HAVE_OPENMP
       ROMP_PF_begin
@@ -615,9 +614,8 @@ static MRI *mosaic_images(MRI **mri, int *x0, int *y0, int nimages, int pad) {
 #endif
       for (x = 0; x < mri_mosaic->width; x++) {
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_begin
+    ROMP_PFLB_begin
 #endif
-
 
         float sum,
         count;
@@ -630,9 +628,8 @@ static MRI *mosaic_images(MRI **mri, int *x0, int *y0, int nimages, int pad) {
       MRIsetVoxVal(mri_mosaic, x, y, 0, 0, sum / count);
     }
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_end
+    ROMP_PFLB_end
 #endif
-
   }
 #ifdef HAVE_OPENMP
   ROMP_PF_end
@@ -643,10 +640,10 @@ static MRI *mosaic_images(MRI **mri, int *x0, int *y0, int nimages, int pad) {
 }
 
 static double compute_mosaic_energy(MRI *mri_mosaic, int nimages) {
-  int x, overlap_voxels, min_overlap_voxels, nonzero;
+  int    x, overlap_voxels, min_overlap_voxels, nonzero;
   double energy;
 
-  energy = 0.0;
+  energy  = 0.0;
   nonzero = overlap_voxels = 0;
 
 #ifdef HAVE_OPENMP
@@ -655,17 +652,18 @@ static double compute_mosaic_energy(MRI *mri_mosaic, int nimages) {
 #endif
       for (x = 0; x < mri_mosaic->width; x++) {
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_begin
+    ROMP_PFLB_begin
 #endif
 
-        int y, count, frame;
+        int y,
+        count, frame;
     double var, dif, val, mean, vals[MAX_IMAGES];
     ;
     for (y = 0; y < mri_mosaic->height; y++) {
       if (x == Gx && y == Gy)
         DiagBreak();
       for (count = 0, mean = 0.0, frame = 1; frame <= nimages; frame++) {
-        val = MRIgetVoxVal(mri_mosaic, x, y, 0, frame);
+        val             = MRIgetVoxVal(mri_mosaic, x, y, 0, frame);
         vals[frame - 1] = val;
         if (val > 0) {
           mean += val;
@@ -690,16 +688,15 @@ static double compute_mosaic_energy(MRI *mri_mosaic, int nimages) {
       }
     }
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_end
+    ROMP_PFLB_end
 #endif
-
   }
 #ifdef HAVE_OPENMP
   ROMP_PF_end
 #endif
 
       min_overlap_voxels = nint(nonzero * .1);
-  energy = (sqrt(energy / (double)overlap_voxels));
+  energy                 = (sqrt(energy / (double)overlap_voxels));
 //  printf("%d overlapping voxels (%2.3f%%) - energy = %2.4f\n", overlap_voxels,
 //  100.0f*overlap_voxels/(nonzero), energy) ;
 #if 0
@@ -715,7 +712,7 @@ static double compute_mosaic_energy(MRI *mri_mosaic, int nimages) {
 
   integration will take place in space of MRI1 image
 */
-static MRI *Gmri1, *Gmri2;
+static MRI *  Gmri1, *Gmri2;
 static double Gdx, Gdy;
 
 #define VALID(a, b, c, d)                                                      \
@@ -726,7 +723,7 @@ static double compute_pairwise_deformation_energy(MRI *mri1, MRI *mri2,
                                                   double a, double b, double c,
                                                   double d) {
   double energy;
-  int xmin, ymin, xmax, ymax, x1, nvox;
+  int    xmin, ymin, xmax, ymax, x1, nvox;
 
   xmin = dx;
   ymin = dy;
@@ -742,7 +739,7 @@ static double compute_pairwise_deformation_energy(MRI *mri1, MRI *mri2,
   if (!VALID(a, b, c, d))
     return (1e10);
 
-  nvox = 0;
+  nvox   = 0;
   energy = 0.0;
 
 #ifdef HAVE_OPENMP
@@ -751,10 +748,11 @@ static double compute_pairwise_deformation_energy(MRI *mri1, MRI *mri2,
 #endif
       for (x1 = xmin; x1 <= xmax; x1++) {
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_begin
+    ROMP_PFLB_begin
 #endif
 
-        double val1, val2, x1u, y1u, x2u, y2u;
+        double val1,
+        val2, x1u, y1u, x2u, y2u;
     int x2, y1, y2;
 
     x2 = x1 - dx;
@@ -775,16 +773,15 @@ static double compute_pairwise_deformation_energy(MRI *mri1, MRI *mri2,
       }
     }
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_end
+    ROMP_PFLB_end
 #endif
-
   }
 #ifdef HAVE_OPENMP
   ROMP_PF_end
 #endif
 
       if (nvox == 0 || (xmax - xmin) < 100 ||
-                  (ymax - ymin) < 100) return (1e10);
+          (ymax - ymin) < 100) return (1e10);
   energy = sqrt(energy / (double)nvox);
   if (energy < 7)
     DiagBreak();
@@ -801,12 +798,12 @@ static int undistorted_coords(MRI *mri, double x, double y, double ax,
   r0 = MIN(x0, y0);
   dx = x - ax;
   dy = y - ay;
-  r = sqrt(SQR(dx) + SQR(dy));
+  r  = sqrt(SQR(dx) + SQR(dy));
   r /= r0;
-  r2 = r * r;
-  r3 = r * r2;
-  r4 = r * r3;
-  rdst = a * r4 + b * r3 + c * r2 + d * r;
+  r2    = r * r;
+  r3    = r * r2;
+  r4    = r * r3;
+  rdst  = a * r4 + b * r3 + c * r2 + d * r;
   theta = atan2(dy, dx);
   rdst *= r0;
   *px = rdst * cos(theta) + ax;
@@ -821,21 +818,21 @@ static int powell_minimize(MRI *mri1, MRI *mri2, double dx, double dy, double a,
 
 {
   float *p, **xi, fret, fstart, min_sse, orig_sse;
-  int iter, row, col;
+  int    iter, row, col;
 
   Gmri1 = mri1;
   Gmri2 = mri2;
-  Gdx = dx;
-  Gdy = dy;
+  Gdx   = dx;
+  Gdy   = dy;
 
-  p = vector(1, NPARMS);
+  p       = vector(1, NPARMS);
   p[DX_I] = dx;
   p[DY_I] = dy;
   if (NPARMS > 2) {
-    p[A_I] = a;
-    p[B_I] = b;
-    p[C_I] = c;
-    p[D_I] = d;
+    p[A_I]   = a;
+    p[B_I]   = b;
+    p[C_I]   = c;
+    p[D_I]   = d;
     p[AX0_I] = ax[0];
     p[AY0_I] = ay[0];
     p[AX1_I] = ax[1];
@@ -869,17 +866,17 @@ static int powell_minimize(MRI *mri1, MRI *mri2, double dx, double dy, double a,
     dx = p[DX_I];
     dy = p[DY_I];
     if (NPARMS > 2) {
-      a = p[A_I];
-      b = p[B_I];
-      c = p[C_I];
-      d = p[D_I];
+      a     = p[A_I];
+      b     = p[B_I];
+      c     = p[C_I];
+      d     = p[D_I];
       ax[0] = p[AX0_I];
       ay[0] = p[AY0_I];
       ax[1] = p[AX1_I];
       ay[1] = p[AY1_I];
     } else {
       a = b = c = 0;
-      d = 1;
+      d         = 1;
     }
     printf("best energy after powell: %2.3f (%d steps)\n", fret, iter);
     if ((fstart - fret) / fstart < TOL)
@@ -887,12 +884,12 @@ static int powell_minimize(MRI *mri1, MRI *mri2, double dx, double dy, double a,
   } while (fret < fstart);
 
   min_sse = compute_powell_sse(p);
-  *pa = a;
-  *pb = b;
-  *pc = c;
-  *pd = d;
-  *pdx = dx;
-  *pdy = dy;
+  *pa     = a;
+  *pb     = b;
+  *pc     = c;
+  *pd     = d;
+  *pdx    = dx;
+  *pdy    = dy;
   free_matrix(xi, 1, NPARMS, 1, NPARMS);
   free_vector(p, 1, NPARMS);
   return ((orig_sse - min_sse) / orig_sse < TOL);
@@ -904,10 +901,10 @@ static float compute_powell_sse(float *p) {
   dx = p[DX_I];
   dy = p[DY_I];
   if (NPARMS > 2) {
-    a = p[A_I];
-    b = p[B_I];
-    c = p[C_I];
-    d = p[D_I];
+    a     = p[A_I];
+    b     = p[B_I];
+    c     = p[C_I];
+    d     = p[D_I];
     ax[0] = p[AX0_I];
     ay[0] = p[AY0_I];
     ax[1] = p[AX1_I];
@@ -915,7 +912,7 @@ static float compute_powell_sse(float *p) {
   } else {
     int i;
     a = b = c = 0;
-    d = 1;
+    d         = 1;
     for (i = 0; i < 2; i++) {
       ax[i] = (Gmri1->width - 1.0) / 2.0;
       ay[i] = (Gmri1->height - 1.0) / 2.0;
@@ -1011,10 +1008,10 @@ static MRI *undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
                                         int nimages, double *ax, double *ay,
                                         double a, double b, double c, double d,
                                         double *penergy) {
-  int xmin, ymin, xmax, ymax, nvoxels;
-  MRI *mri_mosaic, *mri_counts, *mri_vars;
-  int i, width, height, x;
-  MRI *mri_jac;
+  int    xmin, ymin, xmax, ymax, nvoxels;
+  MRI *  mri_mosaic, *mri_counts, *mri_vars;
+  int    i, width, height, x;
+  MRI *  mri_jac;
   double x1, y1, x2, y2, energy;
 
   ymin = xmin = 10000000;
@@ -1035,8 +1032,8 @@ static MRI *undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
       ymax = ceil(y2);
   }
 
-  width = xmax - xmin + 1;
-  height = ymax - ymin + 1;
+  width      = xmax - xmin + 1;
+  height     = ymax - ymin + 1;
   mri_mosaic = MRIallocSequence(width, height, 1, MRI_FLOAT, nimages + 1);
   mri_jac =
       MRIallocSequence(mri[0]->width, mri[0]->height, 1, MRI_FLOAT, nimages);
@@ -1053,19 +1050,20 @@ static MRI *undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
 #endif
       for (i = 0; i < nimages; i++) {
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_begin
+    ROMP_PFLB_begin
 #endif
 
-        int x, y, count, xstart, xend, ystart, yend;
+        int x,
+        y, count, xstart, xend, ystart, yend;
     double xu, yu, xf, yf;
     double val, sum;
 
     // x and y are in the (larger) mosaic coords, while xf and yf are in the
     // indidual tile coords
     xstart = MAX(0, x0[i] - xmin);
-    xend = MIN(mri[i]->width - 1 + x0[i] - xmin, mri_mosaic->width - 1);
+    xend   = MIN(mri[i]->width - 1 + x0[i] - xmin, mri_mosaic->width - 1);
     ystart = MAX(0, y0[i] - ymin);
-    yend = MIN(mri[i]->height - 1 + y0[i] - ymin, mri_mosaic->height - 1);
+    yend   = MIN(mri[i]->height - 1 + y0[i] - ymin, mri_mosaic->height - 1);
     for (x = xstart; x <= xend; x++) {
       xf = x - x0[i] + xmin;
       for (y = ystart; y <= yend; y++) {
@@ -1103,18 +1101,16 @@ static MRI *undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
       }
     }
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_end
+    ROMP_PFLB_end
 #endif
-
   }
 #ifdef HAVE_OPENMP
   ROMP_PF_end
 #endif
 
-
       //  MRIwrite(mri_jac, "jac.mgz") ;
       MRIfree(&mri_jac);
-  energy = 0.0;
+  energy  = 0.0;
   nvoxels = 0;
 
 #ifdef HAVE_OPENMP
@@ -1123,9 +1119,8 @@ static MRI *undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
 #endif
       for (x = 0; x < mri_mosaic->width; x++) {
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_begin
+    ROMP_PFLB_begin
 #endif
-
 
         float sum,
         count, var;
@@ -1143,14 +1138,12 @@ static MRI *undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
       nvoxels++;
     }
 #ifdef HAVE_OPENMP
-        ROMP_PFLB_end
+    ROMP_PFLB_end
 #endif
-
   }
 #ifdef HAVE_OPENMP
   ROMP_PF_end
 #endif
-
 
       energy = sqrt(energy / nvoxels);
   if (penergy)
@@ -1191,14 +1184,14 @@ jacobian_correct(MRI *mri_src, MRI *mri_dst, double ax, double ay, double a, dou
 
 static int insert_image_into_mosaic(MRI *mri_mosaic, MRI *mri, double x0,
                                     double y0) {
-  int x, y;
+  int    x, y;
   double xi, yi, dof, vali, valm;
 
   for (x = nint(x0); x < nint(x0) + mri->width; x++)
     for (y = nint(y0); y < nint(y0) + mri->height; y++) {
-      xi = x - x0;
-      yi = y - y0;
-      dof = MRIgetVoxVal(mri_mosaic, x, y, 0, 1);
+      xi   = x - x0;
+      yi   = y - y0;
+      dof  = MRIgetVoxVal(mri_mosaic, x, y, 0, 1);
       valm = MRIgetVoxVal(mri_mosaic, x, y, 0, 0);
       vali = MRIgetVoxVal(mri, xi, yi, 0, 0);
       valm = (dof * valm + vali) / (dof + 1);
@@ -1208,9 +1201,9 @@ static int insert_image_into_mosaic(MRI *mri_mosaic, MRI *mri, double x0,
     }
   return (NO_ERROR);
 }
-static int Gnimages;
-static MRI **Gmri;
-static MRI **Gmri_smooth;
+static int    Gnimages;
+static MRI ** Gmri;
+static MRI ** Gmri_smooth;
 static double Gx0,
     Gy0; // offset of first image that won't be modified by Powell
 
@@ -1226,10 +1219,10 @@ static void dump_parms(float *p, int nimages, char *name) {
 }
 static void powell_step_func(float *p, int nparms) {
   static int step = 0;
-  int i, nimages;
-  char fname[STRLEN];
-  MRI *mri_mosaic;
-  double x0d[MAX_IMAGES], y0d[MAX_IMAGES];
+  int        i, nimages;
+  char       fname[STRLEN];
+  MRI *      mri_mosaic;
+  double     x0d[MAX_IMAGES], y0d[MAX_IMAGES];
 
   nimages = (nparms + 2) / 2;
   sprintf(fname, "%s powell iter %d", Gout_name, step);
@@ -1253,23 +1246,23 @@ static void powell_step_func(float *p, int nparms) {
 static MRI *build_best_mosaic(MRI **mri, MRI **mri_smooth, double *x0d,
                               double *y0d, int nimages) {
   float *p, **xi, fret, fstart, min_sse, orig_sse;
-  int iter, row, col, nparms, i;
-  MRI *mri_mosaic;
+  int    iter, row, col, nparms, i;
+  MRI *  mri_mosaic;
 
   powell_iteration_func = powell_step_func;
-  Gnimages = nimages;
-  Gmri = mri;
-  Gmri_smooth = mri_smooth;
+  Gnimages              = nimages;
+  Gmri                  = mri;
+  Gmri_smooth           = mri_smooth;
 
   nparms =
       nimages * 2 - 2; // dx and dy for each image, but first image is fixed
-  p = vector(1, nparms);
+  p  = vector(1, nparms);
   xi = matrix(1, nparms, 1, nparms);
 
   Gx0 = x0d[0];
   Gy0 = y0d[0];
   for (i = 1; i < Gnimages; i++) {
-    p[i] = x0d[i];
+    p[i]                = x0d[i];
     p[Gnimages - 1 + i] = y0d[i]; // [0] slots are used to store first image
                                   // offset but won't be modified
   }
@@ -1305,8 +1298,8 @@ static MRI *build_best_mosaic(MRI **mri, MRI **mri_smooth, double *x0d,
     x0d[i] = p[i];
     y0d[i] = p[Gnimages - 1 + i];
   }
-  x0d[0] = Gx0;
-  y0d[0] = Gy0;
+  x0d[0]     = Gx0;
+  y0d[0]     = Gy0;
   mri_mosaic = undistort_and_mosaic_images(mri, x0d, y0d, nimages, nullptr,
                                            nullptr, 0, 0, 0, 1, nullptr);
 
@@ -1318,15 +1311,15 @@ static MRI *build_best_mosaic(MRI **mri, MRI **mri_smooth, double *x0d,
 
 static float compute_powell_global_sse(float *p) {
   double x0[MAX_IMAGES], y0[MAX_IMAGES], energy;
-  int i;
-  MRI *mri_mosaic;
+  int    i;
+  MRI *  mri_mosaic;
 
   for (i = 1; i < Gnimages; i++) {
     x0[i] = p[i];
     y0[i] = p[Gnimages - 1 + i];
   }
-  x0[0] = Gx0;
-  y0[0] = Gy0;
+  x0[0]      = Gx0;
+  y0[0]      = Gy0;
   mri_mosaic = undistort_and_mosaic_images(
       Gmri_smooth, x0, y0, Gnimages, nullptr, nullptr, 0, 0, 0, 1, &energy);
   //  energy = compute_mosaic_energy(mri_mosaic, Gnimages) ;
@@ -1336,17 +1329,17 @@ static float compute_powell_global_sse(float *p) {
 
 static MRI *mosaic_images_with_xforms(MRI **mri, int nimages, MRI *mri_weights,
                                       int pad) {
-  double xmin, ymin, zmin, xmax, ymax, zmax, x1, y1, z1;
-  MRI *mri_mosaic, *mri_counts;
-  int i, width, height, depth, x;
+  double  xmin, ymin, zmin, xmax, ymax, zmax, x1, y1, z1;
+  MRI *   mri_mosaic, *mri_counts;
+  int     i, width, height, depth, x;
   MATRIX *m_vox2ras[MAX_IMAGES], *m_ras2vox;
   VECTOR *v_ras, *v_vox;
 
   zmin = ymin = xmin = 10000000;
   zmax = ymax = xmax = -ymin;
 
-  v_ras = VectorAlloc(4, MATRIX_REAL);
-  v_vox = VectorAlloc(4, MATRIX_REAL);
+  v_ras                = VectorAlloc(4, MATRIX_REAL);
+  v_vox                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v_ras, 4) = VECTOR_ELT(v_vox, 4) = 1.0;
   for (i = 0; i < nimages; i++) {
     int x, y, z;
@@ -1386,9 +1379,9 @@ static MRI *mosaic_images_with_xforms(MRI **mri, int nimages, MRI *mri_weights,
     }
   }
 
-  width = ceil((xmax - xmin) / mri[0]->xsize) + 1;
-  height = ceil((ymax - ymin) / mri[0]->ysize) + 1;
-  depth = ceil((zmax - zmin) / mri[0]->zsize) + 1;
+  width      = ceil((xmax - xmin) / mri[0]->xsize) + 1;
+  height     = ceil((ymax - ymin) / mri[0]->ysize) + 1;
+  depth      = ceil((zmax - zmin) / mri[0]->zsize) + 1;
   mri_mosaic = MRIallocSequence(width, height, depth, MRI_FLOAT, 1);
   MRIcopyHeader(mri[0], mri_mosaic);
 
@@ -1516,20 +1509,20 @@ static MRI *mosaic_images_with_xforms(MRI **mri, int nimages, MRI *mri_weights,
          "%2.2f-->%2.2f \n",
          width, height, depth, xmin, xmax, ymin, ymax, zmin, zmax);
 
-  m_ras2vox = MRIgetRasToVoxelXform(mri_mosaic);
+  m_ras2vox  = MRIgetRasToVoxelXform(mri_mosaic);
   mri_counts = MRIclone(mri_mosaic, nullptr);
   //#ifdef HAVE_OPENMP
   //#pragma omp parallel for if_ROMP(experimental)
   //#endif
   for (i = 0; i < nimages; i++) {
-    int x, y, z, xm, ym, zm;
-    float val, sum, count, w;
+    int     x, y, z, xm, ym, zm;
+    float   val, sum, count, w;
     MATRIX *m_vox2vox;
     VECTOR *v_vox2;
 
-    v_vox2 = VectorAlloc(4, MATRIX_REAL);
+    v_vox2                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(v_vox2, 4) = 1.0;
-    m_vox2vox = MRIgetVoxelToVoxelXform(mri[i], mri_mosaic);
+    m_vox2vox             = MRIgetVoxelToVoxelXform(mri[i], mri_mosaic);
     for (x = 0; x < mri[i]->width; x++) {
       for (y = 0; y < mri[i]->height; y++) {
         for (z = 0; z < mri[i]->depth; z++) {
@@ -1591,7 +1584,7 @@ static MRI *mosaic_images_with_xforms(MRI **mri, int nimages, MRI *mri_weights,
   //#endif
   for (x = 0; x < mri_mosaic->width; x++) {
     float sum, count;
-    int y, z;
+    int   y, z;
     for (y = 0; y < mri_mosaic->height; y++) {
       for (z = 0; z < mri_mosaic->depth; z++) {
         if (x == Gx && y == Gy && z == Gz)

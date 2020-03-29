@@ -22,74 +22,72 @@
  *
  */
 
-#include <iostream>
-#include <iomanip>
 #include <cstdio>
 #include <cstdlib>
+#include <iomanip>
+#include <iostream>
 #include <typeinfo>
 
 #include "fio.h"
 
-const int MAX = 5;
-const double MAXD = 1.7976931348623157e+308;
-const double MIND = 2.2250738585072014e-308;
-const char *Progname = "extest";
-
-using namespace std;
+const int    MAX      = 5;
+const double MAXD     = 1.7976931348623157e+308;
+const double MIND     = 2.2250738585072014e-308;
+const char * Progname = "extest";
 
 template <typename T> bool checkOK(const T &p, const T &q) {
   if (p != q) {
-    cerr << "type is " << typeid(p).name() << ":";
-    cerr << "value differed " << p << " vs. " << q << endl;
+    std::cerr << "type is " << typeid(p).name() << ":";
+    std::cerr << "value differed " << p << " vs. " << q << std::endl;
     return false;
   } else {
-    cout << "type is " << typeid(p).name() << ":";
-    cout << "read " << p << "  orig: " << q << endl;
+    std::cout << "type is " << typeid(p).name() << ":";
+    std::cout << "read " << p << "  orig: " << q << std::endl;
     return true;
   }
 }
 
 template <> bool checkOK(const double &p, const double &q) {
   if ((p - q) > 0.00000000001) {
-    cerr << "type is " << typeid(p).name() << ":";
-    cerr << "value differed " << p << " vs. " << q << endl;
+    std::cerr << "type is " << typeid(p).name() << ":";
+    std::cerr << "value differed " << p << " vs. " << q << std::endl;
     return false;
   } else {
-    cout << "type is " << typeid(p).name() << ":";
-    cout << "read " << p << "  orig: " << q << endl;
+    std::cout << "type is " << typeid(p).name() << ":";
+    std::cout << "read " << p << "  orig: " << q << std::endl;
     return true;
   }
 }
 
 template <> bool checkOK(const float &p, const float &q) {
   if ((p - q) > 0.0000001) {
-    cerr << "type is " << typeid(p).name() << ":";
-    cerr << "value differed " << p << " vs. " << q << endl;
+    std::cerr << "type is " << typeid(p).name() << ":";
+    std::cerr << "value differed " << p << " vs. " << q << std::endl;
     return false;
   } else {
-    cout << "type is " << typeid(p).name() << ":";
-    cout << "read " << p << "  orig: " << q << endl;
+    std::cout << "type is " << typeid(p).name() << ":";
+    std::cout << "read " << p << "  orig: " << q << std::endl;
     return true;
   }
 }
 
 int main(int argc, char *argv[]) {
-  FILE *in, *out;
-  int i[MAX];
-  short s[MAX];
-  float f[MAX];
+  FILE * in, *out;
+  int    i[MAX];
+  short  s[MAX];
+  float  f[MAX];
   double d[MAX];
 
-  int ii[MAX];
-  short ss[MAX];
-  float ff[MAX];
+  int    ii[MAX];
+  short  ss[MAX];
+  float  ff[MAX];
   double dd[MAX];
 
   const char *file = "./extest.out";
 
   out = fopen(file, "w");
   if (!out) {
-    cerr << "could not open " << file << endl;
+    std::cerr << "could not open " << file << std::endl;
     exit(-1);
   }
   i[0] = 1;
@@ -183,10 +181,10 @@ int main(int argc, char *argv[]) {
   }
 
   fclose(in);
-  cout << "No error" << endl;
+  std::cout << "No error" << std::endl;
   return 0;
 
 finalize:
-  cerr << "Error" << endl;
+  std::cerr << "Error" << std::endl;
   exit(-1);
 }

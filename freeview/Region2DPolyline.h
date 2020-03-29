@@ -27,8 +27,8 @@
 #define Region2DPolyline_h
 
 #include "Region2D.h"
-#include <QList>
 #include "vtkSmartPointer.h"
+#include <QList>
 
 class vtkActor2D;
 class RenderView2D;
@@ -80,7 +80,7 @@ protected:
   };
 
   QList<ScreenPoint> m_screenPts; // 2D points
-  QList<WorldPoint> m_worldPts;
+  QList<WorldPoint>  m_worldPts;
 
   bool m_bSpline;
 };

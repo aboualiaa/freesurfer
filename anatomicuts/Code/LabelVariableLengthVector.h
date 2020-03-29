@@ -1,29 +1,27 @@
 #ifndef __LabelVariableLengthVector_h
 #define __LabelVariableLengthVector_h
 
-#include "itkVariableLengthVector.h"
 #include "itkMacro.h"
 #include "itkNumericTraits.h"
-#include <vnl/vnl_vector.h>
-#include <vnl/vnl_transpose.h>
-#include <vnl/vnl_matrix.h>
-#include <vnl/algo/vnl_matrix_inverse.h>
+#include "itkVariableLengthVector.h"
 #include <vnl/algo/vnl_determinant.h>
-
-using namespace itk;
+#include <vnl/algo/vnl_matrix_inverse.h>
+#include <vnl/vnl_matrix.h>
+#include <vnl/vnl_transpose.h>
+#include <vnl/vnl_vector.h>
 
 template <typename TValueType, class TMesh>
 class LabelVariableLengthVector : public VariableLengthVector<TValueType> {
 public:
   /** The element type stored at each location in the Array. */
-  using ValueType = TValueType;
-  using ComponentType = TValueType;
-  using RealValueType = typename NumericTraits<ValueType>::RealType;
-  using Self = LabelVariableLengthVector<TValueType, TMesh>;
-  using Superclass = VariableLengthVector<TValueType>;
-  using MeshType = TMesh;
-  using MeshPointerType = typename MeshType::Pointer;
-  using CellType = typename MeshType::CellType;                   //??
+  using ValueType           = TValueType;
+  using ComponentType       = TValueType;
+  using RealValueType       = typename NumericTraits<ValueType>::RealType;
+  using Self                = LabelVariableLengthVector<TValueType, TMesh>;
+  using Superclass          = VariableLengthVector<TValueType>;
+  using MeshType            = TMesh;
+  using MeshPointerType     = typename MeshType::Pointer;
+  using CellType            = typename MeshType::CellType;        //??
   using CellAutoPointerType = typename MeshType::CellAutoPointer; //??
 
   LabelVariableLengthVector() : Superclass() { ; };

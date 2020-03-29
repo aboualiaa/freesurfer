@@ -20,7 +20,7 @@ void MRISMP_dtr(MRIS_MP *mp) {
   //
 #define SEP
 #define ELTX(C, T, N) ELT(C, T, N)
-#define ELT(C, T, N) freeAndNULL(mp->f_##N);
+#define ELT(C, T, N)  freeAndNULL(mp->f_##N);
   MRIS_MP__LIST_F_IN SEP MRIS_MP__LIST_F_OUT
 #undef ELT
 #undef ELTX
@@ -37,7 +37,7 @@ void MRISMP_dtr(MRIS_MP *mp) {
 
 #define SEP
 #define ELTX(C, T, N) ELT(C, T, N)
-#define ELT(C, T, N) freeAndNULL(mp->v_##N);
+#define ELT(C, T, N)  freeAndNULL(mp->v_##N);
   MRIS_MP__LIST_V_IN SEP MRIS_MP__LIST_V_IN_OUT SEP MRIS_MP__LIST_V_OUT
 #undef ELT
 #undef ELTX
@@ -116,7 +116,7 @@ void MRISMP_copy(MRIS_MP *dst, MRIS_MP *src, bool only_inputs,
   //
 #define SEP
 #define ELTX(C, T, N) ELT(C, T, N)
-#define ELT(C, T, N) dst->v_##N = src->v_##N;
+#define ELT(C, T, N)  dst->v_##N = src->v_##N;
           MRIS_MP__LIST_V_IN
 #undef ELT
 #undef ELTX
@@ -125,7 +125,7 @@ void MRISMP_copy(MRIS_MP *dst, MRIS_MP *src, bool only_inputs,
 #define SEP
 #define ELTX(C, T, N) ELT(C, T, N)
 #define ELT(C, T, N)                                                           \
-  T *v_##N = (T *)realloc((void *)dst->v_##N, dst->nvertices * sizeof(T));     \
+  T *v_##N   = (T *)realloc((void *)dst->v_##N, dst->nvertices * sizeof(T));   \
   dst->v_##N = v_##N;
               MRIS_MP__LIST_V_IN_OUT SEP MRIS_MP__LIST_V_OUT
 #undef ELT
@@ -167,7 +167,7 @@ void MRISMP_copy(MRIS_MP *dst, MRIS_MP *src, bool only_inputs,
 #define SEP
 #define ELTX(C, T, N) ELT(C, T, N)
 #define ELT(C, T, N)                                                           \
-  T *f_##N = (T *)realloc((void *)dst->f_##N, dst->nfaces * sizeof(T));        \
+  T *f_##N   = (T *)realloc((void *)dst->f_##N, dst->nfaces * sizeof(T));      \
   dst->f_##N = f_##N;
   MRIS_MP__LIST_F_OUT
 #undef ELT
@@ -176,7 +176,7 @@ void MRISMP_copy(MRIS_MP *dst, MRIS_MP *src, bool only_inputs,
 
 #define SEP
 #define ELTX(C, T, N) ELT(C, T, N)
-#define ELT(C, T, N) dst->f_##N = src->f_##N;
+#define ELT(C, T, N)  dst->f_##N = src->f_##N;
   MRIS_MP__LIST_F_IN
 #undef ELT
 #undef ELTX
@@ -190,9 +190,9 @@ void MRISMP_copy(MRIS_MP *dst, MRIS_MP *src, bool only_inputs,
     for (fno = 0; fno < dst->nfaces; fno++) {
 #define SEP
 #define ELTX(C, T, N) // these are the special cases dealt with here
-#define ELT(C, T, N) f_##N[fno] = src->f_##N[fno];
+#define ELT(C, T, N)  f_##N[fno] = src->f_##N[fno];
       f_normSet[fno] = src->f_normSet[fno];
-      f_norm[fno] = src->f_norm[fno];
+      f_norm[fno]    = src->f_norm[fno];
       copyAnglesPerTriangle(f_angle[fno], src->f_angle[fno]); // not so special
       MRIS_MP__LIST_F_OUT
 #undef ELT
@@ -245,7 +245,7 @@ void MRISMP_load(MRIS_MP *mp, MRIS *mris, bool loadOutputs, float *dx_or_NULL,
 #define SEP
 #define ELTX(C, T, N) ELT(C, T, N)
 #define ELT(C, T, N)                                                           \
-  T *v_##N = (T *)malloc(mris->nvertices * sizeof(T));                         \
+  T *v_##N  = (T *)malloc(mris->nvertices * sizeof(T));                        \
   mp->v_##N = v_##N;
   MRIS_MP__LIST_V_IN SEP
 #define ELTX(C, T, N) ELT(C, T, N)
@@ -264,9 +264,9 @@ void MRISMP_load(MRIS_MP *mp, MRIS *mris, bool loadOutputs, float *dx_or_NULL,
     VERTEX const *const v = &mris->vertices[vno];
 #define SEP
 #define ELTX(C, T, N) // these are the special cases dealt with here
-    v_dist_orig[vno] = v->dist_orig;
-    v_VSize[vno] = mrisVertexVSize(mris, vno);
-    v_dist[vno] = NULL;
+    v_dist_orig[vno]     = v->dist_orig;
+    v_VSize[vno]         = mrisVertexVSize(mris, vno);
+    v_dist[vno]          = NULL;
     v_dist_capacity[vno] = 0;
 #define ELT(C, T, N) v_##N[vno] = v->N;
     MRIS_MP__LIST_V_IN SEP MRIS_MP__LIST_V_IN_OUT if (loadOutputs) {
@@ -297,7 +297,7 @@ void MRISMP_load(MRIS_MP *mp, MRIS *mris, bool loadOutputs, float *dx_or_NULL,
 #define SEP
 #define ELTX(C, T, N) ELT(C, T, N)
 #define ELT(C, T, N)                                                           \
-  T *f_##N = (T *)malloc(mris->nfaces * sizeof(T));                            \
+  T *f_##N  = (T *)malloc(mris->nfaces * sizeof(T));                           \
   mp->f_##N = f_##N;
   MRIS_MP__LIST_F_IN SEP MRIS_MP__LIST_F_OUT
 #undef ELT
@@ -306,7 +306,7 @@ void MRISMP_load(MRIS_MP *mp, MRIS *mris, bool loadOutputs, float *dx_or_NULL,
 
       int fno;
   for (fno = 0; fno < mris->nfaces; fno++) {
-    FACE const *const f = &mris->faces[fno];
+    FACE const *const               f     = &mris->faces[fno];
     FaceNormCacheEntry const *const fNorm = getFaceNorm(mris, fno);
 #define SEP
 #define ELTX(C, T, N) // these are the special cases dealt with here
@@ -371,7 +371,7 @@ void MRISMP_unload(MRIS *mris, MRIS_MP *mp, bool check) {
     // When fixing, fix the dtr also!
     //
     FACE_TOPOLOGY const *ft = mp->faces_topology;
-    int fno;
+    int                  fno;
     for (fno = 0; fno < mris->nfaces; fno++) {
       comparison(fno, 0, memcmp(ft[fno].v, mris->faces[fno].v, sizeof(ft->v)));
     }
@@ -397,7 +397,7 @@ void MRISMP_unload(MRIS *mris, MRIS_MP *mp, bool check) {
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (mp->v_ripflag[vno] && v->ripflag)
       continue;
 #define SEP
@@ -413,10 +413,10 @@ void MRISMP_unload(MRIS *mris, MRIS_MP *mp, bool check) {
                     mp->v_dist_capacity[vno]); // why assign and free when you
                                                // can just move?
         mp->v_dist[vno] = mp->v_dist_buffer[vno] = NULL;
-        mp->v_dist_capacity[vno] = 0;
+        mp->v_dist_capacity[vno]                 = 0;
       } else {
 
-        float *const mp_dist = mp->v_dist[vno];
+        float *const mp_dist   = mp->v_dist[vno];
         float *const mris_dist = v->dist;
 
         int const vtotal = vt->vtotal;
@@ -558,9 +558,9 @@ static float mrismp_TriangleArea(MRIS_MP *mris, int fno, int n) {
 static void mrismp_setFaceNorm(MRIS_MP *mris, int fno, float nx, float ny,
                                float nz) {
   mris->f_normSet[fno] = true;
-  mris->f_norm[fno].x = nx;
-  mris->f_norm[fno].y = ny;
-  mris->f_norm[fno].z = nz;
+  mris->f_norm[fno].x  = nx;
+  mris->f_norm[fno].y  = ny;
+  mris->f_norm[fno].z  = nz;
 }
 
 static void mrismp_setFaceAreaNormal(MRIS_MP *mris, int fno) {
@@ -568,7 +568,7 @@ static void mrismp_setFaceAreaNormal(MRIS_MP *mris, int fno) {
   // so use the cross product of any two edges
   //
   FACE_TOPOLOGY const *const ft = &mris->faces_topology[fno];
-  int const *const pv = ft->v;
+  int const *const           pv = ft->v;
 
   int const vno0 = pv[0];
   int const vno1 = pv[1];
@@ -615,7 +615,7 @@ static void mrismp_setFaceAreaNormal(MRIS_MP *mris, int fno) {
  */
 static void mrismp_NormalFace(MRIS_MP *mris, int fno, int n, float norm[]) {
   FACE_TOPOLOGY const *const ft = &mris->faces_topology[fno];
-  int const *const pv = ft->v;
+  int const *const           pv = ft->v;
 
   int const n0 = (n == 0) ? VERTICES_PER_FACE - 1 : n - 1;
   int const n1 = (n == VERTICES_PER_FACE - 1) ? 0 : n + 1;
@@ -717,9 +717,9 @@ static void MRISMP_computeNormals(MRIS_MP *mris, bool check) {
       // Build the initial pending list
       //
       int pendingCapacity = mris->nvertices;
-  int *pending = (int *)malloc(pendingCapacity * sizeof(int));
-  int *nextPending = (int *)malloc(pendingCapacity * sizeof(int));
-  int pendingSize = 0;
+  int *   pending         = (int *)malloc(pendingCapacity * sizeof(int));
+  int *   nextPending     = (int *)malloc(pendingCapacity * sizeof(int));
+  int     pendingSize     = 0;
 
   for (k = 0; k < mris->nvertices; k++) {
     if (mris->v_ripflag[k])
@@ -749,7 +749,7 @@ static void MRISMP_computeNormals(MRIS_MP *mris, bool check) {
         for (p = 0; p < pendingSize; p++) {
       ROMP_PFLB_begin
 
-          int const k = pending[p];
+          int const                k  = pending[p];
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[k];
       // RTEX                * const v  = &mris->vertices         [k];
 
@@ -833,7 +833,7 @@ static void MRISMP_computeNormals(MRIS_MP *mris, bool check) {
     // If this is a performance problem, can be fixed, but I doubt it will be
     //
     for (p = 0; p < nextPendingSize; p++) {
-      int const k = nextPending[p];
+      int const                    k  = nextPending[p];
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[k];
       // RTEX                * const v  = &mris->vertices         [k];
 
@@ -891,9 +891,9 @@ static void MRISMP_computeNormals(MRIS_MP *mris, bool check) {
     // enough
     //
     int *tempPending = pending;
-    pending = nextPending;
-    nextPending = tempPending;
-    pendingSize = nextPendingSize;
+    pending          = nextPending;
+    nextPending      = tempPending;
+    pendingSize      = nextPendingSize;
 
   } // trials
 
@@ -911,12 +911,12 @@ static void MRISMP_computeNormals(MRIS_MP *mris, bool check) {
 #define COMPILING_MRIS_MP
 
 #define FUNCTION_NAME MRISMP_computeVertexDistancesWkr
-#define INPUT_STATUS status
-#define INPUT_X v_x
-#define INPUT_Y v_y
-#define INPUT_Z v_z
-#define OUTPUT_DIST dist
-#define OUTPUT_MAKER MRISMP_makeDist
+#define INPUT_STATUS  status
+#define INPUT_X       v_x
+#define INPUT_Y       v_y
+#define INPUT_Z       v_z
+#define OUTPUT_DIST   dist
+#define OUTPUT_MAKER  MRISMP_makeDist
 #include "mrisComputeVertexDistancesWkr_extracted.h"
 
 static void MRISMP_computeVertexDistances(MRIS_MP *mris) {
@@ -948,8 +948,8 @@ static void MRISMP_computeAvgInterVertexDist(MRIS_MP *mris, double *StdDev) {
   double N = 0.0;
 
 #define ROMP_VARIABLE vno
-#define ROMP_LO 0
-#define ROMP_HI mris->nvertices
+#define ROMP_LO       0
+#define ROMP_HI       mris->nvertices
 
 #define ROMP_SUMREDUCTION0 Sum
 #define ROMP_SUMREDUCTION1 Sum2
@@ -963,9 +963,9 @@ static void MRISMP_computeAvgInterVertexDist(MRIS_MP *mris, double *StdDev) {
 #include "romp_for_begin.h"
   ROMP_for_begin
 
-#define Sum ROMP_PARTIALSUM(0)
+#define Sum  ROMP_PARTIALSUM(0)
 #define Sum2 ROMP_PARTIALSUM(1)
-#define N ROMP_PARTIALSUM(2)
+#define N    ROMP_PARTIALSUM(2)
 
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
 
@@ -973,7 +973,7 @@ static void MRISMP_computeAvgInterVertexDist(MRIS_MP *mris, double *StdDev) {
     continue;
   }
   int const vnum = vt->vnum;
-  int m;
+  int       m;
   for (m = 0; m < vnum; m++) {
     int const vno2 = vt->v[m];
 
@@ -981,7 +981,7 @@ static void MRISMP_computeAvgInterVertexDist(MRIS_MP *mris, double *StdDev) {
       continue;
     }
     float *dist = mris->v_dist[vno];
-    double d = dist[m];
+    double d    = dist[m];
     Sum += d;
     Sum2 += (d * d);
     N += 1;
@@ -1014,8 +1014,8 @@ static void mrismp_OrientEllipsoid(MRIS_MP *mris) {
   double total_area = 0.0, neg_area = 0.0, neg_orig_area = 0.0;
 
 #define ROMP_VARIABLE fno
-#define ROMP_LO 0
-#define ROMP_HI mris->nfaces
+#define ROMP_LO       0
+#define ROMP_HI       mris->nfaces
 
 #define ROMP_SUMREDUCTION0 total_area
 #define ROMP_SUMREDUCTION1 neg_area
@@ -1029,8 +1029,8 @@ static void mrismp_OrientEllipsoid(MRIS_MP *mris) {
 #include "romp_for_begin.h"
   ROMP_for_begin
 
-#define total_area ROMP_PARTIALSUM(0)
-#define neg_area ROMP_PARTIALSUM(1)
+#define total_area    ROMP_PARTIALSUM(0)
+#define neg_area      ROMP_PARTIALSUM(1)
 #define neg_orig_area ROMP_PARTIALSUM(2)
 
       FACE_TOPOLOGY const *const ft = &mris->faces_topology[fno];
@@ -1040,9 +1040,9 @@ static void mrismp_OrientEllipsoid(MRIS_MP *mris) {
   }
 
   FloatXYZ const *const fNorm = &mris->f_norm[fno];
-  float const nx = fNorm->x;
-  float const ny = fNorm->y;
-  float const nz = fNorm->z;
+  float const           nx    = fNorm->x;
+  float const           ny    = fNorm->y;
+  float const           nz    = fNorm->z;
 
   /* now give the area an orientation: if the unit normal is pointing
      inwards on the ellipsoid then the area should be negative.
@@ -1079,7 +1079,7 @@ static void mrismp_OrientEllipsoid(MRIS_MP *mris) {
     mris->f_norm[fno].z *= -1.0f;
 
     angles_per_triangle_t *angle = &mris->f_angle[fno];
-    int ano;
+    int                    ano;
     for (ano = 0; ano < ANGLES_PER_TRIANGLE; ano++) {
       (*angle)[ano] *= -1.0f;
     }
@@ -1098,8 +1098,8 @@ static void mrismp_OrientEllipsoid(MRIS_MP *mris) {
 
 #include "romp_for_end.h"
 
-  mris->total_area = total_area;
-  mris->neg_area = neg_area;
+  mris->total_area    = total_area;
+  mris->neg_area      = neg_area;
   mris->neg_orig_area = neg_orig_area;
 }
 
@@ -1122,9 +1122,9 @@ static void mrismp_OrientPlane(MRIS_MP *mris) {
     // downwards in the plane then the area should be negative.
     //
     FloatXYZ *const fNorm = &mris->f_norm[fno];
-    float const nx = fNorm->x;
-    float const ny = fNorm->y;
-    float const nz = fNorm->z;
+    float const     nx    = fNorm->x;
+    float const     ny    = fNorm->y;
+    float const     nz    = fNorm->z;
 
     if (nz < 0.0f) {
       /* not in same direction, area < 0 and reverse n */
@@ -1135,7 +1135,7 @@ static void mrismp_OrientPlane(MRIS_MP *mris) {
       fNorm->z = -nz;
 
       angles_per_triangle_t *angle = &mris->f_angle[fno];
-      int ano;
+      int                    ano;
       for (ano = 0; ano < ANGLES_PER_TRIANGLE; ano++) {
         (*angle)[ano] *= -1.0f;
       }
@@ -1163,7 +1163,7 @@ static void mrismp_OrientPlane(MRIS_MP *mris) {
       mris->v_neg[vno] = 0;
     }
     float v_area = 0.0f;
-    int fn;
+    int   fn;
     for (fn = 0; fn < vt->num; fn++) {
       int fno = vt->f[fn];
       v_area += mris->f_area[fno];

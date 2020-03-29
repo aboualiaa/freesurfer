@@ -30,12 +30,10 @@
  */
 
 #include "MultiRegistration.h"
-#include "Regression.h"
 #include "CostFunctions.h"
+#include "Regression.h"
 
 #include <vnl/algo/vnl_determinant.h>
-
-using namespace std;
 
 void MultiRegistration::clear() {
   if (mri_mean)
@@ -63,7 +61,7 @@ unsigned int MultiRegistration::getSeed()
   assert(n > 1);
 
   double dseed = 0.0;
-  int x, y, z, i, p, xup, xdown, yup, ydown, zup, zdown;
+  int    x, y, z, i, p, xup, xdown, yup, ydown, zup, zdown;
   for (i = 0; i < n; i++) {
     // center voxel:
     x = mri_mov[i]->width / 2;
@@ -72,11 +70,11 @@ unsigned int MultiRegistration::getSeed()
 
     // sum up crossair
     for (p = 0; p < 20; p++) {
-      xup = x + p;
+      xup   = x + p;
       xdown = x - p;
-      yup = y + p;
+      yup   = y + p;
       ydown = y - p;
-      zup = z + p;
+      zup   = z + p;
       zdown = z - p;
 
       if (xdown >= 0)
@@ -122,7 +120,7 @@ int MultiRegistration::loadMovables(const std::vector<std::string> &pmov,
   mov = pmov; // local copy of input filenames
   if (n == 1) // try read 4D volume
   {
-    cout << "trying to read 4D source '" << mov[0] << "'..." << endl;
+    std::cout << "trying to read 4D source '" << mov[0] << "'..." << std::endl;
     MRI *mri4d = MRIread(mov[0].c_str());
     if (!mri4d) {
       ErrorExit(
@@ -131,10 +129,10 @@ int MultiRegistration::loadMovables(const std::vector<std::string> &pmov,
           mov[0].c_str());
     }
     n = mri4d->nframes;
-    cout << " Input has " << n << " frames." << endl;
+    std::cout << " Input has " << n << " frames." << std::endl;
     if (n == 1) {
-      cerr << "ERROR: only single 3D volume passed!" << endl;
-      cerr << "    Pass several inputs, or 4D input volume" << endl;
+      std::cerr << "ERROR: only single 3D volume passed!" << std::endl;
+      std::cerr << "    Pass several inputs, or 4D input volume" << std::endl;
       exit(1);
     }
 
@@ -149,8 +147,9 @@ int MultiRegistration::loadMovables(const std::vector<std::string> &pmov,
       }
       m = mask4d->nframes;
       if (n != m) {
-        cerr << "ERROR: frame count in mask does not agree with frames in mov!"
-             << endl;
+        std::cerr
+            << "ERROR: frame count in mask does not agree with frames in mov!"
+            << std::endl;
         exit(1);
       }
     }
@@ -160,16 +159,17 @@ int MultiRegistration::loadMovables(const std::vector<std::string> &pmov,
     for (int i = 0; i < n; i++) {
       mri_mov[i] = MRIcopyFrame(mri4d, nullptr, i, 0);
       if (m > 0) {
-        cout << "masking source frame " << i << " ..." << endl;
-        MRI *mask = MRIcopyFrame(mask4d, nullptr, i, 0);
+        std::cout << "masking source frame " << i << " ..." << std::endl;
+        MRI *mask  = MRIcopyFrame(mask4d, nullptr, i, 0);
         mri_mov[i] = MRImaskZero(mri_mov[i], mask, mri_mov[i]);
         MRIfree(&mask);
       }
       if (sampletype == SAMPLE_CUBIC_BSPLINE) {
-        cout << "converting source frame " << i << " to bspline ..." << endl;
+        std::cout << "converting source frame " << i << " to bspline ..."
+                  << std::endl;
         mri_bsplines[i] = MRItoBSpline(mri_mov[i], mri_bsplines[i], 3);
       }
-      ostringstream oss;
+      std::ostringstream oss;
       oss << "Frame_" << i;
       mov[i] = oss.str();
     }
@@ -180,9 +180,9 @@ int MultiRegistration::loadMovables(const std::vector<std::string> &pmov,
     assert(n > 1);
     mri_mov.resize(n);
     mri_bsplines.resize(n, nullptr);
-    vector<double> msize(pmov.size());
+    std::vector<double> msize(pmov.size());
     for (int i = 0; i < n; i++) {
-      cout << "reading source '" << mov[i] << "'..." << endl;
+      std::cout << "reading source '" << mov[i] << "'..." << std::endl;
 
       mri_mov[i] = MRIread(mov[i].c_str());
       if (!mri_mov[i]) {
@@ -204,7 +204,7 @@ int MultiRegistration::loadMovables(const std::vector<std::string> &pmov,
         msize[i] = mri_mov[i]->zsize;
 
       if (m > 0) {
-        cout << "masking source frame " << i << " ..." << endl;
+        std::cout << "masking source frame " << i << " ..." << std::endl;
         MRI *mask = MRIread(pmasks[i].c_str());
         if (!mask) {
           ErrorExit(ERROR_NOFILE,
@@ -223,7 +223,8 @@ int MultiRegistration::loadMovables(const std::vector<std::string> &pmov,
       }
 
       if (sampletype == SAMPLE_CUBIC_BSPLINE) {
-        cout << "converting source '" << mov[i] << "' to bspline ..." << endl;
+        std::cout << "converting source '" << mov[i] << "' to bspline ..."
+                  << std::endl;
         mri_bsplines[i] = MRItoBSpline(mri_mov[i], mri_bsplines[i], 3);
       }
     }
@@ -232,13 +233,15 @@ int MultiRegistration::loadMovables(const std::vector<std::string> &pmov,
       if (fabs(mri_mov[i]->xsize - mri_mov[0]->xsize) > EPS ||
           fabs(mri_mov[i]->ysize - mri_mov[0]->ysize) > EPS ||
           fabs(mri_mov[i]->zsize - mri_mov[0]->zsize) > EPS) {
-        cerr << "ERROR: MultiRegistration::loadMovables: images have different "
-                "voxel sizes.\n";
-        cerr << "  Currently not supported, maybe first make conform?\n";
-        cerr << "  Debug info: size(" << i << ") = " << mri_mov[i]->xsize
-             << ", " << mri_mov[i]->ysize << ", " << mri_mov[i]->zsize
-             << "   size(0) = " << mri_mov[0]->xsize << ", "
-             << mri_mov[0]->ysize << ", " << mri_mov[0]->zsize << endl;
+        std::cerr
+            << "ERROR: MultiRegistration::loadMovables: images have different "
+               "voxel sizes.\n";
+        std::cerr << "  Currently not supported, maybe first make conform?\n";
+        std::cerr << "  Debug info: size(" << i << ") = " << mri_mov[i]->xsize
+                  << ", " << mri_mov[i]->ysize << ", " << mri_mov[i]->zsize
+                  << "   size(0) = " << mri_mov[0]->xsize << ", "
+                  << mri_mov[0]->ysize << ", " << mri_mov[0]->zsize
+                  << std::endl;
         ErrorExit(
             ERROR_BADFILE,
             "MultiRegistration::loadMovables: voxel size is different %s.\n",
@@ -262,7 +265,7 @@ int MultiRegistration::loadLTAs(const std::vector<std::string> nltas) {
   iltas = nltas; // copy of input filenames
   for (uint i = 0; i < nltas.size(); i++) {
     TRANSFORM *trans = TransformRead(nltas[i].c_str());
-    LTA *lta = (LTA *)trans->xform;
+    LTA *      lta   = (LTA *)trans->xform;
     if (!lta)
       ErrorExit(ERROR_BADFILE,
                 "MultiRegistration::loadLTAs could not read transform file %s",
@@ -292,7 +295,7 @@ int MultiRegistration::loadIntensities(const std::vector<std::string> nintens) {
   assert(intensities.size() == mov.size());
   iintens = nintens; // copy of input filenames
   for (uint i = 0; i < nintens.size(); i++) {
-    ifstream f(nintens[i].c_str(), ios::in);
+    std::ifstream f(nintens[i].c_str(), std::ios::in);
     if (f.good()) {
       f >> intensities[i];
       f.close();
@@ -362,21 +365,21 @@ bool MultiRegistration::mapAndAverageMov(int itdebug)
   assert(intensities.size() == nin);
 
   if (iscaleonly) {
-    cout << "creating intitial template (iscale only)" << endl;
+    std::cout << "creating intitial template (iscale only)" << std::endl;
     for (unsigned int i = 0; i < nin; i++) {
       mri_warps[i] =
           MyMRI::MRIvalscale(mri_mov[i], mri_warps[i], intensities[i]);
       if (debug) {
-        ostringstream oss;
+        std::ostringstream oss;
         oss << outdir << "tp" << i + 1 << "_to_template-it" << itdebug
             << ".mgz";
         MRIwrite(mri_warps[i], oss.str().c_str());
       }
     }
   } else {
-    cout << "mapping movs and creating initial template..." << endl;
+    std::cout << "mapping movs and creating initial template..." << std::endl;
     if (iscale)
-      cout << " allow intensity scaling" << endl;
+      std::cout << " allow intensity scaling" << std::endl;
     for (unsigned int i = 0; i < nin; i++) {
       if (mri_warps[i])
         MRIfree(&mri_warps[i]);
@@ -393,7 +396,7 @@ bool MultiRegistration::mapAndAverageMov(int itdebug)
             MyMRI::MRIvalscale(mri_warps[i], mri_warps[i], intensities[i]);
       }
       if (debug) {
-        ostringstream oss;
+        std::ostringstream oss;
         oss << outdir << "tp" << i + 1 << "_to_template-it" << itdebug
             << ".mgz";
         MRIwrite(mri_warps[i], oss.str().c_str());
@@ -416,9 +419,9 @@ MRI *MultiRegistration::averageConformSet(int itdebug)
 
   std::vector<MRI *> mri_cwarps(nin, nullptr);
 
-  cout << "warping movs and creating conform template..." << endl;
+  std::cout << "warping movs and creating conform template..." << std::endl;
   if (iscale)
-    cout << " allow intensity scaling" << endl;
+    std::cout << " allow intensity scaling" << std::endl;
   for (unsigned int i = 0; i < nin; i++) {
 
     // use geometry from ltas
@@ -426,8 +429,9 @@ MRI *MultiRegistration::averageConformSet(int itdebug)
     mri_cwarps[i] = LTAtransform(mri_mov[i], nullptr, ltas[i]);
     MRIcopyPulseParameters(mri_mov[i], mri_warps[i]);
     //????
-    cerr << " MultiRegistration::averageConformSet not implemented, yet !!!"
-         << endl;
+    std::cerr
+        << " MultiRegistration::averageConformSet not implemented, yet !!!"
+        << std::endl;
     assert(1 == 2);
 
     if (iscale) {
@@ -435,7 +439,7 @@ MRI *MultiRegistration::averageConformSet(int itdebug)
           MyMRI::MRIvalscale(mri_cwarps[i], mri_cwarps[i], intensities[i]);
     }
     if (debug) {
-      ostringstream oss;
+      std::ostringstream oss;
       oss << outdir << "tp" << i + 1 << "_to_template_conform-it" << itdebug
           << ".mgz";
       MRIwrite(mri_cwarps[i], oss.str().c_str());
@@ -457,13 +461,13 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
   assert(nin > 1);
 
   if (debug)
-    cout << endl
-         << endl
-         << "MultiRegistration::computeTemplate(avitmax: " << itmax
-         << ", aveps " << eps << ", regit: " << iterate << ", regeps: " << epsit
-         << " )" << endl;
+    std::cout << std::endl
+              << std::endl
+              << "MultiRegistration::computeTemplate(avitmax: " << itmax
+              << ", aveps " << eps << ", regit: " << iterate
+              << ", regeps: " << epsit << " )" << std::endl;
 
-  cout << endl << "Computing first template" << endl;
+  std::cout << std::endl << "Computing first template" << std::endl;
   bool havexforms = (ltas[0] != nullptr);
   if (!havexforms) // create simple initial average aligning centers (moments),
                    // blurry!
@@ -481,7 +485,7 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 
   strncpy(mri_mean->fname, (outdir + "template-it0.mgz").c_str(), STRLEN);
   if (debug) {
-    cout << "debug: saving template-it0.mgz" << endl;
+    std::cout << "debug: saving template-it0.mgz" << std::endl;
     MRIwrite(mri_mean, (outdir + "template-it0.mgz").c_str());
   }
 
@@ -490,13 +494,13 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
   //  int itmax  = 10;
   //  double eps = 0.025;
 
-  int itcount = 0;
+  int    itcount   = 0;
   double maxchange = 100;
 
   //  vector < Registration > Rv(mri_mov.size()); //(removed to save mem)
   //  for (int i = 0;i<nin;i++) Rv[i].setSource(mri_mov[i],fixvoxel,keeptype);
 
-  vector<vnl_matrix_fixed<double, 4, 4>> transforms(mri_mov.size());
+  std::vector<vnl_matrix_fixed<double, 4, 4>> transforms(mri_mov.size());
   //  if (havexforms) //initial transforms
   {
     for (int i = 0; i < nin; i++) {
@@ -532,20 +536,23 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
     if (ltas[0])
       maxchange = 0;
 
-    cout << endl
-         << "=======================================================" << endl;
-    cout << endl << "Working on global iteration : " << itcount << endl;
-    cout << endl
-         << "=======================================================" << endl;
+    std::cout << std::endl
+              << "======================================================="
+              << std::endl;
+    std::cout << std::endl
+              << "Working on global iteration : " << itcount << std::endl;
+    std::cout << std::endl
+              << "======================================================="
+              << std::endl;
     // cout << "========================================" << endl;
     // printmemusage();
     // cout << "========================================" << endl << endl;
 
     if (itcount <= 4 && noxformits[itcount - 1] > 0)
-      cout << "  noxformits = " << noxformits[itcount - 1] << endl;
+      std::cout << "  noxformits = " << noxformits[itcount - 1] << std::endl;
 
     // register all inputs to mean
-    vector<double> dists(nin, 1000); // should be larger than maxchange!
+    std::vector<double> dists(nin, 1000); // should be larger than maxchange!
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static, 1)
 #endif
@@ -553,7 +560,9 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
-      cout << endl << "Working on TP " << i + 1 << endl << endl;
+      std::cout << std::endl
+                << "Working on TP " << i + 1 << std::endl
+                << std::endl;
       RegRobust
           R; // create new registration each time to keep mem usage smaller
              //      Rv[i].clear();
@@ -566,7 +575,7 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
       //                                                 optimized
       R.setSourceAndTarget(mri_mov[i], mri_mean, keeptype);
 
-      ostringstream oss;
+      std::ostringstream oss;
       oss << outdir << "tp" << i + 1 << "_to_template-it" << itcount;
       R.setName(oss.str());
 
@@ -608,26 +617,26 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 #pragma omp critical
 #endif
       if (nomulti || iscaleonly) {
-        cout << " - running high-res registration on TP " << i + 1 << "..."
-             << endl;
+        std::cout << " - running high-res registration on TP " << i + 1 << "..."
+                  << std::endl;
         R.computeIterativeRegistration(iterate, epsit);
       } else {
-        cout << " - running multi-resolutional registration on TP " << i + 1
-             << "..." << endl;
+        std::cout << " - running multi-resolutional registration on TP "
+                  << i + 1 << "..." << std::endl;
         R.computeMultiresRegistration(maxres, iterate, epsit);
       }
 
-      Md.first = R.getFinalVox2Vox();
+      Md.first  = R.getFinalVox2Vox();
       Md.second = R.getFinalIscale();
       if (!R.getConverged()) {
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
-        cout << "   *** WARNING: TP " << i + 1
-             << " to template did not converge ***" << endl;
+        std::cout << "   *** WARNING: TP " << i + 1
+                  << " to template did not converge ***" << std::endl;
       }
 
-      transforms[i] = Md.first;
+      transforms[i]  = Md.first;
       intensities[i] = Md.second;
 
       // convert Matrix to LTA ras to ras
@@ -657,7 +666,8 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
-        cout << "   tp " << i + 1 << " distance: " << dists[i] << endl;
+        std::cout << "   tp " << i + 1 << " distance: " << dists[i]
+                  << std::endl;
       }
 
       // create warps: warp mov to mean
@@ -668,15 +678,16 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
-        cout << " - mapping tp " << i + 1 << " to template (cubic bspline) ..."
-             << endl;
+        std::cout << " - mapping tp " << i + 1
+                  << " to template (cubic bspline) ..." << std::endl;
         mri_warps[i] =
             LTAtransformBSpline(mri_bsplines[i], mri_warps[i], ltas[i]);
       } else {
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
-        cout << " - mapping tp " << i + 1 << " to template..." << endl;
+        std::cout << " - mapping tp " << i + 1 << " to template..."
+                  << std::endl;
         mri_warps[i] =
             LTAtransformInterp(mri_mov[i], mri_warps[i], ltas[i], sampletype);
       }
@@ -687,8 +698,8 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
-        cout << " - adjusting intensity of mapped tp " << i + 1 << " by "
-             << Md.second << endl;
+        std::cout << " - adjusting intensity of mapped tp " << i + 1 << " by "
+                  << Md.second << std::endl;
         mri_warps[i] =
             MyMRI::MRIvalscale(mri_warps[i], mri_warps[i], Md.second);
       }
@@ -699,7 +710,7 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
-        cout << " - backup weights tp " << i + 1 << " ..." << endl;
+        std::cout << " - backup weights tp " << i + 1 << " ..." << std::endl;
         // if (mri_weights[i]) MRIfree(&mri_weights[i]);
         mri_weights[i] = MRIcopy(R.getWeights(), mri_weights[i]);
       }
@@ -713,16 +724,16 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
-        cout << " - debug tp " << i + 1
-             << " : writing transforms, warps, weights ..." << endl;
+        std::cout << " - debug tp " << i + 1
+                  << " : writing transforms, warps, weights ..." << std::endl;
 
         LTAwriteEx(ltas[i], (oss.str() + ".lta").c_str());
 
         MRIwrite(mri_warps[i], (oss.str() + ".mgz").c_str());
 
         if (R.isIscale() && Md.second > 0) {
-          string fn = oss.str() + "-intensity.txt";
-          ofstream f(fn.c_str(), ios::out);
+          std::string   fn = oss.str() + "-intensity.txt";
+          std::ofstream f(fn.c_str(), std::ios::out);
           f << Md.second;
           f.close();
         }
@@ -731,20 +742,20 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
         if (mri_weights[i] != nullptr) {
           std::pair<vnl_matrix_fixed<double, 4, 4>,
                     vnl_matrix_fixed<double, 4, 4>>
-              map2weights = R.getHalfWayMaps();
+                                         map2weights = R.getHalfWayMaps();
           vnl_matrix_fixed<double, 4, 4> hinv = vnl_inverse(map2weights.second);
 
 #ifdef HAVE_OPENMP
 #pragma omp critical
 #endif
           {
-            cout << endl;
-            cout << map2weights.first << endl;
-            cout << endl;
-            cout << map2weights.second << endl;
-            cout << endl;
-            cout << hinv << endl;
-            cout << endl;
+            std::cout << std::endl;
+            std::cout << map2weights.first << std::endl;
+            std::cout << std::endl;
+            std::cout << map2weights.second << std::endl;
+            std::cout << std::endl;
+            std::cout << hinv << std::endl;
+            std::cout << std::endl;
           }
           MRI *wtarg = MRIallocSequence(
               mri_weights[i]->width, mri_weights[i]->height,
@@ -774,9 +785,10 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 #pragma omp critical
 #endif
       {
-        cout << endl << "Finished TP : " << i + 1 << endl;
-        cout << endl;
-        cout << "=====================================================" << endl;
+        std::cout << std::endl << "Finished TP : " << i + 1 << std::endl;
+        std::cout << std::endl;
+        std::cout << "====================================================="
+                  << std::endl;
       }
 
     } // for loop end (all timepoints)
@@ -791,19 +803,23 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 
     if (dists[0] <= maxchange) // it was computed, so print it:
     {
-      cout << endl << "Global Iteration " << itcount << " Distances: " << endl;
+      std::cout << std::endl
+                << "Global Iteration " << itcount
+                << " Distances: " << std::endl;
       for (unsigned int i = 0; i < dists.size(); i++)
-        cout << dists[i] << " ";
-      cout << endl << "Maxchange: " << maxchange << endl << endl;
+        std::cout << dists[i] << " ";
+      std::cout << std::endl
+                << "Maxchange: " << maxchange << std::endl
+                << std::endl;
     }
 
     // create new mean
-    cout << "Computing new template " << itcount << endl;
+    std::cout << "Computing new template " << itcount << std::endl;
     mri_mean = averageSet(mri_warps, mri_mean, average, sat);
     if (debug) {
-      ostringstream oss;
+      std::ostringstream oss;
       oss << outdir << "template-it" << itcount << ".mgz";
-      cout << "debug: writing template to " << oss.str() << endl;
+      std::cout << "debug: writing template to " << oss.str() << std::endl;
       MRIwrite(mri_mean, oss.str().c_str());
       // strncpy(mri_mean->fname, oss.str().c_str(),STRLEN);
     }
@@ -812,7 +828,7 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
 
   // strncpy(P.mri_mean->fname, P.mean.c_str(),STRLEN);
 
-  cout << " DONE : computeTemplate " << endl;
+  std::cout << " DONE : computeTemplate " << std::endl;
   return true;
 }
 
@@ -821,12 +837,13 @@ bool MultiRegistration::halfWayTemplate(int maxres, int iterate, double epsit,
 // can be used only with two input images
 {
 
-  cerr << " Error MultiRegistration::halfWayTemplate is deprecated " << endl;
+  std::cerr << " Error MultiRegistration::halfWayTemplate is deprecated "
+            << std::endl;
   exit(1);
 
   int nin = (int)mri_mov.size();
   if (nin != 2) {
-    cerr << "Error, need 2 movs" << endl;
+    std::cerr << "Error, need 2 movs" << std::endl;
     exit(1);
   }
 
@@ -836,7 +853,7 @@ bool MultiRegistration::halfWayTemplate(int maxres, int iterate, double epsit,
   initRegistration(R); // set parameter
   R.setSourceAndTarget(mri_mov[0], mri_mov[1], keeptype);
 
-  ostringstream oss;
+  std::ostringstream oss;
   oss << outdir << "halfway_template.mgz";
   R.setName(oss.str().c_str());
 
@@ -870,19 +887,19 @@ bool MultiRegistration::halfWayTemplate(int maxres, int iterate, double epsit,
   } else {
     R.computeMultiresRegistration(maxres, iterate, epsit);
   }
-  Md.first = R.getFinalVox2Vox();
+  Md.first  = R.getFinalVox2Vox();
   Md.second = R.getFinalIscale();
   // if (minit) MatrixFree(&minit);
   intensities[0] = Md.second;
   intensities[1] = 1;
 
-  cout << "creating half way data ..." << endl;
+  std::cout << "creating half way data ..." << std::endl;
   assert(MyMRI::isIsotropic(mri_mov[0]) && MyMRI::isIsotropic(mri_mov[1]));
 
   std::pair<vnl_matrix_fixed<double, 4, 4>, vnl_matrix_fixed<double, 4, 4>>
-      maps2weights = R.getHalfWayMaps();
-  LTA *m2hwlta = LTAalloc(1, mri_mov[0]);
-  LTA *d2hwlta = LTAalloc(1, mri_mov[1]);
+       maps2weights = R.getHalfWayMaps();
+  LTA *m2hwlta      = LTAalloc(1, mri_mov[0]);
+  LTA *d2hwlta      = LTAalloc(1, mri_mov[1]);
   if (!vox2vox) // do ras to ras
   {
     // cout << "converting VOX to RAS and saving RAS2RAS..." << endl ;
@@ -902,7 +919,7 @@ bool MultiRegistration::halfWayTemplate(int maxres, int iterate, double epsit,
     // cout << "saving VOX2VOX..." << endl ;
     m2hwlta->xforms[0].m_L =
         MyMatrix::convertVNL2MATRIX(maps2weights.first, m2hwlta->xforms[0].m_L);
-    m2hwlta->type = LINEAR_VOX_TO_VOX;
+    m2hwlta->type          = LINEAR_VOX_TO_VOX;
     d2hwlta->xforms[0].m_L = MyMatrix::convertVNL2MATRIX(
         maps2weights.second, m2hwlta->xforms[0].m_L);
     d2hwlta->type = LINEAR_VOX_TO_VOX;
@@ -921,7 +938,7 @@ bool MultiRegistration::halfWayTemplate(int maxres, int iterate, double epsit,
   ltas[0] = m2hwlta;
   ltas[1] = d2hwlta;
 
-  cout << " creating half-way template ..." << endl;
+  std::cout << " creating half-way template ..." << std::endl;
   // take dst info from lta:
   if (mri_warps[0])
     MRIfree(&mri_warps[0]);
@@ -933,7 +950,7 @@ bool MultiRegistration::halfWayTemplate(int maxres, int iterate, double epsit,
   MRIcopyPulseParameters(mri_mov[1], mri_warps[1]);
   // here do scaling of intensity values
   if (R.isIscale() && Md.second > 0) {
-    cout << "Adjusting Intensity of MOV by " << Md.second << endl;
+    std::cout << "Adjusting Intensity of MOV by " << Md.second << std::endl;
     mri_warps[0] = MyMRI::MRIvalscale(mri_warps[0], mri_warps[0], Md.second);
   }
   mri_mean = averageSet(mri_warps, mri_mean, average, sat);
@@ -960,7 +977,7 @@ vnl_matrix_fixed<double, 3, 3> MultiRegistration::getAverageCosines() {
   int nin = (int)mri_mov.size();
 
   std::vector<vnl_matrix_fixed<double, 3, 3>> cosM(nin);
-  vnl_matrix_fixed<double, 3, 3> meanr(0.0);
+  vnl_matrix_fixed<double, 3, 3>              meanr(0.0);
 
   //  // conform slice orientation
   //  // orientation: LIA
@@ -977,8 +994,8 @@ vnl_matrix_fixed<double, 3, 3> MultiRegistration::getAverageCosines() {
   //  v2rconf[2][2] =  0.0;
 
   // extract cosines
-  bool same = true;
-  double eps = 0.000000001;
+  bool   same = true;
+  double eps  = 0.000000001;
   for (int i = 0; i < nin; i++) {
     cosM[i][0][0] = mri_mov[i]->x_r;
     cosM[i][1][0] = mri_mov[i]->x_a;
@@ -1054,17 +1071,19 @@ vnl_matrix_fixed<double, 3, 3> MultiRegistration::getAverageCosines() {
 
       // reorder = true;
       if (abs(xd) + abs(yd) + abs(zd) != 6) {
-        cout << "WARNING: reorder not clear ..." << endl;
+        std::cout << "WARNING: reorder not clear ..." << std::endl;
         vnl_matlab_print(std::cout, v2v, "v2v", vnl_matlab_print_format_long);
-        cout << endl;
-        cout << " xd: " << xd << " yd: " << yd << " zd: " << zd << endl;
+        std::cout << std::endl;
+        std::cout << " xd: " << xd << " yd: " << yd << " zd: " << zd
+                  << std::endl;
         if (vnl_determinant(v2v) < 0) { // cannot run sqrt later if det < 0
-          cout << "ERROR: vox2vox det: " << vnl_determinant(v2v) << " < 0"
-               << endl;
-          cout << "       Something might be wrong with RAS info in inputs."
-               << endl;
-          cout << "       Make sure volumes are in same voxel orientation."
-               << endl;
+          std::cout << "ERROR: vox2vox det: " << vnl_determinant(v2v) << " < 0"
+                    << std::endl;
+          std::cout
+              << "       Something might be wrong with RAS info in inputs."
+              << std::endl;
+          std::cout << "       Make sure volumes are in same voxel orientation."
+                    << std::endl;
           exit(1);
         }
         exit(1);
@@ -1143,12 +1162,12 @@ MRI *MultiRegistration::createTemplateGeo() {
   int maxdimd = 0;
   int count2d = 0;
   for (int i = 0; i < nin; i++) {
-    double xsize = fabs(mri_mov[i]->xsize);
-    double ysize = fabs(mri_mov[i]->ysize);
-    double zsize = fabs(mri_mov[i]->zsize);
-    double fwidth = xsize * mri_mov[i]->width;
+    double xsize   = fabs(mri_mov[i]->xsize);
+    double ysize   = fabs(mri_mov[i]->ysize);
+    double zsize   = fabs(mri_mov[i]->zsize);
+    double fwidth  = xsize * mri_mov[i]->width;
     double fheight = ysize * mri_mov[i]->height;
-    double fdepth = zsize * mri_mov[i]->depth;
+    double fdepth  = zsize * mri_mov[i]->depth;
 
     double eps =
         0.0001; // to prevent ceil(2.0*64 / 2.0) = ceil(64.000000000001) = 65
@@ -1173,26 +1192,27 @@ MRI *MultiRegistration::createTemplateGeo() {
   //      depth = 1;
   //    else
   if (count2d > 0 && count2d != nin) {
-    cerr << " ERROR (createTemplateGeo) : mixing 2d and 3d input images not "
-            "possible!"
-         << endl;
+    std::cerr
+        << " ERROR (createTemplateGeo) : mixing 2d and 3d input images not "
+           "possible!"
+        << std::endl;
     exit(1);
   }
   //  }
   //  MRI * template_geo   = MRIallocHeader(maxdimw, maxdimh, depth, MRI_FLOAT ,
   //  1);
-  MRI *template_geo = MRIallocHeader(maxdimw, maxdimh, maxdimd, MRI_FLOAT, 1);
+  MRI *template_geo   = MRIallocHeader(maxdimw, maxdimh, maxdimd, MRI_FLOAT, 1);
   template_geo->xsize = template_geo->ysize = template_geo->zsize =
       conform_size;
-  template_geo->imnr0 = 1;
-  template_geo->imnr1 = maxdimh;
-  template_geo->type = MRI_UCHAR;
-  template_geo->thick = conform_size;
-  template_geo->ps = conform_size;
+  template_geo->imnr0  = 1;
+  template_geo->imnr1  = maxdimh;
+  template_geo->type   = MRI_UCHAR;
+  template_geo->thick  = conform_size;
+  template_geo->ps     = conform_size;
   template_geo->xstart = template_geo->ystart = -maxdimw / 2;
-  template_geo->zstart = -maxdimd / 2;
+  template_geo->zstart                        = -maxdimd / 2;
   template_geo->xend = template_geo->yend = maxdimw / 2;
-  template_geo->zend = maxdimd / 2;
+  template_geo->zend                      = maxdimd / 2;
 
   // set direction cosines to default directions:
   // template_geo->x_r = -1.0;
@@ -1206,15 +1226,15 @@ MRI *MultiRegistration::createTemplateGeo() {
   // template_geo->z_s =  0.0;
 
   vnl_matrix_fixed<double, 3, 3> avgcos = getAverageCosines();
-  template_geo->x_r = avgcos[0][0];
-  template_geo->x_a = avgcos[1][0];
-  template_geo->x_s = avgcos[2][0];
-  template_geo->y_r = avgcos[0][1];
-  template_geo->y_a = avgcos[1][1];
-  template_geo->y_s = avgcos[2][1];
-  template_geo->z_r = avgcos[0][2];
-  template_geo->z_a = avgcos[1][2];
-  template_geo->z_s = avgcos[2][2];
+  template_geo->x_r                     = avgcos[0][0];
+  template_geo->x_a                     = avgcos[1][0];
+  template_geo->x_s                     = avgcos[2][0];
+  template_geo->y_r                     = avgcos[0][1];
+  template_geo->y_a                     = avgcos[1][1];
+  template_geo->y_s                     = avgcos[2][1];
+  template_geo->z_r                     = avgcos[0][2];
+  template_geo->z_a                     = avgcos[1][2];
+  template_geo->z_s                     = avgcos[2][2];
 
   // set center: use the average cras coords of the input images
   double nr = 0.0;
@@ -1230,9 +1250,9 @@ MRI *MultiRegistration::createTemplateGeo() {
   ns /= (double)nin;
 
   // set new center in geometry
-  template_geo->c_r = nr;
-  template_geo->c_a = na;
-  template_geo->c_s = ns;
+  template_geo->c_r           = nr;
+  template_geo->c_a           = na;
+  template_geo->c_s           = ns;
   template_geo->ras_good_flag = 1;
 
   MRIreInitCache(template_geo);
@@ -1257,10 +1277,10 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
 {
   if (tpi <= 0)
     return false; // no init?
-  cout << endl
-       << "MultiRegistration::initializing Xforms (init " << tpi << " , maxres "
-       << maxres << " , iterate " << iterate << " , epsit " << epsit
-       << " ) : " << endl;
+  std::cout << std::endl
+            << "MultiRegistration::initializing Xforms (init " << tpi
+            << " , maxres " << maxres << " , iterate " << iterate << " , epsit "
+            << epsit << " ) : " << std::endl;
   assert(ltas.size() == mri_mov.size());
   assert(mri_mov.size() > 1);
   if (debug)
@@ -1272,16 +1292,16 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
   assert(tpi >= 0 && tpi < nin);
 
   // create index set for lookup (tpi should switch places with 0)
-  vector<int> index(nin);
+  std::vector<int> index(nin);
   for (int i = 0; i < nin; i++)
     index[i] = i;
-  index[0] = tpi;
+  index[0]   = tpi;
   index[tpi] = 0;
-  vector<bool> converged(nin, true);
+  std::vector<bool> converged(nin, true);
 
   // Register everything to tpi TP
   //  vector < Registration > Rv(nin);
-  vector<std::pair<vnl_matrix_fixed<double, 4, 4>, double>> Md(nin);
+  std::vector<std::pair<vnl_matrix_fixed<double, 4, 4>, double>> Md(nin);
   //  vector < double >  centroid;
   vnl_vector_fixed<double, 4> centroid(0.0);
 
@@ -1297,17 +1317,17 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
 #pragma omp critical
 #endif
     {
-      cout << endl
-           << "[init] ========================= TP " << j + 1 << " to TP "
-           << tpi + 1 << " ==============================" << endl;
-      cout << "         Register TP " << j + 1 << " ( " << mov[j] << " )"
-           << endl;
-      cout << "          to      TP " << tpi + 1 << " ( " << mov[tpi] << " )"
-           << endl
-           << endl;
+      std::cout << std::endl
+                << "[init] ========================= TP " << j + 1 << " to TP "
+                << tpi + 1 << " ==============================" << std::endl;
+      std::cout << "         Register TP " << j + 1 << " ( " << mov[j] << " )"
+                << std::endl;
+      std::cout << "          to      TP " << tpi + 1 << " ( " << mov[tpi]
+                << " )" << std::endl
+                << std::endl;
     }
 
-    ostringstream oss;
+    std::ostringstream oss;
     oss << outdir << "tp" << j + 1 << "_to_tp" << tpi;
 
     RegRobust R;
@@ -1329,7 +1349,7 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
     } else {
       R.computeMultiresRegistration(maxres, iterate, epsit);
     }
-    Md[i].first = R.getFinalVox2Vox();
+    Md[i].first  = R.getFinalVox2Vox();
     Md[i].second = R.getFinalIscale();
     converged[i] = R.getConverged();
 
@@ -1366,8 +1386,8 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
 
   for (int i = 1; i < nin; i++) {
     if (!converged[i])
-      cout << "* WARNING: TP " << index[i] + 1 << " to " << tpi + 1
-           << " did not converge !! " << endl;
+      std::cout << "* WARNING: TP " << index[i] + 1 << " to " << tpi + 1
+                << " did not converge !! " << std::endl;
   }
 
   // copy results in correct order back to global members
@@ -1377,13 +1397,13 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
     int j = index[i]; // use new index
 
     assert(ltas[j] == nullptr);
-    ltas[j] = MyMatrix::VOXmatrix2LTA(Md[i].first, mri_mov[j],
+    ltas[j]        = MyMatrix::VOXmatrix2LTA(Md[i].first, mri_mov[j],
                                       mri_mov[tpi]); // use geometry of tpi
     intensities[j] = Md[i].second;
     // LTAwrite(ltas[j],(mov[i]+"-temp.lta").c_str());
 
     if (debug && fixtp) {
-      ostringstream oss;
+      std::ostringstream oss;
       oss << outdir << "tp" << j + 1 << "_to_mcoord";
       LTAwriteEx(ltas[j], (oss.str() + ".lta").c_str());
       MRI *warped = nullptr;
@@ -1393,8 +1413,8 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
         warped = LTAtransformInterp(mri_mov[j], nullptr, ltas[j], sampletype);
 
       if (iscale) {
-        string fn = oss.str() + "-intensity.txt";
-        ofstream f(fn.c_str(), ios::out);
+        std::string   fn = oss.str() + "-intensity.txt";
+        std::ofstream f(fn.c_str(), std::ios::out);
         f << Md[i].second;
         f.close();
 
@@ -1417,13 +1437,13 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
   }
 
   // convert to ras2ras and invert (to map from tpi to each other image
-  vector<vnl_matrix_fixed<double, 4, 4>> mras(nin);
+  std::vector<vnl_matrix_fixed<double, 4, 4>> mras(nin);
   mras[0].set_identity();
-  vector<vnl_matrix_fixed<double, 3, 3>> mras3(nin);
+  std::vector<vnl_matrix_fixed<double, 3, 3>> mras3(nin);
   mras3[0].set_identity();
-  vnl_vector_fixed<double, 3> meant(0.0);
+  vnl_vector_fixed<double, 3>    meant(0.0);
   vnl_matrix_fixed<double, 3, 3> lin;
-  vnl_vector_fixed<double, 3> trans;
+  vnl_vector_fixed<double, 3>    trans;
   vnl_matrix_fixed<double, 4, 4> mrasinv;
 
   for (int i = 1; i < nin; i++) {
@@ -1480,18 +1500,20 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
     vnl_matlab_print(std::cout, meanr, "meanr", vnl_matlab_print_format_long);
     std::cout << std::endl;
 
-    cout << " Determinant( meanr ) : " << vnl_determinant(meanr) << endl
-         << endl;
-    cout << " Decompose into Rot * Shear * Scale : " << endl << endl;
-    vnl_matrix<double> Rot, Shear;
+    std::cout << " Determinant( meanr ) : " << vnl_determinant(meanr)
+              << std::endl
+              << std::endl;
+    std::cout << " Decompose into Rot * Shear * Scale : " << std::endl
+              << std::endl;
+    vnl_matrix<double>      Rot, Shear;
     vnl_diag_matrix<double> Scale;
     MyMatrix::Polar2Decomposition(meanr, Rot, Shear, Scale);
     vnl_matlab_print(std::cout, Rot, "Rot", vnl_matlab_print_format_long);
-    cout << endl;
+    std::cout << std::endl;
     vnl_matlab_print(std::cout, Shear, "Shear", vnl_matlab_print_format_long);
-    cout << endl;
+    std::cout << std::endl;
     vnl_matlab_print(std::cout, Scale, "Scale", vnl_matlab_print_format_long);
-    cout << endl;
+    std::cout << std::endl;
   }
 
   // put back together to matrix in homogeneous coords
@@ -1531,9 +1553,9 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
     // << std::endl;
 
     // set new center in geometry
-    template_geo->c_r = ncenter[0];
-    template_geo->c_a = ncenter[1];
-    template_geo->c_s = ncenter[2];
+    template_geo->c_r           = ncenter[0];
+    template_geo->c_a           = ncenter[1];
+    template_geo->c_s           = ncenter[2];
     template_geo->ras_good_flag = 1;
     MRIreInitCache(template_geo);
   }
@@ -1553,8 +1575,8 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
   vnl_matrix_fixed<double, 4, 4> M;
   for (int i = 0; i < nin; i++) {
     int j = index[i];
-    cout << "  computing mean coord of TP " << j + 1 << " ( " << mov[j] << " ) "
-         << endl;
+    std::cout << "  computing mean coord of TP " << j + 1 << " ( " << mov[j]
+              << " ) " << std::endl;
     // concat transforms: meant meanr mras
     // from right to left, first mras[j] (aligns to T1)
     // then do the mean rot and move to mean location
@@ -1570,7 +1592,7 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
       if (S[0][0] < 0.0 || S[1][1] < 0.0 || S[2][2] < 0.0)
         ErrorExit(ERROR_OUT_OF_BOUNDS,
                   "Internal Error:  produced reflection.\n");
-      double eps = 0.0001;
+      double eps    = 0.0001;
       double fnorm1 = (S - I).frobenius_norm();
       if (fnorm1 > eps) {
         std::cerr << "Internal Error for tp " << j << " -> template"
@@ -1591,7 +1613,7 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
                   "Internal Error: Rotation should not scale.\n");
       }
 
-      cout << "   mapping back to rot, err = " << fnorm1 << endl;
+      std::cout << "   mapping back to rot, err = " << fnorm1 << std::endl;
       M.update(R);
       M.set_row(3, 0.0);
       M[3][3] = 1.0;
@@ -1656,7 +1678,7 @@ std::endl; ltas[j]->xforms[0].m_L = MyMatrix::convertVNL2MATRIX(MM,
     }*/
 
     if (debug) {
-      ostringstream oss;
+      std::ostringstream oss;
       oss << outdir << "tp" << j + 1 << "_to_mcoord";
       LTAwriteEx(ltas[j], (oss.str() + ".lta").c_str());
       MRI *warped = nullptr;
@@ -1665,8 +1687,8 @@ std::endl; ltas[j]->xforms[0].m_L = MyMatrix::convertVNL2MATRIX(MM,
       else
         warped = LTAtransformInterp(mri_mov[j], nullptr, ltas[j], sampletype);
       if (iscale) {
-        string fn = oss.str() + "-intensity.txt";
-        ofstream f(fn.c_str(), ios::out);
+        std::string   fn = oss.str() + "-intensity.txt";
+        std::ofstream f(fn.c_str(), std::ios::out);
         f << Md[i].second;
         f.close();
 
@@ -1689,7 +1711,7 @@ void MultiRegistration::normalizeIntensities()
 // that their geometric mean is equal to 1
 {
   double mint = 1.0;
-  int nin = (int)intensities.size();
+  int    nin  = (int)intensities.size();
   for (int i = 0; i < nin; i++)
     mint *= intensities[i];
 
@@ -1703,7 +1725,7 @@ void MultiRegistration::normalizeIntensities()
 
 bool MultiRegistration::writeMean(const std::string &mean) {
   if (!mri_mean) {
-    cout << " ERROR: No average exists! Skipping output." << endl;
+    std::cout << " ERROR: No average exists! Skipping output." << std::endl;
     return false;
   }
   strncpy(mri_mean->fname, mean.c_str(), STRLEN);
@@ -1712,7 +1734,7 @@ bool MultiRegistration::writeMean(const std::string &mean) {
 
 bool MultiRegistration::writeConformMean(const std::string &mean) {
   if (!mri_mean) {
-    cout << " ERROR: No average exists! Skipping output." << endl;
+    std::cout << " ERROR: No average exists! Skipping output." << std::endl;
     return false;
   }
 
@@ -1730,7 +1752,7 @@ bool MultiRegistration::writeLTAs(const std::vector<std::string> &nltas,
   int error = 0;
   for (unsigned int i = 0; i < nltas.size(); i++) {
     if (!ltas[i]) {
-      cout << " ERROR: No ltas exist! Skipping output." << endl;
+      std::cout << " ERROR: No ltas exist! Skipping output." << std::endl;
       return false;
     }
 
@@ -1744,21 +1766,22 @@ bool MultiRegistration::writeLTAs(const std::vector<std::string> &nltas,
     LTAwriteEx(ltas[i], nltas[i].c_str());
 
     vnl_matrix<double> fMv2v = MyMatrix::LTA2VOXmatrix(ltas[i]);
-    cout << " Determinant( lta[ " << i << " ]) : " << vnl_determinant(fMv2v)
-         << endl
-         << endl;
+    std::cout << " Determinant( lta[ " << i
+              << " ]) : " << vnl_determinant(fMv2v) << std::endl
+              << std::endl;
 
     if (!rigid) {
-      cout << " Decompose into Rot * Shear * Scale : " << endl << endl;
-      vnl_matrix<double> Rot, Shear;
+      std::cout << " Decompose into Rot * Shear * Scale : " << std::endl
+                << std::endl;
+      vnl_matrix<double>      Rot, Shear;
       vnl_diag_matrix<double> Scale;
       MyMatrix::Polar2Decomposition(fMv2v.extract(3, 3), Rot, Shear, Scale);
       vnl_matlab_print(std::cout, Rot, "Rot", vnl_matlab_print_format_long);
-      cout << endl;
+      std::cout << std::endl;
       vnl_matlab_print(std::cout, Shear, "Shear", vnl_matlab_print_format_long);
-      cout << endl;
+      std::cout << std::endl;
       vnl_matlab_print(std::cout, Scale, "Scale", vnl_matlab_print_format_long);
-      cout << endl;
+      std::cout << std::endl;
     }
   }
   return (error == 0);
@@ -1769,7 +1792,7 @@ bool MultiRegistration::writeMapMovHdr(
   assert(mapmovhdr.size() == mri_mov.size());
   MATRIX *ras2ras = MatrixAlloc(4, 4, MATRIX_REAL);
   MATRIX *vox2ras;
-  int error = 0;
+  int     error = 0;
   for (unsigned int i = 0; i < mapmovhdr.size(); i++) {
     if (!ltas[i]) {
       std::cout << " ERROR: No LTAs exist! Skipping output.\n";
@@ -1777,10 +1800,10 @@ bool MultiRegistration::writeMapMovHdr(
       break;
     }
     vnl_matrix<double> fMr2r = MyMatrix::LTA2RASmatrix(ltas[i]);
-    ras2ras = MyMatrix::convertVNL2MATRIX(fMr2r, ras2ras);
-    vox2ras = MRIgetVoxelToRasXform(mri_mov[i]);
-    vox2ras = MatrixMultiply(ras2ras, vox2ras, vox2ras);
-    MRI *mri_aligned = MRIcopy(mri_mov[i], nullptr);
+    ras2ras                  = MyMatrix::convertVNL2MATRIX(fMr2r, ras2ras);
+    vox2ras                  = MRIgetVoxelToRasXform(mri_mov[i]);
+    vox2ras                  = MatrixMultiply(ras2ras, vox2ras, vox2ras);
+    MRI *mri_aligned         = MRIcopy(mri_mov[i], nullptr);
     MRIsetVoxelToRasXform(mri_aligned, vox2ras);
     error = MRIwrite(mri_aligned, mapmovhdr[i].c_str());
     MRIfree(&mri_aligned);
@@ -1804,9 +1827,9 @@ bool MultiRegistration::writeWarps(const std::vector<std::string> &nwarps) {
   // int count = 0;
 
   if (nwarps.size() == 1) {
-    cout << " Writing single output (4D volume) ..." << endl;
+    std::cout << " Writing single output (4D volume) ..." << std::endl;
     if (!mri_warps[0]) {
-      cout << " ERROR: Warps do not exist! Skipping output." << endl;
+      std::cout << " ERROR: Warps do not exist! Skipping output." << std::endl;
       return false;
     }
 
@@ -1816,8 +1839,8 @@ bool MultiRegistration::writeWarps(const std::vector<std::string> &nwarps) {
 
     for (unsigned int i = 0; i < mri_warps.size(); i++) {
       if (!mri_warps[i]) {
-        cout << " ERROR: Warp " << i << " does not exist! Skipping output."
-             << endl;
+        std::cout << " ERROR: Warp " << i << " does not exist! Skipping output."
+                  << std::endl;
         return false;
       }
       MRIcopyFrame(mri_warps[i], mri4d, 0, i);
@@ -1828,8 +1851,8 @@ bool MultiRegistration::writeWarps(const std::vector<std::string> &nwarps) {
   {
     for (unsigned int i = 0; i < nwarps.size(); i++) {
       if (!mri_warps[i]) {
-        cout << " ERROR: Warp " << i << " does not exist! Skipping output."
-             << endl;
+        std::cout << " ERROR: Warp " << i << " does not exist! Skipping output."
+                  << std::endl;
         return false;
       }
       error += MRIwrite(mri_warps[i], nwarps[i].c_str());
@@ -1856,7 +1879,7 @@ bool MultiRegistration::writeIntensities(
   int error = 0;
   for (unsigned int i = 0; i < nintens.size(); i++) {
     assert(intensities[i] > 0);
-    ofstream f(nintens[i].c_str(), ios::out);
+    std::ofstream f(nintens[i].c_str(), std::ios::out);
     if (f.good()) {
       f << intensities[i];
       f.close();
@@ -1872,7 +1895,8 @@ bool MultiRegistration::writeWeights(const std::vector<std::string> &nweights,
   int error = 0;
   for (unsigned int i = 0; i < nweights.size(); i++) {
     if (!mri_weights[i]) {
-      cout << " No weights constructed, skipping output of weights" << endl;
+      std::cout << " No weights constructed, skipping output of weights"
+                << std::endl;
       return false;
     }
     MRI *wtmp = mri_weights[i];
@@ -1907,12 +1931,12 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
 
   if (method == 0) {
     // mean
-    cout << "    using mean" << endl;
+    std::cout << "    using mean" << std::endl;
     for (unsigned int i = 0; i < set.size(); i++) {
       mean = MRIaverage(set[i], i, mean);
     }
   } else if (method == 1) {
-    cout << " using median " << endl;
+    std::cout << " using median " << std::endl;
     // robust
     int x, y, z, i;
     assert(set.size() > 0);
@@ -1931,7 +1955,7 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
         for (x = 0; x < set[0]->width; x++) {
           for (i = 0; i < (int)set.size(); i++)
             dd[i] = MRIgetVoxVal(set[i], x, y, z, 0);
-          pair<float, float> mm =
+          std::pair<float, float> mm =
               RobustGaussian<float>::medianI(dd, (int)set.size());
           MRIsetVoxVal(mean, x, y, z, 0, mm.first);
           // MRIsetVoxVal(midx,x,y,z,0,mm.second);
@@ -1943,7 +1967,7 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
   } else if (method ==
              2) // NEVER REALLY WORKED!! (not enough values and usually int)
   {
-    cout << "    using tukey biweight" << endl;
+    std::cout << "    using tukey biweight" << std::endl;
     // robust tukey biweight
     int x, y, z, i;
     //     MATRIX* b = MatrixAlloc(set.size(),1,MATRIX_REAL);
@@ -1976,7 +2000,7 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
         }
   } else if (method == 3) // needs more development (sigma..)
   {
-    cout << "    using tukey biweight (alltoghether)" << endl;
+    std::cout << "    using tukey biweight (alltoghether)" << std::endl;
     // robust tukey biweight
     int x, y, z, i;
     int n = set[0]->depth * set[0]->height * set[0]->width;
@@ -2031,7 +2055,7 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
 
   } else {
 
-    cerr << " averageSet  method " << method << " unknown" << endl;
+    std::cerr << " averageSet  method " << method << " unknown" << std::endl;
     exit(1);
   }
   //       cout << " Average Vol "  << endl;
@@ -2087,10 +2111,10 @@ bool MultiRegistration::initialAverageSet() {
   } else {
     std::cout << "    -- aligning image centroids (translation)" << std::endl;
     // compute input centroids and common centroid
-    vector<double> centroid(3, 0.0);
-    vector<vector<double>> centroids(n);
+    std::vector<double>              centroid(3, 0.0);
+    std::vector<std::vector<double>> centroids(n);
     for (int i = 0; i < n; i++) {
-      centroids[i] = CostFunctions::centroid(mri_mov[i]);
+      centroids[i]      = CostFunctions::centroid(mri_mov[i]);
       MATRIX *mv2r_temp = MRIgetVoxelToRasXform(mri_mov[i]);
       vnl_matrix_fixed<double, 4, 4> tpi_v2r(
           MyMatrix::convertMATRIX2VNL(mv2r_temp));
@@ -2134,9 +2158,9 @@ bool MultiRegistration::initialAverageSet() {
       // set new center in geometry
       for (uint ii = 0; ii < 3; ii++)
         centroid[ii] = ncenter[ii];
-      mri_mean->c_r = ncenter[0];
-      mri_mean->c_a = ncenter[1];
-      mri_mean->c_s = ncenter[2];
+      mri_mean->c_r           = ncenter[0];
+      mri_mean->c_a           = ncenter[1];
+      mri_mean->c_s           = ncenter[2];
       mri_mean->ras_good_flag = 1;
       MRIreInitCache(mri_mean);
     }

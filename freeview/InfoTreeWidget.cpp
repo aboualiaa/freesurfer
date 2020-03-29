@@ -22,27 +22,27 @@
  *
  */
 #include "InfoTreeWidget.h"
-#include "MainWindow.h"
+#include "FSSurface.h"
+#include "FSVolume.h"
 #include "LayerCollection.h"
 #include "LayerMRI.h"
 #include "LayerPLabel.h"
+#include "LayerProperty.h"
 #include "LayerPropertyMRI.h"
 #include "LayerPropertySurface.h"
 #include "LayerSurface.h"
-#include "FSSurface.h"
-#include "FSVolume.h"
-#include "SurfaceOverlay.h"
-#include "SurfaceAnnotation.h"
+#include "MainWindow.h"
 #include "MyUtils.h"
-#include "LayerProperty.h"
-#include <QTreeWidgetItem>
-#include <QLineEdit>
+#include "RenderView3D.h"
+#include "SurfaceAnnotation.h"
+#include "SurfaceOverlay.h"
+#include "SurfacePath.h"
+#include <QDebug>
 #include <QHeaderView>
 #include <QKeyEvent>
-#include <QDebug>
+#include <QLineEdit>
 #include <QMenu>
-#include "RenderView3D.h"
-#include "SurfacePath.h"
+#include <QTreeWidgetItem>
 
 InfoTreeWidget::InfoTreeWidget(QWidget *parent)
     : QTreeWidget(parent), m_bShowSurfaceCurvature(false),
@@ -95,7 +95,7 @@ void InfoTreeWidget::UpdateAll() {
       MainWindow::GetMainWindow()->GetLayerCollection("Surface");
 
   int nPrecision = MainWindow::GetMainWindow()->GetSetting("Precision").toInt();
-  bool bComma = MainWindow::GetMainWindow()->GetSetting("UseComma").toBool();
+  bool bComma    = MainWindow::GetMainWindow()->GetSetting("UseComma").toBool();
   if (lc_mri->IsEmpty() && lc_surf->IsEmpty()) {
     return;
   }
@@ -113,12 +113,12 @@ void InfoTreeWidget::UpdateAll() {
                        .arg(ras[0], 0, 'f', 2)
                        .arg(ras[1], 0, 'f', 2)
                        .arg(ras[2], 0, 'f', 2));
-  map["Type"] = "RAS";
+  map["Type"]         = "RAS";
   map["EditableText"] = item->text(1);
   item->setData(1, Qt::UserRole, map);
 
   if (!lc_mri->IsEmpty()) {
-    double tkRegRAS[3];
+    double    tkRegRAS[3];
     LayerMRI *mri = qobject_cast<LayerMRI *>(lc_mri->GetActiveLayer());
     if (m_bShowTkRegRAS) {
       mri->NativeRASToTkReg(ras, tkRegRAS);
@@ -129,12 +129,12 @@ void InfoTreeWidget::UpdateAll() {
                            .arg(tkRegRAS[0], 0, 'f', 2)
                            .arg(tkRegRAS[1], 0, 'f', 2)
                            .arg(tkRegRAS[2], 0, 'f', 2));
-      map["Type"] = "TkRegRAS";
+      map["Type"]         = "TkRegRAS";
       map["EditableText"] = item->text(1);
       item->setData(1, Qt::UserRole, map);
     }
     FSVolume *vol = mri->GetSourceVolume();
-    item = new QTreeWidgetItem(this);
+    item          = new QTreeWidgetItem(this);
     item->setText(0, QString("Talairach (%1)").arg(mri->GetName()));
     double tpos[3];
     if (vol->RASToTalairachVoxel(ras, tpos)) {
@@ -143,7 +143,7 @@ void InfoTreeWidget::UpdateAll() {
                            .arg(tpos[0], 0, 'f', 2)
                            .arg(tpos[1], 0, 'f', 2)
                            .arg(tpos[2], 0, 'f', 2));
-      map["Type"] = "Talairach";
+      map["Type"]         = "Talairach";
       map["EditableText"] = item->text(1);
       item->setData(1, Qt::UserRole, map);
     } else
@@ -154,7 +154,7 @@ void InfoTreeWidget::UpdateAll() {
       MainWindow::GetMainWindow()->GetSetting("DecimalVoxelCoord").toBool();
   for (int i = 0; i < lc_mri->GetNumberOfLayers(); i++) {
     LayerMRI *layer = (LayerMRI *)lc_mri->GetLayer(i);
-    double fIndex[3];
+    double    fIndex[3];
     if (layer->GetProperty()->GetShowInfo()) {
       QTreeWidgetItem *item = new QTreeWidgetItem(this);
       item->setText(0, layer->GetName());
@@ -215,9 +215,9 @@ void InfoTreeWidget::UpdateAll() {
       item->setText(1, strg);
       item->setToolTip(1, strg);
       map.clear();
-      map["Type"] = "MRI";
+      map["Type"]         = "MRI";
       map["EditableText"] = editable;
-      map["Object"] = QVariant::fromValue((QObject *)layer);
+      map["Object"]       = QVariant::fromValue((QObject *)layer);
       item->setData(1, Qt::UserRole, map);
     }
   }
@@ -227,7 +227,7 @@ void InfoTreeWidget::UpdateAll() {
     if (surf->GetProperty()->GetShowInfo()) {
       QTreeWidgetItem *item = new QTreeWidgetItem(this);
       item->setText(0, surf->GetName());
-      int nVertex = -1;
+      int  nVertex = -1;
       bool bMappingVertex =
           (surf->IsInflated() &&
            surf->GetSourceSurface()->IsSurfaceLoaded(FSSurface::SurfaceWhite));
@@ -239,9 +239,8 @@ void InfoTreeWidget::UpdateAll() {
       if (bMappingVertex && nVertex >= 0)
         surf->GetSourceSurface()->GetSurfaceRASAtVertex(
             nVertex, sf_pos, FSSurface::SurfaceWhite);
-      else
-      {
-        surf->GetSurfaceRASAtTarget( m_dRAS, sf_pos );
+      else {
+        surf->GetSurfaceRASAtTarget(m_dRAS, sf_pos);
       }
       QString editable = QString("%1, %2, %3")
                              .arg(sf_pos[0], 0, 'f', 2)
@@ -249,9 +248,9 @@ void InfoTreeWidget::UpdateAll() {
                              .arg(sf_pos[2], 0, 'f', 2);
       item->setText(1, QString("SurfaceRAS\t[%1]").arg(editable));
       map.clear();
-      map["Type"] = "SurfaceRAS";
+      map["Type"]         = "SurfaceRAS";
       map["EditableText"] = editable;
-      map["Object"] = QVariant::fromValue((QObject *)surf);
+      map["Object"]       = QVariant::fromValue((QObject *)surf);
       item->setData(1, Qt::UserRole, map);
 
       if (nVertex < 0)
@@ -269,9 +268,9 @@ void InfoTreeWidget::UpdateAll() {
                              .arg(sf_pos[1], 0, 'f', 2)
                              .arg(sf_pos[2], 0, 'f', 2));
         map.clear();
-        map["Type"] = "SurfaceVertex";
+        map["Type"]         = "SurfaceVertex";
         map["EditableText"] = QString::number(nVertex);
-        map["Object"] = QVariant::fromValue((QObject *)surf);
+        map["Object"]       = QVariant::fromValue((QObject *)surf);
         item->setData(1, Qt::UserRole, map);
 
         double vec[3];
@@ -304,7 +303,7 @@ void InfoTreeWidget::UpdateAll() {
         int nOverlays = surf->GetNumberOfOverlays();
         for (int i = 0; i < nOverlays; i++) {
           SurfaceOverlay *overlay = surf->GetOverlay(i);
-          item = new QTreeWidgetItem(this);
+          item                    = new QTreeWidgetItem(this);
           item->setText(
               1, QString("%1 \t%2")
                      .arg(overlay->GetName())
@@ -316,7 +315,7 @@ void InfoTreeWidget::UpdateAll() {
         int nAnnotations = surf->GetNumberOfAnnotations();
         for (int i = 0; i < nAnnotations; i++) {
           SurfaceAnnotation *annot = surf->GetAnnotation(i);
-          item = new QTreeWidgetItem(this);
+          item                     = new QTreeWidgetItem(this);
           item->setText(1, QString("%1 \t%2")
                                .arg(annot->GetName())
                                .arg(annot->GetAnnotationNameAtVertex(nVertex)));
@@ -337,9 +336,9 @@ void InfoTreeWidget::UpdateAll() {
         QTreeWidgetItem *item = new QTreeWidgetItem(this);
         item->setText(1, "Vertex \tN/A");
         map.clear();
-        map["Type"] = "SurfaceVertex";
+        map["Type"]         = "SurfaceVertex";
         map["EditableText"] = "N/A";
-        map["Object"] = QVariant::fromValue((QObject *)surf);
+        map["Object"]       = QVariant::fromValue((QObject *)surf);
         item->setData(1, Qt::UserRole, map);
       }
     }
@@ -376,18 +375,18 @@ void InfoTreeWidget::OnEditFinished() {
   if (list.size() < 3) {
     list = m_editor->text().trimmed().split(" ", QString::SkipEmptyParts);
   }
-  QString type = map["Type"].toString();
-  double ras[3];
-  bool bSuccess = false;
-  QObject *layer = map["Object"].value<QObject *>();
-  LayerSurface *surf = NULL;
+  QString       type = map["Type"].toString();
+  double        ras[3];
+  bool          bSuccess = false;
+  QObject *     layer    = map["Object"].value<QObject *>();
+  LayerSurface *surf     = NULL;
   if (type == "SurfaceVertex") {
     bool bOK;
-    int nVertex = list[0].toInt(&bOK);
+    int  nVertex = list[0].toInt(&bOK);
     if (bOK &&
         qobject_cast<LayerSurface *>(layer)->GetTargetAtVertex(nVertex, ras)) {
       bSuccess = true;
-      surf = qobject_cast<LayerSurface *>(layer);
+      surf     = qobject_cast<LayerSurface *>(layer);
       emit VertexChangeTriggered(nVertex);
     } else {
       std::cerr << "Error: Invalid input";
@@ -469,7 +468,7 @@ void InfoTreeWidget::mousePressEvent(QMouseEvent *event) {
   QTreeWidget::mousePressEvent(event);
 }
 
-void InfoTreeWidget::UpdateTrackVolumeAnnotation(Layer *layer,
+void InfoTreeWidget::UpdateTrackVolumeAnnotation(Layer *            layer,
                                                  const QVariantMap &info) {
   for (int i = 0; i < this->topLevelItemCount(); i++) {
     QTreeWidgetItem *item = this->topLevelItem(i);

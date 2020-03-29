@@ -26,31 +26,31 @@
  *
  */
 
-#include "diag.h"
-#include "version.h"
 #include "cma.h"
-#include "voxlist.h"
-#include "pdf.h"
 #include "cmat.h"
+#include "diag.h"
+#include "pdf.h"
+#include "version.h"
+#include "voxlist.h"
 
 #include "romp_support.h"
 
 #define MIN_SPLINE_CONTROL_POINTS 3
 
 #define SPLINE_WM_DIST 0x0001
-#define SPLINE_LENGTH 0x0008
-#define SPLINE_SIGNED 0x0010
-#define MIN_LH_CORTEX 1000
-#define MAX_LH_CORTEX 1999
-#define MIN_RH_CORTEX 2000
-#define MAX_RH_CORTEX 2999
-#define MIN_CORTEX MIN_LH_CORTEX
-#define MAX_CORTEX MAX_RH_CORTEX
-#define MAX_LABELS (MAX_CORTEX - MIN_CORTEX + 1)
-#define XHEMI_OFFSET 1000
+#define SPLINE_LENGTH  0x0008
+#define SPLINE_SIGNED  0x0010
+#define MIN_LH_CORTEX  1000
+#define MAX_LH_CORTEX  1999
+#define MIN_RH_CORTEX  2000
+#define MAX_RH_CORTEX  2999
+#define MIN_CORTEX     MIN_LH_CORTEX
+#define MAX_CORTEX     MAX_RH_CORTEX
+#define MAX_LABELS     (MAX_CORTEX - MIN_CORTEX + 1)
+#define XHEMI_OFFSET   1000
 
-#define LAPLACE_SOURCE -1
-#define LAPLACE_TARGET 1
+#define LAPLACE_SOURCE  -1
+#define LAPLACE_TARGET  1
 #define LAPLACE_OUTSIDE 2
 #if 0
 static VOXEL_LIST *compute_path_to_ventricles(MRI_SURFACE *mris, int vno, MRI *mri_ventricle_dist_grad, MRI *mri_aseg) ;
@@ -69,16 +69,16 @@ static double max_wm_dist = -2.5 ;
 // static VOXEL_LIST *MRIfindBestSpline(MRI *mri_aseg, MRI *mri_wm_dist, int
 // label1_target, int label2_target, int ncontrol) ;
 
-static int use_laplace = 0;
-static int hemi = 0;
+static int use_laplace   = 0;
+static int hemi          = 0;
 static int label1_target = -1;
 static int label2_target = -1;
-static int ncontrol = 5;
+static int ncontrol      = 5;
 
-static int energy_flags = SPLINE_WM_DIST | SPLINE_LENGTH;
+static int    energy_flags          = SPLINE_WM_DIST | SPLINE_LENGTH;
 static double spline_length_penalty = 2;
-static double proposal_sigma = .5; // stddev of noise distribution
-static double acceptance_sigma = 6;
+static double proposal_sigma        = .5; // stddev of noise distribution
+static double acceptance_sigma      = 6;
 static double compute_spline_energy(VOXEL_LIST *vl, MRI *mri_wm_dist, int flags,
                                     double spline_length_penalty,
                                     double spline_interior_penalty);
@@ -89,8 +89,8 @@ static VOXEL_LIST *find_optimal_spline(VOXEL_LIST *vl, MRI *mri_aseg,
 
 static MRI *MRIinteriorDistanceTransform(MRI *mri_aseg, MRI *mri_wm_interior,
                                          MRI *mri_paths, int label, int hemi);
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static VOXEL_LIST *compute_spline_initialization(
     MRI *mri_aseg, MRI *mri_wm, MRI *mri_wm_dist, MRI *mri_label1_dist,
     MRI *mri_dist_grad, int label1, int label2, int min_spline_control_points);
@@ -98,11 +98,11 @@ static VOXEL_LIST *compute_path_to_label(MRI *mri_aseg, MRI *mri_wm,
                                          MRI *mri_dist_grad, MRI *mri_dist,
                                          int label1, int label2);
 
-static int min_spline_control_points = MIN_SPLINE_CONTROL_POINTS;
-static int write_diags = 0;
-static int randomize_data = 0;
-static int mcmc_samples = 10000;
-static double noise = .1;
+static int    min_spline_control_points = MIN_SPLINE_CONTROL_POINTS;
+static int    write_diags               = 0;
+static int    randomize_data            = 0;
+static int    mcmc_samples              = 10000;
+static double noise                     = .1;
 
 static double spline_interior_penalty = 100;
 
@@ -121,15 +121,15 @@ static char sdir[STRLEN] = "";
 static int xhemi = 0; // if 1, only do homologous ROIs across the hemis
 
 int main(int argc, char *argv[]) {
-  char fname[STRLEN], *subject, base_name[STRLEN];
-  int nargs, x, y, z, labels[MAX_LABELS], label_found[MAX_LABELS], nlabels;
-  int msec, minutes, seconds, label, label2;
+  char  fname[STRLEN], *subject, base_name[STRLEN];
+  int   nargs, x, y, z, labels[MAX_LABELS], label_found[MAX_LABELS], nlabels;
+  int   msec, minutes, seconds, label, label2;
   Timer start;
-  MRI *mri_aseg, *mri_wm, *mri_label1_dist, *mri_dist_grad, *mri_smooth,
+  MRI * mri_aseg, *mri_wm, *mri_label1_dist, *mri_dist_grad, *mri_smooth,
       *mri_wm_dist;
   VOXEL_LIST **vl_splines[MAX_LABELS], *vl;
-  CMAT *cmat;
-  MRI *mri_tmp, *mri_wm_only;
+  CMAT *       cmat;
+  MRI *        mri_tmp, *mri_wm_only;
 
   nargs = handleVersionOption(argc, argv, "mris_init_global_tractography");
   if (nargs && argc - nargs == 1)
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
           }
 
           label_found[label - MIN_CORTEX] = 1;
-          labels[nlabels++] = label;
+          labels[nlabels++]               = label;
         }
       }
 
@@ -226,9 +226,9 @@ int main(int argc, char *argv[]) {
     VOXEL_LIST *vl_spline;
 
     if (use_laplace) {
-      MRI *mri_laplace;
-      int xm, ym, zm, xv, yv, zv, xk, yk, zk, xi, yi, zi;
-      double dist, min_dist;
+      MRI *    mri_laplace;
+      int      xm, ym, zm, xv, yv, zv, xk, yk, zk, xi, yi, zi;
+      double   dist, min_dist;
       VOXLIST *vl;
 
       mri_laplace = MRIsolveLaplaceEquation(
@@ -256,9 +256,9 @@ int main(int argc, char *argv[]) {
                       continue;
                     dist = MRIgetVoxVal(mri_laplace, xi, yi, zi, 0);
                     if (dist < min_dist) {
-                      xm = xi;
-                      ym = yi;
-                      zm = zi;
+                      xm       = xi;
+                      ym       = yi;
+                      zm       = zi;
                       min_dist = dist;
                     }
                   }
@@ -295,7 +295,7 @@ int main(int argc, char *argv[]) {
                                           1, 2, .5);
     MRIcopy(mri_wm_only, mri_wm);
     {
-      int x, y, z, i, l;
+      int   x, y, z, i, l;
       float val;
 
       mri_tmp = MRIcopy(mri_smooth, nullptr);
@@ -371,7 +371,7 @@ int main(int argc, char *argv[]) {
                                           1, 2, .5);
     MRIcopy(mri_wm_only, mri_wm);
     {
-      int x, y, z, i, l;
+      int   x, y, z, i, l;
       float val;
 
       mri_tmp = MRIcopy(mri_smooth, nullptr);
@@ -409,7 +409,7 @@ int main(int argc, char *argv[]) {
 
     MRIfree(&mri_label1_dist);
     mri_label1_dist = mri_smooth;
-    mri_dist_grad = MRIsobel(mri_label1_dist, nullptr, nullptr);
+    mri_dist_grad   = MRIsobel(mri_label1_dist, nullptr, nullptr);
     MRInormalizeSequence(mri_dist_grad, 1.0);
     if (false && write_diags) {
       sprintf(fname, "dist.%d.mgz", labels[label]);
@@ -473,7 +473,7 @@ int main(int argc, char *argv[]) {
     }
 
   CMATwrite(cmat, argv[3]);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -490,14 +490,14 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "RAND")) {
@@ -521,7 +521,7 @@ static int get_option(int argc, char *argv[]) {
     printf("only computing inter-hemispheric splines\n");
   } else if (!stricmp(option, "NCONTROL")) {
     ncontrol = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("using %d control points in spline fit\n", ncontrol);
   } else if (!stricmp(option, "openmp")) {
     char str[STRLEN];
@@ -537,7 +537,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "LABELS")) {
     label1_target = atof(argv[2]);
     label2_target = atof(argv[3]);
-    nargs = 2;
+    nargs         = 2;
     printf("computing optimal initial spline connecting %s (%d) and %s (%d)\n",
            cma_label_to_name(label1_target), label1_target,
            cma_label_to_name(label2_target), label2_target);
@@ -592,8 +592,8 @@ static MRI *MRIinteriorDistanceTransform(MRI *mri_aseg, MRI *mri_wm_interior,
   int x, y, z, nadded, n, max_thick_vox, i, xi, yi, zi, xk, yk, zk, label,
       nbr_label;
   VOXEL_LIST *vl_current, *vl_next;
-  MRI *mri_dilated = nullptr;
-  float fmin, fmax;
+  MRI *       mri_dilated = nullptr;
+  float       fmin, fmax;
 
   if (mri_paths == nullptr)
     mri_paths = MRIcloneDifferentType(mri_aseg, MRI_FLOAT);
@@ -601,17 +601,17 @@ static MRI *MRIinteriorDistanceTransform(MRI *mri_aseg, MRI *mri_wm_interior,
   MRIcopyLabel(mri_aseg, mri_paths, target_label);
   MRIbinarize(mri_paths, mri_paths, 1, 0, 1);
 
-  n = 1;
-  vl_next = VLSTalloc(mri_aseg->depth * mri_aseg->width * mri_aseg->height);
+  n          = 1;
+  vl_next    = VLSTalloc(mri_aseg->depth * mri_aseg->width * mri_aseg->height);
   vl_current = VLSTalloc(mri_aseg->depth * mri_aseg->width * mri_aseg->height);
   vl_next->nvox = vl_current->nvox = 0;
   VLSTcreate(mri_paths, 1, 1, vl_current, 0, 0);
   do {
     nadded = vl_next->nvox = 0;
     for (i = 0; i < vl_current->nvox; i++) {
-      x = vl_current->xi[i];
-      y = vl_current->yi[i];
-      z = vl_current->zi[i];
+      x     = vl_current->xi[i];
+      y     = vl_current->yi[i];
+      z     = vl_current->zi[i];
       label = MRIgetVoxVal(mri_aseg, x, y, z, 0);
       for (xk = -1; xk <= 1; xk++)
         for (yk = -1; yk <= 1; yk++)
@@ -660,10 +660,10 @@ static MRI *MRIinteriorDistanceTransform(MRI *mri_aseg, MRI *mri_wm_interior,
   } while (nadded > 0);
 
   // extend distance transform into gray matter
-  n = 0;
+  n             = 0;
   max_thick_vox = nint(MAX_THICKNESS / mri_aseg->xsize);
   do {
-    nadded = 0;
+    nadded      = 0;
     mri_dilated = MRIdilate(mri_paths, mri_dilated);
     for (x = 0; x < mri_aseg->width; x++)
       for (y = 0; y < mri_aseg->height; y++)
@@ -694,9 +694,9 @@ static MRI *MRIinteriorDistanceTransform(MRI *mri_aseg, MRI *mri_wm_interior,
 
     nadded = vl_next->nvox = 0;
     for (i = 0; i < vl_current->nvox; i++) {
-      x = vl_current->xi[i];
-      y = vl_current->yi[i];
-      z = vl_current->zi[i];
+      x   = vl_current->xi[i];
+      y   = vl_current->yi[i];
+      z   = vl_current->zi[i];
       val = MRImaxInRegion(mri_paths, x, y, z, 1) + 1; // one greater than max
       for (xk = -1; xk <= 1; xk++)
         for (yk = -1; yk <= 1; yk++)
@@ -1217,7 +1217,7 @@ static VOXEL_LIST *compute_spline_initialization(
       find_optimal_spline(vl_init_spline, mri_aseg, mri_wm_dist, mcmc_samples,
                           spline_length_penalty, spline_interior_penalty);
   VLSTfree(&vl_interp);
-  vl_interp = VLSTinterpolate(vl_optimal, 1);
+  vl_interp        = VLSTinterpolate(vl_optimal, 1);
   vl_optimal_final = compute_optimal_number_of_control_points(
       mri_aseg, vl_interp, min_spline_control_points, ALLOWABLE_SPLINE_DIST);
 
@@ -1249,7 +1249,7 @@ static VOXEL_LIST *compute_spline_initialization(
 static VOXEL_LIST *compute_path_to_label(MRI *mri_aseg, MRI *mri_wm,
                                          MRI *mri_dist_grad, MRI *mri_dist,
                                          int label1, int label2) {
-  double step, xc, yc, zc, dist, min_dist;
+  double      step, xc, yc, zc, dist, min_dist;
   VOXEL_LIST *vl;
   int label = 0, max_steps, nvox, xk, yk, zk, xi, yi, zi, xm, ym, zm, odx, ody,
       odz, dx, dy, dz, xv, yv, zv, found, backtrack_steps = 10, current_label,
@@ -1262,8 +1262,8 @@ static VOXEL_LIST *compute_path_to_label(MRI *mri_aseg, MRI *mri_wm,
   step = mri_dist_grad->xsize / 2;
 
   max_steps = nint(ceil(MAX_PARCEL_DIST / step));
-  vl = VLSTalloc(max_steps + 1);
-  vl->nvox = 0;
+  vl        = VLSTalloc(max_steps + 1);
+  vl->nvox  = 0;
 
   // compute voxel in label2 that is closest to centroid
   for (xc = yc = zc = 0.0, nvox = xv = 0; xv < mri_aseg->width; xv++)
@@ -1303,9 +1303,9 @@ static VOXEL_LIST *compute_path_to_label(MRI *mri_aseg, MRI *mri_wm,
                   continue;
                 dist = MRIgetVoxVal(mri_dist, xi, yi, zi, 0);
                 if (dist < min_dist) {
-                  xm = xi;
-                  ym = yi;
-                  zm = zi;
+                  xm       = xi;
+                  ym       = yi;
+                  zm       = zi;
                   min_dist = dist;
                 }
               }
@@ -1329,17 +1329,17 @@ static VOXEL_LIST *compute_path_to_label(MRI *mri_aseg, MRI *mri_wm,
 
     // examine all 6-connected voxels except where we came from to see what
     // direction to move in
-    min_dist = mri_aseg->width + mri_aseg->height + mri_aseg->depth;
+    min_dist      = mri_aseg->width + mri_aseg->height + mri_aseg->depth;
     current_label = MRIgetVoxVal(mri_aseg, xv, yv, zv, 0);
     for (found = 0, xk = -1; xk <= 1; xk++)
       for (yk = -1; yk <= 1; yk++)
         for (zk = -1; zk <= 1; zk++) {
           if (abs(xk) + abs(yk) + abs(zk) != 1)
             continue; // enforce 6-connectivity
-          xi = mri_dist->xi[(xv + xk)];
-          yi = mri_dist->yi[(yv + yk)];
-          zi = mri_dist->zi[(zv + zk)];
-          dist = MRIgetVoxVal(mri_dist, xi, yi, zi, 0);
+          xi    = mri_dist->xi[(xv + xk)];
+          yi    = mri_dist->yi[(yv + yk)];
+          zi    = mri_dist->zi[(zv + zk)];
+          dist  = MRIgetVoxVal(mri_dist, xi, yi, zi, 0);
           label = MRIgetVoxVal(mri_aseg, xi, yi, zi, 0);
           // find the smallest distance that we haven't visited with a feasible
           // label
@@ -1352,10 +1352,10 @@ static VOXEL_LIST *compute_path_to_label(MRI *mri_aseg, MRI *mri_wm,
                nint(MRIgetVoxVal(mri_path, xi, yi, zi, 0)) ==
                    0)) // and we have never visited this voxel before
           {
-            dx = xi - xv;
-            dy = yi - yv;
-            dz = zi - zv;
-            found = 1;
+            dx       = xi - xv;
+            dy       = yi - yv;
+            dz       = zi - zv;
+            found    = 1;
             min_dist = dist;
           }
         }
@@ -1418,9 +1418,9 @@ static VOXEL_LIST *compute_path_to_label(MRI *mri_aseg, MRI *mri_wm,
       MRIsetValues(mri_path, 0);
       printf("restarting  path finding with backtracking length = %d\n",
              backtrack_steps);
-      xv = xm;
-      yv = ym;
-      zv = zm;
+      xv  = xm;
+      yv  = ym;
+      zv  = zm;
       odx = ody = odz = 0;
       continue;
       VLSTfree(&vl);
@@ -1455,17 +1455,17 @@ static VOXEL_LIST *compute_path_to_label(MRI *mri_aseg, MRI *mri_wm,
 
 static VOXEL_LIST *compute_optimal_number_of_control_points(
     MRI *mri_aseg, VOXEL_LIST *vl, int min_points, double allowable_dist) {
-  int ncontrol, max_points;
-  double dist;
-  MRI *mri_dist = nullptr;
+  int         ncontrol, max_points;
+  double      dist;
+  MRI *       mri_dist  = nullptr;
   VOXEL_LIST *vl_spline = nullptr, *vl_spline_list;
 
-  vl->mri = mri_aseg;
+  vl->mri    = mri_aseg;
   max_points = MIN(10 * min_points, vl->nvox);
   for (ncontrol = min_points; ncontrol <= max_points; ncontrol++) {
     if (vl_spline)
       VLSTfree(&vl_spline);
-    vl_spline = VLSTsplineFit(vl, ncontrol);
+    vl_spline      = VLSTsplineFit(vl, ncontrol);
     vl_spline_list = VLSTinterpolate(vl_spline, 1);
     dist = VLSThausdorffDistance(vl, vl_spline_list, 10 * allowable_dist,
                                  &mri_dist);
@@ -1489,8 +1489,8 @@ static VOXEL_LIST *find_optimal_spline(VOXEL_LIST *vl, MRI *mri_aseg,
                                        double spline_length_penalty,
                                        double spline_interior_penalty) {
   VOXEL_LIST *vl_spline, *vl_spline_optimal, *vl_spline_current;
-  double energy, xn, yn, zn, best_energy, acceptance_val, current_energy;
-  int n, cnum, label, label1, label2;
+  double      energy, xn, yn, zn, best_energy, acceptance_val, current_energy;
+  int         n, cnum, label, label1, label2;
 
   label1 = MRIgetVoxVal(mri_aseg, vl->xi[0], vl->yi[0], vl->zi[0], 0);
   label2 = MRIgetVoxVal(mri_aseg, vl->xi[vl->nvox - 1], vl->yi[vl->nvox - 1],
@@ -1505,7 +1505,7 @@ static VOXEL_LIST *find_optimal_spline(VOXEL_LIST *vl, MRI *mri_aseg,
       compute_spline_energy(vl_spline_optimal, mri_wm_dist, energy_flags,
                             spline_length_penalty, spline_interior_penalty);
   if (DIAG_VERBOSE_ON) {
-    char fname[STRLEN];
+    char        fname[STRLEN];
     VOXEL_LIST *vl_interp = VLSTinterpolate(vl_spline_optimal, .1);
 
     sprintf(fname, "spline.000.label");
@@ -1583,14 +1583,14 @@ static VOXEL_LIST *find_optimal_spline(VOXEL_LIST *vl, MRI *mri_aseg,
     if (randomNumber(0.0, 1.0) < acceptance_val) {
       VLSTfree(&vl_spline_current);
       vl_spline_current = vl_spline;
-      current_energy = energy;
+      current_energy    = energy;
       if (best_energy > energy) {
         best_energy = energy;
         VLSTfree(&vl_spline_optimal);
         vl_spline_optimal =
             VLSTcopy(vl_spline_current, nullptr, 0, vl_spline_current->nvox);
         if (DIAG_VERBOSE_ON) {
-          char fname[STRLEN];
+          char        fname[STRLEN];
           VOXEL_LIST *vl_interp = VLSTinterpolate(vl_spline_optimal, 1);
 
           sprintf(fname, "spline.%3.3d.label", n + 1);
@@ -1617,13 +1617,13 @@ static VOXEL_LIST *find_optimal_spline(VOXEL_LIST *vl, MRI *mri_aseg,
 static double compute_spline_energy(VOXEL_LIST *vl, MRI *mri_wm_dist, int which,
                                     double spline_length_penalty,
                                     double spline_interior_penalty) {
-  int n, num;
+  int         n, num;
   VOXEL_LIST *vl_interp;
-  double wm_dist;
-  double interior_energy, length_energy, energy;
+  double      wm_dist;
+  double      interior_energy, length_energy, energy;
 
   interior_energy = 0;
-  vl_interp = VLSTinterpolate(vl, 1);
+  vl_interp       = VLSTinterpolate(vl, 1);
 
   for (n = num = 0; n < vl_interp->nvox; n++) {
     if (vl_interp->xi[n] == Gx && vl_interp->yi[n] == Gy &&

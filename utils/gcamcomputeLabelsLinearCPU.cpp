@@ -35,7 +35,7 @@ int GCAMcomputeLabelsLinearCPU(MRI *mri, GCA_MORPH *gcam) {
     return (NO_ERROR);
   }
 
-  Freesurfer::GCAlinearNode gcaLN;
+  Freesurfer::GCAlinearNode  gcaLN;
   Freesurfer::GCAlinearPrior gcaLP;
 
   gcaLN.Exhume(gcam->gca);

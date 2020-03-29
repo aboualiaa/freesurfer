@@ -25,24 +25,22 @@
 
 #include "QdecUtilities.h"
 
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
 
-using namespace std;
-
-void QdecUtilities::AssertFileIsReadable(string const &ifn) {
+void QdecUtilities::AssertFileIsReadable(std::string const &ifn) {
 
   if (!QdecUtilities::IsFileReadable(ifn))
-    throw runtime_error(string("Couldn't find file ") + ifn);
+    throw std::runtime_error(string("Couldn't find file ") + ifn);
 }
 
-bool QdecUtilities::IsFileReadable(string const &ifn) {
+bool QdecUtilities::IsFileReadable(std::string const &ifn) {
 
-  ifstream f(ifn.c_str(), ios::in);
+  std::ifstream f(ifn.c_str(), std::ios::in);
   if (!f || f.bad())
     return false;
 
@@ -79,7 +77,7 @@ const char *QdecUtilities::GetQdecrcResourceString(const char *key) {
   // the first key found is returned
   const char *value = NULL;
   if (NULL != getenv("SUBJECTS_DIR")) {
-    string rcFile = getenv("SUBJECTS_DIR");
+    std::string rcFile = getenv("SUBJECTS_DIR");
     rcFile += "/qdec/.Qdecrc";
     value = QdecUtilities::GetResourceString(key, rcFile.c_str());
   }
@@ -87,7 +85,7 @@ const char *QdecUtilities::GetQdecrcResourceString(const char *key) {
   {
     // ...so look for it in $HOME/.Qdecrc
     if (NULL != getenv("HOME")) {
-      string rcFile = getenv("HOME");
+      std::string rcFile = getenv("HOME");
       rcFile += "/.Qdecrc";
       value = QdecUtilities::GetResourceString(key, rcFile.c_str());
     }
@@ -100,13 +98,13 @@ const char *QdecUtilities::GetResourceString(const char *key,
   // resource file contains key = value pairs
   if (NULL == filename)
     return NULL;
-  ifstream ifsFile;
+  std::ifstream ifsFile;
   ifsFile.open(filename);
   if (ifsFile.is_open()) {
     size_t tmpstrMaxSize = 200000; // maximum size of one line in the file
-    char *tmpstr = (char *)malloc(tmpstrMaxSize);
+    char * tmpstr        = (char *)malloc(tmpstrMaxSize);
 #define UNIX_EOL 0x0A
-#define MAC_EOL 0x0D
+#define MAC_EOL  0x0D
     char eol_delim = UNIX_EOL;
     ifsFile.getline(tmpstr, tmpstrMaxSize, eol_delim);
     if (ifsFile.eof()) {

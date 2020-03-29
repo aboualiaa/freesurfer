@@ -28,67 +28,67 @@
  *
  */
 
-#include "diag.h"
-#include "timer.h"
-#include "mrinorm.h"
-#include "mri_conform.h"
-#include "tags.h"
-#include "version.h"
 #include "cma.h"
+#include "diag.h"
 #include "gca.h"
+#include "mri_conform.h"
+#include "mrinorm.h"
+#include "tags.h"
+#include "timer.h"
+#include "version.h"
 
 #define CONTRAST_UNKNOWN 0
-#define T1_CONTRAST 1
-#define T2_CONTRAST 2
+#define T1_CONTRAST      1
+#define T2_CONTRAST      2
 
 static int contrast = CONTRAST_UNKNOWN;
 
-static int threshold_control_points(MRI *mri_ctrl, MRI *mri_intensity,
-                                    float thresh);
-static MRI *build_outside_of_brain_mask(MRI *mri_src, GCA *gca,
-                                        TRANSFORM *xform, double prior_thresh,
-                                        int whalf);
-static int remove_surface_outliers(MRI *mri_ctrl_src, MRI *mri_dist,
-                                   MRI *mri_src, MRI *mri_ctrl_dst,
-                                   float min_dist);
-static MRI *remove_surface_outliers_T2(MRI *mri_ctrl_src, MRI *mri_dist,
-                                       MRI *mri_src, MRI *mri_ctrl_dst);
-static MRI *MRIremoveWMOutliersAndRetainMedialSurface(MRI *mri_src,
-                                                      MRI *mri_src_ctrl,
-                                                      MRI *mri_dst_ctrl,
-                                                      int intensity_below);
-static MRI *MRIremoveWMOutliers(MRI *mri_src, MRI *mri_src_ctrl,
-                                MRI *mri_dst_ctrl, int intensity_below);
-int main(int argc, char *argv[]);
-static int remove_outliers_near_surface(MRI *mri_ctrl, MRI *mri_dist,
-                                        MRI *mri_dst, MRI *mri_ctrl_out,
-                                        float min_dist, float nsigma);
-static int get_option(int argc, char *argv[]);
-static void usage_exit(int code);
-static MRI *compute_bias(MRI *mri_src, MRI *mri_dst, MRI *mri_bias);
-static MRI *add_interior_points(MRI *mri_src, MRI *mri_vals,
-                                float intensity_above, float intensity_below,
-                                MRI_SURFACE *mris_interior1,
-                                MRI_SURFACE *mris_interior2, MRI *mri_aseg,
-                                MRI *mri_dst);
-static float nonmax_thresh = 2.5;
-static GCA *gca;
+static int        threshold_control_points(MRI *mri_ctrl, MRI *mri_intensity,
+                                           float thresh);
+static MRI *      build_outside_of_brain_mask(MRI *mri_src, GCA *gca,
+                                              TRANSFORM *xform, double prior_thresh,
+                                              int whalf);
+static int        remove_surface_outliers(MRI *mri_ctrl_src, MRI *mri_dist,
+                                          MRI *mri_src, MRI *mri_ctrl_dst,
+                                          float min_dist);
+static MRI *      remove_surface_outliers_T2(MRI *mri_ctrl_src, MRI *mri_dist,
+                                             MRI *mri_src, MRI *mri_ctrl_dst);
+static MRI *      MRIremoveWMOutliersAndRetainMedialSurface(MRI *mri_src,
+                                                            MRI *mri_src_ctrl,
+                                                            MRI *mri_dst_ctrl,
+                                                            int  intensity_below);
+static MRI *      MRIremoveWMOutliers(MRI *mri_src, MRI *mri_src_ctrl,
+                                      MRI *mri_dst_ctrl, int intensity_below);
+int               main(int argc, char *argv[]);
+static int        remove_outliers_near_surface(MRI *mri_ctrl, MRI *mri_dist,
+                                               MRI *mri_dst, MRI *mri_ctrl_out,
+                                               float min_dist, float nsigma);
+static int        get_option(int argc, char *argv[]);
+static void       usage_exit(int code);
+static MRI *      compute_bias(MRI *mri_src, MRI *mri_dst, MRI *mri_bias);
+static MRI *      add_interior_points(MRI *mri_src, MRI *mri_vals,
+                                      float intensity_above, float intensity_below,
+                                      MRI_SURFACE *mris_interior1,
+                                      MRI_SURFACE *mris_interior2, MRI *mri_aseg,
+                                      MRI *mri_dst);
+static float      nonmax_thresh = 2.5;
+static GCA *      gca;
 static TRANSFORM *xform;
-static int brain_distance = 1;
-static int conform = 0;
-static int gentle_flag = 0;
-static int noskull = 0;
-static int nosnr = 1;
-static double min_dist = 2.5; // mm away from border in -surface
+static int        brain_distance = 1;
+static int        conform        = 0;
+static int        gentle_flag    = 0;
+static int        noskull        = 0;
+static int        nosnr          = 1;
+static double     min_dist       = 2.5; // mm away from border in -surface
 
-static int remove_controlpoints_outside_range(MRI *mri_ctrl, MRI *mri,
-                                              float fmin, float fmax);
+static int   remove_controlpoints_outside_range(MRI *mri_ctrl, MRI *mri,
+                                                float fmin, float fmax);
 static char *checknorm_fname = nullptr;
-static float check_min = 90;
-static float check_max = 120;
+static float check_min       = 90;
+static float check_max       = 120;
 
 static char *renorm_fname = nullptr;
-static int renorm_val = DEFAULT_DESIRED_WHITE_MATTER_VALUE;
+static int   renorm_val   = DEFAULT_DESIRED_WHITE_MATTER_VALUE;
 
 static float bias_sigma = 8.0;
 
@@ -96,26 +96,26 @@ static char *mask_fname;
 static char *interior_fname1 = nullptr;
 static char *interior_fname2 = nullptr;
 
-static float mask_sigma = 0.0;
-static float mask_thresh = 0.0;
-static char *mask_orig_fname = nullptr;
+static float mask_sigma       = 0.0;
+static float mask_thresh      = 0.0;
+static char *mask_orig_fname  = nullptr;
 static float mask_orig_thresh = 150;
 
 const char *Progname;
 
 static int scan_type = MRI_UNKNOWN;
 
-static int prune = 0;     /* off by default */
-static MRI_NORM_INFO mni; // = {} ;
-static int verbose = 1;
-static int num_3d_iter = 2;
+static int           prune = 0; /* off by default */
+static MRI_NORM_INFO mni;       // = {} ;
+static int           verbose     = 1;
+static int           num_3d_iter = 2;
 
 static float intensity_above = 25;
 static float intensity_below = 10;
 
 static char *control_point_fname;
 static char *long_control_volume_fname = nullptr;
-static char *long_bias_volume_fname = nullptr;
+static char *long_bias_volume_fname    = nullptr;
 
 static char *aseg_fname = nullptr;
 // static int aseg_wm_labels[] =
@@ -125,42 +125,39 @@ static int aseg_wm_labels[] = {Left_Cerebral_White_Matter,
 #define NWM_LABELS (sizeof(aseg_wm_labels) / sizeof(aseg_wm_labels[0]))
 
 static char *control_volume_fname = nullptr;
-static char *bias_volume_fname = nullptr;
-static int read_flag = 0;
-static int long_flag = 0;
+static char *bias_volume_fname    = nullptr;
+static int   read_flag            = 0;
+static int   long_flag            = 0;
 
-static int no1d = 0;
+static int no1d      = 0;
 static int file_only = 0;
 
 #define MAX_NORM_SURFACES 10
-static int nsurfs = 0 ;
-static char *surface_fnames[MAX_NORM_SURFACES]  ;
-static TRANSFORM *surface_xforms[MAX_NORM_SURFACES] ;
-static char *surface_xform_fnames[MAX_NORM_SURFACES] ;
-static float grad_thresh = -1 ;
-static MRI *mri_not_control = NULL;
+static int        nsurfs = 0;
+static char *     surface_fnames[MAX_NORM_SURFACES];
+static TRANSFORM *surface_xforms[MAX_NORM_SURFACES];
+static char *     surface_xform_fnames[MAX_NORM_SURFACES];
+static float      grad_thresh     = -1;
+static MRI *      mri_not_control = NULL;
 
-static LABEL *control_point_label = NULL ;
+static LABEL *control_point_label = NULL;
 
-static int nonmax_suppress = 1 ;
-static int erode = 0 ;
-static int remove_nonwm_voxels(MRI *mri_ctrl_src,
-                               MRI *mri_aseg,
-                               MRI *mri_ctrl_dst) ;
+static int nonmax_suppress = 1;
+static int erode           = 0;
+static int remove_nonwm_voxels(MRI *mri_ctrl_src, MRI *mri_aseg,
+                               MRI *mri_ctrl_dst);
 
-int
-main(int argc, char *argv[])
-{
-  int    nargs, n ;
-  MRI    *mri_src, *mri_dst = NULL, *mri_bias, *mri_orig, *mri_aseg = NULL ;
-  char   *in_fname, *out_fname ;
-  int          msec, minutes, seconds ;
-  Timer start ;
-
+int main(int argc, char *argv[]) {
+  int   nargs, n;
+  MRI * mri_src, *mri_dst = NULL, *mri_bias, *mri_orig, *mri_aseg = NULL;
+  char *in_fname, *out_fname;
+  int   msec, minutes, seconds;
+  Timer start;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_normalize");
-  nargs = handleVersionOption(argc, argv, "mri_normalize");
-  if (nargs && argc - nargs == 1) exit(0);
+  nargs               = handleVersionOption(argc, argv, "mri_normalize");
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
 
   Progname = argv[0];
@@ -263,7 +260,7 @@ main(int argc, char *argv[])
     MRI_SURFACE *mris;
     MRI *mri_dist = nullptr, *mri_dist_sup = nullptr, *mri_ctrl, *mri_dist_one;
     // LTA          *lta ;
-    int i;
+    int        i;
     TRANSFORM *surface_xform;
 
     if (control_point_fname ||
@@ -339,7 +336,7 @@ main(int argc, char *argv[])
     if (nonmax_suppress) {
       printf("computing nonmaximum suppression\n");
       mri_dist_sup = MRInonMaxSuppress(mri_dist, nullptr, 0, 1);
-      mri_ctrl = MRIcloneDifferentType(mri_dist_sup, MRI_UCHAR);
+      mri_ctrl     = MRIcloneDifferentType(mri_dist_sup, MRI_UCHAR);
       MRIbinarize(mri_dist_sup, mri_ctrl, min_dist, CONTROL_NONE,
                   CONTROL_MARKED);
     } else if (erode) {
@@ -360,8 +357,8 @@ main(int argc, char *argv[])
     if (mask_sigma > 0) {
       MRI *mri_smooth, *mri_mag, *mri_grad;
       mri_smooth = MRIgaussianSmooth(mri_dst, mask_sigma, 1, nullptr);
-      mri_mag = MRIcloneDifferentType(mri_dst, MRI_FLOAT);
-      mri_grad = MRIsobel(mri_smooth, nullptr, mri_mag);
+      mri_mag    = MRIcloneDifferentType(mri_dst, MRI_FLOAT);
+      mri_grad   = MRIsobel(mri_smooth, nullptr, mri_mag);
       MRIbinarize(mri_mag, mri_mag, mask_thresh, 1, 0);
       MRImask(mri_ctrl, mri_mag, mri_ctrl, 0, CONTROL_NONE);
       MRIfree(&mri_grad);
@@ -487,7 +484,7 @@ main(int argc, char *argv[])
   }
 
   if (read_flag) {
-    MRI *mri_ctrl;
+    MRI *  mri_ctrl;
     double scale;
 
     mri_bias = MRIread(bias_volume_fname);
@@ -500,7 +497,7 @@ main(int argc, char *argv[])
                 control_volume_fname);
     MRIbinarize(mri_ctrl, mri_ctrl, 1, 0, 128);
     mri_dst = MRImultiply(mri_bias, mri_src, nullptr);
-    scale = MRImeanInLabel(mri_dst, mri_ctrl, 128);
+    scale   = MRImeanInLabel(mri_dst, mri_ctrl, 128);
     printf("mean in wm is %2.0f, scaling by %2.2f\n", scale, 110 / scale);
     scale = 110 / scale;
     MRIscalarMul(mri_dst, mri_dst, scale);
@@ -509,7 +506,7 @@ main(int argc, char *argv[])
   }
 
   if (long_flag) {
-    MRI *mri_ctrl;
+    MRI *  mri_ctrl;
     double scale;
 
     mri_bias = MRIread(long_bias_volume_fname);
@@ -529,7 +526,7 @@ main(int argc, char *argv[])
     }
     scale = MRImeanInLabel(mri_src, mri_ctrl, CONTROL_MARKED);
     printf("mean in wm is %2.0f, scaling by %2.2f\n", scale, 110 / scale);
-    scale = DEFAULT_DESIRED_WHITE_MATTER_VALUE / scale;
+    scale   = DEFAULT_DESIRED_WHITE_MATTER_VALUE / scale;
     mri_dst = MRIscalarMul(mri_src, nullptr, scale);
     MRIremoveWMOutliers(mri_dst, mri_ctrl, mri_ctrl, intensity_below / 2);
     mri_bias = MRIbuildBiasImage(mri_dst, mri_ctrl, nullptr, 0.0);
@@ -542,8 +539,8 @@ main(int argc, char *argv[])
 
   if (grad_thresh > 0) {
     float thresh;
-    MRI *mri_mag, *mri_grad, *mri_smooth;
-    MRI *mri_kernel = MRIgaussian1d(.5, -1);
+    MRI * mri_mag, *mri_grad, *mri_smooth;
+    MRI * mri_kernel = MRIgaussian1d(.5, -1);
 
     mri_not_control = MRIcloneDifferentType(mri_src, MRI_UCHAR);
     switch (scan_type) {
@@ -559,9 +556,9 @@ main(int argc, char *argv[])
       break;
     }
     mri_smooth = MRIconvolveGaussian(mri_src, nullptr, mri_kernel);
-    thresh = grad_thresh;
-    mri_mag = MRIcloneDifferentType(mri_src, MRI_FLOAT);
-    mri_grad = MRIsobel(mri_smooth, nullptr, mri_mag);
+    thresh     = grad_thresh;
+    mri_mag    = MRIcloneDifferentType(mri_src, MRI_FLOAT);
+    mri_grad   = MRIsobel(mri_smooth, nullptr, mri_mag);
     MRIwrite(mri_mag, "m.mgz");
     MRIbinarize(mri_mag, mri_not_control, thresh, 0, 1);
     MRIwrite(mri_not_control, "nc.mgz");
@@ -649,7 +646,7 @@ main(int argc, char *argv[])
 
   if (mri_aseg) {
     MRI *mri_ctrl, *mri_bias;
-    int i;
+    int  i;
 
     printf("processing with aseg\n");
 
@@ -735,10 +732,10 @@ main(int argc, char *argv[])
         if (nosnr) {
           if (interior_fname1) {
             MRIS *mris_interior1, *mris_interior2;
-            MRI *mri_ctrl;
+            MRI * mri_ctrl;
 
             printf("computing initial normalization using surface interiors\n");
-            mri_ctrl = MRIcloneDifferentType(mri_src, MRI_UCHAR);
+            mri_ctrl       = MRIcloneDifferentType(mri_src, MRI_UCHAR);
             mris_interior1 = MRISread(interior_fname1);
             if (mris_interior1 == nullptr)
               ErrorExit(ERROR_NOFILE,
@@ -821,7 +818,7 @@ main(int argc, char *argv[])
   if (mri_dst->type != MRI_UCHAR) {
     MRI *mri_tmp;
     if (mriConformed(mri_dst)) {
-      int x, y, z;
+      int   x, y, z;
       float val;
       for (x = 0; x < mri_dst->width; x++)
         for (y = 0; y < mri_dst->height; y++)
@@ -862,7 +859,7 @@ main(int argc, char *argv[])
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -893,16 +890,16 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "checknorm")) {
     checknorm_fname = argv[2];
-    check_min = atof(argv[3]);
-    check_max = atof(argv[4]);
+    check_min       = atof(argv[3]);
+    check_max       = atof(argv[4]);
     printf("removing control points that are not in [%2.0f %2.f] in %s\n",
            check_min, check_max, checknorm_fname);
     nargs = 3;
   } else if (!stricmp(option, "ATLAS")) {
     printf("reading gca and atlas transform from %s and %s\n", argv[2],
            argv[3]);
-    gca = GCAread(argv[2]);
-    xform = TransformRead(argv[3]);
+    gca            = GCAread(argv[2]);
+    xform          = TransformRead(argv[3]);
     brain_distance = atoi(argv[4]);
     printf("reading gca from %s, xform from %s and setting brain distance to "
            "%d voxels\n",
@@ -913,29 +910,29 @@ static int get_option(int argc, char *argv[]) {
                 Progname, argv[2], argv[3]);
   } else if (!stricmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else if (!stricmp(option, "NOSKULL")) {
     noskull = 1;
     printf("assuming input volume has been skull stripped\n");
   } else if (!stricmp(option, "GRAD")) {
     grad_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("using gradient volume thresholded at %2.1f to prevent control "
            "points from crossing edges...\n",
            grad_thresh);
   } else if (!stricmp(option, "MASK_SIGMA")) {
-    mask_sigma = atof(argv[2]);
+    mask_sigma  = atof(argv[2]);
     mask_thresh = atof(argv[3]);
-    nargs = 1;
+    nargs       = 1;
     printf("smoothing input volume with sigma = %2.3f mm and thresholding at "
            "%2.0f for mask\n",
            mask_sigma, mask_thresh);
     nargs = 2;
   } else if (!stricmp(option, "MASK_ORIG")) {
-    mask_orig_fname = argv[2];
+    mask_orig_fname  = argv[2];
     mask_orig_thresh = atof(argv[3]);
-    nargs = 1;
+    nargs            = 1;
     printf("removing control points that are below %2.3f in %s\n",
            mask_orig_thresh, mask_orig_fname);
     nargs = 2;
@@ -943,8 +940,8 @@ static int get_option(int argc, char *argv[]) {
     if (nsurfs >= MAX_NORM_SURFACES) {
       ErrorExit(ERROR_NOMEMORY, "too many surfaces (%d) specified", nsurfs);
     }
-    surface_fnames[nsurfs] = argv[2];
-    surface_xforms[nsurfs] = TransformRead(argv[3]);
+    surface_fnames[nsurfs]       = argv[2];
+    surface_xforms[nsurfs]       = TransformRead(argv[3]);
     surface_xform_fnames[nsurfs] = argv[3];
     if (surface_xforms[nsurfs] == nullptr) {
       ErrorExit(ERROR_NOFILE, "%s:could not load xform from %s", Progname,
@@ -954,13 +951,13 @@ static int get_option(int argc, char *argv[]) {
     nsurfs++;
   } else if (!stricmp(option, "MIN_DIST")) {
     min_dist = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("retaining %s points that are at least %2.3fmm from the boundary\n",
            nonmax_suppress ? " nonmaximum suppressed" : "", min_dist);
   } else if (!stricmp(option, "INTERIOR")) {
     interior_fname1 = argv[2];
     interior_fname2 = argv[3];
-    nargs = 2;
+    nargs           = 2;
     printf("using surfaces %s and %s to compute wm interior\n", interior_fname1,
            interior_fname2);
   } else if (!stricmp(option, "MGH_MPRAGE") || !stricmp(option, "MPRAGE")) {
@@ -973,7 +970,7 @@ static int get_option(int argc, char *argv[]) {
     intensity_below = 22;
 
   } else if (!stricmp(option, "monkey")) {
-    no1d = 1;
+    no1d        = 1;
     num_3d_iter = 1;
     printf("disabling 1D normalization and "
            "setting niter=1, make sure to use "
@@ -986,7 +983,7 @@ static int get_option(int argc, char *argv[]) {
     printf("enabling SNR normalization\n");
   } else if (!stricmp(option, "sigma")) {
     bias_sigma = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("using Gaussian smoothing of bias field, sigma=%2.3f\n", bias_sigma);
   } else if (!stricmp(option, "conform")) {
     conform = 1;
@@ -998,7 +995,7 @@ static int get_option(int argc, char *argv[]) {
            conform ? "" : "not ");
   } else if (!stricmp(option, "aseg") || !stricmp(option, "segmentation")) {
     aseg_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using segmentation for initial intensity normalization\n");
   } else if (!stricmp(option, "gentle")) {
     gentle_flag = 1;
@@ -1017,15 +1014,15 @@ static int get_option(int argc, char *argv[]) {
     if (control_point_label == nullptr)
       ErrorExit(ERROR_NOFILE, "%s: could not read label from %s", Progname,
                 argv[2]);
-    nargs = 1;
+    nargs     = 1;
     file_only = 1;
-    no1d = 1;
+    no1d      = 1;
   } else if (!stricmp(option, "file_only") || !stricmp(option, "fonly") ||
              !stricmp(option, "fileonly")) {
-    file_only = 1;
+    file_only           = 1;
     control_point_fname = argv[2];
-    no1d = 1;
-    nargs = 1;
+    no1d                = 1;
+    nargs               = 1;
     printf("using control points from file %s...\n", control_point_fname);
     printf("only using file control points...\n");
   } else if (!stricmp(option, "seed")) {
@@ -1035,16 +1032,16 @@ static int get_option(int argc, char *argv[]) {
   } else
     switch (toupper(*option)) {
     case 'D':
-      Gx = atoi(argv[2]);
-      Gy = atoi(argv[3]);
-      Gz = atoi(argv[4]);
+      Gx    = atoi(argv[2]);
+      Gy    = atoi(argv[3]);
+      Gz    = atoi(argv[4]);
       nargs = 3;
       printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
       break;
     case 'V':
-      Gvx = atoi(argv[2]);
-      Gvy = atoi(argv[3]);
-      Gvz = atoi(argv[4]);
+      Gvx   = atoi(argv[2]);
+      Gvy   = atoi(argv[3]);
+      Gvz   = atoi(argv[4]);
       nargs = 3;
       printf("debugging alternative voxel (%d, %d, %d)\n", Gvx, Gvy, Gvz);
       break;
@@ -1057,32 +1054,32 @@ static int get_option(int argc, char *argv[]) {
       }
       break;
     case 'R':
-      read_flag = 1;
-      nargs = 2;
+      read_flag            = 1;
+      nargs                = 2;
       control_volume_fname = argv[2];
-      bias_volume_fname = argv[3];
+      bias_volume_fname    = argv[3];
       printf("reading bias field from %s and ctrl points from %s\n",
              bias_volume_fname, control_volume_fname);
       break;
     case 'L':
-      long_flag = 1;
-      no1d = 1;
-      nargs = 2;
+      long_flag                 = 1;
+      no1d                      = 1;
+      nargs                     = 2;
       long_control_volume_fname = argv[2];
-      long_bias_volume_fname = argv[3];
+      long_bias_volume_fname    = argv[3];
       printf("reading bias field from %s and ctrl points from %s\n",
              long_bias_volume_fname, long_control_volume_fname);
       break;
     case 'W':
       control_volume_fname = argv[2];
-      bias_volume_fname = argv[3];
-      nargs = 2;
+      bias_volume_fname    = argv[3];
+      nargs                = 2;
       printf("writing ctrl pts to   %s\n", control_volume_fname);
       printf("writing bias field to %s\n", bias_volume_fname);
       break;
     case 'F':
       control_point_fname = argv[2];
-      nargs = 1;
+      nargs               = 1;
       printf("using control points from file %s...\n", control_point_fname);
       break;
     case 'A':
@@ -1109,7 +1106,7 @@ static int get_option(int argc, char *argv[]) {
 #endif
     case 'N':
       num_3d_iter = atoi(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("performing 3d normalization %d times\n", num_3d_iter);
       break;
     case '?':
@@ -1133,7 +1130,7 @@ static void usage_exit(int code) {
 }
 
 static MRI *compute_bias(MRI *mri_src, MRI *mri_dst, MRI *mri_bias) {
-  int x, y, z;
+  int   x, y, z;
   float bias, src, dst;
 
   if (!mri_bias)
@@ -1163,25 +1160,25 @@ static MRI *compute_bias(MRI *mri_src, MRI *mri_dst, MRI *mri_bias) {
 static MRI *MRIremoveWMOutliersAndRetainMedialSurface(MRI *mri_src,
                                                       MRI *mri_src_ctrl,
                                                       MRI *mri_dst_ctrl,
-                                                      int intensity_below) {
-  MRI *mri_bin, *mri_dist, *mri_dist_sup, *mri_outliers = nullptr;
-  float max, thresh, val;
+                                                      int  intensity_below) {
+  MRI *      mri_bin, *mri_dist, *mri_dist_sup, *mri_outliers = nullptr;
+  float      max, thresh, val;
   HISTOGRAM *histo, *hsmooth;
-  int wm_peak, x, y, z, whalf = 5;
-  long nremoved = 0L;
+  int        wm_peak, x, y, z, whalf = 5;
+  long       nremoved = 0L;
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRIwrite(mri_src_ctrl, "sc.mgz");
   }
 
-  mri_bin = MRIbinarize(mri_dst_ctrl, nullptr, 1, 0, 1);
+  mri_bin  = MRIbinarize(mri_dst_ctrl, nullptr, 1, 0, 1);
   mri_dist = MRIdistanceTransform(mri_bin, nullptr, 1, -1, DTRANS_MODE_SIGNED,
                                   nullptr);
   MRIscalarMul(mri_dist, mri_dist, -1);
   mri_dist_sup = MRInonMaxSuppress(mri_dist, nullptr, 0, 1);
   mri_dst_ctrl = MRIbinarize(mri_dist_sup, mri_dst_ctrl, 1, 0, 1);
-  histo = MRIhistogramLabel(mri_src, mri_src_ctrl, 1, 256);
-  hsmooth = HISTOcopy(histo, nullptr);
+  histo        = MRIhistogramLabel(mri_src, mri_src_ctrl, 1, 256);
+  hsmooth      = HISTOcopy(histo, nullptr);
   HISTOsmooth(histo, hsmooth, 2);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     HISTOplot(histo, "h.plt");
@@ -1189,7 +1186,7 @@ static MRI *MRIremoveWMOutliersAndRetainMedialSurface(MRI *mri_src,
   }
   wm_peak = HISTOfindHighestPeakInRegion(hsmooth, 1, hsmooth->nbins - 1);
   wm_peak = hsmooth->bins[wm_peak];
-  thresh = wm_peak - intensity_below;
+  thresh  = wm_peak - intensity_below;
 
   HISTOfree(&histo);
   HISTOfree(&hsmooth);
@@ -1235,10 +1232,10 @@ static MRI *MRIremoveWMOutliersAndRetainMedialSurface(MRI *mri_src,
 
 static MRI *MRIremoveWMOutliers(MRI *mri_src, MRI *mri_src_ctrl,
                                 MRI *mri_dst_ctrl, int intensity_below) {
-  MRI *mri_bin, *mri_outliers = nullptr;
-  float max, thresh, val;
+  MRI *      mri_bin, *mri_outliers = nullptr;
+  float      max, thresh, val;
   HISTOGRAM *histo, *hsmooth;
-  int wm_peak, x, y, z, nremoved = 0, whalf = 5, total;
+  int        wm_peak, x, y, z, nremoved = 0, whalf = 5, total;
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRIwrite(mri_src_ctrl, "sc.mgz");
@@ -1248,7 +1245,7 @@ static MRI *MRIremoveWMOutliers(MRI *mri_src, MRI *mri_src_ctrl,
     mri_dst_ctrl = MRIcopy(mri_src_ctrl, nullptr);
   }
   mri_bin = MRIbinarize(mri_src_ctrl, nullptr, 1, 0, CONTROL_MARKED);
-  histo = MRIhistogramLabel(mri_src, mri_bin, 1, 256);
+  histo   = MRIhistogramLabel(mri_src, mri_bin, 1, 256);
   hsmooth = HISTOcopy(histo, nullptr);
   HISTOsmooth(histo, hsmooth, 2);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
@@ -1257,7 +1254,7 @@ static MRI *MRIremoveWMOutliers(MRI *mri_src, MRI *mri_src_ctrl,
   }
   wm_peak = HISTOfindHighestPeakInRegion(hsmooth, 1, hsmooth->nbins - 1);
   wm_peak = hsmooth->bins[wm_peak];
-  thresh = wm_peak - intensity_below;
+  thresh  = wm_peak - intensity_below;
 
   HISTOfree(&histo);
   HISTOfree(&hsmooth);
@@ -1304,12 +1301,12 @@ static MRI *MRIremoveWMOutliers(MRI *mri_src, MRI *mri_src_ctrl,
 static MRI *MRIremoveWMOutliersAndRetainMedialSurface(MRI *mri_src,
                                                       MRI *mri_src_ctrl,
                                                       MRI *mri_dst_ctrl,
-                                                      int intensity_below) {
-  MRI *mri_inside, *mri_bin;
+                                                      int  intensity_below) {
+  MRI *      mri_inside, *mri_bin;
   HISTOGRAM *histo, *hsmooth;
-  int wm_peak, x, y, z, nremoved;
-  float thresh, hi_thresh;
-  double val, lmean, max;
+  int        wm_peak, x, y, z, nremoved;
+  float      thresh, hi_thresh;
+  double     val, lmean, max;
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRIwrite(mri_src_ctrl, "sc.mgz");
@@ -1320,7 +1317,7 @@ static MRI *MRIremoveWMOutliersAndRetainMedialSurface(MRI *mri_src,
   mri_inside = MRIerode(mri_dst_ctrl, NULL);
   MRIbinarize(mri_inside, mri_inside, 1, 0, 1);
 
-  histo = MRIhistogramLabel(mri_src, mri_inside, 1, 256);
+  histo   = MRIhistogramLabel(mri_src, mri_inside, 1, 256);
   hsmooth = HISTOcopy(histo, NULL);
   HISTOsmooth(histo, hsmooth, 2);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
@@ -1329,9 +1326,9 @@ static MRI *MRIremoveWMOutliersAndRetainMedialSurface(MRI *mri_src,
   }
   printf("using wm (%d) threshold %2.1f for removing exterior voxels\n",
          wm_peak, thresh);
-  wm_peak = HISTOfindHighestPeakInRegion(hsmooth, 1, hsmooth->nbins - 1);
-  wm_peak = hsmooth->bins[wm_peak];
-  thresh = wm_peak - intensity_below;
+  wm_peak   = HISTOfindHighestPeakInRegion(hsmooth, 1, hsmooth->nbins - 1);
+  wm_peak   = hsmooth->bins[wm_peak];
+  thresh    = wm_peak - intensity_below;
   hi_thresh = wm_peak - .5 * intensity_below;
   printf("using wm (%d) threshold %2.1f for removing exterior voxels\n",
          wm_peak, thresh);
@@ -1447,10 +1444,10 @@ static MRI *add_interior_points(MRI *mri_src, MRI *mri_vals,
                                 MRI_SURFACE *mris_white1,
                                 MRI_SURFACE *mris_white2, MRI *mri_aseg,
                                 MRI *mri_dst) {
-  int x, y, z, ctrl, label, i;
+  int   x, y, z, ctrl, label, i;
   float val;
-  MRI *mri_core;
-  MRI *mri_interior, *mri_tmp;
+  MRI * mri_core;
+  MRI * mri_interior, *mri_tmp;
 
   mri_interior = MRIclone(mri_src, nullptr);
   MRISfillInterior(mris_white1, mri_src->xsize, mri_interior);
@@ -1512,14 +1509,14 @@ static MRI *add_interior_points(MRI *mri_src, MRI *mri_vals,
 static int remove_surface_outliers(MRI *mri_ctrl_src, MRI *mri_dist,
                                    MRI *mri_src, MRI *mri_ctrl_dst,
                                    float min_dist) {
-  int x, y, z, wsize;
+  int        x, y, z, wsize;
   HISTOGRAM *h, *hs;
-  double mean, sigma, val;
-  MRI *mri_outlier = MRIclone(mri_ctrl_src, nullptr);
+  double     mean, sigma, val;
+  MRI *      mri_outlier = MRIclone(mri_ctrl_src, nullptr);
 
   return (0);
   mri_ctrl_dst = MRIcopy(mri_ctrl_src, mri_ctrl_dst);
-  wsize = nint(WSIZE_MM / mri_src->xsize);
+  wsize        = nint(WSIZE_MM / mri_src->xsize);
   for (x = 0; x < mri_src->width; x++)
     for (y = 0; y < mri_src->height; y++)
       for (z = 0; z < mri_src->depth; z++) {
@@ -1586,13 +1583,13 @@ static int remove_surface_outliers(MRI *mri_ctrl_src, MRI *mri_dist,
 
 static int remove_nonwm_voxels(MRI *mri_ctrl_src, MRI *mri_aseg,
                                MRI *mri_ctrl_dst) {
-  int x, y, z, label, removed = 0, xa, ya, za;
+  int     x, y, z, label, removed = 0, xa, ya, za;
   MATRIX *m_vox_to_vox;
   VECTOR *v_src, *v_dst;
 
-  m_vox_to_vox = MRIgetVoxelToVoxelXform(mri_ctrl_src, mri_aseg);
-  v_src = VectorAlloc(4, 1);
-  v_dst = VectorAlloc(4, 1);
+  m_vox_to_vox         = MRIgetVoxelToVoxelXform(mri_ctrl_src, mri_aseg);
+  v_src                = VectorAlloc(4, 1);
+  v_dst                = VectorAlloc(4, 1);
   VECTOR_ELT(v_src, 4) = VECTOR_ELT(v_dst, 4) = 1;
 
   for (x = 0; x < mri_ctrl_src->width; x++)
@@ -1608,9 +1605,9 @@ static int remove_nonwm_voxels(MRI *mri_ctrl_src, MRI *mri_aseg,
         V3_Y(v_src) = y;
         V3_Z(v_src) = z;
         MatrixMultiply(m_vox_to_vox, v_src, v_dst);
-        xa = nint(V3_X(v_dst));
-        ya = nint(V3_Y(v_dst));
-        za = nint(V3_Z(v_dst));
+        xa    = nint(V3_X(v_dst));
+        ya    = nint(V3_Y(v_dst));
+        za    = nint(V3_Z(v_dst));
         label = MRIgetVoxVal(mri_aseg, xa, ya, za, 0);
         switch (label) {
         case Left_Accumbens_area:
@@ -1670,7 +1667,7 @@ static int remove_nonwm_voxels(MRI *mri_ctrl_src, MRI *mri_aseg,
 static int remove_outliers_near_surface(MRI *mri_ctrl, MRI *mri_dist,
                                         MRI *mri_dst, MRI *mri_ctrl_out,
                                         float min_dist, float nsigma) {
-  int x, y, z, c, nremoved;
+  int    x, y, z, c, nremoved;
   double mean, sigma, val;
 
   return (0);
@@ -1704,8 +1701,8 @@ static int remove_outliers_near_surface(MRI *mri_ctrl, MRI *mri_dist,
 static MRI *build_outside_of_brain_mask(MRI *mri_src, GCA *gca,
                                         TRANSFORM *xform, double prior_thresh,
                                         int whalf) {
-  MRI *mri_outside_of_brain;
-  int x, y, z, xp, yp, zp, i, brain;
+  MRI *      mri_outside_of_brain;
+  int        x, y, z, xp, yp, zp, i, brain;
   GCA_PRIOR *gcap;
 
   mri_outside_of_brain = MRIcloneDifferentType(mri_src, MRI_UCHAR);
@@ -1734,18 +1731,18 @@ static MRI *build_outside_of_brain_mask(MRI *mri_src, GCA *gca,
 static MRI *remove_surface_outliers_T2(MRI *mri_ctrl_src, MRI *mri_dist,
                                        MRI *mri_src, MRI *mri_ctrl_dst) {
 
-  MRI *mri_grad, *mri_mag, *mri_nonmax, *mri_dist_grad, *mri_dist_sup;
-  int x, y, z, done = 0, xv, yv, zv;
+  MRI * mri_grad, *mri_mag, *mri_nonmax, *mri_dist_grad, *mri_dist_sup;
+  int   x, y, z, done = 0, xv, yv, zv;
   float ddx, ddy, ddz, sdx, sdy, sdz, dot, xf, yf, zf, dist,
       step_size = 0.5, odx, ody, odz, norm;
 
   if (mri_ctrl_dst != mri_ctrl_src)
     mri_ctrl_dst = MRIcopy(mri_ctrl_src, mri_ctrl_dst);
 
-  mri_mag = MRIcloneDifferentType(mri_src, MRI_FLOAT);
-  mri_grad = MRIsobel(mri_src, nullptr, mri_mag);
+  mri_mag       = MRIcloneDifferentType(mri_src, MRI_FLOAT);
+  mri_grad      = MRIsobel(mri_src, nullptr, mri_mag);
   mri_dist_grad = MRIsobel(mri_dist, nullptr, nullptr);
-  mri_dist_sup = MRInonMaxSuppress(mri_dist, nullptr, 0, 1);
+  mri_dist_sup  = MRInonMaxSuppress(mri_dist, nullptr, 0, 1);
   MRIwrite(mri_dist_grad, "dg.mgz");
   MRIwrite(mri_grad, "g.mgz");
   MRIwrite(mri_mag, "m.mgz");
@@ -1786,23 +1783,23 @@ static MRI *remove_surface_outliers_T2(MRI *mri_ctrl_src, MRI *mri_dist,
         if (MRIgetVoxVal(mri_ctrl_src, x, y, z, 0) == 0)
           continue;
 
-        odx = MRIgetVoxVal(mri_dist_grad, x, y, z, 0);
-        ody = MRIgetVoxVal(mri_dist_grad, x, y, z, 1);
-        odz = MRIgetVoxVal(mri_dist_grad, x, y, z, 2);
-        xf = x;
-        yf = y;
-        zf = z;
+        odx  = MRIgetVoxVal(mri_dist_grad, x, y, z, 0);
+        ody  = MRIgetVoxVal(mri_dist_grad, x, y, z, 1);
+        odz  = MRIgetVoxVal(mri_dist_grad, x, y, z, 2);
+        xf   = x;
+        yf   = y;
+        zf   = z;
         dist = 0;
-        xv = nint(xf);
-        yv = nint(yf);
-        zv = nint(zf);
+        xv   = nint(xf);
+        yv   = nint(yf);
+        zv   = nint(zf);
 
         do {
           dist += (step_size * mri_dist->xsize);
           ;
-          ddx = MRIgetVoxVal(mri_dist_grad, xv, yv, zv, 0);
-          ddy = MRIgetVoxVal(mri_dist_grad, xv, yv, zv, 1);
-          ddz = MRIgetVoxVal(mri_dist_grad, xv, yv, zv, 2);
+          ddx  = MRIgetVoxVal(mri_dist_grad, xv, yv, zv, 0);
+          ddy  = MRIgetVoxVal(mri_dist_grad, xv, yv, zv, 1);
+          ddz  = MRIgetVoxVal(mri_dist_grad, xv, yv, zv, 2);
           norm = sqrt(ddx * ddx + ddy * ddy + ddz * ddz);
           if (FZERO(norm)) {
             done = 1;
@@ -1822,7 +1819,7 @@ static MRI *remove_surface_outliers_T2(MRI *mri_ctrl_src, MRI *mri_dist,
           if (MRIgetVoxVal(mri_nonmax, xv, yv, zv, 0) > 0)
             done = -1;
           else {
-            dot = (odx * ddx) + (ody * ddy) + (odz * ddz);
+            dot  = (odx * ddx) + (ody * ddy) + (odz * ddz);
             done = (dot <= 0.0);
             if (MRIgetVoxVal(mri_dist_sup, xv, yv, zv, 0) > 0)
               done = 1; // got to skeleton without intersecting and egdge -
@@ -1848,7 +1845,7 @@ static MRI *remove_surface_outliers_T2(MRI *mri_ctrl_src, MRI *mri_dist,
 
 static int threshold_control_points(MRI *mri_ctrl, MRI *mri_intensity,
                                     float thresh) {
-  int x, y, z;
+  int    x, y, z;
   double val;
 
   for (x = 0; x < mri_ctrl->width; x++)
@@ -1869,7 +1866,7 @@ static int threshold_control_points(MRI *mri_ctrl, MRI *mri_intensity,
 }
 static int remove_controlpoints_outside_range(MRI *mri_ctrl, MRI *mri,
                                               float fmin, float fmax) {
-  int x, y, z, nremoved = 0, ctrl;
+  int   x, y, z, nremoved = 0, ctrl;
   float val;
 
   for (x = 0; x < mri->width; x++)

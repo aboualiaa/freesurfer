@@ -26,12 +26,12 @@
  */
 
 #include "diag.h"
+#include "mrinorm.h"
+#include "mrisurf.h"
 #include "timer.h"
 #include "version.h"
-#include "mrisurf.h"
-#include "mrinorm.h"
 
-#define NLAYERS 6
+#define NLAYERS    6
 #define MAX_LAYERS 50
 
 static int nlayers = NLAYERS;
@@ -39,17 +39,17 @@ static int nlayers = NLAYERS;
 static double vfrac_thresh = -1;
 
 static char *subject_name = nullptr;
-static char *hemi = nullptr;
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+static char *hemi         = nullptr;
+int          main(int argc, char *argv[]);
+static int   get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static int FS_names = 0;
-static int Gwhalf = 3;
-static MRI *compute_layer_intensities(MRI *mri_intensities,
-                                      MRI *mri_volume_fractions,
+static int  FS_names = 0;
+static int  Gwhalf   = 3;
+static MRI *compute_layer_intensities(MRI *         mri_intensities,
+                                      MRI *         mri_volume_fractions,
                                       MRI_SURFACE **mris, int nlayers,
                                       int whalf0, MRI *mri_layer_intensities,
                                       int curv_bins);
@@ -59,14 +59,14 @@ static MRI *compute_thresholded_layer_intensities(
     double vfrac_thresh);
 
 static int curv_bins = 0;
-int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs;
-  int msec, minutes, seconds, i;
-  Timer start;
+int        main(int argc, char *argv[]) {
+  char **      av;
+  int          ac, nargs;
+  int          msec, minutes, seconds, i;
+  Timer        start;
   MRI_SURFACE *mris[MAX_LAYERS];
-  char fname[STRLEN];
-  MRI *mri_intensities, *mri_volume_fractions, *mri_layer_intensities;
+  char         fname[STRLEN];
+  MRI *        mri_intensities, *mri_volume_fractions, *mri_layer_intensities;
 
   nargs = handleVersionOption(argc, argv, "mris_compute_layer_intensities");
   if (nargs && argc - nargs == 1)
@@ -74,8 +74,8 @@ int main(int argc, char *argv[]) {
   argc -= nargs;
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
   printf("writing layer intensities to %s\n", argv[4]);
   MRIwrite(mri_layer_intensities, argv[4]);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -173,20 +173,20 @@ static int get_option(int argc, char *argv[]) {
     nargs = 3;
   } else if (!stricmp(option, "nlayers")) {
     nlayers = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("using %d input layers for laminar analysis\n", nlayers);
   } else if (!stricmp(option, "FS_names")) {
     printf("using standard FS names white and pial\n");
     FS_names = 1;
   } else if (!stricmp(option, "thresh")) {
     vfrac_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("only using voxels with at least %2.2f volume fraction to estimate "
            "intensities\n",
            vfrac_thresh);
   } else if (!stricmp(option, "curv")) {
     curv_bins = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("binning curvature into %d bins\n", curv_bins);
   } else if (!stricmp(option, "rh") || !stricmp(option, "lh")) {
     hemi = option;
@@ -195,7 +195,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("debugging vertex %d\n", Gdiag_no);
       break;
     case 'W':
@@ -206,7 +206,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'S':
       subject_name = argv[2];
-      nargs = 1;
+      nargs        = 1;
       printf("overriding subject name in .dat file with %s\n", subject_name);
       break;
     case '?':
@@ -236,18 +236,18 @@ static void usage_exit(int code) {
 
 #define CURV_THRESH .02
 
-static MRI *compute_layer_intensities(MRI *mri_intensities,
-                                      MRI *mri_volume_fractions,
+static MRI *compute_layer_intensities(MRI *         mri_intensities,
+                                      MRI *         mri_volume_fractions,
                                       MRI_SURFACE **mris, int nlayers,
                                       int whalf0, MRI *mri_layer_intensities,
                                       int curv_bins) {
   MATRIX *mF, *mL, *mI, *mFinv;
-  int whalf, vno, n, nd, t1, t2, nvals, xvi, yvi, zvi, n1, out_of_fov;
+  int     whalf, vno, n, nd, t1, t2, nvals, xvi, yvi, zvi, n1, out_of_fov;
   VERTEX *v;
-  double step, xs, ys, zs, xv, yv, zv, vfrac, nx, ny, nz;
-  MRI *mri_visited, *mri_curv_bins;
-  double bin_size, Hmin, whalf_total = 0, val, vfrac_thresh;
-  int bin0, bin, found_layer[MAX_LAYERS], estimable, nwindows = 0;
+  double  step, xs, ys, zs, xv, yv, zv, vfrac, nx, ny, nz;
+  MRI *   mri_visited, *mri_curv_bins;
+  double  bin_size, Hmin, whalf_total = 0, val, vfrac_thresh;
+  int     bin0, bin, found_layer[MAX_LAYERS], estimable, nwindows = 0;
 
   printf("computing partial volume corrected layer intensities\n");
   /*
@@ -281,14 +281,14 @@ static MRI *compute_layer_intensities(MRI *mri_intensities,
   mri_curv_bins = MRIcloneDifferentType(mri_intensities, MRI_UCHAR);
   if (curv_bins > 1) {
     MRI *mri_ctrl;
-    int x, y, z;
+    int  x, y, z;
 
     mri_ctrl = MRIclone(mri_curv_bins, nullptr);
     printf("constructing %d curvature bins\n", curv_bins);
-    Hmin = mris[0]->Hmin;
+    Hmin     = mris[0]->Hmin;
     bin_size = (mris[0]->Hmax - mris[0]->Hmin) / (float)(curv_bins - 1);
     for (vno = 0; vno < mris[0]->nvertices; vno++) {
-      v = &mris[0]->vertices[vno];
+      v   = &mris[0]->vertices[vno];
       bin = nint((v->H - Hmin) / bin_size);
       bin = v->H < -CURV_THRESH ? 1 : (v->H > CURV_THRESH ? 3 : 2);
       for (n = 0; n <= nlayers; n++) {
@@ -363,7 +363,7 @@ static MRI *compute_layer_intensities(MRI *mri_intensities,
       bin0 = v->H < -CURV_THRESH ? 1 : (v->H > CURV_THRESH ? 3 : 2);
     }
 
-    whalf = whalf0 / step;
+    whalf      = whalf0 / step;
     out_of_fov = 0;
     do {
       // build the matrices
@@ -552,11 +552,11 @@ static MRI *compute_thresholded_layer_intensities(
   int whalf, vno, n, t1, t2, xvi, yvi, zvi, n1, out_of_fov,
       num_found[MAX_LAYERS], xv0, yv0, zv0;
   VERTEX *v;
-  double step, xs, ys, zs, xv, yv, zv, vfrac, nx, ny, nz;
-  MRI *mri_curv_bins;
-  double bin_size, Hmin, val;
-  int bin0, bin, nd;
-  MRI *mri_visited;
+  double  step, xs, ys, zs, xv, yv, zv, vfrac, nx, ny, nz;
+  MRI *   mri_curv_bins;
+  double  bin_size, Hmin, val;
+  int     bin0, bin, nd;
+  MRI *   mri_visited;
 
   printf("computing thresholded layer intensities\n");
   step = mri_intensities->xsize / 4;
@@ -579,10 +579,10 @@ static MRI *compute_thresholded_layer_intensities(
 
     mri_ctrl = MRIclone(mri_curv_bins, nullptr);
     printf("constructing %d curvature bins\n", curv_bins);
-    Hmin = mris[0]->Hmin;
+    Hmin     = mris[0]->Hmin;
     bin_size = (mris[0]->Hmax - mris[0]->Hmin) / (float)(curv_bins - 1);
     for (vno = 0; vno < mris[0]->nvertices; vno++) {
-      v = &mris[0]->vertices[vno];
+      v   = &mris[0]->vertices[vno];
       bin = nint((v->H - Hmin) / bin_size);
       bin = v->H < -CURV_THRESH ? 1 : (v->H > CURV_THRESH ? 3 : 2);
       for (n = 0; n <= nlayers; n++) {
@@ -632,7 +632,7 @@ static MRI *compute_thresholded_layer_intensities(
       bin0 = v->H < -CURV_THRESH ? 1 : (v->H > CURV_THRESH ? 3 : 2);
     }
 
-    whalf = whalf0 / step;
+    whalf      = whalf0 / step;
     out_of_fov = 0;
 
     // look for supra-threshold volume fraction voxels
@@ -679,7 +679,7 @@ static MRI *compute_thresholded_layer_intensities(
               float vnew;
 
               num_found[n1]++;
-              val = MRIgetVoxVal(mri_layer_intensities, vno, 0, 0, n1);
+              val  = MRIgetVoxVal(mri_layer_intensities, vno, 0, 0, n1);
               vnew = MRIgetVoxVal(mri_intensities, xvi, yvi, zvi, 0);
               if (vno == Gdiag_no)
                 printf("layer %d, v %d: val %d with fraction %f found at (%d, "

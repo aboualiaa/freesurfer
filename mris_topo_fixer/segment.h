@@ -28,12 +28,12 @@
 
 #include "globals.h"
 
-#define NUMBER_OF_POINTS 10
+#define NUMBER_OF_POINTS          10
 #define INCREASE_NUMBER_OF_POINTS 1.2
 
 class Segment {
 private:
-  int npoints, maxpoints;
+  int  npoints, maxpoints;
   int *points;
 
   int nvertices, nfaces, nedges, euler;
@@ -46,15 +46,15 @@ public:
   Segment();
   ~Segment();
 
-  int size() const;
-  void clear();
-  void AddPoint(int pt);
-  void AddSegment(Segment *s);
-  void Transfer(Segment &b);
-  int GetEuler();
+  int        size() const;
+  void       clear();
+  void       AddPoint(int pt);
+  void       AddSegment(Segment *s);
+  void       Transfer(Segment &b);
+  int        GetEuler();
   const int *GetPointList() const;
-  int GetMark() const;
-  void SetMark(int m);
+  int        GetMark() const;
+  void       SetMark(int m);
 };
 
 #endif

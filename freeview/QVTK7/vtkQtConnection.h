@@ -59,8 +59,8 @@ public:
   // set the connection
   void SetConnection(vtkObject *vtk_obj, unsigned long event,
                      const QObject *qt_obj, const char *slot, void *client_data,
-                     float priority = 0.0,
-                     Qt::ConnectionType type = Qt::AutoConnection);
+                     float              priority = 0.0,
+                     Qt::ConnectionType type     = Qt::AutoConnection);
 
   // check if a connection matches input parameters
   bool IsConnection(vtkObject *vtk_obj, unsigned long event,
@@ -79,12 +79,12 @@ protected slots:
 
 protected:
   // the connection information
-  vtkObject *VTKObject;
-  vtkCallbackCommand *Callback;
-  const QObject *QtObject;
-  void *ClientData;
-  unsigned long VTKEvent;
-  QString QtSlot;
+  vtkObject *            VTKObject;
+  vtkCallbackCommand *   Callback;
+  const QObject *        QtObject;
+  void *                 ClientData;
+  unsigned long          VTKEvent;
+  QString                QtSlot;
   vtkEventQtSlotConnect *Owner;
 
 private:

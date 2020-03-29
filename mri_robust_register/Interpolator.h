@@ -43,12 +43,12 @@ public:
   //! Resample full image (in mri_dst space), after applying voxel transform
   virtual MRI *transformVOX(MRI *mri_dst, MATRIX *mA) const = 0;
   //! Resample full image (in mri_dst space), after applying voxel transform
-  virtual MRI *transformVOX(MRI *mri_dst,
+  virtual MRI *transformVOX(MRI *                                 mri_dst,
                             const vnl_matrix_fixed<double, 4, 4> &m) const = 0;
   //! Resample full image (in mri_dst space), after applying RAS transform
   virtual MRI *transformRAS(MRI *mri_dst, MATRIX *mA) const = 0;
   //! Resample full image (in mri_dst space), after applying RAS transform
-  virtual MRI *transformRAS(MRI *mri_dst,
+  virtual MRI *transformRAS(MRI *                                 mri_dst,
                             const vnl_matrix_fixed<double, 4, 4> &m) const = 0;
   //! Resample full image (in mri_dst space), after applying LTA
   virtual MRI *transformLTA(MRI *mri_dst, LTA *lta) const = 0;
@@ -80,8 +80,8 @@ public:
   };
   inline virtual MRI *
   transformVOX(MRI *mri_dst, const vnl_matrix_fixed<double, 4, 4> &m) const {
-    MATRIX *mA = MyMatrix::convertVNL2MATRIX(m, NULL);
-    MRI *mriT = ::MRIlinearTransformInterp(mri, mri_dst, mA, SAMPLE_NEAREST);
+    MATRIX *mA   = MyMatrix::convertVNL2MATRIX(m, NULL);
+    MRI *   mriT = ::MRIlinearTransformInterp(mri, mri_dst, mA, SAMPLE_NEAREST);
     MatrixFree(&mA);
     return mriT;
   };
@@ -91,7 +91,7 @@ public:
   inline virtual MRI *
   transformRAS(MRI *mri_dst, const vnl_matrix_fixed<double, 4, 4> &m) const {
     MATRIX *mA = MyMatrix::convertVNL2MATRIX(m, NULL);
-    MRI *mriT =
+    MRI *   mriT =
         ::MRIapplyRASlinearTransformInterp(mri, mri_dst, mA, SAMPLE_NEAREST);
     MatrixFree(&mA);
     return mriT;
@@ -126,7 +126,7 @@ public:
   inline virtual MRI *
   transformVOX(MRI *mri_dst, const vnl_matrix_fixed<double, 4, 4> &m) const {
     MATRIX *mA = MyMatrix::convertVNL2MATRIX(m, NULL);
-    MRI *mriT = ::MRIlinearTransformInterp(mri, mri_dst, mA, SAMPLE_TRILINEAR);
+    MRI *mriT  = ::MRIlinearTransformInterp(mri, mri_dst, mA, SAMPLE_TRILINEAR);
     MatrixFree(&mA);
     return mriT;
   };
@@ -136,7 +136,7 @@ public:
   inline virtual MRI *
   transformRAS(MRI *mri_dst, const vnl_matrix_fixed<double, 4, 4> &m) const {
     MATRIX *mA = MyMatrix::convertVNL2MATRIX(m, NULL);
-    MRI *mriT =
+    MRI *   mriT =
         ::MRIapplyRASlinearTransformInterp(mri, mri_dst, mA, SAMPLE_TRILINEAR);
     MatrixFree(&mA);
     return mriT;
@@ -171,8 +171,8 @@ public:
   };
   inline virtual MRI *
   transformVOX(MRI *mri_dst, const vnl_matrix_fixed<double, 4, 4> &m) const {
-    MATRIX *mA = MyMatrix::convertVNL2MATRIX(m, NULL);
-    MRI *mriT = ::MRIlinearTransformBSpline(bspline, mri_dst, mA);
+    MATRIX *mA   = MyMatrix::convertVNL2MATRIX(m, NULL);
+    MRI *   mriT = ::MRIlinearTransformBSpline(bspline, mri_dst, mA);
     MatrixFree(&mA);
     return mriT;
   };
@@ -181,8 +181,8 @@ public:
   };
   inline virtual MRI *
   transformRAS(MRI *mri_dst, const vnl_matrix_fixed<double, 4, 4> &m) const {
-    MATRIX *mA = MyMatrix::convertVNL2MATRIX(m, NULL);
-    MRI *mriT = ::MRIapplyRASlinearTransformBSpline(bspline, mri_dst, mA);
+    MATRIX *mA   = MyMatrix::convertVNL2MATRIX(m, NULL);
+    MRI *   mriT = ::MRIapplyRASlinearTransformBSpline(bspline, mri_dst, mA);
     MatrixFree(&mA);
     return mriT;
   };

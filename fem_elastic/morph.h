@@ -23,14 +23,14 @@ polymorphic way.
 
 // ITK
 #include <itkImage.h>
-#include <itkVectorInterpolateImageFunction.h>
 #include <itkInterpolateImageFunction.h>
 #include <itkVector.h>
+#include <itkVectorInterpolateImageFunction.h>
 
 // OWN includes
 #include "coords.h"
-#include "mesh.h"
 #include "gmpError.h"
+#include "mesh.h"
 
 #include "fem_3d.h"
 
@@ -54,7 +54,7 @@ namespace gmp {
 template <int n> class Transform;
 
 std::shared_ptr<Transform<3>>
-loadTransform(std::istream &is, unsigned int zlibBufferMultiplier = 5);
+     loadTransform(std::istream &is, unsigned int zlibBufferMultiplier = 5);
 void saveTransform(std::ostream &os, std::shared_ptr<Transform<3>> ptransform);
 
 template <int n> class Transform {
@@ -115,15 +115,15 @@ protected:
   }
   std::shared_ptr<Transform<n>> m_pInitial;
 
-  virtual void doInput(std::istream &is) = 0;
-  virtual void doOutput(std::ostream &os) const = 0;
+  virtual void    doInput(std::istream &is)         = 0;
+  virtual void    doOutput(std::ostream &os) const  = 0;
   virtual tCoords doOwnImg(const tCoords &pt) const = 0;
-  virtual void doOwnInit(){};
+  virtual void    doOwnInit(){};
 };
 
 class IdentityTransform3d : public Transform<3> {
 public:
-  typedef gmp::Transform<3> Superclass;
+  typedef gmp::Transform<3>   Superclass;
   typedef Superclass::tCoords tCoords;
 
   void invert() {}
@@ -137,7 +137,7 @@ protected:
 
 class AffineTransform3d : public gmp::Transform<3> {
 public:
-  typedef gmp::Transform<3> Superclass;
+  typedef gmp::Transform<3>   Superclass;
   typedef Superclass::tCoords tCoords;
 
   AffineTransform3d();
@@ -163,7 +163,7 @@ private:
 
 class DeltaTransform3d : public gmp::Transform<3> {
 public:
-  typedef gmp::Transform<3> Superclass;
+  typedef gmp::Transform<3>   Superclass;
   typedef Superclass::tCoords tCoords;
 
   DeltaTransform3d();
@@ -200,15 +200,15 @@ private:
 
 class DenseDisplacementField : public gmp::Transform<3> {
 public:
-  typedef gmp::Transform<3> Superclass;
-  typedef Superclass::tCoords tCoords;
-  typedef itk::Vector<float, 3> FieldPixelType;
+  typedef gmp::Transform<3>             Superclass;
+  typedef Superclass::tCoords           tCoords;
+  typedef itk::Vector<float, 3>         FieldPixelType;
   typedef itk::Image<FieldPixelType, 3> FieldType;
-  typedef FieldType::Pointer FieldPointer;
-  typedef FieldType::ConstPointer FieldConstPointer;
-  typedef itk::Image<bool, 3> MaskType;
-  typedef MaskType::Pointer MaskPointer;
-  typedef MaskType::ConstPointer MaskConstPointer;
+  typedef FieldType::Pointer            FieldPointer;
+  typedef FieldType::ConstPointer       FieldConstPointer;
+  typedef itk::Image<bool, 3>           MaskType;
+  typedef MaskType::Pointer             MaskPointer;
+  typedef MaskType::ConstPointer        MaskConstPointer;
 
   DenseDisplacementField();
 
@@ -232,15 +232,15 @@ protected:
 
 private:
   typedef itk::VectorInterpolateImageFunction<FieldType> FieldInterpolatorType;
-  typedef FieldInterpolatorType::Pointer FieldInterpolatorPointer;
+  typedef FieldInterpolatorType::Pointer          FieldInterpolatorPointer;
   typedef itk::InterpolateImageFunction<MaskType> MaskInterpolatorType;
-  typedef MaskInterpolatorType::Pointer MaskInterpolatorPointer;
+  typedef MaskInterpolatorType::Pointer           MaskInterpolatorPointer;
 
-  typedef FieldInterpolatorType::PointType PointType;
+  typedef FieldInterpolatorType::PointType  PointType;
   typedef FieldInterpolatorType::OutputType OutputType;
 
   FieldInterpolatorPointer m_fieldInterpolator;
-  MaskInterpolatorPointer m_maskInterpolator;
+  MaskInterpolatorPointer  m_maskInterpolator;
 
   std::string PrepareTagSize(FieldConstPointer) const;
   std::string PrepareTagStart(FieldConstPointer) const;
@@ -252,9 +252,9 @@ private:
 
 class FemTransform3d : public gmp::Transform<3> {
 public:
-  typedef gmp::Transform<3> Superclass;
-  typedef Superclass::tCoords tCoords;
-  typedef gmp::Transform<3> TransformType;
+  typedef gmp::Transform<3>              Superclass;
+  typedef Superclass::tCoords            tCoords;
+  typedef gmp::Transform<3>              TransformType;
   typedef std::shared_ptr<TransformType> TransformPointer;
 
   virtual ~FemTransform3d() {}
@@ -295,10 +295,10 @@ public:
   VolumeMorph();
   ~VolumeMorph();
 
-  typedef gmp::Transform<3> TransformType;
+  typedef gmp::Transform<3>              TransformType;
   typedef std::shared_ptr<TransformType> TransformPointer;
-  typedef std::list<TransformPointer> TransformContainerType;
-  typedef TransformType::tCoords tCoords;
+  typedef std::list<TransformPointer>    TransformContainerType;
+  typedef TransformType::tCoords         tCoords;
 
   MRI *m_template;
 
@@ -377,14 +377,14 @@ private:
                 bool clearExisting = true);
 
   std::string PrepareTagVolGeom(const VOL_GEOM &vg);
-  void ReadTagVolGeom(const std::string &strData, VOL_GEOM &vg);
+  void        ReadTagVolGeom(const std::string &strData, VOL_GEOM &vg);
 };
 
 } // namespace gmp
 
-typedef std::shared_ptr<gmp::Transform<3>> Transform3SPointer;
-typedef std::shared_ptr<gmp::FemTransform3d> FemTransform3SPointer;
+typedef std::shared_ptr<gmp::Transform<3>>     Transform3SPointer;
+typedef std::shared_ptr<gmp::FemTransform3d>   FemTransform3SPointer;
 typedef std::shared_ptr<gmp::DeltaTransform3d> DeltaTransform3SPointer;
-typedef std::shared_ptr<gmp::VolumeMorph> VolumeMorphSPointer;
+typedef std::shared_ptr<gmp::VolumeMorph>      VolumeMorphSPointer;
 
 #endif

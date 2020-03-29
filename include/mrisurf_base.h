@@ -26,7 +26,7 @@
 //
 
 static const int debugNonDeterminism = 0;
-extern int fix_vertex_area;
+extern int       fix_vertex_area;
 
 //#define BEVIN_REPRODUCIBLES_CHECK
 #ifdef BEVIN_REPRODUCIBLES_CHECK
@@ -56,9 +56,6 @@ extern int fix_vertex_area;
 #include <mcheck.h>
 #endif
 
-#include "mri.h"
-#include "mrisurf.h"
-#include "mrishash_internals.h"
 #include "MRISrigidBodyAlignGlobal.h"
 #include "chklc.h"
 #include "cma.h"
@@ -73,9 +70,12 @@ extern int fix_vertex_area;
 #include "machine.h"
 #include "macros.h"
 #include "matrix.h"
+#include "mri.h"
 #include "mri2.h"
 #include "mri_circulars.h"
 #include "mri_identify.h"
+#include "mrishash_internals.h"
+#include "mrisurf.h"
 #include "proto.h"
 #include "realm.h"
 #include "selxavgio.h"
@@ -107,8 +107,8 @@ extern int fix_vertex_area;
 // Differ from SQR etc. if an argument has a side-effect
 //
 template <typename T> double sign(T const &t) { return (t > 0) ? 1.0 : -1.0; }
-template <typename T> T square(T const &t) { return t * t; }
-template <typename T> T square3(T const &t) {
+template <typename T> T      square(T const &t) { return t * t; }
+template <typename T> T      square3(T const &t) {
   return square(t[0]) + square(t[1]) + square(t[2]);
 }
 template <typename T> T norm3(T const &t) { return sqrt(square3(t)); }
@@ -194,18 +194,18 @@ static int project_point_onto_sphere(float cx, float cy, float cz, float radius,
                                      float *pcx, float *pcy, float *pcz) {
   float x2, y2, z2, d, dist, dx, dy, dz;
 
-  x2 = cx * cx;
-  y2 = cy * cy;
-  z2 = cz * cz;
+  x2   = cx * cx;
+  y2   = cy * cy;
+  z2   = cz * cz;
   dist = sqrt(x2 + y2 + z2);
   if (FZERO(dist)) {
     d = 0;
   } else {
     d = 1 - radius / dist;
   }
-  dx = d * cx;
-  dy = d * cy;
-  dz = d * cz;
+  dx   = d * cx;
+  dy   = d * cy;
+  dz   = d * cz;
   *pcx = cx - dx;
   *pcy = cy - dy;
   *pcz = cz - dz;
@@ -214,7 +214,7 @@ static int project_point_onto_sphere(float cx, float cy, float cz, float radius,
 
 // mostly for diagnostics
 #define MAXVERTICES 10000000
-#define MAXFACES (2 * MAXVERTICES)
+#define MAXFACES    (2 * MAXVERTICES)
 #define MAX_NBHD_VERTICES                                                      \
   20000 // must fit in short because VERTEX.vnum etc are short
 
@@ -230,38 +230,38 @@ static int project_point_onto_sphere(float cx, float cy, float cz, float radius,
 
 #define REPULSE_K 1.0
 #define REPULSE_E                                                              \
-  0.25 // was 0.5
-       // if (dist+REPULSE_E) < 1 it will have a big effect
+  0.25 // was 0.5                                                              \
+       // if (dist+REPULSE_E) < 1 it will have a big effect                    \
        // bigger distances decay rapidly
 
 #define NO_NEG_DISTANCE_TERM 0
-#define ONLY_NEG_AREA_TERM 1
-#define ANGLE_AREA_SCALE 0.0
+#define ONLY_NEG_AREA_TERM   1
+#define ANGLE_AREA_SCALE     0.0
 
-#define ORIG_AREAS 0
+#define ORIG_AREAS    0
 #define CURRENT_AREAS 1
 #define AVERAGE_AREAS 0
 
-#define CURV_SCALE 1000.0
+#define CURV_SCALE   1000.0
 #define MIN_DT_SCALE 0.01
 
 #if 0
-#define MAX_SMALL 10
+#define MAX_SMALL   10
 #define TOTAL_SMALL (4 * MAX_SMALL)
 #else
-#define MAX_SMALL 50000
+#define MAX_SMALL   50000
 #define TOTAL_SMALL 15000
 #endif
 
 #define METRIC_SCALE 1
 
-#define MAX_NBHD_SIZE 200
+#define MAX_NBHD_SIZE    200
 #define MAX_NEG_AREA_PCT 0.005f
 
-#define MAX_ASYNCH_MM 0.3
+#define MAX_ASYNCH_MM     0.3
 #define MAX_ASYNCH_NEW_MM 0.3
 
-#define NOT_USED 0             // not used
+#define NOT_USED             0 // not used
 #define USED_IN_TESSELLATION 1 // used in the final tessellation
 #define USED_IN_ORIGINAL_TESSELLATION                                          \
   2 // used in the original tessellation but not the new one (at first)
@@ -272,8 +272,8 @@ static int project_point_onto_sphere(float cx, float cy, float cz, float radius,
 #define USED_IN_NEW_TEMPORARY_TESSELLATION                                     \
   5 // used in a temporary retessellation (was NOT_USED before)
 #define USED_IN_BOTH_TEMPORARY_TESSELLATION                                    \
-  6 // used in a temporary retessellation (was USED_IN_ORIGINAL_RETESSELLATION
-    // before)
+  6 // used in a temporary retessellation (was USED_IN_ORIGINAL_RETESSELLATION \
+      // before)
 
 /* edge intersection onto the sphere */
 #define SPHERE_INTERSECTION 1
@@ -296,13 +296,13 @@ static int project_point_onto_sphere(float cx, float cy, float cz, float radius,
 
 /* */
 #define MRIS_FIX_TOPOLOGY_ERROR_MODE 1
-#define DEBUG_HOMEOMORPHISM 0
+#define DEBUG_HOMEOMORPHISM          0
 
 #define WHICH_OUTPUT stderr
 
 #define IMAGES_PER_SURFACE 3 /* mean, variance, and dof */
-#define SURFACES sizeof(curvature_names) / sizeof(curvature_names[0])
-#define PARAM_IMAGES (IMAGES_PER_SURFACE * SURFACES)
+#define SURFACES           sizeof(curvature_names) / sizeof(curvature_names[0])
+#define PARAM_IMAGES       (IMAGES_PER_SURFACE * SURFACES)
 
 extern int mrisurf_activeRealmTreesSize;
 extern int mrisurf_orig_clock;
@@ -316,7 +316,7 @@ extern double NEG_AREA_K;
 #define MAX_NEG_RATIO (400 / NEG_AREA_K)
 
 VOXEL_LIST **vlst_alloc(MRIS *mris, int max_vox);
-int vlst_free(MRIS *mris, VOXEL_LIST ***pvl);
+int          vlst_free(MRIS *mris, VOXEL_LIST ***pvl);
 int vlst_enough_data(MRIS *mris, int vno, VOXEL_LIST *vl, double displacement);
 int vlst_add_to_list(VOXEL_LIST *vl_src, VOXEL_LIST *vl_dst);
 
@@ -341,10 +341,10 @@ int mrisWriteSnapshot(MRIS *mris, INTEGRATION_PARMS *parms, int t);
 // not yet moved there, because saves and restores vertices
 
 extern const float *sigmas;
-extern double nsigmas;
+extern double       nsigmas;
 
 float *mrisStealDistStore(MRIS *mris, int vno, int newCapacity);
-void mrisSetDist(MRIS *mris, int vno, float *dist, int newCapacity);
+void   mrisSetDist(MRIS *mris, int vno, float *dist, int newCapacity);
 
 bool MRISreallocVertices(MRIS *mris, int max_vertices, int nvertices);
 void MRISgrowNVertices(MRIS *mris, int nvertices);
@@ -365,17 +365,17 @@ void insertActiveRealmTree(MRIS const *const mris, RealmTree *realmTree,
 void removeActiveRealmTree(RealmTree *realmTree);
 
 extern int noteVnoMovedInActiveRealmTreesCount;
-void noteVnoMovedInActiveRealmTrees(MRIS const *const mris, int vno);
-void notifyActiveRealmTreesChangedNFacesNVertices(MRIS const *const mris);
+void       noteVnoMovedInActiveRealmTrees(MRIS const *const mris, int vno);
+void       notifyActiveRealmTreesChangedNFacesNVertices(MRIS const *const mris);
 
 extern const char *mrisurf_surface_names[3];
 extern const char *curvature_names[3];
-int MRISprintCurvatureNames(FILE *fp);
+int                MRISprintCurvatureNames(FILE *fp);
 
 #if MATRIX_ALLOCATION
 extern MATRIX *VoxelFromSRASmatrix;
-int mriSurfaceRASToVoxel(double xr, double yr, double zr, double *xv,
-                         double *yv, double *zv);
+int            mriSurfaceRASToVoxel(double xr, double yr, double zr, double *xv,
+                                    double *yv, double *zv);
 #endif
 
 #if SPHERE_INTERSECTION

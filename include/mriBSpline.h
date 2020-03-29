@@ -39,10 +39,10 @@
 /** BSpline structure has degree, coefficient image (float), source type and
     if the source had negative values */
 typedef struct {
-  int degree;
+  int  degree;
   MRI *coeff;
-  int srctype;
-  int srcneg;
+  int  srctype;
+  int  srcneg;
 } MRI_BSPLINE;
 
 /**

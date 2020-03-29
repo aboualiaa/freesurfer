@@ -23,20 +23,20 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "proto.h"
 #include "transform.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -46,50 +46,50 @@ int DEBUG_X = 62;
 int DEBUG_Y = 254;
 int DEBUG_Z = 92;
 
-static float smooth = 0;
-static int erode = 0;
-static int is_open = 0;
-static int binarize = 0;
-static void usage_exit(int code);
-static MRI *MRIcomputePriors(MRI *mri_priors, int ndof, MRI *mri_char_priors);
-int MRIaccumulateMeansAndVariances(MRI *mri, MRI *mri_mean, MRI *mri_std);
-int MRIcomputeMeansAndStds(MRI *mri_mean, MRI *mri_std, int ndof);
-int MRIcomputeMaskedMeansAndStds(MRI *mri_mean, MRI *mri_std, MRI *mri_dof);
+static float smooth   = 0;
+static int   erode    = 0;
+static int   is_open  = 0;
+static int   binarize = 0;
+static void  usage_exit(int code);
+static MRI * MRIcomputePriors(MRI *mri_priors, int ndof, MRI *mri_char_priors);
+int  MRIaccumulateMeansAndVariances(MRI *mri, MRI *mri_mean, MRI *mri_std);
+int  MRIcomputeMeansAndStds(MRI *mri_mean, MRI *mri_std, int ndof);
+int  MRIcomputeMaskedMeansAndStds(MRI *mri_mean, MRI *mri_std, MRI *mri_dof);
 MRI *MRIfloatToChar(MRI *mri_src, MRI *mri_dst);
-int MRIaccumulateMaskedMeansAndVariances(MRI *mri, MRI *mri_mask, MRI *mri_dof,
-                                         float low_val, float hi_val,
-                                         MRI *mri_mean, MRI *mri_std);
+int  MRIaccumulateMaskedMeansAndVariances(MRI *mri, MRI *mri_mask, MRI *mri_dof,
+                                          float low_val, float hi_val,
+                                          MRI *mri_mean, MRI *mri_std);
 static MRI *MRIupdatePriors(MRI *mri_binary, MRI *mri_priors);
 static MRI *MRIcomputePriors(MRI *mri_priors, int ndof, MRI *mri_char_priors);
 
 static char *transform_fname = NULL;
-static char *T1_name = "T1";
-static char *var_fname = NULL;
-static char *binary_name = NULL;
+static char *T1_name         = "T1";
+static char *var_fname       = NULL;
+static char *binary_name     = NULL;
 
 /* just for T1 volume */
 #define T1_MEAN_VOLUME 0
-#define T1_STD_VOLUME 1
+#define T1_STD_VOLUME  1
 
 static int first_transform = 0;
 
 #define BUILD_PRIORS 0
-#define ON_STATS 1
-#define OFF_STATS 2
+#define ON_STATS     1
+#define OFF_STATS    2
 
 #define NPARMS 12
 static MATRIX *m_xforms[NPARMS];
-static MATRIX *m_xform_mean = NULL;
-static MATRIX *m_xform_covariance = NULL;
-static char *xform_mean_fname = NULL;
-static char *xform_covariance_fname = NULL;
-static int stats_only = 0;
-static int novar = 0;
+static MATRIX *m_xform_mean           = NULL;
+static MATRIX *m_xform_covariance     = NULL;
+static char *  xform_mean_fname       = NULL;
+static char *  xform_covariance_fname = NULL;
+static int     stats_only             = 0;
+static int     novar                  = 0;
 
 static char subjects_dir[STRLEN];
 
 static int check_mri(MRI *mri) {
-  int error = 0, x, y, z;
+  int   error = 0, x, y, z;
   float val;
 
   for (x = 0; x < mri->width; x++) {
@@ -109,8 +109,8 @@ static int check_mri(MRI *mri) {
 
 int main(int argc, char *argv[]) {
   char **av, *cp;
-  int ac, nargs, i, dof, no_transform, which, sno = 0, nsubjects = 0;
-  MRI *mri = 0, *mri_mean = NULL, *mri_std = 0, *mri_T1 = 0, *mri_binary = 0,
+  int    ac, nargs, i, dof, no_transform, which, sno = 0, nsubjects = 0;
+  MRI *  mri = 0, *mri_mean = NULL, *mri_std = 0, *mri_T1 = 0, *mri_binary = 0,
       *mri_dof = NULL, *mri_priors = NULL;
   char *subject_name, *out_fname, fname[STRLEN];
   /*  LTA    *lta;*/
@@ -214,11 +214,11 @@ int main(int argc, char *argv[]) {
           mri_priors = MRIupdatePriors(mri_binary, mri_priors);
         } else {
           if (!mri_mean) {
-            mri_dof = MRIalloc(mri_T1->width, mri_T1->height, mri_T1->depth,
+            mri_dof  = MRIalloc(mri_T1->width, mri_T1->height, mri_T1->depth,
                                MRI_UCHAR);
             mri_mean = MRIalloc(mri_T1->width, mri_T1->height, mri_T1->depth,
                                 MRI_FLOAT);
-            mri_std = MRIalloc(mri_T1->width, mri_T1->height, mri_T1->depth,
+            mri_std  = MRIalloc(mri_T1->width, mri_T1->height, mri_T1->depth,
                                MRI_FLOAT);
             if (!mri_mean || !mri_std)
               ErrorExit(ERROR_NOMEMORY, "%s: could not allocate templates.\n",
@@ -385,10 +385,10 @@ int main(int argc, char *argv[]) {
     } /* end loop over subjects */
 
     if (xform_mean_fname) {
-      FILE *fp;
+      FILE *  fp;
       VECTOR *v = NULL, *vT = NULL;
       MATRIX *m_vvT = NULL;
-      int rows, cols;
+      int     rows, cols;
 
       nsubjects = sno;
 
@@ -408,8 +408,8 @@ int main(int argc, char *argv[]) {
       cols = m_xform_mean->cols;
       for (sno = 0; sno < nsubjects; sno++) {
         MatrixSubtract(m_xforms[sno], m_xform_mean, m_xforms[sno]);
-        v = MatrixReshape(m_xforms[sno], v, rows * cols, 1);
-        vT = MatrixTranspose(v, vT);
+        v     = MatrixReshape(m_xforms[sno], v, rows * cols, 1);
+        vT    = MatrixTranspose(v, vT);
         m_vvT = MatrixMultiply(v, vT, m_vvT);
         if (!m_xform_covariance)
           m_xform_covariance =
@@ -477,7 +477,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -489,7 +489,7 @@ static int get_option(int argc, char *argv[]) {
     stats_only = 1;
   } else if (!stricmp(option, "smooth")) {
     smooth = atof(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("smoothing output with Gaussian sigma=%2.2f\n", smooth);
   } else if (!stricmp(option, "sdir")) {
     strcpy(subjects_dir, argv[2]);
@@ -512,7 +512,7 @@ static int get_option(int argc, char *argv[]) {
   } else
     switch (toupper(*option)) {
     case 'X':
-      xform_mean_fname = argv[2];
+      xform_mean_fname       = argv[2];
       xform_covariance_fname = argv[3];
       printf("writing means (%s) and covariances (%s) of xforms\n",
              xform_mean_fname, xform_covariance_fname);
@@ -521,7 +521,7 @@ static int get_option(int argc, char *argv[]) {
     case 'S':
     case 'V':
       var_fname = argv[2];
-      nargs = 1;
+      nargs     = 1;
       fprintf(stderr, "writing variances to %s...\n", var_fname);
       break;
     case 'B':
@@ -565,17 +565,17 @@ static void usage_exit(int code) {
 }
 
 int MRIaccumulateMeansAndVariances(MRI *mri, MRI *mri_mean, MRI *mri_std) {
-  int x, y, z, width, height, depth;
+  int   x, y, z, width, height, depth;
   float val, *pmean, *pstd;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       pmean = &MRIFvox(mri_mean, 0, y, z);
-      pstd = &MRIFvox(mri_std, 0, y, z);
+      pstd  = &MRIFvox(mri_std, 0, y, z);
       for (x = 0; x < width; x++) {
         val = MRIgetVoxVal(mri, x, y, z, 0);
         if (x == DEBUG_X && y == DEBUG_Y && z == DEBUG_Z)
@@ -594,12 +594,12 @@ int MRIaccumulateMeansAndVariances(MRI *mri, MRI *mri_mean, MRI *mri_std) {
 }
 
 int MRIcomputeMeansAndStds(MRI *mri_mean, MRI *mri_std, int ndof) {
-  int x, y, z, width, height, depth;
+  int   x, y, z, width, height, depth;
   float sum, sum_sq, mean, var;
 
-  width = mri_std->width;
+  width  = mri_std->width;
   height = mri_std->height;
-  depth = mri_std->depth;
+  depth  = mri_std->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
@@ -608,10 +608,10 @@ int MRIcomputeMeansAndStds(MRI *mri_mean, MRI *mri_std, int ndof) {
           DiagBreak();
         if (x == Gx && y == Gy && z == Gz)
           DiagBreak();
-        sum = MRIFvox(mri_mean, x, y, z);
+        sum    = MRIFvox(mri_mean, x, y, z);
         sum_sq = MRIFvox(mri_std, x, y, z) / ndof;
         mean = MRIFvox(mri_mean, x, y, z) = sum / ndof;
-        var = sum_sq - mean * mean;
+        var                               = sum_sq - mean * mean;
         if (fabs(var) > 1e10 || fabs(mean) > 1e10)
           DiagBreak();
         MRIFvox(mri_std, x, y, z) = sqrt(var);
@@ -621,26 +621,26 @@ int MRIcomputeMeansAndStds(MRI *mri_mean, MRI *mri_std, int ndof) {
   return (NO_ERROR);
 }
 int MRIcomputeMaskedMeansAndStds(MRI *mri_mean, MRI *mri_std, MRI *mri_dof) {
-  int x, y, z, width, height, depth, ndof;
+  int   x, y, z, width, height, depth, ndof;
   float sum, sum_sq, mean, var;
 
-  width = mri_std->width;
+  width  = mri_std->width;
   height = mri_std->height;
-  depth = mri_std->depth;
+  depth  = mri_std->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
         if (x == DEBUG_X && y == DEBUG_Y && z == DEBUG_Z)
           DiagBreak();
-        sum = MRIFvox(mri_mean, x, y, z);
+        sum  = MRIFvox(mri_mean, x, y, z);
         ndof = MRIvox(mri_dof, x, y, z);
         if (!ndof) /* variance will be 0 in any case */
           ndof = 1;
         sum_sq = MRIFvox(mri_std, x, y, z) / ndof;
         mean = MRIFvox(mri_mean, x, y, z) = sum / ndof;
-        var = sum_sq - mean * mean;
-        MRIFvox(mri_std, x, y, z) = sqrt(var);
+        var                               = sum_sq - mean * mean;
+        MRIFvox(mri_std, x, y, z)         = sqrt(var);
       }
     }
   }
@@ -651,9 +651,9 @@ MRI *MRIfloatToChar(MRI *mri_src, MRI *mri_dst) {
   int width, height, depth /*, x, y, z, out_val*/;
   /*  float fmax, fmin ;*/
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
     mri_dst = MRIalloc(width, height, depth, MRI_UCHAR);
 #if 1
@@ -696,13 +696,13 @@ MRIbinarizeEditting(MRI *mri_src, MRI *mri_dst) {
 int MRIaccumulateMaskedMeansAndVariances(MRI *mri, MRI *mri_mask, MRI *mri_dof,
                                          float low_val, float hi_val,
                                          MRI *mri_mean, MRI *mri_std) {
-  int x, y, z, width, height, depth;
-  float val;
+  int      x, y, z, width, height, depth;
+  float    val;
   BUFTYPE *pmask, mask;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
@@ -723,13 +723,13 @@ int MRIaccumulateMaskedMeansAndVariances(MRI *mri, MRI *mri_mask, MRI *mri_dof,
   return (NO_ERROR);
 }
 static MRI *MRIupdatePriors(MRI *mri_binary, MRI *mri_priors) {
-  int width, height, depth, x, y, z;
+  int      width, height, depth, x, y, z;
   BUFTYPE *pbin;
-  float prob;
+  float    prob;
 
-  width = mri_binary->width;
+  width  = mri_binary->width;
   height = mri_binary->height;
-  depth = mri_binary->depth;
+  depth  = mri_binary->depth;
   if (!mri_priors) {
     mri_priors = MRIalloc(width, height, depth, MRI_FLOAT);
   }
@@ -749,20 +749,20 @@ static MRI *MRIupdatePriors(MRI *mri_binary, MRI *mri_priors) {
 }
 
 static MRI *MRIcomputePriors(MRI *mri_priors, int ndof, MRI *mri_char_priors) {
-  int width, height, depth, x, y, z;
+  int      width, height, depth, x, y, z;
   BUFTYPE *pchar_prior, char_prior;
-  float *pprior, prior;
+  float *  pprior, prior;
 
-  width = mri_priors->width;
+  width  = mri_priors->width;
   height = mri_priors->height;
-  depth = mri_priors->depth;
+  depth  = mri_priors->depth;
   if (!mri_char_priors) {
     mri_char_priors = MRIalloc(width, height, depth, MRI_UCHAR);
   }
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pprior = &MRIFvox(mri_priors, 0, y, z);
+      pprior      = &MRIFvox(mri_priors, 0, y, z);
       pchar_prior = &MRIvox(mri_char_priors, 0, y, z);
       for (x = 0; x < width; x++) {
         if (x == DEBUG_X && y == DEBUG_Y && z == DEBUG_Z)

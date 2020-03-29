@@ -25,7 +25,7 @@ private:
       const vtkInteractorStyleMyTrackballCamera &);
   void operator=(const vtkInteractorStyleMyTrackballCamera &);
 
-  bool m_bRotateAroundPoint;
+  bool   m_bRotateAroundPoint;
   double m_dCenterPoint[3];
 };
 

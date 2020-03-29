@@ -6,9 +6,9 @@ namespace kvl {
 class CreateTransform : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef CreateTransform Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef CreateTransform               Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -17,7 +17,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(CreateTransform, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -33,8 +34,8 @@ public:
 
     // Create the ITK transform object and fill in its elements
     typedef itk::AffineTransform<double, 3> TransformType; // double here!
-    TransformType::Pointer transform = TransformType::New();
-    const auto *data =
+    TransformType::Pointer                  transform = TransformType::New();
+    const auto *                            data =
         static_cast<const double *>(mxGetData(prhs[0])); // float->double
     TransformType::ParametersType parameters(12);
     for (unsigned int row = 0; row < 3; row++) {
@@ -57,8 +58,10 @@ public:
   }
 
 protected:
-  CreateTransform()= default;;
-  ~CreateTransform() override= default;;
+  CreateTransform() = default;
+  ;
+  ~CreateTransform() override = default;
+  ;
 
   CreateTransform(const Self &); // purposely not implemented
   void operator=(const Self &);  // purposely not implemented

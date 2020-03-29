@@ -22,21 +22,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "timer.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
 #include "const.h"
-#include "proto.h"
-#include "mrisurf.h"
+#include "diag.h"
+#include "error.h"
 #include "label.h"
+#include "macros.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "sig.h"
+#include "timer.h"
 #include "version.h"
 
 static char vcid[] =
@@ -44,27 +44,27 @@ static char vcid[] =
 
 /*-------------------------------- CONSTANTS -----------------------------*/
 
-#define STAT_T 0
-#define STAT_F 1
-#define STAT_MEAN 2
-#define STAT_PCT 3
+#define STAT_T        0
+#define STAT_F        1
+#define STAT_MEAN     2
+#define STAT_PCT      3
 #define STAT_PSEUDO_T 4
 
 /*-------------------------------- PROTOTYPES ----------------------------*/
 
-static int which_norm = NORM_MEAN;
-static float sigma = 0.0f;
-static int stat_type = STAT_T;
-static int true_class = 1;
-static int condition_0 = -1;
-static int condition_1 = -1;
-static int wfile_flag = 0;
-static double conf = 0.0;
-static int rectify_flag = 0;
+static int    which_norm   = NORM_MEAN;
+static float  sigma        = 0.0f;
+static int    stat_type    = STAT_T;
+static int    true_class   = 1;
+static int    condition_0  = -1;
+static int    condition_1  = -1;
+static int    wfile_flag   = 0;
+static double conf         = 0.0;
+static int    rectify_flag = 0;
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -72,8 +72,8 @@ static void print_version(void);
 
 static int write_vertex_data(char *fname, int index, float **v, int num);
 
-static int cvector_scalar_mul(float *v, float m, int num);
-static float find_t_for_confidence_interval(float conf, int dof);
+static int    cvector_scalar_mul(float *v, float m, int num);
+static float  find_t_for_confidence_interval(float conf, int dof);
 static double cvector_compute_pvalues(float *c1_mean, float *c1_var,
                                       float *c2_mean, float *c2_var,
                                       int num_class1, int num_class2,
@@ -117,7 +117,7 @@ static int  extract_thickness_at_best_scale(MRI_SURFACE *mris,
     int num, int nvectors);
 static double    cvector_len(float *v, int num) ;
 #endif
-static int cvector_copy(float *v1, float *v2, int num);
+static int    cvector_copy(float *v1, float *v2, int num);
 static double cvector_compute_dist_free_snr(
     float **c1_thickness, int num_class1, float **c2_thickness, int num_class2,
     float *c1_mean, float *c2_mean, float *vsnr, int num, int *pi);
@@ -137,9 +137,9 @@ static int   cvector_mark_low_prob_vertices(float *pvals, float pthresh,
 #endif
 
 static float *cvector_alloc(int num);
-static int cvector_clear(float *v, int num);
-static int cvector_set(float *v, float val, int num);
-static int cvector_add(float *v1, float *v2, float *vdst, int num);
+static int    cvector_clear(float *v, int num);
+static int    cvector_set(float *v, float val, int num);
+static int    cvector_add(float *v1, float *v2, float *vdst, int num);
 static int cvector_add_variances(float *c1_var, float *c2_var, int num_class1,
                                  int num_class2, float *total_var,
                                  int nvertices);
@@ -166,34 +166,34 @@ static int cvector_track_best_stats(
 
 const char *Progname;
 
-static int find_optimal_scale = TRUE;
-static int navgs = 0; /* only used if find_optimal_scale is 0 */
-static int nsort = -1;
-static int use_buggy_snr = 0;
-static char *write_dir = NULL;
-static char *read_dir = NULL;
+static int   find_optimal_scale = TRUE;
+static int   navgs              = 0; /* only used if find_optimal_scale is 0 */
+static int   nsort              = -1;
+static int   use_buggy_snr      = 0;
+static char *write_dir          = NULL;
+static char *read_dir           = NULL;
 
-static int write_flag = 0;
+static int   write_flag     = 0;
 static char *output_subject = NULL;
-static char *test_subject = NULL;
-static char *label_name = NULL;
-static char *prefix = "";
+static char *test_subject   = NULL;
+static char *label_name     = NULL;
+static char *prefix         = "";
 
-static int max_avgs = 5000;
+static int max_avgs            = 5000;
 static int use_no_distribution = 0;
-static int use_stats = 1;
+static int use_stats           = 1;
 
 /* these do 77.8% on schizophrenic left hemispheres */
 static float min_label_area = 25.0f;
-static float fthresh = 2.0;
+static float fthresh        = 2.0;
 
 #define MIN_LABELS 5
 static int min_labels = MIN_LABELS;
 
-static int bonferroni = 0;
-static FILE *labels_fp = NULL;
+static int   bonferroni      = 0;
+static FILE *labels_fp       = NULL;
 static char *out_label_fname = NULL;
-static int normalize_flag = 0;
+static int   normalize_flag  = 0;
 
 /*-------------------------------- FUNCTIONS ----------------------------*/
 
@@ -215,15 +215,15 @@ int main(int argc, char *argv[]) {
   float        current_min_label_area, current_fthresh ;
 #endif
   MRI_SP *mrisp;
-  LABEL *area, **labels = NULL;
-  FILE *fp = NULL;
-  double snr, max_snr;
-  Timer start;
-  int msec, minutes, seconds;
+  LABEL * area, **labels = NULL;
+  FILE *  fp = NULL;
+  double  snr, max_snr;
+  Timer   start;
+  int     msec, minutes, seconds;
 #if 0
   double       **c1_label_thickness, **c2_label_thickness ;
 #endif
-  int *sorted_indices = NULL;
+  int *  sorted_indices = NULL;
   float *test_thickness, *test_avg_thickness;
   double label_avg;
 
@@ -263,9 +263,9 @@ int main(int argc, char *argv[]) {
 
   strcpy(subjects_dir, cp);
 
-  hemi = argv[1];
-  surf_name = argv[2];
-  curv_name = argv[3];
+  hemi       = argv[1];
+  surf_name  = argv[2];
+  curv_name  = argv[3];
   out_prefix = argv[4];
 
   switch (stat_type) {
@@ -290,7 +290,7 @@ int main(int argc, char *argv[]) {
 
   /* first determine the number of subjects in each class */
   num_class1 = 0;
-  n = ARGV_OFFSET;
+  n          = ARGV_OFFSET;
   do {
     num_class1++;
     n++;
@@ -311,14 +311,14 @@ int main(int argc, char *argv[]) {
 
   c1_best_mean = cvector_alloc(nvertices);
   c2_best_mean = cvector_alloc(nvertices);
-  c1_best_var = cvector_alloc(nvertices);
-  c2_best_var = cvector_alloc(nvertices);
-  total_mean = cvector_alloc(nvertices);
-  c1_mean = cvector_alloc(nvertices);
-  pvals = cvector_alloc(nvertices);
-  c2_mean = cvector_alloc(nvertices);
-  c1_var = cvector_alloc(nvertices);
-  c2_var = cvector_alloc(nvertices);
+  c1_best_var  = cvector_alloc(nvertices);
+  c2_best_var  = cvector_alloc(nvertices);
+  total_mean   = cvector_alloc(nvertices);
+  c1_mean      = cvector_alloc(nvertices);
+  pvals        = cvector_alloc(nvertices);
+  c2_mean      = cvector_alloc(nvertices);
+  c1_var       = cvector_alloc(nvertices);
+  c2_var       = cvector_alloc(nvertices);
 
   num_class2 = 0;
   n++; /* skip ':' */
@@ -334,25 +334,25 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "%d subjects in class 1, %d subjects in class 2\n",
           num_class1, num_class2);
 
-  c1_subjects = (char **)calloc(num_class1, sizeof(char *));
-  c1_thickness = (float **)calloc(num_class1, sizeof(char *));
+  c1_subjects      = (char **)calloc(num_class1, sizeof(char *));
+  c1_thickness     = (float **)calloc(num_class1, sizeof(char *));
   c1_avg_thickness = (float **)calloc(num_class1, sizeof(char *));
-  c2_subjects = (char **)calloc(num_class2, sizeof(char *));
-  c2_thickness = (float **)calloc(num_class2, sizeof(char *));
+  c2_subjects      = (char **)calloc(num_class2, sizeof(char *));
+  c2_thickness     = (float **)calloc(num_class2, sizeof(char *));
   c2_avg_thickness = (float **)calloc(num_class2, sizeof(char *));
 
   /* read in subject names for the two classes */
   for (n = 0; n < num_class1; n++) {
-    c1_subjects[n] = argv[ARGV_OFFSET + n];
-    c1_thickness[n] = (float *)cvector_alloc(nvertices);
+    c1_subjects[n]      = argv[ARGV_OFFSET + n];
+    c1_thickness[n]     = (float *)cvector_alloc(nvertices);
     c1_avg_thickness[n] = cvector_alloc(nvertices);
     strcpy(c1_subjects[n], argv[ARGV_OFFSET + n]);
     /*    fprintf(stderr, "class1[%d] - %s\n", n, c1_subjects[n]) ;*/
   }
   i = n + 1 + ARGV_OFFSET; /* starting index */
   for (n = 0; n < num_class2; n++) {
-    c2_subjects[n] = argv[i + n];
-    c2_thickness[n] = cvector_alloc(nvertices);
+    c2_subjects[n]      = argv[i + n];
+    c2_thickness[n]     = cvector_alloc(nvertices);
     c2_avg_thickness[n] = cvector_alloc(nvertices);
     strcpy(c2_subjects[n], argv[i + n]);
     /*    fprintf(stderr, "class2[%d] - %s\n", n, c2_subjects[n]) ;*/
@@ -392,7 +392,7 @@ int main(int argc, char *argv[]) {
         MRISmaskNotLabel(mris, area);
       curvs = (n < num_class1) ? c1_thickness[n] : c2_thickness[n - num_class1];
       class_mean = (n < num_class1) ? c1_mean : c2_mean;
-      class_var = (n < num_class1) ? c1_var : c2_var;
+      class_var  = (n < num_class1) ? c1_var : c2_var;
       MRISexportValVector(mris, curvs);
       cvector_accumulate(curvs, total_mean, nvertices);
       cvector_accumulate(curvs, class_mean, nvertices);
@@ -445,7 +445,7 @@ int main(int argc, char *argv[]) {
         MRISmaskNotLabel(mris, area);
       curvs = (n < num_class1) ? c1_thickness[n] : c2_thickness[n - num_class1];
       class_mean = (n < num_class1) ? c1_mean : c2_mean;
-      class_var = (n < num_class1) ? c1_var : c2_var;
+      class_var  = (n < num_class1) ? c1_var : c2_var;
       MRISextractCurvatureVector(mris, curvs);
       cvector_accumulate(curvs, total_mean, nvertices); /* across class */
       cvector_accumulate(curvs, class_mean, nvertices); /* within class */
@@ -473,11 +473,11 @@ int main(int argc, char *argv[]) {
 
   if (area) /* remove everything else */
     MRISripNotLabel(mris, area);
-  vbest_snr = cvector_alloc(nvertices);
+  vbest_snr     = cvector_alloc(nvertices);
   vbest_pvalues = cvector_alloc(nvertices);
-  vbest_avgs = cvector_alloc(nvertices);
-  vtotal_var = cvector_alloc(nvertices);
-  vsnr = cvector_alloc(nvertices);
+  vbest_avgs    = cvector_alloc(nvertices);
+  vtotal_var    = cvector_alloc(nvertices);
+  vsnr          = cvector_alloc(nvertices);
 
   if (find_optimal_scale == TRUE) {
     if (read_dir == NULL) /* recompute everything */
@@ -516,7 +516,7 @@ int main(int argc, char *argv[]) {
             fthresh / ((float)(num_class1 + num_class2) / 2), &num_found);
       }
 
-      max_snr = snr;
+      max_snr      = snr;
       max_snr_avgs = 0;
 
       /* the c?_avg_thickness will be the thickness at the current scale */
@@ -613,7 +613,7 @@ int main(int argc, char *argv[]) {
                     "d=%2.4f, vno=%d\n",
                     avgs, sqrt((float)avgs), sqrt(snr), c1_mean[i] - c2_mean[i],
                     sqrt(vtotal_var[i]), i);
-          max_snr = snr;
+          max_snr      = snr;
           max_snr_avgs = avgs;
         }
         if (!(avgs % 10)) {
@@ -721,8 +721,8 @@ int main(int argc, char *argv[]) {
     float *c_stderr, *c_mean_diff, *c_conf_interval, tconf;
 
     c_conf_interval = cvector_alloc(nvertices);
-    c_stderr = cvector_alloc(nvertices);
-    c_mean_diff = cvector_alloc(nvertices);
+    c_stderr        = cvector_alloc(nvertices);
+    c_mean_diff     = cvector_alloc(nvertices);
 
     cvector_compute_mean_diff(c1_best_mean, c2_best_mean, c_mean_diff,
                               nvertices, NULL);
@@ -752,10 +752,10 @@ int main(int argc, char *argv[]) {
   }
 
   if (labels_fp) {
-    char line[STRLEN];
-    FILE *out_fp;
+    char   line[STRLEN];
+    FILE * out_fp;
     LABEL *area;
-    int i;
+    int    i;
     double mean, var, thick;
 
     printf("writing label report to %s...\n", out_label_fname);
@@ -803,7 +803,7 @@ int main(int argc, char *argv[]) {
 
   if (condition_0 >= 0) /* write means and variances */
   {
-    char path[STRLEN];
+    char  path[STRLEN];
     FILE *fp;
 
     FileNamePath(out_prefix, path);
@@ -1051,7 +1051,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   if (test_subject) {
-    test_thickness = cvector_alloc(nvertices);
+    test_thickness     = cvector_alloc(nvertices);
     test_avg_thickness = cvector_alloc(nvertices);
     MRISfree(&mris);
     fprintf(stderr, "reading subject %s\n", test_subject);
@@ -1109,7 +1109,7 @@ int main(int argc, char *argv[]) {
     } else /* use sorting instead of connected areas */
     {
       double classification, offset, w;
-      int total_correct, total_wrong, first_wrong, vno;
+      int    total_correct, total_wrong, first_wrong, vno;
 
       sprintf(fname, "%s_%s.dat", hemi, test_subject);
       fprintf(stderr, "writing test subject feature vector to %s...\n", fname);
@@ -1120,8 +1120,8 @@ int main(int argc, char *argv[]) {
       for (i = 0; i < nsort; i++) {
         vno = sorted_indices[i];
         fprintf(fp, "%2.2f\n ", test_avg_thickness[sorted_indices[i]]);
-        offset = (c1_mean[vno] + c2_mean[vno]) / 2.0;
-        w = (c1_mean[vno] - c2_mean[vno]);
+        offset         = (c1_mean[vno] + c2_mean[vno]) / 2.0;
+        w              = (c1_mean[vno] - c2_mean[vno]);
         classification = (test_avg_thickness[vno] - offset) * w;
 
         if (((classification < 0) && (true_class == 1)) ||
@@ -1171,7 +1171,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -1198,7 +1198,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr,
             "writing out confidence intervals of %%%2.1f confidence interval\n",
             100 * conf);
-    conf = 1 - conf;
+    conf  = 1 - conf;
     nargs = 1;
   } else if (!stricmp(option, "labels")) {
     labels_fp = fopen(argv[2], "r");
@@ -1217,7 +1217,7 @@ static int get_option(int argc, char *argv[]) {
     printf("finding optimal smoothing kernel at each cortical location\n");
   } else if (!stricmp(option, "fixed")) {
     find_optimal_scale = FALSE;
-    navgs = atoi(argv[2]);
+    navgs              = atoi(argv[2]);
     printf("using fixed size smoothing "
            " kernel (%d iterations) at each cortical location\n",
            navgs);
@@ -1234,24 +1234,24 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "computing pct difference between groups\n");
   } else if (!stricmp(option, "wt") || !stricmp(option, "write")) {
     write_dir = argv[2];
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "writing out optimal thickness vectors into directory %s\n",
             write_dir);
   } else if (!stricmp(option, "rt") || !stricmp(option, "read")) {
     read_dir = argv[2];
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "reading optimal thickness vectors from directory %s\n",
             read_dir);
   } else if (!stricmp(option, "normalize")) {
     normalize_flag = 1;
     fprintf(stderr, "normalizing inputs\n");
   } else if (!stricmp(option, "max")) {
-    int i = max_avgs;
+    int i    = max_avgs;
     max_avgs = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("setting max_avgs to %d (was %d)\n", max_avgs, i);
   } else if (!stricmp(option, "conditions")) {
-    nargs = 2;
+    nargs       = 2;
     condition_0 = atoi(argv[2]);
     condition_1 = atoi(argv[3]);
     printf("writing summary statistics to condition %d and %d files...\n",
@@ -1260,7 +1260,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'L':
       label_name = argv[2];
@@ -1293,7 +1293,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       fthresh = atof(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       fprintf(stderr, "using F snr threshold of %2.2f...\n", fthresh);
       break;
     case 'W':
@@ -1403,7 +1403,7 @@ static double cvector_compute_t_test(float *c1_mean, float *c1_var,
                                      float *c2_mean, float *c2_var,
                                      int num_class1, int num_class2,
                                      float *pvals, int num, int *pvno) {
-  int i;
+  int    i;
   double t, numer, denom, p, max_p;
 
   max_p = 0;
@@ -1444,7 +1444,7 @@ static double cvector_compute_t_test(float *c1_mean, float *c1_var,
 }
 static double cvector_compute_mean_diff(float *c1_mean, float *c2_mean,
                                         float *vmean_diff, int num, int *pvno) {
-  int i;
+  int    i;
   double max_diff;
 
   max_diff = 0;
@@ -1488,13 +1488,13 @@ cvector_mark_low_prob_vertices(float *pvals, float pthresh, MRI_SURFACE *mris) {
 static double cvector_compute_dist_free_snr(
     float **c1_thickness, int num_class1, float **c2_thickness, int num_class2,
     float *c1_mean, float *c2_mean, float *vsnr, int num, int *pi) {
-  int i, max_i, n, correct, total;
+  int    i, max_i, n, correct, total;
   double max_snr, mean, snr;
 
   max_i = -1;
   for (max_snr = 0.0, i = 0; i < num; i++) {
-    mean = (c1_mean[i] + c2_mean[i]) / 2;
-    snr = 0;
+    mean    = (c1_mean[i] + c2_mean[i]) / 2;
+    snr     = 0;
     correct = 0;
     if (c1_mean[i] > c2_mean[i]) {
       for (n = 0; n < num_class1; n++)
@@ -1514,11 +1514,11 @@ static double cvector_compute_dist_free_snr(
           snr++;
     }
 
-    total = num_class1 + num_class2;
-    snr = (double)correct / (double)total;
+    total   = num_class1 + num_class2;
+    snr     = (double)correct / (double)total;
     vsnr[i] = snr;
     if (snr > max_snr) {
-      max_i = i;
+      max_i   = i;
       max_snr = snr;
     }
   }
@@ -1543,7 +1543,7 @@ static double cvector_compute_snr(float *c1_mean, float *c2_mean, float *vvar,
 static double cvector_compute_snr_F(float *c1_mean, float *c2_mean, float *vvar,
                                     float *snr, int num, int *pi,
                                     float bonferroni) {
-  int i, max_i;
+  int   i, max_i;
   float f, max_snr;
 
   max_i = -1;
@@ -1559,7 +1559,7 @@ static double cvector_compute_snr_F(float *c1_mean, float *c2_mean, float *vvar,
 
     if (fabs(f) > max_snr) {
       max_snr = fabs(f);
-      max_i = i;
+      max_i   = i;
     }
     snr[i] = f;
   }
@@ -1633,12 +1633,12 @@ static int cvector_track_best_snr(
   *pnum_found = 0;
   for (i = 0; i < num; i++) {
     if (fabs(vsnr[i]) > fabs(vbest_snr[i])) {
-      vbest_snr[i] = vsnr[i];
-      vbest_avgs[i] = avgs;
+      vbest_snr[i]    = vsnr[i];
+      vbest_avgs[i]   = avgs;
       c1_best_mean[i] = c1_mean[i];
-      c1_best_var[i] = c1_var[i];
+      c1_best_var[i]  = c1_var[i];
       c2_best_mean[i] = c2_mean[i];
-      c2_best_var[i] = c2_var[i];
+      c2_best_var[i]  = c2_var[i];
       if (vsnr[i] >= fthresh)
         *pnum_found += 1;
       for (n = 0; n < nc1; n++)
@@ -1662,12 +1662,12 @@ static int cvector_track_best_stats(
   *pnum_found = 0;
   for (i = 0; i < num; i++) {
     if (fabs(vpvals[i]) > fabs(vbest_pvals[i])) {
-      vbest_pvals[i] = vpvals[i];
-      vbest_avgs[i] = avgs;
+      vbest_pvals[i]  = vpvals[i];
+      vbest_avgs[i]   = avgs;
       c1_best_mean[i] = c1_mean[i];
-      c1_best_var[i] = c1_var[i];
+      c1_best_var[i]  = c1_var[i];
       c2_best_mean[i] = c2_mean[i];
-      c2_best_var[i] = c2_var[i];
+      c2_best_var[i]  = c2_var[i];
       if (fabs(vpvals[i]) >= fthresh)
         *pnum_found += 1;
       for (n = 0; n < nc1; n++)
@@ -1753,13 +1753,13 @@ static int cvector_extract_best_avg(float *vbest_avgs, float *vsrc, float *vdst,
   return (NO_ERROR);
 }
 static double cvector_average_in_label(float *v, LABEL *area, int num) {
-  int i;
+  int    i;
   double avg;
 
-  for (avg = 0.0, i = 0 ; i < area->n_points ; i++) {
+  for (avg = 0.0, i = 0; i < area->n_points; i++) {
     if (!std::isfinite(v[area->lv[i].vno]))
-      DiagBreak() ;
-    avg += v[area->lv[i].vno] ;
+      DiagBreak();
+    avg += v[area->lv[i].vno];
   }
   avg /= (double)area->n_points;
   return (avg);
@@ -1835,7 +1835,7 @@ cvector_sort(float *vbest_snr, int nvertices) {
 
 static int write_vertex_data(char *fname, int index, float **v, int nclass) {
   FILE *fp;
-  int i;
+  int   i;
 
   fp = fopen(fname, "w");
   if (!fp)
@@ -1886,7 +1886,7 @@ static int cvector_set(float *v, float val, int num) {
 
 static double cvector_compute_pct_diff(float *c1_mean, float *c2_mean,
                                        float *vpct_diff, int num, int *pvno) {
-  int i;
+  int    i;
   double max_diff, denom;
 
   max_diff = 0;

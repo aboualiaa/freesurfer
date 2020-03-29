@@ -19,51 +19,51 @@ Input data is assumed to be as follows:
 #ifndef _Preprocessor_h
 #define _Preprocessor_h
 
-#include <vtkPolyData.h>
+#include <itkFixedArray.h>
 #include <itkImage.h>
 #include <itkPointSet.h>
-#include <itkFixedArray.h>
+#include <vtkPolyData.h>
 
 class Preprocessor {
 public:
   static const unsigned int Dimension = 2;
-  typedef unsigned char LabelPixelType;
-  typedef double DataPixelType;
+  typedef unsigned char     LabelPixelType;
+  typedef double            DataPixelType;
 
   typedef itk::Image<LabelPixelType, Dimension> LabelImageType;
-  typedef LabelImageType::Pointer LabelImagePointer;
-  typedef itk::Image<DataPixelType, Dimension> DataImageType;
-  typedef DataImageType::Pointer DataImagePointer;
+  typedef LabelImageType::Pointer               LabelImagePointer;
+  typedef itk::Image<DataPixelType, Dimension>  DataImageType;
+  typedef DataImageType::Pointer                DataImagePointer;
 
   typedef itk::FixedArray<unsigned int, Dimension> SizeType;
-  typedef itk::FixedArray<float, Dimension> ResolutionType;
+  typedef itk::FixedArray<float, Dimension>        ResolutionType;
 
   Preprocessor();
-  void SetInput(vtkPolyData *data);
-  void SetPadding(const SizeType &);
-  void SetResolution(const ResolutionType &);
-  void Update();
+  void                     SetInput(vtkPolyData *data);
+  void                     SetPadding(const SizeType &);
+  void                     SetResolution(const ResolutionType &);
+  void                     Update();
   inline LabelImagePointer GetOutputLabel() { return mask; }
-  inline DataImagePointer GetOutputData() { return data; }
+  inline DataImagePointer  GetOutputData() { return data; }
 
   inline LabelPixelType GetMaskInsideValue() { return insideValue; }
   inline LabelPixelType GetMaskZeroValue() { return zeroLevelValue; }
 
 private:
   typedef itk::PointSet<float, Dimension> PointSetType;
-  typedef PointSetType::Pointer PointSetPointer;
-  PointSetPointer convertInputToPointSet();
+  typedef PointSetType::Pointer           PointSetPointer;
+  PointSetPointer                         convertInputToPointSet();
 
   LabelImagePointer convertPointSetToBinaryImage(PointSetPointer);
-  void generateImageMask(LabelImagePointer);
-  void generateInitialDataImage();
+  void              generateImageMask(LabelImagePointer);
+  void              generateInitialDataImage();
 
-  vtkPolyData *inputData;
-  SizeType paddingSize;
+  vtkPolyData *  inputData;
+  SizeType       paddingSize;
   ResolutionType imageResolution;
 
   LabelImagePointer mask;
-  DataImagePointer data;
+  DataImagePointer  data;
 
   LabelPixelType zeroLevelValue;
   LabelPixelType insideValue;

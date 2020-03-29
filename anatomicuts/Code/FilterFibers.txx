@@ -1,9 +1,9 @@
 #ifndef _itk_FilterFibers_txx_
 #define _itk_FilterFibers_txx_
-#include <random>
-#include <chrono>
 #include "FilterFibers.h"
 #include "itkPolylineCell.h"
+#include <chrono>
+#include <random>
 
 template <class TInputMesh, class TOutputMesh>
 void FilterFibers<TInputMesh, TOutputMesh>::GenerateData() {
@@ -11,7 +11,7 @@ void FilterFibers<TInputMesh, TOutputMesh>::GenerateData() {
 
   typename InputCellsContainer::ConstIterator inputCellIt =
       input->GetCells()->Begin();
-  int cellId = 0;
+  int                              cellId     = 0;
   typename OutputMeshType::Pointer outputMesh = this->GetOutput();
   outputMesh->SetCellsAllocationMethod(
       OutputMeshType::CellsAllocatedDynamicallyCellByCell);

@@ -34,7 +34,7 @@ public:
   FSTrack(FSVolume *ref = 0, QObject *parent = 0);
   bool LoadFromFile(const QString &filename, const QString &ref_fn = QString());
   bool LoadFromFiles(const QStringList &filenames,
-                     const QString &ref_fn = QString());
+                     const QString &    ref_fn = QString());
 
   void GetRASBounds(double bounds[]);
 
@@ -44,7 +44,7 @@ public slots:
 
 protected:
   FSVolume *m_volumeRef;
-  double m_dRASBounds[6];
+  double    m_dRASBounds[6];
 };
 
 #endif // FSTRACK_H

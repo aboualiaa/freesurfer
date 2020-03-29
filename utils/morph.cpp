@@ -653,9 +653,9 @@ static unsigned char *lut_pointers[] = {
         Description
 ------------------------------------------------------*/
 static unsigned char thicken_se[9] = {255, 1, 255, 1, 1, 1, 255, 1, 255};
-IMAGE *ImageDilate(IMAGE *Isrc, IMAGE *Idst, int which) {
+IMAGE *              ImageDilate(IMAGE *Isrc, IMAGE *Idst, int which) {
   // int ecode,
-  int center_row, center_col;
+  int   center_row, center_col;
   IMAGE Ise, *Iin, *Itmp, *Iout;
 
   init_header(&Ise, "orig", "seq", 1, "today", 3, 3, PFBYTE, 1, "temp");
@@ -679,8 +679,8 @@ IMAGE *ImageDilate(IMAGE *Isrc, IMAGE *Idst, int which) {
   switch (which) {
   case MORPH_THICKEN:
     Ise.image = Ise.firstpix = thicken_se;
-    center_row = Ise.rows / 2;
-    center_col = Ise.cols / 2;
+    center_row               = Ise.rows / 2;
+    center_col               = Ise.cols / 2;
     // ecode =
     h_morphdil(Iin, &Ise, Iout, center_row, center_col, 128);
     break;
@@ -730,7 +730,7 @@ IMAGE *ImageErode(IMAGE *Isrc, IMAGE *Idst, int which) {
         Description
 ------------------------------------------------------*/
 IMAGE *ImageMorph(IMAGE *Isrc, IMAGE *Idst, int which) {
-  IMAGE *Iin, *Itmp, *Iout, *Ifiltered;
+  IMAGE *        Iin, *Itmp, *Iout, *Ifiltered;
   unsigned char *lut;
 
   if (which < 0 || (unsigned)which >= NLUTS)
@@ -744,7 +744,7 @@ IMAGE *ImageMorph(IMAGE *Isrc, IMAGE *Idst, int which) {
 
   if (Isrc->pixel_format != PFBYTE) {
     Itmp = ImageScale(Isrc, nullptr, MORPH_BACKGROUND, MORPH_FOREGROUND);
-    Iin = ImageAlloc(Isrc->rows, Isrc->cols, PFBYTE, Isrc->num_frame);
+    Iin  = ImageAlloc(Isrc->rows, Isrc->cols, PFBYTE, Isrc->num_frame);
     ImageCopy(Itmp, Iin);
     ImageFree(&Itmp);
   } else {
@@ -790,7 +790,7 @@ IMAGE *ImageClose(IMAGE *Isrc, IMAGE *Idst) {
 
   if (Isrc->pixel_format != PFBYTE) {
     Itmp = ImageScale(Isrc, nullptr, MORPH_BACKGROUND, MORPH_FOREGROUND);
-    Iin = ImageAlloc(Isrc->rows, Isrc->cols, PFBYTE, Isrc->num_frame);
+    Iin  = ImageAlloc(Isrc->rows, Isrc->cols, PFBYTE, Isrc->num_frame);
     ImageCopy(Itmp, Iin);
     ImageFree(&Itmp);
   } else /* image already in byte format */
@@ -833,7 +833,7 @@ IMAGE *ImageOpen(IMAGE *Isrc, IMAGE *Idst) {
 
   if (Isrc->pixel_format != PFBYTE) {
     Itmp = ImageScale(Isrc, nullptr, MORPH_BACKGROUND, MORPH_FOREGROUND);
-    Iin = ImageAlloc(Isrc->rows, Isrc->cols, PFBYTE, Isrc->num_frame);
+    Iin  = ImageAlloc(Isrc->rows, Isrc->cols, PFBYTE, Isrc->num_frame);
     ImageCopy(Itmp, Iin);
     ImageFree(&Itmp);
   } else /* image already in byte format */
@@ -868,7 +868,7 @@ IMAGE *ImageOpen(IMAGE *Isrc, IMAGE *Idst) {
 
         Description
 ------------------------------------------------------*/
-static int filter[3][3] = {{1, 8, 64}, {2, 16, 128}, {4, 32, 256}};
+static int  filter[3][3] = {{1, 8, 64}, {2, 16, 128}, {4, 32, 256}};
 static void morphFilter(IMAGE *Isrc, IMAGE *Idst) {
   unsigned char *spix;
   int rows, cols, row, col, row_start, row_end, col_start, col_end, *dpix;
@@ -889,10 +889,10 @@ static void morphFilter(IMAGE *Isrc, IMAGE *Idst) {
 
   for (row = 0; row < rows; row++) {
     row_start = MAX(0, row - 1) - (row - 1);
-    row_end = MIN(rows - 1, row + 1) - (row - 1);
+    row_end   = MIN(rows - 1, row + 1) - (row - 1);
     for (col = 0; col < cols; col++) {
       col_start = MAX(0, col - 1) - (col - 1);
-      col_end = MIN(cols - 1, col + 1) - (col - 1);
+      col_end   = MIN(cols - 1, col + 1) - (col - 1);
 
       val = 0;
       for (frow = row_start; frow <= row_end; frow++) {
@@ -915,7 +915,7 @@ static void morphFilter(IMAGE *Isrc, IMAGE *Idst) {
         Description
 ------------------------------------------------------*/
 static void morphApplyLut(IMAGE *Isrc, IMAGE *Idst, unsigned char *lut) {
-  int row, col, rows, cols, *spix;
+  int            row, col, rows, cols, *spix;
   unsigned char *dpix; //, *endpix;
 
   rows = Isrc->rows;

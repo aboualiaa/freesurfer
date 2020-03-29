@@ -25,26 +25,26 @@
  *
  */
 
+#include <ctype.h>
+#include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <fcntl.h>
 #include <unistd.h>
 
-#include "timer.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "const.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mrishash.h"
-#include "version.h"
-#include "rforest.h"
 #include "cma.h"
+#include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mrishash.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "rforest.h"
 #include "stats.h"
+#include "timer.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mris_classify_thickness.c,v 1.9 2012/03/08 13:30:17 fischl Exp $";
@@ -57,7 +57,7 @@ static int true_class = 1;
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -126,43 +126,43 @@ static float *cvector_alloc(int num) ;
 
 const char *Progname;
 
-static int nsort = -1;
-static int use_buggy_snr = 0;
-static char *write_dir = NULL;
-static int compute_stats = 0;
+static int   nsort         = -1;
+static int   use_buggy_snr = 0;
+static char *write_dir     = NULL;
+static int   compute_stats = 0;
 
-static int write_flag = 0;
+static int   write_flag     = 0;
 static char *output_subject = NULL;
-static char *test_subject = NULL;
-static int test_class = -1;
+static char *test_subject   = NULL;
+static int   test_class     = -1;
 static char *test_log_fname = NULL;
 
 static char *label_name = NULL;
-static char *prefix = "";
+static char *prefix     = "";
 
-static int max_avgs = 500;
+static int max_avgs            = 500;
 static int use_no_distribution = 0;
 
 /* these do 77.8% on schizophrenic left hemispheres */
 static float min_label_area = 25.0f;
-static float fthresh = 5.0;
+static float fthresh        = 5.0;
 
 #define MIN_LABELS 5
 static int min_labels = MIN_LABELS;
 
-static int bonferroni = 0;
+static int  bonferroni           = 0;
 static char subjects_dir[STRLEN] = "";
 
-static int ntrees = 10;
-static double feature_fraction = .5;
+static int    ntrees            = 10;
+static double feature_fraction  = .5;
 static double training_fraction = .5;
-static int max_depth = 10;
-static int nsteps = 20;
-static char *class_names[] = {"control", "AD"};
-static char *rf_write_name = NULL;
+static int    max_depth         = 10;
+static int    nsteps            = 20;
+static char * class_names[]     = {"control", "AD"};
+static char * rf_write_name     = NULL;
 #define MAX_ASEG_LABELS 1000
-static int naseg = 0;
-static int aseg_labels[MAX_ASEG_LABELS];
+static int   naseg = 0;
+static int   aseg_labels[MAX_ASEG_LABELS];
 static char *aseg_name = "aseg.stats";
 
 /*-------------------------------- FUNCTIONS ----------------------------*/
@@ -171,15 +171,15 @@ static char *aseg_name = "aseg.stats";
 
 int main(int argc, char *argv[]) {
   MRI_SURFACE *mris;
-  char **av, *thickness_name, *surf_name, *hemi, fname[STRLEN], *cp,
+  char **      av, *thickness_name, *surf_name, *hemi, fname[STRLEN], *cp,
       *subject_name, **c1_subjects, **c2_subjects;
-  int ac, nargs, n, num_class1, num_class2, i, nvertices, correct, h;
+  int    ac, nargs, n, num_class1, num_class2, i, nvertices, correct, h;
   LABEL *area;
-  FILE *fp = NULL;
-  Timer start;
-  int msec, minutes, seconds, *training_class, classnum, nfeatures, offset;
+  FILE * fp = NULL;
+  Timer  start;
+  int    msec, minutes, seconds, *training_class, classnum, nfeatures, offset;
   RANDOM_FOREST *rf;
-  double **training_data;
+  double **      training_data;
 
   nargs = handleVersionOption(argc, argv, "mris_classify_thickness");
   if (nargs && argc - nargs == 1)
@@ -220,14 +220,14 @@ int main(int argc, char *argv[]) {
     strcpy(subjects_dir, cp);
   }
 
-  surf_name = argv[1];
+  surf_name      = argv[1];
   thickness_name = argv[2];
 
 #define ARGV_OFFSET 3
 
   /* first determine the number of subjects in each classnum */
   num_class1 = 0;
-  n = ARGV_OFFSET;
+  n          = ARGV_OFFSET;
   do {
     num_class1++;
     n++;
@@ -261,14 +261,14 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "%d subjects in classnum 1, %d subjects in class 2\n",
           num_class1, num_class2);
 
-  training_data = (double **)calloc(num_class1 + num_class2, sizeof(double *));
+  training_data  = (double **)calloc(num_class1 + num_class2, sizeof(double *));
   training_class = (int *)calloc(num_class1 + num_class2, sizeof(int));
-  c1_subjects = (char **)calloc(num_class1, sizeof(char *));
-  c2_subjects = (char **)calloc(num_class2, sizeof(char *));
+  c1_subjects    = (char **)calloc(num_class1, sizeof(char *));
+  c2_subjects    = (char **)calloc(num_class2, sizeof(char *));
   for (n = 0; n < num_class1; n++) {
-    training_data[n] = (double *)calloc(nfeatures, sizeof(double));
+    training_data[n]  = (double *)calloc(nfeatures, sizeof(double));
     training_class[n] = 0;
-    c1_subjects[n] = argv[ARGV_OFFSET + n];
+    c1_subjects[n]    = argv[ARGV_OFFSET + n];
     strcpy(c1_subjects[n], argv[ARGV_OFFSET + n]);
     /*    fprintf(stderr, "class1[%d] - %s\n", n, c1_subjects[n]) ;*/
   }
@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
   for (n = 0; n < num_class2; n++) {
     training_data[n + num_class1] = (double *)calloc(nfeatures, sizeof(double));
     training_class[n + num_class1] = 1;
-    c2_subjects[n] = argv[i + n];
+    c2_subjects[n]                 = argv[i + n];
     strcpy(c2_subjects[n], argv[i + n]);
     /*    fprintf(stderr, "class2[%d] - %s\n", n, c2_subjects[n]) ;*/
   }
@@ -298,10 +298,10 @@ int main(int argc, char *argv[]) {
     for (h = 0; h <= 1; h++) {
       if (h == 0) {
         offset = 0;
-        hemi = "lh";
+        hemi   = "lh";
       } else {
         offset = nvertices;
-        hemi = "rh";
+        hemi   = "rh";
       }
       if (strchr(thickness_name, '/') != NULL)
         strcpy(fname, thickness_name); /* full path specified */
@@ -316,7 +316,7 @@ int main(int argc, char *argv[]) {
       MRISextractCurvatureVectorDouble(mris, training_data[n], offset);
     }
     if (naseg > 0) {
-      int a, t;
+      int       a, t;
       FS_STATS *aseg_stats;
 
       sprintf(fname, "%s/%s/stats/%s", subjects_dir, subject_name, aseg_name);
@@ -375,21 +375,21 @@ int main(int argc, char *argv[]) {
          100.0 * (double)correct / (num_class1 + num_class2));
 
   if (test_subject) {
-    char line[MAX_LINE_LEN];
+    char   line[MAX_LINE_LEN];
     double pval, *test_thickness;
     ;
     struct flock fl;
-    int fd;
+    int          fd;
 
     test_thickness = (double *)calloc(nfeatures, sizeof(double));
     fprintf(stderr, "reading subject %s\n", test_subject);
     for (h = 0; h <= 1; h++) {
       if (h == 0) {
         offset = 0;
-        hemi = "lh";
+        hemi   = "lh";
       } else {
         offset = nvertices;
-        hemi = "rh";
+        hemi   = "rh";
       }
       if (strchr(thickness_name, '/') != NULL)
         strcpy(fname, thickness_name); /* full path specified */
@@ -405,7 +405,7 @@ int main(int argc, char *argv[]) {
       MRISextractCurvatureVectorDouble(mris, test_thickness, offset);
     }
     if (naseg > 0) {
-      int a, t;
+      int       a, t;
       FS_STATS *aseg_stats;
 
       sprintf(fname, "%s/%s/stats/%s", subjects_dir, test_subject, aseg_name);
@@ -424,11 +424,11 @@ int main(int argc, char *argv[]) {
     }
     classnum = RFclassify(rf, test_thickness, &pval, test_class);
 
-    fl.l_type = F_WRLCK;    /* F_RDLCK, F_WRLCK, F_UNLCK    */
+    fl.l_type   = F_WRLCK;  /* F_RDLCK, F_WRLCK, F_UNLCK    */
     fl.l_whence = SEEK_SET; /* SEEK_SET, SEEK_CUR, SEEK_END */
-    fl.l_start = 0;         /* Offset from l_whence         */
-    fl.l_len = 0;           /* length, 0 = to EOF           */
-    fl.l_pid = getpid();    /* our PID                      */
+    fl.l_start  = 0;        /* Offset from l_whence         */
+    fl.l_len    = 0;        /* length, 0 = to EOF           */
+    fl.l_pid    = getpid(); /* our PID                      */
     fd = open(test_log_fname, O_WRONLY | O_APPEND | O_CREAT, S_IRWXU | S_IRWXG);
     if (fd < 0)
       ErrorExit(ERROR_NOFILE, "%s: could not open test log file %s", Progname,
@@ -443,7 +443,7 @@ int main(int argc, char *argv[]) {
     close(fd);
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -456,7 +456,7 @@ int main(int argc, char *argv[]) {
 #else
 int main(int argc, char *argv[]) {
   MRI_SURFACE *mris;
-  char **av, *thickness_name, *surf_name, *hemi, fname[STRLEN], *cp,
+  char **      av, *thickness_name, *surf_name, *hemi, fname[STRLEN], *cp,
       *subject_name, subjects_dir[STRLEN], **c1_subjects, **c2_subjects;
   int ac, nargs, n, num_class1, num_class2, i, nvertices, avgs, max_snr_avgs,
       nlabels = 0, done;
@@ -464,18 +464,21 @@ int main(int argc, char *argv[]) {
       *class_mean, *c1_var, *c2_var, *class_var, *pvals, **c1_avg_thickness,
       *vbest_snr, *vbest_avgs, *vtotal_var, *vsnr, **c2_avg_thickness,
       *vbest_pvalues, current_min_label_area, current_fthresh;
-  MRI_SP *mrisp;
-  LABEL *area, **labels = NULL;
-  FILE *fp = NULL;
-  double snr, max_snr;
-  Timer start;
-  int msec, minutes, seconds;
+  MRI_SP * mrisp;
+  LABEL *  area, **labels = NULL;
+  FILE *   fp = NULL;
+  double   snr, max_snr;
+  Timer    start;
+  int      msec, minutes, seconds;
   double **c1_label_thickness, **c2_label_thickness;
-  int *sorted_indices = NULL, vno;
-  float *test_thickness, *test_avg_thickness;
-  double label_avg;
+  int *    sorted_indices = NULL, vno;
+  float *  test_thickness, *test_avg_thickness;
+  double   label_avg;
 
-  nargs = handle_version_option (argc, argv, "$Id: mris_classify_thickness.c,v 1.9 2012/03/08 13:30:17 fischl Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mris_classify_thickness.c,v 1.9 2012/03/08 13:30:17 fischl Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;
@@ -511,15 +514,15 @@ int main(int argc, char *argv[]) {
 
   strcpy(subjects_dir, cp);
 
-  hemi = argv[1];
-  surf_name = argv[2];
+  hemi           = argv[1];
+  surf_name      = argv[2];
   thickness_name = argv[3];
 
 #define ARGV_OFFSET 4
 
   /* first determine the number of subjects in each classnum */
   num_class1 = 0;
-  n = ARGV_OFFSET;
+  n          = ARGV_OFFSET;
   do {
     num_class1++;
     n++;
@@ -583,15 +586,15 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "%d subjects in classnum 1, %d subjects in classnum 2\n",
           num_class1, num_class2);
 
-  c1_subjects = (char **)calloc(num_class1, sizeof(char *));
-  c1_thickness = (float **)calloc(num_class1, sizeof(char *));
+  c1_subjects      = (char **)calloc(num_class1, sizeof(char *));
+  c1_thickness     = (float **)calloc(num_class1, sizeof(char *));
   c1_avg_thickness = (float **)calloc(num_class1, sizeof(char *));
-  c2_subjects = (char **)calloc(num_class2, sizeof(char *));
-  c2_thickness = (float **)calloc(num_class2, sizeof(char *));
+  c2_subjects      = (char **)calloc(num_class2, sizeof(char *));
+  c2_thickness     = (float **)calloc(num_class2, sizeof(char *));
   c2_avg_thickness = (float **)calloc(num_class2, sizeof(char *));
   for (n = 0; n < num_class1; n++) {
-    c1_subjects[n] = argv[ARGV_OFFSET + n];
-    c1_thickness[n] = (float *)calloc(nvertices, sizeof(float));
+    c1_subjects[n]      = argv[ARGV_OFFSET + n];
+    c1_thickness[n]     = (float *)calloc(nvertices, sizeof(float));
     c1_avg_thickness[n] = (float *)calloc(nvertices, sizeof(float));
     if (!c1_thickness[n] || !c1_avg_thickness[n])
       ErrorExit(ERROR_NOMEMORY,
@@ -603,8 +606,8 @@ int main(int argc, char *argv[]) {
   }
   i = n + 1 + ARGV_OFFSET; /* starting index */
   for (n = 0; n < num_class2; n++) {
-    c2_subjects[n] = argv[i + n];
-    c2_thickness[n] = (float *)calloc(nvertices, sizeof(float));
+    c2_subjects[n]      = argv[i + n];
+    c2_thickness[n]     = (float *)calloc(nvertices, sizeof(float));
     c2_avg_thickness[n] = (float *)calloc(nvertices, sizeof(float));
     if (!c2_thickness[n] || !c2_avg_thickness[n])
       ErrorExit(ERROR_NOMEMORY,
@@ -646,7 +649,7 @@ int main(int argc, char *argv[]) {
         MRISmaskNotLabel(mris, area);
       curvs = (n < num_class1) ? c1_thickness[n] : c2_thickness[n - num_class1];
       class_mean = (n < num_class1) ? c1_mean : c2_mean;
-      class_var = (n < num_class1) ? c1_var : c2_var;
+      class_var  = (n < num_class1) ? c1_var : c2_var;
       MRISexportValVector(mris, curvs);
       cvector_accumulate(curvs, total_mean, nvertices);
       cvector_accumulate(curvs, class_mean, nvertices);
@@ -690,7 +693,7 @@ int main(int argc, char *argv[]) {
         MRISmaskNotLabel(mris, area);
       curvs = (n < num_class1) ? c1_thickness[n] : c2_thickness[n - num_class1];
       class_mean = (n < num_class1) ? c1_mean : c2_mean;
-      class_var = (n < num_class1) ? c1_var : c2_var;
+      class_var  = (n < num_class1) ? c1_var : c2_var;
       MRISextractCurvatureVector(mris, curvs);
       cvector_accumulate(curvs, total_mean, nvertices);
       cvector_accumulate(curvs, class_mean, nvertices);
@@ -719,11 +722,11 @@ int main(int argc, char *argv[]) {
 
   if (area)
     MRISripNotLabel(mris, area);
-  vbest_snr = cvector_alloc(nvertices);
+  vbest_snr     = cvector_alloc(nvertices);
   vbest_pvalues = cvector_alloc(nvertices);
-  vbest_avgs = cvector_alloc(nvertices);
-  vtotal_var = cvector_alloc(nvertices);
-  vsnr = cvector_alloc(nvertices);
+  vbest_avgs    = cvector_alloc(nvertices);
+  vtotal_var    = cvector_alloc(nvertices);
+  vsnr          = cvector_alloc(nvertices);
 
   if (read_dir == NULL) /* recompute everything */
   {
@@ -742,7 +745,7 @@ int main(int argc, char *argv[]) {
                                 &i, 0.0f);
     fprintf(stderr, "raw SNR %2.2f, n=%2.4f, d=%2.4f, vno=%d\n", sqrt(snr),
             c1_mean[i] - c2_mean[i], sqrt(vtotal_var[i]), i);
-    max_snr = snr;
+    max_snr      = snr;
     max_snr_avgs = 0;
     cvector_track_best_snr(vsnr, vbest_snr, vbest_avgs, 0, nvertices);
 
@@ -815,7 +818,7 @@ int main(int argc, char *argv[]) {
                 "d=%2.4f, vno=%d\n",
                 avgs, sqrt((float)avgs), sqrt(snr), c1_mean[i] - c2_mean[i],
                 sqrt(vtotal_var[i]), i);
-        max_snr = snr;
+        max_snr      = snr;
         max_snr_avgs = avgs;
       }
       cvector_track_best_snr(vsnr, vbest_snr, vbest_avgs, avgs, nvertices);
@@ -866,11 +869,11 @@ int main(int argc, char *argv[]) {
     nsort = mris->nvertices;
 
   if (nsort <= 0) {
-    nlabels = 0;
+    nlabels                = 0;
     current_min_label_area = min_label_area;
     for (done = 0, current_fthresh = fthresh; !FZERO(current_fthresh) && !done;
          current_fthresh *= 0.95) {
-      int npos_labels, nneg_labels;
+      int     npos_labels, nneg_labels;
       LABEL **pos_labels, **neg_labels;
 
       for (current_min_label_area = min_label_area;
@@ -1022,7 +1025,7 @@ int main(int argc, char *argv[]) {
     fclose(fp);
   } else {
     sorted_indices = cvector_sort(vbest_snr, nvertices);
-    vno = sorted_indices[0];
+    vno            = sorted_indices[0];
     write_vertex_data("c1.dat", vno, c1_avg_thickness, num_class1);
     write_vertex_data("c2.dat", vno, c2_avg_thickness, num_class2);
     printf("sorting complete\n");
@@ -1049,7 +1052,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (test_subject) {
-    test_thickness = cvector_alloc(nvertices);
+    test_thickness     = cvector_alloc(nvertices);
     test_avg_thickness = cvector_alloc(nvertices);
     MRISfree(&mris);
     fprintf(stderr, "reading subject %s\n", test_subject);
@@ -1102,7 +1105,7 @@ int main(int argc, char *argv[]) {
     } else /* use sorting instead of connected areas */
     {
       double classification, offset, w;
-      int total_correct, total_wrong, first_wrong, vno;
+      int    total_correct, total_wrong, first_wrong, vno;
 
       sprintf(fname, "%s_%s.dat", hemi, test_subject);
       fprintf(stderr, "writing test subject feature vector to %s...\n", fname);
@@ -1113,8 +1116,8 @@ int main(int argc, char *argv[]) {
       for (i = 0; i < nsort; i++) {
         vno = sorted_indices[i];
         fprintf(fp, "%2.2f\n ", test_avg_thickness[sorted_indices[i]]);
-        offset = (c1_mean[vno] + c2_mean[vno]) / 2.0;
-        w = (c1_mean[vno] - c2_mean[vno]);
+        offset         = (c1_mean[vno] + c2_mean[vno]) / 2.0;
+        w              = (c1_mean[vno] - c2_mean[vno]);
         classification = (test_avg_thickness[vno] - offset) * w;
 
         if (((classification < 0) && (true_class == 1)) ||
@@ -1164,7 +1167,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -1173,8 +1176,8 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "-version"))
     print_version();
   else if (!stricmp(option, "test")) {
-    test_subject = argv[2];
-    test_class = atoi(argv[3]);
+    test_subject   = argv[2];
+    test_class     = atoi(argv[3]);
     test_log_fname = argv[4];
     fprintf(stderr, "writing subject %s classnum %d classification to %s\n",
             test_subject, test_class, test_log_fname);
@@ -1221,16 +1224,16 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "ntrees")) {
     ntrees = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
   } else if (!stricmp(option, "max_depth")) {
     max_depth = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
   } else if (!stricmp(option, "nsteps")) {
     nsteps = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
   } else if (!stricmp(option, "wt") || !stricmp(option, "write")) {
     write_dir = argv[2];
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "writing out optimal thickness vectors into directory %s\n",
             write_dir);
   } else if (!stricmp(option, "stats")) {
@@ -1272,12 +1275,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       fthresh = atof(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       fprintf(stderr, "using F snr threshold of %2.2f...\n", fthresh);
       break;
     case 'W':
       rf_write_name = argv[2];
-      nargs = 1;
+      nargs         = 1;
       printf("writing random forest to %s\n", rf_write_name);
       break;
     case 'O':

@@ -24,11 +24,11 @@
  */
 
 #include "VolumeFilter.h"
-#include <math.h>
 #include "LayerMRI.h"
-#include <vtkImageData.h>
 #include "MyVTKUtils.h"
 #include <QTimer>
+#include <math.h>
+#include <vtkImageData.h>
 
 #include "utils.h"
 
@@ -42,7 +42,7 @@ VolumeFilter::VolumeFilter(LayerMRI *input, LayerMRI *output, QObject *parent)
 VolumeFilter::~VolumeFilter() {}
 
 void VolumeFilter::SetInputOutputVolumes(LayerMRI *input, LayerMRI *output) {
-  m_volumeInput = input;
+  m_volumeInput  = input;
   m_volumeOutput = output;
   if (m_volumeInput) {
     connect(m_volumeInput, SIGNAL(destroyed()), this,
@@ -66,7 +66,7 @@ bool VolumeFilter::ReadyToUpdate() { return (m_volumeInput && m_volumeOutput); }
 
 bool VolumeFilter::Update() {
   if (!ReadyToUpdate()) {
-    cerr << "Volume has been removed. Please start over.\n";
+    std::cerr << "Volume has been removed. Please start over.\n";
     return false;
   }
 
@@ -86,8 +86,8 @@ bool VolumeFilter::Update() {
 #include <QDebug>
 
 MRI *VolumeFilter::CreateMRIFromVolume(LayerMRI *layer) {
-  vtkImageData *image = layer->GetImageData();
-  int mri_type = MRI_FLOAT;
+  vtkImageData *image    = layer->GetImageData();
+  int           mri_type = MRI_FLOAT;
   switch (image->GetScalarType()) {
   case VTK_CHAR:
   case VTK_SIGNED_CHAR:
@@ -110,9 +110,9 @@ MRI *VolumeFilter::CreateMRIFromVolume(LayerMRI *layer) {
     break;
   }
 
-  int *dim = image->GetDimensions();
-  int zFrames = image->GetNumberOfScalarComponents();
-  MRI *mri = NULL;
+  int *dim     = image->GetDimensions();
+  int  zFrames = image->GetNumberOfScalarComponents();
+  MRI *mri     = NULL;
   try {
     mri = MRIallocSequence(dim[0], dim[1], dim[2], mri_type, zFrames);
   } catch (int ret) {
@@ -120,13 +120,13 @@ MRI *VolumeFilter::CreateMRIFromVolume(LayerMRI *layer) {
   }
 
   if (!mri) {
-    cerr << "Can not allocate memory for MRI.\n";
+    std::cerr << "Can not allocate memory for MRI.\n";
     return NULL;
   }
 
-  char *ptr = (char *)image->GetScalarPointer();
-  int scalar_type = image->GetScalarType();
-  int n_frames = image->GetNumberOfScalarComponents();
+  char *ptr         = (char *)image->GetScalarPointer();
+  int   scalar_type = image->GetScalarType();
+  int   n_frames    = image->GetNumberOfScalarComponents();
   for (int j = 0; j < mri->height; j++) {
     for (int k = 0; k < mri->depth; k++) {
       for (int i = 0; i < mri->width; i++) {
@@ -171,15 +171,15 @@ MRI *VolumeFilter::CreateMRIFromVolume(LayerMRI *layer) {
 
 // map mri data to image data, assuming same data type
 void VolumeFilter::MapMRIToVolume(MRI *mri, LayerMRI *layer) {
-  vtkImageData *image = layer->GetImageData();
-  int zX = mri->width;
-  int zY = mri->height;
-  int zZ = mri->depth;
-  int zFrames = mri->nframes;
-  char *ptr = (char *)image->GetScalarPointer();
-  int scalar_type = image->GetScalarType();
-  int *dim = image->GetDimensions();
-  int n_frames = image->GetNumberOfScalarComponents();
+  vtkImageData *image       = layer->GetImageData();
+  int           zX          = mri->width;
+  int           zY          = mri->height;
+  int           zZ          = mri->depth;
+  int           zFrames     = mri->nframes;
+  char *        ptr         = (char *)image->GetScalarPointer();
+  int           scalar_type = image->GetScalarType();
+  int *         dim         = image->GetDimensions();
+  int           n_frames    = image->GetNumberOfScalarComponents();
   for (int nZ = 0; nZ < zZ; nZ++) {
     for (int nY = 0; nY < zY; nY++) {
       for (int nX = 0; nX < zX; nX++) {

@@ -28,14 +28,14 @@
 #ifndef CommonDataStruct_h
 #define CommonDataStruct_h
 
-#include <QString>
 #include <QColor>
+#include <QString>
 
 struct SettingsGeneral {
   QColor BackgroundColor;
   QColor CursorColor;
-  int CursorStyle;
-  bool SaveCopy;
+  int    CursorStyle;
+  bool   SaveCopy;
 };
 
 struct Settings2D {
@@ -47,22 +47,22 @@ struct SettingsScreenshot {
   bool HideCoords;
   bool HideScaleBar;
   bool AntiAliasing;
-  int Magnification;
+  int  Magnification;
   bool AutoTrim;
 };
 
 struct SettingsMovieFrames {
   QString OutputLocation;
   QString OutputExtension;
-  double AngleStep;
-  int StepCount;
+  double  AngleStep;
+  int     StepCount;
 };
 
 struct RotationElement {
-  int Plane;
+  int    Plane;
   double Angle;
   double Point[3];
-  int SampleMethod;
+  int    SampleMethod;
 };
 
 #endif

@@ -28,13 +28,11 @@
  */
 
 #include "LayerPropertySurface.h"
-#include "vtkLookupTable.h"
-#include "vtkRGBAColorTransferFunction.h"
-#include "vtkMath.h"
 #include "FSSurface.h"
+#include "vtkLookupTable.h"
+#include "vtkMath.h"
+#include "vtkRGBAColorTransferFunction.h"
 #include <QDebug>
-
-using namespace std;
 
 LayerPropertySurface::LayerPropertySurface(QObject *parent)
     : LayerProperty(parent), m_dOpacity(1), m_nEdgeThickness(2),
@@ -86,30 +84,30 @@ void LayerPropertySurface::RebuildCurvatureLUT() { SetColorMapChanged(); }
 
 QVariantMap LayerPropertySurface::GetFullSettings() {
   QVariantMap map;
-  map["Opacity"] = m_dOpacity;
-  map["RGB_R"] = m_dRGB[0];
-  map["RGB_G"] = m_dRGB[1];
-  map["RGB_B"] = m_dRGB[2];
+  map["Opacity"]            = m_dOpacity;
+  map["RGB_R"]              = m_dRGB[0];
+  map["RGB_G"]              = m_dRGB[1];
+  map["RGB_B"]              = m_dRGB[2];
   map["RGBThresholdHigh_R"] = m_dRGBThresholdHigh[0];
   map["RGBThresholdHigh_G"] = m_dRGBThresholdHigh[1];
   map["RGBThresholdHigh_B"] = m_dRGBThresholdHigh[2];
-  map["RGBThresholdLow_R"] = m_dRGBThresholdLow[0];
-  map["RGBThresholdLow_G"] = m_dRGBThresholdLow[1];
-  map["RGBThresholdLow_B"] = m_dRGBThresholdLow[2];
-  map["RGBEdge_R"] = m_dRGBEdge[0];
-  map["RGBEdge_G"] = m_dRGBEdge[1];
-  map["RGBEdge_B"] = m_dRGBEdge[2];
-  map["RGBVector_R"] = m_dRGBVector[0];
-  map["RGBVector_G"] = m_dRGBVector[1];
-  map["RGBVector_B"] = m_dRGBVector[2];
-  map["RGBMesh_R"] = m_dRGBMesh[0];
-  map["RGBMesh_G"] = m_dRGBMesh[1];
-  map["RGBMesh_B"] = m_dRGBMesh[2];
-  map["EdgeThickness"] = m_nEdgeThickness;
-  map["VectorPointSize"] = m_nVectorPointSize;
+  map["RGBThresholdLow_R"]  = m_dRGBThresholdLow[0];
+  map["RGBThresholdLow_G"]  = m_dRGBThresholdLow[1];
+  map["RGBThresholdLow_B"]  = m_dRGBThresholdLow[2];
+  map["RGBEdge_R"]          = m_dRGBEdge[0];
+  map["RGBEdge_G"]          = m_dRGBEdge[1];
+  map["RGBEdge_B"]          = m_dRGBEdge[2];
+  map["RGBVector_R"]        = m_dRGBVector[0];
+  map["RGBVector_G"]        = m_dRGBVector[1];
+  map["RGBVector_B"]        = m_dRGBVector[2];
+  map["RGBMesh_R"]          = m_dRGBMesh[0];
+  map["RGBMesh_G"]          = m_dRGBMesh[1];
+  map["RGBMesh_B"]          = m_dRGBMesh[2];
+  map["EdgeThickness"]      = m_nEdgeThickness;
+  map["VectorPointSize"]    = m_nVectorPointSize;
 
   map["ThresholdMidPoint"] = m_dThresholdMidPoint;
-  map["ThresholdSlope"] = m_dThresholdSlope;
+  map["ThresholdSlope"]    = m_dThresholdSlope;
 
   map["Position_X"] = m_dPosition[0];
   map["Position_Y"] = m_dPosition[1];
@@ -119,10 +117,10 @@ QVariantMap LayerPropertySurface::GetFullSettings() {
 
   map["SurfaceRenderMode"] = m_nSurfaceRenderMode;
 
-  map["ShowVertices"] = m_bShowVertices;
-  map["RGBVertex_R"] = m_dRGBVertex[0];
-  map["RGBVertex_G"] = m_dRGBVertex[1];
-  map["RGBVertex_B"] = m_dRGBVertex[2];
+  map["ShowVertices"]    = m_bShowVertices;
+  map["RGBVertex_R"]     = m_dRGBVertex[0];
+  map["RGBVertex_G"]     = m_dRGBVertex[1];
+  map["RGBVertex_B"]     = m_dRGBVertex[2];
   map["VertexPointSize"] = m_nVertexPointSize;
 
   map["MeshColorMap"] = m_nMeshColorMap;
@@ -264,7 +262,7 @@ void LayerPropertySurface::SetThresholdSlope(double dValue) {
 
 void LayerPropertySurface::SetThresholdColor(double *low, double *high) {
   for (int i = 0; i < 3; i++) {
-    m_dRGBThresholdLow[i] = low[i];
+    m_dRGBThresholdLow[i]  = low[i];
     m_dRGBThresholdHigh[i] = high[i];
   }
   this->SetColorMapChanged();
@@ -363,7 +361,7 @@ void LayerPropertySurface::SetMeshColorMap(int nMap) {
 void LayerPropertySurface::SetPosition(double *p) {
   double dp[3];
   for (int i = 0; i < 3; i++) {
-    dp[i] = p[i] - m_dPosition[i];
+    dp[i]          = p[i] - m_dPosition[i];
     m_dPosition[i] = p[i];
   }
 

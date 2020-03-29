@@ -38,15 +38,15 @@ TensorCubicSmoothing::~TensorCubicSmoothing() {
 
 // Copy Constructor
 TensorCubicSmoothing::TensorCubicSmoothing(const TensorCubicSmoothing &other) {
-  AtWA = other.AtWA;
-  AtWr = other.AtWr;
+  AtWA         = other.AtWA;
+  AtWr         = other.AtWr;
   coefficients = other.coefficients;
 }
 // Assignment Overload
 TensorCubicSmoothing &
 TensorCubicSmoothing::operator=(const TensorCubicSmoothing &other) {
-  AtWA = other.AtWA;
-  AtWr = other.AtWr;
+  AtWA         = other.AtWA;
+  AtWr         = other.AtWr;
   coefficients = other.coefficients;
   return *this;
 }
@@ -56,18 +56,18 @@ TensorCubicSmoothing::operator=(const TensorCubicSmoothing &other) {
 int TensorCubicSmoothing::constructAtWA(const vnl_matrix<float> &B2x,
                                         const vnl_matrix<float> &B2y,
                                         const vnl_matrix<float> &B2z,
-                                        const Matrix3d &W,
-                                        const vnl_vector<int> &indexMap) {
-  int X = B2x.cols();
-  int Y = B2y.cols();
-  int Z = B2z.cols();
-  int size = (int)sqrt(X * Y * Z);
+                                        const Matrix3d &         W,
+                                        const vnl_vector<int> &  indexMap) {
+  int      X    = B2x.cols();
+  int      Y    = B2y.cols();
+  int      Z    = B2z.cols();
+  int      size = (int)sqrt(X * Y * Z);
   Matrix3d temp = doBasisMultiplications(W, B2x, B2y, B2z);
   AtWA.set_size(size, size);
 
   // move to temporary 1 dimensional form
   vnl_vector<float> intermediate(size * size);
-  int count = 0;
+  int               count = 0;
   for (int i = 0; i < Z; i++)
     for (int j = 0; j < Y; j++)
       for (int k = 0; k < X; k++) {
@@ -91,9 +91,9 @@ int TensorCubicSmoothing::constructAtWr(const vnl_matrix<float> &Bx,
                                         const vnl_matrix<float> &Bz,
                                         const Matrix3d &W, const Matrix3d &r) {
 
-  int X = Bx.cols();
-  int Y = By.cols();
-  int Z = Bz.cols();
+  int      X  = Bx.cols();
+  int      Y  = By.cols();
+  int      Z  = Bz.cols();
   Matrix3d Wr = W;
 
   // multiply each element of W by corresponding in r
@@ -148,9 +148,9 @@ Matrix3d TensorCubicSmoothing::doBasisMultiplications(
   int rows = data.getHeight();
   // int cols = data.getWidth();
   int slices = data.getDepth();
-  int numBx = Bx.columns();
-  int numBy = By.columns();
-  int numBz = Bz.columns();
+  int numBx  = Bx.columns();
+  int numBy  = By.columns();
+  int numBz  = Bz.columns();
 
   vnl_matrix<float> temp1(rows, numBy * slices);
 

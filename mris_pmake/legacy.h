@@ -186,13 +186,13 @@ float costFunc_distanceReturn(s_env &st_env, s_iterInfo *pst_iterInfo,
 /// \param ast_env   Core simulation environment
 /// \param astr_comms  Control string parsed from socket
 /// \return  true|false  Status: success or fail.
-bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms);
+bool asynchEvent_processDWGHT(s_env &ast_env, std::string astr_comms);
 
 /// \fn void asynchEvent_processWGHT(s_env& st_env, string str_comms)
 /// \brief Process socket-based access to the core weight structure
 /// \param ast_env   Core simulation environment
 /// \param astr_comms  Control string parsed from socket
 /// \return  true|false  Status: success or fail.
-bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms);
+bool asynchEvent_processWGHT(s_env &ast_env, std::string astr_comms);
 
 #endif //__LEGACY_H__

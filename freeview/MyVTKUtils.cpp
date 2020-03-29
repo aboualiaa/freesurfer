@@ -24,55 +24,55 @@
  */
 
 #include "MyVTKUtils.h"
+#include "vtkDataSetAttributes.h"
+#include "vtkFloatArray.h"
+#include "vtkGlyph3DMapper.h"
+#include "vtkPointData.h"
+#include <QDebug>
+#include <QFileInfo>
+#include <QMap>
 #include <stddef.h>
-#include <vtkSmartPointer.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkImageWriter.h>
-#include <vtkBMPWriter.h>
-#include <vtkJPEGWriter.h>
-#include <vtkPNGWriter.h>
-#include <vtkTIFFWriter.h>
-#include <vtkPostScriptWriter.h>
-#include <vtkRenderLargeImage.h>
-#include <vtkVRMLExporter.h>
 #include <vtkActor.h>
+#include <vtkAppendPolyData.h>
+#include <vtkBMPWriter.h>
+#include <vtkCamera.h>
+#include <vtkCleanPolyData.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkContourFilter.h>
+#include <vtkCubeSource.h>
+#include <vtkDijkstraImageGeodesicPath.h>
+#include <vtkFixedPointVolumeRayCastMapper.h>
+#include <vtkImageAnisotropicDiffusion2D.h>
+#include <vtkImageCast.h>
+#include <vtkImageChangeInformation.h>
+#include <vtkImageClip.h>
 #include <vtkImageData.h>
 #include <vtkImageDilateErode3D.h>
-#include <vtkContourFilter.h>
+#include <vtkImageGradientMagnitude.h>
+#include <vtkImageReslice.h>
+#include <vtkImageShiftScale.h>
+#include <vtkImageThreshold.h>
+#include <vtkImageWriter.h>
+#include <vtkJPEGWriter.h>
 #include <vtkMarchingCubes.h>
-#include <vtkPolyDataConnectivityFilter.h>
+#include <vtkPNGWriter.h>
+#include <vtkPiecewiseFunction.h>
 #include <vtkPolyData.h>
+#include <vtkPolyDataConnectivityFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPolyDataNormals.h>
-#include <vtkCamera.h>
-#include <vtkCubeSource.h>
+#include <vtkPostScriptWriter.h>
 #include <vtkProperty.h>
-#include <vtkAppendPolyData.h>
-#include <vtkImageThreshold.h>
+#include <vtkRenderLargeImage.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+#include <vtkTIFFWriter.h>
 #include <vtkTriangleFilter.h>
-#include <vtkPiecewiseFunction.h>
-#include <vtkColorTransferFunction.h>
-#include <vtkVolumeProperty.h>
+#include <vtkVRMLExporter.h>
 #include <vtkVolume.h>
-#include <vtkFixedPointVolumeRayCastMapper.h>
-#include <vtkImageCast.h>
-#include <vtkImageClip.h>
-#include <vtkImageGradientMagnitude.h>
-#include <vtkImageShiftScale.h>
-#include <vtkImageChangeInformation.h>
-#include <vtkImageAnisotropicDiffusion2D.h>
-#include <vtkDijkstraImageGeodesicPath.h>
-#include <vtkCleanPolyData.h>
-#include <vtkImageReslice.h>
+#include <vtkVolumeProperty.h>
 #include <vtkWindowedSincPolyDataFilter.h>
-#include <QFileInfo>
-#include <QDebug>
-#include <QMap>
-#include "vtkGlyph3DMapper.h"
-#include "vtkDataSetAttributes.h"
-#include "vtkPointData.h"
-#include "vtkFloatArray.h"
 #if VTK_MAJOR_VERSION > 5
 #endif
 
@@ -80,9 +80,9 @@ bool MyVTKUtils::VTKScreenCapture(vtkRenderWindow *renderWnd,
                                   vtkRenderer *renderer, const char *filename,
                                   bool bAntiAliasing, int nMag) {
   Q_UNUSED(bAntiAliasing);
-  QString fn = filename;
+  QString         fn     = filename;
   vtkImageWriter *writer = 0;
-  QString ext = QFileInfo(filename).suffix();
+  QString         ext    = QFileInfo(filename).suffix();
   if (ext == "wrl") {
     vtkVRMLExporter *exporter = vtkVRMLExporter::New();
     exporter->SetFileName(filename);
@@ -181,7 +181,7 @@ bool MyVTKUtils::BuildLabelContourActor(vtkImageData *data_in, int labelIndex,
                                         bool bAllRegions, bool bUpsample,
                                         bool bVoxelized) {
   Q_UNUSED(ext);
-  int i = labelIndex;
+  int                                i = labelIndex;
   vtkSmartPointer<vtkImageThreshold> threshold =
       vtkSmartPointer<vtkImageThreshold>::New();
 #if VTK_MAJOR_VERSION > 5
@@ -247,11 +247,11 @@ bool MyVTKUtils::BuildLabelContourActor(vtkImageData *data_in, int labelIndex,
     threshold->SetOutputScalarTypeToFloat();
     threshold->Update();
     vtkImageData *outputImage = threshold->GetOutput();
-    int *dim = outputImage->GetDimensions();
-    double *voxel_size = outputImage->GetSpacing();
-    double *origin = outputImage->GetOrigin();
-    float *p = static_cast<float *>(outputImage->GetScalarPointer());
-    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+    int *         dim         = outputImage->GetDimensions();
+    double *      voxel_size  = outputImage->GetSpacing();
+    double *      origin      = outputImage->GetOrigin();
+    float *       p = static_cast<float *>(outputImage->GetScalarPointer());
+    vtkSmartPointer<vtkPoints>     points = vtkSmartPointer<vtkPoints>::New();
     vtkSmartPointer<vtkFloatArray> scalars =
         vtkSmartPointer<vtkFloatArray>::New();
     for (int i = 0; i < dim[0]; i++) {
@@ -295,9 +295,9 @@ bool MyVTKUtils::BuildLabelContourActor(vtkImageData *data_in, int labelIndex,
 }
 
 // test multiple contours
-bool MyVTKUtils::BuildLabelContourActor(vtkImageData *data_in,
+bool MyVTKUtils::BuildLabelContourActor(vtkImageData *    data_in,
                                         const QList<int> &labelIndices,
-                                        vtkActor *actor_out,
+                                        vtkActor *        actor_out,
                                         int nSmoothIterations, int *ext,
                                         bool bAllRegions, bool bUpsample) {
   Q_UNUSED(ext);
@@ -387,8 +387,8 @@ bool MyVTKUtils::BuildContourActor(vtkImageData *data_in, double dTh1,
                                    double dTh2, vtkActor *actor_out,
                                    int nSmoothIterations, int *ext,
                                    bool bAllRegions, bool bUpsample) {
-  double nValue = 1;
-  int nSwell = 2;
+  double                             nValue = 1;
+  int                                nSwell = 2;
   vtkSmartPointer<vtkImageThreshold> threshold =
       vtkSmartPointer<vtkImageThreshold>::New();
 
@@ -605,7 +605,7 @@ void MyVTKUtils::GetLivewirePoints(vtkImageData *image_in, int nPlane_in,
   scale->ReleaseDataFlagOff();
 
   m_info->SetInputConnection(scale->GetOutputPort());
-  int n[3] = {0, 0, 0};
+  int n[3]    = {0, 0, 0};
   n[m_nPlane] = -1 * m_nSlice;
   m_info->SetExtentTranslation(n);
   m_info->Update();
@@ -624,7 +624,7 @@ void MyVTKUtils::GetLivewirePoints(vtkImageData *image_in, int nPlane_in,
   }
 
   vtkIdType beginVertId = m_imageSlice->FindPoint(pt1);
-  vtkIdType endVertId = m_imageSlice->FindPoint(pt2);
+  vtkIdType endVertId   = m_imageSlice->FindPoint(pt2);
   //  cout << beginVertId << "  " << endVertId << endl;
 
   if (beginVertId == -1 || endVertId == -1) {
@@ -638,14 +638,14 @@ void MyVTKUtils::GetLivewirePoints(vtkImageData *image_in, int nPlane_in,
   m_path->SetEndVertex(beginVertId);
   m_path->Update();
 
-  vtkPolyData *pd = m_path->GetOutput();
-  vtkIdType npts = 0, *pts = NULL;
+  vtkPolyData *pd   = m_path->GetOutput();
+  vtkIdType    npts = 0, *pts = NULL;
   pd->GetLines()->InitTraversal();
   pd->GetLines()->GetNextCell(npts, pts);
   //  cout << npts << endl;
-  double offset[3] = {0, 0, 0};
-  double *vs = image_in->GetSpacing();
-  offset[m_nPlane] = m_nSlice * vs[m_nPlane];
+  double  offset[3] = {0, 0, 0};
+  double *vs        = image_in->GetSpacing();
+  offset[m_nPlane]  = m_nSlice * vs[m_nPlane];
   for (int i = 0; i < npts; i++) {
     double *p = pd->GetPoint(pts[i]);
     // cout << p[0] << " " << p[1] << " " << p[2] << endl;

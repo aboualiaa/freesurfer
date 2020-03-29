@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-long new_mesh(long num_points, // creates new mesh
+long new_mesh(long    num_points, // creates new mesh
               double *points, long num_triangles, long *triangles,
               long *num_edges, double **edges);
 
@@ -22,7 +22,7 @@ void delete_algorithm(long id);
 void delete_mesh(long id); // delete mesh and all associated algorithms
 
 void propagate(
-    long algorithm_id, // compute distance field for given source points
+    long    algorithm_id, // compute distance field for given source points
     double *source_points, long num_sources,
     double *stop_points, // limitations on distance field propagation
     long num_stop_points, double max_propagation_distance);
@@ -40,7 +40,7 @@ long distance_and_source(
 long distance_and_source_for_all_vertices(
     long algorithm_id, // same idea as in the previous function
     double *
-        *distances, // list distance/source info for all vertices of the mesh
+        *  distances, // list distance/source info for all vertices of the mesh
     long **sources);
 
 #ifdef __cplusplus

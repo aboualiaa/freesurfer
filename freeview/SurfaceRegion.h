@@ -28,8 +28,8 @@
 
 #include "RenderView.h"
 #include "vtkSmartPointer.h"
-#include <QObject>
 #include <QColor>
+#include <QObject>
 
 class vtkRenderer;
 class vtkActor;
@@ -58,7 +58,7 @@ public:
   void ResetOutline();
 
   QColor GetColor();
-  void SetColor(const QColor &color);
+  void   SetColor(const QColor &color);
 
   void Update();
 
@@ -98,21 +98,21 @@ signals:
 private:
   void RebuildOutline(bool bClose);
 
-  vtkSmartPointer<vtkActor> m_actorMesh;
-  vtkSmartPointer<vtkActor> m_actorOutline;
+  vtkSmartPointer<vtkActor>  m_actorMesh;
+  vtkSmartPointer<vtkActor>  m_actorOutline;
   vtkSmartPointer<vtkPoints> m_points;
 
-  vtkSmartPointer<vtkBox> m_clipbox;
-  vtkSmartPointer<vtkClipPolyData> m_clipperPre;
+  vtkSmartPointer<vtkBox>            m_clipbox;
+  vtkSmartPointer<vtkClipPolyData>   m_clipperPre;
   vtkSmartPointer<vtkSelectPolyData> m_selector;
-  vtkSmartPointer<vtkCleanPolyData> m_cleanerPost;
+  vtkSmartPointer<vtkCleanPolyData>  m_cleanerPost;
 
   vtkSmartPointer<vtkPolyData> m_polydataHolder;
 
   LayerMRI *m_mri;
-  QColor m_color;
-  int m_nId;
-  int m_nGroup;
+  QColor    m_color;
+  int       m_nId;
+  int       m_nGroup;
 };
 
 #endif

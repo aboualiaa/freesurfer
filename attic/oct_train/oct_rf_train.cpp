@@ -24,64 +24,64 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "const.h"
-#include "timer.h"
-#include "version.h"
-#include "rforest.h"
-#include "voxlist.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "mrisegment.h"
+#include "proto.h"
+#include "rforest.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
+#include "voxlist.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
 static double training_fraction = .25;
-static double feature_fraction = 1;
-static int ntrees = 20;
-static int max_tree_depth = 10;
-static int dilate = 0;
-static double pthresh = 0;
-static int nthresh = 0;
-static int gthresh = 0;
-static char *class_names[] = {
+static double feature_fraction  = 1;
+static int    ntrees            = 20;
+static int    max_tree_depth    = 10;
+static int    dilate            = 0;
+static double pthresh           = 0;
+static int    nthresh           = 0;
+static int    gthresh           = 0;
+static char * class_names[]     = {
     "Background", // actually label 3, but will do replacement before calling
                   // traiining
     "Neuron", "Astrocyte", "Speckle", "Fiber"};
 
 #define OCT_BACKGROUND 0
-#define OCT_NEURON 1
-#define OCT_GLIA 2
-#define OCT_SPECKLE 3
-#define OCT_FIBER 4
+#define OCT_NEURON     1
+#define OCT_GLIA       2
+#define OCT_SPECKLE    3
+#define OCT_FIBER      4
 
-static int downsample = 2;
-static int extract = 0;
-static int whalf = 0;
+static int downsample           = 2;
+static int extract              = 0;
+static int whalf                = 0;
 static int min_training_samples = 20;
 
 // static int  classifier_type = CLASSIFIER_RFOREST ;
 
 static MRI *extract_subimage(MRI *mri_inputs) {
-  int x0, y0, w, h;
+  int  x0, y0, w, h;
   MRI *mri_tmp;
 
-  w = mri_inputs->width / extract;
-  h = mri_inputs->height / extract;
-  x0 = (mri_inputs->width - w) / 2;
-  y0 = (mri_inputs->height - h) / 2;
+  w       = mri_inputs->width / extract;
+  h       = mri_inputs->height / extract;
+  x0      = (mri_inputs->width - w) / 2;
+  y0      = (mri_inputs->height - h) / 2;
   mri_tmp = MRIextract(mri_inputs, NULL, x0, y0, 0, w, h, 1);
   MRIfree(&mri_inputs);
   return (mri_tmp);
@@ -89,17 +89,17 @@ static MRI *extract_subimage(MRI *mri_inputs) {
 
 int main(int argc, char *argv[]) {
   char **av, *int_fname, *label_fname, *out_fname;
-  int x, y, z, f, ac, nargs, msec, minutes, seconds, nfeatures, nc, label, i,
+  int    x, y, z, f, ac, nargs, msec, minutes, seconds, nfeatures, nc, label, i,
       wsize;
-  Timer start;
-  MRI *mri_inputs, *mri_labels, *mri_tmp, *mri_out;
-  float min_label, max_label;
-  double pval;
-  VOXEL_LIST *vl;
+  Timer          start;
+  MRI *          mri_inputs, *mri_labels, *mri_tmp, *mri_out;
+  float          min_label, max_label;
+  double         pval;
+  VOXEL_LIST *   vl;
   RANDOM_FOREST *rf;
-  double **training_data, *feature;
-  int *training_classes;
-  int xi, yi, xk, yk, fno;
+  double **      training_data, *feature;
+  int *          training_classes;
+  int            xi, yi, xk, yk, fno;
 
   nargs = handleVersionOption(argc, argv, "oct_rf_train");
   if (nargs && argc - nargs == 1)
@@ -124,12 +124,12 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit(1);
 
-  wsize = whalf * 2 + 1;
-  int_fname = argv[1];
+  wsize       = whalf * 2 + 1;
+  int_fname   = argv[1];
   label_fname = argv[2];
-  out_fname = argv[3];
+  out_fname   = argv[3];
   if (FileType(int_fname) == TEXT_FILE) {
-    char line[STRLEN], *cp;
+    char  line[STRLEN], *cp;
     FILE *fp;
 
     nfeatures = FileNumberOfEntries(int_fname);
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
     mri_labels = extract_subimage(mri_labels);
   if (downsample > 0) {
     MRI *mri_tmp;
-    int i;
+    int  i;
 
     for (i = 0; i < downsample; i++) {
       mri_tmp = MRIdownsample2LabeledVolume(mri_labels, NULL);
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
     }
 
     downsample = (int)pow(2.0, downsample);
-    mri_tmp = MRIdownsampleN(mri_inputs, NULL, downsample, downsample, 1, 0);
+    mri_tmp    = MRIdownsampleN(mri_inputs, NULL, downsample, downsample, 1, 0);
     mri_inputs = mri_tmp;
     MRIwrite(mri_inputs, "i.mgz");
     MRIwrite(mri_labels, "l.mgz");
@@ -216,24 +216,24 @@ int main(int argc, char *argv[]) {
   MRIcopy(mri_inputs, mri_tmp);
   MRIfree(&mri_inputs);
   mri_inputs = mri_tmp;
-  vl = VLSTcreate(mri_labels, 1, 10000, NULL, 0, 0);
+  vl         = VLSTcreate(mri_labels, 1, 10000, NULL, 0, 0);
 
   nfeatures = mri_inputs->nframes * wsize * wsize;
   rf = RFalloc(ntrees, nfeatures, max_label + 1, max_tree_depth, class_names,
                10);
 
-  feature = (double *)calloc(nfeatures, sizeof(double));
+  feature          = (double *)calloc(nfeatures, sizeof(double));
   training_classes = (int *)calloc(vl->nvox, sizeof(int));
-  training_data = (double **)calloc(vl->nvox, sizeof(double *));
+  training_data    = (double **)calloc(vl->nvox, sizeof(double *));
   for (i = 0; i < vl->nvox; i++) {
     training_data[i] = (double *)calloc(nfeatures, sizeof(double));
     if (training_data[i] == NULL)
       ErrorExit(ERROR_NOMEMORY,
                 "%s: could not allocate %d of %d training vector\n", i,
                 vl->nvox);
-    x = vl->xi[i];
-    y = vl->yi[i];
-    z = vl->zi[i];
+    x     = vl->xi[i];
+    y     = vl->yi[i];
+    z     = vl->zi[i];
     label = MRIgetVoxVal(mri_labels, x, y, z, 0);
     if (label == OCT_SPECKLE)
       label = 0; // change background to class 0
@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
       for (xk = -whalf; xk <= whalf; xk++) {
         xi = mri_inputs->xi[x + xk];
         for (yk = -whalf; yk <= whalf; yk++, fno++) {
-          yi = mri_inputs->yi[y + yk];
+          yi                    = mri_inputs->yi[y + yk];
           training_data[i][fno] = MRIgetVoxVal(mri_inputs, xi, yi, z, f);
         }
       }
@@ -273,7 +273,7 @@ int main(int argc, char *argv[]) {
         for (xk = -whalf; xk <= whalf; xk++) {
           xi = mri_inputs->xi[x + xk];
           for (yk = -whalf; yk <= whalf; yk++, fno++) {
-            yi = mri_inputs->yi[y + yk];
+            yi           = mri_inputs->yi[y + yk];
             feature[fno] = MRIgetVoxVal(mri_inputs, xi, yi, 0, f);
           }
         }
@@ -312,7 +312,7 @@ int main(int argc, char *argv[]) {
   free(training_data);
   free(training_classes);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -327,50 +327,50 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "trees")) {
     ntrees = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("using %d trees in training random forest\n", ntrees);
   } else if (!stricmp(option, "dilate")) {
     dilate = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("dilating labels %d times and using outer ring as background\n",
            dilate);
   } else if (!stricmp(option, "depth")) {
     max_tree_depth = atoi(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("using %d max tree depth in training random forest\n",
            max_tree_depth);
   } else if (!stricmp(option, "tfrac")) {
     training_fraction = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     printf("using %2.3f training fraction in training random forest\n",
            training_fraction);
   } else
     switch (toupper(*option)) {
     case 'D':
       downsample = atoi(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("downsampling inputs %d times before training\n", downsample);
       break;
     case 'X':
       extract = atof(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       printf("setting extract to %d\n", extract);
       break;
     case 'V':
       Gdiag_no = atof(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':

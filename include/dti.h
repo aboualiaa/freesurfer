@@ -36,19 +36,19 @@ typedef struct {
   MATRIX *GradDirNorm;
   MATRIX *B;
   // These strictly relate to Siemens/MGH DTI
-  int nB0;
-  int nDir;
+  int   nB0;
+  int   nDir;
   char *GradFile;
 } DTI;
 
 const char *DTIsrcVersion();
-int DTIfree(DTI **pdti);
-int DTIparamsFromSiemensAscii(const char *fname, float *bValue, int *nDir,
-                              int *nB0);
-int DTIloadGradients(DTI *dti, const char *GradFile);
+int         DTIfree(DTI **pdti);
+int  DTIparamsFromSiemensAscii(const char *fname, float *bValue, int *nDir,
+                               int *nB0);
+int  DTIloadGradients(DTI *dti, const char *GradFile);
 DTI *DTIstructFromSiemensAscii(const char *fname);
-int DTInormGradDir(DTI *dti);
-int DTIdesignMatrix(DTI *dti);
+int  DTInormGradDir(DTI *dti);
+int  DTIdesignMatrix(DTI *dti);
 MRI *DTIbeta2Tensor(MRI *beta, MRI *mask, MRI *tensor);
 MRI *DTIbeta2LowB(MRI *beta, MRI *mask, MRI *lowb);
 MRI *DTIsynthDWI(MATRIX *X, MRI *beta, MRI *mask, MRI *synth);
@@ -60,19 +60,19 @@ MRI *DTIeigvals2RA(MRI *evals, MRI *mask, MRI *RA);
 MRI *DTIeigvals2VR(MRI *evals, MRI *mask, MRI *VR);
 MRI *DTIradialDiffusivity(MRI *evals, MRI *mask, MRI *RD);
 
-MRI *DTItensor2ADC(MRI *tensor, MRI *mask, MRI *adc);
-int DTIsortEV(float *EigVals, MATRIX *EigVecs);
-int DTIfslBValFile(DTI *dti, const char *bvalfname);
-int DTIfslBVecFile(DTI *dti, const char *bvecfname);
-MRI *DTIivc(MRI *evec, MRI *mask, MRI *ivc);
+MRI *   DTItensor2ADC(MRI *tensor, MRI *mask, MRI *adc);
+int     DTIsortEV(float *EigVals, MATRIX *EigVecs);
+int     DTIfslBValFile(DTI *dti, const char *bvalfname);
+int     DTIfslBVecFile(DTI *dti, const char *bvecfname);
+MRI *   DTIivc(MRI *evec, MRI *mask, MRI *ivc);
 MATRIX *DTIloadBValues(const char *bvalfile);
 MATRIX *DTIloadBVectors(const char *bvecfile);
-int DTIwriteBVectors(MATRIX *bvecs, const char *bvecfile);
-int DTIwriteBValues(MATRIX *bvals, const char *bvalfile);
-DTI *DTIstructFromBFiles(const char *bvalfile, const char *bvecfile);
-int DTIparsePulseSeqName(const char *pulseseq, double *bValue,
-                         int *nthDirection);
-int DTIisFSLBVec(const char *fname);
-int DTIbvecChangeSpace(MRI *vol, int desired_bvec_space);
+int     DTIwriteBVectors(MATRIX *bvecs, const char *bvecfile);
+int     DTIwriteBValues(MATRIX *bvals, const char *bvalfile);
+DTI *   DTIstructFromBFiles(const char *bvalfile, const char *bvecfile);
+int     DTIparsePulseSeqName(const char *pulseseq, double *bValue,
+                             int *nthDirection);
+int     DTIisFSLBVec(const char *fname);
+int     DTIbvecChangeSpace(MRI *vol, int desired_bvec_space);
 
 #endif //#ifndef FSENV_INC

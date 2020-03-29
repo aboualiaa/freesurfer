@@ -28,9 +28,9 @@
 
 #include "diag.h"
 #include "error.h"
-#include "mrisurf.h"
 #include "macros.h"
 #include "mri.h"
+#include "mrisurf.h"
 #include "proto.h"
 #include "voxlist.h"
 
@@ -39,13 +39,13 @@ extern const char *Progname;
 VOXEL_LIST *VLSTcreateInRegion(MRI *mri, float low_val, float hi_val,
                                VOXEL_LIST *vl, int skip, int border_only,
                                MRI_REGION *box) {
-  int x, y, z, f, nvox, i, width, height, depth;
+  int    x, y, z, f, nvox, i, width, height, depth;
   double val;
 
   skip++; /* next voxel + amount to skip */
-  width = box->x + box->dx;
+  width  = box->x + box->dx;
   height = box->y + box->dy;
-  depth = box->z + box->dz;
+  depth  = box->z + box->dz;
   for (nvox = 0, x = box->x; x < width; x += skip) {
     for (y = box->y; y < height; y += skip) {
       for (z = box->z; z < depth; z += skip) {
@@ -74,15 +74,15 @@ VOXEL_LIST *VLSTcreateInRegion(MRI *mri, float low_val, float hi_val,
     vl->xi = vl->yi = vl->zi = vl->fi = nullptr;
   }
   if (vl->xi == nullptr) {
-    vl->xd = (float *)calloc(nvox, sizeof(float));
-    vl->yd = (float *)calloc(nvox, sizeof(float));
-    vl->zd = (float *)calloc(nvox, sizeof(float));
+    vl->xd   = (float *)calloc(nvox, sizeof(float));
+    vl->yd   = (float *)calloc(nvox, sizeof(float));
+    vl->zd   = (float *)calloc(nvox, sizeof(float));
     vl->vsrc = (float *)calloc(nvox, sizeof(float));
     vl->vdst = (float *)calloc(nvox, sizeof(float));
-    vl->xi = (int *)calloc(nvox, sizeof(int));
-    vl->yi = (int *)calloc(nvox, sizeof(int));
-    vl->zi = (int *)calloc(nvox, sizeof(int));
-    vl->fi = (int *)calloc(nvox, sizeof(int));
+    vl->xi   = (int *)calloc(nvox, sizeof(int));
+    vl->yi   = (int *)calloc(nvox, sizeof(int));
+    vl->zi   = (int *)calloc(nvox, sizeof(int));
+    vl->fi   = (int *)calloc(nvox, sizeof(int));
   }
   if (!vl || !vl->xi || !vl->yi || !vl->zi || !vl->fi)
     ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d voxel list\n",
@@ -98,11 +98,11 @@ VOXEL_LIST *VLSTcreateInRegion(MRI *mri, float low_val, float hi_val,
             if (x == Gx && y == Gy && z == Gz)
               DiagBreak();
             if ((border_only == 0) || (MRIneighbors(mri, x, y, z, f) > 0)) {
-              i = nvox++;
-              vl->xi[i] = x;
-              vl->yi[i] = y;
-              vl->zi[i] = z;
-              vl->fi[i] = f;
+              i           = nvox++;
+              vl->xi[i]   = x;
+              vl->yi[i]   = y;
+              vl->zi[i]   = z;
+              vl->fi[i]   = f;
               vl->vsrc[i] = val;
             }
           }
@@ -114,7 +114,7 @@ VOXEL_LIST *VLSTcreateInRegion(MRI *mri, float low_val, float hi_val,
 }
 VOXEL_LIST *VLSTcreate(MRI *mri, float low_val, float hi_val, VOXEL_LIST *vl,
                        int skip, int border_only) {
-  int x, y, z, nvox, i, f;
+  int    x, y, z, nvox, i, f;
   double val;
 
   skip++; /* next voxel + amount to skip */
@@ -152,15 +152,15 @@ VOXEL_LIST *VLSTcreate(MRI *mri, float low_val, float hi_val, VOXEL_LIST *vl,
   if (vl->xi == nullptr) {
     if (nvox == 0)
       nvox = 1;
-    vl->xd = (float *)calloc(nvox, sizeof(float));
-    vl->yd = (float *)calloc(nvox, sizeof(float));
-    vl->zd = (float *)calloc(nvox, sizeof(float));
+    vl->xd   = (float *)calloc(nvox, sizeof(float));
+    vl->yd   = (float *)calloc(nvox, sizeof(float));
+    vl->zd   = (float *)calloc(nvox, sizeof(float));
     vl->vsrc = (float *)calloc(nvox, sizeof(float));
     vl->vdst = (float *)calloc(nvox, sizeof(float));
-    vl->xi = (int *)calloc(nvox, sizeof(int));
-    vl->yi = (int *)calloc(nvox, sizeof(int));
-    vl->zi = (int *)calloc(nvox, sizeof(int));
-    vl->fi = (int *)calloc(nvox, sizeof(int));
+    vl->xi   = (int *)calloc(nvox, sizeof(int));
+    vl->yi   = (int *)calloc(nvox, sizeof(int));
+    vl->zi   = (int *)calloc(nvox, sizeof(int));
+    vl->fi   = (int *)calloc(nvox, sizeof(int));
   }
   if (!vl || !vl->xi || !vl->yi || !vl->zi || !vl->fi)
     ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d voxel list\n",
@@ -182,10 +182,10 @@ VOXEL_LIST *VLSTcreate(MRI *mri, float low_val, float hi_val, VOXEL_LIST *vl,
                 printf("voxel (%d, %d, %d) = %2.1f added to voxlist at %d\n", x,
                        y, z, val, i);
               }
-              vl->xi[i] = x;
-              vl->yi[i] = y;
-              vl->zi[i] = z;
-              vl->fi[i] = f;
+              vl->xi[i]   = x;
+              vl->yi[i]   = y;
+              vl->zi[i]   = z;
+              vl->fi[i]   = f;
               vl->vsrc[i] = val;
             }
           }
@@ -198,7 +198,7 @@ VOXEL_LIST *VLSTcreate(MRI *mri, float low_val, float hi_val, VOXEL_LIST *vl,
 
 typedef struct {
   float vsrc, vdst, xd, yd, zd;
-  int xi, yi, zi;
+  int   xi, yi, zi;
 } SORT_VOXEL;
 
 static int compare_sort(const void *psv1, const void *psv2) {
@@ -236,7 +236,7 @@ static int compare_sort(const void *psv1, const void *psv2) {
 
 VOXEL_LIST *VLSTsort(VOXEL_LIST *vl_src, VOXEL_LIST *vl_dst) {
   SORT_VOXEL *sort_voxels;
-  int n;
+  int         n;
 
   if (vl_dst == nullptr)
     vl_dst = VLSTcopy(vl_src, nullptr, 0, vl_src->nvox);
@@ -246,26 +246,26 @@ VOXEL_LIST *VLSTsort(VOXEL_LIST *vl_src, VOXEL_LIST *vl_dst) {
     ErrorExit(ERROR_NOMEMORY, "MRIorderIndices: could not allocate sort table");
 
   for (n = 0; n < vl_dst->nvox; n++) {
-    sort_voxels[n].xi = vl_dst->xi[n];
-    sort_voxels[n].yi = vl_dst->yi[n];
-    sort_voxels[n].zi = vl_dst->zi[n];
+    sort_voxels[n].xi   = vl_dst->xi[n];
+    sort_voxels[n].yi   = vl_dst->yi[n];
+    sort_voxels[n].zi   = vl_dst->zi[n];
     sort_voxels[n].vsrc = vl_dst->vsrc[n];
     sort_voxels[n].vdst = vl_dst->vdst[n];
-    sort_voxels[n].xd = vl_dst->xd[n];
-    sort_voxels[n].yd = vl_dst->yd[n];
-    sort_voxels[n].zd = vl_dst->zd[n];
+    sort_voxels[n].xd   = vl_dst->xd[n];
+    sort_voxels[n].yd   = vl_dst->yd[n];
+    sort_voxels[n].zd   = vl_dst->zd[n];
   }
   qsort(sort_voxels, vl_dst->nvox, sizeof(SORT_VOXEL), compare_sort);
 
   for (n = 0; n < vl_dst->nvox; n++) {
-    vl_dst->xi[n] = sort_voxels[n].xi;
-    vl_dst->yi[n] = sort_voxels[n].yi;
-    vl_dst->zi[n] = sort_voxels[n].zi;
+    vl_dst->xi[n]   = sort_voxels[n].xi;
+    vl_dst->yi[n]   = sort_voxels[n].yi;
+    vl_dst->zi[n]   = sort_voxels[n].zi;
     vl_dst->vsrc[n] = sort_voxels[n].vsrc;
     vl_dst->vdst[n] = sort_voxels[n].vdst;
-    vl_dst->xd[n] = sort_voxels[n].xd;
-    vl_dst->yd[n] = sort_voxels[n].yd;
-    vl_dst->zd[n] = sort_voxels[n].zd;
+    vl_dst->xd[n]   = sort_voxels[n].xd;
+    vl_dst->yd[n]   = sort_voxels[n].yd;
+    vl_dst->zd[n]   = sort_voxels[n].zd;
   }
 
   free(sort_voxels);
@@ -274,7 +274,7 @@ VOXEL_LIST *VLSTsort(VOXEL_LIST *vl_src, VOXEL_LIST *vl_dst) {
 
 int VLSTfree(VOXEL_LIST **pvl) {
   VOXEL_LIST *vl = *pvl;
-  *pvl = nullptr;
+  *pvl           = nullptr;
 
   if (!vl)
     return (ERROR_BADPARM);
@@ -301,7 +301,7 @@ int VLSTfree(VOXEL_LIST **pvl) {
   return (NO_ERROR);
 }
 MRI *VLSTcreateMri(VOXEL_LIST *vl, int val) {
-  int i;
+  int  i;
   MRI *mri;
 
   mri = MRIalloc(vl->mri->width, vl->mri->height, vl->mri->depth, MRI_UCHAR);
@@ -325,7 +325,7 @@ MRI *VLSTaddToMri(VOXEL_LIST *vl, MRI *mri, int val) {
   return (mri);
 }
 MRI *VLSTtoMri(VOXEL_LIST *vl, MRI *mri) {
-  int i;
+  int    i;
   double val;
 
   if (mri == nullptr) {
@@ -343,7 +343,7 @@ MRI *VLSTtoMri(VOXEL_LIST *vl, MRI *mri) {
 }
 
 MRI *VLSTvsrcToMri(VOXEL_LIST *vl, MRI *mri) {
-  int i;
+  int    i;
   double val;
 
   if (mri == nullptr)
@@ -357,13 +357,13 @@ MRI *VLSTvsrcToMri(VOXEL_LIST *vl, MRI *mri) {
 }
 
 VOXEL_LIST *VLSTdilate(VOXEL_LIST *vl, int mode, MRI *mri_exclude) {
-  MRI *mri_current, *mri_new;
-  int i, xi, yi, zi, xk, yk, zk, nvox;
+  MRI *       mri_current, *mri_new;
+  int         i, xi, yi, zi, xk, yk, zk, nvox;
   VOXEL_LIST *vl_exp = nullptr;
 
   // create volume to keep track of what voxels are in current list
   mri_current = VLSTcreateMri(vl, 1);
-  mri_new = MRIclone(mri_current, nullptr);
+  mri_new     = MRIclone(mri_current, nullptr);
 
   // count how many vox will be in new list
   for (nvox = i = 0; i < vl->nvox; i++) {
@@ -389,13 +389,13 @@ VOXEL_LIST *VLSTdilate(VOXEL_LIST *vl, int mode, MRI *mri_exclude) {
     return (nullptr);
 
   if (mode == VL_DILATE_ADD) {
-    vl_exp = (VOXEL_LIST *)calloc(1, sizeof(VOXEL_LIST));
-    vl_exp->nvox = vl->nvox + nvox;
+    vl_exp          = (VOXEL_LIST *)calloc(1, sizeof(VOXEL_LIST));
+    vl_exp->nvox    = vl->nvox + nvox;
     vl_exp->max_vox = vl->nvox + nvox;
-    vl_exp->mri = vl->mri;
-    vl_exp->xi = (int *)calloc(vl->nvox + nvox, sizeof(int));
-    vl_exp->yi = (int *)calloc(vl->nvox + nvox, sizeof(int));
-    vl_exp->zi = (int *)calloc(vl->nvox + nvox, sizeof(int));
+    vl_exp->mri     = vl->mri;
+    vl_exp->xi      = (int *)calloc(vl->nvox + nvox, sizeof(int));
+    vl_exp->yi      = (int *)calloc(vl->nvox + nvox, sizeof(int));
+    vl_exp->zi      = (int *)calloc(vl->nvox + nvox, sizeof(int));
     if (!vl_exp || !vl_exp->xi || !vl_exp->yi || !vl_exp->zi)
       ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d voxel list\n",
                 Progname, nvox);
@@ -406,12 +406,12 @@ VOXEL_LIST *VLSTdilate(VOXEL_LIST *vl, int mode, MRI *mri_exclude) {
     }
     nvox = vl->nvox;
   } else if (mode == VL_DILATE_REPLACE) {
-    vl_exp = (VOXEL_LIST *)calloc(1, sizeof(VOXEL_LIST));
+    vl_exp       = (VOXEL_LIST *)calloc(1, sizeof(VOXEL_LIST));
     vl_exp->nvox = vl_exp->max_vox = nvox;
-    vl_exp->mri = vl->mri;
-    vl_exp->xi = (int *)calloc(nvox, sizeof(int));
-    vl_exp->yi = (int *)calloc(nvox, sizeof(int));
-    vl_exp->zi = (int *)calloc(nvox, sizeof(int));
+    vl_exp->mri                    = vl->mri;
+    vl_exp->xi                     = (int *)calloc(nvox, sizeof(int));
+    vl_exp->yi                     = (int *)calloc(nvox, sizeof(int));
+    vl_exp->zi                     = (int *)calloc(nvox, sizeof(int));
     if (!vl_exp || !vl_exp->xi || !vl_exp->yi || !vl_exp->zi)
       ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d voxel list\n",
                 Progname, nvox);
@@ -427,9 +427,9 @@ VOXEL_LIST *VLSTdilate(VOXEL_LIST *vl, int mode, MRI *mri_exclude) {
           if (MRIvox(mri_new, xi, yi, zi) == 1) // add it
           {
             MRIvox(mri_new, xi, yi, zi) = 0; // only add it once
-            vl_exp->xi[nvox] = xi;
-            vl_exp->yi[nvox] = yi;
-            vl_exp->zi[nvox] = zi;
+            vl_exp->xi[nvox]            = xi;
+            vl_exp->yi[nvox]            = yi;
+            vl_exp->zi[nvox]            = zi;
             nvox++;
           }
         }
@@ -445,13 +445,13 @@ VOXEL_LIST *VLSTdilate(VOXEL_LIST *vl, int mode, MRI *mri_exclude) {
 
 void VLSTcomputeStats(VOXEL_LIST *vl) {
   double mean = 0;
-  double std = 0;
-  int i;
+  double std  = 0;
+  int    i;
   double val;
 
   if (vl->mri == nullptr || vl->nvox <= 0) {
     vl->mean = 0;
-    vl->std = 0;
+    vl->std  = 0;
     return;
   }
 
@@ -467,21 +467,21 @@ void VLSTcomputeStats(VOXEL_LIST *vl) {
   std = sqrt(std - mean * mean);
 
   vl->mean = mean;
-  vl->std = std;
+  vl->std  = std;
 
   return;
 }
 int VLSTtransform(VOXEL_LIST *vl, MATRIX *m, MRI *mri, int sample_type) {
   double val, xd, yd, zd;
-  int i;
+  int    i;
 
   VLSTtransformCoords(vl, m, 0);
   for (i = 0; i < vl->nvox; i++) {
-    val = MRIgetVoxVal(vl->mri, vl->xi[i], vl->yi[i], vl->zi[i], 0);
+    val         = MRIgetVoxVal(vl->mri, vl->xi[i], vl->yi[i], vl->zi[i], 0);
     vl->vsrc[i] = val;
-    xd = vl->xd[i];
-    yd = vl->yd[i];
-    zd = vl->zd[i];
+    xd          = vl->xd[i];
+    yd          = vl->yd[i];
+    zd          = vl->zd[i];
     if (xd < 0)
       xd = 0;
     else if (xd >= mri->width - 1)
@@ -503,14 +503,14 @@ int VLSTtransform(VOXEL_LIST *vl, MATRIX *m, MRI *mri, int sample_type) {
   return (NO_ERROR);
 }
 int VLSTtransformCoords(VOXEL_LIST *vl, MATRIX *m, int skip) {
-  double xd, yd, zd, val;
-  int i, x, y, z;
+  double         xd, yd, zd, val;
+  int            i, x, y, z;
   static VECTOR *v1 = nullptr, *v2;
 
   skip++; // skip=0 means do every one
   if (v1 == nullptr) {
-    v1 = VectorAlloc(4, MATRIX_REAL);
-    v2 = VectorAlloc(4, MATRIX_REAL);
+    v1                     = VectorAlloc(4, MATRIX_REAL);
+    v2                     = VectorAlloc(4, MATRIX_REAL);
     *MATRIX_RELT(v1, 4, 1) = 1.0;
     *MATRIX_RELT(v2, 4, 1) = 1.0;
   }
@@ -520,16 +520,16 @@ int VLSTtransformCoords(VOXEL_LIST *vl, MATRIX *m, int skip) {
     y = vl->yi[i];
     z = vl->zi[i];
     if (vl->mri) {
-      val = MRIgetVoxVal(vl->mri, x, y, z, 0);
+      val         = MRIgetVoxVal(vl->mri, x, y, z, 0);
       vl->vsrc[i] = val;
     }
     V3_X(v1) = x;
     V3_Y(v1) = y;
     V3_Z(v1) = z;
     MatrixMultiply(m, v1, v2);
-    xd = V3_X(v2);
-    yd = V3_Y(v2);
-    zd = V3_Z(v2);
+    xd        = V3_X(v2);
+    yd        = V3_Y(v2);
+    zd        = V3_Z(v2);
     vl->xd[i] = xd;
     vl->yd[i] = yd;
     vl->zd[i] = zd;
@@ -539,7 +539,7 @@ int VLSTtransformCoords(VOXEL_LIST *vl, MATRIX *m, int skip) {
 
 VOXEL_LIST *VLSTcreateFromDifference(MRI *mri1, MRI *mri2, VOXEL_LIST *vl,
                                      int target_label) {
-  int x, y, z, f, nvox, i;
+  int    x, y, z, f, nvox, i;
   double val1, val2;
 
   for (nvox = f = 0; f < mri1->nframes; f++)
@@ -575,15 +575,15 @@ VOXEL_LIST *VLSTcreateFromDifference(MRI *mri1, MRI *mri2, VOXEL_LIST *vl,
     vl->xi = vl->yi = vl->zi = vl->fi = nullptr;
   }
   if (vl->xi == nullptr) {
-    vl->xd = (float *)calloc(nvox, sizeof(float));
-    vl->yd = (float *)calloc(nvox, sizeof(float));
-    vl->zd = (float *)calloc(nvox, sizeof(float));
-    vl->vsrc = (float *)calloc(nvox, sizeof(float));
-    vl->vdst = (float *)calloc(nvox, sizeof(float));
-    vl->xi = (int *)calloc(nvox, sizeof(int));
-    vl->yi = (int *)calloc(nvox, sizeof(int));
-    vl->zi = (int *)calloc(nvox, sizeof(int));
-    vl->fi = (int *)calloc(nvox, sizeof(int));
+    vl->xd      = (float *)calloc(nvox, sizeof(float));
+    vl->yd      = (float *)calloc(nvox, sizeof(float));
+    vl->zd      = (float *)calloc(nvox, sizeof(float));
+    vl->vsrc    = (float *)calloc(nvox, sizeof(float));
+    vl->vdst    = (float *)calloc(nvox, sizeof(float));
+    vl->xi      = (int *)calloc(nvox, sizeof(int));
+    vl->yi      = (int *)calloc(nvox, sizeof(int));
+    vl->zi      = (int *)calloc(nvox, sizeof(int));
+    vl->fi      = (int *)calloc(nvox, sizeof(int));
     vl->max_vox = nvox;
   }
   if (!vl || !vl->xi || !vl->yi || !vl->zi)
@@ -606,11 +606,11 @@ VOXEL_LIST *VLSTcreateFromDifference(MRI *mri1, MRI *mri2, VOXEL_LIST *vl,
               (!FEQUAL(target_label, val1) && !FEQUAL(target_label, val2)))
             continue;
           if (!FEQUAL(val1, val2)) {
-            i = nvox++;
-            vl->xi[i] = x;
-            vl->yi[i] = y;
-            vl->zi[i] = z;
-            vl->fi[i] = f;
+            i           = nvox++;
+            vl->xi[i]   = x;
+            vl->yi[i]   = y;
+            vl->zi[i]   = z;
+            vl->fi[i]   = f;
             vl->vsrc[i] = val1;
             vl->vdst[i] = val2;
           }
@@ -618,7 +618,7 @@ VOXEL_LIST *VLSTcreateFromDifference(MRI *mri1, MRI *mri2, VOXEL_LIST *vl,
       }
     }
 
-  vl->mri = mri1;
+  vl->mri  = mri1;
   vl->mri2 = mri2;
   return (vl);
 }
@@ -629,16 +629,16 @@ VOXEL_LIST *VLSTalloc(int nvox) {
   if (vl == nullptr)
     ErrorExit(ERROR_NOMEMORY, "VLSTalloc(%d): could not allocate VL struct",
               nvox);
-  vl->xd = (float *)calloc(nvox, sizeof(float));
-  vl->yd = (float *)calloc(nvox, sizeof(float));
-  vl->zd = (float *)calloc(nvox, sizeof(float));
-  vl->vsrc = (float *)calloc(nvox, sizeof(float));
-  vl->vdst = (float *)calloc(nvox, sizeof(float));
-  vl->xi = (int *)calloc(nvox, sizeof(int));
-  vl->yi = (int *)calloc(nvox, sizeof(int));
-  vl->zi = (int *)calloc(nvox, sizeof(int));
-  vl->fi = (int *)calloc(nvox, sizeof(int));
-  vl->nvox = nvox;
+  vl->xd      = (float *)calloc(nvox, sizeof(float));
+  vl->yd      = (float *)calloc(nvox, sizeof(float));
+  vl->zd      = (float *)calloc(nvox, sizeof(float));
+  vl->vsrc    = (float *)calloc(nvox, sizeof(float));
+  vl->vdst    = (float *)calloc(nvox, sizeof(float));
+  vl->xi      = (int *)calloc(nvox, sizeof(int));
+  vl->yi      = (int *)calloc(nvox, sizeof(int));
+  vl->zi      = (int *)calloc(nvox, sizeof(int));
+  vl->fi      = (int *)calloc(nvox, sizeof(int));
+  vl->nvox    = nvox;
   vl->max_vox = nvox;
   if (vl->xi == nullptr || vl->yi == nullptr || vl->zi == nullptr ||
       vl->fi == nullptr || vl->xd == nullptr || vl->yd == nullptr ||
@@ -752,7 +752,7 @@ int VLSTaddWithValue(VOXEL_LIST *vl, int x, int y, int z, float xd, float yd,
                      float zd, float vsrc, float vdst) {
   if (VLSTadd(vl, x, y, z, xd, yd, zd) == NO_ERROR) {
     int ind;
-    ind = vl->nvox - 1;
+    ind           = vl->nvox - 1;
     vl->vdst[ind] = vdst;
     vl->vsrc[ind] = vsrc;
   } else
@@ -785,8 +785,8 @@ int VLSTinList(VOXEL_LIST *vl, int x, int y, int z) {
 
 VOXEL_LIST *VLSTsplineFit(VOXEL_LIST *vl, int num_control) {
   VOXEL_LIST *vl_spline;
-  int k, i, km1, kp1;
-  float len, total_len, dx, dy, dz, tx, ty, tz;
+  int         k, i, km1, kp1;
+  float       len, total_len, dx, dy, dz, tx, ty, tz;
 
   if (num_control > vl->nvox)
     ErrorReturn(NULL, (ERROR_BADPARM,
@@ -794,12 +794,12 @@ VOXEL_LIST *VLSTsplineFit(VOXEL_LIST *vl, int num_control) {
                        "%d control points",
                        vl->nvox, num_control));
 
-  vl_spline = VLSTalloc(num_control);
+  vl_spline       = VLSTalloc(num_control);
   vl_spline->type = VOXLIST_SPLINE;
-  vl_spline->mx = (float *)calloc(num_control, sizeof(float));
-  vl_spline->my = (float *)calloc(num_control, sizeof(float));
-  vl_spline->mz = (float *)calloc(num_control, sizeof(float));
-  vl_spline->t = (float *)calloc(num_control, sizeof(float));
+  vl_spline->mx   = (float *)calloc(num_control, sizeof(float));
+  vl_spline->my   = (float *)calloc(num_control, sizeof(float));
+  vl_spline->mz   = (float *)calloc(num_control, sizeof(float));
+  vl_spline->t    = (float *)calloc(num_control, sizeof(float));
   if (vl_spline->t == nullptr || vl_spline->mx == nullptr ||
       vl_spline->my == nullptr || vl_spline->mz == nullptr)
     ErrorExit(ERROR_NOMEMORY,
@@ -809,34 +809,34 @@ VOXEL_LIST *VLSTsplineFit(VOXEL_LIST *vl, int num_control) {
   for (k = 0; k < num_control; k++) {
     i = nint((float)k * (float)(vl->nvox - 1) / (float)(num_control - 1));
 
-    vl_spline->xi[k] = vl->xi[i];
-    vl_spline->yi[k] = vl->yi[i];
-    vl_spline->zi[k] = vl->zi[i];
-    vl_spline->fi[k] = vl->fi[i];
+    vl_spline->xi[k]   = vl->xi[i];
+    vl_spline->yi[k]   = vl->yi[i];
+    vl_spline->zi[k]   = vl->zi[i];
+    vl_spline->fi[k]   = vl->fi[i];
     vl_spline->vsrc[k] = vl->vsrc[i];
     vl_spline->vdst[k] = vl->vdst[i];
-    vl_spline->xd[k] = vl->xd[i];
-    vl_spline->yd[k] = vl->yd[i];
-    vl_spline->zd[k] = vl->zd[i];
+    vl_spline->xd[k]   = vl->xd[i];
+    vl_spline->yd[k]   = vl->yd[i];
+    vl_spline->zd[k]   = vl->zd[i];
   }
 
   // compute total length of control point line segments
   for (total_len = k = 0; k < num_control - 1; k++) {
-    dx = vl_spline->xd[k + 1] - vl_spline->xd[k];
-    dy = vl_spline->yd[k + 1] - vl_spline->yd[k];
-    dz = vl_spline->zd[k + 1] - vl_spline->zd[k];
+    dx  = vl_spline->xd[k + 1] - vl_spline->xd[k];
+    dy  = vl_spline->yd[k + 1] - vl_spline->yd[k];
+    dz  = vl_spline->zd[k + 1] - vl_spline->zd[k];
     len = sqrt(dx * dx + dy * dy + dz * dz);
     total_len += len;
   }
 
   // compute parameterization
-  vl_spline->t[0] = 0;
+  vl_spline->t[0]               = 0;
   vl_spline->t[num_control - 1] = 1;
   for (k = 1; k < num_control - 1; k++) {
-    dx = vl_spline->xd[k] - vl_spline->xd[k - 1];
-    dy = vl_spline->yd[k] - vl_spline->yd[k - 1];
-    dz = vl_spline->zd[k] - vl_spline->zd[k - 1];
-    len = sqrt(dx * dx + dy * dy + dz * dz);
+    dx              = vl_spline->xd[k] - vl_spline->xd[k - 1];
+    dy              = vl_spline->yd[k] - vl_spline->yd[k - 1];
+    dz              = vl_spline->zd[k] - vl_spline->zd[k - 1];
+    len             = sqrt(dx * dx + dy * dy + dz * dz);
     vl_spline->t[k] = len / total_len;
   }
 
@@ -873,7 +873,7 @@ int VLSTwriteLabel(VOXEL_LIST *vl, char *fname, MRI_SURFACE *mris, MRI *mri) {
   return (NO_ERROR);
 }
 LABEL *VLSTtoLabel(VOXEL_LIST *vl, MRI_SURFACE *mris, MRI *mri) {
-  int n;
+  int    n;
   LABEL *area = LabelAlloc(vl->nvox, nullptr, "");
   double xs, ys, zs;
 
@@ -881,9 +881,9 @@ LABEL *VLSTtoLabel(VOXEL_LIST *vl, MRI_SURFACE *mris, MRI *mri) {
     for (n = 0; n < vl->nvox; n++) {
       MRISsurfaceRASFromVoxel(mris, mri, (double)vl->xd[n], (double)vl->yd[n],
                               (double)vl->zd[n], &xs, &ys, &zs);
-      area->lv[n].x = xs;
-      area->lv[n].y = ys;
-      area->lv[n].z = zs;
+      area->lv[n].x    = xs;
+      area->lv[n].y    = ys;
+      area->lv[n].z    = zs;
       area->lv[n].stat = vl->vsrc[n];
     }
   } else // use scanner coords
@@ -891,9 +891,9 @@ LABEL *VLSTtoLabel(VOXEL_LIST *vl, MRI_SURFACE *mris, MRI *mri) {
     for (n = 0; n < vl->nvox; n++) {
       MRIvoxelToWorld(mri, (double)vl->xd[n], (double)vl->yd[n],
                       (double)vl->zd[n], &xs, &ys, &zs);
-      area->lv[n].x = xs;
-      area->lv[n].y = ys;
-      area->lv[n].z = zs;
+      area->lv[n].x    = xs;
+      area->lv[n].y    = ys;
+      area->lv[n].z    = zs;
       area->lv[n].stat = vl->vsrc[n];
     }
     sprintf(area->space, "coords=scanner");
@@ -904,20 +904,20 @@ LABEL *VLSTtoLabel(VOXEL_LIST *vl, MRI_SURFACE *mris, MRI *mri) {
 }
 
 VOXEL_LIST *VLSTinterpolate(VOXEL_LIST *vl, float spacing) {
-  int k, nvox, km1, kp1;
+  int         k, nvox, km1, kp1;
   VOXEL_LIST *vl_interp;
   float x_k, y_k, z_k, x_kp1, y_kp1, z_kp1, x, y, z, t, dx, dy, dz, mx_k, my_k,
       mz_k, mx_kp1, my_kp1, mz_kp1, len;
 
   // compute slopes, and # of points in interpolated spline
   if (vl->mx == nullptr) {
-    int km1, kp1;
+    int    km1, kp1;
     double dx, dy, dz;
 
     vl->mx = (float *)calloc(vl->nvox, sizeof(float));
     vl->my = (float *)calloc(vl->nvox, sizeof(float));
     vl->mz = (float *)calloc(vl->nvox, sizeof(float));
-    vl->t = (float *)calloc(vl->nvox, sizeof(float));
+    vl->t  = (float *)calloc(vl->nvox, sizeof(float));
     if (vl->t == nullptr || vl->mx == nullptr || vl->my == nullptr ||
         vl->mz == nullptr)
       ErrorExit(ERROR_BADPARM, "VLSTinterpolate: cannot allocate slopes");
@@ -930,9 +930,9 @@ VOXEL_LIST *VLSTinterpolate(VOXEL_LIST *vl, float spacing) {
         kp1 = vl->nvox - 1;
       else
         kp1 = k + 1;
-      dx = vl->xd[kp1] - vl->xd[km1];
-      dy = vl->yd[kp1] - vl->yd[km1];
-      dz = vl->zd[kp1] - vl->zd[km1];
+      dx        = vl->xd[kp1] - vl->xd[km1];
+      dy        = vl->yd[kp1] - vl->yd[km1];
+      dz        = vl->zd[kp1] - vl->zd[km1];
       vl->mx[k] = dx / 2;
       vl->my[k] = dy / 2;
       vl->mz[k] = dz / 2;
@@ -957,39 +957,39 @@ VOXEL_LIST *VLSTinterpolate(VOXEL_LIST *vl, float spacing) {
     vl->my[k] = dy / 2;
     vl->mz[k] = dz / 2;
 
-    x_k = vl->xd[k];
-    y_k = vl->yd[k];
-    z_k = vl->zd[k];
+    x_k   = vl->xd[k];
+    y_k   = vl->yd[k];
+    z_k   = vl->zd[k];
     x_kp1 = vl->xd[k + 1];
     y_kp1 = vl->yd[k + 1];
     z_kp1 = vl->zd[k + 1];
-    dx = x_kp1 - x_k;
-    dy = y_kp1 - y_k;
-    dz = z_kp1 - z_k;
-    len = sqrt(dx * dx + dy * dy + dz * dz);
+    dx    = x_kp1 - x_k;
+    dy    = y_kp1 - y_k;
+    dz    = z_kp1 - z_k;
+    len   = sqrt(dx * dx + dy * dy + dz * dz);
     if (FZERO(len))
       continue;
     nvox += ceil(len / spacing) + 1;
   }
 
-  vl_interp = VLSTalloc(nvox + 1);
+  vl_interp       = VLSTalloc(nvox + 1);
   vl_interp->nvox = 0;
   for (k = 0; k < vl->nvox - 1; k++) {
-    x_k = vl->xd[k];
-    y_k = vl->yd[k];
-    z_k = vl->zd[k];
+    x_k   = vl->xd[k];
+    y_k   = vl->yd[k];
+    z_k   = vl->zd[k];
     x_kp1 = vl->xd[k + 1];
     y_kp1 = vl->yd[k + 1];
     z_kp1 = vl->zd[k + 1];
-    dx = x_kp1 - x_k;
-    dy = y_kp1 - y_k;
-    dz = z_kp1 - z_k;
-    len = sqrt(dx * dx + dy * dy + dz * dz);
+    dx    = x_kp1 - x_k;
+    dy    = y_kp1 - y_k;
+    dz    = z_kp1 - z_k;
+    len   = sqrt(dx * dx + dy * dy + dz * dz);
     if (FZERO(len))
       continue;
-    mx_k = vl->mx[k];
-    my_k = vl->my[k];
-    mz_k = vl->mz[k];
+    mx_k   = vl->mx[k];
+    my_k   = vl->my[k];
+    mz_k   = vl->mz[k];
     mx_kp1 = vl->mx[k + 1];
     my_kp1 = vl->my[k + 1];
     mz_kp1 = vl->mz[k + 1];
@@ -1030,10 +1030,10 @@ MRI *VLSTwriteOrderToMRI(VOXEL_LIST *vl, MRI *mri) {
 }
 VOXEL_LIST *VLSTfromMRI(MRI *mri, int vno) {
   VOXEL_LIST *vl;
-  int n;
-  double xd, yd, zd;
+  int         n;
+  double      xd, yd, zd;
 
-  vl = VLSTalloc(mri->height);
+  vl       = VLSTalloc(mri->height);
   vl->nvox = 0;
   for (n = 0; n < vl->max_vox; n++) {
     xd = MRIgetVoxVal(mri, vno, n, 0, 0);
@@ -1067,7 +1067,7 @@ int VLSTinterpolateIntoVolume(VOXEL_LIST *vl, MRI *mri, float val) {
 
 double VLSTcomputeEntropy(VOXEL_LIST *vl, MRI *mri, int num) {
   double val, entropy, total;
-  int n;
+  int    n;
 
   for (total = 0.0, n = 0; n < vl->nvox; n++) {
     val = MRIgetVoxVal(mri, vl->xi[n], vl->yi[n], vl->zi[n], 0);
@@ -1089,8 +1089,8 @@ double VLSTcomputeEntropy(VOXEL_LIST *vl, MRI *mri, int num) {
 double VLSTcomputeSplineMean(VOXEL_LIST *vl_spline, MRI *mri,
                              double step_size) {
   VOXEL_LIST *vl = VLSTinterpolate(vl_spline, step_size);
-  double mean, val;
-  int n;
+  double      mean, val;
+  int         n;
 
   for (mean = 0.0, n = 0; n < vl->nvox; n++) {
     val = MRIgetVoxVal(mri, vl->xi[n], vl->yi[n], vl->zi[n], 0);
@@ -1108,8 +1108,8 @@ double VLSTcomputeSplineMean(VOXEL_LIST *vl_spline, MRI *mri,
 float VLSTcomputeSplineMedian(VOXEL_LIST *vl_spline, MRI *mri,
                               double step_size) {
   VOXEL_LIST *vl = VLSTinterpolate(vl_spline, step_size);
-  float *vals, median;
-  int n;
+  float *     vals, median;
+  int         n;
 
   vals = (float *)calloc(vl->nvox, sizeof(float));
   for (n = 0; n < vl->nvox; n++) {
@@ -1128,8 +1128,8 @@ float VLSTcomputeSplineMedian(VOXEL_LIST *vl_spline, MRI *mri,
 double VLSTcomputeSplineSegmentMean(VOXEL_LIST *vl_spline, MRI *mri,
                                     double step_size, int start, int stop) {
   VOXEL_LIST *vl = VLSTinterpolate(vl_spline, step_size);
-  double mean, val;
-  int n;
+  double      mean, val;
+  int         n;
 
   if (stop >= vl->nvox - 1)
     stop = vl->nvox - 1;
@@ -1150,9 +1150,9 @@ double VLSTcomputeSplineSegmentMean(VOXEL_LIST *vl_spline, MRI *mri,
 
 double VLSTrmsDistance(VOXEL_LIST *vl1, VOXEL_LIST *vl2, double max_dist,
                        MRI **pmri_dist) {
-  MRI *mri_dist;
+  MRI *  mri_dist;
   double dist, rms;
-  int i;
+  int    i;
 
   if (*pmri_dist == nullptr) {
     MRI *mri_tmp;
@@ -1180,9 +1180,9 @@ double VLSTrmsDistance(VOXEL_LIST *vl1, VOXEL_LIST *vl2, double max_dist,
 
 double VLSThausdorffDistance(VOXEL_LIST *vl1, VOXEL_LIST *vl2, double max_dist,
                              MRI **pmri_dist) {
-  MRI *mri_dist;
+  MRI *  mri_dist;
   double dist, hdist;
-  int i;
+  int    i;
 
   if (*pmri_dist == nullptr) {
     MRI *mri_tmp;
@@ -1210,15 +1210,15 @@ double VLSThausdorffDistance(VOXEL_LIST *vl1, VOXEL_LIST *vl2, double max_dist,
 }
 double VLSTmean(VOXEL_LIST *vl, MRI *mri, double *pvar) {
   double mean, var, val;
-  int x, y, z, f, n;
+  int    x, y, z, f, n;
 
   if (mri == nullptr)
     mri = vl->mri;
   for (mean = var = 0.0, n = 0; n < vl->nvox; n++) {
-    x = vl->xi[n];
-    y = vl->yi[n];
-    z = vl->zi[n];
-    f = vl->fi[n];
+    x   = vl->xi[n];
+    y   = vl->yi[n];
+    z   = vl->zi[n];
+    f   = vl->fi[n];
     val = MRIgetVoxVal(mri, x, y, z, f);
     var += val * val;
     mean += val;
@@ -1232,7 +1232,7 @@ double VLSTmean(VOXEL_LIST *vl, MRI *mri, double *pvar) {
 
 int VLSTsample(VOXEL_LIST *vl, MRI *mri) {
   double val;
-  int x, y, z, f, n;
+  int    x, y, z, f, n;
 
   if (mri == nullptr)
     mri = vl->mri;
@@ -1252,7 +1252,7 @@ int VLSTsample(VOXEL_LIST *vl, MRI *mri) {
 int VLSTsampleFloat(VOXEL_LIST *vl, MRI *mri) {
   double val;
   double x, y, z;
-  int n, f;
+  int    n, f;
 
   if (mri == nullptr)
     mri = vl->mri;
@@ -1286,7 +1286,7 @@ int VLmostCommonLabel(VOXEL_LIST *vl) {
   for (max_label_count = max_label = n = 0; n <= max_label; n++)
     if (label_counts[n] > max_label_count) {
       max_label_count = label_counts[n];
-      max_label = n;
+      max_label       = n;
     }
   return (max_label);
 }

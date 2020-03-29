@@ -28,12 +28,12 @@
 #ifndef vtkKWQdecView_h
 #define vtkKWQdecView_h
 
+#include "FsgdfPlot.h"
+#include "vtkInteractorStyleTrackballCamera.h"
+#include "vtkKWRenderWidget.h"
+#include "vtkSmartPointer.h"
 #include <map>
 #include <string>
-#include "vtkKWRenderWidget.h"
-#include "vtkInteractorStyleTrackballCamera.h"
-#include "vtkSmartPointer.h"
-#include "FsgdfPlot.h"
 
 // BTX
 class QdecVertexAnnotationLookup;
@@ -105,11 +105,11 @@ public:
   // This is the overlay color scalars and color map. They are
   // assigned to a translucent surface that's just a little bit
   // inflated, floating over the main surface geometry.
-  void SetSurfaceOverlayScalarsAndColors(vtkFloatArray *iScalars,
+  void SetSurfaceOverlayScalarsAndColors(vtkFloatArray *     iScalars,
                                          vtkScalarsToColors *iColors);
 
   // Get and set the opacity of the overlay surface.
-  void SetSurfaceOverlayOpacity(double iOpacity);
+  void   SetSurfaceOverlayOpacity(double iOpacity);
   double GetSurfaceOverlayOpacity();
 
   // This color table will be used for the ScalarBar legend.
@@ -180,19 +180,19 @@ protected:
 
   // Pipeline objects.
   vtkSmartPointer<vtkFSSurfaceSource> mCurrentSurfaceSource;
-  vtkSmartPointer<vtkPolyDataMapper> mSurfaceMapper;
-  vtkSmartPointer<vtkActor> mSurfaceActor;
-  vtkSmartPointer<vtkScalarBarActor> mScalarBar;
-  vtkSmartPointer<vtkCursor3D> mCursor;
+  vtkSmartPointer<vtkPolyDataMapper>  mSurfaceMapper;
+  vtkSmartPointer<vtkActor>           mSurfaceActor;
+  vtkSmartPointer<vtkScalarBarActor>  mScalarBar;
+  vtkSmartPointer<vtkCursor3D>        mCursor;
   vtkSmartPointer<vtkInflatePolyData> mSurfaceOverlayInflator;
-  vtkSmartPointer<vtkPolyDataMapper> mSurfaceOverlayMapper;
-  vtkSmartPointer<vtkActor> mSurfaceOverlayActor;
-  vtkSmartPointer<vtkPoints> mSurfaceSelectionPoints;
-  vtkSmartPointer<vtkCellArray> mSurfaceSelectionLines;
-  vtkSmartPointer<vtkPolyData> mSurfaceSelectionPolyData;
-  vtkSmartPointer<vtkPolyData> mROIPolyData;
-  vtkSmartPointer<vtkPolyDataMapper> mROIMapper;
-  vtkSmartPointer<vtkActor> mROIActor;
+  vtkSmartPointer<vtkPolyDataMapper>  mSurfaceOverlayMapper;
+  vtkSmartPointer<vtkActor>           mSurfaceOverlayActor;
+  vtkSmartPointer<vtkPoints>          mSurfaceSelectionPoints;
+  vtkSmartPointer<vtkCellArray>       mSurfaceSelectionLines;
+  vtkSmartPointer<vtkPolyData>        mSurfaceSelectionPolyData;
+  vtkSmartPointer<vtkPolyData>        mROIPolyData;
+  vtkSmartPointer<vtkPolyDataMapper>  mROIMapper;
+  vtkSmartPointer<vtkActor>           mROIActor;
 
   FsgdfPlot *mVertexPlot;
 
@@ -200,21 +200,21 @@ protected:
   // curvature and the overlay, we need to have separate arrays for
   // the values we're actually displaying and the values we want to
   // use as the value legend and scalar bar legend.
-  vtkSmartPointer<vtkFloatArray> mCurrentScalars;            // These have
+  vtkSmartPointer<vtkFloatArray>      mCurrentScalars;       // These have
   vtkSmartPointer<vtkScalarsToColors> mCurrentScalarsColors; // curv + overlay
 
-  vtkSmartPointer<vtkFloatArray> mCurrentLookupScalars;     // These have
-  vtkSmartPointer<vtkScalarsToColors> mCurrentLegendColors; // just overlay
+  vtkSmartPointer<vtkFloatArray>      mCurrentLookupScalars; // These have
+  vtkSmartPointer<vtkScalarsToColors> mCurrentLegendColors;  // just overlay
 
   // vtkSmartPointer<These scalars and colors are for the overlay surface.
-  vtkSmartPointer<vtkFloatArray> mCurrentOverlayScalars;
+  vtkSmartPointer<vtkFloatArray>      mCurrentOverlayScalars;
   vtkSmartPointer<vtkScalarsToColors> mCurrentOverlayColors;
 
   // Our position to go to when we hit RestoreView.
   double mDefaultPosition[3];
   double mDefaultFocalPoint[3];
   double mDefaultViewUp[3];
-  float mDefaultZoom;
+  float  mDefaultZoom;
 
   // The currently selected vertex at the cursor. We use this to sync
   // the cursor when switching surfaces.
@@ -228,8 +228,8 @@ protected:
 
   // For keeping track of the lines we're drawing.
   bool mbInSelection;
-  int mnFirstVertexInPath;
-  int mnLastVertexInPath;
+  int  mnFirstVertexInPath;
+  int  mnLastVertexInPath;
 
   // Our InteractorStyle. It's based on the trackball camera so it
   // does all that stuff, but we also listen to some mouse downs for
@@ -239,16 +239,16 @@ protected:
   class ViewInteractor : public vtkInteractorStyleTrackballCamera {
   public:
     static ViewInteractor *New();
-    void SetView(vtkKWQdecView *iView);
-    void OnLeftButtonDown();
-    void OnLeftButtonUp();
-    void OnMouseMove();
-    int GetVertexAtPicker();
+    void                   SetView(vtkKWQdecView *iView);
+    void                   OnLeftButtonDown();
+    void                   OnLeftButtonUp();
+    void                   OnMouseMove();
+    int                    GetVertexAtPicker();
 
   protected:
     ViewInteractor();
     vtkSmartPointer<vtkKWQdecView> mView;
-    int mnButtonDown;
+    int                            mnButtonDown;
   };
   // ETX
 };

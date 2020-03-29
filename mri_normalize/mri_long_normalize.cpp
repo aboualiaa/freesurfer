@@ -28,14 +28,14 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "mrinorm.h"
 #include "tags.h"
 #include "version.h"
-#include "cma.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(int code);
 static MRI *find_control_points_always_in_WM(MRI *mri_aseg, MRI *mri_ctrl);
 static MRI *remove_points_not_in_range(MRI *mri_brain, MRI *mri_ctrl_src,
@@ -53,34 +53,32 @@ static float min_intensity = 95 ;
 static int intensity_pad = 2;
 
 static char *mask_fname = nullptr;
-static char *aseg_name = "aseg.mgz";
+static char *aseg_name  = "aseg.mgz";
 static char *brain_name = "brain.mgz";
 
 static char *control_volume_fname = nullptr;
 ;
-static char *bias_volume_fname = nullptr;
+static char *bias_volume_fname   = nullptr;
 static char *control_point_fname = nullptr;
-static float bias_sigma = 1.0;
-static float cross_time_sigma = -1;
+static float bias_sigma          = 1.0;
+static float cross_time_sigma    = -1;
 
 const char *Progname;
 
 #define MAX_TPS 1000
 
-int
-main(int argc, char *argv[])
-{
-  char   *tp_fname, *in_fname, *out_fname, *tp_names[MAX_TPS] ;
-  int    nargs, t, ntps ;
-  char line[STRLEN], *cp, fname[STRLEN], bdir[STRLEN], *bname, sdir[STRLEN] ;
-  MRI   *mri_norm = NULL, *mri_aseg = NULL, *mri_ctrl, *mri_bias, *mri_dst, *mri_brain = NULL ;
-  FILE  *fp ;
-  LTA   *ltas[MAX_TPS] ;
+int main(int argc, char *argv[]) {
+  char *tp_fname, *in_fname, *out_fname, *tp_names[MAX_TPS];
+  int   nargs, t, ntps;
+  char  line[STRLEN], *cp, fname[STRLEN], bdir[STRLEN], *bname, sdir[STRLEN];
+  MRI * mri_norm = NULL, *mri_aseg = NULL, *mri_ctrl, *mri_bias, *mri_dst,
+      *mri_brain = NULL;
+  FILE *fp;
+  LTA * ltas[MAX_TPS];
 
   nargs = handleVersionOption(argc, argv, "mri_long_normalize");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -94,8 +92,8 @@ main(int argc, char *argv[])
     argv += nargs;
   }
 
-  tp_fname = argv[1];
-  in_fname = argv[2];
+  tp_fname  = argv[1];
+  in_fname  = argv[2];
   out_fname = argv[3];
 
   ntps = FileNumberOfEntries(tp_fname);
@@ -121,7 +119,7 @@ main(int argc, char *argv[])
   for (t = 0; t < ntps; t++) {
     MRI *mri_tmp, *mri_tmp2;
 
-    cp = fgetl(line, 199, fp);
+    cp          = fgetl(line, 199, fp);
     tp_names[t] = (char *)calloc(strlen(cp) + 1, sizeof(char));
     strcpy(tp_names[t], cp);
 
@@ -182,11 +180,11 @@ main(int argc, char *argv[])
   mri_ctrl = find_control_points_always_in_WM(mri_aseg, nullptr);
   //  remove_gradient_outliers(mri_norm, mri_ctrl, mri_ctrl, max_grad) ;
   for (t = 0; t < ntps; t++) {
-    MRI *mri_tmp = nullptr;
+    MRI * mri_tmp = nullptr;
     float scale;
 
     mri_tmp = MRIcopyFrame(mri_norm, mri_tmp, t, 0);
-    scale = MRImeanInLabel(mri_tmp, mri_ctrl, CONTROL_MARKED);
+    scale   = MRImeanInLabel(mri_tmp, mri_ctrl, CONTROL_MARKED);
     printf("mean in wm is %2.0f, scaling by %2.2f\n", scale, 110 / scale);
     scale = 110 / scale;
     MRIscalarMul(mri_tmp, mri_tmp, scale);
@@ -203,9 +201,9 @@ main(int argc, char *argv[])
   for (t = 0; t < ntps; t++) {
     MRI *mri_tmp = nullptr;
 
-    mri_tmp = MRIcopyFrame(mri_norm, mri_tmp, t, 0);
+    mri_tmp  = MRIcopyFrame(mri_norm, mri_tmp, t, 0);
     mri_bias = MRIbuildBiasImage(mri_tmp, mri_ctrl, nullptr, bias_sigma);
-    mri_dst = MRIapplyBiasCorrectionSameGeometry(
+    mri_dst  = MRIapplyBiasCorrectionSameGeometry(
         mri_tmp, mri_bias, nullptr, DEFAULT_DESIRED_WHITE_MATTER_VALUE);
     sprintf(fname, "%s/%s.long.%s/mri/%s", sdir, tp_names[t], bname, out_fname);
     printf("writing output to %s\n", fname);
@@ -221,7 +219,7 @@ main(int argc, char *argv[])
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -229,55 +227,55 @@ static int get_option(int argc, char *argv[]) {
     usage_exit(0);
   } else if (!stricmp(option, "cross_time_sigma")) {
     cross_time_sigma = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     printf("smoothing images with Parzen window with sigma=  = %2.2f\n",
            cross_time_sigma);
 
   } else if (!stricmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else
     switch (toupper(*option)) {
     case 'P':
       intensity_pad = atoi(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       printf("using intensity pad %d (default=2)\n", intensity_pad);
       break;
     case 'S':
       bias_sigma = atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("smoothing bias field with sigma = %2.2f\n", bias_sigma);
       break;
     case 'D':
-      Gx = atoi(argv[2]);
-      Gy = atoi(argv[3]);
-      Gz = atoi(argv[4]);
+      Gx    = atoi(argv[2]);
+      Gy    = atoi(argv[3]);
+      Gz    = atoi(argv[4]);
       nargs = 3;
       printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
       break;
     case 'V':
-      Gvx = atoi(argv[2]);
-      Gvy = atoi(argv[3]);
-      Gvz = atoi(argv[4]);
+      Gvx   = atoi(argv[2]);
+      Gvy   = atoi(argv[3]);
+      Gvz   = atoi(argv[4]);
       nargs = 3;
       printf("debugging alternative voxel (%d, %d, %d)\n", Gvx, Gvy, Gvz);
       break;
     case 'A':
       aseg_name = argv[1];
-      nargs = 1;
+      nargs     = 1;
       printf("using aseg %s for normalization\n", aseg_name);
       break;
     case 'W':
       control_volume_fname = argv[2];
-      bias_volume_fname = argv[3];
-      nargs = 2;
+      bias_volume_fname    = argv[3];
+      nargs                = 2;
       printf("writing ctrl pts to   %s\n", control_volume_fname);
       printf("writing bias field to %s\n", bias_volume_fname);
       break;
     case 'F':
       control_point_fname = argv[2];
-      nargs = 1;
+      nargs               = 1;
       printf("using control points from file %s...\n", control_point_fname);
       break;
     case '?':
@@ -330,7 +328,7 @@ static MRI *find_control_points_always_in_WM(MRI *mri_aseg, MRI *mri_ctrl) {
 static MRI *remove_points_not_in_range(MRI *mri_brain, MRI *mri_ctrl_src,
                                        MRI *mri_ctrl_dst, float min_target,
                                        float max_target) {
-  int x, y, z, f, removed, nremoved = 0;
+  int   x, y, z, f, removed, nremoved = 0;
   float val;
 
   if (mri_ctrl_dst == nullptr)

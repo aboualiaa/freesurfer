@@ -26,15 +26,14 @@
 #ifndef TOPOLOGY_GLOBALS_H
 #define TOPOLOGY_GLOBALS_H
 
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include <cassert>
-using namespace std;
 
 #define PRINT_ERROR_MODE 0
-#define PRINT_MODE 0
+#define PRINT_MODE       0
 
 //#define ASSERT(exp)  assert(exp)
 #define ASSERT(exp) check(exp)
@@ -97,6 +96,6 @@ int Random(int nmax);
 
 void check(bool exp);
 
-void ErrorExit(string s);
+void ErrorExit(std::string s);
 
 #endif

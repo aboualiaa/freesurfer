@@ -29,8 +29,8 @@
 #ifndef LayerPropertyDTI_h
 #define LayerPropertyDTI_h
 
-#include "vtkSmartPointer.h"
 #include "LayerPropertyMRI.h"
+#include "vtkSmartPointer.h"
 
 class vtkLookupTable;
 
@@ -52,7 +52,7 @@ public slots:
   void SetDirectionCode(int nCode);
 
 private:
-  int m_nDirectionCode;
+  int                             m_nDirectionCode;
   vtkSmartPointer<vtkLookupTable> mDirectionCodedTable;
 };
 

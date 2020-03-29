@@ -42,13 +42,13 @@
 #define CTAB_VERSION_TO_WRITE 2
 
 /* Different binary i/o versions. */
-static int CTABwriteIntoBinaryV1(COLOR_TABLE *ct, FILE *fp);
-static int CTABwriteIntoBinaryV2(COLOR_TABLE *ct, FILE *fp);
+static int          CTABwriteIntoBinaryV1(COLOR_TABLE *ct, FILE *fp);
+static int          CTABwriteIntoBinaryV2(COLOR_TABLE *ct, FILE *fp);
 static COLOR_TABLE *CTABreadFromBinaryV1(FILE *fp, int nentries);
 static COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp);
 
-static int znzCTABwriteIntoBinaryV1(COLOR_TABLE *ct, znzFile fp);
-static int znzCTABwriteIntoBinaryV2(COLOR_TABLE *ct, znzFile fp);
+static int          znzCTABwriteIntoBinaryV1(COLOR_TABLE *ct, znzFile fp);
+static int          znzCTABwriteIntoBinaryV2(COLOR_TABLE *ct, znzFile fp);
 static COLOR_TABLE *znzCTABreadFromBinaryV1(znzFile fp, int nentries);
 static COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp);
 
@@ -65,13 +65,13 @@ COLOR_TABLE *CTABreadASCII(const char *fname) {
 
 COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
   COLOR_TABLE *ct;
-  char line[STRLEN], *cp;
-  int max_structure;
-  FILE *fp;
-  int structure;
-  char name[STRLEN];
-  int r, g, b, t, tt = 0;
-  int line_num, nscan;
+  char         line[STRLEN], *cp;
+  int          max_structure;
+  FILE *       fp;
+  int          structure;
+  char         name[STRLEN];
+  int          r, g, b, t, tt = 0;
+  int          line_num, nscan;
 
   /* Try to open the file. */
   fp = fopen(fname, "r");
@@ -122,7 +122,7 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
   /* Rewind the file and go through it again. For each entry we find,
      allocate a CTE. This will leave the items in the array for which
      we don't have entries NULL. */
-  line_num = 1;
+  line_num       = 1;
   ctabDuplicates = 0;
   rewind(fp);
   while ((cp = fgets(line, STRLEN, fp)) != nullptr) {
@@ -167,7 +167,7 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
         ct->entries[structure]->bf = (float)ct->entries[structure]->bi / 255.0;
         ct->entries[structure]->af = (float)ct->entries[structure]->ai / 255.0;
         ct->entries[structure]->TissueType = tt;
-        ct->entries[structure]->count = 0;
+        ct->entries[structure]->count      = 0;
       }
     }
     line_num++;
@@ -193,13 +193,13 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
   #ctTType) as written by CTABwriteFileASCIItt().
  */
 COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
-  FILE *fp;
+  FILE *       fp;
   COLOR_TABLE *ct = nullptr;
-  int nct, ni, segid, segidmax;
-  char *cp, *str, line[5000];
-  int structure;
-  char name[STRLEN];
-  int r, g, b, t;
+  int          nct, ni, segid, segidmax;
+  char *       cp, *str, line[5000];
+  int          structure;
+  char         name[STRLEN];
+  int          r, g, b, t;
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {
@@ -208,8 +208,8 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
   }
 
   segidmax = -1;
-  nct = 0;
-  cp = (char *)1;
+  nct      = 0;
+  cp       = (char *)1;
   while (cp != nullptr) {
     cp = fgets(line, STRLEN, fp);
     ni = CountItemsInString(line);
@@ -232,7 +232,7 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
   if (nct == 0)
     return (nullptr);
 
-  ct = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
+  ct           = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
   ct->nentries = segidmax + 1;
   ct->entries =
       (COLOR_TABLE_ENTRY **)calloc(ct->nentries, sizeof(COLOR_TABLE_ENTRY *));
@@ -240,7 +240,7 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
   rewind(fp);
 
   nct = 0;
-  cp = (char *)1;
+  cp  = (char *)1;
   while (cp != nullptr) {
     cp = fgets(line, STRLEN, fp);
     ni = CountItemsInString(line);
@@ -256,10 +256,10 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
     ct->entries[structure] =
         (COLOR_TABLE_ENTRY *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
     strncpy(ct->entries[structure]->name, name, strlen(name) + 1);
-    ct->entries[structure]->ri = r;
-    ct->entries[structure]->gi = g;
-    ct->entries[structure]->bi = b;
-    ct->entries[structure]->ai = (255 - t); /* alpha = 255-trans */
+    ct->entries[structure]->ri         = r;
+    ct->entries[structure]->gi         = g;
+    ct->entries[structure]->bi         = b;
+    ct->entries[structure]->ai         = (255 - t); /* alpha = 255-trans */
     ct->entries[structure]->TissueType = structure;
     nct++;
   }
@@ -271,7 +271,7 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
 /*-------------------------------------------------------------------
   ----------------------------------------------------------------*/
 int CTABfree(COLOR_TABLE **pct) {
-  int i;
+  int          i;
   COLOR_TABLE *ct;
 
   if (nullptr == pct)
@@ -302,7 +302,7 @@ int CTABfree(COLOR_TABLE **pct) {
   ----------------------------------------------------------------*/
 COLOR_TABLE *CTABdeepCopy(COLOR_TABLE *ct) {
   COLOR_TABLE *copy;
-  int structure;
+  int          structure;
 
   if (nullptr == ct)
     ErrorReturn(NULL, (ERROR_BADPARM, "CTABdeepCopy: ct was NULL"));
@@ -344,14 +344,14 @@ COLOR_TABLE *CTABdeepCopy(COLOR_TABLE *ct) {
       /* Copy the entry. */
       strncpy(copy->entries[structure]->name, ct->entries[structure]->name,
               sizeof(copy->entries[structure]->name));
-      copy->entries[structure]->ri = ct->entries[structure]->ri;
-      copy->entries[structure]->gi = ct->entries[structure]->gi;
-      copy->entries[structure]->bi = ct->entries[structure]->bi;
-      copy->entries[structure]->ai = ct->entries[structure]->ai;
-      copy->entries[structure]->rf = ct->entries[structure]->rf;
-      copy->entries[structure]->gf = ct->entries[structure]->gf;
-      copy->entries[structure]->bf = ct->entries[structure]->bf;
-      copy->entries[structure]->af = ct->entries[structure]->af;
+      copy->entries[structure]->ri         = ct->entries[structure]->ri;
+      copy->entries[structure]->gi         = ct->entries[structure]->gi;
+      copy->entries[structure]->bi         = ct->entries[structure]->bi;
+      copy->entries[structure]->ai         = ct->entries[structure]->ai;
+      copy->entries[structure]->rf         = ct->entries[structure]->rf;
+      copy->entries[structure]->gf         = ct->entries[structure]->gf;
+      copy->entries[structure]->bf         = ct->entries[structure]->bf;
+      copy->entries[structure]->af         = ct->entries[structure]->af;
       copy->entries[structure]->TissueType = ct->entries[structure]->TissueType;
     }
   }
@@ -366,7 +366,7 @@ COLOR_TABLE *CTABdeepCopy(COLOR_TABLE *ct) {
   ----------------------------------------------------------------*/
 COLOR_TABLE *CTABreadFromBinary(FILE *fp) {
   COLOR_TABLE *ct;
-  int version;
+  int          version;
 
   if (nullptr == fp)
     ErrorReturn(NULL, (ERROR_BADPARM, "CTABreadFromBinary: fp was NULL"));
@@ -436,7 +436,7 @@ int CTABwriteIntoBinary(COLOR_TABLE *ct, FILE *fp) {
 */
 COLOR_TABLE *CTABalloc(int nentries) {
   COLOR_TABLE *ct;
-  int structure;
+  int          structure;
 
   if (nentries < 0)
     ErrorReturn(NULL, (ERROR_BADPARM, "CTABalloc: nentries was %d", nentries));
@@ -576,9 +576,9 @@ int CTABrandom(COLOR_TABLE *ct) {
   ----------------------------------------------------------------*/
 COLOR_TABLE *CTABreadFromBinaryV1(FILE *fp, int nentries) {
   COLOR_TABLE *ct;
-  int structure, len;
-  char *name;
-  int t;
+  int          structure, len;
+  char *       name;
+  int          t;
 
   if (nentries < 0)
     ErrorReturn(NULL, (ERROR_BADPARM, "CTABreadFromBinaryV1: nentries was %d",
@@ -656,7 +656,7 @@ COLOR_TABLE *CTABreadFromBinaryV1(FILE *fp, int nentries) {
     ct->entries[structure]->ri = freadInt(fp);
     ct->entries[structure]->gi = freadInt(fp);
     ct->entries[structure]->bi = freadInt(fp);
-    t = freadInt(fp);
+    t                          = freadInt(fp);
     ct->entries[structure]->ai = 255 - t; /* alpha = 255-trans */
 
     /* Now calculate the float versions. */
@@ -716,10 +716,10 @@ int CTABwriteIntoBinaryV1(COLOR_TABLE *ct, FILE *fp) {
   ----------------------------------------------------------------*/
 COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp) {
   COLOR_TABLE *ct;
-  int nentries, num_entries_to_read, i;
-  int structure, len;
-  char *name;
-  int t;
+  int          nentries, num_entries_to_read, i;
+  int          structure, len;
+  char *       name;
+  int          t;
 
   /* Read the number of entries from the stream. Note that this is
      really the max structure index; some of these entries could be
@@ -818,7 +818,7 @@ COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp) {
     ct->entries[structure]->ri = freadInt(fp);
     ct->entries[structure]->gi = freadInt(fp);
     ct->entries[structure]->bi = freadInt(fp);
-    t = freadInt(fp);
+    t                          = freadInt(fp);
     ct->entries[structure]->ai = 255 - t; /* alpha = 255-trans */
 
     /* Now calculate the float versions. */
@@ -892,7 +892,7 @@ znzlib support
 
 COLOR_TABLE *znzCTABreadFromBinary(znzFile fp) {
   COLOR_TABLE *ct;
-  int version;
+  int          version;
 
   if (znz_isnull(fp))
     ErrorReturn(NULL, (ERROR_BADPARM, "CTABreadFromBinary: fp was NULL"));
@@ -956,9 +956,9 @@ int znzCTABwriteIntoBinary(COLOR_TABLE *ct, znzFile fp) {
   ----------------------------------------------------------------*/
 COLOR_TABLE *znzCTABreadFromBinaryV1(znzFile fp, int nentries) {
   COLOR_TABLE *ct;
-  int structure, len;
-  char *name;
-  int t;
+  int          structure, len;
+  char *       name;
+  int          t;
 
   if (nentries < 0)
     ErrorReturn(NULL, (ERROR_BADPARM, "CTABreadFromBinaryV1: nentries was %d",
@@ -1030,7 +1030,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV1(znzFile fp, int nentries) {
     ct->entries[structure]->ri = znzreadInt(fp);
     ct->entries[structure]->gi = znzreadInt(fp);
     ct->entries[structure]->bi = znzreadInt(fp);
-    t = znzreadInt(fp);
+    t                          = znzreadInt(fp);
     ct->entries[structure]->ai = 255 - t; /* alpha = 255-trans */
 
     /* Now calculate the float versions. */
@@ -1090,10 +1090,10 @@ int znzCTABwriteIntoBinaryV1(COLOR_TABLE *ct, znzFile fp) {
   ----------------------------------------------------------------*/
 COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp) {
   COLOR_TABLE *ct;
-  int nentries, num_entries_to_read, i;
-  int structure, len;
-  char *name;
-  int t;
+  int          nentries, num_entries_to_read, i;
+  int          structure, len;
+  char *       name;
+  int          t;
 
   /* Read the number of entries from the stream. Note that this is
   really the max structure index; some of these entries could be
@@ -1186,7 +1186,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp) {
     ct->entries[structure]->ri = znzreadInt(fp);
     ct->entries[structure]->gi = znzreadInt(fp);
     ct->entries[structure]->bi = znzreadInt(fp);
-    t = znzreadInt(fp);
+    t                          = znzreadInt(fp);
     ct->entries[structure]->ai = 255 - t; /* alpha = 255-trans */
 
     /* Now calculate the float versions. */
@@ -1256,7 +1256,7 @@ int znzCTABwriteIntoBinaryV2(COLOR_TABLE *ct, znzFile fp) {
 
 // Reads the default color table from $FREESURFER_HOME/FreeSurferColorLUT.txt
 COLOR_TABLE *CTABreadDefault() {
-  FSENV *fsenv = FSENVgetenv();
+  FSENV *     fsenv = FSENVgetenv();
   std::string filename =
       std::string(fsenv->FREESURFER_HOME) + "/FreeSurferColorLUT.txt";
   FSENVfree(&fsenv);
@@ -1463,7 +1463,7 @@ int CTABrgb2Annotation(int r, int g, int b) {
   ----------------------------------------------------------------*/
 int CTABentryNameToIndex(const char *EntryName, COLOR_TABLE *ct) {
   CTE *cte;
-  int i;
+  int  i;
 
   for (i = 0; i < ct->nentries; i++) {
     cte = ct->entries[i];
@@ -1481,11 +1481,11 @@ int CTABentryNameToIndex(const char *EntryName, COLOR_TABLE *ct) {
   ----------------------------------------------------------------*/
 int CTABentryNameToAnnotation(const char *EntryName, COLOR_TABLE *ct) {
   CTE *cte;
-  int index, annotation;
+  int  index, annotation;
   index = CTABentryNameToIndex(EntryName, ct);
   if (index == -1)
     return (-1); // error
-  cte = ct->entries[index];
+  cte        = ct->entries[index];
   annotation = CTABrgb2Annotation(cte->ri, cte->gi, cte->bi);
   return (annotation);
 }
@@ -1495,7 +1495,7 @@ int CTABentryNameToAnnotation(const char *EntryName, COLOR_TABLE *ct) {
   ----------------------------------------------------------------*/
 int CTABannotationAtIndex(COLOR_TABLE *ct, int index, int *annot) {
   CTE *e;
-  int annotation;
+  int  annotation;
 
   if (nullptr == ct)
     ErrorReturn(ERROR_BADPARM,
@@ -1517,7 +1517,7 @@ int CTABannotationAtIndex(COLOR_TABLE *ct, int index, int *annot) {
   // This should give the same, but have not tested it
   // annotation = CTABrgb2Annotation(e->ri, e->gi, e->bi);
   annotation = (e->bi << 16) + (e->gi << 8) + e->ri;
-  *annot = annotation;
+  *annot     = annotation;
 
   return (NO_ERROR);
 }
@@ -1736,7 +1736,7 @@ int CTABfindEntryByName(COLOR_TABLE *ct, const char *name, int *nEntry) {
 
 /*--------------------------------------------------------------*/
 int CTABprintASCII(COLOR_TABLE *ct, FILE *fp) {
-  int structure;
+  int   structure;
   char *tmpstr;
 
   if (nullptr == ct)
@@ -1761,7 +1761,7 @@ int CTABprintASCII(COLOR_TABLE *ct, FILE *fp) {
 /*--------------------------------------------------------------*/
 int CTABwriteFileASCII(COLOR_TABLE *ct, const char *fname) {
   FILE *fp;
-  int result;
+  int   result;
 
   if (nullptr == ct)
     ErrorReturn(ERROR_BADPARM,
@@ -1790,12 +1790,12 @@ int CTABwriteFileASCII(COLOR_TABLE *ct, const char *fname) {
   Colors are assigned randomly.
   -------------------------------------------------------*/
 COLOR_TABLE *CTABaddEntry(COLOR_TABLE *ctold, const char *name) {
-  COLOR_TABLE *ct;
+  COLOR_TABLE *      ct;
   COLOR_TABLE_ENTRY *cte;
-  int nentries, i;
+  int                nentries, i;
 
   nentries = ctold->nentries;
-  ct = CTABalloc(nentries + 1);
+  ct       = CTABalloc(nentries + 1);
 
   for (i = 0; i < nentries; i++)
     memmove(ct->entries[i], ctold->entries[i], sizeof(COLOR_TABLE_ENTRY));
@@ -1847,14 +1847,14 @@ uses FreeSurferColorLUT.txt)
 */
 COLOR_TABLE *TissueTypeSchemaDefault(COLOR_TABLE *ct) {
   COLOR_TABLE_ENTRY *cte;
-  FSENV *fsenv;
-  char tmpstr[2000];
-  int n, TT, TTUnknown, TTCtxGM, TTSubCtxGM, TTWM, TTCSF;
-  TTUnknown = 0;
-  TTCtxGM = 1;
+  FSENV *            fsenv;
+  char               tmpstr[2000];
+  int                n, TT, TTUnknown, TTCtxGM, TTSubCtxGM, TTWM, TTCSF;
+  TTUnknown  = 0;
+  TTCtxGM    = 1;
   TTSubCtxGM = 2;
-  TTWM = 3;
-  TTCSF = 4;
+  TTWM       = 3;
+  TTCSF      = 4;
 
   if (ct == nullptr) {
     fsenv = FSENVgetenv();
@@ -1864,27 +1864,27 @@ COLOR_TABLE *TissueTypeSchemaDefault(COLOR_TABLE *ct) {
 
   sprintf(ct->TissueTypeSchema, "default-jan-2014");
   ct->ctabTissueType = CTABalloc(5);
-  cte = ct->ctabTissueType->entries[0];
+  cte                = ct->ctabTissueType->entries[0];
   sprintf(cte->name, "unknown");
   cte->ri = 0;
   cte->gi = 0;
   cte->bi = 0;
-  cte = ct->ctabTissueType->entries[1];
+  cte     = ct->ctabTissueType->entries[1];
   sprintf(cte->name, "cortex");
   cte->ri = 205;
   cte->gi = 62;
   cte->bi = 78;
-  cte = ct->ctabTissueType->entries[2];
+  cte     = ct->ctabTissueType->entries[2];
   sprintf(cte->name, "subcort_gm");
   cte->ri = 230;
   cte->gi = 148;
   cte->bi = 34;
-  cte = ct->ctabTissueType->entries[3];
+  cte     = ct->ctabTissueType->entries[3];
   sprintf(cte->name, "wm");
   cte->ri = 0;
   cte->gi = 255;
   cte->bi = 0;
-  cte = ct->ctabTissueType->entries[4];
+  cte     = ct->ctabTissueType->entries[4];
   sprintf(cte->name, "csf");
   cte->ri = 120;
   cte->gi = 18;
@@ -2004,15 +2004,15 @@ uses FreeSurferColorLUT.txt)
 */
 COLOR_TABLE *TissueTypeSchemaDefaultHead(COLOR_TABLE *ct) {
   COLOR_TABLE_ENTRY *cte;
-  FSENV *fsenv;
-  char tmpstr[2000];
-  int n, TT, TTUnknown, TTCtxGM, TTSubCtxGM, TTWM, TTCSF, TTHead;
-  TTUnknown = 0;
-  TTCtxGM = 1;
+  FSENV *            fsenv;
+  char               tmpstr[2000];
+  int                n, TT, TTUnknown, TTCtxGM, TTSubCtxGM, TTWM, TTCSF, TTHead;
+  TTUnknown  = 0;
+  TTCtxGM    = 1;
   TTSubCtxGM = 2;
-  TTWM = 3;
-  TTCSF = 4;
-  TTHead = 5;
+  TTWM       = 3;
+  TTCSF      = 4;
+  TTHead     = 5;
 
   printf("Entering TissueTypeSchemaDefaultHead()\n");
 
@@ -2027,32 +2027,32 @@ COLOR_TABLE *TissueTypeSchemaDefaultHead(COLOR_TABLE *ct) {
   sprintf(ct->TissueTypeSchema, "default-apr-2019+head");
   printf("schema %s\n", ct->TissueTypeSchema);
   ct->ctabTissueType = CTABalloc(6);
-  cte = ct->ctabTissueType->entries[0];
+  cte                = ct->ctabTissueType->entries[0];
   sprintf(cte->name, "unknown");
   cte->ri = 0;
   cte->gi = 0;
   cte->bi = 0;
-  cte = ct->ctabTissueType->entries[1];
+  cte     = ct->ctabTissueType->entries[1];
   sprintf(cte->name, "cortex");
   cte->ri = 205;
   cte->gi = 62;
   cte->bi = 78;
-  cte = ct->ctabTissueType->entries[2];
+  cte     = ct->ctabTissueType->entries[2];
   sprintf(cte->name, "subcort_gm");
   cte->ri = 230;
   cte->gi = 148;
   cte->bi = 34;
-  cte = ct->ctabTissueType->entries[3];
+  cte     = ct->ctabTissueType->entries[3];
   sprintf(cte->name, "wm");
   cte->ri = 0;
   cte->gi = 255;
   cte->bi = 0;
-  cte = ct->ctabTissueType->entries[4];
+  cte     = ct->ctabTissueType->entries[4];
   sprintf(cte->name, "csf");
   cte->ri = 120;
   cte->gi = 18;
   cte->bi = 134;
-  cte = ct->ctabTissueType->entries[5];
+  cte     = ct->ctabTissueType->entries[5];
   sprintf(cte->name, "head");
   cte->ri = 150;
   cte->gi = 150;
@@ -2119,23 +2119,23 @@ COLOR_TABLE *TissueTypeSchemaDefaultHead(COLOR_TABLE *ct) {
       TT = TTWM;
       break;
 
-      case Third_Ventricle:
-      case Fourth_Ventricle:
-      case CSF:
-      case CSF_ExtraCerebral:
-      case Left_Lateral_Ventricle:
-      case 75: // was Left_Lateral_Ventricle
-      case Right_Lateral_Ventricle:
-      case 76: // was Right_Lateral_Ventricle
-      case Left_Inf_Lat_Vent:
-      case Right_Inf_Lat_Vent:
-      case Left_choroid_plexus:
-      case Right_choroid_plexus:
-      case Fifth_Ventricle:
-      case Left_vessel:
-      case Right_vessel:
-        TT = TTCSF;
-        break;
+    case Third_Ventricle:
+    case Fourth_Ventricle:
+    case CSF:
+    case CSF_ExtraCerebral:
+    case Left_Lateral_Ventricle:
+    case 75: // was Left_Lateral_Ventricle
+    case Right_Lateral_Ventricle:
+    case 76: // was Right_Lateral_Ventricle
+    case Left_Inf_Lat_Vent:
+    case Right_Inf_Lat_Vent:
+    case Left_choroid_plexus:
+    case Right_choroid_plexus:
+    case Fifth_Ventricle:
+    case Left_vessel:
+    case Right_vessel:
+      TT = TTCSF;
+      break;
 
     case Head_ExtraCerebral:
     case 165: // Skull
@@ -2208,19 +2208,19 @@ uses FreeSurferColorLUT.txt)
 */
 COLOR_TABLE *TissueTypeSchemaLat(COLOR_TABLE *ct) {
   COLOR_TABLE_ENTRY *cte;
-  FSENV *fsenv;
-  char tmpstr[2000];
+  FSENV *            fsenv;
+  char               tmpstr[2000];
   int n, TT, TTUnknown, TTCtxGMlh, TTSubCtxGMlh, TTSubCtxGMmid, TTCtxGMrh,
       TTSubCtxGMrh, TTWM, TTCSF, TTHead;
-  TTUnknown = 0;
-  TTCtxGMlh = 1;
-  TTCtxGMrh = 2;
-  TTSubCtxGMlh = 3;
-  TTSubCtxGMrh = 4;
+  TTUnknown     = 0;
+  TTCtxGMlh     = 1;
+  TTCtxGMrh     = 2;
+  TTSubCtxGMlh  = 3;
+  TTSubCtxGMrh  = 4;
   TTSubCtxGMmid = 5;
-  TTWM = 6;
-  TTCSF = 7;
-  TTHead = 8;
+  TTWM          = 6;
+  TTCSF         = 7;
+  TTHead        = 8;
 
   if (ct == nullptr) {
     fsenv = FSENVgetenv();
@@ -2230,47 +2230,47 @@ COLOR_TABLE *TissueTypeSchemaLat(COLOR_TABLE *ct) {
 
   sprintf(ct->TissueTypeSchema, "default-apr-2019+head+lat");
   ct->ctabTissueType = CTABalloc(9); // should dealloc existing?
-  cte = ct->ctabTissueType->entries[0];
+  cte                = ct->ctabTissueType->entries[0];
   sprintf(cte->name, "unknown");
   cte->ri = 0;
   cte->gi = 0;
   cte->bi = 0;
-  cte = ct->ctabTissueType->entries[1];
+  cte     = ct->ctabTissueType->entries[1];
   sprintf(cte->name, "cortex-lh");
   cte->ri = 205;
   cte->gi = 62;
   cte->bi = 78;
-  cte = ct->ctabTissueType->entries[2];
+  cte     = ct->ctabTissueType->entries[2];
   sprintf(cte->name, "cortex-rh");
   cte->ri = 205;
   cte->gi = 62;
   cte->bi = 78;
-  cte = ct->ctabTissueType->entries[3];
+  cte     = ct->ctabTissueType->entries[3];
   sprintf(cte->name, "subcort_gm-lh");
   cte->ri = 230;
   cte->gi = 148;
   cte->bi = 34;
-  cte = ct->ctabTissueType->entries[4];
+  cte     = ct->ctabTissueType->entries[4];
   sprintf(cte->name, "subcort_gm-rh");
   cte->ri = 230;
   cte->gi = 148;
   cte->bi = 34;
-  cte = ct->ctabTissueType->entries[5];
+  cte     = ct->ctabTissueType->entries[5];
   sprintf(cte->name, "subcort_gm-mid");
   cte->ri = 230;
   cte->gi = 148;
   cte->bi = 34;
-  cte = ct->ctabTissueType->entries[6];
+  cte     = ct->ctabTissueType->entries[6];
   sprintf(cte->name, "wm");
   cte->ri = 0;
   cte->gi = 255;
   cte->bi = 0;
-  cte = ct->ctabTissueType->entries[7];
+  cte     = ct->ctabTissueType->entries[7];
   sprintf(cte->name, "csf");
   cte->ri = 120;
   cte->gi = 18;
   cte->bi = 134;
-  cte = ct->ctabTissueType->entries[8];
+  cte     = ct->ctabTissueType->entries[8];
   sprintf(cte->name, "head");
   cte->ri = 150;
   cte->gi = 150;
@@ -2430,8 +2430,8 @@ with ribbon values if the aseg is CtxGM or CtxWM or unknown.
 \param ct - color table with tissue type info
 */
 int CTABprintASCIItt(COLOR_TABLE *ct, FILE *fp) {
-  int structure;
-  char *tmpstr;
+  int                structure;
+  char *             tmpstr;
   COLOR_TABLE_ENTRY *cte;
 
   if (nullptr == ct)
@@ -2496,7 +2496,7 @@ already has an item for that structure, it is deleted and
 the new one is used to overwrite it.
 */
 int CTABmerge(COLOR_TABLE *ct, const COLOR_TABLE *merge) {
-  int n;
+  int  n;
   CTE *cte, *cte0;
 
   for (n = 0; n < merge->nentries; n++) {
@@ -2505,7 +2505,7 @@ int CTABmerge(COLOR_TABLE *ct, const COLOR_TABLE *merge) {
       continue;
     cte0 = ct->entries[n];
     if (cte0 == nullptr) {
-      cte0 = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
+      cte0           = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
       ct->entries[n] = cte0;
     }
     memcpy(cte0, cte, sizeof(CTE));
@@ -2535,14 +2535,14 @@ The new entry will be at least min_dist from any existing rgb value so it can be
 visually distinguished (rdist+gdist+bdist)
 */
 int CTABaddUniqueEntry(COLOR_TABLE *ct, char *name, int min_dist) {
-  int dist, i, r, g, b;
+  int                dist, i, r, g, b;
   COLOR_TABLE_ENTRY *cte, **pcte;
 
   while (min_dist > 0) {
     for (i = 0; i < 1000; i++) {
-      r = nint(randomNumber(0, 255));
-      g = nint(randomNumber(0, 255));
-      b = nint(randomNumber(0, 255));
+      r    = nint(randomNumber(0, 255));
+      g    = nint(randomNumber(0, 255));
+      b    = nint(randomNumber(0, 255));
       dist = ctabMinDist(ct, r, g, b);
       if (dist <= min_dist)
         break;
@@ -2577,7 +2577,7 @@ int CTABaddUniqueEntry(COLOR_TABLE *ct, char *name, int min_dist) {
     ct->nentries++;
   }
 
-  cte = ct->entries[i];
+  cte     = ct->entries[i];
   cte->ri = r;
   cte->gi = g;
   cte->bi = b;

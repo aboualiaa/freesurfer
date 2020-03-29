@@ -24,17 +24,17 @@
  */
 
 #include "Interactor.h"
-#include "RenderView.h"
 #include "CursorFactory.h"
-#include <vtkRenderer.h>
+#include "RenderView.h"
 #include <QDebug>
+#include <vtkRenderer.h>
 
 #ifdef Q_OS_MAC
 Qt::KeyboardModifier Interactor::CONTROL_MODIFIER = Qt::MetaModifier;
-Qt::Key Interactor::CONTROL_KEY = Qt::Key_Meta;
+Qt::Key              Interactor::CONTROL_KEY      = Qt::Key_Meta;
 #else
 Qt::KeyboardModifier Interactor::CONTROL_MODIFIER = Qt::ControlModifier;
-Qt::Key Interactor::CONTROL_KEY = Qt::Key_Control;
+Qt::Key              Interactor::CONTROL_KEY      = Qt::Key_Control;
 #endif
 
 Interactor::Interactor(QObject *parent) : QObject(parent) { m_nAction = 0; }
@@ -49,10 +49,10 @@ void Interactor::SetUseCommandControl(bool b) {
 #ifdef Q_OS_MAC
   if (b) {
     CONTROL_MODIFIER = Qt::ControlModifier;
-    CONTROL_KEY = Qt::Key_Control;
+    CONTROL_KEY      = Qt::Key_Control;
   } else {
     CONTROL_MODIFIER = Qt::MetaModifier;
-    CONTROL_KEY = Qt::Key_Meta;
+    CONTROL_KEY      = Qt::Key_Meta;
   }
 #else
   Q_UNUSED(b);

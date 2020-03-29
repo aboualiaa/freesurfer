@@ -29,27 +29,27 @@
 #ifndef Registration_H
 #define Registration_H
 
-#include "matrix.h"
 #include "error.h"
+#include "matrix.h"
 #include "mri.h"
 
-#include <utility>
-#include <string>
-#include <vector>
-#include <typeinfo>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
 #define export // obsolete feature 'export template' used in these headers
-#include <vnl/vnl_vector.h>
-#include <vnl/vnl_matrix.h>
-#include <vnl/vnl_matrix_fixed.h>
 #include <vnl/vnl_inverse.h>
 #include <vnl/vnl_matlab_print.h>
+#include <vnl/vnl_matrix.h>
+#include <vnl/vnl_matrix_fixed.h>
+#include <vnl/vnl_vector.h>
 #undef export
 
-#include "MyMatrix.h"
 #include "MyMRI.h"
+#include "MyMatrix.h"
 #include "Transformation.h"
 
 /** \class Registration
@@ -88,50 +88,50 @@ public:
 
   //! Allow only translation
   void setTransonly() {
-    rigid = false;
-    transonly = true;
-    isoscale = false;
-    affine = false;
+    rigid      = false;
+    transonly  = true;
+    isoscale   = false;
+    affine     = false;
     iscaleonly = false;
   }
 
   //! Allow only iscale
   void setIscaleOnly() {
-    rigid = false;
-    transonly = false;
-    isoscale = false;
-    affine = false;
-    iscale = true;
-    initorient = false;
+    rigid         = false;
+    transonly     = false;
+    isoscale      = false;
+    affine        = false;
+    iscale        = true;
+    initorient    = false;
     inittransform = false;
-    initscaling = false;
-    iscaleonly = true;
+    initscaling   = false;
+    iscaleonly    = true;
   }
 
   //! Allow only rigid (default)
   void setRigid() {
-    rigid = true;
-    transonly = false;
-    isoscale = false;
-    affine = false;
+    rigid      = true;
+    transonly  = false;
+    isoscale   = false;
+    affine     = false;
     iscaleonly = false;
   }
 
   //! Allow rigid and isotropic scaling
   void setIsoscale() {
-    rigid = false;
-    transonly = false;
-    isoscale = true;
-    affine = false;
+    rigid      = false;
+    transonly  = false;
+    isoscale   = true;
+    affine     = false;
     iscaleonly = false;
   }
 
   //! Allow affine transform
   void setAffine() {
-    rigid = false;
-    transonly = false;
-    isoscale = false;
-    affine = true;
+    rigid      = false;
+    transonly  = false;
+    isoscale   = false;
+    affine     = true;
     iscaleonly = false;
   }
 
@@ -294,7 +294,7 @@ protected:
 
   //! IterativeRegistrationHelper
   virtual void computeIterativeRegistrationFull(int n, double epsit, MRI *mriS,
-                                                MRI *mriT,
+                                                MRI *                     mriT,
                                                 const vnl_matrix<double> &Minit,
                                                 double iscaleinit) = 0;
   // template < class T > void iterativeRegistrationHelper( int nmax,double
@@ -345,43 +345,43 @@ protected:
   void saveGaussianPyramid(std::vector<MRI *> &p, const std::string &prefix);
 
   //  double sat;
-  bool iscale;
-  bool iscaleonly;
-  bool transonly;
-  bool rigid;
-  bool isoscale;
-  bool affine;
+  bool            iscale;
+  bool            iscaleonly;
+  bool            transonly;
+  bool            rigid;
+  bool            isoscale;
+  bool            affine;
   Transformation *trans;
   //  int rtype;
-  int subsamplesize;
-  int minsize;
-  int maxsize;
+  int         subsamplesize;
+  int         minsize;
+  int         maxsize;
   std::string name;
   std::string nbase;
-  int debug;
-  int verbose;
-  bool initorient;
-  bool inittransform;
-  bool initscaling;
-  int highit;
+  int         debug;
+  int         verbose;
+  bool        initorient;
+  bool        inittransform;
+  bool        initscaling;
+  int         highit;
 
   // PROTECTED DATA
-  MRI *mri_source;
-  std::vector<MRI *> gpS;
+  MRI *               mri_source;
+  std::vector<MRI *>  gpS;
   std::vector<double> centroidS;
-  MRI *mri_target;
-  std::vector<MRI *> gpT;
+  MRI *               mri_target;
+  std::vector<MRI *>  gpT;
   std::vector<double> centroidT;
-  vnl_matrix<double> Minit;
-  vnl_matrix<double> Mfinal;
-  double iscaleinit;
-  double iscalefinal;
-  bool doubleprec;
+  vnl_matrix<double>  Minit;
+  vnl_matrix<double>  Mfinal;
+  double              iscaleinit;
+  double              iscalefinal;
+  bool                doubleprec;
   //  double wlimit;
   bool symmetry;
-  int sampletype;
+  int  sampletype;
 
-  bool resample;
+  bool               resample;
   vnl_matrix<double> Rsrc;
   vnl_matrix<double> Rtrg;
 

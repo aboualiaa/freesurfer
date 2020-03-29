@@ -27,9 +27,9 @@
 #include "loop.h"
 
 Loop::Loop() {
-  npoints = 0;
+  npoints   = 0;
   maxpoints = 0;
-  points = nullptr;
+  points    = nullptr;
 }
 
 Loop::Loop(int maxpts) {
@@ -45,10 +45,10 @@ Loop::~Loop() {
 void Loop::Alloc(int maxpts) {
   if (points)
     delete[] points;
-  points = nullptr;
+  points    = nullptr;
   maxpoints = maxpts;
-  points = new int[maxpoints];
-  npoints = 0;
+  points    = new int[maxpoints];
+  npoints   = 0;
 }
 
 #define INCREASE_FACTOR 1.2
@@ -77,8 +77,8 @@ void Loop::AddPoint(int pt) {
 
 void Loop::Print() const {
   for (int n = 0; n < npoints - 1; n++)
-    cout << points[n] << "->";
-  cout << points[npoints - 1] << "." << endl;
+    std::cout << points[n] << "->";
+  std::cout << points[npoints - 1] << "." << std::endl;
 }
 
 int Loop::End() { return points[npoints - 1]; }

@@ -27,8 +27,8 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <limits>
 #include <limits.h>
+#include <limits>
 #include <math.h>
 #include <sstream>
 #include <vector>
@@ -42,27 +42,27 @@ public:
   void ReadTrainingSubjects(const char *TrainListFile, const char *MaskFile,
                             const char *AsegFile, const char *OrientFile,
                             std::vector<char *> TractFileList);
-  int GetNx();
-  int GetNy();
-  int GetNz();
-  int GetNumTrain();
+  int  GetNx();
+  int  GetNy();
+  int  GetNz();
+  int  GetNumTrain();
   bool IsInMask(int CoordX, int CoordY, int CoordZ);
   std::vector<unsigned int> GetTestAseg(int CoordX, int CoordY, int CoordZ);
-  std::vector<float> GetTestOrient(int CoordX, int CoordY, int CoordZ);
-  std::vector<int> GetTrainXyz(int SampleIndex);
+  std::vector<float>        GetTestOrient(int CoordX, int CoordY, int CoordZ);
+  std::vector<int>          GetTrainXyz(int SampleIndex);
   std::vector<unsigned int> GetTrainAseg(int SampleIndex);
-  std::vector<float> GetTrainOrient(int SampleIndex);
+  std::vector<float>        GetTrainOrient(int SampleIndex);
   std::vector<unsigned int> GetTrainTractIds(int SampleIndex);
 
 private:
   static const int mSampleStep;
 
-  int mNx, mNy, mNz, mNumTrain, mNumLocal, mNumNear;
-  std::vector<int> mDirLocal, mDirNear, mTrainXyz;
+  int                       mNx, mNy, mNz, mNumTrain, mNumLocal, mNumNear;
+  std::vector<int>          mDirLocal, mDirNear, mTrainXyz;
   std::vector<unsigned int> mTrainAsegIdsLocal, mTrainAsegIdsNear;
-  std::vector<float> mTrainAsegDist, mTrainOrient;
+  std::vector<float>        mTrainAsegDist, mTrainOrient;
   std::vector<std::vector<unsigned int>> mTrainTractIds;
-  MRI *mMask, *mAseg, *mOrient;
+  MRI *                                  mMask, *mAseg, *mOrient;
 };
 
 #endif

@@ -1,19 +1,19 @@
 namespace Analysis {
 struct Face : public Repr_Elt {
   using Surface = Analysis::Surface;
-  using Vertex = Analysis::Vertex;
+  using Vertex  = Analysis::Vertex;
   inline Face();
   inline Face(Face const &src);
   inline Face(Representation *representation, size_t idx);
   inline Face(AllM::Face const &src);
   int fno() const { return idx; }
 
-  inline Vertex v(size_t i) const;
-  inline float area() const;
+  inline Vertex                v(size_t i) const;
+  inline float                 area() const;
   inline angles_per_triangle_t angle() const;
   inline angles_per_triangle_t orig_angle() const;
-  inline char ripflag() const;
-  inline FloatXYZ norm() const;
+  inline char                  ripflag() const;
+  inline FloatXYZ              norm() const;
 
   inline void set_orig_angle(angles_per_triangle_t to);
   inline void set_ripflag(char to);
@@ -21,7 +21,7 @@ struct Face : public Repr_Elt {
 
 struct Vertex : public Repr_Elt {
   using Surface = Analysis::Surface;
-  using Face = Analysis::Face;
+  using Face    = Analysis::Face;
   inline Vertex();
   inline Vertex(Vertex const &src);
   inline Vertex(Representation *representation, size_t idx);
@@ -34,12 +34,12 @@ struct Vertex : public Repr_Elt {
   dist_orig(size_t i) const; // size() is vtotal.    distance to neighboring
                              // vertices based on origxyz
   inline int
-  dist_capacity() const;  //  -- should contain at least vtx_vtotal elements
-  inline float x() const; //  current coordinates
-  inline float y() const; //  use MRISsetXYZ() to set
+               dist_capacity() const; //  -- should contain at least vtx_vtotal elements
+  inline float x() const;             //  current coordinates
+  inline float y() const;             //  use MRISsetXYZ() to set
   inline float z() const;
   inline float
-  origx() const; //  original coordinates, see also MRIS::origxyz_status
+               origx() const; //  original coordinates, see also MRIS::origxyz_status
   inline float origy() const; //  use MRISsetOriginalXYZ(,
   inline float origz() const; //  or MRISsetOriginalXYZfromXYZ to set
   inline float nx() const;
@@ -63,9 +63,9 @@ struct Vertex : public Repr_Elt {
   inline float whitez() const; //  white surface coordinates
   inline float area() const;
   inline float origarea() const;
-  inline int fno() const;      //  face that this vertex is in
-  inline char neg() const;     //  1 if the normal vector is inverted
-  inline char border() const;  //  flag
+  inline int   fno() const;    //  face that this vertex is in
+  inline char  neg() const;    //  1 if the normal vector is inverted
+  inline char  border() const; //  flag
   inline char ripflag() const; //  vertex no longer exists - placed last to load
                                //  the next vertex into cache
   inline void which_coords(int which, float *x, float *y, float *z) const;
@@ -99,8 +99,8 @@ struct Vertex : public Repr_Elt {
 
 struct MRIS_MP : public Repr_Elt {
   using Surface = Analysis::Surface;
-  using Face = Analysis::Face;
-  using Vertex = Analysis::Vertex;
+  using Face    = Analysis::Face;
+  using Vertex  = Analysis::Vertex;
   inline MRIS_MP();
   inline MRIS_MP(MRIS_MP const &src);
   inline MRIS_MP(Representation *representation, size_t idx);
@@ -109,7 +109,7 @@ struct MRIS_MP : public Repr_Elt {
 }; // MRIS_MP
 
 struct Surface : public Repr_Elt {
-  using Face = Analysis::Face;
+  using Face   = Analysis::Face;
   using Vertex = Analysis::Vertex;
   inline Surface();
   inline Surface(Surface const &src);
@@ -120,29 +120,29 @@ struct Surface : public Repr_Elt {
                                 //  MRISreallocVerticesAndFaces et al
   inline int nfaces() const;    //  # of faces on surface, change by calling
                                 //  MRISreallocVerticesAndFaces et al
-  inline Vertex vertices(size_t i) const;
-  inline Face faces(size_t i) const;
-  inline FaceNormCacheEntry faceNormCacheEntries(size_t i) const;
+  inline Vertex                vertices(size_t i) const;
+  inline Face                  faces(size_t i) const;
+  inline FaceNormCacheEntry    faceNormCacheEntries(size_t i) const;
   inline FaceNormDeferredEntry faceNormDeferredEntries(size_t i) const;
-  inline float xctr() const;
-  inline float yctr() const;
-  inline float zctr() const;
-  inline float xlo() const;
-  inline float ylo() const;
-  inline float zlo() const;
-  inline float xhi() const;
-  inline float yhi() const;
-  inline float zhi() const;
-  inline float total_area() const;
-  inline double avg_vertex_area() const;
+  inline float                 xctr() const;
+  inline float                 yctr() const;
+  inline float                 zctr() const;
+  inline float                 xlo() const;
+  inline float                 ylo() const;
+  inline float                 zlo() const;
+  inline float                 xhi() const;
+  inline float                 yhi() const;
+  inline float                 zhi() const;
+  inline float                 total_area() const;
+  inline double                avg_vertex_area() const;
   inline double
-  avg_vertex_dist() const; //  set by MRIScomputeAvgInterVertexDist
+                avg_vertex_dist() const; //  set by MRIScomputeAvgInterVertexDist
   inline double std_vertex_dist() const;
-  inline float orig_area() const;
-  inline float neg_area() const;
-  inline float neg_orig_area() const; //  amount of original surface in folds
-  inline double radius() const;       //  radius (if status==MRIS_SPHERE)
-  inline MRIS_Status status() const;  //  type of surface (e.g. sphere, plane)
+  inline float  orig_area() const;
+  inline float  neg_area() const;
+  inline float  neg_orig_area() const; //  amount of original surface in folds
+  inline double radius() const;        //  radius (if status==MRIS_SPHERE)
+  inline MRIS_Status status() const;   //  type of surface (e.g. sphere, plane)
   inline MRIS_Status
   origxyz_status() const;     //  type of surface (e.g. sphere, plane) that this
                               //  origxyz were obtained from

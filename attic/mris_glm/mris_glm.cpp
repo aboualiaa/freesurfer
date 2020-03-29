@@ -33,35 +33,35 @@ MC Sim:
   1. Cluster area threshold is in mm^2
 */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
-#include "error.h"
 #include "diag.h"
-#include "resample.h"
-#include "icosahedron.h"
-#include "matrix.h"
-#include "matfile.h"
-#include "mri.h"
-#include "mri_identify.h"
-#include "sig.h"
+#include "error.h"
+#include "fio.h"
 #include "fmriutils.h"
+#include "fsgdf.h"
+#include "icosahedron.h"
+#include "matfile.h"
+#include "matrix.h"
+#include "mri.h"
 #include "mri2.h"
-#include "volcluster.h"
+#include "mri_circulars.h"
+#include "mri_identify.h"
+#include "pdf.h"
+#include "resample.h"
+#include "sig.h"
 #include "surfcluster.h"
 #include "version.h"
-#include "pdf.h"
-#include "fsgdf.h"
-#include "fio.h"
-#include "mri_circulars.h"
+#include "volcluster.h"
 
 #ifdef X
 #undef X
 #endif
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
 static void usage_exit(void);
@@ -69,150 +69,150 @@ static void print_help(void);
 static void print_version(void);
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int isflag(char *flag);
-static int nth_is_arg(int nargc, char **argv, int nth);
-static int singledash(char *flag);
-static int stringmatch(char *str1, char *str2);
-static int checkfmt(char *fmt);
-static int getfmtid(char *fname);
-static int IsSurfFmt(char *fmt);
-MRIS *MRISloadSurfSubject(char *subj, char *hemi, char *surfid,
-                          char *SUBJECTS_DIR);
+static int  isflag(char *flag);
+static int  nth_is_arg(int nargc, char **argv, int nth);
+static int  singledash(char *flag);
+static int  stringmatch(char *str1, char *str2);
+static int  checkfmt(char *fmt);
+static int  getfmtid(char *fname);
+static int  IsSurfFmt(char *fmt);
+MRIS *      MRISloadSurfSubject(char *subj, char *hemi, char *surfid,
+                                char *SUBJECTS_DIR);
 
-int ReadAsciiMatrixNRows(char *desmtxfname);
-int ReadAsciiMatrixSize(char *desmtxfname, int *pnrows, int *pncols);
-int ReadDesignMatrix(char *desmtxfname);
-MATRIX *ReadAsciiMatrix(char *asciimtxfname);
-int CheckDesignMatrix(MATRIX *X);
-static int MatrixWriteFmt(MATRIX *M, char *fname, char *fmt);
+int          ReadAsciiMatrixNRows(char *desmtxfname);
+int          ReadAsciiMatrixSize(char *desmtxfname, int *pnrows, int *pncols);
+int          ReadDesignMatrix(char *desmtxfname);
+MATRIX *     ReadAsciiMatrix(char *asciimtxfname);
+int          CheckDesignMatrix(MATRIX *X);
+static int   MatrixWriteFmt(MATRIX *M, char *fname, char *fmt);
 static char *getstem(char *bfilename);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mris_glm.c,v 1.55 2011/05/05 15:28:03 greve Exp $";
+static char vcid[]   = "$Id: mris_glm.c,v 1.55 2011/05/05 15:28:03 greve Exp $";
 const char *Progname = "mris_glm";
 
-char *hemi = NULL;
+char *hemi        = NULL;
 char *desmtxfname = NULL;
-char *fsgdfile = NULL;
-char *xmatfile = NULL;
-int xmatonly = 0;
-char *xmatfmt = "matlab4";
-int nsmooth = 0;
-int frame = 0;
+char *fsgdfile    = NULL;
+char *xmatfile    = NULL;
+int   xmatonly    = 0;
+char *xmatfmt     = "matlab4";
+int   nsmooth     = 0;
+int   frame       = 0;
 
 char *surfmeasure = NULL;
 
-char *surfregid = "sphere.reg";
-int ninputs = 0;
-char *inputlist[1000];
-char *inputfmt = NULL;
-int inputfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *subjectlistfile;
-int nsubjects = 0;
-char *subjectlist[1000];
-int nregressors = 0;
+char *  surfregid = "sphere.reg";
+int     ninputs   = 0;
+char *  inputlist[1000];
+char *  inputfmt   = NULL;
+int     inputfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *  subjectlistfile;
+int     nsubjects = 0;
+char *  subjectlist[1000];
+int     nregressors = 0;
 MATRIX *X; /* design matrix */
-FSGD *fsgd = NULL;
-char *gd2mtx_method = "none";
+FSGD *  fsgd          = NULL;
+char *  gd2mtx_method = "none";
 
-char *conmtxfname;
+char *  conmtxfname;
 MATRIX *C; /* contrast vector */
 
-char *betaid = NULL;
-char *betafmt = NULL;
-int betafmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *betaid    = NULL;
+char *betafmt   = NULL;
+int   betafmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *beta_in_id = NULL;
-char *beta_in_fmt = NULL;
-int beta_in_fmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *beta_in_id    = NULL;
+char *beta_in_fmt   = NULL;
+int   beta_in_fmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *cesid = NULL;
-char *cesfmt = NULL;
-int cesfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *cesid    = NULL;
+char *cesfmt   = NULL;
+int   cesfmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *eresid = NULL;
-char *eresfmt = NULL;
-int eresfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *eresid    = NULL;
+char *eresfmt   = NULL;
+int   eresfmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *yid = NULL, *yidbase, *yidstem, *yidbasestem, xmatpath[1000];
-char *yfmt = NULL;
-int yfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *yid    = NULL, *yidbase, *yidstem, *yidbasestem, xmatpath[1000];
+char *yfmt   = NULL;
+int   yfmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *yhatid = NULL;
-char *yhatfmt = NULL;
-int yhatfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *yhatid    = NULL;
+char *yhatfmt   = NULL;
+int   yhatfmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *eresvarid = NULL;
-char *eresvarfmt = NULL;
-int eresvarfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *eresvarid    = NULL;
+char *eresvarfmt   = NULL;
+int   eresvarfmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *eresvar_in_id = NULL;
-char *eresvar_in_fmt = NULL;
-int eresvar_in_fmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *eresvar_in_id    = NULL;
+char *eresvar_in_fmt   = NULL;
+int   eresvar_in_fmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *tid = NULL;
-char *tfmt = NULL;
-int tfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *tid      = NULL;
+char *tfmt     = NULL;
+int   tfmtid   = MRI_VOLUME_TYPE_UNKNOWN;
 char *tmaxfile = NULL;
 float tmax;
-int nsim = 1, nthsim, MCSim = 0;
+int   nsim = 1, nthsim, MCSim = 0;
 
-char *sigid = NULL;
-char *sigfmt = NULL;
-int sigfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *sigid    = NULL;
+char *sigfmt   = NULL;
+int   sigfmtid = MRI_VOLUME_TYPE_UNKNOWN;
 
-int IcoOrder = 7;
-float IcoRadius = 100.0;
-char *regsurf = "sphere.reg";
+int   IcoOrder   = 7;
+float IcoRadius  = 100.0;
+char *regsurf    = "sphere.reg";
 char *trgsubject = NULL;
 
 int dof;
 int debug = 0;
 
-int SynthPDF = 0;
-int SynthSeed = -1;
-double SynthGaussianMean;
-double SynthGaussianStd;
-char *SynthCDFFile;
+int     SynthPDF  = 0;
+int     SynthSeed = -1;
+double  SynthGaussianMean;
+double  SynthGaussianStd;
+char *  SynthCDFFile;
 double *SynthCDF;
 double *SynthXCDF;
-int SynthNCDF;
+int     SynthNCDF;
 
 MRI_SURFACE *IcoSurf = NULL, *SurfReg = NULL;
-MRI *SrcVals = NULL, *beta = NULL, *yhat = NULL;
-MRI *eres = NULL, *eresvar = NULL, *ces = NULL, *t = NULL, *sig = NULL;
+MRI *        SrcVals = NULL, *beta = NULL, *yhat = NULL;
+MRI *        eres = NULL, *eresvar = NULL, *ces = NULL, *t = NULL, *sig = NULL;
 MATRIX *T = NULL, *Xt = NULL, *XtX = NULL, *iXtX = NULL, *Q = NULL, *R = NULL;
-MRI *tmpmri = NULL, *tmpmri2 = NULL, *SrcHits = NULL;
-MRI *SrcDist = NULL, *TrgHits = NULL, *TrgDist = NULL;
+MRI *   tmpmri = NULL, *tmpmri2 = NULL, *SrcHits = NULL;
+MRI *   SrcDist = NULL, *TrgHits = NULL, *TrgDist = NULL;
 
 float DOF;
 char *SUBJECTS_DIR;
 
-int Force = 0;
-int ParseOnly = 0;
+int  Force     = 0;
+int  ParseOnly = 0;
 char tmpstr[1000];
 
-CHT *cht; // Cluster Hit Table -- for simulations
-int nth_ithr, nth_sthr, NClusters;
-double ithr, sthr;
+CHT *           cht; // Cluster Hit Table -- for simulations
+int             nth_ithr, nth_sthr, NClusters;
+double          ithr, sthr;
 SURFCLUSTERSUM *scs;
-char *chtfile = NULL;
-int n_ithr, n_sthr;
-double ithr_lo, ithr_hi, sthr_lo, sthr_hi;
-char *ithr_sign;
-int abs_flag = 0;
+char *          chtfile = NULL;
+int             n_ithr, n_sthr;
+double          ithr_lo, ithr_hi, sthr_lo, sthr_hi;
+char *          ithr_sign;
+int             abs_flag = 0;
 
-int nvoxels;
+int   nvoxels;
 FILE *fp;
-int DoPermute = 0;
+int   DoPermute = 0;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  int vtx, nthsubj;
+  int   vtx, nthsubj;
   char *subject;
   char *inputfname;
-  int nargs, n;
+  int   nargs, n;
 
   nargs = handleVersionOption(argc, argv, "mris_glm");
   if (nargs && argc - nargs == 1)
@@ -247,8 +247,8 @@ int main(int argc, char **argv) {
     MatrixWriteFmt(X, xmatfile, xmatfmt);
 
   /* X is the design matrix */
-  Xt = MatrixTranspose(X, NULL);
-  XtX = MatrixMultiply(Xt, X, NULL);
+  Xt   = MatrixTranspose(X, NULL);
+  XtX  = MatrixMultiply(Xt, X, NULL);
   iXtX = MatrixInverse(XtX, NULL);
   if (iXtX == NULL) {
     printf("ERROR: could not compute psuedo inverse of X\n");
@@ -262,7 +262,7 @@ int main(int argc, char **argv) {
   T = MatrixMultiply(X, Q, NULL);
 
   /* R is the matrix that when multiplied by y gives the residual error */
-  R = MatrixSubtract(MatrixIdentity(nsubjects, NULL), T, NULL);
+  R   = MatrixSubtract(MatrixIdentity(nsubjects, NULL), T, NULL);
   DOF = X->rows - X->cols;
 
   printf("Design Matrix ------------------------------------\n");
@@ -511,8 +511,8 @@ int main(int argc, char **argv) {
         else
           strcpy(fsgd->measname, "external");
 
-        yidbase = fio_basename(yid, NULL);
-        yidstem = getstem(yid);
+        yidbase     = fio_basename(yid, NULL);
+        yidstem     = getstem(yid);
         yidbasestem = getstem(yidbase);
         sprintf(fsgd->datafile, "%s", yidbase);
 
@@ -655,12 +655,12 @@ int main(int argc, char **argv) {
 
       if (nthsim == 0) {
         /* Set up Cluster Hit Table */
-        cht->nsim = 0;
-        cht->nvox = 0;
+        cht->nsim    = 0;
+        cht->nvox    = 0;
         cht->nsmooth = nsmooth;
-        cht->fwhm = 0;
+        cht->fwhm    = 0;
         cht->totsize = IcoSurf->total_area;
-        cht->seed = SynthSeed;
+        cht->seed    = SynthSeed;
         CHTwrite(chtfile, cht); // Immediately create cht file with zeros
       } else
         cht = CHTread(chtfile);
@@ -697,10 +697,10 @@ int main(int argc, char **argv) {
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
   extern MATRIX *X;
-  int nargc, nargsused;
-  char **pargv, *option;
-  int m, err;
-  float fvtmp[1000];
+  int            nargc, nargsused;
+  char **        pargv, *option;
+  int            m, err;
+  float          fvtmp[1000];
 
   if (argc < 1)
     usage_exit();
@@ -746,7 +746,7 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 2);
       sscanf(pargv[0], "%lf", &SynthGaussianMean);
       sscanf(pargv[1], "%lf", &SynthGaussianStd);
-      SynthPDF = 1;
+      SynthPDF  = 1;
       nargsused = 2;
     } else if (!strcmp(option, "--cdf")) {
       if (nargc < 1)
@@ -755,7 +755,7 @@ static int parse_commandline(int argc, char **argv) {
       err = PDFloadCDF(SynthCDFFile, &SynthXCDF, &SynthCDF, &SynthNCDF);
       if (err)
         exit(1);
-      SynthPDF = 2;
+      SynthPDF  = 2;
       nargsused = 1;
     } else if (!strcmp(option, "--icoorder")) {
       if (nargc < 1)
@@ -765,25 +765,25 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--hemi")) {
       if (nargc < 1)
         argnerr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--sd")) {
       if (nargc < 1)
         argnerr(option, 1);
       SUBJECTS_DIR = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--trgsubj") || !strcmp(option, "--ts")) {
       if (nargc < 1)
         argnerr(option, 1);
       trgsubject = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--surfmeas")) {
       if (nargc < 1)
         argnerr(option, 1);
       surfmeasure = pargv[0];
-      inputfmt = "curv";
-      inputfmtid = checkfmt(inputfmt);
-      nargsused = 1;
+      inputfmt    = "curv";
+      inputfmtid  = checkfmt(inputfmt);
+      nargsused   = 1;
     } else if (!strcmp(option, "--i")) {
       if (nargc < 2)
         argnerr(option, 2);
@@ -798,7 +798,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 2)
         argnerr(option, 2);
       nargsused = 1;
-      fp = fopen(pargv[0], "r");
+      fp        = fopen(pargv[0], "r");
       if (fp == NULL) {
         printf("ERROR: could not open %s\n", pargv[0]);
         exit(1);
@@ -813,15 +813,15 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--ifmt")) {
       if (nargc < 1)
         argnerr(option, 1);
-      inputfmt = pargv[0];
+      inputfmt   = pargv[0];
       inputfmtid = checkfmt(inputfmt);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--fsgd")) {
       if (nargc < 1)
         argnerr(option, 1);
-      fsgdfile = pargv[0];
+      fsgdfile  = pargv[0];
       nargsused = 1;
-      fsgd = gdfRead(fsgdfile, 0);
+      fsgd      = gdfRead(fsgdfile, 0);
       if (fsgd == NULL)
         exit(1);
       strcpy(fsgd->tessellation, "surface");
@@ -836,7 +836,7 @@ static int parse_commandline(int argc, char **argv) {
       if (!stringmatch(gd2mtx_method, "none")) {
         X = gdfMatrix(fsgd, gd2mtx_method, NULL);
         CheckDesignMatrix(X);
-        nsubjects = X->rows;
+        nsubjects   = X->rows;
         nregressors = X->cols;
         for (m = 0; m < nsubjects; m++)
           subjectlist[m] = fsgd->subjid[m];
@@ -846,13 +846,13 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       desmtxfname = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
       ReadDesignMatrix(desmtxfname);
       CheckDesignMatrix(X);
     } else if (!strcmp(option, "--xmat")) {
       if (nargc < 1)
         argnerr(option, 1);
-      xmatfile = pargv[0];
+      xmatfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--xmatfmt")) {
       if (nargc < 1)
@@ -900,7 +900,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       conmtxfname = pargv[0];
-      C = ReadAsciiMatrix(conmtxfname);
+      C           = ReadAsciiMatrix(conmtxfname);
       if (C == NULL)
         exit(1);
       nargsused = 1;
@@ -920,7 +920,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--beta")) {
       if (nargc < 1)
         argnerr(option, 1);
-      betaid = pargv[0];
+      betaid    = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         betafmt = pargv[1];
@@ -936,7 +936,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       beta_in_id = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         beta_in_fmt = pargv[1];
         nargsused++;
@@ -945,7 +945,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--ces")) {
       if (nargc < 1)
         argnerr(option, 1);
-      cesid = pargv[0];
+      cesid     = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         cesfmt = pargv[1];
@@ -956,7 +956,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--eres")) {
       if (nargc < 1)
         argnerr(option, 1);
-      eresid = pargv[0];
+      eresid    = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         eresfmt = pargv[1];
@@ -967,7 +967,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--y")) {
       if (nargc < 1)
         argnerr(option, 1);
-      yid = pargv[0];
+      yid       = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         yfmt = pargv[1];
@@ -979,7 +979,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--yhat")) {
       if (nargc < 1)
         argnerr(option, 1);
-      yhatid = pargv[0];
+      yhatid    = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         yhatfmt = pargv[1];
@@ -1006,7 +1006,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       eresvar_in_id = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         eresvar_in_fmt = pargv[1];
         nargsused++;
@@ -1016,7 +1016,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--t")) {
       if (nargc < 1)
         argnerr(option, 1);
-      tid = pargv[0];
+      tid       = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         tfmt = pargv[1];
@@ -1029,12 +1029,12 @@ static int parse_commandline(int argc, char **argv) {
         exit(1);
       }
     } else if (!strcmp(option, "--tmax")) {
-      tmaxfile = pargv[0];
+      tmaxfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--sigt")) {
       if (nargc < 1)
         argnerr(option, 1);
-      sigid = pargv[0];
+      sigid     = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         sigfmt = pargv[1];
@@ -1669,9 +1669,9 @@ static void check_options(void) {
 
   if (MCSim && SynthPDF == 0) {
     /* Force it to used gaussian (0,1) */
-    SynthPDF = 1;
+    SynthPDF          = 1;
     SynthGaussianMean = 0;
-    SynthGaussianStd = 1;
+    SynthGaussianStd  = 1;
     printf("INFO: using gaussian (0,1) for simulation\n");
   }
 
@@ -1768,16 +1768,16 @@ static int IsSurfFmt(char *fmt) {
 /*------------------------------------------------------------*/
 int ReadDesignMatrix(char *desmtxfname) {
   extern MATRIX *X;
-  extern char *subjectlist[1000];
-  extern int nsubjects, nregressors;
-  int nrows = 0, ncols = 0, r, c;
-  char tmpstring[1001];
-  FILE *fp;
+  extern char *  subjectlist[1000];
+  extern int     nsubjects, nregressors;
+  int            nrows = 0, ncols = 0, r, c;
+  char           tmpstring[1001];
+  FILE *         fp;
 
   ReadAsciiMatrixSize(desmtxfname, &nrows, &ncols);
-  nsubjects = nrows;
+  nsubjects   = nrows;
   nregressors = ncols - 1;
-  X = MatrixAlloc(nrows, ncols - 1, MATRIX_REAL);
+  X           = MatrixAlloc(nrows, ncols - 1, MATRIX_REAL);
 
   fp = fopen(desmtxfname, "r");
   if (fp == NULL) {
@@ -1803,8 +1803,8 @@ int ReadDesignMatrix(char *desmtxfname) {
 /*------------------------------------------------------------*/
 int ReadAsciiMatrixNRows(char *desmtxfname) {
   FILE *fp;
-  int nrows;
-  char tmpstring[2001];
+  int   nrows;
+  char  tmpstring[2001];
 
   fp = fopen(desmtxfname, "r");
   if (fp == NULL) {
@@ -1832,8 +1832,8 @@ int ReadAsciiMatrixNRows(char *desmtxfname) {
 /*-----------------------------------------------------------------*/
 int ReadAsciiMatrixSize(char *asciimtxfname, int *pnrows, int *pncols) {
   FILE *fp;
-  int nrows, nitems, ncols;
-  char tmpstring[2001];
+  int   nrows, nitems, ncols;
+  char  tmpstring[2001];
 
   nrows = ReadAsciiMatrixNRows(asciimtxfname);
   if (nrows < 0)
@@ -1874,7 +1874,7 @@ int ReadAsciiMatrixSize(char *asciimtxfname, int *pnrows, int *pncols) {
 }
 /*------------------------------------------------------------*/
 MATRIX *ReadAsciiMatrix(char *asciimtxfname) {
-  int err, nrows, ncols, r, c, nread;
+  int   err, nrows, ncols, r, c, nread;
   FILE *fp;
 
   err = ReadAsciiMatrixSize(asciimtxfname, &nrows, &ncols);
@@ -1906,9 +1906,9 @@ MATRIX *ReadAsciiMatrix(char *asciimtxfname) {
 /*-----------------------------------------------*/
 int CheckDesignMatrix(MATRIX *X) {
   extern char *xmatfile;
-  extern int Force;
-  float Xcondition;
-  MATRIX *Xnorm;
+  extern int   Force;
+  float        Xcondition;
+  MATRIX *     Xnorm;
 
   if (X->rows <= X->cols) {
     printf("ERROR: Design Matrix: nrows (%d) <= ncols (%d)\n", X->rows,
@@ -1916,7 +1916,7 @@ int CheckDesignMatrix(MATRIX *X) {
     exit(1);
   }
 
-  Xnorm = MatrixNormalizeCol(X, NULL, NULL);
+  Xnorm      = MatrixNormalizeCol(X, NULL, NULL);
   Xcondition = sqrt(MatrixNSConditionNumber(Xnorm));
   MatrixFree(&Xnorm);
   printf("INFO: Normalized Design Matrix Condition Number is %g\n", Xcondition);
@@ -1938,9 +1938,9 @@ int CheckDesignMatrix(MATRIX *X) {
 }
 /*---------------------------------------------------*/
 static char *getstem(char *filename) {
-  int filetype;
+  int   filetype;
   char *stem;
-  int len;
+  int   len;
 
   filetype = mri_identify(filename);
   if (filetype == MRI_VOLUME_TYPE_UNKNOWN) {
@@ -1948,7 +1948,7 @@ static char *getstem(char *filename) {
     exit(1);
   }
 
-  len = strlen(filename);
+  len  = strlen(filename);
   stem = (char *)calloc(sizeof(char), len + 1);
 
   switch (filetype) {
@@ -1972,7 +1972,7 @@ static char *getstem(char *filename) {
 }
 /*-------------------------------------------------------------------*/
 static int MatrixWriteFmt(MATRIX *M, char *fname, char *fmt) {
-  int err = 0, r, c;
+  int   err = 0, r, c;
   FILE *fp;
 
   if (!strcmp(fmt, "matlab4")) {

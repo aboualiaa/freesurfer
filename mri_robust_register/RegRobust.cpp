@@ -77,8 +77,8 @@ void RegRobust::findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit)
 // all kinds of stuff is initialized before (e.g. pyramid)
 {
   // variables to store matrix m and scaling factor d:
-  pair<vnl_matrix_fixed<double, 4, 4>, double> cmd;
-  pair<vnl_matrix_fixed<double, 4, 4>, double> md(mi, scaleinit);
+  std::pair<vnl_matrix_fixed<double, 4, 4>, double> cmd;
+  std::pair<vnl_matrix_fixed<double, 4, 4>, double> md(mi, scaleinit);
 
   // allow 2d case (depth == 1)
   if (gpS[0]->width < 16 || gpS[0]->height < 16 ||
@@ -103,18 +103,18 @@ void RegRobust::findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit)
 
   for (int r = resolution - rstart; r >= stopres; r--) {
     if (verbose > 1) {
-      cout << endl << "Resolution: " << r << endl;
-      cout << " gpS ( " << gpS[r]->width << " , " << gpS[r]->height << " , "
-           << gpS[r]->depth << " )" << endl;
-      cout << " gpT ( " << gpT[r]->width << " , " << gpT[r]->height << " , "
-           << gpT[r]->depth << " )" << endl;
+      std::cout << std::endl << "Resolution: " << r << std::endl;
+      std::cout << " gpS ( " << gpS[r]->width << " , " << gpS[r]->height
+                << " , " << gpS[r]->depth << " )" << std::endl;
+      std::cout << " gpT ( " << gpT[r]->width << " , " << gpT[r]->height
+                << " , " << gpT[r]->depth << " )" << std::endl;
     }
 
     //    if (r==2) iscale = iscaletmp; // set iscale if set by user
 
     // compute Registration
     if (verbose > 2)
-      cout << "   - compute new iterative registration" << endl;
+      std::cout << "   - compute new iterative registration" << std::endl;
 
     int n = 3;
     if (r == stopres)
@@ -124,16 +124,16 @@ void RegRobust::findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit)
       verbose = 0;
     computeIterativeRegistrationFull(n, 0.05, gpS[r], gpT[r], md.first,
                                      md.second);
-    cmd.first = Mfinal;
+    cmd.first  = Mfinal;
     cmd.second = iscalefinal;
-    verbose = vv;
+    verbose    = vv;
 
     if (verbose > 1) {
-      cout << endl << " current Matrix: " << endl;
+      std::cout << std::endl << " current Matrix: " << std::endl;
       vnl_matlab_print(std::cout, cmd.first, "Tc",
                        vnl_matlab_print_format_long);
-      cout << endl;
-      cout << " intens: Ic = " << cmd.second << endl;
+      std::cout << std::endl;
+      std::cout << " intens: Ic = " << cmd.second << std::endl;
 
       // adjust to highest level for output only:
       double tx = cmd.first[0][3];
@@ -144,8 +144,8 @@ void RegRobust::findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit)
         ty *= 2;
         tz *= 2;
       }
-      cout << " equiv trans on highres: " << tx << " " << ty << " " << tz
-           << endl;
+      std::cout << " equiv trans on highres: " << tx << " " << ty << " " << tz
+                << std::endl;
     }
 
     //     if (r == stopres)
@@ -190,20 +190,22 @@ void RegRobust::findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit)
         }
       }
     }
-    md.first = cmd.first;
+    md.first  = cmd.first;
     md.second = cmd.second;
     if (verbose > 1) {
-      cout << endl << " Matrix: " << endl;
+      std::cout << std::endl << " Matrix: " << std::endl;
       vnl_matlab_print(std::cout, md.first, "T", vnl_matlab_print_format_long);
-      cout << endl;
-      cout << " Intensity:  I = " << md.second << endl;
+      std::cout << std::endl;
+      std::cout << " Intensity:  I = " << md.second << std::endl;
     }
   } // resolution loop
 }
 
 double RegRobust::findSaturation() {
   if (verbose > 0)
-    cout << endl << endl << " Registration::findSaturation " << endl;
+    std::cout << std::endl
+              << std::endl
+              << " Registration::findSaturation " << std::endl;
   //   if (!mriS) mriS = mri_source;
   //   if (!mriT) mriT = mri_target;
   MRI *mriS = mri_source;
@@ -213,7 +215,7 @@ double RegRobust::findSaturation() {
   m.set_identity();
 
   // variables to store matrix m and scaling factor d:
-  pair<vnl_matrix_fixed<double, 4, 4>, double> md(
+  std::pair<vnl_matrix_fixed<double, 4, 4>, double> md(
       vnl_matrix_fixed<double, 4, 4>(), iscaleinit);
 
   if (!Minit.empty())
@@ -227,7 +229,7 @@ double RegRobust::findSaturation() {
   int MINS = 16;
   if (minsize > MINS)
     MINS = minsize; // use minsize, but at least 16
-  pair<int, int> limits = getGPLimits(mriS, mriT, MINS, maxsize);
+  std::pair<int, int> limits = getGPLimits(mriS, mriT, MINS, maxsize);
   if (gpS.size() == 0)
     gpS = buildGPLimits(mriS, limits);
   if (gpT.size() == 0)
@@ -260,34 +262,41 @@ double RegRobust::findSaturation() {
 
   if (gpS[stopres]->width < 32 || gpS[stopres]->height < 32 ||
       gpS[stopres]->depth < 32) {
-    cout << endl
-         << " ================================================================="
-            "======="
-         << endl;
-    cout << " WARNING: image might be too small (or ill shaped) for --satit to "
-            "work."
-         << endl;
-    cout << "          Try to manually specify --sat # if not satisfied with "
-            "result! "
-         << endl;
-    cout << " ================================================================="
-            "======="
-         << endl
-         << endl;
+    std::cout
+        << std::endl
+        << " ================================================================="
+           "======="
+        << std::endl;
+    std::cout
+        << " WARNING: image might be too small (or ill shaped) for --satit to "
+           "work."
+        << std::endl;
+    std::cout
+        << "          Try to manually specify --sat # if not satisfied with "
+           "result! "
+        << std::endl;
+    std::cout
+        << " ================================================================="
+           "======="
+        << std::endl
+        << std::endl;
     ;
   }
 
-  cout << endl << "   - Max Resolution used: " << stopres << endl;
-  cout << "     -- gpS ( " << gpS[stopres]->width << " , "
-       << gpS[stopres]->height << " , " << gpS[stopres]->depth << " )" << endl;
-  cout << "     -- gpT ( " << gpT[stopres]->width << " , "
-       << gpT[stopres]->height << " , " << gpT[stopres]->depth << " )" << endl;
+  std::cout << std::endl
+            << "   - Max Resolution used: " << stopres << std::endl;
+  std::cout << "     -- gpS ( " << gpS[stopres]->width << " , "
+            << gpS[stopres]->height << " , " << gpS[stopres]->depth << " )"
+            << std::endl;
+  std::cout << "     -- gpT ( " << gpT[stopres]->width << " , "
+            << gpT[stopres]->height << " , " << gpT[stopres]->depth << " )"
+            << std::endl;
 
   if (verbose > 1) {
-    cout << "   - initial transform:\n";
+    std::cout << "   - initial transform:\n";
     vnl_matlab_print(std::cout, md.first, "Ti", vnl_matlab_print_format_long);
-    cout << endl;
-    cout << "   - initial iscale:   Ii = " << md.second << endl;
+    std::cout << std::endl;
+    std::cout << "   - initial iscale:   Ii = " << md.second << std::endl;
   }
 
   // adjust md.first to current (lowest) resolution:
@@ -298,21 +307,21 @@ double RegRobust::findSaturation() {
   vnl_matrix_fixed<double, 4, 4> firstbackup = md.first;
 
   if (verbose > 1) {
-    cout << "   - initial adjusted:\n";
+    std::cout << "   - initial adjusted:\n";
     vnl_matlab_print(std::cout, md.first, "Tia", vnl_matlab_print_format_long);
-    cout << endl;
+    std::cout << std::endl;
   }
 
   // -------------------------------------------- RUN LOOP
   // ----------------------------------
   //
-  cout << "   - running loop to estimate saturation parameter:\n";
+  std::cout << "   - running loop to estimate saturation parameter:\n";
   double satdiff = 0.5; // stop if we get closer than this
-  double satmax = 0;
-  double satmin = 0;
-  double wmin = -1;
-  double wmax = -1;
-  int counter = 0;
+  double satmax  = 0;
+  double satmin  = 0;
+  double wmin    = -1;
+  double wmax    = -1;
+  int    counter = 0;
   while (satmin == 0.0 || satmax == 0.0 || satmax - satmin > satdiff) {
     counter++;
     if (satmin == 0 && satmax == 0)
@@ -325,20 +334,20 @@ double RegRobust::findSaturation() {
       sat = 0.5 * (satmax + satmin);
     if (verbose > 0) {
       if (counter > 1)
-        cout << "         min sat: " << satmin << " ( " << wmin
-             << " ), max sat: " << satmax << " ( " << wmax
-             << " ), sat diff: " << satmax - satmin << ", (wlimit=" << wlimit
-             << ")" << endl;
-      cout << "     -- Iteration: " << counter << "  trying sat: " << sat
-           << endl;
+        std::cout << "         min sat: " << satmin << " ( " << wmin
+                  << " ), max sat: " << satmax << " ( " << wmax
+                  << " ), sat diff: " << satmax - satmin
+                  << ", (wlimit=" << wlimit << ")" << std::endl;
+      std::cout << "     -- Iteration: " << counter << "  trying sat: " << sat
+                << std::endl;
     }
     findSatMultiRes(md.first, md.second);
     if (wcheck > wlimit) {
       satmin = sat;
-      wmin = wcheck;
+      wmin   = wcheck;
     } else {
       satmax = sat;
-      wmax = wcheck;
+      wmax   = wcheck;
     }
 
     // if sat low (sensitive) and still not many outliers
@@ -347,8 +356,8 @@ double RegRobust::findSaturation() {
     if (sat < 6 && wcheck < 0.04) {
       satmax = sat;
       satmin = sat;
-      wmax = wcheck;
-      wmin = wcheck;
+      wmax   = wcheck;
+      wmin   = wcheck;
       break;
     }
   }
@@ -357,23 +366,24 @@ double RegRobust::findSaturation() {
   // ---------------------------------
   //
   if (wmax <= wlimit) {
-    sat = satmax;
+    sat    = satmax;
     wcheck = wmax;
   } else {
     assert(wmin <= wlimit);
-    sat = satmin;
+    sat    = satmin;
     wcheck = wmin;
   }
 
   if (verbose > 0)
-    cout << "   - final SAT: " << sat << " ( it: " << counter
-         << " , weight check " << wcheck << " <= " << wlimit << " )" << endl;
+    std::cout << "   - final SAT: " << sat << " ( it: " << counter
+              << " , weight check " << wcheck << " <= " << wlimit << " )"
+              << std::endl;
 
   if (debug) {
     // write out wcheck
-    string fn = getName() + "-wcheck-est.txt";
-    ofstream f(fn.c_str(), ios::out);
-    f << sat << " " << wcheck << endl;
+    std::string   fn = getName() + "-wcheck-est.txt";
+    std::ofstream f(fn.c_str(), std::ios::out);
+    f << sat << " " << wcheck << std::endl;
     f.close();
   }
 
@@ -382,13 +392,14 @@ double RegRobust::findSaturation() {
 
 double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
   if (mriS->nframes > 1 || mriT->nframes > 1) {
-    cerr << "RegRobust::estimateIScale multiple frames not supported!" << endl;
+    std::cerr << "RegRobust::estimateIScale multiple frames not supported!"
+              << std::endl;
     exit(1);
     // see constructAB for modifications necessary to do multi frame
   }
 
   if (verbose > 1)
-    cout << "   - estimateIScale: " << endl;
+    std::cout << "   - estimateIScale: " << std::endl;
 
   assert(mriT != nullptr);
   assert(mriS != nullptr);
@@ -402,30 +413,30 @@ double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
   // assert(mask->type == MRI_INT);
   // MRIclear(mask);
 
-  int z, y, x;
+  int      z, y, x;
   long int ss = mriS->width * mriS->height * mriS->depth;
   if (mri_indexing)
     MRIfree(&mri_indexing);
   if (ss > std::numeric_limits<int>::max()) {
     if (verbose > 1)
-      cout << "     -- using LONG for indexing ... " << flush;
+      std::cout << "     -- using LONG for indexing ... " << std::flush;
     mri_indexing = MRIalloc(mriS->width, mriS->height, mriS->depth, MRI_LONG);
     if (mri_indexing == nullptr)
       ErrorExit(ERROR_NO_MEMORY, "Registration::estimateIScale could not "
                                  "allocate memory for mri_indexing");
     if (verbose > 1)
-      cout << " done!" << endl;
+      std::cout << " done!" << std::endl;
   } else {
     double mu = ((double)ss) * sizeof(int) / (1024.0 * 1024.0);
     if (verbose > 1)
-      cout << "     -- allocating " << mu << "Mb mem for indexing ... "
-           << flush;
+      std::cout << "     -- allocating " << mu << "Mb mem for indexing ... "
+                << std::flush;
     mri_indexing = MRIalloc(mriS->width, mriS->height, mriS->depth, MRI_INT);
     if (mri_indexing == nullptr)
       ErrorExit(ERROR_NO_MEMORY, "Registration::estimateIScale could not "
                                  "allocate memory for mri_indexing");
     if (verbose > 1)
-      cout << " done!" << endl;
+      std::cout << " done!" << std::endl;
   }
 
   for (z = 0; z < mriS->depth; z++)
@@ -442,46 +453,46 @@ double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
 
   // we will need the blurred images (as float):
   if (verbose > 1)
-    cout << "     -- compute smoothie ... " << flush;
+    std::cout << "     -- compute smoothie ... " << std::flush;
   MRI *Sbl = MRIalloc(mriS->width, mriS->height, mriS->depth, MRI_FLOAT);
-  Sbl = MRIcopy(mriS, Sbl);
-  Sbl = MyMRI::getBlur(Sbl, Sbl);
+  Sbl      = MRIcopy(mriS, Sbl);
+  Sbl      = MyMRI::getBlur(Sbl, Sbl);
   MRI *Tbl = MRIalloc(mriT->width, mriT->height, mriT->depth, MRI_FLOAT);
-  Tbl = MRIcopy(mriT, Tbl);
-  Tbl = MyMRI::getBlur(Tbl, Tbl);
+  Tbl      = MRIcopy(mriT, Tbl);
+  Tbl      = MyMRI::getBlur(Tbl, Tbl);
 
   if (verbose > 1)
-    cout << " done!" << endl;
+    std::cout << " done!" << std::endl;
 
   if (dosubsample) {
     if (verbose > 1)
-      cout << "     -- subsample ... " << flush;
+      std::cout << "     -- subsample ... " << std::flush;
 
     MRI *Sblt = Sbl;
-    Sbl = MyMRI::subSample(Sblt);
+    Sbl       = MyMRI::subSample(Sblt);
     MRIfree(&Sblt);
     MRI *Tblt = Tbl;
-    Tbl = MyMRI::subSample(Tblt);
+    Tbl       = MyMRI::subSample(Tblt);
     MRIfree(&Tblt);
 
     if (verbose > 1)
-      cout << " done! " << endl;
+      std::cout << " done! " << std::endl;
   }
 
   // compute 'counti': the number of rows needed (zero elements need to be
   // removed)
   int n = Sbl->width * Sbl->height * Sbl->depth;
   if (verbose > 1)
-    cout << "     -- size " << Sbl->width << " x " << Sbl->height << " x "
-         << Sbl->depth << " = " << n << flush;
+    std::cout << "     -- size " << Sbl->width << " x " << Sbl->height << " x "
+              << Sbl->depth << " = " << n << std::flush;
   long int counti = 0;
-  double eps = 0.00001;
+  double   eps    = 0.00001;
   for (z = 0; z < Sbl->depth; z++)
     for (x = 0; x < Sbl->width; x++)
       for (y = 0; y < Sbl->height; y++) {
         if (isnan(MRIFvox(Sbl, x, y, z)) || isnan(MRIFvox(Tbl, x, y, z))) {
           if (verbose > 0)
-            cout << " found a nan value!!!" << endl;
+            std::cout << " found a nan value!!!" << std::endl;
           continue;
         }
         if (fabs(MRIFvox(Sbl, x, y, z)) < eps &&
@@ -492,52 +503,56 @@ double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
         counti++; // start with 1
       }
   if (verbose > 1)
-    cout << "  need only: " << counti << endl;
+    std::cout << "  need only: " << counti << std::endl;
   if (counti == 0) {
-    cerr << endl;
-    cerr << " ERROR: All entries are zero! Images do not overlap (anymore?)."
-         << endl;
-    cerr << "    This can have several reasons (i.e. different modalities, "
-            "different "
-         << endl;
-    cerr << "    intensity scales, large non-linearities, too diff. voxel "
-            "sizes ...)"
-         << endl;
+    std::cerr << std::endl;
+    std::cerr
+        << " ERROR: All entries are zero! Images do not overlap (anymore?)."
+        << std::endl;
+    std::cerr
+        << "    This can have several reasons (i.e. different modalities, "
+           "different "
+        << std::endl;
+    std::cerr << "    intensity scales, large non-linearities, too diff. voxel "
+                 "sizes ...)"
+              << std::endl;
     // cerr << "    Try calling with --noinit (if the original images are well
     // aligned)" << endl;
-    cerr << "    Maybe use --transform <init.lta> with an approx. alignment"
-         << endl;
-    cerr << "    obtained from tkregister or another registration program."
-         << endl;
-    cerr << "    Or do some prior intensity correction? " << endl;
-    cerr << endl;
+    std::cerr
+        << "    Maybe use --transform <init.lta> with an approx. alignment"
+        << std::endl;
+    std::cerr << "    obtained from tkregister or another registration program."
+              << std::endl;
+    std::cerr << "    Or do some prior intensity correction? " << std::endl;
+    std::cerr << std::endl;
     exit(1);
   }
 
   // allocate the space for A and B
   double abmu = ((double)counti) * sizeof(double) / (1024.0 * 1024.0);
   if (verbose > 1)
-    cout << "     -- allocating " << abmu << "Mb mem for A and b ... " << flush;
-  pair<vnl_matrix<double>, vnl_vector<double>> Ab(vnl_matrix<double>(counti, 1),
-                                                  vnl_vector<double>(counti));
+    std::cout << "     -- allocating " << abmu << "Mb mem for A and b ... "
+              << std::flush;
+  std::pair<vnl_matrix<double>, vnl_vector<double>> Ab(
+      vnl_matrix<double>(counti, 1), vnl_vector<double>(counti));
   if (verbose > 1)
-    cout << " done! " << endl;
+    std::cout << " done! " << std::endl;
   //      if (A == NULL || b == NULL)
   //         ErrorExit(ERROR_NO_MEMORY,"Registration::estimateIScale could not
   //         allocate memory for A or b") ;
 
   if (verbose > 1)
-    cout << "     -- size " << Sbl->width << " " << Sbl->height << " "
-         << Sbl->depth << flush;
+    std::cout << "     -- size " << Sbl->width << " " << Sbl->height << " "
+              << Sbl->depth << std::flush;
 
   long int count = 0;
-  int xp1, yp1, zp1;
+  int      xp1, yp1, zp1;
   for (z = 0; z < Sbl->depth; z++)
     for (x = 0; x < Sbl->width; x++)
       for (y = 0; y < Sbl->height; y++) {
         if (isnan(MRIFvox(Sbl, x, y, z)) || isnan(MRIFvox(Tbl, x, y, z))) {
           if (verbose > 0)
-            cout << " found a nan value!!!" << endl;
+            std::cout << " found a nan value!!!" << std::endl;
           continue;
         }
 
@@ -565,7 +580,8 @@ double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
 
         if (xp1 >= mriS->width || yp1 >= mriS->height || zp1 >= mriS->depth) {
 
-          cerr << " outside !!! " << xp1 << " " << yp1 << " " << zp1 << endl;
+          std::cerr << " outside !!! " << xp1 << " " << yp1 << " " << zp1
+                    << std::endl;
           assert(1 == 2);
         }
 
@@ -599,11 +615,11 @@ double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
 
   vnl_vector<double> p(R.getRobustEst());
 
-  double is = p[0];
-  double s = log(iscalefinal);
-  s = s - is;
+  double is   = p[0];
+  double s    = log(iscalefinal);
+  s           = s - is;
   iscalefinal = exp(s);
-  cout << " ISCALE: " << iscalefinal << " returned: " << is << endl;
+  std::cout << " ISCALE: " << iscalefinal << " returned: " << is << std::endl;
 
   return iscalefinal;
 }

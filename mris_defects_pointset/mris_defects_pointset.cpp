@@ -1,16 +1,14 @@
-#include "mris_defects_pointset.help.xml.h"
-#include "mri.h"
 #include "argparse.h"
-#include "pointset.h"
+#include "mri.h"
 #include "mri_circulars.h"
+#include "mris_defects_pointset.help.xml.h"
+#include "pointset.h"
 
 static PointSet::Point sras2ras(MRIS *surf, PointSet::Point point);
 
+static PointSet::Point sras2ras(MRIS *surf, PointSet::Point point);
 
-static PointSet::Point sras2ras(MRIS* surf, PointSet::Point point);
-
-int main(int argc, char **argv) 
-{
+int main(int argc, char **argv) {
 
   // --- setup ----
 
@@ -94,7 +92,7 @@ int main(int argc, char **argv)
     if (!defect.empty()) {
       // average the points in the defect
       PointSet::Point centroid;
-      int npoints = 0;
+      int             npoints = 0;
       for (auto &vnum : defect) {
         centroid.x += surf->vertices[vnum].x;
         centroid.y += surf->vertices[vnum].y;
@@ -156,8 +154,8 @@ static PointSet::Point sras2ras(MRIS *surf, PointSet::Point point) {
     sras2ras_matrix = RASFromSurfaceRAS_(tmp);
     MRIfree(&tmp);
     // allocate input and output vectors
-    v1 = VectorAlloc(4, MATRIX_REAL);
-    v2 = VectorAlloc(4, MATRIX_REAL);
+    v1                = VectorAlloc(4, MATRIX_REAL);
+    v2                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(v1, 4) = 1.0;
     VECTOR_ELT(v2, 4) = 1.0;
   }

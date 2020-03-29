@@ -26,11 +26,11 @@
  *
  */
 
-#include "diag.h"
-#include "mri_topology.h"
-#include "mri_tess.h"
-#include "mrisutils.h"
 #include "cma.h"
+#include "diag.h"
+#include "mri_tess.h"
+#include "mri_topology.h"
+#include "mrisutils.h"
 
 #if 0
 static int
@@ -61,7 +61,7 @@ static int build_label_histograms(MRI *mri_labels, MRI *mri_intensities,
 static MRI_TOPOLOGY_PARMS parms;
 
 static void Error(char *string);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
 //--------------------------------------------
 /*Error routine*/
@@ -72,7 +72,7 @@ static void Error(char *string) {
 
 /*get_option routine*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -115,9 +115,9 @@ static int get_option(int argc, char *argv[]) {
             parms.tesselation_mode);
     nargs = 1;
   } else if (!strcmp(option, "priors")) {
-    parms.using_gca_maps = 1;
+    parms.using_gca_maps  = 1;
     parms.transform_fname = argv[2];
-    parms.gca_fname = argv[3];
+    parms.gca_fname       = argv[3];
     fprintf(stderr,
             "Mode:          Using gca information: "
             "\n               transform %s"
@@ -194,35 +194,35 @@ static int get_option(int argc, char *argv[]) {
 }
 
 static void MRI_TOPOLOGY_PARMSdefault(MRI_TOPOLOGY_PARMS *parms) {
-  parms->connectivity = 1;
-  parms->tesselation_mode = -1;
-  parms->MarchingCubes = 0;
-  parms->nlabels = 0;
-  parms->mode = VOXEL_MODE;
-  parms->using_gca_maps = 0;
-  parms->transform_fname = nullptr;
-  parms->gca_fname = nullptr;
-  parms->initial_surface_file = nullptr;
-  parms->final_surface_file = nullptr;
-  parms->debugging_map_folder = nullptr;
-  parms->background_priority = 0;
-  parms->only = 0;
-  parms->prior_map_file = nullptr;
-  parms->alpha = 1.0f;
-  parms->beta = 1.0f;
+  parms->connectivity               = 1;
+  parms->tesselation_mode           = -1;
+  parms->MarchingCubes              = 0;
+  parms->nlabels                    = 0;
+  parms->mode                       = VOXEL_MODE;
+  parms->using_gca_maps             = 0;
+  parms->transform_fname            = nullptr;
+  parms->gca_fname                  = nullptr;
+  parms->initial_surface_file       = nullptr;
+  parms->final_surface_file         = nullptr;
+  parms->debugging_map_folder       = nullptr;
+  parms->background_priority        = 0;
+  parms->only                       = 0;
+  parms->prior_map_file             = nullptr;
+  parms->alpha                      = 1.0f;
+  parms->beta                       = 1.0f;
   parms->guess_initial_segmentation = 0;
-  parms->generate_surface = 0;
-  parms->verbose_mode = 0;
-  parms->gca = nullptr;
-  parms->transform = nullptr;
+  parms->generate_surface           = 0;
+  parms->verbose_mode               = 0;
+  parms->gca                        = nullptr;
+  parms->transform                  = nullptr;
 }
 
 int main(int argc, char *argv[]) {
   MRIS *mris;
   char *in_orig_fname = nullptr, *in_seg_fname = nullptr, *out_fname = nullptr;
-  MRI *mri_orig = nullptr, *mri_seg = nullptr, *mri_out = nullptr;
-  int nargs, n;
-  char fname[512];
+  MRI * mri_orig = nullptr, *mri_seg = nullptr, *mri_out = nullptr;
+  int   nargs, n;
+  char  fname[512];
 
   Progname = argv[0];
   fprintf(stderr, "\n");
@@ -244,8 +244,8 @@ int main(int argc, char *argv[]) {
   };
 
   in_orig_fname = argv[argc - 3];
-  in_seg_fname = argv[argc - 2];
-  out_fname = argv[argc - 1];
+  in_seg_fname  = argv[argc - 2];
+  out_fname     = argv[argc - 1];
 
   fprintf(stderr,
           "************************************************************"
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "mixing parameters: alpha=%1.3f , beta=%1.3f \n",
             parms.alpha, parms.beta);
   else {
-    parms.beta = 1.0f;
+    parms.beta  = 1.0f;
     parms.alpha = 1.0f;
   }
   fprintf(stderr, "connectivity = %d\n", parms.connectivity);
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
 
   // check euler characteristic of initial surface
   if (parms.initial_surface_file) {
-    int i, j, k, val, euler, pnvertices, pnfaces, pnedges;
+    int  i, j, k, val, euler, pnvertices, pnfaces, pnedges;
     MRI *mri_tmp;
     mri_tmp = MRIclone(mri_seg, nullptr);
     for (k = 0; k < mri_seg->depth; k++)
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
               break;
             }
           }
-    mris = MRIScreateSurfaceFromVolume(mri_tmp, 1, parms.connectivity);
+    mris  = MRIScreateSurfaceFromVolume(mri_tmp, 1, parms.connectivity);
     euler = MRIScomputeEulerNumber(mris, &pnvertices, &pnfaces, &pnedges);
     fprintf(
         stderr,
@@ -450,7 +450,7 @@ int main(int argc, char *argv[]) {
 
   if (parms.final_surface_file) {
     int euler, pnvertices, pnfaces, pnedges;
-    mris = MRIScreateSurfaceFromVolume(mri_out, 1, parms.connectivity);
+    mris  = MRIScreateSurfaceFromVolume(mri_out, 1, parms.connectivity);
     euler = MRIScomputeEulerNumber(mris, &pnvertices, &pnfaces, &pnedges);
     fprintf(
         stderr,
@@ -492,17 +492,17 @@ static int resegment_erased_voxels(MRI *mri_T1, MRI *mri_in, MRI *mri_out,
                                    int target_label) {
   int x, y, z, label_in, label_out, xi, yi, zi, xk, yk, zk, label, changed = 0;
   HISTOGRAM *histos[MAX_CMA_LABEL + 1];
-  double p, max_p, val;
+  double     p, max_p, val;
 
   build_label_histograms(mri_in, mri_T1, histos);
   for (x = 0; x < mri_in->width; x++) {
     for (y = 0; y < mri_in->height; y++) {
       for (z = 0; z < mri_in->depth; z++) {
-        label_in = nint(MRIgetVoxVal(mri_in, x, y, z, 0));
+        label_in  = nint(MRIgetVoxVal(mri_in, x, y, z, 0));
         label_out = nint(MRIgetVoxVal(mri_out, x, y, z, 0));
         if (label_in == target_label) {
           // find most likely nbr label
-          max_p = 0;
+          max_p     = 0;
           label_out = label_in;
           for (xk = -1; xk <= 1; xk++) {
             xi = x + xk;
@@ -520,9 +520,9 @@ static int resegment_erased_voxels(MRI *mri_T1, MRI *mri_in, MRI *mri_out,
                 if (label == label_in)
                   continue; // would be topologically incorrect
                 val = MRIgetVoxVal(mri_T1, xi, yi, zi, 0);
-                p = HISTOvalToCount(histos[label], val);
+                p   = HISTOvalToCount(histos[label], val);
                 if (p > max_p) {
-                  max_p = p;
+                  max_p     = p;
                   label_out = label;
                 }
               }
@@ -540,13 +540,13 @@ static int resegment_erased_voxels(MRI *mri_T1, MRI *mri_in, MRI *mri_out,
 
 static int build_label_histograms(MRI *mri_labels, MRI *mri_intensities,
                                   HISTOGRAM **histos) {
-  int labels[MAX_LABEL + 1], x, y, z, l;
-  MRI *mri_xformed;
+  int     labels[MAX_LABEL + 1], x, y, z, l;
+  MRI *   mri_xformed;
   MATRIX *m_vox2vox;
 
   memset(labels, 0, sizeof(labels));
 
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_intensities, mri_labels);
+  m_vox2vox   = MRIgetVoxelToVoxelXform(mri_intensities, mri_labels);
   mri_xformed = MRIclone(mri_labels, nullptr);
   MRIlinearTransform(mri_intensities, mri_xformed, m_vox2vox);
   MatrixFree(&m_vox2vox);

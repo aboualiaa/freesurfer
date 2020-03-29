@@ -30,27 +30,27 @@
 #include "mrisurf.h"
 
 // functions
-bool MRIScorrectDefect(MRIS *mris, int defect_number, TOPOFIX_PARMS &parms);
-bool MRIScorrectPatchTopology(MRIS *&mris, TOPOFIX_PARMS &parms);
-bool MRISincreaseEuler(MRIS *&mris, TOPOFIX_PARMS &parms);
-int MRISgetEuler(MRIS *mris, int defect_number = -1);
-int MRISgetEulerNumber(const MRIS *mris, const int *list_of_faces, int nfs);
+bool  MRIScorrectDefect(MRIS *mris, int defect_number, TOPOFIX_PARMS &parms);
+bool  MRIScorrectPatchTopology(MRIS *&mris, TOPOFIX_PARMS &parms);
+bool  MRISincreaseEuler(MRIS *&mris, TOPOFIX_PARMS &parms);
+int   MRISgetEuler(MRIS *mris, int defect_number = -1);
+int   MRISgetEulerNumber(const MRIS *mris, const int *list_of_faces, int nfs);
 MRIP *MRIPextractFromMRIS(MRIS *mris, int defect_number);
-void MRISinitSurface(MRIS *mris);
-bool MRISaddMRIP(MRIS *mris_dst, MRIP *mrip);
+void  MRISinitSurface(MRIS *mris);
+bool  MRISaddMRIP(MRIS *mris_dst, MRIP *mrip);
 MRIS *MRISduplicateOver(MRIS *mris, int mode = 0);
-void MRIScopyHeader(MRIS *mris_src, MRIS *mris_dst);
+void  MRIScopyHeader(MRIS *mris_src, MRIS *mris_dst);
 
-#include "mrisurf.h"
 #include "error.h"
+#include "mrisurf.h"
 
 #include "surface.h"
 
 MRIP *MRIPalloc(int nvertices, int nfaces);
-void MRIPfree(MRIP **mrip);
+void  MRIPfree(MRIP **mrip);
 MRIP *MRIPclone(MRIP *src);
 
 Surface *MRIStoSurface(MRIS *mris);
-MRIS *SurfaceToMRIS(Surface *surface);
+MRIS *   SurfaceToMRIS(Surface *surface);
 
 #endif

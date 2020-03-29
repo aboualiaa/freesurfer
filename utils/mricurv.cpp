@@ -30,17 +30,17 @@
 #include "mri.h"
 #include "mricurv.h"
 
-#define SMOOTH_MMT 0.25
-#define NITERSMOOTH 2
-#define MAX_CURV 1
+#define SMOOTH_MMT   0.25
+#define NITERSMOOTH  2
+#define MAX_CURV     1
 #define AVERAGE_CURV 2
-#define MODE MAX_CURV
+#define MODE         MAX_CURV
 
 static float computeLocalCurvature(int *ref_tab, int connectivity);
 
 float Nbhcurvature(Nbh *nbh, int connectivity) {
-  int a, b, c, ref;
-  int reference_table[8];
+  int   a, b, c, ref;
+  int   reference_table[8];
   float curv;
 
   // building reference table for the 8 cubes
@@ -71,8 +71,8 @@ float Nbhcurvature(Nbh *nbh, int connectivity) {
 }
 
 float MRIcurvature(MRI *mri, int i, int j, int k, int label, int connectivity) {
-  int a, b, c, ref;
-  int reference_table[8];
+  int   a, b, c, ref;
+  int   reference_table[8];
   float curv;
 
   // building reference table for the 8 cubes
@@ -104,14 +104,14 @@ float MRIcurvature(MRI *mri, int i, int j, int k, int label, int connectivity) {
 
 typedef struct VerTex {
   float x, y, z;
-  int f[20];
-  int fnum;
-  int v[20];
-  int vnum;
-  int marked;
+  int   f[20];
+  int   fnum;
+  int   v[20];
+  int   vnum;
+  int   marked;
 } VerTex;
 typedef struct FaCe {
-  int v[3];
+  int   v[3];
   float nx, ny, nz, area;
 } FaCe;
 
@@ -124,18 +124,18 @@ static float fy[12] = {0, 0.5, 1, 0.5, 0, 0, 1, 1, 0, 0.5, 1, 0.5};
 static float fz[12] = {0, 0, 0, 0, 0.5, 0.5, 0.5, 0.5, 1, 1, 1, 1};
 
 #define MAX_VERTICES 100
-#define MAX_FACES 40
+#define MAX_FACES    40
 static float computeLocalCurvature(int *ref_tab, int connectivity) {
-  int number_of_vertices;
+  int    number_of_vertices;
   VerTex vertex[MAX_VERTICES];
-  int number_of_faces, reference, refdst;
-  FaCe face[MAX_FACES];
-  int kept_vertex_table[6], kvt_nbr, save_vertex_indice[30];
-  int *Case, vt[12], vind[12], fnbr, n, m, l;
-  float x, y, z, xtmp[6], ytmp[6], ztmp[6], curvature[6], maxcurv;
+  int    number_of_faces, reference, refdst;
+  FaCe   face[MAX_FACES];
+  int    kept_vertex_table[6], kvt_nbr, save_vertex_indice[30];
+  int *  Case, vt[12], vind[12], fnbr, n, m, l;
+  float  x, y, z, xtmp[6], ytmp[6], ztmp[6], curvature[6], maxcurv;
 
   number_of_vertices = 0;
-  number_of_faces = 0;
+  number_of_faces    = 0;
   memset(save_vertex_indice, -1, sizeof(int) * 30);
 
   kvt_nbr = 0;
@@ -173,11 +173,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
     // allocate all vertex
     for (n = 0; n < 12; n++)
       if (vt[n]) {
-        vertex[number_of_vertices].x = x + fx[n];
-        vertex[number_of_vertices].y = y + fy[n];
-        vertex[number_of_vertices].z = z + fz[n];
+        vertex[number_of_vertices].x    = x + fx[n];
+        vertex[number_of_vertices].y    = y + fy[n];
+        vertex[number_of_vertices].z    = z + fz[n];
         vertex[number_of_vertices].fnum = 0;
-        vind[n] = number_of_vertices++;
+        vind[n]                         = number_of_vertices++;
       }
     // save kept vertices
     if (vt[7])
@@ -207,8 +207,8 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
       save_vertex_indice[14] = vind[11];
     // allocate faces
     for (n = 0; n < fnbr; n++) {
-      face[number_of_faces].v[0] = vind[Case[3 * n]];
-      face[number_of_faces].v[1] = vind[Case[3 * n + 1]];
+      face[number_of_faces].v[0]   = vind[Case[3 * n]];
+      face[number_of_faces].v[1]   = vind[Case[3 * n + 1]];
       face[number_of_faces++].v[2] = vind[Case[3 * n + 2]];
     }
   }
@@ -266,11 +266,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
           continue;
         }
 
-        vertex[number_of_vertices].x = x + fx[n];
-        vertex[number_of_vertices].y = y + fy[n];
-        vertex[number_of_vertices].z = z + fz[n];
+        vertex[number_of_vertices].x    = x + fx[n];
+        vertex[number_of_vertices].y    = y + fy[n];
+        vertex[number_of_vertices].z    = z + fz[n];
         vertex[number_of_vertices].fnum = 0;
-        vind[n] = number_of_vertices++;
+        vind[n]                         = number_of_vertices++;
       }
     // save kept vertices
     if (vt[10])
@@ -288,8 +288,8 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
       save_vertex_indice[16] = vind[11];
     // allocate faces
     for (n = 0; n < fnbr; n++) {
-      face[number_of_faces].v[0] = vind[Case[3 * n]];
-      face[number_of_faces].v[1] = vind[Case[3 * n + 1]];
+      face[number_of_faces].v[0]   = vind[Case[3 * n]];
+      face[number_of_faces].v[1]   = vind[Case[3 * n + 1]];
       face[number_of_faces++].v[2] = vind[Case[3 * n + 2]];
     }
   }
@@ -348,11 +348,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
           continue;
         }
 
-        vertex[number_of_vertices].x = x + fx[n];
-        vertex[number_of_vertices].y = y + fy[n];
-        vertex[number_of_vertices].z = z + fz[n];
+        vertex[number_of_vertices].x    = x + fx[n];
+        vertex[number_of_vertices].y    = y + fy[n];
+        vertex[number_of_vertices].z    = z + fz[n];
         vertex[number_of_vertices].fnum = 0;
-        vind[n] = number_of_vertices++;
+        vind[n]                         = number_of_vertices++;
       }
     // save kept vertices
     if (vt[11])
@@ -370,8 +370,8 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
       save_vertex_indice[15] = vind[11];
     // allocate faces
     for (n = 0; n < fnbr; n++) {
-      face[number_of_faces].v[0] = vind[Case[3 * n]];
-      face[number_of_faces].v[1] = vind[Case[3 * n + 1]];
+      face[number_of_faces].v[0]   = vind[Case[3 * n]];
+      face[number_of_faces].v[1]   = vind[Case[3 * n + 1]];
       face[number_of_faces++].v[2] = vind[Case[3 * n + 2]];
     }
   }
@@ -442,11 +442,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
           continue;
         }
 
-        vertex[number_of_vertices].x = x + fx[n];
-        vertex[number_of_vertices].y = y + fy[n];
-        vertex[number_of_vertices].z = z + fz[n];
+        vertex[number_of_vertices].x    = x + fx[n];
+        vertex[number_of_vertices].y    = y + fy[n];
+        vertex[number_of_vertices].z    = z + fz[n];
         vertex[number_of_vertices].fnum = 0;
-        vind[n] = number_of_vertices++;
+        vind[n]                         = number_of_vertices++;
       }
     // save kept vertices
     // none
@@ -457,8 +457,8 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
       save_vertex_indice[17] = vind[11];
     // allocate faces
     for (n = 0; n < fnbr; n++) {
-      face[number_of_faces].v[0] = vind[Case[3 * n]];
-      face[number_of_faces].v[1] = vind[Case[3 * n + 1]];
+      face[number_of_faces].v[0]   = vind[Case[3 * n]];
+      face[number_of_faces].v[1]   = vind[Case[3 * n + 1]];
       face[number_of_faces++].v[2] = vind[Case[3 * n + 2]];
     }
   }
@@ -517,11 +517,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
           continue;
         }
 
-        vertex[number_of_vertices].x = x + fx[n];
-        vertex[number_of_vertices].y = y + fy[n];
-        vertex[number_of_vertices].z = z + fz[n];
+        vertex[number_of_vertices].x    = x + fx[n];
+        vertex[number_of_vertices].y    = y + fy[n];
+        vertex[number_of_vertices].z    = z + fz[n];
         vertex[number_of_vertices].fnum = 0;
-        vind[n] = number_of_vertices++;
+        vind[n]                         = number_of_vertices++;
       }
     // save kept vertices
     if (vt[7])
@@ -539,8 +539,8 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
       save_vertex_indice[18] = vind[11];
     // allocate faces
     for (n = 0; n < fnbr; n++) {
-      face[number_of_faces].v[0] = vind[Case[3 * n]];
-      face[number_of_faces].v[1] = vind[Case[3 * n + 1]];
+      face[number_of_faces].v[0]   = vind[Case[3 * n]];
+      face[number_of_faces].v[1]   = vind[Case[3 * n + 1]];
       face[number_of_faces++].v[2] = vind[Case[3 * n + 2]];
     }
   }
@@ -611,11 +611,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
           continue;
         }
 
-        vertex[number_of_vertices].x = x + fx[n];
-        vertex[number_of_vertices].y = y + fy[n];
-        vertex[number_of_vertices].z = z + fz[n];
+        vertex[number_of_vertices].x    = x + fx[n];
+        vertex[number_of_vertices].y    = y + fy[n];
+        vertex[number_of_vertices].z    = z + fz[n];
         vertex[number_of_vertices].fnum = 0;
-        vind[n] = number_of_vertices++;
+        vind[n]                         = number_of_vertices++;
       }
     // save kept vertices
     // none
@@ -626,8 +626,8 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
       save_vertex_indice[9] = vind[10];
     // allocate faces
     for (n = 0; n < fnbr; n++) {
-      face[number_of_faces].v[0] = vind[Case[3 * n]];
-      face[number_of_faces].v[1] = vind[Case[3 * n + 1]];
+      face[number_of_faces].v[0]   = vind[Case[3 * n]];
+      face[number_of_faces].v[1]   = vind[Case[3 * n + 1]];
       face[number_of_faces++].v[2] = vind[Case[3 * n + 2]];
     }
   }
@@ -698,11 +698,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
           continue;
         }
 
-        vertex[number_of_vertices].x = x + fx[n];
-        vertex[number_of_vertices].y = y + fy[n];
-        vertex[number_of_vertices].z = z + fz[n];
+        vertex[number_of_vertices].x    = x + fx[n];
+        vertex[number_of_vertices].y    = y + fy[n];
+        vertex[number_of_vertices].z    = z + fz[n];
         vertex[number_of_vertices].fnum = 0;
-        vind[n] = number_of_vertices++;
+        vind[n]                         = number_of_vertices++;
       }
     // save kept vertices
     // none
@@ -713,8 +713,8 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
       save_vertex_indice[19] = vind[11];
     // allocate faces
     for (n = 0; n < fnbr; n++) {
-      face[number_of_faces].v[0] = vind[Case[3 * n]];
-      face[number_of_faces].v[1] = vind[Case[3 * n + 1]];
+      face[number_of_faces].v[0]   = vind[Case[3 * n]];
+      face[number_of_faces].v[1]   = vind[Case[3 * n + 1]];
       face[number_of_faces++].v[2] = vind[Case[3 * n + 2]];
     }
   }
@@ -794,11 +794,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
           continue;
         }
 
-        vertex[number_of_vertices].x = x + fx[n];
-        vertex[number_of_vertices].y = y + fy[n];
-        vertex[number_of_vertices].z = z + fz[n];
+        vertex[number_of_vertices].x    = x + fx[n];
+        vertex[number_of_vertices].y    = y + fy[n];
+        vertex[number_of_vertices].z    = z + fz[n];
         vertex[number_of_vertices].fnum = 0;
-        vind[n] = number_of_vertices++;
+        vind[n]                         = number_of_vertices++;
       }
     // save kept vertices
     // none
@@ -806,8 +806,8 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
     // none
     // allocate faces
     for (n = 0; n < fnbr; n++) {
-      face[number_of_faces].v[0] = vind[Case[3 * n]];
-      face[number_of_faces].v[1] = vind[Case[3 * n + 1]];
+      face[number_of_faces].v[0]   = vind[Case[3 * n]];
+      face[number_of_faces].v[1]   = vind[Case[3 * n + 1]];
       face[number_of_faces++].v[2] = vind[Case[3 * n + 2]];
     }
   }
@@ -827,14 +827,14 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
     for (m = 0; m < number_of_vertices; m++)
       vertex[m].marked = 0;
 
-    reference = kept_vertex_table[n];
+    reference                = kept_vertex_table[n];
     vertex[reference].marked = 1;
     for (m = 0; m < vertex[reference].fnum; m++)
       for (l = 0; l < 3; l++) {
         refdst = face[vertex[reference].f[m]].v[l];
         if (vertex[refdst].marked == 0) {
           vertex[reference].v[vertex[reference].vnum++] = refdst;
-          vertex[refdst].marked = 1;
+          vertex[refdst].marked                         = 1;
         }
       }
   }
@@ -916,11 +916,11 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
     maxcurv /= (float)kvt_nbr;
   } else {
     maxcurv = 0;
-    m = 0;
+    m       = 0;
     for (n = 0; n < kvt_nbr; n++)
       if (fabs(curvature[n]) > maxcurv) {
         maxcurv = fabs(curvature[n]);
-        m = n;
+        m       = n;
       }
   }
   return curvature[m];
@@ -928,14 +928,14 @@ static float computeLocalCurvature(int *ref_tab, int connectivity) {
 
 static void computeCurvature(VerTex *vertex, int nvt, FaCe *face, int nfc,
                              int *ref_tab, int nb, float *curv) {
-  int n, m, reference;
+  int     n, m, reference;
   VECTOR *v_n, *v_e1, *v_e2, *v;
-  float nx, ny, nz, area, dx, dy, dz, y, r2, u1, u2, YR2, R4;
+  float   nx, ny, nz, area, dx, dy, dz, y, r2, u1, u2, YR2, R4;
 
-  v_n = VectorAlloc(3, MATRIX_REAL);
+  v_n  = VectorAlloc(3, MATRIX_REAL);
   v_e1 = VectorAlloc(3, MATRIX_REAL);
   v_e2 = VectorAlloc(3, MATRIX_REAL);
-  v = VectorAlloc(3, MATRIX_REAL);
+  v    = VectorAlloc(3, MATRIX_REAL);
   for (n = 0; n < nb; n++) {
     reference = ref_tab[n];
     // first need to compute normal
@@ -973,7 +973,7 @@ static void computeCurvature(VerTex *vertex, int nvt, FaCe *face, int nfc,
       dz = vertex[vertex[reference].v[m]].z - vertex[reference].z;
       VECTOR_LOAD(v, dx, dy, dz);
 
-      y = V3_DOT(v, v_n);
+      y  = V3_DOT(v, v_n);
       u1 = V3_DOT(v_e1, v);
       u2 = V3_DOT(v_e2, v);
       r2 = u1 * u1 + u2 * u2;
@@ -991,7 +991,7 @@ static void computeCurvature(VerTex *vertex, int nvt, FaCe *face, int nfc,
 
 static void computeFaceProperties(VerTex *vertex, int nvt, FaCe *face,
                                   int nfc) {
-  int n;
+  int   n;
   float nx, ny, nz, area, dx1, dx2, dy1, dy2, dz1, dz2;
 
   for (n = 0; n < nfc; n++) {
@@ -1010,8 +1010,8 @@ static void computeFaceProperties(VerTex *vertex, int nvt, FaCe *face,
     area = sqrt(nx * nx + ny * ny + nz * nz);
 
     face[n].area = area / 2;
-    face[n].nx = nx / area;
-    face[n].ny = ny / area;
-    face[n].nz = nz / area;
+    face[n].nx   = nx / area;
+    face[n].ny   = ny / area;
+    face[n].nz   = nz / area;
   }
 }

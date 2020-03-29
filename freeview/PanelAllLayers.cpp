@@ -1,14 +1,14 @@
 #include "PanelAllLayers.h"
-#include "ui_PanelAllLayers.h"
 #include "Layer.h"
-#include "MainWindow.h"
 #include "LayerCollection.h"
-#include "LayerSurface.h"
-#include "LayerPropertySurface.h"
-#include "LayerROI.h"
-#include "LayerPropertyROI.h"
 #include "LayerPointSet.h"
 #include "LayerPropertyPointSet.h"
+#include "LayerPropertyROI.h"
+#include "LayerPropertySurface.h"
+#include "LayerROI.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
+#include "ui_PanelAllLayers.h"
 #include <QDebug>
 #include <QSettings>
 
@@ -55,7 +55,7 @@ PanelAllLayers::PanelAllLayers(QWidget *parent)
   }
 
   QSettings s;
-  QVariant v = s.value("ControlPanel/SplitterState");
+  QVariant  v = s.value("ControlPanel/SplitterState");
   if (v.isValid()) {
     ui->splitterControlPanel->restoreState(v.toByteArray());
   } else {
@@ -88,7 +88,7 @@ void PanelAllLayers::OnActiveLayerChanged(Layer *curlayer) {
     }
     if (topItem) {
       for (int j = 0; j < topItem->childCount(); j++) {
-        item = topItem->child(j);
+        item         = topItem->child(j);
         Layer *layer = reinterpret_cast<Layer *>(
             item->data(0, Qt::UserRole).value<quintptr>());
         QFont fnt = item->font(0);
@@ -109,9 +109,9 @@ void PanelAllLayers::OnLayerAdded(Layer *added_layer) {
 }
 
 void PanelAllLayers::RefreshLayerList(const QList<Layer *> &selectedLayers_in,
-                                      Layer *curLayer) {
-  Layer *layer = NULL;
-  QTreeWidgetItem *item = ui->treeWidgetLayers->currentItem();
+                                      Layer *               curLayer) {
+  Layer *          layer = NULL;
+  QTreeWidgetItem *item  = ui->treeWidgetLayers->currentItem();
   if (item)
     layer = reinterpret_cast<Layer *>(
         item->data(0, Qt::UserRole).value<quintptr>());
@@ -150,11 +150,11 @@ void PanelAllLayers::RefreshLayerList(const QList<Layer *> &selectedLayers_in,
 }
 
 void PanelAllLayers::AddLayers(QList<Layer *> layers, const QString &cat_name,
-                               Layer *activeLayer,
+                               Layer *               activeLayer,
                                const QList<Layer *> &selectedLayers,
-                               Layer *curLayer) {
+                               Layer *               curLayer) {
   ui->treeWidgetLayers->blockSignals(true);
-  QTreeWidgetItem *currentItem = NULL;
+  QTreeWidgetItem *        currentItem = NULL;
   QList<QTreeWidgetItem *> selectedItems;
   if (!layers.isEmpty()) {
     QTreeWidgetItem *topItem = new QTreeWidgetItem(ui->treeWidgetLayers);
@@ -274,7 +274,7 @@ void PanelAllLayers::OnCurrentItemChanged(QTreeWidgetItem *item) {
   QString type;
   if (layer) {
     MainWindow *mainwnd = MainWindow::GetMainWindow();
-    type = layer->GetPrimaryType();
+    type                = layer->GetPrimaryType();
     LayerCollection *lc = mainwnd->GetLayerCollection(type);
     if (lc) {
       lc->SetActiveLayer(layer);
@@ -328,8 +328,8 @@ void PanelAllLayers::OnLayerChanged() {
   for (int i = 0; i < ui->treeWidgetLayers->topLevelItemCount(); i++) {
     QTreeWidgetItem *topItem = ui->treeWidgetLayers->topLevelItem(i);
     for (int j = 0; j < topItem->childCount(); j++) {
-      QTreeWidgetItem *item = topItem->child(j);
-      Layer *layer = reinterpret_cast<Layer *>(
+      QTreeWidgetItem *item  = topItem->child(j);
+      Layer *          layer = reinterpret_cast<Layer *>(
           item->data(0, Qt::UserRole).value<quintptr>());
       if (layer) {
         item->setText(0, layer->GetName());
@@ -380,7 +380,7 @@ void PanelAllLayers::OnItemDoubleClicked(QTreeWidgetItem *item) {
   }
   */
   if (layer) {
-    MainWindow *mainwnd = MainWindow::GetMainWindow();
+    MainWindow *     mainwnd = MainWindow::GetMainWindow();
     LayerCollection *lc = mainwnd->GetLayerCollection(GetCurrentLayerType());
     if (lc) {
       lc->MoveToTop(layer);
@@ -414,7 +414,7 @@ QString PanelAllLayers::GetCurrentLayerType() {
 }
 
 QList<Layer *> PanelAllLayers::GetSelectedLayers(const QString &layerType) {
-  QList<Layer *> layers;
+  QList<Layer *>           layers;
   QList<QTreeWidgetItem *> items = ui->treeWidgetLayers->selectedItems();
   foreach (QTreeWidgetItem *item, items) {
     Layer *layer = reinterpret_cast<Layer *>(

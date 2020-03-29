@@ -24,9 +24,9 @@
 #ifndef WINDOWCONFIGUREOVERLAY_H
 #define WINDOWCONFIGUREOVERLAY_H
 
-#include <QWidget>
 #include "UIUpdateHelper.h"
 #include "WidgetHistogram.h"
+#include <QWidget>
 
 namespace Ui {
 class WindowConfigureOverlay;
@@ -48,7 +48,7 @@ public:
 
   void showEvent(QShowEvent *);
   void hideEvent(QHideEvent *);
-  void resizeEvent(QResizeEvent* e);
+  void resizeEvent(QResizeEvent *e);
 
 signals:
   void ActiveFrameChanged(int nframe);
@@ -64,10 +64,10 @@ public slots:
   void LoadLabelMask(const QString &fn);
 
 protected slots:
-  void OnActiveSurfaceChanged(Layer* layer);
+  void OnActiveSurfaceChanged(Layer *layer);
   void OnButtonClicked();
-  void OnSliderOpacity( int nVal );
-  void OnSpinBoxOpacity( double dVal );
+  void OnSliderOpacity(int nVal);
+  void OnSpinBoxOpacity(double dVal);
   void OnButtonAdd();
   bool UpdateOverlayProperty(SurfaceOverlayProperty *p);
   void UpdateThresholdChanges();
@@ -95,12 +95,12 @@ protected slots:
 private:
   Ui::WindowConfigureOverlay *ui;
 
-  LineMarkers   m_markers;    // custom gradient markers
-  LayerSurface* m_layerSurface;
-  float*        m_fDataCache;
-  double        m_dSavedOffset;
-  double        m_rangeOverall[2];
-  DialogScreenshotOverlay*  m_dlgScreenshot;
+  LineMarkers              m_markers; // custom gradient markers
+  LayerSurface *           m_layerSurface;
+  float *                  m_fDataCache;
+  double                   m_dSavedOffset;
+  double                   m_rangeOverall[2];
+  DialogScreenshotOverlay *m_dlgScreenshot;
 };
 
 #endif // WINDOWCONFIGUREOVERLAY_H

@@ -23,8 +23,8 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
+#include <math.h>
 
 double round(double x);
 #include "fsglm.h"
@@ -46,7 +46,7 @@ double round(double x);
   ------------------------------------------------------------*/
 void RETcompute_angles(MRIS *mris, double EccenRotAngleRad,
                        double PolarRotAngleRad) {
-  int k;
+  int   k;
   float val, valbak, val2, val2bak;
 
   for (k = 0; k < mris->nvertices; k++) {
@@ -63,14 +63,14 @@ void RETcompute_angles(MRIS *mris, double EccenRotAngleRad,
       val2bak =
           sqrt(SQR(mris->vertices[k].val2bak) + SQR(mris->vertices[k].valbak));
     } else {
-      val = 0.0;
-      val2 = 0.0;
-      valbak = 0.0;
+      val     = 0.0;
+      val2    = 0.0;
+      valbak  = 0.0;
       val2bak = 0.0;
     }
-    mris->vertices[k].val = val;
-    mris->vertices[k].val2 = val2;
-    mris->vertices[k].valbak = valbak;
+    mris->vertices[k].val     = val;
+    mris->vertices[k].val2    = val2;
+    mris->vertices[k].valbak  = valbak;
     mris->vertices[k].val2bak = val2bak;
   }
 }
@@ -85,7 +85,7 @@ float RETcircsubtract(float a, float b) {
 }
 /*------------------------------------------------------------*/
 void RETcompute_fieldsign(MRIS *mris) {
-  int k, m, n;
+  int   k, m, n;
   float dv1, dv2, dx, dy, dv1dx, dv1dy, dv2dx, dv2dy;
   float m11, m12, m13, m22, m23, z1, z2, z3, z1b, z2b, z3b, denom;
 
@@ -94,10 +94,10 @@ void RETcompute_fieldsign(MRIS *mris) {
   for (k = 0; k < mris->nvertices; k++) {
     if (!mris->vertices[k].ripflag) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[k];
-      VERTEX *const v = &mris->vertices[k];
+      VERTEX *const                v  = &mris->vertices[k];
       dv1dx = dv1dy = dv2dx = dv2dy = 0;
       m11 = m12 = m13 = m22 = m23 = z1 = z2 = z3 = z1b = z2b = z3b = 0;
-      n = 0;
+      n                                                            = 0;
       for (m = 0; m < vt->vnum; m++) {
         if (mris->vertices[vt->v[m]].ripflag)
           continue;
@@ -145,8 +145,8 @@ void RETcompute_fieldsign(MRIS *mris) {
 /*--------------------------------------------------------------------------*/
 int RETlogMap(MRIS *surf, double k, double a, double xc0, double yc0) {
   double n, r, theta, xw, yw, r2, theta2, xc2, yc2, xc, yc;
-  float dmin;
-  int vno;
+  float  dmin;
+  int    vno;
 
   xc0 = surf->vertices[16930].x;
   yc0 = surf->vertices[16930].y;
@@ -154,18 +154,18 @@ int RETlogMap(MRIS *surf, double k, double a, double xc0, double yc0) {
   for (n = 1; n < 5; n += .3) {
     r = exp(n);
     for (theta = -M_PI / 2.0; theta < M_PI / 2.0; theta += .2 / r) {
-      xw = r * cos(theta);
-      yw = r * sin(theta);
-      r2 = sqrt((xw + a) * (xw + a) + yw * yw);
+      xw     = r * cos(theta);
+      yw     = r * sin(theta);
+      r2     = sqrt((xw + a) * (xw + a) + yw * yw);
       theta2 = atan2(yw, xw + a);
-      xc2 = k * log(r2 * cos(theta2));
-      yc2 = k * log(r2 * sin(theta2));
-      xc = (xc2 - xc0);
-      yc = (yc2 - yc0);
-      vno = MRISfindClosestVertex(surf, xc, yc, 0, &dmin, CURRENT_VERTICES);
+      xc2    = k * log(r2 * cos(theta2));
+      yc2    = k * log(r2 * sin(theta2));
+      xc     = (xc2 - xc0);
+      yc     = (yc2 - yc0);
+      vno    = MRISfindClosestVertex(surf, xc, yc, 0, &dmin, CURRENT_VERTICES);
       if (dmin > 5)
         continue;
-      surf->vertices[vno].val = 1;
+      surf->vertices[vno].val  = 1;
       surf->vertices[vno].val2 = dmin;
       printf("%2f %6.1f %6.4f   %6.2f %6.2f\n", n, r, theta, xc, yc);
     }
@@ -173,18 +173,18 @@ int RETlogMap(MRIS *surf, double k, double a, double xc0, double yc0) {
   for (n = 1; n < 10; n += .1) {
     r = exp(n);
     for (theta = -M_PI / 2.0; theta < M_PI / 2.0; theta += .6) {
-      xw = r * cos(theta);
-      yw = r * sin(theta);
-      r2 = sqrt((xw + a) * (xw + a) + yw * yw);
+      xw     = r * cos(theta);
+      yw     = r * sin(theta);
+      r2     = sqrt((xw + a) * (xw + a) + yw * yw);
       theta2 = atan2(yw, xw + a);
-      xc2 = k * log(r2 * cos(theta2));
-      yc2 = k * log(r2 * sin(theta2));
-      xc = (xc2 - xc0);
-      yc = (yc2 - yc0);
-      vno = MRISfindClosestVertex(surf, xc, yc, 0, &dmin, CURRENT_VERTICES);
+      xc2    = k * log(r2 * cos(theta2));
+      yc2    = k * log(r2 * sin(theta2));
+      xc     = (xc2 - xc0);
+      yc     = (yc2 - yc0);
+      vno    = MRISfindClosestVertex(surf, xc, yc, 0, &dmin, CURRENT_VERTICES);
       if (dmin > 5)
         continue;
-      surf->vertices[vno].val = -1;
+      surf->vertices[vno].val  = -1;
       surf->vertices[vno].val2 = dmin;
       printf("%2f %6.1f %6.4f   %6.2f %6.2f\n", n, r, theta, xc, yc);
     }
@@ -196,17 +196,17 @@ int RETlogMap(MRIS *surf, double k, double a, double xc0, double yc0) {
 int RETinvLogMapFunc(double xc, double yc, double xc0, double yc0, double a,
                      double k, double *r, double *theta) {
   double r2, theta2, xw, yw;
-  r2 = exp((xc - xc0) / k);
+  r2     = exp((xc - xc0) / k);
   theta2 = (yc - yc0) / k;
-  xw = r2 * cos(theta2) - a;
-  yw = r2 * sin(theta2);
-  *r = sqrt(xw * xw + yw * yw);
+  xw     = r2 * cos(theta2) - a;
+  yw     = r2 * sin(theta2);
+  *r     = sqrt(xw * xw + yw * yw);
   *theta = atan2(yw, xw);
   return (0);
 }
 /*--------------------------------------------------------------------------*/
 int RETreverseSign(MRI *mri) {
-  int c, r, s;
+  int    c, r, s;
   double v;
 
   for (c = 0; c < mri->width; c++) {

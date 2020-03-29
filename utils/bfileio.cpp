@@ -39,12 +39,12 @@
 
 #define BFILEIO_SRC
 
-#include <string>
 #include <cerrno>
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <math.h>
+#include <string>
 #include <strings.h>
 #include <unistd.h>
 
@@ -54,25 +54,25 @@ extern int errno;
 
 /* ------------------------- */
 int byteswapbufdouble(void *buf, long int nbufbytes) {
-  char *cbuf, c;
+  char *   cbuf, c;
   long int n, nmax;
 
   nmax = nbufbytes;
   cbuf = (char *)buf;
   for (n = 0; n < nmax; n += 8) {
-    c = *cbuf;
-    *cbuf = *(cbuf + 7);
+    c           = *cbuf;
+    *cbuf       = *(cbuf + 7);
     *(cbuf + 7) = c;
 
-    c = *(cbuf + 1);
+    c           = *(cbuf + 1);
     *(cbuf + 1) = *(cbuf + 6);
     *(cbuf + 6) = c;
 
-    c = *(cbuf + 2);
+    c           = *(cbuf + 2);
     *(cbuf + 2) = *(cbuf + 5);
     *(cbuf + 5) = c;
 
-    c = *(cbuf + 3);
+    c           = *(cbuf + 3);
     *(cbuf + 3) = *(cbuf + 4);
     *(cbuf + 4) = c;
 
@@ -83,17 +83,17 @@ int byteswapbufdouble(void *buf, long int nbufbytes) {
 
 /* ------------------------- */
 int byteswapbuffloat(void *buf, long int nbufbytes) {
-  char *cbuf, c;
+  char *   cbuf, c;
   long int n, nmax;
 
   nmax = nbufbytes;
   cbuf = (char *)buf;
   for (n = 0; n < nmax; n += 4) {
-    c = *cbuf;
-    *cbuf = *(cbuf + 3);
+    c           = *cbuf;
+    *cbuf       = *(cbuf + 3);
     *(cbuf + 3) = c;
 
-    c = *(cbuf + 1);
+    c           = *(cbuf + 1);
     *(cbuf + 1) = *(cbuf + 2);
     *(cbuf + 2) = c;
 
@@ -104,14 +104,14 @@ int byteswapbuffloat(void *buf, long int nbufbytes) {
 
 /* ------------------------- */
 int byteswapbufshort(void *buf, long int nbufbytes) {
-  char *cbuf, c;
+  char *   cbuf, c;
   long int n, nmax;
 
   nmax = nbufbytes;
   cbuf = (char *)buf;
   for (n = 0; n < nmax; n += 2) {
-    c = *cbuf;
-    *cbuf = *(cbuf + 1);
+    c           = *cbuf;
+    *cbuf       = *(cbuf + 1);
     *(cbuf + 1) = c;
     cbuf += 2;
   }
@@ -124,7 +124,7 @@ int byteswapbufshort(void *buf, long int nbufbytes) {
   the designation in the .hdr file 0 = non-PC, 1 = PC.
   --------------------------------------------------------*/
 int bf_getarchendian() {
-  int endian;
+  int   endian;
   short tmp = 1;
   char *ctmp;
 
@@ -137,10 +137,10 @@ int bf_getarchendian() {
 }
 /*---------------------------------------------*/
 char *bf_getstemfromname(char *bfname) {
-  extern int bferr;
+  extern int  bferr;
   extern char bfmsg[BFMSGLEN];
-  int len, stemlen;
-  char *stem;
+  int         len, stemlen;
+  char *      stem;
   bferr = 0;
 
   len = (int)strlen(bfname);
@@ -152,7 +152,7 @@ char *bf_getstemfromname(char *bfname) {
   }
 
   stemlen = len - 7;
-  stem = (char *)calloc(stemlen + 1, sizeof(char));
+  stem    = (char *)calloc(stemlen + 1, sizeof(char));
   if (stem == nullptr) {
     sprintf(bfmsg, "bf_getstemfromname() could not calloc\n");
     bferr = 1;
@@ -165,10 +165,10 @@ char *bf_getstemfromname(char *bfname) {
 }
 /*---------------------------------------------*/
 int bf_gettypefromname(char *bfname) {
-  extern int bferr;
+  extern int  bferr;
   extern char bfmsg[BFMSGLEN];
-  int len;
-  char c;
+  int         len;
+  char        c;
   bferr = 0;
 
   len = (int)strlen(bfname);
@@ -198,9 +198,9 @@ int bf_gettypefromname(char *bfname) {
 /*---------------------------------------------*/
 int bf_readheader(char *hdrfile, int *nrows, int *ncols, int *nfrms,
                   int *endian) {
-  extern int bferr;
+  extern int  bferr;
   extern char bfmsg[BFMSGLEN];
-  FILE *fp;
+  FILE *      fp;
   bferr = 0;
 
   /* open the header file */
@@ -224,9 +224,9 @@ int bf_readheader(char *hdrfile, int *nrows, int *ncols, int *nfrms,
 }
 /*---------------------------------------------*/
 int bf_writeheader(char *hdrfile, int nrows, int ncols, int nfrms, int endian) {
-  extern int bferr;
+  extern int  bferr;
   extern char bfmsg[BFMSGLEN];
-  FILE *fp;
+  FILE *      fp;
   bferr = 0;
 
   /* open the header file */
@@ -249,8 +249,8 @@ int bf_writeheader(char *hdrfile, int nrows, int ncols, int nfrms, int endian) {
 int bf_getbfiledim(char *bfname, int *nrows, int *ncols, int *nfrms,
                    int *endian, int *type) {
   char *stem = nullptr;
-  char hdrfile[1000];
-  int err;
+  char  hdrfile[1000];
+  int   err;
 
   /* get the type (bshort/bfloat) from the name of the file */
   *type = bf_gettypefromname(bfname);
@@ -273,13 +273,13 @@ int bf_getbfiledim(char *bfname, int *nrows, int *ncols, int *nfrms,
 }
 /*---------------------------------------------*/
 float *bf_ldbfile(char *bfname, int *nrows, int *ncols, int *nfrms) {
-  extern int bferr;
+  extern int  bferr;
   extern char bfmsg[BFMSGLEN];
-  short *sdata = nullptr;
-  float *fdata = nullptr;
-  FILE *fp;
-  int err, type, endian, archendian;
-  size_t ntot, nread;
+  short *     sdata = nullptr;
+  float *     fdata = nullptr;
+  FILE *      fp;
+  int         err, type, endian, archendian;
+  size_t      ntot, nread;
   bferr = 0;
 
   /* get endianness of current architecture */
@@ -370,16 +370,16 @@ float *bf_ldbfile(char *bfname, int *nrows, int *ncols, int *nfrms) {
 /*---------------------------------------------*/
 int bf_svbfile(float *bfdata, char *bfname, int nrows, int ncols, int nfrms,
                int svendian) {
-  extern int bferr;
+  extern int  bferr;
   extern char bfmsg[BFMSGLEN];
-  char *stem = nullptr;
-  short *sdata = nullptr;
-  float *fdata = nullptr;
-  char hdrfile[1000];
-  FILE *fp;
-  int type, archendian, err;
-  int fdatadealloc = 0;
-  size_t ntot, nwrote;
+  char *      stem  = nullptr;
+  short *     sdata = nullptr;
+  float *     fdata = nullptr;
+  char        hdrfile[1000];
+  FILE *      fp;
+  int         type, archendian, err;
+  int         fdatadealloc = 0;
+  size_t      ntot, nwrote;
   bferr = 0;
 
   /* get endianness of current architecture */
@@ -493,8 +493,8 @@ int bf_svbfile(float *bfdata, char *bfname, int nrows, int ncols, int nfrms,
   ---------------------------------------------------*/
 int bf_getnslices(char *stem) {
   FILE *fp;
-  int nslices;
-  char bfile[1000];
+  int   nslices;
+  char  bfile[1000];
 
   memset(bfile, '\0', 1000);
 
@@ -519,7 +519,7 @@ int bf_getnslices(char *stem) {
   --------------------------------------------------------*/
 int bf_getvoltype(char *stem) {
   FILE *fp;
-  char bfile[1000];
+  char  bfile[1000];
 
   memset(bfile, '\0', 1000);
 
@@ -544,7 +544,7 @@ int bf_getvoltype(char *stem) {
 int bf_getvoldim(char *stem, int *nrows, int *ncols, int *nslcs, int *nfrms,
                  int *endian, int *type) {
   char hdrfile[1000];
-  int err;
+  int  err;
 
   memset(hdrfile, '\0', 1000);
 
@@ -609,11 +609,11 @@ BF_DATA *bf_preallocbfd(int nrows, int ncols, int nslcs, int nfrms) {
     return (nullptr);
   }
 
-  bfd->nrows = nrows;
-  bfd->ncols = ncols;
+  bfd->nrows    = nrows;
+  bfd->ncols    = ncols;
   bfd->nrowcols = bfd->nrows * bfd->ncols;
-  bfd->nslcs = nslcs;
-  bfd->nfrms = nfrms;
+  bfd->nslcs    = nslcs;
+  bfd->nfrms    = nfrms;
 
   /* allocate the array of pointers */
   bfd->slcdata = (float **)calloc(bfd->nslcs, sizeof(float *));
@@ -628,8 +628,8 @@ BF_DATA *bf_preallocbfd(int nrows, int ncols, int nslcs, int nfrms) {
 /* -----------------------------------------------------------*/
 int bf_iswritable(char *fname) {
   extern int bferr;
-  FILE *fp;
-  char tmpstr[2000];
+  FILE *     fp;
+  char       tmpstr[2000];
   bferr = 0;
 
   sprintf(tmpstr, "%s-doo-da-doo-da-day", fname);
@@ -642,7 +642,7 @@ int bf_iswritable(char *fname) {
 }
 /* -----------------------------------------------------------*/
 int bf_volume_exists(char *stem) {
-  char fname[1000];
+  char  fname[1000];
   FILE *fp;
 
   sprintf(fname, "%s_000.hdr", stem);
@@ -655,9 +655,9 @@ int bf_volume_exists(char *stem) {
 }
 /* -----------------------------------------------------------*/
 int bf_delete_volume(char *stem) {
-  char fname[1000];
-  int nrows, ncols, nslcs, nfrms, endian, type;
-  int err, slice;
+  char        fname[1000];
+  int         nrows, ncols, nslcs, nfrms, endian, type;
+  int         err, slice;
   std::string ext;
 
   if (!bf_volume_exists(stem)) {
@@ -684,7 +684,7 @@ int bf_delete_volume(char *stem) {
 }
 /* -----------------------------------------------------------*/
 BF_DATA *bf_allocbfd(int nrows, int ncols, int nslcs, int nfrms) {
-  int slice, nperslice;
+  int      slice, nperslice;
   BF_DATA *bfd;
 
   bfd = bf_preallocbfd(nrows, ncols, nslcs, nfrms);
@@ -708,12 +708,12 @@ BF_DATA *bf_allocbfd(int nrows, int ncols, int nslcs, int nfrms) {
 }
 /*---------------------------------------------------------*/
 BF_DATA *bf_ldvolume(char *stem) {
-  BF_DATA *bfd;
-  int nrows, ncols, nslcs, nfrms, endian, type;
-  int err, slice;
-  char bfname[1000];
+  BF_DATA *   bfd;
+  int         nrows, ncols, nslcs, nfrms, endian, type;
+  int         err, slice;
+  char        bfname[1000];
   std::string ext;
-  float *fdata;
+  float *     fdata;
 
   err = bf_getvoldim(stem, &nrows, &ncols, &nslcs, &nfrms, &endian, &type);
   if (err)
@@ -743,12 +743,12 @@ BF_DATA *bf_ldvolume(char *stem) {
 }
 /*---------------------------------------------------------*/
 BF_DATA *bf_ldslice(char *stem, int slice) {
-  BF_DATA *bfd;
-  int nrows, ncols, nfrms, endian, type;
-  int err;
-  char bfname[1000];
+  BF_DATA *   bfd;
+  int         nrows, ncols, nfrms, endian, type;
+  int         err;
+  char        bfname[1000];
   std::string ext;
-  float *fdata;
+  float *     fdata;
 
   memset(bfname, '\0', 1000);
 
@@ -779,10 +779,10 @@ BF_DATA *bf_ldslice(char *stem, int slice) {
 }
 /*---------------------------------------------------------*/
 int bf_svvolume(BF_DATA *bfd, char *stem, int svendian, int svtype) {
-  int err, slice;
-  char bfname[1000];
+  int         err, slice;
+  char        bfname[1000];
   std::string ext;
-  float *fdata;
+  float *     fdata;
 
   memset(bfname, '\0', 1000);
 
@@ -811,10 +811,10 @@ int bf_svvolume(BF_DATA *bfd, char *stem, int svendian, int svtype) {
 }
 /*---------------------------------------------------------*/
 int bf_svslice(BF_DATA *bfd, char *stem, int slice, int svendian, int svtype) {
-  int err;
-  char bfname[1000];
+  int         err;
+  char        bfname[1000];
   std::string ext;
-  float *fdata;
+  float *     fdata;
 
   memset(bfname, '\0', 1000);
 
@@ -848,7 +848,7 @@ int bf_svslice(BF_DATA *bfd, char *stem, int slice, int svendian, int svtype) {
   -------------------------------------------------------------*/
 float bf_getval(BF_DATA *bfd, int r, int c, int s, int f) {
   float val;
-  int i;
+  int   i;
 
   if (s < 0 || s >= bfd->nslcs) {
     fprintf(stderr, "ERROR: bf_getval: slice %d out of bounds\n", s);
@@ -938,10 +938,10 @@ int bf_index2rcf(BF_DATA *bfd, int index, int *r, int *c, int *f)
   int i = index;
 
   *f = (int)i / (bfd->nrowcols);
-  i = i - *f * (bfd->nrowcols);
+  i  = i - *f * (bfd->nrowcols);
 
   *r = (int)i / (bfd->ncols);
-  i = i - *r * bfd->ncols;
+  i  = i - *r * bfd->ncols;
 
   *c = (int)i;
 
@@ -951,7 +951,7 @@ int bf_index2rcf(BF_DATA *bfd, int index, int *r, int *c, int *f)
    bf_get_minmax() - finds the global minimum and maximum.
   ----------------------------------------------------------*/
 int bf_get_minmax(BF_DATA *bfd, float *bfdmin, float *bfdmax) {
-  int r, c, s, f;
+  int   r, c, s, f;
   float val;
 
   /* first, find the minimum and maximum */
@@ -977,12 +977,12 @@ int bf_get_minmax(BF_DATA *bfd, float *bfdmin, float *bfdmax) {
    to the new min and max.
   ----------------------------------------------------------*/
 int bf_rescale(BF_DATA *bfd, float min, float max) {
-  int r, c, s, f;
+  int   r, c, s, f;
   float val, bfdmin, bfdmax, bfdrange, range;
 
   bf_get_minmax(bfd, &bfdmin, &bfdmax);
   bfdrange = bfdmax - bfdmin;
-  range = max - min;
+  range    = max - min;
 
   /* now do the actual rescaling */
   for (r = 0; r < bfd->nrows; r++) {

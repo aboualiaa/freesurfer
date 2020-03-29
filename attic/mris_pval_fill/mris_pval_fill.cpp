@@ -35,47 +35,46 @@
 // Revision       : $Revision: 1.4 $
 ////////////////////////////////////////////
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <ctype.h>
-#include "mri.h"
+#include "cma.h"
 #include "const.h"
 #include "diag.h"
 #include "error.h"
 #include "macros.h"
-#include "proto.h"
+#include "mri.h"
 #include "mrimorph.h"
-#include "timer.h"
 #include "mrinorm.h"
-#include "cma.h"
+#include "proto.h"
+#include "timer.h"
 #include "version.h"
-#include "error.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 //#include "volume_io/geom_structs.h"
-#include "transform.h"
-#include "talairachex.h"
+#include "icosahedron.h"
 #include "matrix.h"
 #include "mriTransform.h"
 #include "mrisurf.h"
-#include "icosahedron.h"
+#include "talairachex.h"
+#include "transform.h"
 
 // static char vcid[] = "$Id: mris_pval_fill.c,v 1.4 2011/03/02 00:04:33 nicks
 // Exp $";
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 const char *Progname;
 
 int main(int argc, char *argv[]) {
-  int nargs, msec, i = 0, order = 7;
-  Timer then;
-  MRIS *mris_in, *mris_out;
+  int     nargs, msec, i = 0, order = 7;
+  Timer   then;
+  MRIS *  mris_in, *mris_out;
   MRI_SP *mrisp;
-  FILE *fp_p;
-  float val, temp;
+  FILE *  fp_p;
+  float   val, temp;
 
   Progname = argv[0];
   DiagInit(NULL, NULL, NULL);
@@ -141,7 +140,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

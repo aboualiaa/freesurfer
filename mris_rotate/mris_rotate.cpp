@@ -31,7 +31,7 @@ static char vcid[] = "$Id: mris_rotate.c,v 1.6 2011/03/02 00:04:33 nicks Exp $";
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -40,10 +40,10 @@ static void print_version();
 const char *Progname;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_fname, *out_fname;
-  int ac, nargs;
+  char **      av, *in_fname, *out_fname;
+  int          ac, nargs;
   MRI_SURFACE *mris;
-  float alpha, beta, gamma;
+  float        alpha, beta, gamma;
 
   nargs = handleVersionOption(argc, argv, "mris_rotate");
   if (nargs && argc - nargs == 1)
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
               in_fname);
 
   alpha = RADIANS(alpha);
-  beta = RADIANS(beta);
+  beta  = RADIANS(beta);
   gamma = RADIANS(gamma);
   MRIScenter(mris, mris);
   MRISrotate(mris, mris, alpha, beta, gamma);
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

@@ -30,20 +30,15 @@
 
 class LayerMRI;
 
-class VolumeFilterBoundary : public VolumeFilter
-{
+class VolumeFilterBoundary : public VolumeFilter {
 public:
-  VolumeFilterBoundary( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterBoundary(LayerMRI *input = 0, LayerMRI *output = 0,
+                       QObject *parent = 0);
 
-  QString GetName()
-  {
-    return "Boundary";
-  }
+  QString GetName() { return "Boundary"; }
 
 protected:
   bool Execute();
 };
 
 #endif
-
-

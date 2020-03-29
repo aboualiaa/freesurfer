@@ -1,29 +1,26 @@
 #define export
-#include <vnl/vnl_matrix.h>
 #include <vnl/algo/vnl_matrix_inverse.h>
+#include <vnl/vnl_matrix.h>
 
 #include "error.h"
 #include "macros.h"
 #include "version.h"
 
-using namespace std;
-
 static void printUsage();
 static bool parseCommandLine(int argc, char *argv[]);
-static int parseNextCommand(int argc, char *argv[]);
+static int  parseNextCommand(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: lta_convert.cpp,v 1.10 2016/08/09 02:11:11 zkaufman Exp $";
 const char *Progname = nullptr;
-float myrand(float f);
+float       myrand(float f);
 
 int main(int argc, char *argv[]) {
-  cout << vcid << endl << endl;
+  std::cout << vcid << std::endl << std::endl;
 
   // Default initialization
   int nargs = handleVersionOption(argc, argv, "cpptester");
-  if (nargs && argc - nargs == 1)
-  {
+  if (nargs && argc - nargs == 1) {
     exit(0);
   }
   argc -= nargs;
@@ -61,7 +58,7 @@ static void printUsage() { printf("usage\n"); }
 
 // TODO: use boost
 static int parseNextCommand(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[0] + 1; // remove '-'

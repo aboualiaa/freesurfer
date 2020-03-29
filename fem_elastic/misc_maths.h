@@ -20,7 +20,7 @@ template <class T> T stdev(const std::vector<T> &data);
 //---------------------------------
 
 template <class T> T average(const std::vector<T> &data) {
-  T sum = (T)0;
+  T   sum   = (T)0;
   int count = 0;
   for (typename std::vector<T>::const_iterator cit = data.begin();
        cit != data.end(); cit++) {
@@ -34,8 +34,8 @@ template <class T> T average(const std::vector<T> &data) {
 }
 
 template <class T> T stdev(const std::vector<T> &data) {
-  T sum = average(data);
-  T sum2 = (T)0;
+  T   sum   = average(data);
+  T   sum2  = (T)0;
   int count = 0;
   for (typename std::vector<T>::const_iterator cit = data.begin();
        cit != data.end(); cit++) {
@@ -63,7 +63,7 @@ double FindLeftZeroCrossing(const Functor &f, double dmin, double dmax,
   if (f(dmax) == bConditionToKeep)
     throw std::string("FindLeftZeroCrossing - incorrect boundaries");
 
-  double dmid;
+  double       dmid;
   unsigned int noIterations = 0, maxIterations = 20;
 
   while (dmax - dmin > deps && ++noIterations < maxIterations) {

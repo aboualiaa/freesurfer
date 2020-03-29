@@ -1,8 +1,8 @@
 #ifndef __itkLabelMapVariableLengthVectorCurrents_txx
 #define __itkLabelMapVariableLengthVectorCurrents_txx
 
-#include "itkVariableLengthVectorCurrents.h"
 #include "itkNumericTraitsVariableLengthVectorPixel.h"
+#include "itkVariableLengthVectorCurrents.h"
 #include "vnl/vnl_math.h"
 #include <cstring>
 #include <stdlib.h>

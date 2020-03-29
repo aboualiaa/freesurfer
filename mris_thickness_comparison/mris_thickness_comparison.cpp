@@ -32,28 +32,28 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 static void print_help();
 static void print_version();
-static int compute_thickness_stats(MRI_SURFACE *mris, LABEL *area,
-                                   double *pmean_w, double *pvar_w,
-                                   double *pmean_thick, double *pvar_thick,
-                                   int *pn);
+static int  compute_thickness_stats(MRI_SURFACE *mris, LABEL *area,
+                                    double *pmean_w, double *pvar_w,
+                                    double *pmean_thick, double *pvar_thick,
+                                    int *pn);
 
 const char *Progname;
 
-static char subjects_dir[STRLEN];
-static int avgs = 0;
+static char  subjects_dir[STRLEN];
+static int   avgs   = 0;
 static FILE *log_fp = nullptr;
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN], env_string[STRLEN], *cp, *subject_name, *hemi,
       *thickness_name, *wfile_name, *label_name;
-  int ac, nargs, i, npoints;
+  int          ac, nargs, i, npoints;
   MRI_SURFACE *mris;
-  double mean_w, var_w, mean_thick, var_thick;
-  LABEL *area;
+  double       mean_w, var_w, mean_thick, var_thick;
+  LABEL *      area;
 
   nargs = handleVersionOption(argc, argv, "mris_thickness_comparison");
   if (nargs && argc - nargs == 1)
@@ -85,11 +85,11 @@ int main(int argc, char *argv[]) {
 
   sprintf(env_string, "SUBJECTS_DIR=%s", subjects_dir);
   putenv(env_string);
-  cp = getenv("SUBJECTS_DIR");
-  subject_name = argv[1];
-  hemi = argv[2];
+  cp             = getenv("SUBJECTS_DIR");
+  subject_name   = argv[1];
+  hemi           = argv[2];
   thickness_name = argv[3];
-  wfile_name = argv[4];
+  wfile_name     = argv[4];
 
   sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
           ORIG_NAME);
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -198,15 +198,15 @@ static int compute_thickness_stats(MRI_SURFACE *mris, LABEL *area,
                                    double *pmean_w, double *pvar_w,
                                    double *pmean_thick, double *pvar_thick,
                                    int *pn) {
-  int npoints;
-  double mean_w, var_w, mean_thick, var_thick;
+  int     npoints;
+  double  mean_w, var_w, mean_thick, var_thick;
   VERTEX *v;
-  int vno, n;
+  int     vno, n;
 
   mean_w = var_w = mean_thick = var_thick = 0;
   for (npoints = n = 0; n < area->n_points; n++) {
     vno = area->lv[n].vno;
-    v = &mris->vertices[vno];
+    v   = &mris->vertices[vno];
     if (v->ripflag || FZERO(v->val))
       continue;
     npoints++;
@@ -218,13 +218,13 @@ static int compute_thickness_stats(MRI_SURFACE *mris, LABEL *area,
 
   mean_w /= (float)npoints;
   mean_thick /= (float)npoints;
-  var_w = var_w / npoints - mean_w * mean_w;
+  var_w     = var_w / npoints - mean_w * mean_w;
   var_thick = var_thick / npoints - mean_thick * mean_thick;
 
-  *pmean_w = mean_w;
+  *pmean_w     = mean_w;
   *pmean_thick = mean_thick;
-  *pvar_w = var_w;
-  *pvar_thick = var_thick;
-  *pn = npoints;
+  *pvar_w      = var_w;
+  *pvar_thick  = var_thick;
+  *pn          = npoints;
   return (NO_ERROR);
 }

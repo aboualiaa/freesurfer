@@ -43,39 +43,39 @@ vtkStandardNewMacro(vtkSimpleLabelEdgeFilter3D);
 // that the output data type is the same as the input data type.
 // This is not always the case.
 template <class IT>
-void vtkSimpleLabelEdgeFilter3DExecute(vtkImageData* input,
-                                       vtkImageData* output,
-                                       IT* inPtr, IT* outPtr)
-{
+void vtkSimpleLabelEdgeFilter3DExecute(vtkImageData *input,
+                                       vtkImageData *output, IT *inPtr,
+                                       IT *outPtr) {
   int dim[3];
   input->GetDimensions(dim);
-  if (input->GetScalarType() != output->GetScalarType())
-  {
-    vtkGenericWarningMacro(<< "Execute: input ScalarType, " << input->GetScalarType()
-                           << ", must match out ScalarType " << output->GetScalarType());
+  if (input->GetScalarType() != output->GetScalarType()) {
+    vtkGenericWarningMacro(
+        << "Execute: input ScalarType, " << input->GetScalarType()
+        << ", must match out ScalarType " << output->GetScalarType());
     return;
   }
 
-  memcpy( outPtr, inPtr, sizeof( IT )*dim[0]*dim[1]*dim[2] );
-  for ( int i = 1; i < dim[0]-1; i++ )
-  {
-    for ( int j = 1; j < dim[1]-1; j++ )
-    {
-      for (int k = 1; k < dim[2]-1; k++)
-      {
-        IT pixelvalue = inPtr[k*dim[0]*dim[1]+j*dim[0]+i];
-        int nCnt = 0;
-        if ( pixelvalue > 0)
-        {
-          if (inPtr[k*dim[0]*dim[1]+(j+1)*dim[0]+i] == pixelvalue) nCnt++;
-          if (inPtr[k*dim[0]*dim[1]+(j-1)*dim[0]+i] == pixelvalue) nCnt++;
-          if (inPtr[k*dim[0]*dim[1]+j*dim[0]+i+1] == pixelvalue) nCnt++;
-          if (inPtr[k*dim[0]*dim[1]+j*dim[0]+i-1] == pixelvalue) nCnt++;
-          if (inPtr[(k+1)*dim[0]*dim[1]+j*dim[0]+i] == pixelvalue) nCnt++;
-          if (inPtr[(k-1)*dim[0]*dim[1]+j*dim[0]+i] == pixelvalue) nCnt++;
-          if (nCnt >= 6)
-          {
-            outPtr[k*dim[0]*dim[1]+j*dim[0]+i] = 0;
+  memcpy(outPtr, inPtr, sizeof(IT) * dim[0] * dim[1] * dim[2]);
+  for (int i = 1; i < dim[0] - 1; i++) {
+    for (int j = 1; j < dim[1] - 1; j++) {
+      for (int k = 1; k < dim[2] - 1; k++) {
+        IT  pixelvalue = inPtr[k * dim[0] * dim[1] + j * dim[0] + i];
+        int nCnt       = 0;
+        if (pixelvalue > 0) {
+          if (inPtr[k * dim[0] * dim[1] + (j + 1) * dim[0] + i] == pixelvalue)
+            nCnt++;
+          if (inPtr[k * dim[0] * dim[1] + (j - 1) * dim[0] + i] == pixelvalue)
+            nCnt++;
+          if (inPtr[k * dim[0] * dim[1] + j * dim[0] + i + 1] == pixelvalue)
+            nCnt++;
+          if (inPtr[k * dim[0] * dim[1] + j * dim[0] + i - 1] == pixelvalue)
+            nCnt++;
+          if (inPtr[(k + 1) * dim[0] * dim[1] + j * dim[0] + i] == pixelvalue)
+            nCnt++;
+          if (inPtr[(k - 1) * dim[0] * dim[1] + j * dim[0] + i] == pixelvalue)
+            nCnt++;
+          if (nCnt >= 6) {
+            outPtr[k * dim[0] * dim[1] + j * dim[0] + i] = 0;
           }
         }
       }
@@ -83,20 +83,17 @@ void vtkSimpleLabelEdgeFilter3DExecute(vtkImageData* input,
   }
 }
 
-void vtkSimpleLabelEdgeFilter3D::SimpleExecute(vtkImageData* input,
-                                               vtkImageData* output)
-{
-  void* inPtr = input->GetScalarPointer();
-  void* outPtr = output->GetScalarPointer();
+void vtkSimpleLabelEdgeFilter3D::SimpleExecute(vtkImageData *input,
+                                               vtkImageData *output) {
+  void *inPtr  = input->GetScalarPointer();
+  void *outPtr = output->GetScalarPointer();
 
-  switch(output->GetScalarType())
-  {
-  // This is simply a #define for a big case list. It handles all
-  // data types VTK supports.
-  vtkTemplateMacro(
-        vtkSimpleLabelEdgeFilter3DExecute(input, output,
-                                          static_cast<VTK_TT *>(inPtr),
-                                          static_cast<VTK_TT *>(outPtr)));
+  switch (output->GetScalarType()) {
+    // This is simply a #define for a big case list. It handles all
+    // data types VTK supports.
+    vtkTemplateMacro(vtkSimpleLabelEdgeFilter3DExecute(
+        input, output, static_cast<VTK_TT *>(inPtr),
+        static_cast<VTK_TT *>(outPtr)));
   default:
     vtkGenericWarningMacro("Execute: Unknown input ScalarType");
     return;

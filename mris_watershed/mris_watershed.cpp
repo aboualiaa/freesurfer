@@ -33,34 +33,34 @@ static char vcid[] =
     "$Id: mris_watershed.c,v 1.23 2013/03/27 01:53:50 fischl Exp $";
 
 const char *Progname;
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-int MRISfindMaxLabel(MRI_SURFACE *mris);
-int MRISinitWatershed(MRI_SURFACE *mris, MRI *mri);
-int MRISwatershed(MRI_SURFACE *mris, MRI *mri, int max_clusters,
-                  int merge_type);
-static int MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2);
-int MRISmergeBasins(MRI_SURFACE *mris, int b1, int b2);
+int         MRISfindMaxLabel(MRI_SURFACE *mris);
+int         MRISinitWatershed(MRI_SURFACE *mris, MRI *mri);
+int         MRISwatershed(MRI_SURFACE *mris, MRI *mri, int max_clusters,
+                          int merge_type);
+static int  MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2);
+int         MRISmergeBasins(MRI_SURFACE *mris, int b1, int b2);
 
 #define MERGE_MOST_SIMILAR 1
-#define MERGE_SMALLEST 2
+#define MERGE_SMALLEST     2
 
-static int merge_type = MERGE_SMALLEST; // MERGE_MOST_SIMILAR ;
-static int nbrs = 3;
+static int merge_type   = MERGE_SMALLEST; // MERGE_MOST_SIMILAR ;
+static int nbrs         = 3;
 static int max_clusters = 60;
 
 static LABEL *mask_label = nullptr;
 
 int main(int argc, char *argv[]) {
   MRI_SURFACE *mris;
-  MRI *mri;
-  int nargs, nlabels;
-  char *out_fname;
+  MRI *        mri;
+  int          nargs, nlabels;
+  char *       out_fname;
 
   nargs = handleVersionOption(argc, argv, "mris_watershed");
   if (nargs && argc - nargs == 1)
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 
   MRISresetNeighborhoodSize(mris, nbrs);
   if (mask_label) {
-    int vno;
+    int     vno;
     VERTEX *v;
 
     LabelMark(mask_label, mris);
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
   printf("writing to %s with %d labels\n", out_fname, nlabels);
 
   {
-    int vno, annot;
+    int     vno, annot;
     VERTEX *v;
 
     mris->ct = CTABalloc(nlabels);
@@ -159,7 +159,7 @@ static void print_version() {
   exit(1);
 }
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -209,7 +209,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -226,12 +226,12 @@ static int get_option(int argc, char *argv[]) {
 }
 
 int MRISinitWatershed(MRI_SURFACE *mris, MRI *mri) {
-  int vno, local_min, n, label_no = 1;
+  int   vno, local_min, n, label_no = 1;
   float val0, val;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->ripflag)
       continue;
     if (vno == Gdiag_no)
@@ -257,8 +257,8 @@ int MRISinitWatershed(MRI_SURFACE *mris, MRI *mri) {
 }
 
 typedef struct {
-  int vno;
-  int label;
+  int   vno;
+  int   label;
   float val;
 } VERTEX_VALUE;
 
@@ -288,7 +288,7 @@ static VERTEX_VALUE *MRISgetSortedVertexValues(MRI_SURFACE *mris, MRI *mri,
   label = 0;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX const *const v = &mris->vertices[vno];
+    VERTEX const *const          v  = &mris->vertices[vno];
     if (v->ripflag)
       continue;
     if (v->annotation > 0) {
@@ -296,8 +296,8 @@ static VERTEX_VALUE *MRISgetSortedVertexValues(MRI_SURFACE *mris, MRI *mri,
         VERTEX const *const vn = &mris->vertices[vt->v[n]];
         if (vn->annotation <= 0) // only if at least one neighbor is unlabeled
         {
-          vv[label].vno = vno;
-          vv[label].val = MRIgetVoxVal(mri, vno, 0, 0, 0);
+          vv[label].vno   = vno;
+          vv[label].val   = MRIgetVoxVal(mri, vno, 0, 0, 0);
           vv[label].label = v->annotation;
           label++;
           break;
@@ -312,21 +312,21 @@ static VERTEX_VALUE *MRISgetSortedVertexValues(MRI_SURFACE *mris, MRI *mri,
 
 static int MRISfindMostSimilarBasin(MRI_SURFACE *mris, MRI *mri,
                                     int min_basin) {
-  int best_basin, vno, n, basin, *nbr_vertices, nbr_basin, max_basin;
+  int     best_basin, vno, n, basin, *nbr_vertices, nbr_basin, max_basin;
   double *avg_grad, min_grad;
 
   nbr_vertices = (int *)calloc(mris->nvertices, sizeof(*nbr_vertices));
-  avg_grad = (double *)calloc(mris->nvertices, sizeof(*avg_grad));
+  avg_grad     = (double *)calloc(mris->nvertices, sizeof(*avg_grad));
 
   max_basin = 0;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX const *const v = &mris->vertices[vno];
+    VERTEX const *const          v  = &mris->vertices[vno];
     if (v->ripflag || v->annotation != min_basin)
       continue;
     for (n = 0; n < vt->vnum; n++) {
       VERTEX const *const vn = &mris->vertices[vt->v[n]];
-      nbr_basin = vn->annotation;
+      nbr_basin              = vn->annotation;
       if (vn->ripflag || nbr_basin == min_basin || nbr_basin == 0)
         continue;
       nbr_vertices[nbr_basin]++;
@@ -336,7 +336,7 @@ static int MRISfindMostSimilarBasin(MRI_SURFACE *mris, MRI *mri,
     }
   }
 
-  min_grad = 1e10;
+  min_grad   = 1e10;
   best_basin = -1;
   for (basin = 1; basin <= max_basin; basin++) {
     if (nbr_vertices[basin] <= 0)
@@ -344,7 +344,7 @@ static int MRISfindMostSimilarBasin(MRI_SURFACE *mris, MRI *mri,
     avg_grad[basin] /= nbr_vertices[basin];
     if (avg_grad[basin] < min_grad) {
       best_basin = basin;
-      min_grad = avg_grad[basin];
+      min_grad   = avg_grad[basin];
     }
   }
 
@@ -357,10 +357,10 @@ static int MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2) {
       best_b2, basin1;
   double *avg_grad, min_grad, best_grad;
 
-  nbasins = MRISfindMaxLabel(mris) + 1;
+  nbasins      = MRISfindMaxLabel(mris) + 1;
   nbr_vertices = (int *)calloc(nbasins, sizeof(*nbr_vertices));
-  avg_grad = (double *)calloc(nbasins, sizeof(*avg_grad));
-  best_grad = 1e20;
+  avg_grad     = (double *)calloc(nbasins, sizeof(*avg_grad));
+  best_grad    = 1e20;
   best_b1 = best_b2 = best_basin = -1;
   for (basin1 = 1; basin1 < nbasins; basin1++) {
     memset(nbr_vertices, 0, nbasins * sizeof(*nbr_vertices));
@@ -376,18 +376,19 @@ static int MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2) {
 #endif
         for (vno = 0; vno < mris->nvertices; vno++) {
 #ifdef HAVE_OPENMP
-          ROMP_PFLB_begin
+      ROMP_PFLB_begin
 #endif
 
-          int n, nbr_basin;
+          int n,
+          nbr_basin;
 
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-      VERTEX const *const v = &mris->vertices[vno];
+      VERTEX const *const          v  = &mris->vertices[vno];
       if (v->ripflag || v->annotation != basin1)
         continue;
       for (n = 0; n < vt->vnum; n++) {
         VERTEX const *const vn = &mris->vertices[vt->v[n]];
-        nbr_basin = vn->annotation;
+        nbr_basin              = vn->annotation;
         if (vn->ripflag || nbr_basin == basin1 || nbr_basin == 0)
           continue;
         nbr_vertices[nbr_basin]++;
@@ -396,14 +397,12 @@ static int MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2) {
           max_basin = nbr_basin;
       }
 #ifdef HAVE_OPENMP
-          ROMP_PFLB_end
+      ROMP_PFLB_end
 #endif
-
     }
 #ifdef HAVE_OPENMP
     ROMP_PF_end
 #endif
-
 
         min_grad = 1e10;
     for (basin = 1; basin <= max_basin; basin++) {
@@ -412,13 +411,13 @@ static int MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2) {
       avg_grad[basin] /= nbr_vertices[basin];
       if (avg_grad[basin] < min_grad) {
         best_basin = basin;
-        min_grad = avg_grad[basin];
+        min_grad   = avg_grad[basin];
       }
     }
     if (min_grad < best_grad) {
       best_grad = min_grad;
-      best_b1 = basin1;
-      best_b2 = best_basin;
+      best_b1   = basin1;
+      best_b2   = best_basin;
     }
   }
   free(nbr_vertices);
@@ -427,7 +426,7 @@ static int MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2) {
   return (best_b1);
 }
 int MRISfindMaxLabel(MRI_SURFACE *mris) {
-  int vno, max_label;
+  int     vno, max_label;
   VERTEX *v;
 
   max_label = 0;
@@ -441,11 +440,11 @@ int MRISfindMaxLabel(MRI_SURFACE *mris) {
   return (max_label);
 }
 static int MRISmergeSmallestBasin(MRI_SURFACE *mris, MRI *mri) {
-  int nbasins, vno, basin, min_basin, neighbor_basin;
+  int     nbasins, vno, basin, min_basin, neighbor_basin;
   double *basin_area, min_basin_area;
   VERTEX *v;
 
-  nbasins = MRISfindMaxLabel(mris) + 1;
+  nbasins    = MRISfindMaxLabel(mris) + 1;
   basin_area = (double *)calloc(nbasins, sizeof(*basin_area));
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -453,12 +452,12 @@ static int MRISmergeSmallestBasin(MRI_SURFACE *mris, MRI *mri) {
       continue;
     basin_area[v->annotation] += v->area;
   }
-  min_basin = 1;
+  min_basin      = 1;
   min_basin_area = basin_area[min_basin];
   for (basin = 1; basin < nbasins; basin++)
     if (basin_area[basin] < min_basin_area) {
       min_basin_area = basin_area[basin];
-      min_basin = basin;
+      min_basin      = basin;
     }
 
   neighbor_basin = MRISfindMostSimilarBasin(mris, mri, min_basin);
@@ -477,10 +476,10 @@ static int MRISmergeMostSimilarBasin(MRI_SURFACE *mris, MRI *mri) {
 }
 
 int MRISmergeBasins(MRI_SURFACE *mris, int b1, int b2) {
-  int vno, new_basin, other_basin;
+  int     vno, new_basin, other_basin;
   VERTEX *v;
 
-  new_basin = MIN(b1, b2);   // basin to merge into
+  new_basin   = MIN(b1, b2); // basin to merge into
   other_basin = MAX(b1, b2); // basin to be eliminated
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -498,24 +497,24 @@ int MRISmergeBasins(MRI_SURFACE *mris, int b1, int b2) {
 }
 int MRISwatershed(MRI_SURFACE *mris, MRI *mri, int max_clusters,
                   int merge_type) {
-  int vno, nvert, niter;
+  int           vno, nvert, niter;
   VERTEX_VALUE *vv = nullptr;
-  double max_val;
+  double        max_val;
 
   printf("flooding surface...\n");
   niter = 0;
   do {
-    vv = MRISgetSortedVertexValues(mris, mri, vv, &nvert);
+    vv      = MRISgetSortedVertexValues(mris, mri, vv, &nvert);
     max_val = 0;
     // ifdef HAVE_OPENMP
     // pragma omp parallel for if_ROMP(experimental) reduction(max:max_val)
     // endif
     for (vno = 0; vno < nvert; vno++) {
       double min_nbr_val;
-      int n;
+      int    n;
 
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vv[vno].vno];
-      VERTEX const *const v = &mris->vertices[vv[vno].vno];
+      VERTEX const *const          v  = &mris->vertices[vv[vno].vno];
       if (v->ripflag)
         continue;
 
@@ -527,7 +526,7 @@ int MRISwatershed(MRI_SURFACE *mris, MRI *mri, int max_clusters,
         if (vn->annotation <= 0) {
           float val;
           vn->annotation = v->annotation;
-          val = MRIgetVoxVal(mri, vt->v[n], 0, 0, 0);
+          val            = MRIgetVoxVal(mri, vt->v[n], 0, 0, 0);
           if (val < min_nbr_val)
             min_nbr_val = val;
         }

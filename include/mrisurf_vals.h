@@ -29,7 +29,7 @@
 
 #define SAMPLE_DIST 0.25
 
-#define MAX_CSF 55.0f
+#define MAX_CSF   55.0f
 #define STEP_SIZE 0.1
 
 int mrisClearMomentum(MRI_SURFACE *mris);

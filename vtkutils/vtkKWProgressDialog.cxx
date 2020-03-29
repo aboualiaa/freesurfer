@@ -25,14 +25,12 @@
  */
 
 #include "vtkKWProgressDialog.h"
+#include "vtkAlgorithm.h"
 #include "vtkKWApplication.h"
 #include "vtkKWDialog.h"
-#include "vtkKWProgressGauge.h"
 #include "vtkKWLabel.h"
+#include "vtkKWProgressGauge.h"
 #include "vtkObjectFactory.h"
-#include "vtkAlgorithm.h"
-
-using namespace std;
 
 // vtkStandardNewMacro( vtkKWProgressDialog );
 vtkCxxRevisionMacro(vtkKWProgressDialog, "$Revision: 1.3 $");
@@ -65,8 +63,8 @@ void vtkKWProgressDialog::Execute(vtkObject *iCaller, unsigned long iEvent,
 
   if (iEvent == vtkCommand::ProgressEvent) {
 
-    vtkAlgorithm *algo = (vtkAlgorithm *)iCaller;
-    double progress = *(double *)(iCallData);
+    vtkAlgorithm *algo     = (vtkAlgorithm *)iCaller;
+    double        progress = *(double *)(iCallData);
 
     if (0 == progress) {
 
@@ -102,7 +100,7 @@ void vtkKWProgressDialog::Execute(vtkObject *iCaller, unsigned long iEvent,
         mProgressGauge->Delete();
         mDialog->Delete();
 
-        mDialog = NULL;
+        mDialog        = NULL;
         mProgressGauge = NULL;
       }
 

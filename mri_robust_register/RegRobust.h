@@ -69,26 +69,26 @@ public:
 
 protected:
   virtual void computeIterativeRegistrationFull(int n, double epsit, MRI *mriS,
-                                                MRI *mriT,
+                                                MRI *                     mriT,
                                                 const vnl_matrix<double> &Minit,
                                                 double iscaleinit);
   //! To call the actual registration step
   template <class T>
   void iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS, MRI *mriT,
                                    const vnl_matrix<double> &m,
-                                   double scaleinit);
+                                   double                    scaleinit);
 
 private:
-  void findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit);
+  void   findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit);
   double wcheck;     // set from computeRegistrationStepW
   double wchecksqrt; // set from computeRegistrationStepW
 
   // PRIVATE DATA
   double sat;
   double wlimit;
-  MRI *mri_weights;
-  MRI *mri_hweights;
-  MRI *mri_indexing;
+  MRI *  mri_weights;
+  MRI *  mri_hweights;
+  MRI *  mri_indexing;
 };
 
 /** This is a template function to avoid code duplication.
@@ -98,7 +98,7 @@ private:
  */
 template <class T>
 void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
-                                            MRI *mriT,
+                                            MRI *                     mriT,
                                             const vnl_matrix<double> &m,
                                             double scaleinit) {
   if (!mriS)
@@ -143,17 +143,17 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
   }
 
   // std::cout << "mris width " << mriS->width << std::endl;
-  MRI *mri_Swarp = nullptr;
-  MRI *mri_Twarp = nullptr;
+  MRI *                          mri_Swarp = nullptr;
+  MRI *                          mri_Twarp = nullptr;
   vnl_matrix_fixed<double, 4, 4> mh2;
   vnl_matrix_fixed<double, 4, 4> mh;
   vnl_matrix_fixed<double, 4, 4> mhi;
   mhi.set_identity();
   //  vnl_matrix_fixed<double , 4, 4> mi;
 
-  double diff = 100.0;
+  double diff  = 100.0;
   double idiff = 0.0;
-  double ieps = 0.001; // exp(ieps) = 1.0010005, so stop if below 0.1% change
+  double ieps  = 0.001; // exp(ieps) = 1.0010005, so stop if below 0.1% change
 
   int i = 1;
 
@@ -198,8 +198,8 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
     //
     if (verbose > 1)
       std::cout << "   - compute new registration" << std::endl;
-    cmd = RStep.computeRegistrationStep(mri_Swarp, mri_Twarp);
-    wcheck = RStep.getwcheck();
+    cmd        = RStep.computeRegistrationStep(mri_Swarp, mri_Twarp);
+    wcheck     = RStep.getwcheck();
     wchecksqrt = RStep.getwchecksqrt();
     // ==========================================================================
 
@@ -232,7 +232,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
     if (iscale) {
       fmd.second -= cmd.second;      // adjust log
       iscalefinal = exp(fmd.second); // compute full factor (source to target)
-      idiff = fabs(cmd.second);
+      idiff       = fabs(cmd.second);
       std::ostringstream istar;
       if (idiff <= ieps)
         istar << " <= " << ieps << "  :-)";
@@ -295,7 +295,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
     MRIwrite(mri_Swarp, (name + "-mriS-mapped.mgz").c_str());
     MRIwrite(mri_Twarp, (name + "-mriT-mapped.mgz").c_str());
     MRI *salign = MRIclone(mriS, nullptr);
-    salign = MyMRI::MRIlinearTransform(mri_Swarp, salign, cmd.first);
+    salign      = MyMRI::MRIlinearTransform(mri_Swarp, salign, cmd.first);
     MRIwrite(salign, (name + "-mriS-align.mgz").c_str());
     MRIfree(&salign);
   } // end if debug
@@ -320,7 +320,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
 
     mri_weights = MRIalloc(mriT->width, mriT->height, mriT->depth, MRI_FLOAT);
     MRIcopyHeader(mriT, mri_weights);
-    mri_weights->type = MRI_FLOAT;
+    mri_weights->type        = MRI_FLOAT;
     mri_weights->outside_val = 1;
     if (symmetry && !iscaleonly)
       mri_weights = MyMRI::MRIlinearTransform(mri_hweights, mri_weights, mh2);
@@ -343,10 +343,10 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
   vnl_matrix_fixed<double, 4, 4> ch = MyMatrix::MatrixSqrt(fmd.first);
   // do not just assume c = ch*ch, rather c = ch2 * ch
   // for transforming target we need ch2^-1 = ch * c^-1
-  vnl_matrix_fixed<double, 4, 4> ci = vnl_inverse(fmd.first);
+  vnl_matrix_fixed<double, 4, 4> ci  = vnl_inverse(fmd.first);
   vnl_matrix_fixed<double, 4, 4> chi = ch * ci;
-  mov2weights = ch;
-  dst2weights = chi;
+  mov2weights                        = ch;
+  dst2weights                        = chi;
 
   // vnl_matlab_print(std::cerr,mov2weights,"mov2hw",vnl_matlab_print_format_long);std::cerr
   // << std::endl;

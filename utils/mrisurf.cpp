@@ -24,7 +24,7 @@
 #include "mrisurf_base.h"
 
 int UnitizeNormalFace = 1;
-int BorderValsHiRes = 0;
+int BorderValsHiRes   = 0;
 int RmsValErrorRecord = 0;
 
 #if (!SPHERE_INTERSECTION)
@@ -55,24 +55,24 @@ static int mrisAverageAreas(MRI_SURFACE *mris, int num_avgs, int which);
 #define DEBUG_FACE(vno, fno)                                                   \
   (((fno) == 4) && (Gdiag & DIAG_SURFACE) && (DEBUG_VERTEX(vno)))
 #define VDEBUG_FACE(fno) (DEBUG_FACE(fno) && 0)
-#define DEBUG_VERTEX(v) (((v) == 75530) && (Gdiag & DIAG_SURFACE) && 1)
+#define DEBUG_VERTEX(v)  (((v) == 75530) && (Gdiag & DIAG_SURFACE) && 1)
 #define VDEBUG_VERTEX(v) (((v) == 77115) && (Gdiag & DIAG_SURFACE) && 0)
 
 /*--------------------------------------------------------------------*/
 /*------------------------ STATIC DATA -------------------------------*/
 
 /*-------------------------- FUNCTIONS -------------------------------*/
-double (*gMRISexternalGradient)(MRI_SURFACE *mris,
-                                INTEGRATION_PARMS *parms) = nullptr;
-double (*gMRISexternalSSE)(MRI_SURFACE *mris,
-                           INTEGRATION_PARMS *parms) = nullptr;
-double (*gMRISexternalRMS)(MRI_SURFACE *mris,
-                           INTEGRATION_PARMS *parms) = nullptr;
-int (*gMRISexternalRipVertices)(MRI_SURFACE *mris,
-                                INTEGRATION_PARMS *parms) = nullptr;
-int (*gMRISexternalClearSSEStatus)(MRI_SURFACE *mris) = nullptr;
+double (*gMRISexternalGradient)(MRI_SURFACE *      mris,
+                                INTEGRATION_PARMS *parms)   = nullptr;
+double (*gMRISexternalSSE)(MRI_SURFACE *      mris,
+                           INTEGRATION_PARMS *parms)        = nullptr;
+double (*gMRISexternalRMS)(MRI_SURFACE *      mris,
+                           INTEGRATION_PARMS *parms)        = nullptr;
+int (*gMRISexternalRipVertices)(MRI_SURFACE *      mris,
+                                INTEGRATION_PARMS *parms)   = nullptr;
+int (*gMRISexternalClearSSEStatus)(MRI_SURFACE *mris)       = nullptr;
 int (*gMRISexternalReduceSSEIncreasedGradients)(MRI_SURFACE *mris,
-                                                double pct) = nullptr;
+                                                double       pct) = nullptr;
 
 /*---------------------------------------------------------------
   MRISurfSrcVersion() - returns CVS version of this file.
@@ -102,19 +102,19 @@ static void reproducible_check(double cell, double val, int line, int *count) {
 int MRISSfree(SMALL_SURFACE **pmriss) {
   SMALL_SURFACE *mriss;
 
-  mriss = *pmriss;
+  mriss   = *pmriss;
   *pmriss = nullptr;
   free(mriss->vertices);
   free(mriss);
   return (NO_ERROR);
 }
 
-int MRISaddCommandLine(MRI_SURFACE *mris, const std::string& cmdline)
-{
+int MRISaddCommandLine(MRI_SURFACE *mris, const std::string &cmdline) {
   if (mris->ncmds >= MAX_CMDS)
-    fs::error() << "can't add cmd to surface since max cmds (" << mris->ncmds <<  ") has been reached";
+    fs::error() << "can't add cmd to surface since max cmds (" << mris->ncmds
+                << ") has been reached";
 
-  int i = mris->ncmds++;
+  int i             = mris->ncmds++;
   mris->cmdlines[i] = (char *)calloc(cmdline.size() + 1, sizeof(char));
   strcpy(mris->cmdlines[i], cmdline.c_str());
   return NO_ERROR;
@@ -132,14 +132,14 @@ static bool vertix_n_hash_add(size_t vectorSize, MRIS_HASH *hashVector,
 #define SEP
 #define ELTP(                                                                  \
     TARGET,                                                                    \
-    MBR) // don't hash pointers.   Sometime may implement hashing their target
+    MBR)                // don't hash pointers.   Sometime may implement hashing their target
 #define ELTX(TYPE, MBR) // don't hash excluded elements
 #ifdef SEPARATE_VERTEX_TOPOLOGY
 #define ELTT(TYPE, MBR)                                                        \
   for (i = 0; i < vectorSize; i++) {                                           \
-    MRIS_HASH *hash = &hashVector[i];                                          \
-    MRIS const *mris = mrisPVector[i];                                         \
-    VERTEX_TOPOLOGY const *vt = &mris->vertices_topology[vno];                 \
+    MRIS_HASH *            hash = &hashVector[i];                              \
+    MRIS const *           mris = mrisPVector[i];                              \
+    VERTEX_TOPOLOGY const *vt   = &mris->vertices_topology[vno];               \
     hash->hash = fnv_add(hash->hash, (const unsigned char *)(&vt->MBR),        \
                          sizeof(vt->MBR));                                     \
     if (showHashCalc) {                                                        \
@@ -157,9 +157,9 @@ static bool vertix_n_hash_add(size_t vectorSize, MRIS_HASH *hashVector,
 #endif
 #define ELTT(TYPE, MBR)                                                        \
   for (i = 0; i < vectorSize; i++) {                                           \
-    MRIS_HASH *hash = &hashVector[i];                                          \
-    MRIS const *mris = mrisPVector[i];                                         \
-    VERTEX const *v = &mris->vertices[vno];                                    \
+    MRIS_HASH *   hash = &hashVector[i];                                       \
+    MRIS const *  mris = mrisPVector[i];                                       \
+    VERTEX const *v    = &mris->vertices[vno];                                 \
     hash->hash =                                                               \
         fnv_add(hash->hash, (const unsigned char *)(&v->MBR), sizeof(v->MBR)); \
     if (showHashCalc) {                                                        \
@@ -179,11 +179,11 @@ static bool vertix_n_hash_add(size_t vectorSize, MRIS_HASH *hashVector,
   // Now include some of the pointer targets
   //
   for (i = 0; i < vectorSize; i++) {
-    MRIS_HASH *hash = &hashVector[i];
-    MRIS const *mris = mrisPVector[i];
-    VERTEX_TOPOLOGY const *vt = &mris->vertices_topology[vno];
-    VERTEX const *v = &mris->vertices[vno];
-    int vsize = mrisVertexVSize(mris, vno);
+    MRIS_HASH *            hash  = &hashVector[i];
+    MRIS const *           mris  = mrisPVector[i];
+    VERTEX_TOPOLOGY const *vt    = &mris->vertices_topology[vno];
+    VERTEX const *         v     = &mris->vertices[vno];
+    int                    vsize = mrisVertexVSize(mris, vno);
     if (vt->v) {
       hash->hash = fnv_add(hash->hash, (const unsigned char *)(vt->v),
                            vsize * sizeof(vt->v[0]));
@@ -233,18 +233,18 @@ static bool face_n_hash_add(size_t vectorSize, MRIS_HASH *hashVector,
 #define SEP
 #define ELTP(TARGET, NAME) // don't hash pointers
 #define ELTX(TARGET, NAME) // don't hash these fiellds
-#define ELTT(TYPE, MBR)                                                        \
-  for (i = 0; i < vectorSize; i++) {                                           \
-    MRIS_HASH *hash = &hashVector[i];                                          \
-    MRIS const *mris = mrisPVector[i];                                         \
-    FACE *face = &mris->faces[fno];                                            \
-    hash->hash = fnv_add(hash->hash, (const unsigned char *)(&face->MBR),      \
-                         sizeof(face->MBR));                                   \
-    if (showDiff && i > 0 && hash->hash != hashVector[0].hash) {               \
-      fprintf(showDiff, "Differ at face:%d field %s\n", fno, #MBR);            \
-      return false;                                                            \
-    }                                                                          \
-  }                                                                            \
+#define ELTT(TYPE, MBR)                                                         \
+  for (i = 0; i < vectorSize; i++) {                                            \
+    MRIS_HASH * hash = &hashVector[i];                                          \
+    MRIS const *mris = mrisPVector[i];                                          \
+    FACE *      face = &mris->faces[fno];                                       \
+    hash->hash       = fnv_add(hash->hash, (const unsigned char *)(&face->MBR), \
+                         sizeof(face->MBR));                              \
+    if (showDiff && i > 0 && hash->hash != hashVector[0].hash) {                \
+      fprintf(showDiff, "Differ at face:%d field %s\n", fno, #MBR);             \
+      return false;                                                             \
+    }                                                                           \
+  }                                                                             \
   // end of macro
   LIST_OF_FACE_ELTS
 #undef ELTP
@@ -262,20 +262,20 @@ static bool mris_n_hash_add(size_t vectorSize, MRIS_HASH *hashVector,
     TARGET,                                                                    \
     MBR) // don't hash pointers.   Sometime may implement hashing their target
 #define ELTX(TYPE, MBR)
-#define ELTT(TYPE, MBR)                                                        \
-  for (i = 0; i < vectorSize; i++) {                                           \
-    MRIS_HASH *hash = &hashVector[i];                                          \
-    MRIS const *mris = mrisPVector[i];                                         \
-    hash->hash = fnv_add(hash->hash, (const unsigned char *)(&mris->MBR),      \
-                         sizeof(mris->MBR));                                   \
-    if (showHashCalc) {                                                        \
-      fprintf(stdout, "After mris.%s hash is %ld\n", #MBR, hash->hash);        \
-    }                                                                          \
-    if (showDiff && i > 0 && hash->hash != hashVector[0].hash) {               \
-      fprintf(showDiff, "Differ at field %s\n", #MBR);                         \
-      return false;                                                            \
-    }                                                                          \
-  }                                                                            \
+#define ELTT(TYPE, MBR)                                                         \
+  for (i = 0; i < vectorSize; i++) {                                            \
+    MRIS_HASH * hash = &hashVector[i];                                          \
+    MRIS const *mris = mrisPVector[i];                                          \
+    hash->hash       = fnv_add(hash->hash, (const unsigned char *)(&mris->MBR), \
+                         sizeof(mris->MBR));                              \
+    if (showHashCalc) {                                                         \
+      fprintf(stdout, "After mris.%s hash is %ld\n", #MBR, hash->hash);         \
+    }                                                                           \
+    if (showDiff && i > 0 && hash->hash != hashVector[0].hash) {                \
+      fprintf(showDiff, "Differ at field %s\n", #MBR);                          \
+      return false;                                                             \
+    }                                                                           \
+  }                                                                             \
   // end of macro
   LIST_OF_MRIS_ELTS
 #undef ELTT
@@ -321,9 +321,9 @@ void mris_hash_print(MRIS_HASH const *hash, FILE *file) {
 
 void mris_print_hash(FILE *file, MRIS const *mris, const char *prefix,
                      const char *suffix) {
-  MRIS_HASH hash;
+  MRIS_HASH     hash;
   double const *pd = &mris->avg_vertex_dist;
-  void *const *pp = (void **)pd;
+  void *const * pp = (void **)pd;
   fprintf(stdout, "mris.nsize:%d mris.avg_vertex_dist:%f %p\n", mris->nsize,
           *pd, *pp);
 
@@ -396,12 +396,12 @@ void mris_print_diff(FILE *file, MRIS const *lhs, MRIS const *rhs) {
 */
 int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
                    int which, int fix_mtl) {
-  int vno, label, contra_wm_label, nvox = 0, total_vox = 0, adjacent = 0;
-  int wm_label, gm_label, nlabels, n, index, annotation, entorhinal_index;
+  int     vno, label, contra_wm_label, nvox = 0, total_vox = 0, adjacent = 0;
+  int     wm_label, gm_label, nlabels, n, index, annotation, entorhinal_index;
   VERTEX *v;
-  double xv, yv, zv, val, xs, ys, zs, d, nx, ny, nz;
+  double  xv, yv, zv, val, xs, ys, zs, d, nx, ny, nz;
   LABEL **labels;
-  int nmarked, nmarked2, nripped;
+  int     nmarked, nmarked2, nripped;
 
   printf("Entering: MRISripMidline(): inhibiting deformation at non-cortical "
          "midline structures...\n");
@@ -412,12 +412,12 @@ int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
 
   if (stricmp(hemi, "lh") == 0) {
     contra_wm_label = Right_Cerebral_White_Matter;
-    wm_label = Left_Cerebral_White_Matter;
-    gm_label = Left_Cerebral_Cortex;
+    wm_label        = Left_Cerebral_White_Matter;
+    gm_label        = Left_Cerebral_Cortex;
   } else {
     contra_wm_label = Left_Cerebral_White_Matter;
-    wm_label = Right_Cerebral_White_Matter;
-    gm_label = Right_Cerebral_Cortex;
+    wm_label        = Right_Cerebral_White_Matter;
+    gm_label        = Right_Cerebral_Cortex;
   }
 
   // Clear the deck
@@ -512,8 +512,8 @@ int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
         // Sample brain intensity at vertex (not at distance from vertex)
         MRISvertexToVoxel(mris, v, mri_aseg, &xv, &yv, &zv); // not redundant
         MRIsampleVolume(mri_brain, xv, yv, zv, &val);
-        v->val = val;
-        v->d = 0;
+        v->val    = val;
+        v->d      = 0;
         v->marked = 1;
       }
     } // end loop over distance
@@ -579,7 +579,7 @@ int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
               DiagBreak();
             if (IS_ACCUMBENS(label)) {
               // Same as put and claust but val not set
-              v->d = 0;
+              v->d      = 0;
               v->marked = 1;
               if (Gdiag & DIAG_SHOW && vno == Gdiag_no)
                 printf(
@@ -590,8 +590,8 @@ int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
               MRISvertexToVoxel(mris, v, mri_aseg, &xv, &yv,
                                 &zv); // not redundant
               MRIsampleVolume(mri_brain, xv, yv, zv, &val);
-              v->val = val;
-              v->d = 0;
+              v->val    = val;
+              v->d      = 0;
               v->marked = 1;
               if (Gdiag & DIAG_SHOW && vno == Gdiag_no)
                 printf("marking vertex %d as adjacent to putamen/claustrum in "
@@ -660,8 +660,8 @@ int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
 
         MRISvertexToVoxel(mris, v, mri_aseg, &xv, &yv, &zv);
         MRIsampleVolume(mri_brain, xv, yv, zv, &val);
-        v->val = val;
-        v->d = 0;
+        v->val    = val;
+        v->d      = 0;
         v->marked = 1;
       }
 
@@ -712,8 +712,8 @@ int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
             DiagBreak();
           MRISvertexToVoxel(mris, v, mri_aseg, &xv, &yv, &zv);
           MRIsampleVolume(mri_brain, xv, yv, zv, &val);
-          v->val = val;
-          v->d = 0;
+          v->val    = val;
+          v->d      = 0;
           v->marked = 1;
         }
       }
@@ -766,8 +766,8 @@ int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
 
     // If there is an annoation that includes "unknown", then ...
     if (mris->ct && CTABfindName(mris->ct, "unknown", &index) == NO_ERROR) {
-      double pct_unknown;
-      int i;
+      double  pct_unknown;
+      int     i;
       VERTEX *v;
       CTABannotationAtIndex(mris->ct, index, &annotation);
 
@@ -849,7 +849,7 @@ int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, char *hemi,
 int MRIcomputeLabelNormal(MRI *mri_aseg, int x0, int y0, int z0, int label,
                           int whalf, double *pnx, double *pny, double *pnz,
                           int use_abs) {
-  int xi, yi, zi, xk, yk, zk, nvox = 0, val, dx, dy, dz, xn, yn, zn;
+  int    xi, yi, zi, xk, yk, zk, nvox = 0, val, dx, dy, dz, xn, yn, zn;
   double nx, ny, nz, mag;
 
   nx = ny = nz = 0.0;
@@ -874,9 +874,9 @@ int MRIcomputeLabelNormal(MRI *mri_aseg, int x0, int y0, int z0, int label,
               if (fabs(dx) + fabs(dy) + fabs(dz) != 1)
                 continue; // only 8-connected nbrs (??)
 
-              xn = mri_aseg->xi[xi + dx];
-              yn = mri_aseg->yi[yi + dy];
-              zn = mri_aseg->zi[zi + dz];
+              xn  = mri_aseg->xi[xi + dx];
+              yn  = mri_aseg->yi[yi + dy];
+              zn  = mri_aseg->zi[zi + dz];
               val = (int)MRIgetVoxVal(mri_aseg, xn, yn, zn, 0);
               if (val != label) {
                 // This voxel not the target label but is at the edge of the

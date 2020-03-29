@@ -25,21 +25,25 @@
 #ifndef _DICOMRead_H
 #define _DICOMRead_H
 
-#include "mri.h"
+#include <cstdio>
+
 #include "dicom.h"
 #include "lst.h"
-#include "dicom_objects.h"
+
 #include "condition.h"
+#include "dicom_objects.h"
+
+#include "mri.h"
 
 #define NUMBEROFTAGS 24
-#define SHORTSIZE 16
+#define SHORTSIZE    16
 #ifndef INTSIZE
 #define INTSIZE 16
 #endif
 #define LONGSIZE 32
 
-#define DCM_NOERROR 0
-#define DCM_NODICOMFILES 1
+#define DCM_NOERROR         0
+#define DCM_NODICOMFILES    1
 #define DCM_MULTIPLESTUDIES 2
 
 using BOOL = unsigned short;
@@ -47,23 +51,23 @@ using BOOL = unsigned short;
 
 #ifdef _DICOMRead_SRC
 char *SDCMStatusFile = 0;
-char *SDCMListFile = 0;
-int UseDICOMRead2 = 1; // use new dicom reader by default
+char *SDCMListFile   = 0;
+int   UseDICOMRead2  = 1; // use new dicom reader by default
 /* These variables allow the user to change the first tag checked to
    get the slice thickness.  This is needed with siemens mag res
    angiogram (MRAs) */
 long SliceResElTag1 = 0x88; // Spacing Between Slices, only makes sense for 2D
                             // multislice or 3D multislab
 long SliceResElTag2 = 0x50; // Slice Thickness, make sense for 3D
-int AutoSliceResElTag =
+int  AutoSliceResElTag =
     0; // automatically determine which tag to use based on 18,23
 #else
 extern char *SDCMStatusFile;
 extern char *SDCMListFile;
-extern int UseDICOMRead2;
-extern long SliceResElTag1;
-extern long SliceResElTag2;
-extern int AutoSliceResElTag;
+extern int   UseDICOMRead2;
+extern long  SliceResElTag1;
+extern long  SliceResElTag2;
+extern int   AutoSliceResElTag;
 #endif
 
 typedef enum {
@@ -119,7 +123,7 @@ typedef struct {
   char *TransferSyntaxUID;
 
   // image dimensions
-  double SliceThickness, xsize, ysize, FieldOfView;
+  double         SliceThickness, xsize, ysize, FieldOfView;
   unsigned short ImageNumber, Rows, Columns, BitsAllocated, NumberOfFrames,
       SeriesNumber;
 
@@ -129,13 +133,13 @@ typedef struct {
 
   // acquisition parameters
   double EchoTime, RepetitionTime, InversionTime, FlipAngle, FieldStrength;
-  short EchoNumber;
-  char *PhEncDir;
+  short  EchoNumber;
+  char * PhEncDir;
   double bval, bvecx, bvecy, bvecz;
 
   // pixels
-  void *PixelData;
-  unsigned char min8, max8;
+  void *             PixelData;
+  unsigned char      min8, max8;
   unsigned short int min16, max16;
 
   // Rescaling parameters
@@ -163,7 +167,7 @@ typedef struct {
   // http://www.psychology.nottingham.ac.uk/staff/cr1/dicom.html
   char *TransferSyntaxUID;
 
-  int EchoNo;
+  int   EchoNo;
   float FlipAngle;
   float EchoTime;
   float RepetitionTime;
@@ -173,10 +177,10 @@ typedef struct {
   float PhEncFOV;
   float ReadoutFOV;
 
-  int SeriesNo;
-  int ImageNo;
-  int NImageRows;
-  int NImageCols;
+  int   SeriesNo;
+  int   ImageNo;
+  int   NImageRows;
+  int   NImageCols;
   float ImgPos[3];
 
   int lRepetitions;
@@ -187,26 +191,26 @@ typedef struct {
   float Vr[3]; /* RAS row direction cosines*/
   float Vs[3]; /* RAS slice direction cosines*/
 
-  int RunNo;               /* Run Number that this is associated with */
-  int IsMosaic;            /* Image is a mosaic of slices */
-  int VolDim[3];           /* number of cols rows slices */
-  float VolRes[3];         /* Resolution of col, row, slice in mm */
-  float VolCenter[3];      /* Exact RAS center of the volume */
-  int NFrames;             /* Equals lRepetitions + 1 */
-  double bValue;           /* for DWI */
-  int nthDirection;        /* also for DWI */
-  int UseSliceScaleFactor; /* for slice-by-slice scaling (0020,4000) */
-  double SliceScaleFactor; /* for slice-by-slice scaling (0020,4000) */
+  int    RunNo;               /* Run Number that this is associated with */
+  int    IsMosaic;            /* Image is a mosaic of slices */
+  int    VolDim[3];           /* number of cols rows slices */
+  float  VolRes[3];           /* Resolution of col, row, slice in mm */
+  float  VolCenter[3];        /* Exact RAS center of the volume */
+  int    NFrames;             /* Equals lRepetitions + 1 */
+  double bValue;              /* for DWI */
+  int    nthDirection;        /* also for DWI */
+  int    UseSliceScaleFactor; /* for slice-by-slice scaling (0020,4000) */
+  double SliceScaleFactor;    /* for slice-by-slice scaling (0020,4000) */
   double bval, bvecx, bvecy, bvecz;
-  float LargestValue; // 0x28, 0x107
-  int ErrorFlag;      /* Set for error, eg, aborted run */
+  float  LargestValue; // 0x28, 0x107
+  int    ErrorFlag;    /* Set for error, eg, aborted run */
 
   // Rescaling parameters
   double RescaleIntercept, RescaleSlope; //(0028,1052) (0028,1053)
 
 } SDCMFILEINFO;
 
-void PrintDICOMInfo(DICOMInfo *dcminfo);
+void      PrintDICOMInfo(DICOMInfo *dcminfo);
 CONDITION GetString(DCM_OBJECT **object, DCM_TAG tag, char **st);
 CONDITION GetUSFromString(DCM_OBJECT **object, DCM_TAG tag, unsigned short *us);
 CONDITION GetShortFromString(DCM_OBJECT **object, DCM_TAG tag, short *sh);
@@ -222,75 +226,75 @@ CONDITION GetMultiShortFromString(DCM_OBJECT **object, DCM_TAG tag, short *us[],
                                   int multiplicity);
 CONDITION GetDICOMInfo(const char *fname, DICOMInfo *dcminfo, BOOL ReadImage,
                        int ImageNumber);
-void *ReadDICOMImage(int nfiles, DICOMInfo **aDicomInfo);
-void SortFiles(char *fNames[], int nFiles, DICOMInfo ***ptrDicomArray,
-               int *nStudies);
-int IsDICOM(const char *fname);
-int ScanDir(const char *PathName, char ***FileNames, int *NumberOfFiles);
-int CleanFileNames(char **FileNames, int NumberOfDICOMFiles,
-                   char ***CleanedFileNames);
-int DICOMRead(const char *FileName, MRI **mri, int ReadImage);
+void *    ReadDICOMImage(int nfiles, DICOMInfo **aDicomInfo);
+void      SortFiles(char *fNames[], int nFiles, DICOMInfo ***ptrDicomArray,
+                    int *nStudies);
+int       IsDICOM(const char *fname);
+int       ScanDir(const char *PathName, char ***FileNames, int *NumberOfFiles);
+int       CleanFileNames(char **FileNames, int NumberOfDICOMFiles,
+                         char ***CleanedFileNames);
+int       DICOMRead(const char *FileName, MRI **mri, int ReadImage);
 
-int SortDCMFileInfo(DICOMInfo **dcmfi_list, int nlist);
-int CompareDCMFileInfo(const void *a, const void *b);
-int DCMCountFrames(DICOMInfo **dcmfi_list, int nlist);
-int DCMSliceDir(DICOMInfo **dcmfi_list, int nlist);
+int  SortDCMFileInfo(DICOMInfo **dcmfi_list, int nlist);
+int  CompareDCMFileInfo(const void *a, const void *b);
+int  DCMCountFrames(DICOMInfo **dcmfi_list, int nlist);
+int  DCMSliceDir(DICOMInfo **dcmfi_list, int nlist);
 MRI *DICOMRead2(const char *dcmfile, int LoadVolume);
 
 DCM_ELEMENT *GetElementFromFile(const char *dicomfile, long grpid, long elid);
-int AllocElementData(DCM_ELEMENT *e);
-char *ElementValueString(DCM_ELEMENT *e, int DoBackslash);
-int FreeElementData(DCM_ELEMENT *e);
+int          AllocElementData(DCM_ELEMENT *e);
+char *       ElementValueString(DCM_ELEMENT *e, int DoBackslash);
+int          FreeElementData(DCM_ELEMENT *e);
 DCM_ELEMENT *GetElementFromFile(const char *dicomfile, long grpid, long elid);
-DCM_OBJECT *GetObjectFromFile(const char *fname, unsigned long options);
-int IsSiemensDICOM(const char *dcmfile);
+DCM_OBJECT * GetObjectFromFile(const char *fname, unsigned long options);
+int          IsSiemensDICOM(const char *dcmfile);
 char *SiemensAsciiTag(const char *dcmfile, const char *TagString, int flag);
 char *SiemensAsciiTagEx(const char *dcmfile, const char *TagString,
                         int cleanup);
-int dcmGetNCols(const char *dcmfile);
-int dcmGetNRows(const char *dcmfile);
-int dcmGetVolRes(const char *dcmfile, float *ColRes, float *RowRes,
-                 float *SliceRes);
-int dcmImageDirCos(const char *dcmfile, float *Vcx, float *Vcy, float *Vcz,
-                   float *Vrx, float *Vry, float *Vrz);
-int sdcmSliceDirCos(const char *dcmfile, float *Vsx, float *Vsy, float *Vsz);
-int dcmImagePosition(const char *dcmfile, float *x, float *y, float *z);
-int sdcmIsMosaic(const char *dcmfile, int *pNcols, int *pNrows, int *pNslices,
-                 int *pNframes);
+int   dcmGetNCols(const char *dcmfile);
+int   dcmGetNRows(const char *dcmfile);
+int   dcmGetVolRes(const char *dcmfile, float *ColRes, float *RowRes,
+                   float *SliceRes);
+int   dcmImageDirCos(const char *dcmfile, float *Vcx, float *Vcy, float *Vcz,
+                     float *Vrx, float *Vry, float *Vrz);
+int   sdcmSliceDirCos(const char *dcmfile, float *Vsx, float *Vsy, float *Vsz);
+int   dcmImagePosition(const char *dcmfile, float *x, float *y, float *z);
+int   sdcmIsMosaic(const char *dcmfile, int *pNcols, int *pNrows, int *pNslices,
+                   int *pNframes);
 MATRIX *sdcmAutoAlignMatrix(const char *dcmfile);
 
-int DumpSDCMFileInfo(FILE *fp, SDCMFILEINFO *sdcmfi);
-int FreeSDCMFileInfo(SDCMFILEINFO **ppsdcmfi);
-SDCMFILEINFO *GetSDCMFileInfo(const char *dcmfile);
+int            DumpSDCMFileInfo(FILE *fp, SDCMFILEINFO *sdcmfi);
+int            FreeSDCMFileInfo(SDCMFILEINFO **ppsdcmfi);
+SDCMFILEINFO * GetSDCMFileInfo(const char *dcmfile);
 SDCMFILEINFO **ScanSiemensDCMDir(const char *PathName, int *NSDCMFiles);
-int CompareSDCMFileInfo(const void *a, const void *b);
-int SortSDCMFileInfo(SDCMFILEINFO **sdcmfi_list, int nlist);
+int            CompareSDCMFileInfo(const void *a, const void *b);
+int            SortSDCMFileInfo(SDCMFILEINFO **sdcmfi_list, int nlist);
 
-int sdfiAssignRunNo(SDCMFILEINFO **sdcmfi_list, int nfiles);
-int sdfiAssignRunNo2(SDCMFILEINFO **sdfi_list, int nlist);
-int sdfiRunNo(const char *dcmfile, SDCMFILEINFO **sdfi_list, int nlist);
-int sdfiNFilesInRun(const char *dcmfile, SDCMFILEINFO **sdfi_list, int nlist);
-int sdfiCountFilesInRun(int RunNo, SDCMFILEINFO **sdfi_list, int nlist);
-int *sdfiRunFileList(const char *dcmfile, SDCMFILEINFO **sdfi_list, int nlist,
-                     int *NRunList);
-MRI *sdcmLoadVolume(const char *dcmfile, int LoadVolume, int nthonly);
-MRI *sdcmLoadVolumeAutoScale(const char *dcmfile, int LoadVolume, int nthonly);
-int sdfiVolCenter(SDCMFILEINFO *sdfi);
-int sdfiFixImagePosition(SDCMFILEINFO *sdfi);
-int sdfiSameSlicePos(SDCMFILEINFO *sdfi1, SDCMFILEINFO *sdfi2);
-int sdfiCountRuns(SDCMFILEINFO **sdfi_list, int nlist);
+int   sdfiAssignRunNo(SDCMFILEINFO **sdcmfi_list, int nfiles);
+int   sdfiAssignRunNo2(SDCMFILEINFO **sdfi_list, int nlist);
+int   sdfiRunNo(const char *dcmfile, SDCMFILEINFO **sdfi_list, int nlist);
+int   sdfiNFilesInRun(const char *dcmfile, SDCMFILEINFO **sdfi_list, int nlist);
+int   sdfiCountFilesInRun(int RunNo, SDCMFILEINFO **sdfi_list, int nlist);
+int * sdfiRunFileList(const char *dcmfile, SDCMFILEINFO **sdfi_list, int nlist,
+                      int *NRunList);
+MRI * sdcmLoadVolume(const char *dcmfile, int LoadVolume, int nthonly);
+MRI * sdcmLoadVolumeAutoScale(const char *dcmfile, int LoadVolume, int nthonly);
+int   sdfiVolCenter(SDCMFILEINFO *sdfi);
+int   sdfiFixImagePosition(SDCMFILEINFO *sdfi);
+int   sdfiSameSlicePos(SDCMFILEINFO *sdfi1, SDCMFILEINFO *sdfi2);
+int   sdfiCountRuns(SDCMFILEINFO **sdfi_list, int nlist);
 char *sdfiFirstFileInRun(int RunNo, SDCMFILEINFO **sdfi_list, int nlist);
-int *sdfiRunNoList(SDCMFILEINFO **sdfi_list, int nlist, int *NRuns);
+int * sdfiRunNoList(SDCMFILEINFO **sdfi_list, int nlist, int *NRuns);
 char **ScanSiemensSeries(const char *dcmfile, int *nList);
 char **ReadSiemensSeries(const char *ListFile, int *nList, const char *dcmfile);
 SDCMFILEINFO **LoadSiemensSeriesInfo(char **SeriesList, int nList);
-char *sdcmExtractNumarisVer(const char *e_18_1020, int *Maj, int *Min,
-                            int *MinMin);
-int sdfiIsSliceOrderReversed(SDCMFILEINFO *sdfi);
-int dcmGetDWIParams(DCM_OBJECT *dcm, double *pbval, double *pxbvec,
-                    double *pybvec, double *pzbvec);
-int dcmGetDWIParamsGE(DCM_OBJECT *dcm, double *pbval, double *pxbvec,
-                      double *pybvec, double *pzbvec);
+char *         sdcmExtractNumarisVer(const char *e_18_1020, int *Maj, int *Min,
+                                     int *MinMin);
+int            sdfiIsSliceOrderReversed(SDCMFILEINFO *sdfi);
+int            dcmGetDWIParams(DCM_OBJECT *dcm, double *pbval, double *pxbvec,
+                               double *pybvec, double *pzbvec);
+int            dcmGetDWIParamsGE(DCM_OBJECT *dcm, double *pbval, double *pxbvec,
+                                 double *pybvec, double *pzbvec);
 int dcmGetDWIParamsPhilips(DCM_OBJECT *dcm, double *pbval, double *pxbvec,
                            double *pybvec, double *pzbvec);
 int dcmGetDWIParamsSiemens(DCM_OBJECT *dcm, double *pbval, double *pxbvec,
@@ -314,7 +318,7 @@ typedef struct dirent struct_dirent;
 
 /* nicks - this code complains when built on Solaris 10.5
    it seems to already have scandir and alphasort (29 march 2006) */
-#define HAVE_SCANDIR 1
+#define HAVE_SCANDIR   1
 #define HAVE_ALPHASORT 1
 
 #ifndef HAVE_SCANDIR

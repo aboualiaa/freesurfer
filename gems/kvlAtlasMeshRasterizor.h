@@ -10,9 +10,9 @@ namespace kvl {
 class AtlasMeshRasterizor : public itk::Object {
 public:
   /** Standard class typedefs. */
-  using Self = AtlasMeshRasterizor;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshRasterizor;
+  using Superclass   = itk::Object;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -38,7 +38,7 @@ protected:
 
   /** */
   //
-  virtual bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  virtual bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                                     AtlasMesh::CellIdentifier tetrahedronId,
                                     int threadNumber = 0) = 0;
 
@@ -50,8 +50,8 @@ protected:
   /** Internal structure used for passing information to the threading library
    */
   struct ThreadStruct {
-    Pointer m_Rasterizor;
-    AtlasMesh::ConstPointer m_Mesh;
+    Pointer                                m_Rasterizor;
+    AtlasMesh::ConstPointer                m_Mesh;
     std::vector<AtlasMesh::CellIdentifier> m_TetrahedronIds;
     // std::set< AtlasMesh::CellIdentifier >  m_TetrahedronIds;
   };

@@ -22,15 +22,15 @@
  *
  */
 #include "PanelROI.h"
-#include "ui_PanelROI.h"
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
-#include <QToolBar>
-#include "LayerROI.h"
 #include "LayerPropertyROI.h"
-#include "MyUtils.h"
+#include "LayerROI.h"
 #include "LayerSurface.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "ui_MainWindow.h"
+#include "ui_PanelROI.h"
 #include <QDebug>
+#include <QToolBar>
 
 PanelROI::PanelROI(QWidget *parent)
     : PanelLayer("ROI", parent), ui(new Ui::PanelROI) {
@@ -93,8 +93,8 @@ void PanelROI::OnSliderOpacity(int nVal) {
 }
 
 void PanelROI::OnEditThreshold(const QString &text) {
-  bool ok;
-  double th = text.trimmed().toDouble(&ok);
+  bool      ok;
+  double    th    = text.trimmed().toDouble(&ok);
   LayerROI *layer = GetCurrentLayer<LayerROI *>();
   if (ok && layer) {
     layer->GetProperty()->SetThreshold(th);
@@ -102,8 +102,8 @@ void PanelROI::OnEditThreshold(const QString &text) {
 }
 
 void PanelROI::OnEditHeatscaleMin(const QString &text) {
-  bool ok;
-  double val = text.trimmed().toDouble(&ok);
+  bool      ok;
+  double    val   = text.trimmed().toDouble(&ok);
   LayerROI *layer = GetCurrentLayer<LayerROI *>();
   if (ok && layer) {
     layer->GetProperty()->SetHeatscaleMin(val);
@@ -111,8 +111,8 @@ void PanelROI::OnEditHeatscaleMin(const QString &text) {
 }
 
 void PanelROI::OnEditHeatscaleMax(const QString &text) {
-  bool ok;
-  double val = text.trimmed().toDouble(&ok);
+  bool      ok;
+  double    val   = text.trimmed().toDouble(&ok);
   LayerROI *layer = GetCurrentLayer<LayerROI *>();
   if (ok && layer) {
     layer->GetProperty()->SetHeatscaleMax(val);

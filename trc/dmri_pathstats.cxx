@@ -33,9 +33,7 @@
 #include "timer.h"
 #include "version.h"
 
-using namespace std;
-
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -48,11 +46,11 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
+static char vcid[]   = "";
 const char *Progname = "dmri_pathstats";
 
 float probThresh = .2, faThresh = 0;
-char PathMAP[] = "path.map.txt";
+char  PathMAP[] = "path.map.txt";
 char *inTrkFile = nullptr, *inRoi1File = nullptr, *inRoi2File = nullptr,
      *inTrcDir = nullptr, *inVoxFile = PathMAP, *dtBase = nullptr,
      *outFile = nullptr, *outVoxFile = nullptr, *outMedianFile = nullptr,
@@ -61,28 +59,29 @@ char *inTrkFile = nullptr, *inRoi1File = nullptr, *inRoi2File = nullptr,
 MRI *l1, *l2, *l3, *v1;
 
 struct utsname uts;
-char *cmdline, cwd[2000], subjName[100], pathName[100];
+char *         cmdline, cwd[2000], subjName[100], pathName[100];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
-  int count;
-  int volume;
-  int lenmin;
-  int lenmax;
-  int lencent;
-  float lenavg;
-  vector<float> avg;
-  vector<float> wavg;
-  vector<float> cavg;
-  vector<MRI *> meas;
-  ofstream fout;
+  int                nargs;
+  int                cputime;
+  int                count;
+  int                volume;
+  int                lenmin;
+  int                lenmax;
+  int                lencent;
+  float              lenavg;
+  std::vector<float> avg;
+  std::vector<float> wavg;
+  std::vector<float> cavg;
+  std::vector<MRI *> meas;
+  std::ofstream      fout;
 
   nargs = handleVersionOption(argc, argv, "dmri_pathstats");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -135,35 +134,36 @@ int main(int argc, char **argv) {
   if (outVoxFile != nullptr) {
     WriteHeader(outVoxFile);
 
-    ofstream fvox(outVoxFile, ios::app);
-    fvox << "# pathway start" << endl
-         << "x y z AD RD MD FA AD_Avg RD_Avg MD_Avg FA_Avg" << endl;
+    std::ofstream fvox(outVoxFile, std::ios::app);
+    fvox << "# pathway start" << std::endl
+         << "x y z AD RD MD FA AD_Avg RD_Avg MD_Avg FA_Avg" << std::endl;
     fvox.close();
   }
 
   if (inTrcDir != nullptr) { // Probabilistic paths
-    int len;
-    int nx;
-    int ny;
-    int nz;
-    int nvox = 0;
-    float wtot = 0;
-    float pthresh = 0;
-    vector<int> lengths;
-    vector<int> pathmap;
-    vector<int> basepathmap;
-    vector<float>::iterator iavg;
-    vector<float>::iterator iwavg;
-    MRI *post;
-    ifstream lenfile;
-    ifstream infile;
-    string pathline;
+    int                          len;
+    int                          nx;
+    int                          ny;
+    int                          nz;
+    int                          nvox    = 0;
+    float                        wtot    = 0;
+    float                        pthresh = 0;
+    std::vector<int>             lengths;
+    std::vector<int>             pathmap;
+    std::vector<int>             basepathmap;
+    std::vector<float>::iterator iavg;
+    std::vector<float>::iterator iwavg;
+    MRI *                        post;
+    std::ifstream                lenfile;
+    std::ifstream                infile;
+    std::string                  pathline;
 
     // Read lengths of path samples
     sprintf(fname, "%s/length.samples.txt", inTrcDir);
-    lenfile.open(fname, ios::in);
+    lenfile.open(fname, std::ios::in);
     if (!lenfile) {
-      cout << "ERROR: Could not open " << fname << " for reading" << endl;
+      std::cout << "ERROR: Could not open " << fname << " for reading"
+                << std::endl;
       exit(1);
     }
 
@@ -179,9 +179,9 @@ int main(int argc, char **argv) {
     // Read path posterior distribution
     sprintf(fname, "%s/path.pd.nii.gz", inTrcDir);
     post = MRIread(fname);
-    nx = post->width;
-    ny = post->height;
-    nz = post->depth;
+    nx   = post->width;
+    ny   = post->height;
+    nz   = post->depth;
 
     // Find (robust) maximum value of posterior distribution
     pthresh = static_cast<float>(MRIfindPercentile(post, .99, 0));
@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
               }
             }
 
-            iavg = avg.begin();
+            iavg  = avg.begin();
             iwavg = wavg.begin();
 
             for (auto ivol = meas.begin(); ivol < meas.end(); ivol++) {
@@ -239,15 +239,16 @@ int main(int argc, char **argv) {
 
     // Read maximum a posteriori path coordinates
     sprintf(fname, "%s/%s", inTrcDir, inVoxFile);
-    infile.open(fname, ios::in);
+    infile.open(fname, std::ios::in);
     if (!infile) {
-      cout << "ERROR: Could not open " << fname << " for reading" << endl;
+      std::cout << "ERROR: Could not open " << fname << " for reading"
+                << std::endl;
       exit(1);
     }
 
     while (getline(infile, pathline)) {
-      float coord;
-      istringstream pathstr(pathline);
+      float              coord;
+      std::istringstream pathstr(pathline);
 
       for (int k = 0; k < 3; k++) {
         if (pathstr >> coord) {
@@ -263,12 +264,13 @@ int main(int argc, char **argv) {
     }
 
     if (!basepathmap.empty() && basepathmap.size() != pathmap.size()) {
-      cout << "ERROR: Unexpected number of coordinates in " << fname << endl;
+      std::cout << "ERROR: Unexpected number of coordinates in " << fname
+                << std::endl;
       exit(1);
     }
 
     // Overall measures
-    count = lengths.size();
+    count  = lengths.size();
     volume = nvox;
     lenmin = *min_element(lengths.begin(), lengths.end());
     lenmax = *max_element(lengths.begin(), lengths.end());
@@ -276,7 +278,7 @@ int main(int argc, char **argv) {
     lencent = pathmap.size() / 3;
 
     if (dtBase != nullptr) {
-      vector<float>::iterator iavg;
+      std::vector<float>::iterator iavg;
 
       cavg.resize(meas.size());
       fill(cavg.begin(), cavg.end(), 0.0);
@@ -297,18 +299,18 @@ int main(int argc, char **argv) {
 
     // Measures by voxel on MAP streamline
     if (outVoxFile != nullptr) {
-      int npts;
-      CTrackReader trkreader;
-      TRACK_HEADER trkheadin;
-      vector<int>::const_iterator iptbase;
-      vector<float> valsum(meas.size());
-      vector<float>::iterator ivalsum;
-      vector<vector<int>> pathsamples;
-      ofstream outfile(outVoxFile, ios::app);
+      int                              npts;
+      CTrackReader                     trkreader;
+      TRACK_HEADER                     trkheadin;
+      std::vector<int>::const_iterator iptbase;
+      std::vector<float>               valsum(meas.size());
+      std::vector<float>::iterator     ivalsum;
+      std::vector<std::vector<int>>    pathsamples;
+      std::ofstream                    outfile(outVoxFile, std::ios::app);
 
       if (!outfile) {
-        cout << "ERROR: Could not open " << outVoxFile << " for writing"
-             << endl;
+        std::cout << "ERROR: Could not open " << outVoxFile << " for writing"
+                  << std::endl;
         exit(1);
       }
 
@@ -316,16 +318,16 @@ int main(int argc, char **argv) {
       sprintf(fname, "%s/path.pd.trk", inTrcDir);
 
       if (!trkreader.Open(fname, &trkheadin)) {
-        cout << "ERROR: Cannot open input file " << fname << endl;
-        cout << "ERROR: " << trkreader.GetLastErrorMessage() << endl;
+        std::cout << "ERROR: Cannot open input file " << fname << std::endl;
+        std::cout << "ERROR: " << trkreader.GetLastErrorMessage() << std::endl;
         exit(1);
       }
 
       while (trkreader.GetNextPointCount(&npts)) {
-        float *iraw;
-        float *rawpts = new float[npts * 3];
-        vector<int> coords(npts * 3);
-        auto icoord = coords.begin();
+        float *          iraw;
+        float *          rawpts = new float[npts * 3];
+        std::vector<int> coords(npts * 3);
+        auto             icoord = coords.begin();
 
         // Read a streamline from input file
         trkreader.GetNextTrackData(npts, rawpts);
@@ -370,7 +372,7 @@ int main(int argc, char **argv) {
 
         for (auto ipath = pathsamples.begin(); ipath < pathsamples.end();
              ipath++) {
-          int dmin = 1000000;
+          int  dmin   = 1000000;
           auto iptmin = ipath->begin();
 
           for (auto ipathpt = ipath->begin(); ipathpt < ipath->end();
@@ -383,7 +385,7 @@ int main(int argc, char **argv) {
             }
 
             if (dist < dmin) {
-              dmin = dist;
+              dmin   = dist;
               iptmin = ipathpt;
             }
           }
@@ -418,7 +420,7 @@ int main(int argc, char **argv) {
           ivalsum++;
         }
 
-        outfile << endl;
+        outfile << std::endl;
 
         if (!basepathmap.empty()) {
           iptbase += 3;
@@ -434,15 +436,15 @@ int main(int argc, char **argv) {
     myblood.FindCenterStreamline();
 
     // Overall measures
-    count = myblood.GetNumStr();
-    volume = myblood.GetVolume();
-    lenmin = myblood.GetLengthMin();
-    lenmax = myblood.GetLengthMax();
-    lenavg = myblood.GetLengthAvg();
+    count   = myblood.GetNumStr();
+    volume  = myblood.GetVolume();
+    lenmin  = myblood.GetLengthMin();
+    lenmax  = myblood.GetLengthMax();
+    lenavg  = myblood.GetLengthAvg();
     lencent = myblood.GetLengthCenter();
 
     if (dtBase != nullptr) {
-      avg = myblood.ComputeAvgPath(meas);
+      avg  = myblood.ComputeAvgPath(meas);
       wavg = myblood.ComputeWeightAvgPath(meas);
       cavg = myblood.ComputeAvgCenter(meas);
     }
@@ -474,36 +476,36 @@ int main(int argc, char **argv) {
   if (outFile != nullptr) {
     WriteHeader(outFile);
 
-    fout.open(outFile, ios::app);
+    fout.open(outFile, std::ios::app);
 
-    fout << "Count " << count << endl
-         << "Volume " << volume << endl
-         << "Len_Min " << lenmin << endl
-         << "Len_Max " << lenmax << endl
-         << "Len_Avg " << lenavg << endl
-         << "Len_Center " << lencent << endl;
+    fout << "Count " << count << std::endl
+         << "Volume " << volume << std::endl
+         << "Len_Min " << lenmin << std::endl
+         << "Len_Max " << lenmax << std::endl
+         << "Len_Avg " << lenavg << std::endl
+         << "Len_Center " << lencent << std::endl;
 
     if (dtBase != nullptr) {
-      fout << "AD_Avg " << avg[0] << endl
-           << "AD_Avg_Weight " << wavg[0] << endl
-           << "AD_Avg_Center " << cavg[0] << endl
-           << "RD_Avg " << avg[1] << endl
-           << "RD_Avg_Weight " << wavg[1] << endl
-           << "RD_Avg_Center " << cavg[1] << endl
-           << "MD_Avg " << avg[2] << endl
-           << "MD_Avg_Weight " << wavg[2] << endl
-           << "MD_Avg_Center " << cavg[2] << endl
-           << "FA_Avg " << avg[3] << endl
-           << "FA_Avg_Weight " << wavg[3] << endl
-           << "FA_Avg_Center " << cavg[3] << endl;
+      fout << "AD_Avg " << avg[0] << std::endl
+           << "AD_Avg_Weight " << wavg[0] << std::endl
+           << "AD_Avg_Center " << cavg[0] << std::endl
+           << "RD_Avg " << avg[1] << std::endl
+           << "RD_Avg_Weight " << wavg[1] << std::endl
+           << "RD_Avg_Center " << cavg[1] << std::endl
+           << "MD_Avg " << avg[2] << std::endl
+           << "MD_Avg_Weight " << wavg[2] << std::endl
+           << "MD_Avg_Center " << cavg[2] << std::endl
+           << "FA_Avg " << avg[3] << std::endl
+           << "FA_Avg_Weight " << wavg[3] << std::endl
+           << "FA_Avg_Center " << cavg[3] << std::endl;
     }
 
     fout.close();
   }
 
   if (outVoxFile != nullptr) {
-    ofstream fvox(outVoxFile, ios::app);
-    fvox << "# pathway end" << endl;
+    std::ofstream fvox(outVoxFile, std::ios::app);
+    fvox << "# pathway end" << std::endl;
     fvox.close();
   }
 
@@ -517,10 +519,10 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
+  int    nargc;
+  int    nargsused;
   char **pargv;
-  char *option;
+  char * option;
 
   if (argc < 1) {
     usage_exit();
@@ -560,12 +562,12 @@ static int parse_commandline(int argc, char **argv) {
       }
       inRoi1File = fio_fullpath(pargv[0]);
       inRoi2File = fio_fullpath(pargv[1]);
-      nargsused = 2;
+      nargsused  = 2;
     } else if (strcmp(option, "--intrc") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      inTrcDir = fio_fullpath(pargv[0]);
+      inTrcDir  = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--invox") == 0) {
       if (nargc < 1) {
@@ -577,7 +579,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      dtBase = fio_fullpath(pargv[0]);
+      dtBase    = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--path") == 0) {
       if (nargc < 1) {
@@ -595,32 +597,32 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      outFile = fio_fullpath(pargv[0]);
+      outFile   = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--outvox") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       outVoxFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (strcmp(option, "--median") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       outMedianFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused     = 1;
     } else if (strcmp(option, "--ends") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       outEndBase = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (strcmp(option, "--ref") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       refVolFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (strcmp(option, "--pthr") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
@@ -754,22 +756,22 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void WriteHeader(char *OutFile) {
-  ofstream fout(OutFile, ios::out);
+  std::ofstream fout(OutFile, std::ios::out);
 
-  fout << "# Title Pathway Statistics" << endl
-       << "#" << endl
-       << "# generating_program " << Progname << endl
-       << "# cvs_version " << vcid << endl
-       << "# cmdline " << cmdline << endl
-       << "# sysname " << uts.sysname << endl
-       << "# hostname " << uts.nodename << endl
-       << "# machine " << uts.machine << endl
-       << "# user " << VERuser() << endl
-       << "# anatomy_type pathway" << endl
-       << "#" << endl
-       << "# subjectname " << subjName << endl
-       << "# pathwayname " << pathName << endl
-       << "#" << endl;
+  fout << "# Title Pathway Statistics" << std::endl
+       << "#" << std::endl
+       << "# generating_program " << Progname << std::endl
+       << "# cvs_version " << vcid << std::endl
+       << "# cmdline " << cmdline << std::endl
+       << "# sysname " << uts.sysname << std::endl
+       << "# hostname " << uts.nodename << std::endl
+       << "# machine " << uts.machine << std::endl
+       << "# user " << VERuser() << std::endl
+       << "# anatomy_type pathway" << std::endl
+       << "#" << std::endl
+       << "# subjectname " << subjName << std::endl
+       << "# pathwayname " << pathName << std::endl
+       << "#" << std::endl;
 
   fout.close();
 }

@@ -22,22 +22,22 @@
  *
  */
 #include "PanelPointSet.h"
-#include "ui_PanelPointSet.h"
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
+#include "DialogAddPointSetStat.h"
+#include "LayerMRI.h"
 #include "LayerPointSet.h"
 #include "LayerPropertyPointSet.h"
-#include "LayerMRI.h"
-#include <QFileDialog>
+#include "MainWindow.h"
 #include "MyUtils.h"
-#include <QLabel>
+#include "ui_MainWindow.h"
+#include "ui_PanelPointSet.h"
 #include <QDateTime>
-#include <QInputDialog>
 #include <QDebug>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QLabel>
+#include <QMessageBox>
 #include <QTimer>
 #include <QTreeWidgetItem>
-#include <QMessageBox>
-#include "DialogAddPointSetStat.h"
 
 PanelPointSet::PanelPointSet(QWidget *parent)
     : PanelLayer("PointSet", parent), ui(new Ui::PanelPointSet) {
@@ -118,7 +118,7 @@ void PanelPointSet::DoUpdateWidgets() {
       allWidgets[i]->setEnabled(layer);
     }
   }
-  int nColorMap = 0;
+  int  nColorMap   = 0;
   bool bShowSpline = false;
   ui->lineEditFileName->clear();
   if (layer) {
@@ -143,7 +143,7 @@ void PanelPointSet::DoUpdateWidgets() {
         QString("%1").arg(layer->GetNumberOfPoints()));
     ui->spinBoxGoToPoint->setRange(1, layer->GetNumberOfPoints());
 
-    nColorMap = layer->GetProperty()->GetColorMap();
+    nColorMap   = layer->GetProperty()->GetColorMap();
     double fMin = layer->GetProperty()->GetScalarMinValue();
     double fMax = layer->GetProperty()->GetScalarMaxValue();
     ui->sliderMin->setValue(
@@ -269,7 +269,7 @@ void PanelPointSet::OnSliderOffset(int nVal) {
 void PanelPointSet::OnLineEditMin(const QString &text) {
   QList<LayerPointSet *> layers = GetSelectedLayers<LayerPointSet *>();
   foreach (LayerPointSet *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK && layer->GetProperty()->GetHeatScaleMin() != dVal) {
       layer->GetProperty()->SetHeatScaleMin(dVal);
@@ -280,7 +280,7 @@ void PanelPointSet::OnLineEditMin(const QString &text) {
 void PanelPointSet::OnLineEditMid(const QString &text) {
   QList<LayerPointSet *> layers = GetSelectedLayers<LayerPointSet *>();
   foreach (LayerPointSet *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK && layer->GetProperty()->GetHeatScaleMid() != dVal) {
       layer->GetProperty()->SetHeatScaleMid(dVal);
@@ -291,7 +291,7 @@ void PanelPointSet::OnLineEditMid(const QString &text) {
 void PanelPointSet::OnLineEditMax(const QString &text) {
   QList<LayerPointSet *> layers = GetSelectedLayers<LayerPointSet *>();
   foreach (LayerPointSet *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK && layer->GetProperty()->GetHeatScaleMax() != dVal) {
       layer->GetProperty()->SetHeatScaleMax(dVal);
@@ -302,7 +302,7 @@ void PanelPointSet::OnLineEditMax(const QString &text) {
 void PanelPointSet::OnLineEditOffset(const QString &text) {
   QList<LayerPointSet *> layers = GetSelectedLayers<LayerPointSet *>();
   foreach (LayerPointSet *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK && layer->GetProperty()->GetHeatScaleOffset() != dVal) {
       layer->GetProperty()->SetHeatScaleOffset(dVal);
@@ -313,7 +313,7 @@ void PanelPointSet::OnLineEditOffset(const QString &text) {
 void PanelPointSet::OnLineEditRadius(const QString &text) {
   QList<LayerPointSet *> layers = GetSelectedLayers<LayerPointSet *>();
   foreach (LayerPointSet *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK && dVal >= 0 &&
         layer->GetProperty()->GetRadius() != dVal) {
@@ -325,7 +325,7 @@ void PanelPointSet::OnLineEditRadius(const QString &text) {
 void PanelPointSet::OnLineEditSplineRadius(const QString &text) {
   QList<LayerPointSet *> layers = GetSelectedLayers<LayerPointSet *>();
   foreach (LayerPointSet *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK && dVal > 0 &&
         layer->GetProperty()->GetSplineRadius() != dVal) {
@@ -360,7 +360,7 @@ void PanelPointSet::LoadScalarValues() {
                                               "All files (*)");
     if (!fn.isEmpty()) {
       if (!layer->GetProperty()->LoadScalarsFromFile(fn)) {
-        cout << "Load scalar values failed.\n";
+        std::cout << "Load scalar values failed.\n";
       }
     }
     UpdateWidgets();
@@ -402,10 +402,9 @@ QLabel *PanelPointSet::MakeCommentItem(const QVariantMap &map) {
           .arg(map["user"].toString())
           .arg(map["text"].toString());
   if (map["user"].toString() == m_self)
-    text +=
-        " (<a href=\"delete\" style=\"font-size:11px\">delete</a>)"; // (<a
-                                                                     // href=\"hide\"
-                                                                     // style=\"font-size:10px\">hide</a>)";
+    text += " (<a href=\"delete\" style=\"font-size:11px\">delete</a>)"; // (<a
+        // href=\"hide\"
+        // style=\"font-size:10px\">hide</a>)";
   label->setText(text);
   label->setStyleSheet(
       "QLabel{font-size:12px;padding:2px;padding-top:3px;padding-bottom:3px;}");
@@ -432,8 +431,8 @@ QTreeWidgetItem *PanelPointSet::AddStatItem(const QString &name, double value) {
 
 void PanelPointSet::UpdatePointInfo() {
   BlockAllSignals(true);
-  LayerPointSet *layer = GetCurrentLayer<LayerPointSet *>();
-  int nIndex = ui->spinBoxGoToPoint->value() - 1;
+  LayerPointSet *layer  = GetCurrentLayer<LayerPointSet *>();
+  int            nIndex = ui->spinBoxGoToPoint->value() - 1;
   if (layer && layer->GetNumberOfPoints() > nIndex) {
     ui->labelMoreInfo->setText(tr("Information on Point #%1").arg(nIndex + 1));
 
@@ -445,7 +444,7 @@ void PanelPointSet::UpdatePointInfo() {
         delete item;
       }
     }
-    ControlPoint p = layer->GetPoint(nIndex);
+    ControlPoint p        = layer->GetPoint(nIndex);
     QVariantList comments = p.info.value("comments").toList();
     foreach (QVariant v, comments) {
       ui->layoutComments->addWidget(MakeCommentItem(v.toMap()));
@@ -459,7 +458,7 @@ void PanelPointSet::UpdatePointInfo() {
     QTreeWidgetItem *item = AddStatItem("legacy", p.value);
     item->setTextColor(0, Qt::gray);
     QVariantMap stats = p.info.value("statistics").toMap();
-    QStringList keys = stats.keys();
+    QStringList keys  = stats.keys();
     foreach (QString key, keys) { AddStatItem(key, stats[key].toDouble()); }
   }
   BlockAllSignals(false);
@@ -473,12 +472,12 @@ void PanelPointSet::OnButtonCommentAdd() {
     map["text"] = text;
     // workaround for a QDateTime bug
     QDateTime local = QDateTime::currentDateTime();
-    QDateTime utc = local.toUTC();
+    QDateTime utc   = local.toUTC();
     utc.setTimeSpec(Qt::LocalTime);
     local.setUtcOffset(utc.secsTo(local));
     map["timestamp"] = local;
-    map["user"] = m_self;
-    QLabel *label = MakeCommentItem(map);
+    map["user"]      = m_self;
+    QLabel *label    = MakeCommentItem(map);
     if (ui->layoutComments->count() > 0)
       ui->layoutComments->insertWidget(ui->layoutComments->count() - 1, label);
     else
@@ -486,10 +485,10 @@ void PanelPointSet::OnButtonCommentAdd() {
     ui->scrollAreaComments->widget()->adjustSize();
     QTimer::singleShot(0, this, SLOT(ScrollCommentsToBottom()));
 
-    LayerPointSet *layer = GetCurrentLayer<LayerPointSet *>();
-    int nIndex = ui->spinBoxGoToPoint->value() - 1;
+    LayerPointSet *layer  = GetCurrentLayer<LayerPointSet *>();
+    int            nIndex = ui->spinBoxGoToPoint->value() - 1;
     if (layer && nIndex < layer->GetNumberOfPoints()) {
-      ControlPoint p = layer->GetPoint(nIndex);
+      ControlPoint p        = layer->GetPoint(nIndex);
       QVariantList comments = p.info.value("comments").toList();
       comments << map;
       layer->UpdatePoint(nIndex, "comments", comments);
@@ -503,10 +502,10 @@ void PanelPointSet::OnCommentLabelClicked(const QString &link) {
     if (l) {
       l->hide();
 
-      LayerPointSet *layer = GetCurrentLayer<LayerPointSet *>();
-      int nIndex = ui->spinBoxGoToPoint->value() - 1;
+      LayerPointSet *layer  = GetCurrentLayer<LayerPointSet *>();
+      int            nIndex = ui->spinBoxGoToPoint->value() - 1;
       if (layer && nIndex < layer->GetNumberOfPoints()) {
-        ControlPoint p = layer->GetPoint(nIndex);
+        ControlPoint p        = layer->GetPoint(nIndex);
         QVariantList comments = p.info.value("comments").toList();
         for (int i = 0; i < comments.size(); i++) {
           if (comments[i].toMap() == l->property("comment").toMap()) {
@@ -529,14 +528,14 @@ void PanelPointSet::OnStatItemChanged(QTreeWidgetItem *item, int col) {
     return;
   }
 
-  LayerPointSet *layer = GetCurrentLayer<LayerPointSet *>();
-  int nIndex = ui->spinBoxGoToPoint->value() - 1;
+  LayerPointSet *layer  = GetCurrentLayer<LayerPointSet *>();
+  int            nIndex = ui->spinBoxGoToPoint->value() - 1;
   if (!layer || nIndex >= layer->GetNumberOfPoints())
     return;
 
-  ControlPoint p = layer->GetPoint(nIndex);
-  QVariantMap stats = p.info.value("statistics").toMap();
-  QString old_name = item->data(0, Qt::UserRole).toString();
+  ControlPoint p        = layer->GetPoint(nIndex);
+  QVariantMap  stats    = p.info.value("statistics").toMap();
+  QString      old_name = item->data(0, Qt::UserRole).toString();
   if (col == 0) // change name
   {
     if (old_name == "legacy")
@@ -554,7 +553,7 @@ void PanelPointSet::OnStatItemChanged(QTreeWidgetItem *item, int col) {
     }
   } else // change value
   {
-    bool bOk;
+    bool   bOk;
     double new_val = item->text(col).toDouble(&bOk);
     if (!bOk) {
       item->setText(col, item->data(col, Qt::UserRole).toString());
@@ -572,11 +571,11 @@ void PanelPointSet::OnStatItemChanged(QTreeWidgetItem *item, int col) {
 }
 
 void PanelPointSet::OnButtonStatAdd() {
-  LayerPointSet *layer = GetCurrentLayer<LayerPointSet *>();
-  int nIndex = ui->spinBoxGoToPoint->value() - 1;
+  LayerPointSet *layer  = GetCurrentLayer<LayerPointSet *>();
+  int            nIndex = ui->spinBoxGoToPoint->value() - 1;
   if (layer && nIndex < layer->GetNumberOfPoints()) {
-    ControlPoint p = layer->GetPoint(nIndex);
-    QVariantMap stats = p.info.value("statistics").toMap();
+    ControlPoint          p     = layer->GetPoint(nIndex);
+    QVariantMap           stats = p.info.value("statistics").toMap();
     DialogAddPointSetStat dlg(this);
     if (dlg.exec() == QDialog::Accepted) {
       if (stats.contains(dlg.GetStatName())) {
@@ -596,11 +595,11 @@ void PanelPointSet::OnButtonStatAdd() {
 void PanelPointSet::OnButtonStatDelete() {
   QTreeWidgetItem *item = ui->treeWidgetStats->currentItem();
   if (item && ui->treeWidgetStats->indexOfTopLevelItem(item) != 0) {
-    LayerPointSet *layer = GetCurrentLayer<LayerPointSet *>();
-    int nIndex = ui->spinBoxGoToPoint->value() - 1;
+    LayerPointSet *layer  = GetCurrentLayer<LayerPointSet *>();
+    int            nIndex = ui->spinBoxGoToPoint->value() - 1;
     if (layer && nIndex < layer->GetNumberOfPoints()) {
-      ControlPoint p = layer->GetPoint(nIndex);
-      QVariantMap stats = p.info.value("statistics").toMap();
+      ControlPoint p     = layer->GetPoint(nIndex);
+      QVariantMap  stats = p.info.value("statistics").toMap();
       stats.remove(item->text(0));
       layer->UpdatePoint(nIndex, "statistics", stats);
       ui->treeWidgetStats->takeTopLevelItem(

@@ -37,10 +37,10 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <ctime> /* msvc (dng) */
 #include <sys/param.h>
 #include <sys/resource.h>
 #include <sys/types.h>
-#include <ctime> /* msvc (dng) */
 #include <unistd.h>
 
 /* This should be in ctype.h, but the compiler complains */
@@ -106,7 +106,7 @@ double randomNumber(double low, double hi) {
   if (low > hi) {
     val = low;
     low = hi;
-    hi = val;
+    hi  = val;
   }
 
   if (idum == 0L) /* change seed from run to run */
@@ -115,9 +115,9 @@ double randomNumber(double low, double hi) {
       static int laterTime = 0;
       if (!laterTime) {
         laterTime = 1;
-        char commBuffer[1024];
+        char  commBuffer[1024];
         FILE *commFile = fopen("/proc/self/comm", "r");
-        int commSize = 0;
+        int   commSize = 0;
         if (commFile) {
           commSize = fread(commBuffer, 1, 1023, commFile);
           if (commSize > 0)
@@ -138,7 +138,7 @@ double randomNumber(double low, double hi) {
   }
 
   range = hi - low;
-  val = OpenRan1(&idum) * range + low;
+  val   = OpenRan1(&idum) * range + low;
   // printf("randomcall %3ld %12.10lf\n",nrgcalls,val);
   nrgcalls++;
   if ((val < low) || (val > hi))
@@ -207,7 +207,7 @@ double calcDeltaPhi(double phi1, double phi2) {
   nothing.
   ------------------------------------------------------------------------*/
 double latan2(double y, double x) {
-  int oerr;
+  int    oerr;
   double val;
 
   oerr = errno;
@@ -252,7 +252,7 @@ int QuadEqual(double a1, double a2) {
   nothing.
   ------------------------------------------------------------------------*/
 void fComplementCode(double *pdIn, double *pdOut, int iLen) {
-  int i;
+  int    i;
   double d;
 
   //  int iFullLen = iLen * 2 ;
@@ -274,7 +274,7 @@ void fComplementCode(double *pdIn, double *pdOut, int iLen) {
   ------------------------------------------------------------------------*/
 char *fgetl(char *s, int n, FILE *fp) {
   char *cp, *cp2;
-  int len;
+  int   len;
 
   do {
     cp = fgets(s, n, fp);
@@ -322,7 +322,7 @@ int IntSqrt(int n) {
      *   = x - (x - n/x)/2  but this will *not*
      */
 
-    prev = approx;
+    prev   = approx;
     approx = prev - (prev - n / prev) / 2;
 
   } while (approx != prev);
@@ -376,7 +376,7 @@ char *StrLower(char *str) {
   ------------------------------------------------------------------------*/
 char *StrReplace(const char *src, char *dst, char csrc, int cdst) {
   const char *cp_src;
-  char *cp_dst;
+  char *      cp_dst;
 
   for (cp_src = src, cp_dst = dst; *cp_src; cp_src++, cp_dst++) {
     if (*cp_src == csrc)
@@ -399,7 +399,7 @@ char *StrReplace(const char *src, char *dst, char csrc, int cdst) {
   ------------------------------------------------------------------------*/
 char *FileNameOnly(const char *full_name, char *fname) {
   const char *slash;
-  char *number, *at;
+  char *      number, *at;
 
   slash = strrchr(full_name, '/');
 
@@ -437,7 +437,7 @@ char *FileNameOnly(const char *full_name, char *fname) {
   ------------------------------------------------------------------------*/
 int FileExists(const char *fname) {
   FILE *fp;
-  int old_errno;
+  int   old_errno;
 
   old_errno = errno;
 
@@ -497,7 +497,7 @@ int FileType(const char *fname) {
     return (LIST_FILE);
 
   strcpy(buf, fname);
-  dot = strrchr(buf, '@');
+  dot    = strrchr(buf, '@');
   number = strchr(buf, '#');
   if (number)
     *number = 0; /* don't consider : part of extension */
@@ -531,7 +531,7 @@ int FileType(const char *fname) {
   ------------------------------------------------------------------------*/
 int FileNumber(const char *fname) {
   char buf[STR_LEN], *number;
-  int num;
+  int  num;
 
   strcpy(buf, fname);
   number = strchr(buf, '#');
@@ -552,9 +552,9 @@ int FileNumber(const char *fname) {
 
   ------------------------------------------------------------------------*/
 int FileNumberOfEntries(const char *fname) {
-  int type, num, nentries;
+  int   type, num, nentries;
   FILE *fp;
-  char buf[STR_LEN], line[2 * STR_LEN], *cp;
+  char  buf[STR_LEN], line[2 * STR_LEN], *cp;
 
   strcpy(buf, fname); /* we will modify fname, don't ruin callers copy */
 
@@ -568,7 +568,7 @@ int FileNumberOfEntries(const char *fname) {
         ErrorReturn(-1,
                     (ERROR_NO_FILE, "FileNumberOfEntries: could not open %s",
                      FileName(buf)));
-      cp = fgetl(line, 199, fp);
+      cp       = fgetl(line, 199, fp);
       nentries = 0;
       while (cp) {
         sscanf(cp, "%s", buf);
@@ -585,7 +585,7 @@ int FileNumberOfEntries(const char *fname) {
       if (!fp)
         ErrorReturn(
             -1, (ERROR_NO_FILE, "FileNumberOfEntries: could not open %s", buf));
-      cp = fgetl(line, 199, fp);
+      cp       = fgetl(line, 199, fp);
       nentries = 0;
       while (cp) {
         nentries++;
@@ -645,8 +645,8 @@ char *FileFullName(char *full_name) {
   ------------------------------------------------------------------------*/
 char *FileTmpName(const char *basename) {
   static char fname[STR_LEN];
-  int i;
-  FILE *fp;
+  int         i;
+  FILE *      fp;
 
   const char *realname;
   if (!basename) {
@@ -749,14 +749,14 @@ extern char *getcwd(char *pathname, size_t size);
 
 char *FileNameAbsolute(const char *fname, char *absFname) {
   char pathname[MAXPATHLEN];
-  int len;
+  int  len;
 
   if (*fname == '/') {
     if (absFname != fname)
       strcpy(absFname, fname);
   } else /* not already absolute */
   {
-    len = strlen(fname);
+    len      = strlen(fname);
     char *fn = strcpyalloc(fname);
     if (fn[len - 1] == '/')
       fn[len - 1] = 0;
@@ -860,7 +860,7 @@ float deltaAngle(float angle1, float angle2) {
    forces an exit.
    ---------------------------------------------------------*/
 char *AppendString(char *src, char *app) {
-  int sz1 = 0, sz2 = 0;
+  int   sz1 = 0, sz2 = 0;
   char *tmp;
 
   if (!app)
@@ -933,9 +933,9 @@ int devIsinf(float value) {
 
   union ieee754_float v;
   v.f = value;
-  s = v.ieee.negative;
-  e = v.ieee.exponent;
-  f = v.ieee.mantissa;
+  s   = v.ieee.negative;
+  e   = v.ieee.exponent;
+  f   = v.ieee.mantissa;
 
   if (e == 255 && s == 0 && f == 0)
     return (1);
@@ -998,7 +998,7 @@ char *FileNameExtension(const char *fname, char *ext) {
 
 char *FileNameFromWildcard(const char *inStr, char *outStr) {
   const char *cp;
-  glob_t gbuf;
+  glob_t      gbuf;
 
   if (inStr != outStr)
     strcpy(outStr, inStr);
@@ -1015,9 +1015,9 @@ char *FileNameFromWildcard(const char *inStr, char *outStr) {
 int getMemoryUsed() {
 #ifdef Linux
   FILE *fp = 0;
-  char buf[256];
-  int memused = 0;
-  int numassigned = 0;
+  char  buf[256];
+  int   memused     = 0;
+  int   numassigned = 0;
   /////////////////////////////////////////////////////////////////////////
   // Linux /proc/$pid/status file memory usage information in Kbytes
   // VmSize : virtual memory usage of entire process
@@ -1030,7 +1030,7 @@ int getMemoryUsed() {
   /////////////////////////////////////////////////////////////////////////
   sprintf(buf, "grep -i vmdata /proc/%d/status | cut -f 2", getpid());
   errno = 0;
-  fp = popen(buf, "r");
+  fp    = popen(buf, "r");
   if (fp) {
     numassigned = fscanf(fp, "%d", &memused);
     if (numassigned == 1) {
@@ -1082,7 +1082,7 @@ int ItemsInString(const char *str) {
   if (len == 0)
     return (-1);
 
-  items = 0;
+  items   = 0;
   nthchar = 0;
 
   // Scroll through any white space at the beginning
@@ -1118,7 +1118,7 @@ int ItemsInString(const char *str) {
 */
 char *deblank(const char *str) {
   char *dbstr;
-  int m;
+  int   m;
 
   dbstr = (char *)calloc(strlen(str) + 1, sizeof(char));
 
@@ -1171,7 +1171,7 @@ void __qtol() {
 double sum2stddev(double xsum, double xsum2, int nx) {
   double xmean, xstd;
   xmean = xsum / nx;
-  xstd = sqrt((xsum2 - 2 * xmean * xsum + nx * xmean * xmean) / (nx - 1));
+  xstd  = sqrt((xsum2 - 2 * xmean * xsum + nx * xmean * xmean) / (nx - 1));
   // printf("%g %g %d %g %g\n",xsum,xsum2,nx,xmean,xstd);
   return (xstd);
 }
@@ -1217,7 +1217,7 @@ int nunqiue_int_list(int *idlist, int nlist) {
 
   qsort(idlist, nlist, sizeof(int), compare_ints);
   nunique = 1;
-  idprev = idlist[0];
+  idprev  = idlist[0];
   for (n = 1; n < nlist; n++) {
     if (idprev != idlist[n]) {
       nunique++;
@@ -1242,7 +1242,7 @@ int *unqiue_int_list(int *idlist, int nlist, int *nunique) {
   /* alloc the unqiue list */
   ulist = (int *)calloc(sizeof(int), *nunique);
 
-  nthu = 0;
+  nthu        = 0;
   ulist[nthu] = idlist[0];
   for (n = 1; n < nlist; n++) {
     if (ulist[nthu] != idlist[n]) {
@@ -1263,7 +1263,7 @@ int most_frequent_int_list(int *idlist, int nlist, int *nmax) {
   int n, *ulist, nthu, nthumax, nunique, *nper, mostfreq;
 
   ulist = unqiue_int_list(idlist, nlist, &nunique);
-  nper = (int *)calloc(sizeof(int), nunique);
+  nper  = (int *)calloc(sizeof(int), nunique);
   for (nthu = 0; nthu < nunique; nthu++) {
     for (n = 0; n < nlist; n++)
       if (idlist[n] == ulist[nthu])
@@ -1271,10 +1271,10 @@ int most_frequent_int_list(int *idlist, int nlist, int *nmax) {
   }
 
   nthumax = 0;
-  *nmax = nper[nthumax];
+  *nmax   = nper[nthumax];
   for (nthu = 0; nthu < nunique; nthu++) {
     if (*nmax < nper[nthu]) {
-      *nmax = nper[nthu];
+      *nmax   = nper[nthu];
       nthumax = nthu;
     }
   }
@@ -1292,9 +1292,9 @@ int most_frequent_int_list(int *idlist, int nlist, int *nmax) {
   --------------------------------------------------*/
 int CountItemsInString(const char *str) {
   int len, n, nhits;
-  len = strlen(str);
+  len   = strlen(str);
   nhits = 0;
-  n = 0;
+  n     = 0;
   while (n < len) {
     while (n < len && isblank(str[n]))
       n++;
@@ -1316,8 +1316,8 @@ int CountItemsInString(const char *str) {
   must be freed by the caller. Same as gdfGetNthItemFromString().
   ------------------------------------------------------------------*/
 char *GetNthItemFromString(const char *str, int nth) {
-  char *item;
-  int nitems, n;
+  char *      item;
+  int         nitems, n;
   static char fmt[2000], tmpstr[2000];
 
   memset(fmt, '\0', 2000);
@@ -1363,9 +1363,9 @@ char *GetNthItemFromString(const char *str, int nth) {
 
  ---------------------------------------------------------------------------*/
 float kth_smallest(float a[], int n, int k) {
-  int i, j, l, m;
+  int   i, j, l, m;
   float x, t;
-  int kk = k - 1;
+  int   kk = k - 1;
 
   l = 0;
   m = n - 1;
@@ -1379,7 +1379,7 @@ float kth_smallest(float a[], int n, int k) {
       while (x < a[j])
         j--;
       if (i <= j) {
-        t = a[i];
+        t    = a[i];
         a[i] = a[j];
         a[j] = t;
         i++;
@@ -1400,13 +1400,13 @@ float kth_smallest(float a[], int n, int k) {
   * Cambridge University Press, 1992, Section 8.5, ISBN 0-521-43108-5
  ---------------------------------------------------------------------------*/
 float quick_select(float arr[], int n, int k) {
-  int low, high;
-  int median;
-  int middle, ll, hh;
+  int   low, high;
+  int   median;
+  int   middle, ll, hh;
   float t;
 
-  low = 0;
-  high = n - 1;
+  low    = 0;
+  high   = n - 1;
   median = k - 1;
   for (;;) {
     if (high <= low) /* One element only */
@@ -1415,8 +1415,8 @@ float quick_select(float arr[], int n, int k) {
     }
     if (high == low + 1) { /* Two elements only */
       if (arr[low] > arr[high]) {
-        t = arr[low];
-        arr[low] = arr[high];
+        t         = arr[low];
+        arr[low]  = arr[high];
         arr[high] = t;
       }
       return arr[median];
@@ -1424,24 +1424,24 @@ float quick_select(float arr[], int n, int k) {
     /* Find median of low, middle and high items; swap into position low */
     middle = (low + high) / 2;
     if (arr[middle] > arr[high]) {
-      t = arr[middle];
+      t           = arr[middle];
       arr[middle] = arr[high];
-      arr[high] = t;
+      arr[high]   = t;
     }
     if (arr[low] > arr[high]) {
-      t = arr[low];
-      arr[low] = arr[high];
+      t         = arr[low];
+      arr[low]  = arr[high];
       arr[high] = t;
     }
     if (arr[middle] > arr[low]) {
-      t = arr[middle];
+      t           = arr[middle];
       arr[middle] = arr[low];
-      arr[low] = t;
+      arr[low]    = t;
     }
 
     /* Swap low item (now in position middle) into position (low+1) */
-    t = arr[middle];
-    arr[middle] = arr[low + 1];
+    t            = arr[middle];
+    arr[middle]  = arr[low + 1];
     arr[low + 1] = t;
     /* Nibble from each end towards middle, swapping items when stuck */
     ll = low + 1;
@@ -1455,14 +1455,14 @@ float quick_select(float arr[], int n, int k) {
       while (arr[hh] > arr[low]);
       if (hh < ll)
         break;
-      t = arr[ll];
+      t       = arr[ll];
       arr[ll] = arr[hh];
       arr[hh] = t;
     }
     /* Swap middle item (in position low) back into correct position */
-    t = arr[low];
+    t        = arr[low];
     arr[low] = arr[hh];
-    arr[hh] = t;
+    arr[hh]  = t;
     /* Re-set active partition */
     if (hh <= median)
       low = ll;
@@ -1490,7 +1490,7 @@ float median(float t[], int n) {
   /*  q = kth_smallest(t,n,n/2);
      q2 = kth_smallest(t,n,n/2 + 1); */
 
-  q = quick_select(t, n, n / 2);
+  q  = quick_select(t, n, n / 2);
   q2 = quick_select(t, n, n / 2 + 1);
 
   return 0.5 * (q + q2);
@@ -1507,8 +1507,8 @@ float median(float t[], int n) {
 //
  ---------------------------------------------------------------------------*/
 float mad(float a[], int n) {
-  float d, mm, medi;
-  int i;
+  float  d, mm, medi;
+  int    i;
   float *t = (float *)calloc(n, sizeof(float));
 
   d = 1.4826;
@@ -1544,7 +1544,7 @@ int nint2(const double f) {
 }
 
 void (*progress_callback)(int) = nullptr;
-int global_progress_range[2] = {0, 100};
+int global_progress_range[2]   = {0, 100};
 
 /*---------------------------------------------------------------------------
 // Function SetProgressCallback:
@@ -1555,7 +1555,7 @@ int global_progress_range[2] = {0, 100};
 //
  ---------------------------------------------------------------------------*/
 void SetProgressCallback(void (*callback)(int), int start, int end) {
-  progress_callback = callback;
+  progress_callback        = callback;
   global_progress_range[0] = start;
   global_progress_range[1] = end;
 }
@@ -1589,10 +1589,10 @@ int *compute_permutation(int num, int *vec) {
     vec[n] = n;
 
   for (n = 0; n < num; n++) {
-    index = (int)randomNumber(0.0, (double)(num - 0.0001));
-    tmp = vec[index];
+    index      = (int)randomNumber(0.0, (double)(num - 0.0001));
+    tmp        = vec[index];
     vec[index] = vec[n];
-    vec[n] = tmp;
+    vec[n]     = tmp;
   }
   return (vec);
 }
@@ -1631,9 +1631,9 @@ int GetVmSize() {
   getrusage() below.
 */
 int *GetMemUsage(int *u) {
-  FILE *fp;
+  FILE *      fp;
   static char tag[500];
-  int r;
+  int         r;
 
   if (u == nullptr)
     u = (int *)calloc(sizeof(int), 5);
@@ -1684,7 +1684,7 @@ int PrintMemUsage(FILE *fp) {
   memory usage. GetMemUsage() is probably better.
 */
 int PrintRUsage(int who, const char *pre, FILE *fp) {
-  int err;
+  int           err;
   struct rusage u;
   err = getrusage(who, &u);
   if (err)
@@ -1726,7 +1726,7 @@ int PrintRUsage(int who, const char *pre, FILE *fp) {
   pre is a string that will start each line.
 */
 int WriteRUsage(int who, const char *pre, char *fname) {
-  int err;
+  int   err;
   FILE *fp;
   fp = fopen(fname, "w");
   if (fp == nullptr)
@@ -1735,14 +1735,14 @@ int WriteRUsage(int who, const char *pre, char *fname) {
   return (err);
 }
 
-static const float Pi = PI;
+static const float Pi     = PI;
 static const float halfPi = PI / 2;
 
 static float fastApproxAtan2fWkr(float ay, float ax) { // ax >= ay
 
 #define tableLast 100000
   static volatile float table[tableLast + 1];
-  static volatile int tableInited;
+  static volatile int   tableInited;
   if (!tableInited) {
     int index;
     for (index = 0; index <= tableLast; index++) {
@@ -1761,7 +1761,7 @@ float fastApproxAtan2f(float y, float x) {
   static bool volatile use_atanf2;
   if (!once) {
     use_atanf2 = !!getenv("FREESURFER_fastApproxAtan2f_use_atanf2");
-    once = true;
+    once       = true;
     if (use_atanf2)
       fprintf(stdout, "%s:%d %s\n", __FILE__, __LINE__,
               use_atanf2
@@ -1771,7 +1771,7 @@ float fastApproxAtan2f(float y, float x) {
   if (use_atanf2)
     return atan2f(y, x);
 
-  float ax = fabsf(x), ay = fabsf(y);
+  float  ax = fabsf(x), ay = fabsf(y);
   double r;
   if (ax >= ay) {
     r = fastApproxAtan2fWkr(ay, ax);
@@ -1793,11 +1793,11 @@ float fastApproxAtan2f(float y, float x) {
 //
 typedef struct ReportEntry {
   struct ReportEntry *next; // list for this line
-  const char *file;         // key
-  int check_count;
-  int check_elideUntil;
-  int report_count;
-  int report_elideUntil;
+  const char *        file; // key
+  int                 check_count;
+  int                 check_elideUntil;
+  int                 report_count;
+  int                 report_elideUntil;
 } ReportEntry;
 
 static ReportEntry *reportEntry(const char *file, int line) {
@@ -1808,11 +1808,11 @@ static ReportEntry *reportEntry(const char *file, int line) {
     ep = &(*ep)->next;
   ReportEntry *e = *ep;
   if (!e) {
-    e = (ReportEntry *)calloc(1, sizeof(ReportEntry));
-    e->file = file;
-    e->check_elideUntil = 1;
+    e                    = (ReportEntry *)calloc(1, sizeof(ReportEntry));
+    e->file              = file;
+    e->check_elideUntil  = 1;
     e->report_elideUntil = 1;
-    *ep = e;
+    *ep                  = e;
   }
   return e;
 }
@@ -1829,7 +1829,7 @@ bool spendTimeCheckingForLogicProblem(const char *file, int line) {
   return true;
 }
 
-LogicProblemResponse copeWithLogicProblem2(bool *wasReported,
+LogicProblemResponse copeWithLogicProblem2(bool *      wasReported,
                                            const char *envvarFixer,
                                            const char *msg, const char *file,
                                            int line, const char *function) {
@@ -1884,9 +1884,9 @@ LogicProblemResponse copeWithLogicProblem2(bool *wasReported,
   stats[4] = max;
  */
 double *DListStats(double *dlist, int nlist, double *stats) {
-  int n;
+  int         n;
   long double sum, sum2;
-  double mean, min, max, stddev;
+  double      mean, min, max, stddev;
   if (nlist <= 0) {
     printf("ERROR: DListStats() nlist = %d\n", nlist);
     return (nullptr);
@@ -1898,10 +1898,10 @@ double *DListStats(double *dlist, int nlist, double *stats) {
 
   if (stats == nullptr)
     stats = (double *)calloc(sizeof(double), 5);
-  sum = 0;
+  sum  = 0;
   sum2 = 0;
-  min = dlist[0];
-  max = dlist[0];
+  min  = dlist[0];
+  max  = dlist[0];
   for (n = 0; n < nlist; n++) {
     sum += dlist[n];
     sum2 += (dlist[n] * dlist[n]);
@@ -1910,8 +1910,8 @@ double *DListStats(double *dlist, int nlist, double *stats) {
     if (max < dlist[n])
       max = dlist[n];
   }
-  mean = sum / nlist;
-  stddev = sqrt(sum2 / nlist - mean * mean);
+  mean     = sum / nlist;
+  stddev   = sqrt(sum2 / nlist - mean * mean);
   stats[0] = nlist;
   stats[1] = mean;
   stats[2] = stddev;
@@ -1920,11 +1920,12 @@ double *DListStats(double *dlist, int nlist, double *stats) {
   return (stats);
 }
 
-
 /*!
   /brief Checks whether a string ends with a substring.
 */
-bool stringEndsWith(const std::string& value, const std::string& ending) {
-  if (value.length() < ending.length()) return false;
-  return (0 == value.compare (value.length() - ending.length(), ending.length(), ending));
+bool stringEndsWith(const std::string &value, const std::string &ending) {
+  if (value.length() < ending.length())
+    return false;
+  return (0 == value.compare(value.length() - ending.length(), ending.length(),
+                             ending));
 }

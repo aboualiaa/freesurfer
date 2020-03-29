@@ -23,9 +23,9 @@
  *
  */
 
-#include "tags.h"
 #include "diag.h"
 #include "mrisurf.h"
+#include "tags.h"
 #include "version.h"
 
 static char vcid[] =
@@ -33,8 +33,8 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int count_big_curvatures(MRI_SURFACE *mris, double thresh);
-static int get_option(int argc, char *argv[]);
+static int  count_big_curvatures(MRI_SURFACE *mris, double thresh);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 static void print_help();
 static void print_version();
@@ -42,25 +42,25 @@ static void print_version();
 
 const char *Progname;
 
-static int which_norm = NORM_MEAN;
-static int normalize_flag = 0;
-static char curvature_fname[STRLEN] = "curv";
-static char area_fname[STRLEN] = "area";
-static int nbrs = 2;
-static int dilates = 5;
-static int npasses = 1;
-static int normalize_area = 0;
-static int navgs = 10;
-static int niterations = 10;
-static int rescale = 0;
-static int write_iterations = 0;
-static double l_spring = 1.0;
-static float momentum = 0.0;
-static int no_write = 0;
+static int    which_norm              = NORM_MEAN;
+static int    normalize_flag          = 0;
+static char   curvature_fname[STRLEN] = "curv";
+static char   area_fname[STRLEN]      = "area";
+static int    nbrs                    = 2;
+static int    dilates                 = 5;
+static int    npasses                 = 1;
+static int    normalize_area          = 0;
+static int    navgs                   = 10;
+static int    niterations             = 10;
+static int    rescale                 = 0;
+static int    write_iterations        = 0;
+static double l_spring                = 1.0;
+static float  momentum                = 0.0;
+static int    no_write                = 0;
 
 // -g 20 8 works well for hippo
-static double gaussian_norm = 0;
-static int gaussian_avgs = 0;
+static double gaussian_norm   = 0;
+static int    gaussian_avgs   = 0;
 static double gaussian_thresh = 0;
 
 double MRISfindCurvatureThreshold(MRI_SURFACE *mris, double pct);
@@ -70,16 +70,15 @@ int MRISthresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double low_thresh,
                                            double hi_thresh);
 
 int main(int argc, char *argv[]) {
-  char **av, *in_fname, *out_fname, fname[STRLEN], path[STRLEN];
-  int ac, nargs, start_t, pass;
+  char **      av, *in_fname, *out_fname, fname[STRLEN], path[STRLEN];
+  int          ac, nargs, start_t, pass;
   MRI_SURFACE *mris;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_smooth");
 
   nargs = handleVersionOption(argc, argv, "mris_smooth");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -99,7 +98,7 @@ int main(int argc, char *argv[]) {
     print_help();
   }
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   out_fname = argv[2];
   FileNamePath(out_fname, path);
 
@@ -118,8 +117,8 @@ int main(int argc, char *argv[]) {
   MRISsetNeighborhoodSizeAndDist(mris, nbrs);
   MRIScomputeSecondFundamentalForm(mris);
   if (gaussian_thresh > 0) {
-    double kthresh;
-    int vno, count, n;
+    double  kthresh;
+    int     vno, count, n;
     VERTEX *v;
 
     MRISuseGaussianCurvature(mris);
@@ -160,9 +159,9 @@ int main(int argc, char *argv[]) {
   if (gaussian_norm > 0) {
     int i, done, start_avgs = gaussian_avgs, j;
 
-    done = 0;
+    done    = 0;
     start_t = 0;
-    pass = 0;
+    pass    = 0;
     do {
       for (i = start_t; i < niterations + start_t; i++) {
         MRIScomputeMetricProperties(mris);
@@ -208,7 +207,7 @@ int main(int argc, char *argv[]) {
           MRIScomputeMetricProperties(mris);
           MRISsmoothSurfaceNormals(mris, gaussian_avgs);
           {
-            int vno;
+            int     vno;
             VERTEX *v;
 
             for (vno = 0; vno < mris->nvertices; vno++) {
@@ -335,7 +334,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -344,7 +343,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "-version")) {
     print_version();
   } else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size = %d\n", nbrs);
   } else if (!stricmp(option, "normalize")) {
@@ -457,9 +456,9 @@ static void print_version() {
 #define NBINS 1000
 double MRISfindCurvatureThreshold(MRI_SURFACE *mris, double pct) {
   HISTOGRAM *h, *hcdf;
-  double K, kthresh, min_curv, max_curv;
-  int vno, bin;
-  VERTEX *v;
+  double     K, kthresh, min_curv, max_curv;
+  int        vno, bin;
+  VERTEX *   v;
 
   min_curv = 1e10;
   max_curv = -min_curv;
@@ -491,8 +490,8 @@ double MRISfindCurvatureThreshold(MRI_SURFACE *mris, double pct) {
     HISTOaddSample(h, K, 0, 0);
   }
 
-  hcdf = HISTOmakeCDF(h, nullptr);
-  bin = HISTOfindBinWithCount(hcdf, pct);
+  hcdf    = HISTOmakeCDF(h, nullptr);
+  bin     = HISTOfindBinWithCount(hcdf, pct);
   kthresh = hcdf->bins[bin];
   return (kthresh);
 }
@@ -512,7 +511,7 @@ int MRIShistoThresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double pct) {
     int n;
 
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
 
     if (v->ripflag)
       continue;
@@ -552,10 +551,10 @@ int MRIShistoThresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double pct) {
   }
 
   nvertices = mris->nvertices - skipped;
-  max_curv = MIN(max_curv, 1000);
+  max_curv  = MIN(max_curv, 1000);
   mean /= (float)nvertices;
   std = sqrt(std / (float)nvertices - mean * mean);
-  h = HISTOalloc(NBINS);
+  h   = HISTOalloc(NBINS);
   HISTOinit(h, NBINS, min_curv, max_curv);
 #if 0
   bin_size = (max_curv - min_curv + 1) / NBINS ;
@@ -573,8 +572,8 @@ int MRIShistoThresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double pct) {
     if (v->d < 0.01 * dmean)
       continue;
 
-    K = MIN(fabs(v->k1), fabs(v->k2));
-    K = fabs(v->K);
+    K      = MIN(fabs(v->k1), fabs(v->k2));
+    K      = fabs(v->K);
     bin_no = (int)((float)(K - min_curv) / (float)bin_size);
     if (bin_no > NBINS - 1 || bin_no < 0)
       bin_no = NBINS - 1;
@@ -586,7 +585,7 @@ int MRIShistoThresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double pct) {
   for (total = 0, b = 0; b < NBINS - 1; b++) {
     if (h->counts[b] > mode_peak) {
       mode_peak = h->counts[b];
-      mode = h->bins[b];
+      mode      = h->bins[b];
     }
     total += h->counts[b];
     if (total / nvertices >= pct) {
@@ -648,8 +647,8 @@ int MRIShistoThresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double pct) {
     if (v->ripflag) {
       continue;
     }
-    K = MIN(fabs(v->k1), fabs(v->k2));
-    K = fabs(v->K);
+    K      = MIN(fabs(v->k1), fabs(v->k2));
+    K      = fabs(v->K);
     bin_no = (int)((float)(K - min_curv) / (float)bin_size);
     if (bin_no >= bin_thresh) {
       if (vno == Gdiag_no) {
@@ -660,7 +659,7 @@ int MRIShistoThresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double pct) {
   }
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->ripflag) {
       continue;
     }
@@ -684,9 +683,9 @@ int MRIShistoThresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double pct) {
 }
 
 int MRISthresholdPrincipalCurvatures(MRI_SURFACE *mris, double thresh) {
-  int vno, num;
+  int     vno, num;
   VERTEX *v;
-  double K;
+  double  K;
 
   for (num = vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -703,7 +702,7 @@ int MRISthresholdPrincipalCurvatures(MRI_SURFACE *mris, double thresh) {
   }
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->ripflag) {
       continue;
     }
@@ -713,7 +712,7 @@ int MRISthresholdPrincipalCurvatures(MRI_SURFACE *mris, double thresh) {
       v->marked = 1;
       for (n = 0; n < vt->vtotal; n++) {
         mris->vertices[vt->v[n]].marked = 2;
-        mris->vertices[vt->v[n]].K = 0.5;
+        mris->vertices[vt->v[n]].K      = 0.5;
       }
     }
   }
@@ -723,7 +722,7 @@ int MRISthresholdPrincipalCurvatures(MRI_SURFACE *mris, double thresh) {
 }
 
 static int count_big_curvatures(MRI_SURFACE *mris, double thresh) {
-  int num, vno;
+  int     num, vno;
   VERTEX *v;
 
   for (num = vno = 0; vno < mris->nvertices; vno++) {
@@ -737,12 +736,12 @@ static int count_big_curvatures(MRI_SURFACE *mris, double thresh) {
 
 int MRISthresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double low_thresh,
                                            double hi_thresh) {
-  int vno;
+  int    vno;
   double K;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
 
     if (vno == Gdiag_no) {
       DiagBreak();
@@ -768,7 +767,7 @@ int MRISthresholdGaussianCurvatureToMarked(MRI_SURFACE *mris, double low_thresh,
   }
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->ripflag) {
       continue;
     }

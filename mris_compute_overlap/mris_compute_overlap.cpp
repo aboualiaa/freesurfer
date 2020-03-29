@@ -23,22 +23,22 @@
  *
  */
 
+#include "annotation.h"
 #include "diag.h"
 #include "timer.h"
-#include "annotation.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static void usage_exit(int code);
+int           main(int argc, char *argv[]);
+static int    get_option(int argc, char *argv[]);
+static void   usage_exit(int code);
 static double MRISannotArea(MRI_SURFACE *mris, int label);
 
-const char *Progname;
-static char *log_fname = nullptr;
-static int in_label = -1;
-static int out_label = -1;
-static int compute_pct = 0;
-static char sdir[STRLEN];
+const char * Progname;
+static char *log_fname   = nullptr;
+static int   in_label    = -1;
+static int   out_label   = -1;
+static int   compute_pct = 0;
+static char  sdir[STRLEN];
 
 /*----------------------------------------------------------------------
   Parameters:
@@ -48,11 +48,11 @@ static char sdir[STRLEN];
 int main(int argc, char *argv[]) {
   char **av, *subject_name, *cp, *hemi, *surf_name, *annot_name, fname[STRLEN];
   const char *name;
-  int ac, nargs, msec, minutes, label, seconds, i;
-  double area, total_area;
-  Timer start;
-  MRIS *mris;
-  FILE *log_fp;
+  int         ac, nargs, msec, minutes, label, seconds, i;
+  double      area, total_area;
+  Timer       start;
+  MRIS *      mris;
+  FILE *      log_fp;
 
   nargs = handleVersionOption(argc, argv, "mris_compute_overlap");
   if (nargs && argc - nargs == 1)
@@ -77,9 +77,9 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
 
   subject_name = argv[1];
-  hemi = argv[2];
-  surf_name = argv[3];
-  annot_name = argv[4];
+  hemi         = argv[2];
+  surf_name    = argv[3];
+  annot_name   = argv[4];
 
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 
   for (i = 5; i < argc; i++) {
     label = atoi(argv[i]);
-    name = annotation_to_name(index_to_annotation(label), nullptr);
+    name  = annotation_to_name(index_to_annotation(label), nullptr);
     printf("processing label %s (%d)...\n", name, label);
 
     area = MRISannotArea(mris, label);
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -182,14 +182,14 @@ static int get_option(int argc, char *argv[]) {
       printf("using lookup table %s...\n", argv[2]);
       break;
     case 'T':
-      in_label = atoi(argv[2]);
+      in_label  = atoi(argv[2]);
       out_label = atoi(argv[3]);
-      nargs = 2;
+      nargs     = 2;
       printf("translating label %d to label %d\n", in_label, out_label);
       break;
     case 'L':
       log_fname = argv[2];
-      nargs = 1;
+      nargs     = 1;
       /*    fprintf(stderr, "logging results to %s\n", log_fname) ;*/
       break;
     case 'P':
@@ -230,9 +230,9 @@ static void usage_exit(int code) {
   Description:
   ----------------------------------------------------------------------*/
 static double MRISannotArea(MRI_SURFACE *mris, int label) {
-  int vno, annotation;
+  int     vno, annotation;
   VERTEX *v;
-  double area;
+  double  area;
 
   annotation = index_to_annotation(label);
   for (area = 0.0, vno = 0; vno < mris->nvertices; vno++) {

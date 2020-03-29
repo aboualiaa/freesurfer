@@ -20,7 +20,7 @@ MRI *correct_putamen_pallidum_boundaries(MRI *segmri, MRI *outmri);
 MRI *correct_largestCC_and_fill_holes(MRI *segmri, MRI *outmri);
 MRI *fill_leftover_voxels(MRI *segmri, MRI *inmri, MRI *outmri);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static char vcid[] =
     "$Id: mri_correct_segmentations.c,v 1.1 2015/08/25 01:18:09 lzollei Exp $";
 
@@ -30,9 +30,9 @@ int noGMWM = 0;
 
 /***-------------------------------------------------------****/
 int main(int argc, char *argv[]) {
-  int nargs, ac, nvolumes;
+  int    nargs, ac, nvolumes;
   char **av;
-  MRI *outmri0 = nullptr, *outmri1 = nullptr, *outmri2 = nullptr,
+  MRI *  outmri0 = nullptr, *outmri1 = nullptr, *outmri2 = nullptr,
       *outmri3 = nullptr, *outmri4 = nullptr, *segmri;
 
   nargs = handleVersionOption(argc, argv, "mri_correct_segmentations");
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -186,15 +186,15 @@ static void usage_exit() {
 /* ------------------------------------------------------ */
 
 MRI *correct_gmwm_boundaries(MRI *segmri, MRI *outmri) {
-  int x, y, z, width, height, depth = 0;
+  int    x, y, z, width, height, depth = 0;
   double val;
-  MRI *tmpvol = nullptr;
+  MRI *  tmpvol = nullptr;
   MRI *allmaskdist, *label2, *label2distmap, *label3, *label3distmap, *label41,
       *label41distmap, *label42, *label42distmap = nullptr;
 
-  width = segmri->width;
+  width  = segmri->width;
   height = segmri->height;
-  depth = segmri->depth;
+  depth  = segmri->depth;
 
   // all lables
   tmpvol = MRIclone(segmri, nullptr);
@@ -267,7 +267,7 @@ MRI *correct_gmwm_boundaries(MRI *segmri, MRI *outmri) {
     for (y = 0; y < height; y++)
       for (x = 0; x < width; x++) {
         if (MRIgetVoxVal(label2, x, y, z, 0) == 1) {
-          double tmpval = MRIgetVoxVal(label2distmap, x, y, z, 0);
+          double tmpval  = MRIgetVoxVal(label2distmap, x, y, z, 0);
           double tmpval2 = MRIgetVoxVal(label3distmap, x, y, z, 0);
           // if (-0.5 <= lhwmvoldist(WM_L_ind(i)) && lhwmvoldist(WM_L_ind(i)) <=
           // 0 && abs(lhwmvoldist(WM_L_ind(i))) <= lhgmvoldist(WM_L_ind(i)) &&
@@ -278,7 +278,7 @@ MRI *correct_gmwm_boundaries(MRI *segmri, MRI *outmri) {
               fabs(MRIgetVoxVal(allmaskdist, x, y, z, 0)) <= 0.5)
             MRIsetVoxVal(outmri, x, y, z, 0, 3);
         } else if (MRIgetVoxVal(label41, x, y, z, 0) == 1) {
-          double tmpval = MRIgetVoxVal(label41distmap, x, y, z, 0);
+          double tmpval  = MRIgetVoxVal(label41distmap, x, y, z, 0);
           double tmpval2 = MRIgetVoxVal(label42distmap, x, y, z, 0);
           // if (-0.5 <= rhwmvoldist(WM_R_ind(i)) && rhwmvoldist(WM_R_ind(i)) <=
           // 0 && abs(rhwmvoldist(WM_R_ind(i))) <= rhgmvoldist(WM_R_ind(i)) &&
@@ -295,14 +295,14 @@ MRI *correct_gmwm_boundaries(MRI *segmri, MRI *outmri) {
 }
 
 MRI *correct_putamen_pallidum_boundaries(MRI *segmri, MRI *outmri) {
-  int x, y, z, width, height, depth = 0;
+  int    x, y, z, width, height, depth = 0;
   double val;
-  MRI *label42, *label3, *label12, *label12distmap, *label13, *label13distmap,
+  MRI *  label42, *label3, *label12, *label12distmap, *label13, *label13distmap,
       *label51, *label51distmap, *label52, *label52distmap = nullptr;
 
-  width = segmri->width;
+  width  = segmri->width;
   height = segmri->height;
-  depth = segmri->depth;
+  depth  = segmri->depth;
 
   // label 42
   label42 = MRIclone(segmri, nullptr);
@@ -399,15 +399,15 @@ MRI *correct_putamen_pallidum_boundaries(MRI *segmri, MRI *outmri) {
 }
 
 MRI *correct_gmwm_boundaries_2(MRI *segmri, MRI *outmri) {
-  int x, y, z, width, height, depth = 0;
+  int    x, y, z, width, height, depth = 0;
   double val;
-  MRI *allvol = nullptr;
-  MRI *allmaskdist, *label2, *label2distmap, *label41,
+  MRI *  allvol = nullptr;
+  MRI *  allmaskdist, *label2, *label2distmap, *label41,
       *label41distmap = nullptr;
 
-  width = segmri->width;
+  width  = segmri->width;
   height = segmri->height;
-  depth = segmri->depth;
+  depth  = segmri->depth;
 
   // all lables
   allvol = MRIclone(segmri, nullptr);
@@ -468,9 +468,9 @@ MRI *correct_gmwm_boundaries_2(MRI *segmri, MRI *outmri) {
 
 MRI *correct_largestCC_and_fill_holes(MRI *segmri, MRI *outmri) {
   int i, x, y, z, width, height, depth = 0, val;
-  width = segmri->width;
+  width  = segmri->width;
   height = segmri->height;
-  depth = segmri->depth;
+  depth  = segmri->depth;
   // char fname[STR_LEN];
 
   if (!outmri)
@@ -479,11 +479,11 @@ MRI *correct_largestCC_and_fill_holes(MRI *segmri, MRI *outmri) {
   // outmri = MRIalloc(width, height, depth, MRI_INT);
 
   int *segidlist;
-  int nsegids = 0;
-  segidlist = MRIsegIdListNot0(segmri, &nsegids, 0);
+  int  nsegids = 0;
+  segidlist    = MRIsegIdListNot0(segmri, &nsegids, 0);
 
   MRI *currlabelvol = MRIalloc(width, height, depth, MRI_INT);
-  int currlabel = 0;
+  int  currlabel    = 0;
 
   for (i = 0; i < nsegids; i++) {
     currlabel = segidlist[i];
@@ -530,11 +530,11 @@ MRI *fill_leftover_voxels(MRI *segmri, MRI *inmri, MRI *outmri) {
   int x, y, z, i, ncount;
   int val = 0;
 
-  int width = inmri->width;
+  int width  = inmri->width;
   int height = inmri->height;
-  int depth = inmri->depth;
+  int depth  = inmri->depth;
 
-  int nsegid = 0;
+  int  nsegid    = 0;
   int *segidlist = MRIsegIdListNot0(inmri, &nsegid, 0);
 
   for (z = 0; z < depth; z++)
@@ -544,12 +544,12 @@ MRI *fill_leftover_voxels(MRI *segmri, MRI *inmri, MRI *outmri) {
             !MRIgetVoxVal(inmri, x, y, z, 0)) {
           // find all neighboring labels and assign based upon majority
           int nmax = 0;
-          val = 0;
+          val      = 0;
           for (i = 0; i < nsegid; i++) {
             ncount = MRIlabelsInNbhd6(inmri, x, y, z, segidlist[i]);
             if (nmax < ncount) {
               nmax = ncount;
-              val = segidlist[i];
+              val  = segidlist[i];
             }
           }
           MRIsetVoxVal(outmri, x, y, z, 0, val);

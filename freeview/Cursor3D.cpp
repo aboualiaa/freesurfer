@@ -24,20 +24,20 @@
  */
 
 #include "Cursor3D.h"
-#include "vtkRenderer.h"
-#include "vtkActor2D.h"
-#include "vtkProperty.h"
-#include "vtkPolyDataMapper.h"
-#include <vtkTubeFilter.h>
-#include "vtkPolyData.h"
-#include "MainWindow.h"
-#include "RenderView3D.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkFloatArray.h"
-#include "MyUtils.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "RenderView3D.h"
+#include "vtkActor2D.h"
+#include "vtkCellArray.h"
+#include "vtkFloatArray.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkRenderer.h"
+#include <vtkTubeFilter.h>
 
 Cursor3D::Cursor3D(RenderView3D *view)
     : QObject(view), m_view(view), m_nSize(5), m_nThickness(1), m_dScale(1.0) {
@@ -57,9 +57,9 @@ void Cursor3D::RebuildActor(double scale) {
     m_dScale = scale;
 
   double dLen = 1.5 * m_dScale * (1 + (m_nSize - 1.0) / 5.0);
-  int n = 0;
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+  int    n    = 0;
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
   points->InsertNextPoint(dLen, 0, 0);
   points->InsertNextPoint(-dLen, 0, 0);
   lines->InsertNextCell(2);

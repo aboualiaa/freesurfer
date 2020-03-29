@@ -24,104 +24,110 @@
  *
  */
 
-#include "diag.h"
-#include "timer.h"
-#include "version.h"
 #include "cma.h"
-#include "gcamorph.h"
-#include "tritri.h" // for CROSS3 definition
+#include "diag.h"
 #include "gcaboundary.h"
+#include "gcamorph.h"
+#include "timer.h"
+#include "tritri.h" // for CROSS3 definition
+#include "version.h"
 
-static int compute_gradient_target_positions(MRI_SURFACE *mris,
-                                             MRI *mri_intensities,
-                                             VERTEX_INFO *vi,
-                                             float current_sigma);
+static int  compute_gradient_target_positions(MRI_SURFACE *mris,
+                                              MRI *        mri_intensities,
+                                              VERTEX_INFO *vi,
+                                              float        current_sigma);
 static GCA *make_gca(char *label_vol_name, char *intensity_vol_name,
-										 TRANSFORM *transform) ;
-static MRI *compute_pmap(GCA *gca, TRANSFORM *transform, MRI *mri_intensities, int target_label, MRI *mri_dist, double pad, MRI *mri_pmap) ;
-static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform, MRI *mri_intensities, MRI *mri_labels, int target_label, MRI *mri_dist, double pad, GCAB *gcab, MRI *mri_pmap) ;
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
-static int build_label_histograms(MRI *mri_labels, MRI *mri_intensities, HISTOGRAM **histos) ;
-static MRI *compute_target_intensities_with_gcab(MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities, 
-                                                 HISTOGRAM **histograms, VERTEX_INFO *vi,float sigma, 
-                                                 TRANSFORM *transform, GCA *gca, int target_label, float resolution,
-                                                 GCAB *gcab) ;
-static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities, 
-                                       HISTOGRAM **histograms,
-                                      VERTEX_INFO *vi, float sigma,
-                                      TRANSFORM *transform, GCA *gca, int label, float resolution) ;
-static int compute_target_labels(MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities, HISTOGRAM **histograms,
-                                 VERTEX_INFO *vi) ;
+                     TRANSFORM *transform);
+static MRI *compute_pmap(GCA *gca, TRANSFORM *transform, MRI *mri_intensities,
+                         int target_label, MRI *mri_dist, double pad,
+                         MRI *mri_pmap);
+static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform,
+                                   MRI *mri_intensities, MRI *mri_labels,
+                                   int target_label, MRI *mri_dist, double pad,
+                                   GCAB *gcab, MRI *mri_pmap);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
+static int  build_label_histograms(MRI *mri_labels, MRI *mri_intensities,
+                                   HISTOGRAM **histos);
+static MRI *compute_target_intensities_with_gcab(
+    MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities,
+    HISTOGRAM **histograms, VERTEX_INFO *vi, float sigma, TRANSFORM *transform,
+    GCA *gca, int target_label, float resolution, GCAB *gcab);
+static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels,
+                                       MRI *       mri_intensities,
+                                       HISTOGRAM **histograms, VERTEX_INFO *vi,
+                                       float sigma, TRANSFORM *transform,
+                                       GCA *gca, int label, float resolution);
+static int  compute_target_labels(MRI_SURFACE *mris, MRI *mri_labels,
+                                  MRI *mri_intensities, HISTOGRAM **histograms,
+                                  VERTEX_INFO *vi);
 
+const char *Progname;
 
-const char *Progname ;
+static float resolution         = 8.0;
+static char *label_vol_name     = NULL;
+static char *intensity_vol_name = NULL; // for building GCA from hires data
+static char *gca_fname          = NULL;
+static int   min_averages       = 0;
+static int   max_averages       = 4;
+static float sigma              = 1.0;
+static int   vavgs              = 0;
+static int   nbrs               = 2;
+static int   target_label       = -1;
+static int   renormalize_gca    = 1;
+static char *renorm_seg_fname   = NULL;
+static int   read_ll            = 0;
 
-static float resolution = 8.0 ;
-static char *label_vol_name = NULL ;
-static char *intensity_vol_name = NULL ; // for building GCA from hires data
-static char *gca_fname = NULL ;
-static int min_averages = 0 ;
-static int max_averages = 4 ;
-static float sigma = 1.0 ;
-static int vavgs = 0 ;
-static int nbrs = 2 ;
-static int target_label = -1 ;
-static int renormalize_gca = 1 ;
-static char *renorm_seg_fname = NULL ;
-static int read_ll = 0 ;
+static int    use_grad      = 0;
+static double max_grad_dist = 1.5; // mm away from current boundary position
 
-static int use_grad = 0 ;
-static double max_grad_dist= 1.5 ; // mm away from current boundary position
+static void usage_exit(int code);
 
-static void usage_exit(int code) ;
+static char *            gca_write_fname = NULL;
+static INTEGRATION_PARMS parms;
 
-static char *gca_write_fname = NULL ;
-static INTEGRATION_PARMS parms ;
+static double externalLLGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
+static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
+static double externalLLRMS(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
 
-static double externalLLGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
-static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
-static double externalLLRMS(MRI_SURFACE *mris,INTEGRATION_PARMS *parms) ;
+static double externalGradGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
+static double externalGradSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
+static double externalGradRMS(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
 
-static double externalGradGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
-static double externalGradSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
-static double externalGradRMS(MRI_SURFACE *mris,INTEGRATION_PARMS *parms) ;
+static GCAB *gcab;
 
-static GCAB *gcab ;
+int main(int argc, char *argv[]) {
+  char *out_fname, **av;
+  int   ac, nargs, i;
+  MRI * mri_intensities, *mri_labels /*, *mri_kernel, *mri_smooth=NULL*/,
+      *mri_ll = NULL;
+  MRI_SURFACE *mris;
+  int          msec, minutes, seconds, n_averages;
+  float        current_sigma;
+  Timer        start;
+  char *       cp;
+  HISTOGRAM *  histos[MAX_LABEL + 1];
+  VERTEX_INFO *vi;
+  TRANSFORM *  transform;
+  GCA *        gca;
 
-int
-main(int argc, char *argv[]) {
-  char        *out_fname, **av ;
-  int         ac, nargs, i ;
-  MRI         *mri_intensities, *mri_labels/*, *mri_kernel, *mri_smooth=NULL*/,
-              *mri_ll = NULL ;
-  MRI_SURFACE *mris ;
-  int         msec, minutes, seconds, n_averages ;
-  float        current_sigma ;
-  Timer start ;
-  char        *cp ;
-  HISTOGRAM   *histos[MAX_LABEL+1] ;
-  VERTEX_INFO *vi ;
-  TRANSFORM   *transform ;
-  GCA         *gca ;
-
-  memset(&parms, 0, sizeof(parms)) ;
-  parms.integration_type = INTEGRATE_MOMENTUM ;
+  memset(&parms, 0, sizeof(parms));
+  parms.integration_type = INTEGRATE_MOMENTUM;
 
   // parms.l_nspring = .5; parms.l_tspring = 1; parms.l_curv = 1.0 ;
-  parms.l_spring = .1;
+  parms.l_spring   = .1;
   parms.l_nlspring = 1;
-  parms.rmin = 0.5;
-  parms.rmax = 5;
-  parms.l_curv = .0;
+  parms.rmin       = 0.5;
+  parms.rmax       = 5;
+  parms.l_curv     = .0;
 
   // parms.l_intensity = 0.1 ;
   parms.l_repulse = 0;
   parms.check_tol =
       1; // don't use intensity rms in surface deformation, use sse
-  parms.tol = 0.01;
-  parms.l_external = 1;
-  parms.n_averages = 4;
+  parms.tol         = 0.01;
+  parms.l_external  = 1;
+  parms.n_averages  = 4;
   parms.niterations = 1000;
   // parms.l_surf_repulse = .1 ;
   parms.dt = parms.base_dt = 0.5;
@@ -233,12 +239,12 @@ main(int argc, char *argv[]) {
   current_sigma = sigma;
   if (use_grad) {
     gMRISexternalGradient = externalGradGradient;
-    gMRISexternalSSE = externalGradSSE;
-    gMRISexternalRMS = externalGradRMS;
+    gMRISexternalSSE      = externalGradSSE;
+    gMRISexternalRMS      = externalGradRMS;
   } else {
     gMRISexternalGradient = externalLLGradient;
-    gMRISexternalSSE = externalLLSSE;
-    gMRISexternalRMS = externalLLRMS;
+    gMRISexternalSSE      = externalLLSSE;
+    gMRISexternalRMS      = externalLLRMS;
   }
 
   MRISaverageVertexPositions(mris, 1);
@@ -301,7 +307,7 @@ main(int argc, char *argv[]) {
   MRISaddCommandLine(mris, cmdline);
   printf("writing output surface to %s\n", out_fname);
   MRISwrite(mris, out_fname);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -316,21 +322,21 @@ main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "dt")) {
     parms.dt = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("setting time step to %2.3f\n", parms.dt);
   } else if (!stricmp(option, "tspring")) {
     parms.l_tspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_tspring = %2.3f\n", parms.l_tspring);
   } else if (!stricmp(option, "resolution")) {
     resolution = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "setting resolution to 1/%2.1f of the voxel size\n",
             resolution);
   } else if (!stricmp(option, "sigma")) {
@@ -339,38 +345,38 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "setting max sigma to %2.3f\n", sigma);
   } else if (!stricmp(option, "grad")) {
     use_grad = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "%susing only intensity gradient information\n",
             use_grad ? "" : "not ");
   } else if (!stricmp(option, "grad_dist")) {
     max_grad_dist = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "setting max grad dist to %2.2f mm\n", max_grad_dist);
   } else if (!stricmp(option, "nlspring")) {
     parms.l_nlspring = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     fprintf(stderr, "l_nlspring = %2.3f\n", parms.l_nlspring);
   } else if (!stricmp(option, "vavgs")) {
     vavgs = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "smoothing values for %d iterations\n", vavgs);
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging node (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "tol")) {
     parms.tol = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "using tol = %2.3e\n", parms.tol);
   } else if (!stricmp(option, "write_gca")) {
     gca_write_fname = argv[2];
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "writing renormalized GCA to %s\n", gca_write_fname);
   } else if (!stricmp(option, "rmax")) {
     parms.rmax = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "setting rmax to %2.2f\n", parms.rmax);
   } else if (!stricmp(option, "gcab")) {
     gcab = GCABread(argv[2], nullptr);
@@ -381,12 +387,12 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "using boundary atlas in %s\n", argv[2]);
   } else if (!stricmp(option, "rmin")) {
     parms.rmin = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "setting rmin to %2.2f\n", parms.rmin);
   } else if (!stricmp(option, "renorm")) {
     renormalize_gca = atoi(argv[2]);
     if (renormalize_gca > 1) {
-      nargs = 2;
+      nargs            = 2;
       renorm_seg_fname = argv[3];
       fprintf(stderr, "%srenormalizing GCA using segmentation %s\n",
               renormalize_gca ? "" : "not ", renorm_seg_fname);
@@ -396,24 +402,24 @@ static int get_option(int argc, char *argv[]) {
     }
   } else if (!stricmp(option, "intensity")) {
     parms.l_intensity = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "l_intensity = %2.3f\n", parms.l_intensity);
   } else if (!stricmp(option, "grad")) {
     parms.l_grad = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_grad = %2.3f\n", parms.l_grad);
   } else if (!stricmp(option, "nspring")) {
     parms.l_nspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_nspring = %2.3f\n", parms.l_nspring);
   } else if (!stricmp(option, "curv")) {
     parms.l_curv = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_curv = %2.3f\n", parms.l_curv);
   } else if (!stricmp(option, "make_gca")) {
-    label_vol_name = argv[2];
+    label_vol_name     = argv[2];
     intensity_vol_name = argv[3];
-    nargs = 2;
+    nargs              = 2;
     fprintf(stderr, "building gca from label vol %s and intensity vol %s\n",
             label_vol_name, intensity_vol_name);
   } else
@@ -426,16 +432,16 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'I':
       parms.l_external = atof(argv[2]);
-      nargs = 1;
+      nargs            = 1;
       printf("setting intensity term to %2.3f\n", parms.l_external);
       break;
     case 'G':
       gca_fname = argv[2];
-      nargs = 1;
+      nargs     = 1;
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("debugging vertex %d\n", Gdiag_no);
       break;
     case 'R':
@@ -444,12 +450,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'S':
       parms.l_spring = atof(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       printf("setting spring term to %2.2f\n", parms.l_spring);
       break;
     case 'T':
       parms.dt = atof(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("setting dt = %2.2f\n", parms.dt);
       break;
     case 'L':
@@ -460,7 +466,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'W':
       parms.write_iterations = atoi(argv[2]);
-      nargs = 1;
+      nargs                  = 1;
       printf("writing snapshots of deformation every %d iterations\n",
              parms.write_iterations);
       Gdiag |= DIAG_WRITE;
@@ -505,7 +511,7 @@ static int build_label_histograms(MRI *mri_labels, MRI *mri_intensities,
         {
           HISTO *h;
 
-          h = MRIhistogramLabel(mri_intensities, mri_labels, l, 50);
+          h         = MRIhistogramLabel(mri_intensities, mri_labels, l, 50);
           histos[l] = HISTOsmooth(h, nullptr, 2);
           HISTOmakePDF(histos[l], histos[l]);
           if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
@@ -524,21 +530,21 @@ static int build_label_histograms(MRI *mri_labels, MRI *mri_intensities,
 #define PTHRESH 0.005
 
 static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels,
-                                       MRI *mri_intensities,
+                                       MRI *       mri_intensities,
                                        HISTOGRAM **histograms, VERTEX_INFO *vi,
                                        float sigma, TRANSFORM *transform,
                                        GCA *gca, int target_label,
                                        float resolution) {
-  int nin, nout;
+  int    nin, nout;
   double val, nx, ny, nz, xi, yi, zi, d, e1x, e2x, e1y, e2y, e1z, e2z, d1, d2,
       mag;
   MRI *mri_ll;
   MRI *mri_grad, *mri_dx, *mri_dy, *mri_dz, *mri_mask, *mri_tmp, *mri_dist,
       *mri_pin, *mri_pout, *mri_pmap;
-  int x, y, z, pad;
+  int     x, y, z, pad;
   MATRIX *m_vox2vox, *m_vox2vox_vector;
   VECTOR *v1, *v2;
-  double vsize;
+  double  vsize;
 
 #define WSIZE 3
 
@@ -546,7 +552,7 @@ static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels,
   mri_tmp->c_r += mri_labels->c_r;
   mri_tmp->c_a += mri_labels->c_a;
   mri_tmp->c_s += mri_labels->c_s;
-  pad = ceil(3 / mri_tmp->xsize);
+  pad      = ceil(3 / mri_tmp->xsize);
   mri_mask = MRIextractRegionAndPad(mri_tmp, nullptr, nullptr, pad);
   mri_dist =
       MRIdistanceTransform(mri_mask, nullptr, 1, nint(10 / mri_mask->xsize),
@@ -555,13 +561,13 @@ static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels,
     MRIwrite(mri_dist, "d.mgz");
 
   mri_grad = MRIsobel(mri_dist, nullptr, nullptr);
-  mri_dx = MRIxDerivative(mri_dist, nullptr);
-  mri_dy = MRIyDerivative(mri_dist, nullptr);
-  mri_dz = MRIzDerivative(mri_dist, nullptr);
+  mri_dx   = MRIxDerivative(mri_dist, nullptr);
+  mri_dy   = MRIyDerivative(mri_dist, nullptr);
+  mri_dz   = MRIzDerivative(mri_dist, nullptr);
   MRIfree(&mri_grad);
   MRIfree(&mri_tmp);
-  mri_ll = MRIclone(mri_dist, nullptr);
-  mri_pin = MRIclone(mri_ll, nullptr);
+  mri_ll   = MRIclone(mri_dist, nullptr);
+  mri_pin  = MRIclone(mri_ll, nullptr);
   mri_pout = MRIclone(mri_ll, nullptr);
 
   mri_ll->outside_val = -100;
@@ -577,13 +583,13 @@ static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels,
     MRIwrite(mri_dz, "dz.mgz");
   }
 
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_mask, mri_intensities);
+  m_vox2vox        = MRIgetVoxelToVoxelXform(mri_mask, mri_intensities);
   m_vox2vox_vector = MatrixCopy(m_vox2vox, nullptr);
   *MATRIX_RELT(m_vox2vox_vector, 1, 4) = 0.0;
   *MATRIX_RELT(m_vox2vox_vector, 2, 4) = 0.0;
   *MATRIX_RELT(m_vox2vox_vector, 3, 4) = 0.0;
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  v1                                   = VectorAlloc(4, MATRIX_REAL);
+  v2                                   = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
 
   vsize = mri_pmap->xsize;
@@ -601,9 +607,9 @@ static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels,
           MRIsetVoxVal(mri_ll, x, y, z, 0, -1000);
           continue;
         }
-        nx = MRIgetVoxVal(mri_dx, x, y, z, 0);
-        ny = MRIgetVoxVal(mri_dy, x, y, z, 0);
-        nz = MRIgetVoxVal(mri_dz, x, y, z, 0);
+        nx  = MRIgetVoxVal(mri_dx, x, y, z, 0);
+        ny  = MRIgetVoxVal(mri_dy, x, y, z, 0);
+        nz  = MRIgetVoxVal(mri_dz, x, y, z, 0);
         mag = sqrt(nx * nx + ny * ny + nz * nz);
         if (FZERO(mag)) {
           MRIsetVoxVal(mri_ll, x, y, z, 0, -10);
@@ -724,16 +730,16 @@ static MRI *compute_target_intensities_with_gcab(
     MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities,
     HISTOGRAM **histograms, VERTEX_INFO *vi, float sigma, TRANSFORM *transform,
     GCA *gca, int target_label, float resolution, GCAB *gcab) {
-  int nin, nout;
+  int    nin, nout;
   double val, nx, ny, nz, xi, yi, zi, d, e1x, e2x, e1y, e2y, e1z, e2z, d1, d2,
       mag;
   MRI *mri_ll;
   MRI *mri_grad, *mri_dx, *mri_dy, *mri_dz, *mri_mask, *mri_tmp, *mri_dist,
       *mri_pin, *mri_pout, *mri_pmap;
-  int x, y, z, pad;
+  int     x, y, z, pad;
   MATRIX *m_vox2vox, *m_vox2vox_vector;
   VECTOR *v1, *v2;
-  double vsize;
+  double  vsize;
 
 #define WSIZE 3
 
@@ -741,7 +747,7 @@ static MRI *compute_target_intensities_with_gcab(
   mri_tmp->c_r += mri_labels->c_r;
   mri_tmp->c_a += mri_labels->c_a;
   mri_tmp->c_s += mri_labels->c_s;
-  pad = ceil(3 / mri_tmp->xsize);
+  pad      = ceil(3 / mri_tmp->xsize);
   mri_mask = MRIextractRegionAndPad(mri_tmp, nullptr, nullptr, pad + 1);
   mri_dist =
       MRIdistanceTransform(mri_mask, nullptr, 1, nint(10 / mri_mask->xsize),
@@ -750,13 +756,13 @@ static MRI *compute_target_intensities_with_gcab(
     MRIwrite(mri_dist, "d.mgz");
 
   mri_grad = MRIsobel(mri_dist, nullptr, nullptr);
-  mri_dx = MRIxDerivative(mri_dist, nullptr);
-  mri_dy = MRIyDerivative(mri_dist, nullptr);
-  mri_dz = MRIzDerivative(mri_dist, nullptr);
+  mri_dx   = MRIxDerivative(mri_dist, nullptr);
+  mri_dy   = MRIyDerivative(mri_dist, nullptr);
+  mri_dz   = MRIzDerivative(mri_dist, nullptr);
   MRIfree(&mri_grad);
   MRIfree(&mri_tmp);
-  mri_ll = MRIclone(mri_dist, nullptr);
-  mri_pin = MRIclone(mri_ll, nullptr);
+  mri_ll   = MRIclone(mri_dist, nullptr);
+  mri_pin  = MRIclone(mri_ll, nullptr);
   mri_pout = MRIclone(mri_ll, nullptr);
 
   mri_ll->outside_val = -100;
@@ -775,13 +781,13 @@ static MRI *compute_target_intensities_with_gcab(
   MRIcopy(mri_pmap, mri_ll);
   return (mri_ll);
 
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_mask, mri_intensities);
+  m_vox2vox        = MRIgetVoxelToVoxelXform(mri_mask, mri_intensities);
   m_vox2vox_vector = MatrixCopy(m_vox2vox, nullptr);
   *MATRIX_RELT(m_vox2vox_vector, 1, 4) = 0.0;
   *MATRIX_RELT(m_vox2vox_vector, 2, 4) = 0.0;
   *MATRIX_RELT(m_vox2vox_vector, 3, 4) = 0.0;
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  v1                                   = VectorAlloc(4, MATRIX_REAL);
+  v2                                   = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
 
   vsize = mri_pmap->xsize;
@@ -799,9 +805,9 @@ static MRI *compute_target_intensities_with_gcab(
           MRIsetVoxVal(mri_ll, x, y, z, 0, -1000);
           continue;
         }
-        nx = MRIgetVoxVal(mri_dx, x, y, z, 0);
-        ny = MRIgetVoxVal(mri_dy, x, y, z, 0);
-        nz = MRIgetVoxVal(mri_dz, x, y, z, 0);
+        nx  = MRIgetVoxVal(mri_dx, x, y, z, 0);
+        ny  = MRIgetVoxVal(mri_dy, x, y, z, 0);
+        nz  = MRIgetVoxVal(mri_dz, x, y, z, 0);
         mag = sqrt(nx * nx + ny * ny + nz * nz);
         if (FZERO(mag)) {
           MRIsetVoxVal(mri_ll, x, y, z, 0, -10);
@@ -919,9 +925,9 @@ static MRI *compute_target_intensities_with_gcab(
 static int compute_target_labels(MRI_SURFACE *mris, MRI *mri_labels,
                                  MRI *mri_intensities, HISTOGRAM **histograms,
                                  VERTEX_INFO *vi) {
-  VERTEX *v;
-  int vno, l_out, l_in;
-  double xv, yv, zv, val, nx, ny, nz;
+  VERTEX *   v;
+  int        vno, l_out, l_in;
+  double     xv, yv, zv, val, nx, ny, nz;
   HISTOGRAM *h_in, *h_out;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -933,7 +939,7 @@ static int compute_target_labels(MRI_SURFACE *mris, MRI *mri_labels,
 
     MRISvertexToVoxel(mris, v, mri_intensities, &xv, &yv, &zv);
     MRIsampleVolume(mri_intensities, xv, yv, zv, &val);
-    v->val = val;
+    v->val  = val;
     v->val2 = 2;
 
     /* search locally for a voxel that has large intensity gradients, pointing
@@ -946,12 +952,12 @@ static int compute_target_labels(MRI_SURFACE *mris, MRI *mri_labels,
     l_out = nint(val);
     MRIsampleVolumeType(mri_labels, xv - 1 * nx, yv - 1 * ny, zv - 1 * nz, &val,
                         SAMPLE_NEAREST);
-    l_in = nint(val);
-    h_out = histograms[l_out];
-    h_in = histograms[l_in];
-    vi[vno].h_in = h_in;
+    l_in          = nint(val);
+    h_out         = histograms[l_out];
+    h_in          = histograms[l_in];
+    vi[vno].h_in  = h_in;
     vi[vno].h_out = h_out;
-    vi[vno].l_in = l_in;
+    vi[vno].l_in  = l_in;
     vi[vno].l_out = l_out;
 
     if (target_label > 0) {
@@ -963,14 +969,14 @@ static int compute_target_labels(MRI_SURFACE *mris, MRI *mri_labels,
   return (NO_ERROR);
 }
 
-#define MAX_LL 1 // was 10
+#define MAX_LL   1 // was 10
 #define MAX_DIST 5
 
 static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
-  int vno;
+  int     vno;
   VERTEX *v;
-  double sse /*, error*/, d;
-  double val, xv, yv, zv, nx, ny, nz, max_d, max_ll, x2, y2, z2, dist,
+  double  sse /*, error*/, d;
+  double  val, xv, yv, zv, nx, ny, nz, max_d, max_ll, x2, y2, z2, dist,
       prev_dist, xvd, yvd, zvd, nxd, nyd, nzd, mag, sigma = 4.0;
   MRI *mri_ll = parms->mri_ll, *mri_dist;
 
@@ -1006,7 +1012,7 @@ static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
     MRISvertexToVoxel(mris, v, parms->mri_ll, &xv, &yv, &zv);
     MRIsampleVolume(mri_ll, xv, yv, zv, &val);
     max_ll = val;
-    max_d = 0;
+    max_d  = 0;
 
     MRISvertexNormalInVoxelCoords(mris, mri_ll, vno, &nx, &ny, &nz);
     MRISvertexNormalInVoxelCoords(mris, mri_dist, vno, &nxd, &nyd, &nzd);
@@ -1028,13 +1034,13 @@ static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
         break;
 #endif
       prev_dist = dist;
-      x2 = xv + d * nx;
-      y2 = yv + d * ny;
-      z2 = zv + d * nz;
+      x2        = xv + d * nx;
+      y2        = yv + d * ny;
+      z2        = zv + d * nz;
       MRIsampleVolume(mri_ll, x2, y2, z2, &val);
       if (val > max_ll) {
         max_ll = val;
-        max_d = d;
+        max_d  = d;
       }
     }
     prev_dist = 0;
@@ -1061,7 +1067,7 @@ static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
       MRIsampleVolume(mri_ll, x2, y2, z2, &val);
       if (val > max_ll) {
         max_ll = val;
-        max_d = d;
+        max_d  = d;
       }
     }
     if (vno == Gdiag_no)
@@ -1074,10 +1080,10 @@ static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
 }
 
 static double externalLLGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
-  int vno;
+  int     vno;
   VERTEX *v;
-  double sse, error, d;
-  double val, xv, yv, zv, nx, ny, nz, max_d, max_ll, x2, y2, z2, dist,
+  double  sse, error, d;
+  double  val, xv, yv, zv, nx, ny, nz, max_d, max_ll, x2, y2, z2, dist,
       prev_dist, xvd, yvd, zvd, nxd, nyd, nzd, mag, sigma = 4.0;
   MRI *mri_ll = parms->mri_ll, *mri_dist;
 
@@ -1120,9 +1126,9 @@ static double externalLLGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
 
     MRISvertexNormalInVoxelCoords(mris, mri_ll, vno, &nx, &ny, &nz);
     MRISvertexNormalInVoxelCoords(mris, mri_dist, vno, &nxd, &nyd, &nzd);
-    v->d = error;
+    v->d   = error;
     max_ll = val;
-    max_d = 0;
+    max_d  = 0;
 
     prev_dist = 0;
     for (d = -mri_ll->xsize / 2; d >= -MAX_DIST / mri_ll->xsize;
@@ -1149,7 +1155,7 @@ static double externalLLGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
       MRIsampleVolume(mri_ll, x2, y2, z2, &val);
       if (val > max_ll) {
         max_ll = val;
-        max_d = d;
+        max_d  = d;
       }
     }
     prev_dist = 0;
@@ -1176,7 +1182,7 @@ static double externalLLGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
       MRIsampleVolume(mri_ll, x2, y2, z2, &val);
       if (val > max_ll) {
         max_ll = val;
-        max_d = d;
+        max_d  = d;
       }
     }
     if (vno == Gdiag_no)
@@ -1210,8 +1216,8 @@ static double externalLLRMS(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
 
 static GCA *make_gca(char *label_vol_name, char *intensity_vol_name,
                      TRANSFORM *transform) {
-  MRI *mri_labels, *mri_intensity, *mri_tmp;
-  GCA *gca;
+  MRI *      mri_labels, *mri_intensity, *mri_tmp;
+  GCA *      gca;
   MRI_REGION box;
 
   mri_labels = MRIread(label_vol_name);
@@ -1228,7 +1234,7 @@ static GCA *make_gca(char *label_vol_name, char *intensity_vol_name,
   mri_tmp = MRIextractRegionAndPad(mri_labels, nullptr, &box, 10);
   MRIfree(&mri_labels);
   mri_labels = mri_tmp;
-  mri_tmp = MRIextractRegionAndPad(mri_intensity, nullptr, &box, 10);
+  mri_tmp    = MRIextractRegionAndPad(mri_intensity, nullptr, &box, 10);
   MRIfree(&mri_intensity);
   mri_intensity = mri_tmp;
 
@@ -1246,8 +1252,8 @@ static GCA *make_gca(char *label_vol_name, char *intensity_vol_name,
 static MRI *compute_pmap(GCA *gca, TRANSFORM *transform, MRI *mri_intensities,
                          int target_label, MRI *mri_dist, double pad,
                          MRI *mri_pmap) {
-  int x, y, z;
-  double p, dist, xw, yw, zw;
+  int     x, y, z;
+  double  p, dist, xw, yw, zw;
   VECTOR *v1, *v2;
   MATRIX *m_vox2vox;
 
@@ -1259,9 +1265,9 @@ static MRI *compute_pmap(GCA *gca, TRANSFORM *transform, MRI *mri_intensities,
                 Progname, mri_dist->width, mri_dist->height, mri_dist->depth);
     MRIcopyHeader(mri_dist, mri_pmap);
   }
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_dist, mri_intensities);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_dist, mri_intensities);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
 
   for (x = 0; x < mri_pmap->width; x++) {
@@ -1281,7 +1287,7 @@ static MRI *compute_pmap(GCA *gca, TRANSFORM *transform, MRI *mri_intensities,
         xw = V3_X(v2);
         yw = V3_Y(v2);
         zw = V3_Z(v2);
-        p = GCAcomputeLabelLikelihood(gca, transform, mri_intensities, xw, yw,
+        p  = GCAcomputeLabelLikelihood(gca, transform, mri_intensities, xw, yw,
                                       zw, target_label);
         MRIsetVoxVal(mri_pmap, x, y, z, 0, p);
       }
@@ -1298,11 +1304,11 @@ static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform,
                                    MRI *mri_intensities, MRI *mri_labels,
                                    int target_label, MRI *mri_dist, double pad,
                                    GCAB *gcab, MRI *mri_pmap) {
-  int x, y, z;
-  double p, dist, xw, yw, zw, nx, ny, nz, mag, xw1, yw1, zw1, pout, pin, pgrad;
+  int     x, y, z;
+  double  p, dist, xw, yw, zw, nx, ny, nz, mag, xw1, yw1, zw1, pout, pin, pgrad;
   VECTOR *v1, *v2;
   MATRIX *m_vox2vox;
-  MRI *mri_dist1mm, *mri_pout, *mri_pin, *mri_pgrad, *mri_tmp;
+  MRI *   mri_dist1mm, *mri_pout, *mri_pin, *mri_pgrad, *mri_tmp;
 
   if (mri_pmap == nullptr) {
     mri_pmap =
@@ -1312,9 +1318,9 @@ static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform,
                 Progname, mri_dist->width, mri_dist->height, mri_dist->depth);
     MRIcopyHeader(mri_dist, mri_pmap);
   }
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_dist, mri_intensities);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_dist, mri_intensities);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
 
   mri_tmp = MRIclone(mri_labels, nullptr);
@@ -1324,8 +1330,8 @@ static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform,
   MRIfree(&mri_tmp);
 
   mri_pgrad = MRIclone(mri_pmap, nullptr);
-  mri_pin = MRIclone(mri_pmap, nullptr);
-  mri_pout = MRIclone(mri_pmap, nullptr);
+  mri_pin   = MRIclone(mri_pmap, nullptr);
+  mri_pout  = MRIclone(mri_pmap, nullptr);
   for (x = 0; x < mri_pmap->width; x++) {
     if (((x + 1) % 10) == 0)
       printf("x=%d\n", x);
@@ -1359,9 +1365,9 @@ static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform,
         xw1 = V3_X(v2);
         yw1 = V3_Y(v2);
         zw1 = V3_Z(v2);
-        nx = xw1 - xw;
-        ny = yw1 - yw;
-        nz = zw1 - zw;
+        nx  = xw1 - xw;
+        ny  = yw1 - yw;
+        nz  = zw1 - zw;
         mag = sqrt(nx * nx + ny * ny + nz * nz);
         if (FZERO(mag))
           continue;
@@ -1369,11 +1375,11 @@ static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform,
         ny /= mag;
         nz /= mag;
 
-        p = GCABgetProbability(gcab, mri_intensities, mri_dist1mm, transform,
+        p    = GCABgetProbability(gcab, mri_intensities, mri_dist1mm, transform,
                                xw, yw, zw, nx, ny, nz);
         pout = GCABgetPout(gcab, mri_intensities, mri_dist1mm, transform, xw,
                            yw, zw, nx, ny, nz);
-        pin = GCABgetPin(gcab, mri_intensities, mri_dist1mm, transform, xw, yw,
+        pin  = GCABgetPin(gcab, mri_intensities, mri_dist1mm, transform, xw, yw,
                          zw, nx, ny, nz);
         pgrad = GCABgetPgrad(gcab, mri_intensities, mri_dist1mm, transform, xw,
                              yw, zw, nx, ny, nz);
@@ -1399,13 +1405,13 @@ static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform,
   return (mri_pmap);
 }
 static int compute_gradient_target_positions(MRI_SURFACE *mris,
-                                             MRI *mri_intensities,
+                                             MRI *        mri_intensities,
                                              VERTEX_INFO *vi,
-                                             float current_sigma) {
+                                             float        current_sigma) {
   return (NO_ERROR);
 }
 
-static double externalGradGradient(MRI_SURFACE *mris,
+static double externalGradGradient(MRI_SURFACE *      mris,
                                    INTEGRATION_PARMS *parms) {
   return (0.0);
 }

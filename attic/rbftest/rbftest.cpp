@@ -23,50 +23,50 @@
  *
  */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "diag.h"
 #include "error.h"
 #include "macros.h"
-#include "utils.h"
 #include "matrix.h"
 #include "rbf.h"
+#include "utils.h"
 #include "version.h"
 
 static int verbose = 0;
 
 const char *Progname;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 /*static int readAllData(FILE *fp, CLUSTER_SET *cs) ;*/
-static int read_line(VECTOR *v_obs, int obs_no, void *vfp, int same_class,
-                     int *pclass);
+static int  read_line(VECTOR *v_obs, int obs_no, void *vfp, int same_class,
+                      int *pclass);
 static void classify_all(RBF *rbf, FILE *fp);
-static int count_classes(FILE *fp);
+static int  count_classes(FILE *fp);
 
-#define NINPUTS 2
-#define NCLUSTERS 2
+#define NINPUTS            2
+#define NCLUSTERS          2
 #define NORMALIZE_CLUSTERS 0
-#define RBF_FNAME "test.rbf"
+#define RBF_FNAME          "test.rbf"
 
 #define MAX_CLASSES 10
-#define NCLASSES 2
+#define NCLASSES    2
 
-static float momentum = 0.0f;
-static int nclusters = 0;
-static int nclasses = 0;
+static float momentum  = 0.0f;
+static int   nclusters = 0;
+static int   nclasses  = 0;
 
 static const char *class_names[MAX_CLASSES] = {"gray", "white", "two", "three",
                                                "four"};
-static int max_clusters[MAX_CLASSES] = {NCLUSTERS, NCLUSTERS, NCLUSTERS};
+static int max_clusters[MAX_CLASSES]        = {NCLUSTERS, NCLUSTERS, NCLUSTERS};
 
 int main(int argc, char *argv[]) {
   char *input_file_name;
-  int nargs, classnum;
+  int   nargs, classnum;
   FILE *fp;
   /*  CLUSTER_SET  *cs ;*/
   RBF *rbf;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -190,7 +190,7 @@ static int read_line(VECTOR *v_obs, int obs_no, void *vfp, int same_class,
                      int *pclass) {
   char *cp, line[200];
   FILE *fp;
-  int n, classnum;
+  int   n, classnum;
 
   fp = (FILE *)vfp;
 
@@ -214,16 +214,16 @@ static int read_line(VECTOR *v_obs, int obs_no, void *vfp, int same_class,
   return (NO_ERROR);
 }
 static void classify_all(RBF *rbf, FILE *fp) {
-  int classnum, target_class, obs_no;
+  int     classnum, target_class, obs_no;
   VECTOR *v_obs, *v_error;
-  float sse, error, rms;
+  float   sse, error, rms;
 
-  v_obs = VectorAlloc(NINPUTS, MATRIX_REAL);
+  v_obs   = VectorAlloc(NINPUTS, MATRIX_REAL);
   v_error = VectorAlloc(nclasses, MATRIX_REAL);
 
   fprintf(stderr, "classifying inputs...\n");
   obs_no = 0;
-  sse = 0.0f;
+  sse    = 0.0f;
   while (read_line(v_obs, obs_no++, (void *)fp, 0, &target_class) == NO_ERROR) {
     classnum = RBFclassify(rbf, v_obs);
     fprintf(stderr, "%+2.3f %+2.3f --> classnum %d (%2.3f)%s\n",
@@ -242,7 +242,7 @@ static void classify_all(RBF *rbf, FILE *fp) {
 
 static int count_classes(FILE *fp) {
   VECTOR *v_obs;
-  int classnum, classes[100], obs_no = 0, nclasses = 0;
+  int     classnum, classes[100], obs_no = 0, nclasses = 0;
 
   memset(classes, 0, sizeof(classes));
   v_obs = VectorAlloc(NINPUTS, MATRIX_REAL);

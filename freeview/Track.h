@@ -26,15 +26,15 @@
 #include <QList>
 
 struct Track {
-  int nNum;
-  float *fPts;
+  int            nNum;
+  float *        fPts;
   QList<float *> fScalars;
-  float *fProperty;
+  float *        fProperty;
 
   float fLength;
 
-  short *nVoxels;
-  int nNumberOfVoxels;
+  short *       nVoxels;
+  int           nNumberOfVoxels;
   unsigned char charColor[3];
 
   Track() { Reset(); }

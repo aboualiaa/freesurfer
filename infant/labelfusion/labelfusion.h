@@ -3,7 +3,7 @@
 
 #include "numpy.h"
 
-typedef py::array_t<float> pyarrayf;
+typedef py::array_t<float>  pyarrayf;
 typedef py::array_t<double> pyarrayd;
 
 pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,

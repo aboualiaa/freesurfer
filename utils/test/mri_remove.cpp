@@ -35,17 +35,17 @@ extern "C" {
 char *Progname = "mri_remove";
 }
 
-using namespace std;
-
 int get_option(int argc, char *argv[], int *yval) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
   option = argv[1] + 1;
   if (!strcmp(option, "-help")) {
-    cout << "Usage: mri_remove [--ypos <pos>] <vol> <volchopped>" << endl;
-    cout << "where <volchopped> has voxel val set to zero higher that <pos>"
-         << endl;
-    cout << "      if --ypos is not given, use pos = 170" << endl;
+    std::cout << "Usage: mri_remove [--ypos <pos>] <vol> <volchopped>"
+              << std::endl;
+    std::cout
+        << "where <volchopped> has voxel val set to zero higher that <pos>"
+        << std::endl;
+    std::cout << "      if --ypos is not given, use pos = 170" << std::endl;
     exit(-1);
   } else if (!strcmp(option, "-ypos")) {
     *yval = atoi(argv[2]);
@@ -56,7 +56,8 @@ int get_option(int argc, char *argv[], int *yval) {
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    cout << "Usage: mri_remove [--ypos <pos>] <vol> <volchopped>" << endl;
+    std::cout << "Usage: mri_remove [--ypos <pos>] <vol> <volchopped>"
+              << std::endl;
     return -1;
   }
   int nargs;

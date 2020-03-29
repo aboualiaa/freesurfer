@@ -24,12 +24,12 @@
  */
 
 #include "FSGroupDescriptor.h"
-#include <stdexcept>
 #include "vtkImageData.h"
-#include <QFile>
-#include <QTextStream>
 #include <QDebug>
+#include <QFile>
 #include <QStringList>
+#include <QTextStream>
+#include <stdexcept>
 
 FSGroupDescriptor::FSGroupDescriptor(QObject *parent)
     : QObject(parent), m_fsgd(NULL), m_dXStart(0), m_dXDelta(1),
@@ -60,7 +60,7 @@ bool FSGroupDescriptor::Read(const QString &filename) {
     }
   }
   if (!bOK) {
-    //    cout << "Could not find XAxis tag in file. Using default one." <<
+    //    std::cout << "Could not find XAxis tag in file. Using default one." <<
     //    endl; m_dXStart = 0; m_dXDelta = 1;
   }
   file.close();
@@ -71,7 +71,7 @@ bool FSGroupDescriptor::Read(const QString &filename) {
 
   m_fsgd = ::gdfRead(filename.toLatin1().data(), 1);
   if (m_fsgd == NULL) {
-    cerr << "gdfRead failed\n";
+    std::cerr << "gdfRead failed\n";
     return false;
   }
   float fMinValue, fMaxValue;
@@ -98,7 +98,7 @@ bool FSGroupDescriptor::Read(const QString &filename) {
                << "diamond";
   for (int i = 0; i < m_fsgd->nclasses; i++) {
     FSGDClass gdc;
-    gdc.label = m_fsgd->classlabel[i];
+    gdc.label  = m_fsgd->classlabel[i];
     gdc.marker = m_fsgd->classmarker[i];
     if (gdc.marker.isEmpty())
       gdc.marker = stockMarkers[i % stockMarkers.size()];
@@ -136,7 +136,7 @@ bool FSGroupDescriptor::Read(const QString &filename) {
     //  m_data[i].variable_values;
   }
 
-  m_title = m_fsgd->title;
+  m_title       = m_fsgd->title;
   m_measureName = m_fsgd->measname;
   //  UpdateData(0);
 
@@ -145,7 +145,7 @@ bool FSGroupDescriptor::Read(const QString &filename) {
 
 void FSGroupDescriptor::UpdateData(int nVertex) {
   if (nVertex >= 0 && nVertex < m_fsgd->data->width) {
-    m_nVertexNum = nVertex;
+    m_nVertexNum           = nVertex;
     m_dMeasurementRange[0] = 1e10;
     m_dMeasurementRange[1] = -1e10;
     for (int i = 0; i < m_data.size(); i++) {

@@ -33,8 +33,8 @@
 #include "mriBSpline.h"
 
 #define export // obsolete feature 'export template' used in these headers
-#include <vnl/vnl_matrix_fixed.h>
 #include <vnl/vnl_matlab_print.h>
+#include <vnl/vnl_matrix_fixed.h>
 #undef export
 
 #include <iostream>
@@ -69,9 +69,9 @@ public:
     vnl_matlab_print(std::cout, histo, n.c_str());
     std::cout << std::endl;
   };
-  void save(const std::string &fname, const std::string &n = "H");
+  void   save(const std::string &fname, const std::string &n = "H");
   double clip(double thres);
-  void normalize() {
+  void   normalize() {
     if (sum == 0.0 || sum == 1.0)
       return;
     else {
@@ -110,12 +110,12 @@ protected:
     }
   };
 
-  int n;
-  double sum;
+  int                n;
+  double             sum;
   vnl_matrix<double> histo;
   vnl_vector<double> rowsum;
   vnl_vector<double> colsum;
-  bool haseps;
+  bool               haseps;
 };
 
 #endif

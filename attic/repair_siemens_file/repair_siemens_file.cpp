@@ -23,15 +23,15 @@
  *
  */
 
+#include "const.h"
+#include "error.h"
+#include "version.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h> // for swab on linux
-#include "const.h"
-#include "error.h"
-#include "version.h"
 
-#define OLD_APPEND ".orig"
+#define OLD_APPEND    ".orig"
 #define HEADER_LENGTH 6144
 
 const char *Progname;
@@ -76,11 +76,11 @@ int repair_file(char *fname) {
   FILE *fp;
   short rows, cols;
   short bits_per_voxel, bytes_per_voxel;
-  int file_length;
-  char header[HEADER_LENGTH];
+  int   file_length;
+  char  header[HEADER_LENGTH];
   char *data;
-  int data_bytes;
-  char new_fname[STRLEN];
+  int   data_bytes;
+  char  new_fname[STRLEN];
 
   if ((fp = fopen(fname, "r")) == NULL) {
     fprintf(stderr, "can't open file %s for reading\n", fname);

@@ -7730,7 +7730,7 @@ MRI_SURFACE *ic2562_make_surface(int max_vertices, int max_faces) {
     int fno;
     for (fno = 0; fno < ICO_NFACES; fno++) {
       int vno;
-      vno = ic2562_faces[fno].vno[1];
+      vno                      = ic2562_faces[fno].vno[1];
       ic2562_faces[fno].vno[1] = ic2562_faces[fno].vno[2];
       ic2562_faces[fno].vno[2] = vno;
     }

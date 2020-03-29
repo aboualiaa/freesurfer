@@ -25,10 +25,10 @@
 #include "mrisegment.h"
 #include "mrisurf_project.h"
 
+#include "cma.h"
 #include "diag.h"
 #include "timer.h"
 #include "version.h"
-#include "cma.h"
 
 static char vcid[] =
     "$Id: mris_shrinkwrap.c,v 1.9 2012/11/10 20:19:46 fischl Exp $";
@@ -36,14 +36,14 @@ static char vcid[] =
 int main(int argc, char *argv[]);
 
 #define INNER_SKULL_OUTER_SKULL_SEPARATION 4
-#define BORDER_VAL 128
-#define OUTSIDE_BORDER_STEP 16
-#define TARGET_VAL (BORDER_VAL - OUTSIDE_BORDER_STEP / 2)
+#define BORDER_VAL                         128
+#define OUTSIDE_BORDER_STEP                16
+#define TARGET_VAL                         (BORDER_VAL - OUTSIDE_BORDER_STEP / 2)
 
 static MRI *pad_volume(MRI_SURFACE *mris, MRI *mri_src, MRI *mri_dst);
 
-static int pad = 40;
-static int get_option(int argc, char *argv[]);
+static int  pad = 40;
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -52,8 +52,8 @@ static MRI *create_brain_volume(MRI *mri_labeled, MRI *mri_brain,
                                 int target_label);
 static MRI *create_skull_volume(MRI *mri_labeled, MRI *mri_brain);
 static MRI *create_skin_volume(MRI *mri_labeled, MRI *mri_brain);
-static int initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
-                                       int outside);
+static int  initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
+                                        int outside);
 static MRI *create_distance_map(MRI *mri_masked, MRI *mri_distance,
                                 int border_val, int outside_border_step);
 static MRI *remove_small_segments(MRI *mri_src, MRI *mri_dst);
@@ -62,28 +62,28 @@ const char *Progname;
 
 static INTEGRATION_PARMS parms;
 #define BASE_DT_SCALE 1.0
-static float base_dt_scale = BASE_DT_SCALE;
-static int target_label = -1;
-static char *suffix = "";
-static char *output_suffix = "";
-static double l_tsmooth = 0.0;
-static double l_surf_repulse = 5.0;
-static int smooth = 5;
-static int nbrs = 2;
-static int ic = 5;
-static int inner_skull_only = 0;
-static int embed = 0;
+static float  base_dt_scale    = BASE_DT_SCALE;
+static int    target_label     = -1;
+static char * suffix           = "";
+static char * output_suffix    = "";
+static double l_tsmooth        = 0.0;
+static double l_surf_repulse   = 5.0;
+static int    smooth           = 5;
+static int    nbrs             = 2;
+static int    ic               = 5;
+static int    inner_skull_only = 0;
+static int    embed            = 0;
 
 static float threshold = 0.0;
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN], *vol_name, *output_dir, *mdir;
-  int ac, nargs, msec;
+  char **      av, fname[STRLEN], *vol_name, *output_dir, *mdir;
+  int          ac, nargs, msec;
   MRI_SURFACE *mris;
-  MRI *mri_labeled, *mri_masked, *mri_masked_smooth, *mri_tmp;
-  MRI *mri_kernel, *mri_dist;
-  Timer then;
-  double l_spring;
+  MRI *        mri_labeled, *mri_masked, *mri_masked_smooth, *mri_tmp;
+  MRI *        mri_kernel, *mri_dist;
+  Timer        then;
+  double       l_spring;
 
   nargs = handleVersionOption(argc, argv, "mris_shrinkwrap");
   if (nargs && argc - nargs == 1)
@@ -97,24 +97,24 @@ int main(int argc, char *argv[]) {
 
   memset(&parms, 0, sizeof(parms));
   parms.projection = NO_PROJECTION;
-  parms.tol = 0.05;
-  parms.dt = 0.5f;
-  parms.base_dt = BASE_DT_SCALE * parms.dt;
+  parms.tol        = 0.05;
+  parms.dt         = 0.5f;
+  parms.base_dt    = BASE_DT_SCALE * parms.dt;
 
-  parms.l_intensity = 0.1;
-  parms.l_spring = 1.0f;
+  parms.l_intensity  = 0.1;
+  parms.l_spring     = 1.0f;
   parms.l_shrinkwrap = 0.05;
 
-  parms.niterations = 0;
+  parms.niterations      = 0;
   parms.write_iterations = 0 /*WRITE_ITERATIONS */;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.momentum = 0.0 /*0.8*/;
-  parms.dt_increase = 1.0 /* DT_INCREASE */;
-  parms.dt_decrease = 0.50 /* DT_DECREASE*/;
-  parms.error_ratio = 50.0 /*ERROR_RATIO */;
+  parms.momentum         = 0.0 /*0.8*/;
+  parms.dt_increase      = 1.0 /* DT_INCREASE */;
+  parms.dt_decrease      = 0.50 /* DT_DECREASE*/;
+  parms.error_ratio      = 50.0 /*ERROR_RATIO */;
   /*  parms.integration_type = INTEGRATE_LINE_MINIMIZE ;*/
   parms.l_surf_repulse = 0.0;
-  parms.l_repulse = 1;
+  parms.l_repulse      = 1;
 
   ac = argc;
   av = argv;
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
     parms.momentum = 0.0 /*0.75*/;
 
   then.reset();
-  vol_name = argv[1];
+  vol_name   = argv[1];
   output_dir = argv[2];
   fprintf(stderr, "reading volume %s...\n", vol_name);
   mri_labeled = MRIread(vol_name);
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
     MRIScopyValToVal2(mris);
     MRISsetVals(mris, TARGET_VAL);
 
-    mri_kernel = MRIgaussian1d(parms.sigma, 0);
+    mri_kernel        = MRIgaussian1d(parms.sigma, 0);
     mri_masked_smooth = MRIconvolveGaussian(mri_dist, nullptr, mri_kernel);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
       MRIwrite(mri_masked_smooth, "brain_smooth.mgh");
@@ -199,22 +199,22 @@ int main(int argc, char *argv[]) {
   {
     mri_dist = MRIdistanceTransform(mri_masked, nullptr, BORDER_VAL, 10000,
                                     DTRANS_MODE_SIGNED, nullptr);
-    parms.l_shrinkwrap = 0; // use intensity term
+    parms.l_shrinkwrap  = 0; // use intensity term
     parms.l_spring_norm = parms.l_spring;
-    parms.l_spring = 0;
+    parms.l_spring      = 0;
     sprintf(parms.base_name, "%s%s%s", FileNameOnly(output_dir, fname),
             output_suffix, suffix);
     MRISsetVals(mris, parms.sigma);
     MRIScopyValToVal2(mris);
     MRISsetVals(mris, 0); // 0 distance is the target
 
-    mri_kernel = MRIgaussian1d(parms.sigma, 0);
+    mri_kernel        = MRIgaussian1d(parms.sigma, 0);
     mri_masked_smooth = MRIconvolveGaussian(mri_dist, nullptr, mri_kernel);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
       MRIwrite(mri_masked_smooth, "brain_smooth.mgh");
   }
   parms.mri_brain = mri_dist;
-  l_spring = parms.l_spring;
+  l_spring        = parms.l_spring;
   MRISpositionSurface(mris, mri_dist, mri_masked_smooth, &parms);
 
   if (target_label >= 0) {
@@ -241,15 +241,15 @@ int main(int argc, char *argv[]) {
     MRIwrite(mri_masked, "brain.mgh");
   parms.l_surf_repulse = 5; /* don't let outer_skull come close
                                to inner skull */
-  parms.sigma = 8;
-  parms.start_t = 0;
+  parms.sigma          = 8;
+  parms.start_t        = 0;
 
   create_distance_map(mri_masked, mri_dist, BORDER_VAL, OUTSIDE_BORDER_STEP);
   MRISsetVals(mris, parms.sigma);
   MRIScopyValToVal2(mris);
   MRISsetVals(mris, TARGET_VAL);
 
-  mri_kernel = MRIgaussian1d(parms.sigma, 0);
+  mri_kernel        = MRIgaussian1d(parms.sigma, 0);
   mri_masked_smooth = MRIconvolveGaussian(mri_dist, nullptr, mri_kernel);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
     MRIwrite(mri_masked_smooth, "brain_smooth.mgh");
@@ -278,15 +278,15 @@ int main(int argc, char *argv[]) {
     MRIwrite(mri_masked, "brain.mgh");
   parms.l_surf_repulse = 5; /* don't let outer_skin come close
                                to outer skull */
-  parms.sigma = 8;
-  parms.start_t = 0;
+  parms.sigma          = 8;
+  parms.start_t        = 0;
 
   create_distance_map(mri_masked, mri_dist, BORDER_VAL, OUTSIDE_BORDER_STEP);
   MRISsetVals(mris, parms.sigma);
   MRIScopyValToVal2(mris);
   MRISsetVals(mris, TARGET_VAL);
 
-  mri_kernel = MRIgaussian1d(parms.sigma, 0);
+  mri_kernel        = MRIgaussian1d(parms.sigma, 0);
   mri_masked_smooth = MRIconvolveGaussian(mri_dist, nullptr, mri_kernel);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
     MRIwrite(mri_masked_smooth, "brain_smooth.mgh");
@@ -322,7 +322,7 @@ done:
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -335,13 +335,13 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "coarse"))
     ic = 4;
   else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     fprintf(stderr, "debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "ic")) {
-    ic = atoi(argv[2]);
+    ic    = atoi(argv[2]);
     nargs = 1;
   } else if (!stricmp(option, "nbrs")) {
     nbrs = atoi(argv[2]);
@@ -349,7 +349,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "shrink")) {
     parms.l_shrinkwrap = atof(argv[2]);
-    nargs = 1;
+    nargs              = 1;
   } else if (!stricmp(option, "label")) {
     target_label = atoi(argv[2]);
     printf("shrinkwrapping label %s (%d)\n", cma_label_to_name(target_label),
@@ -360,46 +360,46 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
     fprintf(stderr, "base name = %s\n", parms.base_name);
   } else if (!stricmp(option, "dt")) {
-    parms.dt = atof(argv[2]);
-    parms.base_dt = base_dt_scale * parms.dt;
+    parms.dt               = atof(argv[2]);
+    parms.base_dt          = base_dt_scale * parms.dt;
     parms.integration_type = INTEGRATE_MOMENTUM;
     fprintf(stderr, "using dt = %2.1e\n", parms.dt);
     nargs = 1;
   } else if (!stricmp(option, "spring")) {
     parms.l_spring = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "l_spring = %2.3f\n", parms.l_spring);
   } else if (!stricmp(option, "tsmooth")) {
     l_tsmooth = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "l_tsmooth = %2.3f\n", l_tsmooth);
   } else if (!stricmp(option, "grad")) {
     parms.l_grad = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_grad = %2.3f\n", parms.l_grad);
   } else if (!stricmp(option, "tspring")) {
     parms.l_tspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_tspring = %2.3f\n", parms.l_tspring);
   } else if (!stricmp(option, "nspring")) {
     parms.l_nspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_nspring = %2.3f\n", parms.l_nspring);
   } else if (!stricmp(option, "curv")) {
     parms.l_curv = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_curv = %2.3f\n", parms.l_curv);
   } else if (!stricmp(option, "smooth")) {
     smooth = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     fprintf(stderr, "smoothing for %d iterations\n", smooth);
   } else if (!stricmp(option, "output")) {
     output_suffix = argv[2];
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "appending %s to output names...\n", output_suffix);
   } else if (!stricmp(option, "intensity")) {
     parms.l_intensity = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "l_intensity = %2.3f\n", parms.l_intensity);
   } else if (!stricmp(option, "embed")) {
     embed = 1;
@@ -429,8 +429,8 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'M':
       parms.integration_type = INTEGRATE_MOMENTUM;
-      parms.momentum = atof(argv[2]);
-      nargs = 1;
+      parms.momentum         = atof(argv[2]);
+      nargs                  = 1;
       fprintf(stderr, "momentum = %2.2f\n", parms.momentum);
       break;
     case 'R':
@@ -441,16 +441,16 @@ static int get_option(int argc, char *argv[]) {
     case 'B':
       base_dt_scale = atof(argv[2]);
       parms.base_dt = base_dt_scale * parms.dt;
-      nargs = 1;
+      nargs         = 1;
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'T':
-      threshold = atof(argv[2]);
+      threshold    = atof(argv[2]);
       target_label = BORDER_VAL;
-      nargs = 1;
+      nargs        = 1;
       printf("thresholding input volume at %2.1f\n", threshold);
       break;
     case 'W':
@@ -555,8 +555,8 @@ static MRI *create_brain_volume(MRI *mri_labeled, MRI *mri_brain,
 
 static int initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
                                        int outside) {
-  MRI *mri_dilated;
-  int x, y, z;
+  MRI *  mri_dilated;
+  int    x, y, z;
   double x0, y0, z0, radius, dist, num, max_r;
   double xs, ys, zs;
 
@@ -617,8 +617,8 @@ static int initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
 #define MAX_DIST 40
 static MRI *create_distance_map(MRI *mri_masked, MRI *mri_distance,
                                 int border_val, int outside_border_step) {
-  int target_val;
-  int i;
+  int  target_val;
+  int  i;
   MRI *mri_dilated = nullptr, *mri_tmp = nullptr, *mri_tmp2 = nullptr;
 
   mri_distance = MRIcopy(mri_masked, mri_distance);
@@ -626,13 +626,13 @@ static MRI *create_distance_map(MRI *mri_masked, MRI *mri_distance,
 
   /* build outward distances */
   mri_dilated = MRIcopy(mri_masked, nullptr);
-  target_val = border_val - outside_border_step; /* outside border */
+  target_val  = border_val - outside_border_step; /* outside border */
   for (i = 0; i < MAX_DIST; i++, target_val -= 4) {
     if (target_val <= 0)
       break;
-    mri_tmp = MRIdilate(mri_dilated, mri_tmp);
+    mri_tmp  = MRIdilate(mri_dilated, mri_tmp);
     mri_tmp2 = MRIcopy(mri_tmp, mri_tmp2);
-    mri_tmp = MRIsubtract(mri_tmp, mri_dilated, mri_tmp); /* mri_tmp should
+    mri_tmp  = MRIsubtract(mri_tmp, mri_dilated, mri_tmp); /* mri_tmp should
                                                              be the next
                                                              ring */
     MRIreplaceValues(mri_tmp, mri_tmp, border_val, target_val);
@@ -646,9 +646,9 @@ static MRI *create_distance_map(MRI *mri_masked, MRI *mri_distance,
   for (i = 0; i < MAX_DIST; i++, target_val += 4) {
     if (target_val > 255)
       break;
-    mri_tmp = MRIerode(mri_dilated, mri_tmp);
+    mri_tmp  = MRIerode(mri_dilated, mri_tmp);
     mri_tmp2 = MRIcopy(mri_tmp, mri_tmp2);
-    mri_tmp = MRIsubtract(mri_tmp, mri_dilated, mri_tmp); /* mri_tmp should
+    mri_tmp  = MRIsubtract(mri_tmp, mri_dilated, mri_tmp); /* mri_tmp should
                                                              be the next
                                                              ring */
 
@@ -669,7 +669,7 @@ static MRI *create_distance_map(MRI *mri_masked, MRI *mri_distance,
 }
 
 static MRI *create_skull_volume(MRI *mri_labeled, MRI *mri_brain) {
-  int x, y, z, label, i;
+  int  x, y, z, label, i;
   MRI *mri_tmp = nullptr;
 
   /* don't let outer skull be within 4 mm of brain */
@@ -706,7 +706,7 @@ static MRI *create_skull_volume(MRI *mri_labeled, MRI *mri_brain) {
 }
 
 static MRI *create_skin_volume(MRI *mri_labeled, MRI *mri_brain) {
-  int x, y, z, label, i;
+  int  x, y, z, label, i;
   MRI *mri_tmp = nullptr;
 
   /* don't let outer skull be within 4 mm of brain */
@@ -744,7 +744,7 @@ static MRI *create_skin_volume(MRI *mri_labeled, MRI *mri_brain) {
 
 static MRI *remove_small_segments(MRI *mri_src, MRI *mri_dst) {
   MRI_SEGMENTATION *mriseg;
-  int i, max_vox, same, max_i;
+  int               i, max_vox, same, max_i;
 
   same = mri_dst == mri_src;
   if (same || !mri_dst)
@@ -753,11 +753,11 @@ static MRI *remove_small_segments(MRI *mri_src, MRI *mri_dst) {
   mriseg = MRIsegment(mri_src, 1, 255);
 
   max_vox = mriseg->segments[0].nvoxels;
-  max_i = 0;
+  max_i   = 0;
   for (i = 0; i < mriseg->nsegments; i++)
     if (mriseg->segments[i].nvoxels > max_vox) {
       max_vox = mriseg->segments[i].nvoxels;
-      max_i = i;
+      max_i   = i;
     }
 
   MRIsegmentToImage(mri_src, mri_dst, mriseg, max_i);
@@ -774,7 +774,7 @@ static MRI *remove_small_segments(MRI *mri_src, MRI *mri_dst) {
 }
 
 static MRI *pad_volume(MRI_SURFACE *mris, MRI *mri_src, MRI *mri_dst) {
-  int vno;
+  int    vno;
   double x, y, z, pad;
 
   pad = 0.0;

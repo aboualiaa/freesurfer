@@ -1,7 +1,7 @@
 #include "DialogVolumeSegmentation.h"
-#include "ui_DialogVolumeSegmentation.h"
-#include "MainWindow.h"
 #include "LayerMRI.h"
+#include "MainWindow.h"
+#include "ui_DialogVolumeSegmentation.h"
 #include <QDebug>
 #include <QMessageBox>
 
@@ -38,7 +38,7 @@ bool DialogVolumeSegmentation::ValidateInput() {
     return false;
   }
   bool ok;
-  int nval = ui->lineEditMinLabelIndex->text().trimmed().toInt(&ok);
+  int  nval = ui->lineEditMinLabelIndex->text().trimmed().toInt(&ok);
   if (!ok || nval < 0) {
     QMessageBox::warning(this, "Error",
                          "Please enter a valid minimum label index");
@@ -61,7 +61,7 @@ bool DialogVolumeSegmentation::ValidateInput() {
 
 void DialogVolumeSegmentation::UpdateVolumes() {
   QList<Layer *> layers = MainWindow::GetMainWindow()->GetLayers("MRI");
-  LayerMRI *src = NULL;
+  LayerMRI *     src    = NULL;
   if (ui->comboBoxVolume->currentIndex() >= 0)
     src = qobject_cast<LayerMRI *>(
         ui->comboBoxVolume->itemData(ui->comboBoxVolume->currentIndex())

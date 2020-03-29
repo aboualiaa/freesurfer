@@ -25,8 +25,8 @@
 
 #include "mri_wbc.hpp"
 
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <boost/filesystem.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #include "diag.h"
 #include "fmriutils.h"
@@ -40,38 +40,41 @@
 namespace fsys = boost::filesystem; // sadly fs is already defined: freesurfer
 
 int main(int argc, char *argv[]) {
-  int nargs,err,n;
+  int  nargs, err, n;
   WBC *wbc;
 
-  cmdargs = (CMDARGS *)calloc(sizeof(CMDARGS),1);
+  cmdargs             = (CMDARGS *)calloc(sizeof(CMDARGS), 1);
   cmdargs->distthresh = 10;
-  cmdargs->DoDist = 0;
-  cmdargs->DoMat = 0;
-  cmdargs->nrholist = 0;
-  cmdargs->ForceFail = 0;
+  cmdargs->DoDist     = 0;
+  cmdargs->DoMat      = 0;
+  cmdargs->nrholist   = 0;
+  cmdargs->ForceFail  = 0;
 
   nargs = handleVersionOption(argc, argv, "mri_wbc");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
-  cmdline = argv2cmdline(argc,argv);
+  cmdline = argv2cmdline(argc, argv);
   uname(&uts);
-  getcwd(cwd,2000);
+  getcwd(cwd, 2000);
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
-  if (argc == 0) usage_exit();
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(NULL, NULL, NULL);
+  if (argc == 0)
+    usage_exit();
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly) return(0);
+  if (checkoptsonly)
+    return (0);
   dump_options(stdout);
 
-  if(cmdargs->outdir){
-    err = mkdir(cmdargs->outdir,0777);
-    if(err != 0 && errno != EEXIST) {
-      printf("ERROR: creating directory %s\n",cmdargs->outdir);
+  if (cmdargs->outdir) {
+    err = mkdir(cmdargs->outdir, 0777);
+    if (err != 0 && errno != EEXIST) {
+      printf("ERROR: creating directory %s\n", cmdargs->outdir);
       perror(NULL);
       exit(1);
     }
@@ -82,10 +85,10 @@ int main(int argc, char *argv[]) {
   // its contents
   // TODO(aboualiaa): fix this dependency
   wbc.distthresh = cmdargs.distthresh;
-  wbc.DoDist = cmdargs.DoDist;
-  wbc.DoMat = cmdargs.DoMat;
-  wbc.rholist = cmdargs.rholist;
-  wbc.DoTest = cmdargs.DoTest;
+  wbc.DoDist     = cmdargs.DoDist;
+  wbc.DoMat      = cmdargs.DoMat;
+  wbc.rholist    = cmdargs.rholist;
+  wbc.DoTest     = cmdargs.DoTest;
 
   if (cmdargs.DoTest) {
     WBCtestSynth(&wbc);
@@ -353,12 +356,12 @@ void initArgDesc(podesc *desc, CMDARGS *cmdargs) {
 static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
   podesc desc("\nUSAGE: mri_wbc <options> --lh <lhsurface> -o "
               "<outdir>\n\nAvailable Options");
-  povm vm;
+  povm   vm;
 
   initArgDesc(&desc, cmdargs);
   auto args = cmdargs->raw;
-  auto ac = static_cast<int>(args.size());
-  auto av = args.data();
+  auto ac   = static_cast<int>(args.size());
+  auto av   = args.data();
   if (ac == 1) {
     print_usage(desc, env);
     return false;
@@ -400,7 +403,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
   if (vm.count("lh") != 0U) {
     auto opts = vm["lh"].as<std::vector<std::string>>();
     if (!vm["lh"].empty() && (opts.size() == 3 || opts.size() == 2)) {
-      cmdargs->flh = opts[0];
+      cmdargs->flh       = opts[0];
       cmdargs->lhsurface = opts[1];
       if (opts.size() == 3) {
         cmdargs->lhsurface2 = opts[2];
@@ -416,7 +419,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
   if (vm.count("rh") != 0U) {
     auto opts = vm["rh"].as<std::vector<std::string>>();
     if (!vm["rh"].empty() && (opts.size() == 3 || opts.size() == 2)) {
-      cmdargs->frh = opts[0];
+      cmdargs->frh       = opts[0];
       cmdargs->rhsurface = opts[1];
       if (opts.size() == 3) {
         cmdargs->rhsurface2 = opts[2];
@@ -475,7 +478,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
       } else if (vm.count(v) == 0U) {
         continue;
       }
-      int volNameInt = v == "vol" ? 1 : v == "lh" ? 2 : 3;
+      int         volNameInt = v == "vol" ? 1 : v == "lh" ? 2 : 3;
       std::string prefix(cmdargs->outdir + "/" + v);
       std::string conName(prefix + ".con" + ".nii.gz");
       std::string conNameS(prefix + ".con" + "S" + ".nii.gz");
@@ -483,7 +486,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
       std::string rhoMean(prefix + ".rho.mean" + ".nii.gz");
       switch (volNameInt) {
       case 1:
-        cmdargs->volcon = conName;
+        cmdargs->volcon     = conName;
         cmdargs->volrhomean = rhoMean;
         if (cmdargs->DoDist) {
           cmdargs->volconS = conNameS;
@@ -491,7 +494,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
         }
         break;
       case 2:
-        cmdargs->lhcon = conName;
+        cmdargs->lhcon     = conName;
         cmdargs->lhrhomean = rhoMean;
         if (cmdargs->DoDist) {
           cmdargs->lhconS = conNameS;
@@ -499,7 +502,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
         }
         break;
       case 3:
-        cmdargs->rhcon = conName;
+        cmdargs->rhcon     = conName;
         cmdargs->rhrhomean = rhoMean;
         if (cmdargs->DoDist) {
           cmdargs->rhconS = conNameS;
@@ -626,15 +629,15 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
     }
   } else {
     spdlog::debug("doing test, creating wbcsynth");
-    wbc->wbcsynth = wbc::WBCSYNTH();
-    wbc->wbcsynth.volres = defaultRes;
-    wbc->wbcsynth.voldim = defaultDim;
-    wbc->wbcsynth.nframes = five;
+    wbc->wbcsynth               = wbc::WBCSYNTH();
+    wbc->wbcsynth.volres        = defaultRes;
+    wbc->wbcsynth.voldim        = defaultDim;
+    wbc->wbcsynth.nframes       = five;
     wbc->wbcsynth.nshorttarg[0] = defaultnshorttarg;
-    wbc->wbcsynth.nlongtarg[0] = defaultnlongtarg;
+    wbc->wbcsynth.nlongtarg[0]  = defaultnlongtarg;
     wbc->wbcsynth.nshorttarg[1] = defaultnshorttarg1;
-    wbc->wbcsynth.nlongtarg[1] = defaultnlongtarg1;
-    wbc->wbcsynth.ForceFail = static_cast<int>(cmdargs->ForceFail);
+    wbc->wbcsynth.nlongtarg[1]  = defaultnlongtarg1;
+    wbc->wbcsynth.ForceFail     = static_cast<int>(cmdargs->ForceFail);
     WBCtestSynth(wbc);
   }
 
@@ -660,28 +663,28 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
 // MARK: - Workers
 
 MRI *WholeBrainCon(WBC *wbc) {
-  std::vector<MRI *> conth;
-  std::vector<MRI *> conSth;
-  std::vector<MRI *> conLth;
-  std::vector<MRI *> rhomean;
-  int nthreads = 1;
-  int nthrho;
-  int64 nperthread0;
-  std::vector<int64> nperthread;
-  int64 ntot;
-  int threadno; // thread number
-  int64 npairs;
-  int64 ia;
-  int64 ib;
-  int k1; // note: these are redefined in loop
-  Timer timer;
-  std::vector<double *> pfold;
+  std::vector<MRI *>              conth;
+  std::vector<MRI *>              conSth;
+  std::vector<MRI *>              conLth;
+  std::vector<MRI *>              rhomean;
+  int                             nthreads = 1;
+  int                             nthrho;
+  int64                           nperthread0;
+  std::vector<int64>              nperthread;
+  int64                           ntot;
+  int                             threadno; // thread number
+  int64                           npairs;
+  int64                           ia;
+  int64                           ib;
+  int                             k1; // note: these are redefined in loop
+  Timer                           timer;
+  std::vector<double *>           pfold;
   std::vector<std::vector<float>> pf;
-  float val;
-  std::vector<int64> k1a;
-  std::vector<int64> k1b;
-  std::vector<int64> k2a;
-  std::vector<int64> k2b;
+  float                           val;
+  std::vector<int64>              k1a;
+  std::vector<int64>              k1b;
+  std::vector<int64>              k2a;
+  std::vector<int64>              k2b;
 
   // Load time courses into a pointer structure
   pf.reserve(wbc->ntot);
@@ -783,47 +786,47 @@ MRI *WholeBrainCon(WBC *wbc) {
 
       for (threadno = 0; threadno < nthreads; threadno++) {
     ROMP_PFLB_begin int k1;
-    int k2;
-    int t;
-    float n;
-    int thno; // thread number, used to save thread number of omp
-    int q;
-    float ct1;
-    float ct2;
-    int k1start;
-    int k1stop;
-    int k2start;
-    int k2stop;
-    int k2min;
-    int k2max;
-    int nthrho;
-    int64 nthpair;
-    float rho;
-    double dx;
-    double dy;
-    double dz;
-    double dist;
-    double *pf1old;
+    int                 k2;
+    int                 t;
+    float               n;
+    int                thno; // thread number, used to save thread number of omp
+    int                q;
+    float              ct1;
+    float              ct2;
+    int                k1start;
+    int                k1stop;
+    int                k2start;
+    int                k2stop;
+    int                k2min;
+    int                k2max;
+    int                nthrho;
+    int64              nthpair;
+    float              rho;
+    double             dx;
+    double             dy;
+    double             dz;
+    double             dist;
+    double *           pf1old;
     std::vector<float> pf1;
-    double *pf2old;
+    double *           pf2old;
     std::vector<float> pf2;
-    double x1;
-    double y1;
-    double z1;
-    double x2;
-    double y2;
-    double z2;
-    double rhothresh;
-    MRI *conDth;
+    double             x1;
+    double             y1;
+    double             z1;
+    double             x2;
+    double             y2;
+    double             z2;
+    double             rhothresh;
+    MRI *              conDth;
     thno = threadno;
 #ifdef HAVE_OPENMP
     thno = omp_get_thread_num(); // actual thread number
 #endif
 
     k1start = k1a[thno];
-    k1stop = k1b[thno];
+    k1stop  = k1b[thno];
     k2start = k2a[thno];
-    k2stop = k2b[thno];
+    k2stop  = k2b[thno];
 
     nthpair = 0;
     for (k1 = k1start; k1 <= k1stop; k1++) {
@@ -880,15 +883,15 @@ MRI *WholeBrainCon(WBC *wbc) {
         ct1 = MRIgetVoxVal(wbc->coordtype, k1, 0, 0, 0);
         ct2 = MRIgetVoxVal(wbc->coordtype, k2, 0, 0, 0);
         if (ct1 == ct2) {
-          x1 = MRIgetVoxVal(wbc->xyz, k1, 0, 0, 0);
-          y1 = MRIgetVoxVal(wbc->xyz, k1, 0, 0, 1);
-          z1 = MRIgetVoxVal(wbc->xyz, k1, 0, 0, 2);
-          x2 = MRIgetVoxVal(wbc->xyz, k2, 0, 0, 0);
-          y2 = MRIgetVoxVal(wbc->xyz, k2, 0, 0, 1);
-          z2 = MRIgetVoxVal(wbc->xyz, k2, 0, 0, 2);
-          dx = x1 - x2;
-          dy = y1 - y2;
-          dz = z1 - z2;
+          x1   = MRIgetVoxVal(wbc->xyz, k1, 0, 0, 0);
+          y1   = MRIgetVoxVal(wbc->xyz, k1, 0, 0, 1);
+          z1   = MRIgetVoxVal(wbc->xyz, k1, 0, 0, 2);
+          x2   = MRIgetVoxVal(wbc->xyz, k2, 0, 0, 0);
+          y2   = MRIgetVoxVal(wbc->xyz, k2, 0, 0, 1);
+          z2   = MRIgetVoxVal(wbc->xyz, k2, 0, 0, 2);
+          dx   = x1 - x2;
+          dy   = y1 - y2;
+          dz   = z1 - z2;
           dist = sqrt(dx * dx + dy * dy + dz * dz);
           if (dist < wbc->distthresh) {
             q = 1; // short dist
@@ -910,15 +913,15 @@ MRI *WholeBrainCon(WBC *wbc) {
             a gyrus or sulcus) so this checks the inflated. The problem
             with the inflated is that it is not distortion-free.
             */
-            x1 = MRIgetVoxVal(wbc->xyz2, k1, 0, 0, 0);
-            y1 = MRIgetVoxVal(wbc->xyz2, k1, 0, 0, 1);
-            z1 = MRIgetVoxVal(wbc->xyz2, k1, 0, 0, 2);
-            x2 = MRIgetVoxVal(wbc->xyz2, k2, 0, 0, 0);
-            y2 = MRIgetVoxVal(wbc->xyz2, k2, 0, 0, 1);
-            z2 = MRIgetVoxVal(wbc->xyz2, k2, 0, 0, 2);
-            dx = x1 - x2;
-            dy = y1 - y2;
-            dz = z1 - z2;
+            x1   = MRIgetVoxVal(wbc->xyz2, k1, 0, 0, 0);
+            y1   = MRIgetVoxVal(wbc->xyz2, k1, 0, 0, 1);
+            z1   = MRIgetVoxVal(wbc->xyz2, k1, 0, 0, 2);
+            x2   = MRIgetVoxVal(wbc->xyz2, k2, 0, 0, 0);
+            y2   = MRIgetVoxVal(wbc->xyz2, k2, 0, 0, 1);
+            z2   = MRIgetVoxVal(wbc->xyz2, k2, 0, 0, 2);
+            dx   = x1 - x2;
+            dy   = y1 - y2;
+            dz   = z1 - z2;
             dist = sqrt(dx * dx + dy * dy + dz * dz);
             if (dist >= wbc->distthresh) {
               q = 2; // long dist
@@ -985,18 +988,18 @@ MRI *WholeBrainCon(WBC *wbc) {
 }
 
 int WBCprep(WBC *wbc) {
-  int nthvox;
-  int c;
-  int r;
-  int s;
-  int t;
-  int k;
-  int vtxno;
+  int     nthvox;
+  int     c;
+  int     r;
+  int     s;
+  int     t;
+  int     k;
+  int     vtxno;
   MATRIX *V;
   MATRIX *crs;
   MATRIX *xyz = nullptr;
-  float val;
-  float voxvolume;
+  float   val;
+  float   voxvolume;
 
   if (wbc->fvol != nullptr) {
     wbc->nframes = wbc->fvol->nframes;
@@ -1014,8 +1017,8 @@ int WBCprep(WBC *wbc) {
   }
 
   wbc->nvolmask = 0;
-  wbc->nlhmask = 0;
-  wbc->nrhmask = 0;
+  wbc->nlhmask  = 0;
+  wbc->nrhmask  = 0;
   if (wbc->fvol != nullptr) {
     if (wbc->volmask != nullptr) {
       wbc->nvolmask = MRIcountAboveThreshold(wbc->volmask, half);
@@ -1046,7 +1049,7 @@ int WBCprep(WBC *wbc) {
   wbc->vvol =
       MRIallocSequence(wbc->ntot, 1, 1, MRI_FLOAT, 1); // vertex/voxel volume
   wbc->vertexno = MRIalloc(wbc->ntot, 1, 1, MRI_INT);
-  wbc->xyz = MRIallocSequence(wbc->ntot, 1, 1, MRI_FLOAT, 3);
+  wbc->xyz      = MRIallocSequence(wbc->ntot, 1, 1, MRI_FLOAT, 3);
   if ((wbc->lh2 != nullptr) || (wbc->rh2 != nullptr)) {
     wbc->xyz2 = MRIallocSequence(wbc->ntot, 1, 1, MRI_FLOAT, 3);
   }
@@ -1060,9 +1063,9 @@ int WBCprep(WBC *wbc) {
     // we never compute the distance from volume to surface, it is always
     // long distance. If this turns out not to be the case, then will need
     // a registraion matrix
-    voxvolume = wbc->fvol->xsize * wbc->fvol->ysize * wbc->fvol->zsize;
-    V = MRIxfmCRS2XYZtkreg(wbc->fvol);
-    crs = MatrixAlloc(4, 1, MATRIX_REAL);
+    voxvolume       = wbc->fvol->xsize * wbc->fvol->ysize * wbc->fvol->zsize;
+    V               = MRIxfmCRS2XYZtkreg(wbc->fvol);
+    crs             = MatrixAlloc(4, 1, MATRIX_REAL);
     crs->rptr[4][1] = 1;
     for (s = 0; s < wbc->fvol->depth; s++) {
       for (c = 0; c < wbc->fvol->width; c++) {
@@ -1076,7 +1079,7 @@ int WBCprep(WBC *wbc) {
           crs->rptr[1][1] = static_cast<float>(c);
           crs->rptr[2][1] = static_cast<float>(r);
           crs->rptr[3][1] = static_cast<float>(s);
-          xyz = MatrixMultiplyD(V, crs, xyz);
+          xyz             = MatrixMultiplyD(V, crs, xyz);
           for (k = 0; k < 3; k++) {
             MRIsetVoxVal(wbc->xyz, nthvox, 0, 0, k, xyz->rptr[k + 1][1]);
           }
@@ -1155,12 +1158,12 @@ int WBCprep(WBC *wbc) {
 }
 
 int WBCfinish(WBC *wbc) {
-  int nthvox;
-  int c;
-  int r;
-  int s;
-  int vtxno;
-  int nthrho;
+  int   nthvox;
+  int   c;
+  int   r;
+  int   s;
+  int   vtxno;
+  int   nthrho;
   float val;
 
   nthvox = 0;
@@ -1308,16 +1311,16 @@ int Index2UpperSubscript(int N, int64 i, int64 *r, int64 *c) {
        sqrt(pow((1 - two * static_cast<float>(N)), 2) - eightPointZero * i1)) /
       two);
   ir1 = N * r1 - (r1 * (r1 + 1)) / 2;
-  c1 = N - (ir1 - i1);
-  *r = r1 - 1;
-  *c = c1 - 1;
+  c1  = N - (ir1 - i1);
+  *r  = r1 - 1;
+  *c  = c1 - 1;
   return (0);
 }
 
 // TODO(aboualiaa): move to tests file
 int Index2UpperSubscriptTest(int N) {
-  int r;
-  int c;
+  int   r;
+  int   c;
   int64 rt;
   int64 ct;
   int64 i;
@@ -1325,7 +1328,7 @@ int Index2UpperSubscriptTest(int N) {
 
   fmt::printf("Index2UpperSubscriptTest(): N = %d\n", N);
   err = 0;
-  i = 0;
+  i   = 0;
   for (r = 0; r < N - 1; r++) {
     for (c = r + 1; c < N; c++) {
       Index2UpperSubscript(N, i, &rt, &ct);
@@ -1376,42 +1379,42 @@ int WBCnframes(WBC *wbc) {
 
 // TODO(aboualiaa): move to tests file
 WBC *WBCtestSynth(WBC *wbc) {
-  FSENV *fsenv;
-  double x0;
-  double y0;
-  double z0;
-  double x;
-  double y;
-  double z;
-  double dx;
-  double dy;
-  double dz;
-  double d;
-  float volres;
+  FSENV *             fsenv;
+  double              x0;
+  double              y0;
+  double              z0;
+  double              x;
+  double              y;
+  double              z;
+  double              dx;
+  double              dy;
+  double              dz;
+  double              d;
+  float               volres;
   std::vector<double> wf;
-  double dmax = 0;
-  int nshort;
-  int nlong;
-  int t;
-  int vno;
-  int hemi;
-  int voldim;
-  int nframes;
-  int c0;
-  int r0;
-  int s0;
-  int c2;
-  std::string tmpstr;
-  char *hemistr;
-  MRIS *surf;
-  MRIS *surf2;
-  MRI *func;
-  MRI *mask;
+  double              dmax = 0;
+  int                 nshort;
+  int                 nlong;
+  int                 t;
+  int                 vno;
+  int                 hemi;
+  int                 voldim;
+  int                 nframes;
+  int                 c0;
+  int                 r0;
+  int                 s0;
+  int                 c2;
+  std::string         tmpstr;
+  char *              hemistr;
+  MRIS *              surf;
+  MRIS *              surf2;
+  MRI *               func;
+  MRI *               mask;
 
-  fsenv = FSENVgetenv();
-  volres = wbc->wbcsynth.volres;
-  voldim = wbc->wbcsynth.voldim;
-  nframes = wbc->wbcsynth.nframes;
+  fsenv        = FSENVgetenv();
+  volres       = wbc->wbcsynth.volres;
+  voldim       = wbc->wbcsynth.voldim;
+  nframes      = wbc->wbcsynth.nframes;
   wbc->nframes = nframes;
 
   if (wbc->wbcsynth.ForceFail != 0) {
@@ -1438,13 +1441,13 @@ WBC *WBCtestSynth(WBC *wbc) {
   wbc->fvol->xsize = volres;
   wbc->fvol->ysize = volres;
   wbc->fvol->zsize = volres;
-  wbc->fvol->tr = max_rows;
+  wbc->fvol->tr    = max_rows;
 
-  wbc->volmask = MRIallocSequence(voldim, voldim, voldim, MRI_FLOAT, 1);
+  wbc->volmask        = MRIallocSequence(voldim, voldim, voldim, MRI_FLOAT, 1);
   wbc->volmask->xsize = volres;
   wbc->volmask->ysize = volres;
   wbc->volmask->zsize = volres;
-  wbc->volmask->tr = max_rows;
+  wbc->volmask->tr    = max_rows;
 
   c0 = nint(static_cast<float>(wbc->fvol->width) / two);
   r0 = nint(static_cast<float>(wbc->fvol->height) / two);
@@ -1484,7 +1487,7 @@ WBC *WBCtestSynth(WBC *wbc) {
                1); // mask but no signal, unless ForceFail
   MRIsetVoxVal(wbc->volmask, c2, r0 + 1, s0 - 1, 0, 1); // mask but no signal
   wbc->wbcsynth.nshortvol = 2; // number of short con to/from crs0
-  wbc->wbcsynth.nlongvol = 2;  // number of long con to/from crs0
+  wbc->wbcsynth.nlongvol  = 2; // number of long con to/from crs0
 
   wbc->wbcsynth.v0 = 0;
   for (hemi = 0; hemi < 2; hemi++) {
@@ -1526,9 +1529,9 @@ WBC *WBCtestSynth(WBC *wbc) {
 
     spdlog::debug("alloc sequence again");
 
-    func = MRIallocSequence(surf->nvertices, 1, 1, MRI_FLOAT, wbc->nframes);
+    func     = MRIallocSequence(surf->nvertices, 1, 1, MRI_FLOAT, wbc->nframes);
     func->tr = max_rows;
-    mask = MRIallocSequence(surf->nvertices, 1, 1, MRI_FLOAT, 1);
+    mask     = MRIallocSequence(surf->nvertices, 1, 1, MRI_FLOAT, 1);
 
     spdlog::debug("set the first vertex waveform");
 
@@ -1538,19 +1541,19 @@ WBC *WBCtestSynth(WBC *wbc) {
       MRIsetVoxVal(func, 0, 0, 0, t, wf[t]);
     }
 
-    x0 = surf->vertices[0].x;
-    y0 = surf->vertices[0].y;
-    z0 = surf->vertices[0].z;
+    x0     = surf->vertices[0].x;
+    y0     = surf->vertices[0].y;
+    z0     = surf->vertices[0].z;
     nshort = 0;
-    nlong = 0;
+    nlong  = 0;
     for (vno = 0; vno < surf->nvertices; vno++) {
-      x = surf->vertices[vno].x;
-      y = surf->vertices[vno].y;
-      z = surf->vertices[vno].z;
+      x  = surf->vertices[vno].x;
+      y  = surf->vertices[vno].y;
+      z  = surf->vertices[vno].z;
       dx = (x - x0);
       dy = (y - y0);
       dz = (z - z0);
-      d = sqrt(dx * dx + dy * dy + dz * dz);
+      d  = sqrt(dx * dx + dy * dy + dz * dz);
       if (d < zeroPointNine * wbc->wbcsynth.distthresh &&
           nshort < gsl::at(wbc->wbcsynth.nshorttarg, hemi)) {
         for (t = 0; t < wbc->nframes; t++) {
@@ -1574,17 +1577,17 @@ WBC *WBCtestSynth(WBC *wbc) {
     spdlog::debug("copying");
 
     gsl::at(wbc->wbcsynth.nshort, hemi) = nshort - 1; // remove self
-    gsl::at(wbc->wbcsynth.nlong, hemi) = nlong;
+    gsl::at(wbc->wbcsynth.nlong, hemi)  = nlong;
     fmt::printf("%s short %d long %d\n", hemistr, nshort, nlong);
     if (hemi == 0) {
-      wbc->lh = surf;
-      wbc->lh2 = surf2;
-      wbc->flh = func;
+      wbc->lh     = surf;
+      wbc->lh2    = surf2;
+      wbc->flh    = func;
       wbc->lhmask = mask;
     } else {
-      wbc->rh = surf;
-      wbc->rh2 = surf2;
-      wbc->frh = func;
+      wbc->rh     = surf;
+      wbc->rh2    = surf2;
+      wbc->frh    = func;
       wbc->rhmask = mask;
     }
   } // hemi

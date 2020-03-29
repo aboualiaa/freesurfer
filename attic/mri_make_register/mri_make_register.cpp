@@ -23,14 +23,14 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-#include "mri.h"
-#include "matrix.h"
 #include "error.h"
+#include "matrix.h"
+#include "mri.h"
 #include "version.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 float fct_c_r, fct_c_a, fct_c_s;
 float fct_n_r, fct_n_a, fct_n_s;
@@ -39,17 +39,17 @@ float fct_tr_r, fct_tr_a, fct_tr_s;
 float fct_br_r, fct_br_a, fct_br_s;
 float fct_slice_thickness;
 float fct_in_plane_resolution;
-int fct_rows, fct_cols, fct_slices;
+int   fct_rows, fct_cols, fct_slices;
 
 const char *Progname;
 
-void usage(int exit_val);
-void read_functional_header(char *fct_stem);
+void    usage(int exit_val);
+void    read_functional_header(char *fct_stem);
 MATRIX *make_register_matrix(MRI *high_res_vol, MRI *fct_run_vol);
-void set_matrix(MATRIX *m, float e11, float e12, float e13, float e14,
-                float e21, float e22, float e23, float e24, float e31,
-                float e32, float e33, float e34, float e41, float e42,
-                float e43, float e44);
+void    set_matrix(MATRIX *m, float e11, float e12, float e13, float e14,
+                   float e21, float e22, float e23, float e24, float e31,
+                   float e32, float e33, float e34, float e41, float e42,
+                   float e43, float e44);
 
 void usage(int exit_val) {
 
@@ -71,19 +71,19 @@ void usage(int exit_val) {
 
 int main(int argc, char *argv[]) {
 
-  MRI *high_res_vol = NULL, *fct_run_vol = NULL;
-  char *subjects_dir;
+  MRI *   high_res_vol = NULL, *fct_run_vol = NULL;
+  char *  subjects_dir;
   MATRIX *register_matrix;
-  char *subject_name, *fct_stem, structural_dir[STRLEN];
-  char t1_path[STRLEN];
-  char file_name[STRLEN];
-  FILE *fp;
-  char *s;
-  int n_time_points;
-  char register_name[STRLEN];
-  char analyse_name[STRLEN];
-  int i;
-  int nargs;
+  char *  subject_name, *fct_stem, structural_dir[STRLEN];
+  char    t1_path[STRLEN];
+  char    file_name[STRLEN];
+  FILE *  fp;
+  char *  s;
+  int     n_time_points;
+  char    register_name[STRLEN];
+  char    analyse_name[STRLEN];
+  int     i;
+  int     nargs;
 
   nargs = handleVersionOption(argc, argv, "mri_make_register");
   if (nargs && argc - nargs == 1)
@@ -94,10 +94,10 @@ int main(int argc, char *argv[]) {
   Progname = (Progname == NULL ? argv[0] : Progname + 1);
 
   register_name[0] = '\0';
-  analyse_name[0] = '\0';
-  t1_path[0] = '\0';
+  analyse_name[0]  = '\0';
+  t1_path[0]       = '\0';
   subject_name = fct_stem = NULL;
-  structural_dir[0] = '\0';
+  structural_dir[0]       = '\0';
 
   for (i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-a") == 0) {
@@ -208,9 +208,9 @@ int main(int argc, char *argv[]) {
 void read_functional_header(char *fct_stem) {
 
   FILE *fp;
-  char aws_header_name[STRLEN], aws_header_line[STRLEN];
+  char  aws_header_name[STRLEN], aws_header_line[STRLEN];
   char *s;
-  int good_fct_header_flag = 0;
+  int   good_fct_header_flag = 0;
 
   /* try .awshdr (from translate_aws), .bhdr, and .ras (from imgs2bshort) */
   sprintf(aws_header_name, "%s.awshdr", fct_stem);
@@ -228,62 +228,62 @@ void read_functional_header(char *fct_stem) {
   while (fgets(aws_header_line, STRLEN, fp) != NULL) {
     if ((s = strstr(aws_header_line, "normal_r")) != NULL) {
       s += 10;
-      fct_n_r = (float)atof(s);
+      fct_n_r              = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "normal_a")) != NULL) {
       s += 10;
-      fct_n_a = (float)atof(s);
+      fct_n_a              = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "normal_s")) != NULL) {
       s += 10;
-      fct_n_s = (float)atof(s);
+      fct_n_s              = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_left_r")) != NULL) {
       s += 12;
-      fct_tl_r = (float)atof(s);
+      fct_tl_r             = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_left_a")) != NULL) {
       s += 12;
-      fct_tl_a = (float)atof(s);
+      fct_tl_a             = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_left_s")) != NULL) {
       s += 12;
-      fct_tl_s = (float)atof(s);
+      fct_tl_s             = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_right_r")) != NULL) {
       s += 13;
-      fct_tr_r = (float)atof(s);
+      fct_tr_r             = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_right_a")) != NULL) {
       s += 13;
-      fct_tr_a = (float)atof(s);
+      fct_tr_a             = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_right_s")) != NULL) {
       s += 13;
-      fct_tr_s = (float)atof(s);
+      fct_tr_s             = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "bottom_right_r")) != NULL) {
       s += 16;
-      fct_br_r = (float)atof(s);
+      fct_br_r             = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "bottom_right_a")) != NULL) {
       s += 16;
-      fct_br_a = (float)atof(s);
+      fct_br_a             = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "bottom_right_s")) != NULL) {
       s += 16;
-      fct_br_s = (float)atof(s);
+      fct_br_s             = (float)atof(s);
       good_fct_header_flag = 1;
     }
 
@@ -336,7 +336,7 @@ MATRIX *make_register_matrix(MRI *high_res_vol, MRI *fct_run_vol) {
   MATRIX *si1toi2, *fi1toi2;
   MATRIX *si1tor, *fi1tor;
   MATRIX *rm;
-  float fctxmn, fctymn, fctzmn;
+  float   fctxmn, fctymn, fctzmn;
 
   float fct_x_r, fct_x_a, fct_x_s;
   float fct_y_r, fct_y_a, fct_y_s;
@@ -402,14 +402,14 @@ MATRIX *make_register_matrix(MRI *high_res_vol, MRI *fct_run_vol) {
    *
    ******************************************************************/
 
-  itoi = MatrixAlloc(4, 4, MATRIX_REAL);
+  itoi     = MatrixAlloc(4, 4, MATRIX_REAL);
   si2toras = MatrixAlloc(4, 4, MATRIX_REAL);
   fi2toras = MatrixAlloc(4, 4, MATRIX_REAL);
-  si1toi2 = MatrixAlloc(4, 4, MATRIX_REAL);
-  fi1toi2 = MatrixAlloc(4, 4, MATRIX_REAL);
-  si1tor = MatrixAlloc(4, 4, MATRIX_REAL);
-  fi1tor = MatrixAlloc(4, 4, MATRIX_REAL);
-  rm = MatrixAlloc(4, 4, MATRIX_REAL);
+  si1toi2  = MatrixAlloc(4, 4, MATRIX_REAL);
+  fi1toi2  = MatrixAlloc(4, 4, MATRIX_REAL);
+  si1tor   = MatrixAlloc(4, 4, MATRIX_REAL);
+  fi1tor   = MatrixAlloc(4, 4, MATRIX_REAL);
+  rm       = MatrixAlloc(4, 4, MATRIX_REAL);
 
   if (high_res_vol->ras_good_flag == 0) {
     printf("T1 volume contains no orientation information\n");

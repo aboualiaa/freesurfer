@@ -33,30 +33,30 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-static int extract_labeled_image(MRI *mri_in, TRANSFORM *transform, int label,
-                                 MRI *mri_out);
+static int  extract_labeled_image(MRI *mri_in, TRANSFORM *transform, int label,
+                                  MRI *mri_out);
 
 const char *Progname;
 
-static char *out_like_fname = nullptr;
-static char *xform_fname = nullptr;
-static LTA *lta = nullptr;
-static TRANSFORM *transform = nullptr;
-static float sigma = 0;
-static int dilate = 0;
-static int erode = 0;
-static int exit_none_found = 0;
-static int nvoxels = 0; // track the number of label voxels found
+static char *     out_like_fname  = nullptr;
+static char *     xform_fname     = nullptr;
+static LTA *      lta             = nullptr;
+static TRANSFORM *transform       = nullptr;
+static float      sigma           = 0;
+static int        dilate          = 0;
+static int        erode           = 0;
+static int        exit_none_found = 0;
+static int        nvoxels         = 0; // track the number of label voxels found
 
 int main(int argc, char *argv[]) {
   char **av, *in_fname, *out_fname;
-  int ac, nargs, i, label;
-  MRI *mri_in, *mri_out, *mri_kernel, *mri_smoothed;
+  int    ac, nargs, i, label;
+  MRI *  mri_in, *mri_out, *mri_kernel, *mri_smoothed;
 
   nargs = handleVersionOption(argc, argv, "mri_extract_label");
   if (nargs && argc - nargs == 1)
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit();
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   out_fname = argv[argc - 1];
 
   printf("reading volume from %s...\n", in_fname);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
   }
   if (!FZERO(sigma)) {
     printf("smoothing extracted volume...\n");
-    mri_kernel = MRIgaussian1d(sigma, 10 * sigma);
+    mri_kernel   = MRIgaussian1d(sigma, 10 * sigma);
     mri_smoothed = MRIconvolveGaussian(mri_out, nullptr, mri_kernel);
     MRIfree(&mri_out);
     mri_out = mri_smoothed;
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -152,18 +152,18 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "-version"))
     print_version();
   else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "out_like") || !stricmp(option, "ol")) {
     out_like_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("shaping output to be like %s...\n", out_like_fname);
   } else if (!stricmp(option, "dilate")) {
     dilate = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("dilating output volume %d times before writing\n", dilate);
   } else if (!stricmp(option, "erode")) {
     erode = atoi(argv[2]);
@@ -183,7 +183,7 @@ static int get_option(int argc, char *argv[]) {
     case 'T':
       xform_fname = argv[2];
       printf("reading and applying transform %s...\n", xform_fname);
-      nargs = 1;
+      nargs     = 1;
       transform = TransformRead(xform_fname);
       if (!transform)
         ErrorExit(ERROR_NOFILE, "%s: could not read transform from %s",
@@ -194,7 +194,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':

@@ -26,9 +26,9 @@
 #ifndef fastmarching_h
 #define fastmarching_h
 
+#include "diag.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "diag.h"
 
 MRI *MRIextractDistanceMap(MRI *mri_src, MRI *mri_dst, int label,
                            float max_distance, int mode, MRI *mri_mask);
@@ -37,13 +37,13 @@ void MRISextractOutsideDistanceMap(MRIS *mris, MRI *mri_src, int label,
                                    int offset, float resolution,
                                    float max_distance);
 
-#include <queue>
-#include <functional>
 #include <climits>
+#include <functional>
 #include <list>
+#include <queue>
 
-#include "mrisurf.h"
 #include "error.h"
+#include "mrisurf.h"
 
 #define mapMRI_XYZ(mri, x, y, z)                                               \
   for (int z = 0; z < mri->depth; z++)                                         \
@@ -51,8 +51,8 @@ void MRISextractOutsideDistanceMap(MRIS *mris, MRI *mri_src, int label,
       for (int x = 0; x < mri->width; x++)
 
 const float DELTA = 1.0f;
-const float EPS = 1e-6f;
-const float BIG = 1e6f;
+const float EPS   = 1e-6f;
+const float BIG   = 1e6f;
 
 class stCoord {
 public:
@@ -60,8 +60,8 @@ public:
   stCoord(int _x, int _y, int _z) : x(_x), y(_y), z(_z) {}
 };
 
-using CoordList = std::list<stCoord>;
-using CoordListIterator = CoordList::iterator;
+using CoordList               = std::list<stCoord>;
+using CoordListIterator       = CoordList::iterator;
 using const_CoordListIterator = CoordList::const_iterator;
 
 typedef enum { eAlive = 0, eTrial = 1, eFar = 2, eForbidden = 3 } eState;
@@ -89,29 +89,29 @@ protected:
   // members
 
 public:
-  MRI *mri;
-  MRI *mri_mask;
+  MRI *     mri;
+  MRI *     mri_mask;
   CoordHeap trial_heap;
   CoordList alive_list;
-  MRI *status;
-  float limit;
-  int width, height, depth;
+  MRI *     status;
+  float     limit;
+  int       width, height, depth;
 
 public:
   // constructor, destructor
   FastMarching(MRI *_mri, MRI *_mri_mask)
       : mri(_mri), mri_mask(_mri_mask), trial_heap(HeapCompare(mri)) {
     status = MRIalloc(mri->width, mri->height, mri->depth, MRI_UCHAR);
-    width = mri->width;
+    width  = mri->width;
     height = mri->height;
-    depth = mri->depth;
+    depth  = mri->depth;
     Init();
     // set mask value in status volume to eForbidden here
     if (mri_mask) {
       mapMRI_XYZ(status, x, y,
                  z) if ((int)MRIgetVoxVal(mri_mask, x, y, z, 0) == 0) {
         MRIvox(status, x, y, z) = eForbidden; // Por qua? Por qua pa?
-        MRIFvox(mri, x, y, z) = limit;
+        MRIFvox(mri, x, y, z)   = limit;
       }
     }
   }
@@ -142,7 +142,7 @@ public:
   void AddTrialPoint(const int x, const int y, const int z) {
     if (MRIvox(status, x, y, z) == eFar) {
       MRIvox(status, x, y, z) = eTrial;
-      MRIFvox(mri, x, y, z) = _UpdateValue(x, y, z);
+      MRIFvox(mri, x, y, z)   = _UpdateValue(x, y, z);
       trial_heap.push(stCoord(x, y, z));
     }
   }
@@ -210,7 +210,7 @@ public:
           if (MRIvox(status, pt.x, pt.y, pt.z) == eForbidden)
             DiagBreak();
           MRIvox(status, pt.x, pt.y, pt.z) = eFar;
-          MRIFvox(mri, pt.x, pt.y, pt.z) = limit;
+          MRIFvox(mri, pt.x, pt.y, pt.z)   = limit;
           trial_heap.pop();
         }
         return;
@@ -254,7 +254,7 @@ private:
       DiagBreak();
     if (st == eFar) {
       MRIvox(status, x, y, z) = eTrial;
-      MRIFvox(mri, x, y, z) = _UpdateValue(x, y, z);
+      MRIFvox(mri, x, y, z)   = _UpdateValue(x, y, z);
       trial_heap.push(stCoord(x, y, z));
     } else if (st == eTrial) {
       MRIFvox(mri, x, y, z) = _UpdateValue(x, y, z);
@@ -290,29 +290,29 @@ private:
       DiagBreak();
     if (A > B) {
       const float tmp = A;
-      A = B;
-      B = tmp;
+      A               = B;
+      B               = tmp;
     }
 
     if (B > C) {
       const float tmp = B;
-      B = C;
-      C = tmp;
+      B               = C;
+      C               = tmp;
     }
     if (A > B) {
       const float tmp = A;
-      A = B;
-      B = tmp;
+      A               = B;
+      B               = tmp;
     }
 
     float returnValue = sign * (A + 1);
 
     // On suppose sol>=C : premier trinome
-    float a = 3;
-    float b = -(A + B + C);
-    float c = A * A + B * B + C * C - 1;
+    float a     = 3;
+    float b     = -(A + B + C);
+    float c     = A * A + B * B + C * C - 1;
     float delta = b * b - a * c;
-    float sol = (-b + ::sqrt(delta)) / a;
+    float sol   = (-b + ::sqrt(delta)) / a;
 
     // On a bien sol>=C, on a gagne
     if (delta >= 0 && sol + EPS >= C) {
@@ -322,9 +322,9 @@ private:
     } else {
 
       // On supppose B<=sol<C : deuxieme trinome
-      a = 2;
-      b = -(A + B);
-      c = A * A + B * B - 1;
+      a     = 2;
+      b     = -(A + B);
+      c     = A * A + B * B - 1;
       delta = b * b - a * c;
 
       if (delta >= 0) {
@@ -437,7 +437,7 @@ public:
 
   void InitForOutsideMatch(MRI *mri_distance, MRI *_mri, int label) {
     double xv, yv, zv;
-    MRI *mri_seg = MRIalloc(width, height, depth, MRI_UCHAR);
+    MRI *  mri_seg = MRIalloc(width, height, depth, MRI_UCHAR);
     mapMRI_XYZ(mri, x, y, z) {
       // find coordinates for _mri: mri->surf->_mri
       MRIsurfaceRASToVoxel(_mri, xSURF(mri_distance, x), ySURF(mri_distance, y),
@@ -446,16 +446,16 @@ public:
       int val = MRIvox(_mri, (int)xv, (int)yv, (int)zv);
       if (val != label) {
         MRIvox(mri_seg, x, y, z) = 0;
-        MRIFvox(mri, x, y, z) = limit;
+        MRIFvox(mri, x, y, z)    = limit;
         continue;
       }
       MRIvox(mri_seg, x, y, z) = 1;
-      MRIvox(status, x, y, z) = eForbidden;
+      MRIvox(status, x, y, z)  = eForbidden;
     }
 
     mapMRI_XYZ(mri, x, y, z) {
       if (MRIFvox(mri_distance, x, y, z) <= 0.0f) {
-        MRIFvox(mri, x, y, z) = limit;
+        MRIFvox(mri, x, y, z)   = limit;
         MRIvox(status, x, y, z) = eForbidden;
       }
     }
@@ -463,11 +463,11 @@ public:
     mapMRI_XYZ(mri, x, y, z) {
       int val1 = MRIvox(mri_seg, x, y, z), val2;
       int px, py, pz;
-      px = (x < width - 1) ? x + 1 : x;
-      py = (y < height - 1) ? y + 1 : y;
-      pz = (z < depth - 1) ? z + 1 : z;
+      px       = (x < width - 1) ? x + 1 : x;
+      py       = (y < height - 1) ? y + 1 : y;
+      pz       = (z < depth - 1) ? z + 1 : z;
       bool add = false;
-      val2 = MRIvox(mri_seg, px, y, z);
+      val2     = MRIvox(mri_seg, px, y, z);
       if (val1 != val2) {
         add = true;
         _AddAlivePoint(px, y, z);

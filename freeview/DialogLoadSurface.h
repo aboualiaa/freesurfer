@@ -15,7 +15,7 @@ public:
   explicit DialogLoadSurface(QWidget *parent = 0);
   ~DialogLoadSurface();
 
-  QString GetFilename();
+  QString     GetFilename();
   QStringList GetSupFiles();
 
 public slots:

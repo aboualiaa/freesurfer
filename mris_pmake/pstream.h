@@ -27,21 +27,21 @@
 #ifndef REDI_PSTREAM_H_SEEN
 #define REDI_PSTREAM_H_SEEN
 
+#include <algorithm> // for min()
+#include <cerrno>    // for errno
+#include <csignal>   // for kill()
+#include <cstddef>   // for size_t
+#include <cstdlib>   // for exit()
+#include <cstring>   // for memcpy(), memmove() etc.
 #include <ios>
-#include <streambuf>
 #include <istream>
 #include <ostream>
+#include <streambuf>
 #include <string>
-#include <vector>
-#include <algorithm>   // for min()
-#include <cstring>     // for memcpy(), memmove() etc.
-#include <cerrno>      // for errno
-#include <cstddef>     // for size_t
-#include <cstdlib>     // for exit()
 #include <sys/types.h> // for pid_t
 #include <sys/wait.h>  // for waitpid()
 #include <unistd.h>    // for pipe() fork() exec() and filedes functions
-#include <csignal>     // for kill()
+#include <vector>
 #if REDI_EVISCERATE_PSTREAMS
 #include <stdio.h> // for FILE, fdopen()
 #endif
@@ -71,7 +71,7 @@ struct pstreams {
   /// Type used to hold the arguments for a command.
   using argv_type = std::vector<std::string>;
 
-  static const pmode pstdin = std::ios_base::out;  ///< Write to stdin
+  static const pmode pstdin  = std::ios_base::out; ///< Write to stdin
   static const pmode pstdout = std::ios_base::in;  ///< Read from stdout
   static const pmode pstderr = std::ios_base::app; ///< Read from stderr
 
@@ -86,11 +86,11 @@ class basic_pstreambuf : public std::basic_streambuf<CharT, Traits>,
                          public pstreams {
 public:
   // Type definitions for dependent types
-  using char_type = CharT;
+  using char_type   = CharT;
   using traits_type = Traits;
-  using int_type = typename traits_type::int_type;
-  using off_type = typename traits_type::off_type;
-  using pos_type = typename traits_type::pos_type;
+  using int_type    = typename traits_type::int_type;
+  using off_type    = typename traits_type::off_type;
+  using pos_type    = typename traits_type::pos_type;
   /// Type used for file descriptors.
   using fd_type = int;
   /** @deprecated use fd_type instead. */
@@ -205,16 +205,16 @@ private:
 
   void init_rbuffers();
 
-  pid_t ppid_;       // pid of process
-  fd_type wpipe_;    // pipe used to write to process' stdin
-  fd_type rpipe_[2]; // two pipes to read from, stdout and stderr
+  pid_t      ppid_;     // pid of process
+  fd_type    wpipe_;    // pipe used to write to process' stdin
+  fd_type    rpipe_[2]; // two pipes to read from, stdout and stderr
   char_type *wbuffer_;
   char_type *rbuffer_[2];
   char_type *rbufstate_[3];
   /// Index into rpipe_[] to indicate active source for read operations.
   buf_read_src rsrc_;
-  int status_; // hold exit status of child process
-  int error_;  // hold errno if fork() or exec() fails
+  int          status_; // hold exit status of child process
+  int          error_;  // hold errno if fork() or exec() fails
 };
 
 /// Class template for common base class.
@@ -261,8 +261,8 @@ public:
 #endif
 
 protected:
-  std::string command_; ///< The command used to start the process.
-  streambuf_type buf_;  ///< The stream buffer.
+  std::string    command_; ///< The command used to start the process.
+  streambuf_type buf_;     ///< The stream buffer.
 };
 
 /**
@@ -280,7 +280,7 @@ class basic_ipstream : public std::basic_istream<CharT, Traits>,
                        public pstream_common<CharT, Traits>,
                        virtual public pstreams {
   using istream_type = std::basic_istream<CharT, Traits>;
-  using pbase_type = pstream_common<CharT, Traits>;
+  using pbase_type   = pstream_common<CharT, Traits>;
 
   using pbase_type::buf_; // declare name in this scope
 
@@ -390,7 +390,7 @@ class basic_opstream : public std::basic_ostream<CharT, Traits>,
                        public pstream_common<CharT, Traits>,
                        virtual public pstreams {
   using ostream_type = std::basic_ostream<CharT, Traits>;
-  using pbase_type = pstream_common<CharT, Traits>;
+  using pbase_type   = pstream_common<CharT, Traits>;
 
   using pbase_type::buf_; // declare name in this scope
 
@@ -486,7 +486,7 @@ class basic_pstream : public std::basic_iostream<CharT, Traits>,
                       public pstream_common<CharT, Traits>,
                       virtual public pstreams {
   using iostream_type = std::basic_iostream<CharT, Traits>;
-  using pbase_type = pstream_common<CharT, Traits>;
+  using pbase_type    = pstream_common<CharT, Traits>;
 
   using pbase_type::buf_; // declare name in this scope
 
@@ -610,7 +610,7 @@ class basic_rpstream : public std::basic_ostream<CharT, Traits>,
                        virtual public pstreams {
   using ostream_type = std::basic_ostream<CharT, Traits>;
   using istream_type = std::basic_istream<CharT, Traits>;
-  using pbase_type = pstream_common<CharT, Traits>;
+  using pbase_type   = pstream_common<CharT, Traits>;
 
   using pbase_type::buf_; // declare name in this scope
 
@@ -763,7 +763,7 @@ inline basic_pstreambuf<C, T>::basic_pstreambuf()
  */
 template <typename C, typename T>
 inline basic_pstreambuf<C, T>::basic_pstreambuf(const std::string &command,
-                                                pmode mode)
+                                                pmode              mode)
     : ppid_(-1) // initialise to -1 to indicate no process run yet.
       ,
       wpipe_(-1), wbuffer_(NULL), rsrc_(rsrc_out), status_(-1), error_(0) {
@@ -782,8 +782,8 @@ inline basic_pstreambuf<C, T>::basic_pstreambuf(const std::string &command,
  */
 template <typename C, typename T>
 inline basic_pstreambuf<C, T>::basic_pstreambuf(const std::string &file,
-                                                const argv_type &argv,
-                                                pmode mode)
+                                                const argv_type &  argv,
+                                                pmode              mode)
     : ppid_(-1) // initialise to -1 to indicate no process run yet.
       ,
       wpipe_(-1), wbuffer_(NULL), rsrc_(rsrc_out), status_(-1), error_(0) {
@@ -816,7 +816,7 @@ inline basic_pstreambuf<C, T>::~basic_pstreambuf() {
  */
 template <typename C, typename T>
 basic_pstreambuf<C, T> *basic_pstreambuf<C, T>::open(const std::string &command,
-                                                     pmode mode) {
+                                                     pmode              mode) {
   basic_pstreambuf<C, T> *ret = NULL;
 
   if (!is_open()) {
@@ -864,8 +864,8 @@ basic_pstreambuf<C, T> *basic_pstreambuf<C, T>::open(const std::string &command,
  */
 template <typename C, typename T>
 basic_pstreambuf<C, T> *basic_pstreambuf<C, T>::open(const std::string &file,
-                                                     const argv_type &argv,
-                                                     pmode mode) {
+                                                     const argv_type &  argv,
+                                                     pmode              mode) {
   basic_pstreambuf<C, T> *ret = NULL;
 
   if (!is_open()) {
@@ -875,9 +875,9 @@ basic_pstreambuf<C, T> *basic_pstreambuf<C, T>::open(const std::string &file,
 
       char **arg_v = new char *[argv.size() + 1];
       for (std::size_t i = 0; i < argv.size(); ++i) {
-        const std::string &src = argv[i];
-        char *&dest = arg_v[i];
-        dest = new char[src.size() + 1];
+        const std::string &src           = argv[i];
+        char *&            dest          = arg_v[i];
+        dest                             = new char[src.size() + 1];
         dest[src.copy(dest, src.size())] = '\0';
       }
       arg_v[argv.size()] = nullptr;
@@ -944,10 +944,10 @@ pid_t basic_pstreambuf<C, T>::fork(pmode mode) {
   // three pairs of file descriptors, for pipes connected to the
   // process' stdin, stdout and stderr
   // (stored in a single array so close_fd_array() can close all at once)
-  fd_type fd[6] = {-1, -1, -1, -1, -1, -1};
-  fd_type *const pin = fd;
-  fd_type *const pout = fd + 2;
-  fd_type *const perr = fd + 4;
+  fd_type        fd[6] = {-1, -1, -1, -1, -1, -1};
+  fd_type *const pin   = fd;
+  fd_type *const pout  = fd + 2;
+  fd_type *const perr  = fd + 4;
 
   // constants for read/write ends of pipe
   const int RD = 0;
@@ -1152,9 +1152,9 @@ int basic_pstreambuf<C, T>::wait(bool nohang) {
       break;
     default:
       // process has exited
-      ppid_ = 0;
+      ppid_   = 0;
       status_ = status;
-      exited = 1;
+      exited  = 1;
       destroy_buffers(pstdin | pstdout | pstderr);
       close_fd_array(&wpipe_, 1);
       close_fd_array(rpipe_, 2);
@@ -1289,7 +1289,7 @@ template <typename C, typename T> int basic_pstreambuf<C, T>::sync() {
  */
 template <typename C, typename T>
 std::streamsize basic_pstreambuf<C, T>::xsputn(const char_type *s,
-                                               std::streamsize n) {
+                                               std::streamsize  n) {
   if (n < this->epptr() - this->pptr()) {
     std::memcpy(this->pptr(), s, n * sizeof(char_type));
     this->pbump(n);
@@ -1307,7 +1307,7 @@ std::streamsize basic_pstreambuf<C, T>::xsputn(const char_type *s,
  * @return  true if the buffer was emptied, false otherwise.
  */
 template <typename C, typename T> bool basic_pstreambuf<C, T>::empty_buffer() {
-  const std::streamsize count = this->pptr() - this->pbase();
+  const std::streamsize count   = this->pptr() - this->pbase();
   const std::streamsize written = this->write(this->wbuffer_, count);
   if (count > 0 && written == count) {
     this->pbump(-written);
@@ -1384,7 +1384,7 @@ template <typename C, typename T> bool basic_pstreambuf<C, T>::fill_buffer() {
  * @return  the number of characters written.
  */
 template <typename C, typename T>
-inline std::streamsize basic_pstreambuf<C, T>::write(char_type *s,
+inline std::streamsize basic_pstreambuf<C, T>::write(char_type *     s,
                                                      std::streamsize n) {
   return wpipe() >= 0 ? ::write(wpipe(), s, n * sizeof(char_type)) : 0;
 }
@@ -1399,7 +1399,7 @@ inline std::streamsize basic_pstreambuf<C, T>::write(char_type *s,
  * @return  the number of characters read.
  */
 template <typename C, typename T>
-inline std::streamsize basic_pstreambuf<C, T>::read(char_type *s,
+inline std::streamsize basic_pstreambuf<C, T>::read(char_type *     s,
                                                     std::streamsize n) {
   return rpipe() >= 0 ? ::read(rpipe(), s, n * sizeof(char_type)) : 0;
 }
@@ -1461,7 +1461,7 @@ inline pstream_common<C, T>::pstream_common()
  */
 template <typename C, typename T>
 inline pstream_common<C, T>::pstream_common(const std::string &command,
-                                            pmode mode)
+                                            pmode              mode)
     : std::basic_ios<C, T>(NULL), command_(command), buf_() {
   this->init(&buf_);
   do_open(command, mode);
@@ -1506,7 +1506,7 @@ inline pstream_common<C, T>::~pstream_common() {}
  */
 template <typename C, typename T>
 inline void pstream_common<C, T>::do_open(const std::string &command,
-                                          pmode mode) {
+                                          pmode              mode) {
   if (!buf_.open((command_ = command), mode))
     this->setstate(std::ios_base::failbit);
 }
@@ -1589,7 +1589,7 @@ pstream_common<C, T>::rdbuf() const {
 template <typename C, typename T>
 std::size_t basic_pstreambuf<C, T>::fopen(std::FILE *&in, std::FILE *&out,
                                           std::FILE *&err) {
-  in = out = err = NULL;
+  in = out = err         = NULL;
   std::size_t open_files = 0;
   if (wpipe() > -1) {
     if ((in = ::fdopen(wpipe(), "w"))) {

@@ -22,14 +22,14 @@
  *
  */
 
-#include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
+#include <memory.h>
 
+#include "dmatrix.h"
 #include "error.h"
 #include "matrix.h"
-#include "dmatrix.h"
 
 /*!
   \fn int DMatrixTest(void)
@@ -38,9 +38,9 @@
 */
 int DMatrixTest() {
   DMATRIX *m1d, *m2d, *md;
-  MATRIX *m1f, *m2f, *mf;
-  int err = 0;
-  double v, vf, vd;
+  MATRIX * m1f, *m2f, *mf;
+  int      err = 0;
+  double   v, vf, vd;
 
   printf("DMatrix: testing constant value ...");
   mf = MatrixConstVal(14, 7, 2, nullptr);
@@ -350,7 +350,7 @@ int DMatrixCheckDims(const DMATRIX *m1, const DMATRIX *m2, const int checktype,
 */
 DMATRIX *DMatrixAlloc(const int rows, const int cols, const int type) {
   DMATRIX *mat;
-  int row, nelts;
+  int      row, nelts;
 
   if (type == MATRIX_COMPLEX) {
     printf("ERROR: DMatrixAlloc(): complex types not supported\n");
@@ -370,7 +370,7 @@ DMATRIX *DMatrixAlloc(const int rows, const int cols, const int type) {
   mat->rows = rows;
   mat->cols = cols;
   mat->type = type;
-  nelts = rows * cols;
+  nelts     = rows * cols;
 
   /*Allocate a single array the size of the matrix, then initialize
     row pointers to the proper locations. */
@@ -411,7 +411,7 @@ int DMatrixFree(DMATRIX **pmat) {
   if (!pmat)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "DMatrixFree: NULL pmat POINTER!\n"));
-  mat = *pmat;
+  mat   = *pmat;
   *pmat = nullptr;
   if (!mat)
     return (0);
@@ -428,10 +428,10 @@ int DMatrixFree(DMATRIX **pmat) {
   double.
 */
 DMATRIX *DMatrixMultiply(const DMATRIX *m1, const DMATRIX *m2, DMATRIX *m3) {
-  int col, row, i, rows, cols, m1_cols, err;
+  int           col, row, i, rows, cols, m1_cols, err;
   DMATRIX_TYPE *r3;
   DMATRIX_TYPE *r1, *r2;
-  long double val;
+  long double   val;
 
   err = DMatrixCheckDims(m1, m2, 4, stdout, "DMatrixMultiply(): ");
   if (err)
@@ -459,15 +459,15 @@ DMATRIX *DMatrixMultiply(const DMATRIX *m1, const DMATRIX *m2, DMATRIX *m3) {
                  m1->rows, m1->cols, m2->rows, m2->cols, m3->rows, m3->cols));
   }
 
-  cols = m3->cols;
-  rows = m3->rows;
+  cols    = m3->cols;
+  rows    = m3->rows;
   m1_cols = m1->cols;
   for (row = 1; row <= rows; row++) {
     r3 = &m3->rptr[row][1];
     for (col = 1; col <= cols; col++) {
       val = 0.0;
-      r1 = &m1->rptr[row][1];
-      r2 = &m2->rptr[1][col];
+      r1  = &m1->rptr[row][1];
+      r2  = &m2->rptr[1][col];
       for (i = 1; i <= m1_cols; i++, r2 += cols)
         val += ((DMATRIX_TYPE)(*r1++) * (*r2));
       *r3++ = val;
@@ -525,7 +525,7 @@ int DMatrixPrint(FILE *fp, DMATRIX *mat) {
   the max abs diff. Returns -1 on error.
 */
 double DMatrixCompareFMatrix(MATRIX *mf, DMATRIX *md) {
-  int r, c;
+  int    r, c;
   double d, dmax;
   if (mf == nullptr) {
     printf("ERROR: DMatrixCompareFMatrix(): mf is NULL\n");
@@ -677,7 +677,7 @@ DMATRIX *DMatrixAddMul(DMATRIX *m1, DMATRIX *m2, double v1, double v2,
 #pragma omp parallel for
 #endif
   for (row = 1; row <= m1->rows; row++) {
-    int col;
+    int    col;
     double val;
     for (col = 1; col <= m1->cols; col++) {
       val = 0;
@@ -735,7 +735,7 @@ DMATRIX *DMatrixAdd(DMATRIX *m1, DMATRIX *m2, DMATRIX *mout) {
   \brief Compute the dot product of two vectors
 */
 double DVectorDot(const DVECTOR *v1, const DVECTOR *v2) {
-  int err, i;
+  int         err, i;
   long double dot;
   err = DMatrixCheckDims(v1, v2, 3, stdout, "DDVectorDot(): ");
   if (err)
@@ -794,7 +794,7 @@ DMATRIX *DMatrixZero(const int rows, const int cols, DMATRIX *X) {
   \brief Computes the lenght of the vector;
 */
 double DVectorLen(const DVECTOR *v) {
-  int i;
+  int         i;
   long double len, vi;
   if (v == nullptr) {
     printf("ERROR: DVectorLen() vector is NULL\n");
@@ -848,12 +848,12 @@ DVECTOR *DVectorCrossProduct(const DVECTOR *v1, const DVECTOR *v2,
     return (nullptr);
   }
 
-  x1 = v1->rptr[1][1];
-  y1 = v1->rptr[2][1];
-  z1 = v1->rptr[3][1];
-  x2 = v2->rptr[1][1];
-  y2 = v2->rptr[2][1];
-  z2 = v2->rptr[3][1];
+  x1               = v1->rptr[1][1];
+  y1               = v1->rptr[2][1];
+  z1               = v1->rptr[3][1];
+  x2               = v2->rptr[1][1];
+  y2               = v2->rptr[2][1];
+  z2               = v2->rptr[3][1];
   vdst->rptr[1][1] = y1 * z2 - z1 * y2;
   vdst->rptr[2][1] = z1 * x2 - x1 * z2;
   vdst->rptr[3][1] = x1 * y2 - y1 * x2;
@@ -867,7 +867,7 @@ DVECTOR *DVectorCrossProduct(const DVECTOR *v1, const DVECTOR *v2,
 */
 DMATRIX_TYPE DMatrixMaxAbs(DMATRIX *M) {
   DMATRIX_TYPE vmax = 0;
-  int r, c;
+  int          r, c;
   if (M == nullptr) {
     printf("ERROR: DMatrixMaxAbs(): matrix is NULL\n");
     return (-1);

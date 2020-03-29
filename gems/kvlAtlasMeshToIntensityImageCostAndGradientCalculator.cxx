@@ -1,8 +1,8 @@
 #include "kvlAtlasMeshToIntensityImageCostAndGradientCalculator.h"
 
-#include <itkMath.h>
-#include "vnl/vnl_matrix_fixed.h"
 #include "kvlTetrahedronInteriorConstIterator.h"
+#include "vnl/vnl_matrix_fixed.h"
+#include <itkMath.h>
 
 namespace kvl {
 
@@ -39,8 +39,8 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::SetImages(
 void AtlasMeshToIntensityImageCostAndGradientCalculator ::SetParameters(
     const std::vector<vnl_vector<double>> &means,
     const std::vector<vnl_matrix<double>> &variances,
-    const std::vector<double> &mixtureWeights,
-    const std::vector<int> &numberOfGaussiansPerClass) {
+    const std::vector<double> &            mixtureWeights,
+    const std::vector<int> &               numberOfGaussiansPerClass) {
   m_LikelihoodFilter->SetParameters(means, variances, mixtureWeights,
                                     numberOfGaussiansPerClass);
 }
@@ -94,7 +94,7 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::
     }
 
     //
-    double likelihood = 0.0;
+    double likelihood     = 0.0;
     double xGradientBasis = 0.0;
     double yGradientBasis = 0.0;
     double zGradientBasis = 0.0;

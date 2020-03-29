@@ -23,9 +23,9 @@
  *
  */
 
+#include "diag.h"
 #include "mrisurf_project.h"
 #include "tags.h"
-#include "diag.h"
 #include "timer.h"
 #include "version.h"
 
@@ -34,7 +34,7 @@ static char vcid[] = "$Id: mris_remove_negative_vertices.c,v 1.5 2011/03/02 "
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -45,10 +45,10 @@ const char *Progname;
 static INTEGRATION_PARMS parms;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_surf_fname, *out_fname, fname[STRLEN], *cp;
-  int ac, nargs, msec;
+  char **      av, *in_surf_fname, *out_fname, fname[STRLEN], *cp;
+  int          ac, nargs, msec;
   MRI_SURFACE *mris;
-  Timer then;
+  Timer        then;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_remove_negative_vertices");
 
@@ -65,20 +65,20 @@ int main(int argc, char *argv[]) {
   DiagInit(nullptr, nullptr, nullptr);
 
   memset(&parms, 0, sizeof(parms));
-  parms.dt = 1;
-  parms.tol = .5 /*1e-1*/;
+  parms.dt           = 1;
+  parms.tol          = .5 /*1e-1*/;
   parms.min_averages = 0;
-  parms.l_angle = 0.0 /* L_ANGLE */;
-  parms.l_area = 0.0 /* L_AREA */;
-  parms.l_neg = 0.0;
-  parms.l_spring = 0.0;
-  parms.l_boundary = 0.0;
-  parms.l_curv = 0.0;
-  parms.niterations = 1000;
+  parms.l_angle      = 0.0 /* L_ANGLE */;
+  parms.l_area       = 0.0 /* L_AREA */;
+  parms.l_neg        = 0.0;
+  parms.l_spring     = 0.0;
+  parms.l_boundary   = 0.0;
+  parms.l_curv       = 0.0;
+  parms.niterations  = 1000;
   parms.a = parms.b = parms.c = 0.0f; /* ellipsoid parameters */
-  parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.momentum = 0.0;
-  parms.base_name[0] = 0;
+  parms.integration_type      = INTEGRATE_MOMENTUM;
+  parms.momentum              = 0.0;
+  parms.base_name[0]          = 0;
 
   ac = argc;
   av = argv;
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     usage_exit();
 
   in_surf_fname = argv[1];
-  out_fname = argv[2];
+  out_fname     = argv[2];
 
   if (parms.base_name[0] == 0) {
     FileNameOnly(out_fname, fname);
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -141,12 +141,12 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'M':
       parms.integration_type = INTEGRATE_MOMENTUM;
-      parms.momentum = atof(argv[2]);
-      nargs = 1;
+      parms.momentum         = atof(argv[2]);
+      nargs                  = 1;
       fprintf(stderr, "momentum = %2.2f\n", (float)parms.momentum);
       break;
     case 'W':

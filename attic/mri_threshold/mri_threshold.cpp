@@ -25,44 +25,43 @@
  *
  */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 
-#include "mri.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "tags.h"
 #include "version.h"
-#include "error.h"
-#include "proto.h"
-#include "macros.h"
 
 static char vcid[] =
     "$Id: mri_threshold.c,v 1.10 2015/09/02 18:33:01 lzollei Exp $";
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
-static int binarize = 0;
+static int  binarize = 0;
 const char *Progname;
-int specificframe = 0;
-int frame = 0;
-int upperthreshold = 0;
+int         specificframe  = 0;
+int         frame          = 0;
+int         upperthreshold = 0;
 
 int main(int argc, char *argv[]) {
   char **av, *in_fname, *out_fname;
-  int ac, nargs;
-  MRI *mri_in, *mri_out;
-  float thresh;
-
+  int    ac, nargs;
+  MRI *  mri_in, *mri_out;
+  float  thresh;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_threshold");
-  Progname = argv[0] ;
-  nargs = handleVersionOption(argc, argv, "mri_threshold");
+  Progname            = argv[0];
+  nargs               = handleVersionOption(argc, argv, "mri_threshold");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;
@@ -81,8 +80,8 @@ int main(int argc, char *argv[]) {
 
   if (argc < 4)
     usage_exit();
-  in_fname = argv[1];
-  thresh = atof(argv[2]);
+  in_fname  = argv[1];
+  thresh    = atof(argv[2]);
   out_fname = argv[3];
 
   mri_in = MRIread(in_fname);
@@ -128,7 +127,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -145,12 +144,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'F':
-      frame = atoi(argv[2]);
+      frame         = atoi(argv[2]);
       specificframe = 1;
-      nargs = 1;
+      nargs         = 1;
       break;
     case 'U':
       upperthreshold = 1;

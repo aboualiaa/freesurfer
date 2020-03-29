@@ -24,34 +24,34 @@
  */
 
 #include "LayerVolumeBase.h"
+#include "BrushProperty.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
-#include "vtkImageData.h"
-#include "vtkSmartPointer.h"
-#include "vtkPoints.h"
+#include "LivewireTool.h"
+#include "MainWindow.h"
 #include "MyUtils.h"
 #include "MyVTKUtils.h"
-#include "BrushProperty.h"
-#include "MainWindow.h"
-#include "LivewireTool.h"
-#include <stdlib.h>
-#include <QFile>
-#include <QDir>
-#include <QDebug>
-#include "vtkSimpleLabelEdgeFilter.h"
+#include "vtkImageData.h"
 #include "vtkImageReslice.h"
+#include "vtkPoints.h"
+#include "vtkSimpleLabelEdgeFilter.h"
+#include "vtkSmartPointer.h"
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <stdlib.h>
 
 LayerVolumeBase::LayerVolumeBase(QObject *parent) : LayerEditable(parent) {
   m_strTypeNames.push_back("VolumeBase");
 
-  m_nActiveFrame = 0;
-  m_propertyBrush = MainWindow::GetMainWindow()->GetBrushProperty();
-  m_fFillValue = m_propertyBrush->GetFillValue();
-  m_fBlankValue = m_propertyBrush->GetEraseValue();
-  m_nBrushRadius = m_propertyBrush->GetBrushSize();
-  m_livewire = new LivewireTool();
-  m_imageData = NULL;
-  m_imageDataRef = NULL;
+  m_nActiveFrame        = 0;
+  m_propertyBrush       = MainWindow::GetMainWindow()->GetBrushProperty();
+  m_fFillValue          = m_propertyBrush->GetFillValue();
+  m_fBlankValue         = m_propertyBrush->GetEraseValue();
+  m_nBrushRadius        = m_propertyBrush->GetBrushSize();
+  m_livewire            = new LivewireTool();
+  m_imageData           = NULL;
+  m_imageDataRef        = NULL;
   m_shiftBackgroundData = NULL;
   m_shiftForegroundData = NULL;
   connect(m_propertyBrush, SIGNAL(FillValueChanged(double)), this,
@@ -84,7 +84,7 @@ LayerVolumeBase::~LayerVolumeBase() {
 QVector<int> LayerVolumeBase::SetVoxelByIndex(int *n_in, int nPlane, bool bAdd,
                                               bool ignore_brush_size) {
   QVector<int> indices;
-  int *nDim = m_imageData->GetDimensions();
+  int *        nDim = m_imageData->GetDimensions();
   /* for ( int i = 0; i < 3; i++ )
    {
     if ( n_in[i] < 0 || n_in[i] >= nDim[i] )
@@ -97,29 +97,29 @@ QVector<int> LayerVolumeBase::SetVoxelByIndex(int *n_in, int nPlane, bool bAdd,
 
   int nBrushSize = (ignore_brush_size ? 1 : m_propertyBrush->GetBrushSize());
   int n[3],
-      nsize[3] = {nBrushSize / 2 + 1, nBrushSize / 2 + 1, nBrushSize / 2 + 1};
+      nsize[3]  = {nBrushSize / 2 + 1, nBrushSize / 2 + 1, nBrushSize / 2 + 1};
   nsize[nPlane] = 1;
-  int nActiveComp = GetActiveFrame();
+  int     nActiveComp = GetActiveFrame();
   double *draw_range =
       bAdd ? m_propertyBrush->GetDrawRange() : m_propertyBrush->GetEraseRange();
   double *exclude_range = bAdd ? m_propertyBrush->GetExcludeRange()
                                : m_propertyBrush->GetEraseExcludeRange();
-  LayerVolumeBase *ref_layer = m_propertyBrush->GetReferenceLayer();
-  vtkImageData *ref = m_imageData;
-  int nActiveCompRef = 0;
+  LayerVolumeBase *ref_layer      = m_propertyBrush->GetReferenceLayer();
+  vtkImageData *   ref            = m_imageData;
+  int              nActiveCompRef = 0;
   if (ref_layer != NULL) {
-    ref = ref_layer->GetImageData();
+    ref            = ref_layer->GetImageData();
     nActiveCompRef = ref_layer->GetActiveFrame();
   }
-  char *ptr = (char *)m_imageData->GetScalarPointer();
-  int *dim = m_imageData->GetDimensions();
-  int scalar_type = m_imageData->GetScalarType();
-  int n_frames = m_imageData->GetNumberOfScalarComponents();
-  char *ref_ptr = (char *)ref->GetScalarPointer();
-  int *ref_dim = ref->GetDimensions();
-  int ref_scalar_type = ref->GetScalarType();
-  int ref_n_frames = ref->GetNumberOfScalarComponents();
-  bool bNotROI = (GetEndType() != "ROI");
+  char *ptr             = (char *)m_imageData->GetScalarPointer();
+  int * dim             = m_imageData->GetDimensions();
+  int   scalar_type     = m_imageData->GetScalarType();
+  int   n_frames        = m_imageData->GetNumberOfScalarComponents();
+  char *ref_ptr         = (char *)ref->GetScalarPointer();
+  int * ref_dim         = ref->GetDimensions();
+  int   ref_scalar_type = ref->GetScalarType();
+  int   ref_n_frames    = ref->GetNumberOfScalarComponents();
+  bool  bNotROI         = (GetEndType() != "ROI");
   for (int i = -nsize[0] + 1; i < nsize[0]; i++) {
     for (int j = -nsize[1] + 1; j < nsize[1]; j++) {
       for (int k = -nsize[2] + 1; k < nsize[2]; k++) {
@@ -176,27 +176,27 @@ bool LayerVolumeBase::CloneVoxelByIndex(int *n_in, int nPlane) {
 
   int nBrushSize = m_propertyBrush->GetBrushSize();
   int n[3],
-      nsize[3] = {nBrushSize / 2 + 1, nBrushSize / 2 + 1, nBrushSize / 2 + 1};
+      nsize[3]  = {nBrushSize / 2 + 1, nBrushSize / 2 + 1, nBrushSize / 2 + 1};
   nsize[nPlane] = 1;
-  int nActiveComp = GetActiveFrame();
-  double *draw_range = m_propertyBrush->GetDrawRange();
-  double *exclude_range = m_propertyBrush->GetExcludeRange();
-  LayerVolumeBase *ref_layer = m_propertyBrush->GetReferenceLayer();
-  vtkImageData *ref = m_imageData;
-  int nActiveCompRef = 0;
+  int              nActiveComp    = GetActiveFrame();
+  double *         draw_range     = m_propertyBrush->GetDrawRange();
+  double *         exclude_range  = m_propertyBrush->GetExcludeRange();
+  LayerVolumeBase *ref_layer      = m_propertyBrush->GetReferenceLayer();
+  vtkImageData *   ref            = m_imageData;
+  int              nActiveCompRef = 0;
   if (ref_layer != NULL) {
-    ref = ref_layer->GetImageData();
+    ref            = ref_layer->GetImageData();
     nActiveCompRef = ref_layer->GetActiveFrame();
   }
-  char *ptr = (char *)m_imageData->GetScalarPointer();
-  int *dim = m_imageData->GetDimensions();
-  int scalar_type = m_imageData->GetScalarType();
-  int n_frames = m_imageData->GetNumberOfScalarComponents();
-  char *ref_ptr = (char *)ref->GetScalarPointer();
-  int *ref_dim = ref->GetDimensions();
-  int ref_scalar_type = ref->GetScalarType();
-  int ref_n_frames = ref->GetNumberOfScalarComponents();
-  bool bNotROI = (GetEndType() != "ROI");
+  char *ptr             = (char *)m_imageData->GetScalarPointer();
+  int * dim             = m_imageData->GetDimensions();
+  int   scalar_type     = m_imageData->GetScalarType();
+  int   n_frames        = m_imageData->GetNumberOfScalarComponents();
+  char *ref_ptr         = (char *)ref->GetScalarPointer();
+  int * ref_dim         = ref->GetDimensions();
+  int   ref_scalar_type = ref->GetScalarType();
+  int   ref_n_frames    = ref->GetNumberOfScalarComponents();
+  bool  bNotROI         = (GetEndType() != "ROI");
   for (int i = -nsize[0] + 1; i < nsize[0]; i++) {
     for (int j = -nsize[1] + 1; j < nsize[1]; j++) {
       for (int k = -nsize[2] + 1; k < nsize[2]; k++) {
@@ -231,11 +231,11 @@ bool LayerVolumeBase::CloneVoxelByIndex(int *n_in, int nPlane) {
 
 bool LayerVolumeBase::GetConnectedToOld(vtkImageData *img, int nFrame,
                                         int *n_in, int nPlane) {
-  int *nDim = img->GetDimensions();
-  char *ptr = (char *)img->GetScalarPointer();
-  int scalar_type = img->GetScalarType();
-  int n_frames = img->GetNumberOfScalarComponents();
-  int nBounds[6] = {-1, 1, -1, 1, -1, 1};
+  int * nDim          = img->GetDimensions();
+  char *ptr           = (char *)img->GetScalarPointer();
+  int   scalar_type   = img->GetScalarType();
+  int   n_frames      = img->GetNumberOfScalarComponents();
+  int   nBounds[6]    = {-1, 1, -1, 1, -1, 1};
   nBounds[nPlane * 2] = nBounds[nPlane * 2 + 1] = 0;
   int n[3];
   for (int i = nBounds[0]; i <= nBounds[1]; i++) {
@@ -260,8 +260,8 @@ bool LayerVolumeBase::GetConnectedToOld(vtkImageData *img, int nFrame,
 
 void LayerVolumeBase::SetVoxelByRAS(double *ras, int nPlane, bool bAdd,
                                     bool ignore_brush_size) {
-  int n[3];
-  double *origin = m_imageData->GetOrigin();
+  int     n[3];
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
   for (int i = 0; i < 3; i++) {
     n[i] = (int)((ras[i] - origin[i]) / voxel_size[i] + 0.5);
@@ -279,8 +279,8 @@ void LayerVolumeBase::SetVoxelByRAS(double *ras, int nPlane, bool bAdd,
 
 void LayerVolumeBase::SetVoxelByRAS(double *ras1, double *ras2, int nPlane,
                                     bool bAdd, bool ignore_brush_size) {
-  int n1[3], n2[3];
-  double *origin = m_imageData->GetOrigin();
+  int     n1[3], n2[3];
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
   for (int i = 0; i < 3; i++) {
     n1[i] = (int)((ras1[i] - origin[i]) / voxel_size[i] + 0.5);
@@ -310,10 +310,10 @@ QVector<int> LayerVolumeBase::SetVoxelByIndex(int *n1, int *n2, int nPlane,
   }
   int x0 = n1[nx], y0 = n1[ny], x1 = n2[nx], y1 = n2[ny];
 
-  int dx = x1 - x0;
-  int dy = y1 - y0;
-  double t = 0.5;
-  int n[3];
+  int          dx = x1 - x0;
+  int          dy = y1 - y0;
+  double       t  = 0.5;
+  int          n[3];
   QVector<int> list;
   list = SetVoxelByIndex(n1, nPlane, bAdd, ignore_brush_size);
   if (abs(dx) > abs(dy)) {
@@ -324,9 +324,9 @@ QVector<int> LayerVolumeBase::SetVoxelByIndex(int *n1, int *n2, int nPlane,
     while (x0 != x1) {
       x0 += dx;
       t += m;
-      n[nx] = x0;
-      n[ny] = (int)t;
-      n[nPlane] = n1[nPlane];
+      n[nx]              = x0;
+      n[ny]              = (int)t;
+      n[nPlane]          = n1[nPlane];
       QVector<int> list1 = SetVoxelByIndex(n, nPlane, bAdd, ignore_brush_size);
       if (!list1.isEmpty())
         list << list1;
@@ -339,9 +339,9 @@ QVector<int> LayerVolumeBase::SetVoxelByIndex(int *n1, int *n2, int nPlane,
     while (y0 != y1) {
       y0 += dy;
       t += m;
-      n[nx] = (int)t;
-      n[ny] = y0;
-      n[nPlane] = n1[nPlane];
+      n[nx]              = (int)t;
+      n[ny]              = y0;
+      n[nPlane]          = n1[nPlane];
       QVector<int> list1 = SetVoxelByIndex(n, nPlane, bAdd, ignore_brush_size);
       if (!list1.isEmpty())
         list << list1;
@@ -351,8 +351,8 @@ QVector<int> LayerVolumeBase::SetVoxelByIndex(int *n1, int *n2, int nPlane,
 }
 
 void LayerVolumeBase::CloneVoxelByRAS(double *ras, int nPlane) {
-  int n[3];
-  double *origin = m_imageData->GetOrigin();
+  int     n[3];
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
   for (int i = 0; i < 3; i++) {
     n[i] = (int)((ras[i] - origin[i]) / voxel_size[i] + 0.5);
@@ -367,8 +367,8 @@ void LayerVolumeBase::CloneVoxelByRAS(double *ras, int nPlane) {
 }
 
 void LayerVolumeBase::CloneVoxelByRAS(double *ras1, double *ras2, int nPlane) {
-  int n1[3], n2[3];
-  double *origin = m_imageData->GetOrigin();
+  int     n1[3], n2[3];
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
   for (int i = 0; i < 3; i++) {
     n1[i] = (int)((ras1[i] - origin[i]) / voxel_size[i] + 0.5);
@@ -394,11 +394,11 @@ bool LayerVolumeBase::CloneVoxelByIndex(int *n1, int *n2, int nPlane) {
   }
   int x0 = n1[nx], y0 = n1[ny], x1 = n2[nx], y1 = n2[ny];
 
-  int dx = x1 - x0;
-  int dy = y1 - y0;
-  double t = 0.5;
-  int n[3];
-  bool bChanged = CloneVoxelByIndex(n1, nPlane);
+  int    dx = x1 - x0;
+  int    dy = y1 - y0;
+  double t  = 0.5;
+  int    n[3];
+  bool   bChanged = CloneVoxelByIndex(n1, nPlane);
   if (abs(dx) > abs(dy)) {
     double m = (double)dy / (double)dx;
     t += y0;
@@ -407,10 +407,10 @@ bool LayerVolumeBase::CloneVoxelByIndex(int *n1, int *n2, int nPlane) {
     while (x0 != x1) {
       x0 += dx;
       t += m;
-      n[nx] = x0;
-      n[ny] = (int)t;
+      n[nx]     = x0;
+      n[ny]     = (int)t;
       n[nPlane] = n1[nPlane];
-      bChanged = CloneVoxelByIndex(n, nPlane);
+      bChanged  = CloneVoxelByIndex(n, nPlane);
     }
   } else {
     double m = (double)dx / (double)dy;
@@ -420,18 +420,18 @@ bool LayerVolumeBase::CloneVoxelByIndex(int *n1, int *n2, int nPlane) {
     while (y0 != y1) {
       y0 += dy;
       t += m;
-      n[nx] = (int)t;
-      n[ny] = y0;
+      n[nx]     = (int)t;
+      n[ny]     = y0;
       n[nPlane] = n1[nPlane];
-      bChanged = CloneVoxelByIndex(n, nPlane);
+      bChanged  = CloneVoxelByIndex(n, nPlane);
     }
   }
   return true;
 }
 
 bool LayerVolumeBase::BorderFillByRAS(double *ras, int nPlane, bool b3D) {
-  int n[3];
-  double *origin = m_imageData->GetOrigin();
+  int     n[3];
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
   for (int i = 0; i < 3; i++) {
     n[i] = (int)((ras[i] - origin[i]) / voxel_size[i] + 0.5);
@@ -448,11 +448,11 @@ bool LayerVolumeBase::BorderFillByRAS(double *ras, int nPlane, bool b3D) {
 }
 
 QVector<int> LayerVolumeBase::BorderFillByRAS(int *n, int nPlane) {
-  QVector<int> voxel_list;
-  int *nDim = m_imageData->GetDimensions();
-  double *origin = m_imageData->GetOrigin();
-  double *voxel_size = m_imageData->GetSpacing();
-  int nx = 0, ny = 0;
+  QVector<int>                     voxel_list;
+  int *                            nDim       = m_imageData->GetDimensions();
+  double *                         origin     = m_imageData->GetOrigin();
+  double *                         voxel_size = m_imageData->GetSpacing();
+  int                              nx = 0, ny = 0;
   vtkSmartPointer<vtkImageReslice> reslice =
       vtkSmartPointer<vtkImageReslice>::New();
   reslice->SetOutputDimensionality(2);
@@ -481,23 +481,23 @@ QVector<int> LayerVolumeBase::BorderFillByRAS(int *n, int nPlane) {
     break;
   }
 
-  LayerVolumeBase *ref_layer = m_propertyBrush->GetReferenceLayer();
-  vtkImageData *ref = m_imageData;
-  int nActiveCompRef = 0;
+  LayerVolumeBase *ref_layer      = m_propertyBrush->GetReferenceLayer();
+  vtkImageData *   ref            = m_imageData;
+  int              nActiveCompRef = 0;
   if (ref_layer != NULL) {
-    ref = ref_layer->GetImageData();
+    ref            = ref_layer->GetImageData();
     nActiveCompRef = ref_layer->GetActiveFrame();
   }
-  int nActiveComp = this->GetActiveFrame();
-  char *ptr = (char *)m_imageData->GetScalarPointer();
-  int *dim = m_imageData->GetDimensions();
-  int scalar_type = m_imageData->GetScalarType();
-  int n_frames = m_imageData->GetNumberOfScalarComponents();
-  char *ref_ptr = (char *)ref->GetScalarPointer();
-  int *ref_dim = ref->GetDimensions();
-  int ref_scalar_type = ref->GetScalarType();
-  int ref_n_frames = ref->GetNumberOfScalarComponents();
-  float fVoxelValue = MyVTKUtils::GetImageDataComponent(
+  int   nActiveComp     = this->GetActiveFrame();
+  char *ptr             = (char *)m_imageData->GetScalarPointer();
+  int * dim             = m_imageData->GetDimensions();
+  int   scalar_type     = m_imageData->GetScalarType();
+  int   n_frames        = m_imageData->GetNumberOfScalarComponents();
+  char *ref_ptr         = (char *)ref->GetScalarPointer();
+  int * ref_dim         = ref->GetDimensions();
+  int   ref_scalar_type = ref->GetScalarType();
+  int   ref_n_frames    = ref->GetNumberOfScalarComponents();
+  float fVoxelValue     = MyVTKUtils::GetImageDataComponent(
       ref_ptr, ref_dim, ref_n_frames, n[0], n[1], n[2], 0, ref_scalar_type);
   vtkSmartPointer<vtkSimpleLabelEdgeFilter> filter =
       vtkSmartPointer<vtkSimpleLabelEdgeFilter>::New();
@@ -509,8 +509,8 @@ QVector<int> LayerVolumeBase::BorderFillByRAS(int *n, int nPlane) {
   filter->SetInputConnection(reslice->GetOutputPort());
   filter->Update();
   vtkSmartPointer<vtkImageData> outline_image = filter->GetOutput();
-  ref_ptr = (char *)outline_image->GetScalarPointer();
-  ref_dim = outline_image->GetDimensions();
+  ref_ptr          = (char *)outline_image->GetScalarPointer();
+  ref_dim          = outline_image->GetDimensions();
   float fTolerance = 0;
   switch (nPlane) {
   case 0:
@@ -565,10 +565,10 @@ QVector<int> LayerVolumeBase::BorderFillByRAS(int *n, int nPlane) {
 bool LayerVolumeBase::FloodFillByRAS(double *ras, int nPlane, bool bAdd,
                                      bool b3D, char *mask_out,
                                      bool ignore_exclusion) {
-  int n[3];
-  double *origin = m_imageData->GetOrigin();
+  int     n[3];
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
-  int *dim = m_imageData->GetDimensions();
+  int *   dim        = m_imageData->GetDimensions();
   for (int i = 0; i < 3; i++) {
     n[i] = (int)((ras[i] - origin[i]) / voxel_size[i] + 0.5);
   }
@@ -588,9 +588,9 @@ bool LayerVolumeBase::FloodFillByRAS(double *ras, int nPlane, bool bAdd,
     }
   } else {
     QVector<int> list_all;
-    int n0[3] = {n[0], n[1], n[2]};
+    int          n0[3] = {n[0], n[1], n[2]};
     for (int i = n0[nPlane]; i < dim[nPlane]; i++) {
-      n[nPlane] = i;
+      n[nPlane]         = i;
       QVector<int> list = FloodFillByIndex(n, nPlane, bAdd, false);
       if (list.isEmpty())
         break;
@@ -598,7 +598,7 @@ bool LayerVolumeBase::FloodFillByRAS(double *ras, int nPlane, bool bAdd,
         list_all << list;
     }
     for (int i = n0[nPlane] - 1; i >= 0; i--) {
-      n[nPlane] = i;
+      n[nPlane]         = i;
       QVector<int> list = FloodFillByIndex(n, nPlane, bAdd, false);
       if (list.isEmpty())
         break;
@@ -615,53 +615,53 @@ bool LayerVolumeBase::FloodFillByRAS(double *ras, int nPlane, bool bAdd,
 // when mask_out is not null, do not fill the actual image data. instead, fill
 // the mask_out buffer
 QVector<int> LayerVolumeBase::FloodFillByIndex(int *n, int nPlane, bool bAdd,
-                                               bool ignore_overflow,
+                                               bool  ignore_overflow,
                                                char *mask_out,
-                                               bool ignore_exclusion) {
+                                               bool  ignore_exclusion) {
   QVector<int> voxel_list;
-  int *nDim = m_imageData->GetDimensions();
-  int nx = 0, ny = 0, x = 0, y = 0;
+  int *        nDim = m_imageData->GetDimensions();
+  int          nx = 0, ny = 0, x = 0, y = 0;
   switch (nPlane) {
   case 0:
     nx = nDim[1];
     ny = nDim[2];
-    x = n[1];
-    y = n[2];
+    x  = n[1];
+    y  = n[2];
     break;
   case 1:
     nx = nDim[0];
     ny = nDim[2];
-    x = n[0];
-    y = n[2];
+    x  = n[0];
+    y  = n[2];
     break;
   case 2:
     nx = nDim[0];
     ny = nDim[1];
-    x = n[0];
-    y = n[1];
+    x  = n[0];
+    y  = n[1];
     break;
   }
-  char **mask = MyUtils::AllocateMatrix<char>(ny, nx);
-  int i, j;
-  double *draw_range = m_propertyBrush->GetDrawRange();
-  double *exclude_range = m_propertyBrush->GetExcludeRange();
-  LayerVolumeBase *ref_layer = m_propertyBrush->GetReferenceLayer();
-  vtkImageData *ref = m_imageData;
-  int nActiveCompRef = 0;
+  char **          mask = MyUtils::AllocateMatrix<char>(ny, nx);
+  int              i, j;
+  double *         draw_range     = m_propertyBrush->GetDrawRange();
+  double *         exclude_range  = m_propertyBrush->GetExcludeRange();
+  LayerVolumeBase *ref_layer      = m_propertyBrush->GetReferenceLayer();
+  vtkImageData *   ref            = m_imageData;
+  int              nActiveCompRef = 0;
   if (ref_layer != NULL) {
-    ref = ref_layer->GetImageData();
+    ref            = ref_layer->GetImageData();
     nActiveCompRef = ref_layer->GetActiveFrame();
   }
-  int nActiveComp = this->GetActiveFrame();
-  char *ptr = (char *)m_imageData->GetScalarPointer();
-  int *dim = m_imageData->GetDimensions();
-  int scalar_type = m_imageData->GetScalarType();
-  int n_frames = m_imageData->GetNumberOfScalarComponents();
-  char *ref_ptr = (char *)ref->GetScalarPointer();
-  int *ref_dim = ref->GetDimensions();
-  int ref_scalar_type = ref->GetScalarType();
-  int ref_n_frames = ref->GetNumberOfScalarComponents();
-  float fVoxelValue = MyVTKUtils::GetImageDataComponent(
+  int   nActiveComp     = this->GetActiveFrame();
+  char *ptr             = (char *)m_imageData->GetScalarPointer();
+  int * dim             = m_imageData->GetDimensions();
+  int   scalar_type     = m_imageData->GetScalarType();
+  int   n_frames        = m_imageData->GetNumberOfScalarComponents();
+  char *ref_ptr         = (char *)ref->GetScalarPointer();
+  int * ref_dim         = ref->GetDimensions();
+  int   ref_scalar_type = ref->GetScalarType();
+  int   ref_n_frames    = ref->GetNumberOfScalarComponents();
+  float fVoxelValue     = MyVTKUtils::GetImageDataComponent(
       ref_ptr, ref_dim, ref_n_frames, n[0], n[1], n[2], 0, ref_scalar_type);
   double fRange[2];
   ref->GetScalarRange(fRange);
@@ -861,17 +861,17 @@ QVector<int> LayerVolumeBase::FloodFillByIndex(int *n, int nPlane, bool bAdd,
 }
 
 void LayerVolumeBase::SetLiveWireByRAS(double *pt1, double *pt2, int nPlane) {
-  int n1[3];
-  double *orig = m_imageData->GetOrigin();
+  int     n1[3];
+  double *orig    = m_imageData->GetOrigin();
   double *vxlsize = m_imageData->GetSpacing();
   for (int i = 0; i < 3; i++) {
     n1[i] = (int)((pt1[i] - orig[i]) / vxlsize[i]);
     //    n2[i] = ( int )( ( pt2[i] - orig[i] ) / vxlsize[i] );
   }
 
-  vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
-  vtkImageData *image = m_imageData;
-  LayerVolumeBase *ref_layer = m_propertyBrush->GetReferenceLayer();
+  vtkSmartPointer<vtkPoints> pts       = vtkSmartPointer<vtkPoints>::New();
+  vtkImageData *             image     = m_imageData;
+  LayerVolumeBase *          ref_layer = m_propertyBrush->GetReferenceLayer();
   if (ref_layer != NULL) {
     image = ref_layer->GetImageData();
   }
@@ -881,13 +881,13 @@ void LayerVolumeBase::SetLiveWireByRAS(double *pt1, double *pt2, int nPlane) {
   }
 
   m_livewire->GetLivewirePoints(image, nPlane, n1[nPlane], pt1, pt2, pts);
-  int n[3];
+  int          n[3];
   QVector<int> list;
   for (int i = 0; i < pts->GetNumberOfPoints(); i++) {
     double *p = pts->GetPoint(i);
-    n[0] = (int)((p[0] - orig[0]) / vxlsize[0] + 0.5);
-    n[1] = (int)((p[1] - orig[1]) / vxlsize[1] + 0.5);
-    n[2] = (int)((p[2] - orig[2]) / vxlsize[2] + 0.5);
+    n[0]      = (int)((p[0] - orig[0]) / vxlsize[0] + 0.5);
+    n[1]      = (int)((p[1] - orig[1]) / vxlsize[1] + 0.5);
+    n[2]      = (int)((p[2] - orig[2]) / vxlsize[2] + 0.5);
 
     list << SetVoxelByIndex(n, nPlane, true);
   }
@@ -899,7 +899,7 @@ void LayerVolumeBase::SetLiveWireByRAS(double *pt1, double *pt2, int nPlane) {
 
 std::vector<double>
 LayerVolumeBase::GetLiveWirePointsByRAS(double *pt1, double *pt2, int nPlane) {
-  vtkImageData *image = m_imageData;
+  vtkImageData *   image     = m_imageData;
   LayerVolumeBase *ref_layer = m_propertyBrush->GetReferenceLayer();
   if (ref_layer != NULL) {
     image = ref_layer->GetImageData();
@@ -909,8 +909,8 @@ LayerVolumeBase::GetLiveWirePointsByRAS(double *pt1, double *pt2, int nPlane) {
     image = m_imageDataRef;
   }
 
-  int n1[3];
-  double *orig = image->GetOrigin();
+  int     n1[3];
+  double *orig    = image->GetOrigin();
   double *vxlsize = image->GetSpacing();
   for (int i = 0; i < 3; i++) {
     n1[i] = (int)((pt1[i] - orig[i]) / vxlsize[i]);
@@ -980,9 +980,9 @@ void LayerVolumeBase::Redo() {
 }
 
 void LayerVolumeBase::SaveForUndo(int nPlane, bool bAllFrames) {
-  double *origin = m_imageData->GetOrigin();
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
-  int nSlice = 0;
+  int     nSlice     = 0;
   if (nPlane >= 0) {
     nSlice =
         (int)((m_dSlicePosition[nPlane] - origin[nPlane]) / voxel_size[nPlane] +
@@ -1010,9 +1010,9 @@ bool LayerVolumeBase::IsValidToPaste(int nPlane) {
 }
 
 void LayerVolumeBase::Copy(int nPlane) {
-  double *origin = m_imageData->GetOrigin();
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
-  int nSlice =
+  int     nSlice =
       (int)((m_dSlicePosition[nPlane] - origin[nPlane]) / voxel_size[nPlane] +
             0.5);
   m_bufferClipboard.Clear();
@@ -1020,9 +1020,9 @@ void LayerVolumeBase::Copy(int nPlane) {
 }
 
 bool LayerVolumeBase::CopyStructure(int nPlane, double *ras) {
-  double *origin = m_imageData->GetOrigin();
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
-  int dim[3];
+  int     dim[3];
   m_imageData->GetDimensions(dim);
   int nSlice[3];
   for (int i = 0; i < 3; i++) {
@@ -1036,9 +1036,9 @@ bool LayerVolumeBase::CopyStructure(int nPlane, double *ras) {
     return false;
   }
 
-  dim[nPlane] = 1;
+  dim[nPlane]     = 1;
   long long nsize = ((long long)dim[0]) * dim[1] * dim[2];
-  char *mask = new char[nsize];
+  char *    mask  = new char[nsize];
   memset(mask, 0, nsize);
 
   if (FloodFillByRAS(ras, nPlane, true, false, mask, true)) {
@@ -1055,9 +1055,9 @@ bool LayerVolumeBase::CopyStructure(int nPlane, double *ras) {
 void LayerVolumeBase::Paste(int nPlane) {
   SaveForUndo(nPlane);
 
-  double *origin = m_imageData->GetOrigin();
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
-  int nSlice =
+  int     nSlice =
       (int)((m_dSlicePosition[nPlane] - origin[nPlane]) / voxel_size[nPlane] +
             0.5);
   m_bufferClipboard.slice = nSlice;
@@ -1075,17 +1075,17 @@ void LayerVolumeBase::SaveBufferItem(UndoRedoBufferItem &item, int nPlane,
   if (nPlane >= 0) {
     int nDim[3], nStart[3] = {0, 0, 0};
     m_imageData->GetDimensions(nDim);
-    nDim[nPlane] = 1;
+    nDim[nPlane]   = 1;
     nStart[nPlane] = nSlice;
     size_t nSize =
         ((size_t)nDim[0]) * nDim[1] * nDim[2] * m_imageData->GetScalarSize();
     item.data = new char[nSize];
     memset(item.data, 0, nSize);
-    long long n = 0;
-    char *ptr = (char *)m_imageData->GetScalarPointer();
-    int scalar_size = m_imageData->GetScalarSize();
-    int n_frames = m_imageData->GetNumberOfScalarComponents();
-    int nOrigDim[3];
+    long long n           = 0;
+    char *    ptr         = (char *)m_imageData->GetScalarPointer();
+    int       scalar_size = m_imageData->GetScalarSize();
+    int       n_frames    = m_imageData->GetNumberOfScalarComponents();
+    int       nOrigDim[3];
     m_imageData->GetDimensions(nOrigDim);
     for (size_t i = nStart[0]; i < (size_t)nStart[0] + nDim[0]; i++) {
       for (size_t j = nStart[1]; j < (size_t)nStart[1] + nDim[1]; j++) {
@@ -1114,32 +1114,34 @@ void LayerVolumeBase::SaveBufferItem(UndoRedoBufferItem &item, int nPlane,
         m_imageData->GetScalarSize() *
         (nFrame >= 0 ? 1 : m_imageData->GetNumberOfScalarComponents());
     QFile file(this->GenerateCacheFileName());
-    if (!file.open(QIODevice::WriteOnly) || file.write((char*)m_imageData->GetScalarPointer() + (nFrame >= 0 ? nSize*nFrame : 0), nSize) != nSize)
-    {
-      cerr << "Could not write undo cache to disk" << endl;
+    if (!file.open(QIODevice::WriteOnly) ||
+        file.write((char *)m_imageData->GetScalarPointer() +
+                       (nFrame >= 0 ? nSize * nFrame : 0),
+                   nSize) != nSize) {
+      std::cerr << "Could not write undo cache to disk" << std::endl;
       return;
     }
     file.close();
     item.cache_filename = file.fileName();
     if (this->IsTypeOf("MRI")) {
-      LayerMRI *mri = qobject_cast<LayerMRI *>(this);
+      LayerMRI *mri     = qobject_cast<LayerMRI *>(this);
       item.mri_settings = mri->GetProperty()->GetSettings();
     }
   }
 }
 
 void LayerVolumeBase::LoadBufferItem(UndoRedoBufferItem &item,
-                                     bool bIgnoreZeros) {
+                                     bool                bIgnoreZeros) {
   if (item.plane >= 0) {
     int nDim[3], nStart[3] = {0, 0, 0};
     m_imageData->GetDimensions(nDim);
-    nDim[item.plane] = 1;
+    nDim[item.plane]   = 1;
     nStart[item.plane] = item.slice;
-    char *ptr = (char *)m_imageData->GetScalarPointer();
-    int scalar_size = m_imageData->GetScalarSize();
-    int scalar_type = m_imageData->GetScalarType();
-    int n_frames = m_imageData->GetNumberOfScalarComponents();
-    int nOrigDim[3];
+    char *ptr          = (char *)m_imageData->GetScalarPointer();
+    int   scalar_size  = m_imageData->GetScalarSize();
+    int   scalar_type  = m_imageData->GetScalarType();
+    int   n_frames     = m_imageData->GetNumberOfScalarComponents();
+    int   nOrigDim[3];
     m_imageData->GetDimensions(nOrigDim);
     for (size_t i = nStart[0]; i < (size_t)nStart[0] + nDim[0]; i++) {
       for (size_t j = nStart[1]; j < (size_t)nStart[1] + nDim[1]; j++) {
@@ -1251,8 +1253,8 @@ void LayerVolumeBase::ClearVoxels() {
 }
 
 void LayerVolumeBase::ShiftVoxelsByRAS(double *ras, int nPlane) {
-  int n[3];
-  double *origin = m_imageData->GetOrigin();
+  int     n[3];
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
   for (int i = 0; i < 3; i++) {
     n[i] = (int)((ras[i] - origin[i]) / voxel_size[i] + 0.5);
@@ -1262,27 +1264,27 @@ void LayerVolumeBase::ShiftVoxelsByRAS(double *ras, int nPlane) {
 }
 
 void LayerVolumeBase::ShiftVoxels(int *nOffset, int nPlane) {
-  int nDim[3], nStart[3] = {0, 0, 0};
-  double *origin = m_imageData->GetOrigin();
+  int     nDim[3], nStart[3] = {0, 0, 0};
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
   m_imageData->GetDimensions(nDim);
   nDim[nPlane] = 1;
   nStart[nPlane] =
       (int)((m_dSlicePosition[nPlane] - origin[nPlane]) / voxel_size[nPlane] +
             0.5);
-  char *ptr = (char *)m_imageData->GetScalarPointer();
-  int scalar_size = m_imageData->GetScalarSize();
-  int scalar_type = m_imageData->GetScalarType();
-  int n_frames = m_imageData->GetNumberOfScalarComponents();
-  int nFrame = m_nActiveFrame;
-  int nOrigDim[3];
+  char *ptr         = (char *)m_imageData->GetScalarPointer();
+  int   scalar_size = m_imageData->GetScalarSize();
+  int   scalar_type = m_imageData->GetScalarType();
+  int   n_frames    = m_imageData->GetNumberOfScalarComponents();
+  int   nFrame      = m_nActiveFrame;
+  int   nOrigDim[3];
   m_imageData->GetDimensions(nOrigDim);
   for (size_t i = nStart[0]; i < (size_t)nStart[0] + nDim[0]; i++) {
     for (size_t j = nStart[1]; j < (size_t)nStart[1] + nDim[1]; j++) {
       for (size_t k = nStart[2]; k < (size_t)nStart[2] + nDim[2]; k++) {
-        int ii = i - nStart[0] - nOffset[0];
-        int jj = j - nStart[1] - nOffset[1];
-        int kk = k - nStart[2] - nOffset[2];
+        int    ii  = i - nStart[0] - nOffset[0];
+        int    jj  = j - nStart[1] - nOffset[1];
+        int    kk  = k - nStart[2] - nOffset[2];
         double val = 0;
         if (ii >= 0 && ii < nDim[0] && jj >= 0 && jj < nDim[1] && kk >= 0 &&
             kk < nDim[2])
@@ -1311,20 +1313,20 @@ void LayerVolumeBase::ShiftVoxels(int *nOffset, int nPlane) {
 void LayerVolumeBase::PrepareShifting(int nPlane) {
   delete[] m_shiftBackgroundData;
   delete[] m_shiftForegroundData;
-  int nDim[3], nStart[3] = {0, 0, 0};
-  double *origin = m_imageData->GetOrigin();
+  int     nDim[3], nStart[3] = {0, 0, 0};
+  double *origin     = m_imageData->GetOrigin();
   double *voxel_size = m_imageData->GetSpacing();
   m_imageData->GetDimensions(nDim);
   nDim[nPlane] = 1;
   nStart[nPlane] =
       (int)((m_dSlicePosition[nPlane] - origin[nPlane]) / voxel_size[nPlane] +
             0.5);
-  char *ptr = (char *)m_imageData->GetScalarPointer();
-  int scalar_size = m_imageData->GetScalarSize();
-  int scalar_type = m_imageData->GetScalarType();
-  int n_frames = m_imageData->GetNumberOfScalarComponents();
-  int nFrame = m_nActiveFrame;
-  size_t nsize = ((size_t)nDim[0]) * nDim[1] * nDim[2] * scalar_size;
+  char * ptr            = (char *)m_imageData->GetScalarPointer();
+  int    scalar_size    = m_imageData->GetScalarSize();
+  int    scalar_type    = m_imageData->GetScalarType();
+  int    n_frames       = m_imageData->GetNumberOfScalarComponents();
+  int    nFrame         = m_nActiveFrame;
+  size_t nsize          = ((size_t)nDim[0]) * nDim[1] * nDim[2] * scalar_size;
   m_shiftBackgroundData = new char[nsize];
   m_shiftForegroundData = new char[nsize];
   memset(m_shiftBackgroundData, 0, nsize);

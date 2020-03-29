@@ -24,21 +24,21 @@
  */
 
 #include "diag.h"
-#include "timer.h"
 #include "mrisurf.h"
+#include "timer.h"
 #include "version.h"
 
 static char vcid[] =
     "$Id: mris_merge_parcellations.c,v 1.6 2011/03/02 00:04:33 nicks Exp $";
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
-                             MRI_SURFACE *mris2, MRI_SURFACE *mris);
+static int  merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
+                              MRI_SURFACE *mris2, MRI_SURFACE *mris);
 
 const char *Progname;
 static char fsdir[STRLEN] = "";
@@ -46,9 +46,9 @@ static char fsdir[STRLEN] = "";
 int main(int argc, char *argv[]) {
   char **av, *parc1, *parc2, *oname, surf_name[STRLEN], path[STRLEN],
       hemi[STRLEN], *cp, fname[STRLEN];
-  int ac, nargs, msec;
+  int          ac, nargs, msec;
   MRI_SURFACE *mris1, *mris2;
-  Timer then;
+  Timer        then;
   COLOR_TABLE *ct;
 
   nargs = handleVersionOption(argc, argv, "mris_merge_parcellations");
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -153,7 +153,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -424,7 +424,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
     filled = 0;
     for (vno = 0; vno < mris->nvertices; vno++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-      VERTEX *const v = &mris->vertices[vno];
+      VERTEX *const                v  = &mris->vertices[vno];
       if (vno == Gdiag_no)
         DiagBreak();
       if (v->marked == 1) {
@@ -470,7 +470,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (vno == Gdiag_no)
       DiagBreak();
     if (v->marked == 1) {
@@ -505,7 +505,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
     filled = 0;
     for (vno = 0; vno < mris->nvertices; vno++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-      VERTEX *const v = &mris->vertices[vno];
+      VERTEX *const                v  = &mris->vertices[vno];
       if (vno == Gdiag_no)
         DiagBreak();
       if (v->marked == 1) {
@@ -542,7 +542,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
 
   // now remove the ctx-?h- from the parcellation unit names
   {
-    int i, max_i = 0;
+    int  i, max_i = 0;
     CTE *cte;
     char buf[STRLEN];
 

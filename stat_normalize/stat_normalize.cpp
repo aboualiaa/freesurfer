@@ -32,7 +32,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -40,21 +40,22 @@ static void print_version();
 
 const char *Progname;
 
-static float resolution = 8.0f;
-static float fov = 256.0f;
-static int coordinate_system = TALAIRACH_COORDS;
+static float resolution        = 8.0f;
+static float fov               = 256.0f;
+static int   coordinate_system = TALAIRACH_COORDS;
 static char *hemi;
 static char *surf_name; /* used if in surface-based coordinates */
 
 int main(int argc, char *argv[]) {
   char *in_prefix, *out_prefix, out_fname[100], name[100], path[100],
       *coord_name, fname[100], *cp, subjects_dir[100];
-  int n, nargs, ino, event;
-  SV *sv, *sv_avg = nullptr;
+  int          n, nargs, ino, event;
+  SV *         sv, *sv_avg = nullptr;
   MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "stat_normalize");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
 
   Progname = argv[0];
@@ -172,7 +173,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -184,15 +185,15 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'E':
       coordinate_system = ELLIPSOID_COORDS;
-      hemi = argv[2];
-      surf_name = argv[3];
-      nargs = 2;
+      hemi              = argv[2];
+      surf_name         = argv[3];
+      nargs             = 2;
       break;
     case 'S':
       coordinate_system = SPHERICAL_COORDS;
-      hemi = argv[2];
-      surf_name = argv[3];
-      nargs = 2;
+      hemi              = argv[2];
+      surf_name         = argv[3];
+      nargs             = 2;
       break;
     case '?':
     case 'U':

@@ -40,14 +40,14 @@ typedef struct {
   float x;
   float y;
   float z;
-  int vno;
+  int   vno;
 } PATH_POINT;
 
 /* Main path struct. */
 typedef struct {
-  int n_points;       /* number of points in this path. */
-  char name[100];     /* original file name */
-  PATH_POINT *points; /* array of size n_points */
+  int         n_points;  /* number of points in this path. */
+  char        name[100]; /* original file name */
+  PATH_POINT *points;    /* array of size n_points */
 } PATH;
 
 /* Read in multiple paths from a path file. On return, num_read will
@@ -65,7 +65,7 @@ int PathWriteMany(char *fname, int num_paths, PATH **paths);
 /* Allocate and free paths. PathAlloc returns the new path or NULL if
    there was an error. PathFree returns an error code.*/
 PATH *PathAlloc(int n_points, char *name);
-int PathFree(PATH **path);
+int   PathFree(PATH **path);
 
 /* Returns whether or not a file is a path file. If an error occurs,
    it will just return 0. The file name version will open and close a

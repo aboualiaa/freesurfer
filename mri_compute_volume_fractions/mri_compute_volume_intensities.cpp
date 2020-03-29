@@ -26,22 +26,22 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
+#include "mrinorm.h"
 #include "timer.h"
 #include "version.h"
-#include "mrinorm.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static int whalf = 4;
-static double sigma = 1;
-static int separate_frames = 0;
+static int    whalf           = 4;
+static double sigma           = 1;
+static int    separate_frames = 0;
 
 static MRI *compute_unpartial_volumed_intensities(
     MRI *mri_src, MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
@@ -50,7 +50,7 @@ static MRI *compute_unpartial_volumed_intensities(
 
 static void patch_csf_vol(MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
                           MRI *mri_vfrac_subcort, MRI *mri_vfrac_csf) {
-  int x, y, z;
+  int    x, y, z;
   double v;
 
   for (x = 0; x < mri_vfrac_wm->width; x++)
@@ -66,11 +66,11 @@ static void patch_csf_vol(MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
 }
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
-  char fname[STRLEN], *stem;
-  MRI *mri_src, *mri_vfrac_wm, *mri_vfrac_cortex, *mri_vfrac_subcort,
+  int    ac, nargs;
+  int    msec, minutes, seconds;
+  Timer  start;
+  char   fname[STRLEN], *stem;
+  MRI *  mri_src, *mri_vfrac_wm, *mri_vfrac_cortex, *mri_vfrac_subcort,
       *mri_vfrac_csf, *mri_unpv_intensities;
 
   nargs = handleVersionOption(argc, argv, "mri_compute_volume_intensities");
@@ -79,8 +79,8 @@ int main(int argc, char *argv[]) {
   argc -= nargs;
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   printf("writing unpartial-volumed intensities to %s\n", argv[3]);
   MRIwrite(mri_unpv_intensities, argv[3]);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -208,19 +208,19 @@ static MRI *compute_unpartial_volumed_intensities(
       vcsf;
   MATRIX *m_A_pinv, *m_A3, *m_A2, *m_A1, *m_A;
   VECTOR *v_I, *v_s3, *v_s2, *v_s1, *v_s;
-  float wm, gm, csf;
+  float   wm, gm, csf;
 
   whalfx = (int)ceil(whalf0 / mri_src->xsize);
   whalfy = (int)ceil(whalf0 / mri_src->ysize);
   whalfz = (int)ceil(whalf0 / mri_src->zsize);
-  nvox = (2 * whalfx + 1) * (2 * whalfy + 1) * (2 * whalfz + 1);
-  m_A3 = MatrixAlloc(nvox, 3, MATRIX_REAL);
-  m_A2 = MatrixAlloc(nvox, 2, MATRIX_REAL);
-  m_A1 = MatrixAlloc(nvox, 1, MATRIX_REAL);
-  v_s3 = VectorAlloc(3, MATRIX_REAL);
-  v_s2 = VectorAlloc(2, MATRIX_REAL);
-  v_s1 = VectorAlloc(1, MATRIX_REAL);
-  v_I = VectorAlloc(nvox, MATRIX_REAL);
+  nvox   = (2 * whalfx + 1) * (2 * whalfy + 1) * (2 * whalfz + 1);
+  m_A3   = MatrixAlloc(nvox, 3, MATRIX_REAL);
+  m_A2   = MatrixAlloc(nvox, 2, MATRIX_REAL);
+  m_A1   = MatrixAlloc(nvox, 1, MATRIX_REAL);
+  v_s3   = VectorAlloc(3, MATRIX_REAL);
+  v_s2   = VectorAlloc(2, MATRIX_REAL);
+  v_s1   = VectorAlloc(1, MATRIX_REAL);
+  v_I    = VectorAlloc(nvox, MATRIX_REAL);
 
   if (mri_dst == nullptr) {
     if (separate_frames) {
@@ -247,10 +247,10 @@ static MRI *compute_unpartial_volumed_intensities(
             dy = yk * mri_src->ysize;
             yi = mri_src->yi[y + yk];
             for (zk = -whalfz; zk <= whalfz; zk++) {
-              dz = zk * mri_src->zsize;
-              zi = mri_src->zi[z + zk];
+              dz     = zk * mri_src->zsize;
+              zi     = mri_src->zi[z + zk];
               distsq = dx * dx + dy * dy + dz * dz;
-              w = exp(-.5 * distsq / (sigma * sigma));
+              w      = exp(-.5 * distsq / (sigma * sigma));
               norm += w;
               VECTOR_ELT(v_I, num + 1) =
                   w * MRIgetVoxVal(mri_src, xi, yi, zi, 0);
@@ -344,9 +344,9 @@ static MRI *compute_unpartial_volumed_intensities(
           continue;
 
         MatrixMultiply(m_A_pinv, v_I, v_s);
-        vwm = MRIgetVoxVal(mri_vfrac_wm, x, y, z, 0);
+        vwm  = MRIgetVoxVal(mri_vfrac_wm, x, y, z, 0);
         vcsf = MRIgetVoxVal(mri_vfrac_csf, x, y, z, 0);
-        vgm = MRIgetVoxVal(mri_vfrac_cortex, x, y, z, 0) +
+        vgm  = MRIgetVoxVal(mri_vfrac_cortex, x, y, z, 0) +
               MRIgetVoxVal(mri_vfrac_subcort, x, y, z, 0);
         wm = gm = csf = 0.0;
         if (!FZERO(total_wm)) // wm in 1st col

@@ -22,13 +22,13 @@
  */
 
 #include "xVoxel.h"
-#include <math.h>
-#include <cstdlib>
 #include "xDebug.h"
+#include <cstdlib>
+#include <math.h>
 
 void xVoxl_New(xVoxelRef *oppVoxel) {
   xVoxelRef ref = (xVoxelRef)calloc(1, sizeof(xVoxel));
-  *oppVoxel = ref;
+  *oppVoxel     = ref;
 }
 
 void xVoxl_Delete(xVoxelRef *ioppVoxel) {

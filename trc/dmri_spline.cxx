@@ -34,9 +34,7 @@
 
 #include "spline.h"
 
-using namespace std;
-
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -48,15 +46,15 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
+static char vcid[]   = "";
 const char *Progname = "dmri_spline";
 
-bool showControls = false;
+bool  showControls = false;
 char *inFile = nullptr, *maskFile = nullptr, *outVolFile = nullptr,
      *outTextFile = nullptr, *outVecBase = nullptr;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
@@ -66,7 +64,8 @@ int main(int argc, char **argv) {
   int cputime;
 
   nargs = handleVersionOption(argc, argv, "dmri_spline");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -155,10 +154,10 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
+  int    nargc;
+  int    nargsused;
   char **pargv;
-  char *option;
+  char * option;
 
   if (argc < 1) {
     usage_exit();
@@ -190,31 +189,31 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      inFile = fio_fullpath(pargv[0]);
+      inFile    = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       outVolFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (strcmp(option, "--outpts") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       outTextFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused   = 1;
     } else if (strcmp(option, "--outvec") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       outVecBase = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (strcmp(option, "--mask") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      maskFile = fio_fullpath(pargv[0]);
+      maskFile  = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--show") == 0) {
       showControls = true;
@@ -233,45 +232,49 @@ static int parse_commandline(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static void print_usage() {
-  cout << endl
-       << "USAGE: " << Progname << endl
-       << endl
-       << "Basic inputs" << endl
-       << "   --cpts <file>:" << endl
-       << "     Input text file containing control points" << endl
-       << "   --mask <file>:" << endl
-       << "     Input mask volume (spline is not allowed to stray off mask)"
-       << endl
-       << endl
-       << "Outputs (at least one output type must be specified)" << endl
-       << "   --out <file>:" << endl
-       << "     Output volume of the interpolated spline" << endl
-       << "   --show:" << endl
-       << "     Highlight control points in output volume (default: no)" << endl
-       << "   --outpts <file>:" << endl
-       << "     Output text file containing all interpolated spline points"
-       << endl
-       << "   --outvec <base>:" << endl
-       << "     Base name of output text files containing tangent vectors,"
-       << endl
-       << "     normal vectors, and curvatures at every point along the" << endl
-       << "     spline (both analytical and finite-difference versions)" << endl
-       << endl
-       << "Other options" << endl
-       << "   --debug:     turn on debugging" << endl
-       << "   --checkopts: don't run anything, just check options and exit"
-       << endl
-       << "   --help:      print out information on how to use this program"
-       << endl
-       << "   --version:   print out version and exit" << endl
-       << endl;
+  std::cout
+      << std::endl
+      << "USAGE: " << Progname << std::endl
+      << std::endl
+      << "Basic inputs" << std::endl
+      << "   --cpts <file>:" << std::endl
+      << "     Input text file containing control points" << std::endl
+      << "   --mask <file>:" << std::endl
+      << "     Input mask volume (spline is not allowed to stray off mask)"
+      << std::endl
+      << std::endl
+      << "Outputs (at least one output type must be specified)" << std::endl
+      << "   --out <file>:" << std::endl
+      << "     Output volume of the interpolated spline" << std::endl
+      << "   --show:" << std::endl
+      << "     Highlight control points in output volume (default: no)"
+      << std::endl
+      << "   --outpts <file>:" << std::endl
+      << "     Output text file containing all interpolated spline points"
+      << std::endl
+      << "   --outvec <base>:" << std::endl
+      << "     Base name of output text files containing tangent vectors,"
+      << std::endl
+      << "     normal vectors, and curvatures at every point along the"
+      << std::endl
+      << "     spline (both analytical and finite-difference versions)"
+      << std::endl
+      << std::endl
+      << "Other options" << std::endl
+      << "   --debug:     turn on debugging" << std::endl
+      << "   --checkopts: don't run anything, just check options and exit"
+      << std::endl
+      << "   --help:      print out information on how to use this program"
+      << std::endl
+      << "   --version:   print out version and exit" << std::endl
+      << std::endl;
 }
 
 /* --------------------------------------------- */
 static void print_help() {
   print_usage();
 
-  cout << endl << "..." << endl << endl;
+  std::cout << std::endl << "..." << std::endl << std::endl;
 
   exit(1);
 }
@@ -284,48 +287,50 @@ static void usage_exit() {
 
 /* --------------------------------------------- */
 static void print_version() {
-  cout << vcid << endl;
+  std::cout << vcid << std::endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
 static void check_options() {
   if (inFile == nullptr) {
-    cout << "ERROR: Must specify input text file" << endl;
+    std::cout << "ERROR: Must specify input text file" << std::endl;
     exit(1);
   }
   if (maskFile == nullptr) {
-    cout << "ERROR: Must specify mask volume" << endl;
+    std::cout << "ERROR: Must specify mask volume" << std::endl;
     exit(1);
   }
   if ((outVolFile == nullptr) && (outTextFile == nullptr) &&
       (outVecBase == nullptr)) {
-    cout << "ERROR: Must specify at least one type of output file" << endl;
+    std::cout << "ERROR: Must specify at least one type of output file"
+              << std::endl;
     exit(1);
   }
 }
 
 /* --------------------------------------------- */
 static void dump_options() {
-  cout << endl
-       << vcid << endl
-       << "cwd " << cwd << endl
-       << "cmdline " << cmdline << endl
-       << "sysname  " << uts.sysname << endl
-       << "hostname " << uts.nodename << endl
-       << "machine  " << uts.machine << endl
-       << "user     " << VERuser() << endl;
+  std::cout << std::endl
+            << vcid << std::endl
+            << "cwd " << cwd << std::endl
+            << "cmdline " << cmdline << std::endl
+            << "sysname  " << uts.sysname << std::endl
+            << "hostname " << uts.nodename << std::endl
+            << "machine  " << uts.machine << std::endl
+            << "user     " << VERuser() << std::endl;
 
-  cout << "Control points: " << inFile << endl;
-  cout << "Mask volume: " << maskFile << endl;
+  std::cout << "Control points: " << inFile << std::endl;
+  std::cout << "Mask volume: " << maskFile << std::endl;
   if (outVolFile != nullptr) {
-    cout << "Output volume: " << outVolFile << endl
-         << "Show controls: " << showControls << endl;
+    std::cout << "Output volume: " << outVolFile << std::endl
+              << "Show controls: " << showControls << std::endl;
   }
   if (outTextFile != nullptr) {
-    cout << "Output text file: " << outTextFile << endl;
+    std::cout << "Output text file: " << outTextFile << std::endl;
   }
   if (outVecBase != nullptr) {
-    cout << "Output tangent vector file base name: " << outVecBase << endl;
+    std::cout << "Output tangent vector file base name: " << outVecBase
+              << std::endl;
   }
 }

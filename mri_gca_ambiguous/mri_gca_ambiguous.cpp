@@ -23,10 +23,10 @@
  *
  */
 
-#include "diag.h"
 #include "cma.h"
-#include "version.h"
+#include "diag.h"
 #include "gca.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mri_gca_ambiguous.c,v 1.4 2011/03/02 00:04:15 nicks Exp $";
@@ -35,9 +35,9 @@ static double scale = 1e12;
 
 int main(int argc, char *argv[]);
 
-int GCAscale(GCA *gca_flash, double min_val, double max_val);
+int         GCAscale(GCA *gca_flash, double min_val, double max_val);
 static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb, int classnum);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 static void print_help();
 static void print_version();
@@ -50,31 +50,31 @@ static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
 const char *Progname;
 
-static int optimize = 0;
-static double lambda = 100.0;
+static int    optimize = 0;
+static double lambda   = 100.0;
 
-static double TR = 20;
-static double TE = 3;
-static double MIN_FA1 = 1;
-static double MAX_FA1 = 40;
-static double MIN_FA2 = 1;
-static double MAX_FA2 = 40;
-static double MIN_FA3 = 1;
-static double MAX_FA3 = 40;
-static double FA_STEP = 1;
-static int append = 0;
-static char *fname = "amb.log";
-static int left = 0;
-static int classnum = -1;
+static double TR       = 20;
+static double TE       = 3;
+static double MIN_FA1  = 1;
+static double MAX_FA1  = 40;
+static double MIN_FA2  = 1;
+static double MAX_FA2  = 40;
+static double MIN_FA3  = 1;
+static double MAX_FA3  = 40;
+static double FA_STEP  = 1;
+static int    append   = 0;
+static char * fname    = "amb.log";
+static int    left     = 0;
+static int    classnum = -1;
 
 #define MAX_FAS 10
 int main(int argc, char *argv[]) {
   char **av, *out_name, *gca_name;
-  int ac, nargs;
-  GCA *gca;
-  MRI *mri = nullptr;
+  int    ac, nargs;
+  GCA *  gca;
+  MRI *  mri = nullptr;
   double TEs[MAX_FAS], TRs[MAX_FAS], FAs[MAX_FAS], amb;
-  GCA *gca_flash;
+  GCA *  gca_flash;
 
   nargs = handleVersionOption(argc, argv, "mri_gca_ambiguous");
   if (nargs && argc - nargs == 1)
@@ -112,15 +112,15 @@ int main(int argc, char *argv[]) {
   case 1: {
     double fa1, min_fa1;
     double min_amb, scale;
-    FILE *fp;
+    FILE * fp;
 
     fp = fopen(fname, append ? "a" : "w");
 
-    TRs[0] = TR;
-    TEs[0] = TE;
+    TRs[0]  = TR;
+    TEs[0]  = TE;
     min_amb = 10000000;
     min_fa1 = -1;
-    scale = 1.0 / (gca->prior_width * gca->prior_height * gca->prior_depth);
+    scale   = 1.0 / (gca->prior_width * gca->prior_height * gca->prior_depth);
     for (fa1 = MIN_FA1; fa1 <= MAX_FA1; fa1 += FA_STEP) {
       FAs[0] = RADIANS(fa1);
       printf("testing flip angle %2.1f\n", fa1);
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 #endif
     mri = GCAbuildMostLikelyVolume(gca_flash, nullptr);
     {
-      int i;
+      int  i;
       char fname[STRLEN];
       for (i = 0; i < mri->nframes; i++) {
         sprintf(fname, "mri_gca%d.mgh", i);
@@ -170,14 +170,14 @@ int main(int argc, char *argv[]) {
   case 2: {
     double fa1, fa2, min_fa1, min_fa2;
     double min_amb, scale;
-    FILE *fp;
+    FILE * fp;
 
     fp = fopen(fname, append ? "a" : "w");
 
-    TRs[0] = TR;
-    TRs[1] = TR;
-    TEs[0] = TE;
-    TEs[1] = TE;
+    TRs[0]  = TR;
+    TRs[1]  = TR;
+    TEs[0]  = TE;
+    TEs[1]  = TE;
     min_amb = 10000000;
     min_fa1 = min_fa2 = -1;
     scale = 1.0 / (gca->prior_width * gca->prior_height * gca->prior_depth);
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
 #endif
     mri = GCAbuildMostLikelyVolume(gca_flash, nullptr);
     {
-      int i;
+      int  i;
       char fname[STRLEN];
       for (i = 0; i < mri->nframes; i++) {
         sprintf(fname, "mri_gca%d.mgh", i);
@@ -237,16 +237,16 @@ int main(int argc, char *argv[]) {
   case 3: {
     double fa1, fa2, min_fa1, min_fa2, fa3, min_fa3;
     double min_amb, scale;
-    FILE *fp;
+    FILE * fp;
 
     fp = fopen(fname, append ? "a" : "w");
 
-    TRs[0] = TR;
-    TRs[1] = TR;
-    TRs[2] = TR;
-    TEs[0] = TE;
-    TEs[1] = TE;
-    TEs[2] = TE;
+    TRs[0]  = TR;
+    TRs[1]  = TR;
+    TRs[2]  = TR;
+    TEs[0]  = TE;
+    TEs[1]  = TE;
+    TEs[2]  = TE;
     min_amb = 10000000;
     min_fa3 = min_fa1 = min_fa2 = -1;
     scale = 1.0 / (gca->prior_width * gca->prior_height * gca->prior_depth);
@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
 #endif
   } break;
   case 0: {
-    int i;
+    int  i;
     char fname[STRLEN], tmp[STRLEN];
 
     TRs[0] = TR;
@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -389,14 +389,14 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'W':
       append = 0;
-      nargs = 1;
-      fname = argv[2];
+      nargs  = 1;
+      fname  = argv[2];
       printf("writing output to %s...\n", fname);
       break;
     case 'A':
       append = 1;
-      nargs = 1;
-      fname = argv[2];
+      nargs  = 1;
+      fname  = argv[2];
       printf("appending output to %s...\n", fname);
       break;
     case 'C':
@@ -412,7 +412,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'O':
       optimize = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -452,9 +452,9 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
   GCA_PRIOR *gcap;
   double ambiguity, atotal, p1, p2, amax, total_ambiguity, min_I, max_I, std,
       Istep, I;
-  float vals[MAX_GCA_INPUTS];
+  float  vals[MAX_GCA_INPUTS];
   double label_ambiguity[MAX_CMA_LABEL + 1][MAX_CMA_LABEL + 1];
-  GC1D *gc1, *gc2;
+  GC1D * gc1, *gc2;
 
   memset(label_ambiguity, 0, sizeof(label_ambiguity));
   memset(label_count, 0, sizeof(label_count));
@@ -463,18 +463,18 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
     mri = MRIalloc(gca->prior_width, gca->prior_height, gca->prior_depth,
                    MRI_FLOAT);
   mri->xsize = mri->ysize = mri->zsize = gca->prior_spacing;
-  mri->x_r = -1;
-  mri->y_r = 0;
-  mri->z_r = 0;
-  mri->c_r = 0.0;
-  mri->x_a = 0;
-  mri->y_a = 0;
-  mri->z_a = 1;
-  mri->c_a = 0.0;
-  mri->x_s = 0;
-  mri->y_s = -1;
-  mri->z_s = 0;
-  mri->c_s = 0.0;
+  mri->x_r                             = -1;
+  mri->y_r                             = 0;
+  mri->z_r                             = 0;
+  mri->c_r                             = 0.0;
+  mri->x_a                             = 0;
+  mri->y_a                             = 0;
+  mri->z_a                             = 1;
+  mri->c_a                             = 0.0;
+  mri->x_s                             = 0;
+  mri->y_s                             = -1;
+  mri->z_s                             = 0;
+  mri->c_s                             = 0.0;
 
   mri->ras_good_flag = 1;
   switch (gca->ninputs) {
@@ -503,7 +503,7 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
         min_I = 10000000;
         max_I = 0;
         for (i1 = 0; i1 < gcap->nlabels; i1++) {
-          l1 = gcap->labels[i1];
+          l1  = gcap->labels[i1];
           gc1 = GCAfindPriorGC(gca, xp, yp, zp, l1);
           if (!gc1)
             continue;
@@ -519,13 +519,13 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
         for (amax = atotal = 0.0, i1 = 0; i1 < gcap->nlabels; i1++) {
           for (i1 = 0; i1 < gcap->nlabels; i1++) {
-            l1 = gcap->labels[i1];
+            l1  = gcap->labels[i1];
             gc1 = GCAfindPriorGC(gca, xp, yp, zp, l1);
             if (!gc1)
               continue;
             label1_count[l1]++;
             for (i2 = 0; i2 < i1; i2++) {
-              l2 = gcap->labels[i2];
+              l2  = gcap->labels[i2];
               gc2 = GCAfindPriorGC(gca, xp, yp, zp, l2);
               if (!gc2)
                 continue;
@@ -538,14 +538,14 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
 #define ISTEPS 100
 
               /* marginalize over intensity */
-              Istep = (max_I - min_I) / ISTEPS;
+              Istep     = (max_I - min_I) / ISTEPS;
               ambiguity = 0.0;
               if (gca->ninputs == 1) {
                 for (ambiguity = 0, I = min_I; I <= max_I; I += Istep) {
                   vals[0] = I;
-                  p1 = scale * GCAcomputeConditionalDensity(gc1, vals,
+                  p1      = scale * GCAcomputeConditionalDensity(gc1, vals,
                                                             gca->ninputs, l1);
-                  p2 = scale * GCAcomputeConditionalDensity(gc2, vals,
+                  p2      = scale * GCAcomputeConditionalDensity(gc2, vals,
                                                             gca->ninputs, l2);
                   ambiguity += (p1 * p2 * Istep);
                 }
@@ -559,8 +559,8 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
                     load_inverse_covariance_matrix(gc1, nullptr, gca->ninputs);
                 m2_cov_inv =
                     load_inverse_covariance_matrix(gc2, nullptr, gca->ninputs);
-                v1 = VectorAlloc(2, MATRIX_REAL);
-                v2 = VectorAlloc(2, MATRIX_REAL);
+                v1   = VectorAlloc(2, MATRIX_REAL);
+                v2   = VectorAlloc(2, MATRIX_REAL);
                 vtmp = VectorAlloc(2, MATRIX_REAL);
                 scale1 =
                     scale *
@@ -592,20 +592,20 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
                         m1_cov_inv, v1,
                         vtmp); /* v_means is now inverse(cov) * v_vals */
                     dsq = VectorDot(v1, vtmp);
-                    p1 = scale1 * exp(-0.5 * dsq);
+                    p1  = scale1 * exp(-0.5 * dsq);
 
                     VECTOR_ELT(v2, 2) = I2 - gc2->means[1];
                     MatrixMultiply(
                         m2_cov_inv, v2,
                         vtmp); /* v_means is now inverse(cov) * v_vals */
                     dsq = VectorDot(v2, vtmp);
-                    p2 = scale2 * exp(-0.5 * dsq);
+                    p2  = scale2 * exp(-0.5 * dsq);
                     amb += (p1 * p2 * Istep2);
                   }
                   ambiguity += (amb * Istep1);
                 }
-                std1 = sqrt(gc2->covars[0]);
-                std2 = sqrt(gc2->covars[2]);
+                std1   = sqrt(gc2->covars[0]);
+                std2   = sqrt(gc2->covars[2]);
                 Istep1 = std1 / (ISTEPS / 4);
                 Istep2 = std2 / (ISTEPS / 4);
                 for (I1 = gc2->means[0] - (ISTEPS / 2) * Istep1;
@@ -621,14 +621,14 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
                         m1_cov_inv, v1,
                         vtmp); /* v_means is now inverse(cov) * v_vals */
                     dsq = VectorDot(v1, vtmp);
-                    p1 = scale1 * exp(-0.5 * dsq);
+                    p1  = scale1 * exp(-0.5 * dsq);
 
                     VECTOR_ELT(v2, 2) = I2 - gc2->means[1];
                     MatrixMultiply(
                         m2_cov_inv, v2,
                         vtmp); /* v_means is now inverse(cov) * v_vals */
                     dsq = VectorDot(v2, vtmp);
-                    p2 = scale2 * exp(-0.5 * dsq);
+                    p2  = scale2 * exp(-0.5 * dsq);
                     amb += (p1 * p2 * Istep2);
                   }
                   ambiguity += (amb * Istep1);
@@ -694,10 +694,10 @@ static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb,
 }
 
 int GCAscale(GCA *gca, double min_val, double max_val) {
-  int xp, yp, zp, i, n, r, c, k;
-  double scale, umin[MAX_GCA_INPUTS], umax[MAX_GCA_INPUTS], range;
+  int        xp, yp, zp, i, n, r, c, k;
+  double     scale, umin[MAX_GCA_INPUTS], umax[MAX_GCA_INPUTS], range;
   GCA_PRIOR *gcap;
-  GC1D *gc;
+  GC1D *     gc;
 
   for (xp = 0; xp < gca->prior_width; xp++) {
     for (yp = 0; yp < gca->prior_height; yp++) {
@@ -764,11 +764,11 @@ int GCAscale(GCA *gca, double min_val, double max_val) {
 #ifdef NSTDS
 #undef NSTDS
 #endif
-#define NSTDS 2.5            /* go out 3 stds on either side of the mean */
+#define NSTDS            2.5 /* go out 3 stds on either side of the mean */
 #define SAMPLING_DENSITY 0.1 /* sample every 1/10th of a std */
 
 #define MAX_VALS ((int)((2 * NSTDS / SAMPLING_DENSITY) + 0.9) + 1)
-#define MAX_VAL (MAX_VALS - 1)
+#define MAX_VAL  (MAX_VALS - 1)
 
 #define VAL_TO_INDEX(v, mean, std)                                             \
   ((int)(MAX_VAL * ((v - mean) / (2 * NSTDS * std))))
@@ -782,9 +782,9 @@ static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
   double ambiguity, atotal, p1, p2, amax, total_ambiguity, Imin1, Imax1, pscale,
       dsq, std1, Istep1, I1, Imins1[MAX_LABELS_PER_GCAN],
       Imaxs1[MAX_LABELS_PER_GCAN];
-  float pI_c[MAX_LABELS_PER_GCAN][MAX_VALS];
-  double label_ambiguity[MAX_CMA_LABEL + 1][MAX_CMA_LABEL + 1];
-  GC1D *gc1, *gc2;
+  float   pI_c[MAX_LABELS_PER_GCAN][MAX_VALS];
+  double  label_ambiguity[MAX_CMA_LABEL + 1][MAX_CMA_LABEL + 1];
+  GC1D *  gc1, *gc2;
   MATRIX *m_cov_inv = nullptr;
   VECTOR *v = nullptr, *vtmp = nullptr;
 
@@ -795,18 +795,18 @@ static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
     mri = MRIalloc(gca->prior_width, gca->prior_height, gca->prior_depth,
                    MRI_FLOAT);
   mri->xsize = mri->ysize = mri->zsize = gca->prior_spacing;
-  mri->x_r = -1;
-  mri->y_r = 0;
-  mri->z_r = 0;
-  mri->c_r = 0.0;
-  mri->x_a = 0;
-  mri->y_a = 0;
-  mri->z_a = 1;
-  mri->c_a = 0.0;
-  mri->x_s = 0;
-  mri->y_s = -1;
-  mri->z_s = 0;
-  mri->c_s = 0.0;
+  mri->x_r                             = -1;
+  mri->y_r                             = 0;
+  mri->z_r                             = 0;
+  mri->c_r                             = 0.0;
+  mri->x_a                             = 0;
+  mri->y_a                             = 0;
+  mri->z_a                             = 1;
+  mri->c_a                             = 0.0;
+  mri->x_s                             = 0;
+  mri->y_s                             = -1;
+  mri->z_s                             = 0;
+  mri->c_s                             = 0.0;
 
   mri->ras_good_flag = 1;
 
@@ -821,21 +821,21 @@ static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
         /* now fill in lookup tables with probabilities */
         for (i1 = 0; i1 < gcap->nlabels; i1++) {
-          l1 = gcap->labels[i1];
+          l1  = gcap->labels[i1];
           gc1 = GCAfindPriorGC(gca, xp, yp, zp, l1);
           if (!gc1 || gc1->regularized)
             continue;
-          std1 = sqrt(gc1->covars[0]);
-          Imin1 = gc1->means[0] - NSTDS * std1;
-          Imax1 = gc1->means[0] + NSTDS * std1;
-          Istep1 = (Imax1 - Imin1) / MAX_VALS;
+          std1       = sqrt(gc1->covars[0]);
+          Imin1      = gc1->means[0] - NSTDS * std1;
+          Imax1      = gc1->means[0] + NSTDS * std1;
+          Istep1     = (Imax1 - Imin1) / MAX_VALS;
           Imins1[i1] = Imin1;
           Imaxs1[i1] = Imax1;
 
           m_cov_inv =
               load_inverse_covariance_matrix(gc1, m_cov_inv, gca->ninputs);
           if (!v) {
-            v = VectorAlloc(1, MATRIX_REAL);
+            v    = VectorAlloc(1, MATRIX_REAL);
             vtmp = VectorAlloc(1, MATRIX_REAL);
           }
           pscale = (1.0 / (pow(2 * M_PI, gca->ninputs / 2.0) *
@@ -844,17 +844,17 @@ static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
             VECTOR_ELT(v, 1) = I1 - gc1->means[0];
             MatrixMultiply(m_cov_inv, v,
                            vtmp); /* v_means is now inverse(cov) * v_vals */
-            dsq = VectorDot(v, vtmp);
-            p1 = pscale * exp(-0.5 * dsq);
+            dsq              = VectorDot(v, vtmp);
+            p1               = pscale * exp(-0.5 * dsq);
             pI_c[i1][index1] = p1;
           }
           if (Gdiag & DIAG_VERBOSE) {
             FILE *fp;
-            char fname[STRLEN];
+            char  fname[STRLEN];
             sprintf(fname, "p%d.dat", i1);
             fp = fopen(fname, "w");
             for (I1 = Imin1; I1 <= Imax1; I1 += Istep1) {
-              index1 = nint(MAX_VAL * (I1 - Imin1) / (Imax1 - Imin1));
+              index1           = nint(MAX_VAL * (I1 - Imin1) / (Imax1 - Imin1));
               VECTOR_ELT(v, 1) = I1 - gc1->means[0];
               fprintf(fp, "%d %f %f\n", index1, I1, pI_c[i1][index1]);
             }
@@ -864,13 +864,13 @@ static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
         for (n = 0, amax = atotal = 0.0, i1 = 0; i1 < gcap->nlabels; i1++) {
           for (i1 = 0; i1 < gcap->nlabels; i1++) {
-            l1 = gcap->labels[i1];
+            l1  = gcap->labels[i1];
             gc1 = GCAfindPriorGC(gca, xp, yp, zp, l1);
             if (!gc1 || gc1->regularized)
               continue;
             label1_count[l1]++;
             for (i2 = 0; i2 < i1; i2++) {
-              l2 = gcap->labels[i2];
+              l2  = gcap->labels[i2];
               gc2 = GCAfindPriorGC(gca, xp, yp, zp, l2);
               if (!gc2 || gc2->regularized)
                 continue;
@@ -886,8 +886,8 @@ static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
               /* marginalize over intensity */
               if (l1 == Left_Hippocampus && l2 == Left_Amygdala)
                 DiagBreak();
-              Imin1 = MAX(Imins1[i1], Imins1[i2]);
-              Imax1 = MIN(Imaxs1[i1], Imaxs1[i2]);
+              Imin1  = MAX(Imins1[i1], Imins1[i2]);
+              Imax1  = MIN(Imaxs1[i1], Imaxs1[i2]);
               Istep1 = (Imax1 - Imin1) / MAX_VALS;
               for (ambiguity = 0, I1 = Imin1; I1 < Imax1; I1 += Istep1) {
                 index1_c1 = nint(MAX_VAL * (I1 - Imins1[i1]) /
@@ -926,11 +926,11 @@ static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
   {
     FILE *fp;
-    MRI *mri2;
+    MRI * mri2;
     float norm;
 
     mri2 = MRIalloc(MAX_CMA_LABEL + 1, MAX_CMA_LABEL + 1, 2, MRI_FLOAT);
-    fp = fopen("label_amb.dat", "w");
+    fp   = fopen("label_amb.dat", "w");
     for (l1 = 0; l1 <= MAX_CMA_LABEL; l1++) {
       for (l2 = 0; l2 <= MAX_CMA_LABEL; l2++) {
 #if 1
@@ -974,9 +974,9 @@ static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
       Imax2, pscale, dsq, amb, std1, std2, Istep1, Istep2, I1, I2,
       Imins1[MAX_LABELS_PER_GCAN], Imins2[MAX_LABELS_PER_GCAN],
       Imaxs1[MAX_LABELS_PER_GCAN], Imaxs2[MAX_LABELS_PER_GCAN];
-  float pI_c[MAX_LABELS_PER_GCAN][MAX_VALS][MAX_VALS];
-  double label_ambiguity[MAX_CMA_LABEL + 1][MAX_CMA_LABEL + 1];
-  GC1D *gc1, *gc2;
+  float   pI_c[MAX_LABELS_PER_GCAN][MAX_VALS][MAX_VALS];
+  double  label_ambiguity[MAX_CMA_LABEL + 1][MAX_CMA_LABEL + 1];
+  GC1D *  gc1, *gc2;
   MATRIX *m_cov_inv = nullptr;
   VECTOR *v = nullptr, *vtmp = nullptr;
 
@@ -987,18 +987,18 @@ static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
     mri = MRIalloc(gca->prior_width, gca->prior_height, gca->prior_depth,
                    MRI_FLOAT);
   mri->xsize = mri->ysize = mri->zsize = gca->prior_spacing;
-  mri->x_r = -1;
-  mri->y_r = 0;
-  mri->z_r = 0;
-  mri->c_r = 0.0;
-  mri->x_a = 0;
-  mri->y_a = 0;
-  mri->z_a = 1;
-  mri->c_a = 0.0;
-  mri->x_s = 0;
-  mri->y_s = -1;
-  mri->z_s = 0;
-  mri->c_s = 0.0;
+  mri->x_r                             = -1;
+  mri->y_r                             = 0;
+  mri->z_r                             = 0;
+  mri->c_r                             = 0.0;
+  mri->x_a                             = 0;
+  mri->y_a                             = 0;
+  mri->z_a                             = 1;
+  mri->c_a                             = 0.0;
+  mri->x_s                             = 0;
+  mri->y_s                             = -1;
+  mri->z_s                             = 0;
+  mri->c_s                             = 0.0;
 
   mri->ras_good_flag = 1;
 
@@ -1013,28 +1013,28 @@ static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
         /* now fill in lookup tables with probabilities */
         for (i1 = 0; i1 < gcap->nlabels; i1++) {
-          l1 = gcap->labels[i1];
+          l1  = gcap->labels[i1];
           gc1 = GCAfindPriorGC(gca, xp, yp, zp, l1);
           if (!gc1 || gc1->regularized)
             continue;
-          std1 = sqrt(gc1->covars[0]);
-          std2 = sqrt(gc1->covars[2]);
-          Imin1 = gc1->means[0] - NSTDS * std1;
-          Imax1 = gc1->means[0] + NSTDS * std1;
-          Istep1 = (Imax1 - Imin1) / MAX_VALS;
+          std1       = sqrt(gc1->covars[0]);
+          std2       = sqrt(gc1->covars[2]);
+          Imin1      = gc1->means[0] - NSTDS * std1;
+          Imax1      = gc1->means[0] + NSTDS * std1;
+          Istep1     = (Imax1 - Imin1) / MAX_VALS;
           Imins1[i1] = Imin1;
           Imaxs1[i1] = Imax1;
 
-          Imin2 = gc1->means[1] - NSTDS * std2;
-          Imax2 = gc1->means[1] + NSTDS * std2;
-          Istep2 = (Imax2 - Imin2) / MAX_VALS;
+          Imin2      = gc1->means[1] - NSTDS * std2;
+          Imax2      = gc1->means[1] + NSTDS * std2;
+          Istep2     = (Imax2 - Imin2) / MAX_VALS;
           Imins2[i1] = Imin2;
           Imaxs2[i1] = Imax2;
 
           m_cov_inv =
               load_inverse_covariance_matrix(gc1, m_cov_inv, gca->ninputs);
           if (!v) {
-            v = VectorAlloc(2, MATRIX_REAL);
+            v    = VectorAlloc(2, MATRIX_REAL);
             vtmp = VectorAlloc(2, MATRIX_REAL);
           }
           pscale = (1.0 / (pow(2 * M_PI, gca->ninputs / 2.0) *
@@ -1045,18 +1045,18 @@ static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
               VECTOR_ELT(v, 2) = I2 - gc1->means[1];
               MatrixMultiply(m_cov_inv, v,
                              vtmp); /* v_means is now inverse(cov) * v_vals */
-              dsq = VectorDot(v, vtmp);
-              p1 = pscale * exp(-0.5 * dsq);
+              dsq                      = VectorDot(v, vtmp);
+              p1                       = pscale * exp(-0.5 * dsq);
               pI_c[i1][index1][index2] = p1;
             }
           }
           if (Gdiag & DIAG_VERBOSE) {
             FILE *fp;
-            char fname[STRLEN];
+            char  fname[STRLEN];
             sprintf(fname, "p%d.dat", i1);
             fp = fopen(fname, "w");
             for (I1 = Imin1; I1 <= Imax1; I1 += Istep1) {
-              index1 = nint(MAX_VAL * (I1 - Imin1) / (Imax1 - Imin1));
+              index1           = nint(MAX_VAL * (I1 - Imin1) / (Imax1 - Imin1));
               VECTOR_ELT(v, 1) = I1 - gc1->means[0];
               for (I2 = Imin2; I2 < Imax2; I2 += Istep2) {
                 index2 = nint(MAX_VAL * (I2 - Imin2) / (Imax2 - Imin2));
@@ -1070,13 +1070,13 @@ static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
         for (n = 0, amax = atotal = 0.0, i1 = 0; i1 < gcap->nlabels; i1++) {
           for (i1 = 0; i1 < gcap->nlabels; i1++) {
-            l1 = gcap->labels[i1];
+            l1  = gcap->labels[i1];
             gc1 = GCAfindPriorGC(gca, xp, yp, zp, l1);
             if (!gc1 || gc1->regularized)
               continue;
             label1_count[l1]++;
             for (i2 = 0; i2 < i1; i2++) {
-              l2 = gcap->labels[i2];
+              l2  = gcap->labels[i2];
               gc2 = GCAfindPriorGC(gca, xp, yp, zp, l2);
               if (!gc2 || gc2->regularized)
                 continue;
@@ -1092,10 +1092,10 @@ static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
               /* marginalize over intensity */
               if (l1 == Left_Hippocampus && l2 == Left_Amygdala)
                 DiagBreak();
-              Imin1 = MAX(Imins1[i1], Imins1[i2]);
-              Imax1 = MIN(Imaxs1[i1], Imaxs1[i2]);
-              Imin2 = MAX(Imins2[i1], Imins2[i2]);
-              Imax2 = MIN(Imaxs2[i1], Imaxs2[i2]);
+              Imin1  = MAX(Imins1[i1], Imins1[i2]);
+              Imax1  = MIN(Imaxs1[i1], Imaxs1[i2]);
+              Imin2  = MAX(Imins2[i1], Imins2[i2]);
+              Imax2  = MIN(Imaxs2[i1], Imaxs2[i2]);
               Istep1 = (Imax1 - Imin1) / MAX_VALS;
               Istep2 = (Imax2 - Imin2) / MAX_VALS;
               for (ambiguity = 0, I1 = Imin1; I1 < Imax1; I1 += Istep1) {
@@ -1145,11 +1145,11 @@ static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
   {
     FILE *fp;
-    MRI *mri2;
+    MRI * mri2;
     float norm;
 
     mri2 = MRIalloc(MAX_CMA_LABEL + 1, MAX_CMA_LABEL + 1, 2, MRI_FLOAT);
-    fp = fopen("label_amb.dat", "w");
+    fp   = fopen("label_amb.dat", "w");
     for (l1 = 0; l1 <= MAX_CMA_LABEL; l1++) {
       for (l2 = 0; l2 <= MAX_CMA_LABEL; l2++) {
 #if 1
@@ -1196,9 +1196,9 @@ static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
       Imins2[MAX_LABELS_PER_GCAN], Imins3[MAX_LABELS_PER_GCAN],
       Imaxs1[MAX_LABELS_PER_GCAN], Imaxs2[MAX_LABELS_PER_GCAN],
       Imaxs3[MAX_LABELS_PER_GCAN];
-  float pI_c[MAX_LABELS_PER_GCAN][MAX_VALS][MAX_VALS][MAX_VALS];
-  double label_ambiguity[MAX_CMA_LABEL + 1][MAX_CMA_LABEL + 1];
-  GC1D *gc1, *gc2;
+  float   pI_c[MAX_LABELS_PER_GCAN][MAX_VALS][MAX_VALS][MAX_VALS];
+  double  label_ambiguity[MAX_CMA_LABEL + 1][MAX_CMA_LABEL + 1];
+  GC1D *  gc1, *gc2;
   MATRIX *m_cov_inv = nullptr, *m_cov = nullptr;
   VECTOR *v = nullptr, *vtmp = nullptr;
 
@@ -1209,18 +1209,18 @@ static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
     mri = MRIalloc(gca->prior_width, gca->prior_height, gca->prior_depth,
                    MRI_FLOAT);
   mri->xsize = mri->ysize = mri->zsize = gca->prior_spacing;
-  mri->x_r = -1;
-  mri->y_r = 0;
-  mri->z_r = 0;
-  mri->c_r = 0.0;
-  mri->x_a = 0;
-  mri->y_a = 0;
-  mri->z_a = 1;
-  mri->c_a = 0.0;
-  mri->x_s = 0;
-  mri->y_s = -1;
-  mri->z_s = 0;
-  mri->c_s = 0.0;
+  mri->x_r                             = -1;
+  mri->y_r                             = 0;
+  mri->z_r                             = 0;
+  mri->c_r                             = 0.0;
+  mri->x_a                             = 0;
+  mri->y_a                             = 0;
+  mri->z_a                             = 1;
+  mri->c_a                             = 0.0;
+  mri->x_s                             = 0;
+  mri->y_s                             = -1;
+  mri->z_s                             = 0;
+  mri->c_s                             = 0.0;
 
   mri->ras_good_flag = 1;
 
@@ -1236,37 +1236,37 @@ static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
         /* now fill in lookup tables with probabilities */
         for (i1 = 0; i1 < gcap->nlabels; i1++) {
 
-          l1 = gcap->labels[i1];
+          l1  = gcap->labels[i1];
           gc1 = GCAfindPriorGC(gca, xp, yp, zp, l1);
           if (!gc1 || gc1->regularized)
             continue;
           m_cov = load_covariance_matrix(gc1, m_cov, gca->ninputs);
 
-          std1 = sqrt(*MATRIX_RELT(m_cov, 1, 1));
-          std2 = sqrt(*MATRIX_RELT(m_cov, 2, 2));
-          std3 = sqrt(*MATRIX_RELT(m_cov, 3, 3));
-          Imin1 = gc1->means[0] - NSTDS * std1;
-          Imax1 = gc1->means[0] + NSTDS * std1;
-          Istep1 = (Imax1 - Imin1) / MAX_VALS;
+          std1       = sqrt(*MATRIX_RELT(m_cov, 1, 1));
+          std2       = sqrt(*MATRIX_RELT(m_cov, 2, 2));
+          std3       = sqrt(*MATRIX_RELT(m_cov, 3, 3));
+          Imin1      = gc1->means[0] - NSTDS * std1;
+          Imax1      = gc1->means[0] + NSTDS * std1;
+          Istep1     = (Imax1 - Imin1) / MAX_VALS;
           Imins1[i1] = Imin1;
           Imaxs1[i1] = Imax1;
 
-          Imin2 = gc1->means[1] - NSTDS * std2;
-          Imax2 = gc1->means[1] + NSTDS * std2;
-          Istep2 = (Imax2 - Imin2) / MAX_VALS;
+          Imin2      = gc1->means[1] - NSTDS * std2;
+          Imax2      = gc1->means[1] + NSTDS * std2;
+          Istep2     = (Imax2 - Imin2) / MAX_VALS;
           Imins2[i1] = Imin2;
           Imaxs2[i1] = Imax2;
 
-          Imin3 = gc1->means[2] - NSTDS * std3;
-          Imax3 = gc1->means[2] + NSTDS * std3;
-          Istep3 = (Imax3 - Imin3) / MAX_VALS;
+          Imin3      = gc1->means[2] - NSTDS * std3;
+          Imax3      = gc1->means[2] + NSTDS * std3;
+          Istep3     = (Imax3 - Imin3) / MAX_VALS;
           Imins3[i1] = Imin3;
           Imaxs3[i1] = Imax3;
 
           m_cov_inv =
               load_inverse_covariance_matrix(gc1, m_cov_inv, gca->ninputs);
           if (!v) {
-            v = VectorAlloc(3, MATRIX_REAL);
+            v    = VectorAlloc(3, MATRIX_REAL);
             vtmp = VectorAlloc(3, MATRIX_REAL);
           }
           pscale = (1.0 / (pow(2 * M_PI, gca->ninputs / 2.0) *
@@ -1280,19 +1280,19 @@ static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
                 VECTOR_ELT(v, 3) = I3 - gc1->means[2];
                 MatrixMultiply(m_cov_inv, v,
                                vtmp); /* v_means is now inverse(cov) * v_vals */
-                dsq = VectorDot(v, vtmp);
-                p1 = pscale * exp(-0.5 * dsq);
+                dsq                              = VectorDot(v, vtmp);
+                p1                               = pscale * exp(-0.5 * dsq);
                 pI_c[i1][index1][index2][index3] = p1;
               }
             }
           }
           if (Gdiag & DIAG_VERBOSE) {
             FILE *fp;
-            char fname[STRLEN];
+            char  fname[STRLEN];
             sprintf(fname, "p%d.dat", i1);
             fp = fopen(fname, "w");
             for (I1 = Imin1; I1 <= Imax1; I1 += Istep1) {
-              index1 = nint(MAX_VAL * (I1 - Imin1) / (Imax1 - Imin1));
+              index1           = nint(MAX_VAL * (I1 - Imin1) / (Imax1 - Imin1));
               VECTOR_ELT(v, 1) = I1 - gc1->means[0];
               for (I2 = Imin2; I2 < Imax2; I2 += Istep2) {
                 index2 = nint(MAX_VAL * (I2 - Imin2) / (Imax2 - Imin2));
@@ -1309,13 +1309,13 @@ static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
         for (n = 0, amax = atotal = 0.0, i1 = 0; i1 < gcap->nlabels; i1++) {
           for (i1 = 0; i1 < gcap->nlabels; i1++) {
-            l1 = gcap->labels[i1];
+            l1  = gcap->labels[i1];
             gc1 = GCAfindPriorGC(gca, xp, yp, zp, l1);
             if (!gc1 || gc1->regularized)
               continue;
             label1_count[l1]++;
             for (i2 = 0; i2 < i1; i2++) {
-              l2 = gcap->labels[i2];
+              l2  = gcap->labels[i2];
               gc2 = GCAfindPriorGC(gca, xp, yp, zp, l2);
               if (!gc2 || gc2->regularized)
                 continue;
@@ -1331,12 +1331,12 @@ static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
               /* marginalize over intensity */
               if (l1 == Left_Hippocampus && l2 == Left_Amygdala)
                 DiagBreak();
-              Imin1 = MAX(Imins1[i1], Imins1[i2]);
-              Imax1 = MIN(Imaxs1[i1], Imaxs1[i2]);
-              Imin2 = MAX(Imins2[i1], Imins2[i2]);
-              Imax2 = MIN(Imaxs2[i1], Imaxs2[i2]);
-              Imin3 = MAX(Imins3[i1], Imins3[i2]);
-              Imax3 = MIN(Imaxs3[i1], Imaxs3[i2]);
+              Imin1  = MAX(Imins1[i1], Imins1[i2]);
+              Imax1  = MIN(Imaxs1[i1], Imaxs1[i2]);
+              Imin2  = MAX(Imins2[i1], Imins2[i2]);
+              Imax2  = MIN(Imaxs2[i1], Imaxs2[i2]);
+              Imin3  = MAX(Imins3[i1], Imins3[i2]);
+              Imax3  = MIN(Imaxs3[i1], Imaxs3[i2]);
               Istep1 = (Imax1 - Imin1) / MAX_VALS;
               Istep2 = (Imax2 - Imin2) / MAX_VALS;
               Istep3 = (Imax3 - Imin3) / MAX_VALS;
@@ -1397,11 +1397,11 @@ static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
 
   {
     FILE *fp;
-    MRI *mri2;
+    MRI * mri2;
     float norm;
 
     mri2 = MRIalloc(MAX_CMA_LABEL + 1, MAX_CMA_LABEL + 1, 2, MRI_FLOAT);
-    fp = fopen("label_amb.dat", "w");
+    fp   = fopen("label_amb.dat", "w");
     for (l1 = 0; l1 <= MAX_CMA_LABEL; l1++) {
       for (l2 = 0; l2 <= MAX_CMA_LABEL; l2++) {
 #if 1

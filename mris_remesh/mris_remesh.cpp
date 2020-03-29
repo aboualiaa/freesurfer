@@ -1,16 +1,14 @@
 #include "argparse.h"
+#include "mris_remesh.help.xml.h"
 #include "mrisurf.h"
 #include "remesher.h"
 #include "surfgrad.h"
-#include "mris_remesh.help.xml.h"
 
-
-int main(int argc, char **argv) 
-{
+int main(int argc, char **argv) {
   ArgumentParser parser;
   parser.addHelp(mris_remesh_help_xml, mris_remesh_help_xml_len);
   // required
-  parser.addArgument("-i", "--input",  1, String, true);
+  parser.addArgument("-i", "--input", 1, String, true);
   parser.addArgument("-o", "--output", 1, String, true);
   // one of these is required
   parser.addArgument("--remesh");
@@ -23,8 +21,9 @@ int main(int argc, char **argv)
 
   // read input surface
   std::string inputname = parser.retrieve<std::string>("input");
-  MRIS *surf = MRISread(inputname.c_str());
-  if (!surf) fs::fatal() << "could not read input surface " << inputname;
+  MRIS *      surf      = MRISread(inputname.c_str());
+  if (!surf)
+    fs::fatal() << "could not read input surface " << inputname;
 
   // number of iterations
   int iters = parser.exists("iters") ? parser.retrieve<int>("iters") : 5;
@@ -36,43 +35,40 @@ int main(int argc, char **argv)
   Remesher remesher = Remesher(surf);
 
   // quick sanity check to make sure only one remesh method was specified
-  int numtargets = int(parser.exists("remesh")) +
-                   int(parser.exists("nvert")) +
+  int numtargets = int(parser.exists("remesh")) + int(parser.exists("nvert")) +
                    int(parser.exists("edge-len")) +
                    int(parser.exists("desired-face-area"));
-  if (numtargets > 1) fs::fatal() << "must only specify one remeshing target";
+  if (numtargets > 1)
+    fs::fatal() << "must only specify one remeshing target";
 
   if (parser.exists("nvert")) {
     // remesh to number of vertices
     int nverts = parser.retrieve<int>("nvert");
     std::cout << "target vertices = " << nverts << std::endl;
     remesher.remeshBKV(iters, nverts);
-  }
-  else if (parser.exists("remesh")) {
+  } else if (parser.exists("remesh")) {
     // remesh without changing nvertices - just modify the quality
     std::cout << "standard remeshing without target" << std::endl;
     remesher.remeshBK(iters);
-  }
-  else if (parser.exists("edge-len")) {
+  } else if (parser.exists("edge-len")) {
     // remesh to target edge length
     float edgelength = parser.retrieve<float>("edge-len");
     std::cout << "target edge length = " << edgelength << std::endl;
     remesher.remeshBK(iters, edgelength);
-  }
-  else if (parser.exists("desired-face-area")) {
+  } else if (parser.exists("desired-face-area")) {
     // remesh to target face area
     float  desiredFaceArea = parser.retrieve<float>("desired-face-area");
-    double avgfacearea = surf->total_area / surf->nfaces;
+    double avgfacearea     = surf->total_area / surf->nfaces;
     double decimationLevel = avgfacearea / desiredFaceArea;
-    int nverts = round(surf->nvertices * decimationLevel);
+    int    nverts          = round(surf->nvertices * decimationLevel);
     std::cout << "target face area = " << desiredFaceArea << std::endl;
     std::cout << "average source face area = " << avgfacearea << std::endl;
     std::cout << "decimation level = " << decimationLevel << std::endl;
     std::cout << "target vertices = " << nverts << std::endl;
     remesher.remeshBKV(iters, nverts);
-  }
-  else {
-    fs::fatal() << "must specify target edge length, number of vertices, or face area";
+  } else {
+    fs::fatal()
+        << "must specify target edge length, number of vertices, or face area";
   }
 
   // convert back to MRIS
@@ -85,7 +81,8 @@ int main(int argc, char **argv)
 
   // print stats
   double diff = (double)remeshed->nvertices / (double)surf->nvertices;
-  printf("Remeshed surface quality stats nv0 = %d  nv = %d  %g\n", surf->nvertices, remeshed->nvertices, diff);
+  printf("Remeshed surface quality stats nv0 = %d  nv = %d  %g\n",
+         surf->nvertices, remeshed->nvertices, diff);
   MRISedges(remeshed);
   MRIScorners(remeshed);
   MRISfaceMetric(remeshed, 0);

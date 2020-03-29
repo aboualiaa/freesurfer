@@ -26,9 +26,9 @@
 #ifndef EM_REGISTER_FIND_TRANSLATION_H
 #define EM_REGISTER_FIND_TRANSLATION_H
 
-#include "mri.h"
 #include "gca.h"
 #include "matrix.h"
+#include "mri.h"
 
 double find_optimal_translation(GCA *gca, GCA_SAMPLE *gcas, MRI *mri,
                                 int nsamples, MATRIX *m_L, float min_trans,

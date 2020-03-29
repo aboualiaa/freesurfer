@@ -32,8 +32,8 @@
 #include <vector>
 #include <vnl/vnl_matrix_fixed.h>
 
-#include "Quaternion.h"
 #include "MyMatrix.h"
+#include "Quaternion.h"
 
 /** \class Transformation
  * \brief Base class for all 2d and 3d transformation models
@@ -56,7 +56,7 @@ public:
   virtual vnl_vector<double> getGradient(const unsigned int &x, const float &fx,
                                          const unsigned int &y, const float &fy,
                                          const unsigned int &z,
-                                         const float &fz) const = 0;
+                                         const float &       fz) const = 0;
 
   //! Set the parameters from double std vector
   void setParameters(const std::vector<double> &p) {
@@ -454,7 +454,7 @@ public:
     q.importRotVec(0, 0, parameters[2]);
     vnl_matrix<double> rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
     vnl_matrix_fixed<double, 4, 4> ret;
-    int rr, cc;
+    int                            rr, cc;
     for (rr = 0; rr < 3; rr++) {
       for (cc = 0; cc < 3; cc++) // copy rot-matrix
         ret[rr][cc] = rmat[rr][cc];
@@ -525,14 +525,14 @@ public:
     // rigid: first 2 translation, next rotation (as a vector)
     // split translation and rotation:
     vnl_vector_fixed<double, 3> t(parameters[0], parameters[1], 0);
-    double r = parameters[2];
+    double                      r = parameters[2];
 
     // converts rot vector (3x1) and translation vector (3x1)
     // into an affine matrix (homogeneous coord) 4x4
     // if global rtype ==2 then r1,r2,r3 are angles around x,y,z axis (order
     // 1zrot,2yrot,3xrot)
     vnl_matrix<double> rmat;
-    Quaternion q;
+    Quaternion         q;
     // first convert rotation to quaternion (clockwise)
     // q.importZYXAngles(-r[2], -r[1], -r[0]);
     q.importZYXAngles(-r, 0, 0); // same as spm now
@@ -540,7 +540,7 @@ public:
     rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
 
     vnl_matrix_fixed<double, 4, 4> ret;
-    int rr, cc;
+    int                            rr, cc;
     for (rr = 0; rr < 3; rr++) {
       for (cc = 0; cc < 3; cc++) // copy rot-matrix
         ret[rr][cc] = rmat[rr][cc];
@@ -660,8 +660,8 @@ public:
 
   inline virtual vnl_vector<double> getSteps() const {
     vnl_vector<double> v(getDOF(), 0.001);
-    v[3] = 0.02;
-    v[7] = 0.02;
+    v[3]  = 0.02;
+    v[7]  = 0.02;
     v[11] = 0.02;
     return v;
   }
@@ -682,16 +682,16 @@ public:
   getGradient(const unsigned int &x, const float &fx, const unsigned int &y,
               const float &fy, const unsigned int &z, const float &fz) const {
     vnl_vector<double> ret(12);
-    ret[0] = fx * x;
-    ret[1] = fx * y;
-    ret[2] = fx * z;
-    ret[3] = fx;
-    ret[4] = fy * x;
-    ret[5] = fy * y;
-    ret[6] = fy * z;
-    ret[7] = fy;
-    ret[8] = fz * x;
-    ret[9] = fz * y;
+    ret[0]  = fx * x;
+    ret[1]  = fx * y;
+    ret[2]  = fx * z;
+    ret[3]  = fx;
+    ret[4]  = fy * x;
+    ret[5]  = fy * y;
+    ret[6]  = fy * z;
+    ret[7]  = fy;
+    ret[8]  = fz * x;
+    ret[9]  = fz * y;
     ret[10] = fz * z;
     ret[11] = fz;
     return ret;
@@ -768,7 +768,7 @@ public:
     vnl_matrix<double> M3 = zmat * smat * rmat;
     // consturct 4x4 with translation also:
     vnl_matrix_fixed<double, 4, 4> ret;
-    int rr, cc;
+    int                            rr, cc;
     for (rr = 0; rr < 3; rr++) {
       for (cc = 0; cc < 3; cc++) // copy M3
         ret[rr][cc] = M3[rr][cc];
@@ -791,16 +791,16 @@ public:
               << std::endl;
     exit(1);
     vnl_vector<double> ret(12);
-    ret[0] = fx * x;
-    ret[1] = fx * y;
-    ret[2] = fx * z;
-    ret[3] = fx;
-    ret[4] = fy * x;
-    ret[5] = fy * y;
-    ret[6] = fy * z;
-    ret[7] = fy;
-    ret[8] = fz * x;
-    ret[9] = fz * y;
+    ret[0]  = fx * x;
+    ret[1]  = fx * y;
+    ret[2]  = fx * z;
+    ret[3]  = fx;
+    ret[4]  = fy * x;
+    ret[5]  = fy * y;
+    ret[6]  = fy * z;
+    ret[7]  = fy;
+    ret[8]  = fz * x;
+    ret[9]  = fz * y;
     ret[10] = fz * z;
     ret[11] = fz;
     return ret;

@@ -1,7 +1,7 @@
 #ifndef _SBL_MATRIX_UTIL_H_
 #define _SBL_MATRIX_UTIL_H_
-#include <sbl/core/File.h>
 #include <sbl/core/Array.h>
+#include <sbl/core/File.h>
 #include <sbl/core/Pointer.h>
 #include <sbl/math/Matrix.h>
 #include <sbl/math/Vector.h>
@@ -29,7 +29,7 @@ aptr<MatrixF> readSymMatrixF(const String &fileName);
 aptr<MatrixF> readSparseMatrixF(const String &fileName);
 
 /// load/save matrix from/to CSV text file
-void exportMatrixF(const String &fileName, const MatrixF &mat);
+void          exportMatrixF(const String &fileName, const MatrixF &mat);
 aptr<MatrixF> importMatrixF(const String &fileName);
 
 //-------------------------------------------
@@ -41,10 +41,10 @@ VectorF rowMean(const MatrixF &m);
 VectorF colMean(const MatrixF &m);
 
 /// returns the sum of the columns (the sum along each row)
-template <typename T> Vector<T> rowSum(const Matrix<T> &m);
+template <typename T> std::vector<T> rowSum(const Matrix<T> &m);
 
 /// returns the sum of the rows (the sum along each col)
-template <typename T> Vector<T> colSum(const Matrix<T> &m);
+template <typename T> std::vector<T> colSum(const Matrix<T> &m);
 
 /// subtract vector from each row of matrix
 aptr<MatrixF> subtractRow(const MatrixF &m, const VectorF &v);

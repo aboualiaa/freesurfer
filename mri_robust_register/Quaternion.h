@@ -153,19 +153,19 @@ public:
   // Operators
 
   inline Quaternion &operator=(const Quaternion &);
-  inline int operator==(const Quaternion &) const;
-  inline int operator!=(const Quaternion &) const;
+  inline int         operator==(const Quaternion &) const;
+  inline int         operator!=(const Quaternion &) const;
   inline Quaternion &operator+=(const Quaternion &);
   inline Quaternion &operator-=(const Quaternion &);
   inline Quaternion &operator*=(const double &);
-  inline Quaternion operator+(const Quaternion &) const;
-  inline Quaternion operator-(const Quaternion &) const;
-  inline Quaternion operator*(const double &)const;
-  inline Quaternion operator*(const Quaternion &)const;
+  inline Quaternion  operator+(const Quaternion &) const;
+  inline Quaternion  operator-(const Quaternion &) const;
+  inline Quaternion  operator*(const double &) const;
+  inline Quaternion  operator*(const Quaternion &) const;
 
 private:
   double a, b, c, d;
-  bool normed;
+  bool   normed;
 };
 
 inline void Quaternion::write(std::ostream &os) const {
@@ -179,16 +179,16 @@ inline std::vector<double> Quaternion::getMatrix4d() const
 //         m12 m13 m14 m15
 {
   std::vector<double> m(16);
-  m[0] = a;
-  m[1] = b;
-  m[2] = c;
-  m[3] = d;
-  m[4] = -b;
-  m[5] = a;
-  m[6] = -d;
-  m[7] = c;
-  m[8] = -c;
-  m[9] = d;
+  m[0]  = a;
+  m[1]  = b;
+  m[2]  = c;
+  m[3]  = d;
+  m[4]  = -b;
+  m[5]  = a;
+  m[6]  = -d;
+  m[7]  = c;
+  m[8]  = -c;
+  m[9]  = d;
   m[10] = a;
   m[11] = -b;
   m[12] = -d;
@@ -239,16 +239,16 @@ inline std::vector<double> Quaternion::getRotMatrix3dh() const
 {
   std::vector<double> mr = getRotMatrix3d();
   std::vector<double> m(16);
-  m[0] = mr[0];
-  m[1] = mr[1];
-  m[2] = mr[2];
-  m[3] = 0;
-  m[4] = mr[3];
-  m[5] = mr[4];
-  m[6] = mr[5];
-  m[7] = 0;
-  m[8] = mr[6];
-  m[9] = mr[7];
+  m[0]  = mr[0];
+  m[1]  = mr[1];
+  m[2]  = mr[2];
+  m[3]  = 0;
+  m[4]  = mr[3];
+  m[5]  = mr[4];
+  m[6]  = mr[5];
+  m[7]  = 0;
+  m[8]  = mr[6];
+  m[9]  = mr[7];
   m[10] = mr[8];
   m[11] = 0;
   m[12] = 0;
@@ -271,8 +271,8 @@ inline Quaternion Quaternion::getHalfRotation() const {
   // std::cout << " Quaternion::getHalfRotation" << std::endl;
   // if (normed)   std::cout << " is normed " << std::endl;
   // else std::cout << " is not normed " << std::endl;
-  double angle = .5 * getRotAngle();
-  std::vector<double> v = getRotAxis();
+  double              angle = .5 * getRotAngle();
+  std::vector<double> v     = getRotAxis();
   // std::cout << " angle: " << angle << " v: " << v[0] << " " << v[1] << " "
   // <<v[2] << std::endl;
   Quaternion q;
@@ -282,11 +282,11 @@ inline Quaternion Quaternion::getHalfRotation() const {
 
 inline std::vector<double> Quaternion::getRotAxis() const {
   std::vector<double> v(3);
-  v[0] = b;
-  v[1] = c;
-  v[2] = d;
+  v[0]     = b;
+  v[1]     = c;
+  v[2]     = d;
   double l = sqrt(b * b + c * c + d * d);
-  l = 1.0 / l;
+  l        = 1.0 / l;
   // std::cout << " l : " << l << std::endl;
   v[0] *= l;
   v[1] *= l;
@@ -298,8 +298,8 @@ inline std::vector<double> Quaternion::getRotAxis() const {
 }
 
 inline std::vector<double> Quaternion::getRotVec() const {
-  std::vector<double> v = getRotAxis();
-  double alpha = getRotAngle();
+  std::vector<double> v     = getRotAxis();
+  double              alpha = getRotAngle();
   v[0] *= alpha;
   v[1] *= alpha;
   v[2] *= alpha;
@@ -311,7 +311,7 @@ inline std::vector<double> Quaternion::getRotVec() const {
  rotation of ||v|| around axis defined by vector v=(v1,v2,v3)
  */
 inline Quaternion &Quaternion::importRotVec(double v1, double v2, double v3) {
-  normed = true;
+  normed   = true;
   double l = sqrt(v1 * v1 + v2 * v2 + v3 * v3);
   if (l < 0.000001) {
     a = 1.0;
@@ -319,10 +319,10 @@ inline Quaternion &Quaternion::importRotVec(double v1, double v2, double v3) {
     return *this;
   }
   double slh = sin(l / 2.0);
-  a = cos(l / 2.0);
-  b = slh * v1 / l;
-  c = slh * v2 / l;
-  d = slh * v3 / l;
+  a          = cos(l / 2.0);
+  b          = slh * v1 / l;
+  c          = slh * v2 / l;
+  d          = slh * v3 / l;
   return *this;
 }
 
@@ -341,10 +341,10 @@ inline Quaternion &Quaternion::importRotVec(double alpha, double v1, double v2,
   }
 
   double slh = sin(alpha / 2.0);
-  a = cos(alpha / 2.0);
-  b = slh * v1 / l;
-  c = slh * v2 / l;
-  d = slh * v3 / l;
+  a          = cos(alpha / 2.0);
+  b          = slh * v1 / l;
+  c          = slh * v2 / l;
+  d          = slh * v3 / l;
   return *this;
 }
 
@@ -440,29 +440,29 @@ inline Quaternion &Quaternion::importMatrix(double a00, double a01, double a02,
 
   if (trace > 0.00001) {
     double s = 0.5 / sqrt(trace + 1.0);
-    a = 0.25 / s;
-    b = (a21 - a12) * s;
-    c = (a02 - a20) * s;
-    d = (a10 - a01) * s;
+    a        = 0.25 / s;
+    b        = (a21 - a12) * s;
+    c        = (a02 - a20) * s;
+    d        = (a10 - a01) * s;
   } else {
     if (a00 > a11 && a00 > a22) {
       double s = 2.0 * sqrt(1.0 + a00 - a11 - a22);
-      a = (a21 - a12) / s;
-      b = 0.25 * s;
-      c = (a01 + a10) / s;
-      d = (a02 + a20) / s;
+      a        = (a21 - a12) / s;
+      b        = 0.25 * s;
+      c        = (a01 + a10) / s;
+      d        = (a02 + a20) / s;
     } else if (a11 > a22) {
       double s = 2.0 * sqrt(1.0 + a11 - a00 - a22);
-      a = (a02 - a20) / s;
-      b = (a01 + a10) / s;
-      c = 0.25 * s;
-      d = (a12 + a21) / s;
+      a        = (a02 - a20) / s;
+      b        = (a01 + a10) / s;
+      c        = 0.25 * s;
+      d        = (a12 + a21) / s;
     } else {
       double s = 2.0 * sqrt(1.0 + a22 - a00 - a11);
-      a = (a10 - a01) / s;
-      b = (a02 + a20) / s;
-      c = (a12 + a21) / s;
-      d = 0.25 * s;
+      a        = (a10 - a01) / s;
+      b        = (a02 + a20) / s;
+      c        = (a12 + a21) / s;
+      d        = 0.25 * s;
     }
   }
   normed = true;
@@ -476,13 +476,13 @@ inline Quaternion &Quaternion::importMatrix(double a00, double a01, double a02,
 inline std::vector<double> Quaternion::rotate(double v1, double v2,
                                               double v3) const {
   std::vector<double> vrot(3);
-  Quaternion v(0, v1, v2, v3);
-  Quaternion p = getNormalized();
-  Quaternion pi = p.getConjugate(); // same as inverse as p is normed
-  Quaternion res = p * v * pi;
-  vrot[0] = res.b;
-  vrot[1] = res.c;
-  vrot[2] = res.d;
+  Quaternion          v(0, v1, v2, v3);
+  Quaternion          p   = getNormalized();
+  Quaternion          pi  = p.getConjugate(); // same as inverse as p is normed
+  Quaternion          res = p * v * pi;
+  vrot[0]                 = res.b;
+  vrot[1]                 = res.c;
+  vrot[2]                 = res.d;
   return vrot;
 }
 
@@ -502,7 +502,7 @@ inline Quaternion &Quaternion::normalize() {
   if (normed)
     return *this;
   double l = sqrt(a * a + b * b + c * c + d * d);
-  this->operator*=(1.0 / l);
+  this-> operator*=(1.0 / l);
   normed = true;
   return *this;
 }
@@ -539,15 +539,15 @@ inline Quaternion &Quaternion::invert() {
     return *this;
 
   double d2 = (a * a + b * b + c * c + d * d);
-  this->operator*=(1.0 / d2);
+  this-> operator*=(1.0 / d2);
   return *this;
 }
 
 inline Quaternion &Quaternion::operator=(const Quaternion &vect) {
-  a = vect.a;
-  b = vect.b;
-  c = vect.c;
-  d = vect.d;
+  a      = vect.a;
+  b      = vect.b;
+  c      = vect.c;
+  d      = vect.d;
   normed = vect.normed;
   return *this;
 }

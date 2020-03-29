@@ -8,9 +8,9 @@ class LabelsHistogramMembershipFunction
     : public LabelPerPointMembershipFunction<TVector> {
 public:
   /** Standard class typedefs */
-  using Self = LabelsHistogramMembershipFunction<TVector>;
-  using Superclass = LabelPerPointMembershipFunction<TVector>;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = LabelsHistogramMembershipFunction<TVector>;
+  using Superclass   = LabelPerPointMembershipFunction<TVector>;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Strandard macros */
@@ -19,7 +19,7 @@ public:
 
   /** Typedef alias for the measurement vectors */
   using MeasurementVectorType = TVector;
-  using CentroidType = TVector;
+  using CentroidType          = TVector;
 
   /** Typedef to represent the length of measurement vectors */
   using MeasurementVectorSizeType =

@@ -1,9 +1,9 @@
 #ifndef RENDERWIDGET_H
 #define RENDERWIDGET_H
 
-#include <QWidget>
-#include <QTimer>
 #include <QImage>
+#include <QTimer>
+#include <QWidget>
 
 class RenderWidget : public QWidget {
   Q_OBJECT
@@ -37,15 +37,15 @@ public slots:
   void SetCurrentImageIndex(int n);
 
 private:
-  QTimer m_timerRender;
-  bool m_bAutoResize;
-  int m_nCurrentImageIndex;
+  QTimer        m_timerRender;
+  bool          m_bAutoResize;
+  int           m_nCurrentImageIndex;
   QList<QImage> m_images;
   QList<QImage> m_resizedImages;
-  bool m_bSwing;
-  int m_nInterval;
-  int m_nY;
-  bool m_bPressed;
+  bool          m_bSwing;
+  int           m_nInterval;
+  int           m_nY;
+  bool          m_bPressed;
 };
 
 #endif // RENDERWIDGET_H

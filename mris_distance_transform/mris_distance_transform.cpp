@@ -22,16 +22,16 @@
  *
  */
 
+#include "annotation.h"
 #include "diag.h"
 #include "timer.h"
 #include "version.h"
-#include "annotation.h"
 
 static char vcid[] =
     "$Id: mris_distance_transform.c,v 1.5 2013/04/12 20:59:17 fischl Exp $";
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -39,22 +39,22 @@ static void print_version();
 
 const char *Progname;
 
-static float anterior_dist = -1;
+static float anterior_dist  = -1;
 static float posterior_dist = -1;
-static int divide = 1;
+static int   divide         = 1;
 static char *divide_surf_name;
-static int output_label = 0;
-static float normalize = -1;
-static int vol =
+static int   output_label = 0;
+static float normalize    = -1;
+static int   vol =
     0; // do distance from surface into volume instead of label on surface
 
 int main(int argc, char *argv[]) {
-  char **av, *output_fname;
-  int ac, nargs, msec, mode = -1;
-  LABEL *area = NULL;
+  char **      av, *output_fname;
+  int          ac, nargs, msec, mode = -1;
+  LABEL *      area = NULL;
   MRI_SURFACE *mris;
-  Timer then;
-  MRI *mri_dist;
+  Timer        then;
+  MRI *        mri_dist;
 
   nargs = handleVersionOption(argc, argv, "mris_distance_transform");
   if (nargs && argc - nargs == 1)
@@ -124,8 +124,8 @@ int main(int argc, char *argv[]) {
              mris->total_area, normalize);
     }
     if (divide > 1) {
-      int i;
-      char fname[STRLEN], ext[STRLEN], base_name[STRLEN];
+      int    i;
+      char   fname[STRLEN], ext[STRLEN], base_name[STRLEN];
       LABEL *area_division;
 
       FileNameExtension(output_fname, ext);
@@ -145,8 +145,8 @@ int main(int argc, char *argv[]) {
       // [1,divide] make sure they are oriented along original a/p direction
 #define MAX_UNITS 100
       {
-        double cx[MAX_UNITS], cy[MAX_UNITS], cz[MAX_UNITS], min_a;
-        int index, num[MAX_UNITS], new_index[MAX_UNITS], j, min_i;
+        double  cx[MAX_UNITS], cy[MAX_UNITS], cz[MAX_UNITS], min_a;
+        int     index, num[MAX_UNITS], new_index[MAX_UNITS], j, min_i;
         VERTEX *v;
 
         memset(num, 0, sizeof(num[0]) * divide);
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
         for (i = 0; i < area->n_points; i++) {
           if (area->lv[i].vno < 0 || area->lv[i].deleted > 0)
             continue;
-          v = &mris->vertices[area->lv[i].vno];
+          v         = &mris->vertices[area->lv[i].vno];
           v->marked = new_index[v->marked];
         }
       }
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -237,7 +237,7 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "anterior")) {
     anterior_dist = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("using anterior-most %2.3f mm of label only\n", anterior_dist);
   } else if (!stricmp(option, "vol")) {
     vol = 1;
@@ -250,15 +250,15 @@ static int get_option(int argc, char *argv[]) {
     output_label = 1;
     printf("writing out label subdivisions\n");
   } else if (!stricmp(option, "divide")) {
-    divide = atoi(argv[2]);
+    divide           = atoi(argv[2]);
     divide_surf_name = argv[3];
-    nargs = 2;
+    nargs            = 2;
     printf("dividing label into %d parts along primary eigendirection using "
            "coords in %s\n",
            divide, divide_surf_name);
   } else if (!stricmp(option, "posterior")) {
     posterior_dist = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("using posterior-most %2.3f mm of label only\n", posterior_dist);
   } else
     switch (toupper(*option)) {

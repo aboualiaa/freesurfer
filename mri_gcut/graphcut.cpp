@@ -25,8 +25,8 @@
 
 #include "graphcut.h"
 
-#define TERMINAL ((arc *)1)   /* to terminal */
-#define ORPHAN ((arc *)2)     /* orphan */
+#define TERMINAL   ((arc *)1) /* to terminal */
+#define ORPHAN     ((arc *)2) /* orphan */
 #define INFINITE_D 1000000000 /* infinite distance to the terminal */
 
 #define NEW_VECTOR(X, N, TYPE, MSG) Test_Pointer(X = new TYPE[N], MSG)
@@ -53,7 +53,7 @@ inline void Graph::set_active(node *i) {
     else
       queue_first[1] = i;
     queue_last[1] = i;
-    i->next = i;
+    i->next       = i;
   }
 }
 
@@ -68,9 +68,9 @@ inline Graph::node *Graph::next_active() {
   while (true) {
     if (!(i = queue_first[0])) {
       queue_first[0] = i = queue_first[1];
-      queue_last[0] = queue_last[1];
-      queue_first[1] = NULL;
-      queue_last[1] = NULL;
+      queue_last[0]      = queue_last[1];
+      queue_first[1]     = NULL;
+      queue_last[1]      = NULL;
       if (!i)
         return NULL;
     }
@@ -95,26 +95,26 @@ void Graph::maxflow_init() {
 
   queue_first[0] = queue_last[0] = NULL;
   queue_first[1] = queue_last[1] = NULL;
-  orphan_first = NULL;
+  orphan_first                   = NULL;
 
   for (i = node_block->ScanFirst(); i; i = node_block->ScanNext()) {
-    i->next = NULL;
+    i->next       = NULL;
     i->mark_count = 0;
-    i->is_sink = 0;
+    i->is_sink    = 0;
     if (i->tr_cap > 0) {
       /* i is connected to the source */
       i->is_sink = 0;
-      i->parent = TERMINAL;
+      i->parent  = TERMINAL;
       set_active(i);
       i->mark_count = 1;
-      i->mark_d = 1;
+      i->mark_d     = 1;
     } else if (i->tr_cap < 0) {
       /* i is connected to the sink */
       i->is_sink = 1;
-      i->parent = TERMINAL;
+      i->parent  = TERMINAL;
       set_active(i);
       i->mark_count = 1;
-      i->mark_d = 1;
+      i->mark_d     = 1;
     } else {
       i->parent = NULL;
     }
@@ -125,9 +125,9 @@ void Graph::maxflow_init() {
 /***********************************************************************/
 
 void Graph::augment(arc *middle_arc) {
-  node *i;
-  arc *a;
-  captype bottleneck;
+  node *   i;
+  arc *    a;
+  captype  bottleneck;
   nodeptr *np;
 
   /* 1. Finding bottleneck capacity */
@@ -165,20 +165,20 @@ void Graph::augment(arc *middle_arc) {
     a->sister->r_cap -= bottleneck;
     if (!a->sister->r_cap) {
       /* add i to the adoption list */
-      i->parent = ORPHAN;
-      np = nodeptr_block->New();
-      np->ptr = i;
-      np->next = orphan_first;
+      i->parent    = ORPHAN;
+      np           = nodeptr_block->New();
+      np->ptr      = i;
+      np->next     = orphan_first;
       orphan_first = np;
     }
   }
   i->tr_cap -= bottleneck;
   if (!i->tr_cap) {
     /* add i to the adoption list */
-    i->parent = ORPHAN;
-    np = nodeptr_block->New();
-    np->ptr = i;
-    np->next = orphan_first;
+    i->parent    = ORPHAN;
+    np           = nodeptr_block->New();
+    np->ptr      = i;
+    np->next     = orphan_first;
     orphan_first = np;
   }
   /* 2b - the sink tree */
@@ -190,20 +190,20 @@ void Graph::augment(arc *middle_arc) {
     a->r_cap -= bottleneck;
     if (!a->r_cap) {
       /* add i to the adoption list */
-      i->parent = ORPHAN;
-      np = nodeptr_block->New();
-      np->ptr = i;
-      np->next = orphan_first;
+      i->parent    = ORPHAN;
+      np           = nodeptr_block->New();
+      np->ptr      = i;
+      np->next     = orphan_first;
       orphan_first = np;
     }
   }
   i->tr_cap += bottleneck;
   if (!i->tr_cap) {
     /* add i to the adoption list */
-    i->parent = ORPHAN;
-    np = nodeptr_block->New();
-    np->ptr = i;
-    np->next = orphan_first;
+    i->parent    = ORPHAN;
+    np           = nodeptr_block->New();
+    np->ptr      = i;
+    np->next     = orphan_first;
     orphan_first = np;
   }
 
@@ -213,10 +213,10 @@ void Graph::augment(arc *middle_arc) {
 /***********************************************************************/
 
 void Graph::process_source_orphan(node *i) {
-  node *j;
-  arc *a0, *a0_min = NULL, *a;
+  node *   j;
+  arc *    a0, *a0_min = NULL, *a;
   nodeptr *np;
-  int d, d_min = INFINITE_D;
+  int      d, d_min = INFINITE_D;
 
   /* trying to find a new parent */
   for (a0 = i->first; a0; a0 = a0->next)
@@ -234,7 +234,7 @@ void Graph::process_source_orphan(node *i) {
           d++;
           if (a == TERMINAL) {
             j->mark_count = mark_count;
-            j->mark_d = 1;
+            j->mark_d     = 1;
             break;
           }
           if (a == ORPHAN) {
@@ -247,12 +247,12 @@ void Graph::process_source_orphan(node *i) {
         {
           if (d < d_min) {
             a0_min = a0;
-            d_min = d;
+            d_min  = d;
           }
           /* set marks along the path */
           for (j = a0->head; j->mark_count != mark_count; j = j->parent->head) {
             j->mark_count = mark_count;
-            j->mark_d = d--;
+            j->mark_d     = d--;
           }
         }
       }
@@ -260,7 +260,7 @@ void Graph::process_source_orphan(node *i) {
 
   if ((i->parent = a0_min)) {
     i->mark_count = mark_count;
-    i->mark_d = d_min + 1;
+    i->mark_d     = d_min + 1;
   } else {
     /* no parent is found */
     i->mark_count = 0;
@@ -274,14 +274,14 @@ void Graph::process_source_orphan(node *i) {
         if (a != TERMINAL && a != ORPHAN && a->head == i) {
           /* add j to the adoption list */
           j->parent = ORPHAN;
-          np = nodeptr_block->New();
-          np->ptr = j;
+          np        = nodeptr_block->New();
+          np->ptr   = j;
           if (orphan_last)
             orphan_last->next = np;
           else
             orphan_first = np;
           orphan_last = np;
-          np->next = NULL;
+          np->next    = NULL;
         }
       }
     }
@@ -289,10 +289,10 @@ void Graph::process_source_orphan(node *i) {
 }
 
 void Graph::process_sink_orphan(node *i) {
-  node *j;
-  arc *a0, *a0_min = NULL, *a;
+  node *   j;
+  arc *    a0, *a0_min = NULL, *a;
   nodeptr *np;
-  int d, d_min = INFINITE_D;
+  int      d, d_min = INFINITE_D;
 
   /* trying to find a new parent */
   for (a0 = i->first; a0; a0 = a0->next)
@@ -310,7 +310,7 @@ void Graph::process_sink_orphan(node *i) {
           d++;
           if (a == TERMINAL) {
             j->mark_count = mark_count;
-            j->mark_d = 1;
+            j->mark_d     = 1;
             break;
           }
           if (a == ORPHAN) {
@@ -323,12 +323,12 @@ void Graph::process_sink_orphan(node *i) {
         {
           if (d < d_min) {
             a0_min = a0;
-            d_min = d;
+            d_min  = d;
           }
           /* set marks along the path */
           for (j = a0->head; j->mark_count != mark_count; j = j->parent->head) {
             j->mark_count = mark_count;
-            j->mark_d = d--;
+            j->mark_d     = d--;
           }
         }
       }
@@ -336,7 +336,7 @@ void Graph::process_sink_orphan(node *i) {
 
   if ((i->parent = a0_min)) {
     i->mark_count = mark_count;
-    i->mark_d = d_min + 1;
+    i->mark_d     = d_min + 1;
   } else {
     /* no parent is found */
     i->mark_count = 0;
@@ -350,14 +350,14 @@ void Graph::process_sink_orphan(node *i) {
         if (a != TERMINAL && a != ORPHAN && a->head == i) {
           /* add j to the adoption list */
           j->parent = ORPHAN;
-          np = nodeptr_block->New();
-          np->ptr = j;
+          np        = nodeptr_block->New();
+          np->ptr   = j;
           if (orphan_last)
             orphan_last->next = np;
           else
             orphan_first = np;
           orphan_last = np;
-          np->next = NULL;
+          np->next    = NULL;
         }
       }
     }
@@ -367,8 +367,8 @@ void Graph::process_sink_orphan(node *i) {
 /***********************************************************************/
 
 Graph::flowtype Graph::maxflow() {
-  node *i = NULL, *j = NULL, *current_node = NULL;
-  arc *a = NULL;
+  node *   i = NULL, *j = NULL, *current_node = NULL;
+  arc *    a  = NULL;
   nodeptr *np = NULL, *np_next = NULL;
 
   maxflow_init();
@@ -392,10 +392,10 @@ Graph::flowtype Graph::maxflow() {
         if (a->r_cap) {
           j = a->head;
           if (!j->parent) {
-            j->is_sink = 0;
-            j->parent = a->sister;
+            j->is_sink    = 0;
+            j->parent     = a->sister;
             j->mark_count = i->mark_count;
-            j->mark_d = i->mark_d + 1;
+            j->mark_d     = i->mark_d + 1;
             set_active(j);
           } else if (j->is_sink)
             break;
@@ -403,9 +403,9 @@ Graph::flowtype Graph::maxflow() {
                    j->mark_d > i->mark_d) {
             /* heuristic - trying to make the distance from
                j to the source shorter */
-            j->parent = a->sister;
+            j->parent     = a->sister;
             j->mark_count = i->mark_count;
-            j->mark_d = i->mark_d + 1;
+            j->mark_d     = i->mark_d + 1;
           }
         }
     } else {
@@ -414,10 +414,10 @@ Graph::flowtype Graph::maxflow() {
         if (a->sister->r_cap) {
           j = a->head;
           if (!j->parent) {
-            j->is_sink = 1;
-            j->parent = a->sister;
+            j->is_sink    = 1;
+            j->parent     = a->sister;
             j->mark_count = i->mark_count;
-            j->mark_d = i->mark_d + 1;
+            j->mark_d     = i->mark_d + 1;
             set_active(j);
           } else if (!j->is_sink) {
             a = a->sister;
@@ -426,15 +426,15 @@ Graph::flowtype Graph::maxflow() {
                      j->mark_d > i->mark_d) {
             /* heuristic - trying to make the distance
                from j to the sink shorter */
-            j->parent = a->sister;
+            j->parent     = a->sister;
             j->mark_count = i->mark_count;
-            j->mark_d = i->mark_d + 1;
+            j->mark_d     = i->mark_d + 1;
           }
         }
     }
 
     if (a) {
-      i->next = i; /* set active flag */
+      i->next      = i; /* set active flag */
       current_node = i;
 
       /* augmentation */
@@ -443,12 +443,12 @@ Graph::flowtype Graph::maxflow() {
 
       /* adoption */
       while ((np = orphan_first)) {
-        np_next = np->next;
+        np_next  = np->next;
         np->next = NULL;
 
         while ((np = orphan_first)) {
           orphan_first = np->next;
-          i = np->ptr;
+          i            = np->ptr;
           nodeptr_block->Delete(np);
           if (!orphan_first)
             orphan_last = NULL;
@@ -481,9 +481,9 @@ Graph::termtype Graph::what_segment(node_id i) {
 
 Graph::Graph(void (*err_function)(char *)) {
   error_function = err_function;
-  node_block = new Block<node>(NODE_BLOCK_SIZE, error_function);
-  arc_block = new Block<arc>(NODE_BLOCK_SIZE, error_function);
-  flow = 0;
+  node_block     = new Block<node>(NODE_BLOCK_SIZE, error_function);
+  arc_block      = new Block<arc>(NODE_BLOCK_SIZE, error_function);
+  flow           = 0;
 }
 
 Graph::~Graph() {
@@ -494,7 +494,7 @@ Graph::~Graph() {
 Graph::node_id Graph::add_node() {
   node *i = node_block->New();
 
-  i->first = NULL;
+  i->first  = NULL;
   i->tr_cap = 0;
 
   return (node_id)i;
@@ -503,19 +503,19 @@ Graph::node_id Graph::add_node() {
 void Graph::add_edge(node_id from, node_id to, captype cap, captype rev_cap) {
   arc *a, *a_rev;
 
-  a = arc_block->New(2);
+  a     = arc_block->New(2);
   a_rev = a + 1;
 
-  a->sister = a_rev;
-  a_rev->sister = a;
-  a->next = ((node *)from)->first;
+  a->sister             = a_rev;
+  a_rev->sister         = a;
+  a->next               = ((node *)from)->first;
   ((node *)from)->first = a;
-  a_rev->next = ((node *)to)->first;
-  ((node *)to)->first = a_rev;
-  a->head = (node *)to;
-  a_rev->head = (node *)from;
-  a->r_cap = cap;
-  a_rev->r_cap = rev_cap;
+  a_rev->next           = ((node *)to)->first;
+  ((node *)to)->first   = a_rev;
+  a->head               = (node *)to;
+  a_rev->head           = (node *)from;
+  a->r_cap              = cap;
+  a_rev->r_cap          = rev_cap;
 }
 
 void Graph::set_tweights(node_id i, captype cap_source, captype cap_sink) {
@@ -593,12 +593,12 @@ void do_cityblock(int ***pointer, int zVol, int yVol, int xVol) {
 void mincut(int ***im_gcut, edgeW *hor, edgeW *ver, edgeW *tra, int length_h,
             int length_v, int length_t, int x_start, int y_start, int z_start,
             int x_end, int y_end, int z_end) {
-  int i, k, x, y, z, m1, m2, m3;
+  int  i, k, x, y, z, m1, m2, m3;
   int *marked;
 
-  x = x_end - x_start + 1;
-  y = y_end - y_start + 1;
-  z = z_end - z_start + 1;
+  x  = x_end - x_start + 1;
+  y  = y_end - y_start + 1;
+  z  = z_end - z_start + 1;
   m1 = length_h;
   m2 = length_v;
   m3 = length_t;
@@ -612,7 +612,7 @@ void mincut(int ***im_gcut, edgeW *hor, edgeW *ver, edgeW *tra, int length_h,
   */
   // Flag for the indices in the matrix.
   int sizeofMarked = x * y * z;
-  marked = new int[sizeofMarked];
+  marked           = new int[sizeofMarked];
   for (i = 0; i < sizeofMarked; i++)
     marked[i] = 0;
 
@@ -622,12 +622,12 @@ void mincut(int ***im_gcut, edgeW *hor, edgeW *ver, edgeW *tra, int length_h,
   Graph *g = new Graph();
 
   // Create the first node
-  k = 0;
+  k        = 0;
   nodes[k] = g->add_node();
   g->set_tweights(nodes[k], 400,
                   0); // set_tweights(node, source_weight, sink_weight);
   marked[0] = 1;
-  k = k + 1;
+  k         = k + 1;
 
   // edgewts1 = (float **) calloc(m, sizeof(float *));
   // for (i = 1; i <= m; i++)
@@ -646,14 +646,14 @@ void mincut(int ***im_gcut, edgeW *hor, edgeW *ver, edgeW *tra, int length_h,
   for (i = 0; i < m1; i++) {
     if (marked[hor[i].edge1 - 1] == 0) {
       marked[hor[i].edge1 - 1] = 1;
-      nodes[k] = g->add_node();
+      nodes[k]                 = g->add_node();
       g->set_tweights(nodes[k], hor[i].bsw, hor[i].fsw);
       k = k + 1;
     }
 
     if (marked[hor[i].edge2 - 1] == 0) {
       marked[hor[i].edge2 - 1] = 1;
-      nodes[k] = g->add_node();
+      nodes[k]                 = g->add_node();
       g->set_tweights(nodes[k], hor[i].bsw, hor[i].fsw);
       k = k + 1;
     }
@@ -676,14 +676,14 @@ void mincut(int ***im_gcut, edgeW *hor, edgeW *ver, edgeW *tra, int length_h,
   for (i = 0; i < m2; i++) {
     if (marked[ver[i].edge1 - 1] == 0) {
       marked[ver[i].edge1 - 1] = 1;
-      nodes[k] = g->add_node();
+      nodes[k]                 = g->add_node();
       g->set_tweights(nodes[k], ver[i].bsw, ver[i].fsw);
       k = k + 1;
     }
 
     if (marked[ver[i].edge2 - 1] == 0) {
       marked[ver[i].edge2 - 1] = 1;
-      nodes[k] = g->add_node();
+      nodes[k]                 = g->add_node();
       g->set_tweights(nodes[k], ver[i].bsw, ver[i].fsw);
       k = k + 1;
     }
@@ -706,14 +706,14 @@ void mincut(int ***im_gcut, edgeW *hor, edgeW *ver, edgeW *tra, int length_h,
   for (i = 0; i < m3; i++) {
     if (marked[tra[i].edge1 - 1] == 0) {
       marked[tra[i].edge1 - 1] = 1;
-      nodes[k] = g->add_node();
+      nodes[k]                 = g->add_node();
       g->set_tweights(nodes[k], tra[i].bsw, tra[i].fsw);
       k = k + 1;
     }
 
     if (marked[tra[i].edge2 - 1] == 0) {
       marked[tra[i].edge2 - 1] = 1;
-      nodes[k] = g->add_node();
+      nodes[k]                 = g->add_node();
       g->set_tweights(nodes[k], tra[i].bsw, tra[i].fsw);
       k = k + 1;
     }
@@ -752,9 +752,9 @@ void decide_bound(unsigned char ***image, double threshold, int xVol, int yVol,
                   int zVol, int &x_start, int &x_end, int &y_start, int &y_end,
                   int &z_start, int &z_end) {
   x_start = y_start = z_start = 0;
-  x_end = xVol - 1;
-  y_end = yVol - 1;
-  z_end = zVol - 1;
+  x_end                       = xVol - 1;
+  y_end                       = yVol - 1;
+  z_end                       = zVol - 1;
 
   double factor = 1.2;
   // z_start
@@ -764,7 +764,7 @@ void decide_bound(unsigned char ***image, double threshold, int xVol, int yVol,
       for (int x = 0; x < xVol && bExit == 0; x++) {
         if (image[z][y][x] > threshold * factor) {
           z_start = z;
-          bExit = 1;
+          bExit   = 1;
           break;
         }
       }
@@ -790,7 +790,7 @@ void decide_bound(unsigned char ***image, double threshold, int xVol, int yVol,
       for (int x = 0; x < xVol && bExit == 0; x++) {
         if (image[z][y][x] > threshold * factor) {
           y_start = y;
-          bExit = 1;
+          bExit   = 1;
           break;
         }
       }
@@ -816,7 +816,7 @@ void decide_bound(unsigned char ***image, double threshold, int xVol, int yVol,
       for (int y = 0; y < yVol && bExit == 0; y++) {
         if (image[z][y][x] > threshold * factor) {
           x_start = x;
-          bExit = 1;
+          bExit   = 1;
           break;
         }
       }
@@ -874,12 +874,12 @@ double graphcut(unsigned char ***image, unsigned char ***label, int ***im_gcut,
 
   double k = kval / (whitemean - threshold);
   // assign memory
-  int length_h = (xVol_new - 1) * yVol_new * zVol_new;
-  int length_v = xVol_new * (yVol_new - 1) * zVol_new;
-  int length_t = xVol_new * yVol_new * (zVol_new - 1);
-  edgeW *hor = new edgeW[length_h];
-  edgeW *ver = new edgeW[length_v];
-  edgeW *tra = new edgeW[length_t];
+  int    length_h = (xVol_new - 1) * yVol_new * zVol_new;
+  int    length_v = xVol_new * (yVol_new - 1) * zVol_new;
+  int    length_t = xVol_new * yVol_new * (zVol_new - 1);
+  edgeW *hor      = new edgeW[length_h];
+  edgeW *ver      = new edgeW[length_v];
+  edgeW *tra      = new edgeW[length_t];
   memset(hor, 0, sizeof(edgeW[length_h]));
   memset(ver, 0, sizeof(edgeW[length_v]));
   memset(tra, 0, sizeof(edgeW[length_t]));

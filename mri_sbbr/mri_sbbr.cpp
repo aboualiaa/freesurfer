@@ -39,126 +39,127 @@
 
 #include <sys/utsname.h>
 
-#include "version.h"
 #include "cmdargs.h"
 #include "diag.h"
 #include "mri2.h"
 #include "mrisutils.h"
-#include "volcluster.h"
 #include "numerics.h"
 #include "romp_support.h"
+#include "version.h"
+#include "volcluster.h"
 
 typedef struct {
-  char *movfile;
-  int slice;
-  char *surffile;
-  char *initreg;
-  char *outreg, *outreginv;
+  char * movfile;
+  int    slice;
+  char * surffile;
+  char * initreg;
+  char * outreg, *outreginv;
   double ftol, linmintol;
-  int nitersmax;
-  int optschema;
+  int    nitersmax;
+  int    optschema;
   double bbrslope, bbrcenter, bbrsign;
   double outdist, indist; // mm
   double params[12];
-  int paramset[12];
-  int inc, search, search1d, searchnper, search1diters;
+  int    paramset[12];
+  int    inc, search, search1d, searchnper, search1diters;
   double searchmul;
-  char *outsurffile;
+  char * outsurffile;
 } CMDARGS;
 
 typedef struct {
-  MRIS *surf;
-  MRI *mov, *ref;
-  int slice, nhits;
-  double outdist, indist; // mm
-  double bbrslope, bbrcenter, bbrsign;
-  double cost;
-  int inc;
-  int nparams;
-  double params[12], pmin[12], pmax[12], pdelta[12];
-  double searchmul;
-  int searchnper;
-  int nCostEvaluations;
-  double tLastEval;
-  double ftol, linmintol;
-  float fret;
-  int nitersmax, niters;
-  int startmin;
-  int optschema;
+  MRIS *  surf;
+  MRI *   mov, *ref;
+  int     slice, nhits;
+  double  outdist, indist; // mm
+  double  bbrslope, bbrcenter, bbrsign;
+  double  cost;
+  int     inc;
+  int     nparams;
+  double  params[12], pmin[12], pmax[12], pdelta[12];
+  double  searchmul;
+  int     searchnper;
+  int     nCostEvaluations;
+  double  tLastEval;
+  double  ftol, linmintol;
+  float   fret;
+  int     nitersmax, niters;
+  int     startmin;
+  int     optschema;
   MATRIX *R; // surf->xyz to vol tkreg
-  LTA *R0;
+  LTA *   R0;
   MATRIX *D, *invD, *Surf2Vox, *Q, *invQ, *Q0, *invQ0;
   MATRIX *Vmov, *Vref, *Tmov, *Tref;
   MATRIX *invVref, *invVmov, *invTmov, *invTref;
-  int debug;
+  int     debug;
 } SBBR;
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 double SBBRcost(SBBR *sbbr);
 double BBRcost(double vctx, double vwm, double slope, double center,
                double sign, double *pct);
 
-float SBBRcostPowell(float *pPowel);
-int SBBRMinPowell();
+float   SBBRcostPowell(float *pPowel);
+int     SBBRMinPowell();
 double *SBBRoptSchema2MatrixPar(SBBR *sbbr, double *par);
-int SBBRmatrixPar2OptSchema(SBBR *sbbr, double *mpar);
+int     SBBRmatrixPar2OptSchema(SBBR *sbbr, double *mpar);
 MATRIX *COREGmatrix(double *p, MATRIX *M);
 double *COREGparams9(MATRIX *M9, double *p);
-int SBBRnParams(SBBR *sbbr);
-int SBBRmatrices(SBBR *sbbr, int init);
-int SBBRsearchRange(SBBR *sbbr);
-int SBBRbruteSearch(SBBR *sbbr);
-int SBBRbruteSearchUpdate(SBBR *sbbr, double p[12], double popt[12],
-                          double *mincost);
-int SSBmin1D(SBBR *sbbr);
-int MRIScomputeFaceNormal(MRIS *surf, int faceno, double snorm[3]);
-int NormalizeVect3(double v[3]);
+int     SBBRnParams(SBBR *sbbr);
+int     SBBRmatrices(SBBR *sbbr, int init);
+int     SBBRsearchRange(SBBR *sbbr);
+int     SBBRbruteSearch(SBBR *sbbr);
+int     SBBRbruteSearchUpdate(SBBR *sbbr, double p[12], double popt[12],
+                              double *mincost);
+int     SSBmin1D(SBBR *sbbr);
+int     MRIScomputeFaceNormal(MRIS *surf, int faceno, double snorm[3]);
+int     NormalizeVect3(double v[3]);
 
-static char vcid[] = "$Id: mri_sbbr.c,v 1.7 2016/09/23 20:23:11 greve Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+static char    vcid[] = "$Id: mri_sbbr.c,v 1.7 2016/09/23 20:23:11 greve Exp $";
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *subject, *hemi, *SUBJECTS_DIR;
-SBBR *sbbr;
+char *   subject, *hemi, *SUBJECTS_DIR;
+SBBR *   sbbr;
 CMDARGS *cmdargs;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, n, err;
-  LTA *lta, *ltainv;
+  int    nargs, n, err;
+  LTA *  lta, *ltainv;
   double rms;
 
   // double mpar0[12];
-  cmdargs = (CMDARGS *)calloc(sizeof(CMDARGS), 1);
-  cmdargs->optschema = 1;
-  cmdargs->nitersmax = 10;
-  cmdargs->ftol = 1e-8;
-  cmdargs->linmintol = 1e-8;
-  cmdargs->outdist = 2.0;
-  cmdargs->indist = 1.0;
-  cmdargs->bbrslope = 0.5;
-  cmdargs->bbrcenter = 0.0;
-  cmdargs->bbrsign = -1; //-1 for T2, and +1 for T1
-  cmdargs->inc = 1;
-  cmdargs->search = 0;
-  cmdargs->search1d = 0;
-  cmdargs->searchmul = 1;
-  cmdargs->searchnper = 11;
+  cmdargs                = (CMDARGS *)calloc(sizeof(CMDARGS), 1);
+  cmdargs->optschema     = 1;
+  cmdargs->nitersmax     = 10;
+  cmdargs->ftol          = 1e-8;
+  cmdargs->linmintol     = 1e-8;
+  cmdargs->outdist       = 2.0;
+  cmdargs->indist        = 1.0;
+  cmdargs->bbrslope      = 0.5;
+  cmdargs->bbrcenter     = 0.0;
+  cmdargs->bbrsign       = -1; //-1 for T2, and +1 for T1
+  cmdargs->inc           = 1;
+  cmdargs->search        = 0;
+  cmdargs->search1d      = 0;
+  cmdargs->searchmul     = 1;
+  cmdargs->searchnper    = 11;
   cmdargs->search1diters = 10;
 
   nargs = handleVersionOption(argc, argv, "mri_sbbr");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -177,21 +178,21 @@ int main(int argc, char *argv[]) {
     return (0);
   dump_options(stdout);
 
-  sbbr = (SBBR *)calloc(sizeof(SBBR), 1);
-  sbbr->slice = cmdargs->slice;
-  sbbr->outdist = cmdargs->outdist;
-  sbbr->indist = cmdargs->indist;
-  sbbr->bbrslope = cmdargs->bbrslope;
-  sbbr->bbrcenter = cmdargs->bbrcenter;
-  sbbr->bbrsign = cmdargs->bbrsign;
-  sbbr->nitersmax = cmdargs->nitersmax;
-  sbbr->ftol = cmdargs->ftol;
-  sbbr->linmintol = cmdargs->linmintol;
-  sbbr->inc = cmdargs->inc;
-  sbbr->optschema = cmdargs->optschema;
-  sbbr->searchmul = cmdargs->searchmul;
+  sbbr             = (SBBR *)calloc(sizeof(SBBR), 1);
+  sbbr->slice      = cmdargs->slice;
+  sbbr->outdist    = cmdargs->outdist;
+  sbbr->indist     = cmdargs->indist;
+  sbbr->bbrslope   = cmdargs->bbrslope;
+  sbbr->bbrcenter  = cmdargs->bbrcenter;
+  sbbr->bbrsign    = cmdargs->bbrsign;
+  sbbr->nitersmax  = cmdargs->nitersmax;
+  sbbr->ftol       = cmdargs->ftol;
+  sbbr->linmintol  = cmdargs->linmintol;
+  sbbr->inc        = cmdargs->inc;
+  sbbr->optschema  = cmdargs->optschema;
+  sbbr->searchmul  = cmdargs->searchmul;
   sbbr->searchnper = cmdargs->searchnper;
-  sbbr->debug = debug;
+  sbbr->debug      = debug;
   SBBRnParams(sbbr); // sets number of parameters
 
   // Initialize parameters appropriately (eg, scale must be 1)
@@ -260,7 +261,7 @@ int main(int argc, char *argv[]) {
 
   // Create the matrices and LTA
   SBBRmatrices(sbbr, 0);
-  lta = LTAcreate(sbbr->mov, sbbr->ref, sbbr->R, LINEAR_RAS_TO_RAS);
+  lta         = LTAcreate(sbbr->mov, sbbr->ref, sbbr->R, LINEAR_RAS_TO_RAS);
   lta->fscale = sbbr->R0->fscale;
   strcpy(lta->subject, sbbr->R0->subject);
   err = LTAwrite(lta, cmdargs->outreg);
@@ -302,7 +303,7 @@ int main(int argc, char *argv[]) {
 /* ------------------------------------------------------------ */
 /* ------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -339,7 +340,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->movfile = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--slice")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -349,27 +350,27 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->surffile = pargv[0];
-      nargsused = 1;
+      nargsused         = 1;
     } else if (!strcasecmp(option, "--out-surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->outsurffile = pargv[0];
-      nargsused = 1;
+      nargsused            = 1;
     } else if (!strcasecmp(option, "--init-reg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->initreg = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--reg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->outreg = pargv[0];
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcasecmp(option, "--reg-inv")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->outreginv = pargv[0];
-      nargsused = 1;
+      nargsused          = 1;
     } else if (!strcasecmp(option, "--opt")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -406,7 +407,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%d", &cmdargs->searchnper);
       sscanf(pargv[1], "%lf", &cmdargs->searchmul);
       cmdargs->search = 1;
-      nargsused = 2;
+      nargsused       = 2;
     } else if (!strcasecmp(option, "--search1d")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
@@ -414,7 +415,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%d", &cmdargs->searchnper);
       sscanf(pargv[1], "%lf", &cmdargs->searchmul);
       cmdargs->search1d = 1;
-      nargsused = 3;
+      nargsused         = 3;
     } else if (!strcasecmp(option, "--niters-max")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -432,7 +433,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%d", &paramno);
       sscanf(pargv[1], "%lf", &cmdargs->params[paramno]);
       cmdargs->paramset[paramno] = 1;
-      nargsused = 2;
+      nargsused                  = 2;
     } else if (!strcasecmp(option, "--threads") ||
                !strcasecmp(option, "--nthreads")) {
       if (nargc < 1)
@@ -550,20 +551,20 @@ static void dump_options(FILE *fp) {
 
 /*-----------------------------------------------------------------*/
 double SBBRcost(SBBR *sbbr) {
-  int faceno, nhits, n;
-  double cost, sumcost, detSign;
-  double coutdistvox, routdistvox, cindistvox, rindistvox;
-  MRIS *surf = sbbr->surf;
-  MRI *mov = sbbr->mov;
+  int           faceno, nhits, n;
+  double        cost, sumcost, detSign;
+  double        coutdistvox, routdistvox, cindistvox, rindistvox;
+  MRIS *        surf = sbbr->surf;
+  MRI *         mov  = sbbr->mov;
   static double par[12];
 
   coutdistvox = sbbr->outdist / mov->xsize;
   routdistvox = sbbr->outdist / mov->ysize;
-  cindistvox = sbbr->indist / mov->xsize;
-  rindistvox = sbbr->indist / mov->ysize;
+  cindistvox  = sbbr->indist / mov->xsize;
+  rindistvox  = sbbr->indist / mov->ysize;
 
   SBBRoptSchema2MatrixPar(sbbr, par);
-  sbbr->Q = COREGmatrix(par, sbbr->Q);
+  sbbr->Q    = COREGmatrix(par, sbbr->Q);
   sbbr->invQ = MatrixInverse(sbbr->Q, sbbr->invQ);
   // Surf2Vox = inv(D)*inv(Q)*inv(Q0)
   sbbr->Surf2Vox = MatrixMultiplyD(sbbr->invD, sbbr->invQ, sbbr->Surf2Vox);
@@ -580,7 +581,7 @@ double SBBRcost(SBBR *sbbr) {
   // char tmpstr[1000];
   // sprintf(tmpstr,"cost.%03d.dat",nthcall);
   // fp = fopen(tmpstr,"w");
-  nhits = 0;
+  nhits   = 0;
   sumcost = 0;
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
@@ -590,13 +591,13 @@ double SBBRcost(SBBR *sbbr) {
     ROMP_PFLB_begin
 
         FACE *face;
-    VERTEX *vtx;
-    int npos, vtxno, skip, i0 = 0, i1 = 0, i2 = 0, m, oob, n;
-    double dz[3], cA, rA, sA, cB, rB, sB;
-    double dAB, nABc, nABr, nABs, t, c0[2], r0[2];
-    double c0mn, r0mn, d, uc, ur, lc, lr, snc, snr;
-    double lval, uval, fcost, pct;
-    double snorm[3];
+    VERTEX *  vtx;
+    int       npos, vtxno, skip, i0 = 0, i1 = 0, i2 = 0, m, oob, n;
+    double    dz[3], cA, rA, sA, cB, rB, sB;
+    double    dAB, nABc, nABr, nABs, t, c0[2], r0[2];
+    double    c0mn, r0mn, d, uc, ur, lc, lr, snc, snr;
+    double    lval, uval, fcost, pct;
+    double    snorm[3];
 
     face = &(surf->faces[faceno]);
     if (face->ripflag)
@@ -610,7 +611,7 @@ double SBBRcost(SBBR *sbbr) {
       dz[n] = 0;
     for (n = 0; n < 3; n++) {
       vtxno = face->v[n];
-      vtx = &(surf->vertices[vtxno]);
+      vtx   = &(surf->vertices[vtxno]);
       dz[n] = vtx->z - sbbr->slice;
       if (dz[n] > 0)
         npos++;
@@ -650,27 +651,27 @@ double SBBRcost(SBBR *sbbr) {
     // printf("%d/%d %d %d  %d %d %d  ",faceno,surf->nfaces,npos,skip,i0,i1,i2);
 
     vtxno = surf->faces[faceno].v[i0];
-    vtx = &(surf->vertices[vtxno]);
-    cA = vtx->x;
-    rA = vtx->y;
-    sA = vtx->z - sbbr->slice;
+    vtx   = &(surf->vertices[vtxno]);
+    cA    = vtx->x;
+    rA    = vtx->y;
+    sA    = vtx->z - sbbr->slice;
     for (m = 0; m < 2; m++) {
       if (m == 0)
         vtxno = surf->faces[faceno].v[i1];
       if (m == 1)
         vtxno = surf->faces[faceno].v[i2];
       vtx = &(surf->vertices[vtxno]);
-      cB = vtx->x;
-      rB = vtx->y;
-      sB = vtx->z - sbbr->slice;
+      cB  = vtx->x;
+      rB  = vtx->y;
+      sB  = vtx->z - sbbr->slice;
 
-      dAB = sqrt((cA - cB) * (cA - cB) + (rA - rB) * (rA - rB) +
+      dAB  = sqrt((cA - cB) * (cA - cB) + (rA - rB) * (rA - rB) +
                  (sA - sB) * (sA - sB));
       nABc = (cA - cB) / dAB;
       nABr = (rA - rB) / dAB;
       nABs = (sA - sB) / dAB;
 
-      t = -sA / nABs;
+      t     = -sA / nABs;
       c0[m] = cA + t * nABc;
       r0[m] = rA + t * nABr;
     }
@@ -681,21 +682,21 @@ double SBBRcost(SBBR *sbbr) {
 
     // Compute normal for this face
     MRIScomputeFaceNormal(surf, faceno, snorm);
-    d = sqrt(snorm[0] * snorm[0] + snorm[1] * snorm[1]);
+    d   = sqrt(snorm[0] * snorm[0] + snorm[1] * snorm[1]);
     snc = snorm[0] / d;
     snr = snorm[1] / d;
 
     // sample outside the surface (along the normal)
-    uc = c0mn + detSign * coutdistvox * snc;
-    ur = r0mn + detSign * routdistvox * snr;
+    uc  = c0mn + detSign * coutdistvox * snc;
+    ur  = r0mn + detSign * routdistvox * snr;
     oob = MRIindexNotInVolume(mov, uc, ur, sbbr->slice);
     if (oob)
       continue;
     uval = MRIgetVoxVal(mov, nint(uc), nint(ur), sbbr->slice, 0);
 
     // sample inside the surface (along the normal)
-    lc = c0mn - detSign * coutdistvox * snc;
-    lr = r0mn - detSign * routdistvox * snr;
+    lc  = c0mn - detSign * coutdistvox * snc;
+    lr  = r0mn - detSign * routdistvox * snr;
     oob = MRIindexNotInVolume(mov, lc, lr, sbbr->slice);
     if (oob)
       continue;
@@ -756,7 +757,7 @@ double BBRcost(double vctx, double vwm, double slope, double center,
     else
       a = 0;
   }
-  c = 1 + tanh(a);
+  c    = 1 + tanh(a);
   *pct = d;
   return (c);
 }
@@ -764,10 +765,10 @@ double BBRcost(double vctx, double vwm, double slope, double center,
 /*--------------------------------------------------------------------------*/
 float SBBRcostPowell(float *pPowel) {
   extern SBBR *sbbr;
-  int n, newmin;
-  float curcost;
+  int          n, newmin;
+  float        curcost;
   static float initcost = -1, mincost = -1, ppmin[100];
-  FILE *fp;
+  FILE *       fp;
 
   for (n = 0; n < sbbr->nparams; n++)
     sbbr->params[n] = pPowel[n + 1];
@@ -777,9 +778,9 @@ float SBBRcostPowell(float *pPowel) {
 
   newmin = 0;
   if (sbbr->startmin) {
-    newmin = 1;
+    newmin   = 1;
     initcost = curcost;
-    mincost = curcost;
+    mincost  = curcost;
     for (n = 0; n < sbbr->nparams; n++)
       ppmin[n] = sbbr->params[n];
     printf("InitialCost %20.10lf \n", initcost);
@@ -787,7 +788,7 @@ float SBBRcostPowell(float *pPowel) {
   }
 
   if (mincost > curcost) {
-    newmin = 1;
+    newmin  = 1;
     mincost = curcost;
     for (n = 0; n < sbbr->nparams; n++)
       ppmin[n] = sbbr->params[n];
@@ -816,9 +817,9 @@ float SBBRcostPowell(float *pPowel) {
 /*---------------------------------------------------------*/
 int SBBRMinPowell() {
   extern SBBR *sbbr;
-  float *pPowel, **xi;
-  int r, c, n, dof;
-  Timer timer;
+  float *      pPowel, **xi;
+  int          r, c, n, dof;
+  Timer        timer;
 
   timer.reset();
   dof = sbbr->nparams;
@@ -929,7 +930,7 @@ double *SBBRoptSchema2MatrixPar(SBBR *sbbr, double *mpar) {
     // rigid + in-plane scaling + in-plane shear
     for (n = 0; n < 8; n++)
       mpar[n] = sbbr->params[n];
-    mpar[9] = sbbr->params[8];
+    mpar[9]       = sbbr->params[8];
     sbbr->nparams = 9; // excludes thru-plane scale and shears
     break;
   }
@@ -1018,25 +1019,25 @@ MATRIX *COREGmatrix(double *p, MATRIX *M) {
   // printf("];\n");
 
   // translations
-  T = MatrixIdentity(4, nullptr);
+  T             = MatrixIdentity(4, nullptr);
   T->rptr[1][4] = p[0];
   T->rptr[2][4] = p[1];
   T->rptr[3][4] = p[2];
 
   // rotations
-  R1 = MatrixIdentity(4, nullptr);
+  R1             = MatrixIdentity(4, nullptr);
   R1->rptr[2][2] = cos(p[3] * M_PI / 180);
   R1->rptr[2][3] = sin(p[3] * M_PI / 180);
   R1->rptr[3][2] = -sin(p[3] * M_PI / 180);
   R1->rptr[3][3] = cos(p[3] * M_PI / 180);
 
-  R2 = MatrixIdentity(4, nullptr);
+  R2             = MatrixIdentity(4, nullptr);
   R2->rptr[1][1] = cos(p[4] * M_PI / 180);
   R2->rptr[1][3] = sin(p[4] * M_PI / 180);
   R2->rptr[3][1] = -sin(p[4] * M_PI / 180);
   R2->rptr[3][3] = cos(p[4] * M_PI / 180);
 
-  R3 = MatrixIdentity(4, nullptr);
+  R3             = MatrixIdentity(4, nullptr);
   R3->rptr[1][1] = cos(p[5] * M_PI / 180);
   R3->rptr[1][2] = sin(p[5] * M_PI / 180);
   R3->rptr[2][1] = -sin(p[5] * M_PI / 180);
@@ -1046,14 +1047,14 @@ MATRIX *COREGmatrix(double *p, MATRIX *M) {
   MatrixMultiplyD(R, R3, R);
 
   // scale, use ZZ because some idiot #defined Z
-  ZZ = MatrixIdentity(4, nullptr);
+  ZZ             = MatrixIdentity(4, nullptr);
   ZZ->rptr[1][1] = p[6];
   ZZ->rptr[2][2] = p[7];
   ZZ->rptr[3][3] = p[8];
   ZZ->rptr[4][4] = 1;
 
   // shear
-  S = MatrixIdentity(4, nullptr);
+  S             = MatrixIdentity(4, nullptr);
   S->rptr[1][2] = p[9];
   S->rptr[1][3] = p[10];
   S->rptr[2][3] = p[11];
@@ -1083,8 +1084,8 @@ MATRIX *COREGmatrix(double *p, MATRIX *M) {
   Angles are in degrees.
  */
 double *COREGparams9(MATRIX *M9, double *p) {
-  double sum;
-  int c, r;
+  double  sum;
+  int     c, r;
   MATRIX *R;
 
   if (p == nullptr)
@@ -1122,9 +1123,9 @@ double *COREGparams9(MATRIX *M9, double *p) {
 
 int SBBRmatrices(SBBR *sbbr, int init) {
   double mpar[12];
-  int nthp;
+  int    nthp;
 
-  sbbr->D = MatrixAlloc(4, 4, MATRIX_REAL);
+  sbbr->D             = MatrixAlloc(4, 4, MATRIX_REAL);
   sbbr->D->rptr[1][1] = sbbr->mov->xsize;
   sbbr->D->rptr[2][2] = sbbr->mov->ysize;
   sbbr->D->rptr[3][3] = sbbr->mov->zsize;
@@ -1132,13 +1133,13 @@ int SBBRmatrices(SBBR *sbbr, int init) {
   sbbr->D->rptr[2][4] = -sbbr->mov->ysize * sbbr->mov->height / 2.0;
   sbbr->D->rptr[4][4] = 1;
 
-  sbbr->invD = MatrixInverse(sbbr->D, nullptr);
-  sbbr->Vmov = MRIxfmCRS2XYZ(sbbr->mov, 0);
+  sbbr->invD    = MatrixInverse(sbbr->D, nullptr);
+  sbbr->Vmov    = MRIxfmCRS2XYZ(sbbr->mov, 0);
   sbbr->invVmov = MatrixInverse(sbbr->Vmov, nullptr);
-  sbbr->Vref = MRIxfmCRS2XYZ(sbbr->ref, 0);
+  sbbr->Vref    = MRIxfmCRS2XYZ(sbbr->ref, 0);
   sbbr->invVref = MatrixInverse(sbbr->Vref, nullptr);
-  sbbr->Tmov = MRIxfmCRS2XYZtkreg(sbbr->mov);
-  sbbr->Tref = MRIxfmCRS2XYZtkreg(sbbr->ref);
+  sbbr->Tmov    = MRIxfmCRS2XYZtkreg(sbbr->mov);
+  sbbr->Tref    = MRIxfmCRS2XYZtkreg(sbbr->ref);
   sbbr->invTref = MatrixInverse(sbbr->Tref, nullptr);
 
   if (sbbr->R0 == nullptr)
@@ -1158,11 +1159,11 @@ int SBBRmatrices(SBBR *sbbr, int init) {
 
   if (init) {
     // Q0 = Tref * inv(Vref) * R *Vmov *inv(D) * inv(Q)
-    sbbr->Q0 = MatrixMultiplyD(sbbr->Tref, sbbr->invVref, sbbr->Q0);
-    sbbr->Q0 = MatrixMultiplyD(sbbr->Q0, sbbr->R0->xforms[0].m_L, sbbr->Q0);
-    sbbr->Q0 = MatrixMultiplyD(sbbr->Q0, sbbr->Vmov, sbbr->Q0);
-    sbbr->Q0 = MatrixMultiplyD(sbbr->Q0, sbbr->invD, sbbr->Q0);
-    sbbr->Q0 = MatrixMultiplyD(sbbr->Q0, sbbr->invQ, sbbr->Q0);
+    sbbr->Q0    = MatrixMultiplyD(sbbr->Tref, sbbr->invVref, sbbr->Q0);
+    sbbr->Q0    = MatrixMultiplyD(sbbr->Q0, sbbr->R0->xforms[0].m_L, sbbr->Q0);
+    sbbr->Q0    = MatrixMultiplyD(sbbr->Q0, sbbr->Vmov, sbbr->Q0);
+    sbbr->Q0    = MatrixMultiplyD(sbbr->Q0, sbbr->invD, sbbr->Q0);
+    sbbr->Q0    = MatrixMultiplyD(sbbr->Q0, sbbr->invQ, sbbr->Q0);
     sbbr->invQ0 = MatrixInverse(sbbr->Q0, sbbr->invQ0);
   }
 
@@ -1226,10 +1227,10 @@ int NormalizeVect3(double v[3]) {
 
 int MRIScomputeFaceNormal(MRIS *surf, int faceno, double snorm[3]) {
   VERTEX *v0, *v1, *v2;
-  double v10[3];
-  double v20[3];
-  double v21[3];
-  FACE *face;
+  double  v10[3];
+  double  v20[3];
+  double  v21[3];
+  FACE *  face;
 
   face = &(surf->faces[faceno]);
 
@@ -1284,9 +1285,9 @@ int MRIScomputeFaceNormal(MRIS *surf, int faceno, double snorm[3]) {
 
 int SBBRbruteSearch(SBBR *sbbr) {
   double p[12], mincost, popt[12];
-  long totiter, iter;
-  int newmin, nthp;
-  Timer timer;
+  long   totiter, iter;
+  int    newmin, nthp;
+  Timer  timer;
 
   timer.reset();
 
@@ -1413,7 +1414,7 @@ int SBBRbruteSearchUpdate(SBBR *sbbr, double p[12], double popt[12],
 }
 
 int SSBmin1D(SBBR *sbbr) {
-  int nthp, newmin, n;
+  int    nthp, newmin, n;
   double p, popt[12], mincost;
 
   mincost = sbbr->cost;
@@ -1423,12 +1424,12 @@ int SSBmin1D(SBBR *sbbr) {
   for (nthp = 0; nthp < sbbr->nparams; nthp++) {
     for (p = sbbr->pmin[nthp]; p <= sbbr->pmax[nthp]; p += sbbr->pdelta[nthp]) {
       sbbr->params[nthp] = p;
-      newmin = 0;
+      newmin             = 0;
       SBBRcost(sbbr);
       if (mincost > sbbr->cost) {
-        mincost = sbbr->cost;
+        mincost    = sbbr->cost;
         popt[nthp] = p;
-        newmin = 1;
+        newmin     = 1;
       }
       if (newmin || sbbr->debug) {
         printf("1D %6d %8.4f %6.7f %6.7f ", nthp, p, mincost, sbbr->cost);

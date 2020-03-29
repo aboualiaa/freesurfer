@@ -23,11 +23,11 @@
  */
 
 #include "DialogRepositionSurface.h"
-#include "ui_DialogRepositionSurface.h"
-#include "MainWindow.h"
-#include "LayerSurface.h"
 #include "FSSurface.h"
 #include "LayerMRI.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
+#include "ui_DialogRepositionSurface.h"
 #include <QMessageBox>
 #include <QTimer>
 
@@ -94,8 +94,8 @@ void DialogRepositionSurface::OnComboTarget(int nSel) {
 }
 
 void DialogRepositionSurface::UpdateUI() {
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  LayerSurface *surf = (LayerSurface *)mainwnd->GetActiveLayer("Surface");
+  MainWindow *  mainwnd = MainWindow::GetMainWindow();
+  LayerSurface *surf    = (LayerSurface *)mainwnd->GetActiveLayer("Surface");
   ui->pushButtonSave->setEnabled(surf && surf->IsModified() &&
                                  !mainwnd->IsBusy());
   ui->pushButtonSaveAs->setEnabled(surf && !mainwnd->IsBusy());
@@ -187,7 +187,7 @@ void DialogRepositionSurface::OnUndo() {
 
 bool DialogRepositionSurface::ValidateAll() {
   QString name;
-  bool ok;
+  bool    ok;
   if (ui->tabWidget->currentIndex() == 0) {
     ui->lineEditVertex->text().toInt(&ok);
     if (!ok)

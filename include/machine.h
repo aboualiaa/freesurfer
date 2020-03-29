@@ -40,12 +40,12 @@
 using long32 = int;
 using long64 = long long;
 
-short swapShort(short s);
+short  swapShort(short s);
 long32 swapLong32(long32 l);
 long64 swapLong64(long64 l);
-float swapFloat(float l);
+float  swapFloat(float l);
 double swapDouble(double dval);
-int swapInt(int i);
+int    swapInt(int i);
 
 int Arch486();
 int ByteSwapBuf(void *Buf, long int nItems, int nBytesPerItem);
@@ -55,18 +55,18 @@ int ByteSwap8(void *buf8, long int nitems);
 
 #if (BYTE_ORDER == LITTLE_ENDIAN)
 
-#define orderIntBytes(i) swapInt(i)
-#define orderShortBytes(i) swapShort(i)
-#define orderFloatBytes(i) swapFloat(i)
+#define orderIntBytes(i)    swapInt(i)
+#define orderShortBytes(i)  swapShort(i)
+#define orderFloatBytes(i)  swapFloat(i)
 #define orderDoubleBytes(i) swapDouble(i)
 #define orderLong32Bytes(i) swapLong32(i)
 #define orderLong64Bytes(i) swapLong64(i)
 
 #else
 
-#define orderIntBytes(i) (i)
-#define orderShortBytes(i) (i)
-#define orderFloatBytes(i) (i)
+#define orderIntBytes(i)    (i)
+#define orderShortBytes(i)  (i)
+#define orderFloatBytes(i)  (i)
 #define orderDoubleBytes(i) (i)
 #define orderLong32Bytes(i) (i)
 #define orderLong64Bytes(i) (i)

@@ -34,10 +34,10 @@
 
 #include "diag.h"
 #include "registerio.h"
-#include "version.h"
 #include "resample.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -45,30 +45,30 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 
 int main(int argc, char *argv[]);
 
 static char vcid[] = "$Id: mkxsubjreg.c,v 1.5 2011/03/02 00:04:13 nicks Exp $";
 const char *Progname = nullptr;
 
-char *srcregpath = nullptr;
-char *targregpath = nullptr;
-char *targsubj = nullptr;
-char *xfmrname = "talairach.xfm";
+char *srcregpath   = nullptr;
+char *targregpath  = nullptr;
+char *targsubj     = nullptr;
+char *xfmrname     = "talairach.xfm";
 char *subjects_dir = nullptr;
-char *fvolid = nullptr;
+char *fvolid       = nullptr;
 
 MRI *SrcMRI, *TargMRI, *FuncMRI;
 
 int fixtkreg = 1;
-int debug = 0;
+int debug    = 0;
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  char *srcsubj;
-  float betplaneres, inplaneres, intensity;
+  char *  srcsubj;
+  float   betplaneres, inplaneres, intensity;
   MATRIX *R, *Xsrc, *invXsrc, *Xtarg, *Rtarg;
-  int float2int, err;
+  int     float2int, err;
 
   Progname = argv[0];
   argc--;
@@ -155,9 +155,9 @@ static void print_usage() {
 }
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  int nargs;
+  int    nargs;
 
   if (argc < 1)
     usage_exit();
@@ -190,32 +190,32 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       srcregpath = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--targreg")) {
       if (nargc < 1)
         argnerr(option, 1);
       targregpath = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--targsubj")) {
       if (nargc < 1)
         argnerr(option, 1);
-      targsubj = pargv[0];
+      targsubj  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--xfm")) {
       if (nargc < 1)
         argnerr(option, 1);
-      xfmrname = pargv[0];
+      xfmrname  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--fvol")) {
       if (nargc < 1)
         argnerr(option, 1);
-      fvolid = pargv[0];
+      fvolid    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--sd")) {
       if (nargc < 1)
         argnerr(option, 1);
       subjects_dir = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (singledash(option))

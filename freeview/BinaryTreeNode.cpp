@@ -7,9 +7,9 @@
 #include <QPainter>
 #include <QStyleOption>
 
-#include <QGraphicsView>
-#include <QGraphicsPixmapItem>
 #include <QDebug>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsView>
 
 #define NODE_RADIUS 5
 
@@ -52,7 +52,7 @@ QPainterPath BinaryTreeNode::shape() const {
   return path;
 }
 
-void BinaryTreeNode::paint(QPainter *painter,
+void BinaryTreeNode::paint(QPainter *                      painter,
                            const QStyleOptionGraphicsItem *option, QWidget *) {
   //  painter->setPen(Qt::NoPen);
   //  painter->setBrush(Qt::darkGray);

@@ -23,21 +23,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "fio.h"
 #include "cma.h"
+#include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "version.h"
 
 void usage(int exit_val);
@@ -51,12 +51,12 @@ static int edit_segmentation(MRI *mri_im, MRI *mri_seg);
 int main(int argc, char *argv[]) {
 
   MRI *mri_wm, *mri_seg;
-  int nargs;
+  int  nargs;
 
   Progname = argv[0];
 
   nargs = handleVersionOption(argc, argv, "mri_edit_wm");
-  argc -= nargs ;
+  argc -= nargs;
   if (1 == argc)
     exit(0);
 
@@ -107,9 +107,9 @@ void usage(int exit_val) {
 static int edit_segmentation(MRI *mri_wm, MRI *mri_seg) {
   int width, height, depth, x, y, z, label, non;
 
-  width = mri_wm->width;
+  width  = mri_wm->width;
   height = mri_wm->height;
-  depth = mri_wm->depth;
+  depth  = mri_wm->depth;
 
   non = 0;
   for (z = 0; z < depth; z++) {

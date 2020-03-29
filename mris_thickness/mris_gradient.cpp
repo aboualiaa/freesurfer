@@ -34,30 +34,30 @@ static char vcid[] =
     "$Id: mris_gradient.c,v 1.23 2013/03/27 01:53:50 fischl Exp $";
 
 const char *Progname;
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 #define FROBENIUS_NORM 0
 
 MRI *MRIScomputeGradient(MRI_SURFACE *mris, MRI *mri, int which_norm,
                          MRI *mri_grad);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
 
-static int nbhd_size = 3;
+static int nbhd_size    = 3;
 static int label_dilate = 0;
-static int label_erode = 0;
+static int label_erode  = 0;
 
 static LABEL *mask_label = nullptr;
 
 int main(int argc, char *argv[]) {
-  char *out_fname;
-  int nargs;
+  char *       out_fname;
+  int          nargs;
   MRI_SURFACE *mris;
-  MRI *mri, *mri_grad;
+  MRI *        mri, *mri_grad;
 
   nargs = handleVersionOption(argc, argv, "mris_gradient");
   if (nargs && argc - nargs == 1)
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -146,12 +146,12 @@ static int get_option(int argc, char *argv[]) {
                 Progname, argv[2]);
   } else if (!stricmp(option, "dilate") || !stricmp(option, "label_dilate") ||
              !stricmp(option, "dilate_label")) {
-    nargs = 1;
+    nargs        = 1;
     label_dilate = atoi(argv[2]);
     printf("dilating label %d times\n", label_dilate);
   } else if (!stricmp(option, "erode") || !stricmp(option, "label_erode") ||
              !stricmp(option, "erode_label")) {
-    nargs = 1;
+    nargs       = 1;
     label_erode = atoi(argv[2]);
     printf("eroding label %d times\n", label_erode);
   } else
@@ -163,7 +163,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -218,11 +218,11 @@ MRI *MRIScomputeGradient(MRI_SURFACE *mris, MRI *mri, int which_norm,
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     MATRIX *m_df, *m_p, *m_x, *m_xtx, *m_inv, *m_xt, *m_tmp;
-    int vno2, n, frame;
-    double norm = 0.0, val1, val0, x1, y1, dx, dy;
+    int     vno2, n, frame;
+    double  norm = 0.0, val1, val0, x1, y1, dx, dy;
 
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
 
     if (vno == Gdiag_no)
       DiagBreak();
@@ -231,12 +231,12 @@ MRI *MRIScomputeGradient(MRI_SURFACE *mris, MRI *mri, int which_norm,
 
     m_x =
         MatrixAlloc(vt->vtotal, 2, MATRIX_REAL); // matrix of delta coordinates
-    m_p = MatrixAlloc(2, 1, MATRIX_REAL);        // [dx,dy]
-    m_df = MatrixAlloc(vt->vtotal, 1,
+    m_p   = MatrixAlloc(2, 1, MATRIX_REAL);      // [dx,dy]
+    m_df  = MatrixAlloc(vt->vtotal, 1,
                        MATRIX_REAL); // vector of changes in function val
     m_tmp = m_xt = m_xtx = m_inv = m_p = nullptr;
     for (n = 0; n < vt->vtotal; n++) {
-      vno2 = vt->v[n];
+      vno2                   = vt->v[n];
       VERTEX const *const vn = &mris->vertices[vno2];
       if (vno2 == Gdiag_no)
         DiagBreak();
@@ -247,7 +247,7 @@ MRI *MRIScomputeGradient(MRI_SURFACE *mris, MRI *mri, int which_norm,
       *MATRIX_RELT(m_x, n + 1, 1) = x1;
       *MATRIX_RELT(m_x, n + 1, 2) = y1;
     }
-    m_xt = MatrixTranspose(m_x, nullptr);
+    m_xt  = MatrixTranspose(m_x, nullptr);
     m_xtx = MatrixMultiply(m_xt, m_x, NULL);
     if (MatrixConditionNumber(m_xtx) > 1000) {
       nbad++;
@@ -266,14 +266,14 @@ MRI *MRIScomputeGradient(MRI_SURFACE *mris, MRI *mri, int which_norm,
     for (frame = 0; frame < mri->nframes; frame++) {
       val0 = MRIgetVoxVal(mri, vno, 0, 0, frame);
       for (n = 0; n < vt->vtotal; n++) {
-        vno2 = vt->v[n];
-        val1 = MRIgetVoxVal(mri, vno2, 0, 0, frame);
+        vno2                         = vt->v[n];
+        val1                         = MRIgetVoxVal(mri, vno2, 0, 0, frame);
         *MATRIX_RELT(m_df, n + 1, 1) = val1 - val0;
       }
 
       m_p = MatrixMultiply(m_tmp, m_df, m_p);
-      dx = *MATRIX_RELT(m_p, 1, 1);
-      dy = *MATRIX_RELT(m_p, 1, 2);
+      dx  = *MATRIX_RELT(m_p, 1, 1);
+      dy  = *MATRIX_RELT(m_p, 1, 2);
       if (!devFinite(dx))
         dx = 0;
       if (!devFinite(dy))

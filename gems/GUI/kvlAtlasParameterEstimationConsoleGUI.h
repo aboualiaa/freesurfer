@@ -70,9 +70,9 @@ private:
 
 public:
   Fl_Check_Button *m_ShowAlphasEstimationIterations;
-  Fl_Progress *m_TotalProgress;
-  Fl_Progress *m_SubProgress;
-  Fl_Choice *m_LabelNumber;
+  Fl_Progress *    m_TotalProgress;
+  Fl_Progress *    m_SubProgress;
+  Fl_Choice *      m_LabelNumber;
 
 private:
   inline void cb_m_LabelNumber_i(Fl_Choice *, void *);
@@ -115,7 +115,7 @@ private:
 public:
   Fl_Value_Output *m_FinalSize0;
   Fl_Value_Output *m_FinalSize1;
-  Fl_Input *m_ExplicitStartCollection;
+  Fl_Input *       m_ExplicitStartCollection;
 
 private:
   inline void cb_m_ExplicitStartCollection_i(Fl_Input *, void *);
@@ -141,14 +141,15 @@ public:
   Fl_Round_Button *m_GradientDescent;
   Fl_Round_Button *m_ConjugateGradient;
   Fl_Round_Button *m_LBFGS;
-  ~kvlAtlasParameterEstimationConsoleGUI() = default;;
+  ~kvlAtlasParameterEstimationConsoleGUI() = default;
+  ;
   virtual void DisplayLabelImage(unsigned int labelImageNumber) = 0;
-  virtual void InitializeMesh() = 0;
-  virtual void Estimate() = 0;
-  virtual void SelectTriangleContainingPoint(float, float) = 0;
-  virtual void Interrupt() = 0;
-  virtual void Step() = 0;
-  virtual void Continue() = 0;
-  virtual void SetPositionEstimationResolution(unsigned int) = 0;
+  virtual void InitializeMesh()                                 = 0;
+  virtual void Estimate()                                       = 0;
+  virtual void SelectTriangleContainingPoint(float, float)      = 0;
+  virtual void Interrupt()                                      = 0;
+  virtual void Step()                                           = 0;
+  virtual void Continue()                                       = 0;
+  virtual void SetPositionEstimationResolution(unsigned int)    = 0;
 };
 #endif

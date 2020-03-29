@@ -3,12 +3,10 @@
 
 #include "MeshToImageFilter.h"
 
-#include <itkImageIterator.h>
-#include <itkGaussianSpatialFunction.h>
 #include <algorithm>
 #include <iostream>
-
-using namespace itk;
+#include <itkGaussianSpatialFunction.h>
+#include <itkImageIterator.h>
 
 template <class TInputMesh, class TOutputImage>
 MeshToImageFilter<TInputMesh, TOutputImage>::MeshToImageFilter() {
@@ -111,7 +109,7 @@ void MeshToImageFilter<TInputMesh, TOutputImage>::GenerateData() {
   //      std::cout <<  " region " << this->GetOutput()->GetRequestedRegion() <<
   //      std::endl;
   //   this->GetOutput()->FillBuffer(0);
-  int outsidePixels = 0;
+  int       outsidePixels = 0;
   IndexType index;
   this->GetOutput()->TransformPhysicalPointToIndex(
       this->GetInput()->GetPoints()->Begin().Value(), index);
@@ -193,14 +191,14 @@ template <class TInputMesh, class TOutputImage>
 float MeshToImageFilter<TInputMesh, TOutputImage>::BinaryImageOfLabels(
     int label, int flip) {
 
-  float averageX = 0;
-  this->m_usingLabels = true;
-  int count = 0;
+  float averageX                                            = 0;
+  this->m_usingLabels                                       = true;
+  int                                                 count = 0;
   typename MeshType::CellDataContainer::ConstIterator cellData;
   // if(label != -1 )
   cellData = this->GetInput()->GetCellData()->Begin();
   typename MeshType::PointType pt;
-  IndexType index;
+  IndexType                    index;
   for (typename MeshType::CellsContainer::ConstIterator cells =
            this->GetInput()->GetCells()->Begin();
        cells != this->GetInput()->GetCells()->End(); cells++, ++cellData) {

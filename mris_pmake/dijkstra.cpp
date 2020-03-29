@@ -37,8 +37,8 @@ int addToList(MRIS *surf, int vno) {
                 (ERROR_NO_MEMORY, "list(): error in malloc()"));
   }
 
-  dn_new->vno = vno;
-  dn_new->val = surf->vertices[vno].val;
+  dn_new->vno  = vno;
+  dn_new->val  = surf->vertices[vno].val;
   dn_new->next = nullptr;
 
   /* - case 1: no elements in the list yet - */
@@ -52,7 +52,7 @@ int addToList(MRIS *surf, int vno) {
 
   if (dn_new->val < d_list->val) {
     dn_new->next = d_list;
-    d_list = dn_new;
+    d_list       = dn_new;
     return (NO_ERROR);
   }
 
@@ -64,7 +64,7 @@ int addToList(MRIS *surf, int vno) {
 
   while (dn_this->next != nullptr) {
     if (dn_this->next->val > dn_new->val) {
-      dn_new->next = dn_this->next;
+      dn_new->next  = dn_this->next;
       dn_this->next = dn_new;
       return (NO_ERROR);
     }
@@ -107,7 +107,7 @@ int mark(MRIS *surf, int vno, int m, bool b_overwrite) {
   //
 
   VERTEX *v;
-  int rv;
+  int     rv;
 
   v = &surf->vertices[vno];
 
@@ -126,23 +126,23 @@ int mark(MRIS *surf, int vno, int m, bool b_overwrite) {
 } /* end mark() */
 
 int dijkstra(s_env &st_env, float af_maxAllowedCost, bool ab_surfaceCostVoid) {
-  int i, j;
-  int vno_c = -1;
-  int vno_n = -1;
-  int vno_i, vno_f;
-  float cost, f_pathCost;
+  int            i, j;
+  int            vno_c = -1;
+  int            vno_n = -1;
+  int            vno_i, vno_f;
+  float          cost, f_pathCost;
   struct d_node *dn, *dn_next;
-  int rv;
+  int            rv;
   //    s_iterInfo      st_iterInfo;
   MRIS *surf = st_env.pMS_active;
   //    bool            b_relNextReference  = true;
 
   // If we aren't going to preserve cost history in the environment, then we
   // will by default always be able to write path costs
-  bool b_canWriteCostVal = !st_env.b_costHistoryPreserve;
-  static int calls = 0;
-  int marked = 0;
-  int totalLoops = -1;
+  bool       b_canWriteCostVal = !st_env.b_costHistoryPreserve;
+  static int calls             = 0;
+  int        marked            = 0;
+  int        totalLoops        = -1;
 
   /* --- sanity checks --- */
   vno_i = st_env.startVertex;
@@ -171,7 +171,7 @@ int dijkstra(s_env &st_env, float af_maxAllowedCost, bool ab_surfaceCostVoid) {
   }
   calls++;
 
-  surf->vertices[vno_i].val = 0.0;
+  surf->vertices[vno_i].val          = 0.0;
   surf->vertices[vno_i].old_undefval = vno_f;
   if (mark(surf, vno_i, DIJK_IN_PLAY) != NO_ERROR)
     goto error;
@@ -201,7 +201,7 @@ int dijkstra(s_env &st_env, float af_maxAllowedCost, bool ab_surfaceCostVoid) {
     vno_c = d_list->vno;
 
     VERTEX_TOPOLOGY const *const v_ct = &surf->vertices_topology[vno_c];
-    VERTEX const *const v_c = &surf->vertices[vno_c];
+    VERTEX const *const          v_c  = &surf->vertices[vno_c];
 
     /* mark it */
     if (mark(surf, vno_c, DIJK_DONE) != NO_ERROR)
@@ -211,7 +211,7 @@ int dijkstra(s_env &st_env, float af_maxAllowedCost, bool ab_surfaceCostVoid) {
     // cout << "neighbors = " << (int) v_c->num << endl;
     for (j = 0; j < (int)v_ct->vnum; j++) {
       // cout << "neighbor = " << j << endl;
-      vno_n = v_ct->v[j];
+      vno_n             = v_ct->v[j];
       VERTEX *const v_n = &surf->vertices[vno_n];
 
       // if(v_n->ripflag) continue;
@@ -221,7 +221,7 @@ int dijkstra(s_env &st_env, float af_maxAllowedCost, bool ab_surfaceCostVoid) {
 
       //      cost = st_env.costFunc_do(st_env, &st_iterInfo, vno_c, j,
       //          			b_relNextReference);
-      cost = s_env_edgeCostFind(st_env, vno_c, vno_n);
+      cost       = s_env_edgeCostFind(st_env, vno_c, vno_n);
       f_pathCost = v_c->val + cost;
 
       // Break out of while if af_maxAllowedCost is violated.
@@ -239,7 +239,7 @@ int dijkstra(s_env &st_env, float af_maxAllowedCost, bool ab_surfaceCostVoid) {
         }
         if (b_canWriteCostVal) {
           marked++;
-          v_n->val = f_pathCost;
+          v_n->val          = f_pathCost;
           v_n->old_undefval = vno_c;
           // cout << vno_c << "<---" << vno_n << endl;
         }

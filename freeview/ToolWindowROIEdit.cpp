@@ -22,11 +22,11 @@
  *
  */
 #include "ToolWindowROIEdit.h"
-#include "ui_ToolWindowROIEdit.h"
-#include "Interactor2DROIEdit.h"
-#include "RenderView2D.h"
-#include "MainWindow.h"
 #include "BrushProperty.h"
+#include "Interactor2DROIEdit.h"
+#include "MainWindow.h"
+#include "RenderView2D.h"
+#include "ui_ToolWindowROIEdit.h"
 #include <QSettings>
 
 ToolWindowROIEdit::ToolWindowROIEdit(QWidget *parent)
@@ -75,7 +75,7 @@ void ToolWindowROIEdit::UpdateWidgets() {
     allwidgets[i]->blockSignals(true);
   }
 
-  MainWindow *wnd = MainWindow::GetMainWindow();
+  MainWindow *  wnd  = MainWindow::GetMainWindow();
   RenderView2D *view = (RenderView2D *)wnd->GetRenderView(0);
   ui->actionFill->setChecked(view->GetAction() == Interactor2DROIEdit::EM_Fill);
   ui->actionLiveWire->setChecked(view->GetAction() ==

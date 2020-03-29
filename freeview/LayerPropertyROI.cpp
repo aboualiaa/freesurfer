@@ -27,20 +27,18 @@
  *
  */
 
-#include <assert.h>
 #include "LayerPropertyROI.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include <QDebug>
-
-using namespace std;
+#include <assert.h>
 
 LayerPropertyROI::LayerPropertyROI(QObject *parent) : LayerProperty(parent) {
-  mOpacity = 0.7;
-  mRGB[0] = 1;
-  mRGB[1] = 1;
-  mRGB[2] = 0;
-  m_dThreshold = 0;
-  m_nColorCode = SolidColor;
+  mOpacity         = 0.7;
+  mRGB[0]          = 1;
+  mRGB[1]          = 1;
+  mRGB[2]          = 0;
+  m_dThreshold     = 0;
+  m_nColorCode     = SolidColor;
   m_dValueRange[0] = 0;
   m_dValueRange[1] = 1;
 

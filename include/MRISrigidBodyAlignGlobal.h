@@ -28,9 +28,9 @@
 #include "mrisurf.h"
 
 void MRISrigidBodyAlignGlobal_findMinSSE(double *mina, double *new_minb,
-                                         double *new_ming,
-                                         double *new_sse, // outputs
-                                         MRI_SURFACE *mris,
+                                         double *           new_ming,
+                                         double *           new_sse, // outputs
+                                         MRI_SURFACE *      mris,
                                          INTEGRATION_PARMS *parms,
                                          float min_radians, float max_radians,
                                          double ext_sse, int nangles);

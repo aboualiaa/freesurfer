@@ -6,15 +6,15 @@
 // hash table.
 
 #define hashTableSize (1024 * 1024)
-#define someKeysSize 100000
+#define someKeysSize  100000
 
 // An xyz hashing function that preserves many of the bits in the float and
 // doesn't care much about their range. Cost is not very important compared to
 // all the other work done.
 static int pointHash(float x, float y, float z) {
-  int hx = 1000.0f * logf(abs(x) + 1.0f);
-  int hy = 1000.0f * logf(abs(y) + 1.0f);
-  int hz = 1000.0f * logf(abs(z) + 1.0f);
+  int hx   = 1000.0f * logf(abs(x) + 1.0f);
+  int hy   = 1000.0f * logf(abs(y) + 1.0f);
+  int hz   = 1000.0f * logf(abs(z) + 1.0f);
   int hash = (hx * 2017) ^ (hy * 1029) ^
              (hz * 1159); // No good reason behind these multipliers
   return hash % hashTableSize;
@@ -25,12 +25,12 @@ static int pointHash(float x, float y, float z) {
 class STLMesher {
   struct Key {
     struct Key *next;
-    float x, y, z;
-    int vertexNo;
+    float       x, y, z;
+    int         vertexNo;
   };
   struct Keys {
     struct Keys *next;
-    Key someKeys[someKeysSize];
+    Key          someKeys[someKeysSize];
   };
   struct XYZ {
     float x, y, z;
@@ -45,10 +45,10 @@ class STLMesher {
 
   std::vector<Key *> hashTable;
   std::vector<Key *> vertices;
-  std::vector<XYZ> normals;
+  std::vector<XYZ>   normals;
 
-  Keys *keys = nullptr;
-  int keysInUse = someKeysSize;
+  Keys *keys      = nullptr;
+  int   keysInUse = someKeysSize;
 
 public:
   // initialize the vertices and normals vectors with an arbitrary starting size
@@ -69,7 +69,7 @@ public:
     // hash the vertex position - those already seen will reuse their previously
     // assigned vertex idx
     Key **keyPtrPtr = &hashTable[pointHash(x, y, z)];
-    Key *keyPtr;
+    Key * keyPtr;
 
     // ensure vertex is unique (or not)
     for (; (keyPtr = *keyPtrPtr); keyPtrPtr = &keyPtr->next) {
@@ -81,16 +81,16 @@ public:
       if (someKeysSize == keysInUse) {
         Keys *moreKeys = new Keys();
         moreKeys->next = keys;
-        keys = moreKeys;
-        keysInUse = 0;
+        keys           = moreKeys;
+        keysInUse      = 0;
       }
-      keyPtr = &keys->someKeys[keysInUse++];
-      keyPtr->next = nullptr;
-      keyPtr->x = x;
-      keyPtr->y = y;
-      keyPtr->z = z;
+      keyPtr           = &keys->someKeys[keysInUse++];
+      keyPtr->next     = nullptr;
+      keyPtr->x        = x;
+      keyPtr->y        = y;
+      keyPtr->z        = z;
       keyPtr->vertexNo = nextVertexNo++;
-      *keyPtrPtr = keyPtr;
+      *keyPtrPtr       = keyPtr;
     }
 
     // sanity check on the current face geometry
@@ -125,14 +125,14 @@ public:
     for (int faceNo = 0; faceNo < mris->nfaces; faceNo++) {
 
       FACE *face = &mris->faces[faceNo];
-      XYZ *xyz = &normals[faceNo];
+      XYZ * xyz  = &normals[faceNo];
 
       setFaceNorm(mris, faceNo, xyz->x, xyz->y, xyz->z);
 
       for (int faceVertexNo = 0; faceVertexNo < 3; faceVertexNo++) {
-        int undupVertexNo = 3 * faceNo + faceVertexNo;
-        Key *keyPtr = vertices[undupVertexNo];
-        int vertexNo = keyPtr->vertexNo;
+        int  undupVertexNo = 3 * faceNo + faceVertexNo;
+        Key *keyPtr        = vertices[undupVertexNo];
+        int  vertexNo      = keyPtr->vertexNo;
         if (vertexNo == nv) {
           MRISsetXYZ(mris, vertexNo, keyPtr->x, keyPtr->y, keyPtr->z);
           nv++;
@@ -154,7 +154,7 @@ public:
     // alloc memory for neighbor list of each vertex
     for (int vno = 0; vno < mris->nvertices; vno++) {
       VERTEX_TOPOLOGY *const v = &mris->vertices_topology[vno];
-      v->v = (int *)calloc(v->vnum, sizeof(int));
+      v->v                     = (int *)calloc(v->vnum, sizeof(int));
       if (!v->v)
         ErrorExit(ERROR_NOMEMORY,
                   "MRISreadSTLfile: could not allocate %dth vertex list.", vno);
@@ -191,7 +191,7 @@ public:
     // allocate face arrays in vertices
     for (int vno = 0; vno < mris->nvertices; vno++) {
       VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-      vt->f = (int *)calloc(vt->num, sizeof(int));
+      vt->f                     = (int *)calloc(vt->num, sizeof(int));
       if (!vt->f)
         ErrorExit(ERROR_NO_MEMORY,
                   "MRISreadSTLfileICOread: could not allocate %d faces",
@@ -200,7 +200,7 @@ public:
       if (!vt->n)
         ErrorExit(ERROR_NO_MEMORY,
                   "MRISreadSTLfile: could not allocate %d nbrs", vt->n);
-      vt->num = 0; // for use as counter in next section
+      vt->num    = 0; // for use as counter in next section
       vt->vtotal = vt->vnum;
     }
 
@@ -209,8 +209,8 @@ public:
       FACE *face = &mris->faces[fno];
       for (int fvno = 0; fvno < 3; fvno++) {
         VERTEX_TOPOLOGY *const v = &mris->vertices_topology[face->v[fvno]];
-        v->n[v->num] = fvno;
-        v->f[v->num++] = fno;
+        v->n[v->num]             = fvno;
+        v->f[v->num++]           = fno;
       }
     }
 
@@ -221,10 +221,10 @@ public:
 // Reads an ascii-formatted STL file into a surface.
 static MRIS *mrisReadAsciiSTL(const std::string &filename) {
   STLMesher mesher;
-  int solids = 0;
+  int       solids = 0;
 
   FILE *stlfile = fopen(filename.c_str(), "r");
-  char line[STRLEN], *cp;
+  char  line[STRLEN], *cp;
   while ((cp = fgetl(line, STRLEN, stlfile))) {
 
     // For efficiency purposes, we'll only look at the first character
@@ -286,7 +286,7 @@ static MRIS *mrisReadBinarySTL(const std::string &filename) {
 
   // load and read 80-byte header (not used)
   std::ifstream stlfile(filename, std::ios::in | std::ios::binary);
-  char header[80] = "";
+  char          header[80] = "";
   stlfile.read(header, 80);
 
   // read total number of triangles

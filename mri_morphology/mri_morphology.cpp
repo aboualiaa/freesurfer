@@ -25,27 +25,27 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 
-#define ERODE 1
-#define DILATE 2
-#define CLOSE 3
-#define OPEN 4
-#define DILATE_LABEL 5
-#define MODE_FILTER 6
-#define ERODE_THRESH 7
+#define ERODE         1
+#define DILATE        2
+#define CLOSE         3
+#define OPEN          4
+#define DILATE_LABEL  5
+#define MODE_FILTER   6
+#define ERODE_THRESH  7
 #define DILATE_THRESH 8
-#define ERODE_BOTTOM 9
-#define FILL_HOLES 10
+#define ERODE_BOTTOM  9
+#define FILL_HOLES    10
 
 static void usage_exit(int code);
 
@@ -54,11 +54,11 @@ static int label = -1;
 MRI *MRIerodeBottom(MRI *mri_src, int label, MRI *mri_dst);
 
 static MRI *mri_mask = nullptr;
-int main(int argc, char *argv[]) {
+int         main(int argc, char *argv[]) {
   char *out_fname, **av;
-  int ac, nargs, niter, operation, i;
-  MRI *mri_src, *mri_dst = nullptr, *mri_saved_src = nullptr;
-  int msec, minutes, seconds;
+  int   ac, nargs, niter, operation, i;
+  MRI * mri_src, *mri_dst = nullptr, *mri_saved_src = nullptr;
+  int   msec, minutes, seconds;
   Timer start;
 
   nargs = handleVersionOption(argc, argv, "mri_morphology");
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
 
   out_fname = argv[4];
-  mri_src = MRIread(argv[1]);
+  mri_src   = MRIread(argv[1]);
   if (mri_src == nullptr)
     ErrorExit(ERROR_BADPARM, "%s: could not read input volume %s\n", Progname,
               argv[1]);
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
     MRI *mri_tmp;
 
     mri_saved_src = MRIcopy(mri_src, nullptr);
-    mri_tmp = MRIclone(mri_src, nullptr);
+    mri_tmp       = MRIclone(mri_src, nullptr);
     MRIcopyLabel(mri_src, mri_tmp, label);
     MRIfree(&mri_src);
     mri_src = mri_tmp;
@@ -197,9 +197,9 @@ int main(int argc, char *argv[]) {
     }
     break;
   case ERODE_THRESH: {
-    double thresh = atof(argv[5]);
-    char *intensity_fname = argv[6];
-    MRI *mri_intensity;
+    double thresh          = atof(argv[5]);
+    char * intensity_fname = argv[6];
+    MRI *  mri_intensity;
 
     if (argc < 7)
       ErrorExit(ERROR_BADPARM,
@@ -219,9 +219,9 @@ int main(int argc, char *argv[]) {
     }
   } break;
   case DILATE_THRESH: {
-    double thresh = atof(argv[5]);
-    char *intensity_fname = argv[6];
-    MRI *mri_intensity;
+    double thresh          = atof(argv[5]);
+    char * intensity_fname = argv[6];
+    MRI *  mri_intensity;
 
     if (argc < 7)
       ErrorExit(ERROR_BADPARM,
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "writing to %s...\n", out_fname);
   MRIwrite(mri_dst, out_fname);
   MRIfree(&mri_dst);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -270,7 +270,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -280,9 +280,9 @@ static int get_option(int argc, char *argv[]) {
       exit(Gerror);
     nargs = 1;
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else

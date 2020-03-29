@@ -42,8 +42,8 @@
  */
 
 #include "fmarching3dnband.h"
-#define IFij 1  /* 1/F[k][i][j] */
-#define ISFij 1 /* 1/(F[k][i][j]*F[k][i][j]) */
+#define IFij        1 /* 1/F[k][i][j] */
+#define ISFij       1 /* 1/(F[k][i][j]*F[k][i][j]) */
 #define MYMIN(a, b) (a < b ? a : b)
 
 float ReCompute(float Nv, float Sv, float Ev, float Wv, float Fv, float Bv,
@@ -65,10 +65,10 @@ float ReCompute(float Nv, float Sv, float Ev, float Wv, float Fv, float Bv,
   /* Suppose a, b, and c are the minimum T value in three directions */
   float s, s2; /* s = a + b +c; s2 = a*a + b*b +c*c */
   float tmp;
-  int count;
+  int   count;
 
-  s = 0;
-  s2 = 0;
+  s     = 0;
+  s2    = 0;
   count = 0;
 
   if (Nl == (unsigned char)ALIVE && Sl == (unsigned char)ALIVE) {
@@ -148,21 +148,21 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
   static int xoff[6] = {1, 0, -1, 0, 0, 0};
   static int yoff[6] = {0, 1, 0, -1, 0, 0};
   static int zoff[6] = {0, 0, 0, 0, 1, -1};
-  int XN, YN, ZN;
+  int        XN, YN, ZN;
 
   MRI *label; /* "Alive" => 1; "Narrow Band" => 2; "Far Away" => 3; */
   MRI *BackPointer;
   /* 3D cube storing the backpointer to the narrowband heap */
 
-  Xheap H; /* Narrrow band heap */
+  Xheap        H; /* Narrrow band heap */
   XheapElement he;
 
-  int i, j, d; /* Iteration index, d for depth */
-  int koff;    /* Neighbourhood index */
-  int newi, newj, newd;
+  int   i, j, d; /* Iteration index, d for depth */
+  int   koff;    /* Neighbourhood index */
+  int   newi, newj, newd;
   float Nv = 0, Sv = 0, Wv = 0, Ev = 0, Fv = 0,
         Bv = 0;                         /* Value at six neighours of a pixel */
-  float Cv;                             /* Value at local point */
+  float         Cv;                     /* Value at local point */
   unsigned char Nl, Sl, Wl, El, Fl, Bl; /* Label at six neighours of a pixel */
 
   int NSFlag, WEFlag, FBFlag;
@@ -240,12 +240,12 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
 
           if (Nv * Cv < 0) {
             NSFlag = 1;
-            s = Nv;
+            s      = Nv;
           }
           if (Sv * Cv < 0) {
             if (NSFlag == 0) {
               NSFlag = 1;
-              s = Sv;
+              s      = Sv;
             } else {
               s = (fabs(Nv) > fabs(Sv)) ? Nv : Sv;
             }
@@ -253,12 +253,12 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
 
           if (Wv * Cv < 0) {
             WEFlag = 1;
-            t = Wv;
+            t      = Wv;
           }
           if (Ev * Cv < 0) {
             if (WEFlag == 0) {
               WEFlag = 1;
-              t = Ev;
+              t      = Ev;
             } else {
               t = (fabs(Ev) > fabs(Wv)) ? Ev : Wv;
             }
@@ -266,12 +266,12 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
 
           if (Fv * Cv < 0) {
             FBFlag = 1;
-            w = Fv;
+            w      = Fv;
           }
           if (Bv * Cv < 0) {
             if (FBFlag == 0) {
               FBFlag = 1;
-              w = Bv;
+              w      = Bv;
             } else {
               w = (fabs(Fv) > fabs(Bv)) ? Fv : Bv;
             }

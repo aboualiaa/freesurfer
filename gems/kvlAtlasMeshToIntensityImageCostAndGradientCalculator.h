@@ -1,8 +1,8 @@
 #ifndef __kvlAtlasMeshToIntensityImageCostAndGradientCalculator_h
 #define __kvlAtlasMeshToIntensityImageCostAndGradientCalculator_h
 
-#include "kvlAtlasMeshPositionCostAndGradientCalculator.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshPositionCostAndGradientCalculator.h"
 #include "kvlGMMLikelihoodImageFilter.h"
 
 namespace kvl {
@@ -14,9 +14,9 @@ class AtlasMeshToIntensityImageCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshToIntensityImageCostAndGradientCalculator;
-  using Superclass = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshToIntensityImageCostAndGradientCalculator;
+  using Superclass   = AtlasMeshPositionCostAndGradientCalculator;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -35,7 +35,7 @@ public:
   /** */
   void SetParameters(const std::vector<vnl_vector<double>> &means,
                      const std::vector<vnl_matrix<double>> &variances,
-                     const std::vector<double> &mixtureWeights,
+                     const std::vector<double> &            mixtureWeights,
                      const std::vector<int> &numberOfGaussiansPerClass);
 
   /** */

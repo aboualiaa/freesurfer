@@ -59,8 +59,8 @@ typedef enum {
 MRI *MRIFromMHTandMRIS(MHT *mht, MRIS *mris, MFMM_Option_t mfmm_option);
 
 // Some simple log functions for test programs.
-extern int gw_log_init(char *AProgname, char *AProgversion, char *ALogfilepath,
-                       int newfile);
+extern int  gw_log_init(char *AProgname, char *AProgversion, char *ALogfilepath,
+                        int newfile);
 extern void gw_log_message(char *msg);
 extern void gw_log_timestamp(const char *label);
 extern void gw_log_begin();

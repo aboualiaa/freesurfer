@@ -7,9 +7,9 @@ namespace kvl {
 class EvaluateMeshPosition : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef EvaluateMeshPosition Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef EvaluateMeshPosition          Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -18,7 +18,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(EvaluateMeshPosition, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -65,7 +66,8 @@ public:
     object = kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) != 0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name()) !=
+        0) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
@@ -88,9 +90,9 @@ public:
     const int numberOfNodes = gradient->Size();
     // std::cout << "numberOfNodes :" << numberOfNodes << std::endl;
     mwSize dims[2];
-    dims[0] = numberOfNodes;
-    dims[1] = 3;
-    plhs[1] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+    dims[0]    = numberOfNodes;
+    dims[1]    = 3;
+    plhs[1]    = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     auto *data = static_cast<double *>(mxGetData(plhs[1]));
 
     for (AtlasPositionGradientContainerType::ConstIterator it =
@@ -104,8 +106,10 @@ public:
   }
 
 protected:
-  EvaluateMeshPosition()= default;;
-  ~EvaluateMeshPosition() override= default;;
+  EvaluateMeshPosition() = default;
+  ;
+  ~EvaluateMeshPosition() override = default;
+  ;
 
   EvaluateMeshPosition(const Self &); // purposely not implemented
   void operator=(const Self &);       // purposely not implemented

@@ -1,38 +1,38 @@
 #include <iostream>
 //#include "stdafx.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 #include "interpolation.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "itkVector.h"
 
-#include "vtkVersion.h"
+#include "itkImage.h"
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
 #include "vtkActor.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkSmartPointer.h"
-#include "itkImage.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
+#include "vtkVersion.h"
 
 #include "fsSurfaceOptimizationFilter.h"
 #include "itkVTKPolyDataWriter.h"
 
+#include "colortab.h"
+#include "fsenv.h"
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkVariableLengthVector.h"
 #include "mrisurf.h"
-#include "colortab.h"
-#include "fsenv.h"
 
 #include "GetPot.h"
 using namespace alglib;
-typedef float CoordType;
-typedef itk::Image<CoordType, 4> ProfileType;
+typedef float                             CoordType;
+typedef itk::Image<CoordType, 4>          ProfileType;
 typedef itk::ImageFileReader<ProfileType> ReaderType;
-typedef fs::Surface<CoordType, 3> SurfaceType;
+typedef fs::Surface<CoordType, 3>         SurfaceType;
 
 void function_cx_1_func(const real_1d_array &c, const real_1d_array &x,
                         double &func, void *ptr) {
@@ -68,7 +68,7 @@ int main(int narg, char **arg) {
   }
 
   const char *surfaceFile = cl.follow("", "-s");
-  const char *imageFile = cl.follow("", "-i");
+  const char *imageFile   = cl.follow("", "-i");
   const char *profileFile = cl.follow("", "-p");
   const char *fittingFile = cl.follow("", "-o");
 
@@ -93,9 +93,9 @@ int main(int narg, char **arg) {
        itCells < surface->GetCells()->End(); itCells += 10) {
     SurfaceType::CellType::PointIdIterator pointsIt =
         itCells.Value()->PointIdsBegin();
-    SurfaceType::PointType p1 = surface->GetPoint(*pointsIt);
-    SurfaceType::PointType p2 = surface->GetPoint(*(++pointsIt));
-    SurfaceType::PointType p3 = surface->GetPoint(*(++pointsIt));
+    SurfaceType::PointType p1    = surface->GetPoint(*pointsIt);
+    SurfaceType::PointType p2    = surface->GetPoint(*(++pointsIt));
+    SurfaceType::PointType p3    = surface->GetPoint(*(++pointsIt));
     SurfaceType::PointType edge1 = p1 - p2;
     SurfaceType::PointType edge2 = p1 - p3;
 
@@ -129,13 +129,13 @@ int main(int narg, char **arg) {
     real_1d_array yval(y_fit.c_str());
     real_2d_array xval(x_fit.c_str());
 
-    real_1d_array c = "[1, .1, 2,1, .1,2, 120]";
-    double epsx = 0.01;
-    ae_int_t maxits = 1000;
-    ae_int_t info;
-    lsfitstate state;
-    lsfitreport rep;
-    double diffstep = 0.01;
+    real_1d_array c      = "[1, .1, 2,1, .1,2, 120]";
+    double        epsx   = 0.01;
+    ae_int_t      maxits = 1000;
+    ae_int_t      info;
+    lsfitstate    state;
+    lsfitreport   rep;
+    double        diffstep = 0.01;
 
     lsfitcreatef(xval, yval, c, diffstep, state);
     lsfitsetcond(state, epsx, maxits);
@@ -145,14 +145,14 @@ int main(int narg, char **arg) {
     // printf("%s\n", c.tostring(1).c_str()); // EXPECTED: [1.5]
 
     for (int t = 0; t < image->GetLargestPossibleRegion().GetSize()[3]; t++) {
-      index[3] = t;
+      index[3]    = t;
       float value = c[6] + c[0] * tanh(c[1] * (t - halfSize - c[2])) -
                     c[3] * tanh(c[4] * (t - halfSize - c[5]));
       image->SetPixel(index, value);
     }
   }
   typedef itk::ImageFileWriter<ProfileType> WriterType;
-  WriterType::Pointer writer = WriterType::New();
+  WriterType::Pointer                       writer = WriterType::New();
   writer->SetFileName(fittingFile);
   writer->SetInput(image);
   writer->Update();

@@ -10,16 +10,16 @@
 
 TEST(dmatrix_test, constat_value) { // NOLINT
   DMATRIX *md;
-  MATRIX *mf;
-  double v;
+  MATRIX * mf;
+  double   v;
 
-  md = DMatrixConstVal(0, 3, 3, nullptr);
+  md               = DMatrixConstVal(0, 3, 3, nullptr);
   unsigned int sum = 0;
   for (int i = 0; i < md->rows * md->cols; ++i) {
     sum |= static_cast<unsigned int>(md->data[i]); // NOLINT
   }
   EXPECT_EQ(sum, 0);
-  md = DMatrixConstVal(0, 3, 3, md);
+  md  = DMatrixConstVal(0, 3, 3, md);
   sum = 0;
   for (int i = 0; i < md->rows * md->cols; ++i) {
     sum |= static_cast<unsigned int>(md->data[i]); // NOLINT
@@ -44,10 +44,10 @@ TEST(dmatrix_test, dmatrix_add) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md;
-  MATRIX *m1f;
-  MATRIX *m2f;
-  MATRIX *mf;
-  double v;
+  MATRIX * m1f;
+  MATRIX * m2f;
+  MATRIX * mf;
+  double   v;
 
   m1f = MatrixDRand48(14, 7, nullptr); // NOLINT
   m2f = MatrixDRand48(14, 7, nullptr); // NOLINT
@@ -66,10 +66,10 @@ TEST(dmatrix_test, dmatrix_subtract) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md;
-  MATRIX *m1f;
-  MATRIX *m2f;
-  MATRIX *mf;
-  double v;
+  MATRIX * m1f;
+  MATRIX * m2f;
+  MATRIX * mf;
+  double   v;
 
   m1f = MatrixDRand48(14, 7, nullptr); // NOLINT
   m2f = MatrixDRand48(14, 7, nullptr); // NOLINT
@@ -87,10 +87,10 @@ TEST(dmatrix_test, dmatrix_subtract) { // NOLINT
 TEST(dmatrix_test, dmatrix_scalar_mult) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *md;
-  MATRIX *m1f;
-  MATRIX *m2f;
-  MATRIX *mf;
-  double v;
+  MATRIX * m1f;
+  MATRIX * m2f;
+  MATRIX * mf;
+  double   v;
 
   m1f = MatrixDRand48(14, 7, nullptr); // NOLINT
   m2f = MatrixDRand48(14, 7, nullptr); // NOLINT
@@ -108,10 +108,10 @@ TEST(dmatrix_test, dmatrix_multiply) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md;
-  MATRIX *m1f;
-  MATRIX *m2f;
-  MATRIX *mf;
-  double v;
+  MATRIX * m1f;
+  MATRIX * m2f;
+  MATRIX * mf;
+  double   v;
   m1f = MatrixDRand48(7, 14, nullptr); // NOLINT
   m2f = MatrixDRand48(14, 7, nullptr); // NOLINT
   m1d = DMatrixCopyFMatrix(m1f, nullptr);
@@ -129,10 +129,10 @@ TEST(dmatrix_test, dmatrix_transpose) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md = nullptr;
-  MATRIX *m1f;
-  MATRIX *m2f;
-  MATRIX *mf = nullptr;
-  double v;
+  MATRIX * m1f;
+  MATRIX * m2f;
+  MATRIX * mf = nullptr;
+  double   v;
 
   m1f = MatrixDRand48(7, 14, nullptr); // NOLINT
   m2f = MatrixDRand48(14, 7, nullptr); // NOLINT
@@ -161,10 +161,10 @@ TEST(dmatrix_test, dmatrix_vector_cross) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md;
-  MATRIX *m1f;
-  MATRIX *m2f;
-  MATRIX *mf;
-  double v;
+  MATRIX * m1f;
+  MATRIX * m2f;
+  MATRIX * mf;
+  double   v;
   m1f = MatrixDRand48(4, 1, nullptr);
   m2f = MatrixDRand48(4, 1, nullptr);
   m1d = DMatrixCopyFMatrix(m1f, nullptr);
@@ -197,11 +197,11 @@ TEST(dmatrix_test, dmatrix_vector_cross) { // NOLINT
 TEST(dmatrix_test, dmatrix_vector_dot) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
-  MATRIX *m1f;
-  MATRIX *m2f;
-  double v;
-  float vf;
-  double vd;
+  MATRIX * m1f;
+  MATRIX * m2f;
+  double   v;
+  float    vf;
+  double   vd;
   m1f = MatrixDRand48(3, 1, nullptr);
   m2f = MatrixDRand48(3, 1, nullptr);
   m1d = DMatrixCopyFMatrix(m1f, nullptr);
@@ -217,10 +217,10 @@ TEST(dmatrix_test, dmatrix_vector_dot) { // NOLINT
 
 TEST(dmatrix_test, dmatrix_vector_length) { // NOLINT
   DMATRIX *m1d;
-  MATRIX *m1f;
-  double v;
-  double vf;
-  double vd;
+  MATRIX * m1f;
+  double   v;
+  double   vf;
+  double   vd;
   m1f = MatrixDRand48(3, 1, nullptr);
   m1d = DMatrixCopyFMatrix(m1f, nullptr);
 
@@ -243,10 +243,10 @@ TEST(dmatrix_test, dmatrix_free_null) { // NOLINT
 TEST(dmatrix_test, dmatrix_check_dims) { // NOLINT
   DMATRIX *temp;
   DMATRIX *temp1;
-  MATRIX *m1f;
+  MATRIX * m1f;
   DMATRIX *m1d;
-  temp = nullptr;
-  temp1 = nullptr;
+  temp    = nullptr;
+  temp1   = nullptr;
   int res = DMatrixCheckDims(temp, temp1, 3, stdout, "");
   EXPECT_EQ(res, 1);
   m1f = MatrixDRand48(3, 1, nullptr);
@@ -254,23 +254,23 @@ TEST(dmatrix_test, dmatrix_check_dims) { // NOLINT
   res = DMatrixCheckDims(m1d, temp1, 3, stdout, "");
   EXPECT_EQ(res, 1);
   temp1 = DMatrixCopyFMatrix(m1f, nullptr);
-  m1f = MatrixDRand48(4, 1, nullptr);
-  m1d = DMatrixCopyFMatrix(m1f, nullptr);
-  res = DMatrixCheckDims(m1d, temp1, 3, stdout, "");
+  m1f   = MatrixDRand48(4, 1, nullptr);
+  m1d   = DMatrixCopyFMatrix(m1f, nullptr);
+  res   = DMatrixCheckDims(m1d, temp1, 3, stdout, "");
   EXPECT_EQ(res, 1);
   res = DMatrixCheckDims(m1d, temp1, 1, stdout, "");
   EXPECT_EQ(res, 1);
   temp1 = DMatrixCopyFMatrix(m1f, nullptr);
-  m1f = MatrixDRand48(4, 4, nullptr);
-  m1d = DMatrixCopyFMatrix(m1f, nullptr);
-  res = DMatrixCheckDims(m1d, temp1, 3, stdout, "");
+  m1f   = MatrixDRand48(4, 4, nullptr);
+  m1d   = DMatrixCopyFMatrix(m1f, nullptr);
+  res   = DMatrixCheckDims(m1d, temp1, 3, stdout, "");
   EXPECT_EQ(res, 1);
   res = DMatrixCheckDims(m1d, temp1, 2, stdout, "");
   EXPECT_EQ(res, 1);
   temp1 = DMatrixCopyFMatrix(m1f, nullptr);
-  m1f = MatrixDRand48(5, 5, nullptr); // NOLINT
-  m1d = DMatrixCopyFMatrix(m1f, nullptr);
-  res = DMatrixCheckDims(m1d, temp1, 4, stdout, "");
+  m1f   = MatrixDRand48(5, 5, nullptr); // NOLINT
+  m1d   = DMatrixCopyFMatrix(m1f, nullptr);
+  res   = DMatrixCheckDims(m1d, temp1, 4, stdout, "");
   EXPECT_EQ(res, 1);
 }
 

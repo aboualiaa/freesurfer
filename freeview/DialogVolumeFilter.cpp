@@ -22,8 +22,8 @@
  *
  */
 #include "DialogVolumeFilter.h"
-#include "ui_DialogVolumeFilter.h"
 #include "VolumeFilter.h"
+#include "ui_DialogVolumeFilter.h"
 #include <QMessageBox>
 
 DialogVolumeFilter::DialogVolumeFilter(QWidget *parent)
@@ -50,7 +50,7 @@ void DialogVolumeFilter::SetSigma(double dvalue) {
 
 double DialogVolumeFilter::GetSigma() {
   double dvalue = 0;
-  dvalue = ui->lineEditSigma->text().toDouble();
+  dvalue        = ui->lineEditSigma->text().toDouble();
   return dvalue;
 }
 

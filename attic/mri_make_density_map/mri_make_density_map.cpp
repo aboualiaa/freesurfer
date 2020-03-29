@@ -25,19 +25,19 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
+#include "cma.h"
 #include "diag.h"
-#include "mri.h"
-#include "proto.h"
+#include "error.h"
 #include "gca.h"
 #include "gcamorph.h"
-#include "cma.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "transform.h"
 #include "version.h"
 
@@ -48,28 +48,28 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
-const char *Progname;
+const char * Progname;
 static char *out_like_fname = NULL;
 
-static int nreductions = 0;
-static char *xform_fname = NULL;
-static LTA *lta = NULL;
-static TRANSFORM *transform = NULL;
-static float sigma = 0;
-static int surf_flag = 0;
-static GCA *gca;
-static double resolution = 0.25;
+static int        nreductions = 0;
+static char *     xform_fname = NULL;
+static LTA *      lta         = NULL;
+static TRANSFORM *transform   = NULL;
+static float      sigma       = 0;
+static int        surf_flag   = 0;
+static GCA *      gca;
+static double     resolution = 0.25;
 
 int main(int argc, char *argv[]) {
   TRANSFORM *transform;
-  char **av, *seg_fname, *intensity_fname, *out_fname, *xform_fname;
-  int ac, nargs, i, label;
+  char **    av, *seg_fname, *intensity_fname, *out_fname, *xform_fname;
+  int        ac, nargs, i, label;
   MRI *mri_seg, *mri_intensity, *mri_out = NULL, *mri_kernel, *mri_smoothed,
                                 *mri_orig_intensity, *mri_target;
   GCA_MORPH *gcam;
@@ -94,15 +94,15 @@ int main(int argc, char *argv[]) {
   if (argc < 6)
     usage_exit();
 
-  seg_fname = argv[1];
+  seg_fname       = argv[1];
   intensity_fname = argv[2];
-  xform_fname = argv[3];
-  out_fname = argv[argc - 1];
+  xform_fname     = argv[3];
+  out_fname       = argv[argc - 1];
 
   if (surf_flag) {
 #define PAD 4
     MRI_SURFACE *mris;
-    MRI *mri_tmp;
+    MRI *        mri_tmp;
     mris = MRISread(seg_fname);
     if (!mris)
       ErrorExit(ERROR_NOFILE, "%s: could not read surface %s", Progname,
@@ -152,11 +152,11 @@ int main(int argc, char *argv[]) {
     label = atoi(argv[i]);
     if (gca) // make target volume from it
     {
-      MRI *mri_tmp, *mri_template;
+      MRI *      mri_tmp, *mri_template;
       MRI_REGION box;
-      double scale;
+      double     scale;
 
-      mri_tmp = MRIclone(mri_orig_intensity, NULL);
+      mri_tmp      = MRIclone(mri_orig_intensity, NULL);
       mri_tmp->c_r = mri_tmp->c_a = mri_tmp->c_s = 0.0;
       MRIreInitCache(mri_tmp);
       GCAbuildMostLikelyVolumeForStructure(gca, mri_tmp, label, 0, NULL, NULL);
@@ -190,9 +190,9 @@ int main(int argc, char *argv[]) {
       mri_out =
           GCAMextract_density_map(mri_seg, mri_intensity, gcam, label, mri_out);
     else {
-      MRI *mri_tmp, *mri_cor;
+      MRI *   mri_tmp, *mri_cor;
       MATRIX *m_L;
-      LTA *lta;
+      LTA *   lta;
 
       lta = ((LTA *)(transform->xform));
       if (lta->type == LINEAR_VOX_TO_VOX)
@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
   }
   if (!FZERO(sigma)) {
     printf("smoothing extracted volume...\n");
-    mri_kernel = MRIgaussian1d(sigma, 10 * sigma);
+    mri_kernel   = MRIgaussian1d(sigma, 10 * sigma);
     mri_smoothed = MRIconvolveGaussian(mri_out, NULL, mri_kernel);
     MRIfree(&mri_out);
     mri_out = mri_smoothed;
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -272,14 +272,14 @@ static int get_option(int argc, char *argv[]) {
     printf("setting output resolution to %2.2f for surface\n", resolution);
     nargs = 1;
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "out_like") || !stricmp(option, "ol")) {
     out_like_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("shaping output to be like %s...\n", out_like_fname);
   } else
     switch (toupper(*option)) {
@@ -305,7 +305,7 @@ static int get_option(int argc, char *argv[]) {
     case 'T':
       xform_fname = argv[2];
       printf("reading and applying transform %s...\n", xform_fname);
-      nargs = 1;
+      nargs     = 1;
       transform = TransformRead(xform_fname);
       if (!transform)
         ErrorExit(ERROR_NOFILE, "%s: could not read transform from %s",
@@ -316,7 +316,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':

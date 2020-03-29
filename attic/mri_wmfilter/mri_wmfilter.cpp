@@ -23,15 +23,15 @@
  *
  */
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "macros.h"
 #include "const.h"
-#include "mri.h"
 #include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "version.h"
 
 static char vcid[] =
@@ -44,18 +44,18 @@ static char vcid[] =
 #ifndef SQR
 #define SQR(x) ((x) * (x))
 #endif
-#define MAXCOR 500
-#define MAXLEN 100
+#define MAXCOR   500
+#define MAXLEN   100
 #define DIR_FILE "ic1.tri"
 
 /*-------------------------------------------------------------------
                                 GLOBAL DATA
 -------------------------------------------------------------------*/
 
-int wx0 = 100, wy0 = 100;
+int   wx0 = 100, wy0 = 100;
 float white_hilim = 125; /* new smaller range goes with improved */
 float white_lolim = 95;  /* intensity normalization */
-float gray_hilim = 100;
+float gray_hilim  = 100;
 float xmin, xmax;
 float ymin, ymax;
 float zmin, zmax;
@@ -66,23 +66,23 @@ float ctrx, ctry, ctrz;
 FLOATTYPE **mat,**mati,*vec,*vec2;
 #endif
 float xcor[MAXCOR], ycor[MAXCOR], zcor[MAXCOR];
-int nver, ncor;
+int   nver, ncor;
 
 const char *Progname;
 
-static int central_plane = 0;
-static int grayscale_plane = 0;
-static char *output_name = "wm";
-static float slope = 0.00f; /* 0 mimic original behavior */
+static int   central_plane   = 0;
+static int   grayscale_plane = 0;
+static char *output_name     = "wm";
+static float slope           = 0.00f; /* 0 mimic original behavior */
 static float lslope = 0.0f; /* slope for planar laplacian threshold mod */
 
 /*-------------------------------------------------------------------
                              STATIC PROTOTYPES
 -------------------------------------------------------------------*/
 
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 static MRI *plane_filter(MRI *mri_src, MRI *mri_dst, int niter);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_version(void);
 static void print_help(void);
 
@@ -91,13 +91,13 @@ static void print_help(void);
 -------------------------------------------------------------------*/
 
 int main(int argc, char *argv[]) {
-  int i, j, option = 1, nargs;
+  int   i, j, option = 1, nargs;
   float x, y, z;
   FILE *fptr;
-  char fname[STRLEN], mfname[STRLEN], pfname[STRLEN], dfname[STRLEN];
-  char fpref[STRLEN], pname[STRLEN];
+  char  fname[STRLEN], mfname[STRLEN], pfname[STRLEN], dfname[STRLEN];
+  char  fpref[STRLEN], pname[STRLEN];
   char *data_dir, *mri_dir;
-  MRI *mri_src, *mri_dst;
+  MRI * mri_src, *mri_dst;
 
   nargs = handleVersionOption(argc, argv, "mri_wmfilter");
   if (nargs && argc - nargs == 1)
@@ -194,23 +194,23 @@ int main(int argc, char *argv[]) {
 static MRI *plane_filter(MRI *mri_src, MRI *mri_dst, int niter) {
   int i, j, k, di, dj, dk, m, n, u, ws2 = 2, maxi, mini, wsize, width, height,
                                     depth;
-  float numvox, numnz, numz, probably_white;
-  float f, f2, a, b, c, s;
+  float  numvox, numnz, numz, probably_white;
+  float  f, f2, a, b, c, s;
   double sum2, sum, var, avg, tvar, maxvar, minvar;
   double sum2v[MAXLEN], sumv[MAXLEN], avgv[MAXLEN], varv[MAXLEN], nv[MAXLEN],
       tlaplacian, laplacian;
   float cfrac;
-  MRI *mri_tmp;
+  MRI * mri_tmp;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, NULL);
 
   mri_tmp = MRIcopy(mri_src, NULL);
 
-  cfrac = DEFAULT_FRAC;
+  cfrac          = DEFAULT_FRAC;
   probably_white = (white_lolim + gray_hilim) / 2.0;
   /*
     printf("plane_filter(%d)\n",niter);
@@ -280,15 +280,15 @@ static MRI *plane_filter(MRI *mri_src, MRI *mri_dst, int niter) {
              (numz >= (DEFAULT_FRAC) * (wsize * wsize)) &&
              (MRIvox(mri_tmp, j, i, k) <= gray_hilim))) {
           tlaplacian = laplacian = 0.0;
-          maxvar = -1000000;
-          minvar = 1000000;
+          maxvar                 = -1000000;
+          minvar                 = 1000000;
           maxi = mini = -1;
           for (m = 0; m < ncor; m++) /* for each orientation */
           {
             /* (a,b,c) is normal (orientation) vector */
-            a = xcor[m];
-            b = ycor[m];
-            c = zcor[m];
+            a   = xcor[m];
+            b   = ycor[m];
+            c   = zcor[m];
             sum = sum2 = n = 0;
             for (u = 0; u < wsize; u++)
               sumv[u] = sum2v[u] = nv[u] = 0;
@@ -310,15 +310,15 @@ static MRI *plane_filter(MRI *mri_src, MRI *mri_dst, int niter) {
                   sum2 += f * f;
                   sum += f;
                 }
-            avg = sum / n;
-            var = sum2 / n - avg * avg; /* total mean and variance */
+            avg  = sum / n;
+            var  = sum2 / n - avg * avg; /* total mean and variance */
             tvar = 0;
             if (central_plane) /* only consider variance in central plane */
             {
-              u = ws2;
-              avgv[u] = sumv[u] / nv[u];
-              varv[u] = sum2v[u] / nv[u] - avgv[u] * avgv[u];
-              tvar = varv[u];
+              u          = ws2;
+              avgv[u]    = sumv[u] / nv[u];
+              varv[u]    = sum2v[u] / nv[u] - avgv[u] * avgv[u];
+              tvar       = varv[u];
               tlaplacian = 0.0f; /* only doing central plane - no laplacian */
             } else               /* variance in all planes in stack */
             {
@@ -340,11 +340,11 @@ static MRI *plane_filter(MRI *mri_src, MRI *mri_dst, int niter) {
             }
             if (tvar > maxvar) {
               maxvar = tvar;
-              maxi = m;
+              maxi   = m;
             }
             if (tvar < minvar) {
-              minvar = tvar;
-              mini = m;
+              minvar    = tvar;
+              mini      = m;
               laplacian = tlaplacian;
             }
           }
@@ -392,9 +392,9 @@ static MRI *plane_filter(MRI *mri_src, MRI *mri_dst, int niter) {
           for (dk = -ws2; dk <= ws2; dk++)
             for (di = -ws2; di <= ws2; di++)
               for (dj = -ws2; dj <= ws2; dj++) {
-                f = MRIvox(mri_src, j + dj, i + di, k + dk);
+                f  = MRIvox(mri_src, j + dj, i + di, k + dk);
                 f2 = MRIvox(mri_dst, j + dj, i + di, k + dk);
-                s = dk * c + di * b + dj * a;
+                s  = dk * c + di * b + dj * a;
                 if (fabs(s) <= 0.5) /* in central plane */
                 {
                   numvox++;
@@ -410,7 +410,7 @@ static MRI *plane_filter(MRI *mri_src, MRI *mri_dst, int niter) {
             sum /= numnz;
           if (numvox != 0)
             sum2 /= numvox;
-          f = MRIvox(mri_src, j, i, k);
+          f  = MRIvox(mri_src, j, i, k);
           f2 = MRIvox(mri_tmp, j, i, k);
           /*
             printf("%d %d %d %d %f\n",
@@ -480,7 +480,7 @@ static void print_help(void) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -506,15 +506,15 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "only using planes through origin\n");
   } else if (!strcmp(option, "wlo")) {
     white_lolim = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "using white lolim %2.1f\n", white_lolim);
   } else if (!strcmp(option, "ghi")) {
     gray_hilim = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     fprintf(stderr, "using gray hilim %2.1f\n", gray_hilim);
   } else if (!strcmp(option, "whi")) {
     white_hilim = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "using white hilim %2.1f\n", white_hilim);
   } else
     switch (toupper(*option)) {

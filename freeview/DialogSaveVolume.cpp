@@ -23,9 +23,9 @@
  */
 #include "DialogSaveVolume.h"
 #include "ui_DialogSaveVolume.h"
-#include <QMessageBox>
-#include <QFileDialog>
 #include <QFile>
+#include <QFileDialog>
+#include <QMessageBox>
 
 DialogSaveVolume::DialogSaveVolume(QWidget *parent, const QString &filepath)
     : QDialog(parent), ui(new Ui::DialogSaveVolume) {

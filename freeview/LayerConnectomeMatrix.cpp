@@ -1,20 +1,20 @@
 #include "LayerConnectomeMatrix.h"
 #include "LayerMRI.h"
 #include "LayerPropertyConnectomeMatrix.h"
-#include <QDebug>
+#include "MyVTKUtils.h"
 #include "vtkActor.h"
-#include "vtkRenderer.h"
+#include "vtkPoints.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
+#include "vtkRenderer.h"
 #include "vtkSplineFilter.h"
 #include "vtkTubeFilter.h"
-#include "vtkPoints.h"
+#include <QDebug>
+#include <vtkBox.h>
 #include <vtkCellArray.h>
+#include <vtkCutter.h>
 #include <vtkPointData.h>
 #include <vtkProperty.h>
-#include <vtkBox.h>
-#include <vtkCutter.h>
-#include "MyVTKUtils.h"
 
 LayerConnectomeMatrix::LayerConnectomeMatrix(LayerMRI *ref, QObject *parent)
     : Layer(parent), m_mriRef(ref), m_mriParcel(NULL), m_cmat(NULL),
@@ -28,7 +28,7 @@ LayerConnectomeMatrix::LayerConnectomeMatrix(LayerMRI *ref, QObject *parent)
   connect(p, SIGNAL(SplineColorChanged()), this, SLOT(UpdateSplineColor()));
 
   m_actorSplines = vtkSmartPointer<vtkActor>::New();
-  QColor c = p->GetSplineColor();
+  QColor c       = p->GetSplineColor();
   m_actorSplines->GetProperty()->SetColor(c.redF(), c.greenF(), c.blueF());
   for (int i = 0; i < 3; i++) {
     m_actorSlice[i] = vtkSmartPointer<vtkActor>::New();
@@ -49,7 +49,7 @@ void LayerConnectomeMatrix::SetColorTable(COLOR_TABLE *ctab) { m_ctab = ctab; }
 bool LayerConnectomeMatrix::LoadFromFile(const QString &fn_cmat,
                                          const QString &fn_parcel) {
   if (!m_ctab) {
-    cerr << "Did not set color table. Abort loading.";
+    std::cerr << "Did not set color table. Abort loading.";
     return false;
   }
 
@@ -58,7 +58,8 @@ bool LayerConnectomeMatrix::LoadFromFile(const QString &fn_cmat,
     ::CMATfree(&m_cmat);
   m_cmat = ::CMATread(qPrintable(fn_cmat));
   if (!m_cmat) {
-    cerr << "Could not load CMAT file " << qPrintable(fn_cmat) << endl;
+    std::cerr << "Could not load CMAT file " << qPrintable(fn_cmat)
+              << std::endl;
     return false;
   }
   m_listLabels.clear();
@@ -71,8 +72,8 @@ bool LayerConnectomeMatrix::LoadFromFile(const QString &fn_cmat,
   m_mriParcel = new LayerMRI(m_mriRef);
   m_mriParcel->SetFileName(fn_parcel);
   if (!m_mriParcel->LoadVolumeFromFile()) {
-    cerr << "Could not load parcellation file " << qPrintable(fn_parcel)
-         << endl;
+    std::cerr << "Could not load parcellation file " << qPrintable(fn_parcel)
+              << std::endl;
     delete m_mriParcel;
     m_mriParcel = NULL;
     ::CMATfree(&m_cmat);
@@ -85,7 +86,7 @@ bool LayerConnectomeMatrix::LoadFromFile(const QString &fn_cmat,
 
   // update label coords to target coords
   double pt[3];
-  bool bVoxelCoords = (m_cmat->coords == LABEL_COORDS_VOXEL);
+  bool   bVoxelCoords = (m_cmat->coords == LABEL_COORDS_VOXEL);
   for (int i = 0; i < m_cmat->nlabels; i++) {
     for (int j = 0; j < m_cmat->nlabels; j++) {
       LABEL *label = m_cmat->splines[i][j];
@@ -113,7 +114,7 @@ bool LayerConnectomeMatrix::LoadFromFile(const QString &fn_cmat,
 
 void LayerConnectomeMatrix::BuildLabelActors() {
   for (int i = 0; i < m_listLabels.size(); i++) {
-    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+    vtkSmartPointer<vtkActor>          actor = vtkSmartPointer<vtkActor>::New();
     vtkSmartPointer<vtkPolyDataMapper> mapper =
         vtkSmartPointer<vtkPolyDataMapper>::New();
     actor->SetMapper(mapper);
@@ -161,7 +162,7 @@ void LayerConnectomeMatrix::Append2DProps(vtkRenderer *renderer, int nPlane) {
 }
 
 void LayerConnectomeMatrix::Append3DProps(vtkRenderer *renderer,
-                                          bool *bPlaneVisibility) {
+                                          bool *       bPlaneVisibility) {
   Q_UNUSED(bPlaneVisibility);
   renderer->AddViewProp(m_actorSplines);
   for (int i = 0; i < m_listLabels.size(); i++)
@@ -250,9 +251,9 @@ void LayerConnectomeMatrix::RebuildSplineActors() {
     return;
   }
 
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-  int nCount = 0;
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
+  int                           nCount = 0;
   for (int i = 0; i < m_cmat->nlabels; i++) {
     for (int j = 0; j < m_listFromLabelIndices.size(); j++) {
       int nFrom = m_listFromLabelIndices[j];
@@ -272,9 +273,9 @@ void LayerConnectomeMatrix::RebuildSplineActors() {
       }
     }
   }
-  double voxel_len = qMin(m_dWorldVoxelSize[0],
+  double                       voxel_len = qMin(m_dWorldVoxelSize[0],
                           qMin(m_dWorldVoxelSize[1], m_dWorldVoxelSize[2]));
-  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
+  vtkSmartPointer<vtkPolyData> polydata  = vtkSmartPointer<vtkPolyData>::New();
   polydata->SetPoints(points);
   polydata->SetLines(lines);
   vtkSmartPointer<vtkSplineFilter> spline =
@@ -305,10 +306,10 @@ void LayerConnectomeMatrix::RebuildSplineActors() {
   for (int i = 0; i < 3; i++) {
     vtkSmartPointer<vtkBox> box = vtkSmartPointer<vtkBox>::New();
 
-    double bound[6] = {worigin[0], worigin[0] + wsize[0],
+    double bound[6]  = {worigin[0], worigin[0] + wsize[0],
                        worigin[1], worigin[1] + wsize[1],
                        worigin[2], worigin[2] + wsize[2]};
-    bound[i * 2] = pos[i] - vsize[i] / 2;
+    bound[i * 2]     = pos[i] - vsize[i] / 2;
     bound[i * 2 + 1] = pos[i] + vsize[i] / 2;
     box->SetBounds(bound);
 

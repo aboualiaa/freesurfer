@@ -10,7 +10,7 @@ class TetrahedronInteriorIterator
     : public TetrahedronInteriorConstIterator<TPixel> {
 public:
   /** Standard class typedefs. */
-  using Self = TetrahedronInteriorIterator<TPixel>;
+  using Self       = TetrahedronInteriorIterator<TPixel>;
   using Superclass = TetrahedronInteriorConstIterator<TPixel>;
 
   /**
@@ -20,9 +20,9 @@ public:
    */
   /** Types inherited from the Superclass */
   using InternalPixelType = typename Superclass::InternalPixelType;
-  using PixelType = typename Superclass::PixelType;
-  using ImageType = typename Superclass::ImageType;
-  using PointType = typename Superclass::PointType;
+  using PixelType         = typename Superclass::PixelType;
+  using ImageType         = typename Superclass::ImageType;
+  using PointType         = typename Superclass::PointType;
 
   /** Constructor */
   TetrahedronInteriorIterator(ImageType *ptr, const PointType &p0,

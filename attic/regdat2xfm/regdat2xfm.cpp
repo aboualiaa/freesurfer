@@ -34,10 +34,8 @@
 #include "utils.h"
 const char *Progname = "regdat2xfm";
 
-using namespace std;
-
 void usage() {
-  cout << "regdat2xfm <srcvol> <targetvol> <regdat> <xfm>" << endl;
+  std::cout << "regdat2xfm <srcvol> <targetvol> <regdat> <xfm>" << std::endl;
 }
 
 MATRIX *getRAS2RegRAS(MRI *mri) {
@@ -68,12 +66,12 @@ int main(int argc, char *argv[]) {
   MRI *dst = MRIread(argv[2]);
   // get the mri2frmi
   MATRIX *regSrc2Dest = MatrixAlloc(4, 4, MATRIX_REAL);
-  int type = TransformFileNameType(argv[3]);
+  int     type        = TransformFileNameType(argv[3]);
   if (type == REGISTER_DAT) {
     FILE *fp = fopen(argv[3], "r");
     float r1, r2, r3, r4;
     char *cp;
-    char line[STRLEN];
+    char  line[STRLEN];
     cp = fgetl(line, 199, fp);
     cp = fgetl(line, 199, fp);
     cp = fgetl(line, 199, fp);
@@ -84,19 +82,19 @@ int main(int argc, char *argv[]) {
     *MATRIX_RELT(regSrc2Dest, 1, 2) = r2;
     *MATRIX_RELT(regSrc2Dest, 1, 3) = r3;
     *MATRIX_RELT(regSrc2Dest, 1, 4) = r4;
-    cp = fgetl(line, 199, fp);
+    cp                              = fgetl(line, 199, fp);
     sscanf(cp, "%f %f %f %f", &r1, &r2, &r3, &r4);
     *MATRIX_RELT(regSrc2Dest, 2, 1) = r1;
     *MATRIX_RELT(regSrc2Dest, 2, 2) = r2;
     *MATRIX_RELT(regSrc2Dest, 2, 3) = r3;
     *MATRIX_RELT(regSrc2Dest, 2, 4) = r4;
-    cp = fgetl(line, 199, fp);
+    cp                              = fgetl(line, 199, fp);
     sscanf(cp, "%f %f %f %f", &r1, &r2, &r3, &r4);
     *MATRIX_RELT(regSrc2Dest, 3, 1) = r1;
     *MATRIX_RELT(regSrc2Dest, 3, 2) = r2;
     *MATRIX_RELT(regSrc2Dest, 3, 3) = r3;
     *MATRIX_RELT(regSrc2Dest, 3, 4) = r4;
-    cp = fgetl(line, 199, fp);
+    cp                              = fgetl(line, 199, fp);
     sscanf(cp, "%f %f %f %f", &r1, &r2, &r3, &r4);
     *MATRIX_RELT(regSrc2Dest, 4, 1) = r1;
     *MATRIX_RELT(regSrc2Dest, 4, 2) = r2;
@@ -105,9 +103,9 @@ int main(int argc, char *argv[]) {
     fclose(fp);
   }
   // get ras2RegRAS
-  MATRIX *ras2RegRAS = getRAS2RegRAS(src);
+  MATRIX *ras2RegRAS  = getRAS2RegRAS(src);
   MATRIX *ras2RegRAS2 = getRAS2RegRAS(dst);
-  MATRIX *regRAS2RAS = MatrixInverse(ras2RegRAS2, NULL);
+  MATRIX *regRAS2RAS  = MatrixInverse(ras2RegRAS2, NULL);
 
   //       src  ->  RAS
   //        |1       |
@@ -121,7 +119,7 @@ int main(int argc, char *argv[]) {
   //        V        V
   //       dst  ->  RAS
   //////////////////////////////////////////
-  MATRIX *tmp = MatrixMultiply(regSrc2Dest, ras2RegRAS, NULL);
+  MATRIX *tmp     = MatrixMultiply(regSrc2Dest, ras2RegRAS, NULL);
   MATRIX *ras2RAS = MatrixMultiply(regRAS2RAS, tmp, NULL);
 
   MatrixFree(&regSrc2Dest);

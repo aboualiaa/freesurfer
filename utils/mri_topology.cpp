@@ -33,7 +33,7 @@
 #include "mrisutils.h"
 #include "proto.h" // nint
 
-#define TMP 100
+#define TMP      100
 #define MAX_COMP 10 // maximum number of components in a Nbh
 
 //////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ int associatedConnectivity(int connectivity) {
 }
 
 Nbh *loadNbh(MRI *mri, Nbh *nbh_dst, int i, int j, int k, int label) {
-  int a, b, c;
+  int  a, b, c;
   Nbh *nbh;
 
   if (!nbh_dst)
@@ -110,7 +110,7 @@ Nbh *loadNbh(MRI *mri, Nbh *nbh_dst, int i, int j, int k, int label) {
 }
 
 Nbh *loadSNbh(MRI *mri, Nbh *nbh_dst, int i, int j, int k, int label) {
-  int a, b, c;
+  int  a, b, c;
   Nbh *nbh;
 
   if (!nbh_dst)
@@ -130,7 +130,7 @@ Nbh *loadSNbh(MRI *mri, Nbh *nbh_dst, int i, int j, int k, int label) {
 }
 
 Nbh *N_6_1(Nbh *nbh_src, Nbh *nbh_dst) {
-  int i, j, k;
+  int  i, j, k;
   Nbh *nbh;
   if (!nbh_dst) {
     nbh = (Nbh *)calloc(1, sizeof(Nbh));
@@ -175,7 +175,7 @@ Nbh *N_6_1(Nbh *nbh_src, Nbh *nbh_dst) {
 }
 
 Nbh *N_6_2(Nbh *nbh_src, Nbh *nbh_dst) {
-  int i, j, k;
+  int  i, j, k;
   Nbh *nbh;
 
   nbh = N_6_1(nbh_src, nullptr);
@@ -229,7 +229,7 @@ Nbh *N_6_2(Nbh *nbh_src, Nbh *nbh_dst) {
 }
 
 Nbh *N_6_3(Nbh *nbh_src, Nbh *nbh_dst) {
-  int i, j, k;
+  int  i, j, k;
   Nbh *nbh;
 
   nbh = N_6_2(nbh_src, nullptr);
@@ -296,7 +296,7 @@ Nbh *N_6_3(Nbh *nbh_src, Nbh *nbh_dst) {
 }
 
 Nbh *N_18_1(Nbh *nbh_src, Nbh *nbh_dst) {
-  int i, j, k;
+  int  i, j, k;
   Nbh *nbh;
 
   if (!nbh_dst)
@@ -329,7 +329,7 @@ Nbh *N_18_1(Nbh *nbh_src, Nbh *nbh_dst) {
 }
 
 Nbh *N_18_2(Nbh *nbh_src, Nbh *nbh_dst) {
-  int i, j, k;
+  int  i, j, k;
   Nbh *nbh;
 
   nbh = N_18_1(nbh_src, nullptr);
@@ -404,7 +404,7 @@ Nbh *N_18_2(Nbh *nbh_src, Nbh *nbh_dst) {
 }
 
 Nbh *N_26_1(Nbh *nbh_src, Nbh *nbh_dst) {
-  int i, j, k;
+  int  i, j, k;
   Nbh *nbh;
 
   if (!nbh_dst)
@@ -552,7 +552,7 @@ int checkTn(Nbh *nbh_src, Nbh *nbh_dst, int connectivity) {
             for (ct = 1; comp_table[ct] && ct < MAX_COMP; ct++)
               ;
             (*nbh)[i][j][k] = ct + 1; // label the new basin
-            comp_table[ct] = 1;       // note that this number is taken
+            comp_table[ct]  = 1;      // note that this number is taken
           } else {
             min_val = MAX_COMP + 1;
 
@@ -563,7 +563,7 @@ int checkTn(Nbh *nbh_src, Nbh *nbh_dst, int connectivity) {
                 break;
               }
 
-            (*nbh)[i][j][k] = min_val + 1;
+            (*nbh)[i][j][k]     = min_val + 1;
             comp_table[min_val] = 1;
 
             // merging of the other neighboring values into the smallest one
@@ -670,7 +670,7 @@ int checkWC(MRI *mri, int i0, int j0, int k0, int i1, int j1, int k1,
 
 Nbh *loadNbh2(unsigned char ***im, int x, int y, int z, int label) {
   Nbh *nbh = (Nbh *)malloc(sizeof(Nbh));
-  int i, j, k;
+  int  i, j, k;
 
   if (label == -1)
     for (k = -1; k < 2; k++)
@@ -694,7 +694,7 @@ Nbh *loadNbh2(unsigned char ***im, int x, int y, int z, int label) {
 
 Nbh *reverseNbh(Nbh *nbh_src, Nbh *nbh_dst) {
   Nbh *nbh;
-  int i, j, k;
+  int  i, j, k;
   if (nbh_dst)
     nbh = nbh_dst;
   else
@@ -719,35 +719,35 @@ Nbh *reverseNbh(Nbh *nbh_src, Nbh *nbh_dst) {
 ///////////////////////////////////////////////////////////////////////
 
 typedef struct Cell {
-  struct Cell *next, *previous;
-  int x, y, z;
+  struct Cell * next, *previous;
+  int           x, y, z;
   unsigned char type;
-  float prior;
-  float cost;
+  float         prior;
+  float         cost;
 } Cell;
 
 // for list(cell)
 #define BIN_NBR 10000
 
 #define NONSIMPLE 1
-#define SIMPLE 2
-#define UNKNOWN 3
-#define KNOWN 4
+#define SIMPLE    2
+#define UNKNOWN   3
+#define KNOWN     4
 
-#define MAXCELLS 10000
+#define MAXCELLS      10000
 #define MAXCOMPONENTS 1000
-#define MAXCOST 20.0f
+#define MAXCOST       20.0f
 
 #define NBR_OF_COMPTS 500
 
 // for initSegmentation (single_mode) and CorrectSegmentation (multiple_mode)
-#define SINGLE_MODE 0
+#define SINGLE_MODE   0
 #define MULTIPLE_MODE 1
 
 // flags for the segmentation
-#define BODY 1
-#define VISITED 3
-#define RESIDUE 2
+#define BODY     1
+#define VISITED  3
+#define RESIDUE  2
 #define ISOLATED 4
 
 #define F_B 11
@@ -762,10 +762,10 @@ typedef struct Cell {
 #define DINTMIN 2
 #define DOUTMAX 10
 #define DOUTMIN 2
-#define PDMAX 1.0f
+#define PDMAX   1.0f
 
 // threshold for correcting the volume
-#define INITIAL_THRESHOLD 0.0
+#define INITIAL_THRESHOLD  0.0
 #define THRESHOLD_INCREASE 0.05
 
 // define the minimum probability (zero doesn't exist!)
@@ -775,40 +775,40 @@ typedef struct Cell {
 
 // define the minmax value
 #define MINMAX(a, b, c) MIN(a, MAX(b, c))
-#define PROB(x) MINMAX(MAXPROB, MINPROB, x)
+#define PROB(x)         MINMAX(MAXPROB, MINPROB, x)
 
 typedef struct {
-  int number_of_bins;
-  int reference_max_cell;
-  int ncells;
+  int    number_of_bins;
+  int    reference_max_cell;
+  int    ncells;
   Cell **sorting;
 
-  int width, height, depth;
+  int     width, height, depth;
   Cell ***table;
 } List;
 
 typedef struct ConnectedComponent {
   struct ConnectedComponent *next, *previous;
-  int ncells;
-  int maxcells;
-  Cell **cells;
-  float cost;
-  float map;
-  unsigned char found;
+  int                        ncells;
+  int                        maxcells;
+  Cell **                    cells;
+  float                      cost;
+  float                      map;
+  unsigned char              found;
 } ConnectedComponent;
 
 typedef struct SEGMENTATION {
-  int ncomponents;
-  int maxcomponents;
+  int                 ncomponents;
+  int                 maxcomponents;
   ConnectedComponent *components;
-  void *ccs;
+  void *              ccs;
 } SEGMENTATION;
 
 typedef struct CCSorting {
-  int number_of_bins;
-  int reference_max_component;
-  int ncomponents;
-  float maxcost;
+  int                  number_of_bins;
+  int                  reference_max_component;
+  int                  ncomponents;
+  float                maxcost;
   ConnectedComponent **sorting;
 
   SEGMENTATION *segmentation;
@@ -847,7 +847,7 @@ typedef struct TC_PARMS {
   float alpha, beta;
 
   // atlas and transformation information
-  GCA *gca;
+  GCA *      gca;
   TRANSFORM *transform;
 
   /*label that we want to segment*/
@@ -874,10 +874,10 @@ typedef struct TC_PARMS {
   /*dimensions for mri_bin, mri_dist, ...*/
   int width, height, depth;
 
-  List *list;
-  int current_label;
+  List *        list;
+  int           current_label;
   SEGMENTATION *segmentation;
-  CCS *ccs;
+  CCS *         ccs;
 
   // mode used (single region growing or multiple merging)
   int multiplemode;
@@ -894,33 +894,33 @@ typedef struct TC_PARMS {
 
   // the four segmentation and sorting (F_B,F_R,B_B,B_R)
   SEGMENTATION *F_Bseg, *F_Rseg, *B_Bseg, *B_Rseg;
-  CCS *F_Bccs, *F_Rccs, *B_Bccs, *B_Rccs;
+  CCS *         F_Bccs, *F_Rccs, *B_Bccs, *B_Rccs;
 
   // using priors
-  int priors;
+  int   priors;
   char *transform_fname;
   char *gca_fname;
 
 } TC_PARMS;
 
 static List *initList(int nbr_of_bins, int width, int height, int depth);
-static int listFree(List **list);
-static int addCell(List *list, Cell *new_cell);
-static int removeCell(List *list, Cell *old_cell);
+static int   listFree(List **list);
+static int   addCell(List *list, Cell *new_cell);
+static int   removeCell(List *list, Cell *old_cell);
 static float f(float x);
 
-static CCS *initCCS(int nbr_of_components, SEGMENTATION *segmentation);
-static int CCSfree(CCS **ccs);
-static int ccsSortComponents(CCS *ccs);
-static int removeComponent(CCS *ccs, ConnectedComponent *old_cpmt);
-static int addComponent(CCS *ccs, ConnectedComponent *new_component);
-static int reallocateComponent(ConnectedComponent *cc, int maxcells);
-static int reallocateSegmentation(SEGMENTATION *segmentation,
-                                  int maxcomponents);
-static int componentNew(SEGMENTATION *segmentation);
+static CCS *         initCCS(int nbr_of_components, SEGMENTATION *segmentation);
+static int           CCSfree(CCS **ccs);
+static int           ccsSortComponents(CCS *ccs);
+static int           removeComponent(CCS *ccs, ConnectedComponent *old_cpmt);
+static int           addComponent(CCS *ccs, ConnectedComponent *new_component);
+static int           reallocateComponent(ConnectedComponent *cc, int maxcells);
+static int           reallocateSegmentation(SEGMENTATION *segmentation,
+                                            int           maxcomponents);
+static int           componentNew(SEGMENTATION *segmentation);
 static SEGMENTATION *segmentationAlloc(int maxcomponents, int maxcells);
-static int segmentationFree(SEGMENTATION **segmentation);
-static int addCellToComponent(ConnectedComponent *cc, Cell *cell);
+static int           segmentationFree(SEGMENTATION **segmentation);
+static int           addCellToComponent(ConnectedComponent *cc, Cell *cell);
 
 #if 0
 static TC_PARMS *initTC_PARMS(void);
@@ -943,58 +943,58 @@ static TC_PARMS *initTC_PARMS(void)
 #endif
 static int TC_PARMSfree(TC_PARMS **parms);
 
-static void initImages(TC_PARMS *parms);
-static int initSegmentation(TC_PARMS *parms);
-static int mriChangeLabel(MRI *mri, int src, int dst);
-static int segmentBody(TC_PARMS *parms);
-static void CTExpansion(TC_PARMS *parms);
-static int initCCSSEG(TC_PARMS *parms);
-static int initCellsFromMap(TC_PARMS *parms);
-static int computeResidualSegmentation(TC_PARMS *parms);
-static int componentMerge(TC_PARMS *parms, int s0, int s1);
-static void SaveOrigMaps(TC_PARMS *parms);
+static void      initImages(TC_PARMS *parms);
+static int       initSegmentation(TC_PARMS *parms);
+static int       mriChangeLabel(MRI *mri, int src, int dst);
+static int       segmentBody(TC_PARMS *parms);
+static void      CTExpansion(TC_PARMS *parms);
+static int       initCCSSEG(TC_PARMS *parms);
+static int       initCellsFromMap(TC_PARMS *parms);
+static int       computeResidualSegmentation(TC_PARMS *parms);
+static int       componentMerge(TC_PARMS *parms, int s0, int s1);
+static void      SaveOrigMaps(TC_PARMS *parms);
 static TC_PARMS *initTC_PARMSfromMRITOPOLOGY_PARMS(MRI_TOPOLOGY_PARMS *parms);
 
 static List *initList(int nbr_of_bins, int width, int height, int depth) {
-  int k, i, j;
+  int   k, i, j;
   List *list;
   if (nbr_of_bins < 1)
     nbr_of_bins = BIN_NBR;
 
   list = (List *)calloc(1, sizeof(List));
 
-  list->width = width;
+  list->width  = width;
   list->height = height;
-  list->depth = depth;
-  list->table = (Cell ***)malloc(depth * sizeof(Cell **));
+  list->depth  = depth;
+  list->table  = (Cell ***)malloc(depth * sizeof(Cell **));
   for (k = 0; k < depth; k++) {
     list->table[k] = (Cell **)malloc(height * sizeof(Cell *));
     for (j = 0; j < height; j++) {
       list->table[k][j] = (Cell *)calloc(width, sizeof(Cell));
       for (i = 0; i < width; i++) {
         list->table[k][j][i].prior = -1;
-        list->table[k][j][i].cost = 0;
-        list->table[k][j][i].type = UNKNOWN;
-        list->table[k][j][i].x = i;
-        list->table[k][j][i].y = j;
-        list->table[k][j][i].z = k;
+        list->table[k][j][i].cost  = 0;
+        list->table[k][j][i].type  = UNKNOWN;
+        list->table[k][j][i].x     = i;
+        list->table[k][j][i].y     = j;
+        list->table[k][j][i].z     = k;
       }
     }
   }
 
   list->number_of_bins = nbr_of_bins;
-  list->sorting = (Cell **)calloc(nbr_of_bins, sizeof(Cell *));
+  list->sorting        = (Cell **)calloc(nbr_of_bins, sizeof(Cell *));
 
   return list;
 }
 
 static int listFree(List **list) {
-  int k, j, height, depth;
+  int   k, j, height, depth;
   List *l = *list;
-  *list = nullptr;
+  *list   = nullptr;
 
   height = l->height;
-  depth = l->depth;
+  depth  = l->depth;
 
   free(l->sorting);
   for (k = 0; k < depth; k++) {
@@ -1009,7 +1009,7 @@ static int listFree(List **list) {
 }
 
 static int removeCell(List *list, Cell *old_cell) {
-  int ref;
+  int   ref;
   Cell *ncell;
   float old_prior = old_cell->prior;
 
@@ -1039,7 +1039,7 @@ static int removeCell(List *list, Cell *old_cell) {
   }
 
   old_cell->previous = nullptr;
-  old_cell->next = nullptr;
+  old_cell->next     = nullptr;
 
   list->ncells--;
 
@@ -1048,7 +1048,7 @@ static int removeCell(List *list, Cell *old_cell) {
 
 static int addCell(List *list, Cell *new_cell) {
   Cell *cell, *pcell;
-  int ref;
+  int   ref;
   float new_prior = new_cell->prior;
 
   ref = (int)(new_prior * list->number_of_bins);
@@ -1058,28 +1058,28 @@ static int addCell(List *list, Cell *new_cell) {
   cell = list->sorting[ref];
   if (!cell) // new_cell will be the first and unique element of the list
   {
-    new_cell->next = nullptr;
+    new_cell->next     = nullptr;
     new_cell->previous = nullptr;
     list->sorting[ref] = new_cell;
   } else // find the correct location
   {
     if (new_prior > cell->prior) // must be the first element
     {
-      new_cell->next = cell;
+      new_cell->next     = cell;
       new_cell->previous = nullptr;
       list->sorting[ref] = new_cell;
-      cell->previous = new_cell;
+      cell->previous     = new_cell;
     } else // must find the correct location
     {      // in this case, we put the cell at the last correct location
       pcell = cell;
-      cell = cell->next;
+      cell  = cell->next;
       while ((cell != nullptr) && (cell->prior >= new_prior)) {
         pcell = cell;
-        cell = cell->next;
+        cell  = cell->next;
       }
-      new_cell->next = cell;
+      new_cell->next     = cell;
       new_cell->previous = pcell;
-      pcell->next = new_cell;
+      pcell->next        = new_cell;
       if (cell)
         cell->previous = new_cell;
     }
@@ -1101,7 +1101,7 @@ static CCS *initCCS(int nbr_of_bins, SEGMENTATION *segmentation) {
   ccs = (CCS *)calloc(1, sizeof(CCS));
 
   ccs->number_of_bins = nbr_of_bins;
-  ccs->segmentation = segmentation;
+  ccs->segmentation   = segmentation;
   ccs->sorting =
       (ConnectedComponent **)calloc(nbr_of_bins, sizeof(ConnectedComponent *));
   ccs->maxcost = MAXCOST;
@@ -1111,7 +1111,7 @@ static CCS *initCCS(int nbr_of_bins, SEGMENTATION *segmentation) {
 
 static int CCSfree(CCS **ccs) {
   CCS *c = *ccs;
-  *ccs = nullptr;
+  *ccs   = nullptr;
 
   free(c->sorting);
 
@@ -1120,12 +1120,12 @@ static int CCSfree(CCS **ccs) {
 }
 
 static int ccsSortComponents(CCS *ccs) {
-  int k;
+  int                 k;
   ConnectedComponent *cmpt;
 
   // reinit
   memset(ccs->sorting, 0, ccs->number_of_bins * sizeof(ConnectedComponent *));
-  ccs->ncomponents = 0;
+  ccs->ncomponents             = 0;
   ccs->reference_max_component = 0;
   // sort the different segments
   for (k = 0; k < ccs->segmentation->maxcomponents; k++) {
@@ -1138,9 +1138,9 @@ static int ccsSortComponents(CCS *ccs) {
 }
 
 static int removeComponent(CCS *ccs, ConnectedComponent *old_cmpt) {
-  int ref;
+  int                 ref;
   ConnectedComponent *ncmpt;
-  float old_cost = old_cmpt->cost;
+  float               old_cost = old_cmpt->cost;
 
   ref = (int)(old_cost * ccs->number_of_bins / ccs->maxcost);
   if (ref >= ccs->number_of_bins) // if cost==1!
@@ -1168,7 +1168,7 @@ static int removeComponent(CCS *ccs, ConnectedComponent *old_cmpt) {
   }
 
   old_cmpt->previous = nullptr;
-  old_cmpt->next = nullptr;
+  old_cmpt->next     = nullptr;
 
   ccs->ncomponents--;
 
@@ -1177,8 +1177,8 @@ static int removeComponent(CCS *ccs, ConnectedComponent *old_cmpt) {
 
 static int addComponent(CCS *ccs, ConnectedComponent *new_component) {
   ConnectedComponent *component, *pcomponent;
-  int ref;
-  float new_cost = new_component->cost;
+  int                 ref;
+  float               new_cost = new_component->cost;
 
   ref = (int)(new_cost * ccs->number_of_bins / ccs->maxcost);
   if (ref >= ccs->number_of_bins) // if cost==1!
@@ -1188,28 +1188,28 @@ static int addComponent(CCS *ccs, ConnectedComponent *new_component) {
   if (!component) // new_component will be the first and unique element of the
                   // ccs
   {
-    new_component->next = nullptr;
+    new_component->next     = nullptr;
     new_component->previous = nullptr;
-    ccs->sorting[ref] = new_component;
+    ccs->sorting[ref]       = new_component;
   } else // find the correct location
   {
     if (new_cost > component->cost) // must be the first element
     {
-      new_component->next = component;
+      new_component->next     = component;
       new_component->previous = nullptr;
-      ccs->sorting[ref] = new_component;
-      component->previous = new_component;
+      ccs->sorting[ref]       = new_component;
+      component->previous     = new_component;
     } else // must find the correct location
     {      // in this case, we put the component at the last correct location
       pcomponent = component;
-      component = component->next;
+      component  = component->next;
       while ((component != nullptr) && (component->cost >= new_cost)) {
         pcomponent = component;
-        component = component->next;
+        component  = component->next;
       }
-      new_component->next = component;
+      new_component->next     = component;
       new_component->previous = pcomponent;
-      pcomponent->next = new_component;
+      pcomponent->next        = new_component;
       if (component)
         component->previous = new_component;
     }
@@ -1224,7 +1224,7 @@ static int addComponent(CCS *ccs, ConnectedComponent *new_component) {
 }
 
 static int reallocateComponent(ConnectedComponent *cc, int maxcells) {
-  int k;
+  int    k;
   Cell **oldcells;
 
   if (maxcells <= 0)
@@ -1232,7 +1232,7 @@ static int reallocateComponent(ConnectedComponent *cc, int maxcells) {
 
   oldcells = cc->cells;
 
-  cc->cells = (Cell **)calloc(maxcells, sizeof(Cell *));
+  cc->cells    = (Cell **)calloc(maxcells, sizeof(Cell *));
   cc->maxcells = maxcells;
   for (k = 0; k < cc->ncells; k++)
     cc->cells[k] = oldcells[k];
@@ -1243,9 +1243,9 @@ static int reallocateComponent(ConnectedComponent *cc, int maxcells) {
 }
 
 static int reallocateSegmentation(SEGMENTATION *segmentation,
-                                  int maxcomponents) {
-  int k, n;
-  CCS *ccs;
+                                  int           maxcomponents) {
+  int                 k, n;
+  CCS *               ccs;
   ConnectedComponent *oldcc;
 
   oldcc = segmentation->components;
@@ -1253,7 +1253,7 @@ static int reallocateSegmentation(SEGMENTATION *segmentation,
   segmentation->components =
       (ConnectedComponent *)calloc(maxcomponents, sizeof(ConnectedComponent));
   for (k = 0; k < segmentation->maxcomponents; k++) {
-    segmentation->components[k].ncells = oldcc[k].ncells;
+    segmentation->components[k].ncells   = oldcc[k].ncells;
     segmentation->components[k].maxcells = oldcc[k].maxcells;
     for (n = 0; n < oldcc[k].ncells; n++)
       segmentation->components[k].cells[n] = oldcc[k].cells[n];
@@ -1298,27 +1298,27 @@ static int componentNew(SEGMENTATION *segmentation) {
 }
 
 static SEGMENTATION *segmentationAlloc(int maxcomponents, int maxcells) {
-  SEGMENTATION *segmentation;
+  SEGMENTATION *      segmentation;
   ConnectedComponent *cc;
-  int k;
+  int                 k;
 
-  segmentation = (SEGMENTATION *)calloc(1, sizeof(SEGMENTATION));
+  segmentation                = (SEGMENTATION *)calloc(1, sizeof(SEGMENTATION));
   segmentation->maxcomponents = maxcomponents;
-  segmentation->ncomponents = 0;
+  segmentation->ncomponents   = 0;
   segmentation->components =
       (ConnectedComponent *)calloc(maxcomponents, sizeof(ConnectedComponent));
   for (k = 0; k < maxcomponents; k++) {
-    cc = &segmentation->components[k];
+    cc           = &segmentation->components[k];
     cc->maxcells = maxcells;
-    cc->cells = (Cell **)calloc(maxcells, sizeof(Cell *));
-    cc->cost = -1.0;
+    cc->cells    = (Cell **)calloc(maxcells, sizeof(Cell *));
+    cc->cost     = -1.0;
   }
 
   return segmentation;
 }
 
 static int segmentationFree(SEGMENTATION **segmentation) {
-  int k;
+  int           k;
   SEGMENTATION *seg = *segmentation;
 
   if (!seg)
@@ -1336,8 +1336,8 @@ static int segmentationFree(SEGMENTATION **segmentation) {
 }
 
 static int initCCSSEG(TC_PARMS *parms) {
-  parms->segmentation = segmentationAlloc(MAXCOMPONENTS, MAXCELLS);
-  parms->ccs = initCCS(NBR_OF_COMPTS, parms->segmentation);
+  parms->segmentation      = segmentationAlloc(MAXCOMPONENTS, MAXCELLS);
+  parms->ccs               = initCCS(NBR_OF_COMPTS, parms->segmentation);
   parms->segmentation->ccs = parms->ccs;
   parms->ccs->segmentation = parms->segmentation;
   return NO_ERROR;
@@ -1345,7 +1345,7 @@ static int initCCSSEG(TC_PARMS *parms) {
 
 static int TC_PARMSfree(TC_PARMS **parms) {
   TC_PARMS *p = *parms;
-  *parms = nullptr;
+  *parms      = nullptr;
 
   if (p->list)
     listFree(&p->list);
@@ -1394,13 +1394,13 @@ static int TC_PARMSfree(TC_PARMS **parms) {
 
 static void setBorderValueToSegmentation(TC_PARMS *parms, int s, int dst) {
   SEGMENTATION *segmentation = parms->segmentation;
-  Cell ***table = parms->list->table;
-  int i, j, k;
-  int width, height, depth;
+  Cell ***      table        = parms->list->table;
+  int           i, j, k;
+  int           width, height, depth;
 
-  width = parms->mri_bin->width;
+  width  = parms->mri_bin->width;
   height = parms->mri_bin->height;
-  depth = parms->mri_bin->depth;
+  depth  = parms->mri_bin->depth;
 
   k = dst;
   for (i = dst; i < width - dst; i++)
@@ -1437,9 +1437,9 @@ static void setBorderValue(MRI *mri, int val, int dst) {
   int i, j, k;
   int width, height, depth;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   switch (mri->type) {
   case MRI_UCHAR:
@@ -1526,19 +1526,19 @@ static void setBorderValue(MRI *mri, int val, int dst) {
 static float f(float x) { return x; }
 
 static int initCellsFromMap(TC_PARMS *parms) {
-  int i, j, k;
-  int width, height, depth;
+  int   i, j, k;
+  int   width, height, depth;
   float cost, dval, val, pval, A, prior;
-  char fname[100];
-  MRI *mri_fprior = parms->mri_fprior, *mri_bprior = parms->mri_bprior,
+  char  fname[100];
+  MRI * mri_fprior = parms->mri_fprior, *mri_bprior = parms->mri_bprior,
       *mri_dist = parms->mri_dist, *mri_fcost = parms->mri_fcost,
       *mri_bcost = parms->mri_bcost;
-  Cell ***table = parms->list->table;
-  MRI *mri_c, *mri_prior;
+  Cell ***table  = parms->list->table;
+  MRI *   mri_c, *mri_prior;
 
-  width = mri_dist->width;
+  width  = mri_dist->width;
   height = mri_dist->height;
-  depth = mri_dist->depth;
+  depth  = mri_dist->depth;
 
   A = parms->alpha;
 
@@ -1547,10 +1547,10 @@ static int initCellsFromMap(TC_PARMS *parms) {
     for (k = 1; k < depth - 1; k++)
       for (j = 1; j < height - 1; j++)
         for (i = 1; i < width - 1; i++) {
-          dval = fabs(MRIFvox(mri_dist, i, j, k));
-          prior = dval;
-          cost = 1.0f;
-          table[k][j][i].cost = cost;
+          dval                 = fabs(MRIFvox(mri_dist, i, j, k));
+          prior                = dval;
+          cost                 = 1.0f;
+          table[k][j][i].cost  = cost;
           table[k][j][i].prior = prior;
         }
     break;
@@ -1558,7 +1558,7 @@ static int initCellsFromMap(TC_PARMS *parms) {
     for (k = 1; k < depth - 1; k++)
       for (j = 1; j < height - 1; j++)
         for (i = 1; i < width - 1; i++) {
-          val = MRIFvox(mri_dist, i, j, k);
+          val  = MRIFvox(mri_dist, i, j, k);
           dval = fabs(val);
           if (val > 0) // inside
           {
@@ -1581,22 +1581,22 @@ static int initCellsFromMap(TC_PARMS *parms) {
           }
 
           table[k][j][i].prior = prior;
-          table[k][j][i].cost = cost;
+          table[k][j][i].cost  = cost;
         }
     break;
   case MAP_MODE:
     for (k = 1; k < depth - 1; k++)
       for (j = 1; j < height - 1; j++)
         for (i = 1; i < width - 1; i++) {
-          val = MRIFvox(mri_dist, i, j, k);
+          val  = MRIFvox(mri_dist, i, j, k);
           dval = 0.5 * (1. + fabs(val));
           if (val > 0) // inside
           {
             prior = MRIFvox(mri_fprior, i, j, k);
-            cost = MRIFvox(mri_fcost, i, j, k);
+            cost  = MRIFvox(mri_fcost, i, j, k);
           } else {
             prior = MRIFvox(mri_bprior, i, j, k);
-            cost = MRIFvox(mri_bcost, i, j, k);
+            cost  = MRIFvox(mri_bcost, i, j, k);
           }
           if (prior >= (0.5 + 0.5 * tanh(0.1 * log(MAXPROB / MINPROB))))
             prior = prior * dval;
@@ -1604,14 +1604,14 @@ static int initCellsFromMap(TC_PARMS *parms) {
             prior = prior / 2.;
 
           table[k][j][i].prior = prior;
-          table[k][j][i].cost = cost;
+          table[k][j][i].cost  = cost;
         }
     break;
   case PROB_MAP_MODE:
     for (k = 1; k < depth - 1; k++)
       for (j = 1; j < height - 1; j++)
         for (i = 1; i < width - 1; i++) {
-          val = MRIFvox(mri_dist, i, j, k);
+          val  = MRIFvox(mri_dist, i, j, k);
           dval = fabs(val);
           if (val > 0) // inside
           {
@@ -1631,31 +1631,31 @@ static int initCellsFromMap(TC_PARMS *parms) {
               prior = prior / 2.;
           }
           table[k][j][i].prior = prior;
-          table[k][j][i].cost = cost;
+          table[k][j][i].cost  = cost;
         }
     break;
   default:
     for (k = 1; k < depth - 1; k++)
       for (j = 1; j < height - 1; j++)
         for (i = 1; i < width - 1; i++) {
-          val = MRIFvox(mri_dist, i, j, k);
-          dval = fabs(val);
-          cost = 0.5 * (1. + dval);
-          prior = dval;
+          val                  = MRIFvox(mri_dist, i, j, k);
+          dval                 = fabs(val);
+          cost                 = 0.5 * (1. + dval);
+          prior                = dval;
           table[k][j][i].prior = prior;
-          table[k][j][i].cost = cost;
+          table[k][j][i].cost  = cost;
         }
     break;
   }
 
   if (parms->mapsfname) {
-    mri_c = MRIalloc(width, height, depth, MRI_FLOAT);
+    mri_c     = MRIalloc(width, height, depth, MRI_FLOAT);
     mri_prior = MRIalloc(width, height, depth, MRI_FLOAT);
 
     for (k = 1; k < depth - 1; k++)
       for (j = 1; j < height - 1; j++)
         for (i = 1; i < width - 1; i++) {
-          MRIFvox(mri_c, i, j, k) = table[k][j][i].cost;
+          MRIFvox(mri_c, i, j, k)     = table[k][j][i].cost;
           MRIFvox(mri_prior, i, j, k) = table[k][j][i].prior;
         }
 
@@ -1676,22 +1676,22 @@ static int initCellsFromMap(TC_PARMS *parms) {
 }
 
 static void addBorderVoxels(TC_PARMS *parms, int dst) {
-  int i, j, k;
-  MRI *mri = parms->mri_bin;
-  int width, height, depth;
-  List *list = parms->list;
-  Cell *cell;
+  int     i, j, k;
+  MRI *   mri = parms->mri_bin;
+  int     width, height, depth;
+  List *  list = parms->list;
+  Cell *  cell;
   Cell ***table = parms->list->table;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   k = dst;
   for (i = dst; i < (width - dst); i++)
     for (j = dst; j < (height - dst); j++)
       if (nint(MRIgetVoxVal(mri, i, j, k, 0)) == RESIDUE) {
-        cell = &table[k][j][i];
+        cell       = &table[k][j][i];
         cell->type = UNKNOWN;
         addCell(list, cell);
         MRIsetVoxVal(mri, i, j, k, 0, VISITED);
@@ -1700,7 +1700,7 @@ static void addBorderVoxels(TC_PARMS *parms, int dst) {
   for (i = dst; i < (width - dst); i++)
     for (j = dst; j < (height - dst); j++)
       if (nint(MRIgetVoxVal(mri, i, j, k, 0)) == RESIDUE) {
-        cell = &table[k][j][i];
+        cell       = &table[k][j][i];
         cell->type = UNKNOWN;
         addCell(parms->list, cell);
         MRIsetVoxVal(mri, i, j, k, 0, VISITED);
@@ -1709,7 +1709,7 @@ static void addBorderVoxels(TC_PARMS *parms, int dst) {
   for (i = dst; i < (width - dst); i++)
     for (k = dst + 1; k < (depth - dst - 1); k++)
       if (nint(MRIgetVoxVal(mri, i, j, k, 0)) == RESIDUE) {
-        cell = &table[k][j][i];
+        cell       = &table[k][j][i];
         cell->type = UNKNOWN;
         addCell(parms->list, cell);
         MRIsetVoxVal(mri, i, j, k, 0, VISITED);
@@ -1718,7 +1718,7 @@ static void addBorderVoxels(TC_PARMS *parms, int dst) {
   for (i = dst; i < (width - dst); i++)
     for (k = dst + 1; k < (depth - dst - 1); k++)
       if (nint(MRIgetVoxVal(mri, i, j, k, 0)) == RESIDUE) {
-        cell = &table[k][j][i];
+        cell       = &table[k][j][i];
         cell->type = UNKNOWN;
         addCell(parms->list, cell);
         MRIsetVoxVal(mri, i, j, k, 0, VISITED);
@@ -1727,7 +1727,7 @@ static void addBorderVoxels(TC_PARMS *parms, int dst) {
   for (k = dst + 1; k < (depth - dst - 1); k++)
     for (j = dst + 1; j < (height - dst - 1); j++)
       if (nint(MRIgetVoxVal(mri, i, j, k, 0)) == RESIDUE) {
-        cell = &table[k][j][i];
+        cell       = &table[k][j][i];
         cell->type = UNKNOWN;
         addCell(parms->list, cell);
         MRIsetVoxVal(mri, i, j, k, 0, VISITED);
@@ -1736,7 +1736,7 @@ static void addBorderVoxels(TC_PARMS *parms, int dst) {
   for (k = dst + 1; k < (depth - dst - 1); k++)
     for (j = dst + 1; j < (height - dst - 1); j++)
       if (nint(MRIgetVoxVal(mri, i, j, k, 0)) == RESIDUE) {
-        cell = &table[k][j][i];
+        cell       = &table[k][j][i];
         cell->type = UNKNOWN;
         addCell(parms->list, cell);
         MRIsetVoxVal(mri, i, j, k, 0, VISITED);
@@ -1750,24 +1750,24 @@ static float computeMap(TC_PARMS *parms) {
       *mri_psi = parms->mri_prob, *mri_pcsi = parms->mri_cprob;
   double map;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   xinit = parms->region.x;
   yinit = parms->region.y;
   zinit = parms->region.z;
 
   nlabels = parms->nblabels;
-  tab = parms->labels;
+  tab     = parms->labels;
 
   map = 0;
   for (k = 2; k < depth - 2; k++)
     for (j = 2; j < height - 2; j++)
       for (i = 2; i < width - 2; i++) {
-        x = xinit + i - 2;
-        y = yinit + j - 2;
-        z = zinit + k - 2;
+        x   = xinit + i - 2;
+        y   = yinit + j - 2;
+        z   = zinit + k - 2;
         val = 1;
         for (n = 0; n < nlabels; n++)
           if (nint(MRIgetVoxVal(mri_seg, x, y, z, 0)) == tab[n])
@@ -1786,27 +1786,27 @@ static int computeNLabels(TC_PARMS *parms) {
   int width, height, depth, i, j, k, x, y, z, xinit, yinit, zinit, val, n,
       nlabels, *tab;
   MRI *mri_seg = parms->mri_seg, *mri = parms->mri_bin;
-  int nb, count;
+  int  nb, count;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   xinit = parms->region.x;
   yinit = parms->region.y;
   zinit = parms->region.z;
 
   nlabels = parms->nblabels;
-  tab = parms->labels;
+  tab     = parms->labels;
 
-  nb = 0;
+  nb    = 0;
   count = 0;
   for (k = 2; k < depth - 2; k++)
     for (j = 2; j < height - 2; j++)
       for (i = 2; i < width - 2; i++) {
-        x = xinit + i - 2;
-        y = yinit + j - 2;
-        z = zinit + k - 2;
+        x   = xinit + i - 2;
+        y   = yinit + j - 2;
+        z   = zinit + k - 2;
         val = 1;
         for (n = 0; n < nlabels; n++)
           if (nint(MRIgetVoxVal(mri_seg, x, y, z, 0)) == tab[n])
@@ -1833,16 +1833,16 @@ static int computeNLabels(TC_PARMS *parms) {
 }
 
 static void SmoothImage(MRI *mri, TC_PARMS *parms) {
-  MRI *mri_bin = parms->mri_bin, *mri_tmp;
-  int width, height, depth, i, j, k, a, b, c;
+  MRI * mri_bin = parms->mri_bin, *mri_tmp;
+  int   width, height, depth, i, j, k, a, b, c;
   float average, val;
 
   mri_tmp = MRIclone(mri, nullptr);
   MRIcopy(mri, mri_tmp);
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   for (k = 1; k < depth - 1; k++)
     for (j = 1; j < height - 1; j++)
@@ -1850,7 +1850,7 @@ static void SmoothImage(MRI *mri, TC_PARMS *parms) {
         if (nint(MRIgetVoxVal(mri_bin, i, j, k, 0)) == F_R) // inside the volume
         {
           average = 0;
-          val = 0.0f;
+          val     = 0.0f;
           for (a = -1; a < 2; a++)
             for (b = -1; b < 2; b++)
               for (c = -1; c < 2; c++)
@@ -1862,7 +1862,7 @@ static void SmoothImage(MRI *mri, TC_PARMS *parms) {
           MRIFvox(mri, i, j, k) = average / val;
         } else if (nint(MRIgetVoxVal(mri_bin, i, j, k, 0)) == B_R) {
           average = 0;
-          val = 0.0f;
+          val     = 0.0f;
           for (a = -1; a < 2; a++)
             for (b = -1; b < 2; b++)
               for (c = -1; c < 2; c++)
@@ -1885,23 +1885,23 @@ static double gauss(double x, double m, double v) {
 
 #define NLABELS 50
 static void initProb(TC_PARMS *parms) {
-  GCA *gca;
+  GCA *      gca;
   GCA_PRIOR *gcap;
-  GCA_NODE *gcan;
+  GCA_NODE * gcan;
   TRANSFORM *transform;
-  MRI *mri_orig = parms->mri_orig;
-  MRI *mri_prob = parms->mri_prob;
-  int label, width, height, depth, i, j, k, l, m, a, b, c, x, y, z;
-  int xinit, yinit, zinit, n, nlabels = parms->nblabels, *tab = parms->labels;
+  MRI *      mri_orig = parms->mri_orig;
+  MRI *      mri_prob = parms->mri_prob;
+  int        label, width, height, depth, i, j, k, l, m, a, b, c, x, y, z;
+  int   xinit, yinit, zinit, n, nlabels = parms->nblabels, *tab = parms->labels;
   float ps, pcs, pis, pi, psi, pcsi;
-  char fname[100];
-  MRI *mri_ps, *mri_pcs, *mri_pis, *mri_pi, *mri_psi, *mri_pcsi;
+  char  fname[100];
+  MRI * mri_ps, *mri_pcs, *mri_pis, *mri_pi, *mri_psi, *mri_pcsi;
   float intensity;
 
   double Ps1[NLABELS], Pis1[NLABELS], Psi1[NLABELS];
   double Ps2[NLABELS], Pis2[NLABELS], Psi2[NLABELS];
-  int nlabels1, nlabels2, Labels1[NLABELS], Labels2[NLABELS], test;
-  float maxp1, maxp2;
+  int    nlabels1, nlabels2, Labels1[NLABELS], Labels2[NLABELS], test;
+  float  maxp1, maxp2;
 
   if (!parms->priors)
     return;
@@ -1913,8 +1913,8 @@ static void initProb(TC_PARMS *parms) {
     gca = GCAread(parms->gca_fname);
     if (!gca) {
       fprintf(stderr, "\nIMPOSSIBLE TO READ GCA from %s", parms->gca_fname);
-      parms->alpha = 1.0f;
-      parms->beta = 1.0f;
+      parms->alpha  = 1.0f;
+      parms->beta   = 1.0f;
       parms->priors = 0;
       return;
     }
@@ -1930,28 +1930,28 @@ static void initProb(TC_PARMS *parms) {
         GCAfree(&gca);
       fprintf(stderr, "\nIMPOSSIBLE TO READ TRANSFORM from %s",
               parms->transform_fname);
-      parms->beta = 1.0f;
-      parms->alpha = 1.0f;
+      parms->beta   = 1.0f;
+      parms->alpha  = 1.0f;
       parms->priors = 0;
       return;
     }
     fprintf(stderr, "done");
   }
 
-  width = parms->width;
+  width  = parms->width;
   height = parms->height;
-  depth = parms->depth;
+  depth  = parms->depth;
 
   xinit = parms->region.x;
   yinit = parms->region.y;
   zinit = parms->region.z;
 
   if (parms->mapsfname) {
-    mri_ps = MRIalloc(width, height, depth, MRI_FLOAT);
-    mri_pcs = MRIalloc(width, height, depth, MRI_FLOAT);
-    mri_pis = MRIalloc(width, height, depth, MRI_FLOAT);
-    mri_pi = MRIalloc(width, height, depth, MRI_FLOAT);
-    mri_psi = MRIalloc(width, height, depth, MRI_FLOAT);
+    mri_ps   = MRIalloc(width, height, depth, MRI_FLOAT);
+    mri_pcs  = MRIalloc(width, height, depth, MRI_FLOAT);
+    mri_pis  = MRIalloc(width, height, depth, MRI_FLOAT);
+    mri_pi   = MRIalloc(width, height, depth, MRI_FLOAT);
+    mri_psi  = MRIalloc(width, height, depth, MRI_FLOAT);
     mri_pcsi = MRIalloc(width, height, depth, MRI_FLOAT);
   }
 
@@ -1967,19 +1967,19 @@ static void initProb(TC_PARMS *parms) {
         GCAsourceVoxelToPrior(gca, mri_orig, transform, x, y, z, &a, &b, &c);
         gcap = &gca->priors[a][b][c];
         GCAsourceVoxelToNode(gca, mri_orig, transform, x, y, z, &a, &b, &c);
-        gcan = &gca->nodes[a][b][c];
+        gcan      = &gca->nodes[a][b][c];
         intensity = (float)MRIgetVoxVal(mri_orig, x, y, z, 0);
 
         nlabels1 = nlabels2 = 0;
         // compute prior prob
         maxp1 = maxp2 = 0;
         for (l = 0; l < gcap->nlabels; l++) {
-          test = 1;
+          test  = 1;
           label = gcap->labels[l];
           for (n = 0; n < nlabels; n++)
             if (tab[n] == label) {
               Labels1[nlabels1] = label;
-              Ps1[nlabels1] = gcap->priors[l];
+              Ps1[nlabels1]     = gcap->priors[l];
               nlabels1++;
               test = 0;
               if (gcap->priors[l] > maxp1)
@@ -1987,13 +1987,13 @@ static void initProb(TC_PARMS *parms) {
             }
           if (test) {
             Labels2[nlabels2] = label;
-            Ps2[nlabels2] = gcap->priors[l];
+            Ps2[nlabels2]     = gcap->priors[l];
             nlabels2++;
             if (gcap->priors[l] > maxp2)
               maxp2 = gcap->priors[l];
           }
         }
-        ps = maxp1;
+        ps  = maxp1;
         pcs = maxp2;
         // compute p(i|s)
         maxp1 = 0;
@@ -2035,26 +2035,26 @@ static void initProb(TC_PARMS *parms) {
           if (Psi2[l] > maxp2)
             maxp2 = Psi2[l];
         }
-        psi = maxp1;
+        psi  = maxp1;
         pcsi = maxp2;
 
         if (!nlabels) {
-          psi = 0;
+          psi  = 0;
           pcsi = 1;
         }
 
-        psi = PROB(psi);
+        psi  = PROB(psi);
         pcsi = PROB(pcsi);
 
-        MRIFvox(mri_prob, i + 1, j + 1, k + 1) = psi;
+        MRIFvox(mri_prob, i + 1, j + 1, k + 1)         = psi;
         MRIFvox(parms->mri_cprob, i + 1, j + 1, k + 1) = pcsi;
 
         if (parms->mapsfname) {
-          MRIFvox(mri_ps, i + 1, j + 1, k + 1) = ps;
-          MRIFvox(mri_pcs, i + 1, j + 1, k + 1) = pcs;
-          MRIFvox(mri_pis, i + 1, j + 1, k + 1) = pis;
-          MRIFvox(mri_pi, i + 1, j + 1, k + 1) = pi;
-          MRIFvox(mri_psi, i + 1, j + 1, k + 1) = psi;
+          MRIFvox(mri_ps, i + 1, j + 1, k + 1)   = ps;
+          MRIFvox(mri_pcs, i + 1, j + 1, k + 1)  = pcs;
+          MRIFvox(mri_pis, i + 1, j + 1, k + 1)  = pis;
+          MRIFvox(mri_pi, i + 1, j + 1, k + 1)   = pi;
+          MRIFvox(mri_psi, i + 1, j + 1, k + 1)  = psi;
           MRIFvox(mri_pcsi, i + 1, j + 1, k + 1) = pcsi;
         }
       }
@@ -2094,21 +2094,21 @@ static void initProb(TC_PARMS *parms) {
 }
 
 static void initCostMaps(TC_PARMS *parms) {
-  int i, j, k, width, depth, height;
+  int  i, j, k, width, depth, height;
   MRI *mri = parms->mri_bin, *mri_fcost, *mri_bcost, *mri_psi, *mri_pcsi,
       *mri_dist;
   char fname[100];
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
-  mri_fcost = MRIalloc(width, height, depth, MRI_FLOAT);
+  mri_fcost        = MRIalloc(width, height, depth, MRI_FLOAT);
   parms->mri_fcost = mri_fcost;
-  mri_bcost = MRIalloc(width, height, depth, MRI_FLOAT);
+  mri_bcost        = MRIalloc(width, height, depth, MRI_FLOAT);
   parms->mri_bcost = mri_bcost;
 
-  mri_psi = parms->mri_prob;
+  mri_psi  = parms->mri_prob;
   mri_pcsi = parms->mri_cprob;
   mri_dist = parms->mri_dist;
 
@@ -2168,21 +2168,21 @@ static void initCostMaps(TC_PARMS *parms) {
 }
 
 static void initPriorMaps(TC_PARMS *parms) {
-  int i, j, k, width, depth, height;
+  int  i, j, k, width, depth, height;
   MRI *mri = parms->mri_bin, *mri_dist = parms->mri_dist, *mri_fprior,
       *mri_bprior, *mri_psi, *mri_pcsi;
   char fname[100];
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
-  mri_fprior = MRIalloc(width, height, depth, MRI_FLOAT);
+  mri_fprior        = MRIalloc(width, height, depth, MRI_FLOAT);
   parms->mri_fprior = mri_fprior;
-  mri_bprior = MRIalloc(width, height, depth, MRI_FLOAT);
+  mri_bprior        = MRIalloc(width, height, depth, MRI_FLOAT);
   parms->mri_bprior = mri_bprior;
 
-  mri_psi = parms->mri_prob;
+  mri_psi  = parms->mri_prob;
   mri_pcsi = parms->mri_cprob;
 
   switch (parms->costmode) {
@@ -2227,23 +2227,23 @@ static void initPriorMaps(TC_PARMS *parms) {
 }
 
 static void guessSegmentation(TC_PARMS *parms) {
-  GCA *gca;
+  GCA *      gca;
   GCA_PRIOR *gcap;
-  GCA_NODE *gcan;
+  GCA_NODE * gcan;
   TRANSFORM *transform;
-  MRI *mri_orig = parms->mri_orig;
-  MRI *mri_seg;
-  int width, height, depth, i, j, k, l, m, a, b, c, x, y, z, label;
-  int xmin, ymin, zmin, xmax, ymax, zmax;
-  float ps, pi, psi, pcsi;
+  MRI *      mri_orig = parms->mri_orig;
+  MRI *      mri_seg;
+  int        width, height, depth, i, j, k, l, m, a, b, c, x, y, z, label;
+  int        xmin, ymin, zmin, xmax, ymax, zmax;
+  float      ps, pi, psi, pcsi;
   // float pcs, pis;
   float intensity;
 
   double Ps1[NLABELS], Pis1[NLABELS], Psi1[NLABELS];
   double Ps2[NLABELS], Pis2[NLABELS], Psi2[NLABELS];
-  int nlabels = parms->nblabels, *tab = parms->labels, Labels1[NLABELS],
+  int    nlabels = parms->nblabels, *tab = parms->labels, Labels1[NLABELS],
       Labels2[NLABELS];
-  int nlabels1, nlabels2, test, n, val;
+  int   nlabels1, nlabels2, test, n, val;
   float maxp1, maxp2;
 
   if (!parms->priors)
@@ -2271,9 +2271,9 @@ static void guessSegmentation(TC_PARMS *parms) {
     }
   }
 
-  width = mri_orig->width;
+  width  = mri_orig->width;
   height = mri_orig->height;
-  depth = mri_orig->depth;
+  depth  = mri_orig->depth;
 
   mri_seg = MRIalloc(width, height, depth, MRI_UCHAR);
 
@@ -2322,19 +2322,19 @@ static void guessSegmentation(TC_PARMS *parms) {
         GCAsourceVoxelToPrior(gca, mri_orig, transform, x, y, z, &a, &b, &c);
         gcap = &gca->priors[a][b][c];
         GCAsourceVoxelToNode(gca, mri_orig, transform, x, y, z, &a, &b, &c);
-        gcan = &gca->nodes[a][b][c];
+        gcan      = &gca->nodes[a][b][c];
         intensity = (float)MRIgetVoxVal(mri_orig, x, y, z, 0);
 
         nlabels1 = nlabels2 = 0;
         // compute prior prob
         maxp1 = maxp2 = 0;
         for (l = 0; l < gcap->nlabels; l++) {
-          test = 1;
+          test  = 1;
           label = gcap->labels[l];
           for (n = 0; n < nlabels; n++)
             if (tab[n] == label) {
               Labels1[nlabels1] = label;
-              Ps1[nlabels1] = gcap->priors[l];
+              Ps1[nlabels1]     = gcap->priors[l];
               nlabels1++;
               test = 0;
               if (gcap->priors[l] > maxp1)
@@ -2342,7 +2342,7 @@ static void guessSegmentation(TC_PARMS *parms) {
             }
           if (test) {
             Labels2[nlabels2] = label;
-            Ps2[nlabels2] = gcap->priors[l];
+            Ps2[nlabels2]     = gcap->priors[l];
             nlabels2++;
             if (gcap->priors[l] > maxp2)
               maxp2 = gcap->priors[l];
@@ -2380,11 +2380,11 @@ static void guessSegmentation(TC_PARMS *parms) {
 
         // compute p(s|i)
         maxp1 = maxp2 = 0;
-        val = 0;
+        val           = 0;
         for (l = 0; l < nlabels1; l++) {
           Psi1[l] = Pis1[l] * Ps1[l] / pi;
           if (Psi1[l] > maxp1) {
-            val = Labels1[l];
+            val   = Labels1[l];
             maxp1 = Psi1[l];
           }
         }
@@ -2393,15 +2393,15 @@ static void guessSegmentation(TC_PARMS *parms) {
           if (Psi2[l] > maxp2)
             maxp2 = Psi2[l];
         }
-        psi = maxp1;
+        psi  = maxp1;
         pcsi = maxp2;
 
         if (!nlabels) {
-          psi = 0;
+          psi  = 0;
           pcsi = 1;
         }
 
-        psi = PROB(psi);
+        psi  = PROB(psi);
         pcsi = PROB(pcsi);
 
         if (psi > pcsi)
@@ -2417,12 +2417,12 @@ static void guessSegmentation(TC_PARMS *parms) {
 }
 
 static void initImages(TC_PARMS *parms) {
-  int i, j, k, width, depth, height, xinit, yinit, zinit, a, b, c;
-  MRI *mri, *mri_bin, *mri_dist, *mri_prob, *mri_cprob, *mri_labeled;
-  int changed, con, sum, absval, val;
-  int max_dist_int, max_dist_out;
+  int   i, j, k, width, depth, height, xinit, yinit, zinit, a, b, c;
+  MRI * mri, *mri_bin, *mri_dist, *mri_prob, *mri_cprob, *mri_labeled;
+  int   changed, con, sum, absval, val;
+  int   max_dist_int, max_dist_out;
   float fval;
-  int count, nlabels, n;
+  int   count, nlabels, n;
 
   nlabels = parms->nblabels;
 
@@ -2437,9 +2437,9 @@ static void initImages(TC_PARMS *parms) {
 
   mri = parms->mri_seg;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   count = 0;
   // find region and extract MRI
@@ -2474,13 +2474,13 @@ static void initImages(TC_PARMS *parms) {
   parms->region.dx -= parms->region.x;
 
   // allocate and init binary volume
-  width = parms->region.dx + 5;
+  width  = parms->region.dx + 5;
   height = parms->region.dy + 5;
-  depth = parms->region.dz + 5;
+  depth  = parms->region.dz + 5;
 
-  parms->width = width;
+  parms->width  = width;
   parms->height = height;
-  parms->depth = depth;
+  parms->depth  = depth;
 
   if (parms->verbose_mode) {
     fprintf(stderr, "\n   %d voxels - image size %d * %d * %d", count, width,
@@ -2488,7 +2488,7 @@ static void initImages(TC_PARMS *parms) {
   }
 
   parms->mri_bin = MRIalloc(width, height, depth, MRI_UCHAR);
-  mri_bin = parms->mri_bin;
+  mri_bin        = parms->mri_bin;
 
   xinit = parms->region.x;
   yinit = parms->region.y;
@@ -2509,7 +2509,7 @@ static void initImages(TC_PARMS *parms) {
 
   // allocate and init dist map volume
   parms->mri_dist = MRIalloc(width, height, depth, MRI_FLOAT);
-  mri_dist = parms->mri_dist;
+  mri_dist        = parms->mri_dist;
   for (k = 1; k < depth - 1; k++)
     for (j = 1; j < height - 1; j++)
       for (i = 1; i < width - 1; i++) {
@@ -2522,7 +2522,7 @@ static void initImages(TC_PARMS *parms) {
           MRIFvox(mri_dist, i, j, k) = 0.0f;
       }
 
-  changed = 1;
+  changed      = 1;
   max_dist_int = 0;
   max_dist_out = 0;
   while (changed) {
@@ -2535,7 +2535,7 @@ static void initImages(TC_PARMS *parms) {
           if (nint(MRIgetVoxVal(mri_bin, i, j, k, 0)) ==
               F_R) // inside the volume
           {
-            con = associatedConnectivity(parms->f_c);
+            con    = associatedConnectivity(parms->f_c);
             absval = 1000;
             for (a = -1; a < 2; a++)
               for (b = -1; b < 2; b++)
@@ -2551,14 +2551,14 @@ static void initImages(TC_PARMS *parms) {
                 }
             if (absval != 1000) {
               MRIFvox(mri_dist, i, j, k) = absval + 1;
-              changed = 1;
+              changed                    = 1;
               if (absval + 1 > max_dist_int)
                 max_dist_int = absval + 1;
             }
           } else if (nint(MRIgetVoxVal(mri_bin, i, j, k, 0)) ==
                      B_R) // outside the volume
           {
-            con = associatedConnectivity(parms->b_c);
+            con    = associatedConnectivity(parms->b_c);
             absval = 1000;
             for (a = -1; a < 2; a++)
               for (b = -1; b < 2; b++)
@@ -2574,7 +2574,7 @@ static void initImages(TC_PARMS *parms) {
                 }
             if (absval != 1000) {
               MRIFvox(mri_dist, i, j, k) = -absval - 1;
-              changed = 1;
+              changed                    = 1;
               if (absval + 1 > max_dist_out)
                 max_dist_out = absval + 1;
             }
@@ -2582,7 +2582,7 @@ static void initImages(TC_PARMS *parms) {
         }
   }
 
-  parms->maxindist = max_dist_int;
+  parms->maxindist  = max_dist_int;
   parms->maxoutdist = max_dist_out;
 
   SmoothImage(mri_dist, parms);
@@ -2599,9 +2599,9 @@ static void initImages(TC_PARMS *parms) {
       }
 
   // allocate and init mri_prob volume (linear scaling so far)
-  mri_prob = MRIalloc(width, height, depth, MRI_FLOAT);
-  parms->mri_prob = mri_prob;
-  mri_cprob = MRIalloc(width, height, depth, MRI_FLOAT);
+  mri_prob         = MRIalloc(width, height, depth, MRI_FLOAT);
+  parms->mri_prob  = mri_prob;
+  mri_cprob        = MRIalloc(width, height, depth, MRI_FLOAT);
   parms->mri_cprob = mri_cprob;
 
   if (parms->priormap) {
@@ -2639,9 +2639,9 @@ static void initImages(TC_PARMS *parms) {
 static int mriChangeLabel(MRI *mri, int src, int dst) {
   int i, j, k, width, height, depth, count;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   count = 0;
   for (k = 0; k < depth; k++)
@@ -2657,20 +2657,20 @@ static int mriChangeLabel(MRI *mri, int src, int dst) {
 }
 
 static void modifyImage(TC_PARMS *parms) {
-  int i, j, k;
-  int width, height, depth;
-  int xinit, yinit, zinit;
+  int  i, j, k;
+  int  width, height, depth;
+  int  xinit, yinit, zinit;
   char fname[100];
   MRI *mri = parms->mri_bin, *mri_output = parms->mri_output;
   MRI *mri_final;
 
   if (!mri_output) {
-    mri_output = MRIclone(parms->mri_seg, nullptr);
+    mri_output        = MRIclone(parms->mri_seg, nullptr);
     parms->mri_output = mri_output;
   }
-  width = parms->region.dx + 5;
+  width  = parms->region.dx + 5;
   height = parms->region.dy + 5;
-  depth = parms->region.dz + 5;
+  depth  = parms->region.dz + 5;
 
   xinit = parms->region.x;
   yinit = parms->region.y;
@@ -2700,26 +2700,26 @@ static void modifyImage(TC_PARMS *parms) {
 static MSV *findPoint(TC_PARMS *parms, MSV *point) {
   MSV *pt;
   MRI *mri = parms->mri_bin, *mri_labeled = parms->mri_labeled;
-  int border_labels[27], nlabels;
-  int x, y, z, width, height, depth, s, a, b, c, val, n, i, j, k;
+  int  border_labels[27], nlabels;
+  int  x, y, z, width, height, depth, s, a, b, c, val, n, i, j, k;
   ConnectedComponent *cc;
-  int connectivity = parms->c_c, associatedconnectivity;
-  Nbh fnbh, bnbh;
-  int fgtp, bgtp, con, sum;
-  float maxprior, topo;
-  Cell ***table = parms->list->table;
+  int                 connectivity = parms->c_c, associatedconnectivity;
+  Nbh                 fnbh, bnbh;
+  int                 fgtp, bgtp, con, sum;
+  float               maxprior, topo;
+  Cell ***            table = parms->list->table;
 
-  con = connectivityNumber(connectivity);
-  parms->nlabels = 0;
+  con                    = connectivityNumber(connectivity);
+  parms->nlabels         = 0;
   associatedconnectivity = associatedConnectivity(connectivity);
   if (!point)
     pt = (MSV *)malloc(sizeof(MSV));
   else
     pt = point;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   if (!parms->multiplemode) {
     maxprior = -1;
@@ -2737,9 +2737,9 @@ static MSV *findPoint(TC_PARMS *parms, MSV *point) {
 
               if (fgtp == 1 && bgtp == 1) {
                 maxprior = table[z][y][x].prior;
-                pt->x = x;
-                pt->y = y;
-                pt->z = z;
+                pt->x    = x;
+                pt->y    = y;
+                pt->z    = z;
               }
             } else {
               loadNbh(mri, &fnbh, x, y, z, RESIDUE);
@@ -2752,9 +2752,9 @@ static MSV *findPoint(TC_PARMS *parms, MSV *point) {
                 addComponent(parms->ccs, &parms->segmentation->components[s]);
               } else {
                 maxprior = table[z][y][x].prior;
-                pt->x = x;
-                pt->y = y;
-                pt->z = z;
+                pt->x    = x;
+                pt->y    = y;
+                pt->z    = z;
               }
             }
           };
@@ -2780,7 +2780,7 @@ static MSV *findPoint(TC_PARMS *parms, MSV *point) {
                     if (nint(MRIgetVoxVal(mri, i, j, k, 0)) != BODY)
                       continue;
                     val = MRISvox(mri_labeled, i, j, k);
-                    cc = &parms->segmentation->components[val];
+                    cc  = &parms->segmentation->components[val];
                     if (cc->found == 0) {
                       border_labels[nlabels] = val;
                       nlabels++;
@@ -2819,9 +2819,9 @@ static MSV *findPoint(TC_PARMS *parms, MSV *point) {
                 for (n = 0; n < nlabels; n++)
                   parms->border_labels[n] = border_labels[n];
                 parms->nlabels = nlabels;
-                pt->x = x;
-                pt->y = y;
-                pt->z = z;
+                pt->x          = x;
+                pt->y          = y;
+                pt->z          = z;
               }
             } else {
               loadNbh(mri, &fnbh, x, y, z, RESIDUE);
@@ -2834,10 +2834,10 @@ static MSV *findPoint(TC_PARMS *parms, MSV *point) {
                 MRISvox(parms->mri_labeled, x, y, z) = s;
               } else {
                 parms->nlabels = 0;
-                maxprior = table[z][y][x].prior;
-                pt->x = x;
-                pt->y = y;
-                pt->z = z;
+                maxprior       = table[z][y][x].prior;
+                pt->x          = x;
+                pt->y          = y;
+                pt->z          = z;
               }
             }
           };
@@ -2852,16 +2852,16 @@ static MSV *findPoint(TC_PARMS *parms, MSV *point) {
 }
 
 static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
-  MSV *pt;
-  List *list = parms->list;
-  Cell *cell;
-  int k;
-  Nbh fnbh, bnbh;
-  int connectivity = parms->c_c;
-  int associatedconnectivity, loop;
-  MRI *mri = parms->mri_bin, *mri_labeled;
-  int *border_labels;
-  int nlabels, a, b, c, sum, con, x, y, z, val, n, topo;
+  MSV *               pt;
+  List *              list = parms->list;
+  Cell *              cell;
+  int                 k;
+  Nbh                 fnbh, bnbh;
+  int                 connectivity = parms->c_c;
+  int                 associatedconnectivity, loop;
+  MRI *               mri = parms->mri_bin, *mri_labeled;
+  int *               border_labels;
+  int                 nlabels, a, b, c, sum, con, x, y, z, val, n, topo;
   ConnectedComponent *cc;
 
   if (!list->ncells)
@@ -2886,7 +2886,7 @@ static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
           pt->x = cell->x;
           pt->y = cell->y;
           pt->z = cell->z;
-          loop = 0;
+          loop  = 0;
           break;
         case NONSIMPLE:
           cell = cell->next;
@@ -2897,13 +2897,13 @@ static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
           if (checkTn(&fnbh, &fnbh, connectivity) == 1 &&
               checkTn(&bnbh, &bnbh, associatedconnectivity) == 1) {
             cell->type = SIMPLE;
-            pt->x = cell->x;
-            pt->y = cell->y;
-            pt->z = cell->z;
-            loop = 0;
+            pt->x      = cell->x;
+            pt->y      = cell->y;
+            pt->z      = cell->z;
+            loop       = 0;
           } else {
             cell->type = NONSIMPLE;
-            cell = cell->next;
+            cell       = cell->next;
           }
           break;
         }
@@ -2911,9 +2911,9 @@ static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
     }
   } else {
     border_labels = parms->border_labels;
-    con = connectivityNumber(connectivity);
-    mri_labeled = parms->mri_labeled;
-    loop = 1;
+    con           = connectivityNumber(connectivity);
+    mri_labeled   = parms->mri_labeled;
+    loop          = 1;
     for (k = list->reference_max_cell; loop && k >= 0; k--) {
       cell = list->sorting[k];
       while (loop && cell != nullptr) // check if this cell is appropriate
@@ -2923,7 +2923,7 @@ static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
           pt->x = cell->x;
           pt->y = cell->y;
           pt->z = cell->z;
-          loop = 0;
+          loop  = 0;
           break;
         case NONSIMPLE:
           cell = cell->next;
@@ -2943,7 +2943,7 @@ static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
                 if (nint(MRIgetVoxVal(mri, x, y, z, 0)) != BODY)
                   continue;
                 val = MRISvox(mri_labeled, x, y, z);
-                cc = &parms->segmentation->components[val];
+                cc  = &parms->segmentation->components[val];
                 if (cc->found == 0) {
                   border_labels[nlabels] = val;
                   nlabels++;
@@ -2951,7 +2951,7 @@ static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
                 }
               }
           // then check if topology is correct with each of them
-          topo = 1;
+          topo           = 1;
           parms->nlabels = nlabels;
           for (n = 0; topo && n < nlabels; n++) {
             val = border_labels[n];
@@ -2979,13 +2979,13 @@ static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
           if (topo) // in this case every comp doesn't change the topology
           {
             cell->type = SIMPLE;
-            pt->x = cell->x;
-            pt->y = cell->y;
-            pt->z = cell->z;
-            loop = 0;
+            pt->x      = cell->x;
+            pt->y      = cell->y;
+            pt->z      = cell->z;
+            loop       = 0;
           } else {
             cell->type = NONSIMPLE;
-            cell = cell->next;
+            cell       = cell->next;
           }
           break;
         }
@@ -3002,17 +3002,17 @@ static MSV *findMLVoxel(TC_PARMS *parms, MSV *point) {
 }
 
 static int findNeighbors(TC_PARMS *parms, MSV *pt) {
-  int a, b, c, sum, con, val, x, y, z;
+  int   a, b, c, sum, con, val, x, y, z;
   List *list = parms->list;
-  MRI *mri = parms->mri_bin;
+  MRI * mri  = parms->mri_bin;
 
   con = connectivityNumber(parms->c_c);
   for (a = -1; a < 2; a++)
     for (b = -1; b < 2; b++)
       for (c = -1; c < 2; c++) {
-        x = pt->x + a;
-        y = pt->y + b;
-        z = pt->z + c;
+        x   = pt->x + a;
+        y   = pt->y + b;
+        z   = pt->z + c;
         val = MRIgetVoxVal(mri, x, y, z, 0);
         if (val == RESIDUE || val == VISITED) {
           list->table[z][y][x].type = UNKNOWN;
@@ -3033,9 +3033,9 @@ static int findNeighbors(TC_PARMS *parms, MSV *pt) {
 
 static void changeLabelfromList(TC_PARMS *parms) {
   List *list = parms->list;
-  int k, x, y, z;
+  int   k, x, y, z;
   Cell *cell, *ncell;
-  MRI *mri = parms->mri_bin;
+  MRI * mri = parms->mri_bin;
 
   for (k = 0; k < list->number_of_bins; k++) {
     cell = list->sorting[k];
@@ -3052,10 +3052,10 @@ static void changeLabelfromList(TC_PARMS *parms) {
 }
 
 static int segmentVoxel(TC_PARMS *parms, MSV *pt) {
-  int nlabels = parms->nlabels, *border_labels = parms->border_labels;
+  int           nlabels = parms->nlabels, *border_labels = parms->border_labels;
   SEGMENTATION *segmentation = parms->segmentation, *seg;
   ConnectedComponent *cc;
-  int max, nvox, x, y, z, label, a, b, c, val, sval, i, j, k, n;
+  int                 max, nvox, x, y, z, label, a, b, c, val, sval, i, j, k, n;
   // int width, height, depth;
   MRI *mri_labeled = parms->mri_labeled, *mri_bin = parms->mri_bin;
   CCS *ccs = parms->ccs;
@@ -3071,20 +3071,20 @@ static int segmentVoxel(TC_PARMS *parms, MSV *pt) {
   switch (nlabels) {
   case 0:
     label = componentNew(segmentation);
-    cc = &segmentation->components[label];
+    cc    = &segmentation->components[label];
     break;
   case 1: /* assign this voxel to the one that it borders */
     label = border_labels[0];
-    cc = &segmentation->components[label];
+    cc    = &segmentation->components[label];
     removeComponent(ccs, cc);
     break;
   default: /* merge segments and assign to largest number of cells */
-    max = -1;
+    max   = -1;
     label = -1;
     for (nvox = 0; nvox < nlabels; nvox++) // find largest number
       if (segmentation->components[border_labels[nvox]].ncells > max) {
         label = border_labels[nvox];
-        max = segmentation->components[border_labels[nvox]].ncells;
+        max   = segmentation->components[border_labels[nvox]].ncells;
       }
     cc = &segmentation->components[label];
     for (nvox = 0; nvox < nlabels; nvox++) // merge into lowest number
@@ -3121,16 +3121,16 @@ static int segmentVoxel(TC_PARMS *parms, MSV *pt) {
           if (sval >= 0) {
             cc = &seg->components[sval];
             for (n = 0; n < cc->ncells; n++) {
-              i = cc->cells[n]->x;
-              j = cc->cells[n]->y;
-              k = cc->cells[n]->z;
-              cc->cells[n]->type = UNKNOWN;
+              i                             = cc->cells[n]->x;
+              j                             = cc->cells[n]->y;
+              k                             = cc->cells[n]->z;
+              cc->cells[n]->type            = UNKNOWN;
               MRISvox(mri_labeled, i, j, k) = -1;
             }
             cc->ncells = 0;
             removeComponent(ccs, cc);
             seg->ncomponents--;
-            cc->cost = -1; // CHECK
+            cc->cost   = -1; // CHECK
             cc->ncells = 0;
           }
         }
@@ -3140,8 +3140,8 @@ static int segmentVoxel(TC_PARMS *parms, MSV *pt) {
 }
 
 static void CTExpansion(TC_PARMS *parms) {
-  MSV pt;
-  int x, y, z, count = 0;
+  MSV   pt;
+  int   x, y, z, count = 0;
   List *list = parms->list;
 
   if (!parms->multiplemode)
@@ -3180,11 +3180,11 @@ static void CTExpansion(TC_PARMS *parms) {
 }
 
 static int componentMerge(TC_PARMS *parms, int s0, int s1) {
-  SEGMENTATION *segmentation = parms->segmentation;
-  MRI *mri_labeled = parms->mri_labeled;
+  SEGMENTATION *      segmentation = parms->segmentation;
+  MRI *               mri_labeled  = parms->mri_labeled;
   ConnectedComponent *cc0, *cc1;
-  int v, total_cells, x, y, z, ncells;
-  CCS *ccs = parms->ccs;
+  int                 v, total_cells, x, y, z, ncells;
+  CCS *               ccs = parms->ccs;
 
   cc0 = &segmentation->components[s0];
   cc1 = &segmentation->components[s1];
@@ -3198,9 +3198,9 @@ static int componentMerge(TC_PARMS *parms, int s0, int s1) {
 
   ncells = cc0->ncells;
   for (v = ncells; v < total_cells; v++) {
-    x = cc1->cells[v - ncells]->x;
-    y = cc1->cells[v - ncells]->y;
-    z = cc1->cells[v - ncells]->z;
+    x                             = cc1->cells[v - ncells]->x;
+    y                             = cc1->cells[v - ncells]->y;
+    z                             = cc1->cells[v - ncells]->z;
     MRISvox(mri_labeled, x, y, z) = s0;
     addCellToComponent(cc0, cc1->cells[v - ncells]);
   }
@@ -3210,7 +3210,7 @@ static int componentMerge(TC_PARMS *parms, int s0, int s1) {
   segmentation->ncomponents--;
 
   cc1->ncells = 0;
-  cc1->cost = -1.0;
+  cc1->cost   = -1.0;
 
   return NO_ERROR;
 }
@@ -3230,7 +3230,7 @@ static int segmentBody(TC_PARMS *parms) {
       addCellToComponent(&parms->segmentation->components[s],
                          &parms->list->table[z][y][x]);
       MRISvox(parms->mri_labeled, x, y, z) = s;
-      parms->current_label = s;
+      parms->current_label                 = s;
       MRIsetVoxVal(parms->mri_bin, x, y, z, 0,
                    BODY); // modify in the CTExpansion function
       // find the neighbors of this point and update the list
@@ -3251,8 +3251,8 @@ static int segmentBody(TC_PARMS *parms) {
 
 static int segmentConnectedComponents(TC_PARMS *parms, Cell **list,
                                       int ncells) {
-  SEGMENTATION *segmentation = parms->segmentation;
-  MRI *mri = parms->mri_bin, *mri_labeled = parms->mri_labeled;
+  SEGMENTATION *      segmentation = parms->segmentation;
+  MRI *               mri = parms->mri_bin, *mri_labeled = parms->mri_labeled;
   ConnectedComponent *cc;
   int sum, x, y, z, xi, yi, zi, xk, yk, zk, border_labels[27], nlabels, label,
       nvox, m, con, max;
@@ -3286,7 +3286,7 @@ static int segmentConnectedComponents(TC_PARMS *parms, Cell **list,
           label = MRISvox(mri_labeled, xi, yi, zi);
           if ((label >= 0) && (!segmentation->components[label].found)) {
             segmentation->components[label].found = 1;
-            border_labels[nvox] = label;
+            border_labels[nvox]                   = label;
             nvox++;
           }
         }
@@ -3300,18 +3300,18 @@ static int segmentConnectedComponents(TC_PARMS *parms, Cell **list,
     switch (nlabels) {
     case 0: /* allocate a new segment */
       label = componentNew(segmentation);
-      cc = &segmentation->components[label];
+      cc    = &segmentation->components[label];
       break;
     case 1: /* assign this voxel to the one that it borders */
       label = border_labels[0];
-      cc = &segmentation->components[label];
+      cc    = &segmentation->components[label];
       break;
     default: /* merge segments and assign to largest number of cells */
       max = -1;
       for (nvox = 0; nvox < nlabels; nvox++) // find largest number
         if (segmentation->components[border_labels[nvox]].ncells > max) {
           label = border_labels[nvox];
-          max = segmentation->components[border_labels[nvox]].ncells;
+          max   = segmentation->components[border_labels[nvox]].ncells;
         }
       cc = &segmentation->components[label];
       for (nvox = 0; nvox < nlabels; nvox++) // merge into lowest number
@@ -3333,15 +3333,15 @@ static int segmentConnectedComponents(TC_PARMS *parms, Cell **list,
 // analyze two RCCs to see if they need to be merged together!
 static int analyzeRCCs(TC_PARMS *parms, SEGMENTATION *bccseg, int rcc0,
                        int rcc1) {
-  int x0, y0, z0, x1, y1, z1, ncells0, ncells1, a, b, c;
+  int    x0, y0, z0, x1, y1, z1, ncells0, ncells1, a, b, c;
   Cell **list0, **list1;
-  int loop, m, n, l, p, sum;
+  int    loop, m, n, l, p, sum;
 
-  int con, connectivity = parms->c_c, val;
+  int  con, connectivity = parms->c_c, val;
   MRI *mri_bin = parms->mri_bin, *mri_labeled = parms->mri_labeled;
-  int nbrnbh;
-  int pos[26][4]; // for x,y,z and label
-  int border_labels[10], nlabels;
+  int  nbrnbh;
+  int  pos[26][4]; // for x,y,z and label
+  int  border_labels[10], nlabels;
 
   // compilator warnings
   x0 = y0 = z0 = x1 = y1 = z1 = 0;
@@ -3349,13 +3349,13 @@ static int analyzeRCCs(TC_PARMS *parms, SEGMENTATION *bccseg, int rcc0,
   // size of the list
   if (parms->segmentation->components[rcc0].ncells <
       parms->segmentation->components[rcc1].ncells) {
-    list0 = parms->segmentation->components[rcc0].cells;
-    list1 = parms->segmentation->components[rcc1].cells;
+    list0   = parms->segmentation->components[rcc0].cells;
+    list1   = parms->segmentation->components[rcc1].cells;
     ncells0 = parms->segmentation->components[rcc0].ncells;
     ncells1 = parms->segmentation->components[rcc1].ncells;
   } else {
-    list0 = parms->segmentation->components[rcc1].cells;
-    list1 = parms->segmentation->components[rcc0].cells;
+    list0   = parms->segmentation->components[rcc1].cells;
+    list1   = parms->segmentation->components[rcc0].cells;
     ncells0 = parms->segmentation->components[rcc1].ncells;
     ncells1 = parms->segmentation->components[rcc0].ncells;
   }
@@ -3370,7 +3370,7 @@ static int analyzeRCCs(TC_PARMS *parms, SEGMENTATION *bccseg, int rcc0,
     // find the neighbors in BCCs
     // check if the first voxel has at least two BCC neighbors!
     nlabels = 0;
-    nbrnbh = 0;
+    nbrnbh  = 0;
     for (a = -1; a < 2; a++)
       for (b = -1; b < 2; b++)
         for (c = -1; c < 2; c++) {
@@ -3388,7 +3388,7 @@ static int analyzeRCCs(TC_PARMS *parms, SEGMENTATION *bccseg, int rcc0,
             nbrnbh++;
             if (!bccseg->components[val].found) {
               bccseg->components[val].found = 1;
-              border_labels[nlabels] = val;
+              border_labels[nlabels]        = val;
               nlabels++;
             }
           }
@@ -3438,11 +3438,11 @@ static int analyzeRCCs(TC_PARMS *parms, SEGMENTATION *bccseg, int rcc0,
 
 // return !=-1 only if an RCC is found with a label smaller than rcc
 static int findRCC(TC_PARMS *parms, int rcc) {
-  int label;
-  int x, y, z, a, b, c, k, loop, val1, val2;
+  int  label;
+  int  x, y, z, a, b, c, k, loop, val1, val2;
   MRI *mri_bin = parms->mri_bin, *mri_labeled = parms->mri_labeled;
-  ConnectedComponent *component = &parms->segmentation->components[rcc];
-  SEGMENTATION *segmentation = parms->segmentation;
+  ConnectedComponent *component    = &parms->segmentation->components[rcc];
+  SEGMENTATION *      segmentation = parms->segmentation;
 
   // check for N26
   for (label = -1, loop = 1, k = 0; loop && k < component->ncells; k++) {
@@ -3458,8 +3458,8 @@ static int findRCC(TC_PARMS *parms, int rcc) {
           if (val1 == RESIDUE && val2 >= 0 && val2 < rcc &&
               (!segmentation->components[val2].found)) {
             segmentation->components[val2].found = 1;
-            loop = 0;
-            label = val2;
+            loop                                 = 0;
+            label                                = val2;
           }
         }
   }
@@ -3474,7 +3474,7 @@ static int mergeRCC(TC_PARMS *parms, SEGMENTATION *segmentation) {
 
   nrcccomponents = parms->segmentation->ncomponents;
 
-  maxlabels = MAX_BORDER_LABELS;
+  maxlabels     = MAX_BORDER_LABELS;
   border_labels = (int *)malloc(maxlabels * sizeof(int));
 
   for (count = 0, k = nrcccomponents - 1; k >= 0; k--) {
@@ -3483,7 +3483,7 @@ static int mergeRCC(TC_PARMS *parms, SEGMENTATION *segmentation) {
     // component = &parms->segmentation->components[k];
     // analyze the current rcc with the ones, which indice is smaller
     rcclabel = 0;
-    nlabels = 0;
+    nlabels  = 0;
     while (rcclabel >= 0) {
       rcclabel = findRCC(parms, k);
       if (rcclabel >= 0) {
@@ -3493,7 +3493,7 @@ static int mergeRCC(TC_PARMS *parms, SEGMENTATION *segmentation) {
                                rcclabel); // if return -1, means k -> rcclabel
         if (nlabels == maxlabels) {
           maxlabels = (int)(maxlabels * 1.5);
-          tmp = (int *)malloc(maxlabels * sizeof(int));
+          tmp       = (int *)malloc(maxlabels * sizeof(int));
           for (m = 0; m < nlabels; m++)
             tmp[m] = border_labels[m];
           free(border_labels);
@@ -3517,34 +3517,34 @@ static int mergeRCC(TC_PARMS *parms, SEGMENTATION *segmentation) {
 
 #define CELLNBR 10000
 static int computeResidualSegmentation(TC_PARMS *parms) {
-  int i, j, k, n;
-  int width, height, depth;
-  MRI *mri = parms->mri_bin;
+  int    i, j, k, n;
+  int    width, height, depth;
+  MRI *  mri = parms->mri_bin;
   Cell **table, **tabtmp;
-  int cellnbr, count;
+  int    cellnbr, count;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   // first list all the RESIDUE voxels
   cellnbr = CELLNBR;
-  table = (Cell **)calloc(cellnbr, sizeof(Cell *));
-  count = 0;
+  table   = (Cell **)calloc(cellnbr, sizeof(Cell *));
+  count   = 0;
   for (k = 1; k < depth - 1; k++)
     for (j = 1; j < height - 1; j++)
       for (i = 1; i < width - 1; i++)
         if (nint(MRIgetVoxVal(mri, i, j, k, 0)) == RESIDUE) {
           if (count == cellnbr) {
             cellnbr = cellnbr * 2;
-            tabtmp = (Cell **)calloc(cellnbr, sizeof(Cell *));
+            tabtmp  = (Cell **)calloc(cellnbr, sizeof(Cell *));
             for (n = 0; n < count; n++)
               tabtmp[n] = table[n];
             free(table);
             table = tabtmp;
           }
           MRISvox(parms->mri_labeled, i, j, k) = -1;
-          table[count] = &parms->list->table[k][j][i];
+          table[count]                         = &parms->list->table[k][j][i];
           count++;
         }
   cellnbr = count;
@@ -3590,7 +3590,7 @@ static int backgroundSegmentation(TC_PARMS *parms) {
   int s;
 
   // first segmentation of the main connecting component
-  s = componentNew(parms->segmentation);
+  s                    = componentNew(parms->segmentation);
   parms->current_label = s;
   setBorderValue(parms->mri_bin, BODY, 1);
   setBorderValue(parms->mri_labeled, s, 1);
@@ -3606,12 +3606,12 @@ static int backgroundSegmentation(TC_PARMS *parms) {
 static void SaveOrigMaps(TC_PARMS *parms) {
   MRI *mri;
   char fname[100];
-  int width, height, depth, x, y, z;
-  int xinit, yinit, zinit, n, val;
+  int  width, height, depth, x, y, z;
+  int  xinit, yinit, zinit, n, val;
 
-  width = parms->width;
+  width  = parms->width;
   height = parms->height;
-  depth = parms->depth;
+  depth  = parms->depth;
 
   xinit = parms->region.x - 2;
   yinit = parms->region.y - 2;
@@ -3646,39 +3646,39 @@ static void SaveOrigMaps(TC_PARMS *parms) {
 }
 
 static void SaveInitMaps(TC_PARMS *parms) {
-  MRI *mri, *mri_cost, *mri_seg;
-  char fname[100];
-  int width, height, depth, k, l, x, y, z;
+  MRI *         mri, *mri_cost, *mri_seg;
+  char          fname[100];
+  int           width, height, depth, k, l, x, y, z;
   SEGMENTATION *seg;
 
-  width = parms->width;
+  width  = parms->width;
   height = parms->height;
-  depth = parms->depth;
+  depth  = parms->depth;
 
   mri_cost = MRIalloc(width, height, depth, MRI_FLOAT);
-  mri = MRIalloc(width, height, depth, MRI_FLOAT);
-  mri_seg = MRIalloc(width, height, depth, MRI_FLOAT);
-  seg = parms->F_Bseg;
+  mri      = MRIalloc(width, height, depth, MRI_FLOAT);
+  mri_seg  = MRIalloc(width, height, depth, MRI_FLOAT);
+  seg      = parms->F_Bseg;
   for (k = 0; k < seg->maxcomponents; k++)
     if (seg->components[k].cost >= 0)
       for (l = 0; l < seg->components[k].ncells; l++) {
-        x = seg->components[k].cells[l]->x;
-        y = seg->components[k].cells[l]->y;
-        z = seg->components[k].cells[l]->z;
-        MRIFvox(mri, x, y, z) = k + 1;
+        x                          = seg->components[k].cells[l]->x;
+        y                          = seg->components[k].cells[l]->y;
+        z                          = seg->components[k].cells[l]->z;
+        MRIFvox(mri, x, y, z)      = k + 1;
         MRIFvox(mri_cost, x, y, z) = seg->components[k].map;
-        MRIFvox(mri_seg, x, y, z) = 1;
+        MRIFvox(mri_seg, x, y, z)  = 1;
       }
   seg = parms->F_Rseg;
   for (k = 0; k < seg->maxcomponents; k++)
     if (seg->components[k].cost >= 0)
       for (l = 0; l < seg->components[k].ncells; l++) {
-        x = seg->components[k].cells[l]->x;
-        y = seg->components[k].cells[l]->y;
-        z = seg->components[k].cells[l]->z;
-        MRIFvox(mri, x, y, z) = -k - 1;
+        x                          = seg->components[k].cells[l]->x;
+        y                          = seg->components[k].cells[l]->y;
+        z                          = seg->components[k].cells[l]->z;
+        MRIFvox(mri, x, y, z)      = -k - 1;
         MRIFvox(mri_cost, x, y, z) = seg->components[k].map;
-        MRIFvox(mri_seg, x, y, z) = 3;
+        MRIFvox(mri_seg, x, y, z)  = 3;
       }
   sprintf(fname, "%s", parms->mapsfname);
   strcat(fname, "/out_fs.mgh");
@@ -3689,22 +3689,22 @@ static void SaveInitMaps(TC_PARMS *parms) {
   for (k = 0; k < seg->maxcomponents; k++)
     if (seg->components[k].cost >= 0)
       for (l = 0; l < seg->components[k].ncells; l++) {
-        x = seg->components[k].cells[l]->x;
-        y = seg->components[k].cells[l]->y;
-        z = seg->components[k].cells[l]->z;
-        MRIFvox(mri, x, y, z) = k + 1;
+        x                          = seg->components[k].cells[l]->x;
+        y                          = seg->components[k].cells[l]->y;
+        z                          = seg->components[k].cells[l]->z;
+        MRIFvox(mri, x, y, z)      = k + 1;
         MRIFvox(mri_cost, x, y, z) = seg->components[k].map;
       }
   seg = parms->B_Rseg;
   for (k = 0; k < seg->maxcomponents; k++)
     if (seg->components[k].cost >= 0)
       for (l = 0; l < seg->components[k].ncells; l++) {
-        x = seg->components[k].cells[l]->x;
-        y = seg->components[k].cells[l]->y;
-        z = seg->components[k].cells[l]->z;
-        MRIFvox(mri, x, y, z) = -k - 1;
+        x                          = seg->components[k].cells[l]->x;
+        y                          = seg->components[k].cells[l]->y;
+        z                          = seg->components[k].cells[l]->z;
+        MRIFvox(mri, x, y, z)      = -k - 1;
         MRIFvox(mri_cost, x, y, z) = seg->components[k].map;
-        MRIFvox(mri_seg, x, y, z) = 2;
+        MRIFvox(mri_seg, x, y, z)  = 2;
       }
   sprintf(fname, "%s", parms->mapsfname);
   strcat(fname, "/out_bs.mgh");
@@ -3801,33 +3801,33 @@ static int initSegmentation(TC_PARMS *parms) {
 }
 
 static int findandRemoveComponents(TC_PARMS *parms) {
-  CCS *ccs;
+  CCS *               ccs;
   ConnectedComponent *cc, *ncc;
   MRI *mri = parms->mri_bin, *mri_labeled = parms->mri_labeled, *mri_prior,
       *mri_cost;
   // MRI *mri_dist;
-  int ref, k, n, x, y, z;
-  int label;
-  float threshold = parms->threshold;
+  int           ref, k, n, x, y, z;
+  int           label;
+  float         threshold = parms->threshold;
   SEGMENTATION *seg;
-  int check;
+  int           check;
 
   // mri_dist = parms->mri_dist;
 
   check = 1;
   if (parms->c_c == parms->b_c) // work on the foreground
   {
-    ccs = parms->F_Bccs; // body
-    seg = parms->F_Bseg;
-    label = B_R;
+    ccs       = parms->F_Bccs; // body
+    seg       = parms->F_Bseg;
+    label     = B_R;
     mri_prior = parms->mri_bprior;
-    mri_cost = parms->mri_bcost;
+    mri_cost  = parms->mri_bcost;
   } else {
-    ccs = parms->B_Bccs; // body
-    seg = parms->B_Bseg;
-    label = F_R;
+    ccs       = parms->B_Bccs; // body
+    seg       = parms->B_Bseg;
+    label     = F_R;
     mri_prior = parms->mri_fprior;
-    mri_cost = parms->mri_fcost;
+    mri_cost  = parms->mri_fcost;
   }
 
   ref = (int)(threshold * ccs->number_of_bins / ccs->maxcost);
@@ -3850,17 +3850,17 @@ static int findandRemoveComponents(TC_PARMS *parms) {
             y = cc->cells[n]->y;
             z = cc->cells[n]->z;
 
-            cc->cells[n]->cost = MRIFvox(mri_cost, x, y, z);
+            cc->cells[n]->cost  = MRIFvox(mri_cost, x, y, z);
             cc->cells[n]->prior = MRIFvox(mri_prior, x, y, z);
 
             MRIsetVoxVal(mri, x, y, z, 0, label);
             MRISvox(mri_labeled, x, y, z) = -1;
-            cc->cells[n]->type = UNKNOWN;
+            cc->cells[n]->type            = UNKNOWN;
           }
           removeComponent(ccs, cc);
           seg->ncomponents--;
           cc->ncells = 0;
-          cc->cost = -1;
+          cc->cost   = -1;
         }
         cc = ncc;
       }
@@ -3872,17 +3872,17 @@ static int findandRemoveComponents(TC_PARMS *parms) {
 
   if (parms->c_c == parms->b_c) // work on the foreground
   {
-    ccs = parms->F_Rccs; // residue
-    seg = parms->F_Rseg;
-    label = B_R;
+    ccs       = parms->F_Rccs; // residue
+    seg       = parms->F_Rseg;
+    label     = B_R;
     mri_prior = parms->mri_bprior;
-    mri_cost = parms->mri_bcost;
+    mri_cost  = parms->mri_bcost;
   } else {
-    ccs = parms->B_Rccs; // residue
-    seg = parms->B_Rseg;
-    label = F_R;
+    ccs       = parms->B_Rccs; // residue
+    seg       = parms->B_Rseg;
+    label     = F_R;
     mri_prior = parms->mri_fprior;
-    mri_cost = parms->mri_fcost;
+    mri_cost  = parms->mri_fcost;
   }
 
   ref = (int)(threshold * ccs->number_of_bins / ccs->maxcost);
@@ -3898,16 +3898,16 @@ static int findandRemoveComponents(TC_PARMS *parms) {
           y = cc->cells[n]->y;
           z = cc->cells[n]->z;
 
-          cc->cells[n]->cost = MRIFvox(mri_cost, x, y, z);
+          cc->cells[n]->cost  = MRIFvox(mri_cost, x, y, z);
           cc->cells[n]->prior = MRIFvox(mri_prior, x, y, z);
 
           MRIsetVoxVal(mri, x, y, z, 0, label);
           MRISvox(mri_labeled, x, y, z) = -1;
-          cc->cells[n]->type = UNKNOWN;
+          cc->cells[n]->type            = UNKNOWN;
         }
         removeComponent(ccs, cc);
         seg->ncomponents--;
-        cc->cost = -1;
+        cc->cost   = -1;
         cc->ncells = 0;
       }
       cc = ncc;
@@ -3920,17 +3920,17 @@ static int findandRemoveComponents(TC_PARMS *parms) {
 
   if (parms->c_c == parms->b_c) // work on the foreground
   {
-    ccs = parms->B_Rccs; // residue
-    seg = parms->B_Rseg;
-    label = B_R;
+    ccs       = parms->B_Rccs; // residue
+    seg       = parms->B_Rseg;
+    label     = B_R;
     mri_prior = parms->mri_bprior;
-    mri_cost = parms->mri_bcost;
+    mri_cost  = parms->mri_bcost;
   } else {
-    ccs = parms->F_Rccs; // residue
-    seg = parms->F_Rseg;
-    label = F_R;
+    ccs       = parms->F_Rccs; // residue
+    seg       = parms->F_Rseg;
+    label     = F_R;
     mri_prior = parms->mri_fprior;
-    mri_cost = parms->mri_fcost;
+    mri_cost  = parms->mri_fcost;
   }
 
   for (k = 0; k < ccs->number_of_bins; k++) {
@@ -3942,24 +3942,24 @@ static int findandRemoveComponents(TC_PARMS *parms) {
         y = cc->cells[n]->y;
         z = cc->cells[n]->z;
 
-        cc->cells[n]->cost = MRIFvox(mri_cost, x, y, z);
+        cc->cells[n]->cost  = MRIFvox(mri_cost, x, y, z);
         cc->cells[n]->prior = MRIFvox(mri_prior, x, y, z);
 
         MRIsetVoxVal(mri, x, y, z, 0, label);
         MRISvox(mri_labeled, x, y, z) = -1;
-        cc->cells[n]->type = UNKNOWN;
+        cc->cells[n]->type            = UNKNOWN;
       }
       removeComponent(ccs, cc);
       seg->ncomponents--;
-      cc->cost = -1;
+      cc->cost   = -1;
       cc->ncells = 0;
-      cc = ncc;
+      cc         = ncc;
     }
   }
 
   seg->ncomponents = 0;
   for (k = 0; k < seg->maxcomponents; k++) {
-    seg->components[k].cost = 0;
+    seg->components[k].cost   = 0;
     seg->components[k].ncells = 0;
   }
 
@@ -3971,12 +3971,12 @@ static int updateVolume(TC_PARMS *parms) {
     mriChangeLabel(parms->mri_bin, F_B, BODY);
     mriChangeLabel(parms->mri_bin, F_R, RESIDUE);
     parms->segmentation = parms->F_Bseg;
-    parms->ccs = parms->F_Bccs;
+    parms->ccs          = parms->F_Bccs;
   } else {
     mriChangeLabel(parms->mri_bin, B_B, BODY);
     mriChangeLabel(parms->mri_bin, B_R, RESIDUE);
     parms->segmentation = parms->B_Bseg;
-    parms->ccs = parms->B_Bccs;
+    parms->ccs          = parms->B_Bccs;
   }
 
   return NO_ERROR;
@@ -3997,25 +3997,25 @@ static int resetVolume(TC_PARMS *parms) {
 }
 
 static int updateResidualSegmentation(TC_PARMS *parms) {
-  int i, j, k;
-  int width, height, depth;
+  int  i, j, k;
+  int  width, height, depth;
   MRI *mri = parms->mri_bin, *mri_labeled = parms->mri_labeled;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   if (parms->c_c == parms->f_c) {
     parms->segmentation = parms->F_Rseg;
-    parms->ccs = parms->F_Rccs;
+    parms->ccs          = parms->F_Rccs;
   } else {
     parms->segmentation = parms->B_Rseg;
-    parms->ccs = parms->B_Rccs;
+    parms->ccs          = parms->B_Rccs;
   }
 
   for (k = 0; k < parms->segmentation->maxcomponents; k++) {
     parms->segmentation->components[k].ncells = 0;
-    parms->segmentation->components[k].cost = -1;
+    parms->segmentation->components[k].cost   = -1;
   }
   parms->segmentation->ncomponents = 0;
 
@@ -4033,10 +4033,10 @@ static int updateResidualSegmentation(TC_PARMS *parms) {
 
 #define INITCOST 100000000.0
 static float updateThreshold(TC_PARMS *parms, int type) {
-  int ref, k;
-  CCS *bccs, *rccs;
+  int                 ref, k;
+  CCS *               bccs, *rccs;
   ConnectedComponent *cc;
-  float threshold = parms->threshold, cost, mincost, th1, th2;
+  float               threshold = parms->threshold, cost, mincost, th1, th2;
 
   if (type == parms->b_c) // work on the foreground ->priority background
   {
@@ -4102,16 +4102,16 @@ static int correctSegmentation(TC_PARMS *parms) {
   parms->multiplemode = 1;
   if (parms->mode == 1) // priority to the foreground !
   {
-    parms->c_c = parms->f_c;
+    parms->c_c       = parms->f_c;
     parms->threshold = updateThreshold(parms, parms->c_c);
   } else if (parms->mode == 2) // priority to the background !
   {
-    parms->c_c = parms->b_c;
+    parms->c_c       = parms->b_c;
     parms->threshold = updateThreshold(parms, parms->c_c);
   } else {
     th1 = updateThreshold(
         parms, parms->f_c); // foreground correction -> priority background
-    th2 = updateThreshold(parms, parms->b_c); // background
+    th2       = updateThreshold(parms, parms->b_c); // background
     threshold = MIN(th1, th2);
     if (threshold == th1)
       parms->c_c = parms->f_c;
@@ -4177,8 +4177,8 @@ static int correctSegmentation(TC_PARMS *parms) {
     if (parms->only)
       parms->threshold = updateThreshold(parms, parms->c_c);
     else {
-      th1 = updateThreshold(parms, parms->c_c);
-      th2 = updateThreshold(parms,
+      th1       = updateThreshold(parms, parms->c_c);
+      th2       = updateThreshold(parms,
                             associatedConnectivity(parms->c_c)); // background
       threshold = MIN(th1, th2);
       if (threshold == th2) // change of connectivity
@@ -4201,12 +4201,12 @@ static int correctSegmentation(TC_PARMS *parms) {
 static int finalConditionalExpansion(TC_PARMS *parms) {
   int width, height, depth, n, ref, x, y, z, xinit, yinit, zinit, i, j, k, val;
   // int label;
-  int nlabels = parms->nblabels, *tab = parms->labels, test;
+  int                 nlabels = parms->nblabels, *tab = parms->labels, test;
   ConnectedComponent *cc;
-  MRI *mri_seg = parms->mri_seg, *mri = parms->mri_bin;
-  MSV pt;
-  List *list = parms->list;
-  Cell ***table = parms->list->table;
+  MRI *               mri_seg = parms->mri_seg, *mri = parms->mri_bin;
+  MSV                 pt;
+  List *              list  = parms->list;
+  Cell ***            table = parms->list->table;
 
   if (parms->verbose_mode) {
     fprintf(stderr, "\n****************************************************");
@@ -4219,20 +4219,20 @@ static int finalConditionalExpansion(TC_PARMS *parms) {
   yinit = parms->region.y;
   zinit = parms->region.z;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
 
   // foreground
   if (parms->verbose_mode)
     fprintf(stderr, "\n   FOREGROUND\n");
   mriChangeLabel(mri, F_B, BODY);
-  parms->c_c = parms->f_c;
-  ref = parms->F_Bccs->reference_max_component;
-  cc = parms->F_Bccs->sorting[ref];
-  x = cc->cells[0]->x;
-  y = cc->cells[0]->y;
-  z = cc->cells[0]->z;
+  parms->c_c           = parms->f_c;
+  ref                  = parms->F_Bccs->reference_max_component;
+  cc                   = parms->F_Bccs->sorting[ref];
+  x                    = cc->cells[0]->x;
+  y                    = cc->cells[0]->y;
+  z                    = cc->cells[0]->z;
   parms->current_label = MRISvox(parms->mri_labeled, x, y, z);
 
   for (k = 0; k < depth - 4; k++)
@@ -4266,14 +4266,14 @@ static int finalConditionalExpansion(TC_PARMS *parms) {
   if (parms->verbose_mode)
     fprintf(stderr, "\r   BACKGROUND                   \n");
   mriChangeLabel(mri, B_B, BODY);
-  parms->c_c = parms->b_c;
+  parms->c_c           = parms->b_c;
   parms->current_label = 0;
 
   for (k = 0; k < depth - 4; k++)
     for (j = 0; j < height - 4; j++)
       for (i = 0; i < width - 4; i++) {
         test = 1;
-        val = nint(MRIgetVoxVal(mri_seg, xinit + i, yinit + j, zinit + k, 0));
+        val  = nint(MRIgetVoxVal(mri_seg, xinit + i, yinit + j, zinit + k, 0));
         for (n = 0; n < nlabels; n++)
           if (val == tab[n])
             test = 0;
@@ -4305,21 +4305,21 @@ static int finalConditionalExpansion(TC_PARMS *parms) {
 
 static TC_PARMS *initTC_PARMSfromMRITOPOLOGY_PARMS(MRI_TOPOLOGY_PARMS *parms) {
   TC_PARMS *p;
-  int n;
+  int       n;
 
-  p = (TC_PARMS *)calloc(1, sizeof(TC_PARMS));
-  p->f_c = parms->connectivity;
-  p->b_c = associatedConnectivity(p->f_c);
-  p->c_c = p->f_c;
-  p->alpha = parms->alpha;
-  p->beta = parms->beta;
-  p->costmode = parms->mode;
+  p            = (TC_PARMS *)calloc(1, sizeof(TC_PARMS));
+  p->f_c       = parms->connectivity;
+  p->b_c       = associatedConnectivity(p->f_c);
+  p->c_c       = p->f_c;
+  p->alpha     = parms->alpha;
+  p->beta      = parms->beta;
+  p->costmode  = parms->mode;
   p->threshold = INITIAL_THRESHOLD;
-  p->priors = parms->using_gca_maps;
-  p->guess = parms->guess_initial_segmentation;
-  p->priormap = parms->prior_map_file;
-  p->mode = 0;
-  p->only = parms->only;
+  p->priors    = parms->using_gca_maps;
+  p->guess     = parms->guess_initial_segmentation;
+  p->priormap  = parms->prior_map_file;
+  p->mode      = 0;
+  p->only      = parms->only;
   p->mapsfname = parms->debugging_map_folder;
 
   for (n = 0; n < parms->nlabels; n++)
@@ -4328,10 +4328,10 @@ static TC_PARMS *initTC_PARMSfromMRITOPOLOGY_PARMS(MRI_TOPOLOGY_PARMS *parms) {
 
   p->verbose_mode = parms->verbose_mode;
 
-  p->gca = parms->gca;
+  p->gca       = parms->gca;
   p->transform = parms->transform;
 
-  p->gca_fname = parms->gca_fname;
+  p->gca_fname       = parms->gca_fname;
   p->transform_fname = parms->gca_fname;
 
   return p;
@@ -4343,8 +4343,8 @@ MRI *MRIcorrectTopology(MRI *mri_orig, MRI *mri_seg, MRI *mri_output,
 
   parms = initTC_PARMSfromMRITOPOLOGY_PARMS(mritopparms);
 
-  parms->mri_orig = mri_orig;
-  parms->mri_seg = mri_seg;
+  parms->mri_orig   = mri_orig;
+  parms->mri_seg    = mri_seg;
   parms->mri_output = mri_output;
 
   initImages(parms);

@@ -32,8 +32,8 @@
 
 #include "LayerProperty.h"
 #include "vtkSmartPointer.h"
-#include <QVariantMap>
 #include <QColor>
+#include <QVariantMap>
 
 #include "colortab.h"
 
@@ -78,11 +78,11 @@ public:
   QVariantMap GetSettings();
   QVariantMap GetActiveSettings();
   QVariantMap GetFullSettings();
-  void CopySettings(const LayerPropertyMRI *p);
-  void RestoreSettings(const QVariantMap &map);
-  void RestoreSettings(const QString &filename);
-  void SaveSettings(const QString &filename);
-  void RestoreFullSettings(const QVariantMap &map);
+  void        CopySettings(const LayerPropertyMRI *p);
+  void        RestoreSettings(const QVariantMap &map);
+  void        RestoreSettings(const QString &filename);
+  void        SaveSettings(const QString &filename);
+  void        RestoreFullSettings(const QVariantMap &map);
 
   void SetVolumeSource(FSVolume *source);
 
@@ -92,11 +92,11 @@ public:
   vtkRGBAColorTransferFunction *GetGrayScaleTable() const;
   vtkRGBAColorTransferFunction *GetHeatScaleTable() const;
   vtkRGBAColorTransferFunction *GetColorMapTable() const;
-  vtkLookupTable *GetDirectionCodedTable() const;
+  vtkLookupTable *              GetDirectionCodedTable() const;
 
   COLOR_TABLE *GetLUTCTAB() const;
-  void SetLUTCTAB(COLOR_TABLE *ct);
-  bool IsValueInColorTable(double nVal);
+  void         SetLUTCTAB(COLOR_TABLE *ct);
+  bool         IsValueInColorTable(double nVal);
 
   virtual vtkScalarsToColors *GetActiveLookupTable();
 
@@ -104,11 +104,11 @@ public:
   // Set the color map appropriately.
   // BTX
   void SetColorMap(int iType);
-  int GetColorMap() const;
+  int  GetColorMap() const;
   // ETX
-  void SetColorMapToGrayScale();
-  void SetColorMapToHeatScale();
-  void SetColorMapToLUT();
+  void         SetColorMapToGrayScale();
+  void         SetColorMapToHeatScale();
+  void         SetColorMapToLUT();
   virtual void OnColorMapChanged();
 
   // Description.
@@ -120,11 +120,11 @@ public:
   // Description:
   // This determines the levels above and below which voxels are drawn
   // as black, or no color.
-  void SetMinVisibleValue(double iValue);
+  void   SetMinVisibleValue(double iValue);
   double GetMinVisibleValue();
-  void SetMaxVisibleValue(double iValue);
+  void   SetMaxVisibleValue(double iValue);
   double GetMaxVisibleValue();
-  void SetMinMaxVisibleValue(double iMinValue, double iMaxValue);
+  void   SetMinMaxVisibleValue(double iMinValue, double iMaxValue);
 
   // Description:
   // These determine the visible value range. Values below the range
@@ -132,30 +132,30 @@ public:
   // drawn in the 'highest' color (e.g. white).
   double GetWindow();
   double GetLevel();
-  void SetWindowLevel(double iWindow, double iLevel);
-  void SetMinMaxGrayscaleWindow(double iMin, double iMax);
-  void SetMinGrayscaleWindow(double iMin);
-  void SetMaxGrayscaleWindow(double iMax);
+  void   SetWindowLevel(double iWindow, double iLevel);
+  void   SetMinMaxGrayscaleWindow(double iMin, double iMax);
+  void   SetMinGrayscaleWindow(double iMin);
+  void   SetMaxGrayscaleWindow(double iMax);
 
-  void SetMinMaxGenericThreshold(double iMin, double iMax);
+  void   SetMinMaxGenericThreshold(double iMin, double iMax);
   double GetMinGenericThreshold();
-  void SetMinGenericThreshold(double iMin);
+  void   SetMinGenericThreshold(double iMin);
   double GetMaxGenericThreshold();
-  void SetMaxGenericThreshold(double iMax);
+  void   SetMaxGenericThreshold(double iMax);
 
   // Description:
   // These determine the heatscale color map. The threshold is mirrored:
   // -> cyan -> blue -> trans_blue -> clear -> trans_orange -> orange -> red ->
   // -> -max -> -mid ->    -min    ->   0   ->     min      ->   mid  -> max ->
-  void SetHeatScaleMinThreshold(double iValue, bool bMidToMin = false);
+  void   SetHeatScaleMinThreshold(double iValue, bool bMidToMin = false);
   double GetHeatScaleMinThreshold();
-  void SetHeatScaleMidThreshold(double iValue);
+  void   SetHeatScaleMidThreshold(double iValue);
   double GetHeatScaleMidThreshold();
-  void SetHeatScaleMaxThreshold(double iValue, bool bMidToMin = false);
+  void   SetHeatScaleMaxThreshold(double iValue, bool bMidToMin = false);
   double GetHeatScaleMaxThreshold();
-  void SetHeatScaleOffset(double iValue);
+  void   SetHeatScaleOffset(double iValue);
   double GetHeatScaleOffset();
-  void SetHeatScale(double dMin, double dMid, double dMax);
+  void   SetHeatScale(double dMin, double dMid, double dMax);
 
   bool GetHeatScaleClearHigh() { return m_bHeatScaleClearHigh; }
 
@@ -369,7 +369,7 @@ private:
   vtkSmartPointer<vtkRGBAColorTransferFunction> mGrayScaleTable;
   vtkSmartPointer<vtkRGBAColorTransferFunction> mHeatScaleTable;
   vtkSmartPointer<vtkRGBAColorTransferFunction> mColorMapTable;
-  vtkSmartPointer<vtkLookupTable> mDirectionCodedTable;
+  vtkSmartPointer<vtkLookupTable>               mDirectionCodedTable;
   // ---------------------------------------------------------------------
 
   // Color map variables -------------------------------------------------
@@ -379,7 +379,7 @@ private:
   int mResliceInterpolation;
   int mTextureSmoothing;
 
-  bool mbClearBackground;
+  bool   mbClearBackground;
   double mMinVoxelValue, mMaxVoxelValue;
   double mMinVisibleValue, mMaxVisibleValue;
   double mClearBackgroundValue;
@@ -390,13 +390,13 @@ private:
   // For heatScale drawing.
   double mHeatScaleMinThreshold, mHeatScaleMidThreshold, mHeatScaleMaxThreshold;
   double mHeatScaleOffset;
-  bool mbReverseHeatScale;
-  bool mbShowPositiveHeatScaleValues;
-  bool mbShowNegativeHeatScaleValues;
-  bool m_bHeatScaleClearHigh;
-  bool m_bHeatScaleTruncate;
-  bool m_bHeatScaleInvert;
-  bool m_bHeatScaleAutoMid;
+  bool   mbReverseHeatScale;
+  bool   mbShowPositiveHeatScaleValues;
+  bool   mbShowNegativeHeatScaleValues;
+  bool   m_bHeatScaleClearHigh;
+  bool   m_bHeatScaleTruncate;
+  bool   m_bHeatScaleInvert;
+  bool   m_bHeatScaleAutoMid;
 
   double mMinGenericThreshold;
   double mMaxGenericThreshold;
@@ -406,20 +406,20 @@ private:
   double mWindowRange[2];
   double mLevelRange[2];
 
-  bool m_bRememberFrameSettings;
+  bool        m_bRememberFrameSettings;
   QVariantMap m_frameSettings;
 
   // LUT drawing.
   COLOR_TABLE *mFreeSurferCTAB;
 
-  bool mbShowAsContour;
+  bool   mbShowAsContour;
   double mMinContourThreshold;
   double mMaxContourThreshold;
 
-  bool m_bDisplayVector;
-  int m_nVectorInversion;
-  int m_nVectorRepresentation;
-  bool m_bNormalizeVector;
+  bool   m_bDisplayVector;
+  int    m_nVectorInversion;
+  int    m_nVectorRepresentation;
+  bool   m_bNormalizeVector;
   double m_dVectorDisplayScale;
   double m_dVectorScale;
   double m_dVectorNormThreshold;
@@ -427,22 +427,22 @@ private:
   bool m_bDisplayRGB;
 
   bool m_bDisplayTensor;
-  int m_nTensorInversion;
-  int m_nTensorRepresentation;
+  int  m_nTensorInversion;
+  int  m_nTensorRepresentation;
 
   double m_rgbContour[3];
-  bool m_bContourUseImageColorMap;
-  bool m_bContourExtractAll;
-  int m_nContourSmoothIterations;
-  bool m_bContourUpsample;
+  bool   m_bContourUseImageColorMap;
+  bool   m_bContourExtractAll;
+  int    m_nContourSmoothIterations;
+  bool   m_bContourUpsample;
 
   bool m_bShowAsLabelContour;
   bool m_bShowLabelOutline;
-  int m_nUpSampleMethod;
+  int  m_nUpSampleMethod;
   bool m_bShowVoxelizedContour;
 
-  bool m_bUsePercentile;
-  bool m_bAutoAdjustFrameLevel;
+  bool                             m_bUsePercentile;
+  bool                             m_bAutoAdjustFrameLevel;
   QMap<int, QPair<double, double>> m_mapMinMaxValues;
 
   int m_dVectorLineWidth;
@@ -450,8 +450,8 @@ private:
   // ---------------------------------------------------------------------
 
   FSVolume *mSource;
-  int m_nActiveFrame;
-  QString mfnVolume;
+  int       m_nActiveFrame;
+  QString   mfnVolume;
   // ETX
 
   int m_nProjectionMapType;
@@ -460,7 +460,7 @@ private:
   int m_nVectorSkip;
 
   QList<int> m_listVisibleLabels;
-  QColor m_colorBinary;
+  QColor     m_colorBinary;
 };
 
 #endif

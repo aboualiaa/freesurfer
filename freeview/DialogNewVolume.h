@@ -40,7 +40,7 @@ public:
   ~DialogNewVolume();
 
   QString GetVolumeName();
-  void SetVolumeName(const QString &name);
+  void    SetVolumeName(const QString &name);
 
   bool GetCopyVoxel();
   void SetCopyVoxel(bool bVoxel);

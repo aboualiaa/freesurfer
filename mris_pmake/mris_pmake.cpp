@@ -37,28 +37,26 @@
 #include <config.h>
 #endif
 
-using namespace std;
-
-#include "scanopt.h"
 #include "asynch.h"
+#include "scanopt.h"
 
 // Some global vars...
 extern const option longopts[];
-stringstream Gsout("");
-char *Gpch_Progname;
+std::stringstream   Gsout("");
+char *              Gpch_Progname;
 
 const char *Progname = Gpch_Progname;
 
 bool Gb_stdout = true; // Global flag controlling output to
-                       //+stdout
-string G_SELF = "";    // "My" name
-string G_VERSION =     // version
+//+stdout
+std::string G_SELF    = ""; // "My" name
+std::string G_VERSION =     // version
     "$Id: mris_pmake.cpp,v 1.18 2013/01/25 16:39:24 rudolph Exp $";
 char pch_buffer[65536];
 
 // "Class"-like globals...
-s_env st_env;
-string str_asynchComms = "HUP";
+s_env                  st_env;
+std::string            str_asynchComms  = "HUP";
 c_SSocket_UDP_receive *pCSSocketReceive = nullptr;
 
 int main(int argc, char **ppch_argv) {
@@ -66,8 +64,8 @@ int main(int argc, char **ppch_argv) {
   /* ----- initializations ----- */
   Gpch_Progname = strrchr(ppch_argv[0], '/');
   Gpch_Progname = (Gpch_Progname == nullptr ? ppch_argv[0] : Gpch_Progname + 1);
-  string str_progname(Gpch_Progname);
-  G_SELF = str_progname;
+  std::string str_progname(Gpch_Progname);
+  G_SELF  = str_progname;
   int ret = 0;
 
   // "Construct" a default environment structure.
@@ -75,8 +73,8 @@ int main(int argc, char **ppch_argv) {
 
   // Prior to completely populating the enter st_env structure, we fill in
   // some defaults to "boot strap" the process.
-  st_env.str_workingDir = "./";
-  st_env.str_optionsFileName = "options.txt";
+  st_env.str_workingDir       = "./";
+  st_env.str_optionsFileName  = "options.txt";
   st_env.b_surfacesKeepInSync = true; // This allows us to
                                       //+ propagate changes
                                       //+ in the working

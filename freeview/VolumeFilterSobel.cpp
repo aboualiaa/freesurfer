@@ -25,12 +25,12 @@
 
 #include "VolumeFilterSobel.h"
 #include "LayerMRI.h"
-#include <vtkImageData.h>
-#include <vtkImageSobel3D.h>
-#include <vtkImageMagnitude.h>
-#include <vtkPointData.h>
 #include <vtkDataArray.h>
+#include <vtkImageData.h>
+#include <vtkImageMagnitude.h>
 #include <vtkImageShiftScale.h>
+#include <vtkImageSobel3D.h>
+#include <vtkPointData.h>
 
 VolumeFilterSobel::VolumeFilterSobel(LayerMRI *input, LayerMRI *output,
                                      QObject *parent)
@@ -51,9 +51,9 @@ bool VolumeFilterSobel::Execute() {
   mag->Update();
   double *orig_range =
       m_volumeInput->GetImageData()->GetPointData()->GetScalars()->GetRange();
-  vtkImageData *img = mag->GetOutput();
-  double *range = img->GetPointData()->GetScalars()->GetRange();
-  double scale = orig_range[1] / range[1];
+  vtkImageData *img   = mag->GetOutput();
+  double *      range = img->GetPointData()->GetScalars()->GetRange();
+  double        scale = orig_range[1] / range[1];
   if (scale < 0) {
     scale = -scale;
   }

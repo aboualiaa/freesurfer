@@ -26,37 +26,37 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
+#include "mri_circulars.h"
+#include "mrimorph.h"
 #include "proto.h"
 #include "version.h"
-#include "mrimorph.h"
-#include "mri_circulars.h"
 
 const char *Progname;
 
 int main(int argc, char **argv) {
 
-  int nargs;
-  char mri_fname[STRLEN];
-  char tiff_fname[STRLEN];
-  MRI *mri;
-  int slice;
+  int    nargs;
+  char   mri_fname[STRLEN];
+  char   tiff_fname[STRLEN];
+  MRI *  mri;
+  int    slice;
   IMAGE *image;
 
   Progname = argv[0];
 
   nargs = handleVersionOption(argc, argv, "tiff_write_image");
-  argc -= nargs ;
+  argc -= nargs;
   if (1 == argc)
     exit(0);
 

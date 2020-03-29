@@ -34,18 +34,18 @@ enum InputType { UNKNOWN, LTA, REG, FSL, MNI, NIFTYREG, ITK };
 }
 
 struct Parameters {
-  string transin;
-  string ltaout;
-  string fslout;
-  string mniout;
-  string regout;
-  string itkout;
-  string src;
-  string trg;
-  bool invert;
-  int ltaouttype;
-  bool trgconform;
-  string subject;
+  std::string        transin;
+  std::string        ltaout;
+  std::string        fslout;
+  std::string        mniout;
+  std::string        regout;
+  std::string        itkout;
+  std::string        src;
+  std::string        trg;
+  bool               invert;
+  int                ltaouttype;
+  bool               trgconform;
+  std::string        subject;
   intypes::InputType intype;
 };
 
@@ -71,29 +71,31 @@ static char vcid[] =
 const char *Progname = nullptr;
 
 LTA *shallowCopyLTA(const LTA *lta) {
-  LTA *ltatmp = LTAalloc(1, nullptr);
+  LTA *ltatmp           = LTAalloc(1, nullptr);
   ltatmp->xforms[0].m_L = MatrixCopy(lta->xforms[0].m_L, nullptr);
   copyVolGeom(&lta->xforms[0].src, &ltatmp->xforms[0].src);
   copyVolGeom(&lta->xforms[0].dst, &ltatmp->xforms[0].dst);
-  ltatmp->type = lta->type;
+  ltatmp->type   = lta->type;
   ltatmp->fscale = lta->fscale;
   strcpy(ltatmp->subject, lta->subject);
   return ltatmp;
 }
 
-LTA *readLTA(const string &xfname, const string &sname, const string &tname)
+LTA *readLTA(const std::string &xfname, const std::string &sname,
+             const std::string &tname)
 // here sname and tname are not necessary
 {
   LTA *lta = LTAread(P.transin.c_str());
   if (lta == nullptr) {
-    cerr << "ERROR readLTA: cannot read " << xfname << endl;
+    std::cerr << "ERROR readLTA: cannot read " << xfname << std::endl;
     exit(1);
   }
 
   if (lta->type != LINEAR_RAS_TO_RAS)
     LTAchangeType(lta, LINEAR_RAS_TO_RAS);
   if (lta->type != LINEAR_RAS_TO_RAS) {
-    cerr << "ERROR readLTA: cannot change type to RAS_TO_RAS." << endl;
+    std::cerr << "ERROR readLTA: cannot change type to RAS_TO_RAS."
+              << std::endl;
     exit(1);
   }
 
@@ -101,7 +103,7 @@ LTA *readLTA(const string &xfname, const string &sname, const string &tname)
   if (sname != "") {
     MRI *src = MRIreadHeader(sname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
     if (src == nullptr) {
-      cerr << "ERROR readLTA: cannot read src MRI" << sname << endl;
+      std::cerr << "ERROR readLTA: cannot read src MRI" << sname << std::endl;
       exit(1);
     }
     getVolGeom(src, &lta->xforms[0].src);
@@ -110,7 +112,7 @@ LTA *readLTA(const string &xfname, const string &sname, const string &tname)
   if (tname != "") {
     MRI *trg = MRIreadHeader(tname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
     if (trg == nullptr) {
-      cerr << "ERROR readFSL: cannot read trg MRI" << tname << endl;
+      std::cerr << "ERROR readFSL: cannot read trg MRI" << tname << std::endl;
       exit(1);
     }
     getVolGeom(trg, &lta->xforms[0].dst);
@@ -119,7 +121,8 @@ LTA *readLTA(const string &xfname, const string &sname, const string &tname)
   return lta;
 }
 
-LTA *readFSL(const string &xfname, const string &sname, const string &tname)
+LTA *readFSL(const std::string &xfname, const std::string &sname,
+             const std::string &tname)
 // use lta transform to readin fslreg
 // and then an lta change type from FSLREG_TYPE (I implemented that in
 // transform.c)
@@ -130,12 +133,12 @@ LTA *readFSL(const string &xfname, const string &sname, const string &tname)
   // read src and target mri header
   MRI *src = MRIreadHeader(sname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (src == nullptr) {
-    cerr << "ERROR readFSL: cannot read src MRI" << sname << endl;
+    std::cerr << "ERROR readFSL: cannot read src MRI" << sname << std::endl;
     exit(1);
   }
   MRI *trg = MRIreadHeader(tname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (trg == nullptr) {
-    cerr << "ERROR readFSL: cannot read trg MRI" << tname << endl;
+    std::cerr << "ERROR readFSL: cannot read trg MRI" << tname << std::endl;
     exit(1);
   }
 
@@ -150,7 +153,8 @@ LTA *readFSL(const string &xfname, const string &sname, const string &tname)
   return lta;
 }
 
-LTA *readMNI(const string &xfname, const string &sname, const string &tname)
+LTA *readMNI(const std::string &xfname, const std::string &sname,
+             const std::string &tname)
 // based on regio_read_mincxfm for reading the matrix
 // then the matrix should be RAS2RAS
 {
@@ -160,12 +164,12 @@ LTA *readMNI(const string &xfname, const string &sname, const string &tname)
   // read src and target mri header
   MRI *src = MRIreadHeader(sname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (src == nullptr) {
-    cerr << "ERROR readMNI: cannot read src MRI" << sname << endl;
+    std::cerr << "ERROR readMNI: cannot read src MRI" << sname << std::endl;
     exit(1);
   }
   MRI *trg = MRIreadHeader(tname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (trg == nullptr) {
-    cerr << "ERROR readMNI: cannot read trg MRI" << tname << endl;
+    std::cerr << "ERROR readMNI: cannot read trg MRI" << tname << std::endl;
     exit(1);
   }
 
@@ -180,7 +184,8 @@ LTA *readMNI(const string &xfname, const string &sname, const string &tname)
   return lta;
 }
 
-LTA *readREG(const string &xfname, const string &sname, const string &tname)
+LTA *readREG(const std::string &xfname, const std::string &sname,
+             const std::string &tname)
 // based on regio_read_register for reading and then lta change type from
 // REGISTER_DAT
 {
@@ -190,12 +195,12 @@ LTA *readREG(const string &xfname, const string &sname, const string &tname)
   // read src and target mri header
   MRI *src = MRIreadHeader(sname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (src == nullptr) {
-    cerr << "ERROR readREG: cannot read src MRI" << sname << endl;
+    std::cerr << "ERROR readREG: cannot read src MRI" << sname << std::endl;
     exit(1);
   }
   MRI *trg = MRIreadHeader(tname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (trg == nullptr) {
-    cerr << "ERROR readREG: cannot read trg MRI" << tname << endl;
+    std::cerr << "ERROR readREG: cannot read trg MRI" << tname << std::endl;
     exit(1);
   }
 
@@ -211,21 +216,21 @@ LTA *readREG(const string &xfname, const string &sname, const string &tname)
   return lta;
 }
 
-LTA *readNIFTYREG(const string &xfname, const string &sname,
-                  const string &tname)
+LTA *readNIFTYREG(const std::string &xfname, const std::string &sname,
+                  const std::string &tname)
 // nifty reg writes the inverse RAS2RAS matrix (trg -> src)
 // this functionality needs to be moved to LTA (transform) in the future
 {
-  LTA *lta = LTAalloc(1, nullptr);
-  LINEAR_TRANSFORM *lt = &lta->xforms[0];
-  lt->sigma = 1.0f;
+  LTA *             lta = LTAalloc(1, nullptr);
+  LINEAR_TRANSFORM *lt  = &lta->xforms[0];
+  lt->sigma             = 1.0f;
   lt->x0 = lt->y0 = lt->z0 = 0;
-  lta->type = LINEAR_RAS_TO_RAS;
+  lta->type                = LINEAR_RAS_TO_RAS;
 
   std::ifstream transfile(xfname.c_str());
-  MATRIX *m_L = MatrixAlloc(4, 4, MATRIX_REAL);
+  MATRIX *      m_L = MatrixAlloc(4, 4, MATRIX_REAL);
   if (transfile.is_open()) {
-    int row = 1;
+    int   row = 1;
     float v1, v2, v3, v4;
     while (!transfile.eof()) {
       transfile >> v1 >> v2 >> v3 >> v4;
@@ -239,7 +244,7 @@ LTA *readNIFTYREG(const string &xfname, const string &sname,
     }
     transfile.close();
   } else {
-    cerr << "readNIFTYREG Error opening " << xfname << endl;
+    std::cerr << "readNIFTYREG Error opening " << xfname << std::endl;
     exit(1);
   }
   lt->m_L = MatrixInverse(m_L, lt->m_L);
@@ -248,12 +253,14 @@ LTA *readNIFTYREG(const string &xfname, const string &sname,
   // read src and target mri header
   MRI *src = MRIreadHeader(sname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (src == nullptr) {
-    cerr << "ERROR readNIFTYREG: cannot read src MRI" << sname << endl;
+    std::cerr << "ERROR readNIFTYREG: cannot read src MRI" << sname
+              << std::endl;
     exit(1);
   }
   MRI *trg = MRIreadHeader(tname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (trg == nullptr) {
-    cerr << "ERROR readNIFTYREG: cannot read trg MRI" << tname << endl;
+    std::cerr << "ERROR readNIFTYREG: cannot read trg MRI" << tname
+              << std::endl;
     exit(1);
   }
 
@@ -266,7 +273,8 @@ LTA *readNIFTYREG(const string &xfname, const string &sname,
   return lta;
 }
 
-LTA *readITK(const string &xfname, const string &sname, const string &tname)
+LTA *readITK(const std::string &xfname, const std::string &sname,
+             const std::string &tname)
 // ITK (and Ants) uses Left Posterior Superior coordinates
 // and stores inverse (map from ref to mov).
 // For some Ants output, call ConvertTransformFile (in Ants) to first
@@ -286,20 +294,20 @@ LTA *readITK(const string &xfname, const string &sname, const string &tname)
   // read src and target mri header
   MRI *src = MRIreadHeader(sname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (src == nullptr) {
-    cerr << "ERROR readITK: cannot read src MRI " << sname << endl;
+    std::cerr << "ERROR readITK: cannot read src MRI " << sname << std::endl;
     exit(1);
   }
   MRI *trg = MRIreadHeader(tname.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
   if (trg == nullptr) {
-    cerr << "ERROR readITK: cannot read trg MRI " << tname << endl;
+    std::cerr << "ERROR readITK: cannot read trg MRI " << tname << std::endl;
     exit(1);
   }
 
   // determine if 2D (and which dim is flat)
-  bool src3d = src->width > 1 && src->height > 1 && src->depth > 1;
-  bool trg3d = trg->width > 1 && trg->height > 1 && trg->depth > 1;
-  bool mri3d = src3d || trg3d;
-  int flatdim = -1;
+  bool src3d   = src->width > 1 && src->height > 1 && src->depth > 1;
+  bool trg3d   = trg->width > 1 && trg->height > 1 && trg->depth > 1;
+  bool mri3d   = src3d || trg3d;
+  int  flatdim = -1;
   if (!mri3d) {
     if (src->width == 1 && trg->width == 1)
       flatdim = 1;
@@ -308,8 +316,8 @@ LTA *readITK(const string &xfname, const string &sname, const string &tname)
     else if (src->depth == 1 && trg->depth == 1)
       flatdim = 3;
     else {
-      cerr << "ERROR readITK: 2D images but plane does not agree. " << tname
-           << endl;
+      std::cerr << "ERROR readITK: 2D images but plane does not agree. "
+                << tname << std::endl;
       exit(1);
     }
   }
@@ -320,22 +328,22 @@ LTA *readITK(const string &xfname, const string &sname, const string &tname)
   if (flatdim == 2)
     o2 = 1;
 
-  LTA *lta = LTAalloc(1, nullptr);
-  LINEAR_TRANSFORM *lt = &lta->xforms[0];
-  lt->sigma = 1.0f;
+  LTA *             lta = LTAalloc(1, nullptr);
+  LINEAR_TRANSFORM *lt  = &lta->xforms[0];
+  lt->sigma             = 1.0f;
   lt->x0 = lt->y0 = lt->z0 = 0;
-  lta->type = LINEAR_RAS_TO_RAS;
+  lta->type                = LINEAR_RAS_TO_RAS;
 
   std::ifstream transfile(xfname.c_str());
-  MATRIX *m_L = MatrixAlloc(4, 4, MATRIX_REAL);
-  m_L = MatrixIdentity(4, m_L);
+  MATRIX *      m_L = MatrixAlloc(4, 4, MATRIX_REAL);
+  m_L               = MatrixIdentity(4, m_L);
 
   MATRIX *m_R = MatrixAlloc(3, 3, MATRIX_REAL);
   VECTOR *v_T = VectorAlloc(3, MATRIX_REAL);
   VECTOR *v_F = VectorAlloc(3, MATRIX_REAL);
 
   std::string str;
-  bool is3d = true;
+  bool        is3d = true;
   if (transfile.is_open()) {
     float v1, v2, v3 = 0.0;
     while (!transfile.eof()) {
@@ -392,9 +400,9 @@ LTA *readITK(const string &xfname, const string &sname, const string &tname)
 
           // mL is only correct, if no FixedParameter is specified below
           transfile >> v1 >> v2 >> v3;
-          VECTOR_ELT(v_T, 1) = v1;
-          VECTOR_ELT(v_T, 2) = v2;
-          VECTOR_ELT(v_T, 3) = v3;
+          VECTOR_ELT(v_T, 1)      = v1;
+          VECTOR_ELT(v_T, 2)      = v2;
+          VECTOR_ELT(v_T, 3)      = v3;
           *MATRIX_RELT(m_L, 1, 4) = -v1;
           *MATRIX_RELT(m_L, 2, 4) = -v2;
           *MATRIX_RELT(m_L, 3, 4) = v3;
@@ -406,15 +414,15 @@ LTA *readITK(const string &xfname, const string &sname, const string &tname)
           //*MATRIX_RELT(m_L,4,4) = 1.0;
         } else {
           transfile >> v1 >> v2;
-          *MATRIX_RELT(m_L, 1 + o1, 1 + o1) = v1;
+          *MATRIX_RELT(m_L, 1 + o1, 1 + o1)      = v1;
           *MATRIX_RELT(m_L, 1 + o1, 2 + o1 + o2) = v2;
 
           transfile >> v1 >> v2;
-          *MATRIX_RELT(m_L, 2 + o1 + o2, 1 + o1) = v1;
+          *MATRIX_RELT(m_L, 2 + o1 + o2, 1 + o1)      = v1;
           *MATRIX_RELT(m_L, 2 + o1 + o2, 2 + o1 + o2) = v2;
 
           transfile >> v1 >> v2;
-          *MATRIX_RELT(m_L, 1 + o1, 4) = -v1;
+          *MATRIX_RELT(m_L, 1 + o1, 4)      = -v1;
           *MATRIX_RELT(m_L, 2 + o1 + o2, 4) = -v2;
           //*MATRIX_RELT(m_L,4,1) = 0.0;
           //*MATRIX_RELT(m_L,4,2) = 0.0;
@@ -465,7 +473,7 @@ LTA *readITK(const string &xfname, const string &sname, const string &tname)
     }
     transfile.close();
   } else {
-    cerr << "ERROR readITK:  opening " << xfname << endl;
+    std::cerr << "ERROR readITK:  opening " << xfname << std::endl;
     exit(1);
   }
 
@@ -481,7 +489,7 @@ LTA *readITK(const string &xfname, const string &sname, const string &tname)
   return lta;
 }
 
-void writeFSL(const string &fname, const LTA *lta) {
+void writeFSL(const std::string &fname, const LTA *lta) {
   // shallow copy
   LTA *ltatmp = shallowCopyLTA(lta);
 
@@ -490,7 +498,7 @@ void writeFSL(const string &fname, const LTA *lta) {
     LTAchangeType(ltatmp, FSLREG_TYPE);
 
   if (LTAwrite(ltatmp, fname.c_str()) != NO_ERROR) {
-    cerr << "ERROR writeFSL: cannot create file " << fname << endl;
+    std::cerr << "ERROR writeFSL: cannot create file " << fname << std::endl;
     exit(1);
   }
   LTAfree(&ltatmp);
@@ -498,11 +506,11 @@ void writeFSL(const string &fname, const LTA *lta) {
   return;
 }
 
-void writeMNI(const string &fname, const LTA *lta)
+void writeMNI(const std::string &fname, const LTA *lta)
 // this is the xfm format
 {
   if (lta->type != LINEAR_RAS_TO_RAS) {
-    cerr << "ERROR: lta should be RAS_TO_RAS by now!!!" << endl;
+    std::cerr << "ERROR: lta should be RAS_TO_RAS by now!!!" << std::endl;
     exit(1);
   }
   // shallow copy
@@ -512,7 +520,7 @@ void writeMNI(const string &fname, const LTA *lta)
   ltatmp->type = MNI_TRANSFORM_TYPE;
 
   if (LTAwrite(ltatmp, fname.c_str()) != NO_ERROR) {
-    cerr << "ERROR writeFSL: cannot create file " << fname << endl;
+    std::cerr << "ERROR writeFSL: cannot create file " << fname << std::endl;
     exit(1);
   }
   LTAfree(&ltatmp);
@@ -520,7 +528,7 @@ void writeMNI(const string &fname, const LTA *lta)
   return;
 }
 
-void writeREG(const string &fname, const LTA *lta) {
+void writeREG(const std::string &fname, const LTA *lta) {
   // shallow copy
   LTA *ltatmp = shallowCopyLTA(lta);
 
@@ -529,7 +537,7 @@ void writeREG(const string &fname, const LTA *lta) {
     LTAchangeType(ltatmp, REGISTER_DAT);
 
   if (LTAwrite(ltatmp, fname.c_str()) != NO_ERROR) {
-    cerr << "ERROR writeREG: cannot create file " << fname << endl;
+    std::cerr << "ERROR writeREG: cannot create file " << fname << std::endl;
     exit(1);
   }
   LTAfree(&ltatmp);
@@ -537,7 +545,7 @@ void writeREG(const string &fname, const LTA *lta) {
   return;
 }
 
-void writeITK(const string &fname, const LTA *lta) {
+void writeITK(const std::string &fname, const LTA *lta) {
   // shallow copy
   LTA *ltatmp = shallowCopyLTA(lta);
   if (ltatmp->type != LINEAR_RAS_TO_RAS)
@@ -545,7 +553,7 @@ void writeITK(const string &fname, const LTA *lta) {
 
   // invert
   MATRIX *m_L = MatrixAlloc(4, 4, MATRIX_REAL);
-  m_L = MatrixInverse(ltatmp->xforms[0].m_L, m_L);
+  m_L         = MatrixInverse(ltatmp->xforms[0].m_L, m_L);
 
   // convert to left-post-superior
   // multiply from left and right with diag(-1,-1,1,1)
@@ -574,7 +582,7 @@ void writeITK(const string &fname, const LTA *lta) {
     transfile << "FixedParameters: 0 0 0" << std::endl;
     transfile.close();
   } else {
-    cerr << "writeITK Error opening " << fname << endl;
+    std::cerr << "writeITK Error opening " << fname << std::endl;
     exit(1);
   }
   MatrixFree(&m_L);
@@ -583,12 +591,11 @@ void writeITK(const string &fname, const LTA *lta) {
 }
 
 int main(int argc, char *argv[]) {
-  cout << vcid << endl << endl;
+  std::cout << vcid << std::endl << std::endl;
 
   // Default initialization
   int nargs = handleVersionOption(argc, argv, "lta_convert");
-  if (nargs && argc - nargs == 1)
-  {
+  if (nargs && argc - nargs == 1) {
     exit(0);
   }
   argc -= nargs;
@@ -622,10 +629,10 @@ int main(int argc, char *argv[]) {
               P.transin.c_str());
   }
   if (lta->type != LINEAR_RAS_TO_RAS) {
-    cerr << "ERROR: lta should be RAS_TO_RAS by now!!!" << endl;
+    std::cerr << "ERROR: lta should be RAS_TO_RAS by now!!!" << std::endl;
     exit(1);
   }
-  cout << " LTA read, type : " << lta->type << endl;
+  std::cout << " LTA read, type : " << lta->type << std::endl;
   MatrixPrint(stdout, lta->xforms[0].m_L);
 
   // conform trg
@@ -635,16 +642,19 @@ int main(int argc, char *argv[]) {
   // invert if desired
   if (P.invert) {
     VOL_GEOM vgtmp;
-    MATRIX *m_tmp = lta->xforms[0].m_L;
+    MATRIX * m_tmp     = lta->xforms[0].m_L;
     lta->xforms[0].m_L = MatrixInverse(lta->xforms[0].m_L, nullptr);
     MatrixFree(&m_tmp);
     LT *lt = &lta->xforms[0];
     if (lt->dst.valid == 0 || lt->src.valid == 0) {
-      cerr << "WARNING:********************************************************"
-              "\n";
-      cerr << "WARNING: dst or src volume is invalid.  Inverse likely wrong.\n";
-      cerr << "WARNING:********************************************************"
-              "\n";
+      std::cerr
+          << "WARNING:********************************************************"
+             "\n";
+      std::cerr
+          << "WARNING: dst or src volume is invalid.  Inverse likely wrong.\n";
+      std::cerr
+          << "WARNING:********************************************************"
+             "\n";
     }
     copyVolGeom(&lt->dst, &vgtmp);
     copyVolGeom(&lt->src, &lt->dst);
@@ -664,7 +674,7 @@ int main(int argc, char *argv[]) {
     {
       LTAchangeType(lta, P.ltaouttype);
     }
-    cout << "Writing  LTA to file " << P.ltaout.c_str() << "...\n";
+    std::cout << "Writing  LTA to file " << P.ltaout.c_str() << "...\n";
     FILE *fo = fopen(P.ltaout.c_str(), "w");
     if (fo == nullptr)
       ErrorExit(ERROR_BADFILE, "%s: can't create file %s", Progname,
@@ -705,7 +715,7 @@ static void printUsage() {
  \returns       number of used arguments for this command
  */
 static int parseNextCommand(int argc, char *argv[], Parameters &P) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[0] + 1; // remove '-'
@@ -723,77 +733,86 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   //    cout << "--in: " << P.transin << " input transform." << endl;
   //  }
   if (!strcmp(option, "INLTA")) {
-    P.transin = string(argv[1]);
-    P.intype = intypes::LTA;
-    nargs = 1;
-    cout << "--inlta: " << P.transin << " input LTA transform." << endl;
+    P.transin = std::string(argv[1]);
+    P.intype  = intypes::LTA;
+    nargs     = 1;
+    std::cout << "--inlta: " << P.transin << " input LTA transform."
+              << std::endl;
   } else if (!strcmp(option, "INFSL")) {
-    P.transin = string(argv[1]);
-    P.intype = intypes::FSL;
-    nargs = 1;
-    cout << "--infsl: " << P.transin << " input FSL transform." << endl;
+    P.transin = std::string(argv[1]);
+    P.intype  = intypes::FSL;
+    nargs     = 1;
+    std::cout << "--infsl: " << P.transin << " input FSL transform."
+              << std::endl;
   } else if (!strcmp(option, "INMNI") || !strcmp(option, "INXFM")) {
-    P.transin = string(argv[1]);
-    P.intype = intypes::MNI;
-    nargs = 1;
-    cout << "--inmni: " << P.transin << " input MNI/XFM transform." << endl;
+    P.transin = std::string(argv[1]);
+    P.intype  = intypes::MNI;
+    nargs     = 1;
+    std::cout << "--inmni: " << P.transin << " input MNI/XFM transform."
+              << std::endl;
   } else if (!strcmp(option, "INREG")) {
-    P.transin = string(argv[1]);
-    P.intype = intypes::REG;
-    nargs = 1;
-    cout << "--inreg: " << P.transin << " input TK REG transform." << endl;
+    P.transin = std::string(argv[1]);
+    P.intype  = intypes::REG;
+    nargs     = 1;
+    std::cout << "--inreg: " << P.transin << " input TK REG transform."
+              << std::endl;
   } else if (!strcmp(option, "SUBJECT")) {
-    P.subject = string(argv[1]);
-    nargs = 1;
-    cout << "--s: " << P.subject << " subject name" << endl;
+    P.subject = std::string(argv[1]);
+    nargs     = 1;
+    std::cout << "--s: " << P.subject << " subject name" << std::endl;
   } else if (!strcmp(option, "INNIFTYREG")) {
-    P.transin = string(argv[1]);
-    P.intype = intypes::NIFTYREG;
-    nargs = 1;
-    cout << "--inniftyreg: " << P.transin << " input Nifty Reg transform."
-         << endl;
+    P.transin = std::string(argv[1]);
+    P.intype  = intypes::NIFTYREG;
+    nargs     = 1;
+    std::cout << "--inniftyreg: " << P.transin << " input Nifty Reg transform."
+              << std::endl;
   } else if (!strcmp(option, "INITK")) {
-    P.transin = string(argv[1]);
-    P.intype = intypes::ITK;
-    nargs = 1;
-    cout << "--initk: " << P.transin << " input ITK txt transform." << endl;
+    P.transin = std::string(argv[1]);
+    P.intype  = intypes::ITK;
+    nargs     = 1;
+    std::cout << "--initk: " << P.transin << " input ITK txt transform."
+              << std::endl;
   } else if (!strcmp(option, "OUTLTA")) {
-    P.ltaout = string(argv[1]);
-    nargs = 1;
-    cout << "--outlta: " << P.ltaout << " output LTA." << endl;
+    P.ltaout = std::string(argv[1]);
+    nargs    = 1;
+    std::cout << "--outlta: " << P.ltaout << " output LTA." << std::endl;
   } else if (!strcmp(option, "OUTFSL")) {
-    P.fslout = string(argv[1]);
-    nargs = 1;
-    cout << "--outfsl: " << P.fslout << " output FSL matrix." << endl;
+    P.fslout = std::string(argv[1]);
+    nargs    = 1;
+    std::cout << "--outfsl: " << P.fslout << " output FSL matrix." << std::endl;
   } else if (!strcmp(option, "OUTMNI")) {
-    P.mniout = string(argv[1]);
-    nargs = 1;
-    cout << "--outmni: " << P.mniout << " output MNI/XFM matrix." << endl;
+    P.mniout = std::string(argv[1]);
+    nargs    = 1;
+    std::cout << "--outmni: " << P.mniout << " output MNI/XFM matrix."
+              << std::endl;
   } else if (!strcmp(option, "OUTREG")) {
-    P.regout = string(argv[1]);
-    nargs = 1;
-    cout << "--outreg: " << P.regout << " output reg.dat matrix." << endl;
+    P.regout = std::string(argv[1]);
+    nargs    = 1;
+    std::cout << "--outreg: " << P.regout << " output reg.dat matrix."
+              << std::endl;
   } else if (!strcmp(option, "OUTITK")) {
-    P.itkout = string(argv[1]);
-    nargs = 1;
-    cout << "--outitk: " << P.itkout << " output ITK txt matrix." << endl;
+    P.itkout = std::string(argv[1]);
+    nargs    = 1;
+    std::cout << "--outitk: " << P.itkout << " output ITK txt matrix."
+              << std::endl;
   } else if (!strcmp(option, "SRC")) {
-    P.src = string(argv[1]);
+    P.src = std::string(argv[1]);
     nargs = 1;
-    cout << "--src: " << P.src << " src image (geometry)." << endl;
+    std::cout << "--src: " << P.src << " src image (geometry)." << std::endl;
   } else if (!strcmp(option, "TRG")) {
-    P.trg = string(argv[1]);
+    P.trg = std::string(argv[1]);
     nargs = 1;
-    cout << "--trg: " << P.trg << " trg image (geometry)." << endl;
+    std::cout << "--trg: " << P.trg << " trg image (geometry)." << std::endl;
   } else if (!strcmp(option, "TRGCONFORM")) {
     P.trgconform = true;
-    cout << "--trgconform: will conform target geometry." << endl;
+    std::cout << "--trgconform: will conform target geometry." << std::endl;
   } else if (!strcmp(option, "LTAVOX2VOX")) {
     P.ltaouttype = LINEAR_VOX_TO_VOX;
-    cout << "--ltavox2vox: output LTA as VOX_TO_VOX transform." << endl;
+    std::cout << "--ltavox2vox: output LTA as VOX_TO_VOX transform."
+              << std::endl;
   } else if (!strcmp(option, "INVERT")) {
     P.invert = true;
-    cout << "--invert: will invert transform." << endl;
+    std::cout << "--invert: will invert transform." << std::endl;
   } else if (!strcmp(option, "HELP")) {
     printUsage();
     exit(1);
@@ -803,7 +822,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   //    char* it = argv[1];
   //    StrUpper(it);
   //    nargs = 1;
-  //    string sit = string(it);
+  //   std::string it = string(it);
   //    if (sit == "LTA") P.intype = intypes::LTA;
   //    else if (sit == "MNI") P.intype = intypes::MNI;
   //    else if (sit == "XFM") P.intype = intypes::MNI;
@@ -817,10 +836,11 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   //    cout << "--intype: " << sit << endl;
   //  }
   else {
-    cerr << endl
-         << endl
-         << "ERROR: Option: " << argv[0] << " unknown (see --help) !! " << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Option: " << argv[0] << " unknown (see --help) !! "
+              << std::endl
+              << std::endl;
     exit(1);
   }
 

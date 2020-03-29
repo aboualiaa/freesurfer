@@ -27,8 +27,8 @@
 #define RESAMPLE_H_INC
 
 #include "MRIio_old.h"
-#include "mrisurf.h"
 #include "label.h"
+#include "mrisurf.h"
 
 /* float-to-integer conversions */
 #define FLT2INT_ROUND 0 /* c = (int)rint(x) */
@@ -37,8 +37,8 @@
 
 /* interpolation methods */
 #define INTERP_NEAREST 0
-#define INTERP_TLI 1
-#define INTERP_SINC 2
+#define INTERP_TLI     1
+#define INTERP_SINC    2
 
 #define IND2CRS
 #define CRS2IND
@@ -120,7 +120,7 @@ MRI *surf2surf_nnf(MRI *SrcSurfVals, MRI_SURFACE *SrcSurfReg,
                    MRI_SURFACE *TrgSurfReg, int UseHash);
 
 MRI *MRImapSurf2VolClosest(MRIS *surf, MRI *vol, MATRIX *Ma2v, float projfrac);
-int MRIsurf2Vol(MRI *surfvals, MRI *vol, MRI *map);
+int  MRIsurf2Vol(MRI *surfvals, MRI *vol, MRI *map);
 MRI *MRIsurf2VolOpt(MRI *ribbon, MRIS **surfs, MRI **overlays, int nsurfs,
                     LTA *Q, MRI *volsurf);
 

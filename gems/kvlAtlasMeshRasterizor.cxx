@@ -20,7 +20,7 @@ void AtlasMeshRasterizor ::Rasterize(const AtlasMesh *mesh) {
   // Fill in the data structure to pass on to the threads
   ThreadStruct str;
   str.m_Rasterizor = this;
-  str.m_Mesh = mesh;
+  str.m_Mesh       = mesh;
   for (AtlasMesh::CellsContainer::ConstIterator cellIt =
            mesh->GetCells()->Begin();
        cellIt != mesh->GetCells()->End(); ++cellIt) {

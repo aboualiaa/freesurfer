@@ -23,11 +23,11 @@
  *
  */
 
+#include <Getifh.h>
+#include <endianio.h>
+#include <rec.h>
 #include <stdlib.h>
 #include <string.h>
-#include <endianio.h>
-#include <Getifh.h>
-#include <rec.h>
 
 #define MAXL 256
 
@@ -46,15 +46,15 @@ extern void flipy(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
 extern void flipz(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
 
 static char rcsid[] = "$Id: flip_4dfp.c,v 1.2 2007/05/05 00:00:06 nicks Exp $";
-int main(int argc, char *argv[]) {
+int         main(int argc, char *argv[]) {
   FILE *imgfp, *outfp;
-  IFH ifh;
-  char imgfile[MAXL], outfile[MAXL], imgroot[MAXL], outroot[MAXL] = "";
+  IFH   ifh;
+  char  imgfile[MAXL], outfile[MAXL], imgroot[MAXL], outroot[MAXL] = "";
   char *ptr, command[MAXL], program[MAXL];
-  char control = '\0';
+  char  control = '\0';
 
-  int imgdim[4];
-  float voxdim[3];
+  int    imgdim[4];
+  float  voxdim[3];
   float *imgt;
 
   int c, i, k;
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
           break;
         case '@':
           control = *ptr++;
-          *ptr = '\0';
+          *ptr    = '\0';
           break;
         }
     } else

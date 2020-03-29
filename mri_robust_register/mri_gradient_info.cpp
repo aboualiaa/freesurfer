@@ -26,8 +26,6 @@
 #include "mri.h"
 #include "version.h"
 
-using namespace std;
-
 // static char vcid[] = "$Id: mri_gradient_info.cpp,v 1.5 2012/09/21 23:05:17
 // mreuter Exp $";
 const char *Progname = nullptr;
@@ -42,16 +40,16 @@ double scanX(MRI *mri_grad, MRI *mri_mask) {
 
   // find vert edges in gradx
   double thres = 5.0;
-  int w, h, d;
+  int    w, h, d;
 
   double lastg = -1;
   double currg = -1;
   double nextg;
-  double edgewsum = 0.0;
-  int edgecount = 0;
-  int left = -1;
-  int right = -1;
-  double max = 0;
+  double edgewsum  = 0.0;
+  int    edgecount = 0;
+  int    left      = -1;
+  int    right     = -1;
+  double max       = 0;
   for (d = 0; d < mri_grad->depth; d++)
     for (h = 0; h < mri_grad->height; h++)
     // d=128;
@@ -61,17 +59,17 @@ double scanX(MRI *mri_grad, MRI *mri_mask) {
 
       lastg = -1;
       currg = -1;
-      left = -1;
+      left  = -1;
       right = -1;
-      max = 0;
+      max   = 0;
       for (w = 0; w < mri_grad->width; w++) {
         if (mri_mask != nullptr) {
           if (MRIgetVoxVal(mri_mask, w, h, d, 0) <= 0) {
             lastg = -1;
             currg = -1;
-            left = -1;
+            left  = -1;
             right = -1;
-            max = 0;
+            max   = 0;
             continue;
           }
         }
@@ -96,7 +94,7 @@ double scanX(MRI *mri_grad, MRI *mri_mask) {
           if (nextg > currg) // now going up, set left
           {
             left = w - 1;
-            max = nextg; // reset max starting here
+            max  = nextg; // reset max starting here
           }
           // continue in other cases (down or sideways)
         } else // we have a left minimum
@@ -118,9 +116,9 @@ double scanX(MRI *mri_grad, MRI *mri_mask) {
               // cout << " measure edge max: " << max << " L: " << left << " R:
               // " << right << " w: " << right-left<< endl;
             }
-            left = w - 1;
+            left  = w - 1;
             right = -1;
-            max = nextg;
+            max   = nextg;
           }
           // other cases are 1. going up/sideways before reaching max or going
           // down after max
@@ -135,7 +133,7 @@ double scanX(MRI *mri_grad, MRI *mri_mask) {
       }
     }
   edgewsum /= edgecount;
-  cout << " blur: " << edgewsum << " edges: " << edgecount << endl;
+  std::cout << " blur: " << edgewsum << " edges: " << edgecount << std::endl;
   return edgewsum;
 }
 
@@ -149,16 +147,16 @@ double scanY(MRI *mri_grad, MRI *mri_mask) {
 
   // find vert edges in gradx
   double thres = 5.0;
-  int w, h, d;
+  int    w, h, d;
 
   double lastg = -1;
   double currg = -1;
   double nextg;
-  double edgewsum = 0.0;
-  int edgecount = 0;
-  int left = -1;
-  int right = -1;
-  double max = 0;
+  double edgewsum  = 0.0;
+  int    edgecount = 0;
+  int    left      = -1;
+  int    right     = -1;
+  double max       = 0;
   for (d = 0; d < mri_grad->depth; d++)
     for (w = 0; w < mri_grad->width; w++)
     // d=128;
@@ -168,17 +166,17 @@ double scanY(MRI *mri_grad, MRI *mri_mask) {
 
       lastg = -1;
       currg = -1;
-      left = -1;
+      left  = -1;
       right = -1;
-      max = 0;
+      max   = 0;
       for (h = 0; h < mri_grad->height; h++) {
         if (mri_mask != nullptr) {
           if (MRIgetVoxVal(mri_mask, w, h, d, 0) <= 0) {
             lastg = -1;
             currg = -1;
-            left = -1;
+            left  = -1;
             right = -1;
-            max = 0;
+            max   = 0;
             continue;
           }
         }
@@ -203,7 +201,7 @@ double scanY(MRI *mri_grad, MRI *mri_mask) {
           if (nextg > currg) // now going up, set left
           {
             left = h - 1;
-            max = nextg; // reset max starting here
+            max  = nextg; // reset max starting here
           }
           // continue in other cases (down or sideways)
         } else // we have a left minimum
@@ -225,9 +223,9 @@ double scanY(MRI *mri_grad, MRI *mri_mask) {
               // cout << " measure edge max: " << max << " L: " << left << " R:
               // " << right << " w: " << right-left<< endl;
             }
-            left = h - 1;
+            left  = h - 1;
             right = -1;
-            max = nextg;
+            max   = nextg;
           }
           // other cases are 1. going up/sideways before reaching max or going
           // down after max
@@ -242,7 +240,7 @@ double scanY(MRI *mri_grad, MRI *mri_mask) {
       }
     }
   edgewsum /= edgecount;
-  cout << " blur: " << edgewsum << " edges: " << edgecount << endl;
+  std::cout << " blur: " << edgewsum << " edges: " << edgecount << std::endl;
   return edgecount;
 }
 
@@ -256,16 +254,16 @@ double scanZ(MRI *mri_grad, MRI *mri_mask) {
 
   // find vert edges in gradx
   double thres = 5.0;
-  int w, h, d;
+  int    w, h, d;
 
   double lastg = -1;
   double currg = -1;
   double nextg;
-  double edgewsum = 0.0;
-  int edgecount = 0;
-  int left = -1;
-  int right = -1;
-  double max = 0;
+  double edgewsum  = 0.0;
+  int    edgecount = 0;
+  int    left      = -1;
+  int    right     = -1;
+  double max       = 0;
   for (w = 0; w < mri_grad->width; w++)
     for (h = 0; h < mri_grad->height; h++)
     // d=128;
@@ -275,17 +273,17 @@ double scanZ(MRI *mri_grad, MRI *mri_mask) {
 
       lastg = -1;
       currg = -1;
-      left = -1;
+      left  = -1;
       right = -1;
-      max = 0;
+      max   = 0;
       for (d = 0; d < mri_grad->depth; d++) {
         if (mri_mask != nullptr) {
           if (MRIgetVoxVal(mri_mask, w, h, d, 0) <= 0) {
             lastg = -1;
             currg = -1;
-            left = -1;
+            left  = -1;
             right = -1;
-            max = 0;
+            max   = 0;
             continue;
           }
         }
@@ -310,7 +308,7 @@ double scanZ(MRI *mri_grad, MRI *mri_mask) {
           if (nextg > currg) // now going up, set left
           {
             left = d - 1;
-            max = nextg; // reset max starting here
+            max  = nextg; // reset max starting here
           }
           // continue in other cases (down or sideways)
         } else // we have a left minimum
@@ -332,9 +330,9 @@ double scanZ(MRI *mri_grad, MRI *mri_mask) {
               // cout << " measure edge max: " << max << " L: " << left << " R:
               // " << right << " w: " << right-left<< endl;
             }
-            left = d - 1;
+            left  = d - 1;
             right = -1;
-            max = nextg;
+            max   = nextg;
           }
           // other cases are 1. going up/sideways before reaching max or going
           // down after max
@@ -349,7 +347,7 @@ double scanZ(MRI *mri_grad, MRI *mri_mask) {
       }
     }
   edgewsum /= edgecount;
-  cout << " blur: " << edgewsum << " edges: " << edgecount << endl;
+  std::cout << " blur: " << edgewsum << " edges: " << edgecount << std::endl;
   return edgecount;
 }
 
@@ -366,38 +364,38 @@ double scanXold(MRI *mri_in, MRI *mri_grad, MRI *mri_mask) {
 
   // find vert edges in gradx
   double thres = 5.0;
-  int w, h, d;
-  int extremum = -1;
-  bool onedge = false;
-  double lasti = -1;
-  double lastg = -1;
-  double curri = -1;
-  double currg = -1;
+  int    w, h, d;
+  int    extremum = -1;
+  bool   onedge   = false;
+  double lasti    = -1;
+  double lastg    = -1;
+  double curri    = -1;
+  double currg    = -1;
   double nexti, nextg;
-  double edgewsum = 0.0;
-  int edgecount = 0;
+  double edgewsum  = 0.0;
+  int    edgecount = 0;
   for (d = 0; d < mri_in->depth; d++)
     for (h = 0; h < mri_in->height; h++)
     // d=128;
     // h=128;
     {
       extremum = -1;
-      onedge = false;
-      lasti = -1;
-      curri = -1;
+      onedge   = false;
+      lasti    = -1;
+      curri    = -1;
       for (w = 0; w < mri_in->width; w++) {
         if (mri_mask != nullptr) {
           if (MRIgetVoxVal(mri_mask, w, h, d, 0) <= 0) {
             extremum = -1;
-            onedge = false;
-            lasti = -1;
-            curri = -1;
+            onedge   = false;
+            lasti    = -1;
+            curri    = -1;
             continue;
           }
         }
         if (lasti < 0) {
-          lasti = MRIgetVoxVal(mri_in, w, h, d, 0);
-          lastg = fabs(MRIgetVoxVal(mri_grad, w, h, d, 0));
+          lasti    = MRIgetVoxVal(mri_in, w, h, d, 0);
+          lastg    = fabs(MRIgetVoxVal(mri_grad, w, h, d, 0));
           extremum = w;
           continue;
         }
@@ -414,7 +412,7 @@ double scanXold(MRI *mri_in, MRI *mri_grad, MRI *mri_mask) {
         if (onedge) {
           assert(extremum >= 0);
           if (currg > lastg && currg > nextg) {
-            cout << " onedge and found edge again???" << endl;
+            std::cout << " onedge and found edge again???" << std::endl;
             assert(1 == 2);
           }
 
@@ -424,7 +422,7 @@ double scanXold(MRI *mri_in, MRI *mri_grad, MRI *mri_mask) {
             edgecount++;
             edgewsum += w - 1 - extremum;
             extremum = w - 1;
-            onedge = false;
+            onedge   = false;
           }
         } else // not on edge:
         {
@@ -453,9 +451,9 @@ int main(int argc, char *argv[]) {
   Progname = argv[0];
 
   if (argc < 2) {
-    cout << endl;
-    cout << argv[0] << " image.mgz" << endl;
-    cout << endl;
+    std::cout << std::endl;
+    std::cout << argv[0] << " image.mgz" << std::endl;
+    std::cout << std::endl;
     //    cout << "    norm-div  (=1)  divide final distance by this (e.g. step
     //    adjustment)" << endl; cout << "    dist-type " << endl; cout << " 1
     //    (default) Rigid Transform Distance (||log(R)|| + ||T||)" << endl; cout
@@ -465,7 +463,7 @@ int main(int argc, char *argv[]) {
     //    endl; cout << endl;
     exit(1);
   }
-  string mrif = argv[1];
+  std::string mrif = argv[1];
 
   MRI *mri_in = MRIread(mrif.c_str());
 
@@ -478,11 +476,11 @@ int main(int argc, char *argv[]) {
   //  MRIwriteFrame(mri_grad,"sobel_grad3.mgz",2);
   //  MRIwrite(mri_mag,"sobel_mag.mgz");
 
-  int dd, hh, ww;
+  int    dd, hh, ww;
   double avg = 0.0;
-  float val;
-  int count = 0;
-  int all = mri_mag->depth * mri_mag->height * mri_mag->width;
+  float  val;
+  int    count = 0;
+  int    all   = mri_mag->depth * mri_mag->height * mri_mag->width;
   for (dd = 0; dd < mri_mag->depth; dd++)
     for (hh = 0; hh < mri_mag->height; hh++)
       for (ww = 0; ww < mri_mag->width; ww++) {
@@ -495,8 +493,8 @@ int main(int argc, char *argv[]) {
         //   avg += tanh(val/10.0);
       }
   avg /= count;
-  cout << "avg mag : " << avg << endl;
-  cout << "count   : " << count << endl;
+  std::cout << "avg mag : " << avg << std::endl;
+  std::cout << "count   : " << count << std::endl;
 
   //  double b1 =
   // scanX(mri_grad,mri_mask);
@@ -517,21 +515,21 @@ int main(int argc, char *argv[]) {
   MRIfree(&mri_grad);
 
   MRIsetVoxVal(mri_mag, 0, 0, 0, 0, 77);
-  int n = 2;
+  int        n = 2;
   HISTOGRAM *h = MRIhistogram(mri_mag, n);
 
-  cout << " h = [ ";
+  std::cout << " h = [ ";
   for (int ii = 0; ii < n; ii++) {
     //    cout << "i " << ii << " : " << h->counts[ii] <<  " uval: " <<
     //    h->bins[ii] << endl;
-    cout << h->bins[ii] << " , " << h->counts[ii];
+    std::cout << h->bins[ii] << " , " << h->counts[ii];
     if (ii < n - 1)
-      cout << " ; " << endl;
+      std::cout << " ; " << std::endl;
     else
-      cout << "] ; " << endl;
+      std::cout << "] ; " << std::endl;
   }
 
-  cout << "pct: " << 100 * h->counts[n - 1] / all << endl;
+  std::cout << "pct: " << 100 * h->counts[n - 1] / all << std::endl;
 
-  cout << " entropy: " << HISTOgetEntropy(h) << endl;
+  std::cout << " entropy: " << HISTOgetEntropy(h) << std::endl;
 }

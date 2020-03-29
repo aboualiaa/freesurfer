@@ -75,27 +75,27 @@ parcellation/annotation.
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "mri2.h"
+#include "mrisutils.h"
 #include "version.h"
-#include "cmdargs.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mris_seg2annot.c,v 1.10 2014/11/15 00:07:19 greve Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 static int annot = 0;
@@ -105,20 +105,21 @@ char *subject = nullptr, *hemi = nullptr;
 char *ctabfile = nullptr, *annotfile = nullptr;
 char *SUBJECTS_DIR;
 
-COLOR_TABLE *ctab = nullptr;
-int AutoCTab = 0;
-char *outctabfile = nullptr;
+COLOR_TABLE *ctab        = nullptr;
+int          AutoCTab    = 0;
+char *       outctabfile = nullptr;
 MRI_SURFACE *mris;
-MRI *surfseg, *mritmp;
-char *surfname = "white";
+MRI *        surfseg, *mritmp;
+char *       surfname = "white";
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, nv;
+  int  nargs, nv;
   char tmpstr[2000];
 
   nargs = handleVersionOption(argc, argv, "mris_seg2annot");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -196,7 +197,7 @@ int main(int argc, char *argv[]) {
     for (vno = 0; vno < mris->nvertices; vno++) {
       annot = MRIgetVoxVal(surfseg, vno, 0, 0, 0);
       if (vno == Gdiag_no) {
-        int index, r, g, b;
+        int         index, r, g, b;
         const char *name;
         AnnotToRGB(annot, r, g, b);
         printf("annot %x = %d  %d  %d\n", annot, r, g, b);
@@ -221,7 +222,7 @@ int main(int argc, char *argv[]) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -253,37 +254,37 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--s")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--seg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       surfsegfile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--annot")) {
-      annot = 1;
+      annot     = 1;
       nargsused = 0;
     } else if (!strcasecmp(option, "--h") || !strcasecmp(option, "--hemi")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      surfname = pargv[0];
+      surfname  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--ctab")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      ctabfile = pargv[0];
+      ctabfile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--ctab-auto")) {
-      AutoCTab = 1;
+      AutoCTab  = 1;
       nargsused = 0;
       if (CMDnthIsArg(nargc, pargv, 0)) {
         outctabfile = pargv[0];
-        nargsused = 1;
+        nargsused   = 1;
       }
     } else if (!strcasecmp(option, "--o")) {
       if (nargc < 1)

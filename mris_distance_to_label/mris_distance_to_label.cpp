@@ -24,8 +24,8 @@
  *
  */
 
-#include "version.h"
 #include "timer.h"
+#include "version.h"
 
 #include "fastmarching.h"
 
@@ -55,7 +55,7 @@ static const char *FRAME_FIELD_NAMES[] = /* order correspond to
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -63,23 +63,23 @@ static void print_version();
 
 const char *Progname;
 
-static int labels[50];
-static int nlabels = 0;
-static int navgs = 0;
+static int   labels[50];
+static int   nlabels   = 0;
+static int   navgs     = 0;
 static float fdistance = 20.0f;
-static int mode = 1;
+static int   mode      = 1;
 
 static char subjects_dir[STRLEN];
 
 static void mrisExtractMRIvalues(MRIS *mris, MRI *mri, MRI *mri_distance,
                                  float distance, int mode) {
-  int n;
-  double xw, yw, zw, xv, yv, zv, val;
+  int     n;
+  double  xw, yw, zw, xv, yv, zv, val;
   VERTEX *v;
 
   MRISclearCurvature(mris);
   for (n = 0; n < mris->nvertices; n++) {
-    v = &mris->vertices[n];
+    v  = &mris->vertices[n];
     xw = v->x;
     yw = v->y;
     zw = v->z;
@@ -97,7 +97,7 @@ static void mrisExtractMRIvalues(MRIS *mris, MRI *mri, MRI *mri_distance,
 #define MAXIMUM_DISTANCE 10.0
 
 static void mrisProcessDistanceValues(MRIS *mris) {
-  int n;
+  int     n;
   VERTEX *v;
 
   for (n = 0; n < mris->nvertices; n++) {
@@ -110,19 +110,19 @@ static void mrisProcessDistanceValues(MRIS *mris) {
 
 static void mrisExtractMidGrayValues(MRIS *mris, MRI *mri) {
 
-  int n;
-  float th;
-  double xw, yw, zw, xv, yv, zv, val;
+  int     n;
+  float   th;
+  double  xw, yw, zw, xv, yv, zv, val;
   VERTEX *v;
 
   for (n = 0; n < mris->nvertices; n++) {
-    v = &mris->vertices[n];
+    v      = &mris->vertices[n];
     v->val = 0;
   }
 
   MRIScomputeMetricProperties(mris);
   for (n = 0; n < mris->nvertices; n++) {
-    v = &mris->vertices[n];
+    v  = &mris->vertices[n];
     th = v->curv / 2.0f;
     xw = v->x + th * v->nx;
     yw = v->y + th * v->ny;
@@ -133,7 +133,7 @@ static void mrisExtractMidGrayValues(MRIS *mris, MRI *mri) {
   }
 
   for (n = 0; n < mris->nvertices; n++) {
-    v = &mris->vertices[n];
+    v       = &mris->vertices[n];
     v->curv = v->val;
   }
 }
@@ -170,11 +170,11 @@ static int findSurfaceReference(int label) {
 
 int main(int argc, char *argv[]) {
   char *subject_fname, *subjects_fname[STRLEN], fname[STRLEN], *cp, *hemi;
-  int nargs, n, m, surface_reference, nsubjects;
+  int   nargs, n, m, surface_reference, nsubjects;
   MRI_SURFACE *mris;
-  MRI *mri, *mri_distance, *mri_orig;
+  MRI *        mri, *mri_distance, *mri_orig;
 
-  int msec, minutes, seconds;
+  int   msec, minutes, seconds;
   Timer start;
 
   nargs = handleVersionOption(argc, argv, "mris_distance_to_label");
@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
     MRISfree(&mris);
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = (int)((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

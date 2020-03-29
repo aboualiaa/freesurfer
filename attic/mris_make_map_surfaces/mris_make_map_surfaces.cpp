@@ -23,59 +23,56 @@
  *
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 #include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "cma.h"
+#include "const.h"
 #include "diag.h"
 #include "error.h"
-#include "proto.h"
-#include "mrisutils.h"
-#include "mri.h"
-#include "version.h"
-#include "utils.h"
-#include "const.h"
 #include "macros.h"
+#include "mri.h"
 #include "mrisurf.h"
+#include "mrisutils.h"
+#include "proto.h"
+#include "utils.h"
+#include "version.h"
 
 static char vcid[] =
-  "$Id: mris_make_map_surfaces.c,v 1.3 2013/01/08 22:01:16 nicks Exp $";
-const char *Progname ;
-static char sdir[STRLEN] = "" ;
-static double l_surf_repulse = 5.0 ;
-static int nbrs = 2 ;
+    "$Id: mris_make_map_surfaces.c,v 1.3 2013/01/08 22:01:16 nicks Exp $";
+const char *  Progname;
+static char   sdir[STRLEN]   = "";
+static double l_surf_repulse = 5.0;
+static int    nbrs           = 2;
 
-static char white_name[STRLEN]  = "white" ;
-static char pial_name[STRLEN]  = "pial" ;
-static MRI *mri_aseg = NULL ;
+static char white_name[STRLEN] = "white";
+static char pial_name[STRLEN]  = "pial";
+static MRI *mri_aseg           = NULL;
 
-static MRI *mask_volume(MRI *mri_src, MRI *mri_aseg, MRI *mri_dst) ;
-static int  get_option(int argc, char *argv[]) ;
-static void usage_exit(void) ;
-static void print_usage(void) ;
-static void print_help(void) ;
-static void print_version(void) ;
+static MRI *mask_volume(MRI *mri_src, MRI *mri_aseg, MRI *mri_dst);
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
-static INTEGRATION_PARMS parms ;
+static INTEGRATION_PARMS parms;
 
-static int max_averages = 16 ;
-static int min_averages = 2 ;
+static int max_averages = 16;
+static int min_averages = 2;
 
-int
-main(int argc, char *argv[])
-{
-  char           *output_suffix, *subject, fname[STRLEN], *cp, **av ;
-  MRI            *mri ;
-  MRIS           *mris_lh, *mris_rh, *mris ;
-  int            ac, nargs, averages, i ;
-  double         orig_dt ;
+int main(int argc, char *argv[]) {
+  char * output_suffix, *subject, fname[STRLEN], *cp, **av;
+  MRI *  mri;
+  MRIS * mris_lh, *mris_rh, *mris;
+  int    ac, nargs, averages, i;
+  double orig_dt;
 
   nargs = handleVersionOption(argc, argv, "mris_make_map_surfaces");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
 
   argc -= nargs;
@@ -84,21 +81,21 @@ main(int argc, char *argv[])
   DiagInit(NULL, NULL, NULL);
 
   memset(&parms, 0, sizeof(parms));
-  parms.l_map = 1;
-  parms.n_averages = 16;
-  parms.projection = NO_PROJECTION;
-  parms.tol = 1e-4;
+  parms.l_map            = 1;
+  parms.n_averages       = 16;
+  parms.projection       = NO_PROJECTION;
+  parms.tol              = 1e-4;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.dt = 0.5f;
-  parms.l_curv = .1;
-  parms.l_tspring = 1.0;
-  parms.l_nspring = .5;
-  parms.check_tol = 1;
+  parms.dt               = 0.5f;
+  parms.l_curv           = .1;
+  parms.l_tspring        = 1.0;
+  parms.l_nspring        = .5;
+  parms.check_tol        = 1;
   parms.write_iterations = 0;
-  parms.l_surf_repulse = 0.0;
-  parms.l_repulse = 5;
-  parms.niterations = 1000;
-  parms.resolution = 0.25;
+  parms.l_surf_repulse   = 0.0;
+  parms.l_repulse        = 5;
+  parms.niterations      = 1000;
+  parms.resolution       = 0.25;
 
   ac = argc;
   av = argv;
@@ -162,7 +159,7 @@ main(int argc, char *argv[])
   }
 
   parms.mri_aseg = mri_aseg;
-  orig_dt = parms.dt;
+  orig_dt        = parms.dt;
   for (i = 0; i < 3; i++) {
     for (averages = max_averages; averages >= min_averages; averages /= 2) {
       printf("----------- Positioning Surfaces with %d iterative averages "
@@ -182,7 +179,7 @@ main(int argc, char *argv[])
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -253,8 +250,8 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'M':
       parms.integration_type = INTEGRATE_MOMENTUM;
-      parms.momentum = atof(argv[2]);
-      nargs = 1;
+      parms.momentum         = atof(argv[2]);
+      nargs                  = 1;
       fprintf(stderr, "momentum = %2.2f\n", parms.momentum);
       break;
     case 'R':
@@ -264,7 +261,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'W':
       sscanf(argv[2], "%d", &parms.write_iterations);

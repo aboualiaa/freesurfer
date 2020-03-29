@@ -67,12 +67,12 @@ class Entry;
 class Q_JSONRPC_EXPORT QJsonValue {
 public:
   enum Type {
-    Null = 0x0,
-    Bool = 0x1,
-    Double = 0x2,
-    String = 0x3,
-    Array = 0x4,
-    Object = 0x5,
+    Null      = 0x0,
+    Bool      = 0x1,
+    Double    = 0x2,
+    String    = 0x3,
+    Array     = 0x4,
+    Object    = 0x5,
     Undefined = 0x80
   };
 
@@ -92,9 +92,9 @@ public:
   QJsonValue &operator=(const QJsonValue &other);
 
   static QJsonValue fromVariant(const QVariant &variant);
-  QVariant toVariant() const;
+  QVariant          toVariant() const;
 
-  Type type() const;
+  Type        type() const;
   inline bool isNull() const { return type() == Null; }
   inline bool isBool() const { return type() == Bool; }
   inline bool isDouble() const { return type() == Double; }
@@ -103,12 +103,12 @@ public:
   inline bool isObject() const { return type() == Object; }
   inline bool isUndefined() const { return type() == Undefined; }
 
-  bool toBool(bool defaultValue = false) const;
-  int toInt(int defaultValue = 0) const;
-  double toDouble(double defaultValue = 0) const;
-  QString toString(const QString &defaultValue = QString()) const;
-  QJsonArray toArray() const;
-  QJsonArray toArray(const QJsonArray &defaultValue) const;
+  bool        toBool(bool defaultValue = false) const;
+  int         toInt(int defaultValue = 0) const;
+  double      toDouble(double defaultValue = 0) const;
+  QString     toString(const QString &defaultValue = QString()) const;
+  QJsonArray  toArray() const;
+  QJsonArray  toArray(const QJsonArray &defaultValue) const;
   QJsonObject toObject() const;
   QJsonObject toObject(const QJsonObject &defaultValue) const;
 
@@ -129,14 +129,14 @@ private:
   void detach();
 
   union {
-    quint64 ui;
-    bool b;
-    double dbl;
+    quint64             ui;
+    bool                b;
+    double              dbl;
     QJsonPrivate::Base *base;
   };
-  QString stringValue;
+  QString             stringValue;
   QJsonPrivate::Data *d; // needed for Objects and Arrays
-  Type t;
+  Type                t;
 };
 
 class Q_JSONRPC_EXPORT QJsonValueRef {
@@ -146,25 +146,25 @@ public:
   QJsonValueRef(QJsonObject *object, int idx)
       : o(object), is_object(true), index(idx) {}
 
-  inline operator QJsonValue() const { return toValue(); }
+  inline         operator QJsonValue() const { return toValue(); }
   QJsonValueRef &operator=(const QJsonValue &val);
   QJsonValueRef &operator=(const QJsonValueRef &val);
 
   inline QJsonValue::Type type() const { return toValue().type(); }
-  inline bool isNull() const { return type() == QJsonValue::Null; }
-  inline bool isBool() const { return type() == QJsonValue::Bool; }
+  inline bool             isNull() const { return type() == QJsonValue::Null; }
+  inline bool             isBool() const { return type() == QJsonValue::Bool; }
   inline bool isDouble() const { return type() == QJsonValue::Double; }
   inline bool isString() const { return type() == QJsonValue::String; }
   inline bool isArray() const { return type() == QJsonValue::Array; }
   inline bool isObject() const { return type() == QJsonValue::Object; }
   inline bool isUndefined() const { return type() == QJsonValue::Undefined; }
 
-  inline bool toBool() const { return toValue().toBool(); }
-  inline int toInt() const { return toValue().toInt(); }
-  inline double toDouble() const { return toValue().toDouble(); }
+  inline bool    toBool() const { return toValue().toBool(); }
+  inline int     toInt() const { return toValue().toInt(); }
+  inline double  toDouble() const { return toValue().toDouble(); }
   inline QString toString() const { return toValue().toString(); }
-  QJsonArray toArray() const;
-  QJsonObject toObject() const;
+  QJsonArray     toArray() const;
+  QJsonObject    toObject() const;
 
   inline bool operator==(const QJsonValue &other) const {
     return toValue() == other;
@@ -177,7 +177,7 @@ private:
   QJsonValue toValue() const;
 
   union {
-    QJsonArray *a;
+    QJsonArray * a;
     QJsonObject *o;
   };
   uint is_object : 1;

@@ -23,23 +23,23 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "timer.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
+#include "class_array.h"
+#include "cma.h"
 #include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
 #include "proto.h"
 #include "svm.h"
+#include "timer.h"
 #include "version.h"
 #include "voxlist.h"
-#include "cma.h"
-#include "class_array.h"
 
 static char vcid[] =
     "$Id: mri_aseg_edit_train.c,v 1.3 2011/03/02 00:04:13 nicks Exp $";
@@ -50,11 +50,11 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
-static void usage_exit(void);
-static void print_usage(void);
-static void print_help(void);
-static void print_version(void);
+static int     get_option(int argc, char *argv[]);
+static void    usage_exit(void);
+static void    print_usage(void);
+static void    print_help(void);
+static void    print_version(void);
 static MATRIX *compute_ras_basis_vectors(MRI *mri_aseg_orig, MRI *mri_aseg_edit,
                                          int target_label, MATRIX *mEvectors,
                                          double *means, int width, int height,
@@ -67,18 +67,18 @@ const char *Progname;
 static char *wfile_name;
 static char *c1_name = "Left_Hippocampus";
 static char *c2_name = "Left_fimbria";
-static char *sdir = NULL;
+static char *sdir    = NULL;
 
-static char *test_subject = NULL;
-static char *prefix = "";
-static double svm_tol = DEFAULT_SVM_TOL;
-static double svm_C = DEFAULT_SVM_C;
-static double momentum = 0.0;
-static double rbf_sigma = 0.0;
-static double poly_d = 0.0;
-static int svm_max_iter = 1000000;
+static char * test_subject = NULL;
+static char * prefix       = "";
+static double svm_tol      = DEFAULT_SVM_TOL;
+static double svm_C        = DEFAULT_SVM_C;
+static double momentum     = 0.0;
+static double rbf_sigma    = 0.0;
+static double poly_d       = 0.0;
+static int    svm_max_iter = 1000000;
 
-static int ca_type = CA_GAUSSIAN; // CA_SVM ;
+static int ca_type  = CA_GAUSSIAN; // CA_SVM ;
 static int ca_width = 8;
 
 static int navgs = 0;
@@ -100,9 +100,9 @@ float y[20] = {1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 #endif
 
-static char *aseg_edit_name = "aseg.mgz";
-static char *aseg_orig_name = "aseg.auto.mgz";
-static char norm_name[STRLEN] = "norm.mgz";
+static char *aseg_edit_name    = "aseg.mgz";
+static char *aseg_orig_name    = "aseg.auto.mgz";
+static char  norm_name[STRLEN] = "norm.mgz";
 
 static float sigmas[] = {0, .5, 1.0, 2.0};
 #define NSCALES (sizeof(sigmas) / sizeof(sigmas[0]))
@@ -115,36 +115,36 @@ static VOXEL_LIST *vlst_add_border_voxels(MRI *mri1, MRI *mri2,
                                           VOXEL_LIST *vl_dif,
                                           VOXEL_LIST *vl_total, int target);
 
-static int wsize = 1;
+static int wsize   = 1;
 static int nscales = 1;
 
 /*-------------------------------- FUNCTIONS ----------------------------*/
 
 int main(int argc, char *argv[]) {
-  SVM *svm;
-  MRI *mri_aseg_orig, *mri_aseg_edit, *mri_norm;
+  SVM *  svm;
+  MRI *  mri_aseg_orig, *mri_aseg_edit, *mri_norm;
   char **av, fname[STRLEN], *cp, *subject_name, subjects_dir[STRLEN],
       *out_fname;
-  int ac, nargs, n, nsubjects;
-  Timer start;
-  int msec, minutes, seconds;
+  int         ac, nargs, n, nsubjects;
+  Timer       start;
+  int         msec, minutes, seconds;
   VOXEL_LIST *vl_dif, *vl_total;
 #if 0
   float        *classes, **inputs ;
   int          i ;
 #endif
-  double means[3];
-  float evalues[3];
+  double  means[3];
+  float   evalues[3];
   MATRIX *m_evectors, *m_xform;
-  CA *ca = NULL;
+  CA *    ca = NULL;
 
   m_evectors = MatrixAlloc(3, 3, MATRIX_REAL); /* eigenvectors of label */
 
 #if TEST_SVM
   {
     float **x;
-    int ntraining = 20, i, j, k;
-    double sum, w[2], out;
+    int     ntraining = 20, i, j, k;
+    double  sum, w[2], out;
 
     x = (float **)calloc(ntraining, sizeof(float));
     for (i = 0; i < ntraining; i++) {
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
           test_7T_phantom
 
               x[i][0] = x_[i][0];
-      x[i][1] = x_[i][1];
+      x[i][1]         = x_[i][1];
     }
 
     svm = SVMalloc(2, "c1", "c2");
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
   svm = SVMalloc(NINPUTS(which_inputs, wsize, nscales), c1_name, c2_name);
 
   /* first determine the number of subjects in each class */
-  n = ARGV_OFFSET;
+  n         = ARGV_OFFSET;
   nsubjects = argc - ARGV_OFFSET - 1;
   ;
   printf("training on %d subjects\n", nsubjects);
@@ -323,7 +323,7 @@ int main(int argc, char *argv[]) {
   }
   printf("writing trained classifier to %s...\n", out_fname);
   CAwrite(ca, out_fname);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -338,7 +338,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -510,7 +510,7 @@ static VOXEL_LIST *vlst_add_border_voxels(MRI *mri1, MRI *mri2,
       if (vl_dif->vsrc[i] == target)
         MRIsetVoxVal(mri, x, y, z, 0, 1);
     }
-    mri_dil = MRIdilate(mri, NULL);
+    mri_dil    = MRIdilate(mri, NULL);
     mri_border = MRImarkLabelBorderVoxels(mri2, NULL, target_label, 2, 1);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
       MRIwrite(mri_dil, "d.mgz");
@@ -536,9 +536,9 @@ static VOXEL_LIST *vlst_add_border_voxels(MRI *mri1, MRI *mri2,
               total = fabs(xk) + fabs(yk) + fabs(xk);
               if (total != 1)
                 continue; // only 6-connected nbrs
-              xi = mri1->xi[xk + x];
-              yi = mri1->yi[yk + y];
-              zi = mri1->zi[zk + z];
+              xi  = mri1->xi[xk + x];
+              yi  = mri1->yi[yk + y];
+              zi  = mri1->zi[zk + z];
               nbr = (int)MRIgetVoxVal(mri_dil, xi, yi, zi, 0);
               if (nbr == 0)
                 continue;
@@ -556,10 +556,10 @@ static VOXEL_LIST *vlst_add_border_voxels(MRI *mri1, MRI *mri2,
               if (xi == Gx && yi == Gy && zi == Gz)
                 DiagBreak();
               if (nvox < vl_total->nvox) {
-                l2 = (int)MRIgetVoxVal(mri2, xi, yi, zi, 0);
-                vl_total->xi[nvox] = xi;
-                vl_total->yi[nvox] = yi;
-                vl_total->zi[nvox] = zi;
+                l2                   = (int)MRIgetVoxVal(mri2, xi, yi, zi, 0);
+                vl_total->xi[nvox]   = xi;
+                vl_total->yi[nvox]   = yi;
+                vl_total->zi[nvox]   = zi;
                 vl_total->vsrc[nvox] = l1;
                 vl_total->vdst[nvox] = l2;
                 nvox++;
@@ -606,20 +606,20 @@ static MATRIX *compute_ras_basis_vectors(MRI *mri_aseg_orig, MRI *mri_aseg_edit,
                                          double *means, int width, int height,
                                          int depth, int pad) {
   MRI_REGION box1, box2, box;
-  MRI *mri_aligned, *mri_tmp;
-  MATRIX *m_xform, *m_trans, *m_tmp, *m_id, *m_inv, *m_targ, *m_src, *m_tmp2;
-  int i, j, max_col;
-  double dot, max_dot;
+  MRI *      mri_aligned, *mri_tmp;
+  MATRIX *   m_xform, *m_trans, *m_tmp, *m_id, *m_inv, *m_targ, *m_src, *m_tmp2;
+  int        i, j, max_col;
+  double     dot, max_dot;
 
-  m_xform = MatrixIdentity(4, NULL);
-  m_trans = MatrixIdentity(4, NULL);
+  m_xform                     = MatrixIdentity(4, NULL);
+  m_trans                     = MatrixIdentity(4, NULL);
   *MATRIX_RELT(m_trans, 1, 4) = -means[0];
   *MATRIX_RELT(m_trans, 2, 4) = -means[1];
   *MATRIX_RELT(m_trans, 3, 4) = -means[2];
-  m_inv = MatrixInverse(m_evectors, NULL);
+  m_inv                       = MatrixInverse(m_evectors, NULL);
 
   // rearrange vectors to be as close to RAS as possible
-  m_id = MatrixIdentity(3, NULL);
+  m_id  = MatrixIdentity(3, NULL);
   m_tmp = MatrixMultiply(m_id, m_inv, NULL); // matrix of dot products
   for (i = 1; i <= 3; i++) {
     // find col in the ithrow that is max
@@ -639,7 +639,7 @@ static MATRIX *compute_ras_basis_vectors(MRI *mri_aseg_orig, MRI *mri_aseg_edit,
   }
   MatrixFree(&m_tmp);
   MatrixFree(&m_inv);
-  m_tmp = MatrixMultiply(m_xform, m_trans, NULL);
+  m_tmp                       = MatrixMultiply(m_xform, m_trans, NULL);
   *MATRIX_RELT(m_trans, 1, 4) = means[0];
   *MATRIX_RELT(m_trans, 2, 4) = means[1];
   *MATRIX_RELT(m_trans, 3, 4) = means[2];
@@ -663,58 +663,58 @@ static MATRIX *compute_ras_basis_vectors(MRI *mri_aseg_orig, MRI *mri_aseg_edit,
   MRIfree(&mri_aligned);
   MRIfree(&mri_tmp);
 
-  box.x = MIN(box1.x, box2.x);
-  box.y = MIN(box1.y, box2.y);
-  box.z = MIN(box1.z, box2.z);
+  box.x  = MIN(box1.x, box2.x);
+  box.y  = MIN(box1.y, box2.y);
+  box.z  = MIN(box1.z, box2.z);
   box.dx = MAX(box1.dx + box1.x, box2.dx + box2.x) - box.x;
   box.dy = MAX(box1.dy + box1.y, box2.dy + box2.y) - box.y;
   box.dz = MAX(box1.dz + box1.z, box2.dz + box2.z) - box.z;
 
   // now compute transform that takes corners of bounding box to corners of
   // atlas
-  m_targ = MatrixAlloc(4, 5, MATRIX_REAL);
-  m_src = MatrixAlloc(4, 5, MATRIX_REAL);
+  m_targ                     = MatrixAlloc(4, 5, MATRIX_REAL);
+  m_src                      = MatrixAlloc(4, 5, MATRIX_REAL);
   *MATRIX_RELT(m_targ, 1, 1) = 0;
   *MATRIX_RELT(m_targ, 2, 1) = 0;
   *MATRIX_RELT(m_targ, 3, 1) = 0;
-  *MATRIX_RELT(m_src, 1, 1) = box.x;
-  *MATRIX_RELT(m_src, 2, 1) = box.y;
-  *MATRIX_RELT(m_src, 3, 1) = box.z;
+  *MATRIX_RELT(m_src, 1, 1)  = box.x;
+  *MATRIX_RELT(m_src, 2, 1)  = box.y;
+  *MATRIX_RELT(m_src, 3, 1)  = box.z;
 
   *MATRIX_RELT(m_targ, 1, 2) = 0;
   *MATRIX_RELT(m_targ, 2, 2) = 0;
   *MATRIX_RELT(m_targ, 3, 2) = depth;
-  *MATRIX_RELT(m_src, 1, 2) = box.x;
-  *MATRIX_RELT(m_src, 2, 2) = box.y;
-  *MATRIX_RELT(m_src, 3, 2) = box.z + box.dz;
+  *MATRIX_RELT(m_src, 1, 2)  = box.x;
+  *MATRIX_RELT(m_src, 2, 2)  = box.y;
+  *MATRIX_RELT(m_src, 3, 2)  = box.z + box.dz;
 
   *MATRIX_RELT(m_targ, 1, 3) = 0;
   *MATRIX_RELT(m_targ, 2, 3) = height;
   *MATRIX_RELT(m_targ, 3, 3) = 0;
-  *MATRIX_RELT(m_src, 1, 3) = box.x;
-  *MATRIX_RELT(m_src, 2, 3) = box.y + box.dy;
-  *MATRIX_RELT(m_src, 3, 3) = box.z;
+  *MATRIX_RELT(m_src, 1, 3)  = box.x;
+  *MATRIX_RELT(m_src, 2, 3)  = box.y + box.dy;
+  *MATRIX_RELT(m_src, 3, 3)  = box.z;
 
   *MATRIX_RELT(m_targ, 1, 4) = width;
   *MATRIX_RELT(m_targ, 2, 4) = 0;
   *MATRIX_RELT(m_targ, 3, 4) = 0;
-  *MATRIX_RELT(m_src, 1, 4) = box.x + box.dx;
-  *MATRIX_RELT(m_src, 2, 4) = box.y;
-  *MATRIX_RELT(m_src, 3, 4) = box.z;
+  *MATRIX_RELT(m_src, 1, 4)  = box.x + box.dx;
+  *MATRIX_RELT(m_src, 2, 4)  = box.y;
+  *MATRIX_RELT(m_src, 3, 4)  = box.z;
 
   *MATRIX_RELT(m_targ, 1, 5) = width;
   *MATRIX_RELT(m_targ, 2, 5) = height;
   *MATRIX_RELT(m_targ, 3, 5) = depth;
-  *MATRIX_RELT(m_src, 1, 5) = box.x + box.dx;
-  *MATRIX_RELT(m_src, 2, 5) = box.y + box.dy;
-  *MATRIX_RELT(m_src, 3, 5) = box.z + box.dz;
+  *MATRIX_RELT(m_src, 1, 5)  = box.x + box.dx;
+  *MATRIX_RELT(m_src, 2, 5)  = box.y + box.dy;
+  *MATRIX_RELT(m_src, 3, 5)  = box.z + box.dz;
 
   for (i = 1; i <= m_src->cols; i++) {
     *MATRIX_RELT(m_src, 4, i) = *MATRIX_RELT(m_targ, 4, i) = 1.0;
   }
 
-  m_inv = MatrixSVDPseudoInverse(m_src, NULL);
-  m_tmp = MatrixMultiply(m_targ, m_inv, NULL);
+  m_inv  = MatrixSVDPseudoInverse(m_src, NULL);
+  m_tmp  = MatrixMultiply(m_targ, m_inv, NULL);
   m_tmp2 = MatrixMultiply(m_tmp, m_xform, NULL);
   MatrixCopy(m_tmp2, m_xform);
 

@@ -28,6 +28,8 @@
 
 #include <cstdio>
 
+#include "mri.h"
+
 #ifndef UCHAR
 #define UCHAR unsigned char
 #endif
@@ -37,7 +39,7 @@ typedef struct {
   int nbins_1;
   int nbins_2;
   // int     total_bins ;
-  int sample_count;
+  int    sample_count;
   float *counts; /* # of voxels which map to this bin */
 
   // float   bin_size ;
@@ -45,15 +47,15 @@ typedef struct {
   float max; // min and max vals in the histo
 } JOINT_HISTOGRAM, JHISTO;
 
-int JHISTOfree(JOINT_HISTOGRAM **pjhisto);
-int JHISTOdump(JOINT_HISTOGRAM *jhisto, FILE *fp);
-int JHISTOwriteInto(JOINT_HISTOGRAM *jhisto, FILE *fp);
-void JHISTOfill(MRI *mri1, MRI *mri2, JOINT_HISTOGRAM *jhisto);
-double JHISTOgetEntropy(JOINT_HISTOGRAM *jhisto);
+int              JHISTOfree(JOINT_HISTOGRAM **pjhisto);
+int              JHISTOdump(JOINT_HISTOGRAM *jhisto, FILE *fp);
+int              JHISTOwriteInto(JOINT_HISTOGRAM *jhisto, FILE *fp);
+void             JHISTOfill(MRI *mri1, MRI *mri2, JOINT_HISTOGRAM *jhisto);
+double           JHISTOgetEntropy(JOINT_HISTOGRAM *jhisto);
 JOINT_HISTOGRAM *JHISTOreadFrom(FILE *fp);
 JOINT_HISTOGRAM *JHISTOalloc(int nbins_1, int nbins_2);
 JOINT_HISTOGRAM *JHISTOrealloc(JOINT_HISTOGRAM *jhisto, int nbins_1,
                                int nbins_2);
-double MRIcomputeMi(MRI *mri1, MRI *mri2, int bins1, int bins2);
+double           MRIcomputeMi(MRI *mri1, MRI *mri2, int bins1, int bins2);
 
 #endif

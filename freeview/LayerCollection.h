@@ -26,10 +26,10 @@
 #ifndef LayerCollection_h
 #define LayerCollection_h
 
-#include <QObject>
-#include <QString>
 #include <QList>
 #include <QMap>
+#include <QObject>
+#include <QString>
 
 class Layer;
 class vtkRenderer;
@@ -41,9 +41,9 @@ public:
   LayerCollection(const QString &type, QObject *parent = NULL);
   virtual ~LayerCollection();
 
-  int GetNumberOfLayers();
+  int    GetNumberOfLayers();
   Layer *GetLayer(int i);
-  int GetLayerIndex(Layer *layer);
+  int    GetLayerIndex(Layer *layer);
 
   bool AddLayer(Layer *layer, bool initializeCoordinate = false);
   bool RemoveLayer(Layer *layer, bool deleteObject = true);
@@ -61,12 +61,12 @@ public:
   bool Contains(Layer *layer);
   bool IsEmpty();
 
-  void SetActiveLayer(Layer *layer);
+  void   SetActiveLayer(Layer *layer);
   Layer *GetActiveLayer();
 
   Layer *GetFirstVisibleLayer();
 
-  Layer *GetLayer(const QString &type);
+  Layer *        GetLayer(const QString &type);
   QList<Layer *> GetLayers(const QString &type);
 
   Layer *GetLayerByName(const QString &name);
@@ -74,34 +74,34 @@ public:
   Layer *GetLayerById(int nId);
 
   double *GetSlicePosition();
-  void GetSlicePosition(double *slicePos);
-  bool SetSlicePosition(int nPlane, double dPos, bool bRoundToGrid = true);
-  bool OffsetSlicePosition(int nPlane, double dPosDiff,
-                           bool bRoundToGrid = true);
-  bool SetSlicePosition(int nPlane, int nSliceNumber);
-  bool SetSlicePosition(double *slicePos);
+  void    GetSlicePosition(double *slicePos);
+  bool    SetSlicePosition(int nPlane, double dPos, bool bRoundToGrid = true);
+  bool    OffsetSlicePosition(int nPlane, double dPosDiff,
+                              bool bRoundToGrid = true);
+  bool    SetSlicePosition(int nPlane, int nSliceNumber);
+  bool    SetSlicePosition(double *slicePos);
 
   double *GetCurrentRASPosition();
-  void GetCurrentRASPosition(double *pos);
-  void SetCurrentRASPosition(double *pos);
+  void    GetCurrentRASPosition(double *pos);
+  void    SetCurrentRASPosition(double *pos);
 
   double *GetCursorRASPosition();
-  void GetCursorRASPosition(double *pos);
-  void SetCursorRASPosition(double *pos);
+  void    GetCursorRASPosition(double *pos);
+  void    SetCursorRASPosition(double *pos);
 
   void GetCurrentRASIndex(int *nIdx);
 
   double *GetWorldOrigin();
-  void GetWorldOrigin(double *dWorldOrigin_out);
-  void SetWorldOrigin(double *dWorldOrigin);
+  void    GetWorldOrigin(double *dWorldOrigin_out);
+  void    SetWorldOrigin(double *dWorldOrigin);
 
   double *GetWorldSize();
-  void GetWorldSize(double *dWorldSize_out);
-  void SetWorldSize(double *dWorldSize);
+  void    GetWorldSize(double *dWorldSize_out);
+  void    SetWorldSize(double *dWorldSize);
 
   double *GetWorldVoxelSize();
-  void GetWorldVoxelSize(double *dVoxelSize_out);
-  void SetWorldVoxelSize(double *dVoxelSize);
+  void    GetWorldVoxelSize(double *dVoxelSize_out);
+  void    SetWorldVoxelSize(double *dVoxelSize);
 
   void GetWorldCenter(double *pos);
 
@@ -149,11 +149,11 @@ protected:
   double m_dWorldVoxelSize[3];
 
   double m_dCurrentRASPosition[3];
-  int m_nCurrentRASIndex[3];
+  int    m_nCurrentRASIndex[3];
 
   double m_dCursorRASPosition[3];
 
-  Layer *m_layerActive;
+  Layer * m_layerActive;
   QString m_strType;
 };
 

@@ -23,9 +23,9 @@
  *
  */
 
-#include <math.h>
 #include <cstdlib>
 #include <cstring>
+#include <math.h>
 
 #include "dct.h"
 #include "diag.h"
@@ -42,14 +42,14 @@ DCT *DCTalloc(int ncoef, MRI *mri_source) {
   if (dct == nullptr)
     ErrorExit(ERROR_NOMEMORY, "DCTalloc(%d): allocation failed", ncoef);
 
-  dct->b = 1.0;
+  dct->b     = 1.0;
   dct->ncoef = ncoef;
   dct->res =
       .25 * MIN(MIN(mri_source->xsize, mri_source->ysize), mri_source->zsize);
   dct->mri_source = mri_source;
-  dct->v_xk = VectorAlloc(ncoef, MATRIX_REAL);
-  dct->v_yk = VectorAlloc(ncoef, MATRIX_REAL);
-  dct->v_zk = VectorAlloc(ncoef, MATRIX_REAL);
+  dct->v_xk       = VectorAlloc(ncoef, MATRIX_REAL);
+  dct->v_yk       = VectorAlloc(ncoef, MATRIX_REAL);
+  dct->v_zk       = VectorAlloc(ncoef, MATRIX_REAL);
   if (dct->v_xk == nullptr || dct->v_yk == nullptr || dct->v_zk == nullptr)
     ErrorExit(ERROR_NOMEMORY, "DCTalloc(%d): allocation failed", ncoef);
   dct->x_inv =
@@ -71,7 +71,7 @@ DCT *DCTalloc(int ncoef, MRI *mri_source) {
 int DCTfree(DCT **pdct) {
   DCT *dct;
 
-  dct = *pdct;
+  dct   = *pdct;
   *pdct = nullptr;
 
   if (dct->m_x_basis)
@@ -96,8 +96,8 @@ int DCTfree(DCT **pdct) {
   return (NO_ERROR);
 }
 int DCTcreateMatrix(DCT *dct, MRI *mri, int skip) {
-  int Nx, Ny, Nz, vox, k, N, i;
-  double dk;
+  int     Nx, Ny, Nz, vox, k, N, i;
+  double  dk;
   MATRIX *m;
 
   if (dct->m_x_basis)
@@ -138,7 +138,7 @@ int DCTcreateMatrix(DCT *dct, MRI *mri, int skip) {
       break;
     }
     for (vox = 0; vox < N; vox++) {
-      dk = sqrt(1.0 / N);
+      dk                          = sqrt(1.0 / N);
       *MATRIX_RELT(m, vox + 1, 1) = dk;
       for (k = 1; k < dct->ncoef; k++) {
         dk = sqrt(2.0 / N) * cos(M_PI * (2 * vox + 1) * k / (2.0 * N));
@@ -166,9 +166,9 @@ DCT *DCTcopy(DCT *dct_src, DCT *dct_dst) {
 
 MRI *DCTapply(DCT *dct, MRI *mri_src, MRI *mri_target, MRI *mri_dst,
               int sample_type) {
-  int x, y, z;
-  double xd, yd, zd;
-  double val;
+  int     x, y, z;
+  double  xd, yd, zd;
+  double  val;
   MATRIX *m_vox2vox;
   VECTOR *v1, *v2;
 
@@ -176,9 +176,9 @@ MRI *DCTapply(DCT *dct, MRI *mri_src, MRI *mri_target, MRI *mri_dst,
     mri_target = mri_src; // assume output geometry is same as input
   if (mri_dst == nullptr)
     mri_dst = MRIclone(mri_target, nullptr);
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_target, mri_src);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_target, mri_src);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
 
   DCTupdate(dct);
@@ -205,7 +205,7 @@ MRI *DCTapply(DCT *dct, MRI *mri_src, MRI *mri_target, MRI *mri_dst,
   return (mri_dst);
 }
 MRI *DCTapplyInverse(DCT *dct, MRI *mri_src, MRI *mri_dst, int sample_type) {
-  int x, y, z;
+  int    x, y, z;
   double xs, ys, zs;
   double val;
 
@@ -228,7 +228,7 @@ MRI *DCTapplyInverse(DCT *dct, MRI *mri_src, MRI *mri_dst, int sample_type) {
 }
 
 int DCTtransformVoxlist(DCT *dct, VOXEL_LIST *vl) {
-  int i;
+  int    i;
   double x, y, z, xd, yd, zd;
 
   for (i = 0; i < vl->nvox; i++) {
@@ -245,18 +245,18 @@ int DCTtransformVoxlist(DCT *dct, VOXEL_LIST *vl) {
 }
 
 int DCTinverseTransformVoxlist(DCT *dct, VOXEL_LIST *vl) {
-  int i, x, y, z;
-  MATRIX *m_vox2vox;
+  int            i, x, y, z;
+  MATRIX *       m_vox2vox;
   static VECTOR *v1 = nullptr, *v2;
-  double xd, yd, zd;
+  double         xd, yd, zd;
 
   if (DIAG_VERBOSE_ON) {
     MRIwrite(vl->mri, "t2.mgz");
     MRIwrite(dct->mri_source, "s2.mgz");
   }
   if (v1 == nullptr) {
-    v1 = VectorAlloc(4, MATRIX_REAL);
-    v2 = VectorAlloc(4, MATRIX_REAL);
+    v1                = VectorAlloc(4, MATRIX_REAL);
+    v2                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(v1, 4) = 1.0;
     VECTOR_ELT(v1, 4) = 1.0;
   }
@@ -290,7 +290,7 @@ int DCTinverseTransformVoxlist(DCT *dct, VOXEL_LIST *vl) {
     DCTinverseTransformPoint(dct, x, y, z, &xd, &yd, &zd);
     vl->xd[i] = xd;
     vl->yd[i] = yd;
-    zd = vl->zd[i];
+    zd        = vl->zd[i];
 #endif
   }
 
@@ -301,9 +301,9 @@ int DCTtransformPoint(DCT *dct, int x, int y, int z, double *px, double *py,
                       double *pz) {
   double xd, yd, zd;
 
-  xd = MatrixRowDotProduct(dct->m_x_basis, x + 1, dct->v_xk);
-  yd = MatrixRowDotProduct(dct->m_y_basis, y + 1, dct->v_yk);
-  zd = MatrixRowDotProduct(dct->m_z_basis, z + 1, dct->v_zk);
+  xd  = MatrixRowDotProduct(dct->m_x_basis, x + 1, dct->v_xk);
+  yd  = MatrixRowDotProduct(dct->m_y_basis, y + 1, dct->v_yk);
+  zd  = MatrixRowDotProduct(dct->m_z_basis, z + 1, dct->v_zk);
   *px = x + xd;
   *py = y + yd;
   *pz = z + zd;
@@ -313,7 +313,7 @@ int DCTtransformPoint(DCT *dct, int x, int y, int z, double *px, double *py,
 int DCTinverseTransformPoint(DCT *dct, double x, double y, double z, double *px,
                              double *py, double *pz) {
   double xd, yd, zd;
-  int xi, yi, zi;
+  int    xi, yi, zi;
 
   xi = nint(x / dct->res);
   yi = nint(y / dct->res);
@@ -331,9 +331,9 @@ int DCTinverseTransformPoint(DCT *dct, double x, double y, double z, double *px,
   if (zi >= ceil(dct->mri_source->depth / dct->res))
     zi = ceil(dct->mri_source->depth / dct->res) - 1;
 
-  xd = dct->x_inv[xi];
-  yd = dct->y_inv[yi];
-  zd = dct->z_inv[zi];
+  xd  = dct->x_inv[xi];
+  yd  = dct->y_inv[yi];
+  zd  = dct->z_inv[zi];
   *px = xd;
   *py = yd;
   *pz = zd;
@@ -351,9 +351,9 @@ int DCTdump(DCT *dct, FILE *fp) {
 }
 static int soap_bubble(double *in_vals, double *ctrl, double *out_vals, int N,
                        double max_change_allowed);
-int DCTupdate(DCT *dct) {
+int        DCTupdate(DCT *dct) {
   double *x_wts, *y_wts, *z_wts, xd, yd, zd, jcd, jfd, *wts, *inv, *fwd, jd;
-  int jc, jf, x, y, z, N, i, j, Ninv;
+  int     jc, jf, x, y, z, N, i, j, Ninv;
 
   x_wts =
       (double *)calloc(ceil(dct->mri_source->width / dct->res), sizeof(double));
@@ -369,19 +369,19 @@ int DCTupdate(DCT *dct) {
     default:
     case 0:
       wts = x_wts;
-      N = dct->mri_source->width;
+      N   = dct->mri_source->width;
       inv = dct->x_inv;
       fwd = dct->x;
       break;
     case 1:
       wts = y_wts;
-      N = dct->mri_source->height;
+      N   = dct->mri_source->height;
       inv = dct->y_inv;
       fwd = dct->y;
       break;
     case 2:
       wts = z_wts;
-      N = dct->mri_source->depth;
+      N   = dct->mri_source->depth;
       inv = dct->z_inv;
       fwd = dct->z;
       break;
@@ -415,10 +415,10 @@ int DCTupdate(DCT *dct) {
         break;
       }
       fwd[j] = jd;
-      jf = (int)floor(jd);
-      jc = jf + 1;
-      jfd = jd - jf;
-      jcd = 1 - jfd;
+      jf     = (int)floor(jd);
+      jc     = jf + 1;
+      jfd    = jd - jf;
+      jcd    = 1 - jfd;
       if (jc >= 0 && jc < Ninv) {
         wts[jc] += jfd;
         inv[jc] += jfd * j;
@@ -447,7 +447,7 @@ int DCTupdate(DCT *dct) {
 static int soap_bubble(double *in_vals, double *ctrl, double *out_vals, int N,
                        double max_change_allowed) {
   double *tmp_vals, max_change, change, out_val, min_val, max_val;
-  int iter, i, j, num;
+  int     iter, i, j, num;
 
   tmp_vals = (double *)calloc(N, sizeof(double));
   memmove(out_vals, in_vals, N * sizeof(double));
@@ -464,11 +464,11 @@ static int soap_bubble(double *in_vals, double *ctrl, double *out_vals, int N,
     }
   if (DZERO(ctrl[0])) {
     out_vals[0] = min_val;
-    ctrl[0] = 1;
+    ctrl[0]     = 1;
   }
   if (DZERO(ctrl[N - 1])) {
     out_vals[N - 1] = max_val;
-    ctrl[N - 1] = 1;
+    ctrl[N - 1]     = 1;
   }
 
   iter = 0;
@@ -485,7 +485,7 @@ static int soap_bubble(double *in_vals, double *ctrl, double *out_vals, int N,
            j++, num++)
         out_val += tmp_vals[j];
       out_vals[i] = out_val / num;
-      change = fabs(out_vals[i] - tmp_vals[i]);
+      change      = fabs(out_vals[i] - tmp_vals[i]);
       if (change > max_change)
         max_change = change;
     }

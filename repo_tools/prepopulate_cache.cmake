@@ -1,6 +1,6 @@
 set(CMAKE_INSTALL_PREFIX "/Users/aboualiaa/Desktop/.temp/install/fs/" CACHE STRING "install prefix")
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default: Release")
-set(CMAKE_GENERATOR "Ninja" CACHE STRING "Ninja, Unix Makefiles, Xcode")
+set(CMAKE_GENERATOR "Ninja Multi-Config" CACHE STRING "Ninja, Unix Makefiles, Xcode")
 string(TIMESTAMP TODAY "%Y%m%d")
 set(BUILD_STAMP "freesurfer-local-build-${TODAY}" CACHE STRING "Distribution build stamp")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "create a json database of compile commands for tooling")

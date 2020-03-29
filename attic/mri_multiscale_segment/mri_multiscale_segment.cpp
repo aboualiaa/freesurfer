@@ -23,23 +23,23 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mrimorph.h"
-#include "utils.h"
 #include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrimorph.h"
+#include "proto.h"
 #include "timer.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -48,19 +48,19 @@ static void usage_exit(int code);
 static MRI *MRIupdateSegmentation(MRI *mri_hires, MRI *mri_wm_in,
                                   MRI *mri_wm_out, MRI *mri_mask);
 
-static float mag_thresh = 3;
+static float mag_thresh       = 3;
 static float intensity_thresh = 4;
-static float dist_thresh = .5;
-static int nclose = 1;
-static MRI *mri_mask = NULL;
+static float dist_thresh      = .5;
+static int   nclose           = 1;
+static MRI * mri_mask         = NULL;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
-  MRI *mri_wm, *mri_hires;
-  TRANSFORM *transform;
+  char **      av;
+  int          ac, nargs;
+  int          msec, minutes, seconds;
+  Timer        start;
+  MRI *        mri_wm, *mri_hires;
+  TRANSFORM *  transform;
   MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "mri_multiscale_segment");
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 
   printf("writing output segmentation to %s\n", argv[4]);
   if (nclose > 1) {
-    int i;
+    int  i;
     MRI *mri_tmp = MRIcopy(mri_wm, NULL);
     for (i = 0; i < nclose; i++) {
       MRIdilate(mri_wm, mri_tmp);
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     MRIclose(mri_wm, mri_wm);
 
   MRIwrite(mri_wm, argv[4]);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -136,31 +136,31 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     fprintf(stderr, "debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "dthresh")) {
     printf("using distance threshold %2.2f (default = %2.2f)\n", atof(argv[2]),
            dist_thresh);
     dist_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs       = 1;
   } else if (!stricmp(option, "ithresh")) {
     printf("using intensity threshold %2.2f (default = %2.2f)\n", atof(argv[2]),
            intensity_thresh);
     intensity_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
   } else if (!stricmp(option, "mthresh")) {
     printf("using gradient magnitude threshold %2.2f (default = %2.2f)\n",
            atof(argv[2]), mag_thresh);
     mag_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
   } else if (!stricmp(option, "mask")) {
     nargs = 2;
     printf("reading %s as mask volume thresholded at %2.1f\n", argv[2],
@@ -202,10 +202,10 @@ static void usage_exit(int code) {
 float MRIclosestOnVal(MRI *mri_src, MRI *mri_mask, int x, int y, int z,
                       int whalf) {
   float val, closest_val, val0;
-  int xi, yi, zi, xk, yk, zk;
+  int   xi, yi, zi, xk, yk, zk;
 
   closest_val = -1;
-  val0 = MRIgetVoxVal(mri_src, x, y, z, 0);
+  val0        = MRIgetVoxVal(mri_src, x, y, z, 0);
   for (xk = -1; xk <= 1; xk++) {
     xi = mri_src->xi[x + xk];
     for (yk = -1; yk <= 1; yk++) {
@@ -226,35 +226,35 @@ float MRIclosestOnVal(MRI *mri_src, MRI *mri_mask, int x, int y, int z,
 
 static MRI *MRIupdateSegmentation(MRI *mri_hires, MRI *mri_wm_in,
                                   MRI *mri_wm_out, MRI *mri_mask) {
-  MRI *mri_means, *mri_stds, *mri_tmp, *mri_eroded;
-  int x, y, z, i, removed, added, dxi, dyi, dzi, xi, yi, zi;
+  MRI * mri_means, *mri_stds, *mri_tmp, *mri_eroded;
+  int   x, y, z, i, removed, added, dxi, dyi, dzi, xi, yi, zi;
   float mean, std, val, dist, val0, theta, dx, dy, dz, norm;
 #if 1
   MRI *mri_mag, *mri_grad, *mri_smooth;
 
   mri_smooth = MRIgaussianSmooth(mri_hires, 0.5, 1, NULL);
-  mri_mag = MRIcloneDifferentType(mri_hires, MRI_FLOAT);
-  mri_grad = MRIsobel(mri_smooth, NULL, mri_mag);
+  mri_mag    = MRIcloneDifferentType(mri_hires, MRI_FLOAT);
+  mri_grad   = MRIsobel(mri_smooth, NULL, mri_mag);
   if (Gdiag & DIAG_WRITE) {
     MRIwrite(mri_grad, "grad.mgz");
     MRIwrite(mri_mag, "mag.mgz");
   }
 #endif
   mri_means = MRImeanInMask(mri_hires, NULL, mri_wm_in, 9);
-  mri_stds = MRIstdInMask(mri_hires, NULL, mri_means, mri_wm_in, 9);
+  mri_stds  = MRIstdInMask(mri_hires, NULL, mri_means, mri_wm_in, 9);
   if (Gdiag & DIAG_WRITE) {
     MRIwrite(mri_means, "m.mgz");
     MRIwrite(mri_stds, "s.mgz");
   }
 
   mri_wm_out = MRIcopy(mri_wm_in, mri_wm_out);
-  mri_tmp = MRIcopy(mri_wm_in, NULL);
+  mri_tmp    = MRIcopy(mri_wm_in, NULL);
   mri_eroded = MRIcopy(mri_wm_in, NULL);
 
   for (i = 0; i < 100; i++) {
     added = removed = 0;
-    mean = MRImeanInLabel(mri_hires, mri_wm_out, 1);
-    std = MRImeanInLabel(mri_stds, mri_wm_out, 1);
+    mean            = MRImeanInLabel(mri_hires, mri_wm_out, 1);
+    std             = MRImeanInLabel(mri_stds, mri_wm_out, 1);
     MRIcopy(mri_wm_out, mri_tmp);
     printf("iter %d: wm mean = %2.1f +- %2.1f\n", i, mean, std);
 
@@ -302,9 +302,9 @@ static MRI *MRIupdateSegmentation(MRI *mri_hires, MRI *mri_wm_in,
             continue;
 
           // find voxels in the mask that are adjacent to ones that are not
-          dx = MRIgetVoxVal(mri_grad, x, y, z, 0);
-          dy = MRIgetVoxVal(mri_grad, x, y, z, 1);
-          dz = MRIgetVoxVal(mri_grad, x, y, z, 2);
+          dx   = MRIgetVoxVal(mri_grad, x, y, z, 0);
+          dy   = MRIgetVoxVal(mri_grad, x, y, z, 1);
+          dz   = MRIgetVoxVal(mri_grad, x, y, z, 2);
           norm = MRIgetVoxVal(mri_mag, x, y, z, 0);
           if (norm > mag_thresh)
             continue;
@@ -332,7 +332,7 @@ static MRI *MRIupdateSegmentation(MRI *mri_hires, MRI *mri_wm_in,
                   theta = acos(dx * dxi + dy * dyi + dz * dzi);
                   if (fabs(theta) > M_PI / 6) // not in grad dir
                   {
-                    val = MRIgetVoxVal(mri_hires, xi, yi, zi, 0);
+                    val  = MRIgetVoxVal(mri_hires, xi, yi, zi, 0);
                     dist = (val - mean) / std;
                     if ((fabs(val0 - val) <= intensity_thresh) &&
                         (dist < dist_thresh)) {

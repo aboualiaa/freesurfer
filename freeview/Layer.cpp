@@ -26,10 +26,10 @@
 
 #include "Layer.h"
 #include "LayerProperty.h"
-#include <math.h>
-#include <QFileInfo>
-#include <QDir>
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
+#include <math.h>
 
 #define CLOSE_DISTANCE 1e-6
 
@@ -43,19 +43,19 @@ Layer::Layer(QObject *parent) : QObject(parent) {
   m_bAboutToDelete = false;
 
   for (int i = 0; i < 3; i++) {
-    m_dSlicePosition[i] = 0;
-    m_dWorldOrigin[i] = 0;
+    m_dSlicePosition[i]  = 0;
+    m_dWorldOrigin[i]    = 0;
     m_dWorldVoxelSize[i] = 1;
-    m_dWorldSize[i] = 0;
-    m_dTranslate[i] = 0;
-    m_dScale[i] = 1;
-    m_dRotate[i] = 0;
-    m_bFlip[i] = false;
+    m_dWorldSize[i]      = 0;
+    m_dTranslate[i]      = 0;
+    m_dScale[i]          = 1;
+    m_dRotate[i]         = 0;
+    m_bFlip[i]           = false;
   }
   m_bUseRotationCenter = false;
 
-  m_bLocked = false;
-  mProperty = NULL;
+  m_bLocked     = false;
+  mProperty     = NULL;
   m_nLayerIndex = 0;
   connect(this, SIGNAL(VisibilityChanged(bool)), this, SIGNAL(ActorUpdated()));
 }
@@ -161,9 +161,9 @@ void Layer::Lock(bool bLock) {
 
 void Layer::GetBounds(double *bounds) {
   double *origin = GetWorldOrigin();
-  double *size = GetWorldSize();
+  double *size   = GetWorldSize();
   for (int i = 0; i < 3; i++) {
-    bounds[i * 2] = origin[i];
+    bounds[i * 2]     = origin[i];
     bounds[i * 2 + 1] = origin[i] + size[i];
   }
 }
@@ -232,8 +232,8 @@ void Layer::Restore() {
 
   for (int i = 0; i < 3; i++) {
     m_dTranslate[i] = 0;
-    m_dScale[i] = 1;
-    m_dRotate[i] = 0;
+    m_dScale[i]     = 1;
+    m_dRotate[i]    = 0;
   }
   m_bUseRotationCenter = false;
 
@@ -241,9 +241,9 @@ void Layer::Restore() {
 }
 
 void Layer::SetRotate(double *rotate, bool bAroundCenter) {
-  m_dRotate[0] = rotate[0];
-  m_dRotate[1] = rotate[1];
-  m_dRotate[2] = rotate[2];
+  m_dRotate[0]          = rotate[0];
+  m_dRotate[1]          = rotate[1];
+  m_dRotate[2]          = rotate[2];
   m_bRotateAroundCenter = bAroundCenter;
 
   UpdateTransform();
@@ -290,14 +290,14 @@ void Layer::SetScale(double *scale) {
 
 void Layer::CopyTransformation(Layer *layer) {
   for (int i = 0; i < 3; i++) {
-    m_dTranslate[i] = layer->m_dTranslate[i];
-    m_dScale[i] = layer->m_dScale[i];
-    m_dRotate[i] = layer->m_dRotate[i];
-    m_bFlip[i] = layer->m_bFlip[i];
+    m_dTranslate[i]      = layer->m_dTranslate[i];
+    m_dScale[i]          = layer->m_dScale[i];
+    m_dRotate[i]         = layer->m_dRotate[i];
+    m_bFlip[i]           = layer->m_bFlip[i];
     m_dRotationCenter[i] = layer->m_dRotationCenter[i];
   }
   m_bRotateAroundCenter = false; // layer->m_bRotateAroundCenter;
-  m_bUseRotationCenter = true;
+  m_bUseRotationCenter  = true;
 
   UpdateTransform();
 }

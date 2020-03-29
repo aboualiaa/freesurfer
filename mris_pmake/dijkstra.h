@@ -26,32 +26,30 @@
 #ifndef __DIJKSTRA_H__
 #define __DIJKSTRA_H__
 
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
 
-using namespace std;
-
+#include "error.h"
+#include "label.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "label.h"
-#include "error.h"
 
-#include "general.h"
 #include "env.h"
+#include "general.h"
 #include "pstream.h"
 
-#define DIJK_VIRGIN 0
+#define DIJK_VIRGIN  0
 #define DIJK_IN_PLAY 1
-#define DIJK_DONE 2
+#define DIJK_DONE    2
 
 typedef enum { eDIJK_VIRGIN = 0, eDIJK_IN_PLAY = 1, eDIJK_DONE = 2 } e_DIJKMARK;
 
 /// d_node is the core structure that maintains a linked list of ordered
 /// vertex nodes (with cost).
 struct d_node {
-  int vno;
-  float val;
+  int            vno;
+  float          val;
   struct d_node *next;
 };
 
@@ -94,8 +92,8 @@ int dijkstra(s_env &st_env, float af_maxAllowedCost = 0.0,
 
 using s_node = struct _node;
 typedef struct _node {
-  int id;         // typically an MRIS vertex index
-  float f_val;    // the value of this MRIS vertex
+  int     id;     // typically an MRIS vertex index
+  float   f_val;  // the value of this MRIS vertex
   s_node *p_next; // pointer to next node
 } s_node;
 
@@ -104,7 +102,7 @@ class C_dlist {
 
 protected:
   s_node *mpnode_ordered;
-  MRIS *mpMS_surface;
+  MRIS *  mpMS_surface;
 
   // methods
 

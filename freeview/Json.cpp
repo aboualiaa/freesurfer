@@ -9,20 +9,20 @@ QString Json::encode(const QMap<QString, QVariant> &map) {
   engine.evaluate("function toString() { return JSON.stringify(this) }");
 
   QScriptValue toString = engine.globalObject().property("toString");
-  QScriptValue obj = encodeInner(map, &engine);
+  QScriptValue obj      = encodeInner(map, &engine);
   return toString.call(obj).toString();
 }
 
 QMap<QString, QVariant> Json::decode(const QString &jsonStr) {
-  QScriptValue object;
+  QScriptValue  object;
   QScriptEngine engine;
   object = engine.evaluate("(" + jsonStr + ")");
   return decodeInner(object);
 }
 
 QScriptValue Json::encodeInner(const QMap<QString, QVariant> &map,
-                               QScriptEngine *engine) {
-  QScriptValue obj = engine->newObject();
+                               QScriptEngine *                engine) {
+  QScriptValue                    obj = engine->newObject();
   QMapIterator<QString, QVariant> i(map);
   while (i.hasNext()) {
     i.next();
@@ -43,7 +43,7 @@ QScriptValue Json::encodeInner(const QMap<QString, QVariant> &map,
 
 QMap<QString, QVariant> Json::decodeInner(QScriptValue object) {
   QMap<QString, QVariant> map;
-  QScriptValueIterator it(object);
+  QScriptValueIterator    it(object);
   while (it.hasNext()) {
     it.next();
     if (it.value().isArray())
@@ -61,7 +61,7 @@ QMap<QString, QVariant> Json::decodeInner(QScriptValue object) {
 }
 
 QList<QVariant> Json::decodeInnerToList(QScriptValue arrayValue) {
-  QList<QVariant> list;
+  QList<QVariant>      list;
   QScriptValueIterator it(arrayValue);
   while (it.hasNext()) {
     it.next();

@@ -43,8 +43,8 @@ char *rel2abs(const char *path, const char *base, char *result,
    * endp points the last position which is safe in the result buffer.
    */
   const char *endp = result + size - 1;
-  char *rp;
-  int length;
+  char *      rp;
+  int         length;
 
   if (*path == '/') {
     if (strlen(path) >= size)

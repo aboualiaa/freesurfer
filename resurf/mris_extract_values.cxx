@@ -1,22 +1,22 @@
-#include "itkImageFileReader.h"
 #include "GetPot.h"
+#include "itkImageFileReader.h"
 #include "itkMesh.h"
 
 #include "itkTriangleCell.h"
 
-#include "mrisurf.h"
 #include "mris_multimodal_refinement.h"
+#include "mrisurf.h"
 
 int main(int narg, char *arg[]) {
   //	try{
 
   constexpr unsigned int Dimension = 3;
-  using CoordType = double;
+  using CoordType                  = double;
   typedef itk::Mesh<CoordType, Dimension> MeshType;
   using PointsContainer = MeshType::PointsContainer;
-  using PointType = MeshType::PointType;
+  using PointType       = MeshType::PointType;
   // typedef MeshType::PointIdentifier PointIdentifier;
-  using CellType = MeshType::CellType;
+  using CellType     = MeshType::CellType;
   using TriangleType = itk::TriangleCell<CellType>;
 
   GetPot cl(narg, const_cast<char **>(arg));
@@ -28,9 +28,9 @@ int main(int narg, char *arg[]) {
               << std::endl;
     return -1;
   }
-  const char *inSurf = cl.follow("", "-i");
-  const char *outCsv = cl.follow("", "-o");
-  const char *overlayFilename = cl.follow("", "-v");
+  const char * inSurf          = cl.follow("", "-i");
+  const char * outCsv          = cl.follow("", "-o");
+  const char * overlayFilename = cl.follow("", "-v");
   MRI_SURFACE *surf;
   surf = MRISread(inSurf);
   MRIScomputeMetricProperties(surf);
@@ -57,12 +57,12 @@ int main(int narg, char *arg[]) {
   for (unsigned j = 0; j < surf->nvertices; j++) {
 
     double xv, yv, zv, x, y, z, nx, ny, nz, val;
-    float point[3] = {0, 0, 0};
-    float normal[3] = {0, 0, 0};
+    float  point[3]  = {0, 0, 0};
+    float  normal[3] = {0, 0, 0};
 
-    nx = surf->vertices[j].nx;
-    ny = surf->vertices[j].ny;
-    nz = surf->vertices[j].nz;
+    nx         = surf->vertices[j].nx;
+    ny         = surf->vertices[j].ny;
+    nz         = surf->vertices[j].nz;
     float dist = sqrt(nx * nx + ny * ny + nz * nz);
     if (dist > 0) {
       nx /= dist;

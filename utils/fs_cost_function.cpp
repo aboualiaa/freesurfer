@@ -41,7 +41,7 @@ fs_cost_function::fs_cost_function(float (*function)(float[]),
 }
 
 fs_cost_function::~fs_cost_function() {
-  mFunction = nullptr;
+  mFunction         = nullptr;
   mFunctionGradient = nullptr;
 }
 
@@ -69,7 +69,7 @@ double fs_cost_function::f(const vnl_vector<double> &x) {
 }
 
 void fs_cost_function::gradf(vnl_vector<double> const &x,
-                             vnl_vector<double> &gradient) {
+                             vnl_vector<double> &      gradient) {
   int numberOfParameters = static_cast<int>(x.size());
 
   float p[numberOfParameters + 1];
@@ -84,7 +84,7 @@ void fs_cost_function::gradf(vnl_vector<double> const &x,
   }
 }
 
-void fs_cost_function::copyFromVNLToFloat(float *floatVector,
+void fs_cost_function::copyFromVNLToFloat(float *                  floatVector,
                                           const vnl_vector<double> vnlVector,
                                           int numberOfParameters) {
   for (int i = 0; i < numberOfParameters; i++) {

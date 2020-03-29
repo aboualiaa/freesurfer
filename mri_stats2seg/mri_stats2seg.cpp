@@ -46,65 +46,66 @@ tkmedit $subject norm.mgz -aux ./asegstats.mgh\
 
 // double round(double x);
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "version.h"
 #include "cmdargs.h"
-#include "fsgdf.h"
-#include "surfcluster.h"
+#include "diag.h"
 #include "fsenv.h"
+#include "fsgdf.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "surfcluster.h"
+#include "version.h"
 
 int LoadDavidsTable(char *fname, int **pplutindex, double **pplog10p);
 int LoadSuesTable(char *fname, int col, int log10flag, int **pplutindex,
                   double **pplog10p);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mri_stats2seg.c,v 1.9 2011/03/02 00:04:24 nicks Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 char *TempVolFile = nullptr;
 char *SUBJECTS_DIR;
 
 char *statfile = nullptr;
-char *segfile = nullptr;
-MRI *seg;
+char *segfile  = nullptr;
+MRI * seg;
 
-char *outfile = nullptr;
-MRI *out;
-int nitems = 0;
-int *lutindex;
+char *  outfile = nullptr;
+MRI *   out;
+int     nitems = 0;
+int *   lutindex;
 double *log10p;
 
-char *annot = nullptr;
+char *annot   = nullptr;
 char *subject = nullptr;
-char *hemi = nullptr;
+char *hemi    = nullptr;
 MRIS *mris;
-char tmpstr[2000];
-int DoSue, DoDavid, log10flag, datcol1;
+char  tmpstr[2000];
+int   DoSue, DoDavid, log10flag, datcol1;
 
 int DoStrip4 = 1;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, r, c, s, n, segid, err;
+  int    nargs, r, c, s, n, segid, err;
   double val;
 
   nargs = handleVersionOption(argc, argv, "mri_stats2seg");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -170,7 +171,7 @@ int main(int argc, char *argv[]) {
     for (r = 0; r < seg->height; r++) {
       for (s = 0; s < seg->depth; s++) {
         segid = MRIgetVoxVal(seg, c, r, s, 0);
-        val = 0;
+        val   = 0;
         if (segid != 0) {
           if (annot != nullptr) {
             if (strcmp(hemi, "lh") == 0)
@@ -199,7 +200,7 @@ int main(int argc, char *argv[]) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -235,8 +236,8 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--stat")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      statfile = pargv[0];
-      DoDavid = 1;
+      statfile  = pargv[0];
+      DoDavid   = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--sue")) {
       if (nargc < 2)
@@ -244,24 +245,24 @@ static int parse_commandline(int argc, char **argv) {
       statfile = pargv[0];
       sscanf(pargv[1], "%d", &datcol1);
       log10flag = 1;
-      DoSue = 1;
+      DoSue     = 1;
       nargsused = 2;
     } else if (!strcasecmp(option, "--seg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      segfile = pargv[0];
+      segfile   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--annot")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
-      annot = pargv[0];
-      subject = pargv[1];
-      hemi = pargv[2];
+      annot     = pargv[0];
+      subject   = pargv[1];
+      hemi      = pargv[2];
       nargsused = 3;
     } else if (!strcasecmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      outfile = pargv[0];
+      outfile   = pargv[0];
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
@@ -368,18 +369,18 @@ static void dump_options(FILE *fp) {
 
   ---------------------------------------------------------------------*/
 int LoadDavidsTable(char *fname, int **pplutindex, double **pplog10p) {
-  FSENV *fsenv;
-  int err, tmpindex[1000];
-  double tmpp[1000];
-  char tmpstr[2000], tmpstr2[2000], segname[2000];
-  FILE *fp;
-  double p;
-  int n, segindex, nitems;
-  char *item;
+  FSENV *    fsenv;
+  int        err, tmpindex[1000];
+  double     tmpp[1000];
+  char       tmpstr[2000], tmpstr2[2000], segname[2000];
+  FILE *     fp;
+  double     p;
+  int        n, segindex, nitems;
+  char *     item;
   extern int DoStrip4;
 
   fsenv = FSENVgetenv();
-  fp = fopen(fname, "r");
+  fp    = fopen(fname, "r");
   if (fp == nullptr) {
     printf("ERROR: could not open%s\n", fname);
     exit(1);
@@ -429,18 +430,18 @@ int LoadDavidsTable(char *fname, int **pplutindex, double **pplog10p) {
       sscanf(item, "%lf", &p);
       printf("%2d %2d %s %lf  %lf\n", nitems, segindex, segname, p, -log10(p));
       tmpindex[nitems] = segindex;
-      tmpp[nitems] = p;
+      tmpp[nitems]     = p;
       nitems++;
       free(item);
     }
   }
 
   *pplutindex = (int *)calloc(nitems, sizeof(int));
-  *pplog10p = (double *)calloc(nitems, sizeof(double));
+  *pplog10p   = (double *)calloc(nitems, sizeof(double));
 
   for (n = 0; n < nitems; n++) {
     (*pplutindex)[n] = tmpindex[n];
-    (*pplog10p)[n] = -log10(tmpp[n]);
+    (*pplog10p)[n]   = -log10(tmpp[n]);
   }
 
   FSENVfree(&fsenv);
@@ -450,16 +451,16 @@ int LoadDavidsTable(char *fname, int **pplutindex, double **pplog10p) {
 int LoadSuesTable(char *fname, int col1, int log10flag, int **pplutindex,
                   double **pplog10p) {
   FSENV *fsenv;
-  char tmpstr[2000], tmpstr2[2000], segname[2000], hemi[3];
-  FILE *fp;
-  int nitems, segindex;
-  char *item;
+  char   tmpstr[2000], tmpstr2[2000], segname[2000], hemi[3];
+  FILE * fp;
+  int    nitems, segindex;
+  char * item;
   double v;
 
   memset(hemi, '\0', 3);
 
   fsenv = FSENVgetenv();
-  fp = fopen(fname, "r");
+  fp    = fopen(fname, "r");
   if (fp == nullptr) {
     printf("ERROR: could not open%s\n", fname);
     exit(1);
@@ -476,9 +477,9 @@ int LoadSuesTable(char *fname, int col1, int log10flag, int **pplutindex,
   printf("nitems %d\n", nitems);
 
   *pplutindex = (int *)calloc(nitems, sizeof(int));
-  *pplog10p = (double *)calloc(nitems, sizeof(double));
+  *pplog10p   = (double *)calloc(nitems, sizeof(double));
 
-  fp = fopen(fname, "r");
+  fp     = fopen(fname, "r");
   nitems = 0;
   while (true) {
     if (fgets(tmpstr, 2000 - 1, fp) == nullptr)
@@ -504,7 +505,7 @@ int LoadSuesTable(char *fname, int col1, int log10flag, int **pplutindex,
       v = -SIGN(v) * log10(fabs(v));
     printf("%2d %4d %20s %6.4lf\n", nitems + 1, segindex, segname, v);
     (*pplutindex)[nitems] = segindex;
-    (*pplog10p)[nitems] = v;
+    (*pplog10p)[nitems]   = v;
     nitems++;
     free(item);
   }

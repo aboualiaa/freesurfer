@@ -29,15 +29,13 @@
 #include <vnl/algo/vnl_determinant.h>
 #undef export
 
+#include "CostFunctions.h"
+#include "RegPowell.h"
 #include "RegistrationStep.h"
 #include "Regression.h"
-#include "RegPowell.h"
-#include "CostFunctions.h"
 
 #include "timer.h"
 #include "version.h"
-
-using namespace std;
 
 #define SAT -1 // leave blank, either passed by user or --satit
 //#define SAT 4.685 // this is suggested for gaussian noise
@@ -46,65 +44,65 @@ using namespace std;
 #define ERADIUS 5
 
 struct Parameters {
-  string mov;
-  string dst;
-  string lta;
-  string maskmov;
-  string maskdst;
-  string halfmov;
-  string halfdst;
-  string halfweights;
-  string halfmovlta;
-  string halfdstlta;
-  string weightsout;
-  bool satit;
-  bool nomulti;
-  bool conform;
-  bool floattype;
-  bool lta_vox2vox;
-  bool affine;
-  bool iscale;
-  bool iscaleonly;
-  bool transonly;
-  bool isoscale;
-  string transform;
-  bool leastsquares;
-  int iterate;
-  double epsit;
-  double sat;
-  string warpout;
-  string norlout;
-  int subsamplesize;
-  int debug;
-  MRI *mri_mov;
-  MRI *mri_dst;
-  bool dosatest;
-  bool initorient;
-  bool inittrans;
-  bool initscaling;
-  int verbose;
-  int highit;
-  bool doubleprec;
-  double wlimit;
-  bool oneminusweights;
-  bool symmetry;
-  string iscaleout;
-  string iscalein;
-  int minsize;
-  int maxsize;
+  std::string        mov;
+  std::string        dst;
+  std::string        lta;
+  std::string        maskmov;
+  std::string        maskdst;
+  std::string        halfmov;
+  std::string        halfdst;
+  std::string        halfweights;
+  std::string        halfmovlta;
+  std::string        halfdstlta;
+  std::string        weightsout;
+  bool               satit;
+  bool               nomulti;
+  bool               conform;
+  bool               floattype;
+  bool               lta_vox2vox;
+  bool               affine;
+  bool               iscale;
+  bool               iscaleonly;
+  bool               transonly;
+  bool               isoscale;
+  std::string        transform;
+  bool               leastsquares;
+  int                iterate;
+  double             epsit;
+  double             sat;
+  std::string        warpout;
+  std::string        norlout;
+  int                subsamplesize;
+  int                debug;
+  MRI *              mri_mov;
+  MRI *              mri_dst;
+  bool               dosatest;
+  bool               initorient;
+  bool               inittrans;
+  bool               initscaling;
+  int                verbose;
+  int                highit;
+  bool               doubleprec;
+  double             wlimit;
+  bool               oneminusweights;
+  bool               symmetry;
+  std::string        iscaleout;
+  std::string        iscalein;
+  int                minsize;
+  int                maxsize;
   Registration::Cost cost;
   //  int    bins;
-  int finalsampletype;
-  bool entropy;
-  int entroradius;
-  string entmov;
-  string entdst;
-  bool entball;
-  bool entcorrection;
-  double powelltol;
-  bool whitebgmov;
-  bool whitebgdst;
-  bool uchartype;
+  int         finalsampletype;
+  bool        entropy;
+  int         entroradius;
+  std::string entmov;
+  std::string entdst;
+  bool        entball;
+  bool        entcorrection;
+  double      powelltol;
+  bool        whitebgmov;
+  bool        whitebgdst;
+  bool        uchartype;
 };
 static struct Parameters P = {
     "", "", "", "", "", "", "", "", "", "", "", false, false, false, false,
@@ -131,8 +129,8 @@ void debug(Parameters &P) {
   MRI *mriT = MRIread(P.dst.c_str());
   MRI *SmT = MRIallocSequence(mriS->width, mriS->height, mriS->depth, MRI_FLOAT,
                               mriS->nframes);
-  SmT = MRIsubtract(mriS, mriT, SmT);
-  SmT = MyMRI::getBlur(SmT, SmT);
+  SmT      = MRIsubtract(mriS, mriT, SmT);
+  SmT      = MyMRI::getBlur(SmT, SmT);
 
   // MRI * mri = MRIread(P.mov.c_str());
   // mri = MyMRI::getBlur(mri,mri);
@@ -148,9 +146,9 @@ void debug(Parameters &P) {
 }
 
 void conv(MRI *i) {
-  cout << " adsf" << endl;
+  std::cout << " adsf" << std::endl;
   RegRobust R;
-  MRI *fmri = MRIalloc(i->width, i->height, i->depth, MRI_FLOAT);
+  MRI *     fmri = MRIalloc(i->width, i->height, i->depth, MRI_FLOAT);
   MRIcopyHeader(i, fmri);
   fmri->type = MRI_FLOAT;
   float f;
@@ -161,7 +159,7 @@ void conv(MRI *i) {
         // cout << " f " << f << endl;
         MRIsetVoxVal(fmri, x, y, z, 0, f);
       }
-  cout << "asdfasdf" << endl;
+  std::cout << "asdfasdf" << std::endl;
   MRIwrite(fmri, "float-1.mgz");
   MRI *sfmri;
   sfmri = MyMRI::MRIvalscale(fmri, nullptr, 100);
@@ -173,13 +171,13 @@ void conv(MRI *i) {
 
 void testRegression() {
 
-  int n = 200;
+  int                n = 200;
   vnl_matrix<double> A(n, 1);
   vnl_vector<double> b(n);
 
   for (int i = 0; i < n; i++) {
     A[i][0] = i;
-    b[i] = 4 * i;
+    b[i]    = 4 * i;
   }
   for (int i = 0; i < n; i += 5) {
     b[i] = 0;
@@ -187,13 +185,13 @@ void testRegression() {
 
   Regression<double> R1(A, b);
   vnl_vector<double> M1 = R1.getLSEst();
-  cout << M1 << endl;
-  cout << endl << endl;
+  std::cout << M1 << std::endl;
+  std::cout << std::endl << std::endl;
 
   Regression<double> R2(A, b);
   vnl_vector<double> M2 = R2.getRobustEst();
-  cout << M1 << endl;
-  cout << endl << endl;
+  std::cout << M1 << std::endl;
+  std::cout << std::endl << std::endl;
 
   exit(0);
 }
@@ -218,16 +216,16 @@ void entro(Parameters &P) {
   int radius = 5;
 
   //  cout << "Entropy sigma: " << sigma << "  radius: " << radius << endl;
-  cout << "Entropy radius: " << radius << endl;
+  std::cout << "Entropy radius: " << radius << std::endl;
 
-  cout << "Converting: " << P.mov.c_str() << endl;
+  std::cout << "Converting: " << P.mov.c_str() << std::endl;
   MRI *mri1 = MRIread(P.mov.c_str());
   // MRI * mri1e = MyMRI::entropyImage(mri1,radius,sigma);
   MRI *mri1e = MyMRI::entropyImage(mri1, radius);
   MRIwrite(mri1e, "mri1e.mgz");
   P.mov = "mri1e.mgz";
 
-  cout << "Converting: " << P.dst.c_str() << endl;
+  std::cout << "Converting: " << P.dst.c_str() << std::endl;
   MRI *mri2 = MRIread(P.dst.c_str());
   // MRI * mri2e = MyMRI::entropyImage(mri2,radius,sigma);
   MRI *mri2e = MyMRI::entropyImage(mri2, radius);
@@ -243,16 +241,16 @@ void lnorm(Parameters &P) {
   int radius = 2;
 
   //  cout << "Entropy sigma: " << sigma << "  radius: " << radius << endl;
-  cout << "Normalization Box radius: " << radius << endl;
+  std::cout << "Normalization Box radius: " << radius << std::endl;
 
-  cout << "Converting: " << P.mov.c_str() << endl;
+  std::cout << "Converting: " << P.mov.c_str() << std::endl;
   MRI *mri1 = MRIread(P.mov.c_str());
   // MRI * mri1e = MyMRI::entropyImage(mri1,radius,sigma);
   MRI *mri1e = MyMRI::getNormalizedImage(mri1, radius);
   MRIwrite(mri1e, "mri1n.mgz");
   P.mov = "mri1n.mgz";
 
-  cout << "Converting: " << P.dst.c_str() << endl;
+  std::cout << "Converting: " << P.dst.c_str() << std::endl;
   MRI *mri2 = MRIread(P.dst.c_str());
   // MRI * mri2e = MyMRI::entropyImage(mri2,radius,sigma);
   MRI *mri2e = MyMRI::getNormalizedImage(mri2, radius);
@@ -325,15 +323,15 @@ void jointhisto(Parameters &P) {
 
 void gradmag(Parameters &P) {
 
-  MRI *mri1 = MRIread(P.mov.c_str());
-  MRI *mri_mag1 = MRIalloc(mri1->width, mri1->height, mri1->depth, MRI_FLOAT);
+  MRI *mri1      = MRIread(P.mov.c_str());
+  MRI *mri_mag1  = MRIalloc(mri1->width, mri1->height, mri1->depth, MRI_FLOAT);
   MRI *mri_grad1 = MRIsobel(mri1, nullptr, mri_mag1);
   //  MRIwrite(mri_mag1,"mri1mag.mgz");
   //  MRIwriteFrame(mri_grad1,"mri1sobel_grad1.mgz",0);
   //  MRIwriteFrame(mri_grad1,"mri1sobel_grad2.mgz",1);
   //  MRIwriteFrame(mri_grad1,"mri1sobel_grad3.mgz",2);
 
-  int dd, hh, ww;
+  int   dd, hh, ww;
   float x, y, z, r, phi, psi;
 
   //  MRI* mri_phi1  = MRIalloc(mri1->width, mri1->height, mri1->depth,
@@ -343,10 +341,10 @@ void gradmag(Parameters &P) {
   for (dd = 0; dd < mri_mag1->depth; dd++)
     for (hh = 0; hh < mri_mag1->height; hh++)
       for (ww = 0; ww < mri_mag1->width; ww++) {
-        x = MRIgetVoxVal(mri_grad1, ww, hh, dd, 0);
-        y = MRIgetVoxVal(mri_grad1, ww, hh, dd, 1);
-        z = MRIgetVoxVal(mri_grad1, ww, hh, dd, 2);
-        r = MRIgetVoxVal(mri_mag1, ww, hh, dd, 0);
+        x   = MRIgetVoxVal(mri_grad1, ww, hh, dd, 0);
+        y   = MRIgetVoxVal(mri_grad1, ww, hh, dd, 1);
+        z   = MRIgetVoxVal(mri_grad1, ww, hh, dd, 2);
+        r   = MRIgetVoxVal(mri_mag1, ww, hh, dd, 0);
         phi = 0;
         psi = 0;
         if (r > 10) {
@@ -361,8 +359,8 @@ void gradmag(Parameters &P) {
   //  MRIwrite(mri_psi1,"mri1psi.mgz");
   MRIwrite(mri_pp1, "mri1phipsi.mgz");
 
-  MRI *mri2 = MRIread(P.dst.c_str());
-  MRI *mri_mag2 = MRIalloc(mri2->width, mri2->height, mri2->depth, MRI_FLOAT);
+  MRI *mri2      = MRIread(P.dst.c_str());
+  MRI *mri_mag2  = MRIalloc(mri2->width, mri2->height, mri2->depth, MRI_FLOAT);
   MRI *mri_grad2 = MRIsobel(mri2, nullptr, mri_mag2);
   //  MRIwrite(mri_mag2,"mri2mag.mgz");
   //  MRIwriteFrame(mri_grad2,"mri2sobel_grad1.mgz",0);
@@ -375,10 +373,10 @@ void gradmag(Parameters &P) {
   for (dd = 0; dd < mri_mag2->depth; dd++)
     for (hh = 0; hh < mri_mag2->height; hh++)
       for (ww = 0; ww < mri_mag2->width; ww++) {
-        x = MRIgetVoxVal(mri_grad2, ww, hh, dd, 0);
-        y = MRIgetVoxVal(mri_grad2, ww, hh, dd, 1);
-        z = MRIgetVoxVal(mri_grad2, ww, hh, dd, 2);
-        r = MRIgetVoxVal(mri_mag2, ww, hh, dd, 0);
+        x   = MRIgetVoxVal(mri_grad2, ww, hh, dd, 0);
+        y   = MRIgetVoxVal(mri_grad2, ww, hh, dd, 1);
+        z   = MRIgetVoxVal(mri_grad2, ww, hh, dd, 2);
+        r   = MRIgetVoxVal(mri_mag2, ww, hh, dd, 0);
         phi = 0;
         psi = 0;
         if (r > 10) {
@@ -400,18 +398,18 @@ void gradmag(Parameters &P) {
 }
 
 int ReadByteImageRawData(float **Image, /* output image data */
-                         long *Width,   /* output image width */
-                         long *Height   /* output image height */
+                         long *  Width, /* output image width */
+                         long *  Height /* output image height */
 )
 
 { /* begin ReadByteImageRawData */
 
   // char  Filename[256];
-  FILE *f = (FILE *)nullptr;
-  float *p;
+  FILE *         f = (FILE *)nullptr;
+  float *        p;
   unsigned char *Line;
-  long x, y;
-  int Error;
+  long           x, y;
+  int            Error;
 
   /* interactivity */
   //   do {
@@ -437,8 +435,8 @@ int ReadByteImageRawData(float **Image, /* output image data */
   //     printf("--> ");
   //     scanf("%ld", Height);
   //   } while ((*Width < 1L) || (*Height < 1L));
-  f = fopen("lena.img", "rb");
-  *Width = 256;
+  f       = fopen("lena.img", "rb");
+  *Width  = 256;
   *Height = 256;
 
   /* allocation of workspace */
@@ -484,8 +482,8 @@ int ReadByteImageRawData(float **Image, /* output image data */
 void testcubic(Parameters &P) {
 
   float *ImageRasterArray;
-  long Width, Height;
-  int Error;
+  long   Width, Height;
+  int    Error;
 
   Error = ReadByteImageRawData(&ImageRasterArray, &Width, &Height);
   if (Error) {
@@ -494,7 +492,7 @@ void testcubic(Parameters &P) {
   }
 
   MRI *img = MRIalloc(Width, Height, 1, MRI_FLOAT);
-  int x, y;
+  int  x, y;
   for (x = 0; x < Width; x++)
     for (y = 0; y < Height; y++)
       MRIsetVoxVal(img, x, y, 0, 0, ImageRasterArray[y * Height + x]);
@@ -502,11 +500,11 @@ void testcubic(Parameters &P) {
   // MRIwrite(img,"coeff-orig.tif");
   // exit(1);
   MRI_BSPLINE *bspline = nullptr;
-  bspline = MRItoBSpline(img, nullptr, 3);
+  bspline              = MRItoBSpline(img, nullptr, 3);
   MRIwrite(bspline->coeff, "img-coeff.tif");
 
   double val;
-  MRI *mri2 = MRIcopy(img, nullptr);
+  MRI *  mri2 = MRIcopy(img, nullptr);
   for (x = 0; x < Width; x++)
     for (y = 0; y < Height; y++) {
       MRIsampleBSpline(bspline, x, y, 0, 0, &val);
@@ -546,7 +544,7 @@ void testcubic(Parameters &P) {
 int main(int argc, char *argv[]) {
   {
     // for valgrind, so that everything is freed
-    cout << vcid << endl << endl;
+    std::cout << vcid << std::endl << std::endl;
     //  setenv("SURFER_FRONTDOOR","",1) ;
     // set the environment variable
     // to store mri as chunk in memory:
@@ -554,8 +552,7 @@ int main(int argc, char *argv[]) {
 
     // Default initialization
     int nargs = handleVersionOption(argc, argv, "mri_robust_register");
-    if (nargs && argc - nargs == 1)
-    {
+    if (nargs && argc - nargs == 1) {
       exit(0);
     }
     argc -= nargs;
@@ -588,7 +585,7 @@ int main(int argc, char *argv[]) {
 
     // Timer
     Timer start;
-    int msec, minutes, seconds;
+    int   msec, minutes, seconds;
     start.reset();
 
     // init registration from Parameters
@@ -655,26 +652,28 @@ int main(int argc, char *argv[]) {
 
     // Print results:
     std::pair<MATRIX *, double> Md;
-    cout << endl << "Final Transform:" << endl;
+    std::cout << std::endl << "Final Transform:" << std::endl;
     vnl_matrix<double> fMv2v(R.getFinalVox2Vox());
     vnl_matlab_print(std::cout, fMv2v, "M", vnl_matlab_print_format_long);
-    cout << endl;
-    Md.first = MyMatrix::convertVNL2MATRIX(fMv2v);
+    std::cout << std::endl;
+    Md.first  = MyMatrix::convertVNL2MATRIX(fMv2v);
     Md.second = R.getFinalIscale();
     //  MatrixPrintFmt(stdout,"% 2.8f",Md.first);
 
-    cout << " Determinant : " << vnl_determinant(fMv2v) << endl << endl;
+    std::cout << " Determinant : " << vnl_determinant(fMv2v) << std::endl
+              << std::endl;
     if (P.affine || P.isoscale) {
-      cout << " Decompose into Rot * Shear * Scale : " << endl << endl;
-      vnl_matrix<double> Rot, Shear;
+      std::cout << " Decompose into Rot * Shear * Scale : " << std::endl
+                << std::endl;
+      vnl_matrix<double>      Rot, Shear;
       vnl_diag_matrix<double> Scale;
       MyMatrix::Polar2Decomposition(fMv2v.extract(3, 3), Rot, Shear, Scale);
       vnl_matlab_print(std::cout, Rot, "Rot", vnl_matlab_print_format_long);
-      cout << endl;
+      std::cout << std::endl;
       vnl_matlab_print(std::cout, Shear, "Shear", vnl_matlab_print_format_long);
-      cout << endl;
+      std::cout << std::endl;
       vnl_matlab_print(std::cout, Scale, "Scale", vnl_matlab_print_format_long);
-      cout << endl;
+      std::cout << std::endl;
 
       //    vnl_svd <double > svd(fMv2v.extract(3,3));
       //    // svd: M = U * W * V'
@@ -701,18 +700,19 @@ int main(int argc, char *argv[]) {
     }
 
     if (R.isIscale()) {
-      cout << "Intenstiy Scale Factor: " << Md.second << endl;
+      std::cout << "Intenstiy Scale Factor: " << Md.second << std::endl;
     }
-    cout << endl;
+    std::cout << std::endl;
 
     // writing transform section here
-    cout << "writing output transformation to " << P.lta << " ..." << endl;
+    std::cout << "writing output transformation to " << P.lta << " ..."
+              << std::endl;
     char reg[STRLEN];
     strcpy(reg, P.lta.c_str());
     LTA *lta = LTAalloc(1, P.mri_mov);
     if (!P.lta_vox2vox) // do ras to ras
     {
-      cout << "converting VOX to RAS and saving RAS2RAS..." << endl;
+      std::cout << "converting VOX to RAS and saving RAS2RAS..." << std::endl;
       // cout << "VOX2VOX:" << endl ;
       // MatrixPrint(stdout, Md.first) ;
       lta->xforms[0].m_L = MRIvoxelXformToRasXform(
@@ -722,9 +722,9 @@ int main(int argc, char *argv[]) {
       lta->type = LINEAR_RAS_TO_RAS;
     } else // vox to vox
     {
-      cout << "saving VOX2VOX..." << endl;
+      std::cout << "saving VOX2VOX..." << std::endl;
       lta->xforms[0].m_L = MatrixCopy(Md.first, lta->xforms[0].m_L);
-      lta->type = LINEAR_VOX_TO_VOX;
+      lta->type          = LINEAR_VOX_TO_VOX;
     }
     // add src and dst info
     getVolGeom(P.mri_mov, &lta->xforms[0].src);
@@ -738,7 +738,7 @@ int main(int argc, char *argv[]) {
       // if (P.iscaleout != "") fn = P.iscaleout;
       // else fn = R.getName() + "-intensity.txt";
       // ofstream f(fn.c_str(),ios::out);
-      ofstream f(P.iscaleout.c_str(), ios::out);
+      std::ofstream f(P.iscaleout.c_str(), std::ios::out);
       f << Md.second;
       f.close();
     }
@@ -748,20 +748,21 @@ int main(int argc, char *argv[]) {
 
     // here do scaling of intensity values
     if (R.isIscale() && Md.second > 0 && !P.entropy) {
-      cout << "Adjusting Intensity of MOV by " << Md.second << endl;
+      std::cout << "Adjusting Intensity of MOV by " << Md.second << std::endl;
       P.mri_mov = MyMRI::MRIvalscale(P.mri_mov, P.mri_mov, Md.second);
     }
 
     // maybe map source to target (resample):
     if (P.warpout != "") {
       // cout << "using lta" << endl;
-      cout << endl;
-      cout << "mapmov: resampling MOV to DST ..." << endl;
+      std::cout << std::endl;
+      std::cout << "mapmov: resampling MOV to DST ..." << std::endl;
       int nframes = P.mri_mov->nframes;
       if (P.mri_mov->nframes > 1) {
-        cout << " WARNING: movable has more than one frame !!! Only map first "
-                "..."
-             << endl;
+        std::cout
+            << " WARNING: movable has more than one frame !!! Only map first "
+               "..."
+            << std::endl;
       }
       P.mri_mov->nframes = 1; // only map frame 1
 
@@ -782,9 +783,9 @@ int main(int argc, char *argv[]) {
       //       }
 
       // keep mov type:
-      cout << " copy ... " << endl;
+      std::cout << " copy ... " << std::endl;
       MRI *mri_aligned = MRIcloneDifferentType(P.mri_dst, P.mri_mov->type);
-      cout << " transform ... " << endl;
+      std::cout << " transform ... " << std::endl;
       mri_aligned =
           LTAtransformInterp(P.mri_mov, mri_aligned, lta, P.finalsampletype);
 
@@ -816,17 +817,17 @@ int main(int argc, char *argv[]) {
       MRIwrite(mri_aligned, P.warpout.c_str());
       MRIfree(&mri_aligned);
 
-      cout << endl;
-      cout << "To check aligned result, run:" << endl;
-      cout << "  freeview -v " << P.dst << " " << P.warpout << endl;
+      std::cout << std::endl;
+      std::cout << "To check aligned result, run:" << std::endl;
+      std::cout << "  freeview -v " << P.dst << " " << P.warpout << std::endl;
     }
 
     if (P.norlout !=
         "") // map source to target (no resample only adjust header)
     {
-      cout << endl;
-      cout << "mapmovhdr: Changing vox2ras MOV header (to map to DST) ..."
-           << endl;
+      std::cout << std::endl;
+      std::cout << "mapmovhdr: Changing vox2ras MOV header (to map to DST) ..."
+                << std::endl;
       // Compute new vox2ras instead of resampling
       // vox2ras = Stemp * invTtemp * invR * Tin
       MATRIX *ras2ras =
@@ -845,9 +846,9 @@ int main(int argc, char *argv[]) {
         exit(1);
       }
 
-      cout << endl;
-      cout << "To check aligned result, run:" << endl;
-      cout << "  freeview -v " << P.dst << " " << P.norlout << endl;
+      std::cout << std::endl;
+      std::cout << "To check aligned result, run:" << std::endl;
+      std::cout << "  freeview -v " << P.dst << " " << P.norlout << std::endl;
     }
 
     // maybe write out weights in target space:
@@ -855,8 +856,8 @@ int main(int argc, char *argv[]) {
 
       MRI *mri_weights = R.getWeights(); // in target space
       if (mri_weights != nullptr) {
-        cout << endl;
-        cout << "Writing out Weights ..." << endl;
+        std::cout << std::endl;
+        std::cout << "Writing out Weights ..." << std::endl;
         // MRIwrite(mri_weights,"temp.mgz") ;
         // cout << " mri_weights type: " << mri_weights->type << endl;
         if (P.oneminusweights) {
@@ -878,37 +879,39 @@ int main(int argc, char *argv[]) {
         //       MRIwrite(wtarg, P.weightsout.c_str()) ;
         //       MRIfree(&wtarg);
         //       //MatrixFree(&hinv);
-        cout << "... overlay the weights:" << endl;
+        std::cout << "... overlay the weights:" << std::endl;
         if (P.warpout != "")
-          cout << "  freeview -v " << P.dst << " " << P.warpout << " "
-               << P.weightsout << ":colormap=heat" << endl;
+          std::cout << "  freeview -v " << P.dst << " " << P.warpout << " "
+                    << P.weightsout << ":colormap=heat" << std::endl;
         else if (P.norlout != "")
-          cout << "  freeview -v " << P.dst << " " << P.norlout << " "
-               << P.weightsout << ":colormap=heat" << endl;
+          std::cout << "  freeview -v " << P.dst << " " << P.norlout << " "
+                    << P.weightsout << ":colormap=heat" << std::endl;
         //        cout << "  tkmedit -f "<< P.dst <<" -aux "<< P.warpout << "
         //        -overlay " << P.weightsout <<endl;
       } else {
-        cout << "Warning: no weights could be created! Maybe you ran with "
-                "--leastsquares??"
-             << endl;
+        std::cout << "Warning: no weights could be created! Maybe you ran with "
+                     "--leastsquares??"
+                  << std::endl;
       }
     }
 
     // write out images in half way space
     if (P.halfmov != "" || P.halfdst != "" || P.halfweights != "" ||
         P.halfdstlta != "" || P.halfmovlta != "") {
-      cout << endl;
+      std::cout << std::endl;
 
       if (!P.symmetry) {
-        cout << "ERROR: no half way space created (symmetry was switched off)!"
-             << endl;
+        std::cout
+            << "ERROR: no half way space created (symmetry was switched off)!"
+            << std::endl;
       } else if (!R.getHalfWayGeom()) {
-        cout << "ERROR: no half way space created (not implemented for this "
-                "cost function)!"
-             << endl;
+        std::cout
+            << "ERROR: no half way space created (not implemented for this "
+               "cost function)!"
+            << std::endl;
       } else {
 
-        cout << "Creating half way data ..." << endl;
+        std::cout << "Creating half way data ..." << std::endl;
         std::pair<vnl_matrix_fixed<double, 4, 4>,
                   vnl_matrix_fixed<double, 4, 4>>
             maps2weights = R.getHalfWayMaps();
@@ -931,7 +934,7 @@ int main(int argc, char *argv[]) {
               P.mri_mov, mri_hwgeom,
               MyMatrix::convertVNL2MATRIX(maps2weights.first),
               m2hwlta->xforms[0].m_L);
-          m2hwlta->type = LINEAR_RAS_TO_RAS;
+          m2hwlta->type          = LINEAR_RAS_TO_RAS;
           d2hwlta->xforms[0].m_L = MRIvoxelXformToRasXform(
               P.mri_dst, mri_hwgeom,
               MyMatrix::convertVNL2MATRIX(maps2weights.second),
@@ -967,7 +970,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (P.halfmov != "") {
-          cout << " creating half-way movable ..." << endl;
+          std::cout << " creating half-way movable ..." << std::endl;
           // take dst geometry info from lta:
           MRI *mri_Swarp = LTAtransformInterp(P.mri_mov, nullptr, m2hwlta,
                                               P.finalsampletype);
@@ -993,8 +996,8 @@ int main(int argc, char *argv[]) {
           if (P.debug) {
             MRIiterator mw(R.getWeights());
             MRIiterator ms(mri_Swarp);
-            double meanw1 = 0, meanw0 = 0, mean = 0, meanw = 0, countw = 0;
-            int countw1 = 0, countw0 = 0, count = 0;
+            double      meanw1 = 0, meanw0 = 0, mean = 0, meanw = 0, countw = 0;
+            int         countw1 = 0, countw0 = 0, count = 0;
             for (ms.begin(); !ms.isEnd(); ms++) {
               if (fabs(*mw) > 0.0001) {
                 meanw0 += (*ms);
@@ -1015,11 +1018,11 @@ int main(int argc, char *argv[]) {
               mw++;
             }
 
-            cout << " mov int means: " << mean / count << " ( " << count
-                 << " )  w0: " << meanw0 / countw0 << " ( " << countw0
-                 << " ) w1: " << meanw1 / countw1 << " ( " << countw1
-                 << " )  weighted: " << meanw / countw << " ( " << countw
-                 << " )" << endl;
+            std::cout << " mov int means: " << mean / count << " ( " << count
+                      << " )  w0: " << meanw0 / countw0 << " ( " << countw0
+                      << " ) w1: " << meanw1 / countw1 << " ( " << countw1
+                      << " )  weighted: " << meanw / countw << " ( " << countw
+                      << " )" << std::endl;
           }
 
           MRIfree(&mri_Swarp);
@@ -1034,7 +1037,7 @@ int main(int argc, char *argv[]) {
           // MRIfree(&tttemp);
         }
         if (P.halfdst != "") {
-          cout << " creating half-way destination ..." << endl;
+          std::cout << " creating half-way destination ..." << std::endl;
           MRI *mri_Twarp = LTAtransformInterp(P.mri_dst, nullptr, d2hwlta,
                                               P.finalsampletype);
           MRIcopyPulseParameters(P.mri_dst, mri_Twarp);
@@ -1043,8 +1046,8 @@ int main(int argc, char *argv[]) {
           if (P.debug) {
             MRIiterator mw(R.getWeights());
             MRIiterator ms(mri_Twarp);
-            double meanw1 = 0, meanw0 = 0, mean = 0, meanw = 0, countw = 0;
-            int countw1 = 0, countw0 = 0, count = 0;
+            double      meanw1 = 0, meanw0 = 0, mean = 0, meanw = 0, countw = 0;
+            int         countw1 = 0, countw0 = 0, count = 0;
             for (ms.begin(); !ms.isEnd(); ms++) {
               if (fabs(*mw) > 0.0001) {
                 meanw0 += (*ms);
@@ -1064,11 +1067,11 @@ int main(int argc, char *argv[]) {
               assert(!(mw.isEnd() && !ms.isEnd()));
               mw++;
             }
-            cout << " mov int means: " << mean / count << " ( " << count
-                 << " )  w0: " << meanw0 / countw0 << " ( " << countw0
-                 << " ) w1: " << meanw1 / countw1 << " ( " << countw1
-                 << " )  weighted: " << meanw / countw << " ( " << countw
-                 << " )" << endl;
+            std::cout << " mov int means: " << mean / count << " ( " << count
+                      << " )  w0: " << meanw0 / countw0 << " ( " << countw0
+                      << " ) w1: " << meanw1 / countw1 << " ( " << countw1
+                      << " )  weighted: " << meanw / countw << " ( " << countw
+                      << " )" << std::endl;
           }
 
           MRIfree(&mri_Twarp);
@@ -1076,7 +1079,7 @@ int main(int argc, char *argv[]) {
         if (P.halfweights != "") {
           MRI *mri_weights = R.getWeights();
           if (mri_weights != nullptr) {
-            cout << " saving half-way weights ..." << endl;
+            std::cout << " saving half-way weights ..." << std::endl;
             MRI *mri_wtemp = LTAtransformInterp(mri_weights, nullptr, d2hwlta,
                                                 P.finalsampletype);
             if (P.oneminusweights) {
@@ -1086,24 +1089,25 @@ int main(int argc, char *argv[]) {
             MRIfree(&mri_wtemp);
             // MRIwrite(mri_weights,P.halfweights.c_str());
           } else {
-            cout << "Warning: no weights have been computed! Maybe you ran "
-                    "with --leastsquares??"
-                 << endl;
+            std::cout
+                << "Warning: no weights have been computed! Maybe you ran "
+                   "with --leastsquares??"
+                << std::endl;
           }
         }
       }
     }
 
     if (P.debug > 0) {
-      cout << endl;
-      cout << "To check debug output, run:" << endl;
+      std::cout << std::endl;
+      std::cout << "To check debug output, run:" << std::endl;
       std::string name = R.getName();
-      cout << "  tkmedit -f " << name << "-mriS-mapped.mgz -aux " << name
-           << "-mriT-mapped.mgz -overlay " << name << "-mriS-weights.mgz"
-           << endl;
+      std::cout << "  tkmedit -f " << name << "-mriS-mapped.mgz -aux " << name
+                << "-mriT-mapped.mgz -overlay " << name << "-mriS-weights.mgz"
+                << std::endl;
     }
 
-    cout << endl;
+    std::cout << std::endl;
     //  cout << "To check transform, run:" << endl;
     //  cout << "  tkregister2 --mov "<< P.mov <<" --targ " << P.dst <<" --lta "
     //  << P.lta << " --reg " << R.getName() << ".reg" << endl;
@@ -1126,26 +1130,32 @@ int main(int argc, char *argv[]) {
       LTAfree(&lta);
 
     ///////////////////////////////////////////////////////////////
-    msec = start.milliseconds();
+    msec    = start.milliseconds();
     seconds = nint((float)msec / 1000.0f);
     minutes = seconds / 60;
     seconds = seconds % 60;
-    cout << endl
-         << "Registration took " << minutes << " minutes and " << seconds
-         << " seconds." << endl;
+    std::cout << std::endl
+              << "Registration took " << minutes << " minutes and " << seconds
+              << " seconds." << std::endl;
 
-    cout << endl << " Thank you for using RobustRegister! " << endl;
-    cout << " If you find it useful and use it for a publication, please cite: "
-         << endl
-         << endl;
-    cout
+    std::cout << std::endl
+              << " Thank you for using RobustRegister! " << std::endl;
+    std::cout
+        << " If you find it useful and use it for a publication, please cite: "
+        << std::endl
+        << std::endl;
+    std::cout
         << " Highly Accurate Inverse Consistent Registration: A Robust Approach"
-        << endl;
-    cout << " M. Reuter, H.D. Rosas, B. Fischl.  NeuroImage 53(4):1181-1196, "
-            "2010."
-         << endl;
-    cout << " http://dx.doi.org/10.1016/j.neuroimage.2010.07.020" << endl;
-    cout << " http://reuter.mit.edu/papers/reuter-robreg10.pdf" << endl << endl;
+        << std::endl;
+    std::cout
+        << " M. Reuter, H.D. Rosas, B. Fischl.  NeuroImage 53(4):1181-1196, "
+           "2010."
+        << std::endl;
+    std::cout << " http://dx.doi.org/10.1016/j.neuroimage.2010.07.020"
+              << std::endl;
+    std::cout << " http://reuter.mit.edu/papers/reuter-robreg10.pdf"
+              << std::endl
+              << std::endl;
     ;
 
     // if (diag_fp) fclose(diag_fp) ;
@@ -1474,8 +1484,8 @@ static void initRegistration(Registration &R, Parameters &P) {
 
   ///////////  read MRI Source
   /////////////////////////////////////////////////////
-  cout << endl;
-  cout << "reading source '" << P.mov << "'..." << endl;
+  std::cout << std::endl;
+  std::cout << "reading source '" << P.mov << "'..." << std::endl;
   fflush(stdout);
 
   MRI *mri_mov = MRIread(P.mov.c_str());
@@ -1495,7 +1505,7 @@ static void initRegistration(Registration &R, Parameters &P) {
   // Load Mask
   MRI *mri_mask = nullptr;
   if (P.maskmov != "") {
-    cout << "reading source mask '" << P.maskmov << "'..." << endl;
+    std::cout << "reading source mask '" << P.maskmov << "'..." << std::endl;
     mri_mask = MRIread(P.maskmov.c_str());
     if (!mri_mask)
       ErrorExit(ERROR_NOFILE, "%s: could not open mask volume %s.\n", Progname,
@@ -1503,21 +1513,22 @@ static void initRegistration(Registration &R, Parameters &P) {
   }
 
   if (P.entropy) {
-    MRI *temp = mri_mov;
+    MRI * temp = mri_mov;
     Timer start;
-    int msec, seconds;
+    int   msec, seconds;
     start.reset();
-    cout << "Converting mov to entropy image (radius " << P.entroradius
-         << " ) ... (can take 1-2 min)" << endl;
+    std::cout << "Converting mov to entropy image (radius " << P.entroradius
+              << " ) ... (can take 1-2 min)" << std::endl;
     mri_mov = MyMRI::entropyImage(temp, P.entroradius, P.entball,
                                   P.entcorrection, mri_mask);
     if (P.entmov != "")
       MRIwrite(mri_mov, P.entmov.c_str());
-    msec = start.milliseconds();
+    msec    = start.milliseconds();
     seconds = nint((float)msec / 1000.0f);
     //    minutes = seconds / 60;
     // seconds = seconds % 60 ;
-    cout << " Entropy computation took " << seconds << " seconds." << endl;
+    std::cout << " Entropy computation took " << seconds << " seconds."
+              << std::endl;
     MRIfree(&temp);
   }
   // apply mask
@@ -1530,7 +1541,7 @@ static void initRegistration(Registration &R, Parameters &P) {
   }
   ///////////  read MRI Target
   /////////////////////////////////////////////////////
-  cout << "reading target '" << P.dst << "'..." << endl;
+  std::cout << "reading target '" << P.dst << "'..." << std::endl;
   fflush(stdout);
 
   MRI *mri_dst = MRIread(P.dst.c_str());
@@ -1547,7 +1558,7 @@ static void initRegistration(Registration &R, Parameters &P) {
   P.mri_dst = MRIcopy(mri_dst, P.mri_dst); // save dst mri
 
   if (P.maskdst != "") {
-    cout << "reading target mask '" << P.maskdst << "'..." << endl;
+    std::cout << "reading target mask '" << P.maskdst << "'..." << std::endl;
     mri_mask = MRIread(P.maskdst.c_str());
     if (!mri_mask)
       ErrorExit(ERROR_NOFILE, "%s: could not open mask volume %s.\n", Progname,
@@ -1556,8 +1567,8 @@ static void initRegistration(Registration &R, Parameters &P) {
 
   if (P.entropy) {
     MRI *temp = mri_dst;
-    cout << "Converting dst to entropy image (radius " << P.entroradius
-         << " ) ... (can take 1-2 min)" << endl;
+    std::cout << "Converting dst to entropy image (radius " << P.entroradius
+              << " ) ... (can take 1-2 min)" << std::endl;
     mri_dst = MyMRI::entropyImage(temp, P.entroradius, P.entball,
                                   P.entcorrection, mri_mask);
     if (P.entdst != "")
@@ -1572,8 +1583,9 @@ static void initRegistration(Registration &R, Parameters &P) {
 
   // Set initial transform //////////////////////////////////////////////////
   if (P.transform != "") {
-    cout << endl
-         << "reading initial transform '" << P.transform << "'..." << endl;
+    std::cout << std::endl
+              << "reading initial transform '" << P.transform << "'..."
+              << std::endl;
 
     //     // try to read simple text
     //     bool st = true;
@@ -1637,15 +1649,15 @@ static void initRegistration(Registration &R, Parameters &P) {
                 Progname, P.transform.c_str());
     }
     if (!lta->xforms[0].src.valid) {
-      cout << " WARNING: no source geometry (RAS) in transform, assuming "
-              "movable !!!"
-           << endl;
+      std::cout << " WARNING: no source geometry (RAS) in transform, assuming "
+                   "movable !!!"
+                << std::endl;
       getVolGeom(mri_mov, &lta->xforms[0].src);
     }
     if (!lta->xforms[0].dst.valid) {
-      cout << " WARNING: no target geometry (RAS) in transform, assuming "
-              "destination !!!"
-           << endl;
+      std::cout << " WARNING: no target geometry (RAS) in transform, assuming "
+                   "destination !!!"
+                << std::endl;
       getVolGeom(mri_dst, &lta->xforms[0].dst);
     }
 
@@ -1673,8 +1685,8 @@ static void initRegistration(Registration &R, Parameters &P) {
 
   // load initial iscale value
   if (P.iscalein != "") {
-    double iscale = 1.0;
-    ifstream f(P.iscalein.c_str(), ios::in);
+    double        iscale = 1.0;
+    std::ifstream f(P.iscalein.c_str(), std::ios::in);
     if (f.good()) {
       f >> iscale;
       f.close();
@@ -1685,13 +1697,13 @@ static void initRegistration(Registration &R, Parameters &P) {
     R.setIscaleInit(iscale);
   }
 
-  cout << endl;
+  std::cout << std::endl;
 
   // set to uchar if passed
   if (P.uchartype) {
     MRI *mriuchar = MyMRI::setTypeUCHAR(mri_mov);
     MRIfree(&mri_mov);
-    mri_mov = mriuchar;
+    mri_mov  = mriuchar;
     mriuchar = MyMRI::setTypeUCHAR(mri_dst);
     MRIfree(&mri_dst);
     mri_dst = mriuchar;
@@ -1719,7 +1731,7 @@ static void initRegistration(Registration &R, Parameters &P) {
  \returns       number of used arguments for this command
  */
 static int parseNextCommand(int argc, char *argv[], Parameters &P) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[0] + 1; // remove '-'
@@ -1731,64 +1743,68 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   // cout << " option: " << option << endl;
 
   if (!strcmp(option, "MOV") || !strcmp(option, "M")) {
-    P.mov = string(argv[1]);
+    P.mov = std::string(argv[1]);
     nargs = 1;
-    cout << "--mov: Using " << P.mov << " as movable/source volume." << endl;
+    std::cout << "--mov: Using " << P.mov << " as movable/source volume."
+              << std::endl;
   } else if (!strcmp(option, "DST") || !strcmp(option, "D")) {
-    P.dst = string(argv[1]);
+    P.dst = std::string(argv[1]);
     nargs = 1;
-    cout << "--dst: Using " << P.dst << " as target volume." << endl;
+    std::cout << "--dst: Using " << P.dst << " as target volume." << std::endl;
   } else if (!strcmp(option, "LTA")) {
-    P.lta = string(argv[1]);
+    P.lta = std::string(argv[1]);
     nargs = 1;
-    cout << "--lta: Output transform as " << P.lta << " . " << endl;
+    std::cout << "--lta: Output transform as " << P.lta << " . " << std::endl;
   } else if (!strcmp(option, "VOX2VOX")) {
     P.lta_vox2vox = true;
-    cout << "--vox2vox: Output transform as VOX2VOX. " << endl;
+    std::cout << "--vox2vox: Output transform as VOX2VOX. " << std::endl;
   } else if (!strcmp(option, "AFFINE") || !strcmp(option, "A")) {
     P.affine = true;
-    cout << "--affine: Enabling affine transform!" << endl;
+    std::cout << "--affine: Enabling affine transform!" << std::endl;
   } else if (!strcmp(option, "ISOSCALE")) {
     P.isoscale = true;
-    cout << "--isoscale: Enabling isotropic scaling!" << endl;
+    std::cout << "--isoscale: Enabling isotropic scaling!" << std::endl;
   } else if (!strcmp(option, "INITSCALING")) {
     P.initscaling = true;
-    cout << "--initscaling: Enabling initial scale adjustment based on image "
-            "dimensions!"
-         << endl;
+    std::cout
+        << "--initscaling: Enabling initial scale adjustment based on image "
+           "dimensions!"
+        << std::endl;
   } else if (!strcmp(option, "ISCALE") || !strcmp(option, "I")) {
     P.iscale = true;
-    cout << "--iscale: Enabling intensity scaling!" << endl;
+    std::cout << "--iscale: Enabling intensity scaling!" << std::endl;
   } else if (!strcmp(option, "ISCALEONLY")) {
-    P.iscaleonly = true;
-    P.iscale = true;
-    P.affine = false;
-    P.isoscale = false;
+    P.iscaleonly  = true;
+    P.iscale      = true;
+    P.affine      = false;
+    P.isoscale    = false;
     P.initscaling = false;
-    P.transonly = false;
-    P.initorient = false;
-    P.inittrans = false;
-    cout << "--iscaleonly: No geometric transform, only iscale!" << endl;
+    P.transonly   = false;
+    P.initorient  = false;
+    P.inittrans   = false;
+    std::cout << "--iscaleonly: No geometric transform, only iscale!"
+              << std::endl;
   } else if (!strcmp(option, "TRANSONLY")) {
     P.transonly = true;
-    cout << "--transonly: Using only translation!" << endl;
+    std::cout << "--transonly: Using only translation!" << std::endl;
   } else if (!strcmp(option, "TRANSFORM") || !strcmp(option, "IXFORM")) {
-    P.transform = string(argv[1]);
-    nargs = 1;
-    cout << "--ixform: Using previously computed initial transform: " << argv[1]
-         << endl;
+    P.transform = std::string(argv[1]);
+    nargs       = 1;
+    std::cout << "--ixform: Using previously computed initial transform: "
+              << argv[1] << std::endl;
   } else if (!strcmp(option, "INITORIENT")) {
     P.initorient = true;
-    cout << "--initorient: Using moments for initial orientation!" << endl;
+    std::cout << "--initorient: Using moments for initial orientation!"
+              << std::endl;
   } else if (!strcmp(option, "NOINIT")) {
     P.inittrans = false;
-    cout << "--noinit: Skipping init of transform !" << endl;
+    std::cout << "--noinit: Skipping init of transform !" << std::endl;
   } else if (!strcmp(option, "LEASTSQUARES")) {
     P.leastsquares = true;
-    cout << "--leastsquares: Using standard least squares (non-robust)!"
-         << endl;
+    std::cout << "--leastsquares: Using standard least squares (non-robust)!"
+              << std::endl;
   } else if (!strcmp(option, "COST")) {
-    string cost(argv[1]);
+    std::string cost(argv[1]);
     std::transform(cost.begin(), cost.end(), cost.begin(), ::toupper);
 
     nargs = 1;
@@ -1797,7 +1813,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     else if (cost == "ROB")
       P.cost = Registration::ROB;
     else if (cost == "ROBENT") {
-      P.cost = Registration::ROB;
+      P.cost    = Registration::ROB;
       P.entropy = true;
     } else if (cost == "MI")
       P.cost = Registration::MI;
@@ -1816,69 +1832,74 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     else if (cost == "SAD")
       P.cost = Registration::SAD;
     else {
-      cout << "ERROR: cost function " << cost << " unknown! " << endl;
+      std::cout << "ERROR: cost function " << cost << " unknown! " << std::endl;
       exit(1);
     }
 
-    cout << "--cost: Using cost function: " << cost << " !" << endl;
+    std::cout << "--cost: Using cost function: " << cost << " !" << std::endl;
   } else if (!strcmp(option, "ENTRADIUS") || !strcmp(option, "RADIUS")) {
     P.entroradius = atoi(argv[1]);
-    nargs = 1;
-    cout << "--entradius: Using local boxes with radius " << P.entroradius
-         << " = " << P.entroradius * 2 + 1 << " sides. " << endl;
+    nargs         = 1;
+    std::cout << "--entradius: Using local boxes with radius " << P.entroradius
+              << " = " << P.entroradius * 2 + 1 << " sides. " << std::endl;
   } else if (!strcmp(option, "ENTDST")) {
-    P.entdst = string(argv[1]);
-    nargs = 1;
-    cout << "--entdst: Output entropy dst image as " << P.entdst << endl;
+    P.entdst = std::string(argv[1]);
+    nargs    = 1;
+    std::cout << "--entdst: Output entropy dst image as " << P.entdst
+              << std::endl;
   } else if (!strcmp(option, "ENTBALL")) {
     P.entball = true;
-    nargs = 0;
-    cout << "--entball: Using ball instead of local boxes. " << endl;
+    nargs     = 0;
+    std::cout << "--entball: Using ball instead of local boxes. " << std::endl;
   } else if (!strcmp(option, "ENTCORRECTION")) {
     P.entcorrection = true;
-    nargs = 0;
-    cout << "--entcorrection: Using 'correction' mode for entropy images. "
-         << endl;
+    nargs           = 0;
+    std::cout << "--entcorrection: Using 'correction' mode for entropy images. "
+              << std::endl;
   } else if (!strcmp(option, "ENTMOV")) {
-    P.entmov = string(argv[1]);
-    nargs = 1;
-    cout << "--entmov: Output entropy mov image as " << P.entmov << endl;
+    P.entmov = std::string(argv[1]);
+    nargs    = 1;
+    std::cout << "--entmov: Output entropy mov image as " << P.entmov
+              << std::endl;
   } else if (!strcmp(option, "MAXIT")) {
     P.iterate = atoi(argv[1]);
-    nargs = 1;
-    cout << "--maxit: Performing maximal " << P.iterate
-         << " iterations on each resolution" << endl;
+    nargs     = 1;
+    std::cout << "--maxit: Performing maximal " << P.iterate
+              << " iterations on each resolution" << std::endl;
   } else if (!strcmp(option, "HIGHIT")) {
     P.highit = atoi(argv[1]);
-    nargs = 1;
-    cout << "--highit: Performing maximal " << P.highit
-         << " iterations on highest resolution" << endl;
+    nargs    = 1;
+    std::cout << "--highit: Performing maximal " << P.highit
+              << " iterations on highest resolution" << std::endl;
   } else if (!strcmp(option, "EPSIT")) {
     P.epsit = atof(argv[1]);
-    nargs = 1;
-    cout << "--epsit: Stop iterations when change is less than " << P.epsit
-         << " . " << endl;
+    nargs   = 1;
+    std::cout << "--epsit: Stop iterations when change is less than " << P.epsit
+              << " . " << std::endl;
   } else if (!strcmp(option, "NOMULTI")) {
     P.nomulti = true;
-    nargs = 0;
-    cout << "--nomulti: Will work on highest resolution only (nomulti)!"
-         << endl;
+    nargs     = 0;
+    std::cout << "--nomulti: Will work on highest resolution only (nomulti)!"
+              << std::endl;
   } else if (!strcmp(option, "MAXSIZE")) {
     P.maxsize = atoi(argv[1]);
-    nargs = 1;
-    cout << "--maxsize: Largest dimension < " << P.maxsize << " . " << endl;
+    nargs     = 1;
+    std::cout << "--maxsize: Largest dimension < " << P.maxsize << " . "
+              << std::endl;
   } else if (!strcmp(option, "MINSIZE")) {
     P.minsize = atoi(argv[1]);
-    nargs = 1;
-    cout << "--minsize: Smallest dimension > " << P.minsize << " . " << endl;
+    nargs     = 1;
+    std::cout << "--minsize: Smallest dimension > " << P.minsize << " . "
+              << std::endl;
   } else if (!strcmp(option, "SAT")) {
     P.sat = atof(argv[1]);
     nargs = 1;
-    cout << "--sat: Using saturation " << P.sat << " in M-estimator!" << endl;
+    std::cout << "--sat: Using saturation " << P.sat << " in M-estimator!"
+              << std::endl;
   } else if (!strcmp(option, "WLIMIT")) {
     P.wlimit = atof(argv[1]);
-    nargs = 1;
-    cout << "--wlimit: Using wlimit in satit " << P.wlimit << endl;
+    nargs    = 1;
+    std::cout << "--wlimit: Using wlimit in satit " << P.wlimit << std::endl;
   } else if (!strcmp(option, "SUBSAMPLE")) {
     if (argc == 1)
       ErrorExit(ERROR_BADPARM,
@@ -1887,19 +1908,21 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
                 Progname);
 
     P.subsamplesize = atoi(argv[1]);
-    nargs = 1;
+    nargs           = 1;
     if (P.subsamplesize >= 0) {
-      cout << "--subsample: Will subsample if size is larger than "
-           << P.subsamplesize << " on all axes!" << endl;
+      std::cout << "--subsample: Will subsample if size is larger than "
+                << P.subsamplesize << " on all axes!" << std::endl;
     } else {
-      cout << "--subsample -1: Will not subsample on any scale!" << endl;
+      std::cout << "--subsample -1: Will not subsample on any scale!"
+                << std::endl;
     }
   } else if (!strcmp(option, "SATIT")) {
     P.satit = true;
-    nargs = 0;
-    cout << "--satit: Will iterate with different SAT to ensure outliers below "
-            "wlimit!"
-         << endl;
+    nargs   = 0;
+    std::cout
+        << "--satit: Will iterate with different SAT to ensure outliers below "
+           "wlimit!"
+        << std::endl;
   }
   //   else if (!strcmp(option, "SATEST") ) // old  remove
   //   {
@@ -1911,134 +1934,140 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   else if (!strcmp(option, "SATEST")) // never reached???  - old remove
   {
     P.dosatest = true;
-    nargs = 0;
-    cout << "--satest: Trying to estimate SAT value!" << endl;
+    nargs      = 0;
+    std::cout << "--satest: Trying to estimate SAT value!" << std::endl;
   } else if (!strcmp(option, "POWELLTOL")) {
     P.powelltol = atof(argv[1]);
-    nargs = 1;
-    cout << "--powelltol: Using tolerance " << P.powelltol
-         << " in Powell optimizier!" << endl;
+    nargs       = 1;
+    std::cout << "--powelltol: Using tolerance " << P.powelltol
+              << " in Powell optimizier!" << std::endl;
   } else if (!strcmp(option, "DOUBLEPREC")) {
     P.doubleprec = true;
-    nargs = 0;
-    cout << "--doubleprec: Will perform algorithm with double precision "
-            "(higher mem usage)!"
-         << endl;
+    nargs        = 0;
+    std::cout << "--doubleprec: Will perform algorithm with double precision "
+                 "(higher mem usage)!"
+              << std::endl;
   } else if (!strcmp(option, "DEBUG")) {
     P.debug = 1;
-    nargs = 0;
-    cout << "--debug: Will output debug info and files!" << endl;
+    nargs   = 0;
+    std::cout << "--debug: Will output debug info and files!" << std::endl;
   } else if (!strcmp(option, "VERBOSE")) {
     P.verbose = atoi(argv[1]);
-    nargs = 1;
-    cout << "--verbose: Will use verbose level : " << P.verbose << endl;
+    nargs     = 1;
+    std::cout << "--verbose: Will use verbose level : " << P.verbose
+              << std::endl;
   } else if (!strcmp(option, "WEIGHTS")) {
-    P.weightsout = string(argv[1]);
-    nargs = 1;
-    cout << "--weights: Will output weights (in target space) as "
-         << P.weightsout << " !" << endl;
+    P.weightsout = std::string(argv[1]);
+    nargs        = 1;
+    std::cout << "--weights: Will output weights (in target space) as "
+              << P.weightsout << " !" << std::endl;
   } else if (!strcmp(option, "WARP") || !strcmp(option, "MAPMOV")) {
-    P.warpout = string(argv[1]);
-    nargs = 1;
-    cout << "--mapmov: Will save resampled movable as " << P.warpout << " !"
-         << endl;
+    P.warpout = std::string(argv[1]);
+    nargs     = 1;
+    std::cout << "--mapmov: Will save resampled movable as " << P.warpout
+              << " !" << std::endl;
   } else if (!strcmp(option, "MAPMOVHDR")) {
-    P.norlout = string(argv[1]);
-    nargs = 1;
-    cout << "--mapmovhdr: Will save header adjusted movable as " << P.norlout
-         << " !" << endl;
+    P.norlout = std::string(argv[1]);
+    nargs     = 1;
+    std::cout << "--mapmovhdr: Will save header adjusted movable as "
+              << P.norlout << " !" << std::endl;
   } else if (!strcmp(option, "HALFMOV")) {
-    P.halfmov = string(argv[1]);
-    nargs = 1;
-    cout << "--halfmov: Will output final half way MOV !" << endl;
+    P.halfmov = std::string(argv[1]);
+    nargs     = 1;
+    std::cout << "--halfmov: Will output final half way MOV !" << std::endl;
   } else if (!strcmp(option, "HALFDST")) {
-    P.halfdst = string(argv[1]);
-    nargs = 1;
-    cout << "--halfdst: Will output final half way DST !" << endl;
+    P.halfdst = std::string(argv[1]);
+    nargs     = 1;
+    std::cout << "--halfdst: Will output final half way DST !" << std::endl;
   } else if (!strcmp(option, "HALFWEIGHTS")) {
-    P.halfweights = string(argv[1]);
-    nargs = 1;
-    cout << "--halfweights: Will output half way WEIGHTS from last step to "
-         << P.halfweights << " !" << endl;
+    P.halfweights = std::string(argv[1]);
+    nargs         = 1;
+    std::cout
+        << "--halfweights: Will output half way WEIGHTS from last step to "
+        << P.halfweights << " !" << std::endl;
   } else if (!strcmp(option, "HALFMOVLTA")) {
-    P.halfmovlta = string(argv[1]);
-    nargs = 1;
-    cout << "--halfmovlta: Will output half way transform (mov) "
-         << P.halfmovlta << " !" << endl;
+    P.halfmovlta = std::string(argv[1]);
+    nargs        = 1;
+    std::cout << "--halfmovlta: Will output half way transform (mov) "
+              << P.halfmovlta << " !" << std::endl;
   } else if (!strcmp(option, "HALFDSTLTA")) {
-    P.halfdstlta = string(argv[1]);
-    nargs = 1;
-    cout << "--halfdstlta: Will output half way transform (dst) "
-         << P.halfdstlta << " !" << endl;
+    P.halfdstlta = std::string(argv[1]);
+    nargs        = 1;
+    std::cout << "--halfdstlta: Will output half way transform (dst) "
+              << P.halfdstlta << " !" << std::endl;
   } else if (!strcmp(option, "MASKMOV")) {
-    P.maskmov = string(argv[1]);
-    nargs = 1;
-    cout << "--maskmov: Will apply " << P.maskmov << " to mask mov/src !"
-         << endl;
+    P.maskmov = std::string(argv[1]);
+    nargs     = 1;
+    std::cout << "--maskmov: Will apply " << P.maskmov << " to mask mov/src !"
+              << std::endl;
   } else if (!strcmp(option, "MASKDST")) {
-    P.maskdst = string(argv[1]);
-    nargs = 1;
-    cout << "--maskdst: Will apply " << P.maskdst << " to mask dst/target !"
-         << endl;
+    P.maskdst = std::string(argv[1]);
+    nargs     = 1;
+    std::cout << "--maskdst: Will apply " << P.maskdst
+              << " to mask dst/target !" << std::endl;
   } else if (!strcmp(option, "TEST")) {
-    cout << "--test: TEST-MODE " << endl;
+    std::cout << "--test: TEST-MODE " << std::endl;
     RegRobust R;
     R.testRobust(argv[2], atoi(argv[1]));
     nargs = 2;
     exit(0);
   } else if (!strcmp(option, "CONFORM")) {
     P.conform = true;
-    nargs = 0;
-    cout << "--conform: Will conform images to 256^3 and voxels to 1mm!"
-         << endl;
+    nargs     = 0;
+    std::cout << "--conform: Will conform images to 256^3 and voxels to 1mm!"
+              << std::endl;
   } else if (!strcmp(option, "FLOATTYPE")) {
     P.floattype = true;
-    nargs = 0;
-    cout << "--floattype: Use float images internally (independent of input)!"
-         << endl;
+    nargs       = 0;
+    std::cout
+        << "--floattype: Use float images internally (independent of input)!"
+        << std::endl;
   } else if (!strcmp(option, "ONEMINUSW")) {
     P.oneminusweights = false;
-    nargs = 0;
-    cout << "--oneminusw: Will output 1-weights (zero=outlier), as in earlier "
-            "versions!"
-         << endl;
+    nargs             = 0;
+    std::cout
+        << "--oneminusw: Will output 1-weights (zero=outlier), as in earlier "
+           "versions!"
+        << std::endl;
   } else if (!strcmp(option, "NOSYM")) {
     P.symmetry = false;
-    nargs = 0;
-    cout << "--nosym: Will resample source to target (no half-way space)!"
-         << endl;
+    nargs      = 0;
+    std::cout << "--nosym: Will resample source to target (no half-way space)!"
+              << std::endl;
   } else if (!strcmp(option, "WHITEBGMOV")) {
     P.whitebgmov = true;
-    nargs = 0;
-    cout << "--whitebgmov: Will assume white background in MOV!" << endl;
+    nargs        = 0;
+    std::cout << "--whitebgmov: Will assume white background in MOV!"
+              << std::endl;
   } else if (!strcmp(option, "WHITEBGDST")) {
     P.whitebgdst = true;
-    nargs = 0;
-    cout << "--whitebgdst: Will assume white background in DST!" << endl;
+    nargs        = 0;
+    std::cout << "--whitebgdst: Will assume white background in DST!"
+              << std::endl;
   } else if (!strcmp(option, "UCHAR")) {
     P.uchartype = true;
-    nargs = 0;
-    cout << "--uchar: Will convert images to uchar (with re-scaling and "
-            "histogram cropping)!"
-         << endl;
+    nargs       = 0;
+    std::cout << "--uchar: Will convert images to uchar (with re-scaling and "
+                 "histogram cropping)!"
+              << std::endl;
   } else if (!strcmp(option, "ISCALEOUT")) {
-    P.iscaleout = string(argv[1]);
-    nargs = 1;
-    P.iscale = true;
-    cout << "--iscaleout: Will do --iscale and ouput intensity scale to "
-         << P.iscaleout << endl;
+    P.iscaleout = std::string(argv[1]);
+    nargs       = 1;
+    P.iscale    = true;
+    std::cout << "--iscaleout: Will do --iscale and ouput intensity scale to "
+              << P.iscaleout << std::endl;
   } else if (!strcmp(option, "ISCALEIN")) {
-    nargs = 1;
-    P.iscalein = string(argv[1]);
-    cout << "--iscalein: Will use init intensity scale" << endl;
+    nargs      = 1;
+    P.iscalein = std::string(argv[1]);
+    std::cout << "--iscalein: Will use init intensity scale" << std::endl;
   } else if (!strcmp(option, "HELP") || !strcmp(option, "H")) {
     printUsage();
     exit(1);
   } else {
-    cerr << endl
-         << endl
-         << "ERROR: Option: " << argv[0] << " unknown !! " << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Option: " << argv[0] << " unknown !! " << std::endl
+              << std::endl;
     exit(1);
   }
 
@@ -2072,59 +2101,63 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
   bool test1 = (P.mov != "" && P.dst != "");
   if (!test1) {
     printUsage();
-    cerr << endl
-         << endl
-         << "ERROR: Please specify --mov and --dst !  " << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Please specify --mov and --dst !  " << std::endl
+              << std::endl;
     exit(1);
   }
   bool test1b = (P.lta != "" || P.iscaleonly);
   if (!test1b) {
     printUsage();
-    cerr << endl << endl << "ERROR: Please specify --lta !  " << endl << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Please specify --lta !  " << std::endl
+              << std::endl;
     exit(1);
   }
   bool test2 =
       (P.satit || P.sat > 0 || P.cost != Registration::ROB || P.leastsquares);
   if (!test2) {
     printUsage();
-    cerr << endl
-         << endl
-         << "ERROR: Please specify either --satit or --sat <float> !  " << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Please specify either --satit or --sat <float> !  "
+              << std::endl
+              << std::endl;
     exit(1);
   }
   bool test3 = (P.iscaleout == "" || P.iscale);
   if (!test3) {
     printUsage();
-    cerr << endl
-         << endl
-         << "ERROR: Please specify --iscale together with --iscaleout to "
-            "compute and output global intensity scaling! "
-         << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Please specify --iscale together with --iscaleout to "
+                 "compute and output global intensity scaling! "
+              << std::endl
+              << std::endl;
     exit(1);
   }
   bool test4 = (P.warpout == "" || (P.warpout != P.weightsout));
   if (!test4) {
     printUsage();
-    cerr << endl
-         << endl
-         << "ERROR: Resampled input name (--mapmov) cannot be same as "
-            "--weights output!"
-         << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Resampled input name (--mapmov) cannot be same as "
+                 "--weights output!"
+              << std::endl
+              << std::endl;
     exit(1);
   }
   bool test5 = (P.iterate > 0);
   if (!test5) {
     // printUsage();
-    cerr << endl
-         << endl
-         << "ERROR: --maxit must be larger than 0 (max iterations on each "
-            "resolution)"
-         << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: --maxit must be larger than 0 (max iterations on each "
+                 "resolution)"
+              << std::endl
+              << std::endl;
     exit(1);
   }
 

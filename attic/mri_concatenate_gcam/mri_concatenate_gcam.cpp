@@ -2,35 +2,35 @@
 #include <vector>
 
 #include "error.h"
-#include "utils.h"
+#include "gcamorph.h"
 #include "macros.h"
 #include "mri.h"
 #include "transform.h"
-#include "gcamorph.h"
+#include "utils.h"
 
 struct Parameters {
-  std::string progName;
-  std::string outFile;
-  std::string srcImage;
-  std::string dstImage;
+  std::string              progName;
+  std::string              outFile;
+  std::string              srcImage;
+  std::string              dstImage;
   std::vector<std::string> fileList;
-  bool reduce = false;
-  bool invert = false;
-  bool downsample = false;
+  bool                     reduce     = false;
+  bool                     invert     = false;
+  bool                     downsample = false;
 };
 
-static void parseCommand(int argc, char *argv[], Parameters &par);
-static void forward(int &argc, char **&argv);
-static void printUsage(void);
+static void       parseCommand(int argc, char *argv[], Parameters &par);
+static void       forward(int &argc, char **&argv);
+static void       printUsage(void);
 static TRANSFORM *concat(std::vector<std::string> fileList);
 
 int main(int argc, char *argv[]) {
   vg_isEqual_Threshold = 10e-4; // Override, include/transform.h.
   Parameters par;
   parseCommand(argc, argv, par);
-  TRANSFORM *out = concat(par.fileList);
-  MRI *mri_src = NULL;
-  MRI *mri_dst = NULL;
+  TRANSFORM *out     = concat(par.fileList);
+  MRI *      mri_src = NULL;
+  MRI *      mri_dst = NULL;
 
   if (!par.srcImage.empty()) {
     mri_src = MRIreadHeader(par.srcImage.c_str(), MRI_VOLUME_TYPE_UNKNOWN);
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (par.reduce && out->type != MORPH_3D_TYPE) {
-    LTA *tmp = (LTA *)out->xform;
+    LTA *tmp   = (LTA *)out->xform;
     out->xform = (void *)LTAreduce(tmp);
     LTAfree(&tmp);
   }
@@ -85,8 +85,8 @@ TRANSFORM *concat(std::vector<std::string> fileList) {
     exit(EXIT_FAILURE);
   }
   while (!fileList.empty()) {
-    const int numTrx = 2;
-    TRANSFORM *next = TransformRead(fileList.back().c_str());
+    const int  numTrx = 2;
+    TRANSFORM *next   = TransformRead(fileList.back().c_str());
     fileList.pop_back();
     if (!next) {
       exit(EXIT_FAILURE);
@@ -94,7 +94,7 @@ TRANSFORM *concat(std::vector<std::string> fileList) {
     TRANSFORM *trxArray[numTrx];
     trxArray[1] = out;
     trxArray[0] = next;
-    out = TransformConcat(trxArray, numTrx);
+    out         = TransformConcat(trxArray, numTrx);
     TransformFree(&trxArray[1]);
     TransformFree(&trxArray[0]);
   }

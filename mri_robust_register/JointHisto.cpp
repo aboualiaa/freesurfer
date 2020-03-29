@@ -25,17 +25,15 @@
 
 #include "JointHisto.h"
 
-using namespace std;
-
 void JointHisto::create(MRI *mri1, MRI *mri2, int d1, int d2, int d3)
 // images are expected to be uchar 0..255 and have uniform voxels and same
 // dimensions
 {
   // cout << " JointHisto::create " << endl;
 
-  int width = mri1->width;
+  int width  = mri1->width;
   int height = mri1->height;
-  int depth = mri1->depth;
+  int depth  = mri1->depth;
   assert(width == mri2->width);
   assert(height == mri2->height);
   assert(depth == mri2->depth);
@@ -76,7 +74,7 @@ void JointHisto::save(const std::string &fname, const std::string &n) {
 
 double JointHisto::clip(double thres) {
 
-  int i, j;
+  int    i, j;
   double csum = 0.0;
   thres *= sum;
   for (i = 0; i < n; i++)
@@ -94,13 +92,13 @@ double JointHisto::clip(double thres) {
   return cratio;
 }
 
-pair<double, double> JointHisto::getMinMax() {
-  int i, j;
-  pair<double, double> mm(-1, -1);
-  double tmp;
+std::pair<double, double> JointHisto::getMinMax() {
+  int                       i, j;
+  std::pair<double, double> mm(-1, -1);
+  double                    tmp;
   if (n == 0)
     return mm;
-  mm.first = histo[0][0];
+  mm.first  = histo[0][0];
   mm.second = mm.first;
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++) {
@@ -128,12 +126,12 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
   //   assert (mriT->type == MRI_UCHAR);
   // int dim = 4;
   int dim = 1;
-  n = 256 / dim;
+  n       = 256 / dim;
   int nm1 = n - 1;
   histo.set_size(n, n);
   histo.fill(0.0);
   haseps = false;
-  sum = 0.0;
+  sum    = 0.0;
 
   //  MRIwrite(mriS,"histoS.mgz");
   //  MRIwrite(mriT,"histoT.mgz");
@@ -196,12 +194,12 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
   //    int    upos=0;
   //   bool   ssamp = (d1>1 || d2 > 1 || d3 >1);
 
-  int x, y, z;
+  int    x, y, z;
   double ux, uy, uz;
   double xs, ys, zs;
   double xt, yt, zt;
   double vs, vt;
-  int ivs, ivt;
+  int    ivs, ivt;
   double sdiff, tdiff;
   double dt[3] = {(double)mriT->width, (double)mriT->height,
                   (double)mriT->depth};
@@ -257,10 +255,13 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
           ivt = (int)floor(vt);
           // cout << "ivs " << ivs << " ivt " << ivt << endl;
           if (ivs < 0 || ivt < 0 || ivs >= n || ivt >= n) {
-            cout << "ERROR at ( " << x << " " << y << " " << z << " ) " << endl;
-            cout << " PS: ( " << xs << " " << ys << " " << zs << " )  PT: ( "
-                 << xt << " " << yt << " " << zt << " )" << endl;
-            cout << " ivs: " << ivs << "  ivt: " << ivt << "  n: " << n << endl;
+            std::cout << "ERROR at ( " << x << " " << y << " " << z << " ) "
+                      << std::endl;
+            std::cout << " PS: ( " << xs << " " << ys << " " << zs
+                      << " )  PT: ( " << xt << " " << yt << " " << zt << " )"
+                      << std::endl;
+            std::cout << " ivs: " << ivs << "  ivt: " << ivt << "  n: " << n
+                      << std::endl;
             exit(1);
           }
           sdiff = vs - ivs;
@@ -282,8 +283,9 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
   }
   // cout << " count: " << count << endl;
   if (sum == 0.0) {
-    cout << " WARNING JointHisto::create : histogram is empty (no overlap?) "
-         << endl;
+    std::cout
+        << " WARNING JointHisto::create : histogram is empty (no overlap?) "
+        << std::endl;
     // cout << " ERROR JointHisto::create : histogram is empty? Writing debug
     // images. " << endl; MRIwrite(mriS,"mriS_error.mgz");
     // MRIwrite(mriT,"mriT_error.mgz");
@@ -297,12 +299,12 @@ MRI *JointHisto::locate(MRI *mriS, MRI *mriT,
                         int d2, int d3) {
   // int dim = 4;
   int dim = 1;
-  n = 256 / dim;
+  n       = 256 / dim;
 
   normalize();
-  pair<double, double> minmax = getMinMax();
-  double min = minmax.first;
-  double scale = 1.0 / (minmax.second - minmax.first);
+  std::pair<double, double> minmax = getMinMax();
+  double                    min    = minmax.first;
+  double                    scale  = 1.0 / (minmax.second - minmax.first);
 
   //  MRIwrite(mriS,"histoS.mgz");
   //  MRIwrite(mriT,"histoT.mgz");
@@ -365,18 +367,18 @@ MRI *JointHisto::locate(MRI *mriS, MRI *mriT,
   //    int    upos=0;
   //   bool   ssamp = (d1>1 || d2 > 1 || d3 >1);
 
-  int x, y, z, i, maxi;
+  int    x, y, z, i, maxi;
   double ux, uy, uz;
   double xs, ys, zs;
   double xt, yt, zt;
   double vs, vt;
-  int ivs, ivt;
+  int    ivs, ivt;
   double sdiff, tdiff;
   double dt[3] = {(double)mriT->width, (double)mriT->height,
                   (double)mriT->depth};
   double four[4];
   double maxfour;
-  MRI *weights = MRIcloneDifferentType(mriT, MRI_FLOAT);
+  MRI *  weights = MRIcloneDifferentType(mriT, MRI_FLOAT);
 
   // double ds[3] = { mriS->width, mriS->height, mriS->depth};
   mriS->outside_val = -1;
@@ -429,10 +431,13 @@ MRI *JointHisto::locate(MRI *mriS, MRI *mriT,
             vt /= dim;
           ivt = (int)floor(vt);
           if (ivs < 0 || ivt < 0 || ivs >= n || ivt >= n) {
-            cout << "ERROR at ( " << x << " " << y << " " << z << " ) " << endl;
-            cout << " PS: ( " << xs << " " << ys << " " << zs << " )  PT: ( "
-                 << xt << " " << yt << " " << zt << " )" << endl;
-            cout << " ivs: " << ivs << "  ivt: " << ivt << "  n: " << n << endl;
+            std::cout << "ERROR at ( " << x << " " << y << " " << z << " ) "
+                      << std::endl;
+            std::cout << " PS: ( " << xs << " " << ys << " " << zs
+                      << " )  PT: ( " << xt << " " << yt << " " << zt << " )"
+                      << std::endl;
+            std::cout << " ivs: " << ivs << "  ivt: " << ivt << "  n: " << n
+                      << std::endl;
             exit(1);
           }
           sdiff = vs - ivs;
@@ -443,11 +448,11 @@ MRI *JointHisto::locate(MRI *mriS, MRI *mriT,
           four[2] = (1 - sdiff) * tdiff;
           four[3] = sdiff * tdiff;
           maxfour = four[3];
-          maxi = 3;
+          maxi    = 3;
           for (i = 0; i < 3; i++)
             if (four[i] > maxfour) {
               maxfour = four[i];
-              maxi = i;
+              maxi    = i;
             }
 
           switch (maxi) {
@@ -474,7 +479,8 @@ MRI *JointHisto::locate(MRI *mriS, MRI *mriT,
   }
   // cout << " count: " << count << endl;
   if (sum == 0.0) {
-    cout << " ERROR JointHisto::create : histogram is empty? " << endl;
+    std::cout << " ERROR JointHisto::create : histogram is empty? "
+              << std::endl;
     exit(1);
   }
 
@@ -487,12 +493,12 @@ void JointHisto::create(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
                         int d2, int d3) {
   // int dim = 4;
   int dim = 1;
-  n = 256 / dim;
+  n       = 256 / dim;
   int nm1 = n - 1;
   histo.set_size(n, n);
   histo.fill(0.0);
   haseps = false;
-  sum = 0.0;
+  sum    = 0.0;
 
   //  MRIwrite(mriS,"histoS.mgz");
   //  MRIwrite(mriT,"histoT.mgz");
@@ -555,12 +561,12 @@ void JointHisto::create(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
   //    int    upos=0;
   //   bool   ssamp = (d1>1 || d2 > 1 || d3 >1);
 
-  int x, y, z;
+  int    x, y, z;
   double ux, uy, uz;
   double xs, ys, zs;
   double xt, yt, zt;
   double vs, vt;
-  int ivs, ivt;
+  int    ivs, ivt;
   double sdiff, tdiff;
   double dt[3] = {(double)mriT->coeff->width, (double)mriT->coeff->height,
                   (double)mriT->coeff->depth};
@@ -615,10 +621,13 @@ void JointHisto::create(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
             vt /= dim;
           ivt = (int)floor(vt);
           if (ivs < 0 || ivt < 0 || ivs >= n || ivt >= n) {
-            cout << "ERROR at ( " << x << " " << y << " " << z << " ) " << endl;
-            cout << " PS: ( " << xs << " " << ys << " " << zs << " )  PT: ( "
-                 << xt << " " << yt << " " << zt << " )" << endl;
-            cout << " ivs: " << ivs << "  ivt: " << ivt << "  n: " << n << endl;
+            std::cout << "ERROR at ( " << x << " " << y << " " << z << " ) "
+                      << std::endl;
+            std::cout << " PS: ( " << xs << " " << ys << " " << zs
+                      << " )  PT: ( " << xt << " " << yt << " " << zt << " )"
+                      << std::endl;
+            std::cout << " ivs: " << ivs << "  ivt: " << ivt << "  n: " << n
+                      << std::endl;
             exit(1);
           }
           sdiff = vs - ivs;
@@ -639,7 +648,8 @@ void JointHisto::create(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
   }
   // cout << " count: " << count << endl;
   if (sum == 0.0) {
-    cout << " ERROR JointHisto::create : histogram is empty? " << endl;
+    std::cout << " ERROR JointHisto::create : histogram is empty? "
+              << std::endl;
     exit(1);
   }
 }
@@ -648,12 +658,12 @@ void JointHisto::set(const vnl_matrix<double> &h)
 // set histo matrix directly (for debugging)
 {
   assert(h.rows() == h.cols());
-  histo = h;
-  n = h.rows();
-  haseps = false;
-  sum = 0.0;
+  histo       = h;
+  n           = h.rows();
+  haseps      = false;
+  sum         = 0.0;
   double sum1 = 0.0;
-  int i, j;
+  int    i, j;
   for (i = 0; i < n; i++) {
     sum1 = 0.0;
     for (j = 0; j < n; j++) {
@@ -672,7 +682,7 @@ void JointHisto::smooth(double fwhm) {
   // create kernel
   double filter[2 * t + 1];
   double fsum = 0.0;
-  double sm2 = -sm * sm;
+  double sm2  = -sm * sm;
   // cout << " sm = " << sm << endl;
   for (int i = -t; i <= t; i++) {
     filter[i + t] = exp((i * i) / sm2);
@@ -686,11 +696,11 @@ void JointHisto::smooth(double fwhm) {
 
   // convolve 2D
   vnl_matrix<double> htmp(n, n);
-  double dtmp;
-  int i, j, k, count;
+  double             dtmp;
+  int                i, j, k, count;
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++) {
-      dtmp = 0;
+      dtmp  = 0;
       count = -1;
       for (k = j - t; k <= j + t; k++) {
         count++;
@@ -703,7 +713,7 @@ void JointHisto::smooth(double fwhm) {
   sum = 0.0;
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++) {
-      dtmp = 0;
+      dtmp  = 0;
       count = -1;
       for (k = i - t; k <= i + t; k++) {
         count++;
@@ -730,7 +740,7 @@ double JointHisto::computeMI()
 // mi =  sum_{i,j} [ P(i,j) log2 (P(i,j) /(Pr(i) Pc(j)) ) ]
 // mi = H(M) + H(N) - H(M,N)
 {
-  int i, j;
+  int    i, j;
   double mi = 0.0;
   double d;
   // addeps(2.2204E-16);
@@ -762,9 +772,9 @@ double JointHisto::computeECC()
 {
   // double mi = computeMI();
   double msum = 0.0;
-  double mi = 0.0;
+  double mi   = 0.0;
   double d;
-  int i, j;
+  int    i, j;
   // addeps(2.2204E-16);
   normalize();
   computeRCsums();
@@ -793,7 +803,7 @@ double JointHisto::computeNMI()
 {
   double s1 = 0;
   double s2 = 0;
-  int i, j;
+  int    i, j;
   double d;
   if (sum == 0.0)
     return -100;
@@ -826,7 +836,7 @@ double JointHisto::computeNCC()
 {
   double m1 = 0.0;
   double m2 = 0.0;
-  int i, j;
+  int    i, j;
   // addeps(2.2204E-16);
   // addeps(1);
   normalize();
@@ -875,7 +885,7 @@ double JointHisto::computeSCR()
   // compute means
   double m1 = 0.0;
   double m2 = 0.0;
-  int i, j;
+  int    i, j;
   for (i = 0; i < n; i++) {
     m1 += rowsum[i] * i;
     m2 += colsum[i] * i;
@@ -996,7 +1006,7 @@ double JointHisto::computeSCR()
 
 double JointHisto::computeLS() {
   double ssd = 0.0;
-  int i, j, k;
+  int    i, j, k;
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++) {
       if (i == j)

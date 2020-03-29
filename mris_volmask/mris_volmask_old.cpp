@@ -25,11 +25,11 @@
  */
 
 // STL
+#include <cstdio>
+#include <iomanip>
+#include <iostream>
 #include <queue>
 #include <string>
-#include <iostream>
-#include <iomanip>
-#include <cstdio>
 #include <vector>
 
 // option to not use VTK libs to perform surface/volume intersection detection
@@ -37,26 +37,26 @@
 // problematic for cluster machines which may not have those libs
 #ifndef NO_VTK
 // VTK
-#include <vtkPoints.h>
 #include <vtkCellArray.h>
-#include <vtkPolyData.h>
-#include <vtkStructuredPoints.h>
 #include <vtkImplicitModeller.h>
 #include <vtkOBBTree.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkStructuredPoints.h>
 #endif
 #include "cmd_line_interface.h"
 
 // FS
 
-#include "fsenv.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "mri2.h"
-#include "error.h"
 #include "cma.h"
 #include "diag.h"
-#include "macros.h"
+#include "error.h"
+#include "fsenv.h"
 #include "gca.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri2.h"
+#include "mrisurf.h"
 
 #define throw(...)
 
@@ -65,7 +65,6 @@ const char *Progname;
 // static function declarations
 // forward declaration
 struct IoParams;
-using namespace std;
 
 class IoError : public std::exception {
 public:
@@ -96,7 +95,7 @@ std::string LoadInputFiles(const IoParams &params, MRI *&mriInput,
 void ComputeSurfaceDistanceFunction(
     MRIS *mris,      // input surface
     float thickness, // cap value for the precise distance value
-    MRI *mriInOut);  // output mri structure
+    MRI * mriInOut);  // output mri structure
 
 MRI *CreateHemiMask(MRI *dpial, MRI *dwhite, const unsigned char lblWhite,
                     const unsigned char lblRibbon,
@@ -157,10 +156,10 @@ int main(int ac, char *av[]) {
   // process input files
   // will also resolve the paths depending on the mode of the application
   // (namely if the subject option has been specified or not)
-  MRI *mriTemplate;
-  MRIS *surfLeftWhite = nullptr;
-  MRIS *surfLeftPial = nullptr;
-  MRIS *surfRightPial = nullptr;
+  MRI * mriTemplate;
+  MRIS *surfLeftWhite  = nullptr;
+  MRIS *surfLeftPial   = nullptr;
+  MRIS *surfRightPial  = nullptr;
   MRIS *surfRightWhite = nullptr;
 
   std::string outputPath;
@@ -312,13 +311,14 @@ int main(int ac, char *av[]) {
   std::cout << "writing volume "
             << const_cast<char *>(
                    (outputPath / (params.outRoot + ".mgz")).c_str())
-            << endl;
+            << std::endl;
 
   MRIwrite(finalMask, const_cast<char *>(
                           (outputPath / (params.outRoot + ".mgz")).c_str()));
   // sanity-check: make sure location 0,0,0 is background (not brain)
   if (MRIgetVoxVal(finalMask, 0, 0, 0, 0) != 0) {
-    cerr << "ERROR: ribbon has non-zero value at location 0,0,0" << endl;
+    std::cerr << "ERROR: ribbon has non-zero value at location 0,0,0"
+              << std::endl;
     exit(1);
   }
 
@@ -335,7 +335,8 @@ int main(int ac, char *av[]) {
                  (outputPath / "lh." + params.outRoot + ".mgz").c_str()));
     // sanity-check: make sure location 0,0,0 is background (not brain)
     if (MRIgetVoxVal(ribbon, 0, 0, 0, 0) != 0) {
-      cerr << "ERROR: lh ribbon has non-zero value at location 0,0,0" << endl;
+      std::cerr << "ERROR: lh ribbon has non-zero value at location 0,0,0"
+                << std::endl;
       exit(1);
     }
     MRIfree(&ribbon);
@@ -347,7 +348,8 @@ int main(int ac, char *av[]) {
                  (outputPath / "rh." + params.outRoot + ".mgz").c_str()));
     // sanity-check: make sure location 0,0,0 is background (not brain)
     if (MRIgetVoxVal(ribbon, 0, 0, 0, 0) != 0) {
-      cerr << "ERROR: rh ribbon has non-zero value at location 0,0,0" << endl;
+      std::cerr << "ERROR: rh ribbon has non-zero value at location 0,0,0"
+                << std::endl;
       exit(1);
     }
     MRIfree(&ribbon);
@@ -359,20 +361,20 @@ int main(int ac, char *av[]) {
 IoParams::IoParams() {
   labelBackground = 0;
 
-  labelLeftWhite = 20;
+  labelLeftWhite  = 20;
   labelRightWhite = 120;
 
-  labelLeftRibbon = 10;
+  labelLeftRibbon  = 10;
   labelRightRibbon = 110;
 
-  capValue = 3;
+  capValue      = 3;
   bSaveDistance = false;
-  bEditAseg = false;
-  bSaveRibbon = false;
+  bEditAseg     = false;
+  bSaveRibbon   = false;
 
-  outRoot = "ribbon";
+  outRoot       = "ribbon";
   surfWhiteRoot = "white";
-  surfPialRoot = "pial";
+  surfPialRoot  = "pial";
 
   char *sd = FSENVgetSUBJECTS_DIR();
   if (nullptr == sd)
@@ -382,12 +384,12 @@ IoParams::IoParams() {
 }
 
 void IoParams::parse(int ac, char *av[]) {
-  std::string sl = "left_";
-  std::string sr = "right_";
-  std::string srib = "ribbon";
-  std::string sw = "white";
+  std::string sl    = "left_";
+  std::string sr    = "right_";
+  std::string srib  = "ribbon";
+  std::string sw    = "white";
   std::string ssurf = "surf_";
-  std::string slbl = "label_";
+  std::string slbl  = "label_";
 
   int iLeftWhite(labelLeftWhite), iLeftRibbon(labelLeftRibbon),
       iRightWhite(labelRightWhite), iRightRibbon(labelRightRibbon),
@@ -395,7 +397,7 @@ void IoParams::parse(int ac, char *av[]) {
 
   std::string strUse = "surface root name (i.e. <subject>/surf/$hemi.<NAME>";
   CCmdLineInterface interface(av[0]);
-  bool showHelp(false);
+  bool              showHelp(false);
 
   interface.AddOptionBool("help", &showHelp, "display help message");
   interface.AddOptionString((ssurf + sw).c_str(), &surfWhiteRoot,
@@ -463,11 +465,11 @@ void IoParams::parse(int ac, char *av[]) {
     exit(0);
   }
 
-  labelLeftWhite = (unsigned char)(iLeftWhite);
-  labelLeftRibbon = (unsigned char)(iLeftRibbon);
-  labelRightWhite = (unsigned char)(iRightWhite);
+  labelLeftWhite   = (unsigned char)(iLeftWhite);
+  labelLeftRibbon  = (unsigned char)(iLeftRibbon);
+  labelRightWhite  = (unsigned char)(iRightWhite);
   labelRightRibbon = (unsigned char)(iRightRibbon);
-  labelBackground = (unsigned char)(iBackground);
+  labelBackground  = (unsigned char)(iBackground);
 }
 
 std::string LoadInputFiles(const IoParams &params, MRI *&mriTemplate,
@@ -481,22 +483,22 @@ std::string LoadInputFiles(const IoParams &params, MRI *&mriTemplate,
       pathSurfRightPial, pathMriInput, pathOutput;
 
   if (params.subjectsDir.empty()) {
-    cerr << "SUBJECTS_DIR not found. Use --sd <dir>, or set SUBJECTS_DIR"
-         << endl;
+    std::cerr << "SUBJECTS_DIR not found. Use --sd <dir>, or set SUBJECTS_DIR"
+              << std::endl;
     exit(1);
   } else {
-    cout << "SUBJECTS_DIR is " << params.subjectsDir << endl;
+    std::cout << "SUBJECTS_DIR is " << params.subjectsDir << std::endl;
   }
 
   if (!params.subject.empty()) // application is in subject-mode
   {
     std::string subjDir = params.subjectsDir / params.subject;
     std::string pathSurf(subjDir / "surf");
-    pathSurfLeftWhite = pathSurf / "lh.white";
-    pathSurfLeftPial = pathSurf / "lh.pial";
+    pathSurfLeftWhite  = pathSurf / "lh.white";
+    pathSurfLeftPial   = pathSurf / "lh.pial";
     pathSurfRightWhite = pathSurf / "rh.white";
-    pathSurfRightPial = pathSurf / "rh.pial";
-    pathMriInput = subjDir / "mri" / "aseg.mgz";
+    pathSurfRightPial  = pathSurf / "rh.pial";
+    pathMriInput       = subjDir / "mri" / "aseg.mgz";
 
     pathOutput = subjDir / "mri";
   }
@@ -533,9 +535,9 @@ std::string LoadInputFiles(const IoParams &params, MRI *&mriTemplate,
 
 #ifndef NO_VTK
 void ComputeSurfaceDistanceFunction(MRIS *mris, float thickness, MRI *vol) {
-  vtkPoints *points;
+  vtkPoints *   points;
   vtkCellArray *faces;
-  vtkPolyData *mesh;
+  vtkPolyData * mesh;
 
   points = vtkPoints::New();
   points->SetNumberOfPoints(mris->nvertices);
@@ -560,8 +562,8 @@ void ComputeSurfaceDistanceFunction(MRIS *mris, float thickness, MRI *vol) {
   mesh->SetPolys(faces);
   mesh->Modified();
 
-  vtkStructuredPoints *sp = vtkStructuredPoints::New();
-  int dims[3] = {vol->width, vol->height, vol->depth};
+  vtkStructuredPoints *sp      = vtkStructuredPoints::New();
+  int                  dims[3] = {vol->width, vol->height, vol->depth};
   sp->SetDimensions(dims);
 
   // compute the unsigned distance
@@ -596,8 +598,8 @@ void ComputeSurfaceDistanceFunction(MRIS *mris, float thickness, MRI *vol) {
   obb->BuildLocator();
 
   // array for voxels inside, outside or yet to determin
-  int npoints = sp->GetNumberOfPoints();
-  int *inout = new int[npoints];
+  int  npoints = sp->GetNumberOfPoints();
+  int *inout   = new int[npoints];
   memset(inout, 0, npoints * sizeof(int));
   float *tab = (float *)sp->GetScalarPointer();
 
@@ -624,7 +626,7 @@ void ComputeSurfaceDistanceFunction(MRIS *mris, float thickness, MRI *vol) {
       if (inout[j])
         continue;
 
-      inout[j] = _inout;
+      inout[j]         = _inout;
       const float dist = tab[j]; // unsigned distance
       tab[j] *= _inout;          // make it signed
 

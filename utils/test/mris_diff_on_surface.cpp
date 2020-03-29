@@ -28,22 +28,21 @@
  * equal to zero! No wonder my output file gets smaller
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
-#include "mrishash.h"
-#include "mri_identify.h"
+#include "error.h"
 #include "icosahedron.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_identify.h"
+#include "mrishash.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 
 #define MAX_DATA_NUMBERS 200
@@ -55,21 +54,21 @@ int main(int argc, char *argv[]);
 
 int framesave = 0;
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
 char *srctypestring = NULL;
-int srctype = MRI_VOLUME_TYPE_UNKNOWN;
+int   srctype       = MRI_VOLUME_TYPE_UNKNOWN;
 char *trgtypestring = NULL;
-int trgtype = MRI_VOLUME_TYPE_UNKNOWN;
+int   trgtype       = MRI_VOLUME_TYPE_UNKNOWN;
 
-int negflag = 0;
+int negflag   = 0;
 int debugflag = 0;
-int debugvtx = 0;
-int pathflag = 0;
+int debugvtx  = 0;
+int pathflag  = 0;
 
 const char *Progname;
 
@@ -106,7 +105,7 @@ int main(int argc, char *argv[]) {
   if (argc != 5)
     usage_exit();
 
-  surf_name = argv[1];
+  surf_name  = argv[1];
   out_prefix = argv[argc - 1];
 
   if (srctypestring == NULL || trgtypestring == NULL) {
@@ -196,8 +195,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  maxV = -1000.0;
-  minV = 1000.0;
+  maxV  = -1000.0;
+  minV  = 1000.0;
   meanV = 0.0;
 
   for (index = 0; index < BaseSurf->nvertices; index++) {
@@ -312,7 +311,7 @@ static void print_version(void) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -322,20 +321,20 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "src_type")) {
     srctypestring = argv[2];
-    srctype = string_to_type(srctypestring);
-    nargs = 1;
+    srctype       = string_to_type(srctypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "trg_type")) {
     trgtypestring = argv[2];
-    trgtype = string_to_type(srctypestring);
-    nargs = 1;
+    trgtype       = string_to_type(srctypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "abspath")) {
     pathflag = 1;
   } else if (!stricmp(option, "neg")) {
     negflag = 1;
   } else if (!stricmp(option, "debug")) {
     debugflag = 1;
-    debugvtx = atoi(argv[2]);
-    nargs = 1;
+    debugvtx  = atoi(argv[2]);
+    nargs     = 1;
   } else {
     fprintf(stderr, "unknown option %s\n", argv[1]);
     print_help();

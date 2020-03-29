@@ -42,7 +42,7 @@ bool TrackData::LoadFromFiles(const QStringList &filenames) {
   Clear();
   CTrackReader reader;
   TRACK_HEADER header;
-  Track track;
+  Track        track;
   for (int n = 0; n < filenames.size(); n++) {
     if (!reader.Open(filenames[n].toLatin1().constData(), &header)) {
       return false;
@@ -50,10 +50,10 @@ bool TrackData::LoadFromFiles(const QStringList &filenames) {
 
     if (n == 0) {
       for (int i = 0; i < 3; i++) {
-        m_nDim[i] = header.dim[i];
+        m_nDim[i]       = header.dim[i];
         m_dVoxelSize[i] = header.voxel_size[i];
       }
-      m_nNumberOfScalars = header.n_scalars;
+      m_nNumberOfScalars    = header.n_scalars;
       m_nNumberOfProperties = header.n_properties;
       for (int i = 0; i < m_nNumberOfScalars; i++) {
         m_scalarNames << header.scalar_name[i];
@@ -86,28 +86,24 @@ bool TrackData::LoadFromFiles(const QStringList &filenames) {
       for (int i = 0; i < m_nNumberOfProperties; i++) {
         m_rangeProperty << qMakePair(1e12, -1e12);
       }
-      m_nNumberOfPoints = 0;
-      m_nNumberOfSegs = 0;
+      m_nNumberOfPoints   = 0;
+      m_nNumberOfSegs     = 0;
       m_bHasEmbeddedColor = (header.reserved[0] == 'C');
     }
 
-    int nScalars = m_nNumberOfScalars;
-    int nProperties = m_nNumberOfProperties;
-    short dim[3] = {(short)m_nDim[0], (short)m_nDim[1], (short)m_nDim[2]};
-    while (reader.GetNextPointCount(&track.nNum))
-    {
-      track.fPts = new float[track.nNum*3];
-      if (!track.fPts)
-      {
+    int   nScalars    = m_nNumberOfScalars;
+    int   nProperties = m_nNumberOfProperties;
+    short dim[3]      = {(short)m_nDim[0], (short)m_nDim[1], (short)m_nDim[2]};
+    while (reader.GetNextPointCount(&track.nNum)) {
+      track.fPts = new float[track.nNum * 3];
+      if (!track.fPts) {
         std::cerr << "Can not allocate memory." << std::endl;
         return false;
       }
-      float* f = NULL;
-      if (nScalars > 0)
-      {
-        f = new float[track.nNum*nScalars];
-        if (!f)
-        {
+      float *f = NULL;
+      if (nScalars > 0) {
+        f = new float[track.nNum * nScalars];
+        if (!f) {
           std::cerr << "Can not allocate memory." << std::endl;
           return false;
         }
@@ -115,18 +111,15 @@ bool TrackData::LoadFromFiles(const QStringList &filenames) {
       track.fProperty = NULL;
       if (nProperties > 0) {
         track.fProperty = new float[nProperties];
-        if (!track.fProperty)
-        {
+        if (!track.fProperty) {
           std::cerr << "Can not allocate memory." << std::endl;
           return false;
         }
       }
       reader.GetNextTrackData(track.nNum, track.fPts, f, track.fProperty);
-      for (int i = 0; i < nScalars; i++)
-      {
-        float* p = new float[track.nNum];
-        if (!p)
-        {
+      for (int i = 0; i < nScalars; i++) {
+        float *p = new float[track.nNum];
+        if (!p) {
           std::cerr << "Can not allocate memory." << std::endl;
           return false;
         }

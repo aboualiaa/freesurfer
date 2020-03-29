@@ -2,31 +2,31 @@
 #define _NormalizedCutsFilter_txx
 
 #include "NormalizedCutsFilter.h"
+#include "ThreadedMembershipFunction.h"
 #include "itkDecisionRule.h"
-#include "itkVector.h"
-#include "itkListSample.h"
 #include "itkKdTree.h"
+#include "itkListSample.h"
 #include "itkNormalVariateGenerator.h"
-#include <iostream>
-#include <algorithm>
+#include "itkVector.h"
 #include "vnl/vnl_matrix.h"
+#include <algorithm>
+#include <iostream>
 #include <stdlib.h>
-#include <vnl/vnl_sparse_matrix.h>
 #include <vnl/algo/vnl_sparse_symmetric_eigensystem.h>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
-#include "ThreadedMembershipFunction.h"
+#include <vnl/vnl_sparse_matrix.h>
 
 template <class T> class PriorityNode {
   typedef typename T::Pointer TPointer;
 
 public:
-  TPointer _thing;
-  int _priority;
+  TPointer    _thing;
+  int         _priority;
   std::string _id;
   PriorityNode(int priority, std::string id, TPointer thing) {
     _priority = priority;
-    _id = id;
-    _thing = thing;
+    _id       = id;
+    _thing    = thing;
   }
   bool operator<(const PriorityNode n) const {
     return n._priority > this->_priority;
@@ -52,13 +52,13 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
     mv.SetCell(this->GetInput(), i); // inputCellIt.Value());
     sample->PushBack(mv);
   }
-  std::string lastLabel = "1";
+  std::string                                   lastLabel = "1";
   std::priority_queue<PriorityNode<SampleType>> queue;
   queue.push(PriorityNode<SampleType>(sample->Size(), lastLabel, sample));
   while (queue.size() < this->GetNumberOfClusters()) {
     PriorityNode<SampleType> node = queue.top();
-    sample = node._thing;
-    lastLabel = node._id;
+    sample                        = node._thing;
+    lastLabel                     = node._id;
     queue.pop();
     std::vector<std::pair<int, int>> centroidIndeces =
         this->SelectCentroidsParallel(
@@ -80,7 +80,7 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
         }
       }
       typename ThreadedMembershipFunctionType::Pointer
-          threadedMembershipFunction = ThreadedMembershipFunctionType::New();
+                                                          threadedMembershipFunction = ThreadedMembershipFunctionType::New();
       typename ThreadedMembershipFunctionType::DomainType domain;
       domain[0] = 0;
       domain[1] = inIndeces.size() - 1;
@@ -95,7 +95,7 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
       std::vector<int> maxvals = threadedMembershipFunction->GetMaxIndeces();
       for (int j = 0; j < sample->Size(); j++) {
         int argmax = 0; //, maxVal=0;
-        argmax = maxvals[j];
+        argmax     = maxvals[j];
         labels[sample->GetMeasurementVector(j).GetCellId()] =
             lastLabel + std::to_string(centroidIndeces[argmax].first);
 
@@ -108,7 +108,7 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
       // std::cout << " finding maximum end " << std::endl;
     } else {
       typename SampleType::ConstIterator iter = sample->Begin();
-      int i = 0;
+      int                                i    = 0;
       while (!(iter == sample->End())) {
         labels[iter.GetMeasurementVector().GetCellId()] =
             lastLabel + std::to_string(centroidIndeces[i].first);
@@ -150,11 +150,11 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
 template <class TMesh, class TMembershipFunctionType>
 std::vector<std::pair<int, int>>
 NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroidsParallel(
-    typename SampleType::Pointer samples,
+    typename SampleType::Pointer                   samples,
     const typename MembershipFunctionType::Pointer membershipFunction) {
 
   std::vector<std::pair<int, int>> indices;
-  std::vector<int> selected;
+  std::vector<int>                 selected;
 
   const unsigned int n = std::min(
       this->GetNumberOfFibersForEigenDecomposition(), (int)samples->Size());
@@ -235,11 +235,11 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroidsParallel(
 template <class TMesh, class TMembershipFunctionType>
 std::vector<std::pair<int, int>>
 NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroids(
-    typename SampleType::Pointer samples,
+    typename SampleType::Pointer                   samples,
     const typename MembershipFunctionType::Pointer membershipFunction) {
 
   std::vector<std::pair<int, int>> indices;
-  std::vector<int> selected;
+  std::vector<int>                 selected;
 
   const unsigned int n = min(
       this->GetNumberOfFibersForEigenDecomposition(),
@@ -248,7 +248,7 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroids(
   vnl_sparse_matrix<double> ms(n, n);
   vnl_sparse_matrix<double> identity(n, n);
   vnl_sparse_matrix<double> diagonal(n, n);
-  bool random = false; // true;
+  bool                      random = false; // true;
   int offset = (samples->Size() > n) ? samples->Size() / n : 1;
   for (unsigned i = 0; i < n; i++) {
     if (random)
@@ -312,8 +312,8 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroids(
   else
     vector = es.get_eigenvector(1);
   double in = 0, out = 0, maximum = 0;
-  int k_i = 0;
-  int positivos = 0, negativos = 0;
+  int    k_i       = 0;
+  int    positivos = 0, negativos = 0;
   for (int i = 0; i < n; i++) {
     //	std::cout << " - " <<vector(i);;
     if (vector(i) > 0) // vector(k_i))

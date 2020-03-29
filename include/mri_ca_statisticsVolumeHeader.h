@@ -25,15 +25,15 @@
 #ifndef StatisticsVolumeHeader_h
 #define StatisticsVolumeHeader_h
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
+#include "mri_ca_configFile.h"
+#include "mri_ca_trainingParameters.h"
+#include "mri_ca_util.h"
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <math.h>
-#include "mri_ca_configFile.h"
-#include "mri_ca_util.h"
-#include "mri_ca_trainingParameters.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 typedef struct NativeIndexPointTag {
   int nNiX;
@@ -41,10 +41,10 @@ typedef struct NativeIndexPointTag {
   int nNiZ;
 } TypeNativeIndexPoint;
 
-typedef vector<TypeNativeIndexPoint> TypeVectorNativeIndexPoints;
+typedef std::vector<TypeNativeIndexPoint> TypeVectorNativeIndexPoints;
 
 typedef struct FractionalAreaAndPointsTag {
-  float fFractionalArea;
+  float                       fFractionalArea;
   TypeVectorNativeIndexPoints vectorNativeIndexPoints;
 } TypeFractionalAreaAndPoints;
 
@@ -63,8 +63,8 @@ public:
     AFLTEditedNonWhite
   };
 
-  bool writeStatisticsVolumeInfoFile(string strStatisticsVolumePath,
-                                     bool bEchoToStdOut = false) {
+  bool writeStatisticsVolumeInfoFile(std::string strStatisticsVolumePath,
+                                     bool        bEchoToStdOut = false) {
     CConfigFile statisticsVolumeInfoConfigFile;
     // erase what is there since we may
     // be updating the contents that were there
@@ -108,28 +108,28 @@ public:
   }
 
   bool getStatisticsVolumeInfoFile(
-      string strStatisticsVolumePath,
-      string strDefaultLabelLUTPath = "../LabelsAutoFixer.cfg") {
-    bool bReturnValue = true;
+      std::string strStatisticsVolumePath,
+      std::string strDefaultLabelLUTPath = "../LabelsAutoFixer.cfg") {
+    bool        bReturnValue = true;
     CConfigFile statisticsVolumeInfoConfigFile;
     try {
       // Define  defaults
       nNumSubjects = 0;
       arr2DstrTrainedScans.clear();
-      nNumMeasures = 1;
-      nXDIM = 128;
-      nYDIM = 128;
-      nNumSlices = 128;
-      strLabelLUTPath = strDefaultLabelLUTPath;
-      fSliceThickness = 0.002;
-      fSquarePixelSize = 0.002;
-      fStartX = -0.128;
-      fEndX = 0.128;
-      fStartY = -0.128;
-      fEndY = 0.128;
-      fStartZ = -0.128;
-      fEndZ = 0.128;
-      strLabeledVolumeSourceType = "NMRAutoFixer";
+      nNumMeasures                = 1;
+      nXDIM                       = 128;
+      nYDIM                       = 128;
+      nNumSlices                  = 128;
+      strLabelLUTPath             = strDefaultLabelLUTPath;
+      fSliceThickness             = 0.002;
+      fSquarePixelSize            = 0.002;
+      fStartX                     = -0.128;
+      fEndX                       = 0.128;
+      fStartY                     = -0.128;
+      fEndY                       = 0.128;
+      fStartZ                     = -0.128;
+      fEndZ                       = 0.128;
+      strLabeledVolumeSourceType  = "NMRAutoFixer";
       enumLabeledVolumeSourceType = enumNMRAutoFixer;
 
       statisticsVolumeInfoConfigFile.init(strStatisticsVolumePath,
@@ -171,20 +171,20 @@ public:
       // Define and use these as defaults
       nNumSubjects = 0;
       arr2DstrTrainedScans.clear();
-      nNumMeasures = 1;
-      nXDIM = 128;
-      nYDIM = 128;
-      nNumSlices = 128;
-      strLabelLUTPath = strDefaultLabelLUTPath;
-      fSliceThickness = 0.002;
-      fSquarePixelSize = 0.002;
-      fStartX = -0.128;
-      fEndX = 0.128;
-      fStartY = -0.128;
-      fEndY = 0.128;
-      fStartZ = -0.128;
-      fEndZ = 0.128;
-      strLabeledVolumeSourceType = "NMRAutoFixer";
+      nNumMeasures                = 1;
+      nXDIM                       = 128;
+      nYDIM                       = 128;
+      nNumSlices                  = 128;
+      strLabelLUTPath             = strDefaultLabelLUTPath;
+      fSliceThickness             = 0.002;
+      fSquarePixelSize            = 0.002;
+      fStartX                     = -0.128;
+      fEndX                       = 0.128;
+      fStartY                     = -0.128;
+      fEndY                       = 0.128;
+      fStartZ                     = -0.128;
+      fEndZ                       = 0.128;
+      strLabeledVolumeSourceType  = "NMRAutoFixer";
       enumLabeledVolumeSourceType = enumNMRAutoFixer;
     }
 
@@ -197,7 +197,7 @@ public:
       strStatisticsVolumeDirPath = ".";
     } else {
       *cstrStatisticsVolumeDirPath = '\00';
-      strStatisticsVolumeDirPath = cstrTemp;
+      strStatisticsVolumeDirPath   = cstrTemp;
     }
 
     // create an MRI structure so that we can map from
@@ -213,11 +213,11 @@ public:
       // pTalairachMRI->slice_direction=MRI_CORONAL;
 
       pTalairachMRI->xstart = fStartX * 1000;
-      pTalairachMRI->xend = fEndX * 1000;
+      pTalairachMRI->xend   = fEndX * 1000;
       pTalairachMRI->ystart = fStartY * 1000;
-      pTalairachMRI->yend = fEndY * 1000;
+      pTalairachMRI->yend   = fEndY * 1000;
       pTalairachMRI->zstart = fStartZ * 1000;
-      pTalairachMRI->zend = fEndZ * 1000;
+      pTalairachMRI->zend   = fEndZ * 1000;
 
       pTalairachMRI->xsize = fSquarePixelSize * 1000;
       pTalairachMRI->ysize = fSquarePixelSize * 1000;
@@ -508,9 +508,9 @@ public:
       of the Native space simply return with no labels and no fractionalVolumes
      */
 
-    float arr1DXPoints[8];
-    float arr1DYPoints[8];
-    float arr1DZPoints[8];
+    float       arr1DXPoints[8];
+    float       arr1DYPoints[8];
+    float       arr1DZPoints[8];
     const float AREA_FACTOR = 0.4999;
 
     float fNiX, fNiY, fNiZ;
@@ -556,7 +556,7 @@ public:
                                   arr1DZPoints[7]);
 
       // debug stuff
-      int nDebug = 0;
+      int  nDebug = 0;
       char cstrMsg[500];
       if (nDebug == 1) {
 
@@ -646,7 +646,7 @@ public:
       // Count the number of voxels of each label
       //  and find the set of points which label the canonical voxel with that
       //  label
-      unsigned char ucharLabel;
+      unsigned char                            ucharLabel;
       TypeMapFractionalAreaAndPoints::iterator it;
       mapFractionalAreaAndPoints.clear();
       for (int nNiX = (int)fMinX; nNiX <= fMaxX; nNiX++)
@@ -656,7 +656,7 @@ public:
             aPoint.nNiX = nNiX;
             aPoint.nNiY = nNiY;
             aPoint.nNiZ = nNiZ;
-            ucharLabel = MRIvox(pLabeledVolume, nNiX, nNiY, nNiZ);
+            ucharLabel  = MRIvox(pLabeledVolume, nNiX, nNiY, nNiZ);
             if (enumLabeledVolumeSourceType == enumNMRAutoFixer) {
               ucharLabel = mapLabelToAFLT(ucharLabel);
             }
@@ -687,7 +687,7 @@ public:
             (float)nNumNiVoxelsInTightestBoundingRectanguloid;
 
         if (nDebug == 1) {
-          int nLabel = it->first;
+          int   nLabel            = it->first;
           float fFractionalVolume = it->second.fFractionalArea;
           cout << "label " << nLabel << " w frac vol " << fFractionalVolume;
           cout << "\n\n";
@@ -710,25 +710,25 @@ public:
   }
 
 public:
-  int nNumSlices;
-  int nXDIM;
-  int nYDIM;
-  int nNumSubjects;
-  int nNumMeasures;
+  int   nNumSlices;
+  int   nXDIM;
+  int   nYDIM;
+  int   nNumSubjects;
+  int   nNumMeasures;
   float fSliceThickness;
   ;
-  float fSquarePixelSize;
-  float fStartX;
-  float fEndX;
-  float fStartY;
-  float fEndY;
-  float fStartZ;
-  float fEndZ;
-  string strLabelLUTPath;
-  TypeMatrixString arr2DstrTrainedScans;
-  string strStatisticsVolumeDirPath;
-  MRI *pTalairachMRI;
-  string strLabeledVolumeSourceType;
+  float                   fSquarePixelSize;
+  float                   fStartX;
+  float                   fEndX;
+  float                   fStartY;
+  float                   fEndY;
+  float                   fStartZ;
+  float                   fEndZ;
+  std::string             strLabelLUTPath;
+  TypeMatrixString        arr2DstrTrainedScans;
+  std::string             strStatisticsVolumeDirPath;
+  MRI *                   pTalairachMRI;
+  std::string             strLabeledVolumeSourceType;
   LabeledVolumeSourceType enumLabeledVolumeSourceType;
 };
 

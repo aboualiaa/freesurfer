@@ -28,9 +28,9 @@
 #ifndef __vtkKWQdecApp_h
 #define __vtkKWQdecApp_h
 
-#include <string>
 #include "vtkKWApplication.h"
 #include "vtkSmartPointer.h"
+#include <string>
 
 class vtkKWDialog;
 class vtkKWQdecWindow;

@@ -13,9 +13,9 @@ class AtlasMeshProbabilityImageStatisticsCollector
     : public AtlasMeshStatisticsCollector {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshProbabilityImageStatisticsCollector;
-  using Superclass = AtlasMeshStatisticsCollector;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshProbabilityImageStatisticsCollector;
+  using Superclass   = AtlasMeshStatisticsCollector;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -41,11 +41,11 @@ protected:
                                     const AtlasMesh::PointType &p1,
                                     const AtlasMesh::PointType &p2,
                                     const AtlasMesh::PointType &p3,
-                                    const AtlasAlphasType &alphasInVertex0,
-                                    const AtlasAlphasType &alphasInVertex1,
-                                    const AtlasAlphasType &alphasInVertex2,
-                                    const AtlasAlphasType &alphasInVertex3,
-                                    double &minLogLikelihood,
+                                    const AtlasAlphasType &     alphasInVertex0,
+                                    const AtlasAlphasType &     alphasInVertex1,
+                                    const AtlasAlphasType &     alphasInVertex2,
+                                    const AtlasAlphasType &     alphasInVertex3,
+                                    double &         minLogLikelihood,
                                     AtlasAlphasType &statisticsInVertex0,
                                     AtlasAlphasType &statisticsInVertex1,
                                     AtlasAlphasType &statisticsInVertex2,

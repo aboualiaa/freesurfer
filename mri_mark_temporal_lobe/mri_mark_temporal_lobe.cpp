@@ -23,14 +23,14 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "timer.h"
-#include "cma.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
-MRI *MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst);
+MRI *      MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst);
 
 const char *Progname;
 static void usage_exit(int code);
@@ -41,10 +41,10 @@ static char subjects_dir[STRLEN];
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN], *out_fname, *subject_name, *cp;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
-  MRI *mri_seg, *mri_dst;
+  int    ac, nargs;
+  int    msec, minutes, seconds;
+  Timer  start;
+  MRI *  mri_seg, *mri_dst;
 
   nargs = handleVersionOption(argc, argv, "mri_mark_temporal_lobe");
   if (nargs && argc - nargs == 1)
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
   printf("writing labeled temporal lobe to %s...\n", fname);
   MRIwrite(mri_dst, fname);
   MRIfree(&mri_dst);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -106,19 +106,19 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging node (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "PARC_DIR") || !stricmp(option, "SEG_DIR")) {
     seg_dir = argv[2];
-    nargs = 1;
+    nargs   = 1;
     printf("reading segmentation from subject's mri/%s directory\n", seg_dir);
   } else if (!stricmp(option, "SDIR")) {
     strcpy(subjects_dir, argv[2]);
@@ -156,9 +156,9 @@ MRI *MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst) {
       depth, left;
   MRI *mri_tmp;
 
-  width = mri_seg->width;
+  width  = mri_seg->width;
   height = mri_seg->height;
-  depth = mri_seg->depth;
+  depth  = mri_seg->depth;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_seg, nullptr);
@@ -177,12 +177,12 @@ MRI *MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst) {
                (label == Left_Temporal_Cerebral_White_Matter);
 
         for (found_other = found_gray = 0, i = 1; i <= 3; i++) {
-          yi = mri_seg->yi[y + i];
+          yi    = mri_seg->yi[y + i];
           label = MRIvox(mri_seg, x, yi, z);
           if (IS_CORTEX(label))
             found_gray = 1; /* gray matter inferior */
 
-          yi = mri_seg->yi[y - i];
+          yi    = mri_seg->yi[y - i];
           label = MRIvox(mri_seg, x, yi, z);
           if (IS_HIPPO(label) || IS_AMYGDALA(label))
             found_other = 1;
@@ -214,12 +214,12 @@ MRI *MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst) {
                  (label == Left_Temporal_Cerebral_White_Matter);
 
           for (found_other = found_gray = 0, i = 1; i <= 3; i++) {
-            yi = mri_seg->yi[y + i];
+            yi    = mri_seg->yi[y + i];
             label = MRIvox(mri_seg, x, yi, z);
             if (IS_CORTEX(label))
               found_gray = 1; /* gray matter inferior */
 
-            yi = mri_seg->yi[y - i]; /* lateral ventricle superior */
+            yi    = mri_seg->yi[y - i]; /* lateral ventricle superior */
             label = MRIvox(mri_seg, x, yi, z);
             if (IS_LAT_VENT(label))
               found_other = 1;

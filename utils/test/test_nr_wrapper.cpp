@@ -22,23 +22,23 @@
  *
  */
 
-#include <stdexcept>
-#include <sstream>
 #include <iostream>
-#include <string>
 #include <math.h>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 // testing
-#include <cppunit/TestCase.h>
 #include <cppunit/TestCaller.h>
-#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/ui/text/TestRunner.h>
 
 #include "numerics.h"
 
 extern "C" {
-#include "matrix.h"
 #include "error.h"
+#include "matrix.h"
 #include "stdlib.h"
 }
 
@@ -60,13 +60,13 @@ class NRWrapperTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE_END();
 
 private:
-  float mExpectedFret1;
+  float  mExpectedFret1;
   float *mExpectedP1;
-  int mFunction1Size;
+  int    mFunction1Size;
 
-  float mExpectedFret2;
+  float  mExpectedFret2;
   float *mExpectedP2;
-  int mFunction2Size;
+  int    mFunction2Size;
 
   void SetUpMinimizationTestResults();
   void TearDownMinimizationTestResults();
@@ -124,10 +124,10 @@ public:
   static const std::string GAMMA_INCOMPLETE_1;
 
   static float TestFunction1(float *p);
-  static void TestFunction1Gradient(float *p, float *g);
+  static void  TestFunction1Gradient(float *p, float *g);
 
   static float TestFunction2(float *p);
-  static void TestFunction2Gradient(float *p, float *g);
+  static void  TestFunction2Gradient(float *p, float *g);
 
   static void StepFunction(int itno, float sse, void *parms, float *p);
 
@@ -196,17 +196,17 @@ public:
 const float NRWrapperTest::EPSILON = 5e-5;
 
 const int NRWrapperTest::MATRICES_NOT_EQUAL = 0;
-const int NRWrapperTest::MATRICES_EQUAL = 1;
-const int NRWrapperTest::MATRICES_ERROR = 2;
+const int NRWrapperTest::MATRICES_EQUAL     = 1;
+const int NRWrapperTest::MATRICES_ERROR     = 2;
 
 const std::string NRWrapperTest::TESTING_DIR = "test_nr_wrapper_data/";
 
-const std::string NRWrapperTest::PASCAL_MATRIX = TESTING_DIR + "Pascal.mat";
-const std::string NRWrapperTest::BUCKY_MATRIX = TESTING_DIR + "Bucky.mat";
-const std::string NRWrapperTest::ZEROES_MATRIX = TESTING_DIR + "Zeroes.mat";
+const std::string NRWrapperTest::PASCAL_MATRIX   = TESTING_DIR + "Pascal.mat";
+const std::string NRWrapperTest::BUCKY_MATRIX    = TESTING_DIR + "Bucky.mat";
+const std::string NRWrapperTest::ZEROES_MATRIX   = TESTING_DIR + "Zeroes.mat";
 const std::string NRWrapperTest::IDENTITY_MATRIX = TESTING_DIR + "Identity.mat";
 const std::string NRWrapperTest::SINGULAR_MATRIX = TESTING_DIR + "Singular.mat";
-const std::string NRWrapperTest::ONE_MATRIX = TESTING_DIR + "One.mat";
+const std::string NRWrapperTest::ONE_MATRIX      = TESTING_DIR + "One.mat";
 const std::string NRWrapperTest::ONE_SMALL_MATRIX =
     TESTING_DIR + "OneSmall.mat";
 
@@ -352,8 +352,8 @@ bool NRWrapperTest::TestBetaIncompleteHelper(const float a, const float b,
                                              std::string resultFileName) {
 
   // number of samples will always be 100 for these test cases
-  const int cSamples = 100;
-  const float spacing = 0.01;
+  const int   cSamples = 100;
+  const float spacing  = 0.01;
 
   // TODO: this may need to be changed to be more strict or loose...
   // 1e-6 was too contrained for NR
@@ -370,7 +370,7 @@ bool NRWrapperTest::TestBetaIncompleteHelper(const float a, const float b,
     double expectedResult = expectedResults->data[nSamples];
 
     float actualResult = 0.0;
-    actualResult = OpenBetaIncomplete(a, b, x);
+    actualResult       = OpenBetaIncomplete(a, b, x);
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(expectedResult, actualResult, tolerance);
 
@@ -413,8 +413,8 @@ bool NRWrapperTest::TestGammaIncompleteHelper(const float a,
                                               std::string resultFileName) {
 
   // number of samples will always be 100 for these test cases
-  const int cSamples = 100;
-  const float spacing = 0.01;
+  const int   cSamples = 100;
+  const float spacing  = 0.01;
 
   // TODO: this may need to be changed to be more strict or loose...
   // 1e-6 was too contrained for NR
@@ -431,7 +431,7 @@ bool NRWrapperTest::TestGammaIncompleteHelper(const float a,
     double expectedResult = expectedResults->data[nSamples];
 
     float actualResult = 0.0;
-    actualResult = OpenGammaIncomplete(a, x);
+    actualResult       = OpenGammaIncomplete(a, x);
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(expectedResult, actualResult, tolerance);
     x += spacing;
@@ -462,7 +462,7 @@ bool NRWrapperTest::TestDFPMinHelper(
     void (*stepFunction)(int itno, float sse, void *parms, float *p),
     void *params) {
 
-  int iter = 0;
+  int   iter = 0;
   float fret = expectedFret;
   float ftol = .1;
 
@@ -504,12 +504,12 @@ bool NRWrapperTest::TestDFPMinHelper(
 void NRWrapperTest::SetUpMinimizationTestResults() {
   mFunction1Size = 1;
   mExpectedFret1 = -4.0;
-  mExpectedP1 = new float[2];
+  mExpectedP1    = new float[2];
   mExpectedP1[1] = 3.0;
 
   mFunction2Size = 2;
   mExpectedFret2 = -10.0;
-  mExpectedP2 = new float[3];
+  mExpectedP2    = new float[3];
   mExpectedP2[1] = 2.0;
   mExpectedP2[2] = -2.0;
 }
@@ -540,7 +540,7 @@ void NRWrapperTest::TestOpenDFPMin() {
   CPPUNIT_ASSERT(isSuccess);
 
   bool *isCalled = new bool;
-  isSuccess = TestDFPMinHelper(mFunction2Size, mExpectedFret2, mExpectedP2,
+  isSuccess      = TestDFPMinHelper(mFunction2Size, mExpectedFret2, mExpectedP2,
                                TestFunction2, TestFunction2Gradient,
                                StepFunction, isCalled);
   CPPUNIT_ASSERT(*isCalled);
@@ -558,7 +558,7 @@ void NRWrapperTest::TestOpenDFPMin() {
 
 void NRWrapperTest::StepFunction(int itno, float sse, void *parms, float *p) {
   bool *isCalled = (bool *)parms;
-  isCalled[0] = true;
+  isCalled[0]    = true;
 }
 
 // static
@@ -571,7 +571,7 @@ float NRWrapperTest::TestFunction1(float *p) {
 
 void NRWrapperTest::TestFunction1Gradient(float *p, float *g) {
   float x = p[1];
-  g[1] = 2 * x - 6;
+  g[1]    = 2 * x - 6;
 }
 
 // static
@@ -620,10 +620,10 @@ bool NRWrapperTest::TestPowellHelper(const int numberOfParameters,
                                      float expectedFret, float *expectedP,
                                      float (*function)(float[])) {
   const float tolerance = 1e-5;
-  float fret = 0;
-  int iter = 0;
+  float       fret      = 0;
+  int         iter      = 0;
 
-  float *p = vector(1, numberOfParameters);
+  float * p  = vector(1, numberOfParameters);
   float **xi = matrix(1, numberOfParameters, 1, numberOfParameters);
 
   for (int i = 0; i < numberOfParameters; i++) {
@@ -683,8 +683,8 @@ MATRIX *NRWrapperTest::ReconstructFromSVD(MATRIX *u, VECTOR *wVector,
   }
 
   MATRIX *vTranspose = MatrixTranspose(v, NULL);
-  MATRIX *uw = MatrixMultiply(u, w, NULL);
-  MATRIX *result = MatrixMultiply(uw, vTranspose, NULL);
+  MATRIX *uw         = MatrixMultiply(u, w, NULL);
+  MATRIX *result     = MatrixMultiply(uw, vTranspose, NULL);
 
   MatrixFree(&w);
   MatrixFree(&vTranspose);
@@ -694,8 +694,8 @@ MATRIX *NRWrapperTest::ReconstructFromSVD(MATRIX *u, VECTOR *wVector,
 }
 
 int NRWrapperTest::TestSVDcmpHelper(std::string matrixFile,
-                                    int numberOfRows = -1,
-                                    int numberOfColumns = -1) {
+                                    int         numberOfRows    = -1,
+                                    int         numberOfColumns = -1) {
   int status;
 
   MATRIX *x = MatrixRead((char *)(matrixFile.c_str()));
@@ -724,8 +724,8 @@ int NRWrapperTest::TestSVDcmpHelper(std::string matrixFile,
 
   if (isError == NO_ERROR) {
     const double tolerance = 1e-2;
-    MATRIX *result = ReconstructFromSVD(u, w, v);
-    bool areEqual =
+    MATRIX *     result    = ReconstructFromSVD(u, w, v);
+    bool         areEqual =
         AreMatricesEqual(x, result, tolerance, numberOfRows, numberOfColumns);
     if (areEqual) {
       status = MATRICES_EQUAL;
@@ -790,14 +790,14 @@ void NRWrapperTest::TestRan1() {
   std::cout << "\rNRWrapperTest::TestRan1()\n";
 
   const int numberOfBins = 10;
-  int bins[numberOfBins];
+  int       bins[numberOfBins];
 
   for (int i = 0; i < numberOfBins; i++) {
     bins[i] = 0;
   }
 
   const int numberOfRuns = 1000000;
-  long seed = -1L * (long)(abs((int)time(NULL)));
+  long      seed         = -1L * (long)(abs((int)time(NULL)));
 
   float randomNumber;
 
@@ -814,12 +814,12 @@ void NRWrapperTest::TestRan1() {
 
   float x2 = 0;
   for (int i = 0; i < numberOfBins; i++) {
-    float n = (float)bins[i];
+    float n   = (float)bins[i];
     float top = (n - binMean);
     x2 += top * top / binMean;
   }
 
-  int x2Mean = numberOfBins - 1;
+  int   x2Mean     = numberOfBins - 1;
   float lowerBound = 1.0;
   float upperBound = x2Mean * 4;
 
@@ -846,7 +846,7 @@ bool NRWrapperTest::AreSplinesEqual(MATRIX *x, MATRIX *y, MATRIX *xx,
   float *inputX = x->data;
   float *inputY = y->data;
 
-  int n = x->cols;
+  int   n = x->cols;
   float output[300];
 
   MATRIX *yy = MatrixRead((char *)(yyFile.c_str()));
@@ -873,7 +873,7 @@ bool NRWrapperTest::AreSplinesEqual(MATRIX *x, MATRIX *y, MATRIX *xx,
   // the edges
 
   // this point should be the same as the first control point
-  float pointX = xx->data[0] - 10;
+  float pointX   = xx->data[0] - 10;
   float expected = y->data[0];
   float result;
   OpenSplint(inputX, inputY, output, n, pointX, &result);
@@ -882,7 +882,7 @@ bool NRWrapperTest::AreSplinesEqual(MATRIX *x, MATRIX *y, MATRIX *xx,
   }
 
   // this point should be the same as the last control point
-  pointX = xx->data[xx->cols - 1] + 100;
+  pointX   = xx->data[xx->cols - 1] + 100;
   expected = y->data[y->cols - 1];
   OpenSplint(inputX, inputY, output, n, pointX, &result);
   if (fabs(result - expected) > EPSILON) {
@@ -1045,10 +1045,10 @@ bool NRWrapperTest::DoesCreateValidEigenSystem(std::string matrixFile) {
   }
 
   const float TOLERANCE = 1e-5;
-  bool isValid = false;
-  int size = matrix->rows;
+  bool        isValid   = false;
+  int         size      = matrix->rows;
 
-  float *eigenValues = new float[size];
+  float * eigenValues  = new float[size];
   MATRIX *eigenVectors = MatrixAlloc(size, size, MATRIX_REAL);
 
   OpenEigenSystem(matrix->data, size, eigenValues, eigenVectors->data);
@@ -1104,7 +1104,7 @@ void NRWrapperTest::TestOpenEigenSystem() {
 int main(int argc, char **argv) {
 
   int SUCCESS = 0;
-  int FAIL = 1;
+  int FAIL    = 1;
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(NRWrapperTest::suite());

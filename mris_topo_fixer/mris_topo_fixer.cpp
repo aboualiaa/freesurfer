@@ -26,53 +26,53 @@
  */
 
 #include "diag.h"
-#include "version.h"
 #include "timer.h"
 #include "topo_parms.h"
+#include "version.h"
 
 #include "mris_topology.h"
 #include "patchdisk.h"
 
 int main(int argc, char *argv[]);
 
-static int asc = 0;
-static int noint = 1;
+static int asc    = 0;
+static int noint  = 1;
 static int sphere = 1;
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void initTopoFixerParameters();
 static void freeTopoFixerParameters();
 
 const char *Progname;
 
 static const char *brain_name = "brain";
-static const char *wm_name = "wm";
-static const char *orig_name = "orig";
+static const char *wm_name    = "wm";
+static const char *orig_name  = "orig";
 static const char *input_name = "input";
 // static const char *defect_name  = "defects" ;
 static const char *sphere_name = "qsphere";
-static const char *out_name = "orig_corrected";
+static const char *out_name    = "orig_corrected";
 
-static char sdir[STRLEN] = "";
+static char          sdir[STRLEN] = "";
 static TOPOFIX_PARMS parms;
-static int MGZ = 1; // set to 1 for MGZ
+static int           MGZ = 1; // set to 1 for MGZ
 
 static double pct_over = 1.1;
 
 static void initTopoFixerParameters() {
-  parms.verbose = 1; // minimal mode
-  parms.smooth = 0;  // smoothing
-  parms.match = 1;   // matching using local intensity estimates
-  parms.mode = 0;
-  parms.minimal_mode = 0;
-  parms.nminattempts = 10;
-  parms.l_mri = 0.0;
-  parms.l_curv = 4.0;
-  parms.l_qcurv = 0.0;
-  parms.l_unmri = 1.0;
-  parms.volume_resolution = 3;
-  parms.nattempts_percent = 0.15;
-  parms.minimal_loop_percent = 0.4;
+  parms.verbose               = 1; // minimal mode
+  parms.smooth                = 0; // smoothing
+  parms.match                 = 1; // matching using local intensity estimates
+  parms.mode                  = 0;
+  parms.minimal_mode          = 0;
+  parms.nminattempts          = 10;
+  parms.l_mri                 = 0.0;
+  parms.l_curv                = 4.0;
+  parms.l_qcurv               = 0.0;
+  parms.l_unmri               = 1.0;
+  parms.volume_resolution     = 3;
+  parms.nattempts_percent     = 0.15;
+  parms.minimal_loop_percent  = 0.4;
   parms.no_self_intersections = 1;
   parms.contrast = -2; // contrast (regular==1;inversion== -1 ; detect = -2)
   // does not write out information
@@ -85,21 +85,21 @@ static void initTopoFixerParameters() {
   parms.patchdisk = (void *)disk;
 
   // mri
-  parms.mri = nullptr;
-  parms.mri_wm = nullptr;
+  parms.mri            = nullptr;
+  parms.mri_wm         = nullptr;
   parms.mri_gray_white = nullptr;
-  parms.mri_k1_k2 = nullptr;
+  parms.mri_k1_k2      = nullptr;
   // histo
-  parms.h_k1 = nullptr;
-  parms.h_k2 = nullptr;
-  parms.h_gray = nullptr;
-  parms.h_white = nullptr;
-  parms.h_dot = nullptr;
+  parms.h_k1     = nullptr;
+  parms.h_k2     = nullptr;
+  parms.h_gray   = nullptr;
+  parms.h_white  = nullptr;
+  parms.h_dot    = nullptr;
   parms.h_border = nullptr;
-  parms.h_grad = nullptr;
+  parms.h_grad   = nullptr;
   ;
   parms.transformation_matrix = nullptr;
-  parms.defect_list = nullptr;
+  parms.defect_list           = nullptr;
 }
 
 static void freeTopoFixerParameters() {
@@ -150,11 +150,11 @@ static void freeTopoFixerParameters() {
 
 int main(int argc, char *argv[]) {
 
-  char *hemi, *sname, *cp, fname[STRLEN];
-  int nargs;
+  char *       hemi, *sname, *cp, fname[STRLEN];
+  int          nargs;
   MRI_SURFACE *mris, *mris_corrected;
   // MRI           *mri, *mri_wm ;
-  int msec, nvert, nfaces, nedges, eno, is_valid;
+  int   msec, nvert, nfaces, nedges, eno, is_valid;
   Timer then;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_topo_fixer");
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
 
   then.reset();
   sname = argv[1];
-  hemi = argv[2];
+  hemi  = argv[2];
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
     if (!cp)
@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
     MRISrestoreVertexPositions(mris, ORIGINAL_VERTICES);
     MRIS *mris_temp = MRISextractMainComponent(mris, 0, 0, &ncpts);
     MRISfree(&mris);
-    mris = mris_temp;
+    mris                       = mris_temp;
     did_extract_main_component = 1;
     // fprintf(stderr,"\nAbort !!!\n");
     // MRISfree(&mris);
@@ -341,17 +341,17 @@ int main(int argc, char *argv[]) {
 
   DEFECT_LIST *dl = (DEFECT_LIST *)parms.defect_list;
   for (int n = 0; n < mris->nvertices; n++) {
-    mris->vertices[n].curv = 0;
+    mris->vertices[n].curv    = 0;
     mris->vertices[n].marked2 = 0;
   }
   for (int i = 0; i < dl->ndefects; i++) {
     DEFECT *defect = &dl->defects[i];
     for (int n = 0; n < defect->nvertices; n++) {
-      mris->vertices[defect->vertices[n]].curv = i + 1;
+      mris->vertices[defect->vertices[n]].curv    = i + 1;
       mris->vertices[defect->vertices[n]].marked2 = i + 1;
     }
     for (int n = 0; n < defect->nborder; n++) {
-      mris->vertices[defect->border[n]].curv = i + 1;
+      mris->vertices[defect->border[n]].curv    = i + 1;
       mris->vertices[defect->border[n]].marked2 = i + 1;
     }
   }
@@ -359,7 +359,7 @@ int main(int argc, char *argv[]) {
   sprintf(fname, "%s/%s/surf/%s.defects", sdir, sname, hemi);
   MRISwriteCurvature(mris, fname);
 
-  mris_corrected = MRISduplicateOver(mris);
+  mris_corrected       = MRISduplicateOver(mris);
   mris_corrected->type = MRIS_TRIANGULAR_SURFACE;
   // mris becomes useless!
   MRISfree(&mris);
@@ -456,7 +456,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -527,15 +527,15 @@ static int get_option(int argc, char *argv[]) {
     asc = 1;
     fprintf(stderr, "writting out surface in asci mode\n");
   } else if (!stricmp(option, (char *)"int")) {
-    noint = 0;
-    nargs = 0;
+    noint                       = 0;
+    nargs                       = 0;
     parms.no_self_intersections = 0;
   } else if (!stricmp(option, (char *)"no_intersection")) {
     parms.no_self_intersections = 1;
     fprintf(stderr, "avoiding self-intersecting patches\n");
   } else if (!stricmp(option, (char *)"minimal")) {
-    parms.minimal_mode = 1;
-    parms.nminattempts = 1;
+    parms.minimal_mode      = 1;
+    parms.nminattempts      = 1;
     parms.nattempts_percent = 0.0f;
     fprintf(stderr, "cuting minimal loop only\n");
   } else if (!stricmp(option, (char *)"loop_pct")) {
@@ -567,7 +567,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     }
 

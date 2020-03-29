@@ -1,8 +1,8 @@
 #ifndef __kvlAtlasMeshJacobianDeterminantDrawer_h
 #define __kvlAtlasMeshJacobianDeterminantDrawer_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 namespace kvl {
 
@@ -12,9 +12,9 @@ namespace kvl {
 class AtlasMeshJacobianDeterminantDrawer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshJacobianDeterminantDrawer;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshJacobianDeterminantDrawer;
+  using Superclass   = AtlasMeshRasterizor;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -42,9 +42,9 @@ protected:
   virtual ~AtlasMeshJacobianDeterminantDrawer();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
   AtlasMeshJacobianDeterminantDrawer(const Self &); // purposely not implemented

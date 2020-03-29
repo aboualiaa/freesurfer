@@ -17,7 +17,7 @@ AtlasParameterEstimationConsole ::AtlasParameterEstimationConsole() {
   m_Estimator = AtlasParameterEstimator::New();
 
   m_Interrupted = false;
-  m_Stepping = false;
+  m_Stepping    = false;
 
   // Add observers to the estimator
   typedef itk::MemberCommand<AtlasParameterEstimationConsole> MemberCommandType;
@@ -76,7 +76,7 @@ void AtlasParameterEstimationConsole ::SetLabelImages(
   std::vector<InputImageType::ConstPointer> labelImages;
   for (auto it = fileNames.begin(); it != fileNames.end(); ++it) {
     // Read the input image
-    using ReaderType = itk::ImageFileReader<InputImageType>;
+    using ReaderType           = itk::ImageFileReader<InputImageType>;
     ReaderType::Pointer reader = ReaderType::New();
     reader->SetFileName(*it);
     reader->Update();
@@ -85,7 +85,7 @@ void AtlasParameterEstimationConsole ::SetLabelImages(
     // Over-ride the spacing and origin since at this point we can't deal with
     // that
     const double spacing[] = {1, 1, 1};
-    const double origin[] = {0, 0, 0};
+    const double origin[]  = {0, 0, 0};
     const_cast<InputImageType *>(labelImage.GetPointer())->SetSpacing(spacing);
     const_cast<InputImageType *>(labelImage.GetPointer())->SetOrigin(origin);
 
@@ -199,13 +199,13 @@ void AtlasParameterEstimationConsole ::DisplayLabelImage(
     unsigned int labelImageNumber) {
   // Show the label image
   typedef ImageViewer::ImageType CompressedImageType;
-  CompressedImageType::Pointer compressedImage = CompressedImageType::New();
+  CompressedImageType::Pointer   compressedImage = CompressedImageType::New();
   compressedImage->SetRegions(
       m_Estimator->GetLabelImage(labelImageNumber)->GetLargestPossibleRegion());
   compressedImage->Allocate();
   compressedImage->FillBuffer(0);
   typedef CompressionLookupTable::ImageType ImageType;
-  itk::ImageRegionConstIterator<ImageType> origIt(
+  itk::ImageRegionConstIterator<ImageType>  origIt(
       m_Estimator->GetLabelImage(labelImageNumber),
       m_Estimator->GetLabelImage(labelImageNumber)->GetLargestPossibleRegion());
   itk::ImageRegionIterator<CompressedImageType> compIt(
@@ -227,7 +227,7 @@ void AtlasParameterEstimationConsole ::DisplayLabelImage(
 
   typedef itk::IntensityWindowingImageFilter<AtlasMeshAlphaDrawer::ImageType,
                                              ImageViewer::ImageType>
-      WindowerType;
+                        WindowerType;
   WindowerType::Pointer windower = WindowerType::New();
   windower->SetInput(alphaDrawer->GetImage());
   windower->SetWindowMinimum(0);

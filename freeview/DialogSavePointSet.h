@@ -54,7 +54,7 @@ protected slots:
 
 private:
   Ui::DialogSavePointSet *ui;
-  QString m_strLastDir;
+  QString                 m_strLastDir;
 
   bool m_bRemind;
 };

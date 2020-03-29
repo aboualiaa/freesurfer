@@ -53,14 +53,14 @@
 // We mean it.
 //
 
+#include <qatomic.h>
+#include <qendian.h>
+#include <qjsonarray.h>
+#include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <qjsonvalue.h>
-#include <qjsondocument.h>
-#include <qjsonarray.h>
-#include <qatomic.h>
-#include <qstring.h>
-#include <qendian.h>
 #include <qnumeric.h>
+#include <qstring.h>
 
 #include <limits.h>
 #include <limits>
@@ -136,24 +136,24 @@ public:
   }
   operator T() const { return qFromLittleEndian(val); }
 
-  bool operator==(T i) { return qFromLittleEndian(val) == i; }
-  bool operator!=(T i) { return qFromLittleEndian(val) != i; }
-  bool operator==(q_littleendian<T> i) { return val == i.val; }
-  bool operator!=(q_littleendian<T> i) { return val != i.val; }
-  bool operator<(T i) { return qFromLittleEndian(val) < i; }
-  bool operator>(T i) { return qFromLittleEndian(val) > i; }
-  bool operator<=(T i) { return qFromLittleEndian(val) <= i; }
-  bool operator>=(T i) { return qFromLittleEndian(val) >= i; }
+  bool            operator==(T i) { return qFromLittleEndian(val) == i; }
+  bool            operator!=(T i) { return qFromLittleEndian(val) != i; }
+  bool            operator==(q_littleendian<T> i) { return val == i.val; }
+  bool            operator!=(q_littleendian<T> i) { return val != i.val; }
+  bool            operator<(T i) { return qFromLittleEndian(val) < i; }
+  bool            operator>(T i) { return qFromLittleEndian(val) > i; }
+  bool            operator<=(T i) { return qFromLittleEndian(val) <= i; }
+  bool            operator>=(T i) { return qFromLittleEndian(val) >= i; }
   q_littleendian &operator+=(T i) {
     val = qToLittleEndian(qFromLittleEndian(val) + i);
     return *this;
   }
 };
 
-typedef q_littleendian<short> qle_short;
+typedef q_littleendian<short>          qle_short;
 typedef q_littleendian<unsigned short> qle_ushort;
-typedef q_littleendian<int> qle_int;
-typedef q_littleendian<unsigned int> qle_uint;
+typedef q_littleendian<int>            qle_int;
+typedef q_littleendian<unsigned int>   qle_uint;
 
 template <int pos, int width> class qle_bitfield {
 public:
@@ -175,12 +175,12 @@ public:
   }
   bool operator!() const { return !operator uint(); }
 
-  bool operator==(uint t) { return uint(*this) == t; }
-  bool operator!=(uint t) { return uint(*this) != t; }
-  bool operator<(uint t) { return uint(*this) < t; }
-  bool operator>(uint t) { return uint(*this) > t; }
-  bool operator<=(uint t) { return uint(*this) <= t; }
-  bool operator>=(uint t) { return uint(*this) >= t; }
+  bool          operator==(uint t) { return uint(*this) == t; }
+  bool          operator!=(uint t) { return uint(*this) != t; }
+  bool          operator<(uint t) { return uint(*this) < t; }
+  bool          operator>(uint t) { return uint(*this) > t; }
+  bool          operator<=(uint t) { return uint(*this) <= t; }
+  bool          operator>=(uint t) { return uint(*this) >= t; }
   qle_bitfield &operator+=(uint i) {
     *this = (uint(*this) + i);
     return *this;
@@ -212,12 +212,12 @@ public:
   }
   bool operator!() const { return !operator int(); }
 
-  bool operator==(int t) { return int(*this) == t; }
-  bool operator!=(int t) { return int(*this) != t; }
-  bool operator<(int t) { return int(*this) < t; }
-  bool operator>(int t) { return int(*this) > t; }
-  bool operator<=(int t) { return int(*this) <= t; }
-  bool operator>=(int t) { return int(*this) >= t; }
+  bool                operator==(int t) { return int(*this) == t; }
+  bool                operator!=(int t) { return int(*this) != t; }
+  bool                operator<(int t) { return int(*this) < t; }
+  bool                operator>(int t) { return int(*this) > t; }
+  bool                operator<=(int t) { return int(*this) <= t; }
+  bool                operator>=(int t) { return int(*this) >= t; }
   qle_signedbitfield &operator+=(int i) {
     *this = (int(*this) + i);
     return *this;
@@ -237,7 +237,7 @@ static inline bool useCompressed(const QString &s) {
   if (s.length() >= 0x8000)
     return false;
   const ushort *uc = (const ushort *)s.constData();
-  const ushort *e = uc + s.length();
+  const ushort *e  = uc + s.length();
   while (uc < e) {
     if (*uc > 0xff)
       return false;
@@ -256,7 +256,7 @@ static inline int qStringSize(const QString &string, bool compress) {
 // returns INT_MAX if it can't compress it into 28 bits
 static inline int compressedNumber(double d) {
   // this relies on details of how ieee floats are represented
-  const int exponent_off = 52;
+  const int     exponent_off  = 52;
   const quint64 fraction_mask = 0x000fffffffffffffull;
   const quint64 exponent_mask = 0x7ff0000000000000ull;
 
@@ -284,7 +284,7 @@ public:
   String(const char *data) { d = (Data *)data; }
 
   struct Data {
-    qle_int length;
+    qle_int    length;
     qle_ushort utf16[1];
   };
 
@@ -306,12 +306,12 @@ public:
 
   inline bool operator==(const QString &str) const {
     int slen = str.length();
-    int l = d->length;
+    int l    = d->length;
     if (slen != l)
       return false;
-    const ushort *s = (const ushort *)str.constData();
+    const ushort *    s = (const ushort *)str.constData();
     const qle_ushort *a = d->utf16;
-    const ushort *b = s;
+    const ushort *    b = s;
     while (l-- && *a == *b)
       a++, b++;
     return (l == -1);
@@ -340,9 +340,9 @@ public:
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
     return QString((QChar *)d->utf16, d->length);
 #else
-    int l = d->length;
+    int     l = d->length;
     QString str(l, Qt::Uninitialized);
-    QChar *ch = str.data();
+    QChar * ch = str.data();
     for (int i = 0; i < l; ++i)
       ch[i] = QChar(d->utf16[i]);
     return str;
@@ -356,13 +356,13 @@ public:
 
   struct Data {
     qle_short length;
-    char latin1[1];
+    char      latin1[1];
   };
   Data *d;
 
   inline Latin1String &operator=(const QString &str) {
-    d->length = str.length();
-    uchar *l = (uchar *)d->latin1;
+    d->length        = str.length();
+    uchar *       l  = (uchar *)d->latin1;
     const ushort *uc = (const ushort *)str.unicode();
     for (int i = 0; i < str.length(); ++i)
       *l++ = uc[i];
@@ -383,7 +383,7 @@ public:
     return d->length == str.d->length && !strcmp(d->latin1, str.d->latin1);
   }
   inline bool operator>=(const Latin1String &str) const {
-    int l = qMin(d->length, str.d->length);
+    int l   = qMin(d->length, str.d->length);
     int val = strncmp(d->latin1, str.d->latin1, l);
     if (!val)
       val = d->length - str.d->length;
@@ -402,8 +402,8 @@ inline bool String::operator==(const Latin1String &str) const {
   if ((int)d->length != (int)str.d->length)
     return false;
   const qle_ushort *uc = d->utf16;
-  const qle_ushort *e = uc + d->length;
-  const uchar *c = (uchar *)str.d->latin1;
+  const qle_ushort *e  = uc + d->length;
+  const uchar *     c  = (uchar *)str.d->latin1;
 
   while (uc < e) {
     if (*uc != *c)
@@ -415,11 +415,11 @@ inline bool String::operator==(const Latin1String &str) const {
 }
 
 inline bool String::operator<(const String &other) const {
-  int alen = d->length;
-  int blen = other.d->length;
-  int l = qMin(alen, blen);
-  qle_ushort *a = d->utf16;
-  qle_ushort *b = other.d->utf16;
+  int         alen = d->length;
+  int         blen = other.d->length;
+  int         l    = qMin(alen, blen);
+  qle_ushort *a    = d->utf16;
+  qle_ushort *b    = other.d->utf16;
 
   while (l-- && *a == *b)
     a++, b++;
@@ -434,7 +434,7 @@ inline bool String::operator<(const Latin1String &str) const {
     return false;
 
   const qle_ushort *uc = d->utf16;
-  const qle_ushort *e = uc + qMin((int)d->length, (int)str.d->length);
+  const qle_ushort *e  = uc + qMin((int)d->length, (int)str.d->length);
 
   while (uc < e) {
     if (*uc != *c)
@@ -448,10 +448,10 @@ inline bool String::operator<(const Latin1String &str) const {
 static inline void copyString(char *dest, const QString &str, bool compress) {
   if (compress) {
     Latin1String string(dest);
-    string = str;
+    std::string = str;
   } else {
     String string(dest);
-    string = str;
+    std::string = str;
   }
 }
 
@@ -472,8 +472,8 @@ class Base {
 public:
   qle_uint size;
   union {
-    uint _dummy;
-    qle_bitfield<0, 1> is_object;
+    uint                _dummy;
+    qle_bitfield<0, 1>  is_object;
     qle_bitfield<1, 31> length;
   };
   offset tableOffset;
@@ -486,7 +486,7 @@ public:
     return (offset *)(((char *)this) + tableOffset);
   }
 
-  int reserveSpace(uint dataSize, int posInTable, uint numItems, bool replace);
+  int  reserveSpace(uint dataSize, int posInTable, uint numItems, bool replace);
   void removeItems(int pos, int numItems);
 };
 
@@ -502,7 +502,7 @@ public:
 
 class Array : public Base {
 public:
-  inline Value at(int i) const;
+  inline Value  at(int i) const;
   inline Value &operator[](int i);
 
   bool isValid() const;
@@ -512,27 +512,27 @@ class Value {
 public:
   enum { MaxSize = (1 << 27) - 1 };
   union {
-    uint _dummy;
-    qle_bitfield<0, 3> type;
-    qle_bitfield<3, 1> latinOrIntValue;
-    qle_bitfield<4, 1> latinKey;
-    qle_bitfield<5, 27> value;
+    uint                      _dummy;
+    qle_bitfield<0, 3>        type;
+    qle_bitfield<3, 1>        latinOrIntValue;
+    qle_bitfield<4, 1>        latinKey;
+    qle_bitfield<5, 27>       value;
     qle_signedbitfield<5, 27> int_value;
   };
 
   inline char *data(const Base *b) const { return ((char *)b) + value; }
-  int usedStorage(const Base *b) const;
+  int          usedStorage(const Base *b) const;
 
-  bool toBoolean() const;
-  double toDouble(const Base *b) const;
-  QString toString(const Base *b) const;
-  String asString(const Base *b) const;
+  bool         toBoolean() const;
+  double       toDouble(const Base *b) const;
+  QString      toString(const Base *b) const;
+  String       asString(const Base *b) const;
   Latin1String asLatin1String(const Base *b) const;
-  Base *base(const Base *b) const;
+  Base *       base(const Base *b) const;
 
   bool isValid(const Base *b) const;
 
-  static int requiredStorage(QJsonValue &v, bool *compressed);
+  static int  requiredStorage(QJsonValue &v, bool *compressed);
   static uint valueToStore(const QJsonValue &v, uint offset);
   static void copyData(const QJsonValue &v, char *dest, bool compressed);
 };
@@ -575,7 +575,7 @@ public:
     return shallowKey().toString();
   }
 
-  bool operator==(const QString &key) const;
+  bool        operator==(const QString &key) const;
   inline bool operator!=(const QString &key) const { return !operator==(key); }
   inline bool operator>=(const QString &key) const;
 
@@ -596,7 +596,7 @@ class Header {
 public:
   qle_uint tag;     // 'qbjs'
   qle_uint version; // 1
-  Base *root() { return (Base *)(this + 1); }
+  Base *   root() { return (Base *)(this + 1); }
 };
 
 inline bool Value::toBoolean() const {
@@ -610,7 +610,7 @@ inline double Value::toDouble(const Base *b) const {
     return int_value;
 
   quint64 i = qFromLittleEndian<quint64>((const uchar *)b + value);
-  double d;
+  double  d;
   memcpy(&d, &i, sizeof(double));
   return d;
 }
@@ -642,9 +642,9 @@ public:
   enum Validation { Unchecked, Validated, Invalid };
 
   QAtomicInt ref;
-  int alloc;
+  int        alloc;
   union {
-    char *rawData;
+    char *  rawData;
     Header *header;
   };
   uint compactionCounter : 31;
@@ -656,16 +656,16 @@ public:
       : rawData(0), compactionCounter(0), ownsData(true) {
     Q_ASSERT(valueType == QJsonValue::Array || valueType == QJsonValue::Object);
 
-    alloc = sizeof(Header) + sizeof(Base) + reserved + sizeof(offset);
+    alloc  = sizeof(Header) + sizeof(Base) + reserved + sizeof(offset);
     header = (Header *)malloc(alloc);
     Q_CHECK_PTR(header);
-    header->tag = QJsonDocument::BinaryFormatTag;
+    header->tag     = QJsonDocument::BinaryFormatTag;
     header->version = 1;
-    Base *b = header->root();
-    b->size = sizeof(Base);
-    b->is_object = (valueType == QJsonValue::Object);
-    b->tableOffset = sizeof(Base);
-    b->length = 0;
+    Base *b         = header->root();
+    b->size         = sizeof(Base);
+    b->is_object    = (valueType == QJsonValue::Object);
+    b->tableOffset  = sizeof(Base);
+    b->length       = 0;
   }
   inline ~Data() {
     if (ownsData)
@@ -697,10 +697,10 @@ public:
     char *raw = (char *)malloc(size);
     Q_CHECK_PTR(raw);
     memcpy(raw + sizeof(Header), b, b->size);
-    Header *h = (Header *)raw;
-    h->tag = QJsonDocument::BinaryFormatTag;
-    h->version = 1;
-    Data *d = new Data(raw, size);
+    Header *h            = (Header *)raw;
+    h->tag               = QJsonDocument::BinaryFormatTag;
+    h->version           = 1;
+    Data *d              = new Data(raw, size);
     d->compactionCounter = (b == header->root()) ? compactionCounter : 0;
     return d;
   }

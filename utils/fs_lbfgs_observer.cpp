@@ -28,8 +28,8 @@
 fs_lbfgs_observer::fs_lbfgs_observer() {
   mNumberOfOptimalUpdates = 0;
 
-  mStepFunction = nullptr;
-  mStepFunctionParms = nullptr;
+  mStepFunction         = nullptr;
+  mStepFunctionParms    = nullptr;
   mUserCallbackFunction = nullptr;
 }
 
@@ -69,7 +69,7 @@ int fs_lbfgs_observer::getNumberOfOptimalUpdates() {
 void fs_lbfgs_observer::setStepFunction(
     void (*stepFunction)(int itno, float sse, void *parms, float *p),
     void *parms) {
-  mStepFunction = stepFunction;
+  mStepFunction      = stepFunction;
   mStepFunctionParms = parms;
 }
 

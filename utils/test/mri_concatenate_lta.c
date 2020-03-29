@@ -25,22 +25,22 @@
 
 /* Concatenate two (or more?) LTAs into one final LTA */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
 #include "fio.h"
-#include "version.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "transform.h"
+#include "version.h"
 
 void usage(int exit_val);
 
@@ -48,7 +48,7 @@ static int get_option(int argc, char *argv[]);
 
 LTA *ltaReadFileEx(const char *fname);
 LTA *ltaMNIreadEx(const char *fname);
-int ltaMNIwrite(LTA *lta, char *fname);
+int  ltaMNIwrite(LTA *lta, char *fname);
 
 static int invert1 = 0;
 static int invert2 = 0;
@@ -56,20 +56,20 @@ static int invert2 = 0;
 static int out_type = 0;
 
 const char *Progname;
-char *tal_src_file = 0;
-char *tal_dst_file = 0;
-MRI *tal_src = 0;
-MRI *tal_dst = 0;
+char *      tal_src_file = 0;
+char *      tal_dst_file = 0;
+MRI *       tal_src      = 0;
+MRI *       tal_dst      = 0;
 
 int main(int argc, char *argv[]) {
 
-  char **av, *ltafn1, *ltafn2, *ltafn_total;
-  LTA *lta1, *lta2, *lta_total;
-  FILE *fo;
+  char ** av, *ltafn1, *ltafn2, *ltafn_total;
+  LTA *   lta1, *lta2, *lta_total;
+  FILE *  fo;
   MATRIX *r_to_i_1, *i_to_r_1, *i_to_r_2, *r_to_i_2;
   MATRIX *RAS_1_to_1, *RAS_2_to_2, *m_tmp;
-  int nargs, ac;
-  int type = 0;
+  int     nargs, ac;
+  int     type = 0;
 
   Progname = argv[0];
 
@@ -89,8 +89,8 @@ int main(int argc, char *argv[]) {
   if (argc != 4)
     usage(1);
 
-  ltafn1 = argv[1];
-  ltafn2 = argv[2];
+  ltafn1      = argv[1];
+  ltafn2      = argv[2];
   ltafn_total = argv[3];
 
   printf("Read individual LTAs\n");
@@ -100,8 +100,8 @@ int main(int argc, char *argv[]) {
 
   if (invert1) {
     VOL_GEOM vgtmp;
-    LT *lt;
-    MATRIX *m_tmp = lta1->xforms[0].m_L;
+    LT *     lt;
+    MATRIX * m_tmp      = lta1->xforms[0].m_L;
     lta1->xforms[0].m_L = MatrixInverse(lta1->xforms[0].m_L, NULL);
     MatrixFree(&m_tmp);
     lt = &lta1->xforms[0];
@@ -153,8 +153,8 @@ int main(int argc, char *argv[]) {
 
   if (invert2) {
     VOL_GEOM vgtmp;
-    LT *lt;
-    MATRIX *m_tmp = lta2->xforms[0].m_L;
+    LT *     lt;
+    MATRIX * m_tmp      = lta2->xforms[0].m_L;
     lta2->xforms[0].m_L = MatrixInverse(lta2->xforms[0].m_L, NULL);
     MatrixFree(&m_tmp);
     lt = &lta2->xforms[0];
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
     if (!r_to_i_1 || !i_to_r_1)
       ErrorExit(ERROR_BADFILE, "%s: failed to convert LTA1 to RAS_to_RAS",
                 Progname);
-    m_tmp = MatrixMultiply(lta1->xforms[0].m_L, r_to_i_1, NULL);
+    m_tmp      = MatrixMultiply(lta1->xforms[0].m_L, r_to_i_1, NULL);
     RAS_1_to_1 = MatrixMultiply(i_to_r_1, m_tmp, NULL);
     MatrixFree(&m_tmp);
   } else {
@@ -207,21 +207,21 @@ int main(int argc, char *argv[]) {
     if (!r_to_i_2 || !i_to_r_2)
       ErrorExit(ERROR_BADFILE, "%s: failed to convert LTA1 to RAS_to_RAS",
                 Progname);
-    m_tmp = MatrixMultiply(lta2->xforms[0].m_L, r_to_i_2, NULL);
+    m_tmp      = MatrixMultiply(lta2->xforms[0].m_L, r_to_i_2, NULL);
     RAS_2_to_2 = MatrixMultiply(i_to_r_2, m_tmp, NULL);
     MatrixFree(&m_tmp);
   } else {
     ErrorExit(ERROR_BADFILE, "%s: unknown transform type for LTA1", Progname);
   }
 
-  lta_total = LTAalloc(1, NULL);
+  lta_total       = LTAalloc(1, NULL);
   lta_total->type = LINEAR_RAS_TO_RAS;
   MatrixMultiply(RAS_2_to_2, RAS_1_to_1, lta_total->xforms[0].m_L);
-  lta_total->xforms[0].src = lta1->xforms[0].src;
-  lta_total->xforms[0].dst = lta2->xforms[0].dst;
-  lta_total->xforms[0].x0 = 0;
-  lta_total->xforms[0].y0 = 0;
-  lta_total->xforms[0].z0 = 0;
+  lta_total->xforms[0].src   = lta1->xforms[0].src;
+  lta_total->xforms[0].dst   = lta2->xforms[0].dst;
+  lta_total->xforms[0].x0    = 0;
+  lta_total->xforms[0].y0    = 0;
+  lta_total->xforms[0].z0    = 0;
   lta_total->xforms[0].sigma = 1.0f;
 
   type = TransformFileNameType(ltafn_total);
@@ -277,11 +277,11 @@ void usage(int exit_val) {
 } /*  end usage()  */
 
 LTA *ltaReadFileEx(const char *fname) {
-  FILE *fp;
+  FILE *            fp;
   LINEAR_TRANSFORM *lt;
-  int i, nxforms, type;
-  char line[STRLEN], *cp;
-  LTA *lta;
+  int               i, nxforms, type;
+  char              line[STRLEN], *cp;
+  LTA *             lta;
 
   fp = fopen(fname, "r");
   if (fp == NULL)
@@ -296,7 +296,7 @@ LTA *ltaReadFileEx(const char *fname) {
   sscanf(cp, "type      = %d\n", &type);
   cp = fgetl(line, 199, fp);
   sscanf(cp, "nxforms   = %d\n", &nxforms);
-  lta = LTAalloc(nxforms, NULL);
+  lta       = LTAalloc(nxforms, NULL);
   lta->type = type;
   for (i = 0; i < lta->num_xforms; i++) {
     lt = &lta->xforms[i];
@@ -323,7 +323,7 @@ LTA *ltaReadFileEx(const char *fname) {
 /*  EOF  */
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -334,12 +334,12 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "invert the first LTA before applying it \n");
   } else if (!stricmp(option, "out_type")) {
     out_type = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "set final LTA type to %d\n", out_type);
   } else if (!stricmp(option, "tal")) {
     tal_src_file = argv[2];
     tal_dst_file = argv[3];
-    nargs = 2;
+    nargs        = 2;
     fprintf(stderr, "Talairach xfrm src file is %s\n", tal_src_file);
     fprintf(stderr, "Talairach xfrm dst file is %s\n", tal_dst_file);
     tal_src = MRIreadHeader(argv[2], MRI_VOLUME_TYPE_UNKNOWN);
@@ -363,21 +363,21 @@ static int get_option(int argc, char *argv[]) {
 }
 
 LTA *ltaMNIreadEx(const char *fname) {
-  LTA *lta = 0;
+  LTA *             lta = 0;
   LINEAR_TRANSFORM *lt;
-  char *cp, line[1000], infoline[1024], infoline2[1024];
-  FILE *fp;
-  int row;
-  MATRIX *m_L;
-  int no_volinfo = 0;
+  char *            cp, line[1000], infoline[1024], infoline2[1024];
+  FILE *            fp;
+  int               row;
+  MATRIX *          m_L;
+  int               no_volinfo = 0;
 
   fp = fopen(fname, "r");
   if (!fp)
     ErrorReturn(NULL,
                 (ERROR_NOFILE, "ltMNIreadEx: could not open file %s", fname));
 
-  lta = LTAalloc(1, NULL);
-  lt = &lta->xforms[0];
+  lta       = LTAalloc(1, NULL);
+  lt        = &lta->xforms[0];
   lt->sigma = 1.0f;
   lt->x0 = lt->y0 = lt->z0 = 0;
 
@@ -448,8 +448,8 @@ get_transform:
 #include "minc.h"
 
 int ltaMNIwrite(LTA *lta, char *fname) {
-  FILE *fp;
-  int row;
+  FILE *  fp;
+  int     row;
   MATRIX *m_L;
 
   fp = fopen(fname, "w");
@@ -477,24 +477,24 @@ int ltaMNIwrite(LTA *lta, char *fname) {
     }
   } else if (lta->type == LINEAR_VOX_TO_VOX) {
     // we use src and dst info to create RAS_TO_RAS xfm
-    MATRIX *voxFromRAS = 0;
+    MATRIX *voxFromRAS   = 0;
     MATRIX *rasFromVoxel = 0;
-    MATRIX *tmp = 0;
-    MATRIX *rasToRAS = 0;
-    MRI *src = 0;
-    MRI *dst = 0;
-    LT *lt = 0;
-    lt = &lta->xforms[0];
+    MATRIX *tmp          = 0;
+    MATRIX *rasToRAS     = 0;
+    MRI *   src          = 0;
+    MRI *   dst          = 0;
+    LT *    lt           = 0;
+    lt                   = &lta->xforms[0];
     src = MRIallocHeader(lt->src.width, lt->src.height, lt->src.depth,
                          MRI_UCHAR, 0);
     useVolGeomToMRI(&lt->src, src);
     dst = MRIallocHeader(lt->dst.width, lt->dst.height, lt->dst.depth,
                          MRI_UCHAR, 0);
     useVolGeomToMRI(&lt->dst, dst);
-    voxFromRAS = extract_r_to_i(src);
-    tmp = MatrixMultiply(lta->xforms[0].m_L, voxFromRAS, NULL);
+    voxFromRAS   = extract_r_to_i(src);
+    tmp          = MatrixMultiply(lta->xforms[0].m_L, voxFromRAS, NULL);
     rasFromVoxel = extract_i_to_r(dst);
-    rasToRAS = MatrixMultiply(rasFromVoxel, tmp, NULL);
+    rasToRAS     = MatrixMultiply(rasFromVoxel, tmp, NULL);
     for (row = 1; row <= 3; row++) {
       fprintf(fp, "      %f       %f       %f       %f",
               *MATRIX_RELT(rasToRAS, row, 1), *MATRIX_RELT(rasToRAS, row, 2),

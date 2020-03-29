@@ -24,10 +24,10 @@
 #ifndef WIDGETHISTOGRAM_H
 #define WIDGETHISTOGRAM_H
 
-#include <QWidget>
-#include <QVector>
 #include <QColor>
 #include <QPolygon>
+#include <QVector>
+#include <QWidget>
 
 struct LineMarker;
 typedef QVector<LineMarker> LineMarkers;
@@ -35,10 +35,10 @@ typedef QVector<LineMarker> LineMarkers;
 struct LineMarker {
   LineMarker() : style(Qt::DashLine), movable(true) {}
 
-  double position;
-  QColor color;
+  double       position;
+  QColor       color;
   Qt::PenStyle style;
-  bool movable;
+  bool         movable;
 };
 
 class WidgetHistogram : public QWidget {
@@ -97,35 +97,35 @@ public slots:
   }
 
 protected:
-  void Initialize();
+  void         Initialize();
   virtual void paintEvent(QPaintEvent *);
   virtual void mousePressEvent(QMouseEvent *);
   virtual void mouseMoveEvent(QMouseEvent *);
   virtual void mouseReleaseEvent(QMouseEvent *);
   virtual void mouseDoubleClickEvent(QMouseEvent *);
 
-  void UpdateData(bool bRepaint = true);
-  void UpdateColorTable();
-  void DrawMarker(QPainter *p, LineMarker marker);
-  void DrawMarkerThumb(QPainter *p, LineMarker marker, int x, int y);
-  bool FindMarker(int x, int y, int *nIndex, bool *bMirrored = 0);
-  bool MarkerHit(int x, int y, LineMarker marker);
+  void     UpdateData(bool bRepaint = true);
+  void     UpdateColorTable();
+  void     DrawMarker(QPainter *p, LineMarker marker);
+  void     DrawMarkerThumb(QPainter *p, LineMarker marker, int x, int y);
+  bool     FindMarker(int x, int y, int *nIndex, bool *bMirrored = 0);
+  bool     MarkerHit(int x, int y, LineMarker marker);
   QPolygon MakeMarkerThumb(int x, int y);
 
   double *m_dInputData;
-  long m_nInputSize;
-  double m_dInputRange[2];
+  long    m_nInputSize;
+  double  m_dInputRange[2];
 
-  int *m_nOutputData;
-  double m_dOutputRange[2];
-  bool m_bAutoRange;
-  int m_nNumberOfBins;
-  double m_dOutputTotalArea;
-  double *m_dOutputArea;
+  int *          m_nOutputData;
+  double         m_dOutputRange[2];
+  bool           m_bAutoRange;
+  int            m_nNumberOfBins;
+  double         m_dOutputTotalArea;
+  double *       m_dOutputArea;
   unsigned char *m_nColorTable; // color table for histogram drawing as RGBA
 
   double m_dBinWidth;
-  int m_nMaxCount;
+  int    m_nMaxCount;
 
   QColor m_colorBackground;
   QColor m_colorForeground;
@@ -133,11 +133,11 @@ protected:
   QRect m_rectGraph;
 
   LineMarkers m_markers;
-  bool m_bSymmetricMarkers;
-  bool m_bMarkerEditable;
-  int m_nActiveMarker;
-  bool m_bActiveMarkerMirrored;
-  bool m_bUsePercentile;
+  bool        m_bSymmetricMarkers;
+  bool        m_bMarkerEditable;
+  int         m_nActiveMarker;
+  bool        m_bActiveMarkerMirrored;
+  bool        m_bUsePercentile;
 };
 
 template <class T>
@@ -158,7 +158,7 @@ void WidgetHistogram::SetInputData(T *data, long size, double *range) {
       }
     }
 
-    m_nInputSize = size;
+    m_nInputSize      = size;
     m_dOutputRange[0] = m_dInputRange[0];
     m_dOutputRange[1] = m_dInputRange[1];
   }

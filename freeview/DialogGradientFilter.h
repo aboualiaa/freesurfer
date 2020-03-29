@@ -40,7 +40,7 @@ public:
   void SetSmoothing(bool smooth);
   bool GetSmoothing();
 
-  void SetSD(double val);
+  void   SetSD(double val);
   double GetSD();
 
 private:

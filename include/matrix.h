@@ -35,19 +35,19 @@
    have one column (by default) or one row.
 */
 typedef struct {
-  short type;
-  char inBuf; // The matrix is in a stack buffer (see below)
-  int rows;
-  int cols;
+  short   type;
+  char    inBuf; // The matrix is in a stack buffer (see below)
+  int     rows;
+  int     cols;
   float **rptr; /* pointer to an array of rows */
-  float *data;  /* pointer to base of data */
-  FILE *mmapfile;
+  float * data; /* pointer to base of data */
+  FILE *  mmapfile;
 } MATRIX, VECTOR;
 
 typedef struct MatrixBuffer {
   MATRIX matrix;
   float *rptr[5];
-  float data[5 * 5 + 2];
+  float  data[5 * 5 + 2];
 } MatrixBuffer; // Upto 4x4 are so common and so small they should be stack
                 // allocated so MatrixFree will just NULL the pointer
 
@@ -72,16 +72,16 @@ typedef struct {
 #define MATRIX_CELT_REAL(m, r, c) (MATRIX_CELT(m, r, c)->real)
 #define MATRIX_CELT_IMAG(m, r, c) (MATRIX_CELT(m, r, c)->imag)
 
-#define MATRIX_REAL 1
+#define MATRIX_REAL    1
 #define MATRIX_COMPLEX 2
-#define MATRIX_SYM 0
-#define MATRIX_UPPER 1
-#define MATRIX_LOWER 2
+#define MATRIX_SYM     0
+#define MATRIX_UPPER   1
+#define MATRIX_LOWER   2
 
-int MatrixIsZero(MATRIX *m);
-int MatrixIsIdentity(MATRIX *m);
+int     MatrixIsZero(MATRIX *m);
+int     MatrixIsIdentity(MATRIX *m);
 MATRIX *MatrixReshape(MATRIX *m_src, MATRIX *m_dst, int rows, int cols);
-int MatrixCheck(MATRIX *m);
+int     MatrixCheck(MATRIX *m);
 MATRIX *MatrixInverse(const MATRIX *mIn, MATRIX *mOut);
 MATRIX *MatrixPseudoInverse(MATRIX *m, MATRIX *m_pseudo_inv);
 MATRIX *MatrixSVDPseudoInverse(MATRIX *m, MATRIX *m_pseudo_inv);
@@ -98,7 +98,7 @@ MATRIX *MatrixAlloc2_wkr(const int rows, const int cols, const int type,
 #define MatrixAlloc2(ROWS, COLS, TYPE, BUF)                                    \
   MatrixAlloc2_wkr((ROWS), (COLS), (TYPE), (BUF), __FILE__, __LINE__)
 
-int MatrixFree(MATRIX **pmat);
+int     MatrixFree(MATRIX **pmat);
 MATRIX *MatrixMultiplyD(const MATRIX *m1, const MATRIX *m2,
                         MATRIX *m3); // use this one
 MATRIX *MatrixMultiply_wkr(const MATRIX *m1, const MATRIX *m2, MATRIX *m3,
@@ -115,17 +115,17 @@ MATRIX *MatrixDivideElts(MATRIX *num, MATRIX *den,
 MATRIX *MatrixReplicate(MATRIX *mIn, int nr, int nc,
                         MATRIX *mOut); // like matlab repmat()
 MATRIX *MatrixCopy(const MATRIX *mIn, MATRIX *mOut);
-int MatrixWriteTxt(const char *fname, MATRIX *mat);
+int     MatrixWriteTxt(const char *fname, MATRIX *mat);
 MATRIX *MatrixReadTxt(const char *fname, MATRIX *mat);
 MATRIX *MatrixRead(const char *fname);
-int MatrixWrite(MATRIX *mIn, const char *fname, const char *name);
+int     MatrixWrite(MATRIX *mIn, const char *fname, const char *name);
 MATRIX *MatrixIdentity(int n, MATRIX *mI);
-int MatrixPrint(FILE *fp, const MATRIX *mat);
-int MatrixPrintFmt(FILE *fp, const char *fmt, MATRIX *mat);
-int MatrixPrintOneLine(FILE *fp, MATRIX *mat);
-int MatrixPrintTranspose(FILE *fp, MATRIX *mat);
-int MatrixPrintWithString(FILE *fp, MATRIX *m, const char *Pre,
-                          const char *Post);
+int     MatrixPrint(FILE *fp, const MATRIX *mat);
+int     MatrixPrintFmt(FILE *fp, const char *fmt, MATRIX *mat);
+int     MatrixPrintOneLine(FILE *fp, MATRIX *mat);
+int     MatrixPrintTranspose(FILE *fp, MATRIX *mat);
+int     MatrixPrintWithString(FILE *fp, MATRIX *m, const char *Pre,
+                              const char *Post);
 MATRIX *MatrixTranspose(MATRIX *mIn, MATRIX *mOut);
 MATRIX *MatrixAdd(const MATRIX *m1, const MATRIX *m2, MATRIX *mOut);
 MATRIX *MatrixSubtract(const MATRIX *m1, const MATRIX *m2, MATRIX *mOut);
@@ -153,18 +153,18 @@ MATRIX *MatrixSetRegion(MATRIX *mSrc, MATRIX *mDst, int start_row,
                         int start_col, int rows, int cols, float val);
 MATRIX *MatrixRealToComplex(MATRIX *mReal, MATRIX *mImag, MATRIX *mOut);
 MATRIX *MatrixRegularize(MATRIX *mIn, MATRIX *mOut);
-int MatrixSingular(MATRIX *m);
+int     MatrixSingular(MATRIX *m);
 MATRIX *MatrixToeplitz(VECTOR *v, MATRIX *T, int Type);
 
 /* determinants and eigenvectors */
-float MatrixDeterminant(MATRIX *m);
+float   MatrixDeterminant(MATRIX *m);
 MATRIX *MatrixEigenSystem(MATRIX *m, float *evalues, MATRIX *m_dst);
 
 MATRIX *MatrixSVD(MATRIX *mA, VECTOR *v_z, MATRIX *mV);
 MATRIX *MatrixSVDInverse(MATRIX *m, MATRIX *m_inverse);
-float MatrixNSConditionNumber(MATRIX *m);
-float MatrixConditionNumber(MATRIX *m);
-float MatrixSVDEigenValues(MATRIX *m, float *evalues);
+float   MatrixNSConditionNumber(MATRIX *m);
+float   MatrixConditionNumber(MATRIX *m);
+float   MatrixSVDEigenValues(MATRIX *m, float *evalues);
 MATRIX *MatrixFactorSqrSVD(MATRIX *M, int Invert, MATRIX *D);
 
 /* statistical stuff */
@@ -175,36 +175,36 @@ MATRIX *MatrixFinalMeans(VECTOR *mMeans, VECTOR *mNobs);
 MATRIX *MatrixFinalCovariance(MATRIX *mInputs, MATRIX *mCov, VECTOR *mNobs);
 
 /* misc. I/O functions */
-int MatrixAsciiWriteInto(FILE *fp, MATRIX *m);
+int     MatrixAsciiWriteInto(FILE *fp, MATRIX *m);
 MATRIX *MatrixAsciiReadFrom(FILE *fp, MATRIX *m);
-int MatrixAsciiWrite(const char *fname, MATRIX *m);
+int     MatrixAsciiWrite(const char *fname, MATRIX *m);
 MATRIX *MatrixAsciiRead(const char *fname, MATRIX *m);
 MATRIX *MatrixAsciiReadRaw(const char *fname, MATRIX *m);
 
-int MatrixWriteInto(FILE *fp, MATRIX *m);
+int     MatrixWriteInto(FILE *fp, MATRIX *m);
 MATRIX *MatrixReadFrom(FILE *fp, MATRIX *m);
 
-#define VectorAlloc(n, type) MatrixAlloc(n, 1, type)
-#define RVectorAlloc(n, type) MatrixAlloc(1, n, type)
-#define VectorFree(pm) MatrixFree(pm)
-#define VectorAdd(v1, v2, v3) MatrixAdd(v1, v2, v3)
-#define VectorSubtract(v1, v2, v3) MatrixSubtract(v1, v2, v3)
+#define VectorAlloc(n, type)         MatrixAlloc(n, 1, type)
+#define RVectorAlloc(n, type)        MatrixAlloc(1, n, type)
+#define VectorFree(pm)               MatrixFree(pm)
+#define VectorAdd(v1, v2, v3)        MatrixAdd(v1, v2, v3)
+#define VectorSubtract(v1, v2, v3)   MatrixSubtract(v1, v2, v3)
 #define VectorScalarMul(v1, val, v2) MatrixScalarMul(v1, val, v2)
-#define VectorCopy(v1, v2) MatrixCopy(v1, v2)
-#define VectorClear(v) MatrixClear(v)
-#define VectorTranspose(vsrc, vdst) MatrixTranspose(vsrc, vdst)
-#define VectorAsciiWriteInto MatrixAsciiWriteInto
-#define VectorAsciiReadFrom MatrixAsciiReadFrom
+#define VectorCopy(v1, v2)           MatrixCopy(v1, v2)
+#define VectorClear(v)               MatrixClear(v)
+#define VectorTranspose(vsrc, vdst)  MatrixTranspose(vsrc, vdst)
+#define VectorAsciiWriteInto         MatrixAsciiWriteInto
+#define VectorAsciiReadFrom          MatrixAsciiReadFrom
 
-#define VECTOR_ELT(v, i) ((v)->rptr[i][1])
+#define VECTOR_ELT(v, i)  ((v)->rptr[i][1])
 #define RVECTOR_ELT(v, i) ((v)->rptr[1][i])
 #define VECTOR3_LOAD(v, x, y, z)                                               \
   (VECTOR_ELT(v, 1) = x, VECTOR_ELT(v, 2) = y, VECTOR_ELT(v, 3) = z);
 #define VECTOR_LOAD VECTOR3_LOAD
-#define V3_LOAD VECTOR3_LOAD
+#define V3_LOAD     VECTOR3_LOAD
 
-#include <math.h>
 #include "macros.h"
+#include <math.h>
 
 #define XYZ_LOAD(v, x, y, z)                                                   \
   do {                                                                         \
@@ -219,14 +219,14 @@ float XYZApproxAngle(XYZ const *normalizedXYZ, float x2, float y2, float z2);
 float XYZApproxAngle_knownLength(XYZ const *normalizedXYZ, float x2, float y2,
                                  float z2, float length2);
 
-double Vector3Angle(VECTOR *v1, VECTOR *v2);
-float VectorLen(const VECTOR *v);
-float VectorAngle(const VECTOR *v1, const VECTOR *v2);
-float VectorDot(const VECTOR *v1, const VECTOR *v2);
-float VectorNormalizedDot(VECTOR *v1, VECTOR *v2);
-float VectorDistance(VECTOR *v1, VECTOR *v2);
-double MatrixMahalanobisDistance(VECTOR *v_mean, MATRIX *m_cov, VECTOR *v);
-double MatrixTransformDistance(MATRIX *m1, MATRIX *m2, double radius);
+double  Vector3Angle(VECTOR *v1, VECTOR *v2);
+float   VectorLen(const VECTOR *v);
+float   VectorAngle(const VECTOR *v1, const VECTOR *v2);
+float   VectorDot(const VECTOR *v1, const VECTOR *v2);
+float   VectorNormalizedDot(VECTOR *v1, VECTOR *v2);
+float   VectorDistance(VECTOR *v1, VECTOR *v2);
+double  MatrixMahalanobisDistance(VECTOR *v_mean, MATRIX *m_cov, VECTOR *v);
+double  MatrixTransformDistance(MATRIX *m1, MATRIX *m2, double radius);
 VECTOR *MatrixColumn(MATRIX *m, VECTOR *v, int col);
 MATRIX *VectorOuterProduct(VECTOR *v1, VECTOR *v2, MATRIX *m);
 VECTOR *VectorCrossProduct(const VECTOR *v1, const VECTOR *v2, VECTOR *vdst);
@@ -240,13 +240,13 @@ MATRIX *MatrixNormalizeColScale(MATRIX *m, MATRIX *scale);
 #define RV3_X(v) (RVECTOR_ELT(v, 1))
 #define RV3_Y(v) (RVECTOR_ELT(v, 2))
 #define RV3_Z(v) (RVECTOR_ELT(v, 3))
-#define V3_X(v) (VECTOR_ELT(v, 1))
-#define V3_Y(v) (VECTOR_ELT(v, 2))
-#define V3_Z(v) (VECTOR_ELT(v, 3))
+#define V3_X(v)  (VECTOR_ELT(v, 1))
+#define V3_Y(v)  (VECTOR_ELT(v, 2))
+#define V3_Z(v)  (VECTOR_ELT(v, 3))
 #define V3_LEN(v)                                                              \
   (sqrt(V3_X(v) * V3_X(v) + V3_Y(v) * V3_Y(v) + V3_Z(v) * V3_Z(v)))
 #define V3_LEN_IS_ZERO(v) (DZERO(V3_LEN_SQ(v)))
-#define V3_LEN_SQ(v) (V3_X(v) * V3_X(v) + V3_Y(v) * V3_Y(v) + V3_Z(v) * V3_Z(v))
+#define V3_LEN_SQ(v)      (V3_X(v) * V3_X(v) + V3_Y(v) * V3_Y(v) + V3_Z(v) * V3_Z(v))
 #define V3_CROSS_PRODUCT(va, vb, vc)                                           \
   V3_X(vc) = V3_Y(va) * V3_Z(vb) - V3_Z(va) * V3_Y(vb),                        \
   V3_Y(vc) = V3_Z(va) * V3_X(vb) - V3_X(va) * V3_Z(vb),                        \
@@ -296,15 +296,15 @@ MATRIX *MatrixAllocRotation(int n, float angle, int which);
 MATRIX *MatrixReallocRotation(int n, float angle, int which, MATRIX *m);
 MATRIX *MatrixAllocTranslation(int n, double *trans);
 #define MatrixClone(mat) MatrixZero(0, 0, MatrixCopy(mat, NULL))
-#define VectorClone MatrixClone
+#define VectorClone      MatrixClone
 
-float MatrixTrace(MATRIX *M);
+float   MatrixTrace(MATRIX *M);
 MATRIX *MatrixVertCat(MATRIX *m1, MATRIX *m2, MATRIX *mcat);
 MATRIX *MatrixHorCat(MATRIX *m1, MATRIX *m2, MATRIX *mcat);
 
 MATRIX *MatrixConstVal(float val, int rows, int cols, MATRIX *X);
 MATRIX *MatrixZero(int rows, int cols, MATRIX *X);
-double MatrixSumElts(MATRIX *m);
+double  MatrixSumElts(MATRIX *m);
 MATRIX *MatrixSum(MATRIX *m, int dim, MATRIX *msum);
 MATRIX *MatrixSumSquare(MATRIX *m, int dim, MATRIX *msumsq);
 MATRIX *MatrixDRand48(int rows, int cols, MATRIX *m);
@@ -320,20 +320,20 @@ double VectorRange(MATRIX *v, double *pVmin, double *pVmax);
 MATRIX *GaussianMatrix(int len, float std, int norm, MATRIX *G);
 MATRIX *GaussianVector(int len, float mean, float std, int norm, MATRIX *g);
 MATRIX *MatrixReorderRows(MATRIX *X, int *NewRowOrder, MATRIX *XRO);
-int MatrixRandPermRows(MATRIX *X);
-int MatrixColsAreNotOrthog(MATRIX *X);
+int     MatrixRandPermRows(MATRIX *X);
+int     MatrixColsAreNotOrthog(MATRIX *X);
 #define VectorSSE(v1, v2) MatrixSSE(v1, v2)
 #define VectorRMS(v1, v2) MatrixRMS(v1, v2)
 double MatrixSSE(MATRIX *m1, MATRIX *m2);
 double MatrixRMS(MATRIX *m1, MATRIX *m2);
-int MatrixOrthonormalizeTransform(MATRIX *m_L);
-int MatrixToRigidParameters(MATRIX *m, double *pxr, double *pyr, double *pzr,
-                            double *pxt, double *pyt, double *pzt);
+int    MatrixOrthonormalizeTransform(MATRIX *m_L);
+int    MatrixToRigidParameters(MATRIX *m, double *pxr, double *pyr, double *pzr,
+                               double *pxt, double *pyt, double *pzt);
 MATRIX *MatrixFromRigidParameters(MATRIX *m, double xr, double yr, double zr,
                                   double xt, double yt, double zt);
 
-int MatrixCheckFinite(MATRIX *m);
-double MatrixRowDotProduct(MATRIX *m, int row, VECTOR *v);
+int     MatrixCheckFinite(MATRIX *m);
+double  MatrixRowDotProduct(MATRIX *m, int row, VECTOR *v);
 MATRIX *MatrixKron(MATRIX *m1, MATRIX *m2, MATRIX *k);
 MATRIX *MatrixDemean(MATRIX *M, MATRIX *Mdm);
 MATRIX *MatrixExcludeFrames(MATRIX *Src, int *ExcludeFrames, int nExclude);
@@ -348,7 +348,7 @@ MATRIX *MatrixMtM(MATRIX *m, MATRIX *mout);
 MATRIX *MatrixAtB(MATRIX *A, MATRIX *B, MATRIX *mout);
 MATRIX *MatrixSkew(MATRIX *y, MATRIX *s);
 MATRIX *MatrixKurtosis(MATRIX *y, MATRIX *k);
-double MatrixMaxAbsDiff(MATRIX *m1, MATRIX *m2, double dthresh);
+double  MatrixMaxAbsDiff(MATRIX *m1, MATRIX *m2, double dthresh);
 MATRIX *MatrixColNullSpace(MATRIX *M, int *err);
 MATRIX *MatrixResidualForming(MATRIX *X, MATRIX *R);
 MATRIX *MatrixGlmFit(MATRIX *y, MATRIX *X, double *pRVar, MATRIX *beta);

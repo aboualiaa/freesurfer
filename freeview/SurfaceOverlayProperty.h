@@ -30,13 +30,13 @@
 #define SurfaceOverlayProperty_h
 
 #include "vtkSmartPointer.h"
-#include <QObject>
 #include <QColor>
+#include <QObject>
 #include <QPair>
 #include <QVector>
 
 #ifndef QGradientStop
-typedef QPair<qreal, QColor> QGradientStop;
+typedef QPair<qreal, QColor>   QGradientStop;
 typedef QVector<QGradientStop> QGradientStops;
 #endif
 
@@ -63,26 +63,26 @@ public:
   void Copy(SurfaceOverlayProperty *p);
 
   double GetOpacity() const;
-  void SetOpacity(double opacity);
+  void   SetOpacity(double opacity);
 
-  int GetColorScale() const;
+  int  GetColorScale() const;
   void SetColorScale(int nScale);
 
   void SetSurfaceOverlay(SurfaceOverlay *overlay);
 
-  void SetMinPoint(double dValue);
+  void   SetMinPoint(double dValue);
   double GetMinPoint();
 
-  void SetMidPoint(double dValue);
+  void   SetMidPoint(double dValue);
   double GetMidPoint();
 
-  void SetMaxPoint(double dValue);
+  void   SetMaxPoint(double dValue);
   double GetMaxPoint();
 
-  void SetOffset(double dOffset);
+  void   SetOffset(double dOffset);
   double GetOffset();
 
-  int GetColorMethod();
+  int  GetColorMethod();
   void SetColorMethod(int n);
 
   bool GetColorInverse();
@@ -98,12 +98,12 @@ public:
   void SetClearHigher(bool bClear);
 
   QGradientStops GetCustomColorScale() { return m_customScale; }
-  void SetCustomColorScale(QGradientStops stops);
+  void           SetCustomColorScale(QGradientStops stops);
 
   bool GetSmooth() { return m_bSmooth; }
   void SetSmooth(bool bSmooth);
 
-  int GetSmoothSteps() { return m_nSmoothSteps; }
+  int  GetSmoothSteps() { return m_nSmoothSteps; }
   void SetSmoothSteps(int n);
 
   bool GetUsePercentile() { return m_bUsePercentile; }
@@ -125,7 +125,7 @@ public:
 
   void Reset();
 
-  void SetMask(SurfaceLabel* label);
+  void SetMask(SurfaceLabel *label);
 
   SurfaceLabel *GetMask() { return m_mask; }
 
@@ -140,38 +140,35 @@ signals:
   void ComputeCorrelationChanged();
 
 public slots:
-  void EmitColorMapChanged()
-  {
-    emit ColorMapChanged();
-  }
-  void OnLabelMaskDestroyed(QObject* label);
+  void EmitColorMapChanged() { emit ColorMapChanged(); }
+  void OnLabelMaskDestroyed(QObject *label);
 
 private:
-  double m_dOpacity;
-  int m_nColorScale;
-  int m_nColorMethod;
-  double m_dMinPoint;
-  double m_dMidPoint;
-  double m_dMaxPoint;
-  double m_dOffset;
-  int m_colorMin[3];
-  int m_colorMid[3];
-  int m_colorMax[3];
-  bool m_bColorInverse;
-  bool m_bColorTruncate;
+  double         m_dOpacity;
+  int            m_nColorScale;
+  int            m_nColorMethod;
+  double         m_dMinPoint;
+  double         m_dMidPoint;
+  double         m_dMaxPoint;
+  double         m_dOffset;
+  int            m_colorMin[3];
+  int            m_colorMid[3];
+  int            m_colorMax[3];
+  bool           m_bColorInverse;
+  bool           m_bColorTruncate;
   QGradientStops m_customScale;
-  double m_dMinStop;
-  double m_dMaxStop;
-  bool m_bClearLower;
-  bool m_bClearHigher;
-  bool m_bSmooth;
-  int m_nSmoothSteps;
-  bool m_bUsePercentile;
-  bool m_bIgnoreZeros;
+  double         m_dMinStop;
+  double         m_dMaxStop;
+  bool           m_bClearLower;
+  bool           m_bClearHigher;
+  bool           m_bSmooth;
+  int            m_nSmoothSteps;
+  bool           m_bUsePercentile;
+  bool           m_bIgnoreZeros;
 
-  SurfaceLabel *m_mask;
+  SurfaceLabel * m_mask;
   unsigned char *m_maskData;
-  bool m_bInverseMask;
+  bool           m_bInverseMask;
 
   vtkRGBAColorTransferFunction *m_lut;
 

@@ -33,33 +33,33 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-static int make_profiles_zero_baseline(MRI *mri);
-static int compute_spherical_distances_to_vertex(MRI_SURFACE *mris, int vno0);
+static int  make_profiles_zero_baseline(MRI *mri);
+static int  compute_spherical_distances_to_vertex(MRI_SURFACE *mris, int vno0);
 static double compute_MT_log_likelihood(MRI_SURFACE *mris, MRI *mri_profiles,
                                         int vno0, double r, double exterior_mm);
 
 const char *Progname;
 
 static int nbhd_size = 2;
-static int navgs = 0;
+static int navgs     = 0;
 
 static double MT_radius_mean = 7.79; // mm from Zilles data set
-static double MT_radius_std = 1.13;  // mm from Zilles data set
+static double MT_radius_std  = 1.13; // mm from Zilles data set
 static LABEL *segment_MT(MRI_SURFACE *mris, MRI *mri, LABEL *lprior,
                          double MT_radius_mean, double MT_radius_std);
 
 static char *white_name = "white";
-int main(int argc, char *argv[]) {
-  char **av, *out_name, *surf_name, *profile_name, *prior_name;
-  int ac, nargs;
+int          main(int argc, char *argv[]) {
+  char **      av, *out_name, *surf_name, *profile_name, *prior_name;
+  int          ac, nargs;
   MRI_SURFACE *mris;
-  LABEL *lprior, *lout;
-  MRI *mri;
+  LABEL *      lprior, *lout;
+  MRI *        mri;
 
   nargs = handleVersionOption(argc, argv, "mris_BA_segment");
   if (nargs && argc - nargs == 1)
@@ -78,10 +78,10 @@ int main(int argc, char *argv[]) {
     argv += nargs;
   }
 
-  surf_name = argv[1];
+  surf_name    = argv[1];
   profile_name = argv[2];
-  prior_name = argv[3];
-  out_name = argv[4];
+  prior_name   = argv[3];
+  out_name     = argv[4];
   if (argc < 5)
     usage_exit();
 
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -195,10 +195,10 @@ static void print_version() {
 #define EXTERIOR_MM 2 // mm for outside stuff
 static LABEL *segment_MT(MRI_SURFACE *mris, MRI *mri_profiles, LABEL *lprior,
                          double MT_radius_mean, double MT_radius_std) {
-  LABEL *area;
-  int *vertices, nvertices, vno, i, vno_best;
+  LABEL * area;
+  int *   vertices, nvertices, vno, i, vno_best;
   VERTEX *v;
-  double ll, max_ll, rmin, rmax, r, rstep = 0.25, rbest, pradius;
+  double  ll, max_ll, rmin, rmax, r, rstep = 0.25, rbest, pradius;
 
   for (vno = nvertices = 0; vno < mris->nvertices; vno++)
     if (mris->vertices[vno].val > 0.01)
@@ -215,13 +215,13 @@ static LABEL *segment_MT(MRI_SURFACE *mris, MRI *mri_profiles, LABEL *lprior,
 
   ll = max_ll = -1e8;
   ;
-  rmin = MT_radius_mean - 2 * MT_radius_std;
-  rmax = MT_radius_mean + 2 * MT_radius_std;
+  rmin     = MT_radius_mean - 2 * MT_radius_std;
+  rmax     = MT_radius_mean + 2 * MT_radius_std;
   vno_best = -1;
-  rbest = -1;
+  rbest    = -1;
   for (i = 0; i < nvertices; i++) {
     vno = vertices[i];
-    v = &mris->vertices[vno];
+    v   = &mris->vertices[vno];
     if (vno == Gdiag_no)
       DiagBreak();
     compute_spherical_distances_to_vertex(mris, vno);
@@ -232,8 +232,8 @@ static LABEL *segment_MT(MRI_SURFACE *mris, MRI *mri_profiles, LABEL *lprior,
       ll = compute_MT_log_likelihood(mris, mri_profiles, vno, r, EXTERIOR_MM);
       ll += log(pradius);
       if (ll > max_ll) {
-        rbest = r;
-        max_ll = ll;
+        rbest    = r;
+        max_ll   = ll;
         vno_best = vno;
         printf("new max %2.2f found at vno %d, r = %2.2f\n", ll, vno, r);
       }
@@ -250,8 +250,8 @@ static LABEL *segment_MT(MRI_SURFACE *mris, MRI *mri_profiles, LABEL *lprior,
   }
   area = LabelFromMarkedSurface(mris);
   {
-    FILE *fp;
-    int num, i;
+    FILE * fp;
+    int    num, i;
     double profile[100];
 
     memset(profile, 0, sizeof(profile));
@@ -277,9 +277,9 @@ static LABEL *segment_MT(MRI_SURFACE *mris, MRI *mri_profiles, LABEL *lprior,
 static double compute_MT_log_likelihood(MRI_SURFACE *mris, MRI *mri_profiles,
                                         int vno0, double radius,
                                         double exterior_mm) {
-  int vno, i, nsamples = mri_profiles->nframes, num;
-  VERTEX *v, *v0;
-  double val, ll, ll_vno, ll_exterior;
+  int            vno, i, nsamples = mri_profiles->nframes, num;
+  VERTEX *       v, *v0;
+  double         val, ll, ll_vno, ll_exterior;
   static double *u_interior = nullptr, *v_interior, *v_exterior;
 
   if (vno0 == Gdiag_no)
@@ -328,9 +328,9 @@ static double compute_MT_log_likelihood(MRI_SURFACE *mris, MRI *mri_profiles,
       val = MRIgetVoxVal(mri_profiles, vno, 0, 0, i);
       ll_vno += -SQR(u_interior[i] - val) / (2 * v_interior[i]);
     }
-    ll += ll_vno ;
+    ll += ll_vno;
     if (!std::isfinite(ll))
-      DiagBreak() ;
+      DiagBreak();
   }
   if (num == 0)
     return (-1e10);
@@ -359,15 +359,15 @@ static double compute_MT_log_likelihood(MRI_SURFACE *mris, MRI *mri_profiles,
   return (ll + ll_exterior);
 }
 static int compute_spherical_distances_to_vertex(MRI_SURFACE *mris, int vno0) {
-  int vno;
+  int     vno;
   VERTEX *v0, *v;
-  double x0, y0, z0, dot, x, y, z, theta, d;
+  double  x0, y0, z0, dot, x, y, z, theta, d;
 
   v0 = &mris->vertices[vno0];
   x0 = v0->x;
   y0 = v0->y;
   z0 = v0->z;
-  d = sqrt(x0 * x0 + y0 * y0 + z0 * z0);
+  d  = sqrt(x0 * x0 + y0 * y0 + z0 * z0);
   x0 /= d;
   y0 /= d;
   z0 /= d;
@@ -380,15 +380,15 @@ static int compute_spherical_distances_to_vertex(MRI_SURFACE *mris, int vno0) {
     x /= d;
     y /= d;
     z /= d;
-    dot = x * x0 + y * y0 + z * z0;
+    dot   = x * x0 + y * y0 + z * z0;
     theta = acos(dot);
-    v->d = mris->radius * theta;
+    v->d  = mris->radius * theta;
   }
   return (NO_ERROR);
 }
 
 static int make_profiles_zero_baseline(MRI *mri) {
-  int vno, i;
+  int    vno, i;
   double val0;
 
   for (vno = 0; vno < mri->width; vno++) {

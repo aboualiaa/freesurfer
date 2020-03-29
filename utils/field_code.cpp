@@ -23,10 +23,10 @@
  *
  */
 
+#include "error.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include "error.h"
 
 #include "field_code.h"
 
@@ -151,14 +151,14 @@ int InitFieldLabel(FIELD_LABEL *label) {
 
 int SetFieldLabel(FIELD_LABEL *label, int field, int frame, float l_corr,
                   float l_pcorr, int navgs, int which_norm) {
-  label->field = field;
-  label->frame = frame;
-  label->type = IsDistanceField(field);
-  label->l_corr = MAX_OF_TWO(0.0, l_corr);
-  label->l_pcorr = MAX_OF_TWO(0.0, l_pcorr);
-  label->sse = 0.0f;
-  label->name = nullptr;
-  label->navgs = navgs;
+  label->field      = field;
+  label->frame      = frame;
+  label->type       = IsDistanceField(field);
+  label->l_corr     = MAX_OF_TWO(0.0, l_corr);
+  label->l_pcorr    = MAX_OF_TWO(0.0, l_pcorr);
+  label->sse        = 0.0f;
+  label->name       = nullptr;
+  label->navgs      = navgs;
   label->which_norm = which_norm;
   return NO_ERROR;
 }

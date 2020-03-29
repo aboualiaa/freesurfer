@@ -26,20 +26,20 @@
 /* Extract a subvolume from original one
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
 #include "fio.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "version.h"
 
 void usage(int exit_val);
@@ -47,33 +47,32 @@ void usage(int exit_val);
 static int debug_flag = 0;
 
 static int start_flag = 0;
-static int size_flag = 0;
+static int size_flag  = 0;
 
 static int start_x, start_y, start_z, dx, dy, dz;
 
 const char *Progname;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
 
   char **av;
-  MRI *mri_in, *mri_out;
-  int ac, nargs;
+  MRI *  mri_in, *mri_out;
+  int    ac, nargs;
 
   Progname = argv[0];
 
   nargs = handleVersionOption(argc, argv, "mri_extract");
-  argc -= nargs ;
+  argc -= nargs;
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++)
-  {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc != 3)
@@ -124,30 +123,30 @@ void usage(int exit_val) {
 /*  EOF  */
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "start")) {
-    start_x = atoi(argv[2]);
-    start_y = atoi(argv[3]);
-    start_z = atoi(argv[4]);
+    start_x    = atoi(argv[2]);
+    start_y    = atoi(argv[3]);
+    start_z    = atoi(argv[4]);
     start_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("starting voxel is (%d, %d, %d)...\n", start_x, start_y, start_z);
   } else if (!stricmp(option, "size")) {
-    dx = atoi(argv[2]);
-    dy = atoi(argv[3]);
-    dz = atoi(argv[4]);
+    dx        = atoi(argv[2]);
+    dy        = atoi(argv[3]);
+    dz        = atoi(argv[4]);
     size_flag = 1;
-    nargs = 3;
+    nargs     = 3;
     printf("output size is (%d, %d, %d)...\n", dx, dy, dz);
 
   } else

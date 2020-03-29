@@ -26,13 +26,12 @@
 #ifndef Measure_h
 #define Measure_h
 
-#include <stdlib.h>
 #include "mri_ca_configFile.h"
 #include "mri_ca_util.h"
-using namespace std;
+#include <stdlib.h>
 
 class CMeasure;
-typedef vector<class CMeasure> TypeVectorMeasures;
+typedef std::vector<class CMeasure> TypeVectorMeasures;
 
 class CMeasure {
 
@@ -41,7 +40,7 @@ public:
 
   CMeasure() {}
 
-  void get(CConfigFile &configFile, string strSectionName) {
+  void get(CConfigFile &configFile, std::string strSectionName) {
     if (strstr(strSectionName.c_str(), "T1") != NULL)
       measureType = T1;
     else if (strstr(strSectionName.c_str(), "T2") != NULL)
@@ -62,7 +61,7 @@ public:
   }
 
   void write(CConfigFile &configFile, bool bEchoToStdOut = false) {
-    string strSectionName = "MEASURE: ";
+    std::string strSectionName = "MEASURE: ";
     switch (measureType) {
     case T1:
       strSectionName.append("T1");
@@ -102,7 +101,7 @@ public:
   // use a class scoped enumeration type
   enum MeasureType { T1, T2, PD, EEG, MEG, fMRI };
 
-  MeasureType measureType;
+  MeasureType      measureType;
   TypeVectorDouble vectDoubleIntensityScales;
   TypeVectorDouble vectDoubleGradientScales;
   TypeVectorDouble vectDoubleCurvatureScales;

@@ -23,15 +23,15 @@
  *
  */
 
-#include "error.h"
-#include "diag.h"
-#include "timer.h"
-#include "mrinorm.h"
-#include "version.h"
-#include "mri_conform.h"
 #include "ctrpoints.h"
+#include "diag.h"
+#include "error.h"
+#include "mri_conform.h"
+#include "mrinorm.h"
+#include "timer.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 static int update_bias(MRI *mri_orig, MRI *mri_T1, MRI *mri_brain,
                        MRI *mri_bias, MRI *mri_counts, int normalize);
@@ -41,23 +41,23 @@ const char *Progname;
 
 static void usage_exit(int code);
 
-static LABEL *label = nullptr;
-static char *control_fname = nullptr;
-static char sdir[STRLEN] = "";
-static float pad = 20;
-static double sigma = 4.0;
-static int normalize = 0;
-static char *xform_name;
+static LABEL *label         = nullptr;
+static char * control_fname = nullptr;
+static char   sdir[STRLEN]  = "";
+static float  pad           = 20;
+static double sigma         = 4.0;
+static int    normalize     = 0;
+static char * xform_name;
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN], *subject, *cp;
-  int ac, nargs, i;
-  MRI *mri_orig, *mri_T1, *mri_bias, *mri_counts, *mri_kernel, *mri_smooth,
+  int    ac, nargs, i;
+  MRI *  mri_orig, *mri_T1, *mri_bias, *mri_counts, *mri_kernel, *mri_smooth,
       *mri_brain;
-  char *out_fname;
-  int msec, minutes, seconds;
-  Timer start;
-  double c_r, c_a, c_s;
+  char *  out_fname;
+  int     msec, minutes, seconds;
+  Timer   start;
+  double  c_r, c_a, c_s;
   MATRIX *m_vox2vox;
 
   nargs = handleVersionOption(argc, argv, "mri_compute_bias");
@@ -82,9 +82,9 @@ int main(int argc, char *argv[]) {
   out_fname = argv[argc - 1];
 
   if (label) {
-    MRI *mri, *mri_control, *mri_bias, *mri_kernel, *mri_smooth;
+    MRI *  mri, *mri_control, *mri_bias, *mri_kernel, *mri_smooth;
     double mean, val;
-    int n, xv, yv, zv;
+    int    n, xv, yv, zv;
 
     printf("reading label %s and volume %s to compute bias field\n",
            label->name, argv[1]);
@@ -96,16 +96,16 @@ int main(int argc, char *argv[]) {
     printf("mean in WM label is %2.1f\n", mean);
 
     mri_control = MRIcloneDifferentType(mri, MRI_UCHAR);
-    mri_bias = MRIcloneDifferentType(mri, MRI_FLOAT);
+    mri_bias    = MRIcloneDifferentType(mri, MRI_FLOAT);
 
     if (control_fname) {
-      int n, total;
-      MRI *mri_conf;
+      int     n, total;
+      MRI *   mri_conf;
       MATRIX *m_vox2vox;
-      LABEL *ltmp, *lconf;
+      LABEL * ltmp, *lconf;
       MPoint *pointArray;
 
-      mri_conf = MRIconform(mri);
+      mri_conf  = MRIconform(mri);
       m_vox2vox = MRIgetVoxelToVoxelXform(mri, mri_conf);
       printf("writing output control points to %s\n", control_fname);
       MatrixPrint(stdout, m_vox2vox);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
       if (FileExists(control_fname)) {
         MPoint *existingPointArray, *newArray;
-        int count, useRealRAS, i1, i2, duplicate;
+        int     count, useRealRAS, i1, i2, duplicate;
 
         existingPointArray =
             MRIreadControlPoints(control_fname, &count, &useRealRAS);
@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
           Progname);
   }
 
-  mri_bias = MRIalloc(256 + 2 * pad, 256 + 2 * pad, 256 + 2 * pad, MRI_FLOAT);
+  mri_bias   = MRIalloc(256 + 2 * pad, 256 + 2 * pad, 256 + 2 * pad, MRI_FLOAT);
   mri_counts = MRIalloc(256 + 2 * pad, 256 + 2 * pad, 256 + 2 * pad, MRI_FLOAT);
 #if 0
 	mri_bias->c_r = (double)mri_bias->width/2.0 ;
@@ -246,16 +246,16 @@ int main(int argc, char *argv[]) {
       mri_bias->xstart = mri_orig->xstart - pad * mri_orig->xsize;
       mri_bias->ystart = mri_orig->ystart - pad * mri_orig->ysize;
       mri_bias->zstart = mri_orig->zstart - pad * mri_orig->zsize;
-      mri_bias->xend = mri_orig->xend + pad * mri_orig->xsize;
-      mri_bias->yend = mri_orig->yend + pad * mri_orig->ysize;
-      mri_bias->zend = mri_orig->zend + pad * mri_orig->zsize;
+      mri_bias->xend   = mri_orig->xend + pad * mri_orig->xsize;
+      mri_bias->yend   = mri_orig->yend + pad * mri_orig->ysize;
+      mri_bias->zend   = mri_orig->zend + pad * mri_orig->zsize;
 
       mri_counts->xstart = mri_orig->xstart - pad * mri_orig->xsize;
       mri_counts->ystart = mri_orig->ystart - pad * mri_orig->ysize;
       mri_counts->zstart = mri_orig->zstart - pad * mri_orig->zsize;
-      mri_counts->xend = mri_orig->xend + pad * mri_orig->xsize;
-      mri_counts->yend = mri_orig->yend + pad * mri_orig->ysize;
-      mri_counts->zend = mri_orig->zend + pad * mri_orig->zsize;
+      mri_counts->xend   = mri_orig->xend + pad * mri_orig->xsize;
+      mri_counts->yend   = mri_orig->yend + pad * mri_orig->ysize;
+      mri_counts->zend   = mri_orig->zend + pad * mri_orig->zsize;
       MRIreInitCache(mri_bias);
       MRIreInitCache(mri_counts);
       MRIcalcCRASforExtractedVolume(
@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
     }
     if (xform_name) {
       TRANSFORM *transform;
-      MRI *mri;
+      MRI *      mri;
       sprintf(fname, "%s/%s/mri/transforms/%s", sdir, subject, xform_name);
       transform = TransformRead(fname);
       if (transform == nullptr)
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
       TransformApplyType(transform, mri_orig, mri, SAMPLE_TRILINEAR);
       MRIfree(&mri_orig);
       mri_orig = mri;
-      mri = MRIclone(mri_bias, nullptr);
+      mri      = MRIclone(mri_bias, nullptr);
       //      mri->c_r = mri->c_a = mri->c_s = 0 ;
       TransformApplyType(transform, mri_T1, mri, SAMPLE_TRILINEAR);
       MRIfree(&mri_T1);
@@ -305,7 +305,7 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "writing to %s...\n", out_fname);
   MRIwrite(mri_smooth, out_fname);
   MRIfree(&mri_smooth);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -321,7 +321,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -330,9 +330,9 @@ static int get_option(int argc, char *argv[]) {
     printf("using SUBJECTS_DIR %s\n", sdir);
     nargs = 1;
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "label")) {
@@ -343,7 +343,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'T':
       xform_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("applying xform %s to input datasets\n", xform_name);
       break;
     case 'S':
@@ -353,7 +353,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'C':
       control_fname = argv[2];
-      nargs = 1;
+      nargs         = 1;
       printf("writing label to control point file %s\n", control_fname);
       break;
     case 'N':
@@ -387,13 +387,13 @@ static int update_bias(MRI *mri_orig, MRI *mri_T1, MRI *mri_brain,
                        MRI *mri_bias, MRI *mri_counts, int normalize) {
   MATRIX *m_vox2vox;
   VECTOR *v1, *v2;
-  int x, y, z, num;
-  double xd, yd, zd, bias, val_orig, val_T1, mn, val_brain;
-  MRI *mri_tmp;
+  int     x, y, z, num;
+  double  xd, yd, zd, bias, val_orig, val_T1, mn, val_brain;
+  MRI *   mri_tmp;
 
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_orig, mri_bias);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_orig, mri_bias);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
 
@@ -407,7 +407,7 @@ static int update_bias(MRI *mri_orig, MRI *mri_T1, MRI *mri_brain,
         if (x == Gx && y == Gy && z == Gz)
           DiagBreak();
         val_orig = MRIgetVoxVal(mri_orig, x, y, z, 0);
-        val_T1 = MRIgetVoxVal(mri_T1, x, y, z, 0);
+        val_T1   = MRIgetVoxVal(mri_T1, x, y, z, 0);
         if (FZERO(val_orig))
           continue;
         val_brain = MRIgetVoxVal(mri_brain, x, y, z, 0);
@@ -454,7 +454,7 @@ static int update_bias(MRI *mri_orig, MRI *mri_T1, MRI *mri_brain,
         if (FZERO(val_brain)) // don't use it for mean calculation
           continue;
         V3_Z(v1) = z;
-        bias = MRIgetVoxVal(mri_tmp, x, y, z, 0);
+        bias     = MRIgetVoxVal(mri_tmp, x, y, z, 0);
         MatrixMultiply(m_vox2vox, v1, v2);
         xd = V3_X(v2);
         yd = V3_Y(v2);
@@ -475,9 +475,9 @@ static int update_bias(MRI *mri_orig, MRI *mri_T1, MRI *mri_brain,
 }
 
 static int normalize_bias(MRI *mri_bias, MRI *mri_counts, int normalize) {
-  int x, y, z, num;
+  int    x, y, z, num;
   double count, bias, mn;
-  MRI *mri_ctrl;
+  MRI *  mri_ctrl;
 
   mri_ctrl =
       MRIalloc(mri_bias->width, mri_bias->height, mri_bias->depth, MRI_UCHAR);

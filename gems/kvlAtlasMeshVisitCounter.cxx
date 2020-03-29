@@ -25,7 +25,7 @@ bool AtlasMeshVisitCounter ::RasterizeTetrahedron(
   mesh->GetCell(tetrahedronId, cell);
 
   AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-  const AtlasMesh::PointIdentifier id0 = *pit;
+  const AtlasMesh::PointIdentifier     id0 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier id1 = *pit;
   ++pit;

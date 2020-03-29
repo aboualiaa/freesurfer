@@ -30,8 +30,8 @@
 #ifndef LayerPropertyROI_h
 #define LayerPropertyROI_h
 
-#include "vtkSmartPointer.h"
 #include "LayerProperty.h"
+#include "vtkSmartPointer.h"
 #include <QColor>
 
 #include "colortab.h"
@@ -47,7 +47,7 @@ public:
   double GetOpacity() const;
 
   double *GetColor() { return mRGB; }
-  void SetColor(double r, double g, double b);
+  void    SetColor(double r, double g, double b);
 
   double GetThreshold() const { return m_dThreshold; }
 
@@ -57,8 +57,7 @@ public:
 
   double GetHeatscaleMax() { return m_dHeatscaleMax; }
 
-  void GetValueRange(double* range)
-  {
+  void GetValueRange(double *range) {
     range[0] = m_dValueRange[0];
     range[1] = m_dValueRange[1];
   }
@@ -103,7 +102,7 @@ private:
   double mOpacity;
   double mRGB[3];
   double m_dThreshold;
-  int m_nColorCode;
+  int    m_nColorCode;
 
   double m_dHeatscaleMin;
   double m_dHeatscaleMax;

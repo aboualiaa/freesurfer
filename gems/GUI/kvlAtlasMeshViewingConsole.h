@@ -43,7 +43,7 @@ protected:
   //
   void Draw() override;
 
-  void SelectTriangleContainingPoint(float, float) override {};
+  void SelectTriangleContainingPoint(float, float) override{};
 
   void SetSliceLocation(unsigned int sagittalSliceNumber,
                         unsigned int coronalSliceNumber,

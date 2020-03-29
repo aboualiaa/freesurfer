@@ -1,3 +1,6 @@
+#ifndef MRI_TESSELLATE_TRILIB_H
+#define MRI_TESSELLATE_TRILIB_H
+
 /**
  * @file  trilib.h
  * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
@@ -27,6 +30,8 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#include <cstdio>
+
 #ifndef systemid
 #include "systemid.h"
 #endif
@@ -40,7 +45,7 @@
 */
 
 typedef float PNT[3];
-typedef int DHK[3];
+typedef int   DHK[3];
 
 /* crosslin.c  */
 
@@ -63,11 +68,11 @@ void autoscal(float step, float *ss, char *f);
 /* vecfun.c  */
 
 float vecdot(float *r1, float *r2);
-void veccross(float *r1, float *r2, float *r3);
+void  veccross(float *r1, float *r2, float *r3);
 float vecnorm(float *r);
-int vecnormate(float *r);
+int   vecnormate(float *r);
 float vecdist(float *r1, float *r2);
-void vecmirror(float *r1, float *n, float *r2);
+void  vecmirror(float *r1, float *n, float *r2);
 int linesect(float *p1, float *r1, float *p2, float *r2, float *lab, float *mu);
 
 /* trinorm.c  */
@@ -95,35 +100,35 @@ int pntinp(char *filename, int *npnt, float (**pnt1)[3]);
 
 /* nrutils.c  */
 
-void nrerror(char *error_text);
-float *vector(int nl, int nh);
-void free_vector(float *v, int nl, int nh);
-int *ivector(int nl, int nh);
-void ifree_vector(int *v, int nl, int nh);
+void    nrerror(char *error_text);
+float * vector(int nl, int nh);
+void    free_vector(float *v, int nl, int nh);
+int *   ivector(int nl, int nh);
+void    ifree_vector(int *v, int nl, int nh);
 float **matrix(int nrl, int nrh, int ncl, int nch);
-int **imatrix(int nrl, int nrh, int ncl, int nch);
-void free_matrix(float **m, int nrl, int nrh, int ncl, int nch);
-void ifree_matrix(int **m, int nrl, int nrh, int ncl, int nch);
+int **  imatrix(int nrl, int nrh, int ncl, int nch);
+void    free_matrix(float **m, int nrl, int nrh, int ncl, int nch);
+void    ifree_matrix(int **m, int nrl, int nrh, int ncl, int nch);
 
 /* matrix3d.c  */
 
 float ***matrix3d(int n3l, int n3h, int nrl, int nrh, int ncl, int nch);
-void free_3dmatrix(float ***m, int n3l, int n3h, int nrl, int nrh, int ncl,
-                   int nch);
+void     free_3dmatrix(float ***m, int n3l, int n3h, int nrl, int nrh, int ncl,
+                       int nch);
 
 /* matrix.c  */
 
-int putmatrix(char *name, float **m, int nrh, int nch, char *format);
-int binputmatrix(char *name, float **m, int nrh, int nch);
+int     putmatrix(char *name, float **m, int nrh, int nch, char *format);
+int     binputmatrix(char *name, float **m, int nrh, int nch);
 float **getmatrix(char *name, int *nrh, int *nch);
-int puttailmatrix(char *name, float **m, int nrh, int nch, char *format,
-                  int nextra, char *extra);
-int binputtailmatrix(char *name, float **m, int nrh, int nch, int nextra,
-                     char *extra);
+int     puttailmatrix(char *name, float **m, int nrh, int nch, char *format,
+                      int nextra, char *extra);
+int     binputtailmatrix(char *name, float **m, int nrh, int nch, int nextra,
+                         char *extra);
 float **gettailmatrix(char *name, int *nrh, int *nch, int *nextra,
                       char **extra);
-int ascimatrix();
-int foreignmatrix();
+int     ascimatrix();
+int     foreignmatrix();
 
 /* rhoek.c   */
 
@@ -152,7 +157,7 @@ void solveu(float **b, int npnt, float *x);
 void tsolvel(float **b, int npnt, float *x);
 void tsolveu(float **b, int npnt, float *x);
 void solvelu(float **b, int npnt, float *x);
-int invertlu(float **b, int npnt, float **y);
+int  invertlu(float **b, int npnt, float **y);
 
 /* marquard.c  */
 
@@ -200,13 +205,13 @@ int decouple(int nopt, int nlpar, int nnpar, int ntim, float **v, float **phi,
 /* contour.c    */
 
 typedef struct {
-  int tr;
+  int   tr;
   float l;
   float m;
 } CONTOUR;
 
 typedef struct {
-  int tr;
+  int   tr;
   float l;
   float m;
   float l2;
@@ -215,18 +220,18 @@ typedef struct {
 
 void routlm(float *r, int tr, float l, float m, int npnt, float (*pnt)[3],
             int ndhk, int (*dhk)[3]);
-int contour(float *p1, float *p2, int isp2, float *p3, int isp3, float *dir,
-            int npnt, float (*pnt)[3], int ndhk, int (*dhk)[3], int *nlm,
-            DCONT *c, int *p2tr);
-int elecs(int nlm, DCONT *c, int i1, int i2, int npnt, float (*pnt)[3],
-          int ndhk, int (*dhk)[3], int nel, float *pos, int isfrac,
-          CONTOUR *el);
+int  contour(float *p1, float *p2, int isp2, float *p3, int isp3, float *dir,
+             int npnt, float (*pnt)[3], int ndhk, int (*dhk)[3], int *nlm,
+             DCONT *c, int *p2tr);
+int  elecs(int nlm, DCONT *c, int i1, int i2, int npnt, float (*pnt)[3],
+           int ndhk, int (*dhk)[3], int nel, float *pos, int isfrac,
+           CONTOUR *el);
 
 /* readtail.c    */
 
 char *find_tail_item(int length, char tail[], char temp[]);
-int tail_float(int length, char tail[], char temp[], float *value);
-int tail_replace_item(int *length, char **tail, char temp[], char new_val[]);
+int   tail_float(int length, char tail[], char temp[], float *value);
+int   tail_replace_item(int *length, char **tail, char temp[], char new_val[]);
 
 /* trifun.c    */
 
@@ -248,3 +253,5 @@ int voisine(int (*dhk)[3], int ndhk, int npnt, int ***nb1, int **nnb1,
 /* four1.c     */
 
 void four1(float data[], unsigned long nn, int isign);
+
+#endif

@@ -29,15 +29,15 @@
 
 double swapDouble(double d) {
   size_t typeSize = sizeof(double);
-  char *pVar = (char *)(&d);
-  char tmp;
+  char * pVar     = (char *)(&d);
+  char   tmp;
   double w;
   size_t i;
   for (i = 0; i < typeSize / 2; ++i) // typeSize must be even
   {
     // swap front and back
-    tmp = *(pVar + 2 * i);
-    *(pVar + 2 * i) = *(pVar + typeSize - 1 - 2 * i);
+    tmp                            = *(pVar + 2 * i);
+    *(pVar + 2 * i)                = *(pVar + typeSize - 1 - 2 * i);
     *(pVar + typeSize - 1 - 2 * i) = tmp;
   }
   w = *((double *)(pVar)); // copy
@@ -46,15 +46,15 @@ double swapDouble(double d) {
 
 long64 swapLong64(long64 l) {
   size_t typeSize = sizeof(long64);
-  char *pVar = (char *)(&l);
-  char tmp;
+  char * pVar     = (char *)(&l);
+  char   tmp;
   double w;
   size_t i;
   for (i = 0; i < typeSize / 2; ++i) // typeSize must be even
   {
     // swap front and back
-    tmp = *(pVar + 2 * i);
-    *(pVar + 2 * i) = *(pVar + typeSize - 1 - 2 * i);
+    tmp                            = *(pVar + 2 * i);
+    *(pVar + 2 * i)                = *(pVar + typeSize - 1 - 2 * i);
     *(pVar + typeSize - 1 - 2 * i) = tmp;
   }
   w = *((long64 *)(pVar)); // copy
@@ -67,24 +67,24 @@ long64 swapLong64(long64 l) {
 // double is always 64 bit and float is always 32 bit
 typedef union {
   long32 l;
-  float f;
-  int i;
-  char buf[4];
-  short s[2];
+  float  f;
+  int    i;
+  char   buf[4];
+  short  s[2];
 } SWAP_LONG32;
 
 /* does not work for 64 bit OS */
 long32 swapLong32(long32 l) {
   SWAP_LONG32 sl;
-  short s;
+  short       s;
 
   /* first swap bytes in each word */
-  sl.l = l;
+  sl.l    = l;
   sl.s[0] = swapShort(sl.s[0]);
   sl.s[1] = swapShort(sl.s[1]);
 
   /* now swap words */
-  s = sl.s[0];
+  s       = sl.s[0];
   sl.s[0] = sl.s[1];
   sl.s[1] = s;
 
@@ -93,15 +93,15 @@ long32 swapLong32(long32 l) {
 
 float swapFloat(float f) {
   SWAP_LONG32 sl;
-  short s;
+  short       s;
 
   /* first swap bytes in each word */
-  sl.f = f;
+  sl.f    = f;
   sl.s[0] = swapShort(sl.s[0]);
   sl.s[1] = swapShort(sl.s[1]);
 
   /* now swap words */
-  s = sl.s[0];
+  s       = sl.s[0];
   sl.s[0] = sl.s[1];
   sl.s[1] = s;
 
@@ -110,16 +110,16 @@ float swapFloat(float f) {
 
 typedef union {
   short s;
-  char buf[sizeof(short)];
+  char  buf[sizeof(short)];
 } SWAP_SHORT;
 
 short swapShort(short s) {
   SWAP_SHORT ss;
-  char c;
+  char       c;
 
   /* first swap bytes in word */
-  ss.s = s;
-  c = ss.buf[0];
+  ss.s      = s;
+  c         = ss.buf[0];
   ss.buf[0] = ss.buf[1];
   ss.buf[1] = c;
 
@@ -128,7 +128,7 @@ short swapShort(short s) {
 
 typedef union {
   double d;
-  long l[sizeof(double) / sizeof(long)];
+  long   l[sizeof(double) / sizeof(long)];
 } SWAP_DOUBLE;
 
 /* the following does not work for 64 bit
@@ -152,15 +152,15 @@ swapDouble(double d)
 
 int swapInt(int i) {
   SWAP_LONG32 sl;
-  short s;
+  short       s;
 
   /* first swap bytes in each word */
-  sl.i = i;
+  sl.i    = i;
   sl.s[0] = swapShort(sl.s[0]);
   sl.s[1] = swapShort(sl.s[1]);
 
   /* now swap words */
-  s = sl.s[0];
+  s       = sl.s[0];
   sl.s[0] = sl.s[1];
   sl.s[1] = s;
 
@@ -177,7 +177,7 @@ int swapInt(int i) {
        bshort/bfloat format.
   --------------------------------------------------------*/
 int Arch486() {
-  int endian;
+  int   endian;
   short tmp = 1;
   char *ctmp;
 
@@ -220,13 +220,13 @@ int ByteSwapBuf(void *Buf, long int nItems, int nBytesPerItem) {
   nitems is the number of 2-byte items in buf2;
   ---------------------------------------------------------*/
 int ByteSwap2(void *buf2, long int nitems) {
-  char *cbuf, ctmp;
+  char *   cbuf, ctmp;
   long int n;
 
   cbuf = (char *)buf2;
   for (n = 0; n < nitems; n += 2) {
-    ctmp = *cbuf;
-    *cbuf = *(cbuf + 1);
+    ctmp        = *cbuf;
+    *cbuf       = *(cbuf + 1);
     *(cbuf + 1) = ctmp;
     cbuf += 2;
   }
@@ -238,18 +238,18 @@ int ByteSwap2(void *buf2, long int nitems) {
   nitems is the number of 4-byte items in buf4;
   ---------------------------------------------------------*/
 int ByteSwap4(void *buf4, long int nitems) {
-  char *cbuf, ctmp;
+  char *   cbuf, ctmp;
   long int n;
 
   cbuf = (char *)buf4;
   for (n = 0; n < nitems; n += 4) {
     /* swap the first and fourth */
-    ctmp = *cbuf;
-    *cbuf = *(cbuf + 3);
+    ctmp        = *cbuf;
+    *cbuf       = *(cbuf + 3);
     *(cbuf + 3) = ctmp;
 
     /* swap the second and third */
-    ctmp = *(cbuf + 1);
+    ctmp        = *(cbuf + 1);
     *(cbuf + 1) = *(cbuf + 2);
     *(cbuf + 2) = ctmp;
 
@@ -264,28 +264,28 @@ int ByteSwap4(void *buf4, long int nitems) {
   nitems is the number of 8-byte items in buf8;
   ---------------------------------------------------------*/
 int ByteSwap8(void *buf8, long int nitems) {
-  char *cbuf, ctmp;
+  char *   cbuf, ctmp;
   long int n;
 
   cbuf = (char *)buf8;
   for (n = 0; n < nitems; n += 8) {
     /* swap the first and eigth */
-    ctmp = *cbuf;
-    *cbuf = *(cbuf + 7);
+    ctmp        = *cbuf;
+    *cbuf       = *(cbuf + 7);
     *(cbuf + 7) = ctmp;
 
     /* swap the second and seventh */
-    ctmp = *(cbuf + 1);
+    ctmp        = *(cbuf + 1);
     *(cbuf + 1) = *(cbuf + 6);
     *(cbuf + 6) = ctmp;
 
     /* swap the third and sixth */
-    ctmp = *(cbuf + 2);
+    ctmp        = *(cbuf + 2);
     *(cbuf + 2) = *(cbuf + 5);
     *(cbuf + 5) = ctmp;
 
     /* swap the fourth and fifth */
-    ctmp = *(cbuf + 3);
+    ctmp        = *(cbuf + 3);
     *(cbuf + 3) = *(cbuf + 4);
     *(cbuf + 4) = ctmp;
 

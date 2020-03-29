@@ -29,8 +29,8 @@
 #include "LayerEditable.h"
 #include "vtkSmartPointer.h"
 #include <QList>
-#include <QVector>
 #include <QVariantMap>
+#include <QVector>
 
 class vtkImageReslice;
 class vtkImageMapToColors;
@@ -57,7 +57,7 @@ class SurfacePath;
 class LayerROI;
 
 struct RGBMap {
-  QString name;
+  QString    name;
   QList<int> data;
 };
 
@@ -74,7 +74,7 @@ public:
                            bool bCorrelation, bool bSecondHalfData = false);
   bool LoadGenericOverlayFromFile(const QString &filename,
                                   const QString &fn_reg,
-                                  bool bSecondHalfData = false);
+                                  bool           bSecondHalfData = false);
   bool LoadCorrelationFromFile(const QString &filename);
   bool LoadAnnotationFromFile(const QString &filename);
   bool LoadLabelFromFile(const QString &filename);
@@ -295,7 +295,7 @@ public:
 
   SurfacePath *GetActivePath();
 
-  SurfacePath* GetMadePath(int nPath);
+  SurfacePath *GetMadePath(int nPath);
 
   void DeleteActivePath();
 
@@ -313,7 +313,7 @@ public:
 
   bool FillPath(int nvo, const QVariantMap &options);
 
-  int FillPath(const QVector<int>& verts, const QVariantMap& options);
+  int FillPath(const QVector<int> &verts, const QVariantMap &options);
 
   void ClearMarks();
 
@@ -379,7 +379,7 @@ public slots:
 
   void UndoCut();
 
-  QVector<int> FloodFillFromSeed(int seed_vno,
+  QVector<int> FloodFillFromSeed(int                seed_vno,
                                  const QVariantMap &options = QVariantMap());
 
   bool IsVertexOnPath(int vno);
@@ -432,12 +432,12 @@ protected:
   virtual void OnSlicePositionChanged(int nPlane);
 
   // Pipeline ------------------------------------------------------------
-  vtkSmartPointer<vtkPlane> mReslicePlane[3];
+  vtkSmartPointer<vtkPlane>            mReslicePlane[3];
   vtkSmartPointer<vtkImageMapToColors> mColorMap[3];
 
   FSSurface *m_surfaceSource;
-  bool m_bResampleToRAS;
-  LayerMRI *m_volumeRef;
+  bool       m_bResampleToRAS;
+  LayerMRI * m_volumeRef;
 
   QString m_sPatchFilename;
   QString m_sVectorFilename;
@@ -455,30 +455,30 @@ protected:
   vtkSmartPointer<vtkActor> m_wireframeActor;
 
   vtkSmartPointer<vtkCutter> m_cutter[3];
-  vtkSmartPointer<vtkBox> m_box[3];
+  vtkSmartPointer<vtkBox>    m_box[3];
 
   QList<SurfaceOverlay *> m_overlays;
-  int m_nActiveOverlay;
+  int                     m_nActiveOverlay;
 
   QList<SurfaceAnnotation *> m_annotations;
-  int m_nActiveAnnotation;
+  int                        m_nActiveAnnotation;
 
   QList<SurfaceLabel *> m_labels;
-  int m_nActiveLabel;
+  int                   m_nActiveLabel;
 
   QList<SurfacePath *> m_paths;
-  int m_nActivePath;
-  SurfacePath *m_marks;
+  int                  m_nActivePath;
+  SurfacePath *        m_marks;
 
   QList<RGBMap> m_rgbMaps;
-  int m_nActiveRGBMap;
+  int           m_nActiveRGBMap;
 
   int m_nCurrentVertex;
   int m_nMouseVertex;
 
-  SurfaceROI *m_roi;
+  SurfaceROI *           m_roi;
   QList<SurfaceSpline *> m_splines;
-  int m_nActiveSpline;
+  int                    m_nActiveSpline;
 
   bool m_bUndoable;
   bool m_bVector2DPendingUpdate;

@@ -33,8 +33,8 @@ const char *Progname = "testcolortab";
 int main(int argc, char *argv[]) {
   int errs = ctabDuplicates = 0; // CTABreadASCII will increment ctabDuplicates
   fprintf(stdout, "Colortable test...\n");
-  char defaultfname[] = "../../distribution/FreeSurferColorLUT.txt";
-  char *fname = argv[1];
+  char  defaultfname[] = "../../distribution/FreeSurferColorLUT.txt";
+  char *fname          = argv[1];
   if (NULL == fname)
     fname = defaultfname;
   COLOR_TABLE *ct = CTABreadASCII(fname);

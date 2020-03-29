@@ -24,9 +24,9 @@
 #ifndef DIALOGPREFERENCES_H
 #define DIALOGPREFERENCES_H
 
+#include "UIUpdateHelper.h"
 #include <QDialog>
 #include <QVariantMap>
-#include "UIUpdateHelper.h"
 
 namespace Ui {
 class DialogPreferences;

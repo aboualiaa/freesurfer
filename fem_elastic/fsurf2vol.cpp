@@ -10,12 +10,12 @@
 // the isfinite defined in utils conflicts with vnl
 #undef isfinite
 
+#include "morph.h"
 #include "timer.h"
 #include "transformUtils.h"
-#include "morph.h"
 
-#include "surf_utils.h"
 #include "surf_energy.h"
+#include "surf_utils.h"
 
 // old topology solver
 #include "untangler.h"
@@ -24,7 +24,7 @@
 
 #include "misc_maths.h"
 
-#define MORPH_WITH_MESH 1
+#define MORPH_WITH_MESH     1
 #define DO_MORPH_REGRESSION 0
 
 ;
@@ -54,7 +54,7 @@ struct IoParams {
   // fixed volume data
   StringVectorType vstrFixedSurf;
   StringVectorType vstrAparc;
-  bool hasAparc;
+  bool             hasAparc;
 
   std::string strFixedMri;
   std::string strAseg;
@@ -69,7 +69,7 @@ struct IoParams {
   std::string strOutputField;
   std::string strOutputMesh;
   std::string
-      strOutputSurf; // only root of the name (<index>.surf will be appended)
+              strOutputSurf; // only root of the name (<index>.surf will be appended)
   std::string strOutputSurfAffine;
   std::string strGcam;
   std::string strOutputAffine;
@@ -80,8 +80,8 @@ struct IoParams {
   // other options
   // tDblCoords       pixelsPerElt;
   double eltVolMin, eltVolMax;
-  float poissonRatio;
-  float YoungModulus;
+  float  poissonRatio;
+  float  YoungModulus;
 
   bool compress;
 
@@ -93,8 +93,8 @@ struct IoParams {
   double surfSubsample;
 
   std::string strDebug;
-  bool bUseOldTopologySolver;
-  bool bUsePialForSurf;
+  bool        bUseOldTopologySolver;
+  bool        bUsePialForSurf;
 
   IoParams();
   // std::string parse(int ac, char* av[]);
@@ -131,16 +131,16 @@ static float *powell_lin(const SurfaceVectorType &mris_x,
                          const SurfaceVectorType &mris_fx);
 
 static int create_bc_container(PointsContainerType &container,
-                               SurfaceVectorType &vmris_fixed,
-                               SurfaceVectorType &vmris_moving);
+                               SurfaceVectorType &  vmris_fixed,
+                               SurfaceVectorType &  vmris_moving);
 
-static void compute_fem_error(Transform3SPointer ptransform,
+static void compute_fem_error(Transform3SPointer         ptransform,
                               const PointsContainerType &container);
 
 // will only use the white surface, if available
 //
 // the last parameter subsamples the surface - only effective is > 0
-static void create_surf_container(PointsListType &srcPoints,
+static void create_surf_container(PointsListType &   srcPoints,
                                   SurfaceVectorType &vmris, double dist = -1,
                                   bool usePialForSurf = false);
 
@@ -152,13 +152,13 @@ static void create_surf_container(PointsListType &srcPoints,
 #if MORPH_WITH_MESH
 static void update_sources(PointsListType &points, const CMesh3d *pmesh);
 #else
-static void update_sources(const PointsListType &initPoints,
-                           PointsListType &srcPoints,
+static void update_sources(const PointsListType &   initPoints,
+                           PointsListType &         srcPoints,
                            const Transform3Spointer ptransform);
 #endif
 
 unsigned int update_bc_container(PointsContainerType &container,
-                                 Transform3SPointer ptransform);
+                                 Transform3SPointer   ptransform);
 
 //==========================================================
 
@@ -246,8 +246,8 @@ int main(int argc, char *argv[]) {
   SurfaceVectorType vmris_fixed;
   SurfaceVectorType vmris_moving;
 
-  MRI *mri_fixed = NULL;
-  MRI *mri_aseg = NULL;
+  MRI *mri_fixed  = NULL;
+  MRI *mri_aseg   = NULL;
   MRI *mri_moving = NULL;
 
   // if next fct fails -> it exits
@@ -320,12 +320,12 @@ int main(int argc, char *argv[]) {
             << std::endl;
   std::cout << " direct min TMP = " << TMPcmin
             << " direct max TMP = " << TMPcmax << std::endl;
-  cmin = cmin - tDblCoords(10.0);
+  cmin    = cmin - tDblCoords(10.0);
   TMPcmin = TMPcmin - tDblCoords(10.0);
 
   cmin = max(cmin - tDblCoords(10.0), tDblCoords(0.0));
   // cmax = cmax + tDblCoords(10.0);
-  cmax = tDblCoords(256.0);
+  cmax    = tDblCoords(256.0);
   TMPcmax = TMPcmax + tDblCoords(10.0);
   std::cout << " bounding box elts = " << std::endl
             << " min = " << cmin << std::endl
@@ -347,7 +347,7 @@ int main(int argc, char *argv[]) {
   //     however, it is also practical to be able
   //     to compute the error at the very end of the process
   PointsContainerType container, initContainer;
-  PointsListType srcPoints, initPoints;
+  PointsListType      srcPoints, initPoints;
 
   // encode the deformation field in the atlas surface file
   create_bc_container(initContainer, vmris_fixed, vmris_moving);
@@ -380,7 +380,7 @@ int main(int argc, char *argv[]) {
     for (unsigned int counter = 0; counter < 100; ++counter)
       ++cit;
     dbgCoords = *cit;
-    dbgImage = dbgCoords;
+    dbgImage  = dbgCoords;
   }
 
   std::cout << " srcPoints size = " << srcPoints.size() << std::endl;
@@ -446,8 +446,8 @@ int main(int argc, char *argv[]) {
 
         // collect statistics about the orientation pbs
         {
-          typedef std::vector<unsigned int> IndexVectorType;
-          IndexVectorType vecIdx;
+          typedef std::vector<unsigned int>     IndexVectorType;
+          IndexVectorType                       vecIdx;
           std::insert_iterator<IndexVectorType> ii(vecIdx, vecIdx.begin());
           pmesh->orientation_pb(dst, ii);
 
@@ -722,9 +722,9 @@ static int do_vol_deformation(PointsContainerType &container, tSolver &solver,
 
 #undef __FUNCT__
 #define __FUNCT__ "do_vol_deformation"
-static int do_vol_deformation(PointsContainerType &container, tSolver &solver,
-                              tDblCoords cmin, tDblCoords cmax,
-                              const Transform3Spointer ptransform, int step) {
+static int  do_vol_deformation(PointsContainerType &container, tSolver &solver,
+                               tDblCoords cmin, tDblCoords cmax,
+                               const Transform3Spointer ptransform, int step) {
   tDblCoords pt, delta;
 
   // pin down volume corners to make sure the matrix is positive definite
@@ -742,7 +742,7 @@ static int do_vol_deformation(PointsContainerType &container, tSolver &solver,
 
   for (PointsContainerType::const_iterator pit = container.begin();
        pit != container.end(); ++pit) {
-    pt = ptransform->img(pit->first);
+    pt    = ptransform->img(pit->first);
     delta = (pit->second - pt) / (double)step;
     if (!pt.isValid()) {
       // std::cerr << " invalid pt\n";
@@ -763,23 +763,23 @@ static float *powell_lin(const SurfaceVectorType &vmris_x,
 
   PointsContainerType container;
 
-  VERTEX *pvtx_x = NULL;
-  VERTEX *pvtx_fx = NULL;
+  VERTEX *     pvtx_x  = NULL;
+  VERTEX *     pvtx_fx = NULL;
   unsigned int nvertices;
-  tDblCoords pt_x, pt_fx;
+  tDblCoords   pt_x, pt_fx;
 
   PetscInt linInc = 1;
-  ierr = PetscOptionsGetInt(NULL, NULL, "-lin_res", &linInc, NULL);
+  ierr            = PetscOptionsGetInt(NULL, NULL, "-lin_res", &linInc, NULL);
 
   SurfaceVectorType::const_iterator cit_x, cit_fx;
   cit_fx = vmris_fx.begin();
 
   for (cit_x = vmris_x.begin(); cit_x != vmris_x.end(); ++cit_x, ++cit_fx) {
-    MRI_SURFACE *mris_x = cit_x->mris;
+    MRI_SURFACE *mris_x  = cit_x->mris;
     MRI_SURFACE *mris_fx = cit_fx->mris;
 
-    pvtx_x = &(mris_x->vertices[0]);
-    pvtx_fx = &(mris_fx->vertices[0]);
+    pvtx_x    = &(mris_x->vertices[0]);
+    pvtx_fx   = &(mris_fx->vertices[0]);
     nvertices = (unsigned int)mris_x->nvertices;
 
     for (unsigned int ui = 0; ui < nvertices;
@@ -817,10 +817,10 @@ static float *powell_lin(const SurfaceVectorType &vmris_x,
 }
 
 static int create_bc_container(PointsContainerType &container,
-                               SurfaceVectorType &vmris_fixed,
-                               SurfaceVectorType &vmris_moving) {
+                               SurfaceVectorType &  vmris_fixed,
+                               SurfaceVectorType &  vmris_moving) {
   PetscErrorCode ierr;
-  PetscReal petreal = 1.0;
+  PetscReal      petreal = 1.0;
 
   ierr = PetscOptionsGetReal(NULL, NULL, "-dirty", &petreal, NULL);
   CHKERRQ(ierr);
@@ -834,14 +834,14 @@ static int create_bc_container(PointsContainerType &container,
   cit_moving = vmris_moving.begin();
   for (cit_fixed = vmris_fixed.begin(); cit_fixed != vmris_fixed.end();
        ++cit_fixed, ++cit_moving) {
-    MRI_SURFACE *mris_fixed = cit_fixed->mris;
+    MRI_SURFACE *mris_fixed  = cit_fixed->mris;
     MRI_SURFACE *mris_moving = cit_moving->mris;
 #if 0
     int markedVertices = MRISsubsampleDist(mris_fixed, 2.0f);
 #endif
-    VERTEX *pvtx_fixed = &(mris_fixed->vertices[0]);
-    unsigned int nvertices = (unsigned int)mris_fixed->nvertices;
-    VERTEX *pvtx_moving = &(mris_moving->vertices[0]);
+    VERTEX *     pvtx_fixed  = &(mris_fixed->vertices[0]);
+    unsigned int nvertices   = (unsigned int)mris_fixed->nvertices;
+    VERTEX *     pvtx_moving = &(mris_moving->vertices[0]);
 
     unsigned int ripCounter = 0;
     for (unsigned int ui = 0; ui < nvertices;
@@ -871,7 +871,7 @@ static int create_bc_container(PointsContainerType &container,
   return 0;
 }
 
-static void create_surf_container(PointsListType &srcPoints,
+static void create_surf_container(PointsListType &   srcPoints,
                                   SurfaceVectorType &vmris,
                                   double subsampleDist, bool usePialForSurf) {
   tDblCoords pt;
@@ -891,7 +891,7 @@ static void create_surf_container(PointsListType &srcPoints,
       std::cout << " create_surf_container - init size = " << mris->nvertices
                 << " subsampled = " << markedVertices << std::endl;
     }
-    VERTEX *pvtx = &(mris->vertices[0]);
+    VERTEX *           pvtx      = &(mris->vertices[0]);
     const unsigned int nvertices = mris->nvertices;
     for (unsigned int ui = 0; ui < nvertices; ++ui, ++pvtx) {
       if (pvtx->ripflag)
@@ -912,7 +912,7 @@ static void create_surf_container(PointsListType &srcPoints,
 struct PointMorphWithMesh {
   PointMorphWithMesh(const CMesh3d *pm = NULL) : pmesh(pm) {}
   const CMesh3d *pmesh;
-  tDblCoords operator()(tDblCoords pt) const { return pmesh->dir_img(pt); }
+  tDblCoords     operator()(tDblCoords pt) const { return pmesh->dir_img(pt); }
 };
 struct InvalidPointFilter {
   bool operator()(tDblCoords pt) const { return !pt.isValid(); }
@@ -924,8 +924,8 @@ static void update_sources(PointsListType &points, const CMesh3d *pmesh) {
   std::remove_if(points.begin(), points.end(), InvalidPointFilter());
 }
 #else
-static void update_sources(const PointsListType &initPoints,
-                           PointsListType &srcPoints,
+static void update_sources(const PointsListType &   initPoints,
+                           PointsListType &         srcPoints,
                            const Transform3Spointer ptransform) {
   tDblCoords pt;
 
@@ -961,7 +961,7 @@ static MRI *compute_morph(Transform3SPointer ptransform, MATRIX *mat_lt,
       plin[i * 3 + j] = mat_lt->rptr[j + 1][i + 1];
 
   try {
-    std::shared_ptr<gmp::Transform<3>> bpTransform(ptransform);
+    std::shared_ptr<gmp::Transform<3>>      bpTransform(ptransform);
     std::shared_ptr<gmp::AffineTransform3d> paffine(
         new gmp::AffineTransform3d(plin));
 
@@ -1001,14 +1001,14 @@ static MRI *compute_morph(const CMesh3d &mesh, MATRIX *mat_lt, MRI *mri_x,
 
   try {
     gmp::AffineTransform3d affine(plin);
-    gmp::FemTransform3d femTransform(&mesh);
+    gmp::FemTransform3d    femTransform(&mesh);
     femTransform.set_bbox(cmin, cmax);
 
     std::cout << " 3\n";
 
     gmp::VolumeMorph volMorph;
     volMorph.m_template = mri_atlas;
-    volMorph.m_input = mri_src;
+    volMorph.m_input    = mri_src;
 
     std::cout << " got here\n";
     volMorph.m_transforms.push_back(&femTransform);
@@ -1041,23 +1041,23 @@ IoParams::IoParams()
       strOutputSurf(),       // just a placeholder
       strOutputSurfAffine(), // just a placeholder
       strGcam(), strOutputAffine() {
-  eltVolMin = 2;
-  eltVolMax = 21;
-  poissonRatio = .3f;
-  YoungModulus = 10;
-  iSteps = 1;    // by default, simple linear elastic model
-  iEndStep = -1; // by default, do an extra step to finish converging
+  eltVolMin     = 2;
+  eltVolMax     = 21;
+  poissonRatio  = .3f;
+  YoungModulus  = 10;
+  iSteps        = 1;  // by default, simple linear elastic model
+  iEndStep      = -1; // by default, do an extra step to finish converging
   surfSubsample = -1;
   bUseOldTopologySolver = false;
-  bUsePialForSurf = false;
+  bUsePialForSurf       = false;
 }
 
 int IoParams::parse(std::string &errMsg) {
   PetscErrorCode ierr;
-  PetscBool petscFlag;
+  PetscBool      petscFlag;
 
   const unsigned int maxLen = 256;
-  char buffer[maxLen];
+  char               buffer[maxLen];
 
   // help
   ierr = PetscOptionsGetString(NULL, NULL, "-help", buffer, maxLen, &petscFlag);
@@ -1091,8 +1091,8 @@ int IoParams::parse(std::string &errMsg) {
   // else std::cout << " No ASEG option present\n";
 
   // Fixed Surfaces
-  char option[maxLen];
-  bool bContinue = true;
+  char         option[maxLen];
+  bool         bContinue = true;
   unsigned int surfIndex = 1;
   while (bContinue) {
     if (surfIndex == 1)
@@ -1225,7 +1225,7 @@ int IoParams::parse(std::string &errMsg) {
 
   {
     PetscReal rar[20];
-    int nmax = 3;
+    int       nmax = 3;
     ierr = PetscOptionsGetRealArray(NULL, NULL, "-elt_vol_range", rar, &nmax,
                                     &petscFlag);
     CHKERRQ(ierr);
@@ -1365,7 +1365,7 @@ private:
   SurfaceMarker(){};
 
   std::vector<int> m_vecAparcIgnored;
-  MRIS *m_psurf;
+  MRIS *           m_psurf;
 
   void addLabelToIgnored(const char *name) {
     int aparcVal;
@@ -1443,7 +1443,7 @@ static int process_input_data(const IoParams &params, MRI *&mri_fixed,
         }
 
         SurfaceVertexIterator vtxIter(it->mris);
-        SurfaceMarker functor(it->mris);
+        SurfaceMarker         functor(it->mris);
         vtxIter.Execute(functor);
 
       } // next it, citAparc
@@ -1471,7 +1471,7 @@ static int process_input_data(const IoParams &params, MRI *&mri_fixed,
 
 void output_bc_locations(const tSolver &solver, MRI *mri) {
   typedef tSolver::BcContainerConstIterator BcConstIterator;
-  BcConstIterator begin, end;
+  BcConstIterator                           begin, end;
 
   solver.getBcIterators(begin, end);
 
@@ -1493,11 +1493,11 @@ void output_bc_locations(const tSolver &solver, MRI *mri) {
 
 void compute_bc_error(const tSolver &solver) {
   double dActiveError = 0.0;
-  double dTotalError = 0.0;
-  double dcount = 0;
+  double dTotalError  = 0.0;
+  double dcount       = 0;
 
   typedef tSolver::BcContainerConstIterator BcConstIterator;
-  BcConstIterator it, end;
+  BcConstIterator                           it, end;
 
   solver.getBcIterators(it, end);
 
@@ -1542,8 +1542,8 @@ static void surf_forward_morph(const CMesh3d *pmesh, std::string strName,
        it != vmris_moving.end(); ++it) {
     std::cout << " processing surface " << it - vmris_moving.begin()
               << std::endl;
-    MRI_SURFACE *mris = it->mris;
-    VERTEX *pvtx = &(mris->vertices[0]);
+    MRI_SURFACE *mris      = it->mris;
+    VERTEX *     pvtx      = &(mris->vertices[0]);
     unsigned int nvertices = (unsigned int)mris->nvertices;
 
     int errCount = 0;
@@ -1586,7 +1586,7 @@ static void surf_forward_morph(const CMesh3d *pmesh, std::string strName,
 }
 #endif // ifdef USE_SURF_FORWARD_MORPH
 
-static void compute_fem_error(const Transform3SPointer ptransform,
+static void compute_fem_error(const Transform3SPointer   ptransform,
                               const PointsContainerType &container) {
   std::cout << " FEM error\n";
 
@@ -1623,8 +1623,8 @@ static void compute_fem_error(const Transform3SPointer ptransform,
 
 #ifdef USE_GATHER_DEFECT_INFO
 static void gather_defect_info(CMesh3d::ElementIndexContainer &lstElts,
-                               tSolver::BcMfcInfoType &mfcInfo) {
-  int bcDefects = 0;
+                               tSolver::BcMfcInfoType &        mfcInfo) {
+  int                                    bcDefects = 0;
   tSolver::BcMfcInfoType::const_iterator bcIter;
   for (CMesh3d::ElementIndexContainer::const_iterator cit = lstElts.begin();
        cit != lstElts.end(); ++cit) {
@@ -1656,14 +1656,14 @@ void check_surface_defects(const SurfaceVectorType &vmris_x,
 
   for (cit_x = vmris_x.begin(), cit_fx = vmris_fx.begin();
        cit_x != vmris_x.end(); ++cit_x, ++cit_fx) {
-    MRI_SURFACE *mrisX = cit_x->mris;
+    MRI_SURFACE *mrisX  = cit_x->mris;
     MRI_SURFACE *mrisFx = cit_fx->mris;
 
     MRIScomputeMetricProperties(mrisX);
     MRIScomputeMetricProperties(mrisFx);
 
-    FACE *faceX = &(mrisX->faces[0]);
-    FACE *faceFx = &(mrisFx->faces[0]);
+    FACE *       faceX  = &(mrisX->faces[0]);
+    FACE *       faceFx = &(mrisFx->faces[0]);
     unsigned int nfaces = (unsigned int)(mrisX->nfaces);
 
     for (unsigned int ui = 0; ui < nfaces; ++ui, ++faceX, ++faceFx) {
@@ -1687,7 +1687,7 @@ void dbg_surf2vol(const PointsContainerType &c, MRI *mri) {
   for (PointsContainerType::const_iterator cit = c.begin(); cit != c.end();
        ++cit) {
     MRIvox(out_fixed, nint(cit->first(0)), nint(cit->first(1)),
-           nint(cit->first(2))) = 200;
+           nint(cit->first(2)))  = 200;
     MRIvox(out_moving, nint(cit->second(0)), nint(cit->second(1)),
            nint(cit->second(2))) = 200;
   } // next cit
@@ -1700,7 +1700,7 @@ void dbg_surf2vol(const PointsContainerType &c, MRI *mri) {
 }
 
 unsigned int update_bc_container(PointsContainerType &container,
-                                 Transform3SPointer ptransform) {
+                                 Transform3SPointer   ptransform) {
   unsigned int countErased(0);
   for (PointsContainerType::iterator it = container.begin();
        it != container.end();) {

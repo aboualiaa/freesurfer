@@ -23,36 +23,36 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "timer.h"
 #include "version.h"
-#include "cma.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char *Progname;
+const char * Progname;
 static char *log_fname = nullptr;
-static void usage_exit(int code);
+static void  usage_exit(int code);
 
-static int segmentation_flag = -1;
-static char *annot_prefix = nullptr;
-static int quiet = 0;
-static int scaleup_flag = 0;
-static int cras = 0; // 0 is false.  1 is true
-static int cras_not_set = 1;
-static char *surface_dir = nullptr;
+static int   segmentation_flag = -1;
+static char *annot_prefix      = nullptr;
+static int   quiet             = 0;
+static int   scaleup_flag      = 0;
+static int   cras              = 0; // 0 is false.  1 is true
+static int   cras_not_set      = 1;
+static char *surface_dir       = nullptr;
 static char *hemi;
-static int erode = 0;
-static int coords = 0;
+static int   erode  = 0;
+static int   coords = 0;
 
 int main(int argc, char *argv[]) {
   char **av, *label_name, *vol_name, *out_name;
-  int ac, nargs;
-  int msec, minutes, seconds, i;
+  int    ac, nargs;
+  int    msec, minutes, seconds, i;
   LABEL *area;
-  Timer start;
-  MRI *mri, *mri_seg;
+  Timer  start;
+  MRI *  mri, *mri_seg;
   double xw, yw, zw, xv, yv, zv, val;
 
   nargs = handleVersionOption(argc, argv, "mri_label_vals");
@@ -77,9 +77,9 @@ int main(int argc, char *argv[]) {
   if (argc < 3)
     usage_exit(1);
 
-  vol_name = argv[1];
+  vol_name   = argv[1];
   label_name = argv[2];
-  out_name = argv[3];
+  out_name   = argv[3];
 
   mri = MRIread(vol_name);
   if (!mri)
@@ -93,14 +93,14 @@ int main(int argc, char *argv[]) {
     mri->xsize *= scale;
     mri->ysize *= scale;
     mri->zsize *= scale;
-    fov_x = mri->xsize * mri->width;
-    fov_y = mri->ysize * mri->height;
-    fov_z = mri->zsize * mri->depth;
-    mri->xend = fov_x / 2.0;
+    fov_x       = mri->xsize * mri->width;
+    fov_y       = mri->ysize * mri->height;
+    fov_z       = mri->zsize * mri->depth;
+    mri->xend   = fov_x / 2.0;
     mri->xstart = -mri->xend;
-    mri->yend = fov_y / 2.0;
+    mri->yend   = fov_y / 2.0;
     mri->ystart = -mri->yend;
-    mri->zend = fov_z / 2.0;
+    mri->zend   = fov_z / 2.0;
     mri->zstart = -mri->zend;
 
     mri->fov = (fov_x > fov_y ? (fov_x > fov_z ? fov_x : fov_z)
@@ -108,12 +108,12 @@ int main(int argc, char *argv[]) {
   }
 
   if (segmentation_flag >= 0) {
-    int x, y, z;
+    int     x, y, z;
     VECTOR *v_seg, *v_mri;
     MATRIX *m_seg_to_mri;
 
-    v_seg = VectorAlloc(4, MATRIX_REAL);
-    v_mri = VectorAlloc(4, MATRIX_REAL);
+    v_seg                = VectorAlloc(4, MATRIX_REAL);
+    v_mri                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(v_seg, 4) = 1.0;
     VECTOR_ELT(v_mri, 4) = 1.0;
 
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
 
     if (surface_dir) {
       MRI_SURFACE *mris;
-      char fname[STRLEN];
+      char         fname[STRLEN];
       sprintf(fname, "%s/%s.white", surface_dir, hemi);
       mris = MRISread(fname);
       if (mris == nullptr)
@@ -182,11 +182,11 @@ int main(int argc, char *argv[]) {
       if (annot_prefix) /* read an annotation in and print vals in it */
       {
 #define MAX_ANNOT 10000
-        int vno, annot_counts[MAX_ANNOT], index;
+        int     vno, annot_counts[MAX_ANNOT], index;
         VERTEX *v;
-        double xw, yw, zw, xv, yv, zv, val;
-        float annot_means[MAX_ANNOT];
-        FILE *fp;
+        double  xw, yw, zw, xv, yv, zv, val;
+        float   annot_means[MAX_ANNOT];
+        FILE *  fp;
 
         memset(annot_means, 0, sizeof(annot_means));
         memset(annot_counts, 0, sizeof(annot_counts));
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -273,18 +273,18 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (strcmp("cras", option) == 0) {
-    cras = 1;
+    cras         = 1;
     cras_not_set = 0;
   } else if (strcmp("scaleup", option) == 0)
     scaleup_flag = 1;
   else if (strcmp("segmentation", option) == 0) {
     segmentation_flag = atoi(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "using segmentation %d (%s) as label...\n",
             segmentation_flag, cma_label_to_name(segmentation_flag));
   } else if (strcmp("coords", option) == 0) {
@@ -301,7 +301,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'S':
       surface_dir = argv[2];
-      hemi = argv[3];
+      hemi        = argv[3];
       printf("sampling from midpoint of cortical ribbon in %s (hemi=%s)\n",
              surface_dir, hemi);
       nargs = 2;
@@ -311,14 +311,14 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'A':
       annot_prefix = argv[2];
-      nargs = 1;
+      nargs        = 1;
       fprintf(stderr,
               "reading annotation file, and outputting with prefix %s ...\n",
               annot_prefix);
       break;
     case 'L':
       log_fname = argv[2];
-      nargs = 1;
+      nargs     = 1;
       fprintf(stderr, "logging results to %s\n", log_fname);
       break;
     case 'U':

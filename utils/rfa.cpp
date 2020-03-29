@@ -22,9 +22,9 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
 #include "cma.h"
 #include "diag.h"
@@ -40,27 +40,27 @@
 #define MAX_LABELS_PER_NODE 10
 
 RFA *RFAalloc(RFA_PARMS *parms, int alloc_trees) {
-  int x, y, z;
+  int      x, y, z;
   RF_NODE *node;
-  RFA *rfa;
+  RFA *    rfa;
 
   rfa = (RFA *)calloc(1, sizeof(RFA));
   if (rfa == nullptr)
     ErrorExit(ERROR_NOMEMORY, "RFAalloc: could not allocate rfa");
 
-  rfa->spacing = parms->spacing;
-  rfa->vg.width = parms->width / parms->spacing;
-  rfa->vg.height = parms->height / parms->spacing;
-  rfa->vg.depth = parms->depth / parms->spacing;
-  rfa->width = rfa->vg.width;
-  rfa->height = rfa->vg.height;
-  rfa->depth = rfa->vg.depth;
-  rfa->vg.xsize = parms->spacing;
-  rfa->vg.ysize = parms->spacing;
-  rfa->vg.zsize = parms->spacing;
-  rfa->vg.valid = 0;
-  rfa->ninputs = parms->nvols;
-  rfa->wsize = parms->wsize;
+  rfa->spacing          = parms->spacing;
+  rfa->vg.width         = parms->width / parms->spacing;
+  rfa->vg.height        = parms->height / parms->spacing;
+  rfa->vg.depth         = parms->depth / parms->spacing;
+  rfa->width            = rfa->vg.width;
+  rfa->height           = rfa->vg.height;
+  rfa->depth            = rfa->vg.depth;
+  rfa->vg.xsize         = parms->spacing;
+  rfa->vg.ysize         = parms->spacing;
+  rfa->vg.zsize         = parms->spacing;
+  rfa->vg.valid         = 0;
+  rfa->ninputs          = parms->nvols;
+  rfa->wsize            = parms->wsize;
   parms->training_index = 0; // this will get incremented in RFAaddInput
 
   // +3 is for the 3 spatial coordinates
@@ -115,7 +115,7 @@ int RFAaddInput(RFA *rfa, MRI *mri_seg, MRI *mri_inputs, TRANSFORM *transform,
 
   index = (parms->training_index % parms->training_size);
   parms->training_index++;
-  parms->mri_segs[index] = mri_seg;
+  parms->mri_segs[index]   = mri_seg;
   parms->mri_inputs[index] = mri_inputs;
   parms->transforms[index] = transform;
 
@@ -152,7 +152,7 @@ int RFAnodeToVoxel(const RFA *rfa, double xt, double yt, double zt, double *px,
 
 int RFAsourceVoxelToNode(const RFA *rfa, MRI *mri, TRANSFORM *transform, int xv,
                          int yv, int zv, int *px, int *py, int *pz) {
-  float xt = 0, yt = 0, zt = 0;
+  float  xt = 0, yt = 0, zt = 0;
   double xrt, yrt, zrt, xd, yd, zd;
   // int retval;
 
@@ -199,7 +199,7 @@ int RFAsourceVoxelToAtlas(const RFA *rfa, MRI *mri, TRANSFORM *transform,
                           int xv, int yv, int zv, double *px, double *py,
                           double *pz) {
   float xt, yt, zt;
-  LTA *lta;
+  LTA * lta;
 
   if (transform->type != MORPH_3D_TYPE) {
     if (transform->type == LINEAR_VOX_TO_VOX) {
@@ -241,17 +241,17 @@ int RFAsourceVoxelToAtlas(const RFA *rfa, MRI *mri, TRANSFORM *transform,
 int RFAnodeToSourceVoxel(RFA *rfa, MRI *mri, TRANSFORM *transform, int xn,
                          int yn, int zn, double *pxv, double *pyv,
                          double *pzv) {
-  int width, height, depth;
+  int    width, height, depth;
   double xt, yt, zt;
   double xv, yv, zv;
   double xc, yc, zc;
-  float xf, yf, zf;
-  int errCode = NO_ERROR;
-  LTA *lta;
+  float  xf, yf, zf;
+  int    errCode = NO_ERROR;
+  LTA *  lta;
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
   // get template voxel position
   RFAnodeToVoxel(rfa, xn, yn, zn, &xt, &yt, &zt);
   if (transform->type != MORPH_3D_TYPE) {
@@ -292,18 +292,18 @@ int RFAupdateTraining(RFA *rfa, RFA_PARMS *parms) {
       *training_classes, *wmsa_permutation;
   int xk, yk, zk, xi, yi, zi, tno, label, index, total_correct, total_training,
       n, nwmsa, max_count, wmsa_count, wmsa_label = WM_hypointensities;
-  double **training_data, xd, yd, zd, **wmsa_data, xatlas, yatlas, zatlas;
-  MRI *mri_in, *mri_seg;
+  double **  training_data, xd, yd, zd, **wmsa_data, xatlas, yatlas, zatlas;
+  MRI *      mri_in, *mri_seg;
   TRANSFORM *transform;
-  RF_NODE *node;
+  RF_NODE *  node;
 
-  x = y = z = 0; // silly compiler warning
+  x = y = z      = 0; // silly compiler warning
   ntraining_sets = parms->training_index % parms->training_size;
-  start = parms->training_index - ntraining_sets;
+  start          = parms->training_index - ntraining_sets;
   if (start < 0 || ntraining_sets <= 0)
     return (NO_ERROR); // no more to do
 
-  ntraining = ntraining_sets * rfa->spacing * rfa->spacing * rfa->spacing;
+  ntraining     = ntraining_sets * rfa->spacing * rfa->spacing * rfa->spacing;
   training_data = (double **)calloc(2 * ntraining, sizeof(training_data[0]));
   training_classes = (int *)calloc(2 * ntraining, sizeof(training_classes[0]));
   if (training_data == nullptr || training_classes == nullptr)
@@ -316,10 +316,10 @@ int RFAupdateTraining(RFA *rfa, RFA_PARMS *parms) {
   if (rfa->vg.valid == 0) {
     if (parms->transforms[0]->type == MORPH_3D_TYPE) {
       GCA_MORPH *gcam = (GCA_MORPH *)(parms->transforms[0]->xform);
-      rfa->vg = *(&gcam->atlas);
+      rfa->vg         = *(&gcam->atlas);
     } else {
       LTA *lta = (LTA *)(parms->transforms[0]->xform);
-      rfa->vg = *(&lta->xforms[0].dst);
+      rfa->vg  = *(&lta->xforms[0].dst);
     }
   }
   for (i = 0; i < ntraining;
@@ -335,8 +335,8 @@ int RFAupdateTraining(RFA *rfa, RFA_PARMS *parms) {
 
   // count total # of wmsas in training set
   for (nwmsa = i = 0; i < ntraining_sets; i++) {
-    mri_in = parms->mri_inputs[i];
-    mri_seg = parms->mri_segs[i];
+    mri_in    = parms->mri_inputs[i];
+    mri_seg   = parms->mri_segs[i];
     transform = parms->transforms[i];
     nwmsa += MRIvoxelsInLabel(mri_seg, WM_hypointensities);
     nwmsa += MRIvoxelsInLabel(mri_seg, Left_WM_hypointensities);
@@ -354,8 +354,8 @@ int RFAupdateTraining(RFA *rfa, RFA_PARMS *parms) {
               "RFAupdateTraining: could not allocate %d-length wmsa buffers",
               nwmsa);
   for (nwmsa = i = 0; i < ntraining_sets; i++) {
-    mri_in = parms->mri_inputs[i];
-    mri_seg = parms->mri_segs[i];
+    mri_in    = parms->mri_inputs[i];
+    mri_seg   = parms->mri_segs[i];
     transform = parms->transforms[i];
     for (x = 0; x < mri_in->width; x++)
       for (y = 0; y < mri_in->height; y++)
@@ -384,8 +384,8 @@ int RFAupdateTraining(RFA *rfa, RFA_PARMS *parms) {
           DiagBreak();
         node = &rfa->nodes[xn][yn][zn];
         for (tno = i = 0; i < ntraining_sets; i++) {
-          mri_in = parms->mri_inputs[i];
-          mri_seg = parms->mri_segs[i];
+          mri_in    = parms->mri_inputs[i];
+          mri_seg   = parms->mri_segs[i];
           transform = parms->transforms[i];
           RFAnodeToSourceVoxel(rfa, mri_in, transform, xn, yn, zn, &xd, &yd,
                                &zd);
@@ -408,7 +408,7 @@ int RFAupdateTraining(RFA *rfa, RFA_PARMS *parms) {
                     break;
                 if (index >= node->nlabels) {
                   if (index >= node->max_labels) {
-                    float label_priors[100 * MAX_LABELS_PER_NODE];
+                    float          label_priors[100 * MAX_LABELS_PER_NODE];
                     unsigned short labels[100 * MAX_LABELS_PER_NODE];
                     memmove(label_priors, node->label_priors,
                             node->nlabels * sizeof(node->label_priors[0]));
@@ -484,13 +484,13 @@ int RFAupdateTraining(RFA *rfa, RFA_PARMS *parms) {
               ind = ntraining + wmsa_index - start_wmsa_index;
               if (ind < 0 || ind >= 2 * ntraining)
                 DiagBreak();
-              training_data[ind] = wmsa_data[wmsa_permutation[wmsa_index]];
+              training_data[ind]    = wmsa_data[wmsa_permutation[wmsa_index]];
               training_classes[ind] = wmsa_label;
             }
           }
           RFsetNumberOfClasses(node->rf, node->nlabels);
           node->rf->min_step_size = .5;
-          node->rf->max_steps = 256;
+          node->rf->max_steps     = 256;
           RFtrain(node->rf, parms->feature_fraction, parms->training_fraction,
                   training_classes, training_data, ntraining + extra);
           correct = RFcomputeOutOfBagCorrect(node->rf, training_classes,
@@ -515,8 +515,8 @@ int RFAupdateTraining(RFA *rfa, RFA_PARMS *parms) {
   return (NO_ERROR);
 }
 int RFAwrite(RFA *rfa, char *fname) {
-  FILE *fp;
-  int xn, yn, zn, n;
+  FILE *   fp;
+  int      xn, yn, zn, n;
   RF_NODE *node;
 
   fp = fopen(fname, "w");
@@ -548,10 +548,10 @@ int RFAwrite(RFA *rfa, char *fname) {
   return (NO_ERROR);
 }
 RFA *RFAread(char *fname) {
-  RFA *rfa;
-  FILE *fp;
-  int xn, yn, zn, n, nfeatures, total_training, first = 1;
-  RF_NODE *node;
+  RFA *     rfa;
+  FILE *    fp;
+  int       xn, yn, zn, n, nfeatures, total_training, first = 1;
+  RF_NODE * node;
   RFA_PARMS parms;
 
   memset(&parms, 0, sizeof(parms));
@@ -575,7 +575,7 @@ RFA *RFAread(char *fname) {
   for (xn = 0; xn < rfa->width; xn++)
     for (yn = 0; yn < rfa->height; yn++)
       for (zn = 0; zn < rfa->depth; zn++) {
-        int nlabels, label;
+        int  nlabels, label;
         char line[MAX_LINE_LEN], *cp;
 
         node = &rfa->nodes[xn][yn][zn];
@@ -622,7 +622,7 @@ RFA *RFAread(char *fname) {
           node->rf = RFreadFrom(fp);
           if (first) {
             rfa->nfeatures = node->rf->nfeatures;
-            first = 0;
+            first          = 0;
           }
         }
       }
@@ -635,10 +635,10 @@ RFA *RFAread(char *fname) {
 
 #define MAX_FEATURE_LEN 10000
 MRI *RFAlabel(MRI *mri_in, RFA *rfa, MRI *mri_labeled, TRANSFORM *transform) {
-  int x, y, z, xn, yn, zn;
-  int label;
+  int      x, y, z, xn, yn, zn;
+  int      label;
   RF_NODE *node;
-  double feature[MAX_FEATURE_LEN], xatlas, yatlas, zatlas;
+  double   feature[MAX_FEATURE_LEN], xatlas, yatlas, zatlas;
 
   if (mri_labeled == nullptr) {
     mri_labeled =

@@ -34,7 +34,7 @@ void AverageAtlasMeshPositionCostAndGradientCalculator ::Rasterize(
   // Initialize from a clean slate
   // std::cout << "Initializing" << std::endl;
   m_MinLogLikelihoodTimesPrior = 0;
-  m_PositionGradient = AtlasPositionGradientContainerType::New();
+  m_PositionGradient           = AtlasPositionGradientContainerType::New();
   AtlasPositionGradientType zeroEntry(0.0f);
   for (AtlasMesh::PointsContainer::ConstIterator pointIt =
            mesh->GetPoints()->Begin();

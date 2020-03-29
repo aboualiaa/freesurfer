@@ -23,10 +23,10 @@
  *
  */
 
-#include "diag.h"
-#include "version.h"
-#include "fmriutils.h"
 #include "cma.h"
+#include "diag.h"
+#include "fmriutils.h"
+#include "version.h"
 
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
@@ -43,104 +43,104 @@ static float *mrisComputeWhiteMatterIntensities(MRI_SURFACE *mris, MRI *mri,
                                                 float wsize_mm, float *norm,
                                                 int navgs, MRI *mri_aseg,
                                                 float mm_border);
-MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
-    MRI_SURFACE *mris, MRI *mri, int nbhd_size, float max_thick, int normalize,
-    int curv_thresh, float *norm);
+MRI *         MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
+             MRI_SURFACE *mris, MRI *mri, int nbhd_size, float max_thick, int normalize,
+             int curv_thresh, float *norm);
 static MRI *MRIfitPolynomial(MRI *mri_profiles, MRI *mri_poly, int order);
 static MRI *MRIfitQuadratic(MRI *mri_profiles, MRI *mri_quad);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
 
-static int pial_normal_avgs = 5;
-static char *read_laplace_name = nullptr;
-static char *write_surf_name = nullptr;
-static char *sphere_name = "sphere";
-static int fmin_thick = 0;
-static float laplace_res = 0.5;
-static int laplace_thick = 0;
-static char *write_thickness_fname = nullptr;
+static int               pial_normal_avgs      = 5;
+static char *            read_laplace_name     = nullptr;
+static char *            write_surf_name       = nullptr;
+static char *            sphere_name           = "sphere";
+static int               fmin_thick            = 0;
+static float             laplace_res           = 0.5;
+static int               laplace_thick         = 0;
+static char *            write_thickness_fname = nullptr;
 static INTEGRATION_PARMS parms;
 
-const char *Progname;
-static char *flat_name = nullptr;
-static int smooth_iters = 1;
-static double flat_res = 0;
+const char *  Progname;
+static char * flat_name    = nullptr;
+static int    smooth_iters = 1;
+static double flat_res     = 0;
 
-static int nbrs = 1;
-static char pial_name[100] = "pial";
+static int  nbrs            = 1;
+static char pial_name[100]  = "pial";
 static char white_name[100] = WHITE_MATTER_NAME;
 #define MAX_LABELS 10000
 static char *label_names[MAX_LABELS];
-static int nlabels = 0;
+static int   nlabels = 0;
 
 static float wm_border_mm = 3.0;
-static int zero_mean = 0;
-static MRI *mri_aseg = nullptr;
-double normal_sigma = 0;
-static int inorm = 0;
-static int nbhd_size = 2;
-static float max_thick = 5.0;
-static int remove_bad = 0;
-static char *sdir = nullptr;
-static int num_erode = 0;
+static int   zero_mean    = 0;
+static MRI * mri_aseg     = nullptr;
+double       normal_sigma = 0;
+static int   inorm        = 0;
+static int   nbhd_size    = 2;
+static float max_thick    = 5.0;
+static int   remove_bad   = 0;
+static char *sdir         = nullptr;
+static int   num_erode    = 0;
 static float thresh;
-static int normalize = 0;
-static int use_normal = 0;
-static int use_pial = 1;
-static char *curv_fname = nullptr;
-static int curv_thresh = 0;
-static int navgs = 0;
+static int   normalize   = 0;
+static int   use_normal  = 0;
+static int   use_pial    = 1;
+static char *curv_fname  = nullptr;
+static int   curv_thresh = 0;
+static int   navgs       = 0;
 #define MIN_BORDER_DIST 5.0 // mm from border
-#define MAX_SAMPLES 20
+#define MAX_SAMPLES     20
 
 static char *wm_norm_fname = nullptr;
-static int max_samples = MAX_SAMPLES;
-static int quadfit = 0;
-static int polyfit = 0;
-static int extra = 0;
+static int   max_samples   = MAX_SAMPLES;
+static int   quadfit       = 0;
+static int   polyfit       = 0;
+static int   extra         = 0;
 
 static float norm_gw = 0;
 static float norm_white;
-static float norm_csf = 0;
-static float norm_pial = 0;
-static float norm_mid = 0;
-static float norm_mean = 0;
+static float norm_csf    = 0;
+static float norm_pial   = 0;
+static float norm_mid    = 0;
+static float norm_mean   = 0;
 static float norm_median = 0;
 
 static char *overlay_fname = nullptr;
-static int overlay_t0;
-static int overlay_t1;
+static int   overlay_t0;
+static int   overlay_t1;
 
 static int ratio_offsets[4];
 static int ratio = 0;
 
-static int use_normals = 0;
+static int    use_normals = 0;
 static double dist_in, dist_out;
 
 /* The following specifies the src and dst volumes of the input FSL/LTA
  * transform */
-MRI *lta_src = nullptr;
-MRI *lta_dst = nullptr;
-static int invert = 0;
-static char *xform_fname = nullptr;
+MRI *        lta_src      = nullptr;
+MRI *        lta_dst      = nullptr;
+static int   invert       = 0;
+static char *xform_fname  = nullptr;
 static char *mean_outname = nullptr;
-static MRI *MRISmeasureCorticalIntensityProfiles(MRI_SURFACE *mris, MRI *mri,
-                                                 int nsamples);
-static MRI *MRISmeasureNormalCorticalIntensityProfiles(MRI_SURFACE *mris,
-                                                       MRI *mri, double dist_in,
-                                                       double dist_out,
-                                                       int nsamples);
+static MRI * MRISmeasureCorticalIntensityProfiles(MRI_SURFACE *mris, MRI *mri,
+                                                  int nsamples);
+static MRI * MRISmeasureNormalCorticalIntensityProfiles(MRI_SURFACE *mris,
+                                                        MRI *mri, double dist_in,
+                                                        double dist_out,
+                                                        int    nsamples);
 
 int main(int argc, char *argv[]) {
-  char *out_fname, *sname, buf[STRLEN], *cp, fname[STRLEN], *hemi;
-  int nargs;
+  char *       out_fname, *sname, buf[STRLEN], *cp, fname[STRLEN], *hemi;
+  int          nargs;
   MRI_SURFACE *mris;
-  LABEL *label = nullptr;
-  MRI *mri, *mri_profiles;
-  float *norm = nullptr;
+  LABEL *      label = nullptr;
+  MRI *        mri, *mri_profiles;
+  float *      norm = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mris_intensity_profile");
   if (nargs && argc - nargs == 1)
@@ -151,21 +151,21 @@ int main(int argc, char *argv[]) {
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
 
-  parms.dt = 0.01;
-  parms.remove_neg = 1;
-  parms.momentum = .1;
-  parms.niterations = 1000;
-  parms.l_nlarea = 0;
-  parms.l_thick_min = 0;
-  parms.l_tsmooth = 0;
-  parms.l_thick_parallel = 1;
-  parms.l_thick_spring = 1;
+  parms.dt                   = 0.01;
+  parms.remove_neg           = 1;
+  parms.momentum             = .1;
+  parms.niterations          = 1000;
+  parms.l_nlarea             = 0;
+  parms.l_thick_min          = 0;
+  parms.l_tsmooth            = 0;
+  parms.l_thick_parallel     = 1;
+  parms.l_thick_spring       = 1;
   parms.l_ashburner_triangle = 1;
-  parms.l_ashburner_lambda = .1;
-  parms.l_tspring = 0;
-  parms.l_thick_normal = .01;
-  parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.tol = 1e-3;
+  parms.l_ashburner_lambda   = .1;
+  parms.l_tspring            = 0;
+  parms.l_thick_normal       = .01;
+  parms.integration_type     = INTEGRATE_MOMENTUM;
+  parms.tol                  = 1e-3;
 
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
@@ -176,12 +176,12 @@ int main(int argc, char *argv[]) {
   if (argc < 5)
     usage_exit();
 
-  sname = argv[1];
-  hemi = argv[2];
+  sname     = argv[1];
+  hemi      = argv[2];
   out_fname = argv[4];
   if (!sdir) {
     sdir = buf;
-    cp = getenv("SUBJECTS_DIR");
+    cp   = getenv("SUBJECTS_DIR");
     if (!cp)
       ErrorExit(ERROR_BADPARM, "%s: SUBJECTS_DIR not defined in environment.\n",
                 Progname);
@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not read intensity volume %s", Progname,
               argv[3]);
   if (inorm) {
-    int x, y, z, n;
+    int   x, y, z, n;
     float mean, val;
 
     for (mean = 0.0, n = 0, x = mri->width / 2 - 5; x <= mri->width / 2 + 5;
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (wm_norm_fname) {
-    MRI *mri_wm;
+    MRI *  mri_wm;
     double mean;
 
     mri_wm = MRIread(wm_norm_fname);
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]) {
   // use the specified xform if it's given
   if (xform_fname != nullptr) {
     LTA *lta = nullptr;
-    int transform_type;
+    int  transform_type;
 
     printf("INFO: Applying transformation from file %s...\n", xform_fname);
     transform_type = TransformFileNameType(xform_fname);
@@ -326,8 +326,8 @@ int main(int argc, char *argv[]) {
 
       if (invert) {
         VOL_GEOM vgtmp;
-        LT *lt;
-        MATRIX *m_tmp = lta->xforms[0].m_L;
+        LT *     lt;
+        MATRIX * m_tmp     = lta->xforms[0].m_L;
         lta->xforms[0].m_L = MatrixInverse(lta->xforms[0].m_L, nullptr);
         MatrixFree(&m_tmp);
         lt = &lta->xforms[0];
@@ -416,12 +416,12 @@ int main(int argc, char *argv[]) {
   }
 
   if (laplace_thick) {
-    MRI *mri_laplace;
-    MRI *mri_dist_white, *mri_dist_pial;
-    int nwmissing, npmissing, nmissing, vno;
-    double xv, yv, zv, white_val, pial_val;
+    MRI *   mri_laplace;
+    MRI *   mri_dist_white, *mri_dist_pial;
+    int     nwmissing, npmissing, nmissing, vno;
+    double  xv, yv, zv, white_val, pial_val;
     VERTEX *v;
-    FILE *fp;
+    FILE *  fp;
 
     if (read_laplace_name) {
       mri_laplace = MRIread(read_laplace_name);
@@ -515,7 +515,7 @@ int main(int argc, char *argv[]) {
     MRISminimizeThicknessFunctional(mris, &parms, max_thick);
     MRISrestoreVertexPositions(mris, TMP_VERTICES);
     if (write_surf_name) {
-      int vno;
+      int  vno;
       MRI *mri_vector;
       mri_vector = MRIallocSequence(mris->nvertices, 1, 1, MRI_FLOAT, 3);
 
@@ -541,8 +541,8 @@ int main(int argc, char *argv[]) {
   }
 
   if (nlabels > 0) {
-    int l;
-    char label_name[STRLEN];
+    int    l;
+    char   label_name[STRLEN];
     LABEL *ltotal = nullptr;
 
     for (l = 0; l < nlabels; l++) {
@@ -585,11 +585,11 @@ int main(int argc, char *argv[]) {
   if (remove_bad)
     remove_bad_profiles(mris, mri_profiles, mri, 20);
   if (norm_csf > 0) {
-    MRI *mri_ven, *mri_tmp;
+    MRI *  mri_ven, *mri_tmp;
     double csf_mean;
-    char fname[STRLEN], tmp[STRLEN];
-    FILE *fp;
-    int nvox, n;
+    char   fname[STRLEN], tmp[STRLEN];
+    FILE * fp;
+    int    nvox, n;
 
     if (mri_aseg == nullptr)
       ErrorExit(ERROR_BADPARM, "%s: must specify aseg volume with -aseg",
@@ -639,8 +639,8 @@ int main(int argc, char *argv[]) {
   }
 
   if (mean_outname != nullptr) {
-    MRI *mri_mean;
-    int vtx, index;
+    MRI *  mri_mean;
+    int    vtx, index;
     double sum_profile;
 
     printf("Compute the mean of the intensity profile ...\n");
@@ -730,8 +730,8 @@ int main(int argc, char *argv[]) {
       MRISwriteCurvature(mris, write_thickness_fname);
   }
   if (overlay_fname) {
-    MRI *mri_overlay;
-    int vno, t;
+    MRI *  mri_overlay;
+    int    vno, t;
     double avg, avg2;
 
     mri_overlay = MRIalloc(mri_profiles->width, 1, 1, MRI_FLOAT);
@@ -773,7 +773,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -818,7 +818,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "using variational thickness measurement\n");
   } else if (!stricmp(option, "flatten")) {
     flat_name = argv[2];
-    flat_res = atof(argv[3]);
+    flat_res  = atof(argv[3]);
     fprintf(stderr,
             "reading flattened coordinates from %s, and resolution %2.2f\n",
             flat_name, flat_res);
@@ -845,8 +845,8 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "normal") || !stricmp(option, "normals")) {
     use_normals = 1;
-    dist_in = atof(argv[2]);
-    dist_out = atof(argv[3]);
+    dist_in     = atof(argv[2]);
+    dist_out    = atof(argv[3]);
     fprintf(stderr,
             "computing profiles along surface normal in interval [-%2.2f, "
             "%2.2f] with %d samples (del=%2.3f)\n",
@@ -874,7 +874,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "laplace") || !stricmp(option, "laplacian")) {
     laplace_thick = 1;
-    laplace_res = atof(argv[2]);
+    laplace_res   = atof(argv[2]);
     fprintf(
         stderr,
         "using Laplacian thickness measurement with PDE resolution = %2.3fmm\n",
@@ -882,15 +882,15 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "overlay")) {
     overlay_fname = argv[2];
-    overlay_t0 = atoi(argv[3]);
-    overlay_t1 = atoi(argv[4]);
+    overlay_t0    = atoi(argv[3]);
+    overlay_t1    = atoi(argv[4]);
     fprintf(stderr, "computing overlay as average in interval [%d %d]\n",
             overlay_t0, overlay_t1);
     nargs = 3;
   } else if (!stricmp(option, "ratio")) {
     int i;
     overlay_fname = argv[2];
-    ratio = 1;
+    ratio         = 1;
 
     for (i = 0; i < 4; i++)
       ratio_offsets[i] = atoi(argv[3 + i]);
@@ -953,7 +953,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "eroding label %d times\n", num_erode);
     nargs = 1;
   } else if (!stricmp(option, "sdir")) {
-    sdir = argv[2];
+    sdir  = argv[2];
     nargs = 1;
   } else if (!stricmp(option, "use_normal")) {
     use_normal = atoi(argv[2]);
@@ -974,8 +974,8 @@ static int get_option(int argc, char *argv[]) {
     printf("normalizing intensities to mean background level\n");
   } else if (!stricmp(option, "nsamples") || !stricmp(option, "samples")) {
     max_samples = atoi(argv[2]);
-    normalize = 1;
-    nargs = 1;
+    normalize   = 1;
+    nargs       = 1;
     printf("normalizing profiles to have %d samples\n", max_samples);
   } else if (!stricmp(option, "max")) {
     max_thick = atof(argv[2]);
@@ -993,17 +993,17 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "xform") || !stricmp(option, "at")) {
     xform_fname = argv[2];
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "transform file name is %s\n", xform_fname);
   } else if (!stricmp(option, "ait")) {
     xform_fname = argv[2];
-    invert = 1;
-    nargs = 1;
+    invert      = 1;
+    nargs       = 1;
     fprintf(stderr, "Inversely apply the transform given by %s\n", xform_fname);
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     fprintf(stderr, "debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "invert")) {
@@ -1043,13 +1043,13 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'W':
       parms.write_iterations = atoi(argv[2]);
-      nargs = 1;
+      nargs                  = 1;
       printf("using write iterations = %d\n", parms.write_iterations);
       Gdiag |= DIAG_WRITE;
       break;
     case 'M':
       parms.momentum = atof(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       printf("using momentum = %2.1f\n", parms.momentum);
       break;
     case 'Z':
@@ -1058,7 +1058,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'B':
       remove_bad = atoi(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("%sremoving bad intensity profiles\n", remove_bad ? "" : "not ");
       break;
     case 'E':
@@ -1068,7 +1068,7 @@ static int get_option(int argc, char *argv[]) {
       max_samples += 2 * extra;
       break;
     case 'C':
-      curv_fname = argv[2];
+      curv_fname  = argv[2];
       curv_thresh = atoi(argv[3]);
       printf("reading curvature from %s, and limiting calculations to %s "
              "regions\n",
@@ -1086,7 +1086,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'L':
       label_names[nlabels] = argv[2];
-      nargs = 1;
+      nargs                = 1;
       printf("limiting profile calculation to label %s\n",
              label_names[nlabels]);
       nlabels++;
@@ -1103,11 +1103,11 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'T':
       thresh = atof(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       break;
     case '?':
     case 'U':
@@ -1179,14 +1179,14 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
   float d, dx, dy, dz, dist, min_dist, nx, ny, nz, dot, sample_dist, thick,
       white_mode, gray_mode, min_gray, max_gray, csf_mode, min_gray_at_wm;
   double x, y, z, xv, yv, zv, val;
-  MRI *mri_profiles;
-  float scale = 1;
+  MRI *  mri_profiles;
+  float  scale = 1;
 
   MRIScomputeClassModes(mris, mri, &white_mode, &gray_mode, &csf_mode, nullptr,
                         nullptr, nullptr);
-  min_gray = (gray_mode + 2 * csf_mode) / 3;
+  min_gray       = (gray_mode + 2 * csf_mode) / 3;
   min_gray_at_wm = (1.5 * gray_mode + csf_mode) / 2.5;
-  max_gray = (2 * white_mode + gray_mode) / 3;
+  max_gray       = (2 * white_mode + gray_mode) / 3;
   printf("bounding GM intensities in [%2.0f,%2.0f]\n", min_gray, max_gray);
   mri_profiles =
       MRIallocSequence(mris->nvertices, 1, 1, MRI_FLOAT, max_samples);
@@ -1213,20 +1213,20 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
     nz = v->nz;
     if (vno == Gdiag_no)
       DiagBreak();
-    dx = v->x - v->origx;
-    dy = v->y - v->origy;
-    dz = v->z - v->origz;
-    pial_vno = vno;
-    min_dist = sqrt(dx * dx + dy * dy + dz * dz);
+    dx        = v->x - v->origx;
+    dy        = v->y - v->origy;
+    dz        = v->z - v->origz;
+    pial_vno  = vno;
+    min_dist  = sqrt(dx * dx + dy * dy + dz * dz);
     v->marked = 1;
-    vtotal = 1;
-    vlist[0] = vno;
-    min_n = 0;
+    vtotal    = 1;
+    vlist[0]  = vno;
+    min_n     = 0;
     for (ns = 1; ns <= nbhd_size; ns++) {
       vnum = 0; /* will be # of new neighbors added to list */
       for (i = 0; i < vtotal; i++) {
         VERTEX_TOPOLOGY const *const vnt = &mris->vertices_topology[vlist[i]];
-        VERTEX *const vn = &mris->vertices[vlist[i]];
+        VERTEX *const                vn  = &mris->vertices[vlist[i]];
         if (vn->ripflag)
           continue;
         if (vn->marked && vn->marked < ns - 1)
@@ -1236,11 +1236,11 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
           if (vn2->ripflag || vn2->marked) /* already processed */
             continue;
           vlist[vtotal + vnum++] = vnt->v[n];
-          vn2->marked = ns;
-          dx = vn2->x - v->origx;
-          dy = vn2->y - v->origy;
-          dz = vn2->z - v->origz;
-          dot = dx * nx + dy * ny + dz * nz;
+          vn2->marked            = ns;
+          dx                     = vn2->x - v->origx;
+          dy                     = vn2->y - v->origy;
+          dz                     = vn2->z - v->origz;
+          dot                    = dx * nx + dy * ny + dz * nz;
           if (dot < 0) /* must be outwards from surface */
             continue;
           dot = vn2->nx * nx + vn2->ny * ny + vn2->nz * nz;
@@ -1248,7 +1248,7 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
             continue;
           dist = sqrt(dx * dx + dy * dy + dz * dz);
           if (dist < min_dist) {
-            min_n = ns;
+            min_n    = ns;
             min_dist = dist;
             if (min_n == nbhd_size && DIAG_VERBOSE_ON)
               fprintf(stdout, "%d --> %d = %2.3f\n", vno, vnt->v[n], dist);
@@ -1271,18 +1271,18 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
     {
       VERTEX const *const vn2 = &mris->vertices[pial_vno];
       if (use_normal) {
-        dx = vn2->x - v->origx;
-        dy = vn2->y - v->origy;
-        dz = vn2->z - v->origz;
+        dx    = vn2->x - v->origx;
+        dy    = vn2->y - v->origy;
+        dz    = vn2->z - v->origz;
         thick = sqrt(dx * dx + dy * dy + dz * dz);
-        dx = v->nx;
-        dy = v->ny;
-        dz = v->nz;
+        dx    = v->nx;
+        dy    = v->ny;
+        dz    = v->nz;
       } else // use vector pointing from white to pial
       {
-        dx = vn2->x - v->origx;
-        dy = vn2->y - v->origy;
-        dz = vn2->z - v->origz;
+        dx    = vn2->x - v->origx;
+        dy    = vn2->y - v->origy;
+        dz    = vn2->z - v->origz;
         thick = sqrt(dx * dx + dy * dy + dz * dz);
         if (FZERO(thick) == 0) {
           dx /= thick;
@@ -1317,12 +1317,12 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
       if (norm_pial > 0 || norm_mid > 0 || norm_gw > 0) {
         if (norm_pial > 0) {
           scale = norm_pial;
-          d = thick;
+          d     = thick;
         } else if (norm_mid > 0) {
           scale = norm_mid;
-          d = thick / 2;
+          d     = thick / 2;
         } else {
-          d = 0;
+          d     = 0;
           scale = norm_gw;
         }
         x = v->origx + d * dx;
@@ -1365,12 +1365,12 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
       if (norm_pial > 0 || norm_mid > 0 || norm_gw > 0) {
         if (norm_pial > 0) {
           scale = norm_pial;
-          d = thick;
+          d     = thick;
         } else if (norm_mid > 0) {
           scale = norm_mid;
-          d = thick / 2;
+          d     = thick / 2;
         } else {
-          d = 0;
+          d     = 0;
           scale = norm_gw;
         }
         x = v->origx + d * dx;
@@ -1448,7 +1448,7 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->ripflag == 1) {
       int n;
       for (n = 0; n < vt->vnum; n++)
@@ -1464,20 +1464,20 @@ MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
   return (mri_profiles);
 }
 static MRI *MRIfitQuadratic(MRI *mri_profiles, MRI *mri_quad) {
-  int width, depth, height, x, y, z, wsize, whalf, t, tk, ti, nsamples;
-  float max_curv, a /*, b, c */;
+  int     width, depth, height, x, y, z, wsize, whalf, t, tk, ti, nsamples;
+  float   max_curv, a /*, b, c */;
   MATRIX *mX, *mXinv = nullptr;
-  VECTOR *vY, *vP = nullptr;
+  VECTOR *vY, *vP    = nullptr;
   max_curv = 0;
 
   wsize = 5;
   whalf = (wsize - 1) / 2;
-  mX = MatrixAlloc(wsize, 3, MATRIX_REAL);
-  vY = VectorAlloc(wsize, MATRIX_REAL);
+  mX    = MatrixAlloc(wsize, 3, MATRIX_REAL);
+  vY    = VectorAlloc(wsize, MATRIX_REAL);
 
-  width = mri_profiles->width;
-  height = mri_profiles->height;
-  depth = mri_profiles->depth;
+  width    = mri_profiles->width;
+  height   = mri_profiles->height;
+  depth    = mri_profiles->depth;
   nsamples = mri_profiles->nframes;
   if (mri_quad == nullptr) {
     mri_quad = MRIalloc(width, height, depth, MRI_FLOAT);
@@ -1492,7 +1492,7 @@ static MRI *MRIfitQuadratic(MRI *mri_profiles, MRI *mri_quad) {
         max_curv = 0;
         for (t = whalf; t < nsamples - whalf; t++) {
           for (tk = -whalf; tk <= whalf; tk++) {
-            ti = t + tk;
+            ti                                  = t + tk;
             *MATRIX_RELT(mX, tk + whalf + 1, 1) = tk * tk;
             *MATRIX_RELT(mX, tk + whalf + 1, 2) = tk;
             *MATRIX_RELT(mX, tk + whalf + 1, 3) = 1.0f;
@@ -1504,7 +1504,7 @@ static MRI *MRIfitQuadratic(MRI *mri_profiles, MRI *mri_quad) {
           if (mXinv == nullptr)
             continue;
           vP = MatrixMultiply(mXinv, vY, vP);
-          a = RVECTOR_ELT(vP, 1);
+          a  = RVECTOR_ELT(vP, 1);
           //          b = RVECTOR_ELT(vP, 2) ;
           //          c = RVECTOR_ELT(vP, 3);
           if (a > max_curv)
@@ -1518,17 +1518,17 @@ static MRI *MRIfitQuadratic(MRI *mri_profiles, MRI *mri_quad) {
   return (mri_quad);
 }
 static MRI *MRIfitPolynomial(MRI *mri_profiles, MRI *mri_poly, int order) {
-  int width, depth, height, x, y, z, i, p;
+  int     width, depth, height, x, y, z, i, p;
   MATRIX *mX, *mXinv = nullptr;
-  VECTOR *vY, *vP = nullptr;
-  double d;
+  VECTOR *vY, *vP    = nullptr;
+  double  d;
 
   mX = MatrixAlloc(mri_profiles->nframes, order + 1, MATRIX_REAL);
   vY = VectorAlloc(mri_profiles->nframes, MATRIX_REAL);
 
-  width = mri_profiles->width;
+  width  = mri_profiles->width;
   height = mri_profiles->height;
-  depth = mri_profiles->depth;
+  depth  = mri_profiles->depth;
   if (mri_poly == nullptr) {
     mri_poly = MRIallocSequence(width, height, depth, MRI_FLOAT, order + 1);
     MRIcopyHeader(mri_profiles, mri_poly);
@@ -1568,10 +1568,10 @@ static MRI *MRIfitPolynomial(MRI *mri_profiles, MRI *mri_poly, int order) {
 }
 static int remove_bad_profiles(MRI_SURFACE *mris, MRI *mri_profiles, MRI *mri,
                                float border_mm) {
-  int nvox, vno, i, good, unknown_index, med_index;
+  int     nvox, vno, i, good, unknown_index, med_index;
   VERTEX *v;
-  double xv, yv, zv;
-  int annot_index;
+  double  xv, yv, zv;
+  int     annot_index;
 
   if (MRISreadAnnotation(mris, "ad_aparc") != NO_ERROR) {
     if (MRISreadAnnotation(mris, "aparc") != NO_ERROR)
@@ -1619,20 +1619,20 @@ static float *mrisComputeWhiteMatterIntensities(MRI_SURFACE *mris, MRI *mri,
                                                 float wsize_mm, float *norm,
                                                 int navgs, MRI *mri_aseg,
                                                 float mm_border) {
-  int vno, whalf, num, xk, yk, zk, i, whalf_orig, label, erosions;
+  int     vno, whalf, num, xk, yk, zk, i, whalf_orig, label, erosions;
   VERTEX *v;
-  MRI *mri_interior;
+  MRI *   mri_interior;
   VECTOR *v1, *v2;
   MATRIX *m_vox2vox_aseg, *m_vox2vox;
-  float avg_wm, res;
-  double xv, yv, zv, xi, yi, zi, val;
+  float   avg_wm, res;
+  double  xv, yv, zv, xi, yi, zi, val;
 
   MRISsaveVertexPositions(mris, TMP_VERTICES);
   MRISrestoreVertexPositions(mris, WHITE_VERTICES);
   MRIScomputeMetricProperties(mris);
-  res = MAX(0.5, mri->xsize / 2);
+  res          = MAX(0.5, mri->xsize / 2);
   mri_interior = MRISfillInterior(mris, res, nullptr);
-  erosions = MAX(nint(1.5 / mri_interior->xsize),
+  erosions     = MAX(nint(1.5 / mri_interior->xsize),
                  nint(mm_border / mri_interior->xsize));
   for (i = 0; i < erosions; i++)
     MRIerode(mri_interior, mri_interior); // avoid partial volume voxels.
@@ -1650,8 +1650,8 @@ static float *mrisComputeWhiteMatterIntensities(MRI_SURFACE *mris, MRI *mri,
     m_vox2vox_aseg = MRIgetVoxelToVoxelXform(mri_interior, mri_aseg);
   else
     m_vox2vox_aseg = nullptr;
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -1724,10 +1724,10 @@ static float *mrisComputeWhiteMatterIntensities(MRI_SURFACE *mris, MRI *mri,
 int MRISsampleFaceNormals(MHT *mht, MRI_SURFACE *mris, double x, double y,
                           double z, int which, float *px, float *py,
                           float *pz) {
-  float d, dtotal, dx, dy, dz, xc, yc, zc;
-  int n, fno;
-  double fdist;
-  FACE *face;
+  float   d, dtotal, dx, dy, dz, xc, yc, zc;
+  int     n, fno;
+  double  fdist;
+  FACE *  face;
   VERTEX *v;
 
   MHTfindClosestFaceGeneric(mht, mris, x, y, z, 1000, -1, -1, &face, &fno,
@@ -1769,9 +1769,9 @@ int MRISsampleFaceNormals(MHT *mht, MRI_SURFACE *mris, double x, double y,
 }
 static MRI *MRISmeasureCorticalIntensityProfiles(MRI_SURFACE *mris, MRI *mri,
                                                  int nsamples) {
-  MRI *mri_profiles;
-  int vno, n;
-  double del, dist, dx, dy, dz, len, xv, yv, zv, x, y, z, val;
+  MRI *   mri_profiles;
+  int     vno, n;
+  double  del, dist, dx, dy, dz, len, xv, yv, zv, x, y, z, val;
   VERTEX *v;
 
   mri_profiles = MRIallocSequence(mris->nvertices, 1, 1, MRI_FLOAT, nsamples);
@@ -1782,9 +1782,9 @@ static MRI *MRISmeasureCorticalIntensityProfiles(MRI_SURFACE *mris, MRI *mri,
       DiagBreak();
     if (v->ripflag)
       continue;
-    dx = v->pialx - v->whitex;
-    dy = v->pialy - v->whitey;
-    dz = v->pialz - v->whitez;
+    dx  = v->pialx - v->whitex;
+    dy  = v->pialy - v->whitey;
+    dz  = v->pialz - v->whitez;
     len = sqrt(dx * dx + dy * dy + dz * dz);
     if (len < 0.01)
       continue;
@@ -1808,10 +1808,10 @@ static MRI *MRISmeasureCorticalIntensityProfiles(MRI_SURFACE *mris, MRI *mri,
 static MRI *MRISmeasureNormalCorticalIntensityProfiles(MRI_SURFACE *mris,
                                                        MRI *mri, double dist_in,
                                                        double dist_out,
-                                                       int nsamples) {
-  MRI *mri_profiles;
-  int vno, n;
-  double del, dist, dx, dy, dz, len, xv, yv, zv, x, y, z, val;
+                                                       int    nsamples) {
+  MRI *   mri_profiles;
+  int     vno, n;
+  double  del, dist, dx, dy, dz, len, xv, yv, zv, x, y, z, val;
   VERTEX *v;
 
   mri_profiles = MRIallocSequence(mris->nvertices, 1, 1, MRI_FLOAT, nsamples);
@@ -1822,9 +1822,9 @@ static MRI *MRISmeasureNormalCorticalIntensityProfiles(MRI_SURFACE *mris,
       DiagBreak();
     if (v->ripflag)
       continue;
-    dx = v->nx;
-    dy = v->ny;
-    dz = v->nz;
+    dx  = v->nx;
+    dy  = v->ny;
+    dz  = v->nz;
     len = sqrt(dx * dx + dy * dy + dz * dz);
     if (len < 0.01)
       continue;

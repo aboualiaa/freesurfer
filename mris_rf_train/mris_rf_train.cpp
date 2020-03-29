@@ -26,20 +26,20 @@
 
 #include "diag.h"
 #include "mrisurf.h"
+#include "rforest.h"
 #include "timer.h"
 #include "version.h"
-#include "rforest.h"
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
 #endif
 
 static char *class_names[] = {"Normal Cortex", "Dysplasia"};
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int          main(int argc, char *argv[]);
+static int   get_option(int argc, char *argv[]);
 
-const char *Progname;
-static void usage_exit(int code);
-static char *hemi = "lh";
+const char * Progname;
+static void  usage_exit(int code);
+static char *hemi      = "lh";
 static char *surf_name = "white";
 
 static char sdir[STRLEN];
@@ -47,18 +47,18 @@ static char sdir[STRLEN];
 #define MAX_OVERLAYS 100
 #define MAX_SUBJECTS 100
 
-static int ndilates = 3;
-static int nbhd_size = 0;
-static MRI *mri_overlays[MAX_SUBJECTS][MAX_OVERLAYS];
+static int          ndilates  = 3;
+static int          nbhd_size = 0;
+static MRI *        mri_overlays[MAX_SUBJECTS][MAX_OVERLAYS];
 static MRI_SURFACE *mris[MAX_SUBJECTS];
-static int noverlays = 0;
-static char *overlay_names[MAX_OVERLAYS];
+static int          noverlays = 0;
+static char *       overlay_names[MAX_OVERLAYS];
 
 static char *cortex_label_name = "cortex";
-static char *label_name = "FCD";
+static char *label_name        = "FCD";
 
-static int ntrees = 40;
-static int max_depth = 12;
+static int   ntrees            = 40;
+static int   max_depth         = 12;
 static float training_fraction = .5;
 
 #define ARGC_OFFSET 1
@@ -69,13 +69,13 @@ static int assemble_training_data_and_free_mris(
 
 int main(int argc, char *argv[]) {
   char **av, *cp, fname[STRLEN], *subject, *out_fname;
-  int ac, nargs, msec, minutes, n, seconds, nsubjects, i, sno, nfeatures,
+  int    ac, nargs, msec, minutes, n, seconds, nsubjects, i, sno, nfeatures,
       correct;
-  Timer start;
-  LABEL *cortex_label, *training_label;
+  Timer          start;
+  LABEL *        cortex_label, *training_label;
   RANDOM_FOREST *rf;
-  double **training_data;
-  int *training_classes, ntraining, n_omp_threads;
+  double **      training_data;
+  int *          training_classes, ntraining, n_omp_threads;
 
   nargs = handleVersionOption(argc, argv, "mris_rf_train");
   if (nargs && argc - nargs == 1)
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
   printf("training random forest classifier using %d subjects\n", nsubjects);
   for (n = ARGC_OFFSET; n < argc - 1; n++) {
     subject = argv[n];
-    sno = n - ARGC_OFFSET;
+    sno     = n - ARGC_OFFSET;
     printf("processing subject %s: %d of %d\n", subject, sno + 1, nsubjects);
 
     sprintf(fname, "%s/%s/label/lh.%s.label", sdir, subject, label_name);
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
   }
 
   nfeatures = noverlays * (nbhd_size + 1);
-  rf = RFalloc(ntrees, nfeatures, 2, max_depth, class_names, 100);
+  rf        = RFalloc(ntrees, nfeatures, 2, max_depth, class_names, 100);
   rf->feature_names = (char **)calloc(nfeatures, sizeof(char *));
   for (i = 0; i < noverlays; i++) {
     rf->feature_names[i] =
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
   out_fname = argv[argc - 1];
   printf("writing output to %s\n", out_fname);
   RFwrite(rf, out_fname);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -257,19 +257,19 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'L':
       label_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("using label %s to define FCD\n", label_name);
       break;
     case 'N':
       nbhd_size = atof(argv[2]);
-      nargs = 1;
+      nargs     = 1;
       printf("using nbhd_size = %d\n", nbhd_size);
       if (nbhd_size > 0)
         ErrorExit(ERROR_UNSUPPORTED, "nsize>0 not supported yet", nbhd_size);
       break;
     case 'T':
       ntrees = atoi(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       printf("training %d trees\n", ntrees);
       break;
     default:
@@ -297,7 +297,7 @@ static int assemble_training_data_and_free_mris(
     MRI_SURFACE *mris[MAX_SUBJECTS],
     MRI *mri_overlays[MAX_SUBJECTS][MAX_OVERLAYS], int nsubjects, int noverlays,
     int **ptraining_classes, double ***ptraining_data, int *pntraining) {
-  int sno, i, ntraining, *training_classes, x, y, z, f, vno, tno;
+  int      sno, i, ntraining, *training_classes, x, y, z, f, vno, tno;
   double **training_data;
 
   for (ntraining = sno = 0; sno < nsubjects; sno++)
@@ -328,7 +328,7 @@ static int assemble_training_data_and_free_mris(
             if (mris[sno]->vertices[vno].ripflag)
               continue; // not in cortex
             training_classes[tno] = mris[sno]->vertices[vno].marked;
-            training_data[tno] = (double *)calloc(noverlays, sizeof(double));
+            training_data[tno]    = (double *)calloc(noverlays, sizeof(double));
             if (training_data[tno] == nullptr)
               ErrorExit(
                   ERROR_NOFILE,
@@ -345,9 +345,9 @@ static int assemble_training_data_and_free_mris(
     MRISfree(&mris[sno]);
   }
 
-  *pntraining = ntraining;
+  *pntraining        = ntraining;
   *ptraining_classes = training_classes;
-  *ptraining_data = training_data;
+  *ptraining_data    = training_data;
 
   return (NO_ERROR);
 }

@@ -23,16 +23,16 @@
  *
  */
 
+#include "cma.h"
+#include "cmdargs.h"
+#include "diag.h"
 #include "fio.h"
 #include "gcamorph.h"
 #include "mri_identify.h"
-#include "diag.h"
 #include "version.h"
-#include "cmdargs.h"
-#include "cma.h"
 
 static void do_file(char *fname);
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -41,74 +41,73 @@ static void print_version();
 
 static char vcid[] = "$Id: mri_info.c,v 1.87 2014/11/20 23:46:54 greve Exp $";
 
-const char *Progname;
+const char * Progname;
 static char *inputlist[100];
-static int nthinput = 0;
-static int PrintTR = 0;
-static int PrintTE = 0;
-static int PrintTI = 0;
-static int PrintFlipAngle = 0;
-static int PrintFlipAngleDeg = 0;
-static int PrintPEDir = 0;
-static int PrintCRes = 0;
-static int PrintType = 0;
-static int PrintConformed = 0;
-static int PrintColorLookupTable = 0;
-static int PrintConformedToMin = 0;
-static int PrintIs1mmIso = 0;
-static int PrintRRes = 0;
-static int PrintSRes = 0;
-static int PrintVoxVol = 0;
-static int PrintNCols = 0;
-static int PrintNRows = 0;
-static int PrintNSlices = 0;
-static int PrintDim = 0;
-static int PrintRes = 0;
-static int PrintDOF = 0;
-static int PrintNFrames = 0;
-static int PrintMidFrame = 0;
-static int PrintFormat = 0;
-static int PrintColDC = 0;
-static int PrintRowDC = 0;
-static int PrintSliceDC = 0;
-static int PrintVox2RAS = 0;
-static int PrintRAS2Vox = 0;
-static int PrintRASGood = 0;
-static int PrintVox2RAStkr = 0;
-static int PrintRAS2Voxtkr = 0;
-static int PrintVox2RASfsl = 0;
-static int PrintTkr2Scanner = 0;
-static int PrintScanner2Tkr = 0;
-static int PrintDet = 0;
-static int PrintOrientation = 0;
-static int PrintSliceDirection = 0;
-static int PrintCRAS = 0;
-static int PrintCenter = 0;
-static int PrintP0 = 0;
-static int PrintEntropy = 0;
-static int PrintVoxVolSum = 0;
-static int PrintStats = 0;
-static int PrintVoxel = 0;
-static int PrintAutoAlign = 0;
-static int PrintCmds = 0;
-static int PrintDump = 0;
-static int VoxelCRS[3];
+static int   nthinput              = 0;
+static int   PrintTR               = 0;
+static int   PrintTE               = 0;
+static int   PrintTI               = 0;
+static int   PrintFlipAngle        = 0;
+static int   PrintFlipAngleDeg     = 0;
+static int   PrintPEDir            = 0;
+static int   PrintCRes             = 0;
+static int   PrintType             = 0;
+static int   PrintConformed        = 0;
+static int   PrintColorLookupTable = 0;
+static int   PrintConformedToMin   = 0;
+static int   PrintIs1mmIso         = 0;
+static int   PrintRRes             = 0;
+static int   PrintSRes             = 0;
+static int   PrintVoxVol           = 0;
+static int   PrintNCols            = 0;
+static int   PrintNRows            = 0;
+static int   PrintNSlices          = 0;
+static int   PrintDim              = 0;
+static int   PrintRes              = 0;
+static int   PrintDOF              = 0;
+static int   PrintNFrames          = 0;
+static int   PrintMidFrame         = 0;
+static int   PrintFormat           = 0;
+static int   PrintColDC            = 0;
+static int   PrintRowDC            = 0;
+static int   PrintSliceDC          = 0;
+static int   PrintVox2RAS          = 0;
+static int   PrintRAS2Vox          = 0;
+static int   PrintRASGood          = 0;
+static int   PrintVox2RAStkr       = 0;
+static int   PrintRAS2Voxtkr       = 0;
+static int   PrintVox2RASfsl       = 0;
+static int   PrintTkr2Scanner      = 0;
+static int   PrintScanner2Tkr      = 0;
+static int   PrintDet              = 0;
+static int   PrintOrientation      = 0;
+static int   PrintSliceDirection   = 0;
+static int   PrintCRAS             = 0;
+static int   PrintCenter           = 0;
+static int   PrintP0               = 0;
+static int   PrintEntropy          = 0;
+static int   PrintVoxVolSum        = 0;
+static int   PrintStats            = 0;
+static int   PrintVoxel            = 0;
+static int   PrintAutoAlign        = 0;
+static int   PrintCmds             = 0;
+static int   PrintDump             = 0;
+static int   VoxelCRS[3];
 static FILE *fpout;
-static int PrintToFile = 0;
-static char *outfile = nullptr;
-static int debug = 0;
-static int intype = MRI_VOLUME_TYPE_UNKNOWN;
-static char *intypestr = nullptr;
-int ZeroCRAS = 0;
+static int   PrintToFile = 0;
+static char *outfile     = nullptr;
+static int   debug       = 0;
+static int   intype      = MRI_VOLUME_TYPE_UNKNOWN;
+static char *intypestr   = nullptr;
+int          ZeroCRAS    = 0;
 
 /***-------------------------------------------------------****/
 int main(int argc, char *argv[]) {
   int nargs, index;
 
   nargs = handleVersionOption(argc, argv, "mri_info");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -150,7 +149,7 @@ int main(int argc, char *argv[]) {
 
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1) {
@@ -290,12 +289,12 @@ static int parse_commandline(int argc, char **argv) {
       PrintCmds = 1;
     } else if (!strcasecmp(option, "--o")) {
       PrintToFile = 1;
-      outfile = pargv[0];
+      outfile     = pargv[0];
       nargc--;
       pargv++;
     } else if (!strcasecmp(option, "-it") || !strcasecmp(option, "--in_type")) {
       intypestr = pargv[0];
-      intype = string_to_type(intypestr);
+      intype    = string_to_type(intypestr);
       nargc--;
       pargv++;
     } else if (!strcasecmp(option, "--voxel")) {
@@ -442,13 +441,13 @@ int PrettyMatrixPrint(MATRIX *mat) {
 
 /***-------------------------------------------------------****/
 static void do_file(char *fname) {
-  MRI *mri;
-  MATRIX *m, *minv, *m2, *m2inv, *p;
-  int r, c, s, f;
-  char ostr[5], *ext;
+  MRI *      mri;
+  MATRIX *   m, *minv, *m2, *m2inv, *p;
+  int        r, c, s, f;
+  char       ostr[5], *ext;
   GCA_MORPH *gcam;
   ostr[4] = '\0';
-  ext = fio_extension(fname);
+  ext     = fio_extension(fname);
   if (ext == nullptr)
     ErrorExit(ERROR_UNSUPPORTED, "%s: could not parse extension from %s",
               Progname, fname);
@@ -687,13 +686,13 @@ static void do_file(char *fname) {
     return;
   }
   if (PrintCenter) {
-    m = MRIgetVoxelToRasXform(mri);
-    p = MatrixAlloc(4, 1, MATRIX_REAL);
+    m             = MRIgetVoxelToRasXform(mri);
+    p             = MatrixAlloc(4, 1, MATRIX_REAL);
     p->rptr[1][1] = (mri->width - 1.0) / 2.0;
     p->rptr[2][1] = (mri->height - 1.0) / 2.0;
     p->rptr[3][1] = (mri->depth - 1.0) / 2.0;
     p->rptr[4][1] = 1;
-    m2 = MatrixMultiply(m, p, NULL);
+    m2            = MatrixMultiply(m, p, NULL);
     fprintf(fpout, "%g %g %g\n", m2->rptr[1][1], m2->rptr[2][1],
             m2->rptr[3][1]);
     MatrixFree(&m);
@@ -729,7 +728,7 @@ static void do_file(char *fname) {
     return;
   }
   if (PrintRAS2Vox) {
-    m = MRIgetVoxelToRasXform(mri);
+    m    = MRIgetVoxelToRasXform(mri);
     minv = MatrixInverse(m, nullptr);
     for (r = 1; r <= 4; r++) {
       for (c = 1; c <= 4; c++) {
@@ -765,10 +764,10 @@ static void do_file(char *fname) {
     return;
   }
   if (PrintTkr2Scanner) {
-    m = MRIxfmCRS2XYZ(mri, 0);
-    m2 = MRIxfmCRS2XYZtkreg(mri);
+    m     = MRIxfmCRS2XYZ(mri, 0);
+    m2    = MRIxfmCRS2XYZtkreg(mri);
     m2inv = MatrixInverse(m2, nullptr);
-    p = MatrixMultiply(m, m2inv, NULL);
+    p     = MatrixMultiply(m, m2inv, NULL);
     for (r = 1; r <= 4; r++) {
       for (c = 1; c <= 4; c++) {
         fprintf(fpout, "%10.5f ", p->rptr[r][c]);
@@ -841,23 +840,23 @@ static void do_file(char *fname) {
   }
   if (PrintEntropy) {
     HISTOGRAM *h = MRIhistogram(mri, 256);
-    double e = HISTOgetEntropy(h);
+    double     e = HISTOgetEntropy(h);
     fprintf(fpout, "%f\n", e);
     HISTOfree(&h);
     return;
   }
   if (PrintStats) {
-    int w = mri->width;
-    int h = mri->height;
-    int d = mri->depth;
-    int x, y, z;
+    int    w = mri->width;
+    int    h = mri->height;
+    int    d = mri->depth;
+    int    x, y, z;
     double min;
     double max;
     double mean;
     double val;
     for (f = 0; f < mri->nframes; f++) {
-      min = MRIgetVoxVal(mri, 0, 0, 0, f);
-      max = MRIgetVoxVal(mri, 0, 0, 0, f);
+      min  = MRIgetVoxVal(mri, 0, 0, 0, f);
+      max  = MRIgetVoxVal(mri, 0, 0, 0, f);
       mean = 0.0;
       for (z = 0; z < d; z++)
         for (y = 0; y < h; y++)
@@ -963,7 +962,7 @@ static void do_file(char *fname) {
     printf("\ntalairach xfm : %s\n", mri->transform_fname);
   } else {
     char *ext = nullptr;
-    ext = fio_extension(fname);
+    ext       = fio_extension(fname);
     if (ext) {
       if (strcmp(ext, "mgz") == 0 || strcmp(ext, "mgh") == 0) {
         printf("\ntalairach xfm : %s\n", mri->transform_fname);
@@ -989,7 +988,7 @@ static void do_file(char *fname) {
     int i;
     for (i = 0; i < mri->nframes; i++) {
       MRI_FRAME *frame;
-      int frame_valid = 0;
+      int        frame_valid = 0;
 
       frame = &mri->frames[i];
 

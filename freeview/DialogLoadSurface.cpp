@@ -1,9 +1,9 @@
 #include "DialogLoadSurface.h"
+#include "MainWindow.h"
 #include "ui_DialogLoadSurface.h"
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
-#include "MainWindow.h"
+#include <QMessageBox>
 #include <QSettings>
 
 DialogLoadSurface::DialogLoadSurface(QWidget *parent)

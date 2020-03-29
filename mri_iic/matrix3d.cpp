@@ -22,19 +22,19 @@
  *
  */
 
-#include <vnl/vnl_matrix.h>
-#include <iostream>
-#include <iomanip>
 #include <cstdlib>
+#include <iomanip>
+#include <iostream>
+#include <vnl/vnl_matrix.h>
 
 #include "matrix3d.h"
 
 // default constructor, creates matrix with all dimentions 0 and NULL data
 Matrix3d::Matrix3d() {
-  data = NULL;
-  width = 0;
+  data   = NULL;
+  width  = 0;
   height = 0;
-  depth = 0;
+  depth  = 0;
 }
 
 // constructor that creates the matrix with specified dimensions
@@ -43,9 +43,9 @@ Matrix3d::Matrix3d(int rows, int cols, int slices) {
   for (int i = 0; i < slices; i++) {
     data[i] = new vnl_matrix<float>(rows, cols);
   }
-  width = cols;
+  width  = cols;
   height = rows;
-  depth = slices;
+  depth  = slices;
 }
 
 // destructor, deletes the array of matricies and all matricies within
@@ -60,9 +60,9 @@ Matrix3d::~Matrix3d() {
 
 // copy constructor, creates exact replica of other
 Matrix3d::Matrix3d(const Matrix3d &other) {
-  width = other.width;
+  width  = other.width;
   height = other.height;
-  depth = other.depth;
+  depth  = other.depth;
 
   data = new vnl_matrix<float> *[depth];
   for (int i = 0; i < depth; i++) {
@@ -82,9 +82,9 @@ Matrix3d &Matrix3d::operator=(const Matrix3d &other) {
       delete[] data;
     }
     // find new dimensions
-    width = other.width;
+    width  = other.width;
     height = other.height;
-    depth = other.depth;
+    depth  = other.depth;
 
     // create new matrix and copy data
     data = new vnl_matrix<float> *[depth];

@@ -22,18 +22,16 @@
  *
  */
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 extern "C" {
+#include "matrix.h"
 #include "mri.h"
 #include "transform.h"
-#include "matrix.h"
 
 const char *Progname = "surf2surf";
 }
-
-using namespace std;
 
 #define V4_LOAD(v, x, y, z, r)                                                 \
   (VECTOR_ELT(v, 1) = x, VECTOR_ELT(v, 2) = y, VECTOR_ELT(v, 3) = z,           \
@@ -41,23 +39,23 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
   if (argc < 4) {
-    cout << "surf2surf <surf> <dstvol> <xfm> <surfdst>" << endl;
+    std::cout << "surf2surf <surf> <dstvol> <xfm> <surfdst>" << std::endl;
     return -1;
   }
   LTA *lta = 0;
-  cout << "Reading xfm     from " << argv[3] << endl;
+  std::cout << "Reading xfm     from " << argv[3] << std::endl;
   if (!stricmp(argv[3], "ID")) // no xfm is given
   {
-    cout << "Just load identity ras-to-ras" << endl;
-    lta = LTAalloc(1, NULL);
+    std::cout << "Just load identity ras-to-ras" << std::endl;
+    lta       = LTAalloc(1, NULL);
     lta->type = LINEAR_RAS_TO_RAS;
   } else
     lta = LTAreadEx(argv[3]);
 
-  cout << "Reading surface from " << argv[1] << endl;
+  std::cout << "Reading surface from " << argv[1] << std::endl;
   MRIS *mris = MRISread(argv[1]);
   if (mris->vg.valid == 0) {
-    cout << "could not get the original volume info" << endl;
+    std::cout << "could not get the original volume info" << std::endl;
     return -1;
   }
   MRIS *mrisDst = MRISclone(mris);
@@ -66,7 +64,7 @@ int main(int argc, char *argv[]) {
                             MRI_VOLUME_TYPE_UNKNOWN);
   useVolGeomToMRI(&mris->vg, src);
 
-  cout << "Reading dstvol  from " << argv[2] << endl;
+  std::cout << "Reading dstvol  from " << argv[2] << std::endl;
   MRI *dst = MRIread(argv[2]);
   // modify geometry info
   getVolGeom(dst, &mrisDst->vg);
@@ -94,7 +92,7 @@ int main(int argc, char *argv[]) {
   MRIScomputeMetricProperties(mrisDst);
   MRISstoreCurrentPositions(mrisDst);
   // write it out
-  cout << "Writing surface to " << argv[4] << endl;
+  std::cout << "Writing surface to " << argv[4] << std::endl;
   MRISwrite(mrisDst, argv[4]);
 
   MatrixFree(&surf2surf);

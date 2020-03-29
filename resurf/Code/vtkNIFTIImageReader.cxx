@@ -14,17 +14,17 @@
 =========================================================================*/
 
 #include "vtkNIFTIImageReader.h"
-#include "vtkObjectFactory.h"
-#include "vtkImageData.h"
-#include "vtkPointData.h"
-#include "vtkDataArray.h"
 #include "vtkByteSwap.h"
-#include "vtkMatrix4x4.h"
-#include "vtkMath.h"
 #include "vtkCommand.h"
+#include "vtkDataArray.h"
 #include "vtkErrorCode.h"
+#include "vtkImageData.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkMath.h"
+#include "vtkMatrix4x4.h"
+#include "vtkObjectFactory.h"
+#include "vtkPointData.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "vtkVersion.h"
@@ -53,14 +53,14 @@ vtkNIFTIImageReader::vtkNIFTIImageReader() {
   for (int i = 0; i < 8; i++) {
     this->PixDim[i] = 1.0;
   }
-  this->TimeAsVector = false;
-  this->RescaleSlope = 1.0;
+  this->TimeAsVector     = false;
+  this->RescaleSlope     = 1.0;
   this->RescaleIntercept = 0.0;
-  this->QFac = 1.0;
-  this->QFormMatrix = nullptr;
-  this->SFormMatrix = nullptr;
-  this->NIFTIHeader = nullptr;
-  this->PlanarRGB = false;
+  this->QFac             = 1.0;
+  this->QFormMatrix      = nullptr;
+  this->SFormMatrix      = nullptr;
+  this->NIFTIHeader      = nullptr;
+  this->PlanarRGB        = false;
 }
 
 //----------------------------------------------------------------------------
@@ -233,7 +233,7 @@ char *vtkNIFTIImageReader::ReplaceExtension(const char *filename,
       ext2[0] == '.') {
     size_t n = strlen(filename);
     size_t m = n;
-    newname = new char[n + 4];
+    newname  = new char[n + 4];
     strcpy(newname, filename);
 
     // check for trailing .gz
@@ -264,10 +264,10 @@ char *vtkNIFTIImageReader::ReplaceExtension(const char *filename,
         if (m < n) {
           // try again without the ".gz"
           newname[m] = '\0';
-          n = m;
+          n          = m;
         } else {
           // try again with the ".gz"
-          newname[m] = '.';
+          newname[m]     = '.';
           newname[m + 1] = (isupper(newname[m - 3]) ? 'G' : 'g');
           newname[m + 2] = (isupper(newname[m - 3]) ? 'Z' : 'z');
           newname[m + 3] = '\0';
@@ -341,7 +341,7 @@ int vtkNIFTIImageReader::CanReadFile(const char *filename) {
   }
 
   // read and check the header
-  bool canRead = false;
+  bool           canRead = false;
   nifti_1_header hdr;
   int hsize = vtkNIFTIImageHeader::NIFTI1HeaderSize; // nifti_1 header size
   int rsize = gzread(file, &hdr, hsize);
@@ -363,9 +363,9 @@ int vtkNIFTIImageReader::CanReadFile(const char *filename) {
 
 //----------------------------------------------------------------------------
 int vtkNIFTIImageReader::RequestInformation(
-    vtkInformation *vtkNotUsed(request),
+    vtkInformation *       vtkNotUsed(request),
     vtkInformationVector **vtkNotUsed(inputVector),
-    vtkInformationVector *outputVector) {
+    vtkInformationVector * outputVector) {
   // Clear the error indicator.
   this->SetErrorCode(vtkErrorCode::NoError);
 
@@ -382,11 +382,11 @@ int vtkNIFTIImageReader::RequestInformation(
 #endif
 
   const char *filename = nullptr;
-  char *hdrname = nullptr;
+  char *      hdrname  = nullptr;
 
   if (this->FileNames) {
-    vtkIdType n = this->FileNames->GetNumberOfValues();
-    int headers = 0;
+    vtkIdType n       = this->FileNames->GetNumberOfValues();
+    int       headers = 0;
     for (vtkIdType i = 0; i < n; i++) {
       filename = this->FileNames->GetValue(i);
       // this checks for .hdr and .hdr.gz, case insensitive
@@ -435,13 +435,13 @@ int vtkNIFTIImageReader::RequestInformation(
   }
 
   // read and check the header
-  bool canRead = false;
-  int niftiVersion = 0;
-  nifti_1_header *hdr1 = new nifti_1_header;
-  nifti_2_header hdr2obj;
-  nifti_2_header *hdr2 = &hdr2obj;
-  const int hsize = vtkNIFTIImageHeader::NIFTI1HeaderSize;
-  int rsize = gzread(file, hdr1, hsize);
+  bool            canRead      = false;
+  int             niftiVersion = 0;
+  nifti_1_header *hdr1         = new nifti_1_header;
+  nifti_2_header  hdr2obj;
+  nifti_2_header *hdr2  = &hdr2obj;
+  const int       hsize = vtkNIFTIImageHeader::NIFTI1HeaderSize;
+  int             rsize = gzread(file, hdr1, hsize);
   if (rsize == hsize) {
     niftiVersion = vtkNIFTIImageReader::CheckNIFTIVersion(hdr1);
     if (niftiVersion >= 2) {
@@ -531,11 +531,11 @@ int vtkNIFTIImageReader::RequestInformation(
 
   if (niftiVersion > 0) {
     // pass rescale info to user (do not rescale in the reader)
-    this->RescaleSlope = hdr2->scl_slope;
+    this->RescaleSlope     = hdr2->scl_slope;
     this->RescaleIntercept = hdr2->scl_inter;
   } else {
     // rescale information not available for Analyze 7.5
-    this->RescaleSlope = 1.0;
+    this->RescaleSlope     = 1.0;
     this->RescaleIntercept = 0.0;
   }
 
@@ -582,12 +582,12 @@ int vtkNIFTIImageReader::RequestInformation(
                                    {NIFTI_TYPE_RGBA32, VTK_TYPE_UINT8, 4},
                                    {0, 0, 0}};
 
-  int scalarType = 0;
+  int scalarType    = 0;
   int numComponents = 0;
 
   for (int i = 0; typeMap[2] != nullptr; i++) {
     if (hdr2->datatype == typeMap[i][0]) {
-      scalarType = typeMap[i][1];
+      scalarType    = typeMap[i][1];
       numComponents = typeMap[i][2];
       break;
     }
@@ -624,7 +624,7 @@ int vtkNIFTIImageReader::RequestInformation(
 
   // copy dim for when RequestData is called
   for (int j = 0; j < 8; j++) {
-    this->Dim[j] = hdr2->dim[j];
+    this->Dim[j]    = hdr2->dim[j];
     this->PixDim[j] = hdr2->pixdim[j];
   }
 
@@ -840,8 +840,8 @@ int vtkNIFTIImageReader::RequestInformation(
     mmat[7] = hdr2->qoffset_y;
 
     // third row
-    mmat[8] = rmat[2][0];
-    mmat[9] = rmat[2][1];
+    mmat[8]  = rmat[2][0];
+    mmat[9]  = rmat[2][1];
     mmat[10] = rmat[2][2];
     mmat[11] = hdr2->qoffset_z;
 
@@ -883,8 +883,8 @@ int vtkNIFTIImageReader::RequestInformation(
     mmat[7] = hdr2->srow_y[3];
 
     // third row
-    mmat[8] = hdr2->srow_z[0] / hdr2->pixdim[1];
-    mmat[9] = hdr2->srow_z[1] / hdr2->pixdim[2];
+    mmat[8]  = hdr2->srow_z[0] / hdr2->pixdim[1];
+    mmat[9]  = hdr2->srow_z[1] / hdr2->pixdim[2];
     mmat[10] = hdr2->srow_z[2] / hdr2->pixdim[3];
     mmat[11] = hdr2->srow_z[3];
 
@@ -905,8 +905,8 @@ int vtkNIFTIImageReader::RequestInformation(
       // to compensate.
 
       // reverse the slice orientation vector
-      mmat[2] = -mmat[2];
-      mmat[6] = -mmat[6];
+      mmat[2]  = -mmat[2];
+      mmat[6]  = -mmat[6];
       mmat[10] = -mmat[10];
 
       // adjust the offset to compensate for changed slice ordering
@@ -960,11 +960,11 @@ int vtkNIFTIImageReader::RequestData(
   data->GetPointData()->GetScalars()->SetName("NIFTI");
 
   const char *filename = nullptr;
-  char *imgname = nullptr;
+  char *      imgname  = nullptr;
 
   if (this->FileNames) {
-    vtkIdType n = this->FileNames->GetNumberOfValues();
-    int headers = 0;
+    vtkIdType n       = this->FileNames->GetNumberOfValues();
+    int       headers = 0;
     for (vtkIdType i = 0; i < n; i++) {
       filename = this->FileNames->GetValue(i);
       // this checks for .hdr and .hdr.gz, case insensitive
@@ -1018,11 +1018,11 @@ int vtkNIFTIImageReader::RequestData(
                     (this->NIFTIHeader->GetDataType() == NIFTI_TYPE_RGB24 ||
                      this->NIFTIHeader->GetDataType() == NIFTI_TYPE_RGBA32));
 
-  int swapBytes = this->GetSwapBytes();
-  int scalarSize = data->GetScalarSize();
+  int swapBytes     = this->GetSwapBytes();
+  int scalarSize    = data->GetScalarSize();
   int numComponents = data->GetNumberOfScalarComponents();
-  int timeDim = (this->Dim[0] >= 4 ? this->Dim[4] : 1);
-  int vectorDim = (this->Dim[0] >= 5 ? this->Dim[5] : 1);
+  int timeDim       = (this->Dim[0] >= 4 ? this->Dim[4] : 1);
+  int vectorDim     = (this->Dim[0] >= 5 ? this->Dim[5] : 1);
   if (this->TimeAsVector) {
     vectorDim *= timeDim;
   }
@@ -1031,11 +1031,11 @@ int vtkNIFTIImageReader::RequestData(
   int outSizeY = extent[3] - extent[2] + 1;
   int outSizeZ = extent[5] - extent[4] + 1;
 
-  z_off_t fileVoxelIncr = scalarSize * numComponents / vectorDim;
-  z_off_t fileRowIncr = fileVoxelIncr * this->Dim[1];
-  z_off_t filePlaneIncr = fileRowIncr * this->Dim[2];
-  z_off_t fileSliceIncr = fileRowIncr * this->Dim[2];
-  z_off_t fileTimeIncr = fileSliceIncr * this->Dim[3];
+  z_off_t fileVoxelIncr  = scalarSize * numComponents / vectorDim;
+  z_off_t fileRowIncr    = fileVoxelIncr * this->Dim[1];
+  z_off_t filePlaneIncr  = fileRowIncr * this->Dim[2];
+  z_off_t fileSliceIncr  = fileRowIncr * this->Dim[2];
+  z_off_t fileTimeIncr   = fileSliceIncr * this->Dim[3];
   z_off_t fileVectorIncr = fileTimeIncr * this->Dim[4];
   if (this->TimeAsVector) {
     fileVectorIncr = fileTimeIncr;
@@ -1044,9 +1044,9 @@ int vtkNIFTIImageReader::RequestData(
   // planar RGB requires different increments
   int planarSize = 1; // if > 1, indicates planar RGB
   if (planarRGB) {
-    planarSize = numComponents / vectorDim;
+    planarSize    = numComponents / vectorDim;
     fileVoxelIncr = scalarSize;
-    fileRowIncr = fileVoxelIncr * this->Dim[1];
+    fileRowIncr   = fileVoxelIncr * this->Dim[1];
     filePlaneIncr = fileRowIncr * this->Dim[2];
   }
 
@@ -1068,7 +1068,7 @@ int vtkNIFTIImageReader::RequestData(
   }
 
   // special increment to handle planar RGB
-  vtkIdType planarOffset = 0;
+  vtkIdType planarOffset    = 0;
   vtkIdType planarEndOffset = 0;
   if (planarRGB) {
     planarOffset = scalarSize * numComponents;
@@ -1094,13 +1094,13 @@ int vtkNIFTIImageReader::RequestData(
 
   // read the data one row at a time, do planar-to-packed conversion
   // of vector components if NIFTI file has a vector dimension
-  int rowSize = fileVoxelIncr / scalarSize * outSizeX;
-  int t = 0; // counter for time
-  int c = 0; // counter for vector components
-  int j = 0; // counter for rows
-  int p = 0; // counter for planes (planar RGB)
-  int k = 0; // counter for slices
-  unsigned char *ptr = dataPtr;
+  int            rowSize = fileVoxelIncr / scalarSize * outSizeX;
+  int            t       = 0; // counter for time
+  int            c       = 0; // counter for vector components
+  int            j       = 0; // counter for rows
+  int            p       = 0; // counter for planes (planar RGB)
+  int            k       = 0; // counter for slices
+  unsigned char *ptr     = dataPtr;
 
   int errorCode = 0;
 
@@ -1140,8 +1140,8 @@ int vtkNIFTIImageReader::RequestData(
       rowBuffer = nullptr;
     } else {
       // write vector plane to packed vector component
-      unsigned char *tmpPtr = rowBuffer;
-      z_off_t skipOther = scalarSize * numComponents - fileVoxelIncr;
+      unsigned char *tmpPtr    = rowBuffer;
+      z_off_t        skipOther = scalarSize * numComponents - fileVoxelIncr;
       for (int i = 0; i < outSizeX; i++) {
         // write one vector component of one voxel
         z_off_t n = fileVoxelIncr;

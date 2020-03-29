@@ -26,10 +26,10 @@
 #ifndef FSPointSet_h
 #define FSPointSet_h
 
-#include <QObject>
-#include "vtkMatrix4x4.h"
 #include "CommonDataStruct.h"
+#include "vtkMatrix4x4.h"
 #include <QList>
+#include <QObject>
 #include <QVariantMap>
 
 #include "label.h"
@@ -37,8 +37,8 @@
 class FSVolume;
 
 struct ControlPoint {
-  double pt[3];
-  double value;
+  double      pt[3];
+  double      value;
   QVariantMap info; // enhanced fields
 };
 
@@ -59,7 +59,7 @@ public:
   void UpdateLabel(PointSet &points_in, FSVolume *vol_ref);
   void LabelToPointSet(PointSet &points_out, FSVolume *vol_ref);
 
-  bool ReadFromStringAsControlPoints(const QString &content);
+  bool    ReadFromStringAsControlPoints(const QString &content);
   QString WriteAsControlPointsToString();
 
   bool GetCentroidRASPosition(double *pos, FSVolume *ref_vol);

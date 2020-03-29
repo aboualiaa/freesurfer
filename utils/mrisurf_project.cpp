@@ -26,7 +26,7 @@ void mrisSphericalProjectXYZ(float xs, float ys, float zs, float *xd, float *yd,
                              float *zd) {
   double dist, lambda;
 
-  dist = sqrt(SQR(xs) + SQR(ys) + SQR(zs));
+  dist   = sqrt(SQR(xs) + SQR(ys) + SQR(zs));
   lambda = DEFAULT_RADIUS / dist;
 
   /* making sure things are stable : double projection */
@@ -34,10 +34,10 @@ void mrisSphericalProjectXYZ(float xs, float ys, float zs, float *xd, float *yd,
   *yd = ys * lambda;
   *zd = zs * lambda;
 
-  xs = *xd;
-  ys = *yd;
-  zs = *zd;
-  dist = sqrt(SQR(xs) + SQR(ys) + SQR(zs));
+  xs     = *xd;
+  ys     = *yd;
+  zs     = *zd;
+  dist   = sqrt(SQR(xs) + SQR(ys) + SQR(zs));
   lambda = DEFAULT_RADIUS / dist;
 
   *xd = xs * lambda;
@@ -46,7 +46,7 @@ void mrisSphericalProjectXYZ(float xs, float ys, float zs, float *xd, float *yd,
 }
 
 void mrisSphericalProjection(MRIS *mris) {
-  int n;
+  int     n;
   VERTEX *v;
   //    fprintf(stderr,"spherical projection\n");
   for (n = 0; n < mris->nvertices; n++) {
@@ -117,7 +117,7 @@ static MRIS *MRISprojectOntoSphereWkr(MRIS *mris, double r) {
     double const z = v->z, z2 = z * z;
 
     double const dist = sqrt(x2 + y2 + z2);
-    double const d = FZERO(dist) ? 0 : (1 - r / dist);
+    double const d    = FZERO(dist) ? 0 : (1 - r / dist);
 
     double const dx = d * x;
     double const dy = d * y;
@@ -176,8 +176,8 @@ void mrisAssignFaces(MRI_SURFACE *mris, MHT *mht, int which_vertices) {
 
         int fno;
     VERTEX *v;
-    double fdist;
-    FACE *face;
+    double  fdist;
+    FACE *  face;
 
     v = &mris->vertices[vno];
     if (v->ripflag)
@@ -213,9 +213,9 @@ void mrisAssignFaces(MRI_SURFACE *mris, MHT *mht, int which_vertices) {
   ------------------------------------------------------*/
 int MRISprojectOntoCylinder(MRI_SURFACE *mris, float radius) {
   VERTEX *v;
-  int k;
-  float x, y, z, x2, z2, dx, dz;
-  float d;
+  int     k;
+  float   x, y, z, x2, z2, dx, dz;
+  float   d;
 
   MRIScenter(mris, mris);
 
@@ -230,10 +230,12 @@ int MRISprojectOntoCylinder(MRI_SURFACE *mris, float radius) {
 
     d = (-1.0 + (float)radius / sqrt(x2 + z2));
     if (!std::isfinite(d)) {
-      ErrorPrintf(ERROR_BADPARM, "point (%2.2f,%2.2f,%2.2f) cannot be projected on cylinder", x, y, z);
+      ErrorPrintf(ERROR_BADPARM,
+                  "point (%2.2f,%2.2f,%2.2f) cannot be projected on cylinder",
+                  x, y, z);
     }
-    dx = d * x;
-    dz = d * z;
+    dx   = d * x;
+    dz   = d * z;
     v->x = x + dx;
     v->z = z + dz;
 
@@ -261,9 +263,9 @@ MRI_SURFACE *MRISprojectOntoEllipsoid(MRI_SURFACE *mris_src,
                                       MRI_SURFACE *mris_dst, float a, float b,
                                       float c) {
   VERTEX *v;
-  int k;
-  float x, y, z, x2, y2, z2, dx, dy, dz, a2, b2, c2, a4, b4, c4, a6, b6, c6;
-  float f, g, h, d, dist, avgdist = 0.0f;
+  int     k;
+  float   x, y, z, x2, y2, z2, dx, dy, dz, a2, b2, c2, a4, b4, c4, a6, b6, c6;
+  float   f, g, h, d, dist, avgdist = 0.0f;
 
   if (FZERO(a)) {
     a = DEFAULT_A;
@@ -331,10 +333,10 @@ MRI_SURFACE *MRISprojectOntoEllipsoid(MRI_SURFACE *mris_src,
     x2 = x * x;
     y2 = y * y;
     z2 = z * z;
-    f = x2 / a6 + y2 / b6 + z2 / c6;
-    g = 2 * (x2 / a4 + y2 / b4 + z2 / c4);
-    h = x2 / a2 + y2 / b2 + z2 / c2 - 1;
-    d = (-g + (float)sqrt((double)(g * g - 4 * f * h))) / (2 * f);
+    f  = x2 / a6 + y2 / b6 + z2 / c6;
+    g  = 2 * (x2 / a4 + y2 / b4 + z2 / c4);
+    h  = x2 / a2 + y2 / b2 + z2 / c2 - 1;
+    d  = (-g + (float)sqrt((double)(g * g - 4 * f * h))) / (2 * f);
     if (!std::isfinite(d)) {
       ErrorPrintf(ERROR_BADPARM,
                   "point (%2.2f,%2.2f,%2.2f) cannot be projected on ell "
@@ -343,9 +345,9 @@ MRI_SURFACE *MRISprojectOntoEllipsoid(MRI_SURFACE *mris_src,
 
       return (MRISradialProjectOntoEllipsoid(mris_src, mris_dst, a, b, c));
     }
-    dx = d * x / a2;
-    dy = d * y / b2;
-    dz = d * z / c2;
+    dx   = d * x / a2;
+    dy   = d * y / b2;
+    dz   = d * z / c2;
     v->x = x + dx;
     v->y = y + dy;
     v->z = z + dz;
@@ -381,9 +383,9 @@ MRI_SURFACE *MRISprojectOntoEllipsoid(MRI_SURFACE *mris_src,
 MRI_SURFACE *MRISradialProjectOntoEllipsoid(MRI_SURFACE *mris_src,
                                             MRI_SURFACE *mris_dst, float a,
                                             float b, float c) {
-  int vno;
+  int     vno;
   VERTEX *vsrc, *vdst;
-  float x0, y0, z0, x1, y1, z1, denom, asq_bsq, asq_csq, bsq_csq, x1sq, y1sq,
+  float   x0, y0, z0, x1, y1, z1, denom, asq_bsq, asq_csq, bsq_csq, x1sq, y1sq,
       z1sq, abc;
 
   if (FZERO(a)) {
@@ -396,20 +398,20 @@ MRI_SURFACE *MRISradialProjectOntoEllipsoid(MRI_SURFACE *mris_src,
     mris_dst = MRISclone(mris_src);
   }
 
-  x0 = mris_dst->xctr;
-  y0 = mris_dst->yctr;
-  z0 = mris_dst->zctr;
+  x0      = mris_dst->xctr;
+  y0      = mris_dst->yctr;
+  z0      = mris_dst->zctr;
   asq_bsq = a * a * b * b;
   bsq_csq = b * b * c * c;
   asq_csq = a * a * c * c;
-  abc = a * b * c;
+  abc     = a * b * c;
 
   for (vno = 0; vno < mris_src->nvertices; vno++) {
     vsrc = &mris_src->vertices[vno];
     vdst = &mris_dst->vertices[vno];
-    x1 = (vsrc->x - x0);
-    y1 = (vsrc->y - y0);
-    z1 = (vsrc->z - z0);
+    x1   = (vsrc->x - x0);
+    y1   = (vsrc->y - y0);
+    z1   = (vsrc->z - z0);
     x1sq = x1 * x1;
     y1sq = y1 * y1;
     z1sq = z1 * z1;

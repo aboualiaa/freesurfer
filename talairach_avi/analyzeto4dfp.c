@@ -23,12 +23,12 @@
  *
  */
 
+#include <Getifh.h>
+#include <endianio.h> /* includes <ANALYZE.h>	*/
+#include <float.h>
+#include <rec.h>
 #include <stdlib.h>
 #include <string.h>
-#include <float.h>
-#include <endianio.h> /* includes <ANALYZE.h>	*/
-#include <Getifh.h>
-#include <rec.h>
 
 #define MAXL 256
 
@@ -49,24 +49,24 @@ extern void flipz(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
 static char rcsid[] =
     "$Id: analyzeto4dfp.c,v 1.2 2007/05/05 00:00:06 nicks Exp $";
 int main(int argc, char *argv[]) {
-  FILE *fpimg, *fpout;
+  FILE *     fpimg, *fpout;
   struct dsr hdr; /* ANALYZE hdr */
-  char *str, command[MAXL], program[MAXL];
-  char imgroot[MAXL], outroot[MAXL];
-  char imgfile[MAXL], outfile[MAXL];
+  char *     str, command[MAXL], program[MAXL];
+  char       imgroot[MAXL], outroot[MAXL];
+  char       imgfile[MAXL], outfile[MAXL];
 
   /****************/
   /* image arrays */
   /****************/
-  float fmin = +FLT_MAX;
-  float fmax = -FLT_MAX;
-  float *imgf;
+  float          fmin = +FLT_MAX;
+  float          fmax = -FLT_MAX;
+  float *        imgf;
   unsigned char *imgu;
-  short *imgi;
-  float ROIScaleFactor = 0.0;
-  float voxsiz[3];
-  int imgdim[4], vdim, bytepix, orient = 0;
-  char control = '\0';
+  short *        imgi;
+  float          ROIScaleFactor = 0.0;
+  float          voxsiz[3];
+  int            imgdim[4], vdim, bytepix, orient = 0;
+  char           control = '\0';
 
   /***********/
   /* utility */
@@ -76,11 +76,11 @@ int main(int argc, char *argv[]) {
   /*********/
   /* flags */
   /*********/
-  int status = 0;
+  int status     = 0;
   int Weber_flag = 0;
-  int swab_flag = 0;
+  int swab_flag  = 0;
   int scale_flag = 0;
-  int O_flag = 0;
+  int O_flag     = 0;
   int xflag = 0, yflag = 0, zflag = 0;
 
   fprintf(stdout, "%s\n", rcsid);
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
           break;
         case '@':
           control = *str++;
-          *str = '\0';
+          *str    = '\0';
           break;
         case 'O':
           orient = atoi(str++);
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
   if (orient > 2 && orient < 6) { /* unflip according to Darren Weber */
     orient -= 3;
     hdr.hist.orient = orient;
-    Weber_flag = 1;
+    Weber_flag      = 1;
   }
 
   printf("dimensionality%6d\n", hdr.dime.dim[0]);
@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
       break;
     }
     if (scale_flag) {
-      ROIScaleFactor = hdr.dime.funused9;
+      ROIScaleFactor    = hdr.dime.funused9;
       hdr.dime.funused9 = 0.;
     }
     if (Weber_flag)

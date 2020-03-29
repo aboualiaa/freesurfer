@@ -23,7 +23,7 @@ public:
 
   /// retrieve frame by frame index
   aptr<ImageColorU> frame(int frameIndex);
-  aptr<ImageGrayU> frameGray(int frameIndex);
+  aptr<ImageGrayU>  frameGray(int frameIndex);
 
   /// the number of frames
   int length();
@@ -37,12 +37,12 @@ public:
 
 private:
   // internal data
-  CvCapture *m_cvCapture;
-  String m_imagePath;
+  CvCapture *   m_cvCapture;
+  String        m_imagePath;
   Array<String> m_imageList;
-  int m_width;
-  int m_height;
-  int m_length;
+  int           m_width;
+  int           m_height;
+  int           m_length;
 
   // disable copy constructor and assignment operator
   InputVideo(const InputVideo &x);

@@ -6,15 +6,15 @@ namespace pvl {
 
 // fixed-length equation structure
 struct FixedEquation9 {
-  int i1;
-  int i2;
-  int i3;
-  int i4;
-  int i5;
-  int i6;
-  int i7;
-  int i8;
-  int i9;
+  int   i1;
+  int   i2;
+  int   i3;
+  int   i4;
+  int   i5;
+  int   i6;
+  int   i7;
+  int   i8;
+  int   i9;
   float a1;
   float a2;
   float a3;
@@ -29,12 +29,12 @@ struct FixedEquation9 {
 
 // fixed-length equation structure
 struct FixedEquation6 {
-  int i1;
-  int i2;
-  int i3;
-  int i4;
-  int i5;
-  int i6;
+  int   i1;
+  int   i2;
+  int   i3;
+  int   i4;
+  int   i5;
+  int   i6;
   float a1;
   float a2;
   float a3;
@@ -46,11 +46,11 @@ struct FixedEquation6 {
 
 // fixed-length equation structure
 struct FixedEquation5 {
-  int i1;
-  int i2;
-  int i3;
-  int i4;
-  int i5;
+  int   i1;
+  int   i2;
+  int   i3;
+  int   i4;
+  int   i5;
   float a1;
   float a2;
   float a3;
@@ -64,8 +64,8 @@ struct FixedEquation5 {
 
 // variable-length equation structure
 struct VarEquation {
-  int termCount;
-  int index[MAX_TERM_COUNT];
+  int   termCount;
+  int   index[MAX_TERM_COUNT];
   float a[MAX_TERM_COUNT];
   float a1Inv;
 };
@@ -86,7 +86,7 @@ public:
 
   /// enable adaptive SOR
   inline void enableAdaptive(int adaptIterMask, float adaptUpdateThresh) {
-    m_adaptIterMask = adaptIterMask;
+    m_adaptIterMask     = adaptIterMask;
     m_adaptUpdateThresh = adaptUpdateThresh;
   }
 
@@ -133,23 +133,23 @@ private:
   void checkEquations();
 
   // equations
-  VectorF m_b;
-  VectorF m_x;
+  VectorF         m_b;
+  VectorF         m_x;
   FixedEquation5 *m_fixedEqn5;
   FixedEquation6 *m_fixedEqn6;
   FixedEquation9 *m_fixedEqn9;
-  VarEquation *m_varEqn;
-  int m_eqnCount;
-  int m_nextEqnIndex;
+  VarEquation *   m_varEqn;
+  int             m_eqnCount;
+  int             m_nextEqnIndex;
 
   // optimization parameters
-  int m_maxIter;
+  int   m_maxIter;
   float m_sorFactor;
-  int m_indent;
+  int   m_indent;
 
   // parameters for adaptive SOR; cuts short optimization of parameters that
   // aren't changing
-  int m_adaptIterMask;
+  int   m_adaptIterMask;
   float m_adaptUpdateThresh;
 
   // disable copy constructor and assignment operator

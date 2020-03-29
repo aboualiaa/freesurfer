@@ -21,16 +21,16 @@ public:
 
 protected:
   QRectF boundingRect() const;
-  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-             QWidget *widget);
+  void   paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget);
 
 private:
   BinaryTreeNode *source, *dest;
 
   QPointF sourcePoint;
   QPointF destPoint;
-  qreal arrowSize;
-  bool m_bHighlighted;
+  qreal   arrowSize;
+  bool    m_bHighlighted;
 };
 
 #endif // BINARYTREEEDGE_H

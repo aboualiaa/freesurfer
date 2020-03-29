@@ -22,23 +22,23 @@
  *
  */
 #include "ToolWindowMeasure.h"
-#include "ui_ToolWindowMeasure.h"
-#include "RenderView2D.h"
-#include "RenderView3D.h"
-#include "MainWindow.h"
-#include <QTimer>
-#include "Region2D.h"
-#include "SurfaceRegion.h"
-#include "SurfaceRegionGroups.h"
+#include "Interactor.h"
 #include "LayerCollection.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
-#include "Interactor.h"
-#include <QSettings>
+#include "MainWindow.h"
+#include "Region2D.h"
+#include "RenderView2D.h"
+#include "RenderView3D.h"
+#include "SurfaceRegion.h"
+#include "SurfaceRegionGroups.h"
+#include "ui_ToolWindowMeasure.h"
+#include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QFile>
+#include <QSettings>
 #include <QTextStream>
+#include <QTimer>
 
 ToolWindowMeasure::ToolWindowMeasure(QWidget *parent)
     : QWidget(parent), UIUpdateHelper(), ui(new Ui::ToolWindowMeasure) {
@@ -70,8 +70,8 @@ ToolWindowMeasure::ToolWindowMeasure(QWidget *parent)
               << ui->labelId << ui->labelGroup << ui->colorPickerGroup
               << ui->lineSeparator;
 
-  m_region = NULL;
-  m_surfaceRegion = NULL;
+  m_region           = NULL;
+  m_surfaceRegion    = NULL;
   m_bToUpdateWidgets = true;
 
   MainWindow *mainwnd = MainWindow::GetMainWindow();
@@ -164,9 +164,9 @@ void ToolWindowMeasure::SetSurfaceRegion(SurfaceRegion *reg) {
 void ToolWindowMeasure::UpdateWidgets() { m_bToUpdateWidgets = true; }
 
 QString ToolWindowMeasure::GetLabelStats() {
-  QString strg;
+  QString          strg;
   LayerCollection *lc = MainWindow::GetMainWindow()->GetLayerCollection("MRI");
-  LayerMRI *label = NULL, *mri = NULL;
+  LayerMRI *       label = NULL, *mri = NULL;
   for (int i = 0; i < lc->GetNumberOfLayers(); i++) {
     if (((LayerMRI *)lc->GetLayer(i))->GetProperty()->GetColorMap() ==
         LayerPropertyMRI::LUT) {
@@ -184,12 +184,12 @@ QString ToolWindowMeasure::GetLabelStats() {
   if (label && mri) {
     int nPlane = MainWindow::GetMainWindow()->GetMainViewId();
     if (nPlane < 3) {
-      std::vector<int> ids, numbers;
+      std::vector<int>    ids, numbers;
       std::vector<double> means, sds;
       mri->GetLabelStats(label, nPlane, ids, numbers, means, sds);
       strg = "Id \tCount \tMean \t+/-SD\n";
       for (size_t i = 0; i < ids.size(); i++) {
-        QString snum = QString("%1").arg(numbers[i], -4);
+        QString snum  = QString("%1").arg(numbers[i], -4);
         QString smean = QString("%1").arg(means[i], -4);
         strg += QString("%1 \t%2 \t%3 \t%4\n")
                     .arg(ids[i])
@@ -223,7 +223,7 @@ void ToolWindowMeasure::OnIdle() {
   ui->actionLabel->setChecked(view->GetAction() == Interactor::MM_Label);
   ui->actionContour->setChecked(view->GetAction() ==
                                 Interactor::MM_SurfaceRegion);
-  bool bLabelExist = false;
+  bool             bLabelExist = false;
   LayerCollection *col_mri =
       MainWindow::GetMainWindow()->GetLayerCollection("MRI");
   for (int i = 0; i < col_mri->GetNumberOfLayers(); i++) {

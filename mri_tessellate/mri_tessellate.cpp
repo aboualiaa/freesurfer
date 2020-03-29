@@ -66,12 +66,11 @@
 //    MRIvoxelToSurfaceRAS()
 //
 
+#include "cma.h"
+#include "diag.h"
 #include "fio.h"
 #include "tags.h"
-#include "diag.h"
 #include "version.h"
-#include "tags.h"
-#include "cma.h"
 
 static char vcid[] =
     "$Id: mri_tessellate.c,v 1.39 2016/07/20 21:05:04 zkaufman Exp $";
@@ -79,56 +78,53 @@ static char vcid[] =
 /////////////////////////////////////////////
 #define MAXV 10000000
 static long MAXVERTICES = MAXV;
-static long MAXFACES = (2 * MAXV);
+static long MAXFACES    = (2 * MAXV);
 
 ////////////////////////////////////////////////
 // gather globals
 static int remove_non_hippo_voxels(MRI *mri);
-static int all_flag = 0;
-static int hippo_flag = 0;
+static int all_flag     = 0;
+static int hippo_flag   = 0;
 static int type_changed = 0;
 // orig->surface RAS is not MRIvoxelToWorld(), but more involved one
 int compatibility = 1;
 ////////////////////////////////////////////////
 
 tface_type *face;
-int *face_index_table0;
-int *face_index_table1;
+int *       face_index_table0;
+int *       face_index_table1;
 
 tvertex_type *vertex;
-int *vertex_index_table;
+int *         vertex_index_table;
 
 static int value;
 
-int main(int argc, char *argv[]) ;
-static MRI *read_images(char *fpref) ;
-static void add_face(MRI *mri, int imnr, int i, int j, int f, int prev_flag) ;
-static int add_vertex(MRI *mri, int imnr, int i, int j) ;
-static int facep(MRI *mri, int im0, int i0, int j0, int im1, int i1, int j1) ;
-static void check_face(MRI *mri, int im0, int i0, int j0,
-                       int im1, int i1,int j1,
-                       int f, int n, int v_ind, int prev_flag) ;
-static void make_surface(MRI *mri) ;
-static void write_binary_surface(char *fname, MRI *mri, std::string& cmdline) ;
-static int get_option(int argc, char *argv[]) ;
+int         main(int argc, char *argv[]);
+static MRI *read_images(char *fpref);
+static void add_face(MRI *mri, int imnr, int i, int j, int f, int prev_flag);
+static int  add_vertex(MRI *mri, int imnr, int i, int j);
+static int  facep(MRI *mri, int im0, int i0, int j0, int im1, int i1, int j1);
+static void check_face(MRI *mri, int im0, int i0, int j0, int im1, int i1,
+                       int j1, int f, int n, int v_ind, int prev_flag);
+static void make_surface(MRI *mri);
+static void write_binary_surface(char *fname, MRI *mri, std::string &cmdline);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(int code);
 
 const char *Progname;
-int UseMRIStessellate = 0;
+int         UseMRIStessellate = 0;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   char ofpref[STRLEN] /*,*data_dir*/;
-  int  nargs ;
+  int  nargs;
   MRI *mri = 0;
-  int xnum, ynum, numimg;
+  int  xnum, ynum, numimg;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_tessellate");
 
   nargs = handleVersionOption(argc, argv, "mri_tessellate");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -187,7 +183,7 @@ int main(int argc, char *argv[])
 
   if (UseMRIStessellate) {
     MRIS *mris;
-    int err;
+    int   err;
     printf("Using MRIStessellate())\n");
     mris = MRIStessellate(mri, value, all_flag);
     if (mris == nullptr) {
@@ -202,8 +198,8 @@ int main(int argc, char *argv[])
   }
 
   // 4 connected (6 in 3D) neighbors
-  xnum = mri->width;
-  ynum = mri->height;
+  xnum   = mri->width;
+  ynum   = mri->height;
   numimg = mri->depth;
 
   face = (tface_type *)lcalloc(MAXFACES, sizeof(tface_type));
@@ -261,10 +257,10 @@ static void add_face(MRI *mri, int imnr, int i, int j, int f, int prev_flag) {
     face_index_table1[pack] = face_index;
   }
   face[face_index].imnr = imnr; // z
-  face[face_index].i = i;       // y
-  face[face_index].j = j;       // x
-  face[face_index].f = f;
-  face[face_index].num = 0;
+  face[face_index].i    = i;    // y
+  face[face_index].j    = j;    // x
+  face[face_index].f    = f;
+  face[face_index].num  = 0;
   face_index++;
 }
 
@@ -276,11 +272,11 @@ static int add_vertex(MRI *mri, int imnr, int i, int j) {
   if (vertex_index >= MAXVERTICES - 1)
     ErrorExit(ERROR_NOMEMORY, "%s: max vertices %d exceeded", Progname,
               MAXVERTICES);
-  vertex_index_table[pack] = vertex_index;
+  vertex_index_table[pack]  = vertex_index;
   vertex[vertex_index].imnr = imnr; // z
-  vertex[vertex_index].i = i;       // y
-  vertex[vertex_index].j = j;       // x
-  vertex[vertex_index].num = 0;
+  vertex[vertex_index].i    = i;    // y
+  vertex[vertex_index].j    = j;    // x
+  vertex[vertex_index].num  = 0;
   return vertex_index++;
 }
 
@@ -305,8 +301,8 @@ static void check_face(MRI *mri, int im0, int i0, int j0, int im1, int i1,
                        int j1, int f, int n, int v_ind, int prev_flag) {
   int xnum, ynum, numimg, f_pack, f_ind;
   int imax, imin, jmax, jmin;
-  xnum = mri->width;
-  ynum = mri->height;
+  xnum   = mri->width;
+  ynum   = mri->height;
   numimg = mri->depth;
   f_pack = f * ynum * xnum + i0 * xnum + j0; // f= 0, 1, 2, 3, 4, 5
 
@@ -346,11 +342,11 @@ static void make_surface(MRI *mri) {
   int imnr, i, j, f_pack, v_ind, f;
   int xnum, ynum, numimg;
 
-  face_index = 0;
+  face_index   = 0;
   vertex_index = 0;
 
-  xnum = mri->width;
-  ynum = mri->height;
+  xnum   = mri->width;
+  ynum   = mri->height;
   numimg = mri->depth;
 
   for (imnr = 0; imnr <= numimg; imnr++) {
@@ -416,7 +412,7 @@ static void make_surface(MRI *mri) {
     for (i = 0; i < ynum; i++)
       for (j = 0; j < xnum; j++)
         for (f = 0; f < 6; f++) {
-          f_pack = f * ynum * xnum + i * xnum + j;
+          f_pack                    = f * ynum * xnum + i * xnum + j;
           face_index_table0[f_pack] = face_index_table1[f_pack];
         }
   }
@@ -426,13 +422,12 @@ static void make_surface(MRI *mri) {
   (VECTOR_ELT(v, 1) = x, VECTOR_ELT(v, 2) = y, VECTOR_ELT(v, 3) = z,           \
    VECTOR_ELT(v, 4) = r);
 
-static void write_binary_surface(char *fname, MRI *mri, std::string& cmdline)
-{
-  int k,n;
-  double x,y,z;
-  FILE *fp;
-  MATRIX *m;
-  VECTOR *vw, *vv;
+static void write_binary_surface(char *fname, MRI *mri, std::string &cmdline) {
+  int      k, n;
+  double   x, y, z;
+  FILE *   fp;
+  MATRIX * m;
+  VECTOR * vw, *vv;
   VOL_GEOM vg;
 
   int useRealRAS = compatibility ? 0 : 1;
@@ -516,7 +511,7 @@ static void write_binary_surface(char *fname, MRI *mri, std::string& cmdline)
     getVolGeom(mri, &vg);
     writeVolGeom(fp, &vg);
   }
-  TAGwrite(fp, TAG_CMDLINE, &cmdline[0], cmdline.size() + 1) ;
+  TAGwrite(fp, TAG_CMDLINE, &cmdline[0], cmdline.size() + 1);
 #endif
 
   fclose(fp);
@@ -528,7 +523,7 @@ static void write_binary_surface(char *fname, MRI *mri, std::string& cmdline)
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -546,7 +541,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "maxv") || !stricmp(option, "max_vertices")) {
     MAXVERTICES = atol(argv[2]);
-    MAXFACES = 2 * MAXVERTICES;
+    MAXFACES    = 2 * MAXVERTICES;
     fprintf(stderr, "setting max vertices = %ld, and max faces = %ld\n",
             MAXVERTICES, MAXFACES);
     nargs = 2;
@@ -555,7 +550,7 @@ static int get_option(int argc, char *argv[]) {
   else
     switch (toupper(*option)) {
     case 'H':
-      hippo_flag = 1;
+      hippo_flag    = 1;
       compatibility = 0;
       printf("tessellating the surface of all hippocampal voxels with "
              "different labels\n");

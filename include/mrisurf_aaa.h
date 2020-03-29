@@ -27,29 +27,29 @@
  */
 
 #include "const.h"
-#include "matrix.h"
 #include "dmatrix.h"
+#include "matrix.h"
 
-#define MAX_NEIGHBORS (1024)
+#define MAX_NEIGHBORS               (1024)
 #define MRIS_MAX_NEIGHBORHOOD_LINKS 50 // bound on nlinks
 
-#define MAX_SURFACES 20
+#define MAX_SURFACES     20
 #define TALAIRACH_COORDS 0
 #define SPHERICAL_COORDS 1
 #define ELLIPSOID_COORDS 2
 
-#define VERTICES_PER_FACE 3
+#define VERTICES_PER_FACE   3
 #define ANGLES_PER_TRIANGLE 3
 
-#define INFLATED_NAME "inflated"
-#define SMOOTH_NAME "smoothwm"
-#define SPHERE_NAME "sphere"
-#define ORIG_NAME "orig"
+#define INFLATED_NAME     "inflated"
+#define SMOOTH_NAME       "smoothwm"
+#define SPHERE_NAME       "sphere"
+#define ORIG_NAME         "orig"
 #define WHITE_MATTER_NAME "white"
-#define GRAY_MATTER_NAME "gray"
-#define LAYERIV_NAME "graymid"
-#define GRAYMID_NAME LAYERIV_NAME
-#define MAX_CMDS 1000
+#define GRAY_MATTER_NAME  "gray"
+#define LAYERIV_NAME      "graymid"
+#define GRAYMID_NAME      LAYERIV_NAME
+#define MAX_CMDS          1000
 
 #define NEW_VERSION_MAGIC_NUMBER 16777215 // was in mrisurf.c
 
@@ -59,15 +59,15 @@
 // This is used in a repeatable arbitrary true false selector based on the
 // resulting int being EVEN or ODD
 
-using MRIS_cmdlines_t = FixedSizeArray<char *, MAX_CMDS>;
+using MRIS_cmdlines_t     = FixedSizeArray<char *, MAX_CMDS>;
 using MRIS_subject_name_t = FixedSizeArray<char, STRLEN>;
-using MRIS_fname_t = FixedSizeArray<char, STRLEN>;
+using MRIS_fname_t        = FixedSizeArray<char, STRLEN>;
 //
 // C arrays can not be returned as function results, but there can
 
 enum MRIS_Status_DistanceFormula {
   MRIS_Status_DistanceFormula_0, // see
-                                 // utils/mrisComputeVertexDistancesWkr_extracted.h
+  // utils/mrisComputeVertexDistancesWkr_extracted.h
   MRIS_Status_DistanceFormula_1
 };
 
@@ -77,9 +77,9 @@ enum MRIS_Status {
   SEP ELT(MRIS_PATCH, 0) SEP ELT(MRIS_PLANE, 0) SEP ELT(MRIS_ELLIPSOID, 0)     \
       SEP ELT(MRIS_SPHERE, 1) SEP ELT(MRIS_PARAMETERIZED_SPHERE, 1)            \
           SEP ELT(MRIS_RIGID_BODY, 0) SEP ELT(MRIS_SPHERICAL_PATCH, 0)         \
-              SEP ELT(MRIS_UNORIENTED_SPHERE, 0)                               \
+              SEP                         ELT(MRIS_UNORIENTED_SPHERE, 0)       \
                   SEP ELT(MRIS_PIAL_SURFACE, 0) // end of macro
-#define SEP ,
+#define SEP       ,
 #define ELT(E, D) E
   MRIS_Status_ELTS,
   MRIS_Status__end,
@@ -88,9 +88,9 @@ enum MRIS_Status {
 #undef SEP
 };
 
-const char *MRIS_Status_text(MRIS_Status s1);
+const char *                MRIS_Status_text(MRIS_Status s1);
 MRIS_Status_DistanceFormula MRIS_Status_distanceFormula(MRIS_Status s1);
-bool areCompatible(MRIS_Status s1, MRIS_Status s2);
+bool                        areCompatible(MRIS_Status s1, MRIS_Status s2);
 void checkOrigXYZCompatibleWkr(MRIS_Status s1, MRIS_Status s2, const char *file,
                                int line);
 #define checkOrigXYZCompatible(S1, S2)                                         \
@@ -110,10 +110,10 @@ using VERTEX_TOPOLOGY = struct VERTEX_TOPOLOGY;
   the vertices in the face structure are arranged in
   counter-clockwise fashion when viewed from the outside.
 */
-using vertices_per_face_t = FixedSizeArray<int, VERTICES_PER_FACE>;
+using vertices_per_face_t   = FixedSizeArray<int, VERTICES_PER_FACE>;
 using angles_per_triangle_t = FixedSizeArray<float, ANGLES_PER_TRIANGLE>;
 
-static void copyAnglesPerTriangle(angles_per_triangle_t &dst,
+static void copyAnglesPerTriangle(angles_per_triangle_t &      dst,
                                   angles_per_triangle_t const &src) {
   dst = src;
 }
@@ -131,11 +131,11 @@ typedef struct {
 } MRIS_HASH;
 
 typedef struct _area_label {
-  char name[STRLEN]; /* name of region */
-  float cx;          /* centroid x */
-  float cy;          /* centroid y */
-  float cz;          /* centroid z */
-  int label;         /* an identifier (used as an index) */
+  char  name[STRLEN]; /* name of region */
+  float cx;           /* centroid x */
+  float cy;           /* centroid y */
+  float cz;           /* centroid z */
+  int   label;        /* an identifier (used as an index) */
 } MRIS_AREA_LABEL;
 
 typedef struct FaceNormCacheEntry {
@@ -160,16 +160,16 @@ typedef struct FaceNormDeferredEntry {
 
 typedef struct edge_type_ {
   // topology
-  int edgeno;                 // this edge no
-  int vtxno[4];               // vertex numbers of 2 ends + 2 opposites
-  int faceno[2];              // two adjacent faces
+  int           edgeno;       // this edge no
+  int           vtxno[4];     // vertex numbers of 2 ends + 2 opposites
+  int           faceno[2];    // two adjacent faces
   unsigned char corner[4][2]; // corner[nthvtx][faceno]
   // metrics
-  double len;          // length of the edge
-  double dot;          // dot product of the adjacent face normals
-  double angle;        // angle (deg) of the adjacent face normals
-  double J;            // Angle Cost of this edge
-  double u[3];         // unit vector pointing from v0 to v1
+  double   len;        // length of the edge
+  double   dot;        // dot product of the adjacent face normals
+  double   angle;      // angle (deg) of the adjacent face normals
+  double   J;          // Angle Cost of this edge
+  double   u[3];       // unit vector pointing from v0 to v1
   DMATRIX *gradU;      // 1x3 grad of unit verctor wrt vertex 0
   DMATRIX *gradDot[4]; // 3x3 grad of dot product wrt 4 vertices
 } MRI_EDGE;
@@ -183,9 +183,9 @@ typedef struct corner_type_ {
   int edgeno[2];  // edge numbers
   int edgedir[2]; // direction of the edge relative to the corner
   // metrics
-  double dot;   // dot product of the adjacent segments
-  double angle; // angle (deg) of the corner
-  double J;     // cost, eg, (dot-0.5)^2 where 0.5 = cos(60) = equilateral tri
+  double   dot;   // dot product of the adjacent segments
+  double   angle; // angle (deg) of the corner
+  double   J;     // cost, eg, (dot-0.5)^2 where 0.5 = cos(60) = equilateral tri
   DMATRIX *gradDot[3]; // 3 1x3 grad of dot wrt each vertex
 } MRI_CORNER;
 
@@ -194,36 +194,36 @@ typedef struct corner_type_ {
 #define VERTEX_SULCAL 0x00000001L
 
 typedef struct {
-  int nvertices;
+  int           nvertices;
   unsigned int *vertex_indices;
 } STRIP;
 
 #include "transform.h" // TRANSFORM, LTA
 
-using pSeveralInt = int *;
-using pSeveralUchar = unsigned_char *;
-using pSeveralFloat = float *;
+using pSeveralInt        = int *;
+using pSeveralUchar      = unsigned_char *;
+using pSeveralFloat      = float *;
 using pSeveralConstFloat = const float *;
-using p_void = void *;
-using p_p_void = void **;
+using p_void             = void *;
+using p_p_void           = void **;
 
-using PDMATRIX = DMATRIX *;
-using PMATRIX = MATRIX *;
-using PLTA = LTA *;
+using PDMATRIX     = DMATRIX *;
+using PMATRIX      = MATRIX *;
+using PLTA         = LTA *;
 using PCOLOR_TABLE = COLOR_TABLE *;
 
-using PMRI = MRI *;
-using pSeveralMRI_EDGE = MRI_EDGE *;
+using PMRI               = MRI *;
+using pSeveralMRI_EDGE   = MRI_EDGE *;
 using pSeveralMRI_CORNER = MRI_CORNER *;
-using PMRIS_AREA_LABEL = MRIS_AREA_LABEL *;
-using PVERTEX = VERTEX *;
-using A3PDMATRIX = FixedSizeArray<PDMATRIX, 3>;
+using PMRIS_AREA_LABEL   = MRIS_AREA_LABEL *;
+using PVERTEX            = VERTEX *;
+using A3PDMATRIX         = FixedSizeArray<PDMATRIX, 3>;
 
-using pSeveralSTRIP = STRIP *;
-using pSeveralVERTEX = VERTEX *;
-using pSeveralVERTEX_TOPOLOGY = VERTEX_TOPOLOGY *;
-using pSeveralFACE = FACE *;
-using pSeveralFaceNormCacheEntry = FaceNormCacheEntry *;
+using pSeveralSTRIP                 = STRIP *;
+using pSeveralVERTEX                = VERTEX *;
+using pSeveralVERTEX_TOPOLOGY       = VERTEX_TOPOLOGY *;
+using pSeveralFACE                  = FACE *;
+using pSeveralFaceNormCacheEntry    = FaceNormCacheEntry *;
 using pSeveralFaceNormDeferredEntry = FaceNormDeferredEntry *;
 
 // MRIS supplies a rich world, but in a format that causes lots of memory
@@ -270,25 +270,25 @@ using MRISPV = struct MRISPV;
 //
 typedef struct MRISBase {
   MRIS_MP *mris_mp; // takes precidence over mris
-  MRIS *mris;
+  MRIS *   mris;
 } MRISBase;
 
 typedef struct MRISBaseConst {
   MRIS_MP const *mris_mp; // takes precidence over mris
-  MRIS const *mris;
+  MRIS const *   mris;
 } MRISBaseConst;
 
 static MRISBase MRISBaseCtr(MRIS_MP *mris_mp, MRIS *mris) {
   MRISBase base;
   base.mris_mp = mris_mp;
-  base.mris = mris;
+  base.mris    = mris;
   return base;
 }
 static MRISBaseConst MRISBaseConstCtr(const MRIS_MP *mris_mp,
-                                      MRIS const *mris) {
+                                      MRIS const *   mris) {
   MRISBaseConst base;
   base.mris_mp = mris_mp;
-  base.mris = mris;
+  base.mris    = mris;
   return base;
 }
 static MRISBaseConst MRISBaseToConst(MRISBase src) {

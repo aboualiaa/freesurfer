@@ -42,8 +42,8 @@
    the null terminator), or -1 on error or EOF.  */
 
 ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *fp) {
-  ssize_t result = 0;
-  size_t cur_len = 0;
+  ssize_t result  = 0;
+  size_t  cur_len = 0;
 
   if (lineptr == nullptr || n == nullptr || fp == nullptr) {
     errno = EINVAL;
@@ -53,7 +53,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *fp) {
   flockfile(fp);
 
   if (*lineptr == nullptr || *n == 0) {
-    *n = 120;
+    *n       = 120;
     *lineptr = (char *)malloc(*n);
     if (*lineptr == nullptr) {
       result = -1;
@@ -75,7 +75,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *fp) {
       size_t needed_max =
           SSIZE_MAX < SIZE_MAX ? (size_t)SSIZE_MAX + 1 : SIZE_MAX;
       size_t needed = 2 * *n + 1; /* Be generous. */
-      char *new_lineptr;
+      char * new_lineptr;
 
       if (needed_max < needed)
         needed = needed_max;
@@ -91,7 +91,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *fp) {
       }
 
       *lineptr = new_lineptr;
-      *n = needed;
+      *n       = needed;
     }
 
     (*lineptr)[cur_len] = i;
@@ -101,7 +101,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *fp) {
       break;
   }
   (*lineptr)[cur_len] = '\0';
-  result = cur_len ? cur_len : result;
+  result              = cur_len ? cur_len : result;
 
 unlock_return:
   funlockfile(fp);

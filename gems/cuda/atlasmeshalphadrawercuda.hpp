@@ -25,7 +25,7 @@ public:
 private:
   int classNumber;
 
-  CudaImage<float, 3, unsigned short> d_Output;
+  CudaImage<float, 3, unsigned short>          d_Output;
   AtlasMeshAlphaDrawerCUDA::ImageType::Pointer image;
 };
 } // namespace cuda

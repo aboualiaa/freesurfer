@@ -23,20 +23,20 @@
  *
  */
 
+#include "const.h"
+#include "version.h"
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> // for gcc
 #include <sys/stat.h>
-#include <dirent.h>
-#include "const.h"
-#include "version.h"
+#include <unistd.h> // for gcc
 
 #define MAX_FILES 10000
 
 struct file {
-  char fname[STRLEN];
-  int exam, series, image, length;
+  char  fname[STRLEN];
+  int   exam, series, image, length;
   short rows, cols, bytes_per_voxel;
 };
 
@@ -53,10 +53,10 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 
-  int i;
+  int         i;
   struct stat stat_buf;
-  DIR *dp;
-  int nargs;
+  DIR *       dp;
+  int         nargs;
 
   nargs = handleVersionOption(argc, argv, "check_siemens_dir");
   if (nargs && argc - nargs == 1)
@@ -94,16 +94,16 @@ int main(int argc, char *argv[]) {
 void check_directory(DIR *dp, char *dir_name) {
 
   struct dirent *de;
-  int exam, series, image;
-  int fname_length;
-  struct file files[MAX_FILES];
-  int i, j;
-  char full_fname[STRLEN];
-  int last_series;
-  int first_image;
-  int last_image;
-  FILE *fp;
-  short rows, cols, bits_per_voxel;
+  int            exam, series, image;
+  int            fname_length;
+  struct file    files[MAX_FILES];
+  int            i, j;
+  char           full_fname[STRLEN];
+  int            last_series;
+  int            first_image;
+  int            last_image;
+  FILE *         fp;
+  short          rows, cols, bits_per_voxel;
 
   for (i = 0; i < MAX_FILES; i++) {
     files[i].image = -1;
@@ -152,13 +152,13 @@ void check_directory(DIR *dp, char *dir_name) {
               swab(&bits_per_voxel, &bits_per_voxel, 2);
 #endif
 #endif
-              files[image].rows = rows;
-              files[image].cols = cols;
+              files[image].rows            = rows;
+              files[image].cols            = cols;
               files[image].bytes_per_voxel = bits_per_voxel / 8;
             }
-            files[image].exam = exam;
+            files[image].exam   = exam;
             files[image].series = series;
-            files[image].image = image;
+            files[image].image  = image;
             i++;
           }
         }
@@ -171,7 +171,7 @@ void check_directory(DIR *dp, char *dir_name) {
     return;
   }
 
-  exam = -1;
+  exam        = -1;
   last_series = -1;
   for (i = 0; i < MAX_FILES; i++) {
     if (files[i].image != -1) {

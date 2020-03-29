@@ -39,15 +39,15 @@
 **
 ****************************************************************************/
 
+#include <qdebug.h>
+#include <qjsonarray.h>
 #include <qjsonobject.h>
 #include <qjsonvalue.h>
-#include <qjsonarray.h>
 #include <qstringlist.h>
 #include <qvariant.h>
-#include <qdebug.h>
 
-#include "qjsonwriter_p.h"
 #include "qjson_p.h"
+#include "qjsonwriter_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -373,7 +373,7 @@ void QJsonArray::insert(int i, const QJsonValue &value) {
   QJsonValue val = value;
 
   bool compressed;
-  int valueSize = QJsonPrivate::Value::requiredStorage(val, &compressed);
+  int  valueSize = QJsonPrivate::Value::requiredStorage(val, &compressed);
 
   detach(valueSize + sizeof(QJsonPrivate::Value));
 
@@ -387,8 +387,8 @@ void QJsonArray::insert(int i, const QJsonValue &value) {
   QJsonPrivate::Value &v = (*a)[i];
   v.type = (val.t == QJsonValue::Undefined ? QJsonValue::Null : val.t);
   v.latinOrIntValue = compressed;
-  v.latinKey = false;
-  v.value = QJsonPrivate::Value::valueToStore(val, valueOffset);
+  v.latinKey        = false;
+  v.value           = QJsonPrivate::Value::valueToStore(val, valueOffset);
   if (valueSize)
     QJsonPrivate::Value::copyData(val, (char *)a + valueOffset, compressed);
 }
@@ -423,7 +423,7 @@ void QJsonArray::replace(int i, const QJsonValue &value) {
   QJsonValue val = value;
 
   bool compressed;
-  int valueSize = QJsonPrivate::Value::requiredStorage(val, &compressed);
+  int  valueSize = QJsonPrivate::Value::requiredStorage(val, &compressed);
 
   detach(valueSize);
 
@@ -437,8 +437,8 @@ void QJsonArray::replace(int i, const QJsonValue &value) {
   QJsonPrivate::Value &v = (*a)[i];
   v.type = (val.t == QJsonValue::Undefined ? QJsonValue::Null : val.t);
   v.latinOrIntValue = compressed;
-  v.latinKey = false;
-  v.value = QJsonPrivate::Value::valueToStore(val, valueOffset);
+  v.latinKey        = false;
+  v.value           = QJsonPrivate::Value::valueToStore(val, valueOffset);
   if (valueSize)
     QJsonPrivate::Value::copyData(val, (char *)a + valueOffset, compressed);
 

@@ -28,17 +28,17 @@
 // On Linux the following fails with -O for the eigenvalues at 5, 9, 10
 // Make sure that you don't optimize but with -ffloat-store
 //
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 
 #include "numerics.h"
 
-#define NP 10
+#define NP   10
 #define TINY 1.0e-6
 
 int main(void) {
-  int i, j, k;
-  float *d, *e, *f, **a;
+  int          i, j, k;
+  float *      d, *e, *f, **a;
   static float c[NP][NP] = {
       {5.0, 4.3, 3.0, 2.0, 1.0, 0.0, -1.0, -2.0, -3.0, -4.0},
       {4.3, 5.1, 4.0, 3.0, 2.0, 1.0, 0.0, -1.0, -2.0, -3.0},

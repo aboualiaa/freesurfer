@@ -24,9 +24,9 @@
 #ifndef TERMWIDGET_H
 #define TERMWIDGET_H
 
-#include <ios>
-#include <QWidget>
 #include <QSocketNotifier>
+#include <QWidget>
+#include <ios>
 #include <unistd.h> //Provides STDIN_FILENO
 
 namespace Ui {
@@ -78,9 +78,9 @@ public:
 
 protected:
   std::basic_ostream<Elem, Tr> &m_Stream;
-  std::streambuf *m_pBuf;
-  pfncb m_pCbFunc;
-  void *m_pUserData;
+  std::streambuf *              m_pBuf;
+  pfncb                         m_pCbFunc;
+  void *                        m_pUserData;
 };
 
 class TermWidget : public QWidget {
@@ -110,13 +110,13 @@ private:
   void ScrollToBottom();
   void AppendErrorString(const QString &strg);
 
-  Ui::TermWidget *ui;
+  Ui::TermWidget * ui;
   StdRedirector<> *m_stdOut;
   StdRedirector<> *m_stdErr;
-  QString m_bufferStdOut;
-  QString m_bufferStdErr;
-  QString m_strLogColor;
-  QString m_strErrorColor;
+  QString          m_bufferStdOut;
+  QString          m_bufferStdErr;
+  QString          m_strLogColor;
+  QString          m_strErrorColor;
   QSocketNotifier *m_stdinNotifier;
 
   bool m_bRedirectStdOutput;

@@ -27,8 +27,8 @@
 
 #include <vector>
 
-#include "timer.h"
 #include "gca.h"
+#include "timer.h"
 
 // Forward declaration
 namespace GPU {
@@ -231,7 +231,7 @@ private:
   long long xDim;
   long long yDim;
   long long zDim;
-  size_t n4D;
+  size_t    n4D;
 
   //! Count of bytes allocated
   size_t bytes;

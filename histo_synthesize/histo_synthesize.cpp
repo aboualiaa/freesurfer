@@ -30,17 +30,17 @@
 #include "version.h"
 
 typedef struct {
-  int len;
-  int whalf;
+  int     len;
+  int     whalf;
   double *vals;
-  int flags;
+  int     flags;
 } FEATURE;
 
 static int dump_window(MRI *mri, char *fname, int x0, int y0, int z0,
                        int wsize);
 static int prune_indices(MRI *mri_mask, MRI *histo, short *xind, short *yind,
                          short *zind, int nind, int use_val, float hthresh);
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
                      MRI *hsynth, int wsize, int flags, char *fname,
@@ -58,23 +58,23 @@ static double feature_distance(FEATURE *f1, FEATURE *f2, int which);
 const char *Progname;
 static void usage_exit(int code);
 
-static char base_name[STRLEN] = "";
-static int crop_width = 0;
-static int test_slice = 20;  // in histo coords
-static int train_slice = 30; // in MRI coords
-static int wsize = 3;
-static int downsample = 0;
-static double tol = 0;
-static int num_notfound = 1000; // # of search voxels to terminate after
+static char   base_name[STRLEN] = "";
+static int    crop_width        = 0;
+static int    test_slice        = 20; // in histo coords
+static int    train_slice       = 30; // in MRI coords
+static int    wsize             = 3;
+static int    downsample        = 0;
+static double tol               = 0;
+static int    num_notfound      = 1000; // # of search voxels to terminate after
 static double min_training_dist = 100;
 
 static char *training_src_fname = nullptr;
 static char *training_dst_fname = nullptr;
 
 #define SUBTRACT_CENTER 0x00001
-#define L1_NORM 0x00002
-#define MRI_SPACE 0x00004
-#define TRAINING_PAIR 0x00008
+#define L1_NORM         0x00002
+#define MRI_SPACE       0x00004
+#define TRAINING_PAIR   0x00008
 
 #define L2_NORM_DIST 0
 #define L1_NORM_DIST 1
@@ -83,9 +83,9 @@ static int flags = 0;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
+  int    ac, nargs;
+  int    msec, minutes, seconds;
+  Timer  start;
   MRI *mri, *histo, *hsynth, *mri_train_src = nullptr, *mri_train_dst = nullptr;
 
   setRandomSeed(-1L);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
               argv[1]);
   if (downsample > 0) {
     MRI *mri_tmp;
-    int n;
+    int  n;
 
     for (n = 0; n < downsample; n++) {
       mri_tmp = MRIreduce(mri, nullptr);
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
                            flags, argv[3], mri_train_src, mri_train_dst);
   printf("writing output to %s\n", argv[3]);
   MRIwrite(hsynth, argv[3]);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -173,19 +173,19 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atof(argv[2]);
-    Gy = atof(argv[3]);
-    Gz = atof(argv[4]);
+    Gx    = atof(argv[2]);
+    Gy    = atof(argv[3]);
+    Gz    = atof(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "test_slice")) {
     test_slice = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("testing on slice %d\n", test_slice);
   } else if (!stricmp(option, "train")) {
     training_src_fname = argv[2];
@@ -197,19 +197,19 @@ static int get_option(int argc, char *argv[]) {
     min_training_dist = 0;
   } else if (!stricmp(option, "crop_width")) {
     crop_width = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("cropping width to %d in synthesis\n", crop_width);
   } else if (!stricmp(option, "tol")) {
-    tol = atof(argv[2]);
+    tol   = atof(argv[2]);
     nargs = 1;
     printf("setting search termination tol = %f\n", tol);
   } else if (!stricmp(option, "num")) {
     num_notfound = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("setting search termination num = %d\n", num_notfound);
   } else if (!stricmp(option, "train_slice")) {
     train_slice = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("training on slice %d\n", train_slice);
   } else if (!stricmp(option, "L1")) {
     flags |= L1_NORM;
@@ -262,20 +262,20 @@ MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
                      MRI *mri_train_src, MRI *mri_train_dst) {
   int x, y, z, xd = 0, yd = 0, zd = 0, xm, ym, zm, x1, y1, z1, identity, tid,
                nind, width;
-  short *xind, *yind, *zind;
-  double val, xh, yh, zh, sval;
-  FEATURE farray[_MAX_FS_THREADS], *f = &farray[0];
-  MATRIX *m_histo2mri, *m_mri2histo;
-  VECTOR *v1, *v2;
-  MRI *mri_mask;
+  short *    xind, *yind, *zind;
+  double     val, xh, yh, zh, sval;
+  FEATURE    farray[_MAX_FS_THREADS], *f = &farray[0];
+  MATRIX *   m_histo2mri, *m_mri2histo;
+  VECTOR *   v1, *v2;
+  MRI *      mri_mask;
   MRI_REGION box_train, box_test;
 
   xh = yh = zh = y = 0; // compiler warning - not sure why
   for (x = 0; x < _MAX_FS_THREADS; x++) {
-    farray[x].len = wsize * wsize * wsize;
+    farray[x].len   = wsize * wsize * wsize;
     farray[x].whalf = (wsize - 1) / 2;
     farray[x].flags = flags;
-    farray[x].vals = (double *)calloc(farray[x].len, sizeof(double));
+    farray[x].vals  = (double *)calloc(farray[x].len, sizeof(double));
     if (farray[x].vals == nullptr)
       ErrorExit(ERROR_NOMEMORY,
                 "HISTOsynthesize: could not allocate %d-len feature vector",
@@ -295,19 +295,19 @@ MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
   if (mri_train_dst == nullptr)
     mri_train_dst = histo;
 
-  m_histo2mri = MRIgetVoxelToVoxelXform(mri_train_dst, mri_train_src);
-  m_mri2histo = MRIgetVoxelToVoxelXform(mri_train_src, mri_train_dst);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  m_histo2mri       = MRIgetVoxelToVoxelXform(mri_train_dst, mri_train_src);
+  m_mri2histo       = MRIgetVoxelToVoxelXform(mri_train_src, mri_train_dst);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
-  identity = MatrixIsIdentity(m_histo2mri);
+  identity                              = MatrixIsIdentity(m_histo2mri);
   if (identity)
     printf("image geometries are identical - disabling transforms\n");
 
   // compute region of MRI that maps to valid histo
-  box_train.x = mri_train_src->width;
-  box_train.y = mri_train_src->height;
-  box_train.z = mri_train_src->depth;
+  box_train.x  = mri_train_src->width;
+  box_train.y  = mri_train_src->height;
+  box_train.z  = mri_train_src->depth;
   box_train.dx = 0;
   box_train.dy = 0;
   box_train.dz = 0;
@@ -319,10 +319,10 @@ MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
         if (x == Gx && y == Gy && z == Gz)
           DiagBreak();
         if (identity) {
-          xh = x;
-          yh = y;
-          zh = z;
-          val = MRIgetVoxVal(mri_train_dst, x, y, z, 0);
+          xh   = x;
+          yh   = y;
+          zh   = z;
+          val  = MRIgetVoxVal(mri_train_dst, x, y, z, 0);
           sval = MRIgetVoxVal(mri_train_src, x, y, z, 0);
         } else {
           V3_X(v1) = x;
@@ -374,21 +374,21 @@ MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
   //  MRImask(mri_train_src, mri_mask, mri_train_src, 0, 255) ;
   if (flags & MRI_SPACE) {
     MRIsetValues(hsynth, 4080);
-    box_test.x = mri->width;
-    box_test.y = mri->height;
-    box_test.z = mri->depth;
+    box_test.x  = mri->width;
+    box_test.y  = mri->height;
+    box_test.z  = mri->depth;
     box_test.dx = 0;
     box_test.dy = 0;
     box_test.dz = 0;
-    z = test_slice;
+    z           = test_slice;
     for (x = 0; x < mri->width; x++) {
       for (y = 0; y < mri->height; y++) {
         if (x == Gx && y == Gy)
           DiagBreak();
         if (identity) {
-          xh = x;
-          yh = y;
-          zh = test_slice;
+          xh  = x;
+          yh  = y;
+          zh  = test_slice;
           val = MRIgetVoxVal(histo, xh, yh, zh, 0);
         } else {
           V3_X(v1) = x;
@@ -447,9 +447,9 @@ MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
                                    tol, num_notfound, x, y, test_slice,
                                    min_training_dist);
         if (identity) {
-          xh = xd;
-          yh = yd;
-          zh = zd;
+          xh  = xd;
+          yh  = yd;
+          zh  = zd;
           val = MRIgetVoxVal(histo, xh, yh, zh, 0);
         } else {
           V3_X(v1) = xd;
@@ -486,7 +486,7 @@ MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
       ROMP_PFLB_begin
 #ifdef HAVE_OPENMP
           tid = omp_get_thread_num();
-      f = &farray[tid];
+      f       = &farray[tid];
 #else
           tid = 0;
 #endif
@@ -531,9 +531,9 @@ MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
           dump_window(mri_train_src, "train.dat", xd, yd, zd, wsize);
         }
         if (identity) {
-          xh = xd;
-          yh = yd;
-          zh = zd;
+          xh  = xd;
+          yh  = yd;
+          zh  = zd;
           val = MRIgetVoxVal(mri_train_dst, xh, yh, zh, 0);
         } else {
           V3_X(v1) = xd;
@@ -566,7 +566,7 @@ MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
 }
 
 static int extract_feature_vector(MRI *mri, int x, int y, int z, FEATURE *f) {
-  int xi, yi, zi, xk, yk, zk, i;
+  int    xi, yi, zi, xk, yk, zk, i;
   double val;
 
   if (f->flags & SUBTRACT_CENTER)
@@ -578,7 +578,7 @@ static int extract_feature_vector(MRI *mri, int x, int y, int z, FEATURE *f) {
     for (yk = -f->whalf; yk <= f->whalf; yk++) {
       yi = mri->yi[y + yk];
       for (zk = -f->whalf; zk <= f->whalf; zk++, i++) {
-        zi = mri->zi[z + zk];
+        zi         = mri->zi[z + zk];
         f->vals[i] = MRIgetVoxVal(mri, xi, yi, zi, 0);
         if (f->flags & SUBTRACT_CENTER)
           f->vals[i] -= val;
@@ -597,14 +597,14 @@ static int find_most_similar_location(MRI *mri, FEATURE *fsrc, int z, int *pxd,
                                       int y0, int z0,
                                       double min_training_dist) {
   FEATURE f;
-  double dist, min_dist;
-  int x, y, x1, y1, num = 0, ind;
+  double  dist, min_dist;
+  int     x, y, x1, y1, num = 0, ind;
 
-  f.len = fsrc->len;
+  f.len   = fsrc->len;
   f.whalf = fsrc->whalf;
   ;
   f.flags = fsrc->flags;
-  f.vals = (double *)calloc(f.len, sizeof(double));
+  f.vals  = (double *)calloc(f.len, sizeof(double));
   if (f.vals == nullptr)
     ErrorExit(
         ERROR_NOMEMORY,
@@ -626,8 +626,8 @@ static int find_most_similar_location(MRI *mri, FEATURE *fsrc, int z, int *pxd,
 #endif
   for (ind = 0; ind < nind; ind++) {
     ind = randomNumber(0, nind - .1);
-    x = xind[ind];
-    y = yind[ind];
+    x   = xind[ind];
+    y   = yind[ind];
     if (x < box->x || x > x1 || y < box->y || y > y1)
       continue;
     if (x == Gx && y == Gy && z == Gz)
@@ -641,11 +641,11 @@ static int find_most_similar_location(MRI *mri, FEATURE *fsrc, int z, int *pxd,
     dist = feature_distance(fsrc, &f,
                             flags & L1_NORM ? L1_NORM_DIST : L2_NORM_DIST);
     if (dist < min_dist) {
-      num = 0;
+      num      = 0;
       min_dist = dist;
-      *pxd = x;
-      *pyd = y;
-      *pzd = z;
+      *pxd     = x;
+      *pyd     = y;
+      *pzd     = z;
     } else if (num++ > num_notfound)
 #ifdef HAVE_OPENMP
       continue;
@@ -659,9 +659,9 @@ static int find_most_similar_location(MRI *mri, FEATURE *fsrc, int z, int *pxd,
 }
 
 static double feature_distance(FEATURE *f1, FEATURE *f2, int which) {
-  int i, num = 0;
+  int    i, num = 0;
   double sse = 0.0;
-  float v1, v2;
+  float  v1, v2;
 
   switch (which) {
   default:
@@ -693,19 +693,19 @@ static double feature_distance(FEATURE *f1, FEATURE *f2, int which) {
 }
 static int prune_indices(MRI *mri_mask, MRI *histo, short *xind, short *yind,
                          short *zind, int nind, int use_val, float hthresh) {
-  int isrc, idst, x, y, z, val, deleted;
+  int    isrc, idst, x, y, z, val, deleted;
   short *xi, *yi, *zi;
-  float hval;
+  float  hval;
 
   xi = (short *)calloc(nind, sizeof(short));
   yi = (short *)calloc(nind, sizeof(short));
   zi = (short *)calloc(nind, sizeof(short));
 
   for (isrc = idst = deleted = 0; isrc < nind; isrc++) {
-    x = xind[isrc];
-    y = yind[isrc];
-    z = zind[isrc];
-    val = (int)MRIgetVoxVal(mri_mask, x, y, z, 0);
+    x    = xind[isrc];
+    y    = yind[isrc];
+    z    = zind[isrc];
+    val  = (int)MRIgetVoxVal(mri_mask, x, y, z, 0);
     hval = (int)MRIgetVoxVal(histo, x, y, z, 0);
     if (x == Gx && y == Gy && z == Gz)
       DiagBreak();
@@ -731,7 +731,7 @@ static int prune_indices(MRI *mri_mask, MRI *histo, short *xind, short *yind,
 }
 static int dump_window(MRI *mri, char *fname, int x0, int y0, int z0,
                        int wsize) {
-  int xk, yk, xi, yi, whalf;
+  int   xk, yk, xi, yi, whalf;
   float val;
   FILE *fp;
 

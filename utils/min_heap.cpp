@@ -14,7 +14,7 @@ static int Min_HeapifyUp(MIN_HEAP *MH, int index);
 MIN_HEAP
 *Min_HeapAllocate(int max_size, int max_id_array_size) {
   MIN_HEAP *MH;
-  int i;
+  int       i;
 
   MH = (MIN_HEAP *)calloc(1, sizeof(MIN_HEAP));
   if (MH == nullptr) {
@@ -23,9 +23,9 @@ MIN_HEAP
     return (nullptr);
   }
 
-  MH->MaxHeapSize = max_size;
+  MH->MaxHeapSize  = max_size;
   MH->CurrHeapSize = 0;
-  MH->MHE_array = (MHE *)calloc(max_size, sizeof(MHE));
+  MH->MHE_array    = (MHE *)calloc(max_size, sizeof(MHE));
   if (MH->MHE_array == nullptr) {
     fprintf(stderr, "Min_HeapAllocate: Unable to allocate memory for min "
                     "heapelement array!!\n");
@@ -53,8 +53,8 @@ MIN_HEAP
 
 static int Min_HeapExchangeElements(MIN_HEAP *MH, int i, int j) {
   double tempHeapKey;
-  int tempID = 0;
-  void *tempData;
+  int    tempID = 0;
+  void * tempData;
 
   if (i < 0 || i >= MH->CurrHeapSize) {
     fprintf(stderr,
@@ -89,22 +89,22 @@ static int Min_HeapExchangeElements(MIN_HEAP *MH, int i, int j) {
 
   // Copy i's stuff over to temporary storage
   tempHeapKey = MH->MHE_array[i].HeapKey;
-  tempData = MH->MHE_array[i].Data;
+  tempData    = MH->MHE_array[i].Data;
   if (MH->max_id_array_size > 0)
     tempID = MH->MHE_array[i].id;
 
   // Copy j's stuff to i
   MH->MHE_array[i].HeapKey = MH->MHE_array[j].HeapKey;
-  MH->MHE_array[i].Data = MH->MHE_array[j].Data;
+  MH->MHE_array[i].Data    = MH->MHE_array[j].Data;
 
   // Copy i's stuff to j via temporary storage
   MH->MHE_array[j].HeapKey = tempHeapKey;
-  MH->MHE_array[j].Data = tempData;
+  MH->MHE_array[j].Data    = tempData;
 
   // Need to update id_array
   if (MH->max_id_array_size > 0) {
-    MH->MHE_array[i].id = MH->MHE_array[j].id;
-    MH->MHE_array[j].id = tempID;
+    MH->MHE_array[i].id               = MH->MHE_array[j].id;
+    MH->MHE_array[j].id               = tempID;
     MH->id_array[MH->MHE_array[i].id] = i;
     MH->id_array[MH->MHE_array[j].id] = j;
   }
@@ -156,9 +156,9 @@ int Min_HeapExtract(MIN_HEAP *MH, double *key, void **data, int *id) {
   }
 
   // Copy data out...
-  *key = MH->MHE_array[0].HeapKey;
+  *key  = MH->MHE_array[0].HeapKey;
   *data = MH->MHE_array[0].Data;
-  *id = MH->MHE_array[0].id;
+  *id   = MH->MHE_array[0].id;
 
   MH->id_array[*id] = -1; // after extracting element, the pointer into the
                           // MHE_array has to be set to negative
@@ -166,8 +166,8 @@ int Min_HeapExtract(MIN_HEAP *MH, double *key, void **data, int *id) {
 
   if (MH->CurrHeapSize != 0) {
     MH->MHE_array[0].HeapKey = MH->MHE_array[MH->CurrHeapSize].HeapKey;
-    MH->MHE_array[0].Data = MH->MHE_array[MH->CurrHeapSize].Data;
-    MH->MHE_array[0].id = MH->MHE_array[MH->CurrHeapSize].id;
+    MH->MHE_array[0].Data    = MH->MHE_array[MH->CurrHeapSize].Data;
+    MH->MHE_array[0].id      = MH->MHE_array[MH->CurrHeapSize].id;
     MH->id_array[MH->MHE_array[MH->CurrHeapSize].id] = 0;
     Min_HeapifyDown(MH, 0);
   }
@@ -189,7 +189,7 @@ static int Min_HeapifyDown(MIN_HEAP *MH, int index) {
   curr_index = index;
 
   while (true) {
-    left = 2 * curr_index + 1;
+    left  = 2 * curr_index + 1;
     right = 2 * curr_index + 2;
 
     if (left < MH->CurrHeapSize) {
@@ -275,9 +275,9 @@ int Min_HeapInsert(MIN_HEAP *MH, double key, void *data, int id) {
     return (ERROR);
   } else {
     MH->MHE_array[MH->CurrHeapSize].HeapKey = key;
-    MH->MHE_array[MH->CurrHeapSize].Data = data;
-    MH->MHE_array[MH->CurrHeapSize].id = id;
-    MH->id_array[id] = MH->CurrHeapSize;
+    MH->MHE_array[MH->CurrHeapSize].Data    = data;
+    MH->MHE_array[MH->CurrHeapSize].id      = id;
+    MH->id_array[id]                        = MH->CurrHeapSize;
 
     MH->CurrHeapSize++;
     Min_HeapifyUp(MH, MH->CurrHeapSize - 1);

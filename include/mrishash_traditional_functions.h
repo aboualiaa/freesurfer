@@ -48,7 +48,7 @@ MHT_VIRTUAL void MHT_FUNCTION(findClosestFaceNoGeneric)(
     // How far to search: set one or both
     double in_max_distance_mm, /* Use large number
                                   to ignore */
-    int in_max_mhts,           /* Use -1 to ignore */
+    int    in_max_mhts,        /* Use -1 to ignore */
     // only faces that projection is interior to (Use -1 to ignore )
     int project_into_face,
     //---------- outputs -------------
@@ -63,7 +63,7 @@ MHT_VIRTUAL void MHT_FUNCTION(findClosestFaceNoGeneric)(
 //
 MHT_STATIC_MEMBER int MHT_FUNCTION(BruteForceClosestFace)(
     MHT_MRIS_PARAMETER float x, float y, float z,
-    int which, // which surface within mris to search
+    int    which, // which surface within mris to search
     float *dmin);
 
 MHT_STATIC_MEMBER int

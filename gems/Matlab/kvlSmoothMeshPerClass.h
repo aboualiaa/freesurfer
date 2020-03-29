@@ -1,16 +1,16 @@
-#include "kvlMatlabRunner.h"
-#include "kvlMatlabObjectArray.h"
 #include "kvlAtlasMeshCollection.h"
 #include "kvlAtlasMeshSmoother.h"
+#include "kvlMatlabObjectArray.h"
+#include "kvlMatlabRunner.h"
 
 namespace kvl {
 
 class SmoothMesh : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef SmoothMesh Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef SmoothMesh                    Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */

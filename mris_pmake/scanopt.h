@@ -54,7 +54,7 @@
  *   internally.
  *
  *   This list is then parsed to construct a STL-type
- *   map<string, string> which can be rapidly searched for target tokens
+ *   map<std::string, string> which can be rapidly searched for target tokens
  *   and their values.
  *
  */
@@ -78,19 +78,17 @@
  */
 
 #include <iostream>
-#include <string>
-#include <map>
 #include <list>
+#include <map>
+#include <string>
 
 #include <vector>
-
-using namespace std;
 
 #ifndef __SCANOPT_H__
 #define __SCANOPT_H__
 
-const string str_NONCOUPLET = "< nonCouplet >";
-const int C_scanopt_STACKDEPTH = 64;
+const std::string str_NONCOUPLET       = "< nonCouplet >";
+const int         C_scanopt_STACKDEPTH = 64;
 
 typedef enum {
   e_DesTag, // --<token>    <val>
@@ -108,35 +106,36 @@ protected:
   // and str_proc[] variables are maintained by the debug_push|pop
   // methods
   //
-  string str_obj;                        // name of object class
-  string str_name;                       // name of object variable
-  int id;                                // id of agent
-  int iter;                              // current iteration in an
-                                         //+ arbitrary processing scheme
-  int verbosity;                         // debug related value for object
-  int warnings;                          // show warnings (and warnings level)
-  int stackDepth;                        // current pseudo stack depth
-  string str_proc[C_scanopt_STACKDEPTH]; // execution procedure stack
+  std::string str_obj;    // name of object class
+  std::string str_name;   // name of object variable
+  int         id;         // id of agent
+  int         iter;       // current iteration in an
+                          //+ arbitrary processing scheme
+  int         verbosity;  // debug related value for object
+  int         warnings;   // show warnings (and warnings level)
+  int         stackDepth; // current pseudo stack depth
+  std::string str_proc[C_scanopt_STACKDEPTH]; // execution procedure stack
 
 protected:
-  int argc;                         // size of string vector
-  list<string> Lstr_body;           // string list containing
-                                    //+ options and values
-  list<string>::iterator Lstr_iter; // an iterator to move over
-                                    //+ the list
+  int                    argc;      // size of string vector
+  std::list<std::string> Lstr_body; // string list containing
+  //+ options and values
+  std::list<std::string>::iterator Lstr_iter; // an iterator to move over
+                                              //+ the list
 
-  map<string, string> map_opt;            // a map associating
-                                          //+ possible optName and
-                                          //+ optVal pairs
-  map<string, string>::iterator map_iter; // an iterator to move over the map
+  std::map<std::string, std::string> map_opt; // a map associating
+  //+ possible optName and
+  //+ optVal pairs
+  std::map<std::string, std::string>::iterator
+      map_iter; // an iterator to move over the map
 
-  string str_optDes; // the "pattern" that defines
-                     //+ a string as an option.
-                     //+ Typically this will be
-                     //+ either "-" or "--".
-  string str_equ;    // The string for the
-                     //+ EquLink. Defaults to
-                     //+ "="
+  std::string str_optDes; // the "pattern" that defines
+                          //+ a string as an option.
+                          //+ Typically this will be
+                          //+ either "-" or "--".
+  std::string str_equ;    // The string for the
+                          //+ EquLink. Defaults to
+                          //+ "="
 
   // methods
 
@@ -146,62 +145,62 @@ public:
   //
 
   // conventional constructor using passed command line args
-  C_scanopt(int a_argc, char **appch_argv, string astr_optDes = "--");
+  C_scanopt(int a_argc, char **appch_argv, std::string astr_optDes = "--");
 
   // constructor reading options from file
-  C_scanopt(string astr_filename, e_SCANOPT_tokType e_tokType = e_DesTag,
-            string astr_optDes = "--", string astr_equ = "=");
+  C_scanopt(std::string astr_filename, e_SCANOPT_tokType e_tokType = e_DesTag,
+            std::string astr_optDes = "--", std::string astr_equ = "=");
 
-  C_scanopt(string astr_options, string astr_delimiter = ";",
-            e_SCANOPT_tokType e_tokType = e_EquLink, string astr_optDes = "--",
-            string astr_equ = "=");
+  C_scanopt(std::string astr_options, std::string astr_delimiter = ";",
+            e_SCANOPT_tokType e_tokType = e_EquLink,
+            std::string astr_optDes = "--", std::string astr_equ = "=");
 
-  void core_construct(string astr_name = "unnamed", int a_id = -1,
+  void core_construct(std::string astr_name = "unnamed", int a_id = -1,
                       int a_iter = 0, int a_verbosity = 0, int a_warnings = 0,
-                      int a_stackDepth = 0, string astr_proc = "noproc");
+                      int a_stackDepth = 0, std::string astr_proc = "noproc");
   ~C_scanopt();
 
   //
   // error / warn / print block
   //
-  void debug_push(string astr_currentProc);
+  void debug_push(std::string astr_currentProc);
   void debug_pop();
 
-  void error(string astr_msg = "Some error has occured", int code = -1);
-  void warn(string astr_class = "C_scanopt::", string astr_msg = "",
+  void error(std::string astr_msg = "Some error has occured", int code = -1);
+  void warn(std::string astr_class = "C_scanopt::", std::string astr_msg = "",
             int code = -1);
-  void function_trace(string astr_class, string astr_msg,
-                      string astr_separator);
-  void function_trace(string astr_msg) {
+  void function_trace(std::string astr_class, std::string astr_msg,
+                      std::string astr_separator);
+  void function_trace(std::string astr_msg) {
     function_trace("C_scanopt", astr_msg, "");
   };
 
   //
   // access block
   //
-  void print(); // print object
-  int stackDepth_get() const { return stackDepth; };
-  void stackDepth_set(int anum) { stackDepth = anum; };
-  int iter_get() const { return iter; };
-  void iter_set(int anum) { iter = anum; };
-  int id_get() const { return id; };
-  void id_set(int anum) { id = anum; };
-  int verbosity_get() const { return verbosity; };
-  void verbosity_set(int anum) { verbosity = anum; };
-  int warnings_get() const { return warnings; };
-  void warnings_set(int anum) { warnings = anum; };
-  string str_obj_get() const { return str_obj; };
-  void str_obj_set(string astr) { str_obj = astr; };
-  string str_name_get() const { return str_name; };
-  void str_name_set(string astr) { str_name = astr; };
-  string str_proc_get() const { return str_proc[stackDepth_get()]; };
-  void str_proc_set(int depth, string astr) { str_proc[depth] = astr; };
-  int argc_get() const { return argc; };
+  void        print(); // print object
+  int         stackDepth_get() const { return stackDepth; };
+  void        stackDepth_set(int anum) { stackDepth = anum; };
+  int         iter_get() const { return iter; };
+  void        iter_set(int anum) { iter = anum; };
+  int         id_get() const { return id; };
+  void        id_set(int anum) { id = anum; };
+  int         verbosity_get() const { return verbosity; };
+  void        verbosity_set(int anum) { verbosity = anum; };
+  int         warnings_get() const { return warnings; };
+  void        warnings_set(int anum) { warnings = anum; };
+  std::string str_obj_get() const { return str_obj; };
+  void        str_obj_set(std::string astr) { str_obj = astr; };
+  std::string str_name_get() const { return str_name; };
+  void        str_name_set(std::string astr) { str_name = astr; };
+  std::string str_proc_get() const { return str_proc[stackDepth_get()]; };
+  void str_proc_set(int depth, std::string astr) { str_proc[depth] = astr; };
+  int  argc_get() const { return argc; };
   void argc_set(int anum) { argc = anum; };
-  string str_optDes_get() const { return str_optDes; };
-  void str_optDes_set(string astr) { str_optDes = astr; };
-  string str_equ_get() const { return str_equ; };
-  void str_equ_set(string astr) { str_equ = astr; };
+  std::string str_optDes_get() const { return str_optDes; };
+  void        str_optDes_set(std::string astr) { str_optDes = astr; };
+  std::string str_equ_get() const { return str_equ; };
+  void        str_equ_set(std::string astr) { str_equ = astr; };
 
   //
   // miscellaneous block
@@ -212,12 +211,12 @@ private:
 protected:
   void nullify(); // "reset" structure to 0
 public:
-  bool scanFor(string astr_target, // the main purpose of the class
-               string *apstr_value);
+  bool scanFor(std::string  astr_target, // the main purpose of the class
+               std::string *apstr_value);
 };
 
-string str_trim(string astr_toTrim);
-int str_tokenize(const string &str, vector<string> &tokens,
-                 const string &delimiters = " ");
+std::string str_trim(std::string astr_toTrim);
+int str_tokenize(const std::string &str, std::vector<std::string> &tokens,
+                 const std::string &delimiters = " ");
 
 #endif //__SCANOPT_H__

@@ -26,24 +26,24 @@
 
 extern const char *Progname;
 
-extern string G_SELF;
-extern bool Gb_stdout;
+extern std::string G_SELF;
+extern bool        Gb_stdout;
 
 int arr_stats(e_stats &a_stats, float *arr, int asize) {
   /*
    * Perform some simple stats on a passed array
    */
-  a_stats.f_max = 0.0;
+  a_stats.f_max    = 0.0;
   a_stats.indexMax = -1;
-  a_stats.f_min = 0.0;
+  a_stats.f_min    = 0.0;
   a_stats.indexMin = -1;
   for (int v = 0; v < asize; v++) {
     if (a_stats.f_max < arr[v]) {
-      a_stats.f_max = arr[v];
+      a_stats.f_max    = arr[v];
       a_stats.indexMax = v;
     }
     if (a_stats.f_min > arr[v]) {
-      a_stats.f_min = arr[v];
+      a_stats.f_min    = arr[v];
       a_stats.indexMin = v;
     }
   }
@@ -51,8 +51,8 @@ int arr_stats(e_stats &a_stats, float *arr, int asize) {
 }
 
 void lprintf(int lw, const char *format, ...) {
-  int len = 0;
-  char pch_buffer[65536];
+  int     len = 0;
+  char    pch_buffer[65536];
   va_list vp_arg;
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -68,8 +68,8 @@ void lprintf(int lw, const char *format, ...) {
 }
 
 char *lsprintf(int lw, char *pch_bufferOut, const char *format, ...) {
-  int len = 0;
-  char pch_bufferFormatted[65536];
+  int     len = 0;
+  char    pch_bufferFormatted[65536];
   va_list vp_arg;
   va_start(vp_arg, format);
   vsnprintf(pch_bufferFormatted, 65536, format, vp_arg);
@@ -84,8 +84,8 @@ char *lsprintf(int lw, char *pch_bufferOut, const char *format, ...) {
 }
 
 void colprintf(int lw, int rw, const char *pch_lstr, const char *format, ...) {
-  int len = 0;
-  char pch_buffer[65536];
+  int     len = 0;
+  char    pch_buffer[65536];
   va_list vp_arg;
   va_start(vp_arg, format);
   vsnprintf(pch_buffer, 65536, format, vp_arg);
@@ -102,8 +102,8 @@ void colprintf(int lw, int rw, const char *pch_lstr, const char *format, ...) {
 
 char *colsprintf(int lw, int rw, char *pch_bufferOut, const char *pch_lstr,
                  const char *format, ...) {
-  int len = 0;
-  char pch_bufferRight[65536];
+  int     len = 0;
+  char    pch_bufferRight[65536];
   va_list vp_arg;
   va_start(vp_arg, format);
   vsnprintf(pch_bufferRight, 65536, format, vp_arg);
@@ -129,8 +129,8 @@ short CURV_arrayProgress_print(int asize, int acurrent, char *apch_message) {
   //
 
   static int fivePerc = 0;
-  FILE *G_FP = nullptr;
-  fivePerc = (int)(0.05 * asize);
+  FILE *     G_FP     = nullptr;
+  fivePerc            = (int)(0.05 * asize);
 
   if (Gb_stdout)
     G_FP = stdout;
@@ -220,7 +220,7 @@ float V3D_distance(st_V3D &V_A, st_V3D &V_B) {
                (V_A.f_z - V_B.f_z) * (V_A.f_z - V_B.f_z)));
 }
 
-bool str_leadingWSremove(string &astr_input) {
+bool str_leadingWSremove(std::string &astr_input) {
   //
   // PRECONDITIONS
   // o An input string that is (possibly) prepended with white space
@@ -231,8 +231,8 @@ bool str_leadingWSremove(string &astr_input) {
   //
 
   char const *str_sep = " \t";
-  int pos = 0;
-  bool ret = false;
+  int         pos     = 0;
+  bool        ret     = false;
 
   // find leading whitespace. Loop until whitespace pos != 0
   pos = astr_input.find_first_of(str_sep);
@@ -244,7 +244,7 @@ bool str_leadingWSremove(string &astr_input) {
   return ret;
 }
 
-bool relDirSpec_test(string &astr_dirSpec) {
+bool relDirSpec_test(std::string &astr_dirSpec) {
   //
   // ARGS
   //  astr_dirSpec      in      input string containing a
@@ -271,11 +271,11 @@ bool relDirSpec_test(string &astr_dirSpec) {
   char ch_first;
 
   ch_first = astr_dirSpec[0];
-  b_ret = (ch_first == '/') ? false : true;
+  b_ret    = (ch_first == '/') ? false : true;
   return b_ret;
 }
 
-bool str_rel2absDirSpec_change(string &astr_rel, string &astr_abs) {
+bool str_rel2absDirSpec_change(std::string &astr_rel, std::string &astr_abs) {
   //
   // ARGS
   //  astr_rel          in      input string containing a
@@ -313,13 +313,13 @@ bool str_rel2absDirSpec_change(string &astr_rel, string &astr_abs) {
                  "I cannot seem to read the current directory.", 1);
     rel2abs(astr_rel.c_str(), pch_cwd, pch_result, MAXPATHLEN);
     astr_abs = pch_result;
-    b_ret = true;
+    b_ret    = true;
   }
   return b_ret;
 }
 
-int str_3parse(string &astr_input, string &astr_first, string &astr_second,
-               string &astr_third) {
+int str_3parse(std::string &astr_input, std::string &astr_first,
+               std::string &astr_second, std::string &astr_third) {
   char const *str_sep = " \t";
   // string str_sep  = " \t";
   unsigned pos = 0;
@@ -329,7 +329,7 @@ int str_3parse(string &astr_input, string &astr_first, string &astr_second,
 
   // Parse for <first>
   pos = astr_input.find_first_of(str_sep);
-  if (pos == (unsigned)string::npos)
+  if (pos == (unsigned)std::string::npos)
     return 0;
   astr_first = astr_input.substr(0, pos);
   astr_input.erase(0, astr_first.length() + 1);
@@ -337,11 +337,11 @@ int str_3parse(string &astr_input, string &astr_first, string &astr_second,
   // Parse for <second>
   str_leadingWSremove(astr_input); // Remove any leading WS
   pos = astr_input.find_first_of(str_sep);
-  if (pos == (unsigned)string::npos) {
+  if (pos == (unsigned)std::string::npos) {
     // No trailing spaces remaining
     if (!astr_input.length()) {
       astr_second = "";
-      astr_third = "";
+      astr_third  = "";
       return 1;
     } else {
       astr_second = astr_input;
@@ -356,7 +356,7 @@ int str_3parse(string &astr_input, string &astr_first, string &astr_second,
   // Parse for [<third>]
   str_leadingWSremove(astr_input); // Remove any leading WS
   pos = astr_input.find_first_of(str_sep);
-  if (pos == (unsigned)string::npos) {
+  if (pos == (unsigned)std::string::npos) {
     // No trailing spaces remaining
     if (!astr_input.length()) {
       astr_third = "";
@@ -373,8 +373,8 @@ int str_3parse(string &astr_input, string &astr_first, string &astr_second,
   return 3;
 }
 
-bool str_findAndReplace(string &astr_source, const string astr_find,
-                        string astr_replace) {
+bool str_findAndReplace(std::string &astr_source, const std::string astr_find,
+                        std::string astr_replace) {
   //
   // ARGS
   //  astr_source	in/out		source string
@@ -385,10 +385,10 @@ bool str_findAndReplace(string &astr_source, const string astr_find,
   //  Simple find and replace.
   //
 
-  size_t uPos = 0;
-  size_t uFindLen = astr_find.length();
+  size_t uPos        = 0;
+  size_t uFindLen    = astr_find.length();
   size_t uReplaceLen = astr_replace.length();
-  bool b_ret = false;
+  bool   b_ret       = false;
 
   if (uFindLen == 0) {
     return false;
@@ -402,7 +402,7 @@ bool str_findAndReplace(string &astr_source, const string astr_find,
   return b_ret;
 }
 
-void warn(string str_action, string str_errorMsg, int errorCode) {
+void warn(std::string str_action, std::string str_errorMsg, int errorCode) {
 
   //
   // ARGS
@@ -415,16 +415,17 @@ void warn(string str_action, string str_errorMsg, int errorCode) {
   //  errorCode.
   //
 
-  cerr << endl << G_SELF;
-  cerr << endl << "\tWarning, Will Robinson!";
-  cerr << endl << "\tWhile I was " << str_action;
-  cerr << endl << "\t" << str_errorMsg;
-  cerr << endl;
-  cerr << endl << "\tWarning code " << errorCode;
-  cerr << endl;
+  std::cerr << std::endl << G_SELF;
+  std::cerr << std::endl << "\tWarning, Will Robinson!";
+  std::cerr << std::endl << "\tWhile I was " << str_action;
+  std::cerr << std::endl << "\t" << str_errorMsg;
+  std::cerr << std::endl;
+  std::cerr << std::endl << "\tWarning code " << errorCode;
+  std::cerr << std::endl;
 }
 
-void error_exit(string str_action, string str_errorMsg, int errorCode) {
+void error_exit(std::string str_action, std::string str_errorMsg,
+                int errorCode) {
 
   //
   // ARGS
@@ -437,13 +438,13 @@ void error_exit(string str_action, string str_errorMsg, int errorCode) {
   //  errorCode.
   //
 
-  cerr << endl << G_SELF;
-  cerr << endl << "\tI'm sorry, but an error condition has occurred.";
-  cerr << endl << "\tWhile I was " << str_action;
-  cerr << endl << "\t" << str_errorMsg;
-  cerr << endl;
-  cerr << endl << "\tExiting to system with code " << errorCode;
-  cerr << endl;
+  std::cerr << std::endl << G_SELF;
+  std::cerr << std::endl << "\tI'm sorry, but an error condition has occurred.";
+  std::cerr << std::endl << "\tWhile I was " << str_action;
+  std::cerr << std::endl << "\t" << str_errorMsg;
+  std::cerr << std::endl;
+  std::cerr << std::endl << "\tExiting to system with code " << errorCode;
+  std::cerr << std::endl;
   exit(errorCode);
 }
 

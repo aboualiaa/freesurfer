@@ -23,30 +23,30 @@
  */
 
 #include "LayerFCD.h"
-#include "LayerPropertyFCD.h"
-#include "vtkRenderer.h"
-#include "vtkImageReslice.h"
-#include "vtkImageActor.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkSmartPointer.h"
-#include "vtkMatrix4x4.h"
-#include "vtkImageMapToColors.h"
-#include "vtkTransform.h"
-#include "vtkPlaneSource.h"
-#include "vtkTexture.h"
-#include "vtkActor.h"
-#include "vtkRGBAColorTransferFunction.h"
-#include "vtkProperty.h"
-#include "vtkImageMapper3D.h"
-#include "vtkFreesurferLookupTable.h"
-#include "LayerMRI.h"
-#include "LayerPropertyMRI.h"
-#include "LayerFCDWorkerThread.h"
 #include "FSVolume.h"
-#include "ProgressCallback.h"
-#include "LayerSurface.h"
+#include "LayerFCDWorkerThread.h"
+#include "LayerMRI.h"
+#include "LayerPropertyFCD.h"
+#include "LayerPropertyMRI.h"
 #include "LayerPropertySurface.h"
+#include "LayerSurface.h"
 #include "MyVTKUtils.h"
+#include "ProgressCallback.h"
+#include "vtkActor.h"
+#include "vtkFreesurferLookupTable.h"
+#include "vtkImageActor.h"
+#include "vtkImageMapToColors.h"
+#include "vtkImageMapper3D.h"
+#include "vtkImageReslice.h"
+#include "vtkMatrix4x4.h"
+#include "vtkPlaneSource.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkRGBAColorTransferFunction.h"
+#include "vtkRenderer.h"
+#include "vtkSmartPointer.h"
+#include "vtkTexture.h"
+#include "vtkTransform.h"
 #include <QDebug>
 #include <QTimer>
 
@@ -54,11 +54,11 @@ LayerFCD::LayerFCD(LayerMRI *layerMRI, QObject *parent)
     : LayerVolumeBase(parent), m_fcd(NULL), m_mri_difference(NULL) {
   m_strTypeNames.push_back("FCD");
   m_sPrimaryType = "FCD";
-  mProperty = new LayerPropertyFCD(this);
+  mProperty      = new LayerPropertyFCD(this);
   for (int i = 0; i < 3; i++) {
     m_dSlicePosition[i] = 0;
-    m_sliceActor2D[i] = vtkSmartPointer<vtkImageActor>::New();
-    m_sliceActor3D[i] = vtkSmartPointer<vtkImageActor>::New();
+    m_sliceActor2D[i]   = vtkSmartPointer<vtkImageActor>::New();
+    m_sliceActor3D[i]   = vtkSmartPointer<vtkImageActor>::New();
     m_sliceActor2D[i]->InterpolateOff();
     m_sliceActor3D[i]->InterpolateOff();
   }
@@ -79,10 +79,10 @@ LayerFCD::LayerFCD(LayerMRI *layerMRI, QObject *parent)
   connect(p, SIGNAL(MinAreaChanged(int)), this, SLOT(Recompute()));
 
   // pre allocate MRIs & surfaces
-  m_mri_norm = new LayerMRI(NULL);
-  m_mri_flair = new LayerMRI(NULL);
-  m_mri_t2 = new LayerMRI(NULL);
-  m_mri_aseg = new LayerMRI(NULL);
+  m_mri_norm       = new LayerMRI(NULL);
+  m_mri_flair      = new LayerMRI(NULL);
+  m_mri_t2         = new LayerMRI(NULL);
+  m_mri_aseg       = new LayerMRI(NULL);
   m_mri_difference = new LayerMRI(NULL);
   connect(m_mri_norm, SIGNAL(destroyed()), this, SLOT(OnLayerDestroyed()),
           Qt::UniqueConnection);
@@ -188,8 +188,8 @@ void LayerFCD::InitializeData() {
     m_imageData->SetNumberOfScalarComponents(1);
     m_imageData->AllocateScalars();
 #endif
-    void *ptr = m_imageData->GetScalarPointer();
-    int *nDim = m_imageData->GetDimensions();
+    void *ptr  = m_imageData->GetScalarPointer();
+    int * nDim = m_imageData->GetDimensions();
     // cout << nDim[0] << ", " << nDim[1] << ", " << nDim[2] << endl;
     memset(ptr, 0,
            ((size_t)m_imageData->GetScalarSize()) * nDim[0] * nDim[1] *
@@ -223,7 +223,7 @@ bool LayerFCD::LoadFromFile() {
 
   if (m_fcd) {
     if (!m_fcd->mri_norm) {
-      cerr << "Did not find norm volume for FCD data" << endl;
+      std::cerr << "Did not find norm volume for FCD data" << std::endl;
       return false;
     }
     ::SetProgressCallback(ProgressCallback, 50, 70);
@@ -254,7 +254,7 @@ void LayerFCD::MakeAllLayers() {
         InitializeData();
       }
     } else {
-      cerr << "Failed to create norm layer" << endl;
+      std::cerr << "Failed to create norm layer" << std::endl;
       delete mri;
       m_mri_norm = NULL;
     }
@@ -456,7 +456,7 @@ void LayerFCD::Recompute() {
 
 void LayerFCD::SaveFCDLabels(const QString &dir) {
   if (!m_fcd) {
-    cerr << "No FCD data to save" << endl;
+    std::cerr << "No FCD data to save" << std::endl;
     return;
   }
 
@@ -505,21 +505,21 @@ void LayerFCD::UpdateRASImage(vtkImageData *rasImage) {
     return;
   }
 
-  int n[3];
+  int    n[3];
   double pos[3];
-  int *dim = rasImage->GetDimensions();
-  char *ptr = (char *)rasImage->GetScalarPointer();
-  int scalar_type = rasImage->GetScalarType();
-  int n_frames = rasImage->GetNumberOfScalarComponents();
+  int *  dim         = rasImage->GetDimensions();
+  char * ptr         = (char *)rasImage->GetScalarPointer();
+  int    scalar_type = rasImage->GetScalarType();
+  int    n_frames    = rasImage->GetNumberOfScalarComponents();
   memset(ptr, 0,
          ((size_t)rasImage->GetScalarSize()) * dim[0] * dim[1] * dim[2]);
   if (m_fcd->nlabels == 0) {
-    cout << "No labels found\n";
+    std::cout << "No labels found\n";
     return;
   }
 
   for (int cnt = 0; cnt < m_fcd->nlabels; cnt++) {
-    LABEL *label = m_fcd->labels[cnt];
+    LABEL *   label   = m_fcd->labels[cnt];
     FSVolume *ref_vol = m_layerSource->GetSourceVolume();
     for (int i = 0; i < label->n_points; i++) {
       pos[0] = label->lv[i].x;
@@ -725,14 +725,14 @@ void LayerFCD::GetLabelCentroidPosition(int nLabelIndex, double *pos) {
 }
 
 void LayerFCD::SetLabelVisible(int nIndex, bool visible) {
-  LABEL *label = m_fcd->labels[nIndex];
+  LABEL *   label   = m_fcd->labels[nIndex];
   FSVolume *ref_vol = m_layerSource->GetSourceVolume();
-  int n[3];
-  double pos[3];
-  int *dim = m_imageData->GetDimensions();
-  char *ptr = (char *)m_imageData->GetScalarPointer();
-  int scalar_type = m_imageData->GetScalarType();
-  int n_frames = m_imageData->GetNumberOfScalarComponents();
+  int       n[3];
+  double    pos[3];
+  int *     dim         = m_imageData->GetDimensions();
+  char *    ptr         = (char *)m_imageData->GetScalarPointer();
+  int       scalar_type = m_imageData->GetScalarType();
+  int       n_frames    = m_imageData->GetNumberOfScalarComponents();
   for (int i = 0; i < label->n_points; i++) {
     pos[0] = label->lv[i].x;
     pos[1] = label->lv[i].y;
@@ -842,15 +842,15 @@ void LayerFCD::OnLayerDestroyed() {
 
 bool LayerFCD::GoToContralateralPoint(double *pos, double *pos_out) {
   LayerSurface *oppo_surf = NULL;
-  bool bLeft = true;
-  int nVertex = m_surf_lh->GetVertexIndexAtTarget(pos, NULL);
+  bool          bLeft     = true;
+  int           nVertex   = m_surf_lh->GetVertexIndexAtTarget(pos, NULL);
   if (nVertex < 0) {
     nVertex = m_surf_lh_pial->GetVertexIndexAtTarget(pos, NULL);
     if (nVertex < 0) {
-      bLeft = false;
+      bLeft   = false;
       nVertex = m_surf_rh->GetVertexIndexAtTarget(pos, NULL);
       if (nVertex < 0) {
-        nVertex = m_surf_rh_pial->GetVertexIndexAtTarget(pos, NULL);
+        nVertex   = m_surf_rh_pial->GetVertexIndexAtTarget(pos, NULL);
         oppo_surf = m_surf_lh_pial;
       } else
         oppo_surf = m_surf_lh;
@@ -859,9 +859,9 @@ bool LayerFCD::GoToContralateralPoint(double *pos, double *pos_out) {
   } else
     oppo_surf = m_surf_rh;
 
-  if (nVertex < 0)
-  {
-    cout << "Did not find any vertex at cursor on" << qPrintable(GetName()) << endl;
+  if (nVertex < 0) {
+    std::cout << "Did not find any vertex at cursor on" << qPrintable(GetName())
+              << std::endl;
     return false;
   }
 

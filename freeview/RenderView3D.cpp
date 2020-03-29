@@ -22,50 +22,50 @@
  *
  */
 #include "RenderView3D.h"
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
+#include "Cursor3D.h"
+#include "FSSurface.h"
+#include "Interactor3DMeasure.h"
+#include "Interactor3DNavigate.h"
+#include "Interactor3DPathEdit.h"
+#include "Interactor3DROIEdit.h"
+#include "Interactor3DVolumeCrop.h"
 #include "LayerCollection.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
-#include "LayerSurface.h"
 #include "LayerPropertySurface.h"
+#include "LayerSurface.h"
+#include "LayerVolumeTrack.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
 #include "SurfaceOverlay.h"
-#include "VolumeCropper.h"
-#include "Cursor3D.h"
-#include "SurfaceRegion.h"
-#include "SurfaceROI.h"
 #include "SurfaceOverlayProperty.h"
-#include <vtkProp.h>
-#include <vtkCellPicker.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderer.h>
-#include <vtkCamera.h>
+#include "SurfaceROI.h"
+#include "SurfaceRegion.h"
+#include "VolumeCropper.h"
+#include "ui_MainWindow.h"
+#include "vtkInteractorStyleMyTrackballCamera.h"
+#include "vtkRGBAColorTransferFunction.h"
+#include <QDebug>
+#include <QFileInfo>
+#include <QMenu>
+#include <QtGlobal>
 #include <vtkActor2D.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkProperty.h>
+#include <vtkAnnotatedCubeActor.h>
+#include <vtkCamera.h>
+#include <vtkCellArray.h>
+#include <vtkCellPicker.h>
+#include <vtkCubeAxesActor.h>
 #include <vtkCubeSource.h>
-#include <vtkPoints.h>
 #include <vtkLine.h>
 #include <vtkPlane.h>
-#include <vtkCellArray.h>
-#include <QtGlobal>
-#include <QMenu>
-#include <QDebug>
-#include "Interactor3DNavigate.h"
-#include "Interactor3DMeasure.h"
-#include "Interactor3DVolumeCrop.h"
-#include "Interactor3DROIEdit.h"
-#include "LayerVolumeTrack.h"
+#include <vtkPoints.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProp.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
 #include <vtkScalarBarActor.h>
-#include "vtkRGBAColorTransferFunction.h"
-#include <vtkAnnotatedCubeActor.h>
-#include <vtkCubeAxesActor.h>
 #include <vtkTextProperty.h>
-#include <QFileInfo>
-#include "MyUtils.h"
-#include "FSSurface.h"
-#include "Interactor3DPathEdit.h"
-#include "vtkInteractorStyleMyTrackballCamera.h"
 
 #define SLICE_PICKER_PIXEL_TOLERANCE 15
 
@@ -83,9 +83,9 @@ RenderView3D::RenderView3D(QWidget *parent) : RenderView(parent) {
   GetRenderer()->SetMaximumNumberOfPeels(4);
   GetRenderer()->SetOcclusionRatio(0);
 
-  m_bShowSliceFrames = true;
-  m_bShowAxes = false;
-  m_bShowCursor = true;
+  m_bShowSliceFrames    = true;
+  m_bShowAxes           = false;
+  m_bShowCursor         = true;
   m_bFocalPointAtCursor = false;
   for (int i = 0; i < 3; i++) {
     m_actorSliceFrames[i] = vtkSmartPointer<vtkActor>::New();
@@ -96,7 +96,7 @@ RenderView3D::RenderView3D(QWidget *parent) : RenderView(parent) {
     m_bSliceVisibility[i] = true;
 
     m_actorSliceBoundingBox[i] = vtkSmartPointer<vtkActor>::New();
-    m_cubeSliceBoundingBox[i] = vtkSmartPointer<vtkCubeSource>::New();
+    m_cubeSliceBoundingBox[i]  = vtkSmartPointer<vtkCubeSource>::New();
     vtkSmartPointer<vtkPolyDataMapper> mapper =
         vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetInputConnection(m_cubeSliceBoundingBox[i]->GetOutputPort());
@@ -106,12 +106,12 @@ RenderView3D::RenderView3D(QWidget *parent) : RenderView(parent) {
   }
   HighlightSliceFrame(-1);
 
-  m_cursor3D = new Cursor3D(this);
-  m_interactorNavigate = new Interactor3DNavigate(this);
-  m_interactorMeasure = new Interactor3DMeasure(this);
+  m_cursor3D             = new Cursor3D(this);
+  m_interactorNavigate   = new Interactor3DNavigate(this);
+  m_interactorMeasure    = new Interactor3DMeasure(this);
   m_interactorVolumeCrop = new Interactor3DVolumeCrop(this);
-  m_interactorROIEdit = new Interactor3DROIEdit(this);
-  m_interactorPathEdit = new Interactor3DPathEdit(this);
+  m_interactorROIEdit    = new Interactor3DROIEdit(this);
+  m_interactorPathEdit   = new Interactor3DPathEdit(this);
   connect(m_cursor3D, SIGNAL(Updated()), this, SLOT(RequestRedraw()));
 
   m_cursorInflatedSurf = new Cursor3D(this);
@@ -200,16 +200,16 @@ void RenderView3D::UpdateSurfaceCorrelationData() {
 }
 
 void RenderView3D::UpdateSliceFrames() {
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  LayerCollection *lc = mainwnd->GetLayerCollection("MRI");
+  MainWindow *     mainwnd = MainWindow::GetMainWindow();
+  LayerCollection *lc      = mainwnd->GetLayerCollection("MRI");
   if (lc->IsEmpty()) {
     lc = mainwnd->GetLayerCollection("Surface");
   }
-  double *bounds = m_dBounds;
+  double *bounds   = m_dBounds;
   double *slicepos = lc->GetSlicePosition();
 
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
   points->InsertPoint(0, slicepos[0], bounds[2], bounds[4]);
   points->InsertPoint(1, slicepos[0], bounds[2], bounds[5]);
   points->InsertPoint(2, slicepos[0], bounds[3], bounds[5]);
@@ -262,11 +262,11 @@ void RenderView3D::UpdateSliceFrames() {
   for (int i = 0; i < 3; i++) {
     double bds[6];
     for (int n = 0; n < 3; n++) {
-      bds[n * 2] = m_dBounds[n * 2] - m_dBoundingTolerance;
+      bds[n * 2]     = m_dBounds[n * 2] - m_dBoundingTolerance;
       bds[n * 2 + 1] = m_dBounds[n * 2 + 1] + m_dBoundingTolerance;
     }
 
-    bds[i * 2] = slicepos[i] - m_dBoundingTolerance;
+    bds[i * 2]     = slicepos[i] - m_dBoundingTolerance;
     bds[i * 2 + 1] = slicepos[i] + m_dBoundingTolerance;
     m_cubeSliceBoundingBox[i]->SetBounds(bds);
     m_actorSliceBoundingBox[i]->GetMapper()->Update();
@@ -276,7 +276,7 @@ void RenderView3D::UpdateSliceFrames() {
 
 void RenderView3D::UpdateViewByWorldCoordinate() {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double wcenter[3];
+  double     wcenter[3];
   for (int i = 0; i < 3; i++) {
     wcenter[i] = m_dWorldOrigin[i] + m_dWorldSize[i] / 2;
   }
@@ -342,7 +342,7 @@ void RenderView3D::ResetViewMedial() {
 }
 
 void RenderView3D::RefreshAllActors(bool bForScreenShot) {
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
+  MainWindow *       mainwnd = MainWindow::GetMainWindow();
   SettingsScreenshot setting = mainwnd->GetScreenShotSettings();
 
   m_renderer->RemoveAllViewProps();
@@ -445,8 +445,8 @@ void RenderView3D::DoUpdateRASPosition(int posX, int posY, bool bCursor,
     }
 
     // check slice frame selection first
-    bool bFramePicked = false;
-    double tolerance = m_dBoundingTolerance * 1.414;
+    bool   bFramePicked = false;
+    double tolerance    = m_dBoundingTolerance * 1.414;
     for (int i = 0; i < 3; i++) {
       if (m_actorSliceBoundingBox[i].GetPointer() == prop) {
         if (fabs(pos[0] - m_dBounds[0]) < tolerance ||
@@ -458,11 +458,11 @@ void RenderView3D::DoUpdateRASPosition(int posX, int posY, bool bCursor,
           // 3D hit test passed, now we check screen distance
           double screen_pt[3];
           double screen_pts[4][3];
-          int x, y;
+          int    x, y;
           this->WorldToScreen(pos[0], pos[1], pos[2], x, y);
-          screen_pt[0] = x;
-          screen_pt[1] = y;
-          screen_pt[2] = 0;
+          screen_pt[0]   = x;
+          screen_pt[1]   = y;
+          screen_pt[2]   = 0;
           vtkPoints *pts = vtkPolyDataMapper::SafeDownCast(
                                m_actorSliceFrames[i]->GetMapper())
                                ->GetInput()
@@ -474,8 +474,8 @@ void RenderView3D::DoUpdateRASPosition(int posX, int posY, bool bCursor,
             screen_pts[j][1] = y;
             screen_pts[j][2] = 0;
           }
-          int ids[4][2] = {{0, 1}, {1, 2}, {2, 3}, {3, 0}};
-          double dMinDist = 1000000000;
+          int    ids[4][2] = {{0, 1}, {1, 2}, {2, 3}, {3, 0}};
+          double dMinDist  = 1000000000;
           for (int j = 0; j < 4; j++) {
             double dist = vtkLine::DistanceToLine(
                 screen_pt, screen_pts[ids[j][0]], screen_pts[ids[j][1]]);
@@ -488,7 +488,7 @@ void RenderView3D::DoUpdateRASPosition(int posX, int posY, bool bCursor,
             m_dIntersectPoint[0] = pos[0];
             m_dIntersectPoint[1] = pos[1];
             m_dIntersectPoint[2] = pos[2];
-            bFramePicked = true;
+            bFramePicked         = true;
             break;
           }
         }
@@ -509,7 +509,7 @@ void RenderView3D::DoUpdateRASPosition(int posX, int posY, bool bCursor,
 
       if (lc_mri->HasProp(prop) || lc_roi->HasProp(prop)) {
         if (bCursor) {
-          LayerMRI *mri = (LayerMRI *)lc_mri->HasProp(prop);
+          LayerMRI *     mri = (LayerMRI *)lc_mri->HasProp(prop);
           SurfaceRegion *reg = NULL;
           if (mri) {
             reg = mri->SelectSurfaceRegion(pos);
@@ -536,7 +536,7 @@ void RenderView3D::DoUpdateRASPosition(int posX, int posY, bool bCursor,
           if (bCursor)
             lc_surface->SetActiveLayer(layer);
           LayerSurface *surf = (LayerSurface *)layer;
-          QVariantMap settings =
+          QVariantMap   settings =
               MainWindow::GetMainWindow()->GetGeneralSettings();
 
           MapInflatedCoords(surf, pos, pos,
@@ -572,9 +572,9 @@ bool RenderView3D::MapInflatedCoords(LayerSurface *surf, double *pos_in,
       m_cursorInflatedSurf->Show();
     if (bCursor)
       m_cursorInflatedSurf->SetPosition(pos_in);
-    FSSurface *fsurf = surf->GetSourceSurface();
+    FSSurface *    fsurf  = surf->GetSourceSurface();
     QList<Layer *> layers = MainWindow::GetMainWindow()->GetLayers("Surface");
-    bool bFoundMappingSurface = false;
+    bool           bFoundMappingSurface = false;
     foreach (Layer *s, layers) {
       LayerSurface *f = (LayerSurface *)s;
       if (f != surf && QFileInfo(f->GetFileName())
@@ -612,8 +612,8 @@ bool RenderView3D::MapInflatedCoords(LayerSurface *surf, double *pos_in,
 }
 
 void RenderView3D::MapToInflatedCoords(double *pos_in) {
-  QList<Layer *> layers = MainWindow::GetMainWindow()->GetLayers("Surface");
-  LayerSurface *inflated = NULL;
+  QList<Layer *> layers   = MainWindow::GetMainWindow()->GetLayers("Surface");
+  LayerSurface * inflated = NULL;
   foreach (Layer *s, layers) {
     LayerSurface *f = (LayerSurface *)s;
     if (f->IsInflated())
@@ -660,8 +660,8 @@ int RenderView3D::PickCurrentSurfaceVertex(int posX, int posY,
     return -1;
   }
 
-  posY = this->rect().height() - posY;
-  int nvo = -1;
+  posY                  = this->rect().height() - posY;
+  int            nvo    = -1;
   vtkCellPicker *picker = vtkCellPicker::SafeDownCast(
       this->GetRenderWindow()->GetInteractor()->GetPicker());
   if (picker) {
@@ -689,8 +689,8 @@ int RenderView3D::PickCurrentSurfaceVertex(int posX, int posY,
     picker->Pick(posX, posY, 0, GetRenderer());
     picker->GetPickPosition(pos);
 
-    vtkProp *prop = picker->GetViewProp();
-    Layer *layer = lc_surface->HasProp(prop);
+    vtkProp *prop  = picker->GetViewProp();
+    Layer *  layer = lc_surface->HasProp(prop);
     if (layer) {
       LayerSurface *surf = (LayerSurface *)layer;
       if (curSurf == NULL || curSurf == surf)
@@ -721,7 +721,7 @@ void RenderView3D::HighlightSliceFrame(int n) {
   }
 
   double colors[][3] = {{1, 0.1, 0.1}, {0.1, 1, 0.1}, {0.1, 0.1, 1}};
-  double ratio = 1;
+  double ratio       = 1;
 #if VTK_MAJOR_VERSION > 7
   ratio = devicePixelRatio();
 #endif
@@ -768,16 +768,16 @@ void RenderView3D::ShowSlice(int nPlane, bool bshow) {
 
 void RenderView3D::UpdateCursorRASPosition(int posX, int posY) {
   m_bToUpdateCursorPosition = true;
-  m_nCursorCoord[0] = posX;
-  m_nCursorCoord[1] = posY;
+  m_nCursorCoord[0]         = posX;
+  m_nCursorCoord[1]         = posY;
 }
 
 void RenderView3D::UpdateMouseRASPosition(int posX, int posY,
                                           bool bSlicePickOnly) {
   m_bToUpdateRASPosition = true;
-  m_bSlicePickOnly = bSlicePickOnly;
-  m_nPickCoord[0] = posX;
-  m_nPickCoord[1] = posY;
+  m_bSlicePickOnly       = bSlicePickOnly;
+  m_nPickCoord[0]        = posX;
+  m_nPickCoord[1]        = posY;
 }
 
 void RenderView3D::MoveSliceToScreenCoord(int x, int y) {
@@ -785,13 +785,13 @@ void RenderView3D::MoveSliceToScreenCoord(int x, int y) {
     return;
   }
 
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  LayerCollection *lc = mainwnd->GetLayerCollection("MRI");
+  MainWindow *     mainwnd = MainWindow::GetMainWindow();
+  LayerCollection *lc      = mainwnd->GetLayerCollection("MRI");
   if (lc->IsEmpty()) {
     lc = mainwnd->GetLayerCollection("Surface");
   }
   double *bounds = m_dBounds;
-  double slicepos[3];
+  double  slicepos[3];
   lc->GetSlicePosition(slicepos);
   double pt[3];
   pt[0] = m_dIntersectPoint[0];
@@ -914,7 +914,7 @@ vtkProp *RenderView3D::PickProp(int posX, int posY, double *pos_out) {
 }
 
 bool RenderView3D::InitializeSelectRegion(int posX, int posY) {
-  double pos[3];
+  double   pos[3];
   vtkProp *prop = this->PickProp(posX, posY, pos);
   if (!prop) {
     return false;
@@ -971,7 +971,7 @@ void RenderView3D::AddSelectRegionLoopPoint(int posX, int posY) {
   LayerMRI *mri =
       (LayerMRI *)MainWindow::GetMainWindow()->GetActiveLayer("MRI");
   if (mri) {
-    double pos[3];
+    double   pos[3];
     vtkProp *prop = this->PickProp(posX, posY, pos);
     if (!prop || !mri->HasProp(prop)) {
       return;
@@ -1001,7 +1001,7 @@ void RenderView3D::DeleteCurrentSelectRegion() {
 }
 
 SurfaceROI *RenderView3D::InitializeSurfaceROI(int posX, int posY) {
-  double pos[3];
+  double   pos[3];
   vtkProp *prop = this->PickProp(posX, posY, pos);
   if (!prop) {
     return NULL;
@@ -1034,7 +1034,7 @@ void RenderView3D::AddSurfaceROIPoint(int posX, int posY) {
   LayerSurface *surf =
       (LayerSurface *)MainWindow::GetMainWindow()->GetActiveLayer("Surface");
   if (surf) {
-    double pos[3];
+    double   pos[3];
     vtkProp *prop = this->PickProp(posX, posY, pos);
     if (!prop || !surf->HasProp(prop)) {
       return;
@@ -1085,7 +1085,7 @@ void RenderView3D::UpdateAxesActor() {
       (LayerSurface *)MainWindow::GetMainWindow()->GetActiveLayer("Surface");
   if (surf && surf->IsVisible()) {
     vtkActor *prop = surf->GetMainActor();
-    double bounds[6];
+    double    bounds[6];
     prop->GetBounds(bounds);
     m_actorAxesActor->SetXAxisRange(0, bounds[1] - bounds[0]);
     m_actorAxesActor->SetYAxisRange(0, bounds[3] - bounds[2]);
@@ -1115,7 +1115,7 @@ void RenderView3D::MoveCroppingBound(int nX, int nY) {
 
 void RenderView3D::SnapToNearestAxis() {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double v[3], v_up[3];
+  double     v[3], v_up[3];
 
   cam->OrthogonalizeViewUp();
 
@@ -1197,10 +1197,10 @@ void RenderView3D::UpdateScalarBar() {
 }
 
 void RenderView3D::TriggerContextMenu(QMouseEvent *event) {
-  QMenu *menu = new QMenu(this);
-  bool bShowBar = this->GetShowScalarBar();
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  QList<Layer *> layers = mainwnd->GetLayers("Surface");
+  QMenu *        menu     = new QMenu(this);
+  bool           bShowBar = this->GetShowScalarBar();
+  MainWindow *   mainwnd  = MainWindow::GetMainWindow();
+  QList<Layer *> layers   = mainwnd->GetLayers("Surface");
   layers << mainwnd->GetLayers("MRI");
   layers << mainwnd->GetLayers("PointSet");
 
@@ -1267,8 +1267,8 @@ void RenderView3D::TriggerContextMenu(QMouseEvent *event) {
   }
 
   if (!layers.isEmpty()) {
-    QMenu *menu2 = menu->addMenu("Show Color Bar");
-    QActionGroup *ag = new QActionGroup(this);
+    QMenu *       menu2 = menu->addMenu("Show Color Bar");
+    QActionGroup *ag    = new QActionGroup(this);
     ag->setExclusive(false);
     foreach (Layer *layer, layers) {
       QAction *act = new QAction(layer->GetName(), this);
@@ -1336,18 +1336,18 @@ void RenderView3D::SetCamera(const QVariantMap &info) {
     if (!info.contains("Position") || !info.contains("FocalPoint") ||
         !info.contains("ViewUp") || !info.contains("ViewAngle"))
       return;
-    double pos[3], focal_pt[3], view_up[3];
+    double      pos[3], focal_pt[3], view_up[3];
     QVariantMap map = info["Position"].toMap();
-    pos[0] = map["x"].toDouble();
-    pos[1] = map["y"].toDouble();
-    pos[2] = map["z"].toDouble();
+    pos[0]          = map["x"].toDouble();
+    pos[1]          = map["y"].toDouble();
+    pos[2]          = map["z"].toDouble();
     cam->SetPosition(pos);
-    map = info["FocalPoint"].toMap();
+    map         = info["FocalPoint"].toMap();
     focal_pt[0] = map["x"].toDouble();
     focal_pt[1] = map["y"].toDouble();
     focal_pt[2] = map["z"].toDouble();
     cam->SetFocalPoint(focal_pt);
-    map = info["ViewUp"].toMap();
+    map        = info["ViewUp"].toMap();
     view_up[0] = map["x"].toDouble();
     view_up[1] = map["y"].toDouble();
     view_up[2] = map["z"].toDouble();
@@ -1359,37 +1359,37 @@ void RenderView3D::SetCamera(const QVariantMap &info) {
     //    cam->SetClippingRange(clip_range);
     m_renderer->ResetCameraClippingRange();
     Render();
-    if (info.contains("ViewSize"))
-    {
+    if (info.contains("ViewSize")) {
       map = info["ViewSize"].toMap();
-      MainWindow::GetMainWindow()->SetViewSize(map["width"].toInt(), map["height"].toInt());
+      MainWindow::GetMainWindow()->SetViewSize(map["width"].toInt(),
+                                               map["height"].toInt());
     }
   }
 }
 
 QVariantMap RenderView3D::GetCamera() {
   QVariantMap info;
-  vtkCamera *cam = m_renderer->GetActiveCamera();
+  vtkCamera * cam = m_renderer->GetActiveCamera();
   if (cam) {
     double pos[3], focal_pt[3], view_up[3];
     cam->GetPosition(pos);
     cam->GetFocalPoint(focal_pt);
     cam->GetViewUp(view_up);
     QVariantMap map;
-    map["x"] = pos[0];
-    map["y"] = pos[1];
-    map["z"] = pos[2];
+    map["x"]         = pos[0];
+    map["y"]         = pos[1];
+    map["z"]         = pos[2];
     info["Position"] = map;
     map.clear();
-    map["x"] = focal_pt[0];
-    map["y"] = focal_pt[1];
-    map["z"] = focal_pt[2];
+    map["x"]           = focal_pt[0];
+    map["y"]           = focal_pt[1];
+    map["z"]           = focal_pt[2];
     info["FocalPoint"] = map;
     map.clear();
-    map["x"] = view_up[0];
-    map["y"] = view_up[1];
-    map["z"] = view_up[2];
-    info["ViewUp"] = map;
+    map["x"]          = view_up[0];
+    map["y"]          = view_up[1];
+    map["z"]          = view_up[2];
+    info["ViewUp"]    = map;
     info["ViewAngle"] = cam->GetViewAngle();
     //    map.clear();
     //    cam->GetClippingRange(clip_range);
@@ -1397,8 +1397,8 @@ QVariantMap RenderView3D::GetCamera() {
     //    map["far"] = clip_range[1];
     //    info["ClippingRange"] = map;
     map.clear();
-    map["width"] = width();
-    map["height"] = height();
+    map["width"]     = width();
+    map["height"]    = height();
     info["ViewSize"] = map;
   }
   return info;
@@ -1432,7 +1432,7 @@ void RenderView3D::ShowCursor(bool bshow) {
 void RenderView3D::OnLayerVisibilityChanged() {
   LayerCollection *lc_surface =
       MainWindow::GetMainWindow()->GetLayerCollection("Surface");
-  bool bShowCursor = m_cursor3D->IsShown();
+  bool bShowCursor   = m_cursor3D->IsShown();
   bool bShowInflated = m_cursorInflatedSurf->IsShown();
   if (lc_surface->IsEmpty())
     m_cursorInflatedSurf->Hide();

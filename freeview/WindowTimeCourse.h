@@ -25,8 +25,8 @@
 #ifndef WINDOWTIMECOURSE_H
 #define WINDOWTIMECOURSE_H
 
-#include <QWidget>
 #include <QLabel>
+#include <QWidget>
 
 namespace Ui {
 class WindowTimeCourse;
@@ -42,8 +42,8 @@ class ClickableLabel : public QLabel {
   Q_OBJECT
 
 public:
-  explicit ClickableLabel(QWidget *parent = Q_NULLPTR,
-                          Qt::WindowFlags f = Qt::WindowFlags());
+  explicit ClickableLabel(QWidget *       parent = Q_NULLPTR,
+                          Qt::WindowFlags f      = Qt::WindowFlags());
   ~ClickableLabel();
 
 signals:
@@ -90,10 +90,10 @@ private:
   QWidget *MakeLegendWidget(QObject *obj, const TimeCourseData &td);
 
   Ui::WindowTimeCourse *ui;
-  LayerMRI *lastMRI;
-  LayerSurface *lastSurface;
-  SurfaceOverlay *lastOverlay;
-  FlowLayout *layoutLegend;
+  LayerMRI *            lastMRI;
+  LayerSurface *        lastSurface;
+  SurfaceOverlay *      lastOverlay;
+  FlowLayout *          layoutLegend;
 };
 
 #endif // WINDOWTIMECOURSE_H

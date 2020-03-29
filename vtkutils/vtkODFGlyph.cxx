@@ -1,14 +1,14 @@
 #include "vtkODFGlyph.h"
 
-#include <vtkObjectFactory.h>
+#include <vtkCellArray.h>
 #include <vtkDoubleArray.h>
 #include <vtkIdTypeArray.h>
-#include <vtkCellArray.h>
+#include <vtkImageData.h>
+#include <vtkLookupTable.h>
+#include <vtkObjectFactory.h>
 #include <vtkPointData.h>
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
-#include <vtkImageData.h>
-#include <vtkLookupTable.h>
 
 #include <cmath>
 
@@ -774,7 +774,7 @@ vtkODFGlyph::vtkODFGlyph() : ScaleFactor(7), BrightnessLevels(100) {
   this->SetGFARange(0, 1);
 
   int numTableValues = this->NUM_SPHERE_POINTS * this->BrightnessLevels;
-  this->ColorTable = vtkLookupTable::New();
+  this->ColorTable   = vtkLookupTable::New();
   this->ColorTable->SetNumberOfTableValues(numTableValues);
   this->ColorTable->SetTableRange(0, numTableValues - 1);
 
@@ -798,13 +798,13 @@ vtkODFGlyph::vtkODFGlyph() : ScaleFactor(7), BrightnessLevels(100) {
 vtkODFGlyph::~vtkODFGlyph() { this->ColorTable->Delete(); }
 
 void vtkODFGlyph::Execute() {
-  vtkImageData *input = (vtkImageData *)(this->GetInput());
-  vtkPolyData *output = this->GetOutput();
+  vtkImageData *input  = (vtkImageData *)(this->GetInput());
+  vtkPolyData * output = this->GetOutput();
 
-  int *dim = input->GetDimensions(); // change to rely on extent only
-  int *extent = input->GetExtent();
-  double *spacing = input->GetSpacing();
-  vtkIdType newId = 0;
+  int *     dim     = input->GetDimensions(); // change to rely on extent only
+  int *     extent  = input->GetExtent();
+  double *  spacing = input->GetSpacing();
+  vtkIdType newId   = 0;
 
   vtkDoubleArray *pcoords = vtkDoubleArray::New();
   pcoords->SetNumberOfComponents(3);

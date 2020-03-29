@@ -1,27 +1,25 @@
 #ifndef _MeshToImageFilter_h_
 #define _MeshToImageFilter_h_
 
-#include "itkImageSource.h"
 #include "itkGaussianSpatialFunction.h"
+#include "itkImageSource.h"
 #include "itkMinimumMaximumImageCalculator.h"
 #include "itkShiftScaleImageFilter.h"
 
 #include "itkContinuousIndex.h"
+#include "itkEuclideanDistanceMetric.h"
 #include "itkKdTree.h"
 #include "itkKdTreeGenerator.h"
 #include "itkListSample.h"
-#include "itkEuclideanDistanceMetric.h"
-
-using namespace itk;
 
 template <class TInputMesh, class TOutputImage>
-class ITK_EXPORT MeshToImageFilter : public ImageSource<TOutputImage> {
+class ITK_EXPORT MeshToImageFilter : public itk::ImageSource<TOutputImage> {
 
 public:
-  using Self = MeshToImageFilter<TInputMesh, TOutputImage>;
-  using Superclass = ImageSource<TOutputImage>;
-  using Pointer = SmartPointer<Self>;
-  using ConstPointer = SmartPointer<const Self>;
+  using Self         = MeshToImageFilter<TInputMesh, TOutputImage>;
+  using Superclass   = itk::ImageSource<TOutputImage>;
+  using Pointer      = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
   itkNewMacro(Self);
   itkTypeMacro(MeshToImageFilter, ImageSource);
@@ -29,21 +27,21 @@ public:
   itkStaticConstMacro(ImageDimension, unsigned int,
                       TOutputImage::ImageDimension);
 
-  using MeshType = TInputMesh;
+  using MeshType        = TInputMesh;
   using MeshTypePointer = typename MeshType::Pointer;
 
   /** Image typedefs */
-  using OutputImageType = TOutputImage;
-  using OutputPixelType = typename OutputImageType::PixelType;
+  using OutputImageType       = TOutputImage;
+  using OutputPixelType       = typename OutputImageType::PixelType;
   using OutputImageRegionType = typename OutputImageType::RegionType;
-  using PointType = typename OutputImageType::PointType;
-  using IndexType = typename OutputImageType::IndexType;
-  using SpacingType = typename OutputImageType::SpacingType;
-  using SizeType = typename OutputImageType::SizeType;
-  using DirectionType = typename OutputImageType::DirectionType;
+  using PointType             = typename OutputImageType::PointType;
+  using IndexType             = typename OutputImageType::IndexType;
+  using SpacingType           = typename OutputImageType::SpacingType;
+  using SizeType              = typename OutputImageType::SizeType;
+  using DirectionType         = typename OutputImageType::DirectionType;
 
   /** Typedefs for base image. */
-  using ImageBaseType = ImageBase<(Self::ImageDimension)>;
+  using ImageBaseType = itk::ImageBase<(Self::ImageDimension)>;
 
   /** Set the size of the output image. */
   virtual void SetOutputSize(const SizeType &size);
@@ -89,7 +87,7 @@ public:
   virtual void GenerateOutputInformation();
 
   /** Set/Get the vector of positions */
-  void SetInput(MeshTypePointer mesh) { m_Input = mesh; }
+  void            SetInput(MeshTypePointer mesh) { m_Input = mesh; }
   MeshTypePointer GetInput() { return this->m_Input; }
 
   float BinaryImageOfLabels(int label, int flip);
@@ -101,7 +99,7 @@ protected:
   /** Threaded implementation */
   void GenerateData();
 
-  void PrintSelf(std::ostream &os, Indent indent) const {
+  void PrintSelf(std::ostream &os, itk::Indent indent) const {
     Superclass::PrintSelf(os, indent);
   }
 
@@ -109,13 +107,13 @@ private:
   MeshToImageFilter(const Self &);
   void operator=(const Self &);
 
-  OutputImageRegionType m_OutputRegion; // region of the output image
-  SpacingType m_OutputSpacing;          // output image spacing
-  PointType m_OutputOrigin;             // output image origin
-  DirectionType m_OutputDirection;      // output image direction cosines
+  OutputImageRegionType m_OutputRegion;    // region of the output image
+  SpacingType           m_OutputSpacing;   // output image spacing
+  PointType             m_OutputOrigin;    // output image origin
+  DirectionType         m_OutputDirection; // output image direction cosines
 
   MeshTypePointer m_Input;
-  bool m_usingLabels;
+  bool            m_usingLabels;
 };
 
 #include "MeshToImageFilter.txx"

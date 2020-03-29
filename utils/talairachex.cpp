@@ -118,9 +118,9 @@ int ModifyTalairachCRAS(MRI *mri_tal, const LTA *lta) {
 // Matrix routines
 ///////////////////////////////////////////////////////////////////
 MATRIX *MtalairachFromVoxel(MRI *mri_src, const LTA *lta) {
-  MATRIX *RASfromVoxel = nullptr;
+  MATRIX *RASfromVoxel    = nullptr;
   MATRIX *talRASfromVoxel = nullptr;
-  RASfromVoxel = extract_i_to_r(mri_src);
+  RASfromVoxel            = extract_i_to_r(mri_src);
   if (lta) {
     if (lta->num_xforms == 0)
       ErrorExit(ERROR_BADPARM, "lta does not have xform");
@@ -137,10 +137,10 @@ MATRIX *MtalairachFromVoxel(MRI *mri_src, const LTA *lta) {
 }
 
 MATRIX *MtalVoxelFromVoxel(MRI *mri_src, const LTA *lta) {
-  MATRIX *talRASFromVoxel = nullptr;
+  MATRIX *talRASFromVoxel    = nullptr;
   MATRIX *talVoxelFromTalRAS = nullptr;
   MATRIX *res;
-  MRI *mri_talvol;
+  MRI *   mri_talvol;
 
   talRASFromVoxel = MtalairachFromVoxel(mri_src, lta);
   // use lta->xform[0].dst to construct the talairach volume matrix
@@ -159,14 +159,14 @@ MATRIX *MtalVoxelFromVoxel(MRI *mri_src, const LTA *lta) {
 
 MATRIX *MvoxelFromTalairach(MRI *mri_dst, const LTA *lta) {
   MATRIX *RASFromTalairach = nullptr;
-  MATRIX *voxelFromRAS = nullptr;
-  MATRIX *res = nullptr;
+  MATRIX *voxelFromRAS     = nullptr;
+  MATRIX *res              = nullptr;
   if (lta)
     RASFromTalairach = MatrixInverse(lta->xforms[0].m_L, nullptr);
   else
     RASFromTalairach = MatrixIdentity(4, nullptr);
   voxelFromRAS = extract_r_to_i(mri_dst);
-  res = MatrixMultiply(voxelFromRAS, RASFromTalairach, NULL);
+  res          = MatrixMultiply(voxelFromRAS, RASFromTalairach, NULL);
   MatrixFree(&RASFromTalairach);
   MatrixFree(&voxelFromRAS);
   return res;
@@ -174,9 +174,9 @@ MATRIX *MvoxelFromTalairach(MRI *mri_dst, const LTA *lta) {
 
 MATRIX *MvoxelFromTalVoxel(MRI *mri_dst, const LTA *lta) {
   MATRIX *talairachFromTalVol = nullptr;
-  MATRIX *voxelFromTalRAS = nullptr;
-  MATRIX *res = nullptr;
-  MRI *mri_talvol = nullptr;
+  MATRIX *voxelFromTalRAS     = nullptr;
+  MATRIX *res                 = nullptr;
+  MRI *   mri_talvol          = nullptr;
 
   mri_talvol = MRIallocHeader(mri_dst->width, mri_dst->height, mri_dst->depth,
                               mri_dst->type, 1);
@@ -184,7 +184,7 @@ MATRIX *MvoxelFromTalVoxel(MRI *mri_dst, const LTA *lta) {
   ModifyTalairachCRAS(mri_talvol, lta);
 
   talairachFromTalVol = extract_i_to_r(mri_talvol);
-  voxelFromTalRAS = MvoxelFromTalairach(mri_dst, lta);
+  voxelFromTalRAS     = MvoxelFromTalairach(mri_dst, lta);
   res = MatrixMultiply(voxelFromTalRAS, talairachFromTalVol, NULL);
   MatrixFree(&talairachFromTalVol);
   MatrixFree(&voxelFromTalRAS);
@@ -193,18 +193,18 @@ MATRIX *MvoxelFromTalVoxel(MRI *mri_dst, const LTA *lta) {
 }
 
 MATRIX *MRASFromTalVoxel(MRI *mri, const LTA *lta) {
-  MRI *mriTal = nullptr;
+  MRI *   mriTal             = nullptr;
   MATRIX *talRASfromTalVoxel = nullptr;
-  MATRIX *RASfromTalRAS = nullptr;
-  MATRIX *res = nullptr;
+  MATRIX *RASfromTalRAS      = nullptr;
+  MATRIX *res                = nullptr;
 
   mriTal = MRIallocHeader(mri->width, mri->height, mri->depth, mri->type, 1);
   MRIcopyHeader(mri, mriTal);
   ModifyTalairachCRAS(mriTal, lta);
 
   talRASfromTalVoxel = extract_i_to_r(mriTal);
-  RASfromTalRAS = MatrixInverse(lta->xforms[0].m_L, nullptr);
-  res = MatrixMultiply(RASfromTalRAS, talRASfromTalVoxel, NULL);
+  RASfromTalRAS      = MatrixInverse(lta->xforms[0].m_L, nullptr);
+  res                = MatrixMultiply(RASfromTalRAS, talRASfromTalVoxel, NULL);
   MatrixFree(&talRASfromTalVoxel);
   MatrixFree(&RASfromTalRAS);
   MRIfree(&mriTal);
@@ -372,7 +372,7 @@ MRI *MRIfromTalairachEx(MRI *mri_tal, MRI *mri_dst, const LTA *lta) {
 MRI *MRIextractTalairachPlaneEx(MRI *mri_src, MRI *mri_dst, int orientation,
                                 int x, int y, int z, int wsize, LTA *lta) {
   double e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
-  int whalf, xk, yk, xi, yi, zi;
+  int    whalf, xk, yk, xi, yi, zi;
   double ex, ey, ez, x0, y0, z0;
   // double len;
 
@@ -385,11 +385,11 @@ MRI *MRIextractTalairachPlaneEx(MRI *mri_src, MRI *mri_dst, int orientation,
     mri_dst->xstart = x - whalf * mri_dst->xsize;
     mri_dst->ystart = y - whalf * mri_dst->ysize;
     mri_dst->zstart = z - whalf * mri_dst->zsize;
-    mri_dst->xend = mri_dst->xstart + wsize * mri_dst->xsize;
-    mri_dst->yend = mri_dst->ystart + wsize * mri_dst->ysize;
-    mri_dst->zend = mri_dst->zstart + wsize * mri_dst->zsize;
-    mri_dst->imnr0 = z + mri_src->imnr0;
-    mri_dst->imnr1 = mri_dst->imnr0;
+    mri_dst->xend   = mri_dst->xstart + wsize * mri_dst->xsize;
+    mri_dst->yend   = mri_dst->ystart + wsize * mri_dst->ysize;
+    mri_dst->zend   = mri_dst->zstart + wsize * mri_dst->zsize;
+    mri_dst->imnr0  = z + mri_src->imnr0;
+    mri_dst->imnr1  = mri_dst->imnr0;
   }
   // get a poisition in talairach volume
   MRIvoxelToTalairachVoxelEx(mri_src, x, y, z, &x0, &y0, &z0, lta);
@@ -482,7 +482,7 @@ int MRIeraseTalairachPlaneNewEx(MRI *mri, MRI *mri_mask, int orientation, int x,
                                 int y, int z, int wsize, int fill_val,
                                 LTA *lta) {
   double e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
-  int whalf, xk, yk, xi, yi, zi, xki, yki, x0, y0;
+  int    whalf, xk, yk, xi, yi, zi, xki, yki, x0, y0;
   double ex, ey, ez, xt0, yt0, zt0;
   // double len;
 
@@ -567,9 +567,9 @@ int MRIeraseTalairachPlaneNewEx(MRI *mri, MRI *mri_mask, int orientation, int x,
     zbase = (float)z + (float)yk * e2_z;
     for (xk = -whalf; xk <= whalf; xk++) {
       /* in-plane vect. is linear combination of scaled basis vects */
-      xi = mri->xi[nint(xbase + xk * e1_x)];
-      yi = mri->yi[nint(ybase + xk * e1_y)];
-      zi = mri->zi[nint(zbase + xk * e1_z)];
+      xi  = mri->xi[nint(xbase + xk * e1_x)];
+      yi  = mri->yi[nint(ybase + xk * e1_y)];
+      zi  = mri->zi[nint(zbase + xk * e1_z)];
       xki = mri_mask->xi[xk + x0];
       yki = mri_mask->yi[yk + y0];
       if (MRIvox(mri_mask, xki, yki, 0))

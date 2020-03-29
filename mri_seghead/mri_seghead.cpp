@@ -35,10 +35,10 @@
 #include "diag.h"
 #include "mrisurf.h"
 
-#include "fio.h"
 #include "cmdargs.h"
+#include "fio.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -46,27 +46,27 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int isflag(char *flag);
-static int singledash(char *flag);
-static int stringmatch(char *str1, char *str2);
-int main(int argc, char *argv[]);
+static int  isflag(char *flag);
+static int  singledash(char *flag);
+static int  stringmatch(char *str1, char *str2);
+int         main(int argc, char *argv[]);
 
 static char vcid[] = "$Id: mri_seghead.c,v 1.8 2014/03/25 16:06:42 greve Exp $";
 const char *Progname = nullptr;
-int debug = 0;
-char *subjid;
+int         debug    = 0;
+char *      subjid;
 
-char *involid;
-char *outvolid;
-char *outbox = nullptr;
-unsigned char fillval = 255;
-int thresh1 = -1;
-int thresh2 = -1;
-int nhitsmin = 2;
+char *        involid;
+char *        outvolid;
+char *        outbox   = nullptr;
+unsigned char fillval  = 255;
+int           thresh1  = -1;
+int           thresh2  = -1;
+int           nhitsmin = 2;
 
 int fillslices = 1;
-int fillrows = 1;
-int fillcols = 1;
+int fillrows   = 1;
+int fillcols   = 1;
 
 int dilate = 0;
 
@@ -77,7 +77,7 @@ MRI *cvol, *rvol, *svol;
 MRI *mrgvol;
 MRI *invol_orig;
 
-char tmpstr[1000];
+char  tmpstr[1000];
 char *hvoldat = nullptr;
 char *SUBJECTS_DIR;
 FILE *fp;
@@ -92,14 +92,14 @@ FILE *fp;
 void getSignalBehindHead(MRI *mri_in, MRI *mri_mask, const char *outbox) {
   // unsigned int debug = 0;
   // swap axis to be in conform orientation (LIA)
-  MRI *mri_lia = MRIconformSliceOrder(mri_in);
+  MRI *mri_lia  = MRIconformSliceOrder(mri_in);
   MRI *mri_head = MRIconformSliceOrder(mri_mask);
   // if (debug) MRIwrite(mri_lia,"test_orig.mgz");
   // if (debug) MRIwrite(mri_head,"test_head.mgz");
 
   int bdepth = 7;
-  int hmin = 30;
-  int hmax = 190;
+  int hmin   = 30;
+  int hmax   = 190;
   int cspace = 2;
 
   // find slices behind head (in the middle):
@@ -134,14 +134,14 @@ FOUND:
   if (outbox != nullptr)
     MRIwrite(mri_box, outbox);
 
-  MRI *mri_mag = MRIcloneDifferentType(mri_box, MRI_FLOAT);
+  MRI *mri_mag  = MRIcloneDifferentType(mri_box, MRI_FLOAT);
   MRI *mri_grad = MRIsobel(mri_box, nullptr, mri_mag);
   MRIfree(&mri_grad);
 
   // if (debug) MRIwrite(mri_mag,"test_mag.mgz");
 
-  double mean = 0.0;
-  double meanm = 0.0;
+  double       mean  = 0.0;
+  double       meanm = 0.0;
   unsigned int count = 0;
   for (s = 0; s < mri_box->depth; s++)
     for (r = 0; r < mri_box->height; r++)
@@ -150,8 +150,8 @@ FOUND:
         meanm += MRIgetVoxVal(mri_mag, c, r, s, 0);
         count++;
       }
-  mean = mean / count;
-  meanm = meanm / count;
+  mean       = mean / count;
+  meanm      = meanm / count;
   double var = 0;
   double temp;
   for (s = 0; s < mri_box->depth; s++)
@@ -222,9 +222,9 @@ int main(int argc, char **argv) {
     return (1);
   }
 
-  cvol = MRIclone(invol, nullptr);
-  rvol = MRIclone(invol, nullptr);
-  svol = MRIclone(invol, nullptr);
+  cvol   = MRIclone(invol, nullptr);
+  rvol   = MRIclone(invol, nullptr);
+  svol   = MRIclone(invol, nullptr);
   mrgvol = MRIclone(invol, nullptr);
   outvol = MRIclone(invol, nullptr);
 
@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
     for (r = 0; r < invol->height; r++) {
       for (s = 0; s < invol->depth; s++) {
 
-        c = 0;
+        c     = 0;
         nhits = 0;
         while (c < invol->width && nhits < nhitsmin) {
           if (MRIseq_vox(invol, c, r, s, 0) > thresh1)
@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
           continue;
         cmin = c;
 
-        c = invol->width - 1;
+        c     = invol->width - 1;
         nhits = 0;
         while (c > cmin && nhits < nhitsmin) {
           if (MRIseq_vox(invol, c, r, s, 0) > thresh1)
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
     for (c = 0; c < invol->width; c++) {
       for (s = 0; s < invol->depth; s++) {
 
-        r = 0;
+        r     = 0;
         nhits = 0;
         while (r < invol->height && nhits < nhitsmin) {
           if (MRIseq_vox(invol, c, r, s, 0) > thresh1)
@@ -293,7 +293,7 @@ int main(int argc, char **argv) {
           continue;
         rmin = r;
 
-        r = invol->height - 1;
+        r     = invol->height - 1;
         nhits = 0;
         while (r > rmin && nhits < nhitsmin) {
           if (MRIseq_vox(invol, c, r, s, 0) > thresh1)
@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
     for (c = 0; c < invol->width; c++) {
       for (r = 0; r < invol->height; r++) {
 
-        s = 0;
+        s     = 0;
         nhits = 0;
         while (s < invol->depth && nhits < nhitsmin) {
           if (MRIseq_vox(invol, c, r, s, 0) > thresh1)
@@ -339,7 +339,7 @@ int main(int argc, char **argv) {
           continue;
         smin = s;
 
-        s = invol->depth - 1;
+        s     = invol->depth - 1;
         nhits = 0;
         while (s > smin && nhits < nhitsmin) {
           if (MRIseq_vox(invol, c, r, s, 0) > thresh1)
@@ -386,11 +386,11 @@ int main(int argc, char **argv) {
                    thresh2, fillval, -1);
 
   printf("Counting\n");
-  n = 0;
+  n                = 0;
   double backnoise = 0.0;
-  int backcount = 0;
-  double backmax = 0.0;
-  double val = 0.0;
+  int    backcount = 0;
+  double backmax   = 0.0;
+  double val       = 0.0;
   for (c = 0; c < invol->width; c++) {
     for (r = 0; r < invol->height; r++) {
       for (s = 0; s < invol->depth; s++) {
@@ -433,9 +433,9 @@ int main(int argc, char **argv) {
 }
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  int a;
+  int    a;
 
   if (argc < 1)
     usage_exit();
@@ -468,23 +468,23 @@ static int parse_commandline(int argc, char **argv) {
     else if (stringmatch(option, "--invol") || stringmatch(option, "--i")) {
       if (nargc < 1)
         argnerr(option, 1);
-      involid = pargv[0];
+      involid   = pargv[0];
       nargsused = 1;
     } else if (stringmatch(option, "--outvol") || stringmatch(option, "--o")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outvolid = pargv[0];
+      outvolid  = pargv[0];
       nargsused = 1;
     } else if (stringmatch(option, "--subject") || stringmatch(option, "--s")) {
       if (nargc < 1)
         argnerr(option, 1);
-      subjid = pargv[0];
+      subjid    = pargv[0];
       nargsused = 1;
     } else if (stringmatch(option, "--fill")) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%d", &a);
-      fillval = (unsigned char)a;
+      fillval   = (unsigned char)a;
       nargsused = 1;
     } else if (stringmatch(option, "--thresh1")) {
       if (nargc < 1)
@@ -500,7 +500,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%d", &thresh1);
-      thresh2 = thresh1;
+      thresh2   = thresh1;
       nargsused = 1;
     } else if (stringmatch(option, "--nhitsmin")) {
       if (nargc < 1)
@@ -510,7 +510,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (stringmatch(option, "--hvoldat")) {
       if (nargc < 1)
         argnerr(option, 1);
-      hvoldat = pargv[0];
+      hvoldat   = pargv[0];
       nargsused = 1;
     } else if (stringmatch(option, "--dilate")) {
       if (nargc < 1)
@@ -520,14 +520,14 @@ static int parse_commandline(int argc, char **argv) {
     } else if (stringmatch(option, "--outbox")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outbox = pargv[0];
+      outbox    = pargv[0];
       nargsused = 1;
     } else if (stringmatch(option, "--skull")) {
-      char *subject, *innername, *outername;
+      char * subject, *innername, *outername;
       double params[7];
       if (nargc < 3)
         argnerr(option, 3);
-      subject = pargv[0];
+      subject   = pargv[0];
       innername = pargv[1]; // relative to subject/surf
       outername = pargv[2]; // relative to subject/surf
       params[0] = .5;       // athresh
@@ -545,7 +545,7 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       setenv("SUBJECTS_DIR", pargv[0], 1);
       SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-      nargsused = 1;
+      nargsused    = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (singledash(option))
@@ -701,8 +701,8 @@ int MakeSkullSurface(char *subject, double *params, char *innername,
                      char *outername) {
   char *SUBJECTS_DIR, tmpstr[5000];
   MRIS *surf, *surf2;
-  MRI *mri;
-  int ndils, navgs, n, err;
+  MRI * mri;
+  int   ndils, navgs, n, err;
   // athresh  = params[0]; // .5
   // minthick = params[1]; // 2
   // maxthick = params[2]; // 9
@@ -795,61 +795,61 @@ int MRISprojectDist(MRIS *surf, const MRI *mridist) {
  */
 int MRISbrainSurfToSkull(MRIS *surf, const double *params, const MRI *vol) {
   VERTEX *vtx;
-  MRI *mridist;
-  int vno, c, r, s, nthstep, nthstepvmax, nhits, nsteps;
+  MRI *   mridist;
+  int     vno, c, r, s, nthstep, nthstepvmax, nhits, nsteps;
   MATRIX *vox2tkras, *tkras2vox, *xyz, *crs;
-  double a, dist, dx, dy, dz, v, vmax, vmin, *vlist, dmax;
-  double athresh, maxdist = 30, stepsize = 0.5, minthick = 2, maxthick = 9;
+  double  a, dist, dx, dy, dz, v, vmax, vmin, *vlist, dmax;
+  double  athresh, maxdist = 30, stepsize = 0.5, minthick = 2, maxthick = 9;
 
-  athresh = params[0];  // .5
+  athresh  = params[0]; // .5
   minthick = params[1]; // 2
   maxthick = params[2]; // 9
-  maxdist = params[3];  // 30
+  maxdist  = params[3]; // 30
   stepsize = params[4]; // 0.5
 
-  vox2tkras = MRIxfmCRS2XYZtkreg(vol);
-  tkras2vox = MatrixInverse(vox2tkras, nullptr);
-  crs = MatrixAlloc(4, 1, MATRIX_REAL);
-  xyz = MatrixAlloc(4, 1, MATRIX_REAL);
+  vox2tkras       = MRIxfmCRS2XYZtkreg(vol);
+  tkras2vox       = MatrixInverse(vox2tkras, nullptr);
+  crs             = MatrixAlloc(4, 1, MATRIX_REAL);
+  xyz             = MatrixAlloc(4, 1, MATRIX_REAL);
   crs->rptr[4][1] = 1;
   xyz->rptr[4][1] = 1;
 
   nsteps = ceil(maxdist / stepsize) + 1;
-  vlist = (double *)calloc(sizeof(double), nsteps);
+  vlist  = (double *)calloc(sizeof(double), nsteps);
 
   mridist = MRIallocSequence(surf->nvertices, 1, 1, MRI_FLOAT, 1);
 
   nhits = 0;
   for (vno = 0; vno < surf->nvertices; vno++) {
-    vtx = &(surf->vertices[vno]);
-    vmax = 0;
-    vmin = 1e10;
+    vtx         = &(surf->vertices[vno]);
+    vmax        = 0;
+    vmin        = 1e10;
     nthstepvmax = 0;
     for (nthstep = 0; nthstep < nsteps; nthstep++)
       vlist[nthstep] = 0;
     // project out along the normal
     for (nthstep = 0; nthstep < nsteps; nthstep++) {
-      dist = stepsize * nthstep;
-      dx = dist * vtx->nx;
-      dy = dist * vtx->ny;
-      dz = dist * vtx->nz;
+      dist            = stepsize * nthstep;
+      dx              = dist * vtx->nx;
+      dy              = dist * vtx->ny;
+      dz              = dist * vtx->nz;
       xyz->rptr[1][1] = vtx->x + dx;
       xyz->rptr[2][1] = vtx->y + dy;
       xyz->rptr[3][1] = vtx->z + dz;
-      crs = MatrixMultiply(tkras2vox, xyz, crs);
-      c = crs->rptr[1][1];
-      r = crs->rptr[2][1];
-      s = crs->rptr[3][1];
+      crs             = MatrixMultiply(tkras2vox, xyz, crs);
+      c               = crs->rptr[1][1];
+      r               = crs->rptr[2][1];
+      s               = crs->rptr[3][1];
       if (c < 0 || c >= vol->width || r < 0 || r >= vol->height || s < 0 ||
           s >= vol->depth) {
         continue;
       }
-      v = MRIgetVoxVal(vol, c, r, s, 0);
+      v              = MRIgetVoxVal(vol, c, r, s, 0);
       vlist[nthstep] = v;
       if (vmax < v) {
         // keep track of where the max intensity is
-        vmax = v;
-        dmax = dist;
+        vmax        = v;
+        dmax        = dist;
         nthstepvmax = nthstep;
       }
     }

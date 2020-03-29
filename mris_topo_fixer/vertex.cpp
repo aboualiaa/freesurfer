@@ -29,7 +29,7 @@ Vertex::Vertex() {
   fnum = maxfnum = 0;
   f = n = nullptr;
   vnum = maxvnum = 0;
-  v = e = nullptr;
+  v = e  = nullptr;
   marked = 0;
 }
 
@@ -67,22 +67,22 @@ const Vertex &Vertex::operator=(const Vertex &vertex) {
   }
 
   // copying other variables
-  x = vertex.x;
-  y = vertex.y;
-  z = vertex.z;
-  tx = vertex.tx;
-  ty = vertex.ty;
-  tz = vertex.tz;
-  xorig = vertex.xorig;
-  yorig = vertex.yorig;
-  zorig = vertex.zorig;
-  sx = vertex.sx;
-  sy = vertex.sy;
-  sz = vertex.sz;
-  nx = vertex.nx;
-  ny = vertex.ny;
-  nz = vertex.nz;
-  curv = vertex.curv;
+  x      = vertex.x;
+  y      = vertex.y;
+  z      = vertex.z;
+  tx     = vertex.tx;
+  ty     = vertex.ty;
+  tz     = vertex.tz;
+  xorig  = vertex.xorig;
+  yorig  = vertex.yorig;
+  zorig  = vertex.zorig;
+  sx     = vertex.sx;
+  sy     = vertex.sy;
+  sz     = vertex.sz;
+  nx     = vertex.nx;
+  ny     = vertex.ny;
+  nz     = vertex.nz;
+  curv   = vertex.curv;
   marked = vertex.marked;
 
   return vertex;

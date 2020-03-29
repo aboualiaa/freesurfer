@@ -2,19 +2,19 @@
 // unit test for MRISpositionSurface - located in utils/mrisurf.c
 //
 
-#include <string>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <string>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "error.h"
-#include "utils.h"
 #include "macros.h"
 #include "mri.h"
 #include "mrisurf.h"
+#include "utils.h"
 
 #ifdef __cplusplus
 }
@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
 
   // read args:
   std::string Progname = argv[0];
-  std::string s_mris = argv[1];
-  std::string s_brain = argv[2];
+  std::string s_mris   = argv[1];
+  std::string s_brain  = argv[2];
   std::string s_smooth = argv[3];
 
   std::cout << Progname << std::endl;
@@ -63,28 +63,28 @@ int main(int argc, char *argv[]) {
   INTEGRATION_PARMS parms;
   memset(&parms, 0, sizeof(parms));
 
-  parms.fill_interior = 0;
-  parms.projection = NO_PROJECTION;
-  parms.tol = 1e-4;
-  parms.dt = 0.5f;
-  parms.base_dt = parms.dt;
-  parms.l_curv = 1.0;
-  parms.l_intensity = 0.2;
-  parms.l_spring = 1.0f;
-  parms.l_tspring = 1.0f;
-  parms.l_nspring = 0.5f;
-  parms.niterations = 20;
-  parms.start_t = 0;
+  parms.fill_interior    = 0;
+  parms.projection       = NO_PROJECTION;
+  parms.tol              = 1e-4;
+  parms.dt               = 0.5f;
+  parms.base_dt          = parms.dt;
+  parms.l_curv           = 1.0;
+  parms.l_intensity      = 0.2;
+  parms.l_spring         = 1.0f;
+  parms.l_tspring        = 1.0f;
+  parms.l_nspring        = 0.5f;
+  parms.niterations      = 20;
+  parms.start_t          = 0;
   parms.write_iterations = 0;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.momentum = 0.0;
-  parms.dt_increase = 1.0;
-  parms.dt_decrease = 0.50;
-  parms.error_ratio = 50.0;
-  parms.l_surf_repulse = 0.0;
-  parms.l_repulse = 5;
-  parms.sigma = 0.2f;
-  parms.n_averages = 10;
+  parms.momentum         = 0.0;
+  parms.dt_increase      = 1.0;
+  parms.dt_decrease      = 0.50;
+  parms.error_ratio      = 50.0;
+  parms.l_surf_repulse   = 0.0;
+  parms.l_repulse        = 5;
+  parms.sigma            = 0.2f;
+  parms.n_averages       = 10;
 
   // run:
   std::cout << "running MRISpositionSurface...\n";

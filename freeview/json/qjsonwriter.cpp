@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-#include "qjsonwriter_p.h"
 #include "qjson_p.h"
+#include "qjsonwriter_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -57,12 +57,12 @@ static inline uchar hexdig(uint u) {
 
 static QByteArray escapedString(const QString &s) {
   const uchar replacement = '?';
-  QByteArray ba(s.length(), Qt::Uninitialized);
+  QByteArray  ba(s.length(), Qt::Uninitialized);
 
-  uchar *cursor = (uchar *)ba.data();
+  uchar *      cursor = (uchar *)ba.data();
   const uchar *ba_end = cursor + ba.length();
 
-  const QChar *ch = (const QChar *)s.constData();
+  const QChar *ch  = (const QChar *)s.constData();
   const QChar *end = ch + s.length();
 
   int surrogate_high = -1;
@@ -79,7 +79,7 @@ static QByteArray escapedString(const QString &s) {
     uint u = ch->unicode();
     if (surrogate_high >= 0) {
       if (ch->isLowSurrogate()) {
-        u = QChar::surrogateToUcs4(surrogate_high, u);
+        u              = QChar::surrogateToUcs4(surrogate_high, u);
         surrogate_high = -1;
       } else {
         // high surrogate without low
@@ -155,7 +155,7 @@ static QByteArray escapedString(const QString &s) {
   return ba;
 }
 
-static void valueToJson(const QJsonPrivate::Base *b,
+static void valueToJson(const QJsonPrivate::Base * b,
                         const QJsonPrivate::Value &v, QByteArray &json,
                         int indent, bool compact) {
   QJsonValue::Type type = (QJsonValue::Type)(uint)v.type;

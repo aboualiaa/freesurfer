@@ -27,12 +27,12 @@
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
 #endif
-#include "timer.h"
-#include "diag.h"
-#include "mrimorph.h"
 #include "cma.h"
-#include "version.h"
+#include "diag.h"
 #include "mri2.h"
+#include "mrimorph.h"
+#include "timer.h"
+#include "version.h"
 
 #include "emregisterutils.h"
 #include "findtranslation.h"
@@ -41,12 +41,12 @@
 #define MM_FROM_EXTERIOR                                                       \
   5 // distance into brain mask to go when erasing super bright CSF voxels
 
-static int MIN_SCALES = DEFAULT_MIN_SCALES;
-static int clamp_set = 0;
-static double Gclamp = 6; // robust threshold - everything less likely than
-                          // -Gclamp will be set to -Gclamp
-static int remove_cerebellum = 0;
-static int mark_gcas_classes(GCA_SAMPLE *gcas, int nsamples);
+static int    MIN_SCALES = DEFAULT_MIN_SCALES;
+static int    clamp_set  = 0;
+static double Gclamp     = 6; // robust threshold - everything less likely than
+                              // -Gclamp will be set to -Gclamp
+static int  remove_cerebellum = 0;
+static int  mark_gcas_classes(GCA_SAMPLE *gcas, int nsamples);
 static void printUsage();
 
 static double TRs[MAX_GCA_INPUTS];
@@ -54,15 +54,15 @@ static double fas[MAX_GCA_INPUTS];
 static double TEs[MAX_GCA_INPUTS];
 
 static int bigvent = 0;
-static int skull = 0; /* if 1, aligning to image with skull */
-static int rigid = 0;
+static int skull   = 0; /* if 1, aligning to image with skull */
+static int rigid   = 0;
 
 GCA_SAMPLE *Ggcas;
 
 #define MAX_SCALE_PCT 0.15
-static float max_scale_pct = MAX_SCALE_PCT;
-static int Gscale_samples = 0;
-int robust = 0;
+static float max_scale_pct  = MAX_SCALE_PCT;
+static int   Gscale_samples = 0;
+int          robust         = 0;
 /*
   allowable distance from an unknown sample to one in brain. Default
   is 1 implying just a ring of unknowns alloowed outside brain. If aligning
@@ -70,7 +70,7 @@ int robust = 0;
   be used in the alignment.
 */
 static int unknown_nbr_spacing = 1;
-static int vent_spacing = -1;
+static int vent_spacing        = -1;
 
 int use_variance = 0;
 
@@ -83,57 +83,57 @@ static double find_optimal_linear_xform(
     float max_scale, float min_trans, float max_trans, float angle_steps,
     float scale_steps, float trans_steps, int nreductions);
 
-const char *Progname;
+const char *       Progname;
 static MORPH_PARMS parms;
 
-static char *T2_mask_fname = nullptr;
-static double T2_thresh = 0;
-static char *aparc_aseg_fname = nullptr;
-static char *mask_fname = nullptr;
-static char *norm_fname = nullptr;
+static char * T2_mask_fname    = nullptr;
+static double T2_thresh        = 0;
+static char * aparc_aseg_fname = nullptr;
+static char * mask_fname       = nullptr;
+static char * norm_fname       = nullptr;
 
-static char *xform_name = nullptr;
+static char *xform_name     = nullptr;
 static char *long_reg_fname = nullptr;
 
-static char *example_T1 = nullptr;
+static char *example_T1           = nullptr;
 static char *example_segmentation = nullptr;
 
-static int map_to_flash = 0;
-static double TR = -1;
-static double alpha = -1;
-static double TE = -1;
-static int baby = 0;
+static int    map_to_flash = 0;
+static double TR           = -1;
+static double alpha        = -1;
+static double TE           = -1;
+static int    baby         = 0;
 
-float G_wm_mean, G_gm_mean, G_fluid_mean;
+float      G_wm_mean, G_gm_mean, G_fluid_mean;
 static int nomap = 0;
 
-static char *sample_fname = nullptr;
-static char *transformed_sample_fname = nullptr;
+static char *sample_fname                        = nullptr;
+static char *transformed_sample_fname            = nullptr;
 static char *normalized_transformed_sample_fname = nullptr;
-static char *ctl_point_fname = nullptr;
-static int novar = 0;
+static char *ctl_point_fname                     = nullptr;
+static int   novar                               = 0;
 
 #define MAX_SPACING 8
 static int max_spacing = MAX_SPACING;
-static int nscales = 1;
+static int nscales     = 1;
 
-static int use_contrast = 0;
-static float min_prior = MIN_PRIOR;
-static double tol = 0.001;
-static double tx = 0.0;
-static double ty = 0.0;
-static double tz = 0.0;
-static double rzrot = 0.0;
-static double rxrot = 0.0;
-static double ryrot = 0.0;
+static int    use_contrast = 0;
+static float  min_prior    = MIN_PRIOR;
+static double tol          = 0.001;
+static double tx           = 0.0;
+static double ty           = 0.0;
+static double tz           = 0.0;
+static double rzrot        = 0.0;
+static double rxrot        = 0.0;
+static double ryrot        = 0.0;
 
-int exvivo = 0;
+int        exvivo    = 0;
 static int remove_lh = 0;
 static int remove_rh = 0;
 
 static FILE *diag_fp = nullptr;
 
-static LTA *Glta = nullptr;
+static LTA *      Glta      = nullptr;
 static TRANSFORM *transform = nullptr;
 
 static int translation_only = 0;
@@ -141,16 +141,16 @@ static int get_option(int argc, char *argv[]);
 static int register_mri(MRI *mri_in, GCA *gca, MP *parms, int passno,
                         int spacing);
 
-static char *renormalization_fname = nullptr;
-static char *tissue_parms_fname = nullptr;
-static int center = 1;
-static int nreductions = 1;
-static int noscale = 0;
-static int noiscale = 0;
-static double prior_iscale = -1;
-static int num_xforms = 1;
-static int transform_loaded = 0;
-static char *gca_mean_fname = nullptr;
+static char * renormalization_fname = nullptr;
+static char * tissue_parms_fname    = nullptr;
+static int    center                = 1;
+static int    nreductions           = 1;
+static int    noscale               = 0;
+static int    noiscale              = 0;
+static double prior_iscale          = -1;
+static int    num_xforms            = 1;
+static int    transform_loaded      = 0;
+static char * gca_mean_fname        = nullptr;
 
 static int ninsertions = 0;
 static int insert_labels[MAX_INSERTIONS];
@@ -172,18 +172,18 @@ static double blur_sigma = 0.0f;
    argv[3]  - directory in which to write out registered brain.
 */
 
-#define NPARMS 12
-#define NSAMPLES (NPARMS * 20)
+#define NPARMS                12
+#define NSAMPLES              (NPARMS * 20)
 #define DEFAULT_CTL_POINT_PCT .25
 static double ctl_point_pct = DEFAULT_CTL_POINT_PCT;
-static int nsamples = NSAMPLES;
+static int    nsamples      = NSAMPLES;
 
 static MRI *apply_transform(MRI *mri, GCA *gca, MATRIX *m_L) {
   MRI *mri_aligned;
 
-  mri->nframes = 1;
+  mri->nframes        = 1;
   Glta->xforms[0].m_L = m_L;
-  mri_aligned = MRIlinearTransform(mri, nullptr, m_L);
+  mri_aligned         = MRIlinearTransform(mri, nullptr, m_L);
   GCAcopyDCToMRI(gca, mri_aligned);
   mri->nframes = gca->ninputs;
 
@@ -194,7 +194,7 @@ static MRI *apply_transform(MRI *mri, GCA *gca, MATRIX *m_L) {
                          gca->depth);
     GCAcopyDCToMRI(gca, mri_tmp);
     MRIfree(&mri_aligned);
-    mri_aligned = mri_tmp;
+    mri_aligned        = mri_tmp;
     mri_aligned->xsize = gca->xsize;
     mri_aligned->ysize = gca->ysize;
     mri_aligned->zsize = gca->zsize;
@@ -202,12 +202,12 @@ static MRI *apply_transform(MRI *mri, GCA *gca, MATRIX *m_L) {
   return (mri_aligned);
 }
 
-char *rusage_file = nullptr;
-int n_omp_threads = 1;
+char *rusage_file   = nullptr;
+int   n_omp_threads = 1;
 
 int main(int argc, char *argv[]) {
   if (false) {
-    int i;
+    int         i;
     const char *sep = "";
     for (i = 0; i < argc; i++) {
       fputs(sep, stderr);
@@ -218,20 +218,19 @@ int main(int argc, char *argv[]) {
   }
 
   char *gca_fname, *in_fname, *out_fname, fname[STRLEN], **av;
-  MRI *mri_in, *mri_tmp, *mri_dst;
-  GCA *gca /*, *gca_tmp, *gca_reduced*/;
-  int ac, nargs, i, ninputs, scale, spacing;
-  int exclude_list[MAX_CMA_LABEL + 1];
-  int msec, minutes, seconds, min_left_cbm, min_right_cbm;
+  MRI * mri_in, *mri_tmp, *mri_dst;
+  GCA * gca /*, *gca_tmp, *gca_reduced*/;
+  int   ac, nargs, i, ninputs, scale, spacing;
+  int   exclude_list[MAX_CMA_LABEL + 1];
+  int   msec, minutes, seconds, min_left_cbm, min_right_cbm;
   Timer start;
   float old_log_p, log_p;
 
   FSinit();
 
   nargs = handleVersionOption(argc, argv, "mri_em_register");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -239,16 +238,16 @@ int main(int argc, char *argv[]) {
   /*    exclude_list[0] = 1 ;*/
   parms.l_intensity = 1.0f;
   parms.niterations = 100;
-  parms.levels = -1; /* use default */
-  parms.dt = 1e-6;   /* was 5e-6 */
-  parms.tol = INTEGRATION_TOL * 5;
+  parms.levels      = -1;   /* use default */
+  parms.dt          = 1e-6; /* was 5e-6 */
+  parms.tol         = INTEGRATION_TOL * 5;
 
-  parms.max_levels = 0;
-  parms.dt = 5e-6; /* was 5e-6 */
-  parms.tol = 1e-5;
-  parms.momentum = 0.8;
+  parms.max_levels  = 0;
+  parms.dt          = 5e-6; /* was 5e-6 */
+  parms.tol         = 1e-5;
+  parms.momentum    = 0.8;
   parms.niterations = 25;
-  Progname = argv[0];
+  Progname          = argv[0];
 
   setRandomSeed(-1L);
   DiagInit(nullptr, nullptr, nullptr);
@@ -300,8 +299,8 @@ int main(int argc, char *argv[]) {
   {
     Timer start;
     start.reset();
-    gca = GCAread(gca_fname);
-    int msec = start.milliseconds();
+    gca         = GCAread(gca_fname);
+    int msec    = start.milliseconds();
     int seconds = nint((float)msec / 1000.0f);
     printf("GCAread took %d minutes and %d seconds.\n", seconds / 60,
            seconds % 60);
@@ -352,17 +351,17 @@ int main(int argc, char *argv[]) {
 
   ////////// -renorm fname ////////////////////////////////////////////
   if (renormalization_fname) {
-    FILE *fp;
-    int *labels, nlines, i;
+    FILE * fp;
+    int *  labels, nlines, i;
     float *intensities, f1, f2;
-    char *cp, line[STRLEN];
+    char * cp, line[STRLEN];
 
     fp = fopen(renormalization_fname, "r");
     if (!fp)
       ErrorExit(ERROR_NOFILE, "%s: could not read %s", Progname,
                 renormalization_fname);
 
-    cp = fgetl(line, 199, fp);
+    cp     = fgetl(line, 199, fp);
     nlines = 0;
     while (cp) {
       nlines++;
@@ -370,12 +369,12 @@ int main(int argc, char *argv[]) {
     }
     rewind(fp);
     printf("reading %d labels from %s...\n", nlines, renormalization_fname);
-    labels = (int *)calloc(nlines, sizeof(int));
+    labels      = (int *)calloc(nlines, sizeof(int));
     intensities = (float *)calloc(nlines, sizeof(float));
-    cp = fgetl(line, 199, fp);
+    cp          = fgetl(line, 199, fp);
     for (i = 0; i < nlines; i++) {
       sscanf(cp, "%e  %e", &f1, &f2);
-      labels[i] = (int)f1;
+      labels[i]      = (int)f1;
       intensities[i] = f2;
       if (labels[i] == Left_Cerebral_White_Matter) {
         DiagBreak();
@@ -403,7 +402,7 @@ int main(int argc, char *argv[]) {
     TEs[i] = mri_tmp->te;
     if (mask_fname) {
       MRI *mri_mask;
-      int val;
+      int  val;
 
       mri_mask = MRIread(mask_fname);
       if (!mri_mask)
@@ -495,8 +494,8 @@ int main(int argc, char *argv[]) {
   ///////////////////////////////////////////////////////////////
   else if (gca->type == GCA_FLASH) {
     GCA *gca_tmp;
-    int need_map_flag = 0;
-    int n;
+    int  need_map_flag = 0;
+    int  n;
 
     if (gca->ninputs != mri_in->nframes) {
       need_map_flag = 1;
@@ -640,7 +639,7 @@ int main(int argc, char *argv[]) {
     // now start working (remember this is vox-to-vox transform)
     parms.lta->xforms[0].m_L = MatrixIdentity(4, nullptr);
     printf("accounting for voxel sizes in initial transform\n");
-    m_voxsize = MatrixIdentity(4, nullptr);
+    m_voxsize                     = MatrixIdentity(4, nullptr);
     *MATRIX_RELT(m_voxsize, 1, 1) = mri_in->xsize;
     *MATRIX_RELT(m_voxsize, 2, 2) = mri_in->ysize;
     *MATRIX_RELT(m_voxsize, 3, 3) = mri_in->zsize;
@@ -655,7 +654,7 @@ int main(int argc, char *argv[]) {
     MRI *mri_tmp, *mri_kernel;
 
     mri_kernel = MRIgaussian1d(blur_sigma, 100);
-    mri_tmp = MRIconvolveGaussian(mri_in, nullptr, mri_kernel);
+    mri_tmp    = MRIconvolveGaussian(mri_in, nullptr, mri_kernel);
     MRIfree(&mri_in);
     mri_in = mri_tmp;
   }
@@ -730,7 +729,7 @@ int main(int argc, char *argv[]) {
                                    unknown_nbr_spacing); // HACK, bigvent) ;
   mark_gcas_classes(parms.gcas, nsamples);
   parms.nsamples = nsamples;
-  parms.tol = 1e-7;
+  parms.tol      = 1e-7;
   parms.start_t++;
 
   //////////////////// diagnostics //////////////////////////////////////////
@@ -771,7 +770,7 @@ int main(int argc, char *argv[]) {
   printf("**************************************************\n");
   fflush(stdout);
   parms.mri_in = mri_in; /* for diagnostics */
-  parms.clamp = Gclamp;
+  parms.clamp  = Gclamp;
   MRIemAlign(mri_in, gca, &parms, parms.lta->xforms[0].m_L);
 
   printf("final transform:\n");
@@ -846,7 +845,7 @@ int main(int argc, char *argv[]) {
   ///////////////////////////////////////////////////////////////////////
   if (norm_fname) {
     int *ordered_indices, i, label, nused, nleft_cbm, nright_cbm;
-    int nleft_used, nright_used;
+    int  nleft_used, nright_used;
     MRI *mri_norm;
 
     local_GCAcomputeLogSampleProbability(
@@ -952,7 +951,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    min_left_cbm = nint(nleft_cbm * ctl_point_pct + .9);
+    min_left_cbm  = nint(nleft_cbm * ctl_point_pct + .9);
     min_right_cbm = nint(nright_cbm * ctl_point_pct + .9);
     printf("%d/%d (l/r) cerebellar points initially in "
            "top %d%%, min (%d,%d)\n",
@@ -1116,23 +1115,23 @@ static int register_mri(MRI *mri_in, GCA *gca, MORPH_PARMS *parms, int passno,
 
 #define DEFAULT_MAX_STEPS 5
 static double MAX_ANGLES = DEFAULT_MAX_STEPS;
-static double MAX_ANGLE = RADIANS(30);
+static double MAX_ANGLE  = RADIANS(30);
 // static double MIN_ANGLE  = RADIANS(2) ;
 
-static int max_angles = DEFAULT_MAX_STEPS;
-static int max_scales = DEFAULT_MAX_STEPS;
-static int MAX_TRANS_STEPS = DEFAULT_MAX_STEPS;
-static double MAX_TRANS = 30;
+static int    max_angles      = DEFAULT_MAX_STEPS;
+static int    max_scales      = DEFAULT_MAX_STEPS;
+static int    MAX_TRANS_STEPS = DEFAULT_MAX_STEPS;
+static double MAX_TRANS       = 30;
 
 static MATRIX *find_optimal_transform(MRI *mri, GCA *gca, GCA_SAMPLE *gcas,
                                       int nsamples, MATRIX *m_L, int passno,
                                       int write_iterations, int spacing) {
   MATRIX *m_origin;
-  MRI *mri_gca;
-  double gca_means[3], /*in_means[3], dx, dy, dz,*/ max_log_p, old_max,
+  MRI *   mri_gca;
+  double  gca_means[3], /*in_means[3], dx, dy, dz,*/ max_log_p, old_max,
       max_angle, angle_steps, min_scale, max_scale, scale_steps, scale, delta,
       mean;
-  int niter, good_step, done, nscales, scale_samples;
+  int   niter, good_step, done, nscales, scale_samples;
   float min_search_scale;
 #if 0
   int        min_real_bin, mri_peak ;
@@ -1192,7 +1191,7 @@ static MATRIX *find_optimal_transform(MRI *mri, GCA *gca, GCA_SAMPLE *gcas,
         MRI *mri_aligned;
 
         Glta->xforms[0].m_L = m_L;
-        mri_aligned = apply_transform(mri, gca, m_L);
+        mri_aligned         = apply_transform(mri, gca, m_L);
         sprintf(fname, "%s_before_intensity.mgz", parms.base_name);
         printf("writing snapshot to %s...\n", fname);
         fflush(stdout);
@@ -1309,14 +1308,14 @@ static MATRIX *find_optimal_transform(MRI *mri, GCA *gca, GCA_SAMPLE *gcas,
     if (skull) // remove excess neck
     {
       MRI_REGION box;
-      int min_real_bin, mri_peak;
-      float min_real_val, fmax, fmin;
+      int        min_real_bin, mri_peak;
+      float      min_real_val, fmax, fmin;
       HISTOGRAM *h_mri, *h_smooth;
 
       MRIvalRange(mri, &fmin, &fmax);
-      h_mri = MRIhistogram(mri, nint(fmax - fmin + 1));
+      h_mri            = MRIhistogram(mri, nint(fmax - fmin + 1));
       h_mri->counts[0] = 0; /* ignore background */
-      h_smooth = HISTOsmooth(h_mri, nullptr, 2);
+      h_smooth         = HISTOsmooth(h_mri, nullptr, 2);
       mri_peak = HISTOfindHighestPeakInRegion(h_smooth, 0, h_smooth->nbins / 3);
       min_real_bin = HISTOfindEndOfPeak(h_smooth, mri_peak, .25);
       min_real_val = 2 * h_smooth->bins[min_real_bin];
@@ -1326,14 +1325,14 @@ static MATRIX *find_optimal_transform(MRI *mri, GCA *gca, GCA_SAMPLE *gcas,
       }
       printf("using real data threshold=%2.1f\n", min_real_val);
       MRIfindApproximateSkullBoundingBox(mri, min_real_val, &box);
-      box.y = (box.y + 1.1 * box.dx); // use saggital to estimate s/i extent
+      box.y  = (box.y + 1.1 * box.dx); // use saggital to estimate s/i extent
       box.dy = (mri->height - 1) - box.y;
       box.x = box.z = 0;
-      box.dx = mri->width;
-      box.dz = mri->depth;
+      box.dx        = mri->width;
+      box.dz        = mri->depth;
       if (mriConformed(mri)) {
         if (box.y < 190) {
-          box.y = 190;
+          box.y  = 190;
           box.dy = (mri->height - 1) - box.y;
         }
       }
@@ -1390,17 +1389,17 @@ static MATRIX *find_optimal_transform(MRI *mri, GCA *gca, GCA_SAMPLE *gcas,
     MRIfree(&mri_gca);
   }
 
-  max_angle = MAX_ANGLE;
+  max_angle   = MAX_ANGLE;
   angle_steps = max_angles;
-  max_scale = 1 + max_scale_pct;
-  min_scale = 1 - max_scale_pct;
+  max_scale   = 1 + max_scale_pct;
+  min_scale   = 1 - max_scale_pct;
   scale_steps = max_scales;
 
   //////////////// loop here ////////////////////////////////////////////
   niter = nscales = 0;
-  scale = 1.0;
-  good_step = 0;
-  done = 0;
+  scale           = 1.0;
+  good_step       = 0;
+  done            = 0;
   do {
     Timer start;
     start.reset();
@@ -1457,11 +1456,11 @@ static MATRIX *find_optimal_transform(MRI *mri, GCA *gca, GCA_SAMPLE *gcas,
         printf("min search scale %f reached\n", min_search_scale);
         break;
       }
-      mean = (max_scale + min_scale) / 2;
-      delta = (max_scale - min_scale) / 2;
+      mean      = (max_scale + min_scale) / 2;
+      delta     = (max_scale - min_scale) / 2;
       max_scale = 1.0 + delta * scale;
       min_scale = 1.0 - delta * scale;
-      done = (good_step == 0);
+      done      = (good_step == 0);
       good_step = 0;
       printf("reducing scale to %2.4f\n", scale);
       nscales++;
@@ -1469,7 +1468,7 @@ static MATRIX *find_optimal_transform(MRI *mri, GCA *gca, GCA_SAMPLE *gcas,
       good_step = 1; /* took at least one good step at this scale */
     }
 
-    int msec = start.milliseconds();
+    int msec    = start.milliseconds();
     int seconds = nint((float)msec / 1000.0f);
     printf("iteration took %d minutes and %d seconds.\n", seconds / 60,
            seconds % 60);
@@ -1490,7 +1489,7 @@ static void printUsage() {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -1498,7 +1497,7 @@ static int get_option(int argc, char *argv[]) {
   if (!strcmp(option, "DIST") || !strcmp(option, "DISTANCE")) {
     // seems like not used.
     parms.l_dist = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("l_dist = %2.2f\n", parms.l_dist);
   } else if (!strcmp(option, "-HELP") || !strcmp(option, "-USAGE")) {
     printUsage();
@@ -1507,7 +1506,7 @@ static int get_option(int argc, char *argv[]) {
     // seems not used
     nomap = 1;
   } else if (!strcmp(option, "BIGVENT")) {
-    bigvent = 1;
+    bigvent      = 1;
     vent_spacing = 30;
     printf("handling expanded ventricles with vent_spacing = %d\n",
            vent_spacing);
@@ -1516,9 +1515,9 @@ static int get_option(int argc, char *argv[]) {
     printf("minimizing within-label intensity variance\n");
   } else if (!strcmp(option, "LSCALE")) {
     int l;
-    l = atoi(argv[2]);
+    l               = atoi(argv[2]);
     label_scales[l] = atof(argv[3]);
-    nargs = 2;
+    nargs           = 2;
     printf("scaling label %s by %2.2f\n", cma_label_to_name(l),
            label_scales[l]);
     for (l = 0; l < MAX_CMA_LABELS; l++)
@@ -1526,8 +1525,8 @@ static int get_option(int argc, char *argv[]) {
         label_scales[l] = 1.0;
   } else if (!strcmp(option, "CLAMP")) {
     clamp_set = 1;
-    Gclamp = atof(argv[2]);
-    nargs = 1;
+    Gclamp    = atof(argv[2]);
+    nargs     = 1;
     printf("setting robust clamp to %2.3f\n", Gclamp);
   } else if (!strcmp(option, "ROBUST")) {
     robust = 1;
@@ -1562,12 +1561,12 @@ static int get_option(int argc, char *argv[]) {
       ErrorExit(ERROR_NOMEMORY, "%s: too many insertions (%d) specified\n",
                 Progname, ninsertions);
 
-    insert_labels[ninsertions] = atoi(argv[2]);
+    insert_labels[ninsertions]      = atoi(argv[2]);
     insert_intensities[ninsertions] = atoi(argv[3]);
-    insert_coords[ninsertions][0] = atoi(argv[4]);
-    insert_coords[ninsertions][1] = atoi(argv[5]);
-    insert_coords[ninsertions][2] = atoi(argv[6]);
-    insert_whalf[ninsertions] = atoi(argv[7]);
+    insert_coords[ninsertions][0]   = atoi(argv[4]);
+    insert_coords[ninsertions][1]   = atoi(argv[5]);
+    insert_coords[ninsertions][2]   = atoi(argv[6]);
+    insert_whalf[ninsertions]       = atoi(argv[7]);
     printf("inserting label %d (%s) at (%d, %d, %d) with intensity = %d\n",
            insert_labels[ninsertions],
            cma_label_to_name(insert_labels[ninsertions]),
@@ -1578,15 +1577,15 @@ static int get_option(int argc, char *argv[]) {
     nargs = 6;
   } else if (!stricmp(option, "T2MASK")) {
     T2_mask_fname = argv[2];
-    T2_thresh = atof(argv[3]);
-    nargs = 2;
+    T2_thresh     = atof(argv[3]);
+    nargs         = 2;
     printf("using T2 volume %s thresholded at %f to mask input volume...\n",
            T2_mask_fname, T2_thresh);
   } else if (!stricmp(option, "AMASK")) {
     aparc_aseg_fname = argv[2];
-    T2_mask_fname = argv[3];
-    T2_thresh = atof(argv[4]);
-    nargs = 3;
+    T2_mask_fname    = argv[3];
+    T2_thresh        = atof(argv[4]);
+    nargs            = 3;
     printf("using aparc+aseg vol %s and T2 volume %s thresholded at %f to mask "
            "input volume...\n",
            aparc_aseg_fname, T2_mask_fname, T2_thresh);
@@ -1601,7 +1600,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!strcmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else if (!strcmp(option, "SKULL")) {
     unknown_nbr_spacing = 5;
@@ -1611,7 +1610,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "rusage")) {
     // resource usage
     rusage_file = argv[2];
-    nargs = 1;
+    nargs       = 1;
   } else if (!stricmp(option, "NOCEREBELLUM")) {
     remove_cerebellum = 1;
     printf("removing cerebellum from atlas\n");
@@ -1620,11 +1619,11 @@ static int get_option(int argc, char *argv[]) {
     printf("constraining transform to be rigid\n");
   } else if (!strcmp(option, "UNS")) {
     unknown_nbr_spacing = atoi(argv[2]);
-    nargs = 1;
+    nargs               = 1;
     printf("setting unknown_nbr_spacing = %d\n", unknown_nbr_spacing);
   } else if (!strcmp(option, "VENT_SPACING")) {
     vent_spacing = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("disallowing WM voxels within %d mm of ventricles in atlas (useful "
            "for big ventricles)\n",
            vent_spacing);
@@ -1638,24 +1637,24 @@ static int get_option(int argc, char *argv[]) {
     printf("opening diag file %s for writing\n", argv[2]);
     nargs = 1;
   } else if (!strcmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!strcmp(option, "DEBUG_LABEL")) {
     Ggca_label = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("debugging label %s (%d)\n", cma_label_to_name(Ggca_label),
            Ggca_label);
   }
   ////////// TR, TE, Alpha ////////////////////////////////
   else if (!strcmp(option, "TR")) {
-    TR = atof(argv[2]);
+    TR    = atof(argv[2]);
     nargs = 1;
     printf("using TR=%2.1f msec\n", TR);
   } else if (!strcmp(option, "TE")) {
-    TE = atof(argv[2]);
+    TE    = atof(argv[2]);
     nargs = 1;
     printf("using TE=%2.1f msec\n", TE);
   } else if (!strcmp(option, "ALPHA")) {
@@ -1663,7 +1662,7 @@ static int get_option(int argc, char *argv[]) {
     alpha = RADIANS(atof(argv[2]));
     printf("using alpha=%2.0f degrees\n", DEGREES(alpha));
   } else if (!strcmp(option, "EXAMPLE")) {
-    example_T1 = argv[2];
+    example_T1           = argv[2];
     example_segmentation = argv[3];
     printf("using %s and %s as example T1 and segmentations respectively.\n",
            example_T1, example_segmentation);
@@ -1672,16 +1671,16 @@ static int get_option(int argc, char *argv[]) {
   /////////////// writing out various samples /////////////////
   else if (!strcmp(option, "SAMPLES")) {
     sample_fname = argv[2];
-    nargs = 1;
+    nargs        = 1;
     printf("writing control points to %s...\n", sample_fname);
   } else if (!strcmp(option, "FSAMPLES") || !strcmp(option, "ISAMPLES")) {
     transformed_sample_fname = argv[2];
-    nargs = 1;
+    nargs                    = 1;
     printf("writing transformed control points to %s...\n",
            transformed_sample_fname);
   } else if (!strcmp(option, "NSAMPLES")) {
     normalized_transformed_sample_fname = argv[2];
-    nargs = 1;
+    nargs                               = 1;
     printf("writing  transformed normalization control points to %s...\n",
            normalized_transformed_sample_fname);
   }
@@ -1691,12 +1690,12 @@ static int get_option(int argc, char *argv[]) {
     printf("using contrast to find labels...\n");
   } else if (!stricmp(option, "RENORM") || !stricmp(option, "RENORMALIZE")) {
     renormalization_fname = argv[2];
-    nargs = 1;
+    nargs                 = 1;
     printf("renormalizing using predicted intensity values in %s...\n",
            renormalization_fname);
   } else if (!strcmp(option, "FLASH_PARMS")) {
     tissue_parms_fname = argv[2];
-    nargs = 1;
+    nargs              = 1;
     printf("using FLASH forward model and tissue parms in %s to predict"
            " intensity values...\n",
            tissue_parms_fname);
@@ -1705,34 +1704,34 @@ static int get_option(int argc, char *argv[]) {
     printf("only computing translation parameters...\n");
   } else if (!strcmp(option, "WRITE_MEAN")) {
     gca_mean_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("writing gca means to %s...\n", gca_mean_fname);
   } else if (!strcmp(option, "PRIOR")) {
     min_prior = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("using prior threshold %2.2f\n", min_prior);
   } else if (!strcmp(option, "SPACING")) {
     max_spacing = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("using max GCA spacing %d...\n", max_spacing);
   } else if (!stricmp(option, "SCALES") || !stricmp(option, "SCALES")) {
     nscales = MIN_SCALES = atoi(argv[2]);
-    nargs = 1;
+    nargs                = 1;
     printf("finding optimal linear transform over %d scales...\n", MIN_SCALES);
   } else if (!stricmp(option, "NSCALES")) {
     Gscale_samples = atoi(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("sampling scaling %d times at each scale\n", Gscale_samples);
   } else if (!stricmp(option, "NOVAR")) {
     novar = 1;
     printf("not using variance estimates\n");
   } else if (!strcmp(option, "DT")) {
     parms.dt = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("dt = %2.2e\n", parms.dt);
   } else if (!strcmp(option, "TOL")) {
     tol = parms.tol = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     printf("tol = %2.2e\n", parms.tol);
   } else if (!strcmp(option, "CENTER")) {
     center = 1;
@@ -1744,49 +1743,49 @@ static int get_option(int argc, char *argv[]) {
     noiscale = 1;
     printf("disabling intensity scaling...\n");
   } else if (!stricmp(option, "ISCALE")) {
-    noiscale = 1;
+    noiscale     = 1;
     prior_iscale = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("scaling image intensities by %2.3f\n", prior_iscale);
   } else if (!strcmp(option, "NUM")) {
     num_xforms = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("finding a total of %d linear transforms\n", num_xforms);
   } else if (!strcmp(option, "AREA")) {
     parms.l_area = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("l_area = %2.2f\n", parms.l_area);
   } else if (!strcmp(option, "NLAREA")) {
     parms.l_nlarea = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("l_nlarea = %2.2f\n", parms.l_nlarea);
   } else if (!strcmp(option, "LEVELS")) {
     parms.levels = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("levels = %d\n", parms.levels);
   } else if (!strcmp(option, "INTENSITY") || !strcmp(option, "CORR")) {
     parms.l_intensity = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     printf("l_intensity = %2.2f\n", parms.l_intensity);
   } else if (!stricmp(option, "reduce")) {
     nreductions = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("reducing input images %d times before aligning...\n", nreductions);
   } else if (!stricmp(option, "nsamples")) {
     nsamples = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("using %d samples of GCA...\n", nsamples);
   } else if (!stricmp(option, "norm")) {
     norm_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("intensity normalizing and writing to %s...\n", norm_fname);
   } else if (!stricmp(option, "trans")) {
     MAX_TRANS = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("setting max translation search range to be %2.1f\n", MAX_TRANS);
   } else if (!stricmp(option, "steps")) {
     max_angles = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("taking %d angular steps...\n", max_angles);
   } else
     switch (*option) {
@@ -1794,9 +1793,9 @@ static int get_option(int argc, char *argv[]) {
     {
       TRANSFORM *reg_transform;
 
-      xform_name = argv[2];
+      xform_name     = argv[2];
       long_reg_fname = argv[3];
-      nargs = 2;
+      nargs          = 2;
       printf("reading previously computed atlas xform %s "
              "and applying registration %s\n",
              xform_name, long_reg_fname);
@@ -1805,7 +1804,7 @@ static int get_option(int argc, char *argv[]) {
         ErrorExit(ERROR_NOFILE, "%s: could not read transform from %s",
                   Progname, argv[2]);
       Glta = parms.lta = (LTA *)transform->xform;
-      reg_transform = TransformRead(argv[3]);
+      reg_transform    = TransformRead(argv[3]);
       if (reg_transform == nullptr)
         ErrorExit(ERROR_NOFILE, "%s: could not read registration from %s",
                   Progname, argv[3]);
@@ -1818,14 +1817,14 @@ static int get_option(int argc, char *argv[]) {
     } break;
     case 'F':
       ctl_point_fname = argv[2];
-      nargs = 1;
+      nargs           = 1;
       printf("reading manually defined control points from %s\n",
              ctl_point_fname);
       break;
     case 'D':
-      tx = atof(argv[2]);
-      ty = atof(argv[3]);
-      tz = atof(argv[4]);
+      tx    = atof(argv[2]);
+      ty    = atof(argv[3]);
+      tz    = atof(argv[4]);
       nargs = 3;
       break;
     case 'R':
@@ -1862,12 +1861,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'B':
       blur_sigma = atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("blurring input image with sigma=%2.3f\n", blur_sigma);
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'S':
 #if 0
@@ -1891,24 +1890,24 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'N':
       parms.niterations = atoi(argv[2]);
-      nargs = 1;
+      nargs             = 1;
       printf("niterations = %d\n", parms.niterations);
       break;
     case 'W':
       parms.write_iterations = atoi(argv[2]);
-      nargs = 1;
+      nargs                  = 1;
       printf("write iterations = %d\n", parms.write_iterations);
       Gdiag |= DIAG_WRITE;
       break;
     case 'P':
       ctl_point_pct = atof(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       printf("using top %2.1f%% wm points as control points....\n",
              100.0 * ctl_point_pct);
       break;
     case 'M':
       parms.momentum = atof(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       printf("momentum = %2.2f\n", parms.momentum);
       break;
     default:
@@ -1943,13 +1942,13 @@ static double find_optimal_linear_xform(
   double x_scale, y_scale, z_scale;
   double x_angle, y_angle, z_angle;
   double log_p;
-  int i;
+  int    i;
 
   if (rigid) {
     min_scale = max_scale = 1.0;
   }
 
-  m_trans = MatrixIdentity(4, nullptr);
+  m_trans      = MatrixIdentity(4, nullptr);
   m_origin_inv = MatrixCopy(m_origin, nullptr);
   *MATRIX_RELT(m_origin_inv, 1, 4) *= -1;
   *MATRIX_RELT(m_origin_inv, 2, 4) *= -1;
@@ -1958,7 +1957,7 @@ static double find_optimal_linear_xform(
   x_max_trans = y_max_trans = z_max_trans = x_max_rot = y_max_rot = z_max_rot =
       0.0;
   x_max_scale = y_max_scale = z_max_scale = 1.0f;
-  m_scale = MatrixIdentity(4, nullptr);
+  m_scale                                 = MatrixIdentity(4, nullptr);
   max_log_p = local_GCAcomputeLogSampleProbability(gca, gcas, mri, m_L,
                                                    nsamples, exvivo, Gclamp);
 
@@ -1973,7 +1972,7 @@ static double find_optimal_linear_xform(
 
     if (angle_steps == 1) {
       min_angle = max_angle = 0.0;
-      delta_rot = 1;
+      delta_rot             = 1;
     } else {
       delta_rot = (max_angle - min_angle) / (angle_steps - 1);
     }
@@ -1997,7 +1996,7 @@ static double find_optimal_linear_xform(
           *MATRIX_RELT(m_scale, 3, 3) = z_scale;
 
           /* reset translation values */
-          *MATRIX_RELT(m_scale, 1, 4) = *MATRIX_RELT(m_scale, 2, 4) =
+          *MATRIX_RELT(m_scale, 1, 4)     = *MATRIX_RELT(m_scale, 2, 4) =
               *MATRIX_RELT(m_scale, 3, 4) = 0.0f;
           m_tmp = MatrixMultiply(m_scale, m_origin_inv, m_tmp);
           MatrixMultiply(m_origin, m_tmp, m_scale);
@@ -2009,12 +2008,12 @@ static double find_optimal_linear_xform(
             for (y_angle = min_angle; y_angle <= max_angle;
                  y_angle += delta_rot) {
               m_y_rot = MatrixReallocRotation(4, y_angle, Y_ROTATION, m_y_rot);
-              m_tmp = MatrixMultiply(m_y_rot, m_x_rot, m_tmp);
+              m_tmp   = MatrixMultiply(m_y_rot, m_x_rot, m_tmp);
               for (z_angle = min_angle; z_angle <= max_angle;
                    z_angle += delta_rot) {
                 m_z_rot =
                     MatrixReallocRotation(4, z_angle, Z_ROTATION, m_z_rot);
-                m_rot = MatrixMultiply(m_z_rot, m_tmp, m_rot);
+                m_rot  = MatrixMultiply(m_z_rot, m_tmp, m_rot);
                 m_tmp2 = MatrixMultiply(m_rot, m_origin_inv, m_tmp2);
                 MatrixMultiply(m_origin, m_tmp2, m_rot);
 
@@ -2041,13 +2040,13 @@ static double find_optimal_linear_xform(
                           printf("current estimates G=%d, W=%d, F=%d\n",
                                  (int)G_gm_mean, (int)G_wm_mean,
                                  (int)G_fluid_mean);
-                        max_log_p = log_p;
+                        max_log_p   = log_p;
                         x_max_scale = x_scale;
                         y_max_scale = y_scale;
                         z_max_scale = z_scale;
-                        x_max_rot = x_angle;
-                        y_max_rot = y_angle;
-                        z_max_rot = z_angle;
+                        x_max_rot   = x_angle;
+                        y_max_rot   = y_angle;
+                        z_max_rot   = z_angle;
                         x_max_trans = x_trans;
                         y_max_trans = y_trans;
                         z_max_trans = z_trans;
@@ -2081,29 +2080,29 @@ static double find_optimal_linear_xform(
     }
 
     /* update L to reflect new maximum and search around it */
-    *MATRIX_RELT(m_scale, 1, 4) = *MATRIX_RELT(m_scale, 2, 4) =
+    *MATRIX_RELT(m_scale, 1, 4)     = *MATRIX_RELT(m_scale, 2, 4) =
         *MATRIX_RELT(m_scale, 3, 4) = 0.0f;
-    *MATRIX_RELT(m_scale, 1, 1) = x_max_scale;
-    *MATRIX_RELT(m_scale, 2, 2) = y_max_scale;
-    *MATRIX_RELT(m_scale, 3, 3) = z_max_scale;
-    m_tmp = MatrixMultiply(m_scale, m_origin_inv, m_tmp);
+    *MATRIX_RELT(m_scale, 1, 1)     = x_max_scale;
+    *MATRIX_RELT(m_scale, 2, 2)     = y_max_scale;
+    *MATRIX_RELT(m_scale, 3, 3)     = z_max_scale;
+    m_tmp   = MatrixMultiply(m_scale, m_origin_inv, m_tmp);
     m_scale = MatrixMultiply(m_origin, m_tmp, m_scale);
 
     x_max_scale = y_max_scale = z_max_scale = 1.0;
 
-    mean_scale = (max_scale + min_scale) / 2;
+    mean_scale  = (max_scale + min_scale) / 2;
     delta_scale = (max_scale - min_scale) / 4;
-    min_scale = mean_scale - delta_scale;
-    max_scale = mean_scale + delta_scale;
+    min_scale   = mean_scale - delta_scale;
+    max_scale   = mean_scale + delta_scale;
 
     /* update L to reflect new maximum and search around it */
     m_x_rot = MatrixReallocRotation(4, x_max_rot, X_ROTATION, m_x_rot);
     m_y_rot = MatrixReallocRotation(4, y_max_rot, Y_ROTATION, m_y_rot);
     m_z_rot = MatrixReallocRotation(4, z_max_rot, Z_ROTATION, m_z_rot);
-    m_tmp = MatrixMultiply(m_y_rot, m_x_rot, m_tmp);
-    m_rot = MatrixMultiply(m_z_rot, m_tmp, m_rot);
-    m_tmp2 = MatrixMultiply(m_rot, m_origin_inv, m_tmp2);
-    m_rot = MatrixMultiply(m_origin, m_tmp2, m_rot);
+    m_tmp   = MatrixMultiply(m_y_rot, m_x_rot, m_tmp);
+    m_rot   = MatrixMultiply(m_z_rot, m_tmp, m_rot);
+    m_tmp2  = MatrixMultiply(m_rot, m_origin_inv, m_tmp2);
+    m_rot   = MatrixMultiply(m_origin, m_tmp2, m_rot);
 
     m_tmp2 = MatrixMultiply(m_scale, m_rot, m_tmp2);
     m_tmp3 = MatrixMultiply(m_tmp2, m_L, m_tmp3);
@@ -2112,24 +2111,24 @@ static double find_optimal_linear_xform(
     *MATRIX_RELT(m_trans, 1, 4) = x_max_trans;
     *MATRIX_RELT(m_trans, 2, 4) = y_max_trans;
     *MATRIX_RELT(m_trans, 3, 4) = z_max_trans;
-    m_L_tmp = MatrixMultiply(m_trans, m_tmp3, m_L_tmp);
+    m_L_tmp                     = MatrixMultiply(m_trans, m_tmp3, m_L_tmp);
 
     MatrixCopy(m_L_tmp, m_L);
 
     x_max_trans = y_max_trans = z_max_trans = 0.0;
     /* we've translated transform by old maxs */
-    mean_trans = (max_trans + min_trans) / 2;
+    mean_trans  = (max_trans + min_trans) / 2;
     delta_trans = (max_trans - min_trans) / 4;
-    min_trans = mean_trans - delta_trans;
-    max_trans = mean_trans + delta_trans;
+    min_trans   = mean_trans - delta_trans;
+    max_trans   = mean_trans + delta_trans;
 
     /* we've rotated transform to old max */
     x_max_rot = y_max_rot = z_max_rot = 0.0;
 
     mean_angle = (max_angle + min_angle) / 2;
-    delta_rot = (max_angle - min_angle) / 4;
-    min_angle = mean_angle - delta_rot;
-    max_angle = mean_angle + delta_rot;
+    delta_rot  = (max_angle - min_angle) / 4;
+    min_angle  = mean_angle - delta_rot;
+    max_angle  = mean_angle + delta_rot;
   }
 
   MatrixFree(&m_x_rot);

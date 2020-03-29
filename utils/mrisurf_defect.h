@@ -27,32 +27,32 @@
 
 #include "mrisurf_deform.h"
 
-#define KEEP_VERTEX 0
+#define KEEP_VERTEX    0
 #define DISCARD_VERTEX 1
-#define FINAL_VERTEX 2
+#define FINAL_VERTEX   2
 
 #define ET_OVERLAP_LIST_INCOMPLETE 0x0001
 
 typedef struct {
-  int nedges;
-  EDGE *edges;
-  int **overlapping_edges; /* indices of all edges
+  int            nedges;
+  EDGE *         edges;
+  int **         overlapping_edges; /* indices of all edges
                               overlapping this one (i.e. [i][j]) */
-  int *noverlap;
+  int *          noverlap;
   unsigned char *flags;
-  int use_overlap;
+  int            use_overlap;
 } EDGE_TABLE;
 
 typedef struct {
-  double fitness;
-  int nedges;
-  int *ordering; /* order of edges in EDGE_TABLE
+  double      fitness;
+  int         nedges;
+  int *       ordering; /* order of edges in EDGE_TABLE
                     for retessellation */
-  DEFECT *defect;
+  DEFECT *    defect;
   EDGE_TABLE *etable;
-  int rank;
+  int         rank;
 
-  TP tp; /* list of vertices,edges,faces
+  TP  tp; /* list of vertices,edges,faces
             used in the tessellated defect */
   int retessellation_mode;
 
@@ -74,14 +74,14 @@ typedef struct {
 
   // copied from VERTEX (malloc used for pointers)
   unsigned char nsizeMax, nsizeCur;
-  int vnum, v2num, v3num;
-  int vtotal;
-  int *v;
-  float origx, origy, origz;
-  float nx, ny, nz;
-  int *f;
-  uchar *n;
-  uchar num;
+  int           vnum, v2num, v3num;
+  int           vtotal;
+  int *         v;
+  float         origx, origy, origz;
+  float         nx, ny, nz;
+  int *         f;
+  uchar *       n;
+  uchar         num;
 
   // A hash that can be checked after restore to test for other changes
   //
@@ -89,28 +89,28 @@ typedef struct {
 } VERTEX_STATE, VS;
 
 typedef struct {
-  DEFECT *defect;
+  DEFECT *      defect;
   VERTEX_STATE *vs;
-  int nvertices;
-  int *vertex_trans; /* not allocated - pointer to preexisting table */
-  int nfaces;        /* number of used faces before retessellation */
+  int           nvertices;
+  int *         vertex_trans; /* not allocated - pointer to preexisting table */
+  int           nfaces;       /* number of used faces before retessellation */
 } DEFECT_VERTEX_STATE, DVS;
 
 /* this structure is used in the VERTEX structure (*vp) */
 typedef struct {
-  int nedges;
+  int  nedges;
   int *edges;
 } EDGE_POINTER, EP;
 
 typedef struct {
   /* edges constituting the cluster */
   int *edges;
-  int nedges;
-  int max_edges;
+  int  nedges;
+  int  max_edges;
   /* edge intersecting the edges of the cluster */
   int *xedges;
-  int nxedges;
-  int max_xedges;
+  int  nxedges;
+  int  max_xedges;
 } SEGMENT;
 
 // for the clustering of overlapping edges
@@ -120,14 +120,14 @@ typedef struct {
   int segment;    /* cluster number */
 
   int *xedges; /* intersecting edges */
-  int nxedges;
+  int  nxedges;
 } EDGE_STRUCTURE, ES;
 
 typedef struct {
   SEGMENT *segments;
-  int nsegments;
-  int max_segments;
-  MRIS *mris;
+  int      nsegments;
+  int      max_segments;
+  MRIS *   mris;
   /* the structure containing the edges */
   ES *edges;
   int nedges;
@@ -135,12 +135,12 @@ typedef struct {
 
 typedef struct {
   /* save the best configuration */
-  int *best_ordering;
+  int * best_ordering;
   float best_fitness;
   char *status; // kept or discarded
 
   /* keep track of the result for the past iterations */
-  int *nused;
+  int *  nused;
   float *vertex_fitness;
 } RANDOM_PATCH, RP;
 
@@ -151,11 +151,11 @@ typedef struct {
 } FS_VERTEX_INFO;
 
 typedef struct {
-  int nvertices;
-  int ninside; /* index of the first inside vertex */
+  int             nvertices;
+  int             ninside; /* index of the first inside vertex */
   FS_VERTEX_INFO *vertices;
-  float fitness; /* fitness associated with this patch */
-  int status;    /* valid patch or not */
+  float           fitness; /* fitness associated with this patch */
+  int             status;  /* valid patch or not */
 } MAPPING;
 
 /* structure which encodes the information for the optimal mapping */
@@ -165,7 +165,7 @@ typedef struct {
   int *vertex_trans;
   int *face_trans;
 
-  int nmappings; /* number of generated mappings */
+  int     nmappings; /* number of generated mappings */
   MAPPING orig_mapping;
   MAPPING mappings[10]; /* mapping (mapping 0 corresponds
                            to the initial mapping) */

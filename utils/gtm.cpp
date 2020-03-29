@@ -25,9 +25,9 @@
 
 #include "gtm.h"
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
-#include <cerrno>
 
 #include "cma.h"
 #include "diag.h"
@@ -78,9 +78,9 @@ int GTMSEGprint(GTMSEG *gtmseg, FILE *fp) {
 
 /*------------------------------------------------------------------------------------*/
 int MRIgtmSeg(GTMSEG *gtmseg) {
-  int err, *segidlist, nsegs, n;
+  int   err, *segidlist, nsegs, n;
   char *SUBJECTS_DIR, tmpstr[5000];
-  MRI *apas, *aseg, *hrseg, *ctxseg;
+  MRI * apas, *aseg, *hrseg, *ctxseg;
   Timer timer;
 
   printf("Starting MRIgtmSeg() USF=%d\n", gtmseg->USF);
@@ -274,7 +274,7 @@ int MRIgtmSeg(GTMSEG *gtmseg) {
       return (1);
   }
   gtmseg->segidlist = segidlist;
-  gtmseg->nsegs = nsegs;
+  gtmseg->nsegs     = nsegs;
 
   printf("MRIgtmSeg() done, t = %6.4f\n", timer.seconds());
   fflush(stdout);
@@ -309,64 +309,64 @@ int GTMdefaultSegReplacmentList(int *nReplace, int *ReplaceThis,
 
   // Merge ventricular CSF into one label
   ReplaceThis[nlist] = 4;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // LLatVent
   ReplaceThis[nlist] = 5;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // LInfLatVent
   ReplaceThis[nlist] = 14;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // 3rd
   ReplaceThis[nlist] = 15;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // 4th
   ReplaceThis[nlist] = 72;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // 5th
   ReplaceThis[nlist] = 43;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // RLatVent
   ReplaceThis[nlist] = 44;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // RInfLatVent
 
   /* Merge multiple CC subsegments into one CC */
   ReplaceThis[nlist] = 251;
-  WithThat[nlist] = 192;
+  WithThat[nlist]    = 192;
   nlist++;
   ReplaceThis[nlist] = 252;
-  WithThat[nlist] = 192;
+  WithThat[nlist]    = 192;
   nlist++;
   ReplaceThis[nlist] = 253;
-  WithThat[nlist] = 192;
+  WithThat[nlist]    = 192;
   nlist++;
   ReplaceThis[nlist] = 254;
-  WithThat[nlist] = 192;
+  WithThat[nlist]    = 192;
   nlist++;
   ReplaceThis[nlist] = 255;
-  WithThat[nlist] = 192;
+  WithThat[nlist]    = 192;
   nlist++;
 
   // There should not be any cortex unknown after MRIannot2CorticalSeg()
   ReplaceThis[nlist] = 1000;
-  WithThat[nlist] = 0;
+  WithThat[nlist]    = 0;
   nlist++; // cortex unknown
   ReplaceThis[nlist] = 2000;
-  WithThat[nlist] = 0;
+  WithThat[nlist]    = 0;
   nlist++; // cortex unknown
   ReplaceThis[nlist] = 85;
-  WithThat[nlist] = 0;
+  WithThat[nlist]    = 0;
   nlist++; // optic chiasm
 
   // And these?
   ReplaceThis[nlist] = 30;
-  WithThat[nlist] = 0;
+  WithThat[nlist]    = 0;
   nlist++; // LVessel ?
   ReplaceThis[nlist] = 62;
-  WithThat[nlist] = 0;
+  WithThat[nlist]    = 0;
   nlist++; // RVessel ?
   ReplaceThis[nlist] = 80;
-  WithThat[nlist] = 0;
+  WithThat[nlist]    = 0;
   nlist++; // non-WM-hypo ?
 
   // Not sure about choriod plexus. Make part of CSF?
@@ -393,291 +393,291 @@ int GTMoptSegReplacmentList(int *nReplace, int *ReplaceThis, int *WithThat) {
   nlist = *nReplace;
   // Merge all occip (left and right) into a single seg (1021, lh calc)
   ReplaceThis[nlist] = 2021;
-  WithThat[nlist] = 1021;
+  WithThat[nlist]    = 1021;
   nlist++; // rh calc
   ReplaceThis[nlist] = 1011;
-  WithThat[nlist] = 1021;
+  WithThat[nlist]    = 1021;
   nlist++; // lh lat occip
   ReplaceThis[nlist] = 2011;
-  WithThat[nlist] = 1021;
+  WithThat[nlist]    = 1021;
   nlist++; // rh lat occip
   ReplaceThis[nlist] = 1005;
-  WithThat[nlist] = 1021;
+  WithThat[nlist]    = 1021;
   nlist++; // lh cuneus
   ReplaceThis[nlist] = 2005;
-  WithThat[nlist] = 1021;
+  WithThat[nlist]    = 1021;
   nlist++; // rh cuneus
   ReplaceThis[nlist] = 1013;
-  WithThat[nlist] = 1021;
+  WithThat[nlist]    = 1021;
   nlist++; // lh lingual
   ReplaceThis[nlist] = 2013;
-  WithThat[nlist] = 1021;
+  WithThat[nlist]    = 1021;
   nlist++; // rh lingual
 
   // Merge all temporal (left and right) into a single seg (1015, lh med temp)
   ReplaceThis[nlist] = 2015;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh medtemp
   ReplaceThis[nlist] = 1009;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // lh inftemp
   ReplaceThis[nlist] = 2009;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh inftemp
   ReplaceThis[nlist] = 1030;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // lh suptemp
   ReplaceThis[nlist] = 2030;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh suptemp
   ReplaceThis[nlist] = 1033;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // lh temppole
   ReplaceThis[nlist] = 2033;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh temppole
   ReplaceThis[nlist] = 1034;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // lh transtemp
   ReplaceThis[nlist] = 2034;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh transtemp
   ReplaceThis[nlist] = 1007;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // lh fusi
   ReplaceThis[nlist] = 2007;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh fusi
   ReplaceThis[nlist] = 1001;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // lh banks sts
   ReplaceThis[nlist] = 2001;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh banks sts
   ReplaceThis[nlist] = 1016;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // lh parahip
   ReplaceThis[nlist] = 2016;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh parahip
   ReplaceThis[nlist] = 1006;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // lh ento
   ReplaceThis[nlist] = 2006;
-  WithThat[nlist] = 1015;
+  WithThat[nlist]    = 1015;
   nlist++; // rh ento
 
   // Merge all parietal (left and right) into a single seg (1029, lh sup
   // parietal)
   ReplaceThis[nlist] = 2029;
-  WithThat[nlist] = 1029;
+  WithThat[nlist]    = 1029;
   nlist++; // rh sup par
   ReplaceThis[nlist] = 1008;
-  WithThat[nlist] = 1029;
+  WithThat[nlist]    = 1029;
   nlist++; // lh inf par
   ReplaceThis[nlist] = 2008;
-  WithThat[nlist] = 1029;
+  WithThat[nlist]    = 1029;
   nlist++; // rh inf par
   ReplaceThis[nlist] = 1025;
-  WithThat[nlist] = 1029;
+  WithThat[nlist]    = 1029;
   nlist++; // lh precuen
   ReplaceThis[nlist] = 2025;
-  WithThat[nlist] = 1029;
+  WithThat[nlist]    = 1029;
   nlist++; // rh precuen
   ReplaceThis[nlist] = 1031;
-  WithThat[nlist] = 1029;
+  WithThat[nlist]    = 1029;
   nlist++; // lh sup marg
   ReplaceThis[nlist] = 2031;
-  WithThat[nlist] = 1029;
+  WithThat[nlist]    = 1029;
   nlist++; // rh sup marg
 
   // Merge all cingulate (left and right) into a single seg (1002, lh caud ant
   // cing)
   ReplaceThis[nlist] = 2002;
-  WithThat[nlist] = 1002;
+  WithThat[nlist]    = 1002;
   nlist++; // rh caudantcing
   ReplaceThis[nlist] = 1026;
-  WithThat[nlist] = 1002;
+  WithThat[nlist]    = 1002;
   nlist++; // lh rostantcing
   ReplaceThis[nlist] = 2026;
-  WithThat[nlist] = 1002;
+  WithThat[nlist]    = 1002;
   nlist++; // rh rostantcing
   ReplaceThis[nlist] = 1023;
-  WithThat[nlist] = 1002;
+  WithThat[nlist]    = 1002;
   nlist++; // lh postcing
   ReplaceThis[nlist] = 2023;
-  WithThat[nlist] = 1002;
+  WithThat[nlist]    = 1002;
   nlist++; // rh postcing
   ReplaceThis[nlist] = 1010;
-  WithThat[nlist] = 1002;
+  WithThat[nlist]    = 1002;
   nlist++; // lh isthmuscing
   ReplaceThis[nlist] = 2010;
-  WithThat[nlist] = 1002;
+  WithThat[nlist]    = 1002;
   nlist++; // rh isthmuscing
 
   // Merge all central (left and right) into a single seg (1022, lh post cent)
   ReplaceThis[nlist] = 2022;
-  WithThat[nlist] = 1022;
+  WithThat[nlist]    = 1022;
   nlist++; // rh post cent
   ReplaceThis[nlist] = 1024;
-  WithThat[nlist] = 1022;
+  WithThat[nlist]    = 1022;
   nlist++; // lh pre cent
   ReplaceThis[nlist] = 2024;
-  WithThat[nlist] = 1022;
+  WithThat[nlist]    = 1022;
   nlist++; // rh pre cent
   ReplaceThis[nlist] = 1017;
-  WithThat[nlist] = 1022;
+  WithThat[nlist]    = 1022;
   nlist++; // lh para cent
   ReplaceThis[nlist] = 2017;
-  WithThat[nlist] = 1022;
+  WithThat[nlist]    = 1022;
   nlist++; // rh para cent
 
   // Merge all supfront (left and right) into a single seg (1028, lh sup front)
   ReplaceThis[nlist] = 2028;
-  WithThat[nlist] = 1028;
+  WithThat[nlist]    = 1028;
   nlist++; // rh sup front
 
   // Merge all midfront (left and right) into a single seg (1003, lh caudmid
   // front)
   ReplaceThis[nlist] = 2003;
-  WithThat[nlist] = 1003;
+  WithThat[nlist]    = 1003;
   nlist++; // rh caudmid front
   ReplaceThis[nlist] = 1027;
-  WithThat[nlist] = 1003;
+  WithThat[nlist]    = 1003;
   nlist++; // lh rostmid front
   ReplaceThis[nlist] = 2027;
-  WithThat[nlist] = 1003;
+  WithThat[nlist]    = 1003;
   nlist++; // rh rostmid front
 
   // Merge all pars (left and right) into a single seg (1020, lh pars tri)
   ReplaceThis[nlist] = 2020;
-  WithThat[nlist] = 1020;
+  WithThat[nlist]    = 1020;
   nlist++; // rh pars tri
   ReplaceThis[nlist] = 1018;
-  WithThat[nlist] = 1020;
+  WithThat[nlist]    = 1020;
   nlist++; // lh pars oper
   ReplaceThis[nlist] = 2018;
-  WithThat[nlist] = 1020;
+  WithThat[nlist]    = 1020;
   nlist++; // rh pars oper
   ReplaceThis[nlist] = 1019;
-  WithThat[nlist] = 1020;
+  WithThat[nlist]    = 1020;
   nlist++; // lh pars orbit
   ReplaceThis[nlist] = 2019;
-  WithThat[nlist] = 1020;
+  WithThat[nlist]    = 1020;
   nlist++; // rh pars orbit
 
   // Merge all orb front (left and right) into a single seg (1012, lh lat orb
   // front)
   ReplaceThis[nlist] = 2012;
-  WithThat[nlist] = 1012;
+  WithThat[nlist]    = 1012;
   nlist++; // rh lat orb front
   ReplaceThis[nlist] = 1014;
-  WithThat[nlist] = 1012;
+  WithThat[nlist]    = 1012;
   nlist++; // lh med orb front
   ReplaceThis[nlist] = 2014;
-  WithThat[nlist] = 1012;
+  WithThat[nlist]    = 1012;
   nlist++; // rh med orb front
   ReplaceThis[nlist] = 1032;
-  WithThat[nlist] = 1012;
+  WithThat[nlist]    = 1012;
   nlist++; // lh frontal pole
   ReplaceThis[nlist] = 2032;
-  WithThat[nlist] = 1012;
+  WithThat[nlist]    = 1012;
   nlist++; // rh frontal pole
 
   // Merge left and right insula into left ins 1035
   ReplaceThis[nlist] = 2035;
-  WithThat[nlist] = 1035;
+  WithThat[nlist]    = 1035;
   nlist++; // rh ins
 
   // Merge CP with CSF
   ReplaceThis[nlist] = 31;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // LChoroidP
   ReplaceThis[nlist] = 63;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // RChoroidP
 
   // Merge Cerebellar GM into left cblum 8
   ReplaceThis[nlist] = 47;
-  WithThat[nlist] = 8;
+  WithThat[nlist]    = 8;
   nlist++; // L Cblum GM
   ReplaceThis[nlist] = 172;
-  WithThat[nlist] = 8;
+  WithThat[nlist]    = 8;
   nlist++; // Vermis
 
   // Merge L and R Cerebellar WGM into left cblum wm 7
   ReplaceThis[nlist] = 46;
-  WithThat[nlist] = 7;
+  WithThat[nlist]    = 7;
   nlist++; // R Cblum WM
 
   // Merge Hippo and Amyg into LHip 17
   ReplaceThis[nlist] = 53;
-  WithThat[nlist] = 17;
+  WithThat[nlist]    = 17;
   nlist++; // R Hippo
   ReplaceThis[nlist] = 18;
-  WithThat[nlist] = 17;
+  WithThat[nlist]    = 17;
   nlist++; // L Amyg
   ReplaceThis[nlist] = 54;
-  WithThat[nlist] = 17;
+  WithThat[nlist]    = 17;
   nlist++; // R Amyg
 
   // Merge Putamen and Pallidum into L Put 12
   ReplaceThis[nlist] = 51;
-  WithThat[nlist] = 12;
+  WithThat[nlist]    = 12;
   nlist++; // R Put
   ReplaceThis[nlist] = 13;
-  WithThat[nlist] = 12;
+  WithThat[nlist]    = 12;
   nlist++; // L Pal
   ReplaceThis[nlist] = 52;
-  WithThat[nlist] = 12;
+  WithThat[nlist]    = 12;
   nlist++; // R Pal
 
   // Merge Caudate and NucAcc into L Caud 11
   ReplaceThis[nlist] = 50;
-  WithThat[nlist] = 11;
+  WithThat[nlist]    = 11;
   nlist++; // R Put
   ReplaceThis[nlist] = 26;
-  WithThat[nlist] = 11;
+  WithThat[nlist]    = 11;
   nlist++; // L NAcc
   ReplaceThis[nlist] = 58;
-  WithThat[nlist] = 11;
+  WithThat[nlist]    = 11;
   nlist++; // R NAcc
 
   // Merge L and R Thal into L Thal 10
   ReplaceThis[nlist] = 49;
-  WithThat[nlist] = 10;
+  WithThat[nlist]    = 10;
   nlist++; // R Thal
 
   // Merge L and R VDC into L VDC 28
   ReplaceThis[nlist] = 60;
-  WithThat[nlist] = 28;
+  WithThat[nlist]    = 28;
   nlist++; // R VDC
 
   // Merge L and R Cerebral WM into L WM 2 (and WMSAs too)
   ReplaceThis[nlist] = 41;
-  WithThat[nlist] = 2;
+  WithThat[nlist]    = 2;
   nlist++; // R WM
   ReplaceThis[nlist] = 77;
-  WithThat[nlist] = 2;
+  WithThat[nlist]    = 2;
   nlist++; // WMSA
   ReplaceThis[nlist] = 78;
-  WithThat[nlist] = 2;
+  WithThat[nlist]    = 2;
   nlist++; // L WMSA
   ReplaceThis[nlist] = 79;
-  WithThat[nlist] = 2;
+  WithThat[nlist]    = 2;
   nlist++; // R WMSA
 
   // Merge ExtraCerebral CSF with CSF 24
   ReplaceThis[nlist] = 257;
-  WithThat[nlist] = 24;
+  WithThat[nlist]    = 24;
   nlist++; // XCSF
 
   // Merge Head segs
   ReplaceThis[nlist] = 130;
-  WithThat[nlist] = 258;
+  WithThat[nlist]    = 258;
   nlist++; // Air
   ReplaceThis[nlist] = 165;
-  WithThat[nlist] = 258;
+  WithThat[nlist]    = 258;
   nlist++; // Skull
 
   *nReplace = nlist;
@@ -694,12 +694,12 @@ structures are determined from ctSubCort (which should have tissue
 type set for all relevant structures).
 */
 COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
-  int nsegs, *segidlist, *segidhit, n, m, hit, segid, err;
+  int          nsegs, *segidlist, *segidhit, n, m, hit, segid, err;
   COLOR_TABLE *ct, *ct0;
-  CTE *cte, *cte0;
+  CTE *        cte, *cte0;
 
   segidlist = MRIsegIdListNot0(gtmseg->seg, &nsegs, 0);
-  segidhit = (int *)calloc(nsegs, sizeof(int));
+  segidhit  = (int *)calloc(nsegs, sizeof(int));
 
   // FILE *fp = fopen("segidlist.dat","w");
   // for(m=0; m < nsegs; m++) fprintf(fp,"%4d\n",segidlist[m]);
@@ -716,18 +716,18 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
   strcpy(ct->TissueTypeSchema, ctSubCort->TissueTypeSchema);
 
   // Add an entry for unknown
-  segid = 0;
+  segid              = 0;
   ct->entries[segid] = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
-  cte = ct->entries[segid];
-  cte->ri = 0;
-  cte->gi = 0;
-  cte->bi = 0;
-  cte->ai = 255;
-  cte->rf = 0;
-  cte->gf = 0;
-  cte->bf = 0;
-  cte->af = 255;
-  cte->TissueType = 0;
+  cte                = ct->entries[segid];
+  cte->ri            = 0;
+  cte->gi            = 0;
+  cte->bi            = 0;
+  cte->ai            = 255;
+  cte->rf            = 0;
+  cte->gf            = 0;
+  cte->bf            = 0;
+  cte->af            = 255;
+  cte->TissueType    = 0;
   sprintf(cte->name, "Unknown");
 
   fflush(stdout);
@@ -759,7 +759,7 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
     }
     segidhit[m]++; // keep track of number of times this seg id represented
     ct->entries[segid] = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
-    cte = ct->entries[segid];
+    cte                = ct->entries[segid];
     memcpy(cte, cte0, sizeof(CTE));
     sprintf(cte->name, "ctx-lh-%s",
             cte0->name); // new name reflects cortex and hemi
@@ -773,7 +773,7 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
     if (cte0 == nullptr)
       continue;
     segid = gtmseg->ctxrhbase + n;
-    hit = 0;
+    hit   = 0;
     for (m = 0; m < nsegs; m++) {
       if (segid == segidlist[m]) {
         hit = 1;
@@ -788,7 +788,7 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
     }
     segidhit[m]++;
     ct->entries[segid] = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
-    cte = ct->entries[segid];
+    cte                = ct->entries[segid];
     memcpy(cte, cte0, sizeof(CTE));
     sprintf(cte->name, "ctx-rh-%s", cte0->name);
     cte->TissueType = 1;
@@ -802,7 +802,7 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
       if (cte0 == nullptr)
         continue;
       segid = gtmseg->wmlhbase + n;
-      hit = 0;
+      hit   = 0;
       for (m = 0; m < nsegs; m++) {
         if (segid == segidlist[m]) {
           hit = 1;
@@ -818,7 +818,7 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
       }
       segidhit[m]++;
       ct->entries[segid] = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
-      cte = ct->entries[segid];
+      cte                = ct->entries[segid];
       memcpy(cte, cte0, sizeof(CTE));
       sprintf(cte->name, "wm-lh-%s", cte0->name);
       cte->TissueType = 3;
@@ -829,7 +829,7 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
       if (cte0 == nullptr)
         continue;
       segid = gtmseg->wmrhbase + n;
-      hit = 0;
+      hit   = 0;
       for (m = 0; m < nsegs; m++) {
         if (segid == segidlist[m]) {
           hit = 1;
@@ -845,7 +845,7 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
       }
       segidhit[m]++;
       ct->entries[segid] = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
-      cte = ct->entries[segid];
+      cte                = ct->entries[segid];
       memcpy(cte, cte0, sizeof(CTE));
       sprintf(cte->name, "wm-rh-%s", cte0->name);
       cte->TissueType = 3;
@@ -858,13 +858,13 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
     if (segidhit[m] != 0)
       continue; // skip of already hit
     segid = segidlist[m];
-    cte0 = ct0->entries[segid];
+    cte0  = ct0->entries[segid];
     if (cte0 == nullptr) {
       printf("ERROR: cannot find match for subcortical segid %d\n", segid);
       return (nullptr);
     }
     ct->entries[segid] = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
-    cte = ct->entries[segid];
+    cte                = ct->entries[segid];
     memcpy(cte, cte0, sizeof(CTE));
     segidhit[m]++;
   }
@@ -885,7 +885,7 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
   }
   for (m = 0; m < nsegs; m++) {
     segid = segidlist[m];
-    cte = ct->entries[segid];
+    cte   = ct->entries[segid];
     if (cte->TissueType == -1)
       printf("WARNING: segid %4d %s tissue type is not set\n", segid,
              cte->name);
@@ -905,12 +905,12 @@ COLOR_TABLE *GTMSEGctab(GTMSEG *gtmseg, COLOR_TABLE *ctSubCort) {
   the max and min VRF.
 */
 int VRFStats(GTM *gtm, double *vrfmean, double *vrfmin, double *vrfmax) {
-  int n, nvox, segid, f;
+  int    n, nvox, segid, f;
   double vrf;
 
   *vrfmean = 0;
-  *vrfmax = 0;
-  *vrfmin = 0;
+  *vrfmax  = 0;
+  *vrfmin  = 0;
   for (n = 0; n < gtm->iXtX->rows; n++) {
     vrf = (double)1.0 / gtm->iXtX->rptr[n + 1][n + 1];
     if (n == 0) {
@@ -939,9 +939,9 @@ int VRFStats(GTM *gtm, double *vrfmean, double *vrfmin, double *vrfmax) {
 
   for (n = 0; n < gtm->iXtX->rows; n++) {
     segid = gtm->segidlist[n];
-    nvox = MRIcountMatches(gtm->gtmseg, segid, 0, gtm->mask);
-    vrf = (double)1.0 / gtm->iXtX->rptr[n + 1][n + 1];
-    gtm->vrf->rptr[n + 1][1] = vrf;
+    nvox  = MRIcountMatches(gtm->gtmseg, segid, 0, gtm->mask);
+    vrf   = (double)1.0 / gtm->iXtX->rptr[n + 1][n + 1];
+    gtm->vrf->rptr[n + 1][1]  = vrf;
     gtm->nvox->rptr[n + 1][1] = nvox;
     for (f = 0; f < gtm->beta->cols; f++)
       gtm->betavar->rptr[n + 1][f + 1] = gtm->rvar->rptr[1][f + 1] / vrf;
@@ -956,11 +956,11 @@ int VRFStats(GTM *gtm, double *vrfmean, double *vrfmin, double *vrfmax) {
   that reports several statistics including the variance reduction factor (VRF).
 */
 int WriteVRFStats(char *fname, GTM *gtm) {
-  int n, segid, nvox;
+  int    n, segid, nvox;
   double vrf;
-  FILE *fp;
-  CTE *cte;
-  CT *ttctab;
+  FILE * fp;
+  CTE *  cte;
+  CT *   ttctab;
 
   ttctab = gtm->ctGTMSeg->ctabTissueType;
 
@@ -972,9 +972,9 @@ int WriteVRFStats(char *fname, GTM *gtm) {
 
   for (n = 0; n < gtm->iXtX->rows; n++) {
     segid = gtm->segidlist[n];
-    vrf = gtm->vrf->rptr[n + 1][1];
-    nvox = gtm->nvox->rptr[n + 1][1];
-    cte = gtm->ctGTMSeg->entries[segid];
+    vrf   = gtm->vrf->rptr[n + 1][1];
+    nvox  = gtm->nvox->rptr[n + 1][1];
+    cte   = gtm->ctGTMSeg->entries[segid];
     fprintf(fp, "%3d %4d %-31s %-13s %6d %8.3f", n + 1, segid, cte->name,
             ttctab->entries[cte->TissueType]->name, nvox, vrf);
     // printf("%3d %4d %-31s %-13s %6d %8.3f",n+1,segid,cte->name,
@@ -997,19 +997,19 @@ int WriteVRFStats(char *fname, GTM *gtm) {
   weighted according to number of voxels in each ROI.
 */
 int GTMglobalStats(GTM *gtm) {
-  int nthseg, segid, tt, f, ngm, ngmwm, ngmwmcsf;
+  int    nthseg, segid, tt, f, ngm, ngmwm, ngmwmcsf;
   double v;
 
-  gtm->glob_gm = MatrixAlloc(gtm->nframes, 1, MATRIX_REAL);
-  gtm->glob_gmwm = MatrixAlloc(gtm->nframes, 1, MATRIX_REAL);
+  gtm->glob_gm      = MatrixAlloc(gtm->nframes, 1, MATRIX_REAL);
+  gtm->glob_gmwm    = MatrixAlloc(gtm->nframes, 1, MATRIX_REAL);
   gtm->glob_gmwmcsf = MatrixAlloc(gtm->nframes, 1, MATRIX_REAL);
-  ngm = 0;
-  ngmwm = 0;
-  ngmwmcsf = 0;
+  ngm               = 0;
+  ngmwm             = 0;
+  ngmwmcsf          = 0;
 
   for (nthseg = 0; nthseg < gtm->nsegs; nthseg++) {
     segid = gtm->segidlist[nthseg];
-    tt = gtm->ctGTMSeg->entries[segid]->TissueType;
+    tt    = gtm->ctGTMSeg->entries[segid]->TissueType;
     if (tt == 1 || tt == 2) {
       ngm += gtm->nvox->rptr[nthseg + 1][1];
       for (f = 0; f < gtm->nframes; f++) {
@@ -1122,7 +1122,7 @@ int GTMsegidlist(GTM *gtm) {
 */
 GTM *GTMalloc() {
   GTM *gtm;
-  gtm = (GTM *)calloc(sizeof(GTM), 1);
+  gtm            = (GTM *)calloc(sizeof(GTM), 1);
   gtm->PadThresh = .0001;
   return (gtm);
 }
@@ -1170,7 +1170,7 @@ int GTMnPad(GTM *gtm) {
   number if matrix cannot be inverted. Otherwise returns 0.
 */
 int GTMsolve(GTM *gtm) {
-  int n, f;
+  int    n, f;
   double sum;
 
   if (gtm->X == nullptr) {
@@ -1195,7 +1195,7 @@ int GTMsolve(GTM *gtm) {
     printf("ERROR: matrix cannot be inverted, cond=%g\n", gtm->XtXcond);
     return (1);
   }
-  gtm->Xty = MatrixAtB(gtm->X, gtm->y, gtm->Xty);
+  gtm->Xty  = MatrixAtB(gtm->X, gtm->y, gtm->Xty);
   gtm->beta = MatrixMultiplyD(gtm->iXtX, gtm->Xty, gtm->beta);
   if (gtm->rescale)
     GTMrescale(gtm);
@@ -1204,8 +1204,8 @@ int GTMsolve(GTM *gtm) {
     GTMsteadyState(gtm);
 
   gtm->yhat = MatrixMultiplyD(gtm->X, gtm->beta, gtm->yhat);
-  gtm->res = MatrixSubtract(gtm->y, gtm->yhat, gtm->res);
-  gtm->dof = gtm->X->rows - gtm->X->cols;
+  gtm->res  = MatrixSubtract(gtm->y, gtm->yhat, gtm->res);
+  gtm->dof  = gtm->X->rows - gtm->X->cols;
   if (gtm->rvar == nullptr)
     gtm->rvar = MatrixAlloc(1, gtm->res->cols, MATRIX_REAL);
   if (gtm->rvarUnscaled == nullptr)
@@ -1223,7 +1223,7 @@ int GTMsolve(GTM *gtm) {
       gtm->rvarUnscaled->rptr[1][f + 1] = gtm->rvar->rptr[1][f + 1];
   }
   gtm->kurtosis = MatrixKurtosis(gtm->res, gtm->kurtosis);
-  gtm->skew = MatrixSkew(gtm->res, gtm->skew);
+  gtm->skew     = MatrixSkew(gtm->res, gtm->skew);
 
   return (0);
 }
@@ -1316,8 +1316,8 @@ MATRIX *GTMvol2mat(GTM *gtm, MRI *vol, MATRIX *m) {
   because the resdiual has spill-over. Hopefully it is meaningful for something.
 */
 int GTMsegrvar(GTM *gtm) {
-  int c, r, s, f, k;
-  int nthseg = 0, segid;
+  int    c, r, s, f, k;
+  int    nthseg = 0, segid;
   double v;
 
   gtm->segrvar = MatrixAlloc(gtm->nsegs, gtm->beta->cols, MATRIX_REAL);
@@ -1369,13 +1369,13 @@ int GTMsegrvar(GTM *gtm) {
   not be accurate for segs outside the brain.
  */
 int GTMrbv(GTM *gtm) {
-  int c, r, s, f, nthseg, segid;
-  double val, v, vhat0, vhat, v2;
-  LTA *lta;
-  MATRIX *nhits;
-  MRI *yframe = nullptr;
+  int         c, r, s, f, nthseg, segid;
+  double      val, v, vhat0, vhat, v2;
+  LTA *       lta;
+  MATRIX *    nhits;
+  MRI *       yframe = nullptr;
   MRI_REGION *region = nullptr;
-  MRI *yseg =
+  MRI *       yseg =
       nullptr; // source volume trilin resampled to seg space (used with RBV)
   MRI *yhat0seg =
       nullptr; // unsmoothed yhat created in seg space (used with RBV)
@@ -1404,7 +1404,7 @@ int GTMrbv(GTM *gtm) {
       if (gtm->ctGTMSeg->entries[n]->TissueType != 5)
         continue; // should not hard-code
       ReplaceThis[nReplace] = n;
-      WithThat[nReplace] = 0;
+      WithThat[nReplace]    = 0;
       nReplace++;
     }
     printf("  replacing head voxels with 0\n");
@@ -1525,10 +1525,10 @@ int GTMrbv(GTM *gtm) {
           if (f == 0)
             nhits->rptr[nthseg + 1][1]++;
 
-          v = MRIgetVoxVal(yseg, c, r, s, 0);
+          v     = MRIgetVoxVal(yseg, c, r, s, 0);
           vhat0 = MRIgetVoxVal(yhat0seg, c, r, s, 0);
-          vhat = MRIgetVoxVal(yhatseg, c, r, s, 0);
-          val = v * vhat0 / (vhat + FLT_EPSILON); // RBV equation
+          vhat  = MRIgetVoxVal(yhatseg, c, r, s, 0);
+          val   = v * vhat0 / (vhat + FLT_EPSILON); // RBV equation
           if (gtm->mask_rbv_to_brain)
             MRIsetVoxVal(gtm->rbv, c - region->x, r - region->y, s - region->z,
                          f, val);
@@ -1579,11 +1579,11 @@ int GTMrbv(GTM *gtm) {
  */
 int GTMrbvseg(GTM *gtm) {
   double res;
-  LTA *new2seg; // *seg2new; //
+  LTA *  new2seg; // *seg2new; //
 
   if (gtm->rbvsegres <= 0 || gtm->rbvsegres == gtm->anatseg->xsize) {
     printf("Not changing res of seg for RBV\n");
-    gtm->rbvseg = gtm->anatseg;
+    gtm->rbvseg     = gtm->anatseg;
     gtm->rbvseg2pet = gtm->seg2pet;
     return (0);
   }
@@ -1614,13 +1614,13 @@ int GTMrbvseg(GTM *gtm) {
   memory much better and provides the same output.
  */
 int GTMrbv0(GTM *gtm) {
-  int c, r, s, f, nthseg, segid;
-  double val, v, vhat0, vhat, v2;
-  LTA *lta;
+  int     c, r, s, f, nthseg, segid;
+  double  val, v, vhat0, vhat, v2;
+  LTA *   lta;
   MATRIX *nhits;
-  MRI *yseg;     // source volume trilin resampled to seg space (used with RBV)
-  MRI *yhat0seg; // unsmoothed yhat created in seg space (used with RBV)
-  MRI *yhatseg;  // smoothed yhat in seg space (used with RBV)
+  MRI *   yseg; // source volume trilin resampled to seg space (used with RBV)
+  MRI *   yhat0seg; // unsmoothed yhat created in seg space (used with RBV)
+  MRI *   yhatseg;  // smoothed yhat in seg space (used with RBV)
 
   Timer mytimer;
 
@@ -1701,10 +1701,10 @@ int GTMrbv0(GTM *gtm) {
             break;
         nhits->rptr[nthseg + 1][1]++;
         for (f = 0; f < gtm->yvol->nframes; f++) {
-          v = MRIgetVoxVal(yseg, c, r, s, f);
+          v     = MRIgetVoxVal(yseg, c, r, s, f);
           vhat0 = MRIgetVoxVal(yhat0seg, c, r, s, f);
-          vhat = MRIgetVoxVal(yhatseg, c, r, s, f);
-          val = v * vhat0 / (vhat + FLT_EPSILON); // RBV equation
+          vhat  = MRIgetVoxVal(yhatseg, c, r, s, f);
+          val   = v * vhat0 / (vhat + FLT_EPSILON); // RBV equation
           MRIsetVoxVal(gtm->rbv, c, r, s, f, val);
           v2 = MRIgetVoxVal(gtm->rbvsegmean, nthseg, 0, 0,
                             f); // track seg means for QA
@@ -1739,8 +1739,8 @@ int GTMrbv0(GTM *gtm) {
     printf("   masking RBV to brain\n");
     if (Gdiag_no > 0)
       PrintMemUsage(stdout);
-    int n, nReplace, ReplaceThis[1000], WithThat[1000];
-    MRI *segtmp, *rbvtmp;
+    int         n, nReplace, ReplaceThis[1000], WithThat[1000];
+    MRI *       segtmp, *rbvtmp;
     MRI_REGION *region;
     nReplace = 0;
     for (n = 0; n < gtm->ctGTMSeg->nentries; n++) {
@@ -1749,7 +1749,7 @@ int GTMrbv0(GTM *gtm) {
       if (gtm->ctGTMSeg->entries[n]->TissueType != 5)
         continue; // should not hard-code
       ReplaceThis[nReplace] = n;
-      WithThat[nReplace] = 0;
+      WithThat[nReplace]    = 0;
       nReplace++;
     }
     printf("  replacing head voxels with 0\n");
@@ -1789,10 +1789,10 @@ int GTMrbv0(GTM *gtm) {
     TissueTypeSchemaLat()
  */
 MRI *GTMmgxpvc(GTM *gtm, int Target) {
-  int nthseg, segid, r, f, tt;
-  MATRIX *betaNotTarg, *yNotTarg, *ydiff;
-  double sum;
-  MRI *mgx = nullptr;
+  int                nthseg, segid, r, f, tt;
+  MATRIX *           betaNotTarg, *yNotTarg, *ydiff;
+  double             sum;
+  MRI *              mgx = nullptr;
   COLOR_TABLE_ENTRY *cte;
   // COLOR_TABLE *ttctab = gtm->ctGTMSeg->ctabTissueType;
 
@@ -1800,8 +1800,8 @@ MRI *GTMmgxpvc(GTM *gtm, int Target) {
   betaNotTarg = MatrixAlloc(gtm->beta->rows, gtm->beta->cols, MATRIX_REAL);
   for (nthseg = 0; nthseg < gtm->nsegs; nthseg++) {
     segid = gtm->segidlist[nthseg];
-    tt = gtm->ctGTMSeg->entries[segid]->TissueType;
-    cte = gtm->ctGTMSeg->ctabTissueType->entries[tt];
+    tt    = gtm->ctGTMSeg->entries[segid]->TissueType;
+    cte   = gtm->ctGTMSeg->ctabTissueType->entries[tt];
     if (Target == 1 || Target == 3) {
       if (strcmp("cortex", cte->name) == 0)
         continue;
@@ -1845,8 +1845,8 @@ MRI *GTMmgxpvc(GTM *gtm, int Target) {
     sum = 0;
     for (nthseg = 0; nthseg < gtm->nsegs; nthseg++) {
       segid = gtm->segidlist[nthseg];
-      tt = gtm->ctGTMSeg->entries[segid]->TissueType;
-      cte = gtm->ctGTMSeg->ctabTissueType->entries[tt];
+      tt    = gtm->ctGTMSeg->entries[segid]->TissueType;
+      cte   = gtm->ctGTMSeg->ctabTissueType->entries[tt];
       if (Target == 1) { // asking for cortex
         if (strcmp("cortex", cte->name) != 0 &&
             strcmp("cortex-lh", cte->name) != 0 &&
@@ -1907,7 +1907,7 @@ MRI *GTMmgxpvc(GTM *gtm, int Target) {
   be frame0=cortex, frame1=subcortexgm, frame2=WM.
  */
 int GTMmgpvc(GTM *gtm) {
-  int c, r, s, f;
+  int    c, r, s, f;
   double vgmpsf, vwmpsf, vwmtac, vtac, vmgtac;
   // MRI *ctxpvf, *subctxpvf, *gmpvf;
   MRI *wmpvf, *wmpvfpsf;
@@ -1936,8 +1936,8 @@ int GTMmgpvc(GTM *gtm) {
       MRIgaussianSmoothNI(wmpvf, gtm->cStd, gtm->rStd, gtm->sStd, nullptr);
   if (gtm->UseMBrad) {
     MB2D *mb;
-    MRI *mritmp;
-    mb = MB2Dcopy(gtm->mbrad, 0, nullptr);
+    MRI * mritmp;
+    mb     = MB2Dcopy(gtm->mbrad, 0, nullptr);
     mb->cR = 0;
     mb->rR = 0;
     mritmp = MRImotionBlur2D(wmpvfpsf, mb, nullptr);
@@ -1947,8 +1947,8 @@ int GTMmgpvc(GTM *gtm) {
   }
   if (gtm->UseMBtan) {
     MB2D *mb;
-    MRI *mritmp;
-    mb = MB2Dcopy(gtm->mbtan, 0, nullptr);
+    MRI * mritmp;
+    mb     = MB2Dcopy(gtm->mbtan, 0, nullptr);
     mb->cR = 0;
     mb->rR = 0;
     mritmp = MRImotionBlur2D(wmpvfpsf, mb, nullptr);
@@ -1969,7 +1969,7 @@ int GTMmgpvc(GTM *gtm) {
         vwmpsf = MRIgetVoxVal(wmpvfpsf, c, r, s, 0);
         for (f = 0; f < gtm->yvol->nframes; f++) {
           vwmtac = gtm->mg_reftac->rptr[f + 1][1];
-          vtac = MRIgetVoxVal(gtm->yvol, c, r, s, f);
+          vtac   = MRIgetVoxVal(gtm->yvol, c, r, s, f);
           vmgtac = (vtac - vwmpsf * vwmtac) / vgmpsf;
           MRIsetVoxVal(gtm->mg, c, r, s, f, vmgtac);
         }
@@ -1984,13 +1984,13 @@ int GTMmgpvc(GTM *gtm) {
 
 // Compute the MG reference TAC
 int GTMmgRefTAC(GTM *gtm) {
-  int f, nhits, n, found, nthseg, segid;
+  int    f, nhits, n, found, nthseg, segid;
   double sum;
 
   gtm->mg_reftac = MatrixAlloc(gtm->yvol->nframes, 1, MATRIX_REAL);
   for (f = 0; f < gtm->yvol->nframes; f++) {
     nhits = 0;
-    sum = 0;
+    sum   = 0;
     for (nthseg = 0; nthseg < gtm->nsegs; nthseg++) {
       segid = gtm->segidlist[nthseg];
       found = 0;
@@ -2019,9 +2019,9 @@ int GTMmgRefTAC(GTM *gtm) {
   be 0=cortex, 1=subcortexgm, 2=WM.
  */
 int GTMmeltzerpvc(GTM *gtm) {
-  int c, r, s, f, k, segid, nhits;
+  int    c, r, s, f, k, segid, nhits;
   double vgmwmpsf, v, sum;
-  MRI *ctxpvf, *subctxpvf, *wmpvf, *gmwmpvf, *gmwmpvfpsf, *mritmp, *nhitseg;
+  MRI *  ctxpvf, *subctxpvf, *wmpvf, *gmwmpvf, *gmwmpvfpsf, *mritmp, *nhitseg;
 
   if (gtm->meltzer)
     MRIfree(&gtm->meltzer);
@@ -2033,11 +2033,11 @@ int GTMmeltzerpvc(GTM *gtm) {
   MRIcopyHeader(gtm->yvol, gtm->meltzer);
 
   // Compute gray+white matter PVF with smoothing
-  ctxpvf = fMRIframe(gtm->ttpvf, 0, nullptr);    // cortex PVF
-  subctxpvf = fMRIframe(gtm->ttpvf, 1, nullptr); // subcortex GM PVF
-  wmpvf = fMRIframe(gtm->ttpvf, 2, nullptr);     // WM PVF
-  gmwmpvf = MRIadd(ctxpvf, subctxpvf, nullptr);  // All GM PVF
-  MRIadd(gmwmpvf, wmpvf, gmwmpvf);               // All GM+WM PVF
+  ctxpvf    = fMRIframe(gtm->ttpvf, 0, nullptr);  // cortex PVF
+  subctxpvf = fMRIframe(gtm->ttpvf, 1, nullptr);  // subcortex GM PVF
+  wmpvf     = fMRIframe(gtm->ttpvf, 2, nullptr);  // WM PVF
+  gmwmpvf   = MRIadd(ctxpvf, subctxpvf, nullptr); // All GM PVF
+  MRIadd(gmwmpvf, wmpvf, gmwmpvf);                // All GM+WM PVF
 
   // Setting BinThresh to 0 turns off binarization
   if (gtm->MeltzerBinThresh > 0.0) {
@@ -2060,7 +2060,7 @@ int GTMmeltzerpvc(GTM *gtm) {
 
   // Finally, do the actual Meltzer correction
   gtm->mzseg = MRIallocSequence(gtm->nsegs, 1, 1, MRI_FLOAT, gtm->nframes);
-  nhitseg = MRIallocSequence(gtm->nsegs, 1, 1, MRI_INT, gtm->nframes);
+  nhitseg    = MRIallocSequence(gtm->nsegs, 1, 1, MRI_INT, gtm->nframes);
   for (c = 0; c < gtm->yvol->width; c++) { // crs order not important
     for (r = 0; r < gtm->yvol->height; r++) {
       for (s = 0; s < gtm->yvol->depth; s++) {
@@ -2074,7 +2074,7 @@ int GTMmeltzerpvc(GTM *gtm) {
         // not defined in anatseg
         if (k == gtm->nsegs)
           continue;
-        nhits = MRIgetVoxVal(nhitseg, k, 0, 0, 0) + 1;
+        nhits    = MRIgetVoxVal(nhitseg, k, 0, 0, 0) + 1;
         vgmwmpsf = MRIgetVoxVal(gmwmpvfpsf, c, r, s, 0);
         if (vgmwmpsf < gtm->MeltzerMaskThresh)
           continue;
@@ -2121,7 +2121,7 @@ int GTMmeltzerpvc(GTM *gtm) {
  */
 int GTMsynth(GTM *gtm, int NoiseSeed, int nReps) {
   MATRIX *yhat;
-  MRI *mritmp;
+  MRI *   mritmp;
 
   if (gtm->ysynth)
     MRIfree(&gtm->ysynth);
@@ -2140,7 +2140,7 @@ int GTMsynth(GTM *gtm, int NoiseSeed, int nReps) {
     printf("GTMsynth(): adding noise, seed=%d, nReps=%d\n", NoiseSeed, nReps);
     mritmp = MRIrandexp(gtm->ysynth, gtm->mask, NoiseSeed, nReps, nullptr);
     MRIfree(&gtm->ysynth);
-    gtm->ysynth = mritmp;
+    gtm->ysynth  = mritmp;
     gtm->nframes = nReps;
   }
 
@@ -2159,8 +2159,8 @@ int GTMsmoothSynth(GTM *gtm) {
                                       gtm->sStd, gtm->ysynthsm);
   if (gtm->UseMBrad) {
     MB2D *mb;
-    MRI *mritmp;
-    mb = MB2Dcopy(gtm->mbrad, 0, nullptr);
+    MRI * mritmp;
+    mb     = MB2Dcopy(gtm->mbrad, 0, nullptr);
     mb->cR = 0;
     mb->rR = 0;
     mritmp = MRImotionBlur2D(gtm->ysynthsm, mb, nullptr);
@@ -2170,8 +2170,8 @@ int GTMsmoothSynth(GTM *gtm) {
   }
   if (gtm->UseMBtan) {
     MB2D *mb;
-    MRI *mritmp;
-    mb = MB2Dcopy(gtm->mbtan, 0, nullptr);
+    MRI * mritmp;
+    mb     = MB2Dcopy(gtm->mbtan, 0, nullptr);
     mb->cR = 0;
     mb->rR = 0;
     mritmp = MRImotionBlur2D(gtm->ysynthsm, mb, nullptr);
@@ -2188,11 +2188,11 @@ int GTMsmoothSynth(GTM *gtm) {
   \brief Checks that all colums sum to 1
  */
 int GTMcheckX(MATRIX *X) {
-  int r, c, count;
+  int    r, c, count;
   double sum, d, dmax;
 
   count = 0;
-  dmax = -1;
+  dmax  = -1;
   for (r = 0; r < X->rows; r++) {
     sum = 0;
     for (c = 0; c < X->cols; c++) {
@@ -2257,7 +2257,7 @@ int GTMbuildX(GTM *gtm) {
     MRI *nthsegpvf = nullptr, *nthsegpvfbb = nullptr, *nthsegpvfbbsm = nullptr,
         *nthsegpvfbbsmmb = nullptr;
     MRI_REGION *region;
-    MB2D *mb;
+    MB2D *      mb;
     segid = gtm->segidlist[nthseg];
     if (gtm->DoVoxFracCor)
       nthsegpvf =
@@ -2293,9 +2293,9 @@ int GTMbuildX(GTM *gtm) {
                                         gtm->sStd, nullptr);
     if (gtm->UseMBrad) {
       // Order of operations should not matter
-      mb = MB2Dcopy(gtm->mbrad, 0, nullptr);
-      mb->cR = region->x;
-      mb->rR = region->y;
+      mb              = MB2Dcopy(gtm->mbrad, 0, nullptr);
+      mb->cR          = region->x;
+      mb->rR          = region->y;
       nthsegpvfbbsmmb = MRImotionBlur2D(nthsegpvfbbsm, mb, nullptr);
       MRIfree(&nthsegpvfbbsm);
       nthsegpvfbbsm = nthsegpvfbbsmmb;
@@ -2303,9 +2303,9 @@ int GTMbuildX(GTM *gtm) {
     }
     if (gtm->UseMBtan) {
       // Order of operations should not matter
-      mb = MB2Dcopy(gtm->mbtan, 0, nullptr);
-      mb->cR = region->x;
-      mb->rR = region->y;
+      mb              = MB2Dcopy(gtm->mbtan, 0, nullptr);
+      mb->cR          = region->x;
+      mb->rR          = region->y;
       nthsegpvfbbsmmb = MRImotionBlur2D(nthsegpvfbbsm, mb, nullptr);
       MRIfree(&nthsegpvfbbsm);
       nthsegpvfbbsm = nthsegpvfbbsmmb;
@@ -2443,12 +2443,12 @@ int GTMwriteMGRefTAC(GTM *gtm, char *filename) {
   (scale_ref_ids)
 */
 int GTMrescale(GTM *gtm) {
-  int f, n, nthseg, segid, found, nhits;
+  int    f, n, nthseg, segid, found, nhits;
   double sum;
 
   // global rescaling
   nhits = 0;
-  sum = 0;
+  sum   = 0;
   for (f = 0; f < gtm->yvol->nframes; f++) {
     for (nthseg = 0; nthseg < gtm->nsegs; nthseg++) {
       segid = gtm->segidlist[nthseg];
@@ -2480,7 +2480,7 @@ int GTMrescale(GTM *gtm) {
   \brief out = (in - ref)*dcf/(scale*bpc)
 */
 int GTMsteadyState(GTM *gtm) {
-  int f, n, c, r, s;
+  int    f, n, c, r, s;
   double v, y, ref;
 
   if (gtm->DoSteadyState == 0)
@@ -2518,21 +2518,21 @@ int GTMsteadyState(GTM *gtm) {
 */
 int GTMttest(GTM *gtm) {
   MATRIX *Ct, *CiXtX, *CiXtXCt;
-  int n, f, nframes;
+  int     n, f, nframes;
   GTMCON *gtmc;
-  double F;
+  double  F;
 
   nframes = gtm->beta->cols;
 
   for (n = 0; n < gtm->nContrasts; n++) {
-    gtmc = gtm->contrasts[n];
-    gtmc->gamma = MatrixMultiply(gtmc->C, gtm->beta, NULL);
+    gtmc           = gtm->contrasts[n];
+    gtmc->gamma    = MatrixMultiply(gtmc->C, gtm->beta, NULL);
     gtmc->gammavar = MatrixAlloc(1, nframes, MATRIX_REAL);
-    gtmc->t = MatrixAlloc(1, nframes, MATRIX_REAL);
-    gtmc->p = MatrixAlloc(1, nframes, MATRIX_REAL);
-    Ct = MatrixTranspose(gtmc->C, nullptr);
-    CiXtX = MatrixMultiply(gtmc->C, gtm->iXtX, NULL);
-    CiXtXCt = MatrixMultiply(CiXtX, Ct, NULL);
+    gtmc->t        = MatrixAlloc(1, nframes, MATRIX_REAL);
+    gtmc->p        = MatrixAlloc(1, nframes, MATRIX_REAL);
+    Ct             = MatrixTranspose(gtmc->C, nullptr);
+    CiXtX          = MatrixMultiply(gtmc->C, gtm->iXtX, NULL);
+    CiXtXCt        = MatrixMultiply(CiXtX, Ct, NULL);
     for (f = 0; f < nframes; f++) {
       gtmc->gammavar->rptr[1][f + 1] =
           CiXtXCt->rptr[1][1] * gtm->rvar->rptr[1][f + 1];
@@ -2554,10 +2554,10 @@ int GTMttest(GTM *gtm) {
   gamma, gammavar, t, and p
  */
 int GTMwriteContrasts(GTM *gtm) {
-  int n, nframes, f;
+  int     n, nframes, f;
   GTMCON *gtmc;
-  char tmpstr[5000];
-  FILE *fp;
+  char    tmpstr[5000];
+  FILE *  fp;
 
   nframes = gtm->beta->cols;
 
@@ -2715,10 +2715,10 @@ int GTMprintRefIds(GTM *gtm, FILE *fp) {
   and a nii.gz (the later needed for KM analysis with mri_glmfit)
  */
 int GTMrefTAC(GTM *gtm) {
-  int f, n, nthseg, segid;
+  int    f, n, nthseg, segid;
   double sum;
-  char tmpstr[5000];
-  FILE *fp;
+  char   tmpstr[5000];
+  FILE * fp;
 
   if (gtm->DoKMRef) {
     sprintf(tmpstr, "%s/km.ref.tac.dat", gtm->OutDir);
@@ -2818,8 +2818,8 @@ int GTMcheckReplaceList(const int nReplace, const int *ReplaceThis,
 int GTMloadReplacmentList(const char *fname, int *nReplace, int *ReplaceThis,
                           int *WithThat) {
   FILE *fp;
-  int nlist, r, nth;
-  char tmpstr[1001], *s;
+  int   nlist, r, nth;
+  char  tmpstr[1001], *s;
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {
@@ -2866,7 +2866,7 @@ int GTMloadReplacmentList(const char *fname, int *nReplace, int *ReplaceThis,
   gtm->yvol_full_fov but the pixel data are freed to reduce storage.
 */
 int GTMautoMask(GTM *gtm) {
-  LTA *lta;
+  LTA *  lta;
   double std;
 
   gtm->mask = MRIalloc(gtm->yvol->width, gtm->yvol->height, gtm->yvol->depth,
@@ -2903,10 +2903,10 @@ int GTMautoMask(GTM *gtm) {
 */
 int GTMrvarGM(GTM *gtm) {
   COLOR_TABLE *ct;
-  int f, s, c, r, n, nhits, nhitsb, segid, tt;
-  double sum, sumb;
-  FILE *fp;
-  char tmpstr[2000];
+  int          f, s, c, r, n, nhits, nhitsb, segid, tt;
+  double       sum, sumb;
+  FILE *       fp;
+  char         tmpstr[2000];
 
   if (gtm->rvargm == nullptr)
     gtm->rvargm = MatrixAlloc(1, gtm->res->cols, MATRIX_REAL);
@@ -2915,10 +2915,10 @@ int GTMrvarGM(GTM *gtm) {
   ct = gtm->ctGTMSeg;
 
   for (f = 0; f < gtm->res->cols; f++) {
-    sum = 0;
-    sumb = 0;
-    n = -1;
-    nhits = 0;
+    sum    = 0;
+    sumb   = 0;
+    n      = -1;
+    nhits  = 0;
     nhitsb = 0;
     // slice, col, row order is important here as is skipping the mask
     for (s = 0; s < gtm->yvol->depth; s++) {
@@ -2955,7 +2955,7 @@ int GTMrvarGM(GTM *gtm) {
         }
       }
     }
-    gtm->rvargm->rptr[1][f + 1] = sum / nhits;
+    gtm->rvargm->rptr[1][f + 1]    = sum / nhits;
     gtm->rvarbrain->rptr[1][f + 1] = sumb / nhitsb;
     if (f == 0 && !gtm->Optimizing)
       printf("rvargm %2d %6.4f %6.4f\n", f, gtm->rvargm->rptr[1][f + 1],
@@ -3073,8 +3073,8 @@ MRI **GTMlocal(GTM *gtm, MRI **pvc) {
         *y, *beta = nullptr, *Xt = nullptr, *XtX = nullptr, *Xty = nullptr,
             *iXtX = nullptr, *Xsum, *ytmp, *Xtmp;
     MATRIX *yhat, *eres;
-    int r, s, f, dc, dr, ds, tt, nth, nv, nkeep, indkeep[100], nthbeta;
-    double v;
+    int     r, s, f, dc, dr, ds, tt, nth, nv, nkeep, indkeep[100], nthbeta;
+    double  v;
     for (r = 0; r < gtm->yvol->height; r++) {
       for (s = 0; s < gtm->yvol->depth; s++) {
         if (gtm->mask && MRIgetVoxVal(gtm->mask, c, r, s, 0) < 0.5)
@@ -3114,7 +3114,7 @@ MRI **GTMlocal(GTM *gtm, MRI **pvc) {
 
         // Each ttype needs a minmal representation
         // Sum the columns of X
-        Xsum = MatrixSum(X, 1, nullptr);
+        Xsum  = MatrixSum(X, 1, nullptr);
         nkeep = 0;
         for (tt = 0; tt < pvfpsf->nframes; tt++) {
           indkeep[tt] = 0;
@@ -3148,8 +3148,8 @@ MRI **GTMlocal(GTM *gtm, MRI **pvc) {
           X = Xtmp;
         }
         MatrixFree(&Xsum);
-        Xt = MatrixTranspose(X, nullptr);
-        XtX = MatrixMultiplyD(Xt, X, nullptr);
+        Xt   = MatrixTranspose(X, nullptr);
+        XtX  = MatrixMultiplyD(Xt, X, nullptr);
         iXtX = MatrixInverse(XtX, nullptr);
         if (iXtX == nullptr) {
           MatrixFree(&y);
@@ -3159,8 +3159,8 @@ MRI **GTMlocal(GTM *gtm, MRI **pvc) {
           continue;
         }
 
-        Xty = MatrixMultiplyD(Xt, y, nullptr);
-        beta = MatrixMultiplyD(iXtX, Xty, nullptr);
+        Xty     = MatrixMultiplyD(Xt, y, nullptr);
+        beta    = MatrixMultiplyD(iXtX, Xty, nullptr);
         nthbeta = 0;
         for (tt = 0; tt < pvfpsf->nframes; tt++) {
           if (indkeep[tt] == 0)
@@ -3228,7 +3228,7 @@ MRI **GTMlocal(GTM *gtm, MRI **pvc) {
    each segmentation.
 */
 int GTMttPercent(GTM *gtm) {
-  int nTT, k, s, c, r, segid, nthseg, mthseg, mthsegid, tt;
+  int    nTT, k, s, c, r, segid, nthseg, mthseg, mthsegid, tt;
   double sum;
 
   nTT = gtm->ttpvf->nframes;
@@ -3252,7 +3252,7 @@ int GTMttPercent(GTM *gtm) {
             break;
         for (mthseg = 0; mthseg < gtm->nsegs; mthseg++) {
           mthsegid = gtm->segidlist[mthseg];
-          tt = gtm->ctGTMSeg->entries[mthsegid]->TissueType;
+          tt       = gtm->ctGTMSeg->entries[mthsegid]->TissueType;
           // printf("k=%d, segid = %d, nthseg = %d, mthsegid = %d, mthseg = %d,
           // tt=%d\n", k,segid,nthseg,mthsegid,mthseg,tt);
           fflush(stdout);
@@ -3300,14 +3300,14 @@ int GTMsegid2nthseg(GTM *gtm, int segid) {
   output dir. Returns 0 if no error.
  */
 int GTMwriteText(GTM *gtm, char *OutDir, int DeMean) {
-  int nthseg, f, segid;
-  FILE *fp;
-  char fname[1000];
+  int    nthseg, f, segid;
+  FILE * fp;
+  char   fname[1000];
   double mean;
 
   for (nthseg = 0; nthseg < gtm->nsegs; nthseg++) {
     segid = gtm->segidlist[nthseg];
-    mean = 0;
+    mean  = 0;
     if (DeMean) {
       for (f = 0; f < gtm->beta->cols; f++)
         mean += gtm->beta->rptr[nthseg + 1][f + 1];

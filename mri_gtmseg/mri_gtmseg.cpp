@@ -37,72 +37,73 @@
 #include <sys/utsname.h>
 
 #undef X
-#include "mri2.h"
-#include "version.h"
 #include "cmdargs.h"
 #include "diag.h"
+#include "mri2.h"
 #include "mri_identify.h"
+#include "version.h"
 
 #include "romp_support.h"
 
 #include "gtm.h"
 #include "resample.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
-MRI *MRIErodeWMSeg(MRI *seg, int nErode3d, MRI *outseg);
+int         main(int argc, char *argv[]);
+MRI *       MRIErodeWMSeg(MRI *seg, int nErode3d, MRI *outseg);
 
 static char vcid[] = "$Id: mri_gtmseg.c,v 1.10 2016/08/02 21:07:24 greve Exp $";
 const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+char *      cmdline, cwd[2000];
+int         debug         = 0;
+int         checkoptsonly = 0;
 struct utsname uts;
 
-GTMSEG *gtmseg;
-char *OutVolFile = nullptr;
-char *SUBJECTS_DIR;
-int nthreads;
+GTMSEG *     gtmseg;
+char *       OutVolFile = nullptr;
+char *       SUBJECTS_DIR;
+int          nthreads;
 COLOR_TABLE *ctMaster, *ctMerge = nullptr;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, err;
-  char tmpstr[5000], *stem;
-  Timer mytimer;
+  int          nargs, err;
+  char         tmpstr[5000], *stem;
+  Timer        mytimer;
   COLOR_TABLE *ct;
-  MRI *mritmp;
-  LTA *seg2new, *ltatmp;
+  MRI *        mritmp;
+  LTA *        seg2new, *ltatmp;
 
   nargs = handleVersionOption(argc, argv, "mri_gtmseg");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
   getcwd(cwd, 2000);
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
 
-  gtmseg = (GTMSEG *)calloc(sizeof(GTMSEG), 1);
-  gtmseg->USF = 2;
-  gtmseg->OutputUSF = gtmseg->USF;
-  gtmseg->dmax = 5.0;
-  gtmseg->KeepHypo = 0;
-  gtmseg->KeepCC = 0;
-  gtmseg->apasfile = "apas+head.mgz";
+  gtmseg               = (GTMSEG *)calloc(sizeof(GTMSEG), 1);
+  gtmseg->USF          = 2;
+  gtmseg->OutputUSF    = gtmseg->USF;
+  gtmseg->dmax         = 5.0;
+  gtmseg->KeepHypo     = 0;
+  gtmseg->KeepCC       = 0;
+  gtmseg->apasfile     = "apas+head.mgz";
   gtmseg->ctxannotfile = "aparc.annot";
-  gtmseg->ctxlhbase = 1000;
-  gtmseg->ctxrhbase = 2000;
-  gtmseg->SubSegWM = 0;
+  gtmseg->ctxlhbase    = 1000;
+  gtmseg->ctxrhbase    = 2000;
+  gtmseg->SubSegWM     = 0;
   if (gtmseg->SubSegWM) {
     gtmseg->wmannotfile = "lobes.annot";
-    gtmseg->wmlhbase = 3200;
-    gtmseg->wmrhbase = 4200;
+    gtmseg->wmlhbase    = 3200;
+    gtmseg->wmrhbase    = 4200;
   } else
     gtmseg->wmannotfile = nullptr;
   gtmseg->nlist = 0;
@@ -152,12 +153,12 @@ int main(int argc, char *argv[]) {
   if (gtmseg->OutputUSF != gtmseg->USF) {
     printf("Changing size of output to USF of %d\n", gtmseg->OutputUSF);
     double res = 1.0 / gtmseg->OutputUSF;
-    mritmp = MRIchangeSegRes(gtmseg->seg, res, res, res, ct, &seg2new);
+    mritmp     = MRIchangeSegRes(gtmseg->seg, res, res, res, ct, &seg2new);
     if (mritmp == nullptr)
       exit(1);
     MRIfree(&gtmseg->seg);
     gtmseg->seg = mritmp;
-    ltatmp = LTAconcat2(gtmseg->anat2seg, seg2new, 1);
+    ltatmp      = LTAconcat2(gtmseg->anat2seg, seg2new, 1);
     LTAfree(&gtmseg->anat2seg);
     LTAfree(&seg2new);
     gtmseg->anat2seg = ltatmp;
@@ -203,7 +204,7 @@ int main(int argc, char *argv[]) {
 /*------------------------------------------------------------------*/
 
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -236,14 +237,14 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       OutVolFile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     }
 
     else if (!strcasecmp(option, "--s")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       gtmseg->subject = pargv[0];
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcasecmp(option, "--usf") ||
                !strcasecmp(option, "--internal-usf")) {
       if (nargc < 1)
@@ -259,7 +260,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       gtmseg->apasfile = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--ctab")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -277,13 +278,13 @@ static int parse_commandline(int argc, char **argv) {
     }
 
     else if (!strcasecmp(option, "--subseg-wm")) {
-      gtmseg->SubSegWM = 1;
+      gtmseg->SubSegWM    = 1;
       gtmseg->wmannotfile = "lobes.annot";
-      gtmseg->wmlhbase = 3200;
-      gtmseg->wmrhbase = 4200;
+      gtmseg->wmlhbase    = 3200;
+      gtmseg->wmrhbase    = 4200;
     } else if (!strcasecmp(option, "--no-subseg-wm")) {
       gtmseg->wmannotfile = nullptr;
-      gtmseg->SubSegWM = 0;
+      gtmseg->SubSegWM    = 0;
     } else if (!strcasecmp(option, "--wm-annot")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
@@ -291,7 +292,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[1], "%d", &gtmseg->wmlhbase);
       sscanf(pargv[2], "%d", &gtmseg->wmrhbase);
       gtmseg->SubSegWM = 1;
-      nargsused = 3;
+      nargsused        = 3;
     } else if (!strcasecmp(option, "--dmax")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -311,7 +312,7 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       setenv("SUBJECTS_DIR", pargv[0], 1);
       SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-      nargsused = 1;
+      nargsused    = 1;
     }
 
     else if (!strcasecmp(option, "--threads")) {
@@ -453,7 +454,7 @@ static void dump_options(FILE *fp) {
   changed. It assumes that WM is 2 and 41.
  */
 MRI *MRIErodeWMSeg(MRI *seg, int nErode3d, MRI *outseg) {
-  int c, n;
+  int  c, n;
   MRI *wm;
 
   if (outseg == nullptr) {
@@ -470,7 +471,7 @@ MRI *MRIErodeWMSeg(MRI *seg, int nErode3d, MRI *outseg) {
 #endif
       for (c = 0; c < seg->width; c++) {
     ROMP_PFLB_begin int r, s;
-    int val;
+    int                 val;
     for (r = 0; r < seg->height; r++) {
       for (s = 0; s < seg->depth; s++) {
         val = MRIgetVoxVal(seg, c, r, s, 0);
@@ -493,7 +494,7 @@ MRI *MRIErodeWMSeg(MRI *seg, int nErode3d, MRI *outseg) {
 #endif
       for (c = 0; c < seg->width; c++) {
     ROMP_PFLB_begin int r, s;
-    int val;
+    int                 val;
     for (r = 0; r < seg->height; r++) {
       for (s = 0; s < seg->depth; s++) {
         val = MRIgetVoxVal(wm, c, r, s, 0);

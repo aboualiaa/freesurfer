@@ -47,8 +47,8 @@
 
 // $Id: mris_decimate.cpp,v 1.6 2011/03/02 00:04:30 nicks Exp $
 
-#include <gts.h>
 #include "mris_decimate.h"
+#include <gts.h>
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -62,7 +62,7 @@
 //
 struct VertexLoadContext {
   MRI_SURFACE *mris;
-  int nextVertex;
+  int          nextVertex;
 };
 
 static void vertexLoad(GtsPoint *p, gpointer *data) {
@@ -72,7 +72,7 @@ static void vertexLoad(GtsPoint *p, gpointer *data) {
 
   MRISsetXYZ(mris, vertexLoadContext->nextVertex, p->x, p->y, p->z);
 
-  unsigned int vertexID = vertexLoadContext->nextVertex;
+  unsigned int vertexID   = vertexLoadContext->nextVertex;
   GTS_OBJECT(p)->reserved = GUINT_TO_POINTER(vertexID);
   vertexLoadContext->nextVertex++;
 }
@@ -83,12 +83,12 @@ static void vertexLoad(GtsPoint *p, gpointer *data) {
 //
 struct FaceLoadContext {
   MRI_SURFACE *mris;
-  int nextFace;
+  int          nextFace;
 };
 
 static void faceLoad(GtsTriangle *t, gpointer *data) {
   FaceLoadContext *faceLoadContext = (FaceLoadContext *)data;
-  MRI_SURFACE *mris = faceLoadContext->mris;
+  MRI_SURFACE *    mris            = faceLoadContext->mris;
 
   GtsVertex *v1, *v2, *v3;
   gts_triangle_vertices(t, &v1, &v2, &v3);
@@ -180,10 +180,10 @@ static void edgeCleanup(GtsSurface *surface) {
 /// \param userData If decimateProgressFn is non-NULL, argument passed into
 /// decimateProgressFn \return 0 on success, 1 on failure
 ///
-int decimateSurface(MRI_SURFACE **pmris,
+int decimateSurface(MRI_SURFACE **            pmris,
                     const DECIMATION_OPTIONS &decimationOptions,
                     DECIMATE_PROGRESS_FUNC decimateProgressFn, void *userData) {
-  MRI_SURFACE *mris = (*pmris);
+  MRI_SURFACE *mris  = (*pmris);
   MRI_SURFACE *mris0 = MRISclone(mris); // make a copy
 
   // Special case: if decimation level is 1.0, just make a copy of the
@@ -195,11 +195,11 @@ int decimateSurface(MRI_SURFACE **pmris,
 
     return 0;
   }
-  GtsSurface *gtsSurface = nullptr;
+  GtsSurface *gtsSurface  = nullptr;
   GtsVertex **gtsVertices = nullptr;
-  GtsEdge **gtsEdges = nullptr;
+  GtsEdge **  gtsEdges    = nullptr;
 
-  gtsSurface = gts_surface_new(gts_surface_class(), gts_face_class(),
+  gtsSurface  = gts_surface_new(gts_surface_class(), gts_face_class(),
                                gts_edge_class(), gts_vertex_class());
   gtsVertices = (GtsVertex **)g_malloc(sizeof(GtsVertex *) * (mris->nvertices));
 
@@ -258,7 +258,7 @@ int decimateSurface(MRI_SURFACE **pmris,
   }
 
   GtsVolumeOptimizedParams params = {0.5, 0.5, 0.};
-  gdouble fold = minimumAngle * PI / 180.;
+  gdouble                  fold   = minimumAngle * PI / 180.;
   int stop = (int)((float)numDistinctEdges * decimationOptions.decimationLevel);
   gts_surface_coarsen(gtsSurface, (GtsKeyFunc)gts_volume_optimized_cost,
                       &params, (GtsCoarsenFunc)gts_volume_optimized_vertex,
@@ -294,7 +294,7 @@ int decimateSurface(MRI_SURFACE **pmris,
   }
 
   VertexLoadContext vertexLoadContext;
-  vertexLoadContext.mris = mris;
+  vertexLoadContext.mris       = mris;
   vertexLoadContext.nextVertex = 0;
   gts_surface_foreach_vertex(gtsSurface, (GtsFunc)vertexLoad,
                              (gpointer)&vertexLoadContext);
@@ -304,7 +304,7 @@ int decimateSurface(MRI_SURFACE **pmris,
   }
 
   FaceLoadContext faceLoadContext;
-  faceLoadContext.mris = mris;
+  faceLoadContext.mris     = mris;
   faceLoadContext.nextFace = 0;
   gts_surface_foreach_face(gtsSurface, (GtsFunc)faceLoad,
                            (gpointer)&faceLoadContext);
@@ -328,8 +328,8 @@ int decimateSurface(MRI_SURFACE **pmris,
   // structure.  I felt this was the safest way to make sure everything
   // in the surface got recalculated properly.
   char *tmpName = strdup("/tmp/mris_decimateXXXXXX");
-  int fd = mkstemp(tmpName);
-  char tmp_fpath[STRLEN];
+  int   fd      = mkstemp(tmpName);
+  char  tmp_fpath[STRLEN];
   if (fd == -1) {
     std::cerr << "Error creating temporary file: " << std::string(tmpName)
               << std::endl;
@@ -360,7 +360,7 @@ int decimateSurface(MRI_SURFACE **pmris,
     MRI_SURFACE *mris2;
     mris2 = MRISsortVertices(mris);
     MRISfree(&mris);
-    mris = mris2;
+    mris   = mris2;
     *pmris = mris;
   }
 

@@ -26,13 +26,13 @@
 #ifndef sparse2DGausDistMatrix_h
 #define sparse2DGausDistMatrix_h
 
-#include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <map>
 
 #include "mri_ca_gausDist.h"
-// using namespace std;
+//
 
 /*
 
@@ -65,7 +65,7 @@
 
 typedef map<unsigned short, CGaussianDistribution> TypeGausDistMap;
 
-typedef unsigned long ulong;
+typedef unsigned long  ulong;
 typedef unsigned short ushort;
 
 class CSparse2DGausDistMatrix {
@@ -73,8 +73,8 @@ public:
   // copy ctor
   CSparse2DGausDistMatrix(const CSparse2DGausDistMatrix &srcSparseMatrix) {
     nGausDistMeanVectorDim = srcSparseMatrix.nGausDistMeanVectorDim;
-    nXMAX = srcSparseMatrix.nXMAX;
-    nYMAX = srcSparseMatrix.nYMAX;
+    nXMAX                  = srcSparseMatrix.nXMAX;
+    nYMAX                  = srcSparseMatrix.nYMAX;
 
     // if (arrMap!=NULL)
     //   delete[] arrMap;
@@ -90,16 +90,16 @@ public:
   // declare the null ctor to satisfy map<> class. Do not use directly
   CSparse2DGausDistMatrix() {
     nGausDistMeanVectorDim = 0;
-    nXMAX = 0;
-    nYMAX = 0;
-    arrMap = NULL;
+    nXMAX                  = 0;
+    nYMAX                  = 0;
+    arrMap                 = NULL;
   }
 
   CSparse2DGausDistMatrix(ushort nXDim, ushort nYDim,
                           ushort nNewGausDistMeanVectorDim) {
     nGausDistMeanVectorDim = nNewGausDistMeanVectorDim;
-    nXMAX = nXDim;
-    nYMAX = nYDim; // you could alter the yDim Size but not the XDim size
+    nXMAX                  = nXDim;
+    nYMAX  = nYDim; // you could alter the yDim Size but not the XDim size
     arrMap = new TypeGausDistMap[nXMAX];
     for (int i = 0; i < nXMAX; i++) {
       arrMap[i].clear();
@@ -114,7 +114,7 @@ public:
   // increment values at specific location
   bool insertMeasure(const TypeVectorFloat &measure, ushort x, ushort y,
                      float fFractionOfAMeasure = 1.0) {
-    bool bInserted = false;
+    bool                      bInserted = false;
     TypeGausDistMap::iterator it;
     if (x <= nXMAX - 1) // && (x>=0)
     {
@@ -141,7 +141,7 @@ public:
   // If there is no gaussian dist for a given location, an empty gauss dist
   //  is not created and queried, instead the density zero is returned directly
   double density(const TypeVectorFloat &measure, ushort x, ushort y) {
-    double dValue = 0;
+    double                    dValue = 0;
     TypeGausDistMap::iterator it;
 
     if (x <= nXMAX - 1) // && (x>=0)
@@ -155,7 +155,7 @@ public:
   }
 
   double extractMeanComponent(ushort x, ushort y, int nWhichComponent) {
-    double dValue = 0;
+    double                    dValue = 0;
     TypeGausDistMap::iterator it;
 
     if (x <= nXMAX - 1) // && (x>=0)
@@ -172,7 +172,7 @@ public:
   // returns the (nWhichComponent,nWhichComponent) diagonal entry of the Cov
   // Matrix
   double extractVarianceComponent(ushort x, ushort y, int nWhichComponent) {
-    double dValue = 0;
+    double                    dValue = 0;
     TypeGausDistMap::iterator it;
 
     if (x <= nXMAX - 1) // && (x>=0)
@@ -221,8 +221,8 @@ public:
 
   bool setGausParams(ushort x, ushort y, TypeVectorFloat &vectFloatMeasureMean,
                      TypeMatrixFloat &matrixFloatMeasureVariance,
-                     float floatNewNumMeasuresEntered) {
-    bool bSet = false;
+                     float            floatNewNumMeasuresEntered) {
+    bool                      bSet = false;
     TypeGausDistMap::iterator it;
     if (x <= nXMAX - 1) {
       if ((it = arrMap[x].find(y)) == arrMap[x].end()) { // Init a new gaus dist
@@ -267,7 +267,7 @@ public:
   */
 
 private:
-  ushort nXMAX, nYMAX;
+  ushort           nXMAX, nYMAX;
   TypeGausDistMap *arrMap;
   // CGaussianDistribution gausDistZeroDist;
   ushort nGausDistMeanVectorDim;
@@ -287,9 +287,9 @@ istream &operator>>(istream &is, CSparse2DGausDistMatrix &mat) {
   // allocate row arrays
   mat.arrMap = new TypeGausDistMap[mat.nXMAX];
 
-  ushort nMapIndex;
-  ushort x;
-  ushort nKey;
+  ushort                nMapIndex;
+  ushort                x;
+  ushort                nKey;
   CGaussianDistribution newGausDist(mat.nGausDistMeanVectorDim);
   for (x = 0; x < mat.nXMAX; x++) {
     ulong nMapSize;
@@ -317,7 +317,7 @@ ostream &operator<<(ostream &os, CSparse2DGausDistMatrix &mat) {
            sizeof(mat.nGausDistMeanVectorDim));
 
   TypeGausDistMap::iterator it;
-  ushort x;
+  ushort                    x;
   for (x = 0; x < mat.nXMAX; x++) {
     ulong nMapSize = mat.arrMap[x].size();
     os.write((unsigned char *)&nMapSize, sizeof(nMapSize));
@@ -350,7 +350,7 @@ ostream &print(ostream &os, CSparse2DGausDistMatrix &mat) {
   os << "Dim of mean gaus vector = " << mat.nGausDistMeanVectorDim << "\n";
 
   TypeGausDistMap::iterator it;
-  ushort x;
+  ushort                    x;
   //  for (x=0; x<mat.nXMAX; x++)
   for (x = 0; x < 3; x++) // truncate the huge dumps
   {

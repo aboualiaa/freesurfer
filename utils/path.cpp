@@ -33,19 +33,19 @@
 #include "path.h"
 
 int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
-  FILE *fp;
-  int num_scanf;
-  int line_number;
-  int path_pno;
-  int num_points;
-  char *line = nullptr;
+  FILE * fp;
+  int    num_scanf;
+  int    line_number;
+  int    path_pno;
+  int    num_points;
+  char * line      = nullptr;
   size_t line_size = 1024;
-  int version;
-  PATH *path = nullptr;
-  PATH **paths = nullptr;
-  int num_paths = 0;
-  float x, y, z;
-  int vno;
+  int    version;
+  PATH * path      = nullptr;
+  PATH **paths     = nullptr;
+  int    num_paths = 0;
+  float  x, y, z;
+  int    vno;
 
   /* Try opening the file. */
   fp = fopen(fname, "r");
@@ -205,9 +205,9 @@ int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
         }
 
         /* Add this coordinate to our label. */
-        path->points[path_pno].x = x;
-        path->points[path_pno].y = y;
-        path->points[path_pno].z = z;
+        path->points[path_pno].x   = x;
+        path->points[path_pno].y   = y;
+        path->points[path_pno].z   = z;
         path->points[path_pno].vno = vno;
       }
 
@@ -252,7 +252,7 @@ int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
   free(line);
   fclose(fp);
 
-  *num_read = num_paths;
+  *num_read       = num_paths;
   *returned_paths = paths;
 
   return (ERROR_NONE);
@@ -260,8 +260,8 @@ int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
 
 int PathWriteMany(char *fname, int num_paths, PATH **paths) {
   FILE *fp;
-  int path;
-  int path_pno;
+  int   path;
+  int   path_pno;
 
   /* Try to open the file. */
   fp = fopen(fname, "w");
@@ -343,8 +343,8 @@ int PathFree(PATH **path) {
 }
 
 int PathIsPathFile(char *fname) {
-  FILE *fp = nullptr;
-  int is_path_file = 0;
+  FILE *fp           = nullptr;
+  int   is_path_file = 0;
 
   /* Open the file. */
   fp = fopen(fname, "r");
@@ -361,10 +361,10 @@ int PathIsPathFile(char *fname) {
 }
 
 int PathIsPathFileStream(FILE *fp) {
-  char *line = nullptr;
-  size_t size = 1024;
-  char *needle = nullptr;
-  int found = 0;
+  char * line   = nullptr;
+  size_t size   = 1024;
+  char * needle = nullptr;
+  int    found  = 0;
 
   found = 0;
 
@@ -395,7 +395,7 @@ int PathIsPathFileStream(FILE *fp) {
 
 int PathConvertToLabel(PATH *path, LABEL **label) {
   LABEL *new_label = nullptr;
-  int pno = 0;
+  int    pno       = 0;
 
   if (nullptr == path)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "Path pointer was null"));
@@ -414,9 +414,9 @@ int PathConvertToLabel(PATH *path, LABEL **label) {
 
   /* Write all the path points to the label. */
   for (pno = 0; pno < path->n_points; pno++) {
-    new_label->lv[pno].x = path->points[pno].x;
-    new_label->lv[pno].y = path->points[pno].y;
-    new_label->lv[pno].z = path->points[pno].z;
+    new_label->lv[pno].x   = path->points[pno].x;
+    new_label->lv[pno].y   = path->points[pno].y;
+    new_label->lv[pno].z   = path->points[pno].z;
     new_label->lv[pno].vno = path->points[pno].vno;
   }
 
@@ -428,7 +428,7 @@ int PathConvertToLabel(PATH *path, LABEL **label) {
 
 int PathCreateFromLabel(LABEL *label, PATH **path) {
   PATH *new_path = nullptr;
-  int pno = 0;
+  int   pno      = 0;
 
   if (nullptr == label)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "Label pointer was null"));
@@ -445,9 +445,9 @@ int PathCreateFromLabel(LABEL *label, PATH **path) {
 
   /* Read points into the path from the label. */
   for (pno = 0; pno < label->n_points; pno++) {
-    new_path->points[pno].x = label->lv[pno].x;
-    new_path->points[pno].y = label->lv[pno].y;
-    new_path->points[pno].z = label->lv[pno].z;
+    new_path->points[pno].x   = label->lv[pno].x;
+    new_path->points[pno].y   = label->lv[pno].y;
+    new_path->points[pno].z   = label->lv[pno].z;
     new_path->points[pno].vno = label->lv[pno].vno;
   }
 

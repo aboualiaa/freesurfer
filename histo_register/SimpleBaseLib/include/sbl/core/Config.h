@@ -28,9 +28,9 @@ public:
 
   // public members
   // fix(clean): make private
-  String name;
-  String value;
-  String description;
+  String          name;
+  String          value;
+  String          description;
   ConfigEntryType type;
 };
 
@@ -50,9 +50,9 @@ public:
   //-------------------------------------------
 
   /// read value from parameter with given name
-  bool readBool(const String &name, int defaultValue = -7777);
-  int readInt(const String &name, int defaultValue = -7777);
-  float readFloat(const String &name, float defaultValue = -7777.77f);
+  bool   readBool(const String &name, int defaultValue = -7777);
+  int    readInt(const String &name, int defaultValue = -7777);
+  float  readFloat(const String &name, float defaultValue = -7777.77f);
   double readDouble(const String &name, double defaultValue = -7777.77);
   String readString(const String &name, const String &defaultValue = "[none]");
   inline Array<String> readStrings(const String &name) {
@@ -78,8 +78,8 @@ public:
   inline void writeDouble(const String &name, double val) {
     writeString(name, sprintF("%f", val));
   }
-  void writeString(const String &name, const String &val,
-                   ConfigEntryType type = CONFIG_ENTRY_TEXT);
+  void        writeString(const String &name, const String &val,
+                          ConfigEntryType type = CONFIG_ENTRY_TEXT);
   inline void writeStrings(const String &name, const Array<String> &strArr) {
     writeString(name, join(strArr, ","));
   }
@@ -145,7 +145,7 @@ public:
   // fix(clean): better to write args+names first time around rather than reset
   // arg pos?
   inline void setInitialPass(bool initialPass) {
-    m_initialPass = initialPass;
+    m_initialPass        = initialPass;
     m_commandArgPosition = 0;
   }
 
@@ -173,14 +173,14 @@ public:
 private:
   /// find an entry by name
   const ConfigEntry *findEntry(const String &name) const;
-  ConfigEntry *findEntry(const String &name);
+  ConfigEntry *      findEntry(const String &name);
 
   // the entries
   Array<ConfigEntry> m_configEntries;
 
   // if specified, fill in config entries from command args
   Array<String> m_commandArgs;
-  mutable int m_commandArgPosition;
+  mutable int   m_commandArgPosition;
 
   // allow write() calls to create new entries
   bool m_allowNewEntries;

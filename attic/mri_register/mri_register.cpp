@@ -39,64 +39,64 @@
  *
  */
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "mri.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
-#include "timer.h"
-#include "diag.h"
-#include "mrimorph.h"
-#include "utils.h"
-#include "gca.h"
 #include "cma.h"
+#include "diag.h"
+#include "error.h"
+#include "gca.h"
 #include "gcamorph.h"
-#include "transform.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrimorph.h"
 #include "mrisegment.h"
+#include "proto.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
 #include "version.h"
 
-static int nogibbs = 0;
-static int remove_bright = 0;
-static int map_to_flash = 0;
+static int    nogibbs       = 0;
+static int    remove_bright = 0;
+static int    map_to_flash  = 0;
 static double TRs[MAX_GCA_INPUTS];
 static double fas[MAX_GCA_INPUTS];
 static double TEs[MAX_GCA_INPUTS];
 
-const char *Progname;
+const char *           Progname;
 static GCA_MORPH_PARMS parms;
 
-static int avgs = 0; /* for smoothing conditional densities */
-static int read_lta = 0;
-static char *mask_fname = NULL;
-static char *norm_fname = NULL;
-static int renormalize = 0;
-static int renormalize_new = 0;
-static int renormalize_align = 0;
-static int renormalize_align_after = 0;
-static int demons = 1;
-static int use_pvals = 0;
+static int   avgs              = 0; /* for smoothing conditional densities */
+static int   read_lta          = 0;
+static char *mask_fname        = NULL;
+static char *norm_fname        = NULL;
+static int   renormalize       = 0;
+static int   renormalize_new   = 0;
+static int   renormalize_align = 0;
+static int   renormalize_align_after = 0;
+static int   demons                  = 1;
+static int   use_pvals               = 0;
 
 static char *long_reg_fname = NULL;
 // static int inverted_xform = 0 ;
 
-static int max_rounds = 5;
-static int max_reductions = 3;
-static char *write_gca_fname = NULL;
-static float regularize = 0;
-static float regularize_mean = 0;
-static char *example_T1 = NULL;
+static int   max_rounds           = 5;
+static int   max_reductions       = 3;
+static char *write_gca_fname      = NULL;
+static float regularize           = 0;
+static float regularize_mean      = 0;
+static char *example_T1           = NULL;
 static char *example_segmentation = NULL;
-static int register_wm_flag = 0;
+static int   register_wm_flag     = 0;
 
-static double TR = -1;
-static double alpha = -1;
-static double TE = -1;
-static char *tl_fname = NULL;
+static double TR       = -1;
+static double alpha    = -1;
+static double TE       = -1;
+static char * tl_fname = NULL;
 
 static int ninsertions = 0;
 static int insert_labels[MAX_INSERTIONS];
@@ -104,16 +104,16 @@ static int insert_intensities[MAX_INSERTIONS];
 static int insert_coords[MAX_INSERTIONS][3];
 static int insert_whalf[MAX_INSERTIONS];
 
-static char *sample_fname = NULL;
-static char *transformed_sample_fname = NULL;
+static char *sample_fname                        = NULL;
+static char *transformed_sample_fname            = NULL;
 static char *normalized_transformed_sample_fname = NULL;
-static char *ctl_point_fname = NULL;
-static int novar = 1;
-static int reinit = 0;
+static char *ctl_point_fname                     = NULL;
+static int   novar                               = 1;
+static int   reinit                              = 0;
 
-static int use_contrast = 0;
-static float min_prior = MIN_PRIOR;
-static int reset = 0;
+static int   use_contrast = 0;
+static float min_prior    = MIN_PRIOR;
+static int   reset        = 0;
 
 static FILE *diag_fp = NULL;
 
@@ -122,16 +122,16 @@ static int get_option(int argc, char *argv[]);
 static int write_vector_field(MRI *mri, GCA_MORPH *gcam, char *vf_fname);
 static int remove_bright_stuff(MRI *mri, GCA *gca, TRANSFORM *transform);
 
-static char *renormalization_fname = NULL;
-static char *tissue_parms_fname = NULL;
-static int center = 1;
-static int nreductions = 1;
-static char *xform_name = NULL;
-static int noscale = 0;
-static int transform_loaded = 0;
-static char *gca_mean_fname = NULL;
-static TRANSFORM *transform = NULL;
-static char *vf_fname = NULL;
+static char *     renormalization_fname = NULL;
+static char *     tissue_parms_fname    = NULL;
+static int        center                = 1;
+static int        nreductions           = 1;
+static char *     xform_name            = NULL;
+static int        noscale               = 0;
+static int        transform_loaded      = 0;
+static char *     gca_mean_fname        = NULL;
+static TRANSFORM *transform             = NULL;
+static char *     vf_fname              = NULL;
 
 static double blur_sigma = 0.0f;
 
@@ -147,7 +147,7 @@ static int do_secondpass_renorm = 0;
    argv[3]  - directory in which to write out registered brain.
 */
 
-#define NPARMS 12
+#define NPARMS                12
 #define DEFAULT_CTL_POINT_PCT .25
 static double ctl_point_pct = DEFAULT_CTL_POINT_PCT;
 
@@ -161,35 +161,35 @@ static int nsigmas = NSIGMAS;
 GCAM_MULTISCALE *GCAMMSalloc(GCA_MORPH *gcam, GCA *gca, double *sigmas,
                              int nsigmas, char *write_ms_name);
 GCAM_MULTISCALE *GCAMMSread(char *base_fname, GCA_MORPH *gcam, int nsigmas);
-int GCAMMSwrite(GCAM_MULTISCALE *gcam_ms, char *base_fname);
+int              GCAMMSwrite(GCAM_MULTISCALE *gcam_ms, char *base_fname);
 
 GCAM_MULTISCALE *GCAMMSalloc(GCA_MORPH *gcam, GCA *gca, double *sigmas,
                              int nsigmas, char *write_ms_name) {
   GCAM_MULTISCALE *gcam_ms;
-  int s;
-  GCA *gca_tmp;
-  float base_sigma = 1.0;
+  int              s;
+  GCA *            gca_tmp;
+  float            base_sigma = 1.0;
 
-  gcam_ms = (GCAM_MS *)calloc(1, sizeof(GCAM_MULTISCALE));
+  gcam_ms          = (GCAM_MS *)calloc(1, sizeof(GCAM_MULTISCALE));
   gcam_ms->nsigmas = nsigmas + 1; // including original atlas (unsmoothed)
 
-  gcam_ms->gcam = gcam;
-  gcam_ms->sigmas = (double *)calloc(nsigmas + 1, sizeof(sigmas[0]));
-  gcam_ms->gcas = (GCA **)calloc(nsigmas + 1, sizeof(GCA *));
-  gcam_ms->gcas[0] = gca;
+  gcam_ms->gcam      = gcam;
+  gcam_ms->sigmas    = (double *)calloc(nsigmas + 1, sizeof(sigmas[0]));
+  gcam_ms->gcas      = (GCA **)calloc(nsigmas + 1, sizeof(GCA *));
+  gcam_ms->gcas[0]   = gca;
   gcam_ms->sigmas[0] = 0;
   for (s = 0; s < nsigmas; s++) {
     if (s == Gdiag_no)
       DiagBreak();
     printf("generating atlas at smoothness level s=%2.3f\n", sigmas[s]);
     gcam_ms->sigmas[s + 1] = sigmas[s];
-    gca_tmp = GCAsmooth(gcam_ms->gcas[s],
+    gca_tmp                = GCAsmooth(gcam_ms->gcas[s],
                         gcam_ms->sigmas[s + 1] - gcam_ms->sigmas[s]);
     if (0 && sigmas[s] / base_sigma > 4) // change node spacing
     {
       printf("setting node spacing to be %2.0f mm\n",
              gca_tmp->node_spacing * 2);
-      base_sigma = sigmas[s];
+      base_sigma           = sigmas[s];
       gcam_ms->gcas[s + 1] = GCAnodeDownsample2(gca_tmp);
       GCAfree(&gca_tmp);
     } else
@@ -205,8 +205,8 @@ GCAM_MULTISCALE *GCAMMSalloc(GCA_MORPH *gcam, GCA *gca, double *sigmas,
 }
 
 int GCAMMSwrite(GCAM_MULTISCALE *gcam_ms, char *base_fname) {
-  int s;
-  char fname[STRLEN];
+  int   s;
+  char  fname[STRLEN];
   FILE *fp;
 
   sprintf(fname, "%s_ms.dat", base_fname);
@@ -225,10 +225,10 @@ int GCAMMSwrite(GCAM_MULTISCALE *gcam_ms, char *base_fname) {
 }
 
 GCAM_MULTISCALE *GCAMMSread(char *base_fname, GCA_MORPH *gcam, int nsigmas) {
-  int s, n;
-  char fname[STRLEN];
-  FILE *fp;
-  double sigmas[1000];
+  int              s, n;
+  char             fname[STRLEN];
+  FILE *           fp;
+  double           sigmas[1000];
   GCAM_MULTISCALE *gcam_ms;
 
   sprintf(fname, "%s_ms.dat", base_fname);
@@ -243,87 +243,86 @@ GCAM_MULTISCALE *GCAMMSread(char *base_fname, GCA_MORPH *gcam, int nsigmas) {
     fscanf(fp, "sigma=%lf\n", &sigmas[s]);
   fclose(fp);
 
-  gcam_ms = (GCAM_MS *)calloc(1, sizeof(GCAM_MULTISCALE));
+  gcam_ms          = (GCAM_MS *)calloc(1, sizeof(GCAM_MULTISCALE));
   gcam_ms->nsigmas = nsigmas; // including original atlas (unsmoothed)
 
-  gcam_ms->gcam = gcam;
+  gcam_ms->gcam   = gcam;
   gcam_ms->sigmas = (double *)calloc(nsigmas, sizeof(sigmas[0]));
-  gcam_ms->gcas = (GCA **)calloc(nsigmas, sizeof(GCA *));
+  gcam_ms->gcas   = (GCA **)calloc(nsigmas, sizeof(GCA *));
   for (s = 0; s < nsigmas; s++) {
     sprintf(fname, "%s_sigma%.2f.gca", base_fname, sigmas[s]);
     printf("reading atlas at smoothness level s=%2.2f\n", sigmas[s]);
     gcam_ms->sigmas[s] = sigmas[s];
-    gcam_ms->gcas[s] = GCAread(fname);
+    gcam_ms->gcas[s]   = GCAread(fname);
   }
   printf("multi-scale atlas reading complete\n");
   gcam_ms->nsigmas = nsigmas;
-  gcam->vgcam_ms = gcam_ms;
+  gcam->vgcam_ms   = gcam_ms;
   return (gcam_ms);
 }
 
+static char *read_ms_name    = NULL;
+static char *write_ms_name   = NULL;
+static char *read_dist_name  = NULL;
+static char *write_dist_name = NULL;
 
-static char *read_ms_name = NULL ;
-static char *write_ms_name = NULL ;
-static char *read_dist_name = NULL ;
-static char *write_dist_name = NULL ;
+int main(int argc, char *argv[]) {
+  char *     gca_fname, *in_fname, *out_fname, fname[STRLEN], **av, *dot;
+  MRI *      mri_inputs, *mri_tmp, *mri_atlas_dist_map, *mri_atlas_labels;
+  GCA *      gca /*, *gca_tmp, *gca_reduced*/;
+  int        ac, nargs, ninputs, input, extra = 0;
+  int        msec, hours, minutes, seconds, round, done, nvox, reductions;
+  Timer      start;
+  GCA_MORPH *gcam;
+  GCAM_MS *  gcam_ms;
+  double     log_posterior, last_log_posterior, mean_scale, last_mean_scale,
+      gca_log_posterior, last_gca_log_posterior, min_scale;
 
-int
-main(int argc, char *argv[]) {
-  char         *gca_fname, *in_fname, *out_fname, fname[STRLEN], **av, *dot ;
-  MRI          *mri_inputs, *mri_tmp, *mri_atlas_dist_map, *mri_atlas_labels ;
-  GCA          *gca /*, *gca_tmp, *gca_reduced*/ ;
-  int          ac, nargs, ninputs, input, extra = 0 ;
-  int          msec, hours, minutes, seconds, round, done, nvox, reductions ;
-  Timer start ;
-  GCA_MORPH    *gcam ;
-  GCAM_MS      *gcam_ms ;
-  double       log_posterior, last_log_posterior, mean_scale, last_mean_scale,
-               gca_log_posterior, last_gca_log_posterior, min_scale ;
+  // for GCA Renormalization with Alignment (if called sequentially)
+  float label_scales[MAX_CMA_LABELS], label_offsets[MAX_CMA_LABELS];
+  float label_peaks[MAX_CMA_LABELS];
+  int   label_computed[MAX_CMA_LABELS];
+  int   got_scales = 0;
 
-	// for GCA Renormalization with Alignment (if called sequentially)
-  float        label_scales[MAX_CMA_LABELS], label_offsets[MAX_CMA_LABELS];
-	float        label_peaks[MAX_CMA_LABELS];
-  int          label_computed[MAX_CMA_LABELS];
-	int          got_scales =0;
+  parms.l_log_likelihood     = 0.0;
+  parms.l_multiscale         = 1.0;
+  parms.niterations          = 500;
+  parms.levels               = 6;
+  parms.scale_smoothness     = 1;
+  parms.uncompress           = 0;
+  parms.npasses              = 1;
+  parms.diag_write_snapshots = 1;
+  parms.diag_sample_type     = SAMPLE_TRILINEAR;
+  parms.relabel_avgs         = -1;   /* never relabel, was 1 */
+  parms.reset_avgs           = 0;    /* reset metric properties when navgs=0 */
+  parms.dt                   = 0.05; /* was 5e-6 */
+  parms.momentum             = 0.9;
+  parms.tol                  = 1; /* at least 1% decrease in sse */
+  parms.l_jacobian           = 1.0;
+  parms.l_label              = 1.0;
+  parms.l_map                = 0.0;
+  parms.label_dist           = 10.0;
+  parms.l_smoothness         = 1;
+  parms.start_t              = 0;
+  parms.max_grad             = 0.3;
+  parms.sigma                = 2.0f;
+  parms.exp_k                = 20;
+  parms.min_avgs             = 0;
+  parms.navgs                = 256;
+  parms.noneg                = True;
+  parms.log_fp               = NULL;
+  parms.ratio_thresh         = 0.1;
+  parms.nsmall               = 1;
+  parms.integration_type     = GCAM_INTEGRATE_BOTH;
 
-  parms.l_log_likelihood = 0.0 ;
-  parms.l_multiscale = 1.0 ;
-  parms.niterations = 500 ;
-  parms.levels = 6 ;
-  parms.scale_smoothness = 1 ;
-  parms.uncompress = 0 ;
-  parms.npasses = 1 ;
-  parms.diag_write_snapshots = 1 ;
-  parms.diag_sample_type = SAMPLE_TRILINEAR ;
-  parms.relabel_avgs = -1 ;  /* never relabel, was 1 */
-  parms.reset_avgs = 0 ;  /* reset metric properties when navgs=0 */
-  parms.dt = 0.05 ;  /* was 5e-6 */
-  parms.momentum = 0.9 ;
-  parms.tol = 1 ;  /* at least 1% decrease in sse */
-  parms.l_jacobian = 1.0 ;
-  parms.l_label = 1.0 ;
-  parms.l_map = 0.0 ;
-  parms.label_dist = 10.0 ;
-  parms.l_smoothness = 1 ;
-  parms.start_t = 0 ;
-  parms.max_grad = 0.3 ;
-  parms.sigma = 2.0f ;
-  parms.exp_k = 20 ;
-  parms.min_avgs = 0 ;
-  parms.navgs = 256 ;
-  parms.noneg = True ;
-  parms.log_fp = NULL ;
-  parms.ratio_thresh = 0.1 ;
-  parms.nsmall = 1 ;
-  parms.integration_type = GCAM_INTEGRATE_BOTH ;
+  parms.l_multiscale = 0.0;
+  parms.l_dtrans     = 1.0;
+  parms.l_label      = 0.0;
+  Progname           = argv[0];
+  setRandomSeed(-1L);
 
-  parms.l_multiscale = 0.0 ;
-  parms.l_dtrans = 1.0 ;   parms.l_label = 0.0 ;
-  Progname = argv[0] ;
-  setRandomSeed(-1L) ;
-
-  DiagInit(NULL, NULL, NULL) ;
-  ErrorInit(NULL, NULL, NULL) ;
+  DiagInit(NULL, NULL, NULL);
+  ErrorInit(NULL, NULL, NULL);
 
   nargs = handleVersionOption(argc, argv, "mri_register");
   if (nargs && argc - nargs == 1)
@@ -380,7 +379,7 @@ main(int argc, char *argv[]) {
 
   ninputs = argc - 3;
   printf("reading %d input volumes...\n", ninputs);
-  in_fname = argv[1];
+  in_fname  = argv[1];
   gca_fname = argv[ninputs + 1];
   out_fname = argv[ninputs + 2];
   FileNameOnly(out_fname, fname);
@@ -560,7 +559,7 @@ main(int argc, char *argv[]) {
   // XGRAD or YGRAD or ZGRAD set
   // store (x,y,z)gradient info into mri_inputs
   if (gca->flags & GCA_GRAD) {
-    int i, start = ninputs;
+    int  i, start = ninputs;
     MRI *mri_kernel, *mri_smooth, *mri_grad, *mri_tmp;
 
     mri_kernel = MRIgaussian1d(1.0, 30);
@@ -613,7 +612,7 @@ main(int argc, char *argv[]) {
     MRI *mri_tmp, *mri_kernel;
 
     mri_kernel = MRIgaussian1d(blur_sigma, 100);
-    mri_tmp = MRIconvolveGaussian(mri_inputs, NULL, mri_kernel);
+    mri_tmp    = MRIconvolveGaussian(mri_inputs, NULL, mri_kernel);
     MRIfree(&mri_inputs);
     mri_inputs = mri_tmp;
   }
@@ -672,26 +671,26 @@ main(int argc, char *argv[]) {
              parms.relabel_avgs >= parms.navgs);
   else {
     // added by xhan
-    int x, y, z, n, label, max_n, max_label;
-    float max_p;
-    GC1D *gc;
+    int             x, y, z, n, label, max_n, max_label;
+    float           max_p;
+    GC1D *          gc;
     GCA_MORPH_NODE *gcamn;
-    GCA_PRIOR *gcap;
+    GCA_PRIOR *     gcap;
 
     gcam->ninputs = mri_inputs->nframes;
     getVolGeom(mri_inputs, &gcam->image);
     GCAsetVolGeom(gca, &gcam->atlas);
-    gcam->gca = gca;
+    gcam->gca     = gca;
     gcam->spacing = gca->prior_spacing;
 
     // use gca information
     for (x = 0; x < gcam->width; x++) {
       for (y = 0; y < gcam->height; y++) {
         for (z = 0; z < gcam->depth; z++) {
-          gcamn = &gcam->nodes[x][y][z];
-          gcap = &gca->priors[x][y][z];
-          max_p = 0;
-          max_n = -1;
+          gcamn     = &gcam->nodes[x][y][z];
+          gcap      = &gca->priors[x][y][z];
+          max_p     = 0;
+          max_n     = -1;
           max_label = 0;
 
           // find the label which has the max p
@@ -705,18 +704,18 @@ main(int argc, char *argv[]) {
             }
             if (gcap->priors[n] >= max_p) // update the max_p and max_label
             {
-              max_n = n;
-              max_p = gcap->priors[n];
+              max_n     = n;
+              max_p     = gcap->priors[n];
               max_label = gcap->labels[n];
             }
           }
 
           gcamn->label = max_label;
-          gcamn->n = max_n;
+          gcamn->n     = max_n;
           gcamn->prior = max_p;
-          gc = GCAfindPriorGC(gca, x, y, z, max_label);
+          gc           = GCAfindPriorGC(gca, x, y, z, max_label);
           // gc can be NULL
-          gcamn->gc = gc;
+          gcamn->gc    = gc;
           gcamn->log_p = 0;
         }
       }
@@ -738,8 +737,8 @@ main(int argc, char *argv[]) {
       GCAmapRenormalize(gcam->gca, mri_inputs, transform);
     else {
       TRANSFORM *trans;
-      trans = (TRANSFORM *)calloc(1, sizeof(TRANSFORM));
-      trans->type = TransformFileNameType(xform_name);
+      trans        = (TRANSFORM *)calloc(1, sizeof(TRANSFORM));
+      trans->type  = TransformFileNameType(xform_name);
       trans->xform = (void *)gcam;
       GCAmapRenormalize(gcam->gca, mri_inputs, trans);
       free(trans);
@@ -749,8 +748,8 @@ main(int argc, char *argv[]) {
       GCAmapRenormalizeByClass(gcam->gca, mri_inputs, transform);
     else {
       TRANSFORM *trans;
-      trans = (TRANSFORM *)calloc(1, sizeof(TRANSFORM));
-      trans->type = TransformFileNameType(xform_name);
+      trans        = (TRANSFORM *)calloc(1, sizeof(TRANSFORM));
+      trans->type  = TransformFileNameType(xform_name);
       trans->xform = (void *)gcam;
       GCAmapRenormalizeByClass(gcam->gca, mri_inputs, trans);
       free(trans);
@@ -798,7 +797,7 @@ main(int argc, char *argv[]) {
       //      GCAmapRenormalize(gcam->gca, mri_inputs, transform) ;
       //   if (read_lta == 0)
       {
-        int old_diag;
+        int  old_diag;
         MRI *mri_morphed;
 
         old_diag = Gdiag;
@@ -859,8 +858,8 @@ main(int argc, char *argv[]) {
     } else // for longitudinal processing
     {
       TRANSFORM *trans;
-      trans = (TRANSFORM *)calloc(1, sizeof(TRANSFORM));
-      trans->type = TransformFileNameType(xform_name);
+      trans        = (TRANSFORM *)calloc(1, sizeof(TRANSFORM));
+      trans->type  = TransformFileNameType(xform_name);
       trans->xform = (void *)gcam;
 
       /*The following inversion is necessary;
@@ -915,10 +914,10 @@ main(int argc, char *argv[]) {
     }
     if (DIAG_VERBOSE_ON) {
       MRI *mri_seg, *mri_aligned;
-      int l;
-      lta = LTAread("gcam.lta");
+      int  l;
+      lta     = LTAread("gcam.lta");
       mri_seg = MRIclone(mri_inputs, NULL);
-      l = lta->xforms[0].label;
+      l       = lta->xforms[0].label;
       GCAbuildMostLikelyVolumeForStructure(gca, mri_seg, l, 0, transform, NULL);
       LTAfillInverse(lta);
       mri_aligned = MRIlinearTransform(mri_seg, NULL, lta->xforms[0].m_L);
@@ -932,8 +931,8 @@ main(int argc, char *argv[]) {
       GCAMreinitWithLTA(gcam, lta, mri_inputs, &parms);
     if (DIAG_VERBOSE_ON) {
       MRI *mri_seg;
-      int l;
-      l = lta->xforms[0].label;
+      int  l;
+      l       = lta->xforms[0].label;
       mri_seg = MRIclone(mri_inputs, NULL);
       GCAbuildMostLikelyVolumeForStructure(gca, mri_seg, l, 0, transform, NULL);
       MRIwrite(mri_seg, "sa.mgh");
@@ -993,10 +992,10 @@ main(int argc, char *argv[]) {
 
   if (renormalize_align_after) // 1st morph should be smooth
   {
-    int old_diag;
-    TRANSFORM _transform, *transform = &_transform;
+    int             old_diag;
+    TRANSFORM       _transform, *transform = &_transform;
     GCA_MORPH_PARMS saved_parms;
-    int start_t;
+    int             start_t;
 
     *(&saved_parms) = *(&parms);
 
@@ -1005,13 +1004,13 @@ main(int argc, char *argv[]) {
     parms.l_dtrans = 0;
     parms.tol *= 5;
     parms.l_smoothness *= 5;
-    parms.levels = 4;
+    parms.levels           = 4;
     parms.l_log_likelihood = 0.2f;
-    parms.l_label = 1.0;
+    parms.l_label          = 1.0;
     GCAMregister(gcam, mri_inputs, &parms);
-    transform->type = MORPH_3D_TYPE;
+    transform->type  = MORPH_3D_TYPE;
     transform->xform = (void *)gcam;
-    old_diag = Gdiag;
+    old_diag         = Gdiag;
     if (parms.write_iterations == 0)
       Gdiag &= ~DIAG_WRITE;
     TransformInvert(transform, mri_inputs);
@@ -1046,8 +1045,8 @@ main(int argc, char *argv[]) {
       printf("writing normalized gca to %s...\n", write_gca_fname);
       GCAwrite(gcam->gca, write_gca_fname);
     }
-    start_t = parms.start_t;
-    *(&parms) = *(&saved_parms);
+    start_t       = parms.start_t;
+    *(&parms)     = *(&saved_parms);
     parms.start_t = start_t;
 #if 0
     parms.l_dtrans = l_dtrans ;
@@ -1098,17 +1097,17 @@ main(int argc, char *argv[]) {
   //////////////////////////////////////////////////////////////
   // -renorm fname option
   if (renormalization_fname) {
-    FILE *fp;
-    int *labels, nlines, i;
+    FILE * fp;
+    int *  labels, nlines, i;
     float *intensities, f1, f2;
-    char *cp, line[STRLEN];
+    char * cp, line[STRLEN];
 
     fp = fopen(renormalization_fname, "r");
     if (!fp)
       ErrorExit(ERROR_NOFILE, "%s: could not read %s", Progname,
                 renormalization_fname);
 
-    cp = fgetl(line, 199, fp);
+    cp     = fgetl(line, 199, fp);
     nlines = 0;
     while (cp) {
       nlines++;
@@ -1116,12 +1115,12 @@ main(int argc, char *argv[]) {
     }
     rewind(fp);
     printf("reading %d labels from %s...\n", nlines, renormalization_fname);
-    labels = (int *)calloc(nlines, sizeof(int));
+    labels      = (int *)calloc(nlines, sizeof(int));
     intensities = (float *)calloc(nlines, sizeof(float));
-    cp = fgetl(line, 199, fp);
+    cp          = fgetl(line, 199, fp);
     for (i = 0; i < nlines; i++) {
       sscanf(cp, "%e  %e", &f1, &f2);
-      labels[i] = (int)f1;
+      labels[i]      = (int)f1;
       intensities[i] = f2;
       if (labels[i] == Left_Cerebral_White_Matter)
         DiagBreak();
@@ -1135,7 +1134,7 @@ main(int argc, char *argv[]) {
     free(intensities);
   }
 
-  parms.ndtrans = NDTRANS_LABELS;
+  parms.ndtrans       = NDTRANS_LABELS;
   parms.dtrans_labels = dtrans_labels;
   if (ninsertions > 0) {
     int i, found, l;
@@ -1187,13 +1186,13 @@ main(int argc, char *argv[]) {
   mri_atlas_dist_map = MRIcreateDistanceTransforms(
       mri_atlas_labels, NULL, 2 * sigmas[nsigmas - 1], parms.dtrans_labels,
       parms.ndtrans);
-  done = 0;
+  done              = 0;
   gca_log_posterior = 0.0;
   do {
     TRANSFORM _transform, *gcam_transform = &_transform;
-    char fname[STRLEN];
-    MRI *mri_aseg, *mri_pvals, *mri_sigma, *mri_aseg_orig, *mri_s_index;
-    gcam_transform->type = MORPH_3D_TYPE;
+    char      fname[STRLEN];
+    MRI *     mri_aseg, *mri_pvals, *mri_sigma, *mri_aseg_orig, *mri_s_index;
+    gcam_transform->type  = MORPH_3D_TYPE;
     gcam_transform->xform = (void *)gcam;
     if (round > 0 || 1) {
       double maxp;
@@ -1201,7 +1200,7 @@ main(int argc, char *argv[]) {
       mri_aseg_orig = MRIallocSequence(mri_inputs->width, mri_inputs->height,
                                        mri_inputs->depth, MRI_FLOAT, 4);
       MRIcopyHeader(mri_inputs, mri_aseg_orig);
-      mri_pvals = MRIcloneDifferentType(mri_inputs, MRI_FLOAT);
+      mri_pvals   = MRIcloneDifferentType(mri_inputs, MRI_FLOAT);
       mri_s_index = MRIcloneDifferentType(mri_inputs, MRI_UCHAR);
       mri_sigma =
           GCAMMScomputeOptimalScale(gcam_ms, gcam_transform, mri_inputs, NULL,
@@ -1248,16 +1247,16 @@ main(int argc, char *argv[]) {
       mri_pvals = MRIread(fname);
     }
     last_mean_scale = mean_scale;
-    mean_scale = MRImeanFrame(mri_sigma, 0);
-    mean_scale = MRImeanFrameNonzeroMask(mri_sigma, 0, mri_aseg);
+    mean_scale      = MRImeanFrame(mri_sigma, 0);
+    mean_scale      = MRImeanFrameNonzeroMask(mri_sigma, 0, mri_aseg);
     printf("round %d, log posterior = %f, mean_scale = %2.2f (min %2.2f)\n",
            round, log_posterior, mean_scale, min_scale);
     if (min_scale > mean_scale)
       mean_scale = min_scale;
     parms.sigma = mean_scale;
-    min_scale = .95 * mean_scale; // ensure it decreases
+    min_scale   = .95 * mean_scale; // ensure it decreases
 
-    last_log_posterior = log_posterior;
+    last_log_posterior     = log_posterior;
     last_gca_log_posterior = gca_log_posterior;
     if (Gdiag & DIAG_WRITE) {
       sprintf(fname, "%s.log", parms.base_name);
@@ -1393,10 +1392,10 @@ main(int argc, char *argv[]) {
     MRIfree(&mri_inputs);
   if (diag_fp)
     fclose(diag_fp);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
-  hours = minutes / (60);
+  hours   = minutes / (60);
   minutes = minutes % 60;
   seconds = seconds % 60;
   printf("registration took %d hours, %d minutes and %d seconds.\n", hours,
@@ -1411,14 +1410,14 @@ main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0, err;
+  int   nargs = 0, err;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   /*  StrUpper(option) ;*/
   if (!stricmp(option, "DIST") || !stricmp(option, "DISTANCE")) {
     parms.l_distance = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     printf("l_dist = %2.2f\n", parms.l_distance);
   } else if (!stricmp(option, "REGULARIZE")) {
     regularize = atof(argv[2]);
@@ -1482,7 +1481,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "scale_smoothness")) {
     parms.scale_smoothness = atoi(argv[2]);
-    parms.npasses = 2;
+    parms.npasses          = 2;
     printf("%sscaling smooothness coefficient (default=1), "
            "and setting npasses=%d\n",
            parms.scale_smoothness ? "" : "not ", parms.npasses);
@@ -1513,15 +1512,15 @@ static int get_option(int argc, char *argv[]) {
     printf("reading LTA from <base-name>.lta\n");
   } else if (!stricmp(option, "SMOOTH") || !stricmp(option, "SMOOTHNESS")) {
     parms.l_smoothness = atof(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     printf("l_smoothness = %2.2f\n", parms.l_smoothness);
   } else if (!stricmp(option, "SAMPLES")) {
     sample_fname = argv[2];
-    nargs = 1;
+    nargs        = 1;
     printf("writing control points to %s...\n", sample_fname);
   } else if (!stricmp(option, "SMALL") || !stricmp(option, "NSMALL")) {
     parms.nsmall = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("allowing %d small steps before terminating integration\n",
            parms.nsmall);
   } else if (!stricmp(option, "FIXED")) {
@@ -1532,52 +1531,52 @@ static int get_option(int argc, char *argv[]) {
     printf("using optimal time-step integration\n");
   } else if (!stricmp(option, "NONEG")) {
     parms.noneg = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("%s allowing temporary folds during numerical minimization\n",
            parms.noneg ? "not" : "");
   } else if (!stricmp(option, "ISIZE") || !stricmp(option, "IMAGE_SIZE")) {
     IMAGE_SIZE = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("setting diagnostic image size to %d\n", IMAGE_SIZE);
   } else if (!stricmp(option, "WM")) {
     register_wm_flag = 1;
     printf("registering white matter in initial pass...\n");
   } else if (!stricmp(option, "TL")) {
     tl_fname = argv[2];
-    nargs = 1;
+    nargs    = 1;
     printf("reading temporal lobe atlas from %s...\n", tl_fname);
   } else if (!stricmp(option, "RELABEL")) {
     parms.relabel = atoi(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("%srelabeling nodes with MAP estimates\n",
            parms.relabel ? "" : "not ");
   } else if (!stricmp(option, "RELABEL_AVGS")) {
     parms.relabel_avgs = atoi(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     printf("relabeling nodes with MAP estimates at avgs=%d\n",
            parms.relabel_avgs);
   } else if (!stricmp(option, "RESET_AVGS")) {
     parms.reset_avgs = atoi(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     printf("resetting metric properties at avgs=%d\n", parms.reset_avgs);
   } else if (!stricmp(option, "RESET")) {
     reset = 1;
     printf("resetting metric properties...\n");
   } else if (!stricmp(option, "VF")) {
     vf_fname = argv[2];
-    nargs = 1;
+    nargs    = 1;
     printf("writing vector field to %s...\n", vf_fname);
   } else if (!stricmp(option, "INSERT")) {
     if (ninsertions >= MAX_INSERTIONS)
       ErrorExit(ERROR_NOMEMORY, "%s: too many insertions (%d) specified\n",
                 Progname, ninsertions);
 
-    insert_labels[ninsertions] = atoi(argv[2]);
+    insert_labels[ninsertions]      = atoi(argv[2]);
     insert_intensities[ninsertions] = atoi(argv[3]);
-    insert_coords[ninsertions][0] = atoi(argv[4]);
-    insert_coords[ninsertions][1] = atoi(argv[5]);
-    insert_coords[ninsertions][2] = atoi(argv[6]);
-    insert_whalf[ninsertions] = atoi(argv[7]);
+    insert_coords[ninsertions][0]   = atoi(argv[4]);
+    insert_coords[ninsertions][1]   = atoi(argv[5]);
+    insert_coords[ninsertions][2]   = atoi(argv[6]);
+    insert_whalf[ninsertions]       = atoi(argv[7]);
     printf("inserting label %d (%s) at (%d, %d, %d) with intensity = %d, in %d "
            "voxel nbhd\n",
            insert_labels[ninsertions],
@@ -1590,7 +1589,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 6;
   } else if (!stricmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else if (!stricmp(option, "DIAG")) {
     diag_fp = fopen(argv[2], "w");
@@ -1600,17 +1599,17 @@ static int get_option(int argc, char *argv[]) {
     printf("opening diag file %s for writing\n", argv[2]);
     nargs = 1;
   } else if (!stricmp(option, "TR")) {
-    TR = atof(argv[2]);
+    TR    = atof(argv[2]);
     nargs = 1;
     printf("using TR=%2.1f msec\n", TR);
   } else if (!stricmp(option, "EXAMPLE")) {
-    example_T1 = argv[2];
+    example_T1           = argv[2];
     example_segmentation = argv[3];
     printf("using %s and %s as example T1 and segmentations respectively.\n",
            example_T1, example_segmentation);
     nargs = 2;
   } else if (!stricmp(option, "TE")) {
-    TE = atof(argv[2]);
+    TE    = atof(argv[2]);
     nargs = 1;
     printf("using TE=%2.1f msec\n", TE);
   } else if (!stricmp(option, "ALPHA")) {
@@ -1619,12 +1618,12 @@ static int get_option(int argc, char *argv[]) {
     printf("using alpha=%2.0f degrees\n", DEGREES(alpha));
   } else if (!stricmp(option, "FSAMPLES") || !stricmp(option, "ISAMPLES")) {
     transformed_sample_fname = argv[2];
-    nargs = 1;
+    nargs                    = 1;
     printf("writing transformed control points to %s...\n",
            transformed_sample_fname);
   } else if (!stricmp(option, "NSAMPLES")) {
     normalized_transformed_sample_fname = argv[2];
-    nargs = 1;
+    nargs                               = 1;
     printf("writing  transformed normalization control points to %s...\n",
            normalized_transformed_sample_fname);
   } else if (!stricmp(option, "CONTRAST")) {
@@ -1632,7 +1631,7 @@ static int get_option(int argc, char *argv[]) {
     printf("using contrast to find labels...\n");
   } else if (!stricmp(option, "RENORM")) {
     renormalization_fname = argv[2];
-    nargs = 1;
+    nargs                 = 1;
     printf("renormalizing using predicted intensity values in %s...\n",
            renormalization_fname);
   } else if (!stricmp(option, "FLASH")) {
@@ -1640,7 +1639,7 @@ static int get_option(int argc, char *argv[]) {
     printf("using FLASH forward model to predict intensity values...\n");
   } else if (!stricmp(option, "FLASH_PARMS")) {
     tissue_parms_fname = argv[2];
-    nargs = 1;
+    nargs              = 1;
     printf("using FLASH forward model and tissue parms in %s to predict"
            " intensity values...\n",
            tissue_parms_fname);
@@ -1649,11 +1648,11 @@ static int get_option(int argc, char *argv[]) {
     printf("only computing translation parameters...\n");
   } else if (!stricmp(option, "WRITE_MEAN")) {
     gca_mean_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("writing gca means to %s...\n", gca_mean_fname);
   } else if (!stricmp(option, "PRIOR")) {
     min_prior = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("using prior threshold %2.2f\n", min_prior);
   } else if (!stricmp(option, "NOVAR")) {
     novar = 1;
@@ -1663,15 +1662,15 @@ static int get_option(int argc, char *argv[]) {
     printf("using variance estimates\n");
   } else if (!stricmp(option, "DT")) {
     parms.dt = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("dt = %2.2e\n", parms.dt);
   } else if (!stricmp(option, "DTRANS")) {
     parms.l_dtrans = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("l_dtrans = %2.2e\n", parms.l_dtrans);
   } else if (!stricmp(option, "TOL")) {
     parms.tol = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("tol = %2.2e\n", parms.tol);
   } else if (!stricmp(option, "CENTER")) {
     center = 1;
@@ -1681,67 +1680,67 @@ static int get_option(int argc, char *argv[]) {
     printf("disabling scaling...\n");
   } else if (!stricmp(option, "LEVELS")) {
     parms.levels = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("levels = %d\n", parms.levels);
   } else if (!stricmp(option, "LIKELIHOOD")) {
     parms.l_likelihood = atof(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     printf("l_likelihood = %2.2f\n", parms.l_likelihood);
   } else if (!stricmp(option, "LOGLIKELIHOOD")) {
     parms.l_log_likelihood = atof(argv[2]);
-    nargs = 1;
+    nargs                  = 1;
     printf("l_log_likelihood = %2.2f\n", parms.l_log_likelihood);
   } else if (!stricmp(option, "LABEL")) {
     parms.l_label = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("l_label = %2.2f\n", parms.l_label);
   } else if (!stricmp(option, "MAP")) {
     parms.l_map = atof(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("l_map = %2.2f\n", parms.l_map);
   } else if (!stricmp(option, "LDIST") || !stricmp(option, "LABEL_DIST")) {
     parms.label_dist = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     printf("label_dist = %2.2f\n", parms.label_dist);
   } else if (!stricmp(option, "REDUCE")) {
     nreductions = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("reducing input images %d times before aligning...\n", nreductions);
   } else if (!stricmp(option, "DEBUG_NODE")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging node (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx2 = atoi(argv[2]);
-    Gy2 = atoi(argv[3]);
-    Gz2 = atoi(argv[4]);
+    Gx2   = atoi(argv[2]);
+    Gy2   = atoi(argv[3]);
+    Gz2   = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gvx, Gvy, Gvz);
   } else if (!stricmp(option, "norm")) {
     norm_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("intensity normalizing and writing to %s...\n", norm_fname);
   } else if (!stricmp(option, "avgs")) {
-    avgs = atoi(argv[2]);
+    avgs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr,
             "applying mean filter %d times to conditional densities...\n",
             avgs);
   } else if (!stricmp(option, "cross-sequence") ||
              !stricmp(option, "cross_sequence")) {
-    regularize = .5;
-    avgs = 2;
+    regularize  = .5;
+    avgs        = 2;
     renormalize = 1;
     printf("registering sequences, equivalent to:\n");
     printf("\t-renormalize\n\t-avgs %d\n\t-regularize %2.3f\n", avgs,
            regularize);
   } else if (!stricmp(option, "align-cross-sequence") ||
              !stricmp(option, "align") || !stricmp(option, "align-after")) {
-    regularize = .5;
-    reinit = 1;
-    regularize_mean = .5;
+    regularize         = .5;
+    reinit             = 1;
+    regularize_mean    = .5;
     parms.ratio_thresh = 0.000001;
     //  avgs = 2 ;   not used anymore
     renormalize_align = 1;
@@ -1750,7 +1749,7 @@ static int get_option(int argc, char *argv[]) {
     printf("\t-renormalize\n\t-regularize_mean %2.3f\n\t-regularize %2.3f\n",
            regularize_mean, regularize);
     if (!stricmp(option, "align-after")) {
-      renormalize_align = 0;
+      renormalize_align       = 0;
       renormalize_align_after = 1;
     }
 
@@ -1759,19 +1758,19 @@ static int get_option(int argc, char *argv[]) {
     reinit = 0; // donot reinitialize GCAM with the multiple linear registration
   } else if (!stricmp(option, "cross-sequence-new") ||
              !stricmp(option, "cross_sequence_new")) {
-    regularize = .5;
-    avgs = 2;
+    regularize      = .5;
+    avgs            = 2;
     renormalize_new = 1;
     printf("registering sequences, equivalent to:\n");
     printf("\t-renormalize\n\t-avgs %d\n\t-regularize %2.3f\n", avgs,
            regularize);
   } else if (!stricmp(option, "area")) {
     parms.l_area = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("using l_area=%2.3f\n", parms.l_area);
   } else if (!stricmp(option, "rthresh")) {
     parms.ratio_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     printf("using compression ratio threshold = %2.3f...\n",
            parms.ratio_thresh);
   } else if (!stricmp(option, "invert-and-save")) {
@@ -1785,30 +1784,30 @@ static int get_option(int argc, char *argv[]) {
       // invert is not needed if REG is from tp1 to current subject! -xh
       //   inverted_xform = 1 ;
       long_reg_fname = argv[3];
-      nargs = 2;
+      nargs          = 2;
       printf("reading previously computed atlas xform %s "
              "and applying inverse registration %s\n",
              xform_name, long_reg_fname);
       break;
     case 'J':
       parms.l_jacobian = atof(argv[2]);
-      nargs = 1;
+      nargs            = 1;
       printf("using l_jacobian=%2.3f\n", parms.l_jacobian);
       break;
     case 'A':
       parms.navgs = atoi(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("smoothing gradient with %d averages...\n", parms.navgs);
       break;
     case 'F':
       ctl_point_fname = argv[2];
-      nargs = 1;
+      nargs           = 1;
       printf("reading manually defined control points from %s\n",
              ctl_point_fname);
       break;
     case 'X':
       xform_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("reading previous transform from %s...\n", xform_name);
       break;
     case 'K':
@@ -1831,12 +1830,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'B':
       blur_sigma = atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("blurring input image with sigma=%2.3f\n", blur_sigma);
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'S':
       parms.sigma = atof(argv[2]);
@@ -1851,24 +1850,24 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'N':
       parms.niterations = atoi(argv[2]);
-      nargs = 1;
+      nargs             = 1;
       printf("niterations = %d\n", parms.niterations);
       break;
     case 'W':
       parms.write_iterations = atoi(argv[2]);
-      nargs = 1;
+      nargs                  = 1;
       printf("write iterations = %d\n", parms.write_iterations);
       Gdiag |= DIAG_WRITE;
       break;
     case 'P':
       ctl_point_pct = atof(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       printf("using top %2.1f%% wm points as control points....\n",
              100.0 * ctl_point_pct);
       break;
     case 'M':
       parms.momentum = atof(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       printf("momentum = %2.2f\n", parms.momentum);
       break;
     default:
@@ -1881,8 +1880,8 @@ static int get_option(int argc, char *argv[]) {
 }
 
 static int write_vector_field(MRI *mri, GCA_MORPH *gcam, char *vf_fname) {
-  FILE *fp;
-  int x, y, z;
+  FILE *          fp;
+  int             x, y, z;
   GCA_MORPH_NODE *gcamn;
 
   fp = fopen(vf_fname, "w");
@@ -1905,19 +1904,19 @@ static int write_vector_field(MRI *mri, GCA_MORPH *gcam, char *vf_fname) {
 
 static int remove_bright_stuff(MRI *mri, GCA *gca, TRANSFORM *transform) {
   HISTO *h, *hs;
-  int peak, num, end, x, y, z, xi, yi, zi, xk, yk, zk, i, n, erase, five_mm;
-  float thresh;
+  int    peak, num, end, x, y, z, xi, yi, zi, xk, yk, zk, i, n, erase, five_mm;
+  float  thresh;
   double val, new_val;
-  MRI *mri_tmp, *mri_nonbrain, *mri_tmp2;
-  GCA_PRIOR *gcap;
+  MRI *  mri_tmp, *mri_nonbrain, *mri_tmp2;
+  GCA_PRIOR *       gcap;
   MRI_SEGMENTATION *mriseg;
-  MRI_SEGMENT *mseg;
-  MSV *msv;
+  MRI_SEGMENT *     mseg;
+  MSV *             msv;
 
   if (gca->ninputs > 1)
     return (NO_ERROR);
 
-  mri_tmp = MRIalloc(mri->width, mri->height, mri->depth, MRI_UCHAR);
+  mri_tmp      = MRIalloc(mri->width, mri->height, mri->depth, MRI_UCHAR);
   mri_nonbrain = MRIalloc(mri->width, mri->height, mri->depth, MRI_UCHAR);
   for (x = 0; x < mri->width; x++) {
     for (y = 0; y < mri->height; y++) {
@@ -1942,13 +1941,13 @@ static int remove_bright_stuff(MRI *mri, GCA *gca, TRANSFORM *transform) {
   }
 
   MRIclear(mri_tmp);
-  h = MRIhistogram(mri, 0);
+  h            = MRIhistogram(mri, 0);
   h->counts[0] = 0;
-  hs = HISTOsmooth(h, NULL, 2);
+  hs           = HISTOsmooth(h, NULL, 2);
 
-  peak = HISTOfindLastPeak(hs, 5, 0.1);
-  end = HISTOfindEndOfPeak(hs, peak, 0.01);
-  thresh = hs->bins[end];
+  peak    = HISTOfindLastPeak(hs, 5, 0.1);
+  end     = HISTOfindEndOfPeak(hs, peak, 0.01);
+  thresh  = hs->bins[end];
   new_val = 0;
 
   printf("removing voxels brighter than %2.1f\n", thresh);
@@ -1971,8 +1970,8 @@ static int remove_bright_stuff(MRI *mri, GCA *gca, TRANSFORM *transform) {
   /* relax threshold somewhat, and reduce voxels that are above this thresh
      and nbrs of one above the more stringent one.
   */
-  end = HISTOfindStartOfPeak(hs, peak, 0.1);
-  thresh = hs->bins[end];
+  end      = HISTOfindStartOfPeak(hs, peak, 0.1);
+  thresh   = hs->bins[end];
   mri_tmp2 = MRIcopy(mri_tmp, NULL);
   for (x = 0; x < mri->width; x++) {
     for (y = 0; y < mri->height; y++) {

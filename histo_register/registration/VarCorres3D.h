@@ -1,9 +1,9 @@
 #ifndef _VAR_CORRES_3D_H_
 #define _VAR_CORRES_3D_H_
+#include "registration/CorresField3D.h"
 #include <sbl/core/Array.h>
 #include <sbl/core/Config.h>
 #include <sbl/core/Pointer.h>
-#include "registration/CorresField3D.h"
 using namespace sbl;
 namespace hb {
 

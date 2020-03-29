@@ -11,8 +11,8 @@ class DialogNewAnnotation : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DialogNewAnnotation(QWidget *parent = nullptr,
-                               const QString &dir = "");
+  explicit DialogNewAnnotation(QWidget *      parent = nullptr,
+                               const QString &dir    = "");
   ~DialogNewAnnotation();
 
   QString GetName();
@@ -24,7 +24,7 @@ public slots:
 
 private:
   Ui::DialogNewAnnotation *ui;
-  QString m_strDir;
+  QString                  m_strDir;
 };
 
 #endif // DIALOGNEWANNOTATION_H

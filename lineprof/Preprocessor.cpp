@@ -1,13 +1,13 @@
 // ITK
 #define export // obsolete feature "export template" used in these header files
-#include <itkPointSetToImageFilter.h>
-#include <itkNeighborhoodConnectedImageFilter.h>
 #include <itkImageRegionIterator.h>
+#include <itkNeighborhoodConnectedImageFilter.h>
+#include <itkPointSetToImageFilter.h>
 #undef export
 
 // VTK
-#include <vtkPointData.h>
 #include <vtkFloatArray.h>
+#include <vtkPointData.h>
 
 #include "Preprocessor.h"
 
@@ -21,8 +21,8 @@ Preprocessor::Preprocessor() {
   data = NULL;
 
   zeroLevelValue = 100;
-  insideValue = 200;
-  outsideValue = 0;
+  insideValue    = 200;
+  outsideValue   = 0;
 }
 
 void Preprocessor::SetPadding(const SizeType &padding) {
@@ -39,9 +39,9 @@ void Preprocessor::SetInput(vtkPolyData *polyData) {
 
 Preprocessor::PointSetPointer Preprocessor::convertInputToPointSet() {
   typedef PointSetType::PointType PointType;
-  PointSetPointer pointSet = PointSetType::New();
+  PointSetPointer                 pointSet = PointSetType::New();
 
-  PointType pt;
+  PointType    pt;
   unsigned int ptSetCounter(0);
 
   // recover data by cells
@@ -51,8 +51,8 @@ Preprocessor::PointSetPointer Preprocessor::convertInputToPointSet() {
   // cell 3 = 0 -> 1
   vtkCellArray *lines = inputData->GetLines();
   lines->InitTraversal();
-  vtkIdType *vtkIds = NULL;
-  vtkIdType numPoints;
+  vtkIdType *  vtkIds = NULL;
+  vtkIdType    numPoints;
   unsigned int counter = 0;
 
   vtkFloatArray *floatArray = vtkFloatArray::New();
@@ -80,12 +80,12 @@ Preprocessor::PointSetPointer Preprocessor::convertInputToPointSet() {
 
   // get the transverse lines
   counter = 0;
-  fBuf = .0f;
+  fBuf    = .0f;
   while (counter < 2 && lines->GetNextCell(numPoints, vtkIds)) {
     typedef std::map<unsigned int, float> MapType;
-    MapType distMap;
-    float fLength(.0f);
-    vtkIdType *idPtr = vtkIds;
+    MapType                               distMap;
+    float                                 fLength(.0f);
+    vtkIdType *                           idPtr = vtkIds;
 
     // the following is useful for length measurements
     PointType prevPt;
@@ -133,7 +133,7 @@ Preprocessor::convertPointSetToBinaryImage(PointSetPointer pointSet) {
   // compute the bounding box of the pointSet
 #ifdef HAVE_ITK45
   typedef itk::BoundingBox<itk::IdentifierType, Dimension, float>
-      BoundingBoxType;
+                           BoundingBoxType;
   BoundingBoxType::Pointer boundingBox = BoundingBoxType::New();
   boundingBox->SetPoints(pointSet->GetPoints());
   boundingBox->ComputeBoundingBox();
@@ -175,7 +175,7 @@ Preprocessor::convertPointSetToBinaryImage(PointSetPointer pointSet) {
 
 void Preprocessor::generateImageMask(LabelImagePointer image) {
   typedef itk::NeighborhoodConnectedImageFilter<LabelImageType, LabelImageType>
-      FilterType;
+                      FilterType;
   FilterType::Pointer filter = FilterType::New();
 
   filter->SetInput(image);
@@ -198,10 +198,10 @@ void Preprocessor::generateImageMask(LabelImagePointer image) {
   filter->Update();
 
   // now form the final mask image
-  typedef itk::ImageRegionIterator<LabelImageType> IteratorType;
+  typedef itk::ImageRegionIterator<LabelImageType>      IteratorType;
   typedef itk::ImageRegionConstIterator<LabelImageType> ConstIteratorType;
 
-  IteratorType iter(image, image->GetRequestedRegion());
+  IteratorType      iter(image, image->GetRequestedRegion());
   ConstIteratorType citerOutside(filter->GetOutput(),
                                  filter->GetOutput()->GetRequestedRegion());
 
@@ -232,8 +232,8 @@ void Preprocessor::generateInitialDataImage() {
   typedef itk::ImageRegionIteratorWithIndex<DataImageType> DataIteratorType;
   DataIteratorType iterData(data, data->GetRequestedRegion());
 
-  double pt[3];
-  vtkIdType foundId;
+  double                  pt[3];
+  vtkIdType               foundId;
   PointSetType::PointType point;
   for (iterData.GoToBegin(), citer.GoToBegin(); !iterData.IsAtEnd();
        ++iterData, ++citer) {

@@ -77,7 +77,7 @@ CheckOptions:
   - key:             cert-dcl16-c.NewSuffixes
     value:           'L;LL;LU;LLU'
   - key:             cert-dcl59-cpp.HeaderFileExtensions
-    value:           ',h,hh,hpp,hxx'
+    value:           ',h,hh,hpp,hxx,txx,tpp'
   - key:             cert-err09-cpp.CheckThrowTemporaries
     value:           '1'
   - key:             cert-err61-cpp.CheckThrowTemporaries

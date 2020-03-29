@@ -39,12 +39,12 @@
 **
 ****************************************************************************/
 
-#include "qjsonobject.h"
 #include "qjsonvalue.h"
 #include "qjsonarray.h"
-#include <qvariant.h>
-#include <qstringlist.h>
+#include "qjsonobject.h"
 #include <qdebug.h>
+#include <qstringlist.h>
+#include <qvariant.h>
 
 #include "qjson_p.h"
 
@@ -116,7 +116,7 @@ QJsonValue::QJsonValue(QJsonPrivate::Data *data, QJsonPrivate::Base *base,
   }
   case Array:
   case Object:
-    d = data;
+    d          = data;
     this->base = v.base(base);
     break;
   }
@@ -191,8 +191,8 @@ QJsonValue::~QJsonValue() {
     Creates a copy of \a other.
  */
 QJsonValue::QJsonValue(const QJsonValue &other) {
-  t = other.t;
-  d = other.d;
+  t  = other.t;
+  d  = other.d;
   ui = other.ui;
   if (d)
     d->ref.ref();
@@ -204,8 +204,8 @@ QJsonValue::QJsonValue(const QJsonValue &other) {
     Assigns the value stored in \a other to this object.
  */
 QJsonValue &QJsonValue::operator=(const QJsonValue &other) {
-  t = other.t;
-  dbl = other.dbl;
+  t           = other.t;
+  dbl         = other.dbl;
   stringValue = other.stringValue;
 
   if (d != other.d) {
@@ -318,7 +318,7 @@ QJsonValue QJsonValue::fromVariant(const QVariant &variant) {
   default:
     break;
   }
-  QString string = variant.toString();
+  QString std::string = variant.toString();
   if (string.isEmpty())
     return QJsonValue();
   return QJsonValue(string);
@@ -526,7 +526,7 @@ void QJsonValue::detach() {
   x->ref.ref();
   if (!d->ref.deref())
     delete d;
-  d = x;
+  d    = x;
   base = static_cast<QJsonPrivate::Object *>(d->header->root());
 }
 

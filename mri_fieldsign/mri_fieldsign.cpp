@@ -45,59 +45,59 @@
 */
 
 // double round(double x);
-#include "diag.h"
-#include "mrisutils.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "fio.h"
 #include "fsenv.h"
-#include "retinotopy.h"
 #include "fsglm.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "retinotopy.h"
 #include "surfcluster.h"
 #include "timer.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-MRI *SFA2MRI(MRI *eccen, MRI *polar, int SFATrue);
+MRI *       SFA2MRI(MRI *eccen, MRI *polar, int SFATrue);
 
 int main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mri_fieldsign.c,v 1.15 2011/10/05 21:57:21 greve Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 char *FieldSignFile = nullptr;
-char *CMFFile = nullptr;
-char *NNbrFile = nullptr;
-char *RVarFile = nullptr;
+char *CMFFile       = nullptr;
+char *NNbrFile      = nullptr;
+char *RVarFile      = nullptr;
 
-int DoSFA = 0;
+int   DoSFA        = 0;
 char *EccenSFAFile = nullptr, *PolarSFAFile = nullptr;
 
-int DoComplex = 0;
+int   DoComplex     = 0;
 char *EccenRealFile = nullptr, *EccenImagFile = nullptr;
 char *PolarRealFile = nullptr, *PolarImagFile = nullptr;
 char *EccenOut = nullptr, *PolarOut = nullptr;
 
-char *subject, *hemi, *SUBJECTS_DIR;
-char *PatchFile = nullptr;
-double fwhm = -1;
-int nsmooth = -1;
-char tmpstr[2000];
-int ReverseSign = 0;
-int SFATrue = 0;
-int UseSphere = 0;
-int usenew = 1;
+char * subject, *hemi, *SUBJECTS_DIR;
+char * PatchFile = nullptr;
+double fwhm      = -1;
+int    nsmooth   = -1;
+char   tmpstr[2000];
+int    ReverseSign   = 0;
+int    SFATrue       = 0;
+int    UseSphere     = 0;
+int    usenew        = 1;
 double EccenRotAngle = 0;
 double PolarRotAngle = 0;
 
@@ -105,14 +105,15 @@ int RETcompute_fieldsign2(MRIS *mris);
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, err, reshapefactor, r, c, s;
+  int    nargs, err, reshapefactor, r, c, s;
   double v;
-  MRIS *surf;
-  MRI *eccensfa, *polarsfa, *mri, *mritmp;
-  MRI *eccenreal, *eccenimag, *polarreal, *polarimag;
+  MRIS * surf;
+  MRI *  eccensfa, *polarsfa, *mri, *mritmp;
+  MRI *  eccenreal, *eccenimag, *polarreal, *polarimag;
 
   nargs = handleVersionOption(argc, argv, "mri_fieldsign");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -218,7 +219,7 @@ int main(int argc, char *argv[]) {
     printf("Reshaping %d\n", reshapefactor);
     mritmp = mri_reshape(mri, reshapefactor * mri->width, 1, 1, mri->nframes);
     MRIfree(&mri);
-    mri = mritmp;
+    mri           = mritmp;
     reshapefactor = 0; /* reset for output */
   }
 
@@ -297,7 +298,7 @@ int main(int argc, char *argv[]) {
 }
 /*---------------------------------------------------------*/
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -346,7 +347,7 @@ static int parse_commandline(int argc, char **argv) {
         printf("ERROR: cannot find %s\n", EccenSFAFile);
         exit(1);
       }
-      DoSFA = 1;
+      DoSFA     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--polar-sfa")) {
       if (nargc < 1)
@@ -356,7 +357,7 @@ static int parse_commandline(int argc, char **argv) {
         printf("ERROR: cannot find %s\n", PolarSFAFile);
         exit(1);
       }
-      DoSFA = 1;
+      DoSFA     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--sfa")) {
       if (nargc < 1)
@@ -373,7 +374,7 @@ static int parse_commandline(int argc, char **argv) {
         printf("ERROR: cannot find %s\n", PolarSFAFile);
         exit(1);
       }
-      DoSFA = 1;
+      DoSFA     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--eccen")) {
       if (nargc < 2)
@@ -385,7 +386,7 @@ static int parse_commandline(int argc, char **argv) {
         exit(1);
       }
       DoComplex = 1;
-      DoSFA = 0;
+      DoSFA     = 0;
       nargsused = 2;
     } else if (!strcasecmp(option, "--polar")) {
       if (nargc < 2)
@@ -397,17 +398,17 @@ static int parse_commandline(int argc, char **argv) {
         exit(1);
       }
       DoComplex = 1;
-      DoSFA = 0;
+      DoSFA     = 0;
       nargsused = 2;
     } else if (!strcasecmp(option, "--eccen-out")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      EccenOut = pargv[0];
+      EccenOut  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--polar-out")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      PolarOut = pargv[0];
+      PolarOut  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--eccen-rot")) {
       if (nargc < 1)
@@ -424,12 +425,12 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--s")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--hemi")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--patch")) {
       if (nargc < 1)
@@ -455,21 +456,21 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       FieldSignFile = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--cmf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      CMFFile = pargv[0];
+      CMFFile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--nnbr")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      NNbrFile = pargv[0];
+      NNbrFile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--rvar")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      RVarFile = pargv[0];
+      RVarFile  = pargv[0];
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
@@ -595,8 +596,8 @@ static void dump_options(FILE *fp) {
   the actual phase is in the 10th frame (f0=9) of the SFA.
   ----------------------------------------------------------------*/
 MRI *SFA2MRI(MRI *eccen, MRI *polar, int SFATrue) {
-  MRI *mri;
-  int c, r, s;
+  MRI *  mri;
+  int    c, r, s;
   double v;
 
   mri =
@@ -639,8 +640,8 @@ MRI *SFA2MRI(MRI *eccen, MRI *polar, int SFATrue) {
 int MRISextendedHopNeighbors(MRIS *surf, int TargVtxNo, int CurVtxNo, int nhops,
                              int *XNbrVtxNo, int *nXNbrs) {
   static int nthhop = 0;
-  VERTEX *vcur, *vnbr;
-  int nNNbrs, n, NbrVtxNo;
+  VERTEX *   vcur, *vnbr;
+  int        nNNbrs, n, NbrVtxNo;
 
   // Get the current vertex
   vcur = &surf->vertices[CurVtxNo];
@@ -653,8 +654,8 @@ int MRISextendedHopNeighbors(MRIS *surf, int TargVtxNo, int CurVtxNo, int nhops,
 
   // Init the number of hops
   if (CurVtxNo == TargVtxNo) {
-    *nXNbrs = 0;
-    nthhop = 0;
+    *nXNbrs            = 0;
+    nthhop             = 0;
     XNbrVtxNo[*nXNbrs] = CurVtxNo;
     (*nXNbrs)++;
     vcur->val2bak = TargVtxNo; // record a hit
@@ -671,7 +672,7 @@ int MRISextendedHopNeighbors(MRIS *surf, int TargVtxNo, int CurVtxNo, int nhops,
   nNNbrs = surf->vertices_topology[CurVtxNo].vnum;
   for (n = 0; n < nNNbrs; n++) {
     NbrVtxNo = surf->vertices_topology[CurVtxNo].v[n];
-    vnbr = &surf->vertices[NbrVtxNo];
+    vnbr     = &surf->vertices[NbrVtxNo];
     if (vnbr->ripflag)
       continue;
     if (vnbr->val2bak == TargVtxNo)
@@ -694,41 +695,41 @@ int MRISextendedHopNeighbors(MRIS *surf, int TargVtxNo, int CurVtxNo, int nhops,
 }
 /*------------------------------------------------------------*/
 int RETcompute_fieldsign2(MRIS *mris) {
-  int k, n, knbr, shape;
+  int     k, n, knbr, shape;
   VERTEX *v, *vnbr;
-  double dthresh = 1.5; // mm
-  int *vtxlist, nlist = 0;
+  double  dthresh = 1.5; // mm
+  int *   vtxlist, nlist = 0;
   double *uctx, *vctx, d, deccen, dpolar, det = 0;
   MATRIX *X, *y, *J;
   GLMMAT *glm;
-  int msecTime, msecTot, nhit;
-  Timer mytimer;
-  int annot, annotindex, ok;
-  FILE *fp;
+  int     msecTime, msecTot, nhit;
+  Timer   mytimer;
+  int     annot, annotindex, ok;
+  FILE *  fp;
 
   MRISremoveTriangleLinks(mris);
   printf("surfer: compute_fieldsign2()\n");
 
-  J = MatrixAlloc(2, 2, MATRIX_REAL);
+  J       = MatrixAlloc(2, 2, MATRIX_REAL);
   vtxlist = (int *)calloc(mris->nvertices, sizeof(int));
-  uctx = (double *)calloc(mris->nvertices, sizeof(double));
-  vctx = (double *)calloc(mris->nvertices, sizeof(double));
+  uctx    = (double *)calloc(mris->nvertices, sizeof(double));
+  vctx    = (double *)calloc(mris->nvertices, sizeof(double));
 
   if (mris->patch) {
     // Assume flat map if a patch
     shape = 0;
     for (k = 0; k < mris->nvertices; k++) {
-      v = &(mris->vertices[k]);
+      v       = &(mris->vertices[k]);
       uctx[k] = v->x;
       vctx[k] = v->y;
     }
   } else {
     shape = SPHERICAL_COORDS;
-    v = &(mris->vertices[0]);
+    v     = &(mris->vertices[0]);
     for (k = 0; k < mris->nvertices; k++) {
-      v = &(mris->vertices[k]);
+      v       = &(mris->vertices[k]);
       uctx[k] = atan2(v->y, v->x);
-      d = sqrt(v->x * v->x + v->y * v->y);
+      d       = sqrt(v->x * v->x + v->y * v->y);
       vctx[k] = atan2(d, v->z);
     }
   }
@@ -739,8 +740,8 @@ int RETcompute_fieldsign2(MRIS *mris) {
   msecTot = 0;
   mytimer.reset();
   nhit = 0;
-  fp = nullptr;
-  fp = fopen("tmp.dat", "w");
+  fp   = nullptr;
+  fp   = fopen("tmp.dat", "w");
   for (k = 0; k < mris->nvertices; k++) {
     // printf("%d ------------------------\n",k);
     v = &(mris->vertices[k]);
@@ -781,14 +782,14 @@ int RETcompute_fieldsign2(MRIS *mris) {
     }
 
     nlist = sclustGrowByDist(mris, k, dthresh, shape, -1, vtxlist);
-    X = MatrixAlloc(nlist, 3, MATRIX_REAL);
-    y = MatrixAlloc(nlist, 2, MATRIX_REAL);
+    X     = MatrixAlloc(nlist, 3, MATRIX_REAL);
+    y     = MatrixAlloc(nlist, 2, MATRIX_REAL);
     // printf("nlist = %d\n",nlist);
     for (n = 0; n < nlist; n++) {
-      knbr = vtxlist[n];
-      vnbr = &(mris->vertices[knbr]);
-      deccen = RETcircsubtract(v->val, vnbr->val);
-      dpolar = RETcircsubtract(v->valbak, vnbr->valbak);
+      knbr              = vtxlist[n];
+      vnbr              = &(mris->vertices[knbr]);
+      deccen            = RETcircsubtract(v->val, vnbr->val);
+      dpolar            = RETcircsubtract(v->valbak, vnbr->valbak);
       y->rptr[n + 1][1] = deccen;
       y->rptr[n + 1][2] = dpolar;
       X->rptr[n + 1][1] = uctx[k] - uctx[knbr];
@@ -802,7 +803,7 @@ int RETcompute_fieldsign2(MRIS *mris) {
     v->K = nlist; // size of neighborhood
 
     // Solve GLM
-    glm = GLMalloc();
+    glm    = GLMalloc();
     glm->X = X;
     glm->y = y;
     GLMxMatrices(glm);
@@ -823,7 +824,7 @@ int RETcompute_fieldsign2(MRIS *mris) {
         printf("J -----------\n");
       }
 
-      det = MatrixDeterminant(J);
+      det     = MatrixDeterminant(J);
       v->stat = 1000 * fabs(det); // 1000 to make range a little easier
       if (det < 0)
         v->fieldsign = -1.0;

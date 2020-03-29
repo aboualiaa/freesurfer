@@ -24,8 +24,8 @@
  */
 
 #include "diag.h"
-#include "version.h"
 #include "rfa.h"
+#include "version.h"
 #include <fcntl.h>
 
 #include "romp_support.h"
@@ -33,90 +33,90 @@
 #define MAX_RFA_INPUTS 1000
 #define MAX_TIMEPOINTS 20
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 static char *log_file_name = nullptr;
-static int conform = 1;
-static int binarize = 0;
-static int binarize_in = 0;
-static int binarize_out = 0;
-static char *wmsa_fname = nullptr;
+static int   conform       = 1;
+static int   binarize      = 0;
+static int   binarize_in   = 0;
+static int   binarize_out  = 0;
+static char *wmsa_fname    = nullptr;
 
 static COLOR_TABLE *ctab = nullptr;
-const char *Progname;
-static char *mask_fname = nullptr;
-static char *insert_fname = nullptr;
-static int insert_label = 0;
+const char *        Progname;
+static char *       mask_fname   = nullptr;
+static char *       insert_fname = nullptr;
+static int          insert_label = 0;
 
-static float scale = 0;
-static int force_inputs = 1;
+static float scale        = 0;
+static int   force_inputs = 1;
 
 static RFA_PARMS parms;
-static char *seg_dir = "seg_edited.mgz"; // default name of manual edit file
-static char T1_name[STRLEN] = "orig";
-static char *xform_name = nullptr;
-static float smooth = -1;
-static double TRs[MAX_RFA_INPUTS];
-static double TEs[MAX_RFA_INPUTS];
-static double FAs[MAX_RFA_INPUTS];
+static char *    seg_dir = "seg_edited.mgz"; // default name of manual edit file
+static char      T1_name[STRLEN] = "orig";
+static char *    xform_name      = nullptr;
+static float     smooth          = -1;
+static double    TRs[MAX_RFA_INPUTS];
+static double    TEs[MAX_RFA_INPUTS];
+static double    FAs[MAX_RFA_INPUTS];
 
 static int ninputs = 1; /* T1 intensity */
-static int navgs = 0;
+static int navgs   = 0;
 
 static char subjects_dir[STRLEN];
 
 static char *input_names[MAX_RFA_INPUTS] = {T1_name};
 
-static int do_sanity_check = 0;
-static int do_fix_badsubjs = 0;
+static int do_sanity_check            = 0;
+static int do_fix_badsubjs            = 0;
 static int sanity_check_badsubj_count = 0;
 
 static int single_classifier_flag = 0;
 static int only_nbrs; // only pick voxels that are on borders of a wmsa to train
 static float max_wm_wmsa_ratio = 5.0;
-static int make_uchar = 1;
-static char *gca_name = nullptr;
+static int   make_uchar        = 1;
+static char *gca_name          = nullptr;
 static float wm_thresh =
     .8; // only consider voxels with a prior at least this high
-static int max_steps = 10;
+static int   max_steps                 = 10;
 static char *single_classifier_names[] = {"NOT WMSA", "WMSA", "FUTURE WMSA"};
 
-#define NCLASSES 3
-#define NOT_WMSA 0
-#define WMSA 1
-#define FUTURE_WMSA 2
+#define NCLASSES     3
+#define NOT_WMSA     0
+#define WMSA         1
+#define FUTURE_WMSA  2
 #define MAX_SUBJECTS 1000
 
-static MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS];
-static MRI *mri_segs[MAX_SUBJECTS][MAX_TIMEPOINTS];
+static MRI *      mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS];
+static MRI *      mri_segs[MAX_SUBJECTS][MAX_TIMEPOINTS];
 static TRANSFORM *transforms[MAX_SUBJECTS][MAX_TIMEPOINTS];
 
-static int lateralize_hypointensities(MRI *mri_seg);
+static int  lateralize_hypointensities(MRI *mri_seg);
 static void usage_exit(int code);
-static int replaceLabels(MRI *mri_seg);
-static int check(MRI *mri_seg, char *subjects_dir, char *subject_name);
+static int  replaceLabels(MRI *mri_seg);
+static int  check(MRI *mri_seg, char *subjects_dir, char *subject_name);
 static RANDOM_FOREST *
-train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
-              MRI *mri_segs[MAX_SUBJECTS][MAX_TIMEPOINTS],
-              TRANSFORM *transforms[MAX_SUBJECTS][MAX_TIMEPOINTS],
-              int nsubjects, GCA *gca, RFA_PARMS *parms, float wm_thresh,
-              int wmsa_whalf, int ntp);
+           train_rforest(MRI *      mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
+                         MRI *      mri_segs[MAX_SUBJECTS][MAX_TIMEPOINTS],
+                         TRANSFORM *transforms[MAX_SUBJECTS][MAX_TIMEPOINTS],
+                         int nsubjects, GCA *gca, RFA_PARMS *parms, float wm_thresh,
+                         int wmsa_whalf, int ntp);
 static int wmsa_whalf = 0;
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN], *out_fname, *subject_name, *cp, *tp1_name,
       *tp2_name;
-  char s1_name[STRLEN], s2_name[STRLEN], *sname;
-  int ac, nargs, i, n, options, max_index;
-  int msec, minutes, seconds, nsubjects, input;
-  Timer start;
-  MRI *mri_seg, *mri_tmp, *mri_in;
+  char       s1_name[STRLEN], s2_name[STRLEN], *sname;
+  int        ac, nargs, i, n, options, max_index;
+  int        msec, minutes, seconds, nsubjects, input;
+  Timer      start;
+  MRI *      mri_seg, *mri_tmp, *mri_in;
   TRANSFORM *transform;
   //  int          counts ;
-  int t;
-  RANDOM_FOREST *rf = nullptr;
-  GCA *gca = nullptr;
+  int            t;
+  RANDOM_FOREST *rf  = nullptr;
+  GCA *          gca = nullptr;
 
   Progname = argv[0];
 
@@ -126,12 +126,12 @@ int main(int argc, char *argv[]) {
   start.reset();
 
   parms.width = parms.height = parms.depth = DEFAULT_VOLUME_SIZE;
-  parms.ntrees = 10;
-  parms.max_depth = 10;
-  parms.wsize = 1;
-  parms.training_size = 100;
-  parms.training_fraction = .5;
-  parms.feature_fraction = 1;
+  parms.ntrees                             = 10;
+  parms.max_depth                          = 10;
+  parms.wsize                              = 1;
+  parms.training_size                      = 100;
+  parms.training_fraction                  = .5;
+  parms.feature_fraction                   = 1;
 
   nargs = handleVersionOption(argc, argv, "mri_rf_long_train");
   if (nargs && argc - nargs == 1)
@@ -194,15 +194,15 @@ int main(int argc, char *argv[]) {
   ////////////////////////////////////////////////////////
   // going through the subject one at a time
   max_index = nsubjects + options;
-  nargs = 0;
-  mri_in = nullptr;
+  nargs     = 0;
+  mri_in    = nullptr;
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
       subject_name = NULL;
-  sname = NULL;
-  t = 0;
+  sname            = NULL;
+  t                = 0;
   //  counts = 0 ;   would be private
-  input = 0;
+  input     = 0;
   transform = NULL;
   tp1_name = tp2_name = NULL;
   mri_tmp = mri_seg = NULL;
@@ -214,8 +214,8 @@ int main(int argc, char *argv[]) {
 #endif
   for (i = 0; i < max_index; i++) {
     ROMP_PFLB_begin subject_name = argv[3 * i + 1];
-    tp1_name = argv[3 * i + 2];
-    tp2_name = argv[3 * i + 3];
+    tp1_name                     = argv[3 * i + 2];
+    tp2_name                     = argv[3 * i + 3];
     sprintf(s1_name, "%s_%s.long.%s_base", subject_name, tp1_name,
             subject_name);
     sprintf(s2_name, "%s_%s.long.%s_base", subject_name, tp2_name,
@@ -423,7 +423,7 @@ int main(int argc, char *argv[]) {
         }
       }
 
-      mri_segs[i][t] = mri_seg;
+      mri_segs[i][t]   = mri_seg;
       mri_inputs[i][t] = mri_in;
       transforms[i][t] = transform;
     }
@@ -438,7 +438,7 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_BADFILE, "%s: could not write rf to %s", Progname,
               out_fname);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -454,8 +454,8 @@ int main(int argc, char *argv[]) {
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
   static int first_input = 1;
-  int nargs = 0;
-  char *option;
+  int        nargs       = 0;
+  char *     option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "GRADIENT")) {
@@ -465,24 +465,24 @@ static int get_option(int argc, char *argv[]) {
 
   else if (!stricmp(option, "MAX_RATIO")) {
     max_wm_wmsa_ratio = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     printf("using %2.1f as max wm/wmsa ratio for number of training samples\n",
            max_wm_wmsa_ratio);
   } else if (!stricmp(option, "CONFORM")) {
     conform = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("%sassuming input volumes are conformed\n", conform ? "" : "NOT ");
   } else if (!stricmp(option, "MAKE_UCHAR")) {
     make_uchar = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("%smaking input volumes UCHAR\n", make_uchar ? "" : "NOT ");
   } else if (!stricmp(option, "TRAINING_FRACTION")) {
     parms.training_fraction = atof(argv[2]);
-    nargs = 1;
+    nargs                   = 1;
     printf("setting training_fraction = %2.6f\n", parms.training_fraction);
   } else if (!stricmp(option, "WMSA")) {
     wmsa_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("reading white matter signal abnormalities from %s\n", wmsa_fname);
   } else if (!stricmp(option, "INPUT")) {
     if (first_input) {
@@ -491,40 +491,40 @@ static int get_option(int argc, char *argv[]) {
     }
 
     input_names[ninputs++] = argv[2];
-    nargs = 1;
+    nargs                  = 1;
     printf("input[%d] = %s\n", ninputs - 1, input_names[ninputs - 1]);
   } else if (!stricmp(option, "BINARIZE")) {
-    binarize = 1;
-    binarize_in = atoi(argv[2]);
+    binarize     = 1;
+    binarize_in  = atoi(argv[2]);
     binarize_out = atoi(argv[3]);
-    nargs = 2;
+    nargs        = 2;
     printf("binarizing segmentation values, setting input %d to output %d\n",
            binarize_in, binarize_out);
   } else if (!stricmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else if (!stricmp(option, "DEBUG_NODE")) {
     Ggca_x = atoi(argv[2]);
     Ggca_y = atoi(argv[3]);
     Ggca_z = atoi(argv[4]);
-    nargs = 3;
+    nargs  = 3;
     printf("debugging node (%d, %d, %d)\n", Ggca_x, Ggca_y, Ggca_z);
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "DEBUG_LABEL")) {
     Ggca_label = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("debugging label %s (%d)\n", cma_label_to_name(Ggca_label),
            Ggca_label);
   } else if (!stricmp(option, "INSERT")) {
     insert_fname = argv[2];
     insert_label = atoi(argv[3]);
-    nargs = 2;
+    nargs        = 2;
     printf("inserting non-zero vals from %s as label %d...\n", insert_fname,
            insert_label);
   } else if (!stricmp(option, "ctab")) {
@@ -541,11 +541,11 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "PARC_DIR") || !stricmp(option, "SEG_DIR") ||
              !stricmp(option, "SEG") || !stricmp(option, "SEGMENTATION")) {
     seg_dir = argv[2];
-    nargs = 1;
+    nargs   = 1;
     printf("reading segmentation from subject's mri/%s directory\n", seg_dir);
   } else if (!stricmp(option, "XFORM")) {
     xform_name = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("reading xform from %s\n", xform_name);
   } else if (!stricmp(option, "NOXFORM")) {
     xform_name = nullptr;
@@ -564,16 +564,16 @@ static int get_option(int argc, char *argv[]) {
     printf("using %s as subjects directory\n", subjects_dir);
   } else if (!stricmp(option, "NTREES")) {
     parms.ntrees = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("using %d trees in random forest classifier\n", parms.ntrees);
   } else if (!stricmp(option, "MAX_DEPTH")) {
     parms.max_depth = atoi(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     printf("using %d max tree depth in random forest classifier\n",
            parms.max_depth);
   } else if (!stricmp(option, "WMSA_WHALF")) {
     wmsa_whalf = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("only examing voxels that wmsa occurred within %d voxels of\n",
            wmsa_whalf);
   } else if (!stricmp(option, "SMOOTH")) {
@@ -592,14 +592,14 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'G':
       single_classifier_flag = 1;
-      gca_name = argv[2];
-      nargs = 1;
+      gca_name               = argv[2];
+      nargs                  = 1;
       printf("training a single classifier instead of an array using gca %s\n",
              gca_name);
       break;
     case 'T':
       wm_thresh = atof(argv[2]);
-      nargs = 1;
+      nargs     = 1;
       printf("thresholding wm priors at %f to build training set\n", wm_thresh);
       break;
     case 'F':
@@ -628,7 +628,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'W':
       parms.wsize = atoi(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("using window size = %d for RFA\n", parms.wsize);
       break;
     default:
@@ -912,22 +912,22 @@ static int lateralize_hypointensities(MRI *mri_seg) {
  * where they are known not to belong (indicating a bad manual edit)
  */
 static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) {
-  MRI *mri_fixed = nullptr;
-  int errors = 0;
-  int x, y, z, label = 0;
+  MRI *  mri_fixed = nullptr;
+  int    errors    = 0;
+  int    x, y, z, label = 0;
   double xw = 0.0, yw = 0.0, zw = 0.0;    // RAS coords
   double xmt = 0.0, ymt = 0.0, zmt = 0.0; // MNI tal coords
-  float xt = 0.0, yt = 0.0, zt = 0.0;     // 'real' tal coords
+  float  xt = 0.0, yt = 0.0, zt = 0.0;    // 'real' tal coords
 
-  float max_xtal_l_hippo = -1000;
-  float max_xtal_l_caudate = -1000;
+  float max_xtal_l_hippo    = -1000;
+  float max_xtal_l_caudate  = -1000;
   float max_xtal_l_amygdala = -1000;
-  float max_xtal_l_putamen = -1000;
+  float max_xtal_l_putamen  = -1000;
   float max_xtal_l_pallidum = -1000;
-  float min_xtal_r_hippo = 1000;
-  float min_xtal_r_caudate = 1000;
+  float min_xtal_r_hippo    = 1000;
+  float min_xtal_r_caudate  = 1000;
   float min_xtal_r_amygdala = 1000;
-  float min_xtal_r_putamen = 1000;
+  float min_xtal_r_putamen  = 1000;
   float min_xtal_r_pallidum = 1000;
 
   printf("checking labels in subject %s...\n", subject_name);
@@ -954,7 +954,7 @@ static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) {
          * - no left hippo, caudate, amydala, putamen or pallidum
          *   labels with x tal coord > 5 (or right, with x tal coord < -5)
          */
-        label = MRIgetVoxVal(mri_seg, x, y, z, 0);
+        label            = MRIgetVoxVal(mri_seg, x, y, z, 0);
         int proper_label = label; // used for making corrections
 
         if (label != Unknown) {
@@ -1154,19 +1154,19 @@ static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) {
 }
 
 static RANDOM_FOREST *
-train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
-              MRI *mri_segs[MAX_SUBJECTS][MAX_TIMEPOINTS],
+train_rforest(MRI *      mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
+              MRI *      mri_segs[MAX_SUBJECTS][MAX_TIMEPOINTS],
               TRANSFORM *transforms[MAX_SUBJECTS][MAX_TIMEPOINTS],
               int nsubjects, GCA *gca, RFA_PARMS *parms, float wm_thresh,
               int wmsa_whalf, int ntp) {
   RANDOM_FOREST *rf;
   int nfeatures, x, y, z, ntraining, n, tvoxel_size, width, height, depth, xt,
       yt, zt;
-  double xatlas, yatlas, zatlas;
-  MRI *mri_in, *mri_seg, *mri_training_voxels, *mri_wmsa_possible;
+  double     xatlas, yatlas, zatlas;
+  MRI *      mri_in, *mri_seg, *mri_training_voxels, *mri_wmsa_possible;
   TRANSFORM *transform;
-  double **training_data;
-  int *training_classes, i, label, tlabel, nwmsa, nfuture, nnot, correct,
+  double **  training_data;
+  int *      training_classes, i, label, tlabel, nwmsa, nfuture, nnot, correct,
       label_time1, label_time2;
 
   nwmsa = nnot = nfuture = 0;
@@ -1186,13 +1186,13 @@ train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
     ErrorExit(ERROR_NOFILE, "%s: could not allocate random forest", Progname);
   rf->min_step_size = 1;
 
-  tvoxel_size = 1;
-  width = (int)ceil((float)mri_segs[0][0]->width / tvoxel_size);
-  height = (int)ceil((float)mri_segs[0][0]->height / tvoxel_size);
-  depth = (int)ceil((float)mri_segs[0][0]->depth / tvoxel_size);
+  tvoxel_size       = 1;
+  width             = (int)ceil((float)mri_segs[0][0]->width / tvoxel_size);
+  height            = (int)ceil((float)mri_segs[0][0]->height / tvoxel_size);
+  depth             = (int)ceil((float)mri_segs[0][0]->depth / tvoxel_size);
   mri_wmsa_possible = MRIalloc(width, height, depth, MRI_UCHAR);
   GCAcopyDCToMRI(gca, mri_wmsa_possible);
-  mri_in = mri_inputs[0][0];
+  mri_in              = mri_inputs[0][0];
   mri_training_voxels = MRIallocSequence(mri_in->width, mri_in->height,
                                          mri_in->depth, MRI_UCHAR, nsubjects);
 
@@ -1215,7 +1215,7 @@ train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
 
   // build map of spatial locations that WMSAs can possibly occur in
   for (n = 0; n < nsubjects; n++) {
-    mri_in = mri_inputs[n][1];
+    mri_in    = mri_inputs[n][1];
     transform = transforms[n][1];
     for (x = 0; x < mri_in->width; x++)
       for (y = 0; y < mri_in->height; y++)
@@ -1236,8 +1236,8 @@ train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
 
   // now build map of all voxels in training set
   for (nnot = nwmsa = nfuture = ntraining = n = 0; n < nsubjects; n++) {
-    mri_in = mri_inputs[n][0];
-    mri_seg = mri_segs[n][0];
+    mri_in    = mri_inputs[n][0];
+    mri_seg   = mri_segs[n][0];
     transform = transforms[n][0];
     for (x = 0; x < mri_in->width; x++)
       for (y = 0; y < mri_in->height; y++)
@@ -1324,7 +1324,7 @@ train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
     DiagBreak();
   //  if (Gx >= 0)
   {
-    int whalf = (parms->wsize - 1) / 2;
+    int  whalf = (parms->wsize - 1) / 2;
     char buf[STRLEN];
     rf->feature_names = (char **)calloc(rf->nfeatures, sizeof(char *));
     for (i = 0, x = -whalf; x <= whalf; x++)
@@ -1389,8 +1389,8 @@ train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
               "train_rforest: could not allocate %d-length training buffers",
               ntraining);
   for (i = n = 0; n < nsubjects; n++) {
-    mri_in = mri_inputs[n][0];
-    mri_seg = mri_segs[n][0];
+    mri_in    = mri_inputs[n][0];
+    mri_seg   = mri_segs[n][0];
     transform = transforms[n][0];
     for (x = 0; x < mri_in->width; x++)
       for (y = 0; y < mri_in->height; y++)
@@ -1411,7 +1411,7 @@ train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
             tlabel = NOT_WMSA;
 
           training_classes[i] = tlabel;
-          training_data[i] = (double *)calloc(nfeatures, sizeof(double));
+          training_data[i]    = (double *)calloc(nfeatures, sizeof(double));
           if (training_data[i] == nullptr)
             ErrorExit(
                 ERROR_NOMEMORY,
@@ -1448,8 +1448,8 @@ train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
          100.0 * correct / ntraining);
   if (log_file_name) {
     struct flock fl;
-    int fd;
-    char line[MAX_LINE_LEN];
+    int          fd;
+    char         line[MAX_LINE_LEN];
 
     printf("writing results to train.log file %s\n", log_file_name);
     fd = open(log_file_name, O_WRONLY | O_APPEND | O_CREAT, S_IRWXU | S_IRWXG);

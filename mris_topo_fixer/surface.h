@@ -26,36 +26,36 @@
 #ifndef TOPOLOGY_SURFACE_H
 #define TOPOLOGY_SURFACE_H
 
-#include "globals.h"
-#include "vertex.h"
 #include "face.h"
+#include "globals.h"
 #include "loop.h"
+#include "vertex.h"
 
 #define UNKNOWN_TYPE_OF_SURFACE 0
-#define CLOSED_SURFACE 1
-#define OPEN_SURFACE 2
-#define PATCH 3
+#define CLOSED_SURFACE          1
+#define OPEN_SURFACE            2
+#define PATCH                   3
 
 class PatchDisk;
 
 class Surface {
 private:
-  int _InitSurfaceConnectivity();
-  bool _InitFaceConnectivity();
-  int _InitFaceCoordinates();
-  int _FindFace(int n1, int n2, int fn) const;
-  int _Allocate(int nv, int nf);
-  void _OverAlloc(int nextrav, int nextraf);
+  int    _InitSurfaceConnectivity();
+  bool   _InitFaceConnectivity();
+  int    _InitFaceCoordinates();
+  int    _FindFace(int n1, int n2, int fn) const;
+  int    _Allocate(int nv, int nf);
+  void   _OverAlloc(int nextrav, int nextraf);
   double _FaceDistance(int fdst, int fsrc);
 
 public:
   // number of vertices, edges, and faces, and Euler characteristic
   int nvertices, nedges, nfaces, euler;
   // list of vertices
-  int maxvertices;
+  int     maxvertices;
   Vertex *vertices;
   // list of faces
-  int maxfaces;
+  int   maxfaces;
   Face *faces;
   // type of surface
   int type_of_surface;
@@ -63,30 +63,30 @@ public:
   // constructor/destructor
   Surface();
   Surface(int nv, int nf);
-  Surface(const string s);
+  Surface(const std::string s);
   ~Surface();
 
   Surface *Clone() const;
-  void Expand(int nextrav, int nextraf);
-  void Center();
-  void scale(double scaling_factor);
-  int OpenFile(const string s, int verbose = 0);
-  int WriteFile(const string s, int verbose = -1) const;
-  int GetDefectLabels(const string s);
-  int OpenCurvatureFile(const string s);
-  bool IsSurfaceValid(int verbose = 0);
-  void PrintDefectInfo(int ndefect = -1);
-  int InitSurface();
-  int GetEuler(int &nv, int &ne, int &nf, int mark = -1);
-  int GetEuler(int mark = -1);
-  int GetEuler(const int *list_of_faces, int nfs);
+  void     Expand(int nextrav, int nextraf);
+  void     Center();
+  void     scale(double scaling_factor);
+  int      OpenFile(const std::string s, int verbose = 0);
+  int      WriteFile(const std::string s, int verbose = -1) const;
+  int      GetDefectLabels(const std::string s);
+  int      OpenCurvatureFile(const std::string s);
+  bool     IsSurfaceValid(int verbose = 0);
+  void     PrintDefectInfo(int ndefect = -1);
+  int      InitSurface();
+  int      GetEuler(int &nv, int &ne, int &nf, int mark = -1);
+  int      GetEuler(int mark = -1);
+  int      GetEuler(const int *list_of_faces, int nfs);
   Surface *ExtractPatch(int mark, int nextravertices = 0, int nextrafaces = 0);
-  void SetMarks(int mark);
-  void SetMarks(const int *v, int nv, int mark);
-  void Smooth(int niters);
-  void Smooth(int niters, const int *v, int nv);
-  void SmoothMarked(int niters, int mark);
-  void ExpandMarks(int niters, int mark);
+  void     SetMarks(int mark);
+  void     SetMarks(const int *v, int nv, int mark);
+  void     Smooth(int niters);
+  void     Smooth(int niters, const int *v, int nv);
+  void     SmoothMarked(int niters, int mark);
+  void     ExpandMarks(int niters, int mark);
 
   ///////////////////////////////////////////////////////////////
   //
@@ -95,18 +95,18 @@ public:
   ///////////////////////////////////////////////////////////////
 
   // when the surface is a patch extracted from another surface
-  int *vtrans_to, *ftrans_to, *vtrans_from, *ftrans_from;
-  Surface *surface_source;
+  int *      vtrans_to, *ftrans_to, *vtrans_from, *ftrans_from;
+  Surface *  surface_source;
   PatchDisk *disk;
 
   double GetLoopLength(Loop &loop);
-  void CutLoop(Loop &loop, int very_small_patch = 0);
-  bool LoopValid(Loop &loop);
-  void KnitPatch(Loop &loop, PatchDisk *pdisk);
-  void IncreaseEuler(int nattempts, int maxinitface = -1);
-  void CorrectTopology();
-  int CutPatch(int seed = -1, int maxinitface = -1, int nattempts = 10,
-               int very_small_patch = 0);
+  void   CutLoop(Loop &loop, int very_small_patch = 0);
+  bool   LoopValid(Loop &loop);
+  void   KnitPatch(Loop &loop, PatchDisk *pdisk);
+  void   IncreaseEuler(int nattempts, int maxinitface = -1);
+  void   CorrectTopology();
+  int    CutPatch(int seed = -1, int maxinitface = -1, int nattempts = 10,
+                  int very_small_patch = 0);
 
 #if 0
   int computeVertexNormals(void);

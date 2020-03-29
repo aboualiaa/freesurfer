@@ -25,10 +25,10 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
+#include <memory.h>
 
 #include "error.h"
 #include "macros.h"
@@ -77,28 +77,28 @@ MRI_REGION *REGIONsubtract(MRI_REGION *reg1, MRI_REGION *reg2,
       z2_end;
 
   x1_start = reg1->x;
-  x1_end = reg1->x + reg1->dx - 1;
-  x2_end = reg2->x + reg2->dx - 1;
+  x1_end   = reg1->x + reg1->dx - 1;
+  x2_end   = reg2->x + reg2->dx - 1;
 
-  rdst->x = MAX(x1_start, x2_end);
+  rdst->x  = MAX(x1_start, x2_end);
   rdst->dx = x1_end - rdst->x + 1;
   if (rdst->dx < 0)
     rdst->dx = 0;
 
   y1_start = reg1->y;
-  y1_end = reg1->y + reg1->dy - 1;
-  y2_end = reg2->y + reg2->dy - 1;
+  y1_end   = reg1->y + reg1->dy - 1;
+  y2_end   = reg2->y + reg2->dy - 1;
 
-  rdst->y = MAX(y1_start, y2_end);
+  rdst->y  = MAX(y1_start, y2_end);
   rdst->dy = y1_end - rdst->y + 1;
   if (rdst->dy < 0)
     rdst->dy = 0;
 
   z1_start = reg1->z;
-  z1_end = reg1->z + reg1->dz - 1;
-  z2_end = reg2->z + reg2->dz - 1;
+  z1_end   = reg1->z + reg1->dz - 1;
+  z2_end   = reg2->z + reg2->dz - 1;
 
-  rdst->z = MAX(z1_start, z2_end);
+  rdst->z  = MAX(z1_start, z2_end);
   rdst->dz = z1_end - rdst->z + 1;
   if (rdst->dz < 0)
     rdst->dz = 0;
@@ -155,9 +155,9 @@ MRI_REGION *REGIONintersect(MRI_REGION *reg1, MRI_REGION *reg2,
   rdst->y = MAX(reg1->y, reg2->y);
   rdst->z = MAX(reg1->z, reg2->z);
 
-  x2 = MIN(reg1->x + reg1->dx, reg2->x + reg2->dx) - 1;
-  y2 = MIN(reg1->y + reg1->dy, reg2->y + reg2->dy) - 1;
-  z2 = MIN(reg1->z + reg1->dz, reg2->z + reg2->dz) - 1;
+  x2       = MIN(reg1->x + reg1->dx, reg2->x + reg2->dx) - 1;
+  y2       = MIN(reg1->y + reg1->dy, reg2->y + reg2->dy) - 1;
+  z2       = MIN(reg1->z + reg1->dz, reg2->z + reg2->dz) - 1;
   rdst->dx = x2 - rdst->x + 1;
   rdst->dy = y2 - rdst->y + 1;
   rdst->dz = z2 - rdst->z + 1;
@@ -204,9 +204,9 @@ int REGIONinside(MRI_REGION *reg, int x, int y, int z) {
         Description
 ------------------------------------------------------*/
 MRI_REGION *REGIONexpand(MRI_REGION *rsrc, MRI_REGION *rdst, int n) {
-  rdst->x = rsrc->x - n;
-  rdst->y = rsrc->y - n;
-  rdst->z = rsrc->z - n;
+  rdst->x  = rsrc->x - n;
+  rdst->y  = rsrc->y - n;
+  rdst->z  = rsrc->z - n;
   rdst->dx = rsrc->dx + 2 * n;
   rdst->dy = rsrc->dy + 2 * n;
   rdst->dz = rsrc->dz + 2 * n;
@@ -220,8 +220,8 @@ MRI_REGION *REGIONexpand(MRI_REGION *rsrc, MRI_REGION *rdst, int n) {
         Description
 ------------------------------------------------------*/
 float REGIONminCornerDistance(MRI_REGION *r1, MRI_REGION *r2) {
-  float min_dist = 10000.0f, dist, dx, dy, dz;
-  int i, j, x0 = 0, y0 = 0, z0 = 0, x1 = 0, y1 = 0, z1 = 0;
+  float      min_dist = 10000.0f, dist, dx, dy, dz;
+  int        i, j, x0 = 0, y0 = 0, z0 = 0, x1 = 0, y1 = 0, z1 = 0;
   MRI_REGION r3;
 
   REGIONintersect(r1, r2, &r3);
@@ -234,9 +234,9 @@ float REGIONminCornerDistance(MRI_REGION *r1, MRI_REGION *r2) {
     for (j = 0; j < 8; j++) /* each corner of r2 */
     {
       regionCornerCoords(r2, j, &x1, &y1, &z1);
-      dx = (float)(x1 - x0);
-      dy = (float)(y1 - y0);
-      dz = (float)(z1 - z0);
+      dx   = (float)(x1 - x0);
+      dy   = (float)(y1 - y0);
+      dz   = (float)(z1 - z0);
       dist = sqrt(dx * dx + dy * dy + dz * dz);
       if (dist < min_dist)
         min_dist = dist;
@@ -307,10 +307,10 @@ static int regionCornerCoords(MRI_REGION *r, int which_corner, int *px, int *py,
   for(c=region->x; c < region->x+region->dx; c++)
 */
 MRI_REGION *REGIONgetBoundingBox(MRI *mask, int npad) {
-  int c, r, s;
-  int cmin, cmax, rmin, rmax, smin, smax;
+  int         c, r, s;
+  int         cmin, cmax, rmin, rmax, smin, smax;
   MRI_REGION *region;
-  float v;
+  float       v;
 
   cmin = rmin = smin = 1000000;
   cmax = rmax = smax = 0;
@@ -336,10 +336,10 @@ MRI_REGION *REGIONgetBoundingBox(MRI *mask, int npad) {
       }
     }
   }
-  region = REGIONalloc();
-  region->x = MAX(cmin - npad, 0);
-  region->y = MAX(rmin - npad, 0);
-  region->z = MAX(smin - npad, 0);
+  region     = REGIONalloc();
+  region->x  = MAX(cmin - npad, 0);
+  region->y  = MAX(rmin - npad, 0);
+  region->z  = MAX(smin - npad, 0);
   region->dx = MIN(cmax - cmin + 2 * npad, mask->width - region->x);
   region->dy = MIN(rmax - rmin + 2 * npad, mask->height - region->y);
   region->dz = MIN(smax - smin + 2 * npad, mask->depth - region->z);
@@ -355,10 +355,10 @@ MRI_REGION *REGIONgetBoundingBox(MRI *mask, int npad) {
 */
 MRI_REGION *REGIONgetBoundingBoxEqOdd(MRI *mask, int npad) {
   MRI_REGION *region;
-  int dxy, delta, delta1, delta2, isodd;
+  int         dxy, delta, delta1, delta2, isodd;
 
   region = REGIONgetBoundingBox(mask, npad);
-  isodd = (region->dz % 2);
+  isodd  = (region->dz % 2);
 
   if (region->dx == region->dy && isodd)
     return (region);
@@ -389,7 +389,7 @@ MRI_REGION *REGIONgetBoundingBoxEqOdd(MRI *mask, int npad) {
     return (region);
   }
   // Divide the difference into two (maybe equal) parts
-  delta = fabs(region->dx - region->dy);
+  delta  = fabs(region->dx - region->dy);
   delta1 = delta / 2;
   delta2 = delta - delta1;
   if (region->dx < region->dy) {

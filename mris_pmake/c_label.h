@@ -27,17 +27,16 @@
 #ifndef __C_LABEL_H__
 #define __C_LABEL_H__
 
-#include "general.h"
 #include "env.h"
+#include "general.h"
 #include <deque>
 
+#include "error.h"
+#include "label.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "label.h"
-#include "error.h"
 
 #include <string>
-using namespace std;
 
 /// \fn void label_terminalsFind(s_env &ast_env)
 /// \brief Find the "terminals" associated with a label. These terminals are
@@ -48,8 +47,8 @@ using namespace std;
 /// \param deque<int>  STL queue containing the terminal
 ///     vertex numbers
 /// \return bool - TRUE if terminals were found, FALSE otherwise
-bool label_terminalsFind(MRIS *apmris, string astr_fileName,
-                         deque<int> &aque_terminal
+bool label_terminalsFind(MRIS *apmris, std::string astr_fileName,
+                         std::deque<int> &aque_terminal
 
 );
 
@@ -75,7 +74,7 @@ void label_ply_do(s_env &ast_env);
 /// \return    (void)
 void label_singleVertexSet(MRIS *apmris, int avertex,
                            void (*vertex_labelMark)(VERTEX *pvertex,
-                                                    void *marker),
+                                                    void *  marker),
                            void *apv_marker);
 
 /// \fn void label_coreLoad(MRIS& amris, string astr_fileName, bool
@@ -93,7 +92,7 @@ void label_singleVertexSet(MRIS *apmris, int avertex,
 /// \param apv_marker  a pointer to void that embodies the
 ///     argument list to (*vertex_labelMark)()
 /// \return    (void)
-void label_coreLoad(MRIS *apmris, string astr_fileName,
+void label_coreLoad(MRIS *apmris, std::string astr_fileName,
                     void (*vertex_labelMark)(VERTEX *pvertex, void *marker),
                     void *apv_marker);
 
@@ -113,7 +112,7 @@ void label_coreLoad(MRIS *apmris, string astr_fileName,
 /// \return    (void)
 void label_workingSurface_loadFrom(s_env &st_env,
                                    void (*vertex_labelMark)(VERTEX *pvertex,
-                                                            void *marker),
+                                                            void *  marker),
                                    void *apv_marker);
 
 /// \fn void label_coreSave(MRIS& amris, string astr_fileName, bool
@@ -133,9 +132,9 @@ void label_workingSurface_loadFrom(s_env &st_env,
 ///       whether it should be saved or
 ///      not.
 /// \return    (void)
-void label_coreSave(MRIS *apmris, string astr_fileName,
+void label_coreSave(MRIS *apmris, std::string astr_fileName,
                     bool (*vertex_satisfyTestCondition)(VERTEX *apvertex,
-                                                        void *apv_void),
+                                                        void *  apv_void),
                     void *apv_fromCaller);
 
 /// \fn void label_ply_save(s_env &st_env, string astr_filePrefix, bool
@@ -148,7 +147,7 @@ void label_coreSave(MRIS *apmris, string astr_fileName,
 /// \param b_staggered  a boolean flag that toggles "staggered"
 ///     saves ON | OFF.
 /// \return    (void)
-void label_ply_save(s_env &st_env, string astr_filePrefix,
+void label_ply_save(s_env &st_env, std::string astr_filePrefix,
                     bool b_staggered = true);
 
 /// \fn void label_auxSurface_saveTo(s_env& st_env, bool

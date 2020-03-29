@@ -6,7 +6,7 @@
 namespace kvl {
 namespace cuda {
 void RunVisitCounterTetrahedralMeshCUDA(
-    CudaImage<int, 3, unsigned short> &d_output,
+    CudaImage<int, 3, unsigned short> &                      d_output,
     const CudaTetrahedralMesh<double, unsigned long, float> &ctm);
 }
 } // namespace kvl

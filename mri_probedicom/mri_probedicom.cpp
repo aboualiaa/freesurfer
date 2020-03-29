@@ -43,12 +43,12 @@
 #ifdef HAVE_OPENGL
 #include "glut.h"
 #endif
-#include "diag.h"
 #include "DICOMRead.h"
-#include "mri2.h"
 #include "bfileio.h"
-#include "version.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "mri2.h"
+#include "version.h"
 
 int main(int argc, char *argv[]);
 
@@ -56,53 +56,53 @@ static char vcid[] =
     "$Id: mri_probedicom.c,v 1.45 2015/07/28 21:51:22 greve Exp $";
 const char *Progname = nullptr;
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
-static int singledash(char *flag);
-int GetDirective(char *directivestring);
-int GetDimLength(char *dicomfile, int dimtype);
+static int  singledash(char *flag);
+int         GetDirective(char *directivestring);
+int         GetDimLength(char *dicomfile, int dimtype);
 
-#define QRY_FILETYPE 0
-#define QRY_TAG 1
+#define QRY_FILETYPE       0
+#define QRY_TAG            1
 #define QRY_REPRESENTATION 2
-#define QRY_DESCRIPTION 3
-#define QRY_MULTIPLICITY 4
-#define QRY_LENGTH 5
-#define QRY_VALUE 6
+#define QRY_DESCRIPTION    3
+#define QRY_MULTIPLICITY   4
+#define QRY_LENGTH         5
+#define QRY_VALUE          6
 #define QRY_HAS_PIXEL_DATA 7
-#define QRY_DWI 8
+#define QRY_DWI            8
 
-char *dicomfile = nullptr;
+char *dicomfile       = nullptr;
 char *directivestring = nullptr;
-int directive;
-long grouptag = -1, elementtag = -1;
-int debug, verbose;
-char *outputfile = nullptr;
-int outputbfile = 0;
-char *tagname = nullptr;
-int GettingPixelData = 0;
+int   directive;
+long  grouptag = -1, elementtag = -1;
+int   debug, verbose;
+char *outputfile       = nullptr;
+int   outputbfile      = 0;
+char *tagname          = nullptr;
+int   GettingPixelData = 0;
 FILE *fp;
-int DisplayImage = 0;
-int DoPartialDump = 1;
-int DoTConvertSec = 0;
+int   DisplayImage  = 0;
+int   DoPartialDump = 1;
+int   DoTConvertSec = 0;
 
 // int AllocElement(DCM_ELEMENT *e);
 // int FreeElement(DCM_ELEMENT *e);
 // DCM_OBJECT *GetObjectFromFile(char *fname, unsigned long options);
-int DumpElement(FILE *fp, DCM_ELEMENT *e);
+int   DumpElement(FILE *fp, DCM_ELEMENT *e);
 char *RepString(int RepCode);
-int PartialDump(char *dicomfile, FILE *fp);
-int DumpSiemensASCII(char *dicomfile, FILE *fpout);
-int DumpSiemensASCIIAlt(char *dicomfile, FILE *fpout);
+int   PartialDump(char *dicomfile, FILE *fp);
+int   DumpSiemensASCII(char *dicomfile, FILE *fpout);
+int   DumpSiemensASCIIAlt(char *dicomfile, FILE *fpout);
 
 /*size_t RepSize(int RepCode);*/
-char *ElementValueFormat(DCM_ELEMENT *e);
-int DCMCompare(char *dcmfile1, char *dcmfile2, double thresh);
+char * ElementValueFormat(DCM_ELEMENT *e);
+int    DCMCompare(char *dcmfile1, char *dcmfile2, double thresh);
 double DCMCompareThresh = .00001;
 
 #define TMPSTRLEN 10000
@@ -111,47 +111,47 @@ static char tmpstr[TMPSTRLEN];
 double ConvertTimeStringToSec(char *tstring);
 
 #ifdef HAVE_OPENGL
-int RenderImage(int argc, char **argv);
-int ImageWidth;
-int ImageHeight;
+int      RenderImage(int argc, char **argv);
+int      ImageWidth;
+int      ImageHeight;
 GLubyte *ImageBuff;
 #endif // HAVE_OPENGL
 
 int DoPatientName = 1;
 
-char *title = nullptr;
-int DoBackslash = 0;
-int DoAltDump = 0;
-int GetMax = 0;
-int GetSiemensCrit = 0;
-int dcmGetPixelSpacing(const char *dcmfile, float *ColRes, float *RowRes);
+char *title          = nullptr;
+int   DoBackslash    = 0;
+int   DoAltDump      = 0;
+int   GetMax         = 0;
+int   GetSiemensCrit = 0;
+int   dcmGetPixelSpacing(const char *dcmfile, float *ColRes, float *RowRes);
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  DCM_OBJECT *object;
-  CONDITION cond;
-  DCM_ELEMENT element;
-  DCM_TAG tag;
+  DCM_OBJECT * object;
+  CONDITION    cond;
+  DCM_ELEMENT  element;
+  DCM_TAG      tag;
   unsigned int rtnLength;
-  void *Ctx = nullptr;
-  int nrows;
-  int ncols;
-  int endian;
-  int nargs;
-  short *pixeldata;
-  short minpixel;
-  short maxpixel;
-  int n;
-  int nvoxs;
-  int err;
-  double bval;
-  double xbvec;
-  double ybvec;
-  double zbvec;
+  void *       Ctx = nullptr;
+  int          nrows;
+  int          ncols;
+  int          endian;
+  int          nargs;
+  short *      pixeldata;
+  short        minpixel;
+  short        maxpixel;
+  int          n;
+  int          nvoxs;
+  int          err;
+  double       bval;
+  double       xbvec;
+  double       ybvec;
+  double       zbvec;
 
   nargs = handleVersionOption(argc, argv, "mri_probedicom");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
   tmpstr[0] = 'a'; /* to stop compiler warning */
@@ -300,10 +300,10 @@ int main(int argc, char **argv) {
         if (outputbfile != 0) {
           // Not sure if this will fail with 8bit
           sprintf(tmpstr, "%s.hdr", outputfile);
-          ncols = GetDimLength(dicomfile, 0);
-          nrows = GetDimLength(dicomfile, 1);
+          ncols  = GetDimLength(dicomfile, 0);
+          nrows  = GetDimLength(dicomfile, 1);
           endian = bf_getarchendian();
-          fp = fopen(tmpstr, "we");
+          fp     = fopen(tmpstr, "we");
           fprintf(fp, "%d %d 1 %d\n", nrows, ncols, endian);
           fclose(fp);
           sprintf(tmpstr, "%s.bshort", outputfile);
@@ -322,8 +322,8 @@ int main(int argc, char **argv) {
         nvoxs = nrows * ncols;
         // This will still fail with 8bit
         pixeldata = reinterpret_cast<short *>(element.d.string);
-        maxpixel = pixeldata[0];
-        minpixel = pixeldata[0];
+        maxpixel  = pixeldata[0];
+        minpixel  = pixeldata[0];
         for (n = 0; n < nvoxs; n++) {
           if (maxpixel < pixeldata[n]) {
             maxpixel = pixeldata[n];
@@ -352,13 +352,13 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
+  int    nargc;
+  int    nargsused;
   char **pargv;
-  char *option;
-  char *dicomfile1;
-  char *dicomfile2;
-  int rt;
+  char * option;
+  char * dicomfile1;
+  char * dicomfile2;
+  int    rt;
 
   if (argc < 1) {
     usage_exit();
@@ -429,38 +429,38 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      outputfile = pargv[0];
-      nargsused = 1;
-      grouptag = 0x7FE0;
-      elementtag = 0x10;
+      outputfile    = pargv[0];
+      nargsused     = 1;
+      grouptag      = 0x7FE0;
+      elementtag    = 0x10;
       DoPartialDump = 0;
     } else if (strcmp(option, "--max") == 0) {
-      grouptag = 0x7FE0;
-      elementtag = 0x10;
+      grouptag      = 0x7FE0;
+      elementtag    = 0x10;
       DoPartialDump = 0;
-      GetMax = 1;
+      GetMax        = 1;
     } else if (strcmp(option, "--ob") == 0) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      outputfile = pargv[0];
-      outputbfile = 1;
-      nargsused = 1;
-      grouptag = 0x7FE0;
-      elementtag = 0x10;
+      outputfile    = pargv[0];
+      outputbfile   = 1;
+      nargsused     = 1;
+      grouptag      = 0x7FE0;
+      elementtag    = 0x10;
       DoPartialDump = 0;
     } else if (strcmp(option, "--d") == 0) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       directivestring = pargv[0];
-      nargsused = 1;
-      DoPartialDump = 0;
+      nargsused       = 1;
+      DoPartialDump   = 0;
     } else if (strcmp(option, "--n") == 0) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      tagname = pargv[0];
+      tagname   = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--t") == 0) {
       if (nargc < 2) {
@@ -468,7 +468,7 @@ static int parse_commandline(int argc, char **argv) {
       }
       sscanf(pargv[0], "%lx", &grouptag);
       sscanf(pargv[1], "%lx", &elementtag);
-      nargsused = 2;
+      nargsused     = 2;
       DoPartialDump = 0;
     } else if (strcmp(option, "--backslash") == 0) {
       DoBackslash = 1;
@@ -488,15 +488,15 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      title = pargv[0];
+      title     = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--view") == 0) {
-      DisplayImage = 1;
+      DisplayImage  = 1;
       DoPartialDump = 0;
-      nargsused = 0;
+      nargsused     = 0;
     } else if (strcmp(option, "--partial") == 0) {
       DoPartialDump = 1;
-      nargsused = 0;
+      nargsused     = 0;
     } else if ((strcmp(option, "--dictionary") == 0) ||
                (strcmp(option, "--dic") == 0)) {
       rt = system("dcm_print_dictionary");
@@ -801,7 +801,7 @@ int GetDirective(char *directivestring) {
     return (QRY_DWI);
   }
   if (strcasecmp(directivestring, "haspixel") == 0) {
-    grouptag = 0x7FE0;
+    grouptag   = 0x7FE0;
     elementtag = 0x10;
     return (QRY_HAS_PIXEL_DATA);
   }
@@ -913,13 +913,13 @@ char *RepString(int RepCode) {
 /*---------------------------------------------------------------*/
 /*------------------------------------------------------*/
 int GetDimLength(char *dicomfile, int dimtype) {
-  int dimlength;
-  DCM_OBJECT *object;
-  CONDITION cond;
-  DCM_ELEMENT element;
-  DCM_TAG tag;
+  int          dimlength;
+  DCM_OBJECT * object;
+  CONDITION    cond;
+  DCM_ELEMENT  element;
+  DCM_TAG      tag;
   unsigned int rtnLength;
-  void *Ctx = nullptr;
+  void *       Ctx = nullptr;
 
   object = GetObjectFromFile(dicomfile, 0);
   if (object == nullptr) {
@@ -1277,15 +1277,15 @@ int PartialDump(char *dicomfile, FILE *fp) {
 int DumpSiemensASCII(char *dicomfile, FILE *fpout) {
 
   DCM_ELEMENT *e;
-  FILE *fp;
+  FILE *       fp;
   // declared at top of file: char tmpstr[TMPSTRLEN];
-  int dumpline;
-  int nthchar;
+  int   dumpline;
+  int   nthchar;
   char *rt;
   char *BeginStr;
-  int LenBeginStr;
+  int   LenBeginStr;
   char *TestStr;
-  int nTest;
+  int   nTest;
 
   e = GetElementFromFile(dicomfile, 0x8, 0x70);
   if (e == nullptr) {
@@ -1312,14 +1312,14 @@ int DumpSiemensASCII(char *dicomfile, FILE *fpout) {
   }
 
   // BeginStr = "### ASCCONV BEGIN ###";
-  BeginStr = "### ASCCONV BEGIN";
+  BeginStr    = "### ASCCONV BEGIN";
   LenBeginStr = strlen(BeginStr);
-  TestStr = static_cast<char *>(calloc(LenBeginStr + 1, sizeof(char)));
+  TestStr     = static_cast<char *>(calloc(LenBeginStr + 1, sizeof(char)));
 
   /* This section steps through the file char-by-char until
      the BeginStr is matched */
   dumpline = 0;
-  nthchar = 0;
+  nthchar  = 0;
   while (true) {
     fseek(fp, nthchar, SEEK_SET);
     nTest = fread(TestStr, sizeof(char), LenBeginStr, fp);
@@ -1374,15 +1374,15 @@ int DumpSiemensASCII(char *dicomfile, FILE *fpout) {
 int DumpSiemensASCIIAlt(char *dicomfile, FILE *fpout) {
 
   DCM_ELEMENT *e;
-  FILE *fp;
+  FILE *       fp;
   // declared at top of file: char tmpstr[TMPSTRLEN];
-  int dumpline;
-  int nthchar;
+  int   dumpline;
+  int   nthchar;
   char *rt;
   char *BeginStr;
-  int LenBeginStr;
+  int   LenBeginStr;
   char *TestStr;
-  int nTest;
+  int   nTest;
 
   e = GetElementFromFile(dicomfile, 0x8, 0x70);
   if (e == nullptr) {
@@ -1408,14 +1408,14 @@ int DumpSiemensASCIIAlt(char *dicomfile, FILE *fpout) {
     exit(1);
   }
 
-  BeginStr = "### ASCCONV BEGIN #";
+  BeginStr    = "### ASCCONV BEGIN #";
   LenBeginStr = strlen(BeginStr);
-  TestStr = static_cast<char *>(calloc(LenBeginStr + 1, sizeof(char)));
+  TestStr     = static_cast<char *>(calloc(LenBeginStr + 1, sizeof(char)));
 
   /* This section steps through the file char-by-char until
      the BeginStr is matched */
   dumpline = 0;
-  nthchar = 0;
+  nthchar  = 0;
   while (true) {
     fseek(fp, nthchar, SEEK_SET);
     nTest = fread(TestStr, sizeof(char), LenBeginStr, fp);
@@ -1557,26 +1557,26 @@ void reshape(int w, int h) {
 
 int RenderImage(int argc, char **argv) {
 
-  int nrows;
-  int ncols;
-  int row;
-  int col;
-  int n;
-  int m;
-  char c;
-  DCM_OBJECT *object;
-  CONDITION cond;
-  DCM_ELEMENT element;
-  DCM_TAG tag;
-  unsigned int rtnLength;
-  void *Ctx = nullptr;
-  short *pixeldata;
-  short *pS;
-  short minpixel;
-  short maxpixel;
-  int nvoxs;
-  int nthvox;
-  DICOMInfo RefDCMInfo;
+  int            nrows;
+  int            ncols;
+  int            row;
+  int            col;
+  int            n;
+  int            m;
+  char           c;
+  DCM_OBJECT *   object;
+  CONDITION      cond;
+  DCM_ELEMENT    element;
+  DCM_TAG        tag;
+  unsigned int   rtnLength;
+  void *         Ctx = nullptr;
+  short *        pixeldata;
+  short *        pS;
+  short          minpixel;
+  short          maxpixel;
+  int            nvoxs;
+  int            nthvox;
+  DICOMInfo      RefDCMInfo;
   unsigned char *pC;
 
   ncols = GetDimLength(dicomfile, 0);
@@ -1590,7 +1590,7 @@ int RenderImage(int argc, char **argv) {
     exit(1);
   }
 
-  tag = DCM_MAKETAG(0x7FE0, 0x10);
+  tag  = DCM_MAKETAG(0x7FE0, 0x10);
   cond = DCM_GetElement(&object, tag, &element);
   if (cond != DCM_NORMAL) {
     COND_DumpConditions();
@@ -1607,10 +1607,10 @@ int RenderImage(int argc, char **argv) {
   GetDICOMInfo(dicomfile, &RefDCMInfo, FALSE, 1);
 
   pixeldata = static_cast<short *>(calloc(nvoxs, sizeof(short)));
-  maxpixel = pixeldata[0];
-  minpixel = pixeldata[0];
-  pC = reinterpret_cast<unsigned char *>(element.d.string);
-  pS = reinterpret_cast<short *>(element.d.string);
+  maxpixel  = pixeldata[0];
+  minpixel  = pixeldata[0];
+  pC        = reinterpret_cast<unsigned char *>(element.d.string);
+  pS        = reinterpret_cast<short *>(element.d.string);
   for (n = 0; n < nvoxs; n++) {
     if (RefDCMInfo.BitsAllocated == 8) {
       pixeldata[n] = static_cast<short>(*pC++);
@@ -1627,7 +1627,7 @@ int RenderImage(int argc, char **argv) {
   }
   printf("min = %d, max = %d\n", minpixel, maxpixel);
 
-  ImageWidth = ncols;
+  ImageWidth  = ncols;
   ImageHeight = nrows;
   ImageBuff =
       static_cast<GLubyte *>(calloc((nrows) * (ncols)*3, sizeof(GLubyte)));
@@ -1674,106 +1674,106 @@ int RenderImage(int argc, char **argv) {
 int DCMCompare(char *dcmfile1, char *dcmfile2, double thresh) {
   DCM_ELEMENT *e1;
   DCM_ELEMENT *e2;
-  int tag1[100];
-  int tag2[100];
-  int type[100];
-  char *tagname[100];
-  int n;
-  int nth;
-  int isdiff;
+  int          tag1[100];
+  int          tag2[100];
+  int          type[100];
+  char *       tagname[100];
+  int          n;
+  int          nth;
+  int          isdiff;
 
-  n = 0;
+  n          = 0;
   tagname[n] = "Manufacturer";
-  tag1[n] = 0x8;
-  tag2[n] = 0x0070;
-  type[n] = 0;
+  tag1[n]    = 0x8;
+  tag2[n]    = 0x0070;
+  type[n]    = 0;
   n++;
   tagname[n] = "Model";
-  tag1[n] = 0x8;
-  tag2[n] = 0x1090;
-  type[n] = 0;
+  tag1[n]    = 0x8;
+  tag2[n]    = 0x1090;
+  type[n]    = 0;
   n++;
   tagname[n] = "Software Version";
-  tag1[n] = 0x18;
-  tag2[n] = 0x1020;
-  type[n] = 0;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x1020;
+  type[n]    = 0;
   n++;
   tagname[n] = "Institution";
-  tag1[n] = 0x8;
-  tag2[n] = 0x0080;
-  type[n] = 0;
+  tag1[n]    = 0x8;
+  tag2[n]    = 0x0080;
+  type[n]    = 0;
   n++;
   // tagname[n] = "Imaging Frequency";tag1[n] = 0x18; tag2[n] = 0x0084; type[n]
   // = 0; n++;
   tagname[n] = "Pixel Frequency";
-  tag1[n] = 0x18;
-  tag2[n] = 0x0095;
-  type[n] = 2;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0095;
+  type[n]    = 2;
   n++;
   tagname[n] = "Field Strength";
-  tag1[n] = 0x18;
-  tag2[n] = 0x0087;
-  type[n] = 2;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0087;
+  type[n]    = 2;
   n++;
   tagname[n] = "Pulse Sequence";
-  tag1[n] = 0x18;
-  tag2[n] = 0x0024;
-  type[n] = 0;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0024;
+  type[n]    = 0;
   n++;
   tagname[n] = "Transmitting Coil";
-  tag1[n] = 0x18;
-  tag2[n] = 0x1251;
-  type[n] = 0;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x1251;
+  type[n]    = 0;
   n++;
   tagname[n] = "Flip Angle";
-  tag1[n] = 0x18;
-  tag2[n] = 0x1314;
-  type[n] = 2;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x1314;
+  type[n]    = 2;
   n++;
   tagname[n] = "Echo Time";
-  tag1[n] = 0x18;
-  tag2[n] = 0x0081;
-  type[n] = 2;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0081;
+  type[n]    = 2;
   n++;
   tagname[n] = "Inversion Time";
-  tag1[n] = 0x18;
-  tag2[n] = 0x0082;
-  type[n] = 2;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0082;
+  type[n]    = 2;
   n++;
   tagname[n] = "Repetition Time";
-  tag1[n] = 0x18;
-  tag2[n] = 0x0080;
-  type[n] = 2;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0080;
+  type[n]    = 2;
   n++;
   tagname[n] = "Phase Encode Direction";
-  tag1[n] = 0x18;
-  tag2[n] = 0x1312;
-  type[n] = 0;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x1312;
+  type[n]    = 0;
   n++;
   tagname[n] = "Pixel Spacing";
-  tag1[n] = 0x28;
-  tag2[n] = 0x0030;
-  type[n] = 0;
+  tag1[n]    = 0x28;
+  tag2[n]    = 0x0030;
+  type[n]    = 0;
   n++;
   tagname[n] = "Rows";
-  tag1[n] = 0x28;
-  tag2[n] = 0x0010;
-  type[n] = 1;
+  tag1[n]    = 0x28;
+  tag2[n]    = 0x0010;
+  type[n]    = 1;
   n++;
   tagname[n] = "Cols";
-  tag1[n] = 0x28;
-  tag2[n] = 0x0011;
-  type[n] = 1;
+  tag1[n]    = 0x28;
+  tag2[n]    = 0x0011;
+  type[n]    = 1;
   n++;
   tagname[n] = "Slice Thickness";
-  tag1[n] = 0x18;
-  tag2[n] = 0x0050;
-  type[n] = 2;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0050;
+  type[n]    = 2;
   n++;
   tagname[n] = "Slice Distance";
-  tag1[n] = 0x18;
-  tag2[n] = 0x0088;
-  type[n] = 2;
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0088;
+  type[n]    = 2;
   n++;
 
   isdiff = 0;
@@ -1796,7 +1796,7 @@ int DCMCompare(char *dcmfile1, char *dcmfile2, double thresh) {
     if (strcmp(tagname[nth], "Pixel Spacing") == 0) {
       printf("%2d %s (%x,%x) %s %s ", nth, tagname[nth], tag1[nth], tag2[nth],
              e1->d.string, e2->d.string);
-      int err;
+      int   err;
       float ColRes1;
       float RowRes1;
       float ColRes2;
@@ -1861,7 +1861,7 @@ int DCMCompare(char *dcmfile1, char *dcmfile2, double thresh) {
   to number of seconds. HH=0:23 hours.
  */
 double ConvertTimeStringToSec(char *tstring) {
-  char str[3];
+  char   str[3];
   double h;
   double m;
   double s;
@@ -1893,10 +1893,10 @@ double ConvertTimeStringToSec(char *tstring) {
 
 int dcmGetPixelSpacing(const char *dcmfile, float *ColRes, float *RowRes) {
   DCM_ELEMENT *e;
-  char *s;
-  int ns;
-  int n;
-  int slash_not_found;
+  char *       s;
+  int          ns;
+  int          n;
+  int          slash_not_found;
 
   /* Load the Pixel Spacing - this is a string of the form:
      ColRes\RowRes   */
@@ -1910,10 +1910,10 @@ int dcmGetPixelSpacing(const char *dcmfile, float *ColRes, float *RowRes) {
 
   /* Go through each character looking for the backslash */
   slash_not_found = 1;
-  ns = strlen(s);
+  ns              = strlen(s);
   for (n = 0; n < ns; n++) {
     if (s[n] == '\\') {
-      s[n] = ' ';
+      s[n]            = ' ';
       slash_not_found = 0;
       break;
     }

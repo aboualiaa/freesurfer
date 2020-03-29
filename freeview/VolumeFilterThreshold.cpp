@@ -24,14 +24,14 @@
  */
 
 #include "VolumeFilterThreshold.h"
-#include <math.h>
 #include "LayerMRI.h"
-#include <vtkImageData.h>
-#include <vtkImageThreshold.h>
-#include <vtkImageCast.h>
-#include <vtkPointData.h>
+#include <math.h>
 #include <vtkDataArray.h>
+#include <vtkImageCast.h>
+#include <vtkImageData.h>
 #include <vtkImageShiftScale.h>
+#include <vtkImageThreshold.h>
+#include <vtkPointData.h>
 
 VolumeFilterThreshold::VolumeFilterThreshold(LayerMRI *input, LayerMRI *output,
                                              QObject *parent)

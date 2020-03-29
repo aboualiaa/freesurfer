@@ -4,8 +4,8 @@
 
 SmallMatrix::SmallMatrix() {
   m_pdata = NULL;
-  m_rows = -1;
-  m_cols = -1;
+  m_rows  = -1;
+  m_cols  = -1;
 }
 
 SmallMatrix::SmallMatrix(int _rows, int _cols) {
@@ -17,8 +17,8 @@ SmallMatrix::SmallMatrix(int _rows, int _cols) {
 
 SmallMatrix::SmallMatrix(const SmallMatrix &sm) {
   m_pdata = NULL;
-  m_rows = -1;
-  m_cols = -1;
+  m_rows  = -1;
+  m_cols  = -1;
 
   clone(sm);
 }
@@ -102,7 +102,7 @@ SmallMatrix SmallMatrix::operator*(const SmallMatrix &m) {
 
 const SmallMatrix &SmallMatrix::operator*=(const double val) {
   double *pos = m_pdata;
-  int no = m_rows * m_cols;
+  int     no  = m_rows * m_cols;
 
   for (int i = 0; i < no; ++i, ++pos)
     *pos *= val;
@@ -146,8 +146,8 @@ SmallMatrix SmallMatrix::operator+(const SmallMatrix &m) const {
   SmallMatrix retVal(this->rows(), this->cols());
 
   double *pthis = m_pdata;
-  double *pm = m.m_pdata;
-  double *pret = retVal.m_pdata;
+  double *pm    = m.m_pdata;
+  double *pret  = retVal.m_pdata;
 
   int no = this->rows() * this->cols();
 
@@ -168,8 +168,8 @@ SmallMatrix SmallMatrix::operator-(const SmallMatrix &m) const {
   SmallMatrix retVal(this->rows(), this->cols());
 
   double *pthis = m_pdata;
-  double *pm = m.m_pdata;
-  double *pret = retVal.m_pdata;
+  double *pm    = m.m_pdata;
+  double *pret  = retVal.m_pdata;
 
   int no = this->rows() * this->cols();
 
@@ -188,7 +188,7 @@ void SmallMatrix::operator+=(const SmallMatrix &m) {
   }
 
   double *pthis = m_pdata;
-  double *pm = m.m_pdata;
+  double *pm    = m.m_pdata;
 
   int no = this->rows() * this->cols();
 
@@ -205,7 +205,7 @@ void SmallMatrix::operator-=(const SmallMatrix &m) {
   }
 
   double *pthis = m_pdata;
-  double *pm = m.m_pdata;
+  double *pm    = m.m_pdata;
 
   int no = this->rows() * this->cols();
 
@@ -218,7 +218,7 @@ double SmallMatrix::norm() const {
   double dret(0);
 
   double *pthis = m_pdata;
-  int no = this->rows() * this->cols();
+  int     no    = this->rows() * this->cols();
 
   for (int i = 0; i < no; ++i, ++pthis) {
     dret += *pthis * *pthis;

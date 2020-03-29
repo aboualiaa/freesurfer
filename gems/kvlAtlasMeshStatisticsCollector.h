@@ -11,9 +11,9 @@ namespace kvl {
 class AtlasMeshStatisticsCollector : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshStatisticsCollector;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshStatisticsCollector;
+  using Superclass   = AtlasMeshRasterizor;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -42,9 +42,9 @@ protected:
   virtual ~AtlasMeshStatisticsCollector();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
   virtual void GetContributionOfTetrahedron(
       const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
@@ -64,7 +64,7 @@ private:
 
   //
   StatisticsContainerType::Pointer m_LabelStatistics;
-  double m_MinLogLikelihood;
+  double                           m_MinLogLikelihood;
 
   //
   std::vector<StatisticsContainerType::Pointer> m_ThreadSpecificLabelStatistics;

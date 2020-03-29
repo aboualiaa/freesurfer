@@ -32,24 +32,24 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage_exit();
 static void print_version_exit();
 static void write_surface_tidy_up(MRI_SURFACE *mris, const char *fname);
 
 const char *Progname;
-static int inverse_flag = 0;
+static int  inverse_flag = 0;
 
 MRI *mri_src = nullptr;
 MRI *mri_dst = nullptr;
 
 int main(int argc, char *argv[]) {
   char **av, *in_fname, *out_fname, *xform_fname;
-  int ac, nargs;
+  int    ac, nargs;
 
   if (argc == 1)
     print_usage_exit();
-  
+
   nargs = handleVersionOption(argc, argv, "mris_transform");
   if (nargs && argc - nargs == 1)
     exit(0);
@@ -70,9 +70,9 @@ int main(int argc, char *argv[]) {
   if (argc != 4)
     ErrorExit(ERROR_BADPARM, "ERROR: incorrect number of arguments");
 
-  in_fname = argv[1];
+  in_fname    = argv[1];
   xform_fname = argv[2];
-  out_fname = argv[3];
+  out_fname   = argv[3];
 
   MRI_SURFACE *mris = MRISread(in_fname);
   if (!mris)
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
       getVolGeom(mri_dst, &lta->xforms[0].dst);
     }
     LTAchangeType(lta, LINEAR_VOX_TO_VOX); // Support more types.
-    transform->type = LINEAR_VOX_TO_VOX;
+    transform->type  = LINEAR_VOX_TO_VOX;
     transform->xform = (void *)lta;
   }
 
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

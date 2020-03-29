@@ -19,8 +19,8 @@
 
 #include "itkKernelFunction.h"
 #include "vnl/vnl_math.h"
-#include "vnl/vnl_real_polynomial.h"
 #include "vnl/vnl_matrix.h"
+#include "vnl/vnl_real_polynomial.h"
 
 namespace itk {
 
@@ -49,8 +49,8 @@ class ITK_EXPORT BSplineKernelFunction : public KernelFunction {
 public:
   /** Standard class typedefs. */
   typedef BSplineKernelFunction Self;
-  typedef KernelFunction Superclass;
-  typedef SmartPointer<Self> Pointer;
+  typedef KernelFunction        Superclass;
+  typedef SmartPointer<Self>    Pointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -58,9 +58,9 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(BSplineKernelFunction, KernelFunction);
 
-  typedef double RealType;
+  typedef double               RealType;
   typedef vnl_vector<RealType> VectorType;
-  typedef vnl_real_polynomial PolynomialType;
+  typedef vnl_real_polynomial  PolynomialType;
   typedef vnl_matrix<RealType> MatrixType;
 
   /** Get/Sets the Spline Order */
@@ -70,7 +70,7 @@ public:
   /** Evaluate the function. */
   inline RealType Evaluate(const RealType &u) const {
     RealType absValue = vnl_math_abs(u);
-    int which;
+    int      which;
     if (this->m_SplineOrder % 2 == 0) {
       which = static_cast<unsigned int>(absValue + 0.5);
     } else {
@@ -88,7 +88,7 @@ public:
   /** Evaluate the derivative. */
   inline RealType EvaluateDerivative(const double &u) const {
     RealType absValue = vnl_math_abs(u);
-    int which;
+    int      which;
     if (this->m_SplineOrder % 2 == 0) {
       which = static_cast<unsigned int>(absValue + 0.5);
     } else {
@@ -144,7 +144,7 @@ private:
   PolynomialType CoxDeBoor(unsigned short, VectorType, unsigned int,
                            unsigned int);
 
-  MatrixType m_BSplineShapeFunctions;
+  MatrixType   m_BSplineShapeFunctions;
   unsigned int m_SplineOrder;
 };
 

@@ -22,12 +22,12 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
-#include "matrix.h"
 #include "dmatrix.h"
+#include "matrix.h"
 #include "mrisurf.h"
 #include "romp_support.h"
 #undef private
@@ -105,11 +105,11 @@ int MRIScornerMetric(MRIS *surf, const int DoGrad) {
   is less than 0, then these have no effect.
  */
 int MRISfaceNormalFace(MRIS *surf, int faceno, DMATRIX **pc, double *pcL) {
-  extern int MRISfaceNormalFace_AddDeltaVertex;
+  extern int         MRISfaceNormalFace_AddDeltaVertex;
   extern long double MRISfaceNormalFace_AddDelta[3];
-  VERTEX *v0, *v1, *v2;
-  FACE *f;
-  long double ax, ay, az, bx, by, bz, cx, cy, cz, cL;
+  VERTEX *           v0, *v1, *v2;
+  FACE *             f;
+  long double        ax, ay, az, bx, by, bz, cx, cy, cz, cL;
 
   if (faceno < 0 || faceno >= surf->nfaces) {
     printf("MRISfaceNormalFace(): faceno = %d (0,%d)\n", faceno, surf->nfaces);
@@ -218,13 +218,13 @@ emperically, though there could be some issues with accuracy in certain cases
 because the data structures use float. See MRISfaceNormalGradTest().
 */
 int MRISfaceNormalGradFace(MRIS *surf, int faceno) {
-  VERTEX *vSrc, *vWRT, *vC;
-  FACE *f;
+  VERTEX * vSrc, *vWRT, *vC;
+  FACE *   f;
   DMATRIX *c = nullptr, *cT = nullptr, *gradc = nullptr, *gradcL = nullptr,
           *tmp1 = nullptr, *tmp2 = nullptr;
   long double ax, ay, az, bx, by, bz;
-  double cL;
-  int wrtvtxno, k, m;
+  double      cL;
+  int         wrtvtxno, k, m;
 
   if (faceno < 0 || faceno >= surf->nfaces) {
     printf("MRISfaceNormalGrad(): faceno = %d (0,%d)\n", faceno, surf->nfaces);
@@ -320,12 +320,12 @@ int MRISfaceNormalGradFace(MRIS *surf, int faceno) {
 
 double MRISfaceNormalGradFaceTest(MRIS *surf, int faceno, int wrtvtxno,
                                   long double delta, int verbose) {
-  FACE *f;
-  VERTEX *v;
-  DMATRIX *n0 = nullptr, *g0, *n1 = nullptr, *g1 = nullptr, *gnum;
-  int wrtdimno, c;
-  double diff, maxdiff, maxrdiff, gmax;
-  extern int MRISfaceNormalFace_AddDeltaVertex;
+  FACE *             f;
+  VERTEX *           v;
+  DMATRIX *          n0 = nullptr, *g0, *n1 = nullptr, *g1 = nullptr, *gnum;
+  int                wrtdimno, c;
+  double             diff, maxdiff, maxrdiff, gmax;
+  extern int         MRISfaceNormalFace_AddDeltaVertex;
   extern long double MRISfaceNormalFace_AddDelta[3];
 
   f = &(surf->faces[faceno]);
@@ -342,13 +342,13 @@ double MRISfaceNormalGradFaceTest(MRIS *surf, int faceno, int wrtvtxno,
 
   // Compute the theoretical gradient, does all 3 wrt vertices
   MRISfaceNormalGradFace(surf, faceno);
-  g0 = f->gradNorm[wrtvtxno];
+  g0   = f->gradNorm[wrtvtxno];
   gmax = DMatrixMaxAbs(g0);
 
   // Compute the numerical gradient
   MRISfaceNormalFace_AddDeltaVertex = wrtvtxno;
-  gnum = DMatrixAlloc(3, 3, MATRIX_REAL);
-  maxdiff = 0;
+  gnum                              = DMatrixAlloc(3, 3, MATRIX_REAL);
+  maxdiff                           = 0;
   // Go through each dim in the WRT vertex position
   for (wrtdimno = 0; wrtdimno < 3; wrtdimno++) {
     // Set the delta for this dim
@@ -417,13 +417,13 @@ double MRISfaceNormalGradFaceTest(MRIS *surf, int faceno, int wrtvtxno,
  */
 int MRISedgeMetricEdge(MRIS *surf, int edgeno, int DoGrad) {
   MRI_EDGE *e;
-  FACE *f0, *f1;
-  VERTEX *v0, *v1;
-  double v0xyz[3], v1xyz[3];
-  DMATRIX *gradU = nullptr;
-  e = &(surf->edges[edgeno]);
-  v0 = &(surf->vertices[e->vtxno[0]]);
-  v1 = &(surf->vertices[e->vtxno[1]]);
+  FACE *    f0, *f1;
+  VERTEX *  v0, *v1;
+  double    v0xyz[3], v1xyz[3];
+  DMATRIX * gradU = nullptr;
+  e               = &(surf->edges[edgeno]);
+  v0              = &(surf->vertices[e->vtxno[0]]);
+  v1              = &(surf->vertices[e->vtxno[1]]);
   StuffVertexCoords(surf, e->vtxno[0], &v0xyz[0]);
   StuffVertexCoords(surf, e->vtxno[1], &v1xyz[0]);
   if (DoGrad == 1 || DoGrad == 3) {
@@ -440,8 +440,8 @@ int MRISedgeMetricEdge(MRIS *surf, int edgeno, int DoGrad) {
   }
   // Note f->norm must have been computed with MRISfaceNormalGrad(), grad not
   // needed
-  f0 = &(surf->faces[e->faceno[0]]);
-  f1 = &(surf->faces[e->faceno[1]]);
+  f0     = &(surf->faces[e->faceno[0]]);
+  f1     = &(surf->faces[e->faceno[1]]);
   e->dot = DVectorDot(f0->norm, f1->norm);
   if (e->dot > 1.0)
     e->dot = +1.0; // might be a slight overflow
@@ -461,8 +461,8 @@ int MRISedgeMetricEdge(MRIS *surf, int edgeno, int DoGrad) {
 double MRISedgeAngleCostEdgeVertex(MRIS *surf, int edgeno, int wrtvtxno,
                                    DMATRIX **pgrad) {
   MRI_EDGE *e;
-  double J;
-  DMATRIX *grad = nullptr;
+  double    J;
+  DMATRIX * grad = nullptr;
 
   if (pgrad)
     grad = *pgrad;
@@ -486,19 +486,19 @@ double MRISedgeAngleCostEdgeVertex(MRIS *surf, int edgeno, int wrtvtxno,
 int MRISedgeAngleCostEdgeVertexTest(MRIS *surf, int edgeno, int wrtvtxno,
                                     long double delta) {
   MRI_EDGE *e;
-  DMATRIX *g0, *gnum;
-  double J0, J1;
-  int wrtdimno, c;
+  DMATRIX * g0, *gnum;
+  double    J0, J1;
+  int       wrtdimno, c;
 
   MRISfaceNormalGrad(surf, 0);
   // MRISedgeGradDot(surf);
 
   g0 = DMatrixAlloc(1, 3, MATRIX_REAL);
   J0 = MRISedgeAngleCostEdgeVertex(surf, edgeno, wrtvtxno, &g0);
-  e = &(surf->edges[edgeno]);
+  e  = &(surf->edges[edgeno]);
 
-  int const surfvtxno = e->vtxno[wrtvtxno];
-  VERTEX *const v = &surf->vertices[surfvtxno];
+  int const     surfvtxno = e->vtxno[wrtvtxno];
+  VERTEX *const v         = &surf->vertices[surfvtxno];
 
   // MRISedgePrint(surf, edgeno, stdout);
   // printf("%3d %g %g %g  %g\n",surfvtxno,v->x,v->y,v->z,J0);
@@ -511,7 +511,7 @@ int MRISedgeAngleCostEdgeVertexTest(MRIS *surf, int edgeno, int wrtvtxno,
   for (wrtdimno = 0; wrtdimno < 3; wrtdimno++) {
 
     float const old_x = v->x, old_y = v->y, old_z = v->z;
-    float x = old_x, y = old_y, z = old_z;
+    float       x = old_x, y = old_y, z = old_z;
 
     if (wrtdimno == 0)
       x += delta;
@@ -571,18 +571,18 @@ int MRISfaceNormalGrad(MRIS *surf, int NormOnly) {
  */
 double MRISedgeGradDotEdgeVertexTest(MRIS *surf, int edgeno, int wrtvtxno,
                                      long double delta, int verbose) {
-  int c, wrtdimno, vnosurf, nthface;
-  MRI_EDGE *e;
-  VERTEX *v;
-  double dot0, dot1;
-  DMATRIX *g0, *gnum = nullptr;
-  double diff, maxdiff, maxrdiff, gmax;
+  int        c, wrtdimno, vnosurf, nthface;
+  MRI_EDGE * e;
+  VERTEX *   v;
+  double     dot0, dot1;
+  DMATRIX *  g0, *gnum = nullptr;
+  double     diff, maxdiff, maxrdiff, gmax;
   extern int MRISfaceNormalFace_AddDeltaVertex; // cant run test in parallel
   extern long double MRISfaceNormalFace_AddDelta[3];
 
-  e = &(surf->edges[edgeno]);
+  e       = &(surf->edges[edgeno]);
   vnosurf = e->vtxno[wrtvtxno]; // vertex no wrt the surface
-  v = &(surf->vertices[vnosurf]);
+  v       = &(surf->vertices[vnosurf]);
 
   // Compute the dot at baseline
   MRISfaceNormalFace_AddDeltaVertex = -1;
@@ -591,11 +591,11 @@ double MRISedgeGradDotEdgeVertexTest(MRIS *surf, int edgeno, int wrtvtxno,
   MRISedgeMetricEdge(surf, edgeno, 3); // does all wrtvtxno
   dot0 = e->dot;
   // MRISedgeGradDotEdgeVertex(surf, edgeno, wrtvtxno);
-  g0 = e->gradDot[wrtvtxno];
+  g0   = e->gradDot[wrtvtxno];
   gmax = DMatrixMaxAbs(g0);
 
   // Compute the numerical gradient
-  gnum = DMatrixAlloc(1, 3, MATRIX_REAL);
+  gnum    = DMatrixAlloc(1, 3, MATRIX_REAL);
   maxdiff = 0;
   // Go through each dim in the WRT vertex position
   for (wrtdimno = 0; wrtdimno < 3; wrtdimno++) {
@@ -612,7 +612,7 @@ double MRISedgeGradDotEdgeVertexTest(MRIS *surf, int edgeno, int wrtvtxno,
       }
     }
     if (wrtvtxno == 2) {
-      nthface = 0;
+      nthface                           = 0;
       MRISfaceNormalFace_AddDeltaVertex = e->corner[wrtvtxno][nthface];
       for (c = 0; c < 3; c++)
         MRISfaceNormalFace_AddDelta[c] = 0;
@@ -624,7 +624,7 @@ double MRISedgeGradDotEdgeVertexTest(MRIS *surf, int edgeno, int wrtvtxno,
       MRISfaceNormalGradFace(surf, e->faceno[1]);
     }
     if (wrtvtxno == 3) {
-      nthface = 1;
+      nthface                           = 1;
       MRISfaceNormalFace_AddDeltaVertex = e->corner[wrtvtxno][nthface];
       for (c = 0; c < 3; c++)
         MRISfaceNormalFace_AddDelta[c] = 0;
@@ -637,7 +637,7 @@ double MRISedgeGradDotEdgeVertexTest(MRIS *surf, int edgeno, int wrtvtxno,
     }
 
     MRISedgeMetricEdge(surf, edgeno, 0);
-    dot1 = e->dot;
+    dot1                        = e->dot;
     gnum->rptr[1][wrtdimno + 1] = (dot1 - dot0) / delta;
     diff = fabs(gnum->rptr[1][wrtdimno + 1] - g0->rptr[1][wrtdimno + 1]);
     if (maxdiff < diff)
@@ -703,16 +703,16 @@ int MRISedgeGradDot(MRIS *surf)
  */
 int MRISedgeGradDotEdgeVertex(MRIS *surf, int edgeno, int wrtvtxno) {
   MRI_EDGE *e;
-  FACE *f0, *f1;
-  int face0wrtvtxno, face1wrtvtxno;
-  DMATRIX *n0 = nullptr, *n1 = nullptr, *gradN0 = nullptr, *gradN1 = nullptr;
+  FACE *    f0, *f1;
+  int       face0wrtvtxno, face1wrtvtxno;
+  DMATRIX * n0 = nullptr, *n1 = nullptr, *gradN0 = nullptr, *gradN1 = nullptr;
   DMATRIX *n0T = nullptr, *gradN0T = nullptr, *tmp1 = nullptr, *tmp1T = nullptr,
           *tmp2 = nullptr;
 
   e = &(surf->edges[edgeno]);
 
-  f0 = &(surf->faces[e->faceno[0]]);
-  n0 = f0->norm;
+  f0  = &(surf->faces[e->faceno[0]]);
+  n0  = f0->norm;
   n0T = DMatrixTranspose(n0, nullptr);
 
   f1 = &(surf->faces[e->faceno[1]]);
@@ -722,15 +722,15 @@ int MRISedgeGradDotEdgeVertex(MRIS *surf, int edgeno, int wrtvtxno) {
 
   face0wrtvtxno = e->corner[wrtvtxno][0];
   if (face0wrtvtxno < 3) {
-    gradN0 = f0->gradNorm[face0wrtvtxno];
+    gradN0  = f0->gradNorm[face0wrtvtxno];
     gradN0T = DMatrixTranspose(gradN0, nullptr);
-    tmp1 = DMatrixMultiply(gradN0T, n1, nullptr);
-    tmp1T = DMatrixTranspose(tmp1, nullptr);
+    tmp1    = DMatrixMultiply(gradN0T, n1, nullptr);
+    tmp1T   = DMatrixTranspose(tmp1, nullptr);
   }
   face1wrtvtxno = e->corner[wrtvtxno][1];
   if (face1wrtvtxno < 3) {
     gradN1 = f1->gradNorm[face1wrtvtxno];
-    tmp2 = DMatrixMultiply(n0T, gradN1, nullptr);
+    tmp2   = DMatrixMultiply(n0T, gradN1, nullptr);
   }
 
   // gradDot = (gradN0T)*n1 + n0T*(gradN1) = 1x3
@@ -758,8 +758,8 @@ int MRISedgeGradDotEdgeVertex(MRIS *surf, int edgeno, int wrtvtxno) {
  */
 int MRISedgePrint(MRIS *surf, int edgeno, FILE *fp) {
   MRI_EDGE *e;
-  int c;
-  VERTEX *v;
+  int       c;
+  VERTEX *  v;
   e = &(surf->edges[edgeno]);
   fprintf(fp, "edgeno %d\n", edgeno);
   fprintf(fp, "len %lf\n", e->len);
@@ -784,9 +784,9 @@ int MRISedgePrint(MRIS *surf, int edgeno, FILE *fp) {
   \brief Prints some info about a face.
  */
 int MRISfacePrint(MRIS *surf, int faceno, FILE *fp) {
-  FACE *f;
+  FACE *  f;
   VERTEX *v;
-  int c;
+  int     c;
   f = &(surf->faces[faceno]);
   fprintf(fp, "faceno %d\n", faceno);
   fprintf(fp, "area %f\n", f->area);
@@ -807,28 +807,28 @@ int MRISfacePrint(MRIS *surf, int faceno, FILE *fp) {
  */
 BBRFACE *BBRFaceAlloc() {
   BBRFACE *bbrf;
-  int n;
-  bbrf = (BBRFACE *)calloc(sizeof(BBRFACE), 1);
-  bbrf->pc = DMatrixAlloc(3, 1, MATRIX_REAL);
-  bbrf->pin = DMatrixAlloc(4, 1, MATRIX_REAL);
-  bbrf->vin = DMatrixAlloc(4, 1, MATRIX_REAL);
-  bbrf->pout = DMatrixAlloc(4, 1, MATRIX_REAL);
-  bbrf->vout = DMatrixAlloc(4, 1, MATRIX_REAL);
-  bbrf->pin->rptr[4][1] = 1.0;
-  bbrf->vin->rptr[4][1] = 1.0;
+  int      n;
+  bbrf                   = (BBRFACE *)calloc(sizeof(BBRFACE), 1);
+  bbrf->pc               = DMatrixAlloc(3, 1, MATRIX_REAL);
+  bbrf->pin              = DMatrixAlloc(4, 1, MATRIX_REAL);
+  bbrf->vin              = DMatrixAlloc(4, 1, MATRIX_REAL);
+  bbrf->pout             = DMatrixAlloc(4, 1, MATRIX_REAL);
+  bbrf->vout             = DMatrixAlloc(4, 1, MATRIX_REAL);
+  bbrf->pin->rptr[4][1]  = 1.0;
+  bbrf->vin->rptr[4][1]  = 1.0;
   bbrf->pout->rptr[4][1] = 1.0;
   bbrf->vout->rptr[4][1] = 1.0;
   for (n = 0; n < 3; n++) {
-    bbrf->gradPin[n] = DMatrixAlloc(3, 3, MATRIX_REAL);
-    bbrf->gradVin[n] = DMatrixAlloc(3, 3, MATRIX_REAL);
-    bbrf->gradInterpIn[n] = DMatrixAlloc(1, 3, MATRIX_REAL);
-    bbrf->gradIin[n] = DMatrixAlloc(1, 3, MATRIX_REAL);
-    bbrf->gradPout[n] = DMatrixAlloc(3, 3, MATRIX_REAL);
-    bbrf->gradVout[n] = DMatrixAlloc(3, 3, MATRIX_REAL);
-    bbrf->gradIout[n] = DMatrixAlloc(1, 3, MATRIX_REAL);
+    bbrf->gradPin[n]       = DMatrixAlloc(3, 3, MATRIX_REAL);
+    bbrf->gradVin[n]       = DMatrixAlloc(3, 3, MATRIX_REAL);
+    bbrf->gradInterpIn[n]  = DMatrixAlloc(1, 3, MATRIX_REAL);
+    bbrf->gradIin[n]       = DMatrixAlloc(1, 3, MATRIX_REAL);
+    bbrf->gradPout[n]      = DMatrixAlloc(3, 3, MATRIX_REAL);
+    bbrf->gradVout[n]      = DMatrixAlloc(3, 3, MATRIX_REAL);
+    bbrf->gradIout[n]      = DMatrixAlloc(1, 3, MATRIX_REAL);
     bbrf->gradInterpOut[n] = DMatrixAlloc(1, 3, MATRIX_REAL);
-    bbrf->gradQ[n] = DMatrixAlloc(1, 3, MATRIX_REAL);
-    bbrf->gradCost[n] = DMatrixAlloc(1, 3, MATRIX_REAL);
+    bbrf->gradQ[n]         = DMatrixAlloc(1, 3, MATRIX_REAL);
+    bbrf->gradCost[n]      = DMatrixAlloc(1, 3, MATRIX_REAL);
   }
   return (bbrf);
 }
@@ -838,7 +838,7 @@ BBRFACE *BBRFaceAlloc() {
  */
 int BBRFaceFree(BBRFACE **pbbrf) {
   BBRFACE *bbrf = *pbbrf;
-  int n;
+  int      n;
   if (bbrf->pc)
     DMatrixFree(&bbrf->pc);
   if (bbrf->pin)
@@ -874,7 +874,7 @@ int BBRFaceFree(BBRFACE **pbbrf) {
  */
 BBRFACE *BBRFaceDiff(const BBRFACE *bbrf1, const BBRFACE *bbrf2,
                      const double delta, BBRFACE *bbrfout) {
-  int n;
+  int    n;
   double f = 1.0 / delta;
   if (bbrfout == nullptr)
     bbrfout = BBRFaceAlloc();
@@ -906,9 +906,9 @@ BBRFACE *BBRFaceDiff(const BBRFACE *bbrf1, const BBRFACE *bbrf2,
     DMatrixAddMul(bbrf1->gradCost[n], bbrf2->gradCost[n], f, -f,
                   bbrfout->gradCost[n]);
   }
-  bbrfout->Iin = (bbrf1->Iin - bbrf2->Iin) / delta;
+  bbrfout->Iin  = (bbrf1->Iin - bbrf2->Iin) / delta;
   bbrfout->Iout = (bbrf1->Iout - bbrf2->Iout) / delta;
-  bbrfout->Q = (bbrf1->Q - bbrf2->Q) / delta;
+  bbrfout->Q    = (bbrf1->Q - bbrf2->Q) / delta;
   bbrfout->cost = (bbrf1->cost - bbrf2->cost) / delta;
   return (bbrfout);
 }
@@ -919,9 +919,9 @@ BBRFACE *BBRFaceDiff(const BBRFACE *bbrf1, const BBRFACE *bbrf2,
   costs and gradients.
  */
 int BBRFacePrint(FILE *fp, BBRFACE *bbrf, BBRPARAMS *bbrpar) {
-  FACE *f;
+  FACE *  f;
   VERTEX *v;
-  int n;
+  int     n;
   f = &(bbrpar->surf->faces[bbrf->faceno]);
   fprintf(fp, "faceno %d\n", bbrf->faceno);
   fprintf(fp, "area %12.10f\n", f->area);
@@ -978,19 +978,19 @@ int BBRFacePrint(FILE *fp, BBRFACE *bbrf, BBRPARAMS *bbrpar) {
  */
 BBRFACE *BBRCostFace(int faceno, int wrtvtxno, BBRPARAMS *bbrpar,
                      BBRFACE *bbrf) {
-  FACE *f;
-  VERTEX *v;
-  int n, oob = 0;
-  double c, r, s;
-  double OutInSum, OutInDiff, vtanh;
+  FACE *   f;
+  VERTEX * v;
+  int      n, oob = 0;
+  double   c, r, s;
+  double   OutInSum, OutInDiff, vtanh;
   DMATRIX *tmp1, *tmp2;
-  MRIS *surf = bbrpar->surf;
+  MRIS *   surf = bbrpar->surf;
 
   if (bbrf == nullptr)
     bbrf = BBRFaceAlloc();
 
   bbrf->faceno = faceno;
-  f = &(surf->faces[faceno]);
+  f            = &(surf->faces[faceno]);
 
   if (wrtvtxno < 0) {
     // Compute the center of the triangle
@@ -1053,10 +1053,10 @@ BBRFACE *BBRCostFace(int faceno, int wrtvtxno, BBRPARAMS *bbrpar,
     }
 
     // Finally, compute the cost
-    OutInSum = bbrf->Iout + bbrf->Iin + 10e-10;
-    OutInDiff = bbrf->Iout - bbrf->Iin;
-    bbrf->Q = 100 * (OutInDiff) / (0.5 * (OutInSum));
-    vtanh = tanh(bbrpar->M * (bbrf->Q - bbrpar->Q0));
+    OutInSum   = bbrf->Iout + bbrf->Iin + 10e-10;
+    OutInDiff  = bbrf->Iout - bbrf->Iin;
+    bbrf->Q    = 100 * (OutInDiff) / (0.5 * (OutInSum));
+    vtanh      = tanh(bbrpar->M * (bbrf->Q - bbrpar->Q0));
     bbrf->cost = 1 + vtanh;
 
     return (bbrf);
@@ -1065,9 +1065,9 @@ BBRFACE *BBRCostFace(int faceno, int wrtvtxno, BBRPARAMS *bbrpar,
   // Now compute the gradients
 
   // Recompute these
-  OutInSum = bbrf->Iout + bbrf->Iin + 10e-10;
+  OutInSum  = bbrf->Iout + bbrf->Iin + 10e-10;
   OutInDiff = bbrf->Iout - bbrf->Iin;
-  vtanh = tanh(bbrpar->M * (bbrf->Q - bbrpar->Q0));
+  vtanh     = tanh(bbrpar->M * (bbrf->Q - bbrpar->Q0));
 
   // gradPin = gradPc - Din*gradNorm, gradPc = eye(3)/3
   bbrf->gradPin[wrtvtxno] = DMatrixScalarMul(
@@ -1178,10 +1178,10 @@ double TestBBRCostFace(BBRPARAMS *const bbrpar, int const faceno,
     BBRFacePrint(stdout, bbrf1, bbrpar);
   }
 
-  FACE *const f = &bbrpar->surf->faces[faceno];
-  int const svtxno = f->v[wrtvtxno];
-  MRIS *const mris = bbrpar->surf;
-  VERTEX *const v = &mris->vertices[svtxno];
+  FACE *const   f      = &bbrpar->surf->faces[faceno];
+  int const     svtxno = f->v[wrtvtxno];
+  MRIS *const   mris   = bbrpar->surf;
+  VERTEX *const v      = &mris->vertices[svtxno];
 
   double maxgrad = 0, maxdiff = 0;
 
@@ -1192,7 +1192,7 @@ double TestBBRCostFace(BBRPARAMS *const bbrpar, int const faceno,
   // Go through each dimension in the WRT vertex
   //
   BBRFACE *bbrfgrad = nullptr; // these are reused around the loop
-  BBRFACE *bbrf2 = nullptr;
+  BBRFACE *bbrf2    = nullptr;
 
   int wrtdimno;
   for (wrtdimno = 0; wrtdimno < 3; wrtdimno++) {
@@ -1309,10 +1309,10 @@ double TestBBRCostFace(BBRPARAMS *const bbrpar, int const faceno,
 */
 int BBRPARsras2vox(BBRPARAMS *bbrpar) {
   MATRIX *vox2sras, *sras2vox, *sras2vox3x3 = nullptr;
-  vox2sras = MRIxfmCRS2XYZtkreg(bbrpar->mri);
-  sras2vox = MatrixInverse(vox2sras, nullptr);
+  vox2sras         = MRIxfmCRS2XYZtkreg(bbrpar->mri);
+  sras2vox         = MatrixInverse(vox2sras, nullptr);
   bbrpar->sras2vox = DMatrixCopyFMatrix(sras2vox, bbrpar->sras2vox);
-  sras2vox3x3 = MatrixCopyRegion(sras2vox, sras2vox3x3, 1, 1, 3, 3, 1, 1);
+  sras2vox3x3      = MatrixCopyRegion(sras2vox, sras2vox3x3, 1, 1, 3, 3, 1, 1);
   bbrpar->sras2vox3x3 = DMatrixCopyFMatrix(sras2vox3x3, bbrpar->sras2vox3x3);
   MatrixFree(&vox2sras);
   MatrixFree(&sras2vox);
@@ -1321,12 +1321,12 @@ int BBRPARsras2vox(BBRPARAMS *bbrpar) {
 }
 
 long double MRISbbrCost(BBRPARAMS *bbrpar, DMATRIX *gradCost) {
-  long double cost = 0;
-  int faceno, nthreads, threadno;
-  BBRFACE **bbrfth;
-  static DMATRIX **gradCostTh = nullptr;
-  static int nthreadsalloc = 0;
-  extern int MRISbbrCostFree;
+  long double      cost = 0;
+  int              faceno, nthreads, threadno;
+  BBRFACE **       bbrfth;
+  static DMATRIX **gradCostTh    = nullptr;
+  static int       nthreadsalloc = 0;
+  extern int       MRISbbrCostFree;
 
   // This must already have been run
   // MRISfaceNormalGrad(surf, 0);
@@ -1345,7 +1345,7 @@ long double MRISbbrCost(BBRPARAMS *bbrpar, DMATRIX *gradCost) {
     for (threadno = 0; threadno < nthreads; threadno++)
       DMatrixFree(&gradCostTh[threadno]);
     free(gradCostTh);
-    gradCostTh = nullptr;
+    gradCostTh    = nullptr;
     nthreadsalloc = 0;
     if (MRISbbrCostFree)
       return (0);
@@ -1354,7 +1354,7 @@ long double MRISbbrCost(BBRPARAMS *bbrpar, DMATRIX *gradCost) {
   if (gradCost) {
     if (gradCostTh == nullptr) {
       nthreadsalloc = nthreads;
-      gradCostTh = (DMATRIX **)calloc(sizeof(DMATRIX *), nthreads);
+      gradCostTh    = (DMATRIX **)calloc(sizeof(DMATRIX *), nthreads);
       for (threadno = 0; threadno < nthreads; threadno++) {
         gradCostTh[threadno] =
             DMatrixAlloc(bbrpar->surf->nvertices, 3, MATRIX_REAL);
@@ -1389,9 +1389,9 @@ long double MRISbbrCost(BBRPARAMS *bbrpar, DMATRIX *gradCost) {
     cost += bbrf->cost;
     if (gradCost) {
       FACE *f = &(bbrpar->surf->faces[faceno]);
-      int wrtvtxno, svtxno, n;
+      int   wrtvtxno, svtxno, n;
       for (wrtvtxno = 0; wrtvtxno < 3; wrtvtxno++) {
-        bbrf = BBRCostFace(faceno, wrtvtxno, bbrpar, bbrf); // Compute grads
+        bbrf   = BBRCostFace(faceno, wrtvtxno, bbrpar, bbrf); // Compute grads
         svtxno = f->v[wrtvtxno];
         for (n = 0; n < 3; n++)
           gradCostTh[threadno]->rptr[svtxno + 1][n + 1] +=
@@ -1420,9 +1420,9 @@ long double MRISbbrCost(BBRPARAMS *bbrpar, DMATRIX *gradCost) {
 
 double MRISedgeCost(MRIS *surf, DMATRIX *gradCost) {
   long double cost;
-  int edgeno, wrtvtxno, svtxno, n;
-  MRI_EDGE *e;
-  DMATRIX *gradCostEV = nullptr;
+  int         edgeno, wrtvtxno, svtxno, n;
+  MRI_EDGE *  e;
+  DMATRIX *   gradCostEV = nullptr;
 
   cost = 0;
   for (edgeno = 0; edgeno < surf->nedges; edgeno++) {
@@ -1433,7 +1433,7 @@ double MRISedgeCost(MRIS *surf, DMATRIX *gradCost) {
       for (wrtvtxno = 0; wrtvtxno < 4; wrtvtxno++) {
         gradCostEV = DMatrixScalarMul(e->gradDot[wrtvtxno], -2 * (1.0 - e->dot),
                                       gradCostEV);
-        svtxno = e->vtxno[wrtvtxno];
+        svtxno     = e->vtxno[wrtvtxno];
         for (n = 0; n < 3; n++)
           gradCost->rptr[svtxno + 1][n + 1] += gradCostEV->rptr[1][n + 1];
       }
@@ -1458,13 +1458,13 @@ double MRISedgeCost(MRIS *surf, DMATRIX *gradCost) {
 long double MRISedgeLengthCostEdge(MRIS *surf, int edgeno, double L0,
                                    DMATRIX **pgradv0, DMATRIX **pgradv1) {
   long double cost, dL, a;
-  MRI_EDGE *e;
-  VERTEX *v0, *v1;
+  MRI_EDGE *  e;
+  VERTEX *    v0, *v1;
 
   e = &(surf->edges[edgeno]);
 
   // diff between the actual and desired edge length
-  dL = e->len - L0;
+  dL   = e->len - L0;
   cost = dL * dL;
   if (*pgradv0 == nullptr && *pgradv1 == nullptr)
     return (cost); // done
@@ -1504,12 +1504,12 @@ long double MRISedgeLengthCostEdge(MRIS *surf, int edgeno, double L0,
   of edges.
 */
 double MRISedgeLengthCost(MRIS *surf, double L0, double weight, int DoGrad) {
-  int eno, vno, nhits;
+  int         eno, vno, nhits;
   long double totcost, ecost;
-  DMATRIX *gradv0 = nullptr, *gradv1 = nullptr;
-  MRI_EDGE *e;
-  VERTEX *v;
-  double *tx, *ty, *tz;
+  DMATRIX *   gradv0 = nullptr, *gradv1 = nullptr;
+  MRI_EDGE *  e;
+  VERTEX *    v;
+  double *    tx, *ty, *tz;
 
   if (weight == 0.0)
     return (0);
@@ -1517,14 +1517,14 @@ double MRISedgeLengthCost(MRIS *surf, double L0, double weight, int DoGrad) {
   if (DoGrad) {
     gradv0 = DMatrixAlloc(3, 1, MATRIX_REAL);
     gradv1 = DMatrixAlloc(3, 1, MATRIX_REAL);
-    tx = (double *)calloc(sizeof(double), surf->nvertices);
-    ty = (double *)calloc(sizeof(double), surf->nvertices);
-    tz = (double *)calloc(sizeof(double), surf->nvertices);
+    tx     = (double *)calloc(sizeof(double), surf->nvertices);
+    ty     = (double *)calloc(sizeof(double), surf->nvertices);
+    tz     = (double *)calloc(sizeof(double), surf->nvertices);
   }
 
   // To parallelized this, need txyz for each thread, then combine them
   totcost = 0;
-  nhits = 0;
+  nhits   = 0;
   for (eno = 0; eno < surf->nedges; eno++) {
     e = &(surf->edges[eno]);
     // Skip this edge if either vertex is ripped
@@ -1598,12 +1598,12 @@ double MRISedgeLengthCost(MRIS *surf, double L0, double weight, int DoGrad) {
   (emperical gradients), and val2bak (angle).
  */
 int MRISedgeLengthCostTest(MRIS *surf, double delta, double thresh, double L0) {
-  int vno, k, nerrs, vmpeak0, vmpeak1;
+  int         vno, k, nerrs, vmpeak0, vmpeak1;
   long double cost0, cost, dcost[3], expdcost[3], d2sum, expd2sum;
-  double dot, angle, angleavg, anglemax, expdcostnorm[3], dcostnorm[3];
-  double x, y, z, meanlen;
-  VERTEX *v0;
-  int edgeno;
+  double      dot, angle, angleavg, anglemax, expdcostnorm[3], dcostnorm[3];
+  double      x, y, z, meanlen;
+  VERTEX *    v0;
+  int         edgeno;
 
   // Set up the surface
   MRISedges(surf);
@@ -1634,7 +1634,7 @@ int MRISedgeLengthCostTest(MRIS *surf, double delta, double thresh, double L0) {
   printf("#VMPC# VmPeak  %d\n", vmpeak0);
 
   // Go thru each vertex
-  nerrs = 0;
+  nerrs    = 0;
   anglemax = 0;
   angleavg = 0;
   for (vno = 0; vno < surf->nvertices; vno++) {
@@ -1649,7 +1649,7 @@ int MRISedgeLengthCostTest(MRIS *surf, double delta, double thresh, double L0) {
     z = v0->z;
     // perturb x, y, and z separately
     expd2sum = 0;
-    d2sum = 0;
+    d2sum    = 0;
     for (k = 0; k < 3; k++) {
       if (k == 0)
         v0->x += delta;
@@ -1683,7 +1683,7 @@ int MRISedgeLengthCostTest(MRIS *surf, double delta, double thresh, double L0) {
     dot = 0;
     for (k = 0; k < 3; k++) {
       expdcostnorm[k] = expdcost[k] / sqrt(expd2sum);
-      dcostnorm[k] = dcost[k] / sqrt(d2sum);
+      dcostnorm[k]    = dcost[k] / sqrt(d2sum);
       dot += (expdcostnorm[k] * dcostnorm[k]);
     }
     if (dot > +1.0)
@@ -1691,7 +1691,7 @@ int MRISedgeLengthCostTest(MRIS *surf, double delta, double thresh, double L0) {
     if (dot < -1.0)
       dot = -1.0; // might be a slight overflow
     // Now compute the angle (ideally, this would be 0)
-    angle = acos(dot) * 180 / M_PI;
+    angle       = acos(dot) * 180 / M_PI;
     v0->val2bak = angle;
     angleavg += angle;
     if (anglemax < angle)
@@ -1730,24 +1730,24 @@ int MRISedgeLengthCostTest(MRIS *surf, double delta, double thresh, double L0) {
   surface placement optimization code. edgeAngle=hinge
  */
 long double MRISedgeAngleCost(MRIS *surf, double weight, int DoGrad) {
-  int eno, wrtvtxno, vno, skip, nhits;
+  int         eno, wrtvtxno, vno, skip, nhits;
   long double totcost, ecost;
-  DMATRIX *gradv = nullptr;
-  MRI_EDGE *e;
-  VERTEX *v;
-  double *tx, *ty, *tz;
+  DMATRIX *   gradv = nullptr;
+  MRI_EDGE *  e;
+  VERTEX *    v;
+  double *    tx, *ty, *tz;
 
   if (weight == 0.0)
     return (0);
 
   if (DoGrad) {
     gradv = DMatrixAlloc(1, 3, MATRIX_REAL); // row vector
-    tx = (double *)calloc(sizeof(double), surf->nvertices);
-    ty = (double *)calloc(sizeof(double), surf->nvertices);
-    tz = (double *)calloc(sizeof(double), surf->nvertices);
+    tx    = (double *)calloc(sizeof(double), surf->nvertices);
+    ty    = (double *)calloc(sizeof(double), surf->nvertices);
+    tz    = (double *)calloc(sizeof(double), surf->nvertices);
   }
 
-  nhits = 0;
+  nhits   = 0;
   totcost = 0;
   for (eno = 0; eno < surf->nedges; eno++) {
     e = &(surf->edges[eno]);
@@ -1818,13 +1818,13 @@ long double MRISedgeAngleCost(MRIS *surf, double weight, int DoGrad) {
 
 int MRISedgeAngleCostTest(MRIS *surf, double delta, double anglethresh,
                           double magthresh) {
-  int vno, k, nerrs, vmpeak0, vmpeak1;
+  int         vno, k, nerrs, vmpeak0, vmpeak1;
   long double cost0, cost, dcost[3], expdcost[3], d2sum, expd2sum;
-  double dot, angle, angleavg, anglemax, expdcostnorm[3], dcostnorm[3];
-  double x, y, z, meanlen;
-  VERTEX *v0;
-  int edgeno;
-  double expmag, empmag, magerr, magerrmax;
+  double      dot, angle, angleavg, anglemax, expdcostnorm[3], dcostnorm[3];
+  double      x, y, z, meanlen;
+  VERTEX *    v0;
+  int         edgeno;
+  double      expmag, empmag, magerr, magerrmax;
 
   printf("Starting MRISedgeAngleCostTest()\n");
 
@@ -1855,10 +1855,10 @@ int MRISedgeAngleCostTest(MRIS *surf, double delta, double anglethresh,
   printf("#VMPC# VmPeak  %d\n", vmpeak0);
 
   // Go thru each vertex
-  nerrs = 0;
+  nerrs     = 0;
   magerrmax = 0;
-  anglemax = 0;
-  angleavg = 0;
+  anglemax  = 0;
+  angleavg  = 0;
   for (vno = 0; vno < surf->nvertices; vno++) {
     v0 = &(surf->vertices[vno]);
     // Expected (theoretical) gradient at this vertx
@@ -1871,7 +1871,7 @@ int MRISedgeAngleCostTest(MRIS *surf, double delta, double anglethresh,
     z = v0->z;
     // perturb x, y, and z separately
     expd2sum = 0;
-    d2sum = 0;
+    d2sum    = 0;
     for (k = 0; k < 3; k++) {
       if (k == 0)
         v0->x += delta;
@@ -1915,7 +1915,7 @@ int MRISedgeAngleCostTest(MRIS *surf, double delta, double anglethresh,
     dot = 0;
     for (k = 0; k < 3; k++) {
       expdcostnorm[k] = expdcost[k] / expmag;
-      dcostnorm[k] = dcost[k] / empmag;
+      dcostnorm[k]    = dcost[k] / empmag;
       dot += (expdcostnorm[k] * dcostnorm[k]);
     }
     if (dot > +1.0)
@@ -1923,7 +1923,7 @@ int MRISedgeAngleCostTest(MRIS *surf, double delta, double anglethresh,
     if (dot < -1.0)
       dot = -1.0; // might be a slight overflow
     // Now compute the angle (ideally, this would be 0)
-    angle = 180 * acos(dot) / M_PI;
+    angle       = 180 * acos(dot) / M_PI;
     v0->val2bak = angle;
     angleavg += angle;
     if (anglemax < angle)
@@ -1970,9 +1970,9 @@ int MRISedgeAngleCostTest(MRIS *surf, double delta, double anglethresh,
 long double MRIStargetCostVertex(const MRIS *surf, const int vno,
                                  long double *dc) {
   long double cost, dx, dy, dz;
-  VERTEX *v;
+  VERTEX *    v;
 
-  v = &(surf->vertices[vno]);
+  v  = &(surf->vertices[vno]);
   dx = v->targx - v->x;
   dy = v->targy - v->y;
   dz = v->targz - v->z;
@@ -2000,9 +2000,9 @@ long double MRIStargetCostVertex(const MRIS *surf, const int vno,
   by the number of edges. Uses OpenMP.
 */
 long double MRIStargetCost(MRIS *surf, const double weight, int DoGrad) {
-  int vno, nhits;
+  int         vno, nhits;
   long double totcost, vcost;
-  double *tx, *ty, *tz;
+  double *    tx, *ty, *tz;
 
   if (weight == 0.0)
     return (0);
@@ -2015,7 +2015,7 @@ long double MRIStargetCost(MRIS *surf, const double weight, int DoGrad) {
 
   // This particular cost function is easy to parallelize
   totcost = 0;
-  nhits = 0;
+  nhits   = 0;
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
 #pragma omp parallel for if_ROMP(assume_reproducible) reduction(+ : nhits, totcost)
@@ -2084,12 +2084,12 @@ long double MRIStargetCost(MRIS *surf, const double weight, int DoGrad) {
 
 int MRIStargetCostTest(MRIS *surf, const double delta, const double anglethresh,
                        const double magthresh) {
-  int vno, k, nerrs, vmpeak0, vmpeak1;
+  int         vno, k, nerrs, vmpeak0, vmpeak1;
   long double cost0, cost, dcost[3], expdcost[3], d2sum, expd2sum;
-  double dot, angle, angleavg, anglemax, expdcostnorm[3], dcostnorm[3];
-  double x, y, z;
-  VERTEX *v0;
-  double expmag, empmag, magerr, magerrmax;
+  double      dot, angle, angleavg, anglemax, expdcostnorm[3], dcostnorm[3];
+  double      x, y, z;
+  VERTEX *    v0;
+  double      expmag, empmag, magerr, magerrmax;
 
   printf("Starting MRIStargetCostTest()\n");
 
@@ -2111,10 +2111,10 @@ int MRIStargetCostTest(MRIS *surf, const double delta, const double anglethresh,
   printf("#VMPC# VmPeak  %d\n", vmpeak0);
 
   // Go thru each vertex
-  nerrs = 0;
+  nerrs     = 0;
   magerrmax = 0;
-  anglemax = 0;
-  angleavg = 0;
+  anglemax  = 0;
+  angleavg  = 0;
   for (vno = 0; vno < surf->nvertices; vno++) {
     v0 = &(surf->vertices[vno]);
     // Expected (theoretical) gradient at this vertx
@@ -2127,7 +2127,7 @@ int MRIStargetCostTest(MRIS *surf, const double delta, const double anglethresh,
     z = v0->z;
     // perturb x, y, and z separately
     expd2sum = 0;
-    d2sum = 0;
+    d2sum    = 0;
     for (k = 0; k < 3; k++) {
       if (k == 0)
         v0->x += delta;
@@ -2168,7 +2168,7 @@ int MRIStargetCostTest(MRIS *surf, const double delta, const double anglethresh,
     dot = 0;
     for (k = 0; k < 3; k++) {
       expdcostnorm[k] = expdcost[k] / expmag;
-      dcostnorm[k] = dcost[k] / empmag;
+      dcostnorm[k]    = dcost[k] / empmag;
       dot += (expdcostnorm[k] * dcostnorm[k]);
     }
     if (dot > 1.0)
@@ -2176,7 +2176,7 @@ int MRIStargetCostTest(MRIS *surf, const double delta, const double anglethresh,
     if (dot < -1.0)
       dot = -1.0; // might be a slight overflow
     // Now compute the angle (ideally, this would be 0)
-    angle = 180 * acos(dot) / M_PI;
+    angle       = 180 * acos(dot) / M_PI;
     v0->val2bak = angle;
     angleavg += angle;
     if (anglemax < angle)
@@ -2223,7 +2223,7 @@ int MRIStargetCostTest(MRIS *surf, const double delta, const double anglethresh,
  */
 long double SurfGradUnitVector(const double v0[3], const double v1[3],
                                double u[3], DMATRIX *grad) {
-  int k, m;
+  int         k, m;
   long double w[3], L = 0;
 
   // It is inefficient to compute length here. It should
@@ -2257,7 +2257,7 @@ long double SurfGradUnitVector(const double v0[3], const double v1[3],
   // same if v0 and v1 are swapped. Therefore, do not apply a sign
   // flip to the gradient.
   long double iL3 = 1.0 / (L * L * L);
-  long double iL = 1.0 / L;
+  long double iL  = 1.0 / L;
   long double A;
   for (k = 0; k < 3; k++) {
     for (m = k; m < 3; m++) {
@@ -2286,15 +2286,15 @@ long double SurfGradUnitVector(const double v0[3], const double v1[3],
   SurfGradUnitVectorTest(.0001, .01, 1000);
  */
 int SurfGradUnitVectorTest(long double delta, double thresh, int ntrials) {
-  int k, m, n, nerrs;
-  double v0[3], v1[3], u[3], L, v0b[3], ub[3];
+  int      k, m, n, nerrs;
+  double   v0[3], v1[3], u[3], L, v0b[3], ub[3];
   DMATRIX *grad, *gradnum;
-  double e, emax, g, gmax, err, errmax;
+  double   e, emax, g, gmax, err, errmax;
 
-  grad = DMatrixAlloc(3, 3, MATRIX_REAL);
+  grad    = DMatrixAlloc(3, 3, MATRIX_REAL);
   gradnum = DMatrixAlloc(3, 3, MATRIX_REAL);
 
-  nerrs = 0;
+  nerrs  = 0;
   errmax = 0;
   for (n = 0; n < ntrials; n++) {
     for (k = 0; k < 3; k++) {
@@ -2365,11 +2365,11 @@ int SurfGradUnitVectorTest(long double delta, double thresh, int ntrials) {
 */
 double MRIScornerMetricCorner(MRIS *surf, const int cornerno,
                               const int DoGrad) {
-  int k;
+  int         k;
   MRI_CORNER *c;
-  MRI_EDGE *e1, *e2;
+  MRI_EDGE *  e1, *e2;
 
-  c = &(surf->corners[cornerno]);
+  c  = &(surf->corners[cornerno]);
   e1 = &(surf->edges[c->edgeno[0]]);
   e2 = &(surf->edges[c->edgeno[1]]);
 
@@ -2424,23 +2424,23 @@ double MRIScornerMetricCorner(MRIS *surf, const int cornerno,
   there. Runs MRIScomputeMetricProperties() and MRIScornerMetric(surf).
  */
 double *MRIScornerStats(MRIS *surf, int metricid, MRI *mask, double *stats) {
-  int cornerno, ncorners, nthv;
+  int         cornerno, ncorners, nthv;
   MRI_CORNER *c;
-  double *metric;
+  double *    metric;
 
   if (surf->corners == nullptr)
     MRIScorners(surf);
   MRIScomputeMetricProperties(surf);
   MRIScornerMetric(surf, 0);
 
-  metric = (double *)calloc(sizeof(double), surf->ncorners);
+  metric   = (double *)calloc(sizeof(double), surf->ncorners);
   ncorners = 0;
   for (cornerno = 0; cornerno < surf->ncorners; cornerno++) {
-    c = &(surf->corners[cornerno]);
+    c        = &(surf->corners[cornerno]);
     int skip = 0;
     for (nthv = 0; nthv < 3; nthv++) {
-      int vno = c->vtxno[nthv];
-      VERTEX *const v = &(surf->vertices[vno]);
+      int           vno = c->vtxno[nthv];
+      VERTEX *const v   = &(surf->vertices[vno]);
       if (v->ripflag)
         skip = 1;
       if (mask && MRIgetVoxVal(mask, vno, 0, 0, 0) < 0.5)
@@ -2473,13 +2473,13 @@ double *MRIScornerStats(MRIS *surf, int metricid, MRI *mask, double *stats) {
   MRIScomputeMetricProperties() and MRIScornerMetric()
  */
 int MRIScornersPrint(FILE *fp, MRIS *surf) {
-  int cornerno;
+  int         cornerno;
   MRI_CORNER *c;
-  double cost;
+  double      cost;
   MRIScomputeMetricProperties(surf);
   MRIScornerMetric(surf, 0);
   for (cornerno = 0; cornerno < surf->ncorners; cornerno++) {
-    c = &(surf->corners[cornerno]);
+    c    = &(surf->corners[cornerno]);
     cost = (c->dot - 0.5) * (c->dot - 0.5); // cost for an equalateral triangle
     fprintf(fp, "%6d %6d %6d %6d %5d %10.8f %8.4f %11.9f\n", cornerno,
             c->vtxno[0], c->vtxno[1], c->vtxno[2], c->faceno, c->dot, c->angle,
@@ -2506,16 +2506,16 @@ int MRIScornersWrite(char *filename, MRIS *surf) {
   return (0);
 }
 int MRIScornerPrint(FILE *fp, const MRIS *surf, const int cornerno) {
-  double cost;
-  int k;
-  VERTEX *v;
-  MRI_CORNER *c;
-  MRI_EDGE *e;
+  double           cost;
+  int              k;
+  VERTEX *         v;
+  MRI_CORNER *     c;
+  MRI_EDGE *       e;
   VERTEX_TOPOLOGY *vt;
 
-  c = &(surf->corners[cornerno]);
-  vt = &(surf->vertices_topology[c->vtxno[0]]);
-  v = &(surf->vertices[c->vtxno[0]]);
+  c    = &(surf->corners[cornerno]);
+  vt   = &(surf->vertices_topology[c->vtxno[0]]);
+  v    = &(surf->vertices[c->vtxno[0]]);
   cost = (c->dot - 0.5) * (c->dot - 0.5); // cost for an equalateral triangle
   fprintf(fp, "%6d %6d %6d %6d %5d %5d %5d %10.8f %8.4f %11.9f\n", cornerno,
           c->vtxno[0], c->vtxno[1], c->vtxno[2], c->faceno, c->edgeno[0],
@@ -2552,7 +2552,7 @@ int MRISedgeGradU(MRIS *surf) {
 
   for (edgeno = 0; edgeno < surf->nedges; edgeno++) {
     MRI_EDGE *e;
-    double v0[3], v1[3];
+    double    v0[3], v1[3];
     e = &(surf->edges[edgeno]);
     StuffVertexCoords(surf, e->vtxno[0], &v0[0]);
     StuffVertexCoords(surf, e->vtxno[1], &v1[0]);
@@ -2574,11 +2574,11 @@ int MRISedgeGradU(MRIS *surf) {
   See MRIScornerDotCostTest() for how to test.
  */
 long double MRIScornerDotCost(MRIS *surf, double weight, int DoGrad) {
-  int cno, wrtvtxno, vno, skip, nhits;
+  int         cno, wrtvtxno, vno, skip, nhits;
   long double totcost, ccost, A;
   MRI_CORNER *c;
-  VERTEX *v;
-  double *tx, *ty, *tz;
+  VERTEX *    v;
+  double *    tx, *ty, *tz;
 
   if (weight == 0.0)
     return (0);
@@ -2589,7 +2589,7 @@ long double MRIScornerDotCost(MRIS *surf, double weight, int DoGrad) {
     tz = (double *)calloc(sizeof(double), surf->nvertices);
   }
 
-  nhits = 0;
+  nhits   = 0;
   totcost = 0;
   for (cno = 0; cno < surf->ncorners; cno++) {
     c = &(surf->corners[cno]);
@@ -2608,7 +2608,7 @@ long double MRIScornerDotCost(MRIS *surf, double weight, int DoGrad) {
     nhits++;
 
     MRIScornerMetricCorner(surf, cno, DoGrad);
-    A = (c->dot - 0.5);
+    A     = (c->dot - 0.5);
     ccost = A * A;
     totcost += ccost;
 
@@ -2679,12 +2679,12 @@ long double MRIScornerDotCost(MRIS *surf, double weight, int DoGrad) {
  */
 int MRIScornerDotCostTest(MRIS *surf, const double delta,
                           const double anglethresh, const double magthresh) {
-  int vno, k, nerrs, vmpeak0, vmpeak1;
+  int         vno, k, nerrs, vmpeak0, vmpeak1;
   long double cost0, cost, dcost[3], expdcost[3], d2sum, expd2sum;
-  double dot, angle, angleavg, anglemax, expdcostnorm[3], dcostnorm[3];
-  double x, y, z;
-  VERTEX *v0;
-  double expmag, empmag, magerr, magerrmax;
+  double      dot, angle, angleavg, anglemax, expdcostnorm[3], dcostnorm[3];
+  double      x, y, z;
+  VERTEX *    v0;
+  double      expmag, empmag, magerr, magerrmax;
 
   printf("Starting MRIScornerDotCostTest()\n");
 
@@ -2719,10 +2719,10 @@ int MRIScornerDotCostTest(MRIS *surf, const double delta,
   vmpeak0 = GetVmPeak(); // For checking for memory leaks
 
   // Go thru each vertex
-  nerrs = 0;
+  nerrs     = 0;
   magerrmax = 0;
-  anglemax = 0;
-  angleavg = 0;
+  anglemax  = 0;
+  angleavg  = 0;
   for (vno = 0; vno < surf->nvertices; vno++) {
     v0 = &(surf->vertices[vno]);
     // Expected (theoretical) gradient at this vertx computed above
@@ -2735,7 +2735,7 @@ int MRIScornerDotCostTest(MRIS *surf, const double delta,
     z = v0->z;
     // perturb x, y, and z separately
     expd2sum = 0;
-    d2sum = 0;
+    d2sum    = 0;
     for (k = 0; k < 3; k++) {
       if (k == 0)
         v0->x += delta;
@@ -2776,7 +2776,7 @@ int MRIScornerDotCostTest(MRIS *surf, const double delta,
     dot = 0;
     for (k = 0; k < 3; k++) {
       expdcostnorm[k] = expdcost[k] / expmag;
-      dcostnorm[k] = dcost[k] / empmag;
+      dcostnorm[k]    = dcost[k] / empmag;
       dot += (expdcostnorm[k] * dcostnorm[k]);
     }
     if (dot > +1.0)
@@ -2784,7 +2784,7 @@ int MRIScornerDotCostTest(MRIS *surf, const double delta,
     if (dot < -1.0)
       dot = -1.0; // might be a slight overflow
     // Now compute the angle (ideally, this would be 0)
-    angle = 180 * acos(dot) / M_PI;
+    angle       = 180 * acos(dot) / M_PI;
     v0->val2bak = angle;
     angleavg += angle;
     if (anglemax < angle)

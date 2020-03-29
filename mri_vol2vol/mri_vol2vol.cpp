@@ -456,19 +456,19 @@ ENDHELP --------------------------------------------------------------
 
 #include "diag.h"
 
-#include "version.h"
+#include "cmdargs.h"
+#include "fio.h"
+#include "gcamorph.h"
 #include "mri2.h"
+#include "mriBSpline.h"
+#include "mri_circulars.h"
 #include "mri_identify.h"
+#include "mrinorm.h"
+#include "pdf.h"
 #include "registerio.h"
 #include "resample.h"
-#include "gcamorph.h"
-#include "fio.h"
-#include "pdf.h"
-#include "cmdargs.h"
-#include "mri_circulars.h"
-#include "mriBSpline.h"
 #include "timer.h"
-#include "mrinorm.h"
+#include "version.h"
 
 #ifdef X
 #undef X
@@ -477,7 +477,7 @@ ENDHELP --------------------------------------------------------------
 // For some reason, this does not seemed to be defined in math.h
 double round(double x);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -485,13 +485,13 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
-static int isflag(char *flag);
-static int nth_is_arg(int nargc, char **argv, int nth);
+static int  singledash(char *flag);
+static int  isflag(char *flag);
+static int  nth_is_arg(int nargc, char **argv, int nth);
 #include "tags.h"
-static int istringnmatch(char *str1, char *str2, int n);
+static int     istringnmatch(char *str1, char *str2, int n);
 static MATRIX *LoadRtal(int talres);
-MATRIX *LoadRfsl(char *fname);
+MATRIX *       LoadRfsl(char *fname);
 
 int main(int argc, char *argv[]);
 
@@ -501,30 +501,30 @@ const char *Progname = nullptr;
 
 int debug = 0, gdiagno = -1;
 
-static int soap_bubble_iters = 0;
-static MRI *mri_soap_ctrl = nullptr;
+static int  soap_bubble_iters = 0;
+static MRI *mri_soap_ctrl     = nullptr;
 
-char *movvolfile = nullptr;
-char *targvolfile = nullptr;
-int fstarg = 0;
-char *fstargfile = "orig.mgz";
-char *outvolfile = nullptr, *outdir = nullptr;
-char *regfile = nullptr;
-char *xfmfile = nullptr;
-char *fslregfile = nullptr;
-char *tempvolfile = nullptr;
-int invert = 0;
-int fstal = 0;
-LTA *lta = nullptr;
-int usedltageom = 0;
-int fstalres = 2; // Can only be 1 or 2
-const char *precision = "float";
-int precisioncode = MRI_FLOAT;
-char *interpmethod = "trilinear";
-int interpcode = 0;
-int sinchw;
-int regheader = 0;
-int noresample = 0;
+char *      movvolfile  = nullptr;
+char *      targvolfile = nullptr;
+int         fstarg      = 0;
+char *      fstargfile  = "orig.mgz";
+char *      outvolfile = nullptr, *outdir = nullptr;
+char *      regfile       = nullptr;
+char *      xfmfile       = nullptr;
+char *      fslregfile    = nullptr;
+char *      tempvolfile   = nullptr;
+int         invert        = 0;
+int         fstal         = 0;
+LTA *       lta           = nullptr;
+int         usedltageom   = 0;
+int         fstalres      = 2; // Can only be 1 or 2
+const char *precision     = "float";
+int         precisioncode = MRI_FLOAT;
+char *      interpmethod  = "trilinear";
+int         interpcode    = 0;
+int         sinchw;
+int         regheader  = 0;
+int         noresample = 0;
 
 MRI *mov, *targ, *out;
 MRI *in, *mri_template;
@@ -537,98 +537,99 @@ MATRIX *Tin, *invTin, *Sin, *invSin;
 MATRIX *Ttemp, *invTtemp, *Stemp, *invStemp;
 MATRIX *Rfsl, *Rfsl2;
 
-char *FSH = nullptr;
+char *FSH          = nullptr;
 char *SUBJECTS_DIR = nullptr;
-char *talxfmfile = "talairach.xfm";
+char *talxfmfile   = "talairach.xfm";
 
-char *talsubject = nullptr;
-char *subject = nullptr;
-char *MNIsubject = "21_vc716";
+char *talsubject     = nullptr;
+char *subject        = nullptr;
+char *MNIsubject     = "21_vc716";
 char *subject_outreg = nullptr;
 
-int dont_irescale = 1;
+int   dont_irescale = 1;
 float minrescale = 0.0, maxrescale = 255.0;
 
 float ipr, bpr, intensity;
-int float2int, err, nargs;
-int SaveReg = 0;
+int   float2int, err, nargs;
+int   SaveReg = 0;
 
-int DoKernel = 0;
+int DoKernel      = 0;
 int DoSaveInputMR = 1; // this is now the default behavior
-int DoDelta = 0;
+int DoDelta       = 0;
 
 char tmpstr[2000];
 
-int DoMorph = 0;
-int InvertMorph = 0;
+int        DoMorph     = 0;
+int        InvertMorph = 0;
 TRANSFORM *Rtransform; // types : M3D, M3Z, LTA, FSLMAT, DAT, OCT(TA), XFM
-GCAM *gcam;
-GCAM *MNIgcam;
-char gcamfile[1000];
-char MNIgcamfile[1000];
+GCAM *     gcam;
+GCAM *     MNIgcam;
+char       gcamfile[1000];
+char       MNIgcamfile[1000];
 MRI_REGION region;
-char *m3zfile = "talairach.m3z";
+char *     m3zfile = "talairach.m3z";
 
-double angles[3] = {0, 0, 0};
-MATRIX *Mrot = nullptr;
-double xyztrans[3] = {0, 0, 0};
-MATRIX *Mtrans = nullptr;
-double shear[3] = {0, 0, 0};
-MATRIX *Mshear = nullptr;
+double  angles[3]   = {0, 0, 0};
+MATRIX *Mrot        = nullptr;
+double  xyztrans[3] = {0, 0, 0};
+MATRIX *Mtrans      = nullptr;
+double  shear[3]    = {0, 0, 0};
+MATRIX *Mshear      = nullptr;
 
 char *SegRegCostFile = nullptr;
 char *fspec;
-MRI *regseg;
-int CostOnly = 0;
+MRI * regseg;
+int   CostOnly     = 0;
 char *RegFileFinal = nullptr;
 
-int SynthSeed = -1;
-int synth = 0;
-int DoCrop = 0;
+int    SynthSeed = -1;
+int    synth     = 0;
+int    DoCrop    = 0;
 double CropScale = 0;
 
 char *DispFile = nullptr;
-MRI *DispMap = nullptr;
+MRI * DispMap  = nullptr;
 
-int slice_crop_flag = 0;
-int slice_crop_start, slice_crop_stop;
-int SliceReverse = 0;
-int SliceBias = 0;
+int    slice_crop_flag = 0;
+int    slice_crop_start, slice_crop_stop;
+int    SliceReverse   = 0;
+int    SliceBias      = 0;
 double SliceBiasAlpha = 1.0;
 
-int useold = 1;
-MRI *vsm = nullptr;
+int   useold     = 1;
+MRI * vsm        = nullptr;
 char *vsmvolfile = nullptr;
 
-int defM3zPath = 1; // use deafult path to the m3z file
-int TargMNI152 = 0;
-int keepprecision = 0;
-int DoFill = 0;
-int DoFillConserve = 0;
-int FillUpsample = 2;
-MRI *MRIvol2volGCAM(MRI *src, LTA *srclta, GCA_MORPH *gcam, LTA *dstlta,
-                    MRI *vsm, int sample_type, MRI *dst);
-int DoMultiply = 0;
-double MultiplyVal = 0;
-int DownSample[3] = {0, 0, 0}; // downsample source
+int    defM3zPath     = 1; // use deafult path to the m3z file
+int    TargMNI152     = 0;
+int    keepprecision  = 0;
+int    DoFill         = 0;
+int    DoFillConserve = 0;
+int    FillUpsample   = 2;
+MRI *  MRIvol2volGCAM(MRI *src, LTA *srclta, GCA_MORPH *gcam, LTA *dstlta,
+                      MRI *vsm, int sample_type, MRI *dst);
+int    DoMultiply    = 0;
+double MultiplyVal   = 0;
+int    DownSample[3] = {0, 0, 0}; // downsample source
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  char regfile0[1000];
-  double costs[8];
-  FILE *fp;
-  int n, err;
-  MRI *crop, *cropnew, *mri;
+  char       regfile0[1000];
+  double     costs[8];
+  FILE *     fp;
+  int        n, err;
+  MRI *      crop, *cropnew, *mri;
   MRI_REGION box;
-  LTA *ltareg;
+  LTA *      ltareg;
 
   vg_isEqual_Threshold = 10e-4;
 
   nargs = handleVersionOption(argc, argv, "mri_vol2vol");
-  if(nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
@@ -707,7 +708,7 @@ int main(int argc, char **argv) {
     // and set the target volume file
     printf("\n");
     printf("Compute R for talairach space\n");
-    Xtal = DevolveXFM(subject, nullptr, talxfmfile);
+    Xtal    = DevolveXFM(subject, nullptr, talxfmfile);
     invXtal = MatrixInverse(Xtal, nullptr);
     if (Xtal == nullptr)
       exit(1);
@@ -748,24 +749,24 @@ int main(int argc, char **argv) {
                             mov->nframes);
       MRIcopyHeader(mov, targ);
       MRIcopyPulseParameters(mov, targ);
-      targ->width = ceil(mov->width / DownSample[0]);
+      targ->width  = ceil(mov->width / DownSample[0]);
       targ->height = ceil(mov->height / DownSample[1]);
-      targ->depth = ceil(mov->depth / DownSample[2]);
+      targ->depth  = ceil(mov->depth / DownSample[2]);
       targ->xsize *= DownSample[0];
       targ->ysize *= DownSample[1];
       targ->zsize *= DownSample[2];
       targ->xstart = -targ->xsize * targ->width / 2;
-      targ->xend = targ->xsize * targ->width / 2;
+      targ->xend   = targ->xsize * targ->width / 2;
       targ->ystart = -targ->ysize * targ->height / 2;
-      targ->yend = targ->ysize * targ->height / 2;
+      targ->yend   = targ->ysize * targ->height / 2;
       targ->zstart = -targ->zsize * targ->depth / 2;
-      targ->zend = targ->zsize * targ->depth / 2;
+      targ->zend   = targ->zsize * targ->depth / 2;
     }
     if (targ == nullptr)
       exit(1);
-    in = mov;
+    in           = mov;
     mri_template = targ;
-    tempvolfile = targvolfile;
+    tempvolfile  = targvolfile;
   } else {
     // invert
     printf("\n");
@@ -783,9 +784,9 @@ int main(int argc, char **argv) {
     }
     if (mov == nullptr)
       exit(1);
-    in = targ;
+    in           = targ;
     mri_template = mov;
-    tempvolfile = movvolfile;
+    tempvolfile  = movvolfile;
   }
   if (mri_soap_ctrl) {
     MRI *mri_out;
@@ -892,15 +893,15 @@ int main(int argc, char **argv) {
   invR = MatrixInverse(R, nullptr);
 
   // Vox-to-tkRAS Matrices
-  Tin = MRIxfmCRS2XYZtkreg(in);
-  invTin = MatrixInverse(Tin, nullptr);
-  Ttemp = MRIxfmCRS2XYZtkreg(mri_template);
+  Tin      = MRIxfmCRS2XYZtkreg(in);
+  invTin   = MatrixInverse(Tin, nullptr);
+  Ttemp    = MRIxfmCRS2XYZtkreg(mri_template);
   invTtemp = MatrixInverse(Ttemp, nullptr);
 
   // Vox-to-ScannerRAS Matrices
-  Sin = MRIxfmCRS2XYZ(in, 0);
-  invSin = MatrixInverse(Sin, nullptr);
-  Stemp = MRIxfmCRS2XYZ(mri_template, 0);
+  Sin      = MRIxfmCRS2XYZ(in, 0);
+  invSin   = MatrixInverse(Sin, nullptr);
+  Stemp    = MRIxfmCRS2XYZ(mri_template, 0);
   invStemp = MatrixInverse(Stemp, nullptr);
 
   if (noresample) {
@@ -962,10 +963,10 @@ int main(int argc, char **argv) {
   mri_template->type = precisioncode;
   if (DoSaveInputMR) // it is now on by default
   {
-    mri_template->tr = in->tr;
-    mri_template->ti = in->ti;
+    mri_template->tr         = in->tr;
+    mri_template->ti         = in->ti;
     mri_template->flip_angle = in->flip_angle;
-    mri_template->te = in->te;
+    mri_template->te         = in->te;
   }
   if (!DoMorph) {
     if (DoKernel) {
@@ -1000,7 +1001,7 @@ int main(int argc, char **argv) {
       }
     }
   } else {
-    Rtransform = (TRANSFORM *)calloc(sizeof(TRANSFORM), 1);
+    Rtransform        = (TRANSFORM *)calloc(sizeof(TRANSFORM), 1);
     Rtransform->xform = (void *)TransformRegDat2LTA(
         mri_template, mov, R); // LZ: this is where the morphing goes wrong.....
 
@@ -1050,20 +1051,20 @@ int main(int argc, char **argv) {
       }
       printf("Applying inverse morph to input\n");
       gcam->gca = gcaAllocMax(1, 1, 1, in->width, in->height, in->depth, 0, 0);
-      out = GCAMmorphFromAtlas(in, gcam, nullptr, interpcode);
+      out       = GCAMmorphFromAtlas(in, gcam, nullptr, interpcode);
     }
     if (out == nullptr)
       exit(1);
 
     if (false) {
       printf("Extracting region\n");
-      region.x = 51;
-      region.y = 0;
-      region.z = 11;
+      region.x  = 51;
+      region.y  = 0;
+      region.z  = 11;
       region.dx = 156;
       region.dy = 216;
       region.dz = 240;
-      tmpmri = MRIextractRegion(out, nullptr, &region);
+      tmpmri    = MRIextractRegion(out, nullptr, &region);
       MRIfree(&out);
       out = tmpmri;
     }
@@ -1071,7 +1072,7 @@ int main(int argc, char **argv) {
 
   if (SegRegCostFile) {
     sprintf(tmpstr, "%s/%s/mri/regseg", SUBJECTS_DIR, subject);
-    fspec = IDnameFromStem(tmpstr);
+    fspec  = IDnameFromStem(tmpstr);
     regseg = MRIread(fspec);
     if (regseg == nullptr)
       exit(1);
@@ -1115,7 +1116,7 @@ int main(int argc, char **argv) {
   }
 
   if (fstal) {
-    R = Rtal;
+    R              = Rtal;
     subject_outreg = "fsaverage";
   } else {
     R = MatrixIdentity(4, nullptr);
@@ -1131,12 +1132,12 @@ int main(int argc, char **argv) {
     printf("INFO: writing registration to %s\n", regfile0);
     if (lta)
       LTAfree(&lta);
-    lta = LTAalloc(1, nullptr);
+    lta                  = LTAalloc(1, nullptr);
     lta->xforms[0].sigma = 10000.000f;
     lta->xforms[0].x0 = lta->xforms[0].y0 = lta->xforms[0].z0 = 0;
     strcpy(lta->subject, subject_outreg);
     MatrixCopy(R, lta->xforms[0].m_L);
-    lta->type = REGISTER_DAT;
+    lta->type   = REGISTER_DAT;
     lta->fscale = 1;
     LTAmodifySrcDstGeom(lta, in, mri_template);
     LTAchangeType(lta, LINEAR_VOX_TO_VOX);
@@ -1172,10 +1173,10 @@ int main(int argc, char **argv) {
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  int err;
-  char tmp[1000];
+  int    err;
+  char   tmp[1000];
 
   if (argc < 1)
     usage_exit();
@@ -1225,7 +1226,7 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--soap")) {
       if (nargc < 2)
         argnerr(option, 1);
-      nargsused = 2;
+      nargsused     = 2;
       mri_soap_ctrl = MRIread(pargv[0]);
       if (mri_soap_ctrl == nullptr)
         ErrorExit(ERROR_NOFILE, "");
@@ -1235,10 +1236,10 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--new"))
       useold = 0;
     else if (!strcasecmp(option, "--fill-average")) {
-      DoFill = 1;
+      DoFill         = 1;
       DoFillConserve = 0;
     } else if (!strcasecmp(option, "--fill-conserve")) {
-      DoFill = 1;
+      DoFill         = 1;
       DoFillConserve = 1;
     } else if (!strcasecmp(option, "--fill-upsample")) {
       if (nargc < 1)
@@ -1251,30 +1252,30 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%d", &DownSample[0]);
       sscanf(pargv[1], "%d", &DownSample[1]);
       sscanf(pargv[2], "%d", &DownSample[2]);
-      DoFill = 1;
+      DoFill         = 1;
       DoFillConserve = 0;
-      FillUpsample = 2;
-      regheader = 1;
-      nargsused = 3;
+      FillUpsample   = 2;
+      regheader      = 1;
+      nargsused      = 3;
     } else if (!strcasecmp(option, "--morph")) {
       DoMorph = 1;
-      fstarg = 1;
+      fstarg  = 1;
     } else if (!strcasecmp(option, "--fstarg")) {
       fstarg = 1;
       if (CMDnthIsArg(nargc, pargv, 0)) {
         fstargfile = pargv[0];
-        nargsused = 1;
+        nargsused  = 1;
       }
       printf("fstargfile %s\n", fstargfile);
     } else if (!strcasecmp(option, "--inv-morph")) {
-      DoMorph = 1;
+      DoMorph     = 1;
       InvertMorph = 1;
-      invert = 1;
+      invert      = 1;
     } else if (istringnmatch(option, "--m3z", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
-      m3zfile = pargv[0];
-      DoMorph = 1;
+      m3zfile   = pargv[0];
+      DoMorph   = 1;
       nargsused = 1;
     } else if (istringnmatch(option, "--noDefM3zPath", 0)) {
       defM3zPath = 0; // use the m3z file as it is; no assumed location
@@ -1285,18 +1286,18 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       movvolfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--vsm", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       vsmvolfile = pargv[0];
-      useold = 0;
-      nargsused = 1;
+      useold     = 0;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--targ", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       targvolfile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (istringnmatch(option, "--reg", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -1343,7 +1344,7 @@ static int parse_commandline(int argc, char **argv) {
       intensity = lta->fscale;
       float2int = FLT2INT_ROUND;
       LTAchangeType(lta, REGISTER_DAT);
-      R = lta->xforms[0].m_L;
+      R   = lta->xforms[0].m_L;
       ipr = lta->xforms[0].src.xsize;
       bpr = lta->xforms[0].src.zsize;
       printf("\n");
@@ -1362,19 +1363,19 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       RegFileFinal = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (istringnmatch(option, "--s", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
-      subject = pargv[0];
-      R = MatrixIdentity(4, nullptr);
+      subject   = pargv[0];
+      R         = MatrixIdentity(4, nullptr);
       nargsused = 1;
     } else if (istringnmatch(option, "--fsl", 0) ||
                istringnmatch(option, "--fslreg", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       fslregfile = pargv[0];
-      Rfsl = LoadRfsl(fslregfile);
+      Rfsl       = LoadRfsl(fslregfile);
       if (Rfsl == nullptr)
         exit(1);
       nargsused = 1;
@@ -1388,7 +1389,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       xfmfile = pargv[0];
-      err = regio_read_mincxfm(xfmfile, &XFM, nullptr);
+      err     = regio_read_mincxfm(xfmfile, &XFM, nullptr);
       if (err)
         exit(1);
       regheader = 1;
@@ -1397,18 +1398,18 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       talxfmfile = pargv[0];
-      fstal = 1;
-      nargsused = 1;
+      fstal      = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--out", 0) ||
                istringnmatch(option, "--o", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       outvolfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--disp", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
-      DispFile = pargv[0];
+      DispFile  = pargv[0];
       nargsused = 1;
     } else if (istringnmatch(option, "--talres", 8)) {
       if (nargc < 1)
@@ -1423,7 +1424,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%lf", &CropScale);
-      DoCrop = 1;
+      DoCrop    = 1;
       nargsused = 1;
     } else if (!strcmp(option, "--mul")) {
       if (nargc < 1)
@@ -1436,7 +1437,7 @@ static int parse_commandline(int argc, char **argv) {
       }
       sscanf(pargv[0], "%lf", &MultiplyVal);
       DoMultiply = 1;
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--slice-crop", 12)) {
       if (nargc < 2)
         argnerr(option, 2);
@@ -1456,7 +1457,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       interpmethod = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
       if (!strcmp(interpmethod, "sinc") && nth_is_arg(nargc, pargv, 1)) {
         sscanf(pargv[1], "%d", &sinchw);
         nargsused++;
@@ -1470,7 +1471,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (istringnmatch(option, "--precision", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
-      precision = pargv[0];
+      precision     = pargv[0];
       precisioncode = MRIprecisionCode(precision);
       if (precisioncode < 0) {
         printf("ERROR: precision %s unrecognized\n", precision);
@@ -1484,7 +1485,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &SynthSeed);
-      synth = 1;
+      synth     = 1;
       nargsused = 1;
     } else if (istringnmatch(option, "--sd", 4)) {
       if (nargc < 1)
@@ -1501,7 +1502,7 @@ static int parse_commandline(int argc, char **argv) {
       angles[0] *= (M_PI / 180);
       angles[1] *= (M_PI / 180);
       angles[2] *= (M_PI / 180);
-      Mrot = MRIangles2RotMat(angles);
+      Mrot      = MRIangles2RotMat(angles);
       nargsused = 3;
     } else if (istringnmatch(option, "--trans", 0)) {
       if (nargc < 3)
@@ -1510,11 +1511,11 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%lf", &xyztrans[0]);
       sscanf(pargv[1], "%lf", &xyztrans[1]);
       sscanf(pargv[2], "%lf", &xyztrans[2]);
-      Mtrans = MatrixIdentity(4, nullptr);
+      Mtrans             = MatrixIdentity(4, nullptr);
       Mtrans->rptr[1][4] = xyztrans[0];
       Mtrans->rptr[2][4] = xyztrans[1];
       Mtrans->rptr[3][4] = xyztrans[2];
-      nargsused = 3;
+      nargsused          = 3;
     } else if (istringnmatch(option, "--shear", 0)) {
       if (nargc < 3)
         argnerr(option, 3);
@@ -1522,11 +1523,11 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%lf", &shear[0]);
       sscanf(pargv[1], "%lf", &shear[1]);
       sscanf(pargv[2], "%lf", &shear[2]);
-      Mshear = MatrixIdentity(4, nullptr);
+      Mshear             = MatrixIdentity(4, nullptr);
       Mshear->rptr[1][2] = shear[0]; // xy/col-slice
       Mshear->rptr[1][3] = shear[1]; // xz/col-row - in-plane
       Mshear->rptr[2][3] = shear[2]; // yz/row-slice
-      nargsused = 3;
+      nargsused          = 3;
     } else if (!strcmp(option, "--gdiagno")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -1535,13 +1536,13 @@ static int parse_commandline(int argc, char **argv) {
     } else if (istringnmatch(option, "--subject", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (istringnmatch(option, "--cost", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       SegRegCostFile = pargv[0];
-      nargsused = 1;
+      nargsused      = 1;
     } else if (istringnmatch(option, "--spm-warp", 0)) {
       LTA *srclta;
       if (nargc < 5) {
@@ -2211,7 +2212,7 @@ static void check_options() {
   }
   if (outvolfile) {
     outdir = fio_dirname(outvolfile);
-    err = mkdir(outdir, 0777);
+    err    = mkdir(outdir, 0777);
     if (err != 0 && errno != EEXIST) {
       printf("ERROR: creating directory %s\n", outdir);
       exit(1);
@@ -2226,7 +2227,7 @@ static void check_options() {
     if (mov == nullptr)
       exit(1);
     precisioncode = mov->type;
-    precision = MRIprecisionString(precisioncode);
+    precision     = MRIprecisionString(precisioncode);
     MRIfree(&mov);
   }
   if (TargMNI152) {
@@ -2248,7 +2249,7 @@ static void check_options() {
         exit(1);
       }
       invQ = MatrixInverse(Q, nullptr);
-      M = MatrixMultiply(R, invQ, NULL);
+      M    = MatrixMultiply(R, invQ, NULL);
       MatrixFree(&R);
       R = MatrixCopy(M, nullptr);
       MatrixFree(&Q);
@@ -2270,7 +2271,7 @@ static void check_options() {
       exit(1);
     lta = LTAchangeType(lta, LINEAR_RAS_TO_RAS);
     LTAmodifySrcDstGeom(lta, mrimovtmp, mritrgtmp);
-    R = TransformLTA2RegDat(lta);
+    R   = TransformLTA2RegDat(lta);
     ipr = lta->xforms[0].src.xsize;
     bpr = lta->xforms[0].src.zsize;
     MRIfree(&mrimovtmp);
@@ -2402,10 +2403,10 @@ static int istringnmatch(char *str1, char *str2, int n) {
   return (0);
 }
 static MATRIX *LoadRtal(int talres) {
-  char *FSH;
-  char rtalfile[2000];
-  float ipr, bpr, intensity;
-  int float2int, err;
+  char *  FSH;
+  char    rtalfile[2000];
+  float   ipr, bpr, intensity;
+  int     float2int, err;
   MATRIX *Rtal;
 
   FSH = getenv("FREESURFER_HOME");
@@ -2423,8 +2424,8 @@ static MATRIX *LoadRtal(int talres) {
 /*-----------------------------------------------------*/
 MATRIX *LoadRfsl(char *fname) {
   MATRIX *FSLRegMat;
-  FILE *fp;
-  int i, j, n;
+  FILE *  fp;
+  int     i, j, n;
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {
@@ -2453,14 +2454,14 @@ MATRIX *LoadRfsl(char *fname) {
  */
 MRI *MRIvol2volGCAM(MRI *src, LTA *srclta, GCA_MORPH *gcam, LTA *dstlta,
                     MRI *vsm, int sample_type, MRI *dst) {
-  int c, r, s, f, out_of_gcam, cvsm, rvsm, iss;
+  int       c, r, s, f, out_of_gcam, cvsm, rvsm, iss;
   VOL_GEOM *vgdst_src, *vgdst_dst;
-  MATRIX *crsDst, *crsGCAM = nullptr, *crsAnat = nullptr, *crsSrc = nullptr,
+  MATRIX *  crsDst, *crsGCAM = nullptr, *crsAnat = nullptr, *crsSrc = nullptr,
                   *Vdst, *Vsrc;
-  double val, v;
+  double       val, v;
   MRI_BSPLINE *bspline = nullptr;
-  float drvsm, *valvect;
-  Timer timer;
+  float        drvsm, *valvect;
+  Timer        timer;
 
   if (!vsm)
     printf("MRIvol2volGCAM(): VSM not used\n");
@@ -2528,9 +2529,9 @@ MRI *MRIvol2volGCAM(MRI *src, LTA *srclta, GCA_MORPH *gcam, LTA *dstlta,
     bspline = MRItoBSpline(src, nullptr, 3);
   valvect = (float *)calloc(sizeof(float), src->nframes);
 
-  crsDst = MatrixAlloc(4, 1, MATRIX_REAL);
-  crsDst->rptr[4][1] = 1;
-  crsAnat = MatrixAlloc(4, 1, MATRIX_REAL);
+  crsDst              = MatrixAlloc(4, 1, MATRIX_REAL);
+  crsDst->rptr[4][1]  = 1;
+  crsAnat             = MatrixAlloc(4, 1, MATRIX_REAL);
   crsAnat->rptr[4][1] = 1;
   // scroll thru the CRS in the output/dest volume
   timer.reset();
@@ -2567,7 +2568,7 @@ MRI *MRIvol2volGCAM(MRI *src, LTA *srclta, GCA_MORPH *gcam, LTA *dstlta,
              (VSM). The VSM must have the same dimensions as src. */
           cvsm = floor(crsSrc->rptr[1][1]);
           rvsm = floor(crsSrc->rptr[2][1]);
-          iss = nint(crsSrc->rptr[3][1]);
+          iss  = nint(crsSrc->rptr[3][1]);
 
           if (cvsm < 0 || cvsm + 1 >= src->width)
             continue;

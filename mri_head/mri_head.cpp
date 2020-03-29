@@ -29,10 +29,10 @@
 #include "mri_identify.h"
 #include "version.h"
 
-#define ACTION_NONE 0
-#define ACTION_USAGE 1
+#define ACTION_NONE     0
+#define ACTION_USAGE    1
 #define ACTION_IDENTIFY 2
-#define ACTION_READ 3
+#define ACTION_READ     3
 
 void get_options(int argc, char *argv[]);
 void usage(int exit_val);
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
     exit(0);
   argc -= nargs;
 
-  prog_name = argv[0];
+  prog_name       = argv[0];
   short_prog_name = strrchr(prog_name, '/');
   short_prog_name =
       (short_prog_name == nullptr ? prog_name : short_prog_name + 1);
@@ -109,7 +109,7 @@ void usage(int exit_val) {
 
 void dummy_identify() {
 
-  int type;
+  int         type;
   struct stat stat_buf;
 
   if (fname == nullptr)

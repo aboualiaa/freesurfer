@@ -23,20 +23,20 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
+#include "error.h"
+#include "macros.h"
 #include "mrisurf.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage(void);
 
 const char *Progname;
@@ -44,7 +44,7 @@ const char *Progname;
 static int verbose = 0;
 
 static char *surf_name = "white";
-static float thresh = 0;
+static float thresh    = 0;
 
 static float compute_label_area(MRI_SURFACE *mris, char *subject_name,
                                 char *area_name, float thresh);
@@ -52,10 +52,10 @@ static float compute_label_area(MRI_SURFACE *mris, char *subject_name,
 static char subjects_dir[STRLEN] = "";
 
 int main(int argc, char *argv[]) {
-  int ac, nargs, i;
-  char **av, *cp, surf_fname[STRLEN], *hemi, *subject_name, *area_name;
+  int          ac, nargs, i;
+  char **      av, *cp, surf_fname[STRLEN], *hemi, *subject_name, *area_name;
   MRI_SURFACE *mris;
-  float area;
+  float        area;
 
   nargs = handleVersionOption(argc, argv, "label_area");
   if (nargs && argc - nargs == 1)
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     print_usage();
 
-  hemi = argv[1];
+  hemi         = argv[1];
   subject_name = argv[2];
 
   cp = getenv("SUBJECTS_DIR");
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -172,10 +172,10 @@ load_transform(char *subject_name, General_transform *transform) {
 
 static float compute_label_area(MRI_SURFACE *mris, char *subject_name,
                                 char *area_name, float thresh) {
-  int nlines, vno;
-  char *cp, line[200], fname[200];
-  FILE *fp;
-  float total_area, stat;
+  int     nlines, vno;
+  char *  cp, line[200], fname[200];
+  FILE *  fp;
+  float   total_area, stat;
   VERTEX *v;
 
   sprintf(fname, "%s/%s/label/%s.label", subjects_dir, subject_name, area_name);
@@ -191,7 +191,7 @@ static float compute_label_area(MRI_SURFACE *mris, char *subject_name,
     ErrorExit(ERROR_BADFILE, "%s: could not scan # of lines from %s", Progname,
               fname);
 
-  nlines = 0;
+  nlines     = 0;
   total_area = 0.0f;
   while ((cp = fgetl(line, 199, fp)) != NULL) {
     if (sscanf(cp, "%d %*f %*f %*f %f", &vno, &stat) != 2)

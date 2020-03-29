@@ -8,9 +8,9 @@ namespace kvl {
 class ReadImage : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef ReadImage Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef ReadImage                     Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -40,7 +40,7 @@ public:
     // Convert the image to float
     typedef itk::Image<float, 3> ImageType;
     typedef itk::CastImageFilter<kvl::CroppedImageReader::ImageType, ImageType>
-        CasterType;
+                        CasterType;
     CasterType::Pointer caster = CasterType::New();
     caster->SetInput(reader->GetImage());
     caster->Update();
@@ -64,8 +64,10 @@ public:
   }
 
 protected:
-  ReadImage()= default;;
-  ~ReadImage() override= default;;
+  ReadImage() = default;
+  ;
+  ~ReadImage() override = default;
+  ;
 
   ReadImage(const Self &);      // purposely not implemented
   void operator=(const Self &); // purposely not implemented

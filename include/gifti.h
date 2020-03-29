@@ -33,9 +33,9 @@
 
 MRIS *mrisReadGIFTIfile(const char *fname, MRIS *mris);
 MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum);
-MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume);
-int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
-                   const char *curv_fname);
-int mriWriteGifti(MRI *mri, const char *out_fname);
+MRI * MRISreadGiftiAsMRI(const char *fname, int read_volume);
+int   MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
+                     const char *curv_fname);
+int   mriWriteGifti(MRI *mri, const char *out_fname);
 
 #endif

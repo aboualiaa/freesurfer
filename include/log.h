@@ -46,39 +46,44 @@ struct logger {
 
 namespace fs {
 
-  struct fatal : public detail::logger
-  {
-    int ret;
-    fatal(int err = 1) : ret(err) {}
-    ~fatal() {
-      std::cerr << term::red() << "error: " << term::reset() << this->ss.str() << "\n";
-      detail::writeToErrorLog(this->ss.str());
-      detail::errorExit(this->ret);
-    }
-  };
+struct fatal : public detail::logger {
+  int ret;
+  fatal(int err = 1) : ret(err) {}
+  ~fatal() {
+    std::cerr << term::red() << "error: " << term::reset() << this->ss.str()
+              << "\n";
+    detail::writeToErrorLog(this->ss.str());
+    detail::errorExit(this->ret);
+  }
+};
 
-  struct error : public detail::logger
-  {
-    ~error() {
-      std::cerr << term::red() << "error: " << term::reset() << this->ss.str() << "\n";
-      detail::writeToErrorLog(this->ss.str());
-    }
-  };
+struct error : public detail::logger {
+  ~error() {
+    std::cerr << term::red() << "error: " << term::reset() << this->ss.str()
+              << "\n";
+    detail::writeToErrorLog(this->ss.str());
+  }
+};
 
-  struct warning : public detail::logger
-  {
-    ~warning() { std::cerr << term::yellow() << "warning: " << term::reset() << this->ss.str() << "\n"; }
-  };
+struct warning : public detail::logger {
+  ~warning() {
+    std::cerr << term::yellow() << "warning: " << term::reset()
+              << this->ss.str() << "\n";
+  }
+};
 
-  struct debug : public detail::logger
-  {
-    ~debug() { if (DIAG_VERBOSE_ON) std::cerr << term::cyan() << "debug: " << term::reset() << this->ss.str() << "\n"; }
-  };
+struct debug : public detail::logger {
+  ~debug() {
+    if (DIAG_VERBOSE_ON)
+      std::cerr << term::cyan() << "debug: " << term::reset() << this->ss.str()
+                << "\n";
+  }
+};
 
-}
+} // namespace fs
 
 // temporary definitions
-#define logWarning fs::warning()
+#define logWarning    fs::warning()
 #define logFatal(ret) fs::fatal(ret)
 
 // old c-style error functions
@@ -95,17 +100,17 @@ void ErrorPrintf(int ecode, const char *fmt, ...);
 extern int Gerror;
 
 // error codes
-#define NO_ERROR 0
-#define ERROR_NONE NO_ERROR
-#define ERROR_NO_FILE -1
-#define ERROR_NOFILE ERROR_NO_FILE
-#define ERROR_NO_MEMORY -2
-#define ERROR_NOMEMORY ERROR_NO_MEMORY
-#define ERROR_UNSUPPORTED -3
-#define ERROR_BADPARM -4
-#define ERROR_BAD_PARM ERROR_BADPARM
-#define ERROR_BADFILE -5
-#define ERROR_BAD_FILE ERROR_BADFILE
-#define ERROR_SIZE -6
-#define ERROR_BADLOOP -7
+#define NO_ERROR            0
+#define ERROR_NONE          NO_ERROR
+#define ERROR_NO_FILE       -1
+#define ERROR_NOFILE        ERROR_NO_FILE
+#define ERROR_NO_MEMORY     -2
+#define ERROR_NOMEMORY      ERROR_NO_MEMORY
+#define ERROR_UNSUPPORTED   -3
+#define ERROR_BADPARM       -4
+#define ERROR_BAD_PARM      ERROR_BADPARM
+#define ERROR_BADFILE       -5
+#define ERROR_BAD_FILE      ERROR_BADFILE
+#define ERROR_SIZE          -6
+#define ERROR_BADLOOP       -7
 #define ERROR_OUT_OF_BOUNDS -8

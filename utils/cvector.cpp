@@ -23,9 +23,9 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
 #include "const.h"
 #include "cvector.h"
@@ -71,7 +71,7 @@ int cvector_accumulate(float *v, float *vtotal, int num) {
 double cvector_compute_t_test(float *c1_mean, float *c1_var, float *c2_mean,
                               float *c2_var, int num_class1, int num_class2,
                               float *pvals, int num, int *pvno) {
-  int i;
+  int    i;
   double t, numer, denom, p, max_p;
 
   max_p = 0;
@@ -112,7 +112,7 @@ double cvector_compute_t_test(float *c1_mean, float *c1_var, float *c2_mean,
 }
 double cvector_compute_mean_diff(float *c1_mean, float *c2_mean,
                                  float *vmean_diff, int num, int *pvno) {
-  int i;
+  int    i;
   double max_diff;
 
   max_diff = 0;
@@ -154,13 +154,13 @@ double cvector_compute_dist_free_snr(float **c1_thickness, int num_class1,
                                      float **c2_thickness, int num_class2,
                                      float *c1_mean, float *c2_mean,
                                      float *vsnr, int num, int *pi) {
-  int i, max_i, n, correct, total;
+  int    i, max_i, n, correct, total;
   double max_snr, mean, snr;
 
   max_i = -1;
   for (max_snr = 0.0, i = 0; i < num; i++) {
-    mean = (c1_mean[i] + c2_mean[i]) / 2;
-    snr = 0;
+    mean    = (c1_mean[i] + c2_mean[i]) / 2;
+    snr     = 0;
     correct = 0;
     if (c1_mean[i] > c2_mean[i]) {
       for (n = 0; n < num_class1; n++)
@@ -180,11 +180,11 @@ double cvector_compute_dist_free_snr(float **c1_thickness, int num_class1,
           snr++;
     }
 
-    total = num_class1 + num_class2;
-    snr = (double)correct / (double)total;
+    total   = num_class1 + num_class2;
+    snr     = (double)correct / (double)total;
     vsnr[i] = snr;
     if (snr > max_snr) {
-      max_i = i;
+      max_i   = i;
       max_snr = snr;
     }
   }
@@ -208,7 +208,7 @@ double cvector_compute_snr(float *c1_mean, float *c2_mean, float *vvar,
 }
 double cvector_compute_snr_F(float *c1_mean, float *c2_mean, float *vvar,
                              float *snr, int num, int *pi, float bonferroni) {
-  int i, max_i;
+  int   i, max_i;
   float f, max_snr;
 
   max_i = -1;
@@ -224,7 +224,7 @@ double cvector_compute_snr_F(float *c1_mean, float *c2_mean, float *vvar,
 
     if (fabs(f) > max_snr) {
       max_snr = fabs(f);
-      max_i = i;
+      max_i   = i;
     }
     snr[i] = f;
   }
@@ -232,7 +232,7 @@ double cvector_compute_snr_F(float *c1_mean, float *c2_mean, float *vvar,
   return (max_snr);
 }
 double cvector_len(float *v, int num) {
-  int i;
+  int    i;
   double len;
 
   for (len = 0.0, i = 0; i < num; i++)
@@ -296,12 +296,12 @@ int cvector_track_best_snr(float *vsnr, float *vbest_snr, float *vbest_avgs,
   *pnum_found = 0;
   for (i = 0; i < num; i++) {
     if (fabs(vsnr[i]) > fabs(vbest_snr[i])) {
-      vbest_snr[i] = vsnr[i];
-      vbest_avgs[i] = avgs;
+      vbest_snr[i]    = vsnr[i];
+      vbest_avgs[i]   = avgs;
       c1_best_mean[i] = c1_mean[i];
-      c1_best_var[i] = c1_var[i];
+      c1_best_var[i]  = c1_var[i];
       c2_best_mean[i] = c2_mean[i];
-      c2_best_var[i] = c2_var[i];
+      c2_best_var[i]  = c2_var[i];
       if (vsnr[i] >= fthresh)
         *pnum_found += 1;
       for (n = 0; n < nc1; n++)
@@ -327,12 +327,12 @@ int cvector_track_best_stats(float *vpvals, float *vbest_pvals,
   *pnum_found = 0;
   for (i = 0; i < num; i++) {
     if (fabs(vpvals[i]) > fabs(vbest_pvals[i])) {
-      vbest_pvals[i] = vpvals[i];
-      vbest_avgs[i] = avgs;
+      vbest_pvals[i]  = vpvals[i];
+      vbest_avgs[i]   = avgs;
       c1_best_mean[i] = c1_mean[i];
-      c1_best_var[i] = c1_var[i];
+      c1_best_var[i]  = c1_var[i];
       c2_best_mean[i] = c2_mean[i];
-      c2_best_var[i] = c2_var[i];
+      c2_best_var[i]  = c2_var[i];
       if (fabs(vpvals[i]) >= fthresh)
         *pnum_found += 1;
       for (n = 0; n < nc1; n++)
@@ -365,11 +365,12 @@ int cvector_extract_best_avg(float *vbest_avgs, float *vsrc, float *vdst,
   return (NO_ERROR);
 }
 double cvector_average_in_label(float *v, LABEL *area, int num) {
-  int i;
+  int    i;
   double avg;
 
   for (avg = 0.0, i = 0; i < area->n_points; i++) {
-    if (!std::isfinite(v[area->lv[i].vno])) DiagBreak();
+    if (!std::isfinite(v[area->lv[i].vno]))
+      DiagBreak();
     avg += v[area->lv[i].vno];
   }
   avg /= (double)area->n_points;
@@ -378,7 +379,7 @@ double cvector_average_in_label(float *v, LABEL *area, int num) {
 
 typedef struct {
   float snr;
-  int index;
+  int   index;
 } SORT_ELT;
 int compare_sort_elts(const void *vse1, const void *vse2);
 int compare_sort_elts(const void *vse1, const void *vse2) {
@@ -390,7 +391,7 @@ int compare_sort_elts(const void *vse1, const void *vse2) {
 }
 
 int *cvector_sort(float *vbest_snr, int nvertices) {
-  int *sorted_vertices, i;
+  int *     sorted_vertices, i;
   SORT_ELT *se_table;
 
   se_table = (SORT_ELT *)calloc(nvertices, sizeof(SORT_ELT));
@@ -404,7 +405,7 @@ int *cvector_sort(float *vbest_snr, int nvertices) {
 
   for (i = 0; i < nvertices; i++) {
     se_table[i].index = i;
-    se_table[i].snr = vbest_snr[i];
+    se_table[i].snr   = vbest_snr[i];
   }
 
   qsort(se_table, nvertices, sizeof(SORT_ELT), compare_sort_elts);

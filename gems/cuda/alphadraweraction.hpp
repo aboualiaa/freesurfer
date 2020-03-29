@@ -5,7 +5,7 @@
 template <typename AlphasType> class AlphaDrawerAction {
 public:
   AlphaDrawerAction(kvl::cuda::Image_GPU<AlphasType, 3, unsigned short> target,
-                    const unsigned int iA)
+                    const unsigned int                                  iA)
       : output(target), iAlpha(iA) {}
 
   template <typename MeshSupplier, typename T, typename Internal,
@@ -24,5 +24,5 @@ public:
 
 private:
   kvl::cuda::Image_GPU<AlphasType, 3, unsigned short> output;
-  const unsigned int iAlpha;
+  const unsigned int                                  iAlpha;
 };

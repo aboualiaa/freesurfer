@@ -1,11 +1,11 @@
 #include "WindowLayerInfo.h"
-#include "ui_WindowLayerInfo.h"
-#include <QLayoutItem>
-#include <QLabel>
-#include "LayerMRI.h"
-#include "FSVolume.h"
-#include "LayerSurface.h"
 #include "FSSurface.h"
+#include "FSVolume.h"
+#include "LayerMRI.h"
+#include "LayerSurface.h"
+#include "ui_WindowLayerInfo.h"
+#include <QLabel>
+#include <QLayoutItem>
 #include <QSettings>
 
 WindowLayerInfo::WindowLayerInfo(QWidget *parent)
@@ -55,7 +55,7 @@ void WindowLayerInfo::UpdateInfo(Layer *layer) {
   QString type = layer->GetPrimaryType();
   if (type == "MRI") {
     LayerMRI *layer_mri = qobject_cast<LayerMRI *>(layer);
-    MRI *mri = layer_mri->GetSourceVolume()->GetMRI();
+    MRI *     mri       = layer_mri->GetSourceVolume()->GetMRI();
     Clear();
     setWindowTitle("Volume Information");
     SetCaption(
@@ -97,7 +97,7 @@ void WindowLayerInfo::UpdateInfo(Layer *layer) {
     AddLine("flip angle:", QString("%1 degrees").arg(mri->flip_angle));
   } else if (type == "Surface") {
     LayerSurface *surf = qobject_cast<LayerSurface *>(layer);
-    MRIS *mris = surf->GetSourceSurface()->GetMRIS();
+    MRIS *        mris = surf->GetSourceSurface()->GetMRIS();
     Clear();
     setWindowTitle("Surface Information");
     SetCaption(QString("Surface information for %1").arg(surf->GetFileName()));

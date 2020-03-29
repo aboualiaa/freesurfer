@@ -1,11 +1,11 @@
 #pragma once
 
-#include <stdexcept>
-#include <memory>
-#include <string>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include <limits>
+#include <memory>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 #include <cuda_runtime.h>
@@ -21,8 +21,8 @@ template <typename ElementType, unsigned char nDims,
 class Image_GPU {
 public:
   IndexType dims[nDims];
-  void *pitchedPtr;
-  size_t dataPitch;
+  void *    pitchedPtr;
+  size_t    dataPitch;
 
   template <typename NextType, typename... Values>
   __device__ ElementType operator()(const NextType iVal,
@@ -40,7 +40,7 @@ public:
     }
 
     const char *data = reinterpret_cast<const char *>(this->pitchedPtr);
-    const char *row = data + (iRow * this->dataPitch);
+    const char *row  = data + (iRow * this->dataPitch);
 
     return (reinterpret_cast<const ElementType *>(row)[location[nDims - 1]]);
   }
@@ -61,7 +61,7 @@ public:
     }
 
     char *data = reinterpret_cast<char *>(this->pitchedPtr);
-    char *row = data + (iRow * this->dataPitch);
+    char *row  = data + (iRow * this->dataPitch);
 
     return (reinterpret_cast<ElementType *>(row)[location[nDims - 1]]);
   }
@@ -122,10 +122,10 @@ public:
 
     // Set up the copy params
     cudaMemcpy3DParms cpyPrms = cudaMemcpy3DParms();
-    cpyPrms.srcPtr = *(this->d_elements);
-    cpyPrms.dstPtr = dst;
-    cpyPrms.extent = extent;
-    cpyPrms.kind = cudaMemcpyDeviceToHost;
+    cpyPrms.srcPtr            = *(this->d_elements);
+    cpyPrms.dstPtr            = dst;
+    cpyPrms.extent            = extent;
+    cpyPrms.kind              = cudaMemcpyDeviceToHost;
 
     // Do the copy
     CUDA_SAFE_CALL(cudaMemcpy3D(&cpyPrms));
@@ -141,10 +141,10 @@ public:
 
     // Set up the copy params
     cudaMemcpy3DParms cpyPrms = cudaMemcpy3DParms();
-    cpyPrms.srcPtr = src;
-    cpyPrms.dstPtr = *(this->d_elements);
-    cpyPrms.extent = extent;
-    cpyPrms.kind = cudaMemcpyHostToDevice;
+    cpyPrms.srcPtr            = src;
+    cpyPrms.dstPtr            = *(this->d_elements);
+    cpyPrms.extent            = extent;
+    cpyPrms.kind              = cudaMemcpyHostToDevice;
 
     // Do the copy
     CUDA_SAFE_CALL(cudaMemcpy3D(&cpyPrms));
@@ -163,9 +163,9 @@ public:
   cudaExtent GetCudaExtent() const {
     // Creates the CudaExtent from the dims
     cudaExtent res;
-    res.width = this->dims[nDims - 1] * sizeof(ElementType);
+    res.width  = this->dims[nDims - 1] * sizeof(ElementType);
     res.height = 1;
-    res.depth = 1;
+    res.depth  = 1;
 
     if (nDims >= 2) {
       res.height = this->dims[nDims - 2];
@@ -205,7 +205,7 @@ public:
       gpuArg.dims[i] = this->dims[i];
     }
     gpuArg.pitchedPtr = this->d_elements->ptr;
-    gpuArg.dataPitch = this->d_elements->pitch;
+    gpuArg.dataPitch  = this->d_elements->pitch;
 
     return gpuArg;
   }
@@ -216,7 +216,7 @@ public:
   }
 
 private:
-  DimensionType dims;
+  DimensionType                                      dims;
   std::unique_ptr<cudaPitchedPtr, CudaDeviceDeleter> d_elements;
 
   void SetDimensionsCommon() {

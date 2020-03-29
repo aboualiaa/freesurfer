@@ -41,11 +41,11 @@ public:
   ~PanelPointSet();
 
 protected:
-  void DoUpdateWidgets();
-  void DoIdle();
+  void         DoUpdateWidgets();
+  void         DoIdle();
   virtual void ConnectLayer(Layer *layer);
-  void LoadScalarValues();
-  void UpdatePointInfo();
+  void         LoadScalarValues();
+  void         UpdatePointInfo();
 
 protected slots:
   void OnSliderOpacity(int nVal);
@@ -72,13 +72,13 @@ protected slots:
   void SetCurrentPoint(int nIndex);
 
 private:
-  QLabel *MakeCommentItem(const QVariantMap &map);
+  QLabel *         MakeCommentItem(const QVariantMap &map);
   QTreeWidgetItem *AddStatItem(const QString &name, double value);
 
   Ui::PanelPointSet *ui;
-  QList<QWidget *> m_widgetlistSolidColor;
-  QList<QWidget *> m_widgetlistHeatScale;
-  QList<QWidget *> m_widgetlistSpline;
+  QList<QWidget *>   m_widgetlistSolidColor;
+  QList<QWidget *>   m_widgetlistHeatScale;
+  QList<QWidget *>   m_widgetlistSpline;
 
   QString m_self;
 };

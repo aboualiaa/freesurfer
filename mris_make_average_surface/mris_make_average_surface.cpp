@@ -92,18 +92,18 @@ ENDHELP
 */
 
 #include "diag.h"
-#include "mrisutils.h"
-#include "icosahedron.h"
-#include "version.h"
 #include "fio.h"
 #include "gcamorph.h"
+#include "icosahedron.h"
+#include "mrisutils.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mris_make_average_surface.c,v 1.30 2013/04/11 20:41:58 greve Exp $";
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -111,27 +111,27 @@ static void print_version();
 
 static int normalize_area = 1;
 
-static char *orig_name = "orig";
+static char *orig_name  = "orig";
 static char *xform_name = "talairach.xfm";
 
-static int ico_no = 6;
-int UseSurf2Surf = 1; // use surf2surf instead of parametric surface
+static int ico_no       = 6;
+int        UseSurf2Surf = 1; // use surf2surf instead of parametric surface
 
-const char *Progname;
+const char * Progname;
 static char *sdir = nullptr, *sdirout = nullptr;
 
 int main(int argc, char *argv[]) {
   char **av, *avg_surf_name, *canon_surf_name, fname[STRLEN], *mdir,
       ico_fname[STRLEN], *hemi, *out_sname;
-  int ac, nargs, i, vno, n, err;
+  int          ac, nargs, i, vno, n, err;
   MRI_SURFACE *mris_ico, *surf;
-  MRI_SP *mrisp_total;
-  LTA *lta;
-  VOL_GEOM vg;
-  float average_surface_area = 0.0;
-  MATRIX *XFM = nullptr;
-  GCA_MORPH *gcam = nullptr;
-  MRI *mritemplate;
+  MRI_SP *     mrisp_total;
+  LTA *        lta;
+  VOL_GEOM     vg;
+  float        average_surface_area = 0.0;
+  MATRIX *     XFM                  = nullptr;
+  GCA_MORPH *  gcam                 = nullptr;
+  MRI *        mritemplate;
 
   memset((void *)&vg, 0, sizeof(VOL_GEOM));
 
@@ -166,10 +166,10 @@ int main(int argc, char *argv[]) {
   if (argc < 6)
     usage_exit();
 
-  hemi = argv[1];
-  avg_surf_name = argv[2];
+  hemi            = argv[1];
+  avg_surf_name   = argv[2];
   canon_surf_name = argv[3];
-  out_sname = argv[4];
+  out_sname       = argv[4];
 
   printf("---------------------------------------------------\n");
   printf("hemi            = %s\n", hemi);
@@ -195,13 +195,13 @@ int main(int argc, char *argv[]) {
     printf(" To use the old method include -no-surf2surf\n");
 
     AVERAGE_SURFACE_PARAMS *asp;
-    asp = MRISaverageSurfaceParamAlloc(argc - 5);
-    asp->icoorder = ico_no;
-    asp->hemi = hemi;
-    asp->surfname = avg_surf_name;
+    asp              = MRISaverageSurfaceParamAlloc(argc - 5);
+    asp->icoorder    = ico_no;
+    asp->hemi        = hemi;
+    asp->surfname    = avg_surf_name;
     asp->surfregname = canon_surf_name;
-    asp->xform_name = xform_name;
-    n = 0;
+    asp->xform_name  = xform_name;
+    n                = 0;
     for (i = 5; i < argc; i++) {
       asp->subjectlist[n] = strcpyalloc(argv[i]);
       n++;
@@ -223,9 +223,9 @@ int main(int argc, char *argv[]) {
 #define SCALE 1
   mrisp_total = MRISPalloc(SCALE, 3);
   for (n = 0, i = 5; i < argc; i++) {
-    MRI *mri;
+    MRI *        mri;
     MRI_SURFACE *mris;
-    MRI_SP *mrisp;
+    MRI_SP *     mrisp;
 
     printf("\n---------------------------------------------------\n");
     printf("#@# processing subject %d/%d %s...\n", i - 4, argc - 5, argv[i]);
@@ -354,7 +354,7 @@ int main(int argc, char *argv[]) {
     int n;
 
     VERTEX_TOPOLOGY const *const vt = &mris_ico->vertices_topology[Gdiag_no];
-    VERTEX const *const v = &mris_ico->vertices[Gdiag_no];
+    VERTEX const *const          v  = &mris_ico->vertices[Gdiag_no];
     printf("v %d: x = (%2.2f, %2.2f, %2.2f)\n", Gdiag_no, v->origx, v->origy,
            v->origz);
     for (n = 0; n < vt->vnum; n++) {
@@ -433,7 +433,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -442,14 +442,14 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "version") || !stricmp(option, "version"))
     print_version();
   else if (!stricmp(option, "sdir")) {
-    sdir = argv[2];
+    sdir  = argv[2];
     nargs = 1;
   } else if (!stricmp(option, "identity")) {
     xform_name = nullptr;
     printf("using identity transform\n");
   } else if (!stricmp(option, "sdir-out")) {
     sdirout = argv[2];
-    nargs = 1;
+    nargs   = 1;
   } else if (!stricmp(option, "nonorm")) {
     normalize_area = 0;
     printf("not normalizing surface area\n");
@@ -461,11 +461,11 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'I':
       ico_no = atoi(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       break;
     case 'X':
       xform_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("using xform %s...\n", xform_name);
       break;
     case '?':
@@ -481,7 +481,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     default:
       printf("unknown option %s\n", argv[1]);

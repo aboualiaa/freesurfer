@@ -33,8 +33,6 @@
 #include "QdecGlmDesign.h"
 #include "QdecGlmFitResults.h"
 
-using namespace std;
-
 class QdecGlmFit {
 public:
   // Constructors/Destructors

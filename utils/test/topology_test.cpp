@@ -37,7 +37,7 @@ int test1() {
   //
   int const max_vertices = 4, max_faces = 2, nvertices = 4, nfaces = 2;
 
-  MRIS mrisObject;
+  MRIS  mrisObject;
   MRIS *src = &mrisObject;
 
   MRISctr(src, max_vertices, max_faces, nvertices, nfaces);
@@ -59,9 +59,9 @@ int test1() {
 
   // Copy the src
   //
-  size_t dst_nvertices;
+  size_t     dst_nvertices;
   int const *dst_mapToDstVno;
-  size_t dst_nfaces;
+  size_t     dst_nfaces;
   int const *dst_mapToDstFno;
 
   MRIS *dst;
@@ -91,7 +91,7 @@ int test1() {
   // Subset the src
   //
   src->vertices[0].ripflag = 1;
-  src->faces[0].ripflag = 1;
+  src->faces[0].ripflag    = 1;
 
   MRIScreateSimilarTopologyMapsForNonripped(
       src, &dst_nvertices, &dst_mapToDstVno, &dst_nfaces, &dst_mapToDstFno);
@@ -119,7 +119,7 @@ int test1() {
 
 int bitCount(int x) {
   int count = 0;
-  int i = 1;
+  int i     = 1;
   while (x) {
     if (x & i) {
       x ^= i;
@@ -143,7 +143,7 @@ int test2Wkr(int verticesLog2) {
   int const max_vertices = 1 << verticesLog2, max_faces = 0,
             nvertices = max_vertices, nfaces = 0;
 
-  MRIS mrisObject;
+  MRIS  mrisObject;
   MRIS *src = &mrisObject;
 
   MRISctr(src, max_vertices, max_faces, nvertices, nfaces);
@@ -157,11 +157,11 @@ int test2Wkr(int verticesLog2) {
   }
 
   size_t const neighborsCapacity = nvertices;
-  int *neighbors = (int *)malloc(neighborsCapacity * sizeof(int));
-  int *hops = (int *)malloc(neighborsCapacity * sizeof(int));
+  int *        neighbors = (int *)malloc(neighborsCapacity * sizeof(int));
+  int *        hops      = (int *)malloc(neighborsCapacity * sizeof(int));
 
-  int const vno1 = 0;
-  int const nlinks = 4;
+  int const vno1          = 0;
+  int const nlinks        = 4;
   int const neighborsSize = MRISfindNeighborsAtVertex(
       src, vno1, nlinks, neighborsCapacity, neighbors, hops);
 

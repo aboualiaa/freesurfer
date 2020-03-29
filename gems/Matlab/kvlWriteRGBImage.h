@@ -1,11 +1,11 @@
 #ifndef _GEMS2_MATLAB_KVLWRITERGBIMAGE_H
 #define _GEMS2_MATLAB_KVLWRITERGBIMAGE_H
 
-#include "kvlMatlabRunner.h"
-#include "kvlMatlabObjectArray.h"
 #include "itkImage.h"
 #include "itkImageFileWriter.h"
 #include "itkRGBAPixel.h"
+#include "kvlMatlabObjectArray.h"
+#include "kvlMatlabRunner.h"
 
 namespace kvl {
 
@@ -39,8 +39,8 @@ public:
 
     // Retrieve input arguments
     std::cout << "Here! " << std::endl;
-    const int imageHandle      = *(static_cast<int *>(mxGetData(prhs[0])));
-    const std::string fileName = mxArrayToString(prhs[1]);
+    const int         imageHandle = *(static_cast<int *>(mxGetData(prhs[0])));
+    const std::string fileName    = mxArrayToString(prhs[1]);
     std::cout << "Here! " << std::endl;
 
     // Retrieve the image
@@ -96,8 +96,8 @@ public:
       RGBAcaster->Update();
       RGBAimage = RGBAcaster->GetOutput();
 
-      RGBAImageType::PointType newRGBAOrigin;
-      RGBAImageType::SpacingType newRGBASpacing;
+      RGBAImageType::PointType     newRGBAOrigin;
+      RGBAImageType::SpacingType   newRGBASpacing;
       RGBAImageType::DirectionType newRGBADirection;
 
       std::cout << "Print out transformation matrix: " << std::endl;

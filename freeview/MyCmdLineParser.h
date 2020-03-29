@@ -26,26 +26,24 @@
 #ifndef MyCmdLineParser_h
 #define MyCmdLineParser_h
 
-#include <string>
-#include <vector>
-#include <QStringList>
 #include "stdio.h"
 #include "stdlib.h"
+#include <QStringList>
+#include <string>
+#include <vector>
 
-using namespace std;
-
-typedef vector<string> string_array;
+typedef std::vector<std::string> string_array;
 
 enum CmdLineEntryType { CMD_LINE_SWITCH = 0, CMD_LINE_OPTION, CMD_LINE_NONE };
 
 struct CmdLineEntry {
-  int type;
-  const char *shortName;
-  const char *longName;
-  const char *arguName;
-  const char *description;
-  int minArguments;
-  int maxArguments;
+  int          type;
+  const char * shortName;
+  const char * longName;
+  const char * arguName;
+  const char * description;
+  int          minArguments;
+  int          maxArguments;
   string_array arguments;
 
   CmdLineEntry(int nType = CMD_LINE_SWITCH, const char *sShortName = 0,
@@ -56,18 +54,18 @@ struct CmdLineEntry {
       nMaxArguments = nMinArguments;
     }
 
-    type = nType;
-    shortName = sShortName;
-    longName = sLongName;
-    arguName = sArguName;
-    description = desc;
+    type         = nType;
+    shortName    = sShortName;
+    longName     = sLongName;
+    arguName     = sArguName;
+    description  = desc;
     minArguments = nMinArguments;
     maxArguments = nMaxArguments;
   }
 
   void Print() {
     printf("-%s -%s ", shortName, longName);
-    foreach (string s, arguments) { printf("%s ", s.c_str()); }
+    foreach (std::string s, arguments) { printf("%s ", s.c_str()); }
     printf("\n");
     fflush(0);
   }
@@ -85,8 +83,8 @@ public:
                             const char *desc, int nMinArguments = 1,
                             int nMaxArguments = 1);
 
-  void SetProgramName(string name);
-  void SetProgramDescription(string text);
+  void SetProgramName(std::string name);
+  void SetProgramDescription(std::string text);
 
   bool Parse(int argc, char *argv[]);
   bool Parse(const string_array &args);
@@ -104,14 +102,14 @@ public:
 
   int GetNumberOfArguments(const char *ch);
 
-  string GetArgument(const char *ch, int n, const char *chDefault = NULL);
+  std::string  GetArgument(const char *ch, int n, const char *chDefault = NULL);
   string_array GetArguments(const char *ch, int nIndex = -1);
 
   string_array GetFloatingArguments();
 
   void PrintHelp();
 
-  void PrintErrorMessage(string msg);
+  void PrintErrorMessage(std::string msg);
 
 protected:
   bool Found(const char *ch, CmdLineEntry *e, int nIndex = -1);
@@ -119,12 +117,12 @@ protected:
 
   inline bool IsNumber(const char ch) { return ch <= '9' && ch >= '0'; }
 
-  vector<CmdLineEntry> m_cmdLineEntries;
-  vector<CmdLineEntry> m_cmdLineEntriesValid;
-  string_array m_cmdLineFloatingArguments;
-  int m_nNumberOfPureArguments;
-  string m_strProgramName;
-  string m_strProgramDescription;
+  std::vector<CmdLineEntry> m_cmdLineEntries;
+  std::vector<CmdLineEntry> m_cmdLineEntriesValid;
+  string_array              m_cmdLineFloatingArguments;
+  int                       m_nNumberOfPureArguments;
+  std::string               m_strProgramName;
+  std::string               m_strProgramDescription;
 
   bool m_bNewLineStyle;
 };

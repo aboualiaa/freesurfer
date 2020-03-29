@@ -57,41 +57,41 @@
 
 #include "labelfusion.h"
 
-#define YES 0
-#define NO 1
-#define PI 3.1415926
+#define YES       0
+#define NO        1
+#define PI        3.1415926
 #define MAX(a, b) std::max(a, b)
 #define MIN(a, b) std::min(a, b)
-#define ABS(x) std::abs(x)
-#define SQRT(x) std::sqrt(x)
-#define SQR(x) (x) * (x)
-#define SIGN(x) (x >= 0.0 ? 1.0 : -1.0)
+#define ABS(x)    std::abs(x)
+#define SQRT(x)   std::sqrt(x)
+#define SQR(x)    (x) * (x)
+#define SIGN(x)   (x >= 0.0 ? 1.0 : -1.0)
 
 pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
                   float steps) {
-  float *pfu, *pfbx, *pfby, *pfbz, *pfps, *pfpt, *pfgk, *pfft, *pfdiv;
-  float fpt, fps, pfcvg;
+  float *      pfu, *pfbx, *pfby, *pfbz, *pfps, *pfpt, *pfgk, *pfft, *pfdiv;
+  float        fpt, fps, pfcvg;
   unsigned int iNy, iNx, iNz, iLab, ix, iy, iz, id;
-  int ik, iNI;
-  int szImg, S3D, S2D;
-  int index, index1, indz, indd, indy;
+  int          ik, iNI;
+  int          szImg, S3D, S2D;
+  int          index, index1, indz, indd, indy;
 
   if (bound.ndim() != 4)
     throw std::runtime_error("input must have 4 dimensions");
 
-  iNy = bound.shape(0);
-  iNx = bound.shape(1);
-  iNz = bound.shape(2);
+  iNy  = bound.shape(0);
+  iNx  = bound.shape(1);
+  iNz  = bound.shape(2);
   iLab = bound.shape(3);
 
-  S2D = iNy * iNx;
-  S3D = S2D * iNz;
+  S2D   = iNy * iNx;
+  S3D   = S2D * iNz;
   szImg = S3D * iLab;
 
   const float *pfCt = bound.data(0);
 
   float *const u = new float[bound.size()];
-  pfu = u;
+  pfu            = u;
 
   // allocate the memory for px1
   pfbx =
@@ -145,17 +145,17 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         index = indy + iy;
 
         fpt = pfCt[index];
-        ik = 0;
+        ik  = 0;
 
         for (id = 1; id < iLab; id++) {
           index1 = index + id * S3D;
           if (fpt >= pfCt[index1]) {
             fpt = pfCt[index1];
-            ik = id;
+            ik  = id;
           }
         }
 
-        pfps[index] = fpt;
+        pfps[index]           = fpt;
         pfu[index + ik * S3D] = 1;
 
         for (id = 0; id < iLab; id++) {
@@ -185,7 +185,7 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx; ix++) {
           indy = ix * iNy + indz;
           for (iy = 0; iy < iNy; iy++) {
-            index = indy + iy;
+            index  = indy + iy;
             index1 = indd + index;
             pfgk[index] =
                 pfdiv[index1] - (pfps[index] - pfpt[index1] + pfu[index1] / cc);
@@ -198,7 +198,7 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx - 1; ix++) {
           indy = (ix + 1) * iNy + indz;
           for (iy = 0; iy < iNy; iy++) {
-            index = indy + iy;
+            index  = indy + iy;
             index1 = index + indd;
             pfbx[index1] =
                 steps * (pfgk[index] - pfgk[index - iNy]) + pfbx[index1];
@@ -211,7 +211,7 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx; ix++) {
           indy = ix * iNy + indz;
           for (iy = 0; iy < iNy - 1; iy++) {
-            index = (iy + 1) + indy;
+            index  = (iy + 1) + indy;
             index1 = index + indd;
             pfby[index1] =
                 steps * (pfgk[index] - pfgk[index - 1]) + pfby[index1];
@@ -224,7 +224,7 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx; ix++) {
           indy = ix * iNy + indz;
           for (iy = 0; iy < iNy; iy++) {
-            index = indy + iy;
+            index  = indy + iy;
             index1 = index + indd;
             pfbz[index1] =
                 steps * (pfgk[index] - pfgk[index - S2D]) + pfbz[index1];
@@ -239,7 +239,7 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx; ix++) {
           indy = ix * iNy + indz;
           for (iy = 0; iy < iNy; iy++) {
-            index = iy + indy;
+            index  = iy + indy;
             index1 = index + indd;
 
             fpt = SQRT((SQR(pfbx[index1 + iNy]) + SQR(pfbx[index1]) +
@@ -263,7 +263,7 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx - 1; ix++) {
           indy = (ix + 1) * iNy + indz;
           for (iy = 0; iy < iNy; iy++) {
-            index = iy + indy;
+            index  = iy + indy;
             index1 = index + indd;
             pfbx[index1] =
                 (pfgk[index] + pfgk[index - iNy]) * 0.5 * pfbx[index1];
@@ -278,8 +278,8 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx; ix++) {
           indy = ix * iNy + indz;
           for (iy = 0; iy < iNy - 1; iy++) {
-            index = (iy + 1) + indy;
-            index1 = index + indd;
+            index        = (iy + 1) + indy;
+            index1       = index + indd;
             pfby[index1] = 0.5 * (pfgk[index - 1] + pfgk[index]) * pfby[index1];
           }
         }
@@ -292,7 +292,7 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx; ix++) {
           indy = ix * iNy + indz;
           for (iy = 0; iy < iNy; iy++) {
-            index = iy + indy;
+            index  = iy + indy;
             index1 = index + indd;
             pfbz[index1] =
                 0.5 * (pfgk[index - S2D] + pfgk[index]) * pfbz[index1];
@@ -307,13 +307,13 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
         for (ix = 0; ix < iNx; ix++) {
           indy = ix * iNy + indz;
           for (iy = 0; iy < iNy; iy++) {
-            index = iy + indy;
+            index  = iy + indy;
             index1 = index + indd;
             // update the divergence field div(x,id)
             pfdiv[index1] = pfbx[index1 + iNy] - pfbx[index1] +
                             pfby[index1 + 1] - pfby[index1] +
                             pfbz[index1 + S2D] - pfbz[index1];
-            fpt = pfps[index] + pfu[index1] / cc - pfdiv[index1];
+            fpt          = pfps[index] + pfu[index1] / cc - pfdiv[index1];
             pfpt[index1] = MIN(fpt, pfCt[index1]);
           }
         }
@@ -333,7 +333,7 @@ pyarrayf CMF3D_ML(const pyarrayf &bound, int iNbIters, float fError, float cc,
 
           fpt = 0;
           for (id = 0; id < iLab; id++) {
-            index1 = index + id * S3D;
+            index1   = index + id * S3D;
             pfft[id] = pfdiv[index1] + pfpt[index1];
             fpt += (pfft[id] - pfu[index1] / cc);
           }

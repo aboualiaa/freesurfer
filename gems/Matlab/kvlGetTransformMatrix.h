@@ -9,9 +9,9 @@ namespace kvl {
 class GetTransformMatrix : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef GetTransformMatrix Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef GetTransformMatrix            Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -20,7 +20,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(GetTransformMatrix, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -47,9 +48,9 @@ public:
 
     // Create a Matlab matrix and fill in
     mwSize dims[2];
-    dims[0] = 4;
-    dims[1] = 4;
-    plhs[0] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+    dims[0]    = 4;
+    dims[1]    = 4;
+    plhs[0]    = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     auto *data = static_cast<double *>(mxGetData(plhs[0]));
     TransformType::ParametersType parameters = transform->GetParameters();
 
@@ -66,8 +67,10 @@ public:
   }
 
 protected:
-  GetTransformMatrix()= default;;
-  ~GetTransformMatrix() override= default;;
+  GetTransformMatrix() = default;
+  ;
+  ~GetTransformMatrix() override = default;
+  ;
 
   GetTransformMatrix(const Self &); // purposely not implemented
   void operator=(const Self &);     // purposely not implemented

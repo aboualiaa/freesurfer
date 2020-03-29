@@ -33,9 +33,9 @@ class MutualInformationCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self = MutualInformationCostAndGradientCalculator;
-  using Superclass = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = MutualInformationCostAndGradientCalculator;
+  using Superclass   = AtlasMeshPositionCostAndGradientCalculator;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -77,7 +77,7 @@ private:
 
   //
   Histogrammer::Pointer m_Histogrammer;
-  double m_NumberOfVoxels;
+  double                m_NumberOfVoxels;
 };
 
 } // end namespace kvl

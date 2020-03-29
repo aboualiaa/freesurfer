@@ -23,9 +23,7 @@
  *
  */
 
-
 #include <iostream>
-using namespace std;
 
 #include "macros.h"
 
@@ -35,11 +33,11 @@ using namespace std;
 
 void check(bool exp) {
   if (exp == false)
-    cout << "e";
+    std::cout << "e";
 }
 
-void ErrorExit(string s) {
-  cout << endl << "ERROR: " << s << endl;
+void ErrorExit(std::string s) {
+  std::cout << std::endl << "ERROR: " << s << std::endl;
   exit(-1);
 }
 

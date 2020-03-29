@@ -12,9 +12,9 @@ class AtlasMeshToPointSetCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshToPointSetCostAndGradientCalculator;
-  using Superclass = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshToPointSetCostAndGradientCalculator;
+  using Superclass   = AtlasMeshPositionCostAndGradientCalculator;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */

@@ -21,16 +21,15 @@
  *
  */
 
-#include "mri.h"
 #include "DICOMRead.h"
 #include "cmd_line_interface.h"
+#include "mri.h"
 
 const char *Progname;
 
 // static function declarations
 // forward declaration
 struct IoParams;
-using namespace std;
 
 /*
   IO structure
@@ -97,12 +96,12 @@ int main(int argc, char *argv[]) {
 
   } else if (params.scanner == "ge") {
     MRI *_gedcm = nullptr;
-    _gedcm = DICOMRead2(params.gefile.c_str(), TRUE);
+    _gedcm      = DICOMRead2(params.gefile.c_str(), TRUE);
     if (_gedcm == nullptr) {
       std::cerr << "ERROR: The GE DICOM can't be read. Check the file\n";
       exit(1);
     }
-    mrimag = MRIcloneBySpace(_gedcm, MRI_FLOAT, 1);
+    mrimag   = MRIcloneBySpace(_gedcm, MRI_FLOAT, 1);
     mriphase = MRIcloneBySpace(_gedcm, MRI_FLOAT, 1);
     float _r, _i;
     for (int i = 0; i < _gedcm->width; i++)
@@ -119,12 +118,12 @@ int main(int argc, char *argv[]) {
     MRIfree(&_gedcm);
   } else if (params.scanner == "philips") {
     MRI *_phildcm = nullptr;
-    _phildcm = DICOMRead2(params.philipsfile.c_str(), TRUE);
+    _phildcm      = DICOMRead2(params.philipsfile.c_str(), TRUE);
     if (_phildcm == nullptr) {
       std::cerr << "ERROR: The Philips DICOM can't be read. Check the file\n";
       exit(1);
     }
-    mrimag = MRIcloneBySpace(_phildcm, MRI_FLOAT, 1);
+    mrimag       = MRIcloneBySpace(_phildcm, MRI_FLOAT, 1);
     MRI *_pphase = MRIcloneBySpace(_phildcm, MRI_FLOAT, 1);
     for (int i = 0; i < _phildcm->width; i++)
       for (int j = 0; j < _phildcm->height; j++)

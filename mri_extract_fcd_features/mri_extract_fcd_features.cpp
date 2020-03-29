@@ -24,34 +24,34 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "timer.h"
 #include "version.h"
-#include "cma.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static char sdir[STRLEN] = "";
-static char *white_name = "white";
-static char *pial_name = "pial";
-static char *vol_name = "norm.mgz";
-static char *ribbon_name = "ribbon.mgz";
-static char *aparc_name = "aparc+aseg.mgz";
+static char  sdir[STRLEN] = "";
+static char *white_name   = "white";
+static char *pial_name    = "pial";
+static char *vol_name     = "norm.mgz";
+static char *ribbon_name  = "ribbon.mgz";
+static char *aparc_name   = "aparc+aseg.mgz";
 // static char *annot_name = "aparc" ;
-static char *aseg_name = "aseg.mgz";
-static char *sphere_name = "sphere.d1.left_right";
+static char *aseg_name    = "aseg.mgz";
+static char *sphere_name  = "sphere.d1.left_right";
 static char *cortex_label = "cortex";
-static char *flair_name = "FLAIR.masked.mgz";
+static char *flair_name   = "FLAIR.masked.mgz";
 
 static MRI *MRIcomputeSurfaceDistanceProbabilities(MRI_SURFACE *mris,
                                                    MRI *mri_ribbon, MRI *mri,
                                                    MRI *mri_aseg);
 static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
-                                                 MRI *mri_ribbon,
+                                                 MRI *        mri_ribbon,
                                                  MRI *mri_aparc, MRI *mri,
                                                  MRI *mri_aseg, int whalf);
 static MRI *MRIcomputeFlairRatio(MRI_SURFACE *mris, MRI *mri_ribbon,
@@ -62,14 +62,14 @@ static int whalf = 5;
 static int navgs = 0;
 
 int main(int argc, char *argv[]) {
-  char fname[STRLEN], *cp;
-  int nargs;
+  char  fname[STRLEN], *cp;
+  int   nargs;
   char *subject, *out_fname, *hemi, *ohemi;
-  int msec, minutes, seconds;
+  int   msec, minutes, seconds;
   Timer start;
-  MRI *mri, *mri_features, *mri_ribbon, *mri_aseg, *mri_aparc, *mri_flair;
+  MRI * mri, *mri_features, *mri_ribbon, *mri_aseg, *mri_aparc, *mri_flair;
   MRI_SURFACE *mris, *mris_contra;
-  LABEL *cortex;
+  LABEL *      cortex;
 
   nargs = handleVersionOption(argc, argv, "mri_extract_fcd_features");
   if (nargs && argc - nargs == 1)
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
 
   subject = argv[1];
-  hemi = argv[2];
+  hemi    = argv[2];
   if (strcmp(hemi, "lh") == 0)
     ohemi = "rh";
   else
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
 
   MRIwrite(mri_features, out_fname);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -296,7 +296,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       vol_name = argv[2];
-      nargs = 1;
+      nargs    = 1;
       printf("using %s as vol name\n", vol_name);
       break;
     case '?':
@@ -330,7 +330,7 @@ static double max_pial_dist = 3;
 static double min_pial_dist = -2;
 
 static double white_bin_size = .5;
-static double pial_bin_size = .5;
+static double pial_bin_size  = .5;
 
 static int NBINS = 256;
 
@@ -344,17 +344,17 @@ static MRI *MRIcomputeSurfaceDistanceProbabilities(MRI_SURFACE *mris,
                                                    MRI *mri_ribbon, MRI *mri,
                                                    MRI *mri_aseg) {
   MRI *mri_features, *mri_binary, *mri_white_dist, *mri_pial_dist, *mri_mask;
-  int nwhite_bins, npial_bins, x, y, z, label, i;
+  int  nwhite_bins, npial_bins, x, y, z, label, i;
   HISTOGRAM2D *hw, *hp;
-  float pdist, wdist, val;
-  double wval, pval;
+  float        pdist, wdist, val;
+  double       wval, pval;
 
   mri_features =
       MRIallocSequence(mri->width, mri->height, mri->depth, MRI_FLOAT, 2);
   MRIcopyHeader(mri, mri_features);
 
-  mri_binary = MRIcopy(mri_ribbon, nullptr);
-  mri_binary = MRIbinarize(mri_ribbon, nullptr, 1, 0, 1);
+  mri_binary    = MRIcopy(mri_ribbon, nullptr);
+  mri_binary    = MRIbinarize(mri_ribbon, nullptr, 1, 0, 1);
   mri_pial_dist = MRIdistanceTransform(
       mri_binary, nullptr, 1, max_pial_dist + 1, DTRANS_MODE_SIGNED, nullptr);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
@@ -370,9 +370,9 @@ static MRI *MRIcomputeSurfaceDistanceProbabilities(MRI_SURFACE *mris,
     MRIwrite(mri_white_dist, "wd.mgz");
 
   nwhite_bins = ceil((max_white_dist - min_white_dist) / white_bin_size) + 1;
-  npial_bins = ceil((max_pial_dist - min_pial_dist) / pial_bin_size) + 1;
-  hw = HISTO2Dalloc(NBINS, nwhite_bins);
-  hp = HISTO2Dalloc(NBINS, npial_bins);
+  npial_bins  = ceil((max_pial_dist - min_pial_dist) / pial_bin_size) + 1;
+  hw          = HISTO2Dalloc(NBINS, nwhite_bins);
+  hp          = HISTO2Dalloc(NBINS, npial_bins);
 
   HISTO2Dinit(hw, NBINS, nwhite_bins, 0, NBINS - 1, min_white_dist,
               max_white_dist);
@@ -388,7 +388,7 @@ static MRI *MRIcomputeSurfaceDistanceProbabilities(MRI_SURFACE *mris,
           continue;
         pdist = MRIgetVoxVal(mri_pial_dist, x, y, z, 0);
         wdist = MRIgetVoxVal(mri_pial_dist, x, y, z, 0);
-        val = MRIgetVoxVal(mri, x, y, z, 0);
+        val   = MRIgetVoxVal(mri, x, y, z, 0);
         if (pdist >= min_pial_dist && pdist <= max_pial_dist)
           HISTO2DaddSample(hp, val, pdist, 0, 0, 0, 0);
         if (wdist >= min_white_dist && wdist <= max_white_dist)
@@ -405,8 +405,8 @@ static MRI *MRIcomputeSurfaceDistanceProbabilities(MRI_SURFACE *mris,
           continue;
         pdist = MRIgetVoxVal(mri_pial_dist, x, y, z, 0);
         wdist = MRIgetVoxVal(mri_pial_dist, x, y, z, 0);
-        val = MRIgetVoxVal(mri, x, y, z, 0);
-        wval = HISTO2DgetCount(hw, val, wdist);
+        val   = MRIgetVoxVal(mri, x, y, z, 0);
+        wval  = HISTO2DgetCount(hw, val, wdist);
         if (DZERO(wval) == 0)
           MRIsetVoxVal(mri_features, x, y, z, 1, -log10(wval));
         pval = HISTO2DgetCount(hp, val, pdist);
@@ -442,11 +442,11 @@ static MRI *MRIcomputeSurfaceDistanceProbabilities(MRI_SURFACE *mris,
 #define angle_threshold RADIANS(20.0)
 
 static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
-                                                 MRI *mri_ribbon,
+                                                 MRI *        mri_ribbon,
                                                  MRI *mri_aparc, MRI *mri,
                                                  MRI *mri_aseg, int whalf) {
   MRI *mri_features, *mri_binary, *mri_white_dist, *mri_pial_dist;
-  int vno, ngm, outside_of_ribbon, label0, label, ohemi_label, xi, yi, zi, xk,
+  int  vno, ngm, outside_of_ribbon, label0, label, ohemi_label, xi, yi, zi, xk,
       yk, zk, x0, y0, z0, hemi_label, assignable;
   double xv, yv, zv, step_size, dist, thickness, wdist, pdist, snx, sny, snz,
       nx, ny, nz, xl, yl, zl, x, y, z, dot, angle;
@@ -457,8 +457,8 @@ static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
       1); // one samples inwards, one in ribbon, and one outside
   MRIcopyHeader(mri, mri_features);
 
-  mri_binary = MRIcopy(mri_ribbon, nullptr);
-  mri_binary = MRIbinarize(mri_ribbon, nullptr, 1, 0, 1);
+  mri_binary    = MRIcopy(mri_ribbon, nullptr);
+  mri_binary    = MRIbinarize(mri_ribbon, nullptr, 1, 0, 1);
   mri_pial_dist = MRIdistanceTransform(
       mri_binary, nullptr, 1, max_pial_dist + 1, DTRANS_MODE_SIGNED, nullptr);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
@@ -475,9 +475,9 @@ static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
 
   if (mris->hemisphere == LEFT_HEMISPHERE) {
     ohemi_label = Right_Cerebral_Cortex;
-    hemi_label = Left_Cerebral_Cortex;
+    hemi_label  = Left_Cerebral_Cortex;
   } else {
-    hemi_label = Right_Cerebral_Cortex;
+    hemi_label  = Right_Cerebral_Cortex;
     ohemi_label = Left_Cerebral_Cortex;
   }
 
@@ -488,9 +488,9 @@ static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
       DiagBreak();
     if (v->ripflag)
       continue; // not cortex
-    nx = v->pialx - v->whitex;
-    ny = v->pialy - v->whitey;
-    nz = v->pialz - v->whitez;
+    nx        = v->pialx - v->whitex;
+    ny        = v->pialy - v->whitey;
+    nz        = v->pialz - v->whitez;
     thickness = sqrt(nx * nx + ny * ny + nz * nz);
     if (FZERO(thickness))
       continue; // no  cortex here
@@ -499,9 +499,9 @@ static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
     y = (v->pialy + v->whitey) / 2;
     z = (v->pialz + v->whitez) / 2; // halfway between white and pial is x0
     MRISsurfaceRASToVoxelCached(mris, mri_aseg, x, y, z, &xl, &yl, &zl);
-    x0 = nint(xl);
-    y0 = nint(yl);
-    z0 = nint(zl);
+    x0     = nint(xl);
+    y0     = nint(yl);
+    z0     = nint(zl);
     label0 = MRIgetVoxVal(mri_aparc, x0, y0, z0, 0);
 
     // compute surface normal in voxel coords
@@ -516,7 +516,7 @@ static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
       for (yk = -whalf; yk <= whalf; yk++) {
         yi = mri_aseg->yi[y0 + yk];
         for (zk = -whalf; zk <= whalf; zk++) {
-          zi = mri_aseg->zi[z0 + zk];
+          zi    = mri_aseg->zi[z0 + zk];
           label = MRIgetVoxVal(mri_aseg, xi, yi, zi, 0);
           if (xi == Gx && yi == Gy && zi == Gz)
             DiagBreak();
@@ -529,16 +529,16 @@ static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
 
           // search along vector connecting x0 to this point to make sure it is
           // we don't perforate wm or leave and re-enter cortex
-          nx = xi - x0;
-          ny = yi - y0;
-          nz = zi - z0;
-          thickness = sqrt(nx * nx + ny * ny + nz * nz);
+          nx         = xi - x0;
+          ny         = yi - y0;
+          nz         = zi - z0;
+          thickness  = sqrt(nx * nx + ny * ny + nz * nz);
           assignable = 1; // assume this point should be counted
           if (thickness > 0) {
             nx /= thickness;
             ny /= thickness;
             nz /= thickness;
-            dot = nx * snx + ny * sny + nz * snz;
+            dot   = nx * snx + ny * sny + nz * snz;
             angle = acos(dot);
             if (fabs(angle) > angle_threshold)
               assignable = 0;
@@ -587,8 +587,8 @@ static MRI *MRIcomputeSurfaceDistanceIntensities(MRI_SURFACE *mris,
 static MRI *MRIcomputeFlairRatio(MRI_SURFACE *mris, MRI *mri_ribbon,
                                  MRI *mri_aparc, MRI *mri, MRI *mri_flair,
                                  MRI *mri_aseg, int whalf) {
-  MRI *mri_features, *mri_dist_white, *mri_tmp, *mri_filled;
-  int xv, yv, zv, vno, label;
+  MRI *  mri_features, *mri_dist_white, *mri_tmp, *mri_filled;
+  int    xv, yv, zv, vno, label;
   double xs, ys, zs, xf, yf, zf, flair, T1, dist, xd, yd, zd, dx, dy, dz, nx,
       ny, nz, x0, y0, z0, len, dot, theta;
   VERTEX *v;
@@ -622,9 +622,9 @@ static MRI *MRIcomputeFlairRatio(MRI_SURFACE *mris, MRI *mri_ribbon,
     ys = v->whitey - v->ny * SAMPLE_DIST;
     zs = v->whitez - v->nz * SAMPLE_DIST;
     MRISsurfaceRASToVoxelCached(mris, mri_aseg, xs, ys, zs, &xf, &yf, &zf);
-    xv = nint(xf);
-    yv = nint(yf);
-    zv = nint(zf);
+    xv    = nint(xf);
+    yv    = nint(yf);
+    zv    = nint(zf);
     label = MRIgetVoxVal(mri_aseg, xv, yv, zv, 0);
     if (IS_WHITE_MATTER(label) == 0)
       continue;
@@ -639,14 +639,14 @@ static MRI *MRIcomputeFlairRatio(MRI_SURFACE *mris, MRI *mri_ribbon,
     dz *= -1;
     MRIsampleVolume(mri_dist_white, xd, yd, zd, &dist);
 
-    nx = xd - x0;
-    ny = yd - y0;
-    nz = zd - z0;
+    nx  = xd - x0;
+    ny  = yd - y0;
+    nz  = zd - z0;
     len = sqrt(nx * nx + ny * ny + nz * nz);
     nx /= len;
     ny /= len;
     nz /= len;
-    dot = nx * dx + ny * dy + nz * dz;
+    dot   = nx * dx + ny * dy + nz * dz;
     theta = acos(dot) * 360 / (2 * M_PI);
     if (theta < 0 || theta > 90) {
       if (vno == Gdiag_no)

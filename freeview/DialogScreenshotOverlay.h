@@ -7,15 +7,14 @@ namespace Ui {
 class DialogScreenshotOverlay;
 }
 
-class DialogScreenshotOverlay : public QDialog
-{
+class DialogScreenshotOverlay : public QDialog {
   Q_OBJECT
 
 public:
   explicit DialogScreenshotOverlay(QWidget *parent = 0);
   ~DialogScreenshotOverlay();
 
-  void showEvent(QShowEvent* e);
+  void showEvent(QShowEvent *e);
 
 public slots:
   void OnButtonOpen();
@@ -25,7 +24,7 @@ public slots:
 private:
   Ui::DialogScreenshotOverlay *ui;
 
-  int   m_nIndex;
+  int m_nIndex;
 };
 
 #endif // DIALOGSCREENSHOTOVERLAY_H

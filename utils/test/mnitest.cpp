@@ -22,8 +22,8 @@
  *
  */
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 extern "C" {
 
@@ -34,15 +34,13 @@ extern "C" {
 const char *Progname = "mnitest";
 }
 
-using namespace std;
-
 bool isEqual(MATRIX *m1, MATRIX *m2) {
   for (int j = 1; j < 5; ++j)
     for (int i = 1; i < 5; ++i) {
       if (!FZERO(*MATRIX_RELT(m1, i, j) - *MATRIX_RELT(m2, i, j))) {
-        cout << "(" << i << ", " << j << ")" << endl;
-        cout << *MATRIX_RELT(m1, i, j) << "      " << *MATRIX_RELT(m2, i, j)
-             << endl;
+        std::cout << "(" << i << ", " << j << ")" << std::endl;
+        std::cout << *MATRIX_RELT(m1, i, j) << "      "
+                  << *MATRIX_RELT(m2, i, j) << std::endl;
         return false;
       }
     }
@@ -161,8 +159,6 @@ const char *file3 = "./david.xfm";
 const char *file4 = "./tosa.xfm";
 const char *file5 = "./tosa2.xfm";
 
-using namespace std;
-
 int main(int argc, char *argv[]) {
   MATRIX *m1, *m2, *m3, *m4, *m5;
 
@@ -175,47 +171,47 @@ int main(int argc, char *argv[]) {
   initialize_matrices(m1, m2, m3, m4, m5);
 
   LTA *lta1, *lta2, *lta3, *lta4, *lta5;
-  cout << "////////////////////////////////////" << endl;
-  cout << "Old way of reading -----------------" << endl;
-  cout << "////////////////////////////////////" << endl;
-  cout << "bruce.xfm" << endl;
+  std::cout << "////////////////////////////////////" << std::endl;
+  std::cout << "Old way of reading -----------------" << std::endl;
+  std::cout << "////////////////////////////////////" << std::endl;
+  std::cout << "bruce.xfm" << std::endl;
   lta1 = LTAread((char *)file1);
   LTAprint(stdout, lta1);
   // old way always convert it to vox-to-vox
 #if 0
   if (!isEqual(lta1->xforms[0].m_L, m1))
   {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
 #endif
-  cout << "bruce2.xfm" << endl;
+  std::cout << "bruce2.xfm" << std::endl;
   lta2 = LTAread((char *)file2);
   LTAprint(stdout, lta2);
 #if 0
   if (!isEqual(lta2->xforms[0].m_L, m2))
   {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
 #endif
-  cout << "david.xfm" << endl;
+  std::cout << "david.xfm" << std::endl;
   lta3 = LTAread((char *)file3);
   LTAprint(stdout, lta3);
 #if 0
   if (!isEqual(lta3->xforms[0].m_L, m3))
   {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
 #endif
-  cout << "tosa.xfm" << endl;
+  std::cout << "tosa.xfm" << std::endl;
   lta4 = LTAread((char *)file4);
   LTAprint(stdout, lta4);
 #if 0
   if (!isEqual(lta4->xforms[0].m_L, m4))
   {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
 #endif
@@ -224,48 +220,48 @@ int main(int argc, char *argv[]) {
   LTAfree(&lta3);
   LTAfree(&lta4);
 
-  cout << "////////////////////////////////////" << endl;
-  cout << "New way of reading -----------------" << endl;
-  cout << "////////////////////////////////////" << endl;
-  cout << "bruce.xfm" << endl;
-  cout << "////////////////////////////////////" << endl;
+  std::cout << "////////////////////////////////////" << std::endl;
+  std::cout << "New way of reading -----------------" << std::endl;
+  std::cout << "////////////////////////////////////" << std::endl;
+  std::cout << "bruce.xfm" << std::endl;
+  std::cout << "////////////////////////////////////" << std::endl;
   lta1 = LTAreadEx(file1);
   LTAprint(stdout, lta1);
   if (!isEqual(lta1->xforms[0].m_L, m1)) {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
-  cout << "bruce2.xfm" << endl;
-  cout << "////////////////////////////////////" << endl;
+  std::cout << "bruce2.xfm" << std::endl;
+  std::cout << "////////////////////////////////////" << std::endl;
   lta2 = LTAreadEx(file2);
   LTAprint(stdout, lta2);
   if (!isEqual(lta2->xforms[0].m_L, m2)) {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
-  cout << "david.xfm" << endl;
-  cout << "////////////////////////////////////" << endl;
+  std::cout << "david.xfm" << std::endl;
+  std::cout << "////////////////////////////////////" << std::endl;
   lta3 = LTAreadEx(file3);
   LTAprint(stdout, lta3);
   if (!isEqual(lta3->xforms[0].m_L, m3)) {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
-  cout << "tosa.xfm" << endl;
-  cout << "////////////////////////////////////" << endl;
+  std::cout << "tosa.xfm" << std::endl;
+  std::cout << "////////////////////////////////////" << std::endl;
   lta4 = LTAreadEx(file4);
   LTAprint(stdout, lta4);
   if (!isEqual(lta4->xforms[0].m_L, m4)) {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
-  cout << "tosa2.xfm" << endl;
-  cout << "////////////////////////////////////" << endl;
+  std::cout << "tosa2.xfm" << std::endl;
+  std::cout << "////////////////////////////////////" << std::endl;
   lta5 = LTAreadEx(file5);
   LTAprint(stdout, lta5);
   MatrixPrint(stdout, m5);
   if (!isEqual(lta5->xforms[0].m_L, m5)) {
-    cerr << "lta1 read wrong" << endl;
+    std::cerr << "lta1 read wrong" << std::endl;
     return -1;
   }
 

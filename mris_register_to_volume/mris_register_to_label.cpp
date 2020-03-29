@@ -88,33 +88,33 @@ ENDHELP --------------------------------------------------------------
 
 #include "diag.h"
 
-#include "version.h"
+#include "cmdargs.h"
 #include "mri2.h"
 #include "registerio.h"
 #include "resample.h"
-#include "cmdargs.h"
 #include "romp_support.h"
+#include "version.h"
 
 #ifdef X
 #undef X
 #endif
 
 static float resolution = 0.5;
-static void check_options();
-static int write_lta(MATRIX *m, char *fname_from_caller, MRI *mri_src,
-                     MRI *mri_dst);
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
-static void argnerr(char *option, int n);
-static void dump_options(FILE *fp);
-static int singledash(char *flag);
+static void  check_options();
+static int   write_lta(MATRIX *m, char *fname_from_caller, MRI *mri_src,
+                       MRI *mri_dst);
+static void  print_usage();
+static void  usage_exit();
+static void  print_help();
+static void  print_version();
+static void  argnerr(char *option, int n);
+static void  dump_options(FILE *fp);
+static int   singledash(char *flag);
 #include "tags.h"
 static int istringnmatch(char *str1, char *str2, int n);
 
-int main(int argc, char *argv[]);
-static int parse_commandline(int argc, char **argv);
+int           main(int argc, char *argv[]);
+static int    parse_commandline(int argc, char **argv);
 static double find_optimal_linear_xform(
     MRI *mri_dist, MRI *mri_src, LABEL *area, MATRIX *R0, float min_angle,
     float max_angle, float min_scale, float max_scale, float min_trans,
@@ -129,59 +129,58 @@ static double ax0 = 0; // RADIANS(10) ;
 static double ay0 = 0;
 static double az0 = 0;
 
-#define COST_RMS 0
+#define COST_RMS    0
 #define COST_MEDIAN 1
-#define COST_MAX 2
-#define COST_L1 3
+#define COST_MAX    2
+#define COST_L1     3
 
 static int write_diags = 1;
-static int debug = 0;
-static int downsample = 0;
+static int debug       = 0;
+static int downsample  = 0;
 
-static MRI *mri_targ_vol;
-static int cost_function = COST_RMS;
+static MRI * mri_targ_vol;
+static int   cost_function = COST_RMS;
 static char *regfile, *surf_fname, *outregfile, *vol_fname, *targ_vol_fname,
     *subject, *patch_fname, *label_fname;
 static int write_iter = -1;
-#define MAX_ROT RADIANS(10)
-#define MAX_TRANS 20
+#define MAX_ROT         RADIANS(10)
+#define MAX_TRANS       20
 #define ANGLE_STEP_SIZE (.33333)
 #define TRANS_STEP_SIZE 1
 #define SCALE_STEP_SIZE .025
 
-static double max_rot = MAX_ROT ;
-static double max_trans = MAX_TRANS ;
-static double min_scale = 1.0 ;
-static double max_scale = 1.0 ;
-static MRI_SURFACE   *mris ; 
-static double angle_step_size = ANGLE_STEP_SIZE ;
-static double trans_step_size = TRANS_STEP_SIZE ;
+static double       max_rot   = MAX_ROT;
+static double       max_trans = MAX_TRANS;
+static double       min_scale = 1.0;
+static double       max_scale = 1.0;
+static MRI_SURFACE *mris;
+static double       angle_step_size = ANGLE_STEP_SIZE;
+static double       trans_step_size = TRANS_STEP_SIZE;
 //static double scale_step_size = SCALE_STEP_SIZE ;
-static double trans_steps = (2/TRANS_STEP_SIZE)*MAX_TRANS+1 ;
-static double angle_steps = (2/ANGLE_STEP_SIZE)*DEGREES(MAX_ROT)+1 ;
-static double scale_steps = 1 ;
+static double trans_steps = (2 / TRANS_STEP_SIZE) * MAX_TRANS + 1;
+static double angle_steps = (2 / ANGLE_STEP_SIZE) * DEGREES(MAX_ROT) + 1;
+static double scale_steps = 1;
 
+const char *Progname;
 
-const char *Progname ;
-
-static char base_name[STRLEN] ;
-static char *SUBJECTS_DIR ;
-static MATRIX *R0 ;
-static char vcid[] = "$Id: mris_register_to_label.c,v 1.3 2013/06/07 18:56:17 fischl Exp $";
-int
-main(int argc, char **argv) 
-{
-  char          fname[STRLEN] ;
-  MRI           *mri_dist, *mri_src ;
-  LABEL         *area, *ltmp ;
-  int           msec, nargs ;
-  Timer then ;
+static char    base_name[STRLEN];
+static char *  SUBJECTS_DIR;
+static MATRIX *R0;
+static char    vcid[] =
+    "$Id: mris_register_to_label.c,v 1.3 2013/06/07 18:56:17 fischl Exp $";
+int main(int argc, char **argv) {
+  char   fname[STRLEN];
+  MRI *  mri_dist, *mri_src;
+  LABEL *area, *ltmp;
+  int    msec, nargs;
+  Timer  then;
 
   nargs = handleVersionOption(argc, argv, "mris_register_to_label");
-  if(nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
   DiagInit(NULL, NULL, NULL);
@@ -205,7 +204,7 @@ main(int argc, char **argv)
   printf("label loaded with %d points\n", area->n_points);
   ltmp = LabelRemoveAlmostDuplicates(area, resolution, NULL);
   LabelFree(&area);
-  area = ltmp;
+  area    = ltmp;
   mri_src = MRIread(vol_fname);
   if (mri_src == NULL)
     ErrorExit(Gerror, "");
@@ -264,7 +263,7 @@ main(int argc, char **argv)
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -291,23 +290,23 @@ static int parse_commandline(int argc, char **argv) {
     else if (istringnmatch(option, "--reg", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
-      regfile = pargv[0];
+      regfile   = pargv[0];
       nargsused = 1;
     } else if (istringnmatch(option, "--out-reg", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       outregfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--res", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       resolution = atof(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--downsample", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       downsample = atoi(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--mov", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -317,7 +316,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       targ_vol_fname = pargv[0];
-      nargsused = 1;
+      nargsused      = 1;
     } else if (istringnmatch(option, "--angle_init", 0)) {
       if (nargc < 3)
         argnerr(option, 1);
@@ -340,50 +339,50 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       surf_fname = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--s", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (istringnmatch(option, "--patch", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       patch_fname = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (istringnmatch(option, "--label", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       label_fname = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (istringnmatch(option, "--sdir", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       SUBJECTS_DIR = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--w")) {
       write_iter = atoi(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--max")) {
       cost_function = COST_MAX;
-      nargsused = 0;
+      nargsused     = 0;
       printf("using MAX cost functional\n");
     } else if (!strcasecmp(option, "--rms")) {
       cost_function = COST_RMS;
-      nargsused = 0;
+      nargsused     = 0;
       printf("using RMS cost functional\n");
     } else if (!strcasecmp(option, "--median")) {
       cost_function = COST_MEDIAN;
-      nargsused = 0;
+      nargsused     = 0;
       printf("using median cost functional\n");
     } else if (!strcasecmp(option, "--L1")) {
       cost_function = COST_L1;
-      nargsused = 0;
+      nargsused     = 0;
       printf("using L1 cost functional\n");
     } else if (!strcasecmp(option, "--max_rot")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      max_rot = RADIANS(atof(pargv[0]));
+      max_rot     = RADIANS(atof(pargv[0]));
       angle_steps = (2 / angle_step_size) * DEGREES(max_rot) + 1;
       printf("setting max_rot = %2.1f, angle_steps = %d\n", DEGREES(max_rot),
              nint(angle_steps));
@@ -391,9 +390,9 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--max_trans")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      max_trans = atof(pargv[0]);
+      max_trans   = atof(pargv[0]);
       trans_steps = (2 / trans_step_size) * max_trans + 1;
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--scale")) {
       if (nargc < 2)
         CMDargNErr(option, 1);
@@ -545,20 +544,20 @@ static int istringnmatch(char *str1, char *str2, int n) {
 LABEL *LabelTransformToVoxelCoords(LABEL *lsrc, MRI *mri, MATRIX *R,
                                    MATRIX *Mras2vox, LABEL *ldst) {
   //  double xv, yv, zv ;
-  int i;
+  int            i;
   static VECTOR *v1 = NULL, *v2;
-  MATRIX *M;
+  MATRIX *       M;
 
   if (v1 == NULL) // first time
   {
-    v1 = VectorAlloc(4, MATRIX_REAL);
-    v2 = VectorAlloc(4, MATRIX_REAL);
+    v1                = VectorAlloc(4, MATRIX_REAL);
+    v2                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(v1, 4) = 1.0;
     VECTOR_ELT(v2, 4) = 1.0;
   }
 
   if (ldst == NULL) {
-    ldst = LabelClone(lsrc);
+    ldst           = LabelClone(lsrc);
     ldst->n_points = lsrc->n_points;
   }
   M = MatrixMultiply(Mras2vox, R, NULL);
@@ -567,9 +566,9 @@ LABEL *LabelTransformToVoxelCoords(LABEL *lsrc, MRI *mri, MATRIX *R,
     V3_Y(v1) = lsrc->lv[i].y;
     V3_Z(v1) = lsrc->lv[i].z;
     MatrixMultiply(M, v1, v2);
-    ldst->lv[i].x = V3_X(v2);
-    ldst->lv[i].y = V3_Y(v2);
-    ldst->lv[i].z = V3_Z(v2);
+    ldst->lv[i].x    = V3_X(v2);
+    ldst->lv[i].y    = V3_Y(v2);
+    ldst->lv[i].z    = V3_Z(v2);
     ldst->lv[i].stat = lsrc->lv[i].stat;
   }
 
@@ -586,14 +585,14 @@ LABEL *LabelFromVoxelCoords(LABEL *lsrc, MRI *mri, LABEL *ldst,
 
   if (v1 == NULL) // first time
   {
-    v1 = VectorAlloc(4, MATRIX_REAL);
-    v2 = VectorAlloc(4, MATRIX_REAL);
+    v1                = VectorAlloc(4, MATRIX_REAL);
+    v2                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(v1, 4) = 1.0;
     VECTOR_ELT(v2, 4) = 1.0;
   }
 
   if (ldst == NULL) {
-    ldst = LabelClone(lsrc);
+    ldst           = LabelClone(lsrc);
     ldst->n_points = lsrc->n_points;
   }
   for (i = 0; i < lsrc->n_points; i++) {
@@ -601,9 +600,9 @@ LABEL *LabelFromVoxelCoords(LABEL *lsrc, MRI *mri, LABEL *ldst,
     V3_Y(v1) = lsrc->lv[i].y;
     V3_Z(v1) = lsrc->lv[i].z;
     MatrixMultiply(Mvox2ras, v1, v2);
-    ldst->lv[i].x = V3_X(v2);
-    ldst->lv[i].y = V3_Y(v2);
-    ldst->lv[i].z = V3_Z(v2);
+    ldst->lv[i].x    = V3_X(v2);
+    ldst->lv[i].y    = V3_Y(v2);
+    ldst->lv[i].z    = V3_Z(v2);
     ldst->lv[i].stat = lsrc->lv[i].stat;
   }
 
@@ -615,10 +614,10 @@ static double compute_error(MRI *mri_dist, MATRIX *R0, MATRIX *Mras2vox,
                             LABEL *lras, LABEL *lvol, int cost,
                             double current_error) {
   double sse, val, max_val = 0;
-  int i;
+  int    i;
 
   lvol = LabelTransformToVoxelCoords(lras, mri_dist, R0, Mras2vox, lvol);
-  sse = 0;
+  sse  = 0;
   switch (cost) {
   case COST_MAX:
     ROMP_PF_begin
@@ -690,8 +689,8 @@ static double find_optimal_linear_xform(
     float max_trans, float angle_steps, float scale_steps, float trans_steps,
     int nreductions, int cost_function, double tx0, double ty0, double tz0,
     double ax0, double ay0, double az0, MRI *mri_targ_vol) {
-  double min_error, error;
-  LABEL *lvol;
+  double  min_error, error;
+  LABEL * lvol;
   MATRIX *m_rot, *m_x_rot, *m_y_rot, *m_z_rot, *m_tmp, *m_L_tmp, *m_origin,
       *m_origin_inv, *m_inv, *m_tmp2, *m_scale, *m_trans,
       *m_tmp3 = NULL, *m_best, *Mras2vox, *Mvox2ras, *m_xy_rot, *m_best_inv;
@@ -723,7 +722,7 @@ static double find_optimal_linear_xform(
   *MATRIX_RELT(m_origin, 3, 4) = 0 ;
 #endif
   *MATRIX_RELT(m_origin, 4, 4) = 1;
-  m_origin_inv = MatrixCopy(m_origin, NULL);
+  m_origin_inv                 = MatrixCopy(m_origin, NULL);
   *MATRIX_RELT(m_origin_inv, 1, 4) *= -1;
   *MATRIX_RELT(m_origin_inv, 2, 4) *= -1;
   *MATRIX_RELT(m_origin_inv, 3, 4) *= -1;
@@ -733,26 +732,26 @@ static double find_optimal_linear_xform(
   m_trans = MatrixIdentity(4, NULL);
   // set the translation  (center = 1)
 
-  m_best = MatrixCopy(R0, NULL);
+  m_best     = MatrixCopy(R0, NULL);
   m_best_inv = MatrixInverse(m_best, NULL);
-  lvol = LabelTransformToVoxelCoords(area, mri_dist, R0, Mras2vox, NULL);
+  lvol       = LabelTransformToVoxelCoords(area, mri_dist, R0, Mras2vox, NULL);
   min_error =
       compute_error(mri_dist, R0, Mras2vox, area, lvol, cost_function, 1e10);
   printf("starting error = %2.4f\n", min_error);
 
   m_L_tmp = m_x_rot = m_xy_rot = m_y_rot = m_z_rot = m_rot = m_tmp = m_tmp2 =
-      m_inv = NULL;
+      m_inv                                                        = NULL;
   x_max_trans = y_max_trans = z_max_trans = x_max_rot = y_max_rot = z_max_rot =
       0.0;
   x_max_scale = y_max_scale = z_max_scale = 1.0f;
-  m_scale = MatrixIdentity(4, NULL);
+  m_scale                                 = MatrixIdentity(4, NULL);
 
   if (mri_src->depth == 1) {
     min_z_scale = max_z_scale = 1.0;
-    delta_z_scale = 1.0;
+    delta_z_scale             = 1.0;
   } else {
-    min_z_scale = min_scale;
-    max_z_scale = max_scale;
+    min_z_scale   = min_scale;
+    max_z_scale   = max_scale;
     delta_z_scale = delta_scale;
   }
   for (i = 0; i < nreductions + 1; i++) {
@@ -767,7 +766,7 @@ static double find_optimal_linear_xform(
 
     if (angle_steps == 1) {
       min_angle = max_angle = 0.0;
-      delta_rot = 1;
+      delta_rot             = 1;
     } else {
       delta_rot = (max_angle - min_angle) / (angle_steps - 1);
     }
@@ -781,15 +780,15 @@ static double find_optimal_linear_xform(
     }
 
     if (write_diags) {
-      char fname[STRLEN];
+      char    fname[STRLEN];
       MATRIX *OCT_voxel_to_RAS, *OCT_voxel_to_xformed_RAS;
-      LABEL *l = LabelFromVoxelCoords(lvol, mri_dist, NULL, Mvox2ras);
-      MRI *mri_tmp;
+      LABEL * l = LabelFromVoxelCoords(lvol, mri_dist, NULL, Mvox2ras);
+      MRI *   mri_tmp;
 
       // compute scanner vox2ras
-      OCT_voxel_to_RAS = MRIgetVoxelToRasXform(mri_src);
+      OCT_voxel_to_RAS         = MRIgetVoxelToRasXform(mri_src);
       OCT_voxel_to_xformed_RAS = MatrixMultiply(R0, OCT_voxel_to_RAS, NULL);
-      mri_tmp = MRIcopy(mri_src, NULL);
+      mri_tmp                  = MRIcopy(mri_src, NULL);
       MRIsetVoxelToRasXform(mri_tmp, OCT_voxel_to_xformed_RAS);
 
       if (debug)
@@ -815,11 +814,11 @@ static double find_optimal_linear_xform(
       // compute scanner vox2ras for target vol if given
       if (mri_targ_vol) {
         MATRIX *MRI_voxel_to_RAS, *MRI_voxel_to_xformed_RAS;
-        char fname[STRLEN], ext[STRLEN], fname_only[STRLEN];
+        char    fname[STRLEN], ext[STRLEN], fname_only[STRLEN];
 
-        MRI_voxel_to_RAS = MRIgetVoxelToRasXform(mri_targ_vol);
+        MRI_voxel_to_RAS         = MRIgetVoxelToRasXform(mri_targ_vol);
         MRI_voxel_to_xformed_RAS = MatrixMultiply(R0, MRI_voxel_to_RAS, NULL);
-        mri_tmp = MRIcopy(mri_targ_vol, NULL);
+        mri_tmp                  = MRIcopy(mri_targ_vol, NULL);
         MRIsetVoxelToRasXform(mri_tmp, MRI_voxel_to_xformed_RAS);
         sprintf(fname, "%s.targ.%4.4d.mgz", base_name, nfound);
         printf("writing reoriented target volume to %s\n", fname);
@@ -854,7 +853,7 @@ static double find_optimal_linear_xform(
           *MATRIX_RELT(m_scale, 3, 3) = z_scale;
 
           /* reset scaling values */
-          *MATRIX_RELT(m_scale, 1, 4) = *MATRIX_RELT(m_scale, 2, 4) =
+          *MATRIX_RELT(m_scale, 1, 4)     = *MATRIX_RELT(m_scale, 2, 4) =
               *MATRIX_RELT(m_scale, 3, 4) = 0.0f;
           m_tmp = MatrixMultiply(m_scale, m_origin_inv, m_tmp);
           MatrixMultiply(m_origin, m_tmp, m_scale);
@@ -871,7 +870,7 @@ static double find_optimal_linear_xform(
                  y_angle += delta_rot) {
               if (debug)
                 y_angle = RADIANS(9.5);
-              m_y_rot = MatrixReallocRotation(4, y_angle, Y_ROTATION, m_y_rot);
+              m_y_rot  = MatrixReallocRotation(4, y_angle, Y_ROTATION, m_y_rot);
               m_xy_rot = MatrixMultiply(m_y_rot, m_x_rot, m_xy_rot);
               for (z_angle = min_angle + az0; z_angle <= max_angle + az0;
                    z_angle += delta_rot) {
@@ -903,19 +902,19 @@ static double find_optimal_linear_xform(
                       *MATRIX_RELT(m_trans, 3, 4) = z_trans;
 
                       m_L_tmp = MatrixMultiply(m_trans, m_tmp3, m_L_tmp);
-                      m_inv = MatrixInverse(m_L_tmp, m_inv);
-                      error = compute_error(mri_dist, m_inv, Mras2vox, area,
+                      m_inv   = MatrixInverse(m_L_tmp, m_inv);
+                      error   = compute_error(mri_dist, m_inv, Mras2vox, area,
                                             lvol, cost_function, min_error);
                       if (error < min_error || debug) {
                         MatrixCopy(m_L_tmp, m_best);
                         MatrixCopy(m_inv, m_best_inv);
-                        min_error = error;
+                        min_error   = error;
                         x_max_scale = x_scale;
                         y_max_scale = y_scale;
                         z_max_scale = z_scale;
-                        x_max_rot = x_angle;
-                        y_max_rot = y_angle;
-                        z_max_rot = z_angle;
+                        x_max_rot   = x_angle;
+                        y_max_rot   = y_angle;
+                        z_max_rot   = z_angle;
                         x_max_trans = x_trans;
                         y_max_trans = y_trans;
                         z_max_trans = z_trans;
@@ -932,11 +931,11 @@ static double find_optimal_linear_xform(
                                __FUNCTION__, x_scale, y_scale, z_scale);
 #endif
                         if (write_diags) {
-                          char fname[STRLEN];
+                          char    fname[STRLEN];
                           MATRIX *OCT_voxel_to_RAS, *OCT_voxel_to_xformed_RAS;
-                          LABEL *l = LabelFromVoxelCoords(lvol, mri_dist, NULL,
+                          LABEL * l = LabelFromVoxelCoords(lvol, mri_dist, NULL,
                                                           Mvox2ras);
-                          MRI *mri_tmp;
+                          MRI *   mri_tmp;
 
                           // compute scanner vox2ras
                           OCT_voxel_to_RAS = MRIgetVoxelToRasXform(mri_src);
@@ -1066,19 +1065,19 @@ static double find_optimal_linear_xform(
     x_max_rot = y_max_rot = z_max_rot = 0.0 ;
 #endif
 
-    mean_scale = (max_scale + min_scale) / 2;
+    mean_scale  = (max_scale + min_scale) / 2;
     delta_scale = (max_scale - min_scale) / 4;
-    min_scale = mean_scale - delta_scale;
-    max_scale = mean_scale + delta_scale;
-    mean_trans = (max_trans + min_trans) / 2;
+    min_scale   = mean_scale - delta_scale;
+    max_scale   = mean_scale + delta_scale;
+    mean_trans  = (max_trans + min_trans) / 2;
     delta_trans = (max_trans - min_trans) / 4;
-    min_trans = mean_trans - delta_trans;
-    max_trans = mean_trans + delta_trans;
+    min_trans   = mean_trans - delta_trans;
+    max_trans   = mean_trans + delta_trans;
 
     mean_angle = (max_angle + min_angle) / 2;
-    delta_rot = (max_angle - min_angle) / 4;
-    min_angle = mean_angle - delta_rot;
-    max_angle = mean_angle + delta_rot;
+    delta_rot  = (max_angle - min_angle) / 4;
+    min_angle  = mean_angle - delta_rot;
+    max_angle  = mean_angle + delta_rot;
   }
 
   MatrixCopy(m_best, R0);
@@ -1106,13 +1105,13 @@ static double find_optimal_linear_xform(
 static int write_lta(MATRIX *m, char *fname_from_caller, MRI *mri_src,
                      MRI *mri_dst) {
   char *dot, fname[STRLEN];
-  LTA *lta;
+  LTA * lta;
 
   strcpy(fname, fname_from_caller);
   dot = strrchr(fname, '.');
   strcpy(dot + 1, "lta");
 
-  lta = LTAalloc(1, NULL);
+  lta       = LTAalloc(1, NULL);
   lta->type = LINEAR_RAS_TO_RAS;
 
   LTAsetVolGeom(lta, mri_src, mri_dst);

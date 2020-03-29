@@ -2,9 +2,9 @@
 #define BINARYTREENODE_H
 
 #include <QGraphicsItem>
-#include <QList>
-#include <QGraphicsView>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsView>
+#include <QList>
 
 class BinaryTreeEdge;
 class BinaryTreeView;
@@ -14,7 +14,7 @@ class BinaryTreeNode : public QGraphicsItem {
 public:
   BinaryTreeNode(BinaryTreeView *graphWidget);
 
-  void addEdge(BinaryTreeEdge *edge);
+  void                    addEdge(BinaryTreeEdge *edge);
   QList<BinaryTreeEdge *> edges() const;
 
   enum { Type = UserType + 1 };
@@ -23,10 +23,10 @@ public:
   // void calculateForces();
   bool advance();
 
-  QRectF boundingRect() const;
+  QRectF       boundingRect() const;
   QPainterPath shape() const;
-  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-             QWidget *widget);
+  void         paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                     QWidget *widget);
 
   void SetHighlighted(bool bHighlight, bool whole_branch = false);
 
@@ -39,8 +39,8 @@ protected:
 
 private:
   QList<BinaryTreeEdge *> edgeList;
-  QPointF newPos;
-  bool m_bHighlighted;
+  QPointF                 newPos;
+  bool                    m_bHighlighted;
 };
 
 #endif // BINARYTREENODE_H

@@ -1,13 +1,13 @@
 #include <iostream>
 
-#include <fstream>
 #include "LabelPerPointMembershipFunction.h"
+#include <fstream>
 #include <limits>
 
 #include <set>
 template <class TVector>
 LabelPerPointMembershipFunction<TVector>::LabelPerPointMembershipFunction() {
-  this->m_Variance = 0;
+  this->m_Variance   = 0;
   this->m_withCosine = false;
   this->m_withEuclid = false;
 }
@@ -15,12 +15,12 @@ template <class TVector>
 double LabelPerPointMembershipFunction<TVector>::EvaluateNO2(
     const MeasurementVectorType *m1, const MeasurementVectorType *m2) const {
   std::cout << " hola evaluate " << std::endl;
-  double dist = 0.0;
-  double dist_inv = 0.0;
+  double                                           dist     = 0.0;
+  double                                           dist_inv = 0.0;
   typedef typename MeasurementVectorType::CellType CellType;
-  const std::vector<CellType> labels1 = *m1->GetLabels();
-  const std::vector<CellType> labels2 = *m2->GetLabels();
-  std::set<int> set1, set2;
+  const std::vector<CellType>                      labels1 = *m1->GetLabels();
+  const std::vector<CellType>                      labels2 = *m2->GetLabels();
+  std::set<int>                                    set1, set2;
 
   int validLabels = 0;
   for (int i = 0; i < labels2.size(); i++) {
@@ -54,7 +54,7 @@ void LabelPerPointMembershipFunction<TVector>::AddChild(
 template <class TVector>
 void LabelPerPointMembershipFunction<TVector>::RecalculateCentroid() {
   this->m_Variance = 0;
-  int numPoints = this->GetCentroid()->GetLabels()->size() - 1;
+  int numPoints    = this->GetCentroid()->GetLabels()->size() - 1;
   MeasurementVectorType averageMv(numPoints * 3);
 
   for (int i = 0; i < this->childs.size(); i++) {

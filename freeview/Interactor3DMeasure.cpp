@@ -24,13 +24,13 @@
  */
 
 #include "Interactor3DMeasure.h"
-#include "RenderView3D.h"
-#include "MainWindow.h"
-#include "LayerCollection.h"
-#include "LayerPropertyMRI.h"
-#include "LayerMRI.h"
-#include "SurfaceRegion.h"
 #include "CursorFactory.h"
+#include "LayerCollection.h"
+#include "LayerMRI.h"
+#include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "RenderView3D.h"
+#include "SurfaceRegion.h"
 #include <QDebug>
 
 Interactor3DMeasure::Interactor3DMeasure(QObject *parent)
@@ -39,7 +39,7 @@ Interactor3DMeasure::Interactor3DMeasure(QObject *parent)
 Interactor3DMeasure::~Interactor3DMeasure() {}
 
 bool Interactor3DMeasure::ProcessMouseDownEvent(QMouseEvent *event,
-                                                RenderView *renderview) {
+                                                RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   bool ret = Interactor3D::ProcessMouseDownEvent(event, renderview);
@@ -86,7 +86,7 @@ bool Interactor3DMeasure::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor3DMeasure::ProcessMouseUpEvent(QMouseEvent *event,
-                                              RenderView *renderview) {
+                                              RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   if (m_bSelectRegion) {
@@ -98,7 +98,7 @@ bool Interactor3DMeasure::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor3DMeasure::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                RenderView *renderview) {
+                                                RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   if (m_bSelectRegion) {
@@ -109,7 +109,7 @@ bool Interactor3DMeasure::ProcessMouseMoveEvent(QMouseEvent *event,
   }
 }
 
-bool Interactor3DMeasure::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor3DMeasure::ProcessKeyDownEvent(QKeyEvent * event,
                                               RenderView *renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 

@@ -51,8 +51,8 @@ public:
   bool eventFilter(QObject *watched, QEvent *event);
 
 protected:
-  void DoUpdateWidgets();
-  void DoIdle();
+  void         DoUpdateWidgets();
+  void         DoIdle();
   virtual void ConnectLayer(Layer *layer);
   virtual void DisconnectAllLayers();
 
@@ -124,7 +124,7 @@ protected slots:
   void OnButtonSaveAnnotation();
 
 private:
-  QList<SurfaceLabel *> GetSelectedLabels();
+  QList<SurfaceLabel *>  GetSelectedLabels();
   QList<SurfaceSpline *> GetSelectedSplines();
 
   Ui::PanelSurface *ui;
@@ -138,13 +138,13 @@ private:
   QList<QWidget *> m_widgetsSpline;
   QList<QWidget *> m_widgetsOverlay;
   QList<QWidget *> m_widgetsAnnotation;
-  QToolButton *m_toolButtonSurface;
-  QActionGroup *m_actGroupSurface;
+  QToolButton *    m_toolButtonSurface;
+  QActionGroup *   m_actGroupSurface;
 
-  WindowConfigureOverlay *m_wndConfigureOverlay;
-  DialogCustomFill *m_dlgCustomFill;
+  WindowConfigureOverlay *      m_wndConfigureOverlay;
+  DialogCustomFill *            m_dlgCustomFill;
   DialogSurfaceLabelOperations *m_dlgLabelOps;
-  WindowEditAnnotation *m_wndEditAnnotation;
+  WindowEditAnnotation *        m_wndEditAnnotation;
 };
 
 #endif // PANELSURFACE_H

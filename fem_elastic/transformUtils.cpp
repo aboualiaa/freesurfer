@@ -1,6 +1,6 @@
-#include <math.h>
 #include <fstream>
 #include <iostream>
+#include <math.h>
 
 float *read_transform(const char *fname) {
   std::ifstream ifs(fname);
@@ -10,7 +10,7 @@ float *read_transform(const char *fname) {
     return NULL;
   }
 
-  float *fp = new float[12];
+  float *      fp = new float[12];
   unsigned int ui = 0;
   for (float *pbuf = fp; ui < 12 && ifs; ++ui, ++pbuf)
     ifs >> *pbuf;
@@ -63,7 +63,7 @@ void inv_transform(float *t, float **pinv_t) {
   inv_t[7] = (t[1] * t[6] - t[0] * t[7]) / fdet;
   inv_t[8] = (t[0] * t[4] - t[1] * t[3]) / fdet;
 
-  inv_t[9] = -t[9] * inv_t[0] - t[10] * inv_t[3] - t[11] * inv_t[6];
+  inv_t[9]  = -t[9] * inv_t[0] - t[10] * inv_t[3] - t[11] * inv_t[6];
   inv_t[10] = -t[9] * inv_t[1] - t[10] * inv_t[4] - t[11] * inv_t[7];
   inv_t[11] = -t[9] * inv_t[2] - t[10] * inv_t[5] - t[11] * inv_t[8];
 

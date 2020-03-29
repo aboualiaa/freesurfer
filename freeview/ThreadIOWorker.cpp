@@ -22,14 +22,14 @@
  *
  */
 #include "ThreadIOWorker.h"
-#include "LayerMRI.h"
-#include "LayerSurface.h"
+#include "LayerConnectomeMatrix.h"
 #include "LayerDTI.h"
+#include "LayerFCD.h"
+#include "LayerMRI.h"
 #include "LayerPLabel.h"
+#include "LayerSurface.h"
 #include "LayerTrack.h"
 #include "LayerVolumeTrack.h"
-#include "LayerConnectomeMatrix.h"
-#include "LayerFCD.h"
 #include <QApplication>
 #include <QDebug>
 
@@ -37,66 +37,66 @@ ThreadIOWorker::ThreadIOWorker(QObject *parent)
     : QThread(parent), m_nJobType(JT_LoadVolume), m_layer(NULL) {}
 
 void ThreadIOWorker::LoadVolume(Layer *layer, const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_LoadVolume;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
 void ThreadIOWorker::SaveVolume(Layer *layer, const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_SaveVolume;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
 void ThreadIOWorker::TransformVolume(Layer *layer, const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_TransformVolume;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
 void ThreadIOWorker::LoadSurface(Layer *layer, const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_LoadSurface;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
 void ThreadIOWorker::SaveSurface(Layer *layer, const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_SaveSurface;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
 void ThreadIOWorker::LoadSurfaceOverlay(Layer *layer, const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_LoadSurfaceOverlay;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
 void ThreadIOWorker::LoadTrack(Layer *layer, const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_LoadTrack;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
-void ThreadIOWorker::LoadConnectomeMatrix(Layer *layer,
+void ThreadIOWorker::LoadConnectomeMatrix(Layer *            layer,
                                           const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_LoadConnectome;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
 void ThreadIOWorker::LoadFCD(Layer *layer, const QVariantMap &args) {
-  m_layer = layer;
+  m_layer    = layer;
   m_nJobType = JT_LoadFCD;
-  m_args = args;
+  m_args     = args;
   start();
 }
 
@@ -173,12 +173,9 @@ void ThreadIOWorker::run() {
     if (!surf) {
       return;
     }
-    if ( !surf->LoadSurfaceFromFile(m_args["ignore_vg"].toBool()) )
-    {
-      emit Error( m_layer, m_nJobType );
-    }
-    else
-    {
+    if (!surf->LoadSurfaceFromFile(m_args["ignore_vg"].toBool())) {
+      emit Error(m_layer, m_nJobType);
+    } else {
       if (m_args.value("hidden").toBool())
         m_layer->setProperty("hidden", true);
 
@@ -199,10 +196,10 @@ void ThreadIOWorker::run() {
     if (!surf) {
       return;
     }
-    QString fn = m_args["FileName"].toString();
-    QString fn_reg = m_args["Registration"].toString();
-    bool bCorrelation = m_args["Correlation"].toBool();
-    bool bSecondHalf = m_args["SecondHalfData"].toBool();
+    QString fn           = m_args["FileName"].toString();
+    QString fn_reg       = m_args["Registration"].toString();
+    bool    bCorrelation = m_args["Correlation"].toBool();
+    bool    bSecondHalf  = m_args["SecondHalfData"].toBool();
     if (!surf->LoadOverlayFromFile(fn, fn_reg, bCorrelation, bSecondHalf)) {
       emit Error(m_layer, m_nJobType);
     } else {

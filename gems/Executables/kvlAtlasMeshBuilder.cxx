@@ -1,7 +1,7 @@
 #include "kvlAtlasMeshBuilder.h"
-#include "unistd.h"
-#include "kvlParameterOrderPowellOptimizer.h"
 #include "kvlAtlasMeshCollectionFastReferencePositionCost.h"
+#include "kvlParameterOrderPowellOptimizer.h"
+#include "unistd.h"
 
 #include "itk_5_4_map.h"
 
@@ -16,30 +16,30 @@ AtlasMeshBuilderMutexLock mutex;
 AtlasMeshBuilder ::AtlasMeshBuilder() {
   m_InitialSize.Fill(10);
   m_InitialStiffnesses = std::vector<double>(1, 0.1);
-  m_Mesher = MultiResolutionAtlasMesher::New();
+  m_Mesher             = MultiResolutionAtlasMesher::New();
 
   m_PowellAbsolutePrecision = 1.0;
 
   m_StuckCount = 0;
 
-  m_Current = 0;
+  m_Current  = 0;
   m_Progress = 0;
-  m_Verbose = false;
+  m_Verbose  = false;
 
-  m_IterationNumber = 0;
+  m_IterationNumber           = 0;
   m_MaximumNumberOfIterations = 30;
 
-  m_RetainedMiniCollection = 0;
+  m_RetainedMiniCollection  = 0;
   m_CollapsedMiniCollection = 0;
 
-  m_RetainedCost = 0;
-  m_RetainedDataCost = 0;
-  m_RetainedAlphasCost = 0;
+  m_RetainedCost         = 0;
+  m_RetainedDataCost     = 0;
+  m_RetainedAlphasCost   = 0;
   m_RetainedPositionCost = 0;
 
-  m_CollapsedCost = 0;
-  m_CollapsedDataCost = 0;
-  m_CollapsedAlphasCost = 0;
+  m_CollapsedCost         = 0;
+  m_CollapsedDataCost     = 0;
+  m_CollapsedAlphasCost   = 0;
   m_CollapsedPositionCost = 0;
 
   m_EdgeCollapseEncouragementFactor = 1.0;
@@ -60,13 +60,13 @@ void AtlasMeshBuilder ::PrintSelf(std::ostream &os, itk::Indent indent) const {}
 //
 void AtlasMeshBuilder ::SetUp(
     const std::vector<LabelImageType::ConstPointer> &labelImages,
-    const CompressionLookupTable *compressionLookupTable,
-    const itk::Size<3> &initialSize,
-    const std::vector<double> &initialStiffnesses) {
-  m_LabelImages = labelImages;
+    const CompressionLookupTable *                   compressionLookupTable,
+    const itk::Size<3> &                             initialSize,
+    const std::vector<double> &                      initialStiffnesses) {
+  m_LabelImages            = labelImages;
   m_CompressionLookupTable = compressionLookupTable;
-  m_InitialSize = initialSize;
-  m_InitialStiffnesses = initialStiffnesses;
+  m_InitialSize            = initialSize;
+  m_InitialStiffnesses     = initialStiffnesses;
   m_Mesher->SetUp(m_LabelImages, m_CompressionLookupTable, m_InitialSize,
                   m_InitialStiffnesses);
 }
@@ -115,7 +115,7 @@ void AtlasMeshBuilder ::Build(AtlasMeshCollection *explicitStartCollection,
   // Now start simplifying the result
   this->InvokeEvent(itk::StartEvent());
   itk::MultiThreaderBase::Pointer threader = itk::MultiThreaderBase::New();
-  int numberOfThreads = threader->GetNumberOfWorkUnits();
+  int numberOfThreads                      = threader->GetNumberOfWorkUnits();
   std::cout << "Using " << numberOfThreads << " threads" << std::endl;
 
   // ICM-like algorithm
@@ -144,8 +144,8 @@ void AtlasMeshBuilder ::Build(AtlasMeshCollection *explicitStartCollection,
     // Do the job
     m_StuckCount = 0; // Reset from previous iterations
     LoadBalancedThreadStruct str;
-    str.m_Builder = this;
-    str.m_Edges = edges;
+    str.m_Builder          = this;
+    str.m_Edges            = edges;
     str.m_PointOccupancies = pointOccupancies;
     threader->SetSingleMethod(this->LoadBalancedThreaderCallback, &str);
     threader->SingleMethodExecute();
@@ -170,7 +170,7 @@ void AtlasMeshBuilder ::GetCurrentDataAndAlphasCost(
     double &currentDataCost, double &currentAlphasCost) const {
 
   if (!m_Current) {
-    currentDataCost = 0.0;
+    currentDataCost   = 0.0;
     currentAlphasCost = 0.0;
 
     return;
@@ -219,7 +219,7 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToCollapseFast(
   // std::endl;
 
   // Get the mesh with the edge collapsed.
-  AtlasMesh::CellIdentifier unifiedVertexId;
+  AtlasMesh::CellIdentifier    unifiedVertexId;
   AtlasMeshCollection::Pointer child;
   if (!miniCollection->GetCollapsed(edgeId, child, disappearingCells,
                                     unifiedVertexId)) {
@@ -248,12 +248,12 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToCollapseFast(
   // miniCollection
   AtlasMesh::PointDataContainer::ConstIterator pointParamIt =
       miniCollection->GetPointParameters()->Begin();
-  int maximumAlphaLabelNumber = 0;
-  double maximumAlpha = itk::NumericTraits<double>::min();
+  int    maximumAlphaLabelNumber = 0;
+  double maximumAlpha            = itk::NumericTraits<double>::min();
   for (unsigned int classNumber = 0;
        classNumber < pointParamIt.Value().m_Alphas.Size(); classNumber++) {
     if (pointParamIt.Value().m_Alphas[classNumber] > maximumAlpha) {
-      maximumAlpha = pointParamIt.Value().m_Alphas[classNumber];
+      maximumAlpha            = pointParamIt.Value().m_Alphas[classNumber];
       maximumAlphaLabelNumber = classNumber;
     }
   }
@@ -292,7 +292,7 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToCollapseFast(
     if (canMoveX || canMoveY || canMoveZ) {
       // Decide what to optimize
       ParameterOrderPowellOptimizer::ParameterOrderType parameterOrder(3);
-      int cumulativeSum = 0;
+      int                                               cumulativeSum = 0;
       if (canMoveX) {
         parameterOrder[0] = 1;
         cumulativeSum++;
@@ -471,7 +471,7 @@ bool AtlasMeshBuilder ::OptimizeReferencePositionFast(
   if (optimize) {
     // Decide what to optimize
     ParameterOrderPowellOptimizer::ParameterOrderType parameterOrder(3);
-    int cumulativeSum = 0;
+    int                                               cumulativeSum = 0;
     if (canMoveX) {
       parameterOrder[0] = 1;
       cumulativeSum++;
@@ -644,7 +644,7 @@ AtlasMeshBuilder ::GetFakeCopy(const AtlasMeshCollection *input) const {
 //
 //
 bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
-    std::set<AtlasMesh::CellIdentifier> &edges,
+    std::set<AtlasMesh::CellIdentifier> &      edges,
     std::map<AtlasMesh::PointIdentifier, int> &pointOccupancies, int threadId) {
 
 #if 0
@@ -725,7 +725,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
                     // unlikely event that two threads try to increase this
                     // count at exactly the same time)
     const double averageNumberOfSecondsToSleep = 60.0;
-    const int stuckCountToGiveUpAt =
+    const int    stuckCountToGiveUpAt =
         30 * 20; // If every thread sleeps 1min on average, and 20 threads
                  // are used, this will give up after 30min
     if (m_StuckCount % 10 == 0) {
@@ -819,10 +819,10 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     std::cout << "    [THREAD " << threadId << "] "
               << "Trying to retain edge " << edgeId << std::endl;
   }
-  double retainedCost = 0;
-  double retainedDataCost = 0;
-  double retainedAlphasCost = 0;
-  double retainedPositionCost = 0;
+  double                       retainedCost         = 0;
+  double                       retainedDataCost     = 0;
+  double                       retainedAlphasCost   = 0;
+  double                       retainedPositionCost = 0;
   AtlasMeshCollection::Pointer retainedMiniCollection =
       this->TryToRetainFast(miniCollection, edgeId, retainedDataCost,
                             retainedAlphasCost, retainedPositionCost);
@@ -838,12 +838,12 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     std::cout << "    [THREAD " << threadId << "] "
               << "Trying to collapse edge " << edgeId << std::endl;
   }
-  double collapsedCost = 0;
-  double collapsedDataCost = 0;
-  double collapsedAlphasCost = 0;
-  double collapsedPositionCost = 0;
+  double                              collapsedCost         = 0;
+  double                              collapsedDataCost     = 0;
+  double                              collapsedAlphasCost   = 0;
+  double                              collapsedPositionCost = 0;
   std::set<AtlasMesh::CellIdentifier> collapsedDisappearingCells;
-  AtlasMeshCollection::Pointer collapsedMiniCollection =
+  AtlasMeshCollection::Pointer        collapsedMiniCollection =
       this->TryToCollapseFast(miniCollection, edgeId, collapsedDataCost,
                               collapsedAlphasCost, collapsedPositionCost,
                               collapsedDisappearingCells);
@@ -869,11 +869,11 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
   std::vector<double> totalCosts;
   totalCosts.push_back(retainedCost * m_EdgeCollapseEncouragementFactor);
   totalCosts.push_back(collapsedCost);
-  double minTotalCost = itk::NumericTraits<double>::max();
-  int minTotalCostIndex = -1;
+  double minTotalCost      = itk::NumericTraits<double>::max();
+  int    minTotalCostIndex = -1;
   for (unsigned int i = 0; i < totalCosts.size(); i++) {
     if (totalCosts[i] < minTotalCost) {
-      minTotalCost = totalCosts[i];
+      minTotalCost      = totalCosts[i];
       minTotalCostIndex = i;
     }
   }
@@ -1002,9 +1002,9 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
       // exit( -1 );
       itkExceptionMacro(<< "Ouch!");
     }
-    AtlasMeshCollection::Pointer collapsedBiggerMiniCollection;
+    AtlasMeshCollection::Pointer        collapsedBiggerMiniCollection;
     std::set<AtlasMesh::CellIdentifier> dummyDisappearingCells;
-    AtlasMesh::CellIdentifier dummyUnifiedVertexId;
+    AtlasMesh::CellIdentifier           dummyUnifiedVertexId;
     biggerMiniCollection->GetCollapsed(edgeId, collapsedBiggerMiniCollection,
                                        dummyDisappearingCells,
                                        dummyUnifiedVertexId);
@@ -1192,7 +1192,7 @@ AtlasMeshBuilder ::LoadBalancedThreaderCallback(void *arg) {
            *)(((itk::MultiThreaderBase::WorkUnitInfo *)(arg))->UserData);
 
   const int numberOfEdgesToAnalyze = str->m_Edges.size();
-  int numberOfEdgesAnalyzed = 0;
+  int       numberOfEdgesAnalyzed  = 0;
   while (true) {
     if (str->m_Builder->GetVerbose()) {
       std::cout << "I am thread " << threadId << " and I have analyzed "

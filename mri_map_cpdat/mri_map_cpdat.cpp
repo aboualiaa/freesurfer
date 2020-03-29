@@ -22,24 +22,22 @@
  *
  */
 
+#include "ctrpoints.h"
 #include "error.h"
 #include "version.h"
-#include "ctrpoints.h"
-
-using namespace std;
 
 struct Parameters {
-  string cpin;
-  string cpout;
-  string lta;
-  string subjectlistfile;
-  string subject;
-  int ToMNI305;
-  int FromMNI305;
+  std::string cpin;
+  std::string cpout;
+  std::string lta;
+  std::string subjectlistfile;
+  std::string subject;
+  int         ToMNI305;
+  int         FromMNI305;
 };
 static struct Parameters P = {"", "", "", "", "", 0, 0};
 
-static int get_option(int argc, char *argv[], Parameters &P);
+static int  get_option(int argc, char *argv[], Parameters &P);
 static void usage_exit(int code);
 
 const char *Progname = NULL;
@@ -47,14 +45,13 @@ static LTA *LTAloadTalairachXFM(const char *subject);
 static LTA *LTAloadTalairachXFMInv(const char *subject);
 
 int main(int argc, char *argv[]) {
-  int nargs;
+  int  nargs;
   LTA *lta = nullptr;
 
   // Default initialization
   nargs = handleVersionOption(argc, argv, "mri_map_cpdat");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
   Progname = argv[0];
@@ -74,7 +71,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (P.subjectlistfile != "") {
-    int nctrtot;
+    int     nctrtot;
     MPoint *ctr;
     ctr = GetTalControlPointsSFile(P.subjectlistfile.c_str(), &nctrtot);
     if (ctr == nullptr)
@@ -94,7 +91,7 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
   }
 
-  int count = 0;
+  int count      = 0;
   int useRealRAS = 0;
 
   // read ctrl points
@@ -103,7 +100,7 @@ int main(int argc, char *argv[]) {
     exit(1);
 
   // read lta
-  cout << "Reading LTA" << endl;
+  std::cout << "Reading LTA" << std::endl;
   if (P.subject == "")
     lta = LTAread(P.lta.c_str());
   else {
@@ -118,11 +115,11 @@ int main(int argc, char *argv[]) {
   LTAprint(stdout, lta);
 
   // map ctrl points
-  cout << "Mapping control points..." << endl;
+  std::cout << "Mapping control points..." << std::endl;
   MPoint *mappedArray =
       MRImapControlPoints(pArray, count, useRealRAS, nullptr, lta);
   // write ctrl points
-  cout << "Writing control points..." << endl;
+  std::cout << "Writing control points..." << std::endl;
   MRIwriteControlPoints(mappedArray, count, useRealRAS, P.cpout.c_str());
 
   // cleanup
@@ -133,7 +130,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[], Parameters &P) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[0] + 1; /* past '-' */
@@ -143,34 +140,35 @@ static int get_option(int argc, char *argv[], Parameters &P) {
   StrUpper(option);
 
   if (!strcmp(option, "IN")) {
-    P.cpin = string(argv[1]);
-    nargs = 1;
-    cout << "--in:  Using " << P.cpin << " as input file." << endl;
+    P.cpin = std::string(argv[1]);
+    nargs  = 1;
+    std::cout << "--in:  Using " << P.cpin << " as input file." << std::endl;
   } else if (!strcmp(option, "OUT")) {
-    P.cpout = string(argv[1]);
-    nargs = 1;
-    cout << "--out: Using " << P.cpout << " as output file." << endl;
+    P.cpout = std::string(argv[1]);
+    nargs   = 1;
+    std::cout << "--out: Using " << P.cpout << " as output file." << std::endl;
   } else if (!strcmp(option, "LTA")) {
-    P.lta = string(argv[1]);
+    P.lta = std::string(argv[1]);
     nargs = 1;
-    cout << "--lta: Using " << P.lta << " as transform." << endl;
+    std::cout << "--lta: Using " << P.lta << " as transform." << std::endl;
   } else if (!strcmp(option, "SLF")) {
-    P.subjectlistfile = string(argv[1]);
-    nargs = 1;
-    cout << "--slf: Using " << P.subjectlistfile << " as subjectlist." << endl;
+    P.subjectlistfile = std::string(argv[1]);
+    nargs             = 1;
+    std::cout << "--slf: Using " << P.subjectlistfile << " as subjectlist."
+              << std::endl;
   } else if (!strcmp(option, "TOMNI305")) {
-    P.subject = string(argv[1]);
+    P.subject  = std::string(argv[1]);
     P.ToMNI305 = 1;
-    nargs = 1;
+    nargs      = 1;
   } else if (!strcmp(option, "FROMMNI305")) {
-    P.subject = string(argv[1]);
+    P.subject    = std::string(argv[1]);
     P.FromMNI305 = 1;
-    nargs = 1;
+    nargs        = 1;
   } else {
-    cerr << endl
-         << endl
-         << "ERROR: Option: " << argv[0] << " unknown !! " << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: Option: " << argv[0] << " unknown !! " << std::endl
+              << std::endl;
     exit(1);
   }
 

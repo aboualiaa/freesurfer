@@ -23,22 +23,22 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  MRI *mri_src, *mri_dst;
-  char *in_fname, *out_fname;
-  int label, nvox;
+  int    ac, nargs;
+  MRI *  mri_src, *mri_dst;
+  char * in_fname, *out_fname;
+  int    label, nvox;
 
   nargs = handleVersionOption(argc, argv, "mri_copy_values");
   if (nargs && argc - nargs == 1)
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

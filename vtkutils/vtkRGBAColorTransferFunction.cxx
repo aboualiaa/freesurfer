@@ -46,10 +46,10 @@
 
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
-#include <vector>
 #include <algorithm>
-#include <iterator>
 #include <cmath>
+#include <iterator>
+#include <vector>
 
 // vtkCxxRevisionMacro(vtkRGBAColorTransferFunction, "$Revision: 1.2 $");
 vtkStandardNewMacro(vtkRGBAColorTransferFunction);
@@ -76,14 +76,14 @@ public:
 class vtkCTFFindNodeEqual {
 public:
   double X;
-  bool operator()(const vtkCTFNode *node) { return node->X == this->X; }
+  bool   operator()(const vtkCTFNode *node) { return node->X == this->X; }
 };
 
 class vtkCTFFindNodeInRange {
 public:
   double X1;
   double X2;
-  bool operator()(const vtkCTFNode *node) {
+  bool   operator()(const vtkCTFNode *node) {
     return (node->X >= this->X1 && node->X <= this->X2);
   }
 };
@@ -92,7 +92,7 @@ class vtkCTFFindNodeOutOfRange {
 public:
   double X1;
   double X2;
-  bool operator()(const vtkCTFNode *node) {
+  bool   operator()(const vtkCTFNode *node) {
     return (node->X < this->X1 || node->X > this->X2);
   }
 };
@@ -100,42 +100,42 @@ public:
 class vtkRGBAColorTransferFunctionInternals {
 public:
   std::vector<vtkCTFNode *> Nodes;
-  vtkCTFCompareNodes CompareNodes;
-  vtkCTFFindNodeEqual FindNodeEqual;
-  vtkCTFFindNodeInRange FindNodeInRange;
-  vtkCTFFindNodeOutOfRange FindNodeOutOfRange;
+  vtkCTFCompareNodes        CompareNodes;
+  vtkCTFFindNodeEqual       FindNodeEqual;
+  vtkCTFFindNodeInRange     FindNodeInRange;
+  vtkCTFFindNodeOutOfRange  FindNodeOutOfRange;
 };
 
 //=============================================================================
 // Convert to and from a special polar version of CIELAB (useful for creating
 // continuous diverging color maps).
 inline void vtkRGBAColorTransferFunctionLabToMsh(const double lab[4],
-                                                 double msh[4]) {
+                                                 double       msh[4]) {
   const double &L = lab[0];
   const double &a = lab[1];
   const double &b = lab[2];
-  double &M = msh[0];
-  double &s = msh[1];
-  double &h = msh[2];
+  double &      M = msh[0];
+  double &      s = msh[1];
+  double &      h = msh[2];
 
-  M = sqrt(L * L + a * a + b * b);
-  s = (M > 0.001) ? acos(L / M) : 0.0;
-  h = (s > 0.001) ? atan2(b, a) : 0.0;
+  M      = sqrt(L * L + a * a + b * b);
+  s      = (M > 0.001) ? acos(L / M) : 0.0;
+  h      = (s > 0.001) ? atan2(b, a) : 0.0;
   msh[3] = lab[3];
 }
 
 inline void vtkRGBAColorTransferFunctionMshToLab(const double msh[4],
-                                                 double lab[4]) {
+                                                 double       lab[4]) {
   const double &M = msh[0];
   const double &s = msh[1];
   const double &h = msh[2];
-  double &L = lab[0];
-  double &a = lab[1];
-  double &b = lab[2];
+  double &      L = lab[0];
+  double &      a = lab[1];
+  double &      b = lab[2];
 
-  L = M * cos(s);
-  a = M * sin(s) * cos(h);
-  b = M * sin(s) * sin(h);
+  L      = M * cos(s);
+  a      = M * sin(s) * cos(h);
+  b      = M * sin(s) * sin(h);
   lab[3] = msh[3];
 }
 
@@ -154,7 +154,7 @@ inline double vtkRGBAColorTransferFunctionAngleDiff(double a1, double a2) {
 // For the case when interpolating from a saturated color to an unsaturated
 // color, find a hue for the unsaturated color that makes sense.
 inline double vtkRGBAColorTransferFunctionAdjustHue(const double msh[3],
-                                                    double unsatM) {
+                                                    double       unsatM) {
   if (msh[0] >= unsatM - 0.1) {
     // The best we can do is hold hue constant.
     return msh[2];
@@ -196,12 +196,12 @@ inline void vtkRGBAColorTransferFunctionInterpolateDiverging(
       msh2[0] = 95.0;
       msh2[1] = 0.0;
       msh2[2] = 0.0;
-      s = 2.0 * s;
+      s       = 2.0 * s;
     } else {
       msh1[0] = 95.0;
       msh1[1] = 0.0;
       msh1[2] = 0.0;
-      s = 2.0 * s - 1.0;
+      s       = 2.0 * s - 1.0;
     }
   }
 
@@ -238,15 +238,15 @@ vtkRGBAColorTransferFunction::vtkRGBAColorTransferFunction() {
   this->Range[0] = 0;
   this->Range[1] = 0;
 
-  this->Clamping = 1;
+  this->Clamping   = 1;
   this->ColorSpace = VTK_CTF_RGB;
-  this->HSVWrap = 1; // By default HSV will be wrap
+  this->HSVWrap    = 1; // By default HSV will be wrap
 
   this->Scale = VTK_CTF_LINEAR;
 
   this->Function = nullptr;
 
-  this->Table = nullptr;
+  this->Table     = nullptr;
   this->TableSize = 0;
 
   this->AllowDuplicateScalars = 1;
@@ -290,7 +290,7 @@ double *vtkRGBAColorTransferFunction::GetDataPointer() {
   if (size > 0) {
     this->Function = new double[size * 5];
     for (int i = 0; i < size; i++) {
-      this->Function[5 * i] = this->Internal->Nodes[i]->X;
+      this->Function[5 * i]     = this->Internal->Nodes[i]->X;
       this->Function[5 * i + 1] = this->Internal->Nodes[i]->R;
       this->Function[5 * i + 2] = this->Internal->Nodes[i]->G;
       this->Function[5 * i + 3] = this->Internal->Nodes[i]->B;
@@ -332,13 +332,13 @@ int vtkRGBAColorTransferFunction::AddRGBAPoint(double x, double r, double g,
 
   // Create the new node
   vtkCTFNode *node = new vtkCTFNode;
-  node->X = x;
-  node->R = r;
-  node->G = g;
-  node->B = b;
-  node->A = a;
-  node->Midpoint = midpoint;
-  node->Sharpness = sharpness;
+  node->X          = x;
+  node->R          = r;
+  node->G          = g;
+  node->B          = b;
+  node->A          = a;
+  node->Midpoint   = midpoint;
+  node->Sharpness  = sharpness;
 
   // Add it, then sort to get everyting in order
   this->Internal->Nodes.push_back(node);
@@ -592,7 +592,7 @@ double vtkRGBAColorTransferFunction::GetAlphaValue(double x) {
 void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
                                             int size, double *table) {
   int i, j;
-  int idx = 0;
+  int idx      = 0;
   int numNodes = static_cast<int>(this->Internal->Nodes.size());
 
   // Need to keep track of the last value so that
@@ -609,14 +609,14 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
     lastA = this->Internal->Nodes[numNodes - 1]->A;
   }
 
-  double *tptr = nullptr;
-  double x = 0.0;
-  double x1 = 0.0;
-  double x2 = 0.0;
-  double rgba1[4] = {0.0, 0.0, 0.0, 0.0};
-  double rgba2[4] = {0.0, 0.0, 0.0, 0.0};
-  double midpoint = 0.0;
-  double sharpness = 0.0;
+  double *tptr      = nullptr;
+  double  x         = 0.0;
+  double  x1        = 0.0;
+  double  x2        = 0.0;
+  double  rgba1[4]  = {0.0, 0.0, 0.0, 0.0};
+  double  rgba2[4]  = {0.0, 0.0, 0.0, 0.0};
+  double  midpoint  = 0.0;
+  double  sharpness = 0.0;
 
   // If the scale is logarithmic, make sure the range is valid.
   bool usingLogScale = this->Scale == VTK_CTF_LOG10;
@@ -626,11 +626,11 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
   }
 
   double logStart = 0.0;
-  double logEnd = 0.0;
-  double logX = 0.0;
+  double logEnd   = 0.0;
+  double logX     = 0.0;
   if (usingLogScale) {
     logStart = log10(xStart);
-    logEnd = log10(xEnd);
+    logEnd   = log10(xEnd);
   }
 
   // For each table entry
@@ -655,7 +655,7 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
     } else {
       if (usingLogScale) {
         logX = 0.5 * (logStart + logEnd);
-        x = pow(static_cast<double>(10.0), logX);
+        x    = pow(static_cast<double>(10.0), logX);
       } else {
         x = 0.5 * (xStart + xEnd);
       }
@@ -690,7 +690,7 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
 
         // We only need the previous midpoint and sharpness
         // since these control this region
-        midpoint = this->Internal->Nodes[idx - 1]->Midpoint;
+        midpoint  = this->Internal->Nodes[idx - 1]->Midpoint;
         sharpness = this->Internal->Nodes[idx - 1]->Sharpness;
 
         // Move midpoint away from extreme ends of range to avoid
@@ -830,7 +830,7 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
       }
 
       // Compute some coefficients we will need for the hermite curve
-      double ss = s * s;
+      double ss  = s * s;
       double sss = ss * s;
 
       double h1 = 2 * sss - 3 * ss + 1;
@@ -845,7 +845,7 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
         for (j = 0; j < 4; j++) {
           // Use one slope for both end points
           slope = rgba2[j] - rgba1[j];
-          t = (1.0 - sharpness) * slope;
+          t     = (1.0 - sharpness) * slope;
 
           // Compute the value
           tptr[j] = h1 * rgba1[j] + h2 * rgba2[j] + h3 * t + h4 * t;
@@ -871,7 +871,7 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
         for (j = 0; j < 4; j++) {
           // Use one slope for both end points
           slope = hsv2[j] - hsv1[j];
-          t = (1.0 - sharpness) * slope;
+          t     = (1.0 - sharpness) * slope;
 
           // Compute the value
           hsvTmp[j] = h1 * hsv1[j] + h2 * hsv2[j] + h3 * t + h4 * t;
@@ -893,7 +893,7 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
         for (j = 0; j < 4; j++) {
           // Use one slope for both end points
           slope = lab2[j] - lab1[j];
-          t = (1.0 - sharpness) * slope;
+          t     = (1.0 - sharpness) * slope;
 
           // Compute the value
           labTmp[j] = h1 * lab1[j] + h2 * lab2[j] + h3 * t + h4 * t;
@@ -927,7 +927,7 @@ void vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd,
   this->GetTable(xStart, xEnd, size, tmpTable);
 
   double *tmpPtr = tmpTable;
-  float *tPtr = table;
+  float * tPtr   = table;
 
   for (int i = 0; i < size * 4; i++) {
     *tPtr = static_cast<float>(*tmpPtr);
@@ -953,7 +953,7 @@ vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd, int size) {
 
   if (this->TableSize != size) {
     delete[] this->Table;
-    this->Table = new unsigned char[size * 4];
+    this->Table     = new unsigned char[size * 4];
     this->TableSize = size;
   }
 
@@ -961,8 +961,8 @@ vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd, int size) {
 
   this->GetTable(xStart, xEnd, size, tmpTable);
 
-  double *tmpPtr = tmpTable;
-  unsigned char *tPtr = this->Table;
+  double *       tmpPtr = tmpTable;
+  unsigned char *tPtr   = this->Table;
 
   for (int i = 0; i < size * 4; i++) {
     *tPtr = static_cast<unsigned char>(*tmpPtr * 255.0 + 0.5);
@@ -981,7 +981,7 @@ vtkRGBAColorTransferFunction::GetTable(double xStart, double xEnd, int size) {
 void vtkRGBAColorTransferFunction::BuildFunctionFromTable(double xStart,
                                                           double xEnd, int size,
                                                           double *table) {
-  double inc = 0.0;
+  double  inc  = 0.0;
   double *tptr = table;
 
   this->RemoveAllPoints();
@@ -993,13 +993,13 @@ void vtkRGBAColorTransferFunction::BuildFunctionFromTable(double xStart,
   int i;
   for (i = 0; i < size; i++) {
     vtkCTFNode *node = new vtkCTFNode;
-    node->X = xStart + inc * i;
-    node->R = tptr[0];
-    node->G = tptr[1];
-    node->B = tptr[2];
-    node->A = tptr[3];
-    node->Sharpness = 0.0;
-    node->Midpoint = 0.5;
+    node->X          = xStart + inc * i;
+    node->R          = tptr[0];
+    node->G          = tptr[1];
+    node->B          = tptr[2];
+    node->A          = tptr[3];
+    node->Sharpness  = 0.0;
+    node->Midpoint   = 0.5;
 
     this->Internal->Nodes.push_back(node);
     tptr += 4;
@@ -1047,12 +1047,12 @@ int vtkRGBAColorTransferFunction::SetNodeValue(int index, double val[7]) {
     return -1;
   }
 
-  this->Internal->Nodes[index]->X = val[0];
-  this->Internal->Nodes[index]->R = val[1];
-  this->Internal->Nodes[index]->G = val[2];
-  this->Internal->Nodes[index]->B = val[3];
-  this->Internal->Nodes[index]->A = val[4];
-  this->Internal->Nodes[index]->Midpoint = val[5];
+  this->Internal->Nodes[index]->X         = val[0];
+  this->Internal->Nodes[index]->R         = val[1];
+  this->Internal->Nodes[index]->G         = val[2];
+  this->Internal->Nodes[index]->B         = val[3];
+  this->Internal->Nodes[index]->A         = val[4];
+  this->Internal->Nodes[index]->Midpoint  = val[5];
   this->Internal->Nodes[index]->Sharpness = val[6];
 
   this->Modified();
@@ -1063,10 +1063,10 @@ int vtkRGBAColorTransferFunction::SetNodeValue(int index, double val[7]) {
 //----------------------------------------------------------------------------
 void vtkRGBAColorTransferFunction::DeepCopy(vtkRGBAColorTransferFunction *f) {
   if (f != nullptr) {
-    this->Clamping = f->Clamping;
+    this->Clamping   = f->Clamping;
     this->ColorSpace = f->ColorSpace;
-    this->HSVWrap = f->HSVWrap;
-    this->Scale = f->Scale;
+    this->HSVWrap    = f->HSVWrap;
+    this->Scale      = f->Scale;
 
     int i;
     this->RemoveAllPoints();
@@ -1084,10 +1084,10 @@ void vtkRGBAColorTransferFunction::DeepCopy(vtkRGBAColorTransferFunction *f) {
 void vtkRGBAColorTransferFunction::ShallowCopy(
     vtkRGBAColorTransferFunction *f) {
   if (f != nullptr) {
-    this->Clamping = f->Clamping;
+    this->Clamping   = f->Clamping;
     this->ColorSpace = f->ColorSpace;
-    this->HSVWrap = f->HSVWrap;
-    this->Scale = f->Scale;
+    this->HSVWrap    = f->HSVWrap;
+    this->Scale      = f->Scale;
 
     int i;
     this->RemoveAllPoints();
@@ -1111,11 +1111,11 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
                                          T *input, unsigned char *output,
                                          int length, int inIncr, int outFormat,
                                          long) {
-  double x;
-  int i = length;
-  double rgb[4];
+  double         x;
+  int            i = length;
+  double         rgb[4];
   unsigned char *optr = output;
-  T *iptr = input;
+  T *            iptr = input;
   //  unsigned char   alpha = static_cast<unsigned
   //  char>(self->GetAlphaValue()*255.0);
 
@@ -1148,11 +1148,11 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
 //----------------------------------------------------------------------------
 // Special implementation for unsigned char input.
 void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
-                                         unsigned char *input,
+                                         unsigned char *               input,
                                          unsigned char *output, int length,
                                          int inIncr, int outFormat, int) {
-  int x;
-  int i = length;
+  int            x;
+  int            i    = length;
   unsigned char *optr = output;
   unsigned char *iptr = input;
 
@@ -1165,7 +1165,7 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
   switch (outFormat) {
   case VTK_RGB:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 1];
       *(optr++) = table[x + 2];
@@ -1174,7 +1174,7 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
     break;
   case VTK_RGBA:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 1];
       *(optr++) = table[x + 2];
@@ -1184,7 +1184,7 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
     break;
   case VTK_LUMINANCE_ALPHA:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 3];
       iptr += inIncr;
@@ -1192,7 +1192,7 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
     break;
   case VTK_LUMINANCE:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       iptr += inIncr;
     }
@@ -1203,12 +1203,12 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
 //----------------------------------------------------------------------------
 // Special implementation for unsigned short input.
 void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
-                                         unsigned short *input,
+                                         unsigned short *              input,
                                          unsigned char *output, int length,
                                          int inIncr, int outFormat, int) {
-  int x;
-  int i = length;
-  unsigned char *optr = output;
+  int             x;
+  int             i    = length;
+  unsigned char * optr = output;
   unsigned short *iptr = input;
 
   if (self->GetSize() == 0) {
@@ -1220,7 +1220,7 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
   switch (outFormat) {
   case VTK_RGB:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 1];
       *(optr++) = table[x + 2];
@@ -1229,7 +1229,7 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
     break;
   case VTK_RGBA:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 1];
       *(optr++) = table[x + 2];
@@ -1239,7 +1239,7 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
     break;
   case VTK_LUMINANCE_ALPHA:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 3];
       iptr += inIncr;
@@ -1247,7 +1247,7 @@ void vtkRGBAColorTransferFunctionMapData(vtkRGBAColorTransferFunction *self,
     break;
   case VTK_LUMINANCE:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       iptr += inIncr;
     }
@@ -1263,9 +1263,9 @@ void vtkRGBAColorTransferFunctionMagMapData(vtkRGBAColorTransferFunction *self,
                                             T *input, unsigned char *output,
                                             int length, int inIncr,
                                             int outFormat, int v) {
-  double tmp, sum;
+  double  tmp, sum;
   double *mag;
-  int i, j;
+  int     i, j;
 
   mag = new double[length];
   for (i = 0; i < length; ++i) {
@@ -1386,7 +1386,7 @@ int vtkRGBAColorTransferFunction::AdjustRange(double range[2]) {
 void vtkRGBAColorTransferFunction::PrintSelf(ostream &os, vtkIndent indent) {
   this->Superclass::PrintSelf(os, indent);
 
-  os << indent << "Size: " << this->Internal->Nodes.size() << endl;
+  os << indent << "Size: " << this->Internal->Nodes.size() << std::endl;
   if (this->Clamping) {
     os << indent << "Clamping: On\n";
   } else {
@@ -1410,10 +1410,10 @@ void vtkRGBAColorTransferFunction::PrintSelf(ostream &os, vtkIndent indent) {
   }
 
   os << indent << "Range: " << this->Range[0] << " to " << this->Range[1]
-     << endl;
+     << std::endl;
 
   os << indent << "AllowDuplicateScalars: " << this->AllowDuplicateScalars
-     << endl;
+     << std::endl;
 
   unsigned int i;
   for (i = 0; i < this->Internal->Nodes.size(); i++) {
@@ -1422,6 +1422,6 @@ void vtkRGBAColorTransferFunction::PrintSelf(ostream &os, vtkIndent indent) {
        << " G: " << this->Internal->Nodes[i]->G
        << " B: " << this->Internal->Nodes[i]->B
        << " Sharpness: " << this->Internal->Nodes[i]->Sharpness
-       << " Midpoint: " << this->Internal->Nodes[i]->Midpoint << endl;
+       << " Midpoint: " << this->Internal->Nodes[i]->Midpoint << std::endl;
   }
 }

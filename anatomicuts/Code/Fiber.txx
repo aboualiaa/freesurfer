@@ -89,8 +89,8 @@ double Fiber<T, TDimension, TTensorCoord>::GetLength(void) const {
 
   for (unsigned int i = 0; i < m_FiberPointList.size() - 1; i++) {
     PointType current = m_FiberPointList[i].Point;
-    PointType next = m_FiberPointList[i + 1].Point;
-    double dist = 0.0;
+    PointType next    = m_FiberPointList[i + 1].Point;
+    double    dist    = 0.0;
 
     for (unsigned int j = 0; j < TDimension; j++)
       dist += (next[j] - current[j]) * (next[j] - current[j]);
@@ -104,7 +104,7 @@ double Fiber<T, TDimension, TTensorCoord>::GetLength(void) const {
 template <class T, unsigned int TDimension, class TTensorCoord>
 double Fiber<T, TDimension, TTensorCoord>::GetEuclideanLength(void) const {
   PointType Start = m_FiberPointList[0];
-  PointType End = m_FiberPointList[m_FiberPointList.size() - 1];
+  PointType End   = m_FiberPointList[m_FiberPointList.size() - 1];
 
   double dist = 0.0;
 
@@ -116,38 +116,38 @@ double Fiber<T, TDimension, TTensorCoord>::GetEuclideanLength(void) const {
 
 template <class T, unsigned int TDimension, class TTensorCoord>
 void Fiber<T, TDimension, TTensorCoord>::GetStatistics(StatisticsType type,
-                                                       double &mean,
+                                                       double &       mean,
                                                        double &min, double &max,
                                                        double &var) const {
   if (m_FiberPointList.size() == 0) {
     mean = 0.0;
-    min = 0.0;
-    max = 0.0;
-    var = 0.0;
+    min  = 0.0;
+    max  = 0.0;
+    var  = 0.0;
     return;
   }
 
   // first point
-  PointType current = m_FiberPointList[0].Point;
+  PointType  current       = m_FiberPointList[0].Point;
   TensorType currentTensor = m_FiberPointList[0].Tensor;
 
   if (m_FiberPointList.size() == 1) {
     mean = this->GetTensorScalarValue(currentTensor, type);
-    min = mean;
-    max = mean;
-    var = 0.0;
+    min  = mean;
+    max  = mean;
+    var  = 0.0;
     return;
   }
 
   unsigned int pointCount = m_FiberPointList.size();
 
-  double minStat = 99999999.9;
-  double maxStat = -1.0;
+  double minStat     = 99999999.9;
+  double maxStat     = -1.0;
   double totalLength = 0.0;
-  double totalStat = 0.0;
-  double dist = 0.0;
+  double totalStat   = 0.0;
+  double dist        = 0.0;
 
-  PointType next = m_FiberPointList[1].Point;
+  PointType  next       = m_FiberPointList[1].Point;
   TensorType nextTensor = m_FiberPointList[1].Tensor;
 
   dist = current.EuclideanDistanceTo(next) * 0.5;
@@ -164,10 +164,10 @@ void Fiber<T, TDimension, TTensorCoord>::GetStatistics(StatisticsType type,
   totalLength += dist;
 
   for (unsigned int i = 1; i < m_FiberPointList.size() - 1; i++) {
-    current = next;
+    current       = next;
     currentTensor = nextTensor;
 
-    next = m_FiberPointList[i + 1].Point;
+    next       = m_FiberPointList[i + 1].Point;
     nextTensor = m_FiberPointList[i + 1].Tensor;
 
     double oldDist = dist;
@@ -188,10 +188,10 @@ void Fiber<T, TDimension, TTensorCoord>::GetStatistics(StatisticsType type,
   }
 
   // case of last point
-  current = next;
+  current       = next;
   currentTensor = nextTensor;
 
-  next = m_FiberPointList[pointCount - 1].Point;
+  next       = m_FiberPointList[pointCount - 1].Point;
   nextTensor = m_FiberPointList[pointCount - 1].Tensor;
 
   dist = current.EuclideanDistanceTo(next) * 0.5;
@@ -212,9 +212,9 @@ void Fiber<T, TDimension, TTensorCoord>::GetStatistics(StatisticsType type,
     totalStat /= totalLength;
 
   mean = totalStat;
-  min = minStat;
-  max = maxStat;
-  var = 0.0;
+  min  = minStat;
+  max  = maxStat;
+  var  = 0.0;
 }
 
 template <class T, unsigned int TDimension, class TTensorCoord>

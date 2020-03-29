@@ -22,28 +22,28 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mrimorph.h"
 #include "const.h"
-#include "transform.h"
-#include "timer.h"
-#include "version.h"
+#include "diag.h"
+#include "error.h"
 #include "gcamorph.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrimorph.h"
+#include "proto.h"
+#include "timer.h"
+#include "transform.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static MRI *MRIcombineHemispheres(MRI *mri_lh, MRI *mri_rh, MRI *mri_dst,
                                   MRI *mri_lh_prob, MRI *mri_rh_prob);
-static int MRIfillVolume(MRI *mri);
+static int  MRIfillVolume(MRI *mri);
 static MRI *MRIcheckHemisphereOverlap(MRI *mri_lh, MRI *mri_rh, MRI *mri_dst,
                                       MRI *mri_lh_prob, MRI *mri_rh_prob);
 static MRI *MRIthresholdFilled(MRI *mri_src, MRI *mri_T1, MRI *mri_mask,
@@ -66,23 +66,23 @@ static void usage_exit(int code);
 #define LH_FILLED_VOLUME 4
 #define RH_FILLED_VOLUME 6
 
-static float pct = 95.0f;
-static float nsigma = 0.1f;
-static int fix = 0;
-static int dilate = 0;
-int old_flag = 0; // use M3Dmorph instead of GCAmorph
+static float pct      = 95.0f;
+static float nsigma   = 0.1f;
+static int   fix      = 0;
+static int   dilate   = 0;
+int          old_flag = 0; // use M3Dmorph instead of GCAmorph
 
 int main(int argc, char *argv[]) {
   char **av, path[STRLEN], ventricle_fname[500];
-  int ac, nargs;
+  int    ac, nargs;
   MRI *mri_filled, *mri_lh_template, *mri_lh_inverse_template, *mri_lh, *mri_rh,
       *mri_lv, *mri_rv, *mri_inv_lv, *mri_inv_rv, *mri_rh_template,
       *mri_rh_inverse_template, *mri_T1, *mri_inv_T1, *mri_inv_T1_std, *mri_tmp;
   char *filled_fname, *template_fname, *out_fname, *xform_fname, fname[100],
       *T1_fname;
-  M3D *m3d = nullptr;
+  M3D * m3d = nullptr;
   GCAM *gcam;
-  int msec;
+  int   msec;
 
   nargs = handleVersionOption(argc, argv, "mri_auto_fill");
   if (nargs && argc - nargs == 1)
@@ -106,11 +106,11 @@ int main(int argc, char *argv[]) {
   if (argc < 5)
     usage_exit(1);
 
-  filled_fname = argv[1];
-  T1_fname = argv[2];
-  xform_fname = argv[3];
+  filled_fname   = argv[1];
+  T1_fname       = argv[2];
+  xform_fname    = argv[3];
   template_fname = argv[4];
-  out_fname = argv[5];
+  out_fname      = argv[5];
 
   /////////////////////////////////////////////////////////////////////
   fprintf(stderr, "reading transform %s...", xform_fname);
@@ -356,7 +356,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -382,7 +382,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
     case 'P':
-      pct = atof(argv[2]);
+      pct   = atof(argv[2]);
       nargs = 1;
       fprintf(stderr, "using threshold = %2.1f%%\n", pct);
       break;
@@ -411,29 +411,29 @@ static void usage_exit(int code) {
 }
 static MRI *MRIcombineHemispheres(MRI *mri_lh, MRI *mri_rh, MRI *mri_dst,
                                   MRI *mri_lh_prob, MRI *mri_rh_prob) {
-  int x, y, z, width, height, depth;
+  int      x, y, z, width, height, depth;
   BUFTYPE *plh_prob, *prh_prob, *plh, *prh, *pdst, lh_prob, rh_prob, lh_label,
       rh_label, out_label;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_lh, NULL);
 
-  width = mri_dst->width;
+  width  = mri_dst->width;
   height = mri_dst->height;
-  depth = mri_dst->depth;
+  depth  = mri_dst->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      plh = &MRIvox(mri_lh, 0, y, z);
-      prh = &MRIvox(mri_rh, 0, y, z);
+      plh      = &MRIvox(mri_lh, 0, y, z);
+      prh      = &MRIvox(mri_rh, 0, y, z);
       plh_prob = &MRIvox(mri_lh_prob, 0, y, z);
       prh_prob = &MRIvox(mri_rh_prob, 0, y, z);
-      pdst = &MRIvox(mri_dst, 0, y, z);
+      pdst     = &MRIvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
         lh_label = *plh++;
         rh_label = *prh++;
-        lh_prob = *plh_prob++;
-        rh_prob = *prh_prob++;
+        lh_prob  = *plh_prob++;
+        rh_prob  = *prh_prob++;
         if (lh_label && !rh_label)
           out_label = lh_label;
         else if (rh_label && !lh_label)
@@ -453,8 +453,8 @@ static MRI *MRIcombineHemispheres(MRI *mri_lh, MRI *mri_rh, MRI *mri_dst,
   return (mri_dst);
 }
 /* Talairach seed points for white matter in left and right hemispheres */
-#define SEED_SEARCH_SIZE 9
-#define MIN_NEIGHBORS 3
+#define SEED_SEARCH_SIZE      9
+#define MIN_NEIGHBORS         3
 #define CORPUS_CALLOSUM_TAL_X 0.0
 #define CORPUS_CALLOSUM_TAL_Y 0.0
 #define CORPUS_CALLOSUM_TAL_Z 27.0
@@ -471,7 +471,7 @@ static int MRIfillVolume(MRI *mri) {
   int wm_lh_x, wm_lh_y, wm_lh_z, wm_rh_x, wm_rh_y, wm_rh_z, xi, yi, zi, x, y, z,
       xnew, ynew, znew;
   double xr, yr, zr, dist, min_dist, xd, yd, zd;
-  MRI *mri_fg, *mri_bg;
+  MRI *  mri_fg, *mri_bg;
 #if 0
   BUFTYPE  val ;
   int      xlim0, xlim1, ylim0, ylim1, zlim0, zlim1 ;
@@ -515,7 +515,7 @@ static int MRIfillVolume(MRI *mri) {
       (neighbors_on(mri, wm_lh_x, wm_lh_y, wm_lh_z, MRI_LEFT_HEMISPHERE) <
        MIN_NEIGHBORS)) {
     xnew = ynew = znew = 0;
-    min_dist = 10000.0f;
+    min_dist           = 10000.0f;
     if (Gdiag & DIAG_SHOW)
       fprintf(stderr, "searching for lh wm seed...\n");
     for (z = wm_lh_z - SEED_SEARCH_SIZE; z <= wm_lh_z + SEED_SEARCH_SIZE; z++) {
@@ -529,14 +529,14 @@ static int MRIfillVolume(MRI *mri) {
           if ((MRIvox(mri, xi, yi, zi) == MRI_LEFT_HEMISPHERE) &&
               neighbors_on(mri, xi, yi, zi, MRI_LEFT_HEMISPHERE) >=
                   MIN_NEIGHBORS) {
-            xd = (xi - wm_lh_x);
-            yd = (yi - wm_lh_y);
-            zd = (zi - wm_lh_z);
+            xd   = (xi - wm_lh_x);
+            yd   = (yi - wm_lh_y);
+            zd   = (zi - wm_lh_z);
             dist = xd * xd + yd * yd + zd * zd;
             if (dist < min_dist) {
-              xnew = xi;
-              ynew = yi;
-              znew = zi;
+              xnew     = xi;
+              ynew     = yi;
+              znew     = zi;
               min_dist = dist;
             }
           }
@@ -566,7 +566,7 @@ static int MRIfillVolume(MRI *mri) {
       (neighbors_on(mri, wm_rh_x, wm_rh_y, wm_rh_z, MRI_RIGHT_HEMISPHERE) <
        MIN_NEIGHBORS)) {
     xnew = ynew = znew = 0;
-    min_dist = 10000.0f;
+    min_dist           = 10000.0f;
     if (Gdiag & DIAG_SHOW)
       fprintf(stderr, "searching for rh wm seed...\n");
     for (z = wm_rh_z - SEED_SEARCH_SIZE; z <= wm_rh_z + SEED_SEARCH_SIZE; z++) {
@@ -580,14 +580,14 @@ static int MRIfillVolume(MRI *mri) {
           if ((MRIvox(mri, xi, yi, zi) == MRI_RIGHT_HEMISPHERE) &&
               (neighbors_on(mri, xi, yi, zi, MRI_RIGHT_HEMISPHERE) >=
                MIN_NEIGHBORS)) {
-            xd = (xi - wm_rh_x);
-            yd = (yi - wm_rh_y);
-            zd = (zi - wm_rh_z);
+            xd   = (xi - wm_rh_x);
+            yd   = (yi - wm_rh_y);
+            zd   = (zi - wm_rh_z);
             dist = xd * xd + yd * yd + zd * zd;
             if (dist < min_dist) {
-              xnew = xi;
-              ynew = yi;
-              znew = zi;
+              xnew     = xi;
+              ynew     = yi;
+              znew     = zi;
               min_dist = dist;
             }
           }
@@ -605,7 +605,7 @@ static int MRIfillVolume(MRI *mri) {
             neighbors_on(mri, wm_rh_x, wm_rh_y, wm_rh_z, MRI_RIGHT_HEMISPHERE));
 
   /* initialize the fill with the detected seed points */
-  mri_fg = MRIclone(mri, NULL);
+  mri_fg                                    = MRIclone(mri, NULL);
   MRIvox(mri_fg, wm_rh_x, wm_rh_y, wm_rh_z) = MRI_RIGHT_HEMISPHERE;
   MRIvox(mri_fg, wm_lh_x, wm_lh_y, wm_lh_z) = MRI_LEFT_HEMISPHERE;
   fprintf(stderr, "filling left hemisphere...\n");
@@ -617,7 +617,7 @@ static int MRIfillVolume(MRI *mri) {
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
     MRIwrite(mri_fg, "rh.mgh@mgh");
 
-  mri_bg = MRIclone(mri, NULL);
+  mri_bg                  = MRIclone(mri, NULL);
   MRIvox(mri_bg, 0, 0, 0) = 1;
   fprintf(stderr, "filling background...\n");
   MRIgrowLabel(mri, mri_bg, 0, 1);
@@ -656,36 +656,36 @@ static int neighbors_on(MRI *mri, int x0, int y0, int z0, int label) {
 ----------------------------------------------------------------------*/
 static MRI *MRIcheckHemisphereOverlap(MRI *mri_lh, MRI *mri_rh, MRI *mri_dst,
                                       MRI *mri_lh_prob, MRI *mri_rh_prob) {
-  int x, y, z, width, height, depth;
+  int      x, y, z, width, height, depth;
   BUFTYPE *plh_prob, *prh_prob, *plh, *prh, *pdst, *psrc, lh_prob, rh_prob,
       lh_label, rh_label, label;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_lh, NULL);
 
-  width = mri_dst->width;
+  width  = mri_dst->width;
   height = mri_dst->height;
-  depth = mri_dst->depth;
+  depth  = mri_dst->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      plh = &MRIvox(mri_lh, 0, y, z);
-      prh = &MRIvox(mri_rh, 0, y, z);
+      plh      = &MRIvox(mri_lh, 0, y, z);
+      prh      = &MRIvox(mri_rh, 0, y, z);
       plh_prob = &MRIvox(mri_lh_prob, 0, y, z);
       prh_prob = &MRIvox(mri_rh_prob, 0, y, z);
-      psrc = &MRIvox(mri_dst, 0, y, z);
-      pdst = &MRIvox(mri_dst, 0, y, z);
+      psrc     = &MRIvox(mri_dst, 0, y, z);
+      pdst     = &MRIvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
         if (x == 131 && y == 135 && z == 76)
           DiagBreak(); /* marked as 255, should be 127 */
         if (x == 125 && y == 148 && z == 100)
           DiagBreak(); /* marked as 255, should be 127 */
 
-        label = *psrc++;
+        label    = *psrc++;
         lh_label = *plh++;
         rh_label = *prh++;
-        lh_prob = *plh_prob++;
-        rh_prob = *prh_prob++;
+        lh_prob  = *plh_prob++;
+        rh_prob  = *prh_prob++;
         if (label) /* white matter of one hemi or the other */
         {
 #if 0
@@ -718,7 +718,7 @@ static MRI *MRIthresholdFilled(MRI *mri_src, MRI *mri_T1, MRI *mri_mask,
                                int out_label) {
   BUFTYPE *pmask, *pdst, *psrc, out_val, mask, in_val, T1_val, T1_inv_val,
       sigma, *pT1, *pinvT1, *psigma;
-  int width, height, depth, x, y, z, nchanged, noff, non;
+  int   width, height, depth, x, y, z, nchanged, noff, non;
   float nvox, sdist;
 
   if (mri_mask->type != MRI_UCHAR)
@@ -728,9 +728,9 @@ static MRI *MRIthresholdFilled(MRI *mri_src, MRI *mri_T1, MRI *mri_mask,
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, NULL);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   /* now apply the inverse morph to build an average wm representation
      of the input volume
      */
@@ -738,16 +738,16 @@ static MRI *MRIthresholdFilled(MRI *mri_src, MRI *mri_T1, MRI *mri_mask,
   noff = non = nchanged = 0;
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pmask = &MRIvox(mri_mask, 0, y, z);
-      psrc = &MRIvox(mri_src, 0, y, z);
-      pdst = &MRIvox(mri_dst, 0, y, z);
-      pT1 = &MRIvox(mri_T1, 0, y, z);
+      pmask  = &MRIvox(mri_mask, 0, y, z);
+      psrc   = &MRIvox(mri_src, 0, y, z);
+      pdst   = &MRIvox(mri_dst, 0, y, z);
+      pT1    = &MRIvox(mri_T1, 0, y, z);
       pinvT1 = &MRIvox(mri_inv_T1, 0, y, z);
       psigma = &MRIvox(mri_inv_T1_std, 0, y, z);
       for (x = 0; x < width; x++) {
-        T1_val = *pT1++;
+        T1_val     = *pT1++;
         T1_inv_val = *pinvT1++;
-        sigma = *psigma++;
+        sigma      = *psigma++;
         if (!FZERO(sigma))
           sdist = (float)abs(T1_val - T1_inv_val) / sigma;
         else
@@ -755,8 +755,8 @@ static MRI *MRIthresholdFilled(MRI *mri_src, MRI *mri_T1, MRI *mri_mask,
         if (x == 125 && y == 148 && z == 100)
           DiagBreak(); /* marked as 255, should be 127 */
         out_val = 0;
-        mask = *pmask++; /* value from inverse morphed volume */
-        in_val = *psrc++;
+        mask    = *pmask++; /* value from inverse morphed volume */
+        in_val  = *psrc++;
         if (sdist > nsigma) /* intensities are too different - don't change */
           out_val = in_val;
         else {
@@ -792,14 +792,14 @@ static MRI *MRIthresholdFilled(MRI *mri_src, MRI *mri_T1, MRI *mri_mask,
 MRI *MRIfillVentricle(MRI *mri_inv_ventricle, MRI *mri_T1, float thresh,
                       int out_label, MRI *mri_dst) {
   BUFTYPE *pdst, *pinv_ventricle, out_val, T1_val, inv_ventricle_val, *pT1;
-  int width, height, depth, x, y, z, ventricle_voxels, dno;
+  int      width, height, depth, x, y, z, ventricle_voxels, dno;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_T1, NULL);
 
-  width = mri_T1->width;
+  width  = mri_T1->width;
   height = mri_T1->height;
-  depth = mri_T1->depth;
+  depth  = mri_T1->depth;
   /* now apply the inverse morph to build an average wm representation
      of the input volume
      */
@@ -810,13 +810,13 @@ MRI *MRIfillVentricle(MRI *mri_inv_ventricle, MRI *mri_T1, float thresh,
   ventricle_voxels = 0;
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pdst = &MRIvox(mri_dst, 0, y, z);
-      pT1 = &MRIvox(mri_T1, 0, y, z);
+      pdst           = &MRIvox(mri_dst, 0, y, z);
+      pT1            = &MRIvox(mri_T1, 0, y, z);
       pinv_ventricle = &MRIvox(mri_inv_ventricle, 0, y, z);
       for (x = 0; x < width; x++) {
-        T1_val = *pT1++;
+        T1_val            = *pT1++;
         inv_ventricle_val = *pinv_ventricle++;
-        out_val = 0;
+        out_val           = 0;
         if (inv_ventricle_val >= thresh) {
           ventricle_voxels++;
           out_val = out_label;

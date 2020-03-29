@@ -22,13 +22,13 @@
  *
  */
 #include "TermWidget.h"
-#include "ui_TermWidget.h"
 #include "MainWindow.h"
 #include "MyCmdLineParser.h"
-#include <QTimer>
+#include "ui_TermWidget.h"
 #include <QDebug>
-#include <QSettings>
 #include <QScrollBar>
+#include <QSettings>
+#include <QTimer>
 #include <iostream>
 
 #define BUFFER_SIZE 8192
@@ -255,9 +255,9 @@ void TermWidget::SetDarkTheme(bool bDark) {
     pal.setColor(QPalette::Text, QColor(0x909090));
     pal.setColor(QPalette::Base, QColor(0x333333));
     ui->textLog->setPalette(pal);
-    m_strLogColor = "#c0c0c0";
+    m_strLogColor   = "#c0c0c0";
     m_strErrorColor = "#ee4444";
-    QString text = ui->textLog->toHtml();
+    QString text    = ui->textLog->toHtml();
     text.replace("#444444", m_strLogColor);
     text.replace("#ff0000", m_strErrorColor);
     int pos = sb->sliderPosition();
@@ -273,9 +273,9 @@ void TermWidget::SetDarkTheme(bool bDark) {
     pal.setColor(QPalette::Text, QColor(0x777777));
     pal.setColor(QPalette::Base, QColor(0xeeeeee));
     ui->textLog->setPalette(pal);
-    m_strLogColor = "#444444";
+    m_strLogColor   = "#444444";
     m_strErrorColor = "#ff0000";
-    QString text = ui->textLog->toHtml();
+    QString text    = ui->textLog->toHtml();
     text.replace("#c0c0c0", m_strLogColor);
     text.replace("#ee4444", m_strErrorColor);
     int pos = sb->sliderPosition();

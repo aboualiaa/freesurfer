@@ -8,14 +8,14 @@
 
 int main() {
   // Set 10 x, xnew and y values
-  int N = 10;
-  Spline3<double> S;
+  int                 N = 10;
+  Spline3<double>     S;
   std::vector<double> x(N);
   std::vector<double> xnew(N);
   std::vector<double> ynew;
-  double snm1 = sqrt(N - 1);
+  double              snm1 = sqrt(N - 1);
   for (int i = 0; i < N; i++) {
-    x[i] = sqrt(i);               // sqrt spacing
+    x[i]    = sqrt(i);            // sqrt spacing
     xnew[i] = snm1 * i / (N - 1); // equal spacing
   }
   static const double arr[] = {2, 3, 4, 9, 4, 2, 4, 7, 8, 13}; // y data

@@ -12,9 +12,9 @@
 /*-----------------------------------------------------
   INCLUDE FILES
   -------------------------------------------------------*/
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
 #include "diag.h"
 #include "error.h"
@@ -23,8 +23,8 @@
 
 #include "joint_histo.h"
 
-static int min(int a, int b) { return (a < b) ? a : b; }
-static int max(int a, int b) { return (a > b) ? a : b; }
+static int   min(int a, int b) { return (a < b) ? a : b; }
+static int   max(int a, int b) { return (a > b) ? a : b; }
 static float flmin(float a, float b) { return (a < b) ? a : b; }
 static float flmax(float a, float b) { return (a > b) ? a : b; }
 
@@ -38,7 +38,7 @@ static float flmax(float a, float b) { return (a > b) ? a : b; }
 int JHISTOfree(JOINT_HISTOGRAM **pjhisto) {
   JOINT_HISTOGRAM *jhisto;
 
-  jhisto = *pjhisto;
+  jhisto   = *pjhisto;
   *pjhisto = nullptr;
   if (jhisto) {
     if (jhisto->counts) {
@@ -94,12 +94,12 @@ int JHISTOwriteInto(JOINT_HISTOGRAM *h, FILE *fp) {
 }
 
 JOINT_HISTOGRAM *JHISTOreadFrom(FILE *fp) {
-  int b1, b2, nbins_1, nbins_2; //, sample_count;
+  int              b1, b2, nbins_1, nbins_2; //, sample_count;
   JOINT_HISTOGRAM *jh;
 
   nbins_1 = freadInt(fp);
   nbins_2 = freadInt(fp);
-  jh = JHISTOalloc(nbins_1, nbins_2);
+  jh      = JHISTOalloc(nbins_1, nbins_2);
 
   // total_bins = freadInt(fp) ;
   // sample_count =
@@ -165,13 +165,13 @@ int JHISTOfindBin(JOINT_HISTOGRAM *jhisto, double val1, double val2) {
 void JHISTOfill(MRI *mri1, MRI *mri2, JOINT_HISTOGRAM *jhisto) {
   // MRIcheckVolDims(mri1, mri2);
 
-  int width = mri1->width;
-  int height = mri1->height;
-  int depth = mri1->depth;
-  int frame = mri1->nframes;
-  int f, x, y, z, index;
+  int    width  = mri1->width;
+  int    height = mri1->height;
+  int    depth  = mri1->depth;
+  int    frame  = mri1->nframes;
+  int    f, x, y, z, index;
   double val1, val2;
-  int count = 0;
+  int    count = 0;
 
   //
   float min1, min2, max1, max2;
@@ -204,9 +204,9 @@ void JHISTOfill(MRI *mri1, MRI *mri2, JOINT_HISTOGRAM *jhisto) {
 
 double JHISTOgetEntropy(JOINT_HISTOGRAM *jhisto) {
   double result = 0, p;
-  int i, count;
-  int total_bucket_count = jhisto->nbins_1 * jhisto->nbins_2;
-  int sample_count = jhisto->sample_count;
+  int    i, count;
+  int    total_bucket_count = jhisto->nbins_1 * jhisto->nbins_2;
+  int    sample_count       = jhisto->sample_count;
 
   for (i = 0; i < total_bucket_count; i++) {
     count = jhisto->counts[i];

@@ -44,7 +44,7 @@ public:
   void SetPosition(double *pos);
 
   double *GetPosition();
-  void GetPosition(double *pos);
+  void    GetPosition(double *pos);
 
   void GetColor(double *rgb);
   void SetColor(double r, double g, double b);
@@ -80,8 +80,8 @@ private:
   RenderView3D *m_view;
 
   double m_dPosition[3];
-  int m_nSize;
-  int m_nThickness;
+  int    m_nSize;
+  int    m_nThickness;
   double m_dScale;
 };
 

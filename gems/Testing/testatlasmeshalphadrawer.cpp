@@ -1,17 +1,17 @@
-#include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "itkImageRegionConstIteratorWithIndex.h"
 
-#include "kvlAtlasMesh.h"
-#include "kvlAtlasMeshAlphaDrawer.h"
 #include "atlasmeshalphadrawer.hpp"
 #include "atlasmeshalphadrawercpuwrapper.hpp"
+#include "kvlAtlasMesh.h"
+#include "kvlAtlasMeshAlphaDrawer.h"
 
 #ifdef CUDA_FOUND
-#include "cudaimage.hpp"
 #include "atlasmeshalphadrawercuda.hpp"
+#include "cudaimage.hpp"
 #endif
 
 #include "imageutils.hpp"
@@ -20,19 +20,19 @@
 
 // ----------------------------------------------
 
-const int nDims = 3;
+const int nDims     = 3;
 const int nVertices = 4;
 
 // -----------------------------------------
 
 typedef kvl::interfaces::AtlasMeshAlphaDrawer::ImageType ImageType;
-typedef kvl::AtlasMesh Mesh;
+typedef kvl::AtlasMesh                                   Mesh;
 
 // ----------------------------------------------
 
-void CheckAlphaDrawer(kvl::interfaces::AtlasMeshAlphaDrawer *ad,
+void CheckAlphaDrawer(kvl::interfaces::AtlasMeshAlphaDrawer * ad,
                       TestFileLoader::ImageType::ConstPointer targetImage,
-                      kvl::AtlasMesh::ConstPointer targetMesh,
+                      kvl::AtlasMesh::ConstPointer            targetMesh,
                       const int classNumber, const float percentTolerance) {
   kvl::AtlasMeshAlphaDrawer::Pointer originalAD =
       kvl::AtlasMeshAlphaDrawer::New();
@@ -161,7 +161,7 @@ BOOST_FIXTURE_TEST_SUITE(ActualImage, TestFileLoader)
 
 BOOST_AUTO_TEST_CASE(ReferenceImpl) {
   kvl::AtlasMeshAlphaDrawerCPUWrapper ad;
-  const int classNumber = 1;
+  const int                           classNumber = 1;
 
   // Set floating point tolerance as a percentage
   // A value of 1.0 means 1%
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(ReferenceImpl) {
 #ifdef CUDA_FOUND
 BOOST_AUTO_TEST_CASE(CudaImpl) {
   kvl::cuda::AtlasMeshAlphaDrawerCUDA ad;
-  const int classNumber = 1;
+  const int                           classNumber = 1;
 
   // Set floating point tolerance as a percentage
   // A value of 1.0 means 1%
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(CudaImpl) {
 #endif
 
 BOOST_AUTO_TEST_CASE(MeshInformation) {
-  size_t nOther = 0;
+  size_t                                      nOther = 0;
   std::vector<kvl::AtlasMesh::CellIdentifier> tetrahedronIds;
 
   for (auto cellIt = mesh->GetCells()->Begin();

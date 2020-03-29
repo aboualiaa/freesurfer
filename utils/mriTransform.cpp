@@ -21,8 +21,8 @@
  *
  */
 
-#include <math.h>
 #include <cstdlib>
+#include <math.h>
 
 #include "macros.h"
 
@@ -39,8 +39,8 @@ const char *Trns_ksaErrorStrings[Trns_knNumErrorCodes] = {
     "Invalid error code."};
 
 Trns_tErr Trns_New(mriTransformRef *opTransform) {
-  Trns_tErr eResult = Trns_tErr_NoErr;
-  mriTransformRef ref = nullptr;
+  Trns_tErr       eResult = Trns_tErr_NoErr;
+  mriTransformRef ref     = nullptr;
 
   /* allocate us */
   ref = (mriTransformRef)malloc(sizeof(mriTransform));
@@ -53,14 +53,14 @@ Trns_tErr Trns_New(mriTransformRef *opTransform) {
   ref->mSignature = Trns_kSignature;
 
   /* set our matrices to null. */
-  ref->mAtoRAS = nullptr;
-  ref->mBtoRAS = nullptr;
+  ref->mAtoRAS     = nullptr;
+  ref->mBtoRAS     = nullptr;
   ref->mARAStoBRAS = nullptr;
-  ref->mRAStoA = nullptr;
-  ref->mRAStoB = nullptr;
+  ref->mRAStoA     = nullptr;
+  ref->mRAStoB     = nullptr;
   ref->mBRAStoARAS = nullptr;
-  ref->mAtoB = nullptr;
-  ref->mBtoA = nullptr;
+  ref->mAtoB       = nullptr;
+  ref->mBtoA       = nullptr;
 
   /* allocate our temp matricies */
   ref->mCoord1 = MatrixAlloc(4, 1, MATRIX_REAL);
@@ -84,10 +84,10 @@ cleanup:
 }
 
 Trns_tErr Trns_NewFromLTA(mriTransformRef *opTransform, char *isLTAFileName) {
-  Trns_tErr eResult = Trns_tErr_NoErr;
-  mriTransformRef ref = nullptr;
-  LTA *LTATransform = nullptr;
-  MATRIX *identity = nullptr;
+  Trns_tErr       eResult      = Trns_tErr_NoErr;
+  mriTransformRef ref          = nullptr;
+  LTA *           LTATransform = nullptr;
+  MATRIX *        identity     = nullptr;
 
   /* allocate us */
   ref = (mriTransformRef)malloc(sizeof(mriTransform));
@@ -100,14 +100,14 @@ Trns_tErr Trns_NewFromLTA(mriTransformRef *opTransform, char *isLTAFileName) {
   ref->mSignature = Trns_kSignature;
 
   /* set our matrices to null. */
-  ref->mAtoRAS = nullptr;
-  ref->mBtoRAS = nullptr;
+  ref->mAtoRAS     = nullptr;
+  ref->mBtoRAS     = nullptr;
   ref->mARAStoBRAS = nullptr;
-  ref->mRAStoA = nullptr;
-  ref->mRAStoB = nullptr;
+  ref->mRAStoA     = nullptr;
+  ref->mRAStoB     = nullptr;
   ref->mBRAStoARAS = nullptr;
-  ref->mAtoB = nullptr;
-  ref->mBtoA = nullptr;
+  ref->mAtoB       = nullptr;
+  ref->mBtoA       = nullptr;
 
   /* try to read a transform and make sure we got it */
   DebugNote(("Trying to read transform file %s", isLTAFileName));
@@ -156,8 +156,8 @@ cleanup:
 }
 
 Trns_tErr Trns_Delete(mriTransformRef *iopTransform) {
-  Trns_tErr eResult = Trns_tErr_NoErr;
-  mriTransformRef ref = nullptr;
+  Trns_tErr       eResult = Trns_tErr_NoErr;
+  mriTransformRef ref     = nullptr;
 
   /* get us. */
   ref = *iopTransform;
@@ -221,8 +221,8 @@ cleanup:
 }
 
 Trns_tErr Trns_DeepClone(mriTransformRef ref, mriTransformRef *opTransform) {
-  Trns_tErr eResult = Trns_tErr_NoErr;
-  mriTransformRef clone = nullptr;
+  Trns_tErr       eResult = Trns_tErr_NoErr;
+  mriTransformRef clone   = nullptr;
 
   eResult = Trns_Verify(ref);
   if (Trns_tErr_NoErr != eResult) {
@@ -487,18 +487,18 @@ cleanup:
   MatrixPrint(stderr, m);
 
 Trns_tErr Trns_ApplyTransform(mriTransformRef ref, MATRIX *iTransform) {
-  Trns_tErr eResult = Trns_tErr_NoErr;
-  MATRIX *mTranslation = nullptr;
-  MATRIX *mTranslationInv = nullptr;
-  MATRIX *mRotation = nullptr;
-  MATRIX *mRotationInv = nullptr;
-  MATRIX *mScale = nullptr;
-  MATRIX *mNewTranslation = nullptr;
-  MATRIX *mNewRotation = nullptr;
-  MATRIX *mNewScale = nullptr;
-  MATRIX *mTmp1 = nullptr;
-  MATRIX *mTmp2 = nullptr;
-  MATRIX *mNew = nullptr;
+  Trns_tErr eResult         = Trns_tErr_NoErr;
+  MATRIX *  mTranslation    = nullptr;
+  MATRIX *  mTranslationInv = nullptr;
+  MATRIX *  mRotation       = nullptr;
+  MATRIX *  mRotationInv    = nullptr;
+  MATRIX *  mScale          = nullptr;
+  MATRIX *  mNewTranslation = nullptr;
+  MATRIX *  mNewRotation    = nullptr;
+  MATRIX *  mNewScale       = nullptr;
+  MATRIX *  mTmp1           = nullptr;
+  MATRIX *  mTmp2           = nullptr;
+  MATRIX *  mNew            = nullptr;
 
   eResult = Trns_Verify(ref);
   if (Trns_tErr_NoErr != eResult) {
@@ -506,17 +506,17 @@ Trns_tErr Trns_ApplyTransform(mriTransformRef ref, MATRIX *iTransform) {
   }
 
   /* init our matricies */
-  mTranslation = MatrixAlloc(4, 4, MATRIX_REAL);
+  mTranslation    = MatrixAlloc(4, 4, MATRIX_REAL);
   mTranslationInv = MatrixAlloc(4, 4, MATRIX_REAL);
-  mRotation = MatrixAlloc(4, 4, MATRIX_REAL);
-  mRotationInv = MatrixAlloc(4, 4, MATRIX_REAL);
-  mScale = MatrixAlloc(4, 4, MATRIX_REAL);
+  mRotation       = MatrixAlloc(4, 4, MATRIX_REAL);
+  mRotationInv    = MatrixAlloc(4, 4, MATRIX_REAL);
+  mScale          = MatrixAlloc(4, 4, MATRIX_REAL);
   mNewTranslation = MatrixAlloc(4, 4, MATRIX_REAL);
-  mNewRotation = MatrixAlloc(4, 4, MATRIX_REAL);
-  mNew = MatrixAlloc(4, 4, MATRIX_REAL);
-  mTmp1 = MatrixAlloc(4, 4, MATRIX_REAL);
-  mTmp2 = MatrixAlloc(4, 4, MATRIX_REAL);
-  mNewScale = MatrixAlloc(4, 4, MATRIX_REAL);
+  mNewRotation    = MatrixAlloc(4, 4, MATRIX_REAL);
+  mNew            = MatrixAlloc(4, 4, MATRIX_REAL);
+  mTmp1           = MatrixAlloc(4, 4, MATRIX_REAL);
+  mTmp2           = MatrixAlloc(4, 4, MATRIX_REAL);
+  mNewScale       = MatrixAlloc(4, 4, MATRIX_REAL);
 
   //  mp("orig",ref->mARAStoBRAS);
 
@@ -641,15 +641,15 @@ Trns_tErr Trns_ExtractTranslationMatrix(MATRIX *iTransform,
 
 Trns_tErr Trns_ExtractRotationMatrix(MATRIX *iTransform, MATRIX *oRotation) {
   MATRIX *mScale = nullptr;
-  MATRIX *mTmp = nullptr;
-  int n = 0;
+  MATRIX *mTmp   = nullptr;
+  int     n      = 0;
 
   if (nullptr == iTransform || nullptr == oRotation) {
     return Trns_tErr_InvalidParameter;
   }
 
   /* create a matrix identical to the transform but without the translation */
-  mTmp = MatrixCopy(iTransform, nullptr);
+  mTmp                     = MatrixCopy(iTransform, nullptr);
   *MATRIX_RELT(mTmp, 1, 4) = 0;
   *MATRIX_RELT(mTmp, 2, 4) = 0;
   *MATRIX_RELT(mTmp, 3, 4) = 0;
@@ -677,22 +677,22 @@ Trns_tErr Trns_ExtractRotationMatrix(MATRIX *iTransform, MATRIX *oRotation) {
 }
 
 Trns_tErr Trns_ExtractScaleMatrix(MATRIX *iTransform, MATRIX *oScale) {
-  MATRIX *mTmp = nullptr;
-  VECTOR *vTmp = nullptr;
-  float fFactor = 0;
+  MATRIX *mTmp    = nullptr;
+  VECTOR *vTmp    = nullptr;
+  float   fFactor = 0;
 
   if (nullptr == iTransform || nullptr == oScale) {
     return Trns_tErr_InvalidParameter;
   }
 
   /* create a matrix identical to the transform but without the translation */
-  mTmp = MatrixCopy(iTransform, mTmp);
+  mTmp                     = MatrixCopy(iTransform, mTmp);
   *MATRIX_RELT(mTmp, 1, 4) = 0;
   *MATRIX_RELT(mTmp, 2, 4) = 0;
   *MATRIX_RELT(mTmp, 3, 4) = 0;
 
   /* find the x component. create a 1,0,0 vector and compose it. */
-  vTmp = VectorAlloc(4, MATRIX_REAL);
+  vTmp                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(vTmp, 1) = 1.0;
   VECTOR_ELT(vTmp, 2) = 0;
   VECTOR_ELT(vTmp, 3) = 0;
@@ -710,7 +710,7 @@ Trns_tErr Trns_ExtractScaleMatrix(MATRIX *iTransform, MATRIX *oScale) {
   VECTOR_ELT(vTmp, 3) = 0;
   VECTOR_ELT(vTmp, 4) = 0.0;
   MatrixMultiply(mTmp, vTmp, vTmp);
-  fFactor = VectorLen(vTmp);
+  fFactor                    = VectorLen(vTmp);
   *MATRIX_RELT(oScale, 2, 2) = fFactor;
 
   /* do the same for z with a 0,0,1 vector */
@@ -719,7 +719,7 @@ Trns_tErr Trns_ExtractScaleMatrix(MATRIX *iTransform, MATRIX *oScale) {
   VECTOR_ELT(vTmp, 3) = 1.00;
   VECTOR_ELT(vTmp, 4) = 0.0;
   MatrixMultiply(mTmp, vTmp, vTmp);
-  fFactor = VectorLen(vTmp);
+  fFactor                    = VectorLen(vTmp);
   *MATRIX_RELT(oScale, 3, 3) = fFactor;
 
   MatrixFree(&mTmp);
@@ -729,10 +729,10 @@ Trns_tErr Trns_ExtractScaleMatrix(MATRIX *iTransform, MATRIX *oScale) {
 }
 
 Trns_tErr Trns_Translate(mriTransformRef ref, float ifAmount, tAxis iAxis) {
-  Trns_tErr eResult = Trns_tErr_NoErr;
-  MATRIX *mTransform = nullptr;
-  MATRIX *mOld = nullptr;
-  MATRIX *mNew = nullptr;
+  Trns_tErr eResult    = Trns_tErr_NoErr;
+  MATRIX *  mTransform = nullptr;
+  MATRIX *  mOld       = nullptr;
+  MATRIX *  mNew       = nullptr;
 
   eResult = Trns_Verify(ref);
   if (Trns_tErr_NoErr != eResult) {
@@ -740,8 +740,8 @@ Trns_tErr Trns_Translate(mriTransformRef ref, float ifAmount, tAxis iAxis) {
   }
 
   mTransform = MatrixAlloc(4, 4, MATRIX_REAL);
-  mOld = MatrixAlloc(4, 4, MATRIX_REAL);
-  mNew = MatrixAlloc(4, 4, MATRIX_REAL);
+  mOld       = MatrixAlloc(4, 4, MATRIX_REAL);
+  mNew       = MatrixAlloc(4, 4, MATRIX_REAL);
 
   /* create the matrix */
   mTransform = MatrixIdentity(4, nullptr);
@@ -794,11 +794,11 @@ cleanup:
 }
 
 Trns_tErr Trns_Rotate(mriTransformRef ref, float ifDegrees, tAxis iAxis) {
-  Trns_tErr eResult = Trns_tErr_NoErr;
-  MATRIX *mTransform = nullptr;
-  MATRIX *mOld = nullptr;
-  MATRIX *mNew = nullptr;
-  float fRadians = 0;
+  Trns_tErr eResult    = Trns_tErr_NoErr;
+  MATRIX *  mTransform = nullptr;
+  MATRIX *  mOld       = nullptr;
+  MATRIX *  mNew       = nullptr;
+  float     fRadians   = 0;
 
   eResult = Trns_Verify(ref);
   if (Trns_tErr_NoErr != eResult) {
@@ -806,8 +806,8 @@ Trns_tErr Trns_Rotate(mriTransformRef ref, float ifDegrees, tAxis iAxis) {
   }
 
   mTransform = MatrixAlloc(4, 4, MATRIX_REAL);
-  mOld = MatrixAlloc(4, 4, MATRIX_REAL);
-  mNew = MatrixAlloc(4, 4, MATRIX_REAL);
+  mOld       = MatrixAlloc(4, 4, MATRIX_REAL);
+  mNew       = MatrixAlloc(4, 4, MATRIX_REAL);
 
   /* create the matrix */
   fRadians = ifDegrees * M_PI / 180.0;
@@ -850,10 +850,10 @@ cleanup:
 }
 
 Trns_tErr Trns_Scale(mriTransformRef ref, float ifFactor, tAxis iAxis) {
-  Trns_tErr eResult = Trns_tErr_NoErr;
-  MATRIX *mTransform = nullptr;
-  MATRIX *mOld = nullptr;
-  MATRIX *mNew = nullptr;
+  Trns_tErr eResult    = Trns_tErr_NoErr;
+  MATRIX *  mTransform = nullptr;
+  MATRIX *  mOld       = nullptr;
+  MATRIX *  mNew       = nullptr;
 
   eResult = Trns_Verify(ref);
   if (Trns_tErr_NoErr != eResult) {
@@ -861,8 +861,8 @@ Trns_tErr Trns_Scale(mriTransformRef ref, float ifFactor, tAxis iAxis) {
   }
 
   mTransform = MatrixAlloc(4, 4, MATRIX_REAL);
-  mOld = MatrixAlloc(4, 4, MATRIX_REAL);
-  mNew = MatrixAlloc(4, 4, MATRIX_REAL);
+  mOld       = MatrixAlloc(4, 4, MATRIX_REAL);
+  mNew       = MatrixAlloc(4, 4, MATRIX_REAL);
 
   /* create the matrix */
   mTransform = MatrixIdentity(4, nullptr);
@@ -1251,7 +1251,7 @@ cleanup:
 /* they will be replaced by recalculated ones              */
 Trns_tErr Trns_CalcMatricies_(mriTransformRef ref) {
   Trns_tErr eResult = Trns_tErr_NoErr;
-  MATRIX *tmp = nullptr;
+  MATRIX *  tmp     = nullptr;
 
   /* for each of our first three matricies, if we have them, calc an
      inverse. */
@@ -1270,11 +1270,11 @@ Trns_tErr Trns_CalcMatricies_(mriTransformRef ref) {
       nullptr != ref->mBtoRAS && nullptr != ref->mRAStoB &&
       nullptr != ref->mARAStoBRAS && nullptr != ref->mBRAStoARAS) {
     /* a_index -> a_ras -> b_ras -> b_index */
-    tmp = MatrixMultiply(ref->mARAStoBRAS, ref->mAtoRAS, NULL);
+    tmp        = MatrixMultiply(ref->mARAStoBRAS, ref->mAtoRAS, NULL);
     ref->mAtoB = MatrixMultiply(ref->mRAStoB, tmp, NULL);
 
     /* b_index -> b_ras -> a_ras -> a_index */
-    tmp = MatrixMultiply(ref->mBRAStoARAS, ref->mBtoRAS, NULL);
+    tmp        = MatrixMultiply(ref->mBRAStoARAS, ref->mBtoRAS, NULL);
     ref->mBtoA = MatrixMultiply(ref->mRAStoA, tmp, NULL);
   }
 

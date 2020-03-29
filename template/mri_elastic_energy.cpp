@@ -23,37 +23,37 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mrimorph.h"
-#include "mri_conform.h"
-#include "utils.h"
 #include "const.h"
-#include "timer.h"
-#include "version.h"
+#include "diag.h"
+#include "error.h"
 #include "gcamorph.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_conform.h"
+#include "mrimorph.h"
+#include "proto.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
+  char **    av;
+  int        ac, nargs;
+  int        msec, minutes, seconds;
+  Timer      start;
   GCA_MORPH *gcam;
-  MRI *mri_lame;
+  MRI *      mri_lame;
 
   nargs = handleVersionOption(argc, argv, "mri_elastic_energy");
   if (nargs && argc - nargs == 1)
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
   mri_lame = GCAMestimateLameConstants(gcam);
   printf("writing energy and lame constants to %s\n", argv[2]);
   MRIwrite(mri_lame, argv[2]);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

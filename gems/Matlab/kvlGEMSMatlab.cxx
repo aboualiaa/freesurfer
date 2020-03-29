@@ -18,9 +18,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     itk::ObjectFactoryBase::RegisterFactory(itk::MGHImageIOFactory::New());
 
     // Try to run
-    const int nrhsToPassOn = nrhs - 1;
+    const int       nrhsToPassOn = nrhs - 1;
     const mxArray **prhsToPassOn = prhs + 1;
-    const bool couldRun = kvl::MatlabRunnerArray::GetInstance()->Run(
+    const bool      couldRun     = kvl::MatlabRunnerArray::GetInstance()->Run(
         runnerName, nlhs, plhs, nrhsToPassOn, prhsToPassOn);
     if (!couldRun) {
       std::ostringstream errorStream;

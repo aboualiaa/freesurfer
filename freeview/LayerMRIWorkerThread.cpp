@@ -1,8 +1,8 @@
 #include "LayerMRIWorkerThread.h"
 #include "LayerMRI.h"
+#include "MyVTKUtils.h"
 #include "vtkImageData.h"
 #include <QMutexLocker>
-#include "MyVTKUtils.h"
 
 LayerMRIWorkerThread::LayerMRIWorkerThread(LayerMRI *mri)
     : QThread(mri), m_bAbort(false) {}
@@ -13,18 +13,18 @@ void LayerMRIWorkerThread::Abort() {
 }
 
 void LayerMRIWorkerThread::run() {
-  LayerMRI *mri = qobject_cast<LayerMRI *>(parent());
-  vtkImageData *image = mri->GetImageData();
-  int *dim = image->GetDimensions();
-  double *origin = image->GetOrigin();
-  double *vs = image->GetSpacing();
+  LayerMRI *    mri    = qobject_cast<LayerMRI *>(parent());
+  vtkImageData *image  = mri->GetImageData();
+  int *         dim    = image->GetDimensions();
+  double *      origin = image->GetOrigin();
+  double *      vs     = image->GetSpacing();
 
-  IntList vals;
+  IntList                  vals;
   QMap<int, QList<double>> centers;
-  QMap<int, int> counts;
-  char *ptr = (char *)image->GetScalarPointer();
-  int scalar_type = image->GetScalarType();
-  int n_frames = image->GetNumberOfScalarComponents();
+  QMap<int, int>           counts;
+  char *                   ptr         = (char *)image->GetScalarPointer();
+  int                      scalar_type = image->GetScalarType();
+  int                      n_frames    = image->GetNumberOfScalarComponents();
   for (int i = 0; i < dim[0]; i++) {
     for (int j = 0; j < dim[1]; j++) {
       for (int k = 0; k < dim[2]; k++) {
@@ -38,7 +38,7 @@ void LayerMRIWorkerThread::run() {
             center << i * vs[0] + origin[0] << j * vs[1] + origin[1]
                    << k * vs[2] + origin[2];
             centers[val] = center;
-            counts[val] = 1;
+            counts[val]  = 1;
           } else {
             centers[val][0] += i * vs[0] + origin[0];
             centers[val][1] += j * vs[1] + origin[1];

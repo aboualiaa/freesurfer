@@ -131,7 +131,7 @@ inline static void AffineMatrixAlloc(AffineMatrix **am) {
 }
 
 inline static AffineMatrix *AffineMatrixCopy(const AffineMatrix *src,
-                                             AffineMatrix *dst) {
+                                             AffineMatrix *      dst) {
   if (dst == nullptr) {
     AffineMatrixAlloc(&dst);
   }
@@ -146,25 +146,25 @@ inline static void AffineMV(AffineVector *const y, const AffineMatrix *const A,
 
   const float *const Amat = &(A->mat[0]);
   const float *const xVec = &(x->vec[0]);
-  float *yVec = &(y->vec[0]);
+  float *            yVec = &(y->vec[0]);
 
 #ifdef AFFINE_MATRIX_USE_SSE
   __m128 resLine, col, val;
 
-  val = _mm_set1_ps(xVec[0]);
-  col = _mm_load_ps(&(Amat[0]));
+  val     = _mm_set1_ps(xVec[0]);
+  col     = _mm_load_ps(&(Amat[0]));
   resLine = _mm_mul_ps(col, val);
 
-  val = _mm_set1_ps(xVec[1]);
-  col = _mm_load_ps(&(Amat[4]));
+  val     = _mm_set1_ps(xVec[1]);
+  col     = _mm_load_ps(&(Amat[4]));
   resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
 
-  val = _mm_set1_ps(xVec[2]);
-  col = _mm_load_ps(&(Amat[8]));
+  val     = _mm_set1_ps(xVec[2]);
+  col     = _mm_load_ps(&(Amat[8]));
   resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
 
-  val = _mm_set1_ps(xVec[3]);
-  col = _mm_load_ps(&(Amat[12]));
+  val     = _mm_set1_ps(xVec[3]);
+  col     = _mm_load_ps(&(Amat[12]));
   resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
 
   _mm_store_ps(yVec, resLine);
@@ -187,33 +187,33 @@ inline static void AffineMM(AffineMatrix *const C, const AffineMatrix *const A,
                             const AffineMatrix *const B) {
 #ifdef AFFINE_MATRIX_USE_SSE
   unsigned int j;
-  __m128 resLine, col, val;
+  __m128       resLine, col, val;
 
   const float *Bloc = &(B->mat[0]);
   const float *Aloc = &(A->mat[0]);
-  float *cLoc = &(C->mat[0]);
+  float *      cLoc = &(C->mat[0]);
 
   for (j = 0; j < kAffineVectorSize; j++) {
-    val = _mm_set1_ps(*Bloc);
-    col = _mm_load_ps(Aloc);
+    val     = _mm_set1_ps(*Bloc);
+    col     = _mm_load_ps(Aloc);
     resLine = _mm_mul_ps(col, val);
     Bloc += 1;
     Aloc += kAffineVectorSize;
 
-    val = _mm_set1_ps(*Bloc);
-    col = _mm_load_ps(Aloc);
+    val     = _mm_set1_ps(*Bloc);
+    col     = _mm_load_ps(Aloc);
     resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
     Bloc += 1;
     Aloc += kAffineVectorSize;
 
-    val = _mm_set1_ps(*Bloc);
-    col = _mm_load_ps(Aloc);
+    val     = _mm_set1_ps(*Bloc);
+    col     = _mm_load_ps(Aloc);
     resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
     Bloc += 1;
     Aloc += kAffineVectorSize;
 
-    val = _mm_set1_ps(*Bloc);
-    col = _mm_load_ps(Aloc);
+    val     = _mm_set1_ps(*Bloc);
+    col     = _mm_load_ps(Aloc);
     resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
     Bloc += 1;
     Aloc = &(A->mat[0]); // Reset for next iteration
@@ -226,7 +226,7 @@ inline static void AffineMM(AffineMatrix *const C, const AffineMatrix *const A,
 
   const float *const Amat = &(A->mat[0]);
   const float *const Bmat = &(B->mat[0]);
-  float *const Cmat = &(C->mat[0]);
+  float *const       Cmat = &(C->mat[0]);
 
   for (i = 0; i < kAffineMatrixSize; i++) {
     Cmat[i] = 0;

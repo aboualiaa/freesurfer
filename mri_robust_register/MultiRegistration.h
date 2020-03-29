@@ -32,8 +32,8 @@
 #ifndef MultiRegistration_H
 #define MultiRegistration_H
 
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 //#include <iostream>
 
@@ -120,7 +120,7 @@ public:
   bool writeIntensities(const std::vector<std::string> &nintens);
   //! Write all weights
   bool writeWeights(const std::vector<std::string> &nweights,
-                    bool oneminusweights);
+                    bool                            oneminusweights);
 
   //! Load all inputs
   int loadMovables(
@@ -227,7 +227,7 @@ private:
   void initRegistration(RegRobust &R);
 
   vnl_matrix_fixed<double, 3, 3> getAverageCosines();
-  MRI *createTemplateGeo();
+  MRI *                          createTemplateGeo();
 
   // copy of input filenames
   std::vector<std::string> mov;
@@ -236,34 +236,34 @@ private:
 
   // Parameter:
   std::string outdir;
-  bool transonly;
-  bool rigid;
-  bool robust;
-  double sat;
-  bool satit;
-  int debug;
-  bool iscale;
-  bool iscaleonly;
-  bool nomulti;
-  int subsamplesize;
-  int highit;
+  bool        transonly;
+  bool        rigid;
+  bool        robust;
+  double      sat;
+  bool        satit;
+  int         debug;
+  bool        iscale;
+  bool        iscaleonly;
+  bool        nomulti;
+  int         subsamplesize;
+  int         highit;
 
   bool fixvoxel;
   bool keeptype;
-  int average;
+  int  average;
   bool doubleprec;
   bool backupweights;
-  int sampletype;
+  int  sampletype;
   bool crascenter;
 
   // DATA
-  std::vector<MRI *> mri_mov;
+  std::vector<MRI *>         mri_mov;
   std::vector<MRI_BSPLINE *> mri_bsplines;
-  std::vector<LTA *> ltas;
-  std::vector<MRI *> mri_warps;
-  std::vector<MRI *> mri_weights;
-  std::vector<double> intensities;
-  MRI *mri_mean;
+  std::vector<LTA *>         ltas;
+  std::vector<MRI *>         mri_warps;
+  std::vector<MRI *>         mri_weights;
+  std::vector<double>        intensities;
+  MRI *                      mri_mean;
 };
 
 #endif

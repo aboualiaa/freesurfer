@@ -32,8 +32,8 @@
 #include "matrix.h"
 #include "mri.h"
 
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define export // obsolete feature 'export template' used in these headers
@@ -80,8 +80,8 @@ public:
   static double noiseVar(MRI *mri);
 
   static vnl_matrix_fixed<double, 4, 4>
-  MRIvoxelXformToRasXform(MRI *src, MRI *trg,
-                          const vnl_matrix_fixed<double, 4, 4> &vox);
+              MRIvoxelXformToRasXform(MRI *src, MRI *trg,
+                                      const vnl_matrix_fixed<double, 4, 4> &vox);
   static MRI *MRIlinearTransform(MRI *mriS, MRI *mriT,
                                  const vnl_matrix_fixed<double, 4, 4> &m);
 
@@ -113,8 +113,8 @@ private:
   static bool isConform(MRI *mri);
 
   static MATRIX *MRIgetZslice(MRI *mri, int slice, int frame = 0);
-  static double entropyPatch(MRI *mri, int x, int y, int z, int radius,
-                             int nbins, MRI *kernel, bool ball = false);
+  static double  entropyPatch(MRI *mri, int x, int y, int z, int radius,
+                              int nbins, MRI *kernel, bool ball = false);
   static void get3Dcorrection(double *histo, unsigned int v1, unsigned int v2,
                               unsigned int v3, unsigned int v4,
                               unsigned int intRange);

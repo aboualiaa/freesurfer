@@ -1,9 +1,9 @@
 #ifndef LayerFCDWorkerThread_H
 #define LayerFCDWorkerThread_H
 
-#include <QThread>
 #include <QList>
 #include <QMutex>
+#include <QThread>
 
 #ifndef IntList
 typedef QList<int> IntList;
@@ -25,7 +25,7 @@ public slots:
 protected:
   void run();
 
-  bool m_bAbort;
+  bool   m_bAbort;
   QMutex mutex;
 };
 

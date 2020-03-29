@@ -1,8 +1,8 @@
 #include "kvlAtlasMeshToLabelImageCostAndGradientCalculator.h"
 
-#include <itkMath.h>
-#include "vnl/vnl_matrix_fixed.h"
 #include "kvlTetrahedronInteriorConstIterator.h"
+#include "vnl/vnl_matrix_fixed.h"
+#include <itkMath.h>
 
 namespace kvl {
 
@@ -12,7 +12,7 @@ namespace kvl {
 AtlasMeshToLabelImageCostAndGradientCalculator ::
     AtlasMeshToLabelImageCostAndGradientCalculator() {
 
-  m_LabelImage = nullptr;
+  m_LabelImage             = nullptr;
   m_CompressionLookupTable = nullptr;
 }
 
@@ -26,9 +26,9 @@ AtlasMeshToLabelImageCostAndGradientCalculator ::
 //
 //
 void AtlasMeshToLabelImageCostAndGradientCalculator ::SetLabelImage(
-    const LabelImageType *labelImage,
+    const LabelImageType *        labelImage,
     const CompressionLookupTable *lookupTable) {
-  m_LabelImage = labelImage;
+  m_LabelImage             = labelImage;
   m_CompressionLookupTable = lookupTable;
 }
 
@@ -84,13 +84,13 @@ void AtlasMeshToLabelImageCostAndGradientCalculator ::
 
   // Loop over all voxels within the tetrahedron and do The Right Thing
   for (; !it.IsAtEnd(); ++it) {
-    double alpha0 = 0.0;
-    double alpha1 = 0.0;
-    double alpha2 = 0.0;
-    double alpha3 = 0.0;
-    double xGradientBasis = 0.0;
-    double yGradientBasis = 0.0;
-    double zGradientBasis = 0.0;
+    double                  alpha0         = 0.0;
+    double                  alpha1         = 0.0;
+    double                  alpha2         = 0.0;
+    double                  alpha3         = 0.0;
+    double                  xGradientBasis = 0.0;
+    double                  yGradientBasis = 0.0;
+    double                  zGradientBasis = 0.0;
     const std::vector<int> &classNumbers =
         m_CompressionLookupTable->GetClassNumbers(it.Value());
     for (std::vector<int>::const_iterator classIt = classNumbers.begin();

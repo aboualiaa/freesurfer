@@ -1,10 +1,10 @@
 #ifndef __kvlAtlasMeshBuilder_h
 #define __kvlAtlasMeshBuilder_h
 
-#include "kvlMultiResolutionAtlasMesher.h"
-#include "vnl/vnl_sample.h"
 #include "itkTimeProbe.h"
 #include "kvlCompressionLookupTable.h"
+#include "kvlMultiResolutionAtlasMesher.h"
+#include "vnl/vnl_sample.h"
 #include <mutex>
 
 #include "itk_5_4_map.h"
@@ -15,7 +15,7 @@ class AtlasMeshBuilderMutexLock : public std::mutex {
 public:
   /** Standard class typedefs.  */
   typedef AtlasMeshBuilderMutexLock Self;
-  typedef std::mutex Superclass;
+  typedef std::mutex                Superclass;
 
   /** Lock access. */
   void DescriptiveLock(const std::string &description) {
@@ -33,7 +33,7 @@ public:
   }
 
 protected:
-  std::string m_Description;
+  std::string    m_Description;
   itk::TimeProbe m_TimeProbe;
 };
 
@@ -50,7 +50,7 @@ public:
   typedef AtlasMeshBuilderHelper Self;
 
   AtlasMeshBuilderHelper(
-      AtlasMeshBuilderMutexLock &mutex,
+      AtlasMeshBuilderMutexLock &                mutex,
       std::map<AtlasMesh::PointIdentifier, int> &pointOccupancies)
       : m_Mutex(mutex), m_MutexIsLocked(true),
         m_PointOccupancies(pointOccupancies) {
@@ -91,10 +91,10 @@ public:
 
 protected:
   AtlasMeshBuilderMutexLock &m_Mutex;
-  bool m_MutexIsLocked;
+  bool                       m_MutexIsLocked;
 
   std::map<AtlasMesh::PointIdentifier, int> &m_PointOccupancies;
-  std::vector<AtlasMesh::PointIdentifier> m_AffectedPoints;
+  std::vector<AtlasMesh::PointIdentifier>    m_AffectedPoints;
 
   //
   void RegisterPointOccupancies() {
@@ -127,9 +127,9 @@ itkEventMacro(EdgeAnalysisProgressEvent, itk::UserEvent);
 class AtlasMeshBuilder : public itk::Object {
 public:
   /** Standard class typedefs */
-  typedef AtlasMeshBuilder Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef AtlasMeshBuilder              Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -144,8 +144,8 @@ public:
   // Set label images.
   void SetUp(const std::vector<LabelImageType::ConstPointer> &labelImages,
              const CompressionLookupTable *compressionLookupTable,
-             const itk::Size<3> &initialSize,
-             const std::vector<double> &initialStiffnesses);
+             const itk::Size<3> &          initialSize,
+             const std::vector<double> &   initialStiffnesses);
 
   // Get label images
   const std::vector<LabelImageType::ConstPointer> &GetLabelImages() const {
@@ -188,8 +188,8 @@ public:
   //
   double GetRetainedCosts(double &retainedDataCost, double &retainedAlphasCost,
                           double &retainedPositionCost) const {
-    retainedDataCost = m_RetainedDataCost;
-    retainedAlphasCost = m_RetainedAlphasCost;
+    retainedDataCost     = m_RetainedDataCost;
+    retainedAlphasCost   = m_RetainedAlphasCost;
     retainedPositionCost = m_RetainedPositionCost;
     return m_RetainedCost;
   }
@@ -198,15 +198,15 @@ public:
   double GetCollapsedCosts(double &collapsedDataCost,
                            double &collapsedAlphasCost,
                            double &collapsedPositionCost) const {
-    collapsedDataCost = m_CollapsedDataCost;
-    collapsedAlphasCost = m_CollapsedAlphasCost;
+    collapsedDataCost     = m_CollapsedDataCost;
+    collapsedAlphasCost   = m_CollapsedAlphasCost;
     collapsedPositionCost = m_CollapsedPositionCost;
     return m_CollapsedCost;
   }
 
   //
-  void Build(AtlasMeshCollection *explicitStartCollection = 0,
-             double edgeCollapseEncouragementFactor = 1.0);
+  void Build(AtlasMeshCollection *explicitStartCollection         = 0,
+             double               edgeCollapseEncouragementFactor = 1.0);
 
   //
   double GetProgress() const { return m_Progress; }
@@ -239,9 +239,9 @@ protected:
 
   //
   bool LoadBalancedAnalyzeEdgeFast(
-      std::set<AtlasMesh::CellIdentifier> &edges,
+      std::set<AtlasMesh::CellIdentifier> &      edges,
       std::map<AtlasMesh::PointIdentifier, int> &pointOccupancies,
-      int threadId = 0);
+      int                                        threadId = 0);
 
   //
   AtlasMeshCollection::Pointer TryToCollapseFast(
@@ -258,10 +258,10 @@ protected:
 
   //
   std::vector<AtlasMesh::CellIdentifier> GetRandomizedEdges() const;
-  std::set<AtlasMesh::CellIdentifier> GetRandomizedEdgesAsSet() const;
+  std::set<AtlasMesh::CellIdentifier>    GetRandomizedEdgesAsSet() const;
 
   //
-  bool OptimizeReferencePositionFast(AtlasMeshCollection *meshCollection,
+  bool OptimizeReferencePositionFast(AtlasMeshCollection *     meshCollection,
                                      AtlasMesh::CellIdentifier vertexId,
                                      bool optimize = true) const;
 
@@ -282,8 +282,8 @@ protected:
    */
   struct LoadBalancedThreadStruct {
     // Pointer  m_Builder;
-    Self *m_Builder;
-    std::set<AtlasMesh::CellIdentifier> m_Edges;
+    Self *                                    m_Builder;
+    std::set<AtlasMesh::CellIdentifier>       m_Edges;
     std::map<AtlasMesh::PointIdentifier, int> m_PointOccupancies;
   };
 
@@ -295,10 +295,10 @@ private:
 
   //
   std::vector<LabelImageType::ConstPointer> m_LabelImages;
-  CompressionLookupTable::ConstPointer m_CompressionLookupTable;
-  itk::Size<3> m_InitialSize;
-  std::vector<double> m_InitialStiffnesses;
-  MultiResolutionAtlasMesher::Pointer m_Mesher;
+  CompressionLookupTable::ConstPointer      m_CompressionLookupTable;
+  itk::Size<3>                              m_InitialSize;
+  std::vector<double>                       m_InitialStiffnesses;
+  MultiResolutionAtlasMesher::Pointer       m_Mesher;
 
   double m_PowellAbsolutePrecision;
 
@@ -306,8 +306,8 @@ private:
   unsigned int m_MaximumNumberOfEdgeCollapses;
 
   AtlasMeshCollection::Pointer m_Current;
-  double m_Progress;
-  bool m_Verbose;
+  double                       m_Progress;
+  bool                         m_Verbose;
 
   unsigned int m_IterationNumber;
   unsigned int m_MaximumNumberOfIterations;
@@ -332,13 +332,13 @@ private:
   public:
     //
     EdgeElement() {
-      m_EdgeId = 0;
+      m_EdgeId       = 0;
       m_EdgePriority = vnl_sample_uniform(0, 1);
     }
 
     //
     EdgeElement(AtlasMesh::CellIdentifier edgeId) {
-      m_EdgeId = edgeId;
+      m_EdgeId       = edgeId;
       m_EdgePriority = vnl_sample_uniform(0, 1);
     }
 
@@ -355,7 +355,7 @@ private:
 
   private:
     AtlasMesh::CellIdentifier m_EdgeId;
-    double m_EdgePriority;
+    double                    m_EdgePriority;
   };
 };
 

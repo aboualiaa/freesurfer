@@ -28,16 +28,16 @@
  */
 
 #include "SurfaceOverlay.h"
+#include "FSSurface.h"
+#include "LayerMRI.h"
+#include "LayerSurface.h"
+#include "MyUtils.h"
+#include "ProgressCallback.h"
+#include "SurfaceOverlayProperty.h"
 #include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"
-#include "LayerSurface.h"
-#include "SurfaceOverlayProperty.h"
-#include "FSSurface.h"
-#include <QDebug>
-#include "ProgressCallback.h"
-#include "LayerMRI.h"
-#include "MyUtils.h"
 #include <QDateTime>
+#include <QDebug>
 
 #include "utils.h"
 
@@ -93,7 +93,7 @@ void SurfaceOverlay::InitializeData() {
       delete[] m_fDataRaw;
 
     m_nDataSize = mris->nvertices;
-    m_fDataRaw = new float[m_nDataSize];
+    m_fDataRaw  = new float[m_nDataSize];
     if (!m_fDataRaw) {
       return;
     }
@@ -112,7 +112,7 @@ void SurfaceOverlay::InitializeData() {
     }
 
     m_dMaxValue = m_dMinValue = mris->vertices[0].val;
-    m_dNonZeroMinValue = 1e10;
+    m_dNonZeroMinValue        = 1e10;
     for (int vno = 0; vno < m_nDataSize; vno++) {
       m_fData[vno] = mris->vertices[vno].val;
       if (m_dMaxValue < m_fData[vno]) {
@@ -123,11 +123,11 @@ void SurfaceOverlay::InitializeData() {
       if (m_fData[vno] > 0 && m_dNonZeroMinValue > m_fData[vno])
         m_dNonZeroMinValue = m_fData[vno];
     }
-    m_dRawMaxValue = m_dMaxValue;
-    m_dRawMinValue = m_dMinValue;
+    m_dRawMaxValue     = m_dMaxValue;
+    m_dRawMinValue     = m_dMinValue;
     m_dDisplayRange[0] = m_dMinValue;
     m_dDisplayRange[1] = m_dMaxValue;
-    memcpy(m_fDataRaw, m_fData, sizeof(float)*m_nDataSize);
+    memcpy(m_fDataRaw, m_fData, sizeof(float) * m_nDataSize);
   }
 }
 
@@ -137,14 +137,14 @@ void SurfaceOverlay::InitializeData(float *data_buffer_in, int nvertices,
     if (m_fDataRaw)
       delete[] m_fDataRaw;
 
-    m_nDataSize = nvertices;
+    m_nDataSize    = nvertices;
     m_nNumOfFrames = nframes;
-    m_fDataRaw = data_buffer_in;
+    m_fDataRaw     = data_buffer_in;
     if (!m_fDataRaw)
       return;
 
     m_dMaxValue = m_dMinValue = m_fDataRaw[0];
-    m_dNonZeroMinValue = 1e10;
+    m_dNonZeroMinValue        = 1e10;
     for (int i = 0; i < m_nDataSize * m_nNumOfFrames; i++) {
       if (m_dMaxValue < m_fDataRaw[i])
         m_dMaxValue = m_fDataRaw[i];
@@ -159,7 +159,7 @@ void SurfaceOverlay::InitializeData(float *data_buffer_in, int nvertices,
     m_dDisplayRange[0] = m_dMinValue;
     m_dDisplayRange[1] = m_dMaxValue;
 
-    if ( m_fData )
+    if (m_fData)
       delete[] m_fData;
 
     m_fData = new float[m_nDataSize];
@@ -186,23 +186,23 @@ void SurfaceOverlay::CopyCorrelationData(SurfaceOverlay *overlay) {
   m_property = overlay->m_property;
   connect(m_property, SIGNAL(ColorMapChanged()), m_surface,
           SLOT(UpdateOverlay()), Qt::UniqueConnection);
-  m_mriCorrelation = overlay->m_mriCorrelation;
-  m_overlayPaired = overlay;
+  m_mriCorrelation         = overlay->m_mriCorrelation;
+  m_overlayPaired          = overlay;
   overlay->m_overlayPaired = this;
-  m_bCorrelationData = true;
+  m_bCorrelationData       = true;
 }
 
 bool SurfaceOverlay::LoadCorrelationData(const QString &filename) {
   MRI *mri = ::MRIreadHeader(filename.toLatin1().data(), -1);
   if (mri == NULL) {
-    cerr << "MRIread failed: unable to read from " << qPrintable(filename)
-         << "\n";
+    std::cerr << "MRIread failed: unable to read from " << qPrintable(filename)
+              << "\n";
     return false;
   }
   if ((((qlonglong)mri->width) * mri->height * mri->nframes) %
           (m_nDataSize * m_nDataSize) !=
       0) {
-    cerr << "Correlation data does not match with surface\n";
+    std::cerr << "Correlation data does not match with surface\n";
     MRIfree(&mri);
     return false;
   }
@@ -215,12 +215,12 @@ bool SurfaceOverlay::LoadCorrelationData(const QString &filename) {
   }
 
   if (mri == NULL) {
-    cerr << "MRIread failed: Unable to read from " << qPrintable(filename)
-         << "\n";
+    std::cerr << "MRIread failed: Unable to read from " << qPrintable(filename)
+              << "\n";
     return false;
   }
-  m_mriCorrelation = mri;
-  m_bCorrelationData = true;
+  m_mriCorrelation        = mri;
+  m_bCorrelationData      = true;
   m_bCorrelationDataReady = false;
 
   return true;
@@ -235,10 +235,10 @@ void SurfaceOverlay::UpdateCorrelationAtVertex(int nVertex, int nHemisphere) {
     nHemisphere = m_surface->GetHemisphere();
   }
   int nVertexOffset = nHemisphere * m_nDataSize;
-  int nDataOffset = m_surface->GetHemisphere() * m_nDataSize;
+  int nDataOffset   = m_surface->GetHemisphere() * m_nDataSize;
   if (bSingleHemiData) {
     nVertexOffset = 0;
-    nDataOffset = 0;
+    nDataOffset   = 0;
   }
   double old_range = m_dMaxValue - m_dMinValue;
   if (m_mriCorrelation->height > 1)
@@ -320,7 +320,7 @@ void SurfaceOverlay::SmoothData(int nSteps_in, float *data_out) {
   }
 
   if (!mri) {
-    cerr << "Can not allocate mri\n";
+    std::cerr << "Can not allocate mri\n";
     return;
   }
   memcpy(&MRIFseq_vox(mri, 0, 0, 0, 0), m_fDataUnsmoothed,
@@ -340,7 +340,7 @@ void SurfaceOverlay::SmoothData(int nSteps_in, float *data_out) {
     MRIfree(&mri_smoothed);
     MRIfree(&mri);
   } else {
-    cerr << "Can not allocate mri\n";
+    std::cerr << "Can not allocate mri\n";
     MRIfree(&mri);
   }
 }
@@ -353,7 +353,7 @@ void SurfaceOverlay::SetActiveFrame(int nFrame) {
          sizeof(float) * m_nDataSize);
   memcpy(m_fDataUnsmoothed, m_fData, sizeof(float) * m_nDataSize);
   m_dMaxValue = m_dMinValue = m_fData[0];
-  m_dNonZeroMinValue = 1e10;
+  m_dNonZeroMinValue        = 1e10;
   for (int i = 0; i < m_nDataSize; i++) {
     if (m_dMaxValue < m_fData[i]) {
       m_dMaxValue = m_fData[i];
@@ -382,7 +382,7 @@ void SurfaceOverlay::UpdateCorrelationCoefficient(double *pos_in) {
     if (m_volumeCorrelationSource &&
         m_volumeCorrelationSource->GetNumberOfFrames() == m_nNumOfFrames) {
       double pos[3];
-      int n[3];
+      int    n[3];
       m_volumeCorrelationSource->GetSlicePosition(pos);
       m_volumeCorrelationSource->TargetToRAS(pos, pos);
       m_volumeCorrelationSource->RASToOriginalIndex(pos, n);
@@ -484,16 +484,16 @@ double SurfaceOverlay::PercentileToPosition(double dPercentile) {
 }
 
 double SurfaceOverlay::PercentileToPosition(double percentile_in,
-                                            bool bIgnoreZeros) {
+                                            bool   bIgnoreZeros) {
   double percentile = percentile_in / 100;
   double range[2];
   if (bIgnoreZeros)
     GetNonZeroRange(range);
   else
     GetRange(range);
-  int m_nNumberOfBins = 100;
-  double m_dBinWidth = (range[1] - range[0]) / m_nNumberOfBins;
-  int *m_nOutputData = new int[m_nNumberOfBins];
+  int    m_nNumberOfBins = 100;
+  double m_dBinWidth     = (range[1] - range[0]) / m_nNumberOfBins;
+  int *  m_nOutputData   = new int[m_nNumberOfBins];
   if (!m_nOutputData) {
     qCritical() << "Can not allocate memory.";
     return 0;
@@ -516,8 +516,8 @@ double SurfaceOverlay::PercentileToPosition(double percentile_in,
   }
 
   double dArea = 0;
-  double dPos = range[0];
-  int n = 0;
+  double dPos  = range[0];
+  int    n     = 0;
   while (dArea / m_dOutputTotalArea < percentile && n < m_nNumberOfBins) {
     dArea += m_nOutputData[n];
     dPos += m_dBinWidth;
@@ -543,9 +543,9 @@ double SurfaceOverlay::PositionToPercentile(double pos, bool bIgnoreZeros) {
     GetNonZeroRange(range);
   else
     GetRange(range);
-  int m_nNumberOfBins = 100;
-  double m_dBinWidth = (range[1] - range[0]) / m_nNumberOfBins;
-  int *m_nOutputData = new int[m_nNumberOfBins];
+  int    m_nNumberOfBins = 100;
+  double m_dBinWidth     = (range[1] - range[0]) / m_nNumberOfBins;
+  int *  m_nOutputData   = new int[m_nNumberOfBins];
   if (!m_nOutputData) {
     qCritical() << "Can not allocate memory.";
     return 0;
@@ -568,8 +568,8 @@ double SurfaceOverlay::PositionToPercentile(double pos, bool bIgnoreZeros) {
   }
 
   double dArea = 0;
-  double dPos = range[0];
-  int n = 0;
+  double dPos  = range[0];
+  int    n     = 0;
   while (dPos < pos && n < m_nNumberOfBins) {
     dArea += m_nOutputData[n];
     dPos += m_dBinWidth;

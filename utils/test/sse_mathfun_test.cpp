@@ -117,8 +117,7 @@ millions of vector evaluations/second ->  29 cycles/value on a 2000MHz computer 
 #include <xmmintrin.h>
 
 /* useful when debuggin.. */
-void print4(__m128 v)
-{
+void print4(__m128 v) {
   float *p = (float *)&v;
 #ifndef USE_SSE2
   _mm_empty();
@@ -126,26 +125,24 @@ void print4(__m128 v)
   printf("[%13.8g, %13.8g, %13.8g, %13.8g]", p[0], p[1], p[2], p[3]);
 }
 
-void print2i(__m64 v)
-{
+void print2i(__m64 v) {
   unsigned *p = (unsigned *)&v;
   printf("[%08x %08x]", p[0], p[1]);
 }
 
 #ifdef USE_SSE2
 #include <emmintrin.h>
-void print4i(__m128i v)
-{
+void print4i(__m128i v) {
   unsigned *p = (unsigned *)&v;
   printf("[%08x %08x %08x %08x]", p[0], p[1], p[2], p[3]);
 }
 #endif
 
+#include "sse_mathfun.h"
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-#include "sse_mathfun.h"
 
 #ifdef HAVE_SYS_TIMES
 #include <sys/times.h>
@@ -161,8 +158,8 @@ void print4i(__m128i v)
 
 typedef ALIGN16_BEG union {
   float f[4];
-  int i[4];
-  v4sf v;
+  int   i[4];
+  v4sf  v;
 } ALIGN16_END V4SF;
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
@@ -170,15 +167,17 @@ typedef ALIGN16_BEG union {
 double frand() { return rand() / (double)RAND_MAX; }
 
 #if defined(HAVE_SYS_TIMES)
-inline double uclock_sec(void)
-{
+inline double uclock_sec(void) {
   static double ttclk = 0.;
-  if (ttclk == 0.) ttclk = sysconf(_SC_CLK_TCK);
+  if (ttclk == 0.)
+    ttclk = sysconf(_SC_CLK_TCK);
   struct tms t;
   return ((double)times(&t)) / ttclk;
 }
 #else
-inline double uclock_sec(void) { return (double)clock() / (double)CLOCKS_PER_SEC; }
+inline double uclock_sec(void) {
+  return (double)clock() / (double)CLOCKS_PER_SEC;
+}
 #endif
 
 #ifndef M_PI
@@ -189,16 +188,15 @@ inline double uclock_sec(void) { return (double)clock() / (double)CLOCKS_PER_SEC
 #define M_LN2 0.69314718055994530942
 #endif
 
-int bitdiff(float a, float b)
-{
+int bitdiff(float a, float b) {
   if (a == b)
     return 24;
   else if (a == 0) {
     int j = -log(fabs(b)) / M_LN2;
-    if (j > 24) j = 24;
+    if (j > 24)
+      j = 24;
     return j;
-  }
-  else
+  } else
     return log(fabs(a)) / M_LN2 - log(fabs(b - a)) / M_LN2;
 }
 
@@ -208,15 +206,14 @@ float cephes_cosf(float);
 float cephes_logf(float);
 float cephes_expf(float);
 
-int check_sincos_precision(float xmin, float xmax)
-{
+int check_sincos_precision(float xmin, float xmax) {
   unsigned nb_trials = 100000;
   printf("checking sines on [%g*Pi, %g*Pi]\n", xmin, xmax);
 
   float max_err_sin_ref = 0, max_err_sin_cep = 0, max_err_sin_x = 0;
   float max_err_cos_ref = 0, max_err_cos_cep = 0, max_err_cos_x = 0;
   float max_err_sum_sqr_test = 0;
-  float max_err_sum_sqr_ref = 0;
+  float max_err_sum_sqr_ref  = 0;
   xmin *= M_PI;
   xmax *= M_PI;
   unsigned i;
@@ -226,7 +223,8 @@ int check_sincos_precision(float xmin, float xmax)
     vx.f[1] = (i + .5) * (xmax - xmin) / (nb_trials - 1) + xmin;
     vx.f[2] = frand() * (xmax - xmin);
     vx.f[3] = (i / 32) * M_PI / ((i % 32) + 1);
-    if (vx.f[3] < xmin || vx.f[3] > xmax) vx.f[3] = frand() * (xmax - xmin);
+    if (vx.f[3] < xmin || vx.f[3] > xmax)
+      vx.f[3] = frand() * (xmax - xmin);
 
     /*
     vx.f[0] = M_PI/2;
@@ -239,7 +237,7 @@ int check_sincos_precision(float xmin, float xmax)
     sincos_ps(vx.v, &sin4_2.v, &cos4_2.v);
     unsigned j;
     for (j = 0; j < 4; ++j) {
-      float x = vx.f[j];
+      float x        = vx.f[j];
       float sin_test = sin4.f[j];
       float cos_test = cos4.f[j];
       if (sin_test != sin4_2.f[j]) {
@@ -251,66 +249,66 @@ int check_sincos_precision(float xmin, float xmax)
         printf("cos / sincos mismatch at x=%g\n", x);
         return 1;
       }
-      float sin_ref = sinf(x);
-      float sin_cep = cephes_sinf(x);
+      float sin_ref     = sinf(x);
+      float sin_cep     = cephes_sinf(x);
       float err_sin_ref = fabs(sin_ref - sin_test);
       float err_sin_cep = fabs(sin_cep - sin_test);
       if (err_sin_ref > max_err_sin_ref) {
         max_err_sin_ref = err_sin_ref;
-        max_err_sin_x = x;
+        max_err_sin_x   = x;
       }
-      max_err_sin_cep = MAX(max_err_sin_cep, err_sin_cep);
-      float cos_ref = cosf(x);
-      float cos_cep = cephes_cosf(x);
+      max_err_sin_cep   = MAX(max_err_sin_cep, err_sin_cep);
+      float cos_ref     = cosf(x);
+      float cos_cep     = cephes_cosf(x);
       float err_cos_ref = fabs(cos_ref - cos_test);
       float err_cos_cep = fabs(cos_cep - cos_test);
       if (err_cos_ref > max_err_cos_ref) {
         max_err_cos_ref = err_cos_ref;
-        max_err_cos_x = x;
+        max_err_cos_x   = x;
       }
       max_err_cos_cep = MAX(max_err_cos_cep, err_cos_cep);
-      float err_sum_sqr_test = fabs(1 - cos_test * cos_test - sin_test * sin_test);
+      float err_sum_sqr_test =
+          fabs(1 - cos_test * cos_test - sin_test * sin_test);
       float err_sum_sqr_ref = fabs(1 - cos_ref * cos_ref - sin_ref * sin_ref);
-      max_err_sum_sqr_ref = MAX(max_err_sum_sqr_ref, err_sum_sqr_ref);
-      max_err_sum_sqr_test = MAX(max_err_sum_sqr_test, err_sum_sqr_test);
+      max_err_sum_sqr_ref   = MAX(max_err_sum_sqr_ref, err_sum_sqr_ref);
+      max_err_sum_sqr_test  = MAX(max_err_sum_sqr_test, err_sum_sqr_test);
       // printf("sin(%g) = %g %g err=%g\n", x, sin_ref, sin_test, err_sin_ref);
     }
   }
-  printf("max deviation from sinf(x): %g at %14.12g*Pi, max deviation from cephes_sin(x): %g\n",
-         max_err_sin_ref,
-         max_err_sin_x / M_PI,
-         max_err_sin_cep);
-  printf("max deviation from cosf(x): %g at %14.12g*Pi, max deviation from cephes_cos(x): %g\n",
-         max_err_cos_ref,
-         max_err_cos_x / M_PI,
-         max_err_cos_cep);
+  printf("max deviation from sinf(x): %g at %14.12g*Pi, max deviation from "
+         "cephes_sin(x): %g\n",
+         max_err_sin_ref, max_err_sin_x / M_PI, max_err_sin_cep);
+  printf("max deviation from cosf(x): %g at %14.12g*Pi, max deviation from "
+         "cephes_cos(x): %g\n",
+         max_err_cos_ref, max_err_cos_x / M_PI, max_err_cos_cep);
 
-  printf("deviation of sin(x)^2+cos(x)^2-1: %g (ref deviation is %g)\n", max_err_sum_sqr_test, max_err_sum_sqr_ref);
+  printf("deviation of sin(x)^2+cos(x)^2-1: %g (ref deviation is %g)\n",
+         max_err_sum_sqr_test, max_err_sum_sqr_ref);
 
-  if (max_err_sum_sqr_ref < 2e-7 && max_err_sin_ref < 2e-7 && max_err_cos_ref < 2e-7) {
+  if (max_err_sum_sqr_ref < 2e-7 && max_err_sin_ref < 2e-7 &&
+      max_err_cos_ref < 2e-7) {
     printf("   ->> precision OK for the sin_ps / cos_ps / sincos_ps <<-\n\n");
     return 0;
-  }
-  else {
+  } else {
     printf("\n   WRONG PRECISION !! there is a problem\n\n");
     return 1;
   }
 }
 
 union float_int_union {
-  int i;
+  int   i;
   float f;
-} QNAN = {0xFFC00000}, QNAN2 = {0x7FC00000}, PINF = {0x7F800000}, MINF = {0xFF800000};
+} QNAN = {0xFFC00000}, QNAN2 = {0x7FC00000}, PINF = {0x7F800000},
+  MINF = {0xFF800000};
 
-int check_explog_precision(float xmin, float xmax)
-{
+int check_explog_precision(float xmin, float xmax) {
   unsigned nb_trials = 100000;
   printf("checking exp/log [%g, %g]\n", xmin, xmax);
 
-  float max_err_exp_ref = 0, max_err_exp_cep = 0, max_err_exp_x = 0;
-  float max_err_log_ref = 0, max_err_log_cep = 0, max_err_log_x = 0;
-  float max_err_logexp_test = 0;
-  float max_err_logexp_ref = 0;
+  float    max_err_exp_ref = 0, max_err_exp_cep = 0, max_err_exp_x = 0;
+  float    max_err_log_ref = 0, max_err_log_cep = 0, max_err_log_x = 0;
+  float    max_err_logexp_test = 0;
+  float    max_err_logexp_ref  = 0;
   unsigned i;
   for (i = 0; i < nb_trials; ++i) {
     V4SF vx, exp4, log4;
@@ -318,76 +316,75 @@ int check_explog_precision(float xmin, float xmax)
     vx.f[1] = frand() * (xmax - xmin) + xmin;
     vx.f[2] = frand() * (xmax - xmin) + xmin;
     vx.f[3] = frand() * (xmax - xmin) + xmin;
-    exp4.v = exp_ps(vx.v);
-    log4.v = log_ps(exp4.v);
+    exp4.v  = exp_ps(vx.v);
+    log4.v  = log_ps(exp4.v);
     unsigned j;
     for (j = 0; j < 4; ++j) {
-      float x = vx.f[j];
-      float exp_test = exp4.f[j];
-      float log_test = log4.f[j];
-      float exp_ref = expf(x);
-      float exp_cep = cephes_expf(x);
+      float x           = vx.f[j];
+      float exp_test    = exp4.f[j];
+      float log_test    = log4.f[j];
+      float exp_ref     = expf(x);
+      float exp_cep     = cephes_expf(x);
       float err_exp_ref = fabs(exp_ref - exp_test) / exp_ref;
       float err_exp_cep = fabs(exp_cep - exp_test) / exp_ref;
       if (err_exp_ref > max_err_exp_ref) {
         max_err_exp_ref = err_exp_ref;
-        max_err_exp_x = x;
+        max_err_exp_x   = x;
       }
       max_err_exp_cep = MAX(max_err_exp_cep, err_exp_cep);
 
-      float log_ref = logf(exp_test);
-      float log_cep = cephes_logf(exp_test);
+      float log_ref     = logf(exp_test);
+      float log_cep     = cephes_logf(exp_test);
       float err_log_ref = fabs(log_ref - log_test);
       float err_log_cep = fabs(log_cep - log_test);
       if (err_log_ref > max_err_log_ref) {
         max_err_log_ref = err_log_ref;
-        max_err_log_x = x;
+        max_err_log_x   = x;
       }
-      max_err_log_cep = MAX(max_err_log_cep, err_log_cep);
+      max_err_log_cep       = MAX(max_err_log_cep, err_log_cep);
       float err_logexp_test = fabs(x - log_test);
-      float err_logexp_ref = fabs(x - logf(expf(x)));
-      max_err_logexp_ref = MAX(max_err_logexp_ref, err_logexp_ref);
-      max_err_logexp_test = MAX(max_err_logexp_test, err_logexp_test);
+      float err_logexp_ref  = fabs(x - logf(expf(x)));
+      max_err_logexp_ref    = MAX(max_err_logexp_ref, err_logexp_ref);
+      max_err_logexp_test   = MAX(max_err_logexp_test, err_logexp_test);
     }
   }
-  printf("max (relative) deviation from expf(x): %g at %14.12g, max deviation from cephes_expf(x): %g\n",
-         max_err_exp_ref,
-         max_err_exp_x,
-         max_err_exp_cep);
-  printf("max (absolute) deviation from logf(x): %g at %14.12g, max deviation from cephes_logf(x): %g\n",
-         max_err_log_ref,
-         max_err_log_x,
-         max_err_log_cep);
+  printf("max (relative) deviation from expf(x): %g at %14.12g, max deviation "
+         "from cephes_expf(x): %g\n",
+         max_err_exp_ref, max_err_exp_x, max_err_exp_cep);
+  printf("max (absolute) deviation from logf(x): %g at %14.12g, max deviation "
+         "from cephes_logf(x): %g\n",
+         max_err_log_ref, max_err_log_x, max_err_log_cep);
 
-  printf("deviation of x - log(exp(x)): %g (ref deviation is %g)\n", max_err_logexp_test, max_err_logexp_ref);
+  printf("deviation of x - log(exp(x)): %g (ref deviation is %g)\n",
+         max_err_logexp_test, max_err_logexp_ref);
 
-  if (max_err_logexp_test < 2e-7 && max_err_exp_ref < 2e-7 && max_err_log_ref < 2e-7) {
+  if (max_err_logexp_test < 2e-7 && max_err_exp_ref < 2e-7 &&
+      max_err_log_ref < 2e-7) {
     printf("   ->> precision OK for the exp_ps / log_ps <<-\n\n");
     return 0;
-  }
-  else {
+  } else {
     printf("\n   WRONG PRECISION !! there is a problem\n\n");
     return 1;
   }
 }
 
-void dumb()
-{
-  V4SF x = {{0.0903333798051, 0.0903333798051, 0.0903333798051, 0.0903333798051}};
+void dumb() {
+  V4SF x = {
+      {0.0903333798051, 0.0903333798051, 0.0903333798051, 0.0903333798051}};
   V4SF w;
-  w.v = log_ps(x.v);
+  w.v     = log_ps(x.v);
   float z = cephes_logf(x.f[0]);
   printf("log_ps returned ");
   print4(w.v);
-  printf("\ncephes returned: %14.12g and logf(%g)=%14.12g\n", z, x.f[0], logf(x.f[0]));
+  printf("\ncephes returned: %14.12g and logf(%g)=%14.12g\n", z, x.f[0],
+         logf(x.f[0]));
 
   print4(_mm_cmpeq_ps(x.v, x.v));
   printf("\n");
   exit(1);
 }
 
-void check_special_values()
-{
+void check_special_values() {
   V4SF vx;
   vx.f[0] = -1000;
   vx.f[1] = -100;
@@ -451,48 +448,46 @@ void check_special_values()
   printf("\n");
 }
 
-#define DECL_SCALAR_FN_BENCH(fn)      \
-  int bench_##fn()                    \
-  {                                   \
-    int niter = 10000, i, j;          \
-    float x = 0.5f, y = 0;            \
-    for (i = 0; i < niter; ++i) {     \
-      for (j = 0; j < 4; ++j) {       \
-        x += 1e-6f;                   \
-        y += fn(x + 5 * (j & 1));     \
-      }                               \
-    }                                 \
-    if (y == 2.32132323232f) niter--; \
-    return niter;                     \
+#define DECL_SCALAR_FN_BENCH(fn)                                               \
+  int bench_##fn() {                                                           \
+    int   niter = 10000, i, j;                                                 \
+    float x = 0.5f, y = 0;                                                     \
+    for (i = 0; i < niter; ++i) {                                              \
+      for (j = 0; j < 4; ++j) {                                                \
+        x += 1e-6f;                                                            \
+        y += fn(x + 5 * (j & 1));                                              \
+      }                                                                        \
+    }                                                                          \
+    if (y == 2.32132323232f)                                                   \
+      niter--;                                                                 \
+    return niter;                                                              \
   }
 
-#define DECL_VECTOR_FN_BENCH(fn)                           \
-  int bench_##fn()                                         \
-  {                                                        \
-    int niter = 10000, i;                                  \
-    v4sf bmin = _mm_set_ps1(0.5), bmax = _mm_set_ps1(1.0); \
-    v4sf x = _mm_set_ps1(0.75);                            \
-    for (i = 0; i < niter; ++i) {                          \
-      x = fn(x);                                           \
-      x = _mm_min_ps(x, bmax);                             \
-      x = _mm_max_ps(x, bmin);                             \
-    }                                                      \
-    if (((float *)&x)[0] == 2.32132323232f) niter--;       \
-    return niter;                                          \
+#define DECL_VECTOR_FN_BENCH(fn)                                               \
+  int bench_##fn() {                                                           \
+    int  niter = 10000, i;                                                     \
+    v4sf bmin = _mm_set_ps1(0.5), bmax = _mm_set_ps1(1.0);                     \
+    v4sf x = _mm_set_ps1(0.75);                                                \
+    for (i = 0; i < niter; ++i) {                                              \
+      x = fn(x);                                                               \
+      x = _mm_min_ps(x, bmax);                                                 \
+      x = _mm_max_ps(x, bmin);                                                 \
+    }                                                                          \
+    if (((float *)&x)[0] == 2.32132323232f)                                    \
+      niter--;                                                                 \
+    return niter;                                                              \
   }
 
 #ifdef __GNUC__
 #define HAVE_SINCOS_X86_FPU
-void sincos_x86_fpu(double t, double *st, double *ct)
-{
-//  asm("fsincos;" : "=t"(*ct), "=u"(*st) : "0"(t) : "st(7)");
+void sincos_x86_fpu(double t, double *st, double *ct) {
+  //  asm("fsincos;" : "=t"(*ct), "=u"(*st) : "0"(t) : "st(7)");
   asm("fsincos;" : "=t"(*ct), "=u"(*st) : "0"(t));
   //*st = sin(t); *ct = cos(t);
 }
 #elif defined(_MSC_VER) && !defined(_WIN64)
 #define HAVE_SINCOS_X86_FPU
-void sincos_x86_fpu(double t, double *st_, double *ct_)
-{
+void sincos_x86_fpu(double t, double *st_, double *ct_) {
   _asm {
     fld QWORD PTR [t]
     fsincos
@@ -505,16 +500,14 @@ void sincos_x86_fpu(double t, double *st_, double *ct_)
 #endif
 
 #ifdef HAVE_SINCOS_X86_FPU
-float stupid_sincos_x86_fpu(float x)
-{
+float stupid_sincos_x86_fpu(float x) {
   double s, c;
   sincos_x86_fpu(x, &s, &c);
   return s + c;
 }
 #endif
 
-v4sf stupid_sincos_ps(v4sf x)
-{
+v4sf stupid_sincos_ps(v4sf x) {
   v4sf s, c;
   sincos_ps(x, &s, &c);
   return s;
@@ -549,8 +542,7 @@ DECL_VECTOR_FN_BENCH(__vrs4_expf);
 DECL_VECTOR_FN_BENCH(__vrs4_logf);
 #endif
 
-void run_bench(const char *s, int (*fn)())
-{
+void run_bench(const char *s, int (*fn)()) {
   printf("benching %20s ..", s);
   fflush(stdout);
   double t0 = uclock_sec(), t1, tmax = 1.0;
@@ -560,14 +552,13 @@ void run_bench(const char *s, int (*fn)())
     t1 = uclock_sec();
   } while (t1 - t0 < tmax);
 #define REF_FREQ_MHZ 2000.0
-  printf(" -> %6.1f millions of vector evaluations/second -> %3.0f cycles/value on a %gMHz computer\n",
+  printf(" -> %6.1f millions of vector evaluations/second -> %3.0f "
+         "cycles/value on a %gMHz computer\n",
          floor(niter / (t1 - t0) / 1e5) / 10,
-         (t1 - t0) * REF_FREQ_MHZ * 1e6 / niter / 4,
-         REF_FREQ_MHZ);
+         (t1 - t0) * REF_FREQ_MHZ * 1e6 / niter / 4, REF_FREQ_MHZ);
 }
 
-void sanity_check()
-{
+void sanity_check() {
   printf("doing some sanity checks...\n");
 #ifndef USE_SSE2
   V4SF v = {{1, 2, 3, 4}}, z = {{5, 6, 7, 8}};
@@ -626,19 +617,20 @@ void sanity_check()
   V4SF r;
   r.v = _mm_cmplt_ps(w.v, w.v);
   if (r.i[0] != 0 || r.i[1] != 0 || r.i[2] != 0 || r.i[3] != 0) {
-    printf("your compiler has the nasty bug on all _mm_cmp*_ps functions: IT IS BROKEN\n");
+    printf("your compiler has the nasty bug on all _mm_cmp*_ps functions: IT "
+           "IS BROKEN\n");
     exit(1);
   }
   r.v = _mm_cmpeq_ps(w.v, w.v);
   if (r.i[0] != -1 || r.i[1] != -1 || r.i[2] != -1 || r.i[3] != -1) {
-    printf("your compiler has the nasty bug on all _mm_cmp*_ps functions: IT IS BROKEN\n");
+    printf("your compiler has the nasty bug on all _mm_cmp*_ps functions: IT "
+           "IS BROKEN\n");
     exit(1);
   }
-#endif  // USE_SSE2
+#endif // USE_SSE2
 }
 
-int main()
-{
+int main() {
   // dumb();
   // sanity_check();
   int err = 0;
@@ -779,7 +771,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  * rms relative error: 2.6e-8
  */
 
-static float FOPI = 1.27323954473516;
+static float FOPI  = 1.27323954473516;
 static float PIO4F = 0.7853981633974483096;
 /* Note, these constants are for a 32-bit significand: */
 /*
@@ -790,27 +782,27 @@ static float PIO4F = 0.7853981633974483096;
 */
 
 /* These are for a 24-bit significand: */
-static float DP1 = 0.78515625;
-static float DP2 = 2.4187564849853515625e-4;
-static float DP3 = 3.77489497744594108e-8;
+static float DP1    = 0.78515625;
+static float DP2    = 2.4187564849853515625e-4;
+static float DP3    = 3.77489497744594108e-8;
 static float lossth = 8192.;
-static float T24M1 = 16777215.;
+static float T24M1  = 16777215.;
 
 static float sincof[] = {-1.9515295891E-4, 8.3321608736E-3, -1.6666654611E-1};
-static float coscof[] = {2.443315711809948E-005, -1.388731625493765E-003, 4.166664568298827E-002};
+static float coscof[] = {2.443315711809948E-005, -1.388731625493765E-003,
+                         4.166664568298827E-002};
 
-float cephes_sinf(float xx)
-{
-  float *p;
-  float x, y, z;
+float cephes_sinf(float xx) {
+  float *                p;
+  float                  x, y, z;
   register unsigned long j;
-  register int sign;
+  register int           sign;
 
   sign = 1;
-  x = xx;
+  x    = xx;
   if (xx < 0) {
     sign = -1;
-    x = -xx;
+    x    = -xx;
   }
   if (x > T24M1) {
     // mtherr( "sinf", TLOSS );
@@ -832,8 +824,7 @@ float cephes_sinf(float xx)
   if (x > lossth) {
     // mtherr( "sinf", PLOSS );
     x = x - y * PIO4F;
-  }
-  else {
+  } else {
     /* Extended precision modular arithmetic */
     x = ((x - y * DP1) - y * DP2) - y * DP3;
   }
@@ -855,8 +846,7 @@ float cephes_sinf(float xx)
     y *= z;
     y -= 0.5 * z;
     y += 1.0;
-  }
-  else {
+  } else {
     /* Theoretical relative error = 3.8e-9 in [-pi/4, +pi/4] */
     /*
       y = ((-1.9515295891E-4 * z
@@ -874,7 +864,8 @@ float cephes_sinf(float xx)
   }
   /*einitd();*/
   // printf("my_sinf: j=%d result = %14.10g * %d\n", j, y, sign);
-  if (sign < 0) y = -y;
+  if (sign < 0)
+    y = -y;
   return (y);
 }
 
@@ -885,15 +876,15 @@ float cephes_sinf(float xx)
  * rms relative error: 2.2e-8
  */
 
-float cephes_cosf(float xx)
-{
+float cephes_cosf(float xx) {
   float x, y, z;
-  int j, sign;
+  int   j, sign;
 
   /* make argument positive */
   sign = 1;
-  x = xx;
-  if (x < 0) x = -x;
+  x    = xx;
+  if (x < 0)
+    x = -x;
 
   if (x > T24M1) {
     // mtherr( "cosf", TLOSS );
@@ -914,13 +905,13 @@ float cephes_cosf(float xx)
     sign = -sign;
   }
 
-  if (j > 1) sign = -sign;
+  if (j > 1)
+    sign = -sign;
 
   if (x > lossth) {
     // mtherr( "cosf", PLOSS );
     x = x - y * PIO4F;
-  }
-  else
+  } else
     /* Extended precision modular arithmetic */
     x = ((x - y * DP1) - y * DP2) - y * DP3;
 
@@ -929,14 +920,18 @@ float cephes_cosf(float xx)
   z = x * x;
 
   if ((j == 1) || (j == 2)) {
-    y = (((-1.9515295891E-4f * z + 8.3321608736E-3f) * z - 1.6666654611E-1f) * z * x) + x;
-  }
-  else {
-    y = ((2.443315711809948E-005f * z - 1.388731625493765E-003f) * z + 4.166664568298827E-002f) * z * z;
+    y = (((-1.9515295891E-4f * z + 8.3321608736E-3f) * z - 1.6666654611E-1f) *
+         z * x) +
+        x;
+  } else {
+    y = ((2.443315711809948E-005f * z - 1.388731625493765E-003f) * z +
+         4.166664568298827E-002f) *
+        z * z;
     y -= 0.5 * z;
     y += 1.0;
   }
-  if (sign < 0) y = -y;
+  if (sign < 0)
+    y = -y;
   return (y);
 }
 
@@ -1016,10 +1011,9 @@ static float LOG2EF = 1.44269504088896341;
 static float C1 = 0.693359375;
 static float C2 = -2.12194440e-4;
 
-float cephes_expf(float xx)
-{
+float cephes_expf(float xx) {
   float x, z;
-  int n;
+  int   n;
 
   x = xx;
 
@@ -1045,7 +1039,10 @@ float cephes_expf(float xx)
 
   z = x * x;
   /* Theoretical peak relative error in [-0.5, +0.5] is 4.2e-9. */
-  z = (((((1.9875691500E-4f * x + 1.3981999507E-3f) * x + 8.3334519073E-3f) * x + 4.1665795894E-2f) * x +
+  z = (((((1.9875691500E-4f * x + 1.3981999507E-3f) * x + 8.3334519073E-3f) *
+             x +
+         4.1665795894E-2f) *
+            x +
         1.6666665459E-1f) *
            x +
        5.0000001201E-1f) *
@@ -1113,19 +1110,18 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  * peak relative error: 7.1e-8
  * rms relative error: 2.7e-8
  */
-float LOGE2F = 0.693147180559945309;
-float SQRTHF = 0.707106781186547524;
-float PIF = 3.141592653589793238;
-float PIO2F = 1.5707963267948966192;
+float LOGE2F  = 0.693147180559945309;
+float SQRTHF  = 0.707106781186547524;
+float PIF     = 3.141592653589793238;
+float PIO2F   = 1.5707963267948966192;
 float MACHEPF = 5.9604644775390625E-8;
 
-float cephes_logf(float xx)
-{
+float cephes_logf(float xx) {
   register float y;
-  float x, z, fe;
-  int e;
+  float          x, z, fe;
+  int            e;
 
-  x = xx;
+  x  = xx;
   fe = 0.0;
   /* Test for domain */
   if (x <= 0.0) {
@@ -1138,8 +1134,7 @@ float cephes_logf(float xx)
   if (x < SQRTHF) {
     e -= 1;
     x = x + x - 1.0; /*  2x - 1  */
-  }
-  else {
+  } else {
     x = x - 1.0;
   }
   z = x * x;
@@ -1155,7 +1150,10 @@ float cephes_logf(float xx)
   y *= z;
   */
 
-  y = ((((((((7.0376836292E-2f * x - 1.1514610310E-1f) * x + 1.1676998740E-1f) * x - 1.2420140846E-1f) * x +
+  y = ((((((((7.0376836292E-2f * x - 1.1514610310E-1f) * x + 1.1676998740E-1f) *
+                x -
+            1.2420140846E-1f) *
+               x +
            1.4249322787E-1f) *
               x -
           1.6668057665E-1f) *
@@ -1178,7 +1176,8 @@ float cephes_logf(float xx)
   // printf("my_logf: x = %g y = %g\n", x, y);
   z = x + y; /* ... + x  */
 
-  if (e) z += 0.693359375f * fe;
+  if (e)
+    z += 0.693359375f * fe;
 
   return (z);
 }

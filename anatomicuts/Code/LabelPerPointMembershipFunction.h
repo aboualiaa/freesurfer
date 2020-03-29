@@ -9,9 +9,9 @@ class LabelPerPointMembershipFunction
     : public itk::Statistics::MembershipFunctionBase<TVector> {
 public:
   /** Standard class typedefs */
-  using Self = LabelPerPointMembershipFunction<TVector>;
-  using Superclass = itk::Statistics::MembershipFunctionBase<TVector>;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = LabelPerPointMembershipFunction<TVector>;
+  using Superclass   = itk::Statistics::MembershipFunctionBase<TVector>;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Strandard macros */
@@ -21,7 +21,7 @@ public:
 
   /** Typedef alias for the measurement vectors */
   using MeasurementVectorType = TVector;
-  using CentroidType = TVector;
+  using CentroidType          = TVector;
 
   /** Typedef to represent the length of measurement vectors */
   using MeasurementVectorSizeType =
@@ -57,7 +57,7 @@ public:
   void AddChild(const MeasurementVectorType *measurement);
   void RecalculateCentroid();
   void ClearChilds() { this->childs.clear(); }
-  int GetNumberOfChilds() { return this->childs.size(); }
+  int  GetNumberOfChilds() { return this->childs.size(); }
   void AddDirectionalNeighbors(vnl_matrix<int> *neighbors) {
     this->m_directionalNeighbors.push_back(neighbors);
   }
@@ -72,12 +72,12 @@ protected:
   void PrintSelf(std::ostream &os, itk::Indent indent) const;
 
 private:
-  double m_Variance;
-  std::vector<vnl_matrix<int> *> m_directionalNeighbors;
-  const MeasurementVectorType *m_Centroid;
+  double                                     m_Variance;
+  std::vector<vnl_matrix<int> *>             m_directionalNeighbors;
+  const MeasurementVectorType *              m_Centroid;
   std::vector<const MeasurementVectorType *> childs;
-  bool m_withEuclid;
-  bool m_withCosine;
+  bool                                       m_withEuclid;
+  bool                                       m_withCosine;
 };
 #include "LabelPerPointMembershipFunction.txx"
 

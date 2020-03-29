@@ -1,9 +1,9 @@
 #include "BusyIndicator.h"
 
 #include <QDebug>
+#include <QGradient>
 #include <QPainter>
 #include <QPixmapCache>
-#include <QGradient>
 
 BusyIndicator::BusyIndicator(QWidget *parent)
     : QWidget(parent), startAngle(0), m_style(StyleArc) {
@@ -103,7 +103,7 @@ void BusyIndicator::drawEllipseStyle(QPainter *painter) {
 
 void BusyIndicator::drawArcStyle(QPainter *painter) {
   //    QColor color = palette().color(QPalette::WindowText);
-  QColor color = fillColor;
+  QColor           color = fillColor;
   QConicalGradient gradient(0, 0, -startAngle);
   gradient.setColorAt(0, color);
   color.setAlpha(0);
@@ -127,7 +127,7 @@ void BusyIndicator::paintEvent(QPaintEvent *) {
                     .arg(startAngle)
                     .arg(m_style);
 
-  QPixmap pixmap;
+  QPixmap  pixmap;
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
 

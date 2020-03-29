@@ -24,14 +24,14 @@
  */
 
 #include "LivewireTool.h"
-#include <vtkPoints.h>
+#include "vtkDijkstraImageGeodesicPath.h"
+#include <vtkImageAnisotropicDiffusion2D.h>
+#include <vtkImageChangeInformation.h>
 #include <vtkImageClip.h>
 #include <vtkImageData.h>
 #include <vtkImageGradientMagnitude.h>
 #include <vtkImageShiftScale.h>
-#include <vtkImageChangeInformation.h>
-#include <vtkImageAnisotropicDiffusion2D.h>
-#include "vtkDijkstraImageGeodesicPath.h"
+#include <vtkPoints.h>
 
 LivewireTool::LivewireTool()
     : m_nPlane(0), m_nSlice(0), m_imageData(NULL), m_imageSlice(NULL) {
@@ -50,9 +50,9 @@ void LivewireTool::GetLivewirePoints(vtkImageData *image, int nPlane,
 void LivewireTool::UpdateImageDataInfo(vtkImageData *image_in, int nPlane,
                                        int nSlice) {
   if (m_imageData != image_in || m_nPlane != nPlane || m_nSlice != nSlice) {
-    m_imageData = image_in;
-    m_nPlane = nPlane;
-    m_nSlice = nSlice;
+    m_imageData                        = image_in;
+    m_nPlane                           = nPlane;
+    m_nSlice                           = nSlice;
     vtkSmartPointer<vtkImageClip> clip = vtkSmartPointer<vtkImageClip>::New();
 #if VTK_MAJOR_VERSION > 5
     clip->SetInputData(image_in);
@@ -97,7 +97,7 @@ void LivewireTool::UpdateImageDataInfo(vtkImageData *image_in, int nPlane,
     vtkSmartPointer<vtkImageChangeInformation> info =
         vtkSmartPointer<vtkImageChangeInformation>::New();
     info->SetInputConnection(scale->GetOutputPort());
-    int n[3] = {0, 0, 0};
+    int n[3]    = {0, 0, 0};
     n[m_nPlane] = -1 * m_nSlice;
     info->SetExtentTranslation(n);
     info->Update();
@@ -114,7 +114,7 @@ void LivewireTool::GetLivewirePoints(double *pt1_in, double *pt2_in,
   }
 
   vtkIdType beginVertId = m_imageSlice->FindPoint(pt1_in);
-  vtkIdType endVertId = m_imageSlice->FindPoint(pt2_in);
+  vtkIdType endVertId   = m_imageSlice->FindPoint(pt2_in);
   // cout << beginVertId << "  " << endVertId << endl;
 
   if (beginVertId == -1 || endVertId == -1) {
@@ -130,14 +130,14 @@ void LivewireTool::GetLivewirePoints(double *pt1_in, double *pt2_in,
   // double* pt = m_info->GetOutput()->GetPoint( beginVertId );
   // cout << pt[0] << " " << pt[1] << " " << pt[2] << endl;
 
-  vtkPolyData *pd = m_path->GetOutput();
-  vtkIdType npts = 0, *pts = NULL;
+  vtkPolyData *pd   = m_path->GetOutput();
+  vtkIdType    npts = 0, *pts = NULL;
   pd->GetLines()->InitTraversal();
   pd->GetLines()->GetNextCell(npts, pts);
   // cout << npts << endl;
-  double offset[3] = {0, 0, 0};
-  double *vs = m_imageData->GetSpacing();
-  offset[m_nPlane] = m_nSlice * vs[m_nPlane];
+  double  offset[3] = {0, 0, 0};
+  double *vs        = m_imageData->GetSpacing();
+  offset[m_nPlane]  = m_nSlice * vs[m_nPlane];
   for (int i = 0; i < npts; i++) {
     double *p = pd->GetPoint(pts[i]);
     // cout << p[0] << " " << p[1] << " " << p[2] << endl;

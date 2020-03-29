@@ -36,10 +36,10 @@ using AtlasAlphasType = itk::Array<float>;
 
 struct PointParameters {
   AtlasAlphasType m_Alphas;
-  bool m_CanChangeAlphas;
-  bool m_CanMoveX;
-  bool m_CanMoveY;
-  bool m_CanMoveZ;
+  bool            m_CanChangeAlphas;
+  bool            m_CanMoveX;
+  bool            m_CanMoveY;
+  bool            m_CanMoveZ;
 };
 
 // Some typedefs

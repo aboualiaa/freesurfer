@@ -24,9 +24,9 @@
  */
 
 #include "VolumeFilterDilate.h"
-#include <math.h>
 #include "LayerMRI.h"
 #include "ProgressCallback.h"
+#include <math.h>
 
 #include "utils.h"
 

@@ -1,8 +1,8 @@
 #ifndef __kvlAtlasMeshAlphaDrawer_h
 #define __kvlAtlasMeshAlphaDrawer_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 namespace kvl {
 
@@ -12,9 +12,9 @@ namespace kvl {
 class AtlasMeshAlphaDrawer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshAlphaDrawer;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshAlphaDrawer;
+  using Superclass   = AtlasMeshRasterizor;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -45,16 +45,16 @@ protected:
   virtual ~AtlasMeshAlphaDrawer();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
   AtlasMeshAlphaDrawer(const Self &); // purposely not implemented
   void operator=(const Self &);       // purposely not implemented
 
   //
-  int m_ClassNumber;
+  int                m_ClassNumber;
   ImageType::Pointer m_Image;
 };
 

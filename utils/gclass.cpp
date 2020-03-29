@@ -36,10 +36,10 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <math.h>
 
 #include "error.h"
 #include "gclass.h"
@@ -67,8 +67,8 @@
 ------------------------------------------------------*/
 GCLASSIFY *GCalloc(int nclasses, int nvars, const char *class_names[]) {
   GCLASSIFY *gc;
-  GCLASS *gcl;
-  int cno;
+  GCLASS *   gcl;
+  int        cno;
 
   gc = (GCLASSIFY *)calloc(1, sizeof(GCLASSIFY));
   if (!gc)
@@ -76,8 +76,8 @@ GCLASSIFY *GCalloc(int nclasses, int nvars, const char *class_names[]) {
                        nclasses));
 
   gc->nclasses = nclasses;
-  gc->nvars = nvars;
-  gc->classes = (GCLASS *)calloc(nclasses, sizeof(GCLASS));
+  gc->nvars    = nvars;
+  gc->classes  = (GCLASS *)calloc(nclasses, sizeof(GCLASS));
   if (!gc->classes)
     ErrorReturn(NULL,
                 (ERROR_NO_MEMORY,
@@ -91,8 +91,8 @@ GCLASSIFY *GCalloc(int nclasses, int nvars, const char *class_names[]) {
   }
 
   for (cno = 0; cno < nclasses; cno++) {
-    gcl = &gc->classes[cno];
-    gcl->classno = cno;
+    gcl               = &gc->classes[cno];
+    gcl->classno      = cno;
     gcl->m_covariance = MatrixAlloc(nvars, nvars, MATRIX_REAL);
     if (!gcl->m_covariance) {
       GCfree(&gc);
@@ -151,7 +151,7 @@ GCLASSIFY *GCalloc(int nclasses, int nvars, const char *class_names[]) {
 int GCtrain(GCLASSIFY *gc, int classnum, MATRIX *m_inputs) {
   GCLASS *gcl;
 
-  gcl = &gc->classes[classnum];
+  gcl       = &gc->classes[classnum];
   gcl->nobs = m_inputs->rows;
   if (gcl->nobs == 0) /* no training data */
   {
@@ -175,10 +175,10 @@ int GCtrain(GCLASSIFY *gc, int classnum, MATRIX *m_inputs) {
 ------------------------------------------------------*/
 int GCfree(GCLASSIFY **pgc) {
   GCLASSIFY *gc;
-  GCLASS *gcl;
-  int cno;
+  GCLASS *   gcl;
+  int        cno;
 
-  gc = *pgc;
+  gc   = *pgc;
   *pgc = nullptr;
 
   if (!gc)
@@ -212,10 +212,10 @@ int GCfree(GCLASSIFY **pgc) {
         Description
 ------------------------------------------------------*/
 int GCclassify(GCLASSIFY *gc, MATRIX *m_x, MATRIX *m_priors, float *prisk) {
-  int cno, classnum = -1;
-  GCLASS *gcl;
+  int            cno, classnum = -1;
+  GCLASS *       gcl;
   static MATRIX *m_xT = nullptr, *m_tmp, *m_tmp2, *m_tmp3;
-  float log_p, max_p, sum_p, prior;
+  float          log_p, max_p, sum_p, prior;
 
   if (m_x->cols != 1 || m_x->rows != gc->nvars)
     ErrorReturn(ERROR_BADPARM,
@@ -233,10 +233,10 @@ int GCclassify(GCLASSIFY *gc, MATRIX *m_x, MATRIX *m_priors, float *prisk) {
     if (m_tmp3)
       MatrixFree(&m_tmp3);
   }
-  m_xT = MatrixTranspose(m_x, m_xT);
-  max_p = -100000.0f;
+  m_xT     = MatrixTranspose(m_x, m_xT);
+  max_p    = -100000.0f;
   classnum = -1;
-  sum_p = 0.0f;
+  sum_p    = 0.0f;
   for (cno = 0; cno < gc->nclasses; cno++) {
     gcl = &gc->classes[cno];
 
@@ -246,7 +246,7 @@ int GCclassify(GCLASSIFY *gc, MATRIX *m_x, MATRIX *m_priors, float *prisk) {
       continue;
     }
 
-    m_tmp = MatrixMultiply(gcl->m_W, m_x, m_tmp);
+    m_tmp  = MatrixMultiply(gcl->m_W, m_x, m_tmp);
     m_tmp2 = MatrixMultiply(m_xT, m_tmp, m_tmp2);
     m_tmp3 = MatrixMultiply(gcl->m_wT, m_x, m_tmp3);
     if (m_priors)
@@ -264,7 +264,7 @@ int GCclassify(GCLASSIFY *gc, MATRIX *m_x, MATRIX *m_priors, float *prisk) {
     sum_p += exp(log_p);
     if (log_p > max_p) /* tentatively set this as the most probable class */
     {
-      max_p = log_p;
+      max_p    = log_p;
       classnum = cno;
     }
   }
@@ -360,9 +360,9 @@ GCLASS *GCasciiReadClassFrom(FILE *fp, GCLASS *gcl) {
 
   /* some of these matrices may already be allocated */
   gcl->m_covariance = MatrixAsciiReadFrom(fp, gcl->m_covariance);
-  gcl->m_u = MatrixAsciiReadFrom(fp, gcl->m_u);
-  gcl->m_W = MatrixAsciiReadFrom(fp, gcl->m_W);
-  gcl->m_wT = MatrixAsciiReadFrom(fp, gcl->m_wT);
+  gcl->m_u          = MatrixAsciiReadFrom(fp, gcl->m_u);
+  gcl->m_W          = MatrixAsciiReadFrom(fp, gcl->m_W);
+  gcl->m_wT         = MatrixAsciiReadFrom(fp, gcl->m_wT);
   return (gcl);
 }
 /*-----------------------------------------------------
@@ -378,7 +378,7 @@ GCLASS *GCasciiReadClassFrom(FILE *fp, GCLASS *gcl) {
 int GCinit(GCLASSIFY *gc, int classnum) {
   GCLASS *gcl;
   MATRIX *m_sigma_inverse, *m_uT, *m_tmp, *m_tmp2;
-  float det;
+  float   det;
 
   gcl = &gc->classes[classnum];
   if (gcl->nobs <= gc->nvars) /* not enough training data */
@@ -395,15 +395,15 @@ int GCinit(GCLASSIFY *gc, int classnum) {
   if (!m_sigma_inverse) /* don't really know what to do.... */
   {
     m_sigma_inverse = MatrixIdentity(gc->nvars, nullptr);
-    gcl->ill_cond = 1;
+    gcl->ill_cond   = 1;
   }
-  m_uT = MatrixTranspose(gcl->m_u, nullptr);
-  gcl->m_W = MatrixScalarMul(m_sigma_inverse, -0.5f, gcl->m_W);
-  m_tmp = MatrixMultiply(m_sigma_inverse, gcl->m_u, NULL);
+  m_uT      = MatrixTranspose(gcl->m_u, nullptr);
+  gcl->m_W  = MatrixScalarMul(m_sigma_inverse, -0.5f, gcl->m_W);
+  m_tmp     = MatrixMultiply(m_sigma_inverse, gcl->m_u, NULL);
   gcl->m_wT = MatrixTranspose(m_tmp, gcl->m_wT);
   MatrixFree(&m_tmp);
-  m_tmp = MatrixMultiply(m_sigma_inverse, gcl->m_u, NULL);
-  m_tmp2 = MatrixMultiply(m_uT, m_tmp, NULL);
+  m_tmp   = MatrixMultiply(m_sigma_inverse, gcl->m_u, NULL);
+  m_tmp2  = MatrixMultiply(m_uT, m_tmp, NULL);
   gcl->w0 = -0.5 * (gc->nvars * log(2 * M_PI) + m_tmp2->rptr[1][1] + log(det));
 
   /* log of prior can be added to gcl->w0 */

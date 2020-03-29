@@ -36,35 +36,35 @@
 //
 ////////////////////////////////////////////////////////////////////
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "cma.h"
+#include "diag.h"
+#include "error.h"
+#include "gca.h"
+#include "label.h"
+#include "macros.h"
+#include "matrix.h"
 #include "mri.h"
 #include "proto.h"
-#include "macros.h"
-#include "error.h"
 #include "timer.h"
-#include "diag.h"
 #include "utils.h"
-#include "matrix.h"
-#include "gca.h"
-#include "cma.h"
-#include "label.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 const char *Progname;
 static void usage_exit(int ecode);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static MRI *label_damaged_wm(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
                              MRI *mri_aseg, VECTOR **v_means,
                              MATRIX **m_covariances, TRANSFORM *transform,
                              GCA *gca);
-static int compute_damaged_wm_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
-                                         LABEL *l_damaged_wm, VECTOR **pv_mean,
-                                         MATRIX **pm_cov);
-static int compute_label_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
-                                    MRI *mri_aseg, int label, VECTOR **pv_mean,
-                                    MATRIX **pm_inv_cov, int erode);
+static int  compute_damaged_wm_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
+                                          LABEL *l_damaged_wm, VECTOR **pv_mean,
+                                          MATRIX **pm_cov);
+static int  compute_label_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
+                                     MRI *mri_aseg, int label, VECTOR **pv_mean,
+                                     MATRIX **pm_inv_cov, int erode);
 
 #define COULD_BE_DAMAGED_WM(l)                                                 \
   ((l == Left_Cerebral_White_Matter) || (l == Left_Cerebral_Cortex) ||         \
@@ -84,14 +84,14 @@ static int labels[] = {
                       } ;
 #endif
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs;
-  MRI *mri_T1, *mri_T2, *mri_PD, *mri_aseg, *mri_damaged_wm;
-  LABEL *l_damaged_wm;
-  GCA *gca;
+  char **    av;
+  int        ac, nargs;
+  MRI *      mri_T1, *mri_T2, *mri_PD, *mri_aseg, *mri_damaged_wm;
+  LABEL *    l_damaged_wm;
+  GCA *      gca;
   TRANSFORM *transform;
-  Timer start;
-  int msec, minutes, seconds;
+  Timer      start;
+  int        msec, minutes, seconds;
   char *PD_fname, *T2_fname, *T1_fname, *aseg_fname, *gca_fname, *xform_fname,
       *label_fname, *out_fname;
   MATRIX *m_inv_covariances[MAX_CMA_LABELS];
@@ -105,8 +105,8 @@ int main(int argc, char *argv[]) {
   ErrorInit(NULL, NULL, NULL);
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -116,14 +116,14 @@ int main(int argc, char *argv[]) {
   if (argc < 9)
     usage_exit(1);
 
-  PD_fname = argv[1];
-  T2_fname = argv[2];
-  T1_fname = argv[3];
-  aseg_fname = argv[4];
-  gca_fname = argv[5];
+  PD_fname    = argv[1];
+  T2_fname    = argv[2];
+  T1_fname    = argv[3];
+  aseg_fname  = argv[4];
+  gca_fname   = argv[5];
   xform_fname = argv[6];
   label_fname = argv[7];
-  out_fname = argv[8];
+  out_fname   = argv[8];
   fprintf(stderr, "reading %s...\n", PD_fname);
   mri_PD = MRIread(PD_fname);
   if (!mri_PD)
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
   printf("writing output to %s...\n", out_fname);
   MRIwrite(mri_damaged_wm, out_fname);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -209,15 +209,15 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   StrUpper(option);
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else
@@ -243,19 +243,19 @@ static int compute_damaged_wm_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
                                          MATRIX **pm_cov) {
   MATRIX *m_cov, *m_T1_ras2vox, *m_T2_ras2vox, *m_tmp;
   VECTOR *v_mean, *v_T1, *v_T2, *v_ras, *v_X, *v_XT;
-  double xv, yv, zv, val_T1, val_T2, val_PD;
-  int i, dofs_T1, dofs_T2;
+  double  xv, yv, zv, val_T1, val_T2, val_PD;
+  int     i, dofs_T1, dofs_T2;
 
-  m_cov = MatrixAlloc(3, 3, MATRIX_REAL);
-  v_mean = VectorAlloc(3, MATRIX_REAL);
-  v_T1 = VectorAlloc(4, MATRIX_REAL);
-  v_T2 = VectorAlloc(4, MATRIX_REAL);
-  v_ras = VectorAlloc(4, MATRIX_REAL);
-  v_X = VectorAlloc(3, MATRIX_REAL);
-  v_XT = NULL;
-  m_tmp = NULL;
-  VECTOR_ELT(v_T1, 4) = 1.0;
-  VECTOR_ELT(v_T2, 4) = 1.0;
+  m_cov                = MatrixAlloc(3, 3, MATRIX_REAL);
+  v_mean               = VectorAlloc(3, MATRIX_REAL);
+  v_T1                 = VectorAlloc(4, MATRIX_REAL);
+  v_T2                 = VectorAlloc(4, MATRIX_REAL);
+  v_ras                = VectorAlloc(4, MATRIX_REAL);
+  v_X                  = VectorAlloc(3, MATRIX_REAL);
+  v_XT                 = NULL;
+  m_tmp                = NULL;
+  VECTOR_ELT(v_T1, 4)  = 1.0;
+  VECTOR_ELT(v_T2, 4)  = 1.0;
   VECTOR_ELT(v_ras, 4) = 1.0;
 
   m_T1_ras2vox = MRIgetRasToVoxelXform(mri_T1);
@@ -316,8 +316,8 @@ static int compute_damaged_wm_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
         VECTOR_ELT(v_X, 1) = val_T1 - VECTOR_ELT(v_mean, 1);
         VECTOR_ELT(v_X, 2) = val_PD - VECTOR_ELT(v_mean, 2);
         VECTOR_ELT(v_X, 3) = val_T2 - VECTOR_ELT(v_mean, 3);
-        v_XT = VectorTranspose(v_X, v_XT);
-        m_tmp = MatrixMultiply(v_X, v_XT, m_tmp);
+        v_XT               = VectorTranspose(v_X, v_XT);
+        m_tmp              = MatrixMultiply(v_X, v_XT, m_tmp);
         MatrixAdd(m_tmp, m_cov, m_cov);
         dofs_T1++;
       }
@@ -337,7 +337,7 @@ static int compute_damaged_wm_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
   MatrixFree(&m_T2_ras2vox);
   MatrixFree(&m_tmp);
   *pv_mean = v_mean;
-  *pm_cov = MatrixInverse(m_cov, NULL);
+  *pm_cov  = MatrixInverse(m_cov, NULL);
   MatrixFree(&m_cov);
   return (NO_ERROR);
 }
@@ -347,22 +347,22 @@ static int compute_label_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
                                     MATRIX **pm_inv_cov, int erode) {
   MATRIX *m_cov, *m_T1_to_T2, *m_tmp;
   VECTOR *v_mean, *v_T1, *v_T2, *v_X, *v_XT;
-  double xv, yv, zv, val_T1, val_T2, val_PD;
-  int dofs_T1, dofs_T2, x, y, z;
-  MRI *mri_label;
+  double  xv, yv, zv, val_T1, val_T2, val_PD;
+  int     dofs_T1, dofs_T2, x, y, z;
+  MRI *   mri_label;
 
   mri_label = MRIclone(mri_aseg, NULL);
   MRIcopyLabel(mri_aseg, mri_label, label);
   while (erode-- > 0)
     MRIerode(mri_label, mri_label);
 
-  m_cov = MatrixAlloc(3, 3, MATRIX_REAL);
-  v_mean = VectorAlloc(3, MATRIX_REAL);
-  v_T1 = VectorAlloc(4, MATRIX_REAL);
-  v_T2 = VectorAlloc(4, MATRIX_REAL);
-  v_X = VectorAlloc(3, MATRIX_REAL);
-  v_XT = NULL;
-  m_tmp = NULL;
+  m_cov               = MatrixAlloc(3, 3, MATRIX_REAL);
+  v_mean              = VectorAlloc(3, MATRIX_REAL);
+  v_T1                = VectorAlloc(4, MATRIX_REAL);
+  v_T2                = VectorAlloc(4, MATRIX_REAL);
+  v_X                 = VectorAlloc(3, MATRIX_REAL);
+  v_XT                = NULL;
+  m_tmp               = NULL;
   VECTOR_ELT(v_T1, 4) = 1.0;
   VECTOR_ELT(v_T2, 4) = 1.0;
 
@@ -378,9 +378,9 @@ static int compute_label_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
           continue;
         V3_Z(v_T1) = z;
         MatrixMultiply(m_T1_to_T2, v_T1, v_T2);
-        xv = V3_X(v_T2);
-        yv = V3_Y(v_T2);
-        zv = V3_Z(v_T2);
+        xv     = V3_X(v_T2);
+        yv     = V3_Y(v_T2);
+        zv     = V3_Z(v_T2);
         val_T1 = MRIgetVoxVal(mri_T1, x, y, z, 0);
         VECTOR_ELT(v_mean, 1) += val_T1;
         dofs_T1++;
@@ -415,9 +415,9 @@ static int compute_label_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
         V3_Z(v_T1) = z;
         MatrixMultiply(m_T1_to_T2, v_T1, v_T2);
         val_T1 = MRIgetVoxVal(mri_T1, x, y, z, 0);
-        xv = V3_X(v_T2);
-        yv = V3_Y(v_T2);
-        zv = V3_Z(v_T2);
+        xv     = V3_X(v_T2);
+        yv     = V3_Y(v_T2);
+        zv     = V3_Z(v_T2);
         if (MRIindexNotInVolume(mri_T2, xv, yv, zv) ==
             0) // only if in both sets of volumes
         {
@@ -426,8 +426,8 @@ static int compute_label_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
           VECTOR_ELT(v_X, 1) = val_T1 - VECTOR_ELT(v_mean, 1);
           VECTOR_ELT(v_X, 2) = val_PD - VECTOR_ELT(v_mean, 2);
           VECTOR_ELT(v_X, 3) = val_T2 - VECTOR_ELT(v_mean, 3);
-          v_XT = VectorTranspose(v_X, v_XT);
-          m_tmp = MatrixMultiply(v_X, v_XT, m_tmp);
+          v_XT               = VectorTranspose(v_X, v_XT);
+          m_tmp              = MatrixMultiply(v_X, v_XT, m_tmp);
           MatrixAdd(m_tmp, m_cov, m_cov);
           dofs_T1++;
         }
@@ -445,7 +445,7 @@ static int compute_label_statistics(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
   VectorFree(&v_XT);
   MatrixFree(&m_T1_to_T2);
   MatrixFree(&m_tmp);
-  *pv_mean = v_mean;
+  *pv_mean    = v_mean;
   *pm_inv_cov = MatrixInverse(m_cov, NULL);
   MatrixFree(&m_cov);
   MRIfree(&mri_label);
@@ -460,14 +460,14 @@ static MRI *label_damaged_wm(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
                              MRI *mri_aseg, VECTOR **v_means,
                              MATRIX **m_inv_covariances, TRANSFORM *transform,
                              GCA *gca) {
-  MRI *mri_damaged_wm, *mri_mask;
-  int x, y, z, l, xv, yv, zv, min_dist_label, ndamaged;
+  MRI * mri_damaged_wm, *mri_mask;
+  int   x, y, z, l, xv, yv, zv, min_dist_label, ndamaged;
   float dists[MAX_CMA_LABELS], pwm_damage, prior, min_dist,
       dets[MAX_CMA_LABELS];
-  MATRIX *m_T2_to_T1;
-  VECTOR *v_T1, *v_T2, *v_vals, *v_vals_minus_means, *v_tmp;
+  MATRIX *   m_T2_to_T1;
+  VECTOR *   v_T1, *v_T2, *v_vals, *v_vals_minus_means, *v_tmp;
   GCA_PRIOR *gcap;
-  double val;
+  double     val;
 
   for (l = 0; l < MAX_CMA_LABELS; l++) {
     if (m_inv_covariances[l] != NULL) {
@@ -494,12 +494,12 @@ static MRI *label_damaged_wm(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
   MRIerode(mri_mask, mri_mask); // don't let it occur near cortex
   MRIbinarize(mri_mask, mri_mask, 1, 0, 128);
   MRIwrite(mri_mask, "m.mgz");
-  v_tmp = NULL;
-  v_T1 = VectorAlloc(4, MATRIX_REAL);
-  v_T2 = VectorAlloc(4, MATRIX_REAL);
+  v_tmp               = NULL;
+  v_T1                = VectorAlloc(4, MATRIX_REAL);
+  v_T2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v_T1, 4) = VECTOR_ELT(v_T2, 4) = 1.0;
-  m_T2_to_T1 = MRIgetVoxelToVoxelXform(mri_T2, mri_T1);
-  v_vals = VectorAlloc(3, MATRIX_REAL);
+  m_T2_to_T1         = MRIgetVoxelToVoxelXform(mri_T2, mri_T1);
+  v_vals             = VectorAlloc(3, MATRIX_REAL);
   v_vals_minus_means = VectorAlloc(3, MATRIX_REAL);
 
   mri_damaged_wm = MRIclone(mri_PD, NULL);
@@ -521,7 +521,7 @@ static MRI *label_damaged_wm(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
         if (nint(MRIgetVoxVal(mri_mask, xv, yv, zv, 0)) == 0)
           continue;
 
-        gcap = getGCAP(gca, mri_T1, transform, xv, yv, zv);
+        gcap       = getGCAP(gca, mri_T1, transform, xv, yv, zv);
         pwm_damage = getPrior(gcap, Left_Cerebral_White_Matter) +
                      getPrior(gcap, Right_Cerebral_White_Matter) +
                      getPrior(gcap, Left_Caudate) +
@@ -536,7 +536,7 @@ static MRI *label_damaged_wm(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
         VECTOR_ELT(v_vals, 2) = MRIgetVoxVal(mri_PD, x, y, z, 0);
         VECTOR_ELT(v_vals, 3) = MRIgetVoxVal(mri_T2, x, y, z, 0);
 
-        min_dist = -1;
+        min_dist       = -1;
         min_dist_label = 0;
         for (l = 0; l < MAX_CMA_LABELS; l++)
           if (v_means[l]) {
@@ -550,7 +550,7 @@ static MRI *label_damaged_wm(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2,
                 MatrixMultiply(m_inv_covariances[l], v_vals_minus_means, v_tmp);
             dists[l] = VectorDot(v_vals_minus_means, v_tmp) + dets[l];
             if ((dists[l] < min_dist) || min_dist < 0) {
-              min_dist = dists[l];
+              min_dist       = dists[l];
               min_dist_label = l;
             }
           }

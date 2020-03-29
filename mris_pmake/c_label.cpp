@@ -26,10 +26,10 @@
 
 #include <deque>
 
-#include "dijkstra.h"
+#include "C_mpmProg.h"
 #include "c_surface.h"
 #include "c_vertex.h"
-#include "C_mpmProg.h"
+#include "dijkstra.h"
 
 void label_ply_do(s_env &ast_env) {
   //
@@ -47,20 +47,20 @@ void label_ply_do(s_env &ast_env) {
 
   // Should any cost values remaining in the surface be zeroed? Yes.
 
-  bool b_origHistoryFlag = ast_env.b_costHistoryPreserve;
-  bool b_surfaceCostVoid = false;
-  int i = 0;
-  int j = 0;
-  float f_plyDepth = s_env_plyDepth_get(ast_env);
+  bool  b_origHistoryFlag       = ast_env.b_costHistoryPreserve;
+  bool  b_surfaceCostVoid       = false;
+  int   i                       = 0;
+  int   j                       = 0;
+  float f_plyDepth              = s_env_plyDepth_get(ast_env);
   ast_env.b_costHistoryPreserve = true;
 
   // s_env_costFctSet(&ast_env, costFunc_unityReturn, e_unity);
 
   for (i = 0; i < ast_env.pMS_active->nvertices; i++) {
     if (ast_env.pMS_active->vertices[i].ripflag == TRUE) {
-      b_surfaceCostVoid = !j++;
+      b_surfaceCostVoid   = !j++;
       ast_env.startVertex = i;
-      ast_env.endVertex = i;
+      ast_env.endVertex   = i;
       dijkstra(ast_env, f_plyDepth, b_surfaceCostVoid);
     }
   }
@@ -69,7 +69,7 @@ void label_ply_do(s_env &ast_env) {
 
 void label_singleVertexSet(MRIS *apmris, int avertex,
                            void (*vertex_labelMark)(VERTEX *pvertex,
-                                                    void *marker),
+                                                    void *  marker),
                            void *apv_marker) {
   //
   // POSTCONDITIONS
@@ -85,7 +85,7 @@ void label_singleVertexSet(MRIS *apmris, int avertex,
   //
 
   VERTEX *pvertex;
-  int i;
+  int     i;
 
   for (i = 0; i < apmris->nvertices; i++)
     apmris->vertices[i].ripflag = FALSE;
@@ -94,7 +94,7 @@ void label_singleVertexSet(MRIS *apmris, int avertex,
   vertex_labelMark(pvertex, apv_marker);
 }
 
-bool label_terminalsFind(MRIS *apmris, string astr_fileName,
+bool label_terminalsFind(MRIS *apmris, std::string astr_fileName,
                          std::deque<int> &aque_terminal
 
 ) {
@@ -113,12 +113,12 @@ bool label_terminalsFind(MRIS *apmris, string astr_fileName,
   //
 
   LABEL *pLBL;
-  int vno_i = 0;
-  int vno_j = 0;
-  int vno_k = 0;
-  int i, j, k;
-  short inLabel = 0;
-  bool b_ret = false;
+  int    vno_i = 0;
+  int    vno_j = 0;
+  int    vno_k = 0;
+  int    i, j, k;
+  short  inLabel = 0;
+  bool   b_ret   = false;
 
   pLBL = LabelRead((char *)"", (char *)astr_fileName.c_str());
   if (pLBL == nullptr)
@@ -126,9 +126,9 @@ bool label_terminalsFind(MRIS *apmris, string astr_fileName,
 
   aque_terminal.clear();
   for (i = 0; i < pLBL->n_points; i++) {
-    vno_i = pLBL->lv[i].vno;
+    vno_i                                = pLBL->lv[i].vno;
     VERTEX_TOPOLOGY const *const pvertex = &apmris->vertices_topology[vno_i];
-    inLabel = 0;
+    inLabel                              = 0;
     for (j = 0; j < pvertex->vnum; j++) {
       vno_j = pvertex->v[j];
       for (k = 0; k < pLBL->n_points; k++) {
@@ -146,7 +146,7 @@ bool label_terminalsFind(MRIS *apmris, string astr_fileName,
   return b_ret;
 }
 
-void label_coreLoad(MRIS *apmris, string astr_fileName,
+void label_coreLoad(MRIS *apmris, std::string astr_fileName,
                     void (*vertex_labelMark)(VERTEX *pvertex, void *marker),
                     void *apv_marker) {
   //
@@ -167,10 +167,10 @@ void label_coreLoad(MRIS *apmris, string astr_fileName,
   // o Convert <astr_fileName> to absolute directory spec.
   //
 
-  LABEL *pLBL;
+  LABEL * pLBL;
   VERTEX *pvertex;
-  int vno = 0;
-  int i;
+  int     vno = 0;
+  int     i;
 
   pLBL = LabelRead((char *)"", (char *)astr_fileName.c_str());
   if (pLBL == nullptr)
@@ -180,7 +180,7 @@ void label_coreLoad(MRIS *apmris, string astr_fileName,
     apmris->vertices[i].ripflag = FALSE;
 
   for (i = 0; i < pLBL->n_points; i++) {
-    vno = pLBL->lv[i].vno;
+    vno     = pLBL->lv[i].vno;
     pvertex = &apmris->vertices[vno];
     vertex_labelMark(pvertex, apv_marker);
   }
@@ -189,7 +189,7 @@ void label_coreLoad(MRIS *apmris, string astr_fileName,
 
 void label_workingSurface_loadFrom(s_env &st_env,
                                    void (*vertex_labelMark)(VERTEX *pvertex,
-                                                            void *marker),
+                                                            void *  marker),
                                    void *apv_marker) {
   //
   // ARGS
@@ -206,22 +206,22 @@ void label_workingSurface_loadFrom(s_env &st_env,
   // o Split from "label_save()".
   //
 
-  string str_labelFileName;
-  MRIS *pMS_primary;
+  std::string str_labelFileName;
+  MRIS *      pMS_primary;
 
   bool b_clearWholeSurface = true;
   surface_ripClear(st_env, b_clearWholeSurface);
 
   str_labelFileName = st_env.str_workingDir + st_env.str_labelFileName;
-  pMS_primary = st_env.pMS_primary;
+  pMS_primary       = st_env.pMS_primary;
   ULOUT(str_labelFileName);
   label_coreLoad(pMS_primary, str_labelFileName, vertex_labelMark, apv_marker);
   nULOUT("\t\t\t\t[ ok ]");
 }
 
-void label_coreSave(MRIS *apmris, string astr_fileName,
+void label_coreSave(MRIS *apmris, std::string astr_fileName,
                     bool (*vertex_satisfyTestCondition)(VERTEX *apvertex,
-                                                        void *apv_void),
+                                                        void *  apv_void),
                     void *apv_fromCaller) {
   //
   // ARGS
@@ -241,10 +241,10 @@ void label_coreSave(MRIS *apmris, string astr_fileName,
   // o Split from "label_save()".
   //
 
-  LABEL *pLBL;
+  LABEL * pLBL;
   VERTEX *pvertex;
-  int n = 0;
-  int i;
+  int     n = 0;
+  int     i;
 
   for (i = 0; i < apmris->nvertices; i++) {
     // if(apmris->vertices[i].ripflag == TRUE)
@@ -260,9 +260,9 @@ void label_coreSave(MRIS *apmris, string astr_fileName,
     pvertex = &apmris->vertices[i];
     if (vertex_satisfyTestCondition(pvertex, apv_fromCaller)) {
       pLBL->lv[pLBL->n_points].vno = i;
-      pLBL->lv[pLBL->n_points].x = apmris->vertices[i].x;
-      pLBL->lv[pLBL->n_points].y = apmris->vertices[i].y;
-      pLBL->lv[pLBL->n_points].z = apmris->vertices[i].z;
+      pLBL->lv[pLBL->n_points].x   = apmris->vertices[i].x;
+      pLBL->lv[pLBL->n_points].y   = apmris->vertices[i].y;
+      pLBL->lv[pLBL->n_points].z   = apmris->vertices[i].z;
       pLBL->n_points++;
     }
   }
@@ -270,7 +270,8 @@ void label_coreSave(MRIS *apmris, string astr_fileName,
   LabelFree(&pLBL);
 }
 
-void label_ply_save(s_env &st_env, string astr_filePrefix, bool b_staggered) {
+void label_ply_save(s_env &st_env, std::string astr_filePrefix,
+                    bool b_staggered) {
   //
   // PRECONDITIONS
   //  o ply labels should be defined on the internal working surface.
@@ -283,26 +284,26 @@ void label_ply_save(s_env &st_env, string astr_filePrefix, bool b_staggered) {
   //   reference label curve.
   //
 
-  string str_labelFileName;
-  MRIS *pMS_surface;
-  stringstream sout("");
+  std::string       str_labelFileName;
+  MRIS *            pMS_surface;
+  std::stringstream sout("");
 
-  float f_plyStart;
-  float f_plyIncrement;
-  float f_plyDepth;
+  float  f_plyStart;
+  float  f_plyIncrement;
+  float  f_plyDepth;
   float *pf_plyDepth;
-  void *pv_fromCaller;
+  void * pv_fromCaller;
 
   pMS_surface = st_env.pMS_active;
 
   f_plyIncrement = s_env_plyIncrement_get(st_env);
-  f_plyDepth = s_env_plyDepth_get(st_env);
-  f_plyStart = f_plyDepth;
+  f_plyDepth     = s_env_plyDepth_get(st_env);
+  f_plyStart     = f_plyDepth;
   if (b_staggered)
     f_plyStart = 0.0;
 
   while (f_plyStart <= f_plyDepth) {
-    pf_plyDepth = &f_plyStart;
+    pf_plyDepth   = &f_plyStart;
     pv_fromCaller = (void *)pf_plyDepth;
     sout << st_env.str_workingDir + astr_filePrefix;
     if (b_staggered)
@@ -334,10 +335,10 @@ void label_secondarySurface_saveTo(
   // o Split from "label_save()".
   //
 
-  string str_labelFileName;
-  MRIS *pMS_secondarySurface;
+  std::string str_labelFileName;
+  MRIS *      pMS_secondarySurface;
 
-  str_labelFileName = st_env.str_workingDir + st_env.str_labelFileNameOS;
+  str_labelFileName    = st_env.str_workingDir + st_env.str_labelFileNameOS;
   pMS_secondarySurface = st_env.pMS_secondary;
   label_coreSave(pMS_secondarySurface, str_labelFileName,
                  vertex_satisfyTestCondition, apv_fromCaller);
@@ -361,11 +362,11 @@ void label_workingSurface_saveTo(
   // o Split from "label_save()".
   //
 
-  string str_labelFileName;
-  MRIS *pMS_primary;
+  std::string str_labelFileName;
+  MRIS *      pMS_primary;
 
   str_labelFileName = st_env.str_workingDir + st_env.str_labelFileName;
-  pMS_primary = st_env.pMS_primary;
+  pMS_primary       = st_env.pMS_primary;
   label_coreSave(pMS_primary, str_labelFileName, vertex_satisfyTestCondition,
                  apv_fromCaller);
 }

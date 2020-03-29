@@ -32,7 +32,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -46,7 +46,7 @@ static int nbrs = 1;
 
 int main(int argc, char *argv[]) {
   char **av, *hemi, *sname, sdir[400], *cp, fname[500], *morph_name, *out_name;
-  int ac, nargs;
+  int    ac, nargs;
   MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "mris_morph_stats");
@@ -69,11 +69,11 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit();
 
-  sname = argv[1];
-  hemi = argv[2];
+  sname      = argv[1];
+  hemi       = argv[2];
   morph_name = argv[3];
-  out_name = argv[4];
-  cp = getenv("SUBJECTS_DIR");
+  out_name   = argv[4];
+  cp         = getenv("SUBJECTS_DIR");
   if (!cp)
     ErrorExit(ERROR_BADPARM, "%s: SUBJECTS_DIR not defined in environment.\n",
               Progname);
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -151,7 +151,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     default:
       fprintf(stderr, "unknown option %s\n", argv[1]);

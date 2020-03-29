@@ -23,65 +23,65 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "const.h"
-#include "timer.h"
-#include "version.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "rbm.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
-static int train_xor(RBM_PARMS *parms);
+static int  train_xor(RBM_PARMS *parms);
 
-static int ngroups = 5;         // number of filters to learn
-static int nhidden[MAX_LAYERS]; // only for DBNs
-static int ksizes[MAX_LAYERS];
-static int ksize = 11; // size of filters
-static int downsample;
-static double momentum = .5;
+static int       ngroups = 5;         // number of filters to learn
+static int       nhidden[MAX_LAYERS]; // only for DBNs
+static int       ksizes[MAX_LAYERS];
+static int       ksize = 11; // size of filters
+static int       downsample;
+static double    momentum = .5;
 static RBM_PARMS parms;
-static int extract = 0;
-static int test_on_xor = 0;
-static int rbm_input_type = RBM_TYPE_CONTINUOUS_INPUTS;
-static int force_dbn = 0;
-static int force_cdbn = 0;
+static int       extract        = 0;
+static int       test_on_xor    = 0;
+static int       rbm_input_type = RBM_TYPE_CONTINUOUS_INPUTS;
+static int       force_dbn      = 0;
+static int       force_cdbn     = 0;
 
 static MRI *extract_subimage(MRI *mri_inputs) {
-  int x0, y0, w, h;
+  int  x0, y0, w, h;
   MRI *mri_tmp;
 
-  w = mri_inputs->width / extract;
-  h = mri_inputs->height / extract;
-  x0 = (mri_inputs->width - w) / 2;
-  y0 = (mri_inputs->height - h) / 2;
+  w       = mri_inputs->width / extract;
+  h       = mri_inputs->height / extract;
+  x0      = (mri_inputs->width - w) / 2;
+  y0      = (mri_inputs->height - h) / 2;
   mri_tmp = MRIextract(mri_inputs, NULL, x0, y0, 0, w, h, 1);
   MRIfree(&mri_inputs);
   return (mri_tmp);
 }
 
 static char isXdigit(char c) { return (c == '.' || isdigit(c)); }
-int main(int argc, char *argv[]) {
+int         main(int argc, char *argv[]) {
   char **av, *int_fname, *label_fname, *out_fname;
-  int ac, nargs, msec, minutes, seconds;
-  Timer start;
-  MRI *mri_inputs, *mri_labels, *mri_tmp;
-  RBM *rbm;
-  DBN *dbn;
-  CDBN *cdbn;
-  float min_label, max_label;
+  int    ac, nargs, msec, minutes, seconds;
+  Timer  start;
+  MRI *  mri_inputs, *mri_labels, *mri_tmp;
+  RBM *  rbm;
+  DBN *  dbn;
+  CDBN * cdbn;
+  float  min_label, max_label;
 
   nargs = handleVersionOption(argc, argv, "oct_train");
   if (nargs && argc - nargs == 1)
@@ -95,32 +95,32 @@ int main(int argc, char *argv[]) {
   start.reset();
 
   setRandomSeed(-1L);
-  parms.nlayers = 1;
+  parms.nlayers          = 1;
   parms.write_iterations = 100;
   {
     int l;
     for (l = 0; l < MAX_LAYERS; l++) {
       parms.training_rates[l] = .0001;
-      parms.sparsity[l] = .003;
-      parms.momentum[l] = momentum;
-      parms.weight_decays[l] = .00001;
-      parms.l_sparsity[l] = 1;
+      parms.sparsity[l]       = .003;
+      parms.momentum[l]       = momentum;
+      parms.weight_decays[l]  = .00001;
+      parms.l_sparsity[l]     = 1;
     }
   }
-  parms.mini_batch_size = 1000;
+  parms.mini_batch_size         = 1000;
   parms.discriminative_training = 0;
-  parms.label_trate = .0001;
-  parms.l_label = 1;
-  parms.held_out = 1000;
-  parms.batches_per_step = 10;
-  parms.nsteps = 5000;
-  parms.learn_variance = 0;
-  parms.nclasses = 3;
-  parms.sparsity_decay = .9;
-  parms.max_no_progress = 500;
-  parms.ksize = ksize;
-  ac = argc;
-  av = argv;
+  parms.label_trate             = .0001;
+  parms.l_label                 = 1;
+  parms.held_out                = 1000;
+  parms.batches_per_step        = 10;
+  parms.nsteps                  = 5000;
+  parms.learn_variance          = 0;
+  parms.nclasses                = 3;
+  parms.sparsity_decay          = .9;
+  parms.max_no_progress         = 500;
+  parms.ksize                   = ksize;
+  ac                            = argc;
+  av                            = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -130,9 +130,9 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit(1);
 
-  int_fname = argv[1];
+  int_fname   = argv[1];
   label_fname = argv[2];
-  out_fname = argv[argc - 1];
+  out_fname   = argv[argc - 1];
   FileNameRemoveExtension(out_fname, parms.base_name);
   printf("reading input intensities from %s\n", int_fname);
   mri_inputs = MRIread(int_fname);
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     mri_labels = extract_subimage(mri_labels);
   if (downsample > 0) {
     MRI *mri_tmp;
-    int i;
+    int  i;
 
     for (i = 0; i < downsample; i++) {
       mri_tmp = MRIdownsample2LabeledVolume(mri_labels, NULL);
@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
     //    DBNfree(&dbn) ;
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -274,7 +274,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0, layer;
+  int   nargs = 0, layer;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -289,7 +289,7 @@ static int get_option(int argc, char *argv[]) {
         break;
     }
   } else if (!stricmp(option, "mb")) {
-    parms.mini_batch_size = atoi(argv[2]);
+    parms.mini_batch_size  = atoi(argv[2]);
     parms.batches_per_step = atoi(argv[3]);
     printf("using mini batch size=%d and batches/step = %d\n",
            parms.mini_batch_size, parms.batches_per_step);
@@ -305,7 +305,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "sparsity")) {
     for (layer = 0; layer < MAX_LAYERS; layer++) {
       if (isXdigit(*argv[2 + 2 * layer])) {
-        parms.sparsity[layer] = atof(argv[2 + 2 * layer]);
+        parms.sparsity[layer]   = atof(argv[2 + 2 * layer]);
         parms.l_sparsity[layer] = atof(argv[2 + 2 * layer + 1]);
         printf("setting sparsity target for layer %d to %f with weight %2.3f\n",
                layer, parms.sparsity[layer], parms.l_sparsity[layer]);
@@ -314,7 +314,7 @@ static int get_option(int argc, char *argv[]) {
         break;
     }
   } else if (!stricmp(option, "variance")) {
-    parms.variance = atof(argv[2]);
+    parms.variance       = atof(argv[2]);
     parms.learn_variance = -1;
     printf("setting variance to %f (std=%f)\n", parms.variance,
            sqrt(parms.variance));
@@ -325,9 +325,9 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "layers") || !stricmp(option, "nlayers") ||
              !stricmp(option, "dbn")) {
     int l;
-    force_dbn = 1;
+    force_dbn     = 1;
     parms.nlayers = atoi(argv[2]);
-    nargs = 1 + parms.nlayers;
+    nargs         = 1 + parms.nlayers;
     for (l = 0; l < parms.nlayers; l++) {
       nhidden[l] = atoi(argv[3 + l]);
       printf("hidden layer %d: %d units\n", l + 1, nhidden[l]);
@@ -336,11 +336,11 @@ static int get_option(int argc, char *argv[]) {
     printf("training a %d-layer Deep Belief Network (DBN)\n", parms.nlayers);
   } else if (!stricmp(option, "cdbn")) {
     int l;
-    force_cdbn = 1;
+    force_cdbn    = 1;
     parms.nlayers = atoi(argv[2]);
-    nargs = 1 + 2 * parms.nlayers;
+    nargs         = 1 + 2 * parms.nlayers;
     for (l = 0; l < parms.nlayers; l++) {
-      ksizes[l] = atoi(argv[3 + 2 * l]);
+      ksizes[l]  = atoi(argv[3 + 2 * l]);
       nhidden[l] = atoi(argv[3 + 2 * l + 1]);
       printf("hidden layer %d: ksize: %d groups: %d\n", l + 1, ksizes[l],
              nhidden[l]);
@@ -348,30 +348,30 @@ static int get_option(int argc, char *argv[]) {
 
     printf("training a %d-layer Deep Belief Network (DBN)\n", parms.nlayers);
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "debug")) {
     parms.debug = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("setting debug level to %d\n", parms.debug);
   } else if (!stricmp(option, "disc")) {
     parms.discriminative_training = atoi(argv[2]);
-    nargs = 1;
+    nargs                         = 1;
     printf("setting discriminative traiing to %d\n",
            parms.discriminative_training);
   } else
     switch (toupper(*option)) {
     case 'W':
       parms.write_iterations = atoi(argv[2]);
-      nargs = 1;
+      nargs                  = 1;
       printf("setting write iterations to  %d\n", parms.write_iterations);
       break;
     case 'D':
       downsample = atoi(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("downsampling inputs %d times before training\n", downsample);
       break;
     case 'B':
@@ -390,26 +390,26 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'X':
       extract = atof(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       printf("setting extract to %d\n", extract);
       break;
     case 'G':
       ngroups = atoi(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       printf("using %d groups in each hidden layer\n", ngroups);
       break;
     case 'N':
       parms.nsteps = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       printf("using %d training iterations\n", parms.nsteps);
       break;
     case 'V':
       Gdiag_no = atof(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'K':
       parms.ksize = atoi(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("using kernel size %d in each hidden layer\n", parms.ksize);
       break;
     case 'E':
@@ -446,21 +446,21 @@ static void usage_exit(int code) {
   exit(code);
 }
 
-#define NINPUTS 2
+#define NINPUTS   2
 #define NTRAINING 10000
 static int train_xor(RBM_PARMS *parms) {
-  RBM *rbm;
-  MRI *mri_inputs, *mri_labels;
-  int x, val1, val2, n;
-  double r, visible[NINPUTS], rms;
+  RBM *    rbm;
+  MRI *    mri_inputs, *mri_labels;
+  int      x, val1, val2, n;
+  double   r, visible[NINPUTS], rms;
   VOXLIST *vl;
-  FILE *fp;
+  FILE *   fp;
 
-  fp = fopen("rbm.log", "w");
-  parms->held_out = 1000;
-  parms->mini_batch_size = 1;
+  fp                      = fopen("rbm.log", "w");
+  parms->held_out         = 1000;
+  parms->mini_batch_size  = 1;
   parms->batches_per_step = 1;
-  parms->nsteps = 1000;
+  parms->nsteps           = 1000;
 
   mri_inputs = MRIallocSequence(NTRAINING, 1, 1, MRI_FLOAT, NINPUTS);
   mri_labels = MRIallocSequence(NTRAINING, 1, 1, MRI_UCHAR, 1);
@@ -492,9 +492,9 @@ static int train_xor(RBM_PARMS *parms) {
 
     MRIsetVoxVal(mri_labels, x, 0, 0, 0, 1);
   }
-  vl = VLSTcreate(mri_labels, 1, 255, NULL, 0, 0);
+  vl                      = VLSTcreate(mri_labels, 1, 255, NULL, 0, 0);
   parms->weight_decays[0] = 0;
-  vl->mri = mri_inputs;
+  vl->mri                 = mri_inputs;
   rbm = RBMalloc(RBM_TYPE_BINARY_INPUTS, NINPUTS, ngroups, 0, RBM_INPUT_VALUE);
 
 #if 0

@@ -24,8 +24,8 @@
 #ifndef xDebug_H
 #define xDebug_H
 
-#include <cstdio>
 #include "xTypes.h"
+#include <cstdio>
 
 #ifdef XDEBUG_NO_CODE
 #define kDebugging 0
@@ -34,24 +34,24 @@
 #endif
 
 #define xDebug_Nothing 0
-#define xDebug_Print 1
-#define xDebug_File 2
+#define xDebug_Print   1
+#define xDebug_File    2
 
 /* prototypes */
-void xDbg_Init(char *isFileName);
-void xDbg_ShutDown();
-void xDbg_PrintStatus();
-void xDbg_RegisterSegfaultHandler(void (*f)(int));
-void xDbg_PushStack(char *isTitle, char *isNote);
-void xDbg_PopStack();
+void        xDbg_Init(char *isFileName);
+void        xDbg_ShutDown();
+void        xDbg_PrintStatus();
+void        xDbg_RegisterSegfaultHandler(void (*f)(int));
+void        xDbg_PushStack(char *isTitle, char *isNote);
+void        xDbg_PopStack();
 const char *xDbg_GetCurrentFunction();
-void xDbg_PrintStack();
-void xDbg_SegfaultHandler(int);
-void xDbg_Segfault();
-void xDbg_Printf(const char *iFormat, ...);
-void xDbg_SetStackDesc(const char *iFormat, ...);
-void xDbg_SetCurrentNote(const char *iFormat, ...);
-char *xDbg_GetCurrentNote();
+void        xDbg_PrintStack();
+void        xDbg_SegfaultHandler(int);
+void        xDbg_Segfault();
+void        xDbg_Printf(const char *iFormat, ...);
+void        xDbg_SetStackDesc(const char *iFormat, ...);
+void        xDbg_SetCurrentNote(const char *iFormat, ...);
+char *      xDbg_GetCurrentNote();
 
 /* typedefs */
 using xDbg_tDebuggingState = tBoolean;
@@ -63,12 +63,12 @@ using xDbg_tDebuggingState = tBoolean;
 /* vars, included here because we refrence them in the macros, so they
    need to be global */
 extern xDbg_tDebuggingState xDbg_gbOutput;
-extern FILE *xDbg_gStream;
-extern int xDbg_gType;
-extern char *xDbg_gsRequest;
-extern char xDbg_sStackDesc[xDbg_knMaxDescLength];
-extern char xDbg_sCurNoteDesc[xDbg_knMaxDescLength];
-extern int xDbg_gLineNumberOfError;
+extern FILE *               xDbg_gStream;
+extern int                  xDbg_gType;
+extern char *               xDbg_gsRequest;
+extern char                 xDbg_sStackDesc[xDbg_knMaxDescLength];
+extern char                 xDbg_sCurNoteDesc[xDbg_knMaxDescLength];
+extern int                  xDbg_gLineNumberOfError;
 
 /* if we're generating debugging code... */
 #if kDebugging
@@ -76,7 +76,7 @@ extern int xDbg_gLineNumberOfError;
 /* start up and take down debugging. the argument to Init should be the
    program name. */
 #define InitDebugging(sProgName) xDbg_Init(sProgName)
-#define DeleteDebugging xDbg_ShutDown()
+#define DeleteDebugging          xDbg_ShutDown()
 
 /* register a handler to get called at a segfault */
 #define DebugRegisterSegfaultHandler(s) xDbg_RegisterSegfaultHandler(s)
@@ -111,7 +111,7 @@ extern int xDbg_gLineNumberOfError;
 #define DebugNote(ARGS) xDbg_SetCurrentNote ARGS
 
 /* returns pointers to the current function and current note */
-#define DebugGetNote xDbg_GetCurrentNote()
+#define DebugGetNote     xDbg_GetCurrentNote()
 #define DebugGetFunction xDbg_GetCurrentFunction()
 
 /* prints the stack */
@@ -142,7 +142,7 @@ extern int xDbg_gLineNumberOfError;
   do {                                                                         \
     if (!(test)) {                                                             \
       xDbg_gLineNumberOfError = __LINE__;                                      \
-      var = errorCode;                                                         \
+      var                     = errorCode;                                     \
       goto error;                                                              \
     }                                                                          \
   } while (0)
@@ -150,7 +150,7 @@ extern int xDbg_gLineNumberOfError;
 #define DebugThrowX(var, errorCode)                                            \
   do {                                                                         \
     xDbg_gLineNumberOfError = __LINE__;                                        \
-    var = errorCode;                                                           \
+    var                     = errorCode;                                       \
     goto error;                                                                \
   } while (0)
 

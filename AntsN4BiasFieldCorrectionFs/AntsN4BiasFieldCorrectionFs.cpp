@@ -20,27 +20,28 @@
 #include "itkN4BiasFieldCorrectionImageFilter.h"
 #include "itkShrinkImageFilter.h"
 
-#include "argparse.h"
-#include "mri.h"
 #include "AntsN4BiasFieldCorrectionFs.help.xml.h"
+#include "argparse.h"
 #include "itk_5_4_map.h"
+#include "mri.h"
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   // parse args
   ArgumentParser parser;
-  parser.addHelp(AntsN4BiasFieldCorrectionFs_help_xml, AntsN4BiasFieldCorrectionFs_help_xml_len);
-  parser.addArgument("-i", "--input",  1, String, true);
+  parser.addHelp(AntsN4BiasFieldCorrectionFs_help_xml,
+                 AntsN4BiasFieldCorrectionFs_help_xml_len);
+  parser.addArgument("-i", "--input", 1, String, true);
   parser.addArgument("-o", "--output", 1, String, true);
   parser.addArgument("-s", "--shrink", 1, Int, false);
   parser.parse(argc, argv);
 
-  std::string inputname = parser.retrieve<std::string>("input");
+  std::string inputname  = parser.retrieve<std::string>("input");
   std::string outputname = parser.retrieve<std::string>("output");
 
-  MRI* mri = MRIread(inputname.c_str());
+  MRI *mri = MRIread(inputname.c_str());
 
-  if (mri->nframes != 1) fs::fatal() << "input cannot be 4D (has " << mri->nframes << " frames)";
+  if (mri->nframes != 1)
+    fs::fatal() << "input cannot be 4D (has " << mri->nframes << " frames)";
 
   // convert to ITK image
   ITKImageType::Pointer inputImage = mri->toITKImage();
@@ -53,10 +54,13 @@ int main(int argc, char **argv)
   maskImage->CopyInformation(inputImage);
   maskImage->SetRegions(inputImage->GetRequestedRegion());
   maskImage->Allocate(false);
-  maskImage->FillBuffer(itk::NumericTraits<ITKImageType::PixelType>::OneValue());
+  maskImage->FillBuffer(
+      itk::NumericTraits<ITKImageType::PixelType>::OneValue());
 
   // init the bias field correcter
-  typedef itk::N4BiasFieldCorrectionImageFilter<ITKImageType, ITKImageType, ITKImageType> CorrecterType;
+  typedef itk::N4BiasFieldCorrectionImageFilter<ITKImageType, ITKImageType,
+                                                ITKImageType>
+                         CorrecterType;
   CorrecterType::Pointer correcter = CorrecterType::New();
 
   // convergence options
@@ -67,8 +71,9 @@ int main(int argc, char **argv)
   correcter->SetConvergenceThreshold(0.0);
 
   // shrink the image to save time
-  int shrinkFactor = parser.exists("shrink") ? parser.retrieve<int>("shrink") : 4;
-  std::cout << "Using shrink factor: " <<  shrinkFactor << std::endl;
+  int shrinkFactor =
+      parser.exists("shrink") ? parser.retrieve<int>("shrink") : 4;
+  std::cout << "Using shrink factor: " << shrinkFactor << std::endl;
 
   typedef itk::ShrinkImageFilter<ITKImageType, ITKImageType> ShrinkerType;
   ShrinkerType::Pointer shrinker = ShrinkerType::New();
@@ -86,7 +91,10 @@ int main(int argc, char **argv)
   correcter->Update();
 
   // reconstruct the bias field at full image resolution
-  typedef itk::BSplineControlPointImageFilter<CorrecterType::BiasFieldControlPointLatticeType, CorrecterType::ScalarImageType> BSplinerType;
+  typedef itk::BSplineControlPointImageFilter<
+      CorrecterType::BiasFieldControlPointLatticeType,
+      CorrecterType::ScalarImageType>
+                        BSplinerType;
   BSplinerType::Pointer bspliner = BSplinerType::New();
   bspliner->SetInput(correcter->GetLogBiasFieldControlPointLattice());
   bspliner->SetSplineOrder(correcter->GetSplineOrder());
@@ -106,9 +114,12 @@ int main(int argc, char **argv)
   logField->SetDirection(inputImage->GetDirection());
   logField->Allocate();
 
-  itk::ImageRegionIterator<CorrecterType::ScalarImageType> ItB(bspliner->GetOutput(), bspliner->GetOutput()->GetLargestPossibleRegion());
-  itk::ImageRegionIterator<ITKImageType> ItF(logField, logField->GetLargestPossibleRegion());
-  for(ItB.GoToBegin(), ItF.GoToBegin(); !ItB.IsAtEnd(); ++ItB, ++ItF) ItF.Set(ItB.Get()[0]);
+  itk::ImageRegionIterator<CorrecterType::ScalarImageType> ItB(
+      bspliner->GetOutput(), bspliner->GetOutput()->GetLargestPossibleRegion());
+  itk::ImageRegionIterator<ITKImageType> ItF(
+      logField, logField->GetLargestPossibleRegion());
+  for (ItB.GoToBegin(), ItF.GoToBegin(); !ItB.IsAtEnd(); ++ItB, ++ItF)
+    ItF.Set(ItB.Get()[0]);
 
   // exp bias field
   typedef itk::ExpImageFilter<ITKImageType, ITKImageType> ExpFilterType;
@@ -117,7 +128,8 @@ int main(int argc, char **argv)
   expFilter->Update();
 
   // divide original image by the bias field to get corrected image
-  typedef itk::DivideImageFilter<ITKImageType, ITKImageType, ITKImageType> DividerType;
+  typedef itk::DivideImageFilter<ITKImageType, ITKImageType, ITKImageType>
+                       DividerType;
   DividerType::Pointer divider = DividerType::New();
   divider->SetInput1(inputImage);
   divider->SetInput2(expFilter->GetOutput());
@@ -142,4 +154,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-

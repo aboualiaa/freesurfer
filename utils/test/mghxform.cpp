@@ -26,14 +26,12 @@
 #include <iostream>
 
 extern "C" {
-#include "tags.h"
 #include "matrix.h"
 #include "mri.h"
+#include "tags.h"
 
 const char *Progname = "mghxform";
 }
-
-using namespace std;
 
 void printLinearTransform(MRI *mri) {
   MATRIX *mat = MatrixAlloc(4, 4, MATRIX_REAL);
@@ -49,30 +47,30 @@ void printLinearTransform(MRI *mri) {
 }
 
 int main(int argc, char *argv[]) {
-  cout << "expanding the test data" << endl;
+  std::cout << "expanding the test data" << std::endl;
   system("gunzip -c orig.tar.gz | tar xvf - > /dev/null");
   // now we have talairach.xfm and orig cor files
-  cout << "reading COR" << endl;
+  std::cout << "reading COR" << std::endl;
   MRI *mriCOR = MRIread((char *)"./orig");
   if (!mriCOR) {
-    cerr << "could not read orig volume" << endl;
+    std::cerr << "could not read orig volume" << std::endl;
     exit(1);
     return -1;
   }
   printLinearTransform(mriCOR);
   // this should have read the xform
-  cout << "writing mgh with xform info" << endl;
+  std::cout << "writing mgh with xform info" << std::endl;
   MRIwrite(mriCOR, (char *)"./testxfm.mgh");
   MRIfree(&mriCOR);
 
-  cout << "reading mgh with xform info" << endl;
+  std::cout << "reading mgh with xform info" << std::endl;
   MRI *mriMGH = MRIread((char *)"./testxfm.mgh");
-  cout << mriMGH->transform_fname << endl;
+  std::cout << mriMGH->transform_fname << std::endl;
   printLinearTransform(mriMGH);
   if (strcmp(mriMGH->transform_fname, "./orig/../talairach.xfm")) {
     MRIfree(&mriMGH);
 
-    cerr << "wrong filename for the transform" << endl;
+    std::cerr << "wrong filename for the transform" << std::endl;
     exit(1);
     return -1;
   }

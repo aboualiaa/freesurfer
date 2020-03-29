@@ -3048,7 +3048,7 @@ static MRIS *ICOtoScaledMRIS(ICOSAHEDRON const *const ico, int max_vertices,
 
   int fno;
   for (fno = 0; fno < ico->nfaces; fno++) {
-    int vno = ico->faces[fno].vno[1];
+    int vno                = ico->faces[fno].vno[1];
     ico->faces[fno].vno[1] = ico->faces[fno].vno[2];
     ico->faces[fno].vno[2] = vno;
   }
@@ -3080,7 +3080,7 @@ static MRIS *ICOtoScaledMRIS(ICOSAHEDRON const *const ico, int max_vertices,
 
   for (vno = 0; vno < ico->nvertices; vno++) {
     VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-    vt->v = (int *)calloc(vt->vnum / 2, sizeof(int));
+    vt->v                     = (int *)calloc(vt->vnum / 2, sizeof(int));
     if (!vt->v)
       ErrorExit(ERROR_NOMEMORY, "ICread: could not allocate %dth vertex list.",
                 vno);
@@ -3117,14 +3117,14 @@ static MRIS *ICOtoScaledMRIS(ICOSAHEDRON const *const ico, int max_vertices,
   /* now allocate face arrays in vertices */
   for (vno = 0; vno < ico->nvertices; vno++) {
     VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-    vt->f = (int *)calloc(vt->num, sizeof(int));
+    vt->f                     = (int *)calloc(vt->num, sizeof(int));
     if (!vt->f)
       ErrorExit(ERROR_NO_MEMORY, "ICOread: could not allocate %d faces",
                 vt->num);
     vt->n = (unsigned char *)calloc(vt->num, sizeof(unsigned char));
     if (!vt->n)
       ErrorExit(ERROR_NO_MEMORY, "ICOread: could not allocate %d nbrs", vt->n);
-    vt->num = 0; /* for use as counter in next section */
+    vt->num      = 0; /* for use as counter in next section */
     vt->nsizeMax = 1;
     MRIS_setNsizeCur(mris, vno, 1);
   }
@@ -3134,8 +3134,8 @@ static MRIS *ICOtoScaledMRIS(ICOSAHEDRON const *const ico, int max_vertices,
     FACE const *const f = &mris->faces[fno];
     for (n = 0; n < VERTICES_PER_FACE; n++) {
       VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[f->v[n]];
-      vt->n[vt->num] = n;
-      vt->f[vt->num++] = fno;
+      vt->n[vt->num]            = n;
+      vt->f[vt->num++]          = fno;
     }
   }
 
@@ -3189,13 +3189,13 @@ ICOSAHEDRON *read_icosahedron_by_order(int order) {
 }
 
 ICOSAHEDRON *read_icosahedron(const char *fname) {
-  FILE *fp;
-  char line[200], *cp;
-  int vno, fno, vno1, vno2, vno3, n, nvertices, nfaces;
-  float x, y, z;
+  FILE *       fp;
+  char         line[200], *cp;
+  int          vno, fno, vno1, vno2, vno3, n, nvertices, nfaces;
+  float        x, y, z;
   ICOSAHEDRON *ico;
-  int count;
-  float nx, ny, nz;
+  int          count;
+  float        nx, ny, nz;
 
   fp = fopen(fname, "r");
   if (!fp)
@@ -3207,7 +3207,7 @@ ICOSAHEDRON *read_icosahedron(const char *fname) {
   fgetl(line, 150, fp); /* discard # of vertices */
   sscanf(line, "%d", &nvertices);
   ico->nvertices = nvertices;
-  ico->vertices = (IC_VERTEX *)calloc(nvertices, sizeof(IC_VERTEX));
+  ico->vertices  = (IC_VERTEX *)calloc(nvertices, sizeof(IC_VERTEX));
   if (!ico->vertices)
     ErrorExit(ERROR_NOMEMORY, "read_ico: could not allocate vertex list");
 
@@ -3219,9 +3219,9 @@ ICOSAHEDRON *read_icosahedron(const char *fname) {
     if (count == 4) // mgh tri has vno, x, y, z
     {
       vno = (int)x;
-      x = y;
-      y = z;
-      z = nx;
+      x   = y;
+      y   = z;
+      z   = nx;
     } else if (count == 6) // else x, y, z, nx, ny, nz
     {
       vno = n + 1;
@@ -3238,7 +3238,7 @@ ICOSAHEDRON *read_icosahedron(const char *fname) {
   fgetl(line, 150, fp); /* discard # of faces */
   sscanf(line, "%d", &nfaces);
   ico->nfaces = nfaces;
-  ico->faces = (IC_FACE *)calloc(ico->nfaces, sizeof(IC_FACE));
+  ico->faces  = (IC_FACE *)calloc(ico->nfaces, sizeof(IC_FACE));
   if (!ico->faces)
     ErrorExit(ERROR_NOMEMORY, "read_ico: could not allocate vertex list");
   while ((cp = fgetl(line, 150, fp)) != nullptr) {
@@ -3249,7 +3249,7 @@ ICOSAHEDRON *read_icosahedron(const char *fname) {
       vno3 = vno2; // only 3 modified, fno, vno1, vno2 intact
       vno2 = vno1; // only 2 modified, fno, vno1       intact
       vno1 = fno;  // only 1 modified, fno             intact
-      fno = n + 1;
+      fno  = n + 1;
     }
     // something wrong
     else if (count != 4)
@@ -3334,7 +3334,7 @@ MRI_SURFACE *ReadIcoByOrder(int IcoOrder, float RescaleFactor) {
   ------------------------------------------------------------------*/
 MRI_SURFACE *ReadIcoByNVtxs(int nIcoVtxs, float RescaleFactor) {
   MRI_SURFACE *surf;
-  int IcoOrder;
+  int          IcoOrder;
 
   IcoOrder = IcoOrderFromNVtxs(nIcoVtxs);
   if (IcoOrder == -1)
@@ -3423,16 +3423,16 @@ int IcoNVtxsFromOrder(int IcoOrder) {
 
 int IcoFindNClosestVertices(IC_VERTEX *vertices, int nvertices, float nx,
                             float ny, float nz, int num, int *pv) {
-  int index, max_n, nout, found, n;
+  int    index, max_n, nout, found, n;
   double max_dot, dot;
 
   max_n = IcoFindClosestVertex(vertices, nvertices, nx, ny, nz);
 
-  nout = 0;
+  nout  = 0;
   pv[0] = max_n; // largest
   for (nout = 1; nout < num; nout++) {
     max_dot = -1;
-    max_n = -1;
+    max_n   = -1;
     for (n = 0; n < nvertices; n++) {
       for (found = index = 0; index < nout; index++)
         if (pv[index] == n) {
@@ -3444,7 +3444,7 @@ int IcoFindNClosestVertices(IC_VERTEX *vertices, int nvertices, float nx,
       dot = nx * vertices[n].x + ny * vertices[n].y + nz * vertices[n].z;
       if (dot > max_dot) {
         max_dot = dot;
-        max_n = n;
+        max_n   = n;
       }
     }
     pv[nout] = max_n;
@@ -3454,7 +3454,7 @@ int IcoFindNClosestVertices(IC_VERTEX *vertices, int nvertices, float nx,
 
 int IcoFindClosestVertex(IC_VERTEX *vertices, int nvertices, float nx, float ny,
                          float nz) {
-  int n, max_n;
+  int   n, max_n;
   float mag, dot, max_dot;
 
   mag = sqrt(nx * nx + ny * ny + nz * nz);
@@ -3463,12 +3463,12 @@ int IcoFindClosestVertex(IC_VERTEX *vertices, int nvertices, float nx, float ny,
   nz /= mag;
 
   max_dot = -1;
-  max_n = -1;
+  max_n   = -1;
   for (n = 0; n < nvertices; n++) {
     dot = nx * vertices[n].x + ny * vertices[n].y + nz * vertices[n].z;
     if (dot > max_dot) {
       max_dot = dot;
-      max_n = n;
+      max_n   = n;
     }
   }
   return (max_n);
@@ -3476,9 +3476,9 @@ int IcoFindClosestVertex(IC_VERTEX *vertices, int nvertices, float nx, float ny,
 
 static ICO_FACE_LIST *ICPbuildFaceList(MRI_SURFACE *ico1, MRI_SURFACE *ico2) {
   ICO_FACE_LIST *icf;
-  FACE *f1, *f2;
-  int fno1, fno2, min_fno, index;
-  double cx1, cy1, cz1, cx2, cy2, cz2, dist, min_dist;
+  FACE *         f1, *f2;
+  int            fno1, fno2, min_fno, index;
+  double         cx1, cy1, cz1, cx2, cy2, cz2, dist, min_dist;
 
   icf = (ICF *)calloc(1, sizeof(ICF));
   if (icf == nullptr)
@@ -3496,9 +3496,9 @@ static ICO_FACE_LIST *ICPbuildFaceList(MRI_SURFACE *ico1, MRI_SURFACE *ico2) {
 
   // count # of ico2 faces mapped to each ico1 face
   for (fno2 = 0; fno2 < ico2->nfaces; fno2++) {
-    f2 = &ico2->faces[fno2];
+    f2      = &ico2->faces[fno2];
     min_fno = 0;
-    cx2 = (ico2->vertices[f2->v[0]].x + ico2->vertices[f2->v[1]].x +
+    cx2     = (ico2->vertices[f2->v[0]].x + ico2->vertices[f2->v[1]].x +
            ico2->vertices[f2->v[2]].x) /
           3;
     cy2 = (ico2->vertices[f2->v[0]].y + ico2->vertices[f2->v[1]].y +
@@ -3513,7 +3513,7 @@ static ICO_FACE_LIST *ICPbuildFaceList(MRI_SURFACE *ico1, MRI_SURFACE *ico2) {
 
     min_dist = 1e10;
     for (fno1 = 0; fno1 < ico1->nfaces; fno1++) {
-      f1 = &ico1->faces[fno1];
+      f1  = &ico1->faces[fno1];
       cx1 = (ico1->vertices[f1->v[0]].x + ico1->vertices[f1->v[1]].x +
              ico1->vertices[f1->v[2]].x) /
             3;
@@ -3526,7 +3526,7 @@ static ICO_FACE_LIST *ICPbuildFaceList(MRI_SURFACE *ico1, MRI_SURFACE *ico2) {
       dist = sqrt(SQR(cx2 - cx1) + SQR(cy2 - cy1) + SQR(cz2 - cz1));
       if (dist < min_dist) {
         min_dist = dist;
-        min_fno = fno1;
+        min_fno  = fno1;
       }
     }
     icf->nmapped[min_fno]++;
@@ -3545,9 +3545,9 @@ static ICO_FACE_LIST *ICPbuildFaceList(MRI_SURFACE *ico1, MRI_SURFACE *ico2) {
     icf->nmapped[fno1] = 0; // will use it as an index in the next loop
   }
   for (fno2 = 0; fno2 < ico2->nfaces; fno2++) {
-    f2 = &ico2->faces[fno2];
+    f2      = &ico2->faces[fno2];
     min_fno = 0;
-    cx2 = (ico2->vertices[f2->v[0]].x + ico2->vertices[f2->v[1]].x +
+    cx2     = (ico2->vertices[f2->v[0]].x + ico2->vertices[f2->v[1]].x +
            ico2->vertices[f2->v[2]].x) /
           3;
     cy2 = (ico2->vertices[f2->v[0]].y + ico2->vertices[f2->v[1]].y +
@@ -3562,7 +3562,7 @@ static ICO_FACE_LIST *ICPbuildFaceList(MRI_SURFACE *ico1, MRI_SURFACE *ico2) {
 
     min_dist = 1e10;
     for (fno1 = 0; fno1 < ico1->nfaces; fno1++) {
-      f1 = &ico1->faces[fno1];
+      f1  = &ico1->faces[fno1];
       cx1 = (ico1->vertices[f1->v[0]].x + ico1->vertices[f1->v[1]].x +
              ico1->vertices[f1->v[2]].x) /
             3;
@@ -3575,7 +3575,7 @@ static ICO_FACE_LIST *ICPbuildFaceList(MRI_SURFACE *ico1, MRI_SURFACE *ico2) {
       dist = sqrt(SQR(cx2 - cx1) + SQR(cy2 - cy1) + SQR(cz2 - cz1));
       if (dist < min_dist) {
         min_dist = dist;
-        min_fno = fno1;
+        min_fno  = fno1;
       }
     }
     index = icf->nmapped[min_fno];
@@ -3588,8 +3588,8 @@ static ICO_FACE_LIST *ICPbuildFaceList(MRI_SURFACE *ico1, MRI_SURFACE *ico2) {
 
 ICO_PYRAMID *ICPread(int min_level, int max_level) {
   ICO_PYRAMID *icp;
-  char *cp, fname[STRLEN];
-  int ico_no;
+  char *       cp, fname[STRLEN];
+  int          ico_no;
 
   cp = getenv("FREESURFER_HOME");
   if (cp == nullptr)

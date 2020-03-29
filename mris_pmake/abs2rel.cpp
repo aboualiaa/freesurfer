@@ -42,7 +42,7 @@ char *abs2rel(const char *path, const char *base, char *result,
    * endp points the last position which is safe in the result buffer.
    */
   const char *endp = result + size - 1;
-  char *rp;
+  char *      rp;
 
   if (*path != '/') {
     if (strlen(path) >= size)
@@ -63,7 +63,7 @@ char *abs2rel(const char *path, const char *base, char *result,
       branch = pp;
   if ((*pp == 0 || (*pp == '/' && *(pp + 1) == 0)) &&
       (*bp == 0 || (*bp == '/' && *(bp + 1) == 0))) {
-    rp = result;
+    rp    = result;
     *rp++ = '.';
     if (*pp == '/' || *(pp - 1) == '/')
       *rp++ = '/';

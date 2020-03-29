@@ -15,15 +15,15 @@ void initFilter();
 
 // type definitions for generalized image filters
 typedef aptr<ImageColorU> (*ColorImageFilterCallback)(const ImageColorU &input,
-                                                      Config &conf);
+                                                      Config &           conf);
 typedef aptr<ImageGrayU> (*GrayImageFilterCallback)(const ImageGrayU &input,
-                                                    Config &conf);
+                                                    Config &          conf);
 
 /// register an image processing filter
 #define registerFilter(filter) registerFilterInternal(#filter, filter)
-void registerFilterInternal(const String &name,
+void registerFilterInternal(const String &           name,
                             ColorImageFilterCallback callback);
-void registerFilterInternal(const String &name,
+void registerFilterInternal(const String &          name,
                             GrayImageFilterCallback callback);
 
 } // end namespace sbl

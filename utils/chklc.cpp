@@ -26,16 +26,16 @@
 #include <gnu/libc-version.h>
 #endif
 
-#include <const.h>
 #include <cerrno>
+#include <const.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "diag.h"
 #include "chklc.h"
+#include "diag.h"
 
 extern char *crypt(const char *, const char *);
 
@@ -95,16 +95,16 @@ static const char *isdir_msg =
 
 void chklc() {
   return;
-  char dirname[STRLEN], *cp, *alt;
-  FILE *lfile = nullptr;
-  char *email;
-  char *magic;
-  char *key;
-  char *key2;
-  char *gkey;
-  char *lfilename;
-  char str[STRLEN];
-  char *crypt_gkey;
+  char       dirname[STRLEN], *cp, *alt;
+  FILE *     lfile = nullptr;
+  char *     email;
+  char *     magic;
+  char *     key;
+  char *     key2;
+  char *     gkey;
+  char *     lfilename;
+  char       str[STRLEN];
+  char *     crypt_gkey;
   static int first_time = 1;
 
   sprintf(str, "S%sER%sRONT%sOR", "URF", "_F", "DO");
@@ -127,11 +127,11 @@ void chklc() {
   }
 
   lfilename = (char *)calloc(1, 512);
-  email = (char *)calloc(1, 512);
-  magic = (char *)calloc(1, 512);
-  key = (char *)calloc(1, 512);
-  key2 = (char *)calloc(1, 512);
-  gkey = (char *)calloc(1, 1024);
+  email     = (char *)calloc(1, 512);
+  magic     = (char *)calloc(1, 512);
+  key       = (char *)calloc(1, 512);
+  key2      = (char *)calloc(1, 512);
+  gkey      = (char *)calloc(1, 1024);
 
   // check if alternative license path is provided:
   alt = getenv("FS_LICENSE");
@@ -151,12 +151,11 @@ void chklc() {
     // make sure that the path is not a directory
     struct stat path_stat;
     stat(alt, &path_stat);
-    if
-      S_ISDIR(path_stat.st_mode) {
-        ;
-        puts(isdir_msg);
-        exit(-1);
-      }
+    if S_ISDIR (path_stat.st_mode) {
+      ;
+      puts(isdir_msg);
+      exit(-1);
+    }
   }
 
   // check for license in FREESURFER_HOME:
@@ -272,7 +271,7 @@ void chklc() {
 //  if failed, error msg will be returned in msg. make sure msg is pre-allocated
 //  with enough space
 int chklc2(char *msg) {
-  char dirname[STRLEN], *cp, *alt;
+  char  dirname[STRLEN], *cp, *alt;
   FILE *lfile = nullptr;
   char *email;
   char *magic;
@@ -280,7 +279,7 @@ int chklc2(char *msg) {
   char *key2;
   char *gkey;
   char *lfilename;
-  char str[STRLEN];
+  char  str[STRLEN];
   char *crypt_gkey;
 
   sprintf(str, "S%sER%sRONT%sOR", "URF", "_F", "DO");
@@ -303,11 +302,11 @@ int chklc2(char *msg) {
   }
 
   lfilename = (char *)calloc(1, 512);
-  email = (char *)calloc(1, 512);
-  magic = (char *)calloc(1, 512);
-  key = (char *)calloc(1, 512);
-  key2 = (char *)calloc(1, 512);
-  gkey = (char *)calloc(1, 1024);
+  email     = (char *)calloc(1, 512);
+  magic     = (char *)calloc(1, 512);
+  key       = (char *)calloc(1, 512);
+  key2      = (char *)calloc(1, 512);
+  gkey      = (char *)calloc(1, 1024);
 
   // check if alternative license path is provided:
   alt = getenv("FS_LICENSE");
@@ -407,9 +406,9 @@ int chklc2(char *msg) {
 
 #ifndef Darwin
 void cmp_glib_version(void) {
-  int i;
-  const char *GNU_LIBC_VERSION_MAX = "2.15";
-  int glibc_max[2], glibc_current[2];
+  int                i;
+  const char *       GNU_LIBC_VERSION_MAX = "2.15";
+  int                glibc_max[2], glibc_current[2];
   static const char *new_license_msg =
       "------------------------------------------------------------------------"
       "--\n"

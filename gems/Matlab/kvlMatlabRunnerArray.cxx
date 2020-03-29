@@ -1,3 +1,4 @@
+#include "kvlMatlabRunnerArray.h"
 #include "kvlChangeK.h"
 #include "kvlClear.h"
 #include "kvlCreateImage.h"
@@ -16,7 +17,6 @@
 #include "kvlGetMeshNodePositions.h"
 #include "kvlGetOptimizer.h"
 #include "kvlGetTransformMatrix.h"
-#include "kvlMatlabRunnerArray.h"
 #include "kvlRasterizeAtlasMesh.h"
 #include "kvlReadCroppedImage.h"
 #include "kvlReadImage.h"
@@ -78,7 +78,8 @@ MatlabRunnerArray ::MatlabRunnerArray() {
   m_Array.emplace_back(WriteRGBImage::New().GetPointer());
   m_Array.emplace_back(GetCroppedRegion::New().GetPointer());
   m_Array.emplace_back(GetCostAndGradientCalculator::New().GetPointer());
-  m_Array.emplace_back(GetAverageAtlasMeshPositionCostAndGradientCalculator::New().GetPointer());
+  m_Array.emplace_back(
+      GetAverageAtlasMeshPositionCostAndGradientCalculator::New().GetPointer());
   m_Array.emplace_back(EvaluateMeshPosition::New().GetPointer());
   m_Array.emplace_back(GetOptimizer::New().GetPointer());
   m_Array.emplace_back(StepOptimizer::New().GetPointer());
@@ -109,8 +110,7 @@ bool MatlabRunnerArray ::Run(const std::string &runnerName, int nlhs,
 
   bool executedCorrectRunner = false;
 
-  for (auto it = m_Array.begin();
-       it != m_Array.end(); ++it) {
+  for (auto it = m_Array.begin(); it != m_Array.end(); ++it) {
 
     if (runnerName.compare(it->GetPointer()->GetNameOfClass()) == 0) {
       // std::cout << "Found a runner with name " << runnerName

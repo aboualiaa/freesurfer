@@ -22,8 +22,8 @@
  *
  */
 
-#include "diag.h"
 #include "cma.h"
+#include "diag.h"
 #include "gca.h"
 
 static char vcid[] = "$Id: mri_edit_segmentation_with_surfaces.c,v 1.23 "
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]);
 
 double MRIlabelMean(MRI *mri, MRI *mri_labels, int x, int y, int z, int whalf,
                     int label);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -46,36 +46,36 @@ static int relabel_gray_matter(MRI *mri, MRI_SURFACE *mris, int which_edits);
 
 static char *annot_name = "aparc.annot";
 
-#define HYPO_EDITS 0x0001
+#define HYPO_EDITS       0x0001
 #define CEREBELLUM_EDITS 0x0002
-#define CORTEX_EDITS 0x0004
-#define WM_EDITS 0x0008
+#define CORTEX_EDITS     0x0004
+#define WM_EDITS         0x0008
 
 static int which_edits =
     HYPO_EDITS | CEREBELLUM_EDITS | CORTEX_EDITS | WM_EDITS;
 
 const char *Progname;
 
-static char *label_name = nullptr;
+static char *label_name      = nullptr;
 static char *annotation_name = nullptr;
 
 static char *surf_name = "white";
 
-static MRI *mri_vals = nullptr;
-static GCA *gca = nullptr;
+static MRI *      mri_vals  = nullptr;
+static GCA *      gca       = nullptr;
 static TRANSFORM *transform = nullptr;
 
 static char *config_file;
-int Halo = 0;
+int          Halo = 0;
 
 int main(int argc, char *argv[]) {
   char **av, *hemi, fname[STRLEN], *in_fname, *in_aseg_name, *out_aseg_name,
       *surf_dir;
-  int ac, nargs, h, i, ninputs, input, n;
+  int          ac, nargs, h, i, ninputs, input, n;
   MRI_SURFACE *mris;
-  MRI *mri_aseg, *mri_tmp = nullptr, *mri_inputs = nullptr;
-  float *thickness;
-  WMSA *newWMSA = nullptr;
+  MRI *        mri_aseg, *mri_tmp = nullptr, *mri_inputs = nullptr;
+  float *      thickness;
+  WMSA *       newWMSA = nullptr;
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
@@ -95,10 +95,10 @@ int main(int argc, char *argv[]) {
   // ADDED BY EMILY 02/20/15
   // FILE *config = fopen(config_file,"r");
   ///
-  in_aseg_name = argv[1];
-  surf_dir = argv[2];
+  in_aseg_name  = argv[1];
+  surf_dir      = argv[2];
   out_aseg_name = argv[argc - 1];
-  ninputs = argc - 4;
+  ninputs       = argc - 4;
   printf("reading %d input volumes\n", ninputs);
 
   for (input = 0; input < ninputs; input++) {
@@ -130,8 +130,8 @@ int main(int argc, char *argv[]) {
 
   if (Halo == 2) {
     printf("Setting up WMSA Halo 2\n");
-    newWMSA = WMSAalloc(6);
-    newWMSA->niters = 3;
+    newWMSA                = WMSAalloc(6);
+    newWMSA->niters        = 3;
     newWMSA->reftissues[0] = Left_Cerebral_White_Matter;
     newWMSA->reftissues[1] = Right_Cerebral_White_Matter;
     newWMSA->reftissues[2] = Left_Lateral_Ventricle;
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
       newWMSA->softthresh[n] = 3;
     }
     newWMSA->nbrthresh = 3;
-    newWMSA->nbrwhalf = 3;
+    newWMSA->nbrwhalf  = 3;
   }
 
   for (i = 0; i < 2; i++) {
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
     if (Halo == 2) {
       printf("Starting WMSA Halo 2\n");
       newWMSA->modalities = mri_inputs;
-      newWMSA->seg = mri_aseg;
+      newWMSA->seg        = mri_aseg;
       MRIwmsaHalo2(newWMSA);
       printf("WMSA Halo 2 done\n");
     }
@@ -248,8 +248,8 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int on;
-  int nargs = 0;
+  int   on;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -260,24 +260,24 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   } else if (!stricmp(option, "-annot")) {
     annot_name = argv[2];
-    nargs = 2;
+    nargs      = 2;
     printf("using annotation file %s...\n", annot_name);
   }
   // ADDED BY EMILY 02/20/15
   else if (!stricmp(option, "-config")) {
     config_file = argv[2];
-    nargs = 2;
+    nargs       = 2;
     printf("using config file %s...\n", config_file);
   } else if (!stricmp(option, "halo1")) {
     printf("using wmsa halo1 ...\n");
-    Halo = 1;
+    Halo  = 1;
     nargs = 0;
   } else if (!stricmp(option, "halo2")) {
     printf("using wmsa halo2 ...\n");
-    Halo = 2;
+    Halo  = 2;
     nargs = 0;
   } else if (!stricmp(option, "hypo")) {
-    on = atof(argv[2]);
+    on    = atof(argv[2]);
     nargs = 1;
     if (on) {
       which_edits |= HYPO_EDITS;
@@ -286,7 +286,7 @@ static int get_option(int argc, char *argv[]) {
     }
     printf("turning %s hypointensity editing\n", on ? "on" : "off");
   } else if (!stricmp(option, "cortex")) {
-    on = atof(argv[2]);
+    on    = atof(argv[2]);
     nargs = 1;
     if (on) {
       which_edits |= CORTEX_EDITS;
@@ -295,7 +295,7 @@ static int get_option(int argc, char *argv[]) {
     }
     printf("turning %s cortex editing\n", on ? "on" : "off");
   } else if (!stricmp(option, "white")) {
-    on = atof(argv[2]);
+    on    = atof(argv[2]);
     nargs = 1;
     if (on) {
       which_edits |= WM_EDITS;
@@ -304,7 +304,7 @@ static int get_option(int argc, char *argv[]) {
     }
     printf("turning %s wm editing\n", on ? "on" : "off");
   } else if (!stricmp(option, "cerebellum")) {
-    on = atof(argv[2]);
+    on    = atof(argv[2]);
     nargs = 1;
     if (on) {
       which_edits |= CEREBELLUM_EDITS;
@@ -316,7 +316,7 @@ static int get_option(int argc, char *argv[]) {
     Ggca_x = Gx = atoi(argv[2]);
     Ggca_y = Gy = atoi(argv[3]);
     Ggca_z = Gz = atoi(argv[4]);
-    nargs = 3;
+    nargs       = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "MRI")) {
     printf("reading MRI volume from %s...\n", argv[2]);
@@ -340,12 +340,12 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'L':
       label_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       fprintf(stderr, "limiting computations to label %s.\n", label_name);
       break;
     case 'A':
       annotation_name = argv[2];
-      nargs = 1;
+      nargs           = 1;
       fprintf(stderr, "computing statistics for each annotation in %s.\n",
               annotation_name);
       break;
@@ -416,25 +416,25 @@ static int relabel_hypointensities(MRI *mri, MRI *mri_inputs, MRI_SURFACE *mris,
                                    int right, GCA *gca, TRANSFORM *transform) {
   int x, y, z, label, changed, n, wmsa_label, wm_label;
   // int nwmsa;
-  GCA_PRIOR *gcap;
-  MRI *mri_inside, *mri_inside_eroded, *mri_inside_dilated;
+  GCA_PRIOR *      gcap;
+  MRI *            mri_inside, *mri_inside_eroded, *mri_inside_dilated;
   MRIS_HASH_TABLE *mht;
-  VERTEX *v;
-  float dx, dy, dz, dot, dist, temp_x, temp_y, temp_z;
-  double xw, yw, zw;
+  VERTEX *         v;
+  float            dx, dy, dz, dot, dist, temp_x, temp_y, temp_z;
+  double           xw, yw, zw;
 
   mri_inside = MRIclone(mri, nullptr);
   MRISeraseOutsideOfSurface(0.5, mri_inside, mris, 128);
-  mri_inside_eroded = MRIerode(mri_inside, nullptr);
+  mri_inside_eroded  = MRIerode(mri_inside, nullptr);
   mri_inside_dilated = MRIdilate(mri_inside, nullptr);
   mht = MHTcreateVertexTable_Resolution(mris, CURRENT_VERTICES, 8.0f);
 
   if (right) {
     wmsa_label = Right_WM_hypointensities;
-    wm_label = Right_Cerebral_White_Matter;
+    wm_label   = Right_Cerebral_White_Matter;
   } else {
     wmsa_label = Left_WM_hypointensities;
-    wm_label = Left_Cerebral_White_Matter;
+    wm_label   = Left_Cerebral_White_Matter;
   }
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
@@ -479,10 +479,10 @@ static int relabel_hypointensities(MRI *mri, MRI *mri_inputs, MRI_SURFACE *mris,
           dist = 1000;
         } else // see where we are relative to closest vertex
         {
-          dx = xw - v->x;
-          dy = yw - v->y;
-          dz = zw - v->z;
-          dot = v->nx * dx + v->ny * dy + v->nz * dz;
+          dx   = xw - v->x;
+          dy   = yw - v->y;
+          dz   = zw - v->z;
+          dot  = v->nx * dx + v->ny * dy + v->nz * dz;
           dist = sqrt(dx * dx + dy * dy + dz * dz);
         }
         temp_x = (float)xw;
@@ -555,7 +555,7 @@ static int relabel_hypointensities(MRI *mri, MRI *mri_inputs, MRI_SURFACE *mris,
                                        // and change it to gm
           if (gca) // if we have a gca, check to make sure gm is possible here
           {
-            int found, xk, yk, zk, xi, yi, zi, whalf, found_ven;
+            int    found, xk, yk, zk, xi, yi, zi, whalf, found_ven;
             double dist;
 
             // don't change things on the walls of the ventricles
@@ -593,7 +593,7 @@ static int relabel_hypointensities(MRI *mri, MRI *mri_inputs, MRI_SURFACE *mris,
                     continue;
                   }
                   label = MRIvox(mri, xi, yi, zi);
-                  gcap = getGCAP(gca, mri, transform, xi, yi, zi);
+                  gcap  = getGCAP(gca, mri, transform, xi, yi, zi);
                   for (n = 0; n < gcap->nlabels; n++) {
                     if (gcap->labels[n] == Left_Lateral_Ventricle ||
                         label == Right_Lateral_Ventricle) {
@@ -651,15 +651,15 @@ static int relabel_hypointensities(MRI *mri, MRI *mri_inputs, MRI_SURFACE *mris,
 }
 
 static int relabel_gray_matter(MRI *mri, MRI_SURFACE *mris, int which_edits) {
-  int x, y, z, label, changed, out_label, xi, yi, zi, left;
+  int     x, y, z, label, changed, out_label, xi, yi, zi, left;
   VECTOR *v1, *v2;
-  MRI *mri_pial_dist, *mri_white_dist;
+  MRI *   mri_pial_dist, *mri_white_dist;
   MATRIX *m_vox2vox;
-  float dist;
+  float   dist;
 
-  left = mris->hemisphere == LEFT_HEMISPHERE;
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  left              = mris->hemisphere == LEFT_HEMISPHERE;
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
 
@@ -667,7 +667,7 @@ static int relabel_gray_matter(MRI *mri, MRI_SURFACE *mris, int which_edits) {
   MRIScomputeMetricProperties(mris);
   mri_pial_dist = MRIcloneDifferentType(mri, MRI_FLOAT);
   mri_pial_dist = MRIScomputeDistanceToSurface(mris, mri_pial_dist, 1);
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri, mri_pial_dist);
+  m_vox2vox     = MRIgetVoxelToVoxelXform(mri, mri_pial_dist);
   for (changed = x = 0; x < mri->width; x++) {
     for (y = 0; y < mri->height; y++) {
       for (z = 0; z < mri->depth; z++) {
@@ -685,9 +685,9 @@ static int relabel_gray_matter(MRI *mri, MRI_SURFACE *mris, int which_edits) {
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
         }
-        label = nint(MRIgetVoxVal(mri, x, y, z, 0));
+        label     = nint(MRIgetVoxVal(mri, x, y, z, 0));
         out_label = label;
-        dist = MRIgetVoxVal(mri_pial_dist, xi, yi, zi, 0);
+        dist      = MRIgetVoxVal(mri_pial_dist, xi, yi, zi, 0);
         if (dist < -0.5) // clearly inside ribbon
         {
           if (which_edits & CEREBELLUM_EDITS)
@@ -733,7 +733,7 @@ static int relabel_gray_matter(MRI *mri, MRI_SURFACE *mris, int which_edits) {
   MRIScomputeMetricProperties(mris);
   mri_white_dist = MRIcloneDifferentType(mri, MRI_FLOAT);
   mri_white_dist = MRIScomputeDistanceToSurface(mris, mri_white_dist, 1);
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri, mri_white_dist);
+  m_vox2vox      = MRIgetVoxelToVoxelXform(mri, mri_white_dist);
   for (changed = x = 0; x < mri->width; x++) {
     for (y = 0; y < mri->height; y++) {
       for (z = 0; z < mri->depth; z++) {
@@ -751,9 +751,9 @@ static int relabel_gray_matter(MRI *mri, MRI_SURFACE *mris, int which_edits) {
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
         }
-        label = nint(MRIgetVoxVal(mri, x, y, z, 0));
+        label     = nint(MRIgetVoxVal(mri, x, y, z, 0));
         out_label = label;
-        dist = MRIgetVoxVal(mri_white_dist, xi, yi, zi, 0);
+        dist      = MRIgetVoxVal(mri_white_dist, xi, yi, zi, 0);
         if (dist < -0.5) // clearly inside the white matter
         {
           if (which_edits & CORTEX_EDITS)
@@ -909,17 +909,17 @@ relabel_hypointensities_neighboring_gray(MRI *mri)
 #define MEDIAL_WALL                                                            \
   41 /* only for Simple_surface_labels2002.txt - will have to modify for CMA   \
       */
-#define FUSIFORM_GYRUS 17
-#define LINGUAL_SULCUS 18
-#define LINGUAL_SULCUS2 66
+#define FUSIFORM_GYRUS        17
+#define LINGUAL_SULCUS        18
+#define LINGUAL_SULCUS2       66
 #define PARAHIPPOCAMPAL_GYRUS 19
-#define TEMPORAL_POLE 43
+#define TEMPORAL_POLE         43
 #define COLLATERAL_SULCUS_ANT 52
 #define COLLATERAL_SULCUS_POS 53
-#define SUP_TEMP_GYRUS_POLE 33
-#define CALCARINE_SULCUS 44
-#define MIN_DIST 0.5
-#define MAX_DIST 2
+#define SUP_TEMP_GYRUS_POLE   33
+#define CALCARINE_SULCUS      44
+#define MIN_DIST              0.5
+#define MAX_DIST              2
 
 #define IS_INF_TO_HIPPO(index)                                                 \
   (index == PARAHIPPOCAMPAL_GYRUS || index == LINGUAL_SULCUS ||                \
@@ -1608,7 +1608,7 @@ edit_hippocampus(MRI *mri)
 
 double MRIlabelMean(MRI *mri, MRI *mri_labels, int x, int y, int z, int whalf,
                     int label) {
-  int xi, yi, zi, xk, yk, zk, nvox;
+  int    xi, yi, zi, xk, yk, zk, nvox;
   double mean;
   double val;
 

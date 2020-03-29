@@ -25,15 +25,15 @@
 #ifndef mrisdistancefield_h
 #define mrisdistancefield_h
 
+#include "diag.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "diag.h"
 
 MRI *MRISdistancefield(MRIS *mris, MRI *mri_tmp, double max_distance,
                        int signedfield);
 
-#include <iostream>
 #include "utilsmath.h"
+#include <iostream>
 
 /** This algorithm is based on "Generating Signed Distance Fields from Triangle
  * Meshes" by J.Baerentzen and Henrik Aanaes For a given mesh with N triangles
@@ -47,18 +47,18 @@ MRI *MRISdistancefield(MRIS *mris, MRI *mri_tmp, double max_distance,
  */
 class MRISDistanceField {
 private:
-  MRIS *mris; // The MRIS surface to which the distance field is generated
-  MRI *mri_distfield;  // This has the distance field output once this is run
-  double max_distance; // calculate distance field only for voxels less than
-                       // max_distance far
-  bool signedfield;    // TODO - whether we need a signed field or not
+  MRIS * mris; // The MRIS surface to which the distance field is generated
+  MRI *  mri_distfield; // This has the distance field output once this is run
+  double max_distance;  // calculate distance field only for voxels less than
+                        // max_distance far
+  bool signedfield;     // TODO - whether we need a signed field or not
 
 public:
   //! Constructor needs the surface and the mri
   MRISDistanceField(MRIS *_mris, MRI *_mri_distfield)
       : mris(_mris), mri_distfield(_mri_distfield) {
     this->max_distance = 3.0; // default max distance
-    this->signedfield = false;
+    this->signedfield  = false;
   }
 
   //! Setter for the max distance
@@ -81,10 +81,10 @@ public:
 
   //! Generate the distance field
   void Generate() {
-    FACE *face;
-    VERTEX *v0, *v1, *v2;
+    FACE *                 face;
+    VERTEX *               v0, *v1, *v2;
     Math::BoundingBox<int> bbox;
-    double calcdist;
+    double                 calcdist;
 
     // Init the volume so that all voxels are max_distance
     InitVolume();
@@ -117,12 +117,12 @@ public:
           for (int k = bbox.minc[2]; k <= bbox.maxc[2]; k++) {
             // calculate distance to the face
             double pt[3];
-            pt[0] = (double)i;
-            pt[1] = (double)j;
-            pt[2] = (double)k;
-            v0 = &mris->vertices[face->v[0]];
-            v1 = &mris->vertices[face->v[1]];
-            v2 = &mris->vertices[face->v[2]];
+            pt[0]    = (double)i;
+            pt[1]    = (double)j;
+            pt[2]    = (double)k;
+            v0       = &mris->vertices[face->v[0]];
+            v1       = &mris->vertices[face->v[1]];
+            v2       = &mris->vertices[face->v[2]];
             calcdist = Math::DistancePointToFace(v0, v1, v2, pt);
 
             // if distance to face is smaller than previous voxel-value, update
@@ -138,7 +138,7 @@ public:
   //! Compute the bounding box of the face scaled by the max_distance
   //! return the integer bounding box ( so that it's easy to iterate )
   void computeBB(FACE *face, Math::BoundingBox<int> &bbox) {
-    VERTEX *v1, *v2, *v3;
+    VERTEX *                  v1, *v2, *v3;
     Math::BoundingBox<double> _bb;
 
     v1 = &mris->vertices[face->v[0]];

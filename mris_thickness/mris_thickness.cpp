@@ -24,9 +24,9 @@
  *
  */
 
-#include "timer.h"
 #include "diag.h"
 #include "mrisurf.h"
+#include "timer.h"
 #include "version.h"
 
 static char vcid[] =
@@ -38,38 +38,38 @@ static int fill_thickness_holes(MRI_SURFACE *mris, LABEL *cortex_label,
                                 LABEL *fsaverage_label);
 int MRISmeasureDistanceBetweenSurfaces(MRI_SURFACE *mris, MRI_SURFACE *mris2,
                                        int signed_dist);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
 
 const char *Progname;
-static char pial_name[100] = "pial";
+static char pial_name[100]  = "pial";
 static char white_name[100] = WHITE_MATTER_NAME;
-static int write_vertices = 0;
+static int  write_vertices  = 0;
 
-static int nbhd_size = 2;
-static float max_thick = 5.0;
-static char *osurf_fname = nullptr;
-static char *sphere_name = "sphere";
-static int signed_dist = 0;
-static char sdir[STRLEN] = "";
-static int fmin_thick = 0;
-static float laplace_res = 0.5;
-static int laplace_thick = 0;
+static int               nbhd_size     = 2;
+static float             max_thick     = 5.0;
+static char *            osurf_fname   = nullptr;
+static char *            sphere_name   = "sphere";
+static int               signed_dist   = 0;
+static char              sdir[STRLEN]  = "";
+static int               fmin_thick    = 0;
+static float             laplace_res   = 0.5;
+static int               laplace_thick = 0;
 static INTEGRATION_PARMS parms;
 
 static char *long_fname = nullptr;
 
-static LABEL *cortex_label = nullptr;
+static LABEL *cortex_label    = nullptr;
 static LABEL *fsaverage_label = nullptr;
 
 int main(int argc, char *argv[]) {
-  char *out_fname, *sname, *cp, fname[STRLEN], *hemi;
-  int nargs, msec;
+  char *       out_fname, *sname, *cp, fname[STRLEN], *hemi;
+  int          nargs, msec;
   MRI_SURFACE *mris;
-  Timer then;
+  Timer        then;
 
   nargs = handleVersionOption(argc, argv, "mris_thickness");
   if (nargs && argc - nargs == 1)
@@ -82,19 +82,19 @@ int main(int argc, char *argv[]) {
   DiagInit(nullptr, nullptr, nullptr);
 
   // for variational thickness estimation
-  parms.dt = 0.1;
-  parms.remove_neg = 1;
-  parms.momentum = .1;
-  parms.niterations = 1000;
-  parms.l_nlarea = 0;
-  parms.l_thick_min = 1;
-  parms.l_thick_spring = 0;
+  parms.dt                   = 0.1;
+  parms.remove_neg           = 1;
+  parms.momentum             = .1;
+  parms.niterations          = 1000;
+  parms.l_nlarea             = 0;
+  parms.l_thick_min          = 1;
+  parms.l_thick_spring       = 0;
   parms.l_ashburner_triangle = 1;
-  parms.l_ashburner_lambda = .1;
+  parms.l_ashburner_lambda   = .1;
   //  parms.l_tspring = .25;
-  parms.l_thick_normal = 1;
+  parms.l_thick_normal   = 1;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.tol = 1e-3;
+  parms.tol              = 1e-3;
 
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
@@ -105,8 +105,8 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit();
 
-  sname = argv[1];
-  hemi = argv[2];
+  sname     = argv[1];
+  hemi      = argv[2];
   out_fname = argv[3];
   if (!strlen(sdir)) {
     cp = getenv("SUBJECTS_DIR");
@@ -145,11 +145,11 @@ int main(int argc, char *argv[]) {
     MRI *mri_laplace;
 
     {
-      MRI *mri_dist_white, *mri_dist_pial;
-      int nwmissing, npmissing, nmissing, vno;
-      double xv, yv, zv, white_val, pial_val;
+      MRI *   mri_dist_white, *mri_dist_pial;
+      int     nwmissing, npmissing, nmissing, vno;
+      double  xv, yv, zv, white_val, pial_val;
       VERTEX *v;
-      FILE *fp;
+      FILE *  fp;
 
       MRISsaveVertexPositions(mris, PIAL_VERTICES);
       mri_dist_pial = MRIScomputeDistanceToSurface(mris, nullptr, laplace_res);
@@ -242,8 +242,8 @@ int main(int argc, char *argv[]) {
       MRIScomputeMetricProperties(mris);
     }
     if (Gdiag & DIAG_WRITE) {
-      char tmp[STRLEN];
-      int vno;
+      char    tmp[STRLEN];
+      int     vno;
       VERTEX *v;
       FileNameRemoveExtension(out_fname, tmp);
 
@@ -293,8 +293,8 @@ int main(int argc, char *argv[]) {
     MRISminimizeThicknessFunctional(mris, &parms, max_thick);
 
     if (Gdiag & DIAG_WRITE) {
-      char tmp[STRLEN];
-      int vno;
+      char    tmp[STRLEN];
+      int     vno;
       VERTEX *v;
       FileNameRemoveExtension(out_fname, tmp);
 
@@ -318,10 +318,10 @@ int main(int argc, char *argv[]) {
     if (long_fname) {
       char line[STRLEN], subject[STRLEN], fname[STRLEN], base_name[STRLEN], *cp,
           tmp[STRLEN], out_fname_only[STRLEN];
-      int vno;
-      FILE *fp;
+      int     vno;
+      FILE *  fp;
       VERTEX *v;
-      MHT *mht;
+      MHT *   mht;
 
       MRIScopyCurvatureToImagValues(mris); // save base thickness
       // to lookup closest face
@@ -336,7 +336,7 @@ int main(int argc, char *argv[]) {
       if (cp == nullptr)
         ErrorExit(ERROR_BADPARM, "could not read trailing / from %s", tmp);
       *cp = 0;
-      cp = strrchr(tmp, '/');
+      cp  = strrchr(tmp, '/');
       if (cp == nullptr)
         cp = tmp - 1;
       strcpy(base_name, cp + 1);
@@ -370,11 +370,11 @@ int main(int argc, char *argv[]) {
           MRISvertexCoord2XYZ_float(v, WHITE_VERTICES, &xw, &yw, &zw);
           MRISsampleFaceCoordsCanonical(mht, mris, v->x, v->y, v->z,
                                         PIAL_VERTICES, &xp, &yp, &zp);
-          thick = sqrt(SQR(xp - xw) + SQR(yp - yw) + SQR(zp - zw));
+          thick   = sqrt(SQR(xp - xw) + SQR(yp - yw) + SQR(zp - zw));
           v->curv = thick;
-          v->tx = xp;
-          v->ty = yp;
-          v->tz = zp;
+          v->tx   = xp;
+          v->ty   = yp;
+          v->tz   = zp;
         }
         FileNameOnly(out_fname, out_fname_only);
         sprintf(fname, "%s/%s.long.%s/surf/%s", sdir, subject, base_name,
@@ -417,7 +417,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -438,7 +438,7 @@ static int get_option(int argc, char *argv[]) {
 
   } else if (!stricmp(option, "long")) {
     long_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("computing longitudinal thickness from time points found in %s\n",
            long_fname);
   } else if (!stricmp(option, "pial")) {
@@ -488,7 +488,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "triangle")) {
     parms.l_ashburner_triangle = atof(argv[2]);
-    parms.l_ashburner_lambda = atof(argv[3]);
+    parms.l_ashburner_lambda   = atof(argv[3]);
     printf("using Ashburner, 1999, triangle regularization with l=%2.2f and "
            "lambda=%2.1f\n",
            parms.l_ashburner_triangle, parms.l_ashburner_lambda);
@@ -527,7 +527,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "using variational thickness measurement\n");
   } else if (!stricmp(option, "laplace") || !stricmp(option, "laplacian")) {
     laplace_thick = 1;
-    laplace_res = atof(argv[2]);
+    laplace_res   = atof(argv[2]);
     fprintf(
         stderr,
         "using Laplacian thickness measurement with PDE resolution = %2.3fmm\n",
@@ -541,13 +541,13 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "vno")) {
     Gdiag_no = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "debugging vertex %d\n", Gdiag_no);
   } else
     switch (toupper(*option)) {
     case 'W':
       parms.write_iterations = atoi(argv[2]);
-      nargs = 1;
+      nargs                  = 1;
       Gdiag |= DIAG_WRITE;
       printf("setting write iterations to %d\n", parms.write_iterations);
       break;
@@ -612,7 +612,7 @@ static void print_version() {
 
 static int fill_thickness_holes(MRI_SURFACE *mris, LABEL *cortex_label,
                                 LABEL *fsaverage_label) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   LabelMarkSurface(cortex_label, mris);

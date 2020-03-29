@@ -52,7 +52,7 @@ public:
   ~AffineReg();
   bool IsEmpty();
   void ReadXfm(const char *XfmFile, const MRI *InRefVol, const MRI *OutRefVol);
-  void ApplyXfm(std::vector<float> &OutPoint,
+  void ApplyXfm(std::vector<float> &               OutPoint,
                 std::vector<float>::const_iterator InPoint);
   void DecomposeXfm();
   void PrintScale();
@@ -76,9 +76,9 @@ public:
   ~NonlinReg();
   bool IsEmpty();
   void ReadXfm(const char *XfmFile, MRI *OutRefVol);
-  void ApplyXfm(std::vector<float> &OutPoint,
+  void ApplyXfm(std::vector<float> &               OutPoint,
                 std::vector<float>::const_iterator InPoint);
-  void ApplyXfmInv(std::vector<float> &OutPoint,
+  void ApplyXfmInv(std::vector<float> &               OutPoint,
                    std::vector<float>::const_iterator InPoint);
 
 private:

@@ -23,27 +23,26 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
+#include "error.h"
 #include "macros.h"
-#include "version.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "transform.h"
+#include "version.h"
 
 typedef struct {
   VECTOR *v_mean;
   MATRIX *m_cov;
-  int npoints;
-  int vno;
+  int     npoints;
+  int     vno;
 } CLUSTER;
 
 static char vcid[] =
@@ -67,59 +66,59 @@ static int find_most_likely_vertex_to_swap(MRI_SURFACE *mris, MRI *mri_profiles,
 static CLUSTER *MRISclusterAgglomerative(MRI_SURFACE *mris, MRI *mri_profiles,
                                          int k, char *start_fname,
                                          MRI_SURFACE *mris_ico);
-static int rip_vertices_out_of_fov(MRI_SURFACE *mris, MRI *mri_profiles);
-int main(int argc, char *argv[]);
+static int      rip_vertices_out_of_fov(MRI_SURFACE *mris, MRI *mri_profiles);
+int             main(int argc, char *argv[]);
 
-static int mark_clusters(MRI_SURFACE *mris, MRI *mri_profiles, CLUSTER *ct,
-                         int k);
-static int compute_cluster_statistics(MRI_SURFACE *mris, MRI *mri_profiles,
-                                      CLUSTER *ct, int k);
-CLUSTER *MRISclusterKMeans(MRI_SURFACE *mris, MRI *mri_profiles, int k,
-                           char *start_fname, MRI_SURFACE *mris_ico);
-static int get_option(int argc, char *argv[]);
+static int  mark_clusters(MRI_SURFACE *mris, MRI *mri_profiles, CLUSTER *ct,
+                          int k);
+static int  compute_cluster_statistics(MRI_SURFACE *mris, MRI *mri_profiles,
+                                       CLUSTER *ct, int k);
+CLUSTER *   MRISclusterKMeans(MRI_SURFACE *mris, MRI *mri_profiles, int k,
+                              char *start_fname, MRI_SURFACE *mris_ico);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
-static int initialize_kmeans_centers(MRI_SURFACE *mris, MRI *mri_profiles,
-                                     CLUSTER *ct, int k);
-static int initialize_cluster_centers(MRI_SURFACE *mris, MRI *mri_profiles,
+static int  initialize_kmeans_centers(MRI_SURFACE *mris, MRI *mri_profiles,
                                       CLUSTER *ct, int k);
-static int initialize_cluster_centers_with_ico(MRI_SURFACE *mris,
-                                               MRI *mri_profiles, CLUSTER *ct,
-                                               MRI_SURFACE *mris_ico);
+static int  initialize_cluster_centers(MRI_SURFACE *mris, MRI *mri_profiles,
+                                       CLUSTER *ct, int k);
+static int  initialize_cluster_centers_with_ico(MRI_SURFACE *mris,
+                                                MRI *mri_profiles, CLUSTER *ct,
+                                                MRI_SURFACE *mris_ico);
 
 CLUSTER *MRIScluster(MRI_SURFACE *mris, MRI *mri_profiles, int cluster_type,
                      int k, char *start_fname, MRI_SURFACE *mris_ico);
 
 char *start_fname = NULL;
 
-static int max_iterations = 500000;
+static int  max_iterations = 500000;
 const char *Progname;
 #define MAX_LABELS 10000
 static char *label_names[MAX_LABELS];
-static int nlabels = 0;
+static int   nlabels = 0;
 
-static int nbhd_size = 2;
-static char *sdir = NULL;
-static int num_erode = 0;
-static int navgs = 0;
-static int write_iters = 500;
+static int   nbhd_size   = 2;
+static char *sdir        = NULL;
+static int   num_erode   = 0;
+static int   navgs       = 0;
+static int   write_iters = 500;
 
-#define K_MEANS 0
+#define K_MEANS       0
 #define AGGLOMERATIVE 1
 
 static int cluster_type = AGGLOMERATIVE;
-static int k = 50;
+static int k            = 50;
 
 static char *ico_fname = NULL;
 
 int main(int argc, char *argv[]) {
-  char **av, *surf_fname, *profile_fname, *seg_fname;
-  int ac, nargs;
+  char **      av, *surf_fname, *profile_fname, *seg_fname;
+  int          ac, nargs;
   MRI_SURFACE *mris, *mris_ico = NULL;
   // LABEL         *label = NULL ;
-  MRI *mri_profiles;
+  MRI *    mri_profiles;
   CLUSTER *ct;
 
   setRandomSeed(10L);
@@ -145,9 +144,9 @@ int main(int argc, char *argv[]) {
     usage_exit();
 
   profile_fname = argv[1];
-  surf_fname = argv[2];
-  seg_fname = argv[3];
-  mris = MRISread(surf_fname);
+  surf_fname    = argv[2];
+  seg_fname     = argv[3];
+  mris          = MRISread(surf_fname);
   if (!mris)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
               surf_fname);
@@ -209,10 +208,10 @@ int main(int argc, char *argv[]) {
   printf("writing cortical intensity clusters to %s...\n", seg_fname);
   MRISwriteAnnotation(mris, seg_fname);
   {
-    int vno;
+    int     vno;
     VERTEX *v;
-    int c, i;
-    char fname[STRLEN], ext[STRLEN];
+    int     c, i;
+    char    fname[STRLEN], ext[STRLEN];
 
     // write average profiles into mri_profiles and write it out
     for (vno = 0; vno < mris->nvertices; vno++) {
@@ -245,7 +244,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -258,7 +257,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "eroding label %d times\n", num_erode);
     nargs = 1;
   } else if (!stricmp(option, "sdir")) {
-    sdir = argv[2];
+    sdir  = argv[2];
     nargs = 1;
   } else if (!stricmp(option, "ic")) {
     ico_fname = argv[2];
@@ -266,7 +265,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "start")) {
     start_fname = argv[2];
-    nargs = 1;
+    nargs       = 1;
     printf("using %s as initial clustering...\n", start_fname);
   } else
     switch (toupper(*option)) {
@@ -276,13 +275,13 @@ static int get_option(int argc, char *argv[]) {
       nargs = 1;
       break;
     case 'K':
-      k = atof(argv[2]);
+      k     = atof(argv[2]);
       nargs = 1;
       printf("using k-means clustering with k=%d\n", k);
       break;
     case 'L':
       label_names[nlabels] = argv[2];
-      nargs = 1;
+      nargs                = 1;
       printf("limiting profile calculation to label %s\n",
              label_names[nlabels]);
       nlabels++;
@@ -304,7 +303,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -371,8 +370,8 @@ CLUSTER *MRIScluster(MRI_SURFACE *mris, MRI *mri_profiles, int cluster_type,
 static CLUSTER *MRISclusterAgglomerative(MRI_SURFACE *mris, MRI *mri_profiles,
                                          int k, char *start_fname,
                                          MRI_SURFACE *mris_ico) {
-  int i, nsamples, iter, done, vno, cluster;
-  char fname[STRLEN];
+  int      i, nsamples, iter, done, vno, cluster;
+  char     fname[STRLEN];
   CLUSTER *ct;
 
   if (start_fname) {
@@ -400,8 +399,8 @@ static CLUSTER *MRISclusterAgglomerative(MRI_SURFACE *mris, MRI *mri_profiles,
                 k);
     nsamples = mri_profiles->nframes;
     for (i = 0; i < k; i++) {
-      ct[i].v_mean = VectorAlloc(nsamples, MATRIX_REAL);
-      ct[i].m_cov = MatrixIdentity(nsamples, NULL);
+      ct[i].v_mean  = VectorAlloc(nsamples, MATRIX_REAL);
+      ct[i].m_cov   = MatrixIdentity(nsamples, NULL);
       ct[i].npoints = 0;
     }
     for (vno = 0; vno < mris->nvertices; vno++) {
@@ -419,8 +418,8 @@ static CLUSTER *MRISclusterAgglomerative(MRI_SURFACE *mris, MRI *mri_profiles,
                 k);
     nsamples = mri_profiles->nframes;
     for (i = 0; i < k; i++) {
-      ct[i].v_mean = VectorAlloc(nsamples, MATRIX_REAL);
-      ct[i].m_cov = MatrixIdentity(nsamples, NULL);
+      ct[i].v_mean  = VectorAlloc(nsamples, MATRIX_REAL);
+      ct[i].m_cov   = MatrixIdentity(nsamples, NULL);
       ct[i].npoints = 0;
     }
 
@@ -478,15 +477,15 @@ static CLUSTER *MRISclusterAgglomerative(MRI_SURFACE *mris, MRI *mri_profiles,
 }
 CLUSTER *MRISclusterKMeans(MRI_SURFACE *mris, MRI *mri_profiles, int k,
                            char *start_fname, MRI_SURFACE *mris_ico) {
-  int i, nsamples, iter, done, nchanged;
-  char fname[STRLEN];
+  int      i, nsamples, iter, done, nchanged;
+  char     fname[STRLEN];
   CLUSTER *ct;
 
   nsamples = mri_profiles->nframes;
-  ct = calloc(k, sizeof(CLUSTER));
+  ct       = calloc(k, sizeof(CLUSTER));
   for (i = 0; i < k; i++) {
-    ct[i].v_mean = VectorAlloc(nsamples, MATRIX_REAL);
-    ct[i].m_cov = MatrixIdentity(nsamples, NULL);
+    ct[i].v_mean  = VectorAlloc(nsamples, MATRIX_REAL);
+    ct[i].m_cov   = MatrixIdentity(nsamples, NULL);
     ct[i].npoints = 0;
   }
 
@@ -513,8 +512,8 @@ CLUSTER *MRISclusterKMeans(MRI_SURFACE *mris, MRI *mri_profiles, int k,
 }
 static int initialize_kmeans_centers(MRI_SURFACE *mris, MRI *mri_profiles,
                                      CLUSTER *ct, int k) {
-  int i, j, done, vno, nsamples, vnos[MAX_CLUSTERS];
-  double dist, min_dist;
+  int     i, j, done, vno, nsamples, vnos[MAX_CLUSTERS];
+  double  dist, min_dist;
   VERTEX *v, *vn;
 
   nsamples = mri_profiles->nframes;
@@ -523,7 +522,7 @@ static int initialize_kmeans_centers(MRI_SURFACE *mris, MRI *mri_profiles,
     do {
       do {
         vno = (int)randomNumber(0, mris->nvertices - 1);
-        v = &mris->vertices[vno];
+        v   = &mris->vertices[vno];
       } while (v->ripflag);
 
       // see if any of the other centers are too close to this one
@@ -531,7 +530,7 @@ static int initialize_kmeans_centers(MRI_SURFACE *mris, MRI *mri_profiles,
       for (j = 0; done && j < i; j++) {
         if (j == i)
           continue;
-        vn = &mris->vertices[vnos[j]];
+        vn   = &mris->vertices[vnos[j]];
         dist = sqrt(SQR(vn->x - v->x) + SQR(vn->y - v->y) + SQR(vn->z - v->z));
         if (dist < min_dist) {
           done = 0;
@@ -553,14 +552,14 @@ static int initialize_kmeans_centers(MRI_SURFACE *mris, MRI *mri_profiles,
 
 static int mark_clusters(MRI_SURFACE *mris, MRI *mri_profiles, CLUSTER *ct,
                          int k) {
-  int i, vno, min_i, nsamples, num[MAX_CLUSTERS], nchanged;
-  double min_dist, dist;
+  int     i, vno, min_i, nsamples, num[MAX_CLUSTERS], nchanged;
+  double  min_dist, dist;
   VECTOR *v1;
   VERTEX *v;
 
   memset(num, 0, sizeof(num));
   nsamples = mri_profiles->nframes;
-  v1 = VectorAlloc(nsamples, MATRIX_REAL);
+  v1       = VectorAlloc(nsamples, MATRIX_REAL);
   for (nchanged = vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     if (v->ripflag)
@@ -571,14 +570,14 @@ static int mark_clusters(MRI_SURFACE *mris, MRI *mri_profiles, CLUSTER *ct,
     for (i = 0; i < nsamples; i++)
       VECTOR_ELT(v1, i + 1) = MRIgetVoxVal(mri_profiles, vno, 0, 0, i);
     min_dist = MatrixMahalanobisDistance(ct[0].v_mean, ct[0].m_cov, v1);
-    min_i = 0;
+    min_i    = 0;
     for (i = 1; i < k; i++) {
       if (i == Gdiag_no)
         DiagBreak();
       dist = MatrixMahalanobisDistance(ct[i].v_mean, ct[i].m_cov, v1);
       if (dist < min_dist) {
         min_dist = dist;
-        min_i = i;
+        min_i    = i;
       }
     }
     CTABannotationAtIndex(mris->ct, min_i, &v->annotation);
@@ -599,7 +598,7 @@ static int mark_clusters(MRI_SURFACE *mris, MRI *mri_profiles, CLUSTER *ct,
 #if 1
 static int compute_cluster_statistics(MRI_SURFACE *mris, MRI *mri_profiles,
                                       CLUSTER *ct, int k) {
-  int i, vno, cluster, nsamples, num[MAX_CLUSTERS];
+  int     i, vno, cluster, nsamples, num[MAX_CLUSTERS];
   VECTOR *v1;
 
   memset(num, 0, sizeof(num));
@@ -632,18 +631,18 @@ static int compute_cluster_statistics(MRI_SURFACE *mris, MRI *mri_profiles,
 static int compute_cluster_statistics(MRI_SURFACE *mris, MRI *mri_profiles,
                                       MATRIX **m_covs, VECTOR **v_means,
                                       int k) {
-  int i, vno, cluster, nsamples, num[MAX_CLUSTERS];
-  int singular, cno_pooled, cno;
+  int     i, vno, cluster, nsamples, num[MAX_CLUSTERS];
+  int     singular, cno_pooled, cno;
   MATRIX *m1, *mpooled, *m_inv_covs[MAX_CLUSTERS];
   VECTOR *v1;
-  FILE *fp;
-  double det, det_pooled;
+  FILE *  fp;
+  double  det, det_pooled;
 
   memset(num, 0, sizeof(num));
   nsamples = mri_profiles->nframes;
 
-  v1 = VectorAlloc(nsamples, MATRIX_REAL);
-  m1 = MatrixAlloc(nsamples, nsamples, MATRIX_REAL);
+  v1      = VectorAlloc(nsamples, MATRIX_REAL);
+  m1      = MatrixAlloc(nsamples, nsamples, MATRIX_REAL);
   mpooled = MatrixAlloc(nsamples, nsamples, MATRIX_REAL);
 
   for (cluster = 0; cluster < k; cluster++) {
@@ -697,7 +696,7 @@ static int compute_cluster_statistics(MRI_SURFACE *mris, MRI *mri_profiles,
   MatrixFree(&m1);
   singular = 0;
   for (cluster = 0; cluster < k; cluster++) {
-    m1 = MatrixInverse(m_covs[cluster], NULL);
+    m1  = MatrixInverse(m_covs[cluster], NULL);
     cno = MatrixConditionNumber(m_covs[cluster]);
     det = MatrixDeterminant(m_covs[cluster]);
     if (m1 == NULL)
@@ -709,7 +708,7 @@ static int compute_cluster_statistics(MRI_SURFACE *mris, MRI *mri_profiles,
       MatrixAdd(m_covs[cluster], m1, m_covs[cluster]);
       MatrixFree(&m1);
       cno = MatrixConditionNumber(m_covs[cluster]);
-      m1 = MatrixInverse(m_covs[cluster], NULL);
+      m1  = MatrixInverse(m_covs[cluster], NULL);
       det = MatrixDeterminant(m_covs[cluster]);
     }
     m_inv_covs[cluster] = m1;
@@ -730,7 +729,7 @@ static int compute_cluster_statistics(MRI_SURFACE *mris, MRI *mri_profiles,
 }
 #endif
 static int rip_vertices_out_of_fov(MRI_SURFACE *mris, MRI *mri_profiles) {
-  int vno, n, i, good, nsamples;
+  int     vno, n, i, good, nsamples;
   VERTEX *v;
 
   nsamples = mri_profiles->nframes;
@@ -740,7 +739,7 @@ static int rip_vertices_out_of_fov(MRI_SURFACE *mris, MRI *mri_profiles) {
       if (!FZERO(MRIgetVoxVal(mri_profiles, vno, 0, 0, i)))
         good = 1;
     if (!good) {
-      v->ripflag = 1;
+      v->ripflag    = 1;
       v->annotation = 0;
     }
   }
@@ -751,7 +750,7 @@ static int rip_vertices_out_of_fov(MRI_SURFACE *mris, MRI *mri_profiles) {
     if (v->ripflag != 1)
       continue;
     for (n = 0; n < v->vtotal; n++) {
-      mris->vertices[v->v[n]].ripflag = 2;
+      mris->vertices[v->v[n]].ripflag    = 2;
       mris->vertices[v->v[n]].annotation = 0;
     }
   }
@@ -765,15 +764,15 @@ static int rip_vertices_out_of_fov(MRI_SURFACE *mris, MRI *mri_profiles) {
 static int find_most_likely_unmarked_vertex(MRI_SURFACE *mris,
                                             MRI *mri_profiles, CLUSTER *ct,
                                             int k, int *pcluster_no) {
-  double dist, min_dist;
-  int vno, c, min_cluster, min_vno, n, okay;
+  double  dist, min_dist;
+  int     vno, c, min_cluster, min_vno, n, okay;
   VECTOR *v_vals;
   VERTEX *v, *vn;
 
   v_vals = VectorAlloc(mri_profiles->nframes, MATRIX_REAL);
 
-  min_dist = -1;
-  min_vno = -1;
+  min_dist    = -1;
+  min_vno     = -1;
   min_cluster = -1;
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -804,14 +803,14 @@ static int find_most_likely_unmarked_vertex(MRI_SURFACE *mris,
         }
         if (okay) {
           min_cluster = c;
-          min_dist = dist;
-          min_vno = v->v[n];
+          min_dist    = dist;
+          min_vno     = v->v[n];
         }
       }
     }
   }
 
-  v = &mris->vertices[min_vno];
+  v            = &mris->vertices[min_vno];
   *pcluster_no = min_cluster;
   VectorFree(&v_vals);
   return (min_vno);
@@ -819,18 +818,18 @@ static int find_most_likely_unmarked_vertex(MRI_SURFACE *mris,
 static int find_most_likely_vertex_to_swap(MRI_SURFACE *mris, MRI *mri_profiles,
                                            CLUSTER *ct, int k,
                                            int *pcluster_no) {
-  double dist_current, dist_changed, dist_dec, max_dist_dec;
-  int vno, c1, c2, min_cluster, min_vno, n;
+  double         dist_current, dist_changed, dist_dec, max_dist_dec;
+  int            vno, c1, c2, min_cluster, min_vno, n;
   static VECTOR *v_vals = NULL;
-  VERTEX *v, *vn;
+  VERTEX *       v, *vn;
 
   if (v_vals == NULL)
     v_vals = VectorAlloc(mri_profiles->nframes, MATRIX_REAL);
 
   // search for the vertex that has the biggest distance diff
   max_dist_dec = -1;
-  min_vno = -1;
-  min_cluster = -1;
+  min_vno      = -1;
+  min_cluster  = -1;
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     if (v->ripflag)
@@ -857,15 +856,15 @@ static int find_most_likely_vertex_to_swap(MRI_SURFACE *mris, MRI *mri_profiles,
       dist_dec = (dist_current - dist_changed);
       if (min_vno < 0 || dist_dec > max_dist_dec) {
         if (okay_to_swap(mris, vno, c1, c2)) {
-          min_cluster = c2; // change it to new cluster
+          min_cluster  = c2; // change it to new cluster
           max_dist_dec = dist_dec;
-          min_vno = vno;
+          min_vno      = vno;
         }
       }
     }
   }
 
-  v = &mris->vertices[min_vno];
+  v            = &mris->vertices[min_vno];
   *pcluster_no = min_cluster;
   return (min_vno);
 }
@@ -879,7 +878,7 @@ static int load_vals(MRI *mri_profiles, VECTOR *v, int vno) {
 
 static int remove_vertex_from_cluster(MRI_SURFACE *mris, MRI *mri_profiles,
                                       CLUSTER *ct, int c, int vno) {
-  int nsamples;
+  int            nsamples;
   static VECTOR *v_vals = NULL;
 
   nsamples = mri_profiles->nframes;
@@ -902,7 +901,7 @@ static int remove_vertex_from_cluster(MRI_SURFACE *mris, MRI *mri_profiles,
 }
 static int add_vertex_to_cluster(MRI_SURFACE *mris, MRI *mri_profiles,
                                  CLUSTER *ct, int c, int vno) {
-  int nsamples;
+  int            nsamples;
   static VECTOR *v_vals = NULL;
 
   nsamples = mri_profiles->nframes;
@@ -926,11 +925,11 @@ static int add_vertex_to_cluster(MRI_SURFACE *mris, MRI *mri_profiles,
 static int initialize_cluster_centers_with_ico(MRI_SURFACE *mris,
                                                MRI *mri_profiles, CLUSTER *ct,
                                                MRI_SURFACE *mris_ico) {
-  int i, j, vno, nsamples, vnos[MAX_CLUSTERS], k;
-  double r1, r2, res;
-  float fmin;
+  int              i, j, vno, nsamples, vnos[MAX_CLUSTERS], k;
+  double           r1, r2, res;
+  float            fmin;
   MRIS_HASH_TABLE *mht;
-  VERTEX *vico;
+  VERTEX *         vico;
 
   k = mris_ico->nvertices;
   MRISstoreRipFlags(mris);
@@ -939,12 +938,12 @@ static int initialize_cluster_centers_with_ico(MRI_SURFACE *mris,
   r2 = MRISaverageRadius(mris_ico);
   MRISscaleBrain(mris_ico, mris_ico, r1 / r2);
 
-  res = sqrt(mris->total_area / mris->nvertices);
-  mht = MHTcreateVertexTable_Resolution(mris, CURRENT_VERTICES, 2 * res);
+  res      = sqrt(mris->total_area / mris->nvertices);
+  mht      = MHTcreateVertexTable_Resolution(mris, CURRENT_VERTICES, 2 * res);
   nsamples = mri_profiles->nframes;
   for (i = 0; i < mris_ico->nvertices; i++) {
     vico = &mris_ico->vertices[i];
-    vno = MRISfindClosestVertex(mris, vico->x, vico->y, vico->z, &fmin);
+    vno  = MRISfindClosestVertex(mris, vico->x, vico->y, vico->z, &fmin);
     if (vno < 0)
       continue;
     vnos[i] = vno;
@@ -964,8 +963,8 @@ static int initialize_cluster_centers_with_ico(MRI_SURFACE *mris,
 }
 static int initialize_cluster_centers(MRI_SURFACE *mris, MRI *mri_profiles,
                                       CLUSTER *ct, int k) {
-  int i, j, done, vno, nsamples, vnos[MAX_CLUSTERS], iter;
-  double dist, min_dist;
+  int     i, j, done, vno, nsamples, vnos[MAX_CLUSTERS], iter;
+  double  dist, min_dist;
   VERTEX *v, *vn;
 
   nsamples = mri_profiles->nframes;
@@ -975,7 +974,7 @@ static int initialize_cluster_centers(MRI_SURFACE *mris, MRI *mri_profiles,
     do {
       do {
         vno = (int)randomNumber(0, mris->nvertices - 1);
-        v = &mris->vertices[vno];
+        v   = &mris->vertices[vno];
       } while (v->ripflag);
 
       // see if any of the other centers are too close to this one
@@ -983,7 +982,7 @@ static int initialize_cluster_centers(MRI_SURFACE *mris, MRI *mri_profiles,
       for (j = 0; done && j < i; j++) {
         if (j == i)
           continue;
-        vn = &mris->vertices[vnos[j]];
+        vn   = &mris->vertices[vnos[j]];
         dist = sqrt(SQR(vn->x - v->x) + SQR(vn->y - v->y) + SQR(vn->z - v->z));
         if (dist < min_dist) {
           done = 0;
@@ -1008,7 +1007,7 @@ static int initialize_cluster_centers(MRI_SURFACE *mris, MRI *mri_profiles,
   return (NO_ERROR);
 }
 static int rip_bad_vertices(MRI_SURFACE *mris, MRI *mri_profiles) {
-  int unknown_index, bad, i, vno, index;
+  int     unknown_index, bad, i, vno, index;
   VERTEX *v;
 
   CTABfindName(mris->ct, "Unknown", &unknown_index);
@@ -1023,7 +1022,7 @@ static int rip_bad_vertices(MRI_SURFACE *mris, MRI *mri_profiles) {
     CTABfindAnnotation(mris->ct, v->annotation, &index);
     if (index == unknown_index) {
       v->annotation = 0;
-      v->ripflag = 1;
+      v->ripflag    = 1;
     } else {
       bad = 1;
       for (i = 0; i < mri_profiles->nframes; i++) {
@@ -1031,7 +1030,7 @@ static int rip_bad_vertices(MRI_SURFACE *mris, MRI *mri_profiles) {
           bad = 0;
       }
       if (bad) {
-        v->ripflag = 1;
+        v->ripflag    = 1;
         v->annotation = 0;
       }
     }
@@ -1041,12 +1040,12 @@ static int rip_bad_vertices(MRI_SURFACE *mris, MRI *mri_profiles) {
   return (NO_ERROR);
 }
 static int okay_to_swap(MRI_SURFACE *mris, int vno, int c1, int c2) {
-  int n, nc1, nc2, n2, okay;
+  int     n, nc1, nc2, n2, okay;
   VERTEX *v, *vn, *vn2;
-  float old_curv;
+  float   old_curv;
 
   okay = 0;
-  v = &mris->vertices[vno];
+  v    = &mris->vertices[vno];
   for (nc1 = nc2 = n = 0; n < v->vnum; n++) {
     vn = &mris->vertices[v->v[n]];
     if (vn->curv == c1)
@@ -1058,8 +1057,8 @@ static int okay_to_swap(MRI_SURFACE *mris, int vno, int c1, int c2) {
   {
     // check to make sure the c1 vertices are still connected
     old_curv = v->curv;
-    v->curv = -1; // don't use this for connectivity of c1
-    okay = 1;
+    v->curv  = -1; // don't use this for connectivity of c1
+    okay     = 1;
     for (n = 0; okay && n < v->vnum; n++) {
       vn = &mris->vertices[v->v[n]];
       if (vn->curv == c1) {
@@ -1080,7 +1079,7 @@ static int okay_to_swap(MRI_SURFACE *mris, int vno, int c1, int c2) {
 }
 
 static int clusters_connected(MRI_SURFACE *mris, int vno1, int vno2, int num) {
-  int n, n2, n3, connected;
+  int     n, n2, n3, connected;
   VERTEX *v, *vn, *vn2, *vn3;
 
   v = &mris->vertices[vno1];

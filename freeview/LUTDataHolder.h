@@ -51,8 +51,8 @@ public:
 protected:
   struct ColorTableData {
     COLOR_TABLE *table;
-    QString name;
-    QString filename;
+    QString      name;
+    QString      filename;
   };
 
   QList<ColorTableData> m_tables;

@@ -8,9 +8,9 @@ namespace kvl {
 class AtlasMeshCollectionValidator : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshCollectionValidator;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshCollectionValidator;
+  using Superclass   = itk::Object;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */

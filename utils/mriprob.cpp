@@ -23,8 +23,8 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
+#include <math.h>
 
 #include "diag.h"
 #include "error.h"
@@ -35,35 +35,35 @@
 #define DEBUG_POINT(x, y, z) (((x == 140) && (y == 74)) && ((z) == 174))
 
 MRI *MRIapplyBayesLaw(MRI *mri_priors, MRI *mri_p1, MRI *mri_p2, MRI *mri_dst) {
-  int x, y, z, width, height, depth;
+  int      x, y, z, width, height, depth;
   BUFTYPE *ppriors, *pdst;
-  float p, p1, p2, prior, *pp1, *pp2;
+  float    p, p1, p2, prior, *pp1, *pp2;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_priors, nullptr);
 
-  width = mri_dst->width;
+  width  = mri_dst->width;
   height = mri_dst->height;
-  depth = mri_dst->depth;
+  depth  = mri_dst->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       ppriors = &MRIvox(mri_priors, 0, y, z);
-      pp1 = &MRIFvox(mri_p1, 0, y, z);
-      pp2 = &MRIFvox(mri_p2, 0, y, z);
-      pdst = &MRIvox(mri_dst, 0, y, z);
+      pp1     = &MRIFvox(mri_p1, 0, y, z);
+      pp2     = &MRIFvox(mri_p2, 0, y, z);
+      pdst    = &MRIvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
         if (DEBUG_POINT(x, y, z))
           DiagBreak();
-        p1 = (float)*pp1++;
-        p2 = (float)*pp2++;
+        p1    = (float)*pp1++;
+        p2    = (float)*pp2++;
         prior = (float)*ppriors++;
         p1 /= 100.0f;
         p2 /= 100.0f;
         prior /= 100.0f;
         p1 *= prior;
         p2 *= (1.0f - prior);
-        p = p1 / (p1 + p2);
+        p       = p1 / (p1 + p2);
         *pdst++ = (BUFTYPE)nint(p * 100.0f);
       }
     }
@@ -72,37 +72,37 @@ MRI *MRIapplyBayesLaw(MRI *mri_priors, MRI *mri_p1, MRI *mri_p2, MRI *mri_dst) {
 }
 MRI *MRIcomputeConditionalProbabilities(MRI *mri_T1, MRI *mri_mean,
                                         MRI *mri_std, MRI *mri_dst) {
-  int x, y, z, width, height, depth;
+  int      x, y, z, width, height, depth;
   BUFTYPE *pT1, *pmean, *pstd;
-  float p, mean, std, val, n, *pdst;
+  float    p, mean, std, val, n, *pdst;
 
-  width = mri_T1->width;
+  width  = mri_T1->width;
   height = mri_T1->height;
-  depth = mri_T1->depth;
+  depth  = mri_T1->depth;
 
   if (!mri_dst)
     mri_dst = MRIalloc(width, height, depth, MRI_FLOAT);
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pT1 = &MRIvox(mri_T1, 0, y, z);
+      pT1   = &MRIvox(mri_T1, 0, y, z);
       pmean = &MRIvox(mri_mean, 0, y, z);
-      pstd = &MRIvox(mri_std, 0, y, z);
-      pdst = &MRIFvox(mri_dst, 0, y, z);
+      pstd  = &MRIvox(mri_std, 0, y, z);
+      pdst  = &MRIFvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
         if (DEBUG_POINT(x, y, z))
           DiagBreak();
-        val = (float)*pT1++;
+        val  = (float)*pT1++;
         mean = (float)*pmean++;
-        std = (float)*pstd++;
+        std  = (float)*pstd++;
         if (FZERO(std))
           std = 1.0;
 #if 0
         if (std < 10.0)  /* hack!!!!! - not enough observations */
           std = 10.0 ;
 #endif
-        n = 1 / (std * sqrt(2.0 * M_PI));
-        p = n * exp(-SQR(val - mean) / (2.0f * SQR(std)));
+        n       = 1 / (std * sqrt(2.0 * M_PI));
+        p       = n * exp(-SQR(val - mean) / (2.0f * SQR(std)));
         *pdst++ = p * 100.0f;
       }
     }
@@ -129,9 +129,9 @@ MRI *MRIprobabilityThresholdNeighborhoodOff(MRI *mri_src, MRI *mri_prob,
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, nullptr);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   /* now apply the inverse morph to build an average wm representation
      of the input volume
@@ -241,9 +241,9 @@ MRI *MRIprobabilityThresholdNeighborhoodOn(MRI *mri_src, MRI *mri_prob,
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, nullptr);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   /* now apply the inverse morph to build an average wm representation
      of the input volume
@@ -329,8 +329,8 @@ MRI *MRIprobabilityThresholdNeighborhoodOn(MRI *mri_src, MRI *mri_prob,
 MRI *MRIprobabilityThreshold(MRI *mri_src, MRI *mri_prob, MRI *mri_dst,
                              float threshold, int out_label) {
   BUFTYPE *pprob, *pdst, *psrc, out_val, prob, in_val;
-  int width, height, depth, x, y, z, nchanged, noff, non;
-  float nvox;
+  int      width, height, depth, x, y, z, nchanged, noff, non;
+  float    nvox;
 
   if (mri_prob->type != MRI_UCHAR)
     ErrorReturn(NULL,
@@ -339,9 +339,9 @@ MRI *MRIprobabilityThreshold(MRI *mri_src, MRI *mri_prob, MRI *mri_dst,
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, nullptr);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   /* now apply the inverse morph to build an average wm representation
      of the input volume
      */
@@ -350,14 +350,14 @@ MRI *MRIprobabilityThreshold(MRI *mri_src, MRI *mri_prob, MRI *mri_dst,
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       pprob = &MRIvox(mri_prob, 0, y, z);
-      psrc = &MRIvox(mri_src, 0, y, z);
-      pdst = &MRIvox(mri_dst, 0, y, z);
+      psrc  = &MRIvox(mri_src, 0, y, z);
+      pdst  = &MRIvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
         if (DEBUG_POINT(x, y, z))
           DiagBreak();
         out_val = 0;
-        prob = *pprob++; /* value from inverse morphed volume */
-        in_val = *psrc++;
+        prob    = *pprob++; /* value from inverse morphed volume */
+        in_val  = *psrc++;
         if (in_val < WM_MIN_VAL && prob >= threshold) /* probably on */
           out_val = out_label;
         else /* not sure, use original val */

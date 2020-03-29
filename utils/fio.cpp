@@ -23,21 +23,21 @@
  */
 
 #include "fio.h"
+#include "bfileio.h"
+#include "diag.h"
+#include "error.h"
+#include "machine.h"
+#include "proto.h"
+#include "utils.h" // strcpyalloc
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "bfileio.h"
-#include "error.h"
-#include "machine.h"
-#include "proto.h"
-#include "utils.h" // strcpyalloc
-#include "diag.h"
 
 #define FIO_NPUSHES_MAX 100
-int fio_npushes = -1;
+int  fio_npushes = -1;
 char fio_dirstack[FIO_NPUSHES_MAX][1000];
 
 FILE *MGHopen_file(const char *fname, const char *rwmode) {
@@ -71,16 +71,16 @@ float getf(FILE *fp) {
 
 int fread1(int *v, FILE *fp) {
   unsigned char c;
-  int ret;
+  int           ret;
 
   ret = fread(&c, 1, 1, fp);
-  *v = c;
+  *v  = c;
   return (ret);
 }
 
 int fread2(int *v, FILE *fp) {
   short s;
-  int ret;
+  int   ret;
 
   ret = fread(&s, 2, 1, fp);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -92,7 +92,7 @@ int fread2(int *v, FILE *fp) {
 
 int fread3(int *v, FILE *fp) {
   unsigned int i = 0;
-  int ret;
+  int          ret;
 
   ret = fread(&i, 3, 1, fp);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -104,7 +104,7 @@ int fread3(int *v, FILE *fp) {
 
 int fread4(float *v, FILE *fp) {
   float f;
-  int ret;
+  int   ret;
 
   ret = fread(&f, 4, 1, fp);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -158,7 +158,7 @@ int fwriteShort(short s, FILE *fp) {
 }
 double freadDouble(FILE *fp) {
   double d;
-  int ret;
+  int    ret;
 
   ret = fread(&d, sizeof(double), 1, fp);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -266,9 +266,9 @@ int fwriteLong(long long v, FILE *fp) {
 
 /*----------------------------------------*/
 float freadFloat(FILE *fp) {
-  char buf[4];
+  char  buf[4];
   float f;
-  int ret;
+  int   ret;
 
   ret = fread(buf, 4, 1, fp);
   // ret = fread(&f,4,1,fp); // old way
@@ -285,7 +285,7 @@ float freadFloat(FILE *fp) {
 }
 /*----------------------------------------*/
 int fwriteFloat(float f, FILE *fp) {
-  int ret;
+  int  ret;
   char buf[4];
   memmove(buf, &f, 4);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -312,16 +312,16 @@ int fwriteDouble(double d, FILE *fp) {
 */
 int znzread1(int *v, znzFile fp) {
   unsigned char c;
-  int ret;
+  int           ret;
 
   ret = znzread(&c, 1, 1, fp);
-  *v = c;
+  *v  = c;
   return (ret);
 }
 
 int znzread2(int *v, znzFile fp) {
   short s;
-  int ret;
+  int   ret;
 
   ret = znzread(&s, 2, 1, fp);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -333,7 +333,7 @@ int znzread2(int *v, znzFile fp) {
 
 int znzread3(int *v, znzFile fp) {
   unsigned int i = 0;
-  int ret;
+  int          ret;
 
   ret = znzread(&i, 3, 1, fp);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -345,7 +345,7 @@ int znzread3(int *v, znzFile fp) {
 
 int znzread4(float *v, znzFile fp) {
   float f;
-  int ret;
+  int   ret;
 
   ret = znzread(&f, 4, 1, fp);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -400,7 +400,7 @@ int znzwriteShort(short s, znzFile fp) {
 
 double znzreadDouble(znzFile fp) {
   double d;
-  int ret;
+  int    ret;
 
   ret = znzread(&d, sizeof(double), 1, fp);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -428,7 +428,7 @@ int znzreadInt(znzFile fp) {
 
 long long znzreadLong(znzFile fp) {
   long long i;
-  int ret;
+  int       ret;
   ret = znzread(&i, sizeof(long long), 1, fp);
   if (ret != 1 && Gdiag_no >= 0) {
     // see note above about reading mgz files
@@ -441,7 +441,7 @@ long long znzreadLong(znzFile fp) {
 }
 
 short znzreadShort(znzFile fp) {
-  int nread;
+  int   nread;
   short s;
 
   nread = znzread(&s, sizeof(short), 1, fp);
@@ -520,9 +520,9 @@ int znzwriteLong(long long v, znzFile fp) {
 
 /*----------------------------------------*/
 float znzreadFloat(znzFile fp) {
-  char buf[4];
+  char  buf[4];
   float f;
-  int ret;
+  int   ret;
 
   ret = znzread(buf, 4, 1, fp);
   // ret = fread(&f,4,1,fp); // old way
@@ -539,7 +539,7 @@ float znzreadFloat(znzFile fp) {
 }
 /*----------------------------------------*/
 int znzwriteFloat(float f, znzFile fp) {
-  int ret;
+  int  ret;
   char buf[4];
   memmove(buf, &f, 4);
 #if (BYTE_ORDER == LITTLE_ENDIAN)
@@ -564,19 +564,19 @@ int znzwriteDouble(double d, znzFile fp) {
   Author: Douglas Greve, 9/10/2001
   ------------------------------------------------------*/
 char *fio_dirname(const char *pathname) {
-  int l, n;
+  int   l, n;
   char *dirname;
 
   if (pathname == nullptr)
     return (nullptr);
 
   char *pname = strcpyalloc(pathname);
-  l = strlen(pname);
+  l           = strlen(pname);
 
   /* strip off leading forward slashes */
   while (l > 0 && pname[l - 1] == '/') {
     pname[l - 1] = '\0';
-    l = strlen(pname);
+    l            = strlen(pname);
   }
 
   if (l < 2) {
@@ -598,7 +598,7 @@ char *fio_dirname(const char *pathname) {
 
   if (n < 0) {
     /* no forward slash found */
-    dirname = (char *)calloc(2, sizeof(char));
+    dirname    = (char *)calloc(2, sizeof(char));
     dirname[0] = '.';
     free(pname);
     return (dirname);
@@ -606,7 +606,7 @@ char *fio_dirname(const char *pathname) {
 
   if (n == 0) {
     /* first forward slash is the first character */
-    dirname = (char *)calloc(2, sizeof(char));
+    dirname    = (char *)calloc(2, sizeof(char));
     dirname[0] = '/';
     free(pname);
     return (dirname);
@@ -623,13 +623,13 @@ char *fio_dirname(const char *pathname) {
   Author: Douglas Greve, 9/10/2001
   ------------------------------------------------------*/
 char *fio_basename(const char *pathname, const char *ext) {
-  int l, n, lext;
+  int   l, n, lext;
   char *basename, *tmp;
 
   if (pathname == nullptr)
     return (nullptr);
 
-  l = strlen(pathname);
+  l   = strlen(pathname);
   tmp = strcpyalloc(pathname); // keep a copy
 
   /* strip off the extension if it matches ext */
@@ -646,7 +646,7 @@ char *fio_basename(const char *pathname, const char *ext) {
   /* strip off leading forward slashes */
   while (l > 0 && tmp[l - 1] == '/') {
     tmp[l - 1] = '\0';
-    l = strlen(tmp);
+    l          = strlen(tmp);
   }
 
   if (l < 2) {
@@ -678,7 +678,7 @@ char *fio_basename(const char *pathname, const char *ext) {
   Author: Douglas Greve, 1/30/2002
   -------------------------------------------------------------*/
 char *fio_extension(const char *pathname) {
-  int lpathname, n, lext;
+  int   lpathname, n, lext;
   char *ext;
 
   if (pathname == nullptr)
@@ -687,7 +687,7 @@ char *fio_extension(const char *pathname) {
   lpathname = strlen(pathname);
 
   lext = 0;
-  n = lpathname - 1;
+  n    = lpathname - 1;
   while (n >= 0 && pathname[n] != '.') {
     n--;
     lext++;
@@ -715,7 +715,7 @@ char *fio_extension(const char *pathname) {
   ----------------------------------------------------- */
 int fio_DirIsWritable(const char *dirname, int fname) {
   FILE *fp;
-  char tmpstr[2000];
+  char  tmpstr[2000];
 
   if (fname != 0)
     sprintf(tmpstr, "%s.junk.54_-_sdfklj", dirname);
@@ -748,9 +748,9 @@ int fio_FileExistsReadable(const char *fname) {
   fio_IsDirectory(fname) - fname exists and is a directory
   -----------------------------------------------------*/
 int fio_IsDirectory(const char *fname) {
-  FILE *fp;
+  FILE *      fp;
   struct stat buf;
-  int err;
+  int         err;
 
   fp = fopen(fname, "r");
   if (fp == nullptr)
@@ -767,8 +767,8 @@ int fio_IsDirectory(const char *fname) {
   ------------------------------------------------------------*/
 int fio_NLines(const char *fname) {
   FILE *fp;
-  int nrows;
-  char tmpstring[4001];
+  int   nrows;
+  char  tmpstring[4001];
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {
@@ -786,9 +786,9 @@ int fio_NLines(const char *fname) {
 
 /*------------------------------------------------------------------------*/
 int fio_pushd(const char *dir) {
-  extern int fio_npushes;
+  extern int  fio_npushes;
   extern char fio_dirstack[FIO_NPUSHES_MAX][1000];
-  int err;
+  int         err;
 
   fio_npushes++;
   if (fio_npushes == FIO_NPUSHES_MAX) {
@@ -811,9 +811,9 @@ int fio_pushd(const char *dir) {
 }
 /*------------------------------------------------------------------------*/
 int fio_popd() {
-  extern int fio_npushes;
+  extern int  fio_npushes;
   extern char fio_dirstack[FIO_NPUSHES_MAX][1000];
-  int err;
+  int         err;
 
   if (fio_npushes == -1) {
     printf("ERROR: fio_popd: dir stack is empty\n");
@@ -838,12 +838,12 @@ int fio_popd() {
   -------------------------------------------------------------------*/
 char *fio_fullpath(const char *fname) {
   static char cwd[1000];
-  char *dirname, *basename;
-  char *fullpath;
-  int err;
+  char *      dirname, *basename;
+  char *      fullpath;
+  int         err;
 
   basename = fio_basename(fname, nullptr);
-  dirname = fio_dirname(fname);
+  dirname  = fio_dirname(fname);
 
   err = fio_pushd(dirname);
   if (err) {
@@ -867,13 +867,13 @@ char *fio_fullpath(const char *fname) {
 
 // Replicates mkdir -p
 int fio_mkdirp(const char *path, mode_t mode) {
-  int l, n, m, nthseg, err;
+  int  l, n, m, nthseg, err;
   char seg[2000], path2[2000];
   memset(path2, '\0', 2000);
 
   l = strlen(path);
 
-  n = 0;
+  n      = 0;
   nthseg = 0;
   while (n < l) {
     m = 0;
@@ -911,8 +911,8 @@ int fio_mkdirp(const char *path, mode_t mode) {
  */
 int fio_FileHasCarriageReturn(char *fname) {
   FILE *fp;
-  char c;
-  int n;
+  char  c;
+  int   n;
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {

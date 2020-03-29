@@ -24,23 +24,23 @@
  */
 
 #include "LayerPLabel.h"
-#include "MainWindow.h"
+#include "FSVolume.h"
+#include "LUTDataHolder.h"
 #include "LayerPropertyMRI.h"
+#include "MainWindow.h"
 #include "MyUtils.h"
 #include "MyVTKUtils.h"
-#include "FSVolume.h"
 #include "vtkFloatArray.h"
-#include "vtkPointData.h"
 #include "vtkImageMapToColors.h"
+#include "vtkImageMapper3D.h"
 #include "vtkLookupTable.h"
 #include "vtkMath.h"
-#include "LUTDataHolder.h"
+#include "vtkPointData.h"
+#include <QDebug>
+#include <QFileInfo>
+#include <vtkAbstractTransform.h>
 #include <vtkImageActor.h>
 #include <vtkImageReslice.h>
-#include <vtkAbstractTransform.h>
-#include "vtkImageMapper3D.h"
-#include <QFileInfo>
-#include <QDebug>
 
 LayerPLabel::LayerPLabel(LayerMRI *ref, QObject *parent)
     : LayerMRI(ref, parent), m_volumeTemp(NULL) {
@@ -71,13 +71,13 @@ bool LayerPLabel::LoadVolumeFiles() {
   m_volumeTemp = NULL;
 
   LUTDataHolder *luts = MainWindow::GetMainWindow()->GetLUTData();
-  COLOR_TABLE *ct = luts->GetColorTable(m_sLUT);
+  COLOR_TABLE *  ct   = luts->GetColorTable(m_sLUT);
   if (!ct) {
-    cerr << "Can not find look up table.\n";
+    std::cerr << "Can not find look up table.\n";
     return false;
   }
 
-  m_imageData = vtkSmartPointer<vtkImageData>::New();
+  m_imageData  = vtkSmartPointer<vtkImageData>::New();
   m_imageIndex = vtkSmartPointer<vtkImageData>::New();
   for (int i = 0; i < m_sFilenames.size(); i++) {
     QString fn = QFileInfo(m_sFilenames[i]).completeBaseName();
@@ -99,7 +99,8 @@ bool LayerPLabel::LoadVolumeFiles() {
             CTABentryNameToIndex(
                 QString(fn).replace("-", "_").toLatin1().data(), ct),
             &r, &g, &b) != 0) {
-      cerr << "Can not find index for color name " << qPrintable(fn) << "\n";
+      std::cerr << "Can not find index for color name " << qPrintable(fn)
+                << "\n";
       return false;
     }
 
@@ -108,8 +109,8 @@ bool LayerPLabel::LoadVolumeFiles() {
     if (!m_volumeTemp->MRIRead(m_sFilenames[i], m_sRegFilename.size() > 0
                                                     ? m_sRegFilename
                                                     : NULL)) {
-      cerr << "Can not load volume file " << qPrintable(m_sFilenames[i])
-           << "\n";
+      std::cerr << "Can not load volume file " << qPrintable(m_sFilenames[i])
+                << "\n";
       return false;
     }
 
@@ -137,20 +138,20 @@ bool LayerPLabel::LoadVolumeFiles() {
 #endif
     }
 
-    int *dim = m_imageData->GetDimensions();
-    char *ptr = (char *)m_imageData->GetScalarPointer();
-    int scalar_type = m_imageData->GetScalarType();
-    int n_frames = m_imageData->GetNumberOfScalarComponents();
+    int * dim         = m_imageData->GetDimensions();
+    char *ptr         = (char *)m_imageData->GetScalarPointer();
+    int   scalar_type = m_imageData->GetScalarType();
+    int   n_frames    = m_imageData->GetNumberOfScalarComponents();
 
-    int *index_dim = m_imageIndex->GetDimensions();
-    char *index_ptr = (char *)m_imageIndex->GetScalarPointer();
-    int index_scalar_type = m_imageIndex->GetScalarType();
-    int index_n_frames = m_imageIndex->GetNumberOfScalarComponents();
+    int * index_dim         = m_imageIndex->GetDimensions();
+    char *index_ptr         = (char *)m_imageIndex->GetScalarPointer();
+    int   index_scalar_type = m_imageIndex->GetScalarType();
+    int   index_n_frames    = m_imageIndex->GetNumberOfScalarComponents();
 
-    int *img_dim = imageData->GetDimensions();
-    char *img_ptr = (char *)imageData->GetScalarPointer();
-    int img_scalar_type = imageData->GetScalarType();
-    int img_n_frames = imageData->GetNumberOfScalarComponents();
+    int * img_dim         = imageData->GetDimensions();
+    char *img_ptr         = (char *)imageData->GetScalarPointer();
+    int   img_scalar_type = imageData->GetScalarType();
+    int   img_n_frames    = imageData->GetNumberOfScalarComponents();
     for (int ni = 0; ni < dim[0]; ni++) {
       for (int nj = 0; nj < dim[1]; nj++) {
         for (int nk = 0; nk < dim[2]; nk++) {
@@ -218,12 +219,12 @@ double LayerPLabel::GetVoxelValue(double *pos) {
   }
 
   vtkAbstractTransform *tr = mReslice[0]->GetResliceTransform();
-  double pos_new[3];
+  double                pos_new[3];
   tr->TransformPoint(pos, pos_new);
 
-  double *orig = m_imageData->GetOrigin();
+  double *orig  = m_imageData->GetOrigin();
   double *vsize = m_imageData->GetSpacing();
-  int *ext = m_imageData->GetExtent();
+  int *   ext   = m_imageData->GetExtent();
 
   int n[3];
   for (int i = 0; i < 3; i++) {
@@ -244,12 +245,12 @@ QString LayerPLabel::GetLabelName(double *pos) {
   }
 
   vtkAbstractTransform *tr = mReslice[0]->GetResliceTransform();
-  double pos_new[3];
+  double                pos_new[3];
   tr->TransformPoint(pos, pos_new);
 
-  double *orig = m_imageIndex->GetOrigin();
+  double *orig  = m_imageIndex->GetOrigin();
   double *vsize = m_imageIndex->GetSpacing();
-  int *ext = m_imageIndex->GetExtent();
+  int *   ext   = m_imageIndex->GetExtent();
 
   int n[3];
   for (int i = 0; i < 3; i++) {
@@ -263,7 +264,7 @@ QString LayerPLabel::GetLabelName(double *pos) {
   } else {
     nIndex = (int)m_imageIndex->GetScalarComponentAsDouble(n[0], n[1], n[2], 0);
     QString strg = m_sFilenames[nIndex].mid(m_sFilenamePrefix.length());
-    int n = strg.lastIndexOf('.');
+    int     n    = strg.lastIndexOf('.');
     if (n >= 0) {
       strg = strg.left(n);
     }

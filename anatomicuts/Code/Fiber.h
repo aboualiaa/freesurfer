@@ -1,19 +1,19 @@
 #ifndef _Fibers_h_
 #define _Fibers_h_
 
-#include <itkPoint.h>
 #include <itkDiffusionTensor3D.h>
+#include <itkPoint.h>
 //#include <itkTensor.h>
 #include <type_traits>
 
-#include <typeinfo>
 #include <ostream>
+#include <typeinfo>
 
 template <class T, unsigned int NDimension, class TTensorCoord = float>
 class Fiber {
 public:
-  typedef T ScalarType;
-  typedef Fiber Self;
+  typedef T                             ScalarType;
+  typedef Fiber                         Self;
   typedef Point<ScalarType, NDimension> PointType;
   // typedef Tensor<TTensorCoord, NDimension> TensorType;
   // typedef std::conditional<NDimension== 3,
@@ -22,7 +22,7 @@ public:
   //    typedef DiffusionTensor3D<TTensorCoord> TensorType;
   typedef itk::SymmetricSecondRankTensor<TTensorCoord, NDimension> TensorType;
   struct FiberPoint {
-    PointType Point;
+    PointType  Point;
     TensorType Tensor;
     FiberPoint() : Tensor(0.0) {
       for (unsigned int i = 0; i < NDimension; i++)
@@ -80,7 +80,7 @@ public:
   Self &operator=(const Self &f);
 
 protected:
-  inline double GetTensorScalarValue(const TensorType &tensor,
+  inline double GetTensorScalarValue(const TensorType &    tensor,
                                      const StatisticsType &type) const;
 
 private:

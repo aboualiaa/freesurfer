@@ -215,15 +215,15 @@ ENDHELP
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "fmriutils.h"
-#include "mri2.h"
-#include "version.h"
-#include "cmdargs.h"
 #include "matfile.h"
-#include "randomfields.h"
+#include "mri2.h"
+#include "mrisutils.h"
 #include "pdf.h"
+#include "randomfields.h"
+#include "version.h"
 
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
@@ -240,40 +240,40 @@ double EvalFWHM(MRI *vol, MRI *mask);
 MRI *MRIbinarize2(MRI *mri_src, MRI *mri_dst, double threshold, double low_val,
                   double hi_val);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_fwhm.c,v 1.35 2016/11/01 20:25:24 greve Exp $";
+static char vcid[]   = "$Id: mri_fwhm.c,v 1.35 2016/11/01 20:25:24 greve Exp $";
 const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+char *      cmdline, cwd[2000];
+int         debug         = 0;
+int         checkoptsonly = 0;
 struct utsname uts;
 
-char *inpath = nullptr;
-char *outpath = nullptr;
-char *sumfile = nullptr;
-char *datfile = nullptr;
-MRI *InVals = nullptr;
-MRI *InValsCopy = nullptr;
-int InValsType = MRI_VOLUME_TYPE_UNKNOWN;
+char *inpath     = nullptr;
+char *outpath    = nullptr;
+char *sumfile    = nullptr;
+char *datfile    = nullptr;
+MRI * InVals     = nullptr;
+MRI * InValsCopy = nullptr;
+int   InValsType = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *maskpath = nullptr;
-MRI *mask = nullptr;
-int maskinv = 0;
-double maskthresh = 0.5;
-char *outmaskpath = nullptr;
+char * maskpath    = nullptr;
+MRI *  mask        = nullptr;
+int    maskinv     = 0;
+double maskthresh  = 0.5;
+char * outmaskpath = nullptr;
 
 MRI *mritmp = nullptr;
 char tmpstr[2000];
 
-MRI *ar1;
+MRI * ar1;
 char *ar1path = nullptr;
 
 double infwhm = 0, ingstd = 0;
@@ -281,52 +281,53 @@ double infwhmc = 0, infwhmr = 0, infwhms = 0;
 double ingstdc = 0, ingstdr = 0, ingstds = 0;
 double byfwhm;
 double bygstd;
-char *tofwhmfile = nullptr;
+char * tofwhmfile = nullptr;
 double tofwhm, togstd, tofwhmact, tofwhmtol = 0.5;
-int tofwhmnitersmax = 20;
-int tofwhmniters;
-int synth = 0, nframes = -1;
-int SynthSeed = -1;
+int    tofwhmnitersmax = 20;
+int    tofwhmniters;
+int    synth = 0, nframes = -1;
+int    SynthSeed = -1;
 
-char *Xfile = nullptr;
-MATRIX *X = nullptr;
-int DetrendOrder = -1;
-int SaveDetrended = 0;
-int SaveUnmasked = 0;
-int automask = 0;
-double automaskthresh = .1;
-int nerode = 0;
-int SmoothOnly = 0;
-int nframesmin = 10;
-int DoSqr = 0; // take square of input before smoothing
-int DoMedian = 0, MedianWidth = 0;
+char *  Xfile          = nullptr;
+MATRIX *X              = nullptr;
+int     DetrendOrder   = -1;
+int     SaveDetrended  = 0;
+int     SaveUnmasked   = 0;
+int     automask       = 0;
+double  automaskthresh = .1;
+int     nerode         = 0;
+int     SmoothOnly     = 0;
+int     nframesmin     = 10;
+int     DoSqr          = 0; // take square of input before smoothing
+int     DoMedian = 0, MedianWidth = 0;
 
 char *sum2file = nullptr;
 char *arNfname = nullptr;
-int arNlags;
+int   arNlags;
 
 int DoAR2;
 
-double TR = 0.0;
-int SetTR = 0;
+double TR    = 0.0;
+int    SetTR = 0;
 
 MB2D *mb2drad = nullptr, *mb2dtan = nullptr;
-int DoSpatialINorm = 0;
+int   DoSpatialINorm = 0;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, n, Ntp, nsearch, nsearch2 = 0;
+  int    nargs, n, Ntp, nsearch, nsearch2 = 0;
   double fwhm = 0, nresels, voxelvolume, nvoxperresel, reselvolume;
   double car1mn, rar1mn, sar1mn, cfwhm, rfwhm, sfwhm, ftmp;
   double car2mn, rar2mn, sar2mn;
   double gmean, gstd, gmax;
-  FILE *fp;
+  FILE * fp;
 
   sprintf(tmpstr, "S%sER%sRONT%sOR", "URF", "_F", "DO");
   setenv(tmpstr, "1", 0);
 
   nargs = handleVersionOption(argc, argv, "mri_fwhm");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -457,18 +458,18 @@ int main(int argc, char *argv[]) {
       if (mb2drad) {
         printf("Applying radial motion blur slope=%lf\n", mb2drad->slope);
         mb2drad->DeltaD = InVals->xsize / 2.0;
-        mb2drad->c0 = InVals->width / 2.0;  // center of volume
-        mb2drad->r0 = InVals->height / 2.0; // center of volume
-        mritmp = MRImotionBlur2D(InVals, mb2drad, nullptr);
+        mb2drad->c0     = InVals->width / 2.0;  // center of volume
+        mb2drad->r0     = InVals->height / 2.0; // center of volume
+        mritmp          = MRImotionBlur2D(InVals, mb2drad, nullptr);
         MRIfree(&InVals);
         InVals = mritmp;
       }
       if (mb2dtan) {
         printf("Applying tangential motion blur slope=%lf\n", mb2dtan->slope);
         mb2dtan->DeltaD = InVals->xsize / 2.0;
-        mb2dtan->c0 = InVals->width / 2.0;  // center of volume
-        mb2dtan->r0 = InVals->height / 2.0; // center of volume
-        mritmp = MRImotionBlur2D(InVals, mb2dtan, nullptr);
+        mb2dtan->c0     = InVals->width / 2.0;  // center of volume
+        mb2dtan->r0     = InVals->height / 2.0; // center of volume
+        mritmp          = MRImotionBlur2D(InVals, mb2dtan, nullptr);
         MRIfree(&InVals);
         InVals = mritmp;
       }
@@ -502,7 +503,7 @@ int main(int argc, char *argv[]) {
   // Compute variance reduction factor -------------------
   if (sum2file) {
     ftmp = MRIsum2All(InVals);
-    fp = fopen(sum2file, "w");
+    fp   = fopen(sum2file, "w");
     if (fp == nullptr) {
       printf("ERROR: opening %s\n", sum2file);
       exit(1);
@@ -654,16 +655,16 @@ int main(int argc, char *argv[]) {
   cfwhm = RFar1ToFWHM(car1mn, InVals->xsize);
   rfwhm = RFar1ToFWHM(rar1mn, InVals->ysize);
   sfwhm = RFar1ToFWHM(sar1mn, InVals->zsize);
-  fwhm = sqrt((cfwhm * cfwhm + rfwhm * rfwhm + sfwhm * sfwhm) / 3.0);
+  fwhm  = sqrt((cfwhm * cfwhm + rfwhm * rfwhm + sfwhm * sfwhm) / 3.0);
   printf("ar1mn = (%lf,%lf,%lf)\n", car1mn, rar1mn, sar1mn);
   printf("colfwhm   = %lf\n", cfwhm);
   printf("rowfwhm   = %lf\n", rfwhm);
   printf("slicefwhm = %lf\n", sfwhm);
   printf("outfwhm = %lf\n", fwhm);
 
-  reselvolume = cfwhm * rfwhm * sfwhm;
+  reselvolume  = cfwhm * rfwhm * sfwhm;
   nvoxperresel = reselvolume / voxelvolume;
-  nresels = voxelvolume * nsearch / reselvolume;
+  nresels      = voxelvolume * nsearch / reselvolume;
   printf("reselvolume %lf\n", reselvolume);
   printf("nresels %lf\n", nresels);
   printf("nvoxperresel %lf\n", nvoxperresel);
@@ -724,7 +725,7 @@ int main(int argc, char *argv[]) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -779,12 +780,12 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--i")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      inpath = pargv[0];
+      inpath    = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      maskpath = pargv[0];
+      maskpath  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--mask-thresh")) {
       if (nargc < 1)
@@ -795,34 +796,34 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &automaskthresh);
-      automask = 1;
+      automask  = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--out-mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       outmaskpath = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--sum")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      sumfile = pargv[0];
+      sumfile   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--dat")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      datfile = pargv[0];
+      datfile   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--fwhm")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &infwhm);
-      ingstd = infwhm / sqrt(log(256.0));
+      ingstd    = infwhm / sqrt(log(256.0));
       nargsused = 1;
     } else if (!strcasecmp(option, "--mb-rad")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
-      mb2drad = (MB2D *)calloc(sizeof(MB2D), 1);
-      mb2drad->type = MB_RADIAL;
+      mb2drad         = (MB2D *)calloc(sizeof(MB2D), 1);
+      mb2drad->type   = MB_RADIAL;
       mb2drad->cutoff = 4; // number of stddevs to cut off kernel
       mb2drad->Interp = SAMPLE_NEAREST;
       sscanf(pargv[0], "%lf", &mb2drad->offset);
@@ -831,8 +832,8 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--mb-tan")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
-      mb2dtan = (MB2D *)calloc(sizeof(MB2D), 1);
-      mb2dtan->type = MB_TANGENTIAL;
+      mb2dtan         = (MB2D *)calloc(sizeof(MB2D), 1);
+      mb2dtan->type   = MB_TANGENTIAL;
       mb2dtan->cutoff = 4;
       mb2dtan->Interp = SAMPLE_NEAREST;
       sscanf(pargv[0], "%lf", &mb2dtan->offset);
@@ -842,31 +843,31 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &MedianWidth);
-      DoMedian = 1;
+      DoMedian  = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--fwhmc")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &infwhmc);
-      ingstdc = infwhmc / sqrt(log(256.0));
+      ingstdc   = infwhmc / sqrt(log(256.0));
       nargsused = 1;
     } else if (!strcasecmp(option, "--fwhmr")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &infwhmr);
-      ingstdr = infwhmr / sqrt(log(256.0));
+      ingstdr   = infwhmr / sqrt(log(256.0));
       nargsused = 1;
     } else if (!strcasecmp(option, "--fwhms")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &infwhms);
-      ingstds = infwhms / sqrt(log(256.0));
+      ingstds   = infwhms / sqrt(log(256.0));
       nargsused = 1;
     } else if (!strcasecmp(option, "--gstd")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &ingstd);
-      infwhm = ingstd * sqrt(log(256.0));
+      infwhm    = ingstd * sqrt(log(256.0));
       nargsused = 1;
     } else if (!strcasecmp(option, "--to-fwhm")) {
       if (nargc < 1)
@@ -877,7 +878,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &togstd);
-      tofwhm = togstd * sqrt(log(256.0));
+      tofwhm    = togstd * sqrt(log(256.0));
       nargsused = 1;
     } else if (!strcasecmp(option, "--to-fwhm-tol")) {
       if (nargc < 1)
@@ -893,7 +894,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       tofwhmfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--nerode")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -908,40 +909,40 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &nframes);
-      synth = 1;
+      synth     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--seed")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &SynthSeed);
-      synth = 1;
+      synth     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--tr")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &TR);
-      SetTR = 1;
+      SetTR     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      outpath = pargv[0];
+      outpath   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--ar1")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      ar1path = pargv[0];
+      ar1path   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--arN")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
       sscanf(pargv[0], "%d", &arNlags);
-      arNfname = pargv[1];
+      arNfname  = pargv[1];
       nargsused = 2;
     } else if (!strcmp(option, "--sum2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      sum2file = pargv[0];
+      sum2file  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--X")) {
       if (nargc < 1)
@@ -968,7 +969,7 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &N_Zero_Pad_Input);
       InValsType = MRI_ANALYZE_FILE;
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--threads") ||
                !strcasecmp(option, "--nthreads")) {
       if (nargc < 1)
@@ -1349,15 +1350,15 @@ static void dump_options(FILE *fp) {
   -------------------------------------------------------------------------------*/
 MRI *MRIbinarize2(MRI *mri_src, MRI *mri_dst, double threshold, double low_val,
                   double hi_val) {
-  int width, height, depth, x, y, z, f;
+  int    width, height, depth, x, y, z, f;
   double val;
 
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, nullptr);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   for (f = 0; f < mri_src->nframes; f++) {
     for (z = 0; z < depth; z++) {
@@ -1379,15 +1380,15 @@ MRI *MRIbinarize2(MRI *mri_src, MRI *mri_dst, double threshold, double low_val,
 
 /*------------------------------------------------------------------------*/
 double EvalFWHM(MRI *vol, MRI *mask) {
-  double car1mn, rar1mn, sar1mn;
-  double cfwhm, rfwhm, sfwhm, fwhm;
+  double      car1mn, rar1mn, sar1mn;
+  double      cfwhm, rfwhm, sfwhm, fwhm;
   static MRI *ar1 = nullptr;
-  ar1 = fMRIspatialAR1(vol, mask, ar1);
+  ar1             = fMRIspatialAR1(vol, mask, ar1);
   fMRIspatialAR1Mean(ar1, mask, &car1mn, &rar1mn, &sar1mn);
   cfwhm = RFar1ToFWHM(car1mn, vol->xsize);
   rfwhm = RFar1ToFWHM(rar1mn, vol->ysize);
   sfwhm = RFar1ToFWHM(sar1mn, vol->zsize);
-  fwhm = sqrt((cfwhm * cfwhm + rfwhm * rfwhm + sfwhm * sfwhm) / 3.0);
+  fwhm  = sqrt((cfwhm * cfwhm + rfwhm * rfwhm + sfwhm * sfwhm) / 3.0);
   return (fwhm);
 }
 /*------------------------------------------------------------------------*/
@@ -1396,11 +1397,11 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
                                double *pToFWHMActual, int *niters,
                                MRI *outvol) {
   double SrcFWHM, ByGStd;
-  MRI *volsm;
+  MRI *  volsm;
   double ya, yb, yc, xa, xb, xc, s1, s2;
   double xn, yn;
   double C, R, err;
-  int nth;
+  int    nth;
 
   C = (3.0 - sqrt(5.0)) / 2.0; // golden mean
   R = 1 - C;
@@ -1422,9 +1423,9 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
 
   // Check whether we are close enough already
   if (fabs(SrcFWHM - ToFWHM) < tol) {
-    *pByFWHM = 0.0;
+    *pByFWHM       = 0.0;
     *pToFWHMActual = SrcFWHM;
-    outvol = MRIcopy(invol, outvol);
+    outvol         = MRIcopy(invol, outvol);
     return (outvol);
   }
 
@@ -1434,7 +1435,7 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
 
   // Second point in the bracket
   (*niters)++;
-  xb = sqrt(ToFWHM * ToFWHM - SrcFWHM * SrcFWHM); // power law
+  xb     = sqrt(ToFWHM * ToFWHM - SrcFWHM * SrcFWHM); // power law
   ByGStd = xb / sqrt(log(256.0));
   printf("Trying smoothing by fwhm %g  ", xb);
   fflush(stdout);
@@ -1443,9 +1444,9 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
   printf("results in actual fwhm of %g\n", yb);
   // Check whether we are close enough now
   if (fabs(yb - ToFWHM) < tol) {
-    *pByFWHM = xb;
+    *pByFWHM       = xb;
     *pToFWHMActual = yb;
-    outvol = MRIcopy(volsm, outvol);
+    outvol         = MRIcopy(volsm, outvol);
     MRIfree(&volsm);
     return (outvol);
   }
@@ -1454,7 +1455,7 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
   // it needs to be far enough to bracket the min, but too far
   // and we end up doing to many evaluations.
   (*niters)++;
-  xc = xb + (xb - xa); //
+  xc     = xb + (xb - xa); //
   ByGStd = xc / sqrt(log(256.0));
   printf("Trying smoothing by fwhm %g  ", xc);
   fflush(stdout);
@@ -1463,9 +1464,9 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
   printf("results in actual fwhm of %g\n", yc);
   // Check whether we are close enough now
   if (fabs(yc - ToFWHM) < tol) {
-    *pByFWHM = xc;
+    *pByFWHM       = xc;
     *pToFWHMActual = yc;
-    outvol = MRIcopy(volsm, outvol);
+    outvol         = MRIcopy(volsm, outvol);
     MRIfree(&volsm);
     return (outvol);
   }
@@ -1513,7 +1514,7 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
         // b and c stay the same
       }
     } else { // s2 is bigger
-      xn = xb + C * s2;
+      xn     = xb + C * s2;
       ByGStd = xn / sqrt(log(256.0));
       printf("   Trying smoothing by fwhm %g  ", xn);
       fflush(stdout);

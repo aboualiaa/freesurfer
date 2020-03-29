@@ -31,9 +31,8 @@
 #include "MRISOBBTree.h"
 #include "MRISdistancefield.h"
 
-using Pointd = Math::Point<int>;
+using Pointd  = Math::Point<int>;
 using Point_f = Math::Point<float>;
-using namespace std;
 
 /* This function finds the closest distance of voxels with the distance d of
  * volume mri_dist to the surface mris.
@@ -67,18 +66,18 @@ MRI *MRISsignedFixedDistanceTransform(MRI_SURFACE *mris, MRI *mri_dist,
       for (int k = 0; k < mri_dist->depth; k++) {
         if (MRIIvox(mri_visited, i, j, k))
           continue;
-        int res = OBBTree->PointInclusionTest(i, j, k);
-        Pointd *pt = new Pointd;
-        pt->v[0] = i;
-        pt->v[1] = j;
-        pt->v[2] = k;
+        int     res = OBBTree->PointInclusionTest(i, j, k);
+        Pointd *pt  = new Pointd;
+        pt->v[0]    = i;
+        pt->v[1]    = j;
+        pt->v[2]    = k;
         ptsqueue.push(pt);
 
         // First serve all the points in the queue before going to the next
         // voxel
         while (!ptsqueue.empty()) {
           // serve the front and pop it
-          Pointd *p = ptsqueue.front();
+          Pointd *  p = ptsqueue.front();
           const int x = p->v[0];
           const int y = p->v[1];
           const int z = p->v[2];
@@ -88,60 +87,60 @@ MRI *MRISsignedFixedDistanceTransform(MRI_SURFACE *mris, MRI *mri_dist,
           if (MRIIvox(mri_visited, x, y, z))
             continue;
           MRIIvox(mri_visited, x, y, z) = res;
-          const float dist = MRIFvox(mri_dist, x, y, z);
-          MRIFvox(mri_dist, x, y, z) = dist * res;
+          const float dist              = MRIFvox(mri_dist, x, y, z);
+          MRIFvox(mri_dist, x, y, z)    = dist * res;
 
           // mark its 6 neighbors if distance > 1 ( triangle inequality )
           if (dist > 1) {
             // left neighbor in x
             if (x > 0 && !MRIIvox(mri_visited, x - 1, y, z)) {
               Pointd *ptemp = new Pointd;
-              ptemp->v[0] = x - 1;
-              ptemp->v[1] = y;
-              ptemp->v[2] = z;
+              ptemp->v[0]   = x - 1;
+              ptemp->v[1]   = y;
+              ptemp->v[2]   = z;
               ptsqueue.push(ptemp);
             }
             // bottom neighbor in y
             if (y > 0 && !MRIIvox(mri_visited, x, y - 1, z)) {
               Pointd *ptemp = new Pointd;
-              ptemp->v[0] = x;
-              ptemp->v[1] = y - 1;
-              ptemp->v[2] = z;
+              ptemp->v[0]   = x;
+              ptemp->v[1]   = y - 1;
+              ptemp->v[2]   = z;
               ptsqueue.push(ptemp);
             }
             // front neighbor in z
             if (z > 0 && !MRIIvox(mri_visited, x, y, z - 1)) {
               Pointd *ptemp = new Pointd;
-              ptemp->v[0] = x;
-              ptemp->v[1] = y;
-              ptemp->v[2] = z - 1;
+              ptemp->v[0]   = x;
+              ptemp->v[1]   = y;
+              ptemp->v[2]   = z - 1;
               ptsqueue.push(ptemp);
             }
             // right neighbor in x
             if (x < mri_visited->width - 1 &&
                 !MRIIvox(mri_visited, x + 1, y, z)) {
               Pointd *ptemp = new Pointd;
-              ptemp->v[0] = x + 1;
-              ptemp->v[1] = y;
-              ptemp->v[2] = z;
+              ptemp->v[0]   = x + 1;
+              ptemp->v[1]   = y;
+              ptemp->v[2]   = z;
               ptsqueue.push(ptemp);
             }
             // top neighbor in y
             if (y < mri_visited->height - 1 &&
                 !MRIIvox(mri_visited, x, y + 1, z)) {
               Pointd *ptemp = new Pointd;
-              ptemp->v[0] = x;
-              ptemp->v[1] = y + 1;
-              ptemp->v[2] = z;
+              ptemp->v[0]   = x;
+              ptemp->v[1]   = y + 1;
+              ptemp->v[2]   = z;
               ptsqueue.push(ptemp);
             }
             // back neighbor in z
             if (z < mri_visited->depth - 1 &&
                 !MRIIvox(mri_visited, x, y, z + 1)) {
               Pointd *ptemp = new Pointd;
-              ptemp->v[0] = x;
-              ptemp->v[1] = y;
-              ptemp->v[2] = z + 1;
+              ptemp->v[0]   = x;
+              ptemp->v[1]   = y;
+              ptemp->v[2]   = z + 1;
               ptsqueue.push(ptemp);
             }
           }
@@ -167,7 +166,7 @@ MRI *MRISfillInterior2(MRI_SURFACE *mris, MRI *mri_interior) {
   MRI *_mridist, *mri_out;
 
   _mridist = MRIcloneDifferentType(mri_interior, MRI_FLOAT);
-  mri_out = MRIclone(mri_interior, nullptr);
+  mri_out  = MRIclone(mri_interior, nullptr);
 
   MRISsignedFixedDistanceTransform(mris, _mridist, 3.0);
 

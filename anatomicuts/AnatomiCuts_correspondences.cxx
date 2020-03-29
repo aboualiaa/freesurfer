@@ -1,61 +1,61 @@
-#include <iostream>
-#include "itkImage.h"
-#include <map>
-#include <vnl/vnl_matrix.h>
 #include "itkDefaultStaticMeshTraits.h"
+#include "itkImage.h"
 #include "itkMesh.h"
+#include <iostream>
+#include <map>
 #include <vnl/vnl_hungarian_algorithm.h>
+#include <vnl/vnl_matrix.h>
 
-#include <limits>
 #include "itkVector.h"
+#include <limits>
 
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "VTKPolyDataToPolylineMeshFilter.h"
+#include "GetPot.h"
 #include "HierarchicalClusteringPruner.h"
 #include "LabelPerPointVariableLengthVector.h"
 #include "LabelsEntropyAndIntersectionMembershipFunction.h"
-#include "GetPot.h"
+#include "PolylineMeshToVTKPolyDataFilter.h"
+#include "VTKPolyDataToPolylineMeshFilter.h"
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
 #include <string>
 //#include <ITK-5.0/vcl_compiler.h>
-#include "vtkSplineFilter.h"
 #include "OrientationPlanesFromParcellationFilter.h"
+#include "vtkSplineFilter.h"
 
 #include "colortab.h"
 #include "fsenv.h"
 #define vcl_vector std::vector
 
-using PointDataType = std::vector<int>;
-using PixelType = float;
-const unsigned int PointDimension = 3;
+using PointDataType                        = std::vector<int>;
+using PixelType                            = float;
+const unsigned int PointDimension          = 3;
 const unsigned int MaxTopologicalDimension = 3;
-using CoordinateType = double;
-using InterpolationWeightType = double;
+using CoordinateType                       = double;
+using InterpolationWeightType              = double;
 using MeshTraits =
     itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                  MaxTopologicalDimension, CoordinateType,
                                  InterpolationWeightType, PointDataType>;
-using MeshType = itk::Mesh<PixelType, PointDimension, MeshTraits>;
-using BasicMeshType = itk::Mesh<PixelType, PointDimension>;
-using CellType = MeshType::CellType;
-using CellAutoPointer = CellType::CellAutoPointer;
-using VTKConverterType = PolylineMeshToVTKPolyDataFilter<MeshType>;
+using MeshType          = itk::Mesh<PixelType, PointDimension, MeshTraits>;
+using BasicMeshType     = itk::Mesh<PixelType, PointDimension>;
+using CellType          = MeshType::CellType;
+using CellAutoPointer   = CellType::CellAutoPointer;
+using VTKConverterType  = PolylineMeshToVTKPolyDataFilter<MeshType>;
 using MeshConverterType = VTKPolyDataToPolylineMeshFilter<BasicMeshType>;
-using ImageType = itk::Image<double, 3>;
-using IndexType = ImageType::IndexType;
+using ImageType         = itk::Image<double, 3>;
+using IndexType         = ImageType::IndexType;
 using MeasurementVectorType =
     LabelPerPointVariableLengthVector<float, MeshType>;
 using MembershipFunctionType =
     LabelsEntropyAndIntersectionMembershipFunction<MeasurementVectorType>;
 
-static std::string LEFT = "Left";
-static std::string RIGHT = "Right";
-static std::string LEFT2 = "lh";
+static std::string LEFT   = "Left";
+static std::string RIGHT  = "Right";
+static std::string LEFT2  = "lh";
 static std::string RIGHT2 = "rh";
 
 COLOR_TABLE *ct = nullptr;
@@ -64,13 +64,13 @@ int SymmetricLabelId(int id) {
 
   if (ct == nullptr) {
     FSENV *fsenv = FSENVgetenv();
-    char tmpstr[2000];
+    char   tmpstr[2000];
     sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
     ct = CTABreadASCII(tmpstr);
   }
 
-  std::string str = std::string(ct->entries[id]->name);
-  int symId = id;
+  std::string str   = std::string(ct->entries[id]->name);
+  int         symId = id;
   if (str.find(LEFT) != std::string::npos) {
     char *hola =
         (char *)str.replace(str.find(LEFT), LEFT.length(), RIGHT).c_str();
@@ -103,7 +103,7 @@ BasicMeshToMesh(std::vector<BasicMeshType::Pointer> basicMeshes,
                 ImageType::Pointer segmentation, float interHemiThreshold) {
   if (ct == NULL) {
     FSENV *fsenv = FSENVgetenv();
-    char tmpstr[2000];
+    char   tmpstr[2000];
     sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
     ct = CTABreadASCII(tmpstr);
   }
@@ -111,24 +111,24 @@ BasicMeshToMesh(std::vector<BasicMeshType::Pointer> basicMeshes,
   std::vector<MeshType::Pointer> meshes;
   for (unsigned int i = 0; i < basicMeshes.size(); i++) {
     typedef BasicMeshType::CellsContainer::ConstIterator CellIterator;
-    int globalIndex = 0;
-    int indexCell = 0;
+    int                                                  globalIndex = 0;
+    int                                                  indexCell   = 0;
     // typedef MeshType::PointIdentifier PointIdentifier;
     typedef MeshType::PointDataContainer PointDataContainerType;
-    BasicMeshType::Pointer basicMesh = basicMeshes[i];
-    MeshType::Pointer mesh = MeshType::New();
-    int out = 0;
+    BasicMeshType::Pointer               basicMesh = basicMeshes[i];
+    MeshType::Pointer                    mesh      = MeshType::New();
+    int                                  out       = 0;
     for (CellIterator cellIt = basicMesh->GetCells()->Begin();
          cellIt != basicMesh->GetCells()->End(); cellIt++) {
       PointDataContainerType::Pointer dataContainer =
           PointDataContainerType::New();
-      int withinIndex = 0;
-      MeshType::CellAutoPointer line;
+      int                                        withinIndex = 0;
+      MeshType::CellAutoPointer                  line;
       BasicMeshType::CellTraits::PointIdIterator pointIdIt =
           cellIt.Value()->PointIdsBegin();
 
-      BasicMeshType::PointType pt = 0;
-      int left = 0, right = 0;
+      BasicMeshType::PointType pt   = 0;
+      int                      left = 0, right = 0;
 
       if (interHemiThreshold > 0) {
         for (pointIdIt = cellIt.Value()->PointIdsBegin();
@@ -194,14 +194,14 @@ std::vector<MeasurementVectorType> SetDirectionalNeighbors(
     // MeshType::CellTraits::PointIdIterator  pointIdEnd
     // =meshes[i]->GetNumberOfPoints();
     int pointIdEnd = meshes[i]->GetNumberOfPoints();
-    int numPoints = meshes[i]->GetNumberOfPoints();
+    int numPoints  = meshes[i]->GetNumberOfPoints();
     if (clusterCentroidsIndex[i] > -1) {
 
       CellAutoPointer cell1;
       meshes[i]->GetCell(clusterCentroidsIndex[i], cell1);
-      pointId = *cell1->PointIdsBegin();
+      pointId    = *cell1->PointIdsBegin();
       pointIdEnd = *cell1->PointIdsEnd();
-      numPoints = pointIdEnd - pointId;
+      numPoints  = pointIdEnd - pointId;
     }
 
     for (; pointId != pointIdEnd; pointId++) {
@@ -210,8 +210,8 @@ std::vector<MeasurementVectorType> SetDirectionalNeighbors(
       IndexType index;
       if (segmentation->TransformPhysicalPointToIndex(pt1, index)) {
         PointDataType *pointData = new PointDataType();
-        PixelType labelOrig = segmentation->GetPixel(index);
-        PixelType label = labelOrig;
+        PixelType      labelOrig = segmentation->GetPixel(index);
+        PixelType      label     = labelOrig;
         if (symmetry) {
           label = SymmetricLabelId(labelOrig);
           //					std::cout << " labeled " <<
@@ -222,9 +222,9 @@ std::vector<MeasurementVectorType> SetDirectionalNeighbors(
         pointData->push_back(label);
 
         for (unsigned int k = 0; k < direcciones.size(); k++) {
-          PixelType vecino = labelOrig;
+          PixelType                      vecino          = labelOrig;
           itk::ContinuousIndex<float, 3> continuousIndex = index;
-          MeshType::PointType point = pt1;
+          MeshType::PointType            point           = pt1;
           // std::cout << direcciones[k] << std::endl;
           IndexType roundedIndex;
           while (vecino == labelOrig) {
@@ -270,7 +270,7 @@ std::vector<int> GetCentroidIndices(std::vector<MeshType::Pointer> meshes) {
       cell_i++;
       MeshType::CellTraits::PointIdIterator pointIdIt =
           cells.Value()->PointIdsBegin();
-      double dist = 0.0;
+      double dist     = 0.0;
       double dist_inv = 0.0;
       for (unsigned int j = 0; pointIdIt != cells.Value()->PointIdsEnd();
            pointIdIt++, j++) {
@@ -297,13 +297,13 @@ std::vector<int> GetCentroidIndices(std::vector<MeshType::Pointer> meshes) {
       }
     }
     // clusterCentroids.push_back(avgPoints);
-    cells = meshes[i]->GetCells()->Begin();
+    cells          = meshes[i]->GetCells()->Begin();
     float min_dist = std::numeric_limits<float>::max();
-    cell_i = 0;
+    cell_i         = 0;
     for (; cells != meshes[i]->GetCells()->End(); cells++) {
       MeshType::CellTraits::PointIdIterator pointIdIt =
           cells.Value()->PointIdsBegin();
-      double dist = 0.0;
+      double dist     = 0.0;
       double dist_inv = 0.0;
       for (unsigned int j = 0; pointIdIt != cells.Value()->PointIdsEnd();
            pointIdIt++, j++) {
@@ -314,11 +314,11 @@ std::vector<int> GetCentroidIndices(std::vector<MeshType::Pointer> meshes) {
         dist_inv += avgPoints[avgPoints.size() - j - 1].EuclideanDistanceTo(pt);
       }
       if (dist < min_dist) {
-        min_dist = dist;
+        min_dist                 = dist;
         clusterCentroidsIndex[i] = cell_i;
       }
       if (dist_inv < min_dist) {
-        min_dist = dist_inv;
+        min_dist                 = dist_inv;
         clusterCentroidsIndex[i] = cell_i;
       }
     }
@@ -327,7 +327,7 @@ std::vector<int> GetCentroidIndices(std::vector<MeshType::Pointer> meshes) {
 }
 void GetMeshes(GetPot cl, const char *find1, const char *find2,
                std::vector<BasicMeshType::Pointer> *meshes,
-               std::vector<std::string> *files) {
+               std::vector<std::string> *           files) {
   int maxK = cl.follow(0, 2, find1, find2);
 
   int k = 0;
@@ -391,7 +391,7 @@ FixSampleClusters(std::vector<vtkSmartPointer<vtkPolyData>> polydatas) {
 int main(int narg, char *arg[]) {
   try {
     enum { Dimension = 3 };
-    typedef double PixelType;
+    typedef double                           PixelType;
     typedef itk::Image<PixelType, Dimension> ImageType;
 
     GetPot cl(narg, const_cast<char **>(arg));
@@ -405,15 +405,15 @@ int main(int narg, char *arg[]) {
                 << std::endl;
       return -1;
     }
-    int numClusters = cl.follow(0, "-c");
-    const char *segFile = cl.follow("", "-s1");
+    int                                     numClusters = cl.follow(0, "-c");
+    const char *                            segFile     = cl.follow("", "-s1");
     typedef itk::ImageFileReader<ImageType> ImageReaderType;
-    ImageReaderType::Pointer readerS = ImageReaderType::New();
+    ImageReaderType::Pointer                readerS = ImageReaderType::New();
     readerS->SetFileName(segFile);
     readerS->Update();
     ImageType::Pointer segmentation1 = readerS->GetOutput();
 
-    segFile = cl.follow("", "-s2");
+    segFile    = cl.follow("", "-s2");
     float symm = cl.follow(0.0, "-sym");
     std::cout << "Symmetry " << symm << std::endl;
     bool bb = cl.search("-bb");
@@ -466,7 +466,7 @@ int main(int narg, char *arg[]) {
         std::vector<int>(meshes2.size(), -1);
 
     std::map<long long, long long> correspondances;
-    vnl_matrix<double> distances(meshes1.size(), meshes2.size());
+    vnl_matrix<double>             distances(meshes1.size(), meshes2.size());
     if (cl.search(1, "-euclid")) {
       std::vector<int> clusterCentroidsIndex1 = GetCentroidIndices(meshes1);
       std::vector<int> clusterCentroidsIndex2 = GetCentroidIndices(meshes2);
@@ -480,8 +480,8 @@ int main(int narg, char *arg[]) {
           CellAutoPointer cell2;
           meshes2[j]->GetCell(clusterCentroidsIndex2[j], cell2);
 
-          double dist = 0.0;
-          double dist_inv = 0.0;
+          double                                dist     = 0.0;
+          double                                dist_inv = 0.0;
           MeshType::CellTraits::PointIdIterator pointIdIt1 =
               cell1->PointIdsBegin();
           MeshType::CellTraits::PointIdIterator pointIdIt2 =
@@ -502,7 +502,7 @@ int main(int narg, char *arg[]) {
             dist_inv += pt1.EuclideanDistanceTo(pt2_inv);
           }
           if (dist < dist_min || dist_inv < dist_min) {
-            dist_min = std::min(dist, dist_inv);
+            dist_min           = std::min(dist, dist_inv);
             correspondances[i] = j;
           }
           distances(i, j) = std::min(dist, dist_inv);
@@ -542,7 +542,7 @@ int main(int narg, char *arg[]) {
       // typedef ImageType::IndexType IndexType;
       std::vector<itk::Vector<float>> direcciones1;
       std::vector<itk::Vector<float>> direcciones2;
-      int possibles[3] = {0, 1, -1};
+      int                             possibles[3] = {0, 1, -1};
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int k = 0; k < 3; k++) {
           for (unsigned int j = 0; j < 3; j++) {
@@ -607,7 +607,7 @@ int main(int narg, char *arg[]) {
           float aff = function->Evaluate(&measurements1[i], &measurements2[j]);
           //				std::cout << aff << std::endl;
           if (aff > aff_max) {
-            aff_max = aff;
+            aff_max            = aff;
             correspondances[i] = j;
           }
           // distances(i,j)= (1-aff)*100;

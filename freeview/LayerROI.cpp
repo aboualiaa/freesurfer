@@ -24,32 +24,32 @@
  */
 
 #include "LayerROI.h"
-#include "vtkRenderer.h"
-#include "vtkImageReslice.h"
-#include "vtkImageActor.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkSmartPointer.h"
-#include "vtkMatrix4x4.h"
-#include "vtkImageMapToColors.h"
-#include "vtkTransform.h"
-#include "vtkPlaneSource.h"
-#include "vtkTexture.h"
-#include "vtkActor.h"
-#include "vtkRGBAColorTransferFunction.h"
-#include "vtkLookupTable.h"
-#include "vtkProperty.h"
-#include "vtkImageMapper3D.h"
-#include "vtkImageDilateErode3D.h"
-#include "vtkImageOpenClose3D.h"
-#include "LayerPropertyROI.h"
-#include "LayerMRI.h"
 #include "FSLabel.h"
 #include "FSSurface.h"
-#include <QDebug>
-#include "LayerSurface.h"
 #include "FSVolume.h"
-#include "vtkImageThreshold.h"
+#include "LayerMRI.h"
+#include "LayerPropertyROI.h"
+#include "LayerSurface.h"
 #include "MyVTKUtils.h"
+#include "vtkActor.h"
+#include "vtkImageActor.h"
+#include "vtkImageDilateErode3D.h"
+#include "vtkImageMapToColors.h"
+#include "vtkImageMapper3D.h"
+#include "vtkImageOpenClose3D.h"
+#include "vtkImageReslice.h"
+#include "vtkImageThreshold.h"
+#include "vtkLookupTable.h"
+#include "vtkMatrix4x4.h"
+#include "vtkPlaneSource.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkRGBAColorTransferFunction.h"
+#include "vtkRenderer.h"
+#include "vtkSmartPointer.h"
+#include "vtkTexture.h"
+#include "vtkTransform.h"
+#include <QDebug>
 
 LayerROI::LayerROI(LayerMRI *layerMRI, QObject *parent)
     : LayerVolumeBase(parent) {
@@ -61,8 +61,8 @@ LayerROI::LayerROI(LayerMRI *layerMRI, QObject *parent)
   m_label = new FSLabel(this, layerMRI->GetSourceVolume());
   for (int i = 0; i < 3; i++) {
     m_dSlicePosition[i] = 0;
-    m_sliceActor2D[i] = vtkImageActor::New();
-    m_sliceActor3D[i] = vtkImageActor::New();
+    m_sliceActor2D[i]   = vtkImageActor::New();
+    m_sliceActor3D[i]   = vtkImageActor::New();
     m_sliceActor2D[i]->InterpolateOff();
     m_sliceActor3D[i]->InterpolateOff();
 #if VTK_MAJOR_VERSION > 5
@@ -74,8 +74,8 @@ LayerROI::LayerROI(LayerMRI *layerMRI, QObject *parent)
   mProperty = new LayerPropertyROI(this);
 
   m_layerMappedSurface = NULL;
-  m_layerSource = layerMRI;
-  m_imageDataRef = layerMRI->GetImageData();
+  m_layerSource        = layerMRI;
+  m_imageDataRef       = layerMRI->GetImageData();
   if (m_layerSource) {
     SetWorldOrigin(m_layerSource->GetWorldOrigin());
     SetWorldVoxelSize(m_layerSource->GetWorldVoxelSize());
@@ -97,8 +97,8 @@ LayerROI::LayerROI(LayerMRI *layerMRI, QObject *parent)
     m_imageData->SetNumberOfScalarComponents(1);
     m_imageData->AllocateScalars();
 #endif
-    float *ptr = (float *)m_imageData->GetScalarPointer();
-    int *dim = m_imageData->GetDimensions();
+    float *ptr   = (float *)m_imageData->GetScalarPointer();
+    int *  dim   = m_imageData->GetDimensions();
     size_t nsize = ((size_t)dim[0]) * dim[1] * dim[2];
     for (size_t i = 0; i < nsize; i++) {
       ptr[i] = -1;
@@ -370,9 +370,9 @@ void LayerROI::GetStats(int nPlane, int *count_out, float *area_out,
     return;
   }
 
-  int *dim = m_imageData->GetDimensions();
+  int *   dim    = m_imageData->GetDimensions();
   double *origin = m_imageData->GetOrigin();
-  double vs[3];
+  double  vs[3];
   m_imageData->GetSpacing(vs);
   float *ptr = (float *)m_imageData->GetScalarPointer();
 
@@ -381,14 +381,10 @@ void LayerROI::GetStats(int nPlane, int *count_out, float *area_out,
   double val_range[2];
   GetProperty()->GetValueRange(val_range);
   QVector<float> coords;
-  for ( int i = 0; i < dim[0]; i++ )
-  {
-    for ( int j = 0; j < dim[1]; j++ )
-    {
-      for ( int k = 0; k < dim[2]; k++ )
-      {
-        if ( ptr[k*dim[0]*dim[1]+j*dim[0]+i] >= val_range[0] )
-        {
+  for (int i = 0; i < dim[0]; i++) {
+    for (int j = 0; j < dim[1]; j++) {
+      for (int k = 0; k < dim[2]; k++) {
+        if (ptr[k * dim[0] * dim[1] + j * dim[0] + i] >= val_range[0]) {
           cnt++;
           //          indices << i << j << k;
           coords << i * vs[0] + origin[0] << j * vs[1] + origin[1]
@@ -400,7 +396,7 @@ void LayerROI::GetStats(int nPlane, int *count_out, float *area_out,
   //  vs[nPlane] = 1.0;
 
   *count_out = cnt;
-  *area_out = cnt * vs[0] * vs[1] * vs[2];
+  *area_out  = cnt * vs[0] * vs[1] * vs[2];
 
   if (underlying_mri)
     underlying_mri->GetVoxelStatsByTargetRAS(coords, mean_out, sd_out);
@@ -441,9 +437,9 @@ void LayerROI::OnUpdateLabelRequested() {
 }
 
 void LayerROI::MapLabelColorData(unsigned char *colordata, int nVertexCount) {
-  double *rgbColor = GetProperty()->GetColor();
-  double dThreshold = GetProperty()->GetThreshold();
-  LABEL *label = m_label->GetRawLabel();
+  double *rgbColor   = GetProperty()->GetColor();
+  double  dThreshold = GetProperty()->GetThreshold();
+  LABEL * label      = m_label->GetRawLabel();
   for (int i = 0; i < label->n_points; i++) {
     int vno = label->lv[i].vno;
     if (vno < nVertexCount && vno >= 0 && !label->lv[i].deleted) {
@@ -475,7 +471,7 @@ void LayerROI::OnBaseVoxelEdited(const QVector<int> &voxel_list, bool bAdd) {
       if (!m_nVertexCache && m_layerMappedSurface)
         m_nVertexCache = new int[m_layerMappedSurface->GetNumberOfVertices()];
 
-      int cnt = 0;
+      int cnt    = 0;
       int coords = 0;
       if (m_layerMappedSurface)
         coords = m_layerMappedSurface->IsInflated() ? WHITE_VERTICES
@@ -544,12 +540,12 @@ void LayerROI::EditVertex(const QVector<int> list_nvo_in, bool bAdd) {
 
 void LayerROI::UpdateFilteredImage(vtkImageData *mask_before,
                                    vtkImageData *mask_after) {
-  int scalar_type = m_imageData->GetScalarType();
-  char *ptr1 = (char *)mask_before->GetScalarPointer();
-  char *ptr2 = (char *)mask_after->GetScalarPointer();
-  char *ptr_img = (char *)m_imageData->GetScalarPointer();
+  int          scalar_type = m_imageData->GetScalarType();
+  char *       ptr1        = (char *)mask_before->GetScalarPointer();
+  char *       ptr2        = (char *)mask_after->GetScalarPointer();
+  char *       ptr_img     = (char *)m_imageData->GetScalarPointer();
   QVector<int> listAdd, listRemove;
-  int *dim = m_imageData->GetDimensions();
+  int *        dim = m_imageData->GetDimensions();
   for (size_t i = 0; i < dim[0]; i++) {
     for (size_t j = 0; j < dim[1]; j++) {
       for (size_t k = 0; k < dim[2]; k++) {

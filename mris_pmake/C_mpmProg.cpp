@@ -31,12 +31,12 @@
 #include "C_mpmProg.h"
 #include "dijkstra.h"
 
-#include "c_surface.h"
 #include "c_label.h"
+#include "c_surface.h"
 #include "c_vertex.h"
 
-extern bool Gb_stdout;
-extern stringstream Gsout;
+extern bool              Gb_stdout;
+extern std::stringstream Gsout;
 
 //
 //\\\---
@@ -48,12 +48,12 @@ extern stringstream Gsout;
 // Base socket constructors/destructor, output dump routines
 //-----------------------------------------------------------
 
-void C_mpmProg::debug_push(string astr_currentProc) {
+void C_mpmProg::debug_push(std::string astr_currentProc) {
   if (stackDepth_get() >= SSTACKDEPTH - 1) {
-    cout << "Current stackDepth:\t" << stackDepth_get() << endl;
-    cout << "stackdepth limit:\t" << SSTACKDEPTH << endl;
+    std::cout << "Current stackDepth:\t" << stackDepth_get() << std::endl;
+    std::cout << "stackdepth limit:\t" << SSTACKDEPTH << std::endl;
     for (int i = 0; i < SSTACKDEPTH; i++)
-      cout << "Stack depth: " << i << "\t" << str_proc_get(i) << endl;
+      std::cout << "Stack depth: " << i << "\t" << str_proc_get(i) << std::endl;
     error("Out of str_proc stack depth");
   }
   stackDepth_set(stackDepth_get() + 1);
@@ -62,63 +62,64 @@ void C_mpmProg::debug_push(string astr_currentProc) {
 
 void C_mpmProg::debug_pop() { mstackDepth--; }
 
-void C_mpmProg::error(string astr_msg /* = ""  Error message */,
-                      int code /* = 1  Error ID  */) {
+void C_mpmProg::error(std::string astr_msg /* = ""  Error message */,
+                      int         code /* = 1  Error ID  */) {
 
   extern int errno;
 
-  cerr << "\nFatal error encountered.\n";
-  cerr << "\tC_mpmProg `" << mstr_name << "' (id: " << mid << ")\n";
-  cerr << "\tCurrent function: " << mstr_obj << "::" << str_proc_get() << "\n";
-  cerr << "\t" << astr_msg << "\n";
+  std::cerr << "\nFatal error encountered.\n";
+  std::cerr << "\tC_mpmProg `" << mstr_name << "' (id: " << mid << ")\n";
+  std::cerr << "\tCurrent function: " << mstr_obj << "::" << str_proc_get()
+            << "\n";
+  std::cerr << "\t" << astr_msg << "\n";
   perror("Error returned from system");
   print();
-  cerr << "Throwing exception to (this) with code " << code << "\n\n";
+  std::cerr << "Throwing exception to (this) with code " << code << "\n\n";
   throw(this);
 }
 
-void C_mpmProg::warn(string astr_msg /* = ""  Warning message */,
-                     int code /* = 1  Warning code  */) {
+void C_mpmProg::warn(std::string astr_msg /* = ""  Warning message */,
+                     int         code /* = 1  Warning code  */) {
   if (mwarnings) {
-    cerr << "\nWarning.\n";
-    cerr << "\tC_mpmProg `" << mstr_name << "' (id: " << mid << ")\n";
-    cerr << "\tCurrent function: " << mstr_obj << "::" << str_proc_get()
-         << "\n";
-    cerr << "\t" << astr_msg << " (warning code: " << code << ")\n";
+    std::cerr << "\nWarning.\n";
+    std::cerr << "\tC_mpmProg `" << mstr_name << "' (id: " << mid << ")\n";
+    std::cerr << "\tCurrent function: " << mstr_obj << "::" << str_proc_get()
+              << "\n";
+    std::cerr << "\t" << astr_msg << " (warning code: " << code << ")\n";
   }
 }
 
 void C_mpmProg::function_trace(
-    string astr_msg /* = ""  Trace message */,
-    string astr_separator /* = ""  Separator message */) {
-  int i;
-  string str_tab = "";
-  static string str_objectName = "";
-  static string str_funcName = "";
+    std::string astr_msg /* = ""  Trace message */,
+    std::string astr_separator /* = ""  Separator message */) {
+  int                i;
+  std::string        str_tab        = "";
+  static std::string str_objectName = "";
+  static std::string str_funcName   = "";
 
   if (mverbosity >= mstackDepth) {
-    cerr << astr_separator;
+    std::cerr << astr_separator;
     for (i = 0; i < mstackDepth; i++)
       str_tab += "    ";
     if (str_objectName != mstr_name) {
-      cerr << "\n" << mstr_obj << " `";
-      cerr << str_name_get() << "' (id: " << mid << ")" << endl;
+      std::cerr << "\n" << mstr_obj << " `";
+      std::cerr << str_name_get() << "' (id: " << mid << ")" << std::endl;
     }
     if (str_funcName != str_proc_get()) {
-      cerr << "\n" << str_tab << "Current function: " << mstr_obj << "::";
-      cerr << str_proc_get();
+      std::cerr << "\n" << str_tab << "Current function: " << mstr_obj << "::";
+      std::cerr << str_proc_get();
     }
-    cerr << "\n" << str_tab << astr_msg << endl;
+    std::cerr << "\n" << str_tab << astr_msg << std::endl;
   }
   str_objectName = str_name_get();
-  str_funcName = str_proc_get();
+  str_funcName   = str_proc_get();
 }
 
-void C_mpmProg::core_construct(string astr_name /* = "unnamed" */,
+void C_mpmProg::core_construct(std::string astr_name /* = "unnamed" */,
                                int a_id /* = -1  */, int a_verbosity /* = 0  */,
-                               int a_warnings /* = 0  */,
-                               int a_stackDepth /* = 0  */,
-                               string astr_proc /* = "noproc" */) {
+                               int         a_warnings /* = 0  */,
+                               int         a_stackDepth /* = 0  */,
+                               std::string astr_proc /* = "noproc" */) {
   //
   // ARGS
   //  astr_name       in      name of object
@@ -132,10 +133,10 @@ void C_mpmProg::core_construct(string astr_name /* = "unnamed" */,
   //  Common core statements for all constructors.
   //
 
-  mstr_name = astr_name;
-  mid = a_id;
-  mverbosity = a_verbosity;
-  mwarnings = a_warnings;
+  mstr_name   = astr_name;
+  mid         = a_id;
+  mverbosity  = a_verbosity;
+  mwarnings   = a_warnings;
   mstackDepth = a_stackDepth;
 
   str_proc_set(stackDepth_get(), "no name");
@@ -143,8 +144,8 @@ void C_mpmProg::core_construct(string astr_name /* = "unnamed" */,
 }
 
 C_mpmProg::C_mpmProg(s_env *aps_env) {
-  string str_name = "Unnamed C_mpmProg";
-  int id = 0;
+  std::string str_name = "Unnamed C_mpmProg";
+  int         id       = 0;
   core_construct(str_name, id);
   mps_env = aps_env;
 }
@@ -173,9 +174,9 @@ C_mpmProg &C_mpmProg::operator=(const C_mpmProg &C_mpmProg) {
 C_mpmProg::~C_mpmProg() {}
 
 void C_mpmProg::print() {
-  cout << "object name:\t" << mstr_name << endl;
-  cout << "object id:\t" << mid << endl;
-  cout << "object type:\t" << mstr_obj << endl;
+  std::cout << "object name:\t" << mstr_name << std::endl;
+  std::cout << "object id:\t" << mid << std::endl;
+  std::cout << "object type:\t" << mstr_obj << std::endl;
 }
 
 //
@@ -267,7 +268,7 @@ C_mpmProg_pathFind::C_mpmProg_pathFind(s_env *aps_env, int amvertex_start,
 
   mstr_obj = "C_mpmProg_pathFind";
   vertexStart_set(amvertex_start);
-  mvertex_end = 0;
+  mvertex_end        = 0;
   mb_surfaceRipClear = false;
 
   s_env_activeSurfaceSetIndex(mps_env, 0);
@@ -312,13 +313,13 @@ float C_mpmProg_pathFind::cost_compute(int a_start, int a_end) {
   // computation.
   //
 
-  int ok;
-  float f_cost = 0.0;
-  static int calls = -1;
-  char pch_buffer[65536];
+  int        ok;
+  float      f_cost = 0.0;
+  static int calls  = -1;
+  char       pch_buffer[65536];
 
   mps_env->startVertex = a_start;
-  mps_env->endVertex = a_end;
+  mps_env->endVertex   = a_end;
 
   calls++;
   ok = dijkstra(*mps_env); // costs are written to vertex elements along
@@ -347,11 +348,11 @@ int C_mpmProg_pathFind::run() {
   // the core of the original 'mris_pmake'.
   //
 
-  float f_cost = 0.0;
-  int ret = 1;
-  string str_optionsFQName = "";
-  string str_patchFQName = "";
-  char pch_buffer[65536];
+  float       f_cost            = 0.0;
+  int         ret               = 1;
+  std::string str_optionsFQName = "";
+  std::string str_patchFQName   = "";
+  char        pch_buffer[65536];
 
   debug_push("run");
 
@@ -436,30 +437,30 @@ C_mpmProg_autodijk::C_mpmProg_autodijk(s_env *aps_env) : C_mpmProg(aps_env) {
 
   debug_push("C_mpmProg_autodijk");
 
-  mstr_obj = "C_mpmProg_autodijk";
-  mvertex_polar = 0;
-  mvertex_start = 0;
-  mvertex_step = 1;
-  mvertex_end = 0;
-  m_costFunctionIndex = 0;
+  mstr_obj             = "C_mpmProg_autodijk";
+  mvertex_polar        = 0;
+  mvertex_start        = 0;
+  mvertex_step         = 1;
+  mvertex_end          = 0;
+  m_costFunctionIndex  = 0;
   mb_performExhaustive = false;
-  mb_surfaceRipClear = false;
-  mb_worldMap = false;
-  mb_simpleStatsShow = true;
-  mprogressIter = 100;
+  mb_surfaceRipClear   = false;
+  mb_worldMap          = false;
+  mb_simpleStatsShow   = true;
+  mprogressIter        = 100;
 
   mpOverlayDistance = nullptr;
-  mpOverlayOrig = mps_env->pCmpmOverlay;
+  mpOverlayOrig     = mps_env->pCmpmOverlay;
 
   s_env_activeSurfaceSetIndex(mps_env, 0);
   mstr_costFileName = mps_env->str_costCurvFile;
   mstr_costFullPath = mps_env->str_workingDir + "/" + mstr_costFileName;
-  mvertex_end = mps_env->pMS_primary->nvertices - 1;
-  mvertex_total = mps_env->pMS_primary->nvertices;
-  mpf_cost = new float[mvertex_total];
-  mpf_persistent = new float[mvertex_total];
+  mvertex_end       = mps_env->pMS_primary->nvertices - 1;
+  mvertex_total     = mps_env->pMS_primary->nvertices;
+  mpf_cost          = new float[mvertex_total];
+  mpf_persistent    = new float[mvertex_total];
   for (int i = 0; i < mvertex_total; i++) {
-    mpf_cost[i] = 0.0;
+    mpf_cost[i]       = 0.0;
     mpf_persistent[i] = 0.0;
   }
 
@@ -506,8 +507,8 @@ bool C_mpmProg_autodijk::worldMap_shouldCreate() { return (mb_worldMap); }
 */
 e_FILEACCESS C_mpmProg_autodijk::CURV_fileWrite() {
   FILE *FP_curv;
-  int i;
-  char pch_readMessage[65536];
+  int   i;
+  char  pch_readMessage[65536];
 
   if ((FP_curv = fopen(mstr_costFullPath.c_str(), "w")) == nullptr)
     return (e_WRITEACCESSERROR);
@@ -548,13 +549,13 @@ float C_mpmProg_autodijk::cost_compute(int a_start, int a_end) {
   // o Removed call to 'surface_ripMark()' -- autodijk's have no "paths".
   //
 
-  int ok;
-  float f_cost = 0.0;
-  static int calls = -1;
-  int ret;
+  int        ok;
+  float      f_cost = 0.0;
+  static int calls  = -1;
+  int        ret;
 
   mps_env->startVertex = a_start;
-  mps_env->endVertex = a_end;
+  mps_env->endVertex   = a_end;
 
   if (mb_worldMap && !mb_worldMapDistanceCalc)
     calls++;
@@ -600,12 +601,12 @@ int C_mpmProg_autodijk::vertexCosts_pack(e_stats &a_stats) {
    * Pack the cost values stored in the FreeSurfer mesh into
    * an array.
    */
-  a_stats.f_max = 0.0;
+  a_stats.f_max    = 0.0;
   a_stats.indexMax = -1;
   for (int v = 0; v < mvertex_total; v++) {
     mpf_cost[v] = mps_env->pMS_active->vertices[v].val;
     if (a_stats.f_max < mpf_cost[v]) {
-      a_stats.f_max = mpf_cost[v];
+      a_stats.f_max    = mpf_cost[v];
       a_stats.indexMax = v;
     }
   }
@@ -618,16 +619,16 @@ int C_mpmProg_autodijk::run() {
   // Main entry to the actual 'run' core of the mpmProg
   //
 
-  float f_cost = 0.0;
+  float f_cost            = 0.0;
   float f_valueAtFurthest = 0.0;
-  int ret = 1;
+  int   ret               = 1;
 
-  e_MPMPROG e_prog = mps_env->empmProg_current;
+  e_MPMPROG    e_prog    = mps_env->empmProg_current;
   e_MPMOVERLAY e_overlay = mps_env->empmOverlay_current;
 
   debug_push("run");
 
-  ms_stats.f_max = 0.0;
+  ms_stats.f_max    = 0.0;
   ms_stats.indexMax = -1;
 
   mps_env->pcsm_stdout->colprintf("mpmProg (ID)", "[ %s (%d) ]\n",
@@ -651,7 +652,7 @@ int C_mpmProg_autodijk::run() {
     // have the same result in seconds... the exhaustive search
     // can take multiple hours.
     for (int v = mvertex_start; v <= mvertex_end; v += mvertex_step) {
-      f_cost = cost_compute(mvertex_polar, v);
+      f_cost      = cost_compute(mvertex_polar, v);
       mpf_cost[v] = f_cost;
     }
   } else if (mb_worldMap) {
@@ -664,14 +665,14 @@ int C_mpmProg_autodijk::run() {
       // performing a single sweep from 'v' to 'v' and then
       // finding the highest "cost" which corresponds to the vertex at
       // furthest distance from 'v' on the mesh.
-      mps_env->pCmpmOverlay = mpOverlayDistance;
+      mps_env->pCmpmOverlay   = mpOverlayDistance;
       mb_worldMapDistanceCalc = true;
-      f_cost = cost_compute(v, v);
+      f_cost                  = cost_compute(v, v);
       vertexCosts_pack(ms_stats);
       // Now set the env overlay back to the original, and recompute
-      mps_env->pCmpmOverlay = mpOverlayOrig;
+      mps_env->pCmpmOverlay   = mpOverlayOrig;
       mb_worldMapDistanceCalc = false;
-      f_cost = cost_compute(v, v);
+      f_cost                  = cost_compute(v, v);
       // For this run, we only store the single cost value from the
       // maxIndex vertex from the distance overlay
       f_valueAtFurthest = mps_env->pMS_active->vertices[ms_stats.indexMax].val;
@@ -730,7 +731,7 @@ void C_mpmProg_autodijk_fast::genOpenCLGraphRepresentation(GraphData *graph) {
   //    s_iterInfo      st_iterInfo;
   //    bool            b_relNextReference  = true;
 
-  cout << "Converting graph to fast representation... " << endl;
+  std::cout << "Converting graph to fast representation... " << std::endl;
   // Allocate memory for each of the vertices
   graph->vertexCount = surf->nvertices;
   graph->vertexArray = new int[surf->nvertices];
@@ -742,8 +743,8 @@ void C_mpmProg_autodijk_fast::genOpenCLGraphRepresentation(GraphData *graph) {
   }
 
   // Allocate memory for the edge and weight arrays
-  graph->edgeCount = numEdges;
-  graph->edgeArray = new int[numEdges];
+  graph->edgeCount   = numEdges;
+  graph->edgeArray   = new int[numEdges];
   graph->weightArray = new float[numEdges];
 
   // Now create the edge list and compute all of the edge weights
@@ -758,12 +759,12 @@ void C_mpmProg_autodijk_fast::genOpenCLGraphRepresentation(GraphData *graph) {
       int ij;
       // index for the neighbor
       graph->edgeArray[curEdgeIndex] = curVertex->v[j];
-      ij = curVertex->v[j];
+      ij                             = curVertex->v[j];
 
       // Compute the weight for this edge
       //            float cost = mps_env->costFunc_do(*mps_env, &st_iterInfo, i,
       //            j, b_relNextReference);
-      float cost = s_env_edgeCostFind(*mps_env, i, ij);
+      float cost                       = s_env_edgeCostFind(*mps_env, i, ij);
       graph->weightArray[curEdgeIndex] = cost;
 
       curEdgeIndex++;
@@ -789,7 +790,7 @@ int C_mpmProg_autodijk_fast::run() {
   float *results = new float[graph.vertexCount];
 
   // Perform a Dijkstra run
-  cout << "Running Dijkstra's algorithm..." << endl;
+  std::cout << "Running Dijkstra's algorithm..." << std::endl;
 
 #ifdef FS_OPENCL
   // We have implemented various flavors of the Dijkstra algorithm that runs
@@ -805,7 +806,7 @@ int C_mpmProg_autodijk_fast::run() {
   runDijkstraRef(&graph, &sourceVertices, results, 1);
 #endif
 
-  cout << "Done." << endl;
+  std::cout << "Done." << std::endl;
 
   // Save back the resulting costs
   for (int v = mvertex_start; v <= mvertex_end; v += mvertex_step) {
@@ -834,7 +835,7 @@ int C_mpmProg_autodijk_fast::run() {
 /////***
 //
 
-C_mpmProg_ROI::C_mpmProg_ROI(s_env *aps_env, string astr_vertexFile,
+C_mpmProg_ROI::C_mpmProg_ROI(s_env *aps_env, std::string astr_vertexFile,
                              float af_radius)
     : C_mpmProg(aps_env) {
   //
@@ -858,15 +859,15 @@ C_mpmProg_ROI::C_mpmProg_ROI(s_env *aps_env, string astr_vertexFile,
   if (astr_vertexFile.length())
     vertexFile_load(astr_vertexFile);
 
-  mf_radius = af_radius;
-  mf_plyIncrement = 1.0;
+  mf_radius          = af_radius;
+  mf_plyIncrement    = 1.0;
   mb_surfaceRipClear = true;
-  m_borderSize = 0;
+  m_borderSize       = 0;
 
   debug_pop();
 }
 
-int C_mpmProg_ROI::labelFile_load(string astr_fileName) {
+int C_mpmProg_ROI::labelFile_load(std::string astr_fileName) {
   //
   // ARGS
   // astr_fileName            string          label file to read
@@ -889,18 +890,18 @@ int C_mpmProg_ROI::labelFile_load(string astr_fileName) {
   //  o Vertex indices are also stored in the internal vertex vector.
   //
 
-  MRIS *pmesh = nullptr;
-  LABEL *pLBL = nullptr;
-  string lstr_ext = ".";
-  int i = 0;
-  char ch_mark = TRUE;
-  char *pch_mark = &ch_mark;
-  void *pv_mark = (void *)pch_mark;
+  MRIS *      pmesh    = nullptr;
+  LABEL *     pLBL     = nullptr;
+  std::string lstr_ext = ".";
+  int         i        = 0;
+  char        ch_mark  = TRUE;
+  char *      pch_mark = &ch_mark;
+  void *      pv_mark  = (void *)pch_mark;
 
   mstr_labelFile = astr_fileName;
   lstr_ext += fio_extension(mstr_labelFile.c_str());
   mstr_outputStem = fio_basename(mstr_labelFile.c_str(), lstr_ext.c_str());
-  pmesh = mps_env->pMS_primary;
+  pmesh           = mps_env->pMS_primary;
   // Mark the mesh
   label_coreLoad(pmesh, astr_fileName, vertex_ripFlagMark, pv_mark);
 
@@ -919,15 +920,15 @@ int C_mpmProg_ROI::labelFile_load(string astr_fileName) {
   return true;
 }
 
-int C_mpmProg_ROI::label_savePly(string astr_filePrefix, bool ab_staggered,
+int C_mpmProg_ROI::label_savePly(std::string astr_filePrefix, bool ab_staggered,
                                  float af_plyIncrement) {
-  mf_plyIncrement = af_plyIncrement;
+  mf_plyIncrement  = af_plyIncrement;
   mb_saveStaggered = ab_staggered;
   label_ply_save(*mps_env, astr_filePrefix, mb_saveStaggered);
   return true;
 }
 
-int C_mpmProg_ROI::labelFile_save(string astr_fileName) {
+int C_mpmProg_ROI::labelFile_save(std::string astr_fileName) {
 
   MRIS *pmesh = nullptr;
 
@@ -955,13 +956,13 @@ int C_mpmProg_ROI::border_mark() {
    * o Number of border vertices is returned.
    *
    */
-  unsigned int i = 0;
-  int vertex = -1;
-  int neighbor = -1;
-  int neighborCount = -1;
-  int markedCount = 0;
-  MRIS *mesh = nullptr;
-  bool b_innerVertex = true;
+  unsigned int i             = 0;
+  int          vertex        = -1;
+  int          neighbor      = -1;
+  int          neighborCount = -1;
+  int          markedCount   = 0;
+  MRIS *       mesh          = nullptr;
+  bool         b_innerVertex = true;
 
   mesh = mps_env->pMS_primary;
 
@@ -975,7 +976,7 @@ int C_mpmProg_ROI::border_mark() {
   for (vertex = 0; vertex < mesh->nvertices; vertex++) {
     if (mesh->vertices[vertex].ripflag) {
       markedCount++;
-      b_innerVertex = true;
+      b_innerVertex                        = true;
       VERTEX_TOPOLOGY const *const SVertex = &mesh->vertices_topology[vertex];
       for (neighborCount = 0; neighborCount < SVertex->vnum; neighborCount++) {
         neighbor = SVertex->v[neighborCount];
@@ -994,14 +995,14 @@ int C_mpmProg_ROI::border_mark() {
     // according the mv_vertex array
     surface_ripClear(*mps_env, true);
     for (i = 0; i < mv_vertex.size(); i++) {
-      vertex = mv_vertex[i];
+      vertex                         = mv_vertex[i];
       mesh->vertices[vertex].ripflag = true;
     }
   }
   return m_borderSize;
 }
 
-int C_mpmProg_ROI::vertexFile_load(string astr_fileName) {
+int C_mpmProg_ROI::vertexFile_load(std::string astr_fileName) {
   //
   // ARGS
   // astr_fileName            string          file to read
@@ -1030,10 +1031,10 @@ int C_mpmProg_ROI::vertexFile_load(string astr_fileName) {
   //  o Vertex ripflag is NOT set.
   //
 
-  int vertex = -1;
-  int readCount = 0;
-  string lstr_ext = ".";
-  MRIS *mesh = nullptr;
+  int         vertex    = -1;
+  int         readCount = 0;
+  std::string lstr_ext  = ".";
+  MRIS *      mesh      = nullptr;
 
   mesh = mps_env->pMS_primary;
 
@@ -1049,7 +1050,7 @@ int C_mpmProg_ROI::vertexFile_load(string astr_fileName) {
   lstr_ext += fio_extension(mstr_vertexFile.c_str());
   mstr_outputStem = fio_basename(mstr_vertexFile.c_str(), lstr_ext.c_str());
 
-  ifstream ifs_vertex(astr_fileName.c_str());
+  std::ifstream ifs_vertex(astr_fileName.c_str());
   if (!ifs_vertex)
     return false;
 
@@ -1080,13 +1081,13 @@ int C_mpmProg_ROI::run() {
   // Main entry to the actual 'run' core of the mpmProg
   //
 
-  int ret = 1;
-  bool b_origHistoryFlag = mps_env->b_costHistoryPreserve;
-  bool b_surfaceCostVoid = false;
-  unsigned int i = 0;
-  int j = 0;
+  int          ret               = 1;
+  bool         b_origHistoryFlag = mps_env->b_costHistoryPreserve;
+  bool         b_surfaceCostVoid = false;
+  unsigned int i                 = 0;
+  int          j                 = 0;
   mps_env->b_costHistoryPreserve = true;
-  MRIS *pmesh = mps_env->pMS_active;
+  MRIS *pmesh                    = mps_env->pMS_active;
 
   debug_push("run");
 
@@ -1096,10 +1097,10 @@ int C_mpmProg_ROI::run() {
   if (!mb_ROIsInSeparateLabels) {
     for (i = 0; i < (unsigned int)pmesh->nvertices; i++) {
       if (pmesh->vertices[i].ripflag == TRUE) {
-        b_surfaceCostVoid = !j++;
+        b_surfaceCostVoid    = !j++;
         mps_env->startVertex = i;
-        mps_env->endVertex = i;
-        ret = dijkstra(*mps_env, mf_radius, b_surfaceCostVoid);
+        mps_env->endVertex   = i;
+        ret                  = dijkstra(*mps_env, mf_radius, b_surfaceCostVoid);
       }
     }
     mps_env->b_costHistoryPreserve = b_origHistoryFlag;
@@ -1117,8 +1118,8 @@ int C_mpmProg_ROI::run() {
   } else {
     for (i = 0; i < mv_vertex.size(); i++) {
       mps_env->startVertex = mv_vertex[i];
-      mps_env->endVertex = mv_vertex[i];
-      ret = dijkstra(*mps_env, mf_radius, b_surfaceCostVoid);
+      mps_env->endVertex   = mv_vertex[i];
+      ret                  = dijkstra(*mps_env, mf_radius, b_surfaceCostVoid);
       Gsout.str(std::string());
       Gsout << "-v" << mv_vertex[i] << "-r" << mf_radius << ".label";
       label_savePly(mstr_outputStem + Gsout.str(), mb_saveStaggered,
@@ -1139,8 +1140,8 @@ int C_mpmProg_ROI::run() {
 /////***
 //
 
-C_mpmProg_externalMesh::C_mpmProg_externalMesh(s_env *aps_env,
-                                               string astr_meshFile)
+C_mpmProg_externalMesh::C_mpmProg_externalMesh(s_env *     aps_env,
+                                               std::string astr_meshFile)
     : C_mpmProg(aps_env) {
   //
   // ARGS

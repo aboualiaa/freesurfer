@@ -1,10 +1,10 @@
 #ifndef _SBL_TRIANGULATION_H_
 #define _SBL_TRIANGULATION_H_
 #ifdef USE_CDT
-#include <sbl/math/Vector.h>
-#include <sbl/math/Matrix.h>
 #include <sbl/core/Pointer.h>
 #include <sbl/image/Image.h>
+#include <sbl/math/Matrix.h>
+#include <sbl/math/Vector.h>
 namespace sbl {
 
 /*! \file Triangulation.h

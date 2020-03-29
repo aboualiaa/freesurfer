@@ -50,11 +50,11 @@ public:
                          double *pt1_in, double *pt2_in, vtkPoints *pts_out);
 
 protected:
-  int m_nPlane;
-  int m_nSlice;
+  int                                           m_nPlane;
+  int                                           m_nSlice;
   vtkSmartPointer<vtkDijkstraImageGeodesicPath> m_path;
-  vtkImageData *m_imageData;
-  vtkImageData *m_imageSlice;
+  vtkImageData *                                m_imageData;
+  vtkImageData *                                m_imageSlice;
 };
 
 #endif

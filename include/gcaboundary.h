@@ -29,42 +29,42 @@
 #ifndef GCABOUNDARY_H
 #define GCABOUNDARY_H
 
-#include "gca.h"
-#include "icosahedron.h"
 #include "const.h"
+#include "gca.h"
 #include "histo.h"
+#include "icosahedron.h"
 
 typedef struct {
-  double ***pdfs;          // one per vertex, and each is 2d (I_in, I_out )
+  double ***  pdfs;        // one per vertex, and each is 2d (I_in, I_out )
   HISTOGRAM **h_grad_pdfs; // one per vertex, gradient histogram
   HISTOGRAM **h_Iin_pdfs;  // one per vertex, interior intensity histogram
   HISTOGRAM **h_Iout_pdfs; // one per vertex, exterior intensity histogram
-  float *ntraining;        // one per vertex
+  float *     ntraining;   // one per vertex
 } GCA_BOUNDARY_STATS, GCABS;
 
 typedef struct {
-  int target_label; // what label is this the model of the boundary of
-  int spacing;
-  int nvertices; // # of vertices in the icosahedron
-  int ico_order; // redundant with previous (but makes things simpler)
-  int nintensity_bins;
-  int ngrad_bins;
-  int width;
-  int height;
-  int depth;
-  float max_intensity;
-  float min_intensity;
-  float min_grad;
-  float max_grad;
-  float iscale, gscale; // for histograming
-  int ntraining;
+  int        target_label; // what label is this the model of the boundary of
+  int        spacing;
+  int        nvertices; // # of vertices in the icosahedron
+  int        ico_order; // redundant with previous (but makes things simpler)
+  int        nintensity_bins;
+  int        ngrad_bins;
+  int        width;
+  int        height;
+  int        depth;
+  float      max_intensity;
+  float      min_intensity;
+  float      min_grad;
+  float      max_grad;
+  float      iscale, gscale; // for histograming
+  int        ntraining;
   MRI_REGION bounding_box;
 
-  GCA *gca;
+  GCA *                 gca;
   GCA_BOUNDARY_STATS ***bs;
-  ICOSAHEDRON *ico; // for normal directions
-  char fname[STRLEN];
-  char gca_fname[STRLEN];
+  ICOSAHEDRON *         ico; // for normal directions
+  char                  fname[STRLEN];
+  char                  gca_fname[STRLEN];
 } GCA_BOUNDARY, GCAB;
 
 double GCABgetProbability(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
@@ -78,15 +78,15 @@ double GCABgetPin(GCAB *gcab, MRI *mri_int, MRI *mri_dist, TRANSFORM *transform,
 double GCABgetPgrad(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
                     TRANSFORM *transform, float x0, float y0, float z0,
                     float nx, float ny, float nz);
-GCAB *GCABalloc(GCA *gca, int spacing, int ico_order, int intensity_bins,
-                int grad_bins, int target_label);
+GCAB * GCABalloc(GCA *gca, int spacing, int ico_order, int intensity_bins,
+                 int grad_bins, int target_label);
 
-int GCABfree(GCAB **pgcab);
-int GCABwrite(GCAB *gcab, char *fname);
+int   GCABfree(GCAB **pgcab);
+int   GCABwrite(GCAB *gcab, char *fname);
 GCAB *GCABread(char *fname, GCA *gca);
-int GCABtrain(GCAB *gcab, MRI *mri_int, MRI *mri_seg, TRANSFORM *transform,
-              int label);
-int GCABcompleteTraining(GCAB *gcab);
+int   GCABtrain(GCAB *gcab, MRI *mri_int, MRI *mri_seg, TRANSFORM *transform,
+                int label);
+int   GCABcompleteTraining(GCAB *gcab);
 int GCABsourceVoxelToNode(GCAB *gcab, MRI *mri, TRANSFORM *transform, float xv,
                           float yv, float zv, float *pxn, float *pyn,
                           float *pzn);

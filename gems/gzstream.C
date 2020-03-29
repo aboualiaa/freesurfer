@@ -48,15 +48,15 @@ gzstreambuf *gzstreambuf::open(const char *name, int open_mode) {
   if ((mode & std::ios::ate) || (mode & std::ios::app) ||
       ((mode & std::ios::in) && (mode & std::ios::out)))
     return (gzstreambuf *)nullptr;
-  char fmode[10];
+  char  fmode[10];
   char *fmodeptr = fmode;
   if (mode & std::ios::in)
     *fmodeptr++ = 'r';
   else if (mode & std::ios::out)
     *fmodeptr++ = 'w';
   *fmodeptr++ = 'b';
-  *fmodeptr = '\0';
-  file = gzopen(name, fmode);
+  *fmodeptr   = '\0';
+  file        = gzopen(name, fmode);
   if (file == nullptr)
     return (gzstreambuf *)nullptr;
   opened = 1;

@@ -22,46 +22,46 @@
  *
  */
 #include "GenericRenderView.h"
-#include <vtkRenderer.h>
-#include <vtkActor.h>
-#include <vtkSphereSource.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkCamera.h>
-#include <vtkLightKit.h>
-#include <vtkImageWriter.h>
-#include <vtkBMPWriter.h>
-#include <vtkJPEGWriter.h>
-#include <vtkPNGWriter.h>
-#include <vtkTIFFWriter.h>
-#include <vtkPostScriptWriter.h>
-#include <vtkRenderLargeImage.h>
-#include <vtkVRMLExporter.h>
-#include <vtkRenderWindow.h>
-#include <vtkPropCollection.h>
-#include <vtkPropPicker.h>
-#include <vtkAssemblyPath.h>
-#include <vtkAssemblyNode.h>
-#include <vtkGenericOpenGLRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
 #include <QApplication>
 #include <QClipboard>
+#include <QDateTime>
+#include <QDebug>
+#include <QFileInfo>
 #include <QImage>
 #include <QMouseEvent>
 #include <QString>
-#include <QFileInfo>
-#include <QDateTime>
-#include <QDebug>
+#include <vtkActor.h>
+#include <vtkAssemblyNode.h>
+#include <vtkAssemblyPath.h>
+#include <vtkBMPWriter.h>
+#include <vtkCamera.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <vtkImageWriter.h>
+#include <vtkJPEGWriter.h>
+#include <vtkLightKit.h>
+#include <vtkPNGWriter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkPostScriptWriter.h>
+#include <vtkPropCollection.h>
+#include <vtkPropPicker.h>
+#include <vtkRenderLargeImage.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkSphereSource.h>
+#include <vtkTIFFWriter.h>
+#include <vtkVRMLExporter.h>
 
 // fix for retina screens
 #ifdef Q_OS_OSX
 #include "MacRetina.h"
 #endif
 
-#define MAX_KEY_LIGHT 1.8
-#define MIN_KEY_LIGHT 0.2
+#define MAX_KEY_LIGHT   1.8
+#define MIN_KEY_LIGHT   0.2
 #define MIN_RATIO_LIGHT 1.0 / 100
 
-#define DEFAULT_KEY_LIGHT 0.4
+#define DEFAULT_KEY_LIGHT  0.4
 #define DEFAULT_HEAD_LIGHT 0.3
 #define DEFAULT_FILL_LIGHT 0.25
 #define DEFAULT_BACK_LIGHT 0.2
@@ -94,8 +94,8 @@ GenericRenderView::GenericRenderView(QWidget *parent, Qt::WindowFlags f)
 #endif
   renWin->AddRenderer(m_renderer);
 
-  m_renderer2 = NULL;
-  m_bEnableRender = true;
+  m_renderer2        = NULL;
+  m_bEnableRender    = true;
   m_nStereoPairAngle = -3;
 
   m_lightKit = vtkSmartPointer<vtkLightKit>::New();
@@ -278,10 +278,10 @@ void GenericRenderView::mouseReleaseEvent(QMouseEvent *event) {
 
 bool GenericRenderView::SaveImage(const QString &filename, bool bAntiAliasing,
                                   int nMag) {
-  QFileInfo fi(filename);
-  QString ext = fi.suffix().toLower();
+  QFileInfo       fi(filename);
+  QString         ext    = fi.suffix().toLower();
   vtkImageWriter *writer = 0;
-  QString fn = filename;
+  QString         fn     = filename;
   if (ext == "wrl") {
     vtkVRMLExporter *exporter = vtkVRMLExporter::New();
     exporter->SetFileName(fn.toLatin1().data());
@@ -342,17 +342,17 @@ void GenericRenderView::SetAntialiasing(int bSet, bool redraw) {
 }
 
 void GenericRenderView::CopyToClipboard() {
-  QClipboard *clipboard = QApplication::clipboard();
-  unsigned char *p = this->GetRenderWindow()->GetRGBACharPixelData(
+  QClipboard *   clipboard = QApplication::clipboard();
+  unsigned char *p         = this->GetRenderWindow()->GetRGBACharPixelData(
       0, 0, this->width() - 1, this->height() - 1, 0);
   QImage image(p, width(), height(), QImage::Format_RGB32);
 
-  unsigned char ch[2] = {0, 1};
-  unsigned short *a = (unsigned short *)ch;
+  unsigned char   ch[2] = {0, 1};
+  unsigned short *a     = (unsigned short *)ch;
   if (*a == 1) // Big Endian
   {
-    int nsize = width() * height();
-    unsigned char *ptr = p;
+    int            nsize = width() * height();
+    unsigned char *ptr   = p;
     for (int i = 0; i < nsize; i++) {
       qSwap(*ptr, *(ptr + 3));
       qSwap(*(ptr + 1), *(ptr + 2));
@@ -453,7 +453,7 @@ void GenericRenderView::UpdateRenderer2() {
     return;
   }
 
-  vtkPropCollection *props = m_renderer->GetViewProps(),
+  vtkPropCollection *props  = m_renderer->GetViewProps(),
                     *props2 = m_renderer2->GetViewProps();
   props2->RemoveAllItems();
 
@@ -486,9 +486,9 @@ void GenericRenderView::SetStereoPairAngle(int nAngle) {
   }
 }
 
-vtkProp *GenericRenderView::PickObject(const QPoint &point,
+vtkProp *GenericRenderView::PickObject(const QPoint &     point,
                                        vtkPropCollection *propc,
-                                       double *pickpos) {
+                                       double *           pickpos) {
   if (GetRenderWindow()->GetStereoRender()) {
     return NULL;
   }
@@ -498,8 +498,8 @@ vtkProp *GenericRenderView::PickObject(const QPoint &point,
     p = m_renderer->GetViewProps();
   }
   vtkPropPicker *picker = vtkPropPicker::New();
-  QRect rc = rect();
-  vtkProp *actor = NULL;
+  QRect          rc     = rect();
+  vtkProp *      actor  = NULL;
   if (picker->PickProp(point.x(), rc.height() - point.y(), m_renderer, p)) {
     actor = picker->GetViewProp();
     if (pickpos) {
@@ -545,8 +545,8 @@ bool GenericRenderView::SetCameraOperations(CameraOperations ops) {
     } else if (ops[i].first.toLower() == "yaw") {
       cam->Yaw(ops[i].second);
     } else {
-      cerr << "Unrecognized camera operation: " << qPrintable(ops[i].first)
-           << "\n";
+      std::cerr << "Unrecognized camera operation: " << qPrintable(ops[i].first)
+                << "\n";
       return false;
     }
 

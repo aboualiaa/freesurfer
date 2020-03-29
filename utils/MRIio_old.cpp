@@ -67,11 +67,11 @@ void file_name(char *fpref, char *fname, int num, char *form) {
 
 void buffer_to_image(unsigned char *buf, unsigned char **im, int ysize,
                      int xsize) {
-  int i, j;
+  int           i, j;
   unsigned long k;
-  float sum;
+  float         sum;
 
-  k = 0;
+  k   = 0;
   sum = 0;
   for (i = 0; i < ysize; i++)
     for (j = 0; j < xsize; j++) {
@@ -85,7 +85,7 @@ void buffer_to_image(unsigned char *buf, unsigned char **im, int ysize,
 
 void image_to_buffer(unsigned char **im, unsigned char *buf, int ysize,
                      int xsize) {
-  int i, j;
+  int           i, j;
   unsigned long k;
 
   k = 0;

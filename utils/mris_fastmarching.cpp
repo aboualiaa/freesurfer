@@ -2,9 +2,9 @@
 
 static MRI_REGION *mriFindLabel(MRI *mri, int label, int offset) {
   MRI_REGION *region;
-  int i, j, k, nlabels;
-  double xmin, ymax, zmin, xmax, ymin, zmax;
-  double xw, yw, zw;
+  int         i, j, k, nlabels;
+  double      xmin, ymax, zmin, xmax, ymin, zmax;
+  double      xw, yw, zw;
 
   region = (MRI_REGION *)calloc(1, sizeof(MRI_REGION));
 
@@ -83,16 +83,16 @@ void MRISextractOutsideDistanceMap(MRIS *mris, MRI *mri_src, int label,
 
   /* extract values */
   for (int p = 0; p < mris->nvertices; p++) {
-    int i, j, k;
-    float val;
+    int     i, j, k;
+    float   val;
     VERTEX *v = &mris->vertices[p];
-    v->curv = 1.0f;
+    v->curv   = 1.0f;
     for (int n = 0; n < 5;
          n++) { // first valid point in the direction white->pial
       float t = n * 0.1;
-      i = iVOL(mri_fastmarching, ((1 - t) * v->whitex + t * v->pialx));
-      j = jVOL(mri_fastmarching, ((1 - t) * v->whitey + t * v->pialy));
-      k = kVOL(mri_fastmarching, ((1 - t) * v->whitez + t * v->pialz));
+      i       = iVOL(mri_fastmarching, ((1 - t) * v->whitex + t * v->pialx));
+      j       = jVOL(mri_fastmarching, ((1 - t) * v->whitey + t * v->pialy));
+      k       = kVOL(mri_fastmarching, ((1 - t) * v->whitez + t * v->pialz));
 
       if (i < 0 || i > mri_fastmarching->width - 1 || j < 0 ||
           j > mri_fastmarching->height - 1 || k < 0 ||

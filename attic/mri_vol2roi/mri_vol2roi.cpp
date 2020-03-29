@@ -38,32 +38,32 @@
   $Id: mri_vol2roi.c,v 1.32 2011/03/02 00:04:25 nicks Exp $
 */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
 #include "label.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 
+#include "fio.h"
+#include "fmriutils.h"
+#include "mri2.h"
+#include "mri_identify.h"
 #include "registerio.h"
 #include "resample.h"
 #include "selxavgio.h"
-#include "mri2.h"
-#include "fio.h"
 #include "version.h"
-#include "mri_identify.h"
-#include "fmriutils.h"
 
 LABEL *LabelReadFile(char *labelfile);
-char *Stem2Path(char *stem);
+char * Stem2Path(char *stem);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
 static void usage_exit(void);
@@ -71,8 +71,8 @@ static void print_help(void);
 static void print_version(void);
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
-static int check_format(char *fmt);
+static int  singledash(char *flag);
+static int  check_format(char *fmt);
 /*static int  isoptionflag(char *flag);*/
 
 int CountLabelHits(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
@@ -86,35 +86,35 @@ static char vcid[] =
     "$Id: mri_vol2roi.c,v 1.32 2011/03/02 00:04:25 nicks Exp $";
 const char *Progname = NULL;
 
-char *roifile = NULL;
-char *roifmt = "bvolume";
-char *roitxtfile = NULL;
-int oldtxtstyle = 0;
-int plaintxtstyle = 0;
+char *roifile       = NULL;
+char *roifmt        = "bvolume";
+char *roitxtfile    = NULL;
+int   oldtxtstyle   = 0;
+int   plaintxtstyle = 0;
 
-char *srcvolid = NULL;
-char *srcfmt = NULL;
+char *srcvolid   = NULL;
+char *srcfmt     = NULL;
 char *srcregfile = NULL;
-char *srcwarp = NULL;
-int srcoldreg = 0;
+char *srcwarp    = NULL;
+int   srcoldreg  = 0;
 
-char *labelfile = NULL;
+char *labelfile      = NULL;
 char *src2lblregfile = NULL;
 
-char *mskvolid = NULL;
-char *mskfmt = NULL;
-char *mskregfile = NULL;
+char *mskvolid       = NULL;
+char *mskfmt         = NULL;
+char *mskregfile     = NULL;
 char *msk2srcregfile = NULL;
-int msksamesrc = 1;
+int   msksamesrc     = 1;
 
 float mskthresh = 0.5;
-char *msktail = "abs";
-int mskinvert = 0;
-int mskframe = 0;
+char *msktail   = "abs";
+int   mskinvert = 0;
+int   mskframe  = 0;
 
-char *srcmskvolid = NULL;
+char *srcmskvolid   = NULL;
 char *finalmskvolid = NULL;
-char *finalmskcrs = NULL;
+char *finalmskcrs   = NULL;
 
 LABEL *Label;
 
@@ -127,33 +127,33 @@ MATRIX *Mmsk2src;
 
 SXADAT *sxa;
 
-char *SUBJECTS_DIR = NULL;
+char *SUBJECTS_DIR         = NULL;
 char *FS_TALAIRACH_SUBJECT = NULL;
 char *srcsubject, *msksubject;
 char *regfile = "register.dat";
-MRI *mSrcVol, *mROI, *mMskVol, *mSrcMskVol, *mFinalMskVol;
-MRI *mritmp;
+MRI * mSrcVol, *mROI, *mMskVol, *mSrcMskVol, *mFinalMskVol;
+MRI * mritmp;
 FILE *fp;
-int nmskhits, nlabelhits, nfinalhits;
+int   nmskhits, nlabelhits, nfinalhits;
 
-char tmpstr[2000];
-int float2int_src, float2int_msk;
+char  tmpstr[2000];
+int   float2int_src, float2int_msk;
 float labelfillthresh = .0000001;
 
-int fixxfm = 0;
-int labeltal = 0;
-char *talxfm = "talairach.xfm";
+int   fixxfm   = 0;
+int   labeltal = 0;
+char *talxfm   = "talairach.xfm";
 
-char *outext = NULL;
+char *outext   = NULL;
 char *ListFile = NULL;
 
 /*---------------------------------------------------------*/
 int main(int argc, char **argv) {
-  int n, err, f, nhits, r, c, s;
-  float ipr, bpr, intensity;
+  int    n, err, f, nhits, r, c, s;
+  float  ipr, bpr, intensity;
   float *framepower = NULL, val;
-  LTA *lta;
-  int nargs;
+  LTA *  lta;
+  int    nargs;
   // int endian,roitype;
 
   nargs = handleVersionOption(argc, argv, "mri_vol2roi");
@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
       printf("-------------------------------\n");
     }
   } else {
-    Label = NULL;
+    Label    = NULL;
     Msrc2lbl = NULL;
   }
 
@@ -292,7 +292,7 @@ int main(int argc, char **argv) {
                  &nmskhits);
   } else {
     mSrcMskVol = NULL;
-    nmskhits = 0;
+    nmskhits   = 0;
   }
   /*-------------- Done loading mask stuff -------------------------*/
 
@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
       exit(1);
   } else {
     mFinalMskVol = mSrcMskVol;
-    nfinalhits = nmskhits;
+    nfinalhits   = nmskhits;
   }
 
   if (!oldtxtstyle) {
@@ -471,7 +471,7 @@ int main(int argc, char **argv) {
 
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -514,11 +514,11 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       roitxtfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--roiavg")) {
       if (nargc < 1)
         argnerr(option, 1);
-      roifile = pargv[0];
+      roifile   = pargv[0];
       nargsused = 1;
     }
 
@@ -533,19 +533,19 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--srcfmt")) {
       if (nargc < 1)
         argnerr(option, 1);
-      srcfmt = pargv[0];
+      srcfmt    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--srcreg")) {
       if (nargc < 1)
         argnerr(option, 1);
       srcregfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--srcoldreg")) {
       srcoldreg = 1;
     } else if (!strcmp(option, "--srcwarp")) {
       if (nargc < 1)
         argnerr(option, 1);
-      srcwarp = pargv[0];
+      srcwarp   = pargv[0];
       nargsused = 1;
     }
 
@@ -559,17 +559,17 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       src2lblregfile = pargv[0];
-      nargsused = 1;
+      nargsused      = 1;
     } else if (!strcmp(option, "--labeltal")) {
-      labeltal = 1;
-      fixxfm = 1;
+      labeltal  = 1;
+      fixxfm    = 1;
       nargsused = 0;
     } else if (!strcmp(option, "--talxfm")) {
       if (nargc < 1)
         argnerr(option, 1);
-      talxfm = pargv[0];
-      labeltal = 1;
-      fixxfm = 1;
+      talxfm    = pargv[0];
+      labeltal  = 1;
+      fixxfm    = 1;
       nargsused = 1;
     } else if (!strcmp(option, "--labelfillthresh")) {
       if (nargc < 1)
@@ -589,12 +589,12 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--mskfmt")) {
       if (nargc < 1)
         argnerr(option, 1);
-      mskfmt = pargv[0];
+      mskfmt    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--msktail")) {
       if (nargc < 1)
         argnerr(option, 1);
-      msktail = pargv[0];
+      msktail   = pargv[0];
       nargsused = 1;
       if (strncasecmp(msktail, "abs", 3) && strncasecmp(msktail, "pos", 3) &&
           strncasecmp(msktail, "neg", 3)) {
@@ -616,21 +616,21 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       finalmskvolid = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--srcmskvol")) {
       if (nargc < 1)
         argnerr(option, 1);
       srcmskvolid = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--finalmskcrs")) {
       if (nargc < 1)
         argnerr(option, 1);
       finalmskcrs = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--list")) {
       if (nargc < 1)
         argnerr(option, 1);
-      ListFile = pargv[0];
+      ListFile  = pargv[0];
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
@@ -983,10 +983,10 @@ static int singledash(char *flag) {
 /*---------------------------------------------------------------*/
 LABEL *LabelReadFile(char *labelfile) {
   LABEL *area;
-  char *fname, line[STRLEN], *cp;
-  FILE *fp;
-  int vno, nlines;
-  float x, y, z, stat;
+  char * fname, line[STRLEN], *cp;
+  FILE * fp;
+  int    vno, nlines;
+  float  x, y, z, stat;
 
   fname = labelfile;
 
@@ -1018,11 +1018,11 @@ LABEL *LabelReadFile(char *labelfile) {
     if (sscanf(cp, "%d %f %f %f %f", &vno, &x, &y, &z, &stat) != 5)
       ErrorReturn(NULL, (ERROR_BADFILE, "%s: could not parse %dth line in %s",
                          Progname, area->n_points, fname));
-    area->lv[nlines].x = x;
-    area->lv[nlines].y = y;
-    area->lv[nlines].z = z;
+    area->lv[nlines].x    = x;
+    area->lv[nlines].y    = y;
+    area->lv[nlines].z    = z;
     area->lv[nlines].stat = stat;
-    area->lv[nlines].vno = vno;
+    area->lv[nlines].vno  = vno;
     nlines++;
   }
 
@@ -1041,9 +1041,9 @@ LABEL *LabelReadFile(char *labelfile) {
 int CountLabelHits(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
                    MATRIX *Dsrc, MATRIX *Msrc2lbl, LABEL *Label,
                    float labelfillthresh, int float2int) {
-  MRI *LabelMskVol;
-  int nlabelhits, nfinalhits;
-  int r, c, s;
+  MRI * LabelMskVol;
+  int   nlabelhits, nfinalhits;
+  int   r, c, s;
   float val;
 
   LabelMskVol =
@@ -1085,7 +1085,7 @@ int BTypeFromStem(char *stem) {
 
 char *Stem2Path(char *stem) {
   char *path;
-  char tmpstr[2000];
+  char  tmpstr[2000];
 
   // If stem exists, it is not a stem but a full path already
   if (fio_FileExistsReadable(stem)) {

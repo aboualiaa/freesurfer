@@ -44,7 +44,7 @@ protected:
   void UpdateCursor(QEvent *event, QWidget *wnd);
 
   bool m_bEditing;
-  int m_nCurrentIndex;
+  int  m_nCurrentIndex;
 };
 
 #endif

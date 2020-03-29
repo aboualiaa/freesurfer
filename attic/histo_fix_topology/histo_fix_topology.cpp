@@ -23,25 +23,25 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
 #include "mri.h"
+#include "mrisegment.h"
 #include "proto.h"
 #include "version.h"
-#include "mrisegment.h"
 
 #define RGB_SIZE 500
 
 static char vcid[] =
     "$Id: histo_fix_topology.c,v 1.3 2011/03/02 00:04:09 nicks Exp $";
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -49,17 +49,17 @@ static void print_version(void);
 
 const char *Progname;
 
-static double thresh = 50000;
+static double thresh     = 50000;
 static double max_thresh = 64000;
 
 static int is_open = 5;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs, max_i, i, j;
-  MRI *mri_in, *mri_out;
-  MRI_SEGMENTATION *mriseg;
-  MRI_SEGMENT *ms;
+  char **            av;
+  int                ac, nargs, max_i, i, j;
+  MRI *              mri_in, *mri_out;
+  MRI_SEGMENTATION * mriseg;
+  MRI_SEGMENT *      ms;
   MRI_SEGMENT_VOXEL *msv;
 
   nargs = handleVersionOption(argc, argv, "histo_fix_topology");
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_BADPARM, "%s: could not open input image %s...\n", argv[1]);
 
   mriseg = MRIsegment(mri_in, thresh, max_thresh);
-  max_i = MRIfindMaxSegmentNumber(mriseg);
+  max_i  = MRIfindMaxSegmentNumber(mriseg);
 
   mri_out = MRIclone(mri_in, NULL);
   for (i = 0; i < mriseg->nsegments; i++) {
@@ -103,10 +103,10 @@ int main(int argc, char *argv[]) {
 
   if (is_open > 0 && 0) {
     MRI *mri_opened;
-    int i, x, y;
+    int  i, x, y;
 
     mri_opened = MRIcopy(mri_in, NULL);
-          for (i = 0; i < is_open; i++)
+    for (i = 0; i < is_open; i++)
       MRIerode(mri_opened, mri_opened);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
       MRIwrite(mri_opened, "e.mgz");
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -157,25 +157,25 @@ static int get_option(int argc, char *argv[]) {
 #endif
   } else if (!stricmp(option, "debug_voxel") ||
              !stricmp(option, "debug_pixel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
     nargs = 2;
     printf("debugging pixel (%d, %d)\n", Gx, Gy);
   } else
     switch (toupper(*option)) {
     case 'O':
       is_open = atof(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       printf("opening image %d times to detect tears\n", is_open);
       break;
     case 'T':
       thresh = atof(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       printf("using threshold %2.1f for determining background\n", thresh);
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':

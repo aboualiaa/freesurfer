@@ -13,9 +13,9 @@ class AtlasMeshLabelImageStatisticsCollector
     : public AtlasMeshStatisticsCollector {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshLabelImageStatisticsCollector;
-  using Superclass = AtlasMeshStatisticsCollector;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshLabelImageStatisticsCollector;
+  using Superclass   = AtlasMeshStatisticsCollector;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -28,7 +28,7 @@ public:
   using LabelImageType = CompressionLookupTable::ImageType;
 
   /** */
-  void SetLabelImage(const LabelImageType *labelImage,
+  void SetLabelImage(const LabelImageType *        labelImage,
                      const CompressionLookupTable *lookupTable);
 
 protected:
@@ -40,11 +40,11 @@ protected:
                                     const AtlasMesh::PointType &p1,
                                     const AtlasMesh::PointType &p2,
                                     const AtlasMesh::PointType &p3,
-                                    const AtlasAlphasType &alphasInVertex0,
-                                    const AtlasAlphasType &alphasInVertex1,
-                                    const AtlasAlphasType &alphasInVertex2,
-                                    const AtlasAlphasType &alphasInVertex3,
-                                    double &minLogLikelihood,
+                                    const AtlasAlphasType &     alphasInVertex0,
+                                    const AtlasAlphasType &     alphasInVertex1,
+                                    const AtlasAlphasType &     alphasInVertex2,
+                                    const AtlasAlphasType &     alphasInVertex3,
+                                    double &         minLogLikelihood,
                                     AtlasAlphasType &statisticsInVertex0,
                                     AtlasAlphasType &statisticsInVertex1,
                                     AtlasAlphasType &statisticsInVertex2,
@@ -56,7 +56,7 @@ private:
   void operator=(const Self &); // purposely not implemented
 
   //
-  LabelImageType::ConstPointer m_LabelImage;
+  LabelImageType::ConstPointer         m_LabelImage;
   CompressionLookupTable::ConstPointer m_CompressionLookupTable;
 };
 

@@ -22,9 +22,9 @@
  *
  */
 
-#include "tags.h"
 #include "diag.h"
 #include "mrisurf.h"
+#include "tags.h"
 #include "timer.h"
 #include "version.h"
 
@@ -33,7 +33,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -42,18 +42,16 @@ static void print_version();
 const char *Progname;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_surf_fname, *out_fname;
-  int ac, nargs, msec;
+  char **      av, *in_surf_fname, *out_fname;
+  int          ac, nargs, msec;
   MRI_SURFACE *mris;
-  Timer then;
-
+  Timer        then;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_remove_intersection");
 
   nargs = handleVersionOption(argc, argv, "mris_remove_intersection");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -77,7 +75,7 @@ int main(int argc, char *argv[]) {
   }
 
   in_surf_fname = argv[1];
-  out_fname = argv[2];
+  out_fname     = argv[2];
 
   mris = MRISread(in_surf_fname);
   if (!mris)
@@ -106,7 +104,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -118,7 +116,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':

@@ -24,22 +24,22 @@
  */
 
 #include "Annotation2D.h"
-#include "vtkRenderer.h"
+#include "LayerCollection.h"
+#include "LayerMRI.h"
+#include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "MyVTKUtils.h"
+#include "vtkActor2D.h"
+#include "vtkCellArray.h"
+#include "vtkMath.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper2D.h"
-#include "vtkCellArray.h"
-#include "vtkMath.h"
+#include "vtkPropCollection.h"
+#include "vtkProperty2D.h"
+#include "vtkRenderer.h"
 #include "vtkTextActor.h"
 #include "vtkTextProperty.h"
-#include "vtkActor2D.h"
-#include "vtkProperty2D.h"
-#include "LayerCollection.h"
-#include "MainWindow.h"
-#include "vtkPropCollection.h"
-#include "LayerMRI.h"
-#include "LayerPropertyMRI.h"
-#include "MyVTKUtils.h"
 #include <QDebug>
 
 #define NUMBER_OF_COORD_ANNOTATIONS 6
@@ -127,7 +127,7 @@ void Annotation2D::SetTextSize(int nsize) {
 }
 
 void Annotation2D::Update(vtkRenderer *renderer, int nPlane) {
-  double slicePos[3] = {0, 0, 0};
+  double           slicePos[3] = {0, 0, 0};
   LayerCollection *lc = MainWindow::GetMainWindow()->GetLayerCollection("MRI");
   lc->GetSlicePosition(slicePos);
   bool bHasLayer = (lc->GetNumberOfLayers() > 0);
@@ -137,17 +137,17 @@ void Annotation2D::Update(vtkRenderer *renderer, int nPlane) {
   }
 
   LayerMRI *mri = (LayerMRI *)lc->GetActiveLayer();
-  int nSliceNumber[3];
-  double ras[3];
+  int       nSliceNumber[3];
+  double    ras[3];
   if (mri) {
     mri->RemapPositionToRealRAS(slicePos, ras);
     mri->RASToOriginalIndex(ras, nSliceNumber);
   }
 
-  double centPos[3];
+  double  centPos[3];
   double *worigin = lc->GetWorldOrigin();
-  double *wsize = lc->GetWorldSize();
-  double *wvoxel = lc->GetWorldVoxelSize();
+  double *wsize   = lc->GetWorldSize();
+  double *wvoxel  = lc->GetWorldVoxelSize();
   for (int i = 0; i < 3; i++) {
     centPos[i] = worigin[i] + wsize[i] / 2;
     if (!mri) {
@@ -321,8 +321,8 @@ void Annotation2D::Update(vtkRenderer *renderer, int nPlane) {
   // update slice number
   int nOrigPlane = nPlane;
   if (mri) {
-    QString ostr = mri->GetOrientationString();
-    char ch[3][3] = {"RL", "AP", "IS"};
+    QString ostr     = mri->GetOrientationString();
+    char    ch[3][3] = {"RL", "AP", "IS"};
     for (int i = 0; i < 3; i++) {
       if (ostr[i] == ch[nPlane][0] || ostr[i] == ch[nPlane][1]) {
         nOrigPlane = i;
@@ -336,85 +336,85 @@ void Annotation2D::Update(vtkRenderer *renderer, int nPlane) {
 
   // update scale line
   double *xy_pos = m_actorScaleLine->GetPosition();
-  double w_pos[3], w_pos2[3];
-  int nNumOfTicks = 5;
+  double  w_pos[3], w_pos2[3];
+  int     nNumOfTicks = 5;
   MyVTKUtils::NormalizedViewportToWorld(renderer, xy_pos[0], xy_pos[1],
                                         w_pos[0], w_pos[1], w_pos[2]);
   MyVTKUtils::NormalizedViewportToWorld(renderer, xy_pos[0] + 0.5, xy_pos[1],
                                         w_pos2[0], w_pos2[1], w_pos2[2]);
   w_pos[nPlane] = w_pos2[nPlane] = 0;
-  double d = 0.5 / sqrt(vtkMath::Distance2BetweenPoints(w_pos, w_pos2)) * 10;
+  double  d = 0.5 / sqrt(vtkMath::Distance2BetweenPoints(w_pos, w_pos2)) * 10;
   QString title = "1 cm";
   if (d >= 0.5 - xy_pos[0]) {
     d /= 2;
     title = "5 mm";
     if (d >= 0.5 - xy_pos[0]) {
       d *= 0.4;
-      title = "2 mm";
+      title       = "2 mm";
       nNumOfTicks = 2;
       if (d >= 0.5 - xy_pos[0]) {
         d /= 2;
-        title = "1 mm";
+        title       = "1 mm";
         nNumOfTicks = 5;
         if (d >= 0.5 - xy_pos[0]) {
           d /= 2;
-          title = "500 um";
+          title       = "500 um";
           nNumOfTicks = 5;
           if (d >= 0.5 - xy_pos[0]) {
             d *= 0.4;
-            title = "200 um";
+            title       = "200 um";
             nNumOfTicks = 2;
             if (d >= 0.5 - xy_pos[0]) {
               d /= 2;
-              title = "100 um";
+              title       = "100 um";
               nNumOfTicks = 5;
               if (d >= 0.5 - xy_pos[0]) {
                 d /= 2;
-                title = "50 um";
+                title       = "50 um";
                 nNumOfTicks = 5;
                 if (d >= 0.5 - xy_pos[0]) {
                   d *= 0.4;
-                  title = "20 um";
+                  title       = "20 um";
                   nNumOfTicks = 2;
                   if (d >= 0.5 - xy_pos[0]) {
                     d *= 0.5;
-                    title = "10 um";
+                    title       = "10 um";
                     nNumOfTicks = 5;
                     if (d >= 0.5 - xy_pos[0]) {
                       d *= 0.5;
-                      title = "5 um";
+                      title       = "5 um";
                       nNumOfTicks = 5;
                       if (d >= 0.5 - xy_pos[0]) {
                         d *= 0.4;
-                        title = "2 um";
+                        title       = "2 um";
                         nNumOfTicks = 2;
                         if (d >= 0.5 - xy_pos[0]) {
                           d *= 0.5;
-                          title = "1 um";
+                          title       = "1 um";
                           nNumOfTicks = 5;
                           if (d >= 0.5 - xy_pos[0]) {
                             d *= 0.5;
-                            title = "500 nm";
+                            title       = "500 nm";
                             nNumOfTicks = 5;
                             if (d >= 0.5 - xy_pos[0]) {
                               d *= 0.4;
-                              title = "200 nm";
+                              title       = "200 nm";
                               nNumOfTicks = 2;
                               if (d >= 0.5 - xy_pos[0]) {
                                 d *= 0.5;
-                                title = "100 nm";
+                                title       = "100 nm";
                                 nNumOfTicks = 5;
                                 if (d >= 0.5 - xy_pos[0]) {
                                   d *= 0.5;
-                                  title = "50 nm";
+                                  title       = "50 nm";
                                   nNumOfTicks = 5;
                                   if (d >= 0.5 - xy_pos[0]) {
                                     d *= 0.4;
-                                    title = "20 nm";
+                                    title       = "20 nm";
                                     nNumOfTicks = 2;
                                     if (d >= 0.5 - xy_pos[0]) {
                                       d *= 0.5;
-                                      title = "10 nm";
+                                      title       = "10 nm";
                                       nNumOfTicks = 1;
                                     }
                                   }
@@ -441,9 +441,9 @@ void Annotation2D::Update(vtkRenderer *renderer, int nPlane) {
 void Annotation2D::UpdateScaleActors(double length, int nNumOfTicks,
                                      const char *title) {
   // scale line
-  double *pos = m_actorScaleLine->GetPosition();
-  double tick_len = 0.007;
-  vtkPoints *Pts = vtkPoints::New();
+  double *   pos      = m_actorScaleLine->GetPosition();
+  double     tick_len = 0.007;
+  vtkPoints *Pts      = vtkPoints::New();
   Pts->InsertNextPoint(0, 0, 0);
   Pts->InsertNextPoint(length, 0, 0);
   vtkCellArray *Lines = vtkCellArray::New();
@@ -454,7 +454,7 @@ void Annotation2D::UpdateScaleActors(double length, int nNumOfTicks,
   Lines->InsertCellPoint(1);
   Lines->InsertCellPoint(0);
 
-  int n = 2;
+  int    n    = 2;
   double step = length / nNumOfTicks;
   for (int i = 0; i <= nNumOfTicks; i++) {
     Pts->InsertNextPoint(step * i, 0, 0);

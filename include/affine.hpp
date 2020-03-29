@@ -24,10 +24,10 @@
 #ifndef AFFINE_HPP
 #define AFFINE_HPP
 
-#include <xmmintrin.h>
 #include <cstring>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <xmmintrin.h>
 
 #include "matrix.h"
 
@@ -136,8 +136,8 @@ public:
 
   void Identity() {
     this->Clear();
-    this->mat[0] = 1;
-    this->mat[5] = 1;
+    this->mat[0]  = 1;
+    this->mat[5]  = 1;
     this->mat[10] = 1;
     this->mat[15] = 1;
   }
@@ -197,28 +197,28 @@ public:
 //! Specialise matrix-vector for float and use SSE
 template <>
 AffineVector<float>
-    AffineMatrix<float>::operator*(const AffineVector<float> &v) const {
+AffineMatrix<float>::operator*(const AffineVector<float> &v) const {
 
   __m128 resLine, col, val;
 
   // Use x component of input vector
-  val = _mm_set1_ps(v.vec[0]);
-  col = _mm_load_ps(&(this->mat[0]));
+  val     = _mm_set1_ps(v.vec[0]);
+  col     = _mm_load_ps(&(this->mat[0]));
   resLine = _mm_mul_ps(col, val);
 
   // Use y component of input vector
-  val = _mm_set1_ps(v.vec[1]);
-  col = _mm_load_ps(&(this->mat[4]));
+  val     = _mm_set1_ps(v.vec[1]);
+  col     = _mm_load_ps(&(this->mat[4]));
   resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
 
   // Use z component of input vector
-  val = _mm_set1_ps(v.vec[2]);
-  col = _mm_load_ps(&(this->mat[8]));
+  val     = _mm_set1_ps(v.vec[2]);
+  col     = _mm_load_ps(&(this->mat[8]));
   resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
 
   // And the w
-  val = _mm_set1_ps(v.vec[3]);
-  col = _mm_load_ps(&(this->mat[12]));
+  val     = _mm_set1_ps(v.vec[3]);
+  col     = _mm_load_ps(&(this->mat[12]));
   resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
 
   AffineVector<float> res;
@@ -230,36 +230,36 @@ AffineVector<float>
 //! Specialise matrix-matrix for float and use SSE
 template <>
 AffineMatrix<float>
-    AffineMatrix<float>::operator*(const AffineMatrix<float> &m) const {
+AffineMatrix<float>::operator*(const AffineMatrix<float> &m) const {
 
-  __m128 resLine, col, val;
+  __m128              resLine, col, val;
   AffineMatrix<float> res;
-  const float *mLoc = &m.mat[0];
-  const float *thisLoc = &(this->mat[0]);
-  float *resLoc = &(res.mat[0]);
+  const float *       mLoc    = &m.mat[0];
+  const float *       thisLoc = &(this->mat[0]);
+  float *             resLoc  = &(res.mat[0]);
 
   // Loop over columns
   for (unsigned int j = 0; j < kAffineVectorSize; j++) {
-    val = _mm_set1_ps(*mLoc);
-    col = _mm_load_ps(thisLoc);
+    val     = _mm_set1_ps(*mLoc);
+    col     = _mm_load_ps(thisLoc);
     resLine = _mm_mul_ps(col, val);
     mLoc += 1;
     thisLoc += kAffineVectorSize;
 
-    val = _mm_set1_ps(*mLoc);
-    col = _mm_load_ps(thisLoc);
+    val     = _mm_set1_ps(*mLoc);
+    col     = _mm_load_ps(thisLoc);
     resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
     mLoc += 1;
     thisLoc += kAffineVectorSize;
 
-    val = _mm_set1_ps(*mLoc);
-    col = _mm_load_ps(thisLoc);
+    val     = _mm_set1_ps(*mLoc);
+    col     = _mm_load_ps(thisLoc);
     resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
     mLoc += 1;
     thisLoc += kAffineVectorSize;
 
-    val = _mm_set1_ps(*mLoc);
-    col = _mm_load_ps(thisLoc);
+    val     = _mm_set1_ps(*mLoc);
+    col     = _mm_load_ps(thisLoc);
     resLine = _mm_add_ps(_mm_mul_ps(col, val), resLine);
     mLoc += 1;
     thisLoc = &(this->mat[0]); // Reset for next iteration

@@ -42,16 +42,16 @@ static void rotateVertices1axis_wkr(float *xv_out, float *yv_out,
                                     float const *xv_inp, float const *yv_inp,
                                     float *zv_out, float const *zv_inp,
                                     size_t nvertices,
-                                    float alpha) // rotate around x axis
+                                    float  alpha) // rotate around x axis
 {
   float const sa = sin(alpha);
   float const ca = cos(alpha);
 
   for (unsigned vno = 0; vno < nvertices; vno++) {
-    float x = xv_inp[vno];
-    float y = yv_inp[vno];
-    float xp = x * ca + y * sa;
-    float yp = -x * sa + y * ca;
+    float x     = xv_inp[vno];
+    float y     = yv_inp[vno];
+    float xp    = x * ca + y * sa;
+    float yp    = -x * sa + y * ca;
     xv_out[vno] = xp;
     yv_out[vno] = yp;
   }
@@ -82,18 +82,18 @@ rotateVertices_wkr(float *xv_out, float *yv_out, float *zv_out,
   float const cb = (beta == 0.0) ? 1.0 : cos(beta);
   float const cg = (gamma == 0.0) ? 1.0 : cos(gamma);
 
-  float const cacb = ca * cb;
+  float const cacb   = ca * cb;
   float const cacgsb = ca * cg * sb;
-  float const sasg = sa * sg;
-  float const cgsa = cg * sa;
+  float const sasg   = sa * sg;
+  float const cgsa   = cg * sa;
   float const casbsg = ca * sb * sg;
-  float const cbsa = cb * sa;
+  float const cbsa   = cb * sa;
   float const cgsasb = cg * sa * sb;
-  float const casg = ca * sg;
-  float const cacg = ca * cg;
+  float const casg   = ca * sg;
+  float const cacg   = ca * cg;
   float const sasbsg = sa * sb * sg;
-  float const cbcg = cb * cg;
-  float const cbsg = cb * sg;
+  float const cbcg   = cb * cg;
+  float const cbsg   = cb * sg;
 
   for (unsigned int vno = 0; vno < nvertices; vno++) {
 
@@ -168,9 +168,9 @@ void rotateVertices(float *xv_out, float *yv_out, float *zv_out,
 #include <stdio.h>
 
 static const char *final = "PASSED";
-static int errorCount;
-static void check_wkr(float t, float o, float xi, float yi, float zi,
-                      const char *msg) {
+static int         errorCount;
+static void        check_wkr(float t, float o, float xi, float yi, float zi,
+                             const char *msg) {
   if (fabsf(t - o) < 0.01)
     return;
   printf("FAILED %s, t:%g o:%g (x:%g,y:%g,z:%g)\n", msg, t, o, xi, yi, zi);

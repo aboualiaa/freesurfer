@@ -30,15 +30,13 @@
 #ifndef QDECGLMDESIGN_H
 #define QDECGLMDESIGN_H
 
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
+#include "ProgressUpdateGUI.h"
 #include "QdecContrast.h"
 #include "QdecDataTable.h"
-#include "ProgressUpdateGUI.h"
-
-using namespace std;
 
 class QdecGlmDesign {
 public:
@@ -73,10 +71,10 @@ public:
    * @param  iProgressUpdateGUI
    */
   int Create(QdecDataTable *iDataTable, const char *isName,
-             const char *isFirstDiscreteFactor,
-             const char *isSecondDiscreteFactor,
-             const char *isFirstContinuousFactor,
-             const char *isSecondContinuousFactor,
+             const char * isFirstDiscreteFactor,
+             const char * isSecondDiscreteFactor,
+             const char * isFirstContinuousFactor,
+             const char * isSecondContinuousFactor,
              const char **isNuisanceFactors, int inNumNuisanceFactors,
              const char *isMeasure, const char *isHemi, int iSmoothnessLevel,
              ProgressUpdateGUI *iProgressUpdateGUI);
@@ -119,7 +117,7 @@ public:
   /**
    * @return string
    */
-  string GetName();
+  std::string GetName();
 
   /**
    *
@@ -129,7 +127,7 @@ public:
   /**
    * @return string
    */
-  string GetHemi();
+  std::string GetHemi();
 
   /**
    *
@@ -139,7 +137,7 @@ public:
   /**
    * @return string
    */
-  string GetMeasure();
+  std::string GetMeasure();
 
   /**
    *
@@ -159,7 +157,7 @@ public:
   /**
    * @return string
    */
-  string GetDesignMatrixType();
+  std::string GetDesignMatrixType();
 
   /**
    * @param const char*
@@ -169,7 +167,7 @@ public:
   /**
    * @return string
    */
-  string GetSubjectsDir();
+  std::string GetSubjectsDir();
 
   /**
    * @param const char*
@@ -179,7 +177,7 @@ public:
   /**
    * @return string
    */
-  string GetAverageSubject();
+  std::string GetAverageSubject();
 
   /**
    * @param const char*
@@ -190,38 +188,38 @@ public:
    * returns the pathname to the fsgd file required by mri_glmfit.
    * @return string
    */
-  string GetFsgdFileName();
+  std::string GetFsgdFileName();
 
   /**
    * returns the pathname to the input data, 'y', required by mri_glmfit.
    * @return string
    */
-  string GetYdataFileName();
+  std::string GetYdataFileName();
 
   /**
    * @return vector< string >
    */
-  vector<string> GetContrastNames();
+  std::vector<std::string> GetContrastNames();
 
   /**
    * @return vector< string >
    */
-  vector<string> GetContrastQuestions();
+  std::vector<std::string> GetContrastQuestions();
 
   /**
    * @return vector< string >
    */
-  vector<string> GetContrastFileNames();
+  std::vector<std::string> GetContrastFileNames();
 
   /**
    * @return string
    */
-  string GetDefaultWorkingDir();
+  std::string GetDefaultWorkingDir();
 
   /**
    * @return string
    */
-  string GetWorkingDir();
+  std::string GetWorkingDir();
 
   /**
    * @return int
@@ -310,42 +308,42 @@ public:
    * Access the discrete and continuous factor names.
    * Returns a const vector of QdecFactors pointers.
    */
-  vector<QdecFactor *> const &GetDiscreteFactors() const;
-  vector<QdecFactor *> const &GetContinuousFactors() const;
-  vector<QdecFactor *> const &GetNuisanceFactors() const;
+  std::vector<QdecFactor *> const &GetDiscreteFactors() const;
+  std::vector<QdecFactor *> const &GetContinuousFactors() const;
+  std::vector<QdecFactor *> const &GetNuisanceFactors() const;
 
 private:
   // private attributes
   //
 
-  bool mbValid;
+  bool           mbValid;
   QdecDataTable *mDataTable;
-  string msName;
+  std::string    msName;
   // Stores seleted discrete factors.  Initially empty.
-  vector<QdecFactor *> mDiscreteFactors;
+  std::vector<QdecFactor *> mDiscreteFactors;
   // Stores selected continous factors.  Initially empty.
-  vector<QdecFactor *> mContinuousFactors;
+  std::vector<QdecFactor *> mContinuousFactors;
   // Stores selected nuisance factors.  Initially empty.
-  vector<QdecFactor *> mNuisanceFactors;
-  string msMeasure;
-  string msHemi;
-  int mSmoothness;
-  string msDesignMatrixType; // dods or doss
-  string mfnSubjectsDir;
-  string msAverageSubject;
+  std::vector<QdecFactor *> mNuisanceFactors;
+  std::string               msMeasure;
+  std::string               msHemi;
+  int                       mSmoothness;
+  std::string               msDesignMatrixType; // dods or doss
+  std::string               mfnSubjectsDir;
+  std::string               msAverageSubject;
   // Stores contrasts created from an fsgdf file. Can be empty.
-  vector<QdecContrast *> mContrasts;
-  string mfnFsgdfFile;
-  string mfnYdataFile;
-  string mfnDefaultWorkingDir;
-  string mfnWorkingDir;
-  ProgressUpdateGUI *mProgressUpdateGUI;
+  std::vector<QdecContrast *> mContrasts;
+  std::string                 mfnFsgdfFile;
+  std::string                 mfnYdataFile;
+  std::string                 mfnDefaultWorkingDir;
+  std::string                 mfnWorkingDir;
+  ProgressUpdateGUI *         mProgressUpdateGUI;
 
   // A list of excluded subjects. These will not be included when
   // writing the fsgd and ydata files. The key values are subject IDs,
   // as found in data table, and if there is a value present in the set,
   // that subject is to be excluded.
-  std::set<string> maExcludedSubjects;
+  std::set<std::string> maExcludedSubjects;
 
   // private methods
   //
@@ -374,7 +372,7 @@ private:
    * The class name is created by appending
    *   Factor1NameLevelName-Factor2NameLevelName...
    */
-  string GetLevels2ClassName(unsigned int *nthlevels);
+  std::string GetLevels2ClassName(unsigned int *nthlevels);
 
   /**
    * Creates Contrast objects based on the selected factors.

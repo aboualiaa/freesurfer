@@ -1,51 +1,51 @@
 #ifndef __NormalizedCutsFilter_h
 #define __NormalizedCutsFilter_h
 
-#include "itkKdTree.h"
-#include "itkKdTreeGenerator.h"
-#include "itkKdTreeBasedKmeansEstimator.h"
-#include "itkListSample.h"
 #include "itkArray.h"
+#include "itkKdTree.h"
+#include "itkKdTreeBasedKmeansEstimator.h"
+#include "itkKdTreeGenerator.h"
+#include "itkListSample.h"
 #include "itkVector.h"
 //#include "itkImageKmeansModelEstimator.h"
 #include "itkImageRegionIteratorWithIndex.h"
 //#include "itkKMeansClassifierFilter.h"
-#include "itkVariableLengthVector.h"
-#include "itkPolylineCell.h"
-#include "itkWeightedCentroidKdTreeGenerator.h"
-#include "itkMeshToMeshFilter.h"
 #include "ThreadedMembershipFunction.h"
+#include "itkMeshToMeshFilter.h"
+#include "itkPolylineCell.h"
+#include "itkVariableLengthVector.h"
+#include "itkWeightedCentroidKdTreeGenerator.h"
+
 #if ITK_VERSION_MAJOR < 4
 #include "itkMaximumDecisionRule2.h"
 #else
 #include "itkMaximumDecisionRule.h"
 #endif
-using namespace itk;
-using namespace Statistics;
+
 template <class TMesh, class TMembershipFunctionType>
-class NormalizedCutsFilter : public ProcessObject
+class NormalizedCutsFilter : public itk::ProcessObject
 //  public MeshToMeshFilter<TInputMesh, TOutputMesh>
 {
 public:
-  using Self = NormalizedCutsFilter<TMesh, TMembershipFunctionType>;
-  using Pointer = SmartPointer<Self>;
-  using ConstPointer = SmartPointer<const Self>;
+  using Self         = NormalizedCutsFilter<TMesh, TMembershipFunctionType>;
+  using Pointer      = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
   itkNewMacro(Self);
   itkTypeMacro(NormalizedCutsFilter, ProcessObject);
 
-  using MeshType = TMesh;
-  using MeshTraits = typename MeshType::MeshTraits;
-  using PointType = typename MeshType::PointType;
-  using PixelType = typename MeshType::PixelType;
-  using CellType = typename MeshType::CellType;
+  using MeshType        = TMesh;
+  using MeshTraits      = typename MeshType::MeshTraits;
+  using PointType       = typename MeshType::PointType;
+  using PixelType       = typename MeshType::PixelType;
+  using CellType        = typename MeshType::CellType;
   using MeshPointerType = typename MeshType::Pointer;
 
   using ListOfOutputMeshTypePointer = typename std::vector<MeshPointerType>;
 
-  using MeshCellTraits = typename MeshType::CellTraits;
+  using MeshCellTraits     = typename MeshType::CellTraits;
   using MeshCellIdentifier = typename MeshType::CellIdentifier;
-  using MeshCellType = typename MeshType::CellType;
+  using MeshCellType       = typename MeshType::CellType;
 
   using MeshCellAutoPointer = typename MeshType::CellAutoPointer;
   using MeshPointIdentifier = typename MeshType::PointIdentifier;
@@ -58,9 +58,9 @@ public:
   using CellsContainer = typename MeshType::CellsContainer;
 
   using CellsContainerPointer = typename MeshType::CellsContainerPointer;
-  using PolylineCellType = PolylineCell<MeshCellType>;
+  using PolylineCellType      = itk::PolylineCell<MeshCellType>;
 
-  using MembershipFunctionType = TMembershipFunctionType;
+  using MembershipFunctionType    = TMembershipFunctionType;
   using MembershipFunctionPointer = typename MembershipFunctionType::Pointer;
   using MeasurementVectorType =
       typename MembershipFunctionType::MeasurementVectorType;
@@ -68,15 +68,16 @@ public:
   using ThreadedMembershipFunctionType =
       ThreadedMembershipFunction<MembershipFunctionType>;
 
-  using SampleType = ListSample<MeasurementVectorType>;
-  using TreeGeneratorType = WeightedCentroidKdTreeGenerator<SampleType>;
-  using TreeType = typename TreeGeneratorType::KdTreeType;
-  using EstimatorType = KdTreeBasedKmeansEstimator<TreeType>;
+  using SampleType = itk::Statistics::ListSample<MeasurementVectorType>;
+  using TreeGeneratorType =
+      itk::Statistics::WeightedCentroidKdTreeGenerator<SampleType>;
+  using TreeType      = typename TreeGeneratorType::KdTreeType;
+  using EstimatorType = itk::Statistics::KdTreeBasedKmeansEstimator<TreeType>;
 
 #if ITK_VERSION_MAJOR < 4
   typedef MaximumDecisionRule2 DecisionRuleType;
 #else
-  using DecisionRuleType = MaximumDecisionRule;
+  using DecisionRuleType = itk::Statistics::MaximumDecisionRule;
 #endif
 
   //	typedef KMeansClassifierFilter<SampleType,MembershipFunctionType>
@@ -93,7 +94,7 @@ public:
 
   void SetNumberOfClusters(int n) { this->numberOfClusters = n; }
 
-  int GetNumberOfClusters() { return this->numberOfClusters; }
+  int  GetNumberOfClusters() { return this->numberOfClusters; }
   void SetNumberOfFibersForEigenDecomposition(int e) {
     this->m_numberOfFibersForEigenDecomposition = e;
   }
@@ -105,7 +106,7 @@ public:
   void SetLabels(std::vector<std::string> labels) { this->labels = labels; }
 
   MeshPointerType GetInput() { return this->input; }
-  void SetInput(MeshPointerType input) { this->input = input; }
+  void            SetInput(MeshPointerType input) { this->input = input; }
   // void Update();
   virtual void Update();
 
@@ -132,12 +133,12 @@ protected:
   SelectCentroids(typename SampleType::Pointer samples,
                   const typename MembershipFunctionType::Pointer);
   std::vector<std::pair<int, int>>
-  SelectCentroidsParallel(typename SampleType::Pointer samples,
-                          const typename MembershipFunctionType::Pointer);
-  MeshPointerType input;
-  std::vector<std::string> labels;
+                              SelectCentroidsParallel(typename SampleType::Pointer samples,
+                                                      const typename MembershipFunctionType::Pointer);
+  MeshPointerType             input;
+  std::vector<std::string>    labels;
   ListOfOutputMeshTypePointer m_Output;
-  int numberOfClusters;
+  int                         numberOfClusters;
   NormalizedCutsFilter() {}
   ~NormalizedCutsFilter() {}
 
@@ -146,8 +147,8 @@ private:
   unsigned int m_NumberOfIterations;
   NormalizedCutsFilter(const Self &);
   std::vector<std::pair<std::string, std::string>> m_clusterIdHierarchy;
-  void operator=(const Self &);
-  int m_SigmaCurrents;
+  void                                             operator=(const Self &);
+  int                                              m_SigmaCurrents;
   int m_numberOfFibersForEigenDecomposition;
   //		void SaveClustersInMeshes(MembershipFunctionVectorType mfv);
   MembershipFunctionVectorType *m_membershipFunctions;

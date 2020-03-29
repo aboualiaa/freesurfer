@@ -26,10 +26,9 @@
 
 #include <iostream>
 #include <vector>
-using namespace std;
 
-#include "gcamorphtestutils.hpp"
 #include "gcamorphtestutils.h"
+#include "gcamorphtestutils.hpp"
 
 // ======================================================================
 
@@ -42,15 +41,15 @@ GCAMorphUtils::GCAMorphUtils() : varTypeMap(), scalarTypeMap() {
 
   // Sanity check
   if (this->nVars != 24) {
-    cerr << __FUNCTION__ << ": Invalid nVars!" << endl;
+    std::cerr << __FUNCTION__ << ": Invalid nVars!" << std::endl;
     exit(EXIT_FAILURE);
   }
   if (this->nDims != 3) {
-    cerr << __FUNCTION__ << ": Invalid nDims!" << endl;
+    std::cerr << __FUNCTION__ << ": Invalid nDims!" << std::endl;
     exit(EXIT_FAILURE);
   }
   if (this->nScalars != 2) {
-    cerr << __FUNCTION__ << ": Invalid nScalars!" << endl;
+    std::cerr << __FUNCTION__ << ": Invalid nScalars!" << std::endl;
   }
 
   // Create the variable type map
@@ -70,39 +69,41 @@ GCAMorphUtils::GCAMorphUtils() : varTypeMap(), scalarTypeMap() {
   this->varTypeMap["ody"] = NC_FLOAT;
   this->varTypeMap["odz"] = NC_FLOAT;
 
-  this->varTypeMap["origArea"] = NC_FLOAT;
+  this->varTypeMap["origArea"]  = NC_FLOAT;
   this->varTypeMap["origArea1"] = NC_FLOAT;
   this->varTypeMap["origArea2"] = NC_FLOAT;
-  this->varTypeMap["area"] = NC_FLOAT;
-  this->varTypeMap["area1"] = NC_FLOAT;
-  this->varTypeMap["area2"] = NC_FLOAT;
+  this->varTypeMap["area"]      = NC_FLOAT;
+  this->varTypeMap["area1"]     = NC_FLOAT;
+  this->varTypeMap["area2"]     = NC_FLOAT;
 
-  this->varTypeMap["invalid"] = NC_CHAR;
-  this->varTypeMap["label"] = NC_INT;
-  this->varTypeMap["status"] = NC_INT;
+  this->varTypeMap["invalid"]   = NC_CHAR;
+  this->varTypeMap["label"]     = NC_INT;
+  this->varTypeMap["status"]    = NC_INT;
   this->varTypeMap["labelDist"] = NC_FLOAT;
 
-  this->varTypeMap["mean"] = NC_FLOAT;
+  this->varTypeMap["mean"]     = NC_FLOAT;
   this->varTypeMap["variance"] = NC_FLOAT;
 
   // And another sanity check
   if (this->varTypeMap.size() != this->nVars) {
-    cerr << __FUNCTION__ << ": Incorrect entries in varTypeMap" << endl;
+    std::cerr << __FUNCTION__ << ": Incorrect entries in varTypeMap"
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 
   // Create the scalar type map
   this->scalarTypeMap["exp_k"] = NC_DOUBLE;
-  this->scalarTypeMap["neg"] = NC_INT;
+  this->scalarTypeMap["neg"]   = NC_INT;
 
   // Double check the size
   if (this->scalarTypeMap.size() != this->nScalars) {
-    cerr << __FUNCTION__ << ": Incorrect entries in scalarTypeMap" << endl;
+    std::cerr << __FUNCTION__ << ": Incorrect entries in scalarTypeMap"
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 }
 
-void GCAMorphUtils::Write(const GCAM *src, string fName) const {
+void GCAMorphUtils::Write(const GCAM *src, std::string fName) const {
   // Construct the filename, using fName passed by value
   fName += ".nc";
 
@@ -127,8 +128,8 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const {
   NC_SAFE_CALL(nc_def_dim(ncid, "z", src->depth, &dimIDs[this->iZ]));
 
   // Set up the variable IDs
-  map<string, int> varIDmap;
-  map<string, nc_type>::const_iterator myIt;
+  std::map<std::string, int>                     varIDmap;
+  std::map<std::string, nc_type>::const_iterator myIt;
 
   for (myIt = this->varTypeMap.begin(); myIt != this->varTypeMap.end();
        myIt++) {
@@ -140,14 +141,15 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const {
 
   // Sanity check
   if (varTypeMap.size() != varIDmap.size()) {
-    cerr << __FUNCTION__ << ": Failed to create varIDmap correctly" << endl;
+    std::cerr << __FUNCTION__ << ": Failed to create varIDmap correctly"
+              << std::endl;
     exit(EXIT_FAILURE);
   }
 
   // Set up the scalars
 
-  map<string, int> scalarIDmap;
-  map<string, nc_type>::const_iterator scalarVarIt;
+  std::map<std::string, int>                     scalarIDmap;
+  std::map<std::string, nc_type>::const_iterator scalarVarIt;
 
   // Do the doubles
   for (scalarVarIt = this->scalarTypeMap.begin();
@@ -166,16 +168,16 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const {
   // Pack into contiguous arrays
   const size_t nElems = src->width * src->height * src->depth;
 
-  vector<double> x(nElems), y(nElems), z(nElems);
-  vector<double> origx(nElems), origy(nElems), origz(nElems);
-  vector<float> dx(nElems), dy(nElems), dz(nElems);
-  vector<float> odx(nElems), ody(nElems), odz(nElems);
-  vector<float> area(nElems), area1(nElems), area2(nElems);
-  vector<float> origArea(nElems), origArea1(nElems), origArea2(nElems);
-  vector<char> invalid(nElems);
-  vector<int> label(nElems), status(nElems);
-  vector<float> labelDist(nElems);
-  vector<float> mean(nElems), variance(nElems);
+  std::vector<double> x(nElems), y(nElems), z(nElems);
+  std::vector<double> origx(nElems), origy(nElems), origz(nElems);
+  std::vector<float>  dx(nElems), dy(nElems), dz(nElems);
+  std::vector<float>  odx(nElems), ody(nElems), odz(nElems);
+  std::vector<float>  area(nElems), area1(nElems), area2(nElems);
+  std::vector<float>  origArea(nElems), origArea1(nElems), origArea2(nElems);
+  std::vector<char>   invalid(nElems);
+  std::vector<int>    label(nElems), status(nElems);
+  std::vector<float>  labelDist(nElems);
+  std::vector<float>  mean(nElems), variance(nElems);
 
   // Ugly loop to do the writing element by element
   for (int i = 0; i < src->width; i++) {
@@ -201,24 +203,24 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const {
         ody.at(i1d) = gcamn.ody;
         odz.at(i1d) = gcamn.odz;
 
-        area.at(i1d) = gcamn.area;
+        area.at(i1d)  = gcamn.area;
         area1.at(i1d) = gcamn.area1;
         area2.at(i1d) = gcamn.area2;
 
-        origArea.at(i1d) = gcamn.orig_area;
+        origArea.at(i1d)  = gcamn.orig_area;
         origArea1.at(i1d) = gcamn.orig_area1;
         origArea2.at(i1d) = gcamn.orig_area2;
 
-        invalid.at(i1d) = gcamn.invalid;
-        label.at(i1d) = gcamn.label;
-        status.at(i1d) = gcamn.status;
+        invalid.at(i1d)   = gcamn.invalid;
+        label.at(i1d)     = gcamn.label;
+        status.at(i1d)    = gcamn.status;
         labelDist.at(i1d) = gcamn.label_dist;
 
         if (gcamn.gc != NULL) {
-          mean.at(i1d) = gcamn.gc->means[0];
+          mean.at(i1d)     = gcamn.gc->means[0];
           variance.at(i1d) = gcamn.gc->covars[0];
         } else {
-          mean.at(i1d) = -1;
+          mean.at(i1d)     = -1;
           variance.at(i1d) = -1;
         }
       }
@@ -282,15 +284,15 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const {
   // Close the file
   NC_SAFE_CALL(nc_close(ncid));
 
-  cout << "complete" << endl;
+  std::cout << "complete" << std::endl;
 }
 
 // ---------------
 
-void GCAMorphUtils::Read(GCAM **dst, string fName) const {
+void GCAMorphUtils::Read(GCAM **dst, std::string fName) const {
   // Make sure input pointer is NULL
   if (*dst != NULL) {
-    cerr << __FUNCTION__ << ": dst pointer not NULL!" << endl;
+    std::cerr << __FUNCTION__ << ": dst pointer not NULL!" << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -312,16 +314,16 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const {
   NC_SAFE_CALL(nc_inq_nvars(ncid, &nVarFile));
 
   if (nDimFile != static_cast<int>(this->nDims)) {
-    cerr << "Invalid number of dimensions " << nDimFile << endl;
+    std::cerr << "Invalid number of dimensions " << nDimFile << std::endl;
     exit(EXIT_FAILURE);
   }
 
   if (nVarFile != static_cast<int>(this->totalVars)) {
-    std::cerr << "Invalid number of variables " << nVarFile << endl;
+    std::cerr << "Invalid number of variables " << nVarFile << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  int dimIDs[3];
+  int    dimIDs[3];
   size_t dimLen[3];
 
   NC_SAFE_CALL(nc_inq_dimid(ncid, "x", &dimIDs[this->iX]));
@@ -343,8 +345,8 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const {
   (*dst)->ninputs = 1;
 
   // Get hold of the variable IDs
-  map<string, int> varIDmap;
-  map<string, nc_type>::const_iterator myIt;
+  std::map<std::string, int>                     varIDmap;
+  std::map<std::string, nc_type>::const_iterator myIt;
 
   for (myIt = this->varTypeMap.begin(); myIt != this->varTypeMap.end();
        myIt++) {
@@ -358,15 +360,15 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const {
     NC_SAFE_CALL(
         nc_inq_vartype(ncid, varIDmap.find(myIt->first)->second, &varType));
     if (varType != myIt->second) {
-      cerr << __FUNCTION__ << ": Mismatched type for variable " << myIt->first
-           << endl;
+      std::cerr << __FUNCTION__ << ": Mismatched type for variable "
+                << myIt->first << std::endl;
       exit(EXIT_FAILURE);
     }
   }
 
   // Get hold of the variable IDs for the scalars
-  map<string, int> scalarIDmap;
-  map<string, nc_type>::const_iterator scalarVarIt;
+  std::map<std::string, int>                     scalarIDmap;
+  std::map<std::string, nc_type>::const_iterator scalarVarIt;
 
   for (scalarVarIt = this->scalarTypeMap.begin();
        scalarVarIt != this->scalarTypeMap.end(); scalarVarIt++) {
@@ -381,8 +383,8 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const {
     NC_SAFE_CALL(nc_inq_vartype(
         ncid, scalarIDmap.find(scalarVarIt->first)->second, &varType));
     if (varType != scalarVarIt->second) {
-      cerr << __FUNCTION__ << ": Mismatched type for scalar "
-           << scalarVarIt->first << endl;
+      std::cerr << __FUNCTION__ << ": Mismatched type for scalar "
+                << scalarVarIt->first << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -390,16 +392,16 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const {
   // Read into contiguous arrays
   const size_t nElems = (*dst)->width * (*dst)->height * (*dst)->depth;
 
-  vector<double> x(nElems), y(nElems), z(nElems);
-  vector<double> origx(nElems), origy(nElems), origz(nElems);
-  vector<float> dx(nElems), dy(nElems), dz(nElems);
-  vector<float> odx(nElems), ody(nElems), odz(nElems);
-  vector<float> area(nElems), area1(nElems), area2(nElems);
-  vector<float> origArea(nElems), origArea1(nElems), origArea2(nElems);
-  vector<char> invalid(nElems);
-  vector<int> label(nElems), status(nElems);
-  vector<float> labelDist(nElems);
-  vector<float> mean(nElems), variance(nElems);
+  std::vector<double> x(nElems), y(nElems), z(nElems);
+  std::vector<double> origx(nElems), origy(nElems), origz(nElems);
+  std::vector<float>  dx(nElems), dy(nElems), dz(nElems);
+  std::vector<float>  odx(nElems), ody(nElems), odz(nElems);
+  std::vector<float>  area(nElems), area1(nElems), area2(nElems);
+  std::vector<float>  origArea(nElems), origArea1(nElems), origArea2(nElems);
+  std::vector<char>   invalid(nElems);
+  std::vector<int>    label(nElems), status(nElems);
+  std::vector<float>  labelDist(nElems);
+  std::vector<float>  mean(nElems), variance(nElems);
 
   // We use 'find' to get an exception if the name doesn't exist
 
@@ -473,23 +475,23 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const {
         gcamn.ody = ody.at(i1d);
         gcamn.odz = odz.at(i1d);
 
-        gcamn.orig_area = origArea.at(i1d);
+        gcamn.orig_area  = origArea.at(i1d);
         gcamn.orig_area1 = origArea1.at(i1d);
         gcamn.orig_area2 = origArea2.at(i1d);
 
-        gcamn.area = area.at(i1d);
+        gcamn.area  = area.at(i1d);
         gcamn.area1 = area1.at(i1d);
         gcamn.area2 = area2.at(i1d);
 
-        gcamn.invalid = invalid.at(i1d);
-        gcamn.label = label.at(i1d);
-        gcamn.status = status.at(i1d);
+        gcamn.invalid    = invalid.at(i1d);
+        gcamn.label      = label.at(i1d);
+        gcamn.status     = status.at(i1d);
         gcamn.label_dist = labelDist.at(i1d);
 
         // Mean and variance require special handling
         if (variance.at(i1d) >= 0) {
-          gcamn.gc = alloc_gcs(1, 0, 1);
-          gcamn.gc->means[0] = mean.at(i1d);
+          gcamn.gc            = alloc_gcs(1, 0, 1);
+          gcamn.gc->means[0]  = mean.at(i1d);
           gcamn.gc->covars[0] = variance.at(i1d);
         } else {
           gcamn.gc = NULL;
@@ -506,7 +508,7 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const {
 
   NC_SAFE_CALL(nc_close(ncid));
 
-  cout << "complete" << endl;
+  std::cout << "complete" << std::endl;
 }
 
 // #########################################################################

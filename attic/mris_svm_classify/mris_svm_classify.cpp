@@ -23,53 +23,53 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "mrisurf.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
-#include "timer.h"
-#include "svm.h"
+#include "error.h"
 #include "label.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "svm.h"
+#include "timer.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static char subjects_dir[STRLEN];
-static float true_class = 0;
-static char *log_fname = NULL;
-static int navgs = 0;
-static LABEL *area = NULL;
-static char *label_name = NULL;
+static char   subjects_dir[STRLEN];
+static float  true_class = 0;
+static char * log_fname  = NULL;
+static int    navgs      = 0;
+static LABEL *area       = NULL;
+static char * label_name = NULL;
 
 #define MAX_ANNOTATIONS 100
-static int annotations[MAX_ANNOTATIONS];
+static int   annotations[MAX_ANNOTATIONS];
 static char *anames[MAX_ANNOTATIONS];
-static int nannotations = 0;
-static char *annot_name = "aparc";
+static int   nannotations = 0;
+static char *annot_name   = "aparc";
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN], *input_name, *subject_name, *cp, *hemi, *svm_name,
       *surf_name, *output_subject_name;
-  int ac, nargs, vno;
-  int msec, minutes, seconds;
-  Timer start;
+  int          ac, nargs, vno;
+  int          msec, minutes, seconds;
+  Timer        start;
   MRI_SURFACE *mris;
-  SVM *svm;
-  double classification;
-  float *inputs;
-  MRI_SP *mrisp;
+  SVM *        svm;
+  double       classification;
+  float *      inputs;
+  MRI_SP *     mrisp;
 
   nargs = handleVersionOption(argc, argv, "mris_svm_classify");
   if (nargs && argc - nargs == 1)
@@ -101,12 +101,12 @@ int main(int argc, char *argv[]) {
   if (argc < 7)
     usage_exit(1);
 
-  subject_name = argv[1];
-  hemi = argv[2];
-  surf_name = argv[3];
-  input_name = argv[4];
+  subject_name        = argv[1];
+  hemi                = argv[2];
+  surf_name           = argv[3];
+  input_name          = argv[4];
   output_subject_name = argv[5];
-  svm_name = argv[6];
+  svm_name            = argv[6];
 
   printf("reading svm from %s...\n", svm_name);
   svm = SVMread(svm_name);
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
               input_name);
 
   if (nannotations > 0) {
-    int vno, a, found;
+    int     vno, a, found;
     VERTEX *v;
 
     if (MRISreadAnnotation(mris, annot_name) != NO_ERROR)
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
   free(inputs);
   MRISfree(&mris);
   SVMfree(&svm);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -259,7 +259,7 @@ static int get_option(int argc, char *argv[]) {
       if (true_class > 1.0f)
         true_class = -1.0f;
       log_fname = argv[3];
-      nargs = 2;
+      nargs     = 2;
       break;
     case 'L':
       label_name = argv[2];
@@ -268,7 +268,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':

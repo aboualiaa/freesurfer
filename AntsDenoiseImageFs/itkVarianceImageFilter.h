@@ -22,8 +22,7 @@
 #include "itkImage.h"
 #include "itkNumericTraits.h"
 
-namespace itk
-{
+namespace itk {
 /** \class VarianceImageFilter
  * \brief Applies an averaging filter to an image
  *
@@ -44,10 +43,9 @@ namespace itk
  * \wikiexample{Smoothing/VarianceImageFilter,Variance filter an image}
  * \endwiki
  */
-template< typename TInputImage, typename TOutputImage >
-class VarianceImageFilter final :
-  public BoxImageFilter< TInputImage, TOutputImage >
-{
+template <typename TInputImage, typename TOutputImage>
+class VarianceImageFilter final
+    : public BoxImageFilter<TInputImage, TOutputImage> {
 public:
   /** Extract dimension from input and output image. */
   itkStaticConstMacro(InputImageDimension, unsigned int,
@@ -60,10 +58,10 @@ public:
   typedef TOutputImage OutputImageType;
 
   /** Standard class typedefs. */
-  typedef VarianceImageFilter                               Self;
-  typedef BoxImageFilter< InputImageType, OutputImageType > Superclass;
-  typedef SmartPointer< Self >                              Pointer;
-  typedef SmartPointer< const Self >                        ConstPointer;
+  typedef VarianceImageFilter                             Self;
+  typedef BoxImageFilter<InputImageType, OutputImageType> Superclass;
+  typedef SmartPointer<Self>                              Pointer;
+  typedef SmartPointer<const Self>                        ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -72,9 +70,9 @@ public:
   itkTypeMacro(VarianceImageFilter, BoxImageFilter);
 
   /** Image typedef support. */
-  typedef typename InputImageType::PixelType                 InputPixelType;
-  typedef typename OutputImageType::PixelType                OutputPixelType;
-  typedef typename NumericTraits< InputPixelType >::RealType InputRealType;
+  typedef typename InputImageType::PixelType               InputPixelType;
+  typedef typename OutputImageType::PixelType              OutputPixelType;
+  typedef typename NumericTraits<InputPixelType>::RealType InputRealType;
 
   typedef typename InputImageType::RegionType  InputImageRegionType;
   typedef typename OutputImageType::RegionType OutputImageRegionType;
@@ -83,8 +81,8 @@ public:
 
 #ifdef ITK_USE_CONCEPT_CHECKING
   // Begin concept checking
-  itkConceptMacro( InputHasNumericTraitsCheck,
-                   ( Concept::HasNumericTraits< InputPixelType > ) );
+  itkConceptMacro(InputHasNumericTraitsCheck,
+                  (Concept::HasNumericTraits<InputPixelType>));
   // End concept checking
 #endif
 
@@ -102,8 +100,8 @@ protected:
    *
    * \sa BoxImageFilter::ThreadedGenerateData(),
    *     BoxImageFilter::GenerateData() */
-  void ThreadedGenerateData(const OutputImageRegionType & outputRegionForThread,
-                            ThreadIdType threadId) override;
+  void ThreadedGenerateData(const OutputImageRegionType &outputRegionForThread,
+                            ThreadIdType                 threadId) override;
 
 private:
   VarianceImageFilter(const Self &) = delete;

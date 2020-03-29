@@ -2,13 +2,13 @@
 
 #include "mrisurf.h"
 
-#include "vtkObjectFactory.h"
-#include "vtkKWWindowBase.h"
-#include "vtkKWFrame.h"
-#include "vtkKWRGBATransferFunctionEditor.h"
-#include "vtkRGBATransferFunction.h"
 #include "vtkFloatArray.h"
+#include "vtkKWFrame.h"
 #include "vtkKWHistogram.h"
+#include "vtkKWRGBATransferFunctionEditor.h"
+#include "vtkKWWindowBase.h"
+#include "vtkObjectFactory.h"
+#include "vtkRGBATransferFunction.h"
 
 extern int Rgbatransferfunctioneditortesterlib_SafeInit(Tcl_Interp *);
 
@@ -18,7 +18,7 @@ int main(int iArgc, char **iArgv) {
 
   Tcl_Interp *interp = vtkKWApplication::InitializeTcl(iArgc, iArgv, &cerr);
   if (!interp) {
-    cerr << "Error initializing Tcl." << endl;
+    std::cerr << "Error initializing Tcl." << std::endl;
     return 1;
   }
 
@@ -77,13 +77,13 @@ void vtkKWRGBATransferFunctionEditorTester::Start(int iArgc, char **iArgv) {
   mEditor->SetRGBATransferFunction(colors);
 
   const int cValues = 163842;
-  float *aValues = NULL;
-  int eRead = MRISreadValuesIntoArray(
+  float *   aValues = NULL;
+  int       eRead   = MRISreadValuesIntoArray(
       "vtkKWRGBATransferFunctionEditorTester-scalars.mgh", cValues, &aValues);
   if (0 != eRead) {
     if (aValues)
       free(aValues);
-    cerr << "Could not read scalar file" << endl;
+    std::cerr << "Could not read scalar file" << std::endl;
     this->SetExitStatus(1);
     return;
   }
@@ -117,7 +117,7 @@ void vtkKWRGBATransferFunctionEditorTester::Start(int iArgc, char **iArgv) {
   colors->AddRGBAPoint(  2, 1, 0, 0, 1 );
   colors->AddRGBAPoint(  3, 1, 1, 0, 1 );
   colors->Build();
-  
+
   mEditor->SetPointCountMinimum( 8 );
   mEditor->SetPointCountMaximum( 8 );
   mEditor->SetPointSymmetry( 0, 7 ); // max

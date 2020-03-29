@@ -43,7 +43,7 @@ public:
 
 void TestPoistatsReplica::setUp() {
   m_PoistatsModel = new PoistatsModel();
-  m_Replica = new PoistatsReplica(m_PoistatsModel);
+  m_Replica       = new PoistatsReplica(m_PoistatsModel);
 }
 
 void TestPoistatsReplica::tearDown() {
@@ -110,7 +110,7 @@ void TestPoistatsReplica::TestGenerateUnitSphereRandom() {
       {0.222737, 0.966395, 0.128328},     {-0.73637, 0.238522, -0.633141},
       {0.266053, -0.85653, 0.442235},     {-0.734796, -0.607653, -0.301385}};
 
-  const int numberOfPoints = 100;
+  const int numberOfPoints    = 100;
   const int spatialDimensions = 3;
 
   const long seed = 10;
@@ -126,7 +126,7 @@ void TestPoistatsReplica::TestGenerateUnitSphereRandom() {
     for (unsigned int cColumn = 0; cColumn < resultRandomUnitSphere.cols();
          cColumn++) {
       double expected = expectedRandomUnitSphere[cRow][cColumn];
-      double result = resultRandomUnitSphere[cRow][cColumn];
+      double result   = resultRandomUnitSphere[cRow][cColumn];
 
       CPPUNIT_ASSERT_DOUBLES_EQUAL(expected, result, tolerance);
     }
@@ -138,7 +138,7 @@ void TestPoistatsReplica::TestGenerateConstrainedRandomPoint3D() {
   std::cerr << "TestGenerateConstrainedRandomPoint3D" << std::endl;
 
   const int spatialDimensions = 3;
-  const int numberOfPoints = 3;
+  const int numberOfPoints    = 3;
 
   vnl_vector<double> currentPoint(spatialDimensions);
   currentPoint[0] = 1;
@@ -160,7 +160,7 @@ void TestPoistatsReplica::TestGenerateConstrainedRandomPoint3D() {
   possibleNewPoints[2][2] = 2.0;
 
   const double sigma = 2.5;
-  long seed = 10;
+  long         seed  = 10;
   m_PoistatsModel->SetRandomSeed(seed);
 
   PoistatsReplica::ArrayType newRandomPoint(spatialDimensions);
@@ -196,7 +196,7 @@ void TestPoistatsReplica::TestCopyPath() {
 
   const double points1[][3] = {{1, 2, 3}, {4, 5, 6}, {1, 5, -2}, {5, 1, 0}};
 
-  vnl_matrix<double> vnlPath1(*points1, 4, 3);
+  vnl_matrix<double>          vnlPath1(*points1, 4, 3);
   PoistatsReplica::MatrixType path1(vnlPath1);
 
   PoistatsReplica::MatrixType destinationPath(4, 3);
@@ -205,21 +205,21 @@ void TestPoistatsReplica::TestCopyPath() {
   for (unsigned int cRow = 0; cRow < path1.rows(); cRow++) {
     for (unsigned int cCol = 0; cCol < path1.cols(); cCol++) {
 
-      const double source = path1[cRow][cCol];
+      const double source      = path1[cRow][cCol];
       const double destination = destinationPath[cRow][cCol];
 
       CPPUNIT_ASSERT_EQUAL(source, destination);
     }
   }
 
-  vnl_matrix<double> vnlPath2(*points1, 4, 3);
+  vnl_matrix<double>          vnlPath2(*points1, 4, 3);
   PoistatsReplica::MatrixType path2(vnlPath2);
   PoistatsReplica::CopyPath(&path2, &destinationPath);
 
   for (unsigned int cRow = 0; cRow < path2.rows(); cRow++) {
     for (unsigned int cCol = 0; cCol < path2.cols(); cCol++) {
 
-      const double source = path2[cRow][cCol];
+      const double source      = path2[cRow][cCol];
       const double destination = destinationPath[cRow][cCol];
 
       CPPUNIT_ASSERT_EQUAL(source, destination);
@@ -241,7 +241,7 @@ void TestPoistatsReplica::TestFoundBestPath() {
       {1, 2, 3},  {5, 1, 0},  {1, 5, -2}, {4, 5, 6},  {4, 5, 6},  {1, 2, 3},
       {5, 1, 0},  {1, 5, -2}, {4, 5, 6},  {4, 5, 6},  {1, 2, 3},  {5, 1, 0},
       {1, 5, -2}, {4, 5, 6}};
-  vnl_matrix<double> vnlTrialPath(*trialPathPoints, 50, 3);
+  vnl_matrix<double>          vnlTrialPath(*trialPathPoints, 50, 3);
   PoistatsReplica::MatrixType trialPath(vnlTrialPath);
 
   m_Replica->SetCurrentTrialPath(&trialPath);
@@ -255,7 +255,7 @@ void TestPoistatsReplica::TestFoundBestPath() {
   m_Replica->SetBestTrialPath(&zeroes);
 
   const double basePoints[][3] = {{4, 5, 6}, {1, 2, 3}, {5, 1, 0}, {1, 5, -2}};
-  vnl_matrix<double> vnlBasePath(*basePoints, 4, 3);
+  vnl_matrix<double>          vnlBasePath(*basePoints, 4, 3);
   PoistatsReplica::MatrixType basePath(vnlBasePath);
   m_Replica->FoundBestPath(&basePath);
 
@@ -263,8 +263,8 @@ void TestPoistatsReplica::TestFoundBestPath() {
     for (unsigned int cCol = 0; cCol < basePath.cols(); cCol++) {
 
       PoistatsReplica::MatrixPointer actualBasePath = m_Replica->GetBasePath();
-      const double expected = basePath[cRow][cCol];
-      const double actual = (*actualBasePath)[cRow][cCol];
+      const double                   expected       = basePath[cRow][cCol];
+      const double                   actual = (*actualBasePath)[cRow][cCol];
 
       CPPUNIT_ASSERT_EQUAL(expected, actual);
     }
@@ -276,7 +276,7 @@ void TestPoistatsReplica::TestFoundBestPath() {
       PoistatsReplica::MatrixPointer actualBasePath =
           m_Replica->GetBestTrialPath();
       const double expected = trialPath[cRow][cCol];
-      const double actual = (*actualBasePath)[cRow][cCol];
+      const double actual   = (*actualBasePath)[cRow][cCol];
 
       CPPUNIT_ASSERT_EQUAL(expected, actual);
     }
@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
   Progname = (char *)"TestPoistatsReplica";
 
   const int SUCCESS = 0;
-  const int FAIL = 1;
+  const int FAIL    = 1;
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(TestPoistatsReplica::suite());

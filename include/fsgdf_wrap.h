@@ -53,9 +53,9 @@
 
 /* -------- TYPES TABLE (END) -------- */
 
-#define SWIG_init Fsgdf_Init
-#define SWIG_name "fsgdf"
-#define SWIG_prefix ""
+#define SWIG_init    Fsgdf_Init
+#define SWIG_name    "fsgdf"
+#define SWIG_prefix  ""
 #define SWIG_version "0.0"
 
 #ifdef MAC_TCL

@@ -23,11 +23,11 @@
  *
  */
 
-#include "mri.h"
 #include "error.h"
+#include "mri.h"
 
-#define SET_METHOD_XYZ 0
-#define SET_METHOD_RANDOM 1
+#define SET_METHOD_XYZ      0
+#define SET_METHOD_RANDOM   1
 #define SET_METHOD_CONSTANT 2
 
 char sSetMethods[][256] = {"XYZ", "Random", "Constant"};
@@ -73,21 +73,21 @@ void PrintUsage(char *isError) {
 
 int main(int argc, char **argv) {
 
-  MRI *mri = nullptr;
-  int zX = 256;
-  int zY = 256;
-  int zZ = 256;
-  int err = NO_ERROR;
-  int nX = 0;
-  int nY = 0;
-  int nZ = 0;
-  float sizeX = 1.0;
-  float sizeY = 1.0;
-  float sizeZ = 1.0;
-  int setMethod = SET_METHOD_XYZ;
-  int setValue = 0;
-  char fnVol[256] = "new_volume.mgz";
-  int i;
+  MRI * mri        = nullptr;
+  int   zX         = 256;
+  int   zY         = 256;
+  int   zZ         = 256;
+  int   err        = NO_ERROR;
+  int   nX         = 0;
+  int   nY         = 0;
+  int   nZ         = 0;
+  float sizeX      = 1.0;
+  float sizeY      = 1.0;
+  float sizeZ      = 1.0;
+  int   setMethod  = SET_METHOD_XYZ;
+  int   setValue   = 0;
+  char  fnVol[256] = "new_volume.mgz";
+  int   i;
   char *arg = nullptr;
 
   for (i = 1; i < argc; i++) {
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
           exit(1);
         }
         setMethod = SET_METHOD_CONSTANT;
-        setValue = atoi(argv[i + 2]);
+        setValue  = atoi(argv[i + 2]);
         i += 2;
         printf("set_method is constant, %d\n", setValue);
       } else {

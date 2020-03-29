@@ -58,7 +58,7 @@ void GetGCAnodeStats(const GCA *const src) {
             << "( " << nx << ", " << ny << ", " << nz << " )" << std::endl;
   // ---
 
-  MinMax<int> nLabelsNode, nMaxLabelsNode;
+  MinMax<int>   nLabelsNode, nMaxLabelsNode;
   MinMax<short> nLabelsGC1D[GIBBS_NEIGHBORHOOD];
 
   for (unsigned int ix = 0; ix < nx; ix++) {

@@ -23,10 +23,10 @@
  *
  */
 
-#include "timer.h"
 #include "diag.h"
 #include "mrisurf.h"
 #include "sig.h"
+#include "timer.h"
 #include "version.h"
 
 static char vcid[] =
@@ -40,7 +40,7 @@ static char vcid[] =
 
 static int cvector_expand_label(LABEL *area, float f, float *vout);
 static int extract_thickness_at_best_scale(MRI_SURFACE *mris,
-                                           float **c1_avg_curvs,
+                                           float **     c1_avg_curvs,
                                            float *vbest_avgs, float **c1_curvs,
                                            int num, int nvectors);
 static int mark_thresholded_vertices(MRI_SURFACE *mris, float *vbest_snr,
@@ -48,9 +48,9 @@ static int mark_thresholded_vertices(MRI_SURFACE *mris, float *vbest_snr,
 static int segment_and_write_labels(char *subject, char *fname,
                                     MRI_SURFACE *mris, LABEL ***plabels,
                                     int *pnlabels, int offset);
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -76,7 +76,7 @@ static int  extract_thickness_at_best_scale(MRI_SURFACE *mris,
     int num, int nvectors);
 static double    cvector_len(float *v, int num) ;
 #endif
-static int cvector_copy(float *v1, float *v2, int num);
+static int    cvector_copy(float *v1, float *v2, int num);
 static double cvector_compute_dist_free_snr(float **c1_curvs, int num_class1,
                                             float **c2_curvs, int num_class2,
                                             float *c1_mean, float *c2_mean,
@@ -95,7 +95,7 @@ static int   cvector_track_best_snr(float *vsnr, float *vbest_snr,
 #endif
 
 static float *cvector_alloc(int num);
-static int cvector_clear(float *v, int num);
+static int    cvector_clear(float *v, int num);
 static int cvector_add_variances(float *c1_var, float *c2_var, int num_class1,
                                  int num_class2, float *total_var,
                                  int nvertices);
@@ -108,20 +108,20 @@ static int cvector_track_best_stats(float *vsnr, float *vbest_snr,
 
 /*-------------------------------- DATA ----------------------------*/
 
-static float tthresh = 1.0f;
-static int roi_flag = 0;
-static int cond_no1 = 0;
-static int cond_no2 = 1;
+static float tthresh  = 1.0f;
+static int   roi_flag = 0;
+static int   cond_no1 = 0;
+static int   cond_no2 = 1;
 
 const char *Progname;
 
 static float min_label_area = 30.0f;
-static int write_flag = 0;
+static int   write_flag     = 0;
 static char *output_subject = nullptr;
-static char *label_name = nullptr;
-static char *prefix = "";
+static char *label_name     = nullptr;
+static char *prefix         = "";
 
-static int max_avgs = 500;
+static int max_avgs            = 500;
 static int use_no_distribution = 0;
 
 static int bonferroni = 0;
@@ -138,13 +138,13 @@ int main(int argc, char *argv[]) {
       *c1_var, *c2_var, *class_var, *pvals, **c1_avg_curvs, *vbest_snr,
       *vbest_avgs, *vtotal_var, *vsnr, **c2_avg_curvs, *vbest_pvalues,
       *c1_best_var, *c2_best_var, *c1_best_mean, *c2_best_mean;
-  MRI_SP *mrisp;
-  LABEL *area, **labels = nullptr;
-  FILE *fp = nullptr;
-  double snr, max_snr;
+  MRI_SP * mrisp;
+  LABEL *  area, **labels = nullptr;
+  FILE *   fp = nullptr;
+  double   snr, max_snr;
   double **c1_thickness, **c2_thickness;
-  Timer start;
-  int msec, minutes, seconds;
+  Timer    start;
+  int      msec, minutes, seconds;
 
   nargs = handleVersionOption(argc, argv, "mris_multiscale_stats");
   if (nargs && argc - nargs == 1)
@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 
   strcpy(subjects_dir, cp);
 
-  hemi = argv[1];
+  hemi      = argv[1];
   surf_name = argv[2];
   curv_name = argv[3];
 
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
 
   /* first determine the number of subjects in each class */
   num_class1 = 0;
-  n = ARGV_OFFSET;
+  n          = ARGV_OFFSET;
   do {
     num_class1++;
     n++;
@@ -209,15 +209,15 @@ int main(int argc, char *argv[]) {
   nvertices = mris->nvertices;
   MRISfree(&mris);
 
-  pvals = cvector_alloc(nvertices);
-  c1_mean = cvector_alloc(nvertices);
-  c2_mean = cvector_alloc(nvertices);
+  pvals        = cvector_alloc(nvertices);
+  c1_mean      = cvector_alloc(nvertices);
+  c2_mean      = cvector_alloc(nvertices);
   c1_best_mean = cvector_alloc(nvertices);
   c2_best_mean = cvector_alloc(nvertices);
-  c1_var = cvector_alloc(nvertices);
-  c2_var = cvector_alloc(nvertices);
-  c1_best_var = cvector_alloc(nvertices);
-  c2_best_var = cvector_alloc(nvertices);
+  c1_var       = cvector_alloc(nvertices);
+  c2_var       = cvector_alloc(nvertices);
+  c1_best_var  = cvector_alloc(nvertices);
+  c2_best_var  = cvector_alloc(nvertices);
 
   num_class2 = 0;
   n++; /* skip ':' */
@@ -233,22 +233,22 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "%d subjects in class 1, %d subjects in class 2\n",
           num_class1, num_class2);
 
-  c1_subjects = (char **)calloc(num_class1, sizeof(char *));
-  c1_curvs = (float **)calloc(num_class1, sizeof(char *));
+  c1_subjects  = (char **)calloc(num_class1, sizeof(char *));
+  c1_curvs     = (float **)calloc(num_class1, sizeof(char *));
   c1_avg_curvs = (float **)calloc(num_class1, sizeof(char *));
-  c2_subjects = (char **)calloc(num_class2, sizeof(char *));
-  c2_curvs = (float **)calloc(num_class2, sizeof(char *));
+  c2_subjects  = (char **)calloc(num_class2, sizeof(char *));
+  c2_curvs     = (float **)calloc(num_class2, sizeof(char *));
   c2_avg_curvs = (float **)calloc(num_class2, sizeof(char *));
   for (n = 0; n < num_class1; n++) {
-    c1_subjects[n] = argv[ARGV_OFFSET + n];
-    c1_curvs[n] = cvector_alloc(nvertices);
+    c1_subjects[n]  = argv[ARGV_OFFSET + n];
+    c1_curvs[n]     = cvector_alloc(nvertices);
     c1_avg_curvs[n] = cvector_alloc(nvertices);
     strcpy(c1_subjects[n], argv[ARGV_OFFSET + n]);
   }
   i = n + 1 + ARGV_OFFSET; /* starting index */
   for (n = 0; n < num_class2; n++) {
-    c2_subjects[n] = argv[i + n];
-    c2_curvs[n] = cvector_alloc(nvertices);
+    c2_subjects[n]  = argv[i + n];
+    c2_curvs[n]     = cvector_alloc(nvertices);
     c2_avg_curvs[n] = cvector_alloc(nvertices);
     strcpy(c2_subjects[n], argv[i + n]);
   }
@@ -294,9 +294,9 @@ int main(int argc, char *argv[]) {
     MRISfromParameterization(mrisp, mris, 0);
     if (area)
       MRISmaskNotLabel(mris, area);
-    curvs = (n < num_class1) ? c1_curvs[n] : c2_curvs[n - num_class1];
+    curvs      = (n < num_class1) ? c1_curvs[n] : c2_curvs[n - num_class1];
     class_mean = (n < num_class1) ? c1_mean : c2_mean;
-    class_var = (n < num_class1) ? c1_var : c2_var;
+    class_var  = (n < num_class1) ? c1_var : c2_var;
     MRISextractCurvatureVector(mris, curvs);
     cvector_accumulate(curvs, class_mean, nvertices);
     cvector_accumulate_square(curvs, class_var, nvertices);
@@ -320,11 +320,11 @@ int main(int argc, char *argv[]) {
 
   if (area)
     MRISripNotLabel(mris, area);
-  vbest_snr = cvector_alloc(nvertices);
+  vbest_snr     = cvector_alloc(nvertices);
   vbest_pvalues = cvector_alloc(nvertices);
-  vbest_avgs = cvector_alloc(nvertices);
-  vtotal_var = cvector_alloc(nvertices);
-  vsnr = cvector_alloc(nvertices);
+  vbest_avgs    = cvector_alloc(nvertices);
+  vtotal_var    = cvector_alloc(nvertices);
+  vsnr          = cvector_alloc(nvertices);
 
   cvector_add_variances(c1_var, c2_var, num_class1, num_class2, vtotal_var,
                         nvertices);
@@ -337,7 +337,7 @@ int main(int argc, char *argv[]) {
                               0.0f);
   fprintf(stderr, "raw SNR %2.2f, n=%2.4f, d=%2.4f, vno=%d\n", sqrt(snr),
           c1_mean[i] - c2_mean[i], sqrt(vtotal_var[i]), i);
-  max_snr = snr;
+  max_snr      = snr;
   max_snr_avgs = 0;
   cvector_track_best_stats(vsnr, vbest_snr, vbest_avgs, c1_var, c2_var,
                            c1_best_var, c2_best_var, c1_mean, c2_mean,
@@ -411,7 +411,7 @@ int main(int argc, char *argv[]) {
               "d=%2.4f, vno=%d\n",
               avgs, sqrt((float)avgs), sqrt(snr), c1_mean[i] - c2_mean[i],
               sqrt(vtotal_var[i]), i);
-      max_snr = snr;
+      max_snr      = snr;
       max_snr_avgs = avgs;
     }
     cvector_track_best_stats(vsnr, vbest_snr, vbest_avgs, c1_var, c2_var,
@@ -431,7 +431,7 @@ int main(int argc, char *argv[]) {
   if (roi_flag) /* collapse across label */
   {
     do {
-      int npos_labels, nneg_labels;
+      int     npos_labels, nneg_labels;
       LABEL **pos_labels, **neg_labels;
 
       MRISclearMarks(mris);
@@ -502,8 +502,8 @@ int main(int argc, char *argv[]) {
     cvector_clear(c2_best_var, nvertices);
     c1_mean = cvector_alloc(nlabels);
     c2_mean = cvector_alloc(nlabels);
-    c1_var = cvector_alloc(nlabels);
-    c2_var = cvector_alloc(nlabels);
+    c1_var  = cvector_alloc(nlabels);
+    c2_var  = cvector_alloc(nlabels);
     for (i = 0; i < nlabels; i++) /* for each row */
     {
       double total, totalsq;
@@ -515,7 +515,7 @@ int main(int argc, char *argv[]) {
         totalsq += (c1_thickness[n][i] * c1_thickness[n][i]);
       }
       c1_mean[i] = total / (float)num_class1;
-      c1_var[i] = totalsq / (float)num_class1 - c1_mean[i] * c1_mean[i];
+      c1_var[i]  = totalsq / (float)num_class1 - c1_mean[i] * c1_mean[i];
       cvector_expand_label(labels[i], c1_mean[i], c1_best_mean);
       cvector_expand_label(labels[i], c1_var[i], c1_best_var);
     }
@@ -530,7 +530,7 @@ int main(int argc, char *argv[]) {
         totalsq += (c2_thickness[n][i] * c2_thickness[n][i]);
       }
       c2_mean[i] = total / (float)num_class2;
-      c2_var[i] = totalsq / (float)num_class2 - c2_mean[i] * c2_mean[i];
+      c2_var[i]  = totalsq / (float)num_class2 - c2_mean[i] * c2_mean[i];
       cvector_expand_label(labels[i], c2_mean[i], c2_best_mean);
       cvector_expand_label(labels[i], c2_var[i], c2_best_var);
     }
@@ -569,7 +569,7 @@ int main(int argc, char *argv[]) {
   sprintf(fname, "./%s.%s_sigvar%d", hemi, prefix, cond_no2);
   MRISwriteValues(mris, fname);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -585,7 +585,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -607,7 +607,7 @@ static int get_option(int argc, char *argv[]) {
     case 'C':
       cond_no1 = atoi(argv[2]);
       cond_no2 = atoi(argv[3]);
-      nargs = 2;
+      nargs    = 2;
       fprintf(stderr, "writing stats as condition numbers %d and %d\n",
               cond_no1, cond_no2);
       break;
@@ -618,7 +618,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'M':
       min_label_area = atof(argv[2]);
@@ -634,7 +634,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       tthresh = atof(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       fprintf(stderr, "using t threshold of %2.2f...\n", tthresh);
       break;
     case 'W':
@@ -735,7 +735,7 @@ static int cvector_accumulate(float *v, float *vtotal, int num) {
 static int cvector_compute_t_test(float *c1_mean, float *c1_var, float *c2_mean,
                                   float *c2_var, int num_class1, int num_class2,
                                   float *pvals, int num) {
-  int i;
+  int    i;
   double t, numer, denom, sig;
 
   for (i = 0; i < num; i++) {
@@ -743,7 +743,7 @@ static int cvector_compute_t_test(float *c1_mean, float *c1_var, float *c2_mean,
       DiagBreak();
     numer = (c1_mean[i] - c2_mean[i]);
     denom = sqrt(c1_var[i] / num_class1 + c2_var[i] / num_class2);
-    t = numer / denom;
+    t     = numer / denom;
     if (FZERO(denom))
       sig = FZERO(numer) ? 1.0f : 0.0f;
     else
@@ -751,10 +751,10 @@ static int cvector_compute_t_test(float *c1_mean, float *c1_var, float *c2_mean,
     if (numer > 0)
       pvals[i] = -log10(sig);
     else
-      pvals[i] = log10(sig) ;
-    if (!std::isfinite(numer) || !std::isfinite(denom) || !std::isfinite(pvals[i])
-        || i == Gdiag_no)
-      DiagBreak() ;
+      pvals[i] = log10(sig);
+    if (!std::isfinite(numer) || !std::isfinite(denom) ||
+        !std::isfinite(pvals[i]) || i == Gdiag_no)
+      DiagBreak();
   }
   return (NO_ERROR);
 }
@@ -787,13 +787,13 @@ static double cvector_compute_dist_free_snr(float **c1_curvs, int num_class1,
                                             float **c2_curvs, int num_class2,
                                             float *c1_mean, float *c2_mean,
                                             float *vsnr, int num, int *pi) {
-  int i, max_i, n;
+  int    i, max_i, n;
   double max_snr, mean, snr;
 
   max_i = -1;
   for (max_snr = 0.0, i = 0; i < num; i++) {
     mean = (c1_mean[i] + c2_mean[i]) / 2;
-    snr = 0;
+    snr  = 0;
     if (c1_mean[i] > c2_mean[i]) {
       for (n = 0; n < num_class1; n++)
         if (c1_curvs[n][i] > mean)
@@ -820,7 +820,7 @@ static double cvector_compute_dist_free_snr(float **c1_curvs, int num_class1,
 static double cvector_compute_snr(float *c1_mean, float *c2_mean, float *vvar,
                                   float *snr, int num, int *pi,
                                   float bonferroni) {
-  int i, max_i;
+  int   i, max_i;
   float f, max_snr;
 
   max_i = -1;
@@ -836,7 +836,7 @@ static double cvector_compute_snr(float *c1_mean, float *c2_mean, float *vvar,
 
     if (fabs(f) > max_snr) {
       max_snr = fabs(f);
-      max_i = i;
+      max_i   = i;
     }
     snr[i] = f;
   }
@@ -920,10 +920,10 @@ static int cvector_track_best_stats(float *vsnr, float *vbest_snr,
         DiagBreak();
       if (i == Gdiag_no && avgs == 286)
         DiagBreak();
-      vbest_snr[i] = vsnr[i];
-      vbest_avgs[i] = avgs;
-      c1_best_var[i] = c1_var[i];
-      c2_best_var[i] = c2_var[i];
+      vbest_snr[i]    = vsnr[i];
+      vbest_avgs[i]   = avgs;
+      c1_best_var[i]  = c1_var[i];
+      c2_best_var[i]  = c2_var[i];
       c1_best_mean[i] = c1_mean[i];
       c2_best_mean[i] = c2_mean[i];
     }
@@ -978,7 +978,7 @@ extract_thickness_at_best_scale(MRI_SURFACE *mris, float **c1_avg_curvs,
 #endif
 
 static int cvector_bonferroni_correct(float *pvalues, float *avgs, int num) {
-  int i;
+  int    i;
   double correction;
 
   for (i = 0; i < num; i++) {
@@ -998,7 +998,7 @@ static int cvector_divide(float *v, float div, int num) {
 
 static int mark_thresholded_vertices(MRI_SURFACE *mris, float *vbest_snr,
                                      float *vbest_avgs, float thresh) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1007,12 +1007,12 @@ static int mark_thresholded_vertices(MRI_SURFACE *mris, float *vbest_snr,
     v = &mris->vertices[vno];
     if (thresh > 0 && vbest_snr[vno] > thresh) {
       v->marked = 1;
-      v->val = vbest_snr[vno];
-      v->val2 = vbest_avgs[vno];
+      v->val    = vbest_snr[vno];
+      v->val2   = vbest_avgs[vno];
     } else if (thresh < 0 && vbest_snr[vno] < thresh) {
       v->marked = 1;
-      v->val = vbest_snr[vno];
-      v->val2 = vbest_avgs[vno];
+      v->val    = vbest_snr[vno];
+      v->val2   = vbest_avgs[vno];
     }
   }
   return (NO_ERROR);
@@ -1021,8 +1021,8 @@ static int segment_and_write_labels(char *subject, char *name,
                                     MRI_SURFACE *mris, LABEL ***plabels,
                                     int *pnlabels, int offset) {
   LABEL **labels, *area;
-  int nlabels, i;
-  char fname[STRLEN];
+  int     nlabels, i;
+  char    fname[STRLEN];
 
   MRISsegmentMarked(mris, &labels, &nlabels, min_label_area);
 
@@ -1039,7 +1039,7 @@ static int segment_and_write_labels(char *subject, char *name,
     strcpy(area->name, name);
   }
   *pnlabels = nlabels;
-  *plabels = labels;
+  *plabels  = labels;
   return (NO_ERROR);
 }
 
@@ -1054,7 +1054,7 @@ static int cvector_extract_best_avg(float *vbest_avgs, float *vsrc, float *vdst,
   return (NO_ERROR);
 }
 static double cvector_average_in_label(float *v, LABEL *area, int num) {
-  int i;
+  int    i;
   double avg;
 
   for (avg = 0.0, i = 0; i < area->n_points; i++)
@@ -1063,7 +1063,7 @@ static double cvector_average_in_label(float *v, LABEL *area, int num) {
   return (avg);
 }
 static int extract_thickness_at_best_scale(MRI_SURFACE *mris,
-                                           float **c1_avg_curvs,
+                                           float **     c1_avg_curvs,
                                            float *vbest_avgs, float **c1_curvs,
                                            int num, int nvectors) {
   int i, max_avgs, avgs, n;

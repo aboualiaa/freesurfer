@@ -25,8 +25,8 @@
 #define TOOLWINDOWEDIT_H
 
 #include "UIUpdateHelper.h"
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 
 namespace Ui {
 class ToolWindowEdit;
@@ -76,7 +76,7 @@ protected:
 private:
   Ui::ToolWindowEdit *ui;
 
-  bool m_bToUpdateWidgets;
+  bool             m_bToUpdateWidgets;
   QList<QWidget *> m_widgetsBrushSize;
   QList<QWidget *> m_widgetsReference;
   QList<QWidget *> m_widgetsTolerance;

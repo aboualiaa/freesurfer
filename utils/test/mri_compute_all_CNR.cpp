@@ -26,20 +26,20 @@
 /* Compute the mean and std of a labeled region */
 /* manually chose which class-pairs to compute */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
 #include "fio.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "version.h"
 
 void usage(int exit_val);
@@ -56,32 +56,32 @@ static int MAXLABEL = 39;
 
 /* Compute CNR inside a window only */
 
-static int debug_flag = 0;
+static int debug_flag  = 0;
 static int window_flag = 0;
 static int window_size = 30;
 
 static char *fname = NULL;
 
-void computeClassStats(float *LDAmean, float *variance, float *classsize,
-                       MRI *mri_src, MRI *mri_label, MRI *mri_mask,
-                       int classID);
-MATRIX *ComputeAdjMatrix(MRI *mri_label, MRI *mri_mask, int minlabel,
-                         int maxlabel);
+void       computeClassStats(float *LDAmean, float *variance, float *classsize,
+                             MRI *mri_src, MRI *mri_label, MRI *mri_mask,
+                             int classID);
+MATRIX *   ComputeAdjMatrix(MRI *mri_label, MRI *mri_mask, int minlabel,
+                            int maxlabel);
 static int get_option(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
 
   char **av;
-  MRI *mri_src, *mri_label, *mri_mask;
-  int ac, nargs;
-  int width, height, depth, x, y, z, i, j;
-  FILE *fp;
+  MRI *  mri_src, *mri_label, *mri_mask;
+  int    ac, nargs;
+  int    width, height, depth, x, y, z, i, j;
+  FILE * fp;
 
-  float *LDAmeans = NULL;
-  float *classSize = NULL;
+  float * LDAmeans  = NULL;
+  float * classSize = NULL;
   MATRIX *AdjMatrix;
-  float *Variances = NULL;
-  int num_classes, label;
+  float * Variances = NULL;
+  int     num_classes, label;
 
   double cnr;
 
@@ -131,9 +131,9 @@ int main(int argc, char *argv[]) {
     MAXLABEL = atoi(argv[4]);
   }
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   printf("Clear cerebellum related labels  6, 7, 8 and 16, 24, 28\n");
   for (z = 0; z < depth; z++)
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
   printf("Total of %d classes considered in LDA training\n", num_classes);
 
   /* Allocate memory */
-  LDAmeans = (float *)malloc(num_classes * sizeof(float));
+  LDAmeans  = (float *)malloc(num_classes * sizeof(float));
   Variances = (float *)malloc(num_classes * sizeof(float));
   classSize = (float *)malloc(num_classes * sizeof(float));
 
@@ -198,15 +198,15 @@ int main(int argc, char *argv[]) {
         AdjMatrix->rptr[j][i] = 0.0;
       }
 
-    AdjMatrix->rptr[2 + 1 - MINLABEL][3 + 1 - MINLABEL] = 1.0;
-    AdjMatrix->rptr[2 + 1 - MINLABEL][10 + 1 - MINLABEL] = 1.0;
-    AdjMatrix->rptr[2 + 1 - MINLABEL][11 + 1 - MINLABEL] = 1.0;
-    AdjMatrix->rptr[2 + 1 - MINLABEL][12 + 1 - MINLABEL] = 1.0;
-    AdjMatrix->rptr[2 + 1 - MINLABEL][13 + 1 - MINLABEL] = 1.0;
-    AdjMatrix->rptr[2 + 1 - MINLABEL][17 + 1 - MINLABEL] = 1.0;
-    AdjMatrix->rptr[2 + 1 - MINLABEL][18 + 1 - MINLABEL] = 1.0;
-    AdjMatrix->rptr[3 + 1 - MINLABEL][12 + 1 - MINLABEL] = 1.0;
-    AdjMatrix->rptr[3 + 1 - MINLABEL][18 + 1 - MINLABEL] = 1.0;
+    AdjMatrix->rptr[2 + 1 - MINLABEL][3 + 1 - MINLABEL]   = 1.0;
+    AdjMatrix->rptr[2 + 1 - MINLABEL][10 + 1 - MINLABEL]  = 1.0;
+    AdjMatrix->rptr[2 + 1 - MINLABEL][11 + 1 - MINLABEL]  = 1.0;
+    AdjMatrix->rptr[2 + 1 - MINLABEL][12 + 1 - MINLABEL]  = 1.0;
+    AdjMatrix->rptr[2 + 1 - MINLABEL][13 + 1 - MINLABEL]  = 1.0;
+    AdjMatrix->rptr[2 + 1 - MINLABEL][17 + 1 - MINLABEL]  = 1.0;
+    AdjMatrix->rptr[2 + 1 - MINLABEL][18 + 1 - MINLABEL]  = 1.0;
+    AdjMatrix->rptr[3 + 1 - MINLABEL][12 + 1 - MINLABEL]  = 1.0;
+    AdjMatrix->rptr[3 + 1 - MINLABEL][18 + 1 - MINLABEL]  = 1.0;
     AdjMatrix->rptr[10 + 1 - MINLABEL][11 + 1 - MINLABEL] = 1.0;
     AdjMatrix->rptr[12 + 1 - MINLABEL][13 + 1 - MINLABEL] = 1.0;
     AdjMatrix->rptr[17 + 1 - MINLABEL][18 + 1 - MINLABEL] = 1.0;
@@ -255,13 +255,13 @@ void computeClassStats(float *LDAmean, float *variance, float *classsize,
                        int classID) {
   /* Compute LDAmean and SW from given data and label */
 
-  int x, y, z, depth, height, width;
+  int    x, y, z, depth, height, width;
   double numer, denom, meanV;
   double data1;
-  int label;
+  int    label;
 
-  depth = mri_src->depth;
-  width = mri_src->width;
+  depth  = mri_src->depth;
+  width  = mri_src->width;
   height = mri_src->height;
 
   /* Compute Class mean */
@@ -313,21 +313,21 @@ void computeClassStats(float *LDAmean, float *variance, float *classsize,
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "window")) {
     window_flag = 1;
     window_size = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("interpolating volume to be isotropic 1mm^3\n");
   } else if (!stricmp(option, "f") || !stricmp(option, "fname")) {
     fname = argv[2];
@@ -358,14 +358,14 @@ void usage(int exit_val) {
 MATRIX *ComputeAdjMatrix(MRI *mri_label, MRI *mri_mask, int minlabel,
                          int maxlabel) {
   MATRIX *AdjMatrix;
-  int i, j, label1, label2, offset, numLabels;
-  int depth, width, height;
-  int x, y, z, cx, cy, cz;
+  int     i, j, label1, label2, offset, numLabels;
+  int     depth, width, height;
+  int     x, y, z, cx, cy, cz;
 
   numLabels = maxlabel - minlabel + 1;
 
-  depth = mri_label->depth;
-  width = mri_label->width;
+  depth  = mri_label->depth;
+  width  = mri_label->width;
   height = mri_label->height;
 
   AdjMatrix = (MATRIX *)MatrixAlloc(numLabels, numLabels, MATRIX_REAL);

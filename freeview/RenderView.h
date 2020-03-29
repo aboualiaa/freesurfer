@@ -56,13 +56,13 @@ public:
     IM_SurfacePath
   };
 
-  void SetWorldCoordinateInfo(const double *origin, const double *size,
-                              bool bResetView = true);
+  void         SetWorldCoordinateInfo(const double *origin, const double *size,
+                                      bool bResetView = true);
   virtual void UpdateViewByWorldCoordinate() {}
 
   int PickCell(vtkProp *prop, int posX, int posY, double *pos_out = NULL);
 
-  int GetInteractionMode();
+  int          GetInteractionMode();
   virtual void SetInteractionMode(int nMode);
 
   int GetAction();
@@ -106,20 +106,20 @@ signals:
   void DoubleClicked();
 
 public slots:
-  void RequestRedraw(bool bForce = false);
-  void MoveUp();
-  void MoveDown();
-  void MoveLeft();
-  void MoveRight();
-  void Zoom(double factor);
-  void PanToWorld(double *pos);
-  void Reset();
-  void SetAction(int nAction);
-  void ShowScalarBar(bool bShow);
-  void SetScalarBarLayer(Layer *layer);
-  void SetScalarBarLayer(QAction *act);
-  void CenterAtWorldPosition(double *pos);
-  void AlignViewToNormal(double *v);
+  void         RequestRedraw(bool bForce = false);
+  void         MoveUp();
+  void         MoveDown();
+  void         MoveLeft();
+  void         MoveRight();
+  void         Zoom(double factor);
+  void         PanToWorld(double *pos);
+  void         Reset();
+  void         SetAction(int nAction);
+  void         ShowScalarBar(bool bShow);
+  void         SetScalarBarLayer(Layer *layer);
+  void         SetScalarBarLayer(QAction *act);
+  void         CenterAtWorldPosition(double *pos);
+  void         AlignViewToNormal(double *v);
   virtual void UpdateScalarBar();
 
 protected:
@@ -133,16 +133,16 @@ protected slots:
   }
 
 protected:
-  bool m_bNeedRedraw;
+  bool   m_bNeedRedraw;
   double m_dWorldOrigin[3];
   double m_dWorldSize[3];
 
   Interactor *m_interactor;
-  int m_nInteractionMode;
+  int         m_nInteractionMode;
 
-  vtkSmartPointer<vtkActor2D> m_actorFocusFrame;
+  vtkSmartPointer<vtkActor2D>        m_actorFocusFrame;
   vtkSmartPointer<vtkScalarBarActor> m_actorScalarBar;
-  QPointer<Layer> m_layerScalarBar;
+  QPointer<Layer>                    m_layerScalarBar;
 };
 
 #endif // RENDERVIEW_H

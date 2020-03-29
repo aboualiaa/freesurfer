@@ -34,17 +34,15 @@
 
 #include <string>
 
-using namespace std;
-
 class QdecUtilities {
 
 public:
   // Calls IsFileReadable and throws an error if it fails.
-  static void AssertFileIsReadable(string const &ifn);
+  static void AssertFileIsReadable(std::string const &ifn);
 
   // Returns true if a file exists and is openable with read
   // permissions.
-  static bool IsFileReadable(string const &ifn);
+  static bool IsFileReadable(std::string const &ifn);
 
   // extract the path name from a file name and return a pointer to it
   static const char *FileNamePath(const char *fname, const char *pathName);

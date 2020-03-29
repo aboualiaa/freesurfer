@@ -40,7 +40,7 @@ public:
   ~DialogNewROI();
 
   QString GetROIName();
-  void SetROIName(const QString &name);
+  void    SetROIName(const QString &name);
 
   LayerMRI *GetTemplate();
 

@@ -1,11 +1,11 @@
 #include "kvlCroppedImageReader.h"
 
-#include "vnl/vnl_matlab_read.h"
 #include "itkImageFileReader.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
-#include "itkShrinkImageFilter.h"
 #include "itkMGHImageIO.h"
+#include "itkShrinkImageFilter.h"
+#include "vnl/vnl_matlab_read.h"
 
 namespace kvl {
 
@@ -13,11 +13,11 @@ namespace kvl {
 //
 //
 CroppedImageReader ::CroppedImageReader() {
-  m_Image = nullptr;
-  m_Transform = TransformType::New();
+  m_Image                 = nullptr;
+  m_Transform             = TransformType::New();
   m_WorldToImageTransform = TransformType::New();
 
-  m_ExtraFraction = 0.0;
+  m_ExtraFraction      = 0.0;
   m_DownSamplingFactor = 1;
 
   for (int i = 0; i < 3; i++) {
@@ -130,7 +130,7 @@ CroppedImageReader ::GetTransformOfFileName(const std::string &filename) {
     itk::Matrix<double, 3, 3> direction;
     for (int i = 0; i < 3; i++) {
       scale[i][i] = io->GetSpacing(i);
-      offset[i] = io->GetOrigin(i);
+      offset[i]   = io->GetOrigin(i);
 
       const std::vector<double> axis = io->GetDirection(i);
       for (int j = 0; j < 3; j++) {
@@ -181,7 +181,7 @@ void CroppedImageReader ::Read(const char *fileName,
                                const char *boundingFileName) {
 
   // Read the first image
-  using ReaderType = itk::ImageFileReader<ImageType>;
+  using ReaderType           = itk::ImageFileReader<ImageType>;
   ReaderType::Pointer reader = ReaderType::New();
   reader->SetFileName(fileName);
   reader->Update();
@@ -201,7 +201,7 @@ void CroppedImageReader ::Read(const char *fileName,
   // construct the transform between the bounding image and the
   // cropped imagae
   if (!boundingFileName) {
-    m_Image = reader->GetOutput();
+    m_Image                          = reader->GetOutput();
     TransformType::Pointer transform = TransformType::New();
     this->GetTransformOfFileName(fileName)->GetInverse(transform);
     m_WorldToImageTransform->Compose(transform);
@@ -260,7 +260,7 @@ void CroppedImageReader ::Read(const char *fileName,
       maximalMappedCoordinate[i] = itk::NumericTraits<double>::min();
     }
     std::vector<TransformType::InputPointType> meshCornerPoints;
-    TransformType::InputPointType corner;
+    TransformType::InputPointType              corner;
     corner[2] = 0;
     corner[0] = 0;
     corner[1] = 0;
@@ -353,7 +353,7 @@ void CroppedImageReader ::Read(const char *fileName,
 
     // Gets the image regions
     ImageType::IndexType originalImageIndex = {{min[0], min[1], min[2]}};
-    ImageType::SizeType originalImageSize;
+    ImageType::SizeType  originalImageSize;
     for (int i = 0; i < 3; i++) {
       originalImageSize[i] = max[i] - min[i] + 1;
     }
@@ -361,7 +361,7 @@ void CroppedImageReader ::Read(const char *fileName,
         ImageType::RegionType(originalImageIndex, originalImageSize);
 
     ImageType::IndexType croppedImageIndex = {{0, 0, 0}};
-    ImageType::SizeType croppedImageSize = originalImageSize;
+    ImageType::SizeType  croppedImageSize  = originalImageSize;
     m_CroppedImageRegion =
         ImageType::RegionType(croppedImageIndex, croppedImageSize);
 

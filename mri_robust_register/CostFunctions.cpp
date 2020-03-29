@@ -33,8 +33,6 @@
 #include <vnl/vnl_det.h>
 #undef export
 
-using namespace std;
-
 std::pair<float, float> CostFunctions::minmax(MRI *i) {
   MRIiterator it1(i);
   it1.begin();
@@ -65,16 +63,16 @@ double CostFunctions::mean(MRI *mri, int frame) {
   // mapping only once, then each process needs it's own vector < double >
   // finally sum across processess (basically reduction on a vector)
 
-  double d = 0.0;
+  double       d      = 0.0;
   unsigned int ocount = 0;
-  unsigned int count = 0;
+  unsigned int count  = 0;
 
   int z;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) reduction(+ : d)
 #endif
   for (z = 0; z < mri->depth; z++) {
-    int y, x;
+    int    y, x;
     double v;
     for (y = 0; y < mri->height; y++) {
       for (x = 0; x < mri->width; x++) {
@@ -123,20 +121,20 @@ double CostFunctions::mean(MRI *mri, const vnl_matrix_fixed<double, 4, 4> &Mi,
     exit(1);
   }
   int dt[3] = {xmax, ymax, zmax};
-  dt[0] = dt[0] - d1 + 1;
-  dt[1] = dt[1] - d2 + 1;
-  dt[2] = dt[2] - d3 + 1;
+  dt[0]     = dt[0] - d1 + 1;
+  dt[1]     = dt[1] - d2 + 1;
+  dt[2]     = dt[2] - d3 + 1;
 
-  int z;
-  double d = 0.0;
+  int          z;
+  double       d      = 0.0;
   unsigned int ocount = 0;
-  unsigned int count = 0;
+  unsigned int count  = 0;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) reduction(+ : d)
 #endif
   for (z = zmin; z < dt[2]; z += d3) {
-    int x, y;
+    int    x, y;
     double xx, yx, zx;
     double v;
     double xz, yz, zz;
@@ -185,10 +183,10 @@ double CostFunctions::mean(MRI *mri, const vnl_matrix_fixed<double, 4, 4> &Mi,
 }
 
 double CostFunctions::var(MRI *i, int frame) {
-  double m = mean(i, frame);
-  double d = 0.0;
-  double dd;
-  int count = 0;
+  double      m = mean(i, frame);
+  double      d = 0.0;
+  double      dd;
+  int         count = 0;
   MRIiterator it1(i);
   for (it1.begin(); !it1.isEnd(); it1++) {
     dd = (*it1) - m;
@@ -199,7 +197,7 @@ double CostFunctions::var(MRI *i, int frame) {
 }
 
 float CostFunctions::median(MRI *i) {
-  int n = i->width * i->height * i->depth;
+  int    n = i->width * i->height * i->depth;
   float *t = (float *)calloc(n, sizeof(float));
 
   int cc = 0;
@@ -216,7 +214,7 @@ float CostFunctions::median(MRI *i) {
 }
 
 float CostFunctions::mad(MRI *i, float d) {
-  int n = i->width * i->height * i->depth;
+  int    n = i->width * i->height * i->depth;
   float *t = (float *)calloc(n, sizeof(float));
 
   int cc = 0;
@@ -283,19 +281,19 @@ double CostFunctions::leastSquares(MRI *mriS, MRI *mriT,
                                    int d1, int d2, int d3) {
   mriS->outside_val = -1;
   mriT->outside_val = -1;
-  int dt[4] = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
-  dt[0] = dt[0] - d1 + 1;
-  dt[1] = dt[1] - d2 + 1;
-  dt[2] = dt[2] - d3 + 1;
+  int dt[4]         = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
+  dt[0]             = dt[0] - d1 + 1;
+  dt[1]             = dt[1] - d2 + 1;
+  dt[2]             = dt[2] - d3 + 1;
 
-  int z;
+  int    z;
   double d = 0.0;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) reduction(+ : d)
 #endif
   for (z = 0; z < dt[2]; z += d3) {
-    int x, y, f;
+    int    x, y, f;
     double dd;
     double xs, ys, zs;
     double xt, yt, zt;
@@ -352,16 +350,16 @@ double CostFunctions::leastSquares(MRI *mriS, MRI *mriT,
   // in my test case there were black stripes,
   // at boundary, leading to gray stripes after
   // downsampling, leading to big problems during alingment
-  double sout = mriS->outside_val;
-  double tout = mriT->outside_val;
+  double sout       = mriS->outside_val;
+  double tout       = mriT->outside_val;
   mriS->outside_val = -1;
   mriT->outside_val = -1;
-  int dt[4] = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
-  dt[0] = dt[0] - d1 + 1;
-  dt[1] = dt[1] - d2 + 1;
-  dt[2] = dt[2] - d3 + 1;
+  int dt[4]         = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
+  dt[0]             = dt[0] - d1 + 1;
+  dt[1]             = dt[1] - d2 + 1;
+  dt[2]             = dt[2] - d3 + 1;
 
-  int z;
+  int    z;
   double d = 0.0;
   // double oepss = sout / 255.0;
   // double oepst = tout / 255.0;
@@ -369,7 +367,7 @@ double CostFunctions::leastSquares(MRI *mriS, MRI *mriT,
 #pragma omp parallel for schedule(static) reduction(+ : d)
 #endif
   for (z = 0; z < dt[2]; z += d3) {
-    int x, y, f;
+    int    x, y, f;
     double dd;
     double xs, ys, zs;
     double xt, yt, zt;
@@ -428,19 +426,19 @@ double CostFunctions::absDiff(MRI *mriS, MRI *mriT,
                               const double &s2) {
   mriS->outside_val = -1;
   mriT->outside_val = -1;
-  int dt[4] = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
-  dt[0] = dt[0] - d1 + 1;
-  dt[1] = dt[1] - d2 + 1;
-  dt[2] = dt[2] - d3 + 1;
+  int dt[4]         = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
+  dt[0]             = dt[0] - d1 + 1;
+  dt[1]             = dt[1] - d2 + 1;
+  dt[2]             = dt[2] - d3 + 1;
 
-  int z;
+  int    z;
   double d = 0.0;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) reduction(+ : d)
 #endif
   for (z = 0; z < dt[2]; z += d3) {
-    int x, y, f;
+    int    x, y, f;
     double dd;
     double xs, ys, zs;
     double xt, yt, zt;
@@ -497,7 +495,7 @@ double CostFunctions::leastSquares(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
   mriT->coeff->outside_val = -1;
   double dt[4] = {(double)mriT->coeff->width, (double)mriT->coeff->height,
                   (double)mriT->coeff->depth, (double)mriT->coeff->nframes};
-  int x, y, z, f;
+  int    x, y, z, f;
   double dd, d = 0;
   double xs, ys, zs;
   double xt, yt, zt;
@@ -576,7 +574,7 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
                                const vnl_matrix_fixed<double, 4, 4> &Mti,
                                int d1, int d2, int d3) {
   int blockradius = 2;
-  int bw = 2 * blockradius + 1;
+  int bw          = 2 * blockradius + 1;
   // int bw2 = bw*bw;
   // int bw3 = bw*bw2;
 
@@ -589,43 +587,43 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
   MRI *nmriT = mapMRI(mriT, Mti, 1, 1, 1);
 
   int dt[4] = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
-  dt[0] = dt[0] - d1 - blockradius;
-  dt[1] = dt[1] - d2 - blockradius;
-  dt[2] = dt[2] - d3 - blockradius;
+  dt[0]     = dt[0] - d1 - blockradius;
+  dt[1]     = dt[1] - d2 - blockradius;
+  dt[2]     = dt[2] - d3 - blockradius;
 
-  int z;
-  double d = 0.0;
+  int          z;
+  double       d      = 0.0;
   unsigned int dcount = 0;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) reduction(+ : d)
 #endif
   for (z = blockradius; z < dt[2]; z += d3) {
-    int x, y, f, i, j, k;
+    int    x, y, f, i, j, k;
     double dd;
     // double xs, ys, zs;
     // double xt, yt, zt;
     double vs, vt;
 
     // precompute xyz coords for all z in block (include translation)
-    int nz = z - blockradius;
+    int nz  = z - blockradius;
     int nzm = nz + bw;
     int ny, nx, nym, nxm;
 
     double smean, tmean, svar, tvar, tdd, sdd;
-    int counter;
+    int    counter;
 
     for (y = blockradius; y < dt[1]; y += d2) {
-      ny = y - blockradius;
+      ny  = y - blockradius;
       nym = ny + bw;
       for (x = blockradius; x < dt[0]; x += d1) {
-        nx = x - blockradius;
+        nx  = x - blockradius;
         nxm = nx + bw;
 
         for (f = 0; f < dt[3]; f++) {
           // loop over block to compute means
-          smean = 0.0;
-          tmean = 0.0;
+          smean   = 0.0;
+          tmean   = 0.0;
           counter = 0;
           for (i = nz; i < nzm; i++)
             for (j = ny; j < nym; j++)
@@ -650,7 +648,7 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
           smean /= counter;
 
           // loop over block again
-          dd = 0.0;
+          dd   = 0.0;
           svar = 0.0;
           tvar = 0.0;
           for (i = nz; i < nzm; i++)
@@ -681,7 +679,8 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
           d += fabs(dd / (svar * tvar));
 
           if (std::isnan(d)) {
-            cout << "d is nan " << dd << " " << svar << " " << tvar << endl;
+            std::cout << "d is nan " << dd << " " << svar << " " << tvar
+                      << std::endl;
             exit(1);
           }
 
@@ -706,10 +705,10 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
 
 MRI *CostFunctions::mapMRI(MRI *mri, const vnl_matrix_fixed<double, 4, 4> &Mi,
                            int d1, int d2, int d3) {
-  int width = ((mri->width - 1) / d1) + 1;
-  int height = ((mri->height - 1) / d2) + 1;
-  int depth = ((mri->depth - 1) / d3) + 1;
-  MRI *nmri = MRIallocSequence(width, height, depth, MRI_FLOAT, mri->nframes);
+  int  width  = ((mri->width - 1) / d1) + 1;
+  int  height = ((mri->height - 1) / d2) + 1;
+  int  depth  = ((mri->depth - 1) / d3) + 1;
+  MRI *nmri   = MRIallocSequence(width, height, depth, MRI_FLOAT, mri->nframes);
   nmri->outside_val = mri->outside_val;
 
   int iz;
@@ -718,8 +717,8 @@ MRI *CostFunctions::mapMRI(MRI *mri, const vnl_matrix_fixed<double, 4, 4> &Mi,
 #pragma omp parallel for schedule(static)
 #endif
   for (iz = 0; iz < depth; iz++) {
-    int z = iz * d3;
-    int ix, x, iy, y, f;
+    int    z = iz * d3;
+    int    ix, x, iy, y, f;
     double xt, yt, zt;
     double v;
     double xtz, ytz, ztz;
@@ -730,13 +729,13 @@ MRI *CostFunctions::mapMRI(MRI *mri, const vnl_matrix_fixed<double, 4, 4> &Mi,
     ztz = Mi[2][2] * z + Mi[2][3];
 
     for (iy = 0; iy < height; iy++) {
-      y = iy * d2;
+      y   = iy * d2;
       xty = Mi[0][1] * y + xtz;
       yty = Mi[1][1] * y + ytz;
       zty = Mi[2][1] * y + ztz;
 
       for (ix = 0; ix < width; ix++) {
-        x = ix * d1;
+        x  = ix * d1;
         xt = Mi[0][0] * x + xty;
         yt = Mi[1][0] * x + yty;
         zt = Mi[2][0] * x + zty;
@@ -764,8 +763,8 @@ double CostFunctions::NCC(MRI *mriS, MRI *mriT,
   MRI *nmriT = mapMRI(mriT, Mti, d1, d2, d3);
 
   // compute means for each frame
-  vector<double> meanS(mriS->nframes);
-  vector<double> meanT(mriT->nframes);
+  std::vector<double> meanS(mriS->nframes);
+  std::vector<double> meanT(mriT->nframes);
   assert(mriS->nframes == mriT->nframes);
   for (int f = 0; f < mriT->nframes; f++) {
     meanS[f] = mean(nmriS, f);
@@ -774,8 +773,8 @@ double CostFunctions::NCC(MRI *mriS, MRI *mriT,
 
   assert(mriT->nframes == 1); // for now
 
-  int z;
-  double d = 0.0;
+  int    z;
+  double d    = 0.0;
   double sigS = 0.0;
   double sigT = 0.0;
 
@@ -783,7 +782,7 @@ double CostFunctions::NCC(MRI *mriS, MRI *mriT,
 #pragma omp parallel for schedule(static) reduction(+ : d)
 #endif
   for (z = 0; z < nmriT->depth; z++) {
-    int x, y, f;
+    int    x, y, f;
     double ds, dt, vs, vt;
 
     for (y = 0; y < nmriT->height; y++) {
@@ -834,7 +833,7 @@ double CostFunctions::tukeyBiweight(MRI *i1, MRI *i2, double sat) {
     assert(i1->depth == i2->depth);
   }
 
-  int n = i1->width * i1->height * i1->depth;
+  int    n    = i1->width * i1->height * i1->depth;
   float *diff = (float *)calloc(n, sizeof(float));
 
   int cc = 0;
@@ -871,13 +870,13 @@ double CostFunctions::tukeyBiweight(MRI *i1, MRI *i2, double sat) {
   float sigma = RobustGaussian<float>::mad(diff, n);
   // if (sigma == 0.0)
   sigma = 1.4826;
-  cout << "sigma: " << sigma << endl;
+  std::cout << "sigma: " << sigma << std::endl;
   double d = 0;
   for (int i = 0; i < n; i++)
     d += rhoTukeyBiweight(diff[i] / sigma, sat);
 
   free(diff);
-  cout << " d: " << d << endl;
+  std::cout << " d: " << d << std::endl;
   return d;
 }
 
@@ -957,16 +956,16 @@ double CostFunctions::tukeyBiweight(MRI *mriS, MRI *mriT,
                                     int d1, int d2, int d3, double sat) {
   mriS->outside_val = -1;
   mriT->outside_val = -1;
-  int dt[4] = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
-  dt[0] = dt[0] - d1 + 1;
-  dt[1] = dt[1] - d2 + 1;
-  dt[2] = dt[2] - d3 + 1;
+  int dt[4]         = {mriT->width, mriT->height, mriT->depth, mriT->nframes};
+  dt[0]             = dt[0] - d1 + 1;
+  dt[1]             = dt[1] - d2 + 1;
+  dt[2]             = dt[2] - d3 + 1;
 
   int z;
 
   unsigned int n = ((mriT->width + 1) / d1) * ((mriT->height + 1) / d2) *
                    ((mriT->depth + 1) / d3) * mriT->nframes;
-  float *diff = (float *)calloc(n, sizeof(float));
+  float *      diff = (float *)calloc(n, sizeof(float));
   unsigned int pn =
       ((mriT->width + 1) / d1) * ((mriT->height + 1) / d2) * mriT->nframes;
 
@@ -974,7 +973,7 @@ double CostFunctions::tukeyBiweight(MRI *mriS, MRI *mriT,
 #pragma omp parallel for schedule(static)
 #endif
   for (z = 0; z < dt[2]; z += d3) {
-    int x, y, f;
+    int    x, y, f;
     double dd;
     double xs, ys, zs;
     double xt, yt, zt;
@@ -983,7 +982,7 @@ double CostFunctions::tukeyBiweight(MRI *mriS, MRI *mriT,
     double xty, yty, zty, xsy, ysy, zsy;
 
     unsigned int count = 0;
-    unsigned int zpos = (z / d3) * pn;
+    unsigned int zpos  = (z / d3) * pn;
 
     xtz = Mti[0][2] * z + Mti[0][3];
     ytz = Mti[1][2] * z + Mti[1][3];
@@ -1048,9 +1047,9 @@ double CostFunctions::normalizedCorrelation(MRI *i1, MRI *i2) {
   assert(i1->height == i2->height);
   assert(i1->depth == i2->depth);
 
-  double d = 0;
-  float d1 = 0;
-  float d2 = 0;
+  double d   = 0;
+  float  d1  = 0;
+  float  d2  = 0;
   double dd1 = 0;
   double dd2 = 0;
 
@@ -1096,9 +1095,9 @@ std::vector<double> CostFunctions::centroid(MRI *i)
 {
   // cout << "CostFunctions::centroid" << endl;
   std::vector<double> dd(3, 0.0);
-  double n = 0;
-  double val;
-  double eps = i->outside_val / 255.0;
+  double              n = 0;
+  double              val;
+  double              eps = i->outside_val / 255.0;
   for (int d = 0; d < i->depth; d++)
     for (int h = 0; h < i->height; h++)
       for (int w = 0; w < i->width; w++) {
@@ -1114,8 +1113,8 @@ std::vector<double> CostFunctions::centroid(MRI *i)
   dd[1] = dd[1] / n;
   dd[2] = dd[2] / n;
   if (std::isnan(dd[0] + dd[1] + dd[2])) {
-    cerr << "CostFunctions::centroid is NAN (empty image? n = " << n << " )"
-         << endl;
+    std::cerr << "CostFunctions::centroid is NAN (empty image? n = " << n
+              << " )" << std::endl;
     exit(1);
   }
 
@@ -1127,9 +1126,9 @@ vnl_matrix_fixed<double, 3, 3> CostFunctions::orientation(MRI *i)
 {
   // compute mean
   std::vector<double> dd(3, 0.0);
-  double n = 0;
-  float val;
-  int wp1, hp1, dp1;
+  double              n = 0;
+  float               val;
+  int                 wp1, hp1, dp1;
 
   //  MATRIX* cov = MatrixAlloc(3,3,MATRIX_REAL);
   //  cov = MatrixZero(3,3,cov);
@@ -1179,7 +1178,7 @@ vnl_matrix_fixed<double, 3, 3> CostFunctions::orientation(MRI *i)
   vnl_symmetric_eigensystem<double> SymEig(cov);
   // sort:
   unsigned int smallest = 0;
-  unsigned int largest = 0;
+  unsigned int largest  = 0;
   for (uint i = 1; i < 3; i++) {
     if (SymEig.D[largest] < SymEig.D[i])
       largest = i;

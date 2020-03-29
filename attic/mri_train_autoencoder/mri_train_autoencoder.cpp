@@ -29,36 +29,36 @@ IEEE Transaction on Pattern Analysis and Machine Intelligence, 2012.
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
+#include "autoencoder.h"
+#include "const.h"
+#include "diag.h"
 #include "error.h"
 #include "macros.h"
-#include "diag.h"
+#include "mri.h"
 #include "proto.h"
-#include "utils.h"
-#include "const.h"
 #include "timer.h"
+#include "utils.h"
 #include "version.h"
-#include "autoencoder.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static int encoder_type = NORMAL_AUTOENCODER;
-static int synthesize = 1;
-static int whalf = 2;
-static double tol = 1e-4;
-static double momentum = .5;
-static double dt = 1e-2;
-static double scale = .5;
-static char *read_fname = NULL;
+static int    encoder_type = NORMAL_AUTOENCODER;
+static int    synthesize   = 1;
+static int    whalf        = 2;
+static double tol          = 1e-4;
+static double momentum     = .5;
+static double dt           = 1e-2;
+static double scale        = .5;
+static char * read_fname   = NULL;
 
 static int x0 = -1;
 static int x1;
@@ -77,12 +77,12 @@ static int nlevels = 4;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  char *in_fname, *out_fname;
-  int msec, minutes, seconds, n;
-  Timer start;
-  MRI *mri, *mri_orig, *mri_scaled, *mri_pyramid[MAX_PYR_LEVELS];
-  SAE *sae;
+  int    ac, nargs;
+  char * in_fname, *out_fname;
+  int    msec, minutes, seconds, n;
+  Timer  start;
+  MRI *  mri, *mri_orig, *mri_scaled, *mri_pyramid[MAX_PYR_LEVELS];
+  SAE *  sae;
   double mean;
 
   memset(&parms, 0, sizeof(parms));
@@ -109,8 +109,8 @@ int main(int argc, char *argv[]) {
 
   parms.momentum = momentum;
   parms.orig_dt = parms.dt = dt;
-  parms.tol = tol;
-  in_fname = argv[1];
+  parms.tol                = tol;
+  in_fname                 = argv[1];
   parms.out_fname = out_fname = argv[2];
   if (argc < 3)
     usage_exit(1);
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     mri = mri_tmp;
   }
   mri_scaled = MRIcopy(mri, NULL);
-  mean = MRImeanFrame(mri_scaled, 0);
+  mean       = MRImeanFrame(mri_scaled, 0);
   MRIaddScalar(mri, mri, -mean);
 
   if (x0 >= 0) {
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
       ErrorExit(Gerror, "");
     SAEaddLayer(sae, scale);
     nlevels = sae->nlevels;
-    whalf = sae->whalf;
+    whalf   = sae->whalf;
   } else
     sae = SAEalloc(whalf, nlevels, encoder_type, scale);
   if (sae == NULL)
@@ -168,10 +168,10 @@ int main(int argc, char *argv[]) {
   SAEwrite(sae, out_fname);
 
   if (synthesize) {
-    int x, y, z, ind;
+    int     x, y, z, ind;
     VECTOR *v;
-    char path[STRLEN], fname[STRLEN];
-    MRI *mri_synth;
+    char    path[STRLEN], fname[STRLEN];
+    MRI *   mri_synth;
 
     printf("synthesizing output volume using auto-encoder...\n");
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
   }
 
   SAEfree(&sae);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -217,14 +217,14 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gvx, Gvy, Gvz);
   } else
@@ -236,7 +236,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'B':
       parms.acceptance_sigma = atof(argv[2]);
-      parms.proposal_sigma = atof(argv[3]);
+      parms.proposal_sigma   = atof(argv[3]);
       parms.integration_type = INTEGRATE_BOLTZMANN_MACHINE;
       printf("minimizing using Boltzmann machine with acceptance/proposal = "
              "%2.2f / %2.2f\n",
@@ -257,19 +257,19 @@ static int get_option(int argc, char *argv[]) {
       nargs = 1;
       break;
     case 'X':
-      x0 = atoi(argv[2]);
-      x1 = atoi(argv[3]);
-      y0_ = atoi(argv[4]);
-      y1_ = atoi(argv[5]);
-      z0 = atoi(argv[6]);
-      z1 = atoi(argv[7]);
+      x0    = atoi(argv[2]);
+      x1    = atoi(argv[3]);
+      y0_   = atoi(argv[4]);
+      y1_   = atoi(argv[5]);
+      z0    = atoi(argv[6]);
+      z1    = atoi(argv[7]);
       nargs = 6;
       printf("extracting subregion X %d -->%d, y %d --> %d, z %d --> %d\n", x0,
              x1, y0_, y1_, z0, z1);
       break;
     case 'R':
       read_fname = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("reading previously trained auto-encoded from %s\n", read_fname);
       break;
     case 'D':

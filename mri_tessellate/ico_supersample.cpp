@@ -25,23 +25,23 @@
 
 /* isobol.c */
 
+#include "trilib.h"
+#include <cctype>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-#include <cctype>
-#include "trilib.h"
 
-char name[2048], line[80];
-int dhk[4000000][3], npnt, ndhk;
+char  name[2048], line[80];
+int   dhk[4000000][3], npnt, ndhk;
 float pnt[2000000][3], x[3], y[3];
 FILE *outfile;
 
 void icosa() {
-  int index[3], i, j, k, l;
-  int i1, i2, i3, j1, npnt0, ndhk0;
+  int   index[3], i, j, k, l;
+  int   i1, i2, i3, j1, npnt0, ndhk0;
   float h[3][3], eps = 0.001, r, ra, rho, fpi, d;
-  char line[80];
-  int ico[3][20] = {
+  char  line[80];
+  int   ico[3][20] = {
       {1, 1, 1, 1, 1, 4, 4, 4, 5, 5, 6, 6, 2, 2, 3, 9, 10, 11, 7, 8},
       {5, 6, 2, 3, 4, 9, 10, 5, 11, 6, 7, 2, 8, 3, 9, 10, 11, 7, 8, 9},
       {4, 5, 6, 2, 3, 3, 9, 10, 10, 11, 11, 7, 7, 8, 8, 12, 12, 12, 12, 12}};
@@ -51,15 +51,15 @@ void icosa() {
   for (i = 0; i < 20; i++)
     for (j = 0; j < 3; j++)
       dhk[i][j] = ico[j][i] - 1;
-  r = 1;
-  pnt[0][0] = 0;
-  pnt[0][1] = 0;
-  pnt[0][2] = r;
+  r          = 1;
+  pnt[0][0]  = 0;
+  pnt[0][1]  = 0;
+  pnt[0][2]  = r;
   pnt[11][0] = 0;
   pnt[11][1] = 0;
   pnt[11][2] = -r;
-  rho = 0.4 * sqrt(5.0) * r;
-  fpi = 0.4 * M_PI;
+  rho        = 0.4 * sqrt(5.0) * r;
+  fpi        = 0.4 * M_PI;
   for (i = 1; i < 6; i++) {
     pnt[i][0] = rho * cos((i - 2) * fpi);
     pnt[i][1] = rho * sin((i - 2) * fpi);
@@ -118,10 +118,10 @@ void icosa() {
 
       /* vul hoekpunten van nieuwe vlakken in,gooi oude driehoekje weg */
 
-      i2 = dhk[i][1];
-      i3 = dhk[i][2];
-      dhk[i][1] = index[0];
-      dhk[i][2] = index[2];
+      i2           = dhk[i][1];
+      i3           = dhk[i][2];
+      dhk[i][1]    = index[0];
+      dhk[i][2]    = index[2];
       dhk[ndhk][0] = index[0];
       dhk[ndhk][1] = i2;
       dhk[ndhk][2] = index[1];
@@ -139,9 +139,9 @@ void icosa() {
 }
 
 int main(int argc, char *argv[]) {
-  int i, k;
+  int   i, k;
   float radius, a, b, c, rlab, r[3] = {0.0, 0.0, 0.0}, ri[3];
-  char line[280];
+  char  line[280];
 
   icosa();
 
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
       a += ri[k] * ri[k];
       b += ri[k] * r[k];
     }
-    b = 2 * b;
+    b    = 2 * b;
     rlab = (-b + sqrt(b * b - 4 * a * c)) / (2 * a);
     if (rlab < 0)
       rlab = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);

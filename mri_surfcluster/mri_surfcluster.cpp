@@ -22,21 +22,21 @@
  *
  */
 
+#include "annotation.h"
 #include "diag.h"
+#include "fio.h"
+#include "fsenv.h"
 #include "mri2.h"
 #include "mri_identify.h"
 #include "mrisutils.h"
-#include "fio.h"
-#include "volcluster.h"
+#include "randomfields.h"
 #include "surfcluster.h"
 #include "version.h"
-#include "annotation.h"
-#include "fsenv.h"
-#include "randomfields.h"
+#include "volcluster.h"
 
 LABEL *MaskToSurfaceLabel(MRI *mask, double thresh, int sign);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -44,10 +44,10 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int isflag(char *flag);
-static int nth_is_arg(int nargc, char **argv, int nth);
-static int singledash(char *flag);
-static int stringmatch(char *str1, char *str2);
+static int  isflag(char *flag);
+static int  nth_is_arg(int nargc, char **argv, int nth);
+static int  singledash(char *flag);
+static int  stringmatch(char *str1, char *str2);
 
 int main(int argc, char *argv[]);
 
@@ -56,117 +56,117 @@ static char vcid[] =
 const char *Progname = nullptr;
 
 char *subjectdir = nullptr;
-char *hemi = nullptr;
+char *hemi       = nullptr;
 
-char *srcid = nullptr;
-char *srcfmt = "";
-int srcfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *srcsurfid = "white";
-char *srcsubjid = nullptr;
-int srcframe = 0;
+char * srcid     = nullptr;
+char * srcfmt    = "";
+int    srcfmtid  = MRI_VOLUME_TYPE_UNKNOWN;
+char * srcsurfid = "white";
+char * srcsubjid = nullptr;
+int    srcframe  = 0;
 double thmin = -1, thmax = -1;
-char *thsign = nullptr;
-int thsignid = 0;
-float minarea = 0;
-char *annotname = nullptr;
+char * thsign    = nullptr;
+int    thsignid  = 0;
+float  minarea   = 0;
+char * annotname = nullptr;
 
-char *maskid = nullptr;
-char *maskfmt = nullptr;
-int maskfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *masksubjid = nullptr;
+char *maskid      = nullptr;
+char *maskfmt     = nullptr;
+int   maskfmtid   = MRI_VOLUME_TYPE_UNKNOWN;
+char *masksubjid  = nullptr;
 char *masksignstr = nullptr;
-int masksign = 0;
-float maskthresh = 0.5; // assume binary
+int   masksign    = 0;
+float maskthresh  = 0.5; // assume binary
 
 int nth = -1;
 
-char *omaskid = nullptr;
-char *omaskfmt = "paint";
+char *omaskid     = nullptr;
+char *omaskfmt    = "paint";
 char *omasksubjid = nullptr;
 
 // Constraining label
-char *clabelfile = nullptr;
-char *maskfile = nullptr;
-LABEL *clabel = nullptr;
-int clabelinv = 0;
-int UseCortexLabel = 0;
+char * clabelfile     = nullptr;
+char * maskfile       = nullptr;
+LABEL *clabel         = nullptr;
+int    clabelinv      = 0;
+int    UseCortexLabel = 0;
 
-char *outid = nullptr;
-char *outfmt = "paint";
-int outfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *ocnid = nullptr;
-char *ocnfmt = "paint";
-int ocnfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *ocpvalid = nullptr;
-char *ocpvalfmt = "paint";
-int ocpvalfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *sumfile = nullptr;
+char *outid        = nullptr;
+char *outfmt       = "paint";
+int   outfmtid     = MRI_VOLUME_TYPE_UNKNOWN;
+char *ocnid        = nullptr;
+char *ocnfmt       = "paint";
+int   ocnfmtid     = MRI_VOLUME_TYPE_UNKNOWN;
+char *ocpvalid     = nullptr;
+char *ocpvalfmt    = "paint";
+int   ocpvalfmtid  = MRI_VOLUME_TYPE_UNKNOWN;
+char *sumfile      = nullptr;
 char *pointsetfile = nullptr;
 
-char *outlabelbase = nullptr;
-char outlabelfile[1000];
-int nthlab = 0;
-LABEL *outlabel;
+char *  outlabelbase = nullptr;
+char    outlabelfile[1000];
+int     nthlab = 0;
+LABEL * outlabel;
 VERTEX *v;
 
 char *outannot = nullptr;
 
-char *synthfunc = nullptr;
+char *synthfunc   = nullptr;
 char *subjectsdir = nullptr;
-int debug = 0;
+int   debug       = 0;
 
-MRI *srcval, *mritmp, *cnsurf;
+MRI *        srcval, *mritmp, *cnsurf;
 MRI_SURFACE *srcsurf;
-int reshape = 1;
-int reshapefactor;
+int          reshape = 1;
+int          reshapefactor;
 
-char *xfmfile = "talairach.xfm";
-char xfmpath[2000];
+char *  xfmfile = "talairach.xfm";
+char    xfmpath[2000];
 MATRIX *XFM;
-int FixMNI = 1;
+int     FixMNI = 1;
 
 SURFCLUSTERSUM *scs, *scs2;
 
-int overallmaxvtx, overallminvtx;
+int   overallmaxvtx, overallminvtx;
 float overallmax, overallmin;
 
-CSD *csd = nullptr;
-char *csdfile;
+CSD *  csd = nullptr;
+char * csdfile;
 double pvalLow, pvalHi, ciPct = 90, pval, ClusterSize;
-char *csdpdffile = nullptr;
-int csdpdfonly = 0;
-char *csdoutfile = nullptr;
+char * csdpdffile = nullptr;
+int    csdpdfonly = 0;
+char * csdoutfile = nullptr;
 
 MRI *merged, *mask;
 
 double thminadj, thmaxadj;
-int AdjustThreshWhenOneTail = 1;
+int    AdjustThreshWhenOneTail = 1;
 
-char *voxwisesigfile = nullptr;
-MRI *voxwisesig;
-char *maxvoxwisesigfile = nullptr;
-int ReallyUseAverage7 = 0;
-double fwhm = -1;
-double fdr = -1;
+char * voxwisesigfile = nullptr;
+MRI *  voxwisesig;
+char * maxvoxwisesigfile = nullptr;
+int    ReallyUseAverage7 = 0;
+double fwhm              = -1;
+double fdr               = -1;
 
-double cwpvalthresh = -1; // pvalue, NOT log10(p)!
-int Bonferroni = 0;
-int BonferroniMax = 0;
-int ReportCentroid = 0;
-int sig2pmax = 0; // convert max value from -log10(p) to p
+double cwpvalthresh   = -1; // pvalue, NOT log10(p)!
+int    Bonferroni     = 0;
+int    BonferroniMax  = 0;
+int    ReportCentroid = 0;
+int    sig2pmax       = 0; // convert max value from -log10(p) to p
 
 MRI *fwhmmap = nullptr; // map of vertex-wise FWHM for non-stationary correction
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  char fname[2000];
-  int n, nsearch, NClusters, NPrunedClusters, vtx, rt;
-  FILE *fp;
-  float totarea;
-  int nargs, err;
+  char           fname[2000];
+  int            n, nsearch, NClusters, NPrunedClusters, vtx, rt;
+  FILE *         fp;
+  float          totarea;
+  int            nargs, err;
   struct utsname uts;
-  char *cmdline, cwd[2000];
-  double cmaxsize, fwhmvtx;
+  char *         cmdline, cwd[2000];
+  double         cmaxsize, fwhmvtx;
 
   nargs = handleVersionOption(argc, argv, "mri_surfcluster");
   if (nargs && argc - nargs == 1)
@@ -269,7 +269,7 @@ int main(int argc, char **argv) {
       }
     } else {
       srcfmtid = string_to_type(srcfmt);
-      srcval = MRIreadType(srcid, srcfmtid);
+      srcval   = MRIreadType(srcid, srcfmtid);
       if (srcval == nullptr) {
         printf("ERROR: could not read %s as type %s\n", srcid, srcfmt);
         exit(1);
@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
       mritmp = mri_reshape(srcval, reshapefactor * srcval->width, 1, 1,
                            srcval->nframes);
       MRIfree(&srcval);
-      srcval = mritmp;
+      srcval        = mritmp;
       reshapefactor = 0; /* reset for output */
     }
 
@@ -313,8 +313,8 @@ int main(int argc, char **argv) {
     if (clabelinv) {
       // Constrain to be OUTSIDE clabel by setting INSIDE values to 0
       for (n = 0; n < clabel->n_points; n++) {
-        vtx = clabel->lv[n].vno;
-        srcsurf->vertices[vtx].val = 0.0;
+        vtx                             = clabel->lv[n].vno;
+        srcsurf->vertices[vtx].val      = 0.0;
         srcsurf->vertices[vtx].undefval = 0;
       }
     } else {
@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
         srcsurf->vertices[vtx].undefval = 0;
       // Change undefvals in mask to 1
       for (n = 0; n < clabel->n_points; n++) {
-        vtx = clabel->lv[n].vno;
+        vtx                             = clabel->lv[n].vno;
         srcsurf->vertices[vtx].undefval = 1;
       }
       // Now set the overlay values to 0
@@ -343,15 +343,15 @@ int main(int argc, char **argv) {
   /* Compute the overall max and min */
   for (vtx = 0; vtx < srcsurf->nvertices; vtx++) {
     if (vtx == 0) {
-      overallmax = srcsurf->vertices[vtx].val;
+      overallmax    = srcsurf->vertices[vtx].val;
       overallmaxvtx = vtx;
-      overallmin = srcsurf->vertices[vtx].val;
+      overallmin    = srcsurf->vertices[vtx].val;
       overallminvtx = vtx;
     } else if (overallmax < srcsurf->vertices[vtx].val) {
-      overallmax = srcsurf->vertices[vtx].val;
+      overallmax    = srcsurf->vertices[vtx].val;
       overallmaxvtx = vtx;
     } else if (overallmin > srcsurf->vertices[vtx].val) {
-      overallmin = srcsurf->vertices[vtx].val;
+      overallmin    = srcsurf->vertices[vtx].val;
       overallminvtx = vtx;
     }
   }
@@ -450,9 +450,9 @@ int main(int argc, char **argv) {
     for (n = 0; n < NClusters; n++) {
       ClusterSize = scs[n].area;
       pval = CSDpvalClustSize(csd, ClusterSize, ciPct, &pvalLow, &pvalHi);
-      scs[n].pval_clusterwise = pval;
+      scs[n].pval_clusterwise     = pval;
       scs[n].pval_clusterwise_low = pvalLow;
-      scs[n].pval_clusterwise_hi = pvalHi;
+      scs[n].pval_clusterwise_hi  = pvalHi;
     }
   }
   if (fwhm > 0) { // use RFT
@@ -472,25 +472,25 @@ int main(int argc, char **argv) {
       if (thsignid == 0)
         pval = 2 * pval; // hack for abs
       // printf("  %2d %g %g\n",n,ClusterSize, pval);
-      scs[n].pval_clusterwise = pval;
+      scs[n].pval_clusterwise     = pval;
       scs[n].pval_clusterwise_low = 0;
-      scs[n].pval_clusterwise_hi = 0;
+      scs[n].pval_clusterwise_hi  = 0;
     }
   }
 
   if (Bonferroni > 0) {
     // Bonferroni correction -- generally for across spaces
     for (n = 0; n < NClusters; n++) {
-      pval = scs[n].pval_clusterwise;
-      pval = 1 - pow((1 - pval), Bonferroni);
+      pval                    = scs[n].pval_clusterwise;
+      pval                    = 1 - pow((1 - pval), Bonferroni);
       scs[n].pval_clusterwise = pval;
 
-      pval = scs[n].pval_clusterwise_low;
-      pval = 1 - pow((1 - pval), Bonferroni);
+      pval                        = scs[n].pval_clusterwise_low;
+      pval                        = 1 - pow((1 - pval), Bonferroni);
       scs[n].pval_clusterwise_low = pval;
 
-      pval = scs[n].pval_clusterwise_hi;
-      pval = 1 - pow((1 - pval), Bonferroni);
+      pval                       = scs[n].pval_clusterwise_hi;
+      pval                       = 1 - pow((1 - pval), Bonferroni);
       scs[n].pval_clusterwise_hi = pval;
     }
   }
@@ -506,7 +506,7 @@ int main(int argc, char **argv) {
     scs2 = sclustPruneByCWPval(scs, NClusters, cwpvalthresh, &NPrunedClusters,
                                srcsurf);
     NClusters = NPrunedClusters;
-    scs = scs2;
+    scs       = scs2;
   }
 
   if (debug) {
@@ -690,14 +690,14 @@ int main(int argc, char **argv) {
       sprintf(outlabelfile, "%s-%04d.label", outlabelbase, n);
       outlabel = LabelAlloc(scs[n - 1].nmembers, srcsubjid, outlabelfile);
       outlabel->n_points = scs[n - 1].nmembers;
-      nthlab = 0;
+      nthlab             = 0;
       for (vtx = 0; vtx < srcsurf->nvertices; vtx++) {
         v = &srcsurf->vertices[vtx];
         if (v->undefval == n) {
-          outlabel->lv[nthlab].x = v->x;
-          outlabel->lv[nthlab].y = v->y;
-          outlabel->lv[nthlab].z = v->z;
-          outlabel->lv[nthlab].vno = vtx;
+          outlabel->lv[nthlab].x    = v->x;
+          outlabel->lv[nthlab].y    = v->y;
+          outlabel->lv[nthlab].z    = v->z;
+          outlabel->lv[nthlab].vno  = vtx;
           outlabel->lv[nthlab].stat = v->val;
           nthlab++;
         }
@@ -721,9 +721,9 @@ int main(int argc, char **argv) {
 /* ------------------------------------------------------------------ */
 
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  FILE *fp;
+  FILE * fp;
 
   if (argc < 1)
     usage_exit();
@@ -798,7 +798,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--src") || !strcmp(option, "--in")) {
       if (nargc < 1)
         argnerr(option, 1);
-      srcid = pargv[0];
+      srcid     = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         srcfmt = pargv[1];
@@ -847,13 +847,13 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--xfm")) {
       if (nargc < 1)
         argnerr(option, 1);
-      xfmfile = pargv[0];
+      xfmfile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--csd")) {
       if (nargc < 1)
         argnerr(option, 1);
       csdfile = pargv[0];
-      csd = CSDreadMerge(csdfile, csd);
+      csd     = CSDreadMerge(csdfile, csd);
       if (csd == nullptr)
         exit(1);
       if (strcmp(csd->anattype, "surface")) {
@@ -865,12 +865,12 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       csdoutfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--csdpdf")) {
       if (nargc < 1)
         argnerr(option, 1);
       csdpdffile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--fdr")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -936,11 +936,11 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       clabelfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--mask")) {
       if (nargc < 1)
         argnerr(option, 1);
-      maskfile = pargv[0];
+      maskfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--annot")) {
       if (nargc < 1)
@@ -955,17 +955,17 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--sum")) {
       if (nargc < 1)
         argnerr(option, 1);
-      sumfile = pargv[0];
+      sumfile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--pointset")) {
       if (nargc < 1)
         argnerr(option, 1);
       pointsetfile = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--o")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outid = pargv[0];
+      outid     = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         outfmt = pargv[1];
@@ -978,7 +978,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--ocn")) {
       if (nargc < 1)
         argnerr(option, 1);
-      ocnid = pargv[0];
+      ocnid     = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         ocnfmt = pargv[1];
@@ -991,7 +991,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--cwsig") || !strcmp(option, "--ocp")) {
       if (nargc < 1)
         argnerr(option, 1);
-      ocpvalid = pargv[0];
+      ocpvalid  = pargv[0];
       nargsused = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         ocpvalfmt = pargv[1];
@@ -1006,21 +1006,21 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       voxwisesigfile = pargv[0];
-      nargsused = 1;
+      nargsused      = 1;
     } else if (!strcmp(option, "--vwsigmax")) {
       if (nargc < 1)
         argnerr(option, 1);
       maxvoxwisesigfile = pargv[0];
-      nargsused = 1;
+      nargsused         = 1;
     } else if (!strcmp(option, "--olab")) {
       if (nargc < 1)
         argnerr(option, 1);
       outlabelbase = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--oannot")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outannot = pargv[0];
+      outannot  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--synth")) {
       if (nargc < 1)
@@ -1390,7 +1390,7 @@ static void print_help() {
 /* --------------------------------------------- */
 static void check_options() {
   char tmpstr[2000];
-  int err;
+  int  err;
 
   if (csdoutfile) {
     if (csd == nullptr) {
@@ -1680,7 +1680,7 @@ static void argnerr(char *option, int n) {
 
 /*--------------------------------------------------------*/
 LABEL *MaskToSurfaceLabel(MRI *mask, double thresh, int sign) {
-  int v, c, r, s, nhits, ishit;
+  int    v, c, r, s, nhits, ishit;
   LABEL *label;
   double val;
 
@@ -1689,7 +1689,7 @@ LABEL *MaskToSurfaceLabel(MRI *mask, double thresh, int sign) {
     for (r = 0; r < mask->height; r++) {
       for (c = 0; c < mask->width; c++) { // cols must be fasest
         ishit = 0;
-        val = MRIgetVoxVal(mask, c, r, s, 0);
+        val   = MRIgetVoxVal(mask, c, r, s, 0);
         if (sign == 0 && fabs(val) > thresh)
           ishit = 1;
         if (sign > 0 && val > +thresh)
@@ -1705,16 +1705,16 @@ LABEL *MaskToSurfaceLabel(MRI *mask, double thresh, int sign) {
   if (nhits == 0)
     return (nullptr);
 
-  label = LabelAlloc(nhits, "unknown", "mask");
+  label           = LabelAlloc(nhits, "unknown", "mask");
   label->n_points = nhits;
 
   nhits = 0;
-  v = 0;
+  v     = 0;
   for (s = 0; s < mask->depth; s++) {
     for (r = 0; r < mask->height; r++) {
       for (c = 0; c < mask->width; c++) { // cols must be fasest
         ishit = 0;
-        val = MRIgetVoxVal(mask, c, r, s, 0);
+        val   = MRIgetVoxVal(mask, c, r, s, 0);
         if (sign == 0 && fabs(val) > thresh)
           ishit = 1;
         if (sign > 0 && val > +thresh)

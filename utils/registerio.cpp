@@ -24,13 +24,13 @@
  */
 
 #include "registerio.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include "fio.h"
 #include "proto.h" // nint
 #include "resample.h"
 #include "timer.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 extern const char *Progname;
 
@@ -54,8 +54,8 @@ int regio_read_register(const char *regfile, char **subject, float *inplaneres,
                         float *betplaneres, float *intensity, MATRIX **R,
                         int *float2int) {
   FILE *fp;
-  char tmp[1000];
-  int r, c, n;
+  char  tmp[1000];
+  int   r, c, n;
   float val;
 
   if (!stricmp(FileNameExtension(regfile, tmp), "LTA")) {
@@ -69,11 +69,11 @@ int regio_read_register(const char *regfile, char **subject, float *inplaneres,
     *subject = (char *)calloc(strlen(lta->subject) + 2, sizeof(char));
     strcpy(*subject, lta->subject);
 
-    *intensity = lta->fscale;
-    *float2int = FLT2INT_ROUND;
-    *inplaneres = lta->xforms[0].src.xsize;
+    *intensity   = lta->fscale;
+    *float2int   = FLT2INT_ROUND;
+    *inplaneres  = lta->xforms[0].src.xsize;
     *betplaneres = lta->xforms[0].src.zsize;
-    *R = TransformLTA2RegDat(lta);
+    *R           = TransformLTA2RegDat(lta);
     LTAfree(&lta);
     return (0);
   }
@@ -166,7 +166,7 @@ int regio_read_register(const char *regfile, char **subject, float *inplaneres,
 int regio_print_register(FILE *fp, const char *subject, float inplaneres,
                          float betplaneres, float intensity, const MATRIX *R,
                          int float2int) {
-  int r, c;
+  int         r, c;
   const char *f2imethod;
 
   if (subject == nullptr)
@@ -244,8 +244,8 @@ int regio_write_register(const char *regfile, const char *subject,
    -------------------------------------------------------------- */
 int regio_read_mincxfm(const char *xfmfile, MATRIX **R, char **fileinfo) {
   FILE *fp;
-  char tmpstr[1000];
-  int r, c, n, nlines;
+  char  tmpstr[1000];
+  int   r, c, n, nlines;
   float val;
 
   memset(tmpstr, '\0', 1000);
@@ -323,7 +323,7 @@ int regio_read_mincxfm(const char *xfmfile, MATRIX **R, char **fileinfo) {
 int regio_write_mincxfm(const char *xfmfile, const MATRIX *R,
                         const char *fileinfo) {
   FILE *fp;
-  int r, c;
+  int   r, c;
 
   fp = fopen(xfmfile, "w");
   if (fp == nullptr) {
@@ -358,8 +358,8 @@ int regio_write_mincxfm(const char *xfmfile, const MATRIX *R,
    -------------------------------------------------------------- */
 int regio_read_xfm4(const char *xfmfile, MATRIX **R) {
   FILE *fp;
-  char tmpstr[1000];
-  int r, c, n, nlines;
+  char  tmpstr[1000];
+  int   r, c, n, nlines;
   float val;
 
   memset(tmpstr, '\0', 1000);
@@ -421,7 +421,7 @@ int regio_read_xfm4(const char *xfmfile, MATRIX **R) {
    -------------------------------------------------------------- */
 int regio_read_xfm(const char *xfmfile, MATRIX **R) {
   char *ext, *fileinfo;
-  int err = 0;
+  int   err = 0;
 
   ext = fio_extension(xfmfile);
 
@@ -444,26 +444,26 @@ int regio_read_xfm(const char *xfmfile, MATRIX **R) {
 #include "mri_circulars.h"
 int regio_write_surfacexform_to_register_dat(const MATRIX *B, const char *fname,
                                              const MRI_SURFACE *mris,
-                                             const MRI *mri,
-                                             const char *subject,
-                                             int float2int) {
+                                             const MRI *        mri,
+                                             const char *       subject,
+                                             int                float2int) {
   MATRIX *Ta, *Sa, *invTa, *A, *R, *S, *invS, *T, *m1, *m2;
-  MRI *mri_surf = MRIallocHeader(mris->vg.width, mris->vg.height,
+  MRI *   mri_surf = MRIallocHeader(mris->vg.width, mris->vg.height,
                                  mris->vg.depth, MRI_UCHAR, 1);
 
   MRIcopyVolGeomToMRI(mri_surf, &mris->vg);
 
-  T = MRIxfmCRS2XYZtkreg(mri);
-  S = MRIgetVoxelToRasXform(mri);
-  invS = MatrixInverse(S, nullptr);
-  Ta = MRIxfmCRS2XYZtkreg(mri_surf);
-  Sa = MRIgetVoxelToRasXform(mri_surf);
+  T     = MRIxfmCRS2XYZtkreg(mri);
+  S     = MRIgetVoxelToRasXform(mri);
+  invS  = MatrixInverse(S, nullptr);
+  Ta    = MRIxfmCRS2XYZtkreg(mri_surf);
+  Sa    = MRIgetVoxelToRasXform(mri_surf);
   invTa = MatrixInverse(Ta, nullptr);
-  A = MatrixMultiply(Sa, invTa, NULL);
+  A     = MatrixMultiply(Sa, invTa, NULL);
 
   m1 = MatrixMultiply(A, B, NULL);
   m2 = MatrixMultiply(invS, m1, NULL);
-  R = MatrixMultiply(T, m2, NULL);
+  R  = MatrixMultiply(T, m2, NULL);
   regio_write_register(fname, subject, mri->xsize, mri->zsize, 1, R, float2int);
   MatrixFree(&A);
   MatrixFree(&Ta);
@@ -479,14 +479,14 @@ int regio_write_surfacexform_to_register_dat(const MATRIX *B, const char *fname,
   return (NO_ERROR);
 }
 
-MATRIX *regio_read_surfacexform_from_register_dat(const char *fname,
+MATRIX *regio_read_surfacexform_from_register_dat(const char *       fname,
                                                   const MRI_SURFACE *mris,
-                                                  const MRI *mri,
-                                                  char **subject) {
+                                                  const MRI *        mri,
+                                                  char **            subject) {
   MATRIX *Ta, *Sa, *invT, *A, *R, *S, *invSa, *T, *m1, *m2, *B;
-  float pres, bres, intensity;
-  int float2int;
-  MRI *mri_surf = MRIallocHeader(mris->vg.width, mris->vg.height,
+  float   pres, bres, intensity;
+  int     float2int;
+  MRI *   mri_surf = MRIallocHeader(mris->vg.width, mris->vg.height,
                                  mris->vg.depth, MRI_UCHAR, 1);
 
   if (regio_read_register(fname, subject, &pres, &bres, &intensity, &B,
@@ -497,17 +497,17 @@ MATRIX *regio_read_surfacexform_from_register_dat(const char *fname,
 
   MRIcopyVolGeomToMRI(mri_surf, &mris->vg);
 
-  T = MRIxfmCRS2XYZtkreg(mri);
-  S = MRIgetVoxelToRasXform(mri);
-  Ta = MRIxfmCRS2XYZtkreg(mri_surf);
-  Sa = MRIgetVoxelToRasXform(mri_surf);
+  T     = MRIxfmCRS2XYZtkreg(mri);
+  S     = MRIgetVoxelToRasXform(mri);
+  Ta    = MRIxfmCRS2XYZtkreg(mri_surf);
+  Sa    = MRIgetVoxelToRasXform(mri_surf);
   invSa = MatrixInverse(Sa, nullptr);
-  invT = MatrixInverse(T, nullptr);
-  A = MatrixMultiply(S, invT, NULL);
+  invT  = MatrixInverse(T, nullptr);
+  A     = MatrixMultiply(S, invT, NULL);
 
   m1 = MatrixMultiply(A, B, NULL);
   m2 = MatrixMultiply(invSa, m1, NULL);
-  R = MatrixMultiply(Ta, m2, NULL);
+  R  = MatrixMultiply(Ta, m2, NULL);
   MatrixFree(&A);
   MatrixFree(&Ta);
   MatrixFree(&Sa);
@@ -528,9 +528,9 @@ MATRIX *regio_read_surfacexform_from_register_dat(const char *fname,
   crap in the file.
 */
 MATRIX *regio_read_registermat(const char *regfile) {
-  char *subject;
-  float inplaneres, betplaneres, intensity;
-  int float2int, err;
+  char *  subject;
+  float   inplaneres, betplaneres, intensity;
+  int     float2int, err;
   MATRIX *R;
   err = regio_read_register(regfile, &subject, &inplaneres, &betplaneres,
                             &intensity, &R, &float2int);
@@ -541,10 +541,10 @@ MATRIX *regio_read_registermat(const char *regfile) {
 }
 
 char *regio_read_subject(const char *regfile) {
-  float inplaneres, betplaneres, intensity;
-  int float2int;
+  float   inplaneres, betplaneres, intensity;
+  int     float2int;
   MATRIX *R;
-  char *subject;
+  char *  subject;
   regio_read_register(regfile, &subject, &inplaneres, &betplaneres, &intensity,
                       &R, &float2int);
   MatrixFree(&R);

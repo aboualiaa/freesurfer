@@ -102,8 +102,8 @@
                                                                                                                       \
         /* Serial iteration reproducing each partial sum    */ /*                                                  */ \
         int const ROMP_lo = ROMP_distributor.partials[ROMP_index].lo;                                                 \
-    int const ROMP_hi = ROMP_distributor.partials[ROMP_index].hi;                                                     \
-    int ROMP_VARIABLE;                                                                                                \
+    int const     ROMP_hi = ROMP_distributor.partials[ROMP_index].hi;                                                 \
+    int           ROMP_VARIABLE;                                                                                      \
     for (ROMP_VARIABLE = ROMP_lo; ROMP_VARIABLE < ROMP_hi; ROMP_VARIABLE++) {                                         \
                                                                                                                       \
       ROMP_PFLB_begin                                                                                                 \

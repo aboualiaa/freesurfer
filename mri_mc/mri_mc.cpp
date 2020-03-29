@@ -27,15 +27,15 @@
  *
  */
 
-#include "version.h"
-#include "tags.h"
 #include "MC.h"
 #include "MRIio_old.h"
 #include "mrisurf.h"
+#include "tags.h"
+#include "version.h"
 
-#define MAXFACES 3000000
-#define MAXVERTICES 1500000
-#define FACEINCREASE 1.2
+#define MAXFACES       3000000
+#define MAXVERTICES    1500000
+#define FACEINCREASE   1.2
 #define VERTEXINCREASE 1.2
 
 const char *Progname;
@@ -48,8 +48,8 @@ typedef struct quad_face_type_ {
 
 typedef struct quad_vertex_type_ {
   float imnr, i, j;
-  int num;
-  int f[9];
+  int   num;
+  int   f[9];
 } quad_vertex_type;
 
 typedef struct tesselation_parms_ {
@@ -64,12 +64,12 @@ typedef struct tesselation_parms_ {
   unsigned char ***im;
 
   /*label information*/
-  int number_of_labels;
+  int  number_of_labels;
   int *label_values;
   int *imin, *imax, *jmin, *jmax, *kmin, *kmax;
-  int current_label;
-  int ind;
-  int xmin, xmax, ymin, ymax, zmin, zmax;
+  int  current_label;
+  int  ind;
+  int  xmin, xmax, ymin, ymax, zmin, zmax;
 
   /*final surfaces*/
   /*The surfaces are saved into a table of surfaces*/
@@ -82,16 +82,16 @@ typedef struct tesselation_parms_ {
   int connectivity;
 
   /*face information*/
-  int face_index;
+  int             face_index;
   quad_face_type *face;
-  int maxfaces;
-  int *face_index_table0;
-  int *face_index_table1;
+  int             maxfaces;
+  int *           face_index_table0;
+  int *           face_index_table1;
 
   /*vertex information*/
-  int vertex_index;
+  int               vertex_index;
   quad_vertex_type *vertex;
-  int maxvertices;
+  int               maxvertices;
   //  int *vertex_index_table;
 
   /*used for the debugging*/
@@ -104,19 +104,19 @@ static int downsample = 0;
 /*initialization of tesselation_parms*/
 /*note that not all the fields are allocated*/
 void initTesselationParms(tesselation_parms *parms) {
-  int i, j, k, n;
-  int depth, width, height;
-  int *xmin, *ymin, *zmin, *xmax, *ymax, *zmax;
-  int val, label_nbr, *labels;
+  int              i, j, k, n;
+  int              depth, width, height;
+  int *            xmin, *ymin, *zmin, *xmax, *ymax, *zmax;
+  int              val, label_nbr, *labels;
   unsigned char ***im;
-  MRI *mri = parms->mri;
+  MRI *            mri = parms->mri;
 
-  depth = mri->depth;
-  width = mri->width;
+  depth  = mri->depth;
+  width  = mri->width;
   height = mri->height;
 
-  parms->width = 2 * MAX(width, height) + 1;
-  parms->height = parms->width;
+  parms->width   = 2 * MAX(width, height) + 1;
+  parms->height  = parms->width;
   parms->imgsize = parms->width * parms->height;
 
   /* allocate and initialize the image*/
@@ -137,7 +137,7 @@ void initTesselationParms(tesselation_parms *parms) {
   parms->im = im;
 
   label_nbr = parms->number_of_labels;
-  labels = parms->label_values;
+  labels    = parms->label_values;
 
   xmin = (int *)malloc(label_nbr * sizeof(int));
   ymin = (int *)malloc(label_nbr * sizeof(int));
@@ -202,14 +202,14 @@ void initTesselationParms(tesselation_parms *parms) {
 }
 #if 1
 static int freeTesselationParms(tesselation_parms **parms) {
-  int j, k;
+  int                j, k;
   tesselation_parms *tmp = *parms;
-  int depth, width, height;
-  MRI *mri = tmp->mri;
+  int                depth, width, height;
+  MRI *              mri = tmp->mri;
 
-  depth = mri->depth;
+  depth  = mri->depth;
   height = mri->height;
-  width = mri->width;
+  width  = mri->width;
 
   for (k = 0; k < depth; k++) {
     for (j = 0; j < height; j++)
@@ -230,8 +230,8 @@ static int freeTesselationParms(tesselation_parms **parms) {
 }
 #endif
 void allocateTesselation(tesselation_parms *parms) {
-  int imgsize = parms->imgsize;
-  parms->face = (quad_face_type *)lcalloc(MAXFACES, sizeof(quad_face_type));
+  int imgsize     = parms->imgsize;
+  parms->face     = (quad_face_type *)lcalloc(MAXFACES, sizeof(quad_face_type));
   parms->maxfaces = MAXFACES;
   parms->face_index_table0 = (int *)lcalloc(6 * imgsize, sizeof(int));
   parms->face_index_table1 = (int *)lcalloc(6 * imgsize, sizeof(int));
@@ -241,7 +241,7 @@ void allocateTesselation(tesselation_parms *parms) {
   parms->maxvertices = MAXVERTICES;
   //  parms->vertex_index_table = (int *)lcalloc(8*imgsize,sizeof(int));
 
-  parms->face_index = 0;
+  parms->face_index   = 0;
   parms->vertex_index = 0;
 
   if ((!parms->face) || (!parms->face_index_table0) ||
@@ -262,13 +262,13 @@ static void freeTesselation(tesselation_parms *parms) {
 #endif
 
 MRI *preprocessingStep(tesselation_parms *parms) {
-  int i, j, k, width, height, depth, n;
-  int xmin, ymin, zmin, xmax, ymax, zmax;
+  int  i, j, k, width, height, depth, n;
+  int  xmin, ymin, zmin, xmax, ymax, zmax;
   MRI *mri;
 
-  width = parms->mri->width;
+  width  = parms->mri->width;
   height = parms->mri->height;
-  depth = parms->mri->depth;
+  depth  = parms->mri->depth;
 
   mri = MRIclone(parms->mri, nullptr);
 
@@ -330,8 +330,8 @@ MRI *preprocessingStep(tesselation_parms *parms) {
 
 void reallocateVertices(tesselation_parms *parms) {
   quad_vertex_type *tmp;
-  int k, n;
-  int vertex_index = parms->vertex_index;
+  int               k, n;
+  int               vertex_index = parms->vertex_index;
 
   parms->maxvertices = (int)(parms->maxvertices * VERTEXINCREASE);
   tmp =
@@ -341,9 +341,9 @@ void reallocateVertices(tesselation_parms *parms) {
               parms->maxvertices);
   for (k = 0; k < vertex_index; k++) {
     tmp[k].imnr = parms->vertex[k].imnr;
-    tmp[k].i = parms->vertex[k].i;
-    tmp[k].j = parms->vertex[k].j;
-    tmp[k].num = parms->vertex[k].num;
+    tmp[k].i    = parms->vertex[k].i;
+    tmp[k].j    = parms->vertex[k].j;
+    tmp[k].num  = parms->vertex[k].num;
     for (n = 0; n < 9; n++)
       tmp[k].f[n] = parms->vertex[k].f[n];
   }
@@ -352,8 +352,8 @@ void reallocateVertices(tesselation_parms *parms) {
 }
 void reallocateFaces(tesselation_parms *parms) {
   quad_face_type *tmp;
-  int k, n;
-  int face_index = parms->face_index;
+  int             k, n;
+  int             face_index = parms->face_index;
 
   parms->maxfaces = (int)(parms->maxfaces * FACEINCREASE);
   tmp = (quad_face_type *)lcalloc(parms->maxfaces, sizeof(quad_face_type));
@@ -362,10 +362,10 @@ void reallocateFaces(tesselation_parms *parms) {
               parms->maxfaces);
   for (k = 0; k < face_index; k++) {
     tmp[k].imnr = parms->face[k].imnr;
-    tmp[k].i = parms->face[k].i;
-    tmp[k].j = parms->face[k].j;
-    tmp[k].f = parms->face[k].f;
-    tmp[k].num = parms->face[k].num;
+    tmp[k].i    = parms->face[k].i;
+    tmp[k].j    = parms->face[k].j;
+    tmp[k].f    = parms->face[k].f;
+    tmp[k].num  = parms->face[k].num;
     for (n = 0; n < 4; n++)
       tmp[k].v[n] = parms->face[k].v[n];
   }
@@ -375,16 +375,16 @@ void reallocateFaces(tesselation_parms *parms) {
 }
 
 int saveTesselation2(tesselation_parms *parms) {
-  int vno, m, n, fno;
-  int nVFMultiplier = 1;
-  quad_face_type *face2;
+  int               vno, m, n, fno;
+  int               nVFMultiplier = 1;
+  quad_face_type *  face2;
   quad_vertex_type *vertex2;
-  MRIS *mris;
-  FACE *face;
-  float x, y, z, xhi, xlo, yhi, ylo, zhi, zlo;
-  float st, ps, xx1, yy0, zz1;
-  float j, i, imnr;
-  double xw, yw, zw;
+  MRIS *            mris;
+  FACE *            face;
+  float             x, y, z, xhi, xlo, yhi, ylo, zhi, zlo;
+  float             st, ps, xx1, yy0, zz1;
+  float             j, i, imnr;
+  double            xw, yw, zw;
 
   /*necessary for the coord transformation*/
   ps = parms->mri->ps;
@@ -408,9 +408,9 @@ int saveTesselation2(tesselation_parms *parms) {
     VERTEX_TOPOLOGY *const vertext = &mris->vertices_topology[vno];
 
     vertex2 = &parms->vertex[vno];
-    i = vertex2->i;
-    j = vertex2->j;
-    imnr = vertex2->imnr;
+    i       = vertex2->i;
+    j       = vertex2->j;
+    imnr    = vertex2->imnr;
 
     //      x = xx1-(j-0.5)*ps;
     // y = yy0+(imnr-0.5)*st;
@@ -469,9 +469,9 @@ int saveTesselation2(tesselation_parms *parms) {
   xhi = yhi = zhi = -10000;
   xlo = ylo = zlo = 10000;
   for (vno = 0; vno < mris->nvertices; vno++) {
-    mris->vertices[vno].curv = 0;
+    mris->vertices[vno].curv     = 0;
     mris->vertices[vno].origarea = -1;
-    mris->vertices[vno].border = 0;
+    mris->vertices[vno].border   = 0;
 
     for (n = 0; n < mris->vertices_topology[vno].num; n++) {
       for (m = 0; m < VERTICES_PER_FACE; m++) {
@@ -496,12 +496,12 @@ int saveTesselation2(tesselation_parms *parms) {
       zlo = z;
   }
 
-  mris->xlo = xlo;
-  mris->ylo = ylo;
-  mris->zlo = zlo;
-  mris->xhi = xhi;
-  mris->yhi = yhi;
-  mris->zhi = zhi;
+  mris->xlo  = xlo;
+  mris->ylo  = ylo;
+  mris->zlo  = zlo;
+  mris->xhi  = xhi;
+  mris->yhi  = yhi;
+  mris->zhi  = zhi;
   mris->xctr = (xhi + xlo) / 2;
   mris->yctr = (yhi + ylo) / 2;
   mris->zctr = (zhi + zlo) / 2;
@@ -551,20 +551,20 @@ int saveTesselation2(tesselation_parms *parms) {
 }
 
 void generateMCtesselation(tesselation_parms *parms) {
-  int i, j, k, width, imgsize, *tab1, *tab2, ref, ind, nf, p;
-  int xmin, ymin, zmin, xmax, ymax, zmax;
-  int vt[12], *vk1, *vk2, *vj1, *vj2, *tmp;
-  int f_c[12], vind[12];
+  int  i, j, k, width, imgsize, *tab1, *tab2, ref, ind, nf, p;
+  int  xmin, ymin, zmin, xmax, ymax, zmax;
+  int  vt[12], *vk1, *vk2, *vj1, *vj2, *tmp;
+  int  f_c[12], vind[12];
   MRI *mri;
-  int vertex_index;
-  int debug = 0;
+  int  vertex_index;
+  int  debug = 0;
 
   fprintf(stderr, "\npreprocessing...");
   mri = preprocessingStep(parms);
   allocateTesselation(parms);
   fprintf(stderr, "done\n");
 
-  width = mri->width;
+  width   = mri->width;
   imgsize = mri->width * mri->height;
 
   xmin = parms->xmin;
@@ -583,18 +583,18 @@ void generateMCtesselation(tesselation_parms *parms) {
   vj1 = (int *)calloc(width, sizeof(int));
   vj2 = (int *)calloc(width, sizeof(int));
 
-  f_c[0] = 0;
-  f_c[1] = 1;
-  f_c[2] = 2 * width;
-  f_c[3] = 3;
-  f_c[8] = 0;
-  f_c[9] = 1;
+  f_c[0]  = 0;
+  f_c[1]  = 1;
+  f_c[2]  = 2 * width;
+  f_c[3]  = 3;
+  f_c[8]  = 0;
+  f_c[9]  = 1;
   f_c[10] = 2 * width;
   f_c[11] = 3;
-  f_c[4] = 0;
-  f_c[5] = 1;
-  f_c[6] = 0;
-  f_c[7] = 1;
+  f_c[4]  = 0;
+  f_c[5]  = 1;
+  f_c[6]  = 0;
+  f_c[7]  = 1;
 
   fprintf(stderr, "starting generation of surface...");
 
@@ -685,12 +685,12 @@ void generateMCtesselation(tesselation_parms *parms) {
           // fprintf(stderr,"c(7):%d- ",vertex_index);
           if (vertex_index >= parms->maxvertices - 1)
             reallocateVertices(parms);
-          vind[7] = vertex_index;
+          vind[7]                          = vertex_index;
           parms->vertex[vertex_index].imnr = k + 0.5;
-          parms->vertex[vertex_index].i = i + 1;
-          parms->vertex[vertex_index].j = j + 1;
-          parms->vertex[vertex_index].num = 0;
-          vj2[i + 1] = vertex_index;
+          parms->vertex[vertex_index].i    = i + 1;
+          parms->vertex[vertex_index].j    = j + 1;
+          parms->vertex[vertex_index].num  = 0;
+          vj2[i + 1]                       = vertex_index;
           parms->vertex_index++;
 
           //     printf(stderr," !!!!*!!! ");
@@ -709,12 +709,12 @@ void generateMCtesselation(tesselation_parms *parms) {
           // fprintf(stderr,"c(10):%d- ",vertex_index);
           if (vertex_index >= parms->maxvertices - 1)
             reallocateVertices(parms);
-          vind[10] = vertex_index;
+          vind[10]                         = vertex_index;
           parms->vertex[vertex_index].imnr = k + 1;
-          parms->vertex[vertex_index].i = i + 0.5;
-          parms->vertex[vertex_index].j = j + 1;
-          parms->vertex[vertex_index].num = 0;
-          vk2[2 * ind + f_c[10]] = vertex_index;
+          parms->vertex[vertex_index].i    = i + 0.5;
+          parms->vertex[vertex_index].j    = j + 1;
+          parms->vertex[vertex_index].num  = 0;
+          vk2[2 * ind + f_c[10]]           = vertex_index;
           parms->vertex_index++;
         }
         if (vt[11]) // create a new vertex number and save it into vk2
@@ -723,12 +723,12 @@ void generateMCtesselation(tesselation_parms *parms) {
           // fprintf(stderr,"c(11):%d- ",vertex_index);
           if (vertex_index >= parms->maxvertices - 1)
             reallocateVertices(parms);
-          vind[11] = vertex_index;
+          vind[11]                         = vertex_index;
           parms->vertex[vertex_index].imnr = k + 1;
-          parms->vertex[vertex_index].i = i + 1;
-          parms->vertex[vertex_index].j = j + 0.5;
-          parms->vertex[vertex_index].num = 0;
-          vk2[2 * ind + f_c[11]] = vertex_index;
+          parms->vertex[vertex_index].i    = i + 1;
+          parms->vertex[vertex_index].j    = j + 0.5;
+          parms->vertex[vertex_index].num  = 0;
+          vk2[2 * ind + f_c[11]]           = vertex_index;
           parms->vertex_index++;
         }
         // now create faces
@@ -776,7 +776,7 @@ void generateMCtesselation(tesselation_parms *parms) {
       vj2 = tmp;
       memset(vj2, -1, width * sizeof(int));
     }
-    tmp = tab1;
+    tmp  = tab1;
     tab1 = tab2;
     tab2 = tmp;
     memset(tab2, -1, imgsize * sizeof(int));
@@ -800,13 +800,12 @@ void generateMCtesselation(tesselation_parms *parms) {
 
 int main(int argc, char *argv[]) {
   tesselation_parms *parms;
-  MRIS **mris_table, *mris, *mris_corrected;
-  MRI *mri;
-
+  MRIS **            mris_table, *mris, *mris_corrected;
+  MRI *              mri;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_mc");
 
-  Progname=argv[0];
+  Progname = argv[0];
 
   if (argc > 1 && (stricmp(argv[1], "-d") == 0)) {
     downsample = atoi(argv[2]);
@@ -844,7 +843,7 @@ int main(int argc, char *argv[]) {
   }
   MRIreInitCache(mri);
   if (mri->type != MRI_UCHAR) {
-    MRI *mri_tmp;
+    MRI * mri_tmp;
     float min_val, max_val;
 
     MRIvalRange(mri, &min_val, &max_val);
@@ -862,9 +861,9 @@ int main(int argc, char *argv[]) {
   parms->mri = mri;
 
   parms->number_of_labels = 1; // only one single label
-  parms->label_values = (int *)malloc(sizeof(int));
-  parms->label_values[0] = atoi(argv[2]); // label;
-  parms->ind = 0;
+  parms->label_values     = (int *)malloc(sizeof(int));
+  parms->label_values[0]  = atoi(argv[2]); // label;
+  parms->ind              = 0;
   mris_table = (MRIS **)malloc(sizeof(MRIS *)); // final surface information
   parms->mris_table = mris_table;
   if ((!parms->label_values) || (!mris_table))
@@ -886,11 +885,11 @@ int main(int argc, char *argv[]) {
 
   {
     float dist, max_e = 0.0;
-    int n, p, vn0, vn2;
+    int   n, p, vn0, vn2;
     fprintf(stderr, "computing the maximum edge length...");
     for (n = 0; n < mris->nvertices; n++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[n];
-      VERTEX const *const v = &mris->vertices[n];
+      VERTEX const *const          v  = &mris->vertices[n];
       for (p = 0; p < vt->vnum; p++) {
         VERTEX const *const vp = &mris->vertices[vt->v[p]];
         dist = SQR(vp->x - v->x) + SQR(vp->y - v->y) + SQR(vp->z - v->z);

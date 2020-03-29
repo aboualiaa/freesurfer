@@ -27,19 +27,18 @@
 
 #include <getopt.h>
 
-#include "general.h"
 #include "env.h"
+#include "general.h"
 
+#include "error.h"
+#include "label.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "label.h"
-#include "error.h"
 
-#include <unistd.h>
 #include <string>
-using namespace std;
+#include <unistd.h>
 
-extern string G_VERSION;
+extern std::string G_VERSION;
 
 static struct option const longopts[] = {
     {"optionsFile", required_argument, nullptr, 'o'},
@@ -59,10 +58,11 @@ static struct option const longopts[] = {
     {"mpmOverlayArgs", required_argument, nullptr, 'V'},
     {nullptr, 0, nullptr, 0}};
 
-string commandLineOptions_process(int argc, char **ppch_argv, s_env &st_env);
+std::string commandLineOptions_process(int argc, char **ppch_argv,
+                                       s_env &st_env);
 
 void synopsis_show();
 
-void asynchEvent_processHELP(s_env &st_env, string str_event);
+void asynchEvent_processHELP(s_env &st_env, std::string str_event);
 
 #endif //__HELP_H__

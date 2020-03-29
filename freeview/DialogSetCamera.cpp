@@ -1,7 +1,7 @@
 #include "DialogSetCamera.h"
-#include "ui_DialogSetCamera.h"
 #include "MainWindow.h"
 #include "RenderView3D.h"
+#include "ui_DialogSetCamera.h"
 
 DialogSetCamera::DialogSetCamera(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogSetCamera) {

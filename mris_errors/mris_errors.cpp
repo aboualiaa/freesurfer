@@ -32,26 +32,26 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-int MRISareaErrors(MRI_SURFACE *mris);
-int MRISangleErrors(MRI_SURFACE *mris);
+int         MRISareaErrors(MRI_SURFACE *mris);
+int         MRISangleErrors(MRI_SURFACE *mris);
 
-const char *Progname;
+const char *        Progname;
 static MRI_SURFACE *mris;
 
 static int patch_flag = 0;
 static int write_flag = 0;
-static int area_flag = 0;
-static int nbhd_size = 7;
-static int max_nbrs = 12;
+static int area_flag  = 0;
+static int nbhd_size  = 7;
+static int max_nbrs   = 12;
 
 int main(int argc, char *argv[]) {
   char *cp, **av, *in_fname, fname[100], path[100], name[100], hemi[100];
-  int ac, nargs;
+  int   ac, nargs;
 
   nargs = handleVersionOption(argc, argv, "mris_errors");
   if (nargs && argc - nargs == 1)
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -161,8 +161,8 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "vnum") || (!stricmp(option, "distances"))) {
     nbhd_size = atof(argv[2]);
-    max_nbrs = atof(argv[3]);
-    nargs = 2;
+    max_nbrs  = atof(argv[3]);
+    nargs     = 2;
     fprintf(stderr, "sampling %d neighbors out to a distance of %d mm\n",
             max_nbrs, nbhd_size);
   } else
@@ -172,7 +172,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'P':
       patch_flag = 1;
-      nargs = 0;
+      nargs      = 0;
       break;
     case 'A':
       area_flag = 1;
@@ -215,7 +215,7 @@ static void print_version() {
 }
 
 int MRISareaErrors(MRI_SURFACE *mris) {
-  int fno, max_f = -1;
+  int   fno, max_f = -1;
   FACE *face;
   float ferror, max_ferror, total_error, total_sq_error, error, mean_error,
       std_error, pct_error, n;
@@ -223,11 +223,11 @@ int MRISareaErrors(MRI_SURFACE *mris) {
   MRISupdateEllipsoidSurface(mris);
   total_error = total_sq_error = max_ferror = 0.0f;
   for (fno = 0; fno < mris->nfaces; fno++) {
-    face = &mris->faces[fno];
-    ferror = 0.0f;
+    face                            = &mris->faces[fno];
+    ferror                          = 0.0f;
     FaceNormCacheEntry const *fNorm = getFaceNorm(mris, fno);
-    error = face->area - fNorm->orig_area;
-    pct_error = error / fNorm->orig_area * 100.0f;
+    error                           = face->area - fNorm->orig_area;
+    pct_error                       = error / fNorm->orig_area * 100.0f;
     printf("%d %2.3f %2.3f %2.3f %2.1f\n", fno, fNorm->orig_area, face->area,
            error, pct_error);
     total_sq_error += (error * error);
@@ -235,20 +235,20 @@ int MRISareaErrors(MRI_SURFACE *mris) {
     total_error += error;
     if (ferror >= max_ferror) {
       max_ferror = ferror;
-      max_f = fno;
+      max_f      = fno;
     }
   }
 
-  n = (float)(2 * mris->nfaces);
+  n          = (float)(2 * mris->nfaces);
   mean_error = total_error / n;
-  std_error = sqrt(total_sq_error / (float)n - mean_error * mean_error);
+  std_error  = sqrt(total_sq_error / (float)n - mean_error * mean_error);
   fprintf(stderr, "max error occurs at %d, error = %2.3f\n", max_f, max_ferror);
   fprintf(stderr, "mean error = %2.3f, std = %2.3f\n", mean_error, std_error);
   return (NO_ERROR);
 }
 
 int MRISangleErrors(MRI_SURFACE *mris) {
-  int fno, max_f = -1, ano;
+  int   fno, max_f = -1, ano;
   FACE *face;
   FILE *fp;
   float ferror, max_ferror, total_error, total_sq_error, error, mean_error,
@@ -258,10 +258,10 @@ int MRISangleErrors(MRI_SURFACE *mris) {
   MRISupdateEllipsoidSurface(mris);
   total_error = total_sq_error = max_ferror = 0.0f;
   for (fno = 0; fno < mris->nfaces; fno++) {
-    face = &mris->faces[fno];
+    face   = &mris->faces[fno];
     ferror = 0.0f;
     for (ano = 0; ano < ANGLES_PER_TRIANGLE; ano++) {
-      error = deltaAngle(face->angle[ano], face->orig_angle[ano]);
+      error     = deltaAngle(face->angle[ano], face->orig_angle[ano]);
       pct_error = error / face->orig_angle[ano] * 100.0f;
       fprintf(fp, "%d %2.3f %2.3f %2.3f %2.1f\n", fno,
               (float)DEGREES(face->orig_angle[ano]),
@@ -273,13 +273,13 @@ int MRISangleErrors(MRI_SURFACE *mris) {
     }
     if (ferror >= max_ferror) {
       max_ferror = ferror;
-      max_f = fno;
+      max_f      = fno;
     }
   }
 
-  n = (float)(2 * mris->nfaces);
+  n          = (float)(2 * mris->nfaces);
   mean_error = total_error / n;
-  std_error = sqrt(total_sq_error / (float)n - mean_error * mean_error);
+  std_error  = sqrt(total_sq_error / (float)n - mean_error * mean_error);
   fprintf(stderr, "max angle error occurs at %d, error = %2.3f\n", max_f,
           (float)DEGREES(max_ferror));
   fprintf(stderr, "mean angle error = %2.3f, std = %2.3f\n",

@@ -24,13 +24,13 @@
 
 #include <sys/stat.h>
 
-#include "diag.h"
 #include "annotation.h"
-#include "version.h"
-#include "fio.h"
 #include "cma.h"
+#include "diag.h"
+#include "fio.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -38,7 +38,7 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 
 int main(int argc, char *argv[]);
 
@@ -46,16 +46,16 @@ static char vcid[] =
     "$Id: mri_annotation2label.c,v 1.32 2016/08/02 21:20:27 nicks Exp $";
 const char *Progname = nullptr;
 
-char *subject = nullptr;
-char *annotation = "aparc";
-char *hemi = nullptr;
+char *subject     = nullptr;
+char *annotation  = "aparc";
+char *hemi        = nullptr;
 char *surfacename = "white";
 
-char *outdir = nullptr;
+char *outdir    = nullptr;
 char *labelbase = nullptr;
 
 MRI_SURFACE *Surf;
-LABEL *label = nullptr;
+LABEL *      label = nullptr;
 
 int debug = 0;
 
@@ -65,19 +65,19 @@ FILE *fp;
 char tmpstr[2000];
 char annotfile[1000];
 char labelfile[1000];
-int nperannot[1000];
+int  nperannot[1000];
 
 char *segfile = nullptr;
-MRI *seg;
-int segbase = -1000;
+MRI * seg;
+int   segbase  = -1000;
 char *ctabfile = nullptr;
 
-char *borderfile = nullptr;
-char *BorderAnnotFile = nullptr;
-char *LobesFile = nullptr;
-char *StatFile = nullptr;
-MRI *Stat = nullptr;
-static int label_index = -1; // if >= 0 only extract this label
+char *     borderfile      = nullptr;
+char *     BorderAnnotFile = nullptr;
+char *     LobesFile       = nullptr;
+char *     StatFile        = nullptr;
+MRI *      Stat            = nullptr;
+static int label_index     = -1; // if >= 0 only extract this label
 
 // The global 'gi_lobarDivision'
 typedef enum _lobarDivision {
@@ -91,8 +91,8 @@ e_LOBARDIVISION Ge_lobarDivision = e_default;
 /*-------------------------------------------------*/
 /*-------------------------------------------------*/
 int main(int argc, char **argv) {
-  int err, vtxno, ano, ani, vtxani, animax;
-  int nargs, IsBorder, k;
+  int  err, vtxno, ano, ani, vtxani, animax;
+  int  nargs, IsBorder, k;
   MRI *border;
 
   nargs = handleVersionOption(argc, argv, "mri_annotation2label");
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
 
     if (Stat) {
       for (k = 0; k < label->n_points; k++) {
-        vtxno = label->lv[k].vno;
+        vtxno             = label->lv[k].vno;
         label->lv[k].stat = MRIgetVoxVal(Stat, vtxno, 0, 0, 0);
       }
     }
@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1) {
@@ -354,25 +354,25 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--sd")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       SUBJECTS_DIR = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--surface") || !strcmp(option, "--surf")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       surfacename = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--stat")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      StatFile = pargv[0];
+      StatFile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--labelbase")) {
       if (nargc < 1) {
@@ -392,14 +392,14 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      outdir = pargv[0];
+      outdir    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--annotation")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       annotation = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--table")) {
       printf("ERROR: this program no long accepts --table as\n");
       printf("an argument. The colortable is now read directly\n");
@@ -409,13 +409,13 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--seg")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      segfile = pargv[0];
+      segfile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--segbase")) {
       if (nargc < 1) {
@@ -427,40 +427,40 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      ctabfile = pargv[0];
+      ctabfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--border")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       borderfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--border-annot")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
       BorderAnnotFile = pargv[0];
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcmp(option, "--lobes")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      LobesFile = pargv[0];
-      nargsused = 1;
+      LobesFile        = pargv[0];
+      nargsused        = 1;
       Ge_lobarDivision = e_default;
     } else if (!strcmp(option, "--lobesStrict")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      LobesFile = pargv[0];
-      nargsused = 1;
+      LobesFile        = pargv[0];
+      nargsused        = 1;
       Ge_lobarDivision = e_strict;
     } else if (!strcmp(option, "--lobesStrictPHCG")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      LobesFile = pargv[0];
-      nargsused = 1;
+      LobesFile        = pargv[0];
+      nargsused        = 1;
       Ge_lobarDivision = e_strict_phcg;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);

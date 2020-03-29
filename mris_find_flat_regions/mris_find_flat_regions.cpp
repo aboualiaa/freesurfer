@@ -24,16 +24,16 @@
  */
 
 #include "diag.h"
+#include "mri_identify.h"
 #include "mrisurf.h"
 #include "version.h"
-#include "mri_identify.h"
 
 static char vcid[] =
     "$Id: mris_find_flat_regions.c,v 1.4 2011/03/02 00:04:32 nicks Exp $";
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 static void print_help();
 static void print_version();
@@ -43,10 +43,10 @@ const char *Progname;
 static float thresh = 0.99;
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN], *surf_name, *wfile_name;
-  int ac, nargs, vno;
+  char **      av, fname[STRLEN], *surf_name, *wfile_name;
+  int          ac, nargs, vno;
   MRI_SURFACE *mris;
-  VERTEX *v;
+  VERTEX *     v;
 
   nargs = handleVersionOption(argc, argv, "mris_find_flat_regions");
   if (nargs && argc - nargs == 1)
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
   if (argc < 2)
     print_help();
 
-  surf_name = argv[1];
+  surf_name  = argv[1];
   wfile_name = argv[2];
 
   mris = MRISread(surf_name);
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -121,7 +121,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       thresh = atof(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       fprintf(stderr, "using threshold = %2.3f\n", thresh);
       break;
     default:

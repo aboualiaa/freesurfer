@@ -24,15 +24,15 @@
  */
 
 #include "Interactor2DNavigate.h"
+#include "LayerLandmarks.h"
 #include "MainWindow.h"
 #include "RenderView2D.h"
-#include "LayerLandmarks.h"
 
 Interactor2DNavigate::Interactor2DNavigate(QObject *parent)
     : Interactor2D(parent), m_bEditing(false), m_nCurrentLandmark(-1) {}
 
 bool Interactor2DNavigate::ProcessMouseDownEvent(QMouseEvent *event,
-                                                 RenderView *renderview) {
+                                                 RenderView * renderview) {
   if (m_nCurrentLandmark < 0)
     return Interactor2D::ProcessMouseDownEvent(event, renderview);
 
@@ -64,7 +64,7 @@ bool Interactor2DNavigate::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor2DNavigate::ProcessMouseUpEvent(QMouseEvent *event,
-                                               RenderView *renderview) {
+                                               RenderView * renderview) {
   UpdateCursor(event, renderview);
 
   m_bEditing = false;
@@ -73,7 +73,7 @@ bool Interactor2DNavigate::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor2DNavigate::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                 RenderView *renderview) {
+                                                 RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   if (m_bEditing && m_nCurrentLandmark >= 0) {
     UpdateCursor(event, view);
@@ -91,7 +91,7 @@ bool Interactor2DNavigate::ProcessMouseMoveEvent(QMouseEvent *event,
   }
 }
 
-bool Interactor2DNavigate::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor2DNavigate::ProcessKeyDownEvent(QKeyEvent * event,
                                                RenderView *renderview) {
   return Interactor2D::ProcessKeyDownEvent(event, renderview);
 }

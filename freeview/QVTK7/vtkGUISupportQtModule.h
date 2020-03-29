@@ -8,9 +8,9 @@
 
 #include "qsystemdetection.h"
 #ifdef Q_OS_OSX
-#  include "vtkRenderingOpenGL2Module.h"
+#include "vtkRenderingOpenGL2Module.h"
 #else
-#  include "vtkRenderingOpenGLModule.h"
+#include "vtkRenderingOpenGLModule.h"
 #endif
 
 #endif

@@ -8,7 +8,7 @@ void fs::SurfaceOptimizationFilter<TInputSurface,
 
   const typename InSurfaceType::PointsContainer *points =
       this->GetInput()->GetPoints();
-  typename InSurfaceType::PointsContainerConstIterator it = points->Begin();
+  typename InSurfaceType::PointsContainerConstIterator it    = points->Begin();
   typename InSurfaceType::PointsContainerConstIterator itEnd = points->End();
   for (unsigned int i = 0; it != itEnd; it++, i++) {
     typename InSurfaceType::PointType point = it.Value();
@@ -16,10 +16,10 @@ void fs::SurfaceOptimizationFilter<TInputSurface,
   }
   for (int w = 0; w < 2000; w++) {
     points = this->GetOutput()->GetPoints();
-    it = points->Begin();
-    itEnd = points->End();
+    it     = points->Begin();
+    itEnd  = points->End();
     for (unsigned int i = 0; it != itEnd; it++, i++) {
-      typename InSurfaceType::PointType point = it.Value();
+      typename InSurfaceType::PointType              point = it.Value();
       std::vector<typename InSurfaceType::PointType> adj =
           this->GetInput()->GetAdjacentPoints(i);
 

@@ -44,18 +44,18 @@
   ENDUSAGE
 */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 
+#include "diag.h"
+#include "error.h"
+#include "gca.h"
 #include "macros.h"
+#include "mri.h"
+#include "transform.h"
 #include "utils.h"
 #include "version.h"
-#include "error.h"
-#include "diag.h"
-#include "mri.h"
-#include "gca.h"
-#include "transform.h"
 
 int main(int argc, char *argv[]);
 
@@ -65,20 +65,20 @@ const char *Progname = NULL;
 // char *cmdline, cwd[2000];
 // struct utsname uts;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-static void usage_exit(int code);
+static void  usage_exit(int code);
 static float mthresh = 2;
 
 MRI *GCAsegmentTumor(GCA *gca, TRANSFORM *transform, MRI *mri_inputs,
                      MRI *mri_dst, float mthresh) {
-  int x, y, z, xn, yn, zn, label, n;
-  GCA_NODE *gcan;
+  int        x, y, z, xn, yn, zn, label, n;
+  GCA_NODE * gcan;
   GCA_PRIOR *gcap;
-  GC1D *gc;
-  float vals[MAX_GCA_INPUTS], mdist, min_mdist;
-  MRI *mri_mask;
+  GC1D *     gc;
+  float      vals[MAX_GCA_INPUTS], mdist, min_mdist;
+  MRI *      mri_mask;
 
   mri_mask = MRIalloc(mri_inputs->width, mri_inputs->height, mri_inputs->depth,
                       mri_inputs->type);
@@ -117,7 +117,7 @@ MRI *GCAsegmentTumor(GCA *gca, TRANSFORM *transform, MRI *mri_inputs,
 
           min_mdist = 10000;
           for (label = 1, n = 0; n < gcan->nlabels; n++) {
-            gc = &gcan->gcs[n];
+            gc    = &gcan->gcs[n];
             mdist = sqrt(GCAmahDist(gc, vals, gca->ninputs));
             if (mdist < mthresh) // there is some label that is not unlikely
               label = 0;
@@ -135,10 +135,10 @@ MRI *GCAsegmentTumor(GCA *gca, TRANSFORM *transform, MRI *mri_inputs,
 }
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  char **av;
-  int nargs, ac, i, ninputs;
-  MRI *mri_in = NULL, *mri_tmp, *mri_labeled;
-  GCA *gca;
+  char **    av;
+  int        nargs, ac, i, ninputs;
+  MRI *      mri_in = NULL, *mri_tmp, *mri_labeled;
+  GCA *      gca;
   TRANSFORM *xform;
 
   nargs = handleVersionOption(argc, argv, "mri_segment_tumor");
@@ -210,14 +210,14 @@ int main(int argc, char *argv[]) {
 */
 /* ------ Doxygen markup ends on the line above ---- */
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else
@@ -228,7 +228,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       mthresh = atof(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       printf("using Mahalanobis distance %2.1f\n", mthresh);
       break;
     default:

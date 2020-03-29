@@ -26,15 +26,13 @@
 #ifndef TrainingParameters_h
 #define TrainingParameters_h
 
-using namespace std;
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
 #include "mri_ca_configFile.h"
 #include "mri_ca_measure.h"
 #include "mri_ca_util.h"
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 enum LabeledVolumeSourceType {
   enumCMA = 0,
@@ -44,7 +42,7 @@ enum LabeledVolumeSourceType {
 };
 
 LabeledVolumeSourceType
-stringToLabeledVolumeSourceType(string strLabeledVolumeSourceType) {
+stringToLabeledVolumeSourceType(std::string strLabeledVolumeSourceType) {
   LabeledVolumeSourceType newEnumLabeledVolumeSourceType;
   if (strLabeledVolumeSourceType == "CMA") {
     newEnumLabeledVolumeSourceType = enumCMA;
@@ -104,7 +102,7 @@ public:
   }
 
   // default dtor, copy , assign OK
-  CTrainingParameters(string strFilepath, int nProt = 0) {
+  CTrainingParameters(std::string strFilepath, int nProt = 0) {
     trainingConfigFile.init(strFilepath, nProt);
     strStatisticsVolumeHeaderPath.erase();
     arr2DstrSubjectsToTrain.clear();
@@ -113,11 +111,11 @@ public:
 
 public: // changed to public access so that these could be accessed in train.cxx
   LabeledVolumeSourceType enumLabeledVolumeSourceType;
-  string strLabeledVolumeSourceType;
-  string strStatisticsVolumeHeaderPath;
-  TypeMatrixString arr2DstrSubjectsToTrain;
-  CMeasures measures;
-  string strLabelLUT;
+  std::string             strLabeledVolumeSourceType;
+  std::string             strStatisticsVolumeHeaderPath;
+  TypeMatrixString        arr2DstrSubjectsToTrain;
+  CMeasures               measures;
+  std::string             strLabelLUT;
   //--
   CConfigFile trainingConfigFile;
 

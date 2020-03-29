@@ -24,11 +24,11 @@
  */
 
 #include "Interactor2DVolumeCrop.h"
-#include "RenderView2D.h"
 #include "Cursor2D.h"
-#include "MainWindow.h"
-#include "VolumeCropper.h"
 #include "CursorFactory.h"
+#include "MainWindow.h"
+#include "RenderView2D.h"
+#include "VolumeCropper.h"
 #include <vtkRenderer.h>
 
 Interactor2DVolumeCrop::Interactor2DVolumeCrop(QObject *parent)
@@ -37,7 +37,7 @@ Interactor2DVolumeCrop::Interactor2DVolumeCrop(QObject *parent)
 Interactor2DVolumeCrop::~Interactor2DVolumeCrop() {}
 
 bool Interactor2DVolumeCrop::ProcessMouseDownEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   if (event->button() == Qt::LeftButton &&
@@ -53,7 +53,7 @@ bool Interactor2DVolumeCrop::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor2DVolumeCrop::ProcessMouseUpEvent(QMouseEvent *event,
-                                                 RenderView *renderview) {
+                                                 RenderView * renderview) {
   if (m_bSelected) {
     MainWindow::GetMainWindow()->GetVolumeCropper()->ReleaseActiveBound();
     MainWindow::GetMainWindow()->GetRenderView(3)->RequestRedraw();
@@ -65,7 +65,7 @@ bool Interactor2DVolumeCrop::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor2DVolumeCrop::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   if (m_bSelected) {

@@ -41,26 +41,26 @@ void ConnectPipelines(ITK_Exporter exporter, VTK_Importer importer) {
 //
 ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
     : vtkFlRenderWindowInteractor(x, y, w, h, l) {
-  m_Image = nullptr;
+  m_Image        = nullptr;
   m_OverlayImage = nullptr;
-  m_Mesh = nullptr;
+  m_Mesh         = nullptr;
 
   m_OverlayColor[0] = 0.3;
   m_OverlayColor[1] = 0.3;
   m_OverlayColor[2] = 1.0;
-  m_OverlayAlpha = 1.0;
+  m_OverlayAlpha    = 1.0;
 
   for (int i = 0; i < 3; i++) {
     m_MaximumImageIndex[i] = 0;
   }
 
   m_SagittalSliceNumber = 0;
-  m_AxialSliceNumber = 0;
-  m_CoronalSliceNumber = 0;
+  m_AxialSliceNumber    = 0;
+  m_CoronalSliceNumber  = 0;
 
-  m_ImageExporter = nullptr;
-  m_RGBAImageExporter = nullptr;
-  m_OverlayImageExporter = nullptr;
+  m_ImageExporter            = nullptr;
+  m_RGBAImageExporter        = nullptr;
+  m_OverlayImageExporter     = nullptr;
   m_RGBAOverlayImageExporter = nullptr;
 
   // Create points of connection to VTK pipelines
@@ -159,7 +159,7 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
 
   // Set up VTK pipeline for the blended m_Image and m_ImageOverlay
   m_SagittalBlender = vtkSmartPointer<vtkImageBlend>::New();
-  m_SagittalActor = vtkSmartPointer<vtkImageActor>::New();
+  m_SagittalActor   = vtkSmartPointer<vtkImageActor>::New();
 #if VTK_MAJOR_VERSION <= 5
   m_SagittalActor->SetInput(m_SagittalBlender->GetOutput());
 #else
@@ -168,7 +168,7 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   m_SagittalActor->InterpolateOff();
 
   m_CoronalBlender = vtkSmartPointer<vtkImageBlend>::New();
-  m_CoronalActor = vtkSmartPointer<vtkImageActor>::New();
+  m_CoronalActor   = vtkSmartPointer<vtkImageActor>::New();
 #if VTK_MAJOR_VERSION <= 5
   m_CoronalActor->SetInput(m_CoronalBlender->GetOutput());
 #else
@@ -177,7 +177,7 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   m_CoronalActor->InterpolateOff();
 
   m_AxialBlender = vtkSmartPointer<vtkImageBlend>::New();
-  m_AxialActor = vtkSmartPointer<vtkImageActor>::New();
+  m_AxialActor   = vtkSmartPointer<vtkImageActor>::New();
 #if VTK_MAJOR_VERSION <= 5
   m_AxialActor->SetInput(m_AxialBlender->GetOutput());
 #else
@@ -591,8 +591,8 @@ void ImageViewer ::SetSliceLocation(unsigned int sagittalSliceNumber,
                                     unsigned int coronalSliceNumber,
                                     unsigned int axialSliceNumber) {
   m_SagittalSliceNumber = sagittalSliceNumber;
-  m_CoronalSliceNumber = coronalSliceNumber;
-  m_AxialSliceNumber = axialSliceNumber;
+  m_CoronalSliceNumber  = coronalSliceNumber;
+  m_AxialSliceNumber    = axialSliceNumber;
 
   if (m_Image == nullptr) {
     return;
@@ -749,7 +749,7 @@ ImageViewer ::GetVTKUnstructedGrid(const kvl::AtlasMesh *mesh) const {
   // std::endl;
 
   // Construct a VTK type array and cell array
-  int *vTypes = new int[mesh->GetNumberOfCells()];
+  int *                         vTypes = new int[mesh->GetNumberOfCells()];
   vtkSmartPointer<vtkCellArray> vCells = vtkSmartPointer<vtkCellArray>::New();
 #if 1
   vCells->EstimateSize(mesh->GetNumberOfCells(), 3);

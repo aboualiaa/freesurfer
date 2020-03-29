@@ -54,7 +54,7 @@ protected slots:
 
 private:
   Ui::DialogVolumeFilter *ui;
-  VolumeFilter *m_filter;
+  VolumeFilter *          m_filter;
 };
 
 #endif // DIALOGVOLUMEFILTER_H

@@ -16,7 +16,7 @@ public:
   AtlasParameterEstimationConsole();
 
   //
-//  ~AtlasParameterEstimationConsole() override = default;;
+  //  ~AtlasParameterEstimationConsole() override = default;;
 
   //
   void SetLabelImages(const std::vector<std::string> &fileNames);
@@ -38,7 +38,7 @@ protected:
   void InitializeMesh() override;
 
   void SelectTriangleContainingPoint(float /*unused*/,
-                                     float /*unused*/) override {};
+                                     float /*unused*/) override{};
 
   //
   void Step() override;

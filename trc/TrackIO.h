@@ -77,16 +77,16 @@
 #endif
 
 struct TRACK_HEADER {
-  char id_string[6];   // first 5 chars must be "TRACK"
-  short int dim[3];    // dimensions
-  float voxel_size[3]; // voxel size
-  float origin[3];     // origin. default are 0,0,0.
+  char      id_string[6];  // first 5 chars must be "TRACK"
+  short int dim[3];        // dimensions
+  float     voxel_size[3]; // voxel size
+  float     origin[3];     // origin. default are 0,0,0.
   short int
-      n_scalars; // number of scalars saved per point besides xyz coordinates.
+       n_scalars; // number of scalars saved per point besides xyz coordinates.
   char scalar_name[10][20]; // name of the scalars
 
-  short int n_properties;     // number of properties
-  char property_name[10][20]; // name of the properties
+  short int n_properties;          // number of properties
+  char      property_name[10][20]; // name of the properties
 
   float vox_to_ras[4][4]; // voxel to ras (ijk to xyz) matrix, this is used for
                           // coordinate transformation if vox_to_ras[3][3] is 0,
@@ -106,13 +106,13 @@ struct TRACK_HEADER {
   unsigned char
       invert_x; // inversion/rotation flags used to generate this track file
   unsigned char
-      invert_y; // value is 0 or 1. can be ignored (for private use only).
+                invert_y; // value is 0 or 1. can be ignored (for private use only).
   unsigned char invert_z;
   unsigned char swap_xy;
   unsigned char swap_yz;
   unsigned char swap_zx;
-  int n_count; // total number of tracks. if 0, number of tracks was not
-               // recorded. call GetNumberOfTracks(...) to get it
+  int n_count;  // total number of tracks. if 0, number of tracks was not
+                // recorded. call GetNumberOfTracks(...) to get it
   int version;  // version number
   int hdr_size; // size of the header. used to determine byte swap
 
@@ -122,9 +122,9 @@ struct TRACK_HEADER {
     Initialize();
 
     for (int i = 0; i < 3; i++) {
-      dim[i] = d[i];
+      dim[i]        = d[i];
       voxel_size[i] = vs[i];
-      origin[i] = o[i];
+      origin[i]     = o[i];
     }
     n_scalars = n;
   }
@@ -133,9 +133,9 @@ struct TRACK_HEADER {
     Initialize();
 
     for (int i = 0; i < 3; i++) {
-      dim[i] = d[i];
+      dim[i]        = d[i];
       voxel_size[i] = vs[i];
-      origin[i] = o[i];
+      origin[i]     = o[i];
     }
     n_scalars = n;
   }
@@ -149,7 +149,7 @@ struct TRACK_HEADER {
     SWAP_FLOAT(image_orientation_patient, 6);
     for (int i = 0; i < 4; i++) {
       SWAP_FLOAT(vox_to_ras[i], 4);
-}
+    }
     SWAP_INT(version);
     SWAP_INT(n_count);
     SWAP_INT(hdr_size);
@@ -174,18 +174,18 @@ class CTrackIO {
 public:
   CTrackIO() {
     m_nErrorCode = 0;
-    m_pFile = nullptr;
+    m_pFile      = nullptr;
   }
   virtual ~CTrackIO() { Close(); }
 
-  bool GetHeader(TRACK_HEADER *header);
+  bool         GetHeader(TRACK_HEADER *header);
   virtual bool Close();
-  const char *GetLastErrorMessage();
-  int GetLastErrorCode() { return m_nErrorCode; }
+  const char * GetLastErrorMessage();
+  int          GetLastErrorCode() { return m_nErrorCode; }
 
 protected:
   TRACK_HEADER m_header;
-  FILE *m_pFile;
+  FILE *       m_pFile;
 
   int m_nErrorCode;
 };
@@ -200,8 +200,8 @@ public:
   bool GetNextRawData(int ncount, float *data);
   bool GetNextTrackData(int nCount, float *pt_data, float *scalars = nullptr,
                         float *properties = nullptr);
-  int GetProgress();
-  int GetNumberOfTracks();
+  int  GetProgress();
+  int  GetNumberOfTracks();
   bool GetNumberOfTracks(int *cnt);
   bool ByteSwapped() { return m_bByteSwap; }
   bool IsOldFormat() { return m_bOldFormat; }

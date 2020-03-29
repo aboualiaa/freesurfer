@@ -37,7 +37,7 @@
 #include "transform.h"
 #include "tritri.h"
 
-#define GCAB_IIN 0
+#define GCAB_IIN  0
 #define GCAB_IOUT 1
 #define GCAB_GRAD 2
 
@@ -51,17 +51,17 @@ static int gcabUpdateDistributions(GCAB *gcab, MRI *mri_int, MRI *mri_seg,
                                    int y, int z, float xn, float yn, float zn,
                                    int target_label);
 
-static int gcabUpdateNodeIin(GCAB *gcab, int xn, int yn, int zn, double val1,
-                             int vno, float wt);
-static int gcabUpdateNodeIout(GCAB *gcab, int xn, int yn, int zn, double val2,
+static int  gcabUpdateNodeIin(GCAB *gcab, int xn, int yn, int zn, double val1,
                               int vno, float wt);
+static int  gcabUpdateNodeIout(GCAB *gcab, int xn, int yn, int zn, double val2,
+                               int vno, float wt);
 static MRI *gcabWritePDFToMRI(GCAB *gcab, MRI *mri, int x, int y, int z);
-static int gcabSmoothPDF(GCAB *gcab, int x, int y, int z, MRI *mri_kernel);
+static int  gcabSmoothPDF(GCAB *gcab, int x, int y, int z, MRI *mri_kernel);
 static MRI *gcabWriteMRIToPDF(GCAB *gcab, MRI *mri, int x, int y, int z);
-static int gcabComputeBorderNormal(GCAB *gcab, MRI *mri_seg,
-                                   TRANSFORM *transform, int x, int y, int z,
-                                   float *pnx, float *pny, float *pnz,
-                                   int target_label);
+static int  gcabComputeBorderNormal(GCAB *gcab, MRI *mri_seg,
+                                    TRANSFORM *transform, int x, int y, int z,
+                                    float *pnx, float *pny, float *pnz,
+                                    int target_label);
 
 static int gcabUpdateNode(GCAB *gcab, int xn, int yn, int zn, double val1,
                           double val2, float grad, int vno, float wt);
@@ -70,11 +70,11 @@ static int gcabFindClosestIcoVertex(GCAB *gcab, TRANSFORM *transform, float x0,
                                     float nz);
 static int gcabValsToBins(GCAB *gcab, double val1, double val2, float grad,
                           float *pi1f, float *pi2f, float *pgf);
-GCAB *GCABalloc(GCA *gca, int spacing, int ico_order, int nintensity_bins,
-                int ngrad_bins, int target_label) {
-  GCAB *gcab;
+GCAB *     GCABalloc(GCA *gca, int spacing, int ico_order, int nintensity_bins,
+                     int ngrad_bins, int target_label) {
+  GCAB * gcab;
   GCABS *gcabs;
-  int width, height, depth, x, y, z, vno, i1, x1, y1, z1;
+  int    width, height, depth, x, y, z, vno, i1, x1, y1, z1;
 
   gcab = (GCAB *)calloc(1, sizeof(GCAB));
   if (gcab == nullptr)
@@ -90,29 +90,29 @@ GCAB *GCABalloc(GCA *gca, int spacing, int ico_order, int nintensity_bins,
   gcab->bounding_box.dx += 2 * PAD;
   gcab->bounding_box.dy += 2 * PAD;
   gcab->bounding_box.dz += 2 * PAD;
-  x1 = gcab->bounding_box.x + gcab->bounding_box.dx;
-  y1 = gcab->bounding_box.y + gcab->bounding_box.dy;
-  z1 = gcab->bounding_box.z + gcab->bounding_box.dz;
-  gcab->bounding_box.x = MAX(0, gcab->bounding_box.x);
-  gcab->bounding_box.y = MAX(0, gcab->bounding_box.y);
-  gcab->bounding_box.z = MAX(0, gcab->bounding_box.z);
-  x1 = MIN(x1, gca->width);
-  y1 = MIN(y1, gca->height);
-  z1 = MIN(z1, gca->depth);
+  x1                    = gcab->bounding_box.x + gcab->bounding_box.dx;
+  y1                    = gcab->bounding_box.y + gcab->bounding_box.dy;
+  z1                    = gcab->bounding_box.z + gcab->bounding_box.dz;
+  gcab->bounding_box.x  = MAX(0, gcab->bounding_box.x);
+  gcab->bounding_box.y  = MAX(0, gcab->bounding_box.y);
+  gcab->bounding_box.z  = MAX(0, gcab->bounding_box.z);
+  x1                    = MIN(x1, gca->width);
+  y1                    = MIN(y1, gca->height);
+  z1                    = MIN(z1, gca->depth);
   gcab->bounding_box.dx = x1 - gcab->bounding_box.x;
   gcab->bounding_box.dy = y1 - gcab->bounding_box.y;
   gcab->bounding_box.dz = z1 - gcab->bounding_box.z;
 
-  gcab->min_intensity = 0.0f;
-  gcab->max_intensity = 255.0f;
-  gcab->max_grad = 15;
-  gcab->min_grad = -15;
-  gcab->spacing = spacing;
+  gcab->min_intensity   = 0.0f;
+  gcab->max_intensity   = 255.0f;
+  gcab->max_grad        = 15;
+  gcab->min_grad        = -15;
+  gcab->spacing         = spacing;
   gcab->nintensity_bins = nintensity_bins;
-  gcab->ngrad_bins = ngrad_bins;
-  gcab->gca = gca;
-  gcab->ico_order = ico_order;
-  gcab->ico = read_icosahedron_by_order(ico_order);
+  gcab->ngrad_bins      = ngrad_bins;
+  gcab->gca             = gca;
+  gcab->ico_order       = ico_order;
+  gcab->ico             = read_icosahedron_by_order(ico_order);
 
   gcab->iscale =
       (gcab->nintensity_bins - 1) / (gcab->max_intensity - gcab->min_intensity);
@@ -125,7 +125,7 @@ GCAB *GCABalloc(GCA *gca, int spacing, int ico_order, int nintensity_bins,
   gcab->width = width = (int)(((float)gcab->bounding_box.dx / spacing) + .99);
   gcab->height = height = (int)((float)gcab->bounding_box.dy / spacing + .99);
   gcab->depth = depth = (int)(((float)gcab->bounding_box.dz / spacing) + .99);
-  gcab->bs = (GCABS ***)calloc(width, sizeof(GCABS **));
+  gcab->bs            = (GCABS ***)calloc(width, sizeof(GCABS **));
   if (!gcab->bs)
     ErrorExit(ERROR_NOMEMORY, "GCABalloc: could not allocate BS");
 
@@ -143,7 +143,7 @@ GCAB *GCABalloc(GCA *gca, int spacing, int ico_order, int nintensity_bins,
       for (z = 0; z < depth; z++) {
         if (x == Gx && y == Gy && z == Gz)
           DiagBreak();
-        gcabs = &gcab->bs[x][y][z];
+        gcabs       = &gcab->bs[x][y][z];
         gcabs->pdfs = (double ***)calloc(gcab->nvertices, sizeof(double **));
         gcabs->h_grad_pdfs =
             (HISTOGRAM **)calloc(gcab->nvertices, sizeof(HISTOGRAM *));
@@ -177,7 +177,7 @@ GCAB *GCABalloc(GCA *gca, int spacing, int ico_order, int nintensity_bins,
 int GCABfree(GCAB **pgcab) {
   GCAB *gcab;
 
-  gcab = *pgcab;
+  gcab   = *pgcab;
   *pgcab = nullptr;
 
   free(gcab);
@@ -185,7 +185,7 @@ int GCABfree(GCAB **pgcab) {
 }
 
 int GCABcompleteTraining(GCAB *gcab) {
-  int x, y, z, i1, i2, vno;
+  int    x, y, z, i1, i2, vno;
   GCABS *gcabs;
 
   for (x = 0; x < gcab->width; x++)
@@ -248,7 +248,7 @@ double GCABgetProbability(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
   dx = xo - xi;
   dy = yo - yi;
   dz = zo - zi;
-  d = sqrt(dx * dx + dy * dy + dz * dz);
+  d  = sqrt(dx * dx + dy * dy + dz * dz);
   if (FZERO(d))
     DiagBreak();
   dx /= d;
@@ -286,9 +286,9 @@ double GCABgetProbability(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
 
     // pI_total = pdelI = 0;
 #if 1
-  x = nint(xn);
-  y = nint(yn);
-  z = nint(zn);
+  x     = nint(xn);
+  y     = nint(yn);
+  z     = nint(zn);
   gcabs = &gcab->bs[x][y][z];
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRI *mri;
@@ -311,9 +311,9 @@ double GCABgetProbability(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
   pI_out = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iout)
 
   // compute probability of interior
-  xi0 = xi;
-  yi0 = yi;
-  zi0 = zi;
+  xi0   = xi;
+  yi0   = yi;
+  zi0   = zi;
   pI_in = GCAcomputeLabelLikelihood(gcab->gca, transform, mri_int, xi, yi, zi,
                                     gcab->target_label);
   //  pI_in = gcabSamplePDF(gcab, gcabs, GCAB_IIN, vno, val1) ;  // p(Iin)
@@ -369,7 +369,7 @@ double GCABgetProbability(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
         val2 = gcab->max_intensity;
       if (val2 < gcab->min_intensity)
         val2 = gcab->min_intensity;
-      p = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iin)
+      p      = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iin)
       pI_out = MIN(pI_out, p);
     }
 
@@ -400,10 +400,10 @@ double GCABgetProbability(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
           sprintf(fname, "ohisto_%d_%d_%d_vno%d.plt", x, y, z, vno);
           HISTOplot(gcabs->h_Iout_pdfs[vno], fname);
         }
-        xi0 = xi;
-        yi0 = yi;
-        zi0 = zi;
-        pI_in = 1;
+        xi0    = xi;
+        yi0    = yi;
+        zi0    = zi;
+        pI_in  = 1;
         pI_out = pI = 0.0;
         // compute joint probability of all interior voxels with exterior one
         for (d = 0.0, num = 0; d > -10; d--) // start 1/2mm inside border
@@ -422,14 +422,14 @@ double GCABgetProbability(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
           if (val1 < gcab->min_intensity)
             val1 = gcab->min_intensity;
           gcabValsToBins(gcab, val1, val2, grad, &i1f, &i2f, &gbinf);
-          i1b = (int)i1f;
-          i2b = (int)i2f;
+          i1b   = (int)i1f;
+          i2b   = (int)i2f;
           gbinb = (int)gbinf;
-          i1u = i1b + 1;
-          i2u = i2b + 1;
+          i1u   = i1b + 1;
+          i2u   = i2b + 1;
           gbinu = gbinb + 1;
-          i1d = i1f - i1b;
-          i2d = i2f - i2b;
+          i1d   = i1f - i1b;
+          i2d   = i2f - i2b;
           gbind = gbinf - gbinb;
 
 #if 0
@@ -487,7 +487,7 @@ double GCABgetPin(GCAB *gcab, MRI *mri_int, MRI *mri_dist, TRANSFORM *transform,
   dx = xo - xi;
   dy = yo - yi;
   dz = zo - zi;
-  d = sqrt(dx * dx + dy * dy + dz * dz);
+  d  = sqrt(dx * dx + dy * dy + dz * dz);
   if (FZERO(d))
     DiagBreak();
   dx /= d;
@@ -525,9 +525,9 @@ double GCABgetPin(GCAB *gcab, MRI *mri_int, MRI *mri_dist, TRANSFORM *transform,
 
     // pI_total = pdelI = 0;
 #if 1
-  x = nint(xn);
-  y = nint(yn);
-  z = nint(zn);
+  x     = nint(xn);
+  y     = nint(yn);
+  z     = nint(zn);
   gcabs = &gcab->bs[x][y][z];
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRI *mri;
@@ -550,9 +550,9 @@ double GCABgetPin(GCAB *gcab, MRI *mri_int, MRI *mri_dist, TRANSFORM *transform,
   pI_out = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iout)
 
   // compute probability of interior
-  xi0 = xi;
-  yi0 = yi;
-  zi0 = zi;
+  xi0   = xi;
+  yi0   = yi;
+  zi0   = zi;
   pI_in = GCAcomputeLabelLikelihood(gcab->gca, transform, mri_int, xi, yi, zi,
                                     gcab->target_label);
   //  pI_in = gcabSamplePDF(gcab, gcabs, GCAB_IIN, vno, val1) ;  // p(Iin)
@@ -570,9 +570,9 @@ double GCABgetPin(GCAB *gcab, MRI *mri_int, MRI *mri_dist, TRANSFORM *transform,
       val1 = gcab->max_intensity;
     if (val1 < gcab->min_intensity)
       val1 = gcab->min_intensity;
-    p = GCAcomputeLabelLikelihood(gcab->gca, transform, mri_int, xi, yi, zi,
+    p     = GCAcomputeLabelLikelihood(gcab->gca, transform, mri_int, xi, yi, zi,
                                   gcab->target_label);
-    p = gcabSamplePDF(gcab, gcabs, GCAB_IIN, vno, val1); // p(Iin)
+    p     = gcabSamplePDF(gcab, gcabs, GCAB_IIN, vno, val1); // p(Iin)
     pI_in = MIN(pI_in, p);
   }
 
@@ -608,7 +608,7 @@ double GCABgetPin(GCAB *gcab, MRI *mri_int, MRI *mri_dist, TRANSFORM *transform,
         val2 = gcab->max_intensity;
       if (val2 < gcab->min_intensity)
         val2 = gcab->min_intensity;
-      p = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iin)
+      p      = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iin)
       pI_out = MIN(pI_out, p);
     }
 
@@ -639,10 +639,10 @@ double GCABgetPin(GCAB *gcab, MRI *mri_int, MRI *mri_dist, TRANSFORM *transform,
           sprintf(fname, "ohisto_%d_%d_%d_vno%d.plt", x, y, z, vno);
           HISTOplot(gcabs->h_Iout_pdfs[vno], fname);
         }
-        xi0 = xi;
-        yi0 = yi;
-        zi0 = zi;
-        pI_in = 1;
+        xi0    = xi;
+        yi0    = yi;
+        zi0    = zi;
+        pI_in  = 1;
         pI_out = pI = 0.0;
         // compute joint probability of all interior voxels with exterior one
         for (d = 0.0, num = 0; d > -10; d--) // start 1/2mm inside border
@@ -661,14 +661,14 @@ double GCABgetPin(GCAB *gcab, MRI *mri_int, MRI *mri_dist, TRANSFORM *transform,
           if (val1 < gcab->min_intensity)
             val1 = gcab->min_intensity;
           gcabValsToBins(gcab, val1, val2, grad, &i1f, &i2f, &gbinf);
-          i1b = (int)i1f;
-          i2b = (int)i2f;
+          i1b   = (int)i1f;
+          i2b   = (int)i2f;
           gbinb = (int)gbinf;
-          i1u = i1b + 1;
-          i2u = i2b + 1;
+          i1u   = i1b + 1;
+          i2u   = i2b + 1;
           gbinu = gbinb + 1;
-          i1d = i1f - i1b;
-          i2d = i2f - i2b;
+          i1d   = i1f - i1b;
+          i2d   = i2f - i2b;
           gbind = gbinf - gbinb;
 
 #if 0
@@ -726,7 +726,7 @@ double GCABgetPout(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
   dx = xo - xi;
   dy = yo - yi;
   dz = zo - zi;
-  d = sqrt(dx * dx + dy * dy + dz * dz);
+  d  = sqrt(dx * dx + dy * dy + dz * dz);
   if (FZERO(d))
     DiagBreak();
   dx /= d;
@@ -764,9 +764,9 @@ double GCABgetPout(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
 
     // pI_total = pdelI = 0;
 #if 1
-  x = nint(xn);
-  y = nint(yn);
-  z = nint(zn);
+  x     = nint(xn);
+  y     = nint(yn);
+  z     = nint(zn);
   gcabs = &gcab->bs[x][y][z];
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRI *mri;
@@ -789,9 +789,9 @@ double GCABgetPout(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
   pI_out = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iout)
 
   // compute probability of interior
-  xi0 = xi;
-  yi0 = yi;
-  zi0 = zi;
+  xi0   = xi;
+  yi0   = yi;
+  zi0   = zi;
   pI_in = GCAcomputeLabelLikelihood(gcab->gca, transform, mri_int, xi, yi, zi,
                                     gcab->target_label);
   //  pI_in = gcabSamplePDF(gcab, gcabs, GCAB_IIN, vno, val1) ;  // p(Iin)
@@ -847,7 +847,7 @@ double GCABgetPout(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
         val2 = gcab->max_intensity;
       if (val2 < gcab->min_intensity)
         val2 = gcab->min_intensity;
-      p = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iin)
+      p      = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iin)
       pI_out = MIN(pI_out, p);
     }
 
@@ -878,10 +878,10 @@ double GCABgetPout(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
           sprintf(fname, "ohisto_%d_%d_%d_vno%d.plt", x, y, z, vno);
           HISTOplot(gcabs->h_Iout_pdfs[vno], fname);
         }
-        xi0 = xi;
-        yi0 = yi;
-        zi0 = zi;
-        pI_in = 1;
+        xi0    = xi;
+        yi0    = yi;
+        zi0    = zi;
+        pI_in  = 1;
         pI_out = pI = 0.0;
         // compute joint probability of all interior voxels with exterior one
         for (d = 0.0, num = 0; d > -10; d--) // start 1/2mm inside border
@@ -900,14 +900,14 @@ double GCABgetPout(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
           if (val1 < gcab->min_intensity)
             val1 = gcab->min_intensity;
           gcabValsToBins(gcab, val1, val2, grad, &i1f, &i2f, &gbinf);
-          i1b = (int)i1f;
-          i2b = (int)i2f;
+          i1b   = (int)i1f;
+          i2b   = (int)i2f;
           gbinb = (int)gbinf;
-          i1u = i1b + 1;
-          i2u = i2b + 1;
+          i1u   = i1b + 1;
+          i2u   = i2b + 1;
           gbinu = gbinb + 1;
-          i1d = i1f - i1b;
-          i2d = i2f - i2b;
+          i1d   = i1f - i1b;
+          i2d   = i2f - i2b;
           gbind = gbinf - gbinb;
 
 #if 0
@@ -965,7 +965,7 @@ double GCABgetPgrad(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
   dx = xo - xi;
   dy = yo - yi;
   dz = zo - zi;
-  d = sqrt(dx * dx + dy * dy + dz * dz);
+  d  = sqrt(dx * dx + dy * dy + dz * dz);
   if (FZERO(d))
     DiagBreak();
   dx /= d;
@@ -1003,9 +1003,9 @@ double GCABgetPgrad(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
 
     // pI_total = pdelI = 0;
 #if 1
-  x = nint(xn);
-  y = nint(yn);
-  z = nint(zn);
+  x     = nint(xn);
+  y     = nint(yn);
+  z     = nint(zn);
   gcabs = &gcab->bs[x][y][z];
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRI *mri;
@@ -1028,9 +1028,9 @@ double GCABgetPgrad(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
   pI_out = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iout)
 
   // compute probability of interior
-  xi0 = xi;
-  yi0 = yi;
-  zi0 = zi;
+  xi0   = xi;
+  yi0   = yi;
+  zi0   = zi;
   pI_in = GCAcomputeLabelLikelihood(gcab->gca, transform, mri_int, xi, yi, zi,
                                     gcab->target_label);
   //  pI_in = gcabSamplePDF(gcab, gcabs, GCAB_IIN, vno, val1) ;  // p(Iin)
@@ -1086,7 +1086,7 @@ double GCABgetPgrad(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
         val2 = gcab->max_intensity;
       if (val2 < gcab->min_intensity)
         val2 = gcab->min_intensity;
-      p = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iin)
+      p      = gcabSamplePDF(gcab, gcabs, GCAB_IOUT, vno, val2); // p(Iin)
       pI_out = MIN(pI_out, p);
     }
 
@@ -1117,10 +1117,10 @@ double GCABgetPgrad(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
           sprintf(fname, "ohisto_%d_%d_%d_vno%d.plt", x, y, z, vno);
           HISTOplot(gcabs->h_Iout_pdfs[vno], fname);
         }
-        xi0 = xi;
-        yi0 = yi;
-        zi0 = zi;
-        pI_in = 1;
+        xi0    = xi;
+        yi0    = yi;
+        zi0    = zi;
+        pI_in  = 1;
         pI_out = pI = 0.0;
         // compute joint probability of all interior voxels with exterior one
         for (d = 0.0, num = 0; d > -10; d--) // start 1/2mm inside border
@@ -1139,14 +1139,14 @@ double GCABgetPgrad(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
           if (val1 < gcab->min_intensity)
             val1 = gcab->min_intensity;
           gcabValsToBins(gcab, val1, val2, grad, &i1f, &i2f, &gbinf);
-          i1b = (int)i1f;
-          i2b = (int)i2f;
+          i1b   = (int)i1f;
+          i2b   = (int)i2f;
           gbinb = (int)gbinf;
-          i1u = i1b + 1;
-          i2u = i2b + 1;
+          i1u   = i1b + 1;
+          i2u   = i2b + 1;
           gbinu = gbinb + 1;
-          i1d = i1f - i1b;
-          i2d = i2f - i2b;
+          i1d   = i1f - i1b;
+          i2d   = i2f - i2b;
           gbind = gbinf - gbinb;
 
 #if 0
@@ -1180,9 +1180,9 @@ double GCABgetPgrad(GCAB *gcab, MRI *mri_int, MRI *mri_dist,
 
 int GCABtrain(GCAB *gcab, MRI *mri_int, MRI *mri_seg, TRANSFORM *transform,
               int target_label) {
-  int x, y, z, oob, border;
+  int   x, y, z, oob, border;
   float xn, yn, zn;
-  MRI *mri_border, *mri_dist, *mri_tmp;
+  MRI * mri_border, *mri_dist, *mri_tmp;
 
   mri_tmp = MRIclone(mri_seg, nullptr);
   MRIcopyLabel(mri_seg, mri_tmp, target_label);
@@ -1223,9 +1223,9 @@ int GCABtrain(GCAB *gcab, MRI *mri_int, MRI *mri_seg, TRANSFORM *transform,
 int GCABsourceVoxelToNode(GCAB *gcab, MRI *mri, TRANSFORM *transform, float xv,
                           float yv, float zv, float *pxn, float *pyn,
                           float *pzn) {
-  float xt = 0, yt = 0, zt = 0;
+  float  xt = 0, yt = 0, zt = 0;
   double xrt, yrt, zrt;
-  LTA *lta;
+  LTA *  lta;
 
   if (transform->type != MORPH_3D_TYPE) {
     if (transform->type == LINEAR_VOX_TO_VOX) // from src to talairach volume
@@ -1271,10 +1271,10 @@ int GCABvoxelToNode(GCAB *gcab, float xv, float yv, float zv, float *pxn,
   return NO_ERROR;
 }
 int GCABwrite(GCAB *gcab, char *fname) {
-  FILE *fp;
-  int x, y, z, vno, i1, i2;
+  FILE * fp;
+  int    x, y, z, vno, i1, i2;
   GCABS *gcabs;
-  long where;
+  long   where;
 
   strcpy(gcab->fname, fname);
 
@@ -1358,13 +1358,13 @@ int GCABwrite(GCAB *gcab, char *fname) {
 
 GCAB *GCABread(char *fname, GCA *gca) {
   FILE *fp;
-  int x, y, z, vno, i1, i2, spacing, ico_order, nibins, ngbins, label;
+  int   x, y, z, vno, i1, i2, spacing, ico_order, nibins, ngbins, label;
   // int nvertices;
-  float version;
+  float  version;
   GCABS *gcabs;
-  GCAB *gcab;
-  char gca_fname[STRLEN];
-  long where;
+  GCAB * gcab;
+  char   gca_fname[STRLEN];
+  long   where;
 
   fp = fopen(fname, "rb");
   if (fp == nullptr)
@@ -1393,25 +1393,25 @@ GCAB *GCABread(char *fname, GCA *gca) {
                 "GCABread(%s) ftell returned invalid position indicator",
                 fname);
   }
-  label = freadInt(fp);
+  label   = freadInt(fp);
   spacing = freadInt(fp);
   // nvertices =
   freadInt(fp);
   ico_order = freadInt(fp);
-  nibins = freadInt(fp);
-  ngbins = freadInt(fp);
-  gcab = GCABalloc(gca, spacing, ico_order, nibins, ngbins, label);
+  nibins    = freadInt(fp);
+  ngbins    = freadInt(fp);
+  gcab      = GCABalloc(gca, spacing, ico_order, nibins, ngbins, label);
 
   freadInt(fp);
   freadInt(fp);
   freadInt(fp); // width, height and depth
-  gcab->min_intensity = freadFloat(fp);
-  gcab->max_intensity = freadFloat(fp);
-  gcab->min_grad = freadFloat(fp);
-  gcab->max_grad = freadFloat(fp);
-  gcab->iscale = freadFloat(fp);
-  gcab->gscale = freadFloat(fp);
-  gcab->ntraining = freadInt(fp);
+  gcab->min_intensity  = freadFloat(fp);
+  gcab->max_intensity  = freadFloat(fp);
+  gcab->min_grad       = freadFloat(fp);
+  gcab->max_grad       = freadFloat(fp);
+  gcab->iscale         = freadFloat(fp);
+  gcab->gscale         = freadFloat(fp);
+  gcab->ntraining      = freadInt(fp);
   gcab->bounding_box.x = freadInt(fp);
   gcab->bounding_box.y = freadInt(fp);
   gcab->bounding_box.z = freadInt(fp);
@@ -1435,7 +1435,7 @@ GCAB *GCABread(char *fname, GCA *gca) {
           HISTOfree(&gcabs->h_Iin_pdfs[vno]);  // alloced in GCABalloc
           HISTOfree(&gcabs->h_Iout_pdfs[vno]); // alloced in GCABalloc
           gcabs->h_grad_pdfs[vno] = HISTOreadFrom(fp);
-          gcabs->h_Iin_pdfs[vno] = HISTOreadFrom(fp);
+          gcabs->h_Iin_pdfs[vno]  = HISTOreadFrom(fp);
           gcabs->h_Iout_pdfs[vno] = HISTOreadFrom(fp);
           for (i1 = 0; i1 < gcab->nintensity_bins; i1++)
             for (i2 = 0; i2 < gcab->nintensity_bins; i2++)
@@ -1485,7 +1485,7 @@ static int gcabUpdateDistributions(GCAB *gcab, MRI *mri_int, MRI *mri_seg,
   dx = xo - xi;
   dy = yo - yi;
   dz = zo - zi;
-  d = sqrt(dx * dx + dy * dy + dz * dz);
+  d  = sqrt(dx * dx + dy * dy + dz * dz);
   if (FZERO(d))
     DiagBreak();
   dx /= d;
@@ -1740,7 +1740,7 @@ static int gcabComputeBorderNormal(GCAB *gcab, MRI *mri_seg,
                                    TRANSFORM *transform, int x0, int y0, int z0,
                                    float *pnx, float *pny, float *pnz,
                                    int target_label) {
-  int olabel, x1, y1, z1, xk, yk, zk, label, num, max_n;
+  int   olabel, x1, y1, z1, xk, yk, zk, label, num, max_n;
   float nx, ny, nz, mag;
 
   olabel = (int)MRIgetVoxVal(mri_seg, x0, y0, z0, 0);
@@ -1797,29 +1797,29 @@ static int gcabComputeBorderNormal(GCAB *gcab, MRI *mri_seg,
 static int gcabFindClosestIcoVertex(GCAB *gcab, TRANSFORM *transform, float x0,
                                     float y0, float z0, float nx, float ny,
                                     float nz) {
-  int n, max_n;
+  int   n, max_n;
   float xa0, ya0, za0, xa1, ya1, za1, mag, dot, max_dot;
 
   // convert it to atlas coords
   TransformSampleReal(transform, x0, y0, z0, &xa0, &ya0, &za0);
   TransformSampleReal(transform, x0 + 2 * nx, y0 + 2 * ny, z0 + 2 * nz, &xa1,
                       &ya1, &za1);
-  nx = xa1 - xa0;
-  ny = ya1 - ya0;
-  nz = za1 - za0;
+  nx  = xa1 - xa0;
+  ny  = ya1 - ya0;
+  nz  = za1 - za0;
   mag = sqrt(nx * nx + ny * ny + nz * nz);
   nx /= mag;
   ny /= mag;
   nz /= mag;
 
   max_dot = -1;
-  max_n = -1;
+  max_n   = -1;
   for (n = 0; n < gcab->nvertices; n++) {
     dot = nx * gcab->ico->vertices[n].x + ny * gcab->ico->vertices[n].y +
           nz * gcab->ico->vertices[n].z;
     if (dot > max_dot) {
       max_dot = dot;
-      max_n = n;
+      max_n   = n;
     }
   }
   return (max_n);
@@ -1841,12 +1841,12 @@ static int gcabValsToBins(GCAB *gcab, double val1, double val2, float grad,
     grad = gcab->max_grad;
   *pi1f = gcab->iscale * (val1 - gcab->min_intensity);
   *pi2f = gcab->iscale * (val2 - gcab->min_intensity);
-  *pgf = gcab->gscale * (grad - gcab->min_grad);
+  *pgf  = gcab->gscale * (grad - gcab->min_grad);
   return (NO_ERROR);
 }
 
 static MRI *gcabWritePDFToMRI(GCAB *gcab, MRI *mri, int x, int y, int z) {
-  int vno, i1, i2;
+  int    vno, i1, i2;
   GCABS *gcabs;
 
   if (mri == nullptr)
@@ -1861,7 +1861,7 @@ static MRI *gcabWritePDFToMRI(GCAB *gcab, MRI *mri, int x, int y, int z) {
   return (mri);
 }
 static MRI *gcabWriteMRIToPDF(GCAB *gcab, MRI *mri, int x, int y, int z) {
-  int vno, i1, i2;
+  int    vno, i1, i2;
   GCABS *gcabs;
 
   gcabs = &gcab->bs[x][y][z];
@@ -1872,7 +1872,7 @@ static MRI *gcabWriteMRIToPDF(GCAB *gcab, MRI *mri, int x, int y, int z) {
   return (NO_ERROR);
 }
 int GCABsmoothPDFs(GCAB *gcab, float sigma) {
-  int x, y, z;
+  int  x, y, z;
   MRI *mri_kernel;
 
   mri_kernel = MRIgaussian1d(sigma, -1);
@@ -1893,11 +1893,11 @@ int GCABsmoothPDFs(GCAB *gcab, float sigma) {
 static int gcabSmoothPDF(GCAB *gcab, int x, int y, int z, MRI *mri_kernel) {
   MRI *mri_pdf, *mri_tmp;
   // int width, height, depth
-  int klen;
+  int    klen;
   float *kernel;
 
   kernel = &MRIFvox(mri_kernel, 0, 0, 0);
-  klen = mri_kernel->width;
+  klen   = mri_kernel->width;
 
   mri_pdf = gcabWritePDFToMRI(gcab, nullptr, x, y, z);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
@@ -1918,9 +1918,9 @@ static int gcabSmoothPDF(GCAB *gcab, int x, int y, int z, MRI *mri_kernel) {
 
 static double gcabSamplePDF(GCAB *gcab, GCABS *gcabs, int which, int vno,
                             double val) {
-  double p, p1, p2;
-  float index_f = 0, index_d, dummy;
-  int index_b, index_u;
+  double     p, p1, p2;
+  float      index_f = 0, index_d, dummy;
+  int        index_b, index_u;
   HISTOGRAM *h;
 
   h = nullptr;
@@ -1952,7 +1952,7 @@ static double gcabSamplePDF(GCAB *gcab, GCABS *gcabs, int which, int vno,
   }
   p1 = h->counts[index_b];
   p2 = h->counts[index_u];
-  p = (1 - index_d) * p1 + index_d * p2;
+  p  = (1 - index_d) * p1 + index_d * p2;
   if (DZERO(p))
     p = 1e-10;
   return (p);

@@ -18,8 +18,8 @@
 #define __itkPolylineCell_h
 
 #include "itkCellInterface.h"
-#include "itkVertexCell.h"
 #include "itkVectorContainer.h"
+#include "itkVertexCell.h"
 
 namespace itk {
 
@@ -49,7 +49,7 @@ public:
   itkTypeMacro(PolylineCell, CellInterface);
 
   /** The type of boundary for this lines's vertices. */
-  using VertexType = VertexCell<TCellInterface>;
+  using VertexType        = VertexCell<TCellInterface>;
   using VertexAutoPointer = typename VertexType::SelfAutoPointer;
 
   using PointIdentifierVector = VectorContainer<unsigned int, PointIdentifier>;
@@ -59,10 +59,10 @@ public:
   enum { CellDimension = 1 };
 
   /** Implement the standard CellInterface. */
-  virtual CellGeometry GetType() const { return Superclass::POLYGON_CELL; }
-  virtual void MakeCopy(CellAutoPointer &) const;
-  virtual unsigned int GetDimension() const;
-  virtual unsigned int GetNumberOfPoints() const;
+  virtual CellGeometry     GetType() const { return Superclass::POLYGON_CELL; }
+  virtual void             MakeCopy(CellAutoPointer &) const;
+  virtual unsigned int     GetDimension() const;
+  virtual unsigned int     GetNumberOfPoints() const;
   virtual CellFeatureCount GetNumberOfBoundaryFeatures(int dimension) const;
   virtual bool GetBoundaryFeature(int dimension, CellFeatureIdentifier,
                                   CellAutoPointer &);
@@ -70,9 +70,9 @@ public:
   virtual void SetPointIds(PointIdConstIterator first,
                            PointIdConstIterator last);
   virtual void SetPointId(int localId, PointIdentifier);
-  virtual PointIdIterator PointIdsBegin();
+  virtual PointIdIterator      PointIdsBegin();
   virtual PointIdConstIterator PointIdsBegin() const;
-  virtual PointIdIterator PointIdsEnd();
+  virtual PointIdIterator      PointIdsEnd();
   virtual PointIdConstIterator PointIdsEnd() const;
 
   /** Line-specific interface. */

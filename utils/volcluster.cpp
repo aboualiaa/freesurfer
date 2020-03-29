@@ -23,18 +23,18 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <math.h>
 
-#include <numerics.h>
 #include "diag.h"
 #include "matrix.h"
 #include "mri.h"
 #include "randomfields.h"
 #include "transform.h"
 #include "utils.h"
+#include <numerics.h>
 #define VOLCLUSTER_SRC
 #include "surfcluster.h"
 #include "volcluster.h"
@@ -59,12 +59,12 @@ VOLCLUSTER *clustAllocCluster(int nmembers) {
     return (vc);
 
   vc->nmembers = nmembers;
-  vc->col = (int *)calloc(nmembers, sizeof(int));
-  vc->row = (int *)calloc(nmembers, sizeof(int));
-  vc->slc = (int *)calloc(nmembers, sizeof(int));
-  vc->x = (float *)calloc(nmembers, sizeof(float));
-  vc->y = (float *)calloc(nmembers, sizeof(float));
-  vc->z = (float *)calloc(nmembers, sizeof(float));
+  vc->col      = (int *)calloc(nmembers, sizeof(int));
+  vc->row      = (int *)calloc(nmembers, sizeof(int));
+  vc->slc      = (int *)calloc(nmembers, sizeof(int));
+  vc->x        = (float *)calloc(nmembers, sizeof(float));
+  vc->y        = (float *)calloc(nmembers, sizeof(float));
+  vc->z        = (float *)calloc(nmembers, sizeof(float));
 
   return (vc);
 }
@@ -120,7 +120,7 @@ int clustFreeCluster(VOLCLUSTER **ppvc) {
 
 /*------------------------------------------------------------------------*/
 int clustFreeClusterList(VOLCLUSTER ***pppvclist, int nlist) {
-  int n;
+  int          n;
   VOLCLUSTER **vclist;
   vclist = *pppvclist;
 
@@ -139,7 +139,7 @@ int clustFreeClusterList(VOLCLUSTER ***pppvclist, int nlist) {
 
 /*------------------------------------------------------------------------*/
 int clustDumpCluster(FILE *fp, VOLCLUSTER *vc, MRI *vol, int frame) {
-  int n;
+  int   n;
   float val;
 
   for (n = 0; n < vc->nmembers; n++) {
@@ -190,11 +190,11 @@ int clustValueInRange(float val, float thmin, float thmax, int thsign) {
 MRI *clustInitHitMap(MRI *vol, int frame, float thmin, float thmax, int thsign,
                      int *nhits, int **hitcol, int **hitrow, int **hitslc,
                      MRI *binmask, int maskframe) {
-  MRI *HitMap;
-  int row, col, slc;
+  MRI * HitMap;
+  int   row, col, slc;
   float val;
-  int nh, *hrow, *hcol, *hslc;
-  int maskval;
+  int   nh, *hrow, *hcol, *hslc;
+  int   maskval;
 
   if (Gdiag_no > 0) {
     printf("clustInitHitMap: \n");
@@ -291,15 +291,15 @@ MRI *clustInitHitMap(MRI *vol, int frame, float thmin, float thmax, int thsign,
   *hitcol = hcol;
   *hitrow = hrow;
   *hitslc = hslc;
-  *nhits = nh;
+  *nhits  = nh;
 
   return (HitMap);
 }
 
 /*------------------------------------------------------------------------*/
 int clustAddMember(VOLCLUSTER *vc, int col, int row, int slc) {
-  int nmemb;
-  int *tmp;
+  int    nmemb;
+  int *  tmp;
   float *ftmp;
 
   nmemb = vc->nmembers;
@@ -403,9 +403,9 @@ int clustGrowOneVoxel(VOLCLUSTER *vc, int col0, int row0, int slc0, MRI *HitMap,
 VOLCLUSTER *clustGrow(int col0, int row0, int slc0, MRI *HitMap,
                       int AllowDiag) {
   VOLCLUSTER *vc;
-  int nthmember, nmembers_now;
-  int col, row, slc;
-  int nadded, nthpass, n;
+  int         nthmember, nmembers_now;
+  int         col, row, slc;
+  int         nadded, nthpass, n;
 
   vc = (VOLCLUSTER *)calloc(1, sizeof(VOLCLUSTER));
 
@@ -415,17 +415,17 @@ VOLCLUSTER *clustGrow(int col0, int row0, int slc0, MRI *HitMap,
   vc->voxsize = HitMap->xsize * HitMap->ysize * HitMap->zsize;
 
   nthpass = 0;
-  nadded = 1;
+  nadded  = 1;
   while (nadded > 0) {
     // printf("%4d  %5d  %d\n",nthpass,vc->nmembers,nadded);
 
-    nadded = 0;
+    nadded       = 0;
     nmembers_now = vc->nmembers;
     for (nthmember = 0; nthmember < nmembers_now; nthmember++) {
       col = vc->col[nthmember];
       row = vc->row[nthmember];
       slc = vc->slc[nthmember];
-      n = clustGrowOneVoxel(vc, col, row, slc, HitMap, AllowDiag);
+      n   = clustGrowOneVoxel(vc, col, row, slc, HitMap, AllowDiag);
       // printf("Grown: %3d %3d %3d  %d\n",col,row,slc,n);
       nadded += n;
     }
@@ -438,7 +438,7 @@ VOLCLUSTER *clustGrow(int col0, int row0, int slc0, MRI *HitMap,
 
 /*-------------------------------------------------------------------*/
 int clustMaxMember(VOLCLUSTER *vc, MRI *vol, int frame, int thsign) {
-  int n;
+  int   n;
   float val = 0.0, val0;
 
   vc->maxval = 0.0;
@@ -451,7 +451,7 @@ int clustMaxMember(VOLCLUSTER *vc, MRI *vol, int frame, int thsign) {
     if (thsign == -1)
       val = -val0;
     if (fabs(vc->maxval) < val) {
-      vc->maxval = val0; /* keep orginal signed value */
+      vc->maxval    = val0; /* keep orginal signed value */
       vc->maxmember = n;
     }
   }
@@ -463,8 +463,8 @@ int clustMaxMember(VOLCLUSTER *vc, MRI *vol, int frame, int thsign) {
 VOLCLUSTER **clustPruneBySize(VOLCLUSTER **vclist, int nlist, float voxsize,
                               float sizethresh, int *nkeep) {
   VOLCLUSTER **vcprune;
-  int n;
-  float clustersize;
+  int          n;
+  float        clustersize;
 
   /* count the number to keep */
   *nkeep = 0;
@@ -492,13 +492,13 @@ VOLCLUSTER **clustPruneBySize(VOLCLUSTER **vclist, int nlist, float voxsize,
 VOLCLUSTER **clustPruneByDistance(VOLCLUSTER **vclist, int nlist,
                                   float distthresh, int *nkeep) {
   VOLCLUSTER **vcprune;
-  int n1, n2, nmax1, nmax2;
-  float max1, max2;
-  int keep;
-  float x1, y1, z1;
-  float x2, y2, z2;
-  int pass;
-  float d;
+  int          n1, n2, nmax1, nmax2;
+  float        max1, max2;
+  int          keep;
+  float        x1, y1, z1;
+  float        x2, y2, z2;
+  int          pass;
+  float        d;
 
   vcprune = nullptr;
 
@@ -514,10 +514,10 @@ VOLCLUSTER **clustPruneByDistance(VOLCLUSTER **vclist, int nlist,
     *nkeep = 0;
     for (n1 = 0; n1 < nlist; n1++) {
       nmax1 = vclist[n1]->maxmember;
-      max1 = vclist[n1]->maxval;
-      x1 = vclist[n1]->x[nmax1];
-      y1 = vclist[n1]->y[nmax1];
-      z1 = vclist[n1]->z[nmax1];
+      max1  = vclist[n1]->maxval;
+      x1    = vclist[n1]->x[nmax1];
+      y1    = vclist[n1]->y[nmax1];
+      z1    = vclist[n1]->z[nmax1];
 
       /*-- Compare to every other cluster -- */
       keep = 1;
@@ -526,10 +526,10 @@ VOLCLUSTER **clustPruneByDistance(VOLCLUSTER **vclist, int nlist,
           continue; /* dont compare to self */
 
         nmax2 = vclist[n2]->maxmember;
-        max2 = vclist[n2]->maxval;
-        x2 = vclist[n2]->x[nmax2];
-        y2 = vclist[n2]->y[nmax2];
-        z2 = vclist[n2]->z[nmax2];
+        max2  = vclist[n2]->maxval;
+        x2    = vclist[n2]->x[nmax2];
+        y2    = vclist[n2]->y[nmax2];
+        z2    = vclist[n2]->z[nmax2];
 
         /* Compute the distance from the max of one to the max of the
            other */
@@ -567,7 +567,7 @@ VOLCLUSTER **clustPruneByDistance(VOLCLUSTER **vclist, int nlist,
 VOLCLUSTER **clustPruneByCWPval(VOLCLUSTER **vclist, int nlist,
                                 double cwpvalthresh, int *nkeep) {
   VOLCLUSTER **vcprune;
-  int n;
+  int          n;
 
   /* count the number to keep -- Note: pvalue, NOT -log10(p)*/
   *nkeep = 0;
@@ -590,7 +590,7 @@ VOLCLUSTER **clustPruneByCWPval(VOLCLUSTER **vclist, int nlist,
 /*----------------------------------------------------------------*/
 VOLCLUSTER *clustCopyCluster(VOLCLUSTER *vc) {
   VOLCLUSTER *vc2;
-  int ncopy;
+  int         ncopy;
 
   vc2 = clustAllocCluster(vc->nmembers);
 
@@ -605,12 +605,12 @@ VOLCLUSTER *clustCopyCluster(VOLCLUSTER *vc) {
   memmove(vc2->z, vc->z, ncopy);
 
   vc2->maxmember = vc->maxmember;
-  vc2->maxval = vc->maxval;
-  vc2->voxsize = vc->voxsize;
+  vc2->maxval    = vc->maxval;
+  vc2->voxsize   = vc->voxsize;
 
-  vc2->pval_clusterwise = vc->pval_clusterwise;
+  vc2->pval_clusterwise     = vc->pval_clusterwise;
   vc2->pval_clusterwise_low = vc->pval_clusterwise_low;
-  vc2->pval_clusterwise_hi = vc->pval_clusterwise_hi;
+  vc2->pval_clusterwise_hi  = vc->pval_clusterwise_hi;
 
   return (vc2);
 }
@@ -712,10 +712,10 @@ int clustComputeTal(VOLCLUSTER *vc, MATRIX *CRS2MNI) {
 /*----------------------------------------------------------------*/
 MRI *clustClusterList2Vol(VOLCLUSTER **vclist, int nlist, MRI *tvol, int frame,
                           int ValOption) {
-  MRI *vol;
-  int nthvc, n, f;
+  MRI *       vol;
+  int         nthvc, n, f;
   VOLCLUSTER *vc;
-  float val;
+  float       val;
 
   // Allocate vol and fill with all zeros
   if (ValOption)
@@ -747,11 +747,11 @@ MRI *clustClusterList2Vol(VOLCLUSTER **vclist, int nlist, MRI *tvol, int frame,
 /*----------------------------------------------------------------*/
 LABEL *clustCluster2Label(VOLCLUSTER *vc, MRI *vol, int frame, float colres,
                           float rowres, float sliceres, MATRIX *FSA2Func) {
-  LABEL *label;
+  LABEL * label;
   MATRIX *CRS2Func, *Func2FSA;
   MATRIX *xyzFunc, *xyzFSA;
-  int n;
-  float val;
+  int     n;
+  float   val;
 
   CRS2Func = MRIxfmCRS2XYZtkreg(vol);
   clustComputeXYZ(vc, CRS2Func);
@@ -760,9 +760,9 @@ LABEL *clustCluster2Label(VOLCLUSTER *vc, MRI *vol, int frame, float colres,
   Func2FSA = MatrixInverse(FSA2Func, nullptr);
 
   /* Preallocate vectors */
-  xyzFunc = MatrixAlloc(4, 1, MATRIX_REAL);
+  xyzFunc             = MatrixAlloc(4, 1, MATRIX_REAL);
   xyzFunc->rptr[4][1] = 1;
-  xyzFSA = MatrixAlloc(4, 1, MATRIX_REAL);
+  xyzFSA              = MatrixAlloc(4, 1, MATRIX_REAL);
 
   /* Alloc the label */
   label = LabelAlloc(vc->nmembers, nullptr, nullptr);
@@ -778,11 +778,11 @@ LABEL *clustCluster2Label(VOLCLUSTER *vc, MRI *vol, int frame, float colres,
     MatrixMultiply(Func2FSA, xyzFunc, xyzFSA);
 
     /* assign fields to label */
-    label->lv[n].x = rint(xyzFSA->rptr[1][1]);
-    label->lv[n].y = rint(xyzFSA->rptr[2][1]);
-    label->lv[n].z = rint(xyzFSA->rptr[3][1]);
+    label->lv[n].x    = rint(xyzFSA->rptr[1][1]);
+    label->lv[n].y    = rint(xyzFSA->rptr[2][1]);
+    label->lv[n].z    = rint(xyzFSA->rptr[3][1]);
     label->lv[n].stat = val;
-    label->lv[n].vno = -1;
+    label->lv[n].vno  = -1;
   }
   label->n_points = vc->nmembers;
 
@@ -801,10 +801,10 @@ VOLCLUSTER **clustGetClusters(MRI *vol, int frame, float threshmin,
                               int *nClusters, MATRIX *XFM) {
   int nthhit, nclusters, nhits, *hitcol = nullptr, *hitrow = nullptr,
                                 *hitslc = nullptr;
-  int col, row, slc, allowdiag = 0, nprunedclusters;
-  MRI *HitMap;
+  int          col, row, slc, allowdiag = 0, nprunedclusters;
+  MRI *        HitMap;
   VOLCLUSTER **ClusterList, **ClusterList2;
-  float voxsizemm3, distthresh = 0;
+  float        voxsizemm3, distthresh = 0;
 
   voxsizemm3 = vol->xsize * vol->ysize * vol->zsize;
 
@@ -864,7 +864,7 @@ VOLCLUSTER **clustGetClusters(MRI *vol, int frame, float threshmin,
   ClusterList2 = clustPruneBySize(ClusterList, nclusters, voxsizemm3,
                                   minclustsizemm3, &nprunedclusters);
   clustFreeClusterList(&ClusterList, nclusters);
-  nclusters = nprunedclusters;
+  nclusters   = nprunedclusters;
   ClusterList = ClusterList2;
 
   if (Gdiag_no > 0)
@@ -877,7 +877,7 @@ VOLCLUSTER **clustGetClusters(MRI *vol, int frame, float threshmin,
     ClusterList2 = clustPruneByDistance(ClusterList, nclusters, distthresh,
                                         &nprunedclusters);
     clustFreeClusterList(&ClusterList, nclusters);
-    nclusters = nprunedclusters;
+    nclusters   = nprunedclusters;
     ClusterList = ClusterList2;
   }
 
@@ -910,7 +910,7 @@ int clustMaxClusterCount(VOLCLUSTER **VolClustList, int nClusters) {
 
 /*------------------------------------------------------------------------*/
 int clustDumpSummary(FILE *fp, VOLCLUSTER **ClusterList, int nClusters) {
-  int n, col, row, slc;
+  int   n, col, row, slc;
   float x, y, z;
 
   fprintf(fp, "--------------------------------------------------\n");
@@ -918,9 +918,9 @@ int clustDumpSummary(FILE *fp, VOLCLUSTER **ClusterList, int nClusters) {
     col = ClusterList[n]->col[ClusterList[n]->maxmember];
     row = ClusterList[n]->row[ClusterList[n]->maxmember];
     slc = ClusterList[n]->slc[ClusterList[n]->maxmember];
-    x = ClusterList[n]->x[ClusterList[n]->maxmember];
-    y = ClusterList[n]->y[ClusterList[n]->maxmember];
-    z = ClusterList[n]->z[ClusterList[n]->maxmember];
+    x   = ClusterList[n]->x[ClusterList[n]->maxmember];
+    y   = ClusterList[n]->y[ClusterList[n]->maxmember];
+    z   = ClusterList[n]->z[ClusterList[n]->maxmember];
     fprintf(fp, "%3d %4d  %7.1f  %3d %3d %3d  %g  %g %g %g   \n", n + 1,
             ClusterList[n]->nmembers,
             ClusterList[n]->nmembers * ClusterList[n]->voxsize, col, row, slc,
@@ -941,7 +941,7 @@ static int ConvertCRS2XYZ(int col, int row, int slc, MATRIX *CRS2XYZ, float *x,
                           float *y, float *z) {
   MATRIX *crs, *xyz;
 
-  crs = MatrixAlloc(4, 1, MATRIX_REAL);
+  crs             = MatrixAlloc(4, 1, MATRIX_REAL);
   crs->rptr[1][1] = (float)col;
   crs->rptr[2][1] = (float)row;
   crs->rptr[3][1] = (float)slc;
@@ -962,14 +962,14 @@ static int ConvertCRS2XYZ(int col, int row, int slc, MATRIX *CRS2XYZ, float *x,
 /*----------------------------------------------------*/
 CHT *CHTalloc(int n_ithr, double ithr_lo, double ithr_hi, int n_sthr,
               double sthr_lo, double sthr_hi) {
-  CHT *cht;
+  CHT *  cht;
   double dithr, dsthr;
-  int i, v;
+  int    i, v;
 
   cht = (CHT *)calloc(1, sizeof(CHT));
 
   cht->n_ithr = n_ithr;
-  cht->ithr = (double *)calloc(n_ithr, sizeof(double));
+  cht->ithr   = (double *)calloc(n_ithr, sizeof(double));
   if (n_ithr != 1)
     dithr = (ithr_hi - ithr_lo) / (n_ithr - 1);
   else
@@ -980,7 +980,7 @@ CHT *CHTalloc(int n_ithr, double ithr_lo, double ithr_hi, int n_sthr,
   cht->ithr_hi = ithr_hi;
 
   cht->n_sthr = n_sthr;
-  cht->sthr = (double *)calloc(n_sthr, sizeof(double));
+  cht->sthr   = (double *)calloc(n_sthr, sizeof(double));
   if (n_sthr != 1)
     dsthr = (sthr_hi - sthr_lo) / (n_sthr - 1);
   else
@@ -1000,7 +1000,7 @@ CHT *CHTalloc(int n_ithr, double ithr_lo, double ithr_hi, int n_sthr,
 /*----------------------------------------------------*/
 int CHTfree(CHT **ppcht) {
   CHT *cht;
-  int i;
+  int  i;
 
   cht = *ppcht;
   for (i = 0; i < cht->n_ithr; i++)
@@ -1068,23 +1068,23 @@ int CHTwrite(char *fname, CHT *cht) {
 
 /*----------------------------------------------------*/
 CHT *CHTread(char *fname) {
-  CHT *cht;
-  FILE *fp;
-  char tag[1000];
-  char tmpstr[1000];
-  int nsim;                /* number of simulation runs to generate table */
-  long int seed;           // Seed for random number generator
-  int nvox;                /* number of voxels/vertices in search area */
-  double totsize;          /* total volume (mm^3) or area (mm^2) in search*/
-  double fwhm;             /* fwhm in mm */
-  int nsmooth;             /* number of smooth steps, surf only */
-  double ithr_lo, ithr_hi; /* intensity threshold range */
-  int n_ithr;              /* Number ithreshs bet lo and hi*/
-  char ithr_sign[50];      /* abs, pos, neg*/
-  double sthr_lo, sthr_hi; /* volume threshold range */
-  int n_sthr;              /* Number sthreshs bet lo and hi*/
-  int i, v;
-  double dummy;
+  CHT *    cht;
+  FILE *   fp;
+  char     tag[1000];
+  char     tmpstr[1000];
+  int      nsim;             /* number of simulation runs to generate table */
+  long int seed;             // Seed for random number generator
+  int      nvox;             /* number of voxels/vertices in search area */
+  double   totsize;          /* total volume (mm^3) or area (mm^2) in search*/
+  double   fwhm;             /* fwhm in mm */
+  int      nsmooth;          /* number of smooth steps, surf only */
+  double   ithr_lo, ithr_hi; /* intensity threshold range */
+  int      n_ithr;           /* Number ithreshs bet lo and hi*/
+  char     ithr_sign[50];    /* abs, pos, neg*/
+  double   sthr_lo, sthr_hi; /* volume threshold range */
+  int      n_sthr;           /* Number sthreshs bet lo and hi*/
+  int      i, v;
+  double   dummy;
 
   fp = fopen(fname, "r");
   if (fp == nullptr) {
@@ -1144,12 +1144,12 @@ CHT *CHTread(char *fname) {
       sscanf(tmpstr, "%*s %*s %lf", &sthr_hi);
   }
 
-  cht = CHTalloc(n_ithr, ithr_lo, ithr_hi, n_sthr, sthr_lo, sthr_hi);
-  cht->nsim = nsim;
-  cht->seed = seed;
-  cht->nvox = nvox;
+  cht          = CHTalloc(n_ithr, ithr_lo, ithr_hi, n_sthr, sthr_lo, sthr_hi);
+  cht->nsim    = nsim;
+  cht->seed    = seed;
+  cht->nvox    = nvox;
   cht->totsize = totsize;
-  cht->fwhm = fwhm;
+  cht->fwhm    = fwhm;
   cht->nsmooth = nsmooth;
   strcpy(cht->ithr_sign, ithr_sign);
   if (!strcasecmp(ithr_sign, "pos"))
@@ -1296,20 +1296,20 @@ int CHTsignId(char *ithr_sign) {
 CLUSTER_SIM_DATA *CSDalloc() {
   CLUSTER_SIM_DATA *csd;
 
-  csd = (CLUSTER_SIM_DATA *)calloc(sizeof(CLUSTER_SIM_DATA), 1);
+  csd             = (CLUSTER_SIM_DATA *)calloc(sizeof(CLUSTER_SIM_DATA), 1);
   csd->mergedflag = 0; // not a merged data
   memset(csd->simtype, 0, strlen(csd->simtype));
   memset(csd->anattype, 0, strlen(csd->anattype));
   memset(csd->subject, 0, strlen(csd->subject));
   memset(csd->hemi, 0, strlen(csd->hemi));
   memset(csd->contrast, 0, strlen(csd->contrast));
-  csd->seed = -1;
-  csd->thresh = -1;
-  csd->threshsign = 0;
-  csd->nullfwhm = -1;
-  csd->varfwhm = -1;
+  csd->seed        = -1;
+  csd->thresh      = -1;
+  csd->threshsign  = 0;
+  csd->nullfwhm    = -1;
+  csd->varfwhm     = -1;
   csd->searchspace = -1;
-  csd->nreps = -1;
+  csd->nreps       = -1;
   // Always do this now (4/9/10)
   csd->FixGroupSubjectArea = 1;
   // if(getenv("FIX_VERTEX_AREA") == NULL) csd->FixGroupSubjectArea = 0;
@@ -1323,11 +1323,11 @@ CLUSTER_SIM_DATA *CSDalloc() {
   of this file is currently defined by mri_glmfit.
   --------------------------------------------------------------*/
 CLUSTER_SIM_DATA *CSDread(char *csdfile) {
-  FILE *fp;
+  FILE *            fp;
   CLUSTER_SIM_DATA *csd;
-  char tag[1000], tmpstr[1000], c;
-  int r, nthrep, nrepstmp;
-  double d;
+  char              tag[1000], tmpstr[1000], c;
+  int               r, nthrep, nrepstmp;
+  double            d;
 
   fp = fopen(csdfile, "r");
   if (fp == nullptr) {
@@ -1335,7 +1335,7 @@ CLUSTER_SIM_DATA *CSDread(char *csdfile) {
     return (nullptr);
   }
 
-  csd = (CLUSTER_SIM_DATA *)calloc(sizeof(CLUSTER_SIM_DATA), 1);
+  csd             = (CLUSTER_SIM_DATA *)calloc(sizeof(CLUSTER_SIM_DATA), 1);
   csd->mergedflag = 0; // not a merged data
 
   // Go through each input line
@@ -1451,13 +1451,13 @@ CLUSTER_SIM_DATA *CSDreadMerge(char *csdfile, CSD *csd) {
   structure iteself).
   --------------------------------------------------------------*/
 int CSDallocData(CLUSTER_SIM_DATA *csd) {
-  csd->nClusters = (int *)calloc(csd->nreps, sizeof(int));
-  csd->MaxClusterSize = (double *)calloc(csd->nreps, sizeof(double));
-  csd->MaxClusterSizeVtx = (double *)calloc(csd->nreps, sizeof(double));
-  csd->MaxClusterWeightVtx = (double *)calloc(csd->nreps, sizeof(double));
+  csd->nClusters            = (int *)calloc(csd->nreps, sizeof(int));
+  csd->MaxClusterSize       = (double *)calloc(csd->nreps, sizeof(double));
+  csd->MaxClusterSizeVtx    = (double *)calloc(csd->nreps, sizeof(double));
+  csd->MaxClusterWeightVtx  = (double *)calloc(csd->nreps, sizeof(double));
   csd->MaxClusterWeightArea = (double *)calloc(csd->nreps, sizeof(double));
-  csd->MaxSig = (double *)calloc(csd->nreps, sizeof(double));
-  csd->MaxStat = (double *)calloc(csd->nreps, sizeof(double));
+  csd->MaxSig               = (double *)calloc(csd->nreps, sizeof(double));
+  csd->MaxStat              = (double *)calloc(csd->nreps, sizeof(double));
   return (0);
 }
 
@@ -1526,24 +1526,24 @@ CSD *CSDcopy(CSD *csd, CSD *csdcopy) {
   strcpy(csdcopy->anattype, csd->anattype);
   strcpy(csdcopy->subject, csd->subject);
   strcpy(csdcopy->hemi, csd->hemi);
-  csdcopy->thresh = csd->thresh;
-  csdcopy->threshsign = csd->threshsign;
-  csdcopy->searchspace = csd->searchspace;
-  csdcopy->nullfwhm = csd->nullfwhm;
-  csdcopy->varfwhm = csd->varfwhm;
+  csdcopy->thresh              = csd->thresh;
+  csdcopy->threshsign          = csd->threshsign;
+  csdcopy->searchspace         = csd->searchspace;
+  csdcopy->nullfwhm            = csd->nullfwhm;
+  csdcopy->varfwhm             = csd->varfwhm;
   csdcopy->FixGroupSubjectArea = csd->FixGroupSubjectArea;
 
   csdcopy->nreps = csd->nreps;
   CSDallocData(csdcopy);
 
   for (nthrep = 0; nthrep < csd->nreps; nthrep++) {
-    csdcopy->nClusters[nthrep] = csd->nClusters[nthrep];
-    csdcopy->MaxClusterSize[nthrep] = csd->MaxClusterSize[nthrep];
-    csdcopy->MaxClusterSizeVtx[nthrep] = csd->MaxClusterSizeVtx[nthrep];
-    csdcopy->MaxClusterWeightVtx[nthrep] = csd->MaxClusterWeightVtx[nthrep];
+    csdcopy->nClusters[nthrep]            = csd->nClusters[nthrep];
+    csdcopy->MaxClusterSize[nthrep]       = csd->MaxClusterSize[nthrep];
+    csdcopy->MaxClusterSizeVtx[nthrep]    = csd->MaxClusterSizeVtx[nthrep];
+    csdcopy->MaxClusterWeightVtx[nthrep]  = csd->MaxClusterWeightVtx[nthrep];
     csdcopy->MaxClusterWeightArea[nthrep] = csd->MaxClusterWeightArea[nthrep];
-    csdcopy->MaxSig[nthrep] = csd->MaxSig[nthrep];
-    csdcopy->MaxStat[nthrep] = csd->MaxStat[nthrep];
+    csdcopy->MaxSig[nthrep]               = csd->MaxSig[nthrep];
+    csdcopy->MaxStat[nthrep]              = csd->MaxStat[nthrep];
   }
   return (csdcopy);
 }
@@ -1564,7 +1564,7 @@ CSD *CSDcopy(CSD *csd, CSD *csdcopy) {
   mergeflag is set to 1.
   --------------------------------------------------------------*/
 CSD *CSDmerge(CSD *csd1, CSD *csd2) {
-  int nthrep1, nthrep2, nthrep;
+  int  nthrep1, nthrep2, nthrep;
   CSD *csd;
 
   if (strcmp(csd1->simtype, csd2->simtype)) {
@@ -1620,13 +1620,13 @@ CSD *CSDmerge(CSD *csd1, CSD *csd2) {
   strcpy(csd->contrast, csd1->contrast);
   strcpy(csd->subject, csd1->subject);
   strcpy(csd->hemi, csd1->hemi);
-  csd->thresh = csd1->thresh;
-  csd->threshsign = csd1->threshsign;
-  csd->searchspace = csd1->searchspace;
-  csd->nullfwhm = csd1->nullfwhm;
-  csd->varfwhm = csd1->varfwhm;
-  csd->seed = csd1->seed;
-  csd->mergedflag = 1;
+  csd->thresh              = csd1->thresh;
+  csd->threshsign          = csd1->threshsign;
+  csd->searchspace         = csd1->searchspace;
+  csd->nullfwhm            = csd1->nullfwhm;
+  csd->varfwhm             = csd1->varfwhm;
+  csd->seed                = csd1->seed;
+  csd->mergedflag          = 1;
   csd->FixGroupSubjectArea = csd1->FixGroupSubjectArea;
 
   csd->nreps = csd1->nreps + csd2->nreps;
@@ -1634,23 +1634,23 @@ CSD *CSDmerge(CSD *csd1, CSD *csd2) {
 
   nthrep = 0;
   for (nthrep1 = 0; nthrep1 < csd1->nreps; nthrep1++) {
-    csd->nClusters[nthrep] = csd1->nClusters[nthrep1];
-    csd->MaxClusterSize[nthrep] = csd1->MaxClusterSize[nthrep1];
-    csd->MaxClusterSizeVtx[nthrep] = csd1->MaxClusterSizeVtx[nthrep1];
-    csd->MaxClusterWeightVtx[nthrep] = csd1->MaxClusterWeightVtx[nthrep1];
+    csd->nClusters[nthrep]            = csd1->nClusters[nthrep1];
+    csd->MaxClusterSize[nthrep]       = csd1->MaxClusterSize[nthrep1];
+    csd->MaxClusterSizeVtx[nthrep]    = csd1->MaxClusterSizeVtx[nthrep1];
+    csd->MaxClusterWeightVtx[nthrep]  = csd1->MaxClusterWeightVtx[nthrep1];
     csd->MaxClusterWeightArea[nthrep] = csd1->MaxClusterWeightArea[nthrep1];
-    csd->MaxSig[nthrep] = csd1->MaxSig[nthrep1];
-    csd->MaxStat[nthrep] = csd1->MaxStat[nthrep1];
+    csd->MaxSig[nthrep]               = csd1->MaxSig[nthrep1];
+    csd->MaxStat[nthrep]              = csd1->MaxStat[nthrep1];
     nthrep++;
   }
   for (nthrep2 = 0; nthrep2 < csd2->nreps; nthrep2++) {
-    csd->nClusters[nthrep] = csd2->nClusters[nthrep2];
-    csd->MaxClusterSize[nthrep] = csd2->MaxClusterSize[nthrep2];
-    csd->MaxClusterSizeVtx[nthrep] = csd2->MaxClusterSizeVtx[nthrep1];
-    csd->MaxClusterWeightVtx[nthrep] = csd2->MaxClusterWeightVtx[nthrep1];
+    csd->nClusters[nthrep]            = csd2->nClusters[nthrep2];
+    csd->MaxClusterSize[nthrep]       = csd2->MaxClusterSize[nthrep2];
+    csd->MaxClusterSizeVtx[nthrep]    = csd2->MaxClusterSizeVtx[nthrep1];
+    csd->MaxClusterWeightVtx[nthrep]  = csd2->MaxClusterWeightVtx[nthrep1];
     csd->MaxClusterWeightArea[nthrep] = csd2->MaxClusterWeightArea[nthrep1];
-    csd->MaxSig[nthrep] = csd2->MaxSig[nthrep2];
-    csd->MaxStat[nthrep] = csd2->MaxStat[nthrep2];
+    csd->MaxSig[nthrep]               = csd2->MaxSig[nthrep2];
+    csd->MaxStat[nthrep]              = csd2->MaxStat[nthrep2];
     nthrep++;
   }
 
@@ -1757,7 +1757,7 @@ int CSDprintWeight(FILE *fp, CLUSTER_SIM_DATA *csd) {
   --------------------------------------------------------------*/
 double CSDpvalClustSize(CLUSTER_SIM_DATA *csd, double ClusterSize, double ciPct,
                         double *pvalLow, double *pvalHi) {
-  int nthrep, nover, k, nlow, nhi;
+  int    nthrep, nover, k, nlow, nhi;
   double pval, psum, pcilow, pcihi;
 
   // First, count the number of MaxClusters whose size is greater than
@@ -1775,13 +1775,13 @@ double CSDpvalClustSize(CLUSTER_SIM_DATA *csd, double ClusterSize, double ciPct,
   pval = (double)nover / csd->nreps;
 
   // Ranges for confidence interval
-  pcihi = ciPct / 100;
+  pcihi  = ciPct / 100;
   pcilow = 1 - pcihi;
 
   // Loop thru all possible outcomes (k), computing the CDF of the
   // binomial distribution, until the upper conf interval is reached.
   nlow = -1;
-  k = 0;
+  k    = 0;
   psum = sc_ran_binomial_pdf(k, pval, csd->nreps);
   while (psum < pcihi && k <= csd->nreps) {
     // printf("%3d %lf\n",k,psum);
@@ -1793,7 +1793,7 @@ double CSDpvalClustSize(CLUSTER_SIM_DATA *csd, double ClusterSize, double ciPct,
   nhi = k;
   // Compute the pvalues at the lower and upper confidence intervals
   *pvalLow = (double)nlow / csd->nreps;
-  *pvalHi = (double)nhi / csd->nreps;
+  *pvalHi  = (double)nhi / csd->nreps;
 
   // printf("csize=%lf  p=%lf  ci=%lf  nLow=%d pLow=%lf nHi=%d pHi=%lf\n",
   //   ClusterSize,pval,ciPct,nlow,*pvalLow,nhi,*pvalHi);
@@ -1808,7 +1808,7 @@ double CSDpvalClustSize(CLUSTER_SIM_DATA *csd, double ClusterSize, double ciPct,
   --------------------------------------------------------------------------
 */
 double CSDpvalMaxSig(double val, CSD *csd) {
-  int n, nover;
+  int    n, nover;
   double pval;
 
   nover = 0; // number of times maxsig exceeds the given value
@@ -1833,14 +1833,14 @@ double CSDpvalMaxSig(double val, CSD *csd) {
   ------------------------------------------------------------------*/
 MRI *CSDpvalMaxSigMap(MRI *sig, CSD *csd, MRI *mask, MRI *vwsig,
                       double *maxmaxsig, int Bonf) {
-  int c, r, s, f, nhits, nvox;
+  int    c, r, s, f, nhits, nvox;
   double m, val, voxsig, pval, maxvoxsig;
 
   if (vwsig == nullptr)
     vwsig = MRIclone(sig, nullptr);
 
-  nvox = 0;
-  nhits = 0;
+  nvox      = 0;
+  nhits     = 0;
   maxvoxsig = 0;
   for (s = 0; s < sig->depth; s++) {
     for (r = 0; r < sig->height; r++) {
@@ -1904,9 +1904,9 @@ int CSDcheckSimType(char *simtype) {
   Maximum Sig. if nbins < 1, then nbins = sqrt(csd->nreps)
   -------------------------------------------------------------------*/
 int CSDpdf(CSD *csd, int nbins) {
-  int n, dim;
+  int   n, dim;
   float min, max, ClusterSize;
-  RFS *rfs;
+  RFS * rfs;
 
   if (nbins < 1) {
     nbins = sqrt(csd->nreps);
@@ -1918,8 +1918,8 @@ int CSDpdf(CSD *csd, int nbins) {
     dim = 2; // surface
   else
     dim = 3; // volume
-  rfs = RFspecInit(0, nullptr);
-  rfs->name = strcpyalloc("gaussian");
+  rfs            = RFspecInit(0, nullptr);
+  rfs->name      = strcpyalloc("gaussian");
   rfs->params[0] = 0;
   rfs->params[1] = 1;
 

@@ -9,9 +9,9 @@ namespace kvl {
 class DrawJacobianDeterminant : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef DrawJacobianDeterminant Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef DrawJacobianDeterminant       Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -20,7 +20,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(DrawJacobianDeterminant, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -33,7 +34,7 @@ public:
 
     // Some typedefs
     typedef AtlasMeshJacobianDeterminantDrawer::ImageType
-        JacobianDeterminantImageType;
+                                                   JacobianDeterminantImageType;
     typedef JacobianDeterminantImageType::SizeType SizeType;
 
     // Retrieve input arguments
@@ -45,7 +46,7 @@ public:
     }
     kvl::AtlasMesh::ConstPointer mesh =
         static_cast<const kvl::AtlasMesh *>(object.GetPointer());
-    double *tmp = mxGetPr(prhs[1]);
+    double * tmp = mxGetPr(prhs[1]);
     SizeType imageSize;
     for (int i = 0; i < 3; i++, tmp++) {
       imageSize[i] = static_cast<int>(*tmp);
@@ -67,7 +68,7 @@ public:
     }
     // plhs[ 0 ] = mxCreateNumericArray( 3, dims, mxSINGLE_CLASS, mxREAL );
     // float*  data = static_cast< float* >( mxGetData( plhs[ 0 ] ) );
-    plhs[0] = mxCreateNumericArray(3, dims, mxSINGLE_CLASS, mxREAL);
+    plhs[0]    = mxCreateNumericArray(3, dims, mxSINGLE_CLASS, mxREAL);
     auto *data = static_cast<float *>(mxGetData(plhs[0]));
 
     itk::ImageRegionConstIterator<JacobianDeterminantImageType> it(
@@ -78,8 +79,10 @@ public:
   }
 
 protected:
-  DrawJacobianDeterminant()= default;;
-  ~DrawJacobianDeterminant() override= default;;
+  DrawJacobianDeterminant() = default;
+  ;
+  ~DrawJacobianDeterminant() override = default;
+  ;
 
   DrawJacobianDeterminant(const Self &); // purposely not implemented
   void operator=(const Self &);          // purposely not implemented

@@ -1,36 +1,38 @@
 #include <iostream>
+#include <set>
+#include <string>
 
 #include "itkImage.h"
-#include "itkVector.h"
 #include "itkMesh.h"
+#include "itkVector.h"
 
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 
+#include "HierarchicalClusteringPruner.h"
+#include "PolylineMeshToVTKPolyDataFilter.h"
+#include "TrkVTKPolyDataFilter.txx"
+#include "VTKPolyDataToPolylineMeshFilter.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "VTKPolyDataToPolylineMeshFilter.h"
-#include <set>
-#include "GetPot.h"
-#include <string>
-#include "TrkVTKPolyDataFilter.txx"
 #include "vtkSplineFilter.h"
-#include "HierarchicalClusteringPruner.h"
-using PointDataType = std::vector<int>;
-using PixelType = float;
-const unsigned int PointDimension = 3;
+
+#include "GetPot.h"
+
+using PointDataType                        = std::vector<int>;
+using PixelType                            = float;
+const unsigned int PointDimension          = 3;
 const unsigned int MaxTopologicalDimension = 3;
-using CoordinateType = double;
-using InterpolationWeightType = double;
-using MeshType = itk::Mesh<PixelType, PointDimension>;
-using CellType = MeshType::CellType;
-using CellAutoPointer = CellType::CellAutoPointer;
-using VTKConverterType = PolylineMeshToVTKPolyDataFilter<MeshType>;
+using CoordinateType                       = double;
+using InterpolationWeightType              = double;
+using MeshType          = itk::Mesh<PixelType, PointDimension>;
+using CellType          = MeshType::CellType;
+using CellAutoPointer   = CellType::CellAutoPointer;
+using VTKConverterType  = PolylineMeshToVTKPolyDataFilter<MeshType>;
 using MeshConverterType = VTKPolyDataToPolylineMeshFilter<MeshType>;
-using ImageType = itk::Image<double, 3>;
-using IndexType = ImageType::IndexType;
+using ImageType         = itk::Image<double, 3>;
+using IndexType         = ImageType::IndexType;
 
 std::vector<MeshType::Pointer>
 FixSampleClusters(std::vector<vtkSmartPointer<vtkPolyData>> polydatas) {
@@ -70,18 +72,18 @@ int main(int narg, char *arg[]) {
               << std::endl;
     return -1;
   }
-  int numClusters = cl.follow(0, "-n");
-  const char *fileName = cl.follow("output.csv", 2, "-o", "-O");
-  const char *fileCorr = cl.follow("output.csv", 2, "-c", "-C");
+  int         numClusters       = cl.follow(0, "-n");
+  const char *fileName          = cl.follow("output.csv", 2, "-o", "-O");
+  const char *fileCorr          = cl.follow("output.csv", 2, "-c", "-C");
   std::string hierarchyFilename = std::string(cl.follow("", "-i"));
 
   std::vector<ImageType::Pointer> measures;
-  std::vector<std::string> measuresNames;
-  int numMeasures = cl.follow(0, "-m");
+  std::vector<std::string>        measuresNames;
+  int                             numMeasures = cl.follow(0, "-m");
   for (int i = 0; i < numMeasures; i++) {
     measuresNames.push_back(std::string(cl.next("")));
-    const char *imFile = cl.next("");
-    using ImageReaderType = itk::ImageFileReader<ImageType>;
+    const char *imFile               = cl.next("");
+    using ImageReaderType            = itk::ImageFileReader<ImageType>;
     ImageReaderType::Pointer readerS = ImageReaderType::New();
     readerS->SetFileName(imFile);
     readerS->Update();
@@ -100,15 +102,15 @@ int main(int narg, char *arg[]) {
   hierarchyPruner->Update();
   std::vector<vtkSmartPointer<vtkPolyData>> polydatas =
       hierarchyPruner->GetOutputBundles();
-  std::vector<MeshType::Pointer> bundles = FixSampleClusters(polydatas);
-  std::vector<long long> meshesIds = hierarchyPruner->GetClustersIds();
-  std::map<long long, int> bundlesIndeces;
+  std::vector<MeshType::Pointer> bundles   = FixSampleClusters(polydatas);
+  std::vector<long long>         meshesIds = hierarchyPruner->GetClustersIds();
+  std::map<long long, int>       bundlesIndeces;
   for (unsigned int i = 0; i < meshesIds.size(); i++) {
     bundlesIndeces[meshesIds[i]] = i;
     std::cout << meshesIds[i] << " " << i << std::endl;
   }
   std::ifstream file(fileCorr);
-  std::string value;
+  std::string   value;
   getline(file, value, ',');
   getline(file, value, ',');
   std::vector<long long> correspondences;
@@ -139,8 +141,8 @@ int main(int narg, char *arg[]) {
 
     for (unsigned int m = 0; m < measures.size(); m++) {
       itk::Vector<itk::Point<float, 3>, 20> avgPoints;
-      std::vector<float> FAs;
-      std::vector<float> averageFAs;
+      std::vector<float>                    FAs;
+      std::vector<float>                    averageFAs;
 
       float meanFA = 0, meanAvgFA = 0;
 
@@ -153,9 +155,9 @@ int main(int narg, char *arg[]) {
       }
       for (; cells != mesh->GetCells()->End(); cells++) {
         MeshType::CellTraits::PointIdIterator pointIdIt;
-        double dist = 0.0;
-        double dist_inv = 0.0;
-        int j = 0;
+        double                                dist     = 0.0;
+        double                                dist_inv = 0.0;
+        int                                   j        = 0;
         // std::cout << " num points " << cells.Value()->GetNumberOfPoints() <<
         // std::endl;
         for (pointIdIt = cells.Value()->PointIdsBegin();

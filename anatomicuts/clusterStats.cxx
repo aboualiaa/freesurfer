@@ -1,24 +1,24 @@
 #include <iostream>
 
 #include "itkImage.h"
-#include "itkVector.h"
 #include "itkMesh.h"
+#include "itkVector.h"
 
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
+#include "GetPot.h"
 #include "PolylineMeshToVTKPolyDataFilter.h"
 #include "VTKPolyDataToPolylineMeshFilter.h"
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
 #include <set>
-#include "GetPot.h"
 #include <string>
 int main(int narg, char *arg[]) {
 
   enum { Dimension = 3 };
-  typedef double PixelType;
+  typedef double                           PixelType;
   typedef itk::Image<PixelType, Dimension> ImageType;
 
   GetPot cl(narg, const_cast<char **>(arg));
@@ -31,22 +31,22 @@ int main(int narg, char *arg[]) {
     return -1;
   }
   typedef std::vector<int> PointDataType;
-  const unsigned int PointDimension = 3;
-  const unsigned int MaxTopologicalDimension = 3;
-  typedef double CoordinateType;
-  typedef double InterpolationWeightType;
+  const unsigned int       PointDimension          = 3;
+  const unsigned int       MaxTopologicalDimension = 3;
+  typedef double           CoordinateType;
+  typedef double           InterpolationWeightType;
   typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                        MaxTopologicalDimension, CoordinateType,
                                        InterpolationWeightType, int>
-      MeshTraits;
+                                                           MeshTraits;
   typedef itk::Mesh<PixelType, PointDimension, MeshTraits> MeshType;
-  typedef PolylineMeshToVTKPolyDataFilter<MeshType> VTKConverterType;
-  typedef VTKPolyDataToPolylineMeshFilter<MeshType> MeshConverterType;
+  typedef PolylineMeshToVTKPolyDataFilter<MeshType>        VTKConverterType;
+  typedef VTKPolyDataToPolylineMeshFilter<MeshType>        MeshConverterType;
   float faAvg = 0, semAvg = 0;
   if (cl.search(1, "-i")) {
     typedef itk::ImageFileReader<ImageType> ImageReaderType;
-    const char *faFileName = cl.follow("", "-i");
-    ImageReaderType::Pointer faReader = ImageReaderType::New();
+    const char *                            faFileName = cl.follow("", "-i");
+    ImageReaderType::Pointer                faReader   = ImageReaderType::New();
     faReader->SetFileName(faFileName);
     faReader->Update();
     ImageType::Pointer fa = faReader->GetOutput();
@@ -56,7 +56,7 @@ int main(int narg, char *arg[]) {
     std::ofstream csv_file;
     csv_file.open(fileName);
 
-    int k = cl.follow(0, 2, "-f", "-F");
+    int                            k = cl.follow(0, 2, "-f", "-F");
     std::vector<MeshType::Pointer> meshes;
     csv_file << " fileName , meanFA , SE , SEM " << std::endl;
     int norm = 0;
@@ -78,15 +78,15 @@ int main(int narg, char *arg[]) {
       samplingFilter->Update();
       mesh = samplingFilter->GetOutput();
 
-      std::vector<float> fas;
-      float meanFA = 0;
+      std::vector<float>                      fas;
+      float                                   meanFA = 0;
       MeshType::CellsContainer::ConstIterator cells = mesh->GetCells()->Begin();
-      std::vector<MeshType::PointType> avgPoints(10, 0);
+      std::vector<MeshType::PointType>        avgPoints(10, 0);
       for (; cells != mesh->GetCells()->End(); cells++) {
         MeshType::CellTraits::PointIdIterator pointIdIt;
-        double dist = 0.0;
-        double dist_inv = 0.0;
-        int j = 0;
+        double                                dist     = 0.0;
+        double                                dist_inv = 0.0;
+        int                                   j        = 0;
         for (pointIdIt = cells.Value()->PointIdsBegin();
              pointIdIt != cells.Value()->PointIdsEnd(); pointIdIt++, j++) {
           MeshType::PointType pt;

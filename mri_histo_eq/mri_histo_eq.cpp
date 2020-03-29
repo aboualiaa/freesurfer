@@ -23,27 +23,27 @@
  *
  */
 
-#include "mrinorm.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mrinorm.h"
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
-static int adaptive_normalize = 0;
+static int  adaptive_normalize = 0;
 
 static char *xform_fname = nullptr;
 
 int main(int argc, char *argv[]) {
   char **av, *out_fname;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
-  MRI *mri_src, *mri_template;
+  int    ac, nargs;
+  int    msec, minutes, seconds;
+  Timer  start;
+  MRI *  mri_src, *mri_template;
 
   nargs = handleVersionOption(argc, argv, "mri_histo_eq");
   if (nargs && argc - nargs == 1)
@@ -78,10 +78,10 @@ int main(int argc, char *argv[]) {
   out_fname = argv[3];
 
   if (xform_fname) {
-    char path[STRLEN], fname[STRLEN];
-    LTA *lta_src, *lta_template;
+    char    path[STRLEN], fname[STRLEN];
+    LTA *   lta_src, *lta_template;
     MATRIX *m_L, *m_inv;
-    MRI *mri_tmp;
+    MRI *   mri_tmp;
 
     FileNameOnly(xform_fname, xform_fname);
 
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     HISTOplot(hsmooth, "eqs.plt");
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -162,7 +162,7 @@ static int get_option(int argc, char *argv[]) {
     break;
   case 'T':
     xform_fname = argv[2];
-    nargs = 1;
+    nargs       = 1;
   case '?':
   case 'U':
     usage_exit(0);

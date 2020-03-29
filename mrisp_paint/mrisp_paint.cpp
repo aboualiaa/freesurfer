@@ -31,7 +31,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -39,35 +39,34 @@ static void print_version();
 
 const char *Progname;
 
-static int coords = -1;
+static int coords    = -1;
 static int normalize = 0;
-static int variance = 0;
-static int navgs = 0;
+static int variance  = 0;
+static int navgs     = 0;
 static int sqrt_flag = 0;
 
 static char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
 
-static int field_no = -1;
-static char subjects_dir[STRLEN];
+static int   field_no = -1;
+static char  subjects_dir[STRLEN];
 static char *hemi = nullptr;
 static char *subject_name;
 
 static int frame_number = 0;
-static int nframes = 1;
+static int nframes      = 1;
 
 int main(int argc, char *argv[]) {
-  char **av, *surf_fname, *template_fname, *out_fname, *cp;
-  int n, ac, nargs;
-  float sse, var;
-  char fname[STRLEN];
+  char **      av, *surf_fname, *template_fname, *out_fname, *cp;
+  int          n, ac, nargs;
+  float        sse, var;
+  char         fname[STRLEN];
   MRI_SURFACE *mris, *mris_var;
-  MRI_SP *mrisp;
-  VERTEX *v;
+  MRI_SP *     mrisp;
+  VERTEX *     v;
 
   nargs = handleVersionOption(argc, argv, "mrisp_paint");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -88,8 +87,8 @@ int main(int argc, char *argv[]) {
   }
 
   template_fname = argv[1];
-  surf_fname = argv[2];
-  out_fname = argv[3];
+  surf_fname     = argv[2];
+  out_fname      = argv[3];
 
   fprintf(stderr, "reading surface from %s...\n", surf_fname);
   mris = MRISread(surf_fname);
@@ -102,14 +101,14 @@ int main(int argc, char *argv[]) {
     if (cp) /* # explicitly given */
     {
       frame_number = atoi(cp + 1);
-      *cp = 0;
+      *cp          = 0;
     }
   } else {
     cp = strchr(template_fname, '#');
     if (cp) /* # explicitly given */
     {
       frame_number = atoi(cp + 1);
-      *cp = 0;
+      *cp          = 0;
     }
   }
   fprintf(stderr, "reading template parameterization from %s...\n",
@@ -193,14 +192,14 @@ int main(int argc, char *argv[]) {
     MRISnormalizeField(mris, IsDistanceField(field_no), NORM_MEAN);
     /* save curv into curvbak*/
     for (n = 0; n < mris->nvertices; n++) {
-      v = &mris_var->vertices[n];
+      v          = &mris_var->vertices[n];
       v->curvbak = v->curv;
     }
     /* computing variance */
     MRISfromParameterization(mrisp, mris_var, frame_number + 1);
     for (sse = 0.0f, n = 0; n < mris->nvertices; n++) {
-      v = &mris_var->vertices[n];
-      var = MAX(0.01, v->curv);
+      v       = &mris_var->vertices[n];
+      var     = MAX(0.01, v->curv);
       v->curv = SQR(v->curvbak - mris->vertices[n].curv) / var;
       sse += v->curv;
     }
@@ -233,7 +232,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -257,14 +256,14 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "NFRAMES")) // not implemented yet
   {
     nframes = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("writing out %d frames - NOT IMPLEMENTED YET\n", nframes);
     exit(1);
   } else if (!stricmp(option, "variance")) {
-    variance = 1;
-    hemi = argv[3];
+    variance     = 1;
+    hemi         = argv[3];
     subject_name = argv[2];
-    field_no = atoi(argv[4]);
+    field_no     = atoi(argv[4]);
     if (field_no < 0) {
       fprintf(stderr, "Incorrect Field Number\n");
       exit(-1);
@@ -282,7 +281,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'F':
       frame_number = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       printf("writing out frame %d\n", frame_number);
       break;
     case 'N':
@@ -298,7 +297,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':

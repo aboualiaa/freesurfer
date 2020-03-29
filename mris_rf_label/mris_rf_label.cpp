@@ -28,42 +28,42 @@
 
 #include "diag.h"
 #include "mrisurf.h"
+#include "rforest.h"
 #include "timer.h"
 #include "version.h"
-#include "rforest.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char *Progname;
-static void usage_exit(int code);
-static char *hemi = "lh";
+const char * Progname;
+static void  usage_exit(int code);
+static char *hemi      = "lh";
 static char *surf_name = "white";
 
 static char sdir[STRLEN];
 
 #define MAX_OVERLAYS 100
 
-static int ndilates = 3;
-static int nbhd_size = 0;
-static MRI *mri_overlays[MAX_OVERLAYS];
-static int noverlays = 0;
+static int   ndilates  = 3;
+static int   nbhd_size = 0;
+static MRI * mri_overlays[MAX_OVERLAYS];
+static int   noverlays = 0;
 static char *overlay_names[MAX_OVERLAYS];
 
 static char *cortex_label_name = "cortex";
-static char *label_name = "FCD";
+static char *label_name        = "FCD";
 
 int main(int argc, char *argv[]) {
-  char **av, *cp, fname[STRLEN], *subject, *out_fname;
-  int ac, nargs, msec, minutes, seconds, i, nfeatures, vno;
-  Timer start;
-  LABEL *cortex_label, *training_label;
+  char **        av, *cp, fname[STRLEN], *subject, *out_fname;
+  int            ac, nargs, msec, minutes, seconds, i, nfeatures, vno;
+  Timer          start;
+  LABEL *        cortex_label, *training_label;
   RANDOM_FOREST *rf;
-  double *feature, pval;
-  int classnum;
-  MRI_SURFACE *mris;
-  MRI *mri_labels;
-  VERTEX *v;
+  double *       feature, pval;
+  int            classnum;
+  MRI_SURFACE *  mris;
+  MRI *          mri_labels;
+  VERTEX *       v;
 
   nargs = handleVersionOption(argc, argv, "mris_rf_label");
   if (nargs && argc - nargs == 1)
@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
 
-  subject = argv[1];
-  rf = RFread(argv[2]);
+  subject   = argv[1];
+  rf        = RFread(argv[2]);
   noverlays = rf->nfeatures;
 
   sprintf(fname, "%s/%s/surf/%s.%s", sdir, subject, hemi, surf_name);
@@ -137,8 +137,8 @@ int main(int argc, char *argv[]) {
                 fname, i);
   }
   mri_labels = MRIallocSequence(mris->nvertices, 1, 1, MRI_FLOAT, 2);
-  nfeatures = noverlays * (nbhd_size + 1);
-  feature = (double *)calloc(nfeatures, sizeof(double));
+  nfeatures  = noverlays * (nbhd_size + 1);
+  feature    = (double *)calloc(nfeatures, sizeof(double));
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     if (v->ripflag)
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
   out_fname = argv[argc - 1];
   printf("writing output to %s\n", out_fname);
   MRIwrite(mri_labels, out_fname);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -223,14 +223,14 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'N':
       nbhd_size = atof(argv[2]);
-      nargs = 1;
+      nargs     = 1;
       printf("using nbhd_size = %d\n", nbhd_size);
       if (nbhd_size > 0)
         ErrorExit(ERROR_UNSUPPORTED, "nsize>0 not supported yet", nbhd_size);
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     default:
       fprintf(stderr, "unknown option %s\n", argv[1]);

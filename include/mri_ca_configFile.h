@@ -26,12 +26,12 @@
 #ifndef ConfigFile_h
 #define ConfigFile_h
 
+#include "mri_ca_util.h"
+#include <fstream>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
-#include <fstream>
 #include <string>
-#include "mri_ca_util.h"
 
 /* [[]]
          The CConfigFile class needs to be enhanced so that a configFile can be
@@ -79,9 +79,7 @@
 */
 
 #define debugAid 0
-#define EOL 10
-
-using namespace std;
+#define EOL      10
 
 class CConfigFile {
 private:
@@ -89,10 +87,10 @@ private:
   // we are interested in occurs after the current character get the next
   // sequence of characters up to the first 'ch' character or EOL or EOF If EOL
   // is found first then bEOLFoundFirst is set to true
-  string getDelimitedString(fstream &ifs, char ch, bool &bEOLFoundFirst) {
+  std::string getDelimitedString(fstream &ifs, char ch, bool &bEOLFoundFirst) {
 
     bEOLFoundFirst = false;
-    string strDelimitedString; // initially an empty string
+    std::string strDelimitedString; // initially an empty string
     strDelimitedString.erase();
 
     char c;
@@ -107,14 +105,14 @@ private:
     return (strDelimitedString);
   }
 
-  string getDelimitedString(fstream &ifs, char ch, bool &bEOLFoundFirst,
-                            bool &bEQUALFound, bool &bSqBracketFound,
-                            bool &bEOFFound) {
-    bEOLFoundFirst = false;
-    bEQUALFound = false;
+  std::string getDelimitedString(fstream &ifs, char ch, bool &bEOLFoundFirst,
+                                 bool &bEQUALFound, bool &bSqBracketFound,
+                                 bool &bEOFFound) {
+    bEOLFoundFirst  = false;
+    bEQUALFound     = false;
     bSqBracketFound = false;
-    bEOFFound = false;
-    string strDelimitedString; // initially an empty string
+    bEOFFound       = false;
+    std::string strDelimitedString; // initially an empty string
     strDelimitedString.erase();
 
     char c;
@@ -180,7 +178,7 @@ private:
   // skip to a '[' and then
   // get the sequence of characters up to the first ']'
   // If either cannot be found then the section name is left unchanged..
-  bool getNextSectionName(fstream &ifs, string &strSectionName) {
+  bool getNextSectionName(fstream &ifs, std::string &strSectionName) {
     bool bFoundSection = false;
     bool bEOLFound;
     if (skipToNoThrow(ifs, '[')) {
@@ -194,9 +192,9 @@ private:
 
   // skip to the end of the current line next non blank and get the sequence of
   // characters up to the first '='
-  string getNextValueName(fstream &ifs) {
-    bool bEOLFound = true;
-    string strNextValueName;
+  std::string getNextValueName(fstream &ifs) {
+    bool        bEOLFound = true;
+    std::string strNextValueName;
 
     while ((ifs.good()) &&
            (bEOLFound)) // keep looking until we find a value which is
@@ -211,7 +209,7 @@ private:
     return (strNextValueName);
   }
 
-  bool getNextVectorElement(fstream &ifs, string &strNextElement,
+  bool getNextVectorElement(fstream &ifs, std::string &strNextElement,
                             bool &bMoreCols, bool &bMoreRows) {
     if (!ifs.good())
       return (false);
@@ -243,9 +241,9 @@ private:
     }
   }
 
-  bool skipToSection(fstream &ifs, string &strSectionName) {
-    bool bFoundSection = false;
-    string strNextSectionName;
+  bool skipToSection(fstream &ifs, std::string &strSectionName) {
+    bool        bFoundSection = false;
+    std::string strNextSectionName;
     while ((ifs.good()) && (getNextSectionName(ifs, strNextSectionName))) {
       if (strNextSectionName == strSectionName) {
         bFoundSection = true;
@@ -263,13 +261,13 @@ private:
 
   // Skip to the equal sign after the value strValueName but dont go beyond the
   // current section
-  bool skipToValue(fstream &ifs, string &strValueName) {
+  bool skipToValue(fstream &ifs, std::string &strValueName) {
     bool bFoundValue = false;
     if (strValueName == "") {
       bFoundValue = true;
     } else {
       while (ifs.good()) {
-        string strNextValueName = getNextValueName(ifs);
+        std::string strNextValueName = getNextValueName(ifs);
         if (strNextValueName == strValueName) {
           bFoundValue = true;
           break;
@@ -285,7 +283,7 @@ private:
     return (bFoundValue);
   }
 
-  bool skipTo(string &strSectionName, string &strValueName) {
+  bool skipTo(std::string &strSectionName, std::string &strValueName) {
     bool bFoundSectionAndValue = false;
     if (skipToSection(fs, strSectionName)) {
       if (skipToNoThrow(fs, '\n')) {
@@ -311,7 +309,7 @@ public:
   // OVERWRITE_AT_BEGINNING (for all new data written to the file) over-ride
   // these default by passing in ios::nocreate  or ios::trunc   or ios::append
   // as the nProt argument
-  void init(string strTheFilepath, int nProt = 0) {
+  void init(std::string strTheFilepath, int nProt = 0) {
     strFilepath = strTheFilepath;
 
     fs.open(strFilepath.c_str(), ios::in | ios::out | nProt);
@@ -325,8 +323,8 @@ public:
   }
 
   // methods to retrieve values from a config file
-  bool get(string &strValue, string strSectionName,
-           string valueName) // get string
+  bool get(std::string &strValue, std::string strSectionName,
+           std::string valueName) // get string
   {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
@@ -336,17 +334,17 @@ public:
     }
   }
 
-  bool get(TypeVectorString &vectStrValues, string strSectionName,
-           string valueName) // get 1D vector of strings
+  bool get(TypeVectorString &vectStrValues, std::string strSectionName,
+           std::string valueName) // get 1D vector of strings
   {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
       // read in the comma separated strings into  vectIntValues
       //
-      string strNextElement;
-      bool bMoreCols = true;
-      bool bMoreRowsDummy;
+      std::string strNextElement;
+      bool        bMoreCols = true;
+      bool        bMoreRowsDummy;
       while ((bMoreCols == true) &&
              (getNextVectorElement(fs, strNextElement, bMoreCols,
                                    bMoreRowsDummy))) {
@@ -355,8 +353,8 @@ public:
     }
   }
 
-  bool get(TypeMatrixString &matrixStrValues, string strSectionName,
-           string valueName) // get 2D matrix of strings
+  bool get(TypeMatrixString &matrixStrValues, std::string strSectionName,
+           std::string valueName) // get 2D matrix of strings
   {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
@@ -366,11 +364,11 @@ public:
       // until there is a line which contains a [, = or EOF
       // permit the number of columns in ea row to be different
       //
-      string strNextElement;
-      bool bMoreRows = true;
+      std::string strNextElement;
+      bool        bMoreRows = true;
       while (bMoreRows == true) {
         TypeVectorString vectString;
-        bool bMoreCols = true;
+        bool             bMoreCols = true;
         while (
             (bMoreCols == true) &&
             (getNextVectorElement(fs, strNextElement, bMoreCols, bMoreRows))) {
@@ -382,20 +380,20 @@ public:
     }
   }
 
-  bool get(int &nValue, string strSectionName,
-           string valueName) // get single int
+  bool get(int &nValue, std::string strSectionName,
+           std::string valueName) // get single int
   {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
-      bool bEOLFound;
-      string strValue = getDelimitedString(fs, ' ', bEOLFound);
-      nValue = atoi(strValue.c_str());
+      bool        bEOLFound;
+      std::string strValue = getDelimitedString(fs, ' ', bEOLFound);
+      nValue               = atoi(strValue.c_str());
     }
   }
 
-  bool get(TypeVectorInt &vectIntValues, string strSectionName,
-           string valueName) // get vector of ints
+  bool get(TypeVectorInt &vectIntValues, std::string strSectionName,
+           std::string valueName) // get vector of ints
   {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
@@ -403,9 +401,9 @@ public:
 
       // read in the comma separated strings into  vectIntValues
       //
-      string strNextElement;
-      bool bMoreCols = true;
-      bool bMoreRowsDummy;
+      std::string strNextElement;
+      bool        bMoreCols = true;
+      bool        bMoreRowsDummy;
       while ((bMoreCols == true) &&
              (getNextVectorElement(fs, strNextElement, bMoreCols,
                                    bMoreRowsDummy))) {
@@ -417,8 +415,8 @@ public:
     }
   }
 
-  bool get(TypeMatrixInt &matrixIntValues, string strSectionName,
-           string valueName) // get 2D matrix of ints
+  bool get(TypeMatrixInt &matrixIntValues, std::string strSectionName,
+           std::string valueName) // get 2D matrix of ints
   {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
@@ -428,11 +426,11 @@ public:
       // until there is a line which contains a [, = or EOF
       // permit the number of columns in ea row to be different
       //
-      string strNextElement;
-      bool bMoreRows = true;
+      std::string strNextElement;
+      bool        bMoreRows = true;
       while (bMoreRows == true) {
         TypeVectorInt vectInt;
-        bool bMoreCols = true;
+        bool          bMoreCols = true;
         while (
             (bMoreCols == true) &&
             (getNextVectorElement(fs, strNextElement, bMoreCols, bMoreRows))) {
@@ -447,39 +445,39 @@ public:
     }
   }
 
-  bool get(double &dValue, string strSectionName,
-           string valueName) // get single int
+  bool get(double &dValue, std::string strSectionName,
+           std::string valueName) // get single int
   {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
-      bool bEOLFound;
-      string strValue = getDelimitedString(fs, ' ', bEOLFound);
-      dValue = atof(strValue.c_str());
+      bool        bEOLFound;
+      std::string strValue = getDelimitedString(fs, ' ', bEOLFound);
+      dValue               = atof(strValue.c_str());
     }
   }
 
-  bool get(float &fValue, string strSectionName, string valueName) {
+  bool get(float &fValue, std::string strSectionName, std::string valueName) {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
-      bool bEOLFound;
-      string strValue = getDelimitedString(fs, ' ', bEOLFound);
-      fValue = atof(strValue.c_str());
+      bool        bEOLFound;
+      std::string strValue = getDelimitedString(fs, ' ', bEOLFound);
+      fValue               = atof(strValue.c_str());
     }
   }
 
-  bool get(TypeVectorDouble &vectDouble, string strSectionName,
-           string valueName) {
+  bool get(TypeVectorDouble &vectDouble, std::string strSectionName,
+           std::string valueName) {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
 
       // read in the comma separated strings into  vectIntValues
       //
-      string strNextElement;
-      bool bMoreCols = true;
-      bool bMoreRowsDummy;
+      std::string strNextElement;
+      bool        bMoreCols = true;
+      bool        bMoreRowsDummy;
       while ((bMoreCols == true) &&
              (getNextVectorElement(fs, strNextElement, bMoreCols,
                                    bMoreRowsDummy))) {
@@ -491,8 +489,8 @@ public:
     }
   }
 
-  bool get(TypeMatrixDouble &matrixDoubleValues, string strSectionName,
-           string valueName) {
+  bool get(TypeMatrixDouble &matrixDoubleValues, std::string strSectionName,
+           std::string valueName) {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
@@ -501,11 +499,11 @@ public:
       // until there is a line which contains a [, = or EOF
       // permit the number of columns in ea row to be different
       //
-      string strNextElement;
-      bool bMoreRows = true;
+      std::string strNextElement;
+      bool        bMoreRows = true;
       while (bMoreRows == true) {
         TypeVectorDouble vectDouble;
-        bool bMoreCols = true;
+        bool             bMoreCols = true;
         while (
             (bMoreCols == true) &&
             (getNextVectorElement(fs, strNextElement, bMoreCols, bMoreRows))) {
@@ -520,17 +518,17 @@ public:
     }
   }
 
-  bool get(TypeVectorFloat &vectFloat, string strSectionName,
-           string valueName) {
+  bool get(TypeVectorFloat &vectFloat, std::string strSectionName,
+           std::string valueName) {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
 
       // read in the comma separated strings into  vectIntValues
       //
-      string strNextElement;
-      bool bMoreCols = true;
-      bool bMoreRowsDummy;
+      std::string strNextElement;
+      bool        bMoreCols = true;
+      bool        bMoreRowsDummy;
       while ((bMoreCols == true) &&
              (getNextVectorElement(fs, strNextElement, bMoreCols,
                                    bMoreRowsDummy))) {
@@ -542,8 +540,8 @@ public:
     }
   }
 
-  bool get(TypeMatrixFloat &matrixFloatValues, string strSectionName,
-           string valueName) {
+  bool get(TypeMatrixFloat &matrixFloatValues, std::string strSectionName,
+           std::string valueName) {
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
@@ -552,11 +550,11 @@ public:
       // until there is a line which contains a [, = or EOF
       // permit the number of columns in ea row to be different
       //
-      string strNextElement;
-      bool bMoreRows = true;
+      std::string strNextElement;
+      bool        bMoreRows = true;
       while (bMoreRows == true) {
         TypeVectorFloat vectFloat;
-        bool bMoreCols = true;
+        bool            bMoreCols = true;
         while (
             (bMoreCols == true) &&
             (getNextVectorElement(fs, strNextElement, bMoreCols, bMoreRows))) {
@@ -571,7 +569,7 @@ public:
     }
   }
 
-  void writeSection(string strSectionName, bool bEchoToStdOut = false) {
+  void writeSection(std::string strSectionName, bool bEchoToStdOut = false) {
     if (bEchoToStdOut) {
       cout << "  [" << strSectionName << "]\n";
     } else {
@@ -581,7 +579,7 @@ public:
 
   // Values can only be written out to a file once
 
-  void writeValueName(string strValueName, bool bEchoToStdOut = false) {
+  void writeValueName(std::string strValueName, bool bEchoToStdOut = false) {
     if (strValueName != "") {
       if (bEchoToStdOut) {
         cout << "    " << strValueName << "=";
@@ -594,7 +592,8 @@ public:
   // sections and values in a file
 
   // Strings -----------
-  void write(string strValue, string strValueName, bool bEchoToStdOut = false) {
+  void write(std::string strValue, std::string strValueName,
+             bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut) {
       cout << strValue << "\n";
@@ -603,7 +602,7 @@ public:
     }
   }
 
-  void write(TypeVectorString vectStrValues, string strValueName,
+  void write(TypeVectorString vectStrValues, std::string strValueName,
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
@@ -612,7 +611,7 @@ public:
       printType(vectStrValues, fs);
   }
 
-  void write(TypeMatrixString matrixStrValues, string strValueName,
+  void write(TypeMatrixString matrixStrValues, std::string strValueName,
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
@@ -622,7 +621,7 @@ public:
   }
 
   // Ints -----------
-  void write(int nValue, string strValueName, bool bEchoToStdOut = false) {
+  void write(int nValue, std::string strValueName, bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut) {
       cout << nValue << "\n";
@@ -631,7 +630,7 @@ public:
     }
   }
 
-  void write(TypeVectorInt vectIntValues, string strValueName,
+  void write(TypeVectorInt vectIntValues, std::string strValueName,
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
@@ -640,7 +639,7 @@ public:
       printType(vectIntValues, fs);
   }
 
-  void write(TypeMatrixInt matrixIntValues, string strValueName,
+  void write(TypeMatrixInt matrixIntValues, std::string strValueName,
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
@@ -650,7 +649,8 @@ public:
   }
 
   // floats -----------
-  void write(float fValue, string strValueName, bool bEchoToStdOut = false) {
+  void write(float fValue, std::string strValueName,
+             bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut) {
       cout << fValue << "\n";
@@ -659,7 +659,7 @@ public:
     }
   }
 
-  void write(TypeVectorFloat vectFloatValues, string strValueName,
+  void write(TypeVectorFloat vectFloatValues, std::string strValueName,
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
@@ -668,7 +668,7 @@ public:
       printType(vectFloatValues, fs);
   }
 
-  void write(TypeMatrixFloat matrixFloatValues, string strValueName,
+  void write(TypeMatrixFloat matrixFloatValues, std::string strValueName,
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
@@ -677,7 +677,8 @@ public:
       printType(matrixFloatValues, fs);
   }
   // Doubles -----------
-  void write(double dValue, string strValueName, bool bEchoToStdOut = false) {
+  void write(double dValue, std::string strValueName,
+             bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut) {
       cout << dValue << "\n";
@@ -686,7 +687,7 @@ public:
     }
   }
 
-  void write(TypeVectorDouble vectDoubleValues, string strValueName,
+  void write(TypeVectorDouble vectDoubleValues, std::string strValueName,
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
@@ -695,7 +696,7 @@ public:
       printType(vectDoubleValues, fs);
   }
 
-  void write(TypeMatrixDouble matrixDoubleValues, string strValueName,
+  void write(TypeMatrixDouble matrixDoubleValues, std::string strValueName,
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
@@ -708,7 +709,7 @@ public:
   // ============== obsolete ===================
 
 // Strings -----------
-  void write(string strValue, string strSectionName, string strValueName,bool bEchoToStdOut=false)
+  void write(std::string strValue, std::string strSectionName, std::string strValueName,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -730,7 +731,7 @@ public:
 
   }
 
-  void write(TypeVectorString vectStrValues, string strSectionName, string strValueName,bool bEchoToStdOut=false)
+  void write(TypeVectorString vectStrValues, std::string strSectionName, std::string strValueName,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -744,7 +745,7 @@ public:
     else printType(vectStrValues, fs);
   }
 
-  void write(TypeMatrixString matrixStrValues, string strSectionName, string strValueName,bool bEchoToStdOut=false)
+  void write(TypeMatrixString matrixStrValues, std::string strSectionName, std::string strValueName,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -759,7 +760,7 @@ public:
   }
 
   // Ints -----------
-  void write(int nValue, string strSectionName, string strValueName,bool bEchoToStdOut=false)
+  void write(int nValue, std::string strSectionName, std::string strValueName,bool bEchoToStdOut=false)
   {
     if (bEchoToStdOut)
     {
@@ -793,7 +794,7 @@ public:
 
   }
 
-  void write(TypeVectorInt vectIntValues, string strSectionName, string strValueName,bool bEchoToStdOut=false)
+  void write(TypeVectorInt vectIntValues, std::string strSectionName, std::string strValueName,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -808,7 +809,7 @@ public:
     else printType(vectIntValues, fs);
   }
 
-  void write(TypeMatrixInt matrixIntValues, string strSectionName, string strValueName,bool bEchoToStdOut=false)
+  void write(TypeMatrixInt matrixIntValues, std::string strSectionName, std::string strValueName,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -823,7 +824,7 @@ public:
   }
 
 // floats -----------
-  void write(float fValue, string strSectionName, string strValueName,bool bEchoToStdOut=false)
+  void write(float fValue, std::string strSectionName, std::string strValueName,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -844,7 +845,7 @@ public:
   }
 
 // Doubles -----------
-  void write(double dValue, string strSectionName, string strValueName,bool bEchoToStdOut=false)
+  void write(double dValue, std::string strSectionName, std::string strValueName,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -864,7 +865,7 @@ public:
     }
   }
 
-  void write(TypeVectorDouble vectDoubleValues, string strSectionName, string strValueName ,bool bEchoToStdOut=false)
+  void write(TypeVectorDouble vectDoubleValues, std::string strSectionName, std::string strValueName ,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -878,7 +879,7 @@ public:
     else printType(vectDoubleValues, fs);
   }
 
-  void write(TypeMatrixDouble matrixDoubleValues, string strSectionName, string strValueName ,bool bEchoToStdOut=false)
+  void write(TypeMatrixDouble matrixDoubleValues, std::string strSectionName, std::string strValueName ,bool bEchoToStdOut=false)
   {
     // if strSectionName is in the file move to it, ow write it to the file
     if ((bEchoToStdOut) || (!skipTo(strSectionName, strValueName)) )
@@ -903,11 +904,11 @@ public:
   }
 
   // retrieve a list of [section names] containing a given prefix
-  void find(TypeVectorString &vectString, string strPrefix) {
+  void find(TypeVectorString &vectString, std::string strPrefix) {
     vectString.clear();
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
-    string strNextSectionName;
+    std::string strNextSectionName;
     while ((fs.good()) && (getNextSectionName(fs, strNextSectionName))) {
       if (!strncmp(strNextSectionName.c_str(), strPrefix.c_str(),
                    strlen(strPrefix.c_str()))) {
@@ -1053,8 +1054,8 @@ public:
   }
 
 protected:
-  string strFilepath;
-  fstream fs; // an i/o stream  which writes to files
+  std::string strFilepath;
+  fstream     fs; // an i/o stream  which writes to files
 };
 
 #endif

@@ -12,9 +12,9 @@ class AtlasMeshDeformationLBFGSOptimizer
     : public AtlasMeshDeformationOptimizer {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshDeformationLBFGSOptimizer;
-  using Superclass = AtlasMeshDeformationOptimizer;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = AtlasMeshDeformationLBFGSOptimizer;
+  using Superclass   = AtlasMeshDeformationOptimizer;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -44,14 +44,14 @@ private:
   AtlasMeshDeformationLBFGSOptimizer(const Self &); // purposely not implemented
   void operator=(const Self &);                     // purposely not implemented
 
-  double m_OldCost;
+  double                                      m_OldCost;
   AtlasPositionGradientContainerType::Pointer m_OldGradient;
   AtlasPositionGradientContainerType::Pointer m_OldSearchDirection;
-  double m_AlphaUsedLastTime;
+  double                                      m_AlphaUsedLastTime;
 
   std::vector<AtlasPositionGradientContainerType::ConstPointer> m_Ss;
   std::vector<AtlasPositionGradientContainerType::ConstPointer> m_Ys;
-  std::vector<double> m_InverseRhos;
+  std::vector<double>                                           m_InverseRhos;
 
   double m_StartDistance;
 

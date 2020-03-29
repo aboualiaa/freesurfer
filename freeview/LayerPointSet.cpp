@@ -24,34 +24,34 @@
  */
 
 #include "LayerPointSet.h"
-#include "LayerMRI.h"
 #include "FSPointSet.h"
-#include "LayerPropertyPointSet.h"
 #include "FSVolume.h"
+#include "LayerMRI.h"
+#include "LayerPropertyPointSet.h"
+#include "MyUtils.h"
 #include "vtkRGBAColorTransferFunction.h"
-#include <vtkRenderer.h>
-#include <vtkActor.h>
-#include <vtkMath.h>
-#include <vtkSphereSource.h>
-#include <vtkSplineFilter.h>
-#include <vtkPoints.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkAppendPolyData.h>
-#include <vtkCellArray.h>
-#include <vtkFloatArray.h>
-#include <vtkTubeFilter.h>
-#include <vtkPolyData.h>
-#include <vtkProperty.h>
-#include <vtkPlane.h>
-#include <vtkCutter.h>
-#include <vtkStripper.h>
-#include <vtkTriangleFilter.h>
-#include <vtkSmartPointer.h>
-#include <vtkPointData.h>
 #include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
-#include "MyUtils.h"
+#include <vtkActor.h>
+#include <vtkAppendPolyData.h>
+#include <vtkCellArray.h>
+#include <vtkCutter.h>
+#include <vtkFloatArray.h>
+#include <vtkMath.h>
+#include <vtkPlane.h>
+#include <vtkPointData.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+#include <vtkSphereSource.h>
+#include <vtkSplineFilter.h>
+#include <vtkStripper.h>
+#include <vtkTriangleFilter.h>
+#include <vtkTubeFilter.h>
 
 #define NUM_OF_SIDES 10 // must be even number!
 
@@ -59,8 +59,8 @@ LayerPointSet::LayerPointSet(LayerMRI *ref, int nType, QObject *parent)
     : LayerEditable(parent) {
   m_strTypeNames.push_back("PointSet");
   m_sPrimaryType = "PointSet";
-  m_actorBalls = vtkActor::New();
-  m_actorSpline = vtkActor::New();
+  m_actorBalls   = vtkActor::New();
+  m_actorSpline  = vtkActor::New();
   for (int i = 0; i < 3; i++) {
     m_actorSlice[i] = vtkActor::New();
     m_actorSlice[i]->GetProperty()->SetInterpolationToFlat();
@@ -71,12 +71,12 @@ LayerPointSet::LayerPointSet(LayerMRI *ref, int nType, QObject *parent)
     m_actorSplineSlice[i]->GetProperty()->SetAmbient(1);
     m_actorSplineSlice[i]->GetProperty()->SetDiffuse(0);
     double pos[3] = {0, 0, 0};
-    pos[i] = 1e-4;
+    pos[i]        = 1e-4;
     if (i == 2)
       pos[i] = -pos[i];
     m_actorSplineSlice[i]->SetPosition(pos);
   }
-  m_layerRef = ref;
+  m_layerRef       = ref;
   m_pointSetSource = new FSPointSet();
 
   mProperty = new LayerPropertyPointSet(this);
@@ -118,11 +118,12 @@ bool LayerPointSet::LoadFromFile(const QString &filename) {
       if (!m_pointSetSource->ReadAsControlPoints(filename)) {
         return false;
       } else {
-        cout << "Warning: Coordinate of control points has been converted to "
-                "realRAS in "
-             << qPrintable(filename) << " and will be saved in that way."
-             << endl
-             << endl;
+        std::cout
+            << "Warning: Coordinate of control points has been converted to "
+               "realRAS in "
+            << qPrintable(filename) << " and will be saved in that way."
+            << std::endl
+            << std::endl;
       }
     } else {
       if (!m_pointSetSource->ReadAsLabel(filename)) {
@@ -144,7 +145,7 @@ bool LayerPointSet::LoadFromFile(const QString &filename) {
 bool LayerPointSet::LoadFromJsonFile(const QString &filename) {
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    cerr << qPrintable(file.errorString()) << "\n";
+    std::cerr << qPrintable(file.errorString()) << "\n";
     ;
     return false;
   }
@@ -154,23 +155,23 @@ bool LayerPointSet::LoadFromJsonFile(const QString &filename) {
     return false;
 
   if (m_mapEnhancedData.value("data_type").toString() != "fs_pointset") {
-    cerr << "Not a freesurfer pointset file\n";
+    std::cerr << "Not a freesurfer pointset file\n";
     return false;
   }
 
-  QVariantList list = m_mapEnhancedData.value("points").toList();
-  QString coord_strg = m_mapEnhancedData.value("vox2ras").toString();
-  FSVolume *ref_vol = m_layerRef->GetSourceVolume();
+  QVariantList list       = m_mapEnhancedData.value("points").toList();
+  QString      coord_strg = m_mapEnhancedData.value("vox2ras").toString();
+  FSVolume *   ref_vol    = m_layerRef->GetSourceVolume();
   m_points.clear();
   foreach (QVariant v, list) {
-    QVariantMap map = v.toMap();
-    QVariantMap coords = map["coordinates"].toMap();
+    QVariantMap  map    = v.toMap();
+    QVariantMap  coords = map["coordinates"].toMap();
     ControlPoint wp;
     wp.pt[0] = coords["x"].toDouble();
     wp.pt[1] = coords["y"].toDouble();
     wp.pt[2] = coords["z"].toDouble();
     wp.value = map["legacy_stat"].toDouble();
-    wp.info = map;
+    wp.info  = map;
     if (coord_strg == "tkreg") {
       ref_vol->TkRegToNativeRAS(wp.pt, wp.pt);
     } else if (coord_strg == "voxel") {
@@ -221,8 +222,8 @@ bool LayerPointSet::Save() {
 
 bool LayerPointSet::SaveAsJson(const QString &filename) {
   QVariantList list;
-  FSVolume *ref_vol = m_layerRef->GetSourceVolume();
-  double pos[3];
+  FSVolume *   ref_vol = m_layerRef->GetSourceVolume();
+  double       pos[3];
   foreach (ControlPoint p, m_points) {
     QVariantMap map = p.info;
     // convert to tkreg coords
@@ -230,26 +231,26 @@ bool LayerPointSet::SaveAsJson(const QString &filename) {
     ref_vol->RASToNativeRAS(pos, pos);
     //    ref_vol->NativeRASToTkReg(pos, pos);
     QVariantMap coords;
-    coords["x"] = pos[0];
-    coords["y"] = pos[1];
-    coords["z"] = pos[2];
+    coords["x"]        = pos[0];
+    coords["y"]        = pos[1];
+    coords["z"]        = pos[2];
     map["coordinates"] = coords;
     if (!map.contains("legacy_stat"))
       map["legacy_stat"] = p.value;
     list << map;
   }
 
-  m_mapEnhancedData["points"] = list;
+  m_mapEnhancedData["points"]    = list;
   m_mapEnhancedData["data_type"] = "fs_pointset";
-  m_mapEnhancedData["vox2ras"] = "scanner_ras";
+  m_mapEnhancedData["vox2ras"]   = "scanner_ras";
 
   QFile file(filename);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QString strg = file.errorString();
     if (strg.isEmpty())
-      cerr << "Can not open file for writing\n";
+      std::cerr << "Can not open file for writing\n";
     else
-      cerr << qPrintable(strg) << "\n";
+      std::cerr << qPrintable(strg) << "\n";
     return false;
   }
 
@@ -296,7 +297,7 @@ void LayerPointSet::Append2DProps(vtkRenderer *renderer, int nPlane) {
 }
 
 void LayerPointSet::Append3DProps(vtkRenderer *renderer,
-                                  bool *bSliceVisibility) {
+                                  bool *       bSliceVisibility) {
   Q_UNUSED(renderer);
   Q_UNUSED(bSliceVisibility);
   renderer->AddViewProp(m_actorSpline);
@@ -345,15 +346,15 @@ void LayerPointSet::RebuildActors(bool bRebuild3D) {
   blockSignals(true);
 
   // 3D
-  MRI *mri = m_layerRef->GetSourceVolume()->GetMRITarget();
+  MRI *  mri           = m_layerRef->GetSourceVolume()->GetMRITarget();
   double voxel_size[3] = {mri->xsize, mri->ysize, mri->zsize};
   // double* origin = m_layerRef->GetWorldOrigin();
-  double scale = qMin(voxel_size[0], qMin(voxel_size[1], voxel_size[2]));
+  double scale  = qMin(voxel_size[0], qMin(voxel_size[1], voxel_size[2]));
   double radius = GetProperty()->GetRadius();
 
   vtkSmartPointer<vtkAppendPolyData> append =
       vtkSmartPointer<vtkAppendPolyData>::New();
-  vtkPoints *pts = vtkPoints::New();
+  vtkPoints *   pts   = vtkPoints::New();
   vtkCellArray *lines = vtkCellArray::New();
   lines->InsertNextCell(m_points.size());
   for (int i = 0; i < m_points.size(); i++) {
@@ -429,10 +430,10 @@ void LayerPointSet::RebuildActors(bool bRebuild3D) {
     for (int j = 0; j < m_points.size(); j++) {
       if (radius > 0 &&
           fabs(m_dSlicePosition[i] - m_points[j].pt[i]) < (voxel_size[i] / 2)) {
-        vtkSphereSource *sphere = vtkSphereSource::New();
-        double point[3] = {m_points[j].pt[0], m_points[j].pt[1],
+        vtkSphereSource *sphere   = vtkSphereSource::New();
+        double           point[3] = {m_points[j].pt[0], m_points[j].pt[1],
                            m_points[j].pt[2]};
-        point[i] = m_dSlicePosition[i];
+        point[i]                  = m_dSlicePosition[i];
         sphere->SetCenter(point);
         sphere->SetRadius(radius * scale);
         sphere->SetThetaResolution(12);
@@ -537,9 +538,9 @@ void LayerPointSet::RebuildActors(bool bRebuild3D) {
 
 void LayerPointSet::UpdateScalars(vtkPolyData *polydata) {
   if (true) {
-    LayerMRI *layer = GetProperty()->GetScalarLayer();
-    vtkPoints *pts = polydata->GetPoints();
-    int nPts = pts->GetNumberOfPoints();
+    LayerMRI *     layer   = GetProperty()->GetScalarLayer();
+    vtkPoints *    pts     = polydata->GetPoints();
+    int            nPts    = pts->GetNumberOfPoints();
     vtkFloatArray *scalars = vtkFloatArray::New();
     scalars->SetNumberOfValues(nPts);
     //    double pt[3] = { 0, 0, 0 };
@@ -575,7 +576,7 @@ int LayerPointSet::FindPoint(double *ras, double tolerance) {
   double dt = tolerance;
   if (dt < 0) {
     double *voxel_size = m_layerRef->GetWorldVoxelSize();
-    dt = GetProperty()->GetRadius() *
+    dt                 = GetProperty()->GetRadius() *
          qMin(voxel_size[0], qMin(voxel_size[1], voxel_size[2]));
     dt = dt * dt;
   }
@@ -589,7 +590,7 @@ int LayerPointSet::FindPoint(double *ras, double tolerance) {
 
 // returns index of the point
 int LayerPointSet::AddPoint(double *ras_in, double value) {
-  int nRet;
+  int    nRet;
   double ras[3];
   if (GetProperty()->GetSnapToVoxelCenter()) {
     m_layerRef->SnapToVoxelCenter(ras_in, ras);
@@ -610,11 +611,11 @@ int LayerPointSet::AddPoint(double *ras_in, double value) {
   } else {
     // first find the closest point
     double dist = 1e20;
-    int n = 0;
+    int    n    = 0;
     for (int i = 0; i < m_points.size(); i++) {
       double temp = vtkMath::Distance2BetweenPoints(ras, m_points[i].pt);
       if (temp < dist) {
-        n = i;
+        n    = i;
         dist = temp;
       }
     }
@@ -702,8 +703,8 @@ void LayerPointSet::UpdatePoint(int nIndex, double *ras, bool rebuildActor) {
 
 void LayerPointSet::UpdatePoint(int nIndex, const QString &key,
                                 const QVariant &value) {
-  QVariantMap map = m_points[nIndex].info;
-  map[key] = value;
+  QVariantMap map       = m_points[nIndex].info;
+  map[key]              = value;
   m_points[nIndex].info = map;
   if (m_mapEnhancedData.isEmpty())
     m_mapEnhancedData["data_type"] = "fs_pointset";

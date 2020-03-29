@@ -24,11 +24,11 @@
 
 #include <vnl/vnl_matrix.h>
 
-#include "tensorCubicSmoothing.h"
 #include "matrix3d.h"
+#include "tensorCubicSmoothing.h"
 
-const int ROWS = 400;
-const int COLS = 400;
+const int ROWS   = 400;
+const int COLS   = 400;
 const int SLICES = 400;
 const int NUM_BX = 15;
 const int NUM_BY = 15;

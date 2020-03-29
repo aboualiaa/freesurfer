@@ -23,27 +23,27 @@
  *
  */
 
-#include "error.h"
 #include "diag.h"
+#include "error.h"
 #include "timer.h"
-#include "version.h"
 #include "transform.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static MRI *apply_bias(MRI *mri_orig, MRI *mri_norm, MRI *mri_bias);
 
 const char *Progname;
 
-static void usage_exit(int code);
+static void  usage_exit(int code);
 static char *xform_fname = nullptr;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  MRI *mri_orig, *mri_norm, *mri_bias;
-  int msec, minutes, seconds;
-  Timer start;
+  int    ac, nargs;
+  MRI *  mri_orig, *mri_norm, *mri_bias;
+  int    msec, minutes, seconds;
+  Timer  start;
 
   nargs = handleVersionOption(argc, argv, "mri_apply_bias");
   if (nargs && argc - nargs == 1)
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
   if (xform_fname) {
     TRANSFORM *transform;
-    MRI *mri;
+    MRI *      mri;
 
     transform = TransformRead(xform_fname);
     if (transform == nullptr)
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "writing to %s...\n", argv[3]);
   MRIwrite(mri_norm, argv[3]);
   MRIfree(&mri_norm);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -108,22 +108,22 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "sdir")) {
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else
     switch (toupper(*option)) {
     case 'T':
       xform_fname = argv[2];
-      nargs = 1;
+      nargs       = 1;
       break;
     case '?':
     case 'U':
@@ -151,15 +151,15 @@ static void usage_exit(int code) {
 static MRI *apply_bias(MRI *mri_orig, MRI *mri_norm, MRI *mri_bias) {
   MATRIX *m_vox2vox;
   VECTOR *v1, *v2;
-  int x, y, z;
-  double xd, yd, zd, bias, val_orig, val_norm;
+  int     x, y, z;
+  double  xd, yd, zd, bias, val_orig, val_norm;
 
   if (mri_norm == nullptr)
     mri_norm = MRIclone(mri_orig, nullptr);
 
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_orig, mri_bias);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_orig, mri_bias);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
 

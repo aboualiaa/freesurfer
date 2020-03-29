@@ -22,12 +22,12 @@
  *
  */
 #include "PanelTrack.h"
-#include "ui_PanelTrack.h"
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
-#include "LayerTrack.h"
-#include "MyUtils.h"
 #include "LayerPropertyTrack.h"
+#include "LayerTrack.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "ui_MainWindow.h"
+#include "ui_PanelTrack.h"
 #include <QFileInfo>
 
 PanelTrack::PanelTrack(QWidget *parent)
@@ -148,8 +148,8 @@ void PanelTrack::OnSliderOpacity(int val) {
 
 void PanelTrack::OnLineEditOpacity(const QString &text) {
   LayerTrack *layer = GetCurrentLayer<LayerTrack *>();
-  bool bOK;
-  double val = text.toDouble(&bOK);
+  bool        bOK;
+  double      val = text.toDouble(&bOK);
   if (layer && bOK) {
     layer->GetProperty()->SetOpacity(val);
     ui->sliderOpacity->blockSignals(true);

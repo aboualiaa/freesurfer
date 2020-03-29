@@ -25,13 +25,13 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
+#include <memory.h>
 
-#include "hmem.h"
 #include "hips.h"
+#include "hmem.h"
 
 #include "error.h"
 #include "image.h"
@@ -63,7 +63,7 @@
 ------------------------------------------------------*/
 IMAGE *ImageAlloc(int rows, int cols, int format, int nframes) {
   IMAGE *I;
-  int ecode;
+  int    ecode;
 
   I = (IMAGE *)calloc(1, sizeof(IMAGE));
   if (!I)
@@ -105,7 +105,7 @@ IMAGE *ImageAllocHeader(int rows, int cols, int format, int nframes) {
            stolen from hips2 code and modified to allocate multiple frames.
 ------------------------------------------------------*/
 int ImageAllocBuffer(IMAGE *I) {
-  int fcb, cb;
+  int  fcb, cb;
   long npix;
 
   if (I->sizeimage == (fs_hsize_t)0) /*dng*/
@@ -121,8 +121,8 @@ int ImageAllocBuffer(IMAGE *I) {
       (hips_byte *)nullptr)
     return (ERROR_NO_MEMORY);
   if (I->pixel_format == PFMSBF || I->pixel_format == PFLSBF) {
-    fcb = I->fcol / 8;
-    cb = (I->ocols + 7) / 8;
+    fcb         = I->fcol / 8;
+    cb          = (I->ocols + 7) / 8;
     I->firstpix = I->image + ((cb * I->frow) + fcb);
   } else
     I->firstpix =
@@ -158,7 +158,7 @@ int ImageFree(IMAGE **pI) {
 ------------------------------------------------------*/
 int ImageUpdateHeader(IMAGE *I, const char *fname) {
   FILE *fp;
-  int ecode;
+  int   ecode;
 
   fp = fopen(fname, "r+b");
   if (!fp)
@@ -201,7 +201,7 @@ IMAGE *ImageThreshold(IMAGE *Isrc, IMAGE *Idst, float threshold) {
 ------------------------------------------------------*/
 IMAGE *ImageDFT(IMAGE *Isrc, IMAGE *Idst) {
   /*float    loglen ;*/
-  int ecode;
+  int    ecode;
   IMAGE *Itmp;
   /*Pixelval p ;*/
 
@@ -218,7 +218,7 @@ IMAGE *ImageDFT(IMAGE *Isrc, IMAGE *Idst) {
 
   if (Isrc->pixel_format != PFCOMPLEX) {
     hips_rtocplx = CPLX_RVI0;
-    ecode = h_toc(Isrc, Idst);
+    ecode        = h_toc(Isrc, Idst);
     if (ecode != HIPS_OK) {
       ImageFree(&Idst);
       ErrorReturn(NULL, (ecode, "ImageDFT: h_toc failed (%d)\n", ecode));
@@ -253,8 +253,8 @@ IMAGE *ImageDFT(IMAGE *Isrc, IMAGE *Idst) {
 ------------------------------------------------------*/
 IMAGE *ImageInverseDFT(IMAGE *Isrc, IMAGE *Idst) {
   /*float    loglen ;*/
-  IMAGE *Itmp;
-  int ecode;
+  IMAGE *  Itmp;
+  int      ecode;
   Pixelval p;
 
   if (!Idst)
@@ -283,7 +283,7 @@ IMAGE *ImageInverseDFT(IMAGE *Isrc, IMAGE *Idst) {
 
 #if 1
   p.v_float = (float)Idst->numpix;
-  ecode = h_divscale(Idst, Idst, &p);
+  ecode     = h_divscale(Idst, Idst, &p);
   if (ecode != HIPS_OK)
     ErrorExit(ecode, "ImageInverseDFT: h_divscale failed (%d)\n", ecode);
 #endif
@@ -318,8 +318,8 @@ IMAGE *ImageMul(IMAGE *Isrc1, IMAGE *Isrc2, IMAGE *Idst) {
         Description
 ------------------------------------------------------*/
 IMAGE *ImageResize(IMAGE *Isrc, IMAGE *Idst, int drows, int dcols) {
-  float x_scale, y_scale;
-  int ecode;
+  float  x_scale, y_scale;
+  int    ecode;
   IMAGE *Itmp;
 
   if (!Idst)
@@ -397,7 +397,7 @@ IMAGE *ImageResize(IMAGE *Isrc, IMAGE *Idst, int drows, int dcols) {
         Description
 ------------------------------------------------------*/
 IMAGE *ImageCopy(IMAGE *Isrc, IMAGE *Idst) {
-  int old, ecode, frame, nframes;
+  int        old, ecode, frame, nframes;
   hips_byte *src_image, *dst_image;
 
   if (Idst &&
@@ -412,12 +412,12 @@ IMAGE *ImageCopy(IMAGE *Isrc, IMAGE *Idst) {
     Idst =
         ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
 
-  src_image = Isrc->image;
-  dst_image = Idst->image;
-  nframes = Isrc->num_frame;
+  src_image       = Isrc->image;
+  dst_image       = Idst->image;
+  nframes         = Isrc->num_frame;
   Isrc->num_frame = Idst->num_frame = 1;
-  Idst->rows = Isrc->rows;
-  Idst->cols = Isrc->cols;
+  Idst->rows                        = Isrc->rows;
+  Idst->cols                        = Isrc->cols;
 
   for (frame = 0; frame < nframes; frame++) {
     if (Idst->pixel_format == Isrc->pixel_format) {
@@ -427,33 +427,33 @@ IMAGE *ImageCopy(IMAGE *Isrc, IMAGE *Idst) {
     } else {
       switch (Idst->pixel_format) {
       case PFDOUBLE:
-        old = hips_cplxtor;
+        old          = hips_cplxtor;
         hips_cplxtor = CPLX_REAL;
-        ecode = h_tod(Isrc, Idst);
+        ecode        = h_tod(Isrc, Idst);
         if (ecode != HIPS_OK)
           ErrorExit(ecode, "ImageCopy: h_tod failed (%d)\n", ecode);
         hips_cplxtor = old;
         break;
       case PFFLOAT:
-        old = hips_cplxtor;
+        old          = hips_cplxtor;
         hips_cplxtor = CPLX_REAL;
-        ecode = h_tof(Isrc, Idst);
+        ecode        = h_tof(Isrc, Idst);
         if (ecode != HIPS_OK)
           ErrorExit(ecode, "ImageCopy: h_tof failed (%d)\n", ecode);
         hips_cplxtor = old;
         break;
       case PFCOMPLEX:
-        old = hips_rtocplx;
+        old          = hips_rtocplx;
         hips_rtocplx = CPLX_RVI0;
-        ecode = h_toc(Isrc, Idst);
+        ecode        = h_toc(Isrc, Idst);
         if (ecode != HIPS_OK)
           ErrorExit(ecode, "ImageCopy: h_toc failed (%d)\n", ecode);
         hips_rtocplx = old;
         break;
       case PFDBLCOM:
-        old = hips_rtocplx;
+        old          = hips_rtocplx;
         hips_rtocplx = CPLX_RVI0;
-        ecode = h_todc(Isrc, Idst);
+        ecode        = h_todc(Isrc, Idst);
         if (ecode != HIPS_OK)
           ErrorExit(ecode, "ImageCopy: h_todc failed (%d)\n", ecode);
         hips_rtocplx = old;
@@ -497,13 +497,13 @@ IMAGE *ImageCopy(IMAGE *Isrc, IMAGE *Idst) {
         Description
 ------------------------------------------------------*/
 #define DISCEDGE_VARCRIT 0.0f
-#define DISCEDGE_SIZE 7
+#define DISCEDGE_SIZE    7
 
 IMAGE *ImageEdgeDetect(IMAGE *Isrc, IMAGE *Idst, float sigma, int wsize,
                        float lthresh, float uthresh, int dothin) {
-  int ecode;
+  int    ecode;
   IMAGE *Iout;
-  float fmin = 0., fmax = 0.;
+  float  fmin = 0., fmax = 0.;
 
   if (!Idst)
     Idst = ImageAlloc(Isrc->rows, Isrc->cols, PFBYTE, Isrc->num_frame);
@@ -551,8 +551,8 @@ ImageCopyArea(IMAGE *Isrc, IMAGE *Idst, int srow, int scol,
 ------------------------------------------------------*/
 int ImageClearArea(IMAGE *I, int r0, int c0, int rows, int cols, float val,
                    int frame) {
-  float *fptr;
-  int row, col, start_frame, end_frame;
+  float *    fptr;
+  int        row, col, start_frame, end_frame;
   hips_byte *cptr, cval;
 
   if (r0 < 0)
@@ -570,7 +570,7 @@ int ImageClearArea(IMAGE *I, int r0, int c0, int rows, int cols, float val,
 
   if (frame < 0) {
     start_frame = 0;
-    end_frame = I->num_frame - 1;
+    end_frame   = I->num_frame - 1;
   } else
     start_frame = end_frame = frame;
 
@@ -608,7 +608,7 @@ int ImageClearArea(IMAGE *I, int r0, int c0, int rows, int cols, float val,
 ------------------------------------------------------*/
 float ImageFindPeak(IMAGE *I, int *prow, int *pcol, float *pval) {
   float max_val, *fpix, val;
-  int max_row = -1, max_col = -1, row, col, rows, cols;
+  int   max_row = -1, max_col = -1, row, col, rows, cols;
 
   if (I->pixel_format != PFFLOAT)
     ErrorReturn(0.0f,
@@ -617,7 +617,7 @@ float ImageFindPeak(IMAGE *I, int *prow, int *pcol, float *pval) {
   rows = I->rows;
   cols = I->cols;
 
-  fpix = IMAGEFpix(I, 0, 0);
+  fpix    = IMAGEFpix(I, 0, 0);
   max_val = -1000000.0f;
   for (row = 0; row < rows; row++) {
     for (col = 0; col < cols; col++) {
@@ -691,8 +691,8 @@ imageLargeEnough(IMAGE *Isrc, IMAGE *Idst)
         Description
 ------------------------------------------------------*/
 IMAGE *ImageNormalizePix(IMAGE *Isrc, IMAGE *Idst) {
-  float scale, fmin = 0.0f, fmax = 0.0f;
-  int ecode;
+  float    scale, fmin = 0.0f, fmax = 0.0f;
+  int      ecode;
   Pixelval pmin, pmax;
 
   if (!Idst)
@@ -730,7 +730,7 @@ IMAGE *ImageNormalizePix(IMAGE *Isrc, IMAGE *Idst) {
 #endif
 
   scale = 1.0f / (fmax - fmin);
-  fmin = -fmin * scale;
+  fmin  = -fmin * scale;
 
   ecode = h_linscale(Isrc, Idst, scale, fmin);
   if (ecode != HIPS_OK)
@@ -748,7 +748,7 @@ IMAGE *ImageNormalizePix(IMAGE *Isrc, IMAGE *Idst) {
 ------------------------------------------------------*/
 IMAGE *ImageConjugate(IMAGE *Isrc, IMAGE *Idst) {
   CPIX *spix, *dpix;
-  long npix, i;
+  long  npix, i;
 
   npix = (long)Isrc->orows * Isrc->ocols * Isrc->num_frame;
   switch (Isrc->pixel_format) {
@@ -780,9 +780,9 @@ IMAGE *ImageConjugate(IMAGE *Isrc, IMAGE *Idst) {
 ------------------------------------------------------*/
 Pixelval ImageAccum(IMAGE *Isrc) {
   Pixelval retval;
-  int row, col, endrow, endcol;
-  float real, imag;
-  CPIX *cpix;
+  int      row, col, endrow, endcol;
+  float    real, imag;
+  CPIX *   cpix;
 
   memset(&retval, 0, sizeof(Pixelval));
 
@@ -817,8 +817,8 @@ Pixelval ImageAccum(IMAGE *Isrc) {
 ------------------------------------------------------*/
 MATRIX *ImageToMatrix(IMAGE *I) {
   MATRIX *mat;
-  int format = 0;
-  long bytes;
+  int     format = 0;
+  long    bytes;
 
   switch (I->pixel_format) {
   case PFCOMPLEX:
@@ -833,7 +833,7 @@ MATRIX *ImageToMatrix(IMAGE *I) {
     break;
   }
 
-  mat = MatrixAlloc(I->rows, I->cols, format);
+  mat   = MatrixAlloc(I->rows, I->cols, format);
   bytes = (long)mat->rows * mat->cols * sizeof(float);
   if (mat->type == MATRIX_COMPLEX)
     bytes *= 2;
@@ -849,7 +849,7 @@ MATRIX *ImageToMatrix(IMAGE *I) {
         Description
 ------------------------------------------------------*/
 IMAGE *ImageFromMatrix(MATRIX *matrix, IMAGE *I) {
-  int format;
+  int  format;
   long bytes;
 
   format = (matrix->type == MATRIX_COMPLEX) ? PFCOMPLEX : PFFLOAT;
@@ -876,9 +876,9 @@ IMAGE *ImageFromMatrix(MATRIX *matrix, IMAGE *I) {
 IMAGE *ImageInverse(IMAGE *Isrc, IMAGE *Idst) {
   MATRIX *mat, *mat_inverse;
 
-  mat = ImageToMatrix(Isrc);
+  mat         = ImageToMatrix(Isrc);
   mat_inverse = MatrixInverse(mat, nullptr);
-  Idst = ImageFromMatrix(mat_inverse, Idst);
+  Idst        = ImageFromMatrix(mat_inverse, Idst);
   MatrixFree(&mat);
   MatrixFree(&mat_inverse);
   return (Idst);
@@ -898,10 +898,10 @@ IMAGE *ImageMatrixMul(IMAGE *Isrc1, IMAGE *Isrc2, IMAGE *Idst) {
               "ImageMatrixMul: inner dimensions must agree (%d, %d)",
               Isrc1->cols, Isrc2->rows);
 
-  mat1 = ImageToMatrix(Isrc1);
-  mat2 = ImageToMatrix(Isrc2);
+  mat1    = ImageToMatrix(Isrc1);
+  mat2    = ImageToMatrix(Isrc2);
   mat_dst = MatrixMultiply(mat1, mat2, NULL);
-  Idst = ImageFromMatrix(mat_dst, Idst);
+  Idst    = ImageFromMatrix(mat_dst, Idst);
   MatrixFree(&mat1);
   MatrixFree(&mat2);
   MatrixFree(&mat_dst);
@@ -920,10 +920,10 @@ IMAGE *ImageMatrixMul(IMAGE *Isrc1, IMAGE *Isrc2, IMAGE *Idst) {
            float format.
 ------------------------------------------------------*/
 IMAGE *ImageScale(IMAGE *Isrc, IMAGE *Idst, float new_min, float new_max) {
-  float scale, old_min, old_max;
-  int ecode, nframes, frame;
-  Pixelval pmin, pmax;
-  IMAGE *Iout;
+  float      scale, old_min, old_max;
+  int        ecode, nframes, frame;
+  Pixelval   pmin, pmax;
+  IMAGE *    Iout;
   hips_byte *src_image, *out_image;
 
   if (!Idst)
@@ -948,9 +948,9 @@ IMAGE *ImageScale(IMAGE *Isrc, IMAGE *Idst, float new_min, float new_max) {
   else
     Iout = Idst;
 
-  src_image = Isrc->image;
-  out_image = Iout->image;
-  nframes = Isrc->num_frame;
+  src_image       = Isrc->image;
+  out_image       = Iout->image;
+  nframes         = Isrc->num_frame;
   Isrc->num_frame = Iout->num_frame = 1;
   for (frame = 0; frame < nframes; frame++) {
     ecode = h_minmax(Isrc, &pmin, &pmax, 0);
@@ -1061,8 +1061,8 @@ int ImageSetSize(IMAGE *I, int rows, int cols) {
   I->frow = I->fcol = 0;
   I->rows = I->orows = rows;
   I->cols = I->ocols = cols;
-  I->numpix = rows * cols;
-  I->sizeimage = rows * cols * I->sizepix;
+  I->numpix          = rows * cols;
+  I->sizeimage       = rows * cols * I->sizepix;
   return (1);
 }
 /*----------------------------------------------------------------------
@@ -1072,17 +1072,17 @@ int ImageSetSize(IMAGE *I, int rows, int cols) {
 ----------------------------------------------------------------------*/
 int ImageCopyFrames(IMAGE *inImage, IMAGE *outImage, int start, int nframes,
                     int dst_frame) {
-  hips_byte *cIn, *cOut;
+  hips_byte *   cIn, *cOut;
   unsigned int *iIn, *iOut;
-  float *fsrc, *fdst;
-  double *dsrc, *ddst;
-  int size, frameno, pix_per_frame, end;
+  float *       fsrc, *fdst;
+  double *      dsrc, *ddst;
+  int           size, frameno, pix_per_frame, end;
 
   if (!ImageCheckSize(inImage, outImage, 0, 0, dst_frame + nframes))
     ErrorReturn(
         -1, (ERROR_NO_MEMORY, "ImageCopyFrames: outImage not large enough\n"));
 
-  end = start + nframes - 1;
+  end           = start + nframes - 1;
   pix_per_frame = inImage->rows * inImage->cols;
   for (frameno = start; frameno <= end; frameno++) {
     size = inImage->rows * inImage->cols;
@@ -1114,7 +1114,7 @@ int ImageCopyFrames(IMAGE *inImage, IMAGE *outImage, int start, int nframes,
                 pix_per_frame * sizeof(char));
       else {
         size = inImage->rows * inImage->cols;
-        cIn = IMAGEseq_pix(inImage, 0, 0, frameno);
+        cIn  = IMAGEseq_pix(inImage, 0, 0, frameno);
         switch (outImage->pixel_format) {
         case PFFLOAT:
           fdst = IMAGEFseq_pix(outImage, 0, 0, frameno);
@@ -1194,11 +1194,11 @@ int ImageCopyFrames(IMAGE *inImage, IMAGE *outImage, int start, int nframes,
            Description:
 ----------------------------------------------------------------------*/
 int ImageScaleRange(IMAGE *image, float fmin, float fmax, int low, int high) {
-  int size;
+  int        size;
   hips_byte *csrc, cmin_val, cmax_val, cval;
-  int *isrc, imin_val, imax_val, ival;
-  float *fsrc, fval, norm;
-  double *dsrc, dval, dmin, dmax, dnorm; //, dlow;
+  int *      isrc, imin_val, imax_val, ival;
+  float *    fsrc, fval, norm;
+  double *   dsrc, dval, dmin, dmax, dnorm; //, dlow;
 
   if (FZERO(fmax - fmin))
     return (ERROR_BADPARM);
@@ -1208,13 +1208,13 @@ int ImageScaleRange(IMAGE *image, float fmin, float fmax, int low, int high) {
   case PFBYTE:
     cmax_val = (UCHAR)fmax;
     cmin_val = (UCHAR)fmin;
-    size = image->cols * image->rows;
-    csrc = IMAGEpix(image, 0, 0);
-    norm = ((float)high - (float)low) / ((float)cmax_val - (float)cmin_val);
+    size     = image->cols * image->rows;
+    csrc     = IMAGEpix(image, 0, 0);
+    norm     = ((float)high - (float)low) / ((float)cmax_val - (float)cmin_val);
     while (size--) {
-      cval = *csrc;
-      fval = (float)(cval - cmin_val) * norm;
-      cval = (hips_byte)((hips_byte)fval + (hips_byte)low);
+      cval    = *csrc;
+      fval    = (float)(cval - cmin_val) * norm;
+      cval    = (hips_byte)((hips_byte)fval + (hips_byte)low);
       *csrc++ = cval;
     }
     break;
@@ -1222,25 +1222,25 @@ int ImageScaleRange(IMAGE *image, float fmin, float fmax, int low, int high) {
   case PFINT:
     imax_val = (int)fmax;
     imin_val = (int)fmin;
-    size = image->cols * image->rows;
-    isrc = (int *)IMAGEIpix(image, 0, 0);
-    norm = ((float)high - (float)low) / ((float)imax_val - (float)imin_val);
+    size     = image->cols * image->rows;
+    isrc     = (int *)IMAGEIpix(image, 0, 0);
+    norm     = ((float)high - (float)low) / ((float)imax_val - (float)imin_val);
     while (size--) {
-      ival = *isrc;
-      ival = (int)((float)((float)ival - (float)imin_val) * norm) + low;
+      ival    = *isrc;
+      ival    = (int)((float)((float)ival - (float)imin_val) * norm) + low;
       *isrc++ = ival;
     }
     break;
   case PFDOUBLE:
-    dmin = (double)fmin;
-    dmax = (double)fmax;
-    size = image->cols * image->rows;
-    dsrc = IMAGEDpix(image, 0, 0);
+    dmin  = (double)fmin;
+    dmax  = (double)fmax;
+    size  = image->cols * image->rows;
+    dsrc  = IMAGEDpix(image, 0, 0);
     dnorm = ((double)high - (double)low) / (dmax - dmin);
     // dlow = (double)low;
     while (size--) {
-      dval = *dsrc;
-      dval = ((dval - dmin) * dnorm) + (double)low;
+      dval    = *dsrc;
+      dval    = ((dval - dmin) * dnorm) + (double)low;
       *dsrc++ = dval;
     }
     break;
@@ -1249,8 +1249,8 @@ int ImageScaleRange(IMAGE *image, float fmin, float fmax, int low, int high) {
     fsrc = (float *)IMAGEFpix(image, 0, 0);
     norm = ((float)high - (float)low) / (fmax - fmin);
     while (size--) {
-      fval = *fsrc;
-      fval = ((fval - fmin) * norm) + (float)low;
+      fval    = *fsrc;
+      fval    = ((fval - fmin) * norm) + (float)low;
       *fsrc++ = fval;
     }
     break;
@@ -1292,10 +1292,10 @@ IMAGE *ImageRescale(IMAGE *inImage, IMAGE *outImage, float scale) {
            Description:
 ----------------------------------------------------------------------*/
 int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
-  int inRow, inCol, outRow, outCol, inCols, inRows, outRows, outCols, frame;
+  int    inRow, inCol, outRow, outCol, inCols, inRows, outRows, outCols, frame;
   UCHAR *outPix;
   hips_byte *in_image, *out_image;
-  float *foutPix;
+  float *    foutPix;
 
   if (!ImageCheckSize(inImage, outImage, nint((float)inImage->rows * scale),
                       nint((float)inImage->cols * scale), inImage->num_frame))
@@ -1305,12 +1305,12 @@ int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
   ImageSetSize(outImage, nint((float)inImage->rows * scale),
                nint((float)inImage->cols * scale));
 
-  inRows = inImage->rows;
-  inCols = inImage->cols;
+  inRows  = inImage->rows;
+  inCols  = inImage->cols;
   outRows = outImage->rows;
   outCols = outImage->cols;
 
-  in_image = inImage->image;
+  in_image  = inImage->image;
   out_image = outImage->image;
   for (frame = 0; frame < inImage->num_frame; frame++) {
     switch (inImage->pixel_format) {
@@ -1321,8 +1321,8 @@ int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
         for (outRow = 0; outRow < outRows; outRow++)
           for (outCol = 0; outCol < outCols; outCol++, foutPix++) {
             /* map center point to this output point */
-            inRow = nint((float)outRow / scale);
-            inCol = nint((float)outCol / scale);
+            inRow    = nint((float)outRow / scale);
+            inCol    = nint((float)outCol / scale);
             *foutPix = (float)*IMAGEpix(inImage, inCol, inRow);
           }
         break;
@@ -1356,8 +1356,8 @@ int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
         for (outRow = 0; outRow < outRows; outRow++)
           for (outCol = 0; outCol < outCols; outCol++, outPix++) {
             /* map center point to this output point */
-            inRow = nint((float)outRow / scale);
-            inCol = nint((float)outCol / scale);
+            inRow   = nint((float)outRow / scale);
+            inCol   = nint((float)outCol / scale);
             *outPix = (UCHAR)*IMAGEFpix(inImage, inCol, inRow);
           }
         break;
@@ -1366,12 +1366,12 @@ int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
         /* if scale is a power of 2, use reduce */
 
         if (ISPOW2(1.0f / scale)) {
-          int reductions, i;
+          int    reductions, i;
           IMAGE *Itmp;
 
           reductions = nint(log2(1.0 / scale));
           for (i = 0; i < reductions; i++) {
-            Itmp = inImage;
+            Itmp    = inImage;
             inImage = ImageReduce(Itmp, nullptr);
             if (i) /* first one is real source image, don't free it */
               ImageFree(&Itmp);
@@ -1382,8 +1382,8 @@ int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
           for (outRow = 0; outRow < outRows; outRow++)
             for (outCol = 0; outCol < outCols; outCol++, foutPix++) {
               /* map center point to this output point */
-              inRow = nint((float)outRow / scale);
-              inCol = nint((float)outCol / scale);
+              inRow    = nint((float)outRow / scale);
+              inCol    = nint((float)outCol / scale);
               *foutPix = (float)*IMAGEFpix(inImage, inCol, inRow);
             }
         }
@@ -1422,9 +1422,9 @@ int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
 int ImageScaleUp(IMAGE *inImage, IMAGE *outImage, float scale) {
   int inRow, inCol, outRow, outCol, inCols, inRows, endCol, endRow, outRows,
       outCols, frame;
-  UCHAR *inPix, *outPix;
-  UINT *inIPix, *outIPix;
-  float *finPix, *foutPix;
+  UCHAR *    inPix, *outPix;
+  UINT *     inIPix, *outIPix;
+  float *    finPix, *foutPix;
   hips_byte *in_image, *out_image;
 
   if (!ImageCheckSize(inImage, outImage, nint(inImage->rows * scale),
@@ -1440,7 +1440,7 @@ int ImageScaleUp(IMAGE *inImage, IMAGE *outImage, float scale) {
   inRows = inImage->rows;
   inCols = inImage->cols;
 
-  in_image = inImage->image;
+  in_image  = inImage->image;
   out_image = outImage->image;
   for (frame = 0; frame < inImage->num_frame; frame++) {
     switch (inImage->pixel_format) {
@@ -1450,9 +1450,9 @@ int ImageScaleUp(IMAGE *inImage, IMAGE *outImage, float scale) {
         outPix = IMAGEpix(outImage, 0, 0);
         for (outRow = 0; outRow < outRows; outRow++) {
           for (outCol = 0; outCol < outCols; outCol++) {
-            inCol = (int)((float)outCol / scale);
-            inRow = (int)((float)outRow / scale);
-            inPix = IMAGEpix(inImage, inCol, inRow);
+            inCol     = (int)((float)outCol / scale);
+            inRow     = (int)((float)outRow / scale);
+            inPix     = IMAGEpix(inImage, inCol, inRow);
             *outPix++ = *inPix;
           }
         }
@@ -1592,10 +1592,10 @@ IMAGE *ImageDifferentialScale(IMAGE *Isrc, IMAGE *Iout, int outRows,
 ----------------------------------------------------------------------*/
 int ImageDifferentialScaleDown(IMAGE *Isrc, IMAGE *Iout, int outRows,
                                int outCols) {
-  int inRow, inCol, outRow, outCol, inCols, inRows, frame;
-  UCHAR *outPix;
+  int        inRow, inCol, outRow, outCol, inCols, inRows, frame;
+  UCHAR *    outPix;
   hips_byte *in_image, *out_image;
-  float *foutPix, xscale, yscale;
+  float *    foutPix, xscale, yscale;
 
   if (!ImageCheckSize(Isrc, Iout, outRows, outCols, Isrc->num_frame))
     ErrorReturn(-1,
@@ -1604,14 +1604,14 @@ int ImageDifferentialScaleDown(IMAGE *Isrc, IMAGE *Iout, int outRows,
 
   ImageSetSize(Iout, outRows, outCols);
 
-  inRows = Isrc->rows;
-  inCols = Isrc->cols;
+  inRows  = Isrc->rows;
+  inCols  = Isrc->cols;
   outRows = Iout->rows;
   outCols = Iout->cols;
-  xscale = (float)outCols / (float)inCols;
-  yscale = (float)outRows / (float)inRows;
+  xscale  = (float)outCols / (float)inCols;
+  yscale  = (float)outRows / (float)inRows;
 
-  in_image = Isrc->image;
+  in_image  = Isrc->image;
   out_image = Iout->image;
   for (frame = 0; frame < Isrc->num_frame; frame++) {
     switch (Isrc->pixel_format) {
@@ -1622,8 +1622,8 @@ int ImageDifferentialScaleDown(IMAGE *Isrc, IMAGE *Iout, int outRows,
         for (outRow = 0; outRow < outRows; outRow++)
           for (outCol = 0; outCol < outCols; outCol++, foutPix++) {
             /* map center point to this output point */
-            inRow = nint((float)outRow / yscale);
-            inCol = nint((float)outCol / xscale);
+            inRow    = nint((float)outRow / yscale);
+            inCol    = nint((float)outCol / xscale);
             *foutPix = (float)*IMAGEpix(Isrc, inCol, inRow);
           }
         break;
@@ -1659,8 +1659,8 @@ int ImageDifferentialScaleDown(IMAGE *Isrc, IMAGE *Iout, int outRows,
         for (outRow = 0; outRow < outRows; outRow++)
           for (outCol = 0; outCol < outCols; outCol++, outPix++) {
             /* map center point to this output point */
-            inRow = nint((float)outRow / yscale);
-            inCol = nint((float)outCol / xscale);
+            inRow   = nint((float)outRow / yscale);
+            inCol   = nint((float)outCol / xscale);
             *outPix = (UCHAR)*IMAGEFpix(Isrc, inCol, inRow);
           }
         break;
@@ -1669,8 +1669,8 @@ int ImageDifferentialScaleDown(IMAGE *Isrc, IMAGE *Iout, int outRows,
         for (outRow = 0; outRow < outRows; outRow++)
           for (outCol = 0; outCol < outCols; outCol++, foutPix++) {
             /* map center point to this output point */
-            inRow = nint((float)outRow / yscale);
-            inCol = nint((float)outCol / xscale);
+            inRow    = nint((float)outRow / yscale);
+            inCol    = nint((float)outCol / xscale);
             *foutPix = (float)*IMAGEFpix(Isrc, inCol, inRow);
           }
         break;
@@ -1710,9 +1710,9 @@ int ImageDifferentialScaleDown(IMAGE *Isrc, IMAGE *Iout, int outRows,
 ----------------------------------------------------------------------*/
 int ImageDifferentialScaleUp(IMAGE *Isrc, IMAGE *Iout, int outRows,
                              int outCols) {
-  int inRow, inCol, outRow, outCol, inCols, inRows, endCol, endRow, frame;
+  int    inRow, inCol, outRow, outCol, inCols, inRows, endCol, endRow, frame;
   UCHAR *inPix, *outPix;
-  UINT *inIPix, *outIPix;
+  UINT * inIPix, *outIPix;
   float *finPix, *foutPix, xscale, yscale;
   hips_byte *in_image, *out_image;
 
@@ -1728,7 +1728,7 @@ int ImageDifferentialScaleUp(IMAGE *Isrc, IMAGE *Iout, int outRows,
   xscale = (float)outCols / (float)inCols;
   yscale = (float)outRows / (float)inRows;
 
-  in_image = Isrc->image;
+  in_image  = Isrc->image;
   out_image = Iout->image;
   for (frame = 0; frame < Isrc->num_frame; frame++) {
     switch (Isrc->pixel_format) {
@@ -1738,9 +1738,9 @@ int ImageDifferentialScaleUp(IMAGE *Isrc, IMAGE *Iout, int outRows,
         outPix = IMAGEpix(Iout, 0, 0);
         for (outRow = 0; outRow < outRows; outRow++) {
           for (outCol = 0; outCol < outCols; outCol++) {
-            inCol = (int)((float)outCol / xscale);
-            inRow = (int)((float)outRow / yscale);
-            inPix = IMAGEpix(Isrc, inCol, inRow);
+            inCol     = (int)((float)outCol / xscale);
+            inRow     = (int)((float)outRow / yscale);
+            inPix     = IMAGEpix(Isrc, inCol, inRow);
             *outPix++ = *inPix;
           }
         }
@@ -1861,9 +1861,9 @@ int ImageDifferentialScaleUp(IMAGE *Isrc, IMAGE *Iout, int outRows,
            Description:
 ----------------------------------------------------------------------*/
 int ImageReflect(IMAGE *inImage, IMAGE *outImage, int how) {
-  int x, y, ymax;
-  unsigned char *src, *dst;  //, *tmp;
-  unsigned int *isrc, *idst; //, *itmp;
+  int            x, y, ymax;
+  unsigned char *src, *dst;   //, *tmp;
+  unsigned int * isrc, *idst; //, *itmp;
 
   if (!ImageCheckSize(inImage, outImage, 0, 0, 0))
     ErrorReturn(
@@ -1876,11 +1876,11 @@ int ImageReflect(IMAGE *inImage, IMAGE *outImage, int how) {
     switch (how) {
     case IMAGE_REFLECT_AROUND_X_AXIS:
       ymax = inImage->rows - 1;
-      src = inImage->image;
+      src  = inImage->image;
       // tmp = outImage->image;
       for (y = 0; y < inImage->rows; y++) {
         for (x = 0; x < inImage->cols; x++) {
-          dst = IMAGEpix(outImage, x, ymax - y);
+          dst  = IMAGEpix(outImage, x, ymax - y);
           *dst = *src++;
         }
       }
@@ -1900,7 +1900,7 @@ int ImageReflect(IMAGE *inImage, IMAGE *outImage, int how) {
       // itmp = (unsigned int *)outImage->image;
       for (y = 0; y < inImage->rows; y++) {
         for (x = 0; x < inImage->cols; x++) {
-          idst = IMAGEIpix(outImage, x, ymax - y);
+          idst  = IMAGEIpix(outImage, x, ymax - y);
           *idst = *isrc++;
         }
       }
@@ -1928,8 +1928,8 @@ int ImageReflect(IMAGE *inImage, IMAGE *outImage, int how) {
               add multiplicative "speckle" noise to an image.
 ----------------------------------------------------------------------*/
 int ImageAddSpeckleNoise(IMAGE *inImage, IMAGE *outImage, float amp) {
-  long npix;
-  float *inPix, *outPix, noise, out;
+  long       npix;
+  float *    inPix, *outPix, noise, out;
   hips_byte *psrc, *pdst;
 
   if (inImage->pixel_format != outImage->pixel_format)
@@ -1940,10 +1940,10 @@ int ImageAddSpeckleNoise(IMAGE *inImage, IMAGE *outImage, float amp) {
   npix = (long)inImage->rows * inImage->cols * inImage->num_frame;
   switch (inImage->pixel_format) {
   case PFFLOAT:
-    inPix = IMAGEFpix(inImage, 0, 0);
+    inPix  = IMAGEFpix(inImage, 0, 0);
     outPix = IMAGEFpix(outImage, 0, 0);
     while (npix--) {
-      noise = (float)randomNumber(1.0 - (double)amp, 1.0 + (double)amp);
+      noise     = (float)randomNumber(1.0 - (double)amp, 1.0 + (double)amp);
       *outPix++ = *inPix++ * noise;
     }
     break;
@@ -1952,7 +1952,7 @@ int ImageAddSpeckleNoise(IMAGE *inImage, IMAGE *outImage, float amp) {
     pdst = IMAGEpix(outImage, 0, 0);
     while (npix--) {
       noise = (float)randomNumber(1.0 - (double)amp, 1.0 + (double)amp);
-      out = (float)(*psrc++) * noise;
+      out   = (float)(*psrc++) * noise;
       if (out > 255.0f)
         out = 255.0f;
       else if (out < 0.0f)
@@ -1978,8 +1978,8 @@ int ImageAddSpeckleNoise(IMAGE *inImage, IMAGE *outImage, float amp) {
               generated 0s and 1s.
 ----------------------------------------------------------------------*/
 int ImageAddSaltNoise(IMAGE *inImage, IMAGE *outImage, float density) {
-  long npix;
-  float *inPix, *outPix, noise, in;
+  long       npix;
+  float *    inPix, *outPix, noise, in;
   hips_byte *psrc, *pdst, bin;
 
   if (inImage->pixel_format != outImage->pixel_format)
@@ -1990,11 +1990,11 @@ int ImageAddSaltNoise(IMAGE *inImage, IMAGE *outImage, float density) {
   npix = (long)inImage->rows * inImage->cols * inImage->num_frame;
   switch (inImage->pixel_format) {
   case PFFLOAT:
-    inPix = IMAGEFpix(inImage, 0, 0);
+    inPix  = IMAGEFpix(inImage, 0, 0);
     outPix = IMAGEFpix(outImage, 0, 0);
     while (npix--) {
       noise = (float)randomNumber(0.0, 1.0);
-      in = *inPix++;
+      in    = *inPix++;
       if (noise < density) {
         if (noise < density / 2.0f)
           in = 0.0f;
@@ -2009,7 +2009,7 @@ int ImageAddSaltNoise(IMAGE *inImage, IMAGE *outImage, float density) {
     pdst = IMAGEpix(outImage, 0, 0);
     while (npix--) {
       noise = (float)randomNumber(0.0, 1.0);
-      bin = *psrc++;
+      bin   = *psrc++;
       if (noise < density) {
         if (noise < density / 2.0f)
           bin = 0;
@@ -2034,8 +2034,8 @@ int ImageAddSaltNoise(IMAGE *inImage, IMAGE *outImage, float density) {
              corrupt an image with additive zero mean gaussian noise.
 ----------------------------------------------------------------------*/
 int ImageAddNoise(IMAGE *inImage, IMAGE *outImage, float amp) {
-  long npix;
-  float *inPix, *outPix, gnoise, out;
+  long       npix;
+  float *    inPix, *outPix, gnoise, out;
   hips_byte *psrc, *pdst;
 
   if (inImage->pixel_format != outImage->pixel_format)
@@ -2046,10 +2046,10 @@ int ImageAddNoise(IMAGE *inImage, IMAGE *outImage, float amp) {
   npix = (long)inImage->rows * inImage->cols * inImage->num_frame;
   switch (inImage->pixel_format) {
   case PFFLOAT:
-    inPix = IMAGEFpix(inImage, 0, 0);
+    inPix  = IMAGEFpix(inImage, 0, 0);
     outPix = IMAGEFpix(outImage, 0, 0);
     while (npix--) {
-      gnoise = (float)randomNumber(-(double)amp, (double)amp);
+      gnoise    = (float)randomNumber(-(double)amp, (double)amp);
       *outPix++ = *inPix++ + gnoise;
     }
     break;
@@ -2059,7 +2059,7 @@ int ImageAddNoise(IMAGE *inImage, IMAGE *outImage, float amp) {
     amp *= 255.0f;
     while (npix--) {
       gnoise = (float)randomNumber(-(double)amp, (double)amp);
-      out = (float)(*psrc++) + gnoise;
+      out    = (float)(*psrc++) + gnoise;
       if (out > 255.0f)
         out = 255.0f;
       else if (out < 0.0f)
@@ -2082,10 +2082,10 @@ int ImageAddNoise(IMAGE *inImage, IMAGE *outImage, float amp) {
            Description:
 ----------------------------------------------------------------------*/
 int ImageValRange(IMAGE *image, float *pfmin, float *pfmax) {
-  float fmax, fmin, *fpix;
-  double dmax, dmin, *dpix;
+  float        fmax, fmin, *fpix;
+  double       dmax, dmin, *dpix;
   unsigned int size, imax, imin, *ipix; /* "unsiged" added dng */
-  hips_byte bmin, bmax, *bpix;
+  hips_byte    bmin, bmax, *bpix;
 
   size = image->rows * image->cols * image->num_frame;
   switch (image->pixel_format) {
@@ -2172,7 +2172,7 @@ int ImageValRange(IMAGE *image, float *pfmin, float *pfmax) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageCatSeq(IMAGE *Isrc1, IMAGE *Isrc2, IMAGE *Idst) {
   IMAGE *Itmp;
-  int num_frame, frameno;
+  int    num_frame, frameno;
 
   if ((Isrc1->rows != Isrc2->rows) || (Isrc1->cols != Isrc2->cols))
     return (nullptr);
@@ -2224,10 +2224,10 @@ IMAGE *ImageCatSeq(IMAGE *Isrc1, IMAGE *Isrc2, IMAGE *Idst) {
            Description:
 ----------------------------------------------------------------------*/
 IMAGE *ImageMulScale(IMAGE *Isrc, IMAGE *Idst, Pixelval *p) {
-  int ecode;
+  int        ecode;
   fs_hsize_t size;
-  float real, imag, sreal, simag;
-  CPIX *csrc, *cdst;
+  float      real, imag, sreal, simag;
+  CPIX *     csrc, *cdst;
 
   if (!Idst)
     Idst = ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, 1);
@@ -2240,8 +2240,8 @@ IMAGE *ImageMulScale(IMAGE *Isrc, IMAGE *Idst, Pixelval *p) {
     imag = p->v_complex[IMAG_PIX];
     size = Isrc->numpix;
     while (size--) {
-      simag = csrc->imag;
-      sreal = csrc->real;
+      simag      = csrc->imag;
+      sreal      = csrc->real;
       cdst->real = real * sreal - imag * simag;
       cdst->imag = real * simag + sreal * imag;
       csrc++;
@@ -2263,7 +2263,7 @@ IMAGE *ImageMulScale(IMAGE *Isrc, IMAGE *Idst, Pixelval *p) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageAddScalar(IMAGE *Isrc, IMAGE *Idst, float scalar) {
   fs_hsize_t size;
-  float *fpix;
+  float *    fpix;
 
   if (!Idst)
     Idst =
@@ -2291,7 +2291,7 @@ IMAGE *ImageAddScalar(IMAGE *Isrc, IMAGE *Idst, float scalar) {
               replace pixels of value 'inpix' with the value 'outpix'
 ----------------------------------------------------------------------*/
 IMAGE *ImageReplace(IMAGE *Isrc, IMAGE *Idst, float inpix, float outpix) {
-  float *fin, *fout;
+  float *    fin, *fout;
   hips_byte *cin, *cout, cinpix, coutpix;
   fs_hsize_t npix;
 
@@ -2306,7 +2306,7 @@ IMAGE *ImageReplace(IMAGE *Isrc, IMAGE *Idst, float inpix, float outpix) {
   npix = Isrc->numpix * (fs_hsize_t)Isrc->num_frame;
   switch (Isrc->pixel_format) {
   case PFFLOAT:
-    fin = IMAGEFpix(Isrc, 0, 0);
+    fin  = IMAGEFpix(Isrc, 0, 0);
     fout = IMAGEFpix(Idst, 0, 0);
     while (npix--) {
       if (*fin == inpix) {
@@ -2317,10 +2317,10 @@ IMAGE *ImageReplace(IMAGE *Isrc, IMAGE *Idst, float inpix, float outpix) {
     }
     break;
   case PFBYTE:
-    cinpix = (hips_byte)inpix;
+    cinpix  = (hips_byte)inpix;
     coutpix = (hips_byte)outpix;
-    cin = IMAGEpix(Isrc, 0, 0);
-    cout = IMAGEpix(Idst, 0, 0);
+    cin     = IMAGEpix(Isrc, 0, 0);
+    cout    = IMAGEpix(Idst, 0, 0);
     while (npix--) {
       if (*cin == cinpix) {
         *cout++ = coutpix;
@@ -2348,10 +2348,10 @@ IMAGE *ImageReplace(IMAGE *Isrc, IMAGE *Idst, float inpix, float outpix) {
               -1 - images are linearly dependent
 ----------------------------------------------------------------------*/
 int ImageCmp(IMAGE *Isrc, IMAGE *Idst) {
-  int ret, ecode;
-  IMAGE *Idiv;
+  int      ret, ecode;
+  IMAGE *  Idiv;
   Pixelval pmin, pmax;
-  float fmin = 0.0f, fmax = 0.0f;
+  float    fmin = 0.0f, fmax = 0.0f;
 
   Idiv = ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, 1);
 
@@ -2396,9 +2396,9 @@ int ImageCmp(IMAGE *Isrc, IMAGE *Idst) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageAbs(IMAGE *inImage, IMAGE *outImage) {
   UCHAR *cIn, *cOut;
-  UINT *iIn, *iOut;
+  UINT * iIn, *iOut;
   float *fIn, *fOut;
-  int size, nframes, frameno, pix_per_frame, rows, cols;
+  int    size, nframes, frameno, pix_per_frame, rows, cols;
 
   rows = inImage->rows;
   cols = inImage->cols;
@@ -2406,13 +2406,13 @@ IMAGE *ImageAbs(IMAGE *inImage, IMAGE *outImage) {
     outImage = ImageAlloc(rows, cols, 1, inImage->pixel_format);
   }
 
-  nframes = inImage->num_frame;
+  nframes       = inImage->num_frame;
   pix_per_frame = inImage->rows * inImage->cols;
   for (frameno = 0; frameno < nframes; frameno++) {
     size = inImage->rows * inImage->cols;
     switch (inImage->pixel_format) {
     case PFFLOAT:
-      fIn = IMAGEFpix(inImage, 0, 0) + pix_per_frame * frameno;
+      fIn  = IMAGEFpix(inImage, 0, 0) + pix_per_frame * frameno;
       fOut = IMAGEFpix(outImage, 0, 0) + pix_per_frame * frameno;
       while (size--)
         *fOut++ = (float)fabs(*fIn++);
@@ -2510,11 +2510,11 @@ IMAGE *ImageSubtract(IMAGE *Is1, IMAGE *Is2, IMAGE *Idst) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageExtractInto(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx,
                         int dy, int xdst, int ydst) {
-  CPIX *cpsrc, *cpdst;
-  UCHAR *csrc, *cdst;
-  float *fsrc, *fdst;
+  CPIX *  cpsrc, *cpdst;
+  UCHAR * csrc, *cdst;
+  float * fsrc, *fdst;
   double *dsrc, *ddst;
-  int xin, yin, yout, x1, y1, yend, xend;
+  int     xin, yin, yout, x1, y1, yend, xend;
 
   if ((dx <= 0) || (dy <= 0))
     ErrorReturn(NULL, (ERROR_BADPARM,
@@ -2526,8 +2526,8 @@ IMAGE *ImageExtractInto(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx,
     ErrorReturn(NULL, (ERROR_BADPARM, "ImageExtractInto: out format must match"
                                       "input format\n"));
 
-  x1 = x0 + dx;
-  y1 = y0 + dy;
+  x1   = x0 + dx;
+  y1   = y0 + dy;
   xend = Isrc->cols - 1;
   yend = Isrc->rows - 1;
 
@@ -2601,7 +2601,7 @@ IMAGE *ImageExtractInto(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx,
 IMAGE *ImageExtract(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx, int dy) {
   UCHAR *csrc, *cdst;
   float *fsrc, *fdst;
-  int xin, yin, xout, yout, x1, y1, yend, xend;
+  int    xin, yin, xout, yout, x1, y1, yend, xend;
 
   if ((dx <= 0) || (dy <= 0))
     ErrorReturn(NULL, (ERROR_BADPARM, "ImageExtract: invalid dx or dy (%d, %d)",
@@ -2610,15 +2610,15 @@ IMAGE *ImageExtract(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx, int dy) {
   if (!Idst)
     Idst = ImageAlloc(dy, dx, Isrc->pixel_format, Isrc->num_frame);
 
-  x1 = x0 + dx;
-  y1 = y0 + dy;
+  x1   = x0 + dx;
+  y1   = y0 + dy;
   xend = Isrc->cols - 1;
   yend = Isrc->rows - 1;
 
   switch (Isrc->pixel_format) {
   case PFBYTE:
     yout = xout = 0;
-    cdst = IMAGEpix(Idst, 0, 0);
+    cdst        = IMAGEpix(Idst, 0, 0);
     for (yin = y0; yin < y1; yin++, yout++) {
       csrc = IMAGEpix(Isrc, x0, yin);
       cdst = IMAGEpix(Idst, 0, yout);
@@ -2632,7 +2632,7 @@ IMAGE *ImageExtract(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx, int dy) {
     break;
   case PFFLOAT:
     yout = xout = 0;
-    fdst = IMAGEFpix(Idst, 0, 0);
+    fdst        = IMAGEFpix(Idst, 0, 0);
     for (yin = y0; yin < y1; yin++, yout++) {
       fsrc = IMAGEFpix(Isrc, x0, yin);
       fdst = IMAGEFpix(Idst, 0, yout);
@@ -2659,7 +2659,7 @@ IMAGE *ImageExtract(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx, int dy) {
            Description:
 ----------------------------------------------------------------------*/
 IMAGE *ImageZeroMean(IMAGE *Isrc, IMAGE *Idst) {
-  int frameno, rows, cols, row, col, pix_per_frame, nframes;
+  int   frameno, rows, cols, row, col, pix_per_frame, nframes;
   float ftotal, fmean, *fSrcPtr, *fDstPtr, *fSrcBase, *fDstBase;
 
   if (Isrc->pixel_format != PFFLOAT ||
@@ -2672,17 +2672,17 @@ IMAGE *ImageZeroMean(IMAGE *Isrc, IMAGE *Idst) {
   if (!Idst)
     Idst = ImageClone(Isrc);
 
-  nframes = Isrc->num_frame;
-  rows = Isrc->rows;
-  cols = Isrc->cols;
+  nframes       = Isrc->num_frame;
+  rows          = Isrc->rows;
+  cols          = Isrc->cols;
   pix_per_frame = rows * cols;
-  fSrcBase = IMAGEFpix(Isrc, 0, 0);
-  fDstBase = IMAGEFpix(Idst, 0, 0);
+  fSrcBase      = IMAGEFpix(Isrc, 0, 0);
+  fDstBase      = IMAGEFpix(Idst, 0, 0);
 
   /* mean of each pixel across all frames */
   for (row = 0; row < rows; row++) {
     for (col = 0; col < cols; col++, fSrcBase++, fDstBase++) {
-      ftotal = 0.0f;
+      ftotal  = 0.0f;
       fSrcPtr = fSrcBase;
       for (frameno = 0; frameno < nframes; frameno++) {
         ftotal += *fSrcPtr;
@@ -2711,7 +2711,7 @@ IMAGE *ImageZeroMean(IMAGE *Isrc, IMAGE *Idst) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageCovarMatrix(IMAGE *image, float **pmeans) {
   static IMAGE *zimage = nullptr; /* zero-mean version of image */
-  IMAGE *cimage;
+  IMAGE *       cimage;
   int rows, cols, row, col, crow, ccol, crows, ccols, pix_per_frame, nframes,
       frameno, i;
   float *flPtr, *frPtr, *fDstPtr, *flBase, *frBase, ftotal, *means, *meanPtr,
@@ -2728,9 +2728,9 @@ IMAGE *ImageCovarMatrix(IMAGE *image, float **pmeans) {
     zimage = ImageClone(image);
   }
 
-  rows = image->rows;
-  cols = image->cols;
-  nframes = image->num_frame;
+  rows          = image->rows;
+  cols          = image->cols;
+  nframes       = image->num_frame;
   pix_per_frame = rows * cols;
 
   /* first calculate mean across observations (frames) */
@@ -2744,7 +2744,7 @@ IMAGE *ImageCovarMatrix(IMAGE *image, float **pmeans) {
   fSrcBase = IMAGEFpix(image, 0, 0);
   for (i = row = 0; row < rows; row++) {
     for (col = 0; col < cols; col++, fSrcBase++, i++) {
-      ftotal = 0.0f;
+      ftotal  = 0.0f;
       fSrcPtr = fSrcBase;
       for (frameno = 0; frameno < nframes; frameno++) {
         ftotal += *fSrcPtr;
@@ -2773,7 +2773,7 @@ IMAGE *ImageCovarMatrix(IMAGE *image, float **pmeans) {
     have the dimension (rows*cols) x (rows*cols).
   */
   ccols = crows = rows * cols;
-  cimage = ImageAlloc(crows, ccols, PFFLOAT, 1);
+  cimage        = ImageAlloc(crows, ccols, PFFLOAT, 1);
   if (!cimage) {
     fprintf(stderr,
             "ImageCovarMatrix: could not allocate %d x %d covariance matrix\n",
@@ -2819,7 +2819,7 @@ IMAGE *ImageCovarMatrix(IMAGE *image, float **pmeans) {
 static int compare_evalues(const void *l1, const void *l2);
 
 typedef struct {
-  int eno;
+  int   eno;
   float evalue;
 } EIGEN_VALUE, EVALUE;
 
@@ -2855,7 +2855,7 @@ IMAGE *ImagePrincipalComponents(IMAGE *image, int nterms, IMAGE **pcoefImage) {
   IMAGE *cimage, *pcImage, *zImage, *coefImage;
   float *evalues, *evectors;
   int frameno, nframes, row, col, rows, cols, pix_per_frame, i, nevalues, frame;
-  float *fSrcPtr, *fDstPtr, *mean_vector, *fPcPtr;
+  float * fSrcPtr, *fDstPtr, *mean_vector, *fPcPtr;
   EVALUE *eigen_values;
 
   if (image->pixel_format != PFFLOAT) {
@@ -2869,15 +2869,15 @@ IMAGE *ImagePrincipalComponents(IMAGE *image, int nterms, IMAGE **pcoefImage) {
   if (!nterms)
     nterms = nevalues;
 
-  evalues = (float *)calloc((unsigned int)nevalues, sizeof(float));
+  evalues       = (float *)calloc((unsigned int)nevalues, sizeof(float));
   pix_per_frame = image->rows * image->cols;
-  eigen_values = (EVALUE *)calloc((UINT)nevalues, sizeof(EIGEN_VALUE));
+  eigen_values  = (EVALUE *)calloc((UINT)nevalues, sizeof(EIGEN_VALUE));
   evectors = (float *)calloc((UINT)(nevalues * pix_per_frame), sizeof(float));
 
   /* 2 extra frames - 1 for mean vector, and one for eigenvalues */
   pcImage = ImageAlloc(image->rows, image->cols, PFFLOAT, nterms + 2);
-  rows = pcImage->rows;
-  cols = pcImage->cols;
+  rows    = pcImage->rows;
+  cols    = pcImage->cols;
 
   // TODO:
   OpenEigenSystem((float *)cimage->image, cimage->rows, evalues, evectors);
@@ -2893,7 +2893,7 @@ IMAGE *ImagePrincipalComponents(IMAGE *image, int nterms, IMAGE **pcoefImage) {
     we can also sort the eigenvectors.
   */
   for (i = 0; i < nevalues; i++) {
-    eigen_values[i].eno = i;
+    eigen_values[i].eno    = i;
     eigen_values[i].evalue = evalues[i];
   }
   qsort((char *)eigen_values, nevalues, sizeof(EVALUE), compare_evalues);
@@ -2950,7 +2950,7 @@ IMAGE *ImagePrincipalComponents(IMAGE *image, int nterms, IMAGE **pcoefImage) {
 
         y = A . (x - mx)
     */
-    fPcPtr = IMAGEFpix(pcImage, 0, 0);
+    fPcPtr  = IMAGEFpix(pcImage, 0, 0);
     fSrcPtr = IMAGEFpix(zImage, 0, 0);
     fDstPtr = IMAGEFpix(coefImage, 0, 0);
     for (frame = 0; frame < nterms; frame++) {
@@ -2965,7 +2965,7 @@ IMAGE *ImagePrincipalComponents(IMAGE *image, int nterms, IMAGE **pcoefImage) {
                 for each column in the transposed centered image matrix,
            multiply the col'th frame by the frame'th row.
         */
-        fPcPtr = IMAGEFseq_pix(pcImage, 0, 0, frame);
+        fPcPtr  = IMAGEFseq_pix(pcImage, 0, 0, frame);
         fSrcPtr = IMAGEFseq_pix(zImage, 0, 0, col);
         for (i = 0; i < nevalues; i++)
           *fDstPtr += *fPcPtr++ * *fSrcPtr++;
@@ -2999,13 +2999,13 @@ IMAGE *ImagePrincipalComponents(IMAGE *image, int nterms, IMAGE **pcoefImage) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageReconstruct(IMAGE *pcImage, IMAGE *coefImage, IMAGE *xrImage,
                         int start, int nframes) {
-  int rows, cols, frame, nterms, term, i, pix_per_frame, pix_per_coef_frame;
+  int    rows, cols, frame, nterms, term, i, pix_per_frame, pix_per_coef_frame;
   float *fPcPtr, *fXPtr, *fCoefPtr, *means, *Mx, ftotal;
   float *fBasePcPtr, *fBaseCoefPtr;
 
-  rows = pcImage->rows;
-  cols = pcImage->cols;
-  pix_per_frame = rows * cols;
+  rows               = pcImage->rows;
+  cols               = pcImage->cols;
+  pix_per_frame      = rows * cols;
   pix_per_coef_frame = coefImage->cols * coefImage->rows;
 
   /* one coefficient for each frame to be reconstructed */
@@ -3037,13 +3037,13 @@ IMAGE *ImageReconstruct(IMAGE *pcImage, IMAGE *coefImage, IMAGE *xrImage,
   fBaseCoefPtr = IMAGEFpix(coefImage, start, 0);
   for (frame = 0; frame < nframes; frame++, fBaseCoefPtr++) {
     /* reconstruct the frame #'th observation */
-    fXPtr = IMAGEFseq_pix(xrImage, 0, 0, frame);
-    Mx = means;
+    fXPtr      = IMAGEFseq_pix(xrImage, 0, 0, frame);
+    Mx         = means;
     fBasePcPtr = IMAGEFpix(pcImage, 0, 0);
 
     for (i = 0; i < pix_per_frame; i++) {
       /* use i'th component of every term */
-      fPcPtr = fBasePcPtr++;
+      fPcPtr   = fBasePcPtr++;
       fCoefPtr = fBaseCoefPtr;
 #if 0
       fPcPtr = IMAGEFpix(pcImage, i, 0) ;
@@ -3071,8 +3071,8 @@ IMAGE *ImageReconstruct(IMAGE *pcImage, IMAGE *coefImage, IMAGE *xrImage,
              normalize the amplitude of a complex image.
 ----------------------------------------------------------------------*/
 IMAGE *ImageNormalizeComplex(IMAGE *Isrc, IMAGE *Idst, float thresh) {
-  int rows, cols;
-  long npix;
+  int   rows, cols;
+  long  npix;
   CPIX *src, *dst;
   float real, imag, mag;
 
@@ -3115,19 +3115,19 @@ IMAGE *ImageNormalizeComplex(IMAGE *Isrc, IMAGE *Idst, float thresh) {
 ----------------------------------------------------------------------*/
 int ImageNormalizeFrames(IMAGE *Isrc, IMAGE *Idst) {
   float flen, *fsrcPtr, *fdstPtr, fval;
-  int frameno, rows, cols;
-  long npix, pix_per_frame;
+  int   frameno, rows, cols;
+  long  npix, pix_per_frame;
 
-  rows = Isrc->rows;
-  cols = Isrc->cols;
+  rows          = Isrc->rows;
+  cols          = Isrc->cols;
   pix_per_frame = (long)rows * cols;
 
   switch (Isrc->pixel_format) {
   case PFFLOAT:
     for (frameno = 0; frameno < Isrc->num_frame; frameno++) {
       fsrcPtr = IMAGEFpix(Isrc, 0, 0) + frameno * pix_per_frame;
-      npix = pix_per_frame;
-      flen = 0.0f;
+      npix    = pix_per_frame;
+      flen    = 0.0f;
       while (npix--) {
         fval = *fsrcPtr++;
         flen += fval * fval;
@@ -3139,7 +3139,7 @@ int ImageNormalizeFrames(IMAGE *Isrc, IMAGE *Idst) {
 
       fsrcPtr = IMAGEFpix(Isrc, 0, 0) + frameno * pix_per_frame;
       fdstPtr = IMAGEFpix(Idst, 0, 0) + frameno * pix_per_frame;
-      npix = pix_per_frame;
+      npix    = pix_per_frame;
 
       while (npix--)
         *fdstPtr++ = *fsrcPtr++ / flen;
@@ -3161,9 +3161,9 @@ int ImageNormalizeFrames(IMAGE *Isrc, IMAGE *Idst) {
                generate a complex image from a real and an imaginary one
 ----------------------------------------------------------------------*/
 IMAGE *ImageCombine(IMAGE *Ireal, IMAGE *Iimag, IMAGE *Idst) {
-  int x, y, rows, cols;
+  int    x, y, rows, cols;
   float *real, *imag;
-  CPIX *dst;
+  CPIX * dst;
 
   rows = Ireal->rows;
   cols = Ireal->cols;
@@ -3175,7 +3175,7 @@ IMAGE *ImageCombine(IMAGE *Ireal, IMAGE *Iimag, IMAGE *Idst) {
     ErrorReturn(
         NULL, (ERROR_UNSUPPORTED, "ImageCombine: destination must be complex"));
 
-  dst = IMAGECpix(Idst, 0, 0);
+  dst  = IMAGECpix(Idst, 0, 0);
   real = IMAGEFpix(Ireal, 0, 0);
   imag = IMAGEFpix(Iimag, 0, 0);
 
@@ -3197,7 +3197,7 @@ IMAGE *ImageCombine(IMAGE *Ireal, IMAGE *Iimag, IMAGE *Idst) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageInvert(IMAGE *Isrc, IMAGE *Idst) {
   IMAGE *Ireal, *Iimag;
-  int ecode;
+  int    ecode;
 
   if (!Idst)
     Idst = ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, 1);
@@ -3229,11 +3229,11 @@ IMAGE *ImageInvert(IMAGE *Isrc, IMAGE *Idst) {
                generate a complex image from a real and an imaginary one
 ----------------------------------------------------------------------*/
 IMAGE *ImageSplit(IMAGE *Icomp, IMAGE *Ireal, IMAGE *Iimag) {
-  int x, y, rows, cols;
-  float *real, *imag = nullptr;
+  int     x, y, rows, cols;
+  float * real, *imag   = nullptr;
   double *dreal, *dimag = nullptr;
-  CPIX *cpix;
-  DCPIX *dcpix;
+  CPIX *  cpix;
+  DCPIX * dcpix;
 
   rows = Icomp->rows;
   cols = Icomp->cols;
@@ -3306,9 +3306,9 @@ IMAGE *ImageSplit(IMAGE *Icomp, IMAGE *Ireal, IMAGE *Iimag) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageShrink(IMAGE *Isrc, IMAGE *Idst) {
   IMAGE *Iin, *Iout, *Igaussian;
-  int srows, scols, drows, dcols, x, y, xc, yc, xhalf, yhalf, xk, yk, ys;
-  float smax, smin, xscale, yscale, *dpix;
-  int xs;
+  int    srows, scols, drows, dcols, x, y, xc, yc, xhalf, yhalf, xk, yk, ys;
+  float  smax, smin, xscale, yscale, *dpix;
+  int    xs;
   float *spix, *gpix, total;
 
   srows = Isrc->rows;
@@ -3401,12 +3401,12 @@ IMAGE *ImageShrink(IMAGE *Isrc, IMAGE *Idst) {
              perform histogram equalization on an image
 ----------------------------------------------------------------------*/
 IMAGE *ImageHistoEqualize(IMAGE *Isrc, IMAGE *Idst) {
-  IMAGE *Iin, *Iout;
+  IMAGE *           Iin, *Iout;
   struct hips_histo histogram;
-  int ecode, count;
-  float fmin = 0., fmax = 0.;
-  Pixelval crap;
-  hips_byte map[256];
+  int               ecode, count;
+  float             fmin = 0., fmax = 0.;
+  Pixelval          crap;
+  hips_byte         map[256];
 
   if (Isrc->pixel_format != PFBYTE)
     Iin = ImageAlloc(Isrc->rows, Isrc->cols, PFBYTE, 1);
@@ -3456,7 +3456,7 @@ static void break_now();
 static void break_now() {}
 
 int ImageStatistics(IMAGE *Isrc, float *pmean, float *pvar) {
-  long npix;
+  long   npix;
   float *pix, total, dif, mean;
   IMAGE *I = nullptr;
 
@@ -3467,7 +3467,7 @@ int ImageStatistics(IMAGE *Isrc, float *pmean, float *pvar) {
     I = Isrc;
 
   npix = I->numpix;
-  pix = IMAGEFpix(I, 0, 0);
+  pix  = IMAGEFpix(I, 0, 0);
 
   /* compute mean */
   total = 0.0f;
@@ -3476,7 +3476,7 @@ int ImageStatistics(IMAGE *Isrc, float *pmean, float *pvar) {
 
   npix = I->numpix;
   mean = *pmean = total / (float)npix;
-  pix = IMAGEFpix(I, 0, 0);
+  pix           = IMAGEFpix(I, 0, 0);
 
   /* compute variance */
   total = 0.0f;
@@ -3551,11 +3551,11 @@ IMAGE *ImageUnpad(IMAGE *Isrc, IMAGE *Idst, int rows, int cols) {
              determine whether the values in an image are valid or not
 ----------------------------------------------------------------------*/
 int ImageValid(IMAGE *I) {
-  long size, total, bad, swapped_bad;
-  float *fpix;
+  long    size, total, bad, swapped_bad;
+  float * fpix;
   double *dpix, exponent, val;
-  DCPIX *dcpix, dcval;
-  CPIX *cpix, cval;
+  DCPIX * dcpix, dcval;
+  CPIX *  cpix, cval;
 
   size = (long)I->rows * (long)I->cols * (long)I->num_frame;
 
@@ -3578,7 +3578,7 @@ int ImageValid(IMAGE *I) {
       if ((exponent > 6.0) || (exponent < -20))
         bad++;
 
-      val = swapFloat(val);
+      val      = swapFloat(val);
       exponent = log10(fabs(val));
       if (exponent > 10.0) /* any values this big are indicative */
         return (1);
@@ -3600,7 +3600,7 @@ int ImageValid(IMAGE *I) {
 
       if ((exponent > 6.0) || (exponent < -20))
         bad++;
-      val = swapDouble(val);
+      val      = swapDouble(val);
       exponent = log10(fabs(val));
       if (exponent > 10.0) /* any values this big are indicative */
         return (1);
@@ -3633,7 +3633,7 @@ int ImageValid(IMAGE *I) {
       }
 
       /* check it if it were byte-reversed */
-      val = swapDouble(dcval.real);
+      val      = swapDouble(dcval.real);
       exponent = log10(fabs(val));
       if (exponent > 10.0) /* any values this big are indicative */
         return (1);
@@ -3641,7 +3641,7 @@ int ImageValid(IMAGE *I) {
         bad++;
       else /* check imaginary part */
       {
-        val = swapDouble(dcval.imag);
+        val      = swapDouble(dcval.imag);
         exponent = log10(fabs(val));
         if (exponent > 10.0) /* any values this big are indicative */
           return (1);
@@ -3675,7 +3675,7 @@ int ImageValid(IMAGE *I) {
       }
 
       /* check it if it were byte-reversed */
-      val = (double)swapFloat(cval.real);
+      val      = (double)swapFloat(cval.real);
       exponent = log10(fabs(val));
       if (exponent > 10.0) /* any values this big are indicative */
         return (1);
@@ -3683,7 +3683,7 @@ int ImageValid(IMAGE *I) {
         bad++;
       else /* check imaginary part */
       {
-        val = (double)swapFloat(cval.imag);
+        val      = (double)swapFloat(cval.imag);
         exponent = log10(fabs(val));
         if (exponent > 10.0) /* any values this big are indicative */
           return (1);
@@ -3698,7 +3698,7 @@ int ImageValid(IMAGE *I) {
   if (total) {
     float pct, swapped_pct;
 
-    pct = (float)bad / (float)total;
+    pct         = (float)bad / (float)total;
     swapped_pct = (float)swapped_bad / (float)total;
     return (pct < swapped_pct);
   }
@@ -3713,7 +3713,7 @@ int ImageValid(IMAGE *I) {
 ----------------------------------------------------------------------*/
 double ImageEntropy(IMAGE *I, int pairflag) {
   IMAGE *Itmp = nullptr, *Ibyte;
-  int *table, ecode, nframes, frame, count;
+  int *  table, ecode, nframes, frame, count;
   double total_entropy = 0.0;
 
   Ibyte = ImageAlloc(I->rows, I->cols, PFBYTE, 1);
@@ -3743,7 +3743,7 @@ double ImageEntropy(IMAGE *I, int pairflag) {
   }
 
   /* the 1st histo slot is used for underflows, and the last for overflows*/
-  count = nframes * I->rows * I->cols;
+  count         = nframes * I->rows * I->cols;
   total_entropy = h_entropy(table, count, 0);
 
   if (Itmp)
@@ -3760,7 +3760,7 @@ double ImageEntropy(IMAGE *I, int pairflag) {
               downsample an image by 2 (no lowpass filtering)
 ----------------------------------------------------------------------*/
 IMAGE *ImageDownsample2(IMAGE *Isrc, IMAGE *Idst) {
-  int srows, scols, drows, dcols, drow, dcol;
+  int    srows, scols, drows, dcols, drow, dcol;
   float *sptr, *dptr;
 
   srows = Isrc->rows;
@@ -3801,7 +3801,7 @@ IMAGE *ImageDownsample2(IMAGE *Isrc, IMAGE *Idst) {
               (no lowpass filtering)
 ----------------------------------------------------------------------*/
 IMAGE *ImageDownsample2Horizontal(IMAGE *Isrc, IMAGE *Idst) {
-  int srows, scols, drows, dcols, drow, dcol;
+  int        srows, scols, drows, dcols, drow, dcol;
   hips_byte *sptr, *dptr;
 
   srows = Isrc->rows;
@@ -3843,8 +3843,8 @@ IMAGE *ImageDownsample2Horizontal(IMAGE *Isrc, IMAGE *Idst) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageUpsample2(IMAGE *Isrc, IMAGE *Idst) {
   static IMAGE *Itmp = nullptr;
-  int srows, scols, drows, dcols, srow, scol;
-  float *sptr, *dptr;
+  int           srows, scols, drows, dcols, srow, scol;
+  float *       sptr, *dptr;
 
   srows = Isrc->rows;
   scols = Isrc->cols;
@@ -3896,11 +3896,11 @@ IMAGE *ImageUpsample2(IMAGE *Isrc, IMAGE *Idst) {
               images.
 ----------------------------------------------------------------------*/
 float ImageRMSDifference(IMAGE *I1_in, IMAGE *I2_in) {
-  float dif, rms, *pix1, *pix2;
-  int width, height, x, y, frame;
+  float  dif, rms, *pix1, *pix2;
+  int    width, height, x, y, frame;
   IMAGE *I1, *I2;
 
-  width = I1_in->cols;
+  width  = I1_in->cols;
   height = I1_in->rows;
   if (I1_in->pixel_format != PFFLOAT) {
     I1 = ImageAlloc(height, width, PFFLOAT, 1);
@@ -3941,8 +3941,8 @@ int init_header(IMAGE *I, char *onm, char *snm, int nfr, char *odt, int rw,
   I->num_frame = nfr;
   I->orows = I->rows = rw;
   I->ocols = I->cols = cl;
-  I->pixel_format = pfmt;
-  bytes = rw * cl * nfr;
+  I->pixel_format    = pfmt;
+  bytes              = rw * cl * nfr;
   switch (pfmt) {
   default:
   case PFBYTE:
@@ -3981,10 +3981,10 @@ int init_header(IMAGE *I, char *onm, char *snm, int nfr, char *odt, int rw,
     break;
   }
   bytes *= I->sizepix;
-  I->numpix = I->rows * I->cols;
+  I->numpix    = I->rows * I->cols;
   I->sizeimage = I->numpix * I->sizepix;
-  I->firstpix = I->image;
-  I->image = (hips_byte *)calloc(bytes, sizeof(char));
+  I->firstpix  = I->image;
+  I->image     = (hips_byte *)calloc(bytes, sizeof(char));
   if (!I->image)
     ErrorExit(ERROR_NOMEMORY, "init_header: could not allocate %d bytes",
               bytes);

@@ -62,7 +62,7 @@ public:
 
   virtual QString DataToString() = 0;
 
-  virtual Region2D *ObjectFromString(RenderView2D *view,
+  virtual Region2D *ObjectFromString(RenderView2D * view,
                                      const QString &text) = 0;
 
   Region2D *Duplicate(RenderView2D *view = NULL) {
@@ -83,9 +83,9 @@ signals:
   void StatsUpdated();
 
 protected:
-  RenderView2D *m_view;
-  QString m_strShortStats;
-  QStringList m_strsLongStats;
+  RenderView2D *                m_view;
+  QString                       m_strShortStats;
+  QStringList                   m_strsLongStats;
   vtkSmartPointer<vtkTextActor> m_actorText;
 };
 

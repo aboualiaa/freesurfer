@@ -33,9 +33,7 @@
 #include "timer.h"
 #include "version.h"
 
-using namespace std;
-
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -47,34 +45,35 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
+static char vcid[]   = "";
 const char *Progname = "dmri_vox2vox";
 
-int doInvNonlin = 0, nin = 0, nout = 0;
+int   doInvNonlin = 0, nin = 0, nout = 0;
 char *inDir = nullptr, *inFile[100], *outDir = nullptr, *outFile[100],
      *inRefFile = nullptr, *outRefFile = nullptr, *affineXfmFile = nullptr,
      *nonlinXfmFile = nullptr;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
-  char fname[PATH_MAX];
-  vector<float> point(3);
-  MRI *inref = 0;
-  MRI *outref = 0;
-  AffineReg affinereg;
+  int                nargs;
+  int                cputime;
+  char               fname[PATH_MAX];
+  std::vector<float> point(3);
+  MRI *              inref  = 0;
+  MRI *              outref = 0;
+  AffineReg          affinereg;
 #ifndef NO_CVS_UP_IN_HERE
   NonlinReg nonlinreg;
 #endif
 
   nargs = handleVersionOption(argc, argv, "dmri_vox2vox");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -99,7 +98,7 @@ int main(int argc, char **argv) {
   dump_options(stdout);
 
   // Read reference volumes
-  inref = MRIread(inRefFile);
+  inref  = MRIread(inRefFile);
   outref = MRIread(outRefFile);
 
   // Read transform files
@@ -116,10 +115,10 @@ int main(int argc, char **argv) {
   }
 
   for (int k = 0; k < nout; k++) {
-    float coord;
-    ifstream infile;
-    ofstream outfile;
-    vector<float> inpts;
+    float              coord;
+    std::ifstream      infile;
+    std::ofstream      outfile;
+    std::vector<float> inpts;
 
     printf("Processing coordinate file %d of %d...\n", k + 1, nout);
     cputimer.reset();
@@ -131,9 +130,10 @@ int main(int argc, char **argv) {
       strcpy(fname, inFile[k]);
     }
 
-    infile.open(fname, ios::in);
+    infile.open(fname, std::ios::in);
     if (!infile) {
-      cout << "ERROR: Could not open " << fname << " for reading" << endl;
+      std::cout << "ERROR: Could not open " << fname << " for reading"
+                << std::endl;
       exit(1);
     }
 
@@ -143,8 +143,8 @@ int main(int argc, char **argv) {
     }
 
     if (inpts.size() % 3 != 0) {
-      cout << "ERROR: File " << fname << " must contain triplets of coordinates"
-           << endl;
+      std::cout << "ERROR: File " << fname
+                << " must contain triplets of coordinates" << std::endl;
       exit(1);
     }
 
@@ -179,14 +179,15 @@ int main(int argc, char **argv) {
       strcpy(fname, outFile[k]);
     }
 
-    outfile.open(fname, ios::out);
+    outfile.open(fname, std::ios::out);
     if (!outfile) {
-      cout << "ERROR: Could not open " << fname << " for writing" << endl;
+      std::cout << "ERROR: Could not open " << fname << " for writing"
+                << std::endl;
       exit(1);
     }
 
     for (auto ipt = inpts.begin(); ipt < inpts.end(); ipt += 3) {
-      outfile << ipt[0] << " " << ipt[1] << " " << ipt[2] << endl;
+      outfile << ipt[0] << " " << ipt[1] << " " << ipt[2] << std::endl;
     }
 
     outfile.close();
@@ -205,10 +206,10 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
+  int    nargc;
+  int    nargsused;
   char **pargv;
-  char *option;
+  char * option;
 
   if (argc < 1) {
     usage_exit();
@@ -240,7 +241,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      inDir = fio_fullpath(pargv[0]);
+      inDir     = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--in") == 0) {
       if (nargc < 1) {
@@ -256,7 +257,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      outDir = fio_fullpath(pargv[0]);
+      outDir    = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
@@ -279,19 +280,19 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       }
       outRefFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused  = 1;
     } else if (strcmp(option, "--reg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       affineXfmFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused     = 1;
     } else if (strcmp(option, "--regnl") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       nonlinXfmFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused     = 1;
     } else if (strcasecmp(option, "--invnl") == 0) {
       doInvNonlin = 1;
     } else {

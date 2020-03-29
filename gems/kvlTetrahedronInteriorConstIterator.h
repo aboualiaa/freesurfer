@@ -105,7 +105,7 @@ class TetrahedronInteriorConstIterator
     : private itk::ImageConstIteratorWithIndex<typename itk::Image<TPixel, 3>> {
 public:
   /** Standard class typedefs. */
-  using Self = TetrahedronInteriorConstIterator<TPixel>;
+  using Self       = TetrahedronInteriorConstIterator<TPixel>;
   using Superclass = itk::ImageConstIteratorWithIndex<itk::Image<TPixel, 3>>;
 
   /**
@@ -114,15 +114,15 @@ public:
    * properly with gcc.
    */
   /** Types inherited from the Superclass */
-  using IndexType = typename Superclass::IndexType;
-  using SizeType = typename Superclass::SizeType;
-  using OffsetType = typename Superclass::OffsetType;
-  using RegionType = typename Superclass::RegionType;
-  using ImageType = typename Superclass::ImageType;
-  using PixelContainer = typename Superclass::PixelContainer;
+  using IndexType             = typename Superclass::IndexType;
+  using SizeType              = typename Superclass::SizeType;
+  using OffsetType            = typename Superclass::OffsetType;
+  using RegionType            = typename Superclass::RegionType;
+  using ImageType             = typename Superclass::ImageType;
+  using PixelContainer        = typename Superclass::PixelContainer;
   using PixelContainerPointer = typename Superclass::PixelContainerPointer;
-  using InternalPixelType = typename Superclass::InternalPixelType;
-  using PixelType = typename Superclass::PixelType;
+  using InternalPixelType     = typename Superclass::InternalPixelType;
+  using PixelType             = typename Superclass::PixelType;
 
   /** */
   using PointType = AtlasMesh::PointType;

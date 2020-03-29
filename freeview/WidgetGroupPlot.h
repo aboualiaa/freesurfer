@@ -25,9 +25,9 @@
 #ifndef WidgetGroupPlot_H
 #define WidgetGroupPlot_H
 
-#include <QWidget>
-#include <QList>
 #include <QColor>
+#include <QList>
+#include <QWidget>
 
 class FSGroupDescriptor;
 
@@ -65,16 +65,16 @@ signals:
 public:
   static void DrawMarker(QPainter *p, const QPointF &pt, const QString &marker,
                          const QColor &c, double r, bool bHighlight = false);
-  void DrawMarker(QPainter *p, const QPointF &pt, const QString &marker,
-                  const QColor &c, bool bHighlight);
+  void        DrawMarker(QPainter *p, const QPointF &pt, const QString &marker,
+                         const QColor &c, bool bHighlight);
 
-  double m_dTR;
-  double m_dMin;
-  double m_dMax;
-  bool m_bAutoScale;
-  QRectF m_rectPlot;
+  double             m_dTR;
+  double             m_dMin;
+  double             m_dMax;
+  bool               m_bAutoScale;
+  QRectF             m_rectPlot;
   FSGroupDescriptor *m_fsgd;
-  int m_nCurrentDataIndex;
+  int                m_nCurrentDataIndex;
 
   int m_nCurrentVariableIndex;
   int m_nPlotType;

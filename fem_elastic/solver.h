@@ -11,8 +11,8 @@
 
 #include "petscksp.h"
 
-#include "mesh.h"
 #include "cstats.h"
+#include "mesh.h"
 
 //----------------------------------------------------
 //
@@ -22,11 +22,11 @@
 
 template <class Cstr, int n> struct BC {
   typedef TCoords<double, n> tCoords;
-  typedef TMesh<Cstr, n> tMesh;
+  typedef TMesh<Cstr, n>     tMesh;
 
   tCoords pt;
   tCoords delta;
-  bool isActive;
+  bool    isActive;
   BC() : pt(), delta(), isActive(false) {}
   BC(const tCoords &_pt, const tCoords &_delta)
       : pt(_pt), delta(_delta), isActive(false) {}
@@ -36,8 +36,8 @@ template <class Cstr, int n> struct BC {
 
 template <class Cstr, int n> struct BCNatural : public BC<Cstr, n> {
   typedef typename BC<Cstr, n>::tCoords tCoords;
-  typedef typename BC<Cstr, n>::tMesh tMesh;
-  typedef TNode<n> tNode;
+  typedef typename BC<Cstr, n>::tMesh   tMesh;
+  typedef TNode<n>                      tNode;
 
   tNode *pnode;
   BCNatural() : BC<Cstr, n>(), pnode(NULL) {}
@@ -52,8 +52,8 @@ template <class Cstr, int n> struct BCNatural : public BC<Cstr, n> {
 
 template <class Cstr, int n> struct BCMfc : public BC<Cstr, n> {
   typedef typename BC<Cstr, n>::tCoords tCoords;
-  typedef TElement<n> tElement;
-  typedef typename BC<Cstr, n>::tMesh tMesh;
+  typedef TElement<n>                   tElement;
+  typedef typename BC<Cstr, n>::tMesh   tMesh;
 
   tElement *pelt;
   BCMfc(const tCoords &_pt, const tCoords &_delta)
@@ -69,15 +69,15 @@ template <class Cstr, int n> struct BCMfc : public BC<Cstr, n> {
 
 template <class Cstr, int n> class TSolver {
 public:
-  typedef TCoords<int, n> tIntCoords;
+  typedef TCoords<int, n>    tIntCoords;
   typedef TCoords<double, n> tCoords;
-  typedef TMesh<Cstr, n> tMesh;
-  typedef TNode<n> tNode;
-  typedef TElement<n> tElement;
+  typedef TMesh<Cstr, n>     tMesh;
+  typedef TNode<n>           tNode;
+  typedef TElement<n>        tElement;
 
-  typedef BC<Cstr, n> tBC;
+  typedef BC<Cstr, n>        tBC;
   typedef BCNatural<Cstr, n> tBCNatural;
-  typedef BCMfc<Cstr, n> tBCMfc;
+  typedef BCMfc<Cstr, n>     tBCMfc;
 
   TSolver();
   TSolver(tIntCoords &);
@@ -88,24 +88,24 @@ public:
   void add_bc_natural(tNode *pnode, const tCoords &delta);
   void add_bc_mfc(const tCoords &pt, const tCoords &delta);
 
-  virtual int solve();
-  void set_mesh(tMesh *pmesh) { m_pmesh = pmesh; }
+  virtual int  solve();
+  void         set_mesh(tMesh *pmesh) { m_pmesh = pmesh; }
   const tMesh *get_mesh() const { return m_pmesh; }
 
   void set_displayLevel(int level) { m_displayLevel = level; }
-  int get_displayLevel() const { return m_displayLevel; }
+  int  get_displayLevel() const { return m_displayLevel; }
 
   void setThreshold(double dval) {
-    m_bcThreshold = dval;
+    m_bcThreshold  = dval;
     m_useThreshold = true;
   }
 
-  typedef std::vector<tBC *> BcContainerType;
+  typedef std::vector<tBC *>                       BcContainerType;
   typedef typename BcContainerType::const_iterator BcContainerConstIterator;
   unsigned int getBcIterators(BcContainerConstIterator &begin,
                               BcContainerConstIterator &end) const {
     begin = m_vBc.begin();
-    end = m_vBc.end();
+    end   = m_vBc.end();
     return m_vBc.size();
   }
 
@@ -117,7 +117,7 @@ public:
   // when assigning BC MFC - keep the information about
   // the element available for later probing
   typedef typename std::map<unsigned int, std::pair<tCoords, double>>
-      BcMfcInfoType;
+                BcMfcInfoType;
   BcMfcInfoType m_mfcInfo;
 
 protected:
@@ -176,13 +176,13 @@ template <class Cstr, int n> TSolver<Cstr, n>::TSolver() {
   m_pmesh = NULL;
 
   m_stiffness = 0;
-  m_load = 0;
-  m_delta = 0;
+  m_load      = 0;
+  m_delta     = 0;
 
   m_displayLevel = 1;
 
   m_useThreshold = false;
-  m_bcThreshold = 0.0;
+  m_bcThreshold  = 0.0;
 
   m_mfcWeight = 1.0;
 }
@@ -200,8 +200,8 @@ template <class Cstr, int n> void TSolver<Cstr, n>::clone(const TSolver &s) {
   m_pmesh = s.m_pmesh;
 
   m_stiffness = 0;
-  m_load = 0;
-  m_delta = 0;
+  m_load      = 0;
+  m_delta     = 0;
 }
 
 template <class Cstr, int n>
@@ -213,8 +213,8 @@ void TSolver<Cstr, n>::add_bc_natural(const tCoords &pt, const tCoords &delta) {
 template <class Cstr, int n>
 void TSolver<Cstr, n>::add_bc_natural(tNode *pnode, const tCoords &delta) {
   tBCNatural *bc = new tBCNatural(pnode->coords(), delta);
-  bc->pnode = pnode;
-  bc->pt = pnode->coords();
+  bc->pnode      = pnode;
+  bc->pt         = pnode->coords();
   m_vBc.push_back(bc);
 }
 
@@ -228,8 +228,8 @@ void TSolver<Cstr, n>::add_bc_mfc(const tCoords &pt, const tCoords &delta) {
 #define __FUNCT__ "TSolver::solve"
 template <class Cstr, int n> int TSolver<Cstr, n>::solve() {
   PetscErrorCode ierr;
-  PetscBool petscFlag;
-  bool femPrint = false;
+  PetscBool      petscFlag;
+  bool           femPrint = false;
 
   ierr = PetscOptionsGetReal(NULL, NULL, "-penalty_weight", &m_mfcWeight, NULL);
   CHKERRQ(ierr);
@@ -248,7 +248,7 @@ template <class Cstr, int n> int TSolver<Cstr, n>::solve() {
 
   {
     const unsigned int maxLen = 256;
-    char buffer[maxLen];
+    char               buffer[maxLen];
     ierr = PetscOptionsGetString(NULL, NULL, "-fem_print", buffer, maxLen,
                                  &petscFlag);
     if (petscFlag) {
@@ -339,7 +339,7 @@ template <class Cstr, int n> int TSolver<Cstr, n>::solve() {
   ierr = MatMult(m_stiffness, m_delta, vcheck);
   CHKERRQ(ierr);
   PetscScalar neg_one = -1.0;
-  PetscReal norm;
+  PetscReal   norm;
   ierr = VecAXPY(vcheck, neg_one, m_load);
   CHKERRQ(ierr);
   ierr = VecNorm(vcheck, NORM_2, &norm);
@@ -357,8 +357,8 @@ template <class Cstr, int n> int TSolver<Cstr, n>::solve() {
   check_bc_error(dremainingRatio);
   if (dremainingRatio > .1 && 0) {
     PetscViewer viewer;
-    static int outCount = 0;
-    char *pchBuf = new char[100];
+    static int  outCount = 0;
+    char *      pchBuf   = new char[100];
 
     sprintf(pchBuf, "stif_%d.bin", outCount);
     PetscViewerBinaryOpen(PETSC_COMM_SELF, pchBuf, FILE_MODE_WRITE, &viewer);
@@ -382,13 +382,13 @@ template <class Cstr, int n> int TSolver<Cstr, n>::solve() {
   ierr = VecDestroy(&m_delta);
   CHKERRQ(ierr);
   m_delta = 0;
-  ierr = VecDestroy(&m_load);
+  ierr    = VecDestroy(&m_load);
   CHKERRQ(ierr);
   m_load = 0;
-  ierr = MatDestroy(&m_stiffness);
+  ierr   = MatDestroy(&m_stiffness);
   CHKERRQ(ierr);
   m_stiffness = 0;
-  ierr = KSPDestroy(&ksp);
+  ierr        = KSPDestroy(&ksp);
   CHKERRQ(ierr);
   ksp = 0;
 
@@ -399,7 +399,7 @@ template <class Cstr, int n> int TSolver<Cstr, n>::solve() {
 #define __FUNCT__ "TSolver::done_bc_natural"
 template <class Cstr, int n> int TSolver<Cstr, n>::done_bc_natural() {
   std::vector<tCoords> vdelta; // holds the point-wise diff for each BC
-  bool bFailed = false;
+  bool                 bFailed = false;
 
   tNode *pnode = NULL;
   for (typename BcContainerType::iterator it = m_vBc.begin(); it != m_vBc.end();
@@ -407,7 +407,7 @@ template <class Cstr, int n> int TSolver<Cstr, n>::done_bc_natural() {
     if (tBCNatural *bc = dynamic_cast<tBCNatural *>(*it)) {
       // if node was not previously specified, find closest now
       if (!bc->pnode) {
-        pnode = m_pmesh->closest_node(bc->pt);
+        pnode     = m_pmesh->closest_node(bc->pt);
         bc->pnode = pnode;
       } else
         pnode = bc->pnode;
@@ -458,11 +458,11 @@ template <class Cstr, int n> int TSolver<Cstr, n>::done_bc_mfc() {
   bool bFailed = false;
 
   typedef std::map<int, std::vector<int>> MfcCandidateType;
-  MfcCandidateType candidates;
-  MfcCandidateType::iterator mapIter;
+  MfcCandidateType                        candidates;
+  MfcCandidateType::iterator              mapIter;
 
-  tElement *pelt = NULL;
-  int index = 0;
+  tElement *pelt  = NULL;
+  int       index = 0;
   std::cout << " iterating\n";
   for (typename BcContainerType::iterator it = m_vBc.begin(); it != m_vBc.end();
        ++it, ++index) {
@@ -488,8 +488,8 @@ template <class Cstr, int n> int TSolver<Cstr, n>::done_bc_mfc() {
   // go through the assignment map and compute the 3D variances
   // per element
   tCoords mean;
-  int active = 0;
-  double dvarcova;
+  int     active = 0;
+  double  dvarcova;
   for (mapIter = candidates.begin(); mapIter != candidates.end(); ++mapIter) {
     std::vector<tCoords> vdelta;
     for (std::vector<int>::const_iterator cit = mapIter->second.begin();
@@ -498,13 +498,13 @@ template <class Cstr, int n> int TSolver<Cstr, n>::done_bc_mfc() {
     } // next cit
     // compute mean and variance per elt
     // return the norm of the covariance-matrix
-    dvarcova = coords_statistics(vdelta, mean);
+    dvarcova                  = coords_statistics(vdelta, mean);
     m_mfcInfo[mapIter->first] = std::make_pair(mean, dvarcova);
 
     // get closest BC to the mean
     std::vector<int>::const_iterator citArgmin = mapIter->second.begin();
-    double dMinDist(1000);
-    double dCrtDist;
+    double                           dMinDist(1000);
+    double                           dCrtDist;
 
 #if 0
     if ( dvarcova > 1.0 ) continue;
@@ -517,7 +517,7 @@ template <class Cstr, int n> int TSolver<Cstr, n>::done_bc_mfc() {
       // use determinants, i guess
       dCrtDist = (m_vBc[*cit]->delta - mean).norm();
       if (dCrtDist < dMinDist) {
-        dMinDist = dCrtDist;
+        dMinDist  = dCrtDist;
         citArgmin = cit;
       }
     } // next cit
@@ -539,7 +539,7 @@ template <class Cstr, int n> int TSolver<Cstr, n>::done_bc_mfc() {
 #define __FUNCT__ "TSolver::setup_matrix"
 template <class Cstr, int n> int TSolver<Cstr, n>::setup_matrix(bool showInfo) {
   PetscErrorCode ierr;
-  int n_eqs = m_pmesh->get_no_nodes() * n; // template par = dim
+  int            n_eqs = m_pmesh->get_no_nodes() * n; // template par = dim
   if (showInfo)
     std::cout << " no-eqs = " << n_eqs << std::endl;
   ierr =
@@ -571,8 +571,8 @@ template <class Cstr, int n> int TSolver<Cstr, n>::setup_matrix(bool showInfo) {
 template <class Cstr, int n>
 int TSolver<Cstr, n>::add_elt_matrix(const tElement *pelt) {
   PetscErrorCode ierr;
-  int *id = new int[pelt->no_nodes()];
-  tNode *pnode = NULL;
+  int *          id    = new int[pelt->no_nodes()];
+  tNode *        pnode = NULL;
 
   for (int i = 0; i < pelt->no_nodes(); ++i) {
     if (!pelt->get_node(i, &pnode)) {
@@ -585,8 +585,8 @@ int TSolver<Cstr, n>::add_elt_matrix(const tElement *pelt) {
   SmallMatrix elt_matrix = pelt->get_matrix();
 
   PetscScalar *values = new PetscScalar[elt_matrix.rows() * elt_matrix.cols()];
-  int *pindex_1 = new int[elt_matrix.rows()];
-  int *pindex_2 = new int[elt_matrix.cols()];
+  int *        pindex_1 = new int[elt_matrix.rows()];
+  int *        pindex_2 = new int[elt_matrix.cols()];
 
   int a, b;
   for (int i = 0; i < pelt->no_nodes(); ++i)
@@ -622,8 +622,8 @@ int TSolver<Cstr, n>::add_elt_matrix(const tElement *pelt) {
 template <class Cstr, int n>
 int TSolver<Cstr, n>::add_elt_mfc_lhs(const tElement *pelt, tCoords &pt) {
   PetscErrorCode ierr;
-  int *id = new int[pelt->no_nodes()];
-  tNode *pnode = NULL;
+  int *          id    = new int[pelt->no_nodes()];
+  tNode *        pnode = NULL;
 
   for (int i = 0; i < pelt->no_nodes(); ++i) {
     if (!pelt->get_node(i, &pnode)) {
@@ -702,7 +702,7 @@ template <class Cstr, int n>
 int TSolver<Cstr, n>::add_elt_mfc_rhs(const tElement *pelt, tCoords &pt,
                                       tCoords &delta) {
   PetscErrorCode ierr;
-  tNode *pnode = NULL;
+  tNode *        pnode = NULL;
 
   SmallMatrix elt_matrix(n, n * pelt->no_nodes());
   SmallMatrix bufMatrix;
@@ -733,14 +733,14 @@ int TSolver<Cstr, n>::add_elt_mfc_rhs(const tElement *pelt, tCoords &pt,
       mrhs[n * pnode->get_id() + j] = bufMatrix(n * i + j, 0);
   } // next i
 
-  int *indices = new int[mrhs.size()];
-  double *values = new double[mrhs.size()];
+  int *   indices = new int[mrhs.size()];
+  double *values  = new double[mrhs.size()];
 
   int index = 0;
   for (typename std::map<int, double>::const_iterator cit = mrhs.begin();
        cit != mrhs.end(); ++cit, ++index) {
     indices[index] = cit->first;
-    values[index] = cit->second;
+    values[index]  = cit->second;
   } // next cit
 
   ierr = VecSetValues(m_load, (int)mrhs.size(), indices, values, ADD_VALUES);
@@ -760,11 +760,11 @@ template <class Cstr, int n> int TSolver<Cstr, n>::comm_solution() {
   int no_eqs = m_pmesh->get_no_nodes() * n;
 
   PetscScalar *pdelta = new PetscScalar[no_eqs];
-  ierr = VecGetArray(m_delta, &pdelta);
+  ierr                = VecGetArray(m_delta, &pdelta);
   CHKERRQ(ierr);
 
   tNode *pnode = NULL;
-  int count = 0;
+  int    count = 0;
   for (size_t i = size_t(0); i < m_pmesh->get_no_nodes(); ++i, count++) {
     pnode = NULL;
     m_pmesh->get_node(i, &pnode);
@@ -785,8 +785,8 @@ template <class Cstr, int n> int TSolver<Cstr, n>::comm_solution() {
 #define __FUNCT__ "TSolver::setup_load"
 template <class Cstr, int n> int TSolver<Cstr, n>::setup_load() {
   PetscErrorCode ierr;
-  tNode *pnode;
-  int no_eqs = n * m_pmesh->get_no_nodes();
+  tNode *        pnode;
+  int            no_eqs = n * m_pmesh->get_no_nodes();
 
   ierr = MatSetOption(m_stiffness, MAT_NEW_NONZERO_LOCATIONS, PETSC_TRUE);
   CHKERRQ(ierr);
@@ -814,14 +814,14 @@ template <class Cstr, int n> int TSolver<Cstr, n>::setup_load() {
   ierr = VecSetFromOptions(m_load);
   CHKERRQ(ierr);
 
-  int *indices = new int[mrhs.size()];
-  double *values = new double[mrhs.size()];
+  int *   indices = new int[mrhs.size()];
+  double *values  = new double[mrhs.size()];
 
   int i = 0;
   for (typename std::map<int, double>::const_iterator cit = mrhs.begin();
        cit != mrhs.end(); ++cit, ++i) {
     indices[i] = cit->first;
-    values[i] = cit->second;
+    values[i]  = cit->second;
   }
 
   // create index set
@@ -904,14 +904,14 @@ template <class Cstr, int n> int TSolver<Cstr, n>::setup_load_sym() {
   ierr = VecSetFromOptions(m_load);
   CHKERRQ(ierr);
 
-  int *indices = new int[mrhs.size()];
-  double *values = new double[mrhs.size()];
+  int *   indices = new int[mrhs.size()];
+  double *values  = new double[mrhs.size()];
 
   int i = 0;
   for (typename std::map<int, double>::const_iterator cit = mrhs.begin();
        cit != mrhs.end(); ++cit, ++i) {
     indices[i] = cit->first;
-    values[i] = cit->second;
+    values[i]  = cit->second;
   }
 
   // compute RHS vector
@@ -967,9 +967,9 @@ template <class Cstr, int n>
 int TSolver<Cstr, n>::check_bc_error(double &dRemainingRatio) {
   // go through the BCs and measure the error
   double dSum(.0), dSumConditional(.0), dSumInitial(.0), dval;
-  int count(0), countConditional(0);
+  int    count(0), countConditional(0);
 
-  tCoords img;
+  tCoords      img;
   unsigned int countInvalid = 0;
   for (typename BcContainerType::const_iterator cit = m_vBc.begin();
        cit != m_vBc.end(); ++cit) {
@@ -1058,7 +1058,7 @@ template <class Cstr, int n> int TDirectSolver<Cstr, n>::solve() {
   ierr = VecCopy(this->m_load, this->m_delta);
   CHKERRQ(ierr);
 
-  PC pc;
+  PC  pc;
   KSP ksp;
   ierr = KSPCreate(PETSC_COMM_WORLD, &ksp);
   CHKERRQ(ierr);
@@ -1085,7 +1085,7 @@ template <class Cstr, int n> int TDirectSolver<Cstr, n>::solve() {
     static std::map<int, std::string> kspConvergenceReason;
     kspConvergenceReason[KSP_CONVERGED_RTOL] = "ksp-converged-rtol";
     kspConvergenceReason[KSP_CONVERGED_ATOL] = "ksp-converged-atol";
-    kspConvergenceReason[KSP_CONVERGED_ITS] = "ksp-converged-its";
+    kspConvergenceReason[KSP_CONVERGED_ITS]  = "ksp-converged-its";
     kspConvergenceReason[KSP_CONVERGED_CG_NEG_CURVE] =
         "ksp-converged-stcg-neg-curve";
     kspConvergenceReason[KSP_CONVERGED_CG_CONSTRAINED] =
@@ -1094,9 +1094,9 @@ template <class Cstr, int n> int TDirectSolver<Cstr, n>::solve() {
         "ksp-converged-step-length";
     kspConvergenceReason[KSP_CONVERGED_HAPPY_BREAKDOWN] =
         "ksp-converged-happy-breakdown";
-    kspConvergenceReason[KSP_DIVERGED_NULL] = "ksp-diverged-null";
-    kspConvergenceReason[KSP_DIVERGED_ITS] = "ksp-diverged-its";
-    kspConvergenceReason[KSP_DIVERGED_DTOL] = "ksp-diverged-dtol";
+    kspConvergenceReason[KSP_DIVERGED_NULL]      = "ksp-diverged-null";
+    kspConvergenceReason[KSP_DIVERGED_ITS]       = "ksp-diverged-its";
+    kspConvergenceReason[KSP_DIVERGED_DTOL]      = "ksp-diverged-dtol";
     kspConvergenceReason[KSP_DIVERGED_BREAKDOWN] = "ksp-diverged-breakdown";
     kspConvergenceReason[KSP_DIVERGED_BREAKDOWN_BICG] =
         "ksp-diverged-breakdown-bicg";
@@ -1124,13 +1124,13 @@ template <class Cstr, int n> int TDirectSolver<Cstr, n>::solve() {
   ierr = VecDestroy(&this->m_delta);
   CHKERRQ(ierr);
   this->m_delta = 0;
-  ierr = VecDestroy(&this->m_load);
+  ierr          = VecDestroy(&this->m_load);
   CHKERRQ(ierr);
   this->m_load = 0;
-  ierr = MatDestroy(&this->m_stiffness);
+  ierr         = MatDestroy(&this->m_stiffness);
   CHKERRQ(ierr);
   this->m_stiffness = 0;
-  ierr = KSPDestroy(&ksp);
+  ierr              = KSPDestroy(&ksp);
   CHKERRQ(ierr);
   ksp = 0;
 

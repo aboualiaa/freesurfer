@@ -26,30 +26,30 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "proto.h"
 #include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 
-#define ERODE 1
-#define DILATE 2
-#define CLOSE 3
-#define OPEN 4
+#define ERODE        1
+#define DILATE       2
+#define CLOSE        3
+#define OPEN         4
 #define DILATE_LABEL 5
-#define MODE_FILTER 6
+#define MODE_FILTER  6
 
 static void usage_exit(int code);
 
@@ -58,10 +58,10 @@ static int target_label = -1;
 #define PAD 20
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs;
-  MRI *mri_src, *mri_ref, *mri_tmp;
-  double accuracy;
+  char **    av;
+  int        ac, nargs;
+  MRI *      mri_src, *mri_ref, *mri_tmp;
+  double     accuracy;
   MRI_REGION box;
 
   nargs = handleVersionOption(argc, argv, "mri_label_accuracy");
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -134,7 +134,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'L':
       Gdiag_no = target_label = atoi(argv[2]);
-      nargs = 1;
+      nargs                   = 1;
       printf("only applying operations to label %d\n", target_label);
       break;
     case '?':

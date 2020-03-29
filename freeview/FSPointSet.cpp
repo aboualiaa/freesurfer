@@ -25,11 +25,11 @@
 
 #include "FSPointSet.h"
 #include "FSVolume.h"
-#include "vtkImageData.h"
 #include "MyUtils.h"
+#include "vtkImageData.h"
+#include <QDebug>
 #include <QFile>
 #include <QTextStream>
-#include <QDebug>
 
 FSPointSet::FSPointSet(QObject *parent) : QObject(parent), m_label(NULL) {}
 
@@ -55,7 +55,7 @@ bool FSPointSet::ReadAsLabel(const QString &filename) {
   m_label = ::LabelRead(NULL, filename.toLatin1().data());
 
   if (m_label == NULL) {
-    cerr << "LabelRead failed\n";
+    std::cerr << "LabelRead failed\n";
     return false;
   }
 
@@ -71,22 +71,22 @@ bool FSPointSet::ReadAsControlPoints(const QString &filename) {
 
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    cerr << qPrintable(file.errorString()) << "\n";
+    std::cerr << qPrintable(file.errorString()) << "\n";
     ;
     return false;
   }
 
   QTextStream in(&file);
-  QString content = in.readAll();
+  QString     content = in.readAll();
 
   return ReadFromStringAsControlPoints(content);
 }
 
 bool FSPointSet::ReadFromStringAsControlPoints(const QString &content) {
-  QStringList ar = content.split("\n");
-  int nCount = 0;
+  QStringList  ar     = content.split("\n");
+  int          nCount = 0;
   QList<float> values;
-  bool bRealRAS = true;
+  bool         bRealRAS = true;
   for (int i = 0; i < ar.size(); i++) {
     QStringList subs = ar[i].split(" ", QString::SkipEmptyParts);
     if (subs.size() > 2) {
@@ -99,7 +99,7 @@ bool FSPointSet::ReadFromStringAsControlPoints(const QString &content) {
       bRealRAS = false;
   }
 
-  m_label = ::LabelAlloc(nCount, NULL, (char *)"");
+  m_label           = ::LabelAlloc(nCount, NULL, (char *)"");
   m_label->n_points = nCount;
   if (bRealRAS) {
     m_label->coords = LABEL_COORDS_SCANNER_RAS;
@@ -109,12 +109,12 @@ bool FSPointSet::ReadFromStringAsControlPoints(const QString &content) {
     strncpy(m_label->space, "TkReg", sizeof(m_label->space));
   }
   for (int i = 0; i < nCount; i++) {
-    m_label->lv[i].x = values[i * 3];
-    m_label->lv[i].y = values[i * 3 + 1];
-    m_label->lv[i].z = values[i * 3 + 2];
-    m_label->lv[i].vno = -1;
+    m_label->lv[i].x       = values[i * 3];
+    m_label->lv[i].y       = values[i * 3 + 1];
+    m_label->lv[i].z       = values[i * 3 + 2];
+    m_label->lv[i].vno     = -1;
     m_label->lv[i].deleted = false;
-    m_label->lv[i].stat = 0;
+    m_label->lv[i].stat    = 0;
   }
 
   UpdateStatRange();
@@ -126,7 +126,7 @@ bool FSPointSet::WriteAsLabel(const QString &filename) {
   int err = ::LabelWrite(m_label, filename.toLatin1().data());
 
   if (err != 0) {
-    cerr << "Way Points Write failed\n";
+    std::cerr << "Way Points Write failed\n";
   }
 
   return err == 0;
@@ -137,9 +137,9 @@ bool FSPointSet::WriteAsControlPoints(const QString &filename) {
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QString strg = file.errorString();
     if (strg.isEmpty())
-      cerr << "Can not open file for writing\n";
+      std::cerr << "Can not open file for writing\n";
     else
-      cerr << qPrintable(strg) << "\n";
+      std::cerr << qPrintable(strg) << "\n";
     return false;
   }
 
@@ -166,8 +166,8 @@ void FSPointSet::UpdateLabel(PointSet &points_in, FSVolume *ref_vol) {
     ::LabelFree(&m_label);
   }
 
-  int nCount = 0;
-  double pos[3];
+  int          nCount = 0;
+  double       pos[3];
   QList<float> values;
   for (int i = 0; i < points_in.size(); i++) {
     ref_vol->TargetToRAS(points_in[i].pt, pos);
@@ -186,12 +186,12 @@ void FSPointSet::UpdateLabel(PointSet &points_in, FSVolume *ref_vol) {
 
   m_label->n_points = nCount;
   for (int i = 0; i < nCount; i++) {
-    m_label->lv[i].x = values[i * 4];
-    m_label->lv[i].y = values[i * 4 + 1];
-    m_label->lv[i].z = values[i * 4 + 2];
-    m_label->lv[i].vno = -1;
+    m_label->lv[i].x       = values[i * 4];
+    m_label->lv[i].y       = values[i * 4 + 1];
+    m_label->lv[i].z       = values[i * 4 + 2];
+    m_label->lv[i].vno     = -1;
     m_label->lv[i].deleted = false;
-    m_label->lv[i].stat = values[i * 4 + 3];
+    m_label->lv[i].stat    = values[i * 4 + 3];
   }
 }
 

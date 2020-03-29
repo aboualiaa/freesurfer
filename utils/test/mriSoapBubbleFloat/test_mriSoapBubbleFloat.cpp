@@ -2,15 +2,14 @@
 // unit test for mriSoapBubbleFloat - located in utils/mrinorm.c
 //
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include "error.h"
-#include "utils.h"
 #include "macros.h"
 #include "mri.h"
 #include "mrinorm.h"
-
+#include "utils.h"
 
 int main(int argc, char *argv[]) {
   // check arg count:
@@ -21,9 +20,9 @@ int main(int argc, char *argv[]) {
 
   // read args:
   std::string Progname = argv[0];
-  std::string s_src = argv[1];
-  std::string s_ctrl = argv[2];
-  std::string s_dst = argv[3];
+  std::string s_src    = argv[1];
+  std::string s_ctrl   = argv[2];
+  std::string s_dst    = argv[3];
 
   std::cout << Progname << std::endl;
 

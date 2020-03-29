@@ -7,8 +7,8 @@
 // for calculating the elapsed time
 #include <time.h>
 
-#include <vnl/vnl_diag_matrix.h>
 #include <vnl/vnl_cross.h>
+#include <vnl/vnl_diag_matrix.h>
 
 #include "itkPoistatsFilter.h"
 
@@ -304,7 +304,7 @@ PoistatsFilter<TInputImage, TOutputImage>::PoistatsFilter() {
   m_Replicas->SetNumberOfSteps(DEFAULT_NUMBER_OF_STEPS);
 
   const double smallValue = 1e-200;
-  m_InvalidOdf = ArrayType(GetNumberOfDirections());
+  m_InvalidOdf            = ArrayType(GetNumberOfDirections());
   m_InvalidOdf.fill(smallValue);
 
   this->SetReplicaExchangeProbability(DEFAULT_REPLICA_EXCHANGE_PROBABILITY);
@@ -344,15 +344,15 @@ PoistatsFilter<TInputImage, TOutputImage>::GetOdfLookUpTable() {
     RegionType dtiRegion = this->GetInput()->GetLargestPossibleRegion();
     OdfLookUpRegionType odfRegion;
 
-    double odfOrigin[OdfLookUpRegionType::GetImageDimension()];
+    double             odfOrigin[OdfLookUpRegionType::GetImageDimension()];
     OdfLookUpIndexType odfStart;
 
     OdfLookUpSizeType odfSize;
     for (unsigned int cDim = 0; cDim < OdfLookUpRegionType::GetImageDimension();
          cDim++) {
-      odfSize[cDim] = dtiRegion.GetSize()[cDim];
+      odfSize[cDim]   = dtiRegion.GetSize()[cDim];
       odfOrigin[cDim] = this->GetInput()->GetOrigin()[cDim];
-      odfStart[cDim] = 0;
+      odfStart[cDim]  = 0;
     }
 
     odfRegion.SetSize(odfSize);
@@ -376,17 +376,17 @@ void PoistatsFilter<TInputImage, TOutputImage>::AllocateOutputImage(
 
   InputImageConstPointer inputImage = this->GetInput();
 
-  RegionType dtiRegion = inputImage->GetLargestPossibleRegion();
-  OutputSizeType outputSize;
-  double outputOrigin[OutputRegionType::GetImageDimension()];
-  OutputIndexType outputStart;
+  RegionType        dtiRegion = inputImage->GetLargestPossibleRegion();
+  OutputSizeType    outputSize;
+  double            outputOrigin[OutputRegionType::GetImageDimension()];
+  OutputIndexType   outputStart;
   OutputSpacingType outputSpacing;
 
   for (unsigned int cDim = 0; cDim < OutputRegionType::GetImageDimension();
        cDim++) {
-    outputSize[cDim] = dtiRegion.GetSize()[cDim];
-    outputOrigin[cDim] = this->GetInput()->GetOrigin()[cDim];
-    outputStart[cDim] = 0;
+    outputSize[cDim]    = dtiRegion.GetSize()[cDim];
+    outputOrigin[cDim]  = this->GetInput()->GetOrigin()[cDim];
+    outputStart[cDim]   = 0;
     outputSpacing[cDim] = this->GetInput()->GetSpacing()[cDim];
   }
 
@@ -417,7 +417,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetPositiveMinimumInt(
   for (unsigned int cColumn = 0; cColumn < points->cols(); cColumn++) {
 
     vnl_vector<double> column = points->get_column(cColumn);
-    int minimumOfRow = static_cast<int>(floor(column.min_value()));
+    int minimumOfRow          = static_cast<int>(floor(column.min_value()));
     minimumOfRow -= radius;
 
     if (minimumOfRow < rowFloor) {
@@ -436,7 +436,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetPositiveMaximumInt(
   for (unsigned int cColumn = 0; cColumn < points->cols(); cColumn++) {
 
     vnl_vector<double> column = points->get_column(cColumn);
-    int maximumOfRow = static_cast<int>(ceil(column.max_value()));
+    int maximumOfRow          = static_cast<int>(ceil(column.max_value()));
     maximumOfRow += radius;
 
     const int rowCeiling = pointsRegion.GetSize()[cColumn] - 1;
@@ -484,18 +484,18 @@ void PoistatsFilter<TInputImage, TOutputImage>::ConvertPointsToImage(
   const int z = 2;
 
   const int columnStart = minimumPoint[y];
-  const int columnEnd = maximumPoint[y];
+  const int columnEnd   = maximumPoint[y];
 
   const int rowStart = minimumPoint[x];
-  const int rowEnd = maximumPoint[x];
+  const int rowEnd   = maximumPoint[x];
 
   const int sliceStart = minimumPoint[z];
-  const int sliceEnd = maximumPoint[z];
+  const int sliceEnd   = maximumPoint[z];
 
   const double gamma = this->GetPointsToImageGamma();
 
   itk::Array<double> box(points->cols());
-  OutputIndexType pixelIndex;
+  OutputIndexType    pixelIndex;
 
   double totalWeights = 0.0;
 
@@ -515,7 +515,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::ConvertPointsToImage(
 
           vnl_vector<double> point = points->get_row(cPoint);
 
-          const double distance = GetDistance(&point, &box);
+          const double distance  = GetDistance(&point, &box);
           distanceMatrix[cPoint] = exp(-gamma * distance * distance);
         }
 
@@ -573,7 +573,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GenerateData() {
   this->ConstructOdfList();
 
   // initialize temperatures to be regularily spaced between 0.05 and 0.1
-  const double temperatureFloor = 0.05;
+  const double temperatureFloor   = 0.05;
   const double temperatureCeiling = 0.1;
   m_Replicas->SpaceTemperaturesEvenly(temperatureFloor, temperatureCeiling);
 
@@ -585,7 +585,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GenerateData() {
 
   this->SetGlobalMinEnergy(maxDouble);
 
-  const int numberOfSpatialDimensions = 3;
+  const int  numberOfSpatialDimensions = 3;
   MatrixType finalBestPath(this->m_Replicas->GetNumberOfSteps(),
                            numberOfSpatialDimensions);
 
@@ -740,7 +740,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GenerateData() {
     // MATLAB: temp = coolfactor*temp;
     this->m_Replicas->CoolTemperatures(this->GetCoolFactor());
 
-    clock_t endClock = clock();
+    clock_t      endClock = clock();
     const double elapsedTime =
         static_cast<double>(endClock - startClock) / CLOCKS_PER_SEC;
     this->SetElapsedTime(elapsedTime);
@@ -905,7 +905,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::ConstructOdfList() {
 
   // the mask isn't required, so the iterator might not exist and need to be
   // iterated over
-  MaskVolumePointer mask = this->GetMaskVolume();
+  MaskVolumePointer                             mask = this->GetMaskVolume();
   itk::ImageRegionConstIterator<MaskVolumeType> maskIt;
 
   bool isMaskUsed = false;
@@ -922,11 +922,11 @@ void PoistatsFilter<TInputImage, TOutputImage>::ConstructOdfList() {
     maskIt = maskIt.Begin();
   }
 
-  const int nTensorRows = 3;
+  const int nTensorRows    = 3;
   const int nTensorColumns = 3;
 
   // this initialization of the for loop is long
-  for (inputImageIt = inputImageIt.Begin(),
+  for (inputImageIt    = inputImageIt.Begin(),
       odfLookUpTableIt = odfLookUpTableIt.Begin();
 
        !inputImageIt.IsAtEnd() && !odfLookUpTableIt.IsAtEnd();
@@ -1038,7 +1038,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::ConstructOdfList() {
   }
 
   // stop the clock and calculat the elapsed time
-  clock_t endClock = clock();
+  clock_t      endClock = clock();
   const double elapsedTime =
       static_cast<double>(endClock - startClock) / CLOCKS_PER_SEC;
   this->SetElapsedTime(elapsedTime);
@@ -1055,14 +1055,14 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetMagnetToSliceFrameRotation(
   */
 
   const double identityValues[] = {1, 0, 0};
-  ArrayType identity(identityValues, 3);
+  ArrayType    identity(identityValues, 3);
 
   if (this->GetInput()) {
 
     const double normalS = this->GetInput()->GetDirection()(2, 2);
     const double normalA = this->GetInput()->GetDirection()(1, 2);
     const double normalR = 0.0;
-    ArrayType sliceUp(3);
+    ArrayType    sliceUp(3);
     sliceUp(0) = normalS;
     sliceUp(1) = normalA;
     sliceUp(2) = normalR;
@@ -1086,7 +1086,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GenerateRotationMatrix3u2v(
   vMatrix.set_column(0, *v);
 
   VnlMatrixType dotProductMatrix = uMatrix.transpose() * vMatrix;
-  const double dotProduct = dotProductMatrix[0][0];
+  const double  dotProduct       = dotProductMatrix[0][0];
 
   // MATLAB:
   //  if abs(dotprod - 1) < 1e-3
@@ -1158,13 +1158,13 @@ void PoistatsFilter<TInputImage, TOutputImage>::GenerateRotationMatrix3u2v(
     //         +z +0 -x;
     //         -y +x +0];
 
-    const double pValues[] = {0, -z, y, z, 0, -x, -y, x, 0};
+    const double  pValues[] = {0, -z, y, z, 0, -x, -y, x, 0};
     VnlMatrixType p(pValues, 3, 3);
 
     // MATLAB:
     //    theta = acos(u'*v);
     VnlMatrixType angle = uMatrix.transpose() * vMatrix;
-    const double theta = acos(angle[0][0]);
+    const double  theta = acos(angle[0][0]);
 
     // MATLAB: R = eye(3) + P*sin(theta) + P*P*(1-cos(theta));
 
@@ -1239,7 +1239,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::InitPaths() {
 
   } else {
 
-    const int nInitialPoints = this->GetNumberOfInitialPoints();
+    const int nInitialPoints    = this->GetNumberOfInitialPoints();
     const int spatialDimensions = 3;
 
     MatrixType initialPoints(nInitialPoints, spatialDimensions);
@@ -1307,7 +1307,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetPointClosestToCenter(
   GetCenterOfMass(seeds, &center);
 
   double minDistance = std::numeric_limits<double>::max();
-  int indexOfMin = 0;
+  int    indexOfMin  = 0;
 
   for (unsigned int cSeed = 0; cSeed < seeds->rows(); cSeed++) {
     vnl_vector<double> seed = seeds->get_row(cSeed);
@@ -1317,7 +1317,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetPointClosestToCenter(
     // if this distance is the least, then save it
     if (distance < minDistance) {
       minDistance = distance;
-      indexOfMin = cSeed;
+      indexOfMin  = cSeed;
     }
   }
 
@@ -1349,8 +1349,8 @@ template <class TInputImage, class TOutputImage>
 void PoistatsFilter<TInputImage, TOutputImage>::GetCenterOfMass(
     MatrixPointer mass, ArrayPointer center) {
 
-  const double nSeeds = static_cast<double>(mass->rows());
-  const int nDimensions = mass->cols();
+  const double nSeeds      = static_cast<double>(mass->rows());
+  const int    nDimensions = mass->cols();
 
   // get the mean along the columns
   for (int cDim = 0; cDim < nDimensions; cDim++) {
@@ -1393,7 +1393,7 @@ template <class TInputImage, class TOutputImage>
 void PoistatsFilter<TInputImage, TOutputImage>::CalculateTensor2Odf(
     itk::Matrix<double, 3, 3> *tensor, itk::Array<double> *odf) {
 
-  const int numberOfOdfs = this->GetNumberOfDirections();
+  const int numberOfOdfs       = this->GetNumberOfDirections();
   const int numberOfTensorAxes = 3;
 
   // this is the matlab operations that we're doing
@@ -1402,13 +1402,13 @@ void PoistatsFilter<TInputImage, TOutputImage>::CalculateTensor2Odf(
   VnlMatrixType geo = this->GetTensorGeometry();
 
   vnl_svd<double> tensorSvd(tensor->GetVnlMatrix());
-  VnlMatrixType tensorInverse(tensorSvd.pinverse(3));
+  VnlMatrixType   tensorInverse(tensorSvd.pinverse(3));
 
   VnlMatrixType morphedGeo(geo * tensorInverse);
 
-  typedef vcl_complex<double> ComplexType;
+  typedef vcl_complex<double>     ComplexType;
   typedef itk::Array<ComplexType> ComplexArray;
-  ComplexArray complexOdf(odf->size());
+  ComplexArray                    complexOdf(odf->size());
 
   ComplexType odfSum(0.0, 0.0);
   for (int cRow = 0; cRow < numberOfOdfs; cRow++) {
@@ -1464,13 +1464,13 @@ double PoistatsFilter<TInputImage, TOutputImage>::CalculateOdfPathEnergy(
 
   // MATLAB: if max(angles) > pi/3, energies = 1e6; end;
   static const double largeAngle = M_PI / 3.0;
-  double meanEnergy = 0.0;
+  double              meanEnergy = 0.0;
 
   // we don't want sharp turns, so set those very large
   if (anglesBetweenPathVectors.max_value() > largeAngle) {
 
     const double maxEnergy = 1e6;
-    meanEnergy = maxEnergy / magnitude.sum();
+    meanEnergy             = maxEnergy / magnitude.sum();
 
     if (outputEnergies) {
       outputEnergies->Fill(maxEnergy);
@@ -1485,8 +1485,8 @@ double PoistatsFilter<TInputImage, TOutputImage>::CalculateOdfPathEnergy(
     // swap the first and last columns
     for (unsigned int row = 0; row < geo.rows(); row++) {
       const double tmp = geo[row][0];
-      geo[row][0] = geo[row][2];
-      geo[row][2] = tmp;
+      geo[row][0]      = geo[row][2];
+      geo[row][2]      = tmp;
     }
 
     vnl_matrix<double> dotProductPerGeoDirection(normalizedPathVectors *
@@ -1532,8 +1532,8 @@ double PoistatsFilter<TInputImage, TOutputImage>::CalculateOdfPathEnergy(
       for (unsigned int cColumn = 0; cColumn < densityMatrix.cols();
            cColumn++) {
         ArrayPointer odfsAtRow = odfs[cRow];
-        const double odf = (*odfsAtRow)[cColumn];
-        const double density = densityMatrix[cRow][cColumn];
+        const double odf       = (*odfsAtRow)[cColumn];
+        const double density   = densityMatrix[cRow][cColumn];
         odfListSum += odf * density;
       }
 
@@ -1586,7 +1586,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::CalculateDensityMatrix(
 
     for (unsigned int cColumn = 0; cColumn < angles->cols(); cColumn++) {
 
-      const double angle = (*angles)[cRow][cColumn];
+      const double angle          = (*angles)[cRow][cColumn];
       const double currentDensity = exp(-variance * angle * angle);
 
       (*densityMatrix)[cRow][cColumn] = currentDensity;
@@ -1614,7 +1614,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::CalculateAnglesBetweenVectors(
     for (unsigned int cColumn = 0; cColumn < vectors->cols(); cColumn++) {
 
       const double currentCell = (*vectors)[cRow][cColumn];
-      const double nextCell = (*vectors)[cRow + 1][cColumn];
+      const double nextCell    = (*vectors)[cRow + 1][cColumn];
       rowSum += currentCell * nextCell;
     }
 
@@ -1654,8 +1654,8 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetOdfsAtPoints(
       }
     }
 
-    OdfLookUpTablePointer table = this->GetOdfLookUpTable();
-    int odfIndex = INVALID_INDEX;
+    OdfLookUpTablePointer table    = this->GetOdfLookUpTable();
+    int                   odfIndex = INVALID_INDEX;
     if (isValidIndex) {
       odfIndex = table->GetPixel(index);
     }
@@ -1670,10 +1670,10 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetOdfsAtPoints(
 
 template <class TInputImage, class TOutputImage>
 void PoistatsFilter<TInputImage, TOutputImage>::GetSortedUniqueSeedValues(
-    SeedVolumePointer volume,
+    SeedVolumePointer                      volume,
     std::vector<std::pair<SeedType, int>> *seedValues) {
 
-  typedef std::pair<SeedType, int> SeedValueCountPairType;
+  typedef std::pair<SeedType, int>            SeedValueCountPairType;
   typedef std::vector<SeedValueCountPairType> SeedPairList;
 
   itk::ImageRegionConstIterator<SeedVolumeType> seedIt(
@@ -1706,7 +1706,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetSortedUniqueSeedValues(
       }
 
       if (isUnique) {
-        const int size = 1;
+        const int              size = 1;
         SeedValueCountPairType seedPair(pixelValue, size);
         seedValues->insert(insertionIndex, seedPair);
       }
@@ -1731,16 +1731,16 @@ itk::Array<double> PoistatsFilter<TInputImage, TOutputImage>::GetSamples() {
 
   typedef itk::BSplineInterpolateImageFunction<SamplingVolumeType, double,
                                                double>
-      InterpolatorType;
+                            InterpolatorType;
   InterpolatorType::Pointer interpolator = InterpolatorType::New();
   interpolator->SetInputImage(this->m_SamplingVolume);
   interpolator->SetSplineOrder(3);
 
   MatrixType finalPath = this->GetFinalPath();
 
-  ArrayType samples(finalPath.rows());
+  ArrayType                                     samples(finalPath.rows());
   typedef InterpolatorType::ContinuousIndexType ContinuousIndexType;
-  ContinuousIndexType index;
+  ContinuousIndexType                           index;
   // evaluate at the final path points
   for (unsigned int cPoint = 0; cPoint < finalPath.rows(); cPoint++) {
 
@@ -1761,9 +1761,9 @@ itk::Array<double> PoistatsFilter<TInputImage, TOutputImage>::GetSamples() {
 template <class TInputImage, class TOutputImage>
 void PoistatsFilter<TInputImage, TOutputImage>::TakeUnionOfSeeds(
     std::vector<std::pair<SeedType, int>> *seeds1,
-    std::vector<SeedType> *seeds2) {
+    std::vector<SeedType> *                seeds2) {
 
-  typedef std::pair<SeedType, int> SeedValueCountPairType;
+  typedef std::pair<SeedType, int>            SeedValueCountPairType;
   typedef std::vector<SeedValueCountPairType> SeedPairList;
 
   SeedPairList seedUnion;
@@ -1810,9 +1810,9 @@ void PoistatsFilter<TInputImage, TOutputImage>::SetSeedVolume(
 template <class TInputImage, class TOutputImage>
 void PoistatsFilter<TInputImage, TOutputImage>::ParseSeedVolume() {
 
-  typedef std::pair<SeedType, int> SeedValueCountPairType;
+  typedef std::pair<SeedType, int>            SeedValueCountPairType;
   typedef std::vector<SeedValueCountPairType> SeedPairList;
-  SeedPairList seedValueCountPairs;
+  SeedPairList                                seedValueCountPairs;
   GetSortedUniqueSeedValues(this->m_SeedVolume, &seedValueCountPairs);
 
   if (this->m_SeedValuesToUse.empty()) {
@@ -1845,8 +1845,8 @@ void PoistatsFilter<TInputImage, TOutputImage>::ParseSeedVolume() {
     for (SeedPairList::iterator valuesIt = seedValueCountPairs.begin();
          valuesIt != seedValueCountPairs.end(); valuesIt++) {
 
-      const SeedType seedValue = (*valuesIt).first;
-      const int nCurrentSeed = (*valuesIt).second;
+      const SeedType seedValue    = (*valuesIt).first;
+      const int      nCurrentSeed = (*valuesIt).second;
 
       itkDebugMacro(<< "  ( seed value, number of seeds ): (" << seedValue
                     << ", " << nCurrentSeed << " )");
@@ -1935,9 +1935,9 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetPathProbabilities(
     rawProbablities[cProbability][0] = exp(-energies[cProbability]);
   }
 
-  const double gridFloor = 0.0;
+  const double gridFloor   = 0.0;
   const double gridCeiling = 1.0;
-  ArrayType originalPathGrid(rawProbablities.rows());
+  ArrayType    originalPathGrid(rawProbablities.rows());
   PoistatsModel::SpaceEvenly(&originalPathGrid, gridFloor, gridCeiling);
 
   MatrixPointer outputProbabilities = m_PoistatsModel->CubicSplineInterpolation(
@@ -1982,13 +1982,13 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetAggregateReplicaDensities(
 
   aggregateDensities->FillBuffer(0.0);
 
-  OutputSizeType size;
+  OutputSizeType  size;
   OutputIndexType start;
 
   for (unsigned int cDim = 0; cDim < OutputRegionType::GetImageDimension();
        cDim++) {
 
-    size[cDim] = this->GetInput()->GetLargestPossibleRegion().GetSize(cDim);
+    size[cDim]  = this->GetInput()->GetLargestPossibleRegion().GetSize(cDim);
     start[cDim] = 0;
   }
 
@@ -2026,7 +2026,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::GetAggregateReplicaDensities(
           currentReplicaDensity->GetLargestPossibleRegion());
 
       for (currentReplicaIterator = currentReplicaIterator.Begin(),
-          aggregateIterator = aggregateIterator.Begin();
+          aggregateIterator       = aggregateIterator.Begin();
 
            !currentReplicaIterator.IsAtEnd() && !aggregateIterator.IsAtEnd();
 
@@ -2075,7 +2075,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::SetMaskVolume(
   MaskIteratorType maskIterator(this->m_MaskVolume,
                                 this->m_MaskVolume->GetLargestPossibleRegion());
 
-  const MaskType validValue = 1;
+  const MaskType validValue   = 1;
   const MaskType invalidValue = 0;
 
   // the mask that the user inputs will have non zero areas for places that the
@@ -2110,7 +2110,7 @@ PoistatsFilter<TInputImage, TOutputImage>::GetTensorGeometry() {
 
   if (this->m_TensorGeometry.empty()) {
 
-    const int numberOfOdfs = this->GetNumberOfDirections();
+    const int numberOfOdfs       = this->GetNumberOfDirections();
     const int numberOfTensorAxes = 3;
 
     this->m_TensorGeometry =
@@ -2145,7 +2145,7 @@ void PoistatsFilter<TInputImage, TOutputImage>::TakeUnionOfMaskAndSeeds() {
       for (unsigned int row = 0; row < seedRegion->rows(); row++) {
 
         // go through each dimension of the seed and create a mask index
-        vnl_vector<double> seedIndex = seedRegion->get_row(cSeed);
+        vnl_vector<double>  seedIndex = seedRegion->get_row(cSeed);
         MaskVolumeIndexType maskIndex;
 
         // the seed is the index

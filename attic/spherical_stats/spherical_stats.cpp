@@ -23,18 +23,18 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
+#include "error.h"
+#include "macros.h"
 #include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 
 static char vcid[] =
@@ -42,7 +42,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -50,31 +50,31 @@ static void print_version(void);
 
 const char *Progname;
 
-static float scale = 1;
-static int all = 0;
-static int global_stats_per_label = 0;
-static int plt = 1;
+static float scale                  = 1;
+static int   all                    = 0;
+static int   global_stats_per_label = 0;
+static int   plt                    = 1;
 
-static char subjects_dir[STRLEN];
+static char  subjects_dir[STRLEN];
 static char *hemi;
-static char *sphere_fname = "sphere.reg";
+static char *sphere_fname      = "sphere.reg";
 static char *manual_annotation = "parc.annot";
-static char *auto_annotation = "raparc.annot";
-static char *man_vs_auto = "man_vs_auto";
-static char *distance_error = "dist_error";
-static char *mean_fname = "mean_stat";
-static char *var_fname = "var_stat";
+static char *auto_annotation   = "raparc.annot";
+static char *man_vs_auto       = "man_vs_auto";
+static char *distance_error    = "dist_error";
+static char *mean_fname        = "mean_stat";
+static char *var_fname         = "var_stat";
 // static char *prob_fname ="prob_stat";
 // static char *orig_name = "smoothwm" ;
 static char *alignment_fname = "alignment";
-static char *template_fname = NULL;
-static char *suffix = NULL;
+static char *template_fname  = NULL;
+static char *suffix          = NULL;
 static char *current_subject = NULL;
 
 static int *collapses[50]; /* not freed !!! */
-static int ncollapses[50];
+static int  ncollapses[50];
 
-static int labels[100];
+static int   labels[100];
 static float global_nvertices[100];
 static float mean_global_dist[100];
 static float mean_global_Efract[100];
@@ -106,7 +106,7 @@ HISTOGRAM *histos[100];
 #define MAX_NUMBER_OF_SUBJECTS 100
 
 static void normalize(HISTO *histo) {
-  int n;
+  int   n;
   float total = 0.0, scale;
   for (n = 0; n < histo->nbins; n++)
     total += histo->counts[n];
@@ -118,13 +118,13 @@ static void normalize(HISTO *histo) {
 }
 
 static void printGlobalStats(MRIS *mris, char *fname) {
-  int m;
-  int r, g, b;
+  int          m;
+  int          r, g, b;
   COLOR_TABLE *ct;
-  CTE *cte;
-  int index;
-  FILE *f;
-  char histoname[500];
+  CTE *        cte;
+  int          index;
+  FILE *       f;
+  char         histoname[500];
 
   ct = mris->ct;
 
@@ -177,7 +177,7 @@ static void printGlobalStats(MRIS *mris, char *fname) {
 }
 
 static float computeScaleFactor(MRIS *mris, char *fname) {
-  int n;
+  int   n;
   float area, brain_scale = 1.0f;
   MRISsaveVertexPositions(mris, CANONICAL_VERTICES);
 
@@ -200,7 +200,7 @@ static float computeScaleFactor(MRIS *mris, char *fname) {
 }
 
 static float findMedian(HISTO *histo, float med) {
-  int n;
+  int   n;
   float total = 0.0;
   med *= 0.01;
 
@@ -213,19 +213,19 @@ static float findMedian(HISTO *histo, float med) {
   return (histo->bin_size * n);
 }
 static void printStats(MRIS *mris, char *fname) {
-  FILE *f;
-  int m, n, nvertices;
-  int r, g, b, bin;
-  float mean_dist, Efract, larea;
-  float median_25, median_50, median_75;
+  FILE *       f;
+  int          m, n, nvertices;
+  int          r, g, b, bin;
+  float        mean_dist, Efract, larea;
+  float        median_25, median_50, median_75;
   COLOR_TABLE *ct;
-  float maxv;
-  CTE *cte;
-  int index;
-  HISTOGRAM *histo;
-  VERTEX *v;
+  float        maxv;
+  CTE *        cte;
+  int          index;
+  HISTOGRAM *  histo;
+  VERTEX *     v;
 
-  histo = HISTOalloc(100);
+  histo           = HISTOalloc(100);
   histo->bin_size = MAX_DIST / 100.0;
 
   ct = mris->ct;
@@ -247,8 +247,8 @@ static void printStats(MRIS *mris, char *fname) {
       fprintf(f, "Label %d - [ %d , %d , %d ] \n", labels[m], r, g, b);
     }
 
-    maxv = 0.0f;
-    Efract = 0.0f;
+    maxv      = 0.0f;
+    Efract    = 0.0f;
     mean_dist = 0.0f;
     nvertices = 0;
     for (n = 0; n < mris->nvertices; n++) {
@@ -346,7 +346,7 @@ static void printStats(MRIS *mris, char *fname) {
 }
 
 static int checkCollapsing(MRIS *mris) {
-  int n, p, q;
+  int     n, p, q;
   VERTEX *v;
 
   for (p = 0; p < 50; p++) {
@@ -398,9 +398,9 @@ static float sphericaldistance(float x1, float y1, float z1, float x2, float y2,
 }
 
 static void computeDistances(MRIS *mris) {
-  int n, m, p, count;
+  int   n, m, p, count;
   float dist, x, y, z;
-  int nlistvertices, *vertexlist;
+  int   nlistvertices, *vertexlist;
 
   static int first = 1; /* first time compute list of labels */
 
@@ -439,9 +439,9 @@ static void computeDistances(MRIS *mris) {
     // fprintf(stderr,"\nANNOTATION %d [%f]",annotation,v->fieldsign);
 
     if (first) {
-      histos[nlabels] = HISTOalloc(100) /* min = 0 - max = 10mm */;
+      histos[nlabels]           = HISTOalloc(100) /* min = 0 - max = 10mm */;
       histos[nlabels]->bin_size = MAX_DIST / 100.0; /* 0.1 mm */
-      labels[nlabels++] = annotation;
+      labels[nlabels++]         = annotation;
     }
 
     //  fprintf(stderr,"label = %d [%d]\n",nlabels,annotation);
@@ -450,17 +450,17 @@ static void computeDistances(MRIS *mris) {
     /* first locate border labels */
     for (nlistvertices = m = 0; m < mris->nvertices; m++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[m];
-      VERTEX *const v = &mris->vertices[m];
+      VERTEX *const                v  = &mris->vertices[m];
       if (v->ripflag)
         continue;
       if (v->annotation != annotation)
         continue; /* not a label of interest */
       // if(v->fieldsign>0) fprintf(stderr,"#");
-      dist = 0.0f;
+      dist  = 0.0f;
       count = 0;
-      x = v->x;
-      y = v->y;
-      z = v->z;
+      x     = v->x;
+      y     = v->y;
+      z     = v->z;
       for (p = 0; p < vt->vnum; p++) {
         VERTEX const *const vp = &mris->vertices[vt->v[p]];
         if (vp->ripflag)
@@ -501,9 +501,9 @@ static void computeDistances(MRIS *mris) {
       if (v->fieldsign >= 0)
         continue; /*border label */
       /* compute distance to border */
-      x = v->x;
-      y = v->y;
-      z = v->z;
+      x    = v->x;
+      y    = v->y;
+      z    = v->z;
       dist = 10000.0f;
       for (p = 0; p < nlistvertices; p++) {
         VERTEX const *const vp = &mris->vertices[vertexlist[p]];
@@ -518,9 +518,9 @@ static void computeDistances(MRIS *mris) {
 
   if (global_stats_per_label && first) {
     COLOR_TABLE *ct;
-    CTE *cte;
-    int index;
-    char fname[500];
+    CTE *        cte;
+    int          index;
+    char         fname[500];
     /* allocation */
     ct = mris->ct;
     for (m = 0; m < nlabels; m++) {
@@ -556,10 +556,10 @@ static void computeDistances(MRIS *mris) {
 int main(int argc, char *argv[]) {
   char **av, *subjects_fname[MAX_NUMBER_OF_SUBJECTS], fname[STRLEN], *cp,
       *subject_fname;
-  int ac, nargs;
-  float brain_scale;
+  int          ac, nargs;
+  float        brain_scale;
   MRI_SURFACE *mris, *mris_atlas;
-  MRI_SP *mrisp, *mrisp_template, *mrisp_average = NULL;
+  MRI_SP *     mrisp, *mrisp_template, *mrisp_average = NULL;
 
   int n, m, nsubjects;
   // int          msec, minutes, seconds ;
@@ -625,7 +625,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "\n\nPROCESSING SUBJECT %d out of %d subjects\n", n + 1,
             nsubjects);
 
-    subject_fname = subjects_fname[n];
+    subject_fname   = subjects_fname[n];
     current_subject = subject_fname;
     sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_fname, hemi,
             sphere_fname);
@@ -649,8 +649,8 @@ int main(int argc, char *argv[]) {
     /* save annotation of manual into val and fieldsign into fsmask */
     for (m = 0; m < mris->nvertices; m++) {
       VERTEX *const v = &mris->vertices[m];
-      v->val = v->annotation;
-      v->fsmask = v->fieldsign;
+      v->val          = v->annotation;
+      v->fsmask       = v->fieldsign;
     }
 
     sprintf(fname, "%s/%s/label/%s.%s", subjects_dir, subject_fname, hemi,
@@ -664,13 +664,13 @@ int main(int argc, char *argv[]) {
     /* generating maps */
     for (m = 0; m < mris->nvertices; m++) {
       VERTEX *const v = &mris->vertices[m];
-      v->d = 0;
+      v->d            = 0;
       if (v->annotation == (int)v->val)
         v->curv = 0;
       else
         v->curv = 1;
       v->val2 = v->curv; /* temporary saving into v->val2 */
-      v->d = 0.5 * brain_scale * (v->fieldsign + v->fsmask); /* error */
+      v->d    = 0.5 * brain_scale * (v->fieldsign + v->fsmask); /* error */
     }
 
     /* save stats */
@@ -749,14 +749,14 @@ int main(int argc, char *argv[]) {
       MRISnormalizeCurvature(mris, NORM_MEAN);
       for (m = 0; m < mris->nvertices; m++) {
         VERTEX *const v = &mris->vertices[m];
-        v->valbak = v->curv;
+        v->valbak       = v->curv;
       }
       MRISfromParameterization(mrisp_average, mris, 6);
       MRISnormalizeCurvature(mris, NORM_MEAN);
 
       for (m = 0; m < mris->nvertices; m++) {
         VERTEX *const v = &mris->vertices[m];
-        v->curv = fabs(v->valbak - v->curv);
+        v->curv         = fabs(v->valbak - v->curv);
       }
       if (suffix)
         sprintf(fname, "%s/%s/surf/%s.%s.%s", subjects_dir, subject_fname, hemi,
@@ -803,7 +803,7 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "\n\nPROCESSING SUBJECT %d out of %d subjects\n", n + 1,
               nsubjects);
 
-      subject_fname = subjects_fname[n];
+      subject_fname   = subjects_fname[n];
       current_subject = subject_fname;
       sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_fname, hemi,
               sphere_fname);
@@ -1002,7 +1002,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int n, m, nargs = 0, r, g, b = 0;
+  int   n, m, nargs = 0, r, g, b = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

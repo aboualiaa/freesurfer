@@ -29,37 +29,37 @@
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char *Progname;
-static void usage_exit(int code);
+const char *             Progname;
+static void              usage_exit(int code);
 static INTEGRATION_PARMS parms;
-static int use_thickness = 0;
-static int nsurfaces = 1;
-static char *thickness_name = "thickness";
-static char *pial_name = "pial";
-static int nbrs = 2;
+static int               use_thickness  = 0;
+static int               nsurfaces      = 1;
+static char *            thickness_name = "thickness";
+static char *            pial_name      = "pial";
+static int               nbrs           = 2;
 
 static char *orig_name = nullptr;
 
 int main(int argc, char *argv[]) {
-  int nargs;
-  char *in_fname, *out_fname, fname[STRLEN], *cp;
-  int msec, minutes, seconds;
-  Timer start;
-  float mm_out;
+  int          nargs;
+  char *       in_fname, *out_fname, fname[STRLEN], *cp;
+  int          msec, minutes, seconds;
+  Timer        start;
+  float        mm_out;
   MRI_SURFACE *mris;
 
-  parms.l_spring = .05;
+  parms.l_spring   = .05;
   parms.l_location = 1;
   // parms.l_curv = 1.0 ;
-  parms.n_averages = 16;
+  parms.n_averages       = 16;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.min_averages = 0;
-  parms.l_surf_repulse = .0;
-  parms.l_repulse = 0.025;
-  parms.dt = 0.25;
+  parms.min_averages     = 0;
+  parms.l_surf_repulse   = .0;
+  parms.l_repulse        = 0.025;
+  parms.dt               = 0.25;
 
   nargs = handleVersionOption(argc, argv, "mris_expand");
   if (nargs && argc - nargs == 1)
@@ -82,8 +82,8 @@ int main(int argc, char *argv[]) {
   if (argc != 4)
     usage_exit(1);
 
-  in_fname = argv[1];
-  mm_out = atof(argv[2]);
+  in_fname  = argv[1];
+  mm_out    = atof(argv[2]);
   out_fname = argv[3];
 
   FileNameOnly(out_fname, fname);
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
     MRISwrite(mris, out_fname);
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -196,14 +196,14 @@ static int get_option(int argc, char *argv[]) {
     printf("using thickness file %s\n", thickness_name);
     nargs = 1;
   } else if (!stricmp(option, "navgs")) {
-    parms.n_averages = atof(argv[2]);
+    parms.n_averages   = atof(argv[2]);
     parms.min_averages = atoi(argv[3]);
     printf("using n_averages %d --> %d\n", parms.n_averages,
            parms.min_averages);
     nargs = 2;
   } else if (!stricmp(option, "intensity")) {
     parms.target_intensity = atof(argv[2]);
-    parms.mri_brain = MRIread(argv[3]);
+    parms.mri_brain        = MRIread(argv[3]);
     if (parms.mri_brain == nullptr)
       ErrorExit(ERROR_NOFILE, "%s: could not load target intensity volume %s\n",
                 argv[3]);
@@ -212,39 +212,39 @@ static int get_option(int argc, char *argv[]) {
     nargs = 2;
   } else if (!stricmp(option, "curv")) {
     parms.l_curv = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_curv = %2.3f\n", parms.l_curv);
   } else if (!stricmp(option, "location")) {
     parms.l_location = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     fprintf(stderr, "l_location = %2.3f\n", parms.l_location);
   } else if (!stricmp(option, "nspring")) {
     parms.l_nspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_nspring = %2.3f\n", parms.l_nspring);
   } else if (!stricmp(option, "angle")) {
     parms.l_angle = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "l_angle = %2.3f\n", parms.l_angle);
   } else if (!stricmp(option, "pangle")) {
     parms.l_pangle = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "l_angle = %2.3f\n", parms.l_pangle);
   } else if (!stricmp(option, "spring_norm")) {
     parms.l_spring_norm = atof(argv[2]);
-    nargs = 1;
+    nargs               = 1;
     fprintf(stderr, "l_spring_norm = %2.3f\n", parms.l_spring_norm);
   } else if (!stricmp(option, "nltspring")) {
     parms.l_nltspring = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "l_nltspring = %2.3f\n", parms.l_nltspring);
   } else if (!stricmp(option, "tspring")) {
     parms.l_tspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_tspring = %2.3f\n", parms.l_tspring);
   } else if (!stricmp(option, "surf_repulse")) {
     parms.l_surf_repulse = atof(argv[2]);
-    nargs = 1;
+    nargs                = 1;
     fprintf(stderr, "l_surf_repulse = %2.3f\n", parms.l_surf_repulse);
   } else if (!stricmp(option, "pial")) {
     pial_name = argv[2];
@@ -254,7 +254,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'O':
       orig_name = argv[2];
-      nargs = 1;
+      nargs     = 1;
       printf("reading original metric properties from %s\n", orig_name);
       break;
     case '?':
@@ -263,7 +263,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("debugging vertex %d\n", Gdiag_no);
       break;
     case 'R':
@@ -273,30 +273,30 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'S':
       parms.l_spring = atof(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       printf("setting spring term to %2.2f\n", parms.l_spring);
       break;
     case 'T':
       parms.dt = atof(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("setting dt = %2.2f\n", parms.dt);
       break;
     case 'W':
       parms.write_iterations = atoi(argv[2]);
-      nargs = 1;
+      nargs                  = 1;
       printf("writing snapshots of expansion every %d iterations\n",
              parms.write_iterations);
       Gdiag |= DIAG_WRITE;
       break;
     case 'A':
       parms.smooth_averages = atoi(argv[2]);
-      nargs = 1;
+      nargs                 = 1;
       printf("smoothing surface with %d iterations after expansion\n",
              parms.smooth_averages);
       break;
     case 'N': // how many surfaces to write out
       nsurfaces = atoi(argv[2]);
-      nargs = 1;
+      nargs     = 1;
       printf("writing %d surfaces during expansion\n", nsurfaces);
       break;
     default:

@@ -33,7 +33,7 @@ private:
   void _ReAlloc(int maxpts = -1);
 
 public:
-  int npoints, maxpoints;
+  int  npoints, maxpoints;
   int *points;
 
 public:
@@ -45,10 +45,10 @@ public:
   void Alloc(int maxpts);
   void AddPoint(int pt);
   void Print() const;
-  int End();
+  int  End();
   void Pop();
-  int Replace(int pt, int new_pt);
-  int operator[](int n) {
+  int  Replace(int pt, int new_pt);
+  int  operator[](int n) {
     ASSERT((n >= 0) && (n < npoints));
     return points[n];
   }

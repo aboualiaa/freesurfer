@@ -1,7 +1,7 @@
-#include "kvlMatlabRunner.h"
-#include "kvlMatlabObjectArray.h"
-#include "kvlCroppedImageReader.h"
 #include "kvlAtlasMeshCollection.h"
+#include "kvlCroppedImageReader.h"
+#include "kvlMatlabObjectArray.h"
+#include "kvlMatlabRunner.h"
 #include "vnl/vnl_det.h"
 
 namespace kvl {
@@ -9,9 +9,9 @@ namespace kvl {
 class ReadMesh : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef ReadMesh Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef ReadMesh                      Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -36,10 +36,10 @@ public:
     }
     const std::string meshCollectionFileName = mxArrayToString(prhs[0]);
 
-    int startingMeshNumber = -1;
+    int                                       startingMeshNumber = -1;
     typedef CroppedImageReader::TransformType TransformType;
-    TransformType::ConstPointer transform = 0;
-    float K = -1.0f;
+    TransformType::ConstPointer               transform = 0;
+    float                                     K         = -1.0f;
 
     if (nrhs > 1) {
       if (!mxIsInt64(prhs[1])) {
@@ -121,11 +121,11 @@ public:
           // negative tetrahedra
           // into positives ones.
           kvl::AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-          const kvl::AtlasMesh::PointIdentifier p0Id = *pit;
+          const kvl::AtlasMesh::PointIdentifier     p0Id = *pit;
           ++pit;
           const kvl::AtlasMesh::PointIdentifier p1Id = *pit;
 
-          pit = cell->PointIdsBegin();
+          pit  = cell->PointIdsBegin();
           *pit = p1Id;
           ++pit;
           *pit = p0Id;

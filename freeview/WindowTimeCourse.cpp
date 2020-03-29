@@ -23,20 +23,20 @@
  */
 
 #include "WindowTimeCourse.h"
-#include "ui_WindowTimeCourse.h"
-#include "MainWindow.h"
-#include "LayerMRI.h"
-#include "LayerCollection.h"
+#include "FSSurface.h"
 #include "FSVolume.h"
+#include "FlowLayout.h"
+#include "LayerCollection.h"
+#include "LayerMRI.h"
 #include "LayerSurface.h"
+#include "MainWindow.h"
 #include "SurfaceOverlay.h"
 #include "SurfaceOverlayProperty.h"
-#include "FSSurface.h"
-#include <QSettings>
-#include <QDebug>
-#include "FlowLayout.h"
+#include "ui_WindowTimeCourse.h"
 #include <QColorDialog>
+#include <QDebug>
 #include <QPointer>
+#include <QSettings>
 
 ClickableLabel::ClickableLabel(QWidget *parent, Qt::WindowFlags f)
     : QLabel(parent) {}
@@ -61,7 +61,7 @@ WindowTimeCourse::WindowTimeCourse(QWidget *parent)
           SLOT(UpdateScaleInfo()), Qt::QueuedConnection);
 
   QSettings s;
-  QVariant v = s.value("WindowTimeCourse/Geomerty");
+  QVariant  v = s.value("WindowTimeCourse/Geomerty");
   if (v.isValid())
     this->restoreGeometry(v.toByteArray());
   ui->checkBoxAutoScale->setChecked(
@@ -98,7 +98,7 @@ void WindowTimeCourse::UpdateData(bool bForce) {
   if (!isVisible() && !bForce)
     return;
 
-  QString type = MainWindow::GetMainWindow()->GetCurrentLayerType();
+  QString       type = MainWindow::GetMainWindow()->GetCurrentLayerType();
   QList<QColor> colors;
   colors << Qt::yellow << Qt::cyan << Qt::red << Qt::magenta;
   Clear();
@@ -108,7 +108,7 @@ void WindowTimeCourse::UpdateData(bool bForce) {
       LayerMRI *layer = qobject_cast<LayerMRI *>(layers[nl]);
       if (layer && layer->GetNumberOfFrames() > 1) {
         double ras[3];
-        int n[3];
+        int    n[3];
         MainWindow::GetMainWindow()
             ->GetLayerCollection("MRI")
             ->GetSlicePosition(ras);
@@ -117,22 +117,22 @@ void WindowTimeCourse::UpdateData(bool bForce) {
         QList<double> data;
         for (int i = 0; i < layer->GetNumberOfFrames(); i++)
           data << layer->GetVoxelValueByOriginalIndex(n[0], n[1], n[2], i);
-        FSVolume *vol = layer->GetSourceVolume();
+        FSVolume *vol  = layer->GetSourceVolume();
         double val_min = vol->GetMinValue(), val_max = vol->GetFullMaxValue();
-        QVariantMap info = layer->GetTimeSeriesInfo();
+        QVariantMap    info = layer->GetTimeSeriesInfo();
         TimeCourseData td;
         td.m_points = data;
-        td.m_dMin = val_min;
-        td.m_dMax = val_max;
+        td.m_dMin   = val_min;
+        td.m_dMax   = val_max;
         if (!layer->property("legend_color").value<QColor>().isValid())
           layer->setProperty("legend_color",
                              colors[(layers.size() - 1 - nl) % colors.size()]);
-        td.m_color = layer->property("legend_color").value<QColor>();
-        td.m_strXUnit = info["unit"].toString();
+        td.m_color      = layer->property("legend_color").value<QColor>();
+        td.m_strXUnit   = info["unit"].toString();
         td.m_dXInterval = info["tr"].toDouble();
-        td.m_dXOffset = info["offset"].toDouble();
-        td.m_nId = layer->GetID();
-        td.m_strName = layer->GetName();
+        td.m_dXOffset   = info["offset"].toDouble();
+        td.m_nId        = layer->GetID();
+        td.m_strName    = layer->GetName();
         if (layer->property("timecourse_visible").isValid())
           td.m_bShow = layer->property("timecourse_visible").toBool();
         ui->widgetPlot->AddTimeCourseData(td);
@@ -174,9 +174,9 @@ void WindowTimeCourse::UpdateData(bool bForce) {
 
       for (int no = 0; no < overlays.size(); no++) {
         SurfaceOverlay *overlay = overlays[no];
-        int nFrames = overlay->GetNumberOfFrames();
-        float *buffer = new float[nFrames];
-        double range[2];
+        int             nFrames = overlay->GetNumberOfFrames();
+        float *         buffer  = new float[nFrames];
+        double          range[2];
         overlay->GetDataAtVertex(nVert, buffer);
         overlay->GetRawRange(range);
         QList<double> data;
@@ -185,16 +185,16 @@ void WindowTimeCourse::UpdateData(bool bForce) {
         delete[] buffer;
         TimeCourseData td;
         td.m_points = data;
-        td.m_dMin = range[0];
-        td.m_dMax = range[1];
+        td.m_dMin   = range[0];
+        td.m_dMax   = range[1];
         if (!overlay->property("legend_color").value<QColor>().isValid())
           overlay->setProperty(
               "legend_color",
               colors[(overlays.size() - 1 - no) % colors.size()]);
         if (overlay->property("timecourse_visible").isValid())
           td.m_bShow = overlay->property("timecourse_visible").toBool();
-        td.m_color = overlay->property("legend_color").value<QColor>();
-        td.m_nId = overlay->GetID();
+        td.m_color   = overlay->property("legend_color").value<QColor>();
+        td.m_nId     = overlay->GetID();
         td.m_strName = overlay->GetName();
         ui->widgetPlot->AddTimeCourseData(td);
         ui->widgetPlot->SetCurrentFrame(overlay->GetActiveFrame());
@@ -207,9 +207,9 @@ void WindowTimeCourse::UpdateData(bool bForce) {
   }
 }
 
-QWidget *WindowTimeCourse::MakeLegendWidget(QObject *obj,
+QWidget *WindowTimeCourse::MakeLegendWidget(QObject *             obj,
                                             const TimeCourseData &td) {
-  QWidget *w = new QWidget(this);
+  QWidget *    w    = new QWidget(this);
   QHBoxLayout *hbox = new QHBoxLayout;
   w->setLayout(hbox);
   QCheckBox *checkbox = new QCheckBox();
@@ -297,7 +297,7 @@ void WindowTimeCourse::OnLineEditScaleReturnPressed() {
   if (list.size() != 2)
     return;
 
-  bool bOK;
+  bool   bOK;
   double range[2];
   range[0] = list[0].trimmed().toDouble(&bOK);
   if (!bOK)
@@ -331,7 +331,7 @@ void WindowTimeCourse::OnLegendLabelClicked() {
   QPointer<QLabel> l = qobject_cast<QLabel *>(sender());
   if (l) {
     QObject *obj = l->property("data_obj").value<QObject *>();
-    QColor c = QColorDialog::getColor(
+    QColor   c   = QColorDialog::getColor(
         obj ? obj->property("legend_color").value<QColor>() : Qt::white, this);
     if (c.isValid() && l) {
       l->setStyleSheet(QString("color:rgb(%1,%2,%3)")

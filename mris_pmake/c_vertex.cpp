@@ -38,7 +38,7 @@ bool vertex_ripFlagIsTrue(VERTEX *pvertex, void *pv_void) {
 }
 
 void vertex_ripFlagMark(VERTEX *pvertex, void *pv_mark) {
-  char *pch_mark = (char *)pv_mark;
+  char *pch_mark   = (char *)pv_mark;
   pvertex->ripflag = *pch_mark;
 }
 
@@ -74,11 +74,11 @@ void vertex_rawCurveMinMax(VERTEX *apvertex, void *apv_functional) {
   s_minMax *ps_minMax = (s_minMax *)apv_functional;
 
   if (apvertex->curv < ps_minMax->f_min) {
-    ps_minMax->f_min = apvertex->curv;
+    ps_minMax->f_min     = apvertex->curv;
     ps_minMax->minVertex = apvertex->annotation;
   }
   if (apvertex->curv > ps_minMax->f_max) {
-    ps_minMax->f_max = apvertex->curv;
+    ps_minMax->f_max     = apvertex->curv;
     ps_minMax->maxVertex = apvertex->annotation;
   }
 }
@@ -105,7 +105,7 @@ bool vertex_isDijkVirgin(VERTEX *pvertex, void *pv_void) {
 }
 
 void vertex_annotationMark(VERTEX *pvertex, void *pv_mark) {
-  int *mark = (int *)pv_mark;
+  int *mark           = (int *)pv_mark;
   pvertex->annotation = *mark;
 }
 

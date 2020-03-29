@@ -14,10 +14,10 @@
 
 // Qt headers include
 #include <QMouseEvent>
-#include <QtGui/QOffscreenSurface>
 #include <QOpenGLFunctions>
 #include <QResizeEvent>
 #include <QSurfaceFormat>
+#include <QtGui/QOffscreenSurface>
 
 //-----------------------------------------------------------------------------
 QVTKOpenGLWindow::QVTKOpenGLWindow()
@@ -26,15 +26,15 @@ QVTKOpenGLWindow::QVTKOpenGLWindow()
 
 //-----------------------------------------------------------------------------
 QVTKOpenGLWindow::QVTKOpenGLWindow(QOpenGLContext *shareContext,
-                                   UpdateBehavior updateBehavior,
-                                   QWindow *parent)
+                                   UpdateBehavior  updateBehavior,
+                                   QWindow *       parent)
     : QVTKOpenGLWindow(nullptr, shareContext, updateBehavior, parent) {}
 
 //-----------------------------------------------------------------------------
 QVTKOpenGLWindow::QVTKOpenGLWindow(vtkGenericOpenGLRenderWindow *w,
-                                   QOpenGLContext *shareContext,
-                                   UpdateBehavior updateBehavior,
-                                   QWindow *parent)
+                                   QOpenGLContext *              shareContext,
+                                   UpdateBehavior                updateBehavior,
+                                   QWindow *                     parent)
     : QOpenGLWindow(shareContext, updateBehavior, parent), EnableHiDPI(false),
       OriginalDPI(0), OffscreenSurface(nullptr) {
   this->IrenAdapter = new QVTKInteractorAdapter(this);
@@ -123,8 +123,8 @@ void QVTKOpenGLWindow::SetRenderWindow(vtkGenericOpenGLRenderWindow *w) {
 
   // tell the vtk window what the size of this window is
   const qreal devicePixelRatio_ = this->devicePixelRatio();
-  const QSize widgetSize = this->size();
-  const QSize deviceSize = widgetSize * devicePixelRatio_;
+  const QSize widgetSize        = this->size();
+  const QSize deviceSize        = widgetSize * devicePixelRatio_;
 
   this->IrenAdapter->SetDevicePixelRatio(devicePixelRatio_);
 
@@ -282,7 +282,7 @@ void QVTKOpenGLWindow::MakeCurrent() {
 void QVTKOpenGLWindow::IsCurrent(vtkObject *, unsigned long, void *,
                                  void *call_data) {
   bool *ptr = reinterpret_cast<bool *>(call_data);
-  *ptr = this->isCurrent();
+  *ptr      = this->isCurrent();
 }
 
 //-----------------------------------------------------------------------------
@@ -297,7 +297,7 @@ void QVTKOpenGLWindow::IsDirect(vtkObject *, unsigned long, void *,
 void QVTKOpenGLWindow::SupportsOpenGL(vtkObject *, unsigned long, void *,
                                       void *call_data) {
   int *ptr = reinterpret_cast<int *>(call_data);
-  *ptr = true;
+  *ptr     = true;
 }
 
 //-----------------------------------------------------------------------------
@@ -425,7 +425,7 @@ bool QVTKOpenGLWindow::ProcessEvent(QEvent *e) {
 
 //-----------------------------------------------------------------------------
 void QVTKOpenGLWindow::copyFromFormat(const QSurfaceFormat &format,
-                                      vtkRenderWindow *win) {
+                                      vtkRenderWindow *     win) {
   if (vtkOpenGLRenderWindow *oglWin =
           vtkOpenGLRenderWindow::SafeDownCast(win)) {
     oglWin->SetStereoCapableWindow(format.stereo() ? 1 : 0);
@@ -436,7 +436,7 @@ void QVTKOpenGLWindow::copyFromFormat(const QSurfaceFormat &format,
 
 //-----------------------------------------------------------------------------
 void QVTKOpenGLWindow::copyToFormat(vtkRenderWindow *win,
-                                    QSurfaceFormat &format) {
+                                    QSurfaceFormat & format) {
   if (vtkOpenGLRenderWindow *oglWin =
           vtkOpenGLRenderWindow::SafeDownCast(win)) {
     format.setStereo(oglWin->GetStereoCapableWindow());

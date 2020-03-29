@@ -23,24 +23,24 @@
  *
  */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 
-#include "mri.h"
 #include "diag.h"
-#include "version.h"
 #include "error.h"
-#include "mrisegment.h"
-#include "mrinorm.h"
-#include "proto.h"
 #include "macros.h"
+#include "mri.h"
+#include "mrinorm.h"
+#include "mrisegment.h"
+#include "proto.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mri_bc_sc_bias_correct.c,v 1.5 2011/03/02 00:04:13 nicks Exp $";
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -52,15 +52,15 @@ const char *Progname;
 
 int main(int argc, char *argv[]) {
   char **av, *out_fname;
-  int ac, nargs, b, segno;
-  MRI *mri_bc, *mri_sc, *mri_bias, *mri_in, *mri_mask, *mri_ctrl, *mri_kernel,
+  int    ac, nargs, b, segno;
+  MRI *  mri_bc, *mri_sc, *mri_bias, *mri_in, *mri_mask, *mri_ctrl, *mri_kernel,
       *mri_smooth_bias, *mri_tmp, *mri_out;
-  float thresh;
-  HISTOGRAM *histo;
+  float             thresh;
+  HISTOGRAM *       histo;
   MRI_SEGMENTATION *mriseg;
 
-  Progname = argv[0] ;
-  nargs = handleVersionOption(argc, argv, "mri_bc_sc_bias_correct");
+  Progname = argv[0];
+  nargs    = handleVersionOption(argc, argv, "mri_bc_sc_bias_correct");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;
@@ -106,24 +106,24 @@ int main(int argc, char *argv[]) {
          histo->bins[b], thresh);
 
   mriseg = MRIsegment(mri_sc, thresh, histo->bins[b]);
-  segno = MRIfindMaxSegmentNumber(mriseg);
+  segno  = MRIfindMaxSegmentNumber(mriseg);
   printf("max seg %d found with %d voxels\n", segno,
          mriseg->segments[segno].nvoxels);
   mri_mask = MRIsegmentToImage(mri_sc, NULL, mriseg, segno);
   MRIsegmentFree(&mriseg);
   MRIerode(mri_mask, mri_mask);
   mri_ctrl = MRIbinarize(mri_mask, NULL, 1, 0, CONTROL_MARKED);
-  mri_tmp = MRIchangeType(mri_ctrl, MRI_UCHAR, 0, 1, 1);
+  mri_tmp  = MRIchangeType(mri_ctrl, MRI_UCHAR, 0, 1, 1);
   MRIfree(&mri_ctrl);
   mri_ctrl = mri_tmp;
   MRImask(mri_bc, mri_mask, mri_bc, 0, 0);
   MRImask(mri_sc, mri_mask, mri_sc, 0, 0);
   mri_tmp = MRIchangeType(mri_bc, MRI_FLOAT, 0, 1, 1);
   MRIfree(&mri_bc);
-  mri_bc = mri_tmp;
+  mri_bc  = mri_tmp;
   mri_tmp = MRIchangeType(mri_sc, MRI_FLOAT, 0, 1, 1);
   MRIfree(&mri_sc);
-  mri_sc = mri_tmp;
+  mri_sc   = mri_tmp;
   mri_bias = MRIdivide(mri_bc, mri_sc, NULL);
   MRIbuildVoronoiDiagram(mri_bias, mri_ctrl, mri_bias);
 
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
   MRIfree(&mri_bc);
   MRIfree(&mri_sc);
 
-  mri_kernel = MRIgaussian1d(sigma, 100);
+  mri_kernel      = MRIgaussian1d(sigma, 100);
   mri_smooth_bias = MRIconvolveGaussian(mri_bias, NULL, mri_kernel);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
     MRIwrite(mri_smooth_bias, "bias.mgz");
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -181,7 +181,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':

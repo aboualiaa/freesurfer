@@ -9,8 +9,8 @@ double LabelsPointToPointMembershipFunction<TVector>::Evaluate(
   double dist = 0.0;
   // double dist_inv=0.0;
   typedef typename MeasurementVectorType::CellType CellType;
-  const std::vector<CellType> labels1 = *m1->GetLabels();
-  const std::vector<CellType> labels2 = *m2->GetLabels();
+  const std::vector<CellType>                      labels1 = *m1->GetLabels();
+  const std::vector<CellType>                      labels2 = *m2->GetLabels();
   // std::cout << " labels coutn " << this->m_labelsCount << std::endl;
   // int validLabels=0;
   for (int i = 0; i < labels2.size(); i++) {

@@ -107,7 +107,7 @@ public:
     // is i<nDims, after decrementing i==0 results in i wrapping to max(i)
     for (unsigned char i = nDims - 1; (i >= 0) && (i < nDims); i--) {
       result[i] = curr % this->lengths[i];
-      curr = curr / this->lengths[i];
+      curr      = curr / this->lengths[i];
     }
   }
 

@@ -1,5 +1,5 @@
-#include "itkImage.h"
 #include "GetPot.h"
+#include "itkImage.h"
 
 #include "mrisurf.h"
 
@@ -9,12 +9,12 @@ int main(int narg, char *arg[]) {
   try {
 
     constexpr unsigned int Dimension = 3;
-    using CoordType = double;
-    using MeshType = itk::Mesh<CoordType, Dimension>;
-    using PointsContainer = MeshType::PointsContainer;
-    using PointType = MeshType::PointType;
+    using CoordType                  = double;
+    using MeshType                   = itk::Mesh<CoordType, Dimension>;
+    using PointsContainer            = MeshType::PointsContainer;
+    using PointType                  = MeshType::PointType;
     // typedef MeshType::PointIdentifier PointIdentifier;
-    using CellType = MeshType::CellType;
+    using CellType     = MeshType::CellType;
     using TriangleType = itk::TriangleCell<CellType>;
 
     GetPot cl(narg, const_cast<char **>(arg));
@@ -23,13 +23,13 @@ int main(int narg, char *arg[]) {
       std::cout << arg[0] << " -i surface -o surface" << std::endl;
       return -1;
     }
-    const char *inSurf = cl.follow("", "-i");
+    const char *inSurf  = cl.follow("", "-i");
     const char *outSurf = cl.follow("", "-o");
 
     MRI_SURFACE *surf;
     surf = MRISread(inSurf);
 
-    MeshType::Pointer mesh = MeshType::New();
+    MeshType::Pointer        mesh   = MeshType::New();
     PointsContainer::Pointer points = PointsContainer::New();
     points->Reserve(surf->nvertices);
 
@@ -52,7 +52,7 @@ int main(int narg, char *arg[]) {
       mesh->SetCell(i, cellpointer);
     }
 
-    using WriterType = itk::VTKPolyDataWriter<MeshType>;
+    using WriterType           = itk::VTKPolyDataWriter<MeshType>;
     WriterType::Pointer writer = WriterType::New();
     writer->SetInput(mesh);
     writer->SetFileName(outSurf);

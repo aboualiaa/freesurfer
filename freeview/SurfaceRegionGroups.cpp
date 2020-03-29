@@ -61,7 +61,7 @@ QColor SurfaceRegionGroups::GetGroupColor(int n) {
 
 int SurfaceRegionGroups::GetGroupIdRange(SurfaceRegion *reg) {
   QList<SurfaceRegion *> &regs = m_mri->m_surfaceRegions;
-  int nMax = 0;
+  int                     nMax = 0;
   for (int i = 0; i < regs.size(); i++) {
     if (regs[i] != reg && regs[i]->GetGroup() > nMax) {
       nMax = regs[i]->GetGroup();

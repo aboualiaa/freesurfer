@@ -2,8 +2,8 @@
 #define _HierarchicalClusteringPruner_txx_
 
 #include "HierarchicalClusteringPruner.h"
-#include <vtkCellData.h>
 #include "TrkVTKPolyDataFilter.txx"
+#include <vtkCellData.h>
 
 template <class TOutputMesh, class TImage>
 HierarchicalClusteringPruner<TOutputMesh,
@@ -17,15 +17,15 @@ void HierarchicalClusteringPruner<TOutputMesh, TImage>::GenerateData() {
   this->m_clustersIds.clear();
   //	std::cout << " Hierarchy file : " <<  this->m_hierarchyFilename <<
   //std::endl;
-  ifstream file(this->m_hierarchyFilename);
+  ifstream    file(this->m_hierarchyFilename);
   std::string value;
   getline(file, value, ',');
   getline(file, value, ',');
-  std::map<long long, long long> idTree_idCluster;
+  std::map<long long, long long>              idTree_idCluster;
   std::map<long long, std::vector<long long>> idNode_idChilds;
-  std::map<long long, long long> idCluster_idClusterParent;
-  std::set<long long> clustersIds;
-  std::set<long long> leafIds;
+  std::map<long long, long long>              idCluster_idClusterParent;
+  std::set<long long>                         clustersIds;
+  std::set<long long>                         leafIds;
   // int max = 0;
   std::map<long long, std::string> fiberFiles;
   while (file.good()) {
@@ -70,13 +70,13 @@ void HierarchicalClusteringPruner<TOutputMesh, TImage>::GenerateData() {
     std::string a = (this->m_fiberFormat == FiberFormat::VTK) ? "vtk" : "trk";
     //		std::cout << this->m_clustersPath << std::endl;
     //		std::cout << a << std::endl;
-    long long b = *it;
+    long long   b   = *it;
     std::string num = std::to_string(b);
     //		std::cout << num<< std::endl;
     std::string clusterFile = this->m_clustersPath + "/" + num + "." + a;
-    ifstream ifile(clusterFile);
+    ifstream    ifile(clusterFile);
     if (ifile) {
-      fiberFiles[*it] = clusterFile;
+      fiberFiles[*it]      = clusterFile;
       long long lastNumber = *it;
       idNode_idChilds[lastNumber].push_back(lastNumber);
       while (idCluster_idClusterParent[lastNumber] != 0) {

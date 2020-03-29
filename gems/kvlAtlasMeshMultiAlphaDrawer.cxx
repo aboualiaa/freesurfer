@@ -41,7 +41,7 @@ bool AtlasMeshMultiAlphaDrawer ::RasterizeTetrahedron(
   mesh->GetCell(tetrahedronId, cell);
 
   AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-  const AtlasMesh::PointIdentifier id0 = *pit;
+  const AtlasMesh::PointIdentifier     id0 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier id1 = *pit;
   ++pit;
@@ -60,7 +60,7 @@ bool AtlasMeshMultiAlphaDrawer ::RasterizeTetrahedron(
 
   // Loop over all voxels within the tetrahedron and do The Right Thing
   TetrahedronInteriorIterator<ImageType::PixelType> it(m_Image, p0, p1, p2, p3);
-  const AtlasAlphasType &alphasInVertex0 =
+  const AtlasAlphasType &                           alphasInVertex0 =
       mesh->GetPointData()->ElementAt(id0).m_Alphas;
   const AtlasAlphasType &alphasInVertex1 =
       mesh->GetPointData()->ElementAt(id1).m_Alphas;

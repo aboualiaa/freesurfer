@@ -32,17 +32,17 @@
 void createTestSegment(double startx, double starty, double endx, double endy,
                        double dist, std::vector<std::vector<double>> &points2d,
                        std::vector<int> &segment) {
-  unsigned int count = points2d.size();
-  double length = std::sqrt((endx - startx) * (endx - startx) +
+  unsigned int count  = points2d.size();
+  double       length = std::sqrt((endx - startx) * (endx - startx) +
                             (endy - starty) * (endy - starty));
-  int num = int(length / dist);
+  int          num    = int(length / dist);
 
   std::vector<double> p(2);
 
   for (int i = 0; i <= num; i++) {
     double d = double(i) / double(num);
-    p[0] = (1 - d) * startx + d * endx;
-    p[1] = (1 - d) * starty + d * endy;
+    p[0]     = (1 - d) * startx + d * endx;
+    p[1]     = (1 - d) * starty + d * endy;
     points2d.push_back(p);
     segment.push_back(count);
     count++;
@@ -61,12 +61,12 @@ void checkProfiles(
     exit(1);
   }
 
-  double eps = 0.000001;
+  double eps    = 0.000001;
   double ystart = 6.0;
   double ydelta = 0.1;
   double xstart = 11.1;
   double xdelta = 0.2;
-  double xp = 0.0;
+  double xp     = 0.0;
   for (unsigned int p = 0; p < profiles.size(); p++) {
     if (profiles[p].size() != 21) {
       std::cerr << "ERROR: expecting 21 points in profile " << p << ", but got "
@@ -115,11 +115,11 @@ void checkProfiles(
 void printProfiles(
     const std::vector<std::vector<std::vector<double>>> &profiles) {
   for (unsigned int i = 0; i < profiles.size(); i++) {
-    cout << "Profile " << i << endl;
+    std::cout << "Profile " << i << std::endl;
     for (unsigned int j = 0; j < profiles[i].size(); j++) {
-      cout << profiles[i][j][0] << " " << profiles[i][j][1] << endl;
+      std::cout << profiles[i][j][0] << " " << profiles[i][j][1] << std::endl;
     }
-    cout << endl;
+    std::cout << std::endl;
   }
 }
 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 
   // offsets (necessary as the line profiles are not straight close to the
   // side boundaries)
-  int offset = 10;
+  int offset   = 10;
   int paddingL = 10;
   int paddingR = 10;
 
@@ -164,10 +164,10 @@ int main(int argc, char *argv[]) {
   // Here we setup the polygon and 4 boundary segments
   // as a rectangle from 10..20, 6..8 (ras coords)
   std::vector<std::vector<double>> points2d;
-  std::vector<int> segment0;
-  std::vector<int> segment1;
-  std::vector<int> segmentL;
-  std::vector<int> segmentR;
+  std::vector<int>                 segment0;
+  std::vector<int>                 segment1;
+  std::vector<int>                 segmentL;
+  std::vector<int>                 segmentR;
   createTestSegment(10, 6, 20, 6, ras_distance, points2d, segment0);
   createTestSegment(10, 8, 20, 8, ras_distance, points2d, segment1);
   createTestSegment(10, 6, 10, 8, ras_distance, points2d, segmentL);

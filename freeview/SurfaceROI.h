@@ -27,8 +27,8 @@
 #define SurfaceROI_h
 
 #include "vtkSmartPointer.h"
-#include <QObject>
 #include <QColor>
+#include <QObject>
 
 class vtkRenderer;
 class vtkActor;
@@ -57,7 +57,7 @@ public:
   void InitializeOutline(double *pos);
 
   QColor GetColor();
-  void SetColor(const QColor &color);
+  void   SetColor(const QColor &color);
 
   void Update();
 
@@ -79,12 +79,12 @@ signals:
 private:
   void RebuildOutline(bool bClose);
 
-  vtkSmartPointer<vtkActor> m_actorOutline;
+  vtkSmartPointer<vtkActor>  m_actorOutline;
   vtkSmartPointer<vtkPoints> m_points;
 
   LayerSurface *m_mris;
-  QColor m_color;
-  int m_nId;
+  QColor        m_color;
+  int           m_nId;
 };
 
 #endif

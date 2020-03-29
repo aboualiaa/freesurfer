@@ -21,10 +21,10 @@
 #endif
 
 #include "fs_vnl/fs_lbfgs.h"
-#include <math.h>
+#include "diag.h"
 #include <iomanip> // for setw (replaces cout.form())
 #include <iostream>
-#include "diag.h"
+#include <math.h>
 
 #include <vnl/algo/vnl_netlib.h> // lbfgs_()
 
@@ -42,9 +42,9 @@ fs_lbfgs::fs_lbfgs(vnl_cost_function &f) : fs_lbfgs_subject(), f_(&f) {
 //: Called by constructors.
 // Memory is set to 5, line_search_accuracy to 0.9, default_step_length to 1.
 void fs_lbfgs::init_parameters() {
-  memory = 5;
+  memory               = 5;
   line_search_accuracy = 0.9;
-  default_step_length = 1.0;
+  default_step_length  = 1.0;
 }
 
 bool fs_lbfgs::minimize(vnl_vector<double> &x) {
@@ -60,7 +60,7 @@ bool fs_lbfgs::minimize(vnl_vector<double> &x) {
   v3p_netlib_lbfgs_global_t lbfgs_global;
   v3p_netlib_lbfgs_init(&lbfgs_global);
 
-  long iprint[2] = {1, 0};
+  long               iprint[2] = {1, 0};
   vnl_vector<double> g(n);
 
   // Workspace
@@ -80,20 +80,20 @@ bool fs_lbfgs::minimize(vnl_vector<double> &x) {
   if (we_trace)
     std::cerr << "vnl_lbfgs: ";
 
-  double best_f = 0;
+  double             best_f = 0;
   vnl_vector<double> best_x;
 
   bool ok;
   this->num_evaluations_ = 0;
-  this->num_iterations_ = 0;
-  long iflag = 0;
+  this->num_iterations_  = 0;
+  long iflag             = 0;
   while (true) {
     // We do not wish to provide the diagonal matrices Hk0, and therefore set
     // DIAGCO to FALSE.
     v3p_netlib_logical diagco = false;
 
     // Set these every iter in case user changes them to bail out
-    double eps = gtol; // Gradient tolerance
+    double eps        = gtol; // Gradient tolerance
     double local_xtol = 1e-16;
     lbfgs_global.gtol =
         line_search_accuracy; // set to 0.1 for huge problems or cheap functions
@@ -104,7 +104,7 @@ bool fs_lbfgs::minimize(vnl_vector<double> &x) {
     f_->compute(x, &f, &g);
     if (this->num_evaluations_ == 0) {
       this->start_error_ = f;
-      best_f = f;
+      best_f             = f;
     } else if (f < best_f) {
       best_x = x;
       best_f = f;
@@ -122,8 +122,8 @@ bool fs_lbfgs::minimize(vnl_vector<double> &x) {
                 << ", computing FD gradient\n";
       vnl_vector<double> fdg = f_->fdgradf(x);
       if (verbose_) {
-        int l = n;
-        int limit = 100;
+        int l          = n;
+        int limit      = 100;
         int limit_tail = 10;
         if (l > limit + limit_tail) {
           std::cerr << " [ Showing only first " << limit << " components ]\n";
@@ -160,8 +160,8 @@ bool fs_lbfgs::minimize(vnl_vector<double> &x) {
     if (iflag == 0) {
       // Successful return
       this->end_error_ = f;
-      ok = true;
-      x = best_x;
+      ok               = true;
+      x                = best_x;
       break;
     }
 
@@ -173,7 +173,7 @@ bool fs_lbfgs::minimize(vnl_vector<double> &x) {
       // this is an DJ addition for when the best_x is not initialized yet
       if (best_x.size() != 0) {
         this->end_error_ = f;
-        x = best_x;
+        x                = best_x;
       }
 
       break;
@@ -181,12 +181,12 @@ bool fs_lbfgs::minimize(vnl_vector<double> &x) {
 
     if (++this->num_evaluations_ > get_max_function_evals()) {
       failure_code_ = FAILED_USER_REQUEST;
-      ok = false;
+      ok            = false;
 
       // this is an DJ addition for when the best_x is not initialized yet
       if (best_x.size() != 0) {
         this->end_error_ = f;
-        x = best_x;
+        x                = best_x;
       }
 
       break;

@@ -31,20 +31,20 @@
 
 #include "mri.h"
 
-#include <utility>
-#include <vector>
+#include "MyMRI.h"
+#include "MyMatrix.h"
+#include "Quaternion.h"
+#include "RegRobust.h"
+#include "Regression.h"
+#include "Transformation.h"
 #include <cassert>
 #include <iostream>
 #include <string>
-#include <vnl/vnl_vector.h>
+#include <utility>
+#include <vector>
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_matrix_fixed.h>
-#include "MyMRI.h"
-#include "MyMatrix.h"
-#include "Regression.h"
-#include "Quaternion.h"
-#include "Transformation.h"
-#include "RegRobust.h"
+#include <vnl/vnl_vector.h>
 
 template <class T> class RegistrationStep {
 public:
@@ -101,31 +101,31 @@ protected:
 private:
   // in:
 
-  double sat;
-  bool iscale;
-  bool transonly;
-  bool rigid;
-  bool isoscale;
-  Transformation *trans;
+  double             sat;
+  bool               iscale;
+  bool               transonly;
+  bool               rigid;
+  bool               isoscale;
+  Transformation *   trans;
   Registration::Cost costfun;
-  int rtype;
-  int subsamplesize;
-  int debug;
-  int verbose;
-  bool floatsvd;      // should be removed
-  double iscalefinal; // from the last step, used in constructAB
+  int                rtype;
+  int                subsamplesize;
+  int                debug;
+  int                verbose;
+  bool               floatsvd;    // should be removed
+  double             iscalefinal; // from the last step, used in constructAB
 
   // out:
 
   std::pair<vnl_matrix_fixed<double, 4, 4>, double> Md;
-  MRI *mri_weights;
+  MRI *                                             mri_weights;
 
   double wcheck;      // set from computeRegistrationStepW
   double wchecksqrt;  // set from computeRegistrationStepW
   double zeroweights; // set from computeRegistrationStepW
 
   // internal
-  MRI *mri_indexing;
+  MRI *         mri_indexing;
   vnl_vector<T> pvec;
 };
 
@@ -140,7 +140,8 @@ std::pair<vnl_matrix_fixed<double, 4, 4>, double>
 RegistrationStep<T>::computeRegistrationStep(MRI *mriS, MRI *mriT) {
 
   if (trans == NULL) {
-    cerr << "ERROR in RegistrationStep: no transform specified ..." << endl;
+    std::cerr << "ERROR in RegistrationStep: no transform specified ..."
+              << std::endl;
     exit(1);
   }
 
@@ -228,10 +229,10 @@ RegistrationStep<T>::computeRegistrationStep(MRI *mriS, MRI *mriT) {
       mri_weights->outside_val = 1.0;
     }
 
-    int x, y, z, f;
+    int          x, y, z, f;
     unsigned int count = 0;
-    long int val;
-    wcheck = 0.0;
+    long int     val;
+    wcheck     = 0.0;
     wchecksqrt = 0.0;
     // sigma = max(widht,height,depth) / 6;
     double sigma = mriS->width;
@@ -239,10 +240,10 @@ RegistrationStep<T>::computeRegistrationStep(MRI *mriS, MRI *mriT) {
       sigma = mriS->height;
     if (mriS->depth > sigma)
       sigma = mriS->depth;
-    sigma = sigma / 6.0;
+    sigma          = sigma / 6.0;
     double sigma22 = 2.0 * sigma * sigma;
-    double factor = 1.0 / sqrt(M_PI * sigma22);
-    double dsum = 0.0;
+    double factor  = 1.0 / sqrt(M_PI * sigma22);
+    double dsum    = 0.0;
     // MRI * gmri = MRIalloc(mriS->width,mriS->height,mriS->depth, MRI_FLOAT);
     for (f = 0; f < mriS->nframes; f++)
       for (z = 0; z < mriS->depth; z++)
@@ -271,14 +272,14 @@ RegistrationStep<T>::computeRegistrationStep(MRI *mriS, MRI *mriT) {
               // " << z << " " << std::flush;
               assert(val < (int)w.size());
               assert(val >= 0);
-              double wtemp = w[val] * w[val];
+              double wtemp                         = w[val] * w[val];
               MRIFseq_vox(mri_weights, x, y, z, f) = wtemp;
               // compute distance to center:
-              double xx = x - 0.5 * mriS->width;
-              double yy = y - 0.5 * mriS->height;
-              double zz = z - 0.5 * mriS->depth;
+              double xx        = x - 0.5 * mriS->width;
+              double yy        = y - 0.5 * mriS->height;
+              double zz        = z - 0.5 * mriS->depth;
               double distance2 = xx * xx + yy * yy + zz * zz;
-              double gauss = factor * exp(-distance2 / sigma22);
+              double gauss     = factor * exp(-distance2 / sigma22);
               dsum += gauss;
               wcheck += gauss * (1.0 - wtemp);
               wchecksqrt +=
@@ -296,7 +297,7 @@ RegistrationStep<T>::computeRegistrationStep(MRI *mriS, MRI *mriT) {
     //    MRIfree(&gmri);
     assert(count == w.size());
 
-    wcheck = wcheck / dsum;
+    wcheck     = wcheck / dsum;
     wchecksqrt = wchecksqrt / dsum;
     if (verbose > 1)
       std::cout << "   - Weight Check: " << wcheck << "  wsqrt: " << wchecksqrt
@@ -372,14 +373,15 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
   // cout << "Sd: " << mriS->depth << " Td: " << mriT->depth << endl;
   if (mriS->depth == 1 || mriT->depth == 1) {
     if (mriT->depth != mriS->depth) {
-      cout << "ERROR: both source and target need to be 2D or 3D" << endl;
+      std::cout << "ERROR: both source and target need to be 2D or 3D"
+                << std::endl;
       exit(1);
     }
     is2d = true;
   }
 
   // Allocate and initialize indexing volume
-  int z, y, x, f;
+  int      z, y, x, f;
   long int ss = mriS->width * mriS->height * mriS->depth * mriS->nframes;
   if (mri_indexing)
     MRIfree(&mri_indexing);
@@ -433,15 +435,15 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
     std::cout << "     -- compute derivatives ... " << std::flush;
   MRI *SpTh = MRIallocSequence(mriS->width, mriS->height, mriS->depth,
                                MRI_FLOAT, mriS->nframes);
-  SpTh = MRIadd(mriS, mriT, SpTh);
-  SpTh = MRIscalarMul(SpTh, SpTh, 0.5);
+  SpTh      = MRIadd(mriS, mriT, SpTh);
+  SpTh      = MRIscalarMul(SpTh, SpTh, 0.5);
   MRI *fx1 = nullptr, *fy1 = nullptr, *fz1 = nullptr, *ft1 = nullptr;
   MyMRI::getPartials(SpTh, fx1, fy1, fz1, ft1);
   MRIfree(&SpTh);
   MRI *SmT = MRIallocSequence(mriS->width, mriS->height, mriS->depth, MRI_FLOAT,
                               mriS->nframes);
-  SmT = MRIsubtract(mriS, mriT, SmT);
-  SmT = MyMRI::getBlur(SmT, SmT);
+  SmT      = MRIsubtract(mriS, mriT, SmT);
+  SmT      = MyMRI::getBlur(SmT, SmT);
 
   if (verbose > 1)
     std::cout << " done!" << std::endl;
@@ -472,7 +474,7 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
     MRIfree(&ft1);
 
     MRI *SmTt = SmT;
-    SmT = MyMRI::subSample(SmTt, nullptr, false, 0);
+    SmT       = MyMRI::subSample(SmTt, nullptr, false, 0);
     MRIfree(&SmTt);
 
     if (verbose > 1)
@@ -495,20 +497,20 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
   if (verbose > 1)
     std::cout << "     -- size " << fx->width << " x " << fx->height << " x "
               << fx->depth << " x " << fx->nframes << " = " << n << std::flush;
-  long int counti = 0;
-  double eps = 0.00001;
-  double oepss = eps + mriS->outside_val / 255.0;
-  double oepst = eps + mriT->outside_val / 255.0;
-  int fxd = fx->depth;
-  int fxw = fx->width;
-  int fxh = fx->height;
-  int fxf = fx->nframes;
-  int fxstart = 0;
-  int xp1, yp1, zp1;
-  int ocount = 0, ncount = 0, zcount = 0;
-  float fzval = eps / 2.0;
-  int dx, dy, dz;
-  int randpos = 0;
+  long int counti  = 0;
+  double   eps     = 0.00001;
+  double   oepss   = eps + mriS->outside_val / 255.0;
+  double   oepst   = eps + mriT->outside_val / 255.0;
+  int      fxd     = fx->depth;
+  int      fxw     = fx->width;
+  int      fxh     = fx->height;
+  int      fxf     = fx->nframes;
+  int      fxstart = 0;
+  int      xp1, yp1, zp1;
+  int      ocount = 0, ncount = 0, zcount = 0;
+  float    fzval = eps / 2.0;
+  int      dx, dy, dz;
+  int      randpos = 0;
   for (z = fxstart; z < fxd; z++)
     for (x = fxstart; x < fxw; x++)
       for (y = fxstart; y < fxh; y++) {
@@ -606,8 +608,8 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
   }
 
   if (verbose > 1)
-    cout << "     -- nans: " << ncount << " zeros: " << zcount
-         << " outside: " << ocount << endl;
+    std::cout << "     -- nans: " << ncount << " zeros: " << zcount
+              << " outside: " << ocount << std::endl;
 
   // allocate the space for A and B
   int pnum = trans->getDOF();
@@ -621,7 +623,7 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
     std::cout << "     -- allocating " << amu + bmu << "Mb mem for A and b ... "
               << std::flush;
   bool OK = A.set_size(counti, pnum);
-  OK = OK && b.set_size(counti);
+  OK      = OK && b.set_size(counti);
   if (!OK) {
     std::cout << std::endl;
     ErrorExit(
@@ -630,11 +632,11 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
   }
   if (verbose > 1)
     std::cout << " done! " << std::endl;
-  double maxmu = 5 * amu + 7 * bmu;
-  string fstr = "";
+  double      maxmu = 5 * amu + 7 * bmu;
+  std::string fstr  = "";
   if (floatsvd) {
     maxmu = amu + 3 * bmu + 2 * (amu + bmu);
-    fstr = "-float";
+    fstr  = "-float";
   }
   if (verbose > 1)
     std::cout << "         (MAX usage in SVD" << fstr << " will be > " << maxmu
@@ -653,9 +655,9 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
 
   // Loop and construct A and b
   long int count = 0;
-  ocount = 0;
-  randpos = 0;
-  fzval = eps / 2.0;
+  ocount         = 0;
+  randpos        = 0;
+  fzval          = eps / 2.0;
 
   for (z = fxstart; z < fxd; z++)
     for (x = fxstart; x < fxw; x++)
@@ -1369,8 +1371,8 @@ vnl_matrix<T> RegistrationStep<T>::constructR(const vnl_vector<T> &p) {
   vnl_matrix<T> R(p.size(), adim, 0.0);
 
   // translation p0,p1,p2 map to m3,m7,m11, (counting from zero)
-  R[0][3] = 1.0;
-  R[1][7] = 1.0;
+  R[0][3]  = 1.0;
+  R[1][7]  = 1.0;
   R[2][11] = 1.0;
 
   // iscale (p6 -> m12)

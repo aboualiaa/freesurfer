@@ -25,21 +25,21 @@
 =========================================================================*/
 
 #include "vtkQtConnection.h"
-#include "vtkEventQtSlotConnect.h"
 #include "vtkCallbackCommand.h"
+#include "vtkEventQtSlotConnect.h"
 
-#include <qobject.h>
 #include <qmetaobject.h>
+#include <qobject.h>
 
 // constructor
 vtkQtConnection::vtkQtConnection(vtkEventQtSlotConnect *owner) : Owner(owner) {
   this->Callback = vtkCallbackCommand::New();
   this->Callback->SetCallback(vtkQtConnection::DoCallback);
   this->Callback->SetClientData(this);
-  this->VTKObject = 0;
-  this->QtObject = 0;
+  this->VTKObject  = 0;
+  this->QtObject   = 0;
   this->ClientData = 0;
-  this->VTKEvent = vtkCommand::NoEvent;
+  this->VTKEvent   = vtkCommand::NoEvent;
 }
 
 // destructor, disconnect if necessary
@@ -98,11 +98,11 @@ void vtkQtConnection::SetConnection(vtkObject *vtk_obj, unsigned long e,
                                     void *client_data, float priority,
                                     Qt::ConnectionType type) {
   // keep track of what we connected
-  this->VTKObject = vtk_obj;
-  this->QtObject = qt_obj;
-  this->VTKEvent = e;
+  this->VTKObject  = vtk_obj;
+  this->QtObject   = qt_obj;
+  this->VTKEvent   = e;
   this->ClientData = client_data;
-  this->QtSlot = slot;
+  this->QtSlot     = slot;
 
   // make a connection between this and the vtk object
   vtk_obj->AddObserver(e, this->Callback, priority);

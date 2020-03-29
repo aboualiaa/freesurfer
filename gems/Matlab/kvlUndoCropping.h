@@ -1,16 +1,16 @@
-#include "kvlMatlabRunner.h"
-#include "kvlMatlabObjectArray.h"
-#include "kvlCroppedImageReader.h"
 #include "itkCastImageFilter.h"
+#include "kvlCroppedImageReader.h"
+#include "kvlMatlabObjectArray.h"
+#include "kvlMatlabRunner.h"
 
 namespace kvl {
 
 class UndoCropping : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef UndoCropping Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef UndoCropping                  Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -33,7 +33,7 @@ public:
     }
 
     // Retrieve input arguments
-    const std::string imageFileName = mxArrayToString(prhs[0]);
+    const std::string imageFileName    = mxArrayToString(prhs[0]);
     const std::string boundingFileName = mxArrayToString(prhs[1]);
 
     // Read the image
@@ -51,7 +51,7 @@ public:
     // Convert the image to float
     typedef itk::Image<float, 3> ImageType;
     typedef itk::CastImageFilter<kvl::CroppedImageReader::ImageType, ImageType>
-        CasterType;
+                        CasterType;
     CasterType::Pointer caster = CasterType::New();
     caster->SetInput(reader->GetImage());
     caster->Update();

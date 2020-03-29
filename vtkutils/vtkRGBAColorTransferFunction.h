@@ -66,13 +66,13 @@
 
 class vtkRGBAColorTransferFunctionInternals;
 
-#define VTK_CTF_RGB 0
-#define VTK_CTF_HSV 1
-#define VTK_CTF_LAB 2
+#define VTK_CTF_RGB       0
+#define VTK_CTF_HSV       1
+#define VTK_CTF_LAB       2
 #define VTK_CTF_DIVERGING 3
 
 #define VTK_CTF_LINEAR 0
-#define VTK_CTF_LOG10 1
+#define VTK_CTF_LOG10  1
 
 class /*VTKCOMMONCORE_EXPORT*/ vtkRGBAColorTransferFunction
     : public vtkScalarsToColors {
@@ -118,7 +118,7 @@ public:
   // Description:
   // Returns an RGBA color for the specified scalar value
   double *GetColor(double x) { return vtkScalarsToColors::GetColor(x); }
-  void GetColor(double x, double rgba[4]);
+  void    GetColor(double x, double rgba[4]);
 
   // Description:
   // Get the color components individually.
@@ -154,8 +154,8 @@ public:
 
   // Description:
   // Fills in a table of n function values between x1 and x2
-  void GetTable(double x1, double x2, int n, double *table);
-  void GetTable(double x1, double x2, int n, float *table);
+  void                 GetTable(double x1, double x2, int n, double *table);
+  void                 GetTable(double x1, double x2, int n, float *table);
   const unsigned char *GetTable(double x1, double x2, int n);
 
   // Description:
@@ -202,7 +202,7 @@ public:
   // Returns a list of all nodes
   // Fills from a pointer to data stored in a similar list of nodes.
   double *GetDataPointer();
-  void FillFromDataPointer(int, double *);
+  void    FillFromDataPointer(int, double *);
 
   // Description:
   // map a set of scalars through the lookup table
@@ -248,9 +248,9 @@ protected:
 
   int AllowDuplicateScalars;
 
-  vtkTimeStamp BuildTime;
+  vtkTimeStamp   BuildTime;
   unsigned char *Table;
-  int TableSize;
+  int            TableSize;
 
   // Description:
   // Set the range of scalars being mapped. The set has no functionality

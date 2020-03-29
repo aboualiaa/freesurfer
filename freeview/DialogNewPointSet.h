@@ -40,7 +40,7 @@ public:
   ~DialogNewPointSet();
 
   QString GetPointSetName();
-  void SetPointSetName(const QString &name);
+  void    SetPointSetName(const QString &name);
 
   LayerMRI *GetTemplate();
 

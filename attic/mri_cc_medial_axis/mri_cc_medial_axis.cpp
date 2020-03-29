@@ -35,48 +35,47 @@
 // Revision       : $Revision: 1.4 $
 ////////////////////////////////////////////
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <ctype.h>
-#include "mri.h"
+#include "cma.h"
 #include "const.h"
 #include "diag.h"
 #include "error.h"
 #include "macros.h"
-#include "proto.h"
+#include "mri.h"
 #include "mrimorph.h"
-#include "timer.h"
 #include "mrinorm.h"
-#include "cma.h"
+#include "proto.h"
+#include "timer.h"
 #include "version.h"
-#include "error.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 //#include "volume_io/geom_structs.h"
-#include "transform.h"
-#include "talairachex.h"
 #include "matrix.h"
 #include "mriTransform.h"
+#include "talairachex.h"
+#include "transform.h"
 
 // static char vcid[] = "$Id: mri_cc_medial_axis.c,v 1.4 2011/03/02 00:04:14
 // nicks Exp $";
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static char *wmvolume = "mri/wm";
-static char *talvolume = "fatalmodthr.img";
-static int WM = 0;
-static int TAL = 1;
-static int ROT = 1;
-static int NO_CORRECTION = 0;
-static int alert = 0;
-const char *Progname;
-MRI *mri_wm, *mri_cc_tal;
-MRI *mri_intensity;
-int dxi = 0;
-int x_edge = 0, y_edge = 0;
+int          main(int argc, char *argv[]);
+static int   get_option(int argc, char *argv[]);
+static char *wmvolume      = "mri/wm";
+static char *talvolume     = "fatalmodthr.img";
+static int   WM            = 0;
+static int   TAL           = 1;
+static int   ROT           = 1;
+static int   NO_CORRECTION = 0;
+static int   alert         = 0;
+const char * Progname;
+MRI *        mri_wm, *mri_cc_tal;
+MRI *        mri_intensity;
+int          dxi    = 0;
+int          x_edge = 0, y_edge = 0;
 
 typedef struct medial_axis_type_ {
   float x, y;     /* curr position */
@@ -89,56 +88,56 @@ typedef struct medial_axis_type_ {
 static double cc_tal_x = 64;
 static double cc_tal_y = 55;
 static double cc_tal_z = 64;
-static LTA *lta = 0;
-static int rotatevolume();
-static int find_mid_plane_wm(char *subject);
-static int find_mid_plane_tal(char *subject, char *volume);
+static LTA *  lta      = 0;
+static int    rotatevolume();
+static int    find_mid_plane_wm(char *subject);
+static int    find_mid_plane_tal(char *subject, char *volume);
 
 static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
                                  char *ofname);
-static MRI *sample_medial_axis(MEDATOM *medial_axis, MRI *cc_medial_axis,
-                               int length);
+static MRI *    sample_medial_axis(MEDATOM *medial_axis, MRI *cc_medial_axis,
+                                   int length);
 static MEDATOM *medial_axis_initialization(MEDATOM *medial_axis, int length);
 static MEDATOM *medial_axis_integration(MEDATOM *medial_axis, MRI *cc_boundary,
                                         MRI *cc_smoothed, int length);
-static MRI *smooth_cc(MRI *mri_filled);
-static MRI *find_cc_boundary(MRI *cc_smoothed, MRI *cc_boundary);
+static MRI *    smooth_cc(MRI *mri_filled);
+static MRI *    find_cc_boundary(MRI *cc_smoothed, MRI *cc_boundary);
 static MEDATOM *compute_gradient_term(MEDATOM *medial_axis, MRI *cc_boundary,
                                       MRI *cc_smoothed, int length, float p);
 static MEDATOM *compute_smooth_term(MEDATOM *medial_axis, int length, float k);
 static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
                                    MRI *cc_smoothed, int length);
-static double compute_energy(MEDATOM *medial_axis, MRI *cc_boundary,
-                             MRI *cc_smoothed, int length);
+static double   compute_energy(MEDATOM *medial_axis, MRI *cc_boundary,
+                               MRI *cc_smoothed, int length);
 static MEDATOM *compute_normal(MEDATOM *medial_axis, int length);
 static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
                                         MRI *cc_smoothed, int length);
-static float compute_error(MEDATOM *medial_axis, MRI *cc_boundary,
-                           MRI *cc_smoothed, int length, int new_length,
-                           int flag);
-static float sample_distance_map(MRI *cc_boundary, MRI *cc_smoothed, float x,
-                                 float y);
+static float    compute_error(MEDATOM *medial_axis, MRI *cc_boundary,
+                              MRI *cc_smoothed, int length, int new_length,
+                              int flag);
+static float    sample_distance_map(MRI *cc_boundary, MRI *cc_smoothed, float x,
+                                    float y);
 static int find_cc_slice(MRI *mri, double *pccx, double *pccy, double *pccz,
                          const LTA *lta);
 static int find_corpus_callosum(MRI *mri, double *ccx, double *ccy, double *ccz,
                                 const LTA *lta);
 static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv);
-static int edge_detection(MRI *mri_temp, int edge_count, int signal);
+static int  edge_detection(MRI *mri_temp, int edge_count, int signal);
 
 static int labels[] = {THICKEN_FILL, NBHD_FILL, VENTRICLE_FILL, DIAGONAL_FILL,
                        DEGENERATE_FILL};
-#define NLABELS sizeof(labels) / (sizeof(labels[0]))
-#define MAX_SLICES 41
+#define NLABELS     sizeof(labels) / (sizeof(labels[0]))
+#define MAX_SLICES  41
 #define HALF_SLICES ((MAX_SLICES - 1) / 2)
-#define CUT_WIDTH 1
-#define HALF_CUT ((CUT_WIDTH - 1) / 2)
+#define CUT_WIDTH   1
+#define HALF_CUT    ((CUT_WIDTH - 1) / 2)
 #define SEARCH_STEP 3
-#define MAX_OFFSET 50
-#define CC_VAL 100
+#define MAX_OFFSET  50
+#define CC_VAL      100
 
 /* aspect ratios are dy/dx */
-#define MIN_CC_AREA 350  /* smallest I've seen is 389 */
-#define MAX_CC_AREA 1400 /* biggest I've seen is 1154 */
+#define MIN_CC_AREA   350  /* smallest I've seen is 389 */
+#define MAX_CC_AREA   1400 /* biggest I've seen is 1154 */
 #define MIN_CC_ASPECT 0.1
 #define MAX_CC_ASPECT 0.75
 
@@ -165,10 +164,10 @@ double findMinSize(MRI *mri) {
 }
 
 int main(int argc, char *argv[]) {
-  char *cp, fname[STRLEN];
-  int nargs, msec, n_sample = 100, length = 100;
-  Timer then;
-  MRI *cc_medial_axis;
+  char *   cp, fname[STRLEN];
+  int      nargs, msec, n_sample = 100, length = 100;
+  Timer    then;
+  MRI *    cc_medial_axis;
   MEDATOM *medial_axis;
 
   Progname = argv[0];
@@ -226,16 +225,16 @@ int main(int argc, char *argv[]) {
 }
 
 static int find_mid_plane_wm(char *subject) {
-  char ifname[200], ofname[200], data_dir[400], *cp;
-  int y, z, xi, yi_low = 256, yi_high = 0, zi_low = 256, zi_high = 0, temp;
-  double xc, yc, zc;
+  char    ifname[200], ofname[200], data_dir[400], *cp;
+  int     y, z, xi, yi_low = 256, yi_high = 0, zi_low = 256, zi_high = 0, temp;
+  double  xc, yc, zc;
   MATRIX *mrot, *mtrans;
-  int i, j, k;
-  MRI *mri_talheader, *mri_header, *mri_cc, *mri_tal;
-  double xv, yv, zv;
-  FILE *fp;
-  LTA *lta2 = 0;
-  float volume[5];
+  int     i, j, k;
+  MRI *   mri_talheader, *mri_header, *mri_cc, *mri_tal;
+  double  xv, yv, zv;
+  FILE *  fp;
+  LTA *   lta2 = 0;
+  float   volume[5];
 
   cp = getenv("SUBJECTS_DIR");
   if (cp == NULL) {
@@ -292,17 +291,17 @@ static int find_mid_plane_wm(char *subject) {
 
   // find the transform matrix
   mtrans = MatrixAlloc(4, 4, MATRIX_REAL);
-  mrot = MatrixAlloc(4, 4, MATRIX_REAL);
+  mrot   = MatrixAlloc(4, 4, MATRIX_REAL);
 
   // try method 2 to get the rotation matrix
   sprintf(ifname, "%s/%s/mri/transforms/talairach.xfm", data_dir, subject);
-  lta2 = LTAreadEx(ifname);
+  lta2   = LTAreadEx(ifname);
   mtrans = lta2->xforms[0].m_L;
   Trns_ExtractRotationMatrix(mtrans, mrot);
   *MATRIX_RELT(mrot, 1, 4) = mtrans->rptr[1][4];
   *MATRIX_RELT(mrot, 2, 4) = mtrans->rptr[2][4];
   *MATRIX_RELT(mrot, 3, 4) = mtrans->rptr[3][4];
-  lta2->xforms[0].m_L = mrot;
+  lta2->xforms[0].m_L      = mrot;
 
   // rotation wm volume to be upright, using cc volume temporarily
   mri_header = MRIallocHeader(mri_wm->width, mri_wm->height, mri_wm->depth,
@@ -422,7 +421,7 @@ static int find_mid_plane_wm(char *subject) {
 static int find_mid_plane_tal(char *subject, char *volume) {
   char ifname[200], ofname[200], data_dir[400], *cp;
   MRI *mri_temp, *mri_filled, *mri_slice;
-  int ii, jj, area;
+  int  ii, jj, area;
 
   /* finish reading in the original volume registered with talaraich space*/
   cp = getenv("SUBJECTS_DIR");
@@ -452,7 +451,7 @@ static int find_mid_plane_tal(char *subject, char *volume) {
     MRIwrite(mri_intensity, ofname);
 
     /*now segment out corpus callosum in talairach space*/
-    mri_slice = MRIextractPlane(mri_cc_tal, NULL, MRI_SAGITTAL, cc_tal_x);
+    mri_slice  = MRIextractPlane(mri_cc_tal, NULL, MRI_SAGITTAL, cc_tal_x);
     mri_filled = MRIfillFG(mri_slice, NULL, cc_tal_z, cc_tal_y, 0, WM_MIN_VAL,
                            CC_VAL, &area);
 
@@ -500,12 +499,12 @@ static int find_mid_plane_tal(char *subject, char *volume) {
 }
 
 static int rotatevolume() {
-  int width, height, depth, counter, number;
-  int y_rotate, z_rotate, x, y_alpha, z_alpha, xi, yi, zi, yk, zk;
-  int whalf, p_x, p_y, p_z;
-  int x_center, y_center, z_center, xshift, i, j, k;
+  int    width, height, depth, counter, number;
+  int    y_rotate, z_rotate, x, y_alpha, z_alpha, xi, yi, zi, yk, zk;
+  int    whalf, p_x, p_y, p_z;
+  int    x_center, y_center, z_center, xshift, i, j, k;
   double val = 0;
-  float ey_x, ey_y, ey_z, ez_x, ez_y, ez_z, x1_x, x1_y, x1_z, xbase, ybase,
+  float  ey_x, ey_y, ey_z, ez_x, ez_y, ez_z, x1_x, x1_y, x1_z, xbase, ybase,
       zbase;
   /*  BUFTYPE     *pdst, *pptr ; */
   MRI *mri_temp, *mri_tal;
@@ -529,25 +528,25 @@ static int rotatevolume() {
   }
 
   /*Done with the construction of a binary volume mri_tal*/
-  mri_tal = MRIchangeType(mri_tal, 0, 0, 0, 1);
+  mri_tal    = MRIchangeType(mri_tal, 0, 0, 0, 1);
   mri_cc_tal = MRIcopy(mri_tal, NULL);
 
   if (!NO_CORRECTION) {
     MRIvalueFill(mri_cc_tal, 0);
 
-    width = mri_tal->width;
-    height = mri_tal->height;
-    depth = mri_tal->depth;
-    xshift = 3;
+    width    = mri_tal->width;
+    height   = mri_tal->height;
+    depth    = mri_tal->depth;
+    xshift   = 3;
     y_rotate = 5;
     z_rotate = 5;
-    whalf = mri_tal->width / 2;
-    p_x = 0;
-    p_y = 0;
-    p_z = 0;
-    number = whalf * whalf;
-    y_alpha = 0;
-    z_alpha = 0;
+    whalf    = mri_tal->width / 2;
+    p_x      = 0;
+    p_y      = 0;
+    p_z      = 0;
+    number   = whalf * whalf;
+    y_alpha  = 0;
+    z_alpha  = 0;
 
     y_center = cc_tal_y;
     z_center = cc_tal_z;
@@ -556,8 +555,8 @@ static int rotatevolume() {
       for (y_alpha = -1 * y_rotate; y_alpha <= y_rotate; y_alpha++)
         for (z_alpha = -1 * z_rotate; z_alpha <= z_rotate; z_alpha++) {
           x_center = nint(cc_tal_x) + x;
-          counter = 0;
-          x1_x = cos((double)y_alpha * M_PI / 180) *
+          counter  = 0;
+          x1_x     = cos((double)y_alpha * M_PI / 180) *
                  cos((double)z_alpha * M_PI / 180); /* new x axis */
           x1_y = sin((double)z_alpha * M_PI / 180);
           x1_z = cos((double)y_alpha * M_PI / 180) *
@@ -593,9 +592,9 @@ static int rotatevolume() {
           }
           if (counter < number) {
             number = counter;
-            p_x = x_center;
-            p_y = y_alpha;
-            p_z = z_alpha;
+            p_x    = x_center;
+            p_y    = y_alpha;
+            p_z    = z_alpha;
           }
         }
 
@@ -604,7 +603,7 @@ static int rotatevolume() {
             number, p_x, p_y, p_z);
 
     x_center = p_x;
-    x1_x = cos((double)p_y * M_PI / 180) *
+    x1_x     = cos((double)p_y * M_PI / 180) *
            cos((double)p_z * M_PI / 180); /* new x axis */
     x1_y = sin((double)p_z * M_PI / 180);
     x1_z = cos((double)p_y * M_PI / 180) * sin((double)p_z * M_PI / 180);
@@ -641,7 +640,7 @@ static int rotatevolume() {
           }
         }
       }
-    cc_tal_x = x_center;
+    cc_tal_x      = x_center;
     mri_intensity = MRIcopy(mri_temp, NULL);
     MRIfree(&mri_temp);
   }
@@ -651,7 +650,7 @@ static int rotatevolume() {
   return (NO_ERROR);
 }
 
-#define CC_SPREAD 10
+#define CC_SPREAD     10
 #define MIN_THICKNESS 3
 #define MAX_THICKNESS 20
 
@@ -659,16 +658,16 @@ static int find_corpus_callosum(MRI *mri_tal, double *pccx, double *pccy,
                                 double *pccz, const LTA *lta) {
   int xv, yv, zv, max_y, max_thick = 0, thickness = 0, y1, xcc, ycc, x, y, x0,
                          extension = 50;
-  int flag = 0, counts = 0;
-  double xr, yr, zr;
+  int        flag = 0, counts = 0;
+  double     xr, yr, zr;
   MRI_REGION region;
-  int cc_spread, min_thickness, max_thickness, slice_size;
-  double voxsize = findMinSize(mri_tal);
+  int        cc_spread, min_thickness, max_thickness, slice_size;
+  double     voxsize = findMinSize(mri_tal);
 
-  cc_spread = ceil(CC_SPREAD / voxsize);
+  cc_spread     = ceil(CC_SPREAD / voxsize);
   min_thickness = ceil(MIN_THICKNESS / voxsize); // estimate bigger
   max_thickness = ceil(MAX_THICKNESS / voxsize);
-  slice_size = mri_tal->width;
+  slice_size    = mri_tal->width;
 
   MRIboundingBox(mri_tal, 1, &region);
   // bounding box center position in voxel coords
@@ -709,9 +708,9 @@ static int find_corpus_callosum(MRI *mri_tal, double *pccx, double *pccy,
         if (thickness > min_thickness && thickness < max_thickness) {
           if (y > max_y || (y == max_y && thickness > max_thick)) {
             // found the zero voxel at y1 -> thinckness
-            xcc = x;
-            ycc = y + thickness / 2; /* in middle of cc */
-            max_y = y;               // mark starting y position
+            xcc       = x;
+            ycc       = y + thickness / 2; /* in middle of cc */
+            max_y     = y;                 // mark starting y position
             max_thick = thickness;
             if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
               fprintf(stdout,
@@ -722,8 +721,8 @@ static int find_corpus_callosum(MRI *mri_tal, double *pccx, double *pccy,
             flag = 1;
             counts++;
           } else if (flag == 1) {
-            xcc = xcc + nint(counts / 2);
-            flag = 0;
+            xcc    = xcc + nint(counts / 2);
+            flag   = 0;
             counts = 0;
           }
         }
@@ -751,40 +750,40 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
   // here we can handle only up to .5 mm voxel size
   int area[MAX_SLICES * 2], flag[MAX_SLICES * 2], min_area, min_slice, slice,
       offset, xv, yv, zv, xo, yo, i, total_area = 0, left = 0, right = 0;
-  MRI *mri_slice, *mri_filled;
-  double aspect, x_tal, y_tal, z_tal, x, y, z, xvv, yvv, zvv;
+  MRI *      mri_slice, *mri_filled;
+  double     aspect, x_tal, y_tal, z_tal, x, y, z, xvv, yvv, zvv;
   MRI_REGION region;
-  char fname[STRLEN];
-  int half_slices, ii, jj;
-  double voxsize = findMinSize(mri_tal);
-  int slice_size = mri_tal->width;
-  int max_slices = ceil(MAX_SLICES / voxsize);
-  int max_cc_area = ceil(MAX_CC_AREA / (voxsize * voxsize));
-  int min_cc_area = floor(MIN_CC_AREA / (voxsize * voxsize));
+  char       fname[STRLEN];
+  int        half_slices, ii, jj;
+  double     voxsize     = findMinSize(mri_tal);
+  int        slice_size  = mri_tal->width;
+  int        max_slices  = ceil(MAX_SLICES / voxsize);
+  int        max_cc_area = ceil(MAX_CC_AREA / (voxsize * voxsize));
+  int        min_cc_area = floor(MIN_CC_AREA / (voxsize * voxsize));
 
   half_slices = floor(HALF_SLICES / voxsize);
   if (half_slices <= 0)
     half_slices = 1;
 
-  x_tal = *pccx;
-  y_tal = *pccy;
-  z_tal = *pccz;
+  x_tal  = *pccx;
+  y_tal  = *pccy;
+  z_tal  = *pccz;
   offset = 0;
   xo = yo = (slice_size - 1) / 2; /* center point of the slice */
   for (slice = 0; slice < max_slices; slice++) {
     offset = slice - half_slices;
 
-    i = 0;
+    i           = 0;
     area[slice] = 0;
     while (area[slice] < 100 && i <= 5) {
       x = x_tal + offset;
       y = y_tal;
       z = z_tal;
       MRIworldToVoxel(mri_tal, x, y, z, &x, &y, &z);
-      xv = nint(x);
-      yv = nint(y) - i;
-      zv = nint(z);
-      mri_slice = MRIextractPlane(mri_tal, NULL, MRI_SAGITTAL, xv);
+      xv         = nint(x);
+      yv         = nint(y) - i;
+      zv         = nint(z);
+      mri_slice  = MRIextractPlane(mri_tal, NULL, MRI_SAGITTAL, xv);
       mri_filled = MRIfillFG(mri_slice, NULL, zv, yv, 0, WM_MIN_VAL, CC_VAL,
                              &area[slice]);
       MRIboundingBox(mri_filled, 1, &region);
@@ -843,7 +842,7 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
     }
   }
 #else
-  min_area = 10000 * 5;
+  min_area  = 10000 * 5;
   min_slice = -1;
   for (slice = 6; slice <= 14; slice++) {
     for (i = -2, total_area = 0; i <= 2; i++)
@@ -851,7 +850,7 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
 
     if (total_area < min_area &&
         (total_area >= min_cc_area * 5 && total_area <= max_cc_area * 5)) {
-      min_area = total_area;
+      min_area  = total_area;
       min_slice = slice;
     }
   }
@@ -902,7 +901,7 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
   int temp = 0, temp2 = 0, old_temp = 0;
   int x1 = 0, y1 = 0, x2 = 0, y2 = 0, height = mri_filled->height,
       width = mri_filled->width, flag = 0;
-  int i, section1[150];
+  int  i, section1[150];
   MRI *mri_temp1, *mri_temp2;
 
   mri_temp1 = MRIcopy(mri_filled, NULL);
@@ -950,8 +949,8 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
       yi_low = yi_high - ratio * 20;
       for (x = 0; x < xi_high - nint((xi_high - xi_low) / 4); x++) {
         for (y = yi_low; y > 0; y--) {
-          MRIvox(mri_temp2, x, y, 0) = 0;
-          MRIvox(mri_temp1, x, y, 0) = 0;
+          MRIvox(mri_temp2, x, y, 0)  = 0;
+          MRIvox(mri_temp1, x, y, 0)  = 0;
           MRIvox(mri_filled, x, y, 0) = 0;
         }
       }
@@ -959,8 +958,8 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
       yi_high = yi_low + 15 * ratio;
       for (x = 0; x < xi_high - nint((xi_high - xi_low) / 4); x++) {
         for (y = yi_high; y < height; y++) {
-          MRIvox(mri_temp2, x, y, 0) = 0;
-          MRIvox(mri_temp1, x, y, 0) = 0;
+          MRIvox(mri_temp2, x, y, 0)  = 0;
+          MRIvox(mri_temp1, x, y, 0)  = 0;
           MRIvox(mri_filled, x, y, 0) = 0;
         }
       }
@@ -983,7 +982,7 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
   for (x_edge = xi_high - nint((xi_high - xi_low) / 3.5);
        x_edge >= xi_low + nint((xi_high - xi_low) / 7); x_edge--) {
     edge_count = 0;
-    y_edge = 0;
+    y_edge     = 0;
     while (edge_count < 3 && y_edge < height - 2) {
       length = edge_detection(mri_temp2, edge_count, 0);
       if (length > 1)
@@ -1019,8 +1018,8 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
       flag = 1;
     else if (edge_count <= 1 && flag == 1 && x_edge > xi_low + 6) {
       flag = 0;
-      y1 = old_temp;
-      x1 = x_edge;
+      y1   = old_temp;
+      x1   = x_edge;
       //   if (x1<zv+6.5*ratio) break;
     }
     old_temp = temp;
@@ -1034,9 +1033,9 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
   flag = 0;
   // for (y_edge=yi_high-nint((yi_high-yi_low)/3); y_edge>=yi_low+2; y_edge--)
   for (y_edge = yv + 2; y_edge >= yi_low + 2; y_edge--) {
-    edge_count = 0;
-    x_edge = 0;
-    i = yv + 2 - y_edge;
+    edge_count  = 0;
+    x_edge      = 0;
+    i           = yv + 2 - y_edge;
     section1[i] = 0;
     while (x_edge < width - 1) {
       length = edge_detection(mri_temp2, edge_count, 1);
@@ -1055,8 +1054,8 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
       flag = 1;
     else if (edge_count <= 2 && flag == 1) {
       flag = 0;
-      x2 = old_temp;
-      y2 = y_edge + 1;
+      x2   = old_temp;
+      y2   = y_edge + 1;
       if (y2 <= yi_low + 8 * ratio)
         break;
     } else if (x2 == 0 && i >= 0 &&
@@ -1076,11 +1075,11 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
   if (x2 > 0 && x1 > xi_low + 4 * ratio && x1 > x2) {
     if (x2 < x1) {
       temp = x1;
-      x1 = x2;
-      x2 = temp;
+      x1   = x2;
+      x2   = temp;
       temp = y1;
-      y1 = y2;
-      y2 = temp;
+      y1   = y2;
+      y2   = temp;
     }
     for (x = x1; x <= x2; x++) {
       for (y = nint(y1 + (y2 - y1) * (x - x1) / (x2 - x1)); y < height; y++)
@@ -1149,8 +1148,8 @@ static int edge_detection(MRI *mri_temp, int edge_count, int signal) {
 }
 
 static MRI *smooth_cc(MRI *mri_filled) {
-  int x, y;
-  int height = mri_filled->height, width = mri_filled->width;
+  int  x, y;
+  int  height = mri_filled->height, width = mri_filled->width;
   MRI *mri_temp1, *mri_temp2;
 
   mri_temp1 = MRIcopy(mri_filled, NULL);
@@ -1188,9 +1187,9 @@ static MRI *smooth_cc(MRI *mri_filled) {
 }
 
 static MRI *find_cc_boundary(MRI *cc_smoothed, MRI *cc_boundary) {
-  int width = cc_smoothed->width;
+  int width  = cc_smoothed->width;
   int height = cc_smoothed->height;
-  int depth = cc_smoothed->depth;
+  int depth  = cc_smoothed->depth;
   int k, j, i;
 
   cc_boundary = MRIcopy(cc_smoothed, NULL);
@@ -1214,22 +1213,22 @@ static MRI *find_cc_boundary(MRI *cc_smoothed, MRI *cc_boundary) {
 }
 
 static MEDATOM *compute_normal(MEDATOM *medial_axis, int length) {
-  int i, j, n;
+  int   i, j, n;
   float dx, dy, sx, sy, dist;
 
 #if 1
 
   /*compute the normal based on 2 neighbors*/
   for (i = 1; i < length - 1; i++) {
-    sx = 0;
-    sy = 0;
+    sx   = 0;
+    sy   = 0;
     dist = 0;
-    j = 0;
-    n = 0;
+    j    = 0;
+    n    = 0;
     do {
       j++;
-      dx = medial_axis[i + j].x - medial_axis[i].x;
-      dy = medial_axis[i + j].y - medial_axis[i].y;
+      dx   = medial_axis[i + j].x - medial_axis[i].x;
+      dy   = medial_axis[i + j].y - medial_axis[i].y;
       dist = sqrt(dx * dx + dy * dy);
       if (dist) {
         medial_axis[i + j].dx = dx / dist;
@@ -1237,8 +1236,8 @@ static MEDATOM *compute_normal(MEDATOM *medial_axis, int length) {
       } else
         continue;
 
-      dx = medial_axis[i - j].x - medial_axis[i].x;
-      dy = medial_axis[i - j].y - medial_axis[i].y;
+      dx   = medial_axis[i - j].x - medial_axis[i].x;
+      dy   = medial_axis[i - j].y - medial_axis[i].y;
       dist = sqrt(dx * dx + dy * dy);
       if (dist) {
         medial_axis[i - j].dx = dx / dist;
@@ -1248,7 +1247,7 @@ static MEDATOM *compute_normal(MEDATOM *medial_axis, int length) {
 
       medial_axis[i].dx = medial_axis[i + j].dx - medial_axis[i - j].dx;
       medial_axis[i].dy = medial_axis[i + j].dy - medial_axis[i - j].dy;
-      dist = sqrt(medial_axis[i].dx * medial_axis[i].dx +
+      dist              = sqrt(medial_axis[i].dx * medial_axis[i].dx +
                   medial_axis[i].dy * medial_axis[i].dy);
       if (dist) {
         dx = medial_axis[i].dy / dist;
@@ -1275,8 +1274,8 @@ static MEDATOM *compute_normal(MEDATOM *medial_axis, int length) {
                 (medial_axis[i + j].y - medial_axis[i].y) <= 0.5;
          j++) {
     }
-    dx = medial_axis[i + j].x - medial_axis[i].x;
-    dy = medial_axis[i + j].y - medial_axis[i].y;
+    dx   = medial_axis[i + j].x - medial_axis[i].x;
+    dy   = medial_axis[i + j].y - medial_axis[i].y;
     dist = sqrt(dx * dx + dy * dy);
     if (dist) {
       medial_axis[i].dx = dx / dist;
@@ -1286,8 +1285,8 @@ static MEDATOM *compute_normal(MEDATOM *medial_axis, int length) {
     for (j = -1; i + j >= 1 && (medial_axis[i].y - medial_axis[i + j].y) <= 0.5;
          j--) {
     }
-    dx = medial_axis[i - j].x - medial_axis[i].x;
-    dy = medial_axis[i - j].y - medial_axis[i].y;
+    dx   = medial_axis[i - j].x - medial_axis[i].x;
+    dy   = medial_axis[i - j].y - medial_axis[i].y;
     dist = sqrt(dx * dx + dy * dy);
     if (dist) {
       medial_axis[i].dx -= dx / dist;
@@ -1314,11 +1313,11 @@ static MEDATOM *compute_normal(MEDATOM *medial_axis, int length) {
 
 static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
                                  char *ofname) {
-  int i, j, xi_high = 0, yi_high = 0, n, count;
-  MRI *cc_boundary, *cc_smoothed;
-  int width, height, yi_low, xi_low, xx, yy;
-  float x1, x2, y1, y2, x, y, dx, dy;
-  FILE *fp;
+  int    i, j, xi_high = 0, yi_high = 0, n, count;
+  MRI *  cc_boundary, *cc_smoothed;
+  int    width, height, yi_low, xi_low, xx, yy;
+  float  x1, x2, y1, y2, x, y, dx, dy;
+  FILE * fp;
   double dist, space, fraction;
   double val = 0, mean_val = 0;
 
@@ -1326,10 +1325,10 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
   cc_smoothed = smooth_cc(cc_smoothed);
   // MRIwrite(cc_smoothed, fname) ;
   cc_boundary = find_cc_boundary(cc_smoothed, cc_boundary);
-  width = cc_boundary->width;
-  height = cc_boundary->height;
-  yi_low = height;
-  xi_low = width;
+  width       = cc_boundary->width;
+  height      = cc_boundary->height;
+  yi_low      = height;
+  xi_low      = width;
 
   /*initialize the leaf nodes first*/
   if (ROT) {
@@ -1339,14 +1338,14 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
           if (i < xi_low)
             xi_low = i;
           if (j < yi_low) {
-            yi_low = j;
+            yi_low           = j;
             medial_axis[0].x = i;
             medial_axis[0].y = j;
           }
           if (i > xi_high)
             xi_high = i;
           if (j > yi_high) {
-            yi_high = j;
+            yi_high                   = j;
             medial_axis[length - 1].x = i;
             medial_axis[length - 1].y = j;
           }
@@ -1358,7 +1357,7 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
       for (j = 0; j < height; j++) {
         if (MRIvox(cc_boundary, i, j, 0)) {
           if (i < xi_low) {
-            xi_low = i;
+            xi_low           = i;
             medial_axis[0].x = i;
             medial_axis[0].y = j;
           }
@@ -1366,7 +1365,7 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
             yi_low = j;
 
           if (i > xi_high) {
-            xi_high = i;
+            xi_high                   = i;
             medial_axis[length - 1].x = i;
             medial_axis[length - 1].y = j;
           }
@@ -1386,7 +1385,7 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
   {
     float val1, val2;
     length = 102;
-    fp = fopen(ofname, "r");
+    fp     = fopen(ofname, "r");
     for (j = 0; j < length; j++) {
       fscanf(fp, "%d %f %f %f %f %f", &i, &medial_axis[j].x, &medial_axis[j].y,
              &medial_axis[j].radius, &medial_axis[j].dx, &medial_axis[j].dy);
@@ -1406,13 +1405,13 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
 
     for (j = 1; j < length - 1; j++) {
       float radius;
-      x = medial_axis[j].x;
-      y = medial_axis[j].y;
+      x      = medial_axis[j].x;
+      y      = medial_axis[j].y;
       radius = medial_axis[j].radius;
-      dx = medial_axis[j].nx;
-      dy = medial_axis[j].ny;
-      dx = dx / sqrt(dx * dx + dy * dy);
-      dy = dy / sqrt(dx * dx + dy * dy);
+      dx     = medial_axis[j].nx;
+      dy     = medial_axis[j].ny;
+      dx     = dx / sqrt(dx * dx + dy * dy);
+      dy     = dy / sqrt(dx * dx + dy * dy);
       MRIvoxelToWorld(mri_cc_tal, cc_tal_x, y + radius * dy / 2,
                       x + radius * dx / 2, &xw, &yw, &zw);
       fprintf(stdout, "0 %.2f %.2f %.2f 1\n", xw, yw, zw);
@@ -1420,13 +1419,13 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
 
     for (j = 1; j < length - 1; j++) {
       float radius;
-      x = medial_axis[j].x;
-      y = medial_axis[j].y;
+      x      = medial_axis[j].x;
+      y      = medial_axis[j].y;
       radius = medial_axis[j].radius;
-      dx = medial_axis[j].nx;
-      dy = medial_axis[j].ny;
-      dx = dx / sqrt(dx * dx + dy * dy);
-      dy = dy / sqrt(dx * dx + dy * dy);
+      dx     = medial_axis[j].nx;
+      dy     = medial_axis[j].ny;
+      dx     = dx / sqrt(dx * dx + dy * dy);
+      dy     = dy / sqrt(dx * dx + dy * dy);
       MRIvoxelToWorld(mri_cc_tal, cc_tal_x, y - radius * dy / 2,
                       x - radius * dx / 2, &xw, &yw, &zw);
       fprintf(stdout, "0 %.2f %.2f %.2f 2\n", xw, yw, zw);
@@ -1452,7 +1451,7 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
   fprintf(fp, "0   %f   %f   0   %f   %f   %f   %f\n", medial_axis[0].x,
           medial_axis[0].y, val, val, val, val);
 
-  dist = 0;
+  dist               = 0;
   medial_axis[0].odx = 0;
   for (j = 1; j < length; j++) {
     dist += sqrt((medial_axis[j].x - medial_axis[j - 1].x) *
@@ -1463,10 +1462,10 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
   }
 
   space = dist / (n_sample + 1);
-  j = 0;
+  j     = 0;
   for (n = 1; n <= n_sample; n++) {
     double upmid, downmid;
-    float radius;
+    float  radius;
     dist = n * space;
     for (; medial_axis[j].odx < dist && j < length; j++) {
       ;
@@ -1475,21 +1474,21 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
     if (j == length)
       printf("sample error at %dth atoms\n", n);
     else {
-      x1 = medial_axis[j - 1].x;
-      y1 = medial_axis[j - 1].y;
-      x2 = medial_axis[j].x;
-      y2 = medial_axis[j].y;
+      x1       = medial_axis[j - 1].x;
+      y1       = medial_axis[j - 1].y;
+      x2       = medial_axis[j].x;
+      y2       = medial_axis[j].y;
       fraction = (dist - medial_axis[j - 1].odx) /
                  (medial_axis[j].odx - medial_axis[j - 1].odx);
       x = fraction * x2 + (1 - fraction) * x1;
       y = fraction * y2 + (1 - fraction) * y1;
 
-      dx = medial_axis[j - 1].nx + medial_axis[j].nx;
-      dy = medial_axis[j - 1].ny + medial_axis[j].ny;
-      dx = dx / sqrt(dx * dx + dy * dy);
-      dy = dy / sqrt(dx * dx + dy * dy);
-      xx = x;
-      yy = y;
+      dx    = medial_axis[j - 1].nx + medial_axis[j].nx;
+      dy    = medial_axis[j - 1].ny + medial_axis[j].ny;
+      dx    = dx / sqrt(dx * dx + dy * dy);
+      dy    = dy / sqrt(dx * dx + dy * dy);
+      xx    = x;
+      yy    = y;
       count = 0;
       MRIsampleVolumeFrameType(mri_intensity, cc_tal_x, yy, xx, 0,
                                SAMPLE_NEAREST, &mean_val);
@@ -1545,20 +1544,20 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
 
 static MEDATOM *medial_axis_initialization(MEDATOM *medial_axis, int length) {
   float dx, dy;
-  int i;
+  int   i;
 
   /*draw a line between the two leaf nodes*/
   dx = (medial_axis[length - 1].x - medial_axis[0].x) / (length - 1);
   dy = (medial_axis[length - 1].y - medial_axis[0].y) / (length - 1);
   for (i = 1; i < length; i++) {
-    medial_axis[i].x = medial_axis[i - 1].x + dx;
-    medial_axis[i].y = medial_axis[i - 1].y + dy;
-    medial_axis[i].dx = 0;
-    medial_axis[i].dy = 0;
+    medial_axis[i].x   = medial_axis[i - 1].x + dx;
+    medial_axis[i].y   = medial_axis[i - 1].y + dy;
+    medial_axis[i].dx  = 0;
+    medial_axis[i].dy  = 0;
     medial_axis[i].odx = 0;
     medial_axis[i].ody = 0;
-    medial_axis[i].nx = 0;
-    medial_axis[i].ny = 0;
+    medial_axis[i].nx  = 0;
+    medial_axis[i].ny  = 0;
   }
   /*compute normal*/
   medial_axis = compute_normal(medial_axis, length);
@@ -1573,27 +1572,27 @@ static MEDATOM *medial_axis_initialization(MEDATOM *medial_axis, int length) {
 
 static MEDATOM *medial_axis_integration(MEDATOM *medial_axis, MRI *cc_boundary,
                                         MRI *cc_smoothed, int length) {
-  int n = 0, i = 0, number = 0, count = 50;
+  int    n = 0, i = 0, number = 0, count = 50;
   double sse = 0, old_sse = 0, min_sse;
-  float p = 1, k = 1, iteration_number = 500, tol = 0.01, ratio = 0, move = 0;
+  float  p = 1, k = 1, iteration_number = 500, tol = 0.01, ratio = 0, move = 0;
 
-  sse = compute_energy(medial_axis, cc_boundary, cc_smoothed, length);
+  sse     = compute_energy(medial_axis, cc_boundary, cc_smoothed, length);
   min_sse = sse;
   if (length < 50) {
     iteration_number = 200;
-    count = 20;
+    count            = 20;
   }
 
   do {
     old_sse = sse;
-    p = 1 / (1 + 0.2 * floor(n / 100));
-    k = 1 / (1 + 0.2 * floor(n / 100));
-    tol = 0.005 / (1 + 0.1 * floor(n / 100));
+    p       = 1 / (1 + 0.2 * floor(n / 100));
+    k       = 1 / (1 + 0.2 * floor(n / 100));
+    tol     = 0.005 / (1 + 0.1 * floor(n / 100));
 
     medial_axis =
         compute_gradient_term(medial_axis, cc_boundary, cc_smoothed, length, p);
     medial_axis = compute_smooth_term(medial_axis, length, k);
-    move = 0;
+    move        = 0;
     for (i = 1; i < length - 1; i++)
       move += (medial_axis[i].dx * medial_axis[i].dx) +
               (medial_axis[i].dy * medial_axis[i].dy);
@@ -1610,7 +1609,7 @@ static MEDATOM *medial_axis_integration(MEDATOM *medial_axis, MRI *cc_boundary,
     ratio = (old_sse - sse) / sse;
     if (sse < min_sse) {
       min_sse = sse;
-      number = 0;
+      number  = 0;
     }
     if (ratio < 0)
       ratio = 1;
@@ -1653,18 +1652,18 @@ static MEDATOM *medial_axis_integration(MEDATOM *medial_axis, MRI *cc_boundary,
 
 static MEDATOM *compute_gradient_term(MEDATOM *medial_axis, MRI *cc_boundary,
                                       MRI *cc_smoothed, int length, float p) {
-  int i = 0;
+  int   i = 0;
   float x, y, dx, dy, nx, ny, val_in, val_out;
 
   for (i = 1; i < length - 1; i++) {
-    x = medial_axis[i].x;
-    y = medial_axis[i].y;
-    nx = medial_axis[i].nx;
-    ny = medial_axis[i].ny;
+    x       = medial_axis[i].x;
+    y       = medial_axis[i].y;
+    nx      = medial_axis[i].nx;
+    ny      = medial_axis[i].ny;
     val_out = sample_distance_map(cc_boundary, cc_smoothed, x + nx, y + ny);
-    val_in = sample_distance_map(cc_boundary, cc_smoothed, x - nx, y - ny);
-    dx = (val_out - val_in) * p * nx / 2;
-    dy = (val_out - val_in) * p * ny / 2;
+    val_in  = sample_distance_map(cc_boundary, cc_smoothed, x - nx, y - ny);
+    dx      = (val_out - val_in) * p * nx / 2;
+    dy      = (val_out - val_in) * p * ny / 2;
     medial_axis[i].dx += dx;
     medial_axis[i].dy += dy;
   }
@@ -1673,8 +1672,8 @@ static MEDATOM *compute_gradient_term(MEDATOM *medial_axis, MRI *cc_boundary,
 
 static float sample_distance_map(MRI *cc_boundary, MRI *cc_smoothed, float x,
                                  float y) {
-  int width = cc_boundary->width, height = cc_boundary->height, i, j;
-  float dist, closest = 1000;
+  int   width = cc_boundary->width, height = cc_boundary->height, i, j;
+  float dist, closest                      = 1000;
 
   if (x < 0)
     x = 0;
@@ -1699,18 +1698,18 @@ static float sample_distance_map(MRI *cc_boundary, MRI *cc_smoothed, float x,
 }
 
 static MEDATOM *compute_smooth_term(MEDATOM *medial_axis, int length, float k) {
-  int i;
+  int   i;
   float dx, dy, nx, ny, val;
 
   for (i = 1; i < length - 1; i++) {
     val = 0;
-    nx = medial_axis[i].nx;
-    ny = medial_axis[i].ny;
-    dx = medial_axis[i + 1].x - medial_axis[i].x;
-    dy = medial_axis[i + 1].y - medial_axis[i].y;
+    nx  = medial_axis[i].nx;
+    ny  = medial_axis[i].ny;
+    dx  = medial_axis[i + 1].x - medial_axis[i].x;
+    dy  = medial_axis[i + 1].y - medial_axis[i].y;
     val = dx * nx + dy * ny;
-    dx = medial_axis[i - 1].x - medial_axis[i].x;
-    dy = medial_axis[i - 1].y - medial_axis[i].y;
+    dx  = medial_axis[i - 1].x - medial_axis[i].x;
+    dy  = medial_axis[i - 1].y - medial_axis[i].y;
     val += dx * nx + dy * ny;
     medial_axis[i].dx += k * val * nx;
     medial_axis[i].dy += k * val * ny;
@@ -1720,9 +1719,9 @@ static MEDATOM *compute_smooth_term(MEDATOM *medial_axis, int length, float k) {
 
 static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
                                    MRI *cc_smoothed, int length) {
-  int i, j, k, count;
-  float f, scale = 0, slope, x1, x2, y1, y2;
-  double sse, min_sse, dist, space;
+  int      i, j, k, count;
+  float    f, scale = 0, slope, x1, x2, y1, y2;
+  double   sse, min_sse, dist, space;
   MEDATOM *temp;
 
   temp = (MEDATOM *)calloc(length, sizeof(MEDATOM));
@@ -1731,12 +1730,12 @@ static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
     temp[i].dy = medial_axis[i].dy;
     temp[i].nx = medial_axis[i].nx;
     temp[i].ny = medial_axis[i].ny;
-    temp[i].x = medial_axis[i].x;
-    temp[i].y = medial_axis[i].y;
+    temp[i].x  = medial_axis[i].x;
+    temp[i].y  = medial_axis[i].y;
   }
 
   min_sse = compute_energy(medial_axis, cc_boundary, cc_smoothed, length);
-  sse = compute_energy(temp, cc_boundary, cc_smoothed, length);
+  sse     = compute_energy(temp, cc_boundary, cc_smoothed, length);
   for (f = -2; f <= 3; f += 0.01) {
     for (i = 1; i < length - 1; i++) {
       temp[i].x = medial_axis[i].x + f * medial_axis[i].dx;
@@ -1744,7 +1743,7 @@ static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
     }
     sse = compute_energy(temp, cc_boundary, cc_smoothed, length);
     if (sse <= min_sse) {
-      scale = f;
+      scale   = f;
       min_sse = sse;
     }
   }
@@ -1756,8 +1755,8 @@ static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
     medial_axis[i].y += scale * medial_axis[i].dy;
     medial_axis[i].odx = medial_axis[i].dx;
     medial_axis[i].ody = medial_axis[i].dy;
-    medial_axis[i].dx = 0;
-    medial_axis[i].dy = 0;
+    medial_axis[i].dx  = 0;
+    medial_axis[i].dy  = 0;
   }
 
   /* check for intersection -simple version*/
@@ -1807,7 +1806,7 @@ static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
 #endif
 
   /*check for small spacing */
-  dist = sqrt((medial_axis[length - 1].x - medial_axis[0].x) *
+  dist  = sqrt((medial_axis[length - 1].x - medial_axis[0].x) *
                   (medial_axis[length - 1].x - medial_axis[0].x) +
               (medial_axis[length - 1].y - medial_axis[0].y) *
                   (medial_axis[length - 1].y - medial_axis[0].y));
@@ -1819,7 +1818,7 @@ static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
                     (medial_axis[i + 1].y - medial_axis[i].y));
     if (dist < space / sqrt(2) && i < length - 2) {
       count = 1;
-      j = i + 1;
+      j     = i + 1;
       do {
         count++;
         j++;
@@ -1834,9 +1833,9 @@ static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
         x2 = medial_axis[j].x;
         y2 = medial_axis[j].y;
         for (k = i + 1; k < j; k++) {
-          slope = (y2 - y1) / (j - i);
+          slope            = (y2 - y1) / (j - i);
           medial_axis[k].y = (k - i) * slope + y1;
-          slope = (x2 - x1) / (j - i);
+          slope            = (x2 - x1) / (j - i);
           medial_axis[k].x = (k - i) * slope + x1;
         }
       }
@@ -1852,12 +1851,12 @@ static MEDATOM *integrate_momentum(MEDATOM *medial_axis, MRI *cc_boundary,
 static double compute_energy(MEDATOM *medial_axis, MRI *cc_boundary,
                              MRI *cc_smoothed, int length) {
   double sse = 0;
-  float dx, dy, nx, ny;
-  int i, x, y, neg_count = 0;
+  float  dx, dy, nx, ny;
+  int    i, x, y, neg_count = 0;
 
   for (i = 1; i < length - 1; i++) {
-    x = medial_axis[i].x;
-    y = medial_axis[i].y;
+    x  = medial_axis[i].x;
+    y  = medial_axis[i].y;
     nx = medial_axis[i].nx;
     ny = medial_axis[i].ny;
 
@@ -1880,7 +1879,7 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
                                         MRI *cc_smoothed, int length) {
   int i, x, y, new_length = 0, mark = 0, ratio = 1,
                height = cc_boundary->height;
-  float error = 0, min_error = 0, x1, y1, x2, y2;
+  float    error = 0, min_error = 0, x1, y1, x2, y2;
   MEDATOM *temp;
 
   ratio = nint(height / 128);
@@ -1895,13 +1894,13 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
     temp = (MEDATOM *)calloc(new_length, sizeof(MEDATOM));
 
     /* fix the end leaf, adjust the head leaf*/
-    error = compute_error(medial_axis, cc_boundary, cc_smoothed, length,
+    error     = compute_error(medial_axis, cc_boundary, cc_smoothed, length,
                           new_length, 0);
     min_error = 100;
     temp[new_length - 1].x = medial_axis[new_length - 1].x;
     temp[new_length - 1].y = medial_axis[new_length - 1].y;
-    x1 = medial_axis[0].x;
-    y1 = medial_axis[0].y;
+    x1                     = medial_axis[0].x;
+    y1                     = medial_axis[0].y;
 
     mark = nint(medial_axis[0].y) + 1;
     for (y = mark; y <= 4 * ratio + mark; y++) {
@@ -1909,8 +1908,8 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
         if (MRIvox(cc_boundary, x, y, 0)) {
           temp[0].x = x;
           temp[0].y = y;
-          temp = medial_axis_initialization(temp, new_length);
-          temp = medial_axis_integration(temp, cc_boundary, cc_smoothed,
+          temp      = medial_axis_initialization(temp, new_length);
+          temp      = medial_axis_integration(temp, cc_boundary, cc_smoothed,
                                          new_length);
           for (i = 0; i < new_length; i++) {
             medial_axis[i].x = temp[i].x;
@@ -1921,8 +1920,8 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
           printf("leaf node x=%d, y=%d, error=%f\n", x, y, error);
           if (error < min_error) {
             min_error = error;
-            x1 = x;
-            y1 = y;
+            x1        = x;
+            y1        = y;
           }
         }
       }
@@ -1930,7 +1929,7 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
 
     temp[0].x = x1;
     temp[0].y = y1;
-    temp = medial_axis_initialization(temp, new_length);
+    temp      = medial_axis_initialization(temp, new_length);
     temp = medial_axis_integration(temp, cc_boundary, cc_smoothed, new_length);
     for (i = 0; i < new_length; i++) {
       medial_axis[i].x = temp[i].x;
@@ -1955,8 +1954,8 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
     min_error = 100;
     temp[0].x = medial_axis[length - new_length].x;
     temp[0].y = medial_axis[length - new_length].y;
-    x2 = medial_axis[length - 1].x;
-    y2 = medial_axis[length - 1].y;
+    x2        = medial_axis[length - 1].x;
+    y2        = medial_axis[length - 1].y;
 
     mark = nint(medial_axis[length - 1].y) - 1; // changed on Jan.6
     for (y = mark; y >= mark - 12 * ratio; y--) {
@@ -1964,7 +1963,7 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
         if (MRIvox(cc_boundary, x, y, 0)) {
           temp[new_length - 1].x = x;
           temp[new_length - 1].y = y;
-          temp = medial_axis_initialization(temp, new_length);
+          temp                   = medial_axis_initialization(temp, new_length);
           temp = medial_axis_integration(temp, cc_boundary, cc_smoothed,
                                          new_length);
           for (i = 0; i < new_length; i++) {
@@ -1976,8 +1975,8 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
           printf("leaf node x=%d, y=%d, error=%f\n", x, y, error);
           if (error < min_error) {
             min_error = error;
-            x2 = x;
-            y2 = y;
+            x2        = x;
+            y2        = y;
           }
         }
       }
@@ -1985,7 +1984,7 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
 
     temp[new_length - 1].x = x2;
     temp[new_length - 1].y = y2;
-    temp = medial_axis_initialization(temp, new_length);
+    temp                   = medial_axis_initialization(temp, new_length);
     temp = medial_axis_integration(temp, cc_boundary, cc_smoothed, new_length);
     for (i = 0; i < new_length; i++) {
       medial_axis[length - new_length + i].x = temp[i].x;
@@ -2002,13 +2001,13 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
     temp = (MEDATOM *)calloc(new_length, sizeof(MEDATOM));
 
     /* fix the end leaf, adjust the head leaf*/
-    error = compute_error(medial_axis, cc_boundary, cc_smoothed, length,
+    error     = compute_error(medial_axis, cc_boundary, cc_smoothed, length,
                           new_length, 0);
     min_error = 100;
     temp[new_length - 1].x = medial_axis[new_length - 1].x;
     temp[new_length - 1].y = medial_axis[new_length - 1].y;
-    x1 = medial_axis[0].x;
-    y1 = medial_axis[0].y;
+    x1                     = medial_axis[0].x;
+    y1                     = medial_axis[0].y;
 
     mark = nint(medial_axis[0].x);
     for (x = mark + 2; x <= mark + 20; x++) {
@@ -2016,8 +2015,8 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
         if (MRIvox(cc_boundary, x, y, 0)) {
           temp[0].x = x;
           temp[0].y = y;
-          temp = medial_axis_initialization(temp, new_length);
-          temp = medial_axis_integration(temp, cc_boundary, cc_smoothed,
+          temp      = medial_axis_initialization(temp, new_length);
+          temp      = medial_axis_integration(temp, cc_boundary, cc_smoothed,
                                          new_length);
           for (i = 0; i < new_length; i++) {
             medial_axis[i].x = temp[i].x;
@@ -2028,8 +2027,8 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
           printf("leaf node x=%d, y=%d, error=%f\n", x, y, error);
           if (error < min_error) {
             min_error = error;
-            x1 = x;
-            y1 = y;
+            x1        = x;
+            y1        = y;
           }
         }
       }
@@ -2037,7 +2036,7 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
 
     temp[0].x = x1;
     temp[0].y = y1;
-    temp = medial_axis_initialization(temp, new_length);
+    temp      = medial_axis_initialization(temp, new_length);
     temp = medial_axis_integration(temp, cc_boundary, cc_smoothed, new_length);
     for (i = 0; i < new_length; i++) {
       medial_axis[i].x = temp[i].x;
@@ -2054,13 +2053,13 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
 
     temp = (MEDATOM *)calloc(new_length, sizeof(MEDATOM));
     /* fix the head leaf, adjust the end leaf*/
-    error = compute_error(medial_axis, cc_boundary, cc_smoothed, length,
+    error     = compute_error(medial_axis, cc_boundary, cc_smoothed, length,
                           new_length, 1);
     min_error = 100;
     temp[0].x = medial_axis[length - new_length].x;
     temp[0].y = medial_axis[length - new_length].y;
-    x2 = medial_axis[length - 1].x;
-    y2 = medial_axis[length - 1].y;
+    x2        = medial_axis[length - 1].x;
+    y2        = medial_axis[length - 1].y;
 
     mark = nint(medial_axis[length - 1].x);
     for (x = mark - 2; x >= mark - 25; x--) {
@@ -2068,7 +2067,7 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
         if (MRIvox(cc_boundary, x, y, 0)) {
           temp[new_length - 1].x = x;
           temp[new_length - 1].y = y;
-          temp = medial_axis_initialization(temp, new_length);
+          temp                   = medial_axis_initialization(temp, new_length);
           temp = medial_axis_integration(temp, cc_boundary, cc_smoothed,
                                          new_length);
           for (i = 0; i < new_length; i++) {
@@ -2080,8 +2079,8 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
           printf("leaf node x=%d, y=%d, error=%f\n", x, y, error);
           if (error < min_error) {
             min_error = error;
-            x2 = x;
-            y2 = y;
+            x2        = x;
+            y2        = y;
           }
         }
       }
@@ -2089,7 +2088,7 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
 
     temp[new_length - 1].x = x2;
     temp[new_length - 1].y = y2;
-    temp = medial_axis_initialization(temp, new_length);
+    temp                   = medial_axis_initialization(temp, new_length);
     temp = medial_axis_integration(temp, cc_boundary, cc_smoothed, new_length);
     for (i = 0; i < new_length; i++) {
       medial_axis[length - new_length + i].x = temp[i].x;
@@ -2215,14 +2214,14 @@ static float compute_error(MEDATOM *medial_axis, MRI *cc_boundary,
 
 static MRI *sample_medial_axis(MEDATOM *medial_axis, MRI *cc_medial_axis,
                                int length) {
-  MRI *cc_slice;
-  int j, n, yi_low, yi_high;
+  MRI * cc_slice;
+  int   j, n, yi_low, yi_high;
   float slope = 0, x1, y1, x2, y2, x, y;
 
   cc_slice = MRIextractPlane(cc_medial_axis, NULL, MRI_SAGITTAL, cc_tal_x);
-  yi_low = nint(medial_axis[0].y);
-  yi_high = nint(medial_axis[length - 1].y);
-  MRIvox(cc_slice, nint(medial_axis[0].x), yi_low, 0) = CC_VAL;
+  yi_low   = nint(medial_axis[0].y);
+  yi_high  = nint(medial_axis[length - 1].y);
+  MRIvox(cc_slice, nint(medial_axis[0].x), yi_low, 0)           = CC_VAL;
   MRIvox(cc_slice, nint(medial_axis[length - 1].x), yi_high, 0) = CC_VAL;
 
 #if 0
@@ -2322,7 +2321,7 @@ static MRI *sample_medial_axis(MEDATOM *medial_axis, MRI *cc_medial_axis,
  ----------------------------------------------------------------------*/
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -2337,8 +2336,8 @@ static int get_option(int argc, char *argv[]) {
     cc_tal_x = atof(argv[2]);
     cc_tal_y = atof(argv[3]);
     cc_tal_z = atof(argv[4]);
-    nargs = 3;
-    ROT = 0;
+    nargs    = 3;
+    ROT      = 0;
     fprintf(stderr, "T1 volume: cc seed at (%f %f %f)\n", cc_tal_x, cc_tal_y,
             cc_tal_z);
   } else if (!stricmp(option, "NC")) {

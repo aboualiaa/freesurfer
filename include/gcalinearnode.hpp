@@ -26,8 +26,8 @@
 
 #include <vector>
 
-#include "timer.h"
 #include "gca.h"
+#include "timer.h"
 
 // Forward declaration
 namespace GPU {
@@ -298,9 +298,9 @@ private:
   long long xDim;
   long long yDim;
   long long zDim;
-  size_t n4D;
-  size_t n5D;
-  size_t n6D;
+  size_t    n4D;
+  size_t    n5D;
+  size_t    n6D;
   const int gc1dNeighbourDim;
 
   //! Stores offsets of (variable length) 4th dimension

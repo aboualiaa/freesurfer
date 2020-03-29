@@ -38,36 +38,40 @@
 #if VTK_MAJOR_VERSION > 5
 #include "vtkImagingGeneralModule.h" // For export macro
 
-class VTKIMAGINGGENERAL_EXPORT vtkSimpleLabelEdgeFilter3D : public vtkSimpleImageToImageFilter
-{
+class VTKIMAGINGGENERAL_EXPORT vtkSimpleLabelEdgeFilter3D
+    : public vtkSimpleImageToImageFilter {
 public:
   static vtkSimpleLabelEdgeFilter3D *New();
-  vtkTypeMacro(vtkSimpleLabelEdgeFilter3D,vtkSimpleImageToImageFilter);
+  vtkTypeMacro(vtkSimpleLabelEdgeFilter3D, vtkSimpleImageToImageFilter);
 
 protected:
-  vtkSimpleLabelEdgeFilter3D() {};
-  ~vtkSimpleLabelEdgeFilter3D() override {};
+  vtkSimpleLabelEdgeFilter3D(){};
+  ~vtkSimpleLabelEdgeFilter3D() override{};
 
-  void SimpleExecute(vtkImageData* input, vtkImageData* output) override;
+  void SimpleExecute(vtkImageData *input, vtkImageData *output) override;
+
 private:
-  vtkSimpleLabelEdgeFilter3D(const vtkSimpleLabelEdgeFilter3D&) = delete;  // Not implemented.
-  void operator=(const vtkSimpleLabelEdgeFilter3D&) = delete;  // Not implemented.
+  vtkSimpleLabelEdgeFilter3D(const vtkSimpleLabelEdgeFilter3D &) =
+      delete; // Not implemented.
+  void
+  operator=(const vtkSimpleLabelEdgeFilter3D &) = delete; // Not implemented.
 };
 #else
-class vtkSimpleLabelEdgeFilter3D : public vtkSimpleImageToImageFilter
-{
+class vtkSimpleLabelEdgeFilter3D : public vtkSimpleImageToImageFilter {
 public:
   static vtkSimpleLabelEdgeFilter3D *New();
-  vtkTypeMacro(vtkSimpleLabelEdgeFilter3D,vtkSimpleImageToImageFilter);
+  vtkTypeMacro(vtkSimpleLabelEdgeFilter3D, vtkSimpleImageToImageFilter);
 
 protected:
-  vtkSimpleLabelEdgeFilter3D() {};
-  ~vtkSimpleLabelEdgeFilter3D() {};
+  vtkSimpleLabelEdgeFilter3D(){};
+  ~vtkSimpleLabelEdgeFilter3D(){};
 
-  virtual void SimpleExecute(vtkImageData* input, vtkImageData* output);
+  virtual void SimpleExecute(vtkImageData *input, vtkImageData *output);
+
 private:
-  vtkSimpleLabelEdgeFilter3D(const vtkSimpleLabelEdgeFilter3D&);  // Not implemented.
-  void operator=(const vtkSimpleLabelEdgeFilter3D&);  // Not implemented.
+  vtkSimpleLabelEdgeFilter3D(
+      const vtkSimpleLabelEdgeFilter3D &);            // Not implemented.
+  void operator=(const vtkSimpleLabelEdgeFilter3D &); // Not implemented.
 };
 #endif
 

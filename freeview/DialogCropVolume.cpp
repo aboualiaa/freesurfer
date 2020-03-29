@@ -22,13 +22,13 @@
  *
  */
 #include "DialogCropVolume.h"
-#include "ui_DialogCropVolume.h"
+#include "LayerMRI.h"
 #include "MainWindow.h"
 #include "RenderView3D.h"
 #include "VolumeCropper.h"
-#include "LayerMRI.h"
-#include <QShowEvent>
+#include "ui_DialogCropVolume.h"
 #include <QSettings>
+#include <QShowEvent>
 
 DialogCropVolume::DialogCropVolume(QWidget *parent, LayerMRI *mri)
     : QDialog(parent), ui(new Ui::DialogCropVolume) {
@@ -50,7 +50,7 @@ DialogCropVolume::DialogCropVolume(QWidget *parent, LayerMRI *mri)
   connect(ui->pushButtonSaveAs, SIGNAL(clicked()), MainWindow::GetMainWindow(),
           SLOT(SaveVolumeAs()));
 
-  QSettings s;
+  QSettings  s;
   QByteArray val = s.value("VolumeCropper/Geometry").toByteArray();
   if (!val.isEmpty())
     restoreGeometry(val);

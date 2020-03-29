@@ -36,10 +36,10 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
+#include <memory.h>
 
 #include "cluster.h"
 #include "error.h"
@@ -57,17 +57,17 @@
                     STATIC PROTOTYPES
 -------------------------------------------------------*/
 
-static int clusterInit(CLUSTER *cluster, int ninputs);
-static int clusterFree(CLUSTER *cluster);
-static int clusterNewObservation(CLUSTER *cluster, VECTOR *v_obs);
+static int   clusterInit(CLUSTER *cluster, int ninputs);
+static int   clusterFree(CLUSTER *cluster);
+static int   clusterNewObservation(CLUSTER *cluster, VECTOR *v_obs);
 static float clusterDistance(CLUSTER_SET *cs, CLUSTER *cluster, VECTOR *v_obs);
-static int clusterComputeStatistics(CLUSTER_SET *cs, CLUSTER *cluster);
-static int clusterPrint(CLUSTER *cluster, FILE *fp);
+static int   clusterComputeStatistics(CLUSTER_SET *cs, CLUSTER *cluster);
+static int   clusterPrint(CLUSTER *cluster, FILE *fp);
 static float clusterVariance(CLUSTER *cluster);
 static CLUSTER *clusterDivide(CLUSTER *csrc, CLUSTER *cdst);
-static int clusterWriteInto(FILE *fp, CLUSTER *cluster);
+static int      clusterWriteInto(FILE *fp, CLUSTER *cluster);
 static CLUSTER *clusterReadFrom(FILE *fp, CLUSTER *cluster);
-static int clusterCopy(CLUSTER *csrc, CLUSTER *cdst);
+static int      clusterCopy(CLUSTER *csrc, CLUSTER *cdst);
 #if 0
 static int      normalizeObservation(CLUSTER_SET *cs, VECTOR *v_obs) ;
 #endif
@@ -112,18 +112,18 @@ int CSprint(CLUSTER_SET *cs, FILE *fp) {
 ------------------------------------------------------*/
 CLUSTER_SET *CSinit(int max_clusters, int ninputs, int normalize) {
   CLUSTER_SET *cs;
-  int c;
+  int          c;
 
   cs = (CLUSTER_SET *)calloc(1, sizeof(CLUSTER_SET));
   if (!cs)
     ErrorExit(ERROR_NO_MEMORY, "ClusterInit(%d, %d); could not allocate struct",
               max_clusters, ninputs);
 
-  cs->normalize = normalize;
-  cs->ninputs = ninputs;
-  cs->nclusters = 1;
+  cs->normalize    = normalize;
+  cs->ninputs      = ninputs;
+  cs->nclusters    = 1;
   cs->max_clusters = max_clusters;
-  cs->clusters = (CLUSTER *)calloc(max_clusters, sizeof(CLUSTER));
+  cs->clusters     = (CLUSTER *)calloc(max_clusters, sizeof(CLUSTER));
   if (!cs->clusters)
     ErrorExit(ERROR_NO_MEMORY,
               "ClusterInit(%d, %d); could not allocate clusters", max_clusters,
@@ -142,7 +142,7 @@ CLUSTER_SET *CSinit(int max_clusters, int ninputs, int normalize) {
   if (!cs->m_sb)
     ErrorExit(ERROR_NO_MEMORY, "ClusterInit(%d, %d); could not allocate Sb",
               max_clusters, ninputs);
-  cs->nobs = 0;
+  cs->nobs  = 0;
   cs->means = (float *)calloc(ninputs, sizeof(float));
   if (!cs->means)
     ErrorExit(ERROR_NO_MEMORY, "ClusterInit(%d, %d); could not allocate means",
@@ -168,9 +168,9 @@ CLUSTER_SET *CSinit(int max_clusters, int ninputs, int normalize) {
 ------------------------------------------------------*/
 int CSfree(CLUSTER_SET **pcs) {
   CLUSTER_SET *cs;
-  int c;
+  int          c;
 
-  cs = *pcs;
+  cs   = *pcs;
   *pcs = nullptr;
 
   if (cs->means)
@@ -246,10 +246,10 @@ static int clusterFree(CLUSTER *cluster) {
            Add this observation to the appropriate cluster.
 ------------------------------------------------------*/
 int CSnewObservation(CLUSTER_SET *cs, VECTOR *v_obs) {
-  int c, min_cluster;
+  int   c, min_cluster;
   float min_dist, dist;
 
-  min_dist = clusterDistance(cs, cs->clusters + 0, v_obs);
+  min_dist    = clusterDistance(cs, cs->clusters + 0, v_obs);
   min_cluster = 0;
   cs->nobs++;
 
@@ -258,7 +258,7 @@ int CSnewObservation(CLUSTER_SET *cs, VECTOR *v_obs) {
     if ((dist < min_dist) ||
         ((FEQUAL(dist, min_dist) &&
           cs->clusters[c].nobs < cs->clusters[min_cluster].nobs))) {
-      min_dist = dist;
+      min_dist    = dist;
       min_cluster = c;
     }
   }
@@ -276,30 +276,30 @@ int CSnewObservation(CLUSTER_SET *cs, VECTOR *v_obs) {
            the cluster with the maximum variance.
 ------------------------------------------------------*/
 int CSdivide(CLUSTER_SET *cs) {
-  int c, max_cluster, nobs, max_obs;
+  int   c, max_cluster, nobs, max_obs;
   float max_variance, variance;
 
   if (cs->nclusters >= cs->max_clusters)
     return (CS_DONE);
 
-  max_cluster = -1;
+  max_cluster  = -1;
   max_variance = 0.0f;
   for (c = 0; c < cs->nclusters; c++) {
     variance = clusterVariance(cs->clusters + c);
     if ((variance > max_variance) && !cs->clusters[c].ill_conditioned) {
       max_variance = variance;
-      max_cluster = c;
+      max_cluster  = c;
     }
   }
 
   if (max_cluster < 0) /* divide the cluster with the largest # of obs. */
   {
-    max_obs = 0;
+    max_obs     = 0;
     max_cluster = -1;
     for (c = 0; c < cs->nclusters; c++) {
       nobs = cs->clusters[c].nobs;
       if (nobs > max_obs) {
-        max_obs = nobs;
+        max_obs     = nobs;
         max_cluster = c;
       }
     }
@@ -324,7 +324,7 @@ int CSdivide(CLUSTER_SET *cs) {
 ------------------------------------------------------*/
 static int clusterNewObservation(CLUSTER *cluster, VECTOR *v_obs) {
   float covariance;
-  int row, col;
+  int   row, col;
 
   cluster->nobs++;
   for (row = 1; row <= v_obs->rows; row++)
@@ -350,18 +350,18 @@ static int clusterNewObservation(CLUSTER *cluster, VECTOR *v_obs) {
 ------------------------------------------------------*/
 static float clusterDistance(CLUSTER_SET *cs, CLUSTER *cluster, VECTOR *v_obs) {
   float dist, mean, sigma, v1, v2, d;
-  int row;
+  int   row;
 
 #if 1
   for (dist = 0.0f, row = 1; row <= v_obs->rows; row++) {
     sigma = cs->stds[row - 1];
-    mean = cs->means[row - 1];
+    mean  = cs->means[row - 1];
     if (FZERO(sigma))
       sigma = 1e-4;
 
     v1 = (VECTOR_ELT(v_obs, row) - mean) / sigma;
     v2 = (VECTOR_ELT(cluster->v_seed, row) - mean) / sigma;
-    d = v2 - v1;
+    d  = v2 - v1;
     dist += d * d; /* actually, use square of Euclidean distance */
   }
 
@@ -385,7 +385,7 @@ static float clusterDistance(CLUSTER_SET *cs, CLUSTER *cluster, VECTOR *v_obs) {
 ------------------------------------------------------*/
 static int clusterComputeStatistics(CLUSTER_SET *cs, CLUSTER *cluster) {
   float mean_a, mean_b, covariance;
-  int nobs, row, col;
+  int   nobs, row, col;
 
   nobs = cluster->nobs;
   if (nobs) {
@@ -512,7 +512,7 @@ static int clusterPrint(CLUSTER *cluster, FILE *fp) {
 ------------------------------------------------------*/
 static float clusterVariance(CLUSTER *cluster) {
   float variance;
-  int i;
+  int   i;
 
   for (variance = 0.0f, i = 0; i < cluster->m_scatter->rows; i++)
     variance += cluster->evalues[i];
@@ -532,7 +532,7 @@ static float clusterVariance(CLUSTER *cluster) {
 
 static CLUSTER *clusterDivide(CLUSTER *csrc, CLUSTER *cdst) {
   VECTOR *v_e;
-  float len;
+  float   len;
 
   v_e = MatrixColumn(csrc->m_evectors, nullptr, 1); /* extract eigenvector */
 
@@ -590,7 +590,7 @@ static CLUSTER *clusterDivide(CLUSTER *csrc, CLUSTER *cdst) {
 int CScluster(CLUSTER_SET *cs,
               int (*get_observation_func)(VECTOR *v_obs, int no, void *parm),
               void *parm) {
-  int obs_no, epoch = 0;
+  int     obs_no, epoch = 0;
   VECTOR *v_obs;
 
   v_obs = VectorAlloc(cs->ninputs, MATRIX_REAL);
@@ -651,11 +651,11 @@ int CScluster(CLUSTER_SET *cs,
           scatter matrices.
 ------------------------------------------------------*/
 int CSreset(CLUSTER_SET *cs) {
-  int c;
+  int      c;
   CLUSTER *cluster;
 
   for (c = 0; c < cs->nclusters; c++) {
-    cluster = cs->clusters + c;
+    cluster       = cs->clusters + c;
     cluster->nobs = 0;
     MatrixClear(cluster->m_scatter);
     VectorClear(cluster->v_means);
@@ -700,12 +700,12 @@ int CScomputeStatistics(CLUSTER_SET *cs) {
 ------------------------------------------------------*/
 int CScomputeDimensionStatistics(CLUSTER_SET *cs,
                                  int (*get_observation_func)(VECTOR *v_obs,
-                                                             int no,
-                                                             void *parm),
+                                                             int     no,
+                                                             void *  parm),
                                  void *parm) {
-  int obs_no = 0, i;
+  int     obs_no = 0, i;
   VECTOR *v_obs;
-  float v, mean;
+  float   v, mean;
 
   v_obs = VectorAlloc(cs->ninputs, MATRIX_REAL);
   memset(cs->means, 0, cs->ninputs * sizeof(float));
@@ -723,7 +723,7 @@ int CScomputeDimensionStatistics(CLUSTER_SET *cs,
     mean = cs->means[i];
     mean /= (obs_no + 1);
     cs->means[i] = mean;
-    cs->stds[i] = sqrt(cs->stds[i] / obs_no - mean * mean);
+    cs->stds[i]  = sqrt(cs->stds[i] / obs_no - mean * mean);
   }
 
   VectorFree(&v_obs);
@@ -766,15 +766,15 @@ normalizeObservation(CLUSTER_SET *cs, VECTOR *v_obs)
           measurement spaces.
 ------------------------------------------------------*/
 int CSrenormalize(CLUSTER_SET *cs) {
-  int c, row;
+  int      c, row;
   CLUSTER *cluster;
-  float mean, sigma;
+  float    mean, sigma;
 
   for (c = 0; c < cs->nclusters; c++) {
     cluster = cs->clusters + c;
     for (row = 1; row <= cs->ninputs; row++) {
-      mean = cs->means[row - 1]; /* zero-based */
-      sigma = cs->stds[row - 1]; /* zero-based */
+      mean  = cs->means[row - 1]; /* zero-based */
+      sigma = cs->stds[row - 1];  /* zero-based */
       VECTOR_ELT(cluster->v_seed, row) *= sigma;
       VECTOR_ELT(cluster->v_seed, row) += mean;
       VECTOR_ELT(cluster->v_means, row) *= sigma;
@@ -825,7 +825,7 @@ int CSwriteInto(FILE *fp, CLUSTER_SET *cs) {
 
 ------------------------------------------------------*/
 CLUSTER_SET *CSreadFrom(FILE *fp, CLUSTER_SET *cs) {
-  int i, ninputs, max_clusters, normalize, nobs, nsamples, nclusters;
+  int   i, ninputs, max_clusters, normalize, nobs, nsamples, nclusters;
   char *cp, line[200];
 
   cp = fgetl(line, 199, fp);
@@ -837,14 +837,14 @@ CLUSTER_SET *CSreadFrom(FILE *fp, CLUSTER_SET *cs) {
     ErrorReturn(NULL, (ERROR_BADFILE, "CSreadFrom: could not scan parms"));
 
   if (cs) {
-    cs->ninputs = ninputs;
+    cs->ninputs      = ninputs;
     cs->max_clusters = max_clusters;
-    cs->normalize = normalize;
+    cs->normalize    = normalize;
   } else
     cs = CSinit(max_clusters, ninputs, normalize);
 
-  cs->nobs = nobs;
-  cs->nsamples = nsamples;
+  cs->nobs      = nobs;
+  cs->nsamples  = nsamples;
   cs->nclusters = nclusters;
 
   cp = fgetl(line, 199, fp);
@@ -938,7 +938,7 @@ static CLUSTER *clusterReadFrom(FILE *fp, CLUSTER *cluster) {
     else
       cluster->norm = 1.0f / sqrt(cluster->det);
   } else {
-    cluster->norm = 1.0f / sqrt(cluster->det);
+    cluster->norm            = 1.0f / sqrt(cluster->det);
     cluster->ill_conditioned = 0;
     cluster->m_inverse = MatrixInverse(cluster->m_scatter, cluster->m_inverse);
   }
@@ -950,7 +950,7 @@ static CLUSTER *clusterReadFrom(FILE *fp, CLUSTER *cluster) {
 
   VectorAsciiReadFrom(fp, cluster->v_means);
   VectorAsciiReadFrom(fp, cluster->v_seed);
-  cluster->det = MatrixDeterminant(cluster->m_inverse);
+  cluster->det        = MatrixDeterminant(cluster->m_inverse);
   cluster->m_evectors = MatrixEigenSystem(cluster->m_scatter, cluster->evalues,
                                           cluster->m_evectors);
   return (cluster);
@@ -972,9 +972,9 @@ static int clusterCopy(CLUSTER *csrc, CLUSTER *cdst) {
   memmove(cdst->evalues, csrc->evalues, csrc->m_scatter->rows * sizeof(float));
   VectorCopy(csrc->v_means, cdst->v_means);
   VectorCopy(csrc->v_seed, cdst->v_seed);
-  cdst->nobs = csrc->nobs;
-  cdst->nsamples = csrc->nsamples;
-  cdst->det = csrc->det;
+  cdst->nobs            = csrc->nobs;
+  cdst->nsamples        = csrc->nsamples;
+  cdst->det             = csrc->det;
   cdst->ill_conditioned = csrc->ill_conditioned;
 
   return (NO_ERROR);

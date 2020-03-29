@@ -5,8 +5,8 @@
 //#include <mpi.h>
 
 // OWN
-#include "surf_utils.h"
 #include "morph_utils.h"
+#include "surf_utils.h"
 
 // FreeSurfer
 #include "argparse.h"
@@ -31,7 +31,7 @@ std::vector<int> g_vDbgCoords;
 struct DataItem {
   enum Type { surf, volume, sprobe, snormals, pointList };
 
-  Type m_type;
+  Type        m_type;
   std::string strInput;
   std::string strOutput;
   std::string strAttached;
@@ -53,22 +53,22 @@ public:
 
 class VolumeFilter : public AbstractFilter {
 public:
-  void Execute();
+  void        Execute();
   std::string strGcam;
-  int m_interpolationType;
+  int         m_interpolationType;
 };
 
 class SurfaceFilter : public AbstractFilter {
 public:
   std::string strAttached;
-  MRI *mriTemplate;
-  void Execute();
+  MRI *       mriTemplate;
+  void        Execute();
 };
 
 class SurfaceProbeFilter : public AbstractFilter {
 public:
   SurfaceProbeFilter() : m_mrisTemplate(NULL), m_mrisSubject(NULL) {}
-  std::string strDestinationSurf;
+  std::string  strDestinationSurf;
   virtual void Execute();
 
 protected:
@@ -76,7 +76,7 @@ protected:
 
   MRIS *m_mrisTemplate;
   MRIS *m_mrisSubject;
-  void ConvertSurfaceToVoxelSpace(const VG &vg, MRIS *mris);
+  void  ConvertSurfaceToVoxelSpace(const VG &vg, MRIS *mris);
 };
 
 class SurfaceNormalsProbeFilter : public SurfaceProbeFilter {
@@ -103,14 +103,12 @@ struct IoParams {
 
   unsigned int zlibBuffer;
 
-  void parse(int ac, char** av);
+  void parse(int ac, char **av);
 };
 
 //------------------------------------------------------
 
-int
-main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
   // cmd-line
   IoParams params;
 
@@ -159,7 +157,7 @@ main(int argc, char** argv)
   initOctree(*pmorph);
 
   typedef std::vector<std::shared_ptr<AbstractFilter>> FilterContainerType;
-  FilterContainerType filterContainer;
+  FilterContainerType                                  filterContainer;
 
   for (std::vector<DataItem>::const_iterator cit = params.items.begin();
        cit != params.items.end(); ++cit) {
@@ -169,7 +167,7 @@ main(int argc, char** argv)
       std::shared_ptr<SurfaceFilter> pTmp(new SurfaceFilter);
       pTmp->strAttached = cit->strAttached;
       pTmp->mriTemplate = mriTemplate;
-      p = pTmp;
+      p                 = pTmp;
       break;
     }
     case DataItem::volume: {
@@ -178,18 +176,18 @@ main(int argc, char** argv)
     case DataItem::sprobe: {
       std::shared_ptr<SurfaceProbeFilter> pTmp(new SurfaceProbeFilter);
       pTmp->strDestinationSurf = cit->strAttached;
-      p = pTmp;
+      p                        = pTmp;
     } break;
     case DataItem::snormals: {
       std::shared_ptr<SurfaceNormalsProbeFilter> pTmp(
           new SurfaceNormalsProbeFilter);
       pTmp->strDestinationSurf = cit->strAttached;
-      p = pTmp;
+      p                        = pTmp;
     } break;
     case DataItem::pointList: {
       std::shared_ptr<PointListProbeFilter> pTmp(new PointListProbeFilter);
       pTmp->strMode = cit->strAttached;
-      p = pTmp;
+      p             = pTmp;
     }
     default:;
     }
@@ -199,8 +197,8 @@ main(int argc, char** argv)
     else if (cit->interpolation == "nearest")
       pmorph->m_interpolationType = SAMPLE_NEAREST;
 
-    p->pmorph = pmorph;
-    p->strInput = cit->strInput;
+    p->pmorph    = pmorph;
+    p->strInput  = cit->strInput;
     p->strOutput = cit->strOutput;
 
     filterContainer.push_back(p);
@@ -236,9 +234,7 @@ main(int argc, char** argv)
 
 //---------------------
 
-void
-IoParams::parse(int ac, char** av)
-{
+void IoParams::parse(int ac, char **av) {
   ArgumentParser parser;
   // required
   parser.addArgument("inputs", '+', String, true);
@@ -251,7 +247,7 @@ IoParams::parse(int ac, char** av)
   parser.addHelp(applyMorph_help_xml, applyMorph_help_xml_len);
   parser.parse(ac, av);
 
-  strTemplate = parser.retrieve<std::string>("template");
+  strTemplate  = parser.retrieve<std::string>("template");
   strTransform = parser.retrieve<std::string>("transform");
 
   zlibBuffer = 5;
@@ -274,7 +270,7 @@ IoParams::parse(int ac, char** av)
         throw " Incomplete data item";
 
       DataItem item;
-      item.m_type = DataItem::surf;
+      item.m_type   = DataItem::surf;
       item.strInput = *cit;
 
       if (++cit == container.end())
@@ -311,7 +307,7 @@ IoParams::parse(int ac, char** av)
         throw " Incomplete data item";
 
       DataItem item;
-      item.m_type = DataItem::volume;
+      item.m_type   = DataItem::volume;
       item.strInput = *cit;
 
       if (++cit == container.end())
@@ -332,7 +328,7 @@ IoParams::parse(int ac, char** av)
         throw " Incomplete data item ";
 
       DataItem item;
-      item.m_type = DataItem::pointList;
+      item.m_type   = DataItem::pointList;
       item.strInput = *cit;
 
       if (++cit == container.end())
@@ -350,7 +346,7 @@ IoParams::parse(int ac, char** av)
         throw " Incomplete data item ";
 
       DataItem item;
-      item.m_type = DataItem::pointList;
+      item.m_type   = DataItem::pointList;
       item.strInput = *cit;
 
       if (++cit == container.end())
@@ -443,9 +439,9 @@ void SurfaceProbeFilter::Execute() {
   // assumption - the correspondence between surface vertices
   // is index/position based
 
-  VERTEX *pvtxTemplate = &(this->m_mrisTemplate->vertices[0]);
-  VERTEX *pvtxSubject = &(this->m_mrisSubject->vertices[0]);
-  const unsigned int nVertices = m_mrisTemplate->nvertices;
+  VERTEX *           pvtxTemplate = &(this->m_mrisTemplate->vertices[0]);
+  VERTEX *           pvtxSubject  = &(this->m_mrisSubject->vertices[0]);
+  const unsigned int nVertices    = m_mrisTemplate->nvertices;
 
   // double ddist;
   Coords3d img;
@@ -522,9 +518,9 @@ void SurfaceNormalsProbeFilter::Execute() {
   // compute normals for the template surface
   MRIScomputeNormals(this->m_mrisSubject);
 
-  VERTEX *pvtxTemplate = &(this->m_mrisTemplate->vertices[0]);
-  VERTEX *pvtxSubject = &(this->m_mrisSubject->vertices[0]);
-  const unsigned nVertices = m_mrisTemplate->nvertices;
+  VERTEX *       pvtxTemplate = &(this->m_mrisTemplate->vertices[0]);
+  VERTEX *       pvtxSubject  = &(this->m_mrisSubject->vertices[0]);
+  const unsigned nVertices    = m_mrisTemplate->nvertices;
 
   // double ddist;
   Coords3d img, normal;
@@ -567,14 +563,14 @@ void PointListProbeFilter::Execute() {
     throw " Failed to open input file while applying PointListProbeFilter ";
 
   std::vector<Coords3d> outputImages;
-  Coords3d pt, img;
+  Coords3d              pt, img;
 
   // int counter = 0;
 
   // if (tractPointList)
   this->pmorph->invert();
 
-  int numLines = 0;
+  int         numLines = 0;
   std::string unused;
   while (std::getline(ifs, unused))
     ++numLines;

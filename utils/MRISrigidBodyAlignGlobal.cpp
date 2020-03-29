@@ -27,8 +27,8 @@
 #include "vertexRotator.h"
 
 static float *getFloats(size_t capacity) {
-  void *ptr = NULL;
-  int status = posix_memalign(&ptr, 64, capacity * sizeof(float));
+  void *ptr    = NULL;
+  int   status = posix_memalign(&ptr, 64, capacity * sizeof(float));
   if (status) {
     fprintf(stderr,
             "%s:%d could not posix_memalign %ld aligned floats, status:%d\n",
@@ -42,14 +42,14 @@ static float *getFloats(size_t capacity) {
 }
 
 void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
-                                         double *new_ming,
-                                         double *new_sse, // outputs
-                                         MRI_SURFACE *mris,
+                                         double *           new_ming,
+                                         double *           new_sse, // outputs
+                                         MRI_SURFACE *      mris,
                                          INTEGRATION_PARMS *parms,
                                          float min_radians, float max_radians,
                                          double ext_sse, int nangles) {
 
-  bool const tracing = false;
+  bool const tracing     = false;
   bool const spreadsheet = false;
 
   // Get all the non-ripped vertices
@@ -72,14 +72,14 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
   float *const betaGammaRotated_zv = getFloats(verticesCapacity);
 
   size_t verticesSize = 0;
-  int vno;
+  int    vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX const *v = &mris->vertices[vno];
     if (v->ripflag)
       continue;
-    xv[verticesSize] = v->x;
-    yv[verticesSize] = v->y;
-    zv[verticesSize] = v->z;
+    xv[verticesSize]   = v->x;
+    yv[verticesSize]   = v->y;
+    zv[verticesSize]   = v->z;
     curv[verticesSize] = v->curv;
     verticesSize++;
   }
@@ -106,8 +106,8 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
   int gridSize_init = 1;
   while (max_radians / gridSize_init > min_radians)
     gridSize_init *= 2;
-  int const gridSize = gridSize_init;
-  int const gridCenterI = gridSize / 2;
+  int const   gridSize           = gridSize_init;
+  int const   gridCenterI        = gridSize / 2;
   float const radiansPerGridCell = max_radians / gridSize;
 
 #define iToRadians(I) (((I)-gridCenterI) * radiansPerGridCell)
@@ -116,8 +116,8 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
   // Zero'ed since none visited yet
   //
   size_t const doneFlagsSize_inBits = gridSize * gridSize * gridSize;
-  size_t const doneFlagsPerElt = sizeof(long) * 8;
-  size_t const doneFlagsMask = doneFlagsPerElt - 1;
+  size_t const doneFlagsPerElt      = sizeof(long) * 8;
+  size_t const doneFlagsMask        = doneFlagsPerElt - 1;
   size_t const doneFlagsSize =
       (doneFlagsSize_inBits + doneFlagsPerElt - 1) / doneFlagsPerElt;
   long *const doneFlags = (long *)calloc(doneFlagsSize, sizeof(long));
@@ -127,9 +127,9 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
   // so the inner loops can be threaded
   //
   int const numberOfVerticesPartitions = 16;
-  int const forAlphasCapacity = nangles + 1;
+  int const forAlphasCapacity          = nangles + 1;
 
-  int *ajsForAlphas = (int *)malloc(forAlphasCapacity * sizeof(int));
+  int *  ajsForAlphas    = (int *)malloc(forAlphasCapacity * sizeof(int));
   float *alphasForAlphas = (float *)malloc(forAlphasCapacity * sizeof(float));
 
   int const forAlphasForPartitionsCapacity =
@@ -156,8 +156,8 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
   //
   struct Center {
     double center_sse;
-    int center_ai, center_bi, center_gi;
-    bool center_sse_known;
+    int    center_ai, center_bi, center_gi;
+    bool   center_sse_known;
   };
 
 // Initialize the centers
@@ -166,12 +166,12 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
   typedef struct Center Centers[centersCapacity];
 
   Centers outCenters;
-  outCenters[0].center_ai = gridSize / 2;
-  outCenters[0].center_bi = gridSize / 2;
-  outCenters[0].center_gi = gridSize / 2;
-  outCenters[0].center_sse = -1.0; // not known
+  outCenters[0].center_ai        = gridSize / 2;
+  outCenters[0].center_bi        = gridSize / 2;
+  outCenters[0].center_gi        = gridSize / 2;
+  outCenters[0].center_sse       = -1.0; // not known
   outCenters[0].center_sse_known = false;
-  int outCentersSize = 1;
+  int outCentersSize             = 1;
 
   // Walk near the centers, stepping gridSize rather than 1, and going
   //        center_i + for (j=0 ; j < nangles+1 ; j++) gridStride*(j -
@@ -215,11 +215,11 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
       //
       struct Center *icp = &inpCenters[ici];
 
-      int const center_ai = icp->center_ai;
-      int const center_bi = icp->center_bi;
-      int const center_gi = icp->center_gi;
-      double const center_sse = icp->center_sse;
-      bool const center_sse_known = icp->center_sse_known;
+      int const    center_ai        = icp->center_ai;
+      int const    center_bi        = icp->center_bi;
+      int const    center_gi        = icp->center_gi;
+      double const center_sse       = icp->center_sse;
+      bool const   center_sse_known = icp->center_sse_known;
 
       bool trace = tracing;
 
@@ -274,13 +274,13 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
             float const alpha = iToRadians(ai);
 
             int const doneIndex = gi * gridSize * gridSize + bi * gridSize + ai;
-            int const doneElt = doneIndex / doneFlagsPerElt;
+            int const doneElt   = doneIndex / doneFlagsPerElt;
             size_t const doneFlag = 1L << (doneIndex & doneFlagsMask);
 
             bool done = doneFlags[doneElt] & doneFlag;
             if (!done) {
               doneFlags[doneElt] |= doneFlag;
-              ajsForAlphas[ajsSize] = aj;
+              ajsForAlphas[ajsSize]      = aj;
               alphasForAlphas[ajsSize++] = alpha;
             }
           }
@@ -301,7 +301,7 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
             ROMP_PFLB_begin
 
                 int const viLo = partition * verticesPerPartition;
-            int const viHi =
+            int const     viHi =
                 MIN(verticesSize, (unsigned)viLo + verticesPerPartition);
 
             double *const ssesForAlphas =
@@ -339,11 +339,11 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
                                        vertexTrace);
 
               for (unsigned int ajsI = 0; ajsI < ajsSize; ajsI++) {
-                int const aj = ajsForAlphas[ajsI];
+                int const    aj     = ajsForAlphas[ajsI];
                 double const target = fvsForAlphas[ajsI].curr;
-                double const std = fvsForAlphas[ajsI].next;
+                double const std    = fvsForAlphas[ajsI].next;
 
-                int const ai = center_ai + gridStride * (aj - nangles / 2);
+                int const   ai    = center_ai + gridStride * (aj - nangles / 2);
                 float const alpha = iToRadians(ai);
 
                 if (false) {
@@ -434,7 +434,7 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
             double const sse = ssesForAlphasForPartitions[aj];
 
             if (spreadsheet) {
-              int const ai = center_ai + gridStride * (aj - nangles / 2);
+              int const   ai    = center_ai + gridStride * (aj - nangles / 2);
               float const alpha = iToRadians(ai);
               // format suitable for spreadsheet
               fprintf(stdout, "abgi, %d,%d,%d,  abg, %g,%g,%g, sse,%g\n", ai,
@@ -455,8 +455,8 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
 
             int oci;
             for (oci = 0; oci < outCentersSize; oci++) {
-              struct Center *oc = &outCenters[oci];
-              bool nearBy = std::abs(oc->center_ai - ai) <= radius &&
+              struct Center *oc     = &outCenters[oci];
+              bool           nearBy = std::abs(oc->center_ai - ai) <= radius &&
                             std::abs(oc->center_bi - bi) <= radius &&
                             std::abs(oc->center_gi - gi) <= radius;
               if (nearBy) {
@@ -481,12 +481,12 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
             // Keep this one
             //
             if (0 <= oci) {
-              changed = true;
-              struct Center *oc = &outCenters[oci];
-              oc->center_ai = ai;
-              oc->center_bi = bi;
-              oc->center_gi = gi;
-              oc->center_sse = sse;
+              changed              = true;
+              struct Center *oc    = &outCenters[oci];
+              oc->center_ai        = ai;
+              oc->center_bi        = bi;
+              oc->center_gi        = gi;
+              oc->center_sse       = sse;
               oc->center_sse_known = true;
               if (oci == outCentersSize)
                 outCentersSize++;
@@ -540,10 +540,10 @@ void MRISrigidBodyAlignGlobal_findMinSSE(double *new_mina, double *new_minb,
         oci = i;
     }
     struct Center *oc = &outCenters[oci];
-    *new_mina = iToRadians(oc->center_ai);
-    *new_minb = iToRadians(oc->center_bi);
-    *new_ming = iToRadians(oc->center_gi);
-    *new_sse = oc->center_sse + ext_sse;
+    *new_mina         = iToRadians(oc->center_ai);
+    *new_minb         = iToRadians(oc->center_bi);
+    *new_ming         = iToRadians(oc->center_gi);
+    *new_sse          = oc->center_sse + ext_sse;
   }
 
 #undef iToRadians

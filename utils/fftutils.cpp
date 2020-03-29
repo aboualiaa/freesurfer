@@ -34,18 +34,18 @@ Only one filter has been implemented so far: The Gaussian
 We have first some basic functions used in the FFT Filter.
 
 -----------------------------------------------------*/
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
-#define FourierForward 1
+#define FourierForward  1
 #define FourierBackward -1
 
-const int cMaxLength = 4096;
-const int cMinLength = 1;
-static int _rev = 0;
-int *reversedBits;
-int **_reverseBits = nullptr;
+const int  cMaxLength = 4096;
+const int  cMinLength = 1;
+static int _rev       = 0;
+int *      reversedBits;
+int **     _reverseBits        = nullptr;
 static int _lookupTabletLength = -1;
 typedef struct complex {
   double a, b;
@@ -54,8 +54,8 @@ typedef struct complexF {
   float a, b;
 } complexF;
 
-static complex **_uRLookup = nullptr;
-static complex **_uILookup = nullptr;
+static complex ** _uRLookup  = nullptr;
+static complex ** _uILookup  = nullptr;
 static complexF **_uRLookupF = nullptr;
 static complexF **_uILookupF = nullptr;
 
@@ -74,8 +74,8 @@ void FFTdebugAssert(int b, const char *string) {
 
 static void Swap(float *a, float *b) {
   float temp = *a;
-  *a = *b;
-  *b = temp;
+  *a         = *b;
+  *b         = temp;
 }
 int FFTisPowerOf2(int x) { return (x & (x - 1)) == 0; }
 int FFTpow2(int exponent) {
@@ -168,9 +168,9 @@ int FFTlog2(int x) { // ceiling of FFTlog2
 
 static void ReorderArray(float *data, int data_length) {
   FFTdebugAssert(data != nullptr, "ReorderArray : Data = Null");
-  int length = data_length / 2;
+  int length       = data_length / 2;
   int numberOfBits = FFTlog2(length);
-  int maxBits = FFTpow2(numberOfBits);
+  int maxBits      = FFTpow2(numberOfBits);
   int i, j;
   FFTdebugAssert(FFTisPowerOf2(length) == 1, "length no power of 2");
   FFTdebugAssert(length >= cMinLength, "length < cMinLength");
@@ -202,7 +202,7 @@ static int _ReverseBits(int bits, int n) {
   int i;
   for (i = 0; i < n; i++) {
     bitsReversed = (bitsReversed << 1) | (bits & 1);
-    bits = (bits >> 1);
+    bits         = (bits >> 1);
   }
   return bitsReversed;
 }
@@ -212,7 +212,7 @@ static void InitializeReverseBits(int levels) {
     free(_reverseBits);
   _reverseBits = (int **)malloc((levels + 1) * sizeof(int *));
   for (j = 0; j < (levels + 1); j++) {
-    int count = (int)FFTpow2(j);
+    int count       = (int)FFTpow2(j);
     _reverseBits[j] = (int *)malloc(count * sizeof(int));
     for (i = 0; i < count; i++) {
       _reverseBits[j][i] = _ReverseBits(i, j);
@@ -231,8 +231,8 @@ static void InitializeComplexRotations(int levels) {
     free(_uRLookupF);
   if (_uILookupF)
     free(_uILookupF);
-  _uRLookup = (complex **)malloc((levels + 1) * sizeof(complex *));
-  _uILookup = (complex **)malloc((levels + 1) * sizeof(complex *));
+  _uRLookup  = (complex **)malloc((levels + 1) * sizeof(complex *));
+  _uILookup  = (complex **)malloc((levels + 1) * sizeof(complex *));
   _uRLookupF = (complexF **)malloc((levels + 1) * sizeof(complexF *));
   _uILookupF = (complexF **)malloc((levels + 1) * sizeof(complexF *));
   int level, j, N = 1;
@@ -241,39 +241,39 @@ static void InitializeComplexRotations(int levels) {
     N <<= 1;
     {
       // positive sign ( i.e. [M,0] )
-      double uR = 1;
-      double uI = 0;
+      double uR    = 1;
+      double uI    = 0;
       double angle = (double)M_PI / M * 1;
-      double wR = (double)cos(angle);
-      double wI = (double)sin(angle);
+      double wR    = (double)cos(angle);
+      double wI    = (double)sin(angle);
 
-      _uRLookup[level] = (complex *)malloc(M * sizeof(complex));
-      _uILookup[level] = (complex *)malloc(M * sizeof(complex));
+      _uRLookup[level]  = (complex *)malloc(M * sizeof(complex));
+      _uILookup[level]  = (complex *)malloc(M * sizeof(complex));
       _uRLookupF[level] = (complexF *)malloc(M * sizeof(complexF));
       _uILookupF[level] = (complexF *)malloc(M * sizeof(complexF));
 
       for (j = 0; j < M; j++) {
         _uRLookupF[level][j].a = (float)(_uRLookup[level][j].a = uR);
         _uILookupF[level][j].a = (float)(_uILookup[level][j].a = uI);
-        double uwI = uR * wI + uI * wR;
-        uR = uR * wR - uI * wI;
-        uI = uwI;
+        double uwI             = uR * wI + uI * wR;
+        uR                     = uR * wR - uI * wI;
+        uI                     = uwI;
       }
     }
     {
       // negative sign ( i.e. [M,1] )
-      double uR = 1;
-      double uI = 0;
+      double uR    = 1;
+      double uI    = 0;
       double angle = (double)M_PI / M * -1;
-      double wR = (double)cos(angle);
-      double wI = (double)sin(angle);
+      double wR    = (double)cos(angle);
+      double wI    = (double)sin(angle);
 
       for (j = 0; j < M; j++) {
         _uRLookupF[level][j].b = (float)(_uRLookup[level][j].b = uR);
         _uILookupF[level][j].b = (float)(_uILookup[level][j].b = uI);
-        double uwI = uR * wI + uI * wR;
-        uR = uR * wR - uI * wI;
-        uI = uwI;
+        double uwI             = uR * wI + uI * wR;
+        uR                     = uR * wR - uI * wI;
+        uI                     = uwI;
       }
     }
   }
@@ -321,7 +321,7 @@ static void FFT(float *data, int data_length, int length, int direction) {
   ReorderArray(data, data_length);
 
   // successive doubling
-  int N = 1;
+  int N         = 1;
   int signIndex = (direction == FourierForward) ? 0 : 1;
 
   int level, j, evenT;
@@ -339,10 +339,10 @@ static void FFT(float *data, int data_length, int length, int direction) {
       float uI = uILookup[j];
 
       for (evenT = j; evenT < length; evenT += N) {
-        int even = evenT << 1;
-        int odd = (evenT + M) << 1;
-        float r = data[odd];
-        float i = data[odd + 1];
+        int   even = evenT << 1;
+        int   odd  = (evenT + M) << 1;
+        float r    = data[odd];
+        float i    = data[odd + 1];
 
         float odduR = r * uR - i * uI;
         float odduI = r * uI + i * uR;
@@ -350,10 +350,10 @@ static void FFT(float *data, int data_length, int length, int direction) {
         r = data[even];
         i = data[even + 1];
 
-        data[even] = r + odduR;
+        data[even]     = r + odduR;
         data[even + 1] = i + odduI;
 
-        data[odd] = r - odduR;
+        data[odd]     = r - odduR;
         data[odd + 1] = i - odduI;
       }
     }
@@ -382,48 +382,48 @@ void RFFT(float *data, int data_length, int length, int direction) {
       "RFFT : length must be at least as large as data_length parameter");
   FFTdebugAssert(FFTisPowerOf2(length) == 1,
                  "RFFT : length must be a power of 2");
-  float c1 = 0.5f, c2;
+  float c1    = 0.5f, c2;
   float theta = (float)M_PI / (length / 2);
-  int i;
+  int   i;
 
   if (direction == FourierForward) {
     c2 = -0.5f;
     FFT(data, data_length, length / 2, direction);
   } else {
-    c2 = 0.5f;
+    c2    = 0.5f;
     theta = -theta;
   }
 
   float wtemp = (float)sin(0.5 * theta);
-  float wpr = -2 * wtemp * wtemp;
-  float wpi = (float)sin(theta);
-  float wr = 1 + wpr;
-  float wi = wpi;
+  float wpr   = -2 * wtemp * wtemp;
+  float wpi   = (float)sin(theta);
+  float wr    = 1 + wpr;
+  float wi    = wpi;
 
   // do / undo packing
   for (i = 1; i < length / 4; i++) {
-    int a = 2 * i;
-    int b = length - 2 * i;
-    float h1r = c1 * (data[a] + data[b]);
-    float h1i = c1 * (data[a + 1] - data[b + 1]);
-    float h2r = -c2 * (data[a + 1] + data[b + 1]);
-    float h2i = c2 * (data[a] - data[b]);
-    data[a] = h1r + wr * h2r - wi * h2i;
+    int   a     = 2 * i;
+    int   b     = length - 2 * i;
+    float h1r   = c1 * (data[a] + data[b]);
+    float h1i   = c1 * (data[a + 1] - data[b + 1]);
+    float h2r   = -c2 * (data[a + 1] + data[b + 1]);
+    float h2i   = c2 * (data[a] - data[b]);
+    data[a]     = h1r + wr * h2r - wi * h2i;
     data[a + 1] = h1i + wr * h2i + wi * h2r;
-    data[b] = h1r - wr * h2r + wi * h2i;
+    data[b]     = h1r - wr * h2r + wi * h2i;
     data[b + 1] = -h1i + wr * h2i + wi * h2r;
-    wr = (wtemp = wr) * wpr - wi * wpi + wr;
-    wi = wi * wpr + wtemp * wpi + wi;
+    wr          = (wtemp = wr) * wpr - wi * wpi + wr;
+    wi          = wi * wpr + wtemp * wpi + wi;
   }
 
   if (direction == FourierForward) {
     float hir = data[0];
-    data[0] = hir + data[1];
-    data[1] = hir - data[1];
+    data[0]   = hir + data[1];
+    data[1]   = hir - data[1];
   } else {
     float hir = data[0];
-    data[0] = c1 * (hir + data[1]);
-    data[1] = c1 * (hir - data[1]);
+    data[0]   = c1 * (hir + data[1]);
+    data[1]   = c1 * (hir - data[1]);
     FFT(data, data_length, length / 2, direction);
   }
 }
@@ -434,13 +434,13 @@ void RFFT(float *data, int data_length, int length, int direction) {
 void RFFTforward(float *data, int length, float *re, float *im) {
   int j;
   RFFT(data, length, length, FourierForward);
-  re[0] = data[0];
-  im[0] = 0;
+  re[0]                    = data[0];
+  im[0]                    = 0;
   re[(length + 2) / 2 - 1] = data[1];
   im[(length + 2) / 2 - 1] = 0;
   for (j = length - 1; j > length / 2; j--) {
-    re[j] = data[2 * (length - j)];
-    im[j] = data[2 * (length - j) + 1];
+    re[j]          = data[2 * (length - j)];
+    im[j]          = data[2 * (length - j) + 1];
     re[length - j] = re[j];
     im[length - j] = -im[j];
   }
@@ -453,7 +453,7 @@ void RFFTforward(float *data, int length, float *re, float *im) {
  ------------------------------------------------------*/
 void CFFTforward(float *re, float *im, int length) {
   float *rec, *imc;
-  int j;
+  int    j;
   rec = (float *)malloc(length * sizeof(float));
   imc = (float *)malloc(length * sizeof(float));
 
@@ -464,8 +464,8 @@ void CFFTforward(float *re, float *im, int length) {
     rec[j] = re[j];
     imc[j] = im[j];
   }
-  re[0] = rec[0];
-  im[0] = imc[0];
+  re[0]                    = rec[0];
+  im[0]                    = imc[0];
   re[(length + 2) / 2 - 1] = rec[1];
   im[(length + 2) / 2 - 1] = imc[1];
 
@@ -485,7 +485,7 @@ void CFFTforward(float *re, float *im, int length) {
  ------------------------------------------------------*/
 void CFFTbackward(float *re, float *im, int length) {
   float *a, *b;
-  int j;
+  int    j;
   a = (float *)malloc(length * sizeof(float));
   b = (float *)malloc(length * sizeof(float));
 
@@ -500,10 +500,10 @@ void CFFTbackward(float *re, float *im, int length) {
   b[1] = im[(length + 2) / 2 - 1];
 
   for (j = length - 1; j > length / 2; j--) {
-    a[2 * (length - j)] = 0.5f * (re[j] + re[length - j]);
+    a[2 * (length - j)]     = 0.5f * (re[j] + re[length - j]);
     a[2 * (length - j) + 1] = 0.5f * (im[j] - im[length - j]);
 
-    b[2 * (length - j)] = 0.5f * (im[j] + im[length - j]);
+    b[2 * (length - j)]     = 0.5f * (im[j] + im[length - j]);
     b[2 * (length - j) + 1] = 0.5f * (-re[j] + re[length - j]);
   }
 
@@ -527,7 +527,7 @@ void CFFTbackward(float *re, float *im, int length) {
  ------------------------------------------------------*/
 void FFTswitch_with_z(float ***vect, int dimension, int is_y) {
   float ***res;
-  int x, y, z;
+  int      x, y, z;
   res = (float ***)malloc(dimension * sizeof(float **));
 
   for (z = 0; z < dimension; z++) {
@@ -551,8 +551,8 @@ void FFTswitch_with_z(float ***vect, int dimension, int is_y) {
 }
 
 float ***FFTinv_quarter(float ***vect, int dimension) {
-  int transl = dimension / 2;
-  int x, y, z, k, j;
+  int      transl = dimension / 2;
+  int      x, y, z, k, j;
   float ***res;
   res = (float ***)malloc(dimension * sizeof(float **));
   for (k = 0; k < dimension; k++) {
@@ -609,26 +609,26 @@ float argument(float re, float im) {
 }
 
 void FFTreim_to_modarg(float ***re_mod, float ***im_arg, int l) {
-  int x, y, z;
+  int   x, y, z;
   float a, b;
   for (z = 0; z < l; z++)
     for (y = 0; y < l; y++)
       for (x = 0; x < l; x++) {
-        a = re_mod[x][y][z];
-        b = im_arg[x][y][z];
+        a               = re_mod[x][y][z];
+        b               = im_arg[x][y][z];
         re_mod[x][y][z] = sqrt(a * a + b * b);
         im_arg[x][y][z] = argument(a, b);
       }
 }
 
 void FFTmodarg_to_reim(float ***re_mod, float ***im_arg, int l) {
-  int x, y, z;
+  int   x, y, z;
   float a, b;
   for (z = 0; z < l; z++)
     for (y = 0; y < l; y++)
       for (x = 0; x < l; x++) {
-        a = re_mod[x][y][z];
-        b = im_arg[x][y][z];
+        a               = re_mod[x][y][z];
+        b               = im_arg[x][y][z];
         re_mod[x][y][z] = a * cos(b);
         im_arg[x][y][z] = a * sin(b);
       }

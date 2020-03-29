@@ -60,7 +60,7 @@ public slots:
   virtual void SetModified();
 
 protected:
-  int m_nMaxUndoSteps;
+  int  m_nMaxUndoSteps;
   bool m_bModified;
 
   bool m_bEditable;

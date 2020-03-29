@@ -25,14 +25,14 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "timer.h"
 #include "version.h"
-#include "cma.h"
 
-#define WM_VAL 1
-#define GM_VAL 2
-#define CSF_VAL 3
+#define WM_VAL         1
+#define GM_VAL         2
+#define CSF_VAL        3
 #define SUBCORT_GM_VAL 4
 
 static MRI *MRISsimulateAtrophy(MRI *mri_norm, MRI *mri_unpv_intensities,
@@ -42,23 +42,23 @@ static MRI *MRISsimulateAtrophy(MRI *mri_norm, MRI *mri_unpv_intensities,
                                 MRI **pmri_cortex_out, MRI **pmri_csf_out);
 static void patch_csf_vol(MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
                           MRI *mri_vfrac_subcort, MRI *mri_vfrac_csf);
-MRI *add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg,
-                                        MRI *mri_dst, int wm_val, int gm_val,
-                                        int csf_val);
-int MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
-                                     MRI *mri_seg, MRI *mri_wm,
-                                     MRI *mri_subcort_gm, MRI *mri_cortex,
-                                     MRI *mri_csf, int wm_val,
-                                     int subcort_gm_val, int cortex_val,
-                                     int csf_val);
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+MRI *       add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg,
+                                               MRI *mri_dst, int wm_val, int gm_val,
+                                               int csf_val);
+int         MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
+                                             MRI *mri_seg, MRI *mri_wm,
+                                             MRI *mri_subcort_gm, MRI *mri_cortex,
+                                             MRI *mri_csf, int wm_val,
+                                             int subcort_gm_val, int cortex_val,
+                                             int csf_val);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
-MRI *MRIsimulateAtrophy(MRI *mri_norm, MRI *mri_aseg, int target_label,
-                        int *border_labels, int nlabels, float atrophy_pct,
-                        MRI *mri_norm_atrophy);
+MRI *       MRIsimulateAtrophy(MRI *mri_norm, MRI *mri_aseg, int target_label,
+                               int *border_labels, int nlabels, float atrophy_pct,
+                               MRI *mri_norm_atrophy);
 
 static MRI *compute_unpartial_volumed_intensities(
     MRI *mri_src, MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
@@ -66,38 +66,38 @@ static MRI *compute_unpartial_volumed_intensities(
     MRI *mri_dst, int separate_frames);
 
 static float noise_sigma = 4;
-static char *sdir = nullptr;
+static char *sdir        = nullptr;
 
-static char *T1_name = "brain.finalsurfs.mgz";
+static char *T1_name    = "brain.finalsurfs.mgz";
 static char *white_name = "white";
-static char *pial_name = "pial";
-static char *aseg_name = "aseg.mgz";
+static char *pial_name  = "pial";
+static char *aseg_name  = "aseg.mgz";
 static float resolution = .5;
 
-static float noise_min = -1;
-static float noise_max = 0;
+static float noise_min  = -1;
+static float noise_max  = 0;
 static float noise_step = 0;
 
-static float atrophy_min = -1;
-static float atrophy_max = 0;
+static float atrophy_min  = -1;
+static float atrophy_max  = 0;
 static float atrophy_step = 0;
 
-static int whalf = 1;
+static int    whalf = 1;
 static double sigma = 1;
 
 int main(int argc, char *argv[]) {
   char **av, *out_fname, *subject, *hemi, buf[STRLEN], fname[STRLEN];
-  int ac, nargs, msec, minutes, seconds, nvox;
-  Timer start;
+  int    ac, nargs, msec, minutes, seconds, nvox;
+  Timer  start;
   MRI *mri_norm, *mri_norm_atrophy, *mri_noise, *mri_pial, *mri_seg, *mri_aseg,
       *mri_cortex, *mri_wm, *mri_csf, *mri_subcort_gm, *mri_ribbon,
       *mri_unpv_intensities, *mri_tmp, *mri_noisy_atrophy, *mri_cortex_atrophy,
       *mri_csf_atrophy;
-  LABEL *area;
-  float atrophy_frac;
+  LABEL *      area;
+  float        atrophy_frac;
   MRI_SURFACE *mris_white_lh, *mris_pial_lh, *mris_white_rh, *mris_pial_rh;
-  MATRIX *m_vox2vox;
-  char extension[STRLEN];
+  MATRIX *     m_vox2vox;
+  char         extension[STRLEN];
 
   nargs = handleVersionOption(argc, argv, "mris_simulate_atrophy");
   if (nargs && argc - nargs == 1)
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
     strcpy(buf, cp);
   }
   subject = argv[1];
-  hemi = argv[2];
+  hemi    = argv[2];
   sprintf(fname, "%s/%s/label/%s.%s", sdir, subject, hemi, argv[3]);
   area = LabelRead(nullptr, fname);
   if (area == nullptr)
@@ -191,27 +191,27 @@ int main(int argc, char *argv[]) {
   if (noise_min < 0) // only one step
   {
     noise_min = noise_max = noise_sigma;
-    noise_step = 1;
+    noise_step            = 1;
   }
   if (atrophy_min < 0) // only one step
   {
     atrophy_min = atrophy_max = atrophy_frac;
-    atrophy_step = 1;
+    atrophy_step              = 1;
   }
 
-  nvox = (int)ceil(mri_norm->width / resolution);
+  nvox     = (int)ceil(mri_norm->width / resolution);
   mri_pial = MRIalloc(nvox, nvox, nvox, MRI_UCHAR);
   MRIsetResolution(mri_pial, resolution, resolution, resolution);
 
   mri_pial->xstart = -resolution * mri_pial->width / 2.0;
-  mri_pial->xend = resolution * mri_pial->width / 2.0;
+  mri_pial->xend   = resolution * mri_pial->width / 2.0;
   mri_pial->ystart = -resolution * mri_pial->height / 2.0;
-  mri_pial->yend = resolution * mri_pial->height / 2.0;
+  mri_pial->yend   = resolution * mri_pial->height / 2.0;
   mri_pial->zstart = -resolution * mri_pial->depth / 2.0;
-  mri_pial->zend = resolution * mri_pial->depth / 2;
-  mri_pial->c_r = mri_aseg->c_r;
-  mri_pial->c_a = mri_aseg->c_a;
-  mri_pial->c_s = mri_aseg->c_s;
+  mri_pial->zend   = resolution * mri_pial->depth / 2;
+  mri_pial->c_r    = mri_aseg->c_r;
+  mri_pial->c_a    = mri_aseg->c_a;
+  mri_pial->c_s    = mri_aseg->c_s;
   MRIreInitCache(mri_pial);
 
   printf("filling interior of lh pial surface...\n");
@@ -248,8 +248,8 @@ int main(int argc, char *argv[]) {
       MRIalloc(mri_norm->width, mri_norm->height, mri_norm->depth, MRI_FLOAT);
   MRIcopyHeader(mri_norm, mri_cortex);
   mri_subcort_gm = MRIclone(mri_cortex, nullptr);
-  mri_wm = MRIclone(mri_cortex, nullptr);
-  mri_csf = MRIclone(mri_cortex, nullptr);
+  mri_wm         = MRIclone(mri_cortex, nullptr);
+  mri_csf        = MRIclone(mri_cortex, nullptr);
   printf("computing partial volume fractions...\n");
   MRIcomputePartialVolumeFractions(mri_norm, m_vox2vox, mri_seg, mri_wm,
                                    mri_subcort_gm, mri_cortex, mri_csf, WM_VAL,
@@ -314,7 +314,7 @@ int main(int argc, char *argv[]) {
     }
 #endif
   }
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -326,7 +326,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -414,10 +414,10 @@ int MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
                                      MRI *mri_csf, int wm_val,
                                      int subcort_gm_val, int cortex_val,
                                      int csf_val) {
-  int x, y, z, xs, ys, zs, label;
+  int     x, y, z, xs, ys, zs, label;
   VECTOR *v1, *v2;
-  MRI *mri_counts;
-  float val, count;
+  MRI *   mri_counts;
+  float   val, count;
   MATRIX *m_inv;
 
   m_inv = MatrixInverse(m_vox2vox, nullptr);
@@ -429,8 +429,8 @@ int MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
   }
   mri_counts = MRIcloneDifferentType(mri_src, MRI_INT);
 
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
   for (x = 0; x < mri_seg->width; x++) {
@@ -523,15 +523,15 @@ MRI *add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg,
                                         int csf_val) {
   VECTOR *v1, *v2;
   MATRIX *m_vox2vox;
-  int x, y, z, xa, ya, za, seg_label, aseg_label;
+  int     x, y, z, xa, ya, za, seg_label, aseg_label;
 
   if (mri_dst == nullptr)
     mri_dst = MRIcopy(mri_src, nullptr);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_src, mri_aseg);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_src, mri_aseg);
 
   for (x = 0; x < mri_dst->width; x++) {
     V3_X(v1) = x;
@@ -541,7 +541,7 @@ MRI *add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg,
         if (x == Gx && y == Gy && z == Gz)
           DiagBreak();
         seg_label = nint(MRIgetVoxVal(mri_dst, x, y, z, 0));
-        V3_Z(v1) = z;
+        V3_Z(v1)  = z;
         MatrixMultiply(m_vox2vox, v1, v2);
         xa = (int)(nint(V3_X(v2)));
         ya = (int)(nint(V3_Y(v2)));
@@ -593,7 +593,7 @@ MRI *add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg,
 }
 static void patch_csf_vol(MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
                           MRI *mri_vfrac_subcort, MRI *mri_vfrac_csf) {
-  int x, y, z;
+  int    x, y, z;
   double v;
 
   for (x = 0; x < mri_vfrac_wm->width; x++)
@@ -616,19 +616,19 @@ static MRI *compute_unpartial_volumed_intensities(
       vcsf;
   MATRIX *m_A_pinv, *m_A3, *m_A2, *m_A1, *m_A;
   VECTOR *v_I, *v_s3, *v_s2, *v_s1, *v_s;
-  float wm, gm, csf;
+  float   wm, gm, csf;
 
   whalfx = (int)ceil(whalf0 / mri_src->xsize);
   whalfy = (int)ceil(whalf0 / mri_src->ysize);
   whalfz = (int)ceil(whalf0 / mri_src->zsize);
-  nvox = (2 * whalfx + 1) * (2 * whalfy + 1) * (2 * whalfz + 1);
-  m_A3 = MatrixAlloc(nvox, 3, MATRIX_REAL);
-  m_A2 = MatrixAlloc(nvox, 2, MATRIX_REAL);
-  m_A1 = MatrixAlloc(nvox, 1, MATRIX_REAL);
-  v_s3 = VectorAlloc(3, MATRIX_REAL);
-  v_s2 = VectorAlloc(2, MATRIX_REAL);
-  v_s1 = VectorAlloc(1, MATRIX_REAL);
-  v_I = VectorAlloc(nvox, MATRIX_REAL);
+  nvox   = (2 * whalfx + 1) * (2 * whalfy + 1) * (2 * whalfz + 1);
+  m_A3   = MatrixAlloc(nvox, 3, MATRIX_REAL);
+  m_A2   = MatrixAlloc(nvox, 2, MATRIX_REAL);
+  m_A1   = MatrixAlloc(nvox, 1, MATRIX_REAL);
+  v_s3   = VectorAlloc(3, MATRIX_REAL);
+  v_s2   = VectorAlloc(2, MATRIX_REAL);
+  v_s1   = VectorAlloc(1, MATRIX_REAL);
+  v_I    = VectorAlloc(nvox, MATRIX_REAL);
 
   if (mri_dst == nullptr) {
     if (separate_frames) {
@@ -655,10 +655,10 @@ static MRI *compute_unpartial_volumed_intensities(
             dy = yk * mri_src->ysize;
             yi = mri_src->yi[y + yk];
             for (zk = -whalfz; zk <= whalfz; zk++) {
-              dz = zk * mri_src->zsize;
-              zi = mri_src->zi[z + zk];
+              dz     = zk * mri_src->zsize;
+              zi     = mri_src->zi[z + zk];
               distsq = dx * dx + dy * dy + dz * dz;
-              w = exp(-.5 * distsq / (sigma * sigma));
+              w      = exp(-.5 * distsq / (sigma * sigma));
               norm += w;
               VECTOR_ELT(v_I, num + 1) =
                   w * MRIgetVoxVal(mri_src, xi, yi, zi, 0);
@@ -752,9 +752,9 @@ static MRI *compute_unpartial_volumed_intensities(
           continue;
 
         MatrixMultiply(m_A_pinv, v_I, v_s);
-        vwm = MRIgetVoxVal(mri_vfrac_wm, x, y, z, 0);
+        vwm  = MRIgetVoxVal(mri_vfrac_wm, x, y, z, 0);
         vcsf = MRIgetVoxVal(mri_vfrac_csf, x, y, z, 0);
-        vgm = MRIgetVoxVal(mri_vfrac_cortex, x, y, z, 0) +
+        vgm  = MRIgetVoxVal(mri_vfrac_cortex, x, y, z, 0) +
               MRIgetVoxVal(mri_vfrac_subcort, x, y, z, 0);
         wm = gm = csf = 0.0;
         if (!FZERO(total_wm)) // wm in 1st col
@@ -814,18 +814,18 @@ static MRI *MRISsimulateAtrophy(MRI *mri_norm, MRI *mri_unpv_intensities,
                                 MRI *mri_cortex, MRI *mri_csf, LABEL *area,
                                 double atrophy_frac, MRI *mri_norm_atrophy,
                                 MRI **pmri_cortex_out, MRI **pmri_csf_out) {
-  MRI *mri_filled, *mri_csf_out, *mri_cortex_out, *mri_unpv_intensities_out;
-  int x, y, z, n, xi, yi, zi, xk, yk, zk, xv, yv, zv;
+  MRI * mri_filled, *mri_csf_out, *mri_cortex_out, *mri_unpv_intensities_out;
+  int   x, y, z, n, xi, yi, zi, xk, yk, zk, xv, yv, zv;
   float gm_frac, csf_frac, wm_frac, wm_intensity, gm_intensity, csf_intensity,
       out_val, gm_reduced, max_csf;
   LABEL *lvox;
 
   mri_unpv_intensities_out = MRIcopy(mri_unpv_intensities, nullptr);
-  mri_csf_out = MRIcopy(mri_csf, nullptr);
-  mri_cortex_out = MRIcopy(mri_cortex, nullptr);
+  mri_csf_out              = MRIcopy(mri_csf, nullptr);
+  mri_cortex_out           = MRIcopy(mri_cortex, nullptr);
 
   mri_norm_atrophy = MRIcopy(mri_norm, mri_norm_atrophy);
-  mri_filled = MRIclone(mri_norm, nullptr);
+  mri_filled       = MRIclone(mri_norm, nullptr);
 
   lvox = LabelToVoxel(area, mri_norm, nullptr); // convert label to voxel coords
   for (n = 0; n < lvox->n_points; n++) {
@@ -844,7 +844,7 @@ static MRI *MRISsimulateAtrophy(MRI *mri_norm, MRI *mri_unpv_intensities,
           if (xi == Gx && yi == Gy && zi == Gz)
             DiagBreak();
           csf_frac = MRIgetVoxVal(mri_csf, xi, yi, zi, 0);
-          gm_frac = MRIgetVoxVal(mri_cortex, xi, yi, zi, 0);
+          gm_frac  = MRIgetVoxVal(mri_cortex, xi, yi, zi, 0);
           if (csf_frac > 0)
             max_csf = 1.0;
           else
@@ -871,19 +871,19 @@ static MRI *MRISsimulateAtrophy(MRI *mri_norm, MRI *mri_unpv_intensities,
       for (z = 0; z < mri_norm->depth; z++) {
         if (x == Gx && y == Gy && z == Gz)
           DiagBreak();
-        wm_frac = MRIgetVoxVal(mri_wm, x, y, z, 0);
+        wm_frac  = MRIgetVoxVal(mri_wm, x, y, z, 0);
         csf_frac = MRIgetVoxVal(mri_csf_out, x, y, z, 0);
-        gm_frac = MRIgetVoxVal(mri_cortex_out, x, y, z, 0);
+        gm_frac  = MRIgetVoxVal(mri_cortex_out, x, y, z, 0);
         gm_frac += MRIgetVoxVal(mri_subcort_gm, x, y, z, 0);
 
 #if 0
 	if (FEQUAL(csf_frac,1))   // retain contralateral hemi
 	  continue ;
 #endif
-        wm_intensity = MRIgetVoxVal(mri_unpv_intensities_out, x, y, z, 0);
-        gm_intensity = MRIgetVoxVal(mri_unpv_intensities_out, x, y, z, 1);
+        wm_intensity  = MRIgetVoxVal(mri_unpv_intensities_out, x, y, z, 0);
+        gm_intensity  = MRIgetVoxVal(mri_unpv_intensities_out, x, y, z, 1);
         csf_intensity = MRIgetVoxVal(mri_unpv_intensities_out, x, y, z, 2);
-        out_val = wm_frac * wm_intensity + gm_frac * gm_intensity +
+        out_val       = wm_frac * wm_intensity + gm_frac * gm_intensity +
                   csf_frac * csf_intensity;
         MRIsetVoxVal(mri_norm_atrophy, x, y, z, 0, out_val);
       }

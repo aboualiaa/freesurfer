@@ -13,7 +13,7 @@ class VMaterial {
 public:
   VMaterial() {}
   VMaterial(double E, double nu) : m_strLabel() {
-    m_E = E;
+    m_E  = E;
     m_nu = nu;
   }
   virtual ~VMaterial() {}
@@ -23,7 +23,7 @@ public:
   double get_E() const { return m_E; }
   double get_nu() const { return m_nu; }
 
-  void set_label(std::string _label) { m_strLabel = _label; }
+  void        set_label(std::string _label) { m_strLabel = _label; }
   std::string label() const { return m_strLabel; }
 
 private:

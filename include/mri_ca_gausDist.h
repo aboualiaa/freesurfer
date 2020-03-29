@@ -26,13 +26,12 @@
 #ifndef GaussianDistribution_h
 #define GaussianDistribution_h
 
-#include "mri_ca_util.h"
 #include "math.h"
-using namespace std;
+#include "mri_ca_util.h"
 
 const float fNormalizationConstant = 1 / sqrt(2 * M_PI);
-const float fMinAllowedVariance = 0.001;
-const float fReplacementVariance = 25.0;
+const float fMinAllowedVariance    = 0.001;
+const float fReplacementVariance   = 25.0;
 // This class should have a fixed size so that it can be binary written/read out
 // easily by CSparse2DGausDistMatrix
 class CGaussianDistribution {
@@ -75,7 +74,7 @@ public:
       fVariance = fReplacementVariance;
     }
     float fStdDev = sqrt(fVariance);
-    float fTerm1 = fNormalizationConstant / fStdDev;
+    float fTerm1  = fNormalizationConstant / fStdDev;
     float fTerm3 =
         exp(-0.5 * (measure[0] - mean[0]) * (measure[0] - mean[0]) / fVariance);
     fDensity = fTerm1 * fTerm3;
@@ -85,9 +84,9 @@ public:
   CGaussianDistribution() { bInitialized = false; }
 
   CGaussianDistribution(int nMeasureDim) {
-    bInitialized = true;
+    bInitialized            = true;
     floatNumMeasuresEntered = 0.0;
-    nDim = nMeasureDim;
+    nDim                    = nMeasureDim;
     sumX.clear();
     sumXOuterProdX.clear();
 
@@ -104,20 +103,20 @@ public:
     }
 
     bMeanVectorIsUpToDate = true;
-    bCovMatrixIsUpToDate = true;
+    bCovMatrixIsUpToDate  = true;
   }
 
   void init(TypeVectorFloat &vectFloatMeasureMean,
             TypeMatrixFloat &matrixFloatMeasureVariance,
-            float floatNewNumMeasuresEntered) {
-    bInitialized = true;
+            float            floatNewNumMeasuresEntered) {
+    bInitialized            = true;
     floatNumMeasuresEntered = floatNewNumMeasuresEntered;
-    nDim = vectFloatMeasureMean.size();
+    nDim                    = vectFloatMeasureMean.size();
 
     bMeanVectorIsUpToDate = true;
-    bCovMatrixIsUpToDate = true;
-    mean = vectFloatMeasureMean;
-    covariance = matrixFloatMeasureVariance;
+    bCovMatrixIsUpToDate  = true;
+    mean                  = vectFloatMeasureMean;
+    covariance            = matrixFloatMeasureVariance;
 
     sumX.clear();
     sumXOuterProdX.clear();
@@ -170,14 +169,14 @@ public:
   }
 
   void insertMeasure(const TypeVectorFloat &measure,
-                     float fFractionOfAMeasure = 1.0) {
+                     float                  fFractionOfAMeasure = 1.0) {
     bMeanVectorIsUpToDate = false;
-    bCovMatrixIsUpToDate = false;
+    bCovMatrixIsUpToDate  = false;
 
     if (bInitialized == false) {
-      bInitialized = true;
+      bInitialized            = true;
       floatNumMeasuresEntered = fFractionOfAMeasure;
-      nDim = measure.size();
+      nDim                    = measure.size();
 
       sumX.clear();
       sumXOuterProdX.clear();
@@ -196,7 +195,7 @@ public:
         floatNumMeasuresEntered += fFractionOfAMeasure;
         for (int i = 0; i < nDim; i++) { // add mean to sum of means
           float fTerm1 = fFractionOfAMeasure * measure[i];
-          sumX[i] = sumX[i] + fTerm1;
+          sumX[i]      = sumX[i] + fTerm1;
 
           // add outer product to the sum of outer products
           for (int j = 0; j < nDim;
@@ -213,7 +212,7 @@ public:
   int getDim() { return (nDim); }
 
   bool write(CConfigFile &configfile) {
-    string strSectionName = "GaussianDistribution";
+    std::string strSectionName = "GaussianDistribution";
     // bring the stats up to date
     meanVector();
     covMatrix();
@@ -227,8 +226,8 @@ public:
   }
   // [[]] This function is wrong and needs to be discarded or corrected
   bool get(CConfigFile &configfile) {
-    string strSectionName = "GaussianDistribution";
-    float dNumMeasuresEntered;
+    std::string strSectionName = "GaussianDistribution";
+    float       dNumMeasuresEntered;
     configfile.get(dNumMeasuresEntered, strSectionName,
                    "NumberOfMeasuresEntered");
     floatNumMeasuresEntered = dNumMeasuresEntered;
@@ -247,9 +246,9 @@ public:
       sumXOuterProdX.push_back(vectFloatRow);
     }
 
-    bInitialized = true;
+    bInitialized          = true;
     bMeanVectorIsUpToDate = true;
-    bCovMatrixIsUpToDate = true;
+    bCovMatrixIsUpToDate  = true;
 
     return (true);
   }
@@ -257,13 +256,13 @@ public:
 private: // size is critical. Must conserve space!
   bool bInitialized;
 
-  int nDim;
-  float floatNumMeasuresEntered;
+  int             nDim;
+  float           floatNumMeasuresEntered;
   TypeVectorFloat sumX;           // sum of the meas
   TypeMatrixFloat sumXOuterProdX; // sum of the outer product of (meas w itself)
 
-  bool bMeanVectorIsUpToDate;
-  bool bCovMatrixIsUpToDate;
+  bool            bMeanVectorIsUpToDate;
+  bool            bCovMatrixIsUpToDate;
   TypeVectorFloat mean;
   TypeMatrixFloat covariance;
 
@@ -329,7 +328,7 @@ istream &operator>>(istream &is, CGaussianDistribution &gausDist) {
   }
 
   gausDist.bMeanVectorIsUpToDate = true;
-  gausDist.bCovMatrixIsUpToDate = true;
+  gausDist.bCovMatrixIsUpToDate  = true;
 
   return is;
 }

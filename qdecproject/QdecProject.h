@@ -31,13 +31,11 @@
 #include <string>
 #include <vector>
 
+#include "ProgressUpdateGUI.h"
 #include "QdecDataTable.h"
 #include "QdecGlmDesign.h"
 #include "QdecGlmFit.h"
 #include "QdecGlmFitResults.h"
-#include "ProgressUpdateGUI.h"
-
-using namespace std;
 
 class QdecProject {
 public:
@@ -138,12 +136,12 @@ public:
    *
    * @return vector< string >
    */
-  vector<string> CreateStatsDataTables();
+  std::vector<std::string> CreateStatsDataTables();
 
   /**
    * @return string   directory where stats data tables are stored
    */
-  string GetStatsDataTablesDir() { return this->msStatsDataTablesDir; }
+  std::string GetStatsDataTablesDir() { return this->msStatsDataTablesDir; }
 
   /**
    * Merge the factor given by isFactorName from data table iDataTable
@@ -155,7 +153,7 @@ public:
    * @param  isFactorName
    * @param  iDataTable
    */
-  int MergeFactorIntoDataTable(const char *isFactorName,
+  int MergeFactorIntoDataTable(const char *   isFactorName,
                                QdecDataTable *iDataTable) {
     return this->mDataTable->MergeFactor(isFactorName, iDataTable);
   }
@@ -173,7 +171,7 @@ public:
   /**
    * @return string
    */
-  string GetSubjectsDir();
+  std::string GetSubjectsDir();
 
   /**
    * @param  ifnSubjectsDir
@@ -183,7 +181,7 @@ public:
   /**
    * @return string
    */
-  string GetAverageSubject();
+  std::string GetAverageSubject();
 
   /**
    * @param  isSubjectName
@@ -193,12 +191,12 @@ public:
   /**
    * @return string
    */
-  string GetDefaultWorkingDir();
+  std::string GetDefaultWorkingDir();
 
   /**
    * @return string
    */
-  string GetWorkingDir();
+  std::string GetWorkingDir();
 
   /**
    * @return 0 if ok, 1 on error
@@ -209,22 +207,22 @@ public:
   /**
    * @return vector< string >
    */
-  vector<string> GetSubjectIDs();
+  std::vector<std::string> GetSubjectIDs();
 
   /**
    * @return vector< string >
    */
-  vector<string> GetDiscreteFactorNames();
+  std::vector<std::string> GetDiscreteFactorNames();
 
   /**
    * @return vector< string >
    */
-  vector<string> GetContinousFactorNames();
+  std::vector<std::string> GetContinousFactorNames();
 
   /**
    * @return string
    */
-  string GetHemi();
+  std::string GetHemi();
 
   /**
    *
@@ -250,12 +248,12 @@ public:
    * @param  iProgressUpdateGUI (optional)
    */
   int CreateGlmDesign(const char *isName, const char *isFirstDiscreteFactor,
-                      const char *isSecondDiscreteFactor,
-                      const char *isFirstContinuousFactor,
-                      const char *isSecondContinuousFactor,
+                      const char * isSecondDiscreteFactor,
+                      const char * isFirstContinuousFactor,
+                      const char * isSecondContinuousFactor,
                       const char **isNuisanceFactors, int iNumNuisanceFactors,
                       const char *isMeasure, const char *isHemi,
-                      int iSmoothnessLevel,
+                      int                iSmoothnessLevel,
                       ProgressUpdateGUI *iProgressUpdateGUI = nullptr);
 
   /**
@@ -280,11 +278,11 @@ public:
    * @param  iProgressUpdateGUI
    */
   int CreateGlmDesign(const char *isName, const char *isFirstDiscreteFactor,
-                      const char *isSecondDiscreteFactor,
-                      const char *isFirstContinuousFactor,
-                      const char *isSecondContinuousFactor,
+                      const char * isSecondDiscreteFactor,
+                      const char * isFirstContinuousFactor,
+                      const char * isSecondContinuousFactor,
                       const char **isNuisanceFactors, int iNumNuisanceFactors,
-                      const char *isMeasure,
+                      const char *       isMeasure,
                       ProgressUpdateGUI *iProgressUpdateGUI);
 
   /**
@@ -329,7 +327,7 @@ public:
   void FormatCommandString(const char *ifnProject,
                            const char *isExpandedProjectBaseName,
                            const char *isWorkingDir, const char *isFormat,
-                           string &iosCommand) const;
+                           std::string &iosCommand) const;
 
   /**
    * Run mri_surfcluster using supplied sig.mgh (for a contrast)
@@ -341,7 +339,7 @@ public:
    * @param  isContrast - name of contrast from which to use sig.mgh
    */
   int RunMonteCarloSimulation(const char *isThreshold, const char *isSign,
-                              const char *isContrast,
+                              const char * isContrast,
                               const char **osClusterSigFileName);
 
 private:
@@ -350,14 +348,14 @@ private:
 
   QdecDataTable *mDataTable;
   QdecGlmDesign *mGlmDesign;
-  QdecGlmFit *mGlmFitter;
+  QdecGlmFit *   mGlmFitter;
 
   // The command format to run to zip and unzip a file.
-  string msZipCommandFormat;
-  string msUnzipCommandFormat;
+  std::string msZipCommandFormat;
+  std::string msUnzipCommandFormat;
 
   // directory where stats data tables are stored
-  string msStatsDataTablesDir;
+  std::string msStatsDataTablesDir;
 };
 
 #endif // QDECPROJECT_H

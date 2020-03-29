@@ -2,10 +2,9 @@
 #define _ThreadedMembershipFunction_txx
 
 #include "ThreadedMembershipFunction.h"
-#include <iostream>
-#include "vnl/vnl_matrix.h"
 #include "itk_5_4_map.h"
-
+#include "vnl/vnl_matrix.h"
+#include <iostream>
 
 template <class TMembershipFunctionType>
 void ThreadedMembershipFunction<
@@ -28,8 +27,8 @@ template <class TMembershipFunctionType>
 void ThreadedMembershipFunction<TMembershipFunctionType>::ThreadedExecution(
     const DomainType &subDomain, const itk::ThreadIdType threadId) {
   for (itk::IndexValueType ii = subDomain[0]; ii <= subDomain[1]; ++ii) {
-    int i = m_indeces[ii].first;  // [0];
-    int j = m_indeces[ii].second; //[1];
+    int    i = m_indeces[ii].first;  // [0];
+    int    j = m_indeces[ii].second; //[1];
     double val =
         m_membershipFunction->Evaluate(&m_samples->GetMeasurementVector(i),
                                        &m_samples->GetMeasurementVector(j));
@@ -52,12 +51,12 @@ template <class TMembershipFunctionType>
 std::vector<int>
 ThreadedMembershipFunction<TMembershipFunctionType>::GetMaxIndeces() {
   const itk::ThreadIdType numberOfThreads = this->GetNumberOfWorkUnitsUsed();
-  std::vector<int> indeces(m_matrixDim, 0);
-  std::vector<double> values(m_matrixDim, 0);
+  std::vector<int>        indeces(m_matrixDim, 0);
+  std::vector<double>     values(m_matrixDim, 0);
   for (int i = 0; i < m_matrixDim; i++) {
     for (itk::ThreadIdType ii = 0; ii < numberOfThreads; ++ii) {
       if (m_maxValue[ii][i] > values[i]) {
-        values[i] = m_maxValue[ii][i];
+        values[i]  = m_maxValue[ii][i];
         indeces[i] = m_maxIndex[ii][i];
       }
     }
@@ -79,8 +78,8 @@ ThreadedMembershipFunction<TMembershipFunctionType>::GetResults() {
   }*/
 
   for (int k = 0; k < m_indeces.size(); k++) {
-    int i = m_outIndeces[k].first;
-    int j = m_outIndeces[k].second;
+    int i        = m_outIndeces[k].first;
+    int j        = m_outIndeces[k].second;
     (*res)(i, j) = (*res)(j, i) = this->m_results2[k];
   }
   // std::cout << " get results end" << std::endl;

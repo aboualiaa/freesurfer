@@ -46,65 +46,66 @@
 
 #include <sys/utsname.h>
 
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
 #include "diag.h"
-#include "resample.h"
-#include "pdf.h"
-#include "icosahedron.h"
-#include "mrisutils.h"
-#include "mri2.h"
+#include "fio.h"
 #include "gcamorph.h"
+#include "icosahedron.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "pdf.h"
+#include "resample.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-void usage_message(FILE *stream);
-void usage(FILE *stream);
-int main(int argc, char *argv[]);
+void        usage_message(FILE *stream);
+void        usage(FILE *stream);
+int         main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mris_apply_reg.c,v 1.9 2016/12/06 19:40:48 greve Exp $";
-const char *Progname = nullptr;
-static int center_surface = 0;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname       = nullptr;
+static int     center_surface = 0;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *SrcValFile = nullptr;
-char *TrgValFile = nullptr;
-char *SurfRegFile[100];
-int ReverseMapFlag = 1;
-int DoJac = 0;
-int UseHash = 1;
-int nsurfs = 0;
-int DoSynthRand = 0;
-int DoSynthOnes = 0;
-int SynthSeed = -1;
-char *AnnotFile = nullptr;
-char *LabelFile = nullptr;
-char *SurfXYZFile = nullptr;
-int OutputCurvFormat = 0;
+char * SrcValFile = nullptr;
+char * TrgValFile = nullptr;
+char * SurfRegFile[100];
+int    ReverseMapFlag   = 1;
+int    DoJac            = 0;
+int    UseHash          = 1;
+int    nsurfs           = 0;
+int    DoSynthRand      = 0;
+int    DoSynthOnes      = 0;
+int    SynthSeed        = -1;
+char * AnnotFile        = nullptr;
+char * LabelFile        = nullptr;
+char * SurfXYZFile      = nullptr;
+int    OutputCurvFormat = 0;
 LABEL *MRISmask2Label(MRIS *surf, MRI *mask, int frame, double thresh);
-int ApplyScaleSurf(MRIS *surf, const double scale);
+int    ApplyScaleSurf(MRIS *surf, const double scale);
 double SourceSurfRegScale = 0;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, n, err;
-  MRIS *SurfReg[100], *SurfSrc;
-  MRI *SrcVal, *TrgVal;
-  char *base;
+  int          nargs, n, err;
+  MRIS *       SurfReg[100], *SurfSrc;
+  MRI *        SrcVal, *TrgVal;
+  char *       base;
   COLOR_TABLE *ctab = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mris_apply_reg");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -163,7 +164,7 @@ int main(int argc, char *argv[]) {
     if (err)
       exit(1);
     SrcVal = MRISannotIndex2Seg(SurfReg[0]);
-    ctab = CTABdeepCopy(SurfReg[0]->ct);
+    ctab   = CTABdeepCopy(SurfReg[0]->ct);
   } else if (SurfXYZFile) {
     printf("Loading surface xyz %s\n", SurfXYZFile);
     SurfSrc = MRISread(SurfXYZFile);
@@ -257,7 +258,7 @@ int main(int argc, char *argv[]) {
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -329,9 +330,9 @@ static int parse_commandline(int argc, char **argv) {
                AnnotFile);
         exit(1);
       }
-      DoJac = 0;
+      DoJac          = 0;
       ReverseMapFlag = 0;
-      nargsused = 1;
+      nargsused      = 1;
     } else if (!strcasecmp(option, "--src-xyz")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -360,15 +361,15 @@ static int parse_commandline(int argc, char **argv) {
                LabelFile);
         exit(1);
       }
-      DoJac = 0;
+      DoJac          = 0;
       ReverseMapFlag = 0;
-      nargsused = 1;
+      nargsused      = 1;
     } else if (!strcasecmp(option, "--trg") || !strcasecmp(option, "--tval") ||
                !strcasecmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       TrgValFile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--streg") || !strcasecmp(option, "--st")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
@@ -578,9 +579,9 @@ void usage(FILE *stream) {
   be the label stat.
  */
 LABEL *MRISmask2Label(MRIS *surf, MRI *mask, int frame, double thresh) {
-  LABEL *label;
-  int c, r, s, n, vtxno;
-  double val;
+  LABEL * label;
+  int     c, r, s, n, vtxno;
+  double  val;
   VERTEX *v;
 
   // Count number of points in the label
@@ -597,11 +598,11 @@ LABEL *MRISmask2Label(MRIS *surf, MRI *mask, int frame, double thresh) {
   }
 
   // Alloc
-  label = LabelAlloc(n, surf->subject_name, nullptr);
+  label           = LabelAlloc(n, surf->subject_name, nullptr);
   label->n_points = n;
 
   // Asign values
-  n = 0;
+  n     = 0;
   vtxno = -1;
   for (s = 0; s < mask->depth; s++) {
     for (r = 0; r < mask->height; r++) {
@@ -610,11 +611,11 @@ LABEL *MRISmask2Label(MRIS *surf, MRI *mask, int frame, double thresh) {
         val = MRIgetVoxVal(mask, c, r, s, frame);
         if (val < thresh)
           continue;
-        v = &surf->vertices[vtxno];
-        label->lv[n].vno = vtxno;
-        label->lv[n].x = v->x;
-        label->lv[n].y = v->y;
-        label->lv[n].z = v->z;
+        v                 = &surf->vertices[vtxno];
+        label->lv[n].vno  = vtxno;
+        label->lv[n].x    = v->x;
+        label->lv[n].y    = v->y;
+        label->lv[n].z    = v->z;
         label->lv[n].stat = val;
         n++;
       }
@@ -626,7 +627,7 @@ LABEL *MRISmask2Label(MRIS *surf, MRI *mask, int frame, double thresh) {
 
 // A simple function to muliply the surf coords
 int ApplyScaleSurf(MRIS *surf, const double scale) {
-  int vtxno;
+  int     vtxno;
   VERTEX *v;
   for (vtxno = 0; vtxno < surf->nvertices; vtxno++) {
     v = &(surf->vertices[vtxno]);

@@ -26,34 +26,34 @@
 #ifndef DENSITY_H
 #define DENSITY_H
 
-#include <cstdio>
-#include "image.h"
 #include "const.h"
-#include "mri.h"
+#include "image.h"
 #include "matrix.h"
+#include "mri.h"
+#include <cstdio>
 
 typedef struct {
-  float min_val1;
-  float min_val2;
-  float max_val1;
-  float max_val2;
-  int *valid1;
-  int *valid2;
-  char fname1[STRLEN];
-  char fname2[STRLEN];
-  float sigma;
-  int dof;
-  float min_p;
+  float  min_val1;
+  float  min_val2;
+  float  max_val1;
+  float  max_val2;
+  int *  valid1;
+  int *  valid2;
+  char   fname1[STRLEN];
+  char   fname2[STRLEN];
+  float  sigma;
+  int    dof;
+  float  min_p;
   IMAGE *Ipdf;
 } DENSITY;
 
 DENSITY *DensityHistogramEstimate(MRI *mri1, MRI *mri2, int nbins, float sigma,
                                   int *valid1, int *valid2);
-int DensityWrite(DENSITY *pdf, char *fname);
-double DensityLogLikelihood(DENSITY *pdf, float val1, float val2);
+int      DensityWrite(DENSITY *pdf, char *fname);
+double   DensityLogLikelihood(DENSITY *pdf, float val1, float val2);
 DENSITY *DensityRead(char *fname);
-MRI *DensityLikelihoodImage(MRI *mri1, MRI *mri2, MRI *mri_ll, MATRIX *m,
-                            DENSITY *pdf, MRI *mri_seg, int inverse);
+MRI *    DensityLikelihoodImage(MRI *mri1, MRI *mri2, MRI *mri_ll, MATRIX *m,
+                                DENSITY *pdf, MRI *mri_seg, int inverse);
 
 #define val2bin1(pdf, val1)                                                    \
   ((val1 - pdf->min_val1) * (pdf->Ipdf->rows / (pdf->max_val1 - pdf->min_val1)))

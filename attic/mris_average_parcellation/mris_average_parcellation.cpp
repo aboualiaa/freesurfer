@@ -23,22 +23,22 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "mrisurf.h"
-#include "utils.h"
+#include "proto.h"
 #include "timer.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -47,15 +47,15 @@ static char sdir[STRLEN] = "";
 static void usage_exit(int code);
 
 int main(int argc, char *argv[]) {
-  char **av, *cp, *annot_name, fname[STRLEN], *hemi;
-  int **counts, ac, nargs, i, j, num, nvertices, vno;
+  char **      av, *cp, *annot_name, fname[STRLEN], *hemi;
+  int **       counts, ac, nargs, i, j, num, nvertices, vno;
   MRI_SURFACE *mris;
-  char *subject_name, *out_fname;
-  int msec, minutes, seconds;
-  Timer start;
-  VERTEX *v;
+  char *       subject_name, *out_fname;
+  int          msec, minutes, seconds;
+  Timer        start;
+  VERTEX *     v;
 
-  counts = NULL;
+  counts    = NULL;
   nvertices = 0;
 
   nargs = handleVersionOption(argc, argv, "mris_average_parcellation");
@@ -88,8 +88,8 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
 
   annot_name = argv[1];
-  hemi = argv[2];
-  out_fname = argv[argc - 1];
+  hemi       = argv[2];
+  out_fname  = argv[argc - 1];
 
   printf("annot %s, hemi %s, out %s\n", annot_name, hemi, out_fname);
   for (num = 0, i = 3; i < argc - 1; i++, num++) {
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
     if (num == 0) // first one
     {
       nvertices = mris->nvertices;
-      counts = (int **)calloc(sizeof(int *), nvertices);
+      counts    = (int **)calloc(sizeof(int *), nvertices);
       if (counts == NULL)
         ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d vertex counts",
                   Progname, nvertices);
@@ -138,13 +138,13 @@ int main(int argc, char *argv[]) {
   for (vno = 0; vno < mris->nvertices; vno++) {
     int max_j, max_count, annot;
 
-    v = &mris->vertices[vno];
-    max_j = 0;
+    v         = &mris->vertices[vno];
+    max_j     = 0;
     max_count = counts[vno][0];
     for (j = 0; j < mris->ct->nentries; j++) {
       if (counts[vno][j] > max_count) {
         max_count = counts[vno][j];
-        max_j = j;
+        max_j     = j;
       }
     }
     CTABannotationAtIndex(mris->ct, max_j, &annot);
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
   printf("writing to %s...\n", out_fname);
   MRISwriteAnnotation(mris, out_fname);
   MRISfree(&mris);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

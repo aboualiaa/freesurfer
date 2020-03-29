@@ -38,7 +38,7 @@ public:
 
 protected:
   bool m_bEditing;
-  int m_nPrevVertex;
+  int  m_nPrevVertex;
 };
 
 #endif

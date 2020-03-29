@@ -27,7 +27,7 @@
 #include "legacy.h"
 #include "general.h"
 
-extern string G_SELF;
+extern std::string G_SELF;
 
 void s_weights_scan(s_weights &st_costWeight, C_scanopt &cso_options) {
   //
@@ -43,7 +43,7 @@ void s_weights_scan(s_weights &st_costWeight, C_scanopt &cso_options) {
   // o Initial design and coding.
   //
 
-  string str_value;
+  std::string str_value;
 
   if (cso_options.scanFor("wd", &str_value))
     st_costWeight.wd = atof(str_value.c_str());
@@ -93,7 +93,7 @@ void s_Dweights_scan(s_Dweights &st_DcostWeight, C_scanopt &cso_options) {
   // o Initial design and coding.
   //
 
-  string str_value;
+  std::string str_value;
 
   if (cso_options.scanFor("Dwd", &str_value))
     st_DcostWeight.Dwd = atof(str_value.c_str());
@@ -136,13 +136,13 @@ void s_weights_print(s_weights &asw) {
   // std::_Ios_Fmtflags origFlags;
 
   // origFlags  = cout.flags();
-  cout.setf(ios::left);
+  std::cout.setf(std::ios::left);
 
-  cout << "_________________________" << endl;
+  std::cout << "_________________________" << std::endl;
   CW(18, "weight");
   CWn(rw, "value");
-  cout << "_________________________" << endl;
-  cout << endl;
+  std::cout << "_________________________" << std::endl;
+  std::cout << std::endl;
   CW(lw, "wd");
   CWn(rw, asw.wd);
   CW(lw, "wc");
@@ -165,12 +165,12 @@ void s_weights_print(s_weights &asw) {
 #endif
 
 void s_weights_setAll(s_weights &asw, float af) {
-  asw.wd = af;
-  asw.wc = af;
-  asw.wh = af;
-  asw.wdc = af;
-  asw.wdh = af;
-  asw.wch = af;
+  asw.wd   = af;
+  asw.wc   = af;
+  asw.wh   = af;
+  asw.wdc  = af;
+  asw.wdh  = af;
+  asw.wch  = af;
   asw.wdch = af;
   asw.wdir = af;
 }
@@ -182,13 +182,13 @@ void s_Dweights_print(s_Dweights &asw) {
   // std::_Ios_Fmtflags origFlags;
 
   // origFlags  = cout.flags();
-  cout.setf(ios::left);
+  std::cout.setf(std::ios::left);
 
-  cout << "_________________________" << endl;
+  std::cout << "_________________________" << std::endl;
   CW(18, "Dweight");
   CWn(rw, "value");
-  cout << "_________________________" << endl;
-  cout << endl;
+  std::cout << "_________________________" << std::endl;
+  std::cout << std::endl;
   CW(lw, "Dwd");
   CWn(rw, asw.Dwd);
   CW(lw, "Dwc");
@@ -211,12 +211,12 @@ void s_Dweights_print(s_Dweights &asw) {
 #endif
 
 void s_Dweights_setAll(s_Dweights &asw, float af) {
-  asw.Dwd = af;
-  asw.Dwc = af;
-  asw.Dwh = af;
-  asw.Dwdc = af;
-  asw.Dwdh = af;
-  asw.Dwch = af;
+  asw.Dwd   = af;
+  asw.Dwc   = af;
+  asw.Dwh   = af;
+  asw.Dwdc  = af;
+  asw.Dwdh  = af;
+  asw.Dwch  = af;
   asw.Dwdch = af;
   asw.Dwdir = af;
 }
@@ -231,12 +231,12 @@ void s_weights_copy(s_weights &sw_target, s_weights &sw_source) {
   //	"Deep" copy the component of sw_source to sw_target.
   //
 
-  sw_target.wd = sw_source.wd;
-  sw_target.wc = sw_source.wc;
-  sw_target.wh = sw_source.wh;
-  sw_target.wdc = sw_source.wdc;
-  sw_target.wdh = sw_source.wdh;
-  sw_target.wch = sw_source.wch;
+  sw_target.wd   = sw_source.wd;
+  sw_target.wc   = sw_source.wc;
+  sw_target.wh   = sw_source.wh;
+  sw_target.wdc  = sw_source.wdc;
+  sw_target.wdh  = sw_source.wdh;
+  sw_target.wch  = sw_source.wch;
   sw_target.wdch = sw_source.wdch;
   sw_target.wdir = sw_source.wdir;
 }
@@ -251,12 +251,12 @@ void s_Dweights_copy(s_Dweights &sw_target, s_Dweights &sw_source) {
   //	"Deep" copy the component of sw_source to sw_target.
   //
 
-  sw_target.Dwd = sw_source.Dwd;
-  sw_target.Dwc = sw_source.Dwc;
-  sw_target.Dwh = sw_source.Dwh;
-  sw_target.Dwdc = sw_source.Dwdc;
-  sw_target.Dwdh = sw_source.Dwdh;
-  sw_target.Dwch = sw_source.Dwch;
+  sw_target.Dwd   = sw_source.Dwd;
+  sw_target.Dwc   = sw_source.Dwc;
+  sw_target.Dwh   = sw_source.Dwh;
+  sw_target.Dwdc  = sw_source.Dwdc;
+  sw_target.Dwdh  = sw_source.Dwdh;
+  sw_target.Dwch  = sw_source.Dwch;
   sw_target.Dwdch = sw_source.Dwdch;
   sw_target.Dwdir = sw_source.Dwdir;
 }
@@ -268,10 +268,10 @@ void s_env_costFctList(s_env &ast_env) {
   CW(lw, "Current cost function:");
   CWn(rw, ast_env.pstr_functionName[ast_env.ecf_current]);
 
-  cout << "All available cost functions:" << endl;
+  std::cout << "All available cost functions:" << std::endl;
   for (int i = 0; i < ast_env.totalNumFunctions; i++) {
-    cout << "Function index: " << i << ": ";
-    cout << ast_env.pstr_functionName[i] << endl;
+    std::cout << "Function index: " << i << ": ";
+    std::cout << ast_env.pstr_functionName[i] << std::endl;
   }
 }
 
@@ -302,7 +302,7 @@ int s_env_costFctSetIndex(s_env *apst_env, int aindex) {
 }
 
 void s_env_costFctSet(s_env *pst_env,
-                      float (*acost_fct)(s_env &st_env,
+                      float (*acost_fct)(s_env &     st_env,
                                          s_iterInfo *pst_iterInfo, int vno_c,
                                          int j, bool b_relNextReference),
                       e_COSTFUNCTION aecf_new) {
@@ -318,40 +318,40 @@ float costFunc_defaultDetermine(s_env &st_env, s_iterInfo *pst_iterInfo,
   // o Added st_iterInfo
   //
 
-  int vno_n;
-  VERTEX *v_n;
-  float dist, ave_curv, curv, max_height, max_curv, cost;
+  int        vno_n;
+  VERTEX *   v_n;
+  float      dist, ave_curv, curv, max_height, max_curv, cost;
   s_weights *pSTw = st_env.pSTw;
-  MRIS *surf = st_env.pMS_primary;
+  MRIS *     surf = st_env.pMS_primary;
 
   VERTEX_TOPOLOGY const *const v_ct = &surf->vertices_topology[vno_c];
-  VERTEX const *const v_c = &surf->vertices[vno_c];
+  VERTEX const *const          v_c  = &surf->vertices[vno_c];
   if (b_relNextReference) {
     vno_n = v_ct->v[j];
-    v_n = &surf->vertices[vno_n];
+    v_n   = &surf->vertices[vno_n];
   } else {
     v_n = &surf->vertices[j];
   }
 
-  float wd = pSTw->wd;
+  float wd  = pSTw->wd;
   float wdc = pSTw->wdc;
-  float wc = pSTw->wc;
+  float wc  = pSTw->wc;
   float wdh = pSTw->wdh;
-  float wh = pSTw->wh;
+  float wh  = pSTw->wh;
   float wch = pSTw->wch;
 
   float wdch = pSTw->wdch;
   float wdir = pSTw->wdir;
 
   float f_height = 0.;
-  float f_dir = 0.;
+  float f_dir    = 0.;
 
-  st_V3D V3_c;        // current point
-  st_V3D V3_n;        // next points
-  st_V3D V3_cn;       // vector from current to next
-  static st_V3D V3_e; // end point
-  st_V3D V3_ce;       // vector from current to end
-  static int calls = 0;
+  st_V3D        V3_c;  // current point
+  st_V3D        V3_n;  // next points
+  st_V3D        V3_cn; // vector from current to next
+  static st_V3D V3_e;  // end point
+  st_V3D        V3_ce; // vector from current to end
+  static int    calls = 0;
 
   if (!calls) {
     V3_e.f_x = st_env.pMS_primary->vertices[st_env.endVertex].x;
@@ -395,11 +395,11 @@ float costFunc_defaultDetermine(s_env &st_env, s_iterInfo *pst_iterInfo,
   // ave_curv  = (v_c->curv + v_n->curv) / 2.0;
   ave_curv = v_n->curv;
 
-  pst_iterInfo->iter = calls;
-  pst_iterInfo->f_distance = dist;
-  pst_iterInfo->f_curvature = ave_curv;
+  pst_iterInfo->iter           = calls;
+  pst_iterInfo->f_distance     = dist;
+  pst_iterInfo->f_curvature    = ave_curv;
   pst_iterInfo->f_sulcalHeight = st_env.pMS_secondary->vertices[vno_c].curv;
-  pst_iterInfo->f_dir = f_dir;
+  pst_iterInfo->f_dir          = f_dir;
 
   // Initial testing revealed that 'wdch' was particularly sensitive to *=10,
   //  and resulted in considerable (negative) impact on overall
@@ -419,13 +419,13 @@ float costFunc_defaultDetermine(s_env &st_env, s_iterInfo *pst_iterInfo,
   }
 
   max_height = (st_env.pMS_secondary->max_curv);
-  max_curv = (st_env.pMS_primary->max_curv);
+  max_curv   = (st_env.pMS_primary->max_curv);
   if (st_env.b_useAbsCurvs) {
     f_height = fabs(f_height);
-    curv = fabs(ave_curv);
+    curv     = fabs(ave_curv);
   } else {
     f_height = max_height - st_env.pMS_secondary->vertices[vno_c].curv;
-    curv = max_curv - ave_curv;
+    curv     = max_curv - ave_curv;
   }
   // cost   = dist + 20.0 * dist * curv;
   cost = wd * dist + wc * curv + wh * f_height + wdc * dist * curv +
@@ -473,17 +473,17 @@ float costFunc_distanceReturn(s_env &st_env, s_iterInfo *pst_iterInfo,
   // o For "absolute" references, determine the relative neighbor.
   //
 
-  float f_cost = 0.0;
-  float f_distance = 0.0;
-  s_weights *pSTw = st_env.pSTw;
-  float wd = pSTw->wd;
-  MRIS *surf = st_env.pMS_primary;
-  const char *pch_proc = "costFunc_distanceReturn(...)";
-  char pch_txt[65536];
+  float       f_cost     = 0.0;
+  float       f_distance = 0.0;
+  s_weights * pSTw       = st_env.pSTw;
+  float       wd         = pSTw->wd;
+  MRIS *      surf       = st_env.pMS_primary;
+  const char *pch_proc   = "costFunc_distanceReturn(...)";
+  char        pch_txt[65536];
   static bool b_warned = false;
 
   VERTEX_TOPOLOGY const *const v_ct = &surf->vertices_topology[vno_c];
-  VERTEX const *const v_c = &surf->vertices[vno_c];
+  VERTEX const *const          v_c  = &surf->vertices[vno_c];
 
   if (!b_relNextReference) {
     int jrelcount;
@@ -526,29 +526,29 @@ float costFunc_EuclideanReturn(s_env &st_env, s_iterInfo *pst_iterInfo,
   // o Initial development
   //
 
-  float f_cost = 0.0;
+  float f_cost     = 0.0;
   float f_distance = 0.0;
-  int vno_n = 0;
+  int   vno_n      = 0;
 
-  VERTEX *v_n = nullptr;
-  MRIS *surf = st_env.pMS_primary;
-  static int calls = 0;
+  VERTEX *    v_n      = nullptr;
+  MRIS *      surf     = st_env.pMS_primary;
+  static int  calls    = 0;
   const char *pch_proc = "costFunc_EuclideanReturn(...)";
-  char pch_txt[65536];
+  char        pch_txt[65536];
   static bool b_warned = false;
 
   VERTEX_TOPOLOGY const *const v_ct = &surf->vertices_topology[vno_c];
-  VERTEX const *const v_c = &surf->vertices[vno_c];
+  VERTEX const *const          v_c  = &surf->vertices[vno_c];
 
   if (b_relNextReference) {
     vno_n = v_ct->v[j];
-    v_n = &surf->vertices[vno_n];
+    v_n   = &surf->vertices[vno_n];
   } else {
     v_n = &surf->vertices[j];
   }
 
   s_weights *pSTw = st_env.pSTw;
-  float wd = pSTw->wd;
+  float      wd   = pSTw->wd;
 
   if (wd <= 0.) {
     sprintf(pch_txt, "calculating cost in %s", pch_proc);
@@ -584,18 +584,18 @@ float costFunc_EuclideanReturn(s_env &st_env, s_iterInfo *pst_iterInfo,
 bool
 asynchEvent_processWGHT(
   s_env&    ast_env,
-  string    astr_comms
+  std::string    astr_comms
 ) {
 
   int lw     = ast_env.lw;
   int rw     = ast_env.rw;
 
-  string str_errorAct = "checking <WGHT>";
+  std::string str_errorAct = "checking <WGHT>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep  = " ";
+  std::string str_object = "";
+  std::string str_verb = "";
+  std::string str_modifier = "";
+  std::string str_sep  = " ";
   float f_val  = 0.0;
 
   //std::_Ios_Fmtflags origFlags;
@@ -713,18 +713,18 @@ asynchEvent_processWGHT(
 bool
 asynchEvent_processDWGHT(
   s_env&    ast_env,
-  string    astr_comms
+  std::string    astr_comms
 ) {
 
   int lw     = ast_env.lw;
   int rw     = ast_env.rw;
 
-  string str_errorAct = "checking <DWGHT>";
+  std::string str_errorAct = "checking <DWGHT>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep  = " ";
+  std::string str_object = "";
+  std::string str_verb = "";
+  std::string str_modifier = "";
+  std::string str_sep  = " ";
   float f_val  = 0.0;
 
   //std::_Ios_Fmtflags origFlags;

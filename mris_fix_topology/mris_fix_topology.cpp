@@ -29,8 +29,8 @@
  *
  */
 
-#include "mrisurf_project.h"
 #include "diag.h"
+#include "mrisurf_project.h"
 
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]);
 
 static int noint = 1;
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -58,24 +58,24 @@ const char *Progname;
 static int exit_after_diag = 0;
 extern int topology_fixing_exit_after_diag;
 
-static char *surf_dir = "surf";
-static char *brain_name = "brain";
-static char *wm_name = "wm";
-static char *sphere_name = "qsphere.nofix";
-static char *inflated_name = "inflated.nofix";
-static char *orig_name = "orig.nofix";
-static char *out_name = "orig";
-char *defectbasename = "defect";
+static char *surf_dir       = "surf";
+static char *brain_name     = "brain";
+static char *wm_name        = "wm";
+static char *sphere_name    = "qsphere.nofix";
+static char *inflated_name  = "inflated.nofix";
+static char *orig_name      = "orig.nofix";
+static char *out_name       = "orig";
+char *       defectbasename = "defect";
 
 static char suffix[STRLEN] = "";
-static int add = 1;
-static int write_inflated = 0;
-static int nsmooth = 5;
-static int sphere_smooth = 5;
+static int  add            = 1;
+static int  write_inflated = 0;
+static int  nsmooth        = 5;
+static int  sphere_smooth  = 5;
 
-static char sdir[STRLEN] = "";
+static char           sdir[STRLEN] = "";
 static TOPOLOGY_PARMS parms;
-static int MGZ = 1; // set to 1 for MGZ
+static int            MGZ = 1; // set to 1 for MGZ
 
 static double nVFMultiplier = 1.1;
 
@@ -83,31 +83,31 @@ int main(int argc, char *argv[]) {
 #ifdef HAVE_OPENMP
   ROMP_main
 #endif
-  char          **av, *hemi, *sname, *cp, fname[STRLEN] ;
-  int           ac, nargs ;
-  MRI_SURFACE   *mris, *mris_corrected ;
-  MRI           *mri, *mri_wm ;
-  int           msec, nvert, nfaces, nedges, eno ;
-  float         max_len ;
+      char **av,
+      *hemi, *sname, *cp, fname[STRLEN];
+  int          ac, nargs;
+  MRI_SURFACE *mris, *mris_corrected;
+  MRI *        mri, *mri_wm;
+  int          msec, nvert, nfaces, nedges, eno;
+  float        max_len;
 #ifdef HAVE_OPENMP
-  Timer then ;
+  Timer then;
 #endif
 
   std::string cmdline = getAllInfo(argc, argv, "mris_fix_topology");
 
   nargs = handleVersionOption(argc, argv, "mris_fix_topology");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
-  parms.max_patches = 10;
+  parms.max_patches   = 10;
   parms.max_unchanged = 10;
-  parms.l_mri = 1;
-  parms.l_curv = 1;
-  parms.l_qcurv = 1;
-  parms.l_unmri = 1;
+  parms.l_mri         = 1;
+  parms.l_curv        = 1;
+  parms.l_qcurv       = 1;
+  parms.l_unmri       = 1;
   // default is greedy retessellation
   parms.search_mode = GREEDY_SEARCH;
   // default is to use all vertices
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   parms.edge_table = 0;
 
   // don't save
-  parms.save_fname = NULL;
+  parms.save_fname    = NULL;
   parms.defect_number = -1;
   // verbose mode
   parms.verbose = 0;
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   sname = argv[1];
-  hemi = argv[2];
+  hemi  = argv[2];
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
     if (!cp)
@@ -324,7 +324,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -438,37 +438,37 @@ static int get_option(int argc, char *argv[]) {
             parms.niters);
     nargs = 1;
   } else if (!stricmp(option, "optimize")) {
-    parms.search_mode = GENETIC_SEARCH;
-    parms.keep = 0; /* to be discussed */
-    parms.vertex_eliminate = 1;
+    parms.search_mode         = GENETIC_SEARCH;
+    parms.keep                = 0; /* to be discussed */
+    parms.vertex_eliminate    = 1;
     parms.retessellation_mode = 0;
-    parms.initial_selection = 1;
-    parms.smooth = 2;
-    parms.match = 1;
-    parms.volume_resolution = 2;
-    parms.l_mri = 1.0f;
-    parms.l_curv = 1.0f;
-    parms.l_qcurv = 1.0f;
-    parms.l_unmri = 10.0f;
-    nsmooth = 0;
-    add = 0;
+    parms.initial_selection   = 1;
+    parms.smooth              = 2;
+    parms.match               = 1;
+    parms.volume_resolution   = 2;
+    parms.l_mri               = 1.0f;
+    parms.l_curv              = 1.0f;
+    parms.l_qcurv             = 1.0f;
+    parms.l_unmri             = 10.0f;
+    nsmooth                   = 0;
+    add                       = 0;
     fprintf(stderr, "using optimized parameters\n");
     nargs = 0;
   } else if (!stricmp(option, "ga")) {
-    parms.search_mode = GENETIC_SEARCH;
-    parms.keep = 0;
-    parms.vertex_eliminate = 1;
+    parms.search_mode         = GENETIC_SEARCH;
+    parms.keep                = 0;
+    parms.vertex_eliminate    = 1;
     parms.retessellation_mode = 0;
-    parms.initial_selection = 1;
-    parms.smooth = 2;
-    parms.match = 1;
-    parms.volume_resolution = 2;
-    parms.l_mri = 1.0f;
-    parms.l_curv = 1.0f;
-    parms.l_qcurv = 1.0f;
-    parms.l_unmri = 10.0f;
-    nsmooth = 0;
-    add = 0;
+    parms.initial_selection   = 1;
+    parms.smooth              = 2;
+    parms.match               = 1;
+    parms.volume_resolution   = 2;
+    parms.l_mri               = 1.0f;
+    parms.l_curv              = 1.0f;
+    parms.l_qcurv             = 1.0f;
+    parms.l_unmri             = 10.0f;
+    nsmooth                   = 0;
+    add                       = 0;
     fprintf(stderr, "using genetic algorithm with optimized parameters\n");
     nargs = 0;
   } else if (!stricmp(option, "match")) {
@@ -496,7 +496,7 @@ static int get_option(int argc, char *argv[]) {
     }
     nargs = 1;
   } else if (!stricmp(option, "save")) {
-    parms.save_fname = argv[2]; // name of the folder
+    parms.save_fname    = argv[2]; // name of the folder
     parms.defect_number = atoi(argv[3]);
     if (parms.defect_number >= 0)
       fprintf(stderr, "save results in folder %s for the patch %d\n",
@@ -514,7 +514,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 0;
   } else if (!stricmp(option, "random")) {
     parms.search_mode = RANDOM_SEARCH;
-    parms.niters = atoi(argv[2]);
+    parms.niters      = atoi(argv[2]);
     fprintf(stderr,
             "using random search with %d iterations to "
             "retessellate\n",
@@ -558,7 +558,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "diagonly")) {
     printf("saving diagnostic information and exiting....\n");
     Gdiag |= DIAG_SAVE_DIAGS;
-    exit_after_diag = 1;
+    exit_after_diag                 = 1;
     topology_fixing_exit_after_diag = 1;
   } else if (!stricmp(option, "sdir")) {
     strcpy(sdir, argv[2]);
@@ -624,7 +624,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'S':
       nsmooth = atoi(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       printf("smoothing corrected surface for %d iterations\n", nsmooth);
       break;
     case '?':
@@ -635,7 +635,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     default:
       fprintf(stderr, "unknown option %s\n", argv[1]);

@@ -8,9 +8,9 @@ namespace kvl {
 class StepOptimizer : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef StepOptimizer Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef StepOptimizer                 Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -19,7 +19,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(StepOptimizer, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -57,8 +58,10 @@ public:
   }
 
 protected:
-  StepOptimizer()= default;;
-  ~StepOptimizer() override= default;;
+  StepOptimizer() = default;
+  ;
+  ~StepOptimizer() override = default;
+  ;
 
   StepOptimizer(const Self &);  // purposely not implemented
   void operator=(const Self &); // purposely not implemented

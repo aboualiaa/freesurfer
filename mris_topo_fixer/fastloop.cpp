@@ -26,14 +26,14 @@
 #include "fastloop.h"
 
 FastLoop::FastLoop(Surface &s) : surface(&s) {
-  defect_faces = nullptr;
+  defect_faces  = nullptr;
   ndefect_faces = 0;
 
   facedata = new FaceData[surface->nfaces + 1]; // one extra face for the border
   vertexdata = new VertexData[surface->nvertices];
   _InitFaceData();
 
-  FM_trial_heap = new FaceHeap(HeapCompare(facedata));
+  FM_trial_heap  = new FaceHeap(HeapCompare(facedata));
   FCC_trial_heap = new FaceHeap(HeapCompare(facedata));
   Init();
 }
@@ -50,32 +50,32 @@ void FastLoop::_InitFaceData() {
 
   for (int n = 0; n < nfaces; n++) {
     FaceData *fdst = &facedata[n];
-    Face *fsrc = &surface->faces[n];
-    fdst->x = fsrc->x;
-    fdst->y = fsrc->y;
-    fdst->z = fsrc->z;
+    Face *    fsrc = &surface->faces[n];
+    fdst->x        = fsrc->x;
+    fdst->y        = fsrc->y;
+    fdst->z        = fsrc->z;
     for (int i = 0; i < 3; i++) {
       fdst->v[i] = fsrc->v[i];
-      int fn = fsrc->f[i];
+      int fn     = fsrc->f[i];
       if (fn == -1)
         fn = nfaces; // the border faces point towards the last face
       fdst->f[i] = fn;
     }
   }
   // update the extra face to avoid abnormal behaviors
-  facedata[nfaces].border = true;
-  facedata[nfaces].fmState = eForbidden;
-  facedata[nfaces].fccState = eForbidden;
-  facedata[nfaces].fmFather = -1;
+  facedata[nfaces].border    = true;
+  facedata[nfaces].fmState   = eForbidden;
+  facedata[nfaces].fccState  = eForbidden;
+  facedata[nfaces].fmFather  = -1;
   facedata[nfaces].fccFather = -2;
-  facedata[nfaces].nfather = -3;
-  facedata[nfaces].fccLabel = -4;
-  facedata[nfaces].f[0] = -5;
-  facedata[nfaces].f[1] = -5;
-  facedata[nfaces].f[2] = -5;
-  facedata[nfaces].v[0] = -6;
-  facedata[nfaces].v[1] = -6;
-  facedata[nfaces].v[2] = -6;
+  facedata[nfaces].nfather   = -3;
+  facedata[nfaces].fccLabel  = -4;
+  facedata[nfaces].f[0]      = -5;
+  facedata[nfaces].f[1]      = -5;
+  facedata[nfaces].f[2]      = -5;
+  facedata[nfaces].v[0]      = -6;
+  facedata[nfaces].v[1]      = -6;
+  facedata[nfaces].v[2]      = -6;
 }
 
 void FastLoop::Init() {
@@ -87,7 +87,7 @@ void FastLoop::Init() {
 
 void FastLoop::SetSeed(int seed) {
   _AddAliveFace(seed);
-  facedata[seed].val = 0.0;
+  facedata[seed].val      = 0.0;
   facedata[seed].fmFather = -1;
   for (int i = 0; i < 3; i++) {
     _UpdateFace(facedata[seed].f[i], seed);
@@ -95,12 +95,12 @@ void FastLoop::SetSeed(int seed) {
 }
 
 int FastLoop::_AddAliveFace(int fno) {
-  facedata[fno].fmState = eAlive;
+  facedata[fno].fmState  = eAlive;
   facedata[fno].fccState = eForbidden;
 
   for (int i = 0; i < 3; i++) {
     if (vertexdata[facedata[fno].v[i]].fmState == eFar) {
-      vertexdata[facedata[fno].v[i]].fmState = eAlive;
+      vertexdata[facedata[fno].v[i]].fmState  = eAlive;
       vertexdata[facedata[fno].v[i]].fmFather = fno;
     }
   }
@@ -112,10 +112,10 @@ void FastLoop::_UpdateFace(int fdst, int fsrc) {
   const eState st = (eState)facedata[fdst].fmState;
 
   if (st == eFar) {
-    facedata[fdst].fmState = eTrial;
+    facedata[fdst].fmState  = eTrial;
     facedata[fdst].fmFather = fsrc;
-    facedata[fdst].nfather = 1;
-    facedata[fdst].val = facedata[fsrc].val + _Distance(fdst, fsrc);
+    facedata[fdst].nfather  = 1;
+    facedata[fdst].val      = facedata[fsrc].val + _Distance(fdst, fsrc);
     FM_trial_heap->push(fdst);
   } else if (st == eTrial) { // already in the list
     facedata[fdst].nfather++;
@@ -205,24 +205,24 @@ void FastLoop::_UpdateSegmentFaces(int which_segment) {
 
   int euler = surface->GetEuler(segment->GetPointList(), segment->size());
   if (euler < 0) {
-    segment_add = (which_segment + 1) % 2;
+    segment_add  = (which_segment + 1) % 2;
     segment_keep = which_segment;
   }
 #if PRINT_ERROR_MODE
-  cout << "segment " << which_segment << " has an euler number of " << euler
-       << endl;
+  std::cout << "segment " << which_segment << " has an euler number of "
+            << euler << std::endl;
 
-  cout << " we have " << segment_add << ": "
-       << surface->GetEuler(segments[segment_add].GetPointList(),
-                            segments[segment_add].size())
-       << " and " << segment_keep << ": "
-       << surface->GetEuler(segments[segment_keep].GetPointList(),
-                            segments[segment_keep].size())
-       << endl;
+  std::cout << " we have " << segment_add << ": "
+            << surface->GetEuler(segments[segment_add].GetPointList(),
+                                 segments[segment_add].size())
+            << " and " << segment_keep << ": "
+            << surface->GetEuler(segments[segment_keep].GetPointList(),
+                                 segments[segment_keep].size())
+            << std::endl;
 #endif
 
   const int *face_list;
-  int list_size;
+  int        list_size;
 
   // add the faces of segments[segment_add] to the list of alive faces
   if (nsegments[segment_add] == 0) {
@@ -235,16 +235,16 @@ void FastLoop::_UpdateSegmentFaces(int which_segment) {
         _UpdateFace(facedata[face_list[n]].f[i], face_list[n]);
   } else {
 #if PRINT_ERROR_MODE
-    cout << "m";
+    std::cout << "m";
 #endif
     face_list = segments[segment_add].GetPointList();
     list_size = segments[segment_add].size();
     for (int n = 0; n < list_size; n++) {
-      FaceData *face = &facedata[face_list[n]];
+      FaceData *face  = &facedata[face_list[n]];
       face->fccFather = -1;
-      face->val = face->val2;
-      face->fccState = eFar;
-      face->fccLabel = -1;
+      face->val       = face->val2;
+      face->fccState  = eFar;
+      face->fccLabel  = -1;
     }
   }
 
@@ -252,20 +252,20 @@ void FastLoop::_UpdateSegmentFaces(int which_segment) {
   face_list = segments[segment_keep].GetPointList();
   list_size = segments[segment_keep].size();
   for (int n = 0; n < list_size; n++) {
-    FaceData *face = &facedata[face_list[n]];
+    FaceData *face  = &facedata[face_list[n]];
     face->fccFather = -1;
-    face->val = face->val2;
-    face->fccState = eFar;
-    face->fccLabel = -1;
+    face->val       = face->val2;
+    face->fccState  = eFar;
+    face->fccLabel  = -1;
   }
   while (!FCC_trial_heap->empty()) {
     int fn = FCC_trial_heap->top();
     FCC_trial_heap->pop();
-    FaceData *face = &facedata[fn];
+    FaceData *face  = &facedata[fn];
     face->fccFather = -1;
-    face->val = face->val2;
-    face->fccState = eFar;
-    face->fccLabel = -1;
+    face->val       = face->val2;
+    face->fccState  = eFar;
+    face->fccLabel  = -1;
   }
 }
 
@@ -273,7 +273,7 @@ int FastLoop::_FindSeedFaces(int conflicting_face, int &init_fn1,
                              int &init_fn2) {
   int number_of_faces = 0;
   init_fn1 = init_fn2 = -1;
-  FaceData *face = &facedata[conflicting_face];
+  FaceData *face      = &facedata[conflicting_face];
   for (int i = 0; i < 3; i++) {
     if (facedata[face->f[i]].fmState == eAlive)
       continue;
@@ -305,25 +305,25 @@ void FastLoop::_InitSegment(int which_segment, int fn) {
     if (facedata[face->f[i]].border)
       segments[which_segment].SetMark(1);
   }
-  face->fccState = eAlive;
-  face->val2 = face->val;
-  face->val = 0.0;
+  face->fccState  = eAlive;
+  face->val2      = face->val;
+  face->val       = 0.0;
   face->fccFather = -1;
-  face->fccLabel = which_segment;
+  face->fccLabel  = which_segment;
   for (int i = 0; i < 3; i++)
     _UpdateSegmentFace(face->f[i], fn);
 }
 
 void FastLoop::_UpdateSegmentFace(int fdst, int fsrc) {
-  int label = facedata[fsrc].fccLabel;
-  FaceData *face = &facedata[fdst];
+  int       label = facedata[fsrc].fccLabel;
+  FaceData *face  = &facedata[fdst];
 
   if (face->fccState == eFar) {
-    face->fccState = eTrial;
-    face->fccLabel = label;
+    face->fccState  = eTrial;
+    face->fccLabel  = label;
     face->fccFather = fsrc;
-    face->val2 = face->val;
-    face->val = facedata[fsrc].val + _Distance(fdst, fsrc);
+    face->val2      = face->val;
+    face->val       = facedata[fsrc].val + _Distance(fdst, fsrc);
     FCC_trial_heap->push(fdst);
     nsegments[label]++;
   }
@@ -338,9 +338,9 @@ int FastLoop::_InitSegmentation(int fn) {
   int number_of_faces = _FindSeedFaces(fn, init_fn1, init_fn2);
 
 #if PRINT_ERROR_MODE
-  cout << "init1 = " << init_fn1 << " init2 = " << init_fn2 << endl;
+  std::cout << "init1 = " << init_fn1 << " init2 = " << init_fn2 << std::endl;
   if (number_of_faces < 2)
-    cout << "ONLY " << number_of_faces << " FACES!!!!!" << endl;
+    std::cout << "ONLY " << number_of_faces << " FACES!!!!!" << std::endl;
 #endif
 
   _InitSegment(0, init_fn1);
@@ -365,10 +365,12 @@ int FastLoop::_FastSegmentation() {
       // empty the list
       while (FCC_trial_heap->empty())
         FCC_trial_heap->pop();
-      final_face[label] = fn;
+      final_face[label]           = fn;
       final_face[(label + 1) % 2] = fn2;
 #if PRINT_ERROR_MODE
-      cout << endl << "The face " << fn << " is Neighbor with " << fn2 << endl;
+      std::cout << std::endl
+                << "The face " << fn << " is Neighbor with " << fn2
+                << std::endl;
 #endif
       return -1;
     }
@@ -391,18 +393,18 @@ int FastLoop::_FastSegmentation() {
 }
 
 int FastLoop::_CheckAdjacency(int fn) {
-  FaceData *face = &facedata[fn];
-  int label = face->fccLabel;
+  FaceData *face  = &facedata[fn];
+  int       label = face->fccLabel;
 
   // find the smallest face
-  double val = 1e10;
-  int which_face = -1;
+  double val        = 1e10;
+  int    which_face = -1;
   for (int i = 0; i < 3; i++) {
     FaceData *f = &facedata[face->f[i]];
     if ((f->fccState == eAlive || f->fccState == eTrial) &&
         f->fccLabel != label) {
       if (f->val < val) {
-        val = f->val;
+        val        = f->val;
         which_face = face->f[i];
       }
     }
@@ -439,7 +441,7 @@ int FastLoop::_ExtractFirstLoop(Loop &loop, int init_fn1, int init_fn2) {
     if (fn == facedata[fn].fmFather) {
       //  surface->WriteFile("pp2.3d",1);
       // exit(-1);
-      cout << "ExtractFirstLoop: father same as son..." << endl;
+      std::cout << "ExtractFirstLoop: father same as son..." << std::endl;
       return 0;
       ErrorExit("ExtractFirstLoop: father same as son...");
     }
@@ -456,7 +458,7 @@ int FastLoop::_ExtractFirstLoop(Loop &loop, int init_fn1, int init_fn2) {
   }
 
 #if 1
-  int vno = _FindCommonVertex(init_fn1, init_fn2);
+  int vno                 = _FindCommonVertex(init_fn1, init_fn2);
   vertexdata[vno].fmState = 0;
 #else
   // just making sure we are not doing a stupid mistake
@@ -495,13 +497,13 @@ int FastLoop::_ExtractFirstLoop(Loop &loop, int init_fn1, int init_fn2) {
       VertexData *v = &vertexdata[facedata[fn].v[i]];
       if (v->fmState == 2) {
         adjacent_vertex = true;
-        v->fmState = 3;
+        v->fmState      = 3;
       }
     }
     // we can add this face to the list
     loop.AddPoint(fn);
     final_fn1 = fn;
-    fn = facedata[fn].fmFather;
+    fn        = facedata[fn].fmFather;
     if (adjacent_vertex)
       break;
   }
@@ -531,19 +533,19 @@ int FastLoop::_ExtractFirstLoop(Loop &loop, int init_fn1, int init_fn2) {
       VertexData *v = &vertexdata[facedata[fn].v[i]];
       if (v->fmState == 3) {
         adjacent_vertex = true;
-        v->fmState = 1;
+        v->fmState      = 1;
       }
     }
     // we can add this face
     loop.AddPoint(fn);
     final_fn2 = fn;
-    fn = facedata[fn].fmFather;
+    fn        = facedata[fn].fmFather;
     if (adjacent_vertex)
       break;
   }
 
 #if PRINT_ERROR_MODE
-  cout << "first: ";
+  std::cout << "first: ";
   loop.Print();
 #endif
 
@@ -552,7 +554,7 @@ int FastLoop::_ExtractFirstLoop(Loop &loop, int init_fn1, int init_fn2) {
     return 0;
   }
 #if PRINT_ERROR_MODE
-  cout << "second: ";
+  std::cout << "second: ";
   loop.Print();
 #endif
 
@@ -561,7 +563,7 @@ int FastLoop::_ExtractFirstLoop(Loop &loop, int init_fn1, int init_fn2) {
     return 0;
   }
 #if PRINT_ERROR_MODE
-  cout << "third: ";
+  std::cout << "third: ";
   loop.Print();
 #endif
 
@@ -643,7 +645,8 @@ int FastLoop::_FindFacePath(Loop &loop, int init_fn1, int init_fn2) {
   // find the common vertex
   int vno = _FindCommonVertex(init_fn1, init_fn2);
   if (vno == -1) {
-    cout << "_FindFacePath: could not find the common vertex! " << endl;
+    std::cout << "_FindFacePath: could not find the common vertex! "
+              << std::endl;
     return 0;
     ErrorExit("_FindFacePath: could not find the common vertex! ");
   }
@@ -651,54 +654,54 @@ int FastLoop::_FindFacePath(Loop &loop, int init_fn1, int init_fn2) {
 
   //////////////////////////////////
   // Now we are ready to find and evaluate the two paths!
-  bool found;
-  int fn, next_fn;
+  bool   found;
+  int    fn, next_fn;
   double path[2];
-  int *PathFaces[2], nfaces[2];
+  int *  PathFaces[2], nfaces[2];
 
   // first path
-  path[0] = 0;
-  nfaces[0] = 0;
-  next_fn = init_fn1;
+  path[0]      = 0;
+  nfaces[0]    = 0;
+  next_fn      = init_fn1;
   PathFaces[0] = new int[fnum]; // at max fnum faces !!!
   if (fn2 >= 0)
     facedata[fn2].fccLabel = 1; // we want to avoid this face
   found = false;
   while (!found) {
-    fn = next_fn;
+    fn      = next_fn;
     next_fn = _FindNextFace(next_fn, vno);
     if (next_fn == -1)
       found = true;
     else if (next_fn == -2) {
-      found = true;
+      found     = true;
       nfaces[0] = 0;
     } else {
       path[0] += _Distance(fn, next_fn);
       facedata[next_fn].fccLabel = 4;
-      PathFaces[0][nfaces[0]++] = next_fn;
+      PathFaces[0][nfaces[0]++]  = next_fn;
     }
   }
 
   // second path if ( fn2 >= 0 )
-  path[1] = 0;
-  nfaces[1] = 0;
-  next_fn = init_fn1;
+  path[1]      = 0;
+  nfaces[1]    = 0;
+  next_fn      = init_fn1;
   PathFaces[1] = new int[fnum];
   if (fn2 >= 0) {
     facedata[fn2].fccLabel = 0; // now we want to find this face
-    found = false;
+    found                  = false;
     while (!found) {
-      fn = next_fn;
+      fn      = next_fn;
       next_fn = _FindNextFace(next_fn, vno);
       if (next_fn == -1)
         found = true;
       else if (next_fn == -2) {
-        found = true;
+        found     = true;
         nfaces[1] = 0;
       } else {
         path[1] += _Distance(fn, next_fn);
         facedata[next_fn].fccLabel = 4;
-        PathFaces[1][nfaces[1]++] = next_fn;
+        PathFaces[1][nfaces[1]++]  = next_fn;
       }
     }
   }
@@ -711,7 +714,7 @@ int FastLoop::_FindFacePath(Loop &loop, int init_fn1, int init_fn2) {
       delete[] PathFaces[0];
       delete[] PathFaces[1];
       // surface->WriteFile("./test.3d",1);
-      cout << "_FindFacePath: could not find path!" << endl;
+      std::cout << "_FindFacePath: could not find path!" << std::endl;
       return 0;
       ErrorExit("_FindFacePath: could not find path!");
     };
@@ -775,13 +778,13 @@ int FastLoop::_OrderLoop(Loop &loop) {
     facedata[loop.points[n]].fccState = eTemporary;
 
   int *newFaces = new int[loop.npoints];
-  int npoints = 0;
-  bool found = true;
-  int current = loop.points[0];
+  int  npoints  = 0;
+  bool found    = true;
+  int  current  = loop.points[0];
   while (found) {
-    newFaces[npoints++] = current;
+    newFaces[npoints++]        = current;
     facedata[current].fccState = 0;
-    found = false;
+    found                      = false;
     // find the next face
     int next = -1;
     for (int i = 0; i < 3; i++) {
@@ -791,14 +794,14 @@ int FastLoop::_OrderLoop(Loop &loop) {
       }
     }
     if (next >= 0) {
-      found = true;
+      found   = true;
       current = next;
     }
   }
   ASSERT(npoints == loop.npoints);
 
   delete[] loop.points;
-  loop.points = newFaces;
+  loop.points    = newFaces;
   loop.maxpoints = loop.npoints;
 
   return loop.npoints;
@@ -811,7 +814,7 @@ int FastLoop::_SimplifyLoop(Loop &loop) {
   for (int n = 0; n < ndefect_faces; n++) {
     facedata[defect_faces[n]].fccState =
         0; // to mark the loop faces (with eTemporary)
-    facedata[defect_faces[n]].fmState = 0;  // to mark the triple faces (with 1)
+    facedata[defect_faces[n]].fmState  = 0; // to mark the triple faces (with 1)
     facedata[defect_faces[n]].fmFather = 0; // to mark the processed faces
   }
 
@@ -875,7 +878,7 @@ int FastLoop::_SimplifyLoop(Loop &loop) {
 
     // we already process this face
     facedata[next_face].fmFather = 1;
-    current_face = next_face;
+    current_face                 = next_face;
 
     // the current face has two neighboring faces (since it is a triple face)
     int fn1 = -1, fn2 = -1;
@@ -889,8 +892,8 @@ int FastLoop::_SimplifyLoop(Loop &loop) {
     }
     if (facedata[fn1].fmState == 0) { // swap faces if fn1 is non triple
       int tmp = fn1;
-      fn1 = fn2;
-      fn2 = tmp;
+      fn1     = fn2;
+      fn2     = tmp;
     }
     // we temporary mark these two faces
     facedata[fn1].fmFather = 2;
@@ -902,7 +905,7 @@ int FastLoop::_SimplifyLoop(Loop &loop) {
       flist.AddPoint(fn2);
       while (flist.npoints) {
         // take the last point
-        int fn = flist.End();
+        int fn                = flist.End();
         facedata[fn].fmFather = 2;
         flist.Pop();
         for (int i = 0; i < 3; i++) {
@@ -933,8 +936,8 @@ int FastLoop::_SimplifyLoop(Loop &loop) {
     // we start arbitrarily with fn11
     Loop flist;
     flist.AddPoint(fn11);
-    int ending_face = -1;
-    bool found = false;
+    int  ending_face = -1;
+    bool found       = false;
     // se set fn1 to 3 (temporary value)
     facedata[fn1].fmFather = 3;
     while (!found && flist.npoints) {
@@ -953,7 +956,7 @@ int FastLoop::_SimplifyLoop(Loop &loop) {
         }
         // we know that this point has already been processed!
         if (facedata[nfn].fmFather == 1) {
-          found = true;
+          found       = true;
           ending_face = nfn;
           break;
         }
@@ -994,15 +997,15 @@ int FastLoop::_SimplifyLoop(Loop &loop) {
   }
 
   int *newFaces = new int[loop.npoints];
-  npoints = 0;
+  npoints       = 0;
   for (int n = 0; n < loop.npoints; n++) {
     if (facedata[loop.points[n]].fmFather == 1)
       newFaces[npoints++] = loop.points[n];
   }
   delete[] loop.points;
-  loop.points = newFaces;
+  loop.points    = newFaces;
   loop.maxpoints = loop.npoints;
-  loop.npoints = npoints;
+  loop.npoints   = npoints;
 
   return _OrderLoop(loop);
 }
@@ -1011,9 +1014,9 @@ void FastLoop::_InitDefect() {
   Init();
   for (int n = 0; n < ndefect_faces; n++) {
     FaceData *face = &facedata[defect_faces[n]];
-    face->fmState = eFar;
+    face->fmState  = eFar;
     face->fccState = eFar;
-    face->border = false;
+    face->border   = false;
     for (int i = 0; i < 3; i++) {
       vertexdata[face->v[i]].fmState = eFar;
     }
@@ -1021,14 +1024,14 @@ void FastLoop::_InitDefect() {
 }
 
 void FastLoop::SetDefectList(int nfaces, int *list_of_faces) {
-  defect_faces = list_of_faces;
+  defect_faces  = list_of_faces;
   ndefect_faces = nfaces;
   // setting up the correct flags to all the faces
   for (int n = 0; n < surface->nfaces; n++) {
     FaceData *face = &facedata[n];
-    face->border = true;
+    face->border   = true;
     face->fccState = eForbidden;
-    face->fmState = eForbidden;
+    face->fmState  = eForbidden;
     for (int i = 0; i < 3; i++)
       vertexdata[facedata[n].v[i]].fmState = eForbidden;
   }
@@ -1037,7 +1040,7 @@ void FastLoop::SetDefectList(int nfaces, int *list_of_faces) {
 // return NULL if fails to find loop
 Loop *FastLoop::FindLoop(int seed) {
 #if PRINT_ERROR_MODE
-  cout << endl << "seed point is : " << seed << " ";
+  std::cout << std::endl << "seed point is : " << seed << " ";
 #endif
   // cout << " " << seed << ".";
   while (seed >= surface->nfaces || seed < 0) {
@@ -1050,7 +1053,7 @@ Loop *FastLoop::FindLoop(int seed) {
   SetSeed(seed);
 
   bool loop_not_found = true;
-  int stopping_face = -1, conflicting_face = -1;
+  int  stopping_face = -1, conflicting_face = -1;
 
   while (loop_not_found) {
 
@@ -1060,13 +1063,13 @@ Loop *FastLoop::FindLoop(int seed) {
 
     if (conflicting_face == -1) {
 #if PRINT_ERROR_MODE
-      cout << endl << "No loop has been found!!!!" << endl;
+      std::cout << std::endl << "No loop has been found!!!!" << std::endl;
 #endif
       return nullptr;
     };
 #if PRINT_ERROR_MODE
-    cout << "conflict " << conflicting_face << " stopping " << stopping_face
-         << endl;
+    std::cout << "conflict " << conflicting_face << " stopping "
+              << stopping_face << std::endl;
 #endif
     // at this point, conflicting_face generated a clash with the existing
     // stopping_face
@@ -1079,13 +1082,13 @@ Loop *FastLoop::FindLoop(int seed) {
 
       // first find the two neighboring faces
 #if PRINT_ERROR_MODE
-    cout << endl << "Init segmentation ";
+    std::cout << std::endl << "Init segmentation ";
 #endif
     _InitSegmentation(conflicting_face);
 
     // start the segmentation
 #if PRINT_ERROR_MODE
-    cout << endl << "Starting segmentation ";
+    std::cout << std::endl << "Starting segmentation ";
 #endif
     int which_segment = _FastSegmentation();
 
@@ -1095,8 +1098,8 @@ Loop *FastLoop::FindLoop(int seed) {
     // check if there is a path outside  //here
     if (segments[which_segment]
             .GetMark()) { // this segment is touching the border
-      bool is_loop = false;
-      int other_segment = (which_segment + 1) % 2;
+      bool is_loop       = false;
+      int  other_segment = (which_segment + 1) % 2;
       if (segments[other_segment].GetMark()) // we have a loop
         is_loop = true;
       else {
@@ -1123,7 +1126,7 @@ Loop *FastLoop::FindLoop(int seed) {
       }
       if (is_loop) {
 #if PRINT_ERROR_MODE
-        cout << "Found only One Single Loop!!!!" << endl;
+        std::cout << "Found only One Single Loop!!!!" << std::endl;
 #endif
         Loop *loops = new Loop[2];
         if (!_ExtractFirstLoop(loops[0], conflicting_face, stopping_face)) {
@@ -1135,7 +1138,7 @@ Loop *FastLoop::FindLoop(int seed) {
 #endif
         _SimplifyLoop(loops[0]);
 #if PRINT_ERROR_MODE
-        cout << endl << "loop 0 : after simplification: ";
+        std::cout << std::endl << "loop 0 : after simplification: ";
         loops[0].Print();
 #endif
         // second loop is empty nothing
@@ -1145,7 +1148,7 @@ Loop *FastLoop::FindLoop(int seed) {
     _UpdateSegmentFaces(which_segment);
   }
 #if PRINT_ERROR_MODE
-  cout << endl << " Path has been found!" << endl;
+  std::cout << std::endl << " Path has been found!" << std::endl;
 #endif
   // extracting path
   Loop *loops = new Loop[2];
@@ -1158,15 +1161,15 @@ Loop *FastLoop::FindLoop(int seed) {
 #endif
   _ExtractSecondLoop(loops[1], conflicting_face);
 #if PRINT_ERROR_MODE
-  cout << endl;
+  std::cout << std::endl;
   loops[1].Print();
 #endif
   _SimplifyLoop(loops[0]);
   _SimplifyLoop(loops[1]);
 #if PRINT_ERROR_MODE
-  cout << endl << "loop 0 : after simplification: ";
+  std::cout << std::endl << "loop 0 : after simplification: ";
   loops[0].Print();
-  cout << endl << "loop 1 : after simplification: ";
+  std::cout << std::endl << "loop 1 : after simplification: ";
   loops[1].Print();
 #endif
   return loops;
@@ -1209,13 +1212,13 @@ void FastLoop::FindMinimalLoop(Loop &minimal_loop, int max_init_face,
     if (loop == nullptr)
       continue; // next attempt
 
-    int which_loop = 0;
-    double length = _GetLoopLength(loop[0]), olength;
+    int    which_loop = 0;
+    double length     = _GetLoopLength(loop[0]), olength;
     if (loop[1].npoints) {
       olength = _GetLoopLength(loop[1]);
       if (olength < length) {
         which_loop = 1;
-        length = olength;
+        length     = olength;
       }
     }
 
@@ -1223,7 +1226,7 @@ void FastLoop::FindMinimalLoop(Loop &minimal_loop, int max_init_face,
             0 || // loop[which_loop].npoints < minimal_loop.npoints){
         length < minimal_length) {
       minimal_length = length;
-      minimal_loop = loop[which_loop];
+      minimal_loop   = loop[which_loop];
     }
     delete[] loop;
   }

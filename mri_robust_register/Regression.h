@@ -37,11 +37,11 @@
 #include "matrix.h"
 
 #define SATr 4.685 // this is suggested for gaussian noise
-#include <utility>
-#include <string>
 #include <cassert>
-#include <vnl/vnl_vector.h>
+#include <string>
+#include <utility>
 #include <vnl/vnl_matrix.h>
+#include <vnl/vnl_vector.h>
 
 /** \class Transform3dTranslate
  * \brief Templated class for iteratively reweighted least squares
@@ -95,24 +95,24 @@ public:
 protected:
   vnl_vector<T> getRobustEstWAB(vnl_vector<T> &w, double sat = SATr,
                                 double sig = 1.4826);
-  double getRobustEstWB(vnl_vector<T> &w, double sat = SATr,
-                        double sig = 1.4826);
+  double        getRobustEstWB(vnl_vector<T> &w, double sat = SATr,
+                               double sig = 1.4826);
 
   T getSigmaMAD(const vnl_vector<T> &r, T d = 1.4826);
   T VectorMedian(const vnl_vector<T> &v);
 
-  void getSqrtTukeyDiaWeights(const vnl_vector<T> &r, vnl_vector<T> &w,
-                              double sat = SATr);
-  void getTukeyBiweight(const vnl_vector<T> &r, vnl_vector<T> &w,
-                        double sat = SATr);
+  void   getSqrtTukeyDiaWeights(const vnl_vector<T> &r, vnl_vector<T> &w,
+                                double sat = SATr);
+  void   getTukeyBiweight(const vnl_vector<T> &r, vnl_vector<T> &w,
+                          double sat = SATr);
   double getTukeyPartialSat(const vnl_vector<T> &r, double sat = SATr);
 
 private:
   vnl_matrix<T> *A;
   vnl_vector<T> *b;
-  double lasterror, lastweight, lastzero;
-  int verbose;
-  bool floatsvd;
+  double         lasterror, lastweight, lastzero;
+  int            verbose;
+  bool           floatsvd;
 };
 
 #include "Regression.cpp"

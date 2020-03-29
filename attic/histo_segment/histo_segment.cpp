@@ -23,18 +23,18 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
 #include "mri.h"
+#include "mrisegment.h"
 #include "proto.h"
 #include "version.h"
-#include "mrisegment.h"
 
 #define RGB_SIZE 500
 
@@ -45,7 +45,7 @@ static char vcid[] =
 static int write_snapshot(MRI *mri, MRI *mri_src, MRI *mri_dst, MATRIX *m, char *base, int n, int level, DENSITY *density, MRI *mri_seg) ;
 int main(int argc, char *argv[]) ;
 #endif
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -54,11 +54,11 @@ static void print_version(void);
 const char *Progname;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs;
-  MRI *mri_nissl, *mri_seg;
+  char **           av;
+  int               ac, nargs;
+  MRI *             mri_nissl, *mri_seg;
   MRI_SEGMENTATION *mriseg;
-  double thresh, min_neuron_area;
+  double            thresh, min_neuron_area;
 
   nargs = handleVersionOption(argc, argv, "histo_segment");
   if (nargs && argc - nargs == 1)
@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
   if (mri_nissl == NULL)
     ErrorExit(ERROR_BADPARM, "%s: could not open Nissl image %s...\n", argv[1]);
 
-  thresh = atof(argv[2]);
+  thresh          = atof(argv[2]);
   min_neuron_area = atof(argv[3]);
-  mriseg = MRIsegment(mri_nissl, 0, thresh);
+  mriseg          = MRIsegment(mri_nissl, 0, thresh);
   MRIremoveSmallSegments(mriseg, min_neuron_area);
   mri_seg = MRIsegmentToImage(mri_nissl, NULL, mriseg, -1);
   //  MRIbinarize(mri_seg, mri_seg, 0, 0, 1) ;
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -122,7 +122,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':

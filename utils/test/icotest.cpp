@@ -24,8 +24,8 @@
  *
  */
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #if (__GNUC__ < 3)
 #include "/usr/include/g++-3/alloc.h"
 #endif
@@ -37,18 +37,16 @@ extern "C" {
 const char *Progname = "icotest";
 }
 
-using namespace std;
-
 int main() {
-  MRIS *mris;
+  MRIS *      mris;
   const char *mri_dir = "../../distribution";
   for (int index = 0; index < 8; ++index) {
     ostringstream infile, outfile;
     infile << mri_dir << "/lib/bem/ic" << index << ".tri";
-    cout << "Reading " << infile.str() << endl;
+    std::cout << "Reading " << infile.str() << std::endl;
     mris = MRISread(const_cast<char *>(infile.str().c_str()));
     outfile << "./test" << index << ".tri";
-    cout << "Writing " << outfile.str() << endl;
+    std::cout << "Writing " << outfile.str() << std::endl;
     MRISwrite(mris, const_cast<char *>(outfile.str().c_str()));
     MRISfree(&mris);
   }
@@ -57,30 +55,31 @@ int main() {
     ostringstream infile, outfile;
     infile << mri_dir << "/lib/bem/ic" << index << ".tri";
     outfile << "./test" << index << ".tri";
-    cout << "Comparing " << outfile.str() << " with " << infile.str() << endl;
+    std::cout << "Comparing " << outfile.str() << " with " << infile.str()
+              << std::endl;
 
-    ifstream origf(infile.str().c_str(), ios::in);
-    ifstream outf(outfile.str().c_str(), ios::in);
-    char buf[512];
-    char buf1[512];
+    std::ifstream origf(infile.str().c_str(), ios::in);
+    std::ifstream outf(outfile.str().c_str(), ios::in);
+    char          buf[512];
+    char          buf1[512];
     // first check number of vertices
     origf.getline(buf, sizeof(buf));
     stringstream st(buf);
-    int nvertices;
+    int          nvertices;
     st >> nvertices;
     outf.getline(buf1, sizeof(buf1));
     stringstream st1(buf1);
-    int nvertices1;
+    int          nvertices1;
     st1 >> nvertices1;
     if (nvertices != nvertices1) {
-      cerr << "Number of vertices differ: orig " << nvertices << "  new "
-           << nvertices1 << endl;
+      std::cerr << "Number of vertices differ: orig " << nvertices << "  new "
+                << nvertices1 << std::endl;
       return -1;
     }
     // read each vertices
-    int idx;
+    int   idx;
     float x, y, z;
-    int idx1;
+    int   idx1;
     float x1, y1, z1;
     for (int i = 0; i < nvertices; ++i) {
       origf.getline(buf, sizeof(buf));
@@ -90,26 +89,26 @@ int main() {
       stringstream st1(buf1);
       st1 >> idx1 >> x1 >> y1 >> z1;
       if (idx != idx1 || x != x1 || y != y1 || z != z1) {
-        cerr << "vertices values do not agree " << endl;
-        cerr << "orig: idx " << idx << "  x " << x << " y " << y << " z " << z
-             << endl;
-        cerr << "new : idx " << idx1 << "  x " << x1 << " y " << y1 << " z "
-             << z1 << endl;
+        std::cerr << "vertices values do not agree " << std::endl;
+        std::cerr << "orig: idx " << idx << "  x " << x << " y " << y << " z "
+                  << z << std::endl;
+        std::cerr << "new : idx " << idx1 << "  x " << x1 << " y " << y1
+                  << " z " << z1 << std::endl;
         return -1;
       }
     }
     // next faces with 3 vertices
     origf.getline(buf, sizeof(buf));
     outf.getline(buf1, sizeof(buf1));
-    int faces, faces1;
+    int          faces, faces1;
     stringstream st2(buf);
     st2 >> faces;
     stringstream st3(buf1);
     st3 >> faces1;
     if (faces != faces1) {
-      cerr << "orig :" << buf << "   new: " << buf1 << endl;
-      cerr << "number of faces do not agree: orig " << faces << "   new "
-           << faces1 << endl;
+      std::cerr << "orig :" << buf << "   new: " << buf1 << std::endl;
+      std::cerr << "number of faces do not agree: orig " << faces << "   new "
+                << faces1 << std::endl;
       return -1;
     }
     int v1, v2, v3;
@@ -122,11 +121,11 @@ int main() {
       stringstream st5(buf1);
       st5 >> idx1 >> v11 >> v12 >> v13;
       if (idx != idx1 || v1 != v11 || v2 != v12 || v3 != v13) {
-        cerr << "vertices values do not agree " << endl;
-        cerr << "orig: idx " << idx << "  v1 " << v1 << " v2 " << v2 << " v3 "
-             << v3 << endl;
-        cerr << "new : idx " << idx1 << "  v11 " << v11 << " v12 " << v12
-             << " v13 " << v13 << endl;
+        std::cerr << "vertices values do not agree " << std::endl;
+        std::cerr << "orig: idx " << idx << "  v1 " << v1 << " v2 " << v2
+                  << " v3 " << v3 << std::endl;
+        std::cerr << "new : idx " << idx1 << "  v11 " << v11 << " v12 " << v12
+                  << " v13 " << v13 << std::endl;
         return -1;
       }
     }
@@ -135,5 +134,5 @@ int main() {
     command << "rm " << outfile.str();
     system(command.str().c_str());
   }
-  cout << "No difference found" << endl;
+  std::cout << "No difference found" << std::endl;
 }

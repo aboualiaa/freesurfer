@@ -25,56 +25,56 @@
  *
  */
 
-#include "mrinorm.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mrinorm.h"
 #include "version.h"
 
 static int debug_flag = 0;
 
 const char *Progname;
 
-static char *tp1_T1_fname = nullptr;
+static char *tp1_T1_fname   = nullptr;
 static char *tp1_ctrl_fname = nullptr;
 
 /* The following specifies the src and dst volumes
    of the input FSL/LTA transform */
-static MRI *lta_src = nullptr;
-static MRI *lta_dst = nullptr;
-static int invert = 0;
+static MRI * lta_src     = nullptr;
+static MRI * lta_dst     = nullptr;
+static int   invert      = 0;
 static char *xform_fname = nullptr;
-static float bias_sigma = 8.0;
+static float bias_sigma  = 8.0;
 static char *mask1_fname = nullptr;
 static char *mask2_fname = nullptr;
 
 static float noise_threshold = 1.0;
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage(int exit_val);
 
 int main(int argc, char *argv[]) {
   char **av;
-  MRI *mri_T1, *mri_tmp, *mri_ctrl, *mri_in, *mri_out;
-  MRI *mri_snr, *mri_bias;
-  MRI *mri_mask1 = nullptr;
-  MRI *mri_mask2 = nullptr;
+  MRI *  mri_T1, *mri_tmp, *mri_ctrl, *mri_in, *mri_out;
+  MRI *  mri_snr, *mri_bias;
+  MRI *  mri_mask1 = nullptr;
+  MRI *  mri_mask2 = nullptr;
 
-  int ac, nargs;
-  int width, height, depth, x, y, z;
-  int mask1_set = 0;
-  int mask2_set = 0;
-  int i, j, k, cx, cy, cz, count;
-  LTA *lta = nullptr;
-  int transform_type;
+  int    ac, nargs;
+  int    width, height, depth, x, y, z;
+  int    mask1_set = 0;
+  int    mask2_set = 0;
+  int    i, j, k, cx, cy, cz, count;
+  LTA *  lta = nullptr;
+  int    transform_type;
   double mean, std, value, src, bias, norm;
   //  HISTOGRAM *h;
   //  float bin_size;
   //  int nbins, bin_no;
-  double mean1, std1, mean2, std2, count1, count2, slope, offset;
+  double   mean1, std1, mean2, std2, count1, count2, slope, offset;
   VOL_GEOM vgtmp;
-  LT *lt = nullptr;
-  MATRIX *m_tmp = nullptr;
+  LT *     lt    = nullptr;
+  MATRIX * m_tmp = nullptr;
 
   Progname = argv[0];
 
@@ -149,9 +149,9 @@ int main(int argc, char *argv[]) {
                 Progname);
   }
 
-  width = mri_in->width;
+  width  = mri_in->width;
   height = mri_in->height;
-  depth = mri_in->depth;
+  depth  = mri_in->depth;
 
   // nbins = 200;
   // h = HISTOalloc(nbins);
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (invert) {
-      m_tmp = lta->xforms[0].m_L;
+      m_tmp              = lta->xforms[0].m_L;
       lta->xforms[0].m_L = MatrixInverse(lta->xforms[0].m_L, nullptr);
       MatrixFree(&m_tmp);
       lt = &lta->xforms[0];
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
     } else if (mask2_fname != nullptr && mask1_fname == nullptr) {
       printf("map mask for tp2 to get mask for tp1 ...\n");
       // need to invert lta first
-      m_tmp = lta->xforms[0].m_L;
+      m_tmp              = lta->xforms[0].m_L;
       lta->xforms[0].m_L = MatrixInverse(lta->xforms[0].m_L, nullptr);
       MatrixFree(&m_tmp);
       lt = &lta->xforms[0];
@@ -412,8 +412,8 @@ int main(int argc, char *argv[]) {
   MRIfree(&mri_snr);
 #else
   printf("compute mean and std of tp1 volume within masked area...\n");
-  mean1 = 0;
-  std1 = 0;
+  mean1  = 0;
+  std1   = 0;
   count1 = 0;
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
@@ -454,8 +454,8 @@ int main(int argc, char *argv[]) {
           MRIFvox(mri_snr, x, y, z) = 0;
           continue;
         }
-        mean = 0;
-        std = 0;
+        mean  = 0;
+        std   = 0;
         count = 0;
         for (i = -1; i <= 1; i++)
           for (j = -1; j <= 1; j++)
@@ -521,8 +521,8 @@ int main(int argc, char *argv[]) {
   image border, so I will skip image boundaries
   no, that's not a problem of most recent mri_watershed;
   something wrong previously */
-  mean2 = 0;
-  std2 = 0;
+  mean2  = 0;
+  std2   = 0;
   count2 = 0;
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
@@ -549,7 +549,7 @@ int main(int argc, char *argv[]) {
            std2);
 
   // compute intensity scale
-  slope = sqrt(std1 / std2);
+  slope  = sqrt(std1 / std2);
   offset = mean1 - slope * mean2;
 
   printf("scale input volume by %g x + %g\n", slope, offset);
@@ -560,7 +560,7 @@ int main(int argc, char *argv[]) {
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
       for (x = 0; x < width; x++) {
-        value = MRIFvox(mri_in, x, y, z);
+        value                    = MRIFvox(mri_in, x, y, z);
         MRIFvox(mri_in, x, y, z) = value * slope + offset;
       }
 
@@ -598,7 +598,7 @@ int main(int argc, char *argv[]) {
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
-        src = MRIgetVoxVal(mri_in, x, y, z, 0);
+        src  = MRIgetVoxVal(mri_in, x, y, z, 0);
         bias = MRIgetVoxVal(mri_bias, x, y, z, 0);
         if (!bias) /* should never happen */
           norm = (float)src;
@@ -658,16 +658,16 @@ static void usage(int exit_val) {
 } /*  end usage()  */
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "T1")) {
     tp1_T1_fname = argv[2];
@@ -698,7 +698,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "xform")) {
     xform_fname = argv[2];
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "transform file name is %s\n", xform_fname);
   } else if (!stricmp(option, "invert")) {
     invert = 1;

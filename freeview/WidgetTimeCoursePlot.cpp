@@ -23,10 +23,10 @@
  */
 
 #include "WidgetTimeCoursePlot.h"
-#include <QPainter>
-#include <QMouseEvent>
-#include <QDebug>
 #include "MyUtils.h"
+#include <QDebug>
+#include <QMouseEvent>
+#include <QPainter>
 
 WidgetTimeCoursePlot::WidgetTimeCoursePlot(QWidget *parent)
     : QWidget(parent), m_bAutoScale(true), m_nCurrentFrame(0), m_dMinPlot(0),
@@ -38,7 +38,7 @@ WidgetTimeCoursePlot::WidgetTimeCoursePlot(QWidget *parent)
 WidgetTimeCoursePlot::~WidgetTimeCoursePlot() {}
 
 void WidgetTimeCoursePlot::SetDarkMode(bool bDark) {
-  m_bDarkMode = bDark;
+  m_bDarkMode       = bDark;
   m_colorBackground = bDark ? Qt::black : Qt::white;
   m_colorForeground = bDark ? QColor(255, 255, 255) : QColor(30, 30, 30);
 }
@@ -110,7 +110,7 @@ void WidgetTimeCoursePlot::SetDataColor(qint64 nId, const QColor &color) {
 void WidgetTimeCoursePlot::paintEvent(QPaintEvent *e) {
   Q_UNUSED(e);
   QPainter p(this);
-  QRectF rc_plot = rect();
+  QRectF   rc_plot = rect();
   p.fillRect(rect(), m_colorBackground);
   int nMargin = 10;
   rc_plot.adjust(nMargin, nMargin, -nMargin, -nMargin);
@@ -176,9 +176,9 @@ void WidgetTimeCoursePlot::paintEvent(QPaintEvent *e) {
   // draw Y metrics
   p.setFont(fnt);
   double nMetricInterval = 30;
-  double dMetricStep = (dMax - dMin) / (rc_plot.height() / nMetricInterval);
-  dMetricStep = MyUtils::RoundToGrid(dMetricStep);
-  double dMetricPos = (int)(dMin / dMetricStep) * dMetricStep;
+  double dMetricStep     = (dMax - dMin) / (rc_plot.height() / nMetricInterval);
+  dMetricStep            = MyUtils::RoundToGrid(dMetricStep);
+  double dMetricPos      = (int)(dMin / dMetricStep) * dMetricStep;
   double y =
       rc_plot.bottom() - (dMetricPos - dMin) / (dMax - dMin) * rc_plot.height();
   while (y > rc_plot.top()) {
@@ -202,19 +202,19 @@ void WidgetTimeCoursePlot::paintEvent(QPaintEvent *e) {
 
   // draw X metrics
   nMetricInterval = 50;
-  dMetricStep = (m_nFrames - 1) / (rc_plot.width() / nMetricInterval);
-  dMetricStep = MyUtils::RoundToGrid(dMetricStep);
-  dMetricPos = 0;
-  double dScale = 1;
-  int nPrecise = 0;
-  double x = rc_plot.left();
-  TimeCourseData &td = m_data[0];
-  QString strXUnit = td.m_strXUnit;
+  dMetricStep     = (m_nFrames - 1) / (rc_plot.width() / nMetricInterval);
+  dMetricStep     = MyUtils::RoundToGrid(dMetricStep);
+  dMetricPos      = 0;
+  double          dScale   = 1;
+  int             nPrecise = 0;
+  double          x        = rc_plot.left();
+  TimeCourseData &td       = m_data[0];
+  QString         strXUnit = td.m_strXUnit;
   if (!m_bShowFrameNumber) {
     double np = log10(qAbs(td.m_dXInterval * dMetricStep));
     if (np > 3 || np < -3) {
-      np = ((int)np);
-      dScale = pow(10, -np);
+      np       = ((int)np);
+      dScale   = pow(10, -np);
       strXUnit = QString("10^%1 %2").arg(np).arg(td.m_strXUnit);
       nPrecise = 2;
     } else if (np < 2 && qAbs(td.m_dXInterval * dMetricStep) < 10)
@@ -263,9 +263,9 @@ void WidgetTimeCoursePlot::paintEvent(QPaintEvent *e) {
 
   // draw current y values
   if (m_bShowCursorInfo) {
-    int nMaxNameWidth = 0, nMaxValueWidth = 0;
+    int          nMaxNameWidth = 0, nMaxValueWidth = 0;
     QFontMetrics fmt(p.font());
-    int nVisibleLines = 0;
+    int          nVisibleLines = 0;
     for (int n = 0; n < m_data.size(); n++) {
       TimeCourseData &td = m_data[n];
       if (td.m_bShow) {
@@ -281,8 +281,8 @@ void WidgetTimeCoursePlot::paintEvent(QPaintEvent *e) {
       }
     }
     if (nMaxValueWidth > 0) {
-      int nMarginH = 17, nMarginV = 15;
-      int nSpacingH = 9, nSpacingV = 5;
+      int    nMarginH = 17, nMarginV = 15;
+      int    nSpacingH = 9, nSpacingV = 5;
       QRectF rc_frame(0, 0,
                       nMarginH * 2 + nSpacingH + nMaxValueWidth + nMaxNameWidth,
                       nMarginV * 2 + (nVisibleLines - 1) * nSpacingV +
@@ -333,7 +333,7 @@ void WidgetTimeCoursePlot::SetAutoScale(bool bAutoScale) {
 void WidgetTimeCoursePlot::mousePressEvent(QMouseEvent *e) {
   if (e->button() == Qt::LeftButton && m_rectPlot.contains(e->pos())) {
     double dSpacing = m_rectPlot.width() / (m_nFrames - 1);
-    int n = (int)((e->x() - m_rectPlot.left()) / dSpacing + 0.5);
+    int    n        = (int)((e->x() - m_rectPlot.left()) / dSpacing + 0.5);
     if (n >= 0 && n < m_nFrames) {
       m_nCurrentFrame = n;
       update();
@@ -346,7 +346,7 @@ void WidgetTimeCoursePlot::mouseMoveEvent(QMouseEvent *e) {
   m_bShowCursorInfo = true;
   if (e->buttons() & Qt::LeftButton && m_rectPlot.contains(e->pos())) {
     double dSpacing = m_rectPlot.width() / (m_nFrames - 1);
-    int n = (int)((e->x() - m_rectPlot.left()) / dSpacing + 0.5);
+    int    n        = (int)((e->x() - m_rectPlot.left()) / dSpacing + 0.5);
     if (n >= 0 && n < m_nFrames) {
       m_nCurrentFrame = n;
       update();

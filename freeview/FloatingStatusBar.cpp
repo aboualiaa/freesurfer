@@ -54,7 +54,7 @@ void FloatingStatusBar::ShowProgress() {
 
 void FloatingStatusBar::Reposition() {
   QWidget *p = parentWidget();
-  QSize s = p->size() - this->size();
+  QSize    s = p->size() - this->size();
 #ifdef Q_OS_MAC
   this->move(p->geometry().topLeft() + QPoint(0, s.height()) + QPoint(1, -1));
 #elif defined(Q_CYGWIN_WIN)

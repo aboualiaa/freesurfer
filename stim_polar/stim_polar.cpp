@@ -23,37 +23,37 @@
  *
  */
 
-#include "glut.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "glut.h"
 #include "version.h"
 
 #define EPS 1.0e-6
 
 /* Global variables */
-const char *Progname;
+const char *  Progname;
 static double flickerFreq;
 static double stimPeriod;
 static double minEcc;
 static double maxEcc;
-static int numRings, numSpokes, OUTWARD;
-static int counter = 0;
-static int currentFrame = 0;
+static int    numRings, numSpokes, OUTWARD;
+static int    counter      = 0;
+static int    currentFrame = 0;
 
 static double timeTick;
 static double timePoint = 0;
 
-static GLfloat On = 0.0;
-static GLint width = 500, height = 500;
+static GLfloat On    = 0.0;
+static GLint   width = 500, height = 500;
 
 static int numFrames = 1024;
 
-static float ***redFrames = nullptr;
+static float ***redFrames   = nullptr;
 static float ***greenFrames = nullptr;
-static float ***blueFrames = nullptr;
+static float ***blueFrames  = nullptr;
 
 /* m-sequence stuff */
-static int use_mseq = 0;
+static int use_mseq   = 0;
 static int mseq_order = 16;
 static int mseq_tap =
     45; /* could also be 57, 63, 83, 189, 215, 303, 317, 335, 349 and others */
@@ -63,19 +63,19 @@ static int mseq_tap =
 /* for order=17 could use 9, 15, 33, 45, 51, 63, 65, 85, 105, 123, 141, 153,
  * 163, 175, 187, 197, 245 */
 
-static int get_option(int argc, char *argv[]);
+static int            get_option(int argc, char *argv[]);
 static unsigned char *generate_msequence(int order, unsigned int tap, int *len);
 
 void display_expanding_rings() {
 
   GLUquadricObj *qobj = nullptr;
-  double innerRadiusOfRing;
-  double outerRadiusOfRing;
-  double start_angle;
-  double angular_step;
-  static int current_list = 0;
+  double         innerRadiusOfRing;
+  double         outerRadiusOfRing;
+  double         start_angle;
+  double         angular_step;
+  static int     current_list = 0;
 
-  int ring, spoke, bit;
+  int    ring, spoke, bit;
   double scaleFactor;
 
   double t, T, eccRange;
@@ -263,13 +263,13 @@ void display_expanding_rings() {
 void display_all() {
 
   GLUquadricObj *qobj = nullptr;
-  double innerRadiusOfRing;
-  double outerRadiusOfRing;
-  double start_angle;
-  double angular_step;
-  static int current_list = 0;
-  int ring, spoke;
-  double scaleFactor;
+  double         innerRadiusOfRing;
+  double         outerRadiusOfRing;
+  double         start_angle;
+  double         angular_step;
+  static int     current_list = 0;
+  int            ring, spoke;
+  double         scaleFactor;
 
   glClear(GL_COLOR_BUFFER_BIT);
   current_list = !current_list;
@@ -334,24 +334,24 @@ void init() {
   glShadeModel(GL_FLAT);
   timeTick = 1000 / flickerFreq;
 
-  redFrames = (float ***)calloc(numRings, sizeof(float **));
-  blueFrames = (float ***)calloc(numRings, sizeof(float **));
+  redFrames   = (float ***)calloc(numRings, sizeof(float **));
+  blueFrames  = (float ***)calloc(numRings, sizeof(float **));
   greenFrames = (float ***)calloc(numRings, sizeof(float **));
   if (!redFrames || !blueFrames || !greenFrames)
     ErrorExit(ERROR_NOMEMORY,
               "%s: could not allocate ring list of %d x %d x %d buffer",
               Progname, numRings, numSpokes, numFrames);
   for (ring = 0; ring < numRings; ring++) {
-    redFrames[ring] = (float **)calloc(numSpokes, sizeof(float *));
-    blueFrames[ring] = (float **)calloc(numSpokes, sizeof(float *));
+    redFrames[ring]   = (float **)calloc(numSpokes, sizeof(float *));
+    blueFrames[ring]  = (float **)calloc(numSpokes, sizeof(float *));
     greenFrames[ring] = (float **)calloc(numSpokes, sizeof(float *));
     if (!redFrames[ring] || !blueFrames[ring] || !greenFrames[ring])
       ErrorExit(ERROR_NOMEMORY,
                 "%s: could not allocate spoke list [%d] of %d x %d x %d buffer",
                 Progname, ring, numRings, numSpokes, numFrames);
     for (spoke = 0; spoke < numSpokes; spoke++) {
-      redFrames[ring][spoke] = (float *)calloc(numFrames, sizeof(float));
-      blueFrames[ring][spoke] = (float *)calloc(numFrames, sizeof(float));
+      redFrames[ring][spoke]   = (float *)calloc(numFrames, sizeof(float));
+      blueFrames[ring][spoke]  = (float *)calloc(numFrames, sizeof(float));
       greenFrames[ring][spoke] = (float *)calloc(numFrames, sizeof(float));
       if (!redFrames[ring][spoke] || !blueFrames[ring][spoke] ||
           !greenFrames[ring][spoke])
@@ -364,7 +364,7 @@ void init() {
 
   if (use_mseq) {
     unsigned char *mseq;
-    int nbr_delay, delay, index, len;
+    int            nbr_delay, delay, index, len;
 
     nbr_delay = rint(pow(2, mseq_order) / (numRings * numSpokes));
 
@@ -377,12 +377,12 @@ void init() {
         for (spoke = 0; spoke < numSpokes; spoke++, delay += nbr_delay) {
           index = (frame + delay) % len;
           if (mseq[index]) {
-            redFrames[ring][spoke][frame] = 1;
-            blueFrames[ring][spoke][frame] = 1;
+            redFrames[ring][spoke][frame]   = 1;
+            blueFrames[ring][spoke][frame]  = 1;
             greenFrames[ring][spoke][frame] = 1;
           } else {
-            redFrames[ring][spoke][frame] = 0;
-            blueFrames[ring][spoke][frame] = 0;
+            redFrames[ring][spoke][frame]   = 0;
+            blueFrames[ring][spoke][frame]  = 0;
             greenFrames[ring][spoke][frame] = 0;
           }
         }
@@ -399,12 +399,12 @@ void init() {
           bit = !start_bit;
         for (spoke = 0; spoke < numSpokes; spoke++) {
           if ((spoke + bit) % 2) {
-            redFrames[ring][spoke][frame] = On;
-            blueFrames[ring][spoke][frame] = On;
+            redFrames[ring][spoke][frame]   = On;
+            blueFrames[ring][spoke][frame]  = On;
             greenFrames[ring][spoke][frame] = On;
           } else {
-            redFrames[ring][spoke][frame] = 1 - On;
-            blueFrames[ring][spoke][frame] = 1 - On;
+            redFrames[ring][spoke][frame]   = 1 - On;
+            blueFrames[ring][spoke][frame]  = 1 - On;
             greenFrames[ring][spoke][frame] = 1 - On;
           }
         }
@@ -461,12 +461,12 @@ int main(int argc, char **argv) {
   }
 
   flickerFreq = atof(argv[1]);
-  stimPeriod = atof(argv[2]);
-  minEcc = atof(argv[3]);
-  maxEcc = atof(argv[4]);
-  numRings = atoi(argv[5]);
-  numSpokes = atoi(argv[6]);
-  OUTWARD = atoi(argv[7]);
+  stimPeriod  = atof(argv[2]);
+  minEcc      = atof(argv[3]);
+  maxEcc      = atof(argv[4]);
+  numRings    = atoi(argv[5]);
+  numSpokes   = atoi(argv[6]);
+  OUTWARD     = atoi(argv[7]);
 
   if (minEcc < EPS) {
     printf("\nArgument 3 (minEcc) must be larger than %.1e\n\n", EPS);
@@ -496,7 +496,7 @@ int main(int argc, char **argv) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -515,11 +515,11 @@ static int get_option(int argc, char *argv[]) {
 
 static unsigned char *generate_msequence(int order, unsigned int tap,
                                          int *plen) {
-  unsigned int len, q, R, i;
+  unsigned int   len, q, R, i;
   unsigned char *mseq, *used;
 
-  len = pow(2, order) - 1;
-  q = pow(2, order - 1); /* high bit */
+  len  = pow(2, order) - 1;
+  q    = pow(2, order - 1); /* high bit */
   mseq = (unsigned char *)calloc(len, sizeof(unsigned char));
   used = (unsigned char *)calloc(len, sizeof(unsigned char));
 

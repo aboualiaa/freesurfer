@@ -22,36 +22,36 @@
  *
  */
 #include "PanelVolume.h"
-#include "ui_PanelVolume.h"
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
-#include "LayerCollection.h"
-#include "LayerMRI.h"
-#include "LayerPropertyMRI.h"
-#include "LayerDTI.h"
-#include "LayerPropertyDTI.h"
-#include "LayerVolumeTrack.h"
-#include "LUTDataHolder.h"
-#include "LayerSurface.h"
-#include "SurfaceOverlay.h"
-#include "MyUtils.h"
 #include "BrushProperty.h"
-#include <QToolBar>
-#include <QStringList>
+#include "LUTDataHolder.h"
+#include "LayerCollection.h"
+#include "LayerDTI.h"
+#include "LayerMRI.h"
+#include "LayerPropertyDTI.h"
+#include "LayerPropertyMRI.h"
+#include "LayerSurface.h"
+#include "LayerVolumeTrack.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "SurfaceOverlay.h"
+#include "ui_MainWindow.h"
+#include "ui_PanelVolume.h"
 #include <QClipboard>
-#include <QMimeData>
-#include <QToolTip>
 #include <QColorDialog>
+#include <QMimeData>
+#include <QStringList>
+#include <QToolBar>
+#include <QToolTip>
 
 #define FS_VOLUME_SETTING_ID "freesurfer/volume-setting"
 
-int ColorTableItem::SortType = ColorTableItem::ST_VALUE;
+int  ColorTableItem::SortType      = ColorTableItem::ST_VALUE;
 bool ColorTableItem::SortAscending = true;
 
 bool ColorTableItem::operator<(const QTreeWidgetItem &other) const {
-  QString txt = text(0);
+  QString txt       = text(0);
   QString other_txt = other.text(0);
-  bool bRet = false;
+  bool    bRet      = false;
   if (SortType == ColorTableItem::ST_VALUE) {
     bRet = (data(0, Qt::UserRole + 1).toInt() >
             other.data(0, Qt::UserRole + 1).toInt());
@@ -61,7 +61,7 @@ bool ColorTableItem::operator<(const QTreeWidgetItem &other) const {
     //    if (other_txt.trimmed().contains(" "))
     //      other_txt = other_txt.split(" ", QString::SkipEmptyParts).at(1);
     if (txt.toLower() != other_txt.toLower()) {
-      txt = txt.toLower();
+      txt       = txt.toLower();
       other_txt = other_txt.toLower();
     }
     bRet = (txt > other_txt);
@@ -89,13 +89,19 @@ PanelVolume::PanelVolume(QWidget *parent)
   }
 
   connect(mainwnd, SIGNAL(NewVolumeCreated()), SLOT(ShowAllLabels()));
-  connect(mainwnd, SIGNAL(RefreshLookUpTableRequested()), SLOT(RefreshColorTable()), Qt::QueuedConnection);
-  connect(ui->pushButtonContourSave, SIGNAL(clicked(bool)), mainwnd, SLOT(OnSaveIsoSurface()));
+  connect(mainwnd, SIGNAL(RefreshLookUpTableRequested()),
+          SLOT(RefreshColorTable()), Qt::QueuedConnection);
+  connect(ui->pushButtonContourSave, SIGNAL(clicked(bool)), mainwnd,
+          SLOT(OnSaveIsoSurface()));
 
-  ui->toolbar->insertAction(ui->actionMoveLayerUp, mainwnd->ui->actionNewVolume);
-  ui->toolbar->insertAction(ui->actionMoveLayerUp, mainwnd->ui->actionLoadVolume);
-  ui->toolbar->insertAction(ui->actionMoveLayerUp, mainwnd->ui->actionCloseVolume);
-  ui->toolbar->insertAction(ui->actionMoveLayerUp, mainwnd->ui->actionSaveVolume);
+  ui->toolbar->insertAction(ui->actionMoveLayerUp,
+                            mainwnd->ui->actionNewVolume);
+  ui->toolbar->insertAction(ui->actionMoveLayerUp,
+                            mainwnd->ui->actionLoadVolume);
+  ui->toolbar->insertAction(ui->actionMoveLayerUp,
+                            mainwnd->ui->actionCloseVolume);
+  ui->toolbar->insertAction(ui->actionMoveLayerUp,
+                            mainwnd->ui->actionSaveVolume);
   ui->toolbar->insertSeparator(ui->actionMoveLayerUp);
 
   m_luts = mainwnd->GetLUTData();
@@ -177,8 +183,10 @@ PanelVolume::PanelVolume(QWidget *parent)
                             << ui->labelColorMap << ui->comboBoxColorMap;
 
   m_widgetlistVolumeTrack << ui->treeWidgetColorTable << m_widgetlistFrame
-                          << ui->labelSmoothIteration << ui->sliderContourSmoothIteration
-                          << ui->lineEditContourSmoothIteration << ui->checkBoxSelectAllLabels;
+                          << ui->labelSmoothIteration
+                          << ui->sliderContourSmoothIteration
+                          << ui->lineEditContourSmoothIteration
+                          << ui->checkBoxSelectAllLabels;
   m_widgetlistVolumeTrack.removeOne(ui->checkBoxAutoAdjustFrameLevel);
 
   m_widgetlistVolumeTrackSpecs << ui->labelTrackVolumeThreshold
@@ -226,7 +234,7 @@ void PanelVolume::ConnectLayer(Layer *layer_in) {
   }
 
   ui->widgetBusyIndicator->hide();
-  m_curCTAB = NULL;
+  m_curCTAB           = NULL;
   LayerPropertyMRI *p = layer->GetProperty();
   connect(p, SIGNAL(PropertyChanged()), this, SLOT(UpdateWidgets()),
           Qt::UniqueConnection);
@@ -337,7 +345,7 @@ void PanelVolume::DoIdle() {
   ui->actionCopySetting->setEnabled(layer);
 
   QStringList strgs = qApp->clipboard()->text().split(",");
-  bool bDataAvail = (!strgs.isEmpty() && strgs[0] == FS_VOLUME_SETTING_ID);
+  bool bDataAvail   = (!strgs.isEmpty() && strgs[0] == FS_VOLUME_SETTING_ID);
   ui->actionPasteSetting->setEnabled(layer && bDataAvail);
   ui->actionPasteSettingToAll->setEnabled(layer && bDataAvail);
   BlockAllSignals(false);
@@ -356,10 +364,10 @@ void PanelVolume::DoUpdateWidgets() {
     }
   }
   int nColorMap = LayerPropertyMRI::NoColorMap;
-  int nMode = MainWindow::GetMainWindow()->GetMode();
+  int nMode     = MainWindow::GetMainWindow()->GetMode();
   ui->lineEditFileName->clear();
   if (layer) {
-    nColorMap = layer->GetProperty()->GetColorMap();
+    nColorMap        = layer->GetProperty()->GetColorMap();
     bool bPercentile = layer->GetProperty()->GetUsePercentile();
     ui->checkBoxPercentile->setChecked(bPercentile);
     ui->checkBoxPercentile->setVisible(layer->GetProperty()->GetColorMap() !=
@@ -406,18 +414,18 @@ void PanelVolume::DoUpdateWidgets() {
     ChangeLineEditNumber(ui->lineEditBrushValue, layer->GetFillValue());
     ui->lineEditBrushValue->setEnabled(nMode != RenderView::IM_ReconEdit);
     double dwindow = layer->GetProperty()->GetWindow();
-    double dlevel = layer->GetProperty()->GetLevel();
+    double dlevel  = layer->GetProperty()->GetLevel();
     ChangeLineEditNumber(ui->lineEditWindow, dwindow);
     ChangeLineEditNumber(ui->lineEditLevel, dlevel);
-    double dMinTh = dlevel - dwindow / 2;
-    double dMaxTh = dlevel + dwindow / 2;
+    double dMinTh    = dlevel - dwindow / 2;
+    double dMaxTh    = dlevel + dwindow / 2;
     double dminvalue = layer->GetProperty()->GetMinValue();
     double dmaxvalue = layer->GetProperty()->GetMaxValue();
     double range_min = dminvalue - (dmaxvalue - dminvalue) / 4;
     double range_max = dmaxvalue + (dmaxvalue - dminvalue) / 4;
     if (nColorMap == LayerPropertyMRI::Heat) {
-      dMinTh = layer->GetProperty()->GetHeatScaleMinThreshold();
-      dMaxTh = layer->GetProperty()->GetHeatScaleMaxThreshold();
+      dMinTh    = layer->GetProperty()->GetHeatScaleMinThreshold();
+      dMaxTh    = layer->GetProperty()->GetHeatScaleMaxThreshold();
       range_min = dminvalue;
       range_max = dmaxvalue;
     } else if (nColorMap != LayerPropertyMRI::Grayscale &&
@@ -426,20 +434,20 @@ void PanelVolume::DoUpdateWidgets() {
       dMaxTh = layer->GetProperty()->GetMaxGenericThreshold();
     }
     double *windowrange = layer->GetProperty()->GetWindowRange();
-    double *levelrange = layer->GetProperty()->GetLevelRange();
+    double *levelrange  = layer->GetProperty()->GetLevelRange();
     ui->sliderWindow->setValue((int)((dwindow - windowrange[0]) /
                                      (windowrange[1] - windowrange[0]) * 100));
     ui->sliderLevel->setValue((int)((dlevel - levelrange[0]) /
                                     (levelrange[1] - levelrange[0]) * 100));
 
-    double dHeatMidTh = layer->GetProperty()->GetHeatScaleMidThreshold();
+    double dHeatMidTh  = layer->GetProperty()->GetHeatScaleMidThreshold();
     double dHeatOffset = layer->GetProperty()->GetHeatScaleOffset();
     if (bPercentile) {
-      dMaxTh = (layer->GetHistoPercentileFromValue(dMaxTh) * 100);
-      dMinTh = (layer->GetHistoPercentileFromValue(dMinTh) * 100);
+      dMaxTh     = (layer->GetHistoPercentileFromValue(dMaxTh) * 100);
+      dMinTh     = (layer->GetHistoPercentileFromValue(dMinTh) * 100);
       dHeatMidTh = (layer->GetHistoPercentileFromValue(dHeatMidTh) * 100);
-      range_min = 0;
-      range_max = 100;
+      range_min  = 0;
+      range_max  = 100;
     }
     ChangeLineEditNumber(ui->lineEditMax, dMaxTh);
     ChangeLineEditNumber(ui->lineEditMin, dMinTh);
@@ -569,7 +577,7 @@ void PanelVolume::DoUpdateWidgets() {
       nPlane = 2;
     layer->GetProperty()->GetProjectionMapRange(nPlane, nRange);
     if (nRange[1] < 0) {
-      int *dim = layer->GetImageData()->GetDimensions();
+      int *dim  = layer->GetImageData()->GetDimensions();
       nRange[1] = dim[nPlane] - 1;
     }
     ui->lineEditProjectionMapRange->setText(
@@ -587,7 +595,7 @@ void PanelVolume::DoUpdateWidgets() {
     ui->comboBoxMask->clear();
     ui->comboBoxMask->addItem("None");
     QList<Layer *> layers = MainWindow::GetMainWindow()->GetLayers("MRI");
-    int n = 0;
+    int            n      = 0;
     for (int i = 0; i < layers.size(); i++) {
       if (layer != layers[i]) {
         ui->comboBoxMask->addItem(layers[i]->GetName(),
@@ -607,7 +615,7 @@ void PanelVolume::DoUpdateWidgets() {
       ui->comboBoxCorrelationSurface->clear();
       ui->comboBoxCorrelationSurface->addItem("None");
       QList<Layer *> surfs = MainWindow::GetMainWindow()->GetLayers("Surface");
-      n = 0;
+      n                    = 0;
       for (int i = 0; i < surfs.size(); i++) {
         LayerSurface *surf = ((LayerSurface *)surfs[i]);
         for (int j = 0; j < surf->GetNumberOfOverlays(); j++) {
@@ -727,20 +735,19 @@ void PanelVolume::DoUpdateWidgets() {
     if (layer && (nColorMap == LayerPropertyMRI::LUT ||
                   nColorMap == LayerPropertyMRI::Binary)) {
       if (nColorMap == LayerPropertyMRI::LUT) {
-        if (m_curCTAB !=
-            layer->GetProperty()
-                ->GetLUTCTAB()) // || m_bShowExistingLabelsOnly !=
-                                // ui->checkBoxShowExistingLabels->isChecked())
+        if (m_curCTAB != layer->GetProperty()
+                             ->GetLUTCTAB()) // || m_bShowExistingLabelsOnly !=
+        // ui->checkBoxShowExistingLabels->isChecked())
         {
           PopulateColorTable(layer->GetProperty()->GetLUTCTAB());
         }
 
         for (int i = 0; i < ui->treeWidgetColorTable->topLevelItemCount();
              i++) {
-          QTreeWidgetItem *item = ui->treeWidgetColorTable->topLevelItem(i);
-          QStringList strglist = item->text(0).split(" ");
-          bool bOK;
-          double dvalue = strglist[0].trimmed().toDouble(&bOK);
+          QTreeWidgetItem *item     = ui->treeWidgetColorTable->topLevelItem(i);
+          QStringList      strglist = item->text(0).split(" ");
+          bool             bOK;
+          double           dvalue = strglist[0].trimmed().toDouble(&bOK);
           if (bOK && dvalue == layer->GetFillValue()) {
             ui->treeWidgetColorTable->setCurrentItem(item);
             break;
@@ -788,7 +795,7 @@ void PanelVolume::UpdateOpacity(double val) {
 
 void PanelVolume::OnColorTableCurrentItemChanged(QTreeWidgetItem *item) {
   if (item) {
-    double val = item->data(0, Qt::UserRole + 1).toDouble();
+    double    val   = item->data(0, Qt::UserRole + 1).toDouble();
     LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
     if (layer->IsTypeOf("VolumeTrack")) {
       UpdateTrackVolumeThreshold();
@@ -815,17 +822,17 @@ void PanelVolume::OnColorTableItemDoubleClicked(QTreeWidgetItem *item_in) {
   if (!item)
     item = ui->treeWidgetColorTable->currentItem();
   if (item) {
-    double val = item->data(0, Qt::UserRole + 1).toDouble();
+    double    val   = item->data(0, Qt::UserRole + 1).toDouble();
     LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
     if (layer && !layer->IsTypeOf("VolumeTrack")) {
       double pos[3];
       if (layer->GetLayerLabelCenter(val, pos)) {
         MainWindow::GetMainWindow()->SetSlicePosition(pos);
         MainWindow::GetMainWindow()->CenterAtWorldPosition(pos);
-      }
-      else
-      {
-        cout << qPrintable(tr("Label %1 does not exist").arg(item->text(0))) << endl;
+      } else {
+        std::cout << qPrintable(
+                         tr("Label %1 does not exist").arg(item->text(0)))
+                  << std::endl;
       }
     }
   }
@@ -839,7 +846,7 @@ void PanelVolume::OnColorTableSortingChanged() {
     ColorTableItem::SortType = sender()->property("sort_by").toInt();
     BlockAllSignals(true);
     COLOR_TABLE *t = m_curCTAB;
-    m_curCTAB = NULL;
+    m_curCTAB      = NULL;
     PopulateColorTable(t);
     BlockAllSignals(false);
   }
@@ -881,7 +888,7 @@ void PanelVolume::UpdateColorLabel() {
 
 void PanelVolume::UpdateTrackVolumeThreshold() {
   LayerVolumeTrack *layer = GetCurrentLayer<LayerVolumeTrack *>();
-  QTreeWidgetItem *item = ui->treeWidgetColorTable->currentItem();
+  QTreeWidgetItem * item  = ui->treeWidgetColorTable->currentItem();
   if (item && layer) {
     int nLabel = item->data(0, Qt::UserRole + 1).toInt();
     ui->sliderTrackVolumeThresholdLow->blockSignals(true);
@@ -901,27 +908,24 @@ void PanelVolume::UpdateTrackVolumeThreshold() {
   EnableWidgets(this->m_widgetlistVolumeTrackSpecs, item);
 }
 
-void PanelVolume::RefreshColorTable()
-{
+void PanelVolume::RefreshColorTable() {
   BlockAllSignals(true);
   PopulateColorTable(m_curCTAB, true);
   BlockAllSignals(false);
 }
 
-void PanelVolume::PopulateColorTable( COLOR_TABLE* ct, bool bForce )
-{
-  if ( ct && (bForce || ct != m_curCTAB) )
-  {
+void PanelVolume::PopulateColorTable(COLOR_TABLE *ct, bool bForce) {
+  if (ct && (bForce || ct != m_curCTAB)) {
     m_curCTAB = ct;
     ui->treeWidgetColorTable->clear();
     int nTotalCount = 0;
     CTABgetNumberOfTotalEntries(ct, &nTotalCount);
-    int nValid = 0;
+    int  nValid = 0;
     char name[1000];
-    int nSel = -1;
-    int nValue = 0;
+    int  nSel   = -1;
+    int  nValue = 0;
     bool bOK;
-    nValue = ui->lineEditBrushValue->text().toInt(&bOK);
+    nValue          = ui->lineEditBrushValue->text().toInt(&bOK);
     LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
     if (!bOK && layer)
       nValue = (int)layer->GetFillValue();
@@ -930,24 +934,19 @@ void PanelVolume::PopulateColorTable( COLOR_TABLE* ct, bool bForce )
     QList<int> selectedLabels;
     if (layer) {
       labels = layer->GetAvailableLabels();
-      if (layer->IsTypeOf("VolumeTrack"))
-      {
-        selectedLabels = ((LayerVolumeTrack*)layer)->GetVisibleLabels();
-      }
-      else
-      {
+      if (layer->IsTypeOf("VolumeTrack")) {
+        selectedLabels = ((LayerVolumeTrack *)layer)->GetVisibleLabels();
+      } else {
         selectedLabels = layer->GetProperty()->GetSelectedLabels();
       }
     }
-    int nValidCount = 0;
+    int  nValidCount  = 0;
     bool bHasSelected = false, bHasUnselected = false;
-    for ( int i = 0; i < nTotalCount; i++ )
-    {
-      CTABisEntryValid( ct, i, &nValid );
-      if ( nValid )
-      {
-        CTABcopyName( ct, i, name, 1000 );
-        ColorTableItem* item = new ColorTableItem();
+    for (int i = 0; i < nTotalCount; i++) {
+      CTABisEntryValid(ct, i, &nValid);
+      if (nValid) {
+        CTABcopyName(ct, i, name, 1000);
+        ColorTableItem *item = new ColorTableItem();
         if (ColorTableItem::SortType == ColorTableItem::ST_VALUE)
           item->setText(0, QString("%1 %2").arg(i).arg(name));
         else
@@ -955,7 +954,7 @@ void PanelVolume::PopulateColorTable( COLOR_TABLE* ct, bool bForce )
         item->setToolTip(0, name);
         int nr, ng, nb;
         CTABrgbAtIndexi(ct, i, &nr, &ng, &nb);
-        QColor color(nr, ng, nb);
+        QColor  color(nr, ng, nb);
         QPixmap pix(13, 13);
         pix.fill(color);
         item->setIcon(0, QIcon(pix));
@@ -998,9 +997,9 @@ void PanelVolume::PopulateColorTable( COLOR_TABLE* ct, bool bForce )
 }
 
 void PanelVolume::OnLineEditBrushValue(const QString &strg) {
-  QString text = strg.trimmed();
-  bool bOK;
-  int nVal = text.toInt(&bOK);
+  QString   text = strg.trimmed();
+  bool      bOK;
+  int       nVal  = text.toInt(&bOK);
   LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
   if (!layer)
     return;
@@ -1021,7 +1020,7 @@ void PanelVolume::OnLineEditBrushValue(const QString &strg) {
     bool bFound = false;
     for (int i = 0; i < ui->treeWidgetColorTable->topLevelItemCount(); i++) {
       QTreeWidgetItem *item = ui->treeWidgetColorTable->topLevelItem(i);
-      int n = item->data(0, Qt::UserRole + 1).toInt();
+      int              n    = item->data(0, Qt::UserRole + 1).toInt();
       if (m_bShowExistingLabelsOnly)
         item->setHidden(!labels.contains(n));
       else
@@ -1039,9 +1038,9 @@ void PanelVolume::OnLineEditBrushValue(const QString &strg) {
     ui->labelBrushValueWarning->hide();
     QStringList keywords = text.split(" ", QString::SkipEmptyParts);
     for (int i = 0; i < ui->treeWidgetColorTable->topLevelItemCount(); i++) {
-      QTreeWidgetItem *item = ui->treeWidgetColorTable->topLevelItem(i);
-      bool bFound = true;
-      QString item_text = item->text(0);
+      QTreeWidgetItem *item      = ui->treeWidgetColorTable->topLevelItem(i);
+      bool             bFound    = true;
+      QString          item_text = item->text(0);
       foreach (QString key, keywords) {
         if (!item_text.contains(key, Qt::CaseInsensitive)) {
           bFound = false;
@@ -1112,8 +1111,8 @@ void PanelVolume::OnSliderOpacity(int nVal) {
 }
 
 void PanelVolume::OnSliderWindow(int nVal) {
-  QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
-  LayerMRI *curLayer = GetCurrentLayer<LayerMRI *>();
+  QList<LayerMRI *> layers   = GetSelectedLayers<LayerMRI *>();
+  LayerMRI *        curLayer = GetCurrentLayer<LayerMRI *>();
   if (!curLayer)
     return;
   double *r = curLayer->GetProperty()->GetWindowRange();
@@ -1123,8 +1122,8 @@ void PanelVolume::OnSliderWindow(int nVal) {
 }
 
 void PanelVolume::OnSliderLevel(int nVal) {
-  QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
-  LayerMRI *curLayer = GetCurrentLayer<LayerMRI *>();
+  QList<LayerMRI *> layers   = GetSelectedLayers<LayerMRI *>();
+  LayerMRI *        curLayer = GetCurrentLayer<LayerMRI *>();
   if (!curLayer)
     return;
   double *r = curLayer->GetProperty()->GetLevelRange();
@@ -1134,15 +1133,15 @@ void PanelVolume::OnSliderLevel(int nVal) {
 }
 
 void PanelVolume::OnSliderMin(int nVal) {
-  QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
-  LayerMRI *curLayer = GetCurrentLayer<LayerMRI *>();
+  QList<LayerMRI *> layers   = GetSelectedLayers<LayerMRI *>();
+  LayerMRI *        curLayer = GetCurrentLayer<LayerMRI *>();
   if (!curLayer)
     return;
-  double fMin = curLayer->GetProperty()->GetMinValue();
-  double fMax = curLayer->GetProperty()->GetMaxValue();
+  double fMin      = curLayer->GetProperty()->GetMinValue();
+  double fMax      = curLayer->GetProperty()->GetMaxValue();
   double fScaleMin = fMin - (fMax - fMin) / 4;
   double fScaleMax = fMax + (fMax - fMin) / 4;
-  bool bAutoMidToMin =
+  bool   bAutoMidToMin =
       MainWindow::GetMainWindow()->GetSetting("AutoSetMidToMin").toBool();
   foreach (LayerMRI *layer, layers) {
     switch (layer->GetProperty()->GetColorMap()) {
@@ -1175,8 +1174,8 @@ void PanelVolume::OnSliderMin(int nVal) {
 }
 
 void PanelVolume::OnSliderMid(int nVal) {
-  QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
-  LayerMRI *curLayer = GetCurrentLayer<LayerMRI *>();
+  QList<LayerMRI *> layers   = GetSelectedLayers<LayerMRI *>();
+  LayerMRI *        curLayer = GetCurrentLayer<LayerMRI *>();
   if (!curLayer)
     return;
   double fMin = curLayer->GetProperty()->GetMinValue();
@@ -1192,15 +1191,15 @@ void PanelVolume::OnSliderMid(int nVal) {
 }
 
 void PanelVolume::OnSliderMax(int nVal) {
-  QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
-  LayerMRI *curLayer = GetCurrentLayer<LayerMRI *>();
+  QList<LayerMRI *> layers   = GetSelectedLayers<LayerMRI *>();
+  LayerMRI *        curLayer = GetCurrentLayer<LayerMRI *>();
   if (!curLayer)
     return;
-  double fMin = curLayer->GetProperty()->GetMinValue();
-  double fMax = curLayer->GetProperty()->GetMaxValue();
+  double fMin      = curLayer->GetProperty()->GetMinValue();
+  double fMax      = curLayer->GetProperty()->GetMaxValue();
   double fScaleMin = fMin - (fMax - fMin) / 4;
   double fScaleMax = fMax + (fMax - fMin) / 4;
-  bool bAutoMidToMin =
+  bool   bAutoMidToMin =
       MainWindow::GetMainWindow()->GetSetting("AutoSetMidToMin").toBool();
   foreach (LayerMRI *layer, layers) {
     switch (layer->GetProperty()->GetColorMap()) {
@@ -1233,8 +1232,8 @@ void PanelVolume::OnSliderMax(int nVal) {
 }
 
 void PanelVolume::OnSliderOffset(int nVal) {
-  QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
-  LayerMRI *curLayer = GetCurrentLayer<LayerMRI *>();
+  QList<LayerMRI *> layers   = GetSelectedLayers<LayerMRI *>();
+  LayerMRI *        curLayer = GetCurrentLayer<LayerMRI *>();
   if (!curLayer)
     return;
   double fMax = curLayer->GetProperty()->GetMaxValue();
@@ -1247,7 +1246,7 @@ void PanelVolume::OnSliderOffset(int nVal) {
 void PanelVolume::OnLineEditWindow(const QString &text) {
   QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
   foreach (LayerMRI *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (bOK && layer->GetProperty()->GetWindow() != dVal) {
       layer->GetProperty()->SetWindow(dVal);
@@ -1258,7 +1257,7 @@ void PanelVolume::OnLineEditWindow(const QString &text) {
 void PanelVolume::OnLineEditLevel(const QString &text) {
   QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
   foreach (LayerMRI *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (bOK && layer->GetProperty()->GetLevel() != dVal) {
       layer->GetProperty()->SetLevel(dVal);
@@ -1269,7 +1268,7 @@ void PanelVolume::OnLineEditLevel(const QString &text) {
 void PanelVolume::OnLineEditMin(const QString &text) {
   QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
   foreach (LayerMRI *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK) {
       if (layer->GetProperty()->GetUsePercentile())
@@ -1295,7 +1294,7 @@ void PanelVolume::OnLineEditMin(const QString &text) {
 void PanelVolume::OnLineEditMid(const QString &text) {
   QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
   foreach (LayerMRI *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK) {
       if (layer->GetProperty()->GetUsePercentile())
@@ -1308,7 +1307,7 @@ void PanelVolume::OnLineEditMid(const QString &text) {
 void PanelVolume::OnLineEditMax(const QString &text) {
   QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
   foreach (LayerMRI *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK) {
       if (layer->GetProperty()->GetUsePercentile())
@@ -1334,7 +1333,7 @@ void PanelVolume::OnLineEditMax(const QString &text) {
 void PanelVolume::OnLineEditOffset(const QString &text) {
   QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
   foreach (LayerMRI *layer, layers) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (layer && bOK && layer->GetProperty()->GetHeatScaleOffset() != dVal) {
       layer->GetProperty()->SetHeatScaleOffset(dVal);
@@ -1380,7 +1379,7 @@ void PanelVolume::OnSliderContourSmooth(int nval) {
 
 void PanelVolume::OnContourValueChanged() {
   bool bOK;
-  int nSmooth = 30;
+  int  nSmooth = 30;
   if (ui->checkBoxShowLabelContour->isChecked()) {
     nSmooth = ui->lineEditContourSmoothIteration->text().trimmed().toInt(&bOK);
     QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
@@ -1431,8 +1430,8 @@ void PanelVolume::OnTrackVolumeThresholdChanged() {
   if (!item)
     return;
 
-  int nLabel = item->data(0, Qt::UserRole + 1).toInt();
-  bool bOK;
+  int    nLabel = item->data(0, Qt::UserRole + 1).toInt();
+  bool   bOK;
   double fMin;
   fMin = ui->lineEditTrackVolumeThresholdLow->text().trimmed().toDouble(&bOK);
   if (bOK) {
@@ -1446,7 +1445,7 @@ void PanelVolume::OnTrackVolumeThresholdChanged() {
 void PanelVolume::OnCopySettings() {
   LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
   if (layer) {
-    QVariantMap map = layer->GetProperty()->GetActiveSettings();
+    QVariantMap map  = layer->GetProperty()->GetActiveSettings();
     QStringList keys = map.keys();
     QStringList strgs;
     strgs << FS_VOLUME_SETTING_ID;
@@ -1464,7 +1463,7 @@ void PanelVolume::OnPasteSettings() {
     if (!strgs.isEmpty() && strgs[0] == FS_VOLUME_SETTING_ID) {
       QVariantMap map;
       for (int i = 1; i < strgs.size(); i += 2) {
-        bool bOK;
+        bool   bOK;
         double val = strgs[i + 1].toDouble(&bOK);
         if (bOK) {
           map[strgs[i]] = val;
@@ -1480,7 +1479,7 @@ void PanelVolume::OnPasteSettingsToAll() {
   if (!strgs.isEmpty() && strgs[0] == FS_VOLUME_SETTING_ID) {
     QVariantMap map;
     for (int i = 1; i < strgs.size(); i += 2) {
-      bool bOK;
+      bool   bOK;
       double val = strgs[i + 1].toDouble(&bOK);
       if (bOK) {
         map[strgs[i]] = val;
@@ -1579,7 +1578,7 @@ void PanelVolume::OnCheckBoxSetNormalizeVector(bool b) {
 }
 
 void PanelVolume::OnLineEditVectorNormThreshold(const QString &strg) {
-  bool ok;
+  bool   ok;
   double val = strg.toDouble(&ok);
   if (ok) {
     QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
@@ -1590,7 +1589,7 @@ void PanelVolume::OnLineEditVectorNormThreshold(const QString &strg) {
 }
 
 void PanelVolume::OnLineEditVectorDisplayScale(const QString &strg) {
-  bool ok;
+  bool   ok;
   double val = strg.toDouble(&ok);
   if (ok && val > 0) {
     QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
@@ -1601,7 +1600,7 @@ void PanelVolume::OnLineEditVectorDisplayScale(const QString &strg) {
 }
 
 void PanelVolume::OnLineEditVectorLineWidth(const QString &strg) {
-  bool ok;
+  bool   ok;
   double val = strg.toDouble(&ok);
   if (ok && val > 0) {
     QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();
@@ -1668,19 +1667,15 @@ void PanelVolume::OnCheckBoxSelectAllLabels(int nState) {
   }
   ui->treeWidgetColorTable->blockSignals(false);
 
-  LayerMRI* layer = GetCurrentLayer<LayerMRI*>();
-  if ( layer )
-  {
-    if (layer->IsTypeOf("VolumeTrack"))
-    {
-      LayerVolumeTrack* tv = qobject_cast<LayerVolumeTrack*>(layer);
-      if (tv)
-      {
-        tv->ShowAllLabels(ui->checkBoxSelectAllLabels->checkState() == Qt::Checked);
+  LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
+  if (layer) {
+    if (layer->IsTypeOf("VolumeTrack")) {
+      LayerVolumeTrack *tv = qobject_cast<LayerVolumeTrack *>(layer);
+      if (tv) {
+        tv->ShowAllLabels(ui->checkBoxSelectAllLabels->checkState() ==
+                          Qt::Checked);
       }
-    }
-    else
-    {
+    } else {
       if (nState == Qt::Unchecked)
         layer->GetProperty()->SetUnselectAllLabels();
       else
@@ -1692,27 +1687,24 @@ void PanelVolume::OnCheckBoxSelectAllLabels(int nState) {
 void PanelVolume::OnColorTableItemChanged(QTreeWidgetItem *item) {
   ui->checkBoxSelectAllLabels->blockSignals(true);
   ui->checkBoxSelectAllLabels->setCheckState(Qt::PartiallyChecked);
-  LayerMRI* layer = GetCurrentLayer<LayerMRI*>();
-  if ( layer )
-  {
-    int nVal = item->data(0, Qt::UserRole+1).toInt();
+  LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
+  if (layer) {
+    int        nVal = item->data(0, Qt::UserRole + 1).toInt();
     QList<int> selected;
-    if (!layer->IsTypeOf("VolumeTrack"))
-    {
-      layer->GetProperty()->SetSelectLabel(nVal, item->checkState(0) == Qt::Checked);
+    if (!layer->IsTypeOf("VolumeTrack")) {
+      layer->GetProperty()->SetSelectLabel(nVal,
+                                           item->checkState(0) == Qt::Checked);
       selected = layer->GetProperty()->GetSelectedLabels();
-    }
-    else
-    {
-      LayerVolumeTrack* tv = qobject_cast<LayerVolumeTrack*>(layer);
-      if (tv)
-      {
-        int nLabel = item->data(0, Qt::UserRole+1).toInt();
+    } else {
+      LayerVolumeTrack *tv = qobject_cast<LayerVolumeTrack *>(layer);
+      if (tv) {
+        int nLabel = item->data(0, Qt::UserRole + 1).toInt();
         tv->SetLabelVisible(nLabel, item->checkState(0) == Qt::Checked);
         selected = tv->GetVisibleLabels();
       }
     }
-    ui->checkBoxSelectAllLabels->setCheckState(selected.isEmpty()?Qt::Unchecked:Qt::PartiallyChecked);
+    ui->checkBoxSelectAllLabels->setCheckState(
+        selected.isEmpty() ? Qt::Unchecked : Qt::PartiallyChecked);
   }
 
   ui->checkBoxSelectAllLabels->blockSignals(false);
@@ -1721,7 +1713,7 @@ void PanelVolume::OnColorTableItemChanged(QTreeWidgetItem *item) {
 void PanelVolume::OnLineEditMaskThreshold(const QString &text) {
   LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
   if (layer) {
-    bool bOK;
+    bool   bOK;
     double dVal = text.toDouble(&bOK);
     if (bOK) {
       layer->SetMaskThreshold(dVal);
@@ -1731,11 +1723,11 @@ void PanelVolume::OnLineEditMaskThreshold(const QString &text) {
 
 void PanelVolume::OnCustomContextMenu(const QPoint &pt) {
   if (sender() == ui->treeWidgetColorTable) {
-    QMenu menu;
-    QAction *act = new QAction(this);
+    QMenu            menu;
+    QAction *        act  = new QAction(this);
     QTreeWidgetItem *item = ui->treeWidgetColorTable->itemAt(pt);
     if (item) {
-      double val = item->data(0, Qt::UserRole + 1).toDouble();
+      double    val   = item->data(0, Qt::UserRole + 1).toDouble();
       LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
       if (layer) {
         double pos[3];
@@ -1792,7 +1784,7 @@ void PanelVolume::OnButtonResetWindowLevel() {
 void PanelVolume::OnGoToFirstPoint() {
   QTreeWidgetItem *item = ui->treeWidgetColorTable->currentItem();
   if (item) {
-    double val = item->data(0, Qt::UserRole + 1).toDouble();
+    double    val   = item->data(0, Qt::UserRole + 1).toDouble();
     LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
     if (layer) {
       double pos[3];
@@ -1804,10 +1796,10 @@ void PanelVolume::OnGoToFirstPoint() {
         MainWindow::GetMainWindow()->SetSlicePosition(pos);
         MainWindow::GetMainWindow()->CenterAtWorldPosition(pos);
         m_nCurrentVoxelIndex = 0;
-      }
-      else
-      {
-        cout << qPrintable(tr("Label %1 does not exist").arg(item->text(0))) << endl;
+      } else {
+        std::cout << qPrintable(
+                         tr("Label %1 does not exist").arg(item->text(0)))
+                  << std::endl;
       }
     }
   }
@@ -1830,7 +1822,7 @@ void PanelVolume::OnGoToNextPoint() {
   }
   if (m_nCurrentVoxelIndex >= 0 && !m_voxelList.isEmpty()) {
     QWidget *w = MainWindow::GetMainWindow()->GetMainView();
-    QPoint pt(100, 100);
+    QPoint   pt(100, 100);
     if (w) {
       pt = w->mapToGlobal(w->rect().center() + QPoint(30, 30));
     }
@@ -1853,7 +1845,7 @@ void PanelVolume::OnGoToNextPoint() {
 
 void PanelVolume::OnColorTableChangeColor() {
   LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
-  QColor color;
+  QColor    color;
   if (layer &&
       layer->GetProperty()->GetColorMap() == LayerPropertyMRI::Binary) {
     color = layer->GetProperty()->GetBinaryColor();
@@ -1900,7 +1892,7 @@ void PanelVolume::OnCheckVoxelizedContour(bool bVoxelize) {
 }
 
 void PanelVolume::OnLineEditClearBackgroundValue(const QString &text) {
-  bool ok;
+  bool   ok;
   double val = text.toDouble(&ok);
   if (ok) {
     QList<LayerMRI *> layers = GetSelectedLayers<LayerMRI *>();

@@ -24,9 +24,9 @@
  */
 
 #include <cfloat>
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
 #include "fsglm.h"
 #include "mri.h"
@@ -90,7 +90,7 @@ const char *RFcode2Name(RFS *rfs) {
 
 /*-------------------------------------------------------------------*/
 RFS *RFspecInit(unsigned long int seed, sc_rng_type *rngtype) {
-  RFS *rfs;
+  RFS *              rfs;
   const sc_rng_type *sc_rng_intern_type = &intern_rng_type;
 
   rfs = (RFS *)calloc(sizeof(RFS), 1);
@@ -182,7 +182,7 @@ int RFexpectedMeanStddev(RFS *rfs) {
 
 /*-------------------------------------------------------------------*/
 int RFsynth(MRI *rf, RFS *rfs, MRI *binmask) {
-  int c, r, s, f;
+  int    c, r, s, f;
   double v, m;
 
   if (RFname2Code(rfs) == -1)
@@ -211,7 +211,7 @@ int RFsynth(MRI *rf, RFS *rfs, MRI *binmask) {
       based on an unsigned stat, but the sign is still passed to p.
 */
 MRI *RFstat2P(MRI *rf, RFS *rfs, MRI *binmask, int TwoSided, MRI *p) {
-  int c, r, s, f = 0, m;
+  int    c, r, s, f = 0, m;
   double v, pval;
 
   if (RFname2Code(rfs) == -1)
@@ -246,17 +246,17 @@ MRI *RFstat2P(MRI *rf, RFS *rfs, MRI *binmask, int TwoSided, MRI *p) {
 */
 MRI *RFz2p(MRI *z, MRI *mask, int TwoSided, MRI *p) {
   RFS *rfs;
-  rfs = RFspecInit(0, nullptr);
-  rfs->name = strcpyalloc("gaussian");
+  rfs            = RFspecInit(0, nullptr);
+  rfs->name      = strcpyalloc("gaussian");
   rfs->params[0] = 0;
   rfs->params[1] = 1;
-  p = RFstat2P(z, rfs, mask, TwoSided, p);
+  p              = RFstat2P(z, rfs, mask, TwoSided, p);
   return (p);
 }
 
 /*-------------------------------------------------------------------*/
 MRI *RFp2Stat(MRI *p, RFS *rfs, MRI *binmask, MRI *rf) {
-  int c, r, s, f, m;
+  int    c, r, s, f, m;
   double v, pval;
 
   if (RFname2Code(rfs) == -1)
@@ -295,7 +295,7 @@ MRI *RFstat2Stat(MRI *rfin, RFS *rfsin, RFS *rfsout, MRI *binmask, MRI *rfout) {
   if (RFname2Code(rfsout) == -1)
     return (nullptr);
 
-  p = RFstat2P(rfin, rfsin, binmask, 0, p);
+  p     = RFstat2P(rfin, rfsin, binmask, 0, p);
   rfout = RFp2Stat(p, rfsout, binmask, rfout);
   MRIfree(&p);
   return (rfout);
@@ -303,7 +303,7 @@ MRI *RFstat2Stat(MRI *rfin, RFS *rfsin, RFS *rfsout, MRI *binmask, MRI *rfout) {
 
 /*-------------------------------------------------------------------*/
 MRI *RFrescale(MRI *rf, RFS *rfs, MRI *binmask, MRI *rfout) {
-  int c, r, s, f, m;
+  int    c, r, s, f, m;
   double v, gmean, gstddev, gmax;
 
   if (RFname2Code(rfs) == -1)
@@ -335,15 +335,15 @@ MRI *RFrescale(MRI *rf, RFS *rfs, MRI *binmask, MRI *rfout) {
 /*-------------------------------------------------------------------*/
 int RFglobalStats(MRI *rf, MRI *binmask, double *gmean, double *gstddev,
                   double *max) {
-  int c, r, s, f, m;
+  int    c, r, s, f, m;
   double v;
   double sum, sumsq;
-  long nv;
+  long   nv;
 
-  nv = 0;
-  sum = 0;
+  nv    = 0;
+  sum   = 0;
   sumsq = 0;
-  *max = -1000000;
+  *max  = -1000000;
   for (c = 0; c < rf->width; c++) {
     for (r = 0; r < rf->height; r++) {
       for (s = 0; s < rf->depth; s++) {
@@ -363,7 +363,7 @@ int RFglobalStats(MRI *rf, MRI *binmask, double *gmean, double *gstddev,
       }
     }
   }
-  *gmean = sum / nv;
+  *gmean   = sum / nv;
   *gstddev = sqrt(sumsq / nv - (*gmean) * (*gmean));
 
   return (0);
@@ -440,7 +440,8 @@ double RFstat2PVal(RFS *rfs, double stat) {
     printf("ERROR: RFstat2PVal(): field type %s unknown\n", rfs->name);
     return (10000000000.0);
   }
-  if (std::isinf(p) || p < FLT_MIN) p = FLT_MIN;
+  if (std::isinf(p) || p < FLT_MIN)
+    p = FLT_MIN;
   return (p);
 }
 
@@ -485,10 +486,10 @@ double RFp2StatVal(RFS *rfs, double p) {
 /*-------------------------------------------------------------------*/
 int RFexpectedMeanStddevUniform(RFS *rfs) {
   double min, max, d;
-  min = rfs->params[0];
-  max = rfs->params[1];
-  d = max - min;
-  rfs->mean = d / 2;
+  min         = rfs->params[0];
+  max         = rfs->params[1];
+  d           = max - min;
+  rfs->mean   = d / 2;
   rfs->stddev = sqrt((d * d) / 12.0);
   return (0);
 }
@@ -496,7 +497,7 @@ int RFexpectedMeanStddevUniform(RFS *rfs) {
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 int RFexpectedMeanStddevGaussian(RFS *rfs) {
-  rfs->mean = rfs->params[0];
+  rfs->mean   = rfs->params[0];
   rfs->stddev = rfs->params[1];
   return (0);
 }
@@ -505,8 +506,8 @@ int RFexpectedMeanStddevGaussian(RFS *rfs) {
 /*-------------------------------------------------------------------*/
 int RFexpectedMeanStddevt(RFS *rfs) {
   double dof;
-  dof = rfs->params[0];
-  rfs->mean = 0;
+  dof         = rfs->params[0];
+  rfs->mean   = 0;
   rfs->stddev = sqrt(dof / (dof - 2));
   return (0);
 }
@@ -515,9 +516,9 @@ int RFexpectedMeanStddevt(RFS *rfs) {
 /*-------------------------------------------------------------------*/
 int RFexpectedMeanStddevF(RFS *rfs) {
   double ndof, ddof;
-  ndof = rfs->params[0]; // numerator dof (rows in C)
-  ddof = rfs->params[1]; // dof
-  rfs->mean = ddof / (ddof - 2);
+  ndof        = rfs->params[0]; // numerator dof (rows in C)
+  ddof        = rfs->params[1]; // dof
+  rfs->mean   = ddof / (ddof - 2);
   rfs->stddev = 2 * (ddof * ddof) * (ndof + ddof - 2) /
                 (ndof * ((ddof - 2) * (ddof - 2)) * (ddof - 4));
   return (0);
@@ -526,8 +527,8 @@ int RFexpectedMeanStddevF(RFS *rfs) {
 /*-------------------------------------------------------------------*/
 int RFexpectedMeanStddevChi2(RFS *rfs) {
   double dof;
-  dof = rfs->params[0];
-  rfs->mean = dof;
+  dof         = rfs->params[0];
+  rfs->mean   = dof;
   rfs->stddev = sqrt(2.0 * dof);
   return (0);
 }
@@ -583,8 +584,8 @@ double RFprobZCluster(double clustersize, double vzthresh, double fwhm,
   double u, phiu, k, S, W, Em, beta, Pnk, pcluster, D, pi;
 
   pi = M_PI;
-  D = dim;
-  u = vzthresh;
+  D  = dim;
+  u  = vzthresh;
 
   // Equivalent p-value threshold. Note that the paper uses phi(-u),
   // but the results dont work out that way. Note that phi(-u) can be
@@ -690,11 +691,11 @@ double RFprobZClusterSigThresh(double clustersize, double vsigthresh,
  */
 MRI *RFp2z(MRI *p, MRI *mask, MRI *z) {
   RFS *rfs;
-  rfs = RFspecInit(0, nullptr);
-  rfs->name = strcpyalloc("gaussian");
+  rfs            = RFspecInit(0, nullptr);
+  rfs->name      = strcpyalloc("gaussian");
   rfs->params[0] = 0;
   rfs->params[1] = 1;
-  z = RFp2Stat(p, rfs, mask, z);
+  z              = RFp2Stat(p, rfs, mask, z);
   return (z);
 }
 
@@ -704,7 +705,7 @@ MRI *RFp2z(MRI *p, MRI *mask, MRI *z) {
  */
 MRI *RFz1toz2(MRI *z1, MRI *mask, MRI *z2) {
   MRI *p;
-  int TwoSidedFlag = 1;
+  int  TwoSidedFlag = 1;
 
   // Convert to two-sided p-values
   p = RFz2p(z1, mask, TwoSidedFlag, nullptr);

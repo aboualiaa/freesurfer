@@ -32,9 +32,7 @@
 #include "timer.h"
 #include "version.h"
 
-using namespace std;
-
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -46,28 +44,29 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
+static char vcid[]   = "";
 const char *Progname = "dmri_mergepaths";
 
-int nframe = 0;
+int   nframe     = 0;
 float dispThresh = 0;
 char *inDir = nullptr, *inFile[100], *outFile = nullptr, *ctabFile = nullptr;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
+  int  nargs;
+  int  cputime;
   char fname[PATH_MAX];
-  MRI *invol = 0;
+  MRI *invol  = 0;
   MRI *outvol = 0;
 
   nargs = handleVersionOption(argc, argv, "dmri_mergepaths");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -96,8 +95,8 @@ int main(int argc, char **argv) {
   for (int iframe = 0; iframe < nframe; iframe++) {
     float inmax = 0;
 
-    cout << "Merging volume " << iframe + 1 << " of " << nframe << "... "
-         << endl;
+    std::cout << "Merging volume " << iframe + 1 << " of " << nframe << "... "
+              << std::endl;
 
     // Read input volume
     if (inDir != nullptr) {
@@ -140,15 +139,15 @@ int main(int argc, char **argv) {
       }
     }
 
-    cout << "Threshold: " << outvol->frames[iframe].thresh
-         << " Name: " << outvol->frames[iframe].name << endl;
+    std::cout << "Threshold: " << outvol->frames[iframe].thresh
+              << " Name: " << outvol->frames[iframe].name << std::endl;
   }
 
   // Write output file
   if (outvol != nullptr) {
     MRIwrite(outvol, outFile);
   } else {
-    cout << "ERROR: could not open any of the input files" << endl;
+    std::cout << "ERROR: could not open any of the input files" << std::endl;
     exit(1);
   }
 
@@ -162,10 +161,10 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
+  int    nargc;
+  int    nargsused;
   char **pargv;
-  char *option;
+  char * option;
 
   if (argc < 1) {
     usage_exit();
@@ -197,7 +196,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      inDir = fio_fullpath(pargv[0]);
+      inDir     = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--in") == 0) {
       if (nargc < 1) {
@@ -213,13 +212,13 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      outFile = fio_fullpath(pargv[0]);
+      outFile   = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--ctab") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      ctabFile = fio_fullpath(pargv[0]);
+      ctabFile  = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--thresh") == 0) {
       if (nargc < 1) {

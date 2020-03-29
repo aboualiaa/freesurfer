@@ -24,32 +24,32 @@
  *
  */
 
-#include "legacy.h"
 #include "asynch.h"
-#include "c_vertex.h"
 #include "c_label.h"
 #include "c_surface.h"
+#include "c_vertex.h"
+#include "legacy.h"
 
-extern bool Gb_stdout;
-extern stringstream Gsout;
+extern bool              Gb_stdout;
+extern std::stringstream Gsout;
 
 #if 1
-bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
+bool asynchEvent_processWGHT(s_env &ast_env, std::string astr_comms) {
 
   int lw = ast_env.lw;
   int rw = ast_env.rw;
 
-  string str_errorAct = "checking <WGHT>";
+  std::string str_errorAct = "checking <WGHT>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep = " ";
-  float f_val = 0.0;
+  std::string str_object   = "";
+  std::string str_verb     = "";
+  std::string str_modifier = "";
+  std::string str_sep      = " ";
+  float       f_val        = 0.0;
 
   // std::_Ios_Fmtflags origFlags;
   // origFlags  = cout.flags();
-  cout.setf(ios::left);
+  std::cout.setf(std::ios::left);
 
   if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
@@ -71,7 +71,7 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val            = atof(str_modifier.c_str());
       ast_env.pSTw->wd = f_val;
     }
   }
@@ -82,7 +82,7 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val            = atof(str_modifier.c_str());
       ast_env.pSTw->wc = f_val;
     }
   }
@@ -93,7 +93,7 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val            = atof(str_modifier.c_str());
       ast_env.pSTw->wh = f_val;
     }
   }
@@ -104,7 +104,7 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val             = atof(str_modifier.c_str());
       ast_env.pSTw->wdc = f_val;
     }
   }
@@ -115,7 +115,7 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val             = atof(str_modifier.c_str());
       ast_env.pSTw->wdh = f_val;
     }
   }
@@ -126,7 +126,7 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val             = atof(str_modifier.c_str());
       ast_env.pSTw->wch = f_val;
     }
   }
@@ -137,7 +137,7 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val              = atof(str_modifier.c_str());
       ast_env.pSTw->wdch = f_val;
     }
   }
@@ -148,7 +148,7 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val              = atof(str_modifier.c_str());
       ast_env.pSTw->wdir = f_val;
     }
   }
@@ -159,22 +159,22 @@ bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
 #endif
 
 #if 1
-bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
+bool asynchEvent_processDWGHT(s_env &ast_env, std::string astr_comms) {
 
   int lw = ast_env.lw;
   int rw = ast_env.rw;
 
-  string str_errorAct = "checking <DWGHT>";
+  std::string str_errorAct = "checking <DWGHT>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep = " ";
-  float f_val = 0.0;
+  std::string str_object   = "";
+  std::string str_verb     = "";
+  std::string str_modifier = "";
+  std::string str_sep      = " ";
+  float       f_val        = 0.0;
 
   //  std::_Ios_Fmtflags origFlags;
   // origFlags  = cout.flags();
-  cout.setf(ios::left);
+  std::cout.setf(std::ios::left);
 
   if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
@@ -196,7 +196,7 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val              = atof(str_modifier.c_str());
       ast_env.pSTDw->Dwd = f_val;
     }
   }
@@ -207,7 +207,7 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val              = atof(str_modifier.c_str());
       ast_env.pSTDw->Dwc = f_val;
     }
   }
@@ -218,7 +218,7 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val              = atof(str_modifier.c_str());
       ast_env.pSTDw->Dwh = f_val;
     }
   }
@@ -229,7 +229,7 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val               = atof(str_modifier.c_str());
       ast_env.pSTDw->Dwdc = f_val;
     }
   }
@@ -240,7 +240,7 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val               = atof(str_modifier.c_str());
       ast_env.pSTDw->Dwdh = f_val;
     }
   }
@@ -251,7 +251,7 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val               = atof(str_modifier.c_str());
       ast_env.pSTDw->Dwch = f_val;
     }
   }
@@ -262,7 +262,7 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val                = atof(str_modifier.c_str());
       ast_env.pSTDw->Dwdch = f_val;
     }
   }
@@ -273,7 +273,7 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
     } else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      f_val = atof(str_modifier.c_str());
+      f_val                = atof(str_modifier.c_str());
       ast_env.pSTDw->Dwdir = f_val;
     }
   }
@@ -284,23 +284,23 @@ bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
 #endif
 
 #if 1
-bool asynchEvent_processVERTEX(s_env &st_env, string astr_comms) {
+bool asynchEvent_processVERTEX(s_env &st_env, std::string astr_comms) {
 
   int lw = st_env.lw;
   int rw = st_env.rw;
 
-  string str_errorAct = "checking <VERTEX>";
+  std::string str_errorAct = "checking <VERTEX>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep = " ";
-  int val = 0;
-  stringstream Gsout("");
+  std::string       str_object   = "";
+  std::string       str_verb     = "";
+  std::string       str_modifier = "";
+  std::string       str_sep      = " ";
+  int               val          = 0;
+  std::stringstream Gsout("");
 
   //  std::_Ios_Fmtflags origFlags;
   // origFlags  = cout.flags();
-  cout.setf(ios::left);
+  std::cout.setf(std::ios::left);
 
   if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
@@ -314,7 +314,8 @@ bool asynchEvent_processVERTEX(s_env &st_env, string astr_comms) {
         return false;
       val = atoi(str_modifier.c_str());
       Gsout.str("");
-      Gsout << "Setting VERTEX start to \t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Setting VERTEX start to \t\t\t\t\t[ " << val << " ]"
+            << std::endl;
       st_env.startVertex = val;
       ULOUT(Gsout.str());
     }
@@ -328,7 +329,8 @@ bool asynchEvent_processVERTEX(s_env &st_env, string astr_comms) {
         return false;
       val = atoi(str_modifier.c_str());
       Gsout.str("");
-      Gsout << "Setting VERTEX end to \t\t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Setting VERTEX end to \t\t\t\t\t\t[ " << val << " ]"
+            << std::endl;
       st_env.endVertex = val;
       ULOUT(Gsout.str());
     }
@@ -337,23 +339,23 @@ bool asynchEvent_processVERTEX(s_env &st_env, string astr_comms) {
   return true;
 }
 
-bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
+bool asynchEvent_processENV(s_env &st_env, std::string astr_comms) {
 
   int lw = st_env.lw;
   int rw = st_env.rw;
 
-  string str_errorAct = "checking <ENV>";
+  std::string str_errorAct = "checking <ENV>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep = " ";
-  int val = 0;
-  stringstream Gsout("");
+  std::string       str_object   = "";
+  std::string       str_verb     = "";
+  std::string       str_modifier = "";
+  std::string       str_sep      = " ";
+  int               val          = 0;
+  std::stringstream Gsout("");
 
   //  std::_Ios_Fmtflags origFlags;
   // origFlags  = cout.flags();
-  cout.setf(ios::left);
+  std::cout.setf(std::ios::left);
 
   if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
@@ -362,7 +364,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
     if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
-      val = atoi(str_modifier.c_str());
+      val                   = atoi(str_modifier.c_str());
       st_env.b_costPathSave = (bool)val;
       colprintf(lw, rw, "costPathSave flag", "[ %d ]\n", (int)val);
     }
@@ -399,7 +401,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         lprintf(rw, "[ ok ]\n");
         Gsout.str("");
         Gsout << "Setting mpmProgIndex to \t\t\t\t\t[ ";
-        Gsout << str_modifier << " ]" << endl;
+        Gsout << str_modifier << " ]" << std::endl;
         ULOUT(Gsout.str());
       }
     }
@@ -411,7 +413,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting surfaceFile to \t\t\t\t\t\t[ " << str_modifier << " ]"
-            << endl;
+            << std::endl;
       if (!s_env_surfaceFile_set(st_env, str_modifier))
         error_exit("Setting surfaceFile", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -423,7 +425,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting surfaceCurvature to \t\t\t\t\t[ " << str_modifier
-            << " ]" << endl;
+            << " ]" << std::endl;
       if (!s_env_surfaceCurvature_set(st_env, str_modifier))
         error_exit("Setting surfaceCurvature", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -435,7 +437,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting surfaceSulcal to \t\t\t\t\t[ " << str_modifier << " ]"
-            << endl;
+            << std::endl;
       if (!s_env_secondarySurface_setCurvature(st_env, str_modifier))
         error_exit("Setting surfaceSulcal", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -448,7 +450,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting auxSurfaceFile to \t\t\t\t\t[ " << str_modifier << " ]"
-            << endl;
+            << std::endl;
       if (!s_env_auxSurfaceFile_set(st_env, str_modifier))
         error_exit("Setting auxSurfaceFile", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -460,7 +462,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting auxSurfaceCurvature to \t\t\t\t\t[ " << str_modifier
-            << " ]" << endl;
+            << " ]" << std::endl;
       if (!s_env_auxSurfaceCurvature_set(st_env, str_modifier))
         error_exit("Setting auxSurfaceCurvature", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -475,7 +477,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting costFunctionIndex to \t\t\t\t\t[ " << str_modifier
-            << " ]" << endl;
+            << " ]" << std::endl;
       if (s_env_costFctSetIndex(&st_env, atoi(str_modifier.c_str())) == -1)
         error_exit("setting costFunctionIndex", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -491,7 +493,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting syslog to \t\t\t\t\t\t[ " << str_modifier << " ]"
-            << endl;
+            << std::endl;
       s_env_log_file_changeTo(st_env, e_sys, str_modifier);
       ULOUT(Gsout.str());
     }
@@ -505,7 +507,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting userlog to \t\t\t\t\t\t[ " << str_modifier << " ]"
-            << endl;
+            << std::endl;
       s_env_log_file_changeTo(st_env, e_user, str_modifier);
       ULOUT(Gsout.str());
     }
@@ -519,7 +521,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       Gsout << "Setting resultlog to \t\t\t\t\t\t[ " << str_modifier << " ]"
-            << endl;
+            << std::endl;
       s_env_log_file_changeTo(st_env, e_result, str_modifier);
       ULOUT(Gsout.str());
     }
@@ -533,7 +535,8 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       val = atoi(str_modifier.c_str());
       Gsout.str("");
-      Gsout << "Setting surfacesSync to \t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Setting surfacesSync to \t\t\t\t\t[ " << val << " ]"
+            << std::endl;
       st_env.b_surfacesKeepInSync = val;
       ULOUT(Gsout.str());
     }
@@ -548,7 +551,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
       val = atoi(str_modifier.c_str());
       Gsout.str("");
       Gsout << "Setting surfacesClearFlag to \t\t\t\t\t[ " << val << " ]"
-            << endl;
+            << std::endl;
       st_env.b_surfacesClear = val;
       ULOUT(Gsout.str());
     }
@@ -559,7 +562,7 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
         return false;
       val = atoi(str_modifier.c_str());
       Gsout.str("");
-      Gsout << "Slept for \t\t\t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Slept for \t\t\t\t\t\t\t[ " << val << " ]" << std::endl;
       sleep(val);
       ULOUT(Gsout.str());
     }
@@ -573,25 +576,25 @@ bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
 C_mpmProg_NOP *pC_NOP_cast(C_mpmProg *pmpm, C_mpmProg_NOP *&pC_mpmProg_NOP) {
   pC_mpmProg_NOP = dynamic_cast<C_mpmProg_NOP *>(pmpm);
   if (!pC_mpmProg_NOP) {
-    cout << "The embedded mpmProg is not of type 'NOP'" << endl;
+    std::cout << "The embedded mpmProg is not of type 'NOP'" << std::endl;
   }
   return pC_mpmProg_NOP;
 }
 
-C_mpmProg_autodijk *pC_autodijk_cast(C_mpmProg *pmpm,
+C_mpmProg_autodijk *pC_autodijk_cast(C_mpmProg *          pmpm,
                                      C_mpmProg_autodijk *&pC_mpmProg_autodijk) {
   pC_mpmProg_autodijk = dynamic_cast<C_mpmProg_autodijk *>(pmpm);
   if (!pC_mpmProg_autodijk) {
-    cout << "The embedded mpmProg is not of type 'autodijk'" << endl;
+    std::cout << "The embedded mpmProg is not of type 'autodijk'" << std::endl;
   }
   return pC_mpmProg_autodijk;
 }
 
-C_mpmProg_pathFind *pC_pathFind_cast(C_mpmProg *pmpm,
+C_mpmProg_pathFind *pC_pathFind_cast(C_mpmProg *          pmpm,
                                      C_mpmProg_pathFind *&pC_mpmProg_pathFind) {
   pC_mpmProg_pathFind = dynamic_cast<C_mpmProg_pathFind *>(pmpm);
   if (!pC_mpmProg_pathFind) {
-    cout << "The embedded mpmProg is not of type 'pathFind'" << endl;
+    std::cout << "The embedded mpmProg is not of type 'pathFind'" << std::endl;
   }
   return pC_mpmProg_pathFind;
 }
@@ -599,32 +602,33 @@ C_mpmProg_pathFind *pC_pathFind_cast(C_mpmProg *pmpm,
 C_mpmProg_ROI *pC_ROI_cast(C_mpmProg *pmpm, C_mpmProg_ROI *&pC_mpmProg_ROI) {
   pC_mpmProg_ROI = dynamic_cast<C_mpmProg_ROI *>(pmpm);
   if (!pC_mpmProg_ROI) {
-    cout << "The embedded mpmProg is not of type 'ROI'" << endl;
+    std::cout << "The embedded mpmProg is not of type 'ROI'" << std::endl;
   }
   return pC_mpmProg_ROI;
 }
 
 C_mpmProg_externalMesh *
-pC_externalMesh_cast(C_mpmProg *pmpm,
+pC_externalMesh_cast(C_mpmProg *              pmpm,
                      C_mpmProg_externalMesh *&pC_mpmProg_externalMesh) {
   pC_mpmProg_externalMesh = dynamic_cast<C_mpmProg_externalMesh *>(pmpm);
   if (!pC_mpmProg_externalMesh) {
-    cout << "The embedded mpmProg is not of type 'externalMesh'" << endl;
+    std::cout << "The embedded mpmProg is not of type 'externalMesh'"
+              << std::endl;
   }
   return pC_mpmProg_externalMesh;
 }
 
-bool asynchEvent_processMPMPROG(s_env &st_env, string astr_comms) {
+bool asynchEvent_processMPMPROG(s_env &st_env, std::string astr_comms) {
 
   int lw = st_env.lw;
   int rw = st_env.rw;
 
-  string str_errorAct = "checking <MPMPROG>";
+  std::string str_errorAct = "checking <MPMPROG>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep = " ";
+  std::string str_object   = "";
+  std::string str_verb     = "";
+  std::string str_modifier = "";
+  std::string str_sep      = " ";
 
   char pch_buffer[65536];
 
@@ -632,10 +636,10 @@ bool asynchEvent_processMPMPROG(s_env &st_env, string astr_comms) {
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_object == "info") {
-    C_mpmProg_NOP *pC_NOP = nullptr;
-    C_mpmProg_pathFind *pC_pathFind = nullptr;
-    C_mpmProg_autodijk *pC_autodijk = nullptr;
-    C_mpmProg_ROI *pC_ROI = nullptr;
+    C_mpmProg_NOP *         pC_NOP          = nullptr;
+    C_mpmProg_pathFind *    pC_pathFind     = nullptr;
+    C_mpmProg_autodijk *    pC_autodijk     = nullptr;
+    C_mpmProg_ROI *         pC_ROI          = nullptr;
     C_mpmProg_externalMesh *pC_externalMesh = nullptr;
     switch (st_env.empmProg_current) {
     case emp_externalMesh:
@@ -789,32 +793,32 @@ bool asynchEvent_processMPMPROG(s_env &st_env, string astr_comms) {
 }
 
 #if 1
-bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
+bool asynchEvent_processLABEL(s_env &st_env, std::string astr_comms) {
 
   int lw = st_env.lw;
   int rw = st_env.rw;
 
-  string str_errorAct = "checking <LABEL>";
+  std::string str_errorAct = "checking <LABEL>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep = " ";
-  int val = 0;
-  void *pv_void = nullptr;
-  stringstream Gsout("");
+  std::string       str_object   = "";
+  std::string       str_verb     = "";
+  std::string       str_modifier = "";
+  std::string       str_sep      = " ";
+  int               val          = 0;
+  void *            pv_void      = nullptr;
+  std::stringstream Gsout("");
 
   //  std::_Ios_Fmtflags origFlags;
   // origFlags  = cout.flags();
-  cout.setf(ios::left);
+  std::cout.setf(std::ios::left);
 
   if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_verb == "singleVertexSet") {
-    char ch_mark = TRUE;
+    char  ch_mark  = TRUE;
     char *pch_mark = &ch_mark;
-    void *pv_mark = (void *)pch_mark;
+    void *pv_mark  = (void *)pch_mark;
     if (!str_modifier.length())
       return false;
     int vertex = atoi(str_modifier.c_str());
@@ -832,10 +836,10 @@ bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
   }
 
   if (str_verb == "loadFrom") {
-    char ch_mark = TRUE;
-    char *pch_mark = &ch_mark;
-    void *pv_mark = (void *)pch_mark;
-    string str_fileSpec = str_modifier;
+    char        ch_mark      = TRUE;
+    char *      pch_mark     = &ch_mark;
+    void *      pv_mark      = (void *)pch_mark;
+    std::string str_fileSpec = str_modifier;
     if (!str_modifier.length())
       return false;
     if (relDirSpec_test(str_modifier))
@@ -854,7 +858,7 @@ bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
   }
 
   if (str_verb == "SaveTo") {
-    string str_fileSpec = str_modifier;
+    std::string str_fileSpec = str_modifier;
     if (!str_modifier.length())
       return false;
     if (relDirSpec_test(str_modifier))
@@ -877,9 +881,9 @@ bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
       if (!str_modifier.length())
         return false;
       ULOUT("Searching for terminal vertices");
-      string str_fileName = str_modifier;
-      bool b_terminalsFound = false;
-      deque<int> que_terminal;
+      std::string     str_fileName     = str_modifier;
+      bool            b_terminalsFound = false;
+      std::deque<int> que_terminal;
       b_terminalsFound =
           label_terminalsFind(st_env.pMS_primary, str_fileName, que_terminal);
       if (!b_terminalsFound) {
@@ -889,7 +893,7 @@ bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
         for (unsigned i = 0; i < que_terminal.size(); i++) {
           Gsout.str("");
           Gsout << "Terminal " << i << "\t\t\t\t\t\t\t[ ";
-          Gsout << que_terminal[i] << " ]" << endl;
+          Gsout << que_terminal[i] << " ]" << std::endl;
           ULOUT(Gsout.str());
           if (i > 2) {
             ULOUT("Warning! High terminal number detected!\n");
@@ -908,7 +912,8 @@ bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       val = atoi(str_modifier.c_str());
-      Gsout << "Setting ply depth to \t\t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Setting ply depth to \t\t\t\t\t\t[ " << val << " ]"
+            << std::endl;
       s_env_plyDepth_set(st_env, val);
       ULOUT(Gsout.str());
     } else if (str_verb == "do") {
@@ -934,7 +939,8 @@ bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       val = atoi(str_modifier.c_str());
-      Gsout << "Setting ply function to \t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Setting ply function to \t\t\t\t\t[ " << val << " ]"
+            << std::endl;
       ULOUT(Gsout.str());
       s_env_costFctSetIndex(&st_env, val);
     }
@@ -945,21 +951,21 @@ bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
 #endif
 
 #if 1
-bool asynchEvent_processSURFACE(s_env &st_env, string astr_comms) {
+bool asynchEvent_processSURFACE(s_env &st_env, std::string astr_comms) {
 
-  string str_errorAct = "checking <SURFACE>";
+  std::string str_errorAct = "checking <SURFACE>";
 
-  string str_object = "";
-  string str_verb = "";
-  string str_modifier = "";
-  string str_sep = " ";
-  int val = 0;
+  std::string str_object   = "";
+  std::string str_verb     = "";
+  std::string str_modifier = "";
+  std::string str_sep      = " ";
+  int         val          = 0;
 
-  stringstream Gsout("");
+  std::stringstream Gsout("");
 
   //  std::_Ios_Fmtflags origFlags;
   // origFlags  = cout.flags();
-  cout.setf(ios::left);
+  std::cout.setf(std::ios::left);
 
   if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
@@ -972,7 +978,8 @@ bool asynchEvent_processSURFACE(s_env &st_env, string astr_comms) {
         return false;
       Gsout.str("");
       val = atoi(str_modifier.c_str());
-      Gsout << "Setting active surface to \t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Setting active surface to \t\t\t\t\t[ " << val << " ]"
+            << std::endl;
       ULOUT(Gsout.str());
       s_env_activeSurfaceSetIndex(&st_env, val);
     } else if (str_verb == "ripClear") {
@@ -1037,9 +1044,10 @@ bool asynchEvent_processSURFACE(s_env &st_env, string astr_comms) {
       if (!str_modifier.length())
         e_curvature = e_gaussian;
       Gsout.str("");
-      val = atoi(str_modifier.c_str());
+      val         = atoi(str_modifier.c_str());
       e_curvature = (e_CURVATURE)val;
-      Gsout << "Setting curvature type to \t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Setting curvature type to \t\t\t\t\t[ " << val << " ]"
+            << std::endl;
       ULOUT(Gsout.str());
       Gsout.str("");
       Gsout << "Performing surface averageIntegratedCurveArea\t\t\t";
@@ -1054,7 +1062,7 @@ bool asynchEvent_processSURFACE(s_env &st_env, string astr_comms) {
 }
 #endif
 
-void asynchEvent_process(s_env &st_env, string str_event) {
+void asynchEvent_process(s_env &st_env, std::string str_event) {
   //
   // ARGS
   // st_env    		in  		process environment
@@ -1086,103 +1094,103 @@ void asynchEvent_process(s_env &st_env, string str_event) {
   //
 
   // debug_push("asynchEvent_process");
-  unsigned pos = 0;
-  string str_path = "";
-  string str_optionsFile = "";
-  string str_optionsArg = "";
-  string str_text = "";
+  unsigned    pos             = 0;
+  std::string str_path        = "";
+  std::string str_optionsFile = "";
+  std::string str_optionsArg  = "";
+  std::string str_text        = "";
 
-  stringstream Gsout("");
+  std::stringstream Gsout("");
 
   // Check for SYSECHO
   pos = str_event.find("SYSECHO");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 8)
       warn("checking <SYSECHO>", "no argument was found.", 2);
     else {
       str_text = str_event.substr(pos + 8);
       Gsout.str("");
-      Gsout << "ECHO: " << str_text << endl;
+      Gsout << "ECHO: " << str_text << std::endl;
       SLOUT(Gsout.str());
     }
   }
 
   // Check for USERECHO
   pos = str_event.find("USERECHO");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 9)
       warn("checking <USERECHO>", "no argument was found.", 2);
     else {
       str_text = str_event.substr(pos + 9);
       Gsout.str("");
-      Gsout << "ECHO: " << str_text << endl;
+      Gsout << "ECHO: " << str_text << std::endl;
       ULOUT(Gsout.str());
     }
   }
 
   // Check for RESULTECHO
   pos = str_event.find("RESULTECHO");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 11)
       warn("checking <RESULTECHO>", "no argument was found.", 2);
     else {
       str_text = str_event.substr(pos + 11);
       Gsout.str("");
-      Gsout << "ECHO: " << str_text << endl;
+      Gsout << "ECHO: " << str_text << std::endl;
       RLOUT(Gsout.str());
     }
   }
 
   // Check for OPT
   pos = str_event.find("OPT");
-  if (pos != (unsigned)string::npos) {
-    string str_pathAbs;
+  if (pos != (unsigned)std::string::npos) {
+    std::string str_pathAbs;
     if (str_event.length() < 4)
       warn("checking <OPT>", "no argument was found.", 2);
     else {
       str_optionsArg = str_event.substr(pos + 4);
 
-      pos = str_optionsArg.rfind("/");
-      str_path = (pos == (unsigned)string::npos)
+      pos      = str_optionsArg.rfind("/");
+      str_path = (pos == (unsigned)std::string::npos)
                      ? "./"
                      : str_optionsArg.substr(0, pos);
-      str_optionsFile = (pos == (unsigned)string::npos)
+      str_optionsFile = (pos == (unsigned)std::string::npos)
                             ? str_optionsArg
                             : str_optionsArg.substr(pos + 1);
 
       str_pathAbs = str_path;
       str_rel2absDirSpec_change(str_path, str_pathAbs);
-      st_env.str_workingDir = str_pathAbs + "/";
+      st_env.str_workingDir      = str_pathAbs + "/";
       st_env.str_optionsFileName = str_optionsFile;
       Gsout.str("");
-      Gsout << "PATH: " << st_env.str_workingDir << endl;
+      Gsout << "PATH: " << st_env.str_workingDir << std::endl;
       SLOUT(Gsout.str());
       Gsout.str("");
-      Gsout << "OptionsFile: " << st_env.str_optionsFileName << endl;
+      Gsout << "OptionsFile: " << st_env.str_optionsFileName << std::endl;
       SLOUT(Gsout.str());
     }
   }
 
   // Check for CWD
   pos = str_event.find("CWD");
-  if (pos != (unsigned)string::npos) {
-    string str_pathAbs;
+  if (pos != (unsigned)std::string::npos) {
+    std::string str_pathAbs;
     if (str_event.length() < 4)
       warn("checking <CWD>", "no argument was found.", 2);
     else {
-      str_path = str_event.substr(pos + 4);
+      str_path    = str_event.substr(pos + 4);
       str_pathAbs = str_path;
       str_rel2absDirSpec_change(str_path, str_pathAbs);
       st_env.str_workingDir = str_pathAbs + "/";
       Gsout.str("");
-      Gsout << "PATH: " << st_env.str_workingDir << endl;
+      Gsout << "PATH: " << st_env.str_workingDir << std::endl;
       SLOUT(Gsout.str());
     }
   }
 
   // Check for HELP
   pos = str_event.find("HELP");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     // Now remove the HELP<sp> string
     str_event.erase(0, 5);
     asynchEvent_processHELP(st_env, str_event);
@@ -1190,7 +1198,7 @@ void asynchEvent_process(s_env &st_env, string str_event) {
 
   // Check for ENV
   pos = str_event.find("ENV");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 4)
       warn("checking <ENV>", "no argument was found.", 2);
     else {
@@ -1202,7 +1210,7 @@ void asynchEvent_process(s_env &st_env, string str_event) {
 
   // Check for MPMPROG
   pos = str_event.find("MPMPROG");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 4)
       warn("checking <MPMPROG>", "no argument was found.", 2);
     else {
@@ -1214,7 +1222,7 @@ void asynchEvent_process(s_env &st_env, string str_event) {
 
   // Check for DWGHT
   pos = str_event.find("DWGHT");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 6)
       warn("checking <DWGHT>", "no argument was found.", 2);
     else {
@@ -1226,7 +1234,7 @@ void asynchEvent_process(s_env &st_env, string str_event) {
 
   // Check for WGHT
   pos = str_event.find("WGHT");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 5)
       warn("checking <WGHT>", "no argument was found.", 2);
     else {
@@ -1238,7 +1246,7 @@ void asynchEvent_process(s_env &st_env, string str_event) {
 
   // Check for VERTEX
   pos = str_event.find("VERTEX");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 7)
       warn("checking <VERTEX>", "no argument was found.", 2);
     else {
@@ -1250,7 +1258,7 @@ void asynchEvent_process(s_env &st_env, string str_event) {
 
   // Check for LABEL
   pos = str_event.find("LABEL");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 6)
       warn("checking <LABEL>", "no argument was found.", 2);
     else {
@@ -1262,7 +1270,7 @@ void asynchEvent_process(s_env &st_env, string str_event) {
 
   // Check for SURFACE
   pos = str_event.find("SURFACE");
-  if (pos != (unsigned)string::npos) {
+  if (pos != (unsigned)std::string::npos) {
     if (str_event.length() < 7)
       warn("checking <SURFACE>", "no argument was found.", 2);
     else {
@@ -1274,8 +1282,8 @@ void asynchEvent_process(s_env &st_env, string str_event) {
 
   // debug_pop();
 }
-
-string asynchEvent_poll(c_SSocket_UDP_receive *pCSocketUDPR, int maxPolls) {
+std::string asynchEvent_poll(c_SSocket_UDP_receive *pCSocketUDPR,
+                             int                    maxPolls) {
   //
   // ARGS
   // pcSocketUDPR   		in  	socket on which to
@@ -1297,8 +1305,8 @@ string asynchEvent_poll(c_SSocket_UDP_receive *pCSocketUDPR, int maxPolls) {
   // o Initial design and coding.
   //
 
-  int i, rval;
-  string str_payload = "TERM";
+  int         i, rval;
+  std::string str_payload = "TERM";
 
   if (!pCSocketUDPR)
     return str_payload;

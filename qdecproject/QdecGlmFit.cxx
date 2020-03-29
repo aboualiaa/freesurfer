@@ -24,9 +24,9 @@
  *
  */
 
-#include <sstream>
-#include <fstream>
 #include <cstring>
+#include <fstream>
+#include <sstream>
 
 #include "QdecGlmFit.h"
 
@@ -67,21 +67,21 @@ int QdecGlmFit::Run(QdecGlmDesign *iGlmDesign) {
   // check if the ?h.aparc.label file exists, if so, use it to mask-out
   // non-cortical medial wall region. if not, check for existence of
   // ?h.cortex.label
-  stringstream ssAparcLabelFile;
+  std::stringstream ssAparcLabelFile;
   ssAparcLabelFile << iGlmDesign->GetSubjectsDir() << "/"
                    << iGlmDesign->GetAverageSubject() << "/label/"
                    << iGlmDesign->GetHemi() << ".aparc.label";
-  ifstream fInput(ssAparcLabelFile.str().c_str(), std::ios::in);
-  stringstream ssCortexLabel;
+  std::ifstream     fInput(ssAparcLabelFile.str().c_str(), std::ios::in);
+  std::stringstream ssCortexLabel;
   if (fInput && !fInput.bad()) {
     ssCortexLabel << " --label " << ssAparcLabelFile.str();
   } else {
-    stringstream ssCortexLabelFile;
+    std::stringstream ssCortexLabelFile;
     ssCortexLabelFile << iGlmDesign->GetSubjectsDir() << "/"
                       << iGlmDesign->GetAverageSubject() << "/label/"
                       << iGlmDesign->GetHemi() << ".cortex.label";
-    ifstream fInput(ssCortexLabelFile.str().c_str(), std::ios::in);
-    stringstream ssCortexLabel;
+    std::ifstream     fInput(ssCortexLabelFile.str().c_str(), std::ios::in);
+    std::stringstream ssCortexLabel;
     if (fInput && !fInput.bad()) {
       ssCortexLabel << " --label " << ssCortexLabelFile.str();
     } else {
@@ -90,7 +90,7 @@ int QdecGlmFit::Run(QdecGlmDesign *iGlmDesign) {
   }
 
   // We need to build a command line.
-  stringstream ssCommand;
+  std::stringstream ssCommand;
   ssCommand << "mri_glmfit --y " << iGlmDesign->GetYdataFileName() << " --fsgd "
             << iGlmDesign->GetFsgdFileName() << " "
             << iGlmDesign->GetDesignMatrixType() << " --glmdir "
@@ -100,7 +100,8 @@ int QdecGlmFit::Run(QdecGlmDesign *iGlmDesign) {
 
   // Append the contrast option to the command for each contrast we
   // have.
-  vector<string> contrastFileNames = iGlmDesign->GetContrastFileNames();
+  std::vector<std::string> contrastFileNames =
+      iGlmDesign->GetContrastFileNames();
   for (unsigned int i = 0; i < iGlmDesign->GetContrastFileNames().size(); i++) {
     ssCommand << " --C " << contrastFileNames[i];
   }
@@ -115,9 +116,9 @@ int QdecGlmFit::Run(QdecGlmDesign *iGlmDesign) {
   fflush(stderr);
   int rRun = system(sCommand);
   if (-1 == rRun)
-    throw runtime_error("system call failed: " + ssCommand.str());
+    throw std::runtime_error("system call failed: " + ssCommand.str());
   if (rRun > 0)
-    throw runtime_error("command failed: " + ssCommand.str());
+    throw std::runtime_error("command failed: " + ssCommand.str());
   free(sCommand);
 
   //
@@ -133,18 +134,18 @@ int QdecGlmFit::Run(QdecGlmDesign *iGlmDesign) {
         "Finding output...");
     iGlmDesign->GetProgressUpdateGUI()->UpdateProgressPercent(80);
   }
-  vector<string> contrastNames = iGlmDesign->GetContrastNames();
-  vector<string> lfnSigFiles;
+  std::vector<std::string> contrastNames = iGlmDesign->GetContrastNames();
+  std::vector<std::string> lfnSigFiles;
   for (unsigned int i = 0; i < iGlmDesign->GetContrastNames().size(); i++) {
-    string sigFile = iGlmDesign->GetWorkingDir();
+    std::string sigFile = iGlmDesign->GetWorkingDir();
     sigFile += "/";
     sigFile += contrastNames[i];
     sigFile += "/sig.mgh";
 
     // Check if it exists and is readable.
-    ifstream fInput(sigFile.c_str(), std::ios::in);
+    std::ifstream fInput(sigFile.c_str(), std::ios::in);
     if (!fInput || fInput.bad())
-      throw runtime_error(string("Couldn't open file ") + sigFile);
+      throw std::runtime_error(std::string("Couldn't open file ") + sigFile);
 
     lfnSigFiles.push_back(sigFile);
   }
@@ -157,11 +158,11 @@ int QdecGlmFit::Run(QdecGlmDesign *iGlmDesign) {
   }
 
   // form output filename
-  string fnContrastsOutput;
+  std::string fnContrastsOutput;
   fnContrastsOutput = iGlmDesign->GetWorkingDir();
   fnContrastsOutput += "/contrasts.sig.mgh";
 
-  stringstream ssCommand2;
+  std::stringstream ssCommand2;
   ssCommand2 << "mri_concat ";
   // subject inputs...
   for (unsigned int i = 0; i < lfnSigFiles.size(); i++) {
@@ -172,18 +173,18 @@ int QdecGlmFit::Run(QdecGlmDesign *iGlmDesign) {
 
   // Now run the command.
   sCommand = strdup(ssCommand2.str().c_str());
-  rRun = system(sCommand);
+  rRun     = system(sCommand);
   if (-1 == rRun)
-    throw runtime_error("system call failed: " + ssCommand2.str());
+    throw std::runtime_error("system call failed: " + ssCommand2.str());
   if (rRun > 0)
-    throw runtime_error("command failed: " + ssCommand2.str());
+    throw std::runtime_error("command failed: " + ssCommand2.str());
   free(sCommand);
 
-  string fnResidualErrorStdDevFile = iGlmDesign->GetWorkingDir();
+  std::string fnResidualErrorStdDevFile = iGlmDesign->GetWorkingDir();
   fnResidualErrorStdDevFile += "/rstd.mgh";
-  string fnRegressionCoefficientsFile = iGlmDesign->GetWorkingDir();
+  std::string fnRegressionCoefficientsFile = iGlmDesign->GetWorkingDir();
   fnRegressionCoefficientsFile += "/beta.mgh";
-  string fnFsgdFile = iGlmDesign->GetWorkingDir();
+  std::string fnFsgdFile = iGlmDesign->GetWorkingDir();
   fnFsgdFile += "/y.fsgd";
 
   // Now write the result information to a GlmFitResults object
@@ -203,38 +204,38 @@ int QdecGlmFit::Run(QdecGlmDesign *iGlmDesign) {
 int QdecGlmFit::CreateResultsFromCachedData(QdecGlmDesign *iGlmDesign) {
 
   // Build contrast filenames from our contrast names.
-  vector<string> lContrastNames = iGlmDesign->GetContrastNames();
-  vector<string> lfnSigFiles;
-  vector<string>::iterator tContrastName;
+  std::vector<std::string> lContrastNames = iGlmDesign->GetContrastNames();
+  std::vector<std::string> lfnSigFiles;
+  std::vector<std::string>::iterator tContrastName;
   for (tContrastName = lContrastNames.begin();
        tContrastName != lContrastNames.end(); ++tContrastName) {
 
     // Build the name.
-    string fnSigFile = iGlmDesign->GetWorkingDir();
+    std::string fnSigFile = iGlmDesign->GetWorkingDir();
     fnSigFile += "/";
     fnSigFile += *tContrastName;
     fnSigFile += "/sig.mgh";
 
     // Check if it exists and is readable.
-    ifstream fInput(fnSigFile.c_str(), std::ios::in);
+    std::ifstream fInput(fnSigFile.c_str(), std::ios::in);
     if (!fInput || fInput.bad())
-      throw runtime_error(string("Couldn't open file ") + fnSigFile);
+      throw std::runtime_error(std::string("Couldn't open file ") + fnSigFile);
 
     lfnSigFiles.push_back(fnSigFile);
   }
 
   // Make our other filenames.
-  string fnContrastsOutput;
+  std::string fnContrastsOutput;
   fnContrastsOutput = iGlmDesign->GetWorkingDir();
   fnContrastsOutput += "/contrasts.sig.mgh";
 
-  string fnResidualErrorStdDevFile = iGlmDesign->GetWorkingDir();
+  std::string fnResidualErrorStdDevFile = iGlmDesign->GetWorkingDir();
   fnResidualErrorStdDevFile += "/rstd.mgh";
 
-  string fnRegressionCoefficientsFile = iGlmDesign->GetWorkingDir();
+  std::string fnRegressionCoefficientsFile = iGlmDesign->GetWorkingDir();
   fnRegressionCoefficientsFile += "/beta.mgh";
 
-  string fnFsgdFile = iGlmDesign->GetWorkingDir();
+  std::string fnFsgdFile = iGlmDesign->GetWorkingDir();
   fnFsgdFile += "/y.fsgd";
 
   // Now write the result information to a GlmFitResults object

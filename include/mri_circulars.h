@@ -34,7 +34,7 @@
 
 #include "image.h" // IMAGE
 IMAGE *MRItoImage(MRI *mri, IMAGE *image, int slice);
-MRI *ImageToMRI(IMAGE *image);
+MRI *  ImageToMRI(IMAGE *image);
 IMAGE *MRItoImageView(MRI *mri, IMAGE *image, int slice, int view, int frame);
 
 #include "mrisurf.h" // MRIS

@@ -1,6 +1,6 @@
 
-#include <fstream>
 #include <cstddef>
+#include <fstream>
 
 #include "itkMGHImageIO.h"
 
@@ -16,7 +16,7 @@
 //-------------------------------
 
 template <class T> int TReadZ(gzFile iFile, T &out) {
-  T *pt = new T(0);
+  T * pt = new T(0);
   int result;
   result = gzread(iFile, pt, sizeof(T));
   itk::ByteSwapper<T>::SwapFromSystemToBigEndian(pt);
@@ -29,7 +29,7 @@ template <class T> int TReadZ(gzFile iFile, T &out) {
 
 static std::string GetExtension(const std::string &filename) {
   const std::string::size_type pos = filename.find_last_of(".");
-  std::string extension(filename, pos + 1, filename.length());
+  std::string                  extension(filename, pos + 1, filename.length());
   return extension;
 }
 
@@ -58,7 +58,7 @@ public:
 
 private:
   std::ofstream *m_ptrOfs;
-  bool m_own;
+  bool           m_own;
 };
 
 //========================
@@ -86,7 +86,7 @@ public:
 
 private:
   gzFile m_ofs;
-  bool m_own;
+  bool   m_own;
 };
 
 //===========================================================================
@@ -101,9 +101,9 @@ namespace itk {
 MGHImageIO::MGHImageIO() {
   this->SetNumberOfDimensions(3);
   const unsigned int uzero = 0;
-  m_Dimensions[0] = uzero;
-  m_Dimensions[1] = uzero;
-  m_Dimensions[2] = uzero;
+  m_Dimensions[0]          = uzero;
+  m_Dimensions[1]          = uzero;
+  m_Dimensions[2]          = uzero;
 
   if (ByteSwapper<int>::SystemIsBigEndian())
     m_ByteOrder = BigEndian;
@@ -163,10 +163,10 @@ void MGHImageIO::ReadImageInformation() {
 }
 
 void MGHImageIO::ReadVolumeHeader(gzFile fp) {
-  int version;
-  int bufInt; // buffer -> int type (most ITK types are unsigned)
-  int type;
-  int dof;
+  int   version;
+  int   bufInt; // buffer -> int type (most ITK types are unsigned)
+  int   type;
+  int   dof;
   short RASgood;
 
   // check file reading
@@ -203,7 +203,7 @@ void MGHImageIO::ReadVolumeHeader(gzFile fp) {
     m_ComponentType = SHORT;
     break;
   case fs::MRI_TENSOR:
-    m_ComponentType = FLOAT;
+    m_ComponentType      = FLOAT;
     m_NumberOfComponents = 9;
     break;
   default:
@@ -245,7 +245,7 @@ void MGHImageIO::ReadVolumeHeader(gzFile fp) {
       c_r c_a c_s
     */
     typedef itk::Matrix<double> MatrixType;
-    MatrixType matrix;
+    MatrixType                  matrix;
 
     float fBuffer;
     float c[3];
@@ -364,7 +364,7 @@ void MGHImageIO::Read(void *pData) {
 
 } // end Read function
 
-void MGHImageIO::SwapBytesIfNecessary(void *buffer,
+void MGHImageIO::SwapBytesIfNecessary(void *        buffer,
                                       unsigned long numberOfPixels) {
   // NOTE: If machine order is little endian, and the data needs to be
   // swapped, the SwapFromBigEndianToSystem is equivalent to
@@ -414,7 +414,7 @@ void MGHImageIO::WriteImageInformation() {
 
   if (extension == std::string("mgh")) {
     std::ofstream ofs(m_FileName.c_str(), std::ios::out | std::ios::binary);
-    STLWrapper writer(&ofs);
+    STLWrapper    writer(&ofs);
     this->WriteHeader(writer);
   } else {
     gzFile fp = gzopen(m_FileName.c_str(), "wb");
@@ -462,7 +462,7 @@ void MGHImageIO::PermuteFrameValues(const void *buffer, char *tempmemory) {
   const unsigned int frameSize = numPixels * valueSize;
 
   const char *pSrc = (const char *)buffer;
-  char *pDst = (char *)tempmemory;
+  char *      pDst = (char *)tempmemory;
 
   for (unsigned int pixelIndex = 0; pixelIndex < numPixels;
        ++pixelIndex, pDst += valueSize) {

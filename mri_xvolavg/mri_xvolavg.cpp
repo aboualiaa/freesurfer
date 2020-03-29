@@ -31,20 +31,20 @@
   volume. The volumes can be 4D.
   ----------------------------------------------------------*/
 
-#include "error.h"
 #include "diag.h"
+#include "error.h"
 #include "mri.h"
 #include "mri_identify.h"
 #include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 
 int main(int argc, char *argv[]);
 
@@ -52,16 +52,16 @@ static char vcid[] = "$Id: mri_xvolavg.c,v 1.6 2011/03/02 00:04:26 nicks Exp $";
 const char *Progname = nullptr;
 
 char *defaulttypestring;
-int defaulttype = MRI_VOLUME_TYPE_UNKNOWN;
+int   defaulttype = MRI_VOLUME_TYPE_UNKNOWN;
 
 char *volid[500];
-int nvols = 0;
+int   nvols         = 0;
 char *voltypestring = nullptr;
-int voltype = MRI_VOLUME_TYPE_UNKNOWN;
+int   voltype       = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *outvolid = nullptr;
+char *outvolid      = nullptr;
 char *outtypestring = nullptr;
-int outtype = MRI_VOLUME_TYPE_UNKNOWN;
+int   outtype       = MRI_VOLUME_TYPE_UNKNOWN;
 
 float val1, val2;
 
@@ -117,8 +117,8 @@ int main(int argc, char **argv) {
     }
 
     if (nthvol == 0) {
-      ncols = InVol->width;
-      nrows = InVol->height;
+      ncols   = InVol->width;
+      nrows   = InVol->height;
       nslices = InVol->depth;
       nframes = InVol->nframes;
       printf("Input dimension: %d %d %d %d\n", ncols, nrows, nslices, nframes);
@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
 /* ---------End Main --------------------------- */
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -237,19 +237,19 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       voltypestring = pargv[0];
-      voltype = string_to_type(voltypestring);
-      nargsused = 1;
+      voltype       = string_to_type(voltypestring);
+      nargsused     = 1;
     } else if (!strcmp(option, "--out")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outvolid = pargv[0];
+      outvolid  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--out_type")) {
       if (nargc < 1)
         argnerr(option, 1);
       outtypestring = pargv[0];
-      outtype = string_to_type(outtypestring);
-      nargsused = 1;
+      outtype       = string_to_type(outtypestring);
+      nargsused     = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (singledash(option))

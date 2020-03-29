@@ -146,7 +146,7 @@ auto constexpr checkOrientationString = [](std::string_view ostr) {
 
 auto checkNorm = [](std::string_view opt, bool &flag) {
   return [opt, &flag](auto value) {
-    auto norm = fs::math::frobenius_norm(&value);
+    auto norm       = fs::math::frobenius_norm(&value);
     auto directions = value;
     if (norm == 0.0) {
       fmt::fprintf(stderr,

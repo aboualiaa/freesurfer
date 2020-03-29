@@ -26,38 +26,38 @@
  Copyright (c) 1996
 =============================================================================*/
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <sys/stat.h>
 
-#include "proto.h"
+#include "MRIio_old.h" // lcalloc
+#include "const.h"
 #include "diag.h"
 #include "error.h"
-#include "const.h"
+#include "proto.h"
 #include "version.h"
-#include "MRIio_old.h" // lcalloc
 
 /* prototypes */
 /* static void read_datfile(char *fname) ; */
-static void init_surf_to_image(void);
-static void make_filenames(char *lsubjectsdir);
-static void shrink(int niter, int nsmoothsteps);
+static void  init_surf_to_image(void);
+static void  make_filenames(char *lsubjectsdir);
+static void  shrink(int niter, int nsmoothsteps);
 static float rtanh(float x);
-static void compute_normals(void);
-static void normal_face(int f, float *n);
-static void write_geometry(char *fname);
-static void read_geometry(char *fname);
-static void read_images(char *fpref);
-static void read_image_info(char *fpref);
-static void estimate_thickness(int niter);
+static void  compute_normals(void);
+static void  normal_face(int f, float *n);
+static void  write_geometry(char *fname);
+static void  read_geometry(char *fname);
+static void  read_images(char *fpref);
+static void  read_image_info(char *fpref);
+static void  estimate_thickness(int niter);
 
 #if 0
 static void write_datfile(char *fname) ;
 static void normal_vector(float *v0, float *v1, float *v2, float *norm) ;
 #endif
 
-#define TRUE 1
+#define TRUE  1
 #define FALSE 0
 
 #ifdef TCL
@@ -71,15 +71,15 @@ static void normal_vector(float *v0, float *v1, float *v2, float *norm) ;
 #ifndef SQR
 #define SQR(x) ((x) * (x))
 #endif
-#define MATCH(A, B) (!strcmp(A, B))
+#define MATCH(A, B)  (!strcmp(A, B))
 #define MATCH_STR(S) (!strcmp(str, S))
 
 #define IMGSIZE 256
 
-#define MAXIM 512
+#define MAXIM       512
 #define MAXVERTICES 10000
-#define MAXFACES 10000
-#define LOWTHRESH 50
+#define MAXFACES    10000
+#define LOWTHRESH   50
 #define NAME_LENGTH STRLEN
 
 typedef struct ss_vertex_type_ {
@@ -92,66 +92,66 @@ typedef struct ss_vertex_type_ {
   float mx, my, mz;
   float nc, onc, snc;
   float thickness;
-  int vnum;
-  int v[10];
-  int fnum;
-  int f[10];
+  int   vnum;
+  int   v[10];
+  int   fnum;
+  int   f[10];
 } ss_vertex_type;
 
 ss_vertex_type vertex[MAXVERTICES];
-int face[MAXFACES][3];
-int nvertices, nfaces;
+int            face[MAXFACES][3];
+int            nvertices, nfaces;
 
-int xnum = 256, ynum = 256;
-unsigned long bufsize;
+int             xnum = 256, ynum = 256;
+unsigned long   bufsize;
 unsigned char **im[MAXIM]; /* image matrix  */
 unsigned char **fill[MAXIM];
-unsigned char *buf; /* scratch memory  */
-int imnr0, imnr1, numimg;
-int wx0 = 100, wy0 = 100;
+unsigned char * buf; /* scratch memory  */
+int             imnr0, imnr1, numimg;
+int             wx0 = 100, wy0 = 100;
 
 float avgnc = 0;
-float sf = 0.55;
+float sf    = 0.55;
 
-double istilt = 0.0; /* Inside stilt length (mm) */
-double ostilt = 0.5; /* Outside stilt length (mm) */
-double fstrength = 1.0;
-double fzero = 40.0;
-double fsteepness = 0.50;
-double mmbsfmax = 10000;
-double brainval = 80;
-double skullval = 20;
-double scalpval = 70;
-double airval = 10;
-int minscalpthickness = 5;
-int minskullthickness = 3;
-int maxskullthickness = 30;
+double istilt            = 0.0; /* Inside stilt length (mm) */
+double ostilt            = 0.5; /* Outside stilt length (mm) */
+double fstrength         = 1.0;
+double fzero             = 40.0;
+double fsteepness        = 0.50;
+double mmbsfmax          = 10000;
+double brainval          = 80;
+double skullval          = 20;
+double scalpval          = 70;
+double airval            = 10;
+int    minscalpthickness = 5;
+int    minskullthickness = 3;
+int    maxskullthickness = 30;
 
 float whitezero = 35.0, grayzero = 25.0;
 float white_lolim = 60;
-float gray_hilim = 70;
-float threshold = 30;
+float gray_hilim  = 70;
+float threshold   = 30;
 float xmin, xmax;
 float ymin, ymax;
 float zmin, zmax;
 float st, ps, fov, xx0, xx1, yy0, yy1, zz0, zz1;
 
-int MRIflag = FALSE;
-int MRIloaded = FALSE;
-int momentumflag = TRUE;
-int smoothflag = FALSE;
-int centerflag = FALSE;
-int flattenflag = FALSE;
+int MRIflag          = FALSE;
+int MRIloaded        = FALSE;
+int momentumflag     = TRUE;
+int smoothflag       = FALSE;
+int centerflag       = FALSE;
+int flattenflag      = FALSE;
 int intersectionflag = FALSE;
 
 float update = 0.9;
-float decay = 0.9;
+float decay  = 0.9;
 float xlo, xhi, ylo, yhi, zlo, zhi, xctr, yctr, zctr;
 float ctrx, ctry, ctrz;
 
 double dfrac = 0.7;
 
-int changed = TRUE;
+int changed    = TRUE;
 int shrinkmode = 1;
 
 char *subjectsdir; /* SUBJECTS_DIR */
@@ -166,23 +166,22 @@ char *dfname;      /* datfile */
 char *sgfname;     /* abs: sessiondir/rgb/tktrishrink.rgb */
 char *rfname;      /* script */
 
-int doublebufferflag = TRUE;
-int openglwindowflag = FALSE;
-int peeledflag = FALSE;
+int doublebufferflag    = TRUE;
+int openglwindowflag    = FALSE;
+int peeledflag          = FALSE;
 int initsurftoimageflag = FALSE;
 
 const char *Progname;
-int main(int argc, char *argv[]) {
+int         main(int argc, char *argv[]) {
   /* FILE *fptr; */
-  char fpref[STRLEN];
+  char  fpref[STRLEN];
   char *data_dir, *mri_dir;
   /* struct stat buf; */
   int nargs;
 
   nargs = handleVersionOption(argc, argv, "mri_make_bem_surfaces");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -226,30 +225,30 @@ int main(int argc, char *argv[]) {
   read_image_info(mfname);
   read_images(mfname);
 
-  fzero = 10;
-  mmbsfmax = 255;
-  dfrac = 0.7;
-  istilt = 0;
+  fzero      = 10;
+  mmbsfmax   = 255;
+  dfrac      = 0.7;
+  istilt     = 0;
   fsteepness = 0.50;
-  fstrength = 1.0;
+  fstrength  = 1.0;
   if (centerflag && MRIloaded) {
     init_surf_to_image();
   }
 
-  shrinkmode = 4;
+  shrinkmode   = 4;
   momentumflag = TRUE;
-  MRIflag = TRUE;
-  flattenflag = FALSE;
+  MRIflag      = TRUE;
+  flattenflag  = FALSE;
   shrink(100, 0);
   flattenflag = TRUE;
-  MRIflag = FALSE;
+  MRIflag     = FALSE;
   shrink(50, 0);
-  MRIflag = TRUE;
+  MRIflag     = TRUE;
   flattenflag = FALSE;
   shrink(100, 0);
   momentumflag = FALSE;
-  MRIflag = FALSE;
-  flattenflag = TRUE;
+  MRIflag      = FALSE;
+  flattenflag  = TRUE;
   shrink(10, 0);
   write_geometry(ofname);
 
@@ -268,9 +267,9 @@ int main(int argc, char *argv[]) {
   read_image_info(mfname);
   read_images(mfname);
 
-  shrinkmode = 5;
-  MRIflag = TRUE;
-  flattenflag = FALSE;
+  shrinkmode   = 5;
+  MRIflag      = TRUE;
+  flattenflag  = FALSE;
   momentumflag = FALSE;
   shrink(40, 5);
   write_geometry(ofname);
@@ -294,19 +293,19 @@ int main(int argc, char *argv[]) {
   read_image_info(mfname);
   read_images(mfname);
 
-  fzero = 20;
-  mmbsfmax = 1000;
-  dfrac = 1.5;
-  istilt = 0;
+  fzero      = 20;
+  mmbsfmax   = 1000;
+  dfrac      = 1.5;
+  istilt     = 0;
   fsteepness = 0.20;
-  fstrength = 1.0;
+  fstrength  = 1.0;
   if (centerflag && MRIloaded) {
     init_surf_to_image();
   }
 
-  shrinkmode = 6;
-  MRIflag = TRUE;
-  flattenflag = FALSE;
+  shrinkmode   = 6;
+  MRIflag      = TRUE;
+  flattenflag  = FALSE;
   momentumflag = TRUE;
   shrink(200, 10);
   momentumflag = FALSE;
@@ -322,7 +321,7 @@ int main(int argc, char *argv[]) {
 
 static void read_image_info(char *fpref) {
   FILE *fptr;
-  char fname[STRLEN];
+  char  fname[STRLEN];
 
   sprintf(fname, "%s.info", fpref);
   fptr = fopen(fname, "r");
@@ -357,20 +356,20 @@ static void read_image_info(char *fpref) {
   zz1 *= 1000;
   fclose(fptr);
   numimg = imnr1 - imnr0 + 1;
-  ctrx = (xx0 + xx1) / 2.0;
-  ctry = (yy0 + yy1) / 2.0;
-  ctrz = (zz0 + zz1) / 2.0;
+  ctrx   = (xx0 + xx1) / 2.0;
+  ctry   = (yy0 + yy1) / 2.0;
+  ctrz   = (zz0 + zz1) / 2.0;
 }
 
 static void read_images(char *fpref) {
-  int i, j, k; /* loop counters */
+  int   i, j, k; /* loop counters */
   FILE *fptr;
-  char fname[STRLEN];
+  char  fname[STRLEN];
 
   if (!MRIloaded) {
-    numimg = imnr1 - imnr0 + 1;
+    numimg  = imnr1 - imnr0 + 1;
     bufsize = ((unsigned long)xnum) * ynum;
-    buf = (unsigned char *)lcalloc(bufsize, sizeof(char));
+    buf     = (unsigned char *)lcalloc(bufsize, sizeof(char));
     for (k = 0; k < numimg; k++) {
       im[k] = (unsigned char **)lcalloc(IMGSIZE, sizeof(char *));
       for (i = 0; i < IMGSIZE; i++) {
@@ -408,7 +407,7 @@ static void read_images(char *fpref) {
 }
 
 static void init_surf_to_image(void) {
-  int i, j, k;
+  int   i, j, k;
   float x, y, z;
 
   if (initsurftoimageflag) {
@@ -479,10 +478,10 @@ static void read_geometry(char *fname) {
   for (k = 0; k < nvertices; k++) {
     fscanf(fp, "%*d %f %f %f", &vertex[k].x, &vertex[k].y, &vertex[k].z);
     vertex[k].mx = vertex[k].my = vertex[k].mz = 0;
-    vertex[k].vnum = 0;
-    vertex[k].fnum = 0; /* marty */
-    vertex[k].nc = 0;
-    vertex[k].snc = 0;
+    vertex[k].vnum                             = 0;
+    vertex[k].fnum                             = 0; /* marty */
+    vertex[k].nc                               = 0;
+    vertex[k].snc                              = 0;
   }
   fscanf(fp, "%d", &nfaces);
   for (k = 0; k < nfaces; k++) {
@@ -496,14 +495,14 @@ static void read_geometry(char *fname) {
 #else
   nvertices = ICO4_NVERTICES;
   for (k = 0; k < nvertices; k++) {
-    vertex[k].x = ic2562_vertices[k].x;
-    vertex[k].y = ic2562_vertices[k].y;
-    vertex[k].z = ic2562_vertices[k].z;
+    vertex[k].x  = ic2562_vertices[k].x;
+    vertex[k].y  = ic2562_vertices[k].y;
+    vertex[k].z  = ic2562_vertices[k].z;
     vertex[k].mx = vertex[k].my = vertex[k].mz = 0;
-    vertex[k].vnum = 0;
-    vertex[k].fnum = 0; /* marty */
-    vertex[k].nc = 0;
-    vertex[k].snc = 0;
+    vertex[k].vnum                             = 0;
+    vertex[k].fnum                             = 0; /* marty */
+    vertex[k].nc                               = 0;
+    vertex[k].snc                              = 0;
   }
 
   nfaces = ICO4_NFACES;
@@ -520,8 +519,8 @@ static void read_geometry(char *fname) {
   for (k = 0; k < nfaces; k++) {
     for (i = 0; i < 3; i++) {
       vertex[face[k][i]].f[vertex[face[k][i]].fnum++] = k;
-      last = (i > 0) ? i - 1 : 2;
-      next = (i < 2) ? i + 1 : 0;
+      last                                            = (i > 0) ? i - 1 : 2;
+      next                                            = (i < 2) ? i + 1 : 0;
       skiplast = skipnext = FALSE;
       for (j = 0; j < vertex[face[k][i]].vnum; j++) {
         if (vertex[face[k][i]].v[j] == face[k][last]) {
@@ -541,9 +540,9 @@ static void read_geometry(char *fname) {
   }
   compute_normals();
   for (k = 0; k < nvertices; k++) {
-    vertex[k].xb = vertex[k].x;
-    vertex[k].yb = vertex[k].y;
-    vertex[k].zb = vertex[k].z;
+    vertex[k].xb  = vertex[k].x;
+    vertex[k].yb  = vertex[k].y;
+    vertex[k].zb  = vertex[k].z;
     vertex[k].nxb = vertex[k].nx;
     vertex[k].nyb = vertex[k].ny;
     vertex[k].nzb = vertex[k].nz;
@@ -555,7 +554,7 @@ static void read_geometry(char *fname) {
 
 static void write_geometry(char *fname) {
   FILE *fp;
-  int k, n;
+  int   k, n;
 
   fp = fopen(fname, "w");
   if (fp == NULL) {
@@ -589,22 +588,22 @@ static void normal_face(int f, float *n) {
   v2[0] = vertex[face[f][2]].x - vertex[face[f][1]].x;
   v2[1] = vertex[face[f][2]].y - vertex[face[f][1]].y;
   v2[2] = vertex[face[f][2]].z - vertex[face[f][1]].z;
-  n[0] = v1[1] * v2[2] - v1[2] * v2[1];
-  n[1] = v1[2] * v2[0] - v1[0] * v2[2];
-  n[2] = v1[0] * v2[1] - v1[1] * v2[0];
-  d = sqrt(SQR(n[0]) + SQR(n[1]) + SQR(n[2]));
+  n[0]  = v1[1] * v2[2] - v1[2] * v2[1];
+  n[1]  = v1[2] * v2[0] - v1[0] * v2[2];
+  n[2]  = v1[0] * v2[1] - v1[1] * v2[0];
+  d     = sqrt(SQR(n[0]) + SQR(n[1]) + SQR(n[2]));
   n[0] /= d;
   n[1] /= d;
   n[2] /= d;
 }
 
 static void compute_normals(void) {
-  int j, k;
+  int             j, k;
   ss_vertex_type *v;
-  float n[3], nt[3];
+  float           n[3], nt[3];
 
   for (k = 0; k < nvertices; k++) {
-    v = &vertex[k];
+    v    = &vertex[k];
     n[0] = n[1] = n[2] = 0;
     for (j = 0; j < v->fnum; j++) {
       normal_face(v->f[j], nt);
@@ -625,18 +624,18 @@ static void shrink(int niter, int nsmoothsteps) {
       force2;
   float d, dx, dy, dz, sval, sinval, soutval, snc, inmean, inmax, outmean,
       outmax, sum, nsum;
-  float nx, ny, nz;
+  float           nx, ny, nz;
   ss_vertex_type *v;
-  int imnr, i, j, iter, k, m, n, smoothstep;
-  float sd, ad, dmax;
-  int navg, an, nclip, inim, ini, inj, outim, outi, outj;
-  int delpos, mindelpos;
-  int ninside = 20, noutside = 3;
-  int maxdelpos = 30;
-  float meanerr, minmeanerr, meanerr0;
-  float insamp[50], outsamp[50];
-  float delx = 1.0, dely = 1.0, delz = 1.0, valt, xt, yt, zt;
-  int imt, it, jt, h;
+  int             imnr, i, j, iter, k, m, n, smoothstep;
+  float           sd, ad, dmax;
+  int             navg, an, nclip, inim, ini, inj, outim, outi, outj;
+  int             delpos, mindelpos;
+  int             ninside = 20, noutside = 3;
+  int             maxdelpos = 30;
+  float           meanerr, minmeanerr, meanerr0;
+  float           insamp[50], outsamp[50];
+  float           delx = 1.0, dely = 1.0, delz = 1.0, valt, xt, yt, zt;
+  int             imt, it, jt, h;
 
   if (MRIflag && !MRIloaded) {
     printf("mri_strip_skull: ### MRIflag but MRI data not loaded... reset\n");
@@ -646,29 +645,29 @@ static void shrink(int niter, int nsmoothsteps) {
   val = inval = outval = force = 0.0f; /* to stop compiler warnings */
 
   for (iter = 0; iter < niter; iter++) {
-    ad = 0;
-    dmax = 0;
-    an = 0;
+    ad    = 0;
+    dmax  = 0;
+    an    = 0;
     nclip = 0;
     for (k = 0; k < nvertices; k++) {
-      v = &vertex[k];
-      v->ox = v->x;
-      v->oy = v->y;
-      v->oz = v->z;
+      v      = &vertex[k];
+      v->ox  = v->x;
+      v->oy  = v->y;
+      v->oz  = v->z;
       v->onc = v->nc;
     }
     sval = sinval = soutval = snc = 0;
-    navg = 0;
+    navg                          = 0;
     for (k = 0; k < nvertices; k++) {
-      v = &vertex[k];
-      x = v->ox;
-      y = v->oy;
-      z = v->oz;
+      v  = &vertex[k];
+      x  = v->ox;
+      y  = v->oy;
+      z  = v->oz;
       nx = v->nx;
       ny = v->ny;
       nz = v->nz;
       sx = sy = sz = sd = 0;
-      n = 0;
+      n                 = 0;
       for (m = 0; m < v->vnum; m++) {
         sx += dx = vertex[v->v[m]].ox - x;
         sy += dy = vertex[v->v[m]].oy - y;
@@ -685,8 +684,8 @@ static void shrink(int niter, int nsmoothsteps) {
       }
       if (MRIflag) {
         imnr = (int)((y - yy0) / st + 0.5 - imnr0);
-        i = (int)((zz1 - z) / ps + 0.5);
-        j = (int)((xx1 - x) / ps + 0.5);
+        i    = (int)((zz1 - z) / ps + 0.5);
+        j    = (int)((xx1 - x) / ps + 0.5);
         if (imnr < 0 || imnr >= numimg || i < 0 || i >= IMGSIZE || j < 0 ||
             j >= IMGSIZE) {
           val = 0;
@@ -694,8 +693,8 @@ static void shrink(int niter, int nsmoothsteps) {
           val = im[imnr][i][j];
         }
         inim = (int)(imnr - istilt / st * v->ny + 0.5);
-        ini = (int)(i + istilt / ps * v->nz + 0.5);
-        inj = (int)(j + istilt / ps * v->nx + 0.5);
+        ini  = (int)(i + istilt / ps * v->nz + 0.5);
+        inj  = (int)(j + istilt / ps * v->nx + 0.5);
         if (inim < 0 || inim >= numimg || ini < 0 || ini >= IMGSIZE ||
             inj < 0 || inj >= IMGSIZE) {
           inval = 0;
@@ -703,8 +702,8 @@ static void shrink(int niter, int nsmoothsteps) {
           inval = im[inim][ini][inj];
         }
         outim = (int)(imnr + ostilt / st * v->ny + 0.5);
-        outi = (int)(i - ostilt / ps * v->nz + 0.5);
-        outj = (int)(j - ostilt / ps * v->nx + 0.5);
+        outi  = (int)(i - ostilt / ps * v->nz + 0.5);
+        outj  = (int)(j - ostilt / ps * v->nx + 0.5);
         if (outim < 0 || outim >= numimg || outi < 0 || outi >= IMGSIZE ||
             outj < 0 || outj >= IMGSIZE) {
           outval = 0;
@@ -712,18 +711,18 @@ static void shrink(int niter, int nsmoothsteps) {
           outval = im[outim][outi][outj];
         }
         if (shrinkmode == 3) {
-          ninside = 0;
+          ninside  = 0;
           noutside = 40;
-          nc = (v->x - v->xb) * v->nxb + (v->y - v->yb) * v->nyb +
+          nc       = (v->x - v->xb) * v->nxb + (v->y - v->yb) * v->nyb +
                (v->z - v->zb) * v->nzb;
           v->snc = nc;
           for (h = -noutside; h < ninside; h++) {
-            xt = x - nx * (h * delx);
-            yt = y - ny * (h * dely);
-            zt = z - nz * (h * delz);
+            xt  = x - nx * (h * delx);
+            yt  = y - ny * (h * dely);
+            zt  = z - nz * (h * delz);
             imt = (int)((yt - yy0) / st + 0.5 - imnr0);
-            it = (int)((zz1 - zt) / ps + 0.5);
-            jt = (int)((xx1 - xt) / ps + 0.5);
+            it  = (int)((zz1 - zt) / ps + 0.5);
+            jt  = (int)((xx1 - xt) / ps + 0.5);
             if (imt < 0 || imt >= numimg || it < 0 || it >= IMGSIZE || jt < 0 ||
                 jt >= IMGSIZE) {
               valt = 0;
@@ -755,19 +754,19 @@ static void shrink(int niter, int nsmoothsteps) {
         } else if (shrinkmode == 4) {
           force = fstrength * tanh((inval - fzero) * fsteepness);
         } else if (shrinkmode == 5) {
-          ninside = 20;
-          noutside = 3;
+          ninside    = 20;
+          noutside   = 3;
           minmeanerr = 1e10;
-          meanerr0 = 1e10;
-          mindelpos = -maxdelpos; /* by Dav */
+          meanerr0   = 1e10;
+          mindelpos  = -maxdelpos; /* by Dav */
           for (delpos = -maxdelpos; delpos < maxdelpos; delpos++) {
             for (h = -noutside; h < ninside; h++) {
-              xt = x - nx * (h * delx + istilt - delpos);
-              yt = y - ny * (h * dely + istilt - delpos);
-              zt = z - nz * (h * delz + istilt - delpos);
+              xt  = x - nx * (h * delx + istilt - delpos);
+              yt  = y - ny * (h * dely + istilt - delpos);
+              zt  = z - nz * (h * delz + istilt - delpos);
               imt = (int)((yt - yy0) / st + 0.5 - imnr0);
-              it = (int)((zz1 - zt) / ps + 0.5);
-              jt = (int)((xx1 - xt) / ps + 0.5);
+              it  = (int)((zz1 - zt) / ps + 0.5);
+              jt  = (int)((xx1 - xt) / ps + 0.5);
               if (imt < 0 || imt >= numimg || it < 0 || it >= IMGSIZE ||
                   jt < 0 || jt >= IMGSIZE) {
                 valt = 0;
@@ -800,7 +799,7 @@ static void shrink(int niter, int nsmoothsteps) {
             meanerr = sqrt(sum / nsum) / inmean;
             if (meanerr < minmeanerr) {
               minmeanerr = meanerr;
-              mindelpos = delpos;
+              mindelpos  = delpos;
             }
             if (delpos == 0) {
               meanerr0 = meanerr;
@@ -814,18 +813,18 @@ static void shrink(int niter, int nsmoothsteps) {
           }
           force = 0.5 * force1 * tanh(2.0 * (meanerr0 - minmeanerr) / meanerr0);
         } else if (shrinkmode == 6) {
-          ninside = 20;
+          ninside  = 20;
           noutside = 20;
-          nc = (v->x - v->xb) * v->nxb + (v->y - v->yb) * v->nyb +
+          nc       = (v->x - v->xb) * v->nxb + (v->y - v->yb) * v->nyb +
                (v->z - v->zb) * v->nzb;
           v->snc = nc;
           for (h = -noutside; h < ninside; h++) {
-            xt = x - nx * (h * delx);
-            yt = y - ny * (h * dely);
-            zt = z - nz * (h * delz);
+            xt  = x - nx * (h * delx);
+            yt  = y - ny * (h * dely);
+            zt  = z - nz * (h * delz);
             imt = (int)((yt - yy0) / st + 0.5 - imnr0);
-            it = (int)((zz1 - zt) / ps + 0.5);
-            jt = (int)((xx1 - xt) / ps + 0.5);
+            it  = (int)((zz1 - zt) / ps + 0.5);
+            jt  = (int)((xx1 - xt) / ps + 0.5);
             if (imt < 0 || imt >= numimg || it < 0 || it >= IMGSIZE || jt < 0 ||
                 jt >= IMGSIZE) {
               valt = 0;
@@ -850,7 +849,7 @@ static void shrink(int niter, int nsmoothsteps) {
             nsum++;
           }
           outmean = sum / nsum;
-          inmax = -1;
+          inmax   = -1;
           sum = nsum = 0;
           for (h = 1; h < ninside; h++) {
             valt = insamp[h];
@@ -870,19 +869,19 @@ static void shrink(int niter, int nsmoothsteps) {
                                1.0 * tanh((fzero - outmean) * fsteepness) -
                                0.5 * tanh((fzero - outmax) * fsteepness));
         } else if (shrinkmode == 7) {
-          ninside = 5;
-          noutside = 20;
+          ninside    = 5;
+          noutside   = 20;
           minmeanerr = 1e10;
-          meanerr0 = 1e10;
-          mindelpos = -maxdelpos; /* by Dav */
+          meanerr0   = 1e10;
+          mindelpos  = -maxdelpos; /* by Dav */
           for (delpos = -maxdelpos; delpos < maxdelpos; delpos++) {
             for (h = -noutside; h < ninside; h++) {
-              xt = x - nx * (h * delx + istilt - delpos);
-              yt = y - ny * (h * dely + istilt - delpos);
-              zt = z - nz * (h * delz + istilt - delpos);
+              xt  = x - nx * (h * delx + istilt - delpos);
+              yt  = y - ny * (h * dely + istilt - delpos);
+              zt  = z - nz * (h * delz + istilt - delpos);
               imt = (int)((yt - yy0) / st + 0.5 - imnr0);
-              it = (int)((zz1 - zt) / ps + 0.5);
-              jt = (int)((xx1 - xt) / ps + 0.5);
+              it  = (int)((zz1 - zt) / ps + 0.5);
+              jt  = (int)((xx1 - xt) / ps + 0.5);
               if (imt < 0 || imt >= numimg || it < 0 || it >= IMGSIZE ||
                   jt < 0 || jt >= IMGSIZE) {
                 valt = 0;
@@ -915,7 +914,7 @@ static void shrink(int niter, int nsmoothsteps) {
             meanerr = sqrt(sum / nsum) / inmean;
             if (meanerr < minmeanerr) {
               minmeanerr = meanerr;
-              mindelpos = delpos;
+              mindelpos  = delpos;
             }
             if (delpos == 0) {
               meanerr0 = meanerr;
@@ -989,15 +988,15 @@ static void shrink(int niter, int nsmoothsteps) {
 
     for (smoothstep = 0; smoothstep < nsmoothsteps; smoothstep++) {
       for (k = 0; k < nvertices; k++) {
-        v = &vertex[k];
+        v     = &vertex[k];
         v->xb = v->dx;
         v->yb = v->dy;
         v->zb = v->dz;
       }
       for (k = 0; k < nvertices; k++) {
-        v = &vertex[k];
+        v  = &vertex[k];
         sx = sy = sz = 0;
-        nsum = 0;
+        nsum         = 0;
         for (m = 0; m < v->vnum; m++) {
           sx += vertex[v->v[m]].xb;
           sy += vertex[v->v[m]].yb;
@@ -1037,18 +1036,18 @@ static void shrink(int niter, int nsmoothsteps) {
 static void estimate_thickness(int niter) {
   float x, y, z, sx, sy, sz, val, inval, outval,
       /*nc,*/ force /*,force0,force1,force2*/;
-  float /* d,*/ dx, dy, dz, sval, sinval, soutval, snc, inmean, sum, nsum;
-  float nx, ny, nz;
+  float /* d,*/   dx, dy, dz, sval, sinval, soutval, snc, inmean, sum, nsum;
+  float           nx, ny, nz;
   ss_vertex_type *v;
-  int imnr, i, j, iter, k, m, n = 0;
-  float sd, ad, dmax;
-  int navg, an, nclip, inim, ini, inj, outim, outi, outj;
-  int delpos, mindelpos;
-  int ninside = 20, noutside = 40;
-  float meanerr, minmeanerr, fskull, fscalp; /* meanerr0, */
-  float insamp[50], outsamp[50];
-  float delx = 1.0, dely = 1.0, delz = 1.0, valt, xt, yt, zt;
-  int imt, it, jt, h;
+  int             imnr, i, j, iter, k, m, n = 0;
+  float           sd, ad, dmax;
+  int             navg, an, nclip, inim, ini, inj, outim, outi, outj;
+  int             delpos, mindelpos;
+  int             ninside = 20, noutside = 40;
+  float           meanerr, minmeanerr, fskull, fscalp; /* meanerr0, */
+  float           insamp[50], outsamp[50];
+  float           delx = 1.0, dely = 1.0, delz = 1.0, valt, xt, yt, zt;
+  int             imt, it, jt, h;
 
   if (MRIflag && !MRIloaded) {
     printf("mri_strip_skull: ### MRIflag but MRI data not loaded... reset\n");
@@ -1057,29 +1056,29 @@ static void estimate_thickness(int niter) {
 
   val = inval = outval = force = 0.0f; /* to stop compiler warnings */
 
-  ad = 0;
-  dmax = 0;
-  an = 0;
+  ad    = 0;
+  dmax  = 0;
+  an    = 0;
   nclip = 0;
   for (k = 0; k < nvertices; k++) {
-    v = &vertex[k];
-    v->ox = v->x;
-    v->oy = v->y;
-    v->oz = v->z;
+    v      = &vertex[k];
+    v->ox  = v->x;
+    v->oy  = v->y;
+    v->oz  = v->z;
     v->onc = v->nc;
   }
   sval = sinval = soutval = snc = 0;
-  navg = 0;
+  navg                          = 0;
   for (k = 0; k < nvertices; k++) {
-    v = &vertex[k];
-    x = v->ox;
-    y = v->oy;
-    z = v->oz;
+    v  = &vertex[k];
+    x  = v->ox;
+    y  = v->oy;
+    z  = v->oz;
     nx = v->nx;
     ny = v->ny;
     nz = v->nz;
     sx = sy = sz = sd = 0;
-    n = 0;
+    n                 = 0;
     for (m = 0; m < v->vnum; m++) {
       sx += dx = vertex[v->v[m]].ox - x;
       sy += dy = vertex[v->v[m]].oy - y;
@@ -1096,8 +1095,8 @@ static void estimate_thickness(int niter) {
     }
     if (MRIflag) {
       imnr = (int)((y - yy0) / st + 0.5 - imnr0);
-      i = (int)((zz1 - z) / ps + 0.5);
-      j = (int)((xx1 - x) / ps + 0.5);
+      i    = (int)((zz1 - z) / ps + 0.5);
+      j    = (int)((xx1 - x) / ps + 0.5);
       if (imnr < 0 || imnr >= numimg || i < 0 || i >= IMGSIZE || j < 0 ||
           j >= IMGSIZE) {
         val = 0;
@@ -1105,8 +1104,8 @@ static void estimate_thickness(int niter) {
         val = im[imnr][i][j];
       }
       inim = (int)(imnr - istilt / st * v->ny + 0.5);
-      ini = (int)(i + istilt / ps * v->nz + 0.5);
-      inj = (int)(j + istilt / ps * v->nx + 0.5);
+      ini  = (int)(i + istilt / ps * v->nz + 0.5);
+      inj  = (int)(j + istilt / ps * v->nx + 0.5);
       if (inim < 0 || inim >= numimg || ini < 0 || ini >= IMGSIZE || inj < 0 ||
           inj >= IMGSIZE) {
         inval = 0;
@@ -1114,8 +1113,8 @@ static void estimate_thickness(int niter) {
         inval = im[inim][ini][inj];
       }
       outim = (int)(imnr + ostilt / st * v->ny + 0.5);
-      outi = (int)(i - ostilt / ps * v->nz + 0.5);
-      outj = (int)(j - ostilt / ps * v->nx + 0.5);
+      outi  = (int)(i - ostilt / ps * v->nz + 0.5);
+      outj  = (int)(j - ostilt / ps * v->nx + 0.5);
       if (outim < 0 || outim >= numimg || outi < 0 || outi >= IMGSIZE ||
           outj < 0 || outj >= IMGSIZE) {
         outval = 0;
@@ -1123,12 +1122,12 @@ static void estimate_thickness(int niter) {
         outval = im[outim][outi][outj];
       }
       for (h = -noutside; h < ninside; h++) {
-        xt = x - nx * (h * delx + istilt);
-        yt = y - ny * (h * dely + istilt);
-        zt = z - nz * (h * delz + istilt);
+        xt  = x - nx * (h * delx + istilt);
+        yt  = y - ny * (h * dely + istilt);
+        zt  = z - nz * (h * delz + istilt);
         imt = (int)((yt - yy0) / st + 0.5 - imnr0);
-        it = (int)((zz1 - zt) / ps + 0.5);
-        jt = (int)((xx1 - xt) / ps + 0.5);
+        it  = (int)((zz1 - zt) / ps + 0.5);
+        jt  = (int)((xx1 - xt) / ps + 0.5);
         if (imt < 0 || imt >= numimg || it < 0 || it >= IMGSIZE || jt < 0 ||
             jt >= IMGSIZE) {
           valt = 0;
@@ -1147,9 +1146,9 @@ static void estimate_thickness(int niter) {
         sum += insamp[h];
         nsum += 1;
       }
-      inmean = sum / nsum;
+      inmean     = sum / nsum;
       minmeanerr = 1e10;
-      mindelpos = minskullthickness;
+      mindelpos  = minskullthickness;
       for (delpos = minskullthickness; delpos < maxskullthickness; delpos++) {
         sum = nsum = 0;
         for (h = 1; h < ninside; h++) {
@@ -1169,29 +1168,29 @@ static void estimate_thickness(int niter) {
         meanerr = sqrt(sum / nsum);
         if (meanerr < minmeanerr) {
           minmeanerr = meanerr;
-          mindelpos = delpos;
+          mindelpos  = delpos;
         }
       }
       v->thickness = mindelpos;
     }
   }
   for (k = 0; k < nvertices; k++) {
-    v = &vertex[k];
+    v     = &vertex[k];
     v->ox = v->nx * v->thickness;
     v->oy = v->ny * v->thickness;
     v->oz = v->nz * v->thickness;
   }
   for (iter = 0; iter < niter; iter++) {
     for (k = 0; k < nvertices; k++) {
-      v = &vertex[k];
+      v     = &vertex[k];
       v->xb = v->ox;
       v->yb = v->oy;
       v->zb = v->oz;
     }
     for (k = 0; k < nvertices; k++) {
-      v = &vertex[k];
+      v  = &vertex[k];
       sx = sy = sz = 0;
-      nsum = 0;
+      nsum         = 0;
       for (m = 0; m < v->vnum; m++) {
         sx += vertex[v->v[m]].xb;
         sy += vertex[v->v[m]].yb;
@@ -1212,16 +1211,16 @@ static void estimate_thickness(int niter) {
 }
 static void make_filenames(char *lsubjectsdir) {
   subjectsdir = (char *)malloc(NAME_LENGTH * sizeof(char)); /* malloc for tcl */
-  srname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  pname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  mfname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  bfname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  gfname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  ofname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  o2fname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  dfname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  sgfname = (char *)malloc(NAME_LENGTH * sizeof(char));
-  rfname = (char *)malloc(NAME_LENGTH * sizeof(char));
+  srname      = (char *)malloc(NAME_LENGTH * sizeof(char));
+  pname       = (char *)malloc(NAME_LENGTH * sizeof(char));
+  mfname      = (char *)malloc(NAME_LENGTH * sizeof(char));
+  bfname      = (char *)malloc(NAME_LENGTH * sizeof(char));
+  gfname      = (char *)malloc(NAME_LENGTH * sizeof(char));
+  ofname      = (char *)malloc(NAME_LENGTH * sizeof(char));
+  o2fname     = (char *)malloc(NAME_LENGTH * sizeof(char));
+  dfname      = (char *)malloc(NAME_LENGTH * sizeof(char));
+  sgfname     = (char *)malloc(NAME_LENGTH * sizeof(char));
+  rfname      = (char *)malloc(NAME_LENGTH * sizeof(char));
 
   strcpy(subjectsdir, lsubjectsdir);
   /* TODO: fix rest of infile/outfile/datfile mess, init here */

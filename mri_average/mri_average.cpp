@@ -23,49 +23,49 @@
  */
 
 #include "diag.h"
-#include "mrimorph.h"
 #include "mri_conform.h"
+#include "mrimorph.h"
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static MRI *align_with_average(MRI *mri_src, MRI *mri_avg);
+int            main(int argc, char *argv[]);
+static int     get_option(int argc, char *argv[]);
+static MRI *   align_with_average(MRI *mri_src, MRI *mri_avg);
 static MATRIX *align_pca(MRI *mri_src, MRI *mri_avg);
 static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
                           MATRIX *m_ref_evectors, double ref_means[3]);
 
-const char *Progname;
-static int align = 0;
-static int window_flag = 0;
+const char *       Progname;
+static int         align       = 0;
+static int         window_flag = 0;
 static MORPH_PARMS parms;
 
 static void usage_exit(int code);
-static int pct = 0;
-static int fromFile = 0;
-static int use_abs = 0;
+static int  pct      = 0;
+static int  fromFile = 0;
+static int  use_abs  = 0;
 
-static int sqr_images = 0;
-static double tx = 0.0;
-static double ty = 0.0;
-static double tz = 0.0;
-static double rzrot = 0.0;
-static double rxrot = 0.0;
-static double ryrot = 0.0;
-static int thresh_low = 0;
-static int nreductions = 2;
-static int conform = 1;
-static int sinc_flag = 1;
-static int sinchalfwindow = 3;
-static float scale_factor = 0.0;
+static int    sqr_images     = 0;
+static double tx             = 0.0;
+static double ty             = 0.0;
+static double tz             = 0.0;
+static double rzrot          = 0.0;
+static double rxrot          = 0.0;
+static double ryrot          = 0.0;
+static int    thresh_low     = 0;
+static int    nreductions    = 2;
+static int    conform        = 1;
+static int    sinc_flag      = 1;
+static int    sinchalfwindow = 3;
+static float  scale_factor   = 0.0;
 
 static float binarize_thresh = 0;
 
-int MRIsqrtAndNormalize(MRI *mri, float num);
+int  MRIsqrtAndNormalize(MRI *mri, float num);
 MRI *MRIsumSquare(MRI *mri1, MRI *mri2, MRI *mri_dst);
 
 int MRIsqrtAndNormalize(MRI *mri, float num) {
-  int x, y, z;
+  int    x, y, z;
   double val;
 
   for (x = 0; x < mri->width; x++) {
@@ -84,7 +84,7 @@ int MRIsqrtAndNormalize(MRI *mri, float num) {
 }
 
 MRI *MRIsumSquare(MRI *mri1, MRI *mri2, MRI *mri_dst) {
-  int x, y, z, f;
+  int    x, y, z, f;
   double val1, val2, val_dst;
 
   if (!mri_dst)
@@ -112,7 +112,7 @@ MRI *MRIsumSquare(MRI *mri1, MRI *mri2, MRI *mri_dst) {
 }
 
 MRI *MRIsumFrames(MRI *mri, MRI *mri_dst, int squares) {
-  int x, y, z, f;
+  int    x, y, z, f;
   double val, val_dst;
 
   if (!mri_dst) {
@@ -145,11 +145,11 @@ MRI *MRIsumFrames(MRI *mri, MRI *mri_dst, int squares) {
 
 int main(int argc, char *argv[]) {
   char **av, fname[STRLEN];
-  int ac, nargs, i, num = 0, filecount;
-  MRI *mri_src, *mri_avg = nullptr, *mri_tmp;
-  char *in_fname, *out_fname, *list_fname;
-  int msec, minutes, seconds, skipped = 0;
-  Timer start;
+  int    ac, nargs, i, num = 0, filecount;
+  MRI *  mri_src, *mri_avg = nullptr, *mri_tmp;
+  char * in_fname, *out_fname, *list_fname;
+  int    msec, minutes, seconds, skipped = 0;
+  Timer  start;
 
   nargs = handleVersionOption(argc, argv, "mri_average");
   if (nargs && argc - nargs == 1)
@@ -161,9 +161,9 @@ int main(int argc, char *argv[]) {
   DiagInit(nullptr, nullptr, nullptr);
 
   start.reset();
-  parms.dt = 1e-6;
-  parms.tol = 1e-5;
-  parms.momentum = 0.0;
+  parms.dt          = 1e-6;
+  parms.tol         = 1e-5;
+  parms.momentum    = 0.0;
   parms.niterations = 20;
 
   ac = argc;
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
           mri_tmp = MRIconform(mri_src);
           /*      MRIfree(&mri_src) ;*/
           mri_src_old = mri_src; // free it later...
-          mri_src = mri_tmp;
+          mri_src     = mri_tmp;
         }
 
         if (filecount == 1) {
@@ -334,7 +334,7 @@ int main(int argc, char *argv[]) {
         mri_tmp = MRIconform(mri_src);
         /*      MRIfree(&mri_src) ;*/
         mri_src_old = mri_src; // free it later...
-        mri_src = mri_tmp;
+        mri_src     = mri_tmp;
       }
 
       if (i == 2) {
@@ -381,12 +381,12 @@ int main(int argc, char *argv[]) {
         }
 #else
         if (!FZERO(ryrot) || !FZERO(rxrot) || !FZERO(rzrot)) {
-          MRI *mri_tmp;
+          MRI *   mri_tmp;
           MATRIX *mX, *mY, *mZ, *mRot, *mTmp;
 
-          mX = MatrixAllocRotation(3, x_angle, X_ROTATION);
-          mY = MatrixAllocRotation(3, y_angle, Y_ROTATION);
-          mZ = MatrixAllocRotation(3, z_angle, Z_ROTATION);
+          mX   = MatrixAllocRotation(3, x_angle, X_ROTATION);
+          mY   = MatrixAllocRotation(3, y_angle, Y_ROTATION);
+          mZ   = MatrixAllocRotation(3, z_angle, Z_ROTATION);
           mTmp = MatrixMultiply(mX, mZ, NULL);
           mRot = MatrixMultiply(mY, mTmp, NULL);
           fprintf(stderr,
@@ -469,7 +469,7 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "writing to %s...\n", out_fname);
   MRIwrite(mri_avg, out_fname);
   MRIfree(&mri_avg);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -485,17 +485,17 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "dt")) {
     parms.dt = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "using dt = %2.3e\n", parms.dt);
   } else if (!stricmp(option, "tol")) {
     parms.tol = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "using tol = %2.3e\n", parms.tol);
   } else if (!stricmp(option, "sqr") || !stricmp(option, "rms")) {
     sqr_images = 1;
@@ -506,13 +506,13 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "interpolating volume to be isotropic 1mm^3\n");
   } else if (!stricmp(option, "reduce")) {
     nreductions = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "reducing input images %d times before aligning...\n",
             nreductions);
   } else if (!stricmp(option, "sinc")) {
     sinchalfwindow = atoi(argv[2]);
-    sinc_flag = 1;
-    nargs = 1;
+    sinc_flag      = 1;
+    nargs          = 1;
     fprintf(stderr, "using sinc interpolation with windowwidth of %d\n",
             2 * sinchalfwindow);
   } else if (!stricmp(option, "trilinear")) {
@@ -540,13 +540,13 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'S':
       scale_factor = atof(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       printf("scaling all volumes by %f\n", scale_factor);
       break;
     case 'T':
-      tx = atof(argv[2]);
-      ty = atof(argv[3]);
-      tz = atof(argv[4]);
+      tx    = atof(argv[2]);
+      ty    = atof(argv[3]);
+      tz    = atof(argv[4]);
       nargs = 3;
       break;
     case 'P':
@@ -572,7 +572,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'M':
       parms.momentum = atof(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       fprintf(stderr, "using momentum = %2.3f\n", parms.momentum);
       break;
     case 'A':
@@ -631,9 +631,9 @@ static void usage_exit(int code) {
 }
 
 static MRI *align_with_average(MRI *mri_src, MRI *mri_avg) {
-  MRI *mri_aligned, *mri_in_red, *mri_ref_red;
-  MRI *mri_in_windowed, *mri_ref_windowed, *mri_in_tmp, *mri_ref_tmp;
-  int i;
+  MRI *   mri_aligned, *mri_in_red, *mri_ref_red;
+  MRI *   mri_in_windowed, *mri_ref_windowed, *mri_in_tmp, *mri_ref_tmp;
+  int     i;
   MATRIX *m_L;
 
   fprintf(stderr, "initializing alignment using PCA...\n");
@@ -672,15 +672,15 @@ static MRI *align_with_average(MRI *mri_src, MRI *mri_avg) {
   mri_in_red = mri_in_tmp = MRIcopy(mri_src, nullptr);
   mri_ref_red = mri_ref_tmp = MRIcopy(mri_avg, nullptr);
   for (i = 0; i < nreductions; i++) {
-    mri_in_red = MRIreduceByte(mri_in_tmp, nullptr);
+    mri_in_red  = MRIreduceByte(mri_in_tmp, nullptr);
     mri_ref_red = MRIreduceByte(mri_ref_tmp, nullptr);
     MRIfree(&mri_in_tmp);
     MRIfree(&mri_ref_tmp);
-    mri_in_tmp = mri_in_red;
+    mri_in_tmp  = mri_in_red;
     mri_ref_tmp = mri_ref_red;
   }
   parms.mri_ref = mri_avg;
-  parms.mri_in = mri_src; /* for diagnostics */
+  parms.mri_in  = mri_src; /* for diagnostics */
   MRIrigidAlign(mri_in_red, mri_ref_red, &parms, m_L);
 
   fprintf(stderr, "transforming input volume...\n");
@@ -702,11 +702,11 @@ static MRI *align_with_average(MRI *mri_src, MRI *mri_avg) {
 }
 
 static MATRIX *align_pca(MRI *mri_in, MRI *mri_ref) {
-  int row, col, i;
-  float dot;
+  int     row, col, i;
+  float   dot;
   MATRIX *m_ref_evectors = nullptr, *m_in_evectors = nullptr;
-  float in_evalues[3], ref_evalues[3];
-  double ref_means[3], in_means[3];
+  float   in_evalues[3], ref_evalues[3];
+  double  ref_means[3], in_means[3];
 #if 0
   MRI     *mri_in_windowed, *mri_ref_windowed ;
 
@@ -765,21 +765,21 @@ static MATRIX *align_pca(MRI *mri_in, MRI *mri_ref) {
 
 static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
                           MATRIX *m_ref_evectors, double ref_means[3]) {
-  float dx, dy, dz;
+  float   dx, dy, dz;
   MATRIX *mRot, *m_in_T, *mOrigin, *m_L, *m_R, *m_T, *m_tmp;
-  double x_angle, y_angle, z_angle, r11, r21, r31, r32, r33, cosy;
-  int row, col;
+  double  x_angle, y_angle, z_angle, r11, r21, r31, r32, r33, cosy;
+  int     row, col;
 
   m_in_T = MatrixTranspose(m_in_evectors, nullptr);
-  mRot = MatrixMultiply(m_ref_evectors, m_in_T, NULL);
+  mRot   = MatrixMultiply(m_ref_evectors, m_in_T, NULL);
 
-  r11 = mRot->rptr[1][1];
-  r21 = mRot->rptr[2][1];
-  r31 = mRot->rptr[3][1];
-  r32 = mRot->rptr[3][2];
-  r33 = mRot->rptr[3][3];
+  r11     = mRot->rptr[1][1];
+  r21     = mRot->rptr[2][1];
+  r31     = mRot->rptr[3][1];
+  r32     = mRot->rptr[3][2];
+  r33     = mRot->rptr[3][3];
   y_angle = atan2(-r31, sqrt(r11 * r11 + r21 * r21));
-  cosy = cos(y_angle);
+  cosy    = cos(y_angle);
   z_angle = atan2(r21 / cosy, r11 / cosy);
   x_angle = atan2(r32 / cosy, r33 / cosy);
 
@@ -792,7 +792,7 @@ static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
     return (MatrixIdentity(4, nullptr));
   }
 
-  mOrigin = VectorAlloc(3, MATRIX_REAL);
+  mOrigin             = VectorAlloc(3, MATRIX_REAL);
   mOrigin->rptr[1][1] = ref_means[0];
   mOrigin->rptr[2][1] = ref_means[1];
   mOrigin->rptr[3][1] = ref_means[2];
@@ -821,23 +821,23 @@ static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
   *MATRIX_RELT(m_R, 4, 4) = 1.0;
 
   /* translation so that origin is at ref eigenvector origin */
-  dx = -ref_means[0];
-  dy = -ref_means[1];
-  dz = -ref_means[2];
+  dx                      = -ref_means[0];
+  dy                      = -ref_means[1];
+  dz                      = -ref_means[2];
   *MATRIX_RELT(m_T, 1, 4) = dx;
   *MATRIX_RELT(m_T, 2, 4) = dy;
   *MATRIX_RELT(m_T, 3, 4) = dz;
   *MATRIX_RELT(m_T, 4, 4) = 1;
-  m_tmp = MatrixMultiply(m_R, m_T, NULL);
+  m_tmp                   = MatrixMultiply(m_R, m_T, NULL);
   *MATRIX_RELT(m_T, 1, 4) = -dx;
   *MATRIX_RELT(m_T, 2, 4) = -dy;
   *MATRIX_RELT(m_T, 3, 4) = -dz;
   MatrixMultiply(m_T, m_tmp, m_R);
 
   /* now apply translation to take in centroid to ref centroid */
-  dx = ref_means[0] - in_means[0];
-  dy = ref_means[1] - in_means[1];
-  dz = ref_means[2] - in_means[2];
+  dx                      = ref_means[0] - in_means[0];
+  dy                      = ref_means[1] - in_means[1];
+  dz                      = ref_means[2] - in_means[2];
   *MATRIX_RELT(m_T, 1, 4) = dx;
   *MATRIX_RELT(m_T, 2, 4) = dy;
   *MATRIX_RELT(m_T, 3, 4) = dz;

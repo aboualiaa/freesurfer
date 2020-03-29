@@ -3,15 +3,15 @@
 
 #include <QPainter>
 
-static const double Pi = 3.14159265358979323846264338327950288419717;
-static double TwoPi = 2.0 * Pi;
+static const double Pi    = 3.14159265358979323846264338327950288419717;
+static double       TwoPi = 2.0 * Pi;
 
 BinaryTreeEdge::BinaryTreeEdge(BinaryTreeNode *sourceNode,
                                BinaryTreeNode *destNode)
     : arrowSize(0), m_bHighlighted(false) {
   setAcceptedMouseButtons(0);
   source = sourceNode;
-  dest = destNode;
+  dest   = destNode;
   source->addEdge(this);
   dest->addEdge(this);
   adjust();
@@ -26,14 +26,14 @@ void BinaryTreeEdge::adjust() {
     return;
 
   QLineF line(mapFromItem(source, 0, 0), mapFromItem(dest, 0, 0));
-  qreal length = line.length();
+  qreal  length = line.length();
 
   prepareGeometryChange();
 
   if (length > qreal(20.)) {
     QPointF edgeOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
     sourcePoint = line.p1() + edgeOffset;
-    destPoint = line.p2() - edgeOffset;
+    destPoint   = line.p2() - edgeOffset;
   } else {
     sourcePoint = destPoint = line.p1();
   }
@@ -44,7 +44,7 @@ QRectF BinaryTreeEdge::boundingRect() const {
     return QRectF();
 
   qreal penWidth = 1;
-  qreal extra = (penWidth + arrowSize) / 2.0;
+  qreal extra    = (penWidth + arrowSize) / 2.0;
 
   return QRectF(sourcePoint, QSizeF(destPoint.x() - sourcePoint.x(),
                                     destPoint.y() - sourcePoint.y()))

@@ -1,9 +1,9 @@
 #ifndef __kvlCompressionLookupTable_h
 #define __kvlCompressionLookupTable_h
 
-#include "kvlAtlasMeshCollection.h"
 #include "itkImage.h"
 #include "itkRGBAPixel.h"
+#include "kvlAtlasMeshCollection.h"
 #if 0
 #include <unordered_map>
 #endif
@@ -13,9 +13,9 @@ namespace kvl {
 class CompressionLookupTable : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self = CompressionLookupTable;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = CompressionLookupTable;
+  using Superclass   = itk::Object;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
@@ -89,14 +89,14 @@ private:
   using CompressionLookupTableType =
       std::map<ImageType::PixelType, std::vector<int>>;
   using LabelStringLookupTableType = std::map<int, std::string>;
-  using ColorLookupTableType = std::map<int, ColorType>;
+  using ColorLookupTableType       = std::map<int, ColorType>;
 #endif
 
   // Data members
-  int m_NumberOfClasses;
+  int                        m_NumberOfClasses;
   CompressionLookupTableType m_CompressionLookupTable;
   LabelStringLookupTableType m_LabelStringLookupTable;
-  ColorLookupTableType m_ColorLookupTable;
+  ColorLookupTableType       m_ColorLookupTable;
 };
 
 } // end namespace kvl

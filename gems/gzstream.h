@@ -33,14 +33,14 @@
 #include "zlib/itk_zlib_mangle.h"
 
 // standard C++ with new header file names and std:: namespace
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <zlib.h>
 
 #else
-#include <iostream>
-#include <fstream>
 #include "itk_zlib.h"
+#include <fstream>
+#include <iostream>
 
 #endif
 
@@ -57,10 +57,10 @@ private:
   static const int bufferSize = 47 + 256; // size of data buff
   // totals 512 bytes under g++ for igzstream at the end.
 
-  gzFile file;             // file handle for compressed file
-  char buffer[bufferSize]; // data buffer
-  char opened;             // open/close state of stream
-  int mode;                // I/O mode
+  gzFile file;               // file handle for compressed file
+  char   buffer[bufferSize]; // data buffer
+  char   opened;             // open/close state of stream
+  int    mode;               // I/O mode
 
   int flush_buffer();
 
@@ -72,7 +72,7 @@ public:
          buffer + 4); // end position
     // ASSERT: both input & output capabilities will not be used together
   }
-  int is_open() { return opened; }
+  int          is_open() { return opened; }
   gzstreambuf *open(const char *name, int open_mode);
   gzstreambuf *close();
   ~gzstreambuf() { close(); }
@@ -90,8 +90,8 @@ public:
   gzstreambase() { init(&buf); }
   gzstreambase(const char *name, int open_mode);
   ~gzstreambase();
-  void open(const char *name, int open_mode);
-  void close();
+  void         open(const char *name, int open_mode);
+  void         close();
   gzstreambuf *rdbuf() { return &buf; }
 };
 
@@ -107,7 +107,7 @@ public:
   igzstream(const char *name, int open_mode = std::ios::in)
       : gzstreambase(name, open_mode), std::istream(&buf) {}
   gzstreambuf *rdbuf() { return gzstreambase::rdbuf(); }
-  void open(const char *name, int open_mode = std::ios::in) {
+  void         open(const char *name, int open_mode = std::ios::in) {
     gzstreambase::open(name, open_mode);
   }
 };
@@ -118,7 +118,7 @@ public:
   ogzstream(const char *name, int mode = std::ios::out)
       : gzstreambase(name, mode), std::ostream(&buf) {}
   gzstreambuf *rdbuf() { return gzstreambase::rdbuf(); }
-  void open(const char *name, int open_mode = std::ios::out) {
+  void         open(const char *name, int open_mode = std::ios::out) {
     gzstreambase::open(name, open_mode);
   }
 };

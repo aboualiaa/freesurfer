@@ -27,8 +27,8 @@
 #include "mrisurf.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 
 const char *Progname;
@@ -36,19 +36,19 @@ const char *Progname;
 static int verbose = 0;
 
 static char subjects_dir[STRLEN] = "";
-static char surface[STRLEN] = "inflated";
+static char surface[STRLEN]      = "inflated";
 
-static int nerode = 0;
+static int nerode  = 0;
 static int ndilate = 0;
-static int nclose = 0;
+static int nclose  = 0;
 
 static int writesurf = 0;
 
 int main(int argc, char *argv[]) {
-  int ac, nargs;
+  int    ac, nargs;
   char **av, *cp, surf_name[100], *hemi, *subject_name, *label_name, *out_fname;
   MRI_SURFACE *mris;
-  LABEL *label;
+  LABEL *      label;
 
   nargs = handleVersionOption(argc, argv, "label2patch");
   if (nargs && argc - nargs == 1)
@@ -72,9 +72,9 @@ int main(int argc, char *argv[]) {
     print_usage();
 
   subject_name = argv[1];
-  hemi = argv[2];
-  label_name = argv[3];
-  out_fname = argv[4];
+  hemi         = argv[2];
+  label_name   = argv[3];
+  out_fname    = argv[4];
 
   if (strlen(subjects_dir) == 0) {
     cp = getenv("SUBJECTS_DIR");
@@ -119,21 +119,21 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "dilate")) {
     ndilate = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("dilating label %d times...\n", ndilate);
   } else if (!stricmp(option, "erode")) {
     nerode = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("eroding label %d times...\n", nerode);
   } else if (!stricmp(option, "close")) {
     nclose = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("closing label %d times...\n", nclose);
   } else if (!stricmp(option, "sdir")) {
     strcpy(subjects_dir, argv[2]);

@@ -23,11 +23,11 @@
  *
  */
 
+#include <Getifh.h>
+#include <endianio.h>
+#include <rec.h>
 #include <stdlib.h>
 #include <string.h>
-#include <endianio.h>
-#include <Getifh.h>
-#include <rec.h>
 
 #define MAXL 256
 
@@ -48,23 +48,23 @@ int main(int argc, char **argv) {
   /* image I/O */
   /*************/
   FILE *fp_img, *fp_out;
-  IFH ifh;
-  char imgfile[MAXL], imgroot[MAXL];
-  char outfile[MAXL], outroot[MAXL] = "";
+  IFH   ifh;
+  char  imgfile[MAXL], imgroot[MAXL];
+  char  outfile[MAXL], outroot[MAXL] = "";
 
   /**************/
   /* processing */
   /**************/
-  int imgdim[4], dimension, orient, isbig;
-  float voxdim[3];
+  int    imgdim[4], dimension, orient, isbig;
+  float  voxdim[3];
   float *imgr;
-  float thresh = 0.0;
-  char control = '\0';
+  float  thresh  = 0.0;
+  char   control = '\0';
 
   /***********/
   /* utility */
   /***********/
-  int c, i, k;
+  int   c, i, k;
   char *ptr, command[MAXL], program[MAXL];
 
   /*********/
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
         switch (c) {
         case '@':
           control = *ptr++;
-          *ptr = '\0';
+          *ptr    = '\0';
           break;
         }
     } else

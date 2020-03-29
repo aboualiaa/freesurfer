@@ -7,10 +7,10 @@ namespace kvl {
 //
 AtlasMeshDeformationLBFGSOptimizer ::AtlasMeshDeformationLBFGSOptimizer() {
 
-  m_OldCost = 0;
-  m_OldGradient = nullptr;
+  m_OldCost            = 0;
+  m_OldGradient        = nullptr;
   m_OldSearchDirection = nullptr;
-  m_AlphaUsedLastTime = 0.0;
+  m_AlphaUsedLastTime  = 0.0;
 
   m_StartDistance = 1.0; // Measured in voxels
 
@@ -27,8 +27,8 @@ AtlasMeshDeformationLBFGSOptimizer ::~AtlasMeshDeformationLBFGSOptimizer() {}
 //
 void AtlasMeshDeformationLBFGSOptimizer ::Initialize() {
 
-  m_OldCost = 0;
-  m_OldGradient = nullptr;
+  m_OldCost            = 0;
+  m_OldGradient        = nullptr;
   m_OldSearchDirection = nullptr;
 
   m_Ss.clear();
@@ -105,7 +105,7 @@ AtlasMeshDeformationLBFGSOptimizer ::FindAndOptimizeNewSearchDirection() {
   for (int i = 0; i < memoryLength; i++) {
     AtlasPositionGradientContainerType::ConstPointer s = m_Ss[i];
     AtlasPositionGradientContainerType::ConstPointer y = m_Ys[i];
-    const double inverseRho = m_InverseRhos[i];
+    const double inverseRho                            = m_InverseRhos[i];
 
     // alp = ( s' * q ) / inverseRho;
     const double alp = this->ComputeInnerProduct(s, q) / inverseRho;
@@ -122,8 +122,8 @@ AtlasMeshDeformationLBFGSOptimizer ::FindAndOptimizeNewSearchDirection() {
   for (int i = (memoryLength - 1); i >= 0; i--) {
     AtlasPositionGradientContainerType::ConstPointer s = m_Ss[i];
     AtlasPositionGradientContainerType::ConstPointer y = m_Ys[i];
-    const double inverseRho = m_InverseRhos[i];
-    const double alp = alps[i];
+    const double inverseRho                            = m_InverseRhos[i];
+    const double alp                                   = alps[i];
 
     // bet = ( y' * r ) / inverseRho;
     const double bet = this->ComputeInnerProduct(y, r) / inverseRho;
@@ -145,10 +145,10 @@ AtlasMeshDeformationLBFGSOptimizer ::FindAndOptimizeNewSearchDirection() {
   //
   // Part III: Line Search
   //
-  const double c1 = 1e-4;
-  const double c2 = 0.9;
-  m_OldCost = m_Cost;
-  m_OldGradient = m_Gradient;
+  const double c1      = 1e-4;
+  const double c2      = 0.9;
+  m_OldCost            = m_Cost;
+  m_OldGradient        = m_Gradient;
   m_OldSearchDirection = searchDirection;
   // [ x, cost, gradient, alphaUsed ] = tryLineSearch( x, cost, gradient, p,
   // alpha1, c1, c2 );

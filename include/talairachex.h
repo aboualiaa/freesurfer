@@ -36,8 +36,8 @@ MATRIX *MtalVoxelFromVoxel(MRI *mri_src, const LTA *lta);
 MATRIX *MvoxelFromTalairach(MRI *mri_dst, const LTA *lta);
 MATRIX *MvoxelFromTalVoxel(MRI *mri_dst, const LTA *lta);
 MATRIX *MRASFromTalVoxel(MRI *mri, const LTA *lta);
-void TransformWithMatrix(const MATRIX *mat, const double x, const double y,
-                         const double z, double *px, double *py, double *pz);
+void    TransformWithMatrix(const MATRIX *mat, const double x, const double y,
+                            const double z, double *px, double *py, double *pz);
 
 int ModifyTalairachCRAS(MRI *mri_tal, const LTA *lta);
 int MRIvoxelToTalairachEx(MRI *mri_src, double xv, double yv, double zv,

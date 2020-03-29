@@ -24,21 +24,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
-#include "timer.h"
-#include "version.h"
+#include "error.h"
 #include "gca.h"
+#include "macros.h"
+#include "mri.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -46,11 +46,11 @@ static void usage_exit(int code);
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
-  GCA *gca;
-  MRI *mri_norm, *mri_aseg;
+  int    ac, nargs;
+  int    msec, minutes, seconds;
+  Timer  start;
+  GCA *  gca;
+  MRI *  mri_norm, *mri_aseg;
 
   nargs = handleVersionOption(argc, argv, "mri_update_gca");
   if (nargs && argc - nargs == 1)
@@ -74,14 +74,14 @@ int main(int argc, char *argv[]) {
   if (argc < 5)
     usage_exit(1);
 
-  gca = GCAread(argv[1]);
+  gca      = GCAread(argv[1]);
   mri_norm = MRIread(argv[2]);
   mri_aseg = MRIread(argv[3]);
   GCArenormalizeToExample(gca, mri_aseg, mri_norm);
   printf("writing updated gca to %s...\n", argv[4]);
   GCAwrite(gca, argv[4]);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

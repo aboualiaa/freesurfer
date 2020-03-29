@@ -23,20 +23,20 @@
  *
  */
 
-#include "error.h"
-#include "timer.h"
 #include "diag.h"
+#include "error.h"
 #include "gca.h"
 #include "tags.h"
+#include "timer.h"
 #include "version.h"
 
 const char *Progname;
 
 static char *mask_fname = NULL;
-static int novar = 0;
+static int   novar      = 0;
 
 static void usage_exit(int code);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
 static int longinput = 0;
 
@@ -50,19 +50,17 @@ static int longinput = 0;
 */
 
 #define MAX_TIMEPOINTS 2000
-static char *subjects[MAX_TIMEPOINTS] ;
-int
-main(int argc, char *argv[])
-{
-  char         *gca_fname, *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN] ;
-  MRI          *mri_in, *mri_tmp ;
-  GCA          *gca ;
-  int          ac, nargs, msec, minutes, seconds;
-  int          input, ninputs ;
-  Timer start ;
-  TRANSFORM    *transform ;
-  char         line[STRLEN], *cp, sdir[STRLEN], base_name[STRLEN] ;
-  FILE         *fp ;
+static char *subjects[MAX_TIMEPOINTS];
+int          main(int argc, char *argv[]) {
+  char *gca_fname, *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN];
+  MRI * mri_in, *mri_tmp;
+  GCA * gca;
+  int   ac, nargs, msec, minutes, seconds;
+  int   input, ninputs;
+  Timer start;
+  TRANSFORM *transform;
+  char       line[STRLEN], *cp, sdir[STRLEN], base_name[STRLEN];
+  FILE *     fp;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_cal_renormalize_gca");
 
@@ -90,10 +88,10 @@ main(int argc, char *argv[])
               "usage: %s [<options>] <longitudinal time point file> <in vol> "
               "<input atlas> <transform file> <output atlas> \n",
               Progname);
-  in_fname = argv[2];
-  gca_fname = argv[3];
+  in_fname    = argv[2];
+  gca_fname   = argv[3];
   xform_fname = argv[4];
-  out_fname = argv[5];
+  out_fname   = argv[5];
 
   printf("reading atlas from '%s'...\n", gca_fname);
   fflush(stdout);
@@ -117,7 +115,7 @@ main(int argc, char *argv[])
     *cp = 0; // remove last component of path, which is base subject name
   }
   ninputs = 0;
-  fp = fopen(argv[1], "r");
+  fp      = fopen(argv[1], "r");
   if (fp == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read time point file %s", Progname,
               argv[1]);
@@ -158,7 +156,7 @@ main(int argc, char *argv[])
     }
 
     if (mask_fname) {
-      int i;
+      int  i;
       MRI *mri_mask;
 
       mri_mask = MRIread(mask_fname);
@@ -191,7 +189,7 @@ main(int argc, char *argv[])
   if (gca)
     GCAfree(&gca);
   printf("done.\n");
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -206,7 +204,7 @@ main(int argc, char *argv[])
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -215,7 +213,7 @@ static int get_option(int argc, char *argv[]) {
     usage_exit(0);
   else if (!strcmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else if (!strcmp(option, "DEBUG_VOXEL")) {
     Gx = atoi(argv[2]);
@@ -242,7 +240,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':

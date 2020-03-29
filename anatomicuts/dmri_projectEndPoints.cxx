@@ -12,63 +12,60 @@
 const int ENDPOINT_VALUE = 1;
 
 // Libraries
-#include <iostream>
-#include <fstream>
-#include <string>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 // Input Splicing
 #include "GetPot.h"
 
 // TRK Loading
+#include "ClusterTools.h"
+#include "EuclideanMembershipFunction.h"
+#include "LabelPerPointVariableLengthVector.h"
+#include "PolylineMeshToVTKPolyDataFilter.h"
+#include "TrkVTKPolyDataFilter.txx"
+#include "itkArray.h"
+#include "itkDefaultStaticMeshTraits.h"
+#include "itkImage.h"
+#include "itkPolylineCell.h"
+#include <cmath>
+#include <vtkCellArray.h>
+#include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataReader.h>
 #include <vtkPolyDataWriter.h>
-#include "itkPolylineCell.h"
-#include <vtkCellArray.h>
-#include <vtkPoints.h>
-#include <cmath>
-#include "itkArray.h"
-#include "itkPolylineCell.h"
-#include "TrkVTKPolyDataFilter.txx"
-#include "itkImage.h"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "LabelPerPointVariableLengthVector.h"
-#include "EuclideanMembershipFunction.h"
-#include "ClusterTools.h"
-#include "itkDefaultStaticMeshTraits.h"
 
 // Surface Loading
-#include "itkImage.h"
-#include <map>
-#include "itkDefaultStaticMeshTraits.h"
-#include "fsSurface.h"
-#include "itkTriangleCell.h"
-#include <set>
 #include "colortab.h"
+#include "fsSurface.h"
 #include "fsenv.h"
-#include "itkVTKPolyDataWriter.h"
+#include "itkDefaultStaticMeshTraits.h"
+#include "itkImage.h"
 #include "itkSmoothingQuadEdgeMeshFilter.h"
+#include "itkTriangleCell.h"
+#include "itkVTKPolyDataWriter.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"
+#include <map>
+#include <set>
 
+#include "vtkCellArray.h"
+#include "vtkCleanPolyData.h"
+#include "vtkDecimatePro.h"
 #include "vtkFillHolesFilter.h"
 #include "vtkPolyDataNormals.h"
-#include "vtkCellArray.h"
-#include "vtkTriangle.h"
-#include "vtkDecimatePro.h"
-#include "vtkCleanPolyData.h"
 #include "vtkSmoothPolyDataFilter.h"
+#include "vtkTriangle.h"
 #include "vtkTriangleFilter.h"
 
-#include "vtkDelaunay3D.h"
 #include "macros.h"
-#include "mrisurf.h"
 #include "mri.h"
-#include "vtkKdTreePointLocator.h"
+#include "mrisurf.h"
 #include "vtkCurvatures.h"
-
-using namespace std;
+#include "vtkDelaunay3D.h"
+#include "vtkKdTreePointLocator.h"
 
 // Helper Functions
 vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2);
@@ -79,14 +76,15 @@ int main(int narg, char *arg[]) {
 
   // Checking for correct parameters
   if ((gp.size() <= 8) or (gp.search(2, "--help", "-h"))) {
-    cerr << "Usage: " << endl
-         << arg[0]
-         << " -i streamlineFile.trk -sl surfaceFile_lh.orig -sr "
-            "surfaceFile_rh.orig"
-         << endl
-         << "                       -ol left_overlayFile -or right_overlayFile"
-         << endl
-         << "		       -ri reference_Image" << endl;
+    std::cerr
+        << "Usage: " << std::endl
+        << arg[0]
+        << " -i streamlineFile.trk -sl surfaceFile_lh.orig -sr "
+           "surfaceFile_rh.orig"
+        << std::endl
+        << "                       -ol left_overlayFile -or right_overlayFile"
+        << std::endl
+        << "		       -ri reference_Image" << std::endl;
 
     return EXIT_FAILURE;
   }
@@ -94,12 +92,12 @@ int main(int narg, char *arg[]) {
   // Declaration of Variables for Program to Function
   // TRK file Definition
   enum { Dimension = 3 };
-  using PixelType = int;
-  const unsigned int PointDimension = 3;
-  using PointDataType = vector<int>;
+  using PixelType                            = int;
+  const unsigned int PointDimension          = 3;
+  using PointDataType                        = std::vector<int>;
   const unsigned int MaxTopologicalDimension = 3;
-  using CoordinateType = double;
-  using InterpolationWeightType = double;
+  using CoordinateType                       = double;
+  using InterpolationWeightType              = double;
   using MeshTraits =
       itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                    MaxTopologicalDimension, CoordinateType,
@@ -108,30 +106,30 @@ int main(int narg, char *arg[]) {
 
   using ImageType = itk::Image<float, 3>;
 
-  using ColorMeshType = itk::Mesh<PixelType, PointDimension>;
-  using PointType = ColorMeshType::PointType;
-  using CellType = ColorMeshType::CellType;
+  using ColorMeshType    = itk::Mesh<PixelType, PointDimension>;
+  using PointType        = ColorMeshType::PointType;
+  using CellType         = ColorMeshType::CellType;
   using PolylineCellType = itk::PolylineCell<CellType>;
-  using CellAutoPointer = ColorMeshType::CellAutoPointer;
+  using CellAutoPointer  = ColorMeshType::CellAutoPointer;
   using ClusterToolsType =
       ClusterTools<ColorMeshType, ImageType, HistogramMeshType>;
 
   // Surface file Definition
   using CoordType = float;
-  using SurfType = fs::Surface<CoordType, Dimension>;
+  using SurfType  = fs::Surface<CoordType, Dimension>;
 
   // Input Parsing
-  vector<string> TRKFile;
+  std::vector<std::string> TRKFile;
   TRKFile.push_back(gp.follow("Could not find TRK file", "-i"));
   const char *surfaceFileL = gp.follow("Could not find Surface File", "-sl");
   const char *surfaceFileR = gp.follow("Could not find Surface File", "-sr");
   const char *overlayFileL = gp.follow("Could not find Overlay File", "-ol");
   const char *overlayFileR = gp.follow("Could not find Overlay File", "-or");
-  const char *refImage = gp.follow("Could not find Reference Image", "-ri");
+  const char *refImage     = gp.follow("Could not find Reference Image", "-ri");
 
   // Reading in the Image
   // ITK Version
-  using ImageReaderType = itk::ImageFileReader<ImageType>;
+  using ImageReaderType            = itk::ImageFileReader<ImageType>;
   ImageReaderType::Pointer readerS = ImageReaderType::New();
   readerS->SetFileName(refImage);
   readerS->Update();
@@ -141,17 +139,17 @@ int main(int narg, char *arg[]) {
   MRI *image = MRIread(refImage);
 
   // Outputting the Files to Ensure the correct files were input
-  cerr << endl
-       << "TRK File:           " << TRKFile.at(0) << endl
-       << "Left Surface File:  " << surfaceFileL << endl
-       << "Left Overlay File:  " << overlayFileL << endl
-       << "Right Surface File: " << surfaceFileR << endl
-       << "Right Overlay File: " << overlayFileR << endl
-       << "Reference Image:    " << refImage << endl;
+  std::cerr << std::endl
+            << "TRK File:           " << TRKFile.at(0) << std::endl
+            << "Left Surface File:  " << surfaceFileL << std::endl
+            << "Left Overlay File:  " << overlayFileL << std::endl
+            << "Right Surface File: " << surfaceFileR << std::endl
+            << "Right Overlay File: " << overlayFileR << std::endl
+            << "Reference Image:    " << refImage << std::endl;
 
   // Loading the TRK files into a mesh
-  vector<ColorMeshType::Pointer> *meshes;
-  vector<vtkSmartPointer<vtkPolyData>> polydatas;
+  std::vector<ColorMeshType::Pointer> *     meshes;
+  std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
   clusterTools->GetPolyDatas(TRKFile, &polydatas, volume);
@@ -186,7 +184,7 @@ int main(int narg, char *arg[]) {
   double point_array[3];
 
   // Initialization of a streamline
-  ColorMeshType::Pointer input = (*meshes)[0];
+  ColorMeshType::Pointer                  input = (*meshes)[0];
   ColorMeshType::CellsContainer::Iterator inputCellIt =
       input->GetCells()->Begin();
 
@@ -202,7 +200,7 @@ int main(int narg, char *arg[]) {
                          &point_array[1], &point_array[2]);
 
     // Finds closest point and sets value equal to ENDPOINT_VALUE
-    double distL, distR;
+    double    distL, distR;
     vtkIdType Left_ID =
         surfTreeL->FindClosestPointWithinRadius(1000, point_array, distL);
     vtkIdType Right_ID =
@@ -244,7 +242,7 @@ int main(int narg, char *arg[]) {
 // Converts a surface to a VTK
 //
 vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf) {
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> triangles =
       vtkSmartPointer<vtkCellArray>::New();
 

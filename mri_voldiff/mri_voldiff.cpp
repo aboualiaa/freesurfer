@@ -28,23 +28,23 @@
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "fio.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "version.h"
 
 // Exit codes. See dump_exit_codes.
-#define DIMENSION_EC 2
-#define PRECISION_EC 3
+#define DIMENSION_EC  2
+#define PRECISION_EC  3
 #define RESOLUTION_EC 4
-#define VOX2RAS_EC 5
-#define PIXEL_EC 6
+#define VOX2RAS_EC    5
+#define PIXEL_EC      6
 
 static void dump_exit_codes(FILE *fp);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -52,34 +52,35 @@ static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
 
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 static char vcid[] = "$Id: mri_voldiff.c,v 1.6 2011/03/02 00:04:25 nicks Exp $";
 const char *Progname = nullptr;
 
-char *vol1File = nullptr, *vol2File = nullptr;
-MRI *vol1 = nullptr, *vol2 = nullptr;
+char *  vol1File = nullptr, *vol2File = nullptr;
+MRI *   vol1 = nullptr, *vol2 = nullptr;
 MATRIX *vox2ras1, *vox2ras2;
 
-int debug = 0, checkoptsonly = 0;
+int  debug = 0, checkoptsonly = 0;
 char tmpstr[2000];
 
 int AllowResolution = 0;
-int AllowPrecision = 0;
-int AllowVox2RAS = 0;
+int AllowPrecision  = 0;
+int AllowVox2RAS    = 0;
 
 double vox2ras_thresh = 0;
 double pixdiff_thresh = 0;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, r, c;
+  int            nargs, r, c;
   struct utsname uts;
-  char *cmdline, cwd[2000];
-  double maxdiff, d;
-  int cmax, rmax, smax, fmax;
+  char *         cmdline, cwd[2000];
+  double         maxdiff, d;
+  int            cmax, rmax, smax, fmax;
 
   nargs = handleVersionOption(argc, argv, "mri_voldiff");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -174,7 +175,7 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -212,12 +213,12 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcmp(option, "--v1")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      vol1File = fio_fullpath(pargv[0]);
+      vol1File  = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--v2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      vol2File = fio_fullpath(pargv[0]);
+      vol2File  = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--pix")) {
       if (nargc < 1)

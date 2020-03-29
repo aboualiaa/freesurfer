@@ -28,16 +28,16 @@ struct MorphItem {
 std::vector<int> g_vDbgCoords;
 
 struct IoParams {
-  std::string strOut;
-  std::string strTemplate;
-  std::string strSubject;
+  std::string                    strOut;
+  std::string                    strTemplate;
+  std::string                    strSubject;
   typedef std::vector<MorphItem> MorphContainerType;
-  MorphContainerType items;
+  MorphContainerType             items;
 
   typedef std::vector<int> IntVectorType;
-  IntVectorType vDbgCoords;
+  IntVectorType            vDbgCoords;
 
-  void parse(int ac, char** av);
+  void parse(int ac, char **av);
 };
 
 //==================================================
@@ -45,9 +45,7 @@ struct IoParams {
 // assume field was already allocated
 MRI *CopyGcamToDeltaField(GCA_MORPH *gcam, MRI *field);
 
-int
-main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
   IoParams params;
   try {
     params.parse(argc, argv);
@@ -159,7 +157,7 @@ main(int argc, char** argv)
 
     } else if (it->type == "mesh") {
       std::shared_ptr<gmp::FemTransform3d> pfem(new gmp::FemTransform3d);
-      std::shared_ptr<CMesh3d> pmesh(new CMesh3d);
+      std::shared_ptr<CMesh3d>             pmesh(new CMesh3d);
       pmesh->load(it->file.c_str());
       pfem->m_sharedMesh = pmesh;
       pmorph->m_transforms.push_back(pfem);
@@ -180,10 +178,7 @@ main(int argc, char** argv)
   return 0;
 }
 
-
-void
-IoParams::parse(int ac, char** av)
-{
+void IoParams::parse(int ac, char **av) {
   ArgumentParser parser;
   // required
   parser.addArgument("--in", '+', String, true);
@@ -197,11 +192,11 @@ IoParams::parse(int ac, char** av)
   parser.parse(ac, av);
 
   typedef std::vector<std::string> StringVector;
-  StringVector vItems = parser.retrieve<StringVector>("in");
-  strOut = parser.retrieve<std::string>("out");
+  StringVector                     vItems = parser.retrieve<StringVector>("in");
+  strOut                                  = parser.retrieve<std::string>("out");
 
   strTemplate = parser.retrieve<std::string>("template");
-  strSubject = parser.retrieve<std::string>("subject");
+  strSubject  = parser.retrieve<std::string>("subject");
 
   if (parser.exists("dbg")) {
     vDbgCoords = parser.retrieve<std::vector<int>>("dbg");
@@ -234,7 +229,7 @@ MRI *CopyGcamToDeltaField(GCA_MORPH *gcam, MRI *field) {
 
   // allocate the mask
   MRI *mask = MRIalloc(field->width, field->height, field->depth, MRI_UCHAR);
-  unsigned int maskCounter = 0;
+  unsigned int  maskCounter = 0;
   unsigned char ucOne(1); //, ucZero(0);
   // fill the mask with true values to start with
 
@@ -263,7 +258,7 @@ MRI *CopyGcamToDeltaField(GCA_MORPH *gcam, MRI *field) {
   // !!!! The strong underlying assumption is that the IMAGE and ATLAS
   // associated with the GCAM share the same RAS
   //
-  VECTOR *vx = VectorAlloc(4, MATRIX_REAL);
+  VECTOR *vx        = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(vx, 4) = 1.0;
   VECTOR_ELT(vx, 1) = 0.0;
   VECTOR_ELT(vx, 2) = 0.0;
@@ -282,7 +277,7 @@ MRI *CopyGcamToDeltaField(GCA_MORPH *gcam, MRI *field) {
   shift_z = myNint(VECTOR_ELT(vfx, 3));
 
   unsigned int invalidCount = 0;
-  int img_x, img_y, img_z;
+  int          img_x, img_y, img_z;
   for (int z = 0, maxZ = gcam->depth; z < maxZ; ++z)
     for (int y = 0, maxY = gcam->height; y < maxY; ++y)
       for (int x = 0, maxX = gcam->width; x < maxX; ++x) {

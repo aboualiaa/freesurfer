@@ -73,7 +73,7 @@ public:
 
     //
     unsigned int meshSize[3];
-    double *tmp = mxGetPr(prhs[1]);
+    double *     tmp = mxGetPr(prhs[1]);
     for (int i = 0; i < 3; i++, tmp++) {
       meshSize[i] = static_cast<int>(*tmp);
       std::cout << "meshSize[ " << i << " ]: " << meshSize[i] << std::endl;
@@ -83,9 +83,9 @@ public:
     domainSize[1] = imageSize[1];
     domainSize[2] = imageSize[2];
 
-    const float initialStiffness                = 0.1;
-    const unsigned int numberOfMeshes           = 1;
-    AtlasMeshCollection::Pointer meshCollection = AtlasMeshCollection::New();
+    const float                  initialStiffness = 0.1;
+    const unsigned int           numberOfMeshes   = 1;
+    AtlasMeshCollection::Pointer meshCollection   = AtlasMeshCollection::New();
     meshCollection->Construct(meshSize, domainSize, initialStiffness,
                               numberOfClasses, numberOfMeshes);
 

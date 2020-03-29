@@ -159,82 +159,82 @@ Save output file in 'uchar' format.
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "version.h"
-#include "fmriutils.h"
-#include "cmdargs.h"
-#include "randomfields.h"
 #include "cma.h"
+#include "cmdargs.h"
+#include "diag.h"
+#include "fmriutils.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "randomfields.h"
 #include "region.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mri_binarize.c,v 1.43 2016/06/09 20:46:21 greve Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = nullptr;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *InVolFile = nullptr;
-char *OutVolFile = nullptr;
-char *MergeVolFile = nullptr;
-char *CopyVolFile = nullptr;
-char *MaskVolFile = nullptr;
+char * InVolFile    = nullptr;
+char * OutVolFile   = nullptr;
+char * MergeVolFile = nullptr;
+char * CopyVolFile  = nullptr;
+char * MaskVolFile  = nullptr;
 double MinThresh, MaxThresh;
-int MinThreshSet = 0, MaxThreshSet = 0;
+int    MinThreshSet = 0, MaxThreshSet = 0;
 double RMinThresh, RMaxThresh;
-int RMinThreshSet = 0, RMaxThreshSet = 0;
-char *CountFile = nullptr;
+int    RMinThreshSet = 0, RMaxThreshSet = 0;
+char * CountFile = nullptr;
 
-int BinVal = 1;
-int BinValNot = 0;
-int frame = 0;
-int DoFrameLoop = 1;
-int DoAbs = 0;
-int DoNeg = 0;
-int ZeroColEdges = 0;
-int ZeroRowEdges = 0;
+int BinVal         = 1;
+int BinValNot      = 0;
+int frame          = 0;
+int DoFrameLoop    = 1;
+int DoAbs          = 0;
+int DoNeg          = 0;
+int ZeroColEdges   = 0;
+int ZeroRowEdges   = 0;
 int ZeroSliceEdges = 0;
 
 int DoMatch = 0;
-int nMatch = 0;
+int nMatch  = 0;
 int MatchValues[1000];
 int Matched = 0;
 
-MRI *InVol, *OutVol, *MergeVol, *MaskVol = nullptr, *CopyVol;
+MRI *  InVol, *OutVol, *MergeVol, *MaskVol = nullptr, *CopyVol;
 double MaskThresh = 0.5;
 
-int nErode2d = 0;
-int nErode3d = 0;
+int nErode2d  = 0;
+int nErode3d  = 0;
 int nDilate3d = 0;
-int DoBinCol = 0;
+int DoBinCol  = 0;
 
-int mriTypeUchar = 0;
-int DoFrameSum = 0;
-int DoFrameAnd = 0;
-int DoPercent = 0;
-double TopPercent = -1;
+int    mriTypeUchar = 0;
+int    DoFrameSum   = 0;
+int    DoFrameAnd   = 0;
+int    DoPercent    = 0;
+double TopPercent   = -1;
 double FDR;
-int DoFDR = 0;
-int FDRSign = 0;
+int    DoFDR   = 0;
+int    FDRSign = 0;
 
 int nErodeNN = 0, NNType = 0;
 
 static int replace_only = 0;
-int nReplace = 0, SrcReplace[1000], TrgReplace[1000];
-char *SurfFile = nullptr;
-int nsmoothsurf = 0;
+int        nReplace     = 0, SrcReplace[1000], TrgReplace[1000];
+char *     SurfFile     = nullptr;
+int        nsmoothsurf  = 0;
 
 int noverbose = 0;
 int DoBB = 0, nPadBB = 0;
@@ -242,14 +242,15 @@ int DoCount = 1;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, c, r, s, nhits, InMask, n, mriType, nvox;
-  int fstart, fend, nframes;
+  int    nargs, c, r, s, nhits, InMask, n, mriType, nvox;
+  int    fstart, fend, nframes;
   double val, maskval, mergeval, gmean, gstd, gmax, voxvol;
-  FILE *fp;
-  MRI *mritmp;
+  FILE * fp;
+  MRI *  mritmp;
 
   nargs = handleVersionOption(argc, argv, "mri_binarize");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -305,16 +306,16 @@ int main(int argc, char *argv[]) {
                 nullptr);
     printf("FDR %g, Sign=%d, Thresh = %g\n", FDR, FDRSign, FDRThresh);
     if (FDRSign == 0) {
-      DoAbs = 1;
-      MinThresh = FDRThresh;
+      DoAbs        = 1;
+      MinThresh    = FDRThresh;
       MinThreshSet = 1;
     }
     if (FDRSign == +1) {
-      MinThresh = FDRThresh;
+      MinThresh    = FDRThresh;
       MinThreshSet = 1;
     }
     if (FDRSign == -1) {
-      MaxThresh = -FDRThresh;
+      MaxThresh    = -FDRThresh;
       MaxThreshSet = 1;
     }
   }
@@ -341,12 +342,12 @@ int main(int argc, char *argv[]) {
     RFglobalStats(InVol, nullptr, &gmean, &gstd, &gmax);
     printf("mean = %g, std = %g, max = %g\n", gmean, gstd, gmax);
     if (RMinThreshSet) {
-      MinThresh = gmean * RMinThresh;
+      MinThresh    = gmean * RMinThresh;
       MinThreshSet = 1;
       printf("Setting min thresh to %g\n", MinThresh);
     }
     if (RMaxThreshSet) {
-      MaxThresh = gmean * RMaxThresh;
+      MaxThresh    = gmean * RMaxThresh;
       MaxThreshSet = 1;
       printf("Setting max thresh to %g\n", MinThresh);
     }
@@ -397,10 +398,10 @@ int main(int argc, char *argv[]) {
 
   if (DoFrameLoop) {
     fstart = 0;
-    fend = InVol->nframes - 1;
+    fend   = InVol->nframes - 1;
   } else {
     fstart = frame;
-    fend = frame;
+    fend   = frame;
   }
   nframes = fend - fstart + 1;
   if (noverbose == 0)
@@ -421,7 +422,7 @@ int main(int argc, char *argv[]) {
     // Binarize
 
     mergeval = BinValNot;
-    InMask = 1;
+    InMask   = 1;
     for (frame = fstart; frame <= fend; frame++) {
       for (c = 0; c < InVol->width; c++) {
         for (r = 0; r < InVol->height; r++) {
@@ -581,7 +582,7 @@ int main(int argc, char *argv[]) {
     MRISfree(&surf);
   }
 
-  nvox = OutVol->width * OutVol->height * OutVol->depth;
+  nvox   = OutVol->width * OutVol->height * OutVol->depth;
   voxvol = OutVol->xsize * OutVol->ysize * OutVol->zsize;
   if (noverbose == 0)
     printf("Count: %d %lf %d %lf\n", nhits, nhits * voxvol, nvox,
@@ -605,7 +606,7 @@ int main(int argc, char *argv[]) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused, nth;
+  int    nargc, nargsused, nth;
   char **pargv, *option;
 
   if (argc < 1)
@@ -646,8 +647,8 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--no-count"))
       DoCount = 0;
     else if (!strcasecmp(option, "--zero-edges")) {
-      ZeroColEdges = 1;
-      ZeroRowEdges = 1;
+      ZeroColEdges   = 1;
+      ZeroRowEdges   = 1;
       ZeroSliceEdges = 1;
     } else if (!strcasecmp(option, "--zero-slice-edges"))
       ZeroSliceEdges = 1;
@@ -660,7 +661,7 @@ static int parse_commandline(int argc, char **argv) {
       MatchValues[nMatch++] = 253;
       MatchValues[nMatch++] = 254;
       MatchValues[nMatch++] = 255;
-      DoMatch = 1;
+      DoMatch               = 1;
     } else if (!strcasecmp(option, "--all-wm")) {
       MatchValues[nMatch++] = 2;
       MatchValues[nMatch++] = 41;
@@ -672,7 +673,7 @@ static int parse_commandline(int argc, char **argv) {
       MatchValues[nMatch++] = 255;
       MatchValues[nMatch++] = 7;  // Cerebellar WM
       MatchValues[nMatch++] = 46; // Cerebellar WM
-      DoMatch = 1;
+      DoMatch               = 1;
     } else if (!strcasecmp(option, "--ventricles")) {
       MatchValues[nMatch++] = 4;  // Left-Lateral-Ventricle
       MatchValues[nMatch++] = 5;  // Left-Inf-Lat-Vent
@@ -730,9 +731,9 @@ static int parse_commandline(int argc, char **argv) {
       MatchValues[nMatch++] = 63; // Right-choroid-plexus
       MatchValues[nMatch++] = 0;  // Background
       MatchValues[nMatch++] = 24; // CSF
-      DoMatch = 1;
+      DoMatch               = 1;
       // Invert the matches above
-      BinVal = 0;
+      BinVal    = 0;
       BinValNot = 1;
     }
 
@@ -745,11 +746,11 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       OutVolFile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      SurfFile = pargv[0];
+      SurfFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--surf-smooth")) {
       if (nargc < 1)
@@ -760,17 +761,17 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       MergeVolFile = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--copy")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       CopyVolFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       MaskVolFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--mask-thresh")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -781,37 +782,37 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &TopPercent);
       MinThreshSet = 1;
-      DoPercent = 1;
-      nargsused = 1;
+      DoPercent    = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--min")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &MinThresh);
       MinThreshSet = 1;
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--max")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &MaxThresh);
       MaxThreshSet = 1;
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--rmin")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &RMinThresh);
       RMinThreshSet = 1;
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--rmax")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &RMaxThresh);
       RMaxThreshSet = 1;
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--fdr")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &FDR);
-      DoFDR = 1;
+      DoFDR     = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--fdr-pos"))
       FDRSign = +1;
@@ -824,7 +825,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &nPadBB);
-      DoBB = 1;
+      DoBB      = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--replace")) {
       if (nargc < 2)
@@ -852,7 +853,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%d", &BinValNot);
       nargsused = 1;
     } else if (!strcasecmp(option, "--inv")) {
-      BinVal = 0;
+      BinVal    = 0;
       BinValNot = 1;
     } else if (!strcasecmp(option, "--match")) {
       if (nargc < 1)
@@ -864,7 +865,7 @@ static int parse_commandline(int argc, char **argv) {
         nth++;
       }
       nargsused = nth;
-      DoMatch = 1;
+      DoMatch   = 1;
     } else if (!strcasecmp(option, "--subcort-gm")) {
       MatchValues[nMatch] = Left_Thalamus;
       nMatch++;
@@ -912,15 +913,15 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &frame);
-      nargsused = 1;
+      nargsused   = 1;
       DoFrameLoop = 0;
     } else if (!strcasecmp(option, "--frame-sum")) {
-      DoFrameSum = 1;
+      DoFrameSum  = 1;
       DoFrameLoop = 0;
     } else if (!strcasecmp(option, "--frame-and")) {
-      DoFrameAnd = 1;
+      DoFrameAnd   = 1;
       MinThreshSet = 1;
-      DoFrameLoop = 0;
+      DoFrameLoop  = 0;
     } else if (!strcasecmp(option, "--dilate")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -930,19 +931,19 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &nErodeNN);
-      NNType = NEAREST_NEIGHBOR_FACE;
+      NNType    = NEAREST_NEIGHBOR_FACE;
       nargsused = 1;
     } else if (!strcasecmp(option, "--erode-edge")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &nErodeNN);
-      NNType = NEAREST_NEIGHBOR_EDGE;
+      NNType    = NEAREST_NEIGHBOR_EDGE;
       nargsused = 1;
     } else if (!strcasecmp(option, "--erode-corner")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &nErodeNN);
-      NNType = NEAREST_NEIGHBOR_CORNER;
+      NNType    = NEAREST_NEIGHBOR_CORNER;
       nargsused = 1;
     } else if (!strcasecmp(option, "--erode")) {
       if (nargc < 1)
@@ -958,7 +959,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       CountFile = pargv[0];
-      DoCount = 1;
+      DoCount   = 1;
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);

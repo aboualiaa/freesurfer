@@ -23,21 +23,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "timer.h"
-#include "macros.h"
-#include "error.h"
+#include "class_array.h"
+#include "cma.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
 #include "proto.h"
 #include "svm.h"
+#include "timer.h"
 #include "version.h"
 #include "voxlist.h"
-#include "cma.h"
-#include "class_array.h"
 
 static char vcid[] =
     "$Id: mri_aseg_edit_reclassify.c,v 1.5 2011/03/02 00:04:13 nicks Exp $";
@@ -48,7 +48,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -70,12 +70,12 @@ int main(int argc, char *argv[]) {
   MRI *mri_aseg, *mri_norm, *mri_grad[NSCALES], *mri_kernel,
       *mri_smooth[NSCALES], *mri_laplacian[NSCALES], *mri_dtrans,
       *mri_dtrans_grad, *mri_2nd_deriv_s[NSCALES];
-  char **av, *norm_name, *input_aseg_name, *output_aseg_name, *svm_name;
-  int ac, nargs, ninputs, i;
-  Timer start;
-  int msec, minutes, seconds, x, y, z, nchanged;
+  char **     av, *norm_name, *input_aseg_name, *output_aseg_name, *svm_name;
+  int         ac, nargs, ninputs, i;
+  Timer       start;
+  int         msec, minutes, seconds, x, y, z, nchanged;
   VOXEL_LIST *vl_border;
-  float *svm_inputs = NULL, svm_out;
+  float *     svm_inputs = NULL, svm_out;
 
   nargs = handleVersionOption(argc, argv, "mri_aseg_edit_reclassify");
   if (nargs && argc - nargs == 1)
@@ -100,9 +100,9 @@ int main(int argc, char *argv[]) {
   if (argc < 5)
     usage_exit();
 
-  input_aseg_name = argv[1];
-  norm_name = argv[2];
-  svm_name = argv[3];
+  input_aseg_name  = argv[1];
+  norm_name        = argv[2];
+  svm_name         = argv[3];
   output_aseg_name = argv[4];
 
   printf("reading aseg: %s, norm: %s, SVM: %s and writing output to %s...\n",
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
   // every scale at each window location for each of the dx,dy,dz grads and the
   // original image
   ninputs = (WSIZE * WSIZE * WSIZE * NSCALES * (3 + 1));
-  svm = SVMread(svm_name);
+  svm     = SVMread(svm_name);
   if (svm == NULL)
     ErrorExit(ERROR_NOMEMORY, "%s: could not load SVM from %s", Progname,
               svm_name);
@@ -130,15 +130,15 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not read norm volume %s", Progname,
               norm_name);
   for (i = 0; i < NSCALES; i++) {
-    mri_kernel = MRIgaussian1d(sigmas[i], -1);
-    mri_smooth[i] = MRIconvolveGaussian(mri_norm, NULL, mri_kernel);
-    mri_grad[i] = MRIsobel(mri_smooth[i], NULL, NULL);
+    mri_kernel       = MRIgaussian1d(sigmas[i], -1);
+    mri_smooth[i]    = MRIconvolveGaussian(mri_norm, NULL, mri_kernel);
+    mri_grad[i]      = MRIsobel(mri_smooth[i], NULL, NULL);
     mri_laplacian[i] = MRIlaplacian(mri_smooth[i], NULL);
     mri_2nd_deriv_s[i] =
         MRI2ndDirectionalDerivative(mri_smooth[i], NULL, 0, -1, 0);
     MRIfree(&mri_kernel);
   }
-  mri_dtrans = MRIdistanceTransform(mri_aseg, NULL, target_label, 10,
+  mri_dtrans      = MRIdistanceTransform(mri_aseg, NULL, target_label, 10,
                                     DTRANS_MODE_SIGNED, NULL);
   mri_dtrans_grad = MRIsobel(mri_dtrans, NULL, NULL);
 
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
 
   VLSTfree(&vl_border);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -199,9 +199,9 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "-version"))
     print_version();
   else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else

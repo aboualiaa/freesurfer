@@ -28,8 +28,8 @@
 #include "mrisurf_vals.h"
 
 #define VERTEX_INTERIOR 1
-#define VERTEX_BORDER 2
-#define VERTEX_CHULL 3
+#define VERTEX_BORDER   2
+#define VERTEX_CHULL    3
 
 int mrisStoreVtotalInV3num(MRI_SURFACE *mris);
 

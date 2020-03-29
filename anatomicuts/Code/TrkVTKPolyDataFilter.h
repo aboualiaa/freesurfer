@@ -2,26 +2,27 @@
 #define __TrkVTKPolyDataFilter_h
 #include "TrackIO.h"
 
-#include "itkProcessObject.h"
 #include "itkPolylineCell.h"
+#include "itkProcessObject.h"
 #include <vtkSmartPointer.h>
 
-#include "vtkCellData.h"
 #include "itkImageFileReader.h"
+#include "vtkCellData.h"
+#include "vtkPolyData.h"
 
 // class vtkPolyData;
 
 template <class TImage> class TrkVTKPolyDataFilter : public itk::ProcessObject {
 public:
-  using Self = TrkVTKPolyDataFilter<TImage>;
-  using Superclass = itk::ProcessObject;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = TrkVTKPolyDataFilter<TImage>;
+  using Superclass   = itk::ProcessObject;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   itkNewMacro(Self);
   itkTypeMacro(TrkVTKPolyDataFilter, itk::ProcessObject);
 
-  using ImageType = TImage;
+  using ImageType    = TImage;
   using ImagePointer = typename ImageType::Pointer;
 
   using ImageReaderType = typename itk::ImageFileReader<ImageType>;
@@ -33,8 +34,8 @@ public:
   vtkSmartPointer<vtkPolyData> GetOutputPolyData() { return m_vtk; }
 
   virtual void Update() { this->GenerateData(); }
-  void SetColor(unsigned char *color) { this->m_color = color; }
-  void SetReferenceTrack(std::string trackref) {
+  void         SetColor(unsigned char *color) { this->m_color = color; }
+  void         SetReferenceTrack(std::string trackref) {
     CTrackReader trkreader;
     m_refHeader = new TRACK_HEADER();
     trkreader.Open(trackref.c_str(), this->m_refHeader);
@@ -52,12 +53,12 @@ protected:
 
 private:
   TrkVTKPolyDataFilter(const Self &);
-  void operator=(const Self &);
-  unsigned char *m_color;
+  void                         operator=(const Self &);
+  unsigned char *              m_color;
   vtkSmartPointer<vtkPolyData> m_vtk;
-  std::string m_trkFileName;
-  ImagePointer m_refImage;
-  TRACK_HEADER *m_refHeader;
+  std::string                  m_trkFileName;
+  ImagePointer                 m_refImage;
+  TRACK_HEADER *               m_refHeader;
 };
 #endif
 /*
@@ -70,12 +71,12 @@ private:
 #define _TrkVTKPolyDataFilter_h_
 #include "TrackIO.h"
 
-#include "itkProcessObject.h"
 #include "itkPolylineCell.h"
+#include "itkProcessObject.h"
 #include <vtkSmartPointer.h>
 
-#include "vtkCellData.h"
 #include "itkImageFileReader.h"
+#include "vtkCellData.h"
 
 class vtkPolyData;
 

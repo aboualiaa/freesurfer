@@ -22,11 +22,11 @@
  *
  */
 #include "DialogSavePointSet.h"
+#include "LayerPropertyPointSet.h"
 #include "ui_DialogSavePointSet.h"
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
-#include "LayerPropertyPointSet.h"
+#include <QMessageBox>
 
 DialogSavePointSet::DialogSavePointSet(QWidget *parent)
     : QDialog(parent), m_bRemind(false), ui(new Ui::DialogSavePointSet) {
@@ -39,7 +39,7 @@ void DialogSavePointSet::SetFileName(const QString &fn_in, int type) {
   if (fn_in.isEmpty())
     return;
 
-  QString fn = fn_in;
+  QString fn     = fn_in;
   QString suffix = QFileInfo(fn).suffix();
   if (suffix == "label" || suffix == "dat" || suffix == "json")
     fn = fn.left(fn.length() - suffix.length() - 1);
@@ -87,7 +87,7 @@ void DialogSavePointSet::OnOK() {
 
 void DialogSavePointSet::OnOpen() {
   QString old_fn = GetFileName();
-  QString fn = QFileDialog::getSaveFileName(
+  QString fn     = QFileDialog::getSaveFileName(
       this, "Select File To Save", (old_fn.isEmpty() ? m_strLastDir : old_fn),
       "All Files (*)", NULL, QFileDialog::DontConfirmOverwrite);
   if (!fn.isEmpty()) {

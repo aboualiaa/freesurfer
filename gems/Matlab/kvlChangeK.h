@@ -52,7 +52,7 @@ public:
     kvl::AtlasMesh::Pointer mesh =
         const_cast<kvl::AtlasMesh *>(constMesh.GetPointer());
 
-    double scaleFactor    = *(mxGetPr(prhs[1]));
+    double    scaleFactor = *(mxGetPr(prhs[1]));
     const int classNumber = static_cast<int>(*(mxGetPr(prhs[2])));
 
     if (scaleFactor < 1) {
@@ -77,7 +77,7 @@ public:
       if (cell->GetType() == AtlasMesh::CellType::TETRAHEDRON_CELL) {
 
         AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-        AtlasAlphasType alphas0 =
+        AtlasAlphasType                      alphas0 =
             mesh->GetPointData()->ElementAt(*pit).m_Alphas;
         ++pit;
         AtlasAlphasType alphas1 =

@@ -34,17 +34,15 @@
   ENDUSAGE
 */
 
+#include "MyCmdLineParser.h"
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include "MyCmdLineParser.h"
 #include <string>
-#include <iostream>
 
+#include "colortab.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "colortab.h"
-
-using namespace std;
 
 const char *Progname = "connectgraph";
 
@@ -67,29 +65,30 @@ int main(int argc, char *argv[]) {
 
   string_array floatingArgs = cmd.GetFloatingArguments();
   if (floatingArgs.size() < 3) {
-    cerr << "Missing argument(s)" << endl;
-    cout << "Usage: connectgraph DATA_FILE ANNOTATION_FILE OUTPUT_FILE -th "
-            "<THRESHOLD>"
-         << endl
-         << endl;
+    std::cerr << "Missing argument(s)" << std::endl;
+    std::cout
+        << "Usage: connectgraph DATA_FILE ANNOTATION_FILE OUTPUT_FILE -th "
+           "<THRESHOLD>"
+        << std::endl
+        << std::endl;
     return 1;
   }
 
   // load connectivity data
   MRI *mri = ::MRIread(floatingArgs[0].c_str());
   if (!mri) {
-    cerr << "Can not load file " << floatingArgs[0].c_str() << endl;
+    std::cerr << "Can not load file " << floatingArgs[0].c_str() << std::endl;
     return 1;
   }
   if (mri->width != mri->height)
-    cout << "Warning: input matrix is not square" << endl;
+    std::cout << "Warning: input matrix is not square" << std::endl;
 
   // load color table
   COLOR_TABLE *ctab = NULL;
   if (MRISreadCTABFromAnnotationIfPresent(floatingArgs[1].c_str(), &ctab) !=
       0) {
-    cerr << "Can not load color table from  " << floatingArgs[1].c_str()
-         << endl;
+    std::cerr << "Can not load color table from  " << floatingArgs[1].c_str()
+              << std::endl;
     return 1;
   }
 
@@ -105,27 +104,28 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  cout << "Input data value range: " << dMin << ", " << dMax << endl;
+  std::cout << "Input data value range: " << dMin << ", " << dMax << std::endl;
 
-  double dThreshold = dMin;
+  double       dThreshold = dMin;
   string_array sa;
   if (cmd.Found("threshold", &sa)) {
     dThreshold = atof(sa[0].c_str());
   }
   if (dThreshold > dMax)
-    cout << "Warning: Threshold is out of input data range" << endl;
+    std::cout << "Warning: Threshold is out of input data range" << std::endl;
 
   // write data to graphviz file
   FILE *fp = fopen(floatingArgs[2].c_str(), "w");
   if (!fp) {
-    cerr << "Can not write to file " << floatingArgs[2].c_str() << endl;
+    std::cerr << "Can not write to file " << floatingArgs[2].c_str()
+              << std::endl;
     return 1;
   }
 
   fprintf(fp, "graph connectivity {\n");
-  string strg_buffer = "";
-  char ch[1000];
-  short *nConns = new short[mri->width];
+  std::string strg_buffer = "";
+  char        ch[1000];
+  short *     nConns = new short[mri->width];
   memset(nConns, 0, sizeof(short) * mri->width);
   for (int i = 0; i < mri->width; i++) {
     for (int j = i + 1; j < mri->height; j++) {
@@ -146,7 +146,8 @@ int main(int argc, char *argv[]) {
     }
   }
   fprintf(fp, "%s", strg_buffer.c_str());
-  string name = floatingArgs[0].substr(floatingArgs[0].find_last_of('/') + 1);
+  std::string name =
+      floatingArgs[0].substr(floatingArgs[0].find_last_of('/') + 1);
   fprintf(fp, "label=\"%s (%f, %f)\";\n}\n", name.c_str(), dThreshold, dMax);
 
   if (ctab)

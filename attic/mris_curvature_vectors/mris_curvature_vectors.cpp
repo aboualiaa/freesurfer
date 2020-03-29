@@ -23,11 +23,11 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -35,16 +35,15 @@
 #include <getopt.h>
 #include <stdarg.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
+#include "error.h"
+#include "label.h"
 #include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 #include "xDebug.h"
-#include "label.h"
 
 #define STRBUF 65536
 
@@ -74,16 +73,16 @@ short b_sortBySignedPrincipalCurv =
 static int G_nbrs = 2;
 
 int main(int argc, char *argv[]) {
-  char output_filename[STRBUF];
-  char *surf_name, *output_filename_stem;
-  int nargs;
+  char         output_filename[STRBUF];
+  char *       surf_name, *output_filename_stem;
+  int          nargs;
   MRI_SURFACE *mris;
 
-  InitDebugging( "mris_curvature_vectors" ) ;
+  InitDebugging("mris_curvature_vectors");
   nargs = handleVersionOption(argc, argv, "mris_curvature_vectors");
 
-   Progname = argv[0] ;
-//  sprintf(Progname, "mris_curvature_vectors");
+  Progname = argv[0];
+  //  sprintf(Progname, "mris_curvature_vectors");
   ErrorInit(NULL, NULL, NULL);
   DiagInit(NULL, NULL, NULL);
 
@@ -160,11 +159,11 @@ int main(int argc, char *argv[]) {
 }
 
 int MRISsortPrincipalDirectionsByCurvatures(MRI_SURFACE *mris) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   double holder[3];
-  float k1, k2;
+  float  k1, k2;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -237,7 +236,7 @@ int MRISsortPrincipalDirectionsByCurvatures(MRI_SURFACE *mris) {
    d[2] = a[0] * b[1] - b[0] * a[1])
 
 int MRISorderPrincipalDirectionsConsistentWithNormal(MRI_SURFACE *mris) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   double v1[3], v2[3], v3[3], n0[3], dot;
@@ -274,7 +273,7 @@ int MRISorderPrincipalDirectionsConsistentWithNormal(MRI_SURFACE *mris) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

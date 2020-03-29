@@ -26,25 +26,25 @@
 #ifndef MRINORM_H
 #define MRINORM_H
 
-#include "mri.h"
-#include "region.h"
 #include "histo.h"
 #include "label.h"
+#include "mri.h"
+#include "region.h"
 
 /* defaults which can be used in MRInormInit call (using 0 will install these)
  */
-#define CONTROL_NONE 0
+#define CONTROL_NONE   0
 #define CONTROL_MARKED 1
-#define CONTROL_TMP 2
-#define CONTROL_NBR 3
+#define CONTROL_TMP    2
+#define CONTROL_NBR    3
 
 #define DEFAULT_DESIRED_WHITE_MATTER_VALUE 110
-#define DEFAULT_SMOOTH_SIGMA 2.0f
-#define DEFAULT_WINDOWS_BELOW_T0 9  /* 4*/
-#define DEFAULT_WINDOWS_ABOVE_T0 14 /* 9*/
-#define DEFAULT_WINDOW_SIZE 10
+#define DEFAULT_SMOOTH_SIGMA               2.0f
+#define DEFAULT_WINDOWS_BELOW_T0           9  /* 4*/
+#define DEFAULT_WINDOWS_ABOVE_T0           14 /* 9*/
+#define DEFAULT_WINDOW_SIZE                10
 
-#define WM_MEAN DEFAULT_DESIRED_WHITE_MATTER_VALUE
+#define WM_MEAN           DEFAULT_DESIRED_WHITE_MATTER_VALUE
 #define WHITE_MATTER_MEAN WM_MEAN
 
 /* minimum size of peak, relative to total # of voxels in histogram
@@ -69,25 +69,25 @@
 /* maximum gradient measured in (intensity change/voxel) */
 /* allow about 3 voxel change between adjacent windows */
 #define MAX_GRADIENT (5.0f / 5.0f)
-#define MAX_SKIPPED 2
+#define MAX_SKIPPED  2
 
 /* relative to slice at Talairach origin (i.e. 4 slices above it) */
 #define STARTING_SLICE 4
-#define SLICE_OFFSET 3
+#define SLICE_OFFSET   3
 
-#define HISTO_BINS 0
+#define HISTO_BINS           0
 #define BACKGROUND_INTENSITY 30
 
 #define MAX_SPLINE_POINTS 80
 
 typedef struct {
-  int windows_above_t0; /* # of windows above Talairach origin */
-  int windows_below_t0; /* # of windows below Talairach origin */
-  int desired_wm_value; /* desired intensity value for white matter*/
-  float smooth_sigma;   /* sigma of gaussian for smoothing histo */
-  HISTOGRAM histograms[MAX_SPLINE_POINTS];
+  int        windows_above_t0; /* # of windows above Talairach origin */
+  int        windows_below_t0; /* # of windows below Talairach origin */
+  int        desired_wm_value; /* desired intensity value for white matter*/
+  float      smooth_sigma;     /* sigma of gaussian for smoothing histo */
+  HISTOGRAM  histograms[MAX_SPLINE_POINTS];
   MRI_REGION regions[MAX_SPLINE_POINTS];
-  float max_gradient;
+  float      max_gradient;
 } MRI_NORM_INFO, MNI;
 
 MRI *MRIhistoNormalize(MRI *mri_src, MRI *mri_norm, MRI *mri_template, int low,
@@ -99,12 +99,12 @@ MRI *MRIadaptiveHistoNormalize(MRI *mri_src, MRI *mri_norm, MRI *mri_template,
 MRI *MRIhistoNormalizeRegion(MRI *mri_src, MRI *mri_norm, MRI *mri_template,
                              int low, MRI_REGION *wreg, MRI_REGION *h_src_reg,
                              MRI_REGION *h_tmp_reg);
-int MRInormInit(MRI *mri, MNI *mni, int windows_above_t0, int windows_below_t0,
-                int wsize, int desired_wm_value, float smooth_sigma);
-int MRInormFillHistograms(MRI *mri, MNI *mni);
-int MRInormFindPeaks(MNI *mni, float *inputs, float *outputs);
+int  MRInormInit(MRI *mri, MNI *mni, int windows_above_t0, int windows_below_t0,
+                 int wsize, int desired_wm_value, float smooth_sigma);
+int  MRInormFillHistograms(MRI *mri, MNI *mni);
+int  MRInormFindPeaks(MNI *mni, float *inputs, float *outputs);
 MRI *MRInormalize(MRI *mri_src, MRI *mri_dst, MNI *mni);
-int MRInormCheckPeaks(MNI *mni, float *inputs, float *outputs, int npeaks);
+int  MRInormCheckPeaks(MNI *mni, float *inputs, float *outputs, int npeaks);
 
 MRI *MRInormFindControlPoints(MRI *mri_src, float wm_target,
                               float intensity_above, float intensity_below,
@@ -130,13 +130,13 @@ MRI *MRIbuildVoronoiDiagram(MRI *mri_src, MRI *mri_ctrl, MRI *mri_dst);
 MRI *MRIsoapBubble(MRI *mri_src, MRI *mri_ctrl, MRI *mri_dst, int niter,
                    float min_change);
 MRI *MRIsoapBubbleExpand(MRI *mri_src, MRI *mri_ctrl, MRI *mri_dst, int niter);
-int MRI3dUseFileControlPoints(MRI *mri, const char *fname);
-int MRI3dUseLabelControlPoints(MRI *mri, LABEL *area);
-int MRI3dWriteControlPoints(char *control_volume_fname);
-int MRI3dWriteBias(char *bias_volume_fname);
+int  MRI3dUseFileControlPoints(MRI *mri, const char *fname);
+int  MRI3dUseLabelControlPoints(MRI *mri, LABEL *area);
+int  MRI3dWriteControlPoints(char *control_volume_fname);
+int  MRI3dWriteBias(char *bias_volume_fname);
 MRI *MRIaverageFixedPoints(MRI *mri_src, MRI *mri_ctrl, MRI *mri_dst,
                            int niter);
-int MRInormAddFileControlPoints(MRI *mri_ctrl, int value, MRI *mri);
+int  MRInormAddFileControlPoints(MRI *mri_ctrl, int value, MRI *mri);
 MRI *MRInormFindControlPointsInWindow(MRI *mri_src, float wm_target,
                                       float intensity_above,
                                       float intensity_below, MRI *mri_ctrl,

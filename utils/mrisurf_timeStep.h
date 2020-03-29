@@ -27,10 +27,10 @@
 
 #include "mrisurf_deform.h"
 
-#define MAX_MM (MAX_DIM / 10.0f)
-#define MAX_PLANE_MM (100 * 10.0f)
+#define MAX_MM          (MAX_DIM / 10.0f)
+#define MAX_PLANE_MM    (100 * 10.0f)
 #define MAX_MOMENTUM_MM 1
-#define MIN_MM 0.001
+#define MIN_MM          0.001
 
 int mrisClearMomentum(MRI_SURFACE *mris);
 

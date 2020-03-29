@@ -29,14 +29,14 @@
 #include "diag.h"
 #include "version.h"
 
-static int get_option(int argc, char *argv[]);
-static void print_version();
-static void print_usage();
-static void usage_exit();
-static void print_help();
+static int    get_option(int argc, char *argv[]);
+static void   print_version();
+static void   print_usage();
+static void   usage_exit();
+static void   print_help();
 static double compute_hdist(MRI **mri, int nvolumes, int index, double *hdists,
                             int which);
-static char vcid[] =
+static char   vcid[] =
     "$Id: mri_hausdorff_dist.c,v 1.14 2014/07/18 20:19:23 lzollei Exp $";
 static int fromFile = 0;
 
@@ -44,24 +44,24 @@ const char *Progname;
 
 #define MAX_VOLUMES 100
 
-static int binarize = 0;
-static float binarize_thresh = 0;
-static int target_label = 1;
-static double blur_sigma = 0;
+static int    binarize        = 0;
+static float  binarize_thresh = 0;
+static int    target_label    = 1;
+static double blur_sigma      = 0;
 
 #define MEAN_HDIST 0
-#define MAX_HDIST 1
+#define MAX_HDIST  1
 
 static int which = MEAN_HDIST;
 
 /***-------------------------------------------------------****/
 int main(int argc, char *argv[]) {
-  int nargs, nvolumes = 0, n, ac, filecount;
+  int   nargs, nvolumes = 0, n, ac, filecount;
   char *name = nullptr, fname[STRLEN], *out_fname, **av, *list_fname,
        in_fname[STRLEN];
-  MRI *mri[MAX_VOLUMES], *mri_tmp;
+  MRI *  mri[MAX_VOLUMES], *mri_tmp;
   double hdist, hdists[MAX_VOLUMES];
-  FILE *fp;
+  FILE * fp;
 
   nargs = handleVersionOption(argc, argv, "mri_hausdorff_dist");
   if (nargs && argc - nargs == 1)
@@ -276,26 +276,26 @@ static void usage_exit() {
 #if USE_DISTANCE_TRANSFORM
 static double compute_hdist(MRI **mri, int nvolumes, int index, double *hdists,
                             int which) {
-  int x, y, z, width, depth, height, nvox, n, xk, yk, zk, xi, yi, zi;
-  float d, d2, dist, dx, dy, dz;
-  MRI *mri_src;
+  int    x, y, z, width, depth, height, nvox, n, xk, yk, zk, xi, yi, zi;
+  float  d, d2, dist, dx, dy, dz;
+  MRI *  mri_src;
   double hdists_sigma[MAX_VOLUMES], hdist, max_vox, xf, yf, zf, zval, max_hdist,
       max_hdists[MAX_VOLUMES];
   //  FILE   *fp ;
   static int i = 0;
-  char fname[STRLEN];
+  char       fname[STRLEN];
 
   sprintf(fname, "hdists%d.txt", i++);
   //  fp = fopen(fname, "w") ;
 
   mri_src = mri[index];
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   max_hdist = 0.0;
-  max_vox = MAX(mri_src->xsize, MAX(mri_src->ysize, mri_src->zsize));
+  max_vox   = MAX(mri_src->xsize, MAX(mri_src->ysize, mri_src->zsize));
   for (hdist = 0.0, n = 0; n < nvolumes; n++) {
     if (n == index)
       continue;
@@ -323,9 +323,9 @@ static double compute_hdist(MRI **mri, int nvolumes, int index, double *hdists,
                   continue; // not on either side of 0
 
                 // compute dist in mm to nbr voxel
-                dx = (xi - x) * mri_src->xsize;
-                dy = (yi - y) * mri_src->ysize;
-                dz = (zi - z) * mri_src->zsize;
+                dx   = (xi - x) * mri_src->xsize;
+                dy   = (yi - y) * mri_src->ysize;
+                dz   = (zi - z) * mri_src->zsize;
                 dist = sqrt(dx * dx + dy * dy + dz * dz);
 
                 // convert to voxel coords of 0-crossing
@@ -432,7 +432,7 @@ static double compute_hdist(MRI **mri, int nvolumes, int index) {
 }
 #endif
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -447,7 +447,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'G':
       blur_sigma = atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("blurring input image with sigma = %2.2f\n", blur_sigma);
       break;
     case 'L':
@@ -457,7 +457,7 @@ static int get_option(int argc, char *argv[]) {
       nargs = 1;
       break;
     case 'B':
-      binarize = 1;
+      binarize        = 1;
       binarize_thresh = atof(argv[2]);
       printf("binarizing input data with threshold %2.2f\n", binarize_thresh);
       nargs = 1;

@@ -38,18 +38,18 @@
 #define c_bruker_h
 
 typedef struct {
-  int transposition; // 0 no , 1 x-y flipped
+  int    transposition; // 0 no , 1 x-y flipped
   double fov[3];
-  int size[3];
-  int ft_size[3];
+  int    size[3];
+  int    ft_size[3];
   double vox_size[3]; // calculated from fov, size, ft_size
   double offset[3];   // calculated from vox, ft_size
   double read_offset;
   double phase1_offset;
   double slice_offset;
   double grad_matrix[9];
-  int type; // MRI data type
-  int dim;  // record the dimension (for 2d case)
+  int    type; // MRI data type
+  int    dim;  // record the dimension (for 2d case)
 } BrukerTransform;
 
 // specify directory name

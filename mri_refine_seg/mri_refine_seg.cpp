@@ -3,8 +3,8 @@
 #include "argparse.h"
 #include "pointset.h"
 
-#include "mri2.h"
 #include "fio.h"
+#include "mri2.h"
 #include "volcluster.h"
 
 #include "mri_refine_seg.help.xml.h"
@@ -133,9 +133,9 @@ static bool clusterContains(MRI *seg, VOLCLUSTER *clr, int label) {
 static bool clusterSurrounded(MRI *seg, VOLCLUSTER *clr, intvec labels) {
   for (int i = 0; i < clr->nmembers; i++) {
     intvec surrounding;
-    int c = clr->col[i];
-    int r = clr->row[i];
-    int s = clr->slc[i];
+    int    c = clr->col[i];
+    int    r = clr->row[i];
+    int    s = clr->slc[i];
     if (c - 1 >= 0)
       surrounding.push_back(MRIgetVoxVal(seg, c - 1, r, s, 0));
     if (r - 1 >= 0)
@@ -178,7 +178,6 @@ static bool voxelTouches(MRI *seg, intvec labels, int c, int r, int s) {
   return false;
 }
 
-
 int main(int argc, char **argv) {
 
   // ------ setup ------
@@ -196,14 +195,14 @@ int main(int argc, char **argv) {
 
   // load input
   std::string segname = parser.retrieve<std::string>("in");
-  MRI *seg = MRIread(segname.c_str());
+  MRI *       seg     = MRIread(segname.c_str());
   if (!seg)
     logFatal(1) << "could not read input volume " << segname;
   MRI *orig_seg = MRIcopy(seg, nullptr);
 
   // allocate buffer for label mask (used for efficient cluster-finding)
-  MRI *mask_buffer = MRIclone(seg, nullptr);
-  int nclusters;
+  MRI *        mask_buffer = MRIclone(seg, nullptr);
+  int          nclusters;
   VOLCLUSTER **clusters;
 
   // labels to exclude from stray-cluster refinement
@@ -233,8 +232,8 @@ int main(int argc, char **argv) {
 
   // create list of valid components to refine by looping through the unique
   // labels in the input seg
-  int num_unique;
-  int *unique_labels = MRIsegIdListNot0(seg, &num_unique, 0);
+  int                    num_unique;
+  int *                  unique_labels = MRIsegIdListNot0(seg, &num_unique, 0);
   std::vector<Component> components;
   for (int i = 0; i < num_unique; i++) {
     int label = unique_labels[i];
@@ -377,7 +376,7 @@ int main(int argc, char **argv) {
     for (int r = 0; r < seg->height; r++) {
       for (int s = 0; s < seg->depth; s++) {
         int origval = MRIgetVoxVal(orig_seg, c, r, s, 0);
-        int newval = MRIgetVoxVal(seg, c, r, s, 0);
+        int newval  = MRIgetVoxVal(seg, c, r, s, 0);
         if (origval != newval) {
           did_change = true;
           MRIsetVoxVal(mask_buffer, c, r, s, 0, 1);
@@ -414,7 +413,7 @@ int main(int argc, char **argv) {
     PointSet changed_voxels;
     for (int clustid = 0; clustid < nclusters; clustid++) {
       VOLCLUSTER *clr = clusters[clustid];
-      double x, y, z;
+      double      x, y, z;
       MRIvoxelToWorld(seg, clr->col[0], clr->row[0], clr->slc[0], &x, &y, &z);
       changed_voxels.add(PointSet::Point(x, y, z));
     }

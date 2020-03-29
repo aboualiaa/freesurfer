@@ -46,15 +46,15 @@ public:
 
 protected:
   virtual void UpdateCursor(QEvent *event, QWidget *wnd);
-  bool IsInAction() { return m_bWindowLevel || m_bMoveSlice; }
+  bool         IsInAction() { return m_bWindowLevel || m_bMoveSlice; }
 
   int m_nMousePosX;
   int m_nMousePosY;
   int m_nPressedPosX;
   int m_nPressedPosY;
 
-  bool m_bWindowLevel;
-  bool m_bMoveSlice;
+  bool        m_bWindowLevel;
+  bool        m_bMoveSlice;
   SurfaceROI *m_surfaceROI;
 };
 

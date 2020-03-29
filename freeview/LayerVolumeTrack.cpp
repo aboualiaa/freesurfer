@@ -24,16 +24,16 @@
  */
 
 #include "LayerVolumeTrack.h"
-#include "vtkRenderer.h"
-#include "vtkActor.h"
 #include "FSVolume.h"
+#include "LayerPropertyMRI.h"
+#include "MyVTKUtils.h"
+#include "vtkActor.h"
 #include "vtkImageExtractComponents.h"
 #include "vtkPolyDataMapper.h"
-#include "LayerPropertyMRI.h"
 #include "vtkProperty.h"
-#include "MyVTKUtils.h"
-#include <QTimer>
+#include "vtkRenderer.h"
 #include <QDebug>
+#include <QTimer>
 
 #include "cma.h"
 
@@ -63,13 +63,13 @@ bool LayerVolumeTrack::LoadFromFile() {
 
 void LayerVolumeTrack::UpdateData() {
   if (!m_volumeSource->GetEmbeddedColorTable()) {
-    cerr << "Did not find color table in track volume.\n";
+    std::cerr << "Did not find color table in track volume.\n";
     m_ctabStripped = CTABdeepCopy(this->GetProperty()->GetLUTCTAB());
   } else
     m_ctabStripped = CTABdeepCopy(m_volumeSource->GetEmbeddedColorTable());
 
   if (m_ctabStripped) {
-    MRI *mri = m_volumeSource->GetMRI();
+    MRI *      mri = m_volumeSource->GetMRI();
     QList<int> list;
     for (int i = 0; i < mri->nframes; i++)
       list << mri->frames[i].label;
@@ -100,9 +100,9 @@ void LayerVolumeTrack::UpdateData() {
 
 void LayerVolumeTrack::RebuildActors() {
   m_actors.clear();
-  MRI *mri = m_volumeSource->GetMRI();
-  COLOR_TABLE *ct = m_ctabStripped;
-  int nSmoothIterations = GetProperty()->GetContourSmoothIterations();
+  MRI *        mri               = m_volumeSource->GetMRI();
+  COLOR_TABLE *ct                = m_ctabStripped;
+  int          nSmoothIterations = GetProperty()->GetContourSmoothIterations();
   for (int i = 0; i < mri->nframes; i++) {
     vtkSmartPointer<vtkImageExtractComponents> extract =
         vtkSmartPointer<vtkImageExtractComponents>::New();
@@ -113,7 +113,7 @@ void LayerVolumeTrack::RebuildActors() {
     extract->SetInput(m_imageData);
 #endif
     extract->Update();
-    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+    vtkSmartPointer<vtkActor>          actor = vtkSmartPointer<vtkActor>::New();
     vtkSmartPointer<vtkPolyDataMapper> mapper =
         vtkSmartPointer<vtkPolyDataMapper>::New();
     actor->SetMapper(mapper);
@@ -128,22 +128,19 @@ void LayerVolumeTrack::RebuildActors() {
     }
     m_actors << actor;
   }
-  if (m_bVisiblities.isEmpty())
-  {
+  if (m_bVisiblities.isEmpty()) {
     for (int i = 0; i < m_actors.size(); i++)
       m_bVisiblities << true;
-  }
-  else
-  {
+  } else {
     for (int i = 0; i < m_actors.size(); i++)
-      m_actors[i]->SetVisibility(m_bVisiblities[i]?1:0);
+      m_actors[i]->SetVisibility(m_bVisiblities[i] ? 1 : 0);
   }
   emit ActorChanged();
 }
 
 void LayerVolumeTrack::RestoreColors() {
-  MRI *mri = m_volumeSource->GetMRI();
-  COLOR_TABLE *ct = m_ctabStripped;
+  MRI *        mri = m_volumeSource->GetMRI();
+  COLOR_TABLE *ct  = m_ctabStripped;
   if (!ct)
     return;
   for (int i = 0; i < mri->nframes; i++) {
@@ -173,7 +170,7 @@ int LayerVolumeTrack::GetFrameLabel(int nFrame) {
 }
 
 void LayerVolumeTrack::UpdateFrameActor(int n) {
-  vtkActor *actor = m_actors[n];
+  vtkActor *                                 actor = m_actors[n];
   vtkSmartPointer<vtkImageExtractComponents> extract =
       vtkSmartPointer<vtkImageExtractComponents>::New();
   extract->SetComponents(n);
@@ -199,7 +196,7 @@ double LayerVolumeTrack::GetThreshold(int nLabel) {
 }
 
 void LayerVolumeTrack::Append3DProps(vtkRenderer *renderer,
-                                     bool *bPlaneVisibility) {
+                                     bool *       bPlaneVisibility) {
   Q_UNUSED(bPlaneVisibility);
   for (int i = 0; i < m_actors.size(); i++)
     renderer->AddViewProp(m_actors[i]);
@@ -207,11 +204,9 @@ void LayerVolumeTrack::Append3DProps(vtkRenderer *renderer,
 
 void LayerVolumeTrack::UpdateColorMap() { LayerMRI::UpdateColorMap(); }
 
-void LayerVolumeTrack::SetVisible(bool bVisible)
-{
-  for (int i = 0; i < m_actors.size(); i++)
-  {
-    m_actors[i]->SetVisibility(bVisible?m_bVisiblities[i]:false);
+void LayerVolumeTrack::SetVisible(bool bVisible) {
+  for (int i = 0; i < m_actors.size(); i++) {
+    m_actors[i]->SetVisibility(bVisible ? m_bVisiblities[i] : false);
   }
   LayerMRI::SetVisible(bVisible);
 }
@@ -234,9 +229,9 @@ QVariantMap LayerVolumeTrack::GetLabelByProp(vtkProp *prop) {
   QVariantMap map;
   for (int i = 0; i < m_actors.size(); i++) {
     if (m_actors[i].GetPointer() == prop) {
-      MRI *mri = m_volumeSource->GetMRI();
+      MRI *mri     = m_volumeSource->GetMRI();
       map["label"] = mri->frames[i].label;
-      map["name"] = mri->frames[i].name;
+      map["name"]  = mri->frames[i].name;
     }
   }
   return map;
@@ -254,48 +249,38 @@ void LayerVolumeTrack::Highlight(int nLabel) {
   }
 }
 
-void LayerVolumeTrack::ShowAllLabels(bool bShow)
-{
-  for (int i = 0; i < m_actors.size(); i++)
-  {
-    m_actors[i]->SetVisibility(bShow?1:0);
+void LayerVolumeTrack::ShowAllLabels(bool bShow) {
+  for (int i = 0; i < m_actors.size(); i++) {
+    m_actors[i]->SetVisibility(bShow ? 1 : 0);
     m_bVisiblities[i] = bShow;
   }
   emit ActorUpdated();
 }
 
-void LayerVolumeTrack::SetLabelVisible(int nLabel, bool bVisible)
-{
-  MRI* mri = m_volumeSource->GetMRI();
-  for (int i = 0; i < mri->nframes; i++)
-  {
-    if (nLabel == mri->frames[i].label)
-    {
-      m_actors[i]->SetVisibility(bVisible?1:0);
+void LayerVolumeTrack::SetLabelVisible(int nLabel, bool bVisible) {
+  MRI *mri = m_volumeSource->GetMRI();
+  for (int i = 0; i < mri->nframes; i++) {
+    if (nLabel == mri->frames[i].label) {
+      m_actors[i]->SetVisibility(bVisible ? 1 : 0);
       m_bVisiblities[i] = bVisible;
       emit ActorUpdated();
     }
   }
 }
 
-void LayerVolumeTrack::SetFrameVisible(int nFrame, bool bVisible)
-{
-    if (m_actors.size() > nFrame)
-    {
-      m_actors[nFrame]->SetVisibility(bVisible?1:0);
-      m_bVisiblities[nFrame] = bVisible;
-      emit ActorUpdated();
-    }
+void LayerVolumeTrack::SetFrameVisible(int nFrame, bool bVisible) {
+  if (m_actors.size() > nFrame) {
+    m_actors[nFrame]->SetVisibility(bVisible ? 1 : 0);
+    m_bVisiblities[nFrame] = bVisible;
+    emit ActorUpdated();
+  }
 }
 
-QList<int> LayerVolumeTrack::GetVisibleLabels()
-{
+QList<int> LayerVolumeTrack::GetVisibleLabels() {
   QList<int> list;
-  MRI* mri = m_volumeSource->GetMRI();
-  for (int i = 0; i < mri->nframes; i++)
-  {
-    if (m_bVisiblities[i])
-    {
+  MRI *      mri = m_volumeSource->GetMRI();
+  for (int i = 0; i < mri->nframes; i++) {
+    if (m_bVisiblities[i]) {
       list << mri->frames[i].label;
     }
   }

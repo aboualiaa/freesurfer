@@ -1,8 +1,8 @@
 #include "RenderWidget.h"
 #include <QDebug>
-#include <QPainter>
 #include <QFileInfo>
 #include <QMouseEvent>
+#include <QPainter>
 
 RenderWidget::RenderWidget(QWidget *parent)
     : QWidget(parent), m_bAutoResize(true), m_nCurrentImageIndex(-1),
@@ -37,7 +37,7 @@ void RenderWidget::SetCurrentImageIndex(int n) {
 }
 
 void RenderWidget::paintEvent(QPaintEvent *) {
-  QRect rc = rect();
+  QRect    rc = rect();
   QPainter p(this);
   p.fillRect(rc, Qt::black);
   if (m_bAutoResize) {
@@ -63,13 +63,13 @@ void RenderWidget::resizeEvent(QResizeEvent *) {
 void RenderWidget::mousePressEvent(QMouseEvent *e) {
   if (e->button() == Qt::LeftButton) {
     m_bPressed = true;
-    m_nY = e->y();
+    m_nY       = e->y();
   }
 }
 
 void RenderWidget::mouseMoveEvent(QMouseEvent *e) {
   if (m_bPressed) {
-    int d = e->y() - m_nY;
+    int d         = e->y() - m_nY;
     int nStepSize = 1;
     if (d >= nStepSize) {
       do {
@@ -128,13 +128,13 @@ void RenderWidget::OnTimer() {
     if (!bReverse) {
       n = m_nCurrentImageIndex + 1;
       if (n > m_images.size() - 1) {
-        n = m_images.size() - 2;
+        n        = m_images.size() - 2;
         bReverse = true;
       }
     } else {
       n = m_nCurrentImageIndex - 1;
       if (n < 0) {
-        n = 1;
+        n        = 1;
         bReverse = false;
       }
     }

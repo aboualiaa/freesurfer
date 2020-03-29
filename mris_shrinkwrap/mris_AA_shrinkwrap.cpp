@@ -31,8 +31,8 @@
 #include "version.h"
 
 static double compute_surface_dist_sse(MRI_SURFACE *mris, MRI *mri_dist);
-static int MRISrepositionToInnerSkull(MRI_SURFACE *mris, MRI *mri_smooth,
-                                      INTEGRATION_PARMS *parms);
+static int    MRISrepositionToInnerSkull(MRI_SURFACE *mris, MRI *mri_smooth,
+                                         INTEGRATION_PARMS *parms);
 
 static char vcid[] =
     "$Id: mris_AA_shrinkwrap.c,v 1.6 2015/02/05 23:34:41 zkaufman Exp $";
@@ -40,47 +40,47 @@ static char vcid[] =
 int main(int argc, char *argv[]);
 
 #define INNER_SKULL_OUTER_SKULL_SEPARATION 4
-#define BORDER_VAL 128
-#define OUTSIDE_BORDER_STEP 16
-#define TARGET_VAL (BORDER_VAL - OUTSIDE_BORDER_STEP / 2)
+#define BORDER_VAL                         128
+#define OUTSIDE_BORDER_STEP                16
+#define TARGET_VAL                         (BORDER_VAL - OUTSIDE_BORDER_STEP / 2)
 
 static int compute_rigid_gradient(MRI_SURFACE *mris, MRI *mri_dist, double *pdx,
                                   double *pdy, double *pdz);
-static void apply_rigid_gradient(MRI_SURFACE *mris, double dx, double dy,
-                                 double dz);
-static int MRISfindOptimalRigidPosition(MRI_SURFACE *mris, MRI *mri_dist,
-                                        INTEGRATION_PARMS *parms);
+static void  apply_rigid_gradient(MRI_SURFACE *mris, double dx, double dy,
+                                  double dz);
+static int   MRISfindOptimalRigidPosition(MRI_SURFACE *mris, MRI *mri_dist,
+                                          INTEGRATION_PARMS *parms);
 MRI_SURFACE *MRISprojectOntoTranslatedSphere(MRI_SURFACE *mris_src,
                                              MRI_SURFACE *mris_dst, double r,
                                              double x0, double y0, double z0);
-int MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner,
-                              float sample_dist);
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
-static int initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
-                                       int outside, INTEGRATION_PARMS *parms);
+int          MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner,
+                                       float sample_dist);
+static int   get_option(int argc, char *argv[]);
+static void  usage_exit();
+static void  print_usage();
+static void  print_help();
+static void  print_version();
+static int   initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
+                                         int outside, INTEGRATION_PARMS *parms);
 
-static MRI *MRIfindInnerBoundary(MRI *mri_src, MRI *mri_grad, MRI *mri_dst,
-                                 float dist);
+static MRI *  MRIfindInnerBoundary(MRI *mri_src, MRI *mri_grad, MRI *mri_dst,
+                                   float dist);
 static double compute_surface_sse(MRI_SURFACE *mris, MRI *mri,
                                   float sample_dist);
-const char *Progname;
+const char *  Progname;
 
 static INTEGRATION_PARMS parms;
 #define BASE_DT_SCALE 1.0
 static float base_dt_scale = BASE_DT_SCALE;
 
-static char *suffix = "";
-static char *output_suffix = "";
-static double l_tsmooth = 0.0;
+static char * suffix         = "";
+static char * output_suffix  = "";
+static double l_tsmooth      = 0.0;
 static double l_surf_repulse = 5.0;
 
 static int smooth = 5;
 
-static int nbrs = 2;
+static int nbrs    = 2;
 static int ic_init = 3;
 static int finitep(float f);
 static int finitep(float f) {
@@ -96,14 +96,14 @@ static int finitep(float f) {
 }
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN], *T1_fname, *PD_fname, *output_dir, *mdir;
-  int ac, nargs, msec, s;
+  char **      av, fname[STRLEN], *T1_fname, *PD_fname, *output_dir, *mdir;
+  int          ac, nargs, msec, s;
   MRI_SURFACE *mris;
   MRI *mri_flash1, *mri_flash2, *mri_masked, *mri_masked_smooth, *mri_kernel,
       *mri_mean, *mri_dif, *mri_binary, *mri_distance;
-  MRI *mri_smooth, *mri_grad, *mri_inner;
-  Timer then;
-  double l_spring;
+  MRI *             mri_smooth, *mri_grad, *mri_inner;
+  Timer             then;
+  double            l_spring;
   MRI_SEGMENTATION *mriseg;
 
   nargs = handleVersionOption(argc, argv, "mris_AA_shrinkwrap");
@@ -118,28 +118,28 @@ int main(int argc, char *argv[]) {
 
   memset(&parms, 0, sizeof(parms));
 
-  parms.projection = NO_PROJECTION;
-  parms.tol = 0.05;
-  parms.check_tol = 1;
+  parms.projection    = NO_PROJECTION;
+  parms.tol           = 0.05;
+  parms.check_tol     = 1;
   parms.ignore_energy = 1;
-  parms.dt = 0.5f;
-  parms.base_dt = BASE_DT_SCALE * parms.dt;
+  parms.dt            = 0.5f;
+  parms.base_dt       = BASE_DT_SCALE * parms.dt;
 
   parms.l_spring_norm = 1;
-  parms.l_shrinkwrap = 0;
-  parms.l_intensity = 1;
+  parms.l_shrinkwrap  = 0;
+  parms.l_intensity   = 1;
 
-  parms.niterations = 0;
+  parms.niterations      = 0;
   parms.write_iterations = 0 /*WRITE_ITERATIONS */;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.momentum = 0.0 /*0.8*/;
-  parms.l_intensity = 1;
-  parms.dt_increase = 1.0 /* DT_INCREASE */;
-  parms.dt_decrease = 0.50 /* DT_DECREASE*/;
-  parms.error_ratio = 50.0 /*ERROR_RATIO */;
+  parms.momentum         = 0.0 /*0.8*/;
+  parms.l_intensity      = 1;
+  parms.dt_increase      = 1.0 /* DT_INCREASE */;
+  parms.dt_decrease      = 0.50 /* DT_DECREASE*/;
+  parms.error_ratio      = 50.0 /*ERROR_RATIO */;
   /*  parms.integration_type = INTEGRATE_LINE_MINIMIZE ;*/
   parms.l_surf_repulse = 0.0;
-  parms.l_repulse = 0 /*1*/;
+  parms.l_repulse      = 0 /*1*/;
 
   ac = argc;
   av = argv;
@@ -162,8 +162,8 @@ int main(int argc, char *argv[]) {
     parms.momentum = 0.0 /*0.75*/;
 
   then.reset();
-  T1_fname = argv[1];
-  PD_fname = argv[2];
+  T1_fname   = argv[1];
+  PD_fname   = argv[2];
   output_dir = argv[3];
   fprintf(stderr, "reading volume %s...\n", T1_fname);
   mri_flash1 = MRIread(T1_fname);
@@ -189,8 +189,8 @@ int main(int argc, char *argv[]) {
   mri_dif = MRIabsdiff(mri_flash1, mri_flash2, nullptr);
   MRIwrite(mri_dif, "dif.mgz");
 
-  mriseg = MRIsegment(mri_mean, 30, 100000);
-  s = MRIsegmentMax(mriseg);
+  mriseg     = MRIsegment(mri_mean, 30, 100000);
+  s          = MRIsegmentMax(mriseg);
   mri_masked = MRIsegmentToImage(mri_flash1, nullptr, mriseg, s);
   MRIwrite(mri_masked, "mask.mgz");
   MRIsegmentFree(&mriseg);
@@ -226,8 +226,8 @@ int main(int argc, char *argv[]) {
   MRISsetVals(mris, 0);
   sprintf(parms.base_name, "%s_inner_skull%s%s", "test", output_suffix, suffix);
   parms.mri_brain = mri_masked;
-  l_spring = parms.l_spring_norm;
-  mri_kernel = MRIgaussian1d(parms.sigma, 0);
+  l_spring        = parms.l_spring_norm;
+  mri_kernel      = MRIgaussian1d(parms.sigma, 0);
 
   mri_binary = MRIbinarize(mri_dif, mri_binary, 40, 0, 128);
   MRIwrite(mri_binary, "bin.mgz");
@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -266,69 +266,69 @@ static int get_option(int argc, char *argv[]) {
     ic_init = 4;
   else if (!stricmp(option, "ic")) {
     ic_init = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
   } else if (!stricmp(option, "nbrs")) {
     nbrs = atoi(argv[2]);
     fprintf(stderr, "using neighborhood size = %d\n", nbrs);
     nargs = 1;
   } else if (!stricmp(option, "shrink")) {
     parms.l_shrinkwrap = atof(argv[2]);
-    nargs = 1;
+    nargs              = 1;
   } else if (!stricmp(option, "name")) {
     strcpy(parms.base_name, argv[2]);
     nargs = 1;
     fprintf(stderr, "base name = %s\n", parms.base_name);
   } else if (!stricmp(option, "tol")) {
     parms.tol = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "tol = %f\n", parms.tol);
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     fprintf(stderr, "debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "dt")) {
-    parms.dt = atof(argv[2]);
-    parms.base_dt = base_dt_scale * parms.dt;
+    parms.dt               = atof(argv[2]);
+    parms.base_dt          = base_dt_scale * parms.dt;
     parms.integration_type = INTEGRATE_MOMENTUM;
     fprintf(stderr, "using dt = %2.1e\n", parms.dt);
     nargs = 1;
   } else if (!stricmp(option, "spring")) {
     parms.l_spring_norm = atof(argv[2]);
-    nargs = 1;
+    nargs               = 1;
     fprintf(stderr, "l_spring = %2.3f\n", parms.l_spring_norm);
   } else if (!stricmp(option, "tsmooth")) {
     l_tsmooth = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "l_tsmooth = %2.3f\n", l_tsmooth);
   } else if (!stricmp(option, "grad")) {
     parms.l_grad = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_grad = %2.3f\n", parms.l_grad);
   } else if (!stricmp(option, "tspring")) {
     parms.l_tspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_tspring = %2.3f\n", parms.l_tspring);
   } else if (!stricmp(option, "nspring")) {
     parms.l_nspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_nspring = %2.3f\n", parms.l_nspring);
   } else if (!stricmp(option, "curv")) {
     parms.l_curv = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_curv = %2.3f\n", parms.l_curv);
   } else if (!stricmp(option, "smooth")) {
     smooth = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     fprintf(stderr, "smoothing for %d iterations\n", smooth);
   } else if (!stricmp(option, "output")) {
     output_suffix = argv[2];
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "appending %s to output names...\n", output_suffix);
   } else if (!stricmp(option, "intensity")) {
     parms.l_intensity = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "l_intensity = %2.3f\n", parms.l_intensity);
   } else if (!stricmp(option, "lm")) {
     parms.integration_type = INTEGRATE_LINE_MINIMIZE;
@@ -352,8 +352,8 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'M':
       parms.integration_type = INTEGRATE_MOMENTUM;
-      parms.momentum = atof(argv[2]);
-      nargs = 1;
+      parms.momentum         = atof(argv[2]);
+      nargs                  = 1;
       fprintf(stderr, "momentum = %2.2f\n", parms.momentum);
       break;
     case 'R':
@@ -364,11 +364,11 @@ static int get_option(int argc, char *argv[]) {
     case 'B':
       base_dt_scale = atof(argv[2]);
       parms.base_dt = base_dt_scale * parms.dt;
-      nargs = 1;
+      nargs         = 1;
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'W':
       sscanf(argv[2], "%d", &parms.write_iterations);
@@ -437,7 +437,7 @@ static int initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
     MRIsubtract(mri_dilated, mri_masked, mri_dilated);
     MRIwrite(mri_dilated, "outside.mgz");
 
-    int x, y, z;
+    int    x, y, z;
     double x0, y0, z0, dist, num;
     double xs, ys, zs;
 
@@ -493,7 +493,7 @@ static int initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
 
 static MRI *MRIfindInnerBoundary(MRI *mri_src, MRI *mri_grad, MRI *mri_dst,
                                  float dist) {
-  int x, y, z, nsamples;
+  int    x, y, z, nsamples;
   double x1, y1, z1, dx, dy, dz, dot, d, inside, outside, norm, val, xc, yc, zc,
       wt;
 
@@ -521,9 +521,9 @@ static MRI *MRIfindInnerBoundary(MRI *mri_src, MRI *mri_grad, MRI *mri_dst,
       for (z = 0; z < mri_src->depth; z++) {
         if (x == Gx && y == Gy && z == Gz)
           DiagBreak();
-        dx = MRIgetVoxVal(mri_grad, x, y, z, 0);
-        dy = MRIgetVoxVal(mri_grad, x, y, z, 1);
-        dz = MRIgetVoxVal(mri_grad, x, y, z, 2);
+        dx   = MRIgetVoxVal(mri_grad, x, y, z, 0);
+        dy   = MRIgetVoxVal(mri_grad, x, y, z, 1);
+        dz   = MRIgetVoxVal(mri_grad, x, y, z, 2);
         norm = sqrt(dx * dx + dy * dy + dz * dz);
         if (DZERO(norm))
           continue;
@@ -567,12 +567,12 @@ int MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner,
 
   MRISsaveVertexPositions(mris, ORIGINAL_VERTICES);
   MRIScomputeMetricProperties(mris);
-  rmin = mris->radius * .5;
-  rmax = mris->radius * 1.5;
+  rmin   = mris->radius * .5;
+  rmax   = mris->radius * 1.5;
   min_x0 = mris->xctr;
   min_y0 = mris->yctr;
   min_z0 = mris->zctr;
-  min_r = mris->radius;
+  min_r  = mris->radius;
 
   MRISrestoreVertexPositions(mris, ORIGINAL_VERTICES);
   MRISprojectOntoTranslatedSphere(mris, mris, min_r, min_x0, min_y0, min_z0);
@@ -584,7 +584,7 @@ int MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner,
     sse = compute_surface_sse(mris, mri_inner, sample_dist);
     if (sse < min_sse) {
       min_sse = sse;
-      min_r = r;
+      min_r   = r;
       printf(
           "new min sse %2.0f, found at r=%2.1f mm, c = (%2.1f, %2.1f, %2.1f)\n",
           min_sse, min_r, min_x0, min_y0, min_z0);
@@ -595,14 +595,14 @@ int MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner,
   MRISwrite(mris, "lh.minr");
   for (scale = 8; scale >= 1; scale /= 2) {
     printf("scale = %d\n", scale);
-    xmin = min_x0 - scale;
-    xmax = min_x0 + scale;
-    ymin = min_y0 - scale;
-    ymax = min_y0 + scale;
-    zmin = min_z0 - scale;
-    zmax = min_z0 + scale;
-    rmin = min_r * (1.0 - scale / 128.0);
-    rmax = min_r * (1.0 + scale / 128.0);
+    xmin    = min_x0 - scale;
+    xmax    = min_x0 + scale;
+    ymin    = min_y0 - scale;
+    ymax    = min_y0 + scale;
+    zmin    = min_z0 - scale;
+    zmax    = min_z0 + scale;
+    rmin    = min_r * (1.0 - scale / 128.0);
+    rmax    = min_r * (1.0 + scale / 128.0);
     delta_x = mri_inner->xsize * scale / 16;
     delta_y = mri_inner->ysize * scale / 16;
     delta_z = mri_inner->zsize * scale / 16;
@@ -625,10 +625,10 @@ int MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner,
             sse = compute_surface_sse(mris, mri_inner, sample_dist);
             if (sse < min_sse) {
               min_sse = sse;
-              min_r = r;
-              min_x0 = x0;
-              min_y0 = y0;
-              min_z0 = z0;
+              min_r   = r;
+              min_x0  = x0;
+              min_y0  = y0;
+              min_z0  = z0;
               printf("new min sse %2.0f, found at r=%2.1f mm, c = (%2.1f, "
                      "%2.1f, %2.1f)\n",
                      min_sse, min_r, min_x0, min_y0, min_z0);
@@ -658,10 +658,10 @@ int MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner,
 #define DELTA 1 // mm
 static double compute_surface_sse(MRI_SURFACE *mris, MRI *mri,
                                   float sample_dist) {
-  int vno, nsamples;
+  int     vno, nsamples;
   VERTEX *v;
-  float sse, dist;
-  double val, xw, yw, zw, x, y, z, nx, ny, nz, error;
+  float   sse, dist;
+  double  val, xw, yw, zw, x, y, z, nx, ny, nz, error;
 
   for (nsamples = 0, sse = 0.0, vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -669,7 +669,7 @@ static double compute_surface_sse(MRI_SURFACE *mris, MRI *mri,
       continue;
 
     if (!std::isfinite(v->x) || !std::isfinite(v->y) || !std::isfinite(v->z))
-      DiagBreak() ;
+      DiagBreak();
     // sample outside - want bright stuff out here
     nx = v->nx;
     ny = v->ny;
@@ -707,9 +707,9 @@ static double compute_surface_sse(MRI_SURFACE *mris, MRI *mri,
 #define TARGET_VAL 128
 static int MRISrepositionToInnerSkull(MRI_SURFACE *mris, MRI *mri_smooth,
                                       INTEGRATION_PARMS *parms) {
-  MRI *mri_dist, *mri_bin, *mri_kernel, *mri_bin_smooth, *mri_dist_smooth;
+  MRI * mri_dist, *mri_bin, *mri_kernel, *mri_bin_smooth, *mri_dist_smooth;
   float l_spring, sigma;
-  int i, ic_order, avgs;
+  int   i, ic_order, avgs;
 
   parms->niterations = 1000;
   if (parms->momentum < 0.0)
@@ -723,18 +723,18 @@ static int MRISrepositionToInnerSkull(MRI_SURFACE *mris, MRI *mri_smooth,
   MRIwrite(mri_dist, "dist.mgz");
   MRISscaleBrain(mris, mris, 0.5); // start inside
 
-  mri_kernel = MRIgaussian1d(2, 0);
+  mri_kernel     = MRIgaussian1d(2, 0);
   mri_bin_smooth = MRIconvolveGaussian(mri_bin, nullptr, mri_kernel);
   MRIwrite(mri_bin_smooth, "bin_smooth.mgz");
   MRISfindOptimalRigidPosition(mris, mri_bin_smooth, parms);
   MRIfree(&mri_kernel);
   MRIfree(&mri_bin_smooth);
   avgs = parms->n_averages = 32;
-  l_spring = parms->l_spring_norm;
+  l_spring                 = parms->l_spring_norm;
   for (ic_order = 3; ic_order <= 3; ic_order++) {
     if (ic_order != ic_init) {
       MRI_SURFACE *mris_new;
-      char fname[STRLEN], *mdir;
+      char         fname[STRLEN], *mdir;
 
       mdir = getenv("FREESURFER_HOME");
       if (!mdir)
@@ -749,7 +749,7 @@ static int MRISrepositionToInnerSkull(MRI_SURFACE *mris, MRI *mri_smooth,
 
     printf("********************** using ICO order %d *********************\n",
            ic_order);
-    parms->n_averages = avgs;
+    parms->n_averages    = avgs;
     parms->l_spring_norm = l_spring;
     for (sigma = 16.0, i = 0; i < 7; i++, sigma /= 2) {
       printf("******************** pass %d, sigma = %2.2f, avgs = %d "
@@ -761,7 +761,7 @@ static int MRISrepositionToInnerSkull(MRI_SURFACE *mris, MRI *mri_smooth,
       MRISsetVals(mris, 0); // 0 mm from fat
       parms->mri_brain = mri_dist;
 
-      mri_kernel = MRIgaussian1d(sigma, 0);
+      mri_kernel      = MRIgaussian1d(sigma, 0);
       mri_dist_smooth = MRIconvolveGaussian(mri_dist, nullptr, mri_kernel);
       MRIfree(&mri_kernel);
       if (i == 0) {
@@ -784,11 +784,11 @@ static int MRISrepositionToInnerSkull(MRI_SURFACE *mris, MRI *mri_smooth,
 static int MRISfindOptimalRigidPosition(MRI_SURFACE *mris, MRI *mri,
                                         INTEGRATION_PARMS *parms) {
   double dx, dy, dz, old_sse, sse, pct_change, dt, dx_total, dy_total, dz_total;
-  int i;
+  int    i;
 
-  i = 0;
+  i   = 0;
   sse = compute_surface_dist_sse(mris, mri);
-  dt = .1;
+  dt  = .1;
 
   dx_total = dy_total = dz_total = 0;
   do {
@@ -823,10 +823,10 @@ static int MRISfindOptimalRigidPosition(MRI_SURFACE *mris, MRI *mri,
 }
 
 static double compute_surface_dist_sse(MRI_SURFACE *mris, MRI *mri) {
-  double sse = 0.0;
-  int vno;
+  double  sse = 0.0;
+  int     vno;
   VERTEX *v;
-  double val, error, xw, yw, zw;
+  double  val, error, xw, yw, zw;
 
   for (vno = 0, sse = 0.0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -846,9 +846,9 @@ static double compute_surface_dist_sse(MRI_SURFACE *mris, MRI *mri) {
 
 static int compute_rigid_gradient(MRI_SURFACE *mris, MRI *mri, double *pdx,
                                   double *pdy, double *pdz) {
-  int vno;
+  int     vno;
   VERTEX *v;
-  double val, xw, yw, zw, dx, dy, dz, delV, x, y, z, Ix, Iy, Iz, xv, yv, zv;
+  double  val, xw, yw, zw, dx, dy, dz, delV, x, y, z, Ix, Iy, Iz, xv, yv, zv;
 
   dx = dy = dz = 0.0;
   for (vno = 0; vno < mris->nvertices; vno++) {

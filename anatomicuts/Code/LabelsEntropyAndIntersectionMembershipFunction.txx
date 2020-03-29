@@ -9,10 +9,10 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
     const MeasurementVectorType *m1, const MeasurementVectorType *m2) const {
   typedef
       typename MeasurementVectorType::LabelsDirectionType LabelsDirectionsType;
-  typedef typename MeasurementVectorType::LabelsMapType LabelsMapType;
-  const LabelsDirectionsType labels1 = m1->GetLabelsPerDirection();
-  const LabelsDirectionsType labels2 = m2->GetLabelsPerDirection();
-  int numberOfPoints = m1->GetNumberOfPoints();
+  typedef typename MeasurementVectorType::LabelsMapType   LabelsMapType;
+  const LabelsDirectionsType labels1        = m1->GetLabelsPerDirection();
+  const LabelsDirectionsType labels2        = m2->GetLabelsPerDirection();
+  int                        numberOfPoints = m1->GetNumberOfPoints();
 
   //	std::cout << "number of points "<< numberOfPoints << std::endl;
   double intersection = 0.0;
@@ -21,7 +21,7 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
       numberOfPoints; // pow( pow(numberOfPoints,2)*labels1.size(),2);
   // double dice=0.0;
   std::set<int> adhocEntropy;
-  double affinity = 1.0;
+  double        affinity = 1.0;
   if (this->m_labelsAndEuclid) {
     for (int i = 0; i < labels1.size(); i++) {
       for (typename LabelsMapType::const_iterator it = labels1[i].cbegin();
@@ -36,9 +36,9 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
                (pow(normalizing, 2) * labels1.size() * 5);
 
     typedef typename MeasurementVectorType::CellType CellType;
-    const std::vector<CellType> *labels1_ = m1->GetLabels();
-    const std::vector<CellType> *labels2_ = m2->GetLabels();
-    double dist = 0.0, dist_inv = 0.0;
+    const std::vector<CellType> *                    labels1_ = m1->GetLabels();
+    const std::vector<CellType> *                    labels2_ = m2->GetLabels();
+    double                                           dist = 0.0, dist_inv = 0.0;
 
     for (int i = 0; i < labels1_->size(); i++) {
       double euclid = 0, euclid_inv = 0;
@@ -98,9 +98,9 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
   } else if (this->m_meanEuclidean) {
     // std::cout << "mean euc" <<std::endl;
     typedef typename MeasurementVectorType::CellType CellType;
-    const std::vector<CellType> *labels1 = m1->GetLabels();
-    const std::vector<CellType> *labels2 = m2->GetLabels();
-    double dist = 0.0, dist_inv = 0.0;
+    const std::vector<CellType> *                    labels1 = m1->GetLabels();
+    const std::vector<CellType> *                    labels2 = m2->GetLabels();
+    double                                           dist = 0.0, dist_inv = 0.0;
     // std::cout << " num points " << labels1->size() << std::endl;
     for (int i = 0; i < labels1->size(); i++) {
       double euclid = 0, euclid_inv = 0;
@@ -120,9 +120,9 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
     return dist;
   } else if (this->m_gaussian) {
     typedef typename MeasurementVectorType::CellType CellType;
-    const std::vector<CellType> *labels1 = m1->GetLabels();
-    const std::vector<CellType> *labels2 = m2->GetLabels();
-    double dist = 0.0, dist_inv = 0.0;
+    const std::vector<CellType> *                    labels1 = m1->GetLabels();
+    const std::vector<CellType> *                    labels2 = m2->GetLabels();
+    double                                           dist = 0.0, dist_inv = 0.0;
 
     for (int i = 0; i < labels1->size(); i++) {
       double euclid = 0, euclid_inv = 0;
@@ -141,15 +141,15 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
   } else if (this->m_meanClosestPointInvert) {
     //		std::cout << "meann clos" << std::endl;
     typedef typename MeasurementVectorType::CellType CellType;
-    const std::vector<CellType> *labels1 = m1->GetLabels();
+    const std::vector<CellType> *                    labels1 = m1->GetLabels();
     // const std::vector<CellType>* labels2 =m2->GetLabels();
     double max1 = 0.0, max2 = 0.0;
-    int numPoints = labels1->size() - 1;
+    int    numPoints = labels1->size() - 1;
     for (int i = 0; i < numPoints; i++) {
       double min1 = std::numeric_limits<double>::max();
       double min2 = std::numeric_limits<double>::max();
       for (int j = 0; j < numPoints; j++) {
-        double euclid = 0;
+        double euclid  = 0;
         double euclid2 = 0;
         for (int k = 0; k < 3; k++) {
           euclid += pow((*m1)[i * 3 + k] - (*m2)[j * 3 + k], 2);
@@ -166,15 +166,15 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
     return 1.0 / (dist + 1.0);
   } else if (this->m_meanClosestPointGaussian) {
     typedef typename MeasurementVectorType::CellType CellType;
-    const std::vector<CellType> *labels1 = m1->GetLabels();
+    const std::vector<CellType> *                    labels1 = m1->GetLabels();
     // const std::vector<CellType>* labels2 =m2->GetLabels();
     double max1 = 0.0, max2 = 0.0;
-    int numPoints = labels1->size() - 1;
+    int    numPoints = labels1->size() - 1;
     for (int i = 0; i < numPoints; i++) {
       double min1 = std::numeric_limits<double>::max();
       double min2 = std::numeric_limits<double>::max();
       for (int j = 0; j < numPoints; j++) {
-        double euclid = 0;
+        double euclid  = 0;
         double euclid2 = 0;
         for (int k = 0; k < 3; k++) {
           euclid += pow((*m1)[i * 3 + k] - (*m2)[j * 3 + k], 2);
@@ -190,8 +190,8 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
     double aff = (max1 + max2) / (2 * numPoints);
     return exp(-aff / 800.0);
   } else if (this->m_meanAndCovGaussian) {
-    int numPoints = 3;
-    double dist = 0.0;
+    int    numPoints = 3;
+    double dist      = 0.0;
 
     for (int i = 0; i < numPoints; i++) {
       for (int k = 0; k < 3; k++) {
@@ -204,8 +204,8 @@ double LabelsEntropyAndIntersectionMembershipFunction<TVector>::Evaluate(
     return exp(-dist / 800.0);
 
   } else if (this->m_meanAndCovInvert) {
-    int numPoints = 3;
-    double dist = 0.0;
+    int    numPoints = 3;
+    double dist      = 0.0;
 
     for (int i = 0; i < numPoints; i++) {
       for (int k = 0; k < 3; k++) {

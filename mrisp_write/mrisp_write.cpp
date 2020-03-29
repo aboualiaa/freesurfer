@@ -23,9 +23,9 @@
  */
 
 #include "diag.h"
-#include "version.h"
-#include "mri_identify.h"
 #include "mri2.h"
+#include "mri_identify.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mrisp_write.c,v 1.12 2016/03/22 14:47:57 fischl Exp $";
@@ -33,49 +33,48 @@ static char vcid[] =
 int main(int argc, char *argv[]);
 
 static MRI_SP *mrispComputeCorrelations(MRI_SP *mrisp, MRI_SP *mrisp_contra);
-MRI *mrisComputeLabelCorrelations(MRI_SURFACE *mris, LABEL *area,
-                                  MRI *mri_overlay, MRI *mri_corr);
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+MRI *          mrisComputeLabelCorrelations(MRI_SURFACE *mris, LABEL *area,
+                                            MRI *mri_overlay, MRI *mri_corr);
+static int     get_option(int argc, char *argv[]);
+static void    usage_exit();
+static void    print_usage();
+static void    print_help();
+static void    print_version();
 
 const char *Progname;
 
-static MRI_SURFACE *mris_contra = nullptr;
-static MRI *mri_contra_overlay = nullptr;
+static MRI_SURFACE *mris_contra        = nullptr;
+static MRI *        mri_contra_overlay = nullptr;
 
-static int coords = -1;
-static int compute_corr = 0;
-static int spherical_corr = 0;
-static char *clabel_fname = nullptr; // contra hemi label
-static char *label_fname = nullptr;
+static int   coords           = -1;
+static int   compute_corr     = 0;
+static int   spherical_corr   = 0;
+static char *clabel_fname     = nullptr; // contra hemi label
+static char *label_fname      = nullptr;
 static char *seed_label_fname = nullptr;
-static int normalize = 0;
-static int navgs = 0;
-static float sigma = 0;
-static int barycentric = 0;
+static int   normalize        = 0;
+static int   navgs            = 0;
+static float sigma            = 0;
+static int   barycentric      = 0;
 
 static int frame_to_read = -1;
 
 static char subjects_dir[STRLEN];
 
-static float scale = 1;
-static int nframes = 1;
+static float scale   = 1;
+static int   nframes = 1;
 
 int main(int argc, char *argv[]) {
-  char **av, *out_fname;
-  int ac, nargs, file_type;
-  char *in_surf, *in_overlay;
+  char **      av, *out_fname;
+  int          ac, nargs, file_type;
+  char *       in_surf, *in_overlay;
   MRI_SURFACE *mris;
-  MRI_SP *mrisp, *mrisp_contra = nullptr;
-  MRI *mri_overlay;
+  MRI_SP *     mrisp, *mrisp_contra = nullptr;
+  MRI *        mri_overlay;
 
   nargs = handleVersionOption(argc, argv, "mrisp_write");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -96,9 +95,9 @@ int main(int argc, char *argv[]) {
     usage_exit();
   }
 
-  in_surf = argv[1];
+  in_surf    = argv[1];
   in_overlay = argv[2];
-  out_fname = argv[3];
+  out_fname  = argv[3];
 
   fprintf(stderr, "reading surface from %s...\n", in_surf);
   mris = MRISread(in_surf);
@@ -121,7 +120,7 @@ int main(int argc, char *argv[]) {
   file_type = mri_identify(in_overlay);
   if (file_type == MRI_MGH_FILE || file_type == NIFTI1_FILE ||
       file_type == NII_FILE) {
-    int frame;
+    int    frame;
     LABEL *area, *carea;
 
     if (frame_to_read >= 0)
@@ -134,7 +133,7 @@ int main(int argc, char *argv[]) {
                 Progname, in_overlay);
     {
       MRI *mri_tmp;
-      int reshapefactor = mri_overlay->height * mri_overlay->depth;
+      int  reshapefactor = mri_overlay->height * mri_overlay->depth;
 
       mri_tmp = mri_reshape(mri_overlay, reshapefactor * mri_overlay->width, 1,
                             1, mri_overlay->nframes);
@@ -241,7 +240,7 @@ int main(int argc, char *argv[]) {
   } else // process a 'curvature' file like thickness with a single frame
   {
     LABEL *area, *carea;
-    mrisp = MRISPalloc(scale, 1);
+    mrisp     = MRISPalloc(scale, 1);
     file_type = mri_identify(in_overlay);
     if (file_type ==
         MGH_LABEL_FILE) // read in a label and create an overlay from it
@@ -308,7 +307,7 @@ int main(int argc, char *argv[]) {
     MRIStoParameterization(mris, mrisp, scale, 0);
   }
   if (sigma > 0) {
-    int f;
+    int     f;
     MRI_SP *mrisp_dst;
 
     printf("applying spherical convolution with sigma = %2.1f\n", sigma);
@@ -334,7 +333,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -359,8 +358,8 @@ static int get_option(int argc, char *argv[]) {
     extern int DEBUG_U, DEBUG_V;
     DEBUG_U = Gx = atoi(argv[2]);
     DEBUG_V = Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
-    nargs = 3;
+    Gz           = atoi(argv[4]);
+    nargs        = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "CONTRA")) {
     mris_contra = MRISread(argv[2]);
@@ -379,18 +378,18 @@ static int get_option(int argc, char *argv[]) {
     seed_label_fname = argv[2];
     printf("computing vertex correlations inside label %s\n", seed_label_fname);
     compute_corr = 1;
-    nargs = 1;
+    nargs        = 1;
   } else if (!stricmp(option, "SPCORR")) {
     spherical_corr = 1;
     printf("computing correlations in spherical map\n");
   } else if (!stricmp(option, "FRAME")) {
     frame_to_read = atoi(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("extracting frame %d from input volume\n", frame_to_read);
   } else if (!stricmp(option, "BARYCENTRIC") || !stricmp(option, "BARY")) {
     printf("computing spherical mapping using barycentric interpolation\n");
     barycentric = 1;
-    nargs = 0;
+    nargs       = 0;
   } else if (!stricmp(option, "sigma")) {
     sigma = atof(argv[2]);
     nargs = 1;
@@ -398,7 +397,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "NFRAMES")) // not implemented yet
   {
     nframes = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("writing out %d frames - NOT IMPLEMENTED YET\n", nframes);
     exit(1);
   } else if (!stricmp(option, "scale")) {
@@ -431,7 +430,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':
@@ -484,7 +483,7 @@ MRI *mrisComputeLabelCorrelations(MRI_SURFACE *mris, LABEL *area,
 #pragma omp parallel for
 #endif
   for (lvno = 0; lvno < area->n_points; lvno++) {
-    int vno1, vno2, t;
+    int    vno1, vno2, t;
     double norm1, norm2, dot, val1, val2;
 
     vno1 = area->lv[lvno].vno;
@@ -509,13 +508,13 @@ MRI *mrisComputeLabelCorrelations(MRI_SURFACE *mris, LABEL *area,
 }
 
 static MRI_SP *mrispComputeCorrelations(MRI_SP *mrisp, MRI_SP *mrisp_contra) {
-  MRI_SP *mrisp_sphere, *mrisp_debug;
-  int nframes, x, y, width, height, t;
+  MRI_SP * mrisp_sphere, *mrisp_debug;
+  int      nframes, x, y, width, height, t;
   double **norms, mean, val, **cnorms, ****corrs = nullptr;
 
-  mrisp = MRISPclone(mrisp); // we will modify this one and free it later
-  width = mrisp->Ip->cols;
-  height = mrisp->Ip->rows;
+  mrisp   = MRISPclone(mrisp); // we will modify this one and free it later
+  width   = mrisp->Ip->cols;
+  height  = mrisp->Ip->rows;
   nframes = width * height;
   if (mrisp_contra) {
     mrisp_contra =
@@ -574,7 +573,7 @@ static MRI_SP *mrispComputeCorrelations(MRI_SP *mrisp, MRI_SP *mrisp_contra) {
 #pragma omp parallel for
 #endif
   for (x = 0; x < width; x++) {
-    int x1, y1, y, frame, t;
+    int    x1, y1, y, frame, t;
     double norm1, norm2, dot;
 
     for (y = 0; y < height; y++) {
@@ -675,7 +674,7 @@ static MRI_SP *mrispComputeCorrelations(MRI_SP *mrisp, MRI_SP *mrisp_contra) {
 #pragma omp parallel for
 #endif
     for (x = 0; x < width; x++) {
-      int x1, y1, y, frame, t;
+      int    x1, y1, y, frame, t;
       double norm1, norm2, dot;
 
       for (y = 0; y < height; y++) {

@@ -1,11 +1,11 @@
 #include "DialogLoadConnectome.h"
-#include "ui_DialogLoadConnectome.h"
-#include "MainWindow.h"
 #include "LUTDataHolder.h"
+#include "MainWindow.h"
+#include "ui_DialogLoadConnectome.h"
 
 #include <QFileDialog>
-#include <QSettings>
 #include <QMessageBox>
+#include <QSettings>
 
 DialogLoadConnectome::DialogLoadConnectome(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogLoadConnectome) {

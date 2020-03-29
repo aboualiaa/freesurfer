@@ -25,12 +25,10 @@
 #ifndef __GENERAL_H__
 #define __GENERAL_H__
 
-#include <cstring>
-#include "env.h"
 #include "c_SMessage.h"
+#include "env.h"
 #include "pathconvert.h"
-
-using namespace std;
+#include <cstring>
 
 #define PENV str_env.
 
@@ -72,43 +70,43 @@ using namespace std;
   if (mps_env->pcsm_resultlog)                                                 \
     mps_env->pcsm_resultlog->dump(false, (msg));
 
-#define Cn(msg) cout << (msg) << endl;
+#define Cn(msg) cout << (msg) << std::endl;
 #define CW(x, msg)                                                             \
-  cout.width((x));                                                             \
-  cout << (msg);
+  std::cout.width((x));                                                        \
+  std::cout << (msg);
 #define CWn(x, msg)                                                            \
-  cout.width((x));                                                             \
-  cout << (msg);                                                               \
-  cout << endl;
+  std::cout.width((x));                                                        \
+  std::cout << (msg);                                                          \
+  std::cout << std::endl;
 #define CCn(w, msg)                                                            \
   for (unsigned __co = 0; __co < (w - strlen(msg)) / 2; __co++)                \
-    cout << " ";                                                               \
-  cout << (msg);                                                               \
-  cout << endl;
+    std::cout << " ";                                                          \
+  std::cout << (msg);                                                          \
+  std::cout << std::endl;
 
 // A simple structure to hold some statistical information
 typedef struct _e_stats {
   float f_max;
-  int indexMax;
+  int   indexMax;
   float f_min;
-  int indexMin;
+  int   indexMin;
 } e_stats;
 
 typedef enum { e_gaussian, e_mean } e_CURVATURE;
 
 typedef enum _FILEACCESS {
-  e_UNSPECIFIED = -10,
+  e_UNSPECIFIED      = -10,
   e_WRONGMAGICNUMBER = -1,
-  e_OK = 0,
-  e_READACCESSERROR = 1,
+  e_OK               = 0,
+  e_READACCESSERROR  = 1,
   e_WRITEACCESSERROR = 2
 } e_FILEACCESS;
 
 short CURV_arrayProgress_print(int asize, int acurrent, char *apch_message);
 
-void lprintf(int lw, const char *format, ...);
+void  lprintf(int lw, const char *format, ...);
 char *lsprintf(int lw, char *pch_bufferOut, const char *format, ...);
-void colprintf(int lw, int rw, const char *pch_lstr, const char *format, ...);
+void  colprintf(int lw, int rw, const char *pch_lstr, const char *format, ...);
 char *colsprintf(int lw, int rw, char *pch_buffer, const char *pch_lstr,
                  const char *format, ...);
 
@@ -153,39 +151,40 @@ float V3D_distance(st_V3D &V_A, st_V3D &V_B);
 /// The first token component. \param astr_second  The second token component.
 /// \param astr_third  The third token component.
 /// \return int   Number of substrings successfully extracted.
-int str_3parse(string &astr_input, string &astr_first, string &astr_second,
-               string &astr_third);
+int str_3parse(std::string &astr_input, std::string &astr_first,
+               std::string &astr_second, std::string &astr_third);
 
 /// \fn bool str_leadingWSremove(string& astr_input)
 /// \brief Remove (destructively) any leading whitespace in passed string.
 /// \param astr_input  Source string to parse. Destructive parsing.
 /// \return bool   OK
-bool str_leadingWSremove(string &astr_input);
+bool str_leadingWSremove(std::string &astr_input);
 
 /// \fn bool relDirSpec_test(string& astr_dirSpec)
 /// \brief Checks if the current directory specification is relative or
 /// absolute. \param astr_dirSpec  An input string containing a directory (or
 /// file) spec \return bool   TRUE - if astr_dirSpec is a relative specification
-bool relDirSpec_test(string &astr_dirSpec);
+bool relDirSpec_test(std::string &astr_dirSpec);
 
 /// \fn bool str_rel2absDirSpec_change(string& astr_rel, string& astr_abs)
 /// \brief Converts the relative dir spec in astr_rel to an absolute directory
 /// in astr_abs. \param astr_rel  An input string containing a relative
 /// directory \param astr_abs  An output string containing the input as an
 /// absolute dir spec \return bool   OK
-bool str_rel2absDirSpec_change(string &astr_rel, string &astr_abs);
+bool str_rel2absDirSpec_change(std::string &astr_rel, std::string &astr_abs);
 
 /// \fn void str_findAndReplace(string& astr_source, const string astr_find,
 /// string astr_replace) \brief Find and replace. \param astr_source 	The
 /// source string \param astr_find  	The string to find in the source \param
 /// astr_replace	The replacement string \return bool	TRUE: Performed
 /// replacement; FALSE: No replacement
-bool str_findAndReplace(string &astr_source, const string astr_find,
-                        string astr_replace);
+bool str_findAndReplace(std::string &astr_source, const std::string astr_find,
+                        std::string astr_replace);
 
-void warn(string str_action, string str_errorMsg, int errorCode);
+void warn(std::string str_action, std::string str_errorMsg, int errorCode);
 
-void error_exit(string str_action, string str_errorMsg, int errorCode);
+void error_exit(std::string str_action, std::string str_errorMsg,
+                int errorCode);
 
 void command_line_error(char *fmt, ...);
 

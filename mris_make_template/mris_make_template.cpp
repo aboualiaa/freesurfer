@@ -31,7 +31,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms);
+static int  get_option(int argc, char *argv[], INTEGRATION_PARMS *parms);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -39,30 +39,30 @@ static void print_version();
 
 const char *Progname;
 
-static char *surf_dir = "surf";
-static char *annot_name = nullptr;
+static char *surf_dir        = "surf";
+static char *annot_name      = nullptr;
 static char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
 
 static char *curvature_names[] = {"inflated.H", "sulc", nullptr};
 
 #define IMAGES_PER_SURFACE 3 /* mean, variance, and dof */
-#define SURFACES sizeof(curvature_names) / sizeof(curvature_names[0])
-#define PARAM_IMAGES (IMAGES_PER_SURFACE * SURFACES)
+#define SURFACES           sizeof(curvature_names) / sizeof(curvature_names[0])
+#define PARAM_IMAGES       (IMAGES_PER_SURFACE * SURFACES)
 
-static int nbrs = 3;
-static int navgs = 0;
-static float scale = 1;
-static int no_rot = 1;
-static char subjects_dir[STRLEN];
+static int   nbrs   = 3;
+static int   navgs  = 0;
+static float scale  = 1;
+static int   no_rot = 1;
+static char  subjects_dir[STRLEN];
 
 /* VECTORIAL_REGISTRATION */
 static void setParms(INTEGRATION_PARMS *parms);
-static int multiframes = 0;  /* to use multiframes */
-static int base_default = 1; /* using default vector fields */
-static int atlas_size = 3;
+static int  multiframes  = 0; /* to use multiframes */
+static int  base_default = 1; /* using default vector fields */
+static int  atlas_size   = 3;
 
 #define MAX_OVERLAYS 1000
-static int noverlays = 0;
+static int   noverlays = 0;
 static char *overlays[MAX_OVERLAYS];
 static char *overlay_dir = "label";
 
@@ -71,11 +71,11 @@ static int which_norm = NORM_MEAN;
 int main(int argc, char *argv[]) {
   char **av, surf_fname[STRLEN], *template_fname, *hemi, *sphere_name, *cp,
       *subject, fname[STRLEN];
-  int ac, nargs, ino, sno, nbad = 0, failed, n, nfields;
-  VERTEX *v;
-  VALS_VP *vp;
-  MRI_SURFACE *mris;
-  MRI_SP *mrisp, /* *mrisp_aligned,*/ *mrisp_template;
+  int               ac, nargs, ino, sno, nbad = 0, failed, n, nfields;
+  VERTEX *          v;
+  VALS_VP *         vp;
+  MRI_SURFACE *     mris;
+  MRI_SP *          mrisp, /* *mrisp_aligned,*/ *mrisp_template;
   INTEGRATION_PARMS parms;
 
   nargs = handleVersionOption(argc, argv, "mris_make_template");
@@ -113,8 +113,8 @@ int main(int argc, char *argv[]) {
                 Progname);
     strcpy(subjects_dir, cp);
   }
-  hemi = argv[1];
-  sphere_name = argv[2];
+  hemi           = argv[1];
+  sphere_name    = argv[2];
   template_fname = argv[argc - 1];
   if (1 || !FileExists(template_fname)) /* first time - create it */
   {
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
   argv += 3;
   argc -= 3;
   for (ino = 0; ino < argc - 1; ino++) {
-    failed = 0;
+    failed  = 0;
     subject = argv[ino];
     fprintf(stderr, "\nprocessing subject %s (%d of %d)\n", subject, ino + 1,
             argc - 1);
@@ -196,14 +196,14 @@ int main(int argc, char *argv[]) {
       for (n = 0; n < mris->nvertices; n++) /* allocate the VALS_VP
                                                                structure */
       {
-        v = &mris->vertices[n];
-        vp = (VALS_VP *)calloc(1, sizeof(VALS_VP));
-        vp->nvals = nfields;
+        v             = &mris->vertices[n];
+        vp            = (VALS_VP *)calloc(1, sizeof(VALS_VP));
+        vp->nvals     = nfields;
         vp->orig_vals = (float *)malloc(nfields * sizeof(float)); /* before
                                                                      blurring */
         vp->vals = (float *)malloc(nfields * sizeof(float)); /* values used by
                                                                 MRISintegrate */
-        v->vp = (void *)vp;
+        v->vp    = (void *)vp;
       }
 
       /* load the different fields */
@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
                         Progname, surf_fname);
             fprintf(stderr, "setting up correlation coefficient to zero\n");
             parms.fields[n].l_corr = parms.fields[n].l_pcorr = 0.0;
-            failed = 1;
+            failed                                           = 1;
             break;
           }
 
@@ -270,7 +270,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n");
         /* free cal structure*/
         for (n = 0; n < mris->nvertices; n++) {
-          v = &mris->vertices[n];
+          v  = &mris->vertices[n];
           vp = (VALS_VP *)v->vp;
           free(vp->orig_vals);
           free(vp->vals);
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
       parms.frame_no = 3; /* don't use single field correlation functions */
       parms.l_corr = parms.l_pcorr = 0.0f;
 
-      parms.mrisp = MRIStoParameterization(mris, nullptr, scale, 0);
+      parms.mrisp          = MRIStoParameterization(mris, nullptr, scale, 0);
       parms.mrisp_template = mrisp_template;
 
       MRISrigidBodyAlignVectorGlobal(mris, &parms, 1.0, 64.0, 8);
@@ -310,10 +310,10 @@ int main(int argc, char *argv[]) {
         MRISfree(&mris);
         continue;
       }
-      parms.frame_no = 3; /* use sulc for rigid registration */
-      parms.mrisp = MRIStoParameterization(mris, nullptr, scale, 0);
+      parms.frame_no       = 3; /* use sulc for rigid registration */
+      parms.mrisp          = MRIStoParameterization(mris, nullptr, scale, 0);
       parms.mrisp_template = mrisp_template;
-      parms.l_corr = 1.0f;
+      parms.l_corr         = 1.0f;
 
       MRISrigidBodyAlignGlobal(mris, &parms, 1.0, 64.0, 8);
       if (Gdiag & DIAG_WRITE)
@@ -336,7 +336,7 @@ int main(int argc, char *argv[]) {
       }
       /* free the VALS_VP structure */
       for (n = 0; n < mris->nvertices; n++) {
-        v = &mris->vertices[n];
+        v  = &mris->vertices[n];
         vp = (VALS_VP *)v->vp;
         free(vp->orig_vals);
         free(vp->vals);
@@ -521,7 +521,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
-  int n, nargs = 0;
+  int   n, nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -530,7 +530,7 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
   else if (!stricmp(option, "version") || !stricmp(option, "-version"))
     print_version();
   else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size = %d\n", nbrs);
   } else if (!stricmp(option, "sdir")) {
@@ -546,7 +546,7 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
   } else if (!stricmp(option, "infname")) {
     char fname[STRLEN];
     surface_names[0] = argv[2];
-    nargs = 1;
+    nargs            = 1;
     printf("using %s instead of inflated\n", argv[2]);
     sprintf(fname, "%s.H", argv[2]);
     curvature_names[0] = (char *)calloc(strlen(fname) + 1, sizeof(char));
@@ -563,8 +563,8 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
     no_rot = 0;
     fprintf(stderr, "rigidly aligning hemispheres before averaging.\n");
   } else if (!stricmp(option, "nodefault")) {
-    base_default = 0;
-    atlas_size = 0;
+    base_default   = 0;
+    atlas_size     = 0;
     parms->nfields = 0;
     for (n = 0; n < 3; n++)
       InitFieldLabel(&parms->fields[n]);
@@ -588,10 +588,10 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
   } else if (!strcmp(option, "overlay")) {
     int navgs;
     overlays[noverlays++] = argv[2];
-    navgs = atoi(argv[3]);
+    navgs                 = atoi(argv[3]);
     printf("reading overlay from %s...\n", argv[2]);
     multiframes = 1;
-    n = parms->nfields++;
+    n           = parms->nfields++;
     SetFieldLabel(&parms->fields[n], OVERLAY_FRAME, atlas_size, 0.0, 0.0, navgs,
                   which_norm);
     SetFieldName(&parms->fields[n], argv[2]);
@@ -600,10 +600,10 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
   } else if (!strcmp(option, "distance")) {
     int navgs;
     overlays[noverlays++] = argv[2];
-    navgs = atoi(argv[3]);
+    navgs                 = atoi(argv[3]);
     printf("reading overlay from %s...\n", argv[2]);
     multiframes = 1;
-    n = parms->nfields++;
+    n           = parms->nfields++;
     SetFieldLabel(&parms->fields[n], DISTANCE_TRANSFORM_FRAME, atlas_size, 0.0,
                   0.0, navgs, NORM_MAX);
     SetFieldName(&parms->fields[n], argv[2]);
@@ -629,7 +629,7 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
     if (multiframes == 0) /* activate multiframes mode */
       multiframes = 1;
 
-    which_field = atoi(argv[2]);
+    which_field    = atoi(argv[2]);
     where_in_atlas = atoi(argv[3]);
 
     fprintf(stderr, "adding field %d into average atlas at location %d\n",
@@ -674,7 +674,7 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
       break;
     case 'O':
       surface_names[1] = surface_names[2] = argv[2];
-      nargs = 1;
+      nargs                               = 1;
       printf("using %s instead of smoothwm\n", argv[2]);
       break;
     case 'A':

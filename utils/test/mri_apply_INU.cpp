@@ -27,24 +27,24 @@
  *  and then apply the gain field to the current input volume
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
 #include "fio.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
 #include "version.h"
 
 static char *fname_before = NULL; /* filename for template volume before N3 */
-static char *fname_after = NULL;  /* filename for template volume after N3 */
+static char *fname_after  = NULL; /* filename for template volume after N3 */
 
 void usage(int exit_val);
 
@@ -52,30 +52,29 @@ static int debug_flag = 0;
 
 const char *Progname;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
 
   char **av;
-  MRI *mri_before, *mri_after, *mri_in, *mri_out;
-  int ac, nargs;
-  int width, height, depth, x, y, z, f, nframes;
+  MRI *  mri_before, *mri_after, *mri_in, *mri_out;
+  int    ac, nargs;
+  int    width, height, depth, x, y, z, f, nframes;
   double v_before, v_after, v_in, v_out;
   double gain;
 
   Progname = argv[0];
 
   nargs = handleVersionOption(argc, argv, "mri_apply_INU");
-  argc -= nargs ;
+  argc -= nargs;
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++)
-  {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc != 3)
@@ -115,9 +114,9 @@ int main(int argc, char *argv[]) {
 
   mri_out = MRIclone(mri_in, NULL);
 
-  width = mri_in->width;
-  height = mri_in->height;
-  depth = mri_in->depth;
+  width   = mri_in->width;
+  height  = mri_in->height;
+  depth   = mri_in->depth;
   nframes = mri_in->nframes;
   if (nframes == 0)
     nframes = 1;
@@ -126,11 +125,11 @@ int main(int argc, char *argv[]) {
     for (z = 0; z < depth; z++) {
       for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
-          v_in = (double)MRIgetVoxVal(mri_in, x, y, z, f);
+          v_in     = (double)MRIgetVoxVal(mri_in, x, y, z, f);
           v_before = (double)MRIgetVoxVal(mri_before, x, y, z, f);
-          v_after = (double)MRIgetVoxVal(mri_after, x, y, z, f);
-          gain = v_after / (v_before + 1e-15);
-          v_out = gain * v_in;
+          v_after  = (double)MRIgetVoxVal(mri_after, x, y, z, f);
+          gain     = v_after / (v_before + 1e-15);
+          v_out    = gain * v_in;
 
           MRIsetVoxVal(mri_out, x, y, z, f, (float)v_out);
         }
@@ -169,16 +168,16 @@ void usage(int exit_val) {
 /*  EOF  */
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "before")) {
     fname_before = argv[2];

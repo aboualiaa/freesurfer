@@ -43,22 +43,22 @@
 // Section 1: Utilities		Useful classes and functions that are mostly
 // independent of the goal
 //
-#include <iostream>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 
 #include <algorithm>
+#include <assert.h>
 #include <list>
 #include <locale>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
-#include <assert.h>
 
 static std::string uppercase(std::string const &s_init) {
-  using namespace std;
-  string s = s_init;
+
+  std::string s = s_init;
   transform(s.begin(), s.end(), s.begin(), ::toupper);
   return s;
 }
@@ -73,16 +73,14 @@ void bpt() {}
 
 namespace ColumnedOutput {
 
-using namespace std;
-
 enum Justify { Just_left, Just_right, Just_none };
 
 struct T {
 
   struct Cell {
-    string s;
-    bool ignoreWidth;
-    Justify justify;
+    std::string s;
+    bool        ignoreWidth;
+    Justify     justify;
     Cell() : ignoreWidth(false), justify(Just_none) {}
   };
 
@@ -128,7 +126,7 @@ struct T {
   struct EndR {};
   T &operator<<(EndR const &) {
     newRowPending = true;
-    col = 0;
+    col           = 0;
     return *this;
   }
 
@@ -139,7 +137,7 @@ struct T {
 
       auto r_size = r.size();
       while (r_size &&
-             (r[r_size - 1].s.find_first_not_of(" \t") == string::npos))
+             (r[r_size - 1].s.find_first_not_of(" \t") == std::string::npos))
         r_size--; // avoid trailing blanks
 
       for (size_t ci = 0; ci < r_size; ci++) {
@@ -159,25 +157,25 @@ struct T {
         os << r[ci].s;
         sep = " ";
       }
-      os << endl;
+      os << std::endl;
       os << left;
     }
   }
 
 private:
-  bool newRowPending;
-  size_t col;
-  vector<vector<Cell>> grid;
-  vector<size_t> colSizes;
-  void newRow() {
-    grid.push_back(vector<Cell>());
+  bool                           newRowPending;
+  size_t                         col;
+  std::vector<std::vector<Cell>> grid;
+  std::vector<size_t>            colSizes;
+  void                           newRow() {
+    grid.push_back(std::vector<Cell>());
     newRowPending = false;
   }
 };
 
 T::IgnoreWidth ignoreWidth;
-T::EndC endC;
-T::EndR endR;
+T::EndC        endC;
+T::EndR        endR;
 }; // namespace ColumnedOutput
 
 static std::string createFilesWithin;
@@ -186,20 +184,20 @@ static std::string createFilesWithin;
 // abstraction representation
 //
 namespace Abstract_Representation {
-using namespace std;
+
 using namespace ColumnedOutput;
 
-#define PHASES                                                                 \
-  ELT(ExistenceM, Existence)                                                   \
-  SEP ELT(Existence, end) SEP ELT(TopologyM, Topology)                         \
-      SEP ELT(Topology, Existence) SEP ELT(XYZPositionM, XYZPosition)          \
-          SEP ELT(XYZPosition, Topology)                                       \
-              SEP ELT(XYZPositionConsequencesM, XYZPositionConsequences)       \
-                  SEP ELT(XYZPositionConsequences, XYZPosition)                \
-                      SEP ELT(DistortM, Distort)                               \
-                          SEP ELT(Distort, XYZPositionConsequences)            \
-                              SEP ELT(AnalysisM, Analysis)                     \
-                                  SEP ELT(Analysis, Distort)                   \
+#define PHASES                                                                   \
+  ELT(ExistenceM, Existence)                                                     \
+  SEP ELT(Existence, end) SEP ELT(TopologyM, Topology)                           \
+      SEP ELT(Topology, Existence) SEP ELT(XYZPositionM, XYZPosition)            \
+          SEP                          ELT(XYZPosition, Topology)                \
+              SEP         ELT(XYZPositionConsequencesM, XYZPositionConsequences) \
+                  SEP     ELT(XYZPositionConsequences, XYZPosition)              \
+                      SEP ELT(DistortM, Distort)                                 \
+                          SEP             ELT(Distort, XYZPositionConsequences)  \
+                              SEP         ELT(AnalysisM, Analysis)               \
+                                  SEP     ELT(Analysis, Distort)                 \
                                       SEP ELT(AllM, end)
 // end of macro
 
@@ -213,15 +211,15 @@ enum T {
       end
 };
 const char *spelling[] = {
-#define SEP ,
+#define SEP              ,
 #define ELT(N, ENHANCES) #N
     PHASES
 #undef ELT
 #undef SEP
 };
-string namespaceName(T p) { return spelling[p]; }
+std::string    namespaceName(T p) { return spelling[p]; }
 const Phase::T enhances[Phase::end] = {
-#define SEP ,
+#define SEP              ,
 #define ELT(N, ENHANCES) ENHANCES
     PHASES
 #undef ELT
@@ -229,7 +227,7 @@ const Phase::T enhances[Phase::end] = {
 };
 }; // namespace Phase
 
-typedef string Id;
+typedef std::string Id;
 
 struct Prop;
 struct Fmbr;
@@ -239,34 +237,34 @@ enum CommentNature { ComGeneral, ComList, ComListSublist };
 
 struct PropModifiable {
   CommentNature commentNature;
-  bool nohash;
-  string which;
+  bool          nohash;
+  std::string   which;
   Prop *repeatedSize; // type must be a PointerToRepeatedType type, this is the
                       // element that gives the number of repeats
   PropModifiable()
       : commentNature(ComGeneral), nohash(false), repeatedSize(nullptr) {}
 };
 struct Prop : public PropModifiable {
-  string const accessorClassId;
-  Type *const type;
-  Id const id;
+  std::string const accessorClassId;
+  Type *const       type;
+  Id const          id;
 
-  string key() const { return accessorClassId + "." + id; }
+  std::string key() const { return accessorClassId + "." + id; }
 
-  string const comment;
-  Phase::T const firstReadingPhase;
-  Phase::T const firstWritingPhase;
-  Phase::T const lastWritingPhase;
-  Prop(string const &accessorClassId, Type *t, Id i, Phase::T wb,
-       string const &com = "")
+  std::string const comment;
+  Phase::T const    firstReadingPhase;
+  Phase::T const    firstWritingPhase;
+  Phase::T const    lastWritingPhase;
+  Prop(std::string const &accessorClassId, Type *t, Id i, Phase::T wb,
+       std::string const &com = "")
       : accessorClassId(accessorClassId), type(t), id(i), firstReadingPhase(wb),
         firstWritingPhase(wb), lastWritingPhase(wb), comment(com) {}
-  Prop(string const &accessorClassId, Type *t, Id i, Phase::T wb, Phase::T we,
-       string const &com = "")
+  Prop(std::string const &accessorClassId, Type *t, Id i, Phase::T wb,
+       Phase::T we, std::string const &com = "")
       : accessorClassId(accessorClassId), type(t), id(i), firstReadingPhase(wb),
         firstWritingPhase(wb), lastWritingPhase(we), comment(com) {}
-  Prop(string const &accessorClassId, Type *t, Id i, Phase::T rb, Phase::T wb,
-       Phase::T we, string const &com = "")
+  Prop(std::string const &accessorClassId, Type *t, Id i, Phase::T rb,
+       Phase::T wb, Phase::T we, std::string const &com = "")
       : accessorClassId(accessorClassId), type(t), id(i), firstReadingPhase(rb),
         firstWritingPhase(wb), lastWritingPhase(we), comment(com) {}
 
@@ -284,7 +282,7 @@ struct Prop : public PropModifiable {
     repeatedSize = to;
     return this;
   }
-  Prop *setWhich(string const &to) {
+  Prop *setWhich(std::string const &to) {
     which = to;
     return this;
   }
@@ -292,7 +290,7 @@ struct Prop : public PropModifiable {
 
 Phase::T phaseRbegin = Phase::end;
 Phase::T phaseWbegin = Phase::end;
-Phase::T phaseWend = Phase::end;
+Phase::T phaseWend   = Phase::end;
 
 struct AtomicType;
 struct PointerType;
@@ -301,8 +299,8 @@ struct PointerToRepeatedAtomicType;
 struct Type {
   Id const id;
   Type(Id i) : id(i) {}
-  virtual AtomicType *toAtomicType() { return nullptr; }
-  virtual PointerType *toPointerType() { return nullptr; }
+  virtual AtomicType *        toAtomicType() { return nullptr; }
+  virtual PointerType *       toPointerType() { return nullptr; }
   virtual ArrayOfPointerType *toArrayOfPointerType() { return nullptr; }
   virtual PointerToRepeatedAtomicType *toPointerToRepeatedType() {
     return nullptr;
@@ -316,7 +314,7 @@ struct AtomicType : public Type {
 
 struct PointerType : public Type {
   virtual PointerType *toPointerType() { return this; }
-  Type *const target;
+  Type *const          target;
   PointerType(Id i, Type *t) : Type(i), target(t) {}
 };
 
@@ -334,7 +332,7 @@ struct PointerToRepeatedAtomicType : public PointerType {
 
 struct Representation;
 
-int numericPrecision(string const &t) {
+int numericPrecision(std::string const &t) {
   if (t == "char" || t == "uchar")
     return 0;
   if (t == "short")
@@ -347,11 +345,11 @@ int numericPrecision(string const &t) {
     return 4;
   return -1;
 }
-bool cvtNeededToFrom(string const &to, string const &from) {
+bool cvtNeededToFrom(std::string const &to, std::string const &from) {
   if (from == to)
     return false;
   auto from_prec = numericPrecision(from);
-  auto to_prec = numericPrecision(to);
+  auto to_prec   = numericPrecision(to);
   if (from_prec < 0 || to_prec < 0)
     return true;
   return from_prec > to_prec;
@@ -359,92 +357,107 @@ bool cvtNeededToFrom(string const &to, string const &from) {
 
 struct How {
   virtual ~How() {}
-  virtual bool isImplDetail() const = 0;
-  virtual string secondaryName() const = 0;
-  virtual string reprNoArrow() const = 0;
-  virtual string memberType(Prop const &prop) const = 0;
-  virtual string memberId(Prop const &prop) const = 0;
-  virtual string storeType(Prop const &prop) const = 0;
-  virtual string storeId(Prop const &prop) const = 0;
-  virtual string retType(Prop const &prop) const = 0;
-  virtual string getId(Prop const &prop) const = 0;
-  virtual string getArgs(Prop const &prop) const = 0;
-  virtual string setId(Prop const &prop) const = 0;
-  virtual string indexArg(Prop const &prop) const = 0;
-  virtual string setToArg(Prop const &prop) const = 0;
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const = 0;
+  virtual bool        isImplDetail() const                           = 0;
+  virtual std::string secondaryName() const                          = 0;
+  virtual std::string reprNoArrow() const                            = 0;
+  virtual std::string memberType(Prop const &prop) const             = 0;
+  virtual std::string memberId(Prop const &prop) const               = 0;
+  virtual std::string storeType(Prop const &prop) const              = 0;
+  virtual std::string storeId(Prop const &prop) const                = 0;
+  virtual std::string retType(Prop const &prop) const                = 0;
+  virtual std::string getId(Prop const &prop) const                  = 0;
+  virtual std::string getArgs(Prop const &prop) const                = 0;
+  virtual std::string setId(Prop const &prop) const                  = 0;
+  virtual std::string indexArg(Prop const &prop) const               = 0;
+  virtual std::string setToArg(Prop const &prop) const               = 0;
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const = 0;
 };
 
 struct HowRedirect : public How {
   How &to;
   HowRedirect(How *to) : to(*to) {}
   HowRedirect(How &to) : to(to) {}
-  virtual bool isImplDetail() const { return to.isImplDetail(); }
-  virtual string secondaryName() const { return to.secondaryName(); }
-  virtual string reprNoArrow() const { return to.reprNoArrow(); }
-  virtual string memberType(Prop const &prop) const {
+  virtual bool        isImplDetail() const { return to.isImplDetail(); }
+  virtual std::string secondaryName() const { return to.secondaryName(); }
+  virtual std::string reprNoArrow() const { return to.reprNoArrow(); }
+  virtual std::string memberType(Prop const &prop) const {
     return to.memberType(prop);
   }
-  virtual string memberId(Prop const &prop) const { return to.memberId(prop); }
-  virtual string storeType(Prop const &prop) const {
+  virtual std::string memberId(Prop const &prop) const {
+    return to.memberId(prop);
+  }
+  virtual std::string storeType(Prop const &prop) const {
     return to.storeType(prop);
   }
-  virtual string storeId(Prop const &prop) const { return to.storeId(prop); }
-  virtual string retType(Prop const &prop) const { return to.retType(prop); }
-  virtual string getId(Prop const &prop) const { return to.getId(prop); }
-  virtual string getArgs(Prop const &prop) const { return to.getArgs(prop); }
-  virtual string setId(Prop const &prop) const { return to.setId(prop); }
-  virtual string indexArg(Prop const &prop) const { return to.indexArg(prop); }
-  virtual string setToArg(Prop const &prop) const { return to.setToArg(prop); }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string storeId(Prop const &prop) const {
+    return to.storeId(prop);
+  }
+  virtual std::string retType(Prop const &prop) const {
+    return to.retType(prop);
+  }
+  virtual std::string getId(Prop const &prop) const { return to.getId(prop); }
+  virtual std::string getArgs(Prop const &prop) const {
+    return to.getArgs(prop);
+  }
+  virtual std::string setId(Prop const &prop) const { return to.setId(prop); }
+  virtual std::string indexArg(Prop const &prop) const {
+    return to.indexArg(prop);
+  }
+  virtual std::string setToArg(Prop const &prop) const {
+    return to.setToArg(prop);
+  }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     return to.getSetExpr(reprNoArrow, prop, write);
   }
 };
 
 struct HowDirect : public How {
-  virtual bool isImplDetail() const { return m_isImplDetail; }
-  virtual string secondaryName() const { return m_secondaryName; }
-  bool m_isImplDetail;
-  string m_secondaryName; // if not "", then one FACE, VERTEX, etc. showing this
-                          // property has been placed into some composite child
-                          // vector maybe this should be the prop of the
-                          // parent's child vector?
+  virtual bool        isImplDetail() const { return m_isImplDetail; }
+  virtual std::string secondaryName() const { return m_secondaryName; }
+  bool                m_isImplDetail;
+  std::string
+      m_secondaryName; // if not "", then one FACE, VERTEX, etc. showing this
+                       // property has been placed into some composite child
+                       // vector maybe this should be the prop of the
+                       // parent's child vector?
 
   HowDirect() : m_isImplDetail(false) {}
   virtual ~HowDirect() {}
 
-  virtual string reprNoArrow() const { return "repr"; }
+  virtual std::string reprNoArrow() const { return "repr"; }
 
-  virtual string
+  virtual std::string
   memberType(Prop const &prop) const { // the type of the field in the classId
     return prop.type->id;
   }
 
-  virtual string
+  virtual std::string
   memberId(Prop const &prop) const { // the id of field in the classId
     return prop.id;                  // it might need to be indexed by [idx]
   }
 
-  virtual string storeType(Prop const &prop) const { return memberType(prop); }
-  virtual string storeId(Prop const &prop) const { return memberId(prop); }
-  virtual string retType(Prop const &prop) const { return prop.type->id; }
-  virtual string getId(Prop const &prop) const { return prop.id; }
-  virtual string getArgs(Prop const &prop) const { return ""; }
-  virtual string setId(Prop const &prop) const { return "set_" + prop.id; }
-  virtual string indexArg(Prop const &prop) const {
+  virtual std::string storeType(Prop const &prop) const {
+    return memberType(prop);
+  }
+  virtual std::string storeId(Prop const &prop) const { return memberId(prop); }
+  virtual std::string retType(Prop const &prop) const { return prop.type->id; }
+  virtual std::string getId(Prop const &prop) const { return prop.id; }
+  virtual std::string getArgs(Prop const &prop) const { return ""; }
+  virtual std::string setId(Prop const &prop) const { return "set_" + prop.id; }
+  virtual std::string indexArg(Prop const &prop) const {
     if (!prop.type->toPointerToRepeatedType())
       return "";
     return "size_t i";
   }
-  virtual string setToArg(Prop const &prop) const {
-    string s = retType(prop) + " to";
+  virtual std::string setToArg(Prop const &prop) const {
+    std::string s = retType(prop) + " to";
     return s;
   }
 
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     // generate the string needed to fetch or store the value as a retType
     //	convert between the retType and the storeType
     //	the input value for a store is in "retType const & to"
@@ -452,19 +465,19 @@ struct HowDirect : public How {
     auto st = storeType(prop);
     auto rt = retType(prop);
 
-    string storeName = reprNoArrow + "->" + storeId(prop);
+    std::string storeName = reprNoArrow + "->" + storeId(prop);
     if (indexArg(prop).size()) {
       storeName += "[i]";
       if (auto pt = prop.type->toPointerToRepeatedType()) {
         st = pt->target->id;
       }
     }
-    string fetchName = (write ? "to" : storeName);
+    std::string fetchName = (write ? "to" : storeName);
 
     if (rt == "Vertex" || rt == "Face") {
       if (!write) {
         fetchName = rt + "(repr," + storeName + ")";
-        st = rt;
+        st        = rt;
       }
     }
 
@@ -481,14 +494,15 @@ struct HowDirect : public How {
 struct Representation {
   struct PropHow {
     Prop *const prop;
-    How *const how;
+    How *const  how;
     PropHow() : prop(nullptr), how(nullptr) {}
     PropHow(Prop *prop, How *how) : prop(prop), how(how) {}
   };
   std::vector<PropHow> implements;
-  string const reprClassName;
-  const char *const rootHeaderFile;
-  Representation(const char *rootHeaderFile, string const &surfaceClassName)
+  std::string const    reprClassName;
+  const char *const    rootHeaderFile;
+  Representation(const char *       rootHeaderFile,
+                 std::string const &surfaceClassName)
       : rootHeaderFile(rootHeaderFile), reprClassName(surfaceClassName) {}
 };
 
@@ -505,7 +519,8 @@ void walkClasses(Representation &representation, Callable0 propHowToClassId,
     classNames.insert(propHowToClassId(propHow));
   }
 
-  auto walkClass = [&](bool primaryClass, string classId, string key) {
+  auto walkClass = [&](bool primaryClass, std::string classId,
+                       std::string key) {
     auto keyIter = classNames.find(key);
     if (keyIter == classNames.end())
       return;
@@ -521,7 +536,7 @@ void walkClasses(Representation &representation, Callable0 propHowToClassId,
         if (propClassId != key)
           continue;
         auto &prop = *propHow.prop;
-        auto how = propHow.how;
+        auto  how  = propHow.how;
         nextMember(prop, how, write == 1);
       }
     }
@@ -551,7 +566,7 @@ void walkClasses(Representation &representation, Callable0 propHowToClassId,
 // source generators share.
 //
 namespace Generator_Utilities {
-using namespace std;
+
 using namespace ColumnedOutput;
 using namespace Abstract_Representation;
 
@@ -561,25 +576,25 @@ struct Generate_Base {
   Generate_Base(ostream &init_os, Representation &representation)
       : os(), representation(representation), depth(0) {
     os.push_back(&init_os);
-    tos() << endl;
-    indent() << "#pragma once" << endl;
-    indent() << "// GENERATED SOURCE - DO NOT DIRECTLY EDIT" << endl;
-    indent() << "// " << endl;
-    indent() << "// =======================================" << endl;
-    indent() << "#include \"mrisurf_aaa.h\"" << endl;
+    tos() << std::endl;
+    indent() << "#pragma once" << std::endl;
+    indent() << "// GENERATED SOURCE - DO NOT DIRECTLY EDIT" << std::endl;
+    indent() << "// " << std::endl;
+    indent() << "// =======================================" << std::endl;
+    indent() << "#include \"mrisurf_aaa.h\"" << std::endl;
   }
 
   // A stack of output files so we can spread the generated code
   // across several files for readability
   //
-  ostream &tos() { return *os.back(); }
-  void os_push(ostream *new_tos) { os.push_back(new_tos); }
-  void os_pop() { os.pop_back(); }
+  std::ostream &tos() { return *os.back(); }
+  void          os_push(ostream *new_tos) { os.push_back(new_tos); }
+  void          os_pop() { os.pop_back(); }
 
   // Support indented output to the top output file
   //
-  size_t depth;
-  ostream &indent() { return ::indent(tos(), depth); }
+  size_t        depth;
+  std::ostream &indent() { return ::indent(tos(), depth); }
 
 private:
   list<ostream *> os; // stack of output files
@@ -590,7 +605,7 @@ private:
 // representations described above
 //
 namespace Representation_Generators {
-using namespace std;
+
 using namespace ColumnedOutput;
 using namespace Abstract_Representation;
 using namespace Generator_Utilities;
@@ -606,7 +621,7 @@ struct Generate_usingHow : public Generate_Representation {
   Generate_usingHow(ostream &os, Representation &representation)
       : Generate_Representation(os, representation) {
     if (representation.reprClassName == "MRIS")
-      indent() << "#define SEPARATE_VERTEX_TOPOLOGY" << endl;
+      indent() << "#define SEPARATE_VERTEX_TOPOLOGY" << std::endl;
     generateRepresentationClasses();
     generateMacros();
   }
@@ -620,8 +635,8 @@ struct Generate_usingHow : public Generate_Representation {
           return propHow.how ? propHow.how->secondaryName()
                              : representation.reprClassName;
         },
-        [&](string const &classId) {
-          indent() << "struct " << classId << " {" << endl;
+        [&](std::string const &classId) {
+          indent() << "struct " << classId << " {" << std::endl;
           depth++;
           colsPtr = new ColumnedOutput::T;
         },
@@ -649,12 +664,13 @@ struct Generate_usingHow : public Generate_Representation {
             cols << ignoreWidth << comment << "  " << prop.comment;
           cols << endR;
         },
-        [&](string const &classId) {
+        [&](std::string const &classId) {
           colsPtr->append(tos(), depth);
           delete colsPtr;
           colsPtr = nullptr;
           depth--;
-          indent() << "};		// " << classId << endl << endl;
+          indent() << "};		// " << classId << std::endl
+                   << std::endl;
         });
   }
 
@@ -662,27 +678,27 @@ struct Generate_usingHow : public Generate_Representation {
     if (representation.reprClassName != "MRIS")
       return;
 
-    bool eltEmitted = false;
-    bool endlPending = false;
-    bool endMPending = false;
+    bool eltEmitted             = false;
+    bool endlPending            = false;
+    bool endMPending            = false;
     auto emitEndOfMacroIfNeeded = [&] {
       if (!endMPending)
         return;
       depth--;
       eltEmitted = false;
       if (endlPending)
-        tos() << " \\" << endl;
+        tos() << " \\" << std::endl;
       endlPending = false;
       if (endMPending)
-        indent() << "// end of macro" << endl << endl;
+        indent() << "// end of macro" << std::endl << std::endl;
       endMPending = false;
     };
 
-    string secondaryName;
+    std::string secondaryName;
 
     for (auto &propHow : representation.implements) {
       auto &prop = *propHow.prop;
-      auto &how = *propHow.how;
+      auto &how  = *propHow.how;
       if (secondaryName != how.secondaryName()) {
         secondaryName = how.secondaryName();
         emitEndOfMacroIfNeeded();
@@ -695,7 +711,7 @@ struct Generate_usingHow : public Generate_Representation {
         eltEmitted = false;
       }
       if (endlPending) {
-        tos() << " \\" << endl;
+        tos() << " \\" << std::endl;
         endlPending = false;
       }
 
@@ -703,27 +719,27 @@ struct Generate_usingHow : public Generate_Representation {
         switch (prop.commentNature) {
         case ComList:
           emitEndOfMacroIfNeeded();
-          indent() << "#define " << prop.comment << " \\" << endl;
-          eltEmitted = false;
+          indent() << "#define " << prop.comment << " \\" << std::endl;
+          eltEmitted  = false;
           endlPending = false;
           endMPending = true;
           depth++;
           break;
         case ComListSublist:
           indent() << prop.comment;
-          eltEmitted = true;
+          eltEmitted  = true;
           endlPending = true;
           break;
         }
       } else if (endMPending) {
         const char *macro = (prop.nohash) ? "ELTX" : "ELTT";
-        auto t = prop.type;
+        auto        t     = prop.type;
         if (auto tp = t->toPointerType()) {
           macro = "ELTP";
-          t = tp->target;
+          t     = tp->target;
         }
         indent() << macro << "(" << t->id << "," << prop.id << ") ";
-        eltEmitted = true;
+        eltEmitted  = true;
         endlPending = true;
       }
     }
@@ -737,7 +753,7 @@ struct Generate_usingHow : public Generate_Representation {
 // representations described above
 //
 namespace Accessor_Generators {
-using namespace std;
+
 using namespace ColumnedOutput;
 using namespace Abstract_Representation;
 using namespace Generator_Utilities;
@@ -774,17 +790,17 @@ struct Generate_Accessor : public Generate_Base {
     return nullptr;
   }
 
-  virtual string classMemberPrefix(string const &classId) = 0;
-  virtual void beginClass(Phase::T p, string const &classId) = 0;
-  virtual void endClass(Phase::T p, string const &classId) = 0;
+  virtual std::string classMemberPrefix(std::string const &classId)      = 0;
+  virtual void        beginClass(Phase::T p, std::string const &classId) = 0;
+  virtual void        endClass(Phase::T p, std::string const &classId)   = 0;
 
   virtual void generateAccessorClasses(Phase::T p) {
-    string currClassId;
-    bool writeCommented;
-    ColumnedOutput::T *colsPtr = nullptr;
-    vector<Prop *> deferredComGeneral;
-    string classNameDotDot;
-    bool writers;
+    std::string         currClassId;
+    bool                writeCommented;
+    ColumnedOutput::T * colsPtr = nullptr;
+    std::vector<Prop *> deferredComGeneral;
+    std::string         classNameDotDot;
+    bool                writers;
 
     auto maybeEndC = [&](bool needsSep = true) {
       auto &cols = *colsPtr;
@@ -803,19 +819,19 @@ struct Generate_Accessor : public Generate_Base {
         [&](Representation::PropHow const &propHow) {
           return propHow.prop->accessorClassId;
         },
-        [&](string const &classId) {
+        [&](std::string const &classId) {
           beginClass(p, classId);
-          currClassId = classId;
+          currClassId    = classId;
           writeCommented = false;
-          colsPtr = new ColumnedOutput::T;
+          colsPtr        = new ColumnedOutput::T;
           deferredComGeneral.clear();
           classNameDotDot = classMemberPrefix(classId);
-          writers = false;
+          writers         = false;
         },
         [&](Prop &prop, How *how, bool write) {
           typedef void os;
           typedef void indent;
-          auto &cols = *colsPtr;
+          auto &       cols = *colsPtr;
 
           if (currClassId == "Vertex" && !writers && write) {
             auto &cols = *colsPtr;
@@ -882,7 +898,7 @@ struct Generate_Accessor : public Generate_Base {
           else
             cols << ignoreWidth;
 
-          string fname = how->getId(prop);
+          std::string fname = how->getId(prop);
           ;
           if (write) {
             fname = how->setId(prop);
@@ -930,7 +946,7 @@ struct Generate_Accessor : public Generate_Base {
           generateMoreLines(cols, currClassId, prop, *how, write);
         },
 
-        [&](string const &classId) {
+        [&](std::string const &classId) {
           colsPtr->append(tos(), depth);
           endClass(p, classId);
           delete colsPtr;
@@ -939,7 +955,7 @@ struct Generate_Accessor : public Generate_Base {
   }
 
   virtual void generateBeforeComment(ColumnedOutput::T &cols,
-                                     bool const write) {
+                                     bool const         write) {
     cols << ";";
   }
 
@@ -948,22 +964,22 @@ struct Generate_Accessor : public Generate_Base {
     generateBeforeComment(cols, write);
   }
 
-  virtual void generateMoreLines(ColumnedOutput::T &cols, string const &classId,
-                                 Prop const &prop, How const &how,
-                                 bool const write) {}
+  virtual void generateMoreLines(ColumnedOutput::T &cols,
+                                 std::string const &classId, Prop const &prop,
+                                 How const &how, bool const write) {}
 
-  virtual void generate_which_coords(Phase::T p, string const &classId,
+  virtual void generate_which_coords(Phase::T p, std::string const &classId,
                                      ColumnedOutput::T &cols,
-                                     bool const write) {
+                                     bool const         write) {
     generateBeforeComment(cols, write);
   }
 
-  void generateNamespace(string const &parent, string const &name,
+  void generateNamespace(std::string const &parent, std::string const &name,
                          Representation &representation) {
-    indent() << "namespace " << name << " {" << endl;
+    indent() << "namespace " << name << " {" << std::endl;
     depth++;
     indent() << "typedef " << representation.reprClassName << " Representation;"
-             << endl;
+             << std::endl;
 
     for (int doModifiers = 0; doModifiers < 2; doModifiers++) {
       for (auto p = Phase::T(); p < Phase::end; p = Phase::T(p + 1)) {
@@ -973,19 +989,19 @@ struct Generate_Accessor : public Generate_Base {
         if (!isModifier != !doModifiers)
           continue;
 
-        ofstream *child_os = nullptr;
+        std::ofstream *child_os = nullptr;
         if (toGenerate_abstract_spec_Base()) {
           auto child_fnm = parent + "_" + pns + ".h";
-          indent() << "#include \"" + child_fnm + "\"" << endl;
+          indent() << "#include \"" + child_fnm + "\"" << std::endl;
           child_os = new ofstream(createFilesWithin + child_fnm);
           os_push(child_os);
         } else {
-          tos() << endl << endl;
+          tos() << std::endl << std::endl;
         }
 
-        indent() << "namespace " << pns << " {" << endl;
+        indent() << "namespace " << pns << " {" << std::endl;
         generateAccessorClasses(p);
-        indent() << "} // namespace " << pns << endl;
+        indent() << "} // namespace " << pns << std::endl;
 
         if (child_os) {
           os_pop();
@@ -995,43 +1011,43 @@ struct Generate_Accessor : public Generate_Base {
     }
 
     if (toGenerate_abstract_inco_Base()) {
-      indent() << endl;
-      indent() << "struct Repr_Elt { " << endl;
+      indent() << std::endl;
+      indent() << "struct Repr_Elt { " << std::endl;
       depth++;
       indent() << "bool operator==(Repr_Elt const & rhs) const { return repr "
                   "== rhs.repr && idx == rhs.idx; }"
-               << endl;
+               << std::endl;
       indent() << "bool operator!=(Repr_Elt const & rhs) const { return repr "
                   "!= rhs.repr || idx != rhs.idx; }"
-               << endl;
+               << std::endl;
       depth--;
-      indent() << "protected: " << endl;
+      indent() << "protected: " << std::endl;
       depth++;
-      indent() << "Representation* repr; size_t idx; " << endl;
-      indent() << "Repr_Elt() : repr(nullptr), idx(0) {}" << endl;
+      indent() << "Representation* repr; size_t idx; " << std::endl;
+      indent() << "Repr_Elt() : repr(nullptr), idx(0) {}" << std::endl;
       indent() << "Repr_Elt(Representation* repr, size_t idx) : repr(repr), "
                   "idx(idx) {}"
-               << endl;
+               << std::endl;
       indent()
           << "Repr_Elt(Repr_Elt const & src) : repr(src.repr), idx(src.idx) {}"
-          << endl;
-      tos() << endl;
+          << std::endl;
+      tos() << std::endl;
       for (auto p = Phase::T(); p < Phase::end; p = Phase::T(p + 1)) {
-        auto isFriend = [&](string const &classId) {
+        auto isFriend = [&](std::string const &classId) {
           indent() << "friend struct " << name
                    << "::" << Phase::namespaceName(p) << "::" << classId << ";"
-                   << endl;
+                   << std::endl;
         };
         isFriend("Face");
         isFriend("Vertex");
         isFriend("Surface");
       }
       depth--;
-      indent() << "};" << endl;
+      indent() << "};" << std::endl;
     }
 
     depth--;
-    indent() << "} // " << name << endl;
+    indent() << "} // " << name << std::endl;
   }
 
   Generate_Accessor(ostream &os, Representation &representation)
@@ -1043,13 +1059,15 @@ struct Generate_abstract_inco_Base : public Generate_Accessor {
     return this;
   }
 
-  Generate_abstract_inco_Base(ostream &os, string const &parent,
+  Generate_abstract_inco_Base(ostream &os, std::string const &parent,
                               Representation &representation)
       : Generate_Accessor(os, representation) {}
 
-  virtual string classMemberPrefix(string const &classId) { return ""; }
-  virtual void beginClass(Phase::T p, string const &classId) {}
-  virtual void endClass(Phase::T p, string const &classId) {}
+  virtual std::string classMemberPrefix(std::string const &classId) {
+    return "";
+  }
+  virtual void beginClass(Phase::T p, std::string const &classId) {}
+  virtual void endClass(Phase::T p, std::string const &classId) {}
 
   virtual void generateAccessorClasses(Phase::T p) {
     walkClasses(
@@ -1057,13 +1075,13 @@ struct Generate_abstract_inco_Base : public Generate_Accessor {
         [&](Representation::PropHow const &propHow) {
           return propHow.prop->accessorClassId;
         },
-        [&](string const &classId) {
+        [&](std::string const &classId) {
           depth++;
-          indent() << "struct " << classId << ";" << endl;
+          indent() << "struct " << classId << ";" << std::endl;
           depth--;
         },
         [&](Prop &prop, How *how, bool write) {},
-        [&](string const &classId) {});
+        [&](std::string const &classId) {});
   }
 };
 
@@ -1073,29 +1091,32 @@ struct Generate_abstract_spec_Base : public Generate_Accessor {
     return this;
   }
 
-  Generate_abstract_spec_Base(ostream &os, string const &parent,
+  Generate_abstract_spec_Base(ostream &os, std::string const &parent,
                               Representation &representation)
       : Generate_Accessor(os, representation) {}
 
-  virtual string classMemberPrefix(string const &classId) { return ""; }
+  virtual std::string classMemberPrefix(std::string const &classId) {
+    return "";
+  }
 
-  virtual void beginClass(Phase::T p, string const &classId) {
+  virtual void beginClass(Phase::T p, std::string const &classId) {
     auto const phaseNamespaceId = Phase::namespaceName(p);
-    bool isSurface = (classId == "Surface");
+    bool       isSurface        = (classId == "Surface");
 
-    indent() << "struct " << classId << " : public Repr_Elt {" << endl;
+    indent() << "struct " << classId << " : public Repr_Elt {" << std::endl;
     depth++;
     {
       if (classId != "Surface") {
         indent() << "typedef " << phaseNamespaceId << "::Surface Surface;"
-                 << endl;
+                 << std::endl;
       }
       if (classId != "Face") {
-        indent() << "typedef " << phaseNamespaceId << "::Face    Face;" << endl;
+        indent() << "typedef " << phaseNamespaceId << "::Face    Face;"
+                 << std::endl;
       }
       if (classId != "Vertex") {
         indent() << "typedef " << phaseNamespaceId << "::Vertex  Vertex;"
-                 << endl;
+                 << std::endl;
       }
     }
 
@@ -1111,7 +1132,7 @@ struct Generate_abstract_spec_Base : public Generate_Accessor {
     bool const isModifier = (phaseNamespaceId.back() == 'M');
 
     for (auto pLater = Phase::T(p + 1); pLater < Phase::end;
-         pLater = Phase::T(pLater + 1)) {
+         pLater      = Phase::T(pLater + 1)) {
       auto pnsLater = Phase::namespaceName(pLater);
       if (isModifier && pLater != Phase::AllM)
         continue;
@@ -1130,7 +1151,7 @@ struct Generate_abstract_spec_Base : public Generate_Accessor {
     }
 
     cols.append(tos(), depth);
-    tos() << endl;
+    tos() << std::endl;
   }
 
   void generateVariousSurfaceMethods(Phase::T p, ColumnedOutput::T &cols) {
@@ -1141,25 +1162,25 @@ struct Generate_abstract_spec_Base : public Generate_Accessor {
     }
   }
 
-  virtual void endClass(Phase::T p, string const &classId) {
+  virtual void endClass(Phase::T p, std::string const &classId) {
     // indent() << absolutePns(p) << "_" << c.id << " // implementation details"
     // << endl;
     depth--;
-    indent() << "}; // " << classId << endl << endl;
+    indent() << "}; // " << classId << std::endl << std::endl;
   }
 };
 
 struct Generate_abstract_impl_Base : public Generate_Accessor {
 
-  Generate_abstract_impl_Base(ostream &os, string const &parent,
+  Generate_abstract_impl_Base(ostream &os, std::string const &parent,
                               Representation &representation)
       : Generate_Accessor(os, representation) {}
 
-  virtual string classMemberPrefix(string const &classId) {
+  virtual std::string classMemberPrefix(std::string const &classId) {
     return classId + "::";
   }
 
-  virtual void beginClass(Phase::T p, string const &classId) {
+  virtual void beginClass(Phase::T p, std::string const &classId) {
     ColumnedOutput::T cols;
 
     bool isSurface = (classId == "Surface");
@@ -1177,7 +1198,7 @@ struct Generate_abstract_impl_Base : public Generate_Accessor {
     bool const isModifier = (Phase::namespaceName(p).back() == 'M');
 
     for (auto pLater = Phase::T(p + 1); pLater < Phase::end;
-         pLater = Phase::T(pLater + 1)) {
+         pLater      = Phase::T(pLater + 1)) {
       if (isModifier && pLater != Phase::AllM)
         continue;
       cols << classMemberPrefix(classId) << classId << endC << "(" << endC
@@ -1185,11 +1206,11 @@ struct Generate_abstract_impl_Base : public Generate_Accessor {
            << endC << ") : Repr_Elt(src) {}" << endR;
     }
     cols.append(tos(), depth);
-    tos() << endl;
+    tos() << std::endl;
   }
 
-  virtual void endClass(Phase::T p, string const &classId) {
-    tos() << endl << endl;
+  virtual void endClass(Phase::T p, std::string const &classId) {
+    tos() << std::endl << std::endl;
   }
 
   virtual void generateBeforeComment(ColumnedOutput::T &cols, Prop const &d,
@@ -1200,7 +1221,7 @@ struct Generate_abstract_impl_Base : public Generate_Accessor {
 
 struct Generate_Surface_inco : public Generate_abstract_inco_Base {
   virtual Generate_Surface_inco *toGenerate_Surface_inco() { return this; }
-  Generate_Surface_inco(ostream &os, string const &parent,
+  Generate_Surface_inco(ostream &os, std::string const &parent,
                         Representation &representation)
       : Generate_abstract_inco_Base(os, parent, representation) {
     generateNamespace(parent, "SurfaceFrom" + representation.reprClassName,
@@ -1211,7 +1232,7 @@ struct Generate_Surface_inco : public Generate_abstract_inco_Base {
 struct Generate_Surface_spec : public Generate_abstract_spec_Base {
   virtual Generate_Surface_spec *toGenerate_Surface_spec() { return this; }
 
-  Generate_Surface_spec(ostream &os, string const &parent,
+  Generate_Surface_spec(ostream &os, std::string const &parent,
                         Representation &representation)
       : Generate_abstract_spec_Base(os, parent, representation) {
     generateNamespace(parent, "SurfaceFrom" + representation.reprClassName,
@@ -1222,20 +1243,20 @@ struct Generate_Surface_spec : public Generate_abstract_spec_Base {
 struct Generate_Surface_impl : public Generate_abstract_impl_Base {
   virtual Generate_Surface_impl *toGenerate_Surface_impl() { return this; }
 
-  Generate_Surface_impl(ostream &os, string const &parent,
+  Generate_Surface_impl(ostream &os, std::string const &parent,
                         Representation &representation)
       : Generate_abstract_impl_Base(os, parent, representation) {
     generateNamespace(parent, "SurfaceFrom" + representation.reprClassName,
                       representation);
   }
 
-  virtual void generateMoreLines(ColumnedOutput::T &cols, string const &classId,
-                                 Prop const &prop, How const &how,
-                                 bool const write) {
+  virtual void generateMoreLines(ColumnedOutput::T &cols,
+                                 std::string const &classId, Prop const &prop,
+                                 How const &how, bool const write) {
     bool const hasIndexArg = how.indexArg(prop).size();
     cols << ignoreWidth << Just_left << "    ";
 
-    string getSetExpr = how.getSetExpr(how.reprNoArrow(), prop, write);
+    std::string getSetExpr = how.getSetExpr(how.reprNoArrow(), prop, write);
 
     if (!write)
       cols << "return ";
@@ -1244,16 +1265,16 @@ struct Generate_Surface_impl : public Generate_abstract_impl_Base {
     cols << ignoreWidth << Just_left << "}" << endR;
   }
 
-  virtual void generate_which_coords(Phase::T p, string const &classId,
+  virtual void generate_which_coords(Phase::T p, std::string const &classId,
                                      ColumnedOutput::T &cols,
-                                     bool const write) {
+                                     bool const         write) {
     if (representation.reprClassName == "MRIS")
       generate_which_coords_MRIS(p, classId, cols, write);
     else
       generate_which_coords_other(p, classId, cols, write);
   }
 
-  void generate_which_coords_MRIS(Phase::T p, string const &classId,
+  void generate_which_coords_MRIS(Phase::T p, std::string const &classId,
                                   ColumnedOutput::T &cols, bool const write) {
     cols << ignoreWidth << Just_left << "{" << endR;
     cols << ignoreWidth << Just_left << "    " << endC;
@@ -1261,7 +1282,7 @@ struct Generate_Surface_impl : public Generate_abstract_impl_Base {
          << endR;
     cols << ignoreWidth << Just_left << "}" << endR;
   }
-  void generate_which_coords_other(Phase::T p, string const &classId,
+  void generate_which_coords_other(Phase::T p, std::string const &classId,
                                    ColumnedOutput::T &cols, bool const write) {
     cols << ignoreWidth << Just_left << "{" << endR;
     cols << ignoreWidth << Just_left << "    " << endR;
@@ -1278,7 +1299,7 @@ struct Generate_Surface_impl : public Generate_abstract_impl_Base {
 
     for (auto &propHow : representation.implements) {
       auto const &prop = *propHow.prop;
-      auto const how = propHow.how;
+      auto const  how  = propHow.how;
       if (!how)
         continue;
       if (prop.which == "")
@@ -1318,25 +1339,24 @@ static void build(std::vector<Representation *> &representations);
 
 void generate(
     std::vector<Abstract_Representation::Representation *> &representations) {
-  using namespace std;
 
   for (auto representationP : representations) {
     auto &representation = *representationP;
 
     {
-      ofstream os(createFilesWithin + representation.rootHeaderFile);
+      std::ofstream os(createFilesWithin + representation.rootHeaderFile);
       Representation_Generators::Generate_usingHow(os, representation);
     }
 
-    string const root_fnm =
+    std::string const root_fnm =
         "mrisurf_SurfaceFrom" + representation.reprClassName + "_generated";
-    ofstream os(createFilesWithin + root_fnm + ".h");
-    os << "#pragma once" << endl;
+    std::ofstream os(createFilesWithin + root_fnm + ".h");
+    os << "#pragma once" << std::endl;
 
     auto fnm_inco = root_fnm + "_prefix";
-    os << "#include \"./" << fnm_inco << ".h\"" << endl;
+    os << "#include \"./" << fnm_inco << ".h\"" << std::endl;
     {
-      ofstream os_inco(createFilesWithin + fnm_inco + ".h");
+      std::ofstream os_inco(createFilesWithin + fnm_inco + ".h");
       Accessor_Generators::Generate_Surface_inco(os_inco, fnm_inco,
                                                  representation);
     }
@@ -1346,16 +1366,16 @@ void generate(
     }
 
     auto fnm_impl = root_fnm + "_suffix";
-    os << "#include \"./" << fnm_impl << ".h\"" << endl;
+    os << "#include \"./" << fnm_impl << ".h\"" << std::endl;
     {
-      ofstream os_impl(createFilesWithin + fnm_impl + ".h");
+      std::ofstream os_impl(createFilesWithin + fnm_impl + ".h");
       Accessor_Generators::Generate_Surface_impl(os_impl, fnm_impl,
                                                  representation);
     }
   }
 
   auto cmd = "dir " + createFilesWithin;
-  std::cout << cmd << endl;
+  std::cout << cmd << std::endl;
   ::system(cmd.c_str());
 }
 
@@ -1384,15 +1404,15 @@ namespace Representations {
 //
 struct How_FACE : public HowDirect {
   How_FACE() { this->m_secondaryName = "face_type_"; }
-  virtual string storeId(Prop const &prop) const {
+  virtual std::string storeId(Prop const &prop) const {
     return "faces[idx]." + HowDirect::storeId(prop);
   }
 };
 struct How_FACE_v : public How_FACE {
-  virtual string retType(Prop const &prop) const { return "Vertex"; }
-  virtual string indexArg(Prop const &prop) const { return "size_t i"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Vertex"; }
+  virtual std::string indexArg(Prop const &prop) const { return "size_t i"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return How_FACE::getSetExpr(reprNoArrow, prop, write);
     return "cheapAssert(" + reprNoArrow + " == to.repr); " + reprNoArrow +
@@ -1401,17 +1421,17 @@ struct How_FACE_v : public How_FACE {
 };
 struct How_VT : public HowDirect {
   How_VT() { this->m_secondaryName = "VERTEX_TOPOLOGY"; }
-  virtual string storeId(Prop const &prop) const {
+  virtual std::string storeId(Prop const &prop) const {
     return "vertices_topology[idx]." + HowDirect::storeId(prop);
   }
 };
 struct How_VT_indexed : public How_VT {
-  virtual string indexArg(Prop const &prop) const { return "size_t i"; }
+  virtual std::string indexArg(Prop const &prop) const { return "size_t i"; }
 };
 struct How_VT_f : public How_VT_indexed {
-  virtual string retType(Prop const &prop) const { return "Face"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Face"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return How_VT_indexed::getSetExpr(reprNoArrow, prop, write);
     return "cheapAssert(" + reprNoArrow + " == to.repr); " + reprNoArrow +
@@ -1419,15 +1439,15 @@ struct How_VT_f : public How_VT_indexed {
   }
 };
 struct How_VT_n : public How_VT_indexed {
-  virtual string retType(Prop const &prop) const { return "size_t"; }
+  virtual std::string retType(Prop const &prop) const { return "size_t"; }
 };
 struct How_VT_e : public How_VT_indexed {
-  virtual string retType(Prop const &prop) const { return "int"; }
+  virtual std::string retType(Prop const &prop) const { return "int"; }
 };
 struct How_VT_v : public How_VT_indexed {
-  virtual string retType(Prop const &prop) const { return "Vertex"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Vertex"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return How_VT_indexed::getSetExpr(reprNoArrow, prop, write);
     return "cheapAssert(" + reprNoArrow + " == to.repr); " + reprNoArrow +
@@ -1437,15 +1457,15 @@ struct How_VT_v : public How_VT_indexed {
 
 struct How_V : public HowDirect {
   How_V() { this->m_secondaryName = "vertex_type_"; }
-  virtual string storeId(Prop const &prop) const {
+  virtual std::string storeId(Prop const &prop) const {
     return "vertices[idx]." + HowDirect::storeId(prop);
   }
 };
 struct How_V_indexed : public How_V {
-  virtual string indexArg(Prop const &prop) const { return "size_t i"; }
+  virtual std::string indexArg(Prop const &prop) const { return "size_t i"; }
 };
 struct How_V_indexed_float : public How_V_indexed {
-  virtual string retType(Prop const &prop) const { return "float"; }
+  virtual std::string retType(Prop const &prop) const { return "float"; }
 };
 
 struct How_MRIS : public HowDirect {
@@ -1455,9 +1475,9 @@ struct How_MRIS_hidden : public How_MRIS {
   How_MRIS_hidden() { m_isImplDetail = true; }
 };
 struct How_MRIS_vertex : public How_MRIS {
-  virtual string retType(Prop const &prop) const { return "Vertex"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Vertex"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return "Vertex(" + reprNoArrow + ", " + reprNoArrow + "->" + prop.id +
              " - " + reprNoArrow + "->vertices)";
@@ -1466,74 +1486,76 @@ struct How_MRIS_vertex : public How_MRIS {
   }
 };
 struct How_MRIS_indexed : public How_MRIS {
-  virtual string indexArg(Prop const &prop) const { return "size_t i"; }
+  virtual std::string indexArg(Prop const &prop) const { return "size_t i"; }
 };
 struct How_MRIS_indexed_vertices : public How_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "Vertex"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Vertex"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return "Vertex(" + reprNoArrow + ", i)";
     return "TBD";
   }
 };
 struct How_MRIS_indexed_faces : public How_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "Face"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Face"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return "Face(" + reprNoArrow + ", i)";
     return "TBD";
   }
 };
 struct How_MRIS_indexed_MRI_EDGE : public How_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "MRI_EDGE"; }
+  virtual std::string retType(Prop const &prop) const { return "MRI_EDGE"; }
 };
 struct How_MRIS_indexed_MRI_CORNER : public How_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "MRI_CORNER"; }
+  virtual std::string retType(Prop const &prop) const { return "MRI_CORNER"; }
 };
 struct How_MRIS_indexed_FaceNormCacheEntry : public How_MRIS_indexed {
-  virtual string retType(Prop const &prop) const {
+  virtual std::string retType(Prop const &prop) const {
     return "FaceNormCacheEntry";
   }
 };
 struct How_MRIS_indexed_FaceNormDeferredEntry : public How_MRIS_indexed {
-  virtual string retType(Prop const &prop) const {
+  virtual std::string retType(Prop const &prop) const {
     return "FaceNormDeferredEntry";
   }
 };
 struct How_MRIS_indexed_STRIP : public How_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "STRIP"; }
+  virtual std::string retType(Prop const &prop) const { return "STRIP"; }
 };
 struct How_MRIS_indexed_float : public How_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "float"; }
+  virtual std::string retType(Prop const &prop) const { return "float"; }
 };
 
 // MRISPV support
 //
 struct HowPV_Face : public HowDirect {
   HowPV_Face() {}
-  virtual string
+  virtual std::string
   memberType(Prop const &prop) const { // the type of the field in the classId
     return storeType(prop) + "*";
   }
-  virtual string
+  virtual std::string
   memberId(Prop const &prop) const { // the id of field in the classId
     return "f_" + prop.id;           // it might need to be indexed by [idx]
   }
-  virtual string storeType(Prop const &prop) const { return prop.type->id; }
-  virtual string storeId(Prop const &prop) const {
+  virtual std::string storeType(Prop const &prop) const {
+    return prop.type->id;
+  }
+  virtual std::string storeId(Prop const &prop) const {
     return memberId(prop) + "[idx]";
   }
 };
 struct HowPV_F_indexed : public HowPV_Face {
-  virtual string indexArg(Prop const &prop) const { return "size_t i"; }
+  virtual std::string indexArg(Prop const &prop) const { return "size_t i"; }
 };
 struct HowPV_Face_v : public HowPV_Face {
-  virtual string retType(Prop const &prop) const { return "Vertex"; }
-  virtual string indexArg(Prop const &prop) const { return "size_t i"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Vertex"; }
+  virtual std::string indexArg(Prop const &prop) const { return "size_t i"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return HowPV_Face::getSetExpr(reprNoArrow, prop, write);
     return "cheapAssert(" + reprNoArrow + " == to.repr); " + reprNoArrow +
@@ -1542,26 +1564,28 @@ struct HowPV_Face_v : public HowPV_Face {
 };
 struct HowPV_V : public HowDirect {
   HowPV_V() {}
-  virtual string
+  virtual std::string
   memberType(Prop const &prop) const { // the type of the field in the classId
     return prop.type->id + "*";
   }
-  virtual string
+  virtual std::string
   memberId(Prop const &prop) const { // the id of field in the classId
     return "v_" + prop.id;           // it might need to be indexed by [idx]
   }
-  virtual string storeType(Prop const &prop) const { return prop.type->id; }
-  virtual string storeId(Prop const &prop) const {
+  virtual std::string storeType(Prop const &prop) const {
+    return prop.type->id;
+  }
+  virtual std::string storeId(Prop const &prop) const {
     return memberId(prop) + "[idx]";
   }
 };
 struct HowPV_V_indexed : public HowPV_V {
-  virtual string indexArg(Prop const &prop) const { return "size_t i"; }
+  virtual std::string indexArg(Prop const &prop) const { return "size_t i"; }
 };
 struct HowPV_V_f : public HowPV_V_indexed {
-  virtual string retType(Prop const &prop) const { return "Face"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Face"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return "Face(" + reprNoArrow + ", " + reprNoArrow + "->v_f[idx][i])";
     return "cheapAssert(" + reprNoArrow + " == to.repr); " + reprNoArrow +
@@ -1569,15 +1593,15 @@ struct HowPV_V_f : public HowPV_V_indexed {
   }
 };
 struct HowPV_V_n : public HowPV_V_indexed {
-  virtual string retType(Prop const &prop) const { return "size_t"; }
+  virtual std::string retType(Prop const &prop) const { return "size_t"; }
 };
 struct HowPV_V_e : public HowPV_V_indexed {
-  virtual string retType(Prop const &prop) const { return "int"; }
+  virtual std::string retType(Prop const &prop) const { return "int"; }
 };
 struct HowPV_V_v : public HowPV_V_indexed {
-  virtual string retType(Prop const &prop) const { return "Vertex"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Vertex"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return HowPV_V_indexed::getSetExpr(reprNoArrow, prop, write);
     return "cheapAssert(" + reprNoArrow + " == to.repr); " + reprNoArrow +
@@ -1586,7 +1610,7 @@ struct HowPV_V_v : public HowPV_V_indexed {
 };
 
 struct HowPV_V_indexed_float : public HowPV_V_indexed {
-  virtual string retType(Prop const &prop) const { return "float"; }
+  virtual std::string retType(Prop const &prop) const { return "float"; }
 };
 
 struct HowPV_MRIS : public HowDirect {
@@ -1596,9 +1620,9 @@ struct HowPV_MRIS_hidden : public HowPV_MRIS {
   HowPV_MRIS_hidden() { m_isImplDetail = true; }
 };
 struct HowPV_MRIS_vertex : public HowPV_MRIS {
-  virtual string retType(Prop const &prop) const { return "Vertex"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Vertex"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return "Vertex(" + reprNoArrow + ", " + reprNoArrow + "->" + prop.id +
              " - " + reprNoArrow + "->vertices)";
@@ -1607,47 +1631,47 @@ struct HowPV_MRIS_vertex : public HowPV_MRIS {
   }
 };
 struct HowPV_MRIS_indexed : public HowPV_MRIS {
-  virtual string indexArg(Prop const &prop) const { return "size_t i"; }
+  virtual std::string indexArg(Prop const &prop) const { return "size_t i"; }
 };
 struct HowPV_MRIS_indexed_vertices : public HowPV_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "Vertex"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Vertex"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return "Vertex(" + reprNoArrow + ", i)";
     return "TBD";
   }
 };
 struct HowPV_MRIS_indexed_faces : public HowPV_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "Face"; }
-  virtual string getSetExpr(string const &reprNoArrow, Prop const &prop,
-                            bool write) const {
+  virtual std::string retType(Prop const &prop) const { return "Face"; }
+  virtual std::string getSetExpr(std::string const &reprNoArrow,
+                                 Prop const &prop, bool write) const {
     if (!write)
       return "Face(" + reprNoArrow + ", i)";
     return "TBD";
   }
 };
 struct HowPV_MRIS_indexed_MRI_EDGE : public HowPV_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "MRI_EDGE"; }
+  virtual std::string retType(Prop const &prop) const { return "MRI_EDGE"; }
 };
 struct HowPV_MRIS_indexed_MRI_CORNER : public HowPV_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "MRI_CORNER"; }
+  virtual std::string retType(Prop const &prop) const { return "MRI_CORNER"; }
 };
 struct HowPV_MRIS_indexed_FaceNormCacheEntry : public HowPV_MRIS_indexed {
-  virtual string retType(Prop const &prop) const {
+  virtual std::string retType(Prop const &prop) const {
     return "FaceNormCacheEntry";
   }
 };
 struct HowPV_MRIS_indexed_FaceNormDeferredEntry : public HowPV_MRIS_indexed {
-  virtual string retType(Prop const &prop) const {
+  virtual std::string retType(Prop const &prop) const {
     return "FaceNormDeferredEntry";
   }
 };
 struct HowPV_MRIS_indexed_STRIP : public HowPV_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "STRIP"; }
+  virtual std::string retType(Prop const &prop) const { return "STRIP"; }
 };
 struct HowPV_MRIS_indexed_float : public HowPV_MRIS_indexed {
-  virtual string retType(Prop const &prop) const { return "float"; }
+  virtual std::string retType(Prop const &prop) const { return "float"; }
 };
 
 // MRIS_MP support
@@ -1659,33 +1683,36 @@ struct HowPV_MRIS_indexed_float : public HowPV_MRIS_indexed {
 //
 struct HowMP_likePV : public HowRedirect {
   HowMP_likePV(How *how) : HowRedirect(how) {}
-  virtual string secondaryName() const { return ""; }
+  virtual std::string secondaryName() const { return ""; }
 };
 
 struct HowMP_fromMRIS : public HowRedirect {
   HowMP_fromMRIS(How *how) : HowRedirect(how) {}
-  virtual string secondaryName() const { return ""; }
-  virtual string reprNoArrow() const {
+  virtual std::string secondaryName() const { return ""; }
+  virtual std::string reprNoArrow() const {
     return HowRedirect::reprNoArrow() + "->underlyingMRIS";
   }
 };
 
 struct HowMP_fromMRIS_MP : public HowRedirect {
   HowMP_fromMRIS_MP(How *how) : HowRedirect(how) {}
-  virtual string secondaryName() const { return ""; }
-  virtual string reprNoArrow() const {
+  virtual std::string secondaryName() const { return ""; }
+  virtual std::string reprNoArrow() const {
     return HowRedirect::reprNoArrow() + "->in_src";
   }
 };
 
 struct HowMP_FaceNorm : public HowPV_Face {
-  virtual string retType(Prop const &prop) const { return "FloatXYZ"; }
-  virtual string storeType(Prop const &prop) const { return retType(prop); }
+  virtual std::string retType(Prop const &prop) const { return "FloatXYZ"; }
+  virtual std::string storeType(Prop const &prop) const {
+    return retType(prop);
+  }
 };
 // Apply
 //
 struct RepresentationX : public Representation {
-  RepresentationX(const char *rootHeaderFile, string const &surfaceClassName)
+  RepresentationX(const char *       rootHeaderFile,
+                  std::string const &surfaceClassName)
       : Representation(rootHeaderFile, surfaceClassName) {
     hows.push_back(nullptr);
   }
@@ -1703,62 +1730,62 @@ static void build(std::vector<Representation *> &final_representations) {
   //
   auto t_bool = new AtomicType("bool");
 
-  auto t_char = new AtomicType("char");
-  auto t_short = new AtomicType("short");
-  auto t_int = new AtomicType("int");
-  auto t_long = new AtomicType("long");
-  auto t_uchar = new AtomicType("uchar");
+  auto t_char   = new AtomicType("char");
+  auto t_short  = new AtomicType("short");
+  auto t_int    = new AtomicType("int");
+  auto t_long   = new AtomicType("long");
+  auto t_uchar  = new AtomicType("uchar");
   auto t_ushort = new AtomicType("ushort");
-  auto t_uint = new AtomicType("uint");
-  auto t_ulong = new AtomicType("ulong");
+  auto t_uint   = new AtomicType("uint");
+  auto t_ulong  = new AtomicType("ulong");
 
-  auto t_double = new AtomicType("double");
-  auto t_float = new AtomicType("float");
+  auto t_double     = new AtomicType("double");
+  auto t_float      = new AtomicType("float");
   auto t_constFloat = new AtomicType("const float");
 
-  auto t_pVoid = new AtomicType("p_void");
-  auto t_ppVoid = new AtomicType("p_p_void");
-  auto t_vertices_per_face_t = new AtomicType("vertices_per_face_t");
-  auto t_MATRIX = new AtomicType("MATRIX");
-  auto t_DMATRIX = new AtomicType("DMATRIX");
-  auto t_A3PDMATRIX = new AtomicType("A3PDMATRIX");
+  auto t_pVoid                 = new AtomicType("p_void");
+  auto t_ppVoid                = new AtomicType("p_p_void");
+  auto t_vertices_per_face_t   = new AtomicType("vertices_per_face_t");
+  auto t_MATRIX                = new AtomicType("MATRIX");
+  auto t_DMATRIX               = new AtomicType("DMATRIX");
+  auto t_A3PDMATRIX            = new AtomicType("A3PDMATRIX");
   auto t_angles_per_triangle_t = new AtomicType("angles_per_triangle_t");
-  auto t_VOL_GEOM = new AtomicType("VOL_GEOM");
-  auto t_MRIS_cmdlines_t = new AtomicType("MRIS_cmdlines_t");
-  auto t_MRI = new AtomicType("MRI");
-  auto t_VERTEX = new AtomicType("VERTEX");
-  auto t_VERTEX_TOPOLOGY = new AtomicType("VERTEX_TOPOLOGY");
-  auto t_FACE = new AtomicType("FACE");
-  auto t_MRI_EDGE = new AtomicType("MRI_EDGE");
-  auto t_MRI_CORNER = new AtomicType("MRI_CORNER");
-  auto t_FaceNormCacheEntry = new AtomicType("FaceNormCacheEntry");
+  auto t_VOL_GEOM              = new AtomicType("VOL_GEOM");
+  auto t_MRIS_cmdlines_t       = new AtomicType("MRIS_cmdlines_t");
+  auto t_MRI                   = new AtomicType("MRI");
+  auto t_VERTEX                = new AtomicType("VERTEX");
+  auto t_VERTEX_TOPOLOGY       = new AtomicType("VERTEX_TOPOLOGY");
+  auto t_FACE                  = new AtomicType("FACE");
+  auto t_MRI_EDGE              = new AtomicType("MRI_EDGE");
+  auto t_MRI_CORNER            = new AtomicType("MRI_CORNER");
+  auto t_FaceNormCacheEntry    = new AtomicType("FaceNormCacheEntry");
   auto t_FaceNormDeferredEntry = new AtomicType("FaceNormDeferredEntry");
-  auto t_STRIP = new AtomicType("STRIP");
-  auto t_LTA = new AtomicType("LTA");
-  auto t_MRIS_fname_t = new AtomicType("MRIS_fname_t");
-  auto t_MRIS_Status = new AtomicType("MRIS_Status");
-  auto t_MRIS_AREA_LABEL = new AtomicType("MRIS_AREA_LABEL");
-  auto t_MRIS_subject_name_t = new AtomicType("MRIS_subject_name_t");
-  auto t_COLOR_TABLE = new AtomicType("COLOR_TABLE");
+  auto t_STRIP                 = new AtomicType("STRIP");
+  auto t_LTA                   = new AtomicType("LTA");
+  auto t_MRIS_fname_t          = new AtomicType("MRIS_fname_t");
+  auto t_MRIS_Status           = new AtomicType("MRIS_Status");
+  auto t_MRIS_AREA_LABEL       = new AtomicType("MRIS_AREA_LABEL");
+  auto t_MRIS_subject_name_t   = new AtomicType("MRIS_subject_name_t");
+  auto t_COLOR_TABLE           = new AtomicType("COLOR_TABLE");
 
   // Pointer types are passed in by value, stored by value, returned by value
   //
-  auto t_PMATRIX = new PointerType("PMATRIX", t_MATRIX);
+  auto t_PMATRIX  = new PointerType("PMATRIX", t_MATRIX);
   auto t_PDMATRIX = new PointerType("PDMATRIX", t_DMATRIX);
-  auto t_PVERTEX = new PointerType("PVERTEX", t_VERTEX);
-  auto t_PFACE = new PointerType("PFACE", t_FACE);
-  auto t_PLTA = new PointerType("PLTA", t_LTA);
+  auto t_PVERTEX  = new PointerType("PVERTEX", t_VERTEX);
+  auto t_PFACE    = new PointerType("PFACE", t_FACE);
+  auto t_PLTA     = new PointerType("PLTA", t_LTA);
   auto t_PMRIS_AREA_LABEL =
       new PointerType("PMRIS_AREA_LABEL", t_MRIS_AREA_LABEL);
   auto t_PCOLOR_TABLE = new PointerType("PCOLOR_TABLE", t_COLOR_TABLE);
-  auto t_PMRI = new PointerType("PMRI", t_MRI);
+  auto t_PMRI         = new PointerType("PMRI", t_MRI);
 
   // These are passed in by TBD, stored as a count and a pointer, by TBD.
   //
   auto t_PR_float = new PointerToRepeatedAtomicType("pSeveralFloat", t_float);
   auto t_PR_constFloat =
       new PointerToRepeatedAtomicType("pSeveralConstFloat", t_constFloat);
-  auto t_PR_int = new PointerToRepeatedAtomicType("pSeveralInt", t_int);
+  auto t_PR_int   = new PointerToRepeatedAtomicType("pSeveralInt", t_int);
   auto t_PR_uchar = new PointerToRepeatedAtomicType("pSeveralUchar", t_uchar);
   auto t_PR_VERTEX =
       new PointerToRepeatedAtomicType("pSeveralVERTEX", t_VERTEX);
@@ -1780,7 +1807,7 @@ static void build(std::vector<Representation *> &final_representations) {
   //
   std::set<RepresentationX *> representations;
 
-  string accessorClassId;
+  std::string accessorClassId;
 
   auto rep_MRIS =
       new RepresentationX("mrisurf_FACE_VERTEX_MRIS_generated.h", "MRIS");
@@ -1795,7 +1822,7 @@ static void build(std::vector<Representation *> &final_representations) {
     rep_MRISPV->hows.push_back(h1);
   };
   auto howMod = [&](HowDirect *h0, HowDirect *h1) {
-    rep_MRIS->hows.back() = h0;
+    rep_MRIS->hows.back()   = h0;
     rep_MRISPV->hows.back() = h1;
   };
   auto howPop = [&]() {
@@ -1804,7 +1831,7 @@ static void build(std::vector<Representation *> &final_representations) {
   };
 
   auto makeProp = [&](Type *t, Id i, Phase::T rb, Phase::T wb, Phase::T we,
-                      string const &com = "") {
+                      std::string const &com = "") {
     if (rb == Phase::end && wb != Phase::end)
       rb = wb;
     auto added = new Prop(accessorClassId, t, i, rb, wb, we, com);
@@ -1817,16 +1844,16 @@ static void build(std::vector<Representation *> &final_representations) {
     return added;
   };
 
-  auto addProp = [&](Type *t, Id i, string const &com = "") {
+  auto addProp = [&](Type *t, Id i, std::string const &com = "") {
     return makeProp(t, i, phaseRbegin, phaseWbegin, phaseWend, com);
   };
-  auto addPropCom = [&](string const &com) {
+  auto addPropCom = [&](std::string const &com) {
     return makeProp(nullptr, "", Phase::end, Phase::end, Phase::end, com);
   };
-  auto addPropList = [&](string const &com) {
+  auto addPropList = [&](std::string const &com) {
     return addPropCom(com)->setCommentNature(ComList);
   };
-  auto addPropListSublist = [&](string const &com) {
+  auto addPropListSublist = [&](std::string const &com) {
     return addPropCom(com)->setCommentNature(ComListSublist);
   };
 
@@ -1849,12 +1876,12 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_angles_per_triangle_t, "angle");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionConsequencesM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_angles_per_triangle_t, "orig_angle");
 
   phaseRbegin = phaseWbegin = Phase::ExistenceM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_char, "ripflag");
   addProp(t_char, "oripflag");
@@ -1871,7 +1898,7 @@ static void build(std::vector<Representation *> &final_representations) {
   howPush(new How_VT, new HowPV_V);
 
   phaseRbegin = phaseWbegin = Phase::TopologyM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addPropList("LIST_OF_VERTEX_TOPOLOGY_ELTS");
   addPropCom("put the pointers before the ints, before the shorts, before "
@@ -1893,7 +1920,7 @@ static void build(std::vector<Representation *> &final_representations) {
   howPop();
 
   phaseRbegin = phaseWbegin = Phase::TopologyM;
-  phaseWend = Phase::TopologyM;
+  phaseWend                 = Phase::TopologyM;
 
   howPush(new How_VT_v, new HowPV_V_v);
   auto vtx_v =
@@ -1932,7 +1959,7 @@ static void build(std::vector<Representation *> &final_representations) {
 
   phaseRbegin = Phase::XYZPositionM;
   phaseWbegin = Phase::end;
-  phaseWend = Phase::end;
+  phaseWend   = Phase::end;
 
   addPropList("LIST_OF_VERTEX_ELTS_1");
   addPropCom("managed by MRISfreeDists[_orig] and MRISmakeDists[_orig]");
@@ -1953,16 +1980,17 @@ static void build(std::vector<Representation *> &final_representations) {
           "-- should contain at least vtx_vtotal elements   ");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionM;
-  phaseWend = Phase::XYZPositionM;
+  phaseWend                 = Phase::XYZPositionM;
   addPropCom("");
 
-  addProp(t_float, "x", "current coordinates	")->setWhich("CURRENT_VERTICES");
+  addProp(t_float, "x", "current coordinates	")
+      ->setWhich("CURRENT_VERTICES");
   addProp(t_float, "y", "use MRISsetXYZ() to set");
   addProp(t_float, "z");
 
   phaseRbegin = Phase::XYZPositionM;
   phaseWbegin = Phase::end;
-  phaseWend = Phase::end;
+  phaseWend   = Phase::end;
 
   addPropCom("");
   addProp(t_float, "origx",
@@ -1972,7 +2000,7 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_float, "origz", "or MRISsetOriginalXYZfromXYZ to set");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionConsequencesM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addPropCom("");
   addProp(t_float, "nx")->setWhich("VERTEX_NORMALS");
@@ -1980,7 +2008,7 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_float, "nz", "curr normal");
 
   phaseRbegin = phaseWbegin = Phase::DistortM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_float, "pnx")->setWhich("PIAL_NORMALS");
   addProp(t_float, "pny");
@@ -2009,14 +2037,14 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_float, "imag_val", "imaginary part of complex data value");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_float, "cx")->setWhich("CANONICAL_VERTICES");
   addProp(t_float, "cy");
   addProp(t_float, "cz", "coordinates in canonical coordinate system");
 
   phaseRbegin = phaseWbegin = Phase::DistortM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_float, "tx")->setWhich("TMP_VERTICES");
   addProp(t_float, "ty");
@@ -2098,7 +2126,7 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_float, "area");
 
   phaseRbegin = phaseWbegin = Phase::DistortM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_float, "origarea");
   addProp(t_float, "group_avg_area");
@@ -2119,7 +2147,7 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_char, "border", "flag ");
 
   phaseRbegin = phaseWbegin = Phase::ExistenceM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_char, "ripflag",
           "vertex no longer exists - placed last to load the next vertex into "
@@ -2193,13 +2221,13 @@ static void build(std::vector<Representation *> &final_representations) {
   howPop();
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionConsequencesM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
   howPush(new How_MRIS_indexed_STRIP, new HowPV_MRIS_indexed_STRIP);
   addProp(t_PR_STRIP, "strips");
   howPop();
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionConsequencesM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_float, "xctr");
   addProp(t_float, "yctr");
@@ -2230,7 +2258,7 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_double, "avg_vertex_area");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionConsequencesM;
-  phaseWend = Phase::XYZPositionConsequencesM;
+  phaseWend                 = Phase::XYZPositionConsequencesM;
 
   addProp(t_double, "avg_vertex_dist", "set by MRIScomputeAvgInterVertexDist");
   addProp(t_double, "std_vertex_dist");
@@ -2239,14 +2267,14 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_float, "neg_orig_area", "amount of original surface in folds");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionConsequencesM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_int, "zeros");
   addProp(t_int, "hemisphere", "which hemisphere");
 
   phaseRbegin = Phase::ExistenceM;
   phaseWbegin = Phase::end;
-  phaseWend = Phase::end;
+  phaseWend   = Phase::end;
 
   addProp(t_int, "initialized");
 
@@ -2262,12 +2290,12 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_float, "c", "ellipsoid parameters");
 
   phaseRbegin = phaseWbegin = Phase::ExistenceM;
-  phaseWend = Phase::ExistenceM;
+  phaseWend                 = Phase::ExistenceM;
 
   addProp(t_MRIS_fname_t, "fname", "file it was originally loaded from");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionConsequencesM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_float, "Hmin", "min mean curvature");
   addProp(t_float, "Hmax", "max mean curvature");
@@ -2276,7 +2304,7 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_double, "Ktotal", "total Gaussian curvature");
 
   phaseRbegin = phaseWbegin = Phase::ExistenceM;
-  phaseWend = Phase::ExistenceM;
+  phaseWend                 = Phase::ExistenceM;
 
   addProp(t_MRIS_Status, "status",
           "type of surface (e.g. sphere,"
@@ -2287,13 +2315,13 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_int, "patch", "if a patch of the surface");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionConsequencesM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_int, "nlabels");
   addProp(t_PMRIS_AREA_LABEL, "labels", "nlabels of these (may be null)");
 
   phaseRbegin = phaseWbegin = Phase::end;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_char, "nsize", "size of neighborhoods or -1");
   addProp(t_uchar, "vtotalsMightBeTooBig", "MRISsampleDistances sets this");
@@ -2313,7 +2341,7 @@ static void build(std::vector<Representation *> &final_representations) {
   addProp(t_float, "avg_nbrs", "mean # of vertex neighbors");
 
   phaseRbegin = phaseWbegin = Phase::XYZPositionM;
-  phaseWend = Phase::end;
+  phaseWend                 = Phase::end;
 
   addProp(t_pVoid, "vp", "for misc. use")->setNoHash();
   addProp(t_float, "alpha", "rotation around z-axis");
@@ -2326,7 +2354,7 @@ static void build(std::vector<Representation *> &final_representations) {
 
   phaseRbegin = Phase::ExistenceM;
   phaseWbegin = Phase::end;
-  phaseWend = Phase::end;
+  phaseWend   = Phase::end;
 
   addProp(t_int, "max_vertices",
           "may be bigger than nvertices, set by calling "
@@ -2475,10 +2503,11 @@ static void doMRIS_MP(RepresentationX &rep_MRIS, RepresentationX &rep_MRISPV,
     insert("Face.angle");
   }
 
-  auto const how_implementationDetail = new HowDirect();
+  auto const how_implementationDetail      = new HowDirect();
   how_implementationDetail->m_isImplDetail = true;
 
-  auto implementationDetail = [&](string type, string id, string comment) {
+  auto implementationDetail = [&](std::string type, std::string id,
+                                  std::string comment) {
     rep_MRIS_MP.implements.push_back(Representation::PropHow(
         new Prop("", new AtomicType(type), id, Phase::end, Phase::ExistenceM,
                  comment),
@@ -2502,10 +2531,10 @@ static void doMRIS_MP(RepresentationX &rep_MRIS, RepresentationX &rep_MRISPV,
   implementationDetail("char*", "f_normSet", "");
 
   for (size_t i = 0; i < rep_MRIS.implements.size(); i++) {
-    auto &propHow = rep_MRIS.implements[i];
-    auto prop = propHow.prop;
-    auto iPropKey = prop->key();
-    auto it = actions.find(iPropKey);
+    auto &propHow  = rep_MRIS.implements[i];
+    auto  prop     = propHow.prop;
+    auto  iPropKey = prop->key();
+    auto  it       = actions.find(iPropKey);
     if (it == actions.end())
       continue;
 
@@ -2520,7 +2549,7 @@ static void doMRIS_MP(RepresentationX &rep_MRIS, RepresentationX &rep_MRISPV,
       auto it = rep_MRISPV_propHowMap.find(iPropKey);
       assert(it != rep_MRISPV_propHowMap.end());
       auto &pvPropHowImpl = *it->second;
-      How *how = new HowMP_likePV(pvPropHowImpl.how);
+      How * how           = new HowMP_likePV(pvPropHowImpl.how);
       if (iPropKey == "Face.norm") {
         std::cout << "Found " << iPropKey << std::endl;
         how = new HowMP_FaceNorm;

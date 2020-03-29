@@ -1,6 +1,6 @@
-#include "kvlAtlasMeshCollection.h"
 #include "kvlAtlasMesh.h"
 #include "kvlAtlasMeshAveragingConjugateGradientOptimizer.h" // I just copied kvlAtlasMeshDeformationConjugateGradientOptimizer, and will modify it as I need to loop over meshes, etc..
+#include "kvlAtlasMeshCollection.h"
 
 int main(int argc, char **argv) {
   // Sanity check on input
@@ -25,15 +25,15 @@ int main(int argc, char **argv) {
   initialCollection->Read(argv[2]);
 
   std::istringstream KAstream(argv[3]);
-  float Katlas;
+  float              Katlas;
   KAstream >> Katlas;
 
   std::istringstream KTPstream(argv[4]);
-  float KtimePoints;
+  float              KtimePoints;
   KTPstream >> KtimePoints;
 
   if (argc > 6) {
-    int NmeshesToAverage;
+    int                NmeshesToAverage;
     std::istringstream MTAstream(argv[6]);
     MTAstream >> NmeshesToAverage;
     inputCollection->ResizePositions(NmeshesToAverage);
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
   for (int j = 0; j < 10; j++) {
     bool ready = false;
-    int i = 0;
+    int  i     = 0;
     while (!ready) {
       float maximalDeformation = optimizer->PerformOneIteration();
       float minLogLikelihoodTimesPrior =

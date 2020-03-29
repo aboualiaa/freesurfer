@@ -25,23 +25,21 @@
 
 #include <iomanip>
 
-#include "RegPowell.h"
 #include "CostFunctions.h"
+#include "RegPowell.h"
 #include "fs_vnl/fs_powell.h"
 
-using namespace std;
-
-RegPowell *RegPowell::tocurrent = nullptr;
-MRI *RegPowell::scf = nullptr;
-MRI *RegPowell::tcf = nullptr;
-int RegPowell::pcount = 0;
+RegPowell *                    RegPowell::tocurrent = nullptr;
+MRI *                          RegPowell::scf       = nullptr;
+MRI *                          RegPowell::tcf       = nullptr;
+int                            RegPowell::pcount    = 0;
 vnl_matrix_fixed<double, 4, 4> RegPowell::mh1 =
     vnl_matrix_fixed<double, 4, 4>();
 vnl_matrix_fixed<double, 4, 4> RegPowell::mh2 =
     vnl_matrix_fixed<double, 4, 4>();
-int RegPowell::icount = 0;
-int RegPowell::subsamp = 1;
-bool RegPowell::is2d = false;
+int  RegPowell::icount  = 0;
+int  RegPowell::subsamp = 1;
+bool RegPowell::is2d    = false;
 
 class my_cost_function : public fs_cost_function
 // class my_cost_function : public vnl_cost_function
@@ -64,7 +62,7 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
   // cout << "RegPowell::costFunction " << flush;
 
   // transform into matrix and iscale double
-  static pair<vnl_matrix_fixed<double, 4, 4>, double> Md;
+  static std::pair<vnl_matrix_fixed<double, 4, 4>, double> Md;
   //   if (tocurrent->is2d)
   //   {
   //     Md =
@@ -124,12 +122,12 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
       tocurrent->costfun == NCC) {
     // iscale should be taken care of here:
     double dd;
-    double si = 1.0;
+    double si  = 1.0;
     double sii = 1.0;
     if (tocurrent->iscale) {
       double fullscale =
           exp(Md.second); // compute full factor (source to target)
-      si = sqrt(fullscale);
+      si  = sqrt(fullscale);
       sii = 1.0 / si;
     }
     switch (tocurrent->costfun) {
@@ -163,8 +161,9 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
                                   sii);
       break;
     default:
-      cout << " RegPowell::costFunction ERROR cannot deal with cost function "
-           << tocurrent->costfun << " ! " << endl;
+      std::cout
+          << " RegPowell::costFunction ERROR cannot deal with cost function "
+          << tocurrent->costfun << " ! " << std::endl;
       exit(1);
     }
 
@@ -204,15 +203,18 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
     dd = -H.computeSCR();
     break;
   default:
-    cout << " RegPowell::costFunction ERROR cannot deal with cost function "
-         << tocurrent->costfun << " ! " << endl;
+    std::cout
+        << " RegPowell::costFunction ERROR cannot deal with cost function "
+        << tocurrent->costfun << " ! " << std::endl;
     exit(1);
   }
 
   // report eval:
   if (tocurrent->debug) {
-    cout.setf(ios::fixed, ios::floatfield); // floatfield set to fixed
-    cout << " e = " << setprecision(14) << dd << "  @  " << flush;
+    std::cout.setf(std::ios::fixed,
+                   std::ios::floatfield); // floatfield set to fixed
+    std::cout << " e = " << std::setprecision(14) << dd << "  @  "
+              << std::flush;
     vnl_matlab_print(std::cerr, p, "p", vnl_matlab_print_format_long);
     if (icount == 0) {
       MRI *mri_Swarp = MRIclone(tcf, nullptr);
@@ -256,8 +258,8 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
 
   vnl_matrix_fixed<double, 4, 4> mh;
   vnl_matrix_fixed<double, 4, 4> mhi;
-  MRI *mri_Swarp = nullptr;
-  MRI *mri_Twarp = nullptr;
+  MRI *                          mri_Swarp = nullptr;
+  MRI *                          mri_Twarp = nullptr;
   tocurrent->mapToNewSpace(Md.first, Md.second, scf, tcf, mri_Swarp, mri_Twarp,
                            mh, mhi);
   if (icount == 0) {
@@ -278,11 +280,12 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
 
   icount++;
   if (icount % 100 == 0)
-    cout << "*" << flush;
+    std::cout << "*" << std::flush;
   //    if (icount%20 == 0)
   {
     // cout << endl << " iteration : " << icount << endl;
-    std::cerr << icount << "  |  " << setprecision(8) << d << "    " << flush;
+    std::cerr << icount << "  |  " << std::setprecision(8) << d << "    "
+              << std::flush;
     vnl_matlab_print(std::cerr, p, "p", vnl_matlab_print_format_long);
     //       int ii = icount / 20;
     //       std::stringstream out;
@@ -305,8 +308,8 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
                                                  MRI *mriS, MRI *mriT,
                                                  const vnl_matrix<double> &m,
                                                  double scaleinit) {
-  cout << "RegPowell::computeIterativeRegistrationFull" << endl;
-  cout << " sym: " << symmetry << endl;
+  std::cout << "RegPowell::computeIterativeRegistrationFull" << std::endl;
+  std::cout << " sym: " << symmetry << std::endl;
 
   if (!mriS)
     mriS = mri_source;
@@ -318,14 +321,15 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
   is2d = false;
   if (mriS->depth == 1 || mriT->depth == 1) {
     if (mriT->depth != mriS->depth) {
-      cout << "ERROR: both source and target need to be 2D or 3D" << endl;
+      std::cout << "ERROR: both source and target need to be 2D or 3D"
+                << std::endl;
       exit(1);
     }
     is2d = true;
   }
 
   double outsideval = mriS->outside_val;
-  bool cleanupS = true;
+  bool   cleanupS   = true;
   if (mriS->type != MRI_UCHAR) {
     int no_scale_flag = FALSE;
     printf("changing data type from %d to %d (noscale = %d)...\n", mriS->type,
@@ -342,7 +346,7 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
   mriS->outside_val = outsideval;
 
   bool cleanupT = true;
-  outsideval = mriT->outside_val;
+  outsideval    = mriT->outside_val;
   if (mriT->type != MRI_UCHAR) {
     int no_scale_flag = FALSE;
     printf("changing data type from %d to %d (noscale = %d)...\n", mriT->type,
@@ -362,22 +366,22 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
   tocurrent = this; // so that we can access this from static cost function
   // rtype = 2;
 
-  pair<vnl_matrix_fixed<double, 4, 4>, double> fmd(
+  std::pair<vnl_matrix_fixed<double, 4, 4>, double> fmd(
       vnl_matrix_fixed<double, 4, 4>(), 0.0);
 
   // check if mi (inital transform) is passed
   if (!m.empty()) {
     fmd.first = m;
     if (verbose > 1)
-      cout << "     initial M passed ... " << endl;
+      std::cout << "     initial M passed ... " << std::endl;
   } else if (!Minit.empty()) {
     fmd.first = getMinitResampled();
     if (verbose > 1)
-      cout << "     initial M from resample ... " << endl;
+      std::cout << "     initial M from resample ... " << std::endl;
   } else {
     fmd.first = initializeTransform(mriS, mriT);
     if (verbose > 1)
-      cout << "     initialize transform M ... " << endl;
+      std::cout << "     initialize transform M ... " << std::endl;
   }
   vnl_matrix<double> initialM = fmd.first;
 
@@ -446,11 +450,12 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     subsamplesize = 150;
   if (subsamplesize > 0 && mriT->width > subsamplesize &&
       mriT->height > subsamplesize && mriT->depth > subsamplesize) {
-    cout << "   - subsampling this resolution ... " << endl;
+    std::cout << "   - subsampling this resolution ... " << std::endl;
     subsamp = 2;
   }
   // compute Registration
-  cout << "   - compute new registration ( " << pcount << " params )" << endl;
+  std::cout << "   - compute new registration ( " << pcount << " params )"
+            << std::endl;
 
   // initial parameters
   trans->setIdentity();
@@ -494,12 +499,12 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
   }
 
   double min_sse = costFunction(p);
-  cout << "   - initial cost: " << min_sse << endl;
+  std::cout << "   - initial cost: " << min_sse << std::endl;
 
   icount = 0;
-  cout << " START POWELL" << endl;
+  std::cout << " START POWELL" << std::endl;
   my_cost_function myCostFunction(&costFunction, pcount);
-  fs_powell minimizer(&myCostFunction);
+  fs_powell        minimizer(&myCostFunction);
   // vnl_powell minimizer( &myCostFunction );
   // double tol = 1e-4; //-8
   // int maxiter = 5;
@@ -527,11 +532,11 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     ErrorExit(ERROR_BADPARM, "powell error.");
   } else {
     // success
-    cout << " iter: " << minimizer.get_num_iterations() << endl;
-    cout << " final e = " << setprecision(14) << minimizer.get_end_error()
-         << endl;
+    std::cout << " iter: " << minimizer.get_num_iterations() << std::endl;
+    std::cout << " final e = " << std::setprecision(14)
+              << minimizer.get_end_error() << std::endl;
     vnl_matlab_print(std::cout, p, "p", vnl_matlab_print_format_long);
-    cout << endl;
+    std::cout << std::endl;
   }
 
   fmd = convertP2Md(p);
@@ -545,12 +550,12 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     vnl_matrix_fixed<double, 4, 4> ch = MyMatrix::MatrixSqrt(fmd.first);
     // do not just assume c = ch*ch, rather c = ch2 * ch
     // for transforming target we need ch2^-1 = ch * c^-1
-    vnl_matrix_fixed<double, 4, 4> ci = vnl_inverse(fmd.first);
+    vnl_matrix_fixed<double, 4, 4> ci  = vnl_inverse(fmd.first);
     vnl_matrix_fixed<double, 4, 4> chi = ch * ci;
-    mov2weights = ch;
-    dst2weights = chi;
+    mov2weights                        = ch;
+    dst2weights                        = chi;
   } else {
-    fmd.first = fmd.first * initialM;
+    fmd.first   = fmd.first * initialM;
     mov2weights = fmd.first;
     dst2weights.set_identity();
   }
@@ -570,7 +575,7 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
 
   Mfinal = fmd.first;
 
-  cout << endl << " DONE " << endl;
+  std::cout << std::endl << " DONE " << std::endl;
 
   if (cleanupS)
     MRIfree(&mriS);

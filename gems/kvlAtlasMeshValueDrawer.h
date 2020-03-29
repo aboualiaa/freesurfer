@@ -1,8 +1,8 @@
 #ifndef __kvlAtlasMeshValueDrawer_h
 #define __kvlAtlasMeshValueDrawer_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 namespace kvl {
 
@@ -12,11 +12,11 @@ public:
   ~AtlasMeshValueDrawer() {}
 
   // standard class typedefs
-  using Self = AtlasMeshValueDrawer;
-  using Superclass = AtlasMeshRasterizor;
+  using Self            = AtlasMeshValueDrawer;
+  using Superclass      = AtlasMeshRasterizor;
   using AtlasValuesType = itk::Array<double>;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  using Pointer         = itk::SmartPointer<Self>;
+  using ConstPointer    = itk::SmartPointer<const Self>;
 
   // method for creation through the object factory
   itkNewMacro(Self);
@@ -48,17 +48,17 @@ protected:
   // AtlasMeshValueDrawer()  {}
   // ~AtlasMeshValueDrawer() {}
 
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
   AtlasMeshValueDrawer(const Self &); // purposely not implemented
   void operator=(const Self &);       // purposely not implemented
 
-  int m_NumFrames = 0;
-  double const *m_Values = nullptr;
-  ImageType::Pointer m_Image = nullptr;
+  int                m_NumFrames = 0;
+  double const *     m_Values    = nullptr;
+  ImageType::Pointer m_Image     = nullptr;
 };
 
 } // end namespace kvl

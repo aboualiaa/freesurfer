@@ -81,59 +81,59 @@
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisurf_metricProperties.h"
-#include "mrisutils.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "mri2.h"
+#include "mrisurf_metricProperties.h"
+#include "mrisutils.h"
 #include "version.h"
-#include "cmdargs.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 static char vcid[] = "$Id: mris_diff.c,v 1.20 2014/03/21 23:57:48 greve Exp $";
 const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-static int debug = 0;
-static int checkoptsonly = 0;
+char *      cmdline, cwd[2000];
+static int  debug         = 0;
+static int  checkoptsonly = 0;
 static struct utsname uts;
 
 static char *subject1 = nullptr, *subject2 = nullptr, *hemi = nullptr;
 static char *SUBJECTS_DIR = nullptr, *SUBJECTS_DIR1 = nullptr,
             *SUBJECTS_DIR2 = nullptr;
 static char *curvname = nullptr, *aparcname = nullptr, *aparc2name = nullptr,
-            *surfname = nullptr;
-static char *surf1path = nullptr, *surf2path = nullptr;
-static char *out_fname;
-static char tmpstr[2000];
-static const char *xyzRMSFile = nullptr;
-static const char *angleRMSFile = nullptr;
+            *surfname        = nullptr;
+static char *      surf1path = nullptr, *surf2path = nullptr;
+static char *      out_fname;
+static char        tmpstr[2000];
+static const char *xyzRMSFile      = nullptr;
+static const char *angleRMSFile    = nullptr;
 static const char *worstBucketFile = nullptr;
-static int okayBucketMax = 1;
-static int gridx = 0, gridy = 0, gridz = 0;
-static float gridspacing = 0;
-static char *gridFile = nullptr;
+static int         okayBucketMax   = 1;
+static int         gridx = 0, gridy = 0, gridz = 0;
+static float       gridspacing = 0;
+static char *      gridFile    = nullptr;
 
 static MRIS *surf1, *surf2;
 
-static int CheckSurf = 0;
-static int CheckXYZ = 1;
-static int CheckNXYZ = 1;
+static int CheckSurf         = 0;
+static int CheckXYZ          = 1;
+static int CheckNXYZ         = 1;
 static int ComputeNormalDist = 0;
-static int CheckCurv = 0;
-static int CheckAParc = 0;
+static int CheckCurv         = 0;
+static int CheckAParc        = 0;
 
 static int renumberedSpecified = 0;
 
 static long seed = 1234;
 
-static int error_count = 0;
+static int error_count    = 0;
 static int MAX_NUM_ERRORS = 10; // in loops, stop after this many errors found
 // set by cmd-line parm --maxerrs
 
@@ -152,13 +152,13 @@ struct HistogramOfFit {
   bool contributesToWorstBucket;
   HistogramOfFit(bool contributesToWorstBucket = false)
       : contributesToWorstBucket(contributesToWorstBucket) {}
-  double maxV;
-  double maxDiff;
+  double       maxV;
+  double       maxDiff;
   unsigned int v[HistogramSize];
 };
 
 static void initHistogramOfFit(HistogramOfFit *histogramOfFit) {
-  histogramOfFit->maxV = 0.0;
+  histogramOfFit->maxV    = 0.0;
   histogramOfFit->maxDiff = 0.0;
   int i;
   for (i = 0; i < HistogramSize; i++)
@@ -181,7 +181,7 @@ static int headHistogramOfFit(HistogramOfFit *histogramOfFit) {
   return 0;
 }
 
-static void insertHistogramOfFit(int vnoOrNegative,
+static void insertHistogramOfFit(int             vnoOrNegative,
                                  HistogramOfFit *histogramOfFit, double diff,
                                  double v) {
   if (histogramOfFit->maxV < v)
@@ -189,7 +189,7 @@ static void insertHistogramOfFit(int vnoOrNegative,
   if (histogramOfFit->maxDiff < diff)
     histogramOfFit->maxDiff = diff;
   double fit = 0.01;
-  int i = 0;
+  int    i   = 0;
   while (fit < diff) {
     fit *= 3;
     i++;
@@ -199,19 +199,19 @@ static void insertHistogramOfFit(int vnoOrNegative,
   histogramOfFit->v[i]++;
   if (histogramOfFit->contributesToWorstBucket && vnoOrNegative >= 0) {
     auto &e = vnoToWorstBucket[vnoOrNegative];
-    e = std::max(e, char(i));
+    e       = std::max(e, char(i));
   }
 }
 
 static int printfHistogramOfFit(HistogramOfFit *histogramOfFit,
-                                double const *requiredFit) {
-  int countOfBad = 0;
-  const int pop = populationHistogramOfFit(histogramOfFit);
-  double fit = 0.01;
-  int popSoFar = 0;
-  int requiredFitI = 0;
-  const int head = headHistogramOfFit(histogramOfFit);
-  int i = 0;
+                                double const *  requiredFit) {
+  int       countOfBad   = 0;
+  const int pop          = populationHistogramOfFit(histogramOfFit);
+  double    fit          = 0.01;
+  int       popSoFar     = 0;
+  int       requiredFitI = 0;
+  const int head         = headHistogramOfFit(histogramOfFit);
+  int       i            = 0;
   while (i < head) {
     const char *comment = "";
     popSoFar += histogramOfFit->v[i];
@@ -240,8 +240,8 @@ static HistogramOfFit vertexCurvHistogram;
 
 static void compare(int vnoOrNegative, HistogramOfFit *histogramOfFit,
                     double lhs, double rhs) {
-  double absLhs = fabs(lhs);
-  double absRhs = fabs(rhs);
+  double absLhs  = fabs(lhs);
+  double absRhs  = fabs(rhs);
   double diffAbs = fabs(lhs - rhs);
   insertHistogramOfFit(vnoOrNegative, histogramOfFit, diffAbs,
                        absLhs > absRhs ? absLhs : absRhs);
@@ -258,7 +258,7 @@ static void initHistograms() {
 
 static void printOneHistogram(HistogramOfFit *histogramOfFit, const char *name,
                               double const *requiredFit,
-                              const char **badHistogram) {
+                              const char ** badHistogram) {
   printf("%s  largest:%g\n", name, histogramOfFit->maxV);
   if (populationHistogramOfFit(histogramOfFit) == 0) {
     printf(" empty\n");
@@ -282,7 +282,7 @@ static const char *printHistograms() {
   const double vertexRequiredFit[9] = {0.0, 0.0,  0.0,  0.05, 0.1,
                                        0.5, 0.95, 0.99, -1};
   const double relVtxRequiredFit[9] = {0.5, 0.6, 0.90, 0.95, 0.99, -1};
-  const double otherRequiredFit[9] = {0.2, 0.6, 0.95, 0.99, -1};
+  const double otherRequiredFit[9]  = {0.2, 0.6, 0.95, 0.99, -1};
 
   printOneHistogram(&vertexXyzHistogram, "vertex xyz", vertexRequiredFit,
                     &badHistogram);
@@ -339,8 +339,8 @@ static bool compareVertexPositions(MRIS *const lhs, MRIS *const rhs,
   //
   size_t rLo = 0, rHi = 0;
   for (size_t li = 0; li < lhsList.size(); li++) {
-    auto const lhsVno = lhsList[li];
-    auto const &lv = lhs->vertices[lhsVno];
+    auto const  lhsVno = lhsList[li];
+    auto const &lv     = lhs->vertices[lhsVno];
     while (rLo < rhsList.size() &&
            rhs->vertices[rhsList[rLo]].x < lv.x - maxDistortion)
       rLo++;
@@ -350,8 +350,8 @@ static bool compareVertexPositions(MRIS *const lhs, MRIS *const rhs,
     if (rLo == rhsList.size())
       break; // no more candidates
     // the candidates are now [rLo..rhi)
-    size_t found = 0;
-    VERTEX *rv = nullptr;
+    size_t  found = 0;
+    VERTEX *rv    = nullptr;
     for (auto ri = rLo; ri < rHi; ri++) {
       if (closeEnoughV(lv, rhs->vertices[rhsList[ri]])) {
         found++;
@@ -379,7 +379,7 @@ static bool compareVertexPositions(MRIS *const lhs, MRIS *const rhs,
             << " missing:" << missing << " out of " << lhs->nvertices
             << std::endl;
 
-  const char *badHistogram = nullptr;
+  const char * badHistogram         = nullptr;
   const double vertexRequiredFit[9] = {0.99, -1};
   printOneHistogram(&vertexXyzHistogram, "vertex xyz", vertexRequiredFit,
                     &badHistogram);
@@ -394,13 +394,14 @@ int MRISdiffSimple(MRIS *surf1, MRIS *surf2, int ndiffmin, double rmsthresh,
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, nthvtx, nnbrs1, nnbrs2, nthnbr, nbrvtxno1, nbrvtxno2;
-  int nthface, annot1, annot2;
+  int   nargs, nthvtx, nnbrs1, nnbrs2, nthnbr, nbrvtxno1, nbrvtxno2;
+  int   nthface, annot1, annot2;
   FACE *face1, *face2;
   float maxdiff, rms;
 
   nargs = handleVersionOption(argc, argv, "mris_diff");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -549,18 +550,18 @@ int main(int argc, char *argv[]) {
       if (vnos2[0] < 0)
         continue;
 
-      size_t found = 0;
-      VERTEX_TOPOLOGY const *v2 = &surf2->vertices_topology[vnos2[0]];
+      size_t                 found = 0;
+      VERTEX_TOPOLOGY const *v2    = &surf2->vertices_topology[vnos2[0]];
       for (int fi2 = 0; fi2 < v2->num; fi2++) {
         FACE const *candidateF2 = &surf2->faces[v2->f[fi2]];
-        int candidateVnos[3];
+        int         candidateVnos[3];
         for (int i = 0; i < 3; i++)
           candidateVnos[i] = candidateF2->v[i];
         std::sort(candidateVnos + 0, candidateVnos + 3);
         if (candidateVnos[0] == vnos2[0] && candidateVnos[1] == vnos2[1] &&
             candidateVnos[2] == vnos2[2]) {
           cheapAssert(!found);
-          found = 1;
+          found                      = 1;
           surf1Fno_to_surf2Fno[fno1] = v2->f[fi2];
         }
       }
@@ -588,12 +589,12 @@ int main(int argc, char *argv[]) {
 
       VERTEX const *const vtx1 = &(surf1->vertices[nthvtx]);
       VERTEX const *const vtx2 = &(surf2->vertices[nthvtx2]);
-      double dx = vtx2->x - vtx1->x;
-      double dy = vtx2->y - vtx1->y;
-      double dz = vtx2->z - vtx1->z;
-      double dist = sqrt(dx * dx + dy * dy + dz * dz);
-      double dot = dx * vtx1->nx + dy * vtx1->ny + dz * vtx1->nz;
-      dist = dist * dot / fabs(dot);
+      double              dx   = vtx2->x - vtx1->x;
+      double              dy   = vtx2->y - vtx1->y;
+      double              dz   = vtx2->z - vtx1->z;
+      double              dist = sqrt(dx * dx + dy * dy + dz * dz);
+      double              dot  = dx * vtx1->nx + dy * vtx1->ny + dz * vtx1->nz;
+      dist                     = dist * dot / fabs(dot);
       MRIsetVoxVal(mri_dist, nthvtx, 0, 0, 0, dist);
     }
     MRIwrite(mri_dist, out_fname);
@@ -621,7 +622,7 @@ int main(int argc, char *argv[]) {
 
   if (angleRMSFile) {
     printf("Computing angle RMS\n");
-    MRI *angleRMS;
+    MRI *  angleRMS;
     double dot, radius1, radius2;
     angleRMS = MRIalloc(surf1->nvertices, 1, 1, MRI_FLOAT);
     for (nthvtx = 0; nthvtx < surf1->nvertices; nthvtx++) {
@@ -634,7 +635,7 @@ int main(int argc, char *argv[]) {
 
       radius1 = sqrt(vtx1->x * vtx1->x + vtx1->y * vtx1->y + vtx1->z * vtx1->z);
       radius2 = sqrt(vtx2->x * vtx2->x + vtx2->y * vtx2->y + vtx2->z * vtx2->z);
-      dot = (vtx1->x * vtx2->x + vtx1->y * vtx2->y + vtx1->z * vtx2->z) /
+      dot     = (vtx1->x * vtx2->x + vtx1->y * vtx2->y + vtx1->z * vtx2->z) /
             (radius1 * radius2);
       // printf("%6.2f %6.2f %6.2f  %6.2f %6.2f %6.2f  %6.2f %6.2f  %5.4f\n",
       // vtx1->x,vtx1->y,vtx1->z, vtx2->x,vtx2->y,vtx2->z, radius1, radius2,
@@ -665,9 +666,9 @@ int main(int argc, char *argv[]) {
         continue;
 
       VERTEX_TOPOLOGY const *const vtx1t = &(surf1->vertices_topology[nthvtx]);
-      VERTEX const *const vtx1 = &(surf1->vertices[nthvtx]);
+      VERTEX const *const          vtx1  = &(surf1->vertices[nthvtx]);
       VERTEX_TOPOLOGY const *const vtx2t = &(surf2->vertices_topology[nthvtx2]);
-      VERTEX const *const vtx2 = &(surf2->vertices[nthvtx2]);
+      VERTEX const *const          vtx2  = &(surf2->vertices[nthvtx2]);
 
       if (vtx1->ripflag != vtx2->ripflag) {
         printf("Vertex %d differs in ripflag %c %c\n", nthvtx, vtx1->ripflag,
@@ -707,13 +708,13 @@ int main(int argc, char *argv[]) {
               VERTEX *v2 = &(surf2->vertices[f2->v[vn]]);
               if (v1->ripflag || v2->ripflag)
                 continue;
-              double dx1 = v1->x - vtx1->x;
-              double dy1 = v1->y - vtx1->y;
-              double dz1 = v1->z - vtx1->z;
+              double dx1   = v1->x - vtx1->x;
+              double dy1   = v1->y - vtx1->y;
+              double dz1   = v1->z - vtx1->z;
               double dist1 = sqrt(dx1 * dx1 + dy1 * dy1 + dz1 * dz1);
-              double dx2 = v2->x - vtx2->x;
-              double dy2 = v2->y - vtx2->y;
-              double dz2 = v2->z - vtx2->z;
+              double dx2   = v2->x - vtx2->x;
+              double dy2   = v2->y - vtx2->y;
+              double dz2   = v2->z - vtx2->z;
               double dist2 = sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
               compare(f1->v[vn], &vertexRelativeXyzHistogram, dist1, dist2);
             }
@@ -795,7 +796,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Loop over faces ----------------------------------------
-    error_count = 0;
+    error_count                   = 0;
     int faces_with_no_equiv_count = 0;
     for (nthface = 0; nthface < surf1->nfaces; nthface++) {
       auto nthface2 = surf1Fno_to_surf2Fno[nthface];
@@ -805,9 +806,9 @@ int main(int argc, char *argv[]) {
         continue;
       }
 
-      face1 = &(surf1->faces[nthface]);
+      face1                            = &(surf1->faces[nthface]);
       FaceNormCacheEntry const *fNorm1 = getFaceNorm(surf1, nthface);
-      face2 = &(surf2->faces[nthface2]);
+      face2                            = &(surf2->faces[nthface2]);
       FaceNormCacheEntry const *fNorm2 = getFaceNorm(surf2, nthface2);
 
       if (CheckNXYZ) {
@@ -862,12 +863,12 @@ int main(int argc, char *argv[]) {
     if (worstBucketFile) {
       printf("Writing worstBucket\n");
       for (nthvtx = 0; nthvtx < surf1->nvertices; nthvtx++) {
-        auto &v = surf1->vertices[nthvtx];
-        bool interesting = (vnoToWorstBucket[nthvtx] > okayBucketMax);
+        auto &v           = surf1->vertices[nthvtx];
+        bool  interesting = (vnoToWorstBucket[nthvtx] > okayBucketMax);
 
         // yellow interesting, grey uninteresting by default
         if (interesting) {
-          v.stat = 1;
+          v.stat   = 1;
           v.marked = 1;
         }
       }
@@ -879,9 +880,9 @@ int main(int argc, char *argv[]) {
       printf("Writing gridFile\n");
       size_t interestingCount = 0;
       for (nthvtx = 0; nthvtx < surf1->nvertices; nthvtx++) {
-        auto &vt = surf1->vertices_topology[nthvtx];
-        auto &v = surf1->vertices[nthvtx];
-        int interesting = 0;
+        auto &vt          = surf1->vertices_topology[nthvtx];
+        auto &v           = surf1->vertices[nthvtx];
+        int   interesting = 0;
 
         for (int ni = 0; ni < vt.vnum; ni++) {
           auto spans = [&](const char *which, float d0, float d1) -> bool {
@@ -906,7 +907,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (interesting) {
-          v.stat = 1;
+          v.stat   = 1;
           v.marked = 1;
           interestingCount++;
         }
@@ -1021,7 +1022,7 @@ int main(int argc, char *argv[]) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -1057,30 +1058,30 @@ static int parse_commandline(int argc, char **argv) {
       renumberedSpecified = 1;
     else if (!strcasecmp(option, "--ndist")) {
       ComputeNormalDist = 1;
-      out_fname = pargv[0];
-      nargsused = 1;
+      out_fname         = pargv[0];
+      nargsused         = 1;
     } else if (!strcasecmp(option, "--xyz-rms")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       xyzRMSFile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--angle-rms")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       angleRMSFile = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--worst-bucket")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       worstBucketFile = pargv[0];
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcasecmp(option, "--okayBucketMax")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       long int val;
       sscanf(pargv[0], "%ld", &val);
       okayBucketMax = int(val);
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--grid")) {
       if (nargc < 3)
         CMDargNErr(option, 0);
@@ -1108,57 +1109,57 @@ static int parse_commandline(int argc, char **argv) {
         break;
       }
       sscanf(pargv[1], "%f", &gridspacing);
-      gridFile = pargv[2];
+      gridFile  = pargv[2];
       nargsused = 3;
     } else if (!strcasecmp(option, "--s1")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject1 = pargv[0];
+      subject1  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--s2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject2 = pargv[0];
+      subject2  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--sd1")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       SUBJECTS_DIR1 = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--sd2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       SUBJECTS_DIR2 = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--hemi")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      surfname = pargv[0];
+      surfname  = pargv[0];
       CheckSurf = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--curv")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      curvname = pargv[0];
+      curvname  = pargv[0];
       CheckCurv = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--aparc")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      aparcname = pargv[0];
+      aparcname  = pargv[0];
       CheckAParc = 1;
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--aparc2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       aparc2name = pargv[0];
       CheckAParc = 1;
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--thresh")) {
       // ignore --thresh for now
       if (nargc < 1)
@@ -1174,14 +1175,14 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%ld", &seed);
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--gdiag_no")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&Gdiag_no);
+    } else if (!strcasecmp(option, "--gdiag_no")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &Gdiag_no);
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--min-dist")) {
-      if(nargc < 4) CMDargNErr(option,4);
+    } else if (!strcasecmp(option, "--min-dist")) {
+      if (nargc < 4)
+        CMDargNErr(option, 4);
       surf1 = MRISread(pargv[0]);
       if (surf1 == nullptr)
         exit(1);
@@ -1261,7 +1262,8 @@ static void print_usage() {
   printf("\n");
   printf("other options:\n");
   printf("   --simple : just report whether the surfaces are different\n");
-  printf("   --thresh N    threshold (default=0) [note: not currently implemented!] \n");
+  printf("   --thresh N    threshold (default=0) [note: not currently "
+         "implemented!] \n");
   printf("   --maxerrs N   stop looping after N errors (default=%d)\n",
          MAX_NUM_ERRORS);
   printf("   --renumbered  the vertices or faces may have been renumbered and "
@@ -1276,8 +1278,10 @@ static void print_usage() {
   printf("   --xyz-rms xyzrmsfile : compute and save rms diff between xyz\n");
   printf("   --angle-rms anglermsfile : compute angle on sphere between xyz\n");
   printf("   --seed seed : set random seed for degenerate normals\n");
-  printf("   --min-dist surf1 surf2 exactflag mindist : compute vertex-by-vert RMS distance between surfs\n");
-  printf("     surfs do not need to have the same number of vertices. Output on surf2\n");
+  printf("   --min-dist surf1 surf2 exactflag mindist : compute vertex-by-vert "
+         "RMS distance between surfs\n");
+  printf("     surfs do not need to have the same number of vertices. Output "
+         "on surf2\n");
   printf("\n");
   printf("   --debug       turn on debugging\n");
   printf("   --gdiag_no Gdiag_no\n");
@@ -1399,11 +1403,11 @@ static void dump_options(FILE *fp) {
   small.
  */
 MRI *MRISminDist(MRIS *srcsurf, MRIS *trgsurf) {
-  int svtx = 0, tvtx;
+  int     svtx = 0, tvtx;
   VERTEX *vtrg, *vsrc;
-  float dmin;
-  MHT *srchash = nullptr, *trghash = nullptr;
-  MRI *mindist;
+  float   dmin;
+  MHT *   srchash = nullptr, *trghash = nullptr;
+  MRI *   mindist;
 
   mindist = MRIallocSequence(trgsurf->nvertices, 1, 1, MRI_FLOAT, 1);
 
@@ -1432,10 +1436,10 @@ MRI *MRISminDist(MRIS *srcsurf, MRIS *trgsurf) {
 
 int MRISdiffSimple(MRIS *surf1, MRIS *surf2, int ndiffmin, double rmsthresh,
                    int verbosity) {
-  int n, ndiff;
-  VERTEX *v1, *v2;
+  int              n, ndiff;
+  VERTEX *         v1, *v2;
   VERTEX_TOPOLOGY *vt1, *vt2;
-  double dx, dy, dz, rms, rmsmax;
+  double           dx, dy, dz, rms, rmsmax;
 
   printf("Entering MRISdiffSimple(): ndiffmin=%d, rmsthresh=%g, verbosity=%d\n",
          ndiffmin, rmsthresh, verbosity);
@@ -1474,14 +1478,14 @@ int MRISdiffSimple(MRIS *surf1, MRIS *surf2, int ndiffmin, double rmsthresh,
     return (3);
   }
 
-  ndiff = 0;
+  ndiff  = 0;
   rmsmax = 0;
   for (n = 0; n < surf1->nvertices; n++) {
-    v1 = &(surf1->vertices[n]);
-    v2 = &(surf2->vertices[n]);
-    dx = v1->x - v2->x;
-    dy = v1->y - v2->y;
-    dz = v1->z - v2->z;
+    v1  = &(surf1->vertices[n]);
+    v2  = &(surf2->vertices[n]);
+    dx  = v1->x - v2->x;
+    dy  = v1->y - v2->y;
+    dz  = v1->z - v2->z;
     rms = sqrt(dx * dx + dy * dy + dz * dz);
     if (rmsmax < rms)
       rmsmax = rms;

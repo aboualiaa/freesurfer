@@ -75,7 +75,7 @@ public:
 
   // helper function for  constructAtWA and construct AtWr
   // will be private once testing is done
-  Matrix3d doBasisMultiplications(const Matrix3d &data,
+  Matrix3d doBasisMultiplications(const Matrix3d &         data,
                                   const vnl_matrix<float> &Bx,
                                   const vnl_matrix<float> &By,
                                   const vnl_matrix<float> &Bz);

@@ -1,5 +1,5 @@
-#include "kvlCroppedImageReader.h"
 #include "kvlAverageAtlasMeshPositionCostAndGradientCalculator.h"
+#include "kvlCroppedImageReader.h"
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
 
@@ -10,9 +10,9 @@ class GetAverageAtlasMeshPositionCostAndGradientCalculator
 public:
   /** Smart pointer typedef support. */
   typedef GetAverageAtlasMeshPositionCostAndGradientCalculator Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
-  typedef itk::SmartPointer<const Self> ConstPointer;
+  typedef itk::Object                                          Superclass;
+  typedef itk::SmartPointer<Self>                              Pointer;
+  typedef itk::SmartPointer<const Self>                        ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -21,7 +21,8 @@ public:
   itkTypeMacro(GetAverageAtlasMeshPositionCostAndGradientCalculator,
                itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
+  void Run(int nlhs, mxArray *plhs[], int nrhs,
+           const mxArray *prhs[]) override {
     // std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
@@ -80,7 +81,7 @@ public:
         AtlasMeshPositionCostAndGradientCalculator::SLIDING);
     calculator->SetMeshToImageTransform(constTransform);
     std::vector<AtlasMesh::PointsContainer::ConstPointer> positions;
-    std::vector<double> Ks;
+    std::vector<double>                                   Ks;
     positions.push_back(meshCollection->GetReferencePosition());
     Ks.push_back(K0);
     for (int meshNumber = 0; meshNumber < meshCollection->GetPositions().size();
@@ -103,8 +104,10 @@ public:
   }
 
 protected:
-  GetAverageAtlasMeshPositionCostAndGradientCalculator()= default;;
-  ~GetAverageAtlasMeshPositionCostAndGradientCalculator() override= default;;
+  GetAverageAtlasMeshPositionCostAndGradientCalculator() = default;
+  ;
+  ~GetAverageAtlasMeshPositionCostAndGradientCalculator() override = default;
+  ;
 
   GetAverageAtlasMeshPositionCostAndGradientCalculator(
       const Self &);            // purposely not implemented

@@ -8,9 +8,9 @@ namespace kvl {
 class MultiResolutionAtlasMesher : public itk::Object {
 public:
   /** Standard class typedefs */
-  typedef MultiResolutionAtlasMesher Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef MultiResolutionAtlasMesher    Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -25,8 +25,8 @@ public:
   // Set up
   void SetUp(const std::vector<LabelImageType::ConstPointer> &labelImages,
              const CompressionLookupTable *compressionLookupTable,
-             const itk::Size<3> &initialSize,
-             const std::vector<double> &initialStiffnesse);
+             const itk::Size<3> &          initialSize,
+             const std::vector<double> &   initialStiffnesse);
 
   //
   const AtlasMeshCollection *GetCurrentMeshCollection() const {
@@ -52,12 +52,12 @@ protected:
 #ifdef USE_TETGEN
   //
   typedef itk::AutomaticTopologyMeshSource<kvl::AtlasMesh> MeshSourceType;
-  static void AddHexahedron(
-      MeshSourceType *meshSource, AtlasMesh::CellsContainer *hexahedra,
-      const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
-      const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
-      const AtlasMesh::PointType &p4, const AtlasMesh::PointType &p5,
-      const AtlasMesh::PointType &p6, const AtlasMesh::PointType &p7) {
+  static void                                              AddHexahedron(
+                                                   MeshSourceType *meshSource, AtlasMesh::CellsContainer *hexahedra,
+                                                   const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
+                                                   const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
+                                                   const AtlasMesh::PointType &p4, const AtlasMesh::PointType &p5,
+                                                   const AtlasMesh::PointType &p6, const AtlasMesh::PointType &p7) {
     AtlasMesh::PointIdentifier p0IdDummy;
     AtlasMesh::PointIdentifier p1IdDummy;
     AtlasMesh::PointIdentifier p2IdDummy;
@@ -124,14 +124,14 @@ private:
 
   //
   std::vector<LabelImageType::ConstPointer> m_LabelImages;
-  CompressionLookupTable::ConstPointer m_CompressionLookupTable;
-  itk::Size<3> m_InitialSize;
-  std::vector<double> m_InitialStiffnesses;
+  CompressionLookupTable::ConstPointer      m_CompressionLookupTable;
+  itk::Size<3>                              m_InitialSize;
+  std::vector<double>                       m_InitialStiffnesses;
 
   AtlasParameterEstimator::Pointer m_Estimator;
-  int m_NumberOfClasses;
-  int m_NumberOfMeshes;
-  itk::Size<3> m_DomainSize;
+  int                              m_NumberOfClasses;
+  int                              m_NumberOfMeshes;
+  itk::Size<3>                     m_DomainSize;
 
   AtlasMeshCollection::Pointer m_Current;
 

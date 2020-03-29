@@ -38,17 +38,17 @@
 #include <math.h>
  */
 
-#include <math.h>
 #include "macros.h"
 #include "tritri.h"
+#include <math.h>
 
 /* if USE_EPSILON_TEST is true then we do a check:
          if |dv|<EPSILON then dv=0.0;
    else no check is done (which is less robust)
 */
 #define USE_EPSILON_TEST TRUE
-#define EPSILON 0.000001
-#define BEPSILON (0.000001 * 10)
+#define EPSILON          0.000001
+#define BEPSILON         (0.000001 * 10)
 
 /* sort so that a<=b */
 #define SORT(a, b)                                                             \
@@ -92,8 +92,8 @@
   By = U0[i1] - U1[i1];                                                        \
   Cx = V0[i0] - U0[i0];                                                        \
   Cy = V0[i1] - U0[i1];                                                        \
-  f = Ay * Bx - Ax * By;                                                       \
-  d = By * Cx - Bx * Cy;                                                       \
+  f  = Ay * Bx - Ax * By;                                                      \
+  d  = By * Cx - Bx * Cy;                                                      \
   if ((f > 0 && d >= 0 && d <= f) || (f < 0 && d <= 0 && d >= f)) {            \
     e = Ax * Cy - Ay * Cx;                                                     \
     if (f > 0) {                                                               \
@@ -123,19 +123,19 @@
     double a, b, c, d0, d1, d2;                                                \
     /* is T1 completly inside T2? */                                           \
     /* check if V0 is inside tri(U0,U1,U2) */                                  \
-    a = U1[i1] - U0[i1];                                                       \
-    b = -(U1[i0] - U0[i0]);                                                    \
-    c = -a * U0[i0] - b * U0[i1];                                              \
+    a  = U1[i1] - U0[i1];                                                      \
+    b  = -(U1[i0] - U0[i0]);                                                   \
+    c  = -a * U0[i0] - b * U0[i1];                                             \
     d0 = a * V0[i0] + b * V0[i1] + c;                                          \
                                                                                \
-    a = U2[i1] - U1[i1];                                                       \
-    b = -(U2[i0] - U1[i0]);                                                    \
-    c = -a * U1[i0] - b * U1[i1];                                              \
+    a  = U2[i1] - U1[i1];                                                      \
+    b  = -(U2[i0] - U1[i0]);                                                   \
+    c  = -a * U1[i0] - b * U1[i1];                                             \
     d1 = a * V0[i0] + b * V0[i1] + c;                                          \
                                                                                \
-    a = U0[i1] - U2[i1];                                                       \
-    b = -(U0[i0] - U2[i0]);                                                    \
-    c = -a * U2[i0] - b * U2[i1];                                              \
+    a  = U0[i1] - U2[i1];                                                      \
+    b  = -(U0[i0] - U2[i0]);                                                   \
+    c  = -a * U2[i0] - b * U2[i1];                                             \
     d2 = a * V0[i0] + b * V0[i1] + c;                                          \
     if (d0 * d1 > 0.0) {                                                       \
       if (d0 * d2 > 0.0)                                                       \
@@ -149,7 +149,7 @@ int coplanar_tri_tri(double N[3], double V0[3], double V1[3], double V2[3],
 int coplanar_tri_tri(double N[3], double V0[3], double V1[3], double V2[3],
                      double U0[3], double U1[3], double U2[3]) {
   double A[3];
-  short i0, i1;
+  short  i0, i1;
   /* first project onto an axis-aligned plane, that maximizes the area */
   /* of the triangles, compute indices: i0,i1. */
   A[0] = fabs(N[0]);
@@ -194,7 +194,7 @@ int tri_tri_intersect(double V0[3], double V1[3], double V2[3], double U0[3],
   double D[3];
   double isect1[2], isect2[2];
   double du0du1, du0du2, dv0dv1, dv0dv2;
-  short index;
+  short  index;
   double vp0, vp1, vp2;
   double up0, up1, up2;
   double b, c, max;
@@ -208,9 +208,9 @@ int tri_tri_intersect(double V0[3], double V1[3], double V2[3], double U0[3],
 
   /* put U0,U1,U2 into plane equation 1 to compute signed distances to the
    * plane*/
-  du0 = DOT(N1, U0) + d1;
-  du1 = DOT(N1, U1) + d1;
-  du2 = DOT(N1, U2) + d1;
+  du0  = DOT(N1, U0) + d1;
+  du1  = DOT(N1, U1) + d1;
+  du2  = DOT(N1, U2) + d1;
   fdu0 = fabs(du0);
   fdu1 = fabs(du1);
   fdu2 = fabs(du2);
@@ -243,9 +243,9 @@ int tri_tri_intersect(double V0[3], double V1[3], double V2[3], double U0[3],
   /* plane equation 2: N2.X+d2=0 */
 
   /* put V0,V1,V2 into plane equation 2 */
-  dv0 = DOT(N2, V0) + d2;
-  dv1 = DOT(N2, V1) + d2;
-  dv2 = DOT(N2, V2) + d2;
+  dv0  = DOT(N2, V0) + d2;
+  dv1  = DOT(N2, V1) + d2;
+  dv2  = DOT(N2, V2) + d2;
   fdv0 = fabs(dv0);
   fdv1 = fabs(dv1);
   fdv2 = fabs(dv2);
@@ -274,10 +274,10 @@ int tri_tri_intersect(double V0[3], double V1[3], double V2[3], double U0[3],
   CROSS(D, N1, N2);
 
   /* compute and index to the largest component of D */
-  max = fabs(D[0]);
+  max   = fabs(D[0]);
   index = 0;
-  b = fabs(D[1]);
-  c = fabs(D[2]);
+  b     = fabs(D[1]);
+  c     = fabs(D[2]);
   if (b > max)
     max = b, index = 1;
   if (c > max)
@@ -342,7 +342,7 @@ int triangle_ray_intersect(double orig_pt[3], double dir[3], double U0[3],
   // douoble a, b;
   MATRIX *m_U, *m_inv;
   VECTOR *v_p, *v_r;
-  int i;
+  int     i;
 
   m_U = MatrixAlloc(3, 3, MATRIX_REAL);
   v_p = VectorAlloc(3, MATRIX_REAL);
@@ -473,9 +473,9 @@ int intersect_RayTriangle(double ray[2][3], double V0[3], double V1[3],
                           double V2[3], double I[3]) {
   double u[3], v[3], n[3];    // triangle vectors
   double dir[3], w0[3], w[3]; // ray vectors
-  float r, a, b;              // params to calc ray-plane intersect
-  float uu, uv, vv, wu, wv, D;
-  float s, t;
+  float  r, a, b;             // params to calc ray-plane intersect
+  float  uu, uv, vv, wu, wv, D;
+  float  s, t;
 
   // get triangle edge vectors and plane normal
   SUB(u, V1, V0);
@@ -512,7 +512,7 @@ int intersect_RayTriangle(double ray[2][3], double V0[3], double V1[3],
   SUB(w, I, V0);
   wu = DOT(w, u);
   wv = DOT(w, v);
-  D = uv * uv - uu * vv;
+  D  = uv * uv - uu * vv;
 
   // get and test parametric coords
   s = (uv * wv - vv * wu) / D;

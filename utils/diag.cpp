@@ -51,23 +51,23 @@ FILE *Gstdin;
 FILE *Gdiag_fp = nullptr;
 
 int Gprofile = 0;
-int Gvx = -1;
-int Gvy = -1;
-int Gvz = -1;
+int Gvx      = -1;
+int Gvy      = -1;
+int Gvz      = -1;
 
 int Gsx = -1;
 int Gsy = -1;
 int Gsz = -1;
 
-unsigned long Gdiag = 0;
-int Gdiag_no = -1;
-int Gdiag_no2 = -1;
-int Gx = -1;
-int Gy = -1;
-int Gz = -1;
-int Gx2 = -1;
-int Gy2 = -1;
-int Gz2 = -1;
+unsigned long Gdiag     = 0;
+int           Gdiag_no  = -1;
+int           Gdiag_no2 = -1;
+int           Gx        = -1;
+int           Gy        = -1;
+int           Gz        = -1;
+int           Gx2       = -1;
+int           Gy2       = -1;
+int           Gz2       = -1;
 #define DEFAULT_IMAGE_SIZE 512
 int IMAGE_SIZE = DEFAULT_IMAGE_SIZE;
 
@@ -75,7 +75,7 @@ int IMAGE_SIZE = DEFAULT_IMAGE_SIZE;
                      STATIC DATA
 -------------------------------------------------------*/
 
-static char diag_fname[STRLEN] = "diag.log";
+static char diag_fname[STRLEN]                            = "diag.log";
 static int (*diag_vprintf)(const char *fmt, va_list args) = vprintf;
 static int (*diag_vfprintf)(FILE *fp, const char *fmt, va_list args) = vfprintf;
 
@@ -115,12 +115,12 @@ void assertFailed(const char *file, int line, const char *tst) {
 unsigned long DiagInit(char *fname,
                        int (*vfprint)(FILE *fp, const char *fmt, va_list args),
                        int (*vprint)(const char *fmt, va_list args)) {
-  char *cp = nullptr;
+  char *        cp   = nullptr;
   unsigned long diag = 0L;
 
   FSinit();
   Gstdout = stdout;
-  Gstdin = stdin;
+  Gstdin  = stdin;
   Gstderr = stderr; // for use in gdb
   if (fname)
     strcpy(diag_fname, fname);
@@ -298,9 +298,9 @@ int DiagCreateWindow(unsigned long diag_bits, int wrows, int wcols, int rows,
 ------------------------------------------------------*/
 int DiagFprintf(unsigned long diag_bits, char *fmt, ...) {
   static int first = 1;
-  va_list args;
-  FILE *fp;
-  int len;
+  va_list    args;
+  FILE *     fp;
+  int        len;
 
   if (diag_bits && !(diag_bits & Gdiag))
     return (-1);
@@ -390,8 +390,7 @@ void DiagShowPctDone(float pct_done, int nprints) {
   }
 }
 
-int check_finite(const char *where, double what)
-{
+int check_finite(const char *where, double what) {
   if (!std::isfinite(what)) {
     ErrorPrintf(ERROR_BADPARM, "%s not finite!\n", where);
     DiagBreak();

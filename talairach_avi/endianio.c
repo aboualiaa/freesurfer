@@ -23,22 +23,22 @@
  *
  */
 
+#include <ANALYZE.h>
+#include <Getifh.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <ANALYZE.h>
-#include <Getifh.h>
 
 #define MAXL 256
 
 static char rcsid[] = "$Id: endianio.c,v 1.4 2012/01/04 03:16:15 nicks Exp $";
-void endianio_rcs(void) { printf("%s\n", rcsid); }
+void        endianio_rcs(void) { printf("%s\n", rcsid); }
 
 void swab2(char *a) {
   char t;
 
-  t = a[0];
+  t    = a[0];
   a[0] = a[1];
   a[1] = t;
 }
@@ -46,16 +46,16 @@ void swab2(char *a) {
 void swab4(char *a) {
   char t;
 
-  t = a[0];
+  t    = a[0];
   a[0] = a[3];
   a[3] = t;
-  t = a[1];
+  t    = a[1];
   a[1] = a[2];
   a[2] = t;
 }
 
 void swab_hdr(struct dsr *phdr) {
-  int i;
+  int    i;
   float *fptr;
 
   swab4((char *)&phdr->hk.sizeof_hdr);
@@ -87,7 +87,7 @@ void swab_hdr(struct dsr *phdr) {
 
 int CPU_is_bigendian() {
   union {
-    float q;
+    float         q;
     unsigned char c[4];
   } fone;
   fone.q = 1.0;
@@ -151,7 +151,7 @@ int eread(float *imgt, int n, int isbig, FILE *fp) {
 }
 
 int ewrite(float *imgt, int n, char control, FILE *fp) {
-  int i, swab_flag;
+  int   i, swab_flag;
   float f;
 
   swab_flag =
@@ -198,9 +198,9 @@ int gread(char *imgt, size_t bytes, int n, FILE *fp, int isbig) {
 }
 
 int gwrite(char *imgt, size_t bytes, int n, FILE *fp, char control) {
-  int i, swab_flag;
+  int   i, swab_flag;
   char *imgb; /* i/o buffer */
-  int status;
+  int   status;
 
   swab_flag =
       ((CPU_is_bigendian() != 0) && (control == 'l' || control == 'L')) ||
@@ -236,10 +236,10 @@ int gwrite(char *imgt, size_t bytes, int n, FILE *fp, char control) {
 
 void load_4dfp_frame(char *fileroot, int *imgdim, int frame, int isbig,
                      float *fimg) {
-  FILE *fp;
+  FILE *      fp;
   static char subr[] = "load_4dfp_frame";
-  char filespc[4 * MAXL];
-  int vdim, i, swab_flag;
+  char        filespc[4 * MAXL];
+  int         vdim, i, swab_flag;
 
   vdim = imgdim[0] * imgdim[1] * imgdim[2];
 
@@ -258,11 +258,11 @@ void load_4dfp_frame(char *fileroot, int *imgdim, int frame, int isbig,
 
 int get_4dfp_dimoe(char *fileroot, int *imgdim, float *voxsiz, int *orient,
                    int *isbig) {
-  IFH ifh;
+  IFH         ifh;
   static char subr[] = "get_4dfp_dimoe";
-  char filespc[4 * MAXL];
-  int i, k, status;
-  char *TCS[3] = {"T", "C", "S"};
+  char        filespc[4 * MAXL];
+  int         i, k, status;
+  char *      TCS[3] = {"T", "C", "S"};
 
   getroot(fileroot, filespc);
   if ((i = strlen(filespc)) + 10 > 4 * MAXL) {
@@ -298,10 +298,10 @@ int get_4dfp_dimoe(char *fileroot, int *imgdim, float *voxsiz, int *orient,
 
 int get_4dfp_dimoe_quiet(char *fileroot, int *imgdim, float *voxsiz,
                          int *orient, int *isbig) {
-  IFH ifh;
+  IFH         ifh;
   static char subr[] = "get_4dfp_dimoe_quiet";
-  char filespc[4 * MAXL];
-  int i, k, status;
+  char        filespc[4 * MAXL];
+  int         i, k, status;
 
   getroot(fileroot, filespc);
   if ((i = strlen(filespc)) + 10 > 4 * MAXL) {
@@ -330,9 +330,9 @@ int get_4dfp_dimoe_quiet(char *fileroot, int *imgdim, float *voxsiz,
 
 #define N 1000000
 void eread_ewrite_test() {
-  FILE *fp;
-  char program[] = "eread_ewrite_test", filespc[] = "/data/petsun23/testx";
-  int i, n = N;
+  FILE * fp;
+  char   program[] = "eread_ewrite_test", filespc[] = "/data/petsun23/testx";
+  int    i, n                                       = N;
   float *x, *y;
 
   printf("CPU_is_bigendian=%d\n", CPU_is_bigendian());
@@ -385,9 +385,9 @@ void eread_ewrite_test() {
 
 /* main (int argc, char *argv[]) {	*/
 void gread_gwrite_test() {
-  FILE *fp;
-  char program[] = "gread_ewrite_test", filespc[] = "/data/petsun23/testx";
-  int i, n = N;
+  FILE * fp;
+  char   program[] = "gread_ewrite_test", filespc[] = "/data/petsun23/testx";
+  int    i, n                                       = N;
   float *x, *y;
 
   printf("CPU_is_bigendian=%d\n", CPU_is_bigendian());

@@ -37,10 +37,10 @@
  *
  */
 
-#include "mrisurf_project.h"
 #include "diag.h"
-#include "timer.h"
 #include "gcsa.h"
+#include "mrisurf_project.h"
+#include "timer.h"
 #include "version.h"
 
 static char vcid[] =
@@ -50,20 +50,20 @@ static char vcid[] =
 #if 0
 static int write_ptable(char *fname, int *ptable, int nparcs) ;
 #endif
-static int find_parc_index(int parc, int *ptable, int nparcs);
-static int add_to_ptable(MRI_SURFACE *mris, int *ptable, int nparcs);
-static int *ptable = nullptr;
-static int nbrs = 2;
-static int navgs = 5;
-static int normalize1_flag = 0;
-static int normalize2_flag = 0;
-static int normalize3_flag = 0;
-static int nparcs = 0;
-static char *ptable_fname = nullptr;
-static COLOR_TABLE *ctab = nullptr;
-static int which_norm = NORM_MEAN;
+static int          find_parc_index(int parc, int *ptable, int nparcs);
+static int          add_to_ptable(MRI_SURFACE *mris, int *ptable, int nparcs);
+static int *        ptable          = nullptr;
+static int          nbrs            = 2;
+static int          navgs           = 5;
+static int          normalize1_flag = 0;
+static int          normalize2_flag = 0;
+static int          normalize3_flag = 0;
+static int          nparcs          = 0;
+static char *       ptable_fname    = nullptr;
+static COLOR_TABLE *ctab            = nullptr;
+static int          which_norm      = NORM_MEAN;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -72,33 +72,33 @@ static void print_usage();
 static void print_help();
 static void print_version();
 
-static char *orig_name = "smoothwm";
+static char *orig_name  = "smoothwm";
 static char *label_name = nullptr;
-static int label_index;
+static int   label_index;
 
-static int ninputs = 1; /* curv and sulc */
-static int icno_priors = 7;
+static int ninputs          = 1; /* curv and sulc */
+static int icno_priors      = 7;
 static int icno_classifiers = 4;
 
 #if 0
 static char *curv_name = "curv" ;
 #endif
 static char *thickness_name = "thickness";
-static char *sulc_name = "sulc";
-static int sulconly = 0;
+static char *sulc_name      = "sulc";
+static int   sulconly       = 0;
 
 static char subjects_dir[STRLEN];
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN], *out_fname, *subject_name, *cp, *hemi;
-  char *canon_surf_name, *annot_name;
-  int ac, nargs, i, train_type;
-  int msec, minutes, seconds, nsubjects, input1_flags;
-  int input2_flags, input3_flags;
-  Timer start;
+  char **      av, fname[STRLEN], *out_fname, *subject_name, *cp, *hemi;
+  char *       canon_surf_name, *annot_name;
+  int          ac, nargs, i, train_type;
+  int          msec, minutes, seconds, nsubjects, input1_flags;
+  int          input2_flags, input3_flags;
+  Timer        start;
   MRI_SURFACE *mris;
-  GCSA *gcsa;
-  int unknown_index = -1;
+  GCSA *       gcsa;
+  int          unknown_index = -1;
 
   nargs = handleVersionOption(argc, argv, "mris_ca_train");
   if (nargs && argc - nargs == 1)
@@ -151,13 +151,13 @@ int main(int argc, char *argv[]) {
   if (argc < 6)
     usage_exit(1);
 
-  hemi = argv[1];
+  hemi            = argv[1];
   canon_surf_name = argv[2];
-  annot_name = argv[3];
-  out_fname = argv[argc - 1];
-  nsubjects = argc - 5;
+  annot_name      = argv[3];
+  out_fname       = argv[argc - 1];
+  nsubjects       = argc - 5;
 
-  gcsa = GCSAalloc(ninputs, icno_priors, icno_classifiers);
+  gcsa         = GCSAalloc(ninputs, icno_priors, icno_classifiers);
   input1_flags = input2_flags = input3_flags = 0;
   if (normalize1_flag)
     input1_flags |= GCSA_NORMALIZE;
@@ -198,8 +198,8 @@ int main(int argc, char *argv[]) {
       MRIScomputeSecondFundamentalForm(mris);
       MRISsaveVertexPositions(mris, ORIGINAL_VERTICES);
       if (label_name) {
-        LABEL *area;
-        int i;
+        LABEL * area;
+        int     i;
         VERTEX *v;
 
         sprintf(fname, "%s/%s/label/%s.%s", subjects_dir, subject_name, hemi,
@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
   gcsa->ptable_fname = ptable_fname;
   GCSAwrite(gcsa, out_fname);
   GCSAfree(&gcsa);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -326,12 +326,12 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
     printf("using %s as subjects directory\n", subjects_dir);
   } else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size=%d\n", nbrs);
   } else if (!stricmp(option, "ORIG")) {
     orig_name = argv[2];
-    nargs = 1;
+    nargs     = 1;
     printf("using %s as original surface\n", orig_name);
   } else if (!stricmp(option, "NORM1")) {
     printf("normalizing input #1 after reading...\n");
@@ -343,9 +343,9 @@ static int get_option(int argc, char *argv[]) {
     printf("normalizing input #3 after reading...\n");
     normalize3_flag = 1;
   } else if (!stricmp(option, "IC")) {
-    icno_priors = atoi(argv[2]);
+    icno_priors      = atoi(argv[2]);
     icno_classifiers = atoi(argv[3]);
-    nargs = 2;
+    nargs            = 2;
     printf("using ico # %d for classifier array, and %d for priors\n",
            icno_classifiers, icno_priors);
   } else if (!stricmp(option, "SULC") || !stricmp(option, "SULCONLY")) {
@@ -355,7 +355,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'L':
       label_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("interpreting inputs as label files for %s "
              "intead of annotations\n",
              label_name);
@@ -366,16 +366,16 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       ptable_fname = argv[2];
-      nargs = 1;
-      ptable = (int *)calloc(MAX_LABELS, sizeof(int));
+      nargs        = 1;
+      ptable       = (int *)calloc(MAX_LABELS, sizeof(int));
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'N':
       ninputs = atoi(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       break;
     case '?':
     case 'U':
@@ -498,14 +498,14 @@ write_ptable(char *fname, int *ptable, int nparcs)
 }
 #endif
 static int add_to_ptable(MRI_SURFACE *mris, int *ptable, int nparcs) {
-  int vno, i;
+  int     vno, i;
   VERTEX *v;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     i = find_parc_index(v->annotation, ptable, nparcs);
     if (i < 0 || i >= nparcs) {
-      i = nparcs++;
+      i         = nparcs++;
       ptable[i] = v->annotation;
     }
   }

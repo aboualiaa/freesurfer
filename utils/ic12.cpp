@@ -48,7 +48,7 @@ MRI_SURFACE *ic12_make_surface(int max_vertices, int max_faces) {
     first_time = 0;
     int vno, fno;
     for (fno = 0; fno < ICO_NFACES; fno++) {
-      vno = ic12_faces[fno].vno[1];
+      vno                    = ic12_faces[fno].vno[1];
       ic12_faces[fno].vno[1] = ic12_faces[fno].vno[2];
       ic12_faces[fno].vno[2] = vno;
     }

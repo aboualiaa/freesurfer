@@ -86,7 +86,7 @@ void fs::Surface<TValueType, VDimension>::AddEdge(int idPoint1, int idPoint2) {
 template <typename TValueType, unsigned int VDimension>
 std::vector<typename fs::Surface<TValueType, VDimension>::PointType>
 fs::Surface<TValueType, VDimension>::GetAdjacentPoints(int idPoint) const {
-  std::vector<PointType> adj;
+  std::vector<PointType>   adj;
   const std::array<int, 2> hola = this->edgePerVertex.at(idPoint);
   adj.push_back(this->GetPoint(edges[hola[0]].indexPoint[1]));
   adj.push_back(this->GetPoint(edges[hola[1]].indexPoint[0]));

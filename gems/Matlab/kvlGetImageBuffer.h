@@ -9,9 +9,9 @@ namespace kvl {
 class GetImageBuffer : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef GetImageBuffer Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef GetImageBuffer                Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -67,8 +67,10 @@ public:
   }
 
 protected:
-  GetImageBuffer()= default;;
-  ~GetImageBuffer() override= default;;
+  GetImageBuffer() = default;
+  ;
+  ~GetImageBuffer() override = default;
+  ;
 
   GetImageBuffer(const Self &); // purposely not implemented
   void operator=(const Self &); // purposely not implemented

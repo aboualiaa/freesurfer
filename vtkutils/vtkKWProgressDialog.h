@@ -27,8 +27,8 @@
 #ifndef vtkKWProgressDialog_h
 #define vtkKWProgressDialog_h
 
-#include "vtkSetGet.h"
 #include "vtkCommand.h"
+#include "vtkSetGet.h"
 
 class vtkObject;
 class vtkKWDialog;
@@ -50,8 +50,8 @@ protected:
   vtkKWProgressDialog();
   virtual ~vtkKWProgressDialog();
 
-  vtkKWApplication *mApplication;
-  vtkKWDialog *mDialog;
+  vtkKWApplication *  mApplication;
+  vtkKWDialog *       mDialog;
   vtkKWProgressGauge *mProgressGauge;
 
   char msWindowTitle[1024];

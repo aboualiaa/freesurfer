@@ -22,27 +22,27 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "utils.h"
-#include "timer.h"
-#include "gca.h"
-#include "mri_conform.h"
-#include "transform.h"
-#include "gcamorph.h"
 #include "cma.h"
-#include "tags.h"
-#include "version.h"
-#include "rfa.h"
+#include "diag.h"
+#include "error.h"
+#include "gca.h"
+#include "gcamorph.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_conform.h"
 #include "mrisegment.h"
+#include "proto.h"
+#include "rfa.h"
+#include "tags.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
 
 static int remove_wmsas_close_to_surface(char **surf_names, int nsurfs,
                                          MRI *mri_labeled, double surface_dist);
@@ -51,78 +51,73 @@ static int postprocess_segmentation_with_aseg(MRI *mri_labeled, MRI *mri_aseg,
 static int postprocess_grow_wmsas(MRI *mri_labeled, MRI *mri_pvals,
                                   float pthresh, MRI *mri_aseg);
 #define MAX_READS 100
-static int nreads = 0 ;
-static char *read_intensity_fname[MAX_READS] ;
-static int avgs = 0 ;
+static int   nreads = 0;
+static char *read_intensity_fname[MAX_READS];
+static int   avgs = 0;
 
-static int wmsa = 0 ;   // apply wmsa postprocessing (using T2/PD data)
-static int nowmsa = 0 ; // remove all wmsa labels from the atlas
+static int wmsa   = 0; // apply wmsa postprocessing (using T2/PD data)
+static int nowmsa = 0; // remove all wmsa labels from the atlas
 
-static double TRs[MAX_GCA_INPUTS] ;
-static double fas[MAX_GCA_INPUTS] ;
-static double TEs[MAX_GCA_INPUTS] ;
-static int nsurfs = 0 ;
-static char *surface_names[MAX_SURFACES] ;
-static double surface_dist = 1 ;
+static double TRs[MAX_GCA_INPUTS];
+static double fas[MAX_GCA_INPUTS];
+static double TEs[MAX_GCA_INPUTS];
+static int    nsurfs = 0;
+static char * surface_names[MAX_SURFACES];
+static double surface_dist = 1;
 
+int distance_to_label(MRI *mri_labeled, int label, int x, int y, int z, int dx,
+                      int dy, int dz, int max_dist);
 
+int        main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
 
-int distance_to_label( MRI *mri_labeled, int label, int x,
-                       int y, int z, int dx, int dy,
-                       int dz, int max_dist );
+static double TR                = -1;
+static double alpha             = -1;
+static double TE                = -1;
+static char * mask_volume_fname = NULL;
 
+const char *Progname;
+static void usage_exit(int code);
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
+static int filter = 0;
 
+static int   conform_flag           = FALSE;
+static int   single_classifier_flag = 0;
+static char *only_nbrs_rf_fname =
+    0; // only pick voxels that are on borders of a wmsa to train
+static GCA * gca;
+static float wmsa_thresh = 0.0;
+static float pthresh     = -1;
+static float wm_thresh   = .8;
+static int   wmsa_whalf  = 3;
+static MRI * relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf,
+                                                  TRANSFORM *transform, GCA *gca,
+                                                  MRI *mri_inputs,
+                                                  MRI *mri_labeled);
+static MRI * label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform,
+                                      GCA *gca, float wm_thresh, MRI *mri_in,
+                                      MRI *mri_labeled, int wmsa_whalf,
+                                      MRI *mri_aseg, MRI **pmri_pvals);
 
-static double TR = -1 ;
-static double alpha = -1 ;
-static double TE = -1 ;
-static char *mask_volume_fname = NULL ;
+static MRI *mri_aseg   = NULL;
+static int  min_voxels = 6; // remove wmsa segments smaller than this
 
-const char *Progname ;
-static void usage_exit(int code) ;
-
-static int filter = 0 ;
-
-static int conform_flag = FALSE ;
-static int single_classifier_flag = 0 ;
-static char *only_nbrs_rf_fname = 0 ;   // only pick voxels that are on borders of a wmsa to train
-static GCA *gca ;
-static float  wmsa_thresh = 0.0 ;
-static float pthresh = -1 ;
-static float wm_thresh = .8 ;
-static int wmsa_whalf = 3 ;
-static MRI *relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform, GCA *gca, 
-						 MRI *mri_inputs, MRI *mri_labeled) ;
-static MRI *label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform, GCA *gca,
-				     float wm_thresh, MRI *mri_in, MRI *mri_labeled, int wmsa_whalf,
-				     MRI *mri_aseg, MRI **pmri_pvals) ;
-
-static MRI *mri_aseg = NULL; 
-static int min_voxels = 6 ; // remove wmsa segments smaller than this
-
-int
-main(int argc, char *argv[])
-{
-  char         **av ;
-  int          ac, nargs, extra = 0 ;
-  char         *in_fname, *out_fname,  *rfa_fname, *xform_fname ;
-  MRI          *mri_inputs, *mri_labeled, *mri_tmp, *mri_pvals ;
-  int          msec, minutes, seconds, ninputs, input ;
-  Timer start ;
-  TRANSFORM     *transform ;
-  RFA          *rfa = NULL ;
-  RANDOM_FOREST *rf = NULL ;  // if single_classifier_flag is true
-
+int main(int argc, char *argv[]) {
+  char **        av;
+  int            ac, nargs, extra = 0;
+  char *         in_fname, *out_fname, *rfa_fname, *xform_fname;
+  MRI *          mri_inputs, *mri_labeled, *mri_tmp, *mri_pvals;
+  int            msec, minutes, seconds, ninputs, input;
+  Timer          start;
+  TRANSFORM *    transform;
+  RFA *          rfa = NULL;
+  RANDOM_FOREST *rf  = NULL; // if single_classifier_flag is true
 
   std::string cmdline = getAllInfo(argc, argv, "mri_rf_long_label");
 
   nargs = handleVersionOption(argc, argv, "mri_rf_long_label");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -145,11 +140,11 @@ main(int argc, char *argv[])
     usage_exit(1);
   }
 
-  in_fname = argv[1];
+  in_fname    = argv[1];
   xform_fname = argv[argc - 3];
-  rfa_fname = argv[argc - 2];
-  out_fname = argv[argc - 1];
-  ninputs = argc - 4;
+  rfa_fname   = argv[argc - 2];
+  out_fname   = argv[argc - 1];
+  ninputs     = argc - 4;
 
   printf("reading %d input volumes...\n", ninputs);
 
@@ -195,7 +190,7 @@ main(int argc, char *argv[])
       MRI *mri_tmp2;
 
       mri_tmp2 = MRIconform(mri_tmp);
-      mri_tmp = mri_tmp2;
+      mri_tmp  = mri_tmp2;
     }
 
     if (input == 0) {
@@ -302,7 +297,7 @@ main(int argc, char *argv[])
     ErrorExit(Gerror, "%s: MRIwrite(%s) failed", Progname, out_fname);
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -315,7 +310,7 @@ main(int argc, char *argv[])
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -353,7 +348,7 @@ static int get_option(int argc, char *argv[]) {
     printf("disabling WMSA labels\n");
   } else if (!stricmp(option, "read_intensities") || !stricmp(option, "ri")) {
     read_intensity_fname[nreads] = argv[2];
-    nargs = 1;
+    nargs                        = 1;
     printf("reading intensity scaling from %s...\n",
            read_intensity_fname[nreads]);
     nreads++;
@@ -371,27 +366,27 @@ static int get_option(int argc, char *argv[]) {
     wmsa = 1;
     printf("relabeling wm and wmsa in postprocessing\n");
   } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "DEBUG_NODE")) {
     Ggca_x = atoi(argv[2]);
     Ggca_y = atoi(argv[3]);
     Ggca_z = atoi(argv[4]);
-    nargs = 3;
+    nargs  = 3;
     printf("debugging node (%d, %d, %d)\n", Ggca_x, Ggca_y, Ggca_z);
   } else if (!stricmp(option, "DEBUG_LABEL")) {
     Ggca_label = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("debugging label %d\n", Ggca_label);
   } else if (!stricmp(option, "TR")) {
-    TR = atof(argv[2]);
+    TR    = atof(argv[2]);
     nargs = 1;
     printf("using TR=%2.1f msec\n", TR);
   } else if (!stricmp(option, "TE")) {
-    TE = atof(argv[2]);
+    TE    = atof(argv[2]);
     nargs = 1;
     printf("using TE=%2.1f msec\n", TE);
   } else if (!stricmp(option, "ALPHA")) {
@@ -399,16 +394,16 @@ static int get_option(int argc, char *argv[]) {
     alpha = RADIANS(atof(argv[2]));
     printf("using alpha=%2.0f degrees\n", DEGREES(alpha));
   } else if (!stricmp(option, "WMSA_WHALF")) {
-    nargs = 1;
+    nargs      = 1;
     wmsa_whalf = atoi(argv[2]);
     printf("only examing voxels that wmsa occurred within %d voxels of\n",
            wmsa_whalf);
   } else if (!stricmp(option, "THRESH")) {
-    nargs = 1;
+    nargs       = 1;
     wmsa_thresh = atof(argv[2]);
     printf("only labeling WMSAs that exceed threshold %2.2f\n", wmsa_thresh);
   } else if (!stricmp(option, "PTHRESH")) {
-    nargs = 1;
+    nargs   = 1;
     pthresh = atof(argv[2]);
     printf("relabeling voxels adjacent to WMSA that have p-vals < %2.3f\n",
            pthresh);
@@ -416,7 +411,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case '1':
       single_classifier_flag = 1;
-      gca = GCAread(argv[2]);
+      gca                    = GCAread(argv[2]);
       if (gca == NULL)
         ErrorExit(ERROR_NOFILE, "%s: could not read gca from %s", argv[2]);
       nargs = 1;
@@ -425,15 +420,15 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       wm_thresh = atof(argv[2]);
-      nargs = 1;
+      nargs     = 1;
       printf("thresholding wm priors at %f to build training set\n", wm_thresh);
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'A':
-      avgs = atoi(argv[2]);
+      avgs  = atoi(argv[2]);
       nargs = 1;
       fprintf(stderr,
               "applying mean filter %d times to conditional densities...\n",
@@ -441,7 +436,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'M':
       mask_volume_fname = argv[2];
-      nargs = 1;
+      nargs             = 1;
       printf("using %s to mask final labeling...\n", mask_volume_fname);
       break;
     case 'F':
@@ -499,13 +494,13 @@ int distance_to_label(MRI *mri_labeled, int label, int x, int y, int z, int dx,
 double compute_conditional_density(MATRIX *m_inv_cov, VECTOR *v_means,
                                    VECTOR *v_vals) {
   double p, dist, det;
-  int ninputs;
+  int    ninputs;
 
   ninputs = m_inv_cov->rows;
 
-  det = MatrixDeterminant(m_inv_cov);
+  det  = MatrixDeterminant(m_inv_cov);
   dist = MatrixMahalanobisDistance(v_means, m_inv_cov, v_vals);
-  p = (1.0 / (pow(2 * M_PI, ninputs / 2.0) * sqrt(1.0 / det))) *
+  p    = (1.0 / (pow(2 * M_PI, ninputs / 2.0) * sqrt(1.0 / det))) *
       exp(-0.5 * dist);
   return (p);
 }
@@ -514,9 +509,9 @@ static MRI *label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform,
                                      GCA *gca, float wm_thresh, MRI *mri_in,
                                      MRI *mri_labeled, int wmsa_whalf,
                                      MRI *mri_aseg, MRI **pmri_pvals) {
-  int x, y, z, wsize, label;
+  int     x, y, z, wsize, label;
   double *feature, xatlas, yatlas, zatlas, pval;
-  MRI *mri_wmsa_possible, *mri_pvals;
+  MRI *   mri_wmsa_possible, *mri_pvals;
 
   wsize = nint(pow((rf->nfeatures - 3) / mri_in->nframes, 1.0 / 3));
   if (mri_labeled == NULL) {
@@ -543,7 +538,7 @@ static MRI *label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform,
 
   if (Gx >= 0) // diagnostics
   {
-    int whalf = (wsize - 1) / 2, n, i;
+    int  whalf = (wsize - 1) / 2, n, i;
     char buf[STRLEN];
 
     rf->feature_names = (char **)calloc(rf->nfeatures, sizeof(char *));
@@ -640,9 +635,9 @@ static MRI *relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf,
                                                  TRANSFORM *transform, GCA *gca,
                                                  MRI *mri_in,
                                                  MRI *mri_labeled) {
-  int x, y, z, wsize, label, non, noff, nunchanged = 0, new_label, total;
+  int     x, y, z, wsize, label, non, noff, nunchanged = 0, new_label, total;
   double *feature, pval;
-  MRI *mri_mask, *mri_orig_labeled;
+  MRI *   mri_mask, *mri_orig_labeled;
 
   wsize = nint(pow((rf->nfeatures - 3) / mri_in->nframes, 1.0 / 3));
   if (mri_labeled == NULL) {
@@ -651,7 +646,7 @@ static MRI *relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf,
     MRIcopyHeader(mri_in, mri_labeled);
   }
   mri_orig_labeled = MRIcopy(mri_labeled, NULL);
-  mri_mask = MRIcopy(mri_labeled, NULL);
+  mri_mask         = MRIcopy(mri_labeled, NULL);
   MRIdilate(mri_mask, mri_mask); // nbrs
 
   feature = (double *)calloc(rf->nfeatures, sizeof(double));
@@ -661,7 +656,7 @@ static MRI *relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf,
 
   if (Gx >= 0) // diagnostics
   {
-    int whalf = (wsize - 1) / 2, n, i;
+    int  whalf = (wsize - 1) / 2, n, i;
     char buf[STRLEN];
 
     rf->feature_names = (char **)calloc(rf->nfeatures, sizeof(char *));
@@ -779,7 +774,7 @@ static int postprocess_segmentation_with_aseg(MRI *mri_labeled, MRI *mri_aseg,
                                               int min_voxels) {
   int x, y, z, aseg_label, in_wmsa_label, out_wmsa_label, l, nchanged = 0;
   MRI_SEGMENTATION *mseg;
-  MRI *mri_closed;
+  MRI *             mri_closed;
 
   for (x = 0; x < mri_aseg->width; x++)
     for (y = 0; y < mri_aseg->height; y++)
@@ -789,7 +784,7 @@ static int postprocess_segmentation_with_aseg(MRI *mri_labeled, MRI *mri_aseg,
         in_wmsa_label = MRIgetVoxVal(mri_labeled, x, y, z, 0);
         if (in_wmsa_label == 0) // not labeled WMSA
           continue;
-        aseg_label = MRIgetVoxVal(mri_aseg, x, y, z, 0);
+        aseg_label     = MRIgetVoxVal(mri_aseg, x, y, z, 0);
         out_wmsa_label = in_wmsa_label;
         if (NOT_TRAINING_LABEL(aseg_label))
           out_wmsa_label = 0;
@@ -824,7 +819,7 @@ static int postprocess_segmentation_with_aseg(MRI *mri_labeled, MRI *mri_aseg,
         MRIsetVoxVal(mri_labeled, x, y, z, 0, out_wmsa_label);
       }
   mri_closed = MRIclose(mri_labeled, NULL);
-  mseg = MRIsegment(mri_labeled, .5, 1000);
+  mseg       = MRIsegment(mri_labeled, .5, 1000);
   MRIfree(&mri_closed);
   nchanged += MRIeraseSmallSegments(mseg, mri_labeled, min_voxels);
   MRIsegmentFree(&mseg);
@@ -833,10 +828,10 @@ static int postprocess_segmentation_with_aseg(MRI *mri_labeled, MRI *mri_aseg,
 }
 
 static int remove_wmsas_close_to_surface(char **surface_names, int nsurfs,
-                                         MRI *mri_labeled,
+                                         MRI *  mri_labeled,
                                          double surface_dist) {
-  MRI *mri_dist, *mri_dist_total;
-  int x, y, z, nchanged, i;
+  MRI *        mri_dist, *mri_dist_total;
+  int          x, y, z, nchanged, i;
   MRI_SURFACE *mris;
 
   for (i = 0; i < nsurfs; i++) {
@@ -880,12 +875,12 @@ static int remove_wmsas_close_to_surface(char **surface_names, int nsurfs,
 
 static int postprocess_grow_wmsas(MRI *mri_labeled, MRI *mri_pvals,
                                   float pthresh, MRI *mri_aseg) {
-  int x, y, z, nchanged, total_changed, label;
+  int   x, y, z, nchanged, total_changed, label;
   float pval;
-  MRI *mri_tmp;
+  MRI * mri_tmp;
 
   total_changed = 0;
-  mri_tmp = MRIcopy(mri_labeled, NULL);
+  mri_tmp       = MRIcopy(mri_labeled, NULL);
   do {
     nchanged = 0;
     for (x = 0; x < mri_pvals->width; x++)

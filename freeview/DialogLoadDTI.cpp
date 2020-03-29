@@ -22,12 +22,12 @@
  *
  */
 #include "DialogLoadDTI.h"
-#include "ui_DialogLoadDTI.h"
 #include "MainWindow.h"
-#include <QMessageBox>
-#include <QFileInfo>
-#include <QFileDialog>
 #include "MyUtils.h"
+#include "ui_DialogLoadDTI.h"
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
 
 DialogLoadDTI::DialogLoadDTI(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogLoadDTI) {

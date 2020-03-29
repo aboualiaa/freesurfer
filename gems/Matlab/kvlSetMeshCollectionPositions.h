@@ -7,9 +7,9 @@ namespace kvl {
 class SetMeshCollectionPositions : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef SetMeshCollectionPositions Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef SetMeshCollectionPositions    Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */

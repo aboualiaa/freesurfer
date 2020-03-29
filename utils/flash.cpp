@@ -23,37 +23,37 @@
  */
 
 #include "flash.h"
-#include <math.h>
 #include "diag.h"
 #include "error.h"
 #include "macros.h"
+#include <math.h>
 
 extern const char *Progname;
 
 #define MAX_FLASH_VOLUMES 50
-#define MIN_T1 10
-#define MAX_T1 10000
-#define T1_STEP_SIZE 5
-#define T1_TO_INDEX(T1) (nint((T1 - MIN_T1) / T1_STEP_SIZE))
+#define MIN_T1            10
+#define MAX_T1            10000
+#define T1_STEP_SIZE      5
+#define T1_TO_INDEX(T1)   (nint((T1 - MIN_T1) / T1_STEP_SIZE))
 
 typedef struct {
   double *flash; /* forward model f(T1,TR,alpha) */
-  double TR;
-  double alpha;
-  double step_size; /* T1 increment between table elements */
-  double min_T1;
-  double max_T1;
-  int size; /* number of elements in flash and norm */
+  double  TR;
+  double  alpha;
+  double  step_size; /* T1 increment between table elements */
+  double  min_T1;
+  double  max_T1;
+  int     size; /* number of elements in flash and norm */
 } FLASH_LOOKUP_TABLE, FLT;
 
-static int build_lookup_table(double tr, double flip_angle, double te,
-                              double min_T1, double max_T1, double step);
-static double lookup_flash_value(double TR, double flip_angle, double PD,
-                                 double T1);
-static FLT *find_lookup_table(double TR, double flip_angle);
-static FLT lookup_tables[MAX_FLASH_VOLUMES];
-static double *norms = nullptr;
-static int ntables = 0;
+static int     build_lookup_table(double tr, double flip_angle, double te,
+                                  double min_T1, double max_T1, double step);
+static double  lookup_flash_value(double TR, double flip_angle, double PD,
+                                  double T1);
+static FLT *   find_lookup_table(double TR, double flip_angle);
+static FLT     lookup_tables[MAX_FLASH_VOLUMES];
+static double *norms   = nullptr;
+static int     ntables = 0;
 
 static double FLASHforwardModelLookup(double T1, double PD, double TR,
                                       double flip_angle);
@@ -62,7 +62,7 @@ double dFlash_dT1(double T1, double PD, double TR, double flip_angle,
                   double TE) {
   double e1, numer, denom;
 
-  e1 = exp(TR / T1);
+  e1    = exp(TR / T1);
   numer = e1 * PD * TR * (cos(flip_angle) - 1) * sin(flip_angle);
   denom = T1 * (e1 - cos(flip_angle));
   denom *= denom;
@@ -75,7 +75,7 @@ double dFlash_dPD(double T1, double PD, double TR, double flip_angle,
                   double TE) {
   double e1, numer, denom;
 
-  e1 = exp(TR / T1);
+  e1    = exp(TR / T1);
   numer = (e1 - 1) * sin(flip_angle);
   denom = e1 - cos(flip_angle);
   if (DZERO(denom))
@@ -90,7 +90,7 @@ double FLASHforwardModel(double T1, double PD, double TR, double flip_angle,
 
   CFA = cos(flip_angle);
   SFA = sin(flip_angle);
-  E1 = exp(-TR / T1);
+  E1  = exp(-TR / T1);
 
   FLASH = PD * SFA;
   if (!DZERO(T1))
@@ -99,7 +99,7 @@ double FLASHforwardModel(double T1, double PD, double TR, double flip_angle,
 }
 MRI *MRIparameterMapsToFlash(MRI *mri_src, MRI *mri_dst, double *TRs,
                              double *TEs, double *FAs, int nflash) {
-  int x, y, z, n;
+  int    x, y, z, n;
   double T1, PD;
   double val;
 
@@ -165,8 +165,8 @@ int compute_T1_PD(int nvolumes, float *image_vals, double *TRs, double *FAs,
     image_vals[i] /= norm_im; /* normalize them */
 
   mid_T1 = (MAX_T1 - MIN_T1) / 2;
-  mid_j = T1_TO_INDEX(mid_T1);
-  range = (MAX_T1 - MIN_T1) / 2;
+  mid_j  = T1_TO_INDEX(mid_T1);
+  range  = (MAX_T1 - MIN_T1) / 2;
 
   /* compute sse for mid T1 */
   mid_norm = norms[mid_j];
@@ -193,8 +193,8 @@ int compute_T1_PD(int nvolumes, float *image_vals, double *TRs, double *FAs,
       upper_T1 = MAX_T1;
     if (lower_T1 < MIN_T1)
       lower_T1 = MIN_T1;
-    upper_j = T1_TO_INDEX(upper_T1);
-    lower_j = T1_TO_INDEX(lower_T1);
+    upper_j    = T1_TO_INDEX(upper_T1);
+    lower_j    = T1_TO_INDEX(lower_T1);
     upper_norm = norms[upper_j];
     lower_norm = norms[lower_j];
     if (FZERO(upper_norm)) {
@@ -221,21 +221,21 @@ int compute_T1_PD(int nvolumes, float *image_vals, double *TRs, double *FAs,
 
     if (lower_sse <= mid_sse && lower_sse <= upper_sse) /* make lower new mid */
     {
-      mid_sse = lower_sse;
-      mid_j = lower_j;
+      mid_sse  = lower_sse;
+      mid_j    = lower_j;
       mid_norm = lower_norm;
-      mid_T1 = lower_T1;
-      best_T1 = lower_T1;
-      best_PD = norm_im / lower_norm;
+      mid_T1   = lower_T1;
+      best_T1  = lower_T1;
+      best_PD  = norm_im / lower_norm;
       // best_sse = lower_sse;
     } else if (upper_sse < mid_sse) /* make upper new mid */
     {
-      mid_sse = upper_sse;
-      mid_j = upper_j;
+      mid_sse  = upper_sse;
+      mid_j    = upper_j;
       mid_norm = upper_norm;
-      mid_T1 = upper_T1;
-      best_T1 = upper_T1;
-      best_PD = norm_im / upper_norm;
+      mid_T1   = upper_T1;
+      best_T1  = upper_T1;
+      best_PD  = norm_im / upper_norm;
       // best_sse = upper_sse;
     }
     if (!std::isfinite(best_PD)) {
@@ -252,7 +252,7 @@ int compute_T1_PD(int nvolumes, float *image_vals, double *TRs, double *FAs,
 
   for (sse = 0.0, i = 0; i < nvolumes; i++) {
     pred_vals[i] = FLASHforwardModelLookup(best_T1, best_PD, TRs[i], FAs[i]);
-    error = (pred_vals[i] - image_vals[i]);
+    error        = (pred_vals[i] - image_vals[i]);
     sse += (error * error);
   }
 
@@ -270,8 +270,8 @@ static double FLASHforwardModelLookup(double T1, double PD, double TR,
 
 static int build_lookup_table(double tr, double flip_angle, double te,
                               double min_T1, double max_T1, double step) {
-  FLT *flt;
-  int i;
+  FLT *  flt;
+  int    i;
   double T1;
 
   flt = find_lookup_table(tr, flip_angle);
@@ -282,12 +282,12 @@ static int build_lookup_table(double tr, double flip_angle, double te,
     ErrorExit(ERROR_NOMEMORY, "%s: MAX_FLASH_VOLUMES %d exceeded", Progname,
               MAX_FLASH_VOLUMES);
 
-  flt = &lookup_tables[ntables++];
-  flt->TR = tr;
-  flt->alpha = flip_angle;
+  flt            = &lookup_tables[ntables++];
+  flt->TR        = tr;
+  flt->alpha     = flip_angle;
   flt->step_size = step;
 
-  flt->size = (int)((max_T1 - min_T1) / step) + 1;
+  flt->size  = (int)((max_T1 - min_T1) / step) + 1;
   flt->flash = (double *)calloc(flt->size, sizeof(*flt->flash));
   if (!flt->flash)
     ErrorExit(ERROR_NOMEMORY, "%s: could not allocated %dth lookup table",
@@ -324,8 +324,8 @@ int FlashBuildLookupTables(int nvolumes, double *TRs, double *FAs,
 }
 static double lookup_flash_value(double TR, double flip_angle, double PD,
                                  double T1) {
-  int index;
-  FLT *flt;
+  int    index;
+  FLT *  flt;
   double FLASH;
 
   flt = find_lookup_table(TR, flip_angle);
@@ -348,7 +348,7 @@ double FLASHforwardModelT2star(double T1, double PD, double T2star, double TR,
 
   CFA = cos(flip_angle);
   SFA = sin(flip_angle);
-  E1 = exp(-TR / T1);
+  E1  = exp(-TR / T1);
 
   FLASH = PD * SFA;
   if (!DZERO(T1))

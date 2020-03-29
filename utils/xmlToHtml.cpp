@@ -39,12 +39,12 @@ void printName(xmlNodePtr cur, FILE *f);
 void replaceUnderscore(char *c);
 void printContents(xmlDocPtr doc, xmlNodePtr cur, FILE *f);
 void printTableContents(xmlDocPtr doc, xmlNodePtr cur, FILE *f);
-int tagNameIs(char *c, xmlNodePtr cur);
-int wrdLen(char *c);
+int  tagNameIs(char *c, xmlNodePtr cur);
+int  wrdLen(char *c);
 
 //-------------------------------------------------------------------
 int main(int argc, char *argv[]) {
-  xmlDocPtr doc;
+  xmlDocPtr  doc;
   xmlNodePtr cur;
 
   // Checks for the .xml file name

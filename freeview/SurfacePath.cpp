@@ -1,21 +1,21 @@
 #include "SurfacePath.h"
-#include "vtkRenderer.h"
-#include "vtkActor2D.h"
-#include "vtkProperty.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkPolyData.h"
-#include "MainWindow.h"
-#include "RenderView3D.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkBox.h"
-#include "vtkMath.h"
-#include "MyUtils.h"
-#include "LayerSurface.h"
-#include "LayerPropertySurface.h"
-#include <QFile>
 #include "FSSurface.h"
+#include "LayerPropertySurface.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "RenderView3D.h"
+#include "vtkActor2D.h"
+#include "vtkBox.h"
+#include "vtkCellArray.h"
+#include "vtkMath.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkRenderer.h"
 #include <QDebug>
+#include <QFile>
 
 SurfacePath::SurfacePath(LayerSurface *owner)
     : QObject(owner), m_bPathMade(false), m_bClosed(false),
@@ -29,7 +29,7 @@ SurfacePath::SurfacePath(LayerSurface *owner)
   m_actorOutline->GetProperty()->SetLineWidth(4 * ratio);
   m_actorOutline->GetProperty()->SetPointSize(8 * ratio);
   m_points = vtkSmartPointer<vtkPoints>::New();
-  m_mris = owner;
+  m_mris   = owner;
   m_actorOutline->SetPosition(m_mris->GetProperty()->GetPosition());
   SetColor(Qt::yellow);
 }
@@ -62,7 +62,7 @@ void SurfacePath::RebuildActor() {
       lines->InsertCellPoint(0);
     polydata->SetLines(lines);
   } else {
-    vtkIdType n = 0;
+    vtkIdType                     n     = 0;
     vtkSmartPointer<vtkCellArray> verts = vtkSmartPointer<vtkCellArray>::New();
     for (int i = 0; i < m_points->GetNumberOfPoints(); i++) {
       verts->InsertNextCell(1, &n);
@@ -169,17 +169,14 @@ bool SurfacePath::RemovePoint(int nVert) {
   return false;
 }
 
-void SurfacePath::RemoveLastPoint()
-{
-  if (!m_listVertices.isEmpty())
-  {
+void SurfacePath::RemoveLastPoint() {
+  if (!m_listVertices.isEmpty()) {
     m_listVertices.removeLast();
     Update();
   }
 }
 
-bool SurfacePath::RemovePoint( double* pos )
-{
+bool SurfacePath::RemovePoint(double *pos) {
   int nVert = m_mris->GetVertexIndexAtTarget(pos, NULL);
   return RemovePoint(nVert);
 }
@@ -206,45 +203,45 @@ bool find_path(MRIS *mris, int *vert_vno, int num_vno, int max_path_length,
   if (num_vno < 2)
     return false;
 
-  int cur_vert_vno;
-  int src_vno;
-  int dest_vno;
-  int vno;
-  char *check;
-  float *dist;
-  int *pred;
-  char done;
-  VERTEX *v;
+  int              cur_vert_vno;
+  int              src_vno;
+  int              dest_vno;
+  int              vno;
+  char *           check;
+  float *          dist;
+  int *            pred;
+  char             done;
+  VERTEX *         v;
   VERTEX_TOPOLOGY *vt;
-  VERTEX *u;
+  VERTEX *         u;
   VERTEX_TOPOLOGY *ut;
-  float closest_dist;
-  int closest_vno;
-  int neighbor;
-  int neighbor_vno;
-  float dist_uv;
-  int path_vno;
-  int num_path = 0;
-  int num_checked;
-  float vu_x, vu_y, vu_z;
+  float            closest_dist;
+  int              closest_vno;
+  int              neighbor;
+  int              neighbor_vno;
+  float            dist_uv;
+  int              path_vno;
+  int              num_path = 0;
+  int              num_checked;
+  float            vu_x, vu_y, vu_z;
 
-  dist = (float *)calloc(mris->nvertices, sizeof(float));
-  pred = (int *)calloc(mris->nvertices, sizeof(int));
-  check = (char *)calloc(mris->nvertices, sizeof(char));
-  num_path = 0;
-  num_checked = 0;
+  dist           = (float *)calloc(mris->nvertices, sizeof(float));
+  pred           = (int *)calloc(mris->nvertices, sizeof(int));
+  check          = (char *)calloc(mris->nvertices, sizeof(char));
+  num_path       = 0;
+  num_checked    = 0;
   (*path_length) = 0;
 
   for (cur_vert_vno = 0; cur_vert_vno < num_vno - 1; cur_vert_vno++) {
     /* clear everything */
     for (vno = 0; vno < mris->nvertices; vno++) {
-      dist[vno] = 999999;
-      pred[vno] = -1;
+      dist[vno]  = 999999;
+      pred[vno]  = -1;
       check[vno] = FALSE;
     }
 
     /* Set src and dest */
-    src_vno = vert_vno[cur_vert_vno + 1];
+    src_vno  = vert_vno[cur_vert_vno + 1];
     dest_vno = vert_vno[cur_vert_vno];
 
     /* make sure both are in range. */
@@ -256,23 +253,23 @@ bool find_path(MRIS *mris, int *vert_vno, int num_vno, int max_path_length,
       continue;
 
     /* pull the src vertex in. */
-    dist[src_vno] = 0;
-    pred[src_vno] = vno;
+    dist[src_vno]  = 0;
+    pred[src_vno]  = vno;
     check[src_vno] = TRUE;
 
     done = FALSE;
     while (!done) {
       /* find the vertex with the shortest edge. */
       closest_dist = 999999;
-      closest_vno = -1;
+      closest_vno  = -1;
       for (vno = 0; vno < mris->nvertices; vno++)
         if (check[vno])
           if (dist[vno] < closest_dist) {
             closest_dist = dist[vno];
-            closest_vno = vno;
+            closest_vno  = vno;
           }
-      v = &(mris->vertices[closest_vno]);
-      vt = &(mris->vertices_topology[closest_vno]);
+      v                  = &(mris->vertices[closest_vno]);
+      vt                 = &(mris->vertices_topology[closest_vno]);
       check[closest_vno] = FALSE;
 
       /* if this is the dest node, we're done. */
@@ -282,7 +279,7 @@ bool find_path(MRIS *mris, int *vert_vno, int num_vno, int max_path_length,
         /* relax its neighbors. */
         for (neighbor = 0; neighbor < vt->vnum; neighbor++) {
           neighbor_vno = vt->v[neighbor];
-          u = &(mris->vertices[neighbor_vno]);
+          u            = &(mris->vertices[neighbor_vno]);
 
           /* calc the vector from u to v. */
           vu_x = u->x - v->x;
@@ -304,8 +301,8 @@ bool find_path(MRIS *mris, int *vert_vno, int num_vno, int max_path_length,
           /* if this is a new shortest path, update the predecessor,
              weight, and add it to the list of ones to check next. */
           if (dist_uv + dist[closest_vno] < dist[neighbor_vno]) {
-            pred[neighbor_vno] = closest_vno;
-            dist[neighbor_vno] = dist_uv + dist[closest_vno];
+            pred[neighbor_vno]  = closest_vno;
+            dist[neighbor_vno]  = dist_uv + dist[closest_vno];
             check[neighbor_vno] = TRUE;
           }
         }
@@ -316,11 +313,11 @@ bool find_path(MRIS *mris, int *vert_vno, int num_vno, int max_path_length,
     }
 
     /* add the predecessors from the dest to the src to the path. */
-    path_vno = dest_vno;
+    path_vno               = dest_vno;
     path[(*path_length)++] = dest_vno;
     while (pred[path_vno] != src_vno && (*path_length) < max_path_length) {
       path[(*path_length)++] = pred[path_vno];
-      path_vno = pred[path_vno];
+      path_vno               = pred[path_vno];
     }
   }
   free(dist);
@@ -333,13 +330,13 @@ bool find_path(MRIS *mris, int *vert_vno, int num_vno, int max_path_length,
 QVector<int> SurfacePath::DoMakePath(const QVector<int> &verts) {
   QVector<int> verts_out;
 
-  int nverts = verts.size();
+  int  nverts = verts.size();
   int *pverts = new int[nverts];
   for (int i = 0; i < nverts; i++)
     pverts[i] = verts[i];
-  MRIS *mris = m_mris->GetSourceSurface()->GetMRIS();
-  int *path = new int[mris->nvertices];
-  int path_length = 0;
+  MRIS *mris        = m_mris->GetSourceSurface()->GetMRIS();
+  int * path        = new int[mris->nvertices];
+  int   path_length = 0;
   if (find_path(mris, pverts, nverts, mris->nvertices, path, &path_length)) {
     for (int i = 0; i < path_length; i++)
       verts_out << path[i];
@@ -358,8 +355,8 @@ bool SurfacePath::MakePath(bool bClosed) {
   verts = DoMakePath(verts);
   if (!verts.isEmpty()) {
     m_listVertices = verts;
-    m_bClosed = bClosed;
-    m_bPathMade = true;
+    m_bClosed      = bClosed;
+    m_bPathMade    = true;
     Update();
     emit PathMade();
     return true;
@@ -378,8 +375,8 @@ bool SurfacePath::MakeCutLine(bool bClosed) {
   verts = DoMakePath(verts);
   if (!verts.isEmpty()) {
     m_listVertices = verts;
-    m_bClosed = bClosed;
-    m_bPathMade = true;
+    m_bClosed      = bClosed;
+    m_bPathMade    = true;
     m_bCutLineMade = true;
     Update();
     emit CutLineMade();

@@ -22,9 +22,9 @@
  *
  */
 
-#include <iostream>
-#include <iomanip>
 #include <cstdlib>
+#include <iomanip>
+#include <iostream>
 
 extern "C" {
 
@@ -33,8 +33,6 @@ extern "C" {
 
 const char *Progname = "testcras";
 }
-
-using namespace std;
 
 int PrettyMatrixPrint(MATRIX *mat) {
   int row;
@@ -109,24 +107,24 @@ void printInfo(MRI *mri) {
 
 int main(int argc, char *argv[]) {
   if (argc <= 1) {
-    cout << "Usage: testcras srcvolname" << endl;
+    std::cout << "Usage: testcras srcvolname" << std::endl;
     return -1;
   }
   MRI *src = MRIread(argv[1]);
   if (!src) {
-    cerr << "could not load the volume" << endl;
+    std::cerr << "could not load the volume" << std::endl;
     return -1;
   }
 
   MRI *dst = MRIreduce(src, 0);
 
-  cout << "Src volume info: " << endl;
+  std::cout << "Src volume info: " << std::endl;
   printInfo(src);
-  cout << "\nDst volume info: " << endl;
+  std::cout << "\nDst volume info: " << std::endl;
   printInfo(dst);
 
   if (argc == 3) {
-    cout << "writing dst volume as " << argv[2] << endl;
+    std::cout << "writing dst volume as " << argv[2] << std::endl;
     MRIwrite(dst, argv[2]);
   }
   MRIfree(&src);

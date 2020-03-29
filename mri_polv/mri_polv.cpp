@@ -28,29 +28,29 @@
 #include "mri.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 static void print_help();
-static int get_option(char *argv[]);
+static int  get_option(char *argv[]);
 
 const char *Progname;
 
 #define WINDOW_SIZE 5
 
-static int verbose = 1;
+static int verbose     = 1;
 static int window_size = WINDOW_SIZE;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac;
-  int nargs;
-  MRI *mri_src;
-  MRI *mri_dst = nullptr;
-  char *in_fname;
-  char *out_fname;
+  int    ac;
+  int    nargs;
+  MRI *  mri_src;
+  MRI *  mri_dst = nullptr;
+  char * in_fname;
+  char * out_fname;
 
   nargs = handleVersionOption(argc, argv, "mri_polv");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
   Progname = argv[0];
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

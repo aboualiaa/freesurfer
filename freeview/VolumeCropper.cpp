@@ -27,19 +27,19 @@
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
 #include "RenderView2D.h"
-#include <vtkBox.h>
-#include <vtkCubeSource.h>
 #include <vtkActor.h>
-#include <vtkPolyData.h>
-#include <vtkPolyDataMapper.h>
+#include <vtkBox.h>
 #include <vtkClipPolyData.h>
-#include <vtkImageData.h>
-#include <vtkRenderer.h>
-#include <vtkProperty.h>
-#include <vtkSphereSource.h>
+#include <vtkCubeSource.h>
 #include <vtkImageActor.h>
+#include <vtkImageData.h>
 #include <vtkMath.h>
 #include <vtkPlaneSource.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkSphereSource.h>
 
 VolumeCropper::VolumeCropper(QObject *parent)
     : QObject(parent), m_mri(NULL), m_bEnabled(false), m_nActivePlane(-1) {
@@ -98,7 +98,7 @@ VolumeCropper::VolumeCropper(QObject *parent)
   }
 
   m_boxSource = vtkSmartPointer<vtkCubeSource>::New();
-  mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  mapper      = vtkSmartPointer<vtkPolyDataMapper>::New();
   mapper->SetInputConnection(m_boxSource->GetOutputPort());
   m_actorBox->SetMapper(mapper);
   mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -249,9 +249,9 @@ void VolumeCropper::UpdateProps() {
 }
 
 void VolumeCropper::UpdateExtent() {
-  vtkImageData *image = m_mri->GetImageData();
-  double *orig = image->GetOrigin();
-  double *voxelsize = image->GetSpacing();
+  vtkImageData *image     = m_mri->GetImageData();
+  double *      orig      = image->GetOrigin();
+  double *      voxelsize = image->GetSpacing();
   for (int i = 0; i < 6; i++) {
     m_extent[i] = (int)((m_bounds[i] - orig[i / 2]) / voxelsize[i / 2] + 0.5);
   }
@@ -309,9 +309,9 @@ bool VolumeCropper::PickActiveBound2D(RenderView2D *view, int x, int y) {
 
   double pt[3];
   view->ScreenToWorld(x, y, 0, pt[0], pt[1], pt[2]);
-  pt[nPlane] = (m_bounds[nPlane * 2] + m_bounds[nPlane * 2 + 1]) / 2;
+  pt[nPlane]  = (m_bounds[nPlane * 2] + m_bounds[nPlane * 2 + 1]) / 2;
   double dist = 1e10;
-  int n = -1;
+  int    n    = -1;
   for (int i = 0; i < 6; i++) {
     if (i / 2 != nPlane && fabs(m_bounds[i] - pt[i / 2]) < dist) {
       int m = 0;
@@ -322,13 +322,13 @@ bool VolumeCropper::PickActiveBound2D(RenderView2D *view, int x, int y) {
       }
       if (pt[m] <= m_bounds[m * 2 + 1] && pt[m] >= m_bounds[m * 2]) {
         dist = fabs(m_bounds[i] - pt[i / 2]);
-        n = i;
+        n    = i;
       }
     }
   }
 
   int nOldActivePlane = m_nActivePlane;
-  int nTolerance = 5; // in pixels
+  int nTolerance      = 5; // in pixels
   if (n >= 0) {
     for (int i = 0; i < 3; i++) {
       pt[i] = m_bounds[i * 2];
@@ -370,13 +370,13 @@ void VolumeCropper::MoveActiveBound(RenderView *view, int nx, int ny) {
 
   double dMaxBounds[6];
   m_mri->GetDisplayBounds(dMaxBounds);
-  int x1, y1, x2, y2;
+  int    x1, y1, x2, y2;
   double pt1[3], pt2[3];
   for (int i = 0; i < 3; i++) {
     pt1[i] = (dMaxBounds[i * 2] + dMaxBounds[i * 2 + 1]) / 2;
     pt2[i] = pt1[i];
   }
-  int n = m_nActivePlane / 2;
+  int n  = m_nActivePlane / 2;
   pt1[n] = dMaxBounds[m_nActivePlane];
   if (m_nActivePlane % 2 == 0) {
     pt2[n] = dMaxBounds[m_nActivePlane + 1];
@@ -452,9 +452,9 @@ void VolumeCropper::SetExtent(int nComp, int nValue) {
     m_extent[nComp] = m_extent[nComp - 1];
   }
 
-  vtkImageData *image = m_mri->GetImageData();
-  double *orig = image->GetOrigin();
-  double *voxelsize = image->GetSpacing();
+  vtkImageData *image     = m_mri->GetImageData();
+  double *      orig      = image->GetOrigin();
+  double *      voxelsize = image->GetSpacing();
   m_bounds[nComp] = m_extent[nComp] * voxelsize[nComp / 2] - orig[nComp / 2];
 
   m_mri->SetCroppingBounds(m_bounds);

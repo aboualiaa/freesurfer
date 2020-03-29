@@ -34,20 +34,20 @@
  * specifying its i_to_r; especially when need to compare multiple volumes
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
 #include "mri.h"
 #include "proto.h"
 #include "transform.h"
 #include "version.h"
-#define MYFZERO(f) (fabs(f) < 0.0001F)
+#define MYFZERO(f)     (fabs(f) < 0.0001F)
 #define SAMPLE_BSPLINE 5
 //#define DBL_EPSILON 1e-10
 
@@ -55,30 +55,30 @@ static char vcid[] =
     "$Id: mri_transform_to_COR.c,v 1.9 2016/02/27 20:38:29 nicks Exp $";
 
 LTA *ltaReadFileEx(const char *fname);
-int MYvg_isEqual(const VOL_GEOM *vg1, const VOL_GEOM *vg2);
+int  MYvg_isEqual(const VOL_GEOM *vg1, const VOL_GEOM *vg2);
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
-static void usage_exit(int);
-static void print_version(void);
-static int debug_flag = 0;
-static int sinchalfwindow = 6;
-static int SplineDegree = 3;
-const char *Progname;
+static int   get_option(int argc, char *argv[]);
+static void  usage_exit(int);
+static void  print_version(void);
+static int   debug_flag     = 0;
+static int   sinchalfwindow = 6;
+static int   SplineDegree   = 3;
+const char * Progname;
 static char *out_like_fname = NULL;
-static int invert_flag = 0;
+static int   invert_flag    = 0;
 // static int InterpMethod = SAMPLE_BSPLINE;
-static int InterpMethod = SAMPLE_TRILINEAR;
+static int   InterpMethod    = SAMPLE_TRILINEAR;
 static char *transform_fname = NULL;
-static int transform_flag = 0;
-static float scale = 1.0;
+static int   transform_flag  = 0;
+static float scale           = 1.0;
 // static int out_type = 3; /* MRI_FLOAT */
-static int out_type = 0; /* MRI_COR */
-static int noscale = 0;
+static int out_type  = 0; /* MRI_COR */
+static int noscale   = 0;
 static int autoscale = 0; /* automatically scale histogram peak to 110 */
 
-float thred_low = 0.0;
+float thred_low  = 0.0;
 float thred_high = 1.0;
 
 MRI *lta_src = NULL;
@@ -88,7 +88,7 @@ double InterpolatedValue(MRI *Bcoeff, /* input B-spline array of coefficients */
                          double x,    /* x coordinate where to interpolate */
                          double y,    /* y coordinate where to interpolate */
                          double z,    /* z coordinate where to interpolate */
-                         long SplineDegree /* degree of the spline model */
+                         long   SplineDegree /* degree of the spline model */
 );
 
 int SamplesToCoefficients(MRI *mri_vol,     /* in-place processing */
@@ -100,19 +100,19 @@ MRI *MRIlinearTransformInterpBSpline(MRI *mri_src, MRI *mri_dst, MATRIX *mA,
 
 int main(int argc, char *argv[]) {
   char **av, *in_vol, *out_vol;
-  int ac, nargs;
+  int    ac, nargs;
 
-  MRI *mri_in, *mri_out, *mri_tmp;
-  LTA *lta = 0;
-  MATRIX *i_to_r_src = 0; /* src geometry of the input LTA */
-  MATRIX *V_to_V = 0;     /* Final voxel-to-voxel transform */
-  MATRIX *r_to_i_dst = 0; /* dst geometry of the input LTA */
-  MATRIX *m_tmp = 0;
-  MATRIX *i_to_r_reg = 0; /* i_to_r of the volume after registration */
-  MATRIX *r_to_i_out = 0; /* r_to_i of the final output volume */
+  MRI *    mri_in, *mri_out, *mri_tmp;
+  LTA *    lta        = 0;
+  MATRIX * i_to_r_src = 0; /* src geometry of the input LTA */
+  MATRIX * V_to_V     = 0; /* Final voxel-to-voxel transform */
+  MATRIX * r_to_i_dst = 0; /* dst geometry of the input LTA */
+  MATRIX * m_tmp      = 0;
+  MATRIX * i_to_r_reg = 0; /* i_to_r of the volume after registration */
+  MATRIX * r_to_i_out = 0; /* r_to_i of the final output volume */
   VOL_GEOM vgm_in;
-  int x, y, z;
-  double maxV, minV, value;
+  int      x, y, z;
+  double   maxV, minV, value;
   //  MATRIX *i_to_r, *r_to_i;
 
   nargs = handleVersionOption(argc, argv, "mri_transform_to_COR");
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
   if (argc < 3)
     usage_exit(0);
 
-  in_vol = argv[1];
+  in_vol  = argv[1];
   out_vol = argv[2];
 
   printf("reading volume from %s...\n", in_vol);
@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
               ERROR_BADFILE,
               "%s: failed to extract volume geometries from input LTA file",
               Progname);
-        m_tmp = MatrixMultiply(lta->xforms[0].m_L, i_to_r_src, NULL);
+        m_tmp  = MatrixMultiply(lta->xforms[0].m_L, i_to_r_src, NULL);
         V_to_V = MatrixMultiply(r_to_i_dst, m_tmp, NULL);
         MatrixFree(&m_tmp);
 
@@ -336,7 +336,7 @@ int main(int argc, char *argv[]) {
 
   } else {
     /* No registration transform need be applied */
-    V_to_V = MatrixIdentity(4, NULL);
+    V_to_V     = MatrixIdentity(4, NULL);
     i_to_r_reg = extract_i_to_r(mri_in);
     if (!i_to_r_reg)
       ErrorExit(ERROR_BADFILE, "%s: failed to extract i_to_r from input volume",
@@ -383,19 +383,19 @@ int main(int argc, char *argv[]) {
     mri_out->imnr0 = 1;   /* what's this? */
     mri_out->imnr1 = 256; /* what's this? */
     mri_out->thick = 1.0;
-    mri_out->ps = 1.0; /* what's this? */
+    mri_out->ps    = 1.0; /* what's this? */
     mri_out->xsize = mri_out->ysize = mri_out->zsize = 1.0;
     mri_out->xstart = mri_out->ystart = mri_out->zstart = -128.0;
     mri_out->xend = mri_out->yend = mri_out->zend = 128.0;
-    mri_out->x_r = -1;
-    mri_out->y_r = 0;
-    mri_out->z_r = 0;
-    mri_out->x_a = 0;
-    mri_out->y_a = 0;
-    mri_out->z_a = 1;
-    mri_out->x_s = 0;
-    mri_out->y_s = -1;
-    mri_out->z_s = 0;
+    mri_out->x_r                                  = -1;
+    mri_out->y_r                                  = 0;
+    mri_out->z_r                                  = 0;
+    mri_out->x_a                                  = 0;
+    mri_out->y_a                                  = 0;
+    mri_out->z_a                                  = 1;
+    mri_out->x_s                                  = 0;
+    mri_out->y_s                                  = -1;
+    mri_out->z_s                                  = 0;
 
     /* In this case, the RAS itself is not fully determined, i.e., c_ras.
      * It's quite arbitrary, different values just change the final
@@ -433,7 +433,7 @@ int main(int argc, char *argv[]) {
   /* Compute the final input-to-output VOX_to_VOX transformation matrix */
   r_to_i_out = extract_r_to_i(mri_out);
 
-  m_tmp = MatrixMultiply(r_to_i_out, i_to_r_reg, NULL);
+  m_tmp  = MatrixMultiply(r_to_i_out, i_to_r_reg, NULL);
   V_to_V = MatrixMultiply(m_tmp, V_to_V, V_to_V);
   MatrixFree(&m_tmp);
 
@@ -466,15 +466,15 @@ int main(int argc, char *argv[]) {
 
     /* compute histogram of output volume */
     HISTOGRAM *h, *hsmooth;
-    float fmin, fmax, val, peak, smooth_peak;
-    int i, nbins, bin;
+    float      fmin, fmax, val, peak, smooth_peak;
+    int        i, nbins, bin;
 
     fmin = minV;
     fmax = maxV;
     if (fmin < 0)
       fmin = 0;
-    nbins = 256;
-    h = HISTOalloc(nbins);
+    nbins   = 256;
+    h       = HISTOalloc(nbins);
     hsmooth = HISTOcopy(h, NULL);
     HISTOclear(h, h);
     h->bin_size = (fmax - fmin) / 255.0;
@@ -523,7 +523,7 @@ int main(int argc, char *argv[]) {
     for (z = 0; z < mri_out->depth; z++)
       for (y = 0; y < mri_out->height; y++)
         for (x = 0; x < mri_out->width; x++) {
-          val = MRIFvox(mri_out, x, y, z);
+          val                       = MRIFvox(mri_out, x, y, z);
           MRIFvox(mri_out, x, y, z) = val * scale;
         }
   }
@@ -591,16 +591,16 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "scaling")) {
     scale = atof(argv[2]);
@@ -608,11 +608,11 @@ static int get_option(int argc, char *argv[]) {
     printf("scale input by %g\n", scale);
   } else if (!stricmp(option, "low")) {
     thred_low = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("Lower threshold for histogram scaling is %g\n", thred_low);
   } else if (!stricmp(option, "high")) {
     thred_high = atof(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("Higher threshold for histogram scaling is %g\n", thred_high);
   } else if (!stricmp(option, "noscale")) {
     noscale = 1;
@@ -622,16 +622,16 @@ static int get_option(int argc, char *argv[]) {
     printf("automatically scale output volume histo peak to 110 \n");
   } else if (!stricmp(option, "out_type")) {
     out_type = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("Output type is %d\n", out_type);
   } else if (!stricmp(option, "out_like") || !stricmp(option, "like")) {
     out_like_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("Shape the output like the volume in file %s\n", out_like_fname);
   } else if (!stricmp(option, "transform") || !stricmp(option, "at")) {
     transform_fname = argv[2];
-    transform_flag = 1;
-    nargs = 1;
+    transform_flag  = 1;
+    nargs           = 1;
     printf("Apply transformation specified by file %s\n", transform_fname);
   } else if (!stricmp(option, "lta_src") || !stricmp(option, "src")) {
     fprintf(stderr,
@@ -656,9 +656,9 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "invert_transform") || !stricmp(option, "ait")) {
     transform_fname = argv[2];
-    transform_flag = 1;
-    invert_flag = 1;
-    nargs = 1;
+    transform_flag  = 1;
+    invert_flag     = 1;
+    nargs           = 1;
     printf("Apply inversely the transformation specified by file %s\n",
            transform_fname);
   }
@@ -685,7 +685,7 @@ static int get_option(int argc, char *argv[]) {
         printf("using sinc interpolation (default windowwidth is 6)\n");
       } else {
         sinchalfwindow = atoi(argv[3]);
-        nargs = 2;
+        nargs          = 2;
         printf("using sinc interpolation with windowwidth of %d\n",
                2 * sinchalfwindow);
       }
@@ -696,7 +696,7 @@ static int get_option(int argc, char *argv[]) {
         printf("using BSPline interpolation (default Bspline degree is 3)\n");
       } else {
         SplineDegree = atoi(argv[3]);
-        nargs = 2;
+        nargs        = 2;
         printf("using BSpline interpolation with degree of %d\n", SplineDegree);
       }
     }
@@ -708,7 +708,7 @@ static int get_option(int argc, char *argv[]) {
       printf("using sinc interpolation (default windowwidth is 6)\n");
     } else {
       sinchalfwindow = atoi(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       printf("using sinc interpolation with windowwidth of %d\n",
              2 * sinchalfwindow);
     }
@@ -720,13 +720,13 @@ static int get_option(int argc, char *argv[]) {
       printf("using cubic-bspline interpolation \n");
     } else {
       SplineDegree = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       printf("using B-spline interpolation with degree of %d\n", SplineDegree);
     }
   } else if (!stricmp(option, "sinchalfwindow") || !stricmp(option, "hw")) {
-    InterpMethod = SAMPLE_SINC;
+    InterpMethod   = SAMPLE_SINC;
     sinchalfwindow = atoi(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("using sinc interpolation with windowwidth of %d\n",
            2 * sinchalfwindow);
   } else if (!stricmp(option, "trilinear")) {
@@ -789,11 +789,11 @@ static void print_version(void) {
  */
 MRI *MRIlinearTransformInterpBSpline(MRI *mri_src, MRI *mri_dst, MATRIX *mA,
                                      int splinedegree) {
-  int y1, y2, y3, width, height, depth;
+  int     y1, y2, y3, width, height, depth;
   VECTOR *v_X, *v_Y; /* original and transformed coordinate systems */
   MATRIX *mAinv;     /* inverse of mA */
-  double val, x1, x2, x3;
-  MRI *mri_Bcoeff;
+  double  val, x1, x2, x3;
+  MRI *   mri_Bcoeff;
 
   mAinv = MatrixInverse(mA, NULL); /* will sample from dst back to src */
   if (!mAinv)
@@ -818,11 +818,11 @@ MRI *MRIlinearTransformInterpBSpline(MRI *mri_src, MRI *mri_dst, MATRIX *mA,
 
   printf("Direct B-spline Transform Finished. \n");
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  v_X = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
-  v_Y = VectorAlloc(4, MATRIX_REAL); /* transformed (dst) coordinates */
+  depth  = mri_src->depth;
+  v_X    = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
+  v_Y    = VectorAlloc(4, MATRIX_REAL); /* transformed (dst) coordinates */
 
   v_Y->rptr[4][1] = 1.0f;
   for (y3 = 0; y3 < mri_dst->depth; y3++) {
@@ -880,11 +880,11 @@ MRI *MRIlinearTransformInterpBSpline(MRI *mri_src, MRI *mri_dst, MATRIX *mA,
 }
 
 LTA *ltaReadFileEx(const char *fname) {
-  FILE *fp;
+  FILE *            fp;
   LINEAR_TRANSFORM *lt;
-  int i, nxforms, type;
-  char line[STRLEN], *cp;
-  LTA *lta;
+  int               i, nxforms, type;
+  char              line[STRLEN], *cp;
+  LTA *             lta;
 
   fp = fopen(fname, "r");
   if (fp == NULL)
@@ -899,7 +899,7 @@ LTA *ltaReadFileEx(const char *fname) {
   sscanf(cp, "type      = %d\n", &type);
   cp = fgetl(line, 199, fp);
   sscanf(cp, "nxforms   = %d\n", &nxforms);
-  lta = LTAalloc(nxforms, NULL);
+  lta       = LTAalloc(nxforms, NULL);
   lta->type = type;
   for (i = 0; i < lta->num_xforms; i++) {
     lt = &lta->xforms[i];
@@ -952,9 +952,9 @@ int MYvg_isEqual(const VOL_GEOM *vg1, const VOL_GEOM *vg2) {
 ************************************************************************/
 /*--------------------------------------------------------------------------*/
 double InitialAntiCausalCoefficient(
-    double c[],      /* coefficients */
-    long DataLength, /* number of samples or coefficients */
-    double z         /* actual pole */
+    double c[],        /* coefficients */
+    long   DataLength, /* number of samples or coefficients */
+    double z           /* actual pole */
 )
 
 { /* begin InitialAntiCausalCoefficient */
@@ -964,16 +964,16 @@ double InitialAntiCausalCoefficient(
 } /* end InitialAntiCausalCoefficient */
 
 /*--------------------------------------------------------------------------*/
-double InitialCausalCoefficient(double c[],      /* coefficients */
-                                long DataLength, /* number of coefficients */
-                                double z,        /* actual pole */
+double InitialCausalCoefficient(double c[],        /* coefficients */
+                                long   DataLength, /* number of coefficients */
+                                double z,          /* actual pole */
                                 double Tolerance /* admissible relative error */
 )
 
 { /* begin InitialCausalCoefficient */
 
   double Sum, zn, z2n, iz;
-  long n, Horizon;
+  long   n, Horizon;
 
   /* this initialization corresponds to mirror boundaries */
   Horizon = DataLength;
@@ -982,7 +982,7 @@ double InitialCausalCoefficient(double c[],      /* coefficients */
   }
   if (Horizon < DataLength) {
     /* accelerated loop */
-    zn = z;
+    zn  = z;
     Sum = c[0];
     for (n = 1L; n < Horizon; n++) {
       Sum += zn * c[n];
@@ -991,8 +991,8 @@ double InitialCausalCoefficient(double c[],      /* coefficients */
     return (Sum);
   } else {
     /* full loop */
-    zn = z;
-    iz = 1.0 / z;
+    zn  = z;
+    iz  = 1.0 / z;
     z2n = pow(z, (double)(DataLength - 1L));
     Sum = c[0] + z2n * c[DataLength - 1L];
     z2n *= z2n * iz;
@@ -1007,17 +1007,17 @@ double InitialCausalCoefficient(double c[],      /* coefficients */
 
 /*--------------------------------------------------------------------------*/
 static void ConvertToInterpolationCoefficients(
-    double c[],      /* input samples --> output coefficients */
-    long DataLength, /* number of samples or coefficients */
-    double z[],      /* poles */
-    long NbPoles,    /* number of poles */
-    double Tolerance /* admissible relative error */
+    double c[],        /* input samples --> output coefficients */
+    long   DataLength, /* number of samples or coefficients */
+    double z[],        /* poles */
+    long   NbPoles,    /* number of poles */
+    double Tolerance   /* admissible relative error */
 )
 
 { /* begin ConvertToInterpolationCoefficients */
 
   double Lambda = 1.0;
-  long n, k;
+  long   n, k;
 
   /* special case required by mirror boundaries */
   if (DataLength == 1L) {
@@ -1049,10 +1049,10 @@ static void ConvertToInterpolationCoefficients(
 } /* end ConvertToInterpolationCoefficients */
 
 /*--------------------------------------------------------------------------*/
-static void GetColumn(MRI *mri_vol, /* input image volume */
-                      long x,       /* x coordinate of the selected line */
-                      long z,       /* Slice number of the line */
-                      double Line[] /* output linear array */
+static void GetColumn(MRI *  mri_vol, /* input image volume */
+                      long   x,       /* x coordinate of the selected line */
+                      long   z,       /* Slice number of the line */
+                      double Line[]   /* output linear array */
 )
 
 { /* begin GetColumn */
@@ -1065,10 +1065,10 @@ static void GetColumn(MRI *mri_vol, /* input image volume */
 } /* end GetColumn */
 
 /*--------------------------------------------------------------------------*/
-static void GetRow(MRI *mri_vol, /* input image volume */
-                   long y,       /* y coordinate of the selected line */
-                   long z,       /* Slice number of the line */
-                   double Line[] /* output linear array */
+static void GetRow(MRI *  mri_vol, /* input image volume */
+                   long   y,       /* y coordinate of the selected line */
+                   long   z,       /* Slice number of the line */
+                   double Line[]   /* output linear array */
 )
 
 { /* begin GetRow */
@@ -1081,11 +1081,11 @@ static void GetRow(MRI *mri_vol, /* input image volume */
 } /* end GetRow */
 
 /*--------------------------------------------------------------------------*/
-static void GetVertical(MRI *mri_vol, /* input image volume */
-                        long x,       /* x coordinate of the selected line */
-                        long y,       /* y coordinate of the selected line */
-                        double Line[] /* output linear array */
-) {                                   /* begin GetVertical */
+static void GetVertical(MRI *  mri_vol, /* input image volume */
+                        long   x,       /* x coordinate of the selected line */
+                        long   y,       /* y coordinate of the selected line */
+                        double Line[]   /* output linear array */
+) {                                     /* begin GetVertical */
   long z;
 
   for (z = 0L; z < mri_vol->depth; z++) {
@@ -1095,10 +1095,10 @@ static void GetVertical(MRI *mri_vol, /* input image volume */
 } /* end GetVertical */
 
 /*--------------------------------------------------------------------------*/
-static void PutColumn(MRI *mri_vol, /* output image volume */
-                      long x,       /* x coordinate of the selected line */
-                      long z,       /* Slice number of the line */
-                      double Line[] /* input linear array */
+static void PutColumn(MRI *  mri_vol, /* output image volume */
+                      long   x,       /* x coordinate of the selected line */
+                      long   z,       /* Slice number of the line */
+                      double Line[]   /* input linear array */
 )
 
 { /* begin PutColumn */
@@ -1111,10 +1111,10 @@ static void PutColumn(MRI *mri_vol, /* output image volume */
 } /* end PutColumn */
 
 /*--------------------------------------------------------------------------*/
-static void PutRow(MRI *mri_vol, /* output image volume */
-                   long y,       /* y coordinate of the selected line */
-                   long z,       /* Slice number of the line */
-                   double *Line  /* input linear array */
+static void PutRow(MRI *   mri_vol, /* output image volume */
+                   long    y,       /* y coordinate of the selected line */
+                   long    z,       /* Slice number of the line */
+                   double *Line     /* input linear array */
 )
 
 { /* begin PutRow */
@@ -1127,11 +1127,11 @@ static void PutRow(MRI *mri_vol, /* output image volume */
 } /* end PutRow */
 
 /*--------------------------------------------------------------------------*/
-static void PutVertical(MRI *mri_vol, /* output image volume */
-                        long x,       /* x coordinate of the selected line */
-                        long y,       /* y coordinate of the selected line */
-                        double Line[] /* output linear array */
-) {                                   /* begin PutVertical */
+static void PutVertical(MRI *  mri_vol, /* output image volume */
+                        long   x,       /* x coordinate of the selected line */
+                        long   y,       /* y coordinate of the selected line */
+                        double Line[]   /* output linear array */
+) {                                     /* begin PutVertical */
   long z;
   for (z = 0L; z < mri_vol->depth; z++) {
     MRIsetVoxVal(mri_vol, x, y, z, 0, (float)Line[z]);
@@ -1150,10 +1150,10 @@ int SamplesToCoefficients(MRI *mri_vol,     /* in-place processing */
 { /* begin SamplesToCoefficients */
 
   double *Line;
-  double Pole[2];
-  long NbPoles;
-  long x, y, z;
-  long Width, Height, Depth;
+  double  Pole[2];
+  long    NbPoles;
+  long    x, y, z;
+  long    Width, Height, Depth;
 
   /* recover the poles from a lookup table */
   switch (SplineDegree) {
@@ -1182,9 +1182,9 @@ int SamplesToCoefficients(MRI *mri_vol,     /* in-place processing */
     return (1);
   }
 
-  Width = mri_vol->width;
+  Width  = mri_vol->width;
   Height = mri_vol->height;
-  Depth = mri_vol->depth;
+  Depth  = mri_vol->depth;
 
   /* convert the image samples into interpolation coefficients */
   /* in-place separable process, along x */
@@ -1243,7 +1243,7 @@ double InterpolatedValue(MRI *Bcoeff, /* input B-spline array of coefficients */
                          double x,    /* x coordinate where to interpolate */
                          double y,    /* y coordinate where to interpolate */
                          double z,    /* z coordinate where to interpolate */
-                         long SplineDegree /* degree of the spline model */
+                         long   SplineDegree /* degree of the spline model */
 )
 
 { /* begin InterpolatedValue */
@@ -1251,19 +1251,19 @@ double InterpolatedValue(MRI *Bcoeff, /* input B-spline array of coefficients */
   double xWeight[6], yWeight[6], zWeight[6];
   double interpolated;
   double w, w2, w4, t, t0, t1;
-  long xIndex[6], yIndex[6], zIndex[6];
-  long Height, Width, Depth, Height2, Width2, Depth2;
-  long i, j, d, k; /* i,j, d are indices for x,y, and z respectively; k for
+  long   xIndex[6], yIndex[6], zIndex[6];
+  long   Height, Width, Depth, Height2, Width2, Depth2;
+  long   i, j, d, k; /* i,j, d are indices for x,y, and z respectively; k for
                       spline index */
-  long cz, cy, cx;
+  long   cz, cy, cx;
 
-  Width = Bcoeff->width;
+  Width  = Bcoeff->width;
   Height = Bcoeff->height;
-  Depth = Bcoeff->depth;
+  Depth  = Bcoeff->depth;
 
-  Width2 = 2L * Width - 2L;
+  Width2  = 2L * Width - 2L;
   Height2 = 2L * Height - 2L;
-  Depth2 = 2L * Depth - 2L;
+  Depth2  = 2L * Depth - 2L;
 
   /* compute the interpolation indexes */
   if (SplineDegree & 1L) {
@@ -1290,36 +1290,36 @@ double InterpolatedValue(MRI *Bcoeff, /* input B-spline array of coefficients */
   switch (SplineDegree) {
   case 2L:
     /* x */
-    w = x - (double)xIndex[1];
+    w          = x - (double)xIndex[1];
     xWeight[1] = 3.0 / 4.0 - w * w;
     xWeight[2] = (1.0 / 2.0) * (w - xWeight[1] + 1.0);
     xWeight[0] = 1.0 - xWeight[1] - xWeight[2];
     /* y */
-    w = y - (double)yIndex[1];
+    w          = y - (double)yIndex[1];
     yWeight[1] = 3.0 / 4.0 - w * w;
     yWeight[2] = (1.0 / 2.0) * (w - yWeight[1] + 1.0);
     yWeight[0] = 1.0 - yWeight[1] - yWeight[2];
     /* z */
-    w = z - (double)zIndex[1];
+    w          = z - (double)zIndex[1];
     zWeight[1] = 3.0 / 4.0 - w * w;
     zWeight[2] = (1.0 / 2.0) * (w - zWeight[1] + 1.0);
     zWeight[0] = 1.0 - yWeight[1] - zWeight[2];
     break;
   case 3L:
     /* x */
-    w = x - (double)xIndex[1];
+    w          = x - (double)xIndex[1];
     xWeight[3] = (1.0 / 6.0) * w * w * w;
     xWeight[0] = (1.0 / 6.0) + (1.0 / 2.0) * w * (w - 1.0) - xWeight[3];
     xWeight[2] = w + xWeight[0] - 2.0 * xWeight[3];
     xWeight[1] = 1.0 - xWeight[0] - xWeight[2] - xWeight[3];
     /* y */
-    w = y - (double)yIndex[1];
+    w          = y - (double)yIndex[1];
     yWeight[3] = (1.0 / 6.0) * w * w * w;
     yWeight[0] = (1.0 / 6.0) + (1.0 / 2.0) * w * (w - 1.0) - yWeight[3];
     yWeight[2] = w + yWeight[0] - 2.0 * yWeight[3];
     yWeight[1] = 1.0 - yWeight[0] - yWeight[2] - yWeight[3];
     /* z */
-    w = z - (double)zIndex[1];
+    w          = z - (double)zIndex[1];
     zWeight[3] = (1.0 / 6.0) * w * w * w;
     zWeight[0] = (1.0 / 6.0) + (1.0 / 2.0) * w * (w - 1.0) - zWeight[3];
     zWeight[2] = w + zWeight[0] - 2.0 * zWeight[3];
@@ -1327,40 +1327,40 @@ double InterpolatedValue(MRI *Bcoeff, /* input B-spline array of coefficients */
     break;
   case 4L:
     /* x */
-    w = x - (double)xIndex[2];
-    w2 = w * w;
-    t = (1.0 / 6.0) * w2;
+    w          = x - (double)xIndex[2];
+    w2         = w * w;
+    t          = (1.0 / 6.0) * w2;
     xWeight[0] = 1.0 / 2.0 - w;
     xWeight[0] *= xWeight[0];
     xWeight[0] *= (1.0 / 24.0) * xWeight[0];
-    t0 = w * (t - 11.0 / 24.0);
-    t1 = 19.0 / 96.0 + w2 * (1.0 / 4.0 - t);
+    t0         = w * (t - 11.0 / 24.0);
+    t1         = 19.0 / 96.0 + w2 * (1.0 / 4.0 - t);
     xWeight[1] = t1 + t0;
     xWeight[3] = t1 - t0;
     xWeight[4] = xWeight[0] + t0 + (1.0 / 2.0) * w;
     xWeight[2] = 1.0 - xWeight[0] - xWeight[1] - xWeight[3] - xWeight[4];
     /* y */
-    w = y - (double)yIndex[2];
-    w2 = w * w;
-    t = (1.0 / 6.0) * w2;
+    w          = y - (double)yIndex[2];
+    w2         = w * w;
+    t          = (1.0 / 6.0) * w2;
     yWeight[0] = 1.0 / 2.0 - w;
     yWeight[0] *= yWeight[0];
     yWeight[0] *= (1.0 / 24.0) * yWeight[0];
-    t0 = w * (t - 11.0 / 24.0);
-    t1 = 19.0 / 96.0 + w2 * (1.0 / 4.0 - t);
+    t0         = w * (t - 11.0 / 24.0);
+    t1         = 19.0 / 96.0 + w2 * (1.0 / 4.0 - t);
     yWeight[1] = t1 + t0;
     yWeight[3] = t1 - t0;
     yWeight[4] = yWeight[0] + t0 + (1.0 / 2.0) * w;
     yWeight[2] = 1.0 - yWeight[0] - yWeight[1] - yWeight[3] - yWeight[4];
     /* z */
-    w = z - (double)zIndex[2];
-    w2 = w * w;
-    t = (1.0 / 6.0) * w2;
+    w          = z - (double)zIndex[2];
+    w2         = w * w;
+    t          = (1.0 / 6.0) * w2;
     zWeight[0] = 1.0 / 2.0 - w;
     zWeight[0] *= zWeight[0];
     zWeight[0] *= (1.0 / 24.0) * zWeight[0];
-    t0 = w * (t - 11.0 / 24.0);
-    t1 = 19.0 / 96.0 + w2 * (1.0 / 4.0 - t);
+    t0         = w * (t - 11.0 / 24.0);
+    t1         = 19.0 / 96.0 + w2 * (1.0 / 4.0 - t);
     zWeight[1] = t1 + t0;
     zWeight[3] = t1 - t0;
     zWeight[4] = zWeight[0] + t0 + (1.0 / 2.0) * w;
@@ -1368,54 +1368,54 @@ double InterpolatedValue(MRI *Bcoeff, /* input B-spline array of coefficients */
     break;
   case 5L:
     /* x */
-    w = x - (double)xIndex[2];
-    w2 = w * w;
+    w          = x - (double)xIndex[2];
+    w2         = w * w;
     xWeight[5] = (1.0 / 120.0) * w * w2 * w2;
     w2 -= w;
     w4 = w2 * w2;
     w -= 1.0 / 2.0;
-    t = w2 * (w2 - 3.0);
+    t          = w2 * (w2 - 3.0);
     xWeight[0] = (1.0 / 24.0) * (1.0 / 5.0 + w2 + w4) - xWeight[5];
-    t0 = (1.0 / 24.0) * (w2 * (w2 - 5.0) + 46.0 / 5.0);
-    t1 = (-1.0 / 12.0) * w * (t + 4.0);
+    t0         = (1.0 / 24.0) * (w2 * (w2 - 5.0) + 46.0 / 5.0);
+    t1         = (-1.0 / 12.0) * w * (t + 4.0);
     xWeight[2] = t0 + t1;
     xWeight[3] = t0 - t1;
-    t0 = (1.0 / 16.0) * (9.0 / 5.0 - t);
-    t1 = (1.0 / 24.0) * w * (w4 - w2 - 5.0);
+    t0         = (1.0 / 16.0) * (9.0 / 5.0 - t);
+    t1         = (1.0 / 24.0) * w * (w4 - w2 - 5.0);
     xWeight[1] = t0 + t1;
     xWeight[4] = t0 - t1;
     /* y */
-    w = y - (double)yIndex[2];
-    w2 = w * w;
+    w          = y - (double)yIndex[2];
+    w2         = w * w;
     yWeight[5] = (1.0 / 120.0) * w * w2 * w2;
     w2 -= w;
     w4 = w2 * w2;
     w -= 1.0 / 2.0;
-    t = w2 * (w2 - 3.0);
+    t          = w2 * (w2 - 3.0);
     yWeight[0] = (1.0 / 24.0) * (1.0 / 5.0 + w2 + w4) - yWeight[5];
-    t0 = (1.0 / 24.0) * (w2 * (w2 - 5.0) + 46.0 / 5.0);
-    t1 = (-1.0 / 12.0) * w * (t + 4.0);
+    t0         = (1.0 / 24.0) * (w2 * (w2 - 5.0) + 46.0 / 5.0);
+    t1         = (-1.0 / 12.0) * w * (t + 4.0);
     yWeight[2] = t0 + t1;
     yWeight[3] = t0 - t1;
-    t0 = (1.0 / 16.0) * (9.0 / 5.0 - t);
-    t1 = (1.0 / 24.0) * w * (w4 - w2 - 5.0);
+    t0         = (1.0 / 16.0) * (9.0 / 5.0 - t);
+    t1         = (1.0 / 24.0) * w * (w4 - w2 - 5.0);
     yWeight[1] = t0 + t1;
     yWeight[4] = t0 - t1;
     /* z */
-    w = z - (double)zIndex[2];
-    w2 = w * w;
+    w          = z - (double)zIndex[2];
+    w2         = w * w;
     zWeight[5] = (1.0 / 120.0) * w * w2 * w2;
     w2 -= w;
     w4 = w2 * w2;
     w -= 1.0 / 2.0;
-    t = w2 * (w2 - 3.0);
+    t          = w2 * (w2 - 3.0);
     zWeight[0] = (1.0 / 24.0) * (1.0 / 5.0 + w2 + w4) - zWeight[5];
-    t0 = (1.0 / 24.0) * (w2 * (w2 - 5.0) + 46.0 / 5.0);
-    t1 = (-1.0 / 12.0) * w * (t + 4.0);
+    t0         = (1.0 / 24.0) * (w2 * (w2 - 5.0) + 46.0 / 5.0);
+    t1         = (-1.0 / 12.0) * w * (t + 4.0);
     zWeight[2] = t0 + t1;
     zWeight[3] = t0 - t1;
-    t0 = (1.0 / 16.0) * (9.0 / 5.0 - t);
-    t1 = (1.0 / 24.0) * w * (w4 - w2 - 5.0);
+    t0         = (1.0 / 16.0) * (9.0 / 5.0 - t);
+    t1         = (1.0 / 24.0) * w * (w4 - w2 - 5.0);
     zWeight[1] = t0 + t1;
     zWeight[4] = t0 - t1;
     break;
@@ -1465,10 +1465,10 @@ double InterpolatedValue(MRI *Bcoeff, /* input B-spline array of coefficients */
   /* perform interpolation */
   interpolated = 0.0;
   for (d = 0L; d <= SplineDegree; d++) {
-    t = 0;
+    t  = 0;
     cz = zIndex[d];
     for (j = 0L; j <= SplineDegree; j++) {
-      w = 0.0;
+      w  = 0.0;
       cy = yIndex[j];
       for (i = 0L; i <= SplineDegree; i++) {
         cx = xIndex[i];

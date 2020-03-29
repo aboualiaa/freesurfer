@@ -1,7 +1,7 @@
 #ifndef _STITCH_NODE_H_
 #define _STITCH_NODE_H_
-#include <sbl/core/Pointer.h>
 #include <sbl/core/Array.h>
+#include <sbl/core/Pointer.h>
 #include <sbl/image/Image.h>
 #include <sbl/image/ImageTransform.h>
 using namespace sbl;
@@ -23,7 +23,7 @@ public:
   inline const ImageGrayU &image() const { return *m_image; }
 
   /// access the current transform for this node (in small image coords)
-  inline ImageTransform &transform() { return *m_transform; }
+  inline ImageTransform &      transform() { return *m_transform; }
   inline const ImageTransform &transform() const { return *m_transform; }
 
   /// the x and y indices within this slide
@@ -51,13 +51,13 @@ public:
 
 private:
   // internal data
-  aptr<ImageGrayU> m_image;
+  aptr<ImageGrayU>     m_image;
   aptr<ImageTransform> m_transform;
-  int m_xImageIndex;
-  int m_yImageIndex;
-  String m_fileName;
-  float m_minBrightness;
-  float m_maxBrightness;
+  int                  m_xImageIndex;
+  int                  m_yImageIndex;
+  String               m_fileName;
+  float                m_minBrightness;
+  float                m_maxBrightness;
 };
 
 //-------------------------------------------
@@ -95,8 +95,8 @@ public:
 private:
   // internal data
   Array<StitchNode> m_nodes;
-  int m_xCount;
-  int m_yCount;
+  int               m_xCount;
+  int               m_yCount;
 };
 
 } // end namespace hb

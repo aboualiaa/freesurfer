@@ -25,37 +25,37 @@
 
 #include <fstream>
 
-#include "patchdisk.h"
 #include "fastloop.h"
+#include "patchdisk.h"
 
 Surface::Surface() {
   nvertices = maxvertices = 0;
-  vertices = nullptr;
+  vertices                = nullptr;
   nfaces = maxfaces = 0;
-  faces = nullptr;
-  type_of_surface = UNKNOWN_TYPE_OF_SURFACE;
+  faces             = nullptr;
+  type_of_surface   = UNKNOWN_TYPE_OF_SURFACE;
   vtrans_to = ftrans_to = vtrans_from = ftrans_from = nullptr;
-  surface_source = nullptr;
-  disk = nullptr;
+  surface_source                                    = nullptr;
+  disk                                              = nullptr;
 }
 
 Surface::Surface(int nv, int nf) {
   _Allocate(nv, nf);
   type_of_surface = UNKNOWN_TYPE_OF_SURFACE;
   vtrans_to = ftrans_to = vtrans_from = ftrans_from = nullptr;
-  surface_source = nullptr;
-  disk = nullptr;
+  surface_source                                    = nullptr;
+  disk                                              = nullptr;
 }
 
-Surface::Surface(const string s) {
+Surface::Surface(const std::string s) {
   nvertices = maxvertices = 0;
-  vertices = nullptr;
+  vertices                = nullptr;
   nfaces = maxfaces = 0;
-  faces = nullptr;
-  type_of_surface = UNKNOWN_TYPE_OF_SURFACE;
+  faces             = nullptr;
+  type_of_surface   = UNKNOWN_TYPE_OF_SURFACE;
   vtrans_to = ftrans_to = vtrans_from = ftrans_from = nullptr;
-  surface_source = nullptr;
-  disk = nullptr;
+  surface_source                                    = nullptr;
+  disk                                              = nullptr;
   OpenFile(s);
 }
 
@@ -63,8 +63,8 @@ Surface *Surface::Clone() const {
   Surface *surf = new Surface(maxvertices, maxfaces);
 
   surf->nvertices = nvertices;
-  surf->nfaces = nfaces;
-  surf->euler = euler;
+  surf->nfaces    = nfaces;
+  surf->euler     = euler;
   for (int n = 0; n < maxvertices; n++)
     surf->vertices[n] = vertices[n];
   for (int n = 0; n < maxfaces; n++)
@@ -91,20 +91,20 @@ Surface::~Surface() {
 }
 
 int Surface::_Allocate(int nv, int nf) {
-  nvertices = 0;
+  nvertices   = 0;
   maxvertices = nv;
-  vertices = new Vertex[maxvertices];
-  nfaces = 0;
-  maxfaces = nf;
-  faces = new Face[maxfaces];
+  vertices    = new Vertex[maxvertices];
+  nfaces      = 0;
+  maxfaces    = nf;
+  faces       = new Face[maxfaces];
 
   return 0;
 }
 
 void Surface::_OverAlloc(int nextrav, int nextraf) {
   if (nvertices + nextrav > maxvertices) {
-    int new_maxvertices = nvertices + nextrav;
-    Vertex *new_vertices = new Vertex[new_maxvertices];
+    int     new_maxvertices = nvertices + nextrav;
+    Vertex *new_vertices    = new Vertex[new_maxvertices];
     for (int n = 0; n < maxvertices; n++) {
       new_vertices[n] = vertices[n];
       vertices[n].Clear();
@@ -115,8 +115,8 @@ void Surface::_OverAlloc(int nextrav, int nextraf) {
     vertices = new_vertices;
   };
   if (nfaces + nextraf > maxfaces) {
-    int new_maxfaces = nfaces + nextraf;
-    Face *new_faces = new Face[new_maxfaces];
+    int   new_maxfaces = nfaces + nextraf;
+    Face *new_faces    = new Face[new_maxfaces];
     for (int n = 0; n < maxfaces; n++)
       new_faces[n] = faces[n];
     maxfaces = new_maxfaces;
@@ -128,21 +128,21 @@ void Surface::_OverAlloc(int nextrav, int nextraf) {
 
 void Surface::Expand(int nextrav, int nextraf) { _OverAlloc(nextrav, nextraf); }
 
-int Surface::OpenFile(const string s, int verbose) {
-  ifstream file(s.c_str());
+int Surface::OpenFile(const std::string s, int verbose) {
+  std::ifstream file(s.c_str());
 
   if (s[s.size() - 1] == 'd') { // CERTIS file format
     file >> nvertices;
     maxvertices = nvertices;
     if (verbose)
-      cout << nvertices << " vertices - ";
+      std::cout << nvertices << " vertices - ";
     vertices = new Vertex[maxvertices];
     for (int n = 0; n < nvertices; n++)
       file >> vertices[n].x >> vertices[n].y >> vertices[n].z;
     file >> nfaces;
     maxfaces = nfaces;
     if (verbose)
-      cout << nfaces << " faces " << endl;
+      std::cout << nfaces << " faces " << std::endl;
     faces = new Face[maxfaces];
     for (int n = 0; n < nfaces; n++)
       file >> faces[n].v[0] >> faces[n].v[1] >> faces[n].v[2];
@@ -151,7 +151,7 @@ int Surface::OpenFile(const string s, int verbose) {
     file >> nvertices;
     maxvertices = nvertices;
     if (verbose)
-      cout << nvertices << " vertices - ";
+      std::cout << nvertices << " vertices - ";
     vertices = new Vertex[maxvertices];
     for (int n = 0; n < nvertices; n++)
       file >> vertices[n].x >> vertices[n].y >> vertices[n].z >> tmp;
@@ -159,7 +159,7 @@ int Surface::OpenFile(const string s, int verbose) {
     file >> nfaces;
     maxfaces = nfaces;
     if (verbose)
-      cout << nfaces << " faces " << endl;
+      std::cout << nfaces << " faces " << std::endl;
     faces = new Face[maxfaces];
     for (int n = 0; n < nfaces; n++)
       file >> faces[n].v[0] >> faces[n].v[1] >> faces[n].v[2] >> tmp;
@@ -170,33 +170,33 @@ int Surface::OpenFile(const string s, int verbose) {
   return 0;
 }
 
-int Surface::WriteFile(const string s, int verbose) const {
-  ofstream file(s.c_str());
+int Surface::WriteFile(const std::string s, int verbose) const {
+  std::ofstream file(s.c_str());
 
-  file << nvertices << " " << nfaces << endl;
+  file << nvertices << " " << nfaces << std::endl;
   for (int n = 0; n < nvertices; n++)
     file << vertices[n].x << " " << vertices[n].y << " " << vertices[n].z << " "
-         << 0 << endl;
+         << 0 << std::endl;
   for (int n = 0; n < nfaces; n++)
     file << faces[n].v[0] << " " << faces[n].v[1] << " " << faces[n].v[2] << " "
-         << 0 << endl;
+         << 0 << std::endl;
   if (verbose)
-    cout << endl << "surface written in " << s << " ";
+    std::cout << std::endl << "surface written in " << s << " ";
   return 0;
 }
 
-int Surface::GetDefectLabels(const string s) {
+int Surface::GetDefectLabels(const std::string s) {
   OpenCurvatureFile(s);
   for (int n = 0; n < nvertices; n++)
     vertices[n].marked = int(vertices[n].curv);
   return 0;
 }
 
-int Surface::OpenCurvatureFile(const string s) {
+int Surface::OpenCurvatureFile(const std::string s) {
 
-  ifstream file(s.c_str());
+  std::ifstream file(s.c_str());
 
-  int tmp;
+  int   tmp;
   float a, b, c, curv;
   for (int n = 0; n < nvertices; n++) {
     file >> tmp >> a >> b >> c >> curv;
@@ -219,8 +219,8 @@ int Surface::_InitSurfaceConnectivity() {
   Vertex *v;
 
   for (int n = 0; n < nvertices; n++) {
-    v = &vertices[n];
-    v->fnum = 0;
+    v         = &vertices[n];
+    v->fnum   = 0;
     v->marked = 0;
   }
 
@@ -234,16 +234,16 @@ int Surface::_InitSurfaceConnectivity() {
   // initialize the list of faces
   for (int n = 0; n < nfaces; n++) {
     for (int i = 0; i < 3; i++) {
-      int vno = faces[n].v[i];
-      v = &vertices[vno];
-      v->f[v->fnum] = n;
+      int vno         = faces[n].v[i];
+      v               = &vertices[vno];
+      v->f[v->fnum]   = n;
       v->n[v->fnum++] = i;
     }
   }
 
   // counting the list of vertices
   for (int n = 0; n < nvertices; n++) {
-    v = &vertices[n];
+    v       = &vertices[n];
     v->vnum = 0;
     for (int p = 0; p < v->fnum; p++) {
       Face *face = &faces[v->f[p]];
@@ -268,7 +268,7 @@ int Surface::_InitSurfaceConnectivity() {
         if (vertices[vn].marked == 0)
           continue;
         vertices[vn].marked = 0;
-        v->v[v->vnum++] = vn;
+        v->v[v->vnum++]     = vn;
       }
     }
   }
@@ -289,7 +289,7 @@ bool Surface::_InitFaceConnectivity() {
       else
         n2 = face->v[j + 1];
 
-      int fn = _FindFace(n1, n2, i);
+      int fn     = _FindFace(n1, n2, i);
       face->f[j] = fn;
       if (fn == -1)
         is_closed = false;
@@ -332,7 +332,7 @@ int Surface::_InitFaceCoordinates() {
 
 void Surface::Center() {
   Vertex *v;
-  double x, y, z;
+  double  x, y, z;
   // compute the center of gravity
   x = y = z = 0.0;
   for (int n = 0; n < nvertices; n++) {
@@ -382,9 +382,9 @@ int Surface::GetEuler(int &nv, int &ne, int &nf, int mark) {
       nedges += vertices[n].vnum;
     nedges /= 2;
     euler = nvertices + nfaces - nedges;
-    nv = nvertices;
-    ne = nedges;
-    nf = nfaces;
+    nv    = nvertices;
+    ne    = nedges;
+    nf    = nfaces;
     return euler;
   };
 
@@ -401,8 +401,8 @@ int Surface::GetEuler(int &nv, int &ne, int &nf, int mark) {
   // counting number of faces
   nf = 0;
   for (int n = 0; n < nfaces; n++) {
-    Face *face = &faces[n];
-    bool is_face = true;
+    Face *face    = &faces[n];
+    bool  is_face = true;
     for (int i = 0; i < 3; i++) {
       if (vertices[face->v[i]].marked != mark) {
         is_face = false;
@@ -414,7 +414,7 @@ int Surface::GetEuler(int &nv, int &ne, int &nf, int mark) {
       // add the edges
       for (int i = 0; i < 3; i++) {
         Vertex *v = &vertices[face->v[i]];
-        int v1, v2;
+        int     v1, v2;
         (i == 0) ? v1 = face->v[2] : v1 = face->v[i - 1];
         (i == 2) ? v2 = face->v[0] : v2 = face->v[i + 1];
         for (int p = 0; p < v->vnum; p++) {
@@ -466,7 +466,7 @@ int Surface::GetEuler(const int *list_of_faces, int nfs) {
     if (face->marked == 0) {
       nf++;
       face->marked = 1;
-      int vn0, vn1;
+      int     vn0, vn1;
       Vertex *v0, *v1;
       for (int i = 0; i < 3; i++) {
         vn0 = face->v[i];
@@ -504,15 +504,16 @@ void Surface::PrintDefectInfo(int ndefect) {
     for (int n = 0; n < nvertices; n++)
       if (vertices[n].marked > nlabels)
         nlabels = vertices[n].marked;
-    cout << nlabels - 1 << " defects in the surface" << endl;
+    std::cout << nlabels - 1 << " defects in the surface" << std::endl;
 
     for (int l = 1; l < nlabels; l++)
       PrintDefectInfo(l);
   } else {
-    cout << "   Defect #" << ndefect << ": ";
+    std::cout << "   Defect #" << ndefect << ": ";
     int nv, ne, nf, eul;
     eul = GetEuler(nv, ne, nf, ndefect);
-    cout << " (" << nv << "," << ne << "," << nf << ") -> X = " << eul << endl;
+    std::cout << " (" << nv << "," << ne << "," << nf << ") -> X = " << eul
+              << std::endl;
   }
 }
 
@@ -546,7 +547,7 @@ void Surface::Smooth(int niters, const int *tab, int nv) {
   double alpha = 0.3;
   while (niters--) {
     for (int n = 0; n < nv; n++) {
-      double x = 0., y = 0., z = 0.;
+      double  x = 0., y = 0., z = 0.;
       Vertex *v = &vertices[tab[n]];
       for (int p = 0; p < v->vnum; p++) {
         Vertex *vp = &vertices[v->v[p]];
@@ -560,9 +561,9 @@ void Surface::Smooth(int niters, const int *tab, int nv) {
     }
     for (int n = 0; n < nv; n++) {
       Vertex *v = &vertices[tab[n]];
-      v->x = v->tx;
-      v->y = v->ty;
-      v->z = v->tz;
+      v->x      = v->tx;
+      v->y      = v->ty;
+      v->z      = v->tz;
     }
   }
 }
@@ -571,10 +572,10 @@ void Surface::SmoothMarked(int niters, int mark) {
   double alpha = 0.3;
   while (niters--) {
 #if PRINT_MODE
-    cout << ".";
+    std::cout << ".";
 #endif
     for (int n = 0; n < nvertices; n++) {
-      double x = 0., y = 0., z = 0.;
+      double  x = 0., y = 0., z = 0.;
       Vertex *v = &vertices[n];
       if (v->marked != mark)
         continue;
@@ -603,10 +604,10 @@ void Surface::Smooth(int niters) {
   double alpha = 0.3;
   while (niters--) {
 #if PRINT_MODE
-    cout << ".";
+    std::cout << ".";
 #endif
     for (int n = 0; n < nvertices; n++) {
-      double x = 0., y = 0., z = 0.;
+      double  x = 0., y = 0., z = 0.;
       Vertex *v = &vertices[n];
       for (int p = 0; p < v->vnum; p++) {
         Vertex *vp = &vertices[v->v[p]];
@@ -620,9 +621,9 @@ void Surface::Smooth(int niters) {
     }
     for (int n = 0; n < nvertices; n++) {
       Vertex *v = &vertices[n];
-      v->x = v->tx;
-      v->y = v->ty;
-      v->z = v->tz;
+      v->x      = v->tx;
+      v->y      = v->ty;
+      v->z      = v->tz;
     }
   }
 }
@@ -652,33 +653,33 @@ Surface *Surface::ExtractPatch(int mark, int nextravertices, int nextrafaces) {
   }
   /////////////////////////////////////////////////////////////////
   // allocate the new surface
-  Surface *surface = new Surface(nv + nextravertices, nf + nextrafaces);
+  Surface *surface   = new Surface(nv + nextravertices, nf + nextrafaces);
   surface->nvertices = nv;
-  surface->nfaces = nf;
+  surface->nfaces    = nf;
 
   // the corresponding tables
   int *vt_to, *vt_from;
-  vt_to = new int[nv];
+  vt_to   = new int[nv];
   vt_from = new int[nvertices];
 
   nv = 0;
   for (int n = 0; n < nvertices; n++)
     if (vertices[n].marked == mark) {
       Vertex *vsrc = &vertices[n];
-      Vertex *v = &surface->vertices[nv];
-      vt_from[n] = nv;
-      vt_to[nv++] = n;
+      Vertex *v    = &surface->vertices[nv];
+      vt_from[n]   = nv;
+      vt_to[nv++]  = n;
       // copy the strict necessary
       v->x = vsrc->x;
       v->y = vsrc->y;
       v->z = vsrc->z;
     };
-  surface->vtrans_to = vt_to;
+  surface->vtrans_to   = vt_to;
   surface->vtrans_from = vt_from;
 
   // the corresponding tables
   int *ft_to, *ft_from;
-  ft_to = new int[nf];
+  ft_to   = new int[nf];
   ft_from = new int[nfaces];
 
   nf = 0;
@@ -690,15 +691,15 @@ Surface *Surface::ExtractPatch(int mark, int nextravertices, int nextrafaces) {
         break;
       };
     if (is_face) {
-      Face *fsrc = &faces[n];
-      Face *f = &surface->faces[nf];
-      ft_from[n] = nf;
+      Face *fsrc  = &faces[n];
+      Face *f     = &surface->faces[nf];
+      ft_from[n]  = nf;
       ft_to[nf++] = n;
       for (int i = 0; i < 3; i++)
         f->v[i] = vt_from[fsrc->v[i]];
     }
   }
-  surface->ftrans_to = ft_to;
+  surface->ftrans_to   = ft_to;
   surface->ftrans_from = ft_from;
 
   surface->InitSurface();
@@ -748,33 +749,33 @@ void Surface::KnitPatch(Loop &loop, PatchDisk *pdisk) {
 
   // adding vertices
   for (int n = 0; n < pdisk->disk.nvertices; n++) {
-    Vertex *vdst = &vertices[nvertices];
-    Vertex *vsrc = &pdisk->disk.vertices[n];
+    Vertex *vdst     = &vertices[nvertices];
+    Vertex *vsrc     = &pdisk->disk.vertices[n];
     pdisk->vtrans[n] = nvertices;
     if (vsrc->marked == 2)
       pdisk->ring.Replace(n, nvertices);
     nvertices++;
     vdst->AllocateFaces(vsrc->fnum);
     vdst->AllocateVertices(vsrc->vnum);
-    vdst->x = x;
-    vdst->y = y;
-    vdst->z = z;
+    vdst->x      = x;
+    vdst->y      = y;
+    vdst->z      = z;
     vdst->marked = 4; // marking vertices with 4
   }
   // adding faces
   for (int n = 0; n < pdisk->disk.nfaces; n++) {
-    Face *fdst = &faces[nfaces];
-    Face *fsrc = &pdisk->disk.faces[n];
+    Face *fdst       = &faces[nfaces];
+    Face *fsrc       = &pdisk->disk.faces[n];
     pdisk->ftrans[n] = nfaces++;
-    fdst->v[0] = pdisk->vtrans[fsrc->v[0]];
-    fdst->v[1] = pdisk->vtrans[fsrc->v[1]];
-    fdst->v[2] = pdisk->vtrans[fsrc->v[2]];
+    fdst->v[0]       = pdisk->vtrans[fsrc->v[0]];
+    fdst->v[1]       = pdisk->vtrans[fsrc->v[1]];
+    fdst->v[2]       = pdisk->vtrans[fsrc->v[2]];
   }
   // adding connectivity stuff
   for (int n = 0; n < pdisk->disk.nvertices; n++) {
     Vertex *vdst = &vertices[pdisk->vtrans[n]];
     Vertex *vsrc = &pdisk->disk.vertices[n];
-    vdst->fnum = vsrc->fnum;
+    vdst->fnum   = vsrc->fnum;
     for (int p = 0; p < vsrc->fnum; p++) {
       vdst->f[p] = pdisk->ftrans[vsrc->f[p]];
       vdst->n[p] = vsrc->n[p];
@@ -878,11 +879,11 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
   }
   PatchDisk *pdisk = &disk[wd];
 #if PRINT_ERROR_MODE
-  cout << "loop is " << wd << " with " << GetLoopLength(loop) << endl;
+  std::cout << "loop is " << wd << " with " << GetLoopLength(loop) << std::endl;
 #endif
 
-  int *vertex_list = new int[loop.npoints * 3];
-  int nvertex_list = 0;
+  int *vertex_list  = new int[loop.npoints * 3];
+  int  nvertex_list = 0;
 
   for (int n = 0; n < maxfaces; n++)
     faces[n].marked = 0;
@@ -910,7 +911,7 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
   // add 3 triangles (but reusing one triangle) & 4 points for each face of the
   // defect
   for (int n = 0; n < loop.npoints; n++) {
-    int fn = loop.points[n];
+    int   fn   = loop.points[n];
     Face *face = &faces[fn];
     // find the vertices
     int vn0, vn1, vn2;
@@ -922,9 +923,9 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
         break;
       }
     }
-    vn0 = face->v[(k + 2) % 3];
-    vn1 = face->v[(k) % 3];
-    vn2 = face->v[(k + 1) % 3];
+    vn0                         = face->v[(k + 2) % 3];
+    vn1                         = face->v[(k) % 3];
+    vn2                         = face->v[(k + 1) % 3];
     vertex_list[nvertex_list++] = vn0; // potentially with repeatitions
     vertex_list[nvertex_list++] = vn1;
     vertex_list[nvertex_list++] = vn2;
@@ -941,16 +942,16 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
     //                  vn0
 
     // generate four new vertices
-    int v1, v2, v3, v4;
+    int     v1, v2, v3, v4;
     Vertex *vnew;
     // and 3 new faces
     Face *fnew;
     // intermediate variables
     double a;
-    int va, vb;
+    int    va, vb;
 
     // v1 = 2/3*vn0+1/3*vn1
-    a = 2. / 3.;
+    a  = 2. / 3.;
     va = vn0;
     vb = vn1;
     v1 = -1;
@@ -960,16 +961,16 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
         break;
       };
     if (v1 == -1) {
-      v1 = nvertices;
-      vnew = &vertices[nvertices++];
+      v1      = nvertices;
+      vnew    = &vertices[nvertices++];
       vnew->x = a * vertices[va].x + (1. - a) * vertices[vb].x;
       vnew->y = a * vertices[va].y + (1. - a) * vertices[vb].y;
       vnew->z = a * vertices[va].z + (1. - a) * vertices[vb].z;
       vnew->AllocateFaces(6);
       vnew->AllocateVertices(6);
-      vnew->v[vnew->vnum] = va;
+      vnew->v[vnew->vnum]   = va;
       vnew->e[vnew->vnum++] = -1;
-      vnew->marked = 1;
+      vnew->marked          = 1;
       for (int p = 0; p < vertices[va].vnum; p++)
         if (vertices[va].v[p] == vb) {
           vertices[va].e[p] = v1;
@@ -978,7 +979,7 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
     }
 
     // v2 = 2/3*vn0+1/3*vn2
-    a = 2. / 3.;
+    a  = 2. / 3.;
     va = vn0;
     vb = vn2;
     v2 = -1;
@@ -988,17 +989,17 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
         break;
       };
     if (v2 == -1) {
-      v2 = nvertices;
-      vnew = &vertices[nvertices++];
+      v2      = nvertices;
+      vnew    = &vertices[nvertices++];
       vnew->x = a * vertices[va].x + (1. - a) * vertices[vb].x;
       vnew->y = a * vertices[va].y + (1. - a) * vertices[vb].y;
       vnew->z = a * vertices[va].z + (1. - a) * vertices[vb].z;
       vnew->AllocateFaces(6);
       vnew->AllocateVertices(6);
       // for(int i = 0 ; i < 6 ; i++) vnew->e[i]=0;
-      vnew->v[vnew->vnum] = va;
+      vnew->v[vnew->vnum]   = va;
       vnew->e[vnew->vnum++] = -1;
-      vnew->marked = 1;
+      vnew->marked          = 1;
       for (int p = 0; p < vertices[va].vnum; p++)
         if (vertices[va].v[p] == vb) {
           vertices[va].e[p] = v2;
@@ -1006,30 +1007,30 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
         };
     }
     // update link v1<-->v2
-    vertices[v1].v[vertices[v1].vnum] = v2;
+    vertices[v1].v[vertices[v1].vnum]   = v2;
     vertices[v1].e[vertices[v1].vnum++] = -1;
-    vertices[v2].v[vertices[v2].vnum] = v1;
+    vertices[v2].v[vertices[v2].vnum]   = v1;
     vertices[v2].e[vertices[v2].vnum++] = -1;
 
     // modify face v0,v1,v2 (this face is the current one!!!)
     int novel_face = fn;
 
-    fnew = &faces[fn];
+    fnew       = &faces[fn];
     fnew->v[0] = vn0;
     for (int p = 0; p < vertices[vn0].fnum; p++)
       if (vertices[vn0].f[p] == fn) {
         vertices[vn0].f[p] = novel_face;
         vertices[vn0].n[p] = 0;
       };
-    fnew->v[1] = v1;
-    vertices[v1].f[vertices[v1].fnum] = novel_face;
+    fnew->v[1]                          = v1;
+    vertices[v1].f[vertices[v1].fnum]   = novel_face;
     vertices[v1].n[vertices[v1].fnum++] = 1;
-    fnew->v[2] = v2;
-    vertices[v2].f[vertices[v2].fnum] = novel_face;
+    fnew->v[2]                          = v2;
+    vertices[v2].f[vertices[v2].fnum]   = novel_face;
     vertices[v2].n[vertices[v2].fnum++] = 2;
 
     // v3 = 2/3*vn1+1/3*vn0
-    a = 2. / 3.;
+    a  = 2. / 3.;
     va = vn1;
     vb = vn0;
     v3 = -1;
@@ -1039,16 +1040,16 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
         break;
       };
     if (v3 == -1) {
-      v3 = nvertices;
-      vnew = &vertices[nvertices++];
+      v3      = nvertices;
+      vnew    = &vertices[nvertices++];
       vnew->x = a * vertices[va].x + (1. - a) * vertices[vb].x;
       vnew->y = a * vertices[va].y + (1. - a) * vertices[vb].y;
       vnew->z = a * vertices[va].z + (1. - a) * vertices[vb].z;
       vnew->AllocateFaces(6);
       vnew->AllocateVertices(6);
-      vnew->v[vnew->vnum] = va;
+      vnew->v[vnew->vnum]   = va;
       vnew->e[vnew->vnum++] = -1;
-      vnew->marked = 1;
+      vnew->marked          = 1;
       for (int p = 0; p < vertices[va].vnum; p++)
         if (vertices[va].v[p] == vb) {
           vertices[va].e[p] = v3;
@@ -1057,7 +1058,7 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
     }
 
     // v4 = 2/3*vn2+1/3*vn0
-    a = 2. / 3.;
+    a  = 2. / 3.;
     va = vn2;
     vb = vn0;
     v4 = -1;
@@ -1067,16 +1068,16 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
         break;
       };
     if (v4 == -1) {
-      v4 = nvertices;
-      vnew = &vertices[nvertices++];
+      v4      = nvertices;
+      vnew    = &vertices[nvertices++];
       vnew->x = a * vertices[va].x + (1. - a) * vertices[vb].x;
       vnew->y = a * vertices[va].y + (1. - a) * vertices[vb].y;
       vnew->z = a * vertices[va].z + (1. - a) * vertices[vb].z;
       vnew->AllocateFaces(6);
       vnew->AllocateVertices(6);
-      vnew->v[vnew->vnum] = va;
+      vnew->v[vnew->vnum]   = va;
       vnew->e[vnew->vnum++] = -1;
-      vnew->marked = 1;
+      vnew->marked          = 1;
       for (int p = 0; p < vertices[va].vnum; p++)
         if (vertices[va].v[p] == vb) {
           vertices[va].e[p] = v4;
@@ -1085,19 +1086,19 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
     }
 
     // update link v4<-->v3
-    vertices[v3].v[vertices[v3].vnum] = v4;
+    vertices[v3].v[vertices[v3].vnum]   = v4;
     vertices[v3].e[vertices[v3].vnum++] = -1;
-    vertices[v4].v[vertices[v4].vnum] = v3;
+    vertices[v4].v[vertices[v4].vnum]   = v3;
     vertices[v4].e[vertices[v4].vnum++] = -1;
     // update link v3 --> vn2
-    vertices[v3].v[vertices[v3].vnum] = vn2;
+    vertices[v3].v[vertices[v3].vnum]   = vn2;
     vertices[v3].e[vertices[v3].vnum++] = -1;
 
     // create new faces!!!
     // new face vn1,vn2,v3
     novel_face = nfaces;
 
-    fnew = &faces[nfaces++];
+    fnew       = &faces[nfaces++];
     fnew->v[0] = vn1;
     for (int p = 0; p < vertices[vn1].fnum; p++)
       if (vertices[vn1].f[p] == fn) {
@@ -1110,29 +1111,29 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
         vertices[vn2].f[p] = novel_face;
         vertices[vn2].n[p] = 1;
       };
-    fnew->v[2] = v3;
-    vertices[v3].f[vertices[v3].fnum] = novel_face;
+    fnew->v[2]                          = v3;
+    vertices[v3].f[vertices[v3].fnum]   = novel_face;
     vertices[v3].n[vertices[v3].fnum++] = 2;
     // new face vn2,v4,v3
     novel_face = nfaces;
 
-    fnew = &faces[nfaces++];
+    fnew       = &faces[nfaces++];
     fnew->v[0] = vn2;
     // add an edge and one face to vn2
     vnew = &vertices[vn2];
     vnew->ExpandFaces(1);
     vnew->ExpandVertices(1);
-    vnew->f[vnew->fnum] = novel_face;
+    vnew->f[vnew->fnum]   = novel_face;
     vnew->n[vnew->fnum++] = 0;
-    vnew->v[vnew->vnum] = v3;
+    vnew->v[vnew->vnum]   = v3;
     vnew->e[vnew->vnum++] = -1;
 
-    fnew->v[1] = v4;
-    vertices[v4].f[vertices[v4].fnum] = novel_face;
+    fnew->v[1]                          = v4;
+    vertices[v4].f[vertices[v4].fnum]   = novel_face;
     vertices[v4].n[vertices[v4].fnum++] = 1;
 
-    fnew->v[2] = v3;
-    vertices[v3].f[vertices[v3].fnum] = novel_face;
+    fnew->v[2]                          = v3;
+    vertices[v3].f[vertices[v3].fnum]   = novel_face;
     vertices[v3].n[vertices[v3].fnum++] = 2;
 
     if (n == 0) {
@@ -1167,14 +1168,14 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
   vertices[first_v1].marked = 2;
   ring_1.AddPoint(first_v2);
   vertices[first_v2].marked = 2;
-  int current_vertex = first_v2;
-  bool found = true;
+  int  current_vertex       = first_v2;
+  bool found                = true;
   while (found) {
-    found = false;
+    found     = false;
     Vertex *v = &vertices[current_vertex];
     for (int p = 0; p < v->vnum; p++) {
       if (vertices[v->v[p]].marked == 1) {
-        found = true;
+        found          = true;
         current_vertex = v->v[p];
         ring_1.AddPoint(v->v[p]);
         vertices[v->v[p]].marked = 2;
@@ -1192,14 +1193,14 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
   vertices[first_v3].marked = 2;
   ring_2.AddPoint(first_v4);
   vertices[first_v4].marked = 2;
-  current_vertex = first_v4;
-  found = true;
+  current_vertex            = first_v4;
+  found                     = true;
   while (found) {
-    found = false;
+    found     = false;
     Vertex *v = &vertices[current_vertex];
     for (int p = 0; p < v->vnum; p++) {
       if (vertices[v->v[p]].marked == 1) {
-        found = true;
+        found          = true;
         current_vertex = v->v[p];
         ring_2.AddPoint(v->v[p]);
         vertices[v->v[p]].marked = 2;
@@ -1226,7 +1227,7 @@ void Surface::CutLoop(Loop &loop, int very_small_patch) {
     if (vertices[n].marked == 4)
       nvert++;
   int *vert = new int[nvert];
-  nvert = 0;
+  nvert     = 0;
   for (int n = 0; n < nvertices; n++)
     if (vertices[n].marked == 4)
       vert[nvert++] = n;
@@ -1249,7 +1250,7 @@ bool Surface::IsSurfaceValid(int verbose) {
     faces[n].marked = 0;
 
   if (verbose)
-    cout << endl;
+    std::cout << std::endl;
 
   for (int n = 0; n < nvertices; n++) {
     Vertex *v = &vertices[n];
@@ -1294,11 +1295,12 @@ bool Surface::IsSurfaceValid(int verbose) {
     }
   }
   if (verbose) {
-    cout << endl
-         << " we have [" << npbm << " , " << nbord / 2 << " , " << nadd << " , "
-         << nmiss << " , " << nfv1 << " , " << nfv2 << " ]   " << endl;
+    std::cout << std::endl
+              << " we have [" << npbm << " , " << nbord / 2 << " , " << nadd
+              << " , " << nmiss << " , " << nfv1 << " , " << nfv2 << " ]   "
+              << std::endl;
     if (nfv2 || nfv1)
-      cout << "pbm";
+      std::cout << "pbm";
   }
   if (npbm || nmiss || nadd || nfv1 || nfv2)
     return false;
@@ -1316,7 +1318,7 @@ void Surface::IncreaseEuler(int nloops, int maxinitface) {
     return;
 
   FastLoop FL(*this);
-  int *defectfaces = new int[nfaces];
+  int *    defectfaces = new int[nfaces];
   for (int n = 0; n < nfaces; n++)
     defectfaces[n] = n;
   FL.SetDefectList(nfaces, defectfaces);
@@ -1337,10 +1339,10 @@ void Surface::IncreaseEuler(int nloops, int maxinitface) {
         ErrorExit("could not find a loop in IncreaseEuler");
       }
       int seed_face = Random(maxinitface);
-      loop = FL.FindLoop(seed_face);
+      loop          = FL.FindLoop(seed_face);
 #if PRINT_MODE
       if (loop == 0)
-        cout << "l";
+        std::cout << "l";
 #endif
     } while (loop == nullptr);
 
@@ -1367,7 +1369,7 @@ void Surface::IncreaseEuler(int nloops, int maxinitface) {
       if (nattempts-- > 0) {
         n--;
 #if PRINT_MODE
-        cout << "a";
+        std::cout << "a";
 #endif
       }
       continue;
@@ -1388,18 +1390,18 @@ void Surface::IncreaseEuler(int nloops, int maxinitface) {
   // transfer the faces and vertices
   if (vertices)
     delete[] vertices;
-  vertices = best_patch->vertices;
-  nvertices = best_patch->nvertices;
-  maxvertices = best_patch->maxvertices;
+  vertices             = best_patch->vertices;
+  nvertices            = best_patch->nvertices;
+  maxvertices          = best_patch->maxvertices;
   best_patch->vertices = nullptr;
   if (faces)
     delete[] faces;
-  faces = best_patch->faces;
-  nfaces = best_patch->nfaces;
-  maxfaces = best_patch->maxfaces;
+  faces             = best_patch->faces;
+  nfaces            = best_patch->nfaces;
+  maxfaces          = best_patch->maxfaces;
   best_patch->faces = nullptr;
-  nedges = best_patch->nedges;
-  euler = best_patch->euler;
+  nedges            = best_patch->nedges;
+  euler             = best_patch->euler;
   if (best_patch)
     delete best_patch;
 }
@@ -1443,14 +1445,14 @@ int Surface::CutPatch(int seed, int maxinitface, int nattempts,
     nattempts = 1;
 
   FastLoop FL(*this);
-  int *defectfaces = new int[nfaces];
+  int *    defectfaces = new int[nfaces];
   for (int n = 0; n < nfaces; n++)
     defectfaces[n] = n;
   FL.SetDefectList(nfaces, defectfaces);
 
   // finding the loop in at most nattempts attempts
-  Loop *loop = nullptr;
-  int ntries = 0;
+  Loop *loop   = nullptr;
+  int   ntries = 0;
   do {
     ntries++;
     if (ntries > nattempts) {
@@ -1465,7 +1467,7 @@ int Surface::CutPatch(int seed, int maxinitface, int nattempts,
     // check if we use the initial seed face
     if (seed >= 0 && seed < maxinitface) {
       seed_face = seed;
-      seed = -2;
+      seed      = -2;
     };
     if (mode) {
       if (mode == 1) {

@@ -126,14 +126,15 @@ private:
 
 public:
   Fl_Check_Button *m_InvertOrder;
-  ~kvlAtlasMeshViewingConsoleGUI()= default;;
-  virtual void Draw() = 0;
-  virtual void SelectTriangleContainingPoint(float, float) = 0;
+  ~kvlAtlasMeshViewingConsoleGUI() = default;
+  ;
+  virtual void Draw()                                                     = 0;
+  virtual void SelectTriangleContainingPoint(float, float)                = 0;
   virtual void SetSliceLocation(unsigned int, unsigned int, unsigned int) = 0;
-  virtual void ShowSelectedView() = 0;
-  virtual void GetScreenShot() = 0;
-  virtual void GetScreenShotSeries() = 0;
-  virtual void DumpImage() = 0;
-  virtual void GetScreenShotSeries(int directionNumber) = 0;
+  virtual void ShowSelectedView()                                         = 0;
+  virtual void GetScreenShot()                                            = 0;
+  virtual void GetScreenShotSeries()                                      = 0;
+  virtual void DumpImage()                                                = 0;
+  virtual void GetScreenShotSeries(int directionNumber)                   = 0;
 };
 #endif

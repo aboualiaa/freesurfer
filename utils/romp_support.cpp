@@ -64,21 +64,21 @@ ROMP_level romp_level =             // should not be set to ROMP_serial
                                     // //ROMP_level_shown_reproducible;
 
 typedef struct PerThreadScopeTreeData {
-  ROMP_pf_static_struct *key;
+  ROMP_pf_static_struct *        key;
   struct PerThreadScopeTreeData *parent;
   struct PerThreadScopeTreeData *next_sibling;
   struct PerThreadScopeTreeData *first_child;
-  long in_scope;
-  long in_child_threads[ROMP_maxWatchedThreadNum];
+  long                           in_scope;
+  long                           in_child_threads[ROMP_maxWatchedThreadNum];
   // threads may be running in a different scope tree!
 } PerThreadScopeTreeData;
 
-static PerThreadScopeTreeData scopeTreeRoots[ROMP_maxWatchedThreadNum];
+static PerThreadScopeTreeData  scopeTreeRoots[ROMP_maxWatchedThreadNum];
 static PerThreadScopeTreeData *scopeTreeToS[ROMP_maxWatchedThreadNum];
 
 static struct {
   Timer timer;
-  bool inited = false;
+  bool  inited = false;
 } tidStartTime[ROMP_maxWatchedThreadNum];
 static void maybeInitTidStartTime(int tid) {
   if (tidStartTime[tid].inited)
@@ -88,7 +88,7 @@ static void maybeInitTidStartTime(int tid) {
 }
 
 static PerThreadScopeTreeData *enterScope(PerThreadScopeTreeData *parent,
-                                          ROMP_pf_static_struct *key) {
+                                          ROMP_pf_static_struct * key) {
   PerThreadScopeTreeData **prev = &parent->first_child;
   while (*prev && (*prev)->key != key) {
     prev = &(*prev)->next_sibling;
@@ -96,18 +96,18 @@ static PerThreadScopeTreeData *enterScope(PerThreadScopeTreeData *parent,
   if (!*prev) {
     PerThreadScopeTreeData *ptr =
         (PerThreadScopeTreeData *)calloc(1, sizeof(PerThreadScopeTreeData));
-    ptr->key = key;
+    ptr->key    = key;
     ptr->parent = parent;
-    *prev = ptr;
+    *prev       = ptr;
   }
   return *prev;
 }
 
 typedef struct StaticData {
   ROMP_pf_static_struct *next;
-  int skip_pflb_timing;
-  long in_pf_sum, in_pfThread_sum, in_pflb_sum;
-  ROMP_level level;
+  int                    skip_pflb_timing;
+  long                   in_pf_sum, in_pfThread_sum, in_pflb_sum;
+  ROMP_level             level;
 } StaticData;
 
 ROMP_pf_static_struct *known_ROMP_pf;
@@ -136,16 +136,16 @@ int ROMP_if_parallel1(ROMP_level level) {
 } // sad only because it hasn't been analyzed
 
 static size_t countGoParallel;
-size_t ROMP_countGoParallel() { return countGoParallel; }
+size_t        ROMP_countGoParallel() { return countGoParallel; }
 
 int ROMP_if_parallel2(ROMP_level level, ROMP_pf_stack_struct *pf_stack) {
   ROMP_pf_static_struct *pf_static = pf_stack->staticInfo;
-  StaticData *ptr = (StaticData *)pf_static->ptr;
+  StaticData *           ptr       = (StaticData *)pf_static->ptr;
   if (ptr)
     ptr->level = level;
 
   ROMP_level current_level = romp_level;
-  int result = level >= current_level;
+  int        result        = level >= current_level;
 
   if (result) {
     countGoParallel++;
@@ -161,13 +161,13 @@ int ROMP_if_parallel2(ROMP_level level, ROMP_pf_stack_struct *pf_stack) {
 }
 
 static const char *mainFile = nullptr;
-static int mainLine = 0;
+static int         mainLine = 0;
 
 static const char *getMainFile() {
   if (!mainFile) {
     static char commBuffer[1024];
-    FILE *commFile = fopen("/proc/self/comm", "r");
-    int commSize = 0;
+    FILE *      commFile = fopen("/proc/self/comm", "r");
+    int         commSize = 0;
     if (commFile) {
       commSize = fread(commBuffer, 1, 1023, commFile);
       if (commSize > 0)
@@ -243,7 +243,7 @@ static StaticData *initStaticData(ROMP_pf_static_struct *pf_static) {
     // Don't use omp critical because caller might be within a critical already
     //
 #ifdef HAVE_OPENMP
-  static omp_lock_t lock;
+  static omp_lock_t   lock;
   static volatile int lock_inited;
   if (!lock_inited) {
 #pragma omp critical
@@ -258,10 +258,10 @@ static StaticData *initStaticData(ROMP_pf_static_struct *pf_static) {
     ptr = (StaticData *)pf_static->ptr;
     if (!ptr) {
       initMainTimer();
-      ptr = (StaticData *)calloc(1, sizeof(StaticData));
+      ptr            = (StaticData *)calloc(1, sizeof(StaticData));
       pf_static->ptr = ptr;
-      ptr->next = known_ROMP_pf;
-      known_ROMP_pf = pf_static;
+      ptr->next      = known_ROMP_pf;
+      known_ROMP_pf  = pf_static;
     }
   }
 #ifdef HAVE_OPENMP
@@ -271,14 +271,14 @@ static StaticData *initStaticData(ROMP_pf_static_struct *pf_static) {
 }
 
 void ROMP_pf_begin(ROMP_pf_static_struct *pf_static,
-                   ROMP_pf_stack_struct *pf_stack) {
-  pf_stack->staticInfo = pf_static;
+                   ROMP_pf_stack_struct * pf_stack) {
+  pf_stack->staticInfo   = pf_static;
   StaticData *staticData = initStaticData(pf_static);
   if (!staticData)
     return;
 
   pf_stack->gone_parallel = 0;
-  pf_stack->entry_level = romp_level;
+  pf_stack->entry_level   = romp_level;
 
   int tid =
 #ifdef HAVE_OPENMP
@@ -291,7 +291,7 @@ void ROMP_pf_begin(ROMP_pf_static_struct *pf_static,
 
   PerThreadScopeTreeData *tos = scopeTreeToS[tid];
   if (!tos) {
-    tos = &scopeTreeRoots[tid];
+    tos               = &scopeTreeRoots[tid];
     scopeTreeToS[tid] = tos;
     maybeInitTidStartTime(tid);
   }
@@ -441,7 +441,7 @@ void ROMP_pf_end(ROMP_pf_stack_struct *pf_stack) {
   romp_level = pf_stack->entry_level;
 }
 
-void ROMP_pflb_begin(ROMP_pf_stack_struct *pf_stack,
+void ROMP_pflb_begin(ROMP_pf_stack_struct *  pf_stack,
                      ROMP_pflb_stack_struct *pflb_stack) {}
 
 void ROMP_pflb_end(ROMP_pflb_stack_struct *pflb_stack) {}
@@ -515,7 +515,7 @@ void ROMP_Distributor_begin(ROMP_Distributor *distributor, int lo, int hi,
 
   int i;
   for (i = 0; i < distributor->partialSize; i++) {
-    int step = (hi - lo) / (distributor->partialSize - i);
+    int step                    = (hi - lo) / (distributor->partialSize - i);
     distributor->partials[i].lo = lo;
     distributor->partials[i].hi = (lo += step);
     int j;
@@ -531,7 +531,7 @@ void ROMP_Distributor_end(ROMP_Distributor *distributor) {
     if (!distributor->originals[j])
       continue;
     double sum = *distributor->originals[j];
-    int i;
+    int    i;
     for (i = 0; i < distributor->partialSize; i++) {
       sum += distributor->partials[i].partialSum[j];
     }
@@ -652,15 +652,15 @@ int main(int argc, char* argv[])
 
         // the original loop control
         //
-#define ROMP_VARIABLE originalVariable
-#define ROMP_LO 1
-#define ROMP_HI 10000
+#define ROMP_VARIABLE      originalVariable
+#define ROMP_LO            1
+#define ROMP_HI            10000
 
         // the original reductions
         //
 #define ROMP_SUMREDUCTION0 doubleToSum0
 #define ROMP_SUMREDUCTION1 doubleToSum1
-#define ROMP_LEVEL assume_reproducible
+#define ROMP_LEVEL         assume_reproducible
 
 #ifdef ROMP_SUPPORT_ENABLED
         const int romp_for_line = __LINE__;

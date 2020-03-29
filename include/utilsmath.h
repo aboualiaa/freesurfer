@@ -22,16 +22,16 @@
 #ifndef utilsmath_h
 #define utilsmath_h
 
+#include "diag.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "diag.h"
 #include "proto.h"
 
-#include <iostream>
 #include <climits>
+#include <iostream>
+#include <vnl/algo/vnl_symmetric_eigensystem.h>
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_vector.h>
-#include <vnl/algo/vnl_symmetric_eigensystem.h>
 
 namespace Math {
 //! A simple templated 3D Point class
@@ -143,9 +143,9 @@ void ConvertSurfaceRASToVoxel(MRIS *mris, MRI *mri_template) {
 
   for (int i = 0; i < mris->nvertices; i++) {
     VERTEX const *const vertex = &mris->vertices[i];
-    double cx = vertex->x;
-    double cy = vertex->y;
-    double cz = vertex->z;
+    double              cx     = vertex->x;
+    double              cy     = vertex->y;
+    double              cz     = vertex->z;
 
     // for every surface vertex do this call
     double vx, vy, vz;
@@ -223,33 +223,33 @@ void GetSortedEigenVectors(vnl_symmetric_eigensystem<double> eigenSystem,
                            double *evalues, double *max, double *mid,
                            double *min) {
   vnl_vector<double> _ev(3);
-  int _max = 0, _min = 0, _mid;
-  double maxval = std::numeric_limits<float>::min(),
-         minval = std::numeric_limits<float>::max();
+  int                _max = 0, _min = 0, _mid;
+  double             maxval = std::numeric_limits<float>::min(),
+         minval             = std::numeric_limits<float>::max();
 
   // sort the eigenvector indices according to the eigenvalues
   for (int i = 0; i < 3; i++) {
     double curval = eigenSystem.get_eigenvalue(i);
     if (curval > maxval) {
       maxval = curval;
-      _max = i;
+      _max   = i;
     }
     if (curval < minval) {
       minval = curval;
-      _min = i;
+      _min   = i;
     }
   }
   _mid = 3 - _max - _min; // since there are only 3 indices
 
-  _ev = eigenSystem.get_eigenvector(_max);
+  _ev    = eigenSystem.get_eigenvector(_max);
   max[0] = _ev[0];
   max[1] = _ev[1];
   max[2] = _ev[2];
-  _ev = eigenSystem.get_eigenvector(_mid);
+  _ev    = eigenSystem.get_eigenvector(_mid);
   mid[0] = _ev[0];
   mid[1] = _ev[1];
   mid[2] = _ev[2];
-  _ev = eigenSystem.get_eigenvector(_min);
+  _ev    = eigenSystem.get_eigenvector(_min);
   min[0] = _ev[0];
   min[1] = _ev[1];
   min[2] = _ev[2];
@@ -304,12 +304,12 @@ double DistancePointToFace(VERTEX *v0, VERTEX *v1, VERTEX *v2, double pt[3]) {
   double fA00 = SqrNorm(kEdge0);
   double fA01 = Dot(kEdge0, kEdge1);
   double fA11 = SqrNorm(kEdge1);
-  double fB0 = Dot(kDiff, kEdge0);
-  double fB1 = Dot(kDiff, kEdge1);
-  double fC = SqrNorm(kDiff);
+  double fB0  = Dot(kDiff, kEdge0);
+  double fB1  = Dot(kDiff, kEdge1);
+  double fC   = SqrNorm(kDiff);
   double fDet = fabs(fA00 * fA11 - fA01 * fA01);
-  double fS = fA01 * fB1 - fA11 * fB0;
-  double fT = fA01 * fB0 - fA00 * fB1;
+  double fS   = fA01 * fB1 - fA11 * fB0;
+  double fT   = fA01 * fB0 - fA00 * fB1;
   double fSqrDistance;
 
   if (fS + fT <= fDet) {
@@ -319,22 +319,22 @@ double DistancePointToFace(VERTEX *v0, VERTEX *v1, VERTEX *v2, double pt[3]) {
         if (fB0 < 0.0) {
           fT = 0.0;
           if (-fB0 >= fA00) {
-            fS = 1.0;
+            fS           = 1.0;
             fSqrDistance = fA00 + (2.0) * fB0 + fC;
           } else {
-            fS = -fB0 / fA00;
+            fS           = -fB0 / fA00;
             fSqrDistance = fB0 * fS + fC;
           }
         } else {
           fS = 0.0;
           if (fB1 >= 0.0) {
-            fT = 0.0;
+            fT           = 0.0;
             fSqrDistance = fC;
           } else if (-fB1 >= fA11) {
-            fT = 1.0;
+            fT           = 1.0;
             fSqrDistance = fA11 + (2.0) * fB1 + fC;
           } else {
-            fT = -fB1 / fA11;
+            fT           = -fB1 / fA11;
             fSqrDistance = fB1 * fT + fC;
           }
         }
@@ -342,13 +342,13 @@ double DistancePointToFace(VERTEX *v0, VERTEX *v1, VERTEX *v2, double pt[3]) {
       {
         fS = 0.0;
         if (fB1 >= 0.0) {
-          fT = 0.0;
+          fT           = 0.0;
           fSqrDistance = fC;
         } else if (-fB1 >= fA11) {
-          fT = 1.0;
+          fT           = 1.0;
           fSqrDistance = fA11 + (2.0) * fB1 + fC;
         } else {
-          fT = -fB1 / fA11;
+          fT           = -fB1 / fA11;
           fSqrDistance = fB1 * fT + fC;
         }
       }
@@ -356,13 +356,13 @@ double DistancePointToFace(VERTEX *v0, VERTEX *v1, VERTEX *v2, double pt[3]) {
     {
       fT = 0.0;
       if (fB0 >= 0.0) {
-        fS = 0.0;
+        fS           = 0.0;
         fSqrDistance = fC;
       } else if (-fB0 >= fA00) {
-        fS = 1.0;
+        fS           = 1.0;
         fSqrDistance = fA00 + (2.0) * fB0 + fC;
       } else {
-        fS = -fB0 / fA00;
+        fS           = -fB0 / fA00;
         fSqrDistance = fB0 * fS + fC;
       }
     } else // region 0
@@ -385,25 +385,25 @@ double DistancePointToFace(VERTEX *v0, VERTEX *v1, VERTEX *v2, double pt[3]) {
         fNumer = fTmp1 - fTmp0;
         fDenom = fA00 - 2.0f * fA01 + fA11;
         if (fNumer >= fDenom) {
-          fS = 1.0;
-          fT = 0.0;
+          fS           = 1.0;
+          fT           = 0.0;
           fSqrDistance = fA00 + (2.0) * fB0 + fC;
         } else {
-          fS = fNumer / fDenom;
-          fT = 1.0 - fS;
+          fS           = fNumer / fDenom;
+          fT           = 1.0 - fS;
           fSqrDistance = fS * (fA00 * fS + fA01 * fT + 2.0f * fB0) +
                          fT * (fA01 * fS + fA11 * fT + (2.0) * fB1) + fC;
         }
       } else {
         fS = 0.0;
         if (fTmp1 <= 0.0) {
-          fT = 1.0;
+          fT           = 1.0;
           fSqrDistance = fA11 + (2.0) * fB1 + fC;
         } else if (fB1 >= 0.0) {
-          fT = 0.0;
+          fT           = 0.0;
           fSqrDistance = fC;
         } else {
-          fT = -fB1 / fA11;
+          fT           = -fB1 / fA11;
           fSqrDistance = fB1 * fT + fC;
         }
       }
@@ -415,25 +415,25 @@ double DistancePointToFace(VERTEX *v0, VERTEX *v1, VERTEX *v2, double pt[3]) {
         fNumer = fTmp1 - fTmp0;
         fDenom = fA00 - (2.0) * fA01 + fA11;
         if (fNumer >= fDenom) {
-          fT = 1.0;
-          fS = 0.0;
+          fT           = 1.0;
+          fS           = 0.0;
           fSqrDistance = fA11 + (2.0) * fB1 + fC;
         } else {
-          fT = fNumer / fDenom;
-          fS = 1.0 - fT;
+          fT           = fNumer / fDenom;
+          fS           = 1.0 - fT;
           fSqrDistance = fS * (fA00 * fS + fA01 * fT + (2.0) * fB0) +
                          fT * (fA01 * fS + fA11 * fT + (2.0) * fB1) + fC;
         }
       } else {
         fT = 0.0;
         if (fTmp1 <= 0.0) {
-          fS = 1.0;
+          fS           = 1.0;
           fSqrDistance = fA00 + (2.0) * fB0 + fC;
         } else if (fB0 >= 0.0) {
-          fS = 0.0;
+          fS           = 0.0;
           fSqrDistance = fC;
         } else {
-          fS = -fB0 / fA00;
+          fS           = -fB0 / fA00;
           fSqrDistance = fB0 * fS + fC;
         }
       }
@@ -441,18 +441,18 @@ double DistancePointToFace(VERTEX *v0, VERTEX *v1, VERTEX *v2, double pt[3]) {
     {
       fNumer = fA11 + fB1 - fA01 - fB0;
       if (fNumer <= 0.0) {
-        fS = 0.0;
-        fT = 1.0;
+        fS           = 0.0;
+        fT           = 1.0;
         fSqrDistance = fA11 + (2.0) * fB1 + fC;
       } else {
         fDenom = fA00 - 2.0f * fA01 + fA11;
         if (fNumer >= fDenom) {
-          fS = 1.0;
-          fT = 0.0;
+          fS           = 1.0;
+          fT           = 0.0;
           fSqrDistance = fA00 + (2.0) * fB0 + fC;
         } else {
-          fS = fNumer / fDenom;
-          fT = 1.0 - fS;
+          fS           = fNumer / fDenom;
+          fT           = 1.0 - fS;
           fSqrDistance = fS * (fA00 * fS + fA01 * fT + (2.0) * fB0) +
                          fT * (fA01 * fS + fA11 * fT + (2.0) * fB1) + fC;
         }
@@ -479,15 +479,15 @@ MRI *MRISmaxedgeshell(MRI *mrisrc, MRIS *mris, MRI *mridst, int clearflag) {
      maximum length and store it in an array */
   for (int vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vert_topology = &mris->vertices_topology[vno];
-    VERTEX const *const vert = &mris->vertices[vno];
+    VERTEX const *const          vert          = &mris->vertices[vno];
     /* neighbor m */
     double distance = 0.0; // An edge length obviously has to be atleast 0.0
     for (int nc = 0; nc < vert_topology->vnum; nc++) {
       VERTEX const *const nvert = &mris->vertices[vert_topology->v[nc]];
-      double const xd = vert->x - nvert->x;
-      double const yd = vert->y - nvert->y;
-      double const zd = vert->z - nvert->z;
-      double const _dist = sqrt(xd * xd + yd * yd + zd * zd);
+      double const        xd    = vert->x - nvert->x;
+      double const        yd    = vert->y - nvert->y;
+      double const        zd    = vert->z - nvert->z;
+      double const        _dist = sqrt(xd * xd + yd * yd + zd * zd);
       // length of the edge with max length among its neighbors
       if (_dist > distance)
         distance = _dist;
@@ -501,8 +501,8 @@ MRI *MRISmaxedgeshell(MRI *mrisrc, MRIS *mris, MRI *mridst, int clearflag) {
           double fi, fj, fimnr;
           MRISsurfaceRASToVoxelCached(mris, mrisrc, vert->x + xk, vert->y + yk,
                                       vert->z + zk, &fi, &fj, &fimnr);
-          int i = nint(fi);
-          int j = nint(fj);
+          int i    = nint(fi);
+          int j    = nint(fj);
           int imnr = nint(fimnr);
           if (i >= 0 && i < mridst->width && j >= 0 && j < mridst->height &&
               imnr >= 0 && imnr < mridst->depth)
@@ -517,18 +517,18 @@ MRI *MRISmaxedgeshell(MRI *mrisrc, MRIS *mris, MRI *mridst, int clearflag) {
  * The surface is recreated in the MRI space (mri_dst)
  * from the tesselated surface (mris) as voxels of 255 */
 MRI *MRISbshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst, int clearflag) {
-  int width, height, depth, j, imnr, fno;
-  double x0, y0, z0, x1, y1, z1, x2, y2, z2;
-  double px, py, pz;
-  double a, b, c;
-  double fi, fj, fimnr;
+  int     width, height, depth, j, imnr, fno;
+  double  x0, y0, z0, x1, y1, z1, x2, y2, z2;
+  double  px, py, pz;
+  double  a, b, c;
+  double  fi, fj, fimnr;
   VERTEX *v_0, *v_1, *v_2;
-  FACE *f;
+  FACE *  f;
 
   /* Create new blank MRI or clear existing destination MRI */
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst) {
     /*    printf("MRISshell: Creating new (_dst)MRI...\n");*/
     mri_dst = MRIalloc(width, height, depth, mri_src->type);
@@ -541,7 +541,7 @@ MRI *MRISbshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst, int clearflag) {
   /* Fill each face in MRI volume */
   for (fno = 0; fno < mris->nfaces; fno++) {
     /* Calculate (x,y,z) for each vertex for face */
-    f = &mris->faces[fno];
+    f   = &mris->faces[fno];
     v_0 = &mris->vertices[f->v[0]];
     v_1 = &mris->vertices[f->v[1]];
     v_2 = &mris->vertices[f->v[2]];
@@ -572,8 +572,8 @@ MRI *MRISbshell(MRI *mri_src, MRI_SURFACE *mris, MRI *mri_dst, int clearflag) {
       pz = a * z0 + b * z1 + c * z2;
 
       MRISsurfaceRASToVoxelCached(mris, mri_src, px, py, pz, &fi, &fj, &fimnr);
-      i = nint(fi);
-      j = nint(fj);
+      i    = nint(fi);
+      j    = nint(fj);
       imnr = nint(fimnr);
       if (i >= 0 && i < mri_dst->width && j >= 0 && j < mri_dst->height &&
           imnr >= 0 && imnr < mri_dst->depth)

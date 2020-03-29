@@ -22,16 +22,16 @@
  *
  */
 #include "DialogSaveScreenshot.h"
-#include "ui_DialogSaveScreenshot.h"
-#include "MainWindow.h"
-#include "RenderView.h"
-#include "MyUtils.h"
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QFileInfo>
-#include <QDebug>
-#include <QTimer>
 #include "Layer.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "RenderView.h"
+#include "ui_DialogSaveScreenshot.h"
+#include <QDebug>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QTimer>
 
 DialogSaveScreenshot::DialogSaveScreenshot(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogSaveScreenshot) {
@@ -51,8 +51,7 @@ DialogSaveScreenshot::~DialogSaveScreenshot() {
   delete ui;
 }
 
-QString DialogSaveScreenshot::GetFileName()
-{
+QString DialogSaveScreenshot::GetFileName() {
   QString filename = ui->lineEditFileName->text().trimmed();
   if (!filename.isEmpty())
     return QFileInfo(QDir::current(), filename).absoluteFilePath();
@@ -71,12 +70,12 @@ void DialogSaveScreenshot::SetSettings(SettingsScreenshot s) {
 
 SettingsScreenshot DialogSaveScreenshot::GetSettings() {
   SettingsScreenshot s;
-  s.AntiAliasing = ui->checkBoxAntiAliasing->isChecked();
-  s.HideCursor = ui->checkBoxHideCursor->isChecked();
-  s.HideCoords = ui->checkBoxHideAnnotation->isChecked();
+  s.AntiAliasing  = ui->checkBoxAntiAliasing->isChecked();
+  s.HideCursor    = ui->checkBoxHideCursor->isChecked();
+  s.HideCoords    = ui->checkBoxHideAnnotation->isChecked();
   s.Magnification = ui->spinBoxMagnification->value();
-  s.AutoTrim = ui->checkBoxAutoTrim->isChecked();
-  s.HideScaleBar = ui->checkBoxHideScaleBar->isChecked();
+  s.AutoTrim      = ui->checkBoxAutoTrim->isChecked();
+  s.HideScaleBar  = ui->checkBoxHideScaleBar->isChecked();
 
   return s;
 }
@@ -95,23 +94,20 @@ void DialogSaveScreenshot::OnOpen() {
   }
 }
 
-void DialogSaveScreenshot::OnSave()
-{
+void DialogSaveScreenshot::OnSave() {
   ui->labelProgress->clear();
-  if ( GetFileName().isEmpty() )
-  {
+  if (GetFileName().isEmpty()) {
     QMessageBox::warning(this, "Error", "Please enter file name to be saved.");
     return;
   }
 
   MainWindow *mainwnd = MainWindow::GetMainWindow();
   mainwnd->SetScreenShotSettings(GetSettings());
-  if (ui->checkBoxCycle->isChecked())
-  {
+  if (ui->checkBoxCycle->isChecked()) {
     QString type = mainwnd->GetCurrentLayerType();
-    if (type != "Surface" && type != "MRI")
-    {
-      QMessageBox::warning(this, "Error", "Select a volume or surface as current layer");
+    if (type != "Surface" && type != "MRI") {
+      QMessageBox::warning(this, "Error",
+                           "Select a volume or surface as current layer");
       return;
     }
     m_listLayers = mainwnd->GetLayers(type);
@@ -119,9 +115,9 @@ void DialogSaveScreenshot::OnSave()
       return;
 
     m_listFilenames.clear();
-    for (int i = 0; i < m_listLayers.size(); i++)
-    {
-      m_listFilenames << GetFileName().replace("%name", m_listLayers[i]->GetName());
+    for (int i = 0; i < m_listLayers.size(); i++) {
+      m_listFilenames << GetFileName().replace("%name",
+                                               m_listLayers[i]->GetName());
     }
 
     m_nLayerIndex = 0;
@@ -129,11 +125,13 @@ void DialogSaveScreenshot::OnSave()
     return;
   }
 
-  if (!mainwnd->GetMainView()->
-      SaveScreenShot(GetFileName(), ui->checkBoxAntiAliasing,
-                     ui->spinBoxMagnification->value(), ui->checkBoxAutoTrim->isChecked()))
-  {
-    QMessageBox::warning(this, "Error", "Failed to save screenshot. Please make sure the directory exists and writable.");
+  if (!mainwnd->GetMainView()->SaveScreenShot(
+          GetFileName(), ui->checkBoxAntiAliasing,
+          ui->spinBoxMagnification->value(),
+          ui->checkBoxAutoTrim->isChecked())) {
+    QMessageBox::warning(this, "Error",
+                         "Failed to save screenshot. Please make sure the "
+                         "directory exists and writable.");
     return;
   }
   m_strLastDir = QFileInfo(GetFileName()).absolutePath();
@@ -143,22 +141,18 @@ void DialogSaveScreenshot::OnSave()
   }
 }
 
-void DialogSaveScreenshot::OnSaveLayer()
-{
-   if (m_nLayerIndex < m_listLayers.size())
-   {
-     for (int i = 0; i < m_listLayers.size(); i++)
-     {
-        m_listLayers[i]->SetVisible(i == m_nLayerIndex);
-     }
-     MainWindow::GetMainWindow()->GetMainView()->
-         SaveScreenShot(m_listFilenames[m_nLayerIndex],
-                        ui->checkBoxAntiAliasing,
-                        ui->spinBoxMagnification->value(),
-                        ui->checkBoxAutoTrim->isChecked());
-     m_nLayerIndex++;
-     if (m_nLayerIndex < m_listLayers.size())
-       QTimer::singleShot(250, this, SLOT(OnSaveLayer()));
-   }
-   ui->labelProgress->setText(QString("%1 / %2").arg(m_nLayerIndex).arg(m_listLayers.size()));
+void DialogSaveScreenshot::OnSaveLayer() {
+  if (m_nLayerIndex < m_listLayers.size()) {
+    for (int i = 0; i < m_listLayers.size(); i++) {
+      m_listLayers[i]->SetVisible(i == m_nLayerIndex);
+    }
+    MainWindow::GetMainWindow()->GetMainView()->SaveScreenShot(
+        m_listFilenames[m_nLayerIndex], ui->checkBoxAntiAliasing,
+        ui->spinBoxMagnification->value(), ui->checkBoxAutoTrim->isChecked());
+    m_nLayerIndex++;
+    if (m_nLayerIndex < m_listLayers.size())
+      QTimer::singleShot(250, this, SLOT(OnSaveLayer()));
+  }
+  ui->labelProgress->setText(
+      QString("%1 / %2").arg(m_nLayerIndex).arg(m_listLayers.size()));
 }

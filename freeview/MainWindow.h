@@ -24,10 +24,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QVariantMap>
-#include <QStringList>
 #include "CommonDataStruct.h"
+#include <QMainWindow>
+#include <QStringList>
+#include <QVariantMap>
 
 class QAction;
 class Layer;
@@ -67,49 +67,34 @@ class DialogVolumeSegmentation;
 class BinaryTreeView;
 class WindowLayerInfo;
 
-#define MAX_RECENT_FILES    10
+#define MAX_RECENT_FILES 10
 
-namespace Ui
-{
+namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow( QWidget *parent, MyCmdLineParser* cmdParser );
+  explicit MainWindow(QWidget *parent, MyCmdLineParser *cmdParser);
   ~MainWindow();
 
   enum ViewLayout { VL_1x1 = 0, VL_2x2, VL_1n3, VL_1n3h };
-  enum MainView  { MV_Sagittal = 0, MV_Coronal, MV_Axial, MV_3D };
+  enum MainView { MV_Sagittal = 0, MV_Coronal, MV_Axial, MV_3D };
 
-  static MainWindow* GetMainWindow();
+  static MainWindow *GetMainWindow();
 
-  bool HadError()
-  {
-    return m_bHadError;
-  }
+  bool HadError() { return m_bHadError; }
 
-  void SetHadError(bool b)
-  {
-    m_bHadError = b;
-  }
+  void SetHadError(bool b) { m_bHadError = b; }
 
-  BrushProperty* GetBrushProperty()
-  {
-    return m_propertyBrush;
-  }
+  BrushProperty *GetBrushProperty() { return m_propertyBrush; }
 
-  bool GetSaveCopy()
-  {
-    if (m_settings.contains("SaveCopy"))
-    {
+  bool GetSaveCopy() {
+    if (m_settings.contains("SaveCopy")) {
       return m_settings["SaveCopy"].toBool();
-    }
-    else
-    {
+    } else {
       return true;
     }
   }
@@ -119,141 +104,106 @@ public:
 
   int GetActiveViewId();
 
-  LayerCollection* GetLayerCollection( const QString& strType );
-  Layer* GetActiveLayer( const QString& strType );
-  Layer* GetTopVisibleLayer( const QString& strType );
-  QList<Layer*> GetLayers( const QString& strType );
+  LayerCollection *GetLayerCollection(const QString &strType);
+  Layer *          GetActiveLayer(const QString &strType);
+  Layer *          GetTopVisibleLayer(const QString &strType);
+  QList<Layer *>   GetLayers(const QString &strType);
 
-  bool SetSlicePosition( int nPlane, double dPos, bool bRoundToGrid = true );
-  bool SetSlicePosition( double* pos );
-  bool OffsetSlicePosition( int nPlane, double dPosDiff, bool bRoundToGrid = true );
+  bool SetSlicePosition(int nPlane, double dPos, bool bRoundToGrid = true);
+  bool SetSlicePosition(double *pos);
+  bool OffsetSlicePosition(int nPlane, double dPosDiff,
+                           bool bRoundToGrid = true);
 
-  LUTDataHolder* GetLUTData()
-  {
-    return m_luts;
-  }
+  LUTDataHolder *GetLUTData() { return m_luts; }
 
-  VolumeCropper* GetVolumeCropper()
-  {
-    return m_volumeCropper;
-  }
+  VolumeCropper *GetVolumeCropper() { return m_volumeCropper; }
 
-  void LoadSurfaceCurvatureFile( const QString& filename );
-  void LoadSurfaceOverlayFile( const QString& filename, const QString& reg_file = "", bool bCorrelation = false, bool bSecondHalfData = false );
-  void LoadSurfaceAnnotationFile( const QString& filename );
-  bool LoadSurfaceLabelFile( const QString& filename );
-  void LoadSurfaceVectorFile( const QString& filename );
-  void LoadSurfaceSplineFile( const QString& filename );
-  bool LoadSurfaceRGBMap(const QString& filename = "");
+  void LoadSurfaceCurvatureFile(const QString &filename);
+  void LoadSurfaceOverlayFile(const QString &filename,
+                              const QString &reg_file        = "",
+                              bool           bCorrelation    = false,
+                              bool           bSecondHalfData = false);
+  void LoadSurfaceAnnotationFile(const QString &filename);
+  bool LoadSurfaceLabelFile(const QString &filename);
+  void LoadSurfaceVectorFile(const QString &filename);
+  void LoadSurfaceSplineFile(const QString &filename);
+  bool LoadSurfaceRGBMap(const QString &filename = "");
 
-  void SetDefaultSampleMethod( int nMethod )
-  {
-    m_nDefaultSampleMethod = nMethod;
-  }
+  void SetDefaultSampleMethod(int nMethod) { m_nDefaultSampleMethod = nMethod; }
 
-  void SetDefaultColorMapType(const QString& colormap)
-  {
+  void SetDefaultColorMapType(const QString &colormap) {
     m_strDefaultColorMapType = colormap;
   }
 
-  void SetDefaultConform( bool bConform )
-  {
-    m_bDefaultConform = bConform;
-  }
+  void SetDefaultConform(bool bConform) { m_bDefaultConform = bConform; }
 
-  RenderView* GetRenderView( int n )
-  {
-    return m_views[n];
-  }
+  RenderView *GetRenderView(int n) { return m_views[n]; }
 
-  void SetAction( int nAction );
+  void SetAction(int nAction);
 
-  int GetMainViewId()
-  {
-    return m_nMainView;
-  }
+  int GetMainViewId() { return m_nMainView; }
 
-  RenderView* GetMainView()
-  {
-    return m_views[m_nMainView];
-  }
+  RenderView *GetMainView() { return m_views[m_nMainView]; }
 
-  void RotateVolume( std::vector<RotationElement>& rotations, bool bAllVolumes );
+  void RotateVolume(std::vector<RotationElement> &rotations, bool bAllVolumes);
 
-  void TransformVolume(double* mat, int sample_method);
+  void TransformVolume(double *mat, int sample_method);
 
-  void AddScript(const QStringList& command);
-  void AddScripts(const QList<QStringList>& cmds);
+  void AddScript(const QStringList &command);
+  void AddScripts(const QList<QStringList> &cmds);
 
-  QString AutoSelectLastDir( const QString& subdir );
-  static QString AutoSelectLastDir( const QString& lastdir, const QString& subdir );
+  QString        AutoSelectLastDir(const QString &subdir);
+  static QString AutoSelectLastDir(const QString &lastdir,
+                                   const QString &subdir);
 
-  SettingsScreenshot GetScreenShotSettings()
-  {
-    return m_settingsScreenshot;
-  }
+  SettingsScreenshot GetScreenShotSettings() { return m_settingsScreenshot; }
 
-  void SetScreenShotSettings(SettingsScreenshot s)
-  {
-    m_settingsScreenshot = s;
-  }
+  void SetScreenShotSettings(SettingsScreenshot s) { m_settingsScreenshot = s; }
 
-  bool ParseCommand(int argc, char* argv[], bool bAutoQuit = false);
+  bool ParseCommand(int argc, char *argv[], bool bAutoQuit = false);
 
-  TermWidget* GetCommandConsole()
-  {
-    return m_term;
-  }
+  TermWidget *GetCommandConsole() { return m_term; }
 
-  Layer* GetSupplementLayer(const QString& type);
+  Layer *GetSupplementLayer(const QString &type);
 
   bool IsRepositioningSurface();
 
-  bool GetSplinePicking()
-  {
-    return m_bSplinePicking;
-  }
+  bool GetSplinePicking() { return m_bSplinePicking; }
 
-  QVariantMap GetGeneralSettings()
-  {
-    return m_settings;
-  }
+  QVariantMap GetGeneralSettings() { return m_settings; }
 
-  QVariant GetSetting(const QString& key);
+  QVariant GetSetting(const QString &key);
 
-  void SetSetting(const QString& key, const QVariant& value );
+  void SetSetting(const QString &key, const QVariant &value);
 
-  QList<Layer*> GetSelectedLayers(const QString& layerType);
+  QList<Layer *> GetSelectedLayers(const QString &layerType);
 
   int GetMode();
 
-  QVariantMap GetDefaultSettings()
-  {
-    return m_defaultSettings;
-  }
+  QVariantMap GetDefaultSettings() { return m_defaultSettings; }
 
   QString GetCurrentLayerType();
 
-  void SaveLayers(const QList<Layer*>& layers);
+  void SaveLayers(const QList<Layer *> &layers);
 
-  Layer* FindSupplementLayer(const QString& name);
+  Layer *FindSupplementLayer(const QString &name);
 
 Q_SIGNALS:
-  void MainViewChanged( int n );
-  void ViewLayoutChanged( int n );
+  void MainViewChanged(int n);
+  void ViewLayoutChanged(int n);
   void SlicePositionChanged(bool bCenterView = false);
   void SurfaceRepositionVertexChanged();
   void SurfaceRepositionIntensityChanged();
   void NewVolumeCreated();
   void CycleOverlayRequested();
   void SupplementLayerChanged();
-  void OverlayMaskRequested(const QString& fn);
+  void OverlayMaskRequested(const QString &fn);
   void RefreshLookUpTableRequested();
 
 public slots:
-  void SetMode( int nMode );
-  void SetViewLayout( int n );
-  void SetMainView  ( int n );
+  void SetMode(int nMode);
+  void SetViewLayout(int n);
+  void SetMainView(int n);
   void LoadSurfaceCurvature();
   void LoadSurfaceOverlay(bool bCorrelation = false);
   void LoadSurfaceAnnotation();
@@ -264,17 +214,15 @@ public slots:
   void RequestRedraw();
   bool SaveVolumeAs();
   void SaveVolumeAsAndReload();
-  void SetSaveCopy(bool bSaveCopy)
-  {
-    m_settings["SaveCopy"] = bSaveCopy;
-  }
+  void SetSaveCopy(bool bSaveCopy) { m_settings["SaveCopy"] = bSaveCopy; }
   void SyncZoom(bool bSync);
   void SetUseCommandControl(bool b);
   void SetUnifiedTitleAndToolBar(bool b);
   //  void ShowAllLayers();
   //  void HideAllLayers();
-  bool ParseCommand(const QString& cmd, bool bAutoQuit = false);
-  bool ParseCommand(MyCmdLineParser* parser, const QString& cmd, bool bAutoQuit = false);
+  bool ParseCommand(const QString &cmd, bool bAutoQuit = false);
+  bool ParseCommand(MyCmdLineParser *parser, const QString &cmd,
+                    bool bAutoQuit = false);
 
   void SetProgress(int n);
 
@@ -292,166 +240,164 @@ public slots:
 
   void OnApplyVolumeTransform();
 
-  void CenterAtWorldPosition(double* pos, bool mainview_only = false);
+  void CenterAtWorldPosition(double *pos, bool mainview_only = false);
 
   void OnLoadSurfaceParameterization();
 
   void OnStereoRender(bool bOn);
 
-  void AbortScripts()
-  {
-    ClearScripts();
-  }
+  void AbortScripts() { ClearScripts(); }
 
   void OnExportLabelStats();
 
-  bool ExportLineProfileThickness(const QString& filename, const QVariantMap& options);
+  bool ExportLineProfileThickness(const QString &    filename,
+                                  const QVariantMap &options);
 
 protected:
-  void closeEvent   ( QCloseEvent * event );
-  void resizeEvent  (QResizeEvent * event);
-  void moveEvent    (QMoveEvent * event);
-  void showEvent    (QShowEvent * event);
-  void LoadVolumeFile(  const QString& filename,
-                        const QString& reg_filename = "",
-                        bool bResample = false,
-                        int nSampleMethod = 0,
-                        bool bConform = false,
-                        int nGotoLabelOrientation = -1,
-                        const QString& strGotoLabelName = "",
-                        const QVariantMap& sup_data = QVariantMap());
+  void closeEvent(QCloseEvent *event);
+  void resizeEvent(QResizeEvent *event);
+  void moveEvent(QMoveEvent *event);
+  void showEvent(QShowEvent *event);
+  void LoadVolumeFile(const QString &filename, const QString &reg_filename = "",
+                      bool bResample = false, int nSampleMethod = 0,
+                      bool bConform = false, int nGotoLabelOrientation = -1,
+                      const QString &    strGotoLabelName = "",
+                      const QVariantMap &sup_data         = QVariantMap());
 
-  void LoadDTIFile( const QString& fn_vector,
-                    const QString& fn_fa,
-                    const QString& fn_scale = "",
-                    const QString& reg_fn = "",
-                    bool Resample = true );
-  void LoadVolumeTrackFile( const QString& fn,
-                            bool Resample = false );
+  void LoadDTIFile(const QString &fn_vector, const QString &fn_fa,
+                   const QString &fn_scale = "", const QString &reg_fn = "",
+                   bool Resample = true);
+  void LoadVolumeTrackFile(const QString &fn, bool Resample = false);
 
-  void LoadSurfaceFile( const QString& filename,
-                        const QString& fn_patch = "",
-                        const QString& fn_target = "",
-                        const QStringList& sup_files = QStringList(), const QVariantMap& sup_options = QVariantMap());
-  void LoadPVolumeFiles( const QStringList& filenames, const QString& prefix, const QString& lut );
-  void LoadROIFile( const QString& fn, const QString& ref_vol, const QVariantMap& args = QVariantMap() );
-  void LoadWayPointsFile        ( const QString& fn, const QVariantMap& args = QVariantMap() );
-  void LoadControlPointsFile    ( const QString& fn, const QVariantMap& args = QVariantMap() );
-  void LoadTrackFile            ( const QString& fn );
-  void LoadFCD        ( const QString& subdir, const QString& subject, const QString& suffix = "");
-  void LoadSurfaceParameterization(const QString& filename);
-  void LoadSurfaceCoordsFromParameterization(const QString& filename);
-  void SetVolumeColorMap( int nColorMap, int nColorMapScale, const QList<double>& scales );
-  bool GetCursorRAS( double* ras_out, bool tkReg );
+  void LoadSurfaceFile(const QString &filename, const QString &fn_patch = "",
+                       const QString &    fn_target   = "",
+                       const QStringList &sup_files   = QStringList(),
+                       const QVariantMap &sup_options = QVariantMap());
+  void LoadPVolumeFiles(const QStringList &filenames, const QString &prefix,
+                        const QString &lut);
+  void LoadROIFile(const QString &fn, const QString &ref_vol,
+                   const QVariantMap &args = QVariantMap());
+  void LoadWayPointsFile(const QString &    fn,
+                         const QVariantMap &args = QVariantMap());
+  void LoadControlPointsFile(const QString &    fn,
+                             const QVariantMap &args = QVariantMap());
+  void LoadTrackFile(const QString &fn);
+  void LoadFCD(const QString &subdir, const QString &subject,
+               const QString &suffix = "");
+  void LoadSurfaceParameterization(const QString &filename);
+  void LoadSurfaceCoordsFromParameterization(const QString &filename);
+  void SetVolumeColorMap(int nColorMap, int nColorMapScale,
+                         const QList<double> &scales);
+  bool GetCursorRAS(double *ras_out, bool tkReg);
 
   void RunScript();
   void ClearScripts();
-  void CommandLoadCommand( const QStringList& sa );
-  void CommandLoadSubject( const QStringList& sa );
-  void CommandHideLayer( const QStringList& sa);
-  void CommandUnloadLayer( const QStringList& sa);
-  void CommandLoadVolume( const QStringList& sa );
-  void CommandLoadDTI           ( const QStringList& cmd );
-  void CommandLoadVolumeTrack   ( const QStringList& cmd );
-  void CommandLoadROI           ( const QStringList& cmd );
-  void CommandLoadTrack         ( const QStringList& cmd );
-  void CommandLoadSurface       ( const QStringList& cmd );
-  void CommandLoadSurfaceVector ( const QStringList& cmd );
-  void CommandLoadSurfaceCurvature  ( const QStringList& cmd );
-  void CommandSetSurfaceCurvatureMap(const QStringList& cmd);
-  void CommandLoadSurfaceOverlay( const QStringList& cmd );
-  void CommandLoadSurfaceAnnotation ( const QStringList& cmd );
-  void CommandLoadSurfaceLabel  ( const QStringList& cmd );
-  void CommandLoadSurfaceSpline ( const QStringList& cmd );
-  void CommandLoadSurfaceCoordsFromParameterization ( const QStringList& cmd );
-  void CommandLoadConnectomeMatrix  ( const QStringList& cmd );
-  void CommandLoadFCD           ( const QStringList& cmd );
-  void CommandLoadWayPoints     ( const QStringList& cmd );
-  void CommandLoadControlPoints ( const QStringList& cmd );
-  void CommandLoadPVolumes      ( const QStringList& cmd );
-  void CommandScreenCapture     ( const QStringList& cmd );
-  void CommandFlyThrough        ( const QStringList& cmd );
-  void CommandSetViewport       ( const QStringList& cmd );
-  void CommandSetViewSize       ( const QStringList& cmd );
-  void CommandZoom              ( const QStringList& cmd );
-  void CommandSetRAS            ( const QStringList& cmd );
-  void CommandSetSlice          ( const QStringList& cmd );
-  void CommandWriteSurfaceIntersection( const QStringList& cmd);
-  void CommandSetColorMap       ( const QStringList& cmd );
-  void CommandSetLUT            ( const QStringList& cmd );
-  void CommandSetHeadScaleOptions( const QStringList& sa );
-  void CommandSetOpacity        ( const QStringList& cmd );
-  void CommandSetLabelOutline   ( const QStringList& cmd );
-  void CommandSetSurfaceOverlayMethod     ( const QStringList& cmd );
-  void CommandSetSurfaceOverlayColormap   ( const QStringList& cmd );
-  void CommandSetSurfaceOverlayOpacity    ( const QStringList& cmd );
-  void CommandSetSurfaceOverlayFrame      ( const QStringList& cmd );
-  void CommandSetSurfaceOverlaySmooth     ( const QStringList& cmd );
-  void CommandSetSurfaceOverlayMask      ( const QStringList& cmd );
-  void CommandSetSurfaceOverlayCustom     ( const QStringList& cmd );
-  void CommandSetSurfaceColor   ( const QStringList& cmd );
-  void CommandSetSurfaceEdgeColor ( const QStringList& cmd );
-  void CommandSetSurfaceEdgeThickness ( const QStringList& cmd );
-  void CommandSetSurfaceOpacity ( const QStringList& cmd );
-  void CommandSetSurfaceOffset  ( const QStringList& cmd );
-  void CommandSetSurfaceLabelOutline   ( const QStringList& cmd );
-  void CommandSetSurfaceLabelOpacity   ( const QStringList& cmd );
-  void CommandSetSurfaceAnnotationOutline   ( const QStringList& cmd );
-  void CommandGoToSurfaceVertex        ( const QStringList& cmd );
-  void CommandSetDisplaySurfaceVertex  ( const QStringList& cmd );
-  void CommandHideSurfaceIn3D       ( const QStringList &cmd );
-  void CommandSetSurfaceVertexColor ( const QStringList& cmd );
-  void CommandSetSurfaceLabelColor  ( const QStringList& cmd );
-  void CommandHideSurfaceLabel (const QStringList& cmd );
-  void CommandSetPointSetColor ( const QStringList& cmd );
-  void CommandSetPointSetRadius( const QStringList& cmd );
-  void CommandSetPointSetHeatmap( const QStringList& cmd );
-  void CommandSetDisplayVector  ( const QStringList& cmd );
-  void CommandSetDisplayTensor  ( const QStringList& cmd );
-  void CommandSetDisplayIsoSurface  ( const QStringList& cmd );
-  void CommandSetIsoSurfaceColor( const QStringList& cmd );
-  void CommandSetIsoSurfaceUpsample ( const QStringList& cmd );
-  void CommandSetIsoSurfaceSmooth ( const QStringList& cmd );
-  void CommandSetExtractAllRegions ( const QStringList& cmd );
-  void CommandLoadIsoSurfaceRegion  ( const QStringList& cmd );
-  void CommandLockLayer         ( const QStringList& cmd );
-  void CommandShowLayer         ( const QStringList& cmd );
-  void CommandSetLayerName      ( const QStringList& cmd );
-  void CommandSetVolumeMask     ( const QStringList& cmd );
-  void CommandSetSmoothed       ( const QStringList& cmd );
-  void CommandSetRgb            ( const QStringList& cmd );
-  void CommandGoToLabel         ( const QStringList& cmd );
-  void CommandSaveLayer         ( const QStringList& cmd );
-  void CommandSetTrackColor     ( const QStringList& cmd );
-  void CommandSetTrackRender    ( const QStringList& cmd );
-  void CommandLoadTractCluster  ( const QStringList& cmd );
-  void CommandReorderLayers   ( const QStringList& cmd );
-  void CommandUnloadLayers    ( const QStringList& cmd );
-  void CommandSetActiveFrame    ( const QStringList& cmd );
-  void CommandSetActiveLayer    ( const QStringList& cmd );
-  void CommandExportLineProfileThickness  (const QStringList& cmd);
-  void CommandSetVolumeTrackFrame   ( const QStringList& cmd );
+  void CommandLoadCommand(const QStringList &sa);
+  void CommandLoadSubject(const QStringList &sa);
+  void CommandHideLayer(const QStringList &sa);
+  void CommandUnloadLayer(const QStringList &sa);
+  void CommandLoadVolume(const QStringList &sa);
+  void CommandLoadDTI(const QStringList &cmd);
+  void CommandLoadVolumeTrack(const QStringList &cmd);
+  void CommandLoadROI(const QStringList &cmd);
+  void CommandLoadTrack(const QStringList &cmd);
+  void CommandLoadSurface(const QStringList &cmd);
+  void CommandLoadSurfaceVector(const QStringList &cmd);
+  void CommandLoadSurfaceCurvature(const QStringList &cmd);
+  void CommandSetSurfaceCurvatureMap(const QStringList &cmd);
+  void CommandLoadSurfaceOverlay(const QStringList &cmd);
+  void CommandLoadSurfaceAnnotation(const QStringList &cmd);
+  void CommandLoadSurfaceLabel(const QStringList &cmd);
+  void CommandLoadSurfaceSpline(const QStringList &cmd);
+  void CommandLoadSurfaceCoordsFromParameterization(const QStringList &cmd);
+  void CommandLoadConnectomeMatrix(const QStringList &cmd);
+  void CommandLoadFCD(const QStringList &cmd);
+  void CommandLoadWayPoints(const QStringList &cmd);
+  void CommandLoadControlPoints(const QStringList &cmd);
+  void CommandLoadPVolumes(const QStringList &cmd);
+  void CommandScreenCapture(const QStringList &cmd);
+  void CommandFlyThrough(const QStringList &cmd);
+  void CommandSetViewport(const QStringList &cmd);
+  void CommandSetViewSize(const QStringList &cmd);
+  void CommandZoom(const QStringList &cmd);
+  void CommandSetRAS(const QStringList &cmd);
+  void CommandSetSlice(const QStringList &cmd);
+  void CommandWriteSurfaceIntersection(const QStringList &cmd);
+  void CommandSetColorMap(const QStringList &cmd);
+  void CommandSetLUT(const QStringList &cmd);
+  void CommandSetHeadScaleOptions(const QStringList &sa);
+  void CommandSetOpacity(const QStringList &cmd);
+  void CommandSetLabelOutline(const QStringList &cmd);
+  void CommandSetSurfaceOverlayMethod(const QStringList &cmd);
+  void CommandSetSurfaceOverlayColormap(const QStringList &cmd);
+  void CommandSetSurfaceOverlayOpacity(const QStringList &cmd);
+  void CommandSetSurfaceOverlayFrame(const QStringList &cmd);
+  void CommandSetSurfaceOverlaySmooth(const QStringList &cmd);
+  void CommandSetSurfaceOverlayMask(const QStringList &cmd);
+  void CommandSetSurfaceOverlayCustom(const QStringList &cmd);
+  void CommandSetSurfaceColor(const QStringList &cmd);
+  void CommandSetSurfaceEdgeColor(const QStringList &cmd);
+  void CommandSetSurfaceEdgeThickness(const QStringList &cmd);
+  void CommandSetSurfaceOpacity(const QStringList &cmd);
+  void CommandSetSurfaceOffset(const QStringList &cmd);
+  void CommandSetSurfaceLabelOutline(const QStringList &cmd);
+  void CommandSetSurfaceLabelOpacity(const QStringList &cmd);
+  void CommandSetSurfaceAnnotationOutline(const QStringList &cmd);
+  void CommandGoToSurfaceVertex(const QStringList &cmd);
+  void CommandSetDisplaySurfaceVertex(const QStringList &cmd);
+  void CommandHideSurfaceIn3D(const QStringList &cmd);
+  void CommandSetSurfaceVertexColor(const QStringList &cmd);
+  void CommandSetSurfaceLabelColor(const QStringList &cmd);
+  void CommandHideSurfaceLabel(const QStringList &cmd);
+  void CommandSetPointSetColor(const QStringList &cmd);
+  void CommandSetPointSetRadius(const QStringList &cmd);
+  void CommandSetPointSetHeatmap(const QStringList &cmd);
+  void CommandSetDisplayVector(const QStringList &cmd);
+  void CommandSetDisplayTensor(const QStringList &cmd);
+  void CommandSetDisplayIsoSurface(const QStringList &cmd);
+  void CommandSetIsoSurfaceColor(const QStringList &cmd);
+  void CommandSetIsoSurfaceUpsample(const QStringList &cmd);
+  void CommandSetIsoSurfaceSmooth(const QStringList &cmd);
+  void CommandSetExtractAllRegions(const QStringList &cmd);
+  void CommandLoadIsoSurfaceRegion(const QStringList &cmd);
+  void CommandLockLayer(const QStringList &cmd);
+  void CommandShowLayer(const QStringList &cmd);
+  void CommandSetLayerName(const QStringList &cmd);
+  void CommandSetVolumeMask(const QStringList &cmd);
+  void CommandSetSmoothed(const QStringList &cmd);
+  void CommandSetRgb(const QStringList &cmd);
+  void CommandGoToLabel(const QStringList &cmd);
+  void CommandSaveLayer(const QStringList &cmd);
+  void CommandSetTrackColor(const QStringList &cmd);
+  void CommandSetTrackRender(const QStringList &cmd);
+  void CommandLoadTractCluster(const QStringList &cmd);
+  void CommandReorderLayers(const QStringList &cmd);
+  void CommandUnloadLayers(const QStringList &cmd);
+  void CommandSetActiveFrame(const QStringList &cmd);
+  void CommandSetActiveLayer(const QStringList &cmd);
+  void CommandExportLineProfileThickness(const QStringList &cmd);
+  void CommandSetVolumeTrackFrame(const QStringList &cmd);
 
 public:
-  void CommandSetCamera         ( const QStringList& cmd );
-  void SetViewSize  (int x, int y);
+  void CommandSetCamera(const QStringList &cmd);
+  void SetViewSize(int x, int y);
 
 protected slots:
   void OnIdle();
   void OnAbout();
   void OnRecentVolumeFile();
   void OnRecentSurfaceFile();
-  void OnSetViewLayout( QAction* );
-  void OnSetMainView  ( QAction* );
+  void OnSetViewLayout(QAction *);
+  void OnSetMainView(QAction *);
   void OnNewVolume();
   void OnLoadVolume();
-  bool OnCloseVolume(const QList<Layer*>& layers = QList<Layer*>());
+  bool OnCloseVolume(const QList<Layer *> &layers = QList<Layer *>());
   void OnSaveVolume();
   void OnReloadVolume();
   void OnLoadDTI();
   void OnLoadTrackVolume();
   void OnLoadSurface();
-  void OnCloseSurface(const QList<Layer*>& layers = QList<Layer*>());
+  void OnCloseSurface(const QList<Layer *> &layers = QList<Layer *>());
   void OnReloadSurface();
   void OnLoadPatch();
   void OnSavePatchAs();
@@ -459,17 +405,17 @@ protected slots:
   void OnLoadROI();
   void OnSaveROI();
   void OnSaveROIAs();
-  void OnCloseROI(const QList<Layer*>& layers = QList<Layer*>());
+  void OnCloseROI(const QList<Layer *> &layers = QList<Layer *>());
   void OnNewPointSet();
   void OnLoadPointSet();
   void OnSavePointSet(bool bForce = false);
   void OnSavePointSetAs();
-  void OnClosePointSet(const QList<Layer*>& layers = QList<Layer*>());
+  void OnClosePointSet(const QList<Layer *> &layers = QList<Layer *>());
   void OnLoadTrack();
   void OnCloseTrack();
-  void OnIOError( Layer* layer, int ntype );
-  void OnIOFinished( Layer* layer, int ntype );
-  void OnFCDLoadFinished(LayerFCD* layer);
+  void OnIOError(Layer *layer, int ntype);
+  void OnIOFinished(Layer *layer, int ntype);
+  void OnFCDLoadFinished(LayerFCD *layer);
   void OnCycleLayer();
   void OnReverseCycleLayer();
   void OnSetModeNavigate();
@@ -501,7 +447,7 @@ protected slots:
   void OnSavePoint();
   void OnGoToPoint();
   void OnToolSaveCamera();
-  void OnToolLoadCamera(const QString& fn = "");
+  void OnToolLoadCamera(const QString &fn = "");
   void OnShowAnnotation(bool bShow);
   void OnShowColorBar(bool bShow);
   void OnCopy();
@@ -524,7 +470,7 @@ protected slots:
   void OnSmoothSurface();
   void OnRemoveIntersectionsFromSurface();
   void OnShowLabelStats();
-  void OnSaveIsoSurface(const QString& fn = "");
+  void OnSaveIsoSurface(const QString &fn = "");
   void OnPlot();
   void OnLineProfile();
   void OnCycleSurfaceLabel();
@@ -541,46 +487,36 @@ protected slots:
   void OnLoadConnectomeMatrix();
   void OnCloseConnectomeMatrix();
 
-  void OnActiveLayerChanged(Layer*);
+  void OnActiveLayerChanged(Layer *);
 
-  void SetSlicePosition(double x, double y, double z)
-  {
+  void SetSlicePosition(double x, double y, double z) {
     double ras[3] = {x, y, z};
     SetSlicePosition(ras);
   }
 
-  void SetProcessing( bool bProcessing = true )
-  {
-    m_bProcessing = bProcessing;
-  }
+  void SetProcessing(bool bProcessing = true) { m_bProcessing = bProcessing; }
 
-  void SetProcessingFinished()
-  {
-    SetProcessing(false);
-  }
+  void SetProcessingFinished() { SetProcessing(false); }
 
   void ReassureGeometry();
 
-  void OnVolumeFilterFinished(VolumeFilter* filter);
+  void OnVolumeFilterFinished(VolumeFilter *filter);
 
-  void SlotActivateWindow()
-  {
-    this->activateWindow();
-  }
+  void SlotActivateWindow() { this->activateWindow(); }
 
   void UpdateInfoPanel();
 
-  void OnSurfaceVertexClicked(LayerSurface* surf);
+  void OnSurfaceVertexClicked(LayerSurface *surf);
 
   void On2DCursorClicked();
 
-  void ReorderLayers(const QList<Layer*>& layers);
+  void ReorderLayers(const QList<Layer *> &layers);
 
-  void OnLoadSurfaceLabelRequested(const QString& fn);
+  void OnLoadSurfaceLabelRequested(const QString &fn);
 
   void OnLoadTractCluster();
 
-  void OnTractClusterLoaded(const QVariantMap& data);
+  void OnTractClusterLoaded(const QVariantMap &data);
 
   void ShowTractClusterMap();
 
@@ -592,26 +528,29 @@ protected slots:
 
   void OnViewLayerInfo();
 
-  void UpdateLayerInfo(Layer* layer);
+  void UpdateLayerInfo(Layer *layer);
 
 private:
-  bool DoParseCommand(MyCmdLineParser* parser, bool bAutoQuit);
+  bool DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit);
   void SaveSettings();
   void LoadSettings();
-  void SetCurrentFile( const QString &fileName, int type = 0 );
-  void LoadPointSetFile( const QString& fn, int type, const QVariantMap& args = QVariantMap() );
+  void SetCurrentFile(const QString &fileName, int type = 0);
+  void LoadPointSetFile(const QString &fn, int type,
+                        const QVariantMap &args = QVariantMap());
   void UpdateRecentFileActions();
-  void ToggleShowLayer(const QString& type );
-  void ToggleSpecialVolume(const QString& name);
-  bool UpdateSurfaceCorrelation(LayerSurface* layer);
-  void ShowNonModalMessage(const QString& title, const QString& msg);
-  void LoadConnectomeMatrixFile(const QString& fn_cmat, const QString& fn_parcel, const QString& fn_ctab);
-  void GoToContralateralPoint(LayerSurface* layer);
-  void ConnectMRILayer(LayerMRI* mri);
+  void ToggleShowLayer(const QString &type);
+  void ToggleSpecialVolume(const QString &name);
+  bool UpdateSurfaceCorrelation(LayerSurface *layer);
+  void ShowNonModalMessage(const QString &title, const QString &msg);
+  void LoadConnectomeMatrixFile(const QString &fn_cmat,
+                                const QString &fn_parcel,
+                                const QString &fn_ctab);
+  void GoToContralateralPoint(LayerSurface *layer);
+  void ConnectMRILayer(LayerMRI *mri);
 
-  QColor ParseColorInput(const QString& cmd);
+  QColor ParseColorInput(const QString &cmd);
 
-  void LoadSphereLeftRightIfNeeded(LayerSurface* layer);
+  void LoadSphereLeftRightIfNeeded(LayerSurface *layer);
 
   int m_nViewLayout;
   int m_nMainView;
@@ -620,70 +559,70 @@ public:
   Ui::MainWindow *ui;
 
 private:
-  RenderView*   m_views[4];
+  RenderView *m_views[4];
   //  LayerCollectionManager*   m_layerCollectionManager;
-  QMap<QString, LayerCollection*> m_layerCollections;
-  BrushProperty*    m_propertyBrush;
-  bool              m_bResampleToRAS;
-  int               m_nDefaultSampleMethod;
-  bool              m_bDefaultConform;
-  QString           m_strDefaultColorMapType;
-  LayerMRI*         m_layerVolumeRef;
-  LUTDataHolder*    m_luts;
-  ThreadIOWorker*   m_threadIOWorker;
-  bool              m_bProcessing;
-  VolumeCropper*    m_volumeCropper;
+  QMap<QString, LayerCollection *> m_layerCollections;
+  BrushProperty *                  m_propertyBrush;
+  bool                             m_bResampleToRAS;
+  int                              m_nDefaultSampleMethod;
+  bool                             m_bDefaultConform;
+  QString                          m_strDefaultColorMapType;
+  LayerMRI *                       m_layerVolumeRef;
+  LUTDataHolder *                  m_luts;
+  ThreadIOWorker *                 m_threadIOWorker;
+  bool                             m_bProcessing;
+  VolumeCropper *                  m_volumeCropper;
 
-  QString           m_strLastDir;
-  QString           m_strLastFsgdDir;
-  QList<QAction*>   m_actionRecentVolumes;
-  QList<QAction*>   m_actionRecentSurfaces;
+  QString          m_strLastDir;
+  QString          m_strLastFsgdDir;
+  QList<QAction *> m_actionRecentVolumes;
+  QList<QAction *> m_actionRecentSurfaces;
 
-  QList<QStringList>  m_scripts;
-  bool              m_bScriptRunning;
+  QList<QStringList> m_scripts;
+  bool               m_bScriptRunning;
 
-  bool              m_bSplinePicking;
+  bool m_bSplinePicking;
 
-  MyCmdLineParser*  m_cmdParser;
+  MyCmdLineParser *m_cmdParser;
 
-  ToolWindowEdit*       m_toolWindowEdit;
-  ToolWindowMeasure*    m_toolWindowMeasure;
-  ToolWindowROIEdit*    m_toolWindowROIEdit;
-  DialogTransformVolume*    m_dlgTransformVolume;
-  DialogCropVolume*     m_dlgCropVolume;
-  DialogSaveScreenshot* m_dlgSaveScreenshot;
-  DialogWriteMovieFrames*   m_dlgWriteMovieFrames;
-  DialogPreferences*    m_dlgPreferences;
-  DialogRepositionSurface*  m_dlgRepositionSurface;
-  DialogSmoothSurface*  m_dlgSmoothSurface;
-  FloatingStatusBar*    m_statusBar;
-  TermWidget*           m_term;
-  WindowGroupPlot*      m_wndGroupPlot;
-  DialogLabelStats*     m_dlgLabelStats;
-  DialogLineProfile*    m_dlgLineProfile;
-  DialogSetCamera*      m_dlgSetCamera;
-  DialogThresholdVolume* m_dlgThresholdVolume;
-  DialogVolumeSegmentation* m_dlgVolumeSegmentation;
-  BinaryTreeView*       m_wndTractCluster;
-  WindowQuickReference* m_wndQuickRef;
-  WindowTimeCourse*     m_wndTimeCourse;
-  WindowLayerInfo*      m_wndLayerInfo;
+  ToolWindowEdit *          m_toolWindowEdit;
+  ToolWindowMeasure *       m_toolWindowMeasure;
+  ToolWindowROIEdit *       m_toolWindowROIEdit;
+  DialogTransformVolume *   m_dlgTransformVolume;
+  DialogCropVolume *        m_dlgCropVolume;
+  DialogSaveScreenshot *    m_dlgSaveScreenshot;
+  DialogWriteMovieFrames *  m_dlgWriteMovieFrames;
+  DialogPreferences *       m_dlgPreferences;
+  DialogRepositionSurface * m_dlgRepositionSurface;
+  DialogSmoothSurface *     m_dlgSmoothSurface;
+  FloatingStatusBar *       m_statusBar;
+  TermWidget *              m_term;
+  WindowGroupPlot *         m_wndGroupPlot;
+  DialogLabelStats *        m_dlgLabelStats;
+  DialogLineProfile *       m_dlgLineProfile;
+  DialogSetCamera *         m_dlgSetCamera;
+  DialogThresholdVolume *   m_dlgThresholdVolume;
+  DialogVolumeSegmentation *m_dlgVolumeSegmentation;
+  BinaryTreeView *          m_wndTractCluster;
+  WindowQuickReference *    m_wndQuickRef;
+  WindowTimeCourse *        m_wndTimeCourse;
+  WindowLayerInfo *         m_wndLayerInfo;
 
-  VolumeFilterWorkerThread* m_threadVolumeFilter;
+  VolumeFilterWorkerThread *m_threadVolumeFilter;
 
-  SettingsScreenshot    m_settingsScreenshot;
-  QVariantMap           m_settings;
-  QPoint                m_ptBackUpPos;      // for X11 geometry hack
-  QMessageBox*          m_dlgMessage;
+  SettingsScreenshot m_settingsScreenshot;
+  QVariantMap        m_settings;
+  QPoint             m_ptBackUpPos; // for X11 geometry hack
+  QMessageBox *      m_dlgMessage;
 
-  QMap<int, QVariantMap>  m_layerSettings;
-  QVariantMap           m_defaultSettings;
-  bool                  m_bShowTransformWindow;
+  QMap<int, QVariantMap> m_layerSettings;
+  QVariantMap            m_defaultSettings;
+  bool                   m_bShowTransformWindow;
 
-  bool                  m_bVerbose;
-  bool                  m_bContinue;
+  bool m_bVerbose;
+  bool m_bContinue;
 
-  bool                  m_bHadError;
+  bool m_bHadError;
 };
 
 #endif // MAINWINDOW_H

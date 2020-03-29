@@ -11,12 +11,12 @@ AtlasMeshDeformationOptimizer ::AtlasMeshDeformationOptimizer() {
   m_IterationNumber = 0;
   m_MaximumNumberOfIterations =
       1000 /* itk::NumericTraits< unsigned int >::max() */;
-  m_IterationEventResolution = 10;
-  m_Verbose = false;
-  m_Calculator = nullptr;
+  m_IterationEventResolution        = 10;
+  m_Verbose                         = false;
+  m_Calculator                      = nullptr;
   m_MaximalDeformationStopCriterion = 0.05;
 
-  m_Cost = 0;
+  m_Cost     = 0;
   m_Position = nullptr;
   m_Gradient = nullptr;
 
@@ -48,7 +48,7 @@ void AtlasMeshDeformationOptimizer ::GetCostAndGradient(
   m_Calculator->Rasterize(mesh);
 
   // Retrieve results
-  cost = m_Calculator->GetMinLogLikelihoodTimesPrior();
+  cost     = m_Calculator->GetMinLogLikelihoodTimesPrior();
   gradient = m_Calculator->GetPositionGradient();
 }
 
@@ -147,11 +147,11 @@ double AtlasMeshDeformationOptimizer ::ComputeMaximalDeformation(
 void AtlasMeshDeformationOptimizer ::AddDeformation(
     const AtlasMesh::PointsContainer *position, double alpha,
     const AtlasPositionGradientContainerType *deformationDirection,
-    AtlasMesh::PointsContainer::Pointer &newPosition,
-    double &maximalDeformation) const {
+    AtlasMesh::PointsContainer::Pointer &     newPosition,
+    double &                                  maximalDeformation) const {
   maximalDeformation = 0.0;
-  newPosition = AtlasMesh::PointsContainer::New();
-  AtlasMesh::PointsContainer::ConstIterator posIt = position->Begin();
+  newPosition        = AtlasMesh::PointsContainer::New();
+  AtlasMesh::PointsContainer::ConstIterator         posIt = position->Begin();
   AtlasPositionGradientContainerType::ConstIterator defIt =
       deformationDirection->Begin();
   for (; posIt != position->End(); ++posIt, ++defIt) {
@@ -172,7 +172,7 @@ double AtlasMeshDeformationOptimizer ::ComputeInnerProduct(
     const AtlasPositionGradientContainerType *deformation1,
     const AtlasPositionGradientContainerType *deformation2) const {
 
-  double innerProduct = 0.0;
+  double                                            innerProduct = 0.0;
   AtlasPositionGradientContainerType::ConstIterator defIt1 =
       deformation1->Begin();
   AtlasPositionGradientContainerType::ConstIterator defIt2 =
@@ -193,7 +193,7 @@ AtlasPositionGradientContainerType::Pointer
 AtlasMeshDeformationOptimizer ::LinearlyCombineDeformations(
     const AtlasPositionGradientContainerType *deformation1, double beta1,
     const AtlasPositionGradientContainerType *deformation2,
-    double beta2) const {
+    double                                    beta2) const {
 
   AtlasPositionGradientContainerType::Pointer newDeformation =
       AtlasPositionGradientContainerType::New();
@@ -252,13 +252,13 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
     double startAlpha, double c1, double c2,
     AtlasMesh::PointsContainer::Pointer &newPosition, double &newCost,
     AtlasPositionGradientContainerType::Pointer &newGradient,
-    double &alphaUsed) {
+    double &                                     alphaUsed) {
 
   //
   // Part I: Bracket minimum
   //
-  const double initialAlpha = 0.0;
-  const double initialCost = startCost;
+  const double                                     initialAlpha = 0.0;
+  const double                                     initialCost  = startCost;
   AtlasPositionGradientContainerType::ConstPointer initialGradient =
       startGradient;
   const double initialDirectionalDerivative = this->ComputeInnerProduct(
@@ -268,8 +268,8 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
   }
 
   //
-  double previousAlpha = initialAlpha;
-  double previousCost = initialCost;
+  double                                           previousAlpha = initialAlpha;
+  double                                           previousCost  = initialCost;
   AtlasPositionGradientContainerType::ConstPointer previousGradient =
       initialGradient;
   double previousDirectionalDerivative = initialDirectionalDerivative;
@@ -284,26 +284,26 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
     alpha = alphaMax; // min( alpha1, alphaMax );
   }
 
-  bool bracketingFailed = true;
-  const int maximumOfBracketingIterations = 10;
-  double lowAlpha = 0.0;
-  double lowCost = 0.0;
-  AtlasPositionGradientContainerType::ConstPointer lowGradient = nullptr;
-  double lowDirectionalDerivative = 0.0;
-  double highAlpha = 0.0;
-  double highCost = 0.0;
+  bool      bracketingFailed                                    = true;
+  const int maximumOfBracketingIterations                       = 10;
+  double    lowAlpha                                            = 0.0;
+  double    lowCost                                             = 0.0;
+  AtlasPositionGradientContainerType::ConstPointer lowGradient  = nullptr;
+  double lowDirectionalDerivative                               = 0.0;
+  double highAlpha                                              = 0.0;
+  double highCost                                               = 0.0;
   AtlasPositionGradientContainerType::ConstPointer highGradient = nullptr;
-  double highDirectionalDerivative = 0.0;
+  double highDirectionalDerivative                              = 0.0;
 
   for (int bracketingIterationNumber = 0;
        bracketingIterationNumber < maximumOfBracketingIterations;
        bracketingIterationNumber++) {
     // Evaluate current alpha: [ cost gradient ] = tryFunction( x + alpha * p );
-    AtlasMesh::PointsContainer::Pointer position = nullptr;
-    double maximalDeformation = 0.0;
+    AtlasMesh::PointsContainer::Pointer position           = nullptr;
+    double                              maximalDeformation = 0.0;
     this->AddDeformation(startPosition, alpha, searchDirection, position,
                          maximalDeformation);
-    double cost;
+    double                                      cost;
     AtlasPositionGradientContainerType::Pointer gradient = nullptr;
     this->GetCostAndGradient(position, cost, gradient);
     const double directionalDerivative =
@@ -332,16 +332,16 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
             << maximalDeformation << std::endl;
       }
 
-      lowAlpha = previousAlpha;
-      lowCost = previousCost;
-      lowGradient = previousGradient;
+      lowAlpha                 = previousAlpha;
+      lowCost                  = previousCost;
+      lowGradient              = previousGradient;
       lowDirectionalDerivative = previousDirectionalDerivative;
 
-      highAlpha = alpha;
-      highCost = cost;
-      highGradient = gradient;
+      highAlpha                 = alpha;
+      highCost                  = cost;
+      highGradient              = gradient;
       highDirectionalDerivative = directionalDerivative;
-      bracketingFailed = false;
+      bracketingFailed          = false;
       break;
     }
 
@@ -349,9 +349,9 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
       // Found an excellent solution that we can simply return -- no need for
       // zooming
       newPosition = position;
-      newCost = cost;
+      newCost     = cost;
       newGradient = gradient;
-      alphaUsed = alpha;
+      alphaUsed   = alpha;
       if (m_Verbose) {
         std::cout << "[BRACKETING] Found a really good solution -- no need for "
                      "zooming: "
@@ -369,16 +369,16 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
                      "bad for zooming: "
                   << maximalDeformation << std::endl;
       }
-      lowAlpha = alpha;
-      lowCost = cost;
-      lowGradient = gradient;
+      lowAlpha                 = alpha;
+      lowCost                  = cost;
+      lowGradient              = gradient;
       lowDirectionalDerivative = directionalDerivative;
 
-      highAlpha = previousAlpha;
-      highCost = previousCost;
-      highGradient = previousGradient;
+      highAlpha                 = previousAlpha;
+      highCost                  = previousCost;
+      highGradient              = previousGradient;
       highDirectionalDerivative = previousDirectionalDerivative;
-      bracketingFailed = false;
+      bracketingFailed          = false;
       break;
     }
 
@@ -389,9 +389,9 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
         std::cout << "[BRACKETING] Would need to expand but can't anymore"
                   << std::endl;
       }
-      previousAlpha = alpha;
-      previousCost = cost;
-      previousGradient = gradient;
+      previousAlpha                 = alpha;
+      previousCost                  = cost;
+      previousGradient              = gradient;
       previousDirectionalDerivative = directionalDerivative;
       break;
     }
@@ -460,9 +460,9 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
       }
     }
 
-    previousAlpha = alpha;
-    previousCost = cost;
-    previousGradient = gradient;
+    previousAlpha                 = alpha;
+    previousCost                  = cost;
+    previousGradient              = gradient;
     previousDirectionalDerivative = directionalDerivative;
 
     alpha = newAlpha;
@@ -481,7 +481,7 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
     double dummy = 0.0;
     this->AddDeformation(startPosition, previousAlpha, searchDirection,
                          newPosition, dummy); // xStar = x + previousAlpha * p;
-    newCost = previousCost;
+    newCost     = previousCost;
     newGradient = const_cast<AtlasPositionGradientContainerType *>(
         previousGradient.GetPointer());
     alphaUsed = previousAlpha;
@@ -504,29 +504,29 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
   while (true) {
     // If possibly use minimum of cubic polynomial approximation of function;
     // otherwise bisect
-    double leftAlpha = 0.0;
-    double leftCost = 0.0;
+    double leftAlpha                 = 0.0;
+    double leftCost                  = 0.0;
     double leftDirectionalDerivative = 0.0;
 
-    double rightAlpha = 0.0;
-    double rightCost = 0.0;
+    double rightAlpha                 = 0.0;
+    double rightCost                  = 0.0;
     double rightDirectionalDerivative = 0.0;
 
     if (highAlpha > lowAlpha) {
-      rightAlpha = highAlpha;
-      rightCost = highCost;
+      rightAlpha                 = highAlpha;
+      rightCost                  = highCost;
       rightDirectionalDerivative = highDirectionalDerivative;
 
-      leftAlpha = lowAlpha;
-      leftCost = lowCost;
+      leftAlpha                 = lowAlpha;
+      leftCost                  = lowCost;
       leftDirectionalDerivative = lowDirectionalDerivative;
     } else {
-      leftAlpha = highAlpha;
-      leftCost = highCost;
+      leftAlpha                 = highAlpha;
+      leftCost                  = highCost;
       leftDirectionalDerivative = highDirectionalDerivative;
 
-      rightAlpha = lowAlpha;
-      rightCost = lowCost;
+      rightAlpha                 = lowAlpha;
+      rightCost                  = lowCost;
       rightDirectionalDerivative = lowDirectionalDerivative;
     }
 
@@ -611,11 +611,11 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
 #endif
 
     // Evaluate cost function: [ cost gradient ] = tryFunction( x + alpha * p );
-    AtlasMesh::PointsContainer::Pointer position = nullptr;
-    double maximalDeformation = 0.0;
+    AtlasMesh::PointsContainer::Pointer position           = nullptr;
+    double                              maximalDeformation = 0.0;
     this->AddDeformation(startPosition, alpha, searchDirection, position,
                          maximalDeformation);
-    double cost;
+    double                                      cost;
     AtlasPositionGradientContainerType::Pointer gradient = nullptr;
     this->GetCostAndGradient(position, cost, gradient);
     const double directionalDerivative =
@@ -623,16 +623,16 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
 
     if ((cost > (initialCost + c1 * alpha * initialDirectionalDerivative)) ||
         (cost >= lowCost)) {
-      highAlpha = alpha;
-      highCost = cost;
-      highGradient = gradient;
+      highAlpha                 = alpha;
+      highCost                  = cost;
+      highGradient              = gradient;
       highDirectionalDerivative = directionalDerivative;
     } else {
       if (abs(directionalDerivative) <= (-c2 * initialDirectionalDerivative)) {
         newPosition = position;
-        newCost = cost;
+        newCost     = cost;
         newGradient = gradient;
-        alphaUsed = alpha;
+        alphaUsed   = alpha;
         if (m_Verbose) {
           std::cout << "[ZOOMING] Found a good solution: " << maximalDeformation
                     << std::endl;
@@ -642,16 +642,16 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
       }
 
       if (directionalDerivative * (highAlpha - lowAlpha) >= 0) {
-        highAlpha = lowAlpha;
-        highCost = lowCost;
-        highGradient = lowGradient;
+        highAlpha                 = lowAlpha;
+        highCost                  = lowCost;
+        highGradient              = lowGradient;
         highDirectionalDerivative = lowDirectionalDerivative;
       }
 
       //
-      lowAlpha = alpha;
-      lowCost = cost;
-      lowGradient = gradient;
+      lowAlpha                 = alpha;
+      lowCost                  = cost;
+      lowGradient              = gradient;
       lowDirectionalDerivative = directionalDerivative;
     }
 
@@ -661,7 +661,7 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
       double dummy = 0.0;
       this->AddDeformation(startPosition, lowAlpha, searchDirection,
                            newPosition, dummy); // xStar = x + lowAlpha * p;
-      newCost = lowCost;
+      newCost     = lowCost;
       newGradient = const_cast<AtlasPositionGradientContainerType *>(
           lowGradient.GetPointer());
       alphaUsed = lowAlpha;

@@ -54,7 +54,7 @@ namespace QJsonPrivate {
    ((x & 0xff000000) >> 24))
 #endif
 
-static const Base emptyArray = {{Q_TO_LITTLE_ENDIAN(sizeof(Base))}, {0}, {0}};
+static const Base emptyArray  = {{Q_TO_LITTLE_ENDIAN(sizeof(Base))}, {0}, {0}};
 static const Base emptyObject = {{Q_TO_LITTLE_ENDIAN(sizeof(Base))}, {0}, {0}};
 
 void Data::compact() {
@@ -63,8 +63,8 @@ void Data::compact() {
   if (!compactionCounter)
     return;
 
-  Base *base = header->root();
-  int reserve = 0;
+  Base *base    = header->root();
+  int   reserve = 0;
   if (base->is_object) {
     Object *o = static_cast<Object *>(base);
     for (int i = 0; i < (int)o->length; ++i)
@@ -75,28 +75,28 @@ void Data::compact() {
       reserve += (*a)[i].usedStorage(a);
   }
 
-  int size = sizeof(Base) + reserve + base->length * sizeof(offset);
-  int alloc = sizeof(Header) + size;
-  Header *h = (Header *)malloc(alloc);
-  h->tag = QJsonDocument::BinaryFormatTag;
-  h->version = 1;
-  Base *b = h->root();
-  b->size = size;
-  b->is_object = header->root()->is_object;
-  b->length = base->length;
+  int     size   = sizeof(Base) + reserve + base->length * sizeof(offset);
+  int     alloc  = sizeof(Header) + size;
+  Header *h      = (Header *)malloc(alloc);
+  h->tag         = QJsonDocument::BinaryFormatTag;
+  h->version     = 1;
+  Base *b        = h->root();
+  b->size        = size;
+  b->is_object   = header->root()->is_object;
+  b->length      = base->length;
   b->tableOffset = reserve + sizeof(Array);
 
   int offset = sizeof(Base);
   if (b->is_object) {
-    Object *o = static_cast<Object *>(base);
+    Object *o  = static_cast<Object *>(base);
     Object *no = static_cast<Object *>(b);
 
     for (int i = 0; i < (int)o->length; ++i) {
       no->table()[i] = offset;
 
-      const Entry *e = o->entryAt(i);
-      Entry *ne = no->entryAt(i);
-      int s = e->size();
+      const Entry *e  = o->entryAt(i);
+      Entry *      ne = no->entryAt(i);
+      int          s  = e->size();
       memcpy(ne, e, s);
       offset += s;
       int dataSize = e->value.usedStorage(o);
@@ -107,14 +107,14 @@ void Data::compact() {
       }
     }
   } else {
-    Array *a = static_cast<Array *>(base);
+    Array *a  = static_cast<Array *>(base);
     Array *na = static_cast<Array *>(b);
 
     for (int i = 0; i < (int)a->length; ++i) {
-      const Value &v = (*a)[i];
-      Value &nv = (*na)[i];
-      nv = v;
-      int dataSize = v.usedStorage(a);
+      const Value &v  = (*a)[i];
+      Value &      nv = (*na)[i];
+      nv              = v;
+      int dataSize    = v.usedStorage(a);
       if (dataSize) {
         memcpy((char *)na + offset, v.data(a), dataSize);
         nv.value = offset;
@@ -125,8 +125,8 @@ void Data::compact() {
   Q_ASSERT(offset == (int)b->tableOffset);
 
   free(header);
-  header = h;
-  this->alloc = alloc;
+  header            = h;
+  this->alloc       = alloc;
   compactionCounter = 0;
 }
 
@@ -182,9 +182,9 @@ void Base::removeItems(int pos, int numItems) {
 
 int Object::indexOf(const QString &key, bool *exists) {
   int min = 0;
-  int n = length;
+  int n   = length;
   while (n > 0) {
-    int half = n >> 1;
+    int half   = n >> 1;
     int middle = min + half;
     if (*entryAt(middle) >= key) {
       n = half;
@@ -210,7 +210,7 @@ bool Object::isValid() const {
     if (entryOffset + sizeof(Entry) >= tableOffset)
       return false;
     Entry *e = entryAt(i);
-    int s = e->size();
+    int    s = e->size();
     if (table()[i] + s > tableOffset)
       return false;
     if (!e->value.isValid(this))
@@ -335,7 +335,7 @@ int Value::requiredStorage(QJsonValue &v, bool *compressed) {
     }
     return sizeof(double);
   case QJsonValue::String: {
-    QString s = v.toString();
+    QString s   = v.toString();
     *compressed = QJsonPrivate::useCompressed(s);
     return QJsonPrivate::qStringSize(s, *compressed);
   }

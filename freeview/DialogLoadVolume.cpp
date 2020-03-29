@@ -22,14 +22,13 @@
  *
  */
 #include "DialogLoadVolume.h"
-#include "ui_DialogLoadVolume.h"
+#include "LUTDataHolder.h"
 #include "LayerPropertyMRI.h"
 #include "MainWindow.h"
-#include "LUTDataHolder.h"
 #include "MyUtils.h"
+#include "ui_DialogLoadVolume.h"
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFileDialog>
 #include <QMessageBox>
 
 #include "mri.h"

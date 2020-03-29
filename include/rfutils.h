@@ -25,12 +25,12 @@
 #ifndef RFUTILS_H
 #define RFUTILS_H
 
+#include "colortab.h"
 #include "mri.h"
 #include "transform.h"
-#include "colortab.h"
 
 #include "affine.h"
-#include "rforest.h"
 #include "cma.h"
+#include "rforest.h"
 
 #endif

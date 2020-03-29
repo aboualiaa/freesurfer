@@ -29,8 +29,8 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <limits>
 #include <limits.h>
+#include <limits>
 #include <math.h>
 #include <set>
 #include <sstream>
@@ -65,40 +65,41 @@ public:
   void MatchStreamlineEnds();
   void ComputeHistogram();
   void ComputePriors();
-  void FindCenterStreamline(bool CheckOverlap = true,
+  void FindCenterStreamline(bool CheckOverlap   = true,
                             bool CheckDeviation = true, bool CheckFa = true);
-  void WriteOutputs(const char *OutTrainBase, const char *OutTestBase = nullptr);
+  void WriteOutputs(const char *OutTrainBase,
+                    const char *OutTestBase = nullptr);
   void WriteCenterStreamline(const char *CenterTrkFile, const char *RefTrkFile);
   void WriteEndPoints(const char *OutBase, MRI *RefVol);
   void PrintStreamline(int SubjIndex, int LineIndex);
   std::vector<float> ComputeAvgPath(std::vector<MRI *> &ValueVolumes);
   std::vector<float> ComputeWeightAvgPath(std::vector<MRI *> &ValueVolumes);
   std::vector<float> ComputeAvgCenter(std::vector<MRI *> &ValueVolumes);
-  void WriteValuesPointwise(std::vector<MRI *> &ValueVolumes,
-                            const char *TextFile);
-  int GetVolume();
-  int GetNumStr();
-  int GetLengthMin();
-  int GetLengthMax();
-  float GetLengthAvg();
-  int GetNumStrEnds();
-  int GetLengthMinEnds();
-  int GetLengthMaxEnds();
-  float GetLengthAvgEnds();
-  int GetLengthCenter();
+  void               WriteValuesPointwise(std::vector<MRI *> &ValueVolumes,
+                                          const char *        TextFile);
+  int                GetVolume();
+  int                GetNumStr();
+  int                GetLengthMin();
+  int                GetLengthMax();
+  float              GetLengthAvg();
+  int                GetNumStrEnds();
+  int                GetLengthMinEnds();
+  int                GetLengthMaxEnds();
+  float              GetLengthAvgEnds();
+  int                GetLengthCenter();
 
 private:
-  static const int mDistThresh, mEndDilation;
+  static const int          mDistThresh, mEndDilation;
   static const unsigned int mDiffStep;
-  static const float mLengthCutoff, mLengthRatio, mHausStepRatio,
+  static const float        mLengthCutoff, mLengthRatio, mHausStepRatio,
       mControlStepRatio, mTangentBinSize, mCurvatureBinSize;
 
   const bool mDebug, mUseTruncated;
-  int mNx, mNy, mNz, mNumTrain, mVolume, mNumStr, mLengthMin, mLengthMax,
+  int        mNx, mNy, mNz, mNumTrain, mVolume, mNumStr, mLengthMin, mLengthMax,
       mNumStrEnds, mLengthMinEnds, mLengthMaxEnds, mNumArc, mNumLocal, mNumNear;
-  float mMaskLabel, mDx, mLengthAvg, mLengthAvgEnds;
+  float             mMaskLabel, mDx, mLengthAvg, mLengthAvgEnds;
   std::vector<bool> mIsInEnd1, mIsInEnd2;
-  std::vector<int> mNumLines, mLengths, mMidPoints, mTruncatedLengths,
+  std::vector<int>  mNumLines, mLengths, mMidPoints, mTruncatedLengths,
       mCenterStreamline, mDirLocal, mDirNear, mNumControls;
   std::vector<float> mMeanEnd1, mMeanEnd2, mMeanMid, mVarEnd1, mVarEnd2,
       mVarMid;
@@ -114,12 +115,12 @@ private:
   std::vector<std::set<unsigned int>> mIdsLocal, mIdsNear, //[{6,7}xmNumArc]
       mIdsLocalAll, mIdsNearAll;
   std::vector<MRI *> mRoi1, mRoi2, mAseg, mMask, mTestMask, mTestFa;
-  AffineReg mTestAffineReg;
+  AffineReg          mTestAffineReg;
 #ifndef NO_CVS_UP_IN_HERE
   NonlinReg mTestNonlinReg;
 #endif
   std::vector<AffineReg> mTestBaseReg;
-  MRI *mHistoStr, *mHistoSubj, *mTestBaseMask;
+  MRI *                  mHistoStr, *mHistoSubj, *mTestBaseMask;
 
   void ReadExcludedStreamlines(const char *ExcludeFile);
   void ComputeStats();
@@ -136,21 +137,21 @@ private:
   bool FindPointsOnStreamlineLS(std::vector<int> &Streamline, int NumPoints);
   bool FindPointsOnStreamlineComb(std::vector<int> &Streamline, int NumPoints);
   void
-  TryControlPoint(double &HausDistMin, int IndexPoint, int SearchLag,
-                  std::vector<int> &ControlPointsMax,
-                  std::vector<std::vector<int>::const_iterator> &ControlPoints,
-                  Spline &TrySpline, std::vector<int> &Streamline);
+       TryControlPoint(double &HausDistMin, int IndexPoint, int SearchLag,
+                       std::vector<int> &ControlPointsMax,
+                       std::vector<std::vector<int>::const_iterator> &ControlPoints,
+                       Spline &TrySpline, std::vector<int> &Streamline);
   void ComputeStreamlineSpread(std::vector<int> &ControlPoints);
   void FlipStreamline(std::vector<std::vector<int>>::iterator Streamline);
   bool IsEnd1InMask(std::vector<std::vector<int>>::iterator Streamline,
                     MRI *Mask, MRI *Aseg);
   bool IsEnd2InMask(std::vector<std::vector<int>>::iterator Streamline,
                     MRI *Mask, MRI *Aseg);
-  bool MapPointToBase(std::vector<int>::iterator OutPoint,
+  bool MapPointToBase(std::vector<int>::iterator       OutPoint,
                       std::vector<int>::const_iterator InPoint);
-  bool MapPointToNative(std::vector<int>::iterator OutPoint,
+  bool MapPointToNative(std::vector<int>::iterator       OutPoint,
                         std::vector<int>::const_iterator InPoint,
-                        unsigned int FrameIndex);
+                        unsigned int                     FrameIndex);
   void WritePriors(const char *OutBase, bool UseTruncated);
 };
 

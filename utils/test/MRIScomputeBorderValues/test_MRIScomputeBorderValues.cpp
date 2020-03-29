@@ -2,19 +2,19 @@
 // unit test for MRIScomputeBorderValues - located in utils/mrisurf.c
 //
 
-#include <string>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <string>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "error.h"
-#include "utils.h"
 #include "macros.h"
 #include "mri.h"
 #include "mrisurf.h"
+#include "utils.h"
 
 #ifdef __cplusplus
 }
@@ -32,10 +32,10 @@ int main(int argc, char *argv[]) {
 
   // read args:
   std::string Progname = argv[0];
-  std::string s_mris = argv[1];
-  std::string s_brain = argv[2];
+  std::string s_mris   = argv[1];
+  std::string s_brain  = argv[2];
   std::string s_smooth = argv[3];
-  std::string s_aseg = argv[4];
+  std::string s_aseg   = argv[4];
 
   std::cout << Progname << std::endl;
 
@@ -79,10 +79,10 @@ int main(int argc, char *argv[]) {
   }
 
   // check averages of val, d, and mean across all vertices with nonzero val:
-  int vno, vtot = 0;
+  int     vno, vtot = 0;
   VERTEX *v;
-  float val_sum = 0, d_sum = 0, mean_sum = 0;
-  float val_avg, d_avg, mean_avg;
+  float   val_sum = 0, d_sum = 0, mean_sum = 0;
+  float   val_avg, d_avg, mean_avg;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -95,8 +95,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  val_avg = val_sum / vtot;
-  d_avg = d_sum / vtot;
+  val_avg  = val_sum / vtot;
+  d_avg    = d_sum / vtot;
   mean_avg = mean_sum / vtot;
 
   std::cout << "\ncomputing stats for comparison:\n";

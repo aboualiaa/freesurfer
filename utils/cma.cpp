@@ -24,15 +24,15 @@
  *
  */
 
+#include "error.h"
+#include "fio.h"
+#include "gtm.h"
+#include "mrisutils.h"
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include "error.h"
-#include "fio.h"
-#include "gtm.h"
-#include "mrisutils.h"
 
 /* see ch notebook 2 */
 
@@ -50,7 +50,7 @@ extern int errno;
 
 int CMAfreeOutlineField(CMAoutlineField **of) {
   CMAoutlineField *ofp;
-  int i;
+  int              i;
 
   ofp = *of;
 
@@ -86,18 +86,18 @@ int CMAfreeOutlineField(CMAoutlineField **of) {
 
 CMAoutlineField *CMAoutlineFieldAlloc(int width, int height) {
   CMAoutlineField *of;
-  int i;
+  int              i;
 
   of = (CMAoutlineField *)malloc(sizeof(CMAoutlineField));
   if (of == nullptr)
     ErrorReturn(NULL, (ERROR_NOMEMORY,
                        "CMAoutlineFieldAlloc(): error allocating structure"));
 
-  of->claim_field = nullptr;
-  of->fill_field = nullptr;
+  of->claim_field          = nullptr;
+  of->fill_field           = nullptr;
   of->outline_points_field = nullptr;
-  of->width = width;
-  of->height = height;
+  of->width                = width;
+  of->height               = height;
 
   of->claim_field =
       (CMAoutlineClaim **)malloc(height * sizeof(CMAoutlineClaim *));
@@ -204,7 +204,7 @@ int CMAfill(CMAoutlineField *field, short seed_x, short seed_y) {
 
 int CMAclaimPoints(CMAoutlineField *field, short label, short *points,
                    int n_points, short seed_x, short seed_y) {
-  int i, j;
+  int   i, j;
   short x, y;
 
   if (label < 0 || label > MAX_CMA_LABEL)
@@ -237,7 +237,7 @@ int CMAclaimPoints(CMAoutlineField *field, short label, short *points,
       ErrorReturn(
           ERROR_BADPARM,
           (ERROR_BADPARM, "CMAclaimPoints(): outline point out of range (y)"));
-    field->fill_field[y][x] = CMA_FILL_OUTLINE;
+    field->fill_field[y][x]           = CMA_FILL_OUTLINE;
     field->outline_points_field[y][x] = 1;
   }
 
@@ -246,9 +246,9 @@ int CMAclaimPoints(CMAoutlineField *field, short label, short *points,
   for (i = 0; i < field->width; i++) {
     for (j = 0; j < field->height; j++) {
       if (field->fill_field[j][i] == CMA_FILL_INTERIOR) {
-        field->claim_field[j][i].n_claims = 1;
+        field->claim_field[j][i].n_claims            = 1;
         field->claim_field[j][i].interior_claim_flag = TRUE;
-        field->claim_field[j][i].claim_labels[0] = label;
+        field->claim_field[j][i].claim_labels[0]     = label;
       }
 
       if (field->fill_field[j][i] == CMA_FILL_OUTLINE) {
@@ -279,7 +279,7 @@ int CMAvalueClaims(CMAoutlineClaim *claim) {
       claim->claim_values[0] = 1.0;
     else {
       claim->claim_values[0] = 0.5;
-      claim->no_label_claim = 0.5;
+      claim->no_label_claim  = 0.5;
     }
   } else {
     float ct = 1.0 / (float)claim->n_claims;
@@ -322,7 +322,7 @@ short CMAtotalClaims(CMAoutlineField *field, int x, int y) {
   float claim_totals[MAX_CMA_LABEL + 1];
   float best_claim;
   short best_index;
-  int i;
+  int   i;
 
   if (x < 0 || x >= field->width)
     ErrorReturn(-1,
@@ -420,7 +420,7 @@ int insert_ribbon_into_aseg(MRI *mri_src_aseg, MRI *mri_aseg,
                             MRI_SURFACE *mris_white, MRI_SURFACE *mris_pial,
                             int hemi) {
   MRI *mri_ribbon, *mri_white;
-  int x, y, z, gm_label, wm_label, label, nbr_label, dont_change;
+  int  x, y, z, gm_label, wm_label, label, nbr_label, dont_change;
 
   if (mri_src_aseg != mri_aseg)
     mri_aseg = MRIcopy(mri_src_aseg, mri_aseg);
@@ -430,7 +430,7 @@ int insert_ribbon_into_aseg(MRI *mri_src_aseg, MRI *mri_aseg,
   wm_label = hemi == LEFT_HEMISPHERE ? Left_Cerebral_White_Matter
                                      : Right_Cerebral_White_Matter;
 
-  mri_white = MRIclone(mri_aseg, nullptr);
+  mri_white  = MRIclone(mri_aseg, nullptr);
   mri_ribbon = MRISribbon(mris_white, mris_pial, mri_aseg, nullptr);
   MRISfillInterior(mris_white, mri_aseg->xsize, mri_white);
 
@@ -451,7 +451,7 @@ int insert_ribbon_into_aseg(MRI *mri_src_aseg, MRI *mri_aseg,
               for (yk = -1; yk <= 1; yk++) {
                 yi = mri_aseg->yi[yk + y];
                 for (zk = -1; zk <= 1; zk++) {
-                  zi = mri_aseg->zi[zk + z];
+                  zi        = mri_aseg->zi[zk + z];
                   nbr_label = (int)MRIgetVoxVal(mri_aseg, xi, yi, zi, 0);
                   switch (nbr_label) {
                   default:
@@ -574,9 +574,9 @@ volume would have been truncated and affecting the total.
 everything inside the pial surf.
 */
 double SupraTentorialVolCorrection(MRI *aseg, MRI *ribbon) {
-  int c, r, s, SegId;
+  int    c, r, s, SegId;
   double vol = 0;
-  int RibbonVal;
+  int    RibbonVal;
   double VoxSize; // was int
 
   VoxSize = aseg->xsize * aseg->ysize * aseg->zsize;
@@ -683,9 +683,9 @@ volume would have been truncated and affecting the total.
 \param hemi - 1=left, 2=right
 */
 double CorticalGMVolCorrection(MRI *aseg, MRI *ribbon, int hemi) {
-  int c, r, s, SegId;
+  int    c, r, s, SegId;
   double vol = 0, vol2 = 0;
-  int RibbonVal;
+  int    RibbonVal;
   double VoxSize;
 
   VoxSize = aseg->xsize * aseg->ysize * aseg->zsize;
@@ -1109,14 +1109,14 @@ volume geometry. See MRIasegContraLatLabel().
 */
 MRI *MRIlrswapAseg(MRI *aseg) {
   MRI *asegswap;
-  int c, r, s, id, id2;
+  int  c, r, s, id, id2;
 
   asegswap = MRIclone(aseg, nullptr);
 
   for (c = 0; c < aseg->width; c++) {
     for (r = 0; r < aseg->height; r++) {
       for (s = 0; s < aseg->depth; s++) {
-        id = MRIgetVoxVal(aseg, c, r, s, 0);
+        id  = MRIgetVoxVal(aseg, c, r, s, 0);
         id2 = MRIasegContraLatLabel(id);
         if (id2 == -1)
           id2 = id;
@@ -1169,34 +1169,34 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
   };
 
   std::string fname = subjfile("surf/lh.white");
-  MRIS *mris = MRISread(fname.c_str());
+  MRIS *      mris  = MRISread(fname.c_str());
   if (!mris)
     fs::fatal() << "cannot compute vol stats without " << fname;
   double lhwhitevolTot = MRISvolumeInSurf(mris);
   MRISfree(&mris);
 
   fname = subjfile("surf/rh.white");
-  mris = MRISread(fname.c_str());
+  mris  = MRISread(fname.c_str());
   if (!mris)
     fs::fatal() << "cannot compute vol stats without " << fname;
   double rhwhitevolTot = MRISvolumeInSurf(mris);
   MRISfree(&mris);
 
   fname = subjfile("surf/lh.pial");
-  mris = MRISread(fname.c_str());
+  mris  = MRISread(fname.c_str());
   if (!mris)
     fs::fatal() << "cannot compute vol stats without " << fname;
   double lhpialvolTot = MRISvolumeInSurf(mris);
   MRISfree(&mris);
 
   fname = subjfile("surf/rh.pial");
-  mris = MRISread(fname.c_str());
+  mris  = MRISread(fname.c_str());
   if (!mris)
     fs::fatal() << "cannot compute vol stats without " << fname;
   double rhpialvolTot = MRISvolumeInSurf(mris);
   MRISfree(&mris);
 
-  fname = subjfile("mri/brainmask.mgz");
+  fname          = subjfile("mri/brainmask.mgz");
   MRI *brainmask = MRIread(fname.c_str());
   if (!brainmask)
     fs::fatal() << "cannot compute vol stats without " << fname;
@@ -1214,20 +1214,20 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
     fs::fatal() << "cannot compute vol stats without " << fname;
 
   MRI *ribbon, *asegfixed;
-  int ribbonRead;
+  int  ribbonRead;
   fname = subjfile("mri/ribbon.mgz");
   if (fio_FileExistsReadable(fname.c_str())) {
     ribbon = MRIread(fname.c_str());
     if (!ribbon)
       fs::fatal() << "cannot compute vol stats without " << fname;
-    asegfixed = MRIfixAsegWithRibbon(aseg, ribbon, nullptr);
+    asegfixed  = MRIfixAsegWithRibbon(aseg, ribbon, nullptr);
     ribbonRead = 1;
   } else {
     fs::warning()
         << fname
         << " does not exist - ribbon based measurements will be inaccurate";
-    ribbon = aseg;
-    asegfixed = aseg;
+    ribbon     = aseg;
+    asegfixed  = aseg;
     ribbonRead = 0;
   }
   double VoxelVol = aseg->xsize * aseg->ysize * aseg->zsize;
@@ -1235,31 +1235,31 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
       << "ComputeBrainVolumeStats using version with fixed volume (VoxelVol="
       << VoxelVol << ")" << std::endl;
 
-  double lhCtxGMCor = 0;
-  double rhCtxGMCor = 0;
-  double lhCtxWMCor = 0;
-  double rhCtxWMCor = 0;
-  double lhCtxGMCount = 0;
-  double rhCtxGMCount = 0;
-  double lhCtxWMCount = 0;
-  double rhCtxWMCount = 0;
-  double CCVol = 0;
-  double SubCortGMVol = 0;
-  double CerebellumVol = 0;
+  double lhCtxGMCor      = 0;
+  double rhCtxGMCor      = 0;
+  double lhCtxWMCor      = 0;
+  double rhCtxWMCor      = 0;
+  double lhCtxGMCount    = 0;
+  double rhCtxGMCount    = 0;
+  double lhCtxWMCount    = 0;
+  double rhCtxWMCount    = 0;
+  double CCVol           = 0;
+  double SubCortGMVol    = 0;
+  double CerebellumVol   = 0;
   double CerebellumGMVol = 0;
-  double VentChorVol = 0;
-  double BrainSegVol = 0;
-  double MaskVol = 0;
-  double VesselVol = 0;
-  double OptChiasmVol = 0;
-  double CSFVol = 0;
-  double TFFC = 0;
+  double VentChorVol     = 0;
+  double BrainSegVol     = 0;
+  double MaskVol         = 0;
+  double VesselVol       = 0;
+  double OptChiasmVol    = 0;
+  double CSFVol          = 0;
+  double TFFC            = 0;
   for (int c = 0; c < aseg->width; c++) {
     for (int r = 0; r < aseg->height; r++) {
       for (int s = 0; s < aseg->depth; s++) {
-        double asegid = MRIgetVoxVal(aseg, c, r, s, 0);
+        double asegid      = MRIgetVoxVal(aseg, c, r, s, 0);
         double asegfixedid = MRIgetVoxVal(asegfixed, c, r, s, 0);
-        double ribbonid = MRIgetVoxVal(ribbon, c, r, s, 0);
+        double ribbonid    = MRIgetVoxVal(ribbon, c, r, s, 0);
         // Corpus Callosum
         if (asegid == 251 || asegid == 252 || asegid == 253 || asegid == 254 ||
             asegid == 255)
@@ -1352,8 +1352,8 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
 
   // Supratentorial volume is everything inside the pial surface plus
   // stuff that is ouside the surface but still in the ST (eg, hippo, amyg)
-  double SupraTentVolCor = SupraTentorialVolCorrection(aseg, ribbon);
-  double SupraTentVol = lhpialvolTot + rhpialvolTot + SupraTentVolCor;
+  double SupraTentVolCor     = SupraTentorialVolCorrection(aseg, ribbon);
+  double SupraTentVol        = lhpialvolTot + rhpialvolTot + SupraTentVolCor;
   double SupraTentVolNotVent = SupraTentVol - VentChorVol;
   // Estimated STV based - should these be exactly the same? Might depend on how
   // much of CSF and OptChiasm are in or out of the surface.
@@ -1439,8 +1439,8 @@ static const std::string brainVolumeStatsFilename = "stats/brainvol.stats";
   bit time consuming).
 */
 void CacheBrainVolumeStats(const std::vector<double> &stats,
-                           const std::string &subject,
-                           const std::string &subjdir) {
+                           const std::string &        subject,
+                           const std::string &        subjdir) {
   // cache brain volume stats in subject/stats/brainvol.stats
   std::string filename =
       subjdir + "/" + subject + "/" + brainVolumeStatsFilename;
@@ -1534,15 +1534,15 @@ std::vector<double> ReadCachedBrainVolumeStats(const std::string &subject,
       "VentricleChoroidVol, VentricleChoroidVol"               // 15
   };
 
-  int nstats = volumeNames.size();
+  int                 nstats = volumeNames.size();
   std::vector<double> stats(nstats, -1.0);
 
   for (std::string line; getline(statsfile, line);) {
     for (int i = 0; i < nstats; i++) {
       if (line.find(volumeNames[i]) != std::string::npos) {
         std::stringstream ss(line);
-        std::string word;
-        double volume;
+        std::string       word;
+        double            volume;
         while (!ss.eof()) {
           ss >> word;
           word.pop_back();
@@ -1696,7 +1696,7 @@ int CheckSegTissueType(MRI *seg, COLOR_TABLE *ct) {
 */
 MRI **MRIdilateSegWithinTT(MRI *seg, int nDils, COLOR_TABLE *ct, MRI **r) {
   MRI *segtt = nullptr;
-  int nc, tt;
+  int  nc, tt;
   // char tmpstr[1000];
 
   if (ct->ctabTissueType == nullptr) {
@@ -1732,11 +1732,11 @@ MRI **MRIdilateSegWithinTT(MRI *seg, int nDils, COLOR_TABLE *ct, MRI **r) {
 */
 int Seg2NbrNonBrainWrapper(char *subject, char *segname, COLOR_TABLE *ctab,
                            char *statname, double threshmm) {
-  char *SUBJECTS_DIR, tmpstr[2000];
-  MRI *seg, *mritmp;
-  int nReplace, SrcReplace[1000], TrgReplace[1000];
+  char *   SUBJECTS_DIR, tmpstr[2000];
+  MRI *    seg, *mritmp;
+  int      nReplace, SrcReplace[1000], TrgReplace[1000];
   SEGSTAT *segstat;
-  FILE *fp;
+  FILE *   fp;
 
   printf("Seg2NbrNonBrainWrapper()  %s %s %s %g\n", subject, segname, statname,
          threshmm);
@@ -1789,22 +1789,22 @@ int Seg2NbrNonBrainWrapper(char *subject, char *segname, COLOR_TABLE *ctab,
   be counted multiple times.
 */
 SEGSTAT *Seg2NbrNonBrain(MRI *seg, COLOR_TABLE *ctab, double threshmm) {
-  int c, r, s, cB, rB, sB, nthseg, segno, segnoB, FreeCTab;
-  int *segnolist, *count, *segcount, nsegs;
-  double threshvox, d2, dc2, dr2, dc, dr, ds, voxsize, threshmm2;
-  int cBmin, cBmax, rBmin, rBmax, sBmin, sBmax;
+  int      c, r, s, cB, rB, sB, nthseg, segno, segnoB, FreeCTab;
+  int *    segnolist, *count, *segcount, nsegs;
+  double   threshvox, d2, dc2, dr2, dc, dr, ds, voxsize, threshmm2;
+  int      cBmin, cBmax, rBmin, rBmax, sBmin, sBmax;
   SEGSTAT *segstat;
-  MRI *hitmap;
+  MRI *    hitmap;
 
   FreeCTab = 0;
   if (ctab == nullptr) {
-    ctab = TissueTypeSchema(nullptr, "default-jan-2014+head");
+    ctab     = TissueTypeSchema(nullptr, "default-jan-2014+head");
     FreeCTab = 1;
   }
 
   segnolist = MRIsegIdListNot0(seg, &nsegs, 0);
-  count = (int *)calloc(nsegs, sizeof(int));
-  segcount = (int *)calloc(nsegs, sizeof(int));
+  count     = (int *)calloc(nsegs, sizeof(int));
+  segcount  = (int *)calloc(nsegs, sizeof(int));
 
   threshmm2 = threshmm * threshmm; // distance threshold squared
 
@@ -1858,10 +1858,10 @@ SEGSTAT *Seg2NbrNonBrain(MRI *seg, COLOR_TABLE *ctab, double threshmm) {
 
         // Loop through the cube
         for (cB = cBmin; cB < cBmax; cB++) {
-          dc = seg->xsize * (c - cB);
+          dc  = seg->xsize * (c - cB);
           dc2 = (dc * dc);
           for (rB = rBmin; rB < rBmax; rB++) {
-            dr = seg->ysize * (r - rB);
+            dr  = seg->ysize * (r - rB);
             dr2 = (dr * dr);
             for (sB = sBmin; sB < sBmax; sB++) {
               segnoB = MRIgetVoxVal(seg, cB, rB, sB, 0);
@@ -1892,23 +1892,23 @@ SEGSTAT *Seg2NbrNonBrain(MRI *seg, COLOR_TABLE *ctab, double threshmm) {
   fflush(stdout);
   MRIfree(&hitmap);
 
-  segstat = (SEGSTAT *)calloc(sizeof(SEGSTAT), 1);
-  segstat->nentries = nsegs;
-  segstat->entry = (STATSUMENTRY *)calloc(sizeof(STATSUMENTRY), nsegs);
-  segstat->UseName = 1;
-  segstat->IsSurf = 0;
+  segstat              = (SEGSTAT *)calloc(sizeof(SEGSTAT), 1);
+  segstat->nentries    = nsegs;
+  segstat->entry       = (STATSUMENTRY *)calloc(sizeof(STATSUMENTRY), nsegs);
+  segstat->UseName     = 1;
+  segstat->IsSurf      = 0;
   segstat->DoIntensity = 1;
-  segstat->InIntensityName = "SegVolInBrain";
+  segstat->InIntensityName  = "SegVolInBrain";
   segstat->InIntensityUnits = "mm3";
   for (nthseg = 0; nthseg < nsegs; nthseg++) {
     segno = segnolist[nthseg];
     // printf("%3d %4d %d %-25s
     // %5d\n",nthseg,segno,ctab->entries[segno]->TissueType,ctab->entries[segno]->name,count[nthseg]);
     sprintf(segstat->entry[nthseg].name, "%s", ctab->entries[segno]->name);
-    segstat->entry[nthseg].id = segno;
+    segstat->entry[nthseg].id    = segno;
     segstat->entry[nthseg].nhits = count[nthseg];
-    segstat->entry[nthseg].vol = count[nthseg] * voxsize;
-    segstat->entry[nthseg].mean = segcount[nthseg] * voxsize;
+    segstat->entry[nthseg].vol   = count[nthseg] * voxsize;
+    segstat->entry[nthseg].mean  = segcount[nthseg] * voxsize;
   }
 
   free(segnolist);

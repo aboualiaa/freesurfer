@@ -31,14 +31,14 @@ _Pragma("GCC diagnostic ignored \"-Wunused-function\"");
 static void SORT_NAME_small(SORT_ELEMENT *elts, size_t size) {
   while (size > 1) {
     SORT_ELEMENT elt_0 = elts[0], least = elt_0;
-    size_t least_i = 0, i;
+    size_t       least_i = 0, i;
     for (i = 1; i < size; i++) {
       if (SORT_LE(least, elts[i]))
         continue;
-      least = elts[i];
+      least   = elts[i];
       least_i = i;
     }
-    elts[0] = least;
+    elts[0]       = least;
     elts[least_i] = elt_0;
     size--;
     elts++;
@@ -63,7 +63,7 @@ static size_t SORT_NAME_partition(SORT_ELEMENT *elts, size_t size)
   if (size < 100) {
     splitter = elts[size / 2];
   } else {
-    size_t step = size / 8;
+    size_t       step = size / 8;
     SORT_ELEMENT sample[5];
     sample[0] = elts[step * 0];
     sample[1] = elts[step * 1];
@@ -97,8 +97,8 @@ Partition:;
     // elts[lo] > splitter, elts[hi-1] <= splitter, so swap them and skip over
     // them.
     SORT_ELEMENT temp = elts[lo];
-    elts[lo] = elts[hi - 1];
-    elts[hi - 1] = temp;
+    elts[lo]          = elts[hi - 1];
+    elts[hi - 1]      = temp;
     lo++;
     hi--;
   }
@@ -142,33 +142,33 @@ static void SORT_NAME(SORT_ELEMENT *elts, size_t size, bool useThreads) {
   //
   if (useThreads && size > 10000) {
 #define PARTITIONS_CAPACITY 16
-    size_t losA[PARTITIONS_CAPACITY], sizesA[PARTITIONS_CAPACITY];
-    size_t losB[PARTITIONS_CAPACITY], sizesB[PARTITIONS_CAPACITY];
+    size_t  losA[PARTITIONS_CAPACITY], sizesA[PARTITIONS_CAPACITY];
+    size_t  losB[PARTITIONS_CAPACITY], sizesB[PARTITIONS_CAPACITY];
     size_t *losIn = losA, *sizesIn = sizesA;
     size_t *losOut = losB, *sizesOut = sizesB;
-    size_t nPartitions = 1;
-    losIn[nPartitions - 1] = 0;
+    size_t  nPartitions      = 1;
+    losIn[nPartitions - 1]   = 0;
     sizesIn[nPartitions - 1] = size;
     while (2 * nPartitions <= PARTITIONS_CAPACITY) {
       unsigned int p;
 #pragma omp parallel for schedule(guided)
       for (p = 0; p < nPartitions; p++) {
-        size_t lo = losIn[p];
-        size_t middle = SORT_NAME_partition(&elts[lo], sizesIn[p]);
-        losOut[2 * p + 0] = lo;
+        size_t lo           = losIn[p];
+        size_t middle       = SORT_NAME_partition(&elts[lo], sizesIn[p]);
+        losOut[2 * p + 0]   = lo;
         sizesOut[2 * p + 0] = middle;
-        losOut[2 * p + 1] = lo + middle;
+        losOut[2 * p + 1]   = lo + middle;
         sizesOut[2 * p + 1] = sizesIn[p] - middle;
       }
       // Have doubled the number of partitions
       nPartitions *= 2;
       // Swap the ins and the outs
       size_t *temp;
-      temp = losIn;
-      losIn = losOut;
-      losOut = temp;
-      temp = sizesIn;
-      sizesIn = sizesOut;
+      temp     = losIn;
+      losIn    = losOut;
+      losOut   = temp;
+      temp     = sizesIn;
+      sizesIn  = sizesOut;
       sizesOut = temp;
     }
     unsigned int p;

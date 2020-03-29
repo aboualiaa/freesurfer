@@ -99,18 +99,18 @@ int ghi(char *header, int offset) {
 /*------------------------------------------------------------*/
 /* Get Header (float) */
 float ghf(char *header, int offset) {
-#define sign_bit 020000000000
+#define sign_bit  020000000000
 #define dmantissa 077777777
 #define dexponent 0177
-#define dmantlen 24
+#define dmantlen  24
 #define smantissa 037777777
 #define sexponent 0377
-#define smantlen 23
+#define smantlen  23
 
   union {
     float ff;
-    long ii;
-    char buf[4];
+    long  ii;
+    char  buf[4];
   } thing;
   long k;
   long dg_exp, dg_sign, dg_mantissa;
@@ -121,11 +121,11 @@ float ghf(char *header, int offset) {
   thing.buf[1] = *(header + (2 * offset) + 1);
   thing.buf[2] = *(header + (2 * offset) + 2);
   thing.buf[3] = *(header + (2 * offset) + 3);
-  thing.ff = orderFloatBytes(thing.ff);
+  thing.ff     = orderFloatBytes(thing.ff);
 
   /* convert mv floating point numbers to sun float - from GE's mvtsunf */
-  dg_exp = (thing.ii >> 24) & dexponent;
-  dg_sign = thing.ii & sign_bit;
+  dg_exp      = (thing.ii >> 24) & dexponent;
+  dg_sign     = thing.ii & sign_bit;
   dg_mantissa = (thing.ii & dmantissa) << 8;
 
   sun_exp = 4 * (dg_exp - 64);
@@ -153,32 +153,32 @@ float ghf(char *header, int offset) {
 /* Get header info */
 int get_signa_header_info(char *h, HINFO *hinfo) {
   hinfo->plane_type = ghi(h, SEHDR_START + SEHDR_PTYPE);
-  hinfo->x = ghi(h, IHDR_START + IHDR_X);
-  hinfo->y = ghi(h, IHDR_START + IHDR_Y);
-  hinfo->tr = ghf(h, IHDR_START + IHDR_TR);
-  hinfo->ti = ghf(h, IHDR_START + IHDR_TI);
-  hinfo->te = ghf(h, IHDR_START + IHDR_TE);
-  hinfo->strtx = ghf(h, IHDR_START + IHDR_STRTX);
-  hinfo->endx = ghf(h, IHDR_START + IHDR_ENDX);
-  hinfo->strty = ghf(h, IHDR_START + IHDR_STRTY);
-  hinfo->endy = ghf(h, IHDR_START + IHDR_ENDY);
-  hinfo->strtz = ghf(h, IHDR_START + IHDR_STRTZ);
-  hinfo->endz = ghf(h, IHDR_START + IHDR_ENDZ);
-  hinfo->locatn = ghf(h, IHDR_START + IHDR_LOCATN);
-  hinfo->fov = ghf(h, SEHDR_START + SEHDR_FOV);
-  hinfo->center = ghf(h, SEHDR_START + SEHDR_CENTER);
-  hinfo->psiz = ghf(h, IHDR_START + IHDR_PIXSIZ);
-  hinfo->thick = ghf(h, IHDR_START + IHDR_THICK);
-  hinfo->ptype = ghi(h, SEHDR_START + SEHDR_PTYPE);
-  hinfo->imnr0 = 1;
-  hinfo->imnr1 = ghi(h, SEHDR_START + SEHDR_IALLOC);
+  hinfo->x          = ghi(h, IHDR_START + IHDR_X);
+  hinfo->y          = ghi(h, IHDR_START + IHDR_Y);
+  hinfo->tr         = ghf(h, IHDR_START + IHDR_TR);
+  hinfo->ti         = ghf(h, IHDR_START + IHDR_TI);
+  hinfo->te         = ghf(h, IHDR_START + IHDR_TE);
+  hinfo->strtx      = ghf(h, IHDR_START + IHDR_STRTX);
+  hinfo->endx       = ghf(h, IHDR_START + IHDR_ENDX);
+  hinfo->strty      = ghf(h, IHDR_START + IHDR_STRTY);
+  hinfo->endy       = ghf(h, IHDR_START + IHDR_ENDY);
+  hinfo->strtz      = ghf(h, IHDR_START + IHDR_STRTZ);
+  hinfo->endz       = ghf(h, IHDR_START + IHDR_ENDZ);
+  hinfo->locatn     = ghf(h, IHDR_START + IHDR_LOCATN);
+  hinfo->fov        = ghf(h, SEHDR_START + SEHDR_FOV);
+  hinfo->center     = ghf(h, SEHDR_START + SEHDR_CENTER);
+  hinfo->psiz       = ghf(h, IHDR_START + IHDR_PIXSIZ);
+  hinfo->thick      = ghf(h, IHDR_START + IHDR_THICK);
+  hinfo->ptype      = ghi(h, SEHDR_START + SEHDR_PTYPE);
+  hinfo->imnr0      = 1;
+  hinfo->imnr1      = ghi(h, SEHDR_START + SEHDR_IALLOC);
 
   hinfo->c_r = ghf(h, SEHDR_START + SEHDR_C_R);
   hinfo->c_a = ghf(h, SEHDR_START + SEHDR_C_A);
   hinfo->c_s = ghf(h, SEHDR_START + SEHDR_C_S);
 
   hinfo->orien = ghf(h, SEHDR_START + SEHDR_ORIEN);
-  hinfo->pos = ghf(h, SEHDR_START + SEHDR_POS);
+  hinfo->pos   = ghf(h, SEHDR_START + SEHDR_POS);
 
   hinfo->num_echoes = ghi(h, IHDR_START + IHDR_NECHO);
 
@@ -187,9 +187,9 @@ int get_signa_header_info(char *h, HINFO *hinfo) {
 
 int is_signa(char *fname) {
   HINFO header;
-  char h[HLENGTH + 2];
+  char  h[HLENGTH + 2];
   FILE *fp;
-  int ret;
+  int   ret;
 
   fp = fopen(fname, "rb");
   if (!fp)
@@ -212,11 +212,11 @@ int is_signa(char *fname) {
 
 MRI *signaRead(char *fname, int read_volume_flag) {
   HINFO header;
-  char h[HLENGTH + 2];
+  char  h[HLENGTH + 2];
   FILE *fp;
-  int ret, i, odd_only, even_only, slice;
-  MRI *mri;
-  char path[STRLEN];
+  int   ret, i, odd_only, even_only, slice;
+  MRI * mri;
+  char  path[STRLEN];
 
   odd_only = even_only = 0;
   if (getenv("GE_ODD")) {
@@ -268,17 +268,17 @@ MRI *signaRead(char *fname, int read_volume_flag) {
                        "signaRead(%s): could not read %dx%dx%d volume", fname,
                        header.x, header.y, header.imnr1 - header.imnr0 + 1));
 
-  mri->xstart = 1000 * header.strtx;
-  mri->xend = 1000 * header.endx;
-  mri->ystart = 1000 * header.strty;
-  mri->yend = 1000 * header.endy;
-  mri->zstart = 1000 * header.strtz;
-  mri->zend = 1000 * header.endz;
-  mri->tr = header.tr;
-  mri->ti = header.ti;
-  mri->te = header.te;
+  mri->xstart   = 1000 * header.strtx;
+  mri->xend     = 1000 * header.endx;
+  mri->ystart   = 1000 * header.strty;
+  mri->yend     = 1000 * header.endy;
+  mri->zstart   = 1000 * header.strtz;
+  mri->zend     = 1000 * header.endz;
+  mri->tr       = header.tr;
+  mri->ti       = header.ti;
+  mri->te       = header.te;
   mri->location = 1000 * header.locatn;
-  mri->fov = 1000 * header.fov;
+  mri->fov      = 1000 * header.fov;
   mri->xsize = mri->ysize = mri->ps = 1000 * header.psiz;
   mri->zsize = mri->thick = 1000 * header.thick;
   // no orientation info and thus sets to coronal

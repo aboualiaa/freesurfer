@@ -35,82 +35,82 @@
 //
 ////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include "diag.h"
+#include "error.h"
+#include "label.h"
+#include "macros.h"
+#include "matrix.h"
 #include "mri.h"
-#include "mrinorm.h"
 #include "mri_conform.h"
 #include "mri_identify.h"
+#include "mrinorm.h"
 #include "mrisurf.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
 #include "proto.h"
-#include "utils.h"
 #include "timer.h"
-#include "matrix.h"
 #include "transform.h"
+#include "utils.h"
 #include "version.h"
-#include "label.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MAX_IMAGES 200
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 static int use_thickness = 0;
-static int conform = 0;
+static int conform       = 0;
 
 const char *Progname;
 
-static char sdir[80] = ""; // SUBJECTS_DIR
-static char *sname = NULL;
-static char *hemi = NULL;
+static char  sdir[80] = ""; // SUBJECTS_DIR
+static char *sname    = NULL;
+static char *hemi     = NULL;
 
 static char *out_fname = NULL; /* Output CNR filename, curv or paint */
 
 static char *thickness_fname = NULL; /* filename for surface thickness */
 
 const char *trgtypestring = "paint";
-int trgtype = MRI_VOLUME_TYPE_UNKNOWN;
+int         trgtype       = MRI_VOLUME_TYPE_UNKNOWN;
 
 static int nSmoothSteps = 60;
 
 int debugflag = 0;
-int debugvtx = 0;
+int debugvtx  = 0;
 
 static void usage_exit(int code);
 
 int main(int argc, char *argv[]) {
   char **av, *in_fname = NULL, *cp;
-  char filename[80];
-  int ac, nargs;
-  MRIS *mris;
-  MRI *mri_flash[MAX_IMAGES];
-  MRI *mri_gm_profile;
-  MRI *mri_wm_profile;
-  MRI *mri_gm_profile_orig;
-  MRI *mri_wm_profile_orig;
-  MRI *mri_gm_cov_components;
-  MRI *mri_wm_cov_components;
-  int num_of_cov_components;
-  MRI *mri_cnr;
-  MRI *mri_tmp;
-  MRI *mri_weight[MAX_IMAGES]; // this is the relative weighting for each
-                               // component
-  int msec, minutes, seconds;
-  Timer start;
-  int nvolumes, nvolumes_total;
+  char   filename[80];
+  int    ac, nargs;
+  MRIS * mris;
+  MRI *  mri_flash[MAX_IMAGES];
+  MRI *  mri_gm_profile;
+  MRI *  mri_wm_profile;
+  MRI *  mri_gm_profile_orig;
+  MRI *  mri_wm_profile_orig;
+  MRI *  mri_gm_cov_components;
+  MRI *  mri_wm_cov_components;
+  int    num_of_cov_components;
+  MRI *  mri_cnr;
+  MRI *  mri_tmp;
+  MRI *  mri_weight[MAX_IMAGES]; // this is the relative weighting for each
+                                 // component
+  int     msec, minutes, seconds;
+  Timer   start;
+  int     nvolumes, nvolumes_total;
   VERTEX *vertex;
-  int index, i, j, vno;
-  double cx, cy, cz;
-  double vx, vy, vz;
-  double value_in, value_out;
-  double cnr;
+  int     index, i, j, vno;
+  double  cx, cy, cz;
+  double  vx, vy, vz;
+  double  value_in, value_out;
+  double  cnr;
   MATRIX *SW1, *SW2, *SW, *InvSW;
-  float *weight, weight_norm;
+  float * weight, weight_norm;
 
   nargs = handleVersionOption(argc, argv, "mris_ms_surface_CNR");
   if (nargs && argc - nargs == 1)
@@ -341,9 +341,9 @@ int main(int argc, char *argv[]) {
     mri_weight[i] = MRIcopy(mri_cnr, NULL);
   }
 
-  SW1 = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
-  SW2 = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
-  SW = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
+  SW1    = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
+  SW2    = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
+  SW     = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
   weight = (float *)malloc(nvolumes_total * sizeof(float));
   for (vno = 0; vno < mris->nvertices; vno++) {
     // construct the vertex-wise covariance matrix for WM and GM
@@ -387,7 +387,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* compute CNR */
-    cnr = 0;
+    cnr         = 0;
     weight_norm = 0;
     for (i = 0; i < nvolumes_total; i++) {
       cnr += weight[i] * (MRIFseq_vox(mri_wm_profile, vno, 0, 0, i) -
@@ -426,7 +426,7 @@ int main(int argc, char *argv[]) {
     MRISwriteCurvatureToWFile(mris, filename);
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -457,7 +457,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -481,8 +481,8 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "debug")) {
     debugflag = 1;
-    debugvtx = atoi(argv[2]);
-    nargs = 1;
+    debugvtx  = atoi(argv[2]);
+    nargs     = 1;
   } else if (!stricmp(option, "use_thickness")) {
     use_thickness = 1;
     printf("Use thickness to guide the choice of GM point \n");
@@ -494,16 +494,16 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "trg_type")) {
     trgtypestring = argv[2];
-    trgtype = string_to_type(trgtypestring);
-    nargs = 1;
+    trgtype       = string_to_type(trgtypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "nsmooth")) {
     nSmoothSteps = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("Perform %d steps of smoothing of output CNR map\n", nSmoothSteps);
   } else if (!stricmp(option, "debug")) {
     debugflag = 1;
-    debugvtx = atoi(argv[2]);
-    nargs = 1;
+    debugvtx  = atoi(argv[2]);
+    nargs     = 1;
   } else {
     fprintf(stderr, "unknown option %s\n", argv[1]);
     usage_exit(0);

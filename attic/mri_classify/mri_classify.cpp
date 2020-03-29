@@ -23,37 +23,37 @@
  *
  */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
+#include "classify.h"
+#include "cma.h"
 #include "diag.h"
 #include "error.h"
-#include "mriclass.h"
 #include "macros.h"
-#include "utils.h"
+#include "mriclass.h"
 #include "proto.h"
-#include "classify.h"
+#include "utils.h"
 #include "version.h"
-#include "cma.h"
 
 static int features = FEATURE_INTENSITY | FEATURE_MEAN3 | FEATURE_DIRECTION |
                       FEATURE_CPOLV_MEDIAN5;
 
-static int extract = 0;
-static int classifier = CLASSIFIER_RFOREST;
+static int  extract           = 0;
+static int  classifier        = CLASSIFIER_RFOREST;
 static char priors_fname[100] = "none";
-static int verbose = 0;
+static int  verbose           = 0;
 
 const char *Progname;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 #define NCLUSTERS 6
 
-static int nclusters = 0;
+static int nclusters   = 0;
 static int train_cpolv = 0;
 
 static RBF_PARMS rbf_parms = {
@@ -62,7 +62,7 @@ static RBF_PARMS rbf_parms = {
 int main(int argc, char *argv[]) {
   MRIC *mric;
   char *training_file_name, *output_file_name;
-  int nargs, error, i;
+  int   nargs, error, i;
 
   nargs = handleVersionOption(argc, argv, "mri_classify");
   if (nargs && argc - nargs == 1)
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
               Progname);
 
   training_file_name = argv[1];
-  output_file_name = argv[2];
+  output_file_name   = argv[2];
 
   switch (classifier) {
   case CLASSIFIER_RFOREST:
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

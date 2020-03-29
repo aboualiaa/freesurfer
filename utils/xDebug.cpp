@@ -29,19 +29,19 @@
 #include <cstring>
 #include <sys/stat.h>
 
-tBoolean xDbg_gbOutput = FALSE;
-tBoolean xDbg_gbSegfaulted = FALSE;
-FILE *xDbg_gStream = nullptr;
-int xDbg_gType = xDebug_Nothing;
-char *xDbg_gsRequest = nullptr;
-char xDbg_sStackDesc[xDbg_knMaxDescLength] = "";
-char xDbg_sCurNoteDesc[xDbg_knMaxDescLength] = "";
-int xDbg_gLineNumberOfError = 0;
+tBoolean xDbg_gbOutput                           = FALSE;
+tBoolean xDbg_gbSegfaulted                       = FALSE;
+FILE *   xDbg_gStream                            = nullptr;
+int      xDbg_gType                              = xDebug_Nothing;
+char *   xDbg_gsRequest                          = nullptr;
+char     xDbg_sStackDesc[xDbg_knMaxDescLength]   = "";
+char     xDbg_sCurNoteDesc[xDbg_knMaxDescLength] = "";
+int      xDbg_gLineNumberOfError                 = 0;
 
 static char masStackTitle[xDbg_knMaxStackDepth][xDbg_knMaxDescLength] = {};
-static char masStackNote[xDbg_knMaxStackDepth][xDbg_knMaxDescLength] = {};
-static int mCurrentStackDepth = 0;
-static void (*mSegfaultFunction)(int) = nullptr;
+static char masStackNote[xDbg_knMaxStackDepth][xDbg_knMaxDescLength]  = {};
+static int  mCurrentStackDepth                                        = 0;
+static void (*mSegfaultFunction)(int)                                 = nullptr;
 
 void xDbg_Init(char *isFileName) {
   char sFileName[256] = "";
@@ -91,7 +91,7 @@ void xDbg_Init(char *isFileName) {
   }
 
   mCurrentStackDepth = 0;
-  mSegfaultFunction = nullptr;
+  mSegfaultFunction  = nullptr;
   signal(SIGSEGV, xDbg_SegfaultHandler);
 }
 
@@ -157,7 +157,7 @@ const char *xDbg_GetCurrentFunction() {
 
 void xDbg_PrintStack() {
   int nCurDesc = 0;
-  int nSpace = 0;
+  int nSpace   = 0;
 
   DebugPrint(("xDebug stack (length: %d)\n", mCurrentStackDepth + 1));
 
@@ -193,7 +193,7 @@ void xDbg_SegfaultHandler(int inSignal) {
 
 void xDbg_Segfault() {
   char *pBadPtr = nullptr;
-  *pBadPtr = 1;
+  *pBadPtr      = 1;
 }
 
 void xDbg_Printf(const char *iFormat, ...) {

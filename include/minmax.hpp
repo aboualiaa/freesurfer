@@ -25,8 +25,8 @@
 #ifndef MINMAX_HPP
 #define MINMAX_HPP
 
-#include <limits>
 #include <iostream>
+#include <limits>
 
 namespace Freesurfer {
 
@@ -71,9 +71,9 @@ private:
   T minVal;
   T maxVal;
 
-  size_t nAcc;
+  size_t    nAcc;
   long long intTotal;
-  double doubleTotal;
+  double    doubleTotal;
 };
 
 } // namespace Freesurfer

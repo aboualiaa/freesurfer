@@ -9,7 +9,7 @@ namespace kvl {
 //
 AtlasMeshAlphaDrawer ::AtlasMeshAlphaDrawer() {
   m_ClassNumber = 0;
-  m_Image = nullptr;
+  m_Image       = nullptr;
 }
 
 //
@@ -28,7 +28,7 @@ bool AtlasMeshAlphaDrawer ::RasterizeTetrahedron(
   mesh->GetCell(tetrahedronId, cell);
 
   AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-  const AtlasMesh::PointIdentifier id0 = *pit;
+  const AtlasMesh::PointIdentifier     id0 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier id1 = *pit;
   ++pit;

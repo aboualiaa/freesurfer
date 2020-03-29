@@ -31,20 +31,19 @@
 #ifndef __C_MPM_PROG_H__
 #define __C_MPM_PROG_H__
 
-#include "mri.h"
-#include "mrisurf.h"
-#include "label.h"
 #include "error.h"
 #include "fio.h"
+#include "label.h"
+#include "mri.h"
+#include "mrisurf.h"
 
-#include "env.h"
 #include "C_mpmOverlay.h"
+#include "env.h"
 #include "general.h"
 
 #include "oclDijkstraKernel.h"
 
 #include <string>
-using namespace std;
 
 const int MPMSTACKDEPTH = 64;
 
@@ -56,14 +55,14 @@ class C_mpmProg {
 
 public:
   // type and var info
-  string mstr_obj;                 // name of object class
-  string mstr_name;                // name of object variable
-  int mid;                         // id of socket
-  int mverbosity;                  // Debug related value
-  int mwarnings;                   // Show warnings
-  int mstackDepth;                 // Current procedure stackDepth
-  string mstr_proc[MPMSTACKDEPTH]; // Used to track the current
-                                   //+ procedure being executed
+  std::string mstr_obj;                 // name of object class
+  std::string mstr_name;                // name of object variable
+  int         mid;                      // id of socket
+  int         mverbosity;               // Debug related value
+  int         mwarnings;                // Show warnings
+  int         mstackDepth;              // Current procedure stackDepth
+  std::string mstr_proc[MPMSTACKDEPTH]; // Used to track the current
+                                        //+ procedure being executed
 protected:
   // base class info
 
@@ -79,9 +78,9 @@ public:
   //
   // Constructor / destructor block
   //
-  void core_construct(string astr_name = "unnamed", int a_id = -1,
+  void core_construct(std::string astr_name = "unnamed", int a_id = -1,
                       int a_verbosity = 0, int a_warnings = 0,
-                      int a_stackDepth = 0, string astr_proc = "noproc");
+                      int a_stackDepth = 0, std::string astr_proc = "noproc");
   C_mpmProg(s_env *aps_env);
   virtual ~C_mpmProg();
   C_mpmProg(const C_mpmProg &C_mpmProg);
@@ -90,35 +89,38 @@ public:
   //
   // Error / warn /  print block
   //
-  void debug_push(string astr_currentProc);
+  void debug_push(std::string astr_currentProc);
   void debug_pop();
-  void error(string astr_msg = "", int code = 1);
-  void warn(string astr_msg = "", int code = 1);
-  void function_trace(string astr_msg = "", string astr_separator = "");
+  void error(std::string astr_msg = "", int code = 1);
+  void warn(std::string astr_msg = "", int code = 1);
+  void function_trace(std::string astr_msg       = "",
+                      std::string astr_separator = "");
   void print();
 
   //
   // Access "housekeeping" state info
   //
 
-  const string str_obj_get() const { return mstr_obj; };
-  const string str_name_get() const { return mstr_name; };
-  int id_get() const { return mid; };
-  int verbosity_get() const { return mverbosity; };
-  int warnings_get() const { return mwarnings; };
-  int stackDepth_get() const { return mstackDepth; };
+  const std::string str_obj_get() const { return mstr_obj; };
+  const std::string str_name_get() const { return mstr_name; };
+  int               id_get() const { return mid; };
+  int               verbosity_get() const { return mverbosity; };
+  int               warnings_get() const { return mwarnings; };
+  int               stackDepth_get() const { return mstackDepth; };
 
-  void str_obj_set(string astr_val) { mstr_obj = astr_val; };
-  void str_name_set(string astr_val) { mstr_name = astr_val; };
-  void str_proc_set(int depth, string astr_proc) {
+  void str_obj_set(std::string astr_val) { mstr_obj = astr_val; };
+  void str_name_set(std::string astr_val) { mstr_name = astr_val; };
+  void str_proc_set(int depth, std::string astr_proc) {
     mstr_proc[depth] = astr_proc;
   };
-  void id_set(int value) { mid = value; };
-  void verbosity_set(int value) { mverbosity = value; };
-  void warnings_set(int value) { mwarnings = value; };
-  void stackDepth_set(int value) { mstackDepth = value; };
-  const string str_proc_get() const { return mstr_proc[stackDepth_get()]; };
-  const string str_proc_get(int i) { return mstr_proc[i]; };
+  void              id_set(int value) { mid = value; };
+  void              verbosity_set(int value) { mverbosity = value; };
+  void              warnings_set(int value) { mwarnings = value; };
+  void              stackDepth_set(int value) { mstackDepth = value; };
+  const std::string str_proc_get() const {
+    return mstr_proc[stackDepth_get()];
+  };
+  const std::string str_proc_get(int i) { return mstr_proc[i]; };
 
   //
   // Core class methods
@@ -140,7 +142,7 @@ public:
   // Access block
   //
   void sleepSeconds_set(int avalue) { msleepSeconds = avalue; };
-  int sleepSeconds_get() const { return (msleepSeconds); };
+  int  sleepSeconds_get() const { return (msleepSeconds); };
 
   //
   // Functional block
@@ -156,9 +158,9 @@ public:
 class C_mpmProg_pathFind : public C_mpmProg {
 
 protected:
-  int mvertex_start;
-  int mvertex_end;
-  int mvertex_total;
+  int  mvertex_start;
+  int  mvertex_end;
+  int  mvertex_total;
   bool mb_surfaceRipClear;
 
 public:
@@ -170,17 +172,17 @@ public:
   // Access block
   //
   void surfaceRipClear_set(bool avalue) { mb_surfaceRipClear = avalue; };
-  int surfaceRipClear_get() { return (mb_surfaceRipClear); };
+  int  surfaceRipClear_get() { return (mb_surfaceRipClear); };
   void vertexStart_set(int avalue) {
-    mvertex_start = avalue;
+    mvertex_start        = avalue;
     mps_env->startVertex = avalue;
   };
-  int vertexStart_get() { return (mvertex_start); };
+  int  vertexStart_get() { return (mvertex_start); };
   void vertexEnd_set(int avalue) {
-    mvertex_end = avalue;
+    mvertex_end        = avalue;
     mps_env->endVertex = avalue;
   };
-  int vertexEnd_get() { return (mvertex_end); };
+  int  vertexEnd_get() { return (mvertex_end); };
   void print();
 
   //
@@ -188,7 +190,7 @@ public:
   //
 
   virtual int run();
-  float cost_compute(int start, int end);
+  float       cost_compute(int start, int end);
 };
 
 ///
@@ -218,54 +220,54 @@ protected:
                      //+ across the surface, and
                      //+ also for re-starting
                      //+ crashed processes.
-  int mvertex_total;
-  int m_costFunctionIndex;
+  int     mvertex_total;
+  int     m_costFunctionIndex;
   e_stats ms_stats; // A simple stats objects
-  bool mb_surfaceRipClear;
-  bool mb_worldMap;             // If true, generate a 'world
-                                //+ map' by looping exhaustively
-                                //+ over the entire surface and
-                                //+ only recording the cost
-                                //+ value at the vertex index
-                                //+ "farthest" from each start
-                                //+ vertex.
-  bool mb_worldMapDistanceCalc; // State calculation tracker
-                                //+ used for descriptive
-                                //+ output management
-  bool mb_performExhaustive;    // If true, perform cost
-                                //+ calculations from polar
-                                //+ to every other vertex in
-                                //+ mesh -- useful only for
-                                //+ debugging/memory testing
-                                //+ since a search from
-                                //+ vertex->vertex will cover
-                                //+ whole mesh anyway in single
-                                //+ sweep.
-  int mprogressIter;            // Number of iterations to
-                                //+ loop before showing
-                                //+ progress to stdout
-  float *mpf_cost;              // Cost array as calculated by
-                                //+ by single call of autodijk.
-                                //+ In cases where multiple
-                                //+ calls are performed as part
-                                //+ of larger analysis, costs
-                                //+ might change. To keep
-                                //+ costs persistent, use the
-                                //+ mpf_persistent array.
-  float *mpf_persistent;        // An array used to store values
-                                //+ that need to be persistent
-                                //+ across a whole autodijk run.
-  float *mpf_fileSaveData;      // The save routine saves data
-                                //+ pointed to by this routine.
-                                //+ Typically pointer is managed
-                                //+ internally and should not
-                                //+ be manipulated outside this
-                                //+ class.
-  bool mb_simpleStatsShow;      // If true, output some very
-                                //+ simple stats
-  string mstr_costFileName;     // Parsed from the environment
-                                //+ structure
-  string mstr_costFullPath;     // Full path to cost file
+  bool    mb_surfaceRipClear;
+  bool    mb_worldMap;           // If true, generate a 'world
+                                 //+ map' by looping exhaustively
+                                 //+ over the entire surface and
+                                 //+ only recording the cost
+                                 //+ value at the vertex index
+                                 //+ "farthest" from each start
+                                 //+ vertex.
+  bool mb_worldMapDistanceCalc;  // State calculation tracker
+                                 //+ used for descriptive
+                                 //+ output management
+  bool mb_performExhaustive;     // If true, perform cost
+                                 //+ calculations from polar
+                                 //+ to every other vertex in
+                                 //+ mesh -- useful only for
+                                 //+ debugging/memory testing
+                                 //+ since a search from
+                                 //+ vertex->vertex will cover
+                                 //+ whole mesh anyway in single
+                                 //+ sweep.
+  int mprogressIter;             // Number of iterations to
+                                 //+ loop before showing
+                                 //+ progress to stdout
+  float *mpf_cost;               // Cost array as calculated by
+                                 //+ by single call of autodijk.
+                                 //+ In cases where multiple
+                                 //+ calls are performed as part
+                                 //+ of larger analysis, costs
+                                 //+ might change. To keep
+                                 //+ costs persistent, use the
+                                 //+ mpf_persistent array.
+  float *mpf_persistent;         // An array used to store values
+                                 //+ that need to be persistent
+                                 //+ across a whole autodijk run.
+  float *mpf_fileSaveData;       // The save routine saves data
+                                 //+ pointed to by this routine.
+                                 //+ Typically pointer is managed
+                                 //+ internally and should not
+                                 //+ be manipulated outside this
+                                 //+ class.
+  bool mb_simpleStatsShow;       // If true, output some very
+                                 //+ simple stats
+  std::string mstr_costFileName; // Parsed from the environment
+                                 //+ structure
+  std::string mstr_costFullPath; // Full path to cost file
 
 public:
   C_mpmProg_autodijk(s_env *aps_env);
@@ -275,28 +277,28 @@ public:
   // Access block
   //
   void surfaceRipClear_set(bool avalue) { mb_surfaceRipClear = avalue; };
-  int surfaceRipClear_get() { return (mb_surfaceRipClear); };
+  int  surfaceRipClear_get() { return (mb_surfaceRipClear); };
 
-  void costFile_set(string avalue) {
+  void costFile_set(std::string avalue) {
     mstr_costFileName = avalue;
     mstr_costFullPath = mps_env->str_workingDir + "/" + mstr_costFileName;
   };
-  string costFile_get() { return (mstr_costFileName); };
+  std::string costFile_get() { return (mstr_costFileName); };
 
   void vertexPolar_set(int avalue) { mvertex_polar = avalue; };
-  int vertexPolar_get() { return (mvertex_polar); };
+  int  vertexPolar_get() { return (mvertex_polar); };
   void vertexStart_set(int avalue) { mvertex_start = avalue; };
-  int vertexStart_get() { return (mvertex_start); };
+  int  vertexStart_get() { return (mvertex_start); };
   void vertexStep_set(int avalue) { mvertex_step = avalue; };
-  int vertexStep_get() { return (mvertex_step); };
+  int  vertexStep_get() { return (mvertex_step); };
   void vertexEnd_set(int avalue) { mvertex_end = avalue; };
-  int vertexEnd_get() { return (mvertex_end); };
+  int  vertexEnd_get() { return (mvertex_end); };
 
   void worldMap_set(int avalue);
   bool worldMap_shouldCreate();
 
   void progressIter_set(int avalue) { mprogressIter = avalue; };
-  int progressIter_get() { return (mprogressIter); };
+  int  progressIter_get() { return (mprogressIter); };
   void print();
 
   int vertexCosts_pack(e_stats &a_stats);
@@ -304,8 +306,8 @@ public:
   // Functional block
   //
 
-  virtual int run();
-  float cost_compute(int start, int end);
+  virtual int  run();
+  float        cost_compute(int start, int end);
   e_FILEACCESS CURV_fileWrite();
 };
 
@@ -352,20 +354,20 @@ public:
 class C_mpmProg_ROI : public C_mpmProg {
 
 protected:
-  float mf_radius;
-  float mf_plyIncrement;
-  bool mb_surfaceRipClear;
-  vector<int> mv_vertex;
-  string mstr_vertexFile;
-  string mstr_labelFile;
-  string mstr_outputStem;
-  bool mb_ROIsInSeparateLabels;
-  bool mb_saveStaggered;
-  bool mb_boundaryOnly; // Toggle ROI only at border
-  int m_borderSize;
+  float            mf_radius;
+  float            mf_plyIncrement;
+  bool             mb_surfaceRipClear;
+  std::vector<int> mv_vertex;
+  std::string      mstr_vertexFile;
+  std::string      mstr_labelFile;
+  std::string      mstr_outputStem;
+  bool             mb_ROIsInSeparateLabels;
+  bool             mb_saveStaggered;
+  bool             mb_boundaryOnly; // Toggle ROI only at border
+  int              m_borderSize;
 
 public:
-  C_mpmProg_ROI(s_env *aps_env, string astr_vertexFile = "",
+  C_mpmProg_ROI(s_env *aps_env, std::string astr_vertexFile = "",
                 float af_radius = 10);
   ~C_mpmProg_ROI();
 
@@ -382,24 +384,24 @@ public:
   };
 
   void surfaceRipClear_set(bool avalue) { mb_surfaceRipClear = avalue; };
-  int surfaceRipClear_get() { return (mb_surfaceRipClear); };
+  int  surfaceRipClear_get() { return (mb_surfaceRipClear); };
 
   void plySaveStaggered_set(bool avalue) { mb_saveStaggered = avalue; };
-  int plySaveStaggered_get() { return (mb_saveStaggered); };
+  int  plySaveStaggered_get() { return (mb_saveStaggered); };
 
-  void radius_set(float af_value) { mf_radius = af_value; };
+  void  radius_set(float af_value) { mf_radius = af_value; };
   float radius_get() { return mf_radius; };
 
-  void plyIncrement_set(float af_value) { mf_plyIncrement = af_value; };
+  void  plyIncrement_set(float af_value) { mf_plyIncrement = af_value; };
   float plyIncrement_get() { return mf_plyIncrement; };
 
-  vector<int> v_vertex_get() { return mv_vertex; };
+  std::vector<int> v_vertex_get() { return mv_vertex; };
 
   int border_mark();
-  int vertexFile_load(string astr_fileName);
-  int labelFile_load(string astr_fileName);
-  int labelFile_save(string astr_fileName);
-  int label_savePly(string astr_filePrefix, bool ab_staggered = false,
+  int vertexFile_load(std::string astr_fileName);
+  int labelFile_load(std::string astr_fileName);
+  int labelFile_save(std::string astr_fileName);
+  int label_savePly(std::string astr_filePrefix, bool ab_staggered = false,
                     float af_plyIncrement = 1.0);
 
   void print();
@@ -409,7 +411,7 @@ public:
   //
 
   virtual int run();
-  float cost_compute(int start, int end);
+  float       cost_compute(int start, int end);
 };
 
 ///
@@ -420,19 +422,19 @@ public:
 class C_mpmProg_externalMesh : public C_mpmProg {
 
 protected:
-  bool mb_surfaceRipClear;
-  vector<int> mv_vertex;
-  string mstr_meshFile;
+  bool             mb_surfaceRipClear;
+  std::vector<int> mv_vertex;
+  std::string      mstr_meshFile;
 
 public:
-  C_mpmProg_externalMesh(s_env *aps_env, string astr_meshFile = "");
+  C_mpmProg_externalMesh(s_env *aps_env, std::string astr_meshFile = "");
   ~C_mpmProg_externalMesh();
 
   //
   // Access block
   //
   void surfaceRipClear_set(bool avalue) { mb_surfaceRipClear = avalue; };
-  int surfaceRipClear_get() { return (mb_surfaceRipClear); };
+  int  surfaceRipClear_get() { return (mb_surfaceRipClear); };
 
   void print();
 
@@ -441,7 +443,7 @@ public:
   //
 
   virtual int run();
-  float cost_compute(int start, int end);
+  float       cost_compute(int start, int end);
 };
 
 #endif //__C_MPM_PROG_H__

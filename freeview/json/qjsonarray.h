@@ -62,29 +62,29 @@ public:
 
   static QJsonArray fromStringList(const QStringList &list);
   static QJsonArray fromVariantList(const QVariantList &list);
-  QVariantList toVariantList() const;
+  QVariantList      toVariantList() const;
 
-  int size() const;
+  int        size() const;
   inline int count() const { return size(); }
 
-  bool isEmpty() const;
+  bool       isEmpty() const;
   QJsonValue at(int i) const;
   QJsonValue first() const;
   QJsonValue last() const;
 
-  void prepend(const QJsonValue &value);
-  void append(const QJsonValue &value);
-  void removeAt(int i);
-  QJsonValue takeAt(int i);
+  void        prepend(const QJsonValue &value);
+  void        append(const QJsonValue &value);
+  void        removeAt(int i);
+  QJsonValue  takeAt(int i);
   inline void removeFirst() { removeAt(0); }
   inline void removeLast() { removeAt(size() - 1); }
 
   void insert(int i, const QJsonValue &value);
   void replace(int i, const QJsonValue &value);
 
-  bool contains(const QJsonValue &element) const;
+  bool          contains(const QJsonValue &element) const;
   QJsonValueRef operator[](int i);
-  QJsonValue operator[](int i) const;
+  QJsonValue    operator[](int i) const;
 
   bool operator==(const QJsonArray &other) const;
   bool operator!=(const QJsonArray &other) const;
@@ -93,11 +93,11 @@ public:
 
   class iterator {
   public:
-    QJsonArray *a;
-    int i;
+    QJsonArray *                            a;
+    int                                     i;
     typedef std::random_access_iterator_tag iterator_category;
-    typedef int difference_type;
-    typedef QJsonValue value_type;
+    typedef int                             difference_type;
+    typedef QJsonValue                      value_type;
     // typedef T *pointer;
     typedef QJsonValueRef reference;
 
@@ -159,17 +159,17 @@ public:
     }
     inline iterator operator+(int j) const { return iterator(a, i + j); }
     inline iterator operator-(int j) const { return iterator(a, i - j); }
-    inline int operator-(iterator j) const { return i - j.i; }
+    inline int      operator-(iterator j) const { return i - j.i; }
   };
   friend class iterator;
 
   class const_iterator {
   public:
-    const QJsonArray *a;
-    int i;
+    const QJsonArray *                      a;
+    int                                     i;
     typedef std::random_access_iterator_tag iterator_category;
-    typedef qptrdiff difference_type;
-    typedef QJsonValue value_type;
+    typedef qptrdiff                        difference_type;
+    typedef QJsonValue                      value_type;
     // typedef const T *pointer;
     typedef QJsonValue reference;
 
@@ -239,7 +239,7 @@ public:
   }
   inline const_iterator begin() const { return const_iterator(this, 0); }
   inline const_iterator constBegin() const { return const_iterator(this, 0); }
-  inline iterator end() {
+  inline iterator       end() {
     detach();
     return iterator(this, size());
   }
@@ -257,22 +257,22 @@ public:
   }
 
   // more Qt
-  typedef iterator Iterator;
+  typedef iterator       Iterator;
   typedef const_iterator ConstIterator;
 
   // stl compatibility
-  inline void push_back(const QJsonValue &t) { append(t); }
-  inline void push_front(const QJsonValue &t) { prepend(t); }
-  inline void pop_front() { removeFirst(); }
-  inline void pop_back() { removeLast(); }
-  inline bool empty() const { return isEmpty(); }
-  typedef int size_type;
-  typedef QJsonValue value_type;
-  typedef value_type *pointer;
+  inline void               push_back(const QJsonValue &t) { append(t); }
+  inline void               push_front(const QJsonValue &t) { prepend(t); }
+  inline void               pop_front() { removeFirst(); }
+  inline void               pop_back() { removeLast(); }
+  inline bool               empty() const { return isEmpty(); }
+  typedef int               size_type;
+  typedef QJsonValue        value_type;
+  typedef value_type *      pointer;
   typedef const value_type *const_pointer;
-  typedef QJsonValueRef reference;
-  typedef QJsonValue const_reference;
-  typedef int difference_type;
+  typedef QJsonValueRef     reference;
+  typedef QJsonValue        const_reference;
+  typedef int               difference_type;
 
 private:
   friend class QJsonPrivate::Data;
@@ -284,7 +284,7 @@ private:
   void compact();
   void detach(uint reserve = 0);
 
-  QJsonPrivate::Data *d;
+  QJsonPrivate::Data * d;
   QJsonPrivate::Array *a;
 };
 

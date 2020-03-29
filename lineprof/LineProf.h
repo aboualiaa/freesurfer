@@ -26,8 +26,8 @@
 #ifndef _LineProf_h
 #define _LineProf_h
 
-#include <vector>
 #include "Tracer.h"
+#include <vector>
 
 class vtkPolyData;
 
@@ -83,11 +83,11 @@ private:
                        const std::vector<double> &pt2);
 
   std::vector<std::vector<double>> _points2d;
-  std::vector<int> _segment0;
-  std::vector<int> _segment1;
-  std::vector<int> _segmentL;
-  std::vector<int> _segmentR;
-  Tracer *_tracer;
+  std::vector<int>                 _segment0;
+  std::vector<int>                 _segment1;
+  std::vector<int>                 _segmentL;
+  std::vector<int>                 _segmentR;
+  Tracer *                         _tracer;
 };
 
 #endif

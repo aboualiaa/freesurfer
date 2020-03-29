@@ -7,7 +7,7 @@
 
 template <int n>
 double coords_statistics(const std::vector<TCoords<double, n>> &vcoords,
-                         TCoords<double, n> &mean) {
+                         TCoords<double, n> &                   mean) {
   typedef std::vector<TCoords<double, n>> VectorType;
 
   mean.set(0.0);

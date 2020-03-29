@@ -73,16 +73,16 @@ double find_optimal_translation(GCA *gca, GCA_SAMPLE *gcas, MRI *mri,
                                 float max_trans, float trans_steps,
                                 int nreductions, double clamp) {
   MATRIX *m_trans, *m_L_tmp;
-  double x_trans, y_trans, z_trans, x_max, y_max, z_max, delta, log_p,
+  double  x_trans, y_trans, z_trans, x_max, y_max, z_max, delta, log_p,
       max_log_p, mean_trans;
   int i;
 
-  log_p = 0;
+  log_p   = 0;
   x_trans = 0;
   y_trans = 0;
   z_trans = 0;
 
-  delta = (max_trans - min_trans) / trans_steps;
+  delta   = (max_trans - min_trans) / trans_steps;
   m_L_tmp = nullptr;
   m_trans = MatrixIdentity(4, nullptr);
   x_max = y_max = z_max = 0.0;
@@ -139,7 +139,7 @@ double find_optimal_translation(GCA *gca, GCA_SAMPLE *gcas, MRI *mri,
           outFile << "\n";
 
           MATRIX *inv_m_L = NULL;
-          inv_m_L = MatrixInverse((MATRIX *)m_L_tmp, inv_m_L);
+          inv_m_L         = MatrixInverse((MATRIX *)m_L_tmp, inv_m_L);
 #if 0
           // Check against original matrix
           CheckInverseTranslation( inv_m_L,
@@ -157,9 +157,9 @@ double find_optimal_translation(GCA *gca, GCA_SAMPLE *gcas, MRI *mri,
 
           if (log_p > max_log_p) {
             max_log_p = log_p;
-            x_max = x_trans;
-            y_max = y_trans;
-            z_max = z_trans;
+            x_max     = x_trans;
+            y_max     = y_trans;
+            z_max     = z_trans;
 #if 0
             printf("new max p %2.1f found at "
                    "(%2.1f, %2.1f, %2.1f)\n",
@@ -196,9 +196,9 @@ double find_optimal_translation(GCA *gca, GCA_SAMPLE *gcas, MRI *mri,
     /* we've translated transform by old maxs */
 
     mean_trans = (max_trans + min_trans) / 2;
-    delta = (max_trans - min_trans) / 4;
-    min_trans = mean_trans - delta;
-    max_trans = mean_trans + delta;
+    delta      = (max_trans - min_trans) / 4;
+    min_trans  = mean_trans - delta;
+    max_trans  = mean_trans + delta;
   }
 
   MatrixFree(&m_trans);

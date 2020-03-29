@@ -23,64 +23,64 @@
  *
  */
 
-#include "diag.h"
 #include "annotation.h"
-#include "version.h"
 #include "cma.h"
+#include "diag.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mris_sample_parc.c,v 1.31 2016/12/11 14:33:38 fischl Exp $";
 
 int main(int argc, char *argv[]);
 
-static int replace_vertices_with_label(MRI_SURFACE *mris, MRI *mri, int label,
-                                       double proj_mm);
-static int get_option(int argc, char *argv[]);
+static int  replace_vertices_with_label(MRI_SURFACE *mris, MRI *mri, int label,
+                                        double proj_mm);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-static int translate_indices_to_annotations(MRI_SURFACE *mris,
-                                            char *translation_fname);
-static int fix_label_topology(MRI_SURFACE *mris, int nvertices);
-static int resegment_label(MRI_SURFACE *mris, LABEL *segment);
-int MRIsampleParcellationToSurface(MRI_SURFACE *mris, MRI *mri_parc);
+static int  translate_indices_to_annotations(MRI_SURFACE *mris,
+                                             char *       translation_fname);
+static int  fix_label_topology(MRI_SURFACE *mris, int nvertices);
+static int  resegment_label(MRI_SURFACE *mris, LABEL *segment);
+int         MRIsampleParcellationToSurface(MRI_SURFACE *mris, MRI *mri_parc);
 
-const char *Progname;
-static int avgs = 0;
-static int nclose = 0;
-static char *color_table_fname = nullptr;
+const char *  Progname;
+static int    avgs              = 0;
+static int    nclose            = 0;
+static char * color_table_fname = nullptr;
 static LABEL *cortex_label = nullptr; // limit surface area calc to cortex.label
-static int mode_filter = 0;
-static char *surf_name = WHITE_MATTER_NAME;
-static char *thickness_name = "thickness";
-static char sdir[STRLEN];
-static char *translation_fname = "cma_parcellation_colors.txt";
-static int wsize = 7;
-static int unknown_label = -1;
-static int fix_topology = -1; // < 0 means do all
-static float proj_mm = 0.0;
-static float proj_frac = 0.5;
-static int replace_label = 0;
+static int    mode_filter  = 0;
+static char * surf_name    = WHITE_MATTER_NAME;
+static char * thickness_name = "thickness";
+static char   sdir[STRLEN];
+static char * translation_fname = "cma_parcellation_colors.txt";
+static int    wsize             = 7;
+static int    unknown_label     = -1;
+static int    fix_topology      = -1; // < 0 means do all
+static float  proj_mm           = 0.0;
+static float  proj_frac         = 0.5;
+static int    replace_label     = 0;
 #define MAX_TRANS 100
 static int ntrans = 0;
 static int trans_in[MAX_TRANS];
 static int trans_out[MAX_TRANS];
 
-static int sample_from_vol_to_surf = 0;
-static char *mask_fname = nullptr;
-static int mask_val;
-static int label_index = -1;
+static int   sample_from_vol_to_surf = 0;
+static char *mask_fname              = nullptr;
+static int   mask_val;
+static int   label_index = -1;
 
 int main(int argc, char *argv[]) {
-  char **av, *hemi, *subject_name, *cp, fname[STRLEN];
-  char *parc_name, *annot_name;
-  int ac, nargs, vno, i;
+  char **      av, *hemi, *subject_name, *cp, fname[STRLEN];
+  char *       parc_name, *annot_name;
+  int          ac, nargs, vno, i;
   MRI_SURFACE *mris;
-  MRI *mri_parc;
-  VERTEX *v;
-  double d;
-  double x, y, z, xw, yw, zw;
+  MRI *        mri_parc;
+  VERTEX *     v;
+  double       d;
+  double       x, y, z, xw, yw, zw;
 
   nargs = handleVersionOption(argc, argv, "mris_sample_parc");
   if (nargs && argc - nargs == 1)
@@ -103,9 +103,9 @@ int main(int argc, char *argv[]) {
     usage_exit();
 
   subject_name = argv[1];
-  hemi = argv[2];
-  parc_name = argv[3];
-  annot_name = argv[4];
+  hemi         = argv[2];
+  parc_name    = argv[3];
+  annot_name   = argv[4];
 
   if (strlen(sdir) == 0) /* if not specified explicitly as option */
   {
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
     replace_vertices_with_label(mris, mri_parc, replace_label, proj_mm);
   if (unknown_label >= 0) {
     LABEL **labels, *label;
-    int nlabels, i, biggest_label, most_vertices, nzero;
+    int     nlabels, i, biggest_label, most_vertices, nzero;
 
 #define TMP_LABEL 1000
     for (nzero = vno = 0; vno < mris->nvertices; vno++) {
@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
              "(vno=%d) with label %d\n",
              biggest_label, label->n_points, label->lv[0].vno, unknown_label);
       for (i = 0; i < label->n_points; i++) {
-        v = &mris->vertices[label->lv[i].vno];
+        v             = &mris->vertices[label->lv[i].vno];
         v->annotation = v->val = unknown_label;
       }
     }
@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
   translate_indices_to_annotations(mris, translation_fname);
 
   if (label_index >= 0) {
-    int index;
+    int    index;
     LABEL *area;
 
     printf("writing label to %s...\n", annot_name);
@@ -316,7 +316,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -330,12 +330,12 @@ static int get_option(int argc, char *argv[]) {
     printf("using %s as SUBJECTS_DIR\n", sdir);
   } else if (!stricmp(option, "label")) {
     label_index = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("using label %s (%d) and writing output in label format\n",
            cma_label_to_name(label_index), label_index);
   } else if (!stricmp(option, "surf")) {
     surf_name = argv[2];
-    nargs = 1;
+    nargs     = 1;
     printf("using %s as surface name\n", surf_name);
   } else if (!stricmp(option, "cortex")) {
     cortex_label = LabelRead(nullptr, argv[2]);
@@ -348,8 +348,8 @@ static int get_option(int argc, char *argv[]) {
            argv[2]);
   } else if (!stricmp(option, "mask")) {
     mask_fname = argv[2];
-    mask_val = atoi(argv[3]);
-    nargs = 2;
+    mask_val   = atoi(argv[3]);
+    nargs      = 2;
     printf("using %d as a mask in %s\n", mask_val, mask_fname);
   } else if (!stricmp(option, "vol2surf")) {
     sample_from_vol_to_surf = 1;
@@ -366,35 +366,35 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "replace")) {
     replace_label = atoi(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("replacing label %s (%d) with deeper ones\n",
            cma_label_to_name(replace_label), replace_label);
   } else if (!stricmp(option, "trans")) {
     if (ntrans >= MAX_TRANS)
       ErrorExit(ERROR_NOMEMORY, "%s: too many translations (%d)\n", Progname,
                 ntrans);
-    trans_in[ntrans] = atof(argv[2]);
+    trans_in[ntrans]  = atof(argv[2]);
     trans_out[ntrans] = atof(argv[3]);
-    nargs = 2;
+    nargs             = 2;
     printf("translating %s (%d) to %s (%d)\n",
            cma_label_to_name(trans_in[ntrans]), trans_in[ntrans],
            cma_label_to_name(trans_out[ntrans]), trans_out[ntrans]);
     ntrans++;
   } else if (!stricmp(option, "projmm") || !stricmp(option, "proj")) {
     proj_mm = atof(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("projecting %2.2f mm along surface normal\n", proj_mm);
   } else if (!stricmp(option, "projfrac")) {
     proj_frac = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("projecting %2.2f %% along surface normal\n", proj_frac);
   } else if (!stricmp(option, "file")) {
     translation_fname = argv[2];
-    nargs = 1;
+    nargs             = 1;
     printf("using %s as translation fname\n", sdir);
   } else if (!stricmp(option, "ct")) {
     color_table_fname = argv[2];
-    nargs = 1;
+    nargs             = 1;
     printf("embedding color table %s into output annot file\n",
            color_table_fname);
     translation_fname = color_table_fname;
@@ -406,15 +406,15 @@ static int get_option(int argc, char *argv[]) {
         exit(1);
       }
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'F':
       mode_filter = atoi(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("applying mode filter %d times to parcellation\n", mode_filter);
       break;
     case 'A':
-      avgs = atoi(argv[2]);
+      avgs  = atoi(argv[2]);
       nargs = 1;
       printf("smoothing surface %d times\n", avgs);
       break;
@@ -425,7 +425,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       thickness_name = argv[2];
-      nargs = 1;
+      nargs          = 1;
       printf("using thickness file %s\n", thickness_name);
       break;
     case 'U':
@@ -610,8 +610,8 @@ static int translate_indices_to_annotations(MRI_SURFACE *mris,
 }
 #endif
 static int fix_label_topology(MRI_SURFACE *mris, int nvertices) {
-  int i, vno, nsegments, most_vertices, max_label;
-  int label, j, iter, nchanged = 0, max_index, gdiag_seg;
+  int     i, vno, nsegments, most_vertices, max_label;
+  int     label, j, iter, nchanged = 0, max_index, gdiag_seg;
   LABEL **segments;
   VERTEX *v;
 
@@ -643,8 +643,8 @@ static int fix_label_topology(MRI_SURFACE *mris, int nvertices) {
       if (segments[i] == nullptr)
         continue;
       most_vertices = segments[i]->n_points;
-      max_index = i;
-      label = mris->vertices[segments[i]->lv[0].vno].annotation;
+      max_index     = i;
+      label         = mris->vertices[segments[i]->lv[0].vno].annotation;
 
       /* find label with most vertices */
       for (j = 0; j < nsegments; j++) {
@@ -654,7 +654,7 @@ static int fix_label_topology(MRI_SURFACE *mris, int nvertices) {
           continue;
         if (segments[j]->n_points > most_vertices) {
           most_vertices = segments[j]->n_points;
-          max_index = j;
+          max_index     = j;
         }
       }
 
@@ -687,7 +687,7 @@ static int fix_label_topology(MRI_SURFACE *mris, int nvertices) {
 
 static int resegment_label(MRI_SURFACE *mris, LABEL *segment) {
   int *histo, max_label, i, n, vno, ino, index;
-  int max_histo, max_index, nchanged, lno, label;
+  int  max_histo, max_index, nchanged, lno, label;
 
   max_label = 0;
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -705,9 +705,9 @@ static int resegment_label(MRI_SURFACE *mris, LABEL *segment) {
   for (ino = 0; ino < 100; ino++) {
     nchanged = 0;
     for (lno = 0; lno < segment->n_points; lno++) {
-      vno = segment->lv[lno].vno;
+      vno                             = segment->lv[lno].vno;
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-      VERTEX *const v = &mris->vertices[vno];
+      VERTEX *const                v  = &mris->vertices[vno];
       if (vno == Gdiag_no)
         DiagBreak();
       if (v->val != label || v->ripflag)
@@ -716,7 +716,7 @@ static int resegment_label(MRI_SURFACE *mris, LABEL *segment) {
       memset(histo, 0, (max_label + 1) * sizeof(*histo));
       for (n = 0; n < vt->vnum; n++) {
         VERTEX const *const vn = &mris->vertices[vt->v[n]];
-        index = (int)nint(vn->val);
+        index                  = (int)nint(vn->val);
         if (index < 0)
           continue;
         if (vn->val != label) /* don't care about same label */
@@ -734,7 +734,7 @@ static int resegment_label(MRI_SURFACE *mris, LABEL *segment) {
         v->valbak = max_index;
     }
     for (lno = 0; lno < segment->n_points; lno++) {
-      vno = segment->lv[lno].vno;
+      vno             = segment->lv[lno].vno;
       VERTEX *const v = &mris->vertices[vno];
       if (v->ripflag || v->val != label)
         continue;
@@ -754,10 +754,10 @@ static int resegment_label(MRI_SURFACE *mris, LABEL *segment) {
 }
 static int replace_vertices_with_label(MRI_SURFACE *mris, MRI *mri, int label,
                                        double proj_mm) {
-  int vno, new_label, num = 0;
+  int     vno, new_label, num = 0;
   VERTEX *v;
-  double d, x, y, z, xw, yw, zw;
-  MRI *mri_tmp;
+  double  d, x, y, z, xw, yw, zw;
+  MRI *   mri_tmp;
 
   mri_tmp = MRIreplaceValues(mri, nullptr, label, 0);
 
@@ -816,18 +816,18 @@ static int replace_vertices_with_label(MRI_SURFACE *mris, MRI *mri, int label,
 }
 
 int MRIsampleParcellationToSurface(MRI_SURFACE *mris, MRI *mri_parc) {
-  int min_label, max_label, **label_histo, l, vno, nlabels, x, y, z, max_l;
+  int   min_label, max_label, **label_histo, l, vno, nlabels, x, y, z, max_l;
   float fmin, fmax, max_count, d;
   MRIS_HASH_TABLE *mht;
-  VERTEX *v;
-  double xs, ys, zs, xv, yv, zv, val;
-  MRI *mri_parc_unused;
+  VERTEX *         v;
+  double           xs, ys, zs, xv, yv, zv, val;
+  MRI *            mri_parc_unused;
 
   mri_parc_unused = MRIcopy(mri_parc, nullptr);
   MRIvalRange(mri_parc, &fmin, &fmax);
   min_label = (int)floor(fmin);
   max_label = (int)ceil(fmax);
-  nlabels = max_label - min_label + 1;
+  nlabels   = max_label - min_label + 1;
 
   label_histo = (int **)calloc(mris->nvertices, sizeof(int *));
   if (label_histo == nullptr)
@@ -875,15 +875,15 @@ int MRIsampleParcellationToSurface(MRI_SURFACE *mris, MRI *mri_parc) {
   for (vno = 0; vno < mris->nvertices; vno++) {
     if (vno == Gdiag_no)
       DiagBreak();
-    max_l = 0;
+    max_l     = 0;
     max_count = 0;
     for (l = 0; l < nlabels; l++) {
       if (label_histo[vno][l] > max_count) {
         max_count = label_histo[vno][l];
-        max_l = l + min_label;
+        max_l     = l + min_label;
       }
     }
-    v = &mris->vertices[vno];
+    v      = &mris->vertices[vno];
     v->val = v->annotation = max_l;
     if (max_count > 0)
       v->marked = 1;

@@ -3,11 +3,11 @@
 
 #include "bspline/itkBSplineDataPointSetToImageFilter.h" // itkutils
 
-#include <vnl/vnl_random.h>
 #include <vector>
+#include <vnl/vnl_random.h>
 
-#include <itkArray2D.h>
 #include <itkArray.h>
+#include <itkArray2D.h>
 #include <itkPointSet.h>
 
 #include "mri.h"
@@ -17,23 +17,23 @@ class InitializePath;
 class PoistatsModel {
 public:
   enum {
-    INITIALIZE_NORMAL = 0,
+    INITIALIZE_NORMAL       = 0,
     INITIALIZE_EIGEN_VECTOR = 1,
-    INITIALIZE_FIELD_LINE = 2,
+    INITIALIZE_FIELD_LINE   = 2,
   };
 
   typedef itk::Array2D<double> MatrixType;
-  typedef MatrixType *MatrixPointer;
+  typedef MatrixType *         MatrixPointer;
 
   typedef itk::Array<double> ArrayType;
-  typedef ArrayType *ArrayPointer;
+  typedef ArrayType *        ArrayPointer;
 
   // cubic spline stuff
-  typedef itk::Vector<double, 3> VectorType;
-  typedef itk::Image<VectorType, 1> OutputImageType;
+  typedef itk::Vector<double, 3>       VectorType;
+  typedef itk::Image<VectorType, 1>    OutputImageType;
   typedef itk::PointSet<VectorType, 1> PointSetType;
   typedef itk::BSplineDataPointSetToImageFilter<PointSetType, OutputImageType>
-      CubicSplineFilterType;
+                                         CubicSplineFilterType;
   typedef CubicSplineFilterType::Pointer CubicSplineFilterPointer;
 
   PoistatsModel();
@@ -72,13 +72,13 @@ public:
    * Returns the seed values to be used.
    */
   std::vector<int> *GetSeedValues();
-  void SetSeedValues(std::vector<int> *values);
+  void              SetSeedValues(std::vector<int> *values);
 
   MatrixPointer RethreadPath(MatrixPointer originalPath, const int nNewSamples);
 
   MatrixPointer CubicSplineInterpolation(MatrixPointer originalPath,
-                                         ArrayPointer originalPathGrid,
-                                         const int nNewSamples);
+                                         ArrayPointer  originalPathGrid,
+                                         const int     nNewSamples);
 
   void SetNumberOfControlPoints(const int nPoints);
 
@@ -88,7 +88,7 @@ public:
                           const double ceiling);
 
   static void CalculatePathMagnitude(MatrixPointer path,
-                                     ArrayPointer magnitude);
+                                     ArrayPointer  magnitude);
 
   static void CalculateCumulativeSum(ArrayPointer inputArray,
                                      ArrayPointer cumulativeSum);
@@ -116,8 +116,8 @@ private:
 
   bool m_IsDebug;
 
-  MRI *m_EigenVectors;
-  MRI *m_SeedVolume;
+  MRI *             m_EigenVectors;
+  MRI *             m_SeedVolume;
   std::vector<int> *m_SeedValues;
 
   CubicSplineFilterPointer m_CubicSplineFilter;

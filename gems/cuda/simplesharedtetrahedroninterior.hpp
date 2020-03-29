@@ -1,18 +1,18 @@
 #pragma once
 
-#include "simplesharedtetrahedron.hpp"
 #include "cudautils.hpp"
+#include "simplesharedtetrahedron.hpp"
 
 template <typename MeshSupplier, typename VertexAction, typename IndexType,
           typename T, typename Internal>
-__global__ void SimpleSharedTetrahedronInteriorKernel(const IndexType nz,
-                                                      const IndexType ny,
-                                                      const IndexType nx,
+__global__ void SimpleSharedTetrahedronInteriorKernel(const IndexType    nz,
+                                                      const IndexType    ny,
+                                                      const IndexType    nx,
                                                       const MeshSupplier mesh,
                                                       VertexAction action) {
-  const unsigned int nDims = 3;
+  const unsigned int nDims     = 3;
   const unsigned int nVertices = 4;
-  const size_t iTet = blockIdx.x + (gridDim.x * blockIdx.y);
+  const size_t       iTet      = blockIdx.x + (gridDim.x * blockIdx.y);
 
   // Check if this block has an assigned tetrahedron
   if (iTet >= mesh.GetTetrahedraCount()) {
@@ -20,9 +20,9 @@ __global__ void SimpleSharedTetrahedronInteriorKernel(const IndexType nz,
   }
 
   // Load the tetrahedron and determine bounding box
-  __shared__ T tetrahedron[nVertices][nDims];
+  __shared__ T         tetrahedron[nVertices][nDims];
   __shared__ IndexType min[nDims], max[nDims];
-  __shared__ T M[nDims][nDims];
+  __shared__ T         M[nDims][nDims];
   SimpleSharedTetrahedron<MeshSupplier, T, Internal> tet(mesh, tetrahedron, M);
 
   tet.LoadAndBoundingBox(iTet, min, max);
@@ -95,7 +95,7 @@ void RunSimpleSharedTetrahedron(const IndexType nz, const IndexType ny,
     throw CUDAException(err);
   }
 
-  typedef typename MeshSupplier::GPUType MeshArg;
+  typedef typename MeshSupplier::GPUType   MeshArg;
   typedef typename MeshSupplier::CoordType MeshCoordType;
 
   SimpleSharedTetrahedronInteriorKernel<MeshArg, VertexAction, IndexType,

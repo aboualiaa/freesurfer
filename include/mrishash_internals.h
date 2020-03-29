@@ -42,9 +42,9 @@ typedef struct MRIS_HASH_BUCKET {
   omp_lock_t mutable bucket_lock;
 #endif
   MRIS_HASH_BIN *const bins;
-  int const max_bins;
-  int nused;
-  int size, ysize, zsize;
+  int const            max_bins;
+  int                  nused;
+  int                  size, ysize, zsize;
 } MHBT;
 
 //-----------------------------------------------------------
@@ -65,8 +65,8 @@ typedef struct MRIS_HASH_BUCKET {
 #define VOXEL_RES 1.0
 
 // TABLE_SIZE dimensions for array of hash buckets. As defined here
-#define TABLE_SIZE     2000
-#define TABLE_CENTER   (int)(TABLE_SIZE / 2)
+#define TABLE_SIZE   2000
+#define TABLE_CENTER (int)(TABLE_SIZE / 2)
 
 typedef struct mht_face_t {
   // for per-vertex information that should not be stored in the MRIS FACE

@@ -22,11 +22,11 @@
  *
  */
 
+#include <Getifh.h>
+#include <endianio.h>
+#include <librms.h>
 #include <stdlib.h>
 #include <string.h>
-#include <endianio.h>
-#include <Getifh.h>
-#include <librms.h>
 
 #define MAXL 256
 
@@ -68,16 +68,16 @@ void write_command_line(FILE *outfp, int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
   FILE *fp;
-  char srcroot[MAXL], tarroot[MAXL], t4file[MAXL], outfile[MAXL];
-  IFH ifhsrc, ifhtar;
+  char  srcroot[MAXL], tarroot[MAXL], t4file[MAXL], outfile[MAXL];
+  IFH   ifhsrc, ifhtar;
 
   /***********/
   /* utility */
   /***********/
   char *ptr, command[MAXL];
-  int c, i, k;
-  int status = 0;
-  int four = 4;
+  int   c, i, k;
+  int   status = 0;
+  int   four   = 4;
 
   /***************/
   /* computation */

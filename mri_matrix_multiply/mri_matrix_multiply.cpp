@@ -29,17 +29,17 @@
 #define IN_OUT_NAMES 100
 
 const char *Progname;
-int verbose_flag = 0;
+int         verbose_flag = 0;
 
 int read_mat(int argc, char *argv[], int i, MATRIX *in_mat);
 int write_mat(int argc, char *argv[], int i, MATRIX *in_mat);
 
-char subject_name[STR_LEN];
+char  subject_name[STR_LEN];
 char *subjnameuse = nullptr;
 float ipr, st, brightness;
-int register_stuff_defined = 0;
-int fsl_flag = 0;
-int binarize = 0;
+int   register_stuff_defined = 0;
+int   fsl_flag               = 0;
+int   binarize               = 0;
 
 static void usage(int exit_val) {
 
@@ -70,12 +70,12 @@ static void usage(int exit_val) {
 /*----------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
 
-  int i, r, c;
-  int in_names[IN_OUT_NAMES], n_in = 0;
-  int out_names[IN_OUT_NAMES], n_out = 0;
+  int     i, r, c;
+  int     in_names[IN_OUT_NAMES], n_in   = 0;
+  int     out_names[IN_OUT_NAMES], n_out = 0;
   MATRIX *in_mat, *result;
-  int nargs;
-  double v;
+  int     nargs;
+  double  v;
 
   nargs = handleVersionOption(argc, argv, "mri_matrix_multiply");
   if (nargs && argc - nargs == 1)
@@ -184,8 +184,8 @@ int main(int argc, char *argv[]) {
 /*---------------------------------------------------------------*/
 int read_mat(int argc, char *argv[], int i, MATRIX *in_mat) {
 
-  FILE *fin;
-  char line[STR_LEN];
+  FILE *  fin;
+  char    line[STR_LEN];
   MATRIX *tmpmat;
 
   line[0] = '\0';

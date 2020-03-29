@@ -24,10 +24,10 @@
 #ifndef DIALOGTRANSFORMVOLUME_H
 #define DIALOGTRANSFORMVOLUME_H
 
-#include <QDialog>
 #include "UIUpdateHelper.h"
-#include <QList>
+#include <QDialog>
 #include <QIcon>
+#include <QList>
 
 namespace Ui {
 class DialogTransformVolume;
@@ -110,20 +110,20 @@ private:
 
   Ui::DialogTransformVolume *ui;
 
-  QCheckBox *m_checkRotate[3];
-  QComboBox *m_comboRotate[3];
-  QScrollBar *m_sliderRotate[3];
-  QLineEdit *m_textAngle[3];
-  QScrollBar *m_scrollTranslate[3];
-  QLineEdit *m_textTranslate[3];
-  QScrollBar *m_scrollScale[3];
-  QLineEdit *m_textScale[3];
+  QCheckBox *            m_checkRotate[3];
+  QComboBox *            m_comboRotate[3];
+  QScrollBar *           m_sliderRotate[3];
+  QLineEdit *            m_textAngle[3];
+  QScrollBar *           m_scrollTranslate[3];
+  QLineEdit *            m_textTranslate[3];
+  QScrollBar *           m_scrollScale[3];
+  QLineEdit *            m_textScale[3];
   QList<QtColorPicker *> m_colorPickerLandmark;
-  QList<QPushButton *> m_btnPickLandmark;
-  QList<QComboBox *> m_comboLandmark;
-  double m_dIncrementRotate;
-  double m_dIncrementScale;
-  double m_dIncrementTranslate;
+  QList<QPushButton *>   m_btnPickLandmark;
+  QList<QComboBox *>     m_comboLandmark;
+  double                 m_dIncrementRotate;
+  double                 m_dIncrementScale;
+  double                 m_dIncrementTranslate;
 };
 
 #endif // DIALOGTRANSFORMVOLUME_H

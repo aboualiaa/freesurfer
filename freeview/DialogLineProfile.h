@@ -20,7 +20,7 @@ public:
   double GetResolution();
   double GetSpacing();
   double GetOffset();
-  int GetNumberOfSamples();
+  int    GetNumberOfSamples();
 
 public slots:
   void UpdatePointSetList();

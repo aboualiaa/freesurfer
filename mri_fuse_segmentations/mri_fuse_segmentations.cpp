@@ -25,20 +25,20 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "timer.h"
 #include "version.h"
-#include "cma.h"
 
 struct Parameters {
-  std::string prog_name;
+  std::string              prog_name;
   std::vector<std::string> norm_paths;
   std::vector<std::string> aseg_paths;
   std::vector<std::string> aseg_nocc_paths;
   std::vector<std::string> trx_paths;
-  double cross_time_sigma = 3.0;
-  std::string in_path;
-  std::string out_path;
+  double                   cross_time_sigma = 3.0;
+  std::string              in_path;
+  std::string              out_path;
 };
 
 static void parseCommand(int argc, char *argv[], Parameters &par);
@@ -52,10 +52,10 @@ static MRI *MRIfuseSegmentations(MRI *mri_in, std::vector<MRI *> mri_asegs,
 static void forward(int &argc, char **&argv);
 static void printUsage();
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   int nargs = handleVersionOption(argc, argv, "mri_fuse_segmentations");
-  if (nargs && argc - nargs == 1) exit(EXIT_SUCCESS);
+  if (nargs && argc - nargs == 1)
+    exit(EXIT_SUCCESS);
   argc -= nargs;
 
   Timer start;
@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
   }
 
   // Prepare data: try to be efficient by not keeping GCAMs in memory.
-  MRI *mri_in = readMriOrError(par.in_path);
-  const size_t num_tp = par.aseg_paths.size();
+  MRI *              mri_in = readMriOrError(par.in_path);
+  const size_t       num_tp = par.aseg_paths.size();
   std::vector<MRI *> mri_asegs;
   std::vector<MRI *> mri_nocc_asegs;
   std::vector<MRI *> mri_norms;
@@ -106,9 +106,9 @@ int main(int argc, char *argv[])
   std::cout << "Writing fused segmentation to " << par.out_path << std::endl;
   MRIwrite(mri_fused, par.out_path.c_str());
   int msec = start.milliseconds();
-  int sec = nint((float)msec / 1000.0f);
-  int min = sec / 60;
-  sec = sec % 60;
+  int sec  = nint((float)msec / 1000.0f);
+  int min  = sec / 60;
+  sec      = sec % 60;
   std::cout << "Fusing took " << min << " minutes and " << sec << " seconds\n";
 
   MRIfree(&mri_in);
@@ -133,7 +133,7 @@ static void parseCommand(int argc, char *argv[], Parameters &par) {
     ErrorExit(ERROR_BADPARM, "ERROR: positional arguments not specified");
   }
   par.out_path = std::string(argv[--argc]);
-  par.in_path = std::string(argv[--argc]);
+  par.in_path  = std::string(argv[--argc]);
   std::cout << "Input volume: " << par.in_path << std::endl;
   std::cout << "Output aseg: " << par.out_path << std::endl;
 
@@ -220,7 +220,7 @@ static MRI *readMriOrError(const std::string path) {
 static MRI *warpReplace(TRANSFORM *trx, MRI *mri_src, const MRI *mri_dst,
                         int interp_method) {
   if (trx->type != MORPH_3D_TYPE) {
-    LTA *lta = (LTA *)trx->xform;
+    LTA *lta   = (LTA *)trx->xform;
     trx->xform = (void *)LTAreduce(lta); // Apply full transform.
     LTAfree(&lta);
   }
@@ -240,7 +240,7 @@ static MRI *warpReplace(TRANSFORM *trx, MRI *mri_src, const MRI *mri_dst,
     }
   }
   MRI *mri = mri_src;
-  mri = TransformApplyType(trx, mri, nullptr, interp_method);
+  mri      = TransformApplyType(trx, mri, nullptr, interp_method);
   MRIfree(&mri_src);
   return (mri);
 }
@@ -249,10 +249,10 @@ static MRI *MRIfuseSegmentations(MRI *mri_in, std::vector<MRI *> mri_asegs,
                                  std::vector<MRI *> mri_nocc_asegs,
                                  std::vector<MRI *> mri_norms, double sigma) {
   std::vector<double> label_pvals(MAX_CMA_LABELS); // Initialized to zero.
-  int cc_relabel_count = 0;
-  const double s = -0.5 / (sigma * sigma);
-  const int frame = 0;
-  MRI *mri_fused = MRIclone(mri_in, nullptr);
+  int                 cc_relabel_count = 0;
+  const double        s                = -0.5 / (sigma * sigma);
+  const int           frame            = 0;
+  MRI *               mri_fused        = MRIclone(mri_in, nullptr);
   printf("Smoothing temporal bias field with sigma = %2.1f\n", sigma);
 
   for (int x = 0; x < mri_fused->width; x++) {
@@ -261,12 +261,12 @@ static MRI *MRIfuseSegmentations(MRI *mri_in, std::vector<MRI *> mri_asegs,
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
         }
-        double val = MRIgetVoxVal(mri_in, x, y, z, frame);
-        int min_label = MAX_CMA_LABELS;
-        int max_label = 0;
+        double val       = MRIgetVoxVal(mri_in, x, y, z, frame);
+        int    min_label = MAX_CMA_LABELS;
+        int    max_label = 0;
         for (size_t i = 0; i < mri_asegs.size(); i++) {
-          double oval = MRIgetVoxVal(mri_norms[i], x, y, z, frame);
-          int label = MRIgetVoxVal(mri_asegs[i], x, y, z, frame);
+          double oval  = MRIgetVoxVal(mri_norms[i], x, y, z, frame);
+          int    label = MRIgetVoxVal(mri_asegs[i], x, y, z, frame);
           switch (label) {
           case CC_Posterior:
           case CC_Mid_Posterior:
@@ -291,7 +291,7 @@ static MRI *MRIfuseSegmentations(MRI *mri_in, std::vector<MRI *> mri_asegs,
           }
           double dif = oval - val;
           // if sigma is zero only trust images with identical intensity
-          double p = 0;
+          double       p         = 0;
           const double threshold = 0.0000001;
           if (fabs(sigma) < threshold) {
             p = fabs(dif) < threshold ? 1.0 : 0.0;
@@ -329,7 +329,7 @@ static MRI *MRIfuseSegmentations(MRI *mri_in, std::vector<MRI *> mri_asegs,
         case CC_Anterior:
           // look at neighbors to determine who is more predominant: left or
           // right white matter voxels; predominance determines relabeling
-          int leftwm = 0;
+          int leftwm  = 0;
           int rightwm = 0;
           int xk, yk, zk, xi, yi, zi;
           // brute force 3x3 search:

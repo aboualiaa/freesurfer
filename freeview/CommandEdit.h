@@ -47,11 +47,11 @@ protected:
   virtual void mouseMoveEvent(QMouseEvent *e);
 
 private:
-  void ProcessCommandInput();
+  void        ProcessCommandInput();
   QStringList m_listHistory;
-  int m_nPosInHistory;
-  QString m_strPrompt;
-  QString m_strTempCommand;
+  int         m_nPosInHistory;
+  QString     m_strPrompt;
+  QString     m_strTempCommand;
 };
 
 #endif // COMMANDEDIT_H

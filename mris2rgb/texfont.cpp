@@ -20,12 +20,12 @@
 
 #ifdef HAVE_OPENGL
 
+#include "TexFont.h"
+#include "proto.h"
+#include <GL/glu.h>
 #include <cassert>
 #include <cctype>
 #include <cstring>
-#include <GL/glu.h>
-#include "TexFont.h"
-#include "proto.h"
 
 #if 0
 /* Uncomment to debug various scenarios. */
@@ -55,10 +55,10 @@ int useLuminanceAlpha = 0;
 /* byte swap a 32-bit value */
 #define SWAPL(x, n)                                                            \
   {                                                                            \
-    n = ((char *)(x))[0];                                                      \
+    n                = ((char *)(x))[0];                                       \
     ((char *)(x))[0] = ((char *)(x))[3];                                       \
     ((char *)(x))[3] = n;                                                      \
-    n = ((char *)(x))[1];                                                      \
+    n                = ((char *)(x))[1];                                       \
     ((char *)(x))[1] = ((char *)(x))[2];                                       \
     ((char *)(x))[2] = n;                                                      \
   }
@@ -66,7 +66,7 @@ int useLuminanceAlpha = 0;
 /* byte swap a short */
 #define SWAPS(x, n)                                                            \
   {                                                                            \
-    n = ((char *)(x))[0];                                                      \
+    n                = ((char *)(x))[0];                                       \
     ((char *)(x))[0] = ((char *)(x))[1];                                       \
     ((char *)(x))[1] = n;                                                      \
   }
@@ -115,16 +115,16 @@ static char *lastError;
 char *txfErrorString() { return lastError; }
 
 TexFont *txfLoadFont(char *filename) {
-  TexFont *txf;
-  FILE *file;
-  GLfloat w, h, xstep, ystep;
-  char fileid[4], tmp;
+  TexFont *      txf;
+  FILE *         file;
+  GLfloat        w, h, xstep, ystep;
+  char           fileid[4], tmp;
   unsigned char *texbitmap;
-  int min_glyph, max_glyph;
-  int endianness, swap, format, stride, width, height;
-  int i, j, got;
+  int            min_glyph, max_glyph;
+  int            endianness, swap, format, stride, width, height;
+  int            i, j, got;
 
-  txf = nullptr;
+  txf  = nullptr;
   file = fopen(filename, "rb");
   if (file == nullptr) {
     lastError = "file open failed.";
@@ -136,9 +136,9 @@ TexFont *txfLoadFont(char *filename) {
     goto error;
   }
   /* For easy cleanup in error case. */
-  txf->tgi = nullptr;
-  txf->tgvi = nullptr;
-  txf->lut = nullptr;
+  txf->tgi      = nullptr;
+  txf->tgvi     = nullptr;
+  txf->lut      = nullptr;
   txf->teximage = nullptr;
 
   got = fread(fileid, 1, 4, file);
@@ -204,30 +204,30 @@ TexFont *txfLoadFont(char *filename) {
     lastError = "out of memory.";
     goto error;
   }
-  w = txf->tex_width;
-  h = txf->tex_height;
+  w     = txf->tex_width;
+  h     = txf->tex_height;
   xstep = 0.5 / w;
   ystep = 0.5 / h;
   for (i = 0; i < txf->num_glyphs; i++) {
     TexGlyphInfo *tgi;
 
-    tgi = &txf->tgi[i];
-    txf->tgvi[i].t0[0] = tgi->x / w + xstep;
-    txf->tgvi[i].t0[1] = tgi->y / h + ystep;
-    txf->tgvi[i].v0[0] = tgi->xoffset;
-    txf->tgvi[i].v0[1] = tgi->yoffset;
-    txf->tgvi[i].t1[0] = (tgi->x + tgi->width) / w + xstep;
-    txf->tgvi[i].t1[1] = tgi->y / h + ystep;
-    txf->tgvi[i].v1[0] = tgi->xoffset + tgi->width;
-    txf->tgvi[i].v1[1] = tgi->yoffset;
-    txf->tgvi[i].t2[0] = (tgi->x + tgi->width) / w + xstep;
-    txf->tgvi[i].t2[1] = (tgi->y + tgi->height) / h + ystep;
-    txf->tgvi[i].v2[0] = tgi->xoffset + tgi->width;
-    txf->tgvi[i].v2[1] = tgi->yoffset + tgi->height;
-    txf->tgvi[i].t3[0] = tgi->x / w + xstep;
-    txf->tgvi[i].t3[1] = (tgi->y + tgi->height) / h + ystep;
-    txf->tgvi[i].v3[0] = tgi->xoffset;
-    txf->tgvi[i].v3[1] = tgi->yoffset + tgi->height;
+    tgi                  = &txf->tgi[i];
+    txf->tgvi[i].t0[0]   = tgi->x / w + xstep;
+    txf->tgvi[i].t0[1]   = tgi->y / h + ystep;
+    txf->tgvi[i].v0[0]   = tgi->xoffset;
+    txf->tgvi[i].v0[1]   = tgi->yoffset;
+    txf->tgvi[i].t1[0]   = (tgi->x + tgi->width) / w + xstep;
+    txf->tgvi[i].t1[1]   = tgi->y / h + ystep;
+    txf->tgvi[i].v1[0]   = tgi->xoffset + tgi->width;
+    txf->tgvi[i].v1[1]   = tgi->yoffset;
+    txf->tgvi[i].t2[0]   = (tgi->x + tgi->width) / w + xstep;
+    txf->tgvi[i].t2[1]   = (tgi->y + tgi->height) / h + ystep;
+    txf->tgvi[i].v2[0]   = tgi->xoffset + tgi->width;
+    txf->tgvi[i].v2[1]   = tgi->yoffset + tgi->height;
+    txf->tgvi[i].t3[0]   = tgi->x / w + xstep;
+    txf->tgvi[i].t3[1]   = (tgi->y + tgi->height) / h + ystep;
+    txf->tgvi[i].v3[0]   = tgi->xoffset;
+    txf->tgvi[i].v3[1]   = tgi->yoffset + tgi->height;
     txf->tgvi[i].advance = tgi->advance;
   }
 
@@ -242,7 +242,7 @@ TexFont *txfLoadFont(char *filename) {
     }
   }
   txf->min_glyph = min_glyph;
-  txf->range = max_glyph - min_glyph + 1;
+  txf->range     = max_glyph - min_glyph + 1;
 
   txf->lut =
       (TexGlyphVertexInfo **)calloc(txf->range, sizeof(TexGlyphVertexInfo *));
@@ -273,7 +273,7 @@ TexFont *txfLoadFont(char *filename) {
         goto error;
       }
       for (i = 0; i < txf->tex_width * txf->tex_height; i++) {
-        txf->teximage[i * 2] = orig[i];
+        txf->teximage[i * 2]     = orig[i];
         txf->teximage[i * 2 + 1] = orig[i];
       }
       free(orig);
@@ -288,9 +288,9 @@ TexFont *txfLoadFont(char *filename) {
     }
     break;
   case TXF_FORMAT_BITMAP:
-    width = txf->tex_width;
-    height = txf->tex_height;
-    stride = (width + 7) >> 3;
+    width     = txf->tex_width;
+    height    = txf->tex_height;
+    stride    = (width + 7) >> 3;
     texbitmap = (unsigned char *)malloc(stride * height);
     if (texbitmap == nullptr) {
       lastError = "out of memory.";
@@ -307,7 +307,7 @@ TexFont *txfLoadFont(char *filename) {
       for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {
           if (texbitmap[i * stride + (j >> 3)] & (1 << (j & 7))) {
-            txf->teximage[(i * width + j) * 2] = 255;
+            txf->teximage[(i * width + j) * 2]     = 255;
             txf->teximage[(i * width + j) * 2 + 1] = 255;
           }
         }
@@ -378,21 +378,21 @@ GLuint txfEstablishTexture(TexFont *txf, GLuint texobj,
     char *vendor, *renderer, *version;
 
     renderer = (char *)glGetString(GL_RENDERER);
-    vendor = (char *)glGetString(GL_VENDOR);
+    vendor   = (char *)glGetString(GL_VENDOR);
     if (!strcmp(vendor, "SGI") && !strncmp(renderer, "IMPACT", 6)) {
       version = (char *)glGetString(GL_VERSION);
       if (!strcmp(version, "1.0 Irix 6.2") ||
           !strcmp(version, "1.0 Irix 5.3")) {
         unsigned char *latex;
-        int width = txf->tex_width;
-        int height = txf->tex_height;
-        int i;
+        int            width  = txf->tex_width;
+        int            height = txf->tex_height;
+        int            i;
 
         useLuminanceAlpha = 1;
-        latex = (unsigned char *)calloc(width * height * 2, 1);
+        latex             = (unsigned char *)calloc(width * height * 2, 1);
         /* XXX unprotected alloc. */
         for (i = 0; i < height * width; i++) {
-          latex[i * 2] = txf->teximage[i];
+          latex[i * 2]     = txf->teximage[i];
           latex[i * 2 + 1] = txf->teximage[i];
         }
         free(txf->teximage);
@@ -459,7 +459,7 @@ void txfUnloadFont(TexFont *txf) {
 void txfGetStringMetrics(TexFont *txf, char *string, int len, int *width,
                          int *max_ascent, int *max_descent) {
   TexGlyphVertexInfo *tgvi = nullptr;
-  int w, i;
+  int                 w, i;
 
   w = 0;
   for (i = 0; i < len; i++) {
@@ -483,8 +483,8 @@ void txfGetStringMetrics(TexFont *txf, char *string, int len, int *width,
       w += tgvi->advance;
     }
   }
-  *width = w;
-  *max_ascent = txf->max_ascent;
+  *width       = w;
+  *max_ascent  = txf->max_ascent;
   *max_descent = txf->max_descent;
 }
 
@@ -517,9 +517,9 @@ enum { MONO, TOP_BOTTOM, LEFT_RIGHT, FOUR };
 
 void txfRenderFancyString(TexFont *txf, char *string, int len) {
   TexGlyphVertexInfo *tgvi = nullptr;
-  GLubyte c[4][3];
-  int mode = MONO;
-  int i;
+  GLubyte             c[4][3];
+  int                 mode = MONO;
+  int                 i;
 
   for (i = 0; i < len; i++) {
     if (string[i] == 27) {

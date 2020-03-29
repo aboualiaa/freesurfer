@@ -35,12 +35,12 @@ const Face &Face::operator=(const Face &face) {
     f[n] = face.f[n];
   }
   marked = face.marked;
-  nx = face.nx;
-  ny = face.ny;
-  nz = face.nz;
-  x = face.x;
-  y = face.y;
-  z = face.z;
+  nx     = face.nx;
+  ny     = face.ny;
+  nz     = face.nz;
+  x      = face.x;
+  y      = face.y;
+  z      = face.z;
 
   return face;
 }

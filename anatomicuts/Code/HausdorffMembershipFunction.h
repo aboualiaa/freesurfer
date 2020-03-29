@@ -2,7 +2,7 @@
 #define __HausdorffMembershipFunction_h
 
 #include "LabelPerPointMembershipFunction.h"
-// using namespace itk;
+
 //#include "HausdorffMembershipFunction.txx"
 
 template <class TVector>
@@ -10,9 +10,9 @@ class HausdorffMembershipFunction
     : public LabelPerPointMembershipFunction<TVector> {
 public:
   /** Standard class typedefs */
-  using Self = HausdorffMembershipFunction<TVector>;
-  using Superclass = LabelPerPointMembershipFunction<TVector>;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = HausdorffMembershipFunction<TVector>;
+  using Superclass   = LabelPerPointMembershipFunction<TVector>;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Strandard macros */
@@ -21,7 +21,7 @@ public:
 
   /** Typedef alias for the measurement vectors */
   using MeasurementVectorType = TVector;
-  using CentroidType = TVector;
+  using CentroidType          = TVector;
 
   /** Typedef to represent the length of measurement vectors */
   using MeasurementVectorSizeType =

@@ -8,7 +8,7 @@ namespace kvl {
 //
 //
 AtlasMeshSummaryDrawer ::AtlasMeshSummaryDrawer() {
-  m_Image = nullptr;
+  m_Image                  = nullptr;
   m_CompressionLookupTable = nullptr;
 }
 
@@ -28,7 +28,7 @@ bool AtlasMeshSummaryDrawer ::RasterizeTetrahedron(
   mesh->GetCell(tetrahedronId, cell);
 
   AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-  const AtlasMesh::PointIdentifier id0 = *pit;
+  const AtlasMesh::PointIdentifier     id0 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier id1 = *pit;
   ++pit;

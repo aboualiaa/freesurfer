@@ -23,24 +23,24 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "utils.h"
-#include "const.h"
-#include "timer.h"
-#include "version.h"
 #include "cma.h"
 #include "colortab.h"
+#include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
 #include "matrix.h"
+#include "mri.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -48,19 +48,18 @@ static void usage_exit(int code);
 
 #define MAX_DIVISIONS 1000
 
-int
-main(int argc, char *argv[]) {
-  char   **av ;
-  int    ac, nargs, segno, indices[MAX_DIVISIONS] ;
-  int          msec, minutes, seconds, nparts, i, num, label, mx, my, mz, x, y, z ;
-  Timer start ;
-  MRI          *mri ;
-  double       cx, cy, cz, min_dist, dist, dx, dy, dz ;
-  float        evalues[3], zf, zf_low, zf_high, ez_x, ez_y, ez_z ;
-//  double       e1x, e1y, e1z, e2x, e2y, e2z, e3z, e3y, e3z ;
-  MATRIX       *m_obs, *m_obs_T, *m_cov, *m_eig ;
+int main(int argc, char *argv[]) {
+  char **av;
+  int    ac, nargs, segno, indices[MAX_DIVISIONS];
+  int    msec, minutes, seconds, nparts, i, num, label, mx, my, mz, x, y, z;
+  Timer  start;
+  MRI *  mri;
+  double cx, cy, cz, min_dist, dist, dx, dy, dz;
+  float  evalues[3], zf, zf_low, zf_high, ez_x, ez_y, ez_z;
+  //  double       e1x, e1y, e1z, e2x, e2y, e2z, e3z, e3y, e3z ;
+  MATRIX *m_obs, *m_obs_T, *m_cov, *m_eig;
 
-  setRandomSeed(-1L) ;
+  setRandomSeed(-1L);
   nargs = handleVersionOption(argc, argv, "mri_divide_segmentation");
   if (nargs && argc - nargs == 1)
     exit(0);
@@ -102,7 +101,7 @@ main(int argc, char *argv[]) {
                 Progname, argv[1]);
   }
 
-  segno = atoi(argv[2]);
+  segno  = atoi(argv[2]);
   nparts = atoi(argv[3]);
   printf("dividing segmentation %s (%d) into %d parts along its eigen-axis\n",
          cma_label_to_name(segno), segno, nparts);
@@ -166,9 +165,9 @@ main(int argc, char *argv[]) {
         label = MRIgetVoxVal(mri, x, y, z, 0);
         if (label != segno)
           continue;
-        dx = x - cx;
-        dy = y - cy;
-        dz = z - cz;
+        dx                              = x - cx;
+        dy                              = y - cy;
+        dz                              = z - cz;
         *MATRIX_RELT(m_obs, 1, num + 1) = dx;
         *MATRIX_RELT(m_obs, 2, num + 1) = dy;
         *MATRIX_RELT(m_obs, 3, num + 1) = dz;
@@ -176,11 +175,11 @@ main(int argc, char *argv[]) {
       }
 
   m_obs_T = MatrixTranspose(m_obs, NULL);
-  m_cov = MatrixMultiply(m_obs, m_obs_T, NULL);
-  m_eig = MatrixEigenSystem(m_cov, evalues, NULL);
-  ez_x = *MATRIX_RELT(m_eig, 1, 1);
-  ez_y = *MATRIX_RELT(m_eig, 2, 1);
-  ez_z = *MATRIX_RELT(m_eig, 3, 1);
+  m_cov   = MatrixMultiply(m_obs, m_obs_T, NULL);
+  m_eig   = MatrixEigenSystem(m_cov, evalues, NULL);
+  ez_x    = *MATRIX_RELT(m_eig, 1, 1);
+  ez_y    = *MATRIX_RELT(m_eig, 2, 1);
+  ez_z    = *MATRIX_RELT(m_eig, 3, 1);
   for (i = 2; i <= 3; i++) // find eigenvector that is closest to z axis
   {
     if (fabs(*MATRIX_RELT(m_eig, 3, i)) > fabs(ez_z)) {
@@ -197,7 +196,7 @@ main(int argc, char *argv[]) {
   }
 
   // find the bounding box
-  zf_low = 10000;
+  zf_low  = 10000;
   zf_high = -zf_low;
   for (x = 0; x < mri->width; x++)
     for (y = 0; y < mri->height; y++)
@@ -220,7 +219,7 @@ main(int argc, char *argv[]) {
         label = MRIgetVoxVal(mri, x, y, z, 0);
         if (label != segno)
           continue;
-        zf = (x - mx) * ez_x + (y - my) * ez_y + (z - mz) * ez_z;
+        zf          = (x - mx) * ez_x + (y - my) * ez_y + (z - mz) * ez_z;
         subdivision = floor((zf - zf_low) / ((zf_high - zf_low + 1) / nparts));
         if (subdivision < 0)
           subdivision = 0;
@@ -235,7 +234,7 @@ main(int argc, char *argv[]) {
   printf("writing output to %s\n", argv[4]);
   MRIwrite(mri, argv[4]);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -251,7 +250,7 @@ main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

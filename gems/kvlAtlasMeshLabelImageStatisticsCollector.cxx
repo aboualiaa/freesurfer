@@ -10,7 +10,7 @@ namespace kvl {
 AtlasMeshLabelImageStatisticsCollector ::
     AtlasMeshLabelImageStatisticsCollector() {
 
-  m_LabelImage = nullptr;
+  m_LabelImage             = nullptr;
   m_CompressionLookupTable = nullptr;
 }
 
@@ -24,9 +24,9 @@ AtlasMeshLabelImageStatisticsCollector ::
 //
 //
 void AtlasMeshLabelImageStatisticsCollector ::SetLabelImage(
-    const LabelImageType *labelImage,
+    const LabelImageType *        labelImage,
     const CompressionLookupTable *lookupTable) {
-  m_LabelImage = labelImage;
+  m_LabelImage             = labelImage;
   m_CompressionLookupTable = lookupTable;
 }
 
@@ -45,9 +45,9 @@ void AtlasMeshLabelImageStatisticsCollector ::GetContributionOfTetrahedron(
     AtlasAlphasType &statisticsInVertex3) {
 
   // We start with an empty slate
-  minLogLikelihood = 0.0;
+  minLogLikelihood          = 0.0;
   const int numberOfClasses = m_CompressionLookupTable->GetNumberOfClasses();
-  statisticsInVertex0 = AtlasAlphasType(numberOfClasses);
+  statisticsInVertex0       = AtlasAlphasType(numberOfClasses);
   statisticsInVertex0.Fill(0.0f);
   statisticsInVertex1 = AtlasAlphasType(numberOfClasses);
   statisticsInVertex1.Fill(0.0f);
@@ -60,7 +60,7 @@ void AtlasMeshLabelImageStatisticsCollector ::GetContributionOfTetrahedron(
   TetrahedronInteriorConstIterator<LabelImageType::PixelType> it(
       m_LabelImage, p0, p1, p2, p3);
   for (; !it.IsAtEnd(); ++it) {
-    double denominator = 0.0;
+    double                  denominator = 0.0;
     const std::vector<int> &classNumbers =
         m_CompressionLookupTable->GetClassNumbers(it.Value());
     for (std::vector<int>::const_iterator classIt = classNumbers.begin();

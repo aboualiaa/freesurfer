@@ -36,12 +36,12 @@ public:
 
   double nx, ny, nz; // normal (defined by the set of normals)
 
-  int fnum, maxfnum; // number of adjacent faces
-  int *f;            // list of adjacent faces
-  int *n;            // list of vertex positions in adjacent faces
-  int vnum, maxvnum; // number of adjacent vertices (we must have vnum = fnum
-                     // for a valid closed surface)
-  int *v;            // list of adjacent vertices (represent an edge)
+  int  fnum, maxfnum; // number of adjacent faces
+  int *f;             // list of adjacent faces
+  int *n;             // list of vertex positions in adjacent faces
+  int  vnum, maxvnum; // number of adjacent vertices (we must have vnum = fnum
+                      // for a valid closed surface)
+  int *v;             // list of adjacent vertices (represent an edge)
   int *e; // state of the adjacent vertices or of the corresponding edges
 
   double curv; // the curvature of the vertex
@@ -51,7 +51,7 @@ public:
   // constructor/destructor
   Vertex();
   ~Vertex();
-  void Clear();
+  void          Clear();
   const Vertex &operator=(const Vertex &v);
 
   inline int AllocateFaces(int mf) {
@@ -127,13 +127,13 @@ public:
   inline void AddFace(int fn, int _n) {
     if (fnum == maxfnum)
       ExpandFaces(2);
-    f[fnum] = fn;
+    f[fnum]   = fn;
     n[fnum++] = _n;
   }
   inline void AddEdge(int nv) {
     if (vnum == maxvnum)
       ExpandVertices(1);
-    v[vnum] = nv;
+    v[vnum]   = nv;
     e[vnum++] = 0;
   }
 };

@@ -55,11 +55,11 @@
 
 #define MAX_VNOS 200000
 typedef struct _labelInfo {
-  int annotation;      /* its annotation identifier */
-  char vnos[MAX_VNOS]; /* if array element is 1, then that array index, which
+  int   annotation;     /* its annotation identifier */
+  char  vnos[MAX_VNOS]; /* if array element is 1, then that array index, which
                           is a vertex number, is a border vertex of this
                           label */
-  float meanMinDist;   /* average of the minimum distance of every boundary
+  float meanMinDist;    /* average of the minimum distance of every boundary
                           vertex to the other surfaces boundary vertices for
                           this same label */
 } LABEL_INFO;
@@ -78,9 +78,9 @@ static char skippedLabels[MAX_SKIPPED_LABELS];
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #endif
 // this mini colortable is used when two labels are being compared
-static const COLOR_TABLE_ENTRY unknown = {"unknown", 0, 0, 0,  255,
+static const COLOR_TABLE_ENTRY unknown   = {"unknown", 0, 0, 0,  255,
                                           0,         0, 0, 255};
-static COLOR_TABLE_ENTRY userLabel = {
+static COLOR_TABLE_ENTRY       userLabel = {
     "user label name gets copied here                   ",
     220,
     20,
@@ -90,7 +90,7 @@ static COLOR_TABLE_ENTRY userLabel = {
     0.08,
     0.08,
     1};
-static const CTE *entries[2] = {&unknown, &userLabel};
+static const CTE *       entries[2]     = {&unknown, &userLabel};
 static const COLOR_TABLE miniColorTable = {(CTE **)entries, 2, "miniColorTable",
                                            2};
 #if defined(FS_COMP_GNUC)
@@ -100,45 +100,45 @@ static const COLOR_TABLE miniColorTable = {(CTE **)entries, 2, "miniColorTable",
 #endif
 
 static void addToExcludedLabelsList(COLOR_TABLE *ct, char *labelToExclude);
-static int isExcludedLabel(int colortabIndex);
+static int  isExcludedLabel(int colortabIndex);
 static void addToIncludedLabelsList(COLOR_TABLE *ct, char *labelToInclude);
-static int isIncludedLabel(int colortabIndex);
+static int  isIncludedLabel(int colortabIndex);
 static void calcMeanMinLabelDistances();
 static void usage(int exit_val);
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void dump_options(FILE *fp);
 static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 static void padWhite(char *str, int maxLen);
 
 const char *Progname;
 static char vcid[] =
     "$Id: mris_compute_parc_overlap.c,v 1.19 2016/03/28 17:20:11 fischl Exp $";
-static char *FREESURFER_HOME = nullptr;
-static char *SUBJECTS_DIR = nullptr;
-static char *subject = nullptr;
-static char *hemi = nullptr;
-static char *annot1 = nullptr;
-static char *annot2 = nullptr;
-static int unknown_annot = 0;
-static char *label1name = nullptr;
-static char *label2name = nullptr;
-static LABEL *label1 = nullptr;
-static LABEL *label2 = nullptr;
-static MRIS *surface1 = nullptr;
-static MRIS *surface2 = nullptr;
-static int debug_overlap = 0;
-static int debug_boundaries = 0;
-static int debug_labels = 0;
-static int use_label1_xyz = 0;
-static int use_label2_xyz = 0;
-static int check_label1_xyz = 1;
-static int check_label2_xyz = 1;
-static char tmpstr[2000];
-static char *labelsfile =
+static char * FREESURFER_HOME  = nullptr;
+static char * SUBJECTS_DIR     = nullptr;
+static char * subject          = nullptr;
+static char * hemi             = nullptr;
+static char * annot1           = nullptr;
+static char * annot2           = nullptr;
+static int    unknown_annot    = 0;
+static char * label1name       = nullptr;
+static char * label2name       = nullptr;
+static LABEL *label1           = nullptr;
+static LABEL *label2           = nullptr;
+static MRIS * surface1         = nullptr;
+static MRIS * surface2         = nullptr;
+static int    debug_overlap    = 0;
+static int    debug_boundaries = 0;
+static int    debug_labels     = 0;
+static int    use_label1_xyz   = 0;
+static int    use_label2_xyz   = 0;
+static int    check_label1_xyz = 1;
+static int    check_label2_xyz = 1;
+static char   tmpstr[2000];
+static char * labelsfile =
     nullptr; // optional file containing lists of label to chk
 static FILE *logfile = nullptr;
 
@@ -153,7 +153,8 @@ int main(int argc, char *argv[]) {
   // command-line processing...
   int nargs;
   nargs = handleVersionOption(argc, argv, "mris_compute_parc_overlap");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
 
   Progname = argv[0];
@@ -165,7 +166,7 @@ int main(int argc, char *argv[]) {
     usage(1);
 
   FREESURFER_HOME = getenv("FREESURFER_HOME");
-  SUBJECTS_DIR = getenv("SUBJECTS_DIR");
+  SUBJECTS_DIR    = getenv("SUBJECTS_DIR");
   parse_commandline(argc, argv);
   check_options();
   dump_options(stdout);
@@ -184,7 +185,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "ERROR: could not read %s\n", tmpstr);
     exit(1);
   }
-  surface2 = MRISclone(surface1);
+  surface2          = MRISclone(surface1);
   MRIS *overlapSurf = MRISclone(surface1); // a debugging surface
 
   /* --- Load subject's 'reference' annotation or label onto surface1 ---- */
@@ -235,7 +236,7 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     printf(" %d vertices.\n", label2->n_points);
-    surface2->ct = (CT *)&miniColorTable;
+    surface2->ct    = (CT *)&miniColorTable;
     overlapSurf->ct = (CT *)&miniColorTable;
     strcat(userLabel.name, "->");
     strcat(userLabel.name, label2name);
@@ -310,7 +311,7 @@ int main(int argc, char *argv[]) {
      the failure in overlap occurs.
   */
   int unknown_index = 0;
-  unknown_annot = 0;
+  unknown_annot     = 0;
   CTABfindName(surface1->ct, "unknown", &unknown_index);
   if (unknown_index == -1) {
     printf("ERROR: could not retrieve index for label 'unknown'\n");
@@ -367,9 +368,9 @@ int main(int argc, char *argv[]) {
   if (label1 && label2) {
     int vno;
     for (vno = 0; vno < surface1->nvertices; vno++) {
-      VERTEX *v1 = &surface1->vertices[vno];
-      VERTEX *v2 = &surface2->vertices[vno];
-      VERTEX *vo = &overlapSurf->vertices[vno];
+      VERTEX *v1     = &surface1->vertices[vno];
+      VERTEX *v2     = &surface2->vertices[vno];
+      VERTEX *vo     = &overlapSurf->vertices[vno];
       v1->annotation = unknown_annot; // default annotation
       v2->annotation = unknown_annot;
       vo->annotation = unknown_annot;
@@ -454,18 +455,18 @@ int main(int argc, char *argv[]) {
   fflush(stdout);
   fflush(stderr);
   int mismatchCount = 0;
-  int dice_overlap = 0; // for Dice calc
-  int dice_surf1 = 0;   // for Dice calc
-  int dice_surf2 = 0;   // for Dice calc
-  int dice_union = 0;
+  int dice_overlap  = 0; // for Dice calc
+  int dice_surf1    = 0; // for Dice calc
+  int dice_surf2    = 0; // for Dice calc
+  int dice_union    = 0;
   int n;
   for (n = 0; n < surface1->nvertices; n++) {
     /*
      * surface 1: get the colortable index.for this vertex's annotation
      */
-    int colorTabIndex1 = 0;
+    int                          colorTabIndex1 = 0;
     VERTEX_TOPOLOGY const *const v1t = &surface1->vertices_topology[n];
-    VERTEX *const v1 = &surface1->vertices[n];
+    VERTEX *const                v1  = &surface1->vertices[n];
     if (v1->annotation) {
       // printf("v1->annotation=0x%8.8.8X\n",v1->annotation);
       CTABfindAnnotation(surface1->ct, v1->annotation, &colorTabIndex1);
@@ -479,9 +480,9 @@ int main(int argc, char *argv[]) {
     /*
      * surface 2: get the colortable index.for this vertex's annotation
      */
-    int colorTabIndex2 = 0;
+    int                          colorTabIndex2 = 0;
     VERTEX_TOPOLOGY const *const v2t = &surface2->vertices_topology[n];
-    VERTEX *const v2 = &surface2->vertices[n];
+    VERTEX *const                v2  = &surface2->vertices[n];
     if (v2->annotation) {
       CTABfindAnnotation(surface2->ct, v2->annotation, &colorTabIndex2);
     } else {
@@ -622,7 +623,7 @@ int main(int argc, char *argv[]) {
      * as-is, allowing visualization of overlap failure.
      */
     if (colorTabIndex1 == colorTabIndex2) {
-      VERTEX *v = &overlapSurf->vertices[n];
+      VERTEX *v     = &overlapSurf->vertices[n];
       v->annotation = unknown_annot;
     }
   }
@@ -662,12 +663,12 @@ int main(int argc, char *argv[]) {
 } /*  end main()  */
 
 static int *excludedLabelsList = nullptr;
-static int numExcludedLabels;
+static int  numExcludedLabels;
 static void addToExcludedLabelsList(COLOR_TABLE *ct, char *labelToExclude) {
   // first-time setup
   if (excludedLabelsList == nullptr) {
     excludedLabelsList = (int *)malloc(10000 * sizeof(int));
-    numExcludedLabels = 0;
+    numExcludedLabels  = 0;
   }
   if (excludedLabelsList == nullptr) {
     printf("ERROR: failed to malloc memory for excludedLabels list\n");
@@ -700,12 +701,12 @@ static int isExcludedLabel(int colortabIndex) {
 }
 
 static int *includedLabelsList = nullptr;
-static int numIncludedLabels;
+static int  numIncludedLabels;
 static void addToIncludedLabelsList(COLOR_TABLE *ct, char *labelToInclude) {
   // first-time setup
   if (includedLabelsList == nullptr) {
     includedLabelsList = (int *)malloc(10000 * sizeof(int));
-    numIncludedLabels = 0;
+    numIncludedLabels  = 0;
   }
   if (includedLabelsList == nullptr) {
     printf("ERROR: failed to malloc memory for includedLabels list\n");
@@ -830,15 +831,15 @@ static void calcMeanMinLabelDistances() {
           VERTEX *v1 = &surface1->vertices[vno];
           // compute min distance to boundary of same label on surface 2
           float minDist = 100000000;
-          int vno2;
+          int   vno2;
           for (vno2 = 0; vno2 < surface2->nvertices; vno2++) {
             if (surf2BoundaryLabels[cti].vnos[vno2]) { // found boundary vertex
               VERTEX *v2 = &surface2->vertices[vno2];
 #if 1
               // note: this is the Euclidian distance! not geodesic
-              float dx = v2->x - v1->x;
-              float dy = v2->y - v1->y;
-              float dz = v2->z - v1->z;
+              float dx   = v2->x - v1->x;
+              float dy   = v2->y - v1->y;
+              float dz   = v2->z - v1->z;
               float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz));
 #endif
               // printf("dist=%f\n",dist);
@@ -924,14 +925,14 @@ static void calcMeanMinLabelDistances() {
           VERTEX *v2 = &surface2->vertices[vno];
           // compute min distance to boundary of same label on surface 1
           float minDist = 100000000;
-          int vno1;
+          int   vno1;
           for (vno1 = 0; vno1 < surface1->nvertices; vno1++) {
             if (surf1BoundaryLabels[cti].vnos[vno1]) { // found boundary vertex
-              VERTEX *v1 = &surface1->vertices[vno1];
-              float dx = v1->x - v2->x;
-              float dy = v1->y - v2->y;
-              float dz = v1->z - v2->z;
-              float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz));
+              VERTEX *v1   = &surface1->vertices[vno1];
+              float   dx   = v1->x - v2->x;
+              float   dy   = v1->y - v2->y;
+              float   dz   = v1->z - v2->z;
+              float   dist = sqrt((dx * dx) + (dy * dy) + (dz * dz));
               // printf("dist=%f\n",dist);
               if (dist < minDist)
                 minDist = dist;
@@ -987,7 +988,7 @@ static void calcMeanMinLabelDistances() {
    * for each label
    */
   float overallMeanMinDist = 0;
-  int ctiCount = 0;
+  int   ctiCount           = 0;
   printf("\n"
          "Average minimium distance error table:\n"
          "--------------------------------------------\n"
@@ -1071,7 +1072,7 @@ static void calcMeanMinLabelDistances() {
 /* --------------------------------------------- */
 static void usage(int exit_val) {
   FILE *fout;
-  char progname[] = "mris_compute_parc_overlap";
+  char  progname[] = "mris_compute_parc_overlap";
 
   fout = (exit_val ? stderr : stdout);
 
@@ -1174,7 +1175,7 @@ static void print_version() {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -1241,38 +1242,38 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--s")) {
       if (nargc < 1)
         argnerr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--hemi")) {
       if (nargc < 1)
         argnerr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--annot1")) {
       if (nargc < 1)
         argnerr(option, 1);
-      annot1 = pargv[0];
+      annot1    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--annot2")) {
       if (nargc < 1)
         argnerr(option, 1);
-      annot2 = pargv[0];
+      annot2    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--label1")) {
       if (nargc < 1)
         argnerr(option, 1);
       label1name = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--label2")) {
       if (nargc < 1)
         argnerr(option, 1);
       label2name = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--label-list")) {
       if (nargc < 1)
         argnerr(option, 1);
       labelsfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (singledash(option))

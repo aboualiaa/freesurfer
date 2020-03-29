@@ -1,16 +1,16 @@
-#include "kvlAtlasMeshBuilder.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkMGHImageIOFactory.h"
+#include "kvlAtlasMeshBuilder.h"
 
 namespace kvl {
 
 class BuilderCommand : public itk::Command {
 public:
   /** Standard class typedefs. */
-  typedef BuilderCommand Self;
-  typedef itk::Command Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef BuilderCommand                Self;
+  typedef itk::Command                  Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -27,7 +27,7 @@ public:
   /** Abstract method that defines the action to be taken by the command.
    * This variant is expected to be used when requests comes from a
    * const Object */
-  virtual void Execute(const itk::Object *caller,
+  virtual void Execute(const itk::Object *     caller,
                        const itk::EventObject &event) {
 
     if ((typeid(event) == typeid(itk::IterationEvent)) ||
@@ -56,7 +56,7 @@ public:
         exit(-1);
       }
 
-      double currentDataCost = 0;
+      double currentDataCost   = 0;
       double currentAlphasCost = 0;
       std::cout << "Computing current data and alphas cost..." << std::endl;
       itk::TimeProbe probe;
@@ -67,7 +67,7 @@ public:
       std::cout << "Took " << probe.GetMean()
                 << " seconds to compute current data and alphas cost"
                 << std::endl;
-      double currentPositionCost = builder->GetCurrentPositionCost();
+      double       currentPositionCost = builder->GetCurrentPositionCost();
       const double currentCost =
           currentDataCost + currentAlphasCost + currentPositionCost;
       out << builder->GetIterationNumber() << "   " << currentDataCost << "   "
@@ -124,22 +124,22 @@ int main(int argc, char **argv) {
     inputParserStream << argv[argumentNumber] << " ";
   }
   std::istringstream inputStream(inputParserStream.str().c_str());
-  int numberOfUpsamplingSteps;
-  unsigned int meshSizeX;
-  unsigned int meshSizeY;
-  unsigned int meshSizeZ;
-  double stiffness;
-  std::string logDirectory;
+  int                numberOfUpsamplingSteps;
+  unsigned int       meshSizeX;
+  unsigned int       meshSizeY;
+  unsigned int       meshSizeZ;
+  double             stiffness;
+  std::string        logDirectory;
   inputStream >> numberOfUpsamplingSteps >> meshSizeX >> meshSizeY >>
       meshSizeZ >> stiffness >> logDirectory;
 
   // Read the input images
   typedef kvl::CompressionLookupTable::ImageType LabelImageType;
-  std::vector<LabelImageType::ConstPointer> labelImages;
+  std::vector<LabelImageType::ConstPointer>      labelImages;
   for (int argumentNumber = 7; argumentNumber < argc; argumentNumber++) {
     // Read the input image
     typedef itk::ImageFileReader<LabelImageType> ReaderType;
-    ReaderType::Pointer reader = ReaderType::New();
+    ReaderType::Pointer                          reader = ReaderType::New();
     reader->SetFileName(argv[argumentNumber]);
     reader->Update();
     LabelImageType::ConstPointer labelImage = reader->GetOutput();
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     // Over-ride the spacing and origin since at this point we can't deal with
     // that
     const double spacing[] = {1, 1, 1};
-    const double origin[] = {0, 0, 0};
+    const double origin[]  = {0, 0, 0};
     const_cast<LabelImageType *>(labelImage.GetPointer())->SetSpacing(spacing);
     const_cast<LabelImageType *>(labelImage.GetPointer())->SetOrigin(origin);
 
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
 
   // Set up the builder
   kvl::AtlasMeshBuilder::Pointer builder = kvl::AtlasMeshBuilder::New();
-  const itk::Size<3> initialSize = {meshSizeX, meshSizeY, meshSizeZ};
+  const itk::Size<3>  initialSize        = {meshSizeX, meshSizeY, meshSizeZ};
   std::vector<double> initialStiffnesses(numberOfUpsamplingSteps + 1,
                                          stiffness);
   builder->SetUp(labelImages, lookupTable, initialSize, initialStiffnesses);
@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
 
   // If explicitStartCollection exists in the current directory, use it
   kvl::AtlasMeshCollection::Pointer explicitStartCollection = nullptr;
-  const std::string explicitStartCollectionFileName =
+  const std::string                 explicitStartCollectionFileName =
       "explicitStartCollection.gz";
   if (itksys::SystemTools::FileExists(explicitStartCollectionFileName.c_str(),
                                       true)) {
@@ -245,7 +245,7 @@ int main(int argc, char **argv) {
 
   // If edgeCollapseEncouragmentFactor.txt exists in the current directory, read
   // it's content
-  double edgeCollapseEncouragmentFactor = 1.0;
+  double            edgeCollapseEncouragmentFactor = 1.0;
   const std::string edgeCollapseEncouragmentFactorFileName =
       "edgeCollapseEncouragmentFactor.txt";
   // if ( itksys::SystemTools::FileExists(

@@ -8,9 +8,9 @@ class LabelsPointToPointMembershipFunction
     : public LabelPerPointMembershipFunction<TVector> {
 public:
   /** Standard class typedefs */
-  using Self = LabelsPointToPointMembershipFunction<TVector>;
-  using Superclass = LabelPerPointMembershipFunction<TVector>;
-  using Pointer = itk::SmartPointer<Self>;
+  using Self         = LabelsPointToPointMembershipFunction<TVector>;
+  using Superclass   = LabelPerPointMembershipFunction<TVector>;
+  using Pointer      = itk::SmartPointer<Self>;
   using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Strandard macros */
@@ -20,12 +20,12 @@ public:
 
   /** Typedef alias for the measurement vectors */
   using MeasurementVectorType = TVector;
-  using CentroidType = TVector;
+  using CentroidType          = TVector;
 
   /** Typedef to represent the length of measurement vectors */
   using MeasurementVectorSizeType =
       typename Superclass::MeasurementVectorSizeType;
-  void SetLabelsCount(int count) { this->m_labelsCount = count; }
+  void           SetLabelsCount(int count) { this->m_labelsCount = count; }
   virtual double Evaluate(const MeasurementVectorType *m1,
                           const MeasurementVectorType *m2) const;
 

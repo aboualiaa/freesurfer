@@ -22,74 +22,75 @@
  *
  */
 
+#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <string.h>
-#include <errno.h>
 
-#include "macros.h"
-#include "utils.h"
-#include "mri2.h"
-#include "minc.h"
-#include "error.h"
-#include "diag.h"
-#include "version.h"
 #include "cmdargs.h"
-#include "fsenv.h"
+#include "diag.h"
 #include "dti.h"
+#include "error.h"
+#include "fsenv.h"
+#include "macros.h"
+#include "minc.h"
+#include "mri2.h"
+#include "utils.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void);
-static void usage_exit(void);
-static void print_help(void);
-static void print_version(void);
-static void dump_options(FILE *fp);
-static int fastestdim45(MRI *invol, int n1, int n2);
-static void MRIavg4(MRI *invol, int n4, int n5);
-static void MRIavg5(MRI *invol, int n4, int n5);
+static int   parse_commandline(int argc, char **argv);
+static void  check_options(void);
+static void  print_usage(void);
+static void  usage_exit(void);
+static void  print_help(void);
+static void  print_version(void);
+static void  dump_options(FILE *fp);
+static int   fastestdim45(MRI *invol, int n1, int n2);
+static void  MRIavg4(MRI *invol, int n4, int n5);
+static void  MRIavg5(MRI *invol, int n4, int n5);
 static float avgsnr(MRI *invol, MRI *mask, int frame0, int nframe);
 
 static char vcid[] = "$Id$";
 
-const char *Progname;
-FILE *fpin;
-char *InFile = NULL;
-char *OutDir = NULL;
-float bValue = 0.0;
-int nAcq = 1;
-int nDir = 6;
-char *GradFile = NULL;
-char *MaskFile = NULL;
-char *OutFmt = "nii";
-int IsTensorInput = 0;
-int debug = 0;
+const char *   Progname;
+FILE *         fpin;
+char *         InFile        = NULL;
+char *         OutDir        = NULL;
+float          bValue        = 0.0;
+int            nAcq          = 1;
+int            nDir          = 6;
+char *         GradFile      = NULL;
+char *         MaskFile      = NULL;
+char *         OutFmt        = "nii";
+int            IsTensorInput = 0;
+int            debug         = 0;
 struct utsname uts;
-char *cmdline, cwd[2000];
-int DiffMode;
-char tmpstr[2000];
-FSENV *fsenv;
+char *         cmdline, cwd[2000];
+int            DiffMode;
+char           tmpstr[2000];
+FSENV *        fsenv;
 
 /***-------------------------------------------------------****/
 int main(int argc, char *argv[]) {
-  int nargs, ng, ig, i, nx, ny, nz, nf, navg, ix, iy, iz, id, nRow, nCol;
-  float smax, ssum, norm, mean;
-  float *grads = NULL;
-  float *gp = NULL;
-  float *eval = NULL;
+  int     nargs, ng, ig, i, nx, ny, nz, nf, navg, ix, iy, iz, id, nRow, nCol;
+  float   smax, ssum, norm, mean;
+  float * grads = NULL;
+  float * gp    = NULL;
+  float * eval  = NULL;
   MATRIX *B = NULL, *Bpseudo = NULL, *dwi = NULL, *tensor = NULL,
          *Tensor = NULL, *Evec = NULL;
   MRI *invol = NULL, *mask = NULL, *lowb = NULL, *avgdwi = NULL,
       *tenstack = NULL, *eigval = NULL, *eigvec1 = NULL, *eigvec2 = NULL,
       *eigvec3 = NULL, *trace = NULL, *fa = NULL;
-  FILE *fp = NULL;
-  char outfile[1024];
+  FILE *       fp = NULL;
+  char         outfile[1024];
   const double minexp = exp(-10 ^ 35);
 
   nargs = handleVersionOption(argc, argv, "dmri_tensoreig");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -144,8 +145,8 @@ int main(int argc, char *argv[]) {
 
     // our symmetric tensor
     Tensor = MatrixAlloc(3, 3, MATRIX_REAL);
-    eval = (float *)malloc(3 * sizeof(float));
-    Evec = MatrixAlloc(3, 3, MATRIX_REAL);
+    eval   = (float *)malloc(3 * sizeof(float));
+    Evec   = MatrixAlloc(3, 3, MATRIX_REAL);
 
     // go through all the tensors and calculate the eigensystem and fa
     for (iz = 0; iz < nz; iz++) {
@@ -188,7 +189,7 @@ int main(int argc, char *argv[]) {
   } else {
     printf("INFO: Reading gradient vectors.");
     /* Read gradient vectors */
-    ng = 3 * (nDir + 1);
+    ng    = 3 * (nDir + 1);
     grads = (float *)malloc(ng * sizeof(float));
     memset(grads, 0, ng * sizeof(float));
     fp = fopen(GradFile, "r");
@@ -216,7 +217,7 @@ int main(int argc, char *argv[]) {
 
     /* Normalize gradients to unit maximum length */
     smax = 0;
-    gp = grads + 3;
+    gp   = grads + 3;
     for (ig = nDir; ig > 0; ig--) {
       ssum = (*gp) * (*gp);
       gp++;
@@ -228,7 +229,7 @@ int main(int argc, char *argv[]) {
         smax = ssum;
     }
     smax = sqrt(smax);
-    gp = grads + 3;
+    gp   = grads + 3;
     for (ig = ng - 3; ig > 0; ig--)
       *gp++ /= smax;
 
@@ -236,14 +237,14 @@ int main(int argc, char *argv[]) {
     B = MatrixAlloc(nDir + 1, 7, MATRIX_REAL);
     memset(B->rptr[1], 0, 6 * sizeof(float));
     B->rptr[1][7] = 1;
-    gp = grads + 3;
+    gp            = grads + 3;
     for (ig = 2; ig <= nDir + 1; ig++) {
-      ssum = bValue * (*gp);
+      ssum           = bValue * (*gp);
       B->rptr[ig][1] = ssum * (*gp);           /* b g_1^2 */
       B->rptr[ig][2] = 2 * ssum * (*(gp + 1)); /* 2 b g_1 g_2 */
       B->rptr[ig][3] = 2 * ssum * (*(gp + 2)); /* 2 b g_1 g_3 */
       gp++;
-      ssum = bValue * (*gp);
+      ssum           = bValue * (*gp);
       B->rptr[ig][4] = ssum * (*gp);           /* b g_2^2 */
       B->rptr[ig][5] = 2 * ssum * (*(gp + 1)); /* 2 b g_2 g_3 */
       gp++;
@@ -352,8 +353,8 @@ int main(int argc, char *argv[]) {
     // these are horribly named
     tensor = MatrixAlloc(7, 1, MATRIX_REAL);
     Tensor = MatrixAlloc(3, 3, MATRIX_REAL);
-    eval = (float *)malloc(3 * sizeof(float));
-    Evec = MatrixAlloc(3, 3, MATRIX_REAL);
+    eval   = (float *)malloc(3 * sizeof(float));
+    Evec   = MatrixAlloc(3, 3, MATRIX_REAL);
 
     // go through each voxel and calculate tensors, trace, fa, etc.
     for (iz = 0; iz < nz; iz++)
@@ -380,9 +381,9 @@ int main(int argc, char *argv[]) {
             Tensor->rptr[1][1] = tensor->rptr[1][1];
             Tensor->rptr[1][2] = Tensor->rptr[2][1] = tensor->rptr[2][1];
             Tensor->rptr[1][3] = Tensor->rptr[3][1] = tensor->rptr[3][1];
-            Tensor->rptr[2][2] = tensor->rptr[4][1];
+            Tensor->rptr[2][2]                      = tensor->rptr[4][1];
             Tensor->rptr[2][3] = Tensor->rptr[3][2] = tensor->rptr[5][1];
-            Tensor->rptr[3][3] = tensor->rptr[6][1];
+            Tensor->rptr[3][3]                      = tensor->rptr[6][1];
 
             MRIsetVoxVal(tenstack, ix, iy, iz, 0, Tensor->rptr[1][1]);
             MRIsetVoxVal(tenstack, ix, iy, iz, 1, Tensor->rptr[2][1]);
@@ -508,7 +509,7 @@ int main(int argc, char *argv[]) {
 
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused, err;
+  int    nargc, nargsused, err;
   char **pargv, *option;
 
   if (argc < 1)
@@ -703,15 +704,15 @@ static void dump_options(FILE *fp) {
 
 /***-------------------------------------------------------****/
 static int fastestdim45(MRI *invol, int n1, int n2) {
-  const int nx = invol->width;
-  const int ny = invol->height;
-  const int nz = invol->depth;
+  const int nx    = invol->width;
+  const int ny    = invol->height;
+  const int nz    = invol->depth;
   const int nstep = 10;
   const int stepx = nx / nstep;
   const int stepy = ny / nstep;
   const int stepz = nz / nstep;
-  int ix, iy, iz, i1, i2;
-  float mean1, var1, avgvar1, mean2, var2, avgvar2, tmp;
+  int       ix, iy, iz, i1, i2;
+  float     mean1, var1, avgvar1, mean2, var2, avgvar2, tmp;
 
   avgvar1 = avgvar2 = 0.0;
   for (iz = 0; iz < nz; iz += stepz)
@@ -752,14 +753,14 @@ static void MRIavg4(MRI *invol, int n4, int n5) {
   const int nx = invol->width;
   const int ny = invol->height;
   const int nz = invol->depth;
-  int ix, iy, iz, i5, iframe, endframe;
-  float mean;
+  int       ix, iy, iz, i5, iframe, endframe;
+  float     mean;
 
   for (iz = 0; iz < nz; iz++)
     for (iy = 0; iy < ny; iy++)
       for (ix = 0; ix < nx; ix++)
         for (i5 = 0; i5 < n5; i5++) {
-          mean = 0.0;
+          mean     = 0.0;
           endframe = (i5 + 1) * n4;
           for (iframe = i5 * n4; iframe < endframe; iframe++)
             mean += MRIgetVoxVal(invol, ix, iy, iz, iframe) / n4;
@@ -771,18 +772,18 @@ static void MRIavg4(MRI *invol, int n4, int n5) {
 
 /***-------------------------------------------------------****/
 static void MRIavg5(MRI *invol, int n4, int n5) {
-  const int nx = invol->width;
-  const int ny = invol->height;
-  const int nz = invol->depth;
+  const int nx     = invol->width;
+  const int ny     = invol->height;
+  const int nz     = invol->depth;
   const int nframe = invol->nframes;
-  int ix, iy, iz, i4, iframe;
-  float mean;
+  int       ix, iy, iz, i4, iframe;
+  float     mean;
 
   for (iz = 0; iz < nz; iz++)
     for (iy = 0; iy < ny; iy++)
       for (ix = 0; ix < nx; ix++)
         for (i4 = 0; i4 < n4; i4++) {
-          mean = 0.0;
+          mean   = 0.0;
           iframe = i4;
           for (iframe = i4; iframe < nframe; iframe += n4)
             mean += MRIgetVoxVal(invol, ix, iy, iz, iframe) / n5;
@@ -794,12 +795,12 @@ static void MRIavg5(MRI *invol, int n4, int n5) {
 
 /***-------------------------------------------------------****/
 static float avgsnr(MRI *invol, MRI *mask, int frame0, int nframe) {
-  const int nx = invol->width;
-  const int ny = invol->height;
-  const int nz = invol->depth;
+  const int nx     = invol->width;
+  const int ny     = invol->height;
+  const int nz     = invol->depth;
   const int frame1 = frame0 + nframe;
-  int ix, iy, iz, iframe, nmask;
-  float meanfg, meanbg, varbg, snr;
+  int       ix, iy, iz, iframe, nmask;
+  float     meanfg, meanbg, varbg, snr;
 
   snr = 0.0;
   for (iframe = frame0; iframe < frame1; iframe++) {

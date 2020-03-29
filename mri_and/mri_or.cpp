@@ -24,9 +24,9 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "version.h"
 
 static void print_usage();
@@ -34,17 +34,17 @@ static void usage_exit();
 static void print_help();
 static void print_version();
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static char vcid[] = "$Id: mri_or.c,v 1.5 2013/03/20 15:03:29 lzollei Exp $";
 
 const char *Progname;
-int use_orig_value = 0;
+int         use_orig_value = 0;
 
 /***-------------------------------------------------------****/
 int main(int argc, char *argv[]) {
-  int nargs, index, ac, nvolumes;
+  int    nargs, index, ac, nvolumes;
   char **av;
-  MRI *mri_or = nullptr, *mri;
+  MRI *  mri_or = nullptr, *mri;
 
   nargs = handleVersionOption(argc, argv, "mri_or");
   if (nargs && argc - nargs == 1)
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

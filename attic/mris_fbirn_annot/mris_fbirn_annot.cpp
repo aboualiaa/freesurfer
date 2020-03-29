@@ -44,36 +44,36 @@
   ENDUSAGE
 */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 double round(double x);
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#include "mrisutils.h"
-#include "error.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
 static void usage_exit(void);
 static void print_help(void);
 static void print_version(void);
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 static char vcid[] =
     "$Id: mris_fbirn_annot.c,v 1.2 2011/03/02 00:04:32 nicks Exp $";
-const char *Progname = NULL;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 char *TempVolFile = NULL;
@@ -84,7 +84,8 @@ int main(int argc, char *argv[]) {
   int nargs;
 
   nargs = handleVersionOption(argc, argv, "mris_fbirn_annot");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -120,7 +121,7 @@ int main(int argc, char *argv[]) {
 */
 /* ------ Doxygen markup ends on the line above ---- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -153,7 +154,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       TempVolFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))

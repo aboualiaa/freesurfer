@@ -31,34 +31,33 @@
  * atlas. That is, to separate true thickness difference from noise caused
  * by sphere-morphing.
  */
-#include <iostream>
-#include <fstream>
 #include "ANN.h"
+#include <fstream>
+#include <iostream>
 
 extern "C" {
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 //#include "mriColorLookupTable.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
-#include "mrishash.h"
-#include "mri_identify.h"
 #include "annotation.h"
-#include "icosahedron.h"
-#include "version.h"
+#include "diag.h"
+#include "error.h"
 #include "fmarching3dnband.h"
+#include "icosahedron.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_identify.h"
+#include "mrishash.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "version.h"
 }
 
 #define MAX_DATA_NUMBERS 200
-#define DEBUG 0
+#define DEBUG            0
 
 typedef struct _double_3d {
   double x;
@@ -67,8 +66,8 @@ typedef struct _double_3d {
 } double3d;
 
 #define ROTATE(a, i, j, k, l)                                                  \
-  g = a[i][j];                                                                 \
-  h = a[k][l];                                                                 \
+  g       = a[i][j];                                                           \
+  h       = a[k][l];                                                           \
   a[i][j] = g - s * (h + g * tau);                                             \
   a[k][l] = h + s * (g - h * tau);
 #define TINY 1.0e-20;
@@ -77,7 +76,7 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot);
 void ludcmp(double **a, int n, int *indx, double *d);
 void lubksb(double **a, int n, int *indx, double *b);
 
-static char *log_fname = NULL;
+static char *log_fname    = NULL;
 static char *subject_name = NULL;
 
 static char vcid[] =
@@ -87,37 +86,37 @@ int main(int argc, char *argv[]);
 
 int framesave = 0;
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
 char *srctypestring = "paint";
-int srctype = MRI_VOLUME_TYPE_UNKNOWN;
+int   srctype       = MRI_VOLUME_TYPE_UNKNOWN;
 char *trgtypestring = "paint";
-int trgtype = MRI_VOLUME_TYPE_UNKNOWN;
+int   trgtype       = MRI_VOLUME_TYPE_UNKNOWN;
 
 char *out_name = NULL;
 
-char *label_fname = NULL; /* filename for segmentation */
+char *label_fname  = NULL; /* filename for segmentation */
 char *levset_fname = NULL;
 
 char *maplike_fname = NULL; /*Generate maps to indicate thickness difference */
-char *mapout_fname = NULL;  /* must be used together with above */
+char *mapout_fname  = NULL; /* must be used together with above */
 
 int debugflag = 0;
-int debugvtx = 0;
-int pathflag = 0;
-int abs_flag = 0;
+int debugvtx  = 0;
+int pathflag  = 0;
+int abs_flag  = 0;
 
 int percentage = 0;
 
 int register_flag = 0;
 
-static int annotation_flag = 0;
+static int   annotation_flag  = 0;
 static char *annotation_fname = NULL;
-static char *annotation_name = NULL;
+static char *annotation_name  = NULL;
 
 int compute_distance = 0;
 
@@ -125,58 +124,56 @@ static int nSmoothSteps = 0;
 
 const char *Progname;
 
-MRI *ComputeDifference(MRI_SURFACE *Mesh1, MRI *mri_data1, MRI_SURFACE *Mesh2,
-                       MRI *mri_data2, MRI *mri_res);
-MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
-                          MRI_SURFACE *Mesh2, MRI *mri_data2, MRI *mri_res);
+MRI *  ComputeDifference(MRI_SURFACE *Mesh1, MRI *mri_data1, MRI_SURFACE *Mesh2,
+                         MRI *mri_data2, MRI *mri_res);
+MRI *  ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
+                            MRI_SURFACE *Mesh2, MRI *mri_data2, MRI *mri_res);
 double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
                   double shift[3]);
-void FindClosest(MRI_SURFACE *TrueMesh, ANNkd_tree *annkdTree,
-                 MRI_SURFACE *EstMesh, double3d *closest);
+void   FindClosest(MRI_SURFACE *TrueMesh, ANNkd_tree *annkdTree,
+                   MRI_SURFACE *EstMesh, double3d *closest);
 
 void register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2);
 
 /* the following two are used when applying a lta transform to the surface */
-MRI *mri = 0;
-MRI *mri_dst = 0;
-static int invert = 0;
+MRI *        mri         = 0;
+MRI *        mri_dst     = 0;
+static int   invert      = 0;
 static char *xform_fname = NULL;
 
 static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
-double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
-                       int debug, double *sopt, double *topt);
-
-using namespace std;
+double     v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
+                           int debug, double *sopt, double *topt);
 
 int main(int argc, char *argv[]) {
   char **av, *surf1_name, *surf2_name;
-  char *data1_name, *data2_name;
+  char * data1_name, *data2_name;
 
   int nargs, ac;
   int total, index, label, x, y, z, width, height, depth;
 
   double scalar, std, maxV, minV, meanV, absMean, tmpval;
-  int annotation;
+  int    annotation;
 
   MRI *SrcVal1, *SrcVal2, *resVal;
 
   MRI_SURFACE *Surf1, *Surf2;
-  FILE *log_fp;
-  FACE *face;
-  VERTEX *vertex, *vertex2;
-  double cx, cy, cz;
-  Real vx, vy, vz;
+  FILE *       log_fp;
+  FACE *       face;
+  VERTEX *     vertex, *vertex2;
+  double       cx, cy, cz;
+  Real         vx, vy, vz;
 
   MRI *mri_distance = NULL;
-  MRI *mri_tmp = NULL;
-  MRI *mri_label = NULL;
-  MRI *mri_map = NULL;
-  int fno, vno0, vno1, vno2;
+  MRI *mri_tmp      = NULL;
+  MRI *mri_label    = NULL;
+  MRI *mri_map      = NULL;
+  int  fno, vno0, vno1, vno2;
 
   LTA *lta = 0;
-  int transform_type;
+  int  transform_type;
 
-  label = 0;
+  label      = 0;
   annotation = 0;
 
   nargs = handleVersionOption(argc, argv, "mris_diff");
@@ -380,8 +377,8 @@ int main(int argc, char *argv[]) {
 
     if (invert) {
       VOL_GEOM vgtmp;
-      LT *lt;
-      MATRIX *m_tmp = lta->xforms[0].m_L;
+      LT *     lt;
+      MATRIX * m_tmp     = lta->xforms[0].m_L;
       lta->xforms[0].m_L = MatrixInverse(lta->xforms[0].m_L, NULL);
       MatrixFree(&m_tmp);
       lt = &lta->xforms[0];
@@ -418,9 +415,9 @@ int main(int argc, char *argv[]) {
       ErrorExit(ERROR_NOFILE, "%s: could not read input volume %s\n", Progname,
                 label_fname);
 
-    width = mri_label->width;
+    width  = mri_label->width;
     height = mri_label->height;
-    depth = mri_label->depth;
+    depth  = mri_label->depth;
 
     mri_distance =
         MRIallocSequence(width, height, depth, MRI_FLOAT, mri_label->nframes);
@@ -450,9 +447,9 @@ int main(int argc, char *argv[]) {
     printf("Mask out vertices that fall inside subcortical masks.\n");
     for (index = 0; index < Surf1->nvertices; index++) {
       vertex = &Surf1->vertices[index];
-      cx = vertex->x;
-      cy = vertex->y;
-      cz = vertex->z;
+      cx     = vertex->x;
+      cy     = vertex->y;
+      cz     = vertex->z;
 
       MRIsurfaceRASToVoxel(mri_label, cx, cy, cz, &vx, &vy, &vz);
       /* Nearest neighbor */
@@ -491,20 +488,20 @@ int main(int argc, char *argv[]) {
   resVal = ComputeDifferenceNew(Surf1, SrcVal1, Surf2, SrcVal2, NULL);
 
   if (0) {
-    maxV = 10000.0;
-    total = 0; /* all borrowed here */
+    maxV   = 10000.0;
+    total  = 0; /* all borrowed here */
     vertex = &Surf1->vertices[69894];
     for (index = 0; index < Surf2->nvertices; index++) {
-      std = 0.0;
+      std     = 0.0;
       vertex2 = &Surf2->vertices[index];
-      scalar = vertex->x - vertex2->x;
+      scalar  = vertex->x - vertex2->x;
       std += scalar * scalar;
       scalar = vertex->y - vertex2->y;
       std += scalar * scalar;
       scalar = vertex->z - vertex2->z;
       std += scalar * scalar;
       if (std < maxV) {
-        maxV = std;
+        maxV  = std;
         total = index;
       }
     }
@@ -513,11 +510,11 @@ int main(int argc, char *argv[]) {
   }
 
   printf("Compute difference\n");
-  maxV = -1000.0;
-  minV = 1000.0;
-  meanV = 0.0;
+  maxV    = -1000.0;
+  minV    = 1000.0;
+  meanV   = 0.0;
   absMean = 0.0;
-  total = 0;
+  total   = 0;
   for (index = 0; index < Surf1->nvertices; index++) {
     vertex = &Surf1->vertices[index];
     if (vertex->border == 1)
@@ -573,9 +570,9 @@ int main(int argc, char *argv[]) {
 
     if (maplike_fname && mapout_fname) {
       vertex = &Surf1->vertices[index];
-      cx = vertex->origx;
-      cy = vertex->origy;
-      cz = vertex->origz;
+      cx     = vertex->origx;
+      cy     = vertex->origy;
+      cz     = vertex->origz;
 
       MRIsurfaceRASToVoxel(mri_map, cx, cy, cz, &vx, &vy, &vz);
       /* Nearest neighbor */
@@ -758,7 +755,7 @@ static void print_version(void) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -768,15 +765,15 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "src_type")) {
     srctypestring = argv[2];
-    srctype = string_to_type(srctypestring);
-    nargs = 1;
+    srctype       = string_to_type(srctypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "register")) {
     register_flag = 1;
     printf(
         "Do a rigid alignment of two surfaces before mapping to each other\n");
   } else if (!stricmp(option, "xform")) {
     xform_fname = argv[2];
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "transform file name is %s\n", xform_fname);
   } else if (!stricmp(option, "invert")) {
     invert = 1;
@@ -807,17 +804,17 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "nsmooth")) {
     nSmoothSteps = atoi(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     printf("Perform %d steps of smoothing of input data\n", nSmoothSteps);
   } else if (!stricmp(option, "trg_type")) {
     trgtypestring = argv[2];
-    trgtype = string_to_type(trgtypestring);
-    nargs = 1;
+    trgtype       = string_to_type(trgtypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "annot") || !stricmp(option, "annotation")) {
     annotation_fname = argv[2];
-    annotation_flag = 1;
-    annotation_name = argv[3];
-    nargs = 2;
+    annotation_flag  = 1;
+    annotation_name  = argv[3];
+    nargs            = 2;
     printf("only compute thickness stats for region with label %s\n",
            annotation_name);
   } else if (!stricmp(option, "distance")) {
@@ -826,15 +823,15 @@ static int get_option(int argc, char *argv[]) {
     abs_flag = 1;
   } else if (!stricmp(option, "L") || !stricmp(option, "Log")) {
     log_fname = argv[2];
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "logging results to %s\n", log_fname);
   } else if (!stricmp(option, "S") || !stricmp(option, "subj")) {
     subject_name = argv[2];
-    nargs = 1;
+    nargs        = 1;
   } else if (!stricmp(option, "debug")) {
     debugflag = 1;
-    debugvtx = atoi(argv[2]);
-    nargs = 1;
+    debugvtx  = atoi(argv[2]);
+    nargs     = 1;
   } else if (!stricmp(option, "percentage")) {
     percentage = 1;
     printf("Compute percentage thickness-difference\n");
@@ -868,17 +865,17 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   /* Compute the distance from point P0 to a face of the surface mesh */
   /* (sopt, topt) determines the closest point inside the triangle from P0 */
 
-  double a, b, c, d, e, f, det, s, t, invDet;
-  double numer, denom, tmp0, tmp1;
+  double  a, b, c, d, e, f, det, s, t, invDet;
+  double  numer, denom, tmp0, tmp1;
   VERTEX *V1, *V2, *V3;
-  FACE *face;
+  FACE *  face;
 
   VERTEX E0, E1, D;
 
   face = &mri_surf->faces[face_number];
-  V1 = &mri_surf->vertices[face->v[0]];
-  V2 = &mri_surf->vertices[face->v[1]];
-  V3 = &mri_surf->vertices[face->v[2]];
+  V1   = &mri_surf->vertices[face->v[0]];
+  V2   = &mri_surf->vertices[face->v[1]];
+  V3   = &mri_surf->vertices[face->v[2]];
 
   E0.x = V2->x - V1->x;
   E0.y = V2->y - V1->y;
@@ -886,9 +883,9 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   E1.x = V3->x - V1->x;
   E1.y = V3->y - V1->y;
   E1.z = V3->z - V1->z;
-  D.x = V1->x - P0->x;
-  D.y = V1->y - P0->y;
-  D.z = V1->z - P0->z;
+  D.x  = V1->x - P0->x;
+  D.y  = V1->y - P0->y;
+  D.z  = V1->z - P0->z;
 
   a = E0.x * E0.x + E0.y * E0.y + E0.z * E0.z;
   b = E0.x * E1.x + E0.y * E1.y + E0.z * E1.z;
@@ -898,8 +895,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   f = D.x * D.x + D.y * D.y + D.z * D.z;
 
   det = a * c - b * b;
-  s = b * e - c * d;
-  t = b * d - a * e;
+  s   = b * e - c * d;
+  t   = b * d - a * e;
 
   if (debug)
     printf("det = %g\n", det);
@@ -949,8 +946,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
       if (tmp1 > tmp0) {
         numer = tmp1 - tmp0;
         denom = a - b - b + c;
-        s = (numer >= denom ? 1 : numer / denom);
-        t = 1 - s;
+        s     = (numer >= denom ? 1 : numer / denom);
+        t     = 1 - s;
 
       } else {
         s = 0;
@@ -966,8 +963,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
       if (tmp1 > tmp0) {     /* Minimum at line s + t = 1 */
         numer = tmp1 - tmp0; /* Positive */
         denom = a + c - b - b;
-        t = (numer >= denom ? 1 : (numer / denom));
-        s = 1 - t;
+        t     = (numer >= denom ? 1 : (numer / denom));
+        s     = 1 - t;
       } else { /* Minimum at line t = 0 */
         s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
         t = 0;
@@ -981,7 +978,7 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
         s = 0;
       } else {
         denom = a + c - b - b; /* denom is positive */
-        s = (numer >= denom ? 1 : (numer / denom));
+        s     = (numer >= denom ? 1 : (numer / denom));
       }
       t = 1 - s;
       if (debug)
@@ -1003,15 +1000,15 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
 MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
                           MRI_SURFACE *Mesh2, MRI *mri_data2, MRI *mri_res) {
   /* This one will do a more accurate interpolation */
-  int index, k, facenumber, closestface;
+  int           index, k, facenumber, closestface;
   ANNpointArray QueryPt;
-  VERTEX *vertex;
-  double sumcurv, sumweight, weight;
-  VERTEX *V1, *V2, *V3;
-  FACE *face;
-  double value, distance, tmps, tmpt;
-  double total_distance, tmp_distance;
-  double max_distance, std_dist;
+  VERTEX *      vertex;
+  double        sumcurv, sumweight, weight;
+  VERTEX *      V1, *V2, *V3;
+  FACE *        face;
+  double        value, distance, tmps, tmpt;
+  double        total_distance, tmp_distance;
+  double        max_distance, std_dist;
 
   ANNpointArray pa = annAllocPts(Mesh2->nvertices, 3);
 
@@ -1023,9 +1020,9 @@ MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
   }
 
   // construct and initialize the tree
-  ANNkd_tree *annkdTree = new ANNkd_tree(pa, Mesh2->nvertices, 3);
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNkd_tree * annkdTree = new ANNkd_tree(pa, Mesh2->nvertices, 3);
+  ANNidxArray  annIndex  = new ANNidx[1];
+  ANNdistArray annDist   = new ANNdist[1];
 
   if (mri_res == NULL)
     mri_res = MRIclone(mri_data1, NULL);
@@ -1033,12 +1030,12 @@ MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
   QueryPt = annAllocPts(1, 3);
 
   total_distance = 0.0;
-  std_dist = 0;
+  std_dist       = 0;
 
   for (index = 0; index < Mesh1->nvertices; index++) {
     if (Mesh1->vertices[index].border == 1)
       continue;
-    vertex = &Mesh1->vertices[index];
+    vertex        = &Mesh1->vertices[index];
     QueryPt[0][0] = vertex->x;
     QueryPt[0][1] = vertex->y;
     QueryPt[0][2] = vertex->z;
@@ -1055,7 +1052,7 @@ MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
 
     /* Now need to find the closest face in order to perform linear
      * interpolation */
-    distance = 1e30;
+    distance    = 1e30;
     closestface = 0;
     for (k = 0; k < Mesh2->vertices[annIndex[0]].num; k++) {
 
@@ -1066,7 +1063,7 @@ MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
       value = v_to_f_distance(vertex, Mesh2, facenumber, 0, &tmps, &tmpt);
 
       if (distance > value) {
-        distance = value;
+        distance    = value;
         closestface = facenumber;
       }
     }
@@ -1079,13 +1076,13 @@ MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
       std_dist += distance;
     }
 
-    face = &Mesh2->faces[closestface];
-    V1 = &Mesh2->vertices[face->v[0]];
-    V2 = &Mesh2->vertices[face->v[1]];
-    V3 = &Mesh2->vertices[face->v[2]];
-    sumcurv = 0.0;
+    face      = &Mesh2->faces[closestface];
+    V1        = &Mesh2->vertices[face->v[0]];
+    V2        = &Mesh2->vertices[face->v[1]];
+    V3        = &Mesh2->vertices[face->v[2]];
+    sumcurv   = 0.0;
     sumweight = 0.0;
-    weight = 1.0 / (1e-20 + (V1->x - vertex->x) * (V1->x - vertex->x) +
+    weight    = 1.0 / (1e-20 + (V1->x - vertex->x) * (V1->x - vertex->x) +
                     (V1->y - vertex->y) * (V1->y - vertex->y) +
                     (V1->z - vertex->z) * (V1->z - vertex->z));
     sumcurv += weight * MRIgetVoxVal(mri_data2, face->v[0], 0, 0, 0);
@@ -1150,7 +1147,7 @@ MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
 
 MRI *ComputeDifference(MRI_SURFACE *Mesh1, MRI *mri_data1, MRI_SURFACE *Mesh2,
                        MRI *mri_data2, MRI *mri_res) {
-  int index;
+  int    index;
   double total_distance, tmp_value, tmp_distance;
 
   ANNpointArray pa = annAllocPts(Mesh2->nvertices, 3);
@@ -1162,9 +1159,9 @@ MRI *ComputeDifference(MRI_SURFACE *Mesh1, MRI *mri_data1, MRI_SURFACE *Mesh2,
   }
 
   // construct and initialize the tree
-  ANNkd_tree *annkdTree = new ANNkd_tree(pa, Mesh2->nvertices, 3);
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNkd_tree * annkdTree = new ANNkd_tree(pa, Mesh2->nvertices, 3);
+  ANNidxArray  annIndex  = new ANNidx[1];
+  ANNdistArray annDist   = new ANNdist[1];
   //  ANNpoint query_pt = annAllocPt(3);
   ANNpointArray QueryPt;
 
@@ -1207,9 +1204,9 @@ MRI *ComputeDifference(MRI_SURFACE *Mesh1, MRI *mri_data1, MRI_SURFACE *Mesh2,
     }
 
     if (compute_distance) {
-      tmp_value = QueryPt[0][0] - Mesh2->vertices[annIndex[0]].x;
+      tmp_value    = QueryPt[0][0] - Mesh2->vertices[annIndex[0]].x;
       tmp_distance = tmp_value * tmp_value;
-      tmp_value = QueryPt[0][1] - Mesh2->vertices[annIndex[0]].y;
+      tmp_value    = QueryPt[0][1] - Mesh2->vertices[annIndex[0]].y;
       tmp_distance += tmp_value * tmp_value;
       tmp_value = QueryPt[0][2] - Mesh2->vertices[annIndex[0]].z;
       tmp_distance += tmp_value * tmp_value;
@@ -1241,12 +1238,12 @@ MRI *ComputeDifference(MRI_SURFACE *Mesh1, MRI *mri_data1, MRI_SURFACE *Mesh2,
 
 void register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2) {
 
-  double error_old, error_new;
-  int iter = 0;
-  double TR[3][3];
-  double shift[3];
+  double    error_old, error_new;
+  int       iter = 0;
+  double    TR[3][3];
+  double    shift[3];
   double3d *mesh2avtx, *closevtx2a;
-  int index, k;
+  int       index, k;
 
   /* Build the ANN tree repeatedly is time consuming, so
    *  move it outside of the function
@@ -1269,7 +1266,7 @@ void register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2) {
   shift[1] = 0;
   shift[2] = 0;
 
-  mesh2avtx = (double3d *)malloc(Surf2->nvertices * sizeof(double3d));
+  mesh2avtx  = (double3d *)malloc(Surf2->nvertices * sizeof(double3d));
   closevtx2a = (double3d *)malloc(Surf2->nvertices * sizeof(double3d));
 
   /* Initialize */
@@ -1317,8 +1314,8 @@ void FindClosest(MRI_SURFACE *TrueMesh, ANNkd_tree *annkdTree,
                  MRI_SURFACE *EstMesh, double3d *closest) {
   int index;
 
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNidxArray  annIndex = new ANNidx[1];
+  ANNdistArray annDist  = new ANNdist[1];
 
   ANNpoint Qpt;
 
@@ -1357,13 +1354,13 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
 // V1 is equavilent to left frame in Horn paper
 {
   double3d centroid1a, centroid2a;
-  double Sxx, Sxy, Sxz, Syx, Syy, Syz, Szx, Szy, Szz;
-  float **M, **v, *d;
-  float *n;
-  double R[3][3], x, y, z;
-  double scale1, scale2;
-  float dummy;
-  double error = 0;
+  double   Sxx, Sxy, Sxz, Syx, Syy, Syz, Szx, Szy, Szz;
+  float ** M, **v, *d;
+  float *  n;
+  double   R[3][3], x, y, z;
+  double   scale1, scale2;
+  float    dummy;
+  double   error = 0;
 
   int k, l, nrot;
   int count;
@@ -1437,14 +1434,14 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
   M = (float **)malloc(4 * sizeof(float *));
   M--;
   for (k = 1; k <= 4; k++) {
-    n = (float *)malloc(4 * sizeof(float));
+    n    = (float *)malloc(4 * sizeof(float));
     M[k] = n - 1;
   }
 
   v = (float **)malloc(4 * sizeof(float *));
   v--;
   for (k = 1; k <= 4; k++) {
-    n = (float *)malloc(4 * sizeof(float));
+    n    = (float *)malloc(4 * sizeof(float));
     v[k] = n - 1;
   }
 
@@ -1481,11 +1478,11 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
 
   jacobi(M, 4, d, v, &nrot);
   dummy = d[1];
-  l = 1;
+  l     = 1;
   for (k = 2; k <= 4; k++) {
     if (dummy < d[k]) {
       dummy = d[k];
-      l = k;
+      l     = k;
     }
   }
   for (k = 1; k <= 4; k++)
@@ -1588,7 +1585,7 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
   temp[0][0] = shift[0];
   temp[0][1] = shift[1];
   temp[0][2] = shift[2];
-  shift[0] = scale1 * (R[0][0] * (temp[0][0] - centroid1a.x) +
+  shift[0]   = scale1 * (R[0][0] * (temp[0][0] - centroid1a.x) +
                        R[1][0] * (temp[0][1] - centroid1a.y) +
                        R[2][0] * (temp[0][2] - centroid1a.z)) +
              centroid2a.x;
@@ -1614,8 +1611,8 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
 }
 
 void ludcmp(double **a, int n, int *indx, double *d) {
-  int i, imax, j, k;
-  double big, dum, sum, temp;
+  int     i, imax, j, k;
+  double  big, dum, sum, temp;
   double *vv;
 
   imax = 0;
@@ -1647,17 +1644,17 @@ void ludcmp(double **a, int n, int *indx, double *d) {
         sum -= a[i][k] * a[k][j];
       a[i][j] = sum;
       if ((dum = vv[i] * fabs(sum)) >= big) {
-        big = dum;
+        big  = dum;
         imax = i;
       }
     }
     if (j != imax) {
       for (k = 1; k <= n; k++) {
-        dum = a[imax][k];
+        dum        = a[imax][k];
         a[imax][k] = a[j][k];
-        a[j][k] = dum;
+        a[j][k]    = dum;
       }
-      *d = -(*d);
+      *d       = -(*d);
       vv[imax] = vv[j];
     }
     indx[j] = imax;
@@ -1673,12 +1670,12 @@ void ludcmp(double **a, int n, int *indx, double *d) {
 }
 
 void lubksb(double **a, int n, int *indx, double *b) {
-  int i, ii = 0, ip, j;
+  int    i, ii = 0, ip, j;
   double sum;
 
   for (i = 1; i <= n; i++) {
-    ip = indx[i];
-    sum = b[ip];
+    ip    = indx[i];
+    sum   = b[ip];
     b[ip] = b[i];
     if (ii)
       for (j = ii; j <= i - 1; j++)
@@ -1698,7 +1695,7 @@ void lubksb(double **a, int n, int *indx, double *b) {
 void jacobi(float **a, int n, float *d, float **v, int *nrot)
 
 {
-  int j, iq, ip, i;
+  int   j, iq, ip, i;
   float tresh, theta, tau, t, sm, s, h, g, c, *b, *z;
 
   // b=vector(1,n);
@@ -1714,7 +1711,7 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot)
   }
   for (ip = 1; ip <= n; ip++) {
     b[ip] = d[ip] = a[ip][ip];
-    z[ip] = 0.0;
+    z[ip]         = 0.0;
   }
   *nrot = 0;
   for (i = 1; i <= 50; i++) {
@@ -1744,14 +1741,14 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot)
             t = (a[ip][iq]) / h;
           else {
             theta = 0.5 * h / (a[ip][iq]);
-            t = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
+            t     = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
             if (theta < 0.0)
               t = -t;
           }
-          c = 1.0 / sqrt(1 + t * t);
-          s = t * c;
+          c   = 1.0 / sqrt(1 + t * t);
+          s   = t * c;
           tau = s / (1.0 + c);
-          h = t * a[ip][iq];
+          h   = t * a[ip][iq];
           z[ip] -= h;
           z[iq] += h;
           d[ip] -= h;
@@ -1792,8 +1789,8 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot)
 ------------------------------------------------------*/
 static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
   VERTEX *v;
-  FACE *f;
-  int n, i;
+  FACE *  f;
+  int     n, i;
 
   v = &mris->vertices[vno];
   f = &mris->faces[fno];

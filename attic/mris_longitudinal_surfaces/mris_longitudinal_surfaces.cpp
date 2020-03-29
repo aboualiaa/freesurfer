@@ -27,35 +27,35 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "timer.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "mrimorph.h"
-#include "tags.h"
-#include "mrinorm.h"
-#include "version.h"
+#include "error.h"
 #include "label.h"
+#include "macros.h"
+#include "mri.h"
 #include "mri2.h"
+#include "mrimorph.h"
+#include "mrinorm.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "tags.h"
+#include "timer.h"
+#include "version.h"
 
 static char vcid[] = "$Id: mris_longitudinal_surfaces.c,v 1.8 2015/11/09 "
                      "04:18:29 zkaufman Exp $";
 
 int main(int argc, char *argv[]);
 
-#define BRIGHT_LABEL 130
+#define BRIGHT_LABEL        130
 #define BRIGHT_BORDER_LABEL 100
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -65,36 +65,35 @@ static MRI *MRIsmoothMasking(MRI *mri_src, MRI *mri_mask, MRI *mri_dst,
 MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_T1, float thresh, int out_label,
                       MRI *mri_dst);
 
-
 int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm);
 #if 0
 int MRISfindExpansionRegions(MRI_SURFACE *mris);
 MRI *MRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm);
 #endif
 
-static LABEL *highres_label = NULL;
-static char T1_name[STRLEN] = "brain";
+static LABEL *highres_label   = NULL;
+static char   T1_name[STRLEN] = "brain";
 
 static char *white_fname = NULL;
-static int use_mode = 1;
+static int   use_mode    = 1;
 
 static char *orig_white = NULL;
-static char *orig_pial = NULL;
+static char *orig_pial  = NULL;
 
 const char *Progname;
 
 static double std_scale = 1.0;
 
-static int graymid = 0;
-static int curvature_avgs = 10;
-static int create = 1;
-static int smoothwm = 0;
-static int white_only = 0;
-static int overlay = 0;
+static int graymid           = 0;
+static int curvature_avgs    = 10;
+static int create            = 1;
+static int smoothwm          = 0;
+static int white_only        = 0;
+static int overlay           = 0;
 static int inverted_contrast = 0;
 static int auto_detect_stats = 1;
 
-static int in_out_in_flag = 0; /* for Arthur (as are most things) */
+static int in_out_in_flag      = 0; /* for Arthur (as are most things) */
 static int apply_median_filter = 0;
 
 static int nbhd_size = 20;
@@ -105,90 +104,85 @@ static float base_dt_scale = BASE_DT_SCALE;
 
 static int add = 0;
 
-static double l_tsmooth = 0.0;
+static double l_tsmooth      = 0.0;
 static double l_surf_repulse = 5.0;
 
 static int smooth = 5;
-static int vavgs = 5;
+static int vavgs  = 5;
 static int nwhite = 25 /*5*/;
-static int ngray = 30 /*45*/;
+static int ngray  = 30 /*45*/;
 
-static int nowhite = 0;
-static int nbrs = 2;
+static int nowhite    = 0;
+static int nbrs       = 2;
 static int write_vals = 0;
 
-static char *orig_name = ORIG_NAME; // "orig"
-static char *suffix = "";
+static char *orig_name     = ORIG_NAME; // "orig"
+static char *suffix        = "";
 static char *output_suffix = "";
-static char *xform_fname = NULL;
+static char *xform_fname   = NULL;
 
-static char pial_name[STRLEN] = "pial";
+static char pial_name[STRLEN]         = "pial";
 static char white_matter_name[STRLEN] = WHITE_MATTER_NAME; // "white"
 
 static int lh_label = LH_LABEL;
 static int rh_label = RH_LABEL;
 
-static int max_pial_averages = 16;
-static int min_pial_averages = 2;
-static int max_white_averages = 4;
-static int min_white_averages = 0;
-static float pial_sigma = 2.0f;
-static float white_sigma = 2.0f;
-static float max_thickness = 5.0;
+static int   max_pial_averages  = 16;
+static int   min_pial_averages  = 2;
+static int   max_white_averages = 4;
+static int   min_white_averages = 0;
+static float pial_sigma         = 2.0f;
+static float white_sigma        = 2.0f;
+static float max_thickness      = 5.0;
 
-#define MAX_WHITE 120
-#define MAX_BORDER_WHITE 105
-#define MIN_BORDER_WHITE 85
+#define MAX_WHITE                120
+#define MAX_BORDER_WHITE         105
+#define MIN_BORDER_WHITE         85
 #define MIN_GRAY_AT_WHITE_BORDER 70
 
-#define MAX_GRAY 95
+#define MAX_GRAY               95
 #define MIN_GRAY_AT_CSF_BORDER 40
-#define MID_GRAY ((max_gray + min_gray_at_csf_border) / 2)
+#define MID_GRAY               ((max_gray + min_gray_at_csf_border) / 2)
 #define MAX_GRAY_AT_CSF_BORDER 75
-#define MIN_CSF 10
-#define MAX_CSF 40
+#define MIN_CSF                10
+#define MAX_CSF                40
 
 static int max_border_white_set = 0, min_border_white_set = 0,
            min_gray_at_white_border_set = 0, max_gray_set = 0,
            max_gray_at_csf_border_set = 0, min_gray_at_csf_border_set = 0,
            min_csf_set = 0, max_csf_set = 0;
 
-static float max_border_white = MAX_BORDER_WHITE,
-             min_border_white = MIN_BORDER_WHITE,
+static float max_border_white         = MAX_BORDER_WHITE,
+             min_border_white         = MIN_BORDER_WHITE,
              min_gray_at_white_border = MIN_GRAY_AT_WHITE_BORDER,
-             max_gray = MAX_GRAY,
-             max_gray_at_csf_border = MAX_GRAY_AT_CSF_BORDER,
+             max_gray                 = MAX_GRAY,
+             max_gray_at_csf_border   = MAX_GRAY_AT_CSF_BORDER,
              min_gray_at_csf_border = MIN_GRAY_AT_CSF_BORDER, min_csf = MIN_CSF,
-             max_csf = MAX_CSF;
+             max_csf     = MAX_CSF;
 static char sdir[STRLEN] = "";
 
 static int MGZ = 0; // for use with MGZ format
 
 static int longitudinal = 0;
 
-static float check_contrast_direction(MRI_SURFACE *mris,MRI *mri_T1) ;
-int
-main(int argc, char *argv[])
-{
-  char          **av, *hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
-  int           ac, nargs, i, label_val, replace_val, msec, n_averages, j ;
-  MRI_SURFACE   *mris ;
-  MRI           *mri_wm, *mri_kernel = NULL, *mri_smooth = NULL,
-                *mri_filled, *mri_T1, *mri_labeled, *mri_T1_white = NULL, 
-                *mri_T1_pial ;
-  float         max_len ;
-  float         white_mean, white_std, gray_mean, gray_std ;
-  double        l_intensity, current_sigma ;
-  Timer then ;
-  M3D           *m3d ;
-
+static float check_contrast_direction(MRI_SURFACE *mris, MRI *mri_T1);
+int          main(int argc, char *argv[]) {
+  char **      av, *hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
+  int          ac, nargs, i, label_val, replace_val, msec, n_averages, j;
+  MRI_SURFACE *mris;
+  MRI *mri_wm, *mri_kernel = NULL, *mri_smooth = NULL, *mri_filled, *mri_T1,
+               *mri_labeled, *mri_T1_white = NULL, *mri_T1_pial;
+  float  max_len;
+  float  white_mean, white_std, gray_mean, gray_std;
+  double l_intensity, current_sigma;
+  Timer  then;
+  M3D *  m3d;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_longitudinal_surfaces");
 
   nargs = handleVersionOption(argc, argv, "mris_longitudinal_surfaces");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -198,29 +192,29 @@ main(int argc, char *argv[])
   DiagInit(NULL, NULL, NULL);
 
   memset(&parms, 0, sizeof(parms));
-  parms.projection = NO_PROJECTION;
-  parms.tol = 1e-4;
-  parms.dt = 0.5f;
-  parms.base_dt = BASE_DT_SCALE * parms.dt;
-  parms.l_spring = 1.0f;
-  parms.l_curv = 1.0;
+  parms.projection  = NO_PROJECTION;
+  parms.tol         = 1e-4;
+  parms.dt          = 0.5f;
+  parms.base_dt     = BASE_DT_SCALE * parms.dt;
+  parms.l_spring    = 1.0f;
+  parms.l_curv      = 1.0;
   parms.l_intensity = 0.2;
-  parms.l_spring = 0.0f;
-  parms.l_curv = 1.0;
+  parms.l_spring    = 0.0f;
+  parms.l_curv      = 1.0;
   parms.l_intensity = 0.2;
-  parms.l_tspring = 1.0f;
-  parms.l_nspring = 0.5f;
+  parms.l_tspring   = 1.0f;
+  parms.l_nspring   = 0.5f;
 
-  parms.niterations = 0;
+  parms.niterations      = 0;
   parms.write_iterations = 0 /*WRITE_ITERATIONS */;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.momentum = 0.0 /*0.8*/;
-  parms.dt_increase = 1.0 /* DT_INCREASE */;
-  parms.dt_decrease = 0.50 /* DT_DECREASE*/;
-  parms.error_ratio = 50.0 /*ERROR_RATIO */;
+  parms.momentum         = 0.0 /*0.8*/;
+  parms.dt_increase      = 1.0 /* DT_INCREASE */;
+  parms.dt_decrease      = 0.50 /* DT_DECREASE*/;
+  parms.error_ratio      = 50.0 /*ERROR_RATIO */;
   /*  parms.integration_type = INTEGRATE_LINE_MINIMIZE ;*/
   parms.l_surf_repulse = 0.0;
-  parms.l_repulse = 1;
+  parms.l_repulse      = 1;
 
   ac = argc;
   av = argv;
@@ -242,7 +236,7 @@ main(int argc, char *argv[])
 
   then.reset();
   sname = argv[1];
-  hemi = argv[2];
+  hemi  = argv[2];
   if (!strlen(sdir)) {
     cp = getenv("SUBJECTS_DIR");
     if (!cp)
@@ -277,10 +271,10 @@ main(int argc, char *argv[])
   setMRIforSurface(mri_filled);
 
   if (!stricmp(hemi, "lh")) {
-    label_val = lh_label;
+    label_val   = lh_label;
     replace_val = rh_label;
   } else {
-    label_val = rh_label;
+    label_val   = rh_label;
     replace_val = lh_label;
   }
 
@@ -422,7 +416,7 @@ main(int argc, char *argv[])
   MRISaddCommandLine(mris, cmdline);
 
   if (auto_detect_stats) {
-    MRI *mri_tmp;
+    MRI * mri_tmp;
     float white_mode, gray_mode;
 
     mri_tmp = MRIbinarize(mri_wm, NULL, WM_MIN_VAL, MRI_NOT_WHITE, MRI_WHITE);
@@ -436,7 +430,7 @@ main(int argc, char *argv[])
     if (use_mode) {
       printf("using class modes intead of means....\n");
       white_mean = white_mode;
-      gray_mean = gray_mode;
+      gray_mean  = gray_mode;
     }
 
     white_std /= std_scale;
@@ -540,7 +534,7 @@ main(int argc, char *argv[])
     }
 
     parms.sigma = current_sigma;
-    mri_kernel = MRIgaussian1d(current_sigma, 100);
+    mri_kernel  = MRIgaussian1d(current_sigma, 100);
     fprintf(stderr, "smoothing T1 volume with sigma = %2.3f\n", current_sigma);
     if (!mri_smooth) {
       mri_smooth = MRIclone(mri_T1, NULL);
@@ -717,11 +711,11 @@ main(int argc, char *argv[])
          n_averages /= 2, current_sigma /= 2, i++) {
 
       parms.sigma = current_sigma;
-      mri_kernel = MRIgaussian1d(current_sigma, 100);
+      mri_kernel  = MRIgaussian1d(current_sigma, 100);
       fprintf(stderr, "smoothing T1 volume with sigma = %2.3f\n",
               current_sigma);
       parms.n_averages = n_averages;
-      parms.l_tsmooth = l_tsmooth;
+      parms.l_tsmooth  = l_tsmooth;
       /*
         replace bright stuff such as eye sockets with 255. Simply zeroing it out
         would make the border always go through the sockets, and ignore subtle
@@ -814,7 +808,7 @@ main(int argc, char *argv[])
       }
 
       parms.sigma = current_sigma;
-      mri_kernel = MRIgaussian1d(current_sigma, 100);
+      mri_kernel  = MRIgaussian1d(current_sigma, 100);
       fprintf(stderr, "smoothing T1 volume with sigma = %2.3f\n",
               current_sigma);
       if (!mri_smooth) {
@@ -910,7 +904,7 @@ main(int argc, char *argv[])
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -960,40 +954,40 @@ static int get_option(int argc, char *argv[]) {
     apply_median_filter = 1;
   } else if (!stricmp(option, "max_border_white")) {
     max_border_white_set = 1;
-    max_border_white = atof(argv[2]);
-    nargs = 1;
+    max_border_white     = atof(argv[2]);
+    nargs                = 1;
   } else if (!stricmp(option, "min_border_white")) {
     min_border_white_set = 1;
-    min_border_white = atof(argv[2]);
-    nargs = 1;
+    min_border_white     = atof(argv[2]);
+    nargs                = 1;
   } else if (!stricmp(option, "scale_std")) {
     std_scale = atof(argv[2]);
     printf("scale the estimated WM and GM std by %g \n", std_scale);
     nargs = 1;
   } else if (!stricmp(option, "min_gray_at_white_border")) {
     min_gray_at_white_border_set = 1;
-    min_gray_at_white_border = atof(argv[2]);
-    nargs = 1;
+    min_gray_at_white_border     = atof(argv[2]);
+    nargs                        = 1;
   } else if (!stricmp(option, "max_gray")) {
     max_gray_set = 1;
-    max_gray = atof(argv[2]);
-    nargs = 1;
+    max_gray     = atof(argv[2]);
+    nargs        = 1;
   } else if (!stricmp(option, "max_gray_at_csf_border")) {
     max_gray_at_csf_border_set = 1;
-    max_gray_at_csf_border = atof(argv[2]);
-    nargs = 1;
+    max_gray_at_csf_border     = atof(argv[2]);
+    nargs                      = 1;
   } else if (!stricmp(option, "min_gray_at_csf_border")) {
     min_gray_at_csf_border_set = 1;
-    min_gray_at_csf_border = atof(argv[2]);
-    nargs = 1;
+    min_gray_at_csf_border     = atof(argv[2]);
+    nargs                      = 1;
   } else if (!stricmp(option, "min_csf")) {
     min_csf_set = 1;
-    min_csf = atof(argv[2]);
-    nargs = 1;
+    min_csf     = atof(argv[2]);
+    nargs       = 1;
   } else if (!stricmp(option, "max_csf")) {
     max_csf_set = 1;
-    max_csf = atof(argv[2]);
-    nargs = 1;
+    max_csf     = atof(argv[2]);
+    nargs       = 1;
   } else if (!stricmp(option, "noauto")) {
     auto_detect_stats = 0;
     fprintf(stderr, "disabling auto-detection of border ranges...\n");
@@ -1005,16 +999,16 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "generating graymid surface...\n");
   } else if (!strcmp(option, "rval")) {
     rh_label = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "using %d as fill val for right hemisphere.\n", rh_label);
   } else if (!strcmp(option, "nbhd_size")) {
     nbhd_size = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "using %d size nbhd for thickness calculation.\n",
             nbhd_size);
   } else if (!strcmp(option, "lval")) {
     lh_label = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "using %d as fill val for left hemisphere.\n", lh_label);
   } else if (!stricmp(option, "whiteonly")) {
     white_only = 1;
@@ -1034,42 +1028,42 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
     fprintf(stderr, "base name = %s\n", parms.base_name);
   } else if (!stricmp(option, "dt")) {
-    parms.dt = atof(argv[2]);
-    parms.base_dt = base_dt_scale * parms.dt;
+    parms.dt               = atof(argv[2]);
+    parms.base_dt          = base_dt_scale * parms.dt;
     parms.integration_type = INTEGRATE_MOMENTUM;
     fprintf(stderr, "using dt = %2.1e\n", parms.dt);
     nargs = 1;
   } else if (!stricmp(option, "spring")) {
     parms.l_spring = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "l_spring = %2.3f\n", parms.l_spring);
   } else if (!stricmp(option, "tsmooth")) {
     l_tsmooth = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "l_tsmooth = %2.3f\n", l_tsmooth);
   } else if (!stricmp(option, "grad")) {
     parms.l_grad = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_grad = %2.3f\n", parms.l_grad);
   } else if (!stricmp(option, "tspring")) {
     parms.l_tspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_tspring = %2.3f\n", parms.l_tspring);
   } else if (!stricmp(option, "nspring")) {
     parms.l_nspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_nspring = %2.3f\n", parms.l_nspring);
   } else if (!stricmp(option, "curv")) {
     parms.l_curv = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_curv = %2.3f\n", parms.l_curv);
   } else if (!stricmp(option, "smooth")) {
     smooth = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     fprintf(stderr, "smoothing for %d iterations\n", smooth);
   } else if (!stricmp(option, "output")) {
     output_suffix = argv[2];
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "appending %s to output names...\n", output_suffix);
   } else if (!stricmp(option, "vavgs")) {
     vavgs = atoi(argv[2]);
@@ -1081,14 +1075,14 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "using %s as white matter name...\n", white_matter_name);
   } else if (!stricmp(option, "intensity")) {
     parms.l_intensity = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "l_intensity = %2.3f\n", parms.l_intensity);
   } else if (!stricmp(option, "lm")) {
     parms.integration_type = INTEGRATE_LINE_MINIMIZE;
     fprintf(stderr, "integrating with line minimization\n");
   } else if (!stricmp(option, "nwhite")) {
     nwhite = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     fprintf(stderr,
             "integrating gray/white surface positioning for %d time steps\n",
             nwhite);
@@ -1137,7 +1131,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "adding vertices to tessellation during deformation.\n");
   } else if (!stricmp(option, "max")) {
     max_thickness = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("using max_thickness = %2.1f\n", max_thickness);
   } else if (!stricmp(option, "mgz")) {
     MGZ = 1;
@@ -1156,12 +1150,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       xform_fname = argv[2];
-      nargs = 1;
+      nargs       = 1;
       fprintf(stderr, "applying ventricular xform %s\n", xform_fname);
       break;
     case 'O':
       orig_name = argv[2];
-      nargs = 1;
+      nargs     = 1;
       fprintf(stderr, "reading original vertex positions from %s\n", orig_name);
       break;
     case 'Q':
@@ -1184,8 +1178,8 @@ static int get_option(int argc, char *argv[]) {
 #endif
     case 'M':
       parms.integration_type = INTEGRATE_MOMENTUM;
-      parms.momentum = atof(argv[2]);
-      nargs = 1;
+      parms.momentum         = atof(argv[2]);
+      nargs                  = 1;
       fprintf(stderr, "momentum = %2.2f\n", parms.momentum);
       break;
     case 'R':
@@ -1196,11 +1190,11 @@ static int get_option(int argc, char *argv[]) {
     case 'B':
       base_dt_scale = atof(argv[2]);
       parms.base_dt = base_dt_scale * parms.dt;
-      nargs = 1;
+      nargs         = 1;
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'C':
       create = !create;
@@ -1272,15 +1266,15 @@ static void print_version(void) {
 MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_T1, float thresh, int out_label,
                       MRI *mri_dst) {
   BUFTYPE *pdst, *pinv_lv, out_val, T1_val, inv_lv_val, *pT1;
-  int width, height, depth, x, y, z, ventricle_voxels;
+  int      width, height, depth, x, y, z, ventricle_voxels;
 
   if (!mri_dst) {
     mri_dst = MRIclone(mri_T1, NULL);
   }
 
-  width = mri_T1->width;
+  width  = mri_T1->width;
   height = mri_T1->height;
-  depth = mri_T1->depth;
+  depth  = mri_T1->depth;
   /* now apply the inverse morph to build an average wm representation
      of the input volume
   */
@@ -1288,13 +1282,13 @@ MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_T1, float thresh, int out_label,
   ventricle_voxels = 0;
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pdst = &MRIvox(mri_dst, 0, y, z);
-      pT1 = &MRIvox(mri_T1, 0, y, z);
+      pdst    = &MRIvox(mri_dst, 0, y, z);
+      pT1     = &MRIvox(mri_T1, 0, y, z);
       pinv_lv = &MRIvox(mri_inv_lv, 0, y, z);
       for (x = 0; x < width; x++) {
-        T1_val = *pT1++;
+        T1_val     = *pT1++;
         inv_lv_val = *pinv_lv++;
-        out_val = 0;
+        out_val    = 0;
         if (inv_lv_val >= thresh) {
           ventricle_voxels++;
           out_val = out_label;
@@ -1318,10 +1312,10 @@ static MRI *MRIsmoothMasking(MRI *mri_src, MRI *mri_mask, MRI *mri_dst,
       avg;
   BUFTYPE *psrc, *pdst;
 
-  whalf = (wsize - 1) / 2;
-  width = mri_src->width;
+  whalf  = (wsize - 1) / 2;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst) {
     mri_dst = MRIcopy(mri_src, NULL);
   }
@@ -1439,12 +1433,12 @@ int MRISfindExpansionRegions(MRI_SURFACE *mris) {
 #endif
 
 int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm) {
-  int width, height, depth, x, y, z, nthresholded;
+  int      width, height, depth, x, y, z, nthresholded;
   BUFTYPE *pT1, *pwm, val, wm;
 
-  width = mri_T1->width;
+  width  = mri_T1->width;
   height = mri_T1->height;
-  depth = mri_T1->depth;
+  depth  = mri_T1->depth;
 
   nthresholded = 0;
   for (z = 0; z < depth; z++) {
@@ -1453,7 +1447,7 @@ int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm) {
       pwm = &MRIvox(mri_wm, 0, y, z);
       for (x = 0; x < width; x++) {
         val = *pT1;
-        wm = *pwm++;
+        wm  = *pwm++;
         if (wm >= WM_MIN_VAL) /* labeled as white */
         {
           if (val > DEFAULT_DESIRED_WHITE_MATTER_VALUE) {
@@ -1550,9 +1544,9 @@ MRI *MRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm) {
 #endif
 
 static float check_contrast_direction(MRI_SURFACE *mris, MRI *mri_T1) {
-  int vno, n;
+  int     vno, n;
   VERTEX *v;
-  double x, y, z, xw, yw, zw, val, mean_inside, mean_outside;
+  double  x, y, z, xw, yw, zw, val, mean_inside, mean_outside;
 
   mean_inside = mean_outside = 0.0;
   for (n = vno = 0; vno < mris->nvertices; vno++) {

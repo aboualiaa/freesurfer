@@ -22,11 +22,11 @@
  *
  */
 
-#include "mrisutils.h"
-#include "geodesics.h"
-#include "timer.h"
-#include "surfgrad.h"
 #include "DICOMRead.h"
+#include "geodesics.h"
+#include "mrisutils.h"
+#include "surfgrad.h"
+#include "timer.h"
 
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
@@ -37,37 +37,37 @@
 // int MRISfaceNormalFace_AddDeltaVertex = -1;
 // long double MRISfaceNormalFace_AddDelta[3]={0,0,0};
 
-double MRISfaceMinEdge(MRIS *surf, int faceno);
+double   MRISfaceMinEdge(MRIS *surf, int faceno);
 DMATRIX *MRISvertex2Matrix(MRIS *surf, int vtxno, DMATRIX *vm);
-int MRISmatrix2Vertex(MRIS *surf, int vtxno, DMATRIX *vm);
-int MRISscaleVertices(MRIS *surf, double scale);
-int OldTestBBRCostFace(BBRFACE *bbrf, BBRPARAMS *bbrpar, int wrtvtxno);
+int      MRISmatrix2Vertex(MRIS *surf, int vtxno, DMATRIX *vm);
+int      MRISscaleVertices(MRIS *surf, double scale);
+int      OldTestBBRCostFace(BBRFACE *bbrf, BBRPARAMS *bbrpar, int wrtvtxno);
 
 DMATRIX *AllocGradCost(int nvertices);
-int FreeGradCost(int nvertices, DMATRIX **pgradCost);
-int UpdateVertexPosition(MRIS *surf, double stepsize, DMATRIX *grad);
+int      FreeGradCost(int nvertices, DMATRIX **pgradCost);
+int      UpdateVertexPosition(MRIS *surf, double stepsize, DMATRIX *grad);
 
 long double ConjGradBeta(int method, DMATRIX *SteepDir, DMATRIX *PrevSteepDir,
                          DMATRIX *PrevCGDir);
-DMATRIX *ConjGradDir(int method, DMATRIX *SteepDir, DMATRIX *PrevSteepDir,
-                     DMATRIX *PrevCGDir, DMATRIX *CGDir);
-int PlaceSurf(MRI *mri, MRIS *surf);
+DMATRIX *   ConjGradDir(int method, DMATRIX *SteepDir, DMATRIX *PrevSteepDir,
+                        DMATRIX *PrevCGDir, DMATRIX *CGDir);
+int         PlaceSurf(MRI *mri, MRIS *surf);
 
 /*----------------------------------------*/
 int main(int argc, char **argv) {
-  MRIS *surf, *surf2;
-  int msec, nvertices; // vtxno=0;
-  Timer mytimer;
-  MRI *mri, *mriindex, *mri2;
-  Geodesics *geod;
-  float maxdist;
-  double d, dmax;
-  int c, r, s;
+  MRIS *      surf, *surf2;
+  int         msec, nvertices; // vtxno=0;
+  Timer       mytimer;
+  MRI *       mri, *mriindex, *mri2;
+  Geodesics * geod;
+  float       maxdist;
+  double      d, dmax;
+  int         c, r, s;
   LABEL2SURF *l2s;
-  LTA *lta;
-  DMATRIX *dJ, *gnum;
-  VERTEX *v;
-  double d1, delta;
+  LTA *       lta;
+  DMATRIX *   dJ, *gnum;
+  VERTEX *    v;
+  double      d1, delta;
 
 #ifdef HAVE_OPENMP
   omp_set_num_threads(10);
@@ -97,14 +97,14 @@ int main(int argc, char **argv) {
   PlaceSurf(mri, surf);
   exit(0); // FIXME: everything after this is unreachable, why exit here?
 
-  BBRFACE *bbrf = BBRFaceAlloc();
+  BBRFACE *  bbrf   = BBRFaceAlloc();
   BBRPARAMS *bbrpar = (BBRPARAMS *)calloc(sizeof(BBRPARAMS), 1);
-  bbrpar->Din = 0.5;
-  bbrpar->Dout = 0.5;
-  bbrpar->M = 0.5;
-  bbrpar->Q0 = -10.0;
-  bbrpar->mri = mri;
-  bbrpar->surf = surf;
+  bbrpar->Din       = 0.5;
+  bbrpar->Dout      = 0.5;
+  bbrpar->M         = 0.5;
+  bbrpar->Q0        = -10.0;
+  bbrpar->mri       = mri;
+  bbrpar->surf      = surf;
   BBRPARsras2vox(bbrpar);
   bbrpar->interp = SAMPLE_CUBIC;
   // bbrpar->interp = SAMPLE_TRILINEAR;
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
   MRISfaceNormalGrad(surf, 0);
   d = MRISedgeCost(surf, dJ);
   // d = MRISbbrCost(bbrpar, dJ);
-  gnum = DMatrixAlloc(1, 3, MATRIX_REAL);
+  gnum  = DMatrixAlloc(1, 3, MATRIX_REAL);
   delta = .0001;
   for (s = 0; s < surf->nvertices; s++) {
     v = &(surf->vertices[s]);
@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
       MRISsetXYZ(surf, s, v->x + dx, v->y + dy, v->z + dz);
       MRISfaceNormalGrad(surf, 0);
       // d1 = MRISbbrCost(bbrpar, NULL);
-      d1 = MRISedgeCost(surf, nullptr);
+      d1                   = MRISedgeCost(surf, nullptr);
       gnum->rptr[1][c + 1] = (d1 - d) / delta;
       MRISsetXYZ(surf, s, v->x - dx, v->y - dy, v->z - dz);
     }
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
   }
   exit(0); //--------------------------------------
 
-  s = 0;
+  s    = 0;
   dmax = 0;
   for (c = 0; c < surf->nfaces; c++) {
     for (r = 0; r < 3; r++) {
@@ -203,26 +203,26 @@ int main(int argc, char **argv) {
   exit(c);
 
   if (false) {
-    mri = MRIread(argv[1]);
-    surf = MRISread(argv[2]);
+    mri   = MRIread(argv[1]);
+    surf  = MRISread(argv[2]);
     surf2 = MRISread(argv[3]);
-    lta = LTAread(argv[4]);
+    lta   = LTAread(argv[4]);
   } else {
-    mri = MRIread("template.nii.gz");
-    surf = MRISread("lh.white");
+    mri   = MRIread("template.nii.gz");
+    surf  = MRISread("lh.white");
     surf2 = MRISread("rh.white");
-    lta = LTAread("register.dof6.lta");
+    lta   = LTAread("register.dof6.lta");
   }
   printf("\n");
   printf("alloc \n");
-  l2s = L2Salloc(2, "");
+  l2s               = L2Salloc(2, "");
   l2s->mri_template = mri;
-  l2s->surfs[0] = surf;
-  l2s->surfs[1] = surf2;
-  l2s->dmax = 3;
-  l2s->hashres = 16;
-  l2s->vol2surf = lta;
-  l2s->debug = 0;
+  l2s->surfs[0]     = surf;
+  l2s->surfs[1]     = surf2;
+  l2s->dmax         = 3;
+  l2s->hashres      = 16;
+  l2s->vol2surf     = lta;
+  l2s->debug        = 0;
   // l2s->nhopsmax = 10;
   printf("init \n");
   L2Sinit(l2s);
@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
   geod = geodesicsRead(argv[2], &nvertices);
   msec = mytimer.milliseconds();
   printf("t = %g min\n", msec / (1000.0 * 60));
-  mri = MRIread(argv[3]);
+  mri      = MRIread(argv[3]);
   mriindex = MRIread(argv[4]);
   printf("Smoothing\n");
   mytimer.reset();
@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
 
   // check distances: surf geod
   surf = MRISread(argv[1]);
-  d = MRISsphereDist(surf, &surf->vertices[220], &surf->vertices[3140]);
+  d    = MRISsphereDist(surf, &surf->vertices[220], &surf->vertices[3140]);
   geod = geodesicsRead(argv[2], &nvertices);
   geodesicsCheckSphereDist(surf, geod);
   exit(0); //-------------------------
@@ -320,17 +320,17 @@ int main(int argc, char **argv) {
   exit(0); //-------------------------
 }
 double MRISfaceMinEdge(MRIS *surf, int faceno) {
-  FACE *f;
+  FACE *  f;
   VERTEX *vn, *vm;
-  int n, m;
-  double dmin, dmax, dv;
+  int     n, m;
+  double  dmin, dmax, dv;
 
-  f = &(surf->faces[faceno]);
+  f    = &(surf->faces[faceno]);
   dmin = 10e10;
   dmax = 0;
   for (n = 0; n < 3; n++) {
     vn = &(surf->vertices[f->v[n]]);
-    m = n + 1;
+    m  = n + 1;
     if (m > 2)
       m = 0;
     vm = &(surf->vertices[f->v[m]]);
@@ -374,7 +374,7 @@ int MRISmatrix2Vertex(MRIS *surf, int vtxno, DMATRIX *vm) {
 }
 
 int MRISscaleVertices(MRIS *surf, double scale) {
-  int vtxno;
+  int     vtxno;
   VERTEX *v;
   for (vtxno = 0; vtxno < surf->nvertices; vtxno++) {
     v = &(surf->vertices[vtxno]);
@@ -413,7 +413,7 @@ int UpdateVertexPosition(MRIS *surf, double stepsize, DMATRIX *grad) {
 long double ConjGradBeta(int method, DMATRIX *SteepDir, DMATRIX *PrevSteepDir,
                          DMATRIX *PrevCGDir) {
   long double beta, ss, ssprev;
-  int r, c;
+  int         r, c;
 
   // Fletcher Reeves
   ss = 0;
@@ -436,40 +436,40 @@ long double ConjGradBeta(int method, DMATRIX *SteepDir, DMATRIX *PrevSteepDir,
 DMATRIX *ConjGradDir(int method, DMATRIX *SteepDir, DMATRIX *PrevSteepDir,
                      DMATRIX *PrevCGDir, DMATRIX *CGDir) {
   long double beta;
-  beta = ConjGradBeta(method, SteepDir, PrevSteepDir, PrevCGDir);
+  beta  = ConjGradBeta(method, SteepDir, PrevSteepDir, PrevCGDir);
   CGDir = DMatrixAddMul(SteepDir, PrevCGDir, 1, beta, CGDir);
   return (CGDir);
 }
 
 int PlaceSurf(MRI *mri, MRIS *surf) {
   DMATRIX *gradBBR, *gradEdge, *SteepDir = nullptr;
-  double costBBR, costEdge, cost;
-  int n;
+  double   costBBR, costEdge, cost;
+  int      n;
 
   BBRPARAMS *bbrpar = (BBRPARAMS *)calloc(sizeof(BBRPARAMS), 1);
-  bbrpar->Din = 0.5;
-  bbrpar->Dout = 0.5;
-  bbrpar->M = 0.5;
-  bbrpar->Q0 = -10.0;
-  bbrpar->mri = mri;
-  bbrpar->surf = surf;
+  bbrpar->Din       = 0.5;
+  bbrpar->Dout      = 0.5;
+  bbrpar->M         = 0.5;
+  bbrpar->Q0        = -10.0;
+  bbrpar->mri       = mri;
+  bbrpar->surf      = surf;
   BBRPARsras2vox(bbrpar);
   // bbrpar->interp = SAMPLE_CUBIC;
   bbrpar->interp = SAMPLE_TRILINEAR;
 
   MRISfaceNormalGrad(surf, 0);
   gradEdge = AllocGradCost(surf->nvertices);
-  gradBBR = AllocGradCost(surf->nvertices);
+  gradBBR  = AllocGradCost(surf->nvertices);
   costEdge = MRISedgeCost(surf, gradEdge);
-  costBBR = MRISbbrCost(bbrpar, gradBBR);
-  cost = costEdge + costBBR;
+  costBBR  = MRISbbrCost(bbrpar, gradBBR);
+  cost     = costEdge + costBBR;
   for (n = 0; n < 1000; n++) {
     SteepDir = DMatrixAddMul(gradEdge, gradBBR, 1, 1, SteepDir);
     UpdateVertexPosition(surf, 1000, SteepDir);
     MRISfaceNormalGrad(surf, 0);
     costEdge = MRISedgeCost(surf, gradEdge);
-    costBBR = MRISbbrCost(bbrpar, gradBBR);
-    cost = costEdge + costBBR;
+    costBBR  = MRISbbrCost(bbrpar, gradBBR);
+    cost     = costEdge + costBBR;
     printf("%3d %12.10lf %12.10lf %12.10lf\n", n, costEdge, costBBR, cost);
     fflush(stdout);
     if (n == 20)

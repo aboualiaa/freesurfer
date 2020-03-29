@@ -33,13 +33,13 @@
 #undef X
 #endif
 
-void RETcompute_fieldsign(MRIS *mris);
-void RETcompute_angles(MRIS *mris, double EccenRotAngleRad,
-                       double PolarRotAngleRad);
-int RETlogMap(MRIS *surf, double k, double a, double xc0, double yc0);
-int RETinvLogMapFunc(double xc, double yc, double xc0, double yc0, double a,
-                     double k, double *r, double *theta);
+void  RETcompute_fieldsign(MRIS *mris);
+void  RETcompute_angles(MRIS *mris, double EccenRotAngleRad,
+                        double PolarRotAngleRad);
+int   RETlogMap(MRIS *surf, double k, double a, double xc0, double yc0);
+int   RETinvLogMapFunc(double xc, double yc, double xc0, double yc0, double a,
+                       double k, double *r, double *theta);
 float RETcircsubtract(float a, float b);
-int RETreverseSign(MRI *mri);
+int   RETreverseSign(MRI *mri);
 
 #endif

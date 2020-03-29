@@ -25,41 +25,41 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "utils.h"
-#include "const.h"
-#include "timer.h"
-#include "version.h"
-#include "gcamorph.h"
-#include "transform.h"
 #include "cma.h"
+#include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "gcamorph.h"
+#include "macros.h"
+#include "mri.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs, x, y, z, n, i, label;
-  char *m3z_fname, *out_dir, fname[STRLEN];
-  int msec, minutes, seconds, label_counts[MAX_CMA_LABELS];
-  Timer start;
+  char **    av;
+  int        ac, nargs, x, y, z, n, i, label;
+  char *     m3z_fname, *out_dir, fname[STRLEN];
+  int        msec, minutes, seconds, label_counts[MAX_CMA_LABELS];
+  Timer      start;
   GCA_MORPH *gcam;
-  TRANSFORM _transform, *transform = &_transform;
-  MATRIX *mX, *mY, *m, *mXinv;
-  LTA *lta;
-  MRI *mri_aseg;
-  float xa, ya, za;
+  TRANSFORM  _transform, *transform = &_transform;
+  MATRIX *   mX, *mY, *m, *mXinv;
+  LTA *      lta;
+  MRI *      mri_aseg;
+  float      xa, ya, za;
 
   nargs = handleVersionOption(argc, argv, "mri_compute_structure_transforms");
   if (nargs && argc - nargs == 1)
@@ -83,14 +83,14 @@ int main(int argc, char *argv[]) {
   if (argc < 3)
     usage_exit(1);
   m3z_fname = argv[1];
-  out_dir = argv[3];
-  gcam = GCAMread(m3z_fname);
+  out_dir   = argv[3];
+  gcam      = GCAMread(m3z_fname);
   if (gcam == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not ready .m3z from %s", Progname,
               m3z_fname);
   transform->xform = (void *)gcam;
-  transform->type = MORPH_3D_TYPE;
-  mri_aseg = MRIread(argv[2]);
+  transform->type  = MORPH_3D_TYPE;
+  mri_aseg         = MRIread(argv[2]);
   if (mri_aseg == NULL)
     ErrorExit(ERROR_BADFILE, "%s: could not read aseg from %s\n", Progname,
               argv[2]);
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
           }
 
       mXinv = MatrixRightPseudoInverse(mX, NULL);
-      m = MatrixMultiply(mY, mXinv, NULL);
+      m     = MatrixMultiply(mY, mXinv, NULL);
       MatrixCopy(m, lta->xforms[0].m_L);
       copyVolGeom(&gcam->image, &lta->xforms[0].src);
       copyVolGeom(&gcam->atlas, &lta->xforms[0].dst);
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
     }
   }
   MRIfree(&mri_aseg);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

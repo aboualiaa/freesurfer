@@ -46,7 +46,7 @@ protected:
   double GFARange[2];
 
   float ScaleFactor; // Factor by which to scale each odf
-  int ScaleByGFA;    // scale each odf glyph by sqrt(gfa)
+  int   ScaleByGFA;  // scale each odf glyph by sqrt(gfa)
 
   int BrightnessLevels; // # of sets of NUM_SPHERE_POINTS values in ColorTable.
                         // Each set at a different brightness gradation.
@@ -57,8 +57,8 @@ private:
   vtkODFGlyph(const vtkODFGlyph &);    // Not implemented.
   void operator=(const vtkODFGlyph &); // Not implemented.
 
-  static const int ODF_SIZE = 752;
-  static const int NUM_SPHERE_POINTS = ODF_SIZE;
+  static const int    ODF_SIZE          = 752;
+  static const int    NUM_SPHERE_POINTS = ODF_SIZE;
   static const double SPHERE_POINTS[NUM_SPHERE_POINTS][3];
 };
 

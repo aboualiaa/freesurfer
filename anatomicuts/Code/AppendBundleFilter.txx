@@ -1,4 +1,8 @@
+#include <vtkCellData.h>
+#include <vtkFieldData.h>
+
 #include "AppendBundleFilter.h"
+
 typedef struct {
   unsigned char r;
   unsigned char g;
@@ -8,16 +12,16 @@ typedef struct {
 void AppendBundleFilter::Update() {
 
   // std::cout << "AppendBundleFilter::Update()" << std::endl;
-  int i;
-  int red, green, blue;
+  int           i;
+  int           red, green, blue;
   color_triplet table[256] = {{0, 0, 0}}; /* Initialize to all black */
 
   const color_triplet black = {0, 0, 0};
   const color_triplet white = {255, 255, 255};
 
-  table[0] = white;
+  table[0]   = white;
   table[255] = black;
-  i = 20;                                /* first 20 and last 20 are reserved */
+  i          = 20;                       /* first 20 and last 20 are reserved */
   for (red = 0; red <= 255; red += 51) { /* the six values of red */
     for (green = 0; green <= 255; green += 51) {
       for (blue = 0; blue <= 255; blue += 51) {
@@ -28,12 +32,12 @@ void AppendBundleFilter::Update() {
       }
     }
   }
-  table[0] = white;
+  table[0]   = white;
   table[255] = black;
 
-  allBundles = vtkPolyData::New();
-  vtkPoints *allPoints = vtkPoints::New();
-  vtkIntArray *allLabels = vtkIntArray::New();
+  allBundles                      = vtkPolyData::New();
+  vtkPoints *           allPoints = vtkPoints::New();
+  vtkIntArray *         allLabels = vtkIntArray::New();
   vtkUnsignedCharArray *allColors = vtkUnsignedCharArray::New();
 
   allColors->SetNumberOfComponents(3);
@@ -60,7 +64,7 @@ void AppendBundleFilter::Update() {
     //  int index =((int)(
     //  100./(bundle->GetNumberOfLines()))*((i%colorNumber)%(150)))%201;
     int index = ((int)47. * ((i % colorNumber) % (150))) % 197 + 5;
-    index = (int)(13 * (i % colorNumber)) % 150 + 65;
+    index     = (int)(13 * (i % colorNumber)) % 150 + 65;
     //  std::cout << "index " << index << std::endl;
     unsigned char color[3] = {table[index].r, table[index].g, table[index].b};
 

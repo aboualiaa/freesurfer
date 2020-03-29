@@ -30,36 +30,36 @@
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char *Progname;
-static void usage_exit(int code);
-static char *surf_name = "white";
-static char *sphere_name = "sphere.d1.left_right";
-static char *hemi_name = "lh";
-static char *ohemi_name = "rh";
-static int hemi = LEFT_HEMISPHERE;
-static int wsize = 32;
-static int nbrs = 3;
-static char *label_name = "FCD";
-static char *vol_name = "norm.mgz";
-static char *ovol_name = "norm.mgz";
-static char sdir[STRLEN] = "";
+const char * Progname;
+static void  usage_exit(int code);
+static char *surf_name        = "white";
+static char *sphere_name      = "sphere.d1.left_right";
+static char *hemi_name        = "lh";
+static char *ohemi_name       = "rh";
+static int   hemi             = LEFT_HEMISPHERE;
+static int   wsize            = 32;
+static int   nbrs             = 3;
+static char *label_name       = "FCD";
+static char *vol_name         = "norm.mgz";
+static char *ovol_name        = "norm.mgz";
+static char  sdir[STRLEN]     = "";
 static float random_patch_pct = 0.0;
-static int augment = 0;
+static int   augment          = 0;
 
 MRI *MRISextractVolumeWindow(MRI_SURFACE *mris, MRI *mri, int wsize, int vno,
                              double theta);
 
 int main(int argc, char *argv[]) {
-  int nargs, a;
-  char *subject, fname[STRLEN], *out_dir, fname_only[STRLEN];
-  int msec, minutes, seconds, n;
-  Timer start;
+  int          nargs, a;
+  char *       subject, fname[STRLEN], *out_dir, fname_only[STRLEN];
+  int          msec, minutes, seconds, n;
+  Timer        start;
   MRI_SURFACE *mris, *mris_ohemi;
-  MRI *mri_norm, *mri_patches, *mri_labels, *mri_onorm;
-  LABEL *area_tmp, *area;
+  MRI *        mri_norm, *mri_patches, *mri_labels, *mri_onorm;
+  LABEL *      area_tmp, *area;
   int random_patches, npoints, *non_fcd_vertices = nullptr, augment_patches;
 
   nargs = handleVersionOption(argc, argv, "mris_extract_patches");
@@ -143,13 +143,13 @@ int main(int argc, char *argv[]) {
   LabelUnassign(area_tmp);
   area = LabelSampleToSurface(mris, area_tmp, mri_norm, CURRENT_VERTICES);
   LabelFree(&area_tmp);
-  random_patches = round(area->n_points * random_patch_pct);
-  npoints = area->n_points + random_patches;
+  random_patches  = round(area->n_points * random_patch_pct);
+  npoints         = area->n_points + random_patches;
   augment_patches = nint(npoints * augment);
 
   mri_patches = MRIallocSequence(wsize, wsize, wsize, MRI_FLOAT,
                                  npoints + augment_patches);
-  mri_labels = MRIallocSequence(npoints + augment_patches, 2, 1, MRI_INT, 1);
+  mri_labels  = MRIallocSequence(npoints + augment_patches, 2, 1, MRI_INT, 1);
   for (n = 0; n < area->n_points; n++) {
     MRI *mri_tmp;
     mri_tmp =
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
   }
 #define MAX_ITER 1000000
   if (random_patches > 0) {
-    int i, vno, iter;
+    int     i, vno, iter;
     VERTEX *v;
 
     if (MRISreadCurvatureFile(mris, "sulc") != NO_ERROR)
@@ -170,10 +170,10 @@ int main(int argc, char *argv[]) {
     non_fcd_vertices = (int *)calloc(random_patches, sizeof(int));
     for (i = iter = 0; iter < MAX_ITER; iter++) {
       vno = nint(randomNumber(0, mris->nvertices - 1));
-      v = &mris->vertices[vno];
+      v   = &mris->vertices[vno];
       if (v->curv < 0 || v->marked)
         continue;
-      v->marked = 1;
+      v->marked           = 1;
       non_fcd_vertices[i] = vno;
       i++;
       if (i >= random_patches)
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
 
   for (a = 0; a < augment; a++) {
     double theta;
-    int n1, i;
+    int    n1, i;
 
     theta = randomNumber(0.0, M_PI);
     for (n1 = 0; n1 < area->n_points; n1++, n++) {
@@ -232,11 +232,11 @@ int main(int argc, char *argv[]) {
   MRIwrite(mri_labels, fname);
 
   for (n = 0; n < area->n_points; n++) {
-    MRI *mri_tmp;
-    int ovno;
+    MRI *   mri_tmp;
+    int     ovno;
     VERTEX *v;
 
-    v = &mris->vertices[area->lv[n].vno];
+    v    = &mris->vertices[area->lv[n].vno];
     ovno = MRISfindClosestCanonicalVertex(mris_ohemi, v->cx, v->cy, v->cz);
     if (ovno < 0)
       ErrorExit(ERROR_BADPARM, "%s: could not find closest vertex to %d\n",
@@ -252,11 +252,11 @@ int main(int argc, char *argv[]) {
     int i;
 
     for (i = 0; n < npoints; n++, i++) {
-      MRI *mri_tmp;
+      MRI *   mri_tmp;
       VERTEX *v;
-      int ovno;
+      int     ovno;
 
-      v = &mris->vertices[non_fcd_vertices[i]];
+      v    = &mris->vertices[non_fcd_vertices[i]];
       ovno = MRISfindClosestCanonicalVertex(mris_ohemi, v->cx, v->cy, v->cz);
       if (ovno < 0)
         ErrorExit(ERROR_BADPARM, "%s: could not find closest vertex to %d\n",
@@ -272,15 +272,15 @@ int main(int argc, char *argv[]) {
 
   for (a = 0; a < augment; a++) {
     double theta;
-    int n1;
+    int    n1;
 
     theta = randomNumber(0.0, M_PI);
     for (n1 = 0; n1 < area->n_points; n1++, n++) {
-      MRI *mri_tmp;
+      MRI *   mri_tmp;
       VERTEX *v;
-      int ovno;
+      int     ovno;
 
-      v = &mris->vertices[area->lv[n1].vno];
+      v    = &mris->vertices[area->lv[n1].vno];
       ovno = MRISfindClosestCanonicalVertex(mris_ohemi, v->cx, v->cy, v->cz);
       if (ovno < 0)
         ErrorExit(ERROR_BADPARM, "%s: could not find closest vertex to %d\n",
@@ -296,11 +296,11 @@ int main(int argc, char *argv[]) {
       int i;
 
       for (i = 0; n1 < npoints; n1++, n++, i++) {
-        MRI *mri_tmp;
+        MRI *   mri_tmp;
         VERTEX *v;
-        int ovno;
+        int     ovno;
 
-        v = &mris->vertices[non_fcd_vertices[i]];
+        v    = &mris->vertices[non_fcd_vertices[i]];
         ovno = MRISfindClosestCanonicalVertex(mris_ohemi, v->cx, v->cy, v->cz);
         if (ovno < 0)
           ErrorExit(ERROR_BADPARM, "%s: could not find closest vertex to %d\n",
@@ -325,7 +325,7 @@ int main(int argc, char *argv[]) {
   printf("writing output file %s\n", fname);
   MRIwrite(mri_labels, fname);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -370,10 +370,10 @@ static int get_option(int argc, char *argv[]) {
       ErrorExit(ERROR_UNSUPPORTED,
                 "%s: hemi (%s) must be either 'lh' or 'rh'\n", Progname, hemi);
     if (!stricmp(hemi_name, "lh")) {
-      hemi = LEFT_HEMISPHERE;
+      hemi       = LEFT_HEMISPHERE;
       ohemi_name = "rh";
     } else {
-      hemi = RIGHT_HEMISPHERE;
+      hemi       = RIGHT_HEMISPHERE;
       ohemi_name = "lh";
     }
 
@@ -382,22 +382,22 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'A':
       augment = atoi(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       printf("augmenting the data %2d times using planar rotations\n", augment);
       break;
     case 'S':
       surf_name = argv[2];
-      nargs = 1;
+      nargs     = 1;
       printf("reading surface from %s\n", surf_name);
       break;
     case 'L':
       label_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("reading label from %s\n", label_name);
       break;
     case 'R':
       random_patch_pct = atof(argv[2]);
-      nargs = 1;
+      nargs            = 1;
       printf(
           "creating %2.2f%% randomly chosen patches to augment training set\n",
           100 * random_patch_pct);
@@ -413,7 +413,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("debugging vertex %d\n", Gdiag_no);
       break;
     default:
@@ -438,40 +438,40 @@ static void usage_exit(int code) {
 
 MRI *MRISextractVolumeWindow(MRI_SURFACE *mris, MRI *mri, int wsize, int vno,
                              double theta) {
-  MRI *mri_vol;
+  MRI *   mri_vol;
   VERTEX *v;
-  double x0, y0, z0, whalf, xs, ys, zs, xv, yv, zv, val, e1c, e2c, nc, ctheta,
+  double  x0, y0, z0, whalf, xs, ys, zs, xv, yv, zv, val, e1c, e2c, nc, ctheta,
       stheta, x1, y1;
   int xi, yi, zi;
 
   ctheta = cos(theta);
   stheta = sin(theta);
 
-  v = &mris->vertices[vno];
+  v       = &mris->vertices[vno];
   mri_vol = MRIalloc(wsize, wsize, wsize, MRI_FLOAT);
 
   // form a window that has the vertex centered 2/3 of the way down so that more
   // of the window extends 'outwards' (in the surface normal direction), than
   // 'inwards
   whalf = (wsize - 1) / 2.0;
-  x0 = v->x;
-  y0 = v->y;
-  z0 = v->z;
+  x0    = v->x;
+  y0    = v->y;
+  z0    = v->z;
   for (xi = 0; xi < wsize; xi++)
     for (yi = 0; yi < wsize; yi++)
       for (zi = 0; zi < wsize; zi++) {
         e1c = (xi - whalf);
         e2c = (yi - whalf);
-        x1 = e1c * ctheta - e2c * stheta;
-        y1 = e1c * stheta + e2c * ctheta;
+        x1  = e1c * ctheta - e2c * stheta;
+        y1  = e1c * stheta + e2c * ctheta;
         e1c = x1;
         e2c = y1;
-        nc = (zi -
+        nc  = (zi -
               (whalf /
                2.0)); // have more of the window extend outwards than inwards
-        xs = x0 + e1c * v->e1x + e2c * v->e2x + nc * v->nx;
-        ys = y0 + e1c * v->e1y + e2c * v->e2y + nc * v->ny;
-        zs = z0 + e1c * v->e1z + e2c * v->e2z + nc * v->nz;
+        xs  = x0 + e1c * v->e1x + e2c * v->e2x + nc * v->nx;
+        ys  = y0 + e1c * v->e1y + e2c * v->e2y + nc * v->ny;
+        zs  = z0 + e1c * v->e1z + e2c * v->e2z + nc * v->nz;
 
         MRISsurfaceRASToVoxel(mris, mri, xs, ys, zs, &xv, &yv, &zv);
         MRIsampleVolume(mri, xv, yv, zv, &val);

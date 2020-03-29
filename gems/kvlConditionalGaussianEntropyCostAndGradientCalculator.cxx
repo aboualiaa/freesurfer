@@ -1,7 +1,7 @@
 #include "kvlConditionalGaussianEntropyCostAndGradientCalculator.h"
 
-#include <itkMath.h>
 #include "kvlTetrahedronInteriorConstIterator.h"
+#include <itkMath.h>
 
 #define SUBTRACT_MARGINAL_ENTROPY 0
 
@@ -254,7 +254,7 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
       //
       const double variance = (Q * N - pow(L, 2)) / pow(N, 2) + 1e-15;
-      const double entropy = log(variance) + 1;
+      const double entropy  = log(variance) + 1;
 
       //
       dataCost += N * entropy;
@@ -300,7 +300,7 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
       //
       const double variance = (Q * N - pow(L, 2)) / pow(N, 2) + 1e-15;
-      const double entropy = log(variance) + 1;
+      const double entropy  = log(variance) + 1;
 
 #if SUBTRACT_MARGINAL_ENTROPY
       const double Nweight = (entropy - dataCost + Q / (variance * N) -
@@ -403,7 +403,7 @@ bool ConditionalGaussianEntropyCostAndGradientCalculator ::RasterizeTetrahedron(
   mesh->GetCell(tetrahedronId, cell);
 
   AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-  const AtlasMesh::PointIdentifier id0 = *pit;
+  const AtlasMesh::PointIdentifier     id0 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier id1 = *pit;
   ++pit;
@@ -480,7 +480,7 @@ bool ConditionalGaussianEntropyCostAndGradientCalculator ::RasterizeTetrahedron(
       }
 
       // Retrieve intensity
-      const double y = it.Value();
+      const double y        = it.Value();
       const double ySquared = pow(y, 2);
 
       for (unsigned int classNumber = 0; classNumber < numberOfClasses;

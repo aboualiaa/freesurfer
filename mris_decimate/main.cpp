@@ -45,29 +45,29 @@
 
 #include <sys/utsname.h>
 
+#include "diag.h"
 #include "mris_decimate.h"
 #include "version.h"
-#include "diag.h"
 
 ///
 //  Function Prototypes
 //
-static int get_option(int argc, char **argv);
+static int  get_option(int argc, char **argv);
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 ///
 //  Global Variables
 //
-static char vcid[] = "$Id: main.cpp,v 1.3 2011/03/02 00:04:30 nicks Exp $";
-const char *Progname = nullptr;
-char *cmdline;
-int debug = 0;
-int checkoptsonly = 0;
+static char    vcid[]   = "$Id: main.cpp,v 1.3 2011/03/02 00:04:30 nicks Exp $";
+const char *   Progname = nullptr;
+char *         cmdline;
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 DECIMATION_OPTIONS gDecimationOptions;
 
@@ -111,15 +111,14 @@ int main(int argc, char *argv[]) {
   // feature is off by default.
   gDecimationOptions.SortVertices = 0;
 
-  char *in_fname, out_fpath[STRLEN];
-  int nargs;
+  char *       in_fname, out_fpath[STRLEN];
+  int          nargs;
   MRI_SURFACE *mris;
-  double avgfacearea;
+  double       avgfacearea;
 
   nargs = handleVersionOption(argc, argv, "main");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   Progname = argv[0];
   argc -= nargs;
@@ -209,7 +208,7 @@ int main(int argc, char *argv[]) {
 /// \param argv - pointer to a character pointer
 ///
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -241,7 +240,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'M':
       gDecimationOptions.setMinimumAngle = true;
-      gDecimationOptions.minimumAngle = atof(argv[2]);
+      gDecimationOptions.minimumAngle    = atof(argv[2]);
       printf("using minimumAngle = %f\n", gDecimationOptions.minimumAngle);
       nargs = 1;
       break;

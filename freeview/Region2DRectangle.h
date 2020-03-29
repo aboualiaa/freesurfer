@@ -27,8 +27,8 @@
 #define Region2DRectangle_h
 
 #include "Region2D.h"
-#include <vector>
 #include "vtkSmartPointer.h"
+#include <vector>
 
 class vtkTextActor;
 class vtkActor2D;
@@ -73,11 +73,11 @@ public:
 
 protected:
   void UpdateWorldCoords();
-  int GetRange(double[3][2]);
+  int  GetRange(double[3][2]);
 
   vtkSmartPointer<vtkActor2D> m_actorRect;
-  int m_nX1, m_nX2, m_nY1, m_nY2;
-  double m_dPt[4][3]; // rect in world coordinate
+  int                         m_nX1, m_nX2, m_nY1, m_nY2;
+  double                      m_dPt[4][3]; // rect in world coordinate
 
   bool m_bEnableStats;
 };

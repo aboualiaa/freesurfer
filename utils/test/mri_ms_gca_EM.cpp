@@ -36,33 +36,32 @@
  *
  */
 
+#include "diag.h"
+#include "error.h"
+#include "gca.h"
+#include "label.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mri_conform.h"
+#include "mrimorph.h"
+#include "mrinorm.h"
+#include "numerics.h"
+#include "proto.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include "numerics.h"
-#include "mri.h"
-#include "matrix.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mrimorph.h"
-#include "mri_conform.h"
-#include "utils.h"
-#include "timer.h"
-#include "matrix.h"
-#include "gca.h"
-#include "transform.h"
-#include "version.h"
-#include "label.h"
-#include "mrinorm.h"
 
 #define TEST 1
 #define SWAP(a, b)                                                             \
   itemp = (a);                                                                 \
-  (a) = (b);                                                                   \
-  (b) = itemp;
+  (a)   = (b);                                                                 \
+  (b)   = itemp;
 
 /* maximum number of classes */
 #define MAX_CLASSES 20
@@ -76,7 +75,7 @@
 
 static int debug_flag = 0;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -134,7 +133,7 @@ void compute_inverseF(MATRIX **F, int num_classes);
 double distancems(MRI **mri_flash, float *centroids, MATRIX *F, double detF,
                   int x, int y, int z);
 
-static int InterpMethod = SAMPLE_TRILINEAR; /*E* prev default behavior */
+static int InterpMethod   = SAMPLE_TRILINEAR; /*E* prev default behavior */
 static int sinchalfwindow = 3;
 
 static int xoff[6] = {1, 0, -1, 0, 0, 0};
@@ -148,39 +147,39 @@ static int fix_class_size = 1;
 // static double kappa = 0.001; /* 0.01 is too big */
 
 /* eps and lambda are used for covariance regularization */
-static double eps = 1e-30;
-static double lambda = 0.2;
-static int regularize = 0;
+static double eps        = 1e-30;
+static double lambda     = 0.2;
+static int    regularize = 0;
 
 #define MAX_IMAGES 200
 
 int main(int argc, char *argv[]) {
   char **av, *in_fname, fname[100];
-  int ac, nargs, i, j, x, y, z, width, height, depth, iter, c;
-  int num_classes = 0;
-  MRI *mri_flash[MAX_IMAGES], *mri_mem[MAX_CLASSES], *mri_mask, *mri_label,
+  int    ac, nargs, i, j, x, y, z, width, height, depth, iter, c;
+  int    num_classes = 0;
+  MRI *  mri_flash[MAX_IMAGES], *mri_mem[MAX_CLASSES], *mri_mask, *mri_label,
       *mri_tmp;
-  char *out_prefx;
-  int msec, minutes, seconds, nvolumes, nvolumes_total, label;
-  Timer start;
-  MATRIX *F[MAX_CLASSES];
-  float *centroids[MAX_CLASSES];
-  float value;
-  float max_change = 1000.0;
-  double detF[MAX_CLASSES];          /* determinant of the covariance matrix */
-  double distance2, sum_of_distance; /* actually the inverse distance */
-  double oldMems[MAX_CLASSES];
-  float classSize[MAX_CLASSES]; // wouldn't be used here
-  int brainsize;
-  GCA *gca;
+  char *     out_prefx;
+  int        msec, minutes, seconds, nvolumes, nvolumes_total, label;
+  Timer      start;
+  MATRIX *   F[MAX_CLASSES];
+  float *    centroids[MAX_CLASSES];
+  float      value;
+  float      max_change = 1000.0;
+  double     detF[MAX_CLASSES]; /* determinant of the covariance matrix */
+  double     distance2, sum_of_distance; /* actually the inverse distance */
+  double     oldMems[MAX_CLASSES];
+  float      classSize[MAX_CLASSES]; // wouldn't be used here
+  int        brainsize;
+  GCA *      gca;
   GCA_PRIOR *gcap;
   TRANSFORM *transform;
-  int xn, yn, zn, n;
-  int label_to_index[256];
-  int index_to_label[256];
-  int total_label;
-  int MLE_label;
-  double max_prior;
+  int        xn, yn, zn, n;
+  int        label_to_index[256];
+  int        index_to_label[256];
+  int        total_label;
+  int        MLE_label;
+  double     max_prior;
 
   nargs = handleVersionOption(argc, argv, "mri_ms_gca_EM");
   if (nargs && argc - nargs == 1)
@@ -297,9 +296,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  width = mri_flash[0]->width;
+  width  = mri_flash[0]->width;
   height = mri_flash[0]->height;
-  depth = mri_flash[0]->depth;
+  depth  = mri_flash[0]->depth;
 
   if (label_fname == NULL) {
     printf("use GCA prior to generate initial segmentation\n");
@@ -432,8 +431,8 @@ int main(int argc, char *argv[]) {
     label_to_index[i] = -1;
 
   label_to_index[label_of_interest] = 0;
-  index_to_label[0] = label_of_interest;
-  total_label = 1;
+  index_to_label[0]                 = label_of_interest;
+  total_label                       = 1;
 
   for (z = 1; z < (depth - 1); z++)
     for (y = 1; y < (height - 1); y++)
@@ -442,16 +441,16 @@ int main(int argc, char *argv[]) {
           continue;
 
         for (i = 0; i < 6; i++) {
-          xn = x + xoff[6];
-          yn = y + yoff[6];
-          zn = z + zoff[6];
+          xn    = x + xoff[6];
+          yn    = y + yoff[6];
+          zn    = z + zoff[6];
           label = (int)MRIgetVoxVal(mri_label, xn, yn, zn, 0);
           if (label <= 0)
             continue;
           if (label_of_interest == 13 && label == 3)
             continue;
           if (label_to_index[label] < 0) {
-            label_to_index[label] = total_label;
+            label_to_index[label]       = total_label;
             index_to_label[total_label] = label;
             total_label++;
           }
@@ -499,7 +498,7 @@ int main(int argc, char *argv[]) {
 
   /* Allocate memory for membership volumes */
   for (i = 0; i < num_classes; i++) {
-    mri_mem[i] = MRIclone(mri_flash[0], NULL);
+    mri_mem[i]   = MRIclone(mri_flash[0], NULL);
     centroids[i] = (float *)malloc(nvolumes_total * sizeof(float));
     F[i] = (MATRIX *)MatrixAlloc(nvolumes_total, nvolumes_total, MATRIX_REAL);
     //    classSize[i] = 1.0/(float)num_classes;
@@ -513,7 +512,7 @@ int main(int argc, char *argv[]) {
         if (MRIvox(mri_mask, x, y, z) == 0)
           continue;
         label = (int)MRIgetVoxVal(mri_label, x, y, z, 0);
-        i = label_to_index[label];
+        i     = label_to_index[label];
 
         MRIFvox(mri_mem[i], x, y, z) = 1;
       }
@@ -523,7 +522,7 @@ int main(int argc, char *argv[]) {
    */
 
   /* Perform iterative fuzzy-clustering until convergence */
-  iter = 0;
+  iter       = 0;
   max_change = 10000.0;
   while (max_change > tolerance && iter < max_iters) {
     iter++;
@@ -571,7 +570,7 @@ int main(int argc, char *argv[]) {
       for (c = 0; c < num_classes; c++) {
 
         F[c]->rptr[1][1] = 1.0 / F[c]->rptr[1][1];
-        detF[c] = F[c]->rptr[1][1];
+        detF[c]          = F[c]->rptr[1][1];
       }
     } else {
 
@@ -677,11 +676,11 @@ int main(int argc, char *argv[]) {
         for (x = 0; x < width; x++) {
           if (MRIvox(mri_mask, x, y, z) == 0)
             continue;
-          i = 0;
+          i     = 0;
           value = MRIFvox(mri_mem[0], x, y, z);
           for (j = 1; j < num_classes; j++) {
             if (value < MRIFvox(mri_mem[j], x, y, z)) {
-              i = j;
+              i     = j;
               value = MRIFvox(mri_mem[j], x, y, z);
             }
           }
@@ -728,7 +727,7 @@ int main(int argc, char *argv[]) {
     MRIfree(&mri_tmp);
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -757,23 +756,23 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx         = atoi(argv[2]);
+    Gy         = atoi(argv[3]);
+    Gz         = atoi(argv[4]);
     debug_flag = 1;
-    nargs = 3;
+    nargs      = 3;
     printf("debugging voxel (%d, %d, %d)...\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "conform")) {
     conform = 1;
     printf("interpolating volume to be isotropic 1mm^3\n");
   } else if (!stricmp(option, "tissue")) {
     label_of_interest = atoi(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     printf("refine the segmentation of structure with label %d\n",
            label_of_interest);
   } else if (!stricmp(option, "hardonly")) {
@@ -806,7 +805,7 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "st") || !stricmp(option, "sample") ||
            !stricmp(option, "sample_type") || !stricmp(option, "interp")) {
     InterpMethod = MRIinterpCode(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     if (InterpMethod == SAMPLE_SINC) {
       if ((argc < 4) ||
           !strncmp(argv[3], "-",
@@ -815,7 +814,7 @@ static int get_option(int argc, char *argv[]) {
         printf("using sinc interpolation (default windowwidth is 6)\n");
       } else {
         sinchalfwindow = atoi(argv[3]);
-        nargs = 2;
+        nargs          = 2;
         printf("using sinc interpolation with windowwidth of %d\n",
                2 * sinchalfwindow);
       }
@@ -828,14 +827,14 @@ static int get_option(int argc, char *argv[]) {
       printf("using sinc interpolation (default windowwidth is 6)\n");
     } else {
       sinchalfwindow = atoi(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       printf("using sinc interpolation with windowwidth of %d\n",
              2 * sinchalfwindow);
     }
   } else if (!stricmp(option, "sinchalfwindow") || !stricmp(option, "hw")) {
     /*E* InterpMethod = SAMPLE_SINC; //? */
     sinchalfwindow = atoi(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("using sinc interpolation with windowwidth of %d\n",
            2 * sinchalfwindow);
   } else if (!stricmp(option, "gca")) {
@@ -867,8 +866,8 @@ static int get_option(int argc, char *argv[]) {
     printf("inhibiting isotropic volume interpolation\n");
   } else if (!stricmp(option, "regularize")) {
     regularize = 1;
-    lambda = atof(argv[2]);
-    nargs = 1;
+    lambda     = atof(argv[2]);
+    nargs      = 1;
     printf("Regularize the covariance matrix with lambda = %g\n", lambda);
   } else
     switch (toupper(*option)) {
@@ -940,14 +939,14 @@ static void usage_exit(int code) {
 void update_centroids(MRI **mri_flash, MRI **mri_mem, MRI **mri_lihood,
                       MRI *mri_mask, float **centroids, int nvolumes_total,
                       int num_classes) {
-  int m, c, x, y, z, depth, height, width;
+  int    m, c, x, y, z, depth, height, width;
   double numer, denom;
   double mem, data;
   double scale;
   //  double kappa = exp(-4.5);
 
-  depth = mri_flash[0]->depth;
-  width = mri_flash[0]->width;
+  depth  = mri_flash[0]->depth;
+  width  = mri_flash[0]->width;
   height = mri_flash[0]->height;
 
   /* Put the voxel iteration inside makes it easier to
@@ -968,8 +967,8 @@ void update_centroids(MRI **mri_flash, MRI **mri_mem, MRI **mri_lihood,
               // scale = scale/(scale + kappa);
               // }else
               scale = 1;
-              mem = MRIFvox(mri_mem[c], x, y, z) * scale;
-              data = MRIFvox(mri_flash[m], x, y, z);
+              mem   = MRIFvox(mri_mem[c], x, y, z) * scale;
+              data  = MRIFvox(mri_flash[m], x, y, z);
               numer += mem * data;
               denom += mem;
             }
@@ -989,7 +988,7 @@ void update_centroids(MRI **mri_flash, MRI **mri_mem, MRI **mri_lihood,
 double distancems(MRI **mri_flash, float *centroids, MATRIX *F, double detF,
                   int x, int y, int z) {
   /* F would be the inverse of the covariance matrix of the class */
-  int i, j, rows;
+  int    i, j, rows;
   double data1, data2;
 
   double mydistance = 0;
@@ -1024,15 +1023,15 @@ void update_F(MATRIX **F, MRI **mri_flash, MRI **mri_mem, MRI **mri_lihood,
               MRI *mri_mask, float **centroids, int nvolumes_total,
               int num_classes) {
 
-  int m1, m2, c, x, y, z, depth, height, width;
+  int    m1, m2, c, x, y, z, depth, height, width;
   double denom;
   double mem, data1, data2;
   double scale;
   //  double kappa = exp(-4.5);
   MATRIX *tmpM = 0; /*used for covariance regularization */
 
-  depth = mri_flash[0]->depth;
-  width = mri_flash[0]->width;
+  depth  = mri_flash[0]->depth;
+  width  = mri_flash[0]->width;
   height = mri_flash[0]->height;
 
   for (c = 0; c < num_classes; c++) {
@@ -1054,7 +1053,7 @@ void update_F(MATRIX **F, MRI **mri_flash, MRI **mri_mem, MRI **mri_lihood,
           //  scale = scale/(scale + kappa);
           //}else
           scale = 1;
-          mem = MRIFvox(mri_mem[c], x, y, z) * scale;
+          mem   = MRIFvox(mri_mem[c], x, y, z) * scale;
           /* mem = mem*mem; */ /* here differs from FCM */
           denom += mem;
 
@@ -1112,7 +1111,7 @@ void update_F(MATRIX **F, MRI **mri_flash, MRI **mri_mem, MRI **mri_lihood,
 
 void compute_detF(MATRIX **F, double *detF, int num_classes) {
 
-  int c, i, n;
+  int   c, i, n;
   float tmpv;
 
   n = F[0]->rows;
@@ -1138,7 +1137,7 @@ void compute_detF(MATRIX **F, double *detF, int num_classes) {
 
 void compute_inverseF(MATRIX **F, int num_classes) {
   MATRIX *mTmp;
-  int c, row, rows, cols;
+  int     c, row, rows, cols;
 
   rows = F[0]->cols;
   cols = F[0]->cols;
@@ -1169,7 +1168,7 @@ MRI *MRInormalizeXH(MRI *mri_src, MRI *mri_dst, MRI *mri_mask) {
   /* Normalize the source volume to be zero mean and variance 1*/
   /* mri_dst and mri_src can be the same */
 
-  int width, height, depth, x, y, z;
+  int   width, height, depth, x, y, z;
   float mean, variance, total, tmpval;
 
   if (mri_src->type != MRI_FLOAT) {
@@ -1178,14 +1177,14 @@ MRI *MRInormalizeXH(MRI *mri_src, MRI *mri_dst, MRI *mri_mask) {
     return (mri_dst);
   }
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, NULL);
 
   /* compute mean */
-  mean = 0.0;
+  mean  = 0.0;
   total = 0.0;
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
@@ -1230,7 +1229,7 @@ MRI *MRInormalizeXH(MRI *mri_src, MRI *mri_dst, MRI *mri_mask) {
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
       for (x = 0; x < width; x++) {
-        tmpval = MRIFvox(mri_src, x, y, z) - mean;
+        tmpval                    = MRIFvox(mri_src, x, y, z) - mean;
         MRIFvox(mri_dst, x, y, z) = tmpval * variance;
       }
 

@@ -25,19 +25,19 @@
  *
  */
 
+#include <Getifh.h>
+#include <conc.h>
+#include <endianio.h>
+#include <rec.h>
 #include <stdlib.h>
 #include <string.h>
-#include <endianio.h>
-#include <Getifh.h>
-#include <rec.h>
-#include <conc.h>
 
 #define MAXL 256
 
 /*************/
 /* externals */
 /*************/
-extern int npad_(int *n, int *margin); /* FORTRAN librms */
+extern int  npad_(int *n, int *margin); /* FORTRAN librms */
 extern void imgpad_(float *imag, int *nx, int *ny, int *nz, float *imgp,
                     int *nxp, int *nyp, int *nzp); /* FORTRAN librms */
 extern void imgdap_(float *imag, int *nx, int *ny, int *nz, float *imgp,
@@ -74,34 +74,34 @@ void usage(char *program) {
 }
 
 static char rcsid[] = "$Id: gauss_4dfp.c,v 1.3 2009/05/15 21:43:46 nicks Exp $";
-int main(int argc, char **argv) {
+int         main(int argc, char **argv) {
   CONC_BLOCK conc_block; /* conc i/o control block */
-  FILE *imgfp = NULL, *outfp = NULL;
-  IFH ifh;
-  char imgroot[MAXL], imgfile[MAXL];
-  char outroot[MAXL] = "", outfile[MAXL], trailer[MAXL];
+  FILE *     imgfp = NULL, *outfp = NULL;
+  IFH        ifh;
+  char       imgroot[MAXL], imgfile[MAXL];
+  char       outroot[MAXL] = "", outfile[MAXL], trailer[MAXL];
 
-  int imgdim[4], isbig;
-  float voxdim[3];
-  float cmppix[3], f0;
+  int    imgdim[4], isbig;
+  float  voxdim[3];
+  float  cmppix[3], f0;
   float *imgt, *imgp;
-  int nx, ny, nz;
-  int nxp, nyp, nzp;
-  int margin, vdim;
-  char control = '\0';
+  int    nx, ny, nz;
+  int    nxp, nyp, nzp;
+  int    margin, vdim;
+  char   control = '\0';
 
   /***********/
   /* utility */
   /***********/
-  char command[MAXL], program[MAXL], *ptr;
+  char  command[MAXL], program[MAXL], *ptr;
   float val;
-  int c, i, k;
+  int   c, i, k;
 
   /*********/
   /* flags */
   /*********/
   int conc_flag = 0;
-  int status = 0;
+  int status    = 0;
   int wrap_flag = 0;
   int diff_flag = 0;
 
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
           break;
         case '@':
           control = *ptr++;
-          *ptr = '\0';
+          *ptr    = '\0';
           break;
         }
     } else
@@ -193,9 +193,9 @@ int main(int argc, char **argv) {
   }
   printf("Reading: %s\n", imgfile);
   printf("Writing: %s\n", outfile);
-  nx = imgdim[0];
-  ny = imgdim[1];
-  nz = imgdim[2];
+  nx   = imgdim[0];
+  ny   = imgdim[1];
+  nz   = imgdim[2];
   vdim = nx * ny * nz;
   for (k = 0; k < 3; k++)
     cmppix[k] = voxdim[k] / 10.0;
@@ -207,16 +207,16 @@ int main(int argc, char **argv) {
     nxp = nx;
     nyp = ny;
   } else {
-    val = (0.5 + (2.0 * 0.1874 / (cmppix[0] * f0)));
+    val    = (0.5 + (2.0 * 0.1874 / (cmppix[0] * f0)));
     margin = val;
-    nxp = npad_(&nx, &margin);
-    val = (0.5 + (2.0 * 0.1874 / (cmppix[1] * f0)));
+    nxp    = npad_(&nx, &margin);
+    val    = (0.5 + (2.0 * 0.1874 / (cmppix[1] * f0)));
     margin = val;
-    nyp = npad_(&ny, &margin);
+    nyp    = npad_(&ny, &margin);
   }
-  val = (0.5 + (4.0 * 0.1874 / (cmppix[2] * f0)));
+  val    = (0.5 + (4.0 * 0.1874 / (cmppix[2] * f0)));
   margin = val;
-  nzp = npad_(&nz, &margin);
+  nzp    = npad_(&nz, &margin);
   printf("image dimensions %d %d %d padded to %d %d %d\n", nx, ny, nz, nxp, nyp,
          nzp);
   imgt = (float *)malloc(vdim * sizeof(float));

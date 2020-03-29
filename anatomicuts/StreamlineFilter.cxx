@@ -1,36 +1,36 @@
-
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
 #include "itkMesh.h"
 #include "vtkSplineFilter.h"
 
+#include "ClusterTools.h"
+#include "EuclideanMembershipFunction.h"
+#include "LabelPerPointVariableLengthVector.h"
+#include "PolylineMeshToVTKPolyDataFilter.h"
+#include "TrkVTKPolyDataFilter.txx"
+#include "itkArray.h"
+#include "itkDefaultStaticMeshTraits.h"
+#include "itkImage.h"
+#include "itkPolylineCell.h"
+
+#include <vtkCellArray.h>
+#include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataReader.h>
 #include <vtkPolyDataWriter.h>
-#include "itkPolylineCell.h"
-#include <vtkCellArray.h>
-#include <vtkPoints.h>
-#include <cmath>
-#include "itkArray.h"
-#include "itkPolylineCell.h"
+
 #include "GetPot.h"
-#include "TrkVTKPolyDataFilter.txx"
-#include "itkImage.h"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "LabelPerPointVariableLengthVector.h"
-#include "EuclideanMembershipFunction.h"
-#include "ClusterTools.h"
-#include "itkDefaultStaticMeshTraits.h"
 
 int main(int argc, char *argv[]) {
   enum { Dimension = 3 };
-  using PixelType = int;
-  const unsigned int PointDimension = 3;
-  using PointDataType = std::vector<int>;
+  using PixelType                            = int;
+  const unsigned int PointDimension          = 3;
+  using PointDataType                        = std::vector<int>;
   const unsigned int MaxTopologicalDimension = 3;
-  using CoordinateType = double;
-  using InterpolationWeightType = double;
+  using CoordinateType                       = double;
+  using InterpolationWeightType              = double;
   using MeshTraits =
       itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                    MaxTopologicalDimension, CoordinateType,
@@ -39,9 +39,9 @@ int main(int argc, char *argv[]) {
 
   using ImageType = itk::Image<float, 3>;
 
-  using ColorMeshType = itk::Mesh<PixelType, PointDimension>;
-  using PointType = ColorMeshType::PointType;
-  using CellType = ColorMeshType::CellType;
+  using ColorMeshType    = itk::Mesh<PixelType, PointDimension>;
+  using PointType        = ColorMeshType::PointType;
+  using CellType         = ColorMeshType::CellType;
   using PolylineCellType = itk::PolylineCell<CellType>;
   // typedef VTKPolyDataToPolylineMeshFilter<MeshType> MeshConverterType;
   // typedef MeshType::CellsContainer::ConstIterator CellIteratorType;
@@ -57,19 +57,19 @@ int main(int argc, char *argv[]) {
               << std::endl;
     return EXIT_FAILURE;
   }
-  const char *outputDirectory = cl.follow("", 2, "-d", "-D");
-  int minLenght = cl.follow(-1, 2, "-min", "-MIN");
-  int maxLenght = cl.follow(500, 2, "-max", "-MAX");
-  int subSample = cl.follow(-1, 2, "-s", "-S");
-  bool filterUShape = cl.search("-nu");
-  bool maskFibers = cl.search("-m");
-  float cleaningThreshold = cl.follow(0.0, 2, "-c", "-C");
+  const char *outputDirectory   = cl.follow("", 2, "-d", "-D");
+  int         minLenght         = cl.follow(-1, 2, "-min", "-MIN");
+  int         maxLenght         = cl.follow(500, 2, "-max", "-MAX");
+  int         subSample         = cl.follow(-1, 2, "-s", "-S");
+  bool        filterUShape      = cl.search("-nu");
+  bool        maskFibers        = cl.search("-m");
+  float       cleaningThreshold = cl.follow(0.0, 2, "-c", "-C");
   std::cout << " clean " << cleaningThreshold << std::endl;
   ImageType::Pointer refImage;
   ImageType::Pointer mask;
 
   if (cl.search(2, "-m", "-M")) {
-    using ImageReaderType = itk::ImageFileReader<ImageType>;
+    using ImageReaderType           = itk::ImageFileReader<ImageType>;
     ImageReaderType::Pointer reader = ImageReaderType::New();
     reader->SetFileName(cl.next(""));
     reader->Update();
@@ -89,8 +89,8 @@ int main(int argc, char *argv[]) {
     outputFiles.push_back(outputName);
     std::cout << outputName << std::endl;
   }
-  std::vector<ColorMeshType::Pointer> *meshes;
-  std::vector<ColorMeshType::Pointer> *fixMeshes;
+  std::vector<ColorMeshType::Pointer> *     meshes;
+  std::vector<ColorMeshType::Pointer> *     fixMeshes;
   std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
   using ClusterToolsType =
@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
   bool clean = (cleaningThreshold > 0) ? true : false;
   std::cout << " clean " << clean << std::endl;
   if (clean) {
-    meshes = clusterTools->PolydataToMesh(polydatas);
+    meshes    = clusterTools->PolydataToMesh(polydatas);
     fixMeshes = clusterTools->FixSampleClusters(polydatas, 20);
     histoMeshes =
         clusterTools->ColorMeshToHistogramMesh(*fixMeshes, mask, false);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
     ColorMeshType::Pointer input = (*meshes)[i];
     int offset = (subSample > 0) ? input->GetNumberOfCells() / subSample : 1;
 
-    int averageId = 0;
+    int   averageId  = 0;
     float stdCluster = 0;
     if (clean) {
       std::cout << "hola " << std::endl;
@@ -135,8 +135,8 @@ int main(int argc, char *argv[]) {
 
     std::set<int> unfilteredIds;
 
-    int pointIndices = 0;
-    int cellIndices = 0;
+    int                                     pointIndices = 0;
+    int                                     cellIndices  = 0;
     ColorMeshType::CellsContainer::Iterator inputCellIt =
         input->GetCells()->Begin();
     for (int cellId = 0; inputCellIt != input->GetCells()->End();
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
         input->GetPoint(*it, &firstPt);
         if (filterUShape || maskFibers) {
           ImageType::IndexType index;
-          float value = 0;
+          float                value = 0;
           if (mask->TransformPhysicalPointToIndex(firstPt, index)) {
             value = mask->GetPixel(index);
             // std::cout <<  value << std::endl;
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
       if (unfilteredIds.count(cellId) > 0) {
         CellAutoPointer line;
         line.TakeOwnership(new PolylineCellType);
-        int k = 0;
+        int                       k  = 0;
         CellType::PointIdIterator it = inputCellIt.Value()->PointIdsBegin();
         for (; it != inputCellIt.Value()->PointIdsEnd(); it++) {
           PointType pt;

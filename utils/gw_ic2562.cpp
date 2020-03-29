@@ -3033,8 +3033,8 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
 //---------------------------------------------------
 {
   MRI_SURFACE *mris;
-  int vno, fno, n, vn, n1, n2;
-  static int first_time = 1;
+  int          vno, fno, n, vn, n1, n2;
+  static int   first_time = 1;
 
   //-----------------------------------------
   // [GW] For some reason the columns need to be
@@ -3045,7 +3045,7 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
   if (first_time) {
     first_time = 0;
     for (fno = 0; fno < ICO_NFACES; fno++) {
-      vno = gw_ic2562_faces[fno].vno[1];
+      vno                         = gw_ic2562_faces[fno].vno[1];
       gw_ic2562_faces[fno].vno[1] = gw_ic2562_faces[fno].vno[2];
       gw_ic2562_faces[fno].vno[2] = vno;
     }
@@ -3105,7 +3105,7 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-    vt->v = (int *)calloc(vt->vnum / 2, sizeof(int));
+    vt->v                     = (int *)calloc(vt->vnum / 2, sizeof(int));
     if (!vt->v)
       ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %dth vertex list.",
                 __func__, vno);
@@ -3159,8 +3159,8 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
   //----------------------------------------
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-    vt->vtotal = vt->vnum;
-    vt->f = (int *)calloc(vt->num, sizeof(int));
+    vt->vtotal                = vt->vnum;
+    vt->f                     = (int *)calloc(vt->num, sizeof(int));
     if (!vt->f)
       ErrorExit(ERROR_NO_MEMORY, "ic2562: could not allocate %d faces",
                 vt->num);
@@ -3177,8 +3177,8 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
     FACE *f = &mris->faces[fno];
     for (n = 0; n < VERTICES_PER_FACE; n++) {
       VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[f->v[n]];
-      vt->n[vt->num] = n;
-      vt->f[vt->num++] = fno;
+      vt->n[vt->num]            = n;
+      vt->f[vt->num++]          = fno;
     }
   }
 

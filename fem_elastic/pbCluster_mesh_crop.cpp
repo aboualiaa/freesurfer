@@ -30,12 +30,12 @@ template <class Cstr, int n> class TMeshCrop {
 public:
   typedef TMesh<Cstr, n> MeshType;
 
-  typedef typename MeshType::tNode NodeType;
+  typedef typename MeshType::tNode    NodeType;
   typedef typename MeshType::tElement ElementType;
-  typedef typename MeshType::tCoords CoordsType;
+  typedef typename MeshType::tCoords  CoordsType;
 
-  typedef std::vector<unsigned int> IndexContainerType;
-  typedef std::set<unsigned int> IndexSetType;
+  typedef std::vector<unsigned int>            IndexContainerType;
+  typedef std::set<unsigned int>               IndexSetType;
   typedef std::map<unsigned int, unsigned int> MapType;
 
   TMeshCrop(const MeshType *pmesh) : m_pmesh(pmesh) {}
@@ -54,10 +54,10 @@ private:
   typedef std::back_insert_iterator<IndexContainerType> IndexContainerII;
 
   void PopulateNodes(const IndexContainerType &velts,
-                     IndexContainerII ii_nodes);
+                     IndexContainerII          ii_nodes);
   void PopulateBoundaryNodes(const IndexContainerType &velts,
                              const IndexContainerType &vnodes,
-                             IndexContainerII ii_boundary);
+                             IndexContainerII          ii_boundary);
 };
 
 //--------------------------------------------------
@@ -83,7 +83,7 @@ for the set operations to follow
 */
 void TopologySolver::BuildClusters() {
   TMeshBfs<TMesh3d> bfs(&m_mesh);
-  IndexVectorType vecOrigProblems;
+  IndexVectorType   vecOrigProblems;
 
   try {
     m_mesh.orientation_pb(dst, std::back_inserter(vecOrigProblems));
@@ -130,7 +130,7 @@ template <class Container> struct RemoveIfAndCopy {
                _OutputIterator __out, _Predicate __pred) {
     while (__first != __last) {
       if (__pred(*__first)) {
-        *__out = *__first;
+        *__out  = *__first;
         __first = container.erase(__first);
       } else
         ++__first;
@@ -157,7 +157,7 @@ void TopologySolver::MergeIntersectingClusters() {
     bool bAgain = true;
     while (bAgain) {
       ClusterContainerType::iterator it2 = it;
-      ClusterContainerType tmpContainer;
+      ClusterContainerType           tmpContainer;
 
       listFilter.Execute(++it2, m_clusterContainer.end(),
                          std::back_inserter<ClusterContainerType>(tmpContainer),
@@ -178,8 +178,8 @@ void TopologySolver::MergeIntersectingClusters() {
 }
 
 void TopologySolver::DoLocalSmoothing() {
-  typedef TMeshCrop<Constructor, 3> MeshCropFilter;
-  typedef MeshCropFilter::MapType MapType;
+  typedef TMeshCrop<Constructor, 3>          MeshCropFilter;
+  typedef MeshCropFilter::MapType            MapType;
   typedef MeshCropFilter::IndexContainerType Vector;
 
   typedef TDirectSolver<Constructor, 3> SolverType;
@@ -191,7 +191,7 @@ void TopologySolver::DoLocalSmoothing() {
     // use the cluster elements to create a cropped mesh
     CMesh3d cropped;
     MapType nodeMap, elementMap;
-    Vector boundary;
+    Vector  boundary;
 
     mesh_crop.Crop(&cropped, **cit, nodeMap, elementMap, boundary);
 
@@ -233,7 +233,7 @@ void TopologySolver::DoLocalSmoothing() {
 //--------------------------------------------------------------
 
 template <class Cstr, int n>
-void TMeshCrop<Cstr, n>::Crop(MeshType *outMesh,
+void TMeshCrop<Cstr, n>::Crop(MeshType *                outMesh,
                               const IndexContainerType &i_vidxElements,
                               MapType &o_nodeMap, MapType &o_eltMap,
                               IndexContainerType &o_boundaryNodes) {
@@ -270,15 +270,15 @@ void TMeshCrop<Cstr, n>::Crop(MeshType *outMesh,
       outMesh->add_node(pnodeOut);
 
       internalMap[*cit] = index;
-      o_nodeMap[index] = *cit;
+      o_nodeMap[index]  = *cit;
     } // next cit, index
   }
 
   // populate elements
   {
-    unsigned int index = 0;
-    const ElementType *cpelt;
-    std::vector<NodeType *> vpnodes;
+    unsigned int                     index = 0;
+    const ElementType *              cpelt;
+    std::vector<NodeType *>          vpnodes;
     typename MapType::const_iterator map_cit;
 
     for (typename IndexContainerType::const_iterator cit =
@@ -326,10 +326,10 @@ void TMeshCrop<Cstr, n>::Crop(MeshType *outMesh,
 
 template <class Cstr, int n>
 void TMeshCrop<Cstr, n>::PopulateNodes(const IndexContainerType &velts,
-                                       IndexContainerII ii_nodes) {
+                                       IndexContainerII          ii_nodes) {
   for (typename IndexContainerType::const_iterator cit = velts.begin();
        cit != velts.end(); ++cit) {
-    NodeType *pnode = NULL;
+    NodeType *         pnode = NULL;
     const ElementType *cpelt = m_pmesh->get_elt(*cit);
 
     for (unsigned int ui(0), nnodes(cpelt->no_nodes()); ui < nnodes; ++ui) {

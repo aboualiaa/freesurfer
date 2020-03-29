@@ -11,9 +11,9 @@ namespace kvl {
 class GetCostAndGradientCalculator : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef GetCostAndGradientCalculator Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef GetCostAndGradientCalculator  Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -48,9 +48,9 @@ public:
     typedef AtlasMeshToIntensityImageCostAndGradientCalculator::ImageType
         ImageType;
 
-    const int N = mxGetN(prhs[1]);
-    const int M = mxGetM(prhs[1]);
-    int numberOfContrasts = 0;
+    const int N                 = mxGetN(prhs[1]);
+    const int M                 = mxGetM(prhs[1]);
+    int       numberOfContrasts = 0;
     if (N < M) {
       numberOfContrasts = M;
     } else {
@@ -81,7 +81,7 @@ public:
 
     // Retrieve transform if one is provided
     typedef CroppedImageReader::TransformType TransformType;
-    TransformType::ConstPointer constTransform = nullptr;
+    TransformType::ConstPointer               constTransform = nullptr;
     if (nrhs > 3) {
       // Sanity check
       if (!mxIsInt64(prhs[3])) {

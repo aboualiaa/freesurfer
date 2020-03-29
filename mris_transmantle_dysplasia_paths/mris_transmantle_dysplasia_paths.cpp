@@ -26,25 +26,25 @@
  *
  */
 
-#include "diag.h"
-#include "version.h"
 #include "cma.h"
-#include "voxlist.h"
+#include "diag.h"
 #include "pdf.h"
 #include "tritri.h"
+#include "version.h"
+#include "voxlist.h"
 
 #include "romp_support.h"
 
-int main(int argc, char *argv[]);
+int                main(int argc, char *argv[]);
 static VOXEL_LIST *compute_path_to_ventricles(MRI_SURFACE *mris, int vno,
                                               MRI *mri_ventricle_dist_grad,
                                               MRI *mri_aseg);
-static int get_option(int argc, char *argv[]);
-static MRI *compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri,
-                                            MRI *mri_aseg, TRANSFORM *xform,
-                                            MRI *mri_pvals,
-                                            int spline_control_points,
-                                            int mcmc_samples, int read_flag);
+static int         get_option(int argc, char *argv[]);
+static MRI *       compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri,
+                                                   MRI *mri_aseg, TRANSFORM *xform,
+                                                   MRI *mri_pvals,
+                                                   int  spline_control_points,
+                                                   int mcmc_samples, int read_flag);
 static VOXEL_LIST *find_optimal_spline(
     VOXEL_LIST *vl, MRI *mri_intensity, MRI *mri_aseg, MRI *mri_wm_dist,
     double gm_mean, int nsamples, MRI_SURFACE *mris, int spline_control_points,
@@ -57,16 +57,16 @@ static MRI *compute_posterior_on_paths(MRI_SURFACE *mris, MRI *mri_splines,
                                        MRI *mri_posterior_on_spline);
 
 static MRI *compute_filtered_posterior_on_paths(MRI_SURFACE *mris,
-                                                MRI *mri_splines,
+                                                MRI *        mri_splines,
                                                 MRI *mri_total_posterior,
                                                 MRI *mri_aseg,
                                                 MRI *mri_posterior_on_spline);
 
 #define SPLINE_WM_DIST 0x0001
-#define SPLINE_ABOVE 0x0002
-#define SPLINE_BELOW 0x0004
-#define SPLINE_LENGTH 0x0008
-#define SPLINE_SIGNED 0x0010
+#define SPLINE_ABOVE   0x0002
+#define SPLINE_BELOW   0x0004
+#define SPLINE_LENGTH  0x0008
+#define SPLINE_SIGNED  0x0010
 
 // static int energy_flags = SPLINE_WM_DIST | SPLINE_LENGTH | SPLINE_ABOVE |
 // SPLINE_BELOW ;
@@ -83,29 +83,29 @@ static double compute_spline_energy(VOXEL_LIST *vl, MRI *mri_intensity,
 const char *Progname;
 static void usage_exit(int code);
 
-static double noise = .1;
-static int spline_control_points = 5;
-static double spline_length_penalty = 5;
-static double spline_nonwm_penalty = 200;
+static double noise                   = .1;
+static int    spline_control_points   = 5;
+static double spline_length_penalty   = 5;
+static double spline_nonwm_penalty    = 200;
 static double spline_interior_penalty = 1000;
-static double max_wm_dist = -2.5;
-static int read_flag = 0;
+static double max_wm_dist             = -2.5;
+static int    read_flag               = 0;
 
-static char *label_name = nullptr;
-static double proposal_sigma = 5.0; // stddev of noise distribution
+static char * label_name       = nullptr;
+static double proposal_sigma   = 5.0; // stddev of noise distribution
 static double acceptance_sigma = .5;
-static int mcmc_samples = 10000;
+static int    mcmc_samples     = 10000;
 
 static int randomize_data = 0;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
+  char **      av;
+  int          ac, nargs;
+  int          msec, minutes, seconds;
+  Timer        start;
   MRI_SURFACE *mris;
-  MRI *mri, *mri_aseg, *mri_pvals;
-  TRANSFORM *xform;
+  MRI *        mri, *mri_aseg, *mri_pvals;
+  TRANSFORM *  xform;
 
   nargs = handleVersionOption(argc, argv, "mris_transmantle_dysplasia_paths");
   if (nargs && argc - nargs == 1)
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
 
   printf("writing path log probabilities to %s\n", argv[5]);
   MRIwrite(mri_pvals, argv[5]);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -183,14 +183,14 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "RAND")) {
@@ -203,7 +203,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'L':
       label_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("reading cortex label from %s\n", label_name);
       break;
     case 'P':
@@ -251,7 +251,7 @@ static void usage_exit(int code) {
 
 static MRI *MRIbuildPossibleMigrationPaths(MRI *mri_aseg, MRI *mri_wm_interior,
                                            MRI *mri_paths) {
-  int x, y, z, nadded, label, n;
+  int  x, y, z, nadded, label, n;
   MRI *mri_dilated = nullptr;
 
   if (mri_paths == nullptr)
@@ -263,7 +263,7 @@ static MRI *MRIbuildPossibleMigrationPaths(MRI *mri_aseg, MRI *mri_wm_interior,
 
   n = 1;
   do {
-    nadded = 0;
+    nadded      = 0;
     mri_dilated = MRIdilate(mri_paths, mri_dilated);
     for (x = 0; x < mri_aseg->width; x++)
       for (y = 0; y < mri_aseg->height; y++)
@@ -287,7 +287,7 @@ static MRI *MRIbuildPossibleMigrationPaths(MRI *mri_aseg, MRI *mri_wm_interior,
 
   n = 0;
   do {
-    nadded = 0;
+    nadded      = 0;
     mri_dilated = MRIdilate(mri_paths, mri_dilated);
     for (x = 0; x < mri_aseg->width; x++)
       for (y = 0; y < mri_aseg->height; y++)
@@ -314,16 +314,16 @@ static MRI *compute_migration_probabilities(MRI_SURFACE *mris,
                                             TRANSFORM *xform, MRI *mri_pvals,
                                             int spline_control_points,
                                             int mcmc_samples, int read_flag) {
-  int vno, x, y, z, nvox, label, nvox_wm, n;
+  int     vno, x, y, z, nvox, label, nvox_wm, n;
   MATRIX *m_intensity2aseg, *v_aseg, *v_intensity;
-  double gm_mean, gm_var, val, wm_mean, wm_var, entropy = 1.0;
+  double  gm_mean, gm_var, val, wm_mean, wm_var, entropy = 1.0;
   VERTEX *v;
-  MRI *mri_wm_interior, *mri_wm_dist, *mri_kernel, *mri_tmp, *mri_posterior,
+  MRI *   mri_wm_interior, *mri_wm_dist, *mri_kernel, *mri_tmp, *mri_posterior,
       *mri_entropy, *mri_total_posterior, *mri_eroded_aseg,
       *mri_possible_migration_paths, *mri_path_grad, *mri_splines;
   VOXEL_LIST *vl, *vl_spline, *vl_posterior;
-  char fname[STRLEN], path[STRLEN];
-  MRI *mri_posterior_on_splines, *mri_filtered_posterior_on_spline;
+  char        fname[STRLEN], path[STRLEN];
+  MRI *       mri_posterior_on_splines, *mri_filtered_posterior_on_spline;
 
   wm_mean = gm_mean = wm_var = gm_var = 0;
 
@@ -340,10 +340,10 @@ static MRI *compute_migration_probabilities(MRI_SURFACE *mris,
   } else
     mri_splines =
         MRIalloc(mris->nvertices, spline_control_points, 3, MRI_FLOAT);
-  mri_entropy = MRIalloc(mris->nvertices, 1, 1, MRI_FLOAT);
-  mri_posterior = MRIcloneDifferentType(mri_aseg, MRI_FLOAT);
+  mri_entropy         = MRIalloc(mris->nvertices, 1, 1, MRI_FLOAT);
+  mri_posterior       = MRIcloneDifferentType(mri_aseg, MRI_FLOAT);
   mri_total_posterior = MRIcloneDifferentType(mri_aseg, MRI_FLOAT);
-  mri_eroded_aseg = MRIclone(mri_aseg, nullptr);
+  mri_eroded_aseg     = MRIclone(mri_aseg, nullptr);
   MRIcopyLabel(mri_aseg, mri_eroded_aseg, Left_Cerebral_White_Matter);
   MRIcopyLabel(mri_aseg, mri_eroded_aseg, Right_Cerebral_White_Matter);
   MRIcopyLabel(mri_aseg, mri_eroded_aseg, WM_hypointensities);
@@ -362,11 +362,11 @@ static MRI *compute_migration_probabilities(MRI_SURFACE *mris,
   if (mri_pvals == nullptr)
     mri_pvals = MRIalloc(mris->nvertices, 1, 1, MRI_FLOAT);
 
-  v_intensity = VectorAlloc(4, MATRIX_REAL);
-  v_aseg = VectorAlloc(4, MATRIX_REAL);
-  VECTOR_ELT(v_aseg, 4) = 1.0;
+  v_intensity                = VectorAlloc(4, MATRIX_REAL);
+  v_aseg                     = VectorAlloc(4, MATRIX_REAL);
+  VECTOR_ELT(v_aseg, 4)      = 1.0;
   VECTOR_ELT(v_intensity, 4) = 1.0;
-  m_intensity2aseg = MRIgetVoxelToVoxelXform(mri_intensity, mri_aseg);
+  m_intensity2aseg           = MRIgetVoxelToVoxelXform(mri_intensity, mri_aseg);
 
   for (nvox_wm = nvox = x = 0; x < mri_intensity->width; x++)
     for (y = 0; y < mri_intensity->height; y++)
@@ -438,7 +438,7 @@ static MRI *compute_migration_probabilities(MRI_SURFACE *mris,
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
       v = NULL;
-  n = 0;
+  n     = 0;
   vl = vl_spline = NULL;
 #pragma omp parallel for if_ROMP(experimental)                                 \
     firstprivate(n, v, vl, vl_spline, entropy, gm_mean, mcmc_samples)          \
@@ -471,7 +471,7 @@ static MRI *compute_migration_probabilities(MRI_SURFACE *mris,
         ROMP_PFLB_continue;
       }
       if (vno == Gdiag_no) {
-        double init_energy, energy;
+        double      init_energy, energy;
         VOXEL_LIST *vl_init_spline, *vl_interp;
 
         energy = compute_spline_energy(
@@ -626,19 +626,19 @@ static MRI *compute_migration_probabilities(MRI_SURFACE *mris,
 static VOXEL_LIST *compute_path_to_ventricles(MRI_SURFACE *mris, int vno,
                                               MRI *mri_ventricle_dist_grad,
                                               MRI *mri_aseg) {
-  double xv, yv, zv, step, dx, dy, dz, norm;
+  double      xv, yv, zv, step, dx, dy, dz, norm;
   VOXEL_LIST *vl;
-  int label, max_steps;
-  VERTEX *v;
+  int         label, max_steps;
+  VERTEX *    v;
 
   if (vno == Gdiag_no)
     DiagBreak();
   step = mri_ventricle_dist_grad->xsize / 2;
 
-  v = &mris->vertices[vno];
+  v         = &mris->vertices[vno];
   max_steps = nint(ceil(MAX_VENTRICLE_DIST / step));
-  vl = VLSTalloc(max_steps + 1);
-  vl->nvox = 0;
+  vl        = VLSTalloc(max_steps + 1);
+  vl->nvox  = 0;
 
   // once to compute length, and again to add voxels to list
   MRISsurfaceRASToVoxelCached(mris, mri_aseg, v->x, v->y, v->z, &xv, &yv, &zv);
@@ -650,9 +650,9 @@ static VOXEL_LIST *compute_path_to_ventricles(MRI_SURFACE *mris, int vno,
     if (!FEQUAL(norm, 1))
       DiagBreak();
     if (FZERO(norm)) {
-      dy = randomNumber(0.0, 1.0);
-      dy = randomNumber(0.0, 1.0);
-      dz = randomNumber(0.0, 1.0);
+      dy   = randomNumber(0.0, 1.0);
+      dy   = randomNumber(0.0, 1.0);
+      dz   = randomNumber(0.0, 1.0);
       norm = sqrt(dx * dx + dy * dy + dz * dz);
     }
     dx /= norm;
@@ -671,7 +671,7 @@ static VOXEL_LIST *compute_path_to_ventricles(MRI_SURFACE *mris, int vno,
 }
 
 static int burnin = 1000;
-static int jump = 5;
+static int jump   = 5;
 
 static VOXEL_LIST *find_optimal_spline(
     VOXEL_LIST *vl, MRI *mri_intensity, MRI *mri_aseg, MRI *mri_wm_dist,
@@ -680,7 +680,7 @@ static VOXEL_LIST *find_optimal_spline(
     double spline_interior_penalty, MRI *mri_posterior,
     VOXEL_LIST *vl_posterior, double *pentropy, MRI *mri_total_posterior) {
   VOXEL_LIST *vl_spline, *vl_spline_optimal, *vl_spline_current;
-  double energy, xn, yn, zn, best_energy, acceptance_val, current_energy,
+  double      energy, xn, yn, zn, best_energy, acceptance_val, current_energy,
       entropy;
   int n, cnum, label, nposterior = 0, lastn = 0;
 
@@ -695,12 +695,12 @@ static VOXEL_LIST *find_optimal_spline(
   if (spline_control_points > vl->nvox)
     spline_control_points = vl->nvox;
   vl_spline_optimal = VLSTsplineFit(vl, spline_control_points);
-  best_energy = compute_spline_energy(
+  best_energy       = compute_spline_energy(
       vl_spline_optimal, mri_intensity, mri_aseg, mri_wm_dist, gm_mean,
       energy_flags, spline_length_penalty, spline_nonwm_penalty,
       spline_interior_penalty);
   if (DIAG_VERBOSE_ON) {
-    char fname[STRLEN];
+    char        fname[STRLEN];
     VOXEL_LIST *vl_interp = VLSTinterpolate(vl_spline_optimal, .1);
 
     sprintf(fname, "spline.000.label");
@@ -726,7 +726,7 @@ static VOXEL_LIST *find_optimal_spline(
                     1) // don't project out tangential component for end point
     {
       double tx, ty, tz, dot, norm;
-      int km1, kp1;
+      int    km1, kp1;
 
       km1 = cnum - 1;
       kp1 = cnum + 1;
@@ -734,9 +734,9 @@ static VOXEL_LIST *find_optimal_spline(
         km1 = 0;
       else if (cnum == spline_control_points - 1)
         kp1 = spline_control_points - 1;
-      tx = vl_spline->xd[kp1] - vl_spline->xd[km1];
-      ty = vl_spline->yd[kp1] - vl_spline->yd[km1];
-      tz = vl_spline->zd[kp1] - vl_spline->zd[km1];
+      tx   = vl_spline->xd[kp1] - vl_spline->xd[km1];
+      ty   = vl_spline->yd[kp1] - vl_spline->yd[km1];
+      tz   = vl_spline->zd[kp1] - vl_spline->zd[km1];
       norm = sqrt(tx * tx + ty * ty + tz * tz);
       if (DZERO(norm))
         norm = 1.0;
@@ -772,7 +772,7 @@ static VOXEL_LIST *find_optimal_spline(
     if (randomNumber(0.0, 1.0) < acceptance_val) {
       VLSTfree(&vl_spline_current);
       vl_spline_current = vl_spline;
-      current_energy = energy;
+      current_energy    = energy;
       if (n > burnin && mri_posterior && n > (lastn + jump)) {
 
         VOXEL_LIST *vl_interp = VLSTinterpolate(vl_spline_current, 1.0);
@@ -793,7 +793,7 @@ static VOXEL_LIST *find_optimal_spline(
         vl_spline_optimal =
             VLSTcopy(vl_spline_current, nullptr, 0, vl_spline_current->nvox);
         if (DIAG_VERBOSE_ON) {
-          char fname[STRLEN];
+          char        fname[STRLEN];
           VOXEL_LIST *vl_interp = VLSTinterpolate(vl_spline_optimal, 1);
 
           sprintf(fname, "spline.%3.3d.label", n + 1);
@@ -810,7 +810,7 @@ static VOXEL_LIST *find_optimal_spline(
       VLSTfree(&vl_spline);
   }
 
-  entropy = VLSTcomputeEntropy(vl_posterior, mri_posterior, nposterior);
+  entropy   = VLSTcomputeEntropy(vl_posterior, mri_posterior, nposterior);
   *pentropy = entropy;
   return (vl_spline_optimal);
 }
@@ -821,10 +821,10 @@ static double compute_spline_energy(VOXEL_LIST *vl, MRI *mri_intensity,
                                     double spline_length_penalty,
                                     double spline_nonwm_penalty,
                                     double spline_interior_penalty) {
-  int n, label, num;
+  int         n, label, num;
   VOXEL_LIST *vl_interp;
-  double val, wm_dist;
-  double neg_log_p;
+  double      val, wm_dist;
+  double      neg_log_p;
 
   neg_log_p = 0;
   vl_interp = VLSTinterpolate(vl, 1);
@@ -885,14 +885,14 @@ static double compute_spline_energy(VOXEL_LIST *vl, MRI *mri_intensity,
 static MRI *compute_posterior_on_paths(MRI_SURFACE *mris, MRI *mri_splines,
                                        MRI *mri_total_posterior, MRI *mri_aseg,
                                        MRI *mri_posterior_on_spline) {
-  int vno;
+  int         vno;
   VOXEL_LIST *vl_spline;
-  double mean;
-  MRI *mri_mask, *mri_masked_posterior;
+  double      mean;
+  MRI *       mri_mask, *mri_masked_posterior;
 
   if (false) {
-    double sigma = 2.0;
-    MRI *mri_kernel = MRIgaussian1d(sigma, 11);
+    double sigma            = 2.0;
+    MRI *  mri_kernel       = MRIgaussian1d(sigma, 11);
     mri_posterior_on_spline = MRIlaplacian(mri_total_posterior, nullptr);
     MRIscalarMul(mri_posterior_on_spline, mri_posterior_on_spline, -1);
     MRIwrite(mri_posterior_on_spline, "lap.mgz");
@@ -940,9 +940,9 @@ static MRI *
 compute_filtered_posterior_on_paths(MRI_SURFACE *mris, MRI *mri_splines,
                                     MRI *mri_total_posterior, MRI *mri_aseg,
                                     MRI *mri_filtered_posterior_on_spline) {
-  int vno, nm1, np1, nsamples, n, nspline, outside_bad;
+  int         vno, nm1, np1, nsamples, n, nspline, outside_bad;
   VOXEL_LIST *vl_spline, *vl;
-  double tangent[3], normal1[3], normal2[3], norm, theta,
+  double      tangent[3], normal1[3], normal2[3], norm, theta,
       radius = 4.0, p[3], x1[3], y1[3], xscale, yscale, outside, total, val;
   MRI *mri_mask, *mri_masked_posterior;
 
@@ -962,7 +962,7 @@ compute_filtered_posterior_on_paths(MRI_SURFACE *mris, MRI *mri_splines,
       DiagBreak();
 
     vl_spline = VLSTfromMRI(mri_splines, vno);
-    vl = VLSTinterpolate(vl_spline, mri_total_posterior->xsize);
+    vl        = VLSTinterpolate(vl_spline, mri_total_posterior->xsize);
 
     for (total = 0.0, nspline = n = 0; n < vl->nvox; n++) {
       if (MRIgetVoxVal(mri_mask, nint(vl->xi[n]), nint(vl->yi[n]),
@@ -980,7 +980,7 @@ compute_filtered_posterior_on_paths(MRI_SURFACE *mris, MRI *mri_splines,
       tangent[0] = vl->xd[np1] - vl->xd[nm1];
       tangent[1] = vl->yd[np1] - vl->yd[nm1];
       tangent[2] = vl->zd[np1] - vl->zd[nm1];
-      norm = VLEN(tangent);
+      norm       = VLEN(tangent);
       tangent[0] /= norm;
       tangent[1] /= norm;
       tangent[2] /= norm;

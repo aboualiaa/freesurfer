@@ -23,12 +23,12 @@
  *
  */
 
-#include "mrisurf.h"
 #include "diag.h"
+#include "mrisurf.h"
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 static int update_histograms(MRI_SURFACE *mris, MRI_SURFACE *mris_avg,
                              float ***histograms, int nbins);
@@ -43,14 +43,14 @@ static double max_distance = 20;
 #define MAX_SURFACE_SCALE 10
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN];
-  int ac, nargs, i, j, nbins;
-  char *avg_subject, *cp, *hemi, *subject, *output_prefix;
-  int msec, minutes, seconds, nsubjects, vno;
-  Timer start;
+  char **      av, fname[STRLEN];
+  int          ac, nargs, i, j, nbins;
+  char *       avg_subject, *cp, *hemi, *subject, *output_prefix;
+  int          msec, minutes, seconds, nsubjects, vno;
+  Timer        start;
   MRI_SURFACE *mris, *mris_avg;
-  float ***histograms;
-  FILE *fp;
+  float ***    histograms;
+  FILE *       fp;
 
   nargs = handleVersionOption(argc, argv, "mris_surface_to_vol_distances");
   if (nargs && argc - nargs == 1)
@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit(1);
 
-  avg_subject = argv[1];
-  hemi = argv[2];
-  nsubjects = argc - 4;
+  avg_subject   = argv[1];
+  hemi          = argv[2];
+  nsubjects     = argc - 4;
   output_prefix = argv[argc - 1];
   sprintf(fname, "%s/%s/surf/%s.sphere", subjects_dir, avg_subject, hemi);
   mris_avg = MRISread(fname);
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not read spherical surface from %s",
               Progname, fname);
 
-  nbins = nint(max_distance - min_distance);
+  nbins      = nint(max_distance - min_distance);
   histograms = (float ***)calloc(mris_avg->nvertices, sizeof(float **));
   if (histograms == nullptr)
     ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d histogram pointers",
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
     fprintf(fp, "\n");
   }
   fclose(fp);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -197,12 +197,12 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("debugging vertex %d\n", Gdiag_no);
       break;
     case 'D':
       max_distance = atof(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       printf("setting maximum distance to %2.1f\n", max_distance);
       break;
     case '?':
@@ -237,11 +237,11 @@ static void usage_exit(int code) {
 
 static int update_histograms(MRI_SURFACE *mris, MRI_SURFACE *mris_avg,
                              float ***histograms, int nbins) {
-  int vno, vno2, vno_avg;
-  double volume_dist, surface_dist, circumference, angle;
+  int     vno, vno2, vno_avg;
+  double  volume_dist, surface_dist, circumference, angle;
   VERTEX *v1, *v2;
   VECTOR *vec1, *vec2;
-  MHT *mht;
+  MHT *   mht;
   float **histogram, min_dist;
 
   mht = MHTcreateVertexTable_Resolution(mris_avg, CURRENT_VERTICES, 2.0);
@@ -315,7 +315,7 @@ static int update_histograms(MRI_SURFACE *mris, MRI_SURFACE *mris_avg,
       continue;
     if (vno_avg == Gdiag_no)
       DiagBreak();
-    histogram = histograms[vno_avg];
+    histogram                          = histograms[vno_avg];
     mris_avg->vertices[vno_avg].marked = 1;
 
     for (vno2 = 0; vno2 < mris->nvertices; vno2++) {
@@ -328,7 +328,7 @@ static int update_histograms(MRI_SURFACE *mris, MRI_SURFACE *mris_avg,
                SQR(v1->origz - v2->origz));
       if (nint(volume_dist) >= nbins || nint(volume_dist) < 0)
         continue;
-      angle = fabs(Vector3Angle(vec1, vec2));
+      angle        = fabs(Vector3Angle(vec1, vec2));
       surface_dist = circumference * angle / (2.0 * M_PI);
       if (surface_dist > nbins * MAX_SURFACE_SCALE)
         surface_dist = nbins * MAX_SURFACE_SCALE;

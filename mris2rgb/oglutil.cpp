@@ -25,13 +25,13 @@
 #ifdef HAVE_OPENGL
 
 #ifdef HAVE_APPLE_OPENGL_FRAMEWORK
-#include <OpenGL/glu.h>
 #include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 #else
 #include <GL/glu.h>
 #endif
-#include "diag.h"
 #include "TexFont.h"
+#include "diag.h"
 #include "oglutil.h"
 
 #if 0
@@ -41,54 +41,54 @@ static char vcid[] = "$Id: oglutil.c,v 1.30 2011/03/02 00:04:41 nicks Exp $";
 /*-------------------------------- CONSTANTS -----------------------------*/
 
 #define RGBcolor(R, G, B) glColor3ub((GLubyte)(R), (GLubyte)(G), (GLubyte)(B))
-#define GRAY 100
+#define GRAY              100
 
 #define FIELDSIGN_POS 4 /* blue */
 #define FIELDSIGN_NEG 5 /* yellow */
-#define BORDER 6
-#define MARKED 7
+#define BORDER        6
+#define MARKED        7
 
-#define FOV (256.0f * SCALE_FACTOR)
-#define COLSCALEBAR_XPOS 1.7
-#define COLSCALEBAR_YPOS -1.3
-#define COLSCALEBAR_WIDTH 0.15
+#define FOV                (256.0f * SCALE_FACTOR)
+#define COLSCALEBAR_XPOS   1.7
+#define COLSCALEBAR_YPOS   -1.3
+#define COLSCALEBAR_WIDTH  0.15
 #define COLSCALEBAR_HEIGHT 1.0
 
-static float fov = FOV;
-static float colscalebar_xpos = COLSCALEBAR_XPOS;
-static float colscalebar_ypos = COLSCALEBAR_YPOS;
-static float colscalebar_width = COLSCALEBAR_WIDTH;
+static float fov                = FOV;
+static float colscalebar_xpos   = COLSCALEBAR_XPOS;
+static float colscalebar_ypos   = COLSCALEBAR_YPOS;
+static float colscalebar_width  = COLSCALEBAR_WIDTH;
 static float colscalebar_height = COLSCALEBAR_HEIGHT;
-static float sf = 0.55; /* initial scale factor */
+static float sf                 = 0.55; /* initial scale factor */
 
 /*-------------------------------- PROTOTYPES ----------------------------*/
 
 static void draw_colscalebar();
 static void draw_colscalebar_time(int flags);
-static int read_environment_variables();
-static int set_color(float val, float curv, int flags);
-static int set_stat_color(float f, float *rp, float *gp, float *bp,
-                          float tmpoffset);
-static int set_stat_color_time(float f, float *rp, float *gp, float *bp,
-                               float tmpoffset);
+static int  read_environment_variables();
+static int  set_color(float val, float curv, int flags);
+static int  set_stat_color(float f, float *rp, float *gp, float *bp,
+                           float tmpoffset);
+static int  set_stat_color_time(float f, float *rp, float *gp, float *bp,
+                                float tmpoffset);
 static void load_brain_coords(float x, float y, float z, float v[]);
-static int mrisFindMaxExtents(MRI_SURFACE *mris);
-static int ogluSetFOV(MRI_SURFACE *mris, double fov);
+static int  mrisFindMaxExtents(MRI_SURFACE *mris);
+static int  ogluSetFOV(MRI_SURFACE *mris, double fov);
 
-double oglu_fov = FOV;
-static double oglu_coord_thickness = 1.0; /* sigma of coord line */
-static double oglu_coord_spacing = 18.0;  /* spacing between coord lines */
+double        oglu_fov             = FOV;
+static double oglu_coord_thickness = 1.0;  /* sigma of coord line */
+static double oglu_coord_spacing   = 18.0; /* spacing between coord lines */
 
 static int oglu_scale = 1;
 
 static double cvfact = 1.5;
 static double offset = 0.25;
-static double fcurv = 0.0f;
+static double fcurv  = 0.0f;
 
-double fthresh = 0.0;
-double pre_fthresh = 0.0;
-double fmid = 1.0;
-double fslope = 1.0;
+double fthresh      = 0.0;
+double pre_fthresh  = 0.0;
+double fmid         = 1.0;
+double fslope       = 1.0;
 double time_fthresh = 0.9;
 
 int OGLUinit(MRI_SURFACE *mris, long frame_xdim, long frame_ydim) {
@@ -123,19 +123,19 @@ int OGLUinit(MRI_SURFACE *mris, long frame_xdim, long frame_ydim) {
 
 #define LIGHT0_BR 0.4 /* was 0.2 */
 #define LIGHT1_BR 0.0
-#define LIGHT2_BR 0.6 /* was 0.3 */
-#define LIGHT3_BR 0.2 /* was 0.1 */
-#define OFFSET 0.25   /* was 0.15 */
+#define LIGHT2_BR 0.6  /* was 0.3 */
+#define LIGHT3_BR 0.2  /* was 0.1 */
+#define OFFSET    0.25 /* was 0.15 */
 void OGLUsetLightingModel(float lite0, float lite1, float lite2, float lite3,
                           float newoffset) {
-  float offset = OFFSET;
-  static GLfloat mat0_ambient[] = {0.0, 0.0, 0.0, 1.0};
-  static GLfloat mat0_diffuse[] = {OFFSET, OFFSET, OFFSET, 1.0};
-  static GLfloat mat0_emission[] = {0.0, 0.0, 0.0, 1.0};
-  static GLfloat light0_diffuse[] = {LIGHT0_BR, LIGHT0_BR, LIGHT0_BR, 1.0};
-  static GLfloat light1_diffuse[] = {LIGHT1_BR, LIGHT1_BR, LIGHT1_BR, 1.0};
-  static GLfloat light2_diffuse[] = {LIGHT2_BR, LIGHT2_BR, LIGHT2_BR, 1.0};
-  static GLfloat light3_diffuse[] = {LIGHT3_BR, LIGHT3_BR, LIGHT3_BR, 1.0};
+  float          offset            = OFFSET;
+  static GLfloat mat0_ambient[]    = {0.0, 0.0, 0.0, 1.0};
+  static GLfloat mat0_diffuse[]    = {OFFSET, OFFSET, OFFSET, 1.0};
+  static GLfloat mat0_emission[]   = {0.0, 0.0, 0.0, 1.0};
+  static GLfloat light0_diffuse[]  = {LIGHT0_BR, LIGHT0_BR, LIGHT0_BR, 1.0};
+  static GLfloat light1_diffuse[]  = {LIGHT1_BR, LIGHT1_BR, LIGHT1_BR, 1.0};
+  static GLfloat light2_diffuse[]  = {LIGHT2_BR, LIGHT2_BR, LIGHT2_BR, 1.0};
+  static GLfloat light3_diffuse[]  = {LIGHT3_BR, LIGHT3_BR, LIGHT3_BR, 1.0};
   static GLfloat light0_position[] = {0.0, 0.0, 1.0, 0.0};
   static GLfloat light1_position[] = {0.0, 0.0, -1.0, 0.0};
 #if 0
@@ -147,7 +147,7 @@ void OGLUsetLightingModel(float lite0, float lite1, float lite2, float lite3,
   static GLfloat light2_position[] = {0.6, 0.6, 0.6, 0.0};
 #endif
   static GLfloat light3_position[] = {-1.0, 0.0, 0.0, 0.0};
-  static GLfloat lmodel_ambient[] = {0.0, 0.0, 0.0, 0.0};
+  static GLfloat lmodel_ambient[]  = {0.0, 0.0, 0.0, 0.0};
 
   if (lite0 < 0.0)
     lite0 = light0_diffuse[0];
@@ -203,23 +203,23 @@ void OGLUsetLightingModel(float lite0, float lite1, float lite2, float lite3,
   glPopMatrix();
 }
 
-#define COORD_RED 255
-#define COORD_BLUE 255
+#define COORD_RED   255
+#define COORD_BLUE  255
 #define COORD_GREEN 255
 
-static float min_gray = 0.2f;
+static float min_gray   = 0.2f;
 static float brightness = 255.0f;
 
 int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
                 float cslope) {
-  int k, n, red, green, blue, mv, marked, vno;
-  int error;
+  int        k, n, red, green, blue, mv, marked, vno;
+  int        error;
   face_type *f;
-  VERTEX *v, *vn;
-  float v1[3], min_curv, max_curv, coord_coef = 0.0, color_val;
+  VERTEX *   v, *vn;
+  float      v1[3], min_curv, max_curv, coord_coef = 0.0, color_val;
 
   TexFont *txf;
-  char text[256];
+  char     text[256];
 
   read_environment_variables();
 
@@ -266,7 +266,7 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
 
   for (k = 0; k < mris->nfaces; k++)
     if (!mris->faces[k].ripflag) {
-      f = &mris->faces[k];
+      f      = &mris->faces[k];
       marked = 0;
 
       if (flags & MESH_FLAG) {
@@ -275,7 +275,7 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
         glBegin(GL_LINES);
         glColor3ub(255, 255, 255);
         for (n = 0; n < VERTICES_PER_FACE; n++) {
-          v = &mris->vertices[f->v[n]];
+          v  = &mris->vertices[f->v[n]];
           vn = n == VERTICES_PER_FACE - 1 ? &mris->vertices[f->v[0]]
                                           : &mris->vertices[f->v[n + 1]];
           load_brain_coords(v->nx, v->ny, v->nz, v1);
@@ -306,7 +306,7 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
           continue;
 
         if (flags & COORD_FLAG && getenv("THIN_LINES") == nullptr) {
-          int itheta, iphi;
+          int   itheta, iphi;
           float phi_dist, theta_dist, dist, xc, yc, zc, radius, theta, phi;
 
           radius = sqrt(SQR(v->cx) + SQR(v->cy) + SQR(v->cz));
@@ -314,19 +314,19 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
                    oglu_coord_spacing;
           iphi =
               nint((DEGREES(v->phi) / oglu_coord_spacing)) * oglu_coord_spacing;
-          phi = RADIANS((double)iphi);
-          theta = RADIANS((double)itheta);
-          xc = radius * sin(phi) * cos(v->theta);
-          yc = radius * sin(phi) * sin(v->theta);
-          zc = radius * cos(phi);
+          phi      = RADIANS((double)iphi);
+          theta    = RADIANS((double)itheta);
+          xc       = radius * sin(phi) * cos(v->theta);
+          yc       = radius * sin(phi) * sin(v->theta);
+          zc       = radius * cos(phi);
           phi_dist = sqrt(SQR(xc - v->cx) + SQR(yc - v->cy) + SQR(zc - v->cz));
           if (zc > 126)
             DiagBreak();
-          phi = RADIANS((double)iphi);
+          phi   = RADIANS((double)iphi);
           theta = RADIANS((double)itheta);
-          xc = radius * sin(v->phi) * cos(theta);
-          yc = radius * sin(v->phi) * sin(theta);
-          zc = radius * cos(v->phi);
+          xc    = radius * sin(v->phi) * cos(theta);
+          yc    = radius * sin(v->phi) * sin(theta);
+          zc    = radius * cos(v->phi);
           theta_dist =
               sqrt(SQR(xc - v->cx) + SQR(yc - v->cy) + SQR(zc - v->cz));
 
@@ -390,10 +390,10 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
           glColor3f(240, 240, 0.0);
         else /* color it depending on curvature */
         {
-#define DARK_GRAY (brightness - (brightness / 3.0f))
+#define DARK_GRAY   (brightness - (brightness / 3.0f))
 #define BRIGHT_GRAY (brightness + (brightness / 3.0f))
-#define MIN_GRAY min_gray
-#define BRIGHTNESS brightness
+#define MIN_GRAY    min_gray
+#define BRIGHTNESS  brightness
 
           red = green = blue = MIN_GRAY;
           if (FZERO(max_curv))         /* no curvature info */
@@ -413,9 +413,9 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
             else
               color_val = v->curv / max_curv;
 
-            color_val = tanh(cslope * color_val);
+            color_val     = tanh(cslope * color_val);
             abs_color_val = fabs(color_val);
-            red = BRIGHTNESS *
+            red           = BRIGHTNESS *
                   (MIN_GRAY * (1.0f - abs_color_val) + MAX(0, color_val));
             green = BRIGHTNESS *
                     (MIN_GRAY * (1.0f - abs_color_val) + MAX(0, -color_val));
@@ -459,11 +459,11 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
     FACE *f;
     float nx, ny, nz;
     float cross_x[4], cross_y[4], cross_z[4];
-    int nintersections;
+    int   nintersections;
     VERTEX *va, *vb, *vf[VERTICES_PER_FACE];
-    double avg_coord, phi_avg, theta_avg, coorda, coordb, coord_line;
-    double fcoords[VERTICES_PER_FACE], frac;
-    int cno, fvno;
+    double  avg_coord, phi_avg, theta_avg, coorda, coordb, coord_line;
+    double  fcoords[VERTICES_PER_FACE], frac;
+    int     cno, fvno;
 
     for (k = 0; k < mris->nfaces; k++) {
       f = &mris->faces[k];
@@ -524,19 +524,19 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
              fvno++) {
           coorda = fcoords[fvno];
           coordb = fcoords[fvno < VERTICES_PER_FACE - 1 ? fvno + 1 : 0];
-          va = vf[fvno];
-          vb = vf[fvno < VERTICES_PER_FACE - 1 ? fvno + 1 : 0];
+          va     = vf[fvno];
+          vb     = vf[fvno < VERTICES_PER_FACE - 1 ? fvno + 1 : 0];
 
           if (coorda <= coord_line && coordb >= coord_line) {
             /* intersects between 0 and 1 */
-            frac = (coord_line - coorda) / (coordb - coorda);
+            frac                    = (coord_line - coorda) / (coordb - coorda);
             cross_x[nintersections] = va->x + frac * (vb->x - va->x);
             cross_y[nintersections] = va->y + frac * (vb->y - va->y);
             cross_z[nintersections] = va->z + frac * (vb->z - va->z);
             nintersections++;
           } else if (coorda >= coord_line && coordb <= coord_line) {
             /* intersects between 1 and 0 */
-            frac = (coord_line - coordb) / (coorda - coordb);
+            frac                    = (coord_line - coordb) / (coorda - coordb);
             cross_x[nintersections] = vb->x + frac * (va->x - vb->x);
             cross_y[nintersections] = vb->y + frac * (va->y - vb->y);
             cross_z[nintersections] = vb->z + frac * (va->z - vb->z);
@@ -701,7 +701,7 @@ int OGLUcompile(MRI_SURFACE *mris, int *marked_vertices, int flags,
 
     glLoadIdentity();
     v1[0] = v1[1] = 0;
-    v1[2] = 1.0;
+    v1[2]         = 1.0;
     glNormal3fv(v1);
 
     set_color(0.01, 0.0, flags);
@@ -815,7 +815,7 @@ glEndList();
 #endif
 
 static int mrisFindMaxExtents(MRI_SURFACE *mris) {
-  int vno, xlo, xhi, ylo, yhi, zlo, zhi, x, y, z;
+  int     vno, xlo, xhi, ylo, yhi, zlo, zhi, x, y, z;
   VERTEX *v;
 
   xhi = yhi = zhi = -10000;
@@ -881,7 +881,7 @@ int OGLUsetFOV(int fov) {
 
 int OGLUsetCoordParms(double coord_thickness, int num_coord_lines) {
   oglu_coord_thickness = coord_thickness;
-  oglu_coord_spacing = 360.0 / (double)num_coord_lines;
+  oglu_coord_spacing   = 360.0 / (double)num_coord_lines;
   return (NO_ERROR);
 }
 
@@ -919,7 +919,7 @@ static int set_stat_color(float f, float *rp, float *gp, float *bp,
 
   if (fabs(f) > fthresh && fabs(f) < fmid) {
     ftmp = fabs(f);
-    c1 = 1.0 / (fmid - fthresh);
+    c1   = 1.0 / (fmid - fthresh);
     if (fcurv != 1.0)
       c2 = (fmid - fthresh - fcurv * c1 * SQR(fmid - fthresh)) /
            ((1 - fcurv) * (fmid - fthresh));
@@ -1033,16 +1033,16 @@ static int set_stat_color_time(float f, float *rp, float *gp, float *bp,
 }
 
 static void draw_colscalebar() {
-  int i;
+  int   i;
   float v[3], stat, maxval, v1[3];
-  int NSEGMENTS = 100;
+  int   NSEGMENTS = 100;
 
   /** Save geometry / set starting point ... **/
   maxval = fmid + 1.0 / fslope;
   glPushMatrix();
   glLoadIdentity();
   v1[0] = v1[1] = 0;
-  v1[2] = 1.0;
+  v1[2]         = 1.0;
   glNormal3fv(v1);
 
   for (i = 0; i < NSEGMENTS - 1; i++) {
@@ -1072,16 +1072,16 @@ static void draw_colscalebar() {
 }
 
 static void draw_colscalebar_time(int flags) {
-  int i;
+  int   i;
   float v[3], stat, maxval, v1[3];
-  int NSEGMENTS = 100;
+  int   NSEGMENTS = 100;
 
   /** Save geometry / set starting point ... **/
   maxval = fmid + 1.0 / fslope;
   glPushMatrix();
   glLoadIdentity();
   v1[0] = v1[1] = 0;
-  v1[2] = 1.0;
+  v1[2]         = 1.0;
   glNormal3fv(v1);
 
   for (i = 0; i < NSEGMENTS - 1; i++) {

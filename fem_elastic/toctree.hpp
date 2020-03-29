@@ -2,11 +2,11 @@
 #ifndef _h_own_octree_hpp
 #define _h_own_octree_hpp
 
-#include <vector>
 #include <array>
+#include <vector>
 
-#include "stl_utils.hpp"
 #include "coords.h"
+#include "stl_utils.hpp"
 
 #define POW2(N) 1 << N
 
@@ -32,7 +32,7 @@ public:
   */
   bool isOverlapping(const TCubicRegion &other) const {
     // one of the points of the "other" needs to be inside "this" one
-    CoordsType pt;
+    CoordsType                pt;
     static const unsigned int npoints = 1 << N;
 
     for (unsigned int ptIdx = 0; ptIdx < npoints; ++ptIdx) {
@@ -99,7 +99,7 @@ protected:
   }
 
 public:
-  typedef TCubicRegion<N> Superclass;
+  typedef TCubicRegion<N>                 Superclass;
   typedef typename Superclass::CoordsType CoordsType;
 
   TNode(const CoordsType &cmin = CoordsType(),
@@ -108,9 +108,9 @@ public:
   virtual ~TNode() {}
 
   virtual bool insertItem(const ElementProxy *ep, TNode *&pCaller,
-                          const OctreeData &data) = 0;
+                          const OctreeData &data)                          = 0;
   virtual const ElementProxy *element_at_point(const CoordsType &pt) const = 0;
-  virtual unsigned int getElementCount() const = 0;
+  virtual unsigned int        getElementCount() const                      = 0;
 
 private:
   // rule => abc --> 1<<(4+a) + 1<<(2+b) + 1<<c
@@ -121,7 +121,7 @@ private:
     std::cout << " InitializeOctantDeterminant\n";
     unsigned int p2, res;
     for (unsigned int idx = 0; idx < POW2(N); ++idx) {
-      p2 = 1;
+      p2  = 1;
       res = 0;
       for (unsigned int ui = 0; ui < N; ++ui, p2 <<= 1) {
         res += 1 << (2 * ui + ((p2 & idx) ? 1 : 0));
@@ -187,12 +187,12 @@ public:
     // --> implicitly, decide on the ordering - essential in the following to
     // optimize for speed
 
-    CoordsType bufMin, bufMax;
+    CoordsType   bufMin, bufMax;
     unsigned int p2;
     for (unsigned int ptIndex = 0; ptIndex < POW2(N); ++ptIndex) {
       bufMin = this->m_cmin;
       bufMax = this->m_cmidPoint;
-      p2 = 1;
+      p2     = 1;
       // this update rule is tightly connected with the numbering of the octants
       // if n = abc (base 2), then a~x, b~y, c~z
       for (int ui = N - 1; ui >= 0; --ui, p2 <<= 1) {
@@ -212,8 +212,8 @@ public:
   bool insertItem(const ElementProxy *ep, Superclass *&pCaller,
                   const OctreeData &data) {
     unsigned char overlappingOctants = this->FindOverlappingOctants(*ep);
-    OctreeData newData(data, true);
-    bool inserted = false;
+    OctreeData    newData(data, true);
+    bool          inserted = false;
     for (unsigned int ui = 0; ui < POW2(N); ++ui)
       if ((Superclass::GetDeterminant()[ui] & overlappingOctants) ==
           Superclass::GetDeterminant()[ui]) {
@@ -259,7 +259,7 @@ public:
 
 private:
   // the separation into octants is based on the comparison with the mid point.
-  CoordsType m_cmidPoint;
+  CoordsType    m_cmidPoint;
   NodeContainer m_items;
 
   /*
@@ -268,9 +268,9 @@ private:
     argument
   */
   unsigned char FindOverlappingOctants(const TCubicRegion<N> &region) {
-    const double deps = 1.0e-5;
-    unsigned char ret = 0;
-    int exponent;
+    const double  deps = 1.0e-5;
+    unsigned char ret  = 0;
+    int           exponent;
     for (unsigned int ui = 0; ui < N; ++ui) {
       exponent = 2 * (N - 1 - ui);
       if (region.min()(ui) < this->m_cmidPoint(ui) + deps) {
@@ -291,7 +291,7 @@ private:
 
 template <class ElementProxy, unsigned int N>
 class TerminalNode : public TNode<ElementProxy, N> {
-  typedef TNode<ElementProxy, N> Superclass;
+  typedef TNode<ElementProxy, N>            Superclass;
   typedef std::vector<const ElementProxy *> ProxyContainer;
 
 public:
@@ -316,7 +316,7 @@ public:
       // when the new node is created, it readily creates terminal nodes for
       // coming elements
       typedef TIntermediateNode<ElementProxy, N> IntermediateNodeType;
-      IntermediateNodeType *pnewNode =
+      IntermediateNodeType *                     pnewNode =
           new IntermediateNodeType(this->m_cmin, this->m_cmax);
 
       OctreeData newData(data, true);
@@ -363,10 +363,10 @@ public:
          unsigned int maxElementsInLeaf)
       : m_octreeData() {
     typedef TerminalNode<ElementProxy, N> TerminalNodeType;
-    m_pnode = new TerminalNodeType(cmin, cmax);
-    m_octreeData.maxLevels = maxLevels;
+    m_pnode                        = new TerminalNodeType(cmin, cmax);
+    m_octreeData.maxLevels         = maxLevels;
     m_octreeData.maxElementsInLeaf = maxElementsInLeaf;
-    m_octreeData.currentLevel = 0;
+    m_octreeData.currentLevel      = 0;
   }
 
   ~Octree() { delete m_pnode; }
@@ -390,7 +390,7 @@ public:
   unsigned int getElementCount() const { return m_pnode->getElementCount(); }
 
 private:
-  NodeType *m_pnode;
+  NodeType * m_pnode;
   OctreeData m_octreeData;
 };
 

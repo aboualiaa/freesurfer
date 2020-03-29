@@ -42,9 +42,9 @@ class QPaintEngine;
 class vtkRenderWindow;
 class QVTKInteractor;
 class QVTKPaintEngine;
-#include <vtkRenderWindowInteractor.h>
 #include <vtkCommand.h>
 #include <vtkConfigure.h>
+#include <vtkRenderWindowInteractor.h>
 #include <vtkToolkits.h>
 class vtkImageData;
 
@@ -129,7 +129,7 @@ public:
   // interactions. (See vtkRenderWindow::DesiredUpdateRate,
   // vtkRenderWindowInteractor::DesiredUpdateRate and
   // vtkRenderWindowInteractor::StillUpdateRate for more details.)
-  virtual void setMaxRenderRateForImageCache(double rate);
+  virtual void   setMaxRenderRateForImageCache(double rate);
   virtual double maxRenderRateForImageCache() const;
 
   // Description:
@@ -228,7 +228,7 @@ protected:
 
   // the vtk render window
   vtkRenderWindow *mRenWin;
-  bool UseTDx;
+  bool             UseTDx;
 
   // the paint engine
   QPaintEngine *mPaintEngine;
@@ -246,9 +246,9 @@ protected:
 
 protected:
   vtkImageData *mCachedImage;
-  bool cachedImageCleanFlag;
-  bool automaticImageCache;
-  double maxImageCacheRenderRate;
+  bool          cachedImageCleanFlag;
+  bool          automaticImageCache;
+  double        maxImageCacheRenderRate;
 
 private:
   //! unimplemented operator=

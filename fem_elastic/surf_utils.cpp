@@ -69,7 +69,7 @@ void compute_bbox(MRI_SURFACE *mris, tDblCoords &cmin, tDblCoords &cmax,
                   bool initVars) {
   tDblCoords cbuf;
 
-  VERTEX *pvtx = &(mris->vertices[0]);
+  VERTEX *     pvtx      = &(mris->vertices[0]);
   unsigned int nvertices = (unsigned int)mris->nvertices;
 
   cbuf(0) = pvtx->x;

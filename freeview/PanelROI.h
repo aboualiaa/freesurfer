@@ -39,8 +39,8 @@ public:
   ~PanelROI();
 
 protected:
-  void DoUpdateWidgets();
-  void DoIdle();
+  void         DoUpdateWidgets();
+  void         DoIdle();
   virtual void ConnectLayer(Layer *layer);
 
 protected slots:
@@ -56,7 +56,7 @@ protected slots:
   void OnButtonResample();
 
 private:
-  Ui::PanelROI *ui;
+  Ui::PanelROI *   ui;
   QList<QWidget *> m_listWidgetsHeatscale;
 };
 

@@ -30,7 +30,7 @@
 #include "asynch.h"
 #include "legacy.h"
 
-extern string G_SELF;
+extern std::string G_SELF;
 
 #if 0
 void
@@ -51,7 +51,7 @@ s_weights_scan(
   // o Initial design and coding.
   //
 
-  string str_value;
+  std::string str_value;
 
   if (cso_options.scanFor("wd", &str_value))
     st_costWeight.wd = atof(str_value.c_str());
@@ -121,7 +121,7 @@ s_Dweights_scan(
   // o Initial design and coding.
   //
 
-  string str_value;
+  std::string str_value;
 
   if (cso_options.scanFor("Dwd", &str_value))
     st_DcostWeight.Dwd = atof(str_value.c_str());
@@ -184,11 +184,11 @@ s_weights_print(
   origFlags  = cout.flags();
   cout.setf(ios::left);
 
-  cout << "_________________________"  << endl;
+  std::cout << "_________________________"  << std::endl;
   CW(18, "weight");
   CWn(rw, "value");
-  cout << "_________________________"  << endl;
-  cout << endl;
+  std::cout << "_________________________"  << std::endl;
+  std::cout << std::endl;
   CW(lw, "wd");
   CWn(rw, asw.wd);
   CW(lw, "wc");
@@ -235,11 +235,11 @@ s_Dweights_print(
   origFlags  = cout.flags();
   cout.setf(ios::left);
 
-  cout << "_________________________"  << endl;
+  std::cout << "_________________________"  << std::endl;
   CW(18, "Dweight");
   CWn(rw, "value");
-  cout << "_________________________"  << endl;
-  cout << endl;
+  std::cout << "_________________________"  << std::endl;
+  std::cout << std::endl;
   CW(lw, "Dwd");
   CWn(rw, asw.Dwd);
   CW(lw, "Dwc");
@@ -359,53 +359,53 @@ void s_env_nullify(s_env &st_env) {
   // o Initial design and coding.
   //
 
-  st_env.pSTw = nullptr;
+  st_env.pSTw  = nullptr;
   st_env.pSTDw = nullptr;
 
   st_env.timeoutSec = 0;
-  st_env.port = 0;
+  st_env.port       = 0;
 
   st_env.lw = -50;
   st_env.rw = 20;
 
-  st_env.b_syslogPrepend = false;
-  st_env.b_exitOnDone = false;
+  st_env.b_syslogPrepend  = false;
+  st_env.b_exitOnDone     = false;
   st_env.pcsm_optionsFile = nullptr;
-  st_env.pcsm_stdout = nullptr;
-  st_env.pcsm_syslog = nullptr;
-  st_env.pcsm_userlog = nullptr;
-  st_env.pcsm_resultlog = nullptr;
+  st_env.pcsm_stdout      = nullptr;
+  st_env.pcsm_syslog      = nullptr;
+  st_env.pcsm_userlog     = nullptr;
+  st_env.pcsm_resultlog   = nullptr;
 
-  st_env.b_labelFile_save = false;
-  st_env.b_patchFile_save = false;
+  st_env.b_labelFile_save      = false;
+  st_env.b_patchFile_save      = false;
   st_env.b_transitionPenalties = false;
 
-  st_env.str_workingDir = "";
-  st_env.str_patchFileName = "";
+  st_env.str_workingDir      = "";
+  st_env.str_patchFileName   = "";
   st_env.str_labelFileNameOS = "";
-  st_env.str_labelFileName = "";
-  st_env.str_costFileName = "";
-  st_env.b_costPathSave = true;
+  st_env.str_labelFileName   = "";
+  st_env.str_costFileName    = "";
+  st_env.b_costPathSave      = true;
 
   st_env.startVertex = 0;
-  st_env.endVertex = 0;
-  st_env.plyDepth = 0;
+  st_env.endVertex   = 0;
+  st_env.plyDepth    = 0;
 
-  st_env.pMS_active = nullptr;
+  st_env.pMS_active    = nullptr;
   st_env.pMS_secondary = nullptr;
-  st_env.pMS_primary = nullptr;
+  st_env.pMS_primary   = nullptr;
   st_env.pMS_auxillary = nullptr;
 
-  st_env.b_useAbsCurvs = false;
-  st_env.b_surfacesKeepInSync = false;
-  st_env.b_surfacesClear = true;
+  st_env.b_useAbsCurvs         = false;
+  st_env.b_surfacesKeepInSync  = false;
+  st_env.b_surfacesClear       = true;
   st_env.b_costHistoryPreserve = false;
-  st_env.costFunc_do = nullptr;
+  st_env.costFunc_do           = nullptr;
 
   // Define the legacy cost functions for human readable setting / getting
-  st_env.totalNumFunctions = 4;
-  st_env.ecf_current = e_default;
-  st_env.pstr_functionName = new string[st_env.totalNumFunctions];
+  st_env.totalNumFunctions    = 4;
+  st_env.ecf_current          = e_default;
+  st_env.pstr_functionName    = new std::string[st_env.totalNumFunctions];
   st_env.pstr_functionName[0] = "default";
   st_env.pstr_functionName[1] = "unity";
   st_env.pstr_functionName[2] = "euclid";
@@ -417,8 +417,8 @@ void s_env_nullify(s_env &st_env) {
   st_env.vstr_mpm.push_back("mpmOverlay");
 
   // Define the internal mpmProg modules for human readable setting / getting
-  st_env.totalmpmProgs = (int)empmprog;
-  st_env.b_mpmProgUse = false;
+  st_env.totalmpmProgs    = (int)empmprog;
+  st_env.b_mpmProgUse     = false;
   st_env.empmProg_current = emp_NOP;
   st_env.vstr_mpmProgName.clear();
   st_env.vstr_mpmProgName.push_back("NULL");
@@ -429,12 +429,12 @@ void s_env_nullify(s_env &st_env) {
   st_env.vstr_mpmProgName.push_back("ROI");
   st_env.vstr_mpmProgName.push_back("externalMesh");
   st_env.totalmpmProgs = st_env.vstr_mpmProgName.size();
-  st_env.pCmpmProg = nullptr; // Not yet created!
+  st_env.pCmpmProg     = nullptr; // Not yet created!
   // autodijk
   st_env.str_costCurvFile = "autodijk.cost.crv";
 
   // Define the internal mpmOverlay modules
-  st_env.totalmpmOverlays = (int)empmoverlay;
+  st_env.totalmpmOverlays    = (int)empmoverlay;
   st_env.empmOverlay_current = emo_NOP;
   st_env.vstr_mpmOverlayName.clear();
   st_env.vstr_mpmOverlayName.push_back("LEGACY");
@@ -446,12 +446,12 @@ void s_env_nullify(s_env &st_env) {
   st_env.vstr_mpmOverlayName.push_back("fscurvs");
   st_env.vstr_mpmOverlayName.push_back("curvature");
   st_env.totalmpmOverlays = st_env.vstr_mpmOverlayName.size();
-  st_env.pCmpmOverlay = nullptr; // Not yet created!
+  st_env.pCmpmOverlay     = nullptr; // Not yet created!
 
   // Define the active surface tracker
-  st_env.totalNumSurfaces = 3;
-  st_env.esf_active = e_workingCurvature;
-  st_env.pstr_activeName = new string[st_env.totalNumSurfaces];
+  st_env.totalNumSurfaces   = 3;
+  st_env.esf_active         = e_workingCurvature;
+  st_env.pstr_activeName    = new std::string[st_env.totalNumSurfaces];
   st_env.pstr_activeName[0] = "workingCurvature";
   st_env.pstr_activeName[1] = "workingSulcal";
   st_env.pstr_activeName[2] = "auxillary";
@@ -504,8 +504,7 @@ void s_Dweights_copy(
     sw_target.Dwdir	= sw_source.Dwdir;
 }
 #endif
-
-string s_env_HUP(s_env &st_env, c_SSocket_UDP_receive **pCSSocketReceive) {
+std::string s_env_HUP(s_env &st_env, c_SSocket_UDP_receive **pCSSocketReceive) {
   // ARGS
   //	st_env			in/out		reference to environment struct
   //	pCSSocketReceive	in/out		pointer to "server" that
@@ -527,8 +526,8 @@ string s_env_HUP(s_env &st_env, c_SSocket_UDP_receive **pCSSocketReceive) {
   // defaults on very first run.
   //
 
-  string str_asynchComms = "RUNPROG";
-  string str_optionsFQName;
+  std::string str_asynchComms = "RUNPROG";
+  std::string str_optionsFQName;
   struct stat st_fileInfo;
 #if 0
     s_weights           st_costWeight;
@@ -588,7 +587,7 @@ string s_env_HUP(s_env &st_env, c_SSocket_UDP_receive **pCSSocketReceive) {
   return str_asynchComms;
 }
 
-void s_env_mpmPrint(s_env &ast_env, string astr_msg, e_MODULE ae_module)
+void s_env_mpmPrint(s_env &ast_env, std::string astr_msg, e_MODULE ae_module)
 //
 // ARGS
 // 	ast_env			in		reference to environment
@@ -611,32 +610,32 @@ void s_env_mpmPrint(s_env &ast_env, string astr_msg, e_MODULE ae_module)
 //
 {
 
-  int lw = ast_env.lw;
-  int rw = ast_env.rw;
-  int moduleIndex = 0;
-  vector<string> *p_vstr;
-  string str_moduleType;
-  string str_moduleName;
-  void *p_moduleAddress = nullptr;
+  int                       lw          = ast_env.lw;
+  int                       rw          = ast_env.rw;
+  int                       moduleIndex = 0;
+  std::vector<std::string> *p_vstr;
+  std::string               str_moduleType;
+  std::string               str_moduleName;
+  void *                    p_moduleAddress = nullptr;
 
-  p_vstr = &ast_env.vstr_mpmProgName;
+  p_vstr         = &ast_env.vstr_mpmProgName;
   str_moduleType = ast_env.vstr_mpm[ae_module];
   switch (ae_module) {
   case e_mpmProg:
-    p_vstr = &ast_env.vstr_mpmProgName;
-    moduleIndex = ast_env.empmProg_current;
+    p_vstr          = &ast_env.vstr_mpmProgName;
+    moduleIndex     = ast_env.empmProg_current;
     p_moduleAddress = ast_env.pCmpmProg;
     break;
   case e_mpmOverlay:
-    p_vstr = &ast_env.vstr_mpmOverlayName;
-    moduleIndex = ast_env.empmOverlay_current;
+    p_vstr          = &ast_env.vstr_mpmOverlayName;
+    moduleIndex     = ast_env.empmOverlay_current;
     p_moduleAddress = ast_env.pCmpmOverlay;
     break;
   case emodule:
     break;
   }
 
-  cout << astr_msg << endl;
+  std::cout << astr_msg << std::endl;
 
   colprintf(lw, rw, "Module type", "[ %s ]\n", str_moduleType.c_str());
   colprintf(lw, rw, "Module index:name", "[ %d:%s ]\n", (int)moduleIndex,
@@ -679,41 +678,41 @@ void s_env_defaultsSet(s_env &st_env) {
   //
 
   s_env_nullify(st_env);
-  st_env.str_workingDir = "./";
+  st_env.str_workingDir      = "./";
   st_env.str_optionsFileName = "./options.txt";
-  st_env.pcsm_optionsFile = new C_SMessage(
+  st_env.pcsm_optionsFile    = new C_SMessage(
       "", eSM_raw, st_env.str_optionsFileName, eSM_c, eOverwrite);
   st_env.pcsm_optionsFile->lw_set(25);
   st_env.pcsm_optionsFile->rw_set(55);
 
   st_env.startVertex = 0;
-  st_env.endVertex = 0;
+  st_env.endVertex   = 0;
 
-  st_env.str_primarySurfaceFileName = "";
-  st_env.str_secondarySurfaceFileName = "";
-  st_env.str_primaryCurvatureFileName = "";
+  st_env.str_primarySurfaceFileName     = "";
+  st_env.str_secondarySurfaceFileName   = "";
+  st_env.str_primaryCurvatureFileName   = "";
   st_env.str_secondaryCurvatureFileName = "";
 
   st_env.b_patchFile_save = false;
   st_env.b_labelFile_save = true;
 
-  st_env.b_useAbsCurvs = false;
-  st_env.str_costFileName = "cost.txt";
-  st_env.str_patchFileStem = "dijk";
-  st_env.str_labelFileStem = "dijk";
+  st_env.b_useAbsCurvs       = false;
+  st_env.str_costFileName    = "cost.txt";
+  st_env.str_patchFileStem   = "dijk";
+  st_env.str_labelFileStem   = "dijk";
   st_env.str_labelFileNameOS = "dijkAuxSurface";
 
-  st_env.b_syslogPrepend = true;
-  st_env.str_stdout = "./stdout.log";
-  st_env.str_userMsgLog = "./user_msg.log";
-  st_env.str_sysMsgLog = "localhost:1834";
-  st_env.str_resultMsgLog = "localhost:1835";
+  st_env.b_syslogPrepend   = true;
+  st_env.str_stdout        = "./stdout.log";
+  st_env.str_userMsgLog    = "./user_msg.log";
+  st_env.str_sysMsgLog     = "localhost:1834";
+  st_env.str_resultMsgLog  = "localhost:1835";
   st_env.serverControlPort = 1701;
-  st_env.timeoutSec = 60;
+  st_env.timeoutSec        = 60;
 
   //
   // LEGACY CODE
-  st_env.pSTw = new s_weights;
+  st_env.pSTw  = new s_weights;
   st_env.pSTDw = new s_Dweights;
 
   s_weights_setAll(*st_env.pSTw, 0.0);
@@ -726,7 +725,7 @@ void s_env_defaultsSet(s_env &st_env) {
 
   st_env.str_costCurvFile =
       st_env.str_hemi + st_env.str_surface + ".autodijk.crv";
-  st_env.b_exitOnDone = true;
+  st_env.b_exitOnDone   = true;
   st_env.b_costPathSave = false;
 }
 
@@ -753,8 +752,8 @@ void s_env_optionsFile_write(s_env &st_env, bool ab_setToDefaults) {
   //
 
   C_SMessage *O;
-  char pch_commandLine[65536];
-  int i;
+  char        pch_commandLine[65536];
+  int         i;
 
   if (ab_setToDefaults)
     s_env_defaultsSet(st_env);
@@ -907,55 +906,55 @@ void s_env_scan(s_env &st_env) {
 
   static int calls = 0;
 
-  static MRIS *pMS_primary = nullptr;
-  static MRIS *pMS_secondary = nullptr;
-  string str_value = "";
-  string str_surfaceFileName = "";
-  string str_auxSurfaceFileName = "";
-  string str_curvatureFileName = "";
-  string str_secondaryCurvatureFile = "";
-  string str_patchFileName = "";
-  string str_labelFileName = "";
-  string str_labelFileNameOS = "";
-  string str_costFileName = "";
-  string str_stdout = "";
-  string str_userMsgFileName = "";
-  string str_sysMsgFileName = "";
-  string str_resultMsgFileName = "";
-  string str_mpmArgs = "-x";
-  string str_mpmOverlayArgs = "-x";
+  static MRIS *pMS_primary                = nullptr;
+  static MRIS *pMS_secondary              = nullptr;
+  std::string  str_value                  = "";
+  std::string  str_surfaceFileName        = "";
+  std::string  str_auxSurfaceFileName     = "";
+  std::string  str_curvatureFileName      = "";
+  std::string  str_secondaryCurvatureFile = "";
+  std::string  str_patchFileName          = "";
+  std::string  str_labelFileName          = "";
+  std::string  str_labelFileNameOS        = "";
+  std::string  str_costFileName           = "";
+  std::string  str_stdout                 = "";
+  std::string  str_userMsgFileName        = "";
+  std::string  str_sysMsgFileName         = "";
+  std::string  str_resultMsgFileName      = "";
+  std::string  str_mpmArgs                = "-x";
+  std::string  str_mpmOverlayArgs         = "-x";
 
-  bool b_useAbsCurvs = true;
-  bool b_labelFile_save = true;
+  bool b_useAbsCurvs         = true;
+  bool b_labelFile_save      = true;
   bool b_transitionPenalties = true;
-  bool b_patchFile_save = true;
-  bool b_syslogPrepend = true;
-  bool b_mpmProgUse = false;
-  bool b_mpmOverlayUse = false;
-  bool b_exitOnDone = false;
-  bool b_costPathSave = true;
+  bool b_patchFile_save      = true;
+  bool b_syslogPrepend       = true;
+  bool b_mpmProgUse          = false;
+  bool b_mpmOverlayUse       = false;
+  bool b_exitOnDone          = false;
+  bool b_costPathSave        = true;
 
-  int startVertex = 0;
-  int endVertex = 0;
-  int port = 0;
-  int timeoutSec = 0;
-  int mpmProgID = -1;
+  int startVertex  = 0;
+  int endVertex    = 0;
+  int port         = 0;
+  int timeoutSec   = 0;
+  int mpmProgID    = -1;
   int mpmOverlayID = -1;
 
   // These are used to re-read possibly new files if a HUP
   // is sent to the process with changed options file.
-  static string str_surfaceFileNameOld = "";
-  static string str_auxSurfaceFileNameOld = "";
-  static string str_curvatureFileNameOld = "";
-  static string str_secondaryCurvatureFileOld = "";
-  static string str_stdoutOld = "";
-  static string str_userMsgFileNameOld = "";
-  static string str_sysMsgFileNameOld = "";
-  static string str_resultMsgFileNameOld = "";
+  static std::string str_surfaceFileNameOld        = "";
+  static std::string str_auxSurfaceFileNameOld     = "";
+  static std::string str_curvatureFileNameOld      = "";
+  static std::string str_secondaryCurvatureFileOld = "";
+  static std::string str_stdoutOld                 = "";
+  static std::string str_userMsgFileNameOld        = "";
+  static std::string str_sysMsgFileNameOld         = "";
+  static std::string str_resultMsgFileNameOld      = "";
 
   // mpmProg options
-  static string str_costCurvFile = "autodijk.cost.crv";
-  C_scanopt cso_options = *st_env.pcso_options;
+  static std::string str_costCurvFile = "autodijk.cost.crv";
+  C_scanopt          cso_options      = *st_env.pcso_options;
 
 #if 0
   if (cso_options.scanFor("startVertex", &str_value))
@@ -977,17 +976,17 @@ void s_env_scan(s_env &st_env) {
   else
     error_exit("scanning user options", "I couldn't find surfaceFile.", 20);
   if (cso_options.scanFor("secondarySurfaceFile", &str_value)) {
-    str_auxSurfaceFileName = str_value;
+    str_auxSurfaceFileName    = str_value;
     st_env.b_secondarySurface = true;
   } else
     st_env.b_secondarySurface = false;
   if (cso_options.scanFor("curvatureFile", &str_value)) {
-    str_curvatureFileName = str_value;
+    str_curvatureFileName     = str_value;
     st_env.b_primaryCurvature = true;
   } else
     st_env.b_primaryCurvature = false;
   if (cso_options.scanFor("secondaryCurvature", &str_value)) {
-    str_secondaryCurvatureFile = str_value;
+    str_secondaryCurvatureFile  = str_value;
     st_env.b_secondaryCurvature = true;
   } else
     st_env.b_secondaryCurvature = false;
@@ -1083,15 +1082,15 @@ void s_env_scan(s_env &st_env) {
     error_exit("scanning user options", "I couldn't find mpmOverlayID", 54);
 
   st_env.b_syslogPrepend = b_syslogPrepend;
-  e_SMessageIO esm_io = eSM_cpp;
-  int pos = 0;
+  e_SMessageIO esm_io    = eSM_cpp;
+  int          pos       = 0;
 
   if (str_stdout != str_stdoutOld) {
     if (st_env.pcsm_stdout)
       delete st_env.pcsm_stdout;
     pos = str_userMsgFileName.find_first_of(":");
     // C-style IO for the internal "printf"ing...
-    esm_io = ((unsigned)pos != (unsigned)string::npos) ? eSS : eSM_c;
+    esm_io = ((unsigned)pos != (unsigned)std::string::npos) ? eSS : eSM_c;
     st_env.pcsm_stdout = new C_SMessage("", eSM_raw, str_stdout, esm_io);
     st_env.pcsm_stdout->str_syslogID_set(G_SELF);
     st_env.pcsm_stdout->b_syslogPrepend_set(true);
@@ -1103,16 +1102,16 @@ void s_env_scan(s_env &st_env) {
   if (str_userMsgFileName != str_userMsgFileNameOld) {
     if (st_env.pcsm_userlog)
       delete st_env.pcsm_userlog;
-    pos = str_userMsgFileName.find_first_of(":");
-    esm_io = ((unsigned)pos != (unsigned)string::npos) ? eSS : eSM_cpp;
+    pos    = str_userMsgFileName.find_first_of(":");
+    esm_io = ((unsigned)pos != (unsigned)std::string::npos) ? eSS : eSM_cpp;
     st_env.pcsm_userlog =
         new C_SMessage("", eSM_raw, str_userMsgFileName, esm_io);
     st_env.pcsm_userlog->str_syslogID_set(G_SELF);
   }
 
   if (str_sysMsgFileName != str_sysMsgFileNameOld) {
-    pos = str_sysMsgFileName.find_first_of(":");
-    esm_io = ((unsigned)pos != (unsigned)string::npos) ? eSS : eSM_cpp;
+    pos    = str_sysMsgFileName.find_first_of(":");
+    esm_io = ((unsigned)pos != (unsigned)std::string::npos) ? eSS : eSM_cpp;
     if (st_env.pcsm_syslog)
       delete st_env.pcsm_syslog;
     st_env.pcsm_syslog =
@@ -1120,8 +1119,8 @@ void s_env_scan(s_env &st_env) {
     st_env.pcsm_syslog->str_syslogID_set(G_SELF);
   }
   if (str_resultMsgFileName != str_resultMsgFileNameOld) {
-    pos = str_resultMsgFileName.find_first_of(":");
-    esm_io = ((unsigned)pos != (unsigned)string::npos) ? eSS : eSM_cpp;
+    pos    = str_resultMsgFileName.find_first_of(":");
+    esm_io = ((unsigned)pos != (unsigned)std::string::npos) ? eSS : eSM_cpp;
     if (st_env.pcsm_resultlog)
       delete st_env.pcsm_resultlog;
     st_env.pcsm_resultlog =
@@ -1133,10 +1132,10 @@ void s_env_scan(s_env &st_env) {
     st_env.pcsm_syslog->timer(eSM_start);
 
   SLOUT("PARSING: env");
-  string str_surfaceFileNameAbs;
-  string str_auxSurfaceFileNameAbs;
-  string str_curvatureFileNameAbs;
-  string str_secondaryCurvatureFileAbs;
+  std::string str_surfaceFileNameAbs;
+  std::string str_auxSurfaceFileNameAbs;
+  std::string str_curvatureFileNameAbs;
+  std::string str_secondaryCurvatureFileAbs;
 
   if (str_surfaceFileName != str_surfaceFileNameOld) {
     str_rel2absDirSpec_change(str_surfaceFileName, str_surfaceFileNameAbs);
@@ -1198,52 +1197,52 @@ void s_env_scan(s_env &st_env) {
     nULOUT("\t\t\t[ ok ]\n");
   }
 
-  st_env.b_useAbsCurvs = b_useAbsCurvs;
-  st_env.b_labelFile_save = b_labelFile_save;
+  st_env.b_useAbsCurvs         = b_useAbsCurvs;
+  st_env.b_labelFile_save      = b_labelFile_save;
   st_env.b_transitionPenalties = b_transitionPenalties;
-  st_env.b_patchFile_save = b_patchFile_save;
-  st_env.startVertex = startVertex;
-  st_env.endVertex = endVertex;
-  st_env.port = port;
-  st_env.timeoutSec = timeoutSec;
-  st_env.str_patchFileName = str_patchFileName + ".patch";
-  st_env.str_labelFileName = str_labelFileName;
-  st_env.str_labelFileNameOS = str_labelFileNameOS;
-  st_env.str_costFileName = str_costFileName;
-  st_env.b_costPathSave = b_costPathSave;
+  st_env.b_patchFile_save      = b_patchFile_save;
+  st_env.startVertex           = startVertex;
+  st_env.endVertex             = endVertex;
+  st_env.port                  = port;
+  st_env.timeoutSec            = timeoutSec;
+  st_env.str_patchFileName     = str_patchFileName + ".patch";
+  st_env.str_labelFileName     = str_labelFileName;
+  st_env.str_labelFileNameOS   = str_labelFileNameOS;
+  st_env.str_costFileName      = str_costFileName;
+  st_env.b_costPathSave        = b_costPathSave;
 
   //    if(!calls) {
   st_env.pMS_primary = pMS_primary;
-  st_env.pMS_active = pMS_primary;
+  st_env.pMS_active  = pMS_primary;
 
-  str_surfaceFileNameOld = str_surfaceFileName;
-  str_curvatureFileNameOld = str_curvatureFileName;
+  str_surfaceFileNameOld        = str_surfaceFileName;
+  str_curvatureFileNameOld      = str_curvatureFileName;
   str_secondaryCurvatureFileOld = str_secondaryCurvatureFile;
-  str_userMsgFileNameOld = str_userMsgFileName;
-  str_sysMsgFileNameOld = str_sysMsgFileName;
+  str_userMsgFileNameOld        = str_userMsgFileName;
+  str_sysMsgFileNameOld         = str_sysMsgFileName;
   //    }
 
   // mpmProg
   st_env.str_costCurvFile = str_costCurvFile;
-  st_env.b_mpmProgUse = b_mpmProgUse;
-  st_env.str_mpmArgs = str_mpmArgs;
+  st_env.b_mpmProgUse     = b_mpmProgUse;
+  st_env.str_mpmArgs      = str_mpmArgs;
   st_env.empmProg_current = (e_MPMPROG)mpmProgID;
-  st_env.b_exitOnDone = b_exitOnDone;
+  st_env.b_exitOnDone     = b_exitOnDone;
 
   // mpmOverlay
   st_env.empmOverlay_current = (e_MPMOVERLAY)mpmOverlayID;
-  st_env.b_mpmOverlayUse = b_mpmOverlayUse;
-  st_env.str_mpmOverlayArgs = str_mpmOverlayArgs;
+  st_env.b_mpmOverlayUse     = b_mpmOverlayUse;
+  st_env.str_mpmOverlayArgs  = str_mpmOverlayArgs;
 
   if (!st_env.str_hemi.length() || !st_env.str_subject.length() ||
       !st_env.str_primarySurfaceFileName.length()) {
     // Parse the surface text to extract the hemisphere
     //+ and subject name
-    vector<string> v_dir;
-    vector<string> v_surface;
-    vector<string>::iterator i;
-    string str_surfaceFile = "";
-    int tokens = 0;
+    std::vector<std::string>           v_dir;
+    std::vector<std::string>           v_surface;
+    std::vector<std::string>::iterator i;
+    std::string                        str_surfaceFile = "";
+    int                                tokens          = 0;
 
     tokens = str_tokenize(str_surfaceFileName, v_dir, "/");
     if (!tokens)
@@ -1251,7 +1250,7 @@ void s_env_scan(s_env &st_env) {
     else
       str_surfaceFile = v_dir.at(tokens - 1);
     str_tokenize(str_surfaceFile, v_surface, ".");
-    st_env.str_hemi = v_surface.at(0);
+    st_env.str_hemi    = v_surface.at(0);
     st_env.str_surface = v_surface.at(1);
     // st_env.str_mainSurfaceFileName  = v_surface.at(1);
     st_env.str_subject = v_dir.at(tokens - 3);
@@ -1262,7 +1261,7 @@ void s_env_scan(s_env &st_env) {
   calls++;
 }
 
-bool s_env_surfaceFile_set(s_env &st_env, string astr_fileName) {
+bool s_env_surfaceFile_set(s_env &st_env, std::string astr_fileName) {
   //
   // PRECONDITIONS
   // o Internal MRIS structure should ideally speaking
@@ -1291,7 +1290,7 @@ bool s_env_surfaceFile_set(s_env &st_env, string astr_fileName) {
   return true;
 }
 
-bool s_env_surfaceCurvature_set(s_env &st_env, string astr_fileName) {
+bool s_env_surfaceCurvature_set(s_env &st_env, std::string astr_fileName) {
   //
   // PRECONDITIONS
   // o Internal MRIS structure pMS_curvature should
@@ -1316,7 +1315,8 @@ bool s_env_surfaceCurvature_set(s_env &st_env, string astr_fileName) {
   return true;
 }
 
-bool s_env_secondarySurface_setCurvature(s_env &st_env, string astr_fileName) {
+bool s_env_secondarySurface_setCurvature(s_env &     st_env,
+                                         std::string astr_fileName) {
   //
   // PRECONDITIONS
   // o Internal MRIS structure pMS_sulcal should
@@ -1341,7 +1341,7 @@ bool s_env_secondarySurface_setCurvature(s_env &st_env, string astr_fileName) {
   return true;
 }
 
-bool s_env_auxSurfaceCurvature_set(s_env &st_env, string astr_fileName) {
+bool s_env_auxSurfaceCurvature_set(s_env &st_env, std::string astr_fileName) {
   //
   // PRECONDITIONS
   // o Internal MRIS structure pMS_auxSurface should
@@ -1366,7 +1366,7 @@ bool s_env_auxSurfaceCurvature_set(s_env &st_env, string astr_fileName) {
   return true;
 }
 
-bool s_env_auxSurfaceFile_set(s_env &st_env, string astr_fileName) {
+bool s_env_auxSurfaceFile_set(s_env &st_env, std::string astr_fileName) {
   //
   // PRECONDITIONS
   // o Internal MRIS structure should ideally speaking
@@ -1393,7 +1393,7 @@ bool s_env_auxSurfaceFile_set(s_env &st_env, string astr_fileName) {
 }
 
 void s_env_log_file_changeTo(s_env &ast_env, e_LOG ae_log,
-                             string astr_newName) {
+                             std::string astr_newName) {
   //
   // PRECONDITIONS
   //  o None during normal operation.
@@ -1407,12 +1407,12 @@ void s_env_log_file_changeTo(s_env &ast_env, e_LOG ae_log,
   //  o Initial design and coding.
   //
 
-  C_SMessage *pcsm = nullptr;
-  int pos;
+  C_SMessage * pcsm = nullptr;
+  int          pos;
   e_SMessageIO esm_io;
 
-  pos = astr_newName.find_first_of(":");
-  esm_io = ((unsigned)pos != (unsigned)string::npos) ? eSS : eSM_cpp;
+  pos    = astr_newName.find_first_of(":");
+  esm_io = ((unsigned)pos != (unsigned)std::string::npos) ? eSS : eSM_cpp;
 
   switch (ae_log) {
   case e_user:
@@ -1452,10 +1452,10 @@ void s_env_activeSurfaceList(s_env &ast_env) {
   CW(lw, "Current active surface:");
   CWn(rw, ast_env.pstr_activeName[ast_env.esf_active]);
 
-  cout << "All available active surfaces:" << endl;
+  std::cout << "All available active surfaces:" << std::endl;
   for (int i = 0; i < ast_env.totalNumSurfaces; i++) {
-    cout << "Surface index: " << i << ": ";
-    cout << ast_env.pstr_activeName[i] << endl;
+    std::cout << "Surface index: " << i << ": ";
+    std::cout << ast_env.pstr_activeName[i] << std::endl;
   }
 }
 
@@ -1482,8 +1482,8 @@ void s_env_activeSurfaceSetIndex(s_env *apst_env, int aindex) {
 
 int s_env_mpmProgSetIndex(s_env *apst_env, int aindex) {
   int ret = -1;
-  int lw = apst_env->lw;
-  int rw = apst_env->rw;
+  int lw  = apst_env->lw;
+  int rw  = apst_env->rw;
 
   apst_env->b_mpmProgUse = true;
   if (apst_env->pCmpmProg) {
@@ -1504,11 +1504,11 @@ int s_env_mpmProgSetIndex(s_env *apst_env, int aindex) {
         apst_env, apst_env->startVertex, apst_env->endVertex);
     // Check for any command-line spec'd args for this mpmProg:
     if (apst_env->str_mpmArgs != "-x") {
-      C_scanopt cso_mpm(apst_env->str_mpmArgs, ",", e_EquLink, "", ":");
-      string str_vertexStart = "0";
-      string str_vertexEnd = "0";
-      int vertexStart = 0;
-      int vertexEnd = apst_env->pMS_primary->nvertices;
+      C_scanopt   cso_mpm(apst_env->str_mpmArgs, ",", e_EquLink, "", ":");
+      std::string str_vertexStart     = "0";
+      std::string str_vertexEnd       = "0";
+      int         vertexStart         = 0;
+      int         vertexEnd           = apst_env->pMS_primary->nvertices;
       C_mpmProg_pathFind *pC_pathFind = nullptr;
       pC_pathFind_cast(apst_env->pCmpmProg, pC_pathFind);
       if (cso_mpm.scanFor("vertexStart", &str_vertexStart)) {
@@ -1530,18 +1530,18 @@ int s_env_mpmProgSetIndex(s_env *apst_env, int aindex) {
       apst_env->pCmpmProg = new C_mpmProg_autodijk_fast(apst_env);
     // Check for any command-line spec'd args for the 'autodijk' mpmProg:
     if (apst_env->str_mpmArgs != "-x") {
-      C_scanopt cso_mpm(apst_env->str_mpmArgs, ",", e_EquLink, "", ":");
-      string str_vertexPolar = "0";
-      string str_vertexStart = "0";
-      string str_vertexStep = "1";
-      string str_vertexEnd = "0";
-      string str_costCurvStem = "";
-      string str_worldMapCreate = "";
-      bool b_worldMapCreate = false;
-      int vertexPolar = 0;
-      int vertexStart = 0;
-      int vertexEnd = 0;
-      int vertexStep = 1;
+      C_scanopt   cso_mpm(apst_env->str_mpmArgs, ",", e_EquLink, "", ":");
+      std::string str_vertexPolar     = "0";
+      std::string str_vertexStart     = "0";
+      std::string str_vertexStep      = "1";
+      std::string str_vertexEnd       = "0";
+      std::string str_costCurvStem    = "";
+      std::string str_worldMapCreate  = "";
+      bool        b_worldMapCreate    = false;
+      int         vertexPolar         = 0;
+      int         vertexStart         = 0;
+      int         vertexEnd           = 0;
+      int         vertexStep          = 1;
       C_mpmProg_autodijk *pC_autodijk = nullptr;
       pC_autodijk_cast(apst_env->pCmpmProg, pC_autodijk);
       if (cso_mpm.scanFor("vertexPolar", &str_vertexPolar)) {
@@ -1577,12 +1577,12 @@ int s_env_mpmProgSetIndex(s_env *apst_env, int aindex) {
     apst_env->pCmpmProg = new C_mpmProg_ROI(apst_env);
     // Check for any command-line spec'd args for this mpmProg:
     if (apst_env->str_mpmArgs != "-x") {
-      C_scanopt cso_mpm(apst_env->str_mpmArgs, ",", e_EquLink, "", ":");
-      float f_radius = 0.0;
-      bool b_saveStaggered = false;
-      bool b_borderRegion = false;
-      string str_option = "";
-      C_mpmProg_ROI *pC_ROI = nullptr;
+      C_scanopt      cso_mpm(apst_env->str_mpmArgs, ",", e_EquLink, "", ":");
+      float          f_radius        = 0.0;
+      bool           b_saveStaggered = false;
+      bool           b_borderRegion  = false;
+      std::string    str_option      = "";
+      C_mpmProg_ROI *pC_ROI          = nullptr;
       pC_ROI_cast(apst_env->pCmpmProg, pC_ROI);
       if (cso_mpm.scanFor("radius", &str_option)) {
         f_radius = atof(str_option.c_str());
@@ -1613,11 +1613,11 @@ int s_env_mpmProgSetIndex(s_env *apst_env, int aindex) {
     apst_env->pCmpmProg = new C_mpmProg_externalMesh(apst_env);
     // Check for any command-line spec'd args for this mpmProg:
     if (apst_env->str_mpmArgs != "-x") {
-      C_scanopt cso_mpm(apst_env->str_mpmArgs, ",", e_EquLink, "", ":");
-      float f_radius = 0.0;
-      bool b_saveStaggered = false;
-      string str_option = "";
-      C_mpmProg_ROI *pC_ROI = nullptr;
+      C_scanopt      cso_mpm(apst_env->str_mpmArgs, ",", e_EquLink, "", ":");
+      float          f_radius        = 0.0;
+      bool           b_saveStaggered = false;
+      std::string    str_option      = "";
+      C_mpmProg_ROI *pC_ROI          = nullptr;
       pC_ROI_cast(apst_env->pCmpmProg, pC_ROI);
       if (cso_mpm.scanFor("radius", &str_option)) {
         f_radius = atof(str_option.c_str());
@@ -1642,7 +1642,7 @@ int s_env_mpmProgSetIndex(s_env *apst_env, int aindex) {
     break;
   default:
     apst_env->empmProg_current = (e_MPMPROG)0;
-    apst_env->pCmpmProg = new C_mpmProg_NOP(apst_env);
+    apst_env->pCmpmProg        = new C_mpmProg_NOP(apst_env);
     break;
   }
 
@@ -1655,10 +1655,10 @@ int s_env_mpmProgSetIndex(s_env *apst_env, int aindex) {
 }
 
 int s_env_mpmOverlaySetIndex(s_env *apst_env, int aindex) {
-  int ret = -1;
-  int lw = apst_env->lw;
-  int rw = apst_env->rw;
-  string str_curvatureFile = "-x";
+  int         ret               = -1;
+  int         lw                = apst_env->lw;
+  int         rw                = apst_env->rw;
+  std::string str_curvatureFile = "-x";
 
   if (apst_env->pCmpmOverlay) {
     e_MPMOVERLAY e_overlay = apst_env->empmOverlay_current;
@@ -1704,7 +1704,7 @@ int s_env_mpmOverlaySetIndex(s_env *apst_env, int aindex) {
     break;
   default:
     apst_env->empmOverlay_current = (e_MPMOVERLAY)0;
-    apst_env->pCmpmOverlay = new C_mpmOverlay_NOP(apst_env);
+    apst_env->pCmpmOverlay        = new C_mpmOverlay_NOP(apst_env);
     break;
   }
   if (aindex < -2 || aindex >= apst_env->totalmpmOverlays)
@@ -1726,10 +1726,10 @@ s_env_costFctList(
   CW(lw, "Current cost function:");
   CWn(rw, ast_env.pstr_functionName[ast_env.ecf_current]);
 
-  cout << "All available cost functions:" << endl;
+  std::cout << "All available cost functions:" << std::endl;
   for (int i=0; i<ast_env.totalNumFunctions; i++) {
-    cout << "Function index: " << i << ": ";
-    cout << ast_env.pstr_functionName[i] << endl;
+    std::cout << "Function index: " << i << ": ";
+    std::cout << ast_env.pstr_functionName[i] << std::endl;
   }
 }
 
@@ -1799,8 +1799,8 @@ float s_env_edgeCostFind(s_env &ast_env, int avertexi, int avertexj) {
   // 	o Initial design and coding.
   //
 
-  float f_cost = 0.0;
-  bool b_relNextReference = false;
+  float f_cost             = 0.0;
+  bool  b_relNextReference = false;
 
   if (!ast_env.b_mpmOverlayUse)
     f_cost = ast_env.costFunc_do(ast_env, &*(ast_env.pst_iterInfo), avertexi,

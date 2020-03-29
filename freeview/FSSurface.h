@@ -26,20 +26,20 @@
 #ifndef FSSurface_h
 #define FSSurface_h
 
+#include "vtkImageData.h"
+#include "vtkMatrix4x4.h"
+#include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
 #include <QObject>
 #include <QStringList>
-#include "vtkSmartPointer.h"
-#include "vtkImageData.h"
-#include "vtkPolyData.h"
-#include "vtkMatrix4x4.h"
-#include <QVector>
 #include <QVariantMap>
+#include <QVector>
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "mrisurf.h"
 #include "mri.h"
+#include "mrisurf.h"
 
 #define NUM_OF_VSETS 5
 
@@ -60,12 +60,12 @@ public:
     SurfaceOriginal
   };
 
-  bool MRISRead(const QString &filename,
-                const QString &vector_filename = QString(),
-                const QString &patch_filename = QString(),
-                const QString &target_filename = QString(),
-                const QString &sphere_filename = QString(),
-                const QStringList &sup_files = QStringList());
+  bool MRISRead(const QString &    filename,
+                const QString &    vector_filename = QString(),
+                const QString &    patch_filename  = QString(),
+                const QString &    target_filename = QString(),
+                const QString &    sphere_filename = QString(),
+                const QStringList &sup_files       = QStringList());
 
   bool CreateFromMRIS(MRIS *mris);
 
@@ -194,10 +194,10 @@ public:
 
   bool FindPath(int *vert_vno, int num_vno, int *path, int *path_length);
 
-  void UpdatePolyData();
-  void RipFaces();
+  void         UpdatePolyData();
+  void         RipFaces();
   QVector<int> MakeCutLine(const QVector<int> &verts);
-  void ClearCuts(const QVector<int> &verts = QVector<int>());
+  void         ClearCuts(const QVector<int> &verts = QVector<int>());
 
   QVector<int> FloodFillFromSeed(int seed_vno);
 
@@ -207,25 +207,22 @@ public:
 
   vtkTransform *GetSurfaceToRasTransform();
 
-  void SetIgnoreVolumeGeometry(bool bIgnore)
-  {
-    m_bIgnoreVG = bIgnore;
-  }
+  void SetIgnoreVolumeGeometry(bool bIgnore) { m_bIgnoreVG = bIgnore; }
 
 protected:
-  bool InitializeData(const QString &vector_filename = QString(),
-                      const QString &patch_filename = QString(),
-                      const QString &target_filename = QString(),
-                      const QStringList &sup_files = QStringList());
-  void UpdatePolyData(MRIS *mris, vtkPolyData *polydata,
-                      vtkPolyData *polydata_verts = NULL,
-                      vtkPolyData *polydata_wireframe = NULL,
-                      bool create_segs = false);
-  void UpdateVerticesAndNormals();
-  void ComputeNormals();
-  void NormalFace(int fac, int n, float *norm);
+  bool  InitializeData(const QString &    vector_filename = QString(),
+                       const QString &    patch_filename  = QString(),
+                       const QString &    target_filename = QString(),
+                       const QStringList &sup_files       = QStringList());
+  void  UpdatePolyData(MRIS *mris, vtkPolyData *polydata,
+                       vtkPolyData *polydata_verts     = NULL,
+                       vtkPolyData *polydata_wireframe = NULL,
+                       bool         create_segs        = false);
+  void  UpdateVerticesAndNormals();
+  void  ComputeNormals();
+  void  NormalFace(int fac, int n, float *norm);
   float TriangleArea(int fac, int n);
-  void Normalize(float v[3]);
+  void  Normalize(float v[3]);
 
   bool LoadVectors(const QString &filename);
   void LoadTargetSurface(const QString &filename);
@@ -247,14 +244,14 @@ protected:
   MRIS *m_MRIS;
   MRIS *m_MRISTarget;
 
-  double m_SurfaceToRASMatrix[16];
+  double                        m_SurfaceToRASMatrix[16];
   vtkSmartPointer<vtkTransform> m_SurfaceToRASTransform;
 
-  double m_targetToRasMatrix[16];
+  double                        m_targetToRasMatrix[16];
   vtkSmartPointer<vtkTransform> m_targetToRasTransform;
 
   // RAS bounds.
-  bool m_bBoundsCacheDirty;
+  bool  m_bBoundsCacheDirty;
   float m_RASBounds[6];
   float m_RASCenter[3];
 
@@ -291,14 +288,14 @@ protected:
   VertexItem *m_fSmoothedNormal;
 
   struct VertexVectorItem {
-    QString name;
+    QString     name;
     VertexItem *data;
 
     VertexVectorItem() { data = NULL; }
   };
 
   std::vector<VertexVectorItem> m_vertexVectors;
-  int m_nActiveVector;
+  int                           m_nActiveVector;
 
   bool m_bValidVolumeGeometry;
 
@@ -306,9 +303,9 @@ protected:
 
   double m_dMaxSegmentLength;
 
-  QVector<int>  m_originalRipflags;
+  QVector<int> m_originalRipflags;
 
-  bool    m_bIgnoreVG;
+  bool m_bIgnoreVG;
 };
 
 #endif

@@ -49,13 +49,13 @@ public:
   void SetVariance8V(double variance8V);
   void SetNextNode(CCubeNode *ptrNextNode);
 
-  int GetSubX();
-  int GetSubY();
-  int GetSubZ();
-  int GetIndex();
-  double GetMean();
-  double GetVariance();
-  double GetVariance8V();
+  int        GetSubX();
+  int        GetSubY();
+  int        GetSubZ();
+  int        GetIndex();
+  double     GetMean();
+  double     GetVariance();
+  double     GetVariance8V();
   CCubeNode *GetNextNode();
 
 private:
@@ -76,7 +76,7 @@ public:
   CQueue3D();
   ~CQueue3D();
 
-  void Enqueue(CCubeNode *ptrNewNode);
+  void       Enqueue(CCubeNode *ptrNewNode);
   CCubeNode *Dequeue();
   CCubeNode *GetHead();
   CCubeNode *GetTail();

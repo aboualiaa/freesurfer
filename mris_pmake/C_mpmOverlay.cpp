@@ -33,9 +33,9 @@
 
 #include "C_mpmOverlay.h"
 
-extern bool Gb_stdout;
-extern stringstream Gsout;
-extern const int STRBUF;
+extern bool              Gb_stdout;
+extern std::stringstream Gsout;
+extern const int         STRBUF;
 
 //
 //\\\---
@@ -47,12 +47,12 @@ extern const int STRBUF;
 // Base socket constructors/destructor, output dump routines
 //-----------------------------------------------------------
 
-void C_mpmOverlay::debug_push(string astr_currentProc) {
+void C_mpmOverlay::debug_push(std::string astr_currentProc) {
   if (stackDepth_get() >= SSTACKDEPTH - 1) {
-    cout << "Current stackDepth:\t" << stackDepth_get() << endl;
-    cout << "stackdepth limit:\t" << SSTACKDEPTH << endl;
+    std::cout << "Current stackDepth:\t" << stackDepth_get() << std::endl;
+    std::cout << "stackdepth limit:\t" << SSTACKDEPTH << std::endl;
     for (int i = 0; i < SSTACKDEPTH; i++)
-      cout << "Stack depth: " << i << "\t" << str_proc_get(i) << endl;
+      std::cout << "Stack depth: " << i << "\t" << str_proc_get(i) << std::endl;
     error("Out of str_proc stack depth");
   }
   stackDepth_set(stackDepth_get() + 1);
@@ -61,64 +61,65 @@ void C_mpmOverlay::debug_push(string astr_currentProc) {
 
 void C_mpmOverlay::debug_pop() { mstackDepth--; }
 
-void C_mpmOverlay::error(string astr_msg /* = ""  Error message */,
-                         int code /* = 1  Error ID  */) {
+void C_mpmOverlay::error(std::string astr_msg /* = ""  Error message */,
+                         int         code /* = 1  Error ID  */) {
 
   extern int errno;
 
-  cerr << "\nFatal error encountered.\n";
-  cerr << "\tC_mpmOverlay `" << mstr_name << "' (id: " << mid << ")\n";
-  cerr << "\tCurrent function: " << mstr_obj << "::" << str_proc_get() << "\n";
-  cerr << "\t" << astr_msg << "\n";
+  std::cerr << "\nFatal error encountered.\n";
+  std::cerr << "\tC_mpmOverlay `" << mstr_name << "' (id: " << mid << ")\n";
+  std::cerr << "\tCurrent function: " << mstr_obj << "::" << str_proc_get()
+            << "\n";
+  std::cerr << "\t" << astr_msg << "\n";
   perror("Error returned from system");
   print();
-  cerr << "Throwing exception to (this) with code " << code << "\n\n";
+  std::cerr << "Throwing exception to (this) with code " << code << "\n\n";
   throw(this);
 }
 
-void C_mpmOverlay::warn(string astr_msg /* = ""  Warning message */,
-                        int code /* = 1  Warning code  */) {
+void C_mpmOverlay::warn(std::string astr_msg /* = ""  Warning message */,
+                        int         code /* = 1  Warning code  */) {
   if (mwarnings) {
-    cerr << "\nWarning.\n";
-    cerr << "\tC_mpmOverlay `" << mstr_name << "' (id: " << mid << ")\n";
-    cerr << "\tCurrent function: " << mstr_obj << "::" << str_proc_get()
-         << "\n";
-    cerr << "\t" << astr_msg << " (warning code: " << code << ")\n";
+    std::cerr << "\nWarning.\n";
+    std::cerr << "\tC_mpmOverlay `" << mstr_name << "' (id: " << mid << ")\n";
+    std::cerr << "\tCurrent function: " << mstr_obj << "::" << str_proc_get()
+              << "\n";
+    std::cerr << "\t" << astr_msg << " (warning code: " << code << ")\n";
   }
 }
 
 void C_mpmOverlay::function_trace(
-    string astr_msg /* = ""  Trace message */,
-    string astr_separator /* = ""  Separator message */) {
-  int i;
-  string str_tab = "";
-  static string str_objectName = "";
-  static string str_funcName = "";
+    std::string astr_msg /* = ""  Trace message */,
+    std::string astr_separator /* = ""  Separator message */) {
+  int                i;
+  std::string        str_tab        = "";
+  static std::string str_objectName = "";
+  static std::string str_funcName   = "";
 
   if (mverbosity >= mstackDepth) {
-    cerr << astr_separator;
+    std::cerr << astr_separator;
     for (i = 0; i < mstackDepth; i++)
       str_tab += "    ";
     if (str_objectName != mstr_name) {
-      cerr << "\n" << mstr_obj << " `";
-      cerr << str_name_get() << "' (id: " << mid << ")" << endl;
+      std::cerr << "\n" << mstr_obj << " `";
+      std::cerr << str_name_get() << "' (id: " << mid << ")" << std::endl;
     }
     if (str_funcName != str_proc_get()) {
-      cerr << "\n" << str_tab << "Current function: " << mstr_obj << "::";
-      cerr << str_proc_get();
+      std::cerr << "\n" << str_tab << "Current function: " << mstr_obj << "::";
+      std::cerr << str_proc_get();
     }
-    cerr << "\n" << str_tab << astr_msg << endl;
+    std::cerr << "\n" << str_tab << astr_msg << std::endl;
   }
   str_objectName = str_name_get();
-  str_funcName = str_proc_get();
+  str_funcName   = str_proc_get();
 }
 
-void C_mpmOverlay::core_construct(string astr_name /* = "unnamed" */,
-                                  int a_id /* = -1  */,
-                                  int a_verbosity /* = 0  */,
-                                  int a_warnings /* = 0  */,
-                                  int a_stackDepth /* = 0  */,
-                                  string astr_proc /* = "noproc" */) {
+void C_mpmOverlay::core_construct(std::string astr_name /* = "unnamed" */,
+                                  int         a_id /* = -1  */,
+                                  int         a_verbosity /* = 0  */,
+                                  int         a_warnings /* = 0  */,
+                                  int         a_stackDepth /* = 0  */,
+                                  std::string astr_proc /* = "noproc" */) {
   //
   // ARGS
   //  astr_name       in      name of object
@@ -132,10 +133,10 @@ void C_mpmOverlay::core_construct(string astr_name /* = "unnamed" */,
   //  Common core statements for all constructors.
   //
 
-  mstr_name = astr_name;
-  mid = a_id;
-  mverbosity = a_verbosity;
-  mwarnings = a_warnings;
+  mstr_name   = astr_name;
+  mid         = a_id;
+  mverbosity  = a_verbosity;
+  mwarnings   = a_warnings;
   mstackDepth = a_stackDepth;
 
   str_proc_set(stackDepth_get(), "no name");
@@ -143,8 +144,8 @@ void C_mpmOverlay::core_construct(string astr_name /* = "unnamed" */,
 }
 
 C_mpmOverlay::C_mpmOverlay(s_env *aps_env) {
-  string str_name = "Unnamed C_mpmOverlay";
-  int id = 0;
+  std::string str_name = "Unnamed C_mpmOverlay";
+  int         id       = 0;
   core_construct(str_name, id);
   mps_env = aps_env;
 }
@@ -173,12 +174,11 @@ C_mpmOverlay &C_mpmOverlay::operator=(const C_mpmOverlay &C_mpmOverlay) {
 C_mpmOverlay::~C_mpmOverlay() {}
 
 void C_mpmOverlay::print() {
-  cout << "object name:\t" << mstr_name << endl;
-  cout << "object id:\t" << mid << endl;
-  cout << "object type:\t" << mstr_obj << endl;
+  std::cout << "object name:\t" << mstr_name << std::endl;
+  std::cout << "object id:\t" << mid << std::endl;
+  std::cout << "object type:\t" << mstr_obj << std::endl;
 }
-
-string C_mpmOverlay::curvFileName_get(EOVERLAY ae_overlay)
+std::string C_mpmOverlay::curvFileName_get(EOVERLAY ae_overlay)
 //
 // ARGS
 // ae_overlay		enum 		overlay enumeration
@@ -188,21 +188,21 @@ string C_mpmOverlay::curvFileName_get(EOVERLAY ae_overlay)
 //  on current hemisphere and env surface choice.
 //
 {
-  string str_hemi = mps_env->str_hemi;
-  string str_prefix("");
-  string str_suffix("");
-  string str_curvFileName("");
+  std::string str_hemi = mps_env->str_hemi;
+  std::string str_prefix("");
+  std::string str_suffix("");
+  std::string str_curvFileName("");
 
   str_prefix = mstr_curvPrefixTemplate[ae_overlay];
   str_findAndReplace(str_prefix, "HEMI.", str_hemi);
   str_findAndReplace(str_prefix, "SURF.", mstr_surface);
-  str_suffix = mstr_curvSuffix[ae_overlay];
+  str_suffix       = mstr_curvSuffix[ae_overlay];
   str_curvFileName = str_prefix + str_suffix;
 
   return str_curvFileName;
 }
 
-bool C_mpmOverlay::costVector_read(string astr_fileName) {
+bool C_mpmOverlay::costVector_read(std::string astr_fileName) {
   //
   // ARGS
   // astr_fileName		string 		file to read
@@ -224,7 +224,7 @@ bool C_mpmOverlay::costVector_read(string astr_fileName) {
   // 	o The internal mpv_costWeight and mpv_costWeightDel are initialized.
   //
 
-  float f_valcost = 0.;
+  float f_valcost    = 0.;
   float f_valcostdel = 0.;
 
   if (!astr_fileName.length())
@@ -232,7 +232,7 @@ bool C_mpmOverlay::costVector_read(string astr_fileName) {
   else
     mstr_costWeightFile = astr_fileName;
 
-  ifstream ifs_costVector(astr_fileName.c_str());
+  std::ifstream ifs_costVector(astr_fileName.c_str());
   if (!ifs_costVector)
     return false;
 
@@ -250,7 +250,7 @@ bool C_mpmOverlay::costVector_read(string astr_fileName) {
   return true;
 }
 
-bool C_mpmOverlay::costVector_write(string astr_fileName) {
+bool C_mpmOverlay::costVector_write(std::string astr_fileName) {
   //
   // ARGS
   // astr_fileName		string 		file to write
@@ -280,13 +280,13 @@ bool C_mpmOverlay::costVector_write(string astr_fileName) {
   else
     mstr_costWeightFile = astr_fileName;
 
-  ofstream ofs_costVector(astr_fileName.c_str());
+  std::ofstream ofs_costVector(astr_fileName.c_str());
   if (!ofs_costVector)
     return false;
 
   for (row = 0; row < (int)mv_costWeight.size(); row++) {
     ofs_costVector << mv_costWeight[row] << " ";
-    ofs_costVector << mv_costWeightDel[row] << endl;
+    ofs_costVector << mv_costWeightDel[row] << std::endl;
   }
 
   ofs_costVector.close();
@@ -303,13 +303,13 @@ bool C_mpmOverlay::costVector_write(string astr_fileName) {
   e_WRONGMAGICNUMBER.
 */
 #define NEW_VERSION_MAGIC_NUMBER 16777215
-e_FILEACCESS C_mpmOverlay::CURV_fileRead(string astr_curvFileName,
+e_FILEACCESS C_mpmOverlay::CURV_fileRead(std::string astr_curvFileName,
                                          float *apf_curv[], int *api_size) {
-  FILE *FP_curv;
-  int vnum;
-  int nvertices, nfaces, nvalsPerVertex;
-  int i;
-  char pch_readMessage[STRBUF];
+  FILE * FP_curv;
+  int    vnum;
+  int    nvertices, nfaces, nvalsPerVertex;
+  int    i;
+  char   pch_readMessage[STRBUF];
   float *pf_data = nullptr;
 
   if ((FP_curv = fopen(astr_curvFileName.c_str(), "r")) == nullptr) {
@@ -317,10 +317,10 @@ e_FILEACCESS C_mpmOverlay::CURV_fileRead(string astr_curvFileName,
   }
   fread3(&vnum, FP_curv);
   if (vnum == NEW_VERSION_MAGIC_NUMBER) {
-    nvertices = freadInt(FP_curv);
-    nfaces = freadInt(FP_curv);
+    nvertices      = freadInt(FP_curv);
+    nfaces         = freadInt(FP_curv);
     nvalsPerVertex = freadInt(FP_curv);
-    pf_data = (float *)malloc(nvertices * sizeof(float));
+    pf_data        = (float *)malloc(nvertices * sizeof(float));
     sprintf(pch_readMessage,
             "Reading %s (vertices: %d, faces: %d, valsPerVertex: %d)",
             astr_curvFileName.c_str(), nvertices, nfaces, nvalsPerVertex);
@@ -453,7 +453,7 @@ C_mpmOverlay_unity::C_mpmOverlay_unity(s_env *aps_env) : C_mpmOverlay(aps_env) {
   //
 
   debug_push("C_mpmOverlay_unity");
-  mstr_obj = "C_mpmProg_unity";
+  mstr_obj            = "C_mpmProg_unity";
   mstr_costWeightFile = "M_weights_unity.mat";
 
   if (!costVector_read()) {
@@ -481,8 +481,8 @@ float C_mpmOverlay_unity::costEdge_calc(int i, int j) {
 /////***
 //
 
-C_mpmOverlay_FScurvs::C_mpmOverlay_FScurvs(s_env *aps_env,
-                                           string astr_costWeightFile)
+C_mpmOverlay_FScurvs::C_mpmOverlay_FScurvs(s_env *     aps_env,
+                                           std::string astr_costWeightFile)
     : C_mpmOverlay(aps_env) {
   //
   // ARGS
@@ -513,7 +513,7 @@ C_mpmOverlay_FScurvs::C_mpmOverlay_FScurvs(s_env *aps_env,
   }
 
   // Size of overlay arrays
-  mv_size = aps_env->pMS_primary->nvertices;
+  mv_size    = aps_env->pMS_primary->nvertices;
   mb_created = true;
 
   debug_pop();
@@ -597,7 +597,7 @@ C_mpmOverlay_distance::C_mpmOverlay_distance(s_env *aps_env)
   //
 
   debug_push("C_mpmOverlay_distance");
-  mstr_obj = "C_mpmOverlay_distance";
+  mstr_obj            = "C_mpmOverlay_distance";
   mstr_costWeightFile = "M_weights_distance.mat";
 
   if (!costVector_read()) {
@@ -626,12 +626,12 @@ float C_mpmOverlay_distance::costEdge_calc(int i, int j) {
 
   VERTEX_TOPOLOGY const *const pVrtx_it =
       &mps_env->pMS_active->vertices_topology[i];
-  VERTEX const *const pVrtx_i = &mps_env->pMS_active->vertices[i];
-  float wd = mv_costWeight[0];
-  float f_distance = 0.;
-  float f_cost = 0.;
-  int jrel = 0;
-  int jrelcount;
+  VERTEX const *const pVrtx_i    = &mps_env->pMS_active->vertices[i];
+  float               wd         = mv_costWeight[0];
+  float               f_distance = 0.;
+  float               f_cost     = 0.;
+  int                 jrel       = 0;
+  int                 jrelcount;
 
   debug_push("costEdge_calc (...)");
 
@@ -641,7 +641,7 @@ float C_mpmOverlay_distance::costEdge_calc(int i, int j) {
       break;
     }
   }
-  j = jrel;
+  j          = jrel;
   f_distance = pVrtx_i->dist[j];
 
   f_cost = f_distance * wd;
@@ -693,7 +693,7 @@ C_mpmOverlay_euclidean::C_mpmOverlay_euclidean(s_env *aps_env)
   //
 
   debug_push("C_mpmOverlay_euclidean");
-  mstr_obj = "C_mpmOverlay_euclidean";
+  mstr_obj            = "C_mpmOverlay_euclidean";
   mstr_costWeightFile = "M_weights_euclidean.mat";
 
   if (!costVector_read()) {
@@ -721,11 +721,11 @@ float C_mpmOverlay_euclidean::costEdge_calc(int i, int j) {
   // them.
   //
 
-  VERTEX *pVrtx_i = &mps_env->pMS_active->vertices[i];
-  VERTEX *pVrtx_j = &mps_env->pMS_active->vertices[j];
-  float wd = mv_costWeight[0];
-  float f_distance = 0.;
-  float f_cost = 0.;
+  VERTEX *pVrtx_i    = &mps_env->pMS_active->vertices[i];
+  VERTEX *pVrtx_j    = &mps_env->pMS_active->vertices[j];
+  float   wd         = mv_costWeight[0];
+  float   f_distance = 0.;
+  float   f_cost     = 0.;
 
   debug_push("costEdge_calc (...)");
 
@@ -778,9 +778,9 @@ void C_mpmOverlay_curvature::costWeightVector_init() {
   mv_costWeightDel.push_back(1.);
 }
 
-C_mpmOverlay_curvature::C_mpmOverlay_curvature(s_env *aps_env,
-                                               string astr_curvFileStem,
-                                               string astr_costWeightFile)
+C_mpmOverlay_curvature::C_mpmOverlay_curvature(s_env *     aps_env,
+                                               std::string astr_curvFileStem,
+                                               std::string astr_costWeightFile)
     : C_mpmOverlay(aps_env) {
   //
   // ARGS
@@ -806,7 +806,7 @@ C_mpmOverlay_curvature::C_mpmOverlay_curvature(s_env *aps_env,
   int size = 0;
 
   debug_push("C_mpmOverlay_curvature");
-  mstr_obj = "C_mpmOverlay_curvature";
+  mstr_obj            = "C_mpmOverlay_curvature";
   mstr_costWeightFile = "M_weights_distance.mat";
 
   if (!astr_costWeightFile.length())
@@ -818,7 +818,7 @@ C_mpmOverlay_curvature::C_mpmOverlay_curvature(s_env *aps_env,
   }
 
   // Size of overlay arrays
-  mv_size = aps_env->pMS_primary->nvertices;
+  mv_size    = aps_env->pMS_primary->nvertices;
   mb_created = true;
 
   CURV_fileRead(astr_curvFileStem, &mpf_curvatureData, &size);
@@ -848,18 +848,18 @@ float C_mpmOverlay_curvature::costEdge_calc(int i, int j) {
   //   needs to be subtracted from the actual curvature value.
   //
 
-  float wc = mv_costWeight[0];
-  float f_curvI = 0.;
-  float f_curvJ = 0.;
-  float f_cost = 0.;
+  float wc        = mv_costWeight[0];
+  float f_curvI   = 0.;
+  float f_curvJ   = 0.;
+  float f_cost    = 0.;
   float f_curvAve = 0.;
 
   debug_push("costEdge_calc (...)");
 
-  f_curvI = (mpf_curvatureData[i] - mes_curvStats.f_min) * wc;
-  f_curvJ = (mpf_curvatureData[j] - mes_curvStats.f_min) * wc;
+  f_curvI   = (mpf_curvatureData[i] - mes_curvStats.f_min) * wc;
+  f_curvJ   = (mpf_curvatureData[j] - mes_curvStats.f_min) * wc;
   f_curvAve = (f_curvI + f_curvJ) / 2;
-  f_cost = f_curvAve;
+  f_cost    = f_curvAve;
 
   if (f_cost < 0)
     printf("Negative cost! I = %f, J = %f, Min = %f\n\n", f_curvI, f_curvJ,

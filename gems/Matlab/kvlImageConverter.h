@@ -2,7 +2,6 @@
 #define __kvlImageConverter_h
 
 #include "itkImage.h"
-#include "itkImage.h"
 #include "itkImageRegionIterator.h"
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
@@ -12,9 +11,9 @@ namespace kvl {
 
 // get mxClassID of any type T
 template <class T> inline mxClassID mxT() { return mxUNKNOWN_CLASS; }
-template <> inline mxClassID mxT<double>() { return mxDOUBLE_CLASS; }
-template <> inline mxClassID mxT<float>() { return mxSINGLE_CLASS; }
-template <> inline mxClassID mxT<short>() { return mxINT16_CLASS; }
+template <> inline mxClassID        mxT<double>() { return mxDOUBLE_CLASS; }
+template <> inline mxClassID        mxT<float>() { return mxSINGLE_CLASS; }
+template <> inline mxClassID        mxT<short>() { return mxINT16_CLASS; }
 template <> inline mxClassID mxT<unsigned short>() { return mxUINT16_CLASS; }
 template <> inline mxClassID mxT<unsigned char>() { return mxUINT8_CLASS; }
 
@@ -24,14 +23,14 @@ public:
   static itk::Object::Pointer Convert(const mxArray *matlabObject) {
     // Check if we can handle this matlab type
     typedef typename ImageType::PixelType PixelType;
-    mxClassID mxclass = mxT<PixelType>();
+    mxClassID                             mxclass = mxT<PixelType>();
     if (mxGetClassID(matlabObject) != mxclass) {
       return nullptr;
     }
 
     // Determine the size of the image to be created
     typedef typename ImageType::SizeType SizeType;
-    SizeType imageSize;
+    SizeType                             imageSize;
     for (int i = 0; i < 3; i++) {
       imageSize[i] = mxGetDimensions(matlabObject)[i];
       // std::cout << "imageSize[ i ]: " << imageSize[ i ] << std::endl;
@@ -75,9 +74,9 @@ public:
     }
 
     // Create the correct Matlab matrix type
-    mxClassID mxclass = mxT<PixelType>();
-    mxArray *matlabObject = mxCreateNumericArray(3, dims, mxclass, mxREAL);
-    auto *data = static_cast<PixelType *>(mxGetData(matlabObject));
+    mxClassID mxclass      = mxT<PixelType>();
+    mxArray * matlabObject = mxCreateNumericArray(3, dims, mxclass, mxREAL);
+    auto *    data         = static_cast<PixelType *>(mxGetData(matlabObject));
 
     // Loop over all voxels and copy contents
     itk::ImageRegionConstIterator<ImageType> it(image,

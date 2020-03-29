@@ -133,16 +133,16 @@
 */
 
 #include <cfloat>
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 #include <sys/stat.h>
 
 #include "diag.h"
 #include "fsglm.h"
-#include "timer.h"
 #include "numerics.h"
 #include "randomfields.h"
+#include "timer.h"
 #include "utils.h"
 #undef X
 
@@ -171,62 +171,62 @@ int GLManalyze(GLMMAT *glm) {
   GLMcMatrices(), and GLMxMatrices.
   -------------------------------------------------------*/
 GLMMAT *GLMalloc() {
-  int n;
+  int     n;
   GLMMAT *glm;
 
-  glm = (GLMMAT *)calloc(sizeof(GLMMAT), 1);
-  glm->y = nullptr;
-  glm->X = nullptr;
-  glm->beta = nullptr;
-  glm->yhat = nullptr;
-  glm->eres = nullptr;
-  glm->rvar = 0;
-  glm->dof = 0;
-  glm->AllowZeroDOF = 0;
+  glm                = (GLMMAT *)calloc(sizeof(GLMMAT), 1);
+  glm->y             = nullptr;
+  glm->X             = nullptr;
+  glm->beta          = nullptr;
+  glm->yhat          = nullptr;
+  glm->eres          = nullptr;
+  glm->rvar          = 0;
+  glm->dof           = 0;
+  glm->AllowZeroDOF  = 0;
   glm->ill_cond_flag = 0;
-  glm->ReScaleX = 0;
+  glm->ReScaleX      = 0;
 
   glm->yffxvar = nullptr;
-  glm->ffxdof = 0;
+  glm->ffxdof  = 0;
 
-  glm->Xt = nullptr;
-  glm->XtX = nullptr;
+  glm->Xt   = nullptr;
+  glm->XtX  = nullptr;
   glm->iXtX = nullptr;
-  glm->Xty = nullptr;
+  glm->Xty  = nullptr;
 
-  glm->DoPCC = 0;
+  glm->DoPCC      = 0;
   glm->ncontrasts = 0;
 
   for (n = 0; n < GLMMAT_NCONTRASTS_MAX; n++) {
-    glm->C[n] = nullptr;
-    glm->Cname[n] = nullptr;
-    glm->Ccond[n] = -1;
-    glm->gamma0[n] = nullptr;
+    glm->C[n]         = nullptr;
+    glm->Cname[n]     = nullptr;
+    glm->Ccond[n]     = -1;
+    glm->gamma0[n]    = nullptr;
     glm->UseGamma0[n] = 0;
 
-    glm->Mpmf[n] = nullptr;
+    glm->Mpmf[n]     = nullptr;
     glm->ypmfflag[n] = 0;
-    glm->ypmf[n] = nullptr;
+    glm->ypmf[n]     = nullptr;
 
     glm->gamma[n] = nullptr;
-    glm->gCVM[n] = nullptr;
+    glm->gCVM[n]  = nullptr;
 
-    glm->F[n] = 0;
-    glm->p[n] = 0;
-    glm->z[n] = 0;
+    glm->F[n]   = 0;
+    glm->p[n]   = 0;
+    glm->z[n]   = 0;
     glm->pcc[n] = 0;
 
-    glm->Ct[n] = nullptr;
-    glm->CiXtX[n] = nullptr;
+    glm->Ct[n]      = nullptr;
+    glm->CiXtX[n]   = nullptr;
     glm->CiXtXCt[n] = nullptr;
 
     glm->XCt[n] = nullptr;
-    glm->Dt[n] = nullptr;
+    glm->Dt[n]  = nullptr;
     glm->XDt[n] = nullptr;
-    glm->RD[n] = nullptr;
+    glm->RD[n]  = nullptr;
 
-    glm->igCVM[n] = nullptr;
-    glm->gammat[n] = nullptr;
+    glm->igCVM[n]   = nullptr;
+    glm->gammat[n]  = nullptr;
     glm->gtigCVM[n] = nullptr;
   }
   return (glm);
@@ -295,7 +295,7 @@ int GLMallocYFFxVar(GLMMAT *glm) {
   and the GLM struct itself.
   ------------------------------------------------------------------*/
 int GLMfree(GLMMAT **pglm) {
-  int n;
+  int     n;
   GLMMAT *glm;
   glm = *pglm;
 
@@ -390,7 +390,7 @@ int GLMcMatrices(GLMMAT *glm) {
   int n, err;
 
   for (n = 0; n < glm->ncontrasts; n++) {
-    glm->Ct[n] = MatrixTranspose(glm->C[n], nullptr);
+    glm->Ct[n]   = MatrixTranspose(glm->C[n], nullptr);
     glm->Mpmf[n] = GLMpmfMatrix(glm->C[n], &glm->Ccond[n], nullptr);
 
     if (glm->C[n]->rows == 1 && glm->DoPCC) {
@@ -403,7 +403,7 @@ int GLMcMatrices(GLMMAT *glm) {
       glm->XCt[n] = MatrixMultiplyD(glm->X, glm->Ct[n], nullptr);
       // design matrix projected onto contrast null space (nuisance reg space)
       glm->XDt[n] = MatrixMultiplyD(glm->X, glm->Dt[n], nullptr);
-      glm->RD[n] = MatrixResidualForming(glm->XDt[n], nullptr);
+      glm->RD[n]  = MatrixResidualForming(glm->XDt[n], nullptr);
       if (glm->RD[n] == nullptr) {
         printf("RD is not invertable n = %d\n", n);
         MatrixWriteTxt("X.mtx", glm->X);
@@ -413,9 +413,9 @@ int GLMcMatrices(GLMMAT *glm) {
         exit(1);
       }
       // Orthogonalize Xc wrt the nuisance regressors (yhat too, but later)
-      glm->Xcd[n] = MatrixMultiplyD(glm->RD[n], glm->XCt[n], nullptr);
-      glm->Xcdt[n] = MatrixTranspose(glm->Xcd[n], nullptr);
-      glm->sumXcd[n] = MatrixSum(glm->Xcd[n], 1, nullptr);
+      glm->Xcd[n]     = MatrixMultiplyD(glm->RD[n], glm->XCt[n], nullptr);
+      glm->Xcdt[n]    = MatrixTranspose(glm->Xcd[n], nullptr);
+      glm->sumXcd[n]  = MatrixSum(glm->Xcd[n], 1, nullptr);
       glm->sumXcd2[n] = MatrixSumSquare(glm->Xcd[n], 1, nullptr);
     } else
       glm->Dt[n] = nullptr; // make sure
@@ -432,9 +432,9 @@ int GLMcMatrices(GLMMAT *glm) {
   is the same at all voxels, then it is not necessary.
   ---------------------------------------------------------------*/
 int GLMxMatrices(GLMMAT *glm) {
-  int n, c, r;
+  int     n, c, r;
   MATRIX *Mtmp, *Xnorm, *Xtnorm, *Xscale, *XtX;
-  double v;
+  double  v;
   Xscale = nullptr;
 
   glm->dof = glm->X->rows - glm->X->cols;
@@ -445,13 +445,13 @@ int GLMxMatrices(GLMMAT *glm) {
   if (glm->Xt && glm->Xt->cols != glm->X->rows)
     MatrixFree(&glm->Xt);
 
-  glm->Xt = MatrixTranspose(glm->X, glm->Xt);
+  glm->Xt  = MatrixTranspose(glm->X, glm->Xt);
   glm->XtX = MatrixMultiplyD(glm->Xt, glm->X, glm->XtX);
   if (glm->ReScaleX) {
     Xscale = MatrixAlloc(glm->X->cols, 1, MATRIX_REAL);
-    Xnorm = MatrixNormalizeCol(glm->X, nullptr, Xscale);
+    Xnorm  = MatrixNormalizeCol(glm->X, nullptr, Xscale);
     Xtnorm = MatrixTranspose(Xnorm, nullptr);
-    XtX = MatrixMultiplyD(Xtnorm, Xnorm, nullptr);
+    XtX    = MatrixMultiplyD(Xtnorm, Xnorm, nullptr);
   } else
     XtX = glm->XtX;
 
@@ -465,7 +465,7 @@ int GLMxMatrices(GLMMAT *glm) {
     return (1);
   }
   glm->ill_cond_flag = 0;
-  glm->iXtX = Mtmp;
+  glm->iXtX          = Mtmp;
   if (glm->ReScaleX) {
     for (c = 1; c <= glm->iXtX->rows; c++) {
       for (r = 1; r <= glm->iXtX->rows; r++) {
@@ -535,22 +535,22 @@ int GLMfit(GLMMAT *glm) {
   run GLMcMatrices(), GLMxMatrices(), and GLMfit(). See also GLMtestFFX().
   ------------------------------------------------------------------------*/
 int GLMtest(GLMMAT *glm) {
-  int n;
-  double dtmp;
+  int            n;
+  double         dtmp;
   static MATRIX *F = nullptr, *mtmp = nullptr;
-  static RFS *rfs = nullptr;
+  static RFS *   rfs = nullptr;
 
   if (rfs == nullptr) {
-    rfs = RFspecInit(0, nullptr);
+    rfs       = RFspecInit(0, nullptr);
     rfs->name = strcpyalloc("z");
   }
 
   if (glm->ill_cond_flag) {
     // If it's ill cond, just return F=0
     for (n = 0; n < glm->ncontrasts; n++) {
-      glm->F[n] = 0;
-      glm->p[n] = 1;
-      glm->z[n] = 0;
+      glm->F[n]   = 0;
+      glm->p[n]   = 1;
+      glm->z[n]   = 0;
       glm->pcc[n] = 0;
     }
     return (0);
@@ -580,8 +580,8 @@ int GLMtest(GLMMAT *glm) {
     if (glm->UseGamma0[n])
       MatrixSubtract(glm->gamma[n], glm->gamma0[n], glm->gamma[n]);
     glm->gammat[n] = MatrixTranspose(glm->gamma[n], glm->gammat[n]);
-    glm->gCVM[n] = MatrixScalarMul(glm->CiXtXCt[n], dtmp, glm->gCVM[n]);
-    mtmp = MatrixInverse(glm->CiXtXCt[n], glm->igCVM[n]);
+    glm->gCVM[n]   = MatrixScalarMul(glm->CiXtXCt[n], dtmp, glm->gCVM[n]);
+    mtmp           = MatrixInverse(glm->CiXtXCt[n], glm->igCVM[n]);
     if (mtmp != nullptr && glm->rvar > FLT_MIN) {
       glm->igCVM[n] = MatrixScalarMul(glm->igCVM[n], 1.0 / dtmp, glm->igCVM[n]);
       glm->gtigCVM[n] =
@@ -623,9 +623,9 @@ int GLMtest(GLMMAT *glm) {
     } else {
       // this usually happens when the var is close to 0. But if this is
       // happening, should probably use a mask.
-      glm->F[n] = 0;
-      glm->p[n] = 1;
-      glm->z[n] = 0;
+      glm->F[n]   = 0;
+      glm->p[n]   = 1;
+      glm->z[n]   = 0;
       glm->pcc[n] = 0;
     }
     if (glm->ypmfflag[n])
@@ -639,8 +639,8 @@ int GLMtest(GLMMAT *glm) {
   run GLMcMatrices(), GLMxMatrices(), and GLMfit(). See also GLMtest().
   ------------------------------------------------------------------------*/
 int GLMtestFFx(GLMMAT *glm) {
-  double val;
-  int n, r, c;
+  double         val;
+  int            n, r, c;
   static MATRIX *F = nullptr, *mtmp = nullptr;
   MATRIX *Xs = nullptr, *Xst = nullptr, *CiXtXXs = nullptr, *CiXtXXst = nullptr;
 
@@ -671,16 +671,16 @@ int GLMtestFFx(GLMMAT *glm) {
       MatrixSubtract(glm->gamma[n], glm->gamma0[n], glm->gamma[n]);
     glm->gammat[n] = MatrixTranspose(glm->gamma[n], glm->gammat[n]);
 
-    CiXtXXs = MatrixMultiplyD(glm->CiXtX[n], Xst, nullptr);
-    CiXtXXst = MatrixTranspose(CiXtXXs, nullptr);
+    CiXtXXs      = MatrixMultiplyD(glm->CiXtX[n], Xst, nullptr);
+    CiXtXXst     = MatrixTranspose(CiXtXXs, nullptr);
     glm->gCVM[n] = MatrixMultiplyD(CiXtXXs, CiXtXXst, glm->gCVM[n]);
-    mtmp = MatrixInverse(glm->gCVM[n], glm->igCVM[n]);
+    mtmp         = MatrixInverse(glm->gCVM[n], glm->igCVM[n]);
     if (mtmp != nullptr) {
       glm->gtigCVM[n] =
           MatrixMultiplyD(glm->gammat[n], glm->igCVM[n], glm->gtigCVM[n]);
-      F = MatrixMultiplyD(glm->gtigCVM[n], glm->gamma[n], F);
-      glm->F[n] = F->rptr[1][1];
-      glm->p[n] = sc_cdf_fdist_Q(glm->F[n], glm->C[n]->rows, glm->ffxdof);
+      F             = MatrixMultiplyD(glm->gtigCVM[n], glm->gamma[n], F);
+      glm->F[n]     = F->rptr[1][1];
+      glm->p[n]     = sc_cdf_fdist_Q(glm->F[n], glm->C[n]->rows, glm->ffxdof);
       glm->igCVM[n] = mtmp;
     } else {
       // this usually happens when the var is close to 0. But if this is
@@ -706,17 +706,17 @@ int GLMtestFFx(GLMMAT *glm) {
   the number of msec used.
   -----------------------------------------------------------*/
 int GLMprofile(int nrows, int ncols, int ncon, int niters) {
-  int n, c, msec;
+  int     n, c, msec;
   GLMMAT *glm;
-  Timer then;
+  Timer   then;
 
   for (n = 0; n < niters; n++) {
-    glm = GLMalloc();
-    glm->y = MatrixDRand48(nrows, 1, nullptr);
-    glm->X = MatrixDRand48(nrows, ncols, nullptr);
+    glm             = GLMalloc();
+    glm->y          = MatrixDRand48(nrows, 1, nullptr);
+    glm->X          = MatrixDRand48(nrows, ncols, nullptr);
     glm->ncontrasts = ncon;
     for (c = 0; c < glm->ncontrasts; c++) {
-      glm->C[c] = MatrixDRand48(2, ncols, nullptr);
+      glm->C[c]        = MatrixDRand48(2, ncols, nullptr);
       glm->ypmfflag[c] = 1;
     }
     GLMcMatrices(glm);
@@ -739,19 +739,19 @@ int GLMprofile(int nrows, int ncols, int ncon, int niters) {
   ---------------------------------------------------------*/
 GLMMAT *GLMsynth() {
   static char tmpstr[1000];
-  int nrows, ncols, ncon, c;
-  GLMMAT *glm;
+  int         nrows, ncols, ncon, c;
+  GLMMAT *    glm;
 
   nrows = 100;
   ncols = 10;
-  ncon = 3;
+  ncon  = 3;
 
-  glm = GLMalloc();
-  glm->y = MatrixDRand48(nrows, 1, nullptr);
-  glm->X = MatrixDRand48(nrows, ncols, nullptr);
+  glm             = GLMalloc();
+  glm->y          = MatrixDRand48(nrows, 1, nullptr);
+  glm->X          = MatrixDRand48(nrows, ncols, nullptr);
   glm->ncontrasts = ncon;
   for (c = 0; c < ncon; c++) {
-    glm->C[c] = MatrixDRand48(c + 1, ncols, nullptr);
+    glm->C[c]        = MatrixDRand48(c + 1, ncols, nullptr);
     glm->ypmfflag[c] = 1;
     sprintf(tmpstr, "contrast%02d", c);
     glm->Cname[c] = strcpyalloc(tmpstr);
@@ -774,13 +774,13 @@ GLMMAT *GLMsynth() {
   rvar is passed.
   ---------------------------------------------------------*/
 int GLMresynthTest(int niters, double *prvar) {
-  int nrows, ncols, n;
+  int     nrows, ncols, n;
   GLMMAT *glm;
-  double rvarmax;
+  double  rvarmax;
 
   nrows = 100;
   ncols = 10;
-  glm = GLMalloc();
+  glm   = GLMalloc();
 
   rvarmax = 0;
   for (n = 0; n < niters; n++) {
@@ -817,9 +817,9 @@ int GLMresynthTest(int niters, double *prvar) {
   struct into ascii files in the given directory.
   ---------------------------------------------------------*/
 int GLMdump(char *dumpdir, GLMMAT *glm) {
-  char fname[1000], condir[1000];
+  char  fname[1000], condir[1000];
   FILE *fp;
-  int c;
+  int   c;
 
   mkdir(dumpdir, 0777);
 
@@ -922,12 +922,12 @@ MATRIX *GLMpmfMatrix(MATRIX *C, double *cond, MATRIX *P) {
     }
   }
 
-  Ct = MatrixTranspose(C, Ct);
-  CCt = MatrixMultiplyD(C, Ct, CCt);
-  *cond = MatrixConditionNumber(CCt);
-  iCCt = MatrixInverse(CCt, iCCt);
+  Ct     = MatrixTranspose(C, Ct);
+  CCt    = MatrixMultiplyD(C, Ct, CCt);
+  *cond  = MatrixConditionNumber(CCt);
+  iCCt   = MatrixInverse(CCt, iCCt);
   CtiCCt = MatrixMultiplyD(Ct, iCCt, CtiCCt);
-  P = MatrixMultiplyD(CtiCCt, C, P);
+  P      = MatrixMultiplyD(CtiCCt, C, P);
 
   MatrixFree(&Ct);
   MatrixFree(&CCt);

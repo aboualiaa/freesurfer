@@ -26,12 +26,12 @@
 #ifndef EM_REGISTER_UTILS_H
 #define EM_REGISTER_UTILS_H
 
-#include "mri.h"
 #include "gca.h"
 #include "matrix.h"
+#include "mri.h"
 
-extern int exvivo;
-extern int robust;
+extern int   exvivo;
+extern int   robust;
 extern float G_wm_mean, G_gm_mean, G_fluid_mean;
 
 double local_GCAcomputeLogSampleProbability(GCA *gca, GCA_SAMPLE *gcas,

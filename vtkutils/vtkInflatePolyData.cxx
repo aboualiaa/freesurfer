@@ -49,9 +49,9 @@ vtkInflatePolyData::vtkInflatePolyData() : InflateFactor(0.1) {}
 vtkInflatePolyData::~vtkInflatePolyData() {}
 
 int vtkInflatePolyData::RequestInformation(
-    vtkInformation *vtkNotUsed(iRequest),
+    vtkInformation *       vtkNotUsed(iRequest),
     vtkInformationVector **vtkNotUsed(ioaInputInfo),
-    vtkInformationVector *ioaOutputInfo) {
+    vtkInformationVector * ioaOutputInfo) {
 
   // Get the first info from the output. (Should only have 1.)
   vtkInformation *outInfo = ioaOutputInfo->GetInformationObject(0);
@@ -67,7 +67,7 @@ int vtkInflatePolyData::RequestUpdateExtent(
     vtkInformationVector *ioaOutputInfo) {
 
   // Get the first info from input and output. (Should only have 1.)
-  vtkInformation *inInfo = ioaInputInfo[0]->GetInformationObject(0);
+  vtkInformation *inInfo  = ioaInputInfo[0]->GetInformationObject(0);
   vtkInformation *outInfo = ioaOutputInfo->GetInformationObject(0);
 
   if (outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER()) ==
@@ -85,12 +85,12 @@ int vtkInflatePolyData::RequestUpdateExtent(
   return 1;
 }
 
-int vtkInflatePolyData::RequestData(vtkInformation *vtkNotUsed(iRequest),
+int vtkInflatePolyData::RequestData(vtkInformation *       vtkNotUsed(iRequest),
                                     vtkInformationVector **ioaInputInfo,
-                                    vtkInformationVector *ioaOutputInfo) {
+                                    vtkInformationVector * ioaOutputInfo) {
 
   // Get the first info from input and output. (Should only have 1.)
-  vtkInformation *inInfo = ioaInputInfo[0]->GetInformationObject(0);
+  vtkInformation *inInfo  = ioaInputInfo[0]->GetInformationObject(0);
   vtkInformation *outInfo = ioaOutputInfo->GetInformationObject(0);
 
   // Get the poly data from each.
@@ -129,8 +129,8 @@ int vtkInflatePolyData::RequestData(vtkInformation *vtkNotUsed(iRequest),
   std::map<int, std::map<int, double>> aNormals;
 
   // For each polygon...
-  vtkIdType cellID = 0;
-  vtkIdType cPoints = 0;
+  vtkIdType  cellID  = 0;
+  vtkIdType  cPoints = 0;
   vtkIdType *pPoints = nullptr;
   for (polys->InitTraversal(); polys->GetNextCell(cPoints, pPoints); cellID++) {
 
@@ -205,5 +205,5 @@ int vtkInflatePolyData::RequestData(vtkInformation *vtkNotUsed(iRequest),
 void vtkInflatePolyData::PrintSelf(ostream &os, vtkIndent indent) {
   this->Superclass::PrintSelf(os, indent);
 
-  os << indent << "Inflation Factor: " << this->InflateFactor << endl;
+  os << indent << "Inflation Factor: " << this->InflateFactor << std::endl;
 }

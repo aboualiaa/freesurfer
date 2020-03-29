@@ -1,14 +1,12 @@
-#include <limits>
-#include <stdexcept>
-#include <sstream>
-#include <assert.h>
 #include "vtkKWBltGraph.h"
-#include "vtkKWMenu.h"
 #include "vtkCommand.h"
+#include "vtkKWMenu.h"
 #include "vtkObjectFactory.h"
 #include "vtkSmartPointer.h"
-
-using namespace std;
+#include <assert.h>
+#include <limits>
+#include <sstream>
+#include <stdexcept>
 
 vtkStandardNewMacro(vtkKWBltGraph);
 vtkCxxRevisionMacro(vtkKWBltGraph, "$Revision: 1.15 $");
@@ -163,7 +161,7 @@ void vtkKWBltGraph::SetXAxisTitle(const char *isTitle) {
     delete[] XAxisTitle;
 
   if (isTitle) {
-    int len = strlen(isTitle);
+    int len    = strlen(isTitle);
     XAxisTitle = new char[len + 1];
     strcpy(XAxisTitle, isTitle);
   } else {
@@ -187,7 +185,7 @@ void vtkKWBltGraph::SetYAxisTitle(const char *isTitle) {
     delete[] YAxisTitle;
 
   if (isTitle) {
-    int len = strlen(isTitle);
+    int len    = strlen(isTitle);
     YAxisTitle = new char[len + 1];
     strcpy(YAxisTitle, isTitle);
   } else {
@@ -199,24 +197,25 @@ void vtkKWBltGraph::SetYAxisTitle(const char *isTitle) {
   this->UpdateYAxisTitle();
 }
 
-void vtkKWBltGraph::AddElement(const char *isLabel, vector<double> &iPoints,
+void vtkKWBltGraph::AddElement(const char *         isLabel,
+                               std::vector<double> &iPoints,
                                const char *isSymbol, int iLineWidth,
                                double iRed, double iGreen, double iBlue) {
 
   if (NULL == isLabel)
-    throw runtime_error("isLabel argument must not be provided");
+    throw std::runtime_error("isLabel argument must not be provided");
 
   // See if we already have an element with this label
   GraphElementList::iterator tElement;
   for (tElement = mElements.begin(); tElement != mElements.end(); ++tElement) {
     if (tElement->msLabel == isLabel) {
-      throw runtime_error("Element already exists!");
+      throw std::runtime_error("Element already exists!");
     }
   }
 
   // Make sure we have the right number of points.
   if (iPoints.size() == 0 || iPoints.size() % 2 != 0)
-    throw runtime_error("Points must have an even number of elements");
+    throw std::runtime_error("Points must have an even number of elements");
 
   // Make a graph element structure with this data.
   GraphElement element;
@@ -225,9 +224,9 @@ void vtkKWBltGraph::AddElement(const char *isLabel, vector<double> &iPoints,
   if (isSymbol)
     element.msSymbol = isSymbol;
   element.mLineWidth = iLineWidth;
-  element.mRed = iRed;
-  element.mGreen = iGreen;
-  element.mBlue = iBlue;
+  element.mRed       = iRed;
+  element.mGreen     = iGreen;
+  element.mBlue      = iBlue;
 
   // Add it to our list of elements.
   mElements.push_back(element);
@@ -307,8 +306,8 @@ void vtkKWBltGraph::Draw() {
     GraphElement &element = *tElement;
 
     // Make a string with the point data.
-    stringstream ssData;
-    vector<double>::iterator tPoint;
+    std::stringstream             ssData;
+    std::vector<double>::iterator tPoint;
     for (tPoint = element.mPoints.begin(); tPoint != element.mPoints.end();
          ++tPoint) {
       ssData << (*tPoint) << " ";
@@ -335,8 +334,8 @@ void vtkKWBltGraph::MotionCallback(const char *isWidget, int iX, int iY) {
   if (sReply) {
 
     // Extract the x and y from the reply.
-    float x, y;
-    stringstream ssReply(sReply);
+    float             x, y;
+    std::stringstream ssReply(sReply);
     ssReply >> x >> y;
 
     // Go through our elements and try to find the closest point.
@@ -346,21 +345,21 @@ void vtkKWBltGraph::MotionCallback(const char *isWidget, int iX, int iY) {
 
       GraphElement &element = *tElement;
 
-      double minDist2 = std::numeric_limits<double>::max();
-      string sMinElement = "";
-      int nMinPoint = 0;
-      double minX = 0, minY = 0;
+      double      minDist2    = std::numeric_limits<double>::max();
+      std::string sMinElement = "";
+      int         nMinPoint   = 0;
+      double      minX = 0, minY = 0;
 
-      vector<double>::iterator tPoint;
-      bool bX = true;
-      double pointX = 0, pointY = 0;
-      int nPoint = 0;
+      std::vector<double>::iterator tPoint;
+      bool                          bX     = true;
+      double                        pointX = 0, pointY = 0;
+      int                           nPoint = 0;
       for (tPoint = element.mPoints.begin(); tPoint != element.mPoints.end();
            ++tPoint) {
         // Get an x one round, then get a y the next one.
         if (bX) {
           pointX = (*tPoint);
-          bX = false;
+          bX     = false;
         } else {
           pointY = (*tPoint);
           // Calc the distance and compare.
@@ -368,11 +367,11 @@ void vtkKWBltGraph::MotionCallback(const char *isWidget, int iX, int iY) {
               (pointX - x) * (pointX - x) + (pointY - y) * (pointY - y);
           if (dist2 < minDist2) {
             // If this is a new min, save its info.
-            minDist2 = dist2;
+            minDist2    = dist2;
             sMinElement = element.msLabel;
-            nMinPoint = nPoint;
-            minX = pointX;
-            minY = pointY;
+            nMinPoint   = nPoint;
+            minX        = pointX;
+            minY        = pointY;
           }
           bX = true;
           nPoint++;
@@ -386,25 +385,25 @@ void vtkKWBltGraph::MotionCallback(const char *isWidget, int iX, int iY) {
         sReply = this->Script("%s transform %f %f", this->GetWidgetName(), minX,
                               minY);
         if (sReply) {
-          float minWindowX, minWindowY;
-          stringstream ssReply(sReply);
+          float             minWindowX, minWindowY;
+          std::stringstream ssReply(sReply);
           ssReply >> minWindowX >> minWindowY;
           double distance = sqrt((minWindowX - iX) * (minWindowX - iX) +
                                  (minWindowY - iY) * (minWindowY - iY));
           if (distance < mMouseoverDistanceToElement) {
             // We found a good one. Notify our observers.
             SelectedElementAndPoint foundElement;
-            foundElement.msLabel = sMinElement.c_str();
-            foundElement.mnPointInElement = nMinPoint;
-            foundElement.mElementX = minX;
-            foundElement.mElementY = minY;
-            foundElement.mWindowX = iX;
-            foundElement.mWindowY = iY;
+            foundElement.msLabel            = sMinElement.c_str();
+            foundElement.mnPointInElement   = nMinPoint;
+            foundElement.mElementX          = minX;
+            foundElement.mElementY          = minY;
+            foundElement.mWindowX           = iX;
+            foundElement.mWindowY           = iY;
             foundElement.mDistanceToElement = distance;
             this->InvokeEvent(MouseoverEnterElementEvent, &foundElement);
 
             // Remember information about this moused over element.
-            mbCurrentlyOverElement = true;
+            mbCurrentlyOverElement    = true;
             msCurrentMouseoverElement = sMinElement.c_str();
             return;
           }
@@ -436,7 +435,7 @@ void vtkKWBltGraph::Button3DownCallback(const char *isWidget, int iX, int iY) {
     // element, and invoke the event that will let observers populate
     // the menu.
     ContextualMenuElement data;
-    data.mMenu = popup;
+    data.mMenu     = popup;
     data.msElement = msCurrentMouseoverElement.c_str();
     this->InvokeEvent(ContextualMenuOpening, (void *)&data);
 

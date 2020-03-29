@@ -1,8 +1,8 @@
 #include "DialogSmoothSurface.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
 #include "ui_DialogSmoothSurface.h"
 #include <QMessageBox>
-#include "MainWindow.h"
-#include "LayerSurface.h"
 #include <QTimer>
 
 DialogSmoothSurface::DialogSmoothSurface(QWidget *parent)
@@ -20,8 +20,8 @@ void DialogSmoothSurface::OnApply() {
       QMessageBox::warning(this, "Error", "No active surface found.");
       return;
     }
-    int niters = ui->lineEditIterations->text().toInt();
-    double lambda = ui->lineEditLambda->text().toDouble();
+    int    niters   = ui->lineEditIterations->text().toInt();
+    double lambda   = ui->lineEditLambda->text().toDouble();
     double k_cutoff = ui->lineEditFrequencyCutoff->text().toDouble();
     surf->SmoothSurface(ui->comboBoxMethod->currentIndex(), niters, lambda,
                         k_cutoff);
@@ -33,7 +33,7 @@ void DialogSmoothSurface::OnApply() {
 
 bool DialogSmoothSurface::ValidateAll() {
   bool ok;
-  int nVal = ui->lineEditIterations->text().toInt(&ok);
+  int  nVal = ui->lineEditIterations->text().toInt(&ok);
   if (!ok || nVal < 0) {
     QMessageBox::warning(this, "Error", "Number of iterations is not valid.");
     return false;

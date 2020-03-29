@@ -25,26 +25,26 @@
 #ifndef WIDGETTIMECOURSEPLOT_H
 #define WIDGETTIMECOURSEPLOT_H
 
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 
 struct TimeCourseData {
 public:
   TimeCourseData() {
-    m_bShow = true;
-    m_dXOffset = 0;
+    m_bShow      = true;
+    m_dXOffset   = 0;
     m_dXInterval = 1;
   }
   QList<double> m_points;
-  double m_dMin;
-  double m_dMax;
-  QString m_strXUnit;
-  double m_dXOffset;
-  double m_dXInterval;
-  qint64 m_nId;
-  QString m_strName;
+  double        m_dMin;
+  double        m_dMax;
+  QString       m_strXUnit;
+  double        m_dXOffset;
+  double        m_dXInterval;
+  qint64        m_nId;
+  QString       m_strName;
 
-  bool m_bShow;
+  bool   m_bShow;
   QColor m_color;
 };
 
@@ -91,21 +91,21 @@ signals:
 
 private:
   QList<TimeCourseData> m_data;
-  double m_dMin;
-  double m_dMax;
-  double m_dLocalMin;
-  double m_dLocalMax;
-  double m_dMinPlot;
-  double m_dMaxPlot;
-  bool m_bAutoScale;
-  int m_nCurrentFrame;
-  int m_nFrames;
-  QRectF m_rectPlot;
-  bool m_bShowFrameNumber;
+  double                m_dMin;
+  double                m_dMax;
+  double                m_dLocalMin;
+  double                m_dLocalMax;
+  double                m_dMinPlot;
+  double                m_dMaxPlot;
+  bool                  m_bAutoScale;
+  int                   m_nCurrentFrame;
+  int                   m_nFrames;
+  QRectF                m_rectPlot;
+  bool                  m_bShowFrameNumber;
 
   QColor m_colorBackground;
   QColor m_colorForeground;
-  bool m_bDarkMode;
+  bool   m_bDarkMode;
 
   bool m_bShowCursorInfo;
 };

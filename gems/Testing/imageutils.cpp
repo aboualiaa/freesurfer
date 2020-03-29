@@ -3,12 +3,12 @@
 #include <itkAutomaticTopologyMeshSource.h>
 
 typedef itk::AutomaticTopologyMeshSource<kvl::AtlasMesh> MeshSource;
-typedef MeshSource::IdentifierType IdentifierType;
+typedef MeshSource::IdentifierType                       IdentifierType;
 
 namespace kvl {
 namespace Testing {
 kvl::AtlasMesh::Pointer
-CreateSingleTetrahedronMesh(const float vertices[nVertices][nDims],
+CreateSingleTetrahedronMesh(const float        vertices[nVertices][nDims],
                             const unsigned int nAlphas) {
   MeshSource::Pointer meshSource = MeshSource::New();
 

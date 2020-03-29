@@ -1,32 +1,33 @@
 #ifndef _HierarchicalClusteringPruner_h_
 #define _HierarchicalClusteringPruner_h_
 
-#include "itkMeshToMeshFilter.h"
 #include "AppendBundleFilter.h"
+#include "itkMeshToMeshFilter.h"
+
 enum FiberFormat { VTK = 0, TRK = 1 };
 
 template <class TOutputMesh, class TImageType>
-class HierarchicalClusteringPruner : public MeshSource<TOutputMesh> {
+class HierarchicalClusteringPruner : public itk::MeshSource<TOutputMesh> {
 public:
-  using Self = HierarchicalClusteringPruner<TOutputMesh, TImageType>;
-  using Superclass = MeshSource<TOutputMesh>;
-  using Pointer = SmartPointer<Self>;
-  using ConstPointer = SmartPointer<const Self>;
+  using Self         = HierarchicalClusteringPruner<TOutputMesh, TImageType>;
+  using Superclass   = itk::MeshSource<TOutputMesh>;
+  using Pointer      = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
   itkNewMacro(Self);
   itkTypeMacro(HierarchicalClusteringPruner, MeshSource);
 
-  using ImageType = TImageType;
-  using OutputMeshType = TOutputMesh;
+  using ImageType        = TImageType;
+  using OutputMeshType   = TOutputMesh;
   using OutputMeshTraits = typename OutputMeshType::MeshTraits;
-  using OutputPointType = typename OutputMeshType::PointType;
-  using OutputPixelType = typename OutputMeshType::PixelType;
+  using OutputPointType  = typename OutputMeshType::PointType;
+  using OutputPixelType  = typename OutputMeshType::PixelType;
 
   /** Some convenient typedefs. */
-  using OutputMeshPointer = typename OutputMeshType::Pointer;
-  using OutputCellTraits = typename OutputMeshType::CellTraits;
-  using OutputCellIdentifier = typename OutputMeshType::CellIdentifier;
-  using OutputCellType = typename OutputMeshType::CellType;
+  using OutputMeshPointer     = typename OutputMeshType::Pointer;
+  using OutputCellTraits      = typename OutputMeshType::CellTraits;
+  using OutputCellIdentifier  = typename OutputMeshType::CellIdentifier;
+  using OutputCellType        = typename OutputMeshType::CellType;
   using OutputCellAutoPointer = typename OutputMeshType::CellAutoPointer;
   using OutputPointIdentifier = typename OutputMeshType::PointIdentifier;
   using OutputPointIdIterator = typename OutputCellTraits::PointIdIterator;
@@ -50,16 +51,16 @@ public:
     this->m_hierarchyFilename = filename;
   }
   std::string GetHierarchyFilename() { return this->m_hierarchyFilename; }
-  void SetClustersPath(std::string path) { this->m_clustersPath = path; }
+  void        SetClustersPath(std::string path) { this->m_clustersPath = path; }
   std::string GetClustersPath() { return this->m_clustersPath; }
-  void SetExtension(FiberFormat f) { this->m_fiberFormat = f; }
+  void        SetExtension(FiberFormat f) { this->m_fiberFormat = f; }
 
   FiberFormat GetExtension() { return this->m_fiberFormat; }
   std::vector<vtkSmartPointer<vtkPolyData>> GetOutputBundles() {
     return this->m_outputBundles;
   }
   std::vector<long long> GetClustersIds() { return this->m_clustersIds; }
-  void SetReferenceImage(typename ImageType::Pointer image) {
+  void                   SetReferenceImage(typename ImageType::Pointer image) {
     this->m_referenceImage = image;
   }
 
@@ -70,13 +71,13 @@ protected:
   virtual void GenerateData();
 
 private:
-  int m_numberOfClusters;
-  std::string m_hierarchyFilename;
-  std::string m_clustersPath;
-  FiberFormat m_fiberFormat;
+  int                                       m_numberOfClusters;
+  std::string                               m_hierarchyFilename;
+  std::string                               m_clustersPath;
+  FiberFormat                               m_fiberFormat;
   std::vector<vtkSmartPointer<vtkPolyData>> m_outputBundles;
-  std::vector<long long> m_clustersIds;
-  typename ImageType::Pointer m_referenceImage;
+  std::vector<long long>                    m_clustersIds;
+  typename ImageType::Pointer               m_referenceImage;
 };
 
 #include "HierarchicalClusteringPruner.txx"

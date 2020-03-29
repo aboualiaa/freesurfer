@@ -33,7 +33,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -41,21 +41,21 @@ static void print_version();
 
 const char *Progname;
 
-static char sdir[STRLEN] = "";
-static int which_norm = NORM_MEAN;
-static int normalize_flag = 0;
-static int condition_no = 0;
-static int stat_flag = 0;
+static char  sdir[STRLEN]     = "";
+static int   which_norm       = NORM_MEAN;
+static int   normalize_flag   = 0;
+static int   condition_no     = 0;
+static int   stat_flag        = 0;
 static char *output_surf_name = nullptr;
-static int navgs = 0;
-static char *ohemi = nullptr;
-static char *osurf = nullptr;
+static int   navgs            = 0;
+static char *ohemi            = nullptr;
+static char *osurf            = nullptr;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_fname, *out_fname, *surf_name, fname[STRLEN], *hemi;
-  int ac, nargs, i, skipped;
+  char **      av, *in_fname, *out_fname, *surf_name, fname[STRLEN], *hemi;
+  int          ac, nargs, i, skipped;
   MRI_SURFACE *mris;
-  MRI_SP *mrisp, *mrisp_total;
+  MRI_SP *     mrisp, *mrisp_total;
 
   nargs = handleVersionOption(argc, argv, "mris_average_curvature");
   if (nargs && argc - nargs == 1)
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     usage_exit();
 
   in_fname = argv[1];
-  hemi = argv[2];
+  hemi     = argv[2];
   if (!ohemi)
     ohemi = hemi;
   surf_name = argv[3];
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
   out_fname = argv[argc - 1];
 
   mrisp_total = MRISPalloc(1, 3);
-  skipped = 0;
+  skipped     = 0;
   for (i = 4; i < argc - 1; i++) {
     fprintf(stderr, "processing subject %s...\n", argv[i]);
     sprintf(fname, "%s/%s/surf/%s.%s", sdir, argv[i], hemi, surf_name);
@@ -153,9 +153,9 @@ int main(int argc, char *argv[]) {
   MRISfromParameterization(mrisp_total, mris, 0);
   if (stat_flag) /* write out summary statistics files */
   {
-    int vno;
+    int     vno;
     VERTEX *v;
-    float dof;
+    float   dof;
 #if 1
     MRI *mri;
 
@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -262,7 +262,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'O':
       output_surf_name = argv[2];
-      nargs = 1;
+      nargs            = 1;
       fprintf(stderr, "painting output onto subject %s.\n", output_surf_name);
       break;
     case '?':
@@ -271,9 +271,9 @@ static int get_option(int argc, char *argv[]) {
       exit(1);
       break;
     case 'S': /* write out stats */
-      stat_flag = 1;
+      stat_flag    = 1;
       condition_no = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       fprintf(stderr, "writing out summary statistics as condition %d\n",
               condition_no);
       break;

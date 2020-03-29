@@ -28,15 +28,15 @@
  */
 
 #include "SurfaceLabel.h"
-#include "LayerSurface.h"
-#include "LayerPropertySurface.h"
 #include "FSSurface.h"
-#include "MyUtils.h"
-#include <QFile>
-#include <QDebug>
-#include "vtkRGBAColorTransferFunction.h"
-#include "LayerMRI.h"
 #include "FSVolume.h"
+#include "LayerMRI.h"
+#include "LayerPropertySurface.h"
+#include "LayerSurface.h"
+#include "MyUtils.h"
+#include "vtkRGBAColorTransferFunction.h"
+#include <QDebug>
+#include <QFile>
 
 SurfaceLabel::SurfaceLabel(LayerSurface *surf, bool bInitializeLabel)
     : QObject(surf), m_label(NULL), m_surface(surf), m_bVisible(true),
@@ -54,7 +54,7 @@ SurfaceLabel::SurfaceLabel(LayerSurface *surf, bool bInitializeLabel)
 
   if (bInitializeLabel) {
     MRIS *mris = m_surface->GetSourceSurface()->GetMRIS();
-    m_label = ::LabelAlloc(mris->nvertices, NULL, (char *)"");
+    m_label    = ::LabelAlloc(mris->nvertices, NULL, (char *)"");
     int unassigned;
     LabelIsCompletelyUnassigned(m_label, &unassigned);
     if (unassigned) {
@@ -105,7 +105,7 @@ bool SurfaceLabel::LoadLabel(const QString &filename) {
 
   m_label = ::LabelRead(NULL, filename.toLatin1().data());
   if (m_label == NULL) {
-    cerr << "LabelRead failed";
+    std::cerr << "LabelRead failed";
     return false;
   }
 
@@ -116,10 +116,10 @@ bool SurfaceLabel::LoadLabel(const QString &filename) {
     //    return false;
     LabelFillUnassignedVertices(m_surface->GetSourceSurface()->GetMRIS(),
                                 m_label, CURRENT_VERTICES);
-    cout << "label assigned to surface";
+    std::cout << "label assigned to surface";
   }
 
-  MRIS *mris = m_surface->GetSourceSurface()->GetMRIS();
+  MRIS *mris                = m_surface->GetSourceSurface()->GetMRIS();
   m_label->vertex_label_ind = (int *)calloc(mris->nvertices, sizeof(int));
   for (int n = 0; n < mris->nvertices; n++)
     m_label->vertex_label_ind[n] = -1;
@@ -153,7 +153,7 @@ bool SurfaceLabel::LoadLabel(const QString &filename) {
 
   // update vno if it is -1
   double max_spacing;
-  int max_vno;
+  int    max_vno;
   MRIScomputeVertexSpacingStats(mris, NULL, NULL, &max_spacing, NULL, &max_vno,
                                 CURRENT_VERTICES);
   MHT *hash =
@@ -168,7 +168,7 @@ bool SurfaceLabel::LoadLabel(const QString &filename) {
       v.y = m_label->lv[i].y;
       v.z = m_label->lv[i].z;
       float dmin;
-      int vtxno = MHTfindClosestVertexNoXYZ(hash, mris, v.x, v.y, v.z, &dmin);
+      int   vtxno = MHTfindClosestVertexNoXYZ(hash, mris, v.x, v.y, v.z, &dmin);
       if (vtxno >= 0)
         m_label->lv[i].vno = vtxno;
     }
@@ -187,9 +187,9 @@ bool SurfaceLabel::LoadLabel(const QString &filename) {
 }
 
 void SurfaceLabel::UpdateOutline() {
-  VERTEX *v;
+  VERTEX *         v;
   VERTEX_TOPOLOGY *vt;
-  MRIS *mris = m_surface->GetSourceSurface()->GetMRIS();
+  MRIS *           mris = m_surface->GetSourceSurface()->GetMRIS();
   MRISclearMarks(mris);
   LabelMarkSurface(m_label, mris);
   for (int n = 0; n < m_label->n_points; n++) {
@@ -197,7 +197,7 @@ void SurfaceLabel::UpdateOutline() {
     if (m_label->lv[n].vno >= 0 &&
         !m_label->lv[n].deleted) // && m_label->lv[n].stat > m_dThreshold)
     {
-      v = &mris->vertices[m_label->lv[n].vno];
+      v  = &mris->vertices[m_label->lv[n].vno];
       vt = &mris->vertices_topology[m_label->lv[n].vno];
       if (v->ripflag)
         continue;
@@ -349,11 +349,11 @@ bool SurfaceLabel::HasVertex(int nvo) {
 }
 
 void SurfaceLabel::EditVertices(const QVector<int> &verts, bool bAdd) {
-  MRIS *mris = m_surface->GetSourceSurface()->GetMRIS();
-  LV *lv;
+  MRIS *  mris = m_surface->GetSourceSurface()->GetMRIS();
+  LV *    lv;
   VERTEX *v;
-  double x, y, z;
-  int coord = m_surface->IsInflated() ? WHITE_VERTICES : CURRENT_VERTICES;
+  double  x, y, z;
+  int     coord = m_surface->IsInflated() ? WHITE_VERTICES : CURRENT_VERTICES;
   if (bAdd) {
     for (int i = 0; i < verts.size(); i++) {
       int vno = verts[i];
@@ -362,29 +362,29 @@ void SurfaceLabel::EditVertices(const QVector<int> &verts, bool bAdd) {
 
       if (m_label->n_points >= m_label->max_points) {
         LabelRealloc(m_label, mris->nvertices);
-//        qDebug() << "reallocated label";
+        //        qDebug() << "reallocated label";
       }
 
       int n = m_label->n_points++; // n is the number of points before incr
-      lv = &m_label->lv[n];
-      v = &(mris->vertices[vno]);
+      lv    = &m_label->lv[n];
+      v     = &(mris->vertices[vno]);
       MRISgetCoords(v, coord, &x, &y, &z);
 
-      lv->vno = vno;
-      lv->x = x;
-      lv->y = y;
-      lv->z = z;
-      lv->deleted = 0;
+      lv->vno                        = vno;
+      lv->x                          = x;
+      lv->y                          = y;
+      lv->z                          = z;
+      lv->deleted                    = 0;
       m_label->vertex_label_ind[vno] = n;
     }
   } else {
     for (int i = 0; i < verts.size(); i++) {
       int vno = verts[i];
-      int n = m_label->vertex_label_ind[vno];
+      int n   = m_label->vertex_label_ind[vno];
       if (n < 0)
         continue;
 
-      m_label->lv[n].deleted = 1;
+      m_label->lv[n].deleted         = 1;
       m_label->vertex_label_ind[vno] = -1;
     }
 
@@ -410,13 +410,13 @@ bool SurfaceLabel::SaveToFile(const QString &filename) {
     fn = m_strFilename;
 
   if (fn.isEmpty()) {
-    cerr << "Can not write to empty filename\n";
+    std::cerr << "Can not write to empty filename\n";
     return false;
   }
 
   int err = ::LabelWrite(m_label, fn.toLatin1().data());
   if (err != 0) {
-    cerr << "LabelWrite failed\n";
+    std::cerr << "LabelWrite failed\n";
     return false;
   }
   return true;
@@ -424,7 +424,7 @@ bool SurfaceLabel::SaveToFile(const QString &filename) {
 
 void SurfaceLabel::Undo() {
   if (!m_undoBuffer.isEmpty()) {
-    LABEL *l = m_undoBuffer.last();
+    LABEL *l  = m_undoBuffer.last();
     LABEL *l2 = ::LabelCopy(m_label, NULL);
     ::LabelCopy(l, m_label);
     ::LabelFree(&l);
@@ -437,7 +437,7 @@ void SurfaceLabel::Undo() {
 
 void SurfaceLabel::Redo() {
   if (!m_redoBuffer.isEmpty()) {
-    LABEL *l = m_redoBuffer.last();
+    LABEL *l  = m_redoBuffer.last();
     LABEL *l2 = ::LabelCopy(m_label, NULL);
     ::LabelCopy(l, m_label);
     ::LabelFree(&l);

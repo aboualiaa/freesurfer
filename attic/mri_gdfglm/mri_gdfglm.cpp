@@ -26,18 +26,18 @@
  *
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
-#include "error.h"
 #include "diag.h"
+#include "error.h"
 #include "matfile.h"
 
-#include "matrix.h"
-#include "fsgdf.h"
 #include "fio.h"
+#include "fsgdf.h"
+#include "matrix.h"
 #include "sig.h"
 #include "version.h"
 
@@ -46,39 +46,39 @@
 #endif
 
 typedef struct tagDEPVARTABLE {
-  char *dvtfile;
-  char **RowNames;
-  char **ColNames;
+  char *  dvtfile;
+  char ** RowNames;
+  char ** ColNames;
   MATRIX *D;
-  int transposed;
+  int     transposed;
 } DEPVARTABLE, DVT;
 
-DVT *DVTalloc(int nrows, int ncols, char *dvtfile);
-DVT *DVTread(char *dvtfile);
-int DVTdump(DVT *dvt, FILE *fp);
-int DVTsetName(DVT *dvt, int nth, char *Name, int dimid);
-int DVTfree(DVT **ppdvt);
-DVT *DVTtranspose(DVT *dvt);
-int DVTgetNameIndex(DVT *dvt, char *Name, int dimid);
+DVT *   DVTalloc(int nrows, int ncols, char *dvtfile);
+DVT *   DVTread(char *dvtfile);
+int     DVTdump(DVT *dvt, FILE *fp);
+int     DVTsetName(DVT *dvt, int nth, char *Name, int dimid);
+int     DVTfree(DVT **ppdvt);
+DVT *   DVTtranspose(DVT *dvt);
+int     DVTgetNameIndex(DVT *dvt, char *Name, int dimid);
 MATRIX *DVTgetDepVar(DVT *dvt, int nDepVars, char **DepVarList,
                      float *DepVarWeight);
-DVT *DVTpruneRows(DVT *indvt, int nKeep, char **KeepList);
+DVT *   DVTpruneRows(DVT *indvt, int nKeep, char **KeepList);
 
-static int parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void);
-static void usage_exit(void);
-static void print_help(void);
-static void print_version(void);
-static void argnerr(char *option, int n);
-static void dump_options(FILE *fp);
-static int isflag(char *flag);
-static int nth_is_arg(int nargc, char **argv, int nth);
-static int singledash(char *flag);
-static int CheckReps(char **List, int nList);
+static int    parse_commandline(int argc, char **argv);
+static void   check_options(void);
+static void   print_usage(void);
+static void   usage_exit(void);
+static void   print_help(void);
+static void   print_version(void);
+static void   argnerr(char *option, int n);
+static void   dump_options(FILE *fp);
+static int    isflag(char *flag);
+static int    nth_is_arg(int nargc, char **argv, int nth);
+static int    singledash(char *flag);
+static int    CheckReps(char **List, int nList);
 static double ContrastVMF(MATRIX *X, MATRIX *C);
-static int WriteAllClassDat(char *base, FSGD *fsgd, MATRIX *y, MATRIX *yhat,
-                            MATRIX *X, MATRIX *beta);
+static int    WriteAllClassDat(char *base, FSGD *fsgd, MATRIX *y, MATRIX *yhat,
+                               MATRIX *X, MATRIX *beta);
 
 static int WriteClassDat(char *base, char *Class, FSGD *fsgd, MATRIX *y,
                          MATRIX *yhat, MATRIX *X, MATRIX *beta);
@@ -99,52 +99,52 @@ int debug = 0;
 char *GDFile;
 char *DVTFile;
 
-int nClassList = 0;
+int   nClassList = 0;
 char *ClassList[100];
 
-int nwClass = 0;
+int    nwClass = 0;
 float *wClass;
 
-int nCovarList = 0;
+int   nCovarList = 0;
 char *CovarList[100];
 
-int nwCovar = 0;
-float *wCovar = NULL;
+int    nwCovar = 0;
+float *wCovar  = NULL;
 
-int nCovarPrune = 0;
+int        nCovarPrune = 0;
 COVARPRUNE CovarPrune[200];
-int TestOffset = 0;
+int        TestOffset = 0;
 
-int nDepVarList = 0;
+int   nDepVarList = 0;
 char *DepVarList[100];
 
-int nwDepVar = 0;
-float *wDepVar = NULL;
+int    nwDepVar = 0;
+float *wDepVar  = NULL;
 
 char *WLMSDepVar = NULL;
 
-char *OutBase = NULL;
-int KeepSubjId = 0;
+char *OutBase    = NULL;
+int   KeepSubjId = 0;
 
-DVT *dvt0, *dvt;
+DVT * dvt0, *dvt;
 FSGD *fsgd0, *fsgd;
 
 MATRIX *X, *Xnorm, *pinvX;
 MATRIX *y, *beta, *yhat, *r, *ces, *C;
 MATRIX *all;
-float Xcondition;
-double rvar, rmean, dof, tval, sigtval, vmf;
+float   Xcondition;
+double  rvar, rmean, dof, tval, sigtval, vmf;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  int n, v, c;
+  int   n, v, c;
   FILE *fp;
   char *covarname;
-  char SumFile[2000];
-  char DatFile[2000];
-  char MatFile[2000];
-  char OutGDFile[2000];
-  int nargs;
+  char  SumFile[2000];
+  char  DatFile[2000];
+  char  MatFile[2000];
+  char  OutGDFile[2000];
+  int   nargs;
 
   nargs = handleVersionOption(argc, argv, "mri_gdfglm");
   if (nargs && argc - nargs == 1)
@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
   if (debug)
     MatrixPrint(stdout, X);
 
-  Xnorm = MatrixNormalizeCol(X, NULL, NULL);
+  Xnorm      = MatrixNormalizeCol(X, NULL, NULL);
   Xcondition = sqrt(MatrixNSConditionNumber(Xnorm));
   MatrixFree(&Xnorm);
   printf("INFO: Normalized Design Matrix Condition Number is %g\n", Xcondition);
@@ -193,12 +193,12 @@ int main(int argc, char **argv) {
 
   printf("Performing Estimation\n");
   pinvX = MatrixPseudoInverse(X, NULL);
-  beta = MatrixMultiply(pinvX, y, NULL);
-  yhat = MatrixMultiply(X, beta, NULL);
-  r = MatrixSubtract(y, yhat, NULL);
-  dof = X->rows - X->cols;
-  rvar = VectorVar(r, &rmean);
-  rvar = rvar * (X->rows - 1) / dof;
+  beta  = MatrixMultiply(pinvX, y, NULL);
+  yhat  = MatrixMultiply(X, beta, NULL);
+  r     = MatrixSubtract(y, yhat, NULL);
+  dof   = X->rows - X->cols;
+  rvar  = VectorVar(r, &rmean);
+  rvar  = rvar * (X->rows - 1) / dof;
 
   printf("Beta: -----------------\n");
   MatrixPrint(stdout, beta);
@@ -209,9 +209,9 @@ int main(int argc, char **argv) {
   printf("C: -----------------\n");
   MatrixPrint(stdout, C);
   printf("---------------------------------\n\n");
-  ces = MatrixMultiply(C, beta, NULL);
-  vmf = ContrastVMF(X, C);
-  tval = ces->rptr[1][1] / sqrt(rvar * vmf);
+  ces     = MatrixMultiply(C, beta, NULL);
+  vmf     = ContrastVMF(X, C);
+  tval    = ces->rptr[1][1] / sqrt(rvar * vmf);
   sigtval = sigt(tval, rint(dof));
   printf("ces = %g, vmf = %g, t = %g, sigt = %g\n", ces->rptr[1][1], vmf, tval,
          sigtval);
@@ -318,10 +318,10 @@ int main(int argc, char **argv) {
 }
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  DVT *dvttmp;
-  float ftmp[2000];
+  DVT *  dvttmp;
+  float  ftmp[2000];
 
   if (argc < 1)
     usage_exit();
@@ -351,7 +351,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       GDFile = pargv[0];
-      fsgd0 = gdfRead(GDFile, 0);
+      fsgd0  = gdfRead(GDFile, 0);
       if (fsgd0 == NULL)
         exit(1);
       nargsused = 1;
@@ -359,8 +359,8 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       DVTFile = pargv[0];
-      dvttmp = DVTread(DVTFile);
-      dvt0 = DVTtranspose(dvttmp);
+      dvttmp  = DVTread(DVTFile);
+      dvt0    = DVTtranspose(dvttmp);
       DVTfree(&dvttmp);
       nargsused = 1;
     } else if (!strcmp(option, "--classes")) {
@@ -413,7 +413,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       WLMSDepVar = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--wclass")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -442,7 +442,7 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcmp(option, "--o")) {
       if (nargc < 1)
         argnerr(option, 1);
-      OutBase = pargv[0];
+      OutBase   = pargv[0];
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
@@ -636,7 +636,7 @@ static void argnerr(char *option, int n) {
 }
 /* --------------------------------------------- */
 static void check_options(void) {
-  int n, nC, nV;
+  int    n, nC, nV;
   char **ppctmp;
 
   if (GDFile == NULL) {
@@ -938,14 +938,14 @@ static int CheckReps(char **List, int nList) {
   ContrastVMF() - computes the variance multiplication factor
   ------------------------------------------------------------*/
 static double ContrastVMF(MATRIX *X, MATRIX *C) {
-  float vmf;
+  float   vmf;
   MATRIX *Xt, *XtX, *iXtX, *CiXtX, *Ct, *CiXtXCt;
 
-  Xt = MatrixTranspose(X, NULL);
-  XtX = MatrixMultiply(Xt, X, NULL);
-  iXtX = MatrixInverse(XtX, NULL);
-  CiXtX = MatrixMultiply(C, iXtX, NULL);
-  Ct = MatrixTranspose(C, NULL);
+  Xt      = MatrixTranspose(X, NULL);
+  XtX     = MatrixMultiply(Xt, X, NULL);
+  iXtX    = MatrixInverse(XtX, NULL);
+  CiXtX   = MatrixMultiply(C, iXtX, NULL);
+  Ct      = MatrixTranspose(C, NULL);
   CiXtXCt = MatrixMultiply(CiXtX, Ct, NULL);
 
   vmf = CiXtXCt->rptr[1][1];
@@ -976,9 +976,9 @@ static int WriteAllClassDat(char *base, FSGD *fsgd, MATRIX *y, MATRIX *yhat,
 static int WriteClassDat(char *base, char *Class, FSGD *fsgd, MATRIX *y,
                          MATRIX *yhat, MATRIX *X, MATRIX *beta) {
   FILE *fp;
-  int ClassNo;
-  char fname[2000];
-  int n, nth, v;
+  int   ClassNo;
+  char  fname[2000];
+  int   n, nth, v;
 
   ClassNo = gdfClassNo(fsgd, Class);
   if (ClassNo == -1) {
@@ -988,7 +988,7 @@ static int WriteClassDat(char *base, char *Class, FSGD *fsgd, MATRIX *y,
 
   /* SubjNo Covar1 Covar2 ... DepVar DepVarHat */
   sprintf(fname, "%s-%s.dat", base, Class);
-  fp = fopen(fname, "w");
+  fp  = fopen(fname, "w");
   nth = 0;
   for (n = 0; n < fsgd->ninputs; n++) {
     if (fsgd->subjclassno[n] != ClassNo)
@@ -1010,10 +1010,10 @@ static int WriteClassDat(char *base, char *Class, FSGD *fsgd, MATRIX *y,
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 DVT *DVTread(char *dvtfile) {
-  DVT *dvt = NULL;
+  DVT * dvt = NULL;
   FILE *fp;
-  int nrows, ncols, r, c;
-  char tmpstr[4001];
+  int   nrows, ncols, r, c;
+  char  tmpstr[4001];
 
   if (!fio_FileExistsReadable(dvtfile)) {
     printf("ERROR: %s does not exist or is not readable\n", dvtfile);
@@ -1113,7 +1113,7 @@ DVT *DVTalloc(int nrows, int ncols, char *dvtfile) {
     memmove(dvt->dvtfile, dvtfile, strlen(dvtfile));
   }
 
-  dvt->D = MatrixAlloc(nrows, ncols, MATRIX_REAL);
+  dvt->D        = MatrixAlloc(nrows, ncols, MATRIX_REAL);
   dvt->RowNames = (char **)calloc(sizeof(char *), nrows);
   dvt->ColNames = (char **)calloc(sizeof(char *), ncols);
 
@@ -1147,7 +1147,7 @@ int DVTsetName(DVT *dvt, int nth, char *Name, int dimid) {
 /*-----------------------------------------------------*/
 int DVTfree(DVT **ppdvt) {
   DVT *dvt;
-  int r, c;
+  int  r, c;
 
   dvt = *ppdvt;
 
@@ -1168,7 +1168,7 @@ int DVTfree(DVT **ppdvt) {
 /*-----------------------------------------------------*/
 DVT *DVTtranspose(DVT *dvt) {
   DVT *dvtt;
-  int r, c;
+  int  r, c;
 
   dvtt = DVTalloc(dvt->D->cols, dvt->D->rows, dvt->dvtfile);
 
@@ -1200,7 +1200,7 @@ int DVTgetNameIndex(DVT *dvt, char *Name, int dimid) {
   --------------------------------------------------------*/
 DVT *DVTpruneRows(DVT *indvt, int nKeep, char **KeepList) {
   DVT *dvt;
-  int n, index, c, j;
+  int  n, index, c, j;
 
   dvt = DVTalloc(nKeep, indvt->D->cols, indvt->dvtfile);
   for (n = 0; n < nKeep; n++) {
@@ -1230,8 +1230,8 @@ DVT *DVTpruneRows(DVT *indvt, int nKeep, char **KeepList) {
 MATRIX *DVTgetDepVar(DVT *dvt, int nDepVars, char **DepVarList,
                      float *DepVarWeight) {
   MATRIX *y, *W;
-  int index, n;
-  float wc;
+  int     index, n;
+  float   wc;
 
   W = MatrixConstVal(1, dvt->D->cols, 1, NULL);
   if (nDepVars != 0) {

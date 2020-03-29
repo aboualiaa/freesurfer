@@ -23,29 +23,29 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "mriclass.h"
-#include "version.h"
 #include "rforest.h"
-#include "cma.h"
+#include "version.h"
 #include <fcntl.h>
 
 static int features = FEATURE_INTENSITY | FEATURE_MEAN3 | FEATURE_DIRECTION |
                       FEATURE_CPOLV_MEDIAN5;
 
-static int extract = 0;
-static int classifier = CLASSIFIER_RFOREST;
+static int  extract           = 0;
+static int  classifier        = CLASSIFIER_RFOREST;
 static char priors_fname[100] = "none";
-static int verbose = 0;
+static int  verbose           = 0;
 
 const char *Progname;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 #define NCLUSTERS 6
 
-static int nclusters = 0;
+static int nclusters   = 0;
 static int train_cpolv = 0;
 
 static RBF_PARMS rbf_parms = {
@@ -54,22 +54,22 @@ static RBF_PARMS rbf_parms = {
 #define MAX_LONG 1000 // max # of timepoints
 #define MAX_VOLS 10   // max # of input volumes
 
-static int wsize = 1; // use intensities in a 3x3x3 window around each point
-static int nlong = 0;
-static char *long_names[MAX_LONG];
+static int    wsize = 1; // use intensities in a 3x3x3 window around each point
+static int    nlong = 0;
+static char * long_names[MAX_LONG];
 static double long_times[MAX_LONG];
 
-static int nvols = 0;
+static int   nvols               = 0;
 static char *vol_names[MAX_VOLS] = {"norm.mgz"};
 
 static char *seg_name = "wmsa/wmsa.mgz";
 
 static char *classify_name = nullptr;
-static char *aseg_name = "aseg.mgz";
+static char *aseg_name     = "aseg.mgz";
 
-static char sdir[STRLEN] = "";
+static char     sdir[STRLEN] = "";
 static RF_PARMS rf_parms;
-static char *wmsa_class_names[] = {
+static char *   wmsa_class_names[] = {
     "NOT WM", "WMSA 0", "WMSA 1", "WMSA 2", "WMSA 3",
     "WMSA 4", "WMSA 5", "WMSA 6", "WMSA 7",
 };
@@ -88,11 +88,11 @@ static int classify_subjects(RANDOM_FOREST *rf, char *training_file_name,
                              char *classify_name);
 
 int main(int argc, char *argv[]) {
-  MRIC *mric;
+  MRIC *         mric;
   RANDOM_FOREST *rf;
-  char *training_file_name, *output_file_name, *cp;
-  int nargs, error, i;
-  double accuracy = 0;
+  char *         training_file_name, *output_file_name, *cp;
+  int            nargs, error, i;
+  double         accuracy = 0;
 
   nargs = handleVersionOption(argc, argv, "mri_train");
   if (nargs && argc - nargs == 1)
@@ -103,11 +103,11 @@ int main(int argc, char *argv[]) {
   DiagInit(nullptr, nullptr, nullptr);
   ErrorInit(NULL, NULL, NULL);
 
-  rf_parms.ntrees = 500;
-  rf_parms.nsteps = 10;
+  rf_parms.ntrees            = 500;
+  rf_parms.nsteps            = 10;
   rf_parms.training_fraction = .001;
-  rf_parms.feature_fraction = 1;
-  rf_parms.max_depth = 10;
+  rf_parms.feature_fraction  = 1;
+  rf_parms.max_depth         = 10;
 
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
   }
 
   training_file_name = argv[1];
-  output_file_name = argv[2];
+  output_file_name   = argv[2];
 
   switch (classifier) {
   case CLASSIFIER_RFOREST:
@@ -137,8 +137,8 @@ int main(int argc, char *argv[]) {
                        nvols, vol_names, sdir, seg_name, &accuracy);
     {
       struct flock fl;
-      int fd;
-      char line[MAX_LINE_LEN];
+      int          fd;
+      char         line[MAX_LINE_LEN];
 
       printf("writing results to train.log file\n");
       fd = open("train.log", O_WRONLY | O_APPEND | O_CREAT, S_IRWXU | S_IRWXG);
@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -217,7 +217,7 @@ static int get_option(int argc, char *argv[]) {
                 nlong);
     long_names[nlong] = argv[2];
     long_times[nlong] = atof(argv[3]);
-    nargs = 2;
+    nargs             = 2;
     printf("using longitudinal timepoint prefix %s at time %2.1f\n",
            long_names[nlong], long_times[nlong]);
     nlong++;
@@ -226,7 +226,7 @@ static int get_option(int argc, char *argv[]) {
       ErrorExit(ERROR_NOMEMORY, "%s: too many vol names specified (max=%d)\n",
                 nvols);
     vol_names[nvols] = argv[2];
-    nargs = 1;
+    nargs            = 1;
     printf("using input volume named %s\n", vol_names[nvols]);
     nvols++;
   } else if (!stricmp(option, "sdir")) {
@@ -234,34 +234,34 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
     printf("using SUBJECTS_DIR = %s\n", sdir);
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "classify")) {
     classify_name = argv[2];
-    nargs = 1;
+    nargs         = 1;
     printf("writing out of bag classifications to %s\n", classify_name);
   } else if (!stricmp(option, "ntrees")) {
     rf_parms.ntrees = atoi(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     printf("using ntrees = %d\n", rf_parms.ntrees);
   } else if (!stricmp(option, "seg")) {
     seg_name = argv[2];
-    nargs = 1;
+    nargs    = 1;
     printf("using %s as training segmentation volume\n", seg_name);
   } else if (!stricmp(option, "training_fraction")) {
     rf_parms.training_fraction = atof(argv[2]);
-    nargs = 1;
+    nargs                      = 1;
     printf("using training = %lf\n", rf_parms.training_fraction);
   } else if (!stricmp(option, "feature_fraction")) {
     rf_parms.feature_fraction = atof(argv[2]);
-    nargs = 1;
+    nargs                     = 1;
     printf("using feature fraction = %lf\n", rf_parms.feature_fraction);
   } else if (!stricmp(option, "max_depth")) {
     rf_parms.max_depth = atoi(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     printf("using max depth = %d\n", rf_parms.max_depth);
   } else
     switch (toupper(*option)) {
@@ -312,12 +312,12 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-#define NOT_WMSA 1
-#define WMSA 2
+#define NOT_WMSA    1
+#define WMSA        2
 #define FUTURE_WMSA 3
 
 #if 0
-#define WM 2
+#define WM      2
 #define CAUDATE 3
 static int aseg_labels[] =
 {
@@ -344,7 +344,7 @@ static int naseg = sizeof(aseg_labels) / sizeof(aseg_labels[0]) ;
 MRI *label_voxels_with_wmsa(MRI **mri_long_seg, int nlong, int not_wmsa_label,
                             int future_wmsa_label, int wmsa_label) {
   MRI *mri_seg;
-  int x, y, z, l, label, nhypo;
+  int  x, y, z, l, label, nhypo;
 
   mri_seg = MRIalloc(mri_long_seg[0]->width, mri_long_seg[0]->height,
                      mri_long_seg[0]->depth, mri_long_seg[0]->type);
@@ -438,7 +438,7 @@ static MRI *make_mask_from_segmentation(char *sdir, char *subject,
                                         char **long_names, int nlong,
                                         int min_dist, int max_dist) {
   MRI *mri_mask, *mri_min_dist, *mri_max_dist, *mri_long_seg[MAX_LONG];
-  int i, l;
+  int  i, l;
   char fname[STRLEN];
 
   for (l = 0; l < nlong; l++) {
@@ -482,18 +482,18 @@ static RANDOM_FOREST *train_rforest(char *training_file_name, RF_PARMS *parms,
                                     int nvols, char **vol_names, char *sdir,
                                     char *seg_name, double *paccuracy) {
   RANDOM_FOREST *rf;
-  FILE *fp;
-  double **training_data;
-  int *training_classes, x, y, z, x0, y0, z0, xk, yk, zk;
-  int nsubjects, n, ntraining, l, v, label, whalf, t, tno;
-  char line[MAX_LINE_LEN], *cp, fname[MAX_LINE_LEN], *subject;
-  MRI *mri_intensity[MAX_LONG][MAX_VOLS], *mri_int, *mri_training_mask;
+  FILE *         fp;
+  double **      training_data;
+  int *          training_classes, x, y, z, x0, y0, z0, xk, yk, zk;
+  int            nsubjects, n, ntraining, l, v, label, whalf, t, tno;
+  char           line[MAX_LINE_LEN], *cp, fname[MAX_LINE_LEN], *subject;
+  MRI *   mri_intensity[MAX_LONG][MAX_VOLS], *mri_int, *mri_training_mask;
   MATRIX *mX, *mXpinv;
   VECTOR *vP, *vY;
 
-  mX = MatrixAlloc(nlong - 1, 2, MATRIX_REAL);
-  vY = VectorAlloc(nlong - 1, MATRIX_REAL);
-  vP = VectorAlloc(2, 1); // slope and offset
+  mX     = MatrixAlloc(nlong - 1, 2, MATRIX_REAL);
+  vY     = VectorAlloc(nlong - 1, MATRIX_REAL);
+  vP     = VectorAlloc(2, 1); // slope and offset
   mXpinv = nullptr;
   for (l = 0; l < nlong - 1; l++)
     VECTOR_ELT(vY, l + 1) = long_times[l];
@@ -516,7 +516,7 @@ static RANDOM_FOREST *train_rforest(char *training_file_name, RF_PARMS *parms,
                        training_file_name));
 
   nsubjects = 0;
-  cp = fgetl(line, MAX_LINE_LEN, fp);
+  cp        = fgetl(line, MAX_LINE_LEN, fp);
   while (cp != nullptr) {
     cp = fgetl(line, MAX_LINE_LEN, fp);
     nsubjects++;
@@ -538,7 +538,7 @@ static RANDOM_FOREST *train_rforest(char *training_file_name, RF_PARMS *parms,
          parms->nfeatures, ntraining / (1024.0 * 1024),
          (double)parms->nfeatures * ntraining / (1024 * 1024.0));
   training_classes = (int *)calloc(ntraining, sizeof(int));
-  training_data = (double **)calloc(ntraining, sizeof(double *));
+  training_data    = (double **)calloc(ntraining, sizeof(double *));
   rewind(fp);
 
   for (tno = n = 0; n < nsubjects; n++) {
@@ -588,19 +588,19 @@ static RANDOM_FOREST *train_rforest(char *training_file_name, RF_PARMS *parms,
                   {
                     for (l = 0; l < nlong - 1; l++) {
                       mri_int = mri_intensity[l][v];
-                      x = mri_int->xi[x0 + xk];
-                      y = mri_int->yi[y0 + yk];
-                      z = mri_int->zi[z0 + zk];
-                      val = MRIgetVoxVal(mri_int, x, y, z, 0);
+                      x       = mri_int->xi[x0 + xk];
+                      y       = mri_int->yi[y0 + yk];
+                      z       = mri_int->zi[z0 + zk];
+                      val     = MRIgetVoxVal(mri_int, x, y, z, 0);
                       *MATRIX_RELT(mX, l + 1, 1) = val;
                       *MATRIX_RELT(mX, l + 1, 2) = 1;
-                      training_data[tno][t++] = val;
+                      training_data[tno][t++]    = val;
                     }
                     if (nlong > 2) // otherwise not enough to estimate slope
                                    // from nlong-1 tps
                     {
-                      mXpinv = MatrixPseudoInverse(mX, mXpinv);
-                      vP = MatrixMultiply(mXpinv, vY, vP);
+                      mXpinv                  = MatrixPseudoInverse(mX, mXpinv);
+                      vP                      = MatrixMultiply(mXpinv, vY, vP);
                       training_data[tno][t++] = VECTOR_ELT(vP, 1);
                     }
                   }
@@ -650,19 +650,19 @@ static int classify_subjects(RANDOM_FOREST *rf, char *subject_list_file,
                              char **vol_names, char *sdir, char *seg_name,
                              char *classify_name) {
   FILE *fp;
-  int x, y, z, x0, y0, z0, xk, yk, zk, label;
-  int nsubjects, l, v, whalf, t, classnum;
-  char line[MAX_LINE_LEN], fname[MAX_LINE_LEN], *subject;
-  MRI *mri_intensity[MAX_LONG][MAX_VOLS], *mri_int, *mri_aseg[MAX_LONG],
+  int   x, y, z, x0, y0, z0, xk, yk, zk, label;
+  int   nsubjects, l, v, whalf, t, classnum;
+  char  line[MAX_LINE_LEN], fname[MAX_LINE_LEN], *subject;
+  MRI * mri_intensity[MAX_LONG][MAX_VOLS], *mri_int, *mri_aseg[MAX_LONG],
       *mri_labeled;
   MATRIX *mX, *mXpinv;
   VECTOR *vP, *vY;
   double *feature_vec;
 
   printf("classifying subjects...\n");
-  mX = MatrixAlloc(nlong - 1, 2, MATRIX_REAL);
-  vY = VectorAlloc(nlong - 1, MATRIX_REAL);
-  vP = VectorAlloc(2, 1); // slope and offset
+  mX     = MatrixAlloc(nlong - 1, 2, MATRIX_REAL);
+  vY     = VectorAlloc(nlong - 1, MATRIX_REAL);
+  vP     = VectorAlloc(2, 1); // slope and offset
   mXpinv = nullptr;
   for (l = 0; l < nlong - 1; l++)
     VECTOR_ELT(vY, l + 1) = long_times[l];
@@ -677,7 +677,7 @@ static int classify_subjects(RANDOM_FOREST *rf, char *subject_list_file,
                  subject_list_file));
 
   mri_labeled = nullptr;
-  nsubjects = 0;
+  nsubjects   = 0;
   feature_vec = (double *)calloc(rf->nfeatures, sizeof(double));
   do {
     subject = fgetl(line, MAX_LINE_LEN, fp);
@@ -707,7 +707,7 @@ static int classify_subjects(RANDOM_FOREST *rf, char *subject_list_file,
     for (x0 = 0; x0 < mri_labeled->width; x0++)
       for (y0 = 0; y0 < mri_labeled->height; y0++)
         for (z0 = 0; z0 < mri_labeled->depth; z0++) {
-          int l, nzero;
+          int    l, nzero;
           double pval;
 
           if (x0 == Gx && y0 == Gy && z0 == Gz)
@@ -735,17 +735,17 @@ static int classify_subjects(RANDOM_FOREST *rf, char *subject_list_file,
                   {
                     for (l = 0; l < nlong - 1; l++) {
                       mri_int = mri_intensity[l][v];
-                      x = mri_int->xi[x0 + xk];
-                      y = mri_int->yi[y0 + yk];
-                      z = mri_int->zi[z0 + zk];
-                      val = MRIgetVoxVal(mri_int, x, y, z, 0);
+                      x       = mri_int->xi[x0 + xk];
+                      y       = mri_int->yi[y0 + yk];
+                      z       = mri_int->zi[z0 + zk];
+                      val     = MRIgetVoxVal(mri_int, x, y, z, 0);
                       *MATRIX_RELT(mX, l + 1, 1) = val;
                       *MATRIX_RELT(mX, l + 1, 2) = 1;
-                      feature_vec[t++] = val;
+                      feature_vec[t++]           = val;
                     }
                     if (nlong > 2) {
-                      mXpinv = MatrixPseudoInverse(mX, mXpinv);
-                      vP = MatrixMultiply(mXpinv, vY, vP);
+                      mXpinv           = MatrixPseudoInverse(mX, mXpinv);
+                      vP               = MatrixMultiply(mXpinv, vY, vP);
                       feature_vec[t++] = VECTOR_ELT(vP, 1);
                     }
                   }

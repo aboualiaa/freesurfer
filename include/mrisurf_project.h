@@ -33,5 +33,5 @@ MRIS *MRISprojectOntoEllipsoid(MRIS *mris_src, MRIS *mris_dst, float a, float b,
 
 // Ones that are supported by MRIS and MRIS_MP
 //
-MRIS *MRISprojectOntoSphere(MRIS *mris, double r);
+MRIS *   MRISprojectOntoSphere(MRIS *mris, double r);
 MRIS_MP *MRISprojectOntoSphere(MRIS_MP *mris, double r);

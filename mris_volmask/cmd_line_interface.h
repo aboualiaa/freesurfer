@@ -27,8 +27,8 @@
 
 #include <iostream>
 #include <list>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <cstdio> // printf
 #include <cstdlib>
@@ -44,24 +44,24 @@
 //     - help text that gives a generic description
 template <class T> class CCmdLineOption {
 protected:
-  std::string m_strOption;
-  std::string m_strHelp;
+  std::string      m_strOption;
+  std::string      m_strHelp;
   std::vector<T *> m_pars; // this contains parameters assigned to the option
-  int m_iPars;
-  int m_iCur;
-  bool m_bInput;
+  int              m_iPars;
+  int              m_iCur;
+  bool             m_bInput;
 
 public:
   CCmdLineOption() {}
   CCmdLineOption(const char *i_strName, int i_iPars, const char *i_strHelp)
       : m_strOption(), m_strHelp() {
     m_strOption = i_strName;
-    m_iPars = i_iPars;
+    m_iPars     = i_iPars;
     if (i_strHelp)
       m_strHelp = i_strHelp;
     else
       m_strHelp = " no help available for this option ";
-    m_iCur = 0;
+    m_iCur   = 0;
     m_bInput = false;
   }
 
@@ -77,7 +77,7 @@ public:
 
     if (m_iCur == m_iPars) {
       m_bInput = true;
-      m_iCur = 0;
+      m_iCur   = 0;
     }
   }
 
@@ -123,8 +123,8 @@ public:
 };
 
 // specializations to be able to do strong-typing
-using CCmdLineOptionInt = CCmdLineOption<int>;
-using CCmdLineOptionFloat = CCmdLineOption<float>;
+using CCmdLineOptionInt    = CCmdLineOption<int>;
+using CCmdLineOptionFloat  = CCmdLineOption<float>;
 using CCmdLineOptionString = CCmdLineOption<std::string>;
 
 //
@@ -159,13 +159,13 @@ public:
 
 class CCmdLineIo {
   std::string *m_pStrItem;
-  std::string m_strHelp;
-  bool m_bOk;
+  std::string  m_strHelp;
+  bool         m_bOk;
 
 public:
   CCmdLineIo() {
     m_pStrItem = nullptr;
-    m_bOk = false;
+    m_bOk      = false;
   }
   CCmdLineIo(std::string *i_pStrItem, const char *i_strHelp = nullptr) {
     m_pStrItem = i_pStrItem;
@@ -178,7 +178,7 @@ public:
 
   void Set(std::string i_strItem) {
     *m_pStrItem = i_strItem;
-    m_bOk = true;
+    m_bOk       = true;
   }
 
   std::string printHelp() { return m_strHelp; }
@@ -203,10 +203,10 @@ public:
 class CCmdLineInterface {
   std::string m_strProgName;
 
-  std::list<CCmdLineOptionFloat> m_lstFloatOption;
-  std::list<CCmdLineOptionInt> m_lstIntOption;
+  std::list<CCmdLineOptionFloat>  m_lstFloatOption;
+  std::list<CCmdLineOptionInt>    m_lstIntOption;
   std::list<CCmdLineOptionString> m_lstStringOption;
-  std::list<CCmdLineOptionBool> m_lstBoolOption;
+  std::list<CCmdLineOptionBool>   m_lstBoolOption;
 
   std::list<CCmdLineIo> m_lstIo;
 

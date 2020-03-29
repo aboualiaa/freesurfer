@@ -23,26 +23,26 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "timer.h"
 #include "version.h"
-#include "cma.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char *Progname;
+const char * Progname;
 static char *log_fname = nullptr;
-static void usage_exit(int code);
-static void print_help();
+static void  usage_exit(int code);
+static void  print_help();
 
-static int quiet = 0;
-static int all_flag = 0;
+static int quiet      = 0;
+static int all_flag   = 0;
 static int total_flag = 0;
 
 static MRI *mri_mask = nullptr;
 
-static int in_label = -1;
+static int in_label  = -1;
 static int out_label = -1;
 
 static int isSeg = 0;
@@ -51,14 +51,14 @@ static int do_summary = 1;
 
 #define MAX_STRINGS 100
 static char *strings[MAX_STRINGS];
-static int nstrings = 0;
-int main(int argc, char *argv[]) {
+static int   nstrings = 0;
+int          main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs, lno, nshared, nvox1, nvox2, total_nvox1, total_nvox2,
+  int    ac, nargs, lno, nshared, nvox1, nvox2, total_nvox1, total_nvox2,
       total_nshared, nlabels, i;
-  int msec, minutes, seconds /*, wrong, total, correct*/;
+  int   msec, minutes, seconds /*, wrong, total, correct*/;
   Timer start;
-  MRI *mri1, *mri2;
+  MRI * mri1, *mri2;
   FILE *log_fp;
   float nvox_mean, nunion, total_nunion;
   float tmp = 0.0;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     log_fp = nullptr;
 
   nlabels = total_nvox1 = total_nvox2 = total_nshared = 0;
-  total_nunion = 0;
+  total_nunion                                        = 0;
   if (total_flag) {
     int f, x, y, z, total, total_same, v1, v2, mask, s;
 
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
   }
   if (all_flag) {
     MRI *mri1_label = nullptr, *mri2_label = nullptr;
-    int lnoLimit = 1000;
+    int  lnoLimit = 1000;
 
     mri1_label = MRIclone(mri1, nullptr);
     mri2_label = MRIclone(mri2, nullptr);
@@ -160,8 +160,8 @@ int main(int argc, char *argv[]) {
       if (!nvox1 && !nvox2)
         continue;
       nvox_mean = (float)(nvox1 + nvox2) / 2.0f;
-      nshared = MRIlabelOverlap(mri1, mri2, lno);
-      nunion = (float)MRIlabelUnion(mri1, mri2, lno);
+      nshared   = MRIlabelOverlap(mri1, mri2, lno);
+      nunion    = (float)MRIlabelUnion(mri1, mri2, lno);
       if (nunion > 0.0)
         tmp = (float)nshared / nunion;
       else
@@ -202,8 +202,8 @@ int main(int argc, char *argv[]) {
       if (!nvox1 && !nvox2)
         continue;
       correct = MRIlabelOverlap(mri1, mri2, lno);
-      total = (nvox1 + nvox2) / 2;
-      wrong = total - correct;
+      total   = (nvox1 + nvox2) / 2;
+      wrong   = total - correct;
       printf("label %03d: %d of %d voxels correctly labeled - %2.2f%%\n", lno,
              correct, total, 100.0f * (float)correct / (float)total);
       if (log_fp) {
@@ -227,13 +227,13 @@ int main(int argc, char *argv[]) {
 
       lno = atoi(argv[i]);
       // only counts number of lno label
-      nvox1 = MRIvoxelsInLabel(mri1, lno);
-      nvox2 = MRIvoxelsInLabel(mri2, lno);
+      nvox1     = MRIvoxelsInLabel(mri1, lno);
+      nvox2     = MRIvoxelsInLabel(mri2, lno);
       nvox_mean = (float)(nvox1 + nvox2) / 2.0f;
       // if both mri1 and mri2 has the same label, count it.
-      nshared = MRIlabelOverlap(mri1, mri2, lno);
-      nunion = (float)MRIlabelUnion(mri1, mri2, lno);
-      volume_diff = 100.0f * (float)abs(nvox1 - nvox2) / nvox_mean;
+      nshared        = MRIlabelOverlap(mri1, mri2, lno);
+      nunion         = (float)MRIlabelUnion(mri1, mri2, lno);
+      volume_diff    = 100.0f * (float)abs(nvox1 - nvox2) / nvox_mean;
       volume_overlap = 100.0f * (float)nshared / nvox_mean;
       if (nunion > 0.)
         volume_overlap_jacc = 100.0f * (float)nshared / nunion;
@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -320,13 +320,13 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "not computing total label summary\n");
   } else if (stricmp(option, "string") == 0) {
     strings[nstrings++] = argv[2];
-    nargs = 1;
+    nargs               = 1;
   } else
     switch (toupper(*option)) {
     case 'T':
-      in_label = atoi(argv[2]);
+      in_label  = atoi(argv[2]);
       out_label = atoi(argv[3]);
-      nargs = 2;
+      nargs     = 2;
       printf("translating label %d to label %d\n", in_label, out_label);
       break;
     case 'Q':
@@ -338,7 +338,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'L':
       log_fname = argv[2];
-      nargs = 1;
+      nargs     = 1;
       fprintf(stderr, "logging results to %s\n", log_fname);
       quiet = 1;
       break;

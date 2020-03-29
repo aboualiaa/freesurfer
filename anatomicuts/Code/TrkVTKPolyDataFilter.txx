@@ -4,18 +4,18 @@
 #include "TrkVTKPolyDataFilter.h"
 #include <vtkCellArray.h>
 
-#include <vtkPolyData.h>
-#include <vtkPoints.h>
-#include <vtkSmartPointer.h>
-#include "itkPoint.h"
-#include "itkImage.h"
 #include "itkContinuousIndex.h"
+#include "itkImage.h"
+#include "itkPoint.h"
 #include <vnl/vnl_inverse.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
 template <class TImage> TrkVTKPolyDataFilter<TImage>::TrkVTKPolyDataFilter() {
   m_vtk = vtkPolyData::New();
   // this->SetNumberOfInputs (1);
   // unsigned char color[3] = {219,112,147};
-  this->m_color = nullptr;
+  this->m_color     = nullptr;
   this->m_refHeader = 0;
 }
 
@@ -38,7 +38,7 @@ template <class TImage> void TrkVTKPolyDataFilter<TImage>::TrkToVTK() {
   CTrackReader trkreader;
   TRACK_HEADER trkheadin;
   trkreader.Open(this->m_trkFileName.c_str(), &trkheadin);
-  int npts = 0;
+  int npts        = 0;
   int totalPoints = 0;
 
   // std::vector<int> orientation;
@@ -50,23 +50,23 @@ template <class TImage> void TrkVTKPolyDataFilter<TImage>::TrkToVTK() {
   // << std::endl; std::cout << orientation[2]<<
   // trkheadin.voxel_order_original[2] << std::endl;
   while (trkreader.GetNextPointCount(&npts)) {
-    float *iraw, *rawpts = new float[npts * 3];
+    float *            iraw, *rawpts = new float[npts * 3];
     std::vector<float> newpts;
 
     // Read a streamline from input file
     trkreader.GetNextTrackData(npts, rawpts);
 
     iraw = rawpts;
-    itk::Point<float> pt;
+    itk::Point<float>              pt;
     itk::ContinuousIndex<float, 3> index;
     itk::ContinuousIndex<float, 4> index4;
-    vtkIdType *ids = new vtkIdType[npts];
+    vtkIdType *                    ids = new vtkIdType[npts];
 
     for (int ipt = 0; ipt < npts; ipt++) {
       // Divide by input voxel size and make 0-based to get voxel coords
       for (int k = 0; k < 3; k++) {
         pt[k] = *iraw; // / trkheadin.voxel_size[k] ;//*trkheadin.voxel_size[k];
-        index[k] = pt[k] / trkheadin.voxel_size[k]; //*orientation[k];
+        index[k]  = pt[k] / trkheadin.voxel_size[k]; //*orientation[k];
         index4[k] = index[k];
         iraw++;
       }
@@ -120,7 +120,7 @@ void TrkVTKPolyDataFilter<TImage>::VTKToTrk(std::string outputName) {
 
     // std::cout << "hola " << std::endl;
     for (int i = 0; i < 3; i++) {
-      trkheadout.origin[i] = m_refImage->GetOrigin()[i];
+      trkheadout.origin[i]     = m_refImage->GetOrigin()[i];
       trkheadout.voxel_size[i] = m_refImage->GetSpacing()[i];
       trkheadout.dim[i] = m_refImage->GetLargestPossibleRegion().GetSize()[i];
 
@@ -180,9 +180,9 @@ void TrkVTKPolyDataFilter<TImage>::VTKToTrk(std::string outputName) {
   trkwriter.UpdateHeader(trkheadout);
   vtkCellArray *lines = m_vtk->GetLines();
   lines->InitTraversal();
-  vtkIdType pointCount, *pointBuf;
+  vtkIdType         pointCount, *pointBuf;
   vnl_matrix<float> vox_to_ras = vnl_matrix<float>(4, 4);
-  double sum = 0;
+  double            sum        = 0;
   for (int k1 = 0; k1 < 4; k1++) {
     for (int k2 = 0; k2 < 4; k2++) {
       vox_to_ras(k1, k2) = trkheadout.vox_to_ras[k1][k2];
@@ -200,15 +200,15 @@ void TrkVTKPolyDataFilter<TImage>::VTKToTrk(std::string outputName) {
   while (lines->GetNextCell(pointCount, pointBuf)) {
 
     std::vector<float> points(pointCount * 3, 0);
-    int n = 0;
+    int                n = 0;
     for (vtkIdType k = 0; k < pointCount; k++) {
       double *pt = m_vtk->GetPoint(pointBuf[k]);
 
-      itk::Point<float> pt2;
+      itk::Point<float>              pt2;
       itk::ContinuousIndex<float, 3> index;
       itk::ContinuousIndex<float, 4> point4;
       for (int k = 0; k < 3; k++) {
-        pt2[k] = pt[k];
+        pt2[k]    = pt[k];
         point4[k] = pt[k];
       }
       point4[3] = 1;
@@ -274,13 +274,13 @@ void TrkVTKPolyDataFilter<TImage>::VTKToTrk(std::string outputName) {
 #include <vtkFieldData.h>
 
 
-#include <vtkPolyData.h>
-#include <vtkPoints.h>
-#include <vtkFieldData.h>
-#include <vtkSmartPointer.h>
-#include "itkPoint.h"
-#include "itkImage.h"
 #include "itkContinuousIndex.h"
+#include "itkImage.h"
+#include "itkPoint.h"
+#include <vtkFieldData.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
 
         template<class TImage>
 TrkVTKPolyDataFilter<TImage>::TrkVTKPolyDataFilter()

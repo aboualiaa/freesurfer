@@ -48,7 +48,7 @@ MRI_SURFACE *GWU_make_surface_from_lists(GWUTILS_VERTEX *vertices,
                                          int vertexcount, GWUTILS_FACE *faces,
                                          int facecount) {
   MRI_SURFACE *mris;
-  int vno, fno, n, vn, n1, n2;
+  int          vno, fno, n, vn, n1, n2;
 
   mris = MRISoverAlloc(0, 0, vertexcount, facecount);
 
@@ -67,7 +67,7 @@ MRI_SURFACE *GWU_make_surface_from_lists(GWUTILS_VERTEX *vertices,
     FACE *const f = &mris->faces[fno];
 
     for (n = 0; n < VERTICES_PER_FACE; n++) {
-      f->v[n] = faces[fno].vno[n]; // already zero-based
+      f->v[n]                   = faces[fno].vno[n]; // already zero-based
       VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[f->v[n]];
       vt->num++;
       addVnum(mris, f->v[n], 2);
@@ -80,7 +80,7 @@ MRI_SURFACE *GWU_make_surface_from_lists(GWUTILS_VERTEX *vertices,
   //-----------------------------------------
   for (vno = 0; vno < vertexcount; vno++) {
     VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-    vt->v = (int *)calloc(vt->vnum / 2, sizeof(int));
+    vt->v                     = (int *)calloc(vt->vnum / 2, sizeof(int));
     if (!vt->v)
       ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %dth vertex list.",
                 __func__, vno);
@@ -124,7 +124,7 @@ MRI_SURFACE *GWU_make_surface_from_lists(GWUTILS_VERTEX *vertices,
   //--------------------------------------------
   for (vno = 0; vno < vertexcount; vno++) {
     VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-    vt->f = (int *)calloc(vt->num, sizeof(int));
+    vt->f                     = (int *)calloc(vt->num, sizeof(int));
     if (!vt->f)
       ErrorExit(ERROR_NO_MEMORY, "%s: could not allocate %d faces", __func__,
                 vt->num);
@@ -132,7 +132,7 @@ MRI_SURFACE *GWU_make_surface_from_lists(GWUTILS_VERTEX *vertices,
     if (!vt->n)
       ErrorExit(ERROR_NO_MEMORY, "%s: could not allocate %d nbrs", __func__,
                 vt->n);
-    vt->num = 0; /* for use as counter in next section */
+    vt->num      = 0; /* for use as counter in next section */
     vt->nsizeMax = 1;
     MRIS_setNsizeCur(mris, vno, 1);
   }
@@ -144,8 +144,8 @@ MRI_SURFACE *GWU_make_surface_from_lists(GWUTILS_VERTEX *vertices,
     FACE *const f = &mris->faces[fno];
     for (n = 0; n < VERTICES_PER_FACE; n++) {
       VERTEX_TOPOLOGY *const v = &mris->vertices_topology[f->v[n]];
-      v->n[v->num] = n;
-      v->f[v->num++] = fno;
+      v->n[v->num]             = n;
+      v->f[v->num++]           = fno;
     }
   }
 
@@ -170,9 +170,9 @@ MRI_SURFACE *GWU_make_surface_from_lists(GWUTILS_VERTEX *vertices,
   ---------------------------------------------------------*/
 MRI *MRIFromMHTandMRIS(MHT *mht, MRIS *mris, MFMM_Option_t mfmm_option) {
   MRI *amri;
-  int mhtvx, mhtvy, mhtvz; // MHT "voxels"
-  int mrix, mriy, mriz;    // MRI voxels
-  int binnum;
+  int  mhtvx, mhtvy, mhtvz; // MHT "voxels"
+  int  mrix, mriy, mriz;    // MRI voxels
+  int  binnum;
   // int fno_usage; //
   int outval;
 
@@ -242,8 +242,8 @@ MRI *MRIFromMHTandMRIS(MHT *mht, MRIS *mris, MFMM_Option_t mfmm_option) {
 
 // Some simple log functions for test programs.
 
-static char local_Progname[500] = "uninitialized";
-static char local_Progversion[100] = "uninitialized";
+static char local_Progname[500]     = "uninitialized";
+static char local_Progversion[100]  = "uninitialized";
 static char local_Logfilepath[1000] = "uninitialized";
 
 //----------------------------------------
@@ -251,7 +251,7 @@ int gw_log_init(char *AProgname, char *AProgversion, char *ALogfilepath,
                 int newfile) { // 0 for OK
   //----------------------------------------
   FILE *afile;
-  int rslt = 0;
+  int   rslt = 0;
   strcpy(local_Progname, AProgname);
   strcpy(local_Progversion, AProgversion);
   strcpy(local_Logfilepath, ALogfilepath);
@@ -281,7 +281,7 @@ void gw_log_message(char *msg) {
 //------------------------------
 static void nowstr(char *buf) {
   //------------------------------
-  time_t tim;
+  time_t     tim;
   struct tm *tmr;
   // int rslt;
 

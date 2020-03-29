@@ -60,21 +60,21 @@ public:
   QJsonObject &operator=(const QJsonObject &other);
 
   static QJsonObject fromVariantMap(const QVariantMap &map);
-  QVariantMap toVariantMap() const;
+  QVariantMap        toVariantMap() const;
 
   QStringList keys() const;
-  int size() const;
-  inline int count() const { return size(); }
-  inline int length() const { return size(); }
-  bool isEmpty() const;
+  int         size() const;
+  inline int  count() const { return size(); }
+  inline int  length() const { return size(); }
+  bool        isEmpty() const;
 
-  QJsonValue value(const QString &key) const;
-  QJsonValue operator[](const QString &key) const;
+  QJsonValue    value(const QString &key) const;
+  QJsonValue    operator[](const QString &key) const;
   QJsonValueRef operator[](const QString &key);
 
-  void remove(const QString &key);
+  void       remove(const QString &key);
   QJsonValue take(const QString &key);
-  bool contains(const QString &key) const;
+  bool       contains(const QString &key) const;
 
   bool operator==(const QJsonObject &other) const;
   bool operator!=(const QJsonObject &other) const;
@@ -85,19 +85,19 @@ public:
     friend class const_iterator;
     friend class QJsonObject;
     QJsonObject *o;
-    int i;
+    int          i;
 
   public:
     typedef std::bidirectional_iterator_tag iterator_category;
-    typedef int difference_type;
-    typedef QJsonValue value_type;
+    typedef int                             difference_type;
+    typedef QJsonValue                      value_type;
     //        typedef T *pointer;
     typedef QJsonValueRef reference;
 
     inline iterator() : o(0), i(0) {}
     inline iterator(QJsonObject *obj, int index) : o(obj), i(index) {}
 
-    inline QString key() const { return o->keyAt(i); }
+    inline QString       key() const { return o->keyAt(i); }
     inline QJsonValueRef value() const { return QJsonValueRef(o, i); }
     inline QJsonValueRef operator*() const { return QJsonValueRef(o, i); }
     // inline T *operator->() const { return &concrete(i)->value; }
@@ -127,7 +127,7 @@ public:
       r.i += j;
       return r;
     }
-    inline iterator operator-(int j) const { return operator+(-j); }
+    inline iterator  operator-(int j) const { return operator+(-j); }
     inline iterator &operator+=(int j) {
       i += j;
       return *this;
@@ -150,20 +150,20 @@ public:
   class const_iterator {
     friend class iterator;
     const QJsonObject *o;
-    int i;
+    int                i;
 
   public:
     typedef std::bidirectional_iterator_tag iterator_category;
-    typedef int difference_type;
-    typedef QJsonValue value_type;
-    typedef QJsonValue reference;
+    typedef int                             difference_type;
+    typedef QJsonValue                      value_type;
+    typedef QJsonValue                      reference;
 
     inline const_iterator() : o(0), i(0) {}
     inline const_iterator(const QJsonObject *obj, int index)
         : o(obj), i(index) {}
     inline const_iterator(const iterator &other) : o(other.o), i(other.i) {}
 
-    inline QString key() const { return o->keyAt(i); }
+    inline QString    key() const { return o->keyAt(i); }
     inline QJsonValue value() const { return o->valueAt(i); }
     inline QJsonValue operator*() const { return o->valueAt(i); }
     // inline const T *operator->() const { return &concrete(i)->value; }
@@ -197,7 +197,7 @@ public:
       r.i += j;
       return r;
     }
-    inline const_iterator operator-(int j) const { return operator+(-j); }
+    inline const_iterator  operator-(int j) const { return operator+(-j); }
     inline const_iterator &operator+=(int j) {
       i += j;
       return *this;
@@ -219,7 +219,7 @@ public:
   }
   inline const_iterator begin() const { return const_iterator(this, 0); }
   inline const_iterator constBegin() const { return const_iterator(this, 0); }
-  inline iterator end() {
+  inline iterator       end() {
     detach();
     return iterator(this, size());
   }
@@ -230,17 +230,17 @@ public:
   iterator erase(iterator it);
 
   // more Qt
-  typedef iterator Iterator;
+  typedef iterator       Iterator;
   typedef const_iterator ConstIterator;
-  iterator find(const QString &key);
+  iterator               find(const QString &key);
   const_iterator find(const QString &key) const { return constFind(key); }
   const_iterator constFind(const QString &key) const;
-  iterator insert(const QString &key, const QJsonValue &value);
+  iterator       insert(const QString &key, const QJsonValue &value);
 
   // STL compatibility
   typedef QJsonValue mapped_type;
-  typedef QString key_type;
-  typedef int size_type;
+  typedef QString    key_type;
+  typedef int        size_type;
 
   inline bool empty() const { return isEmpty(); }
 
@@ -256,11 +256,11 @@ private:
   void detach(uint reserve = 0);
   void compact();
 
-  QString keyAt(int i) const;
+  QString    keyAt(int i) const;
   QJsonValue valueAt(int i) const;
-  void setValueAt(int i, const QJsonValue &val);
+  void       setValueAt(int i, const QJsonValue &val);
 
-  QJsonPrivate::Data *d;
+  QJsonPrivate::Data *  d;
   QJsonPrivate::Object *o;
 };
 

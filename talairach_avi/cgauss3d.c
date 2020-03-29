@@ -23,10 +23,10 @@
  *
  */
 
-#include <stdlib.h>
-#include <math.h>
 #include <endianio.h>
 #include <librms.h>
+#include <math.h>
+#include <stdlib.h>
 
 void gauss3d(float *image, int *pnx, int *pny, int *pnz, float *cmppix,
              float *fhalf) {
@@ -59,9 +59,9 @@ void gauss3d(float *image, int *pnx, int *pny, int *pnz, float *cmppix,
   /**********************************************************************/
   float *a, *b;
   double q, factor, f2, fx, fy, fz;
-  int i, k, n1, n2, n2ny, jndex;
-  int ix, iy, iz, nx, ny, nz, kx, ky, kz;
-  int one = 1, negone = -1;
+  int    i, k, n1, n2, n2ny, jndex;
+  int    ix, iy, iz, nx, ny, nz, kx, ky, kz;
+  int    one = 1, negone = -1;
 
   nx = *pnx;
   ny = *pny;
@@ -70,8 +70,8 @@ void gauss3d(float *image, int *pnx, int *pny, int *pnz, float *cmppix,
     fprintf(stderr, "gauss3d: nx not a multiple of 2\n");
     exit(-1);
   }
-  n1 = nx / 2;
-  n2 = n1 + 1;
+  n1   = nx / 2;
+  n2   = n1 + 1;
   n2ny = n2 * ny;
   if (!(a = (float *)malloc(n2 * ny * nz * sizeof(float))))
     errm("gauss3d");
@@ -102,9 +102,9 @@ void gauss3d(float *image, int *pnx, int *pny, int *pnz, float *cmppix,
       ky = (iy <= ny / 2) ? iy : ny - iy;
       fy = ky / (ny * cmppix[1]);
       for (ix = 0; ix < n2; ix++) {
-        kx = (ix <= nx / 2) ? ix : nx - ix;
-        fx = kx / (nx * cmppix[0]);
-        f2 = fx * fx + fy * fy + fz * fz;
+        kx     = (ix <= nx / 2) ? ix : nx - ix;
+        fx     = kx / (nx * cmppix[0]);
+        f2     = fx * fx + fy * fy + fz * fz;
         factor = exp(q * f2);
         a[i] *= factor;
         b[i] *= factor;
