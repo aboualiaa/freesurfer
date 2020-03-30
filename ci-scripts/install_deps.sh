@@ -16,7 +16,7 @@ sudo apt-get install -y -qq --no-install-suggests --no-install-recommends git wg
   libarmadillo-dev qt5-default libqt5x11extras5-dev curl git-annex lcov libxml2-utils \
   snapd parallel
 
-sudo snapd install shfmt
+sudo snap install shfmt
 
 if [ "$HOSTING_OS" = "xenial" ] || [ "$HOSTING_OS" = "trusty" ]; then
   sudo apt-get install -y -qq python3.5 python3.5-dev
