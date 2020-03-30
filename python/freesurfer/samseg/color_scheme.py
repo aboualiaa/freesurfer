@@ -10,7 +10,10 @@ LUMINOSITY_VECTOR = np.array([0.2126, 0.7152, 0.0722])
 
 
 def hsv_palette(how_many):
-    return [colorsys.hsv_to_rgb(segment / how_many, 1.0, 1.0) for segment in range(how_many)]
+    return [
+        colorsys.hsv_to_rgb(segment / how_many, 1.0, 1.0)
+        for segment in range(how_many)
+    ]
 
 
 def luminosity(color):
@@ -39,7 +42,9 @@ def disparity_rgb(r0, g0, b0, r1, g1, b1):
     color_differencer = cie_2000_differencer
     gray0 = luminosity([r0, g0, b0])
     gray1 = luminosity([r1, g1, b1])
-    gray_difference = color_differencer(gray0, gray0, gray0, gray1, gray1, gray1)
+    gray_difference = color_differencer(
+        gray0, gray0, gray0, gray1, gray1, gray1
+    )
     color_difference = color_differencer(r0, g0, b0, r1, g1, b1)
     return color_difference, gray_difference
 
@@ -67,13 +72,17 @@ def saturation_biased_perceptual_difference(a, b):
 def candidate_color_listing(segments=None):
     if segments is None:
         segments = [10, 40, 4]
-    ranges = [[index / segment for index in range(segment + 1)] for segment in segments]
+    ranges = [
+        [index / segment for index in range(segment + 1)]
+        for segment in segments
+    ]
     [red_list, green_list, blue_list] = ranges
-    return [[red, green, blue]
-            for red in red_list
-            for green in green_list
-            for blue in blue_list
-            ]
+    return [
+        [red, green, blue]
+        for red in red_list
+        for green in green_list
+        for blue in blue_list
+    ]
 
 
 def closest_distance(color, comparison_list, metric=None):
@@ -96,23 +105,28 @@ def best_color_index(candidates, comparison_list, metric=None):
 def maximal_distance_palette(max_size=35, segments=None, metric=None):
     color_list = candidate_color_listing(segments)
     candidates = color_list[1:-1]
-    bad_choices = [color_list[0], color_list[-1]]  # stay away from black and white
+    bad_choices = [
+        color_list[0],
+        color_list[-1],
+    ]  # stay away from black and white
     palette = []
     while candidates and len(palette) < max_size:
         comparision_list = bad_choices + palette
         index = best_color_index(candidates, comparision_list, metric)
         best_color = candidates[index]
         palette.append(best_color)
-        candidates = candidates[0:index] + candidates[index + 1:]
+        candidates = candidates[0:index] + candidates[index + 1 :]
     return palette
 
 
 def generate_python_code_for_default_palette(palette):
-    print('DEFAULT_PALETTE = [')
+    print("DEFAULT_PALETTE = [")
     for index, color in enumerate(palette):
-        print('    {0},  # luminosity={1}'.format(color, luminosity(color)))
-    print(']')
+        print("    {0},  # luminosity={1}".format(color, luminosity(color)))
+    print("]")
 
 
-if __name__ == '__main__':
-    generate_python_code_for_default_palette(maximal_distance_palette(metric=perceptual_difference))
+if __name__ == "__main__":
+    generate_python_code_for_default_palette(
+        maximal_distance_palette(metric=perceptual_difference)
+    )

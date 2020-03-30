@@ -66,17 +66,18 @@ in each time point. This behavior can be mimicked by setting
 in the implementation provided here.
 """
 
-eps = np.finfo( float ).eps
+eps = np.finfo(float).eps
 
 
 class SamsegLongitudinal:
-    def __init__(self,
+    def __init__(
+        self,
         imageFileNamesList,
         atlasDir,
         savePath,
         userModelSpecifications={},
         userOptimizationOptions={},
-        visualizer=None, 
+        visualizer=None,
         saveHistory=False,
         targetIntensity=None,
         targetSearchStrings=None,
@@ -93,8 +94,8 @@ class SamsegLongitudinal:
         thresholdSearchString=None,
         modeNames=None,
         pallidumAsWM=True,
-        savePosteriors=False
-        ):
+        savePosteriors=False,
+    ):
 
         # Store input parameters as class variables
         self.imageFileNamesList = imageFileNamesList
@@ -107,7 +108,9 @@ class SamsegLongitudinal:
         self.targetSearchStrings = targetSearchStrings
         self.numberOfIterations = numberOfIterations
         self.strengthOfLatentGMMHyperprior = strengthOfLatentGMMHyperprior
-        self.strengthOfLatentDeformationHyperprior = strengthOfLatentDeformationHyperprior
+        self.strengthOfLatentDeformationHyperprior = (
+            strengthOfLatentDeformationHyperprior
+        )
         self.modeNames = modeNames
         self.pallidumAsWM = pallidumAsWM
         self.savePosteriors = savePosteriors
@@ -132,7 +135,9 @@ class SamsegLongitudinal:
         self.updateLatentVariances = updateLatentVariances
         self.updateLatentMixtureWeights = updateLatentMixtureWeights
         self.updateLatentDeformation = updateLatentDeformation
-        self.initializeLatentDeformationToZero = initializeLatentDeformationToZero
+        self.initializeLatentDeformationToZero = (
+            initializeLatentDeformationToZero
+        )
 
         # Make sure we can write in the target/results directory
         os.makedirs(savePath, exist_ok=True)
@@ -181,15 +186,17 @@ class SamsegLongitudinal:
         sstDir, _ = os.path.split(self.sstFileNames[0])
 
         # Affine atlas registration to sst
-        templateFileName = os.path.join(self.atlasDir, 'template.nii')
-        affineRegistrationMeshCollectionFileName = os.path.join(self.atlasDir, 'atlasForAffineRegistration.txt.gz')
+        templateFileName = os.path.join(self.atlasDir, "template.nii")
+        affineRegistrationMeshCollectionFileName = os.path.join(
+            self.atlasDir, "atlasForAffineRegistration.txt.gz"
+        )
 
         self.imageToImageTransformMatrix, _ = self.affine.registerAtlas(
             self.sstFileNames[0],
             affineRegistrationMeshCollectionFileName,
             templateFileName,
             sstDir,
-            visualizer=self.visualizer
+            visualizer=self.visualizer,
         )
 
     def preProcess(self):
@@ -208,7 +215,7 @@ class SamsegLongitudinal:
             targetIntensity=self.targetIntensity,
             targetSearchStrings=self.targetSearchStrings,
             modeNames=self.modeNames,
-            pallidumAsWM=self.pallidumAsWM
+            pallidumAsWM=self.pallidumAsWM,
         )
 
         # =======================================================================================
@@ -217,63 +224,108 @@ class SamsegLongitudinal:
         #
         # =======================================================================================
 
-        templateFileName = os.path.join(self.atlasDir, 'template.nii')
-        self.sstModel.imageBuffers, self.sstModel.transform, self.sstModel.voxelSpacing, self.sstModel.cropping = readCroppedImages(self.sstFileNames, templateFileName, self.imageToImageTransformMatrix)
+        templateFileName = os.path.join(self.atlasDir, "template.nii")
+        (
+            self.sstModel.imageBuffers,
+            self.sstModel.transform,
+            self.sstModel.voxelSpacing,
+            self.sstModel.cropping,
+        ) = readCroppedImages(
+            self.sstFileNames,
+            templateFileName,
+            self.imageToImageTransformMatrix,
+        )
 
         self.imageBuffersList = []
         for imageFileNames in self.imageFileNamesList:
-            imageBuffers, _, _, _ = readCroppedImages(imageFileNames, templateFileName, self.imageToImageTransformMatrix)
+            imageBuffers, _, _, _ = readCroppedImages(
+                imageFileNames,
+                templateFileName,
+                self.imageToImageTransformMatrix,
+            )
             self.imageBuffersList.append(imageBuffers)
 
         # Put everything in a big 4-D matrix to derive one consistent mask across all time points
         imageSize = self.sstModel.imageBuffers.shape[:3]
         numberOfContrasts = self.sstModel.imageBuffers.shape[-1]
-        self.combinedImageBuffers = np.zeros(imageSize + (numberOfContrasts * (1 + self.numberOfTimepoints),))
-        self.combinedImageBuffers[..., 0:numberOfContrasts] = self.sstModel.imageBuffers
+        self.combinedImageBuffers = np.zeros(
+            imageSize + (numberOfContrasts * (1 + self.numberOfTimepoints),)
+        )
+        self.combinedImageBuffers[
+            ..., 0:numberOfContrasts
+        ] = self.sstModel.imageBuffers
         for timepointNumber in range(self.numberOfTimepoints):
-            self.combinedImageBuffers[..., (timepointNumber + 1) * numberOfContrasts:
-                                      (timepointNumber + 2) * numberOfContrasts] = self.imageBuffersList[timepointNumber]
+            self.combinedImageBuffers[
+                ...,
+                (timepointNumber + 1)
+                * numberOfContrasts : (timepointNumber + 2)
+                * numberOfContrasts,
+            ] = self.imageBuffersList[timepointNumber]
 
-        self.combinedImageBuffers, self.sstModel.mask = maskOutBackground(self.combinedImageBuffers, self.sstModel.modelSpecifications.atlasFileName,
-                                                        self.sstModel.transform,
-                                                        self.sstModel.modelSpecifications.brainMaskingSmoothingSigma,
-                                                        self.sstModel.modelSpecifications.brainMaskingThreshold,
-                                                        self.probabilisticAtlas)
-        combinedImageBuffers = logTransform(self.combinedImageBuffers, self.sstModel.mask)
+        self.combinedImageBuffers, self.sstModel.mask = maskOutBackground(
+            self.combinedImageBuffers,
+            self.sstModel.modelSpecifications.atlasFileName,
+            self.sstModel.transform,
+            self.sstModel.modelSpecifications.brainMaskingSmoothingSigma,
+            self.sstModel.modelSpecifications.brainMaskingThreshold,
+            self.probabilisticAtlas,
+        )
+        combinedImageBuffers = logTransform(
+            self.combinedImageBuffers, self.sstModel.mask
+        )
 
         # Retrieve the masked sst and time points
-        self.sstModel.imageBuffers = combinedImageBuffers[..., 0:numberOfContrasts]
+        self.sstModel.imageBuffers = combinedImageBuffers[
+            ..., 0:numberOfContrasts
+        ]
         for timepointNumber in range(self.numberOfTimepoints):
-            self.imageBuffersList[timepointNumber] = combinedImageBuffers[..., (timepointNumber + 1) * numberOfContrasts:
-                                                                          (timepointNumber + 2) * numberOfContrasts]
+            self.imageBuffersList[timepointNumber] = combinedImageBuffers[
+                ...,
+                (timepointNumber + 1)
+                * numberOfContrasts : (timepointNumber + 2)
+                * numberOfContrasts,
+            ]
         self.timepointModels = []
 
         # Construction of the cross sectional model for each timepoint
         for timepointNumber in range(self.numberOfTimepoints):
-            self.timepointModels.append(Samseg(
-                imageFileNames=self.imageFileNamesList[timepointNumber],
-                atlasDir=self.atlasDir,
-                savePath=self.savePath,
-                imageToImageTransformMatrix=self.imageToImageTransformMatrix,
-                userModelSpecifications=self.userModelSpecifications,
-                userOptimizationOptions=self.userOptimizationOptions,
-                visualizer=self.visualizer,
-                saveHistory=True,
-                targetIntensity=self.targetIntensity,
-                targetSearchStrings=self.targetSearchStrings,
-                modeNames=self.modeNames,
-                pallidumAsWM=self.pallidumAsWM,
-                savePosteriors=self.savePosteriors
-            ))
+            self.timepointModels.append(
+                Samseg(
+                    imageFileNames=self.imageFileNamesList[timepointNumber],
+                    atlasDir=self.atlasDir,
+                    savePath=self.savePath,
+                    imageToImageTransformMatrix=self.imageToImageTransformMatrix,
+                    userModelSpecifications=self.userModelSpecifications,
+                    userOptimizationOptions=self.userOptimizationOptions,
+                    visualizer=self.visualizer,
+                    saveHistory=True,
+                    targetIntensity=self.targetIntensity,
+                    targetSearchStrings=self.targetSearchStrings,
+                    modeNames=self.modeNames,
+                    pallidumAsWM=self.pallidumAsWM,
+                    savePosteriors=self.savePosteriors,
+                )
+            )
             self.timepointModels[timepointNumber].mask = self.sstModel.mask
-            self.timepointModels[timepointNumber].imageBuffers = self.imageBuffersList[timepointNumber]
-            self.timepointModels[timepointNumber].voxelSpacing = self.sstModel.voxelSpacing
-            self.timepointModels[timepointNumber].transform = self.sstModel.transform
-            self.timepointModels[timepointNumber].cropping = self.sstModel.cropping
+            self.timepointModels[
+                timepointNumber
+            ].imageBuffers = self.imageBuffersList[timepointNumber]
+            self.timepointModels[
+                timepointNumber
+            ].voxelSpacing = self.sstModel.voxelSpacing
+            self.timepointModels[
+                timepointNumber
+            ].transform = self.sstModel.transform
+            self.timepointModels[
+                timepointNumber
+            ].cropping = self.sstModel.cropping
 
-        self.visualizer.show(images=self.sstModel.imageBuffers, title='sst')
+        self.visualizer.show(images=self.sstModel.imageBuffers, title="sst")
         for timepointNumber in range(self.numberOfTimepoints):
-            self.visualizer.show(images=self.imageBuffersList[timepointNumber], title='time point ' + str(timepointNumber))
+            self.visualizer.show(
+                images=self.imageBuffersList[timepointNumber],
+                title="time point " + str(timepointNumber),
+            )
 
     def fitModel(self):
 
@@ -285,12 +337,18 @@ class SamsegLongitudinal:
 
         self.sstModel.fitModel()
 
-        if hasattr(self.visualizer, 'show_flag'):
+        if hasattr(self.visualizer, "show_flag"):
             import matplotlib.pyplot as plt  # avoid importing matplotlib by default
+
             plt.ion()
             self.sstModel.biasField.downSampleBasisFunctions([1, 1, 1])
-            sstBiasFields = self.sstModel.biasField.getBiasFields( self.sstModel.mask)
-            sstData = self.sstModel.imageBuffers[self.sstModel.mask, :] - sstBiasFields[self.sstModel.mask, :]
+            sstBiasFields = self.sstModel.biasField.getBiasFields(
+                self.sstModel.mask
+            )
+            sstData = (
+                self.sstModel.imageBuffers[self.sstModel.mask, :]
+                - sstBiasFields[self.sstModel.mask, :]
+            )
             axsList = []
             for contrastNumber in range(self.sstModel.gmm.numberOfContrasts):
                 f = plt.figure()
@@ -299,18 +357,28 @@ class SamsegLongitudinal:
                 numberOfColumns = np.int(np.ceil(numberOfAxes / numberOfRows))
                 axs = f.subplots(numberOfRows, numberOfColumns, sharex=True)
                 ax = axs.ravel()[0]
-                _, bins, _ = ax.hist(self.sstModel.imageBuffers[self.sstModel.mask, contrastNumber], 100)
+                _, bins, _ = ax.hist(
+                    self.sstModel.imageBuffers[
+                        self.sstModel.mask, contrastNumber
+                    ],
+                    100,
+                )
                 ax.grid()
-                ax.set_title('sst before bias field correction')
+                ax.set_title("sst before bias field correction")
                 ax = axs.ravel()[1]
                 ax.hist(sstData[:, contrastNumber], bins)
                 ax.grid()
-                ax.set_title('sst after bias field correction')
+                ax.set_title("sst after bias field correction")
                 for timepointNumber in range(self.numberOfTimepoints):
                     ax = axs.ravel()[2 + timepointNumber]
-                    ax.hist(self.imageBuffersList[timepointNumber][self.sstModel.mask, contrastNumber], bins)
+                    ax.hist(
+                        self.imageBuffersList[timepointNumber][
+                            self.sstModel.mask, contrastNumber
+                        ],
+                        bins,
+                    )
                     ax.grid()
-                    ax.set_title('time point ' + str(timepointNumber))
+                    ax.set_title("time point " + str(timepointNumber))
                 axsList.append(axs)
             plt.draw()
 
@@ -323,11 +391,16 @@ class SamsegLongitudinal:
                 "sstDeformation": self.sstModel.deformation,
                 "sstDeformationAtlasFileName": self.sstModel.deformationAtlasFileName,
                 "sstOptimizationSummary": self.sstModel.optimizationSummary,
-                "sstOptimizationHistory": self.sstModel.optimizationHistory
+                "sstOptimizationHistory": self.sstModel.optimizationHistory,
             }
 
         if self.saveSSTResults:
-            sstlabels, sstnames, sstVolumesInCubicMm, sstoptimizationSummary = self.sstModel.postProcess()
+            (
+                sstlabels,
+                sstnames,
+                sstVolumesInCubicMm,
+                sstoptimizationSummary,
+            ) = self.sstModel.postProcess()
 
             #
             if self.saveHistory:
@@ -343,22 +416,36 @@ class SamsegLongitudinal:
         # Initialization of the time-specific model parameters
         for timepointNumber in range(self.numberOfTimepoints):
             self.timepointModels[timepointNumber].initializeGMM()
-            self.timepointModels[timepointNumber].gmm.means = self.sstModel.gmm.means.copy()
-            self.timepointModels[timepointNumber].gmm.variances = self.sstModel.gmm.variances.copy()
-            self.timepointModels[timepointNumber].gmm.mixtureWeights = self.sstModel.gmm.mixtureWeights.copy()
+            self.timepointModels[
+                timepointNumber
+            ].gmm.means = self.sstModel.gmm.means.copy()
+            self.timepointModels[
+                timepointNumber
+            ].gmm.variances = self.sstModel.gmm.variances.copy()
+            self.timepointModels[
+                timepointNumber
+            ].gmm.mixtureWeights = self.sstModel.gmm.mixtureWeights.copy()
             self.timepointModels[timepointNumber].initializeBiasField()
 
         # Initialization of the latent variables, acting as hyperparameters when viewed from the model parameters' perspective
         self.latentDeformation = self.sstModel.deformation.copy()
-        self.latentDeformationAtlasFileName = self.sstModel.deformationAtlasFileName
+        self.latentDeformationAtlasFileName = (
+            self.sstModel.deformationAtlasFileName
+        )
         self.latentMeans = self.sstModel.gmm.means.copy()
         self.latentVariances = self.sstModel.gmm.variances.copy()
         self.latentMixtureWeights = self.sstModel.gmm.mixtureWeights.copy()
 
         if self.initializeLatentDeformationToZero:
             for timepointNumber in range(self.numberOfTimepoints):
-                self.timepointModels[timepointNumber].deformation = self.latentDeformation.copy()
-                self.timepointModels[timepointNumber].latentDeformationAtlasFileName = self.latentDeformationAtlasFileName
+                self.timepointModels[
+                    timepointNumber
+                ].deformation = self.latentDeformation.copy()
+                self.timepointModels[
+                    timepointNumber
+                ].latentDeformationAtlasFileName = (
+                    self.latentDeformationAtlasFileName
+                )
                 self.latentDeformation[:] = 0
 
         # Strength of the hyperprior (i.e., how much the latent variables control the conditional posterior of the parameters)
@@ -367,62 +454,99 @@ class SamsegLongitudinal:
         # For the GMM part, I'm using the *average* number of voxels assigned to the components in each mixture (class) of the
         # SST segmentation, so that all the components in each mixture are well-regularized (and tiny components don't get to do
         # whatever they want)
-        K0 = self.sstModel.modelSpecifications.K  # Stiffness population -> latent position
-        K1 = self.strengthOfLatentDeformationHyperprior * K0  # Stiffness latent position -> each time point
-        sstEstimatedNumberOfVoxelsPerGaussian = np.sum(self.sstModel.optimizationHistory[-1]['posteriorsAtEnd'], axis=0) * \
-                                                np.prod(self.sstModel.optimizationHistory[-1]['downSamplingFactors'])
+        K0 = (
+            self.sstModel.modelSpecifications.K
+        )  # Stiffness population -> latent position
+        K1 = (
+            self.strengthOfLatentDeformationHyperprior * K0
+        )  # Stiffness latent position -> each time point
+        sstEstimatedNumberOfVoxelsPerGaussian = np.sum(
+            self.sstModel.optimizationHistory[-1]["posteriorsAtEnd"], axis=0
+        ) * np.prod(
+            self.sstModel.optimizationHistory[-1]["downSamplingFactors"]
+        )
         numberOfClasses = len(self.sstModel.gmm.numberOfGaussiansPerClass)
         numberOfGaussians = sum(self.sstModel.gmm.numberOfGaussiansPerClass)
         self.latentMeansNumberOfMeasurements = np.zeros(numberOfGaussians)
         self.latentVariancesNumberOfMeasurements = np.zeros(numberOfGaussians)
-        self.latentMixtureWeightsNumberOfMeasurements = np.zeros(numberOfClasses)
+        self.latentMixtureWeightsNumberOfMeasurements = np.zeros(
+            numberOfClasses
+        )
         for classNumber in range(numberOfClasses):
             #
-            numberOfComponents = self.sstModel.gmm.numberOfGaussiansPerClass[classNumber]
-            gaussianNumbers = np.array(np.sum(self.sstModel.gmm.numberOfGaussiansPerClass[:classNumber]) +
-                                       np.array(range(numberOfComponents)), dtype=np.uint32)
-            sstEstimatedNumberOfVoxelsInClass = np.sum(sstEstimatedNumberOfVoxelsPerGaussian[gaussianNumbers])
+            numberOfComponents = self.sstModel.gmm.numberOfGaussiansPerClass[
+                classNumber
+            ]
+            gaussianNumbers = np.array(
+                np.sum(
+                    self.sstModel.gmm.numberOfGaussiansPerClass[:classNumber]
+                )
+                + np.array(range(numberOfComponents)),
+                dtype=np.uint32,
+            )
+            sstEstimatedNumberOfVoxelsInClass = np.sum(
+                sstEstimatedNumberOfVoxelsPerGaussian[gaussianNumbers]
+            )
 
-            self.latentMixtureWeightsNumberOfMeasurements[
-                classNumber] = self.strengthOfLatentGMMHyperprior * sstEstimatedNumberOfVoxelsInClass
+            self.latentMixtureWeightsNumberOfMeasurements[classNumber] = (
+                self.strengthOfLatentGMMHyperprior
+                * sstEstimatedNumberOfVoxelsInClass
+            )
 
-            averageSizeOfComponents = sstEstimatedNumberOfVoxelsInClass / numberOfComponents
-            self.latentMeansNumberOfMeasurements[gaussianNumbers] = self.strengthOfLatentGMMHyperprior * averageSizeOfComponents
-            self.latentVariancesNumberOfMeasurements[gaussianNumbers] = self.strengthOfLatentGMMHyperprior * averageSizeOfComponents
+            averageSizeOfComponents = (
+                sstEstimatedNumberOfVoxelsInClass / numberOfComponents
+            )
+            self.latentMeansNumberOfMeasurements[gaussianNumbers] = (
+                self.strengthOfLatentGMMHyperprior * averageSizeOfComponents
+            )
+            self.latentVariancesNumberOfMeasurements[gaussianNumbers] = (
+                self.strengthOfLatentGMMHyperprior * averageSizeOfComponents
+            )
 
         # Estimating the mode of the latentVariance posterior distribution (which is Wishart) requires a stringent condition
         # on latentVariancesNumberOfMeasurements so that the mode is actually defined
         threshold = (self.sstModel.gmm.numberOfContrasts + 2) + 1e-6
-        self.latentVariancesNumberOfMeasurements[self.latentVariancesNumberOfMeasurements < threshold] = threshold
+        self.latentVariancesNumberOfMeasurements[
+            self.latentVariancesNumberOfMeasurements < threshold
+        ] = threshold
 
         # No point in updating latent GMM parameters if the GMM hyperprior has zero weight. The latent variances are also
         # a bit tricky, as they're technically driven to zero in that scenario -- let's try not to go there...
         if self.strengthOfLatentGMMHyperprior == 0:
-            self.updateLatentMeans, self.updateLatentVariances, self.updateLatentMixtureWeights = False, False, False
+            (
+                self.updateLatentMeans,
+                self.updateLatentVariances,
+                self.updateLatentMixtureWeights,
+            ) = (False, False, False)
 
         # Loop over all iterations
-        self.historyOfTotalCost, self.historyOfTotalTimepointCost, self.historyOfLatentAtlasCost = [], [], []
+        (
+            self.historyOfTotalCost,
+            self.historyOfTotalTimepointCost,
+            self.historyOfLatentAtlasCost,
+        ) = ([], [], [])
         progressPlot = None
         iterationNumber = 0
         if self.saveHistory:
-            self.history = {**self.history,
-                       **{
-                           "timepointMeansEvolution": [],
-                           "timepointVariancesEvolution": [],
-                           "timepointMixtureWeightsEvolution": [],
-                           "timepointBiasFieldCoefficientsEvolution": [],
-                           "timepointDeformationsEvolution": [],
-                           "timepointDeformationAtlasFileNamesEvolution": [],
-                           "latentMeansEvolution": [],
-                           "latentVariancesEvolution": [],
-                           "latentMixtureWeightsEvolution": [],
-                           "latentDeformationEvolution": [],
-                           "latentDeformationAtlasFileNameEvolution": []
-                       }
-                       }
+            self.history = {
+                **self.history,
+                **{
+                    "timepointMeansEvolution": [],
+                    "timepointVariancesEvolution": [],
+                    "timepointMixtureWeightsEvolution": [],
+                    "timepointBiasFieldCoefficientsEvolution": [],
+                    "timepointDeformationsEvolution": [],
+                    "timepointDeformationAtlasFileNamesEvolution": [],
+                    "latentMeansEvolution": [],
+                    "latentVariancesEvolution": [],
+                    "latentMixtureWeightsEvolution": [],
+                    "latentDeformationEvolution": [],
+                    "latentDeformationAtlasFileNameEvolution": [],
+                },
+            }
 
         # Make latent atlas directory
-        latentAtlasDirectory = os.path.join(self.savePath, 'latentAtlases')
+        latentAtlasDirectory = os.path.join(self.savePath, "latentAtlases")
         os.makedirs(latentAtlasDirectory, exist_ok=True)
 
         while True:
@@ -434,15 +558,32 @@ class SamsegLongitudinal:
             # =======================================================================================
 
             # Create a new atlas that will be the basis to deform the individual time points from
-            latentAtlasFileName = os.path.join(latentAtlasDirectory, 'latentAtlas_iteration_%02d.mgz' % (iterationNumber + 1))
-            self.probabilisticAtlas.saveDeformedAtlas(self.latentDeformationAtlasFileName, latentAtlasFileName, self.latentDeformation, True)
+            latentAtlasFileName = os.path.join(
+                latentAtlasDirectory,
+                "latentAtlas_iteration_%02d.mgz" % (iterationNumber + 1),
+            )
+            self.probabilisticAtlas.saveDeformedAtlas(
+                self.latentDeformationAtlasFileName,
+                latentAtlasFileName,
+                self.latentDeformation,
+                True,
+            )
 
             # Only use the last resolution level, and with the newly created atlas as atlas
             for timepointNumber in range(self.numberOfTimepoints):
-                self.timepointModels[timepointNumber].optimizationOptions = self.sstModel.optimizationOptions
-                self.timepointModels[timepointNumber].optimizationOptions['multiResolutionSpecification'] = [
-                    self.timepointModels[timepointNumber].optimizationOptions['multiResolutionSpecification'][-1]]
-                self.timepointModels[timepointNumber].optimizationOptions['multiResolutionSpecification'][0]['atlasFileName'] = latentAtlasFileName
+                self.timepointModels[
+                    timepointNumber
+                ].optimizationOptions = self.sstModel.optimizationOptions
+                self.timepointModels[timepointNumber].optimizationOptions[
+                    "multiResolutionSpecification"
+                ] = [
+                    self.timepointModels[timepointNumber].optimizationOptions[
+                        "multiResolutionSpecification"
+                    ][-1]
+                ]
+                self.timepointModels[timepointNumber].optimizationOptions[
+                    "multiResolutionSpecification"
+                ][0]["atlasFileName"] = latentAtlasFileName
                 print(self.timepointModels[timepointNumber].optimizationOptions)
 
             # Loop over all time points
@@ -450,42 +591,87 @@ class SamsegLongitudinal:
             for timepointNumber in range(self.numberOfTimepoints):
                 #
                 self.timepointModels[timepointNumber].modelSpecifications.K = K1
-                self.timepointModels[timepointNumber].gmm.hyperMeans = self.latentMeans
-                self.timepointModels[timepointNumber].gmm.hyperVariances = self.latentVariances
-                self.timepointModels[timepointNumber].gmm.hyperMixtureWeights = self.latentMixtureWeights
-                self.timepointModels[timepointNumber].gmm.fullHyperMeansNumberOfMeasurements = self.latentMeansNumberOfMeasurements.copy()
-                self.timepointModels[timepointNumber].gmm.fullHyperVariancesNumberOfMeasurements = self.latentVariancesNumberOfMeasurements.copy()
-                self.timepointModels[timepointNumber].gmm.fullHyperMixtureWeightsNumberOfMeasurements = self.latentMixtureWeightsNumberOfMeasurements.copy()
+                self.timepointModels[
+                    timepointNumber
+                ].gmm.hyperMeans = self.latentMeans
+                self.timepointModels[
+                    timepointNumber
+                ].gmm.hyperVariances = self.latentVariances
+                self.timepointModels[
+                    timepointNumber
+                ].gmm.hyperMixtureWeights = self.latentMixtureWeights
+                self.timepointModels[
+                    timepointNumber
+                ].gmm.fullHyperMeansNumberOfMeasurements = (
+                    self.latentMeansNumberOfMeasurements.copy()
+                )
+                self.timepointModels[
+                    timepointNumber
+                ].gmm.fullHyperVariancesNumberOfMeasurements = (
+                    self.latentVariancesNumberOfMeasurements.copy()
+                )
+                self.timepointModels[
+                    timepointNumber
+                ].gmm.fullHyperMixtureWeightsNumberOfMeasurements = (
+                    self.latentMixtureWeightsNumberOfMeasurements.copy()
+                )
 
                 self.timepointModels[timepointNumber].estimateModelParameters(
-                                            initialBiasFieldCoefficients=self.timepointModels[timepointNumber].biasField.coefficients,
-                                            initialDeformation=self.timepointModels[timepointNumber].deformation,
-                                            initialDeformationAtlasFileName=self.timepointModels[timepointNumber].deformationAtlasFileName,
-                                            skipBiasFieldParameterEstimationInFirstIteration=False,
-                                            skipGMMParameterEstimationInFirstIteration=(iterationNumber == 0)
-                                            )
+                    initialBiasFieldCoefficients=self.timepointModels[
+                        timepointNumber
+                    ].biasField.coefficients,
+                    initialDeformation=self.timepointModels[
+                        timepointNumber
+                    ].deformation,
+                    initialDeformationAtlasFileName=self.timepointModels[
+                        timepointNumber
+                    ].deformationAtlasFileName,
+                    skipBiasFieldParameterEstimationInFirstIteration=False,
+                    skipGMMParameterEstimationInFirstIteration=(
+                        iterationNumber == 0
+                    ),
+                )
 
-                totalTimepointCost += self.timepointModels[timepointNumber].optimizationHistory[-1]['historyOfCost'][-1]
+                totalTimepointCost += self.timepointModels[
+                    timepointNumber
+                ].optimizationHistory[-1]["historyOfCost"][-1]
 
-                print('=================================')
-                print('\n')
-                print('timepointNumber: ', timepointNumber)
-                print('perVoxelCost: ', self.timepointModels[timepointNumber].optimizationSummary[-1]['perVoxelCost'])
-                print('\n')
-                print('=================================')
-                if hasattr(self.visualizer, 'show_flag'):
+                print("=================================")
+                print("\n")
+                print("timepointNumber: ", timepointNumber)
+                print(
+                    "perVoxelCost: ",
+                    self.timepointModels[timepointNumber].optimizationSummary[
+                        -1
+                    ]["perVoxelCost"],
+                )
+                print("\n")
+                print("=================================")
+                if hasattr(self.visualizer, "show_flag"):
                     import matplotlib.pyplot as plt  # avoid importing matplotlib by default
+
                     plt.ion()
-                    self.timepointModels[timepointNumber].biasField.downSampleBasisFunctions([1, 1, 1])
-                    timepointBiasFields = self.timepointModels[timepointNumber].biasField.getBiasFields(self.sstModel.mask)
-                    timepointData = self.imageBuffersList[timepointNumber][self.sstModel.mask, :] - timepointBiasFields[self.sstModel.mask, :]
-                    for contrastNumber in range(self.sstModel.gmm.numberOfContrasts):
+                    self.timepointModels[
+                        timepointNumber
+                    ].biasField.downSampleBasisFunctions([1, 1, 1])
+                    timepointBiasFields = self.timepointModels[
+                        timepointNumber
+                    ].biasField.getBiasFields(self.sstModel.mask)
+                    timepointData = (
+                        self.imageBuffersList[timepointNumber][
+                            self.sstModel.mask, :
+                        ]
+                        - timepointBiasFields[self.sstModel.mask, :]
+                    )
+                    for contrastNumber in range(
+                        self.sstModel.gmm.numberOfContrasts
+                    ):
                         axs = axsList[contrastNumber]
                         ax = axs.ravel()[2 + timepointNumber]
                         ax.clear()
                         ax.hist(timepointData[:, contrastNumber], bins)
                         ax.grid()
-                        ax.set_title('time point ' + str(timepointNumber))
+                        ax.set_title("time point " + str(timepointNumber))
                     plt.draw()
 
                 # End loop over time points
@@ -506,68 +692,117 @@ class SamsegLongitudinal:
             # The parameter estimation happens in a (potentially) downsampled image grid, so it's import to work in the same space
             # when measuring and updating the latentDeformation
             transformUsedForEstimation = gems.KvlTransform(
-                requireNumpyArray(self.sstModel.optimizationHistory[-1]['downSampledTransformMatrix']))
+                requireNumpyArray(
+                    self.sstModel.optimizationHistory[-1][
+                        "downSampledTransformMatrix"
+                    ]
+                )
+            )
             mesh_collection = gems.KvlMeshCollection()
             mesh_collection.read(self.latentDeformationAtlasFileName)
             mesh_collection.transform(transformUsedForEstimation)
             referencePosition = mesh_collection.reference_position
             timepointPositions = []
             for timepointNumber in range(self.numberOfTimepoints):
-                positionInTemplateSpace = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(referencePosition,
-                                                                                 transformUsedForEstimation) + \
-                                          self.latentDeformation + self.timepointModels[timepointNumber].deformation
+                positionInTemplateSpace = (
+                    self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                        referencePosition, transformUsedForEstimation
+                    )
+                    + self.latentDeformation
+                    + self.timepointModels[timepointNumber].deformation
+                )
                 timepointPositions.append(
-                    self.probabilisticAtlas.mapPositionsFromTemplateToSubjectSpace(positionInTemplateSpace, transformUsedForEstimation))
+                    self.probabilisticAtlas.mapPositionsFromTemplateToSubjectSpace(
+                        positionInTemplateSpace, transformUsedForEstimation
+                    )
+                )
             mesh_collection.set_positions(referencePosition, timepointPositions)
 
             # Read mesh in sst warp
-            mesh = self.probabilisticAtlas.getMesh(latentAtlasFileName, transformUsedForEstimation)
+            mesh = self.probabilisticAtlas.getMesh(
+                latentAtlasFileName, transformUsedForEstimation
+            )
 
             #
-            calculator = gems.KvlCostAndGradientCalculator(mesh_collection, K0, 0.0, transformUsedForEstimation)
+            calculator = gems.KvlCostAndGradientCalculator(
+                mesh_collection, K0, 0.0, transformUsedForEstimation
+            )
             latentAtlasCost, _ = calculator.evaluate_mesh_position(mesh)
 
             #
             totalCost = totalTimepointCost + latentAtlasCost
-            print('*' * 100 + '\n')
-            print('iterationNumber: ', iterationNumber)
-            print('totalCost: ', totalCost)
-            print('   latentAtlasCost: ', latentAtlasCost)
-            print('   totalTimepointCost: ', totalTimepointCost)
-            print('*' * 100 + '\n')
+            print("*" * 100 + "\n")
+            print("iterationNumber: ", iterationNumber)
+            print("totalCost: ", totalCost)
+            print("   latentAtlasCost: ", latentAtlasCost)
+            print("   totalTimepointCost: ", totalTimepointCost)
+            print("*" * 100 + "\n")
             self.historyOfTotalCost.append(totalCost)
             self.historyOfTotalTimepointCost.append(totalTimepointCost)
             self.historyOfLatentAtlasCost.append(latentAtlasCost)
 
-            if hasattr(self.visualizer, 'show_flag'):
+            if hasattr(self.visualizer, "show_flag"):
                 import matplotlib.pyplot as plt  # avoid importing matplotlib by default
+
                 plt.ion()
                 if progressPlot is None:
                     plt.figure()
                     progressPlot = plt.subplot()
                 progressPlot.clear()
-                progressPlot.plot(self.historyOfTotalCost, color='k')
-                progressPlot.plot(self.historyOfTotalTimepointCost, linestyle='-.', color='b')
-                progressPlot.plot(self.historyOfLatentAtlasCost, linestyle='-.', color='r')
+                progressPlot.plot(self.historyOfTotalCost, color="k")
+                progressPlot.plot(
+                    self.historyOfTotalTimepointCost, linestyle="-.", color="b"
+                )
+                progressPlot.plot(
+                    self.historyOfLatentAtlasCost, linestyle="-.", color="r"
+                )
                 progressPlot.grid()
-                progressPlot.legend(['total', 'timepoints', 'latent atlas deformation'])
+                progressPlot.legend(
+                    ["total", "timepoints", "latent atlas deformation"]
+                )
                 plt.draw()
 
             if self.saveHistory:
-                self.history["timepointMeansEvolution"].append(self.timepointModels[timepointNumber].gmm.means)
-                self.history["timepointVariancesEvolution"].append(self.timepointModels[timepointNumber].gmm.variances)
-                self.history["timepointMixtureWeightsEvolution"].append(self.timepointModels[timepointNumber].gmm.mixtureWeights)
-                self.history["timepointBiasFieldCoefficientsEvolution"].append(self.timepointModels[timepointNumber].biasfield.coefficients)
-                self.history["timepointDeformationsEvolution"].append(self.timepointModels[timepointNumber].deformation)
-                self.history["timepointDeformationAtlasFileNamesEvolution"].append(self.timepointModels[timepointNumber].deformationAtlasFileName)
-                self.history["latentMeansEvolution"].append(self.latentMeans.copy())
-                self.history["latentVariancesEvolution"].append(self.latentVariances.copy())
-                self.history["latentMixtureWeightsEvolution"].append(self.latentMixtureWeights.copy())
-                self.history["latentDeformationEvolution"].append(self.latentDeformation.copy())
-                self.history["latentDeformationAtlasFileNameEvolution"].append(self.latentDeformationAtlasFileName)
+                self.history["timepointMeansEvolution"].append(
+                    self.timepointModels[timepointNumber].gmm.means
+                )
+                self.history["timepointVariancesEvolution"].append(
+                    self.timepointModels[timepointNumber].gmm.variances
+                )
+                self.history["timepointMixtureWeightsEvolution"].append(
+                    self.timepointModels[timepointNumber].gmm.mixtureWeights
+                )
+                self.history["timepointBiasFieldCoefficientsEvolution"].append(
+                    self.timepointModels[timepointNumber].biasfield.coefficients
+                )
+                self.history["timepointDeformationsEvolution"].append(
+                    self.timepointModels[timepointNumber].deformation
+                )
+                self.history[
+                    "timepointDeformationAtlasFileNamesEvolution"
+                ].append(
+                    self.timepointModels[
+                        timepointNumber
+                    ].deformationAtlasFileName
+                )
+                self.history["latentMeansEvolution"].append(
+                    self.latentMeans.copy()
+                )
+                self.history["latentVariancesEvolution"].append(
+                    self.latentVariances.copy()
+                )
+                self.history["latentMixtureWeightsEvolution"].append(
+                    self.latentMixtureWeights.copy()
+                )
+                self.history["latentDeformationEvolution"].append(
+                    self.latentDeformation.copy()
+                )
+                self.history["latentDeformationAtlasFileNameEvolution"].append(
+                    self.latentDeformationAtlasFileName
+                )
 
             if iterationNumber >= (self.numberOfIterations - 1):
-                print('Stopping')
+                print("Stopping")
                 break
 
             # =======================================================================================
@@ -575,70 +810,116 @@ class SamsegLongitudinal:
             # Update the latent variables based on the current parameter estimates
             #
             # =======================================================================================
-            self.updateLatentDeformationAtlas(mesh_collection, mesh, K0, K1, transformUsedForEstimation)
+            self.updateLatentDeformationAtlas(
+                mesh_collection, mesh, K0, K1, transformUsedForEstimation
+            )
             self.updateGMMLatentVariables()
 
             iterationNumber += 1
             # End loop over parameter and latent variable estimation iterations
 
-    def updateLatentDeformationAtlas(self, mesh_collection, mesh, K0, K1, transformUsedForEstimation):
+    def updateLatentDeformationAtlas(
+        self, mesh_collection, mesh, K0, K1, transformUsedForEstimation
+    ):
         # Update the latentDeformation
         if self.updateLatentDeformation:
             # Set up calculator
-            calculator = gems.KvlCostAndGradientCalculator(mesh_collection, K0, K1, transformUsedForEstimation)
+            calculator = gems.KvlCostAndGradientCalculator(
+                mesh_collection, K0, K1, transformUsedForEstimation
+            )
 
             # Get optimizer and plug calculator in it
-            optimizerType = 'L-BFGS'
+            optimizerType = "L-BFGS"
             optimizationParameters = {
-                'Verbose': self.sstModel.optimizationOptions['verbose'],
-                'MaximalDeformationStopCriterion': self.sstModel.optimizationOptions['maximalDeformationStopCriterion'],
-                'LineSearchMaximalDeformationIntervalStopCriterion': self.sstModel.optimizationOptions[
-                    'lineSearchMaximalDeformationIntervalStopCriterion'],
-                'MaximumNumberOfIterations': self.sstModel.optimizationOptions['maximumNumberOfDeformationIterations'],
-                'BFGS-MaximumMemoryLength': self.sstModel.optimizationOptions['BFGSMaximumMemoryLength']
+                "Verbose": self.sstModel.optimizationOptions["verbose"],
+                "MaximalDeformationStopCriterion": self.sstModel.optimizationOptions[
+                    "maximalDeformationStopCriterion"
+                ],
+                "LineSearchMaximalDeformationIntervalStopCriterion": self.sstModel.optimizationOptions[
+                    "lineSearchMaximalDeformationIntervalStopCriterion"
+                ],
+                "MaximumNumberOfIterations": self.sstModel.optimizationOptions[
+                    "maximumNumberOfDeformationIterations"
+                ],
+                "BFGS-MaximumMemoryLength": self.sstModel.optimizationOptions[
+                    "BFGSMaximumMemoryLength"
+                ],
             }
-            optimizer = gems.KvlOptimizer(optimizerType, mesh, calculator, optimizationParameters)
+            optimizer = gems.KvlOptimizer(
+                optimizerType, mesh, calculator, optimizationParameters
+            )
 
             # Run deformation optimization
             historyOfDeformationCost = []
             historyOfMaximalDeformation = []
             nodePositionsBeforeDeformation = mesh.points
             while True:
-                minLogLikelihoodTimesDeformationPrior, maximalDeformation = optimizer.step_optimizer_samseg()
-                print("maximalDeformation=%.4f minLogLikelihood=%.4f" % (
-                    maximalDeformation, minLogLikelihoodTimesDeformationPrior))
-                historyOfDeformationCost.append(minLogLikelihoodTimesDeformationPrior)
+                (
+                    minLogLikelihoodTimesDeformationPrior,
+                    maximalDeformation,
+                ) = optimizer.step_optimizer_samseg()
+                print(
+                    "maximalDeformation=%.4f minLogLikelihood=%.4f"
+                    % (
+                        maximalDeformation,
+                        minLogLikelihoodTimesDeformationPrior,
+                    )
+                )
+                historyOfDeformationCost.append(
+                    minLogLikelihoodTimesDeformationPrior
+                )
                 historyOfMaximalDeformation.append(maximalDeformation)
                 if maximalDeformation == 0:
                     break
 
             nodePositionsAfterDeformation = mesh.points
             maximalDeformationApplied = np.sqrt(
-                np.max(np.sum((nodePositionsAfterDeformation - nodePositionsBeforeDeformation) ** 2, 1)))
+                np.max(
+                    np.sum(
+                        (
+                            nodePositionsAfterDeformation
+                            - nodePositionsBeforeDeformation
+                        )
+                        ** 2,
+                        1,
+                    )
+                )
+            )
 
             #
             nodePositionsBeforeDeformation = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-                nodePositionsBeforeDeformation,
-                transformUsedForEstimation)
+                nodePositionsBeforeDeformation, transformUsedForEstimation
+            )
             nodePositionsAfterDeformation = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-                nodePositionsAfterDeformation,
-                transformUsedForEstimation)
-            estimatedUpdate = nodePositionsAfterDeformation - nodePositionsBeforeDeformation
+                nodePositionsAfterDeformation, transformUsedForEstimation
+            )
+            estimatedUpdate = (
+                nodePositionsAfterDeformation - nodePositionsBeforeDeformation
+            )
             self.latentDeformation += estimatedUpdate
 
     def updateGMMLatentVariables(self):
 
         # Update latentMeans
         if self.updateLatentMeans:
-            numberOfGaussians = np.sum(self.sstModel.gmm.numberOfGaussiansPerClass)
+            numberOfGaussians = np.sum(
+                self.sstModel.gmm.numberOfGaussiansPerClass
+            )
             numberOfContrasts = self.latentMeans.shape[-1]
             for gaussianNumber in range(numberOfGaussians):
                 # Set up linear system
                 lhs = np.zeros((numberOfContrasts, numberOfContrasts))
                 rhs = np.zeros((numberOfContrasts, 1))
                 for timepointNumber in range(self.numberOfTimepoints):
-                    mean = np.expand_dims(self.timepointModels[timepointNumber].gmm.means[gaussianNumber], 1)
-                    variance = self.timepointModels[timepointNumber].gmm.variances[gaussianNumber]
+                    mean = np.expand_dims(
+                        self.timepointModels[timepointNumber].gmm.means[
+                            gaussianNumber
+                        ],
+                        1,
+                    )
+                    variance = self.timepointModels[
+                        timepointNumber
+                    ].gmm.variances[gaussianNumber]
 
                     lhs += np.linalg.inv(variance)
                     rhs += np.linalg.solve(variance, mean)
@@ -649,34 +930,64 @@ class SamsegLongitudinal:
 
         # Update latentVariances
         if self.updateLatentVariances:
-            numberOfGaussians = np.sum(self.sstModel.gmm.numberOfGaussiansPerClass)
+            numberOfGaussians = np.sum(
+                self.sstModel.gmm.numberOfGaussiansPerClass
+            )
             numberOfContrasts = self.latentMeans.shape[-1]
             for gaussianNumber in range(numberOfGaussians):
                 # Precision is essentially averaged
-                averagePrecision = np.zeros((numberOfContrasts, numberOfContrasts))
+                averagePrecision = np.zeros(
+                    (numberOfContrasts, numberOfContrasts)
+                )
                 for timepointNumber in range(self.numberOfTimepoints):
-                    variance = self.timepointModels[timepointNumber].gmm.variances[gaussianNumber]
+                    variance = self.timepointModels[
+                        timepointNumber
+                    ].gmm.variances[gaussianNumber]
 
                     averagePrecision += np.linalg.inv(variance)
                 averagePrecision /= self.numberOfTimepoints
 
-                latentVarianceNumberOfMeasurements = self.latentVariancesNumberOfMeasurements[gaussianNumber]
-                latentVariance = np.linalg.inv(averagePrecision) * \
-                                 (latentVarianceNumberOfMeasurements - numberOfContrasts - 2) / latentVarianceNumberOfMeasurements
+                latentVarianceNumberOfMeasurements = self.latentVariancesNumberOfMeasurements[
+                    gaussianNumber
+                ]
+                latentVariance = (
+                    np.linalg.inv(averagePrecision)
+                    * (
+                        latentVarianceNumberOfMeasurements
+                        - numberOfContrasts
+                        - 2
+                    )
+                    / latentVarianceNumberOfMeasurements
+                )
                 self.latentVariances[gaussianNumber] = latentVariance
 
         # Update latentMixtureWeights
         if self.updateLatentMixtureWeights:
             numberOfClasses = len(self.sstModel.gmm.numberOfGaussiansPerClass)
             for classNumber in range(numberOfClasses):
-                numberOfComponents = self.sstModel.gmm.numberOfGaussiansPerClass[classNumber]
+                numberOfComponents = self.sstModel.gmm.numberOfGaussiansPerClass[
+                    classNumber
+                ]
                 averageInLogDomain = np.zeros(numberOfComponents)
                 for componentNumber in range(numberOfComponents):
-                    gaussianNumber = sum(self.sstModel.gmm.numberOfGaussiansPerClass[:classNumber]) + componentNumber
+                    gaussianNumber = (
+                        sum(
+                            self.sstModel.gmm.numberOfGaussiansPerClass[
+                                :classNumber
+                            ]
+                        )
+                        + componentNumber
+                    )
                     for timepointNumber in range(self.numberOfTimepoints):
-                        mixtureWeight = self.timepointModels[timepointNumber].gmm.mixtureWeights[gaussianNumber]
-                        averageInLogDomain[componentNumber] += np.log(mixtureWeight + eps)
-                    averageInLogDomain[componentNumber] /= self.numberOfTimepoints
+                        mixtureWeight = self.timepointModels[
+                            timepointNumber
+                        ].gmm.mixtureWeights[gaussianNumber]
+                        averageInLogDomain[componentNumber] += np.log(
+                            mixtureWeight + eps
+                        )
+                    averageInLogDomain[
+                        componentNumber
+                    ] /= self.numberOfTimepoints
 
                 # Solution is normalized version
                 solution = np.exp(averageInLogDomain)
@@ -684,8 +995,17 @@ class SamsegLongitudinal:
 
                 #
                 for componentNumber in range(numberOfComponents):
-                    gaussianNumber = sum(self.sstModel.gmm.numberOfGaussiansPerClass[:classNumber]) + componentNumber
-                    self.latentMixtureWeights[gaussianNumber] = solution[componentNumber]
+                    gaussianNumber = (
+                        sum(
+                            self.sstModel.gmm.numberOfGaussiansPerClass[
+                                :classNumber
+                            ]
+                        )
+                        + componentNumber
+                    )
+                    self.latentMixtureWeights[gaussianNumber] = solution[
+                        componentNumber
+                    ]
 
     def postProcess(self, saveWarp=False):
 
@@ -701,21 +1021,37 @@ class SamsegLongitudinal:
             timepointModel = self.timepointModels[timepointNumber]
 
             #
-            timepointModel.deformation = self.latentDeformation + timepointModel.deformation
-            timepointModel.deformationAtlasFileName = self.latentDeformationAtlasFileName
-            posteriors, biasFields, nodePositions, _, _ = timepointModel.computeFinalSegmentation()
+            timepointModel.deformation = (
+                self.latentDeformation + timepointModel.deformation
+            )
+            timepointModel.deformationAtlasFileName = (
+                self.latentDeformationAtlasFileName
+            )
+            (
+                posteriors,
+                biasFields,
+                nodePositions,
+                _,
+                _,
+            ) = timepointModel.computeFinalSegmentation()
 
             #
-            timepointDir = os.path.join(self.savePath, 'tp%03d' % (timepointNumber + 1))
+            timepointDir = os.path.join(
+                self.savePath, "tp%03d" % (timepointNumber + 1)
+            )
             os.makedirs(timepointDir, exist_ok=True)
 
             #
             timepointModel.savePath = timepointDir
-            volumesInCubicMm = timepointModel.writeResults(biasFields, posteriors)
+            volumesInCubicMm = timepointModel.writeResults(
+                biasFields, posteriors
+            )
 
             # Save the timepoint->template warp
             if saveWarp:
-                timepointModel.saveWarpField(os.path.join(timepointDir, 'template.m3z'))
+                timepointModel.saveWarpField(
+                    os.path.join(timepointDir, "template.m3z")
+                )
 
             self.timepointVolumesInCubicMm.append(volumesInCubicMm)
 
@@ -723,36 +1059,48 @@ class SamsegLongitudinal:
         self.optimizationSummary = {
             "historyOfTotalCost": self.historyOfTotalCost,
             "historyOfTotalTimepointCost": self.historyOfTotalTimepointCost,
-            "historyOfLatentAtlasCost": self.historyOfLatentAtlasCost
+            "historyOfLatentAtlasCost": self.historyOfLatentAtlasCost,
         }
 
         if self.saveHistory:
-            self.history["labels"] = self.sstModel.modelSpecifications.FreeSurferLabels
+            self.history[
+                "labels"
+            ] = self.sstModel.modelSpecifications.FreeSurferLabels
             self.history["names"] = self.sstModel.modelSpecifications.names
-            self.history["timepointVolumesInCubicMm"] = self.timepointVolumesInCubicMm
+            self.history[
+                "timepointVolumesInCubicMm"
+            ] = self.timepointVolumesInCubicMm
             self.history["optimizationSummary"] = self.optimizationSummary
-            with open(os.path.join(self.savePath, 'history.p'), 'wb') as file:
-                pickle.dump(self.history, file, protocol=pickle.HIGHEST_PROTOCOL)
+            with open(os.path.join(self.savePath, "history.p"), "wb") as file:
+                pickle.dump(
+                    self.history, file, protocol=pickle.HIGHEST_PROTOCOL
+                )
 
     def generateSubjectSpecificTemplate(self):
 
-        sstDir = os.path.join(self.savePath, 'base')
+        sstDir = os.path.join(self.savePath, "base")
         os.makedirs(sstDir, exist_ok=True)
 
         sstFileNames = []
-        for contrastNumber, contrastImageFileNames in enumerate(zip(*self.imageFileNamesList)):
+        for contrastNumber, contrastImageFileNames in enumerate(
+            zip(*self.imageFileNamesList)
+        ):
 
             # Read in the various time point images, and compute the average
             numberOfTimepoints = len(contrastImageFileNames)
             image0 = gems.KvlImage(contrastImageFileNames[0])
             imageBuffer = image0.getImageBuffer().copy()
             for timepointNumber in range(1, numberOfTimepoints):
-                imageBuffer += gems.KvlImage(contrastImageFileNames[timepointNumber]).getImageBuffer()
+                imageBuffer += gems.KvlImage(
+                    contrastImageFileNames[timepointNumber]
+                ).getImageBuffer()
             imageBuffer /= numberOfTimepoints
 
             # Create an ITK image and write to disk
             sst = gems.KvlImage(requireNumpyArray(imageBuffer))
-            sstFilename = os.path.join(sstDir, 'mode%02d_average.mgz' % (contrastNumber + 1))
+            sstFilename = os.path.join(
+                sstDir, "mode%02d_average.mgz" % (contrastNumber + 1)
+            )
             sst.write(sstFilename, image0.transform_matrix)
 
             #

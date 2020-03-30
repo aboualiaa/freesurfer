@@ -5,11 +5,11 @@
 # plots.py
 
 # This program takes in a directory of subjects, a text csv file that organizes the subjects into
-# groups, and the name of a structure that the user wants data for. The program first organizes 
+# groups, and the name of a structure that the user wants data for. The program first organizes
 # the subjects into the numbered groups. For each subject, the corresponding files for the named
 # structure are extracted and organized by whether they're in the left or right hemisphere. The
 # files are then plotted onto violin plots that directly compare each type of mean value and show
-# a plot for each group number and both sides of each group. 
+# a plot for each group number and both sides of each group.
 
 # Import libraries
 import sys
@@ -20,7 +20,7 @@ import pandas as pd
 
 # Check for correct inputs
 if len(sys.argv) != 4:
-    print('Usage: ./executable directory labels structure')
+    print("Usage: ./executable directory labels structure")
     exit()
 
 
@@ -56,20 +56,23 @@ main_directory = sys.argv[1]
 
 # Loop through the groups
 for i in range(1, len(inf_to_group) + 1):
-    
+
     # Loop through each subject within a group
     for j in range(len(inf_to_group[i])):
         subject = inf_to_group[i][j]
 
         # Iterate through the main directory from the command line
-        for subdir, dirs, files in os.walk(main_directory): 
-            
+        for subdir, dirs, files in os.walk(main_directory):
+
             # Get the name of each file
             for file in files:
                 filepath = subdir + os.sep + file
 
                 # Filter out the files based on the input from command line
-                if filepath.endswith(sys.argv[3] + '.csv') and subject in filepath:
+                if (
+                    filepath.endswith(sys.argv[3] + ".csv")
+                    and subject in filepath
+                ):
                     file_names[i].append(filepath)
 
 
@@ -83,17 +86,17 @@ height = 2 * max_group
 
 
 # Collect the value type names. This assumes the first column name is irrelevant
-xticklabels=list(sample_df.columns.values.tolist()[1:])
+xticklabels = list(sample_df.columns.values.tolist()[1:])
 
 # Create labels for the violin plots
-violin_labels = ['' for x in range(2*max_group)]
+violin_labels = ["" for x in range(2 * max_group)]
 
 # Each group has 2 labels: for both left and right
 i = 2
 while i < 2 * max_group + 1:
-    violin_labels[i-2] += 'Group ' + str(int(i/2)) + ' Left'
-    violin_labels[i-1] += 'Group ' + str(int(i/2)) + ' Right'
-    i+=2
+    violin_labels[i - 2] += "Group " + str(int(i / 2)) + " Left"
+    violin_labels[i - 1] += "Group " + str(int(i / 2)) + " Right"
+    i += 2
 
 
 # Create a list of lists, two for each group
@@ -101,52 +104,55 @@ for k in range(num_plots):
     # Odd indexes will hold left side data, even ones hold right side
     single_plot = [[] for x in range(height)]
 
-
-    # Loop through each group 
+    # Loop through each group
     for i in range(1, len(file_names) + 1):
-        
+
         # Loop though each file within each group
         for j in range(len(file_names[i])):
 
             # Find files of the left side
-            if 'left' in file_names[i][j].lower() or 'lh' in file_names[i][j].lower():
-                
-                df = pd.read_csv(file_names[i][j])
-    
-                means = df.mean(axis = 0)
+            if (
+                "left" in file_names[i][j].lower()
+                or "lh" in file_names[i][j].lower()
+            ):
 
-                #print (xticklabels[k])
-                #print (violin_labels[2 * i - 2], means[k])
+                df = pd.read_csv(file_names[i][j])
+
+                means = df.mean(axis=0)
+
+                # print (xticklabels[k])
+                # print (violin_labels[2 * i - 2], means[k])
 
                 # Isolate the desired mean value for this specific plot and append it
                 single_plot[2 * i - 2].append(means[k])
 
-
             # Same idea as code for mapping the left side values
-            elif 'right' in file_names[i][j].lower() or 'rh' in file_names[i][j].lower():
+            elif (
+                "right" in file_names[i][j].lower()
+                or "rh" in file_names[i][j].lower()
+            ):
 
                 df = pd.read_csv(file_names[i][j])
 
-                means = df.mean(axis = 0)
+                means = df.mean(axis=0)
 
-                #print (xticklabels[k])
-                #print (violin_labels[2 * i - 1], means[k])
+                # print (xticklabels[k])
+                # print (violin_labels[2 * i - 1], means[k])
 
                 # On a separate row and with a separate column iterator, fill in data
                 single_plot[2 * i - 1].append(means[k])
 
-
-    #Violin plots
-    plt.figure(xticklabels[k]) 
+    # Violin plots
+    plt.figure(xticklabels[k])
     plt.violinplot(single_plot, showmeans=True)
 
     # Plot logistics
     plt.title(xticklabels[k])
-    plt.xlabel('Group')
-    plt.ylabel('Observed Values')
+    plt.xlabel("Group")
+    plt.ylabel("Observed Values")
 
     # Label the x axis more specifically
-    plt.xticks([i+1 for i in range(2 * max_group)], violin_labels)
+    plt.xticks([i + 1 for i in range(2 * max_group)], violin_labels)
 
 
 # Print out all the plots
@@ -154,7 +160,7 @@ plt.show()
 
 
 # Code to read in one csv file and isolate the different types of values
-'''
+"""
 # Read in one file to get the dimensions
 sample_df = pd.read_csv(sys.argv[1])
 
@@ -192,8 +198,8 @@ for i in range(1, height + 1):
     # Calculate the means and insert into the 2D array
     for k in range(width):
         means[k][i-1] = sum(data[k]) / len(data[k])
-'''
-'''
+"""
+"""
 # Creates the basis of the plots
 # Increase ncols and add [#] to axes to add more plots
 #fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(20, 20))
@@ -206,10 +212,10 @@ for i in range(width):
     plt.violinplot(means[i], showmeans=True)
     plt.xlabel('Type of Value')
     plt.ylabel('Observed Values')
-'''
+"""
 
 # Code to print out both a violin plot and box plot with all data represented in both
-'''
+"""
 # Violin plot
 #for i in range(width):
 axes.violinplot(means, showmeans=True, showmedians=False)
@@ -233,6 +239,6 @@ axes.set_title('CSV Comparison')
 # Add x tick labels
 plt.setp(axes, xticks=[y + 1 for y in range(len(means))], 
          xticklabels=list(sample_df.columns.values.tolist()[1:]))
-'''
+"""
 # Print out the plots
 # plt.show()

@@ -16,19 +16,21 @@ def vertex_normals(vertices, faces, vfaces):
     max_faces = max([len(x) for x in vfaces])
     nvertices = len(vfaces)
 
-    inds = np.zeros((nvertices, max_faces), dtype='int32')
-    mask = np.zeros((nvertices, max_faces, 3), dtype='int16')
+    inds = np.zeros((nvertices, max_faces), dtype="int32")
+    mask = np.zeros((nvertices, max_faces, 3), dtype="int16")
     for v, f in enumerate(vfaces):
-        inds[v, :len(f)] = f
-        mask[v, :len(f), :] = 1
+        inds[v, : len(f)] = f
+        mask[v, : len(f), :] = 1
 
     vfnorm = tf.gather(fnorm, inds) * mask
-    avg = tf.reduce_sum(vfnorm, axis=1) / tf.cast(tf.reduce_sum(mask, axis=1), dtype=tf.float32)
+    avg = tf.reduce_sum(vfnorm, axis=1) / tf.cast(
+        tf.reduce_sum(mask, axis=1), dtype=tf.float32
+    )
     return tf.linalg.l2_normalize(avg, axis=1)
 
 
 def prod_n(lst):
-    '''From Adrian...'''
+    """From Adrian..."""
     prod = lst[0]
     for p in lst[1:]:
         prod *= p
@@ -36,9 +38,12 @@ def prod_n(lst):
 
 
 def sub2ind(siz, subs, **kwargs):
-    '''From Adrian...'''
+    """From Adrian..."""
     # subs is a list
-    assert len(siz) == len(subs), 'found inconsistent siz and subs: %d %d' % (len(siz), len(subs))
+    assert len(siz) == len(subs), "found inconsistent siz and subs: %d %d" % (
+        len(siz),
+        len(subs),
+    )
 
     k = np.cumprod(siz[::-1])
 
@@ -49,8 +54,8 @@ def sub2ind(siz, subs, **kwargs):
     return ndx
 
 
-def interp(vol, loc, method='linear'):
-    '''From Adrian...'''
+def interp(vol, loc, method="linear"):
+    """From Adrian..."""
 
     if isinstance(loc, (list, tuple)):
         loc = tf.stack(loc, -1)
@@ -59,50 +64,70 @@ def interp(vol, loc, method='linear'):
     if not nb_dims.value:
         raise Exception("Loc dimension is None")
 
-    if len(vol.shape) not in [nb_dims, nb_dims+1]:
-        raise Exception("Number of loc Tensors %d does not match volume dimension %d" % (int(nb_dims), len(vol.shape[:-1])))
+    if len(vol.shape) not in [nb_dims, nb_dims + 1]:
+        raise Exception(
+            "Number of loc Tensors %d does not match volume dimension %d"
+            % (int(nb_dims), len(vol.shape[:-1]))
+        )
 
     if nb_dims > len(vol.shape):
-        raise Exception("Loc dimension %d does not match volume dimension %d" % (int(nb_dims), len(vol.shape)))
+        raise Exception(
+            "Loc dimension %d does not match volume dimension %d"
+            % (int(nb_dims), len(vol.shape))
+        )
 
     if vol.shape.ndims == nb_dims:
         vol = K.expand_dims(vol, -1)
 
     # flatten and float location Tensors
-    loc = tf.cast(loc, 'float32')
-    
+    loc = tf.cast(loc, "float32")
+
     if isinstance(vol.shape, (tf.Dimension, tf.TensorShape)):
         volshape = vol.shape.as_list()
     else:
         volshape = vol.shape
 
     # interpolate
-    if method == 'linear':
+    if method == "linear":
         loc0 = tf.floor(loc)
 
         # clip values
         max_loc = [d - 1 for d in vol.get_shape().as_list()]
-        clipped_loc = [tf.clip_by_value(loc[...,d], 0, max_loc[d]) for d in range(nb_dims)]
-        loc0lst = [tf.clip_by_value(loc0[...,d], 0, max_loc[d]) for d in range(nb_dims)]
+        clipped_loc = [
+            tf.clip_by_value(loc[..., d], 0, max_loc[d]) for d in range(nb_dims)
+        ]
+        loc0lst = [
+            tf.clip_by_value(loc0[..., d], 0, max_loc[d])
+            for d in range(nb_dims)
+        ]
 
         # get other end of point cube
-        loc1 = [tf.clip_by_value(loc0lst[d] + 1, 0, max_loc[d]) for d in range(nb_dims)]
-        locs = [[tf.cast(f, 'int32') for f in loc0lst], [tf.cast(f, 'int32') for f in loc1]]
+        loc1 = [
+            tf.clip_by_value(loc0lst[d] + 1, 0, max_loc[d])
+            for d in range(nb_dims)
+        ]
+        locs = [
+            [tf.cast(f, "int32") for f in loc0lst],
+            [tf.cast(f, "int32") for f in loc1],
+        ]
 
         # compute the difference between the upper value and the original value
         # differences are basically 1 - (pt - floor(pt))
         #   because: floor(pt) + 1 - pt = 1 + (floor(pt) - pt) = 1 - (pt - floor(pt))
         diff_loc1 = [loc1[d] - clipped_loc[d] for d in range(nb_dims)]
         diff_loc0 = [1 - d for d in diff_loc1]
-        weights_loc = [diff_loc1, diff_loc0] # note reverse ordering since weights are inverse of diff.
+        weights_loc = [
+            diff_loc1,
+            diff_loc0,
+        ]  # note reverse ordering since weights are inverse of diff.
 
-        # go through all the cube corners, indexed by a ND binary vector 
+        # go through all the cube corners, indexed by a ND binary vector
         # e.g. [0, 0] means this "first" corner in a 2-D "cube"
         cube_pts = list(itertools.product([0, 1], repeat=nb_dims))
         interp_vol = 0
-        
+
         for c in cube_pts:
-            
+
             # get nd values
             # note re: indices above volumes via https://github.com/tensorflow/tensorflow/issues/15091
             #   It works on GPU because we do not perform index validation checking on GPU -- it's too
@@ -126,23 +151,26 @@ def interp(vol, loc, method='linear'):
             # wt = tf.reduce_prod(wlm, axis=0)
             wt = prod_n(wts_lst)
             wt = K.expand_dims(wt, -1)
-            
+
             # compute final weighted value for each cube corner
             interp_vol += wt * vol_val
-        
+
     else:
-        assert method == 'nearest'
-        roundloc = tf.cast(tf.round(loc), 'int32')
+        assert method == "nearest"
+        roundloc = tf.cast(tf.round(loc), "int32")
 
         # clip values
-        max_loc = [tf.cast(d - 1, 'int32') for d in vol.shape]
-        roundloc = [tf.clip_by_value(roundloc[...,d], 0, max_loc[d]) for d in range(nb_dims)]
+        max_loc = [tf.cast(d - 1, "int32") for d in vol.shape]
+        roundloc = [
+            tf.clip_by_value(roundloc[..., d], 0, max_loc[d])
+            for d in range(nb_dims)
+        ]
 
         # get values
         # tf stacking is slow. replace with gather
         # roundloc = tf.stack(roundloc, axis=-1)
         # interp_vol = tf.gather_nd(vol, roundloc)
         idx = sub2ind(vol.shape[:-1], roundloc)
-        interp_vol = tf.gather(tf.reshape(vol, [-1, vol.shape[-1]]), idx) 
+        interp_vol = tf.gather(tf.reshape(vol, [-1, vol.shape[-1]]), idx)
 
     return interp_vol

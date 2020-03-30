@@ -78,9 +78,13 @@ def list_files(files, recursive=False, extensions=None, exclude=None):
                     dnames[:] = [
                         x
                         for x in dnames
-                        if not fnmatch.fnmatch(os.path.join(dirpath, x), pattern)
+                        if not fnmatch.fnmatch(
+                            os.path.join(dirpath, x), pattern
+                        )
                     ]
-                    fpaths = [x for x in fpaths if not fnmatch.fnmatch(x, pattern)]
+                    fpaths = [
+                        x for x in fpaths if not fnmatch.fnmatch(x, pattern)
+                    ]
                 for f in fpaths:
                     ext = os.path.splitext(f)[1][1:]
                     if ext in extensions:
@@ -122,7 +126,9 @@ def run_clang_format_diff_wrapper(args, file):
     except DiffError:
         raise
     except Exception as e:
-        raise UnexpectedError("{}: {}: {}".format(file, e.__class__.__name__, e), e)
+        raise UnexpectedError(
+            "{}: {}: {}".format(file, e.__class__.__name__, e), e
+        )
 
 
 def run_clang_format_diff(args, file):
@@ -270,7 +276,8 @@ def main():
         metavar="N",
         type=int,
         default=0,
-        help="run N clang-format jobs in parallel" " (default number of cpus + 1)",
+        help="run N clang-format jobs in parallel"
+        " (default number of cpus + 1)",
     )
     parser.add_argument(
         "--color",
@@ -353,7 +360,9 @@ def main():
         pool = None
     else:
         pool = multiprocessing.Pool(njobs)
-        it = pool.imap_unordered(partial(run_clang_format_diff_wrapper, args), files)
+        it = pool.imap_unordered(
+            partial(run_clang_format_diff_wrapper, args), files
+        )
     while True:
         try:
             outs, errs = next(it)

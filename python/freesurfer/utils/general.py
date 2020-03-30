@@ -8,47 +8,53 @@ from .logging import error
 
 
 def fshome():
-    '''Returns the freesurfer home directory.'''
-    return os.environ.get('FREESURFER_HOME')
+    """Returns the freesurfer home directory."""
+    return os.environ.get("FREESURFER_HOME")
 
 
 def readlines(filename):
-    '''Reads the lines of a text file in to a list.'''
+    """Reads the lines of a text file in to a list."""
     with open(filename) as file:
         content = file.read().splitlines()
     return content
 
 
 def write_pickle(item, filename):
-    '''Pickles item (with highest protocol) to a file.'''
-    with open(filename, 'wb') as file:
+    """Pickles item (with highest protocol) to a file."""
+    with open(filename, "wb") as file:
         pickle.dump(item, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def read_pickle(filename):
-    '''Reads pickled item from file.'''
-    with open(filename, 'rb') as file:
+    """Reads pickled item from file."""
+    with open(filename, "rb") as file:
         item = pickle.load(file)
     return item
 
 
 def check_tensorflow():
-    '''Ensures that tensorflow is installed in fspython.'''
+    """Ensures that tensorflow is installed in fspython."""
     try:
         import tensorflow
     except ImportError:
-        error('This tool requires tensorflow, but fspython does not ship with tensorflow')
-        print('by default. You (or a sys admin) can install the CPU version via:\n')
-        print('  fspython -m pip install tensorflow==1.13.1\n')
-        print('Or the GPU version via:\n')
-        print('  fspython -m pip install tensorflow-gpu==1.13.1\n')
+        error(
+            "This tool requires tensorflow, but fspython does not ship with tensorflow"
+        )
+        print(
+            "by default. You (or a sys admin) can install the CPU version via:\n"
+        )
+        print("  fspython -m pip install tensorflow==1.13.1\n")
+        print("Or the GPU version via:\n")
+        print("  fspython -m pip install tensorflow-gpu==1.13.1\n")
         sys.exit(1)
 
 
 class Timer:
-    '''A simple timer class to track process speed.'''
+    """A simple timer class to track process speed."""
+
     def __init__(self, message=None):
-        if message: print(message)
+        if message:
+            print(message)
         self.start_time = dt.datetime.now()
 
     @property
@@ -56,7 +62,7 @@ class Timer:
         return dt.datetime.now() - self.start_time
 
     def mark(self, message):
-        print('%s: %s' % (message, str(self.elapsed)))
+        print("%s: %s" % (message, str(self.elapsed)))
 
 
 class LookupTable(dict):
@@ -70,8 +76,8 @@ class LookupTable(dict):
             if len(color) == 3:
                 color = np.append(color, 255)
             elif len(color) != 4:
-                raise ValueError('Color must be a 4-element RGBA uchar array')
-            self.color = np.array(color, dtype='uint8')
+                raise ValueError("Color must be a 4-element RGBA uchar array")
+            self.color = np.array(color, dtype="uint8")
 
     def add(self, index, name, color):
         self[index] = LookupTable.Element(name, color)
@@ -83,11 +89,11 @@ class LookupTable(dict):
     @classmethod
     def read(cls, filename):
         lut = cls()
-        with open(filename, 'r') as file:
+        with open(filename, "r") as file:
             lines = file.readlines()
         for line in lines:
             split = line.lstrip().split()
-            if split and not split[0].startswith('#'):
+            if split and not split[0].startswith("#"):
                 idx, name = split[:2]
                 if len(split) >= 5:
                     color = list(map(int, split[2:6]))
@@ -99,15 +105,24 @@ class LookupTable(dict):
 
     @classmethod
     def read_default(cls):
-        return cls.read(os.path.join(fshome(), 'FreeSurferColorLUT.txt'))
+        return cls.read(os.path.join(fshome(), "FreeSurferColorLUT.txt"))
 
     def write(self, filename):
         col1 = len(str(max(self.keys()))) + 1  # find largest index
-        col2 = max([len(elt.name) for elt in self.values()]) + 2  # find longest name
-        with open(filename, 'w') as file:
-            file.write('#'.ljust(col1) + 'Label Name'.ljust(col2) + 'R   G   B   A\n\n')
+        col2 = (
+            max([len(elt.name) for elt in self.values()]) + 2
+        )  # find longest name
+        with open(filename, "w") as file:
+            file.write(
+                "#".ljust(col1) + "Label Name".ljust(col2) + "R   G   B   A\n\n"
+            )
             for idx, elt in self.items():
                 color = elt.color
                 color[3] = 255 - color[3]  # invert alpha value
-                colorstr = ' '.join([str(c).ljust(3) for c in color])
-                file.write(str(idx).ljust(col1) + elt.name.ljust(col2) + colorstr + '\n')
+                colorstr = " ".join([str(c).ljust(3) for c in color])
+                file.write(
+                    str(idx).ljust(col1)
+                    + elt.name.ljust(col2)
+                    + colorstr
+                    + "\n"
+                )

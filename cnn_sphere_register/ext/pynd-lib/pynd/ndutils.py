@@ -40,7 +40,6 @@ def boundingbox(bwvol):
     return np.concatenate((starts, ends), 0)
 
 
-
 def bwdist(bwvol):
     """
     positive distance transform from positive entries in logical image
@@ -65,7 +64,6 @@ def bwdist(bwvol):
 
     # get distance
     return scipy.ndimage.morphology.distance_transform_edt(revbwvol)
-
 
 
 def bw2sdtrf(bwvol):
@@ -112,7 +110,8 @@ def bw_convex_hull(bwvol):
     q = np.concatenate([grid[d].flat for d in bwvol.ndims], 1)
     return q
 
-def bw2contour(bwvol, type='both', thr=1.01):
+
+def bw2contour(bwvol, type="both", thr=1.01):
     """
     computes the contour of island(s) on a nd logical volume
 
@@ -138,12 +137,12 @@ def bw2contour(bwvol, type='both', thr=1.01):
     # obtain a signed distance transform for the bw volume
     sdtrf = bw2sdtrf(bwvol)
 
-    if type == 'inner':
+    if type == "inner":
         return np.logical_and(sdtrf <= 0, sdtrf > -thr)
-    elif type == 'outer':
+    elif type == "outer":
         return np.logical_and(sdtrf >= 0, sdtrf < thr)
     else:
-        assert type == 'both', 'type should only be inner, outer or both'
+        assert type == "both", "type should only be inner, outer or both"
         return np.abs(sdtrf) < thr
 
 
@@ -156,7 +155,7 @@ def ndgrid(*args, **kwargs):
     Same as calling ``meshgrid`` with *indexing* = ``'ij'`` (see
     ``meshgrid`` for documentation).
     """
-    kwargs['indexing'] = 'ij'
+    kwargs["indexing"] = "ij"
     return np.meshgrid(*args, **kwargs)
 
 
@@ -176,10 +175,11 @@ def bw_sphere(volshape, rad, loc=None):
 
     # if the location is not given, use the center of the volume.
     if loc is None:
-        loc = 1.0 * (np.array(volshape)-1) / 2
-    assert len(loc) == len(volshape), \
-        'Location (%d) and volume dimensions (%d) do not match' % (len(loc), len(volshape))
-
+        loc = 1.0 * (np.array(volshape) - 1) / 2
+    assert len(loc) == len(volshape), (
+        "Location (%d) and volume dimensions (%d) do not match"
+        % (len(loc), len(volshape))
+    )
 
     # compute distances between each location in the volume and ``loc``
     volgrid = volsize2ndgrid(volshape)
@@ -224,8 +224,9 @@ def volcrop(vol, new_vol_size=None, start=None, end=None, crop=None):
 
     # from whatever is passed, we want to obtain start and end.
     if passed_start and passed_end:
-        assert not (passed_new_vol_size or passed_crop), \
-            "If passing start and end, don't pass anything else"
+        assert not (
+            passed_new_vol_size or passed_crop
+        ), "If passing start and end, don't pass anything else"
 
     elif passed_new_vol_size:
         # compute new volume size and crop_size
@@ -233,24 +234,27 @@ def volcrop(vol, new_vol_size=None, start=None, end=None, crop=None):
 
         # compute start and end
         if passed_start:
-            assert not passed_end, \
-                "When giving passed_new_vol_size, cannot pass both start and end"
+            assert (
+                not passed_end
+            ), "When giving passed_new_vol_size, cannot pass both start and end"
             end = start + new_vol_size
 
         elif passed_end:
-            assert not passed_start, \
-                "When giving passed_new_vol_size, cannot pass both start and end"
+            assert (
+                not passed_start
+            ), "When giving passed_new_vol_size, cannot pass both start and end"
             start = end - new_vol_size
 
-        else: # none of crop_size, crop, start or end are passed
+        else:  # none of crop_size, crop, start or end are passed
             mid = np.asarray(vol_size) // 2
             start = mid - (new_vol_size // 2)
             end = start + new_vol_size
 
     elif passed_crop:
-        assert not (passed_start or passed_end or new_vol_size), \
-            "Cannot pass both passed_crop and start or end or new_vol_size"
-        
+        assert not (
+            passed_start or passed_end or new_vol_size
+        ), "Cannot pass both passed_crop and start or end or new_vol_size"
+
         if isinstance(crop[0], (list, tuple)):
             end = vol_size - [val[1] for val in crop]
             start = [val[0] for val in crop]
@@ -258,7 +262,7 @@ def volcrop(vol, new_vol_size=None, start=None, end=None, crop=None):
             end = vol_size - crop
             start = crop
 
-    elif passed_start: # nothing else is passed
+    elif passed_start:  # nothing else is passed
         end = vol_size
 
     else:
@@ -293,6 +297,7 @@ def slice(*args):
     # prepare
     idx = [slice(start[i], end[i], step[i]) for i in range(len(end))]
     return idx
+
 
 def range(*args):
     """
@@ -336,7 +341,6 @@ def arange(*args):
     return idx
 
 
-
 def axissplit(arr, axis):
     """
     Split a nd volume along an exis into n volumes, where n is the size of the axis dim.
@@ -358,8 +362,6 @@ def axissplit(arr, axis):
     """
     nba = arr.shape[axis]
     return np.split(arr, nba, axis=axis)
-
-
 
 
 def sub2ind(arr, size, **kwargs):
@@ -389,7 +391,6 @@ def centroid(im):
     return [np.sum(p.flat) / np.sum(im.shape) for p in prob]
 
 
-
 def ind2sub_entries(indices, size, **kwargs):
     """
     returns a nb_entries -by- nb_dims (essentially the transpose of ind2sub)
@@ -404,9 +405,11 @@ def ind2sub_entries(indices, size, **kwargs):
     # Warning this might be F-style-like stacking... it's a bit confusing
     return subvec
 
+
 ###############################################################################
 # internal
 ###############################################################################
+
 
 def _prep_range(*args):
     """
@@ -419,10 +422,10 @@ def _prep_range(*args):
     """
 
     # prepare the start, step and end
-    step = np.ones(len(args[0]), 'int')
+    step = np.ones(len(args[0]), "int")
     if len(args) == 1:
         end = args[0]
-        start = np.zeros(len(end), 'int')
+        start = np.zeros(len(end), "int")
     elif len(args) == 2:
         assert len(args[0]) == len(args[1]), "argument vectors do not match"
         start, end = args
@@ -431,6 +434,6 @@ def _prep_range(*args):
         assert len(args[0]) == len(args[2]), "argument vectors do not match"
         start, end, step = args
     else:
-        raise ValueError('unknown arguments')
+        raise ValueError("unknown arguments")
 
     return (start, end, step)

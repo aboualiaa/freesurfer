@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import freesurfer.gems as gems
 
-MESH_COLLECTION_TEST_FILE_NAME = 'Testing/test.txt'
+MESH_COLLECTION_TEST_FILE_NAME = "Testing/test.txt"
 TEST_FILE_POINT_COUNT = 58307
 TEST_FILE_MESH_COUNT = 20
 TEST_FILE_LABEL_COUNT = 17
@@ -13,9 +13,9 @@ CONSTRUCTED_NUMBER_OF_CLASSES = 6
 CONSTRUCTED_POINT_COUNT = 105
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def writeable_mesh_file_name(tmpdir_factory):
-    file = tmpdir_factory.mktemp('data').join('test_mesh.txt')
+    file = tmpdir_factory.mktemp("data").join("test_mesh.txt")
     return file.strpath
 
 
@@ -26,7 +26,8 @@ def make_a_test_mesh_collection(number_of_meshes):
         CONSTRUCTED_DOMAIN_SIZE,
         CONSTRUCTED_STIFFNESS,
         CONSTRUCTED_NUMBER_OF_CLASSES,
-        number_of_meshes)
+        number_of_meshes,
+    )
     return mesh_collection
 
 
@@ -60,11 +61,14 @@ class TestMeshCollection:
     def collection(self):
         # Read is very slow, so many tests operate on the same mesh collection.
         # TODO: separate these tests by reading once and then operating on copies of original
-        if TestMeshCollection._collection is None and TestMeshCollection._okay_to_read:
+        if (
+            TestMeshCollection._collection is None
+            and TestMeshCollection._okay_to_read
+        ):
             TestMeshCollection._collection = gems.KvlMeshCollection()
-            print('reading mesh collection...')
+            print("reading mesh collection...")
             TestMeshCollection._collection.read(MESH_COLLECTION_TEST_FILE_NAME)
-            print('..done reading mesh collection')
+            print("..done reading mesh collection")
         return TestMeshCollection._collection
 
     def test_construction(self):
@@ -83,7 +87,13 @@ class TestMeshCollection:
         number_of_classes = 6
         number_of_meshes = 3
         with pytest.raises(Exception):
-            mesh_collection.construct(mesh_size, domain_size, stiffness, number_of_classes, number_of_meshes)
+            mesh_collection.construct(
+                mesh_size,
+                domain_size,
+                stiffness,
+                number_of_classes,
+                number_of_meshes,
+            )
 
     def test_bad_construction_domain_size(self):
         mesh_collection = gems.KvlMeshCollection()
@@ -93,7 +103,13 @@ class TestMeshCollection:
         number_of_classes = 6
         number_of_meshes = 3
         with pytest.raises(Exception):
-            mesh_collection.construct(mesh_size, domain_size, stiffness, number_of_classes, number_of_meshes)
+            mesh_collection.construct(
+                mesh_size,
+                domain_size,
+                stiffness,
+                number_of_classes,
+                number_of_meshes,
+            )
 
     def test_access_k(self, single_mesh_collection):
         single_mesh_collection.k = 123
@@ -155,13 +171,13 @@ class TestMeshCollection:
     def test_bad_read(self):
         with pytest.raises(Exception):
             bad_collection = gems.KvlMeshCollection()
-            bad_collection.read('nada_nada_nada')
+            bad_collection.read("nada_nada_nada")
 
     @pytest.mark.slowtest
     def test_write(self, writeable_mesh_file_name):
-        print('writing mesh collection...')
+        print("writing mesh collection...")
         self.collection.write(writeable_mesh_file_name)
-        print('...done writing mesh collection')
+        print("...done writing mesh collection")
 
     def test_empty_write(self, writeable_mesh_file_name):
         empty_collection = gems.KvlMeshCollection()
@@ -169,26 +185,25 @@ class TestMeshCollection:
             empty_collection.write(writeable_mesh_file_name)
 
     def test_transform_mesh_collection(self, single_mesh_collection):
-        initial_transform = np.array([
-            [2, 0, 0, 20],
-            [0, 3, 0, 30],
-            [0, 0, 5, 40],
-            [0, 0, 0, 1],
-        ], dtype=np.double, order='F')
+        initial_transform = np.array(
+            [[2, 0, 0, 20], [0, 3, 0, 30], [0, 0, 5, 40], [0, 0, 0, 1],],
+            dtype=np.double,
+            order="F",
+        )
         kvl_transform = gems.KvlTransform(initial_transform)
 
-        current_points = single_mesh_collection.reference_mesh.points;
+        current_points = single_mesh_collection.reference_mesh.points
         [x, y, z] = current_points[13]
         single_mesh_collection.transform(kvl_transform)
 
-        transformed_points = single_mesh_collection.reference_mesh.points;
+        transformed_points = single_mesh_collection.reference_mesh.points
         [sx, sy, sz] = transformed_points[13]
         assert 20 + x * 2 == sx
         assert 30 + y * 3 == sy
         assert 40 + z * 5 == sz
 
-class TestMesh:
 
+class TestMesh:
     def test_get_points(self, simple_mesh):
         points = simple_mesh.points
         [point_count, point_dimensions] = points.shape
@@ -257,13 +272,12 @@ class TestMesh:
         assert fff == 104
 
     def test_scale_mesh(self, simple_mesh):
-        current_points = simple_mesh.points;
+        current_points = simple_mesh.points
         [x, y, z] = current_points[13]
         simple_mesh.scale([2, 3, 5])
-        scaled_points = simple_mesh.points;
+        scaled_points = simple_mesh.points
         [sx, sy, sz] = scaled_points[13]
         assert x * 2 == sx
         assert y * 3 == sy
         assert z * 5 == sz
         # TODO: test cell data content (inverted matrix) has scaled
-

@@ -10,11 +10,17 @@ from .utilities import requireNumpyArray
 from . import gemsbindings as gems
 
 
-def getModelSpecifications(atlasDir, userModelSpecifications={}, pallidumAsWM=True):
+def getModelSpecifications(
+    atlasDir, userModelSpecifications={}, pallidumAsWM=True
+):
 
     # Create default model specifications as a dictionary
-    FreeSurferLabels, names, colors = kvlReadCompressionLookupTable(os.path.join(atlasDir, 'compressionLookupTable.txt'))
-    sharedGMMParameters = kvlReadSharedGMMParameters(os.path.join(atlasDir, 'sharedGMMParameters.txt'))
+    FreeSurferLabels, names, colors = kvlReadCompressionLookupTable(
+        os.path.join(atlasDir, "compressionLookupTable.txt")
+    )
+    sharedGMMParameters = kvlReadSharedGMMParameters(
+        os.path.join(atlasDir, "sharedGMMParameters.txt")
+    )
 
     # If pallidumAsWM is True remove from the sharedGMMParameters 'Pallidum' as an independent class
     # and move it into 'GlobalWM'.
@@ -22,26 +28,28 @@ def getModelSpecifications(atlasDir, userModelSpecifications={}, pallidumAsWM=Tr
         pallidumGMMNumber = None
         globalWMGMMNumber = None
         for classNumber, mergeOption in enumerate(sharedGMMParameters):
-            if 'Pallidum' == mergeOption.mergedName:
+            if "Pallidum" == mergeOption.mergedName:
                 pallidumGMMNumber = classNumber
-            elif 'GlobalWM' == mergeOption.mergedName:
+            elif "GlobalWM" == mergeOption.mergedName:
                 globalWMGMMNumber = classNumber
 
         if pallidumGMMNumber is not None and globalWMGMMNumber is not None:
-            sharedGMMParameters[globalWMGMMNumber].searchStrings.append('Pallidum')
+            sharedGMMParameters[globalWMGMMNumber].searchStrings.append(
+                "Pallidum"
+            )
             sharedGMMParameters.pop(pallidumGMMNumber)
 
     modelSpecifications = {
-        'FreeSurferLabels': FreeSurferLabels,
-        'atlasFileName': os.path.join(atlasDir, 'atlas_level2.txt.gz'),
-        'names': names,
-        'colors': colors,
-        'sharedGMMParameters': sharedGMMParameters,
-        'useDiagonalCovarianceMatrices': True,
-        'brainMaskingSmoothingSigma': 3.0,  # sqrt of the variance of a Gaussian blurring kernel
-        'brainMaskingThreshold': 0.01,
-        'K': 0.1,  # stiffness of the mesh
-        'biasFieldSmoothingKernelSize': 50,  # distance in mm of sinc function center to first zero crossing
+        "FreeSurferLabels": FreeSurferLabels,
+        "atlasFileName": os.path.join(atlasDir, "atlas_level2.txt.gz"),
+        "names": names,
+        "colors": colors,
+        "sharedGMMParameters": sharedGMMParameters,
+        "useDiagonalCovarianceMatrices": True,
+        "brainMaskingSmoothingSigma": 3.0,  # sqrt of the variance of a Gaussian blurring kernel
+        "brainMaskingThreshold": 0.01,
+        "K": 0.1,  # stiffness of the mesh
+        "biasFieldSmoothingKernelSize": 50,  # distance in mm of sinc function center to first zero crossing
     }
 
     modelSpecifications.update(userModelSpecifications)
@@ -53,34 +61,35 @@ def getOptimizationOptions(atlasDir, userOptimizationOptions={}):
 
     # Create default optimization options as a dictionary
     optimizationOptions = {
-        'maximumNumberOfDeformationIterations': 20,
-        'absoluteCostPerVoxelDecreaseStopCriterion': 1e-4,
-        'verbose': False,
-        'maximalDeformationStopCriterion': 0.001,  # measured in pixels
-        'lineSearchMaximalDeformationIntervalStopCriterion': 0.001,
-        'maximalDeformationAppliedStopCriterion': 0.0,
-        'BFGSMaximumMemoryLength': 12,
-        'multiResolutionSpecification': [
+        "maximumNumberOfDeformationIterations": 20,
+        "absoluteCostPerVoxelDecreaseStopCriterion": 1e-4,
+        "verbose": False,
+        "maximalDeformationStopCriterion": 0.001,  # measured in pixels
+        "lineSearchMaximalDeformationIntervalStopCriterion": 0.001,
+        "maximalDeformationAppliedStopCriterion": 0.0,
+        "BFGSMaximumMemoryLength": 12,
+        "multiResolutionSpecification": [
             {
                 # level 1
-                'atlasFileName': os.path.join(atlasDir, 'atlas_level1.txt.gz'),
-                'targetDownsampledVoxelSpacing': 2.0,
-                'maximumNumberOfIterations': 100,
-                'estimateBiasField': True
-            }, {
+                "atlasFileName": os.path.join(atlasDir, "atlas_level1.txt.gz"),
+                "targetDownsampledVoxelSpacing": 2.0,
+                "maximumNumberOfIterations": 100,
+                "estimateBiasField": True,
+            },
+            {
                 # level 2
-                'atlasFileName': os.path.join(atlasDir, 'atlas_level2.txt.gz'),
-                'targetDownsampledVoxelSpacing': 1.0,
-                'maximumNumberOfIterations': 100,
-                'estimateBiasField': True
-            }
-        ]
+                "atlasFileName": os.path.join(atlasDir, "atlas_level2.txt.gz"),
+                "targetDownsampledVoxelSpacing": 1.0,
+                "maximumNumberOfIterations": 100,
+                "estimateBiasField": True,
+            },
+        ],
     }
 
     # Overwrite with any user specified options. The 'multiResolutionSpecification' key has as value a list
     # of dictionaries which we shouldn't just over-write, but rather update themselves, so this is special case
     userOptimizationOptionsCopy = userOptimizationOptions.copy()
-    key = 'multiResolutionSpecification'
+    key = "multiResolutionSpecification"
     if key in userOptimizationOptionsCopy:
         userList = userOptimizationOptionsCopy[key]
         defaultList = optimizationOptions[key]
@@ -109,14 +118,27 @@ def readCroppedImages(imageFileNames, templateFileName, imageToImageTransform):
 
         # Map each of the corners of the bounding box, and record minima and maxima
         boundingLimit = np.array(template_image.shape[:3]) - 1
-        corners = np.array(list(itertools.product(*zip((0, 0, 0), boundingLimit))))
+        corners = np.array(
+            list(itertools.product(*zip((0, 0, 0), boundingLimit)))
+        )
         transformedCorners = imageToImage.transform(corners)
 
         inputLimit = np.array(input_image.shape[:3]) - 1
-        minCoord = np.clip(transformedCorners.min(axis=0).astype(int),     (0, 0, 0), inputLimit)
-        maxCoord = np.clip(transformedCorners.max(axis=0).astype(int) + 1, (0, 0, 0), inputLimit) + 1
+        minCoord = np.clip(
+            transformedCorners.min(axis=0).astype(int), (0, 0, 0), inputLimit
+        )
+        maxCoord = (
+            np.clip(
+                transformedCorners.max(axis=0).astype(int) + 1,
+                (0, 0, 0),
+                inputLimit,
+            )
+            + 1
+        )
 
-        cropping = tuple([slice(min, max) for min, max in zip(minCoord, maxCoord)])
+        cropping = tuple(
+            [slice(min, max) for min, max in zip(minCoord, maxCoord)]
+        )
         croppedImageBuffers.append(input_image.data[cropping])
 
         # create and translate kvl transform
@@ -129,8 +151,12 @@ def readCroppedImages(imageFileNames, templateFileName, imageToImageTransform):
     # Also read in the voxel spacing -- this is needed since we'll be specifying bias field smoothing kernels,
     # downsampling steps etc in mm.
     nonCroppedImage = gems.KvlImage(imageFileNames[0])
-    imageToWorldTransformMatrix = nonCroppedImage.transform_matrix.as_numpy_array
-    voxelSpacing = np.sum(imageToWorldTransformMatrix[0:3, 0:3] ** 2, axis=0) ** (1 / 2)
+    imageToWorldTransformMatrix = (
+        nonCroppedImage.transform_matrix.as_numpy_array
+    )
+    voxelSpacing = np.sum(
+        imageToWorldTransformMatrix[0:3, 0:3] ** 2, axis=0
+    ) ** (1 / 2)
 
     return croppedImageBuffers, transform, voxelSpacing, cropping
 
@@ -152,8 +178,12 @@ def readCroppedImagesLegacy(imageFileNames, transformedTemplateFileName):
     # Also read in the voxel spacing -- this is needed since we'll be specifying bias field smoothing kernels,
     # downsampling steps etc in mm.
     nonCroppedImage = gems.KvlImage(imageFileNames[0])
-    imageToWorldTransformMatrix = nonCroppedImage.transform_matrix.as_numpy_array
-    voxelSpacing = np.sum(imageToWorldTransformMatrix[0:3, 0:3] ** 2, axis=0) ** (1 / 2)
+    imageToWorldTransformMatrix = (
+        nonCroppedImage.transform_matrix.as_numpy_array
+    )
+    voxelSpacing = np.sum(
+        imageToWorldTransformMatrix[0:3, 0:3] ** 2, axis=0
+    ) ** (1 / 2)
 
     #
     return imageBuffers, transform, voxelSpacing, cropping
@@ -174,18 +204,29 @@ def showImage(data):
     xzSlice = data[:, y, :]
     yzSlice = data[x, :, :]
 
-    patchedSlices = np.block([[xySlice, xzSlice], [yzSlice.T, np.zeros((Nz, Nz)) + range[0]]])
+    patchedSlices = np.block(
+        [[xySlice, xzSlice], [yzSlice.T, np.zeros((Nz, Nz)) + range[0]]]
+    )
 
     import matplotlib.pyplot as plt  # avoid importing matplotlib by default
+
     plt.imshow(patchedSlices.T, cmap=plt.cm.gray, vmin=range[0], vmax=range[1])
     # plt.gray()
     # plt.imshow( patchedSlices.T, vmin=range[ 0 ], vmax=range[ 1 ] )
     # plt.show()
-    plt.axis('off')
+    plt.axis("off")
 
 
-def maskOutBackground(imageBuffers, atlasFileName, transform, brainMaskingSmoothingSigma, brainMaskingThreshold,
-                      probabilisticAtlas, visualizer=None, maskOutZeroIntensities=True):
+def maskOutBackground(
+    imageBuffers,
+    atlasFileName,
+    transform,
+    brainMaskingSmoothingSigma,
+    brainMaskingThreshold,
+    probabilisticAtlas,
+    visualizer=None,
+    maskOutZeroIntensities=True,
+):
     # Setup a null visualizer if necessary
     if visualizer is None:
         visualizer = initVisualizer(False, False)
@@ -204,16 +245,27 @@ def maskOutBackground(imageBuffers, atlasFileName, transform, brainMaskingSmooth
     # segmentations, whereas background areas don't have zero probability for non-background structures
     backGroundThreshold = 2 ** 8
     backGroundPeak = 2 ** 16 - 1
-    backgroundPrior = np.ma.filled(np.ma.masked_greater(backgroundPrior, backGroundThreshold),
-                                   backGroundPeak).astype(np.float32)
+    backgroundPrior = np.ma.filled(
+        np.ma.masked_greater(backgroundPrior, backGroundThreshold),
+        backGroundPeak,
+    ).astype(np.float32)
 
-    visualizer.show(probabilities=backgroundPrior, images=imageBuffers, window_id='samsegment background',
-                    title='Background Priors')
+    visualizer.show(
+        probabilities=backgroundPrior,
+        images=imageBuffers,
+        window_id="samsegment background",
+        title="Background Priors",
+    )
 
     smoothingSigmas = [1.0 * brainMaskingSmoothingSigma] * 3
-    smoothedBackgroundPrior = gems.KvlImage.smooth_image_buffer(backgroundPrior, smoothingSigmas)
-    visualizer.show(probabilities=smoothedBackgroundPrior, window_id='samsegment smoothed',
-                    title='Smoothed Background Priors')
+    smoothedBackgroundPrior = gems.KvlImage.smooth_image_buffer(
+        backgroundPrior, smoothingSigmas
+    )
+    visualizer.show(
+        probabilities=smoothedBackgroundPrior,
+        window_id="samsegment smoothed",
+        title="Smoothed Background Priors",
+    )
 
     # 65535 = 2^16 - 1. priors are stored as 16bit ints
     # To put the threshold in perspective: for Gaussian smoothing with a 3D isotropic kernel with variance
@@ -257,7 +309,7 @@ def maskOutBackground(imageBuffers, atlasFileName, transform, brainMaskingSmooth
 
 def undoLogTransformAndBiasField(imageBuffers, biasFields, mask):
     #
-    expBiasFields = np.zeros(biasFields.shape, order='F')
+    expBiasFields = np.zeros(biasFields.shape, order="F")
     numberOfContrasts = imageBuffers.shape[-1]
     for contrastNumber in range(numberOfContrasts):
         # We're computing it also outside of the mask, but clip the intensities there to the range
@@ -280,9 +332,13 @@ def undoLogTransformAndBiasField(imageBuffers, biasFields, mask):
 def writeImage(fileName, buffer, cropping, example):
 
     # Write un-cropped image to file
-    uncroppedBuffer = np.zeros(example.getImageBuffer().shape, dtype=np.float32, order='F')
+    uncroppedBuffer = np.zeros(
+        example.getImageBuffer().shape, dtype=np.float32, order="F"
+    )
     uncroppedBuffer[cropping] = buffer
-    gems.KvlImage(requireNumpyArray(uncroppedBuffer)).write(fileName, example.transform_matrix)
+    gems.KvlImage(requireNumpyArray(uncroppedBuffer)).write(
+        fileName, example.transform_matrix
+    )
 
 
 def logTransform(imageBuffers, mask):
@@ -295,8 +351,15 @@ def logTransform(imageBuffers, mask):
     return logImageBuffers
 
 
-def scaleBiasFields(biasFields, imageBuffers, mask, posteriors, targetIntensity=None, targetSearchStrings=None,
-                        names=None):
+def scaleBiasFields(
+    biasFields,
+    imageBuffers,
+    mask,
+    posteriors,
+    targetIntensity=None,
+    targetSearchStrings=None,
+    names=None,
+):
 
     # Subtract a constant from the bias fields such that after bias field correction and exp-transform, the
     # average intensiy in the target structures will be targetIntensity
@@ -307,7 +370,9 @@ def scaleBiasFields(biasFields, imageBuffers, mask, posteriors, targetIntensity=
             for structureNumber, name in enumerate(names):
                 if searchString in name:
                     targetWeights += posteriors[:, structureNumber]
-        offsets = np.log(targetIntensity) - np.log(np.exp(data).T @ targetWeights / np.sum(targetWeights))
+        offsets = np.log(targetIntensity) - np.log(
+            np.exp(data).T @ targetWeights / np.sum(targetWeights)
+        )
         biasFields -= offsets.reshape([1, 1, 1, biasFields.shape[-1]])
 
         #

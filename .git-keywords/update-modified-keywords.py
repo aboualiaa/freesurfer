@@ -26,26 +26,26 @@ def main(args):
         args: command line arguments
     """
     # Check if git is available.
-    checkfor(['git', '--version'])
+    checkfor(["git", "--version"])
     # Check if .git exists
-    if not os.access('.git', os.F_OK):
-        print('No .git directory found!')
+    if not os.access(".git", os.F_OK):
+        print("No .git directory found!")
         sys.exit(1)
-    print('{}: Updating modified files.'.format(args[0]))
+    print("{}: Updating modified files.".format(args[0]))
     # Get modified files
     files = modifiedfiles()
     if not files:
-        print('{}: No modified files.'.format(args[0]))
+        print("{}: No modified files.".format(args[0]))
         sys.exit(0)
     files.sort()
     # Find files that have keywords in them
     kwfn = keywordfiles(files)
     if not kwfn:
-        print('{}: No keyword files modified.'.format(args[0]))
+        print("{}: No keyword files modified.".format(args[0]))
         sys.exit(0)
     for fn in kwfn:
         os.remove(fn)
-    sargs = ['git', 'checkout', '-f'] + kwfn
+    sargs = ["git", "checkout", "-f"] + kwfn
     subprocess.call(sargs)
 
 
@@ -58,12 +58,13 @@ def checkfor(args):
             not contain spaces.
     """
     if isinstance(args, str):
-        if ' ' in args:
-            raise ValueError('No spaces in single command allowed.')
+        if " " in args:
+            raise ValueError("No spaces in single command allowed.")
         args = [args]
     try:
-        subprocess.check_call(args, stdout=subprocess.DEVNULL,
-                              stderr=subprocess.DEVNULL)
+        subprocess.check_call(
+            args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
     except subprocess.CalledProcessError:
         print("Required program '{}' not found! exiting.".format(args[0]))
         sys.exit(1)
@@ -77,18 +78,25 @@ def modifiedfiles():
     """
     fnl = []
     try:
-        args = ['git', 'diff-tree', 'HEAD~1', 'HEAD', '--name-only', '-r',
-                '--diff-filter=ACMRT']
+        args = [
+            "git",
+            "diff-tree",
+            "HEAD~1",
+            "HEAD",
+            "--name-only",
+            "-r",
+            "--diff-filter=ACMRT",
+        ]
         fnl = subprocess.check_output(args, stderr=subprocess.DEVNULL)
-        fnl = fnl.decode('utf8').splitlines()
+        fnl = fnl.decode("utf8").splitlines()
         # Deal with unmodified repositories
-        if len(fnl) == 1 and fnl[0] is 'clean':
+        if len(fnl) == 1 and fnl[0] is "clean":
             return []
     except subprocess.CalledProcessError as e:
         if e.returncode == 128:  # new repository
-            args = ['git', 'ls-files']
+            args = ["git", "ls-files"]
             fnl = subprocess.check_output(args, stderr=subprocess.DEVNULL)
-            fnl = fnl.decode('utf8').splitlines()
+            fnl = fnl.decode("utf8").splitlines()
     # Only return regular files.
     fnl = [i for i in fnl if os.path.isfile(i)]
     return fnl
@@ -105,11 +113,11 @@ def keywordfiles(fns):
     """
     # These lines are encoded otherwise they would be mangled if this file
     # is checked in my git repo!
-    datekw = b64decode('JERhdGU=')
-    revkw = b64decode('JFJldmlzaW9u')
+    datekw = b64decode("JERhdGU=")
+    revkw = b64decode("JFJldmlzaW9u")
     rv = []
     for fn in fns:
-        with open(fn, 'rb') as f:
+        with open(fn, "rb") as f:
             try:
                 mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
                 if mm.find(datekw) > -1 or mm.find(revkw) > -1:
@@ -120,5 +128,5 @@ def keywordfiles(fns):
     return rv
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

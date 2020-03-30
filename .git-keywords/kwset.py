@@ -21,15 +21,15 @@ import sys
 def main():
     """Main program.
     """
-    dre = re.compile(''.join([r'\$', r'Date:?\$']))
-    rre = re.compile(''.join([r'\$', r'Revision:?\$']))
+    dre = re.compile("".join([r"\$", r"Date:?\$"]))
+    rre = re.compile("".join([r"\$", r"Revision:?\$"]))
     currp = os.getcwd()
-    if not os.path.exists(currp + '/.git'):
-        print >> sys.stderr, 'This directory is not controlled by git!'
+    if not os.path.exists(currp + "/.git"):
+        print >>sys.stderr, "This directory is not controlled by git!"
         sys.exit(1)
     date = gitdate()
     rev = gitrev()
-    input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+    input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
     for line in input_stream:
         line = dre.sub(date, line)
         print(rre.sub(rev, line), end="")
@@ -38,30 +38,30 @@ def main():
 def gitdate():
     """Get the date from the latest commit in ISO8601 format.
     """
-    args = ['git', 'log', '-1', '--date=iso']
+    args = ["git", "log", "-1", "--date=iso"]
     outdata = subprocess.check_output(args, universal_newlines=True)
     outlines = outdata.splitlines()
-    dline = [l for l in outlines if l.startswith('Date')]
+    dline = [l for l in outlines if l.startswith("Date")]
     try:
         dat = dline[0][5:].strip()
-        return ''.join(['$', 'Date: ', dat, ' $'])
+        return "".join(["$", "Date: ", dat, " $"])
     except IndexError:
-        raise ValueError('Date not found in git output')
+        raise ValueError("Date not found in git output")
 
 
 def gitrev():
     """Get the latest tag and use it as the revision number. This presumes the
     habit of using numerical tags. Use the short hash if no tag available.
     """
-    args = ['git', 'describe', '--tags', '--always']
+    args = ["git", "describe", "--tags", "--always"]
     try:
-        r = subprocess.check_output(args,
-                                    stderr=subprocess.DEVNULL,
-                                    universal_newlines=True)[:-1]
+        r = subprocess.check_output(
+            args, stderr=subprocess.DEVNULL, universal_newlines=True
+        )[:-1]
     except subprocess.CalledProcessError:
-        return ''.join(['$', 'Revision', '$'])
-    return ''.join(['$', 'Revision: ', r, ' $'])
+        return "".join(["$", "Revision", "$"])
+    return "".join(["$", "Revision: ", r, " $"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
