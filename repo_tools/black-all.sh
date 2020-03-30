@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 find . \
   -not \( -path ./packages -prune \) \
   -not \( -path "./cmake-build-*" -prune \) \

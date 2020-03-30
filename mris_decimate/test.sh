@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 test_command mris_decimate -a 0.5 lh.orig.nofix.predec lh.orig.nofix
 # 5/22/2019

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 test_command mri_aparc2aseg --s bert
 compare_vol bert/mri/aparc+aseg.mgz bert/mri/aparc+aseg.ref.mgz

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 # apply mask
 test_command mri_mask nu.1.mgz brainmask.1.mgz mask.mgz

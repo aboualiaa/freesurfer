@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 # this is a bit of a needy test, since it requires specific data to be in FREESURFER_HOME
 # and it uses binaries and scripts scattered across the source (and build) tree

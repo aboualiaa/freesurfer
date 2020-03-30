@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 # don't remove test output before each test_command
 FSTEST_NO_DATA_RESET=1 && init_testdata

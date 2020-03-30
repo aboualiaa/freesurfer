@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 # mprage
 test_command mri_normalize -mprage nu.mgz T1.mgz

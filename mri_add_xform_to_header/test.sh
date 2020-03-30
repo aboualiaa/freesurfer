@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 # use talairach.xfm transform
 mri_add_xform_to_header -v -c talairach.xfm orig.mgz out.mgz

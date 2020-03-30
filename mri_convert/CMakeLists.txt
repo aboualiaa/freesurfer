@@ -33,8 +33,17 @@ if(BUILD_TESTING)
   add_help(mri_convert_unit mri_convert.help.xml)
   target_link_libraries(mri_convert_unit ${COMMON_LIBS} ${GTEST_LIBRARIES}
                         gtest ${ARMADILLO_LIBRARIES})
-  add_test(mri_convert_unit mri_convert_unit)
-  set_property(TEST mri_convert_unit PROPERTY LABELS Unit)
+
+  if(CMAKE_CONFIGURATION_TYPES)
+    foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
+      add_test(mri_convert_unit_${X} mri_convert_unit)
+      set_property(TEST mri_convert_unit_${X} PROPERTY LABELS Unit)
+    endforeach()
+  else()
+    add_test(mri_convert_unit mri_convert_unit)
+    set_property(TEST mri_convert_unit PROPERTY LABELS Unit)
+  endif()
+
 
   add_executable(mri_convert_bench mri_convert_bench.cpp)
   add_help(mri_convert_bench mri_convert.help.xml)

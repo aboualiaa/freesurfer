@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 test_command "talairach_afd -xfm good_tal.xfm -afd ${FREESURFER_HOME}/fsafd -V | tee output"
 compare_file output good_tal.txt -IfsafdDir

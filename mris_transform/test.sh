@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 # transform surface with LTA
 test_command mris_transform lh.1.pial 1_to_2.lta lh.out.pial

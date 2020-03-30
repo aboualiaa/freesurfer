@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 test_command mri_surfcluster --in bert/surf/rh.w-g.pct.mgh --hemi rh --subject bert --thmin 22 --ocn rh.clusters.mgh --olab cluster
 compare_vol rh.clusters.mgh rh.clusters_ref.mgh

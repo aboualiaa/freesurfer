@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 test_command mris_anatomical_stats -log lh.stats bert lh
 compare_file lh.stats lh.ref.stats
