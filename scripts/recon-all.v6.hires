@@ -2,7 +2,7 @@
 
 # recon-all.v6.hires - modification of the v6.0 recon-all to better
 # handle hires and T2 surface placement and accomodate HCP. These
-# changes include: 
+# changes include:
 # 1. adding ability to specify a mask for mri_em_register
 # 2. Running the standard 1mm recon-all stream up until the final white
 #    and pial surfaces are created. At that point, the script conf2hires
@@ -134,7 +134,7 @@ set WSAtlas     = 0;    # 0=don't use atlas, 1=use atlas (for skull strip)
 set WSGcaAtlas  = 1;    # 1=use GCA atlas and registration to do skull strip
 set WSUseTalXfm = 0;    # 1=use talairach.xfm instead of talairach_with_skull
                         # to do atlas alignment during mri_watershed
-set WSCopy = 0;         # Simply copy input to output ignoring other opts, 
+set WSCopy = 0;         # Simply copy input to output ignoring other opts,
                         # for when brain is already stripped
 set DoGcut = 0;         # 1=run mri_gcut after mri_watershed
 set NuIterations = 2;   # Number of iterations for nu intensity correction
@@ -211,8 +211,8 @@ set DoT2pial = 0; # if 1, mris_make_surfaces refines pial using T2
 set T2max = ();
 set DoFLAIRpial = 0; # if 1, mris_make_surfaces refines pial using FLAIR
 
-set EMRegMaskArg = () ; # MOD: HCP: mask passed when running mri_em_reg, default is 
-set EMRegMask = brainmask.mgz ; # MOD: HCP: mask when running mri_em_reg, default is 
+set EMRegMaskArg = () ; # MOD: HCP: mask passed when running mri_em_reg, default is
+set EMRegMask = brainmask.mgz ; # MOD: HCP: mask when running mri_em_reg, default is
 
 # set multi-threaded stuff to single-threaded/cpu for cluster politeness.
 # various binaries (em_reg, ca_reg, mris_sphere) have OpenMP enabled code.
@@ -227,7 +227,7 @@ set OMP_NUM_SET = 0 # set to 1 if -openmp <num> is used
 
 # hippocampal subfields processing uses ITK threading
 setenv ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS 1 # -itkthreads <num_threads>
-set DoParallel = 0; # if 1, then run with -openmp 4 and -itkthreads 4, 
+set DoParallel = 0; # if 1, then run with -openmp 4 and -itkthreads 4,
                     # and run rh/lh stages in parallel
 
 # Longitudinal processing:
@@ -588,7 +588,7 @@ if($?PBS_JOBID) then
   echo "pbsjob $PBS_JOBID"  >> $LF
 endif
 
-# check for existence of bc (binary calculator)                                                                                               
+# check for existence of bc (binary calculator)
 # some minimal installs of centos do not have it
 set cmd = (which bc)
 $cmd >& /dev/null
@@ -755,7 +755,7 @@ date >> $SF
 
 # Put a copy of myself (this script) in the scripts dir
 if ("`uname -s`" == "Linux") then
-  set FullProgName = `readlink -f $0`; 
+  set FullProgName = `readlink -f $0`;
   cp -v $FullProgName $subjdir/scripts/recon-all.local-copy
 endif
 
@@ -1348,7 +1348,7 @@ if($DoMotionCor) then
       echo $cmd > $touchdir/longmc.touch
     endif
     goto motioncor_post_process
-  endif 
+  endif
 
   # base processing (we do not need to do anything,
   #   as orig should be there, rawavg is not there, due to difficulties of
@@ -1592,11 +1592,11 @@ talairach:
         # 3T params from Zheng, Chee, Zagorodnov 2009 NeuroImage paper
         # "Improvement of brain segmentation accuracy by optimizing
         # non-uniformity correction using N3"
-        # namely specifying iterations, proto-iters and distance: 
+        # namely specifying iterations, proto-iters and distance:
         set cmd = ($cmd --n 1 --proto-iters 1000 --distance 50)
       else
-        # 1.5T default: 
-        # DNG: changed distance from 200 to 50 to match 5.3 
+        # 1.5T default:
+        # DNG: changed distance from 200 to 50 to match 5.3
         set cmd = ($cmd --n 1 --proto-iters 1000 --distance 50)
       endif
       # allow expert-options override
@@ -1764,7 +1764,7 @@ handle_tal_error:
         # IF Talairach alignment was run
         # AND it was using the default (711-2C) atlas
         # AND a check failed,
-        # THEN first retry avi method using newer 3T Schwartz atlas 
+        # THEN first retry avi method using newer 3T Schwartz atlas
         # THEN (if that fails) try Talairach alignment using MINC mritotal tool
         # ELSE error exit
         if($DoTalairach && ! $UseMincMritotal && ! $longitudinal && \
@@ -1827,7 +1827,7 @@ if($DoNuIntensityCor) then
     # 3T params from Zheng, Chee, Zagorodnov 2009 NeuroImage paper
     # "Improvement of brain segmentation accuracy by optimizing
     # non-uniformity correction using N3"
-    # namely specifying iterations, proto-iters and distance: 
+    # namely specifying iterations, proto-iters and distance:
     set NuIterations = 1;
     set cmd = ($cmd --proto-iters 1000 --distance 50)
   endif
@@ -1921,7 +1921,7 @@ if($DoNormalization) then
         # 3T params from Zheng, Chee, Zagorodnov 2009 NeuroImage paper
         # "Improvement of brain segmentation accuracy by optimizing
         # non-uniformity correction using N3"
-        # namely specifying iterations, proto-iters and distance: 
+        # namely specifying iterations, proto-iters and distance:
         set cmd = ($cmd --n 1 --proto-iters 1000 --distance 50)
       else
       # 1.5T default:
@@ -2101,7 +2101,7 @@ skullstrip:
         else
           # Convert talairach.xfm to LTA format
           set mni305 = $FREESURFER_HOME/average/mni305.cor.mgz
-          set xfm = transforms/talairach.xfm 
+          set xfm = transforms/talairach.xfm
           set lta = transforms/$WSLTA
           set cmd2 = (lta_convert --src orig.mgz --trg $mni305 \
              --inxfm $xfm  --outlta $lta --subject fsaverage --ltavox2vox)
@@ -2144,7 +2144,7 @@ skullstrip:
     foreach vol ( $SS_VOLUMES )
       foreach pfh ( $PREFLOOD_HEIGHTS )
         set cmd = (mri_watershed)
-        set cmd = ($cmd -rusage $touchdir/rusage.mri_watershed.dat) 
+        set cmd = ($cmd -rusage $touchdir/rusage.mri_watershed.dat)
         set BMA_OLD = brainmask.auto.mgz
         set BMA = brainmask_${vol}_PFH${pfh}.auto.mgz
         if(-e $BMA_OLD && -e $BM && ! $DoCleanBM) then
@@ -2361,7 +2361,7 @@ if($DoGCAReg) then
   else
     if($NoEMReg == 0) then
       set cmd = (mri_em_register)
-      #set cmd = ($cmd -rusage $touchdir/rusage.mri_em_register.dat) 
+      #set cmd = ($cmd -rusage $touchdir/rusage.mri_em_register.dat)
       if($DoCreateBaseSubj) then
         # base subj processing (norm_template instead of nu, and no mask needed):
         set cmd = ($cmd -mask brainmask.mgz $xopts \
@@ -2376,7 +2376,7 @@ if($DoGCAReg) then
       endif
     else
       set mni305 = $FREESURFER_HOME/average/mni305.cor.mgz
-      set xfm = transforms/talairach.xfm 
+      set xfm = transforms/talairach.xfm
       set lta = transforms/talairach.lta
       if($#GCAOutputName) set lta = transforms/talairach.$GCAOutputName.lta
       set cmd = (lta_convert --src orig.mgz --trg $mni305 \
@@ -2461,7 +2461,7 @@ if($DoCAReg) then
 
   set xopts = `fsr-getxopts mri_ca_register $XOptsFile`;
   set cmd = (mri_ca_register)
-  set cmd = ($cmd -rusage $touchdir/rusage.mri_ca_register.dat) 
+  set cmd = ($cmd -rusage $touchdir/rusage.mri_ca_register.dat)
   if($#GCARegIterations) set cmd = ($cmd -n $GCARegIterations)
   if($#GCARegTol) set cmd = ($cmd -tol $GCARegTol)
   set lta = transforms/talairach.lta
@@ -2515,7 +2515,7 @@ if($DoCARegInv) then
   # set xopts = `fsr-getxopts mri_ca_register $XOptsFile`; # careful here
   set cmd = (mri_ca_register)
   set cmd = ($cmd -invert-and-save transforms/talairach.m3z)
-  set cmd = ($cmd -rusage $touchdir/rusage.mri_ca_register.inv.dat) 
+  set cmd = ($cmd -rusage $touchdir/rusage.mri_ca_register.inv.dat)
   echo "\n $cmd \n"|& tee -a $LF |& tee -a $CF
   if($RunIt) $fs_time $cmd |& tee -a $LF
   if($status) then
@@ -2651,7 +2651,7 @@ if($DoCALabel) then
         $fs_time $cmd |& tee -a $LF
         if($status) goto error_exit;
       endif
-      # check if all cross dirs have aseg.presurf 
+      # check if all cross dirs have aseg.presurf
       if ( -e ${SUBJECTS_DIR}/${s}/mri/aseg.presurf.mgz ) then
         @ asegprecount++
       endif
@@ -2676,7 +2676,7 @@ if($DoCALabel) then
   #------------------- mri_ca_label ------------------------#
   # Run mri_ca_label to create aseg.auto_noCCseg.mgz
   set xopts = `fsr-getxopts mri_ca_label $XOptsFile`;
-  set rusage = $touchdir/rusage.mri_ca_label.dat 
+  set rusage = $touchdir/rusage.mri_ca_label.dat
   set cmd = (mri_ca_label -relabel_unlikely 9 .3 -prior 0.5)
   set cmd = ($cmd $UseCAAlign)
   if($NoWMSA) set cmd = ($cmd -nowmsa)
@@ -3183,7 +3183,7 @@ if($DoFix && ( ! $longitudinal )) then
         |& tee -a $SF |& tee -a $LF |& tee -a $CF
       set xopts = `fsr-getxopts mris_fix_topology $XOptsFile`;
       set cmd = (mris_fix_topology)
-      set cmd = ($cmd -rusage $touchdir/rusage.mris_fix_topology.$hemi.dat) 
+      set cmd = ($cmd -rusage $touchdir/rusage.mris_fix_topology.$hemi.dat)
       set cmd = ($cmd -mgz -sphere qsphere.nofix)
       if($FixWithGA) set cmd = ($cmd -ga)
       if($FixDiagOnly) set cmd = ($cmd -diagonly)
@@ -3435,7 +3435,7 @@ if($DoInflate2) then
     $PWD |& tee -a $LF
     set xopts = `fsr-getxopts mris_inflate $XOptsFile`;
     set cmd = (mris_inflate)
-    set cmd = ($cmd -rusage $touchdir/rusage.mris_inflate.$hemi.dat) 
+    set cmd = ($cmd -rusage $touchdir/rusage.mris_inflate.$hemi.dat)
     set cmd = ($cmd $xopts ../surf/$hemi.smoothwm \
                ../surf/$hemi.inflated)
     echo "\n $cmd \n"|& tee -a $LF |& tee -a $CF
@@ -3483,7 +3483,7 @@ if($DoCurvHK) then
     endif
     # This is a bit of a hack to account for the change in the name of the input white
     # surface. There needs to be a file called ?h.white.{H,K} but mris_curvature creates
-    # ?h.white.preaparc.{H,K}. This just creates a symlink 
+    # ?h.white.preaparc.{H,K}. This just creates a symlink
     foreach suffix (H K)
       set cmd1 = (rm -f $hemi.white.$suffix)
       set cmd2 = (ln -s $hemi.white.preaparc.$suffix $hemi.white.$suffix)
@@ -3594,7 +3594,7 @@ if($DoSphere) then
       # default stream:
       set xopts = `fsr-getxopts mris_sphere $XOptsFile`;
       set cmd = (mris_sphere)
-      set cmd = ($cmd -rusage $touchdir/rusage.mris_sphere.$hemi.dat) 
+      set cmd = ($cmd -rusage $touchdir/rusage.mris_sphere.$hemi.dat)
       if($NoRandomness) set cmd = ($cmd -seed $RngSeed)
       if($UseNoNeg) set cmd = ($cmd -remove_negative 1)
       set cmd = ($cmd $xopts)
@@ -3633,7 +3633,7 @@ if($DoSurfReg) then
     set AvgTif = ${AvgCurvTifPath}/$hemi.${AvgCurvTif}
     set xopts = `fsr-getxopts mris_register $XOptsFile`;
     set cmd = (mris_register -curv)
-    set cmd = ($cmd -rusage $touchdir/rusage.mris_register.$hemi.dat) 
+    set cmd = ($cmd -rusage $touchdir/rusage.mris_register.$hemi.dat)
     if($UseNoNeg) set cmd = ($cmd -remove_negative 1)
     set cmd = ($cmd $xopts)
     if($longitudinal) then
@@ -3958,7 +3958,7 @@ endif
 
 #----------------                    -------------------#
 #---------------- Make Pial Surfaces -------------------#
-# Also makes the white surface and the curv, area, 
+# Also makes the white surface and the curv, area,
 # curv.pial, area.pial, and thickness
 ##---------------       -pial        -------------------#
 #----------------                    -------------------#
@@ -4095,8 +4095,8 @@ if(($DoT2pial || $DoFLAIRpial) && ! $DoConf2Hires) then
 
     else #regular processing, register T2flairraw to T1 and create lta
 
-      set LTAAuto = $mdir/transforms/${t2flair}raw.auto.lta 
-      set LTAMan = $mdir/transforms/${t2flair}raw.lta 
+      set LTAAuto = $mdir/transforms/${t2flair}raw.auto.lta
+      set LTAMan = $mdir/transforms/${t2flair}raw.lta
       set DontCopy = 0
       if(-e $LTAAuto && -e $LTAMan) then
         set DontCopy = `diff $LTAAuto $LTAMan | grep -v \# | grep -v filename | wc -l`
@@ -4151,8 +4151,8 @@ if(($DoT2pial || $DoFLAIRpial) && ! $DoConf2Hires) then
     echo "\n $normcmd \n"|& tee -a $LF |& tee -a $CF
     if($RunIt) $fs_time $normcmd |& tee -a $LF
     if($status) goto error_exit;
-    
-    # then mask the T2/FLAIR 
+
+    # then mask the T2/FLAIR
     # note: post-normalized file remains for debug, with .norm in name
     # this creates ${t2flair}.mgz
     set maskcmd = (mri_mask \
@@ -4162,7 +4162,7 @@ if(($DoT2pial || $DoFLAIRpial) && ! $DoConf2Hires) then
     echo "\n $maskcmd \n"|& tee -a $LF |& tee -a $CF
     if($RunIt) $fs_time $maskcmd |& tee -a $LF
     if($status) goto error_exit;
-    
+
   endif
 
   set CMDFS = () # see earlier notes on -parallel implementation
@@ -5058,7 +5058,7 @@ if ($DoHippoSF_T1 || $DoHippoSF_T1T2 || $DoHippoSF_T2 || $DoBSsubst) then
     echo "  bin/glnxa64/libdctprocess.so    (Linux 64b) or"
     echo "  bin/maci64/libdctprocess.jnilib (Mac 64b)"
     echo " "
-    echo "You will need to download the Matlab Compiler Runtime (MCR) for Matlab 2012b." 
+    echo "You will need to download the Matlab Compiler Runtime (MCR) for Matlab 2012b."
     echo "To do so, please run the following commands (you might need root permissions):"
     echo " "
     echo "LINUX:"
@@ -5083,17 +5083,17 @@ if ($DoHippoSF_T1 || $DoHippoSF_T1T2 || $DoHippoSF_T2 || $DoBSsubst) then
 endif
 
 # brainstem structures: make sure required files from from default freesurfer processing are in there
-if ($DoBSsubst) then 
+if ($DoBSsubst) then
   if (! -e ${subjdir}/mri/aseg.mgz || \
       ! -e ${subjdir}/mri/norm.mgz ) then
     echo "ERROR: cannot find norm.mgz or aseg.mgz for the subject."
     echo "ERROR: Maybe, run recon-all again or disable segmentation of brainstem substructures."
     goto error_exit;
-  endif #checking of aseg.mgz and norm.mgz 
+  endif #checking of aseg.mgz and norm.mgz
 endif
 
 # hippocampal subfields: make sure required files from default freesurfer processing are in there, and convert hemilist
-if ($DoHippoSF_T1 || $DoHippoSF_T1T2 || $DoHippoSF_T2) then 
+if ($DoHippoSF_T1 || $DoHippoSF_T1T2 || $DoHippoSF_T2) then
   if (! -e ${subjdir}/mri/wmparc.mgz || \
       ! -e ${subjdir}/mri/norm.mgz || \
       ! -e ${subjdir}/mri/transforms/talairach.xfm ) then
@@ -5124,7 +5124,7 @@ if($DoBSsubst) then
       |& tee -a $SF |& tee -a $LF |& tee -a $CF |& tee -a $BSSLOG
 
   # segmentation of brainstem structures
-  set cmd = ( ${FREESURFER_HOME}/bin/segmentBS.sh \
+  set cmd = ( ${FREESURFER_HOME}/bin/segmentBS.tcsh \
     ${FREESURFER_HOME}/MCRv80 \
     $FREESURFER_HOME \
     $subjid  \
@@ -5150,7 +5150,7 @@ if($DoHippoSF_T1) then
       |& tee -a $LF |& tee -a $CF |& tee -a $HSFLOG
     echo "#@# Hippocampal Subfields processing (T1 only) $hemi `date`" \
       |& tee -a $SF |& tee -a $LF |& tee -a $CF |& tee -a $HSFLOG
-    
+
     set cmd = ( ${FREESURFER_HOME}/bin/segmentSF_T1.sh \
       ${FREESURFER_HOME}/MCRv80 \
       $FREESURFER_HOME \
@@ -5169,7 +5169,7 @@ endif
 #--------------                        -----------------#
 ##------------- -hippocampal-subfields-T1T2  -----------#
 #--------------                        -----------------#
-if($DoHippoSF_T1T2) then 
+if($DoHippoSF_T1T2) then
   set HSFLOG = ($subjdir/scripts/hippocampal-subfields-T1T2.log)
   rm -f $HSFLOG
 
@@ -5200,11 +5200,11 @@ endif
 #--------------                        -----------------#
 ##------------- -hippocampal-subfields-T2  -------------#
 #--------------                        -----------------#
-if($DoHippoSF_T2) then 
+if($DoHippoSF_T2) then
 
   set HSFLOG = ($subjdir/scripts/hippocampal-subfields-T2.log)
   rm -f $HSFLOG
-  
+
   # do hippocampal processing
   foreach hemi ($hippohemilist)
     echo "#--------------------------------------------" \
@@ -5225,7 +5225,7 @@ if($DoHippoSF_T2) then
     if($RunIt) $fs_time $cmd |& tee -a $HSFLOG
     if($status) goto error_exit;
   end
-  
+
   echo $cmd > $touchdir/hippo-subfields-T2.touch
 endif
 
@@ -5736,7 +5736,7 @@ while( $#argv != 0 )
       breaksw
 
     case "-motioncor":
-    case "-mc": 
+    case "-mc":
      set DoMotionCor = 1;
       breaksw
     case "-nomotioncor":
@@ -6532,7 +6532,7 @@ while( $#argv != 0 )
       breaksw;
 
 #---------------------------------------------------#
-# Note: end of flags for recon-all stages above, 
+# Note: end of flags for recon-all stages above,
 # below are 'autorecon' and other multi-stage flags
 #---------------------------------------------------#
 
@@ -7361,7 +7361,7 @@ while( $#argv != 0 )
       set DoBSsubst = 1;
       breaksw;
 
-   
+
     case "-cubic":
       set UseCubic = 1;
       breaksw
@@ -8216,15 +8216,15 @@ Run times are approximate for an Intel Xeon E5-2643 64bit 3.4GHz processor:
 If -parallel is specified, runtime is reduced to 3 hours.
 
 
-SEGMENTATION OF HIPPOCAMPAL SUBFIELDS 
+SEGMENTATION OF HIPPOCAMPAL SUBFIELDS
 
 The following flags can be used to obtain a segmentation of the hippocampal subfields.
 The method is described in [17], and you can find further information here:
 http://surfer.nmr.mgh.harvard.edu/fswiki/HippocampalSubfields
 
--hippocampal-subfields-T1 
+-hippocampal-subfields-T1
 
-It uses the T1 scan which the recon-all stream has processed at 1 mm resolution or higher (with -cm). 
+It uses the T1 scan which the recon-all stream has processed at 1 mm resolution or higher (with -cm).
 
 -hippocampal-subfields-T2 file ID
 
@@ -8235,7 +8235,7 @@ different additional volumes are tried in this mode, in order to prevent files f
 
 -hippocampal-subfields-T1T2 file ID
 
-This mode is very similar to the previous one, with the only difference that the main T1 and the 
+This mode is very similar to the previous one, with the only difference that the main T1 and the
 additional volumes are used simultaneously in the segmentation.
 
 
@@ -8243,7 +8243,7 @@ SEGMENTATION OF BRAINSTEM STRUCTURES
 
 -brainstem-structures
 
-Performs segmentation of brains structures (medulla, pons, midbrain, SCP) on the T1 scan which the 
+Performs segmentation of brains structures (medulla, pons, midbrain, SCP) on the T1 scan which the
 recon-all stream has processed, at 1 mm or higher resolution (with -cm). The method is described in [18];
 you can read more at: http://surfer.nmr.mgh.harvard.edu/fswiki/BrainstemSubstructures
 
@@ -8383,7 +8383,7 @@ In the _second_ usage of mri_normalize, do N number of iterations
 -noaseg
 
 Skips subcortical segmentation steps (same as -nosubcortseg), and does
-not use aseg.presurf.mgz for inorm2, wm segmentation, or filling. 
+not use aseg.presurf.mgz for inorm2, wm segmentation, or filling.
 Use this flag for brains that do not support usage of Freesurfers subcortical
 segmentation, such as baby brains, or non-human primates.
 
@@ -8480,8 +8480,8 @@ Create a label of V1, based on Hinds et al., NeuroImage 39 (2008) 1585-1599.
 -ba_labels
 
 Creates Brodmann area labels of BA1, BA2, BA3a, BA3b, BA4a, BA4p, BA6, BA44,
-BA45, V1, V2, and V5/MT (and perirhinal) by mapping labels from the 
-'fsaverage' subject, which must exist within the SUBJECTS_DIR.  
+BA45, V1, V2, and V5/MT (and perirhinal) by mapping labels from the
+'fsaverage' subject, which must exist within the SUBJECTS_DIR.
 Based on:
 "Cortical Folding Patterns and Predicting Cytoarchitecture", Fischl et al.,
 Cerebral Cortex 2007.
@@ -8731,7 +8731,7 @@ then seed points can be supplied (see -cc-crs, -pons-crs, -lh-crs,
 -rh-crs). The actual points used for the cutting planes in the
 corpus callosum and pons can be found in scripts/ponscc.cut.log.
 The stage -autorecon2-wm begins here.  This is the last stage of
-volumetric processing. If -noaseg is used, then aseg.presurf.mgz is 
+volumetric processing. If -noaseg is used, then aseg.presurf.mgz is
 not used by mri_fill.
 
 Tessellation (-<no>tessellate)
@@ -8975,35 +8975,35 @@ the longitudinal stream (creating <tpNsubjid>.long.<longbasesubjid>).
 
 
 
-USING IMAGES FROM A 3T SCANNER 
+USING IMAGES FROM A 3T SCANNER
 
 The -3T flag enables two specific options in recon-all for images acquired with
-a 3T scanner:  3T-specific NU intensity correction parameters are used in the 
-Non-Uniform normalization stage, and the Schwartz 3T atlas is used for 
+a 3T scanner:  3T-specific NU intensity correction parameters are used in the
+Non-Uniform normalization stage, and the Schwartz 3T atlas is used for
 Talairach alignment.
 
 
 T2 OR FLAIR TO IMPROVE PIAL SURFACES
 
 Pial surfaces can be improved using the different contrast in T2 or FLAIR
-images. The original pial surfaces without T2/FLAIR data are saved as  
-?h.woT2.pial or ?h.woFLAIR.pial, and new ?h.pial surfaces are created.  One 
-example where this is useful is when there is dura in the brainmask.mgz that 
+images. The original pial surfaces without T2/FLAIR data are saved as
+?h.woT2.pial or ?h.woFLAIR.pial, and new ?h.pial surfaces are created.  One
+example where this is useful is when there is dura in the brainmask.mgz that
 isn't removed by skull stripping. The flags for these commands are:
 
-  -T2 <input T2 volume>  or -FLAIR <input FLAIR volume> 
+  -T2 <input T2 volume>  or -FLAIR <input FLAIR volume>
     (Specify the  path to the T2 or FLAIR image to use)
-  -T2pial or -FLAIRpial 
+  -T2pial or -FLAIRpial
     (Create new pial surfaces using T2 or FLAIR images)
 
 An example of running a subject through Freesurfer with a T2 image is:
-  
+
   recon-all -s subjectname -i /path/to/input -T2 /path/to/T2_input -T2pial -all
 
 T2 or FLAIR images can also be used with Freesurfer subjects that have already
-been processed without them. Note that autorecon3 should also be re-ran to 
+been processed without them. Note that autorecon3 should also be re-ran to
 compute statistics based on the new surfaces. For example:
-  
+
   recon-all -s subjectname -T2 /path/to/T2_volume -T2pial -autorecon3
 
 
@@ -9170,11 +9170,11 @@ NeuroImage 61(4), 1402-1418, 2012. http://dx.doi.org/10.1016/j.neuroimage.2012.0
 [17] Iglesias, J.E., Augustinack, J.C., Nguyen, K., Player, C.M., Player, A., Wright,
 M., Roy, N., Frosch, M.P., McKee, A.C., Wald, L.L., Fischl, B., and Van Leemput, K.,
 A computational atlas of the hippocampal formation using ex vivo, ultra-high resolution
-MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137. 
+MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137.
 http://dx.doi.org/10.1016/j.neuroimage.2015.04.042
 
 [18] Iglesias, J.E., Van Leemput, K., Bhatt, P., Casillas, C., Dutt, S., Schuff, N.,
-Truran-Sacrey, D., Boxer, A., and Fischl, B., Bayesian segmentation of brainstem 
+Truran-Sacrey, D., Boxer, A., and Fischl, B., Bayesian segmentation of brainstem
 structures in MRI. Neuroimage 113, 2015, 184-195.
 http://dx.doi.org/10.1016/j.neuroimage.2015.02.065
 

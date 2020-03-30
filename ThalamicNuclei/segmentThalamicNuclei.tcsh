@@ -10,7 +10,7 @@ if ("$tcsh61706" != "") then
 endif
 
 # very first thing: check MCR installation
-checkMCR.sh
+checkMCR.tcsh
 if ($status) then
     exit 1
 endif
@@ -60,7 +60,7 @@ if( $1 == "--help") then
   echo "Iglesias, J.E., Insausti, R., Lerma-Usabiaga, G., Bocchetta, M.,"
   echo "Van Leemput, K., Greve, D., van der Kouwe, A., Caballero-Gaudes, C., "
   echo "Paz-Alonso, P. NeuroImage (in press)."
-  echo "Preprint available at arXiv.org:  https://arxiv.org/abs/1806.08634" 
+  echo "Preprint available at arXiv.org:  https://arxiv.org/abs/1806.08634"
   echo " "
   exit 0
 endif
@@ -70,11 +70,11 @@ if( $#argv != 1  && $#argv != 2 && $#argv != 5 ) then
   echo " "
   echo "Usage: "
   echo " "
-  echo "   segmentThalamicNuclei.sh SUBJECT_ID [SUBJECT_DIR] [ADDITIONAL_VOL   ANALYSIS_ID   BBREGISTER_MODE] " 
+  echo "   segmentThalamicNuclei.tcsh SUBJECT_ID [SUBJECT_DIR] [ADDITIONAL_VOL   ANALYSIS_ID   BBREGISTER_MODE] "
   echo " "
   echo "Or, for help"
   echo " "
-  echo "   segmentThalamicNuclei.sh --help"  
+  echo "   segmentThalamicNuclei.tcsh --help"
   echo " "
   exit 1
 endif
@@ -91,7 +91,7 @@ if ($#argv == 1) then
   endif
 endif
 
-# Error if SUBJECTS_DIR (the environemnt variable) is empty 
+# Error if SUBJECTS_DIR (the environemnt variable) is empty
 if ($#argv == 1) then
   if ( $SUBJECTS_DIR == "" ) then
     echo " "
@@ -139,7 +139,7 @@ if ($#argv > 2) then
   set DOBIASFIELDCORR="1";
 endif
 
-# Error if subject not processed 
+# Error if subject not processed
 if (! -e ${SUBJECTS_DIR}/${SUBJECTNAME}/mri/wmparc.mgz || \
     ! -e ${SUBJECTS_DIR}/${SUBJECTNAME}/mri/norm.mgz || \
     ! -e ${SUBJECTS_DIR}/${SUBJECTNAME}/mri/transforms/talairach.xfm ) then
@@ -148,7 +148,7 @@ if (! -e ${SUBJECTS_DIR}/${SUBJECTNAME}/mri/wmparc.mgz || \
   echo "Has the subject been procesed with recon-all?"
   echo " "
   exit 1;
-endif 
+endif
 
 # Make sure that the thalamic nuclei are not running already for this subject
 set IsRunningFile = ${SUBJECTS_DIR}/${SUBJECTNAME}/scripts/IsRunningThalamicNuclei_${ANALYSISID}
@@ -178,7 +178,7 @@ endif
 
 # If everything is in place, let's do it! First, we create the IsRunning file
 echo "------------------------------" > $IsRunningFile
-echo "SUBJECT $SUBJECTNAME" >> $IsRunningFile 
+echo "SUBJECT $SUBJECTNAME" >> $IsRunningFile
 echo "DATE `date`"     >> $IsRunningFile
 echo "USER $user"      >> $IsRunningFile
 echo "HOST `hostname`" >> $IsRunningFile
@@ -239,7 +239,7 @@ endif
 
 fs_time ls >& /dev/null
 if ($status) then
-  $cmd |& tee -a $THNUCLOG 
+  $cmd |& tee -a $THNUCLOG
   set returnVal=$status
 else
   fs_time $cmd |& tee -a $THNUCLOG
@@ -260,11 +260,11 @@ if ($returnVal) then
   exit 1;
 endif
 
- 
+
 # Convert the txt file into a stats file so that asegstats2table can
 # be run Note: the number of voxels is set to 0 and there is no info
 # about intensity. The only useful info is the volume in mm and the
-# structure name. The segmentation IDs also do not mean anything. 
+# structure name. The segmentation IDs also do not mean anything.
 # Could run mri_segstats instead, but the volumes would not include
 # partial volume correction.
 if("$ANALYSISID" == "mainFreeSurferT1") then
@@ -276,10 +276,10 @@ set txt=$SUBJECTS_DIR/$SUBJECTNAME/mri/ThalamicNuclei.$suffix2.volumes.txt
 # Divide the stats into left and right. The sorting is done because
 # the Left and Right nuclei are not ordered the same in the txt file
 set stats=$SUBJECTS_DIR/$SUBJECTNAME/stats/thalamic-nuclei.lh.$suffix2.stats
-echo "# Left Thalamic nuclei volume statistics as created by segmentThalamicNuclei.sh" > $stats
+echo "# Left Thalamic nuclei volume statistics as created by segmentThalamicNuclei.tcsh" > $stats
 grep Left $txt | sed 's/Left-//g' | sort -k 1 | awk '{print NR" "NR"  0 "$2" "$1}' >> $stats
 set stats=$SUBJECTS_DIR/$SUBJECTNAME/stats/thalamic-nuclei.rh.$suffix2.stats
-echo "# Right Thalamic nuclei volume statistics as created by segmentThalamicNuclei.sh" > $stats
+echo "# Right Thalamic nuclei volume statistics as created by segmentThalamicNuclei.tcsh" > $stats
 grep Right $txt | sed 's/Right-//g' | sort -k 1 | awk '{print NR" "NR"  0 "$2" "$1}' >> $stats
 
 # All done!

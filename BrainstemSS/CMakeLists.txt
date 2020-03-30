@@ -5,14 +5,14 @@ if(APPLE)
   install_osx_app(mac_osx/segmentSubject.app)
 else()
   set(BIN_PROGRAMS
-    linux_x86_64/run_SegmentSubject.sh
-    linux_x86_64/segmentSubject
-  )
+      linux_x86_64/run_SegmentSubject.sh
+      linux_x86_64/segmentSubject
+      )
 endif()
 
 install_symlinks(
   ${BIN_PROGRAMS}
-  segmentBS.sh
+  segmentBS.tcsh
   quantifyBrainstemStructures.sh
   TYPE programs
   DESTINATION bin

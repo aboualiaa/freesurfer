@@ -19,7 +19,7 @@ install(PROGRAMS
         cblumwmgyri
         check_recons.sh
         check_subject
-        checkMCR.sh
+        checkMCR.tcsh
         clear_fs_env.csh
         compute_interrater_variability.csh
         compute_label_vals.csh
@@ -328,6 +328,6 @@ if(NOT FS_MINIMAL_BUILD)
           DESTINATION lib/tcl
           )
 
-  install(PROGRAMS process_exvivo_diff_data_bay3.sh DESTINATION bin COMPONENT nmr EXCLUDE_FROM_ALL)
+  install(PROGRAMS process_exvivo_diff_data_bay3.tcsh DESTINATION bin COMPONENT nmr EXCLUDE_FROM_ALL)
 
 endif()

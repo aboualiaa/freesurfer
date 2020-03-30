@@ -10,7 +10,7 @@ if ("$tcsh61706" != "") then
 endif
 
 # check MCR installation
-checkMCR.sh
+checkMCR.tcsh
 if ($status) then
     exit 1
 endif
@@ -21,11 +21,11 @@ if( $#argv == 0 || $#argv == 2  || $#argv == 3 || $#argv > 5) then
   echo " "
   echo "Usage: "
   echo " "
-  echo "   segmentHA_T2.sh  SUBJECT_ID  FILE_ADDITIONAL_SCAN   ANALYSIS_ID  USE_T1  [SUBJECT_DIR]" 
+  echo "   segmentHA_T2.tcsh  SUBJECT_ID  FILE_ADDITIONAL_SCAN   ANALYSIS_ID  USE_T1  [SUBJECT_DIR]"
   echo " "
   echo "Or, for help"
   echo " "
-  echo "   segmentHA_T2.sh --help"  
+  echo "   segmentHA_T2.tcsh --help"
   echo " "
   exit 1
 endif
@@ -51,7 +51,7 @@ if( $1 == "--help") then
   echo "native resolution, they must be processed with the recon-all flag -cm. Then,"
   echo "you can run the following command to obtain the segmentation: "
   echo " "
-  echo "   segmentHA_T2.sh  SUBJECT_ID  FILE_ADDITIONAL_SCAN   ANALYSIS_ID  USE_T1  [SUBJECT_DIR]"
+  echo "   segmentHA_T2.tcsh  SUBJECT_ID  FILE_ADDITIONAL_SCAN   ANALYSIS_ID  USE_T1  [SUBJECT_DIR]"
   echo " "
   echo "   (the argument [SUBJECT_DIR] is only necessary if the"
   echo "    environment variable has not been set)"
@@ -61,9 +61,9 @@ if( $1 == "--help") then
   echo " "
   echo "ANALYSIS_ID is a user defined identifier that makes it possible to run different"
   echo "analysis with different types of additional scans, e.g., a T2 and proton density"
-  echo "weighted volume (see further information on the website below). Please note that it". 
-  echo "is not possible to two instances of run segmentHA_T2.sh in parallel with USE_T1=0 "
-  echo "and USE_T1=1  (segmentHA_T1.sh or different analysis IDs is fine)."
+  echo "weighted volume (see further information on the website below). Please note that it".
+  echo "is not possible to two instances of run segmentHA_T2.tcsh in parallel with USE_T1=0 "
+  echo "and USE_T1=1  (segmentHA_T1.tcsh or different analysis IDs is fine)."
   echo " "
   echo "USE_T1: set to 1 to use the main T1 from recon-all in the segmentation (multispectral "
   echo "mode). If set to 0, only the intensities of the additional scan are used".
@@ -82,12 +82,12 @@ if( $1 == "--help") then
   echo "[1] Iglesias, J.E., Augustinack, J.C., Nguyen, K., Player, C.M., Player, A., Wright,"
   echo "M., Roy, N., Frosch, M.P., McKee, A.C., Wald, L.L., Fischl, B., and Van Leemput, K.,"
   echo "A computational atlas of the hippocampal formation using ex vivo, ultra-high resolution"
-  echo "MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137." 
+  echo "MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137."
   echo "http://dx.doi.org/10.1016/j.neuroimage.2015.04.042"
   echo " "
   echo "[2] Saygin, Z.M. & Kliemann, D. (joint 1st authors), Iglesias, J.E., van der Kouwe, A.J.W.,"
   echo "Boyd, E., Reuter, M., Stevens, A., Van Leemput, K., McKee, A., Frosch, M.P., Fischl, B.,"
-  echo "and Augustinack, J.C., High-resolution magnetic resonance imaging reveals nuclei of the" 
+  echo "and Augustinack, J.C., High-resolution magnetic resonance imaging reveals nuclei of the"
   echo "human amygdala: manual segmentation to automatic atlas. Neuroimage 155, 2017, 370-382."
   echo "http://doi.org/10.1016/j.neuroimage.2017.04.046"
   echo " "
@@ -105,7 +105,7 @@ if ($#argv == 4) then
   endif
 endif
 
-# Error if SUBJECTS_DIR (the environemnt variable) is empty 
+# Error if SUBJECTS_DIR (the environemnt variable) is empty
 if ($#argv == 4) then
   if ( $SUBJECTS_DIR == "" ) then
     echo " "
@@ -156,7 +156,7 @@ if (! -e ${SUBJECTS_DIR}/${SUBJECTNAME}/mri/wmparc.mgz || \
   echo "Has the subject been procesed with recon-all?"
   echo " "
   exit 1;
-endif 
+endif
 
 # Error if additional volume does not exist
 if(! -e "$T2VOL") then
@@ -211,9 +211,9 @@ endif
 
 # If everything is in place, let's do it! First, we create the IsRunning file
 echo "------------------------------" > $IsRunningFile
-echo "SUBJECT $SUBJECTNAME" >> $IsRunningFile 
-echo "ANALYSIS_ID $ANALYSISID" >> $IsRunningFile 
-echo "USE_T1 $USET1" >> $IsRunningFile 
+echo "SUBJECT $SUBJECTNAME" >> $IsRunningFile
+echo "ANALYSIS_ID $ANALYSISID" >> $IsRunningFile
+echo "USE_T1 $USET1" >> $IsRunningFile
 echo "DATE `date`"     >> $IsRunningFile
 echo "USER $user"      >> $IsRunningFile
 echo "HOST `hostname`" >> $IsRunningFile
@@ -260,7 +260,7 @@ echo " " >> $HSFLOG
 foreach hemi ($hippohemilist)
   echo "#--------------------------------------------" \
     |& tee -a $HSFLOG
-  
+
 
   # command
   if ( $USET1 == "1") then
@@ -273,7 +273,7 @@ foreach hemi ($hippohemilist)
 
   fs_time ls >& /dev/null
   if ($status) then
-    $cmd |& tee -a $HSFLOG  
+    $cmd |& tee -a $HSFLOG
     set returnVal=$status
   else
     fs_time $cmd |& tee -a $HSFLOG
@@ -297,7 +297,7 @@ end
 # Convert the txt files into a stats file so that asegstats2table can
 # be run Note: the number of voxels is set to 0 and there is no info
 # about intensity. The only useful info is the volume in mm and the
-# structure name. The segmentation IDs also do not mean anything. 
+# structure name. The segmentation IDs also do not mean anything.
 # Could run mri_segstats instead, but the volumes would not include
 # partial volume correction.
 
@@ -306,14 +306,14 @@ end
 foreach hemi (lh rh)
   set txt=$SUBJECTS_DIR/$SUBJECTNAME/mri/$hemi.hippoSfVolumes-T2.$SUFFIX.$ANALYSISID.txt
   set stats=$SUBJECTS_DIR/$SUBJECTNAME/stats/hipposubfields.$hemi.T2.$SUFFIX.$ANALYSISID.stats
-  echo "# Hippocampal subfield volumes as created by segmentHA_T2.sh" > $stats
+  echo "# Hippocampal subfield volumes as created by segmentHA_T2.tcsh" > $stats
   cat $txt | awk '{print NR" "NR"  0 "$2" "$1}' >> $stats
   set txt=$SUBJECTS_DIR/$SUBJECTNAME/mri/$hemi.amygNucVolumes-T2.$SUFFIX.$ANALYSISID.txt
   set stats=$SUBJECTS_DIR/$SUBJECTNAME/stats/amygdalar-nuclei.$hemi.T2.$SUFFIX.$ANALYSISID.stats
-  echo "# Amygdala nuclei volumes as created by segmentHA_T2.sh" > $stats
+  echo "# Amygdala nuclei volumes as created by segmentHA_T2.tcsh" > $stats
   cat $txt | awk '{print NR" "NR"  0 "$2" "$1}' >> $stats
 end
- 
+
 # All done!
 rm -f $IsRunningFile
 
@@ -325,14 +325,14 @@ echo " "
 echo "Iglesias, J.E., Augustinack, J.C., Nguyen, K., Player, C.M., Player, A., Wright,"
 echo "M., Roy, N., Frosch, M.P., McKee, A.C., Wald, L.L., Fischl, B., and Van Leemput, K.,"
 echo "A computational atlas of the hippocampal formation using ex vivo, ultra-high resolution"
-echo "MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137." 
+echo "MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137."
 echo "http://dx.doi.org/10.1016/j.neuroimage.2015.04.042"
 echo " "
 echo "In addition, if you have used the segmentation of the nuclei of the amygdala, please also cite:"
 echo ""
 echo "Saygin, Z.M. & Kliemann, D. (joint 1st authors), Iglesias, J.E., van der Kouwe, A.J.W.,"
 echo "Boyd, E., Reuter, M., Stevens, A., Van Leemput, K., McKee, A., Frosch, M.P., Fischl, B.,"
-echo "and Augustinack, J.C., High-resolution magnetic resonance imaging reveals nuclei of the" 
+echo "and Augustinack, J.C., High-resolution magnetic resonance imaging reveals nuclei of the"
 echo "human amygdala: manual segmentation to automatic atlas. Neuroimage 155, 2017, 370-382."
 echo "http://doi.org/10.1016/j.neuroimage.2017.04.046"
 echo " "

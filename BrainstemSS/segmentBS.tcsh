@@ -10,7 +10,7 @@ if ("$tcsh61706" != "") then
 endif
 
 # check MCR installation
-checkMCR.sh
+checkMCR.tcsh
 if ($status) then
     exit 1
 endif
@@ -21,11 +21,11 @@ if( $#argv == 0 || $#argv > 2) then
   echo " "
   echo "Usage: "
   echo " "
-  echo "   segmentBS.sh SUBJECT_ID [SUBJECT_DIR]" 
+  echo "   segmentBS.tcsh SUBJECT_ID [SUBJECT_DIR]"
   echo " "
   echo "Or, for help"
   echo " "
-  echo "   segmentBS.sh --help"  
+  echo "   segmentBS.tcsh --help"
   echo " "
   exit 1
 endif
@@ -44,7 +44,7 @@ if( $1 == "--help") then
   echo "processed with the recon-all flag -cm. Then, you can run the following command"
   echo "to obtain the segmentation: "
   echo " "
-  echo "   segmentBS.sh SUBJECT_ID [SUBJECT_DIR]"
+  echo "   segmentBS.tcsh SUBJECT_ID [SUBJECT_DIR]"
   echo " "
   echo "   (the argument [SUBJECT_DIR] is only necessary if the"
   echo "    environment variable SUBJECTS_DIR has not been set"
@@ -75,7 +75,7 @@ if ($#argv == 1) then
   endif
 endif
 
-# Error if SUBJECTS_DIR (the environemnt variable) is empty 
+# Error if SUBJECTS_DIR (the environemnt variable) is empty
 if ($#argv == 1) then
   if ( $SUBJECTS_DIR == "" ) then
     echo " "
@@ -123,7 +123,7 @@ if (! -e ${SUBJECTS_DIR}/${SUBJECTNAME}/mri/wmparc.mgz || \
   echo "Has the subject been procesed with recon-all?"
   echo " "
   exit 1;
-endif 
+endif
 
 # Make sure that the (T1) hippocampal subfields are not running already for this subject
 set IsRunningFile = ${SUBJECTS_DIR}/${SUBJECTNAME}/scripts/IsRunningBSsubst
@@ -152,7 +152,7 @@ endif
 
 # If everything is in place, let's do it! First, we create the IsRunning file
 echo "------------------------------" > $IsRunningFile
-echo "SUBJECT $SUBJECTNAME" >> $IsRunningFile 
+echo "SUBJECT $SUBJECTNAME" >> $IsRunningFile
 echo "DATE `date`"     >> $IsRunningFile
 echo "USER $user"      >> $IsRunningFile
 echo "HOST `hostname`" >> $IsRunningFile
@@ -210,7 +210,7 @@ set cmd="run_SegmentSubject.sh $RUNTIME $SUBJECTNAME $SUBJECTS_DIR $RESOLUTION $
 
 fs_time ls >& /dev/null
 if ($status) then
-  $cmd |& tee -a $BSSLOG 
+  $cmd |& tee -a $BSSLOG
   set returnVal=$status
 else
   fs_time $cmd |& tee -a $BSSLOG
@@ -232,12 +232,12 @@ endif
 # Convert the txt file into a stats file so that asegstats2table can
 # be run Note: the number of voxels is set to 0 and there is no info
 # about intensity. The only useful info is the volume in mm and the
-# structure name. The segmentation IDs also do not mean anything. 
+# structure name. The segmentation IDs also do not mean anything.
 # Could run mri_segstats instead, but the volumes would not include
 # partial volume correction.
 set txt=$SUBJECTS_DIR/$SUBJECTNAME/mri/brainstemSsVolumes.$SUFFIX.txt
 set stats=$SUBJECTS_DIR/$SUBJECTNAME/stats/brainstem.$SUFFIX.stats
-echo "# Brainstem structure volumes as created by segmentBS.sh" > $stats
+echo "# Brainstem structure volumes as created by segmentBS.tcsh" > $stats
 cat $txt | awk '{print NR" "NR"  0 "$2" "$1}' >> $stats
 
 # All done!

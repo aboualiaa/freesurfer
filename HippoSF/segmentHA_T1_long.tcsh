@@ -10,7 +10,7 @@ if ("$tcsh61706" != "") then
 endif
 
 # check MCR installation
-checkMCR.sh
+checkMCR.tcsh
 if ($status) then
     exit 1
 endif
@@ -20,11 +20,11 @@ if( $#argv < 1 ) then
   echo " "
   echo "Usage: "
   echo " "
-  echo "   segmentHA_T1_long.sh BASE_SUBJECT_ID [SUBJECT_DIR]" 
+  echo "   segmentHA_T1_long.tcsh BASE_SUBJECT_ID [SUBJECT_DIR]"
   echo " "
   echo "Or, for help"
   echo " "
-  echo "   segmentHA_T1_long.sh --help"  
+  echo "   segmentHA_T1_long.tcsh --help"
   echo " "
   exit 1
 endif
@@ -49,7 +49,7 @@ if( $1 == "--help") then
   echo "points simultaneously using the method described in [1] (and the atlases described"
   echo "in [2] and [3]):"
   echo " "
-  echo "   segmentHA_T1_long.sh BASE_SUBJECT_ID [SUBJECT_DIR]"
+  echo "   segmentHA_T1_long.tcsh BASE_SUBJECT_ID [SUBJECT_DIR]"
   echo " "
   echo "   (the argument [SUBJECT_DIR] is only necessary if the"
   echo "    environment variable SUBJECTS_DIR has not been set"
@@ -70,12 +70,12 @@ if( $1 == "--help") then
   echo "[2] Iglesias, J.E., Augustinack, J.C., Nguyen, K., Player, C.M., Player, A., Wright,"
   echo "M., Roy, N., Frosch, M.P., McKee, A.C., Wald, L.L., Fischl, B., and Van Leemput, K.,"
   echo "A computational atlas of the hippocampal formation using ex vivo, ultra-high resolution"
-  echo "MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137." 
+  echo "MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137."
   echo "http://dx.doi.org/10.1016/j.neuroimage.2015.04.042"
   echo " "
   echo "[3] Saygin, Z.M. & Kliemann, D. (joint 1st authors), Iglesias, J.E., van der Kouwe, A.J.W.,"
   echo "Boyd, E., Reuter, M., Stevens, A., Van Leemput, K., McKee, A., Frosch, M.P., Fischl, B.,"
-  echo "and Augustinack, J.C., High-resolution magnetic resonance imaging reveals nuclei of the" 
+  echo "and Augustinack, J.C., High-resolution magnetic resonance imaging reveals nuclei of the"
   echo "human amygdala: manual segmentation to automatic atlas. Neuroimage 155, 2017, 370-382."
   echo "http://doi.org/10.1016/j.neuroimage.2017.04.046"
   echo " "
@@ -93,7 +93,7 @@ if ($#argv == 1) then
   endif
 endif
 
-# Error if SUBJECTS_DIR (the environemnt variable) is empty 
+# Error if SUBJECTS_DIR (the environemnt variable) is empty
 if ($#argv == 1) then
   if ( $SUBJECTS_DIR == "" ) then
     echo " "
@@ -151,7 +151,7 @@ if (! -e ${SUBJECTS_DIR}/${BASESUBJ}/mri/wmparc.mgz || \
   echo "Please make sure that the base subject has been processed."
   echo " "
   exit 1;
-endif 
+endif
 
 # Go ahead and read time points
 set SubjsList = (`cat $SUBJECTS_DIR/$BASESUBJ/base-tps`)
@@ -159,14 +159,14 @@ set SubjsList = (`cat $SUBJECTS_DIR/$BASESUBJ/base-tps`)
 # Make sure that necessary files are in there
 foreach s (${SubjsList})
   set longSubj = ${s}.long.$BASESUBJ
-  
+
   if (! -e ${SUBJECTS_DIR}/${longSubj}/mri/wmparc.mgz || \
       ! -e ${SUBJECTS_DIR}/${longSubj}/mri/norm.mgz || \
       ! -e ${SUBJECTS_DIR}/${longSubj}/mri/transforms/talairach.xfm ) then
     echo "Cannot find wmparc.mgz or norm.mgz or talairach.xfm for $longSubj"
     echo "Please make sure you have run the longitudinal processing for all subjects."
     exit 1;
-  endif 
+  endif
 end
 
 
@@ -270,7 +270,7 @@ foreach hemi ($hippohemilist)
     exit 1;
   endif
 end
- 
+
 # All done!
 rm -f $IsRunningFile
 
@@ -289,14 +289,14 @@ echo " "
 echo "Iglesias, J.E., Augustinack, J.C., Nguyen, K., Player, C.M., Player, A., Wright,"
 echo "M., Roy, N., Frosch, M.P., McKee, A.C., Wald, L.L., Fischl, B., and Van Leemput, K.,"
 echo "A computational atlas of the hippocampal formation using ex vivo, ultra-high resolution"
-echo "MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137." 
+echo "MRI: Application to adaptive segmentation of in vivo MRI.  Neuroimage 115, 2015, 117-137."
 echo "http://dx.doi.org/10.1016/j.neuroimage.2015.04.042"
 echo " "
 echo "And/or the following paper if you have used the segmentation of the nuclei of the amygdala:"
 echo ""
 echo "Saygin, Z.M. & Kliemann, D. (joint 1st authors), Iglesias, J.E., van der Kouwe, A.J.W.,"
 echo "Boyd, E., Reuter, M., Stevens, A., Van Leemput, K., McKee, A., Frosch, M.P., Fischl, B.,"
-echo "and Augustinack, J.C., High-resolution magnetic resonance imaging reveals nuclei of the" 
+echo "and Augustinack, J.C., High-resolution magnetic resonance imaging reveals nuclei of the"
 echo "human amygdala: manual segmentation to automatic atlas. Neuroimage 155, 2017, 370-382."
 echo "http://doi.org/10.1016/j.neuroimage.2017.04.046"
 echo " "
