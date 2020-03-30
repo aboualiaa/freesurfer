@@ -21,7 +21,6 @@ stages:
               sudo apt-get update -y
               sudo apt-get install -y libxml2-utils parallel snapd
               sudo snap install shfmt
-              sudo pip install black
               if [[ ! -f "$(pwd)/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz" ]]; then
                 echo "Downloading and Installing LLVM"
                 wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz >/dev/null 2>&1
@@ -30,6 +29,10 @@ stages:
                 echo "Installing LLVM"
                 sudo tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz --strip-components=1 -C /usr/local
               fi
+
+              sudo apt-get install -y -qq python3.7 python3.7-dev
+              sudo update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 --force
+              sudo pip install black
 
               export PATH=/usr/local/bin:$PATH
 
