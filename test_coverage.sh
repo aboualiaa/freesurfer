@@ -60,14 +60,14 @@ function realpath() {
 # first, parse the commandline input
 for i in "$@"; do
   case $i in
-  -r | --regenerate)
-    # regenerate the test reference data
-    FSTEST_REGENERATE=true
-    shift
-    ;;
-  *)
-    error_exit "unknown argument '$i'"
-    ;;
+    -r | --regenerate)
+      # regenerate the test reference data
+      FSTEST_REGENERATE=true
+      shift
+      ;;
+    *)
+      error_exit "unknown argument '$i'"
+      ;;
   esac
 done
 

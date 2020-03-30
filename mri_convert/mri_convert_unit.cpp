@@ -5,10 +5,9 @@
 #include "mri2020.hpp"
 #include "mri_convert.hpp"
 
+#include <filesystem>
 #include <random>
 
-#include <boost/program_options.hpp>
-#include <boost/program_options/parsers.hpp>
 #include <eigen3/Eigen/Dense>
 #include <gtest/gtest.h>
 
@@ -272,110 +271,6 @@ TEST(test_mri_remove_nans, old_vs_new_vox_getter) { // NOLINT
 }
 
 TEST(test_mri_read, old_vs_new_vox_getter) { // NOLINT
-}
-
-TEST(test_mri_convert, test_conform) { // NOLINT
-  std::vector<char const *> args{"mri_convert",
-                                 "testdata2/rawavg.mgz",
-                                 "testdata2/orig.mgz",
-                                 "--conform",
-                                 "-oi",
-                                 "-ii"};
-
-  ASSERT_EQ(mri_convert(args), 0);
-
-  auto res = std::system(
-      "../mri_diff/mri_diff testdata2/orig.mgz testdata2/orig.ref.mgz --debug");
-  ASSERT_EQ(res, 0);
-}
-
-TEST(test_mri_convert, test_dicom) { // NOLINT
-  std::vector<char const *> args{"mri_convert",
-                                 "testdata2/dcm/261000-10-60.dcm",
-                                 "testdata2/dicom.mgz", "-oi", "-ii"};
-
-  ASSERT_EQ(mri_convert(args), 0);
-
-  auto res = std::system("../mri_diff/mri_diff testdata2/dicom.mgz "
-                         "testdata2/freesurfer.mgz --debug");
-  ASSERT_EQ(res, 0);
-}
-
-TEST(test_mri_convert, test_nifti) { // NOLINT
-  std::vector<char const *> args{"mri_convert", "testdata2/nifti.nii",
-                                 "testdata2/nifti.mgz", "-oi", "-ii"};
-
-  ASSERT_EQ(mri_convert(args), 0);
-
-  auto res = std::system(
-      "../mri_diff/mri_diff testdata2/nifti.mgz "
-      "testdata2/freesurfer.mgz --notallow-acq --geo-thresh 0.000008 --debug");
-  ASSERT_EQ(res, 0);
-}
-
-TEST(test_mri_convert, test_analyze) { // NOLINT
-  std::vector<char const *> args{"mri_convert", "testdata2/analyze.img",
-                                 "testdata2/analyze.mgz", "-oi", "-ii"};
-
-  ASSERT_EQ(mri_convert(args), 0);
-
-  auto res = std::system(
-      "../mri_diff/mri_diff testdata2/analyze.mgz "
-      "testdata2/freesurfer.mgz --notallow-acq --geo-thresh 0.000008 --debug");
-  ASSERT_EQ(res, 0);
-}
-
-TEST(test_mri_convert, test_downsampled) { // NOLINT
-  std::vector<char const *> args{"mri_convert",
-                                 "-at",
-                                 "testdata2/odd.m3z",
-                                 "testdata2/orig.mgz",
-                                 "testdata2/morphed.mgz",
-                                 "-oi",
-                                 "-ii"};
-
-  ASSERT_EQ(mri_convert(args), 0);
-
-  auto res = std::system("../mri_diff/mri_diff testdata2/morphed.mgz "
-                         "testdata2/odd.ref.mgz --debug");
-  ASSERT_EQ(res, 0);
-}
-
-TEST(test_mri_convert, test_standard_mosaic_dicom) { // NOLINT
-  std::vector<char const *> args{"mri_convert", "testdata2/ep2d.mosaic.dcm",
-                                 "testdata2/ep2d.mosaic.mgz", "-oi", "-ii"};
-
-  ASSERT_EQ(mri_convert(args), 0);
-
-  auto res = std::system("../mri_diff/mri_diff testdata2/ep2d.mosaic.mgz "
-                         "testdata2/ep2d.mosaic.ref.mgz --debug");
-  ASSERT_EQ(res, 0);
-}
-
-TEST(test_mri_convert, test_non_mosaic_dicom) { // NOLINT
-  std::vector<char const *> args{"mri_convert", "testdata2/vnav.non-mosaic.dcm",
-                                 "testdata2/vnav.non-mosaic.mgz", "-oi", "-ii"};
-
-  ASSERT_EQ(mri_convert(args), 0);
-
-  auto res = std::system("../mri_diff/mri_diff testdata2/vnav.non-mosaic.mgz "
-                         "testdata2/vnav.non-mosaic.ref.mgz --debug");
-  ASSERT_EQ(res, 0);
-}
-
-TEST(test_mri_convert, test_identical_geometry) { // NOLINT
-  std::vector<char const *> args{"mri_convert",
-                                 "--mosaic-fix-noascii",
-                                 "testdata2/vnav.mosaic.dcm",
-                                 "testdata2/vnav.mosaic.mgz",
-                                 "-oi",
-                                 "-ii"};
-
-  ASSERT_EQ(mri_convert(args), 0);
-
-  auto res = std::system("../mri_diff/mri_diff testdata2/vnav.mosaic.mgz "
-                         "testdata2/vnav.mosaic.ref.mgz --debug");
-  ASSERT_EQ(res, 0);
 }
 
 auto main(int /*argc*/, char * * /*argv*/) -> int {
