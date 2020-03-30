@@ -1,24 +1,17 @@
 project(lineprof)
 
-if(ITK_FOUND AND VTK_FOUND AND PETSC_FOUND)
+if(ITK_FOUND
+   AND VTK_FOUND
+   AND PETSC_FOUND
+   )
   find_package(MPI)
-  include_directories(
-    SYSTEM
-    ${ITK_INCLUDE_DIRS}
-    ${VTK_INCLUDE_DIRS}
-    ${PETSC_INCLUDE_DIR}
-  )
+  include_directories(SYSTEM ${ITK_INCLUDE_DIRS} ${VTK_INCLUDE_DIRS} ${PETSC_INCLUDE_DIR})
 
   # temporary macro to deal with BoundingBoxType
   # todo: this should be removed once we updgrade everything
   add_definitions(-DHAVE_ITK45)
 
-  set(SOURCES
-      Tracer.cpp
-      Preprocessor.cpp
-      PetscSolver.cpp
-      LineProf.cpp
-      )
+  set(SOURCES Tracer.cpp Preprocessor.cpp PetscSolver.cpp LineProf.cpp)
 
   add_compile_options(-Wno-deprecated)
 

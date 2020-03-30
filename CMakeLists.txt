@@ -32,22 +32,24 @@ if(POLICY CMP0048) # The project() command manages VERSION variables.
   cmake_policy(SET CMP0048 NEW)
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10"
-   AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+if(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang"
+   AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10"
+   AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
+   )
   set(CMAKE_RANLIB "${FS_USE_LLVM}/llvm-ranlib")
 endif()
 
 if(APPLE)
-  if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)[Cc]lang")# AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)[Cc]lang"
+     )# AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0")
     set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
     set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
     set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
     set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
   endif()
-  mark_as_advanced(CMAKE_OSX_SYSROOT
-                   CMAKE_OSX_DEPLOYMENT_TARGET
-                   CMAKE_OSX_ARCHITECTURES
-                   CMAKE_EXECUTABLE_FORMAT)
+  mark_as_advanced(CMAKE_OSX_SYSROOT CMAKE_OSX_DEPLOYMENT_TARGET CMAKE_OSX_ARCHITECTURES
+                   CMAKE_EXECUTABLE_FORMAT
+                   )
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
@@ -63,7 +65,8 @@ function(prevent_in_source_builds_and_installs)
 
   # disallow in-source builds
   if("${SRCDIR}" STREQUAL "${BINDIR}")
-    message(FATAL_ERROR "In-source builds/installs are disallowed. source dir: ${SRCDIR}; build dir: ${BINDIR}")
+    message(FATAL_ERROR "In-source builds/installs are disallowed. source dir: ${SRCDIR}; build dir: ${BINDIR}"
+            )
   endif()
 endfunction()
 
@@ -89,10 +92,18 @@ enable_language(C CXX Fortran)
 if(APPLE AND NOT TRAVIS)
   set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
 else()
-  set(FS_PACKAGES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-$ENV{HOSTING_OS}/prebuilt_packages")
+  set(FS_PACKAGES_DIR
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-$ENV{HOSTING_OS}/prebuilt_packages"
+      )
   message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
-  set(VTK_DIR ${FS_PACKAGES_DIR}/vtk/ CACHE PATH "VTK install directory")
-  set(ITK_DIR ${FS_PACKAGES_DIR}/itk/ CACHE PATH "ITK install directory")
+  set(VTK_DIR
+      ${FS_PACKAGES_DIR}/vtk/
+      CACHE PATH "VTK install directory"
+      )
+  set(ITK_DIR
+      ${FS_PACKAGES_DIR}/itk/
+      CACHE PATH "ITK install directory"
+      )
 endif()
 
 if(FS_SUPRESS_WARNINGS)
@@ -116,8 +127,9 @@ if(CMAKE_CONFIGURATION_TYPES AND FS_EXP_BUILD_CONFIGURATIONS)
   if(NOT LINUX)
     list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "msan")
   endif()
-  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)[Cc]lang"
-     OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)[Cc]lang")
+  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}"
+                                                           MATCHES "(Apple)[Cc]lang"
+     )
     list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "lsan")
   endif()
   set(CMAKE_CONFIGURATION_TYPES ${FS_EXP_BUILD_CONFIGURATIONS})
@@ -125,9 +137,15 @@ endif()
 
 if(FS_BUILD_TESTING)
   include(CTest)
-  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
-  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/attic/test.sh COPYONLY)
-  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/utils/test.sh COPYONLY)
+  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh
+                 COPYONLY
+                 )
+  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh
+                 ${CMAKE_CURRENT_BINARY_DIR}/attic/test.sh COPYONLY
+                 )
+  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh
+                 ${CMAKE_CURRENT_BINARY_DIR}/utils/test.sh COPYONLY
+                 )
 endif()
 
 include(cmake/functions.cmake)
@@ -142,28 +160,45 @@ set(CMAKE_NO_SYSTEM_FROM_IMPORTED TRUE)
 # if that is not defined, set the default path to /usr/local/freesurfer
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   if(NOT " $ENV{FS_INSTALL_DIR}" STREQUAL "")
-    set(CMAKE_INSTALL_PREFIX "$ENV{FS_INSTALL_DIR}" CACHE PATH "Copied from FS_INSTALL_DIR env variable" FORCE)
+    set(CMAKE_INSTALL_PREFIX
+        "$ENV{FS_INSTALL_DIR}"
+        CACHE PATH "Copied from FS_INSTALL_DIR env variable" FORCE
+        )
   else()
-    set(CMAKE_INSTALL_PREFIX "/usr/local/freesurfer" CACHE PATH "Default install path" FORCE)
+    set(CMAKE_INSTALL_PREFIX
+        "/usr/local/freesurfer"
+        CACHE PATH "Default install path" FORCE
+        )
   endif()
 endif()
 
 # version stamp
-set(FS_VERSION "$ENV{USER}-local" CACHE STRING "Distribution version")
+set(FS_VERSION
+    "$ENV{USER}-local"
+    CACHE STRING "Distribution version"
+    )
 
 # build stamp
 string(TIMESTAMP TODAY "%Y%m%d")
-set(BUILD_STAMP "freesurfer-local-build-${TODAY}" CACHE STRING "Distribution build stamp")
+set(BUILD_STAMP
+    "freesurfer-local-build-${TODAY}"
+    CACHE STRING "Distribution build stamp"
+    )
 install(CODE "file (WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n) ")
 
 # set the default build type to 'Release' for optimization purposes
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS " No build type selected - defaulting to Release")
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
+  set(CMAKE_BUILD_TYPE
+      "Release"
+      CACHE STRING "Default build type" FORCE
+      )
 endif()
 
 # create a custom target "make install-nmr" to only install nmr-component files
-add_custom_target(install-nmr COMMAND ${CMAKE_COMMAND} -D COMPONENT=nmr -P cmake_install.cmake)
+add_custom_target(install-nmr COMMAND ${CMAKE_COMMAND} -D COMPONENT=nmr -P
+                                      cmake_install.cmake
+                  )
 
 # --------------------------------------------------
 #               external dependencies
@@ -188,10 +223,16 @@ mark_as_advanced(XXD)
 if(NOT FS_PACKAGES_DIR)
   if(NOT "$ENV{FS_PACKAGES_DIR}" STREQUAL "")
     # check if FS_PACKAGES_DIR has been set
-    set(FS_PACKAGES_DIR "$ENV{FS_PACKAGES_DIR}" CACHE INTERNAL "Copied from FS_PACKAGES_DIR environment variable")
+    set(FS_PACKAGES_DIR
+        "$ENV{FS_PACKAGES_DIR}"
+        CACHE INTERNAL "Copied from FS_PACKAGES_DIR environment variable"
+        )
   elseif(EXISTS /usr/pubsw/packages)
     # if the user is at Martinos, default to /usr/pubsw/packages
-    set(FS_PACKAGES_DIR /usr/pubsw/packages CACHE INTERNAL "Default Martinos packages dir")
+    set(FS_PACKAGES_DIR
+        /usr/pubsw/packages
+        CACHE INTERNAL "Default Martinos packages dir"
+        )
   else()
     # setting FS_PACKAGES_DIR is required if the user is outside Martinos
     # for more information visit https://surfer.nmr.mgh.harvard.edu/fswiki/BuildRequirements
@@ -213,9 +254,13 @@ add_definitions(-DHAVE_ZLIB)
 if(NOT APPLE)
   find_library(GFORTRAN_LIBRARIES
                HINTS /usr/lib/gcc/*/*/
-               NAMES libgfortran.a gfortran)
+               NAMES libgfortran.a gfortran
+               )
   # LineProfTest and mri_robust_register need this library
-  find_library(QUADMATH_LIB HINTS /usr/lib/gcc/*/*/ NAMES libquadmath.a quadmath)
+  find_library(QUADMATH_LIB
+               HINTS /usr/lib/gcc/*/*/
+               NAMES libquadmath.a quadmath
+               )
   find_library(BLAS_LIBRARIES NAMES libblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
 endif()
@@ -230,7 +275,9 @@ find_package(PETSC)
 # --- boost ---
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED TRUE)
-find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log atomic)
+find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log
+                                       atomic
+             )
 
 # -------- itk --------
 find_package(ITK HINTS ${ITK_DIR})
@@ -274,7 +321,8 @@ mark_as_advanced(HPX_GIT_COMMIT
                  HPX_CXX_COMPILER_VERSION
                  HPX_CXX_COMPILER_ID
                  HPX_CXX_COMPILER
-                 LLVM_FILECHECK_EXE)
+                 LLVM_FILECHECK_EXE
+                 )
 
 # -------- openCV --------
 if(NOT APPLE)
@@ -283,10 +331,9 @@ endif()
 
 # -------- X11 ---------
 find_package(X11)
-mark_as_advanced(XT_LIBRARY
-                 XMU_LIBRARY
-                 X11_LIBRARY
-                 X11_INCLUDE_DIR GL_LIBRARY GLU_LIBRARY)
+mark_as_advanced(XT_LIBRARY XMU_LIBRARY X11_LIBRARY X11_INCLUDE_DIR GL_LIBRARY
+                 GLU_LIBRARY
+                 )
 
 # search for GUI libraries
 if(FS_BUILD_GUIS)
@@ -305,10 +352,7 @@ if(FS_BUILD_GUIS)
   # -------- qt --------
   find_package(QT)
 
-  mark_as_advanced(Qt5Widgets_DIR
-                   Qt5Sql_DIR
-                   Qt5Gui_DIR
-                   Qt5Core_DIR)
+  mark_as_advanced(Qt5Widgets_DIR Qt5Sql_DIR Qt5Gui_DIR Qt5Core_DIR)
 endif()
 
 # -------- vtk --------
@@ -321,11 +365,15 @@ if(VTK_FOUND AND VTK_BUILD_SHARED_LIBS)
   else()
     foreach(_vtk_module ${VTK_MODULES_ENABLED})
       foreach(_vtk_library ${${_vtk_module}_LIBRARIES})
-        file(GLOB _found_library "${${_vtk_module}_RUNTIME_LIBRARY_DIRS}/lib${_vtk_library}*.so*")
+        file(GLOB _found_library
+             "${${_vtk_module}_RUNTIME_LIBRARY_DIRS}/lib${_vtk_library}*.so*"
+             )
         list(APPEND _vtk_library_list ${_found_library})
       endforeach()
       foreach(_vtk_library ${${_vtk_module}_DEPENDS})
-        file(GLOB _found_library "${${_vtk_module}_RUNTIME_LIBRARY_DIRS}/lib${_vtk_library}*.so*")
+        file(GLOB _found_library
+             "${${_vtk_module}_RUNTIME_LIBRARY_DIRS}/lib${_vtk_library}*.so*"
+             )
         list(APPEND _vtk_library_list ${_found_library})
       endforeach()
     endforeach()
@@ -355,7 +403,10 @@ endif()
 # --------------------------------------------------
 #                  third-party code
 # --------------------------------------------------
-set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
+set(BENCHMARK_ENABLE_TESTING
+    OFF
+    CACHE BOOL "Suppressing benchmark's tests" FORCE
+    )
 
 add_subdirectory(packages)
 
@@ -383,7 +434,9 @@ add_subdirectory(packages)
 if(APPLE)
   if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     set(OpenMP_C "${CMAKE_C_COMPILER}")
-    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
+    set(OpenMP_C_FLAGS
+        "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include"
+        )
     set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
     set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
     set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
@@ -391,13 +444,22 @@ if(APPLE)
   endif()
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib")
+    set(OpenMP_CXX_FLAGS
+        "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib"
+        )
     set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
     set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
     set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
     set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
   endif()
-  add_link_options(-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib)
+  add_link_options(-Xpreprocessor
+                   -fopenmp
+                   -lomp
+                   -L/usr/local/opt/libomp/lib
+                   -I/usr/local/opt/libomp/include
+                   -L/usr/local/opt/hdf5/lib
+                   -L/usr/local/opt/szip/lib
+                   )
 endif()
 
 find_package(OpenMP)
@@ -408,7 +470,6 @@ if(OPENMP_FOUND)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
   set(OMP_CXX_LIBRARIES OpenMP::OpenMP_CXX)
 endif()
-
 
 # --------------------------------------------------
 #                    setup python
@@ -431,7 +492,8 @@ if(FS_DISTRIBUTE_FSPYTHON)
     set(PYTHON_LIBRARY ${FSPYTHON_DIR}/lib/libpython3.6m)
     # install the barebones python distribution
     install(DIRECTORY ${FSPYTHON_DIR}/bin ${FSPYTHON_DIR}/lib ${FSPYTHON_DIR}/include
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/python USE_SOURCE_PERMISSIONS
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/python
+            USE_SOURCE_PERMISSIONS
             )
   else()
     message(FATAL_ERROR "Cannot find fspython distribution in FS_PACKAGES_DIR")
@@ -461,7 +523,9 @@ if(APPLE)
 else()
   set(STRIP_FLAGS "-fdata-sections -ffunction-sections -Wl,--gc-sections")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STRIP_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${STRIP_FLAGS} -Wl,-Map,ld_map.txt -Wl,--no-demangle")
+  set(CMAKE_EXE_LINKER_FLAGS
+      "${CMAKE_EXE_LINKER_FLAGS} ${STRIP_FLAGS} -Wl,-Map,ld_map.txt -Wl,--no-demangle"
+      )
 endif()
 
 # --------------------------------------------------
@@ -494,8 +558,9 @@ add_subdirectories(vtkutils lineprof)
 
 # TODO: solve build issues on linux/gcc: looser throw spec...
 # the fem elastic subdir also builds a library, so it should be added first
-if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
-   OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}"
+                                                          MATCHES "(Apple)?[Cc]lang"
+   )
   if(APPLE)
     add_subdirectory(fem_elastic)
   endif()
@@ -511,291 +576,289 @@ add_subdirectory(gems)
 # the following subdirectories contain programs required for recon-all
 # and should be included during a "minimal " install. Extra programs that aren't
 # used in the standard stream should be added further down
-add_subdirectories(
-  AntsDenoiseImageFs
-  AntsN4BiasFieldCorrectionFs
-  lta_convert
-  mri_and
-  mri_add_xform_to_header
-  mri_annotation2label
-  mri_aparc2aseg
-  mri_aparc2wmseg
-  mri_binarize
-  mri_brainvol_stats
-  mri_ca_label
-  mri_ca_normalize
-  mri_ca_register
-  mri_cc
-  mri_compute_overlap
-  mri_compute_seg_overlap
-  mri_concat
-  mri_concatenate_lta
-  mri_convert
-  mri_coreg
-  mri_deface
-  mri_diff
-  mri_edit_segmentation
-  mri_edit_segmentation_with_surfaces
-  mri_edit_wm_with_aseg
-  mri_em_register
-  mri_extract_largest_CC
-  mri_fill
-  mri_fuse_segmentations
-  mri_fwhm
-  mri_gcut
-  mri_info
-  mri_label2label
-  mri_label2vol
-  mri_log_likelihood
-  mri_mask
-  mri_matrix_multiply
-  mri_mc
-  mri_normalize
-  mri_normalize_tp2
-  mri_probedicom
-  mri_refine_seg
-  mri_relabel_hypointensities
-  mri_relabel_nonwm_hypos
-  mri_remove_neck
-  mri_robust_register
-  mri_seg_overlap
-  mri_seg_diff
-  mri_segment
-  mri_segreg
-  mri_segstats
-  mri_stats2seg
-  mri_surf2surf
-  mri_surf2vol
-  mri_surfcluster
-  mri_tessellate
-  mri_vol2surf
-  mri_vol2vol
-  mri_voldiff
-  mri_watershed
-  mris_anatomical_stats
-  mris_annot_diff
-  mris_ca_label
-  mris_calc
-  mris_convert
-  mris_curvature
-  mris_curvature_stats
-  mris_decimate
-  mris_defects_pointset
-  mris_diff
-  mris_divide_parcellation
-  mris_euler_number
-  mris_fix_topology
-  mris_inflate
-  mris_info
-  mris_jacobian
-  mris_label2annot
-  mris_left_right_register
-  mris_make_surfaces
-  mris_register
-  mris_smooth
-  mris_sphere
-  mris_surface_stats
-  mris_thickness
-  mris_thickness_diff
-  mris_topo_fixer
-  mris_volmask
-  mrisp_paint
-  python
-  samseg
-  scripts
-  talairach_afd
-  talairach_avi
-  tkregister2
-)
+add_subdirectories(AntsDenoiseImageFs
+                   AntsN4BiasFieldCorrectionFs
+                   lta_convert
+                   mri_and
+                   mri_add_xform_to_header
+                   mri_annotation2label
+                   mri_aparc2aseg
+                   mri_aparc2wmseg
+                   mri_binarize
+                   mri_brainvol_stats
+                   mri_ca_label
+                   mri_ca_normalize
+                   mri_ca_register
+                   mri_cc
+                   mri_compute_overlap
+                   mri_compute_seg_overlap
+                   mri_concat
+                   mri_concatenate_lta
+                   mri_convert
+                   mri_coreg
+                   mri_deface
+                   mri_diff
+                   mri_edit_segmentation
+                   mri_edit_segmentation_with_surfaces
+                   mri_edit_wm_with_aseg
+                   mri_em_register
+                   mri_extract_largest_CC
+                   mri_fill
+                   mri_fuse_segmentations
+                   mri_fwhm
+                   mri_gcut
+                   mri_info
+                   mri_label2label
+                   mri_label2vol
+                   mri_log_likelihood
+                   mri_mask
+                   mri_matrix_multiply
+                   mri_mc
+                   mri_normalize
+                   mri_normalize_tp2
+                   mri_probedicom
+                   mri_refine_seg
+                   mri_relabel_hypointensities
+                   mri_relabel_nonwm_hypos
+                   mri_remove_neck
+                   mri_robust_register
+                   mri_seg_overlap
+                   mri_seg_diff
+                   mri_segment
+                   mri_segreg
+                   mri_segstats
+                   mri_stats2seg
+                   mri_surf2surf
+                   mri_surf2vol
+                   mri_surfcluster
+                   mri_tessellate
+                   mri_vol2surf
+                   mri_vol2vol
+                   mri_voldiff
+                   mri_watershed
+                   mris_anatomical_stats
+                   mris_annot_diff
+                   mris_ca_label
+                   mris_calc
+                   mris_convert
+                   mris_curvature
+                   mris_curvature_stats
+                   mris_decimate
+                   mris_defects_pointset
+                   mris_diff
+                   mris_divide_parcellation
+                   mris_euler_number
+                   mris_fix_topology
+                   mris_inflate
+                   mris_info
+                   mris_jacobian
+                   mris_label2annot
+                   mris_left_right_register
+                   mris_make_surfaces
+                   mris_register
+                   mris_smooth
+                   mris_sphere
+                   mris_surface_stats
+                   mris_thickness
+                   mris_thickness_diff
+                   mris_topo_fixer
+                   mris_volmask
+                   mrisp_paint
+                   python
+                   samseg
+                   scripts
+                   talairach_afd
+                   talairach_avi
+                   tkregister2
+                   )
 
 # the following program subdirectories aren't required in the standard recon-all stream.
 # they will be built by default, but not if a minimal build is configured
 if(NOT FS_MINIMAL_BUILD)
-  add_subdirectories(
-    anatomicuts
-    attic
-    BrainstemSS
-    diffusion_tool
-    dummy
-    freeview
-    fsfast
-    fslutils
-    hiam_make_surfaces
-    hiam_make_template
-    hiam_register
-    HippoSF
-    histo_compute_joint_density
-    histo_register_block
-    histo_synthesize
-    label2flat
-    label2patch
-    mkxsubjreg
-    matlab
-    mri_average
-    mri_bias
-    mri_ca_tissue_parms
-    mri_ca_train
-    mri_cal_renormalize_gca
-    mri_cnr
-    mri_compile_edits
-    mri_compute_change_map
-    mri_compute_volume_fractions
-    mri_copy_values
-    mri_cor2label
-    mri_correct_segmentations
-    mri_cvs_register
-    mri_dct_align
-    mri_distance_transform
-    mri_dist_surf_label
-    mri_evaluate_morph
-    mri_extract
-    mri_extract_fcd_features
-    mri_extract_label
-    mri_fdr
-    mri_fieldsign
-    mri_fit_bias
-    mri_fslmat_to_lta
-    mri_fuse_intensity_images
-    mri_gca_ambiguous
-    mri_glmfit
-    mri_gtmpvc
-    mri_gtmseg
-    mri_hausdorff_dist
-    mri_head
-    mri_hires_register
-    mri_histo_eq
-    mri_jacobian
-    mri_joint_density
-    mri_label_histo
-    mri_label_vals
-    mri_label_volume
-    mri_linear_register
-    mri_map_cpdat
-    mri_mark_temporal_lobe
-    mri_mcsim
-    mri_mi
-    mri_modify
-    mri_morphology
-    mri_ms_fitparms
-    mri_nlfilter
-    mri_otl
-    mri_paint
-    mri_parse_sdcmdir
-    mri_path2label
-    mri_polv
-    mri_probe_ima
-    mri_reduce
-    mri_rf_label
-    mri_rf_long_train
-    mri_rf_train
-    mri_ribbon
-    mri_rigid_register
-    mri_sbbr
-    mri_segcentroids
-    mri_seghead
-    mri_strip_nonwhite
-    mri_strip_subject_info
-    mri_surfacemask
-    mri_synthesize
-    mri_topologycorrection
-    mri_train
-    mri_transform
-    mri_twoclass
-    mri_volcluster
-    mri_volsynth
-    mri_warp_convert
-    mri_wbc
-    mri_xvolavg
-    mri_z2p
-    mris2rgb
-    mris_annot_to_segmentation
-    mris_apply_reg
-    mris_average_curvature
-    mris_BA_segment
-    mris_ca_train
-    mris_compute_acorr
-    mris_compute_lgi
-    mris_compute_overlap
-    mris_compute_parc_overlap
-    mris_compute_volume_fractions
-    mris_congeal
-    mris_copy_header
-    mris_deform
-    mris_distance_map
-    mris_distance_to_label
-    mris_distance_transform
-    mris_entropy
-    mris_errors
-    mris_expand
-    mris_extract_patches
-    mris_fill
-    mris_find_flat_regions
-    mris_flatten
-    mris_fwhm
-    mris_hausdorff_dist
-    mris_init_global_tractography
-    mris_interpolate_warp
-    mris_label_area
-    mris_label_calc
-    mris_label_mode
-    mris_make_average_surface
-    mris_make_face_parcellation
-    mris_make_template
-    mris_map_cuts
-    mris_merge_parcellations
-    mris_mesh_subdivide
-    mris_morph_stats
-    mris_ms_refine
-    mris_multiscale_stats
-    mris_niters2fwhm
-    mris_parcellate_connectivity
-    mris_pmake
-    mris_register_label_map
-    mris_register_to_volume
-    mris_remove_variance
-    mris_remesh
-    mris_resample
-    mris_rescale
-    mris_reverse
-    mris_rf_label
-    mris_rf_train
-    mris_rotate
-    mris_sample_label
-    mris_sample_parc
-    mris_seg2annot
-    mris_segment
-    mris_segment_vals
-    mris_segmentation_stats
-    mris_shrinkwrap
-    mris_simulate_atrophy
-    mris_smooth_intracortical
-    mris_spherical_average
-    mris_surface_to_vol_distances
-    mris_talairach
-    mris_thickness_comparison
-    mris_transform
-    mris_translate_annotation
-    mris_transmantle_dysplasia_paths
-    mris_volume
-    mris_warp
-    mris_watershed
-    mrisp_write
-    nmovie_qt
-    oct_register_mosaic
-    optseq2
-    qdecproject
-    qdec_glmfit
-    resurf
-    spline3
-    stat_normalize
-    stim_polar
-    swi_processing
-    template
-    test_makevol
-    ThalamicNuclei
-    trc
-    tridec
-  )
+  add_subdirectories(anatomicuts
+                     attic
+                     BrainstemSS
+                     diffusion_tool
+                     dummy
+                     freeview
+                     fsfast
+                     fslutils
+                     hiam_make_surfaces
+                     hiam_make_template
+                     hiam_register
+                     HippoSF
+                     histo_compute_joint_density
+                     histo_register_block
+                     histo_synthesize
+                     label2flat
+                     label2patch
+                     mkxsubjreg
+                     matlab
+                     mri_average
+                     mri_bias
+                     mri_ca_tissue_parms
+                     mri_ca_train
+                     mri_cal_renormalize_gca
+                     mri_cnr
+                     mri_compile_edits
+                     mri_compute_change_map
+                     mri_compute_volume_fractions
+                     mri_copy_values
+                     mri_cor2label
+                     mri_correct_segmentations
+                     mri_cvs_register
+                     mri_dct_align
+                     mri_distance_transform
+                     mri_dist_surf_label
+                     mri_evaluate_morph
+                     mri_extract
+                     mri_extract_fcd_features
+                     mri_extract_label
+                     mri_fdr
+                     mri_fieldsign
+                     mri_fit_bias
+                     mri_fslmat_to_lta
+                     mri_fuse_intensity_images
+                     mri_gca_ambiguous
+                     mri_glmfit
+                     mri_gtmpvc
+                     mri_gtmseg
+                     mri_hausdorff_dist
+                     mri_head
+                     mri_hires_register
+                     mri_histo_eq
+                     mri_jacobian
+                     mri_joint_density
+                     mri_label_histo
+                     mri_label_vals
+                     mri_label_volume
+                     mri_linear_register
+                     mri_map_cpdat
+                     mri_mark_temporal_lobe
+                     mri_mcsim
+                     mri_mi
+                     mri_modify
+                     mri_morphology
+                     mri_ms_fitparms
+                     mri_nlfilter
+                     mri_otl
+                     mri_paint
+                     mri_parse_sdcmdir
+                     mri_path2label
+                     mri_polv
+                     mri_probe_ima
+                     mri_reduce
+                     mri_rf_label
+                     mri_rf_long_train
+                     mri_rf_train
+                     mri_ribbon
+                     mri_rigid_register
+                     mri_sbbr
+                     mri_segcentroids
+                     mri_seghead
+                     mri_strip_nonwhite
+                     mri_strip_subject_info
+                     mri_surfacemask
+                     mri_synthesize
+                     mri_topologycorrection
+                     mri_train
+                     mri_transform
+                     mri_twoclass
+                     mri_volcluster
+                     mri_volsynth
+                     mri_warp_convert
+                     mri_wbc
+                     mri_xvolavg
+                     mri_z2p
+                     mris2rgb
+                     mris_annot_to_segmentation
+                     mris_apply_reg
+                     mris_average_curvature
+                     mris_BA_segment
+                     mris_ca_train
+                     mris_compute_acorr
+                     mris_compute_lgi
+                     mris_compute_overlap
+                     mris_compute_parc_overlap
+                     mris_compute_volume_fractions
+                     mris_congeal
+                     mris_copy_header
+                     mris_deform
+                     mris_distance_map
+                     mris_distance_to_label
+                     mris_distance_transform
+                     mris_entropy
+                     mris_errors
+                     mris_expand
+                     mris_extract_patches
+                     mris_fill
+                     mris_find_flat_regions
+                     mris_flatten
+                     mris_fwhm
+                     mris_hausdorff_dist
+                     mris_init_global_tractography
+                     mris_interpolate_warp
+                     mris_label_area
+                     mris_label_calc
+                     mris_label_mode
+                     mris_make_average_surface
+                     mris_make_face_parcellation
+                     mris_make_template
+                     mris_map_cuts
+                     mris_merge_parcellations
+                     mris_mesh_subdivide
+                     mris_morph_stats
+                     mris_ms_refine
+                     mris_multiscale_stats
+                     mris_niters2fwhm
+                     mris_parcellate_connectivity
+                     mris_pmake
+                     mris_register_label_map
+                     mris_register_to_volume
+                     mris_remove_variance
+                     mris_remesh
+                     mris_resample
+                     mris_rescale
+                     mris_reverse
+                     mris_rf_label
+                     mris_rf_train
+                     mris_rotate
+                     mris_sample_label
+                     mris_sample_parc
+                     mris_seg2annot
+                     mris_segment
+                     mris_segment_vals
+                     mris_segmentation_stats
+                     mris_shrinkwrap
+                     mris_simulate_atrophy
+                     mris_smooth_intracortical
+                     mris_spherical_average
+                     mris_surface_to_vol_distances
+                     mris_talairach
+                     mris_thickness_comparison
+                     mris_transform
+                     mris_translate_annotation
+                     mris_transmantle_dysplasia_paths
+                     mris_volume
+                     mris_warp
+                     mris_watershed
+                     mrisp_write
+                     nmovie_qt
+                     oct_register_mosaic
+                     optseq2
+                     qdecproject
+                     qdec_glmfit
+                     resurf
+                     spline3
+                     stat_normalize
+                     stim_polar
+                     swi_processing
+                     template
+                     test_makevol
+                     ThalamicNuclei
+                     trc
+                     tridec
+                     )
 endif()
 
 if(FS_INFANT_MODULE)

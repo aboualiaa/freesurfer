@@ -1,17 +1,20 @@
 project(freeview)
 
-if(FS_BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
+if(FS_BUILD_GUIS
+   AND VTK_FOUND
+   AND PETSC_FOUND
+   AND TARGET vtkutils
+   )
   find_package(MPI REQUIRED)
 
-  include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${FS_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/vtkutils
-    ${CMAKE_SOURCE_DIR}/lineprof
-    SYSTEM
-    ${ITK_INCLUDE_DIRS}
-    ${VTK_INCLUDE_DIRS}
-  )
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                      ${FS_INCLUDE_DIRS}
+                      ${CMAKE_SOURCE_DIR}/vtkutils
+                      ${CMAKE_SOURCE_DIR}/lineprof
+                      SYSTEM
+                      ${ITK_INCLUDE_DIRS}
+                      ${VTK_INCLUDE_DIRS}
+                      )
 
   include(${VTK_USE_FILE})
   set(CMAKE_AUTOUIC ON)
@@ -206,7 +209,8 @@ if(FS_BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
     set(SOURCES ${SOURCES} QVTK5/QVTKWidget.cxx QVTK5/QVTKPaintEngine.cxx)
   elseif(${VTK_MAJOR_VERSION} LESS 8)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/QVTK7)
-    set(SOURCES ${SOURCES}
+    set(SOURCES
+        ${SOURCES}
         QVTK7/vtkEventQtSlotConnect.cxx
         QVTK7/vtkQtConnection.cxx
         QVTK7/QVTKInteractor.cxx
@@ -221,13 +225,22 @@ if(FS_BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
     set(SOURCES ${SOURCES} MacRetina.mm)
   endif()
 
-  add_compile_options(-Wno-deprecated -Wno-reorder -Wno-uninitialized -Wno-unused-variable -Wno-sign-compare
-                      -Wno-overloaded-virtual -Wno-inconsistent-missing-override -Wno-deprecated-declarations)
+  add_compile_options(-Wno-deprecated
+                      -Wno-reorder
+                      -Wno-uninitialized
+                      -Wno-unused-variable
+                      -Wno-sign-compare
+                      -Wno-overloaded-virtual
+                      -Wno-inconsistent-missing-override
+                      -Wno-deprecated-declarations
+                      )
 
   set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
 
   if(APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework IOKit -framework Accelerate")
+    set(CMAKE_EXE_LINKER_FLAGS
+        "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework IOKit -framework Accelerate"
+        )
   else()
     set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::X11Extras)
   endif()
@@ -253,8 +266,19 @@ if(FS_BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
   endif()
 
   if(APPLE)
-    mac_deploy_qt(TARGET freeview BUNDLE Freeview.app PLIST Info.plist ICONS resource/icons/freeview.icns)
-    install(PROGRAMS mac_wrapper DESTINATION bin RENAME freeview)
+    mac_deploy_qt(TARGET
+                  freeview
+                  BUNDLE
+                  Freeview.app
+                  PLIST
+                  Info.plist
+                  ICONS
+                  resource/icons/freeview.icns
+                  )
+    install(PROGRAMS mac_wrapper
+            DESTINATION bin
+            RENAME freeview
+            )
   else()
     install(TARGETS freeview DESTINATION bin)
   endif()

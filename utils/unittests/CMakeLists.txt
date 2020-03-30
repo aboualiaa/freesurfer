@@ -12,4 +12,3 @@ else()
   add_test(dmatrix_tests dmatrix_tests)
   set_property(TEST dmatrix_tests PROPERTY LABELS Unit)
 endif()
-

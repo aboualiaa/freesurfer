@@ -24,20 +24,22 @@ else()
       )
 endif()
 
-install_symlinks(
-  ${BIN_PROGRAMS}
-  segmentHA_T1_long.tcsh
-  segmentHA_T1.tcsh
-  segmentHA_T2.tcsh
-  quantifyHAsubregions.sh
-  TYPE programs
-  DESTINATION bin
-)
+install_symlinks(${BIN_PROGRAMS}
+                 segmentHA_T1_long.tcsh
+                 segmentHA_T1.tcsh
+                 segmentHA_T2.tcsh
+                 quantifyHAsubregions.sh
+                 TYPE
+                 programs
+                 DESTINATION
+                 bin
+                 )
 
-install_symlinks(
-  AtlasDump.mgz
-  AtlasMesh.gz
-  compressionLookupTable.txt
-  TYPE files
-  DESTINATION average/HippoSF/atlas
-)
+install_symlinks(AtlasDump.mgz
+                 AtlasMesh.gz
+                 compressionLookupTable.txt
+                 TYPE
+                 files
+                 DESTINATION
+                 average/HippoSF/atlas
+                 )

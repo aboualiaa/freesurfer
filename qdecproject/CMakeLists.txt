@@ -11,7 +11,7 @@ set(SOURCES
     QdecGlmFitResults.cxx
     QdecProject.cxx
     QdecSubject.cxx
-)
+    )
 
 add_library(qdecproject STATIC ${SOURCES})
 target_link_libraries(qdecproject utils)

@@ -14,18 +14,19 @@ set(PETSC_INCLUDE_DIRS ${PETSC_DIR}/include)
 
 find_package_handle_standard_args(PETSC DEFAULT_MSG PETSC_INCLUDE_DIR)
 
-library_paths(
-  NAME PETSC_LIBRARIES
-  LIBDIR ${PETSC_DIR}/lib
-  LIBRARIES
-  petscts
-  petscsnes
-  petscksp
-  petscdm
-  petscmat
-  petscvec
-  petsc
-  petsccontrib
-  mpich
-  pmpich
-)
+library_paths(NAME
+              PETSC_LIBRARIES
+              LIBDIR
+              ${PETSC_DIR}/lib
+              LIBRARIES
+              petscts
+              petscsnes
+              petscksp
+              petscdm
+              petscmat
+              petscvec
+              petsc
+              petsccontrib
+              mpich
+              pmpich
+              )

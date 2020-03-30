@@ -34,7 +34,9 @@ if(Qt5_FOUND AND NOT APPLE)
     endif()
     # install the image format plugins
     if(EXISTS ${Qt5_INSTALL_DIR}/plugins/imageformats)
-      install(DIRECTORY ${Qt5_INSTALL_DIR}/plugins/imageformats DESTINATION lib/qt/plugins)
+      install(DIRECTORY ${Qt5_INSTALL_DIR}/plugins/imageformats
+              DESTINATION lib/qt/plugins
+              )
     endif()
     # make sure executables know where to find the plugins directory
     install(FILES ${CMAKE_SOURCE_DIR}/qt/qt.conf DESTINATION bin)

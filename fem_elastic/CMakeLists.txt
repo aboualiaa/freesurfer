@@ -2,14 +2,9 @@ project(fem_elastic)
 
 if(PETSC_FOUND)
   find_package(MPI REQUIRED)
-  include_directories(
-    ${FS_INCLUDE_DIRS}
-    SYSTEM
-    ${CMAKE_SOURCE_DIR}/packages/tetgen
-    ${PETSC_INCLUDE_DIR}
-    ${ITK_INCLUDE_DIRS}
-    ${MPI_CXX_HEADER_DIR}
-  )
+  include_directories(${FS_INCLUDE_DIRS} SYSTEM ${CMAKE_SOURCE_DIR}/packages/tetgen
+                      ${PETSC_INCLUDE_DIR} ${ITK_INCLUDE_DIRS} ${MPI_CXX_HEADER_DIR}
+                      )
 
   set(COMMON3D_SOURCES
       fem_3d.cpp

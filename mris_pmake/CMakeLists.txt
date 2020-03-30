@@ -8,26 +8,26 @@ if(OpenCL_FOUND)
 endif()
 
 set(SOURCES
-  abs2rel.cpp
-  asynch.cpp
-  c_label.cpp
-  C_mpmOverlay.cpp
-  C_mpmProg.cpp
-  c_SMessage.cpp
-  c_SSocket.cpp
-  c_surface.cpp
-  c_vertex.cpp
-  dijkstra.cpp
-  env.cpp
-  general.cpp
-  help.cpp
-  legacy.cpp
-  mris_pmake.cpp
-  oclDijkstraKernel.cpp
-  rel2abs.cpp
-  scanopt.cpp
-  surface.cpp
-)
+    abs2rel.cpp
+    asynch.cpp
+    c_label.cpp
+    C_mpmOverlay.cpp
+    C_mpmProg.cpp
+    c_SMessage.cpp
+    c_SSocket.cpp
+    c_surface.cpp
+    c_vertex.cpp
+    dijkstra.cpp
+    env.cpp
+    general.cpp
+    help.cpp
+    legacy.cpp
+    mris_pmake.cpp
+    oclDijkstraKernel.cpp
+    rel2abs.cpp
+    scanopt.cpp
+    surface.cpp
+    )
 
 if(OpenCL_FOUND)
   set(SOURCES ${SOURCES} oclCommon.cpp)

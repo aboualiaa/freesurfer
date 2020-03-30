@@ -8,5 +8,4 @@ target_link_libraries(mri_segcentroids utils)
 
 add_test_script(NAME mri_segcentroids_test SCRIPT test.sh DEPENDS mri_segcentroids)
 
-install(TARGETS mri_segcentroids DESTINATION bin) 
-
+install(TARGETS mri_segcentroids DESTINATION bin)

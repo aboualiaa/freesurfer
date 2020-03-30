@@ -9,4 +9,3 @@ install(TARGETS swi_preprocess DESTINATION bin)
 add_executable(swi_process swi_process.cpp cmd_line_interface.cpp)
 target_link_libraries(swi_process utils)
 install(TARGETS swi_process DESTINATION bin)
-

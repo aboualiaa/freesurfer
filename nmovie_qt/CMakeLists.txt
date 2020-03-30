@@ -7,11 +7,7 @@ if(FS_BUILD_GUIS AND Qt5_FOUND)
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-  set(SOURCES
-      main.cpp
-      MainWindow.cpp
-      RenderWidget.cpp
-      )
+  set(SOURCES main.cpp MainWindow.cpp RenderWidget.cpp)
 
   add_executable(nmovie_qt ${SOURCES})
 

@@ -1,7 +1,8 @@
 option(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES "Make sparse initial meshes" OFF)
 
 if(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES)
-  message(WARNING "Since you're opting to make sparse (i.e., irregular) initial meshes, the TetGen library will be included, which has a restrictive license.")
+  message(WARNING "Since you're opting to make sparse (i.e., irregular) initial meshes, the TetGen library will be included, which has a restrictive license."
+          )
   if(NOT Tetgen_FOUND)
     find_package(Tetgen REQUIRED)
   endif()
@@ -10,12 +11,12 @@ if(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES)
 endif()
 
 add_executable(kvlBuildAtlasMesh
-  kvlBuildAtlasMesh.cxx
-  kvlAtlasMeshBuilder.cxx
-  kvlAtlasMeshCollectionFastReferencePositionCost.cxx
-  kvlAtlasMeshCollectionModelLikelihoodCalculator.cxx
-  kvlMultiResolutionAtlasMesher.cxx
-)
+               kvlBuildAtlasMesh.cxx
+               kvlAtlasMeshBuilder.cxx
+               kvlAtlasMeshCollectionFastReferencePositionCost.cxx
+               kvlAtlasMeshCollectionModelLikelihoodCalculator.cxx
+               kvlMultiResolutionAtlasMesher.cxx
+               )
 target_link_libraries(kvlBuildAtlasMesh kvlGEMSCommon)
 if(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES)
   target_link_libraries(kvlBuildAtlasMesh ${Tetgen_LIBRARIES})

@@ -24,12 +24,14 @@ if(NOT ZBLIB_FOUND)
   find_package(ZLIB REQUIRED)
 endif()
 
-option(FS_GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" ON) # doesn't do anything
+# doesn't do anything
+option(FS_GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" ON)
 option(FS_GEMS_BUILD_EXECUTABLES "Build command line executables" ON)
 option(FS_GEMS_BUILD_TESTING "Build tests" ON)
 option(FS_GEMS_BUILD_GUI "Build GUI components (requires FLTK and VTK)" ON)
 option(FS_GEMS_BUILD_MATLAB "Build Matlab wrappers" OFF)
-option(FS_GEMS_BUILD_PYTHON "Build Python wrappers" OFF) # if you're building the whole freesurfer project, this gets turned on below
+# if you're building the whole freesurfer project, this gets turned on below
+option(FS_GEMS_BUILD_PYTHON "Build Python wrappers" OFF)
 option(FS_GEMS_BUILD_CUDA "Build CUDA stuff" OFF)
 
 set(GEMS_RUNTIME_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
@@ -40,9 +42,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 if(FS_GEMS_BUILD_EXECUTABLES OR FS_GEMS_BUILD_GUI)
   add_definitions(-DUSE_DYNAMIC_MESH)
   message(STATUS "Since you're building executables to compute meshes, ITK dynamic meshes will "
-          "be used (internally using std::map instead of std::vector to store lists of points, cells, etc). "
-          "Everything will still work, but anything that only uses existing meshes will be "
-          "slower. (up to 100% slower)"
+                 "be used (internally using std::map instead of std::vector to store lists of points, cells, etc). "
+                 "Everything will still work, but anything that only uses existing meshes will be "
+                 "slower. (up to 100% slower)"
           )
 endif()
 

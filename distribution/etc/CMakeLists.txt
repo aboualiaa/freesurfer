@@ -1,4 +1,1 @@
-install(FILES
-  recon-config.yaml
-  DESTINATION etc
-)
+install(FILES recon-config.yaml DESTINATION etc)

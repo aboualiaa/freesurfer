@@ -2,7 +2,9 @@ project(mri_edit_segmentation_with_surfaces)
 
 include_directories(${FS_INCLUDE_DIRS})
 
-add_executable(mri_edit_segmentation_with_surfaces mri_edit_segmentation_with_surfaces.cpp)
+add_executable(mri_edit_segmentation_with_surfaces
+               mri_edit_segmentation_with_surfaces.cpp
+               )
 target_link_libraries(mri_edit_segmentation_with_surfaces utils)
 
 install(TARGETS mri_edit_segmentation_with_surfaces DESTINATION bin)

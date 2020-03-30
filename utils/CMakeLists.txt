@@ -7,23 +7,22 @@ add_compile_options(-Wno-for-loop-analysis)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 configure_file(version_info.h.in version_info.h)
 
-include_directories(
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_SOURCE_DIR}/packages/jpeg
-  ${CMAKE_SOURCE_DIR}/packages/tiff
-  ${CMAKE_SOURCE_DIR}/packages/xml2
-  ${CMAKE_SOURCE_DIR}/packages/minc
-  ${CMAKE_SOURCE_DIR}/packages/netcdf
-  ${CMAKE_SOURCE_DIR}/packages/nrrdio
-  ${CMAKE_SOURCE_DIR}/packages/dicom
-  ${CMAKE_SOURCE_DIR}/packages/cephes
-  ${CMAKE_SOURCE_DIR}/packages/nifti
-  ${CMAKE_SOURCE_DIR}/packages/gifti
-  ${FS_INCLUDE_DIRS}
-  SYSTEM
-  ${ITK_INCLUDE_DIRS}
-)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}
+                    ${CMAKE_SOURCE_DIR}/include
+                    ${CMAKE_SOURCE_DIR}/packages/jpeg
+                    ${CMAKE_SOURCE_DIR}/packages/tiff
+                    ${CMAKE_SOURCE_DIR}/packages/xml2
+                    ${CMAKE_SOURCE_DIR}/packages/minc
+                    ${CMAKE_SOURCE_DIR}/packages/netcdf
+                    ${CMAKE_SOURCE_DIR}/packages/nrrdio
+                    ${CMAKE_SOURCE_DIR}/packages/dicom
+                    ${CMAKE_SOURCE_DIR}/packages/cephes
+                    ${CMAKE_SOURCE_DIR}/packages/nifti
+                    ${CMAKE_SOURCE_DIR}/packages/gifti
+                    ${FS_INCLUDE_DIRS}
+                    SYSTEM
+                    ${ITK_INCLUDE_DIRS}
+                    )
 
 if(CMAKE_CONFIGURATION_TYPES)
   set(UTILS_BUILD_TYPE "STATIC")
@@ -31,7 +30,8 @@ else()
   set(UTILS_BUILD_TYPE "SHARED")
 endif()
 
-add_library(utils ${UTILS_BUILD_TYPE}
+add_library(utils
+            ${UTILS_BUILD_TYPE}
             afni.cpp
             annotation.cpp
             argparse.cpp
@@ -252,5 +252,4 @@ if(BUILD_TESTING)
   add_subdirectory(unittests)
 endif()
 
-install(TARGETS utils
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS utils LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
