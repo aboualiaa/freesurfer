@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 project(gems)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  add_compile_options(-fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w)
+  add_compile_options(-fpermissive -msse2 -mfpmath=sse)
 else()
-  add_compile_options(-arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w)
+  add_compile_options(-arch x86_64 -fpermissive -msse2 -mfpmath=sse)
 endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -37,9 +37,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fpermissive -msse2 -mfpmath=sse")
-
 if(FS_GEMS_BUILD_EXECUTABLES OR FS_GEMS_BUILD_GUI)
   add_definitions(-DUSE_DYNAMIC_MESH)
   message(STATUS "Since you're building executables to compute meshes, ITK dynamic meshes will "
@@ -51,9 +48,9 @@ endif()
 
 if(FS_GEMS_BUILD_CUDA)
   find_package(CUDA REQUIRED)
-  set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS} -std=c++11")
+  add_compile_options("-std=c++11")
   include_directories(${CUDA_INCLUDE_DIRS})
-  set(CMAKE_CXX_FLAGS "-DCUDA_FOUND ${CMAKE_CXX_FLAGS}")
+  add_compile_options("-DCUDA_FOUND")
   include_directories(cuda)
   add_subdirectory(cuda)
 endif()

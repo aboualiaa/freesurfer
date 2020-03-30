@@ -6,8 +6,6 @@ else()
   set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen")
 endif()
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fsanitize=address -fsanitize-recover=address -fsanitize-memory-track-origins -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -O0")
-
 add_library(mri_convert_lib STATIC EXCLUDE_FROM_ALL mri_convert_lib.cpp)
 set(COMMON_LIBS utils mri_convert_lib Boost::program_options benchmark fmt)
 
