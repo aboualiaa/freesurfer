@@ -3,7 +3,7 @@ name: $(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 trigger:
   branches:
     include:
-      - fs-modernize
+      - master
 
 stages:
   - stage: ClangBuilds

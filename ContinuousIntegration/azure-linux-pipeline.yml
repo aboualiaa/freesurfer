@@ -8,7 +8,7 @@ name: $(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 trigger:
   branches:
     include:
-      - fs-modernize
+      - master
 
 stages:
   - stage: Lint
@@ -19,10 +19,38 @@ stages:
         steps:
           - script: |
               sudo apt-get update -y
-              sudo apt-get install -y libxml2-utils
+              sudo apt-get install -y libxml2-utils parallel snapd
+              sudo snapd install shfmt
+              if [[ ! -f "$(pwd)/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz" ]]; then
+                echo "Downloading and Installing LLVM"
+                wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz >/dev/null 2>&1
+                sudo tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz --strip-components=1 -C /usr/local
+              else
+                echo "Installing LLVM"
+                sudo tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz --strip-components=1 -C /usr/local
+              fi
+
+              export PATH=/usr/local/bin:$PATH
+
+              sudo bash <<"ENDBASH"
+                cd /usr/local
+                cat >libs.conf <<"END"
+              /usr/local/lib
+              END
+              ENDBASH
+
+              sudo mv /usr/local/libs.conf /etc/ld.so.conf.d/libs.conf
+              sudo ldconfig
+
+              export PATH=/usr/local/bin:$PATH
+              export CXX=clang++
+              export CC=clang
             displayName: 'Installing Dependencies'
           - script: |
-              xmllint --noout ./**/*.xml
+              export PATH=/usr/local/bin:$PATH
+              export CXX=clang++
+              export CC=clang
+              ./repo_tools/lint-repo.sh
             displayName: 'Linting'
 
   # MARK: -
