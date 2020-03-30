@@ -6,9 +6,6 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshToLabelImageCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:

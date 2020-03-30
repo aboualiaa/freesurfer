@@ -1,16 +1,11 @@
 /**
- * @file  sort_definition.h
- * @brief parallel qsort
+ * @brief parallel qsort 
  *      with threads
  *      with comparison being a macro
  *
  */
 /*
  * Original Author: Bevin Brett
- * CVS Revision Info:
- *    $Author: bbrett $
- *    $Date: 2018/04/29 12:09:00 $
- *    $Revision: 1.0 $
  *
  * Copyright © 2018 The General Hospital Corporation (Boston, MA) "MGH"
  *

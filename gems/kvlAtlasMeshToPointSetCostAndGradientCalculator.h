@@ -5,9 +5,6 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshToPointSetCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:

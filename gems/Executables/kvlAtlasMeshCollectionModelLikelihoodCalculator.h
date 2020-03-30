@@ -6,9 +6,6 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshCollectionModelLikelihoodCalculator : public itk::Object {
 public:
   /** Standard class typedefs */

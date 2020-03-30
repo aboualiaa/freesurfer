@@ -2,9 +2,7 @@
 #define MINC_FILES_H
 
 /*
- * Original Author: David MacDonald, modified to compile within freesurfer/utils
- * by Bevin Brett CVS Revision Info: $Author: Brett $ $Date: 2017/11/01 12:46:00
- * $ $Revision: 1.00 $
+ * Original Author: David MacDonald, modified to compile within freesurfer/utils by Bevin Brett
  *
  * Copyright © 2017 The General Hospital Corporation (Boston, MA) "MGH"
  *

@@ -5,9 +5,6 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshDeformationLBFGSOptimizer
     : public AtlasMeshDeformationOptimizer {
 public:

@@ -1,7 +1,5 @@
 /**
- * @file  mri_apply_autoencoder.c
- * @brief main program for applying a stacked autoencoder for feature
-extraction.
+ * @brief main program for applying a stacked autoencoder for feature extraction.
  *
 H.-C. Shin, M. R. Orton, D. J. Collins, S. J. Doran, and M. O. Leach,
 "Stacked Autoencoders for
@@ -12,10 +10,6 @@ IEEE Transaction on Pattern Analysis and Machine Intelligence, 2012.
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2013/11/22 19:41:39 $
- *    $Revision: 1.2 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *

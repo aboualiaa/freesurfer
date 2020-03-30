@@ -5,9 +5,6 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshStatisticsCollector : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */

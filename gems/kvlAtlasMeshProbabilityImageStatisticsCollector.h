@@ -6,9 +6,6 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshProbabilityImageStatisticsCollector
     : public AtlasMeshStatisticsCollector {
 public:

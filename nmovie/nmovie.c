@@ -1,14 +1,9 @@
 /**
- * @file  nmovie.c
  * @brief image display utility
  *
  */
 /*
  * Original Author: RJ Wood
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2012/03/17 20:33:11 $
- *    $Revision: 1.31 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -22,8 +17,6 @@
  *
  */
 
-char *NMOVIE_VERSION = "$Revision: 1.31 $";
-#include "diag.h"
 #include "error.h"
 #include "macros.h"
 #include "proto.h"

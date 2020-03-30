@@ -1,6 +1,5 @@
 /**
- * @file  mris_indirect_morph.cpp
- * @brief register surface2 to surface1
+ * @brief register surface2 to surface1 
  *
  * This function will register surface2 to surface1 using ICP or input linear
  * transform (can be obtained through volume registration). It then maps
@@ -8,10 +7,6 @@
  */
 /*
  * Original Author: X. Han
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.7 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *

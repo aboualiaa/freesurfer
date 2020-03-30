@@ -1,19 +1,5 @@
-#ifndef AFNI_H
-#define AFNI_H
-
-/**
- * @file  AFNI.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:09 $
- *    $Revision: 1.4 $
- *
+  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
@@ -25,6 +11,9 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
+
+#ifndef AFNI_H
+#define AFNI_H
 
 #include "mri.h"
 

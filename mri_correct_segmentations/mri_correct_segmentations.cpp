@@ -1,6 +1,5 @@
 /**
- * @file  mri_correct_segmentations.c
- * @brief
+ * @brief 
  *
  */
 

@@ -1,7 +1,5 @@
 /**
- * @file  mris_init_global_tractography.c
- * @brief MCMC for computing posterior of splines connecting cortical
- * parcellation with itself
+ * @brief MCMC for computing posterior of splines connecting cortical parcellation with itself
  *
  * Fit a Catmull Rom spline to each pair of points in the cortex, initializing
  * it with a connection along the shortest interior path  between them, then use
@@ -9,10 +7,6 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2016/07/18 15:42:20 $
- *    $Revision: 1.4 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *

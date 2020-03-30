@@ -5,9 +5,6 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshDeformationFixedStepGradientDescentOptimizer
     : public AtlasMeshDeformationOptimizer {
 public:

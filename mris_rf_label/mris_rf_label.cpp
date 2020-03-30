@@ -1,7 +1,5 @@
 /**
- * @file  mris_rf_label.c
- * @brief main program for labeling a surface based on a previously trained
- * random forest on the surface
+ * @brief main program for labeling a surface based on a previously trained random forest on the surface
  *
  * program for labeling a surfaced based on a set of features across subjects on
  * the surface and that had been used to train a Random Forest classifier (see
@@ -9,10 +7,6 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2016/12/11 15:13:53 $
- *    $Revision: 1.2 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *

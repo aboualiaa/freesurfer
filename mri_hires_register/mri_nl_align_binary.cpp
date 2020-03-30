@@ -1,20 +1,11 @@
 /**
- * @file  mri_nl_align_binary.c
  * @brief nonlinear alignment of binary images.
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  * Basically a binary implementation of the algorithm in:
  *
  * Fischl B, Salat DH, van der Kouwe AJW, Makris N, S�gonne F, Dale
  * AM. Sequence-Independent  Segmentation of Magnetic Resonance Images.
  * NeuroImage, 2004; 23 Suppl 1, S69-84.
- */
-/*
- * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:18 $
- *    $Revision: 1.16 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -28,24 +19,20 @@
  *
  */
 
-//
-// mri_nl_align_binary.c
-//
-// written by Bruce Fischl
-// Nov. 9th ,2000
-//
-// Warning: Do not edit the following four lines.  CVS maintains them.
-// Revision Author: $Author: nicks $
-// Revision Date  : $Date: 2011/03/02 00:04:18 $
-// Revision       : $Revision: 1.16 $
-//
-////////////////////////////////////////////////////////////////////
-
 #include "cma.h"
 #include "diag.h"
+#include "error.h"
 #include "gcamorph.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
 #include "mrimorph.h"
+#include "proto.h"
 #include "timer.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define NONMAX       0
 #define PAD          10

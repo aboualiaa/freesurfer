@@ -1,15 +1,4 @@
-/**
- * @file  fmarching3dnband.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.5 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -24,8 +13,7 @@
  */
 
 /* fmarching3dnband.c : functions to implement the Fast Marching Method in 3D */
-/* In this version, only compute the signed distance function till a certain
- * narrowband */
+/* In this version, only compute the signed distance function till a certain narrowband */
 
 /* Fast Marching Method to compute signed distance function in 3D Cube.
  * Assume the initial contour is given by an array Ori, whose values
@@ -231,11 +219,11 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
           FBFlag = 0;
 
           Nv = MRIgetVoxVal(Ori, j, i - 1 + LY, d, 0); // Ori[d][i-1+LY][j];
-          Sv = MRIgetVoxVal(Ori, j, i + 1 - HY, d, 0); // Ori[d][i+1-HY][j];
+          Sv = MRIgetVoxVal(Ori, j, i + 1 - HY, d, 0); //Ori[d][i+1-HY][j];
           Wv = MRIgetVoxVal(Ori, j - 1 + LX, i, d, 0); // Ori[d][i][j-1+LX];
-          Ev = MRIgetVoxVal(Ori, j + 1 - HX, i, d, 0); // Ori[d][i][j+1-HX];
-          Fv = MRIgetVoxVal(Ori, j, i, d + 1 - HZ, 0); // Ori[d+1-HZ][i][j];
-          Bv = MRIgetVoxVal(Ori, j, i, d - 1 + LZ, 0); // Ori[d-1+LZ][i][j];
+          Ev = MRIgetVoxVal(Ori, j + 1 - HX, i, d, 0); //Ori[d][i][j+1-HX];
+          Fv = MRIgetVoxVal(Ori, j, i, d + 1 - HZ, 0); //Ori[d+1-HZ][i][j];
+          Bv = MRIgetVoxVal(Ori, j, i, d - 1 + LZ, 0); //Ori[d-1+LZ][i][j];
           Cv = MRIgetVoxVal(Ori, j, i, d, 0);          // Ori[d][i][j];
 
           if (Nv * Cv < 0) {
@@ -334,7 +322,7 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
             Nv = MRIgetVoxVal(T, newj, newi - 1, newd,
                               0); // T[newd][newi-1][newj];
             Nl = MRIvox(label, newj, newi - 1,
-                        newd); // label[newd][newi-1][newj];
+                        newd); //label[newd][newi-1][newj];
           } else
             Nl = 0;
 
@@ -352,7 +340,7 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
             Ev = MRIgetVoxVal(T, newj + 1, newi, newd,
                               0); // T[newd][newi][newj+1];
             El = MRIvox(label, newj + 1, newi,
-                        newd); // label[newd][newi][newj+1];
+                        newd); //label[newd][newi][newj+1];
           } else
             El = 0;
 
@@ -379,7 +367,7 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
             Bv = MRIgetVoxVal(T, newj, newi, newd - 1,
                               0); // T[newd-1][newi][newj];
             Bl = MRIvox(label, newj, newi,
-                        newd - 1); // label[newd-1][newi][newj];
+                        newd - 1); //label[newd-1][newi][newj];
           } else
             Bl = 0;
 
@@ -405,7 +393,7 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
    */
   while (!xhIsEmpty(H)) { /* There are still points not yet accepted */
     he = xhRemove(H);     /* Label the point with smallest value among all
-                        NarrowBand points as ALIVE */
+                    NarrowBand points as ALIVE */
 
     /* Put the smallest heap element to ALIVE */
     d = he.z;
@@ -447,7 +435,7 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
       /* Neighbour to the north */
       if (newi > 0) {
         Nv = MRIgetVoxVal(T, newj, newi - 1, newd, 0); // T[newd][newi-1][newj];
-        Nl = MRIvox(label, newj, newi - 1, newd); // label[newd][newi-1][newj];
+        Nl = MRIvox(label, newj, newi - 1, newd); //label[newd][newi-1][newj];
       } else
         Nl = 0;
 
@@ -461,7 +449,7 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
       /* Neighbour to the east*/
       if (newj < XN - 1) {
         Ev = MRIgetVoxVal(T, newj + 1, newi, newd, 0); // T[newd][newi][newj+1];
-        El = MRIvox(label, newj + 1, newi, newd); // label[newd][newi][newj+1];
+        El = MRIvox(label, newj + 1, newi, newd); //label[newd][newi][newj+1];
       } else
         El = 0;
 
@@ -482,7 +470,7 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
       /*Neighbour to the back */
       if (newd > 0) {
         Bv = MRIgetVoxVal(T, newj, newi, newd - 1, 0); // T[newd-1][newi][newj];
-        Bl = MRIvox(label, newj, newi, newd - 1); // label[newd-1][newi][newj];
+        Bl = MRIvox(label, newj, newi, newd - 1); //label[newd-1][newi][newj];
       } else
         Bl = 0;
 

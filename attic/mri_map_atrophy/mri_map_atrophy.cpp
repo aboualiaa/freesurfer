@@ -1,15 +1,4 @@
-/**
- * @file  mri_map_atrophy.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:22 $
- *    $Revision: 1.4 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -234,8 +223,7 @@ static MRI *make_atrophy_map(MRI *mri_time1, MRI *mri_time2, MRI *mri_dst,
         if (label1 == label2)
           continue;
 
-        /* if label1 was one of the gray types and label2 one of the csf, call
-         * it atrophy */
+        /* if label1 was one of the gray types and label2 one of the csf, call it atrophy */
         for (found = n = 0; n < ngray; n++)
           if (label1 == gray_labels[n]) {
             found = 1;

@@ -1,17 +1,12 @@
 /**
- * @file  mris_deform.c
- * @brief program for deforming a surface to lie at the gray/white or pial
- * boundary from ultra-high res data
+ * @brief program for deforming a surface to lie at the gray/white or pial boundary from 
+ *  ultra-high res data
  *
  * Fit a generative piecewise constant model to the data to determine
  * target locations and deform the surface to match them.
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2012/08/08 13:10:32 $
- *    $Revision: 1.3 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *

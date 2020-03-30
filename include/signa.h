@@ -1,16 +1,11 @@
 /**
- * @file  signa.h
- * @brief signa mri file format
+ * @brief signa mri file format 
  *
  * Defines the sizes, image file offsets, and the header word
  * offsets into the study, series, image and dss headers.
  */
 /*
  * Original Author: G.E. Medical Systems, Gregory L. Meyers
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2010/03/13 01:32:40 $
- *    $Revision: 1.6 $
  *
  */
 

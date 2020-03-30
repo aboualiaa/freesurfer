@@ -1,5 +1,4 @@
 /**
- * @file  QdecGlmDesign.cpp
  * @brief Contains the data and functions associated with a GLM design run
  *
  * Contains the data and functions associated with the selected GLM input
@@ -10,10 +9,6 @@
  */
 /*
  * Original Author: Nick Schmansky
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2015/04/28 14:34:48 $
- *    $Revision: 1.23 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -255,17 +250,11 @@ int QdecGlmDesign::Create(QdecDataTable *iDataTable, const char *isName,
   return 0;
 }
 
-/**
- *
- */
 void QdecGlmDesign::ClearDiscreteFactors() { mDiscreteFactors.clear(); }
 
-/**
- *
- */
 void QdecGlmDesign::AddDiscreteFactor(const char *isFactorName) {
   QdecFactor *qf = this->mDataTable->GetFactor(isFactorName);
-  if (nullptr == qf) {
+  if (NULL == qf) {
     fprintf(stderr, "ERROR: QdecGlmDesign::AddDiscreteFactor: bad factor!\n");
     mDataTable->Dump(stderr);
     return;
@@ -274,9 +263,6 @@ void QdecGlmDesign::AddDiscreteFactor(const char *isFactorName) {
   this->mDiscreteFactors.push_back(qf);
 }
 
-/**
- *
- */
 void QdecGlmDesign::ClearContinuousFactors() {
   // un-exclude any previously excluded subjects (see AddContinuousFactor)
   // whose data is NaN for this factor
@@ -303,12 +289,9 @@ void QdecGlmDesign::ClearContinuousFactors() {
   mContinuousFactors.clear();
 }
 
-/**
- *
- */
 void QdecGlmDesign::AddContinuousFactor(const char *isFactorName) {
   QdecFactor *qf = this->mDataTable->GetFactor(isFactorName);
-  if (nullptr == qf) {
+  if (NULL == qf) {
     fprintf(stderr, "ERROR: QdecGlmDesign::AddContinuousFactor: bad factor!\n");
     mDataTable->Dump(stderr);
     return;
@@ -330,9 +313,6 @@ void QdecGlmDesign::AddContinuousFactor(const char *isFactorName) {
   }
 }
 
-/**
- *
- */
 void QdecGlmDesign::ClearNuisanceFactors() {
   // un-exclude any previously excluded subjects (see AddNuisanceFactor)
   // whose data is NaN for this factor
@@ -359,12 +339,9 @@ void QdecGlmDesign::ClearNuisanceFactors() {
   mNuisanceFactors.clear();
 }
 
-/**
- *
- */
 void QdecGlmDesign::AddNuisanceFactor(const char *isFactorName) {
   QdecFactor *qf = this->mDataTable->GetFactor(isFactorName);
-  if (nullptr == qf) {
+  if (NULL == qf) {
     fprintf(stderr, "ERROR: QdecGlmDesign::AddNuisanceFactor: bad factor!\n");
     mDataTable->Dump(stderr);
     return;
@@ -423,9 +400,6 @@ void QdecGlmDesign::SetMeasure(const char *isMeasure) {
  */
 int QdecGlmDesign::GetSmoothness() { return this->mSmoothness; }
 
-/**
- *
- */
 void QdecGlmDesign::SetSmoothness(int iVal) { this->mSmoothness = iVal; }
 
 /**

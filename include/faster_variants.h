@@ -1,7 +1,6 @@
 /**
- * @file  faster_variants.h
- * @brief define the macros that conditionalize faster variants of some
- * algorithms before those variants completely replace the original variant
+ * @brief define the macros that conditionalize faster variants of some algorithms
+ *        before those variants completely replace the original variant
  *
  *        keep both variants when the faster variant is
  *           1) not yet fully tested, or
@@ -11,10 +10,6 @@
  */
 /*
  * Original Author: Bevin Brett
- * CVS Revision Info:
- *    $Author: brettb $
- *    $Date: 2018/1 $
- *    $Revision: 1.0 $
  *
  * Copyright © 2018 The General Hospital Corporation (Boston, MA) "MGH"
  *

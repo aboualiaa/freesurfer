@@ -8,8 +8,9 @@
 #include <sstream>
 #include <stdexcept>
 
+using namespace std;
+
 vtkStandardNewMacro(vtkKWBltGraph);
-vtkCxxRevisionMacro(vtkKWBltGraph, "$Revision: 1.15 $");
 
 unsigned long const vtkKWBltGraph::MouseoverEnterElementEvent =
     vtkCommand::UserEvent + 1;

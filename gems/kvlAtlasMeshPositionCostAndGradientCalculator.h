@@ -12,9 +12,6 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshPositionCostAndGradientCalculator : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */

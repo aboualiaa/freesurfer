@@ -1,14 +1,9 @@
 /**
- * @file  LayerSurface.cpp
  * @brief Layer data object for MRI surface.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/08 21:01:00 $
- *    $Revision: 1.137 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -739,18 +734,19 @@ void LayerSurface::InitializeActors() {
     m_sliceActor3D[i]->GetProperty()->SetLineWidth(line_w * ratio);
     //    m_sliceActor3D[i]->GetProperty()->SetInterpolationToFlat();
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper3 =
-        vtkSmartPointer<vtkPolyDataMapper>::New();
-    vtkSmartPointer<vtkMaskPoints> pts = vtkSmartPointer<vtkMaskPoints>::New();
-    pts->GenerateVerticesOn();
-    pts->SetOnRatio(1);
-    pts->SetInputConnection(m_cutter[i]->GetOutputPort());
-    mapper3->SetInputConnection(pts->GetOutputPort());
-    mapper3->ScalarVisibilityOff();
-    m_vertexActor2D[i]->SetMapper(mapper3);
-    m_vertexActor2D[i]->SetProperty(m_vertexActor2D[i]->MakeProperty());
-    m_vertexActor2D[i]->GetProperty()->SetPointSize(3 * ratio);
-    m_vertexActor2D[i]->GetProperty()->SetInterpolationToFlat();
+    //    disable this part for now
+    //
+    //    vtkSmartPointer<vtkPolyDataMapper> mapper3 = vtkSmartPointer<vtkPolyDataMapper>::New();
+    //    vtkSmartPointer<vtkMaskPoints> pts = vtkSmartPointer<vtkMaskPoints>::New();
+    //    pts->GenerateVerticesOn();
+    //    pts->SetOnRatio(1);
+    //    pts->SetInputConnection(m_cutter[i]->GetOutputPort());
+    //    mapper3->SetInputConnection( pts->GetOutputPort() );
+    //    mapper3->ScalarVisibilityOff();
+    //    m_vertexActor2D[i]->SetMapper(mapper3);
+    //    m_vertexActor2D[i]->SetProperty( m_vertexActor2D[i]->MakeProperty() );
+    //    m_vertexActor2D[i]->GetProperty()->SetPointSize(3*ratio);
+    //    m_vertexActor2D[i]->GetProperty()->SetInterpolationToFlat();
 
     // Set ourselves up.
     this->OnSlicePositionChanged(i);

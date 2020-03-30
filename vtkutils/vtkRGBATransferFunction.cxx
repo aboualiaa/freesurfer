@@ -1,7 +1,5 @@
 /**
- * @file  vtkRGBATransferFunction.cxx
- * @brief Defines transfer function for mapping a property to an RGBA color
- * value
+ * @brief Defines transfer function for mapping a property to an RGBA color value
  *
  * This code is based on vtkColorTransferFunction. It was modified to
  * add an alpha element to all color output. This required adding a
@@ -11,10 +9,6 @@
  */
 /*
  * Original Author: Kitware, Inc, modified by Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.4 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -49,7 +43,6 @@
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 
-// vtkCxxRevisionMacro(vtkRGBATransferFunction, "$Revision: 1.4 $");
 vtkStandardNewMacro(vtkRGBATransferFunction);
 
 //----------------------------------------------------------------------------

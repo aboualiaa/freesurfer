@@ -1,15 +1,4 @@
-/**
- * @file  mri_cc_medial_axis.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:14 $
- *    $Revision: 1.4 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -30,9 +19,6 @@
 // date: 01/27/04
 //
 // Warning: Do not edit the following four lines.  CVS maintains them.
-// Revision Author: $Author: nicks $
-// Revision Date  : $Date: 2011/03/02 00:04:14 $
-// Revision       : $Revision: 1.4 $
 ////////////////////////////////////////////
 
 #include "cma.h"
@@ -59,8 +45,7 @@
 #include "talairachex.h"
 #include "transform.h"
 
-// static char vcid[] = "$Id: mri_cc_medial_axis.c,v 1.4 2011/03/02 00:04:14
-// nicks Exp $";
+//static char vcid[] = "$Id: mri_cc_medial_axis.c,v 1.4 2011/03/02 00:04:14 nicks Exp $";
 
 int          main(int argc, char *argv[]);
 static int   get_option(int argc, char *argv[]);
@@ -289,11 +274,11 @@ static int find_mid_plane_wm(char *subject) {
   fprintf(stdout, "writing talairach volume to %s...\n", ofname);
   MRIwrite(mri_tal, ofname);
 
-  // find the transform matrix
+  //find the transform matrix
   mtrans = MatrixAlloc(4, 4, MATRIX_REAL);
   mrot   = MatrixAlloc(4, 4, MATRIX_REAL);
 
-  // try method 2 to get the rotation matrix
+  //try method 2 to get the rotation matrix
   sprintf(ifname, "%s/%s/mri/transforms/talairach.xfm", data_dir, subject);
   lta2   = LTAreadEx(ifname);
   mtrans = lta2->xforms[0].m_L;
@@ -303,7 +288,7 @@ static int find_mid_plane_wm(char *subject) {
   *MATRIX_RELT(mrot, 3, 4) = mtrans->rptr[3][4];
   lta2->xforms[0].m_L      = mrot;
 
-  // rotation wm volume to be upright, using cc volume temporarily
+  //rotation wm volume to be upright, using cc volume temporarily
   mri_header = MRIallocHeader(mri_wm->width, mri_wm->height, mri_wm->depth,
                               mri_wm->type, 1);
   MRIcopyHeader(mri_wm, mri_header);
@@ -318,25 +303,25 @@ static int find_mid_plane_wm(char *subject) {
   fprintf(stdout, "writing rotated white matter volume to %s...\n", ofname);
   MRIwrite(mri_cc, ofname);
 
-  // now start cc segmentation in talairach space
+  //now start cc segmentation in talairach space
   mri_cc_tal = MRIcopy(mri_tal, NULL);
   MRIcopyHeader(mri_talheader, mri_cc_tal);
   MRIvalueFill(mri_cc_tal, 0);
 
-  // most of the work is done in find_corpus_callosum function
+  //most of the work is done in find_corpus_callosum function
   find_corpus_callosum(mri_tal, &cc_tal_x, &cc_tal_y, &cc_tal_z, lta);
   sprintf(ofname, "%s/%s/cc_tal.mgh", cp, subject);
   fprintf(stdout, "writing output to %s...\n", ofname);
   MRIwrite(mri_cc_tal, ofname);
 
-  // starting the volume measurement
+  //starting the volume measurement
   volume[0] = 0.0;
   volume[1] = 0.0;
   volume[2] = 0.0;
   volume[3] = 0.0;
   volume[4] = 0.0;
 
-  // transform cc volume from talairach space to original space
+  //transform cc volume from talairach space to original space
   MRIfromTalairachEx(mri_cc_tal, mri_wm, lta);
   // binalize the rotated cc volume (mri_wm)
   MRIbinarize(mri_wm, mri_wm, CC_VAL / 2 - 1, 0, 100);
@@ -344,12 +329,12 @@ static int find_mid_plane_wm(char *subject) {
   fprintf(stdout, "writing output to %s...\n", ofname);
   MRIwrite(mri_wm, ofname);
 
-  // trying to find the position of mid-sagital plane
+  //trying to find the position of mid-sagital plane
   MRIcopyHeader(mri_talheader, mri_cc_tal);
   MRItalairachVoxelToVoxelEx(mri_cc_tal, cc_tal_x, cc_tal_y, cc_tal_z, &xv, &yv,
                              &zv, lta);
 
-  // rotate the cc volume by the rotation matrix calculated above
+  //rotate the cc volume by the rotation matrix calculated above
   MRIcopyHeader(mri_header, mri_cc);
   MRItoTalairachEx(mri_wm, mri_cc, lta2);
   // binalize the rotated cc volume (mri_cc)
@@ -357,11 +342,11 @@ static int find_mid_plane_wm(char *subject) {
 
   MRIvoxelToTalairachVoxelEx(mri_cc, xv, yv, zv, &xc, &yc, &zc, lta2);
 
-  // find the mid-sagital plane there
+  //find the mid-sagital plane there
   xi = nint(xc);
   fprintf(stdout, "cc center is found at %d %d %d\n", xi, nint(yc), nint(zc));
 
-  // find the bounding box
+  //find the bounding box
   for (y = 0; y < mri_cc->height; y++) {
     for (z = 0; z < mri_cc->depth; z++) {
       if (MRIvox(mri_cc, xi, y, z)) {
@@ -377,7 +362,7 @@ static int find_mid_plane_wm(char *subject) {
     }
   }
 
-  // count the number if equally segmented five parts
+  //count the number if equally segmented five parts
   for (i = xi - dxi; i <= xi + dxi; i++) {
     for (j = 0; j <= 255; j++) {
       for (k = 0; k <= 255; k++) {
@@ -465,12 +450,12 @@ static int find_mid_plane_tal(char *subject, char *volume) {
               MRIvox(mri_filled, mri_filled->width - jj - 1, ii, 0);
         }
       }
-      // sprintf(fname,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_tal.mgh")
-      // ; fprintf(stdout, "writing output to %s...\n", fname) ;
-      // MRIwrite(mri_temp, fname) ;
-      // used the rotated version for correction
+      //sprintf(fname,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_tal.mgh") ;
+      //fprintf(stdout, "writing output to %s...\n", fname) ;
+      //MRIwrite(mri_temp, fname) ;
+      //used the rotated version for correction
       mri_temp = cc_slice_correction(mri_temp, cc_tal_x, cc_tal_z, cc_tal_y);
-      // rotate it back and re-measure the area
+      //rotate it back and re-measure the area
       for (ii = 0; ii < mri_filled->width; ii++) {
         for (jj = 0; jj < mri_filled->height; jj++) {
           MRIvox(mri_filled, ii, jj, 0) =
@@ -479,9 +464,9 @@ static int find_mid_plane_tal(char *subject, char *volume) {
       }
       MRIfree(&mri_temp);
     } else {
-      // sprintf(fname,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_tal.mgh")
-      // ; fprintf(stdout, "writing output to %s...\n", fname) ;
-      // MRIwrite(mri_filled, fname) ;
+      //sprintf(fname,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_tal.mgh") ;
+      //fprintf(stdout, "writing output to %s...\n", fname) ;
+      //MRIwrite(mri_filled, fname) ;
       mri_filled =
           cc_slice_correction(mri_filled, cc_tal_x, cc_tal_y, cc_tal_z);
     }
@@ -811,8 +796,8 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
       }
     } else {
       flag[slice] = 1;
-      // if (offset>=-5&&offset<0) left++;
-      // else if (offset<=5&&offset>0) right++;
+      //if (offset>=-5&&offset<0) left++;
+      //else if (offset<=5&&offset>0) right++;
     }
 
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
@@ -865,7 +850,7 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
   offset = floor((min_slice - half_slices) / 2);
   fprintf(stdout, "find offset as %d using area\n", offset);
 
-  // another way to move the central slice
+  //another way to move the central slice
   for (slice = 0; slice < max_slices; slice++) {
     if ((slice - (half_slices + offset) >= -6) &&
         (slice < half_slices + offset) && flag[slice] == 1)
@@ -966,12 +951,13 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
     }
   }
 
-  // sprintf(fname,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_dilation.mgh")
-  // ; MRIwrite(mri_temp1, fname) ; mri_filled=MRIcopy(mri_temp2,NULL);
-  // sprintf(fname,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_shrinkage.mgh")
-  // ; MRIwrite(mri_temp2, fname) ;
+  //sprintf(fname,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_dilation.mgh") ;
+  //MRIwrite(mri_temp1, fname) ;
+  //mri_filled=MRIcopy(mri_temp2,NULL);
+  //sprintf(fname,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_shrinkage.mgh") ;
+  //MRIwrite(mri_temp2, fname) ;
 
-  // mri_temp2=MRIcopy(mri_filled,NULL);
+  //mri_temp2=MRIcopy(mri_filled,NULL);
   /*find the first edge of the spike */
 
   x_edge = 0;
@@ -1031,7 +1017,7 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
   /*the second edge of the spike */
 
   flag = 0;
-  // for (y_edge=yi_high-nint((yi_high-yi_low)/3); y_edge>=yi_low+2; y_edge--)
+  //for (y_edge=yi_high-nint((yi_high-yi_low)/3); y_edge>=yi_low+2; y_edge--)
   for (y_edge = yv + 2; y_edge >= yi_low + 2; y_edge--) {
     edge_count  = 0;
     x_edge      = 0;
@@ -1087,8 +1073,8 @@ static MRI *cc_slice_correction(MRI *mri_filled, int xv, int yv, int zv) {
     }
   }
 
-  // sprintf(fname,"/space/solo/4/users/recon/ALBJ82_recon/callosum/cc_cut.mgh")
-  // ; MRIwrite(mri_filled, fname) ;
+  //sprintf(fname,"/space/solo/4/users/recon/ALBJ82_recon/callosum/cc_cut.mgh") ;
+  //MRIwrite(mri_filled, fname) ;
   MRIfree(&mri_temp1);
   MRIfree(&mri_temp2);
   return (mri_filled);
@@ -1175,9 +1161,8 @@ static MRI *smooth_cc(MRI *mri_filled) {
     }
   }
 
-  // sprintf(fname,
-  // "/space/yoda/5/users/salat/callosum/EVAC79_recon_dti_cc/cc_dilation.mgh");
-  // MRIwrite(mri_temp1, fname) ;
+  //sprintf(fname, "/space/yoda/5/users/salat/callosum/EVAC79_recon_dti_cc/cc_dilation.mgh");
+  //MRIwrite(mri_temp1, fname) ;
   mri_filled = MRIcopy(mri_temp2, NULL);
   MRIwrite(mri_temp2,
            "/space/solo/4/users/recon/DONF55b_recon/callosum/cc_dilation.mgh");
@@ -1207,8 +1192,7 @@ static MRI *find_cc_boundary(MRI *cc_smoothed, MRI *cc_boundary) {
           {
             MRIvox(cc_boundary, i, j, k) = 100;
           }
-  // MRIwrite(cc_boundary,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_boundary.mgh"
-  // ) ;
+  //MRIwrite(cc_boundary,"/autofs/space/windu_006/users/salat/FR_1004/LEIK76_reconMS/callosum/cc_boundary.mgh" ) ;
   return (cc_boundary);
 }
 
@@ -1323,7 +1307,7 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
 
   cc_smoothed = MRIextractPlane(mri_cc_tal, NULL, MRI_SAGITTAL, cc_tal_x);
   cc_smoothed = smooth_cc(cc_smoothed);
-  // MRIwrite(cc_smoothed, fname) ;
+  //MRIwrite(cc_smoothed, fname) ;
   cc_boundary = find_cc_boundary(cc_smoothed, cc_boundary);
   width       = cc_boundary->width;
   height      = cc_boundary->height;
@@ -1444,8 +1428,7 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
             ofname);
   }
   printf("writing medial axis results to %s\n", ofname);
-  // fprintf(fp, "This file contains the position and radius of 100 equally
-  // sampled medial atoms along the medial axis\n");
+  // fprintf(fp, "This file contains the position and radius of 100 equally sampled medial atoms along the medial axis\n");
   MRIsampleVolumeFrameType(mri_intensity, cc_tal_x, medial_axis[0].y,
                            medial_axis[0].x, 0, SAMPLE_TRILINEAR, &val);
   fprintf(fp, "0   %f   %f   0   %f   %f   %f   %f\n", medial_axis[0].x,
@@ -1617,13 +1600,11 @@ static MEDATOM *medial_axis_integration(MEDATOM *medial_axis, MRI *cc_boundary,
       number++;
     else
       number = 0;
-    // fprintf(stdout, "%d iteration: min_sse= %f   sse=%f  old_sse=%f ratio=%f
-    // tol=%f  p=%f move=%f number=%d\n", n, min_sse, sse, old_sse, ratio, tol,
-    // p, move, number);
+    //fprintf(stdout, "%d iteration: min_sse= %f   sse=%f  old_sse=%f   ratio=%f tol=%f  p=%f move=%f number=%d\n", n, min_sse, sse, old_sse, ratio, tol,  p, move, number);
   } while (n < iteration_number && move > 0.01 &&
            (number < count || ratio > tol || alert));
 
-#if 0 // for debuging
+#if 0 //for debuging
   FILE     *fp;
   int      index;
   fp = fopen("/space/solo/4/users/recon/ALBJ82_recon/callosum/ma.txt", "r");
@@ -1869,7 +1850,7 @@ static double compute_energy(MEDATOM *medial_axis, MRI *cc_boundary,
   }
   if (neg_count > length / 50) {
     alert = 1;
-    // fprintf(stdout, "found %d negative points\n", neg_count);
+    //fprintf(stdout, "found %d negative points\n", neg_count);
   } else
     alert = 0;
   return (sse);
@@ -1950,14 +1931,14 @@ static MEDATOM *medial_axis_refine_leaf(MEDATOM *medial_axis, MRI *cc_boundary,
     /* fix the head leaf, adjust the end leaf*/
     error = compute_error(medial_axis, cc_boundary, cc_smoothed, length,
                           new_length, 1);
-    // min_error = error;
+    //min_error = error;
     min_error = 100;
     temp[0].x = medial_axis[length - new_length].x;
     temp[0].y = medial_axis[length - new_length].y;
     x2        = medial_axis[length - 1].x;
     y2        = medial_axis[length - 1].y;
 
-    mark = nint(medial_axis[length - 1].y) - 1; // changed on Jan.6
+    mark = nint(medial_axis[length - 1].y) - 1; //changed on Jan.6
     for (y = mark; y >= mark - 12 * ratio; y--) {
       for (x = 0; x < temp[0].x; x++) {
         if (MRIvox(cc_boundary, x, y, 0)) {
@@ -2304,8 +2285,7 @@ static MRI *sample_medial_axis(MEDATOM *medial_axis, MRI *cc_medial_axis,
   }
 
 #endif
-  // MRIwrite(cc_slice,
-  // "/space/yoda/5/users/salat/callosum/EVAC79_recon_dti_cc/cc_medial_axis.mgh");
+  //MRIwrite(cc_slice, "/space/yoda/5/users/salat/callosum/EVAC79_recon_dti_cc/cc_medial_axis.mgh");
 
   MRIfillPlane(cc_slice, cc_medial_axis, MRI_SAGITTAL, cc_tal_x, CC_VAL);
   MRIfree(&cc_slice);

@@ -1,16 +1,11 @@
 /**
- * @file  gauss_4dfp.c
  * @brief filters a 4dfp image volume by using the Gaussian filter
  *
  */
 /*
  * Original Authors: Tom Yang and Avi Snyder on 12/17/92
  *                   Originally for ECAT images
- *
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2009/05/15 21:43:46 $
- *    $Revision: 1.3 $
+ * 
  *
  * Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
  * Washington University, Mallinckrodt Institute of Radiology.

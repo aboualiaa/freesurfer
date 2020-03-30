@@ -1,7 +1,5 @@
 /**
- * @file  mri_gtmpvc.c
- * @brief Peforms Partial volume correction based on the geometric transfer
- * matrix GTM
+ * @brief Peforms Partial volume correction based on the geometric transfer matrix GTM
  *
  *
  * Implementation of geometric transfer matrix (GTM). Also includes
@@ -10,10 +8,6 @@
  */
 /*
  * Original Author: Douglas N. Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2016/07/07 15:39:49 $
- *    $Revision: 1.70 $
  *
  * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *

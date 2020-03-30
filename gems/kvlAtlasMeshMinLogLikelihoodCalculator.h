@@ -7,9 +7,6 @@ namespace kvl {
 
 namespace FragmentProcessor {
 
-/**
- *
- */
 class CalculateMinLogLikelihood {
 public:
   CalculateMinLogLikelihood() {
@@ -115,9 +112,6 @@ private:
 
 } // End namespace FragmentProcessor
 
-/**
- *
- */
 class AtlasMeshMinLogLikelihoodCalculator
     : public AtlasMeshRasterizor<FragmentProcessor::CalculateMinLogLikelihood> {
 public:
