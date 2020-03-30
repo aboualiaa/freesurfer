@@ -100,7 +100,9 @@ function(install_append_help SCRIPT HELPTEXT DESTINATION)
     message(STATUS \"Installing (with helptext): ${Z_INSTALL_PREFIX}/${DESTINATION}/${SCRIPT}\")
     execute_process(
       COMMAND bash -c \"
-        ${CMAKE_BINARY_DIR}/utils/fsPrintHelp ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT} >> ${Z_INSTALL_PREFIX}/${DESTINATION}/${SCRIPT}\"
+        ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target fsPrintHelp &&
+        cp -f ${CMAKE_CURRENT_SOURCE_DIR}/${SCRIPT} ${Z_INSTALL_PREFIX}/${DESTINATION} &&
+        ${CMAKE_BINARY_DIR}/utils/fsPrintHelp ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT} >> ${CMAKE_INSTALL_PREFIX}/${DESTINATION}/${SCRIPT}\"
       OUTPUT_QUIET
       RESULT_VARIABLE retcode
     )
