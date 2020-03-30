@@ -30,22 +30,24 @@ logfile="../test_mri_watershed.log"
 [ -e $logfile ] && rm -f $logfile
 
 # set number of threads used
-if $regenerate; then threads="1"
-elif $fulltest; then threads="1 8"
+if $regenerate; then
+  threads="1"
+elif $fulltest; then
+  threads="1 8"
 else threads="8"; fi
 
 for num in $threads; do
 
   # setup vars
   export OMP_NUM_THREADS=$num
-  cmd="../mri_watershed -T1 -brain_atlas RB_all_withskull_2016-05-10.vc700.gca transforms/talairach_with_skull.lta T1.mgz brainmask.auto.mgz" 
+  cmd="../mri_watershed -T1 -brain_atlas RB_all_withskull_2016-05-10.vc700.gca transforms/talairach_with_skull.lta T1.mgz brainmask.auto.mgz"
 
-  # run 
+  # run
   echo 2>&1 | tee -a $logfile
   echo "${tname}:  running mri_watershed with ${num} thread(s)" 2>&1 | tee -a $logfile
-  echo $cmd >> $logfile
+  echo $cmd >>$logfile
   echo $cmd
-  $cmd >> $logfile 2>&1
+  $cmd >>$logfile 2>&1
   status=$?
   if [ $status -ne 0 ]; then
     echo "${tname}:  FAILED with exit code $status" 2>&1 | tee -a $logfile
@@ -61,8 +63,8 @@ for num in $threads; do
   # compare expected results with actual results
   cmd="../../mris_diff/mris_diff --debug ${ref} ${outfile}"
   echo "${tname}:  comparing results to reference data" 2>&1 | tee -a $logfile
-  echo "$cmd" >> $logfile
-  $cmd >> $logfile 2>&1
+  echo "$cmd" >>$logfile
+  $cmd >>$logfile 2>&1
   status=$?
   if [ $status -ne 0 ]; then
     echo "${tname}:  FAILED with exit code $status" 2>&1 | tee -a $logfile

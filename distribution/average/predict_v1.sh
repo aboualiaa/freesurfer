@@ -6,23 +6,23 @@
 # Oliver Hinds <ohinds@mit.edu> 2007-06-16
 
 usage() {
-    echo "$0 [options] subject1 subject2 ..."
-    echo " options:"
-    echo "   -t <template> target image for registration "
-    echo "                 (exvivo or invivo [default])"
+  echo "$0 [options] subject1 subject2 ..."
+  echo " options:"
+  echo "   -t <template> target image for registration "
+  echo "                 (exvivo or invivo [default])"
 
-    echo "   -i: dont use inflated surface as initial "
-    echo "       registration (backward compatibility)"
+  echo "   -i: dont use inflated surface as initial "
+  echo "       registration (backward compatibility)"
 
-    echo "   -h <hemi>  hemisphere (rh or lh) default is both hemis"
+  echo "   -h <hemi>  hemisphere (rh or lh) default is both hemis"
 
-    echo "   -p: print mode (do not run commands, just print them)"
-    echo "   -u, -?: print usage"
+  echo "   -p: print mode (do not run commands, just print them)"
+  echo "   -u, -?: print usage"
 }
 
 if [ ! "$1" ]; then
-    usage
-    exit
+  usage
+  exit
 fi
 
 ## defaults
@@ -43,30 +43,35 @@ printmode=
 #
 # in: $@
 parse_args() {
-   # get the options
-    while getopts ":s:t:h:ip?" Option
-    do
-	case $Option in
-	    t ) regtarget="$OPTARG"
-		;;
-	    h ) hemis="$OPTARG"
-		;;
-	    i ) inflated_flag=
-		;;
-	    p ) printmode=1
-		;;
-	    * ) usage;
-		exit;;
-	esac
-    done
-    shift $(($OPTIND - 1))
+  # get the options
+  while getopts ":s:t:h:ip?" Option; do
+    case $Option in
+      t)
+        regtarget="$OPTARG"
+        ;;
+      h)
+        hemis="$OPTARG"
+        ;;
+      i)
+        inflated_flag=
+        ;;
+      p)
+        printmode=1
+        ;;
+      *)
+        usage
+        exit
+        ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
 
-    export subjs=$@
+  export subjs=$@
 }
 
 if [ ! "$1" ]; then
-    usage;
-    exit 0;
+  usage
+  exit 0
 fi
 
 # thresholds probabilities in one file to another at the optimal
@@ -74,18 +79,18 @@ fi
 # and predicted V1 boundary with and independent dataset (zilles
 # brains)
 threshold_labelfile_at_0p8() {
-    infile=$1
-    outfile=$2
+  infile=$1
+  outfile=$2
 
-    echo -n "thresholding the label..."
-    cat $infile | sed "/^#/d;/^[0-9]*$/d;/.* 0\\.[0-7].*$/d" \
-      > /tmp/tmpthreshout
-    numlab=`wc -l /tmp/tmpthreshout | sed "s/ .*$//"`
+  echo -n "thresholding the label..."
+  cat $infile | sed "/^#/d;/^[0-9]*$/d;/.* 0\\.[0-7].*$/d" \
+    >/tmp/tmpthreshout
+  numlab=$(wc -l /tmp/tmpthreshout | sed "s/ .*$//")
 
-    echo "# v1 atlaspredict label file auto-generated" > $outfile
-    echo $numlab >> $outfile
-    cat /tmp/tmpthreshout >> $outfile
-    echo "done"
+  echo "# v1 atlaspredict label file auto-generated" >$outfile
+  echo $numlab >>$outfile
+  cat /tmp/tmpthreshout >>$outfile
+  echo "done"
 }
 
 # parse command line
@@ -93,28 +98,28 @@ parse_args "$@"
 
 # validate args
 if [ "$regtarget" == "invivo" ]; then
-    vivo=invivo
-    template=invivo
+  vivo=invivo
+  template=invivo
 elif [ "$regtarget" == "exvivo" ]; then
-    vivo=exvivo
-    template=exvivo
-else 
-    echo unknown target $regtarget
-    usage;
-    exit 1;
+  vivo=exvivo
+  template=exvivo
+else
+  echo unknown target $regtarget
+  usage
+  exit 1
 fi
 
 # parm values from Hinds, et al. (2008)
 if [ $vivo == "invivo" ]; then
-    rhdist=10.0 
-    rhparea=0.4
-    lhdist=10.0 
-    lhparea=1.0
+  rhdist=10.0
+  rhparea=0.4
+  lhdist=10.0
+  lhparea=1.0
 elif [ $vivo == "exvivo" ]; then
-    rhdist=5.0 
-    rhparea=1.0
-    lhdist=5.0 
-    lhparea=0.1
+  rhdist=5.0
+  rhparea=1.0
+  lhdist=5.0
+  lhparea=0.1
 fi
 
 # register each subject
@@ -122,11 +127,11 @@ for subject in $subjs; do
 
   for hemi in $hemis; do
     if [ $hemi == "lh" ]; then
-      dist=$lhdist;
-      parea=$lhparea;
+      dist=$lhdist
+      parea=$lhparea
     else
-      dist=$rhdist;
-      parea=$rhparea;
+      dist=$rhdist
+      parea=$rhparea
     fi
 
     ## setup parms
@@ -137,22 +142,24 @@ for subject in $subjs; do
 
     # generate curvature for inflated surface
     if [ ! -f $SUBJECTS_DIR/$subject/surf/"$hemi".inflated.H ]; then
-        cmd="mris_curvature -n -a 5 -w -distances 10 10 \
+      cmd="mris_curvature -n -a 5 -w -distances 10 10 \
             $SUBJECTS_DIR/$subject/surf/"$hemi".inflated"
-        echo $cmd
-        if [ ! $printmode ]; then $cmd; fi
+      echo $cmd
+      if [ ! $printmode ]; then $cmd; fi
     else
-        echo "$SUBJECTS_DIR/$subject/surf/"$hemi".inflated.H already exists, skipping."; echo ""
+      echo "$SUBJECTS_DIR/$subject/surf/"$hemi".inflated.H already exists, skipping."
+      echo ""
     fi
 
     # register the subject to the template
     if [ ! -f $regfile ]; then
-        cmd="mris_register $inflated_flag -a 4096 $warp $surf \
+      cmd="mris_register $inflated_flag -a 4096 $warp $surf \
             $target $regfile"
-        echo $cmd; echo ""
-        if [ ! $printmode ]; then $cmd; fi
+      echo $cmd
+      echo ""
+      if [ ! $printmode ]; then $cmd; fi
     else
-        echo "file $regfile exists, so already been registered, skipping registration."
+      echo "file $regfile exists, so already been registered, skipping registration."
     fi
 
     # map the atlas to the subject
@@ -162,13 +169,15 @@ for subject in $subjs; do
     surf=v1.$vivo.reg
     cmd="mris_spherical_average -osurf $surf -n \
         -o $subject label $atlas $hemi $surf V1_average $reglabel"
-    echo $cmd; echo ""
+    echo $cmd
+    echo ""
     if [ ! $printmode ]; then $cmd; fi
 
     # threshold the label
     threshlabel=$SUBJECTS_DIR/$subject/label/"$hemi".v1.predict.label
     cmd="threshold_labelfile_at_0p8 $reglabel $threshlabel"
-    echo $cmd; echo ""
+    echo $cmd
+    echo ""
     if [ ! $printmode ]; then $cmd; fi
   done
 done

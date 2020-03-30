@@ -2,16 +2,14 @@
 
 dots=""
 
-if [ -z ${goup+x} ];
-then
-    goup=1
+if [ -z ${goup+x} ]; then
+  goup=1
 else
-    goup=$((goup+1))
+  goup=$((goup + 1))
 fi
 
-for i in $(seq 1 $goup)
-do
-    dots="$dots/.."
+for i in $(seq 1 $goup); do
+  dots="$dots/.."
 done
 
 temp=$(dirname "$(realpath $0)")

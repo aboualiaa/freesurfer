@@ -8,8 +8,8 @@ export PYTHONPATH="${FREESURFER_HOME}/python/packages:$PYTHONPATH"
 
 # run python
 if [ -e "${FREESURFER_HOME}/python/bin/python3" ]; then
-    exec ${FREESURFER_HOME}/python/bin/python3 "$@"
+  exec ${FREESURFER_HOME}/python/bin/python3 "$@"
 else
-    echo "error: fspython has not been configured correctly - \$FREESURFER_HOME/python/bin/python3 does not exist"
-    exit 1
+  echo "error: fspython has not been configured correctly - \$FREESURFER_HOME/python/bin/python3 does not exist"
+  exit 1
 fi

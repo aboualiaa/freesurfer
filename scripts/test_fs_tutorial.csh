@@ -3,7 +3,7 @@ set echo
 
 # CVS Info : $Id: test_fs_tutorial.csh,v 1.1 2010/02/04 19:37:09 krish Exp $
 # This script executes all the command-line entries in all the tutorials of the FsTutorial
-# It excludes all the tkmedit, tksurfer, qdec commands until the end where it invokes the 
+# It excludes all the tkmedit, tksurfer, qdec commands until the end where it invokes the
 # three commands in succession.
 # Also excludes commands which take long ( more than a minute ) in the tutorial
 
@@ -35,26 +35,21 @@ setenv TUTORIAL_DATA $FREESURFER_HOME/subjects/buckner_data/tutorial_subjs
 setenv SUBJECTS_DIR $TUTORIAL_DATA/group_analysis_tutorial
 cd $SUBJECTS_DIR/glm
 
-
 mris_preproc --fsgd gender_age.fsgd \
   --cache-in thickness.fwhm10.fsaverage \
   --target fsaverage --hemi lh \
   --out lh.gender_age.thickness.10.mgh
 
-
 mri_glmfit \
   --y lh.gender_age.thickness.10.mgh \
-  --fsgd gender_age.fsgd dods\
-  --C lh-Avg-thickness-age-Cor.mtx \
+  --fsgd gender_age.fsgd dods --C lh-Avg-thickness-age-Cor.mtx \
   --surf fsaverage lh \
   --cortex \
   --glmdir lh.gender_age.glmdir
 
-
 #tksurfer fsaverage lh inflated \
 #  -annot aparc.annot -fthresh 2 \
 #-overlay lh.gender_age.glmdir/lh-Avg-thickness-age-Cor/sig.mgh
-
 
 mri_glmfit-sim \
   --glmdir lh.gender_age.glmdir \
@@ -73,7 +68,6 @@ cat lh.gender_age.glmdir/lh-Avg-thickness-age-Cor/mc-z.neg4.sig.cluster.summary
 #------------------------------
 # ---- QdecGroupAnalysis ----
 #------------------------------
-
 
 setenv TUTORIAL_DATA $FREESURFER_HOME/subjects/buckner_data/tutorial_subjs
 
@@ -239,10 +233,9 @@ cd $TUTORIAL_DATA/multimodal/fmri/fbirn-101
 #  -overlay sig.nii -reg bb.register.dat -fthresh 2 -fmax 4
 
 mri_vol2surf --mov sig.nii \
-    --reg bb.register.dat \
-    --projfrac 0.5 --interp nearest \
-    --hemi lh --o lh.sig.mgh
-
+  --reg bb.register.dat \
+  --projfrac 0.5 --interp nearest \
+  --hemi lh --o lh.sig.mgh
 
 mri_info lh.sig.mgh
 
@@ -250,36 +243,36 @@ mri_info lh.sig.mgh
 #  -overlay lh.sig.mgh
 
 mri_vol2vol --mov ces.nii \
-    --reg bb.register.dat \
-    --fstarg --interp nearest \
-    --o ces.anat.bb.mgh
+  --reg bb.register.dat \
+  --fstarg --interp nearest \
+  --o ces.anat.bb.mgh
 
 mri_info ces.anat.bb.mgh
 
 mri_segstats \
-   --seg $SUBJECTS_DIR/fbirn-anat-101.v4/mri/aparc+aseg.mgz \
-   --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt \
-   --id 1021 --id 1022 --id 1030  --id 17 \
-   --i ces.anat.bb.mgh --sum ces.bb.stats
+  --seg $SUBJECTS_DIR/fbirn-anat-101.v4/mri/aparc+aseg.mgz \
+  --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt \
+  --id 1021 --id 1022 --id 1030 --id 17 \
+  --i ces.anat.bb.mgh --sum ces.bb.stats
 
 mri_vol2vol --mov sig.nii \
-    --reg bb.register.dat \
-    --fstarg --interp nearest \
-    --o sig.anat.bb.mgh
+  --reg bb.register.dat \
+  --fstarg --interp nearest \
+  --o sig.anat.bb.mgh
 
 mri_segstats \
-   --seg $SUBJECTS_DIR/fbirn-anat-101.v4/mri/aparc+aseg.mgz \
-   --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt \
-   --id 1021 --id 1022 --id 1030  --id 17 \
-   --i ces.anat.bb.mgh --sum ces.abs-masked.bb.stats \
-   --mask sig.anat.bb.mgh --maskthresh 2 --masksign abs
+  --seg $SUBJECTS_DIR/fbirn-anat-101.v4/mri/aparc+aseg.mgz \
+  --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt \
+  --id 1021 --id 1022 --id 1030 --id 17 \
+  --i ces.anat.bb.mgh --sum ces.abs-masked.bb.stats \
+  --mask sig.anat.bb.mgh --maskthresh 2 --masksign abs
 
 mri_segstats \
-   --seg $SUBJECTS_DIR/fbirn-anat-101.v4/mri/aparc+aseg.mgz \
-   --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt \
-   --id 1021 --id 1022 --id 1030  --id 17 \
-   --i ces.anat.bb.mgh --sum ces.pos-masked.bb.stats \
-   --mask sig.anat.bb.mgh --maskthresh 2 --masksign pos
+  --seg $SUBJECTS_DIR/fbirn-anat-101.v4/mri/aparc+aseg.mgz \
+  --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt \
+  --id 1021 --id 1022 --id 1030 --id 17 \
+  --i ces.anat.bb.mgh --sum ces.pos-masked.bb.stats \
+  --mask sig.anat.bb.mgh --maskthresh 2 --masksign pos
 
 #------------------------------
 # ---- MultiModalFmriGroup ----
@@ -293,18 +286,17 @@ cd $TUTORIAL_DATA/multimodal/fmri
 #  --reg fbirn-101/bb.register.dat --surf
 
 mris_preproc --target fsaverage --hemi lh \
-  --iv  fbirn-101/ces.nii fbirn-101/bb.register.dat \
-  --iv  fbirn-103/ces.nii fbirn-103/bb.register.dat \
-  --iv  fbirn-104/ces.nii fbirn-104/bb.register.dat \
-  --iv  fbirn-105/ces.nii fbirn-105/bb.register.dat \
-  --iv  fbirn-106/ces.nii fbirn-106/bb.register.dat \
+  --iv fbirn-101/ces.nii fbirn-101/bb.register.dat \
+  --iv fbirn-103/ces.nii fbirn-103/bb.register.dat \
+  --iv fbirn-104/ces.nii fbirn-104/bb.register.dat \
+  --iv fbirn-105/ces.nii fbirn-105/bb.register.dat \
+  --iv fbirn-106/ces.nii fbirn-106/bb.register.dat \
   --projfrac 0.5 \
   --out lh.ces.mgh
 
 mri_info lh.ces.mgh
 
-mri_surf2surf --hemi lh --s fsaverage --fwhm 5 --cortex\
-  --sval lh.ces.mgh --tval lh.ces.sm05.mgh
+mri_surf2surf --hemi lh --s fsaverage --fwhm 5 --cortex --sval lh.ces.mgh --tval lh.ces.sm05.mgh
 
 mri_glmfit --y lh.ces.sm05.mgh --surf fsaverage lh \
   --osgm --glmdir lh.ces.sm05.osgm --cortex
@@ -371,9 +363,9 @@ mri_segstats \
 cd $SUBJECTS_DIR
 
 tkmedit good_output brainmask.mgz lh.white \
-        -aux T1.mgz -aux-surface rh.white \
-        -segmentation aseg.mgz $FREESURFER_HOME/FreeSurferColorLUT.txt
+  -aux T1.mgz -aux-surface rh.white \
+  -segmentation aseg.mgz $FREESURFER_HOME/FreeSurferColorLUT.txt
 
 tksurfer good_output lh inflated
 
-qdec 
+qdec

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source "$(dirname $0)/../test.sh"
 
-# don't remove test output before each test_command 
+# don't remove test output before each test_command
 FSTEST_NO_DATA_RESET=1 && init_testdata
 
 test_command mris_convert lh.white lh.white.asc

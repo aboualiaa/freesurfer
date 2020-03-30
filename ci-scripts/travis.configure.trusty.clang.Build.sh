@@ -4,7 +4,6 @@ set -e
 
 mkdir -p cmake-build-debug-trusty && cd ./cmake-build-debug-trusty
 
-
 if [[ ! -d "$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-14.04" ]]; then
   wget http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz >/dev/null 2>&1
   tar -xf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz

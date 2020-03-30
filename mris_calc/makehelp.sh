@@ -1,1 +1,1 @@
-cat help.txt |  sed 's/\( *\)$//' | sed 's/$/ \\n\\/' > helpn.txt
+cat help.txt | sed 's/\( *\)$//' | sed 's/$/ \\n\\/' >helpn.txt

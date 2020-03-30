@@ -13,7 +13,10 @@ sudo apt-get install -y -qq --no-install-suggests --no-install-recommends git wg
   gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
   libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
   mpich libboost-all-dev libfltk1.3-dev libeigen3-dev \
-  libarmadillo-dev qt5-default libqt5x11extras5-dev curl git-annex lcov libxml2-utils
+  libarmadillo-dev qt5-default libqt5x11extras5-dev curl git-annex lcov libxml2-utils \
+  snapd parallel
+
+sudo snapd install shfmt
 
 if [ "$HOSTING_OS" = "xenial" ] || [ "$HOSTING_OS" = "trusty" ]; then
   sudo apt-get install -y -qq python3.5 python3.5-dev

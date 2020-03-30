@@ -10,18 +10,18 @@
 
 # Set this to the location of the freesurfer installation.
 if [ -z $FREESURFER_HOME ]; then
-    echo " ERROR: Environment variable FREESURFER_HOME must be defined prior to sourcing Freesurfer." 
-    return
+  echo " ERROR: Environment variable FREESURFER_HOME must be defined prior to sourcing Freesurfer."
+  return
 fi
 
 # Set this to your subjects/ dir, usually freesurfer/subjects/
 if [ -z $SUBJECTS_DIR ]; then
-    export SUBJECTS_DIR=$FREESURFER_HOME/subjects
+  export SUBJECTS_DIR=$FREESURFER_HOME/subjects
 fi
 
 # Set this to your functional sessions dir, usually freesurfer/sessions/
 if [ -z $FUNCTIONALS_DIR ]; then
-    export FUNCTIONALS_DIR=$FREESURFER_HOME/sessions
+  export FUNCTIONALS_DIR=$FREESURFER_HOME/sessions
 fi
 
 # Specify the location of the MINC tools.

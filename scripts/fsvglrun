@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 # This script that will run its argument with vglrun is allowed and possible.
 # vglrun allows some graphical applications to run faster when on remote desktops
@@ -6,7 +6,7 @@
 # vglrun will be used:
 #   1. the environment variable FS_ALLOW_VGLRUN but be set to non-zero
 #   2. vglrun must exist in the path or in /usr/pubsw/bin/vglrun
-#   3. the shell should not be local (ie, must be a remote shell), 
+#   3. the shell should not be local (ie, must be a remote shell),
 #      thought it might not hurt to use vglrun if it is local
 #
 # Eg: fsvglrun freeview orig.mgz
@@ -21,10 +21,10 @@ if [[ ! -v FS_ALLOW_VGLRUN ]]; then
   FS_ALLOW_VGLRUN=0
 fi
 
-which vglrun > /dev/null 2> /dev/null 
+which vglrun >/dev/null 2>/dev/null
 if [ $? -eq 0 ]; then
   #echo "Found vglrun"
-  vglrun=`which vglrun`
+  vglrun=$(which vglrun)
 elif [ -e /usr/pubsw/bin/vglrun ]; then
   vglrun=/usr/pubsw/bin/vglrun
   #echo "Found $vglrun"
@@ -32,7 +32,7 @@ else
   #echo "Could not find vglrun"
   FS_ALLOW_VGLRUN=0
 fi
-if [ ! -f /etc/opt/VirtualGL/vgl_xauth_key ] ; then
+if [ ! -f /etc/opt/VirtualGL/vgl_xauth_key ]; then
   # VGL is not installed
   FS_ALLOW_VGLRUN=0
 fi
@@ -43,7 +43,7 @@ if [[ $DISPLAY = *:0 || $DISPLAY = *:0.0 ]]; then
   FS_ALLOW_VGLRUN=0
 fi
 
-if [  $FS_ALLOW_VGLRUN -eq 0 ]; then
+if [ $FS_ALLOW_VGLRUN -eq 0 ]; then
   exec "$@"
   exit $status
 fi
@@ -55,5 +55,3 @@ exit $status
 
 #ps auxw | grep X | grep -v NX
 #root      3177  0.2  0.3 1261528 501372 tty1   Ssl+ Jan10 147:24 /usr/bin/X :2 -background none -noreset -audit 4 -verbose -auth /run/gdm/auth-for-gdm-X9uybc/database -seat seat0 vt1
-
-

@@ -8,7 +8,7 @@ FSTEST_NO_DATA_RESET=1 && init_testdata
 
 # talairach avi calls a few different binaries
 for dir in mri_convert mri_info mri_matrix_multiply mri_robust_register lta_convert; do
-    export PATH="$(find_path $FSTEST_CWD $dir):$PATH"
+  export PATH="$(find_path $FSTEST_CWD $dir):$PATH"
 done
 
 # also calls items in the scripts directory

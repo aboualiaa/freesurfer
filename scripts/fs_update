@@ -1,14 +1,14 @@
 #!/bin/bash
 
 #############################################################
-## This script is used to download and install patches        
-## to the freesurfer installation for running the             
-## freesurfer tutorials.                                      
-##                                                            
-## See the following link for information in the tutorials:   
-##                                                            
-##  http://surfer.nmr.mgh.harvard.edu/fswiki/FsTutorial       
-##                                                            
+## This script is used to download and install patches
+## to the freesurfer installation for running the
+## freesurfer tutorials.
+##
+## See the following link for information in the tutorials:
+##
+##  http://surfer.nmr.mgh.harvard.edu/fswiki/FsTutorial
+##
 ## rsync command explained:
 ## -z         = compress file data during the transfer
 ## -t         = preserve time stamp (so fsfast wont rerun)
@@ -18,63 +18,63 @@
 ## -v         = increase verbosity
 ## --progress = show progress during transfer
 ## --suffix   = suffix used for backups
-############################################################# 
+#############################################################
 
-show_usage() { 
-echo " Usage:"
-echo  
-echo " Update \$FREESURFER_HOME:"
-echo "   $> fs_update" 
-echo
-echo " Update only certain files (directories copied recusrsively):"
-echo "   $> fs_update bin/mri_convert subjects/fsaverge"
-echo
-echo " Show help:"
-echo "   $> fs_update -h, -help, --help"
-echo 
-} 
- 
+show_usage() {
+  echo " Usage:"
+  echo
+  echo " Update \$FREESURFER_HOME:"
+  echo "   $> fs_update"
+  echo
+  echo " Update only certain files (directories copied recusrsively):"
+  echo "   $> fs_update bin/mri_convert subjects/fsaverge"
+  echo
+  echo " Show help:"
+  echo "   $> fs_update -h, -help, --help"
+  echo
+}
+
 if [ "$#" -eq 1 ]; then
-  if [ $1 = "-h" ] || [ $1 = "-help" ] || [ $1 = "--help" ]; then 
+  if [ $1 = "-h" ] || [ $1 = "-help" ] || [ $1 = "--help" ]; then
     show_usage
     exit 0
   fi
 fi
 
 if [ -z "$FREESURFER_HOME" ]; then
-    echo " ERROR: Environment variable FREESURFER_HOME needs to be set."
-    exit 1
+  echo " ERROR: Environment variable FREESURFER_HOME needs to be set."
+  exit 1
 fi
 
 if [ ! -e $FREESURFER_HOME/build-stamp.txt ]; then
-    echo " ERROR: File $FREESURFER_HOME/build-stamp.txt does not exist."
-    exit 1
+  echo " ERROR: File $FREESURFER_HOME/build-stamp.txt does not exist."
+  exit 1
 fi
 
-build=`cat $FREESURFER_HOME/build-stamp.txt`
-rsync_cmd="rsync -zbrlv --progress --suffix=.`date +%s`_bak rsync://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/patches/${build}"
-echo    " Build is ${build}"
-echo  
-echo    "   Running this will update some of your freesurfer binaries."
-echo 
+build=$(cat $FREESURFER_HOME/build-stamp.txt)
+rsync_cmd="rsync -zbrlv --progress --suffix=.$(date +%s)_bak rsync://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/patches/${build}"
+echo " Build is ${build}"
+echo
+echo "   Running this will update some of your freesurfer binaries."
+echo
 read -p " Shall I proceed? [y/n/Abort]: "
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    if [ "$#" -eq 0 ]; then
-      rsync_cmd+="/* $FREESURFER_HOME"
+  if [ "$#" -eq 0 ]; then
+    rsync_cmd+="/* $FREESURFER_HOME"
+    echo "$rsync_cmd"
+    $rsync_cmd
+  else
+    for update_file in "$@"; do
+      rsync_cmd+="/${update_file} $FREESURFER_HOME/${update_file}"
       echo "$rsync_cmd"
       $rsync_cmd
-    else
-      for update_file in "$@"; do
-        rsync_cmd+="/${update_file} $FREESURFER_HOME/${update_file}"
-        echo "$rsync_cmd"
-        $rsync_cmd
-      done
-    fi
-    if [ "$?" -eq 0 ]; then
-      echo "Done."
-      exit 0
-    else
-      exit 1
-    fi
+    done
+  fi
+  if [ "$?" -eq 0 ]; then
+    echo "Done."
+    exit 0
+  else
+    exit 1
+  fi
 fi

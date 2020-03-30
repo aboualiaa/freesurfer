@@ -86,76 +86,78 @@ G_SYNOPSIS="
 "
 SELF=$(basename $0)
 
-function synopsis_show
-{
-	echo "USAGE:"
-	echo "$G_SYNOPSIS"
+function synopsis_show() {
+  echo "USAGE:"
+  echo "$G_SYNOPSIS"
 }
 
-function ret_check
-{
-	# ARGS
-	# $1 		in		return value to check
-	#
-	# DESC
-	# Checks for the passed return value, and echoes a
-	# conditional to stdout. Returns this value back to
-	# the caller.
-	#
+function ret_check() {
+  # ARGS
+  # $1 		in		return value to check
+  #
+  # DESC
+  # Checks for the passed return value, and echoes a
+  # conditional to stdout. Returns this value back to
+  # the caller.
+  #
 
-	local ret=$1
+  local ret=$1
 
-	echo -en "\t\t\t"
-	if [[ $ret != "0" ]] ; then
-		echo -e "[ failure ]"
-	else
-		echo -e "[ ok ]"
-	fi
-	return $ret
+  echo -en "\t\t\t"
+  if [[ $ret != "0" ]]; then
+    echo -e "[ failure ]"
+  else
+    echo -e "[ ok ]"
+  fi
+  return $ret
 }
 
-function die
-{
-	#
-	# ARGS
-	# $1		in		action
-	# $2		in		msg
-	# $3 		in		exit code
-	#
-	# DESC
-	# Exit to system with descriptive text and error code.
-	#
+function die() {
+  #
+  # ARGS
+  # $1		in		action
+  # $2		in		msg
+  # $3 		in		exit code
+  #
+  # DESC
+  # Exit to system with descriptive text and error code.
+  #
 
-	local action="$1"
-	local msg="$2"
-	local exitCode="$3"
+  local action="$1"
+  local msg="$2"
+  local exitCode="$3"
 
-	printf "\n\tWhile $action\n"
-	printf "\t$msg\n"
-	printf "\tExiting with code '$exitCode'.\n\n"
-	exit $exitCode
+  printf "\n\tWhile $action\n"
+  printf "\t$msg\n"
+  printf "\tExiting with code '$exitCode'.\n\n"
+  exit $exitCode
 }
-
 
 # Is this an rpm system?
-if [[ -d /etc/rpm ]] ; then
-	b_RPM=1
+if [[ -d /etc/rpm ]]; then
+  b_RPM=1
 else
-	b_RPM=0
+  b_RPM=0
 fi
 
-while getopts vhlr option ; do
-	case "$option"
-	in
-		l) b_RPM=0 ;;
-		r) b_RPM=1 ;;
-		v) printf "$SELF, version = $G_ID\n"
-		    exit 0;;
-		h) synopsis_show
-		    exit 0;;
-		\?) synopsis_show
-		    exit 0;;
-	esac
+while getopts vhlr option; do
+  case "$option" in
+
+    l) b_RPM=0 ;;
+    r) b_RPM=1 ;;
+    v)
+      printf "$SELF, version = $G_ID\n"
+      exit 0
+      ;;
+    h)
+      synopsis_show
+      exit 0
+      ;;
+    \?)
+      synopsis_show
+      exit 0
+      ;;
+  esac
 done
 
 # Is this a Linux system?
@@ -164,49 +166,47 @@ b_LINUX=$(uname -a | grep -i Linux | wc -l)
 # Is this a Darwin system?
 b_DARWIN=$(uname -a | grep -i Darwin | wc -l)
 
-if (( !b_LINUX )) ; then
-	die "checking system, a non-Linux OS was found."	\
-		 "This script will only work on Linux systems."	\
-		1
+if ((!b_LINUX)); then
+  die "checking system, a non-Linux OS was found." \
+    "This script will only work on Linux systems." \
+    1
 fi
 
-if (( b_RPM )) ; then
-	# Check for 'rpm' executable
-	b_RPMexe=$(type -all rpm 2>/dev/null | awk '{print $3}' | wc -l)
-	if (( !b_RPMexe )) ; then
-		die "checking for rpm executable,"			\
-			"no file called 'rpm' was found on path." 3
-	fi
+if ((b_RPM)); then
+  # Check for 'rpm' executable
+  b_RPMexe=$(type -all rpm 2>/dev/null | awk '{print $3}' | wc -l)
+  if ((!b_RPMexe)); then
+    die "checking for rpm executable," \
+      "no file called 'rpm' was found on path." 3
+  fi
 fi
 
 # Now perform the lib check
-if (( b_LINUX && b_RPM )) ; then
-	CHKCMDPREFIX="rpm -qa | grep -i "
-	FSLIBLIST="jpeg tiff tcl-8 tk-8 tix-8 blt glut"
-	TRIGGER="rpm package "
+if ((b_LINUX && b_RPM)); then
+  CHKCMDPREFIX="rpm -qa | grep -i "
+  FSLIBLIST="jpeg tiff tcl-8 tk-8 tix-8 blt glut"
+  TRIGGER="rpm package "
 fi
 
-if (( b_LINUX && !b_RPM )) ; then
-	CHKCMDPREFIX="ldconfig -p | grep lib"
-	FSLIBLIST="jpeg tiff tcl8 tk8 tix8 BLT glut"
-	TRIGGER="lib"
+if ((b_LINUX && !b_RPM)); then
+  CHKCMDPREFIX="ldconfig -p | grep lib"
+  FSLIBLIST="jpeg tiff tcl8 tk8 tix8 BLT glut"
+  TRIGGER="lib"
 fi
 
 printf "\n%48s\n\n" "FreeSurfer library check"
 
-for LIB in $FSLIBLIST ; do
-	printf "%-40s" "checking for ${TRIGGER}$LIB..."
-	CHKCMD="${CHKCMDPREFIX}${LIB}"
-	eval $CHKCMD 2>/dev/null >/dev/null
-        ret_check $? || \
-		die "checking for ${TRIGGER}$LIB," \
-			"the library/package does not seem to exist on your system." \
-			2
+for LIB in $FSLIBLIST; do
+  printf "%-40s" "checking for ${TRIGGER}$LIB..."
+  CHKCMD="${CHKCMDPREFIX}${LIB}"
+  eval $CHKCMD 2>/dev/null >/dev/null
+  ret_check $? ||
+    die "checking for ${TRIGGER}$LIB," \
+      "the library/package does not seem to exist on your system." \
+      2
 done
 
 printf "\n\t%35s\n" "Congratulations!"
 printf "\tAll necessary libs for running FreeSurfer were found.\n\n"
 
 exit 0
-
-

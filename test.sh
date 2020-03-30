@@ -43,29 +43,32 @@ set -o pipefail
 
 # error_exit
 # simple error function
-function error_exit {
-    >&2 echo "$(tput setaf 1)error:$(tput sgr 0) $@"
-    exit 1
+function error_exit() {
+  echo >&2 "$(tput setaf 1)error:$(tput sgr 0) $@"
+  exit 1
 }
 
 # realpath <path>
 # portable function to trace the absolute path
-function realpath {
-    echo $(cd $(dirname $1); pwd)/$(basename $1)
+function realpath() {
+  echo $(
+    cd $(dirname $1)
+    pwd
+  )/$(basename $1)
 }
 
 # first, parse the commandline input
 for i in "$@"; do
-    case $i in
-        -r|--regenerate)
-        # regenerate the test reference data
-        FSTEST_REGENERATE=true
-        shift
-        ;;
-        *)
-        error_exit "unknown argument '$i'"
-        ;;
-    esac
+  case $i in
+    -r | --regenerate)
+      # regenerate the test reference data
+      FSTEST_REGENERATE=true
+      shift
+      ;;
+    *)
+      error_exit "unknown argument '$i'"
+      ;;
+  esac
 done
 
 # next, define some common paths
@@ -90,32 +93,32 @@ FSTEST_TESTDATA_TARBALL="${FSTEST_SCRIPT_DIR}/testdata.tar.gz"
 # this regeneration directory as the new 'reference' output, and after the test finished, this directory
 # will be tarred to replace the original FSTEST_TESTDATA_TARBALL
 if [ "$FSTEST_REGENERATE" = true ]; then
-    echo "regenerating testdata"
-    # make the temporary dir and untar the original testdata into this directory
-    FSTEST_REGENERATION_DIR="${FSTEST_CWD}/testdata_regeneration"
-    rm -rf $FSTEST_REGENERATION_DIR && mkdir $FSTEST_REGENERATION_DIR
-    tar -xzvf "$FSTEST_TESTDATA_TARBALL" -C $FSTEST_REGENERATION_DIR
+  echo "regenerating testdata"
+  # make the temporary dir and untar the original testdata into this directory
+  FSTEST_REGENERATION_DIR="${FSTEST_CWD}/testdata_regeneration"
+  rm -rf $FSTEST_REGENERATION_DIR && mkdir $FSTEST_REGENERATION_DIR
+  tar -xzvf "$FSTEST_TESTDATA_TARBALL" -C $FSTEST_REGENERATION_DIR
 fi
 
 # find_path <start> <pattern>
 # searches up a starting directory for a file (or filepath) that matches a particular pattern - useful for
 # finding other binaries in the build tree
-function find_path {
-    parent="$(dirname $1)"
-    if [ -e "$parent/$2" ]; then
-        echo "$parent/$2"
-    elif [ "$parent" = "/" ]; then
-        error_exit "recursion limit - could not locate '$2' in tree"
-    else
-        find_path $parent $2
-    fi
+function find_path() {
+  parent="$(dirname $1)"
+  if [ -e "$parent/$2" ]; then
+    echo "$parent/$2"
+  elif [ "$parent" = "/" ]; then
+    error_exit "recursion limit - could not locate '$2' in tree"
+  else
+    find_path $parent $2
+  fi
 }
 
 # setup the necessary freesurfer environment variables - these can be modified in the test script if necessary
 if [ -z ${AZURE_SOURCE_DIR+x} ]; then
   export FREESURFER_HOME="$(find_path $FSTEST_SCRIPT_DIR distribution)"
 else
- export FREESURFER_HOME="$(find_path $AZURE_SOURCE_DIR distribution)"
+  export FREESURFER_HOME="$(find_path $AZURE_SOURCE_DIR distribution)"
 fi
 
 export SUBJECTS_DIR="$FSTEST_TESTDATA_DIR"
@@ -125,56 +128,56 @@ export FSLOUTPUTTYPE="NIFTI_GZ"
 export PATH="${FSTEST_CWD}:${FSTEST_SCRIPT_DIR}:${PATH}"
 
 # set martinos license for internal developers
-if [ -e "/autofs/space/freesurfer/.license" ] ; then
-    export FS_LICENSE="/autofs/space/freesurfer/.license"
+if [ -e "/autofs/space/freesurfer/.license" ]; then
+  export FS_LICENSE="/autofs/space/freesurfer/.license"
 fi
 
 # exit hook to cleanup any remaining testdata
-function cleanup {
-    FSTEST_STATUS=$?
-    if [ "$FSTEST_STATUS" = 0 ]; then
-        if [ "$FSTEST_REGENERATE" = true ]; then
-            # tar the regenerated data
-            cd $FSTEST_REGENERATION_DIR
-            tar -czvf testdata.tar.gz testdata
-            # make sure the annex file is unlocked before replacing it
-            cd $FSTEST_SCRIPT_DIR
-            git annex unlock testdata.tar.gz
-            mv -f ${FSTEST_REGENERATION_DIR}/testdata.tar.gz .
-            rm -rf $FSTEST_REGENERATION_DIR
-            echo "testdata has been regenerated - make sure to run 'git annex add testdata.tar.gz' to rehash before committing"
-            cd $FSTEST_CWD
-        else
-            echo "$(tput setaf 2)success:$(tput sgr 0) test passed"
-        fi
-        # remove testdata directory
-        rm -rf $FSTEST_TESTDATA_DIR
+function cleanup() {
+  FSTEST_STATUS=$?
+  if [ "$FSTEST_STATUS" = 0 ]; then
+    if [ "$FSTEST_REGENERATE" = true ]; then
+      # tar the regenerated data
+      cd $FSTEST_REGENERATION_DIR
+      tar -czvf testdata.tar.gz testdata
+      # make sure the annex file is unlocked before replacing it
+      cd $FSTEST_SCRIPT_DIR
+      git annex unlock testdata.tar.gz
+      mv -f ${FSTEST_REGENERATION_DIR}/testdata.tar.gz .
+      rm -rf $FSTEST_REGENERATION_DIR
+      echo "testdata has been regenerated - make sure to run 'git annex add testdata.tar.gz' to rehash before committing"
+      cd $FSTEST_CWD
     else
-        echo "$(tput setaf 1)error:$(tput sgr 0) test failed"
+      echo "$(tput setaf 2)success:$(tput sgr 0) test passed"
     fi
+    # remove testdata directory
+    rm -rf $FSTEST_TESTDATA_DIR
+  else
+    echo "$(tput setaf 1)error:$(tput sgr 0) test failed"
+  fi
 }
 trap cleanup EXIT
 
 # hook to catch if the script is killed
-function abort {
-    error_exit "script has been killed"
+function abort() {
+  error_exit "script has been killed"
 }
 trap abort SIGINT SIGTERM
 
 # eval_cmd <command>
 # prints a command before running it
-function eval_cmd {
-    echo ">> $(tput setaf 3)$@$(tput sgr 0)"
-    eval $@
+function eval_cmd() {
+  echo ">> $(tput setaf 3)$@$(tput sgr 0)"
+  eval $@
 }
 
 # refreshes (or initializes the testdata directory). By default, this gets run
 # every time a new command is tested
-function init_testdata {
-    cd $FSTEST_CWD
-    rm -rf $FSTEST_TESTDATA_DIR
-    tar -xzvf "$FSTEST_TESTDATA_TARBALL"
-    cd $FSTEST_TESTDATA_DIR
+function init_testdata() {
+  cd $FSTEST_CWD
+  rm -rf $FSTEST_TESTDATA_DIR
+  tar -xzvf "$FSTEST_TESTDATA_TARBALL"
+  cd $FSTEST_TESTDATA_DIR
 }
 
 # test_command <command>
@@ -183,59 +186,59 @@ function init_testdata {
 # options:
 #     FSTEST_NO_DATA_RESET: the testdata directory will not be reset
 #     EXPECT_FAILURE: evaluation will fail if the command returns successfully
-function test_command {
-    # first extract the testdata
-    if [ -z ${FSTEST_NO_DATA_RESET} ]; then
-        init_testdata
+function test_command() {
+  # first extract the testdata
+  if [ -z ${FSTEST_NO_DATA_RESET} ]; then
+    init_testdata
+  fi
+  cd $FSTEST_TESTDATA_DIR
+  # turn off errors if expecting a failure
+  if [ -n "$EXPECT_FAILURE" ]; then
+    set +e
+  fi
+  # run the command
+  eval_cmd $@
+  retcode=$?
+  # reset settings and check error if failure was expected
+  if [ -n "$EXPECT_FAILURE" ]; then
+    if [ "$retcode" = 0 ]; then
+      error_exit "command returned 0 exit status, but expected a failure"
     fi
-    cd $FSTEST_TESTDATA_DIR
-    # turn off errors if expecting a failure
-    if [ -n "$EXPECT_FAILURE" ]; then
-        set +e
-    fi
-    # run the command
-    eval_cmd $@
-    retcode=$?
-    # reset settings and check error if failure was expected
-    if [ -n "$EXPECT_FAILURE" ]; then
-        if [ "$retcode" = 0 ]; then
-            error_exit "command returned 0 exit status, but expected a failure"
-        fi
-        set -e
-    fi
+    set -e
+  fi
 }
 
 # run_comparison <diff command> <output> <reference> [extra options]
 # wraps a diff command so that if testdata regeneration is turned on, no diff is run and
 # the output file is copied into the regeneration directory as the reference file. It is very important
 # that the 1st argument to the diff command is the real output and the 2nd argument is the expected output
-function run_comparison {
-    if [ "$FSTEST_REGENERATE" = true ]; then
-        cp -f ${FSTEST_TESTDATA_DIR}/$2 ${FSTEST_REGENERATION_DIR}/testdata/$3
-    else
-        eval_cmd "$@"
-    fi
+function run_comparison() {
+  if [ "$FSTEST_REGENERATE" = true ]; then
+    cp -f ${FSTEST_TESTDATA_DIR}/$2 ${FSTEST_REGENERATION_DIR}/testdata/$3
+  else
+    eval_cmd "$@"
+  fi
 }
 
 # runs a standard diff on an output and reference file - all extra opts are passed to diff
-function compare_file {
-    run_comparison diff $@
+function compare_file() {
+  run_comparison diff $@
 }
 
 # runs mri_diff on an output and reference volume - all extra opts are passed to mri_diff
-function compare_vol {
-    diffcmd=$(find_path $FSTEST_CWD mri_diff/mri_diff)
-    run_comparison $diffcmd $@ --debug
+function compare_vol() {
+  diffcmd=$(find_path $FSTEST_CWD mri_diff/mri_diff)
+  run_comparison $diffcmd $@ --debug
 }
 
 # runs mris_diff on an output and reference surface - all extra opts are passed to mris_diff
-function compare_surf {
-    diffcmd=$(find_path $FSTEST_CWD mris_diff/mris_diff)
-    run_comparison $diffcmd $@ --debug
+function compare_surf() {
+  diffcmd=$(find_path $FSTEST_CWD mris_diff/mris_diff)
+  run_comparison $diffcmd $@ --debug
 }
 
 # runs lta_diff on an output and reference transform - all extra opts are passed to lta_diff
-function compare_lta {
-    diffcmd=$(find_path $FSTEST_CWD mri_robust_register/lta_diff)
-    run_comparison $diffcmd $@
+function compare_lta() {
+  diffcmd=$(find_path $FSTEST_CWD mri_robust_register/lta_diff)
+  run_comparison $diffcmd $@
 }

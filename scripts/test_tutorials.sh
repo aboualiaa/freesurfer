@@ -76,73 +76,72 @@ while [[ $# > 0 ]]; do
   key="$1"
   case $key in
     -all)
-	do_Interaction_with_Individual_Subject_Data_Tutorial=1
-	do_Troubleshooting_Tutorial=1
-	do_Group_Analysis_Tutorial=1
-	do_QDEC_Tutorial=1
-	do_Logitudinal_Tutorial=1
-	do_ROI_Analysis_Tutorial=1
-	do_Diffusion_Processing_Tutorial=1
-	do_TRACULA_Tutorial=1
-	do_FSFAST_Tutorial=1
-	do_MultiModal_Integration=1
-    	;;
+      do_Interaction_with_Individual_Subject_Data_Tutorial=1
+      do_Troubleshooting_Tutorial=1
+      do_Group_Analysis_Tutorial=1
+      do_QDEC_Tutorial=1
+      do_Logitudinal_Tutorial=1
+      do_ROI_Analysis_Tutorial=1
+      do_Diffusion_Processing_Tutorial=1
+      do_TRACULA_Tutorial=1
+      do_FSFAST_Tutorial=1
+      do_MultiModal_Integration=1
+      ;;
     -quick)
-	do_Quick_Test=1
-    	;;
+      do_Quick_Test=1
+      ;;
     -auto_quit_freeview)
-	auto_quit_freeview=1
-        ;;
+      auto_quit_freeview=1
+      ;;
     -skip_all_guis)
-	skip_all_guis=1
-	;;
+      skip_all_guis=1
+      ;;
     -skip_tk_guis)
-	skip_tk_guis=1
-	;;
+      skip_tk_guis=1
+      ;;
     -skip_qdec_guis)
-	skip_qdec_guis=1
-	;;
+      skip_qdec_guis=1
+      ;;
     -individual_subject)
-	do_Interaction_with_Individual_Subject_Data_Tutorial=1
-	;;
+      do_Interaction_with_Individual_Subject_Data_Tutorial=1
+      ;;
     -troubleshooting)
-	do_Troubleshooting_Tutorial=1
-	;;
+      do_Troubleshooting_Tutorial=1
+      ;;
     -group_analysis)
-	do_Group_Analysis_Tutorial=1 
-	;;
+      do_Group_Analysis_Tutorial=1
+      ;;
     -qdec)
-	do_QDEC_Tutorial=1
-    	;;
+      do_QDEC_Tutorial=1
+      ;;
     -longitudinal)
-	do_Logitudinal_Tutorial=1
-	;;	
+      do_Logitudinal_Tutorial=1
+      ;;
     -roi_analysis)
-	do_ROI_Analysis_Tutorial=1
-	;;
+      do_ROI_Analysis_Tutorial=1
+      ;;
     -diffusion)
-	do_Diffusion_Processing_Tutorial=1
-	;;
+      do_Diffusion_Processing_Tutorial=1
+      ;;
     -tracula)
-	do_TRACULA_Tutorial=1
-	;;
+      do_TRACULA_Tutorial=1
+      ;;
     -fsfast)
-     	do_FSFAST_Tutorial=1
- 	;;
+      do_FSFAST_Tutorial=1
+      ;;
     -multimodal)
-	do_MultiModal_Integration=1
-	;;
+      do_MultiModal_Integration=1
+      ;;
     *)
-    	echo
-    	echo "${HELP}"
-    	exit 1
-    	;;
+      echo
+      echo "${HELP}"
+      exit 1
+      ;;
   esac
   shift
 done
 
-
-run_cmd () {
+run_cmd() {
   cmd="${1}"
 
   ## Auto quit freeview?
@@ -168,7 +167,7 @@ run_cmd () {
     status=0
   else
     echo "##################################################"
-    echo "pwd=`pwd`"
+    echo "pwd=$(pwd)"
     echo $cmd
     echo "##################################################"
     source $FREESURFER_HOME/sources.sh
@@ -177,7 +176,6 @@ run_cmd () {
   fi
   echo ""
 
-  
   if [ $status -ne 0 ]; then
     echo "ERROR: CMD = $cmd"
     exit 1
@@ -189,7 +187,7 @@ if [ $do_Quick_Test -eq 1 ]; then
   # Interaction with Individual Subject
   export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs
   run_cmd "cd $SUBJECTS_DIR"
-  
+
   run_cmd "freeview -v \
   good_output/mri/T1.mgz \
   good_output/mri/wm.mgz \
@@ -200,10 +198,9 @@ if [ $do_Quick_Test -eq 1 ]; then
   good_output/surf/rh.white:edgecolor=blue \
   good_output/surf/rh.pial:edgecolor=red"
 
-
   # Group Analysis Tutorial
   export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs/group_analysis_tutorial
-  
+
   run_cmd "cd $SUBJECTS_DIR/glm"
 
   run_cmd "mris_preproc --fsgd gender_age.fsgd \
@@ -211,10 +208,10 @@ if [ $do_Quick_Test -eq 1 ]; then
   --target fsaverage --hemi lh \
   --out lh.gender_age.thickness.10.mgh"
 
-  # Test qdec 
+  # Test qdec
   run_cmd "qdec &"
 
-  # Diffusion 
+  # Diffusion
   export SUBJECTS_DIR=$TUTORIAL_DATA/diffusion_recons
 
   run_cmd "cd $TUTORIAL_DATA/diffusion_tutorial"
@@ -248,7 +245,7 @@ if [ $do_Quick_Test -eq 1 ]; then
   run_cmd "tractstats2table --load-pathstats-from-file \
   $TUTORIAL_DATA/diffusion_tutorial/lh.ilf.list --overall \
   --only-measures FA_Avg --tablefile $TUTORIAL_DATA/diffusion_tutorial/lh.ilf.FA_Avg.table"
-  
+
   run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/lh.ilf.All.table"
 
   run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/elmo.2012/dpath/lh.ilf_AS_avg33_mni_bbr/pathstats.byvoxel.txt"
@@ -256,19 +253,18 @@ if [ $do_Quick_Test -eq 1 ]; then
   run_cmd "trac-all -stat -c $TUTORIAL_DATA/diffusion_tutorial/dmrirc.tutorial"
 
   run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/elmo.2012/dpath/lh.ilf_AS_avg33_mni_bbr/pathstats.byvoxel.txt"
- 
-  run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/elmo.2012/dpath/lh.ilf_AS_avg33_mni_bbr/pathstats.byvoxel.txt"
 
+  run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/elmo.2012/dpath/lh.ilf_AS_avg33_mni_bbr/pathstats.byvoxel.txt"
 
   # FSFAST
   run_cmd "export SUBJECTS_DIR=$TUTORIAL_DATA/fsfast-tutorial.subjects"
-  
+
   run_cmd "cd $TUTORIAL_DATA/fsfast-functional"
 
   run_cmd "preproc-sess -s sess01 -fsd bold \
   -stc up -surface fsaverage lhrh -mni305 -fwhm 5 -per-run"
 
-  # 
+  #
   run_cmd "export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs"
   run_cmd "cd $SUBJECTS_DIR/multimodal/fmri"
   run_cmd "tkregister2 --mov fbirn-101/template.nii \
@@ -294,7 +290,7 @@ if [ $do_Quick_Test -eq 1 ]; then
   run_cmd "freeview -f \
   $SUBJECTS_DIR/fsaverage/surf/lh.inflated:annot=aparc.annot:annot_outline=1:overlay=lh.ces.sm05.osgm/osgm/sig.mgh:overlay_threshold=2,5 \
   -viewport 3d"
- 
+
   echo ""
   echo "  CONGRATULATIONS!! You passed the quick test."
   echo ""
@@ -305,7 +301,7 @@ if [ $do_Interaction_with_Individual_Subject_Data_Tutorial -eq 1 ]; then
 
   export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs
   cd $SUBJECTS_DIR
-  
+
   run_cmd "freeview -v \
   good_output/mri/T1.mgz \
   good_output/mri/wm.mgz \
@@ -346,9 +342,9 @@ fi
 if [ $do_Troubleshooting_Tutorial -eq 1 ]; then
 
   export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs
-  
+
   run_cmd "cd $SUBJECTS_DIR"
-  
+
   run_cmd "freeview -v  pial_edits_before/mri/T1.mgz  \
   pial_edits_before/mri/brainmask.mgz  \
   -f pial_edits_before/surf/lh.white:edgecolor=yellow \
@@ -489,14 +485,14 @@ if [ $do_Troubleshooting_Tutorial -eq 1 ]; then
   tal_before/mri/brainmask.mgz:reg=tal_before/mri/transforms/talairach.xfm \
   tal_after/mri/brainmask.mgz:reg=tal_after/mri/transforms/talairach.xfm"
 
- # run_cmd "recon-all -s tal_before -talairach -use-mritotal -tal-check -clean-tal"
+  # run_cmd "recon-all -s tal_before -talairach -use-mritotal -tal-check -clean-tal"
 
 fi
 
 if [ $do_Group_Analysis_Tutorial -eq 1 ]; then
 
   export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs/group_analysis_tutorial
-  
+
   run_cmd "cd $SUBJECTS_DIR/glm"
 
   run_cmd "mris_preproc --fsgd gender_age.fsgd \
@@ -530,7 +526,7 @@ if [ $do_Group_Analysis_Tutorial -eq 1 ]; then
   run_cmd "freeview -f $SUBJECTS_DIR/fsaverage/surf/lh.inflated:annot=aparc.annot:annot_outline=1:overlay=lh.gender_age.glmdir/lh-Avg-thickness-age-Cor/sig.mgh:overlay_threshold=4,5 -viewport 3d"
 
   export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs/group_analysis_tutorial
-  
+
   run_cmd "cd $SUBJECTS_DIR/glm"
 
   run_cmd "mri_glmfit-sim \
@@ -548,7 +544,7 @@ fi
 if [ $do_QDEC_Tutorial -eq 1 ]; then
 
   export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs
- 
+
   run_cmd "cd $SUBJECTS_DIR"
 
   run_cmd "if [ ! -e fsaverage ];then ln -s $FREESURFER_HOME/subjects/fsaverage;fi"
@@ -590,7 +586,7 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
 
   run_cmd "cat qdec/long.qdec.table.dat"
 
-  ## DO NOT RUN THIS COMMANS. It will take a while and has already been done for you. 
+  ## DO NOT RUN THIS COMMANS. It will take a while and has already been done for you.
   #run_cmd "long_mris_slopes --qdec ./qdec/long.qdec.table.dat \
   #--meas thickness --hemi lh --do-avg --do-rate --do-pc1 --do-spc \
   #--do-stack --do-label --time years --qcache fsaverage --sd $SUBJECTS_DIR"
@@ -649,7 +645,7 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
 
   run_cmd "recon-all -subjid OAS2_0004_MR2 -skullstrip -wsthresh 55 -clean-bm -no-wsgcaatlas"
 
- # run_cmd "recon-all -subjid OAS2_0004_MR1 -autorecon2 -autorecon3"
+  # run_cmd "recon-all -subjid OAS2_0004_MR1 -autorecon2 -autorecon3"
 
   #run_cmd "recon-all -subjid OAS2_0004_MR2 -autorecon2 -autorecon3"
 
@@ -666,7 +662,6 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
             OAS2_0004_MR2_fixed/surf/rh.pial:edgecolor=red \
             OAS2_0004_MR2_fixed/surf/lh.white:edgecolor=blue \
             OAS2_0004_MR2_fixed/surf/rh.white:edgecolor=blue"
-
 
   run_cmd "freeview -v OAS2_0057/mri/T1.mgz \
             OAS2_0057/mri/brainmask.mgz \
@@ -787,9 +782,9 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
             OAS2_0121_MR2.long.OAS2_0121/surf/lh.white:edgecolor=blue \
             OAS2_0121_MR2.long.OAS2_0121/surf/rh.white:edgecolor=blue"
 
- # run_cmd "recon-all -subjid OAS2_0121_MR1 -autorecon2 -autorecon3"
+  # run_cmd "recon-all -subjid OAS2_0121_MR1 -autorecon2 -autorecon3"
 
- # run_cmd "recon-all -subjid OAS2_0121_MR2 -autorecon2 -autorecon3"
+  # run_cmd "recon-all -subjid OAS2_0121_MR2 -autorecon2 -autorecon3"
 
   run_cmd "freeview -v OAS2_0121_MR1_fixed/mri/T1.mgz \
             OAS2_0121_MR1_fixed/mri/brainmask.mgz \
@@ -805,7 +800,7 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
             OAS2_0121_MR2_fixed/surf/lh.white:edgecolor=blue \
             OAS2_0121_MR2_fixed/surf/rh.white:edgecolor=blue"
 
- # run_cmd "recon-all -base OAS2_0121 -tp OAS2_0121_MR1 -tp OAS2_0121_MR2 -all"
+  # run_cmd "recon-all -base OAS2_0121 -tp OAS2_0121_MR1 -tp OAS2_0121_MR2 -all"
 
   run_cmd "freeview -v OAS2_0121_intermediate/mri/T1.mgz \
             OAS2_0121_intermediate/mri/brainmask.mgz \
@@ -814,11 +809,11 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
             OAS2_0121_intermediate/surf/lh.white:edgecolor=blue \
             OAS2_0121_intermediate/surf/rh.white:edgecolor=blue"
 
- # run_cmd "recon-all -base OAS2_0121 -autorecon2 -autorecon3"
+  # run_cmd "recon-all -base OAS2_0121 -autorecon2 -autorecon3"
 
   #run_cmd "recon-all -long OAS2_0121_MR1 OAS2_0121 -all"
 
- # run_cmd "recon-all -long OAS2_0121_MR2 OAS2_0121 -all"
+  # run_cmd "recon-all -long OAS2_0121_MR2 OAS2_0121 -all"
 
   run_cmd "freeview -v OAS2_0121_MR1.long.OAS2_0121/mri/T1.mgz \
             OAS2_0121_MR1.long.OAS2_0121/mri/brainmask.mgz \
@@ -840,8 +835,6 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
             OAS2_0121_MR1.long.OAS2_0121_fixed/surf/rh.pial:edgecolor=red \
             OAS2_0121_MR1.long.OAS2_0121_fixed/surf/lh.white:edgecolor=blue \
             OAS2_0121_MR1.long.OAS2_0121_fixed/surf/rh.white:edgecolor=blue"
-
-
 
   run_cmd "freeview -v OAS2_0185/mri/wm.mgz \
             OAS2_0185/mri/brainmask.mgz \
@@ -880,7 +873,6 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
 
   #run_cmd "recon-all -base OAS2_0185 -autorecon2-wm -autorecon3"
 
-
   run_cmd "freeview -v OAS2_0185_fixed/mri/wm.mgz \
             OAS2_0185_fixed/mri/brainmask.mgz \
          -f OAS2_0185_fixed/surf/lh.pial:edgecolor=red \
@@ -890,7 +882,7 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
 
   #run_cmd "recon-all -long OAS2_0185_MR1 OAS2_0185 -all"
 
-#  run_cmd "recon-all -long OAS2_0185_MR2 OAS2_0185 -all"
+  #  run_cmd "recon-all -long OAS2_0185_MR2 OAS2_0185 -all"
 
   run_cmd "freeview -v OAS2_0185_MR1.long.OAS2_0185_fixed/mri/wm.mgz \
             OAS2_0185_MR1.long.OAS2_0185_fixed/mri/brainmask.mgz \
@@ -906,7 +898,6 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
             OAS2_0185_MR2.long.OAS2_0185_fixed/surf/lh.white:edgecolor=blue \
             OAS2_0185_MR2.long.OAS2_0185_fixed/surf/rh.white:edgecolor=blue"
 
-
   run_cmd "freeview -v OAS2_0002_MR2/mri/brain.finalsurfs.mgz \
             OAS2_0002_MR2/mri/aseg.mgz:colormap=lut:opacity=0.25 \
          -f OAS2_0002_MR2/surf/lh.pial:edgecolor=red \
@@ -916,8 +907,8 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
 
   run_cmd "cp OAS2_0002_MR2/mri/brain.finalsurfs.mgz OAS2_0002_MR2/mri/brain.finalsurfs.manedit.mgz"
 
-#  run_cmd "recon-all -subjid OAS2_0002_MR2 -autorecon-pial"
-  
+  #  run_cmd "recon-all -subjid OAS2_0002_MR2 -autorecon-pial"
+
   run_cmd "freeview -v OAS2_0002_MR2_fixed/mri/brainmask.mgz \
             OAS2_0002_MR2_fixed/mri/brain.finalsurfs.manedit.mgz \
             OAS2_0002_MR2_fixed/mri/aseg.mgz:colormap=lut:opacity=0.25 \
@@ -927,7 +918,6 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
             OAS2_0002_MR2_fixed/surf/rh.white:edgecolor=blue"
 
   run_cmd "cp OAS2_0002_MR1/mri/brain.finalsurfs.mgz OAS2_0002_MR1/mri/brain.finalsurfs.manedit.mgz"
-
 
   run_cmd "freeview -v OAS2_0002_MR1/mri/brainmask.mgz \
             OAS2_0002_MR1/mri/brain.finalsurfs.manedit.mgz \
@@ -954,7 +944,7 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
 
   run_cmd "cp OAS2_0002/mri/brain.finalsurfs.mgz OAS2_0002/mri/brain.finalsurfs.manedit.mgz"
 
- # run_cmd "recon-all -base OAS2_0002 -autorecon-pial"
+  # run_cmd "recon-all -base OAS2_0002 -autorecon-pial"
 
   run_cmd "freeview -v OAS2_0002_fixed/mri/brainmask.mgz \
             OAS2_0002_fixed/mri/brain.finalsurfs.manedit.mgz \
@@ -981,7 +971,6 @@ if [ $do_Logitudinal_Tutorial -eq 1 ]; then
             OAS2_0002_MR2.long.OAS2_0002/surf/rh.white:edgecolor=blue"
 
   run_cmd "cp OAS2_0002_MR1.long.OAS2_0002/mri/brain.finalsurfs.mgz OAS2_0002_MR1.long.OAS2_0002/mri/brain.finalsurfs.manedit.mgz"
-
 
   run_cmd "freeview -v OAS2_0002_MR1.long.OAS2_0002/mri/brain.finalsurfs.manedit.mgz \
             OAS2_0002_MR1.long.OAS2_0002/mri/aseg.mgz:colormap=lut:opacity=0.25 \
@@ -1085,8 +1074,8 @@ if [ $do_Diffusion_Processing_Tutorial -eq 1 ]; then
   export TUTORIAL_DIR=$TUTORIAL_DATA/diffusion_tutorial
   subj=Diff001
 
-  ## DO NOT RUN THIS COMMAND. It would take a long time so it has already been run for you. 
-  #run_cmd "dt_recon --i $TUTORIAL_DIR/$subj/orig/*-1.dcm 
+  ## DO NOT RUN THIS COMMAND. It would take a long time so it has already been run for you.
+  #run_cmd "dt_recon --i $TUTORIAL_DIR/$subj/orig/*-1.dcm
   #--s $subj --o $TUTORIAL_DIR/$subj/dtrecon"
 
   run_cmd "freeview -v $TUTORIAL_DIR/$subj/dtrecon/fa.nii \
@@ -1167,7 +1156,7 @@ if [ $do_TRACULA_Tutorial -eq 1 ]; then
   run_cmd "tractstats2table --load-pathstats-from-file \
   $TUTORIAL_DATA/diffusion_tutorial/lh.ilf.list --overall \
   --only-measures FA_Avg --tablefile $TUTORIAL_DATA/diffusion_tutorial/lh.ilf.FA_Avg.table"
-  
+
   run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/lh.ilf.All.table"
 
   run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/elmo.2012/dpath/lh.ilf_AS_avg33_mni_bbr/pathstats.byvoxel.txt"
@@ -1175,7 +1164,7 @@ if [ $do_TRACULA_Tutorial -eq 1 ]; then
   run_cmd "trac-all -stat -c $TUTORIAL_DATA/diffusion_tutorial/dmrirc.tutorial"
 
   run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/elmo.2012/dpath/lh.ilf_AS_avg33_mni_bbr/pathstats.byvoxel.txt"
- 
+
   run_cmd "cat $TUTORIAL_DATA/diffusion_tutorial/elmo.2012/dpath/lh.ilf_AS_avg33_mni_bbr/pathstats.byvoxel.txt"
 
   run_cmd "freeview -v $FSLDIR/data/standard/MNI152_T1_1mm_brain.nii.gz \
@@ -1213,7 +1202,7 @@ if [ $do_MultiModal_Integration -eq 1 ]; then
   run_cmd "tkregister2 --mov template.nii --reg register.dat --surf"
 
   run_cmd "export SUBJECTS_DIR=$TUTORIAL_DATA/buckner_data/tutorial_subjs"
- 
+
   run_cmd "cd $SUBJECTS_DIR/multimodal/dti"
 
   run_cmd "freeview -v \
@@ -1367,7 +1356,7 @@ fi
 if [ $do_FSFAST_Tutorial -eq 1 ]; then
 
   run_cmd "cd $TUTORIAL_DATA/fsfast-functional"
- 
+
   run_cmd "ls"
 
   run_cmd "cd $TUTORIAL_DATA/fsfast-functional/sess01.noproc"
@@ -1401,7 +1390,7 @@ if [ $do_FSFAST_Tutorial -eq 1 ]; then
   run_cmd "cat sessidlist"
 
   run_cmd "export SUBJECTS_DIR=$TUTORIAL_DATA/fsfast-tutorial.subjects"
-  
+
   run_cmd "cd $TUTORIAL_DATA/fsfast-functional"
 
   run_cmd "preproc-sess -s sess01 -fsd bold \
@@ -1497,7 +1486,7 @@ if [ $do_FSFAST_Tutorial -eq 1 ]; then
   -freeview"
 
   run_cmd "cd sess01/bold"
- 
+
   run_cmd "ls | grep workmem.sm05.lh"
 
   run_cmd "cd workmem.sm05.lh"
@@ -1556,10 +1545,10 @@ if [ $do_FSFAST_Tutorial -eq 1 ]; then
 
   run_cmd "cat my-glm.wls/osgm/cache.th30.pos.sig.cluster.summary"
 
-  run_cmd "cd $TUTORIAL_DATA/fsfast-functional/group/workmem.sm05.mni305/encode-v-base" 
+  run_cmd "cd $TUTORIAL_DATA/fsfast-functional/group/workmem.sm05.mni305/encode-v-base"
 
   run_cmd "ls"
-  
+
   run_cmd "cd $TUTORIAL_DATA/fsfast-functional/group/workmem.sm05.mni305/encode-v-base"
 
   run_cmd "mri_glmfit --y ces.nii.gz --wls cesvar.nii.gz --osgm  \
