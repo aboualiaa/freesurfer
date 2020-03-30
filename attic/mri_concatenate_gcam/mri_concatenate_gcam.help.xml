@@ -22,7 +22,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mri_concatenate_gcam -- concatenate transforms</name>
   <synopsis>mri_concatenate_gcam [options] &lt;input 1&gt; ... &lt;output&gt;</synopsis>

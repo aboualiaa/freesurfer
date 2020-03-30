@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <help>
   <name>AntsN4BiasFieldCorrectionFs</name>
   <synopsis>AntsN4BiasFieldCorrectionFs [options] -i &lt;invol&gt; -o &lt;outvol&gt;</synopsis>

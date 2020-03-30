@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_pretess</name>
-	<synopsis>mri_pretess [options] filledvol labelstring normvol newfilledvol</synopsis>
-	<description>Changes white matter (WM) segmentation so that the neighbors of all voxels labeled as WM have a face in common - no edges or corners allowed.</description>
+  <name>mri_pretess</name>
+  <synopsis>mri_pretess [options] filledvol labelstring normvol newfilledvol</synopsis>
+  <description>Changes white matter (WM) segmentation so that the neighbors of all voxels labeled as WM have a face in common - no edges or corners allowed.</description>
   <arguments>
     <positional>
       <argument>filledvol</argument>

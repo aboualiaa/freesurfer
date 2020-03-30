@@ -22,7 +22,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>lta_diff</name>
   <synopsis>lta_diff trans1.lta [trans2.lta] [options ...]</synopsis>
@@ -57,7 +56,6 @@ The Affine Trans. Dist. (RMS) is based on Jenkinson 99 RMS deviation tech report
       <explanation>in mm, use for RMS (dist 2), default 100 to include head</explanation>
     </optional-flagged>
   </arguments>
-   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
+  <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
   <see-also>mri_robust_register (to construct registrations between images)</see-also>
 </help>
- 

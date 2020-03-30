@@ -21,7 +21,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mris_apply_reg</name>
   <synopsis>mris_apply_reg</synopsis>
@@ -70,15 +69,12 @@ Note that lh.fsaverage_sym.sphere.reg is used.  This is intentional; the left he
      --streg lh.sphere.left_right rh.sphere.left_right \
      --trg rh.lh.source.label
   </example>
-
   <example>
     Map a surface from the anatomical space to fMRI space.
     First, you have to get an LTA registration file (eg, with bbregister)
     mris_apply_reg --lta lh.white fmri.reg.lta ./lh.white.fmri
   </example>
-
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
   <see-also>mris_convert</see-also>
 </help>
-

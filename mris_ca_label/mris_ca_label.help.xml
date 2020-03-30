@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_ca_label</name>
-	<synopsis>mris_ca_label [options] &lt;subject&gt; &lt;hemi&gt; &lt;canonsurf&gt; &lt;classifier&gt; &lt;outputfile&gt;</synopsis>
-	<description>For a single subject, produces an annotation file, in which each cortical surface vertex is assigned a neuroanatomical label.This automatic procedure employs data from a previously-prepared atlas file. An atlas file is created from a training set, capturing region data manually drawn by neuroanatomists combined with statistics on variability correlated to geometric information derived from the cortical model (sulcus and curvature). Besides the atlases provided with FreeSurfer, new ones can be prepared using mris_ca_train).</description>
+  <name>mris_ca_label</name>
+  <synopsis>mris_ca_label [options] &lt;subject&gt; &lt;hemi&gt; &lt;canonsurf&gt; &lt;classifier&gt; &lt;outputfile&gt;</synopsis>
+  <description>For a single subject, produces an annotation file, in which each cortical surface vertex is assigned a neuroanatomical label.This automatic procedure employs data from a previously-prepared atlas file. An atlas file is created from a training set, capturing region data manually drawn by neuroanatomists combined with statistics on variability correlated to geometric information derived from the cortical model (sulcus and curvature). Besides the atlases provided with FreeSurfer, new ones can be prepared using mris_ca_train).</description>
   <arguments>
     <positional>
       <argument>&lt;subject&gt;</argument>
@@ -75,13 +74,12 @@
     <output>outputfile</output>
     <explanation>labeled cortical surface model</explanation>
   </outputs>
-	<example>mris_ca_label -orig white  -novar  -t $SUBJECTS_DIR/scripts/colortable_final.txt  my_subject  lh  sphere.reg  $SUBJECTS_DIR/average/lh.rahul.gcs  $SUBJECTS_DIR/my_subject/label/lh.raparc.annot 
+  <example>mris_ca_label -orig white  -novar  -t $SUBJECTS_DIR/scripts/colortable_final.txt  my_subject  lh  sphere.reg  $SUBJECTS_DIR/average/lh.rahul.gcs  $SUBJECTS_DIR/my_subject/label/lh.raparc.annot 
 
 In this example, mris_ca_label take sphere.reg as the canonical surface input file, lh.rahul.gcs as the classifier array input file, and writes the annotated surface info to lh.raparc.annot. The file colortable_final.txt is embedded into the output file, so that tksurfer (and other utilities) can read it in.
 
  </example>
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mris_sample_parc, mris_ca_train</see-also>
+  <see-also>mris_sample_parc, mris_ca_train</see-also>
 </help>
-

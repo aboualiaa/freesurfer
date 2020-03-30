@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_make_surfaces</name>
-	<synopsis>mris_make_surfaces [options] &lt;subject name&gt; &lt;hemisphere&gt;</synopsis>
-	<description>This program positions the tessellation of the cortical surface at the white matter surface, then the gray matter surface and generate surface files for these surfaces as well as a 'curvature' file for the cortical thickness, and a surface file which approximates layer IV of the cortical sheet.</description>
+  <name>mris_make_surfaces</name>
+  <synopsis>mris_make_surfaces [options] &lt;subject name&gt; &lt;hemisphere&gt;</synopsis>
+  <description>This program positions the tessellation of the cortical surface at the white matter surface, then the gray matter surface and generate surface files for these surfaces as well as a 'curvature' file for the cortical thickness, and a surface file which approximates layer IV of the cortical sheet.</description>
   <arguments>
     <positional>
       <argument>&lt;Subject Name&gt;</argument>
@@ -142,4 +141,3 @@
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

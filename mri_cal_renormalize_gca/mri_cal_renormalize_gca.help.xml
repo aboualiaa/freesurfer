@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_ca_register</name>
-	<synopsis>mri_ca_register &lt;invol&gt; &lt;template&gt; &lt;outvol&gt;</synopsis>
-	<description>This generates a multi-dimensional talairach transform from a gca file and talairach.lta file</description>
+  <name>mri_ca_register</name>
+  <synopsis>mri_ca_register &lt;invol&gt; &lt;template&gt; &lt;outvol&gt;</synopsis>
+  <description>This generates a multi-dimensional talairach transform from a gca file and talairach.lta file</description>
   <arguments>
     <positional>
       <argument>invol</argument>
@@ -84,9 +83,9 @@
     <output>outvol</output>
     <explanation>multidimensional transform in m3d format</explanation>
   </outputs>
-	<example>mri_ca_register -levels 6 -mask subject1/mri/brain -T subject1/mri/transforms/talairach_one.lta subject1/mri/norm_one.mgh single_one.gca subject1/mri/transforms/talairach_one.m3d </example>
-	<example>mri_ca_register -tol 1 -mask subject1/mri/brain -T subject1/mri/transforms/talairach_multi.lta subject1/mri/norm_multi.mgh multi_one.gca subject1/mri/transforms/talairach_multi.m3d</example>
+  <example>mri_ca_register -levels 6 -mask subject1/mri/brain -T subject1/mri/transforms/talairach_one.lta subject1/mri/norm_one.mgh single_one.gca subject1/mri/transforms/talairach_one.m3d </example>
+  <example>mri_ca_register -tol 1 -mask subject1/mri/brain -T subject1/mri/transforms/talairach_multi.lta subject1/mri/norm_multi.mgh multi_one.gca subject1/mri/transforms/talairach_multi.m3d</example>
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>*****************************************************************************</see-also>
+  <see-also>*****************************************************************************</see-also>
 </help>

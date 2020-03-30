@@ -21,17 +21,15 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_cc</name>
-	<synopsis>mri_cc  &lt;subject name&gt;</synopsis>
-	<description>This program segments the corpus callosum into five separate labels in the subcortical segmentation volume 'aseg.mgz'. The divisions of the cc are equally spaced in terms of distance along the primary eigendirection (pretty much the long axis) of the cc. The lateral extent can be changed with the -T &lt;thickness&gt; parameter, where &lt;thickness&gt; is the distance off the midline (so -T 1 would result in the who CC being 3mm thick). The default is 2 so it's 5mm thick. The aseg.stats values should be volume.</description>
+  <name>mri_cc</name>
+  <synopsis>mri_cc  &lt;subject name&gt;</synopsis>
+  <description>This program segments the corpus callosum into five separate labels in the subcortical segmentation volume 'aseg.mgz'. The divisions of the cc are equally spaced in terms of distance along the primary eigendirection (pretty much the long axis) of the cc. The lateral extent can be changed with the -T &lt;thickness&gt; parameter, where &lt;thickness&gt; is the distance off the midline (so -T 1 would result in the who CC being 3mm thick). The default is 2 so it's 5mm thick. The aseg.stats values should be volume.</description>
   <arguments>
     <positional>
       <argument>subject name</argument>
     </positional>
-    <required-flagged>
-    </required-flagged>
+    <required-flagged/>
     <optional-flagged>
       <argument>-o &lt;fname&gt;</argument>
       <explanation>write aseg including CC to SDIR/mri/&lt;fname&gt;</explanation>
@@ -55,16 +53,15 @@
       <explanation>skipping &lt;int&gt; voxels in rotational align</explanation>
       <argument>-m &lt;float&gt;</argument>
       <explanation>set max of rotations to be searched (default=7deg)</explanation>
-  </optional-flagged>
+    </optional-flagged>
   </arguments>
   <outputs>
     <output>outvol</output>
     <explanation>output volume</explanation>
   </outputs>
-	<example>mri_cc -aseg aseg.mgz -o aseg.auto_CCseg.mgz bert
+  <example>mri_cc -aseg aseg.mgz -o aseg.auto_CCseg.mgz bert
 
 Uses the aseg volume and creates aseg.auto_CCseg.mgz with five divisions of the corpus callosum.</example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mri_ca_label</see-also>
+  <see-also>mri_ca_label</see-also>
 </help>
-

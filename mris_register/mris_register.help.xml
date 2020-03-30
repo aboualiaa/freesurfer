@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_register</name>
-	<synopsis>mris_register [options] &lt;surf_fname&gt; &lt;target&gt; &lt;out_fname&gt;</synopsis>
-	<description>This program registers a surface to an average surface template.</description>
+  <name>mris_register</name>
+  <synopsis>mris_register [options] &lt;surf_fname&gt; &lt;target&gt; &lt;out_fname&gt;</synopsis>
+  <description>This program registers a surface to an average surface template.</description>
   <arguments>
     <positional>
       <argument>&lt;surf_fname&gt;</argument>
@@ -154,4 +153,3 @@
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

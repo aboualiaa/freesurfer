@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_curvature</name>
-	<synopsis>mris_curvature [&lt;options&gt;] insurf</synopsis>
-	<description>This program will compute the second fundamental form of a cortical surface. It will create two new files &lt;hemi&gt;.&lt;surface&gt;.H and &lt;hemi&gt;.&lt;surface&gt;.K with the mean and Gaussian curvature respectively.</description>
+  <name>mris_curvature</name>
+  <synopsis>mris_curvature [&lt;options&gt;] insurf</synopsis>
+  <description>This program will compute the second fundamental form of a cortical surface. It will create two new files &lt;hemi&gt;.&lt;surface&gt;.H and &lt;hemi&gt;.&lt;surface&gt;.K with the mean and Gaussian curvature respectively.</description>
   <arguments>
     <positional>
       <argument>&lt;insurf&gt;</argument>
@@ -57,10 +56,9 @@
     <output>insurf.K</output>
     <explanation>gaussian curvature file</explanation>
   </outputs>
-	<example>mris_curvature lh.pial
+  <example>mris_curvature lh.pial
 Compute the curvature and do not produce output files. </example>
-	<example>mris_curvature -w -a 10 lh.pial
+  <example>mris_curvature -w -a 10 lh.pial
 Smooth 10 iterations and produce output files.</example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

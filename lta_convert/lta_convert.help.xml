@@ -22,7 +22,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>lta_convert</name>
   <synopsis>convert_convert [options]</synopsis>
@@ -57,7 +56,7 @@
       <argument>--outitk &lt;outitk.txt&gt;</argument>
       <explanation>output transform in ITK txt format (inverse LPS2LPS)</explanation>
     </required-flagged>
-    <optional-flagged>      
+    <optional-flagged>
       <argument>--invert</argument>
       <explanation>inverts transform</explanation>
       <argument>--ltavox2vox</argument>

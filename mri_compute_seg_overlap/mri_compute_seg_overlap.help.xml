@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_compute_seg_overlap - compute coefficents of overlap</name>
-	<synopsis>mri_compute_seg_overlap [&lt;options&gt;] segvol1 segvol2</synopsis>
-	<description>This program compares two segmentation volumes and computes the Dice and Jaccard Coefficients. It considers 12 major structures (label numbers):
+  <name>mri_compute_seg_overlap - compute coefficents of overlap</name>
+  <synopsis>mri_compute_seg_overlap [&lt;options&gt;] segvol1 segvol2</synopsis>
+  <description>This program compares two segmentation volumes and computes the Dice and Jaccard Coefficients. It considers 12 major structures (label numbers):
     L/R Hippocampus (17,53)
     L/R Caudate (11,50)
     L/R Putamen (12,51)
@@ -84,4 +83,3 @@
 Used to compare the quality of the automatic segmentation with a manual segmentation.  A Dice of 0.85 is about average. </example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

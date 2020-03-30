@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>talairach_afd</name>
-	<synopsis>talairach_afd -subj &lt;subject_name&gt; [-T &lt;p-value threshold&gt;] or talairach_afd -xfm &lt;xfm_fname&gt; [-T &lt;p-value threshold&gt;]</synopsis>
-	<description>This program detects Talairach alignment failures.</description>
+  <name>talairach_afd</name>
+  <synopsis>talairach_afd -subj &lt;subject_name&gt; [-T &lt;p-value threshold&gt;] or talairach_afd -xfm &lt;xfm_fname&gt; [-T &lt;p-value threshold&gt;]</synopsis>
+  <description>This program detects Talairach alignment failures.</description>
   <arguments>
     <positional>
       <intro>****************************************************************</intro>
@@ -44,7 +43,7 @@
       <explanation>specify directory containing .afd data files</explanation>
       <argument>-V</argument>
       <explanation>verbose</explanation>
- </optional-flagged>
+    </optional-flagged>
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>

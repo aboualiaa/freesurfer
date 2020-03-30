@@ -21,7 +21,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mri_convert</name>
   <synopsis>mri_convert [options] &lt;in volume&gt; &lt;out volume&gt;</synopsis>
@@ -134,7 +133,7 @@ Supply the orientation information in the form of an orientation string  (ostrin
       <explanation>DO apply DICOM rescale intercept and slope based on (0028,1052) (0028,1053). Same as setenv FS_RESCALE_DICOM 1</explanation>
       <intro>APPLYING TRANSFORMS (INCLUDING TALAIRACH) </intro>
       <argument>--apply_transform xfmfile (-T or -at) </argument>
-      <explanation>apply tranform given by xfm or m3z files </explanation> 
+      <explanation>apply tranform given by xfm or m3z files </explanation>
       <explanation>The volume can be resampled into another space by supplying a transform using the -apply_transform flag. This reads the transform file and applies the transform (when --apply_inverse_transform is used, the transform is inverted and then applied). An example of a transform file is talairach.xfm as found in subjectid/mri/transforms. To convert a subject's orig volume to talairach space, execute the following lines: 
     cd subjectid/mri 
     mkdir talairach 
@@ -146,28 +145,28 @@ To evaluate the result, run:
    tkmedit -f $SUBJECTS_DIR/talairach/mri/orig.mgz 
       -aux orig.talairach.mgz 
  
-The main and aux volumes should overlap very closely. If they do not, use tkregister2 to fix it (run tkregister --help for docs).</explanation> 
+The main and aux volumes should overlap very closely. If they do not, use tkregister2 to fix it (run tkregister --help for docs).</explanation>
       <argument>--apply_inverse_transform xfmfile (-ait) </argument>
-      <explanation>apply inverse of tranform given by xfm or m3z files </explanation> 
+      <explanation>apply inverse of tranform given by xfm or m3z files </explanation>
       <argument>--devolvexfm subjectid</argument>
       <argument>--like name</argument>
-      <explanation>output is embedded in a volume like name, or in stats-table like name (measure, columns, rows)</explanation> 
+      <explanation>output is embedded in a volume like name, or in stats-table like name (measure, columns, rows)</explanation>
       <argument>--crop &lt;x&gt; &lt;y&gt; &lt;z&gt; </argument>
-      <explanation>crop to 256 around center (x,y,z) </explanation> 
-      <argument>--cropsize &lt;dx&gt; &lt;dy&gt; &lt;dz&gt;</argument> 
-      <explanation>crop to size &lt;dx, dy, dz&gt;</explanation> 
+      <explanation>crop to 256 around center (x,y,z) </explanation>
+      <argument>--cropsize &lt;dx&gt; &lt;dy&gt; &lt;dz&gt;</argument>
+      <explanation>crop to size &lt;dx, dy, dz&gt;</explanation>
       <argument>--cutends ncut </argument>
-      <explanation>remove ncut slices from the ends</explanation> 
+      <explanation>remove ncut slices from the ends</explanation>
       <argument>--slice-crop s_start s_end </argument>
-      <explanation>keep slices s_start to s_end</explanation> 
+      <explanation>keep slices s_start to s_end</explanation>
       <argument>--slice-reverse </argument>
-      <explanation>reverse order of slices, update vox2ras</explanation> 
+      <explanation>reverse order of slices, update vox2ras</explanation>
       <argument>--nslices-override nslices </argument>
-      <explanation>Use this number of slices when converting DICOM mosaics</explanation> 
+      <explanation>Use this number of slices when converting DICOM mosaics</explanation>
       <argument>--mosaic-fix-noascii</argument>
       <explanation>fix the center of DICOM mosaics without using the ASCII header</explanation>
       <argument>--slice-bias alpha </argument>
-      <explanation>apply half-cosine bias field</explanation> 
+      <explanation>apply half-cosine bias field</explanation>
       <argument>--fwhm fwhm </argument>
       <explanation>smooth input volume by fwhm mm</explanation>
       <intro>SPECIFYING THE INPUT AND OUTPUT FILE TYPES</intro>
@@ -237,7 +236,7 @@ if the input/output has extension .nii.gz, then compressed is used</explanation>
       <argument>-i, --input_volume</argument>
       <argument>-o, --output_volume</argument>
       <argument>-c, --conform</argument>
-      <explanation>conform to 1mm voxel size in coronal</explanation> 
+      <explanation>conform to 1mm voxel size in coronal</explanation>
       <explanation>slice direction with 256^3 or more</explanation>
       <argument>-cm, --conform_min</argument>
       <explanation>conform to the src min direction size </explanation>
@@ -261,21 +260,21 @@ if the input/output has extension .nii.gz, then compressed is used</explanation>
       <argument>--dil-seg-mask mask</argument>
       <explanation>Dilate segmentation boundaries to fill mask</explanation>
       <argument>-f,  --frame frameno [...]</argument>
-      <explanation>keep only 0-based frame number(s)</explanation> 
+      <explanation>keep only 0-based frame number(s)</explanation>
       <argument>--mid-frame</argument>
-      <explanation>keep only the middle frame</explanation> 
+      <explanation>keep only the middle frame</explanation>
       <argument>--nskip n</argument>
-      <explanation>skip the first n frames</explanation> 
+      <explanation>skip the first n frames</explanation>
       <argument>--ndrop n</argument>
-      <explanation>drop the last n frames</explanation> 
+      <explanation>drop the last n frames</explanation>
       <argument>--fsubsample start delta end</argument>
-      <explanation>frame subsampling (end = -1 for end)</explanation> 
+      <explanation>frame subsampling (end = -1 for end)</explanation>
       <argument>-sc, --scale factor </argument>
-      <explanation>input intensity scale factor</explanation> 
+      <explanation>input intensity scale factor</explanation>
       <argument>-osc, --out-scale factor</argument>
-      <explanation>output intensity scale factor</explanation> 
+      <explanation>output intensity scale factor</explanation>
       <argument>--rescale rescalefactor </argument>
-      <explanation>Rescale input so that the global mean is rescalefactor</explanation> 
+      <explanation>Rescale input so that the global mean is rescalefactor</explanation>
       <argument>-il, --in_like</argument>
       <argument>-roi</argument>
       <argument>-fp, --fill_parcellation</argument>
@@ -315,4 +314,3 @@ The main and aux volumes should overlap very closely. If they do not, use tkregi
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
   <see-also>mris_convert</see-also>
 </help>
-

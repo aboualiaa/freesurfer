@@ -22,7 +22,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mri_fuse_segmentations -- fuse a set of segmentations (asegs)</name>
   <synopsis>mri_fuse_segmentations -a &lt;aseg.mgz&gt; ... -c &lt;aseg.auto_noCCseg.mgz&gt; ... -n &lt;norm.mgz&gt; ... [options] &lt;input&gt; &lt;output&gt;</synopsis>
@@ -62,4 +61,3 @@
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
   <see-also>mri_concatenate_lta, mri_concatenate_gcam</see-also>
 </help>
-

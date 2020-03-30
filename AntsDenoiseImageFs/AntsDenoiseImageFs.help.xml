@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <help>
   <name>AntsDenoiseImageFs</name>
   <synopsis>AntsDenoiseImageFs [options] -i &lt;invol&gt; -o &lt;outvol&gt;</synopsis>

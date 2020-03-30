@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_edit_wm_with_aseg</name>
-	<synopsis>mri_edit_wm_with_aseg &lt;options&gt; input-wm input-T1/brain aseg output-wm</synopsis>
-	<description>*****************************************</description>
+  <name>mri_edit_wm_with_aseg</name>
+  <synopsis>mri_edit_wm_with_aseg &lt;options&gt; input-wm input-T1/brain aseg output-wm</synopsis>
+  <description>*****************************************</description>
   <arguments>
     <positional>
       <intro>*********************************************</intro>
@@ -46,7 +45,6 @@
       <argument>-debug_voxel Gx Gy Gz</argument>
     </optional-flagged>
   </arguments>
-	<example>mri_edit_wm_with_aseg -keep-in wm.seg.mgz brain.mgz aseg.mgz wm.asegedit.mgz</example>
+  <example>mri_edit_wm_with_aseg -keep-in wm.seg.mgz brain.mgz aseg.mgz wm.asegedit.mgz</example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

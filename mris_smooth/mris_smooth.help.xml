@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_smooth</name>
+  <name>mris_smooth</name>
   <synopsis>mris_smooth [options] &lt;input surface&gt; &lt;output surface&gt;</synopsis>
-	<description>This program smooths the tessellation of a cortical surface and write out the first and second order properties after smoothing to the files $hemi.curv (mean curvature) and $hemi.area (area).</description>
+  <description>This program smooths the tessellation of a cortical surface and write out the first and second order properties after smoothing to the files $hemi.curv (mean curvature) and $hemi.area (area).</description>
   <arguments>
     <positional>
       <argument>input surface</argument>
@@ -52,7 +51,6 @@
       <argument>-m momentum</argument>
       <argument>-w nwrite</argument>
       <explanation>write snapshot every nwrite iterations</explanation>
-
     </optional-flagged>
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>

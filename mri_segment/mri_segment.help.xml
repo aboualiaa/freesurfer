@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_segment</name>
-	<synopsis>mri_segment &lt;classifierfile&gt; &lt;invol&gt; &lt;outvol&gt;</synopsis>
-	<description>This program segments white matter from the input volume.  The input volume should be normalized such that white matter voxels are ~110-valued, and the volume is conformed to 256^3.  This can be accomplished by:  mri_normalize invol outvol -conform</description>
+  <name>mri_segment</name>
+  <synopsis>mri_segment &lt;classifierfile&gt; &lt;invol&gt; &lt;outvol&gt;</synopsis>
+  <description>This program segments white matter from the input volume.  The input volume should be normalized such that white matter voxels are ~110-valued, and the volume is conformed to 256^3.  This can be accomplished by:  mri_normalize invol outvol -conform</description>
   <arguments>
     <positional>
       <argument>&lt;classifierfile&gt;</argument>
@@ -35,8 +34,7 @@
       <argument>&lt;outvol&gt;</argument>
       <explanation>output volume</explanation>
     </positional>
-    <required-flagged>
-    </required-flagged>
+    <required-flagged/>
     <optional-flagged>
       <argument>-no1d_remove &lt;s&gt;;</argument>
       <explanation>don't run code that removes 1D strands from segmentation</explanation>
@@ -110,4 +108,3 @@
   </outputs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

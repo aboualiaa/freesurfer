@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_tessellate</name>
-	<synopsis>mri_tessellate [options] &lt;invol&gt; &lt;labelvalue&gt; &lt;outsurf&gt;</synopsis>
-	<description>This program creates surface by tessellating given input volumeNote: the meaning of the labels can be found in $FREESURFER_HOME/FreeSurferColorLUT.txt</description>
+  <name>mri_tessellate</name>
+  <synopsis>mri_tessellate [options] &lt;invol&gt; &lt;labelvalue&gt; &lt;outsurf&gt;</synopsis>
+  <description>This program creates surface by tessellating given input volumeNote: the meaning of the labels can be found in $FREESURFER_HOME/FreeSurferColorLUT.txt</description>
   <arguments>
     <positional>
       <argument>&lt;invol&gt;</argument>
@@ -51,10 +50,9 @@
     <output>outsurf</output>
     <explanation>surface file, typically ?h.orig</explanation>
   </outputs>
-	<example>mri_tessellate $SUBJECTS_DIR/subjid/mri/filled 127 rh.orig</example>
-	<example>mri_tessellate $SUBJECTS_DIR/subjid/mri/aseg 17 lh.hippocampus</example>
+  <example>mri_tessellate $SUBJECTS_DIR/subjid/mri/filled 127 rh.orig</example>
+  <example>mri_tessellate $SUBJECTS_DIR/subjid/mri/aseg 17 lh.hippocampus</example>
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mri_pretess</see-also>
+  <see-also>mri_pretess</see-also>
 </help>
-

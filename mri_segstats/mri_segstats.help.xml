@@ -21,15 +21,12 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_segstats</name>
-	<synopsis>mri_segstats --seg segvol --annot  subject hemi parc --slabel subject hemi label --o file</synopsis>
-	<description>Calculates measures and stats derived from brain segmentation data. </description>
+  <name>mri_segstats</name>
+  <synopsis>mri_segstats --seg segvol --annot  subject hemi parc --slabel subject hemi label --o file</synopsis>
+  <description>Calculates measures and stats derived from brain segmentation data. </description>
   <arguments>
-    <positional>
-
-    </positional>
+    <positional/>
     <required-flagged>
       <argument>--seg segvol</argument>
       <explanation>Input segmentation volume. A segmentation is a volume whose voxel values indicate a segmentation or class. This can be as complicated as a FreeSurfer automatic cortical or subcortial segmentation or as simple as a binary mask. The format of segvol can be anything that mri_convert accepts as input (eg, analyze, nifti, mgh, bhdr, bshort, bfloat).
@@ -55,8 +52,7 @@ SUMMARY FILE FORMAT
 
 The summary file is an ascii file in which the segmentation statistics are reported. This file will have some 'header' information. Each header line begins with a '#'. There will be a row for each segmentation reported. The number and meaning of the columns depends somewhat how the program was run. The indentity of each column is given in the header. The first col is the row number. The second col is the segmentation id. The third col is the number of voxels in the segmentation. The fourth col is the volume of the segmentation in mm. If a color table was specified, then the next column will be the segmentation name. If an input volume was specified, then the next five columns will be intensity min, max, range, average, and standard deviation measured across the voxels in the segmentation.</explanation>
       <argument>--annot  subject hemi parc</argument>
-
-<explanation>Create a segmentation from hemi.parc.annot. subject is the name of the subject, not the full path to the subject. If parc is aparc or aparc.a2005s, then the segmentation numbers will match those in $FREESURFER_HOME/FreeSurferColorLUT.txt (and so aparc+aseg.mgz). The numbering can also be altered with --segbase. If an input is used, it must be a surface ovelay with the same dimension as the parcellation. This functionality makes mri_segstats partially redundant with mris_anatomical_stats. If parc is a full path to an annotation, then that file is used instead. </explanation>
+      <explanation>Create a segmentation from hemi.parc.annot. subject is the name of the subject, not the full path to the subject. If parc is aparc or aparc.a2005s, then the segmentation numbers will match those in $FREESURFER_HOME/FreeSurferColorLUT.txt (and so aparc+aseg.mgz). The numbering can also be altered with --segbase. If an input is used, it must be a surface ovelay with the same dimension as the parcellation. This functionality makes mri_segstats partially redundant with mris_anatomical_stats. If parc is a full path to an annotation, then that file is used instead. </explanation>
       <argument>--surf whitesurfname</argument>
       <explanation>Use this surface instead of ?h.white (with --annot), eg white.preaparc</explanation>
       <argument>--slabel subject hemi full_path_to_label</argument>
@@ -188,25 +184,24 @@ For each segmentation, computes the average waveform across all the voxels in th
       <explanation>set random number generator to seed N</explanation>
     </optional-flagged>
   </arguments>
-	<example>mri_segstats --seg $SUBJECTS_DIR/bert/mri/aseg --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --excludeid 0 --sum bert.aseg.sum
+  <example>mri_segstats --seg $SUBJECTS_DIR/bert/mri/aseg --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --excludeid 0 --sum bert.aseg.sum
 
 This will compute the segmentation statistics from the automatic FreeSurfer subcortical segmentation for non-empty segmentations and excluding segmentation 0 (UNKNOWN). The results are stored in bert.aseg.sum.</example>
-	<example>mri_segstats --seg $SUBJECTS_DIR/bert/mri/aseg --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --excludeid 0 --sum bert.aseg.sum --i $SUBJECTS_DIR/bert/mri/orig
+  <example>mri_segstats --seg $SUBJECTS_DIR/bert/mri/aseg --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --excludeid 0 --sum bert.aseg.sum --i $SUBJECTS_DIR/bert/mri/orig
 
 Same as above but intensity statistics from the orig volume will also be reported for each segmentation.</example>
-	<example>mri_segstats --seg aseg-in-func.img --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --excludeid 0 --i func.img --mask spmT.img --maskthresh 2.3 --sum bert.aseg-in-func.sum --avgwf bert.avgwf.dat --avgwfvol bert.avgwf.img
+  <example>mri_segstats --seg aseg-in-func.img --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --excludeid 0 --i func.img --mask spmT.img --maskthresh 2.3 --sum bert.aseg-in-func.sum --avgwf bert.avgwf.dat --avgwfvol bert.avgwf.img
 
 This will compute the segmentation statistics from the automatic FreeSurfer subcortical segmentation resampled into the functional space (see below and mri_label2vol --help). It will report intensity statistics from the 4D analyze volume func.img (same dimension as aseg-in-func.img). The segmentation is masked by thresholding the spmT.img map at 2.3. The average functional waveform of each segmentation is reported in the ascii file bert.avgwf.dat and in the 4D analyze 'volume' bert.avgwf.img. This is not a real volume but just another way to save the data that may be more convenient than ascii.</example>
-	<example>mri_label2vol --seg $SUBJECTS_DIR/bert/mri/aseg --temp func.img --reg register.dat --fillthresh 0.5 --o aseg-in-func.img
+  <example>mri_label2vol --seg $SUBJECTS_DIR/bert/mri/aseg --temp func.img --reg register.dat --fillthresh 0.5 --o aseg-in-func.img
 
 This uses mri_label2vol to resample the automatic subcortical segmentation to the functional space. For more information see mri_label2vol --help.</example>
-	<example>mri_label2vol --annot $SUBJECTS_DIR/bert/label/lh.aparc.annot --temp func.img --reg register.dat --fillthresh 0.5 --hemi lh --subject bert --proj frac 0 .1 1 --o lh.aparc-in-func.img
+  <example>mri_label2vol --annot $SUBJECTS_DIR/bert/label/lh.aparc.annot --temp func.img --reg register.dat --fillthresh 0.5 --hemi lh --subject bert --proj frac 0 .1 1 --o lh.aparc-in-func.img
 
 This uses mri_label2vol to resample the automatic cortical segmentation to the functional space. For more information see mri_label2vol --help.</example>
-	<example>mri_segstats --annot bert lh aparc --i lh.thickness --sum lh.thickness.sum
+  <example>mri_segstats --annot bert lh aparc --i lh.thickness --sum lh.thickness.sum
 
 Produce a summary of the thickness in each parcellation of aparc. This will give the same mean thicknesses as that created by mris_anatomical_stats and found in stats/lh.aparc.stats.</example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mri_label2vol, tkregister2, mri_vol2roi.</see-also>
+  <see-also>mri_label2vol, tkregister2, mri_vol2roi.</see-also>
 </help>
-

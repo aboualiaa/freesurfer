@@ -22,9 +22,9 @@
 <!ELEMENT see-also (#PCDATA)>
 ]>
 <help>
-	<name>mri_nu_correct.mni</name>
-	<synopsis>*********************************************</synopsis>
-	<description>Wrapper for nu_correct, a program from the Montreal Neurological Insitute (MNI) used for correcting intensity non-uniformity (ie, bias fields). You must have the MNI software installed on your system to run this. See www.bic.mni.mcgill.ca/software/N3 for more info. </description>
+  <name>mri_nu_correct.mni</name>
+  <synopsis>*********************************************</synopsis>
+  <description>Wrapper for nu_correct, a program from the Montreal Neurological Insitute (MNI) used for correcting intensity non-uniformity (ie, bias fields). You must have the MNI software installed on your system to run this. See www.bic.mni.mcgill.ca/software/N3 for more info. </description>
   <arguments>
     <positional>
       <intro>*************************************************************</intro>
@@ -64,4 +64,3 @@
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

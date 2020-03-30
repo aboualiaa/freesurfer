@@ -22,9 +22,9 @@
 <!ELEMENT see-also (#PCDATA)>
 ]>
 <help>
-	<name>mri_ca_label</name>
-	<synopsis>mri_ca_label [&lt;options&gt;] invol1 [invol2 ...] xform gcafile outvol</synopsis>
-	<description>**********************************************************</description>
+  <name>mri_ca_label</name>
+  <synopsis>mri_ca_label [&lt;options&gt;] invol1 [invol2 ...] xform gcafile outvol</synopsis>
+  <description>**********************************************************</description>
   <arguments>
     <positional>
       <argument>invol1 [invol2 ...]</argument>
@@ -34,12 +34,12 @@
       <argument>gcafile</argument>
       <argument>outvol</argument>
       <explanation>output volume</explanation>
-</positional>
+    </positional>
     <required-flagged>
       <intro>None</intro>
     </required-flagged>
     <optional-flagged>
-      <argument>-cross-sequence</argument>  
+      <argument>-cross-sequence</argument>
       <explanation>label a volume acquired with sequence different than atlas</explanation>
       <argument>-nogibbs</argument>
       <explanation>disable gibbs priors</explanation>
@@ -127,9 +127,8 @@
     <output>outvol</output>
     <explanation>output volume</explanation>
   </outputs>
-	<example>******************************************************</example>
+  <example>******************************************************</example>
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mri_cc</see-also>
+  <see-also>mri_cc</see-also>
 </help>
-

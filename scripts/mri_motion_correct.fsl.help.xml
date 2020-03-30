@@ -21,10 +21,9 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_motion_correct.fsl</name>
-	<description>Aligns and averages two or more volumes. Uses the FSL flirt program. Actually calls fsl_rigid_register which calls flirt. See fsl_rigid_register -help. This should basically do the same thing as mri_motion_correct and mri_motion_correct2. One difference is that mri_motion_correct.fsl forces the input data to be float when converting to ANALYZE, and so the final output is is also float. mri_motion_correct2 keeps the native precision. The target for the registration can be selected (the default is to register to the first specified input volume). If the passed target number is larger than the number of input volumes, the first volume is used as target. The inputs and output can be any format accepted by mri_convert.</description>
+  <name>mri_motion_correct.fsl</name>
+  <description>Aligns and averages two or more volumes. Uses the FSL flirt program. Actually calls fsl_rigid_register which calls flirt. See fsl_rigid_register -help. This should basically do the same thing as mri_motion_correct and mri_motion_correct2. One difference is that mri_motion_correct.fsl forces the input data to be float when converting to ANALYZE, and so the final output is is also float. mri_motion_correct2 keeps the native precision. The target for the registration can be selected (the default is to register to the first specified input volume). If the passed target number is larger than the number of input volumes, the first volume is used as target. The inputs and output can be any format accepted by mri_convert.</description>
   <arguments>
     <required-flagged>
       <argument>-o  output spec</argument>
@@ -52,11 +51,11 @@
       <explanation>print lots of stuff to screen</explanation>
     </optional-flagged>
   </arguments>
-	<example>mri_motion_correct.fsl -i 002.mgz  -i 003 -o mc4.img
+  <example>mri_motion_correct.fsl -i 002.mgz  -i 003 -o mc4.img
 002.mgz is a volume in compressed MGH format. 003 is in COR format. mc4.img (the output) is in analyze format.</example>
   <example>Say you have many input volumes, eg, 001.mgh ... 010.mgh, and you do not want to list all of them on the command-line with a -i. Then you can:
 mri_motion_correct.fsl -o mc.mgh  -wild *.mgh
 Note that -wild must appear BEFORE the wildcard.</example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mri_motion_correct</see-also>
+  <see-also>mri_motion_correct</see-also>
 </help>

@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_inflate - inflate cortical surface</name>
-	<synopsis>mris_inflate [&lt;options&gt;] insurfacefile outsurfacefile</synopsis>
-	<description>This program will inflate a cortical surface.</description>
+  <name>mris_inflate - inflate cortical surface</name>
+  <synopsis>mris_inflate [&lt;options&gt;] insurfacefile outsurfacefile</synopsis>
+  <description>This program will inflate a cortical surface.</description>
   <arguments>
     <positional>
       <argument>insurfacefile</argument>
@@ -59,4 +58,3 @@
   </outputs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

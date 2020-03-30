@@ -22,7 +22,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mri_warp_convert</name>
   <synopsis>convert_convert [options]</synopsis>

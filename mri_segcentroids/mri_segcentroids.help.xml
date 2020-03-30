@@ -21,7 +21,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mri_segcentroids</name>
   <synopsis>mri_segcentroids [options] --i &lt;segvol&gt; --o &lt;outfile&gt;</synopsis>
@@ -44,6 +43,5 @@
       <explanation>use default FreeSurferColorLUT.txt for lookup table</explanation>
     </optional-flagged>
   </arguments>
-
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>

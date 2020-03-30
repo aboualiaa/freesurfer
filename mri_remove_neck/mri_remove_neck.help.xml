@@ -21,9 +21,8 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_remove_neck</name>
-	<synopsis>mri_remove_neck &lt;in volume&gt; &lt;transform&gt; &lt;GCA&gt; &lt;output volume&gt;</synopsis>
+  <name>mri_remove_neck</name>
+  <synopsis>mri_remove_neck &lt;in volume&gt; &lt;transform&gt; &lt;GCA&gt; &lt;output volume&gt;</synopsis>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>

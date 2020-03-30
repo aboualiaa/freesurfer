@@ -21,7 +21,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mri_ms_fitparms</name>
   <synopsis>mri_ms_fitparms [options] [vol_1] [vol_2] ... [output_dir]</synopsis>
@@ -42,74 +41,74 @@ Interpolation method.  Default is trilinear, other options are nearest, sinc.  Y
       <intro>None</intro>
     </required-flagged>
     <optional-flagged>
-	      <argument>-afi, -fam</argument>
-		<explanation>Designate flip angle map to use with nominal value 60 degrees</explanation>
-	      <argument>-ait</argument>
-		<explanation>Apply inverse of transform</explanation>
-	      <argument>-at</argument>
-		<explanation>Set acquisition time</explanation>
-	      <argument>-conform</argument>
-		<explanation>Interpolate volume to be isotropic 1mm^3</explanation>
-	      <argument>-correct</argument>
-		<explanation>Correct proton density map(PD) by T2* estimates</explanation>
-	      <argument>-cubic</argument>
-		<explanation>Use cubic interpolation (NOT WORKING!)</explanation>
-	      <argument>-debug_slice</argument>
-		<explanation>????</explanation>
-	      <argument>-debug_voxel</argument>
-		<explanation>????</explanation>
-	      <argument>-dt</argument>
-		<explanation>Set dt ????</explanation>
-	      <argument>-fa</argument>
-		<explanation>Set flip angle</explanation>
-	      <argument>-fa_scale</argument>
-		<explanation>Set value to scale all flip angles by</explanation>
-	      <argument>-faf</argument>
-		<explanation>Designate flip angle map to use with specified control points</explanation>
-	      <argument>-fsmooth</argument>
-		<explanation>Smooth flip angle map for X interations of soap bubble smoothing (thres=??)</explanation>
-	      <argument>-i</argument>
-		<explanation>Invert</explanation>
-	      <argument>-m</argument>
-		<explanation>Set momentum</explanation>
-	      <argument>-max</argument>
-		<explanation>Set max T2*</explanation>
-	      <argument>-n</argument>
-		<explanation>Perform estimation/motion correction X times</explanation>
-	      <argument>-nearest</argument>
-		<explanation>Use nearest-neighbor interpolation</explanation>
-	      <argument>-nocompress</argument>
-		<explanation>Do not compress output volumes (save as .mgh)</explanation>
-	      <argument>-nosynth</argument>
-		<explanation>Disable volume synthesis</explanation>
-	      <argument>-r</argument>
-		<explanation>write out residuals to designated location</explanation>
-	      <argument>-s</argument>
-		<explanation>Smooth faf field with sigma=X</explanation>
-	      <argument>-scale</argument>
-		<explanation>Scale volumes by X after reading</explanation>
-	      <argument>-sinc</argument>
-		<explanation>Use sinc interpolation (default window width is 6)</explanation>
-	      <argument>-t</argument>
-		<explanation>Apply transform to output volumes</explanation>
-	      <argument>-te</argument>
-		<explanation>Set echo time (TE) in ms</explanation>
-	      <argument>-tr</argument>
-		<explanation>Set repetition time (TR) in ms</explanation>
-	      <argument>-trilinear</argument>
-		<explanation>Use trilinear interpolation</explanation>
-	      <argument>-tukey</argument>
-		<explanation>Use tukey bi-weight of residuals</explanation>
-	      <argument>-u</argument>
-		<explanation>this help text</explanation>
-	      <argument>-use_brain_mask</argument>
-		<explanation>Compute a brain mask from the PD map and use it when computing registration</explanation>
-	      <argument>-w</argument>
-		<explanation>Write out intermediate results every X iterations</explanation>
-	      <argument>-extract x0 y0 z0 dx dy dz </argument>
-		<explanation>extract a subimage for each input image</explanation>
-	      <argument>-window</argument>
-		<explanation>Not implemented(????)</explanation>
+      <argument>-afi, -fam</argument>
+      <explanation>Designate flip angle map to use with nominal value 60 degrees</explanation>
+      <argument>-ait</argument>
+      <explanation>Apply inverse of transform</explanation>
+      <argument>-at</argument>
+      <explanation>Set acquisition time</explanation>
+      <argument>-conform</argument>
+      <explanation>Interpolate volume to be isotropic 1mm^3</explanation>
+      <argument>-correct</argument>
+      <explanation>Correct proton density map(PD) by T2* estimates</explanation>
+      <argument>-cubic</argument>
+      <explanation>Use cubic interpolation (NOT WORKING!)</explanation>
+      <argument>-debug_slice</argument>
+      <explanation>????</explanation>
+      <argument>-debug_voxel</argument>
+      <explanation>????</explanation>
+      <argument>-dt</argument>
+      <explanation>Set dt ????</explanation>
+      <argument>-fa</argument>
+      <explanation>Set flip angle</explanation>
+      <argument>-fa_scale</argument>
+      <explanation>Set value to scale all flip angles by</explanation>
+      <argument>-faf</argument>
+      <explanation>Designate flip angle map to use with specified control points</explanation>
+      <argument>-fsmooth</argument>
+      <explanation>Smooth flip angle map for X interations of soap bubble smoothing (thres=??)</explanation>
+      <argument>-i</argument>
+      <explanation>Invert</explanation>
+      <argument>-m</argument>
+      <explanation>Set momentum</explanation>
+      <argument>-max</argument>
+      <explanation>Set max T2*</explanation>
+      <argument>-n</argument>
+      <explanation>Perform estimation/motion correction X times</explanation>
+      <argument>-nearest</argument>
+      <explanation>Use nearest-neighbor interpolation</explanation>
+      <argument>-nocompress</argument>
+      <explanation>Do not compress output volumes (save as .mgh)</explanation>
+      <argument>-nosynth</argument>
+      <explanation>Disable volume synthesis</explanation>
+      <argument>-r</argument>
+      <explanation>write out residuals to designated location</explanation>
+      <argument>-s</argument>
+      <explanation>Smooth faf field with sigma=X</explanation>
+      <argument>-scale</argument>
+      <explanation>Scale volumes by X after reading</explanation>
+      <argument>-sinc</argument>
+      <explanation>Use sinc interpolation (default window width is 6)</explanation>
+      <argument>-t</argument>
+      <explanation>Apply transform to output volumes</explanation>
+      <argument>-te</argument>
+      <explanation>Set echo time (TE) in ms</explanation>
+      <argument>-tr</argument>
+      <explanation>Set repetition time (TR) in ms</explanation>
+      <argument>-trilinear</argument>
+      <explanation>Use trilinear interpolation</explanation>
+      <argument>-tukey</argument>
+      <explanation>Use tukey bi-weight of residuals</explanation>
+      <argument>-u</argument>
+      <explanation>this help text</explanation>
+      <argument>-use_brain_mask</argument>
+      <explanation>Compute a brain mask from the PD map and use it when computing registration</explanation>
+      <argument>-w</argument>
+      <explanation>Write out intermediate results every X iterations</explanation>
+      <argument>-extract x0 y0 z0 dx dy dz </argument>
+      <explanation>extract a subimage for each input image</explanation>
+      <argument>-window</argument>
+      <explanation>Not implemented(????)</explanation>
     </optional-flagged>
   </arguments>
   <outputs>
@@ -134,4 +133,3 @@ Description: Two 3D FLASH volumes (flip angles 5 and 30 degrees), both acquired 
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

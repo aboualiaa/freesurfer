@@ -1,9 +1,7 @@
+<?xml version="1.0"?>
 <help>
-
   <name>exportGcam</name>
-
   <arguments>
-
     <required-flagged>
       <argument>--fixed FILE</argument>
       <explanation>Fixed volume.</explanation>
@@ -14,7 +12,6 @@
       <argument>--out_gcam FILE</argument>
       <explanation>Output gcam.</explanation>
     </required-flagged>
-
     <optional-flagged>
       <argument>--zlib_buffer INT</argument>
       <explanation>Zlib buffer pre-allocation multiplier.</explanation>
@@ -25,9 +22,6 @@
       <argument>--test</argument>
       <explanation>Write out test files to verify the equivalence of tm3d and gcam morphs.</explanation>
     </optional-flagged>
-
   </arguments>
-
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-
 </help>

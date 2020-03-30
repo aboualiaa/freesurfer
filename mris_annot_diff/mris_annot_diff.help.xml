@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <help>
   <name>mris_annot_diff</name>
   <usage>mris_annot_diff [options] &lt;annot1&gt; &lt;annot2&gt;</usage>
