@@ -3,8 +3,8 @@
 set -e
 
 # input checks
-if [ "$#" -ne "2" ]; then
-  echo "error: mac_deploy requires 2 arguments"
+if [ "$#" -ne "3" ]; then
+  echo "error: mac_deploy requires 3 arguments"
   echo "usage: mac_deploy <qt-directory> <bundle-directory>"
   exit 1
 fi
@@ -22,7 +22,7 @@ if [ ! -d "$bundle" ]; then
 fi
 
 install_prefix="$3"
-if [ ! -d "install_prefix" ]; then
+if [ ! -d "$install_prefix" ]; then
   echo "error: install_prefix directory '$install_prefix' does not exist"
   exit 1
 fi
