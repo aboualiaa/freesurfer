@@ -1,3 +1,83 @@
+if(NOT FS_NORMAL_BUILD)
+  project(freesurfer_super)
+  include(CTest)
+  set(CONF_MATRIX
+      "Release;Debug;RelWithDebInfo;MinSizeRel;asan;ubsan;tsan;msan;cfisan;coverage;profile;lsan;thinlto;fulllto"
+      )
+  set(COMPILER_MATRIX "clang;gcc;appleclang")
+  foreach(Z_COMPILER IN LISTS COMPILER_MATRIX)
+    foreach(TYPE IN LISTS CONF_MATRIX)
+
+      if(Z_COMPILER STREQUAL "clang")
+        set(COMPILER_PROXY_OPTION
+            "-DFS_USE_LLVM=/Users/aboualiaa/Downloads/clang+llvm-10.0.0-x86_64-apple-darwin/bin"
+            )
+      elseif(Z_COMPILER STREQUAL "gcc")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/opt/gcc/")
+      elseif(Z_COMPILER STREQUAL "appleclang")
+        set(COMPILER_PROXY_OPTION "")
+      endif()
+
+      string(TOLOWER ${TYPE} FOLDER_NAME)
+
+      if(Z_COMPILER STREQUAL "clang" AND TYPE STREQUAL "profile")
+        message(NOTICE "skipping profile build with llvm clang")
+        continue()
+      endif()
+
+      if(Z_COMPILER STREQUAL "appleclang" AND TYPE STREQUAL "profile")
+        message(NOTICE "skipping profile build with llvm clang")
+        continue()
+      endif()
+
+      if(Z_COMPILER STREQUAL "gcc" AND TYPE STREQUAL "cfisan")
+        message(NOTICE "skipping cfisan build with gcc")
+        continue()
+      endif()
+
+      if(Z_COMPILER STREQUAL "appleclang" AND TYPE STREQUAL "cfisan")
+        message(NOTICE "skipping cfisan build with apple clang")
+        continue()
+      endif()
+
+      if(NOT LINUX AND TYPE STREQUAL "msan")
+        message(NOTICE "skipping msan build with on non linux os")
+        continue()
+      endif()
+
+      if(Z_COMPILER STREQUAL "appleclang" AND TYPE STREQUAL "lsan")
+        message(NOTICE "skipping lsan build with apple clang")
+        continue()
+      endif()
+
+      message(NOTICE "configuring ${TYPE} build with ${Z_COMPILER}")
+
+      execute_process(COMMAND mkdir -p
+                              ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
+                      )
+      execute_process(COMMAND ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev
+                              -DFS_NORMAL_BUILD=TRUE ${COMPILER_PROXY_OPTION}
+                              -DCMAKE_BUILD_TYPE=${TYPE} -C
+                              ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
+                              -S ${CMAKE_SOURCE_DIR} -B
+                              ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
+                      )
+
+      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE ALL
+                        COMMAND bash -c \" ninja -C
+                                ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/
+                                \"
+                        )
+
+      add_test(NAME ${Z_COMPILER}_${TYPE}_BUILD_TEST
+               COMMAND ${CMAKE_CTEST_COMMAND} -T Test -L Unit
+               WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
+               )
+    endforeach()
+  endforeach()
+  return()
+endif()
+
 if(UNIX AND NOT APPLE)
   set(CMAKE_Fortran_COMPILER "/usr/bin/gfortran")
 elseif(APPLE)
@@ -24,12 +104,33 @@ elseif(APPLE)
   endif()
 endif()
 
+include(repo_tools/prepare_build_types.cmake)
+
 if(POLICY CMP0025) # AppleClang and Clang are different compilers.
   cmake_policy(SET CMP0025 NEW)
 endif()
 
 if(POLICY CMP0048) # The project() command manages VERSION variables.
   cmake_policy(SET CMP0048 NEW)
+endif()
+
+if(NOT DEFINED FS_VERSION_MAJOR)
+  set(FS_VERSION_MAJOR 8)
+endif()
+if(NOT DEFINED FS_VERSION_MINOR)
+  set(FS_VERSION_MINOR 0)
+endif()
+if(NOT DEFINED FS_VERSION_PATCH)
+  set(FS_VERSION_PATCH 0)
+endif()
+if(NOT DEFINED FS_VERSION_SUFFIX)
+  set(FS_VERSION_SUFFIX git)
+endif()
+
+if(NOT PACKAGE_VERSION)
+  set(PACKAGE_VERSION
+      "${FS_VERSION_MAJOR}.${FS_VERSION_MINOR}.${FS_VERSION_PATCH}${FS_VERSION_SUFFIX}"
+      )
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang"
@@ -40,8 +141,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang"
 endif()
 
 if(APPLE)
-  if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)[Cc]lang"
-     )# AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)[Cc]lang")
     set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
     set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
     set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
@@ -71,7 +171,10 @@ function(prevent_in_source_builds_and_installs)
 endfunction()
 
 # project info
-project(freesurfer VERSION 7.0.0)
+project(freesurfer
+        VERSION ${FS_VERSION_MAJOR}.${FS_VERSION_MINOR}.${FS_VERSION_PATCH}
+        LANGUAGES C CXX Fortran
+        )
 prevent_in_source_builds_and_installs()
 
 if(NOT APPLE)

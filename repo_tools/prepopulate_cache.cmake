@@ -106,14 +106,16 @@ set(FS_USE_CCACHE
     ON
     CACHE BOOL "Use ccache (if present) to reduce build times"
     )
+
 set(FS_USE_GCC
     ""
     CACHE STRING ""
     )
 set(FS_USE_LLVM
-    "/Users/aboualiaa/Downloads/clang+llvm-10.0.0-x86_64-apple-darwin/bin"
+    ""
     CACHE STRING ""
     )
+
 set(FS_VERSION
     "$ENV{USER}-local"
     CACHE STRING "Distribution version"
@@ -173,105 +175,3 @@ set_property(CACHE FS_ENABLE_LTO PROPERTY STRINGS "Off;Thin;Full")
 set_property(CACHE FS_COVERAGE_STYLE PROPERTY STRINGS "gcov;clang")
 
 #set(CMAKE_CONFIGURATION_TYPES ${FS_EXP_BUILD_CONFIGURATIONS} CACHE STRING "")
-
-set(CMAKE_CXX_FLAGS_UBSAN
-    "-fsanitize=undefined"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_UBSAN
-    "-fsanitize=undefined"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_THINLTO
-    "-flto=thin"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_THINLTO
-    "-flto=thin"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_FULLLTO
-    "-flto=full"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_FULLLTO
-    "-flto=full"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_ASAN
-    "-fsanitize=address"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_ASAN
-    "-fsanitize=address"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_TSAN
-    "-fsanitize=thread -O3"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_TSAN
-    "-fsanitize=thread -O3"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_MSAN
-    "-fsanitize=memory -fno-omit-frame-pointer -fno-optimize-sibling-calls -O3"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_MSAN
-    "-fsanitize=memory -fno-omit-frame-pointer -fno-optimize-sibling-calls -O3"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_CFISAN
-    "-fsanitize=cfi -flto -fvisibility=hidden"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_CFISAN
-    "-fsanitize=cfi -flto -fvisibility=hidden"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_COVERAGE
-    "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_COVERAGE
-    "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_PROFILE
-    "-pg"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_PROFILE
-    "-pg"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_EXE_LINKER_FLAGS_PROFILE
-    "-pg"
-    CACHE STRING "" FORCE
-    )
-
-set(CMAKE_CXX_FLAGS_LSAN
-    "-fsanitize=leak"
-    CACHE STRING "" FORCE
-    )
-set(CMAKE_C_FLAGS_LSAN
-    "-fsanitize=leak"
-    CACHE STRING "" FORCE
-    )
-
-foreach(X IN LISTS FS_EXP_BUILD_CONFIGURATIONS)
-  string(TOUPPER ${X} NAME)
-  mark_as_advanced(CMAKE_CXX_FLAGS_${NAME} CMAKE_C_FLAGS_${NAME}
-                   CMAKE_EXE_LINKER_FLAGS_PROFILE
-                   )
-endforeach()
-mark_as_advanced(CMAKE_EXE_LINKER_FLAGS_PROFILE)

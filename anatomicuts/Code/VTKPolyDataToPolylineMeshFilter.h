@@ -4,6 +4,7 @@
 #include "itkMesh.h"
 #include "itkMeshSource.h"
 #include "itkPolylineCell.h"
+#include "itkProcessObject.h"
 
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>

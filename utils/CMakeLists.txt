@@ -24,7 +24,10 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${ITK_INCLUDE_DIRS}
                     )
 
-if(CMAKE_CONFIGURATION_TYPES)
+if(CMAKE_BUILD_TYPE STREQUAL "cfisan"
+   OR CMAKE_BUILD_TYPE STREQUAL "fulllto"
+   OR CMAKE_BUILD_TYPE STREQUAL "thinlto"
+   )
   set(UTILS_BUILD_TYPE "STATIC")
 else()
   set(UTILS_BUILD_TYPE "SHARED")

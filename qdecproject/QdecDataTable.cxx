@@ -656,7 +656,7 @@ int QdecDataTable::Save(const char *isFileName) {
         fprintf(fp, "%s ", subjectFactors[n]->GetIgnoreValue().c_str());
       } else if (subjectFactors[n]->IsOrdinal()) {
         double value = subjectFactors[n]->GetContinuousValue();
-        if (isnan(value)) {
+        if (std::isnan(value)) {
           fprintf(fp, "NaN ");
         } else {
           fprintf(fp, "%d ", (int)value);
@@ -889,7 +889,7 @@ std::vector<double> QdecDataTable::GetMeanAndStdDev(const char *isFactorName) {
   std::vector<QdecSubject *> subjects = this->GetSubjects();
   for (unsigned int i = 0; i < this->GetSubjects().size(); i++, N++) {
     d = subjects[i]->GetContinuousFactorValue(isFactorName);
-    if (isnan(d)) {
+    if (std::isnan(d)) {
       N--;
     } else {
       Sum += d;
