@@ -2,9 +2,9 @@ if(NOT FS_NORMAL_BUILD)
   project(freesurfer_super)
   include(CTest)
   set(CONF_MATRIX
-      "Release;Debug;RelWithDebInfo;MinSizeRel;asan;ubsan;tsan;msan;cfisan;coverage;profile;lsan;thinlto;fulllto"
+      "Release;Debug;RelWithDebInfo;MinSizeRel;asan;ubsan;tsan;msan;coverage;profile;lsan"
       )
-  set(COMPILER_MATRIX "clang;gcc;appleclang")
+  set(COMPILER_MATRIX "clang;appleclang")
   foreach(Z_COMPILER IN LISTS COMPILER_MATRIX)
     foreach(TYPE IN LISTS CONF_MATRIX)
 
@@ -77,14 +77,36 @@ if(NOT FS_NORMAL_BUILD)
       add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CMAKE
                        ${Z_COMPILER}_${TYPE}_BUILD_MKDIR
                        )
-#      add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CREATE
-#                       ${Z_COMPILER}_${TYPE}_BUILD_CMAkE
-#                       )
 
-      add_test(NAME ${Z_COMPILER}_${TYPE}_BUILD_TEST
-               COMMAND ${CMAKE_CTEST_COMMAND} -T Test -L Unit
-               WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
-               )
+      if(NOT TARGET compile-${Z_COMPILER})
+        add_custom_target(compile-${Z_COMPILER})
+      endif()
+
+      add_dependencies(compile-${Z_COMPILER} ${Z_COMPILER}_${TYPE}_BUILD_CREATE)
+
+      if(NOT TARGET compile-${TYPE})
+        add_custom_target(compile-${TYPE})
+      endif()
+
+      add_dependencies(compile-${TYPE} ${Z_COMPILER}_${TYPE}_BUILD_CREATE)
+
+      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
+                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit \"
+                        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
+                        )
+
+      if(NOT TARGET check-${Z_COMPILER})
+        add_custom_target(check-${Z_COMPILER})
+      endif()
+
+      add_dependencies(check-${Z_COMPILER} ${Z_COMPILER}_${TYPE}_BUILD_TEST)
+
+      if(NOT TARGET check-${TYPE})
+        add_custom_target(check-${TYPE})
+      endif()
+
+      add_dependencies(check-${TYPE} ${Z_COMPILER}_${TYPE}_BUILD_TEST)
+
     endforeach()
   endforeach()
   return()
