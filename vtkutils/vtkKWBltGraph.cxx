@@ -8,8 +8,6 @@
 #include <sstream>
 #include <stdexcept>
 
-using namespace std;
-
 vtkStandardNewMacro(vtkKWBltGraph);
 
 unsigned long const vtkKWBltGraph::MouseoverEnterElementEvent =

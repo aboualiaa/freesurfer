@@ -52,22 +52,34 @@ if(NOT FS_NORMAL_BUILD)
 
       message(NOTICE "configuring ${TYPE} build with ${Z_COMPILER}")
 
-      execute_process(COMMAND mkdir -p
-                              ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
-                      )
-      execute_process(COMMAND ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev
-                              -DFS_NORMAL_BUILD=TRUE ${COMPILER_PROXY_OPTION}
-                              -DCMAKE_BUILD_TYPE=${TYPE} -C
-                              ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
-                              -S ${CMAKE_SOURCE_DIR} -B
-                              ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
-                      )
+      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_MKDIR ALL
+                        COMMAND bash -c \" mkdir -p
+                                ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
+                                \"
+                        )
 
-      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE ALL
+      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ALL
+                        COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev
+                                -DFS_NORMAL_BUILD=TRUE ${COMPILER_PROXY_OPTION}
+                                -DCMAKE_BUILD_TYPE=${TYPE} -C
+                                ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
+                                -S ${CMAKE_SOURCE_DIR} -B
+                                ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
+                                \"
+                        )
+
+      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE
                         COMMAND bash -c \" ninja -C
                                 ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/
                                 \"
                         )
+
+      add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CMAKE
+                       ${Z_COMPILER}_${TYPE}_BUILD_MKDIR
+                       )
+#      add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CREATE
+#                       ${Z_COMPILER}_${TYPE}_BUILD_CMAkE
+#                       )
 
       add_test(NAME ${Z_COMPILER}_${TYPE}_BUILD_TEST
                COMMAND ${CMAKE_CTEST_COMMAND} -T Test -L Unit
@@ -189,8 +201,6 @@ if(NOT APPLE)
 else()
   cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
 endif()
-
-enable_language(C CXX Fortran)
 
 if(APPLE AND NOT TRAVIS)
   set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
