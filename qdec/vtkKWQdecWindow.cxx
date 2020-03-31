@@ -92,8 +92,6 @@
 #include "fsenv.h"
 #include "mrisutils.h"
 
-using namespace std;
-
 vtkStandardNewMacro(vtkKWQdecWindow);
 
 const char *vtkKWQdecWindow::ksSubjectsPanelName = "Subjects";

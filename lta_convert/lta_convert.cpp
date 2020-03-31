@@ -22,8 +22,6 @@
 #include "transform.h"
 #include "version.h"
 
-using namespace std;
-
 namespace intypes {
 enum InputType { UNKNOWN, LTA, REG, FSL, MNI, NIFTYREG, ITK };
 }

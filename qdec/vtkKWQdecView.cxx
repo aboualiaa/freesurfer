@@ -61,8 +61,6 @@
 #include "vtkTransform.h"
 #include "vtkTransformPolyDataFilter.h"
 
-using namespace std;
-
 vtkStandardNewMacro(vtkKWQdecView);
 
 // these control the amount and speed of rotation
