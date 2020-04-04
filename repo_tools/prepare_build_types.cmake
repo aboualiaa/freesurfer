@@ -64,27 +64,15 @@ set(CMAKE_C_FLAGS_CFISAN
     CACHE STRING "" FORCE
     )
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS_COVERAGE
-      "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
-      CACHE STRING "" FORCE
-      )
+set(CMAKE_CXX_FLAGS_COVERAGE
+    "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
+    CACHE STRING "" FORCE
+    )
 
-  set(CMAKE_C_FLAGS_COVERAGE
-      "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
-      CACHE STRING "" FORCE
-      )
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  set(CMAKE_CXX_FLAGS_COVERAGE
-      "--coverage -g -O0"
-      CACHE STRING "" FORCE
-      )
-
-  set(CMAKE_C_FLAGS_COVERAGE
-      "--coverage -g -O0"
-      CACHE STRING "" FORCE
-      )
-endif()
+set(CMAKE_C_FLAGS_COVERAGE
+    "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
+    CACHE STRING "" FORCE
+    )
 
 set(CMAKE_CXX_FLAGS_PROFILE
     "-pg"

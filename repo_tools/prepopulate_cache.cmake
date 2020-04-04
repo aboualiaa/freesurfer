@@ -103,7 +103,7 @@ set(FS_SUPRESS_WARNINGS
     CACHE BOOL "Suppress some selected warnings"
     )
 set(FS_USE_CCACHE
-    ON
+    OFF
     CACHE BOOL "Use ccache (if present) to reduce build times"
     )
 

@@ -2,7 +2,7 @@ if(NOT FS_NORMAL_BUILD)
   project(freesurfer_super)
   include(CTest)
   set(CONF_MATRIX
-      "Release;Debug;RelWithDebInfo;MinSizeRel;asan;ubsan;tsan;msan;coverage;profile;lsan"
+      "asan;lsan;ubsan;tsan"
       )
   set(COMPILER_MATRIX "clang;appleclang")
   foreach(Z_COMPILER IN LISTS COMPILER_MATRIX)
@@ -10,7 +10,7 @@ if(NOT FS_NORMAL_BUILD)
 
       if(Z_COMPILER STREQUAL "clang")
         set(COMPILER_PROXY_OPTION
-            "-DFS_USE_LLVM=/Users/aboualiaa/Downloads/clang+llvm-10.0.0-x86_64-apple-darwin/bin"
+            "-DFS_USE_LLVM=/usr/local/opt/llvm/bin")
             )
       elseif(Z_COMPILER STREQUAL "gcc")
         set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/opt/gcc/")
@@ -20,7 +20,7 @@ if(NOT FS_NORMAL_BUILD)
 
       string(TOLOWER ${TYPE} FOLDER_NAME)
 
-      if(Z_COMPILER STREQUAL "clang" AND TYPE STREQUAL "profile")
+      if(Z_COMPILER MATCHES "clang" AND TYPE STREQUAL "profile")
         message(NOTICE "skipping profile build with llvm clang")
         continue()
       endif()
@@ -91,7 +91,8 @@ if(NOT FS_NORMAL_BUILD)
       add_dependencies(compile-${TYPE} ${Z_COMPILER}_${TYPE}_BUILD_CREATE)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
-                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit \"
+                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit
+                                --progress \"
                         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
                         )
 
@@ -188,7 +189,7 @@ endif()
 
 find_program(CCACHE_PROGRAM ccache)
 mark_as_advanced(CCACHE_PROGRAM)
-if(CCACHE_PROGRAM)
+if(CCACHE_PROGRAM AND FS_USE_CCACHE)
   message(STATUS "using ccache")
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 endif()
