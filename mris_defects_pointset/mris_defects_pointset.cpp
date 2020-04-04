@@ -30,17 +30,17 @@ int main(int argc, char **argv) {
   std::cout << "Reading in surface " << surfpath << std::endl;
   MRIS *surf = MRISread(surfpath.c_str());
   if (!surf)
-    logFatal(1) << "could not read surface";
+    fs::fatal() << "could not read surface";
 
   // load defect overlay
   std::string defectpath = parser.retrieve<std::string>("defects");
   std::cout << "Reading in defect segmentation " << defectpath << std::endl;
   MRI *overlay = MRIread(defectpath.c_str());
   if (!overlay)
-    logFatal(1) << "could not read defect segmentation";
+    fs::fatal() << "could not read defect segmentation";
 
   if (overlay->width != surf->nvertices) {
-    logFatal(1) << "error: defect overlay (" << overlay->width << " points) "
+    fs::fatal() << "error: defect overlay (" << overlay->width << " points) "
                 << "does not match surface (" << surf->nvertices
                 << " vertices)";
   }
@@ -54,9 +54,9 @@ int main(int argc, char **argv) {
   if (parser.exists("label")) {
     std::string labelpath = parser.retrieve<std::string>("label");
     std::cout << "Reading in label " << labelpath << std::endl;
-    LABEL *label = LabelRead(nullptr, labelpath.c_str());
+    LABEL *label = LabelRead(NULL, labelpath.c_str());
     if (!label)
-      logFatal(1) << "could not read label";
+      fs::fatal() << "could not read label";
     // set values outside of the label to 0
     MRI *tmp = MRISlabel2Mask(surf, label, nullptr);
     for (int v = 0; v < surf->nvertices; v++) {

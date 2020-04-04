@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   // compare lengths
   int length = annot1.size();
   if (length != annot2.size())
-    logFatal(1) << "annotation sizes (" << length << " and " << annot2.size()
+    fs::fatal() << "annotation sizes (" << length << " and " << annot2.size()
                 << ") do not match";
 
   // diff labels
@@ -30,6 +30,6 @@ int main(int argc, char *argv[]) {
   }
 
   if (ndiffs > 0)
-    logFatal(1) << "found " << ndiffs << " differences between annotations";
+    fs::fatal() << "found " << ndiffs << " differences between annotations";
   exit(0);
 }

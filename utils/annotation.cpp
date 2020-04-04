@@ -80,7 +80,7 @@ int print_annotation_colortable(FILE *fp) {
 std::vector<int> readAnnotationIntoVector(const std::string &filename) {
   FILE *file = fopen(filename.c_str(), "r");
   if (!file)
-    logFatal(1) << "could not open " << filename;
+    fs::fatal() << "could not open " << filename;
 
   std::map<int, int> annotmap;
   int                num = freadInt(file);

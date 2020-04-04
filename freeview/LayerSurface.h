@@ -50,6 +50,7 @@ class SurfaceROI;
 class SurfaceSpline;
 class SurfacePath;
 class LayerROI;
+class vtkPolyData;
 
 struct RGBMap {
   QString    name;
@@ -449,8 +450,9 @@ protected:
   vtkSmartPointer<vtkActor> m_vertexActor2D[3];
   vtkSmartPointer<vtkActor> m_wireframeActor;
 
-  vtkSmartPointer<vtkCutter> m_cutter[3];
-  vtkSmartPointer<vtkBox>    m_box[3];
+  vtkSmartPointer<vtkCutter>   m_cutter[3];
+  vtkSmartPointer<vtkBox>      m_box[3];
+  vtkSmartPointer<vtkPolyData> m_vertexPoly2D[3];
 
   QList<SurfaceOverlay *> m_overlays;
   int                     m_nActiveOverlay;

@@ -136,9 +136,9 @@ void IoParams::parse(int ac, char **av) {
   annotation = false;
 
   if (strAnnotationOut.empty() && !strAnnotationIn.empty())
-    logFatal(1) << "missing --annot_out flag";
+    fs::fatal() << "missing --annot_out flag";
   if (!strAnnotationOut.empty() && strAnnotationIn.empty())
-    logFatal(1) << "missing --annot_in flag";
+    fs::fatal() << "missing --annot_in flag";
 
   if (!strAnnotationOut.empty() && !strAnnotationIn.empty()) {
     annotation       = true;

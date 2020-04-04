@@ -10,13 +10,13 @@
 /// has the correct number of leading dashes)
 static std::string verifyOption(const std::string &name) {
   if (name.empty())
-    logFatal(1)
+    fs::fatal()
         << "invalid argument configuration. Argument names must not be empty";
   if ((name.size() == 2 && name[0] != '-') || name.size() == 3)
-    logFatal(1) << "invalid argument configuration for '" << name
+    fs::fatal() << "invalid argument configuration for '" << name
                 << "'. Short names must begin with '-'";
   if (name.size() > 3 && (name[0] != '-' || name[1] != '-'))
-    logFatal(1) << "invalid argument configuration for '" << name
+    fs::fatal() << "invalid argument configuration for '" << name
                 << "'. Multi-character names must begin with '--'";
   return name;
 }
@@ -92,12 +92,12 @@ ArgumentParser::Argument::Argument(const ArgumentParser::String &_short_name,
 
   // check for illogical option flags
   if ((min_args == 0) && (argtype != ArgType::Bool)) {
-    logFatal(1)
+    fs::fatal()
         << "invalid argument configuration for '" << canonicalName() << "'. "
         << "Option flags that accept no input must be of type ArgType::Bool";
   }
   if ((min_args == 0) && required) {
-    logFatal(1) << "invalid argument configuration for '" << canonicalName()
+    fs::fatal() << "invalid argument configuration for '" << canonicalName()
                 << "'. "
                 << "Required flags must accept at least one input";
   }
@@ -106,13 +106,13 @@ ArgumentParser::Argument::Argument(const ArgumentParser::String &_short_name,
 /// Checks if the correct amount of inputs have been parsed for this argument
 void ArgumentParser::Argument::validate() {
   if (positional && consumed < min_args)
-    logFatal(2) << "not enough positional arguments supplied";
+    fs::fatal(2) << "not enough positional arguments supplied";
   if (fixed && fixed_nargs != consumed)
-    logFatal(2) << "not enough inputs passed to option '" << canonicalName()
-                << "' (expected " << fixed_nargs << ")";
+    fs::fatal(2) << "not enough inputs passed to option '" << canonicalName()
+                 << "' (expected " << fixed_nargs << ")";
   if (!fixed && variable_nargs == '+' && consumed < 1)
-    logFatal(2) << "option '" << canonicalName()
-                << "' requires at least one input";
+    fs::fatal(2) << "option '" << canonicalName()
+                 << "' requires at least one input";
 }
 
 /// Returns a valid name for the configured argument
@@ -210,7 +210,7 @@ void ArgumentParser::parse(size_t ac, char **av) {
           args_following++;
       }
       if (arguments[index[element]].min_args > args_following) {
-        logFatal(2) << "not enough inputs supplied to '" << element << "'";
+        fs::fatal(2) << "not enough inputs supplied to '" << element << "'";
       }
     }
   }
@@ -234,7 +234,7 @@ void ArgumentParser::parse(size_t ac, char **av) {
         // if so, let's get the next set of positional arguments
         posidx++;
         if (posidx >= positionals.size()) {
-          logFatal(2) << "unexpected argument '" << element << "'";
+          fs::fatal(2) << "unexpected argument '" << element << "'";
         } else {
           active = positionals[posidx];
         }
@@ -303,9 +303,9 @@ void ArgumentParser::parse(size_t ac, char **av) {
           }
         }
       } catch (...) {
-        logFatal(2) << "input '" << element
-                    << "' cannot be converted to expected type ("
-                    << active.typeName() << ")";
+        fs::fatal(2) << "input '" << element
+                     << "' cannot be converted to expected type ("
+                     << active.typeName() << ")";
       }
       variables[N].exists = true;
       active.consumed++;
@@ -353,7 +353,7 @@ void ArgumentParser::parse(size_t ac, char **av) {
        it != arguments.end(); ++it) {
     Argument arg = *it;
     if (arg.required && !exists(arg.canonicalName())) {
-      logFatal(2) << "missing required input '" << arg.canonicalName() << "'";
+      fs::fatal(2) << "missing required input '" << arg.canonicalName() << "'";
     }
   }
 }
@@ -373,9 +373,9 @@ ArgumentParser::String ArgumentParser::unstrip(const std::string &name) {
 /// to be preceded by option dashes in order for the key to be found
 bool ArgumentParser::exists(const std::string &name) {
   // first check if name is a valid argument key
-  std::string unstripped = unstrip(name);
+  String unstripped = unstrip(name);
   if (index.count(unstripped) == 0)
-    logFatal(1) << "'" << unstripped << "' is not a known argument";
+    fs::fatal() << "'" << unstripped << "' is not a known argument";
   return variables[index[unstripped]].exists;
 }
 
@@ -401,7 +401,7 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
       variables.push_back(String());
       break;
     default:
-      logFatal(1) << "unknown argument type for '" << arg.canonicalName()
+      fs::fatal() << "unknown argument type for '" << arg.canonicalName()
                   << "'";
     }
   } else {
@@ -419,7 +419,7 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
       variables.push_back(StringVector());
       break;
     default:
-      logFatal(1) << "unknown argument type for '" << arg.canonicalName()
+      fs::fatal() << "unknown argument type for '" << arg.canonicalName()
                   << "'";
     }
   }
@@ -428,7 +428,7 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
   for (IndexMap::iterator it = index.begin(); it != index.end(); it++) {
     std::string stripped = strip(it->first);
     if (stripped == strip(arg.short_name) || stripped == strip(arg.name)) {
-      logFatal(1) << "invalid argument configuration. '" << arg.canonicalName()
+      fs::fatal() << "invalid argument configuration. '" << arg.canonicalName()
                   << "' is used twice";
     }
   }
@@ -438,7 +438,7 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
   if (!arg.fixed) {
     if (arg.positional) {
       if (variable_positional) {
-        logFatal(1)
+        fs::fatal()
             << "invalid argument configuration for '" << arg.canonicalName()
             << "'. "
             << "Two positional arguments cannot both have a variable amount of "
@@ -450,7 +450,7 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
       variable_flag = true;
     }
     if (variable_positional && variable_flag) {
-      logFatal(1) << "invalid argument configuration for '"
+      fs::fatal() << "invalid argument configuration for '"
                   << arg.canonicalName() << "'. "
                   << "A positional argument and flagged argument cannot both "
                      "have a variable "
