@@ -33,13 +33,13 @@
 
 #include "annotation.h"
 #include "cma.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "fio.h"
 #include "gca.h"
-#include "mri2.h"
-#include "mrisegment.h"
-#include "mrisutils.h"
-#include "version.h"
+#ifdef _OPENMP
+#include "romp_support.h"
+#endif
 
 static int  parse_commandline(int argc, char **argv);
 static void check_options();
@@ -67,26 +67,24 @@ static char *relabel_norm_name              = nullptr;
 static char *relabel_xform_name             = nullptr;
 static char *relabel_label_intensities_name = nullptr;
 
-static char *SUBJECTS_DIR = nullptr;
-static char *subject      = nullptr;
-static char *OutASegFile  = nullptr;
-static char *OutAParcFile = nullptr;
-static char *OutDistFile  = nullptr;
-static int   debug        = 0;
-static int   UseRibbon    = 0;
-static int   UseNewRibbon = 1;
-static MRI * ASeg, *filled, *mritmp;
-static MRI * AParc;
-static MRI * Dist;
-static MRI * lhRibbon = nullptr, *rhRibbon = nullptr, *RibbonSeg;
-static MRIS *lhwhite, *rhwhite;
-static MRIS *lhpial, *rhpial;
-static MHT * lhwhite_hash, *rhwhite_hash;
-static MHT * lhpial_hash, *rhpial_hash;
-static struct { float x, y, z; } vtx;
+static char *  SUBJECTS_DIR = nullptr;
+static char *  subject      = nullptr;
+static char *  OutASegFile  = nullptr;
+static char *  OutAParcFile = nullptr;
+static char *  OutDistFile  = nullptr;
+static int     debug        = 0;
+static int     UseRibbon    = 0;
+static int     UseNewRibbon = 1;
+static MRI *   ASeg, *filled, *mritmp;
+static MRI *   AParc;
+static MRI *   Dist;
+static MRI *   lhRibbon = nullptr, *rhRibbon = nullptr, *RibbonSeg;
+static MRIS *  lhwhite, *rhwhite;
+static MRIS *  lhpial, *rhpial;
+static MHT *   lhwhite_hash, *rhwhite_hash;
+static MHT *   lhpial_hash, *rhpial_hash;
 static int     lhwvtx, lhpvtx, rhwvtx, rhpvtx;
-static MATRIX *Vox2RAS, *CRS, *RAS;
-static float   dlhw, dlhp, drhw, drhp;
+static MATRIX *Vox2RAS;
 static float   dmaxctx       = 5.0;
 static int     LabelWM       = 0;
 static int     LabelHypoAsWM = 0;
@@ -104,27 +102,21 @@ int        crsTest = 0, ctest = 0, rtest = 0, stest = 0;
 int        UseHash = 1;
 int        DoLH = 1, DoRH = 1, LHOnly = 0, RHOnly = 0;
 
-char *CtxSegFile = nullptr;
-MRI * CtxSeg     = nullptr;
+char *CtxSegFile = NULL;
+MRI * CtxSeg     = NULL;
 
 int    FixParaHipWM = 1;
 double BRFdotCheck(MRIS *surf, int vtxno, int c, int r, int s, MRI *AParc);
-static double mrisFindMinDistanceVertexWithDotCheck(MRI_SURFACE *mris, int c,
-                                                    int r, int s, MRI *AParc,
-                                                    double dot_dir,
-                                                    int *  pvtxno);
+int    nthreads = 1;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int    nargs, err, asegid, c, r, s, nctx, annot, vtxno, nripped;
-  int    annotid, IsCortex = 0, IsWM = 0, IsHypo = 0, hemi = 0, segval = 0;
-  int    IsCblumCtx = 0;
-  int    RibbonVal = 0, nbrute = 0;
-  float  dmin = 0.0, lhRibbonVal = 0, rhRibbonVal = 0, dist, dthresh;
-  double dot;
-  MRI *  mri_fixed = nullptr, *mri_lh_dist, *mri_rh_dist, *mri_dist = nullptr;
-  TRANSFORM *xform = nullptr;
-  GCA *      gca   = nullptr;
+  int        nargs, err, c, nctx, annot, vtxno, nripped;
+  int        annotid;
+  int        nbrute    = 0;
+  MRI *      mri_fixed = NULL, *mri_lh_dist, *mri_rh_dist, *mri_dist = NULL;
+  TRANSFORM *xform = NULL;
+  GCA *      gca   = NULL;
 
   nargs = handleVersionOption(argc, argv, "mri_aparc2aseg");
   if (nargs && argc - nargs == 1) {
@@ -151,6 +143,11 @@ int main(int argc, char **argv) {
   parse_commandline(argc, argv);
   check_options();
   dump_options(stdout);
+
+#ifdef _OPENMP
+  printf("%d avail.processors, using %d\n", omp_get_num_procs(),
+         omp_get_max_threads());
+#endif
 
   if (DoLH) {
     /* ------ Load subject's lh white surface ------ */
@@ -395,10 +392,6 @@ int main(int argc, char **argv) {
   printf("ASeg Vox2RAS: -----------\n");
   MatrixPrint(stdout, Vox2RAS);
   printf("-------------------------\n");
-  CRS             = MatrixAlloc(4, 1, MATRIX_REAL);
-  CRS->rptr[4][1] = 1;
-  RAS             = MatrixAlloc(4, 1, MATRIX_REAL);
-  RAS->rptr[4][1] = 1;
 
   if (crsTest) {
     printf("Testing point %d %d %d\n", ctest, rtest, stest);
@@ -411,7 +404,6 @@ int main(int argc, char **argv) {
     exit(err);
   }
 
-  printf("\nLabeling Slice\n");
   nctx    = 0;
   annot   = 0;
   annotid = 0;
@@ -536,13 +528,30 @@ int main(int argc, char **argv) {
   }
 
   // Go through each voxel in the aseg
+  printf("\nLabeling Slice (%d)\n", ASeg->width);
+
+  MHT_maybeParallel_begin();
+#ifdef HAVE_OPENMP
+#pragma omp parallel for reduction(+ : nbrute, nctx)
+#endif
   for (c = 0; c < ASeg->width; c++) {
+    int r, s, asegid, IsWM, IsCblumCtx, IsCortex, IsHypo, RibbonVal,
+        lhRibbonVal, rhRibbonVal, lhwvtx, rhwvtx, lhpvtx, rhpvtx;
+    int    annot = 0, annotid, hemi = 0, segval = 0;
+    double dthresh, dist, dot;
+    float  dlhw, drhw, dlhp, drhp, dmin = 1e7;
+    struct {
+      float x, y, z;
+    } vtx;
+    MATRIX *CRS, *RAS;
+
     printf("%3d ", c);
     if (c % 20 == 19)
       printf("\n");
     fflush(stdout);
     for (r = 0; r < ASeg->height; r++) {
       for (s = 0; s < ASeg->depth; s++) {
+
         if (c == Gx && r == Gy && s == Gz)
           DiagBreak();
 
@@ -577,6 +586,10 @@ int main(int argc, char **argv) {
         //  ribbon=GM => GM
         //  aseg=GM AND ribbon=WM => WM
         //  ribbon=UNKNOWN => UNKNOWN
+        // Note: have to be careful when setting values that are "Unknown" in the ribbon
+        // because the aseg.presurf is often not very accurate for cortex, eg, sometimes an entire
+        // gyrus (including sulcal CSF) can be labeled as WM, obviously, you don't want to
+        // just transfer the label.
         if (UseNewRibbon) {
           if (IsCortex || IsWM || (asegid == Unknown || asegid == CSF) ||
               IsCblumCtx) {
@@ -648,6 +661,10 @@ int main(int argc, char **argv) {
         }
 
         // Convert the CRS to RAS
+        CRS             = MatrixAlloc(4, 1, MATRIX_REAL);
+        CRS->rptr[4][1] = 1;
+        RAS             = MatrixAlloc(4, 1, MATRIX_REAL);
+        RAS->rptr[4][1] = 1;
         CRS->rptr[1][1] = c;
         CRS->rptr[2][1] = r;
         CRS->rptr[3][1] = s;
@@ -740,16 +757,34 @@ int main(int argc, char **argv) {
           }
         }
 
+        /* added some checks here to make sure closest vertex (usually pial but can be white) isn't on
+	   the other bank of a sulcus or through a thin white matter strand. This removes inaccurate voxels
+	   that used to speckle the aparc+aseg
+	*/
+        if (lhwvtx < 0)
+          dlhw = 1000000000000000.0;
+        else if (!LabelWM) {
+          dot = BRFdotCheck(lhwhite, lhwvtx, c, r, s, AParc);
+          if (dot < 0) {
+            if (MRIneighbors(ASeg, c, r, s, Left_Cerebral_Cortex) >
+                0) // only do expensive check if it is possible
+              dlhw = MRISfindMinDistanceVertexWithDotCheck(lhwhite, c, r, s,
+                                                           AParc, 1, &lhwvtx);
+            else
+              dlhw = 1000000000000000.0;
+          }
+        }
+
         if (lhpvtx < 0)
           dlhp = 1000000000000000.0;
         else if (!LabelWM) {
           dot = BRFdotCheck(lhpial, lhpvtx, c, r, s, AParc);
-          if (dot > 0) // pial surface normal should point in same direction as
-                       // vector from voxel to vertex
+          if (dot >
+              0) // pial surface normal should point in same direction as vector from voxel to vertex
           {
             if (MRIneighbors(ASeg, c, r, s, Left_Cerebral_Cortex) >
                 0) // only do expensive check if it is possible
-              dlhp = mrisFindMinDistanceVertexWithDotCheck(lhpial, c, r, s,
+              dlhp = MRISfindMinDistanceVertexWithDotCheck(lhpial, c, r, s,
                                                            AParc, -1, &lhpvtx);
             else
               dlhp = 1000000000000000.0;
@@ -763,7 +798,7 @@ int main(int argc, char **argv) {
           if (dot < 0) {
             if (MRIneighbors(ASeg, c, r, s, Right_Cerebral_Cortex) >
                 0) // only do expensive check if it is possible
-              drhw = mrisFindMinDistanceVertexWithDotCheck(rhwhite, c, r, s,
+              drhw = MRISfindMinDistanceVertexWithDotCheck(rhwhite, c, r, s,
                                                            AParc, 1, &rhwvtx);
             else
               drhw = 1000000000000000.0;
@@ -776,7 +811,7 @@ int main(int argc, char **argv) {
           if (dot > 0) {
             if (MRIneighbors(ASeg, c, r, s, Right_Cerebral_Cortex) >
                 0) // only do expensive check if it is possible
-              drhp = mrisFindMinDistanceVertexWithDotCheck(rhpial, c, r, s,
+              drhp = MRISfindMinDistanceVertexWithDotCheck(rhpial, c, r, s,
                                                            AParc, -1, &rhpvtx);
             else
               drhp = 1000000000000000.0;
@@ -827,12 +862,12 @@ int main(int argc, char **argv) {
           annotid = 0;
 
         /* If the cortical label is "unkown", it is difficult to
-           determine what to put here. If the aseg says it is WM, then
-           that is kept. If the aseg says it is GM, then it is given
-           "ctx-?h-unknown". These voxels can show up in funny places
-           (eg, between hippo and amyg), so this is really just a
-           hack. The real fix should be the surface creation or the
-           aseg. */
+	   determine what to put here. If the aseg says it is WM, then
+	   that is kept. If the aseg says it is GM, then it is given
+	   "ctx-?h-unknown". These voxels can show up in funny places
+	   (eg, between hippo and amyg), so this is really just a
+	   hack. The real fix should be the surface creation or the
+	   aseg. */
         if (annotid == 0 && !LabelWM) {
           if (asegid == Left_Cerebral_Cortex)
             MRIsetVoxVal(ASeg, c, r, s, 0, 1000);
@@ -840,11 +875,12 @@ int main(int argc, char **argv) {
             MRIsetVoxVal(ASeg, c, r, s, 0, 2000);
           else
             MRIsetVoxVal(ASeg, c, r, s, 0, asegid);
+          MatrixFree(&CRS);
+          MatrixFree(&RAS);
           continue;
-          //{if(hemi == 1)
-          // MRIsetVoxVal(ASeg,c,r,s,0,Left_Cerebral_White_Matter); if(hemi ==
-          // 2)
-          // MRIsetVoxVal(ASeg,c,r,s,0,Right_Cerebral_White_Matter); continue;
+          //{if(hemi == 1) MRIsetVoxVal(ASeg,c,r,s,0,Left_Cerebral_White_Matter);
+          //if(hemi == 2) MRIsetVoxVal(ASeg,c,r,s,0,Right_Cerebral_White_Matter);
+          //continue;
         }
 
         // why was this here in the first place?
@@ -914,6 +950,8 @@ int main(int argc, char **argv) {
           // Gets here when there is no label at the found vertex.
           // This is different than having a vertex labeled as "unknown"
           if (!debug) {
+            MatrixFree(&CRS);
+            MatrixFree(&RAS);
             continue;
           }
           printf("\n");
@@ -939,13 +977,18 @@ int main(int argc, char **argv) {
                    rhpial->vertices[rhpvtx].z);
           printf("annot = %d, annotid = %d\n", annot, annotid);
           CTABprintASCII(lhwhite->ct, stdout);
+          MatrixFree(&CRS);
+          MatrixFree(&RAS);
           continue;
         }
 
+        MatrixFree(&CRS);
+        MatrixFree(&RAS);
         nctx++;
-      }
-    }
-  }
+      } // slice
+    }   // row
+  }     // col
+  MHT_maybeParallel_end();
   printf("nctx = %d\n", nctx);
   printf("Used brute-force search on %d voxels\n", nbrute);
 
@@ -1249,6 +1292,9 @@ int main(int argc, char **argv) {
     MRIwrite(Dist, OutDistFile);
   }
 
+  printf("#VMPC# mri_aparc2aseg VmPeak  %d\n", GetVmPeak());
+  printf("mri_aparc2aseg done\n");
+
   return (0);
 }
 /*-----------------------------------------------------------------*/
@@ -1435,6 +1481,15 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[2], "%d", &stest);
       crsTest   = 1;
       nargsused = 3;
+    } else if (!strcasecmp(option, "--threads") ||
+               !strcasecmp(option, "--nthreads")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nthreads);
+#ifdef _OPENMP
+      omp_set_num_threads(nthreads);
+#endif
+      nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (singledash(option)) {
@@ -1721,31 +1776,3 @@ static double mrisFindMinDistanceVertexWithDotCheck(MRI_SURFACE *mris, int c,
   int     vno, min_vno;
   VERTEX *v;
   double  dist, dot, min_dist, xs, ys, zs, dx, dy, dz;
-
-  min_vno  = -1;
-  min_dist = 1e10;
-  MRIvoxelToSurfaceRAS(AParc, c, r, s, &xs, &ys, &zs);
-  for (vno = 0; vno < mris->nvertices; vno++) {
-    v = &mris->vertices[vno];
-    if (v->ripflag)
-      continue;
-
-    if (vno == Gdiag_no)
-      DiagBreak();
-    dx  = xs - v->x;
-    dy  = ys - v->y;
-    dz  = zs - v->z;
-    dot = v->nx * dx + v->ny * dy + v->nz * dz;
-    //    dot = BRFdotCheck(mris, vno,c,r,s,AParc);
-    if (dot * dot_dir < 0)
-      continue;
-
-    dist = sqrt(SQR(xs - v->x) + SQR(ys - v->y) + SQR(zs - v->z));
-    if (dist < min_dist) {
-      min_dist = dist;
-      min_vno  = vno;
-    }
-  }
-  *pvtxno = min_vno;
-  return (min_dist);
-}

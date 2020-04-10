@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.ndimage
 from collections.abc import Iterable
+from scipy.interpolate import interpn
 
 from . import bindings
 from .transform import LinearTransform
@@ -54,7 +55,9 @@ def cmass(image):
     return scipy.ndimage.center_of_mass(image)
 
 
-def resample(source, target_shape, trg2src, smooth_sigma=0):
+def resample(
+    source, target_shape, trg2src, interp_method="linear", smooth_sigma=0
+):
     """
     Resamples a volume array from one space to another given
     a target-to-source transformation matrix.
@@ -63,6 +66,7 @@ def resample(source, target_shape, trg2src, smooth_sigma=0):
         source: Source array to sample from. Must be 3D or 4D.
         target_shape: Shape of the returned target array.
         trg2src: 4x4 affine matrix that transforms target coords to source coords.
+        interp_method: Interpolation method. Must be 'linear' or 'nearest'. Default is 'linear'.
         smooth_sigma: Apply gaussian smoothing before resampling (smoothing kernel is
             in voxel space). Default is 0.
     """
@@ -101,9 +105,19 @@ def resample(source, target_shape, trg2src, smooth_sigma=0):
         )  # TODO order?
 
     trg2src = LinearTransform.ensure(trg2src).matrix
-    return bindings.vol.resample_volume(source, target_shape, trg2src).reshape(
-        orig_target_shape
-    )
+
+    if interp_method == "linear":
+        return bindings.vol.resample_volume_linear(
+            source, target_shape, trg2src
+        ).reshape(orig_target_shape)
+    elif interp_method == "nearest":
+        return bindings.vol.resample_volume_nearest(
+            source, target_shape, trg2src
+        ).reshape(orig_target_shape)
+    else:
+        raise ValueError(
+            'invalid resample interpolation method "%s"' % interp_method
+        )
 
 
 def sample_into_volume(volume, weights, coords, values):
@@ -128,3 +142,46 @@ def sample_into_volume(volume, weights, coords, values):
             % source.ndim
         )
     bindings.vol.sample_into_volume(volume, weights, coords, values)
+
+
+def apply_warp(source, flow, interp_method="linear", indexing="ij"):
+    """
+    Warps a source image given a flow field. Source and flow volume sizes must match.
+
+    Parameters:
+        source: Moving image numpy array. Can be multiframe.
+        flow: Flow field numpy array.
+        interp_method: Interpolation method. Must be 'linear' or 'nearest'. Default is 'linear'.
+        indexing: Cartesian (‘xy’) or matrix (‘ij’) indexing of warp. Default is 'ij'.
+    """
+    if source.ndim > 4:
+        raise ValueError(
+            "warping can not be done on arrays with more than 4 dimensions"
+        )
+    elif source.ndim < 3:
+        raise NotImplementedError(
+            "%dD warping is not yet supported (must be 3D or 4D)" % source.ndim
+        )
+
+    linvec = [np.arange(0, dim) for dim in source.shape[:3]]
+    loc = (
+        np.rollaxis(np.array(np.meshgrid(*linvec, indexing=indexing)), 0, 4)
+        + flow
+    )
+    sample = np.stack((loc[:, :, :, 0], loc[:, :, :, 1], loc[:, :, :, 2]), 3)
+
+    warp = lambda src: interpn(
+        linvec,
+        src,
+        sample,
+        method=interp_method,
+        bounds_error=False,
+        fill_value=0,
+    )
+
+    if source.ndim == 3:
+        return warp(source)
+    if source.ndim == 4:
+        return np.stack(
+            [warp(source[..., f]) for f in range(source.shape[-1])], axis=-1
+        )

@@ -5,7 +5,7 @@ import copy
 from collections.abc import Iterable
 
 from . import bindings, warning
-from .geom import resample
+from .geom import resample, apply_warp
 from .transform import Transformable, LinearTransform, Geometry
 
 
@@ -69,9 +69,23 @@ class ArrayContainerTemplate:
         """Data type of the array."""
         return self.data.dtype
 
-    def copy(self):
-        """Returns a deep copy of the instance."""
-        return copy.deepcopy(self)
+    def copy(self, data=None):
+        """
+        Returns a deep copy of the instance.
+
+        Parameters:
+            data: Replace internal data array. Default is None.
+        """
+        if data is not None:
+            # to save memory if we're replacing the data, make sure not to create
+            # a duplicate instance of the original data before replacing it
+            shallow = copy.copy(self)
+            shallow.data = None
+            copied = copy.deepcopy(shallow)
+            copied.data = data
+            return copied
+        else:
+            return copy.deepcopy(self)
 
     @classmethod
     def ensure(cls, unknown):
@@ -203,13 +217,14 @@ class Volume(ArrayContainerTemplate, Transformable):
         self.affine = vol.affine
         self.voxsize = vol.voxsize
 
-    def reslice(self, voxsize, smooth_sigma=0):
+    def reslice(self, voxsize, interp_method="linear", smooth_sigma=0):
         """
         Returns the resampled volume with a given resolution determined by voxel
         size in mm.
 
-        Parameter:
+        Parameters:
             voxsize: Voxel size of target volume. Can be single value or list.
+            interp_method: Interpolation method. Must be 'linear' or 'nearest'. Default is 'linear'.
             smooth_sigma: Apply gaussian smoothing before resampling (kernel size is
                 in voxel space). Default is 0.
         """
@@ -248,7 +263,11 @@ class Volume(ArrayContainerTemplate, Transformable):
         if self.data.ndim != 3:
             target_shape = (*target_shape, self.nframes)
         resliced_data = resample(
-            self.data, target_shape, trg2src, smooth_sigma=smooth_sigma
+            self.data,
+            target_shape,
+            trg2src,
+            interp_method=interp_method,
+            smooth_sigma=smooth_sigma,
         )
         resliced_vol = Volume(resliced_data, affine=trg2ras, voxsize=voxsize)
         resliced_vol.copy_metadata(self)
@@ -262,7 +281,7 @@ class Volume(ArrayContainerTemplate, Transformable):
 
             cropped = vol[:, 10:-10, :]
 
-        Parameter:
+        Parameters:
             cropping: Tuple of crop indices (slices).
         """
         # convert cropping into list
@@ -311,6 +330,41 @@ class Volume(ArrayContainerTemplate, Transformable):
         cropped_vol = Volume(cropped_data, affine=matrix, voxsize=self.voxsize)
         cropped_vol.copy_metadata(self)
         return cropped_vol
+
+    def transform(self, trf, interp_method="linear", indexing="ij"):
+        """
+        Returns a volume transformed by either a dense deformation field or affine
+        target-to-source matrix (4x4).
+
+        Parameters:
+            trf: Transform to apply. Can be a dense warp or an affine matrix.
+            interp_method: Interpolation method. Must be 'linear' or 'nearest'. Default is 'linear'.
+            indexing: Cartesian (‘xy’) or matrix (‘ij’) indexing of warp. Default is 'ij'.
+        """
+
+        # convert high-level types to numpy arrays
+        if isinstance(trf, Volume):
+            trf = trf.data
+        elif isinstance(trf, LinearTransform):
+            trf = trf.matrix
+
+        # assert transform type and apply
+        if trf.shape[-1] == self.basedims:
+            resampled_data = apply_warp(
+                self.data, trf, interp_method=interp_method, indexing=indexing
+            )
+        elif len(trf.shape) == 2:
+            resampled_data = resample(
+                self.data, self.shape, trf, interp_method=interp_method
+            )
+        else:
+            raise ValueError("cannot determine transform type")
+
+        # construct new volume
+        resampled = Volume(resampled_data)
+        resampled.copy_geometry(self)
+        resampled.copy_metadata(self)
+        return resampled
 
     @property
     def image(self):

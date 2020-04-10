@@ -139,6 +139,10 @@ static void checkThread0() {
   if (tid != 0) {
     fprintf(stderr,
             "lock or unlock, not thread 0, but claiming no parallelism\n");
+    fprintf(stdout,
+            "lock or unlock, not thread 0, but claiming no parallelism\n");
+    fprintf(stdout, "You may need to surround the hash code with   "
+                    "MHT_maybeParallel_{begin,end}()\n");
     *(int *)(-1) = 0;
     exit(1);
   }

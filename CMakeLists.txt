@@ -69,8 +69,7 @@ if(FS_BUILD_MATRIX)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ALL
                         COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev
-                                ${COMPILER_PROXY_OPTION}
-                                -DCMAKE_BUILD_TYPE=${TYPE} -C
+                                ${COMPILER_PROXY_OPTION} -DCMAKE_BUILD_TYPE=${TYPE} -C
                                 ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
                                 -S ${CMAKE_SOURCE_DIR} -B
                                 ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}

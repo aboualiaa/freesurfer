@@ -225,6 +225,11 @@ if(FS_BUILD_GUIS
     set(SOURCES ${SOURCES} MacRetina.mm)
   endif()
 
+  # osx helper functions
+  if(APPLE)
+    set(SOURCES ${SOURCES} MacHelper.mm)
+  endif()
+
   add_compile_options(-Wno-deprecated
                       -Wno-reorder
                       -Wno-uninitialized
