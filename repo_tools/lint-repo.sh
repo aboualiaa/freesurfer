@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+#set -e
 
 ./repo_tools/clang-format-all.sh # c, c++
 ./repo_tools/black-all.sh        # python

@@ -1,16 +1,25 @@
-if(NOT FS_NORMAL_BUILD)
+if(FS_BUILD_MATRIX)
+  unset(FS_BUILD_MATRIX)
   project(freesurfer_super)
   include(CTest)
   set(CONF_MATRIX
-      "asan;lsan;ubsan;tsan"
+      "coverage;profile;Debug;Release;RelWithDebInfo;MinSizeRel;asan;lsan;ubsan;tsan;cfisan;msan;thinlto;fulllto"
       )
-  set(COMPILER_MATRIX "clang;appleclang")
+  set(COMPILER_MATRIX "clang09;clang10;appleclang")
   foreach(Z_COMPILER IN LISTS COMPILER_MATRIX)
     foreach(TYPE IN LISTS CONF_MATRIX)
 
-      if(Z_COMPILER STREQUAL "clang")
+      if(Z_COMPILER STREQUAL "clang10")
         set(COMPILER_PROXY_OPTION
-            "-DFS_USE_LLVM=/usr/local/opt/llvm/bin")
+            "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-10/bin"
+            )
+      elseif(Z_COMPILER STREQUAL "clang09")
+        set(COMPILER_PROXY_OPTION
+            "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-09/bin"
+            )
+      elseif(Z_COMPILER STREQUAL "clang11")
+        set(COMPILER_PROXY_OPTION
+            "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-11/bin"
             )
       elseif(Z_COMPILER STREQUAL "gcc")
         set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/opt/gcc/")
@@ -60,7 +69,7 @@ if(NOT FS_NORMAL_BUILD)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ALL
                         COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev
-                                -DFS_NORMAL_BUILD=TRUE ${COMPILER_PROXY_OPTION}
+                                ${COMPILER_PROXY_OPTION}
                                 -DCMAKE_BUILD_TYPE=${TYPE} -C
                                 ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
                                 -S ${CMAKE_SOURCE_DIR} -B
@@ -69,7 +78,7 @@ if(NOT FS_NORMAL_BUILD)
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE
-                        COMMAND bash -c \" ninja -C
+                        COMMAND bash -c \" ninja -k 0 -C
                                 ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/
                                 \"
                         )
@@ -90,11 +99,22 @@ if(NOT FS_NORMAL_BUILD)
 
       add_dependencies(compile-${TYPE} ${Z_COMPILER}_${TYPE}_BUILD_CREATE)
 
+      if(NOT TARGET compile-all)
+        add_custom_target(compile-all)
+      endif()
+
+      add_dependencies(compile-all compile-${TYPE})
+
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
                         COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit
                                 --progress \"
                         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
                         )
+
+      add_test(${Z_COMPILER}_${TYPE}_BUILD_TEST
+               COMMAND ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress
+               WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
+               )
 
       if(NOT TARGET check-${Z_COMPILER})
         add_custom_target(check-${Z_COMPILER})
@@ -107,6 +127,12 @@ if(NOT FS_NORMAL_BUILD)
       endif()
 
       add_dependencies(check-${TYPE} ${Z_COMPILER}_${TYPE}_BUILD_TEST)
+
+      if(NOT TARGET check-all)
+        add_custom_target(check-all)
+      endif()
+
+      add_dependencies(check-all check-${TYPE})
 
     endforeach()
   endforeach()
@@ -124,6 +150,9 @@ elseif(APPLE)
     set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-9")
     set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-9")
     add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+    set(ITK_DIR "/Users/aboualiaa/Downloads/packages/itk/4.13.0")
+    set(VTK_DIR "/Users/aboualiaa/Downloads/packages/vtk/5.10.1")
+    add_definitions(-DFS_ITK_LEGACY_REMOVE)
   endif()
   if(DEFINED FS_USE_LLVM AND NOT FS_USE_LLVM STREQUAL "")
     unset(CMAKE_C_COMPILER CACHE)
@@ -189,7 +218,10 @@ endif()
 
 find_program(CCACHE_PROGRAM ccache)
 mark_as_advanced(CCACHE_PROGRAM)
-if(CCACHE_PROGRAM AND FS_USE_CCACHE)
+if(CCACHE_PROGRAM
+   AND FS_USE_CCACHE
+   AND NOT CMAKE_BUILD_TYPE STREQUAL "coverage"
+   )
   message(STATUS "using ccache")
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 endif()
