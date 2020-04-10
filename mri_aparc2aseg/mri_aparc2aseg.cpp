@@ -35,18 +35,29 @@
 #include "cma.h"
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
 #include "gca.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri2.h"
+#include "mrisegment.h"
+#include "mrisurf.h"
+#include "mrisutils.h"
+#include "version.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifdef _OPENMP
 #include "romp_support.h"
 #endif
 
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
 static int  singledash(char *flag);
@@ -102,8 +113,8 @@ int        crsTest = 0, ctest = 0, rtest = 0, stest = 0;
 int        UseHash = 1;
 int        DoLH = 1, DoRH = 1, LHOnly = 0, RHOnly = 0;
 
-char *CtxSegFile = NULL;
-MRI * CtxSeg     = NULL;
+char *CtxSegFile = nullptr;
+MRI * CtxSeg     = nullptr;
 
 int    FixParaHipWM = 1;
 double BRFdotCheck(MRIS *surf, int vtxno, int c, int r, int s, MRI *AParc);
@@ -115,8 +126,8 @@ int main(int argc, char **argv) {
   int        annotid;
   int        nbrute    = 0;
   MRI *      mri_fixed = NULL, *mri_lh_dist, *mri_rh_dist, *mri_dist = NULL;
-  TRANSFORM *xform = NULL;
-  GCA *      gca   = NULL;
+  TRANSFORM *xform = nullptr;
+  GCA *      gca   = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mri_aparc2aseg");
   if (nargs && argc - nargs == 1) {
@@ -418,8 +429,8 @@ int main(int argc, char **argv) {
     MRISsmoothSurfaceNormals(rhwhite, normal_smoothing_iterations);
   }
 
-  if (relabel_gca_name != nullptr) // reclassify voxels interior to white that
-                                   // are likely to be something else
+  if (relabel_gca_name !=
+      nullptr) // reclassify voxels interior to white that are likely to be something else
   {
     MRI *  mri_norm;
     FILE * fp;
@@ -494,8 +505,7 @@ int main(int argc, char **argv) {
     free(intensities);
 
     TransformInvert(xform, mri_norm);
-    // edit GCA to disallow cortical labels at points interior to white that we
-    // are relabeling
+    // edit GCA to disallow cortical labels at points interior to white that we are relabeling
     {
       int        x, y, z, n;
       GCA_PRIOR *gcap;
@@ -715,7 +725,7 @@ int main(int argc, char **argv) {
                                              CURRENT_VERTICES);
             }
             nbrute++;
-            // exit(1);
+            //exit(1);
           }
         } else {
           if (DoLH) {
@@ -735,25 +745,6 @@ int main(int argc, char **argv) {
           } else {
             rhwvtx = -1;
             rhpvtx = -1;
-          }
-        }
-
-        /* added some checks here to make sure closest vertex (usually pial but
-           can be white) isn't on the other bank of a sulcus or through a thin
-           white matter strand. This removes inaccurate voxels that used to
-           speckle the aparc+aseg
-        */
-        if (lhwvtx < 0)
-          dlhw = 1000000000000000.0;
-        else if (!LabelWM) {
-          dot = BRFdotCheck(lhwhite, lhwvtx, c, r, s, AParc);
-          if (dot < 0) {
-            if (MRIneighbors(ASeg, c, r, s, Left_Cerebral_Cortex) >
-                0) // only do expensive check if it is possible
-              dlhw = mrisFindMinDistanceVertexWithDotCheck(lhwhite, c, r, s,
-                                                           AParc, 1, &lhwvtx);
-            else
-              dlhw = 1000000000000000.0;
           }
         }
 
@@ -898,23 +889,25 @@ int main(int argc, char **argv) {
           } */
 
         if (IsCortex && hemi == 1)
-          segval = annotid + 1000 + baseoffset; // ctx-lh
+          segval = annotid + 1000 + baseoffset; //ctx-lh
         if (IsCortex && hemi == 2)
-          segval = annotid + 2000 + baseoffset; // ctx-rh
+          segval = annotid + 2000 + baseoffset; //ctx-rh
         if (!IsCortex && hemi == 1)
           segval = annotid + 3000 + baseoffset; // wm-lh
         if (!IsCortex && hemi == 2)
           segval = annotid + 4000 + baseoffset; // wm-rh
         if (!IsCortex && dmin > dmaxctx && hemi == 1) {
-          if (dmin > 2 * fabs(dist)) // in medial wall (dist is to a ripped
-                                     // vertex so not reflected in dmin)
+          if (dmin >
+              2 * fabs(
+                      dist)) // in medial wall (dist is to a ripped vertex so not reflected in dmin)
             segval = asegid;
           else
             segval = Left_Unsegmented_WM;
         }
         if (!IsCortex && dmin > dmaxctx && hemi == 2) {
-          if (dmin > 2 * fabs(dist)) // in medial wall (dist is to a ripped
-                                     // vertex so not reflected in dmin)
+          if (dmin >
+              2 * fabs(
+                      dist)) // in medial wall (dist is to a ripped vertex so not reflected in dmin)
             segval = asegid;
           else
             segval = Right_Unsegmented_WM;
@@ -992,8 +985,8 @@ int main(int argc, char **argv) {
   printf("nctx = %d\n", nctx);
   printf("Used brute-force search on %d voxels\n", nbrute);
 
-  if (relabel_gca_name != nullptr) // reclassify voxels interior to white that
-                                   // are likely to be something else
+  if (relabel_gca_name !=
+      nullptr) // reclassify voxels interior to white that are likely to be something else
   {
     MRI *mri_norm;
     int  nchanged = 0;
@@ -1007,7 +1000,7 @@ int main(int argc, char **argv) {
 
     {
       int  x, y, z, i;
-      MRI *mri_tmp = nullptr, *mri_aseg_orig = nullptr;
+      MRI *mri_tmp = NULL, *mri_aseg_orig = NULL;
 
       mri_aseg_orig = MRIcopy(ASeg, nullptr);
       Ggca_x        = Gx;
@@ -1027,8 +1020,7 @@ int main(int argc, char **argv) {
               if (MRIgetVoxVal(mri_fixed, x, y, z, 0) > 0)
                 continue;
               if ((int)MRIgetVoxVal(ASeg, x, y, z, 0) >
-                  0) // only process voxels that are interior to the ribbon and
-                     // unknown - shouldn't be
+                  0) // only process voxels that are interior to the ribbon and unknown - shouldn't be
                 continue;
               if ((MRIlabelsInNbhd(mri_tmp, x, y, z, 1,
                                    Left_Lateral_Ventricle) > 0) ||
@@ -1062,8 +1054,7 @@ int main(int argc, char **argv) {
                     continue; // prohibited interior to white
                   if ((MRIlabelsInNbhd6(mri_tmp, x, y, z, label) == 0) ||
                       (MRIlabelsInNbhd(mri_aseg_orig, x, y, z, 2, label) == 0))
-                    continue; // only if another voxel with this label exists
-                              // nearby
+                    continue; // only if another voxel with this label exists nearby
                   mah_dist = GCAmahDist(&gcan->gcs[n], vals, mri_norm->nframes);
                   prior    = getPrior(gcap, label);
                   if (mah_dist + log(prior) < min_mah_dist) {
@@ -1108,8 +1099,7 @@ int main(int argc, char **argv) {
         }
       }
 
-      // expand into voxels that are adjacent to lots of voxels that are
-      // ventricle
+      // expand into voxels that are adjacent to lots of voxels that are ventricle
       for (i = 2; i < 10; i++) {
         int xi, yi, zi, xk, yk, zk;
         nchanged = 0;
@@ -1122,8 +1112,7 @@ int main(int argc, char **argv) {
               if (MRIgetVoxVal(mri_fixed, x, y, z, 0) > 0)
                 continue;
               if ((int)MRIgetVoxVal(ASeg, x, y, z, 0) >
-                  0) // only process voxels that are interior to the ribbon and
-                     // unknown - shouldn't be
+                  0) // only process voxels that are interior to the ribbon and unknown - shouldn't be
                 continue;
               if (MRIgetVoxVal(mri_dist, x, y, z, 0) > -2)
                 continue; // only if it is pretty far interior
@@ -1165,8 +1154,7 @@ int main(int argc, char **argv) {
                     max_label    = gcan->labels[n];
                   }
                 }
-                // if the max label is vent AND every neighboring vent is itself
-                // neighbored by lots of vent, relabel it
+                // if the max label is vent AND every neighboring vent is itself neighbored by lots of vent, relabel it
                 if (IS_VENTRICLE(max_label)) {
                   int is_vent = 1, vlabels, olabel;
 
@@ -1267,11 +1255,11 @@ int main(int argc, char **argv) {
      */
     printf("Fixing Parahip LH WM\n");
     CCSegment(ASeg, 3016,
-              Left_Unsegmented_WM); // 3016 = lhphwm, 5001 = unsegmented WM left
+              Left_Unsegmented_WM); //3016 = lhphwm, 5001 = unsegmented WM left
     printf("Fixing Parahip RH WM\n");
     CCSegment(
         ASeg, 4016,
-        Right_Unsegmented_WM); // 4016 = rhphwm, 5002 = unsegmented WM right
+        Right_Unsegmented_WM); //4016 = rhphwm, 5002 = unsegmented WM right
   }
 
   // embed color lookup table
@@ -1503,22 +1491,22 @@ static int parse_commandline(int argc, char **argv) {
   return (0);
 }
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 /* --------------------------------------------- */
 #include "mri_aparc2aseg.help.xml.h"
-static void print_usage() {
+static void print_usage(void) {
   outputHelpXml(mri_aparc2aseg_help_xml, mri_aparc2aseg_help_xml_len);
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   outputHelpXml(mri_aparc2aseg_help_xml, mri_aparc2aseg_help_xml_len);
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
+static void print_version(void) {
   printf("%s\n", vcid);
   exit(1);
 }
@@ -1532,7 +1520,7 @@ static void argnerr(char *option, int n) {
   exit(-1);
 }
 /* --------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   if (subject == nullptr) {
     printf("ERROR: must specify a subject\n");
     exit(1);
@@ -1768,11 +1756,3 @@ double BRFdotCheck(MRIS *surf, int vtxno, int c, int r, int s, MRI *AParc) {
   dot = dx * nx + dy * ny + dz * nz;
   return (dot);
 }
-
-static double mrisFindMinDistanceVertexWithDotCheck(MRI_SURFACE *mris, int c,
-                                                    int r, int s, MRI *AParc,
-                                                    double dot_dir,
-                                                    int *  pvtxno) {
-  int     vno, min_vno;
-  VERTEX *v;
-  double  dist, dot, min_dist, xs, ys, zs, dx, dy, dz;

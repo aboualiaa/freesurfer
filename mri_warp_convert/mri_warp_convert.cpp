@@ -122,16 +122,18 @@ GCAM *readFSL(const std::string &warp_file)
 }
 
 // Read a warp file containing displacements in RAS or LPS space.
-GCAM *read_world(const string &warp_file, const string &src_geom,
+GCAM *read_world(const std::string &warp_file, const std::string &src_geom,
                  bool is_lps = false) {
   MRI *in = MRIread(warp_file.c_str());
   if (in == NULL) {
-    cerr << "ERROR: couldn't read input warp from " << warp_file << endl;
+    std::cerr << "ERROR: couldn't read input warp from " << warp_file
+              << std::endl;
     return NULL;
   }
   MRI *src = MRIread(src_geom.c_str());
   if (src == NULL) {
-    cerr << "ERROR: couldn't read source geometry from " << src_geom << endl;
+    std::cerr << "ERROR: couldn't read source geometry from " << src_geom
+              << std::endl;
     return NULL;
   }
 
@@ -200,15 +202,17 @@ GCAM *read_world(const string &warp_file, const string &src_geom,
 }
 
 // Read a warp file as displacements in source-voxel space.
-GCAM *read_voxel(const string &warp_file, const string &src_geom) {
+GCAM *read_voxel(const std::string &warp_file, const std::string &src_geom) {
   MRI *in = MRIread(warp_file.c_str());
   if (in == NULL) {
-    cerr << "ERROR: couldn't read input warp from " << warp_file << endl;
+    std::cerr << "ERROR: couldn't read input warp from " << warp_file
+              << std::endl;
     return NULL;
   }
   MRI *src = MRIread(src_geom.c_str());
   if (src == NULL) {
-    cerr << "ERROR: couldn't read source geometry from " << src_geom << endl;
+    std::cerr << "ERROR: couldn't read source geometry from " << src_geom
+              << std::endl;
     return NULL;
   }
 
@@ -274,7 +278,7 @@ void writeFSL(const std::string &fname, const GCAM *gcam)
 }
 
 // Write warp as displacements in RAS or LPS space.
-void write_world(const string &fname, GCAM *gcam, bool is_lps = false) {
+void write_world(const std::string &fname, GCAM *gcam, bool is_lps = false) {
   MATRIX *dst_vox2mm = VGgetVoxelToRasXform(&gcam->atlas, NULL, 0);
   MATRIX *src_vox2mm = VGgetVoxelToRasXform(&gcam->image, NULL, 0);
 
@@ -332,7 +336,7 @@ void write_world(const string &fname, GCAM *gcam, bool is_lps = false) {
   }
 
   if (MRIwriteType(out, fname.c_str(), ITK_MORPH) != 0) {
-    cerr << "Error writing warp to " << fname << endl;
+    std::cerr << "Error writing warp to " << fname << std::endl;
   }
   MRIfree(&out);
   MatrixFree(&dst_vox2mm);
@@ -344,7 +348,7 @@ void write_world(const string &fname, GCAM *gcam, bool is_lps = false) {
 }
 
 // Write a warp file as displacements in source-voxel space.
-void write_voxel(const string &fname, GCAM *gcam) {
+void write_voxel(const std::string &fname, GCAM *gcam) {
   MATRIX *dst_vox2ras = VGgetVoxelToRasXform(&gcam->atlas, NULL, 0);
   MATRIX *src_vox2ras = VGgetVoxelToRasXform(&gcam->image, NULL, 0);
   MATRIX *src_ras2vox = MatrixInverse(src_vox2ras, NULL);
@@ -384,7 +388,7 @@ void write_voxel(const string &fname, GCAM *gcam) {
     }
   }
   if (MRIwrite(out, fname.c_str()) != 0) {
-    cerr << "Error writing VOX warp to " << fname << endl;
+    std::cerr << "Error writing VOX warp to " << fname << std::endl;
   }
   MRIfree(&out);
   MatrixFree(&dst_vox2ras);
@@ -526,7 +530,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     P.in_warp = std::string(argv[1]);
     P.in_type = filetypes::FSL;
     nargs     = 1;
-    cout << "--infsl: " << P.in_warp << " input FSL warp." << endl;
+    std::cout << "--infsl: " << P.in_warp << " input FSL warp." << std::endl;
   } else if (!strcmp(option, "INITK") || !strcmp(option, "INLPS")) {
     if (have_input) {
       std::cerr << std::endl
@@ -541,7 +545,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     P.in_warp = std::string(argv[1]);
     P.in_type = filetypes::ITK;
     nargs     = 1;
-    cout << "--inlps: " << P.in_warp << " input LPS warp." << endl;
+    std::cout << "--inlps: " << P.in_warp << " input LPS warp." << std::endl;
   } else if (!strcmp(option, "INVOX")) {
     if (have_input) {
       std::cerr << std::endl
@@ -556,22 +560,22 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     P.in_warp = std::string(argv[1]);
     P.in_type = filetypes::VOX;
     nargs     = 1;
-    cout << "--invox: " << P.in_warp << " input VOX warp." << endl;
+    std::cout << "--invox: " << P.in_warp << " input VOX warp." << std::endl;
   } else if (!strcmp(option, "INRAS")) {
     if (have_input) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one input warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one input warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_input = true;
 
-    P.in_warp = string(argv[1]);
+    P.in_warp = std::string(argv[1]);
     P.in_type = filetypes::RAS;
     nargs     = 1;
-    cout << "--inras: " << P.in_warp << " input RAS warp." << endl;
+    std::cout << "--inras: " << P.in_warp << " input RAS warp." << std::endl;
   } else if (!strcmp(option, "OUTM3Z")) {
     if (have_output) {
       std::cerr << std::endl
@@ -601,7 +605,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     P.out_warp = std::string(argv[1]);
     P.out_type = filetypes::FSL;
     nargs      = 1;
-    cout << "--outfsl: " << P.out_warp << " output FSL warp." << endl;
+    std::cout << "--outfsl: " << P.out_warp << " output FSL warp." << std::endl;
   } else if (!strcmp(option, "OUTITK") || !strcmp(option, "OUTLPS")) {
     if (have_output) {
       std::cerr << std::endl
@@ -616,7 +620,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     P.out_warp = std::string(argv[1]);
     P.out_type = filetypes::ITK;
     nargs      = 1;
-    cout << "--outlps: " << P.out_warp << " output LPS warp." << endl;
+    std::cout << "--outlps: " << P.out_warp << " output LPS warp." << std::endl;
   } else if (!strcmp(option, "OUTVOX")) {
     if (have_output) {
       std::cerr << std::endl
@@ -631,30 +635,30 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     P.out_warp = std::string(argv[1]);
     P.out_type = filetypes::VOX;
     nargs      = 1;
-    cout << "--outvox: " << P.out_warp << " output VOX warp." << endl;
+    std::cout << "--outvox: " << P.out_warp << " output VOX warp." << std::endl;
   } else if (!strcmp(option, "OUTRAS")) {
     if (have_output) {
-      cerr << endl
-           << endl
-           << "ERROR: Only one output warp can be specified" << endl
-           << endl;
+      std::cerr << std::endl
+                << std::endl
+                << "ERROR: Only one output warp can be specified" << std::endl
+                << std::endl;
       printUsage();
       exit(1);
     }
     have_output = true;
 
-    P.out_warp = string(argv[1]);
+    P.out_warp = std::string(argv[1]);
     P.out_type = filetypes::RAS;
     nargs      = 1;
-    cout << "--outras: " << P.out_warp << " output RAS warp." << endl;
+    std::cout << "--outras: " << P.out_warp << " output RAS warp." << std::endl;
   } else if (!strcmp(option, "INSRCGEOM") || !strcmp(option, "G")) {
-    P.in_src_geom = string(argv[1]);
+    P.in_src_geom = std::string(argv[1]);
     nargs         = 1;
-    cout << "--insrcgeom: " << P.in_src_geom << " source image (geometry)."
-         << endl;
+    std::cout << "--insrcgeom: " << P.in_src_geom << " source image (geometry)."
+              << std::endl;
   } else if (!strcmp(option, "DOWNSAMPLE") || !strcmp(option, "D")) {
     if (!P.downsample)
-      cout << "--downsample: save M3Z at half resolution." << endl;
+      std::cout << "--downsample: save M3Z at half resolution." << std::endl;
     P.downsample = true;
     nargs        = 0;
   } else if (!strcmp(option, "HELP")) {
@@ -707,10 +711,10 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
     need_geom = false;
   }
   if (P.in_src_geom.empty() && need_geom) {
-    cerr << endl
-         << endl
-         << "ERROR: specified input warp requires --insrcgeom" << endl
-         << endl;
+    std::cerr << std::endl
+              << std::endl
+              << "ERROR: specified input warp requires --insrcgeom" << std::endl
+              << std::endl;
     return false;
   }
 
