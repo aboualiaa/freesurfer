@@ -542,6 +542,9 @@ MRI *  MRISfillWhiteMatterInterior(MRI_SURFACE *mris, MRI *mri_aseg,
 int    MRISfindClosestWhiteVertex(MRI_SURFACE *mris, float x, float y, float z);
 int    MRISfindClosestVertex(MRI_SURFACE *mris, float x, float y, float z,
                              float *dmin, int which_vertices);
+double MRISfindMinDistanceVertexWithDotCheckXYZ(MRI_SURFACE *mris, double xs,
+                                                double ys, double zs, MRI *mri,
+                                                double dot_dir, int *pvtxno);
 double MRISfindMinDistanceVertexWithDotCheck(MRI_SURFACE *mris, int c, int r,
                                              int s, MRI *mri, double dot_dir,
                                              int *pvtxno);
