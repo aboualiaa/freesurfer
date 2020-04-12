@@ -30,6 +30,7 @@
 #include <vtkLoopSubdivisionFilter.h>
 #include <vtkPointData.h>
 #include <vtkTriangle.h>
+#include <vtkCellArray.h>
 
 static int  parse_commandline(int argc, char **argv);
 static void print_usage();

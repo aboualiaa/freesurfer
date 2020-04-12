@@ -27,6 +27,7 @@
 #include <vtkImageGradientMagnitude.h>
 #include <vtkImageShiftScale.h>
 #include <vtkPoints.h>
+#include <vtkCellArray.h>
 
 LivewireTool::LivewireTool()
     : m_nPlane(0), m_nSlice(0), m_imageData(NULL), m_imageSlice(NULL) {

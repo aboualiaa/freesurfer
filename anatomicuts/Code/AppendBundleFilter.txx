@@ -1,4 +1,5 @@
 #include <vtkCellData.h>
+#include <vtkCellArray.h>
 #include <vtkFieldData.h>
 
 #include "AppendBundleFilter.h"

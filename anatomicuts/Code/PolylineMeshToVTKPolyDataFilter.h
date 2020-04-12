@@ -6,6 +6,7 @@
 #include <vtkSmartPointer.h>
 
 #include "vtkCellData.h"
+#include "vtkCellArray.h"
 
 class vtkPolyData;
 

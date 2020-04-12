@@ -5,7 +5,7 @@ if(FS_BUILD_MATRIX)
   set(CONF_MATRIX
       "coverage;profile;Debug;Release;RelWithDebInfo;MinSizeRel;asan;lsan;ubsan;tsan;cfisan;msan;thinlto;fulllto"
       )
-  set(COMPILER_MATRIX "clang09;clang10;appleclang")
+  set(COMPILER_MATRIX "gcc09;clang09;clang10;clang11;appleclang")
   foreach(Z_COMPILER IN LISTS COMPILER_MATRIX)
     foreach(TYPE IN LISTS CONF_MATRIX)
 
@@ -21,7 +21,7 @@ if(FS_BUILD_MATRIX)
         set(COMPILER_PROXY_OPTION
             "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-11/bin"
             )
-      elseif(Z_COMPILER STREQUAL "gcc")
+      elseif(Z_COMPILER STREQUAL "gcc09")
         set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/opt/gcc/")
       elseif(Z_COMPILER STREQUAL "appleclang")
         set(COMPILER_PROXY_OPTION "")

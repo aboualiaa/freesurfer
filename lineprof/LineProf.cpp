@@ -1,3 +1,5 @@
+#include <vtkCellArray.h>
+
 #include "LineProf.h"
 #include "PetscSolver.h"
 #include "Preprocessor.h"
