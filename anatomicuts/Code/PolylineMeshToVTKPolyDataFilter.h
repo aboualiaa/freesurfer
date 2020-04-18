@@ -5,8 +5,8 @@
 #include "itkProcessObject.h"
 #include <vtkSmartPointer.h>
 
-#include "vtkCellData.h"
 #include "vtkCellArray.h"
+#include "vtkCellData.h"
 
 class vtkPolyData;
 

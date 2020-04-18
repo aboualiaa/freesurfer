@@ -6,9 +6,9 @@
 #undef export
 
 // VTK
+#include <vtkCellArray.h>
 #include <vtkFloatArray.h>
 #include <vtkPointData.h>
-#include <vtkCellArray.h>
 
 #include "Preprocessor.h"
 

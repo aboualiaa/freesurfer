@@ -20,6 +20,7 @@
 
 #include "LivewireTool.h"
 #include "vtkDijkstraImageGeodesicPath.h"
+#include <vtkCellArray.h>
 #include <vtkImageAnisotropicDiffusion2D.h>
 #include <vtkImageChangeInformation.h>
 #include <vtkImageClip.h>
@@ -27,7 +28,6 @@
 #include <vtkImageGradientMagnitude.h>
 #include <vtkImageShiftScale.h>
 #include <vtkPoints.h>
-#include <vtkCellArray.h>
 
 LivewireTool::LivewireTool()
     : m_nPlane(0), m_nSlice(0), m_imageData(NULL), m_imageSlice(NULL) {

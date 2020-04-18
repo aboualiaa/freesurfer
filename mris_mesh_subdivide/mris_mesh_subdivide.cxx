@@ -24,13 +24,13 @@
 #include "version.h"
 
 #include <vtkButterflySubdivisionFilter.h>
+#include <vtkCellArray.h>
 #include <vtkCellData.h>
 #include <vtkDoubleArray.h>
 #include <vtkLinearSubdivisionFilter.h>
 #include <vtkLoopSubdivisionFilter.h>
 #include <vtkPointData.h>
 #include <vtkTriangle.h>
-#include <vtkCellArray.h>
 
 static int  parse_commandline(int argc, char **argv);
 static void print_usage();

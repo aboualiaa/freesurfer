@@ -31,11 +31,11 @@
 #include <vtkAppendPolyData.h>
 #include <vtkBMPWriter.h>
 #include <vtkCamera.h>
+#include <vtkCellArray.h>
 #include <vtkCleanPolyData.h>
 #include <vtkColorTransferFunction.h>
 #include <vtkContourFilter.h>
 #include <vtkCubeSource.h>
-#include <vtkCellArray.h>
 #include <vtkDijkstraImageGeodesicPath.h>
 #include <vtkFixedPointVolumeRayCastMapper.h>
 #include <vtkImageAnisotropicDiffusion2D.h>
