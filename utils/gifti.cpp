@@ -819,7 +819,13 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
         return nullptr;
       }
       long long num_cols = 0;
-      gifti_DA_rows_cols(darray, &num_index_nodes, &num_cols);
+
+      if (darray->ind_ord == GIFTI_IND_ORD_ROW_MAJOR) {
+        gifti_DA_rows_cols(darray, &num_index_nodes, &num_cols);
+      } else {
+        gifti_DA_rows_cols(darray, &num_cols, &num_index_nodes);
+      }
+
       if (num_index_nodes <= 0 || num_index_nodes > mris->nvertices ||
           num_cols > 1) {
         fprintf(
@@ -847,7 +853,13 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
       } else if (darray->intent == NIFTI_INTENT_GENMATRIX) {
         expected_num_cols = 9;
       }
-      gifti_DA_rows_cols(darray, &num_vertices, &num_cols);
+
+      if (darray->ind_ord == GIFTI_IND_ORD_ROW_MAJOR) {
+        gifti_DA_rows_cols(darray, &num_vertices, &num_cols);
+      } else {
+        gifti_DA_rows_cols(darray, &num_cols, &num_vertices);
+      }
+
       if (num_vertices <= 0 || num_vertices != mris->nvertices ||
           num_cols > expected_num_cols) {
         fprintf(
@@ -1125,7 +1137,13 @@ MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume) {
       }
       frame_count++;
       long long nvertices = 0, ncols = 0;
-      gifti_DA_rows_cols(scalars, &nvertices, &ncols);
+
+      if (scalars->ind_ord == GIFTI_IND_ORD_ROW_MAJOR) {
+        gifti_DA_rows_cols(scalars, &nvertices, &ncols);
+      } else {
+        gifti_DA_rows_cols(scalars, &ncols, &nvertices);
+      }
+
       if (num_vertices == -1) {
         num_vertices = nvertices;
         num_cols     = ncols;

@@ -32,6 +32,7 @@ class SamsegLesion(Samseg):
         targetSearchStrings=None,
         modeNames=None,
         pallidumAsWM=True,
+        saveModelProbabilities=False,
         numberOfSamplingSteps=50,
         numberOfBurnInSteps=50,
         numberOfPseudoSamplesMean=500,
@@ -59,6 +60,7 @@ class SamsegLesion(Samseg):
             targetSearchStrings,
             modeNames,
             pallidumAsWM=pallidumAsWM,
+            saveModelProbabilities=saveModelProbabilities,
         )
         self.numberOfSamplingSteps = numberOfSamplingSteps
         self.numberOfBurnInSteps = numberOfBurnInSteps
@@ -103,12 +105,19 @@ class SamsegLesion(Samseg):
             return None
 
         #
+        structureClassNumber = None
         for classNumber, mergeOption in enumerate(
             self.modelSpecifications.sharedGMMParameters
         ):
             for searchString in mergeOption.searchStrings:
                 if structureSearchString in searchString:
                     structureClassNumber = classNumber
+
+        if structureClassNumber is None:
+            raise RuntimeError(
+                'Could not find "%s" in model. Make sure you are using the correct atlas'
+                % structureSearchString
+            )
 
         return structureClassNumber
 

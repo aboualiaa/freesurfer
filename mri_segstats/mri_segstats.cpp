@@ -469,7 +469,6 @@ int main(int argc, char **argv) {
           DoSubCortGrayVol                     = 0;
       DoTotalGrayVol                           = 0;
       DoSupraTent                              = 0;
-      DoETIV                                   = 0;
     }
   }
 

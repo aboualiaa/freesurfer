@@ -727,8 +727,8 @@ int MRIcheckSize(MRI *mri_src, MRI *mri_check, int width, int height,
   MRI   *MRIreadRaw(FILE *fp, int width, int height, int depth, int type) ;
 */
 int  MRIreInitCache(MRI *mri); /* when header is modified,
-                                 you must call this function
-                                 to update cached info */
+                                   you must call this function
+                                   to update cached info */
 int  MRIvoxelToWorld(MRI *mri, double xv, double yv, double zv, double *xw,
                      double *yw, double *zw);
 int  MRIworldToVoxel(MRI *mri, double xw, double yw, double zw, double *pxv,
@@ -751,6 +751,8 @@ int MRIvoxelToTalairach(MRI *mri, double xv, double yv, double zv, double *pxt,
                         double *pyt, double *pzt);
 int MRItalairachToVoxel(MRI *mri, double xt, double yt, double zt, double *pxv,
                         double *pyv, double *pzv);
+int MRIworldToTalairach(MRI *mri, double xw, double yw, double zw, double *pxt,
+                        double *pyt, double *pzt);
 
 int  MRItransformRegion(MRI *mri_src, MRI *mri_dst, MRI_REGION *src_region,
                         MRI_REGION *dst_region);

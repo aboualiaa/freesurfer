@@ -3295,8 +3295,10 @@ int MRIvoxelToWorld(MRI *mri, double xv, double yv, double zv, double *pxw,
 
   return (NO_ERROR);
 }
-/*-----------------------------------------------------
-  ------------------------------------------------------*/
+/*!
+  \fn int MRIworldToTalairachVoxel(MRI *mri, double xw, double yw, double zw, double *pxv, double *pyv, double *pzv)
+  \brief Convert a scanner RAS to MNI305 Col,Row,Slice using the mri->linear_transform (should be talairach.xfm)
+ */
 int MRIworldToTalairachVoxel(MRI *mri, double xw, double yw, double zw,
                              double *pxv, double *pyv, double *pzv) {
   double xt, yt, zt;
@@ -3305,10 +3307,26 @@ int MRIworldToTalairachVoxel(MRI *mri, double xw, double yw, double zw,
     xt = xw;
     yt = yw;
     zt = zw;
-  } else
+  } else {
     transform_point(mri->linear_transform, xw, yw, zw, &xt, &yt, &zt);
+  }
 
   MRIworldToVoxel(mri, xt, yt, zt, pxv, pyv, pzv);
+  return (NO_ERROR);
+}
+/*!
+  \fn int MRIworldToTalairach(MRI *mri, double xw, double yw, double zw, double *pxt, double *pyt, double *pzt)
+  \brief Convert a scanner RAS to MNI305 RAS using the mri->linear_transform (should be talairach.xfm)
+ */
+int MRIworldToTalairach(MRI *mri, double xw, double yw, double zw, double *pxt,
+                        double *pyt, double *pzt) {
+  if (mri->linear_transform == NULL) {
+    *pxt = xw;
+    *pyt = yw;
+    *pzt = zw;
+  } else {
+    transform_point(mri->linear_transform, xw, yw, zw, pxt, pyt, pzt);
+  }
   return (NO_ERROR);
 }
 /*-----------------------------------------------------
@@ -12089,10 +12107,6 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
     double mn            = MRImeanFrameThresh(src, 0, 1e-7);
     int    mn_bin        = (int)((mn - src_min) / bin_size);
     float  bin_threshold = (float)N_HIST_BINS / 5.0;
-
-    // make threshold super conservative for in vivo
-    if (src->xsize > .75 && (getenv("FS_FORCE_BIN_CHECK") == NULL))
-      bin_threshold = 10;
 
     if (mn_bin < bin_threshold) {
       float old_bin_size = bin_size;

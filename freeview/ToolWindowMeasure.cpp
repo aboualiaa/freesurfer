@@ -24,12 +24,15 @@
 #include "SurfaceRegion.h"
 #include "SurfaceRegionGroups.h"
 #include "ui_ToolWindowMeasure.h"
+#include <QDebug>
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
 #include <QTextStream>
-#include <QTimer>
+#ifdef Q_OS_MAC
+#include "MacHelper.h"
+#endif
 
 ToolWindowMeasure::ToolWindowMeasure(QWidget *parent)
     : QWidget(parent), UIUpdateHelper(), ui(new Ui::ToolWindowMeasure) {
@@ -93,6 +96,19 @@ ToolWindowMeasure::ToolWindowMeasure(QWidget *parent)
   QTimer *timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(OnIdle()));
   timer->start(50);
+
+#ifdef Q_OS_MAC
+  if (MacHelper::IsDarkMode()) {
+    ui->actionLine->setIcon(
+        MacHelper::InvertIcon(ui->actionLine->icon(), QSize(), true));
+    ui->actionPolyLine->setIcon(
+        MacHelper::InvertIcon(ui->actionPolyLine->icon(), QSize(), true));
+    ui->actionSpline->setIcon(
+        MacHelper::InvertIcon(ui->actionSpline->icon(), QSize(), true));
+    ui->actionContour->setIcon(
+        MacHelper::InvertIcon(ui->actionContour->icon(), QSize(), true));
+  }
+#endif
 }
 
 ToolWindowMeasure::~ToolWindowMeasure() {

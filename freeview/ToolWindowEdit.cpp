@@ -22,9 +22,13 @@
 #include "LayerPropertyMRI.h"
 #include "MainWindow.h"
 #include "RenderView2D.h"
+#include "ui_MainWindow.h"
 #include "ui_ToolWindowEdit.h"
+#include <QDebug>
 #include <QSettings>
-#include <QTimer>
+#ifdef Q_OS_MAC
+#include "MacHelper.h"
+#endif
 
 ToolWindowEdit::ToolWindowEdit(QWidget *parent)
     : QWidget(parent), UIUpdateHelper(), ui(new Ui::ToolWindowEdit) {
@@ -45,6 +49,7 @@ ToolWindowEdit::ToolWindowEdit(QWidget *parent)
   ag->addAction(ui->actionAutoSeg);
   ag->addAction(ui->actionShift);
   ag->setExclusive(true);
+
   ui->actionContour->setData(Interactor2DVoxelEdit::EM_Contour);
   ui->actionColorPicker->setData(Interactor2DVoxelEdit::EM_ColorPicker);
   ui->actionFill->setData(Interactor2DVoxelEdit::EM_Fill);
@@ -107,6 +112,20 @@ ToolWindowEdit::ToolWindowEdit(QWidget *parent)
   connect(mainwnd, SIGNAL(SupplementLayerChanged()), this,
           SLOT(UpdateWidgets()));
 
+  connect(ui->pushButtonCloneCopy, SIGNAL(clicked()), mainwnd->ui->actionCopy,
+          SLOT(trigger()));
+  connect(ui->pushButtonCloneCopyStructure, SIGNAL(clicked()),
+          mainwnd->ui->actionCopyStructure, SLOT(trigger()));
+  connect(ui->pushButtonClonePaste, SIGNAL(clicked()), mainwnd->ui->actionPaste,
+          SLOT(trigger()));
+
+  connect(mainwnd->ui->actionCopy, SIGNAL(triggered(bool)),
+          SLOT(UpdateWidgets()), Qt::QueuedConnection);
+  connect(mainwnd->ui->actionCopyStructure, SIGNAL(triggered(bool)),
+          SLOT(UpdateWidgets()), Qt::QueuedConnection);
+  connect(mainwnd->ui->actionPaste, SIGNAL(triggered(bool)),
+          SLOT(UpdateWidgets()), Qt::QueuedConnection);
+
   for (int i = 0; i < 3; i++) {
     RenderView2D *view = (RenderView2D *)mainwnd->GetRenderView(i);
     connect(ui->colorPickerContour, SIGNAL(colorChanged(QColor)),
@@ -161,6 +180,12 @@ ToolWindowEdit::ToolWindowEdit(QWidget *parent)
   ui->labelTips->setText(ui->labelTips->text().replace("Ctrl +", "Cmd +"));
   ui->labelTipsContour->setText(
       ui->labelTips->text().replace("Ctrl +", "Cmd +"));
+  if (MacHelper::IsDarkMode()) {
+    ui->actionFreeHand->setIcon(
+        MacHelper::InvertIcon(ui->actionFreeHand->icon(), QSize(), true));
+    ui->actionPolyLine->setIcon(
+        MacHelper::InvertIcon(ui->actionPolyLine->icon(), QSize(), true));
+  }
 #endif
 
   m_bToUpdateWidgets = true;
@@ -318,6 +343,8 @@ void ToolWindowEdit::OnIdle() {
   ui->lineEditGeoLambda->hide();
   ui->spinBoxGeoWsize->hide();
 
+  ui->widgetClone->setVisible(nAction == Interactor2DVoxelEdit::EM_Clone);
+
   ui->checkBoxFill3D->setVisible(nAction != Interactor2DVoxelEdit::EM_GeoSeg &&
                                  nAction != Interactor2DVoxelEdit::EM_Contour);
 
@@ -337,9 +364,18 @@ void ToolWindowEdit::OnIdle() {
     ui->lineEditExcludeRangeHigh->setEnabled(false);
   }
 
-  //  LayerMRI* mri_draw =
-  //  qobject_cast<LayerMRI*>(MainWindow::GetMainWindow()->FindSupplementLayer("GEOS_DRAW"));
+  //  LayerMRI* mri_draw = qobject_cast<LayerMRI*>(MainWindow::GetMainWindow()->FindSupplementLayer("GEOS_DRAW"));
   //  ui->pushButtonGeoUndo->setEnabled(mri_draw && mri_draw->HasUndo());
+
+  LayerMRI *mri  = (LayerMRI *)mainwnd->GetActiveLayer("MRI");
+  int       nWnd = mainwnd->GetActiveViewId();
+  ui->pushButtonCloneCopy->setEnabled(mri && mri->IsVisible() && nWnd >= 0 &&
+                                      nWnd < 3);
+  ui->pushButtonCloneCopyStructure->setEnabled(mri && mri->IsVisible() &&
+                                               nWnd >= 0 && nWnd < 3);
+  ui->pushButtonClonePaste->setEnabled(mri && mri->IsVisible() &&
+                                       mri->IsEditable() && nWnd >= 0 &&
+                                       nWnd < 3 && mri->IsValidToPaste(nWnd));
 }
 
 void ToolWindowEdit::OnEditMode(QAction *act) {

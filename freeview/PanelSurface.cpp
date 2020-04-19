@@ -35,9 +35,9 @@
 #include "ui_WindowEditAnnotation.h"
 #include <QDebug>
 #include <QFileDialog>
-#include <QMessageBox>
-#include <QToolBar>
-#include <QToolButton>
+#ifdef Q_OS_MAC
+#include "MacHelper.h"
+#endif
 
 PanelSurface::PanelSurface(QWidget *parent)
     : PanelLayer("Surface", parent), ui(new Ui::PanelSurface) {
@@ -47,7 +47,31 @@ PanelSurface::PanelSurface(QWidget *parent)
   ui->pushButtonDeleteLabel->setMaximumWidth(62);
   ui->pushButtonLoadLabel->setMaximumWidth(55);
   ui->pushButtonSaveLabel->setMaximumWidth(55);
+
+  if (MacHelper::IsDarkMode()) {
+    QIcon icn(":/resource/icons/surface_path_dm.png");
+    icn.addPixmap(QPixmap(":/resource/icons/surface_path_dm.png"),
+                  QIcon::Normal, QIcon::On);
+    ui->actionPath->setIcon(icn);
+    ui->actionCutLine->setIcon(
+        QIcon(":/resource/icons/surface_cut_line_dm.png"));
+    ui->actionCutClosedLine->setIcon(
+        QIcon(":/resource/icons/surface_cut_closed_line_dm.png"));
+    ui->actionCutClear->setIcon(
+        QIcon(":/resource/icons/surface_cut_clear_dm.png"));
+    ui->actionFillUncutArea->setIcon(
+        QIcon(":/resource/icons/surface_fill_uncut_area_dm.png"));
+    ui->actionUndoCut->setIcon(
+        QIcon(":/resource/icons/surface_undo_cut_dm.png"));
+    ui->actionMakePath->setIcon(
+        QIcon(":/resource/icons/surface_path_make_dm.png"));
+    ui->actionMakeClosedPath->setIcon(
+        QIcon(":/resource/icons/surface_path_make_closed_dm.png"));
+    ui->actionDeletePath->setIcon(
+        QIcon(":/resource/icons/surface_path_delete_dm.png"));
+  }
 #endif
+
   MainWindow *mainwnd = MainWindow::GetMainWindow();
   ui->toolbar->insertAction(ui->actionShowOverlay,
                             mainwnd->ui->actionLoadSurface);

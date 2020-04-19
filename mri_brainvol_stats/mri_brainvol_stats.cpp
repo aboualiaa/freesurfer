@@ -23,9 +23,13 @@ int main(int argc, char **argv) {
     subjdir = std::string(sd);
   }
 
-  // compute and write the vol stats to a cache file at
-  // subjects/stats/brainvol.stats
-  std::vector<double> stats = ComputeBrainVolumeStats(subject, subjdir);
+  // compute and write the vol stats to a cache file at subjects/stats/brainvol.stats
+  int                 CBVSVersion = 2, KeepCSF = 1;
+  std::vector<double> stats;
+  if (CBVSVersion == 1)
+    stats = ComputeBrainVolumeStats(subject, subjdir);
+  if (CBVSVersion == 2)
+    stats = ComputeBrainVolumeStats2(subject, subjdir, KeepCSF);
   CacheBrainVolumeStats(stats, subject, subjdir);
 
   return 0;

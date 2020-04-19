@@ -19,6 +19,9 @@
 #include "RenderView2D.h"
 #include "ui_ToolWindowROIEdit.h"
 #include <QSettings>
+#ifdef Q_OS_MAC
+#include "MacHelper.h"
+#endif
 
 ToolWindowROIEdit::ToolWindowROIEdit(QWidget *parent)
     : QWidget(parent), ui(new Ui::ToolWindowROIEdit) {
@@ -41,6 +44,15 @@ ToolWindowROIEdit::ToolWindowROIEdit(QWidget *parent)
           wnd->GetBrushProperty(), SLOT(SetBrushSize(int)));
 
   UpdateWidgets();
+
+#ifdef Q_OS_MAC
+  if (MacHelper::IsDarkMode()) {
+    ui->actionFreeHand->setIcon(
+        MacHelper::InvertIcon(ui->actionFreeHand->icon(), QSize(), true));
+    ui->actionPolyLine->setIcon(
+        MacHelper::InvertIcon(ui->actionPolyLine->icon(), QSize(), true));
+  }
+#endif
 }
 
 ToolWindowROIEdit::~ToolWindowROIEdit() {
