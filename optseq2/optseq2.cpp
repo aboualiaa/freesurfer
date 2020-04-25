@@ -63,15 +63,14 @@ Can something be done to affect the off-diagonals?
 #undef X
 #endif
 
-static char vcid[]   = "$Id: optseq2.c,v 2.22 2011/04/21 19:48:51 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 static int     parse_commandline(int argc, char **argv);
-static void    check_options();
-static void    print_usage();
-static void    usage_exit();
-static void    print_help();
-static void    print_version();
+static void    check_options(void);
+static void    print_usage(void);
+static void    usage_exit(void);
+static void    print_help(void);
+static void    print_version(void);
 static void    argnerr(char *option, int n);
 static void    dump_options(FILE *fp);
 static int     isflag(char *flag);
@@ -956,7 +955,7 @@ static void print_usage() {
   printf("  --version : print version string \n");
 
   printf("\n");
-  printf("%s\n", vcid);
+  printf("%s\n", getVersion().c_str());
   printf("\n");
   printf("\n");
   printf("Optseq Home Page: \n"
@@ -1501,8 +1500,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */
@@ -1651,7 +1650,7 @@ static void dump_options(FILE *fp) {
   int n;
 
   fprintf(fp, "optseq2\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "NoSearch  = %d\n", NoSearch);
   if (nSearch > 0)
     fprintf(fp, "nSearch  = %d\n", nSearch);
@@ -1675,9 +1674,9 @@ static void dump_options(FILE *fp) {
   fprintf(fp, "PolyOrder = %d\n", PolyOrder);
   fprintf(fp, "tNullMax = %g\n", tNullMax);
   fprintf(fp, "tNullMin = %g\n", tNullMin);
-  if (outstem != nullptr)
+  if (outstem != NULL)
     printf("outstem = %s\n", outstem);
-  if (SvAllFile != nullptr)
+  if (SvAllFile != NULL)
     printf("SvAllFile = %s\n", SvAllFile);
   if (nInFiles != 0) {
     fprintf(fp, "nInFiles: %d\n", nInFiles);

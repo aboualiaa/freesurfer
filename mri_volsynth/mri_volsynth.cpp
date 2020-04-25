@@ -19,13 +19,14 @@
 
 #include <sys/time.h>
 
-#include "ctrpoints.h"
 #include "diag.h"
+#include "error.h"
 #include "fmriutils.h"
 #include "mri2.h"
 #include "mri_circulars.h"
 #include "mri_identify.h"
 #include "randomfields.h"
+#include "version.h"
 double round(double);
 
 MRI *fMRIsqrt(MRI *mri, MRI *mrisqrt);
@@ -46,9 +47,6 @@ static int  isflag(char *flag);
 // static int  stringmatch(char *str1, char *str2);
 
 int main(int argc, char *argv[]);
-
-static char vcid[] =
-    "$Id: mri_volsynth.c,v 1.56 2017/02/16 19:50:57 greve Exp $";
 
 const char *Progname = nullptr;
 
@@ -923,8 +921,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

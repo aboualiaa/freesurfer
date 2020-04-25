@@ -30,8 +30,6 @@
 #include "region.h"
 #include "version.h"
 
-static char vcid[] = "$Id: mri_mask.c,v 1.24 2016/11/28 20:30:57 fischl Exp $";
-
 void usage(int exit_val);
 
 const char *Progname;
@@ -318,8 +316,8 @@ void usage(int exit_val) {
 } /*  end usage()  */
 
 /* --------------------------------------------- */
-static void print_version() {
-  fprintf(stdout, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stdout, "%s\n", getVersion().c_str());
   exit(1);
 }
 

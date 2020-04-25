@@ -26,8 +26,6 @@
 #include "version.h"
 
 #ifndef lint
-static char vcid[] =
-    "$Id: mri_convert_mdh.c,v 1.27 2011/03/02 00:04:14 nicks Exp $";
 #endif /* lint */
 
 #define MDH_SIZE        128 // Number of bytes in the miniheader
@@ -748,7 +746,7 @@ static void print_usage(void) {
 static void print_help(void) {
   print_usage();
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
   printf(
 
@@ -826,7 +824,7 @@ static void print_help(void) {
 }
 /* --------------------------------------------- */
 static void print_version(void) {
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

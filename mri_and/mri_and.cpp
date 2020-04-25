@@ -29,8 +29,7 @@ static void usage_exit();
 static void print_help();
 static void print_version();
 
-static int  get_option(int argc, char *argv[]);
-static char vcid[] = "$Id: mri_and.c,v 1.4 2011/03/02 00:04:13 nicks Exp $";
+static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 
@@ -127,8 +126,8 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

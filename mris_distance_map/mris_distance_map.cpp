@@ -24,8 +24,6 @@
 #include "version.h"
 
 //------------------------------------------------------------------------
-static char vcid[] =
-    "$Id: mris_distance_map.c,v 1.2 2011/03/02 00:04:31 nicks Exp $";
 
 /*-------------------------------- CONSTANTS -----------------------------*/
 
@@ -148,8 +146,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  printf("%s\n", getVersion().c_str());
   exit(1);
 }
 MRI *MRIScomputeDistanceMap(MRI_SURFACE *mris, MRI *mri_distance,

@@ -19,8 +19,6 @@
 
 */
 
-// $Id: dummy.c,v 1.10 2011/03/02 00:04:01 nicks Exp $
-
 /*
   BEGINHELP
 
@@ -65,7 +63,6 @@ static void print_version(void);
 static void dump_options(FILE *fp);
 int         main(int argc, char *argv[]);
 
-static char    vcid[]   = "$Id: dummy.c,v 1.10 2011/03/02 00:04:01 nicks Exp $";
 char *         Progname = NULL;
 char *         cmdline, cwd[2000];
 int            debug         = 0;
@@ -394,7 +391,7 @@ static void print_usage(void) {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -419,7 +416,7 @@ static void print_help(void) {
 /* ------ Doxygen markup ends on the line above  (this line not needed for
  * Doxygen) -- */
 static void print_version(void) {
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -443,7 +440,7 @@ static void check_options(void) { return; }
  * Doxygen) -- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

@@ -43,9 +43,7 @@ static void print_version();
 static void dump_options(FILE *fp);
 int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mris_niters2fwhm.c,v 1.14 2011/03/02 00:04:33 nicks Exp $";
-const char *   Progname = nullptr;
+const char *   Progname = NULL;
 char *         cmdline, cwd[2000];
 int            debug         = 0;
 int            checkoptsonly = 0;
@@ -237,7 +235,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -247,8 +245,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */
@@ -257,7 +255,7 @@ static void check_options() { return; }
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "%s\n", Progname);
   fprintf(fp, "FREESURFER_HOME %s\n", getenv("FREESURFER_HOME"));
   fprintf(fp, "SUBJECTS_DIR %s\n", getenv("SUBJECTS_DIR"));

@@ -76,15 +76,14 @@ int main(int narg, char *arg[]) {
 
   // Checking for correct parameters
   if ((gp.size() <= 8) or (gp.search(2, "--help", "-h"))) {
-    std::cerr
-        << "Usage: " << std::endl
-        << arg[0]
-        << " -i streamlineFile.trk -sl surfaceFile_lh.orig -sr "
-           "surfaceFile_rh.orig"
-        << std::endl
-        << "                       -ol left_overlayFile -or right_overlayFile"
-        << std::endl
-        << "		       -ri reference_Image" << std::endl;
+    cerr << "Usage: " << endl
+         << arg[0]
+         << " -i streamlineFile.trk -sl surfaceFile_lh.orig -sr "
+            "surfaceFile_rh.orig"
+         << endl
+         << "                       -ol left_overlayFile -or right_overlayFile"
+         << endl
+         << "		       -ri reference_Image" << endl;
 
     return EXIT_FAILURE;
   }
@@ -92,34 +91,34 @@ int main(int narg, char *arg[]) {
   // Declaration of Variables for Program to Function
   // TRK file Definition
   enum { Dimension = 3 };
-  using PixelType                            = int;
-  const unsigned int PointDimension          = 3;
-  using PointDataType                        = std::vector<int>;
-  const unsigned int MaxTopologicalDimension = 3;
-  using CoordinateType                       = double;
-  using InterpolationWeightType              = double;
-  using MeshTraits =
-      itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
-                                   MaxTopologicalDimension, CoordinateType,
-                                   InterpolationWeightType, PointDataType>;
-  using HistogramMeshType = itk::Mesh<PixelType, PointDimension, MeshTraits>;
+  typedef int         PixelType;
+  const unsigned int  PointDimension = 3;
+  typedef vector<int> PointDataType;
+  const unsigned int  MaxTopologicalDimension = 3;
+  typedef double      CoordinateType;
+  typedef double      InterpolationWeightType;
+  typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
+                                       MaxTopologicalDimension, CoordinateType,
+                                       InterpolationWeightType, PointDataType>
+                                                           MeshTraits;
+  typedef itk::Mesh<PixelType, PointDimension, MeshTraits> HistogramMeshType;
 
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
-  using ColorMeshType    = itk::Mesh<PixelType, PointDimension>;
-  using PointType        = ColorMeshType::PointType;
-  using CellType         = ColorMeshType::CellType;
-  using PolylineCellType = itk::PolylineCell<CellType>;
-  using CellAutoPointer  = ColorMeshType::CellAutoPointer;
-  using ClusterToolsType =
-      ClusterTools<ColorMeshType, ImageType, HistogramMeshType>;
+  typedef itk::Mesh<PixelType, PointDimension> ColorMeshType;
+  typedef ColorMeshType::PointType             PointType;
+  typedef ColorMeshType::CellType              CellType;
+  typedef itk::PolylineCell<CellType>          PolylineCellType;
+  typedef ColorMeshType::CellAutoPointer       CellAutoPointer;
+  typedef ClusterTools<ColorMeshType, ImageType, HistogramMeshType>
+      ClusterToolsType;
 
   // Surface file Definition
-  using CoordType = float;
-  using SurfType  = fs::Surface<CoordType, Dimension>;
+  typedef float                             CoordType;
+  typedef fs::Surface<CoordType, Dimension> SurfType;
 
   // Input Parsing
-  std::vector<std::string> TRKFile;
+  vector<string> TRKFile;
   TRKFile.push_back(gp.follow("Could not find TRK file", "-i"));
   const char *surfaceFileL = gp.follow("Could not find Surface File", "-sl");
   const char *surfaceFileR = gp.follow("Could not find Surface File", "-sr");
@@ -129,8 +128,8 @@ int main(int narg, char *arg[]) {
 
   // Reading in the Image
   // ITK Version
-  using ImageReaderType            = itk::ImageFileReader<ImageType>;
-  ImageReaderType::Pointer readerS = ImageReaderType::New();
+  typedef itk::ImageFileReader<ImageType> ImageReaderType;
+  ImageReaderType::Pointer                readerS = ImageReaderType::New();
   readerS->SetFileName(refImage);
   readerS->Update();
   ImageType::Pointer volume = readerS->GetOutput();
@@ -138,18 +137,18 @@ int main(int narg, char *arg[]) {
   // FS Version
   MRI *image = MRIread(refImage);
 
-  // Outputting the Files to Ensure the correct files were input
-  std::cerr << std::endl
-            << "TRK File:           " << TRKFile.at(0) << std::endl
-            << "Left Surface File:  " << surfaceFileL << std::endl
-            << "Left Overlay File:  " << overlayFileL << std::endl
-            << "Right Surface File: " << surfaceFileR << std::endl
-            << "Right Overlay File: " << overlayFileR << std::endl
-            << "Reference Image:    " << refImage << std::endl;
+  //Outputting the Files to Ensure the correct files were input
+  cerr << endl
+       << "TRK File:           " << TRKFile.at(0) << endl
+       << "Left Surface File:  " << surfaceFileL << endl
+       << "Left Overlay File:  " << overlayFileL << endl
+       << "Right Surface File: " << surfaceFileR << endl
+       << "Right Overlay File: " << overlayFileR << endl
+       << "Reference Image:    " << refImage << endl;
 
   // Loading the TRK files into a mesh
-  std::vector<ColorMeshType::Pointer> *     meshes;
-  std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
+  vector<ColorMeshType::Pointer> *     meshes;
+  vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
   clusterTools->GetPolyDatas(TRKFile, &polydatas, volume);
@@ -202,9 +201,9 @@ int main(int narg, char *arg[]) {
     // Finds closest point and sets value equal to ENDPOINT_VALUE
     double    distL, distR;
     vtkIdType Left_ID =
-        surfTreeL->FindClosestPointWithinRadius(1000, point_array, distL);
+        surfTreeL->FindClosestPointWithinRadius(100000, point_array, distL);
     vtkIdType Right_ID =
-        surfTreeR->FindClosestPointWithinRadius(1000, point_array, distR);
+        surfTreeR->FindClosestPointWithinRadius(100000, point_array, distR);
     vtkIdType ID = which_ID(distL, distR, Left_ID, Right_ID);
 
     if (ID == Left_ID)
@@ -221,9 +220,10 @@ int main(int narg, char *arg[]) {
     MRIvoxelToSurfaceRAS(image, index[0], index[1], index[2], &point_array[0],
                          &point_array[1], &point_array[2]);
 
-    Left_ID = surfTreeL->FindClosestPointWithinRadius(1000, point_array, distL);
+    Left_ID =
+        surfTreeL->FindClosestPointWithinRadius(100000, point_array, distL);
     Right_ID =
-        surfTreeR->FindClosestPointWithinRadius(1000, point_array, distR);
+        surfTreeR->FindClosestPointWithinRadius(100000, point_array, distR);
     ID = which_ID(distL, distR, Left_ID, Right_ID);
 
     if (ID == Left_ID)

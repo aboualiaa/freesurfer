@@ -25,15 +25,12 @@
 #include "mrisutils.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_anatomical_stats.c,v 1.79 2016/03/14 15:15:34 greve Exp $";
-
 int         main(int argc, char *argv[]);
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 double      MRISmeasureTotalWhiteMatterVolume(MRI *mri);
 double      MRISmeasureCorticalGrayMatterVolume(MRI_SURFACE *mris);
 int         MRIScomputeCurvatureIndicesMarked(MRI_SURFACE *mris, double *pici,
@@ -445,8 +442,8 @@ int main(int argc, char *argv[]) {
     fprintf(fp, "# \n");
     fprintf(fp, "# CreationTime %s\n", VERcurTimeStamp());
     fprintf(fp, "# generating_program %s\n", Progname);
-    fprintf(fp, "# cvs_version %s\n", vcid);
-    fprintf(fp, "# mrisurf.c-cvs_version %s\n", MRISurfSrcVersion());
+    fprintf(fp, "# cvs_version %s\n", getVersion().c_str());
+    fprintf(fp, "# mrisurf.c-cvs_version %s\n", getVersion().c_str());
     fprintf(fp, "# cmdline %s\n", cmdline);
     fprintf(fp, "# sysname  %s\n", uts.sysname);
     fprintf(fp, "# hostname %s\n", uts.nodename);
@@ -1130,8 +1127,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

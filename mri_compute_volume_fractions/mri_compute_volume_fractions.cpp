@@ -41,9 +41,7 @@ static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
 
-static char vcid[] = "$Id: mri_compute_volume_fractions.c,v 1.22 2015/09/14 "
-                     "12:25:01 fischl Exp $";
-const char *   Progname = nullptr;
+const char *   Progname = NULL;
 char *         cmdline, cwd[2000];
 int            debug         = 0;
 int            checkoptsonly = 0;
@@ -517,7 +515,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /*---------------------------------------------*/
@@ -537,8 +535,8 @@ static void print_help() {
   exit(1);
 }
 /*---------------------------------------------*/
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /*---------------------------------------------*/
@@ -597,7 +595,7 @@ static void check_options() {
 /*---------------------------------------------*/
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "sysname  %s\n", uts.sysname);
   fprintf(fp, "hostname %s\n", uts.nodename);
   fprintf(fp, "machine  %s\n", uts.machine);

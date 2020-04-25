@@ -25,19 +25,16 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_left_right_register.c,v 1.2 2011/12/16 20:49:37 greve Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 static char *surface_names[]   = {"inflated", "smoothwm", "smoothwm"};
-static char *curvature_names[] = {"inflated.H", "sulc", nullptr};
+static char *curvature_names[] = {"inflated.H", "sulc", NULL};
 
 #define MAX_SIGMAS 10
 static int   nsigmas = 0;
@@ -105,7 +102,7 @@ int main(int argc, char *argv[]) {
   Timer start;
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   memset(&parms, 0, sizeof(parms));
   parms.projection = PROJECT_SPHERE;
@@ -152,8 +149,8 @@ int main(int argc, char *argv[]) {
     usage_exit();
   }
 
-  printf("%s\n", vcid);
-  printf("  %s\n", MRISurfSrcVersion());
+  std::cout << getVersion() << std::endl;
+  printf("  %s\n", getVersion().c_str());
   fflush(stdout);
 
   lh_surf_fname = argv[1];
@@ -697,7 +694,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

@@ -42,9 +42,6 @@ static void argnerr(char *, int);
 
 static int debug = 0;
 
-static char vcid[] =
-    "$Id: mris_mesh_subdivide.cxx,v 1.5 2013/02/07 16:04:07 jonp Exp $";
-
 int mris_mesh_subdivide__VTK(MRI_SURFACE *mris, int iter);
 int mris_mesh_subdivide__convert_mris_VTK(MRI_SURFACE *mris, vtkPolyData *mesh);
 int mris_mesh_subdivide__convert_VTK_mris(vtkPolyData *mesh,
@@ -534,7 +531,7 @@ static void print_usage() {
   printf("   --help        print out information on how to use this program\n");
   printf("   --version     print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 
@@ -561,9 +558,8 @@ static void print_help() {
   exit(1);
 }
 
-/* ---------------------------------------------------------------------------
- */
-static void print_version() {
-  printf("%s\n", vcid);
+/* --------------------------------------------------------------------------- */
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }

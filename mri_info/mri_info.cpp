@@ -34,8 +34,6 @@ static void usage_exit();
 static void print_help();
 static void print_version();
 
-static char vcid[] = "$Id: mri_info.c,v 1.87 2014/11/20 23:46:54 greve Exp $";
-
 const char * Progname;
 static char *inputlist[100];
 static int   nthinput              = 0;
@@ -392,8 +390,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

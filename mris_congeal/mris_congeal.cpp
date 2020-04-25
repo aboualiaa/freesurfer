@@ -25,9 +25,6 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_congeal.c,v 1.4 2011/03/02 00:04:30 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
 static int    get_option(int argc, char *argv[]);
@@ -187,8 +184,8 @@ int     main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit();
 
-  printf("%s\n", vcid);
-  printf("  %s\n", MRISurfSrcVersion());
+  std::cout << getVersion() << std::endl;
+  printf("  %s\n", getVersion().c_str());
   fflush(stdout);
 
   hemi      = argv[1];
@@ -679,8 +676,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

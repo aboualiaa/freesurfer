@@ -29,9 +29,6 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_refine_surfaces.c,v 1.23 2016/12/10 22:57:53 fischl Exp $";
-
 int debug__ = 0; /// tosa debug
 
 int main(int argc, char *argv[]);
@@ -1064,8 +1061,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

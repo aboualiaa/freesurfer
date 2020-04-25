@@ -24,15 +24,12 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_curvature.c,v 1.31 2011/03/02 00:04:30 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 
 const char *Progname;
 
@@ -42,7 +39,7 @@ static int    write_flag          = 0;
 static int    nbrs                = 2;
 static double cthresh             = -1.0;
 static int    navgs               = 0;
-static char * param_file          = nullptr;
+static char * param_file          = NULL;
 static int    normalize           = 0;
 static int    diff_flag           = 0;
 static int    max_flag            = 0;
@@ -449,8 +446,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

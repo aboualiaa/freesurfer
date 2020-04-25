@@ -13,16 +13,10 @@
  */
 
 // cmdargs.c - utilities for handling command-line arguments
-// $Id: cmdargs.c,v 1.3 2011/03/02 00:04:42 nicks Exp $
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-/* --------------------------------------------- */
-const char *CMDSrcVersion() {
-  return ("$Id: cmdargs.c,v 1.3 2011/03/02 00:04:42 nicks Exp $");
-}
 
 /* --------------------------------------------------------------------------
    CMDargNErr() - prints a msg as to the number of arguments needed by a flag

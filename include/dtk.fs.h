@@ -51,7 +51,6 @@ typedef struct {
   MRI *       mri_template; // only need geometry
 } DTK_TRACK_SET;
 
-const char *   DTKFSSrcVersion();
 DTK_TRACK_SET *DTKloadTrackSet(char *trkfile, char *mrifile);
 DTK_TRACK *    DTKreadTrack(FILE *fp, int n_scalars, int n_properties, float dc,
                             float dr, float ds);

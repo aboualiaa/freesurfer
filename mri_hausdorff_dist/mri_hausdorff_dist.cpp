@@ -21,19 +21,21 @@
  */
 
 #include "cma.h"
+#include "cmdargs.h"
 #include "diag.h"
+#include "fio.h"
+#include "macros.h"
+#include "mghendian.h"
 #include "version.h"
 
 static int    get_option(int argc, char *argv[]);
-static void   print_version();
-static void   print_usage();
-static void   usage_exit();
-static void   print_help();
+static void   print_version(void);
+static void   print_usage(void);
+static void   usage_exit(void);
+static void   print_help(void);
 static double compute_hdist(MRI **mri, int nvolumes, int index, double *hdists,
                             int which);
-static char   vcid[] =
-    "$Id: mri_hausdorff_dist.c,v 1.14 2014/07/18 20:19:23 lzollei Exp $";
-static int fromFile = 0;
+static int    fromFile = 0;
 
 const char *Progname;
 
@@ -473,7 +475,7 @@ static int get_option(int argc, char *argv[]) {
     }
   return (nargs);
 }
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

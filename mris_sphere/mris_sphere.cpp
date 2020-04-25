@@ -28,20 +28,13 @@
 #include "timer.h"
 #include "version.h"
 
-#ifdef HAVE_OPENMP
-#include "romp_support.h"
-#endif
-
-static char vcid[] =
-    "$Id: mris_sphere.c,v 1.62 2017/02/07 19:04:37 fischl Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 int         MRISscaleUp(MRI_SURFACE *mris);
 
 const char *Progname;
@@ -161,8 +154,8 @@ int main(int argc, char *argv[]) {
   in_surf_fname = argv[1];
   out_fname     = argv[2];
 
-  printf("%s\n", vcid);
-  printf("  %s\n", MRISurfSrcVersion());
+  printf("%s\n", getVersion().c_str());
+  printf("  %s\n", getVersion().c_str());
 
 #ifdef HAVE_OPENMP
   {
@@ -751,8 +744,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

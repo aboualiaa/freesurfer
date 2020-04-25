@@ -31,7 +31,6 @@
  Blazejewska
  */
 
-// $Id: mri_surf_smooth.c,v 0.90 2019/02/21 00:04:01 anna Exp $
 /*
  BEGINHELP
  TODO
@@ -71,11 +70,13 @@ static char vcid[] =
     "$Id: mris_smooth_intracortical.c,v 1.30 2019/02/21 18:48:21 Anna Exp $";
 const char *Progname = nullptr;
 
+const char *Progname = NULL;
+
 char surf_path[STRLEN], over_path[STRLEN], out_path[STRLEN], surf_name[STRLEN],
     over_name[STRLEN], surf_dir[STRLEN], over_dir[STRLEN], out_dir[STRLEN],
     out_name[STRLEN];
 int surf_num = 0, over_num = 0, nb_rad = 0, ic_size = 1, ic_start = 0,
-    nb_wf = 0; // nb_wf = 0 (gauss)
+    nb_wf = 0; //nb_wf = 0 (gauss)
 
 int main(int argc, char *argv[]) {
   Progname = argv[0];
@@ -512,8 +513,8 @@ static void print_usage() {
 \fn static void print_version(void)
 \brief Prints version and exits
 */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

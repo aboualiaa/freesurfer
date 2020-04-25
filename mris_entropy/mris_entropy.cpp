@@ -16,9 +16,6 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_entropy.c,v 1.7 2011/03/02 00:04:31 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
@@ -193,7 +190,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

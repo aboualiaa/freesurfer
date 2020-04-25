@@ -31,7 +31,9 @@ float OpenBetaIncomplete(float a, float b, float x);
 
 float OpenGammaIncomplete(float a, float x);
 
-float OpenRan1(long *seed);
+int OpenQRdecomposition(const MATRIX *iMatrix, MATRIX *oQ, MATRIX *oR);
+
+float OpenMatrixDeterminant(MATRIX *matrix);
 
 // this is only called from the matrix class
 int OpenSvdcmp(MATRIX *a, VECTOR *w, MATRIX *v);

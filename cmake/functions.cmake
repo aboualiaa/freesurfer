@@ -16,6 +16,7 @@ function(install_configured)
   foreach(FILE ${INSTALL_UNPARSED_ARGUMENTS})
     install(CODE "
       message(STATUS \"Configuring: ${CMAKE_INSTALL_PREFIX}/${INSTALL_DESTINATION}/${FILE}\")
+      file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${INSTALL_DESTINATION})
       set(FS_VERSION ${FS_VERSION})
       set(BUILD_STAMP ${BUILD_STAMP})
       configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${FILE} ${CMAKE_INSTALL_PREFIX}/${INSTALL_DESTINATION} @ONLY)"
@@ -111,13 +112,12 @@ endfunction(add_help)
 # Some shell scripts also utilize a help.xml file by appending the helptext to the end of it.
 # This function will setup this build command and dependency
 function(install_append_help SCRIPT HELPTEXT DESTINATION)
-  string(REGEX REPLACE "/$" "" Z_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+  install_configured(${SCRIPT} DESTINATION ${DESTINATION})
   install(CODE "
-    message(STATUS \"Installing (with helptext): ${Z_INSTALL_PREFIX}/${DESTINATION}/${SCRIPT}\")
+    message(STATUS \"Appending helptext: ${CMAKE_INSTALL_PREFIX}/${DESTINATION}/${SCRIPT}\")
     execute_process(
       COMMAND bash -c \"
-        ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target fsPrintHelp &&
-        cp -f ${CMAKE_CURRENT_SOURCE_DIR}/${SCRIPT} ${Z_INSTALL_PREFIX}/${DESTINATION} &&
+        ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/utils --target fsPrintHelp &&
         ${CMAKE_BINARY_DIR}/utils/fsPrintHelp ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT} >> ${CMAKE_INSTALL_PREFIX}/${DESTINATION}/${SCRIPT}\"
       OUTPUT_QUIET
       RESULT_VARIABLE retcode

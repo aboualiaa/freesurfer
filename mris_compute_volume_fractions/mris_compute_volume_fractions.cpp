@@ -34,9 +34,7 @@ static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
 
-static char vcid[] = "$Id: mris_compute_volume_fractions.c,v 1.4 2013/05/17 "
-                     "15:19:06 enderk Exp $";
-const char *   Progname = nullptr;
+const char *   Progname = NULL;
 char *         cmdline, cwd[2000];
 int            debug         = 0;
 int            checkoptsonly = 0;
@@ -185,7 +183,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -207,10 +205,9 @@ static void print_help() {
 \fn static void print_version(void)
 \brief Prints version and exits
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for
- * Doxygen) -- */
-static void print_version() {
-  printf("%s\n", vcid);
+/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -242,7 +239,7 @@ static void check_options() {
  * Doxygen) -- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "Working Directory: %s\n", cwd);
   fprintf(fp, "cmdline: %s\n", cmdline);
   /*

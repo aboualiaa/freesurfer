@@ -190,9 +190,7 @@ double     VertexCost(double vctx, double vwm, double slope, double center,
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_segreg.c,v 1.113 2016/05/10 03:23:20 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 int debug = 0, gdiagno = -1;
 
@@ -1746,9 +1744,9 @@ static void print_usage() {
   printf("  --surf-con basename : saves final contrast as basename.?h.mgh\n");
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
-  printf("\n%s\n\n", vcid);
+  printf("\n%s\n\n", getVersion().c_str());
   exit(1);
 }
 /* --------------------------------------------- */
@@ -1820,7 +1818,7 @@ static void check_options() {
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   int n;
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "setenv SUBJECTS_DIR %s\n", SUBJECTS_DIR);
   fprintf(fp, "cd %s\n", getcwd(tmpstr, sizeof(tmpstr)));
   fprintf(fp, "%s\n", cmdline2);
@@ -1875,7 +1873,7 @@ static void dump_options(FILE *fp) {
   MatrixPrint(fp, R0);
   fprintf(fp, "\n");
 
-  if (false) {
+  if (0) {
     fprintf(fp, "ntx %d\n", ntx);
     if (ntx > 0) {
       fprintf(fp, " tx values\n");
@@ -1916,8 +1914,8 @@ static void dump_options(FILE *fp) {
   return;
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

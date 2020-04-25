@@ -42,12 +42,11 @@ char *              Gpch_Progname;
 
 const char *Progname = Gpch_Progname;
 
-bool Gb_stdout = true; // Global flag controlling output to
-//+stdout
-std::string G_SELF    = ""; // "My" name
-std::string G_VERSION =     // version
-    "$Id: mris_pmake.cpp,v 1.18 2013/01/25 16:39:24 rudolph Exp $";
-char pch_buffer[65536];
+bool Gb_stdout = true;           // Global flag controlling output to
+                                 //+stdout
+string G_SELF    = "";           // "My" name
+string G_VERSION = "mris_pmake"; // version
+char   pch_buffer[65536];
 
 // "Class"-like globals...
 s_env                  st_env;

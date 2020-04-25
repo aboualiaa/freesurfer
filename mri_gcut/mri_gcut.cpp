@@ -66,15 +66,14 @@
 #include "graphcut.cpp"
 #include "pre_pro.cpp"
 
-const char *Progname;
-static char vcid[] = "$Id: mri_gcut.cpp,v 1.14 2011/03/02 00:04:16 nicks Exp $";
-static char in_filename[STRLEN];
-static char out_filename[STRLEN];
-static char mask_filename[STRLEN];
-static char diff_filename[STRLEN];
-static bool bNeedPreprocessing = true;
-static bool bNeedMasking       = false;
-static double _t               = 0.40;
+const char *  Progname;
+static char   in_filename[STRLEN];
+static char   out_filename[STRLEN];
+static char   mask_filename[STRLEN];
+static char   diff_filename[STRLEN];
+static bool   bNeedPreprocessing = true;
+static bool   bNeedMasking       = false;
+static double _t                 = 0.40;
 
 bool matrix_alloc(int ****pointer, int z, int y, int x) {
   (*pointer) = new int **[z];
@@ -109,8 +108,8 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

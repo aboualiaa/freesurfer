@@ -69,11 +69,6 @@ int (*gMRISexternalClearSSEStatus)(MRI_SURFACE *mris)       = nullptr;
 int (*gMRISexternalReduceSSEIncreasedGradients)(MRI_SURFACE *mris,
                                                 double       pct) = nullptr;
 
-/*---------------------------------------------------------------
-  MRISurfSrcVersion() - returns CVS version of this file.
-  ---------------------------------------------------------------*/
-const char *MRISurfSrcVersion() { return ("$Id$"); }
-
 /*-----------------------------------------------------
   ------------------------------------------------------*/
 #ifdef BEVIN_REPRODUCIBLES_CHECK

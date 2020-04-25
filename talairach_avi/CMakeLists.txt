@@ -13,24 +13,16 @@ else()
       )
 endif()
 
-# sanitizer flags cause errors because of mixed compilation with fortran
-set(CMAKE_C_FLAGS_UBSAN "")
-set(CMAKE_C_FLAGS_ASAN "")
-set(CMAKE_C_FLAGS_MSAN "")
-set(CMAKE_C_FLAGS_TSAN "")
-set(CMAKE_C_FLAGS_LSAN "")
-set(CMAKE_C_FLAGS_CFISAN "")
-set(CMAKE_C_FLAGS_COVERAGE "")
-set(CMAKE_C_FLAGS_FULLLTO "")
-set(CMAKE_C_FLAGS_THINLTO "")
+install_configured(talairach_avi
+                   mpr2mni305
+                   brec
+                   brec.awk
+                   t4img_4dfp
+                   tal_QC_AZS
+                   DESTINATION
+                   bin
+                   )
 
-install(PROGRAMS talairach_avi mpr2mni305 brec brec.awk t4img_4dfp tal_QC_AZS
-        DESTINATION bin
-        )
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/talairach_avi
-               ${CMAKE_CURRENT_BINARY_DIR}/talairach_avi COPYONLY
-               )
 add_test_script(NAME talairach_avi_test SCRIPT test.sh)
 
 set(TRX_SOURCES rec.c Getifh.c endianio.c)

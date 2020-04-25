@@ -490,9 +490,7 @@ MATRIX *       LoadRfsl(char *fname);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_vol2vol.c,v 1.89 2016/06/22 22:33:40 fischl Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 int debug = 0, gdiagno = -1;
 
@@ -1733,9 +1731,9 @@ static void print_usage() {
   printf("\n");
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
-  printf("\n%s\n\n", vcid);
+  printf("\n%s\n\n", getVersion().c_str());
   printf("\n");
   printf(
       "Resamples a volume into another field-of-view using various types of\n");
@@ -2336,8 +2334,8 @@ static void dump_options(FILE *fp) {
   return;
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

@@ -38,12 +38,10 @@ static int  singledash(char *flag);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_aparc2wmseg.c,v 1.6 2011/03/02 00:04:13 nicks Exp $";
-const char *Progname     = nullptr;
-char *      SUBJECTS_DIR = nullptr;
-char *      subject      = nullptr;
-char *      WMSegFile    = nullptr;
+const char *Progname     = NULL;
+char *      SUBJECTS_DIR = NULL;
+char *      subject      = NULL;
+char *      WMSegFile    = NULL;
 MRI *       ASeg, *mritmp;
 MRI *       WMSeg;
 MRIS *      lhwhite, *rhwhite;
@@ -87,7 +85,7 @@ int main(int argc, char **argv) {
   dump_options(stdout);
 
   printf("\n");
-  printf("%s\n", vcid);
+  printf("%s\n", getVersion().c_str());
   printf("cwd %s\n", cwd);
   printf("cmdline %s\n", cmdline);
   printf("sysname  %s\n", uts.sysname);
@@ -329,7 +327,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -339,8 +337,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

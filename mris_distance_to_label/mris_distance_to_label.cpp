@@ -19,13 +19,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "diag.h"
+#include "error.h"
+#include "fastmarching.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "timer.h"
 #include "version.h"
-
-#include "fastmarching.h"
-
-static const char vcid[] =
-    "$Id: mris_distance_to_label.cpp,v 1.8 2011/03/02 00:04:31 nicks Exp $";
 
 static char *aseg_fname = nullptr;
 
@@ -397,7 +405,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

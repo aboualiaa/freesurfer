@@ -12,8 +12,19 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "label.h"
+#include "macros.h"
 #include "mrisurf.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mris_sample_label.c,v 1.5 2012/10/01 18:59:32 fischl Exp $";
@@ -148,7 +159,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

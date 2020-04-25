@@ -70,26 +70,24 @@ int CCSegment(MRI *seg, int segid, int segidunknown);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_aparc2aseg.c,v 1.54 2016/12/26 15:29:30 fischl Exp $";
-const char * Progname                       = nullptr;
-static char *relabel_gca_name               = nullptr;
-static char *relabel_norm_name              = nullptr;
-static char *relabel_xform_name             = nullptr;
-static char *relabel_label_intensities_name = nullptr;
+const char * Progname                       = NULL;
+static char *relabel_gca_name               = NULL;
+static char *relabel_norm_name              = NULL;
+static char *relabel_xform_name             = NULL;
+static char *relabel_label_intensities_name = NULL;
 
-static char *  SUBJECTS_DIR = nullptr;
-static char *  subject      = nullptr;
-static char *  OutASegFile  = nullptr;
-static char *  OutAParcFile = nullptr;
-static char *  OutDistFile  = nullptr;
+static char *  SUBJECTS_DIR = NULL;
+static char *  subject      = NULL;
+static char *  OutASegFile  = NULL;
+static char *  OutAParcFile = NULL;
+static char *  OutDistFile  = NULL;
 static int     debug        = 0;
 static int     UseRibbon    = 0;
 static int     UseNewRibbon = 1;
 static MRI *   ASeg, *filled, *mritmp;
 static MRI *   AParc;
 static MRI *   Dist;
-static MRI *   lhRibbon = nullptr, *rhRibbon = nullptr, *RibbonSeg;
+static MRI *   lhRibbon = NULL, *rhRibbon = NULL, *RibbonSeg;
 static MRIS *  lhwhite, *rhwhite;
 static MRIS *  lhpial, *rhpial;
 static MHT *   lhwhite_hash, *rhwhite_hash;
@@ -1507,7 +1505,7 @@ static void print_help(void) {
 }
 /* --------------------------------------------- */
 static void print_version(void) {
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

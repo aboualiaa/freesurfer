@@ -19,7 +19,7 @@
 #
 
 
-set MKCONTRAST_VER = '$Id: mkcontrast2,v 1.3 2016/03/11 23:46:48 greve Exp $';
+set MKCONTRAST_VER = 'mkcontrast2 @FS_VERSION@';
 
 set CorrIdeal = 0;
 set monly = 0;
@@ -52,7 +52,7 @@ set config = ()
 set configdelete = 1;
 
 if(! $?FS_MKCON_USE_BIN)  setenv FS_MKCON_USE_BIN 0
-if(! $?FS_MCRROOT) setenv FS_MCRROOT /usr/pubsw/common/matlab/9.5
+if(! $?FS_MCRROOT) setenv FS_MCRROOT $FREESURFER_HOME/MCRv84
 
 if ( $#argv == 0 ) then
   echo "USAGE: mkcontrast [-options] -o cmtxmatfile ";

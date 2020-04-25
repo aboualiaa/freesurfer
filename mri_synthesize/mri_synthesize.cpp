@@ -18,21 +18,18 @@
 #include "tags.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mri_synthesize.c,v 1.19 2015/02/05 23:34:40 zkaufman Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  saturate_PD(MRI *mri_PD, float PDsat);
 static int  normalize_PD(MRI *mri_PD, float target);
 static int  discard_PD(MRI *mri_PD, short thresh, short target);
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
 static int  transform_T1_values_using_joint_pdf(MRI *mri_T1, char *jpdf_name,
                                                 int invert);
-static void print_version();
+static void print_version(void);
 static int  apply_bias_field(MRI *mri, int nbias, float *bias_coefs[3][2]);
 #if 0
 static double FLASHforwardModel(double flip_angle, double TR, double PD,
@@ -392,8 +389,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

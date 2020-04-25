@@ -20,9 +20,6 @@
 #include "version.h"
 #include "vlabels.h"
 
-static char vcid[] =
-    "$Id: mri_twoclass.c,v 1.16 2015/02/05 23:34:40 zkaufman Exp $";
-
 /*-------------------------------- STRUCTURES ----------------------------*/
 
 /*-------------------------------- CONSTANTS -----------------------------*/
@@ -518,8 +515,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  printf("%s\n", getVersion().c_str());
   exit(1);
 }
 

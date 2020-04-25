@@ -18,9 +18,6 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_ms_refine.c,v 1.20 2015/02/05 23:34:41 zkaufman Exp $";
-
 int main(int argc, char *argv[]);
 
 #define TOO_SMALL(dist)   (dist < 1)
@@ -1079,8 +1076,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

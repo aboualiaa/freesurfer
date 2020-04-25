@@ -83,9 +83,7 @@ static void dump_options(FILE *fp);
 int         main(int argc, char *argv[]);
 MRI *       MRIpolyfitBiasField(MRI *vol2, int order2, MRI *seg2, MRI *bias2);
 
-static char vcid[] =
-    "$Id: mri_fit_bias.c,v 1.3 2012/04/30 21:32:21 greve Exp $";
-const char *   Progname = nullptr;
+const char *   Progname = NULL;
 char *         cmdline, cwd[2000];
 int            debug         = 0;
 int            checkoptsonly = 0;
@@ -353,7 +351,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* -----------------------------------------------------------------------*/
@@ -363,8 +361,8 @@ static void print_help() {
   exit(1);
 }
 /* -----------------------------------------------------------------------*/
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* -----------------------------------------------------------------------*/
@@ -387,7 +385,7 @@ static void check_options() {
 /* -----------------------------------------------------------------------*/
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

@@ -18,7 +18,6 @@
   email:   analysis-bugs@nmr.mgh.harvard.edu
   Date:    2/27/02
   Purpose: converts values on a surface to a volume
-  $Id: mri_surf2vol.c,v 1.28 2014/12/08 19:49:02 greve Exp $
 */
 
 #include "diag.h"
@@ -46,9 +45,7 @@ static int  istringnmatch(char *str1, char *str2, int n);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_surf2vol.c,v 1.28 2014/12/08 19:49:02 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 int debug = 0, gdiagno = -1;
 
@@ -717,10 +714,10 @@ static void print_usage() {
   printf("  \n");
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
-  printf("\n%s\n\n", vcid);
+  printf("\n%s\n\n", getVersion().c_str());
 
   printf(
       "Resamples a surface into a volume using one of two methods. \n"
@@ -909,8 +906,8 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

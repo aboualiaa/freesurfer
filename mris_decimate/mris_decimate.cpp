@@ -41,8 +41,6 @@
 ///  provided on the command-line.
 ///
 
-// $Id: mris_decimate.cpp,v 1.6 2011/03/02 00:04:30 nicks Exp $
-
 #include "mris_decimate.h"
 #include <gts.h>
 

@@ -41,7 +41,6 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[]   = "";
 const char *Progname = "dmri_pathstats";
 
 float probThresh = .2, faThresh = 0;
@@ -702,8 +701,8 @@ static void usage_exit() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
@@ -751,29 +750,29 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void WriteHeader(char *OutFile) {
-  std::ofstream fout(OutFile, std::ios::out);
+  ofstream fout(OutFile, ios::out);
 
-  fout << "# Title Pathway Statistics" << std::endl
-       << "#" << std::endl
-       << "# generating_program " << Progname << std::endl
-       << "# cvs_version " << vcid << std::endl
-       << "# cmdline " << cmdline << std::endl
-       << "# sysname " << uts.sysname << std::endl
-       << "# hostname " << uts.nodename << std::endl
-       << "# machine " << uts.machine << std::endl
-       << "# user " << VERuser() << std::endl
-       << "# anatomy_type pathway" << std::endl
-       << "#" << std::endl
-       << "# subjectname " << subjName << std::endl
-       << "# pathwayname " << pathName << std::endl
-       << "#" << std::endl;
+  fout << "# Title Pathway Statistics" << endl
+       << "#" << endl
+       << "# generating_program " << Progname << endl
+       << "# cvs_version " << getVersion() << endl
+       << "# cmdline " << cmdline << endl
+       << "# sysname " << uts.sysname << endl
+       << "# hostname " << uts.nodename << endl
+       << "# machine " << uts.machine << endl
+       << "# user " << VERuser() << endl
+       << "# anatomy_type pathway" << endl
+       << "#" << endl
+       << "# subjectname " << subjName << endl
+       << "# pathwayname " << pathName << endl
+       << "#" << endl;
 
   fout.close();
 }
 
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);
@@ -781,40 +780,40 @@ static void dump_options(FILE *fp) {
   fprintf(fp, "machine  %s\n", uts.machine);
   fprintf(fp, "user     %s\n", VERuser());
 
-  if (inTrkFile != nullptr) {
+  if (inTrkFile)
     fprintf(fp, "Input .trk file: %s\n", inTrkFile);
-  }
-  if (inRoi1File != nullptr) {
-    fprintf(fp, "Input end ROI 1: %s\n", inRoi1File);
-    fprintf(fp, "Input end ROI 2: %s\n", inRoi2File);
-  }
-  if (inTrcDir != nullptr) {
-    fprintf(fp, "Input tracula directory: %s\n", inTrcDir);
-  }
-  if (dtBase != nullptr) {
-    fprintf(fp, "Input DTI fit base: %s\n", dtBase);
-  }
-  //  if (pathName)
-  fprintf(fp, "Pathway name: %s\n", pathName);
-  //  if (subjName)
-  fprintf(fp, "Subject name: %s\n", subjName);
-  if (outFile != nullptr) {
-    fprintf(fp, "Output file for overall measures: %s\n", outFile);
-  }
-  if (outVoxFile != nullptr) {
-    fprintf(fp, "Output file for voxel-by-voxel measures: %s\n", outVoxFile);
-  }
-  if (outMedianFile != nullptr) {
-    fprintf(fp, "Output median streamline file: %s\n", outMedianFile);
-  }
-  if (outEndBase != nullptr) {
-    fprintf(fp, "Base name of output end point volumes: %s\n", outEndBase);
-  }
-  if (refVolFile != nullptr) {
-    fprintf(fp, "Reference for output end point volumes: %s\n", refVolFile);
-  }
-  fprintf(fp, "Lower threshold for probability: %f\n", probThresh);
-  if (faThresh > 0) {
-    fprintf(fp, "Lower threshold for FA: %f\n", faThresh);
-  }
+}
+if (inRoi1File != nullptr) {
+  fprintf(fp, "Input end ROI 1: %s\n", inRoi1File);
+  fprintf(fp, "Input end ROI 2: %s\n", inRoi2File);
+}
+if (inTrcDir != nullptr) {
+  fprintf(fp, "Input tracula directory: %s\n", inTrcDir);
+}
+if (dtBase != nullptr) {
+  fprintf(fp, "Input DTI fit base: %s\n", dtBase);
+}
+//  if (pathName)
+fprintf(fp, "Pathway name: %s\n", pathName);
+//  if (subjName)
+fprintf(fp, "Subject name: %s\n", subjName);
+if (outFile != nullptr) {
+  fprintf(fp, "Output file for overall measures: %s\n", outFile);
+}
+if (outVoxFile != nullptr) {
+  fprintf(fp, "Output file for voxel-by-voxel measures: %s\n", outVoxFile);
+}
+if (outMedianFile != nullptr) {
+  fprintf(fp, "Output median streamline file: %s\n", outMedianFile);
+}
+if (outEndBase != nullptr) {
+  fprintf(fp, "Base name of output end point volumes: %s\n", outEndBase);
+}
+if (refVolFile != nullptr) {
+  fprintf(fp, "Reference for output end point volumes: %s\n", refVolFile);
+}
+fprintf(fp, "Lower threshold for probability: %f\n", probThresh);
+if (faThresh > 0) {
+  fprintf(fp, "Lower threshold for FA: %f\n", faThresh);
+}
 }

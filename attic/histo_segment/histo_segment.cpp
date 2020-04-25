@@ -28,9 +28,6 @@
 
 #define RGB_SIZE 500
 
-static char vcid[] =
-    "$Id: histo_segment.c,v 1.2 2011/03/02 00:04:09 nicks Exp $";
-
 #if 0
 static int write_snapshot(MRI *mri, MRI *mri_src, MRI *mri_dst, MATRIX *m, char *base, int n, int level, DENSITY *density, MRI *mri_seg) ;
 int main(int argc, char *argv[]) ;
@@ -153,7 +150,7 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  fprintf(stderr, "%s\n", vcid);
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

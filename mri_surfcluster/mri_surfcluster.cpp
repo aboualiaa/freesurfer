@@ -46,9 +46,7 @@ static int  stringmatch(char *str1, char *str2);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_surfcluster.c,v 1.60 2016/11/01 19:49:22 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 char *subjectdir = nullptr;
 char *hemi       = nullptr;
@@ -188,11 +186,13 @@ int main(int argc, char **argv) {
   // Handle label: either read from mask or read from label file
   if (maskfile) {
     mask = MRIread(maskfile);
-    if (mask == nullptr)
+    if (mask == NULL)
       exit(1);
     clabel = MaskToSurfaceLabel(mask, maskthresh, masksign);
-    if (clabel == nullptr)
-      exit(1);
+    if (clabel == NULL) {
+      printf("No voxels found in mask, so exiting now\n");
+      exit(0); // use exit 0 here for fspalm
+    }
     printf("Found %d points in clabel.\n", clabel->n_points);
   }
   if (clabelfile) {
@@ -521,8 +521,8 @@ int main(int argc, char **argv) {
       exit(1);
     }
     fprintf(fp, "# Cluster Growing Summary (mri_surfcluster)\n");
-    fprintf(fp, "# %s\n", vcid);
-    fprintf(fp, "# %s\n", MRISurfSrcVersion());
+    fprintf(fp, "# %s\n", getVersion().c_str());
+    fprintf(fp, "# %s\n", getVersion().c_str());
     fprintf(fp, "# CreationTime %s\n", VERcurTimeStamp());
     fprintf(fp, "# cmdline %s\n", cmdline);
     fprintf(fp, "# cwd %s\n", cwd);
@@ -1136,7 +1136,7 @@ static void print_usage() {
 static void print_help() {
   print_usage();
 
-  printf("\n%s\n\n", vcid);
+  printf("\n%s\n\n", getVersion().c_str());
 
   printf(
       "This program assigns each vertex on a cortical surface to a cluster \n"
@@ -1358,7 +1358,6 @@ static void print_help() {
       "summary file is shown below.\n"
       "\n"
       "Cluster Growing Summary (mri_surfcluster)\n"
-      "$Id: mri_surfcluster.c,v 1.60 2016/11/01 19:49:22 greve Exp $\n"
       "Input :      minsig-0-lh.w\n"
       "Frame Number:      0\n"
       "Minimum Threshold: 5\n"
@@ -1569,7 +1568,7 @@ static void check_options() {
 }
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
-  fprintf(fp, "version %s\n", vcid);
+  fprintf(fp, "version %s\n", getVersion().c_str());
   fprintf(fp, "hemi           = %s\n", hemi);
   fprintf(fp, "srcid          = %s %s\n", srcid, srcfmt);
   fprintf(fp, "srcsubjid      = %s\n", srcsubjid);
@@ -1583,7 +1582,7 @@ static void dump_options(FILE *fp) {
   if (Bonferroni)
     fprintf(fp, "Bonferroni      = %d\n", Bonferroni);
   fprintf(fp, "xfmfile        = %s\n", xfmfile);
-  if (maskid != nullptr) {
+  if (maskid != NULL) {
     fprintf(fp, "maskid         = %s %s\n", maskid, maskfmt);
     fprintf(fp, "masksubjid     = %s\n", masksubjid);
     fprintf(fp, "maskthresh     = %g\n", maskthresh);
@@ -1660,8 +1659,8 @@ static int stringmatch(char *str1, char *str2) {
   return (0);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

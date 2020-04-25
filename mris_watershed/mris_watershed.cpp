@@ -29,9 +29,6 @@ the watershed transformation. In Mathematical Morphology in Image Processing
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_watershed.c,v 1.23 2013/03/27 01:53:50 fischl Exp $";
-
 const char *Progname;
 int         main(int argc, char *argv[]);
 
@@ -154,8 +151,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 static int get_option(int argc, char *argv[]) {

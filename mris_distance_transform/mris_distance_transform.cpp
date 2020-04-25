@@ -17,20 +17,19 @@
  *
  */
 
+#include "MARS_DT_Boundary.h"
 #include "annotation.h"
 #include "diag.h"
+#include "label.h"
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_distance_transform.c,v 1.5 2013/04/12 20:59:17 fischl Exp $";
-
 int         main(int argc, char *argv[]);
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 const char *Progname;
 
@@ -299,8 +298,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

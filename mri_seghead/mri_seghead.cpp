@@ -18,11 +18,18 @@
   email:   analysis-bugs@nmr.mgh.harvard.edu
   Date:    2/27/02
   Purpose: Segment the head.
-  $Id: mri_seghead.c,v 1.8 2014/03/25 16:06:42 greve Exp $
 */
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "diag.h"
+#include "error.h"
 #include "mrisurf.h"
+#include "version.h"
 
 #include "cmdargs.h"
 #include "fio.h"
@@ -40,14 +47,13 @@ static int  singledash(char *flag);
 static int  stringmatch(char *str1, char *str2);
 int         main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_seghead.c,v 1.8 2014/03/25 16:06:42 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 int         debug    = 0;
 char *      subjid;
 
 char *        involid;
 char *        outvolid;
-char *        outbox   = nullptr;
+char *        outbox   = NULL;
 unsigned char fillval  = 255;
 int           thresh1  = -1;
 int           thresh2  = -1;
@@ -569,7 +575,7 @@ static void print_usage() {
 static void print_help() {
   print_usage();
 
-  printf("\n%s\n\n", vcid);
+  printf("\n%s\n\n", getVersion().c_str());
 
   printf(
       "This program binarizes the input volume such that all the voxels in the "
@@ -611,8 +617,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

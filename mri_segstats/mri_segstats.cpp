@@ -84,24 +84,22 @@ float *       WMAnatStats(char *subject, char *volname, int nErodes, float Pct);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_segstats.c,v 1.122 2017/01/23 18:23:14 greve Exp $";
-const char *Progname     = nullptr;
-char *      SUBJECTS_DIR = nullptr, *FREESURFER_HOME = nullptr;
-char *      SegVolFile       = nullptr;
-char *      InVolFile        = nullptr;
-char *      InVolRegFile     = nullptr;
-MATRIX *    InVolReg         = nullptr;
+const char *Progname     = NULL;
+char *      SUBJECTS_DIR = NULL, *FREESURFER_HOME = NULL;
+char *      SegVolFile       = NULL;
+char *      InVolFile        = NULL;
+char *      InVolRegFile     = NULL;
+MATRIX *    InVolReg         = NULL;
 int         InVolRegHeader   = 0;
 char *      InIntensityName  = "";
 char *      InIntensityUnits = "unknown";
-char *      MaskVolFile      = nullptr;
-char *      PVVolFile        = nullptr;
-char *      BrainMaskFile    = nullptr;
-char *      StatTableFile    = nullptr;
-char *      FrameAvgFile     = nullptr;
-char *      FrameAvgVolFile  = nullptr;
-char *      SpatFrameAvgFile = nullptr;
+char *      MaskVolFile      = NULL;
+char *      PVVolFile        = NULL;
+char *      BrainMaskFile    = NULL;
+char *      StatTableFile    = NULL;
+char *      FrameAvgFile     = NULL;
+char *      FrameAvgVolFile  = NULL;
+char *      SpatFrameAvgFile = NULL;
 int         DoFrameAvg       = 0;
 int         DoFrameSum       = 0;
 int         RmFrameAvgMn     = 0;
@@ -911,12 +909,12 @@ int main(int argc, char **argv) {
   }
 
   /* Print the table to the output file */
-  if (StatTableFile != nullptr) {
+  if (StatTableFile != NULL) {
     fp = fopen(StatTableFile, "w");
     fprintf(fp, "# Title Segmentation Statistics \n");
     fprintf(fp, "# \n");
     fprintf(fp, "# generating_program %s\n", Progname);
-    fprintf(fp, "# cvs_version %s\n", vcid);
+    fprintf(fp, "# cvs_version %s\n", getVersion().c_str());
     fprintf(fp, "# cmdline %s\n", cmdline);
     fprintf(fp, "# sysname  %s\n", uts.sysname);
     fprintf(fp, "# hostname %s\n", uts.nodename);
@@ -927,7 +925,7 @@ int main(int argc, char **argv) {
     else
       fprintf(fp, "# anatomy_type volume\n");
     fprintf(fp, "# \n");
-    if (subject != nullptr) {
+    if (subject != NULL) {
       fprintf(fp, "# SUBJECTS_DIR %s\n", SUBJECTS_DIR);
       fprintf(fp, "# subjectname %s\n", subject);
     }
@@ -952,11 +950,11 @@ int main(int argc, char **argv) {
               "# Measure BrainSegNotVent, BrainSegVolNotVent, "
               "Brain Segmentation Volume Without Ventricles, %f, mm^3\n",
               BrainVolStats[1]);
-      fprintf(
-          fp,
-          "# Measure BrainSegNotVentSurf, BrainSegVolNotVentSurf, "
-          "Brain Segmentation Volume Without Ventricles from Surf, %f, mm^3\n",
-          BrainVolStats[14]);
+      // Not computed in ComputeBrainVolumeStats2() anymore because it is very close
+      // to the voxel-based version and adds needless complexity
+      //fprintf(fp,"# Measure BrainSegNotVentSurf, BrainSegVolNotVentSurf, "
+      //      "Brain Segmentation Volume Without Ventricles from Surf, %f, mm^3\n",
+      //      BrainVolStats[14]);
     }
     if (!BrainVolStats.empty()) {
       fprintf(fp,
@@ -1014,11 +1012,8 @@ int main(int argc, char **argv) {
               "# Measure SupraTentorialNotVent, SupraTentorialVolNotVent, "
               "Supratentorial volume, %f, mm^3\n",
               BrainVolStats[3]);
-      fprintf(
-          fp,
-          "# Measure SupraTentorialNotVentVox, SupraTentorialVolNotVentVox, "
-          "Supratentorial volume voxel count, %f, mm^3\n",
-          BrainVolStats[13]);
+      //fprintf(fp,"# Measure SupraTentorialNotVentVox, SupraTentorialVolNotVentVox, "
+      //      "Supratentorial volume voxel count, %f, mm^3\n",BrainVolStats[13]);
     }
     if (BrainMaskFile && (!BrainVolStats.empty())) {
       // fprintf(fp,"# BrainMaskFile  %s \n",BrainMaskFile);
@@ -1783,8 +1778,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */
@@ -1859,7 +1854,7 @@ static void check_options() {
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

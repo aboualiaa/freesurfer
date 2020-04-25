@@ -59,13 +59,11 @@ static struct Parameters P = {"",
 static void printUsage();
 static bool parseCommandLine(int argc, char *argv[], Parameters &P);
 
-static char vcid[] =
-    "$Id: lta_convert.cpp,v 1.10 2016/08/09 02:11:11 zkaufman Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 LTA *shallowCopyLTA(const LTA *lta) {
-  LTA *ltatmp           = LTAalloc(1, nullptr);
-  ltatmp->xforms[0].m_L = MatrixCopy(lta->xforms[0].m_L, nullptr);
+  LTA *ltatmp           = LTAalloc(1, NULL);
+  ltatmp->xforms[0].m_L = MatrixCopy(lta->xforms[0].m_L, NULL);
   copyVolGeom(&lta->xforms[0].src, &ltatmp->xforms[0].src);
   copyVolGeom(&lta->xforms[0].dst, &ltatmp->xforms[0].dst);
   ltatmp->type   = lta->type;
@@ -584,7 +582,7 @@ void writeITK(const std::string &fname, const LTA *lta) {
 }
 
 int main(int argc, char *argv[]) {
-  std::cout << vcid << std::endl << std::endl;
+  cout << getVersion() << endl << endl;
 
   // Default initialization
   int nargs = handleVersionOption(argc, argv, "lta_convert");

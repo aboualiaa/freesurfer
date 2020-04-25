@@ -40,9 +40,6 @@
 
 #define MAX_HISTO_BINS 1000
 
-static char vcid[] =
-    "$Id: mris_make_surfaces.c,v 1.172 2017/02/16 19:42:36 fischl Exp $";
-
 int main(int argc, char *argv[]);
 
 #define MIN_NONCORTEX_VERTICES 10
@@ -376,8 +373,8 @@ int main(int argc, char *argv[]) {
   strcpy(mdir, cp);
 
   // print out version of this program and mrisurf.c
-  printf("%s\n", vcid);
-  printf("%s\n", MRISurfSrcVersion());
+  printf("%s\n", getVersion().c_str());
+  printf("%s\n", getVersion().c_str());
   printf("\n");
   printf("cd %s\n", cwd);
   printf("setenv SUBJECTS_DIR %s\n", getenv("SUBJECTS_DIR"));
@@ -3018,7 +3015,7 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  fprintf(stderr, "%s\n", vcid);
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

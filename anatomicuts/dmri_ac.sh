@@ -238,11 +238,12 @@ function preGA() {
   std=$4
   bb=$5
 
-  #	Clean ${subject} ${targetSubject} ${lenght} ${std} ${bb}
-  #	Hungarian ${subject} ${targetSubject} ${lenght} ${std} ${bb}
-  #	Measures ${subject} ${targetSubject} ${lenght} ${std} ${bb}
+  Clean ${subject} ${targetSubject} ${lenght} ${std} ${bb}
+  Hungarian ${subject} ${targetSubject} ${lenght} ${std} ${bb}
+  Measures ${subject} ${targetSubject} ${lenght} ${std} ${bb}
+  ToAnat ${subject} ${targetSubject} ${lenght} ${std} ${bb}
   SurfaceMeasures ${subject} ${targetSubject} ${lenght} ${std} ${bb}
-  #	ToTarget ${subject} ${targetSubject} ${lenght} ${std} ${bb}
+  ToTarget ${subject} ${targetSubject} ${lenght} ${std} ${bb}
 
 }
 function GA() {
@@ -255,8 +256,9 @@ function GA() {
   groupB=$7
   groups=$8
   thickness=$9
-  #${FREESURFER_HOME}/bin/anatomiCutsUtils -f GA -m "DTI" -cf "${labels_file}" -cc ${labels_cols} -cta 50:100:150:200 -ts ${targetSubject} -s ${ODMRI_DIR} -d "," -ga $groupA -gb $groupB -l ${lenght} -std ${std} -pt ${groups} -t ${thickness}
+  #${FREESURFER_HOME}/bin/anatomiCutsUtils -f GA -m "DTI" -cf "${labels_file}" -cc ${labels_cols} -cta 50:100:150:200 -ts ${targetSubject} -s ${ODMRI_DIR} -d "," -ga $groupA -gb $groupB -l ${lenght} -std ${std} -pt ${groups}
   ${FREESURFER_HOME}/bin/anatomiCutsUtils -f thicknessPerStructure -m "DTI" -cf "${labels_file}" -cc ${labels_cols} -cta 50:100:150:200 -ts ${targetSubject} -s ${ODMRI_DIR} -d "," -ga $groupA -gb $groupB -l ${lenght} -std ${std} -pt ${groups} -t ${thickness}
+  #${FREESURFER_HOME}/bin/anatomiCutsUtils -f connectivityGraph -m "DTI" -cf "${labels_file}" -cc ${labels_cols} -cta 50:100:150:200 -ts ${targetSubject} -s ${ODMRI_DIR} -d "," -ga $groupA -gb $groupB -l ${lenght} -std ${std} -pt ${groups} -t ${thickness}
 
   #${FREESURFER_HOME}/bin/anatomiCutsUtils -f GA -m "DKI" -cf "/space/snoke/1/public/vivros/data/demos_fullID.csv" -cc 0:6 -cta 200 -ts ${targetSubject} -s ${ODMRI_DIR} -d " " -ga 3 -gb 1 -l ${lenght} -std ${std}
   #${FREESURFER_HOME}/bin/anatomiCutsUtils -f GA -m "DKI" -cf "/space/snoke/1/public/vivros/data/demos_fullID.csv" -cc 0:6 -cta 200 -ts ${targetSubject} -s ${ODMRI_DIR} -d " " -ga 2 -gb 1 -l ${lenght} -std ${std}
@@ -327,12 +329,9 @@ function SurfaceMeasures() {
 
   anatomicuts=${ODMRI_DIR}/${subject}/dmri.ac/${lenght}/${std}/toAnat/
   anatomicutsdiff=${ODMRI_DIR}/${subject}/dmri.ac/${lenght}/${std}/
-  diff=${ODMRI_DIR}/${subject}/dmri/
-  surf=${ODMRI_DIR}/${subject}/surf/
-  annot=${ODMRI_DIR}/${subject}/label/
-  mri=${ODMRI_DIR}/${subject}/mri/
-
-  #flirt -in ${diff}/DTI/dti_FA.nii.gz -ref ${mri}/brain.nii.gz  -omat ${diff}/xfms/fa2brain.mat
+  surf=${SUBJECTS_DIR}/${subject}/surf/
+  annot=${SUBJECTS_DIR}/${subject}/label/
+  mri=${SUBJECTS_DIR}/${subject}/mri/
 
   #lta_convert  --infsl ${diff}/xfms/fa2brain.mat --outlta ${diff}/xfms/diff2anat.bbr.lta --trg ${mri}/brain.mgz  --src ${diff}/DTI/dti_FA.nii.gz
 
@@ -347,16 +346,16 @@ function ToAnat() {
   common="toAnat/"
   anatomicuts=${ODMRI_DIR}/${subject}/dmri.ac/${lenght}/${std}
   diff=${ODMRI_DIR}/${subject}/dmri/
-  surf=${ODMRI_DIR}/${subject}/surf/
-  annot=${ODMRI_DIR}/${subject}/label/
-  mri=${ODMRI_DIR}/${subject}/mri/
+  surf=${SUBJECTS_DIR}/${subject}/surf/
+  annot=${SUBJECTS_DIR}/${subject}/label/
+  mri=${SUBJECTS_DIR}/${subject}/mri/
 
   if [[ -e ${SUBJECTS_DIR}/${subject}/dmri/wm2009parc2dwi.nii.gz ]]; then
     wmIn=${DMRI_DIR}/${subject}/dmri/wm2009parc2dwi.nii.gz
-    wmOut=${DMRI_DIR}/${subject}/mri/brain.nii.gz
+    wmOut=${SUBJECTS_DIR}/${subject}/mri/brain.nii.gz
   else
     wmIn=${DMRI_DIR}/${subject}/dmri/wmparc2dwi.nii.gz
-    wmOut=${DMRI_DIR}/${subject}/mri/brain.nii.gz
+    wmOut=${SUBJECTS_DIR}/${subject}/mri/brain.nii.gz
   fi
   mkdir -p ${ODMRI_DIR}/${subject}/dmri.ac/${lenght}/${std}/${common}/
 
@@ -369,7 +368,7 @@ function ToAnat() {
     echo $f
 
     dmri_trk2trk --in ${f} --out ${common_clustering}/${f} --inref ${wmIn} --outref ${wmOut} --reg ${diff}/xfms/fa2brain.mat
-
+    /usr/pubsw/packages/dtk/current/track_info ${common_clustering}/${f} -vorder LAS LAS
   done
   cp HierarchicalHistory.csv ${common_clustering}/
 
@@ -427,10 +426,10 @@ function average() {
   lenght=$2
   std=$3
 
-  mkdir -p ${ODMRI_DIR}/average/dmri.ac/${lenght}_${std}/images
+  mkdir -p ${ODMRI_DIR}/average/dmri.ac/${lenght}/${std}/images
   #correspondences="["
   #imagesFolder="["
-  outputFolder=${ODMRI_DIR}/average/dmri.ac/${lenght}_${std}/images/
+  outputFolder=${ODMRI_DIR}/average/dmri.ac/${lenght}/${std}/images/
   s2=${targetSubject}
 
   cd ${ODMRI_DIR}

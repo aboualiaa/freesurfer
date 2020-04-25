@@ -38,9 +38,7 @@ extern int isblank(int c);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_parse_sdcmdir.c,v 1.22 2015/05/21 16:37:12 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 static int  parse_commandline(int argc, char **argv);
 static void check_options();
@@ -98,7 +96,7 @@ int main(int argc, char **argv) {
 
   uname(&uts);
   getcwd(cwd, 2000);
-  fprintf(stdout, "%s\n", vcid);
+  fprintf(stdout, "%s\n", getVersion().c_str());
   fprintf(stdout, "cwd %s\n", cwd);
   fprintf(stdout, "cmdline %s\n", cmdline);
   fprintf(stdout, "sysname  %s\n", uts.sysname);
@@ -396,8 +394,8 @@ static void check_options() {
   }
 }
 /* --------------------------------------------- */
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 /* --------------------------------------------- */

@@ -24,8 +24,6 @@ average \author Bruce Fischl
 
 */
 
-// $Id: mris_register_label_map.c,v 1.4 2016/12/11 14:33:31 fischl Exp $
-
 /*
   BEGINHELP
 
@@ -124,21 +122,19 @@ static int    compute_vertex_permutation(MRI_SURFACE *mris_mov_mov,
 static MRI *  average_within_label(MRI *mri_cmat, LABEL *area, int offset,
                                    MRI *mri_avg);
 static int    parse_commandline(int argc, char **argv);
-static void   check_options();
-static void   print_usage();
-static void   usage_exit();
-static void   print_help();
+static void   check_options(void);
+static void   print_usage(void);
+static void   usage_exit(void);
+static void   print_help(void);
 static int    write_snapshot(VECTOR *v_weights, MATRIX **m_I, MRI *mri_mask,
                              char *prefix, int iter, int nsubjects);
-static void   print_version();
+static void   print_version(void);
 static void   dump_options(FILE *fp);
 int           main(int argc, char *argv[]);
 static MRI *  compute_mean_and_variance_across_frames(MRI **mri_label_avg,
                                                       int   nsubjects);
 static MRI *  compute_mean_and_variance(MRI **mri_label_avg, int nsubjects);
 
-static char vcid[] =
-    "$Id: mris_register_label_map.c,v 1.4 2016/12/11 14:33:31 fischl Exp $";
 const char *   Progname = NULL;
 char *         cmdline, cwd[2000];
 int            debug         = 0;
@@ -729,7 +725,7 @@ static void print_usage() {
   printf("   --version   print out version and exit\n");
   printf("   --v         VNO  debug this vertex\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -751,10 +747,9 @@ static void print_help() {
 \fn static void print_version(void)
 \brief Prints version and exits
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for
- * Doxygen) -- */
-static void print_version() {
-  printf("%s\n", vcid);
+/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -778,7 +773,7 @@ static void check_options() { return; }
  * Doxygen) -- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

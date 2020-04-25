@@ -6,11 +6,13 @@ install(FILES ASegStatsLUT.txt
               Simple_surface_labels2009.txt
               tkmeditParcColorsCMA
               WMParcStatsLUT.txt
-        DESTINATION ${CMAKE_INSTALL_PREFIX}
+        DESTINATION .
         )
 
-install(PROGRAMS FreeSurferEnv.csh FreeSurferEnv.sh SetUpFreeSurfer.csh SetUpFreeSurfer.sh
-                 sources.csh sources.sh DESTINATION ${CMAKE_INSTALL_PREFIX}
+install_configured(FreeSurferEnv.csh FreeSurferEnv.sh DESTINATION .)
+
+install(PROGRAMS SetUpFreeSurfer.csh SetUpFreeSurfer.sh sources.csh sources.sh
+        DESTINATION .
         )
 
 add_subdirectories(average docs fsafd subjects etc)

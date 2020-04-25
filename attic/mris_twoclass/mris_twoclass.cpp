@@ -34,9 +34,6 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_twoclass.c,v 1.13 2015/02/05 23:34:41 zkaufman Exp $";
-
 /*-------------------------------- CONSTANTS -----------------------------*/
 
 #define STAT_T        0
@@ -1356,7 +1353,7 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  printf("%s\n", vcid);
+  printf("%s\n", getVersion().c_str());
   exit(1);
 }
 

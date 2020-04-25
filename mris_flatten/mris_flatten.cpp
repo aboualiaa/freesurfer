@@ -24,24 +24,21 @@
 #include "mri2.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_flatten.c,v 1.42 2016/12/10 22:57:46 fischl Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
-static void print_usage();
-static void print_help();
-static void print_version();
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 int         MRISscaleUp(MRI_SURFACE *mris);
 
 const char *Progname;
 
-static char *            synth_name = nullptr;
+static char *            synth_name = NULL;
 static INTEGRATION_PARMS parms;
 #define BASE_DT_SCALE 1.0
 static float  base_dt_scale    = BASE_DT_SCALE;
-static char * label_fname      = nullptr;
+static char * label_fname      = NULL;
 static int    nbrs             = 2;
 static int    do_inflate       = 0;
 static double disturb          = 0;
@@ -62,7 +59,7 @@ static float rescale                   = 1.0f;
 
 static MRI *mri_overlay; // if "flattening" an overlay with an existing flatmap
 
-static LABEL *label_overlay = nullptr;
+static LABEL *label_overlay = NULL;
 
 static double rectangle_error(MRI_SURFACE *mris, double xmin, double ymin,
                               double xmax, double ymax) {
@@ -888,8 +885,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

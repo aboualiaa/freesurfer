@@ -32,8 +32,6 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] = "$Id: mri_fill.c,v 1.119 2011/10/25 14:09:58 fischl Exp $";
-
 /*-------------------------------------------------------------------
   CONSTANTS
   -------------------------------------------------------------------*/
@@ -3242,8 +3240,8 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void print_version() {
-  fprintf(stderr, "fill version %s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "fill version %s\n", getVersion().c_str());
   exit(0);
 }
 

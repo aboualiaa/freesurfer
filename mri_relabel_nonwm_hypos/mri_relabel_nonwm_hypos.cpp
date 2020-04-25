@@ -12,7 +12,12 @@
  *
  */
 
-// $Id: mri_relabel_nonwm_hypos.c,v 1.2 2014/04/17 18:03:22 greve Exp $
+/*!
+\file dummy.c
+\brief Example c file that can be used as a template.
+\author Douglas Greve
+
+*/
 
 /*
   BEGINHELP
@@ -44,8 +49,6 @@ int         main(int argc, char *argv[]);
 int PrintSegIds(int nsegs, int *segidlist, int *outsegidlist);
 int DefaultSegIds(int *segidlist, int *outsegidlist);
 
-static char vcid[] =
-    "$Id: mri_relabel_nonwm_hypos.c,v 1.2 2014/04/17 18:03:22 greve Exp $";
 const char *   Progname = NULL;
 char *         cmdline, cwd[2000];
 int            debug         = 0;
@@ -181,7 +184,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /*-------------------------------------------------------*/
@@ -211,8 +214,8 @@ static void print_help() {
   exit(1);
 }
 /*-------------------------------------------------------*/
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /*-------------------------------------------------------*/
@@ -234,7 +237,7 @@ static void check_options() {
 /*-------------------------------------------------------*/
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

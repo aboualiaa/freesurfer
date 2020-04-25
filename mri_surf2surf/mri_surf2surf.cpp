@@ -357,17 +357,15 @@ MATRIX *    MRIleftRightRevMatrix(MRI *mri);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_surf2surf.c,v 1.103 2015/11/05 22:07:33 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
-char *srcsurfregfile = nullptr;
-char *srchemi        = nullptr;
-char *trgsurfregfile = nullptr;
-char *trghemi        = nullptr;
+char *srcsurfregfile = NULL;
+char *srchemi        = NULL;
+char *trgsurfregfile = NULL;
+char *trghemi        = NULL;
 
-char *       srcsubject    = nullptr;
-char *       srcvalfile    = nullptr;
+char *       srcsubject    = NULL;
+char *       srcvalfile    = NULL;
 char *       srctypestring = "";
 int          srctype       = MRI_VOLUME_TYPE_UNKNOWN;
 MRI *        SrcVals, *SrcHits, *SrcDist;
@@ -1877,7 +1875,7 @@ static void print_usage() {
   printf("   --rms-mask mask : only compute rms in mask (primarily for "
          "testing)\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -2260,7 +2258,7 @@ static void print_help() {
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "\n");
   fprintf(fp, "setenv SUBJECTS_DIR %s\n", getenv("SUBJECTS_DIR"));
   fprintf(fp, "cd %s\n", cwd);
@@ -2291,8 +2289,8 @@ static void dump_options(FILE *fp) {
   return;
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

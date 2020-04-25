@@ -23,16 +23,13 @@
 #include "tags.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_smooth.c,v 1.30 2014/01/21 18:48:21 fischl Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  count_big_curvatures(MRI_SURFACE *mris, double thresh);
 static int  get_option(int argc, char *argv[]);
-static void print_usage();
-static void print_help();
-static void print_version();
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 #define KTHRESH 1.5 // everything with kmin less than this will not move
 
 const char *Progname;
@@ -443,8 +440,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

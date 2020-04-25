@@ -14,11 +14,8 @@
 
 #include "cma.h"
 #include "diag.h"
+#include "flash.h"
 #include "gca.h"
-#include "version.h"
-
-static char vcid[] =
-    "$Id: mri_gca_ambiguous.c,v 1.4 2011/03/02 00:04:15 nicks Exp $";
 
 static double scale = 1e12;
 
@@ -27,9 +24,9 @@ int main(int argc, char *argv[]);
 int         GCAscale(GCA *gca_flash, double min_val, double max_val);
 static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb, int classnum);
 static int  get_option(int argc, char *argv[]);
-static void print_usage();
-static void print_help();
-static void print_version();
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
                                   int classnum);
 static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
@@ -428,8 +425,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

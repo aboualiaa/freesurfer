@@ -24,8 +24,6 @@
 
 */
 
-// $Id: mri_segment_tumor.c,v 1.3 2011/10/31 18:30:41 fischl Exp $
-
 /*
   BEGINHELP
 
@@ -53,8 +51,6 @@
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_segment_tumor.c,v 1.3 2011/10/31 18:30:41 fischl Exp $";
 const char *Progname = NULL;
 // char *cmdline, cwd[2000];
 // struct utsname uts;

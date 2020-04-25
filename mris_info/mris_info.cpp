@@ -44,15 +44,11 @@ static void print_version();
 #define TRIANGLE_FILE_MAGIC_NUMBER (-2 & 0x00ffffff)
 #define NEW_QUAD_FILE_MAGIC_NUMBER (-3 & 0x00ffffff)
 
-static char vcid[] =
-    "$Id: mris_info.cpp,v 1.33 2012/12/04 19:17:57 greve Exp $";
-
-char *surffile = nullptr, *outfile = nullptr, *curvfile = nullptr,
-     *annotfile    = nullptr;
-char *SUBJECTS_DIR = nullptr, *subject = nullptr, *hemi = nullptr,
-     *surfname       = nullptr;
-int            debug = 0;
-char           tmpstr[2000];
+using namespace std;
+char *surffile = NULL, *outfile = NULL, *curvfile = NULL, *annotfile = NULL;
+char *SUBJECTS_DIR = NULL, *subject = NULL, *hemi = NULL, *surfname = NULL;
+int   debug = 0;
+char  tmpstr[2000];
 struct utsname uts;
 int            talairach_flag     = 0;
 MATRIX *       XFM                = nullptr;
@@ -600,7 +596,7 @@ static void print_usage() {
 static void print_help() {
   print_usage();
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
   printf("Prints out information about a surface file.\n");
   printf("\n");
@@ -617,8 +613,8 @@ static void argnerr(char *option, int n) {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

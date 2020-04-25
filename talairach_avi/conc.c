@@ -49,7 +49,6 @@ int split(char *string, char *srgv[], int maxp) {
 /********************/
 /* global variables */
 /********************/
-static char rcsid[] = "$Id: conc.c,v 1.2 2007/05/05 00:00:06 nicks Exp $";
 
 void conc_init_quiet(CONC_BLOCK *conc_block, char *program) {
   strcpy(conc_block->program, program);
@@ -59,7 +58,7 @@ void conc_init_quiet(CONC_BLOCK *conc_block, char *program) {
 }
 
 void conc_init(CONC_BLOCK *conc_block, char *program) {
-  printf("%s\n", rcsid);
+  printf("%s\n", "freesurfer conc.c");
   strcpy(conc_block->program, program);
   conc_block->rnfile = conc_block->wnfile = conc_block->imgfp_open = 0;
   *conc_block->lstroot = *conc_block->lstfile = *conc_block->outroot =

@@ -20,8 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
  * See the .cxx for more notes.
- *
- * $Id: vtkFlRenderWindowInteractor.h,v 1.1 2016/12/02 17:16:12 zkaufman Exp $
+ * 
  */
 
 #ifndef _vtkFlRenderWindowInteractor_h

@@ -62,24 +62,21 @@ static int  con_and_fill_pathx(char *fname, char *ofname, char *surfaceFname,
                                int seed);
 static int  con_and_fill_pathy(char *fname, char *ofname, MRIS *mris, int seed);
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void usage_exit();
-static void print_version();
+static void check_options(void);
+static void usage_exit(void);
+static void print_version(void);
 static int  MRISfill(MRIS *mris, int seedvtxno);
 
-static char vcid[] =
-    "$Id: mri_path2label.c,v 1.23 2011/03/02 00:04:23 nicks Exp $";
-
-char *source_file         = nullptr;
-char *dest_file           = nullptr;
-char *con_and_fillx_fname = nullptr;
+char *source_file         = NULL;
+char *dest_file           = NULL;
+char *con_and_fillx_fname = NULL;
 int   path_to_label       = 0;
 int   label_to_path       = 0;
 int   single_path         = 0;
 int   connect             = 0;
 int   fill = 0, con_and_fill = 0, con_and_fillx = 0, fillseed = -1;
-char *subject = nullptr, *hemi = nullptr;
-char *surfacefname  = nullptr;
+char *subject = NULL, *hemi = NULL;
+char *surfacefname  = NULL;
 int   debug         = 0;
 int   checkoptsonly = 0;
 
@@ -345,8 +342,8 @@ static void usage_exit() {
   exit(1);
 }
 /*-----------------------------------------------------------*/
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /*-----------------------------------------------------------*/

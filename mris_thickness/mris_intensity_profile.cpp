@@ -27,8 +27,18 @@
 #include "romp_support.h"
 #endif
 
-static char vcid[] =
-    "$Id: mris_intensity_profile.c,v 1.23 2013/03/27 01:53:50 fischl Exp $";
+#include "cma.h"
+#include "diag.h"
+#include "error.h"
+#include "fmriutils.h"
+#include "fsinit.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrishash.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "transform.h"
+#include "version.h"
 
 int main(int argc, char *argv[]);
 
@@ -44,23 +54,23 @@ MRI *         MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
 static MRI *MRIfitPolynomial(MRI *mri_profiles, MRI *mri_poly, int order);
 static MRI *MRIfitQuadratic(MRI *mri_profiles, MRI *mri_quad);
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 static int               pial_normal_avgs      = 5;
-static char *            read_laplace_name     = nullptr;
-static char *            write_surf_name       = nullptr;
+static char *            read_laplace_name     = NULL;
+static char *            write_surf_name       = NULL;
 static char *            sphere_name           = "sphere";
 static int               fmin_thick            = 0;
 static float             laplace_res           = 0.5;
 static int               laplace_thick         = 0;
-static char *            write_thickness_fname = nullptr;
+static char *            write_thickness_fname = NULL;
 static INTEGRATION_PARMS parms;
 
 const char *  Progname;
-static char * flat_name    = nullptr;
+static char * flat_name    = NULL;
 static int    smooth_iters = 1;
 static double flat_res     = 0;
 
@@ -1161,8 +1171,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

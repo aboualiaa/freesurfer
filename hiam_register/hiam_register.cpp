@@ -12,13 +12,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "macros.h"
+#include "version.h"
+
+#include "mri.h"
+#include "mrisurf.h"
 #include "mrisurf_project.h"
 
 #include "diag.h"
 #include "timer.h"
-
-static char vcid[] =
-    "$Id: hiam_register.c,v 1.6 2011/12/12 03:28:32 greve Exp $";
 
 static float sigmas[] = {4.0f, 2.0f, 1.0f, 0.5f};
 
@@ -400,8 +408,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

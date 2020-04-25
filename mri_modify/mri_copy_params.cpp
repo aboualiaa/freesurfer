@@ -21,7 +21,9 @@
 #include "mri.h"
 #include "version.h"
 
-const char *Progname = "mri_copy_params";
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_version(void);
 
 static int  get_option(int argc, char *argv[]);
 static void usage_exit();
@@ -177,8 +179,8 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 static void usage_exit() {

@@ -101,8 +101,6 @@ ENDHELP ----------------------------------------------------------------
 
 */
 
-// $Id: mris_divide_parcellation.c,v 1.12 2012/10/24 19:50:06 maritza Exp $
-
 // double round(double x);
 
 #include "annotation.h"
@@ -116,9 +114,7 @@ static void print_help();
 static void print_version();
 int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mris_divide_parcellation.c,v 1.12 2012/10/24 19:50:06 maritza Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 static char sdir[STRLEN] = "";
 
@@ -372,7 +368,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

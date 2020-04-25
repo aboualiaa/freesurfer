@@ -12,8 +12,6 @@
  *
  */
 
-// $Id: mris_seg2annot.c,v 1.10 2014/11/15 00:07:19 greve Exp $
-
 /*
   BEGINHELP
 
@@ -49,6 +47,11 @@ Output annotation file. By default, it will be stored in the subject's
 label directory. If you do not want it there, then supply some path
 in front of it (eg, './'). This is a file like lh.aparc.annot.
 
+--seg2annot seg surf ctab output
+
+This gives the same result but does not rely on recon-all directory structure
+
+
 EXAMPLE:
 
   mris_seg2annot --seg lh.FL_002.sig.th8.mgh \\
@@ -79,9 +82,7 @@ static void print_version();
 static void dump_options(FILE *fp);
 int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mris_seg2annot.c,v 1.10 2014/11/15 00:07:19 greve Exp $";
-const char *   Progname = nullptr;
+const char *   Progname = NULL;
 char *         cmdline, cwd[2000];
 int            debug         = 0;
 int            checkoptsonly = 0;
@@ -280,6 +281,27 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       annotfile = pargv[0];
       nargsused = 1;
+    } else if (!strcasecmp(option, "--seg2annot")) {
+      // --seg2annot seg surf ctab output
+      if (nargc < 4)
+        CMDargNErr(option, 3);
+      MRI *seg = MRIread(pargv[0]);
+      if (seg == NULL)
+        exit(1);
+      MRIS *surf = MRISread(pargv[1]);
+      if (surf == NULL)
+        exit(1);
+      COLOR_TABLE *ctab = CTABreadASCII(pargv[2]);
+      if (ctab == NULL) {
+        printf("ERROR: reading %s\n", pargv[2]);
+        exit(1);
+      }
+      int err = MRISseg2annot(surf, seg, ctab);
+      if (err)
+        exit(1);
+      printf("Writing annot to %s\n", pargv[3]);
+      err = MRISwriteAnnotation(surf, pargv[3]);
+      exit(err);
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))
@@ -314,7 +336,11 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  printf("   --seg2annot seg surf ctab output\n");
+  printf("     This gives the same result but does not rely on recon-all "
+         "directory structure\n");
+  printf("\n");
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -376,8 +402,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */
@@ -408,7 +434,7 @@ static void check_options() {
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

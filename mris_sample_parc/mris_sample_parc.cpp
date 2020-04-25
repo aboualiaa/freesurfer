@@ -22,9 +22,6 @@
 #include "diag.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_sample_parc.c,v 1.31 2016/12/11 14:33:38 fischl Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  replace_vertices_with_label(MRI_SURFACE *mris, MRI *mri, int label,
@@ -526,8 +523,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

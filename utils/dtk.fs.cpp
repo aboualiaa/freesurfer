@@ -15,14 +15,6 @@
  *
  */
 
-/*!
-  \file dtk.fs.c
-  \brief FS interface to Diffusion Toolkit and TrackVis data.
-  DTk http://trackvis.org/docs/?subsect=fileformat
-  $Id: dtk.fs.c,v 1.5 2011/03/02 00:04:43 nicks Exp $
-*/
-#include <cstdio>
-#include <cstdlib>
 #include <math.h>
 
 double round(double x);
@@ -39,12 +31,6 @@ double round(double x);
 #endif
 
 double trkvisOffset = 0.5;
-
-/* --------------------------------------------- */
-// Return the CVS version of this file.
-const char *DTKFSSrcVersion() {
-  return ("$Id: dtk.fs.c,v 1.5 2011/03/02 00:04:43 nicks Exp $");
-}
 
 /*----------------------------------------------------------------*/
 DTK_TRACK_SET *DTKloadTrackSet(char *trkfile, char *mrifile) {

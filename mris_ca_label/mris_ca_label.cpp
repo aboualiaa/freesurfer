@@ -31,22 +31,19 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_ca_label.c,v 1.37 2014/02/04 17:46:42 fischl Exp $";
-
 int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 static int postprocess(GCSA *gcsa, MRI_SURFACE *mris);
 
 const char *Progname;
 static void usage_exit(int code);
-static void print_help();
-static void print_version();
+static void print_help(void);
+static void print_version(void);
 
 static int    which_norm   = NORM_MEAN;
 static double MIN_AREA_PCT = 0.1;
-static char * read_fname   = nullptr;
-static char * prob_fname   = nullptr;
+static char * read_fname   = NULL;
+static char * prob_fname   = NULL;
 static int    nbrs         = 2;
 static int    filter       = 10;
 static char * orig_name    = "smoothwm";
@@ -118,8 +115,8 @@ int main(int argc, char *argv[]) {
   canon_surf_name = argv[3];
   out_fname       = argv[5];
 
-  printf("%s\n", vcid);
-  printf("  %s\n", MRISurfSrcVersion());
+  printf("%s\n", getVersion().c_str());
+  printf("  %s\n", getVersion().c_str());
   fflush(stdout);
 
   printf("reading atlas from %s...\n", argv[4]);
@@ -489,8 +486,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

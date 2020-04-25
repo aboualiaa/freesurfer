@@ -37,8 +37,6 @@
 ///  provided on the command-line.
 ///
 
-// $Id: main.cpp,v 1.3 2011/03/02 00:04:30 nicks Exp $
-
 #include <sys/utsname.h>
 
 #include "diag.h"
@@ -59,12 +57,11 @@ int         main(int argc, char *argv[]);
 ///
 //  Global Variables
 //
-static char    vcid[]   = "$Id: main.cpp,v 1.3 2011/03/02 00:04:30 nicks Exp $";
-const char *   Progname = nullptr;
-char *         cmdline;
-int            debug         = 0;
-int            checkoptsonly = 0;
-struct utsname uts;
+const char *       Progname = NULL;
+char *             cmdline;
+int                debug         = 0;
+int                checkoptsonly = 0;
+struct utsname     uts;
 DECIMATION_OPTIONS gDecimationOptions;
 
 /////////////////////////////////////////////////////////////////////
@@ -280,8 +277,8 @@ static void print_help() {
 /// \fn static void print_version(void)
 /// \brief Prints version and exits
 ///
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
@@ -292,7 +289,7 @@ static void print_version() {
 ///
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);
   fprintf(fp, "hostname %s\n", uts.nodename);

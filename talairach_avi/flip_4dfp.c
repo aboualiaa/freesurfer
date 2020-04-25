@@ -37,8 +37,7 @@ extern void flipx(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
 extern void flipy(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
 extern void flipz(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
 
-static char rcsid[] = "$Id: flip_4dfp.c,v 1.2 2007/05/05 00:00:06 nicks Exp $";
-int         main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   FILE *imgfp, *outfp;
   IFH   ifh;
   char  imgfile[MAXL], outfile[MAXL], imgroot[MAXL], outroot[MAXL] = "";
@@ -55,7 +54,7 @@ int         main(int argc, char *argv[]) {
   int xflag = 0, yflag = 0, zflag = 0;
 
   setprog(program, argv);
-  printf("%s\n", rcsid);
+  printf("%s\n", "freesurfer flip_4dfp.c");
   /************************/
   /* process command line */
   /************************/
@@ -167,7 +166,7 @@ int         main(int argc, char *argv[]) {
   /*******************/
   /* create rec file */
   /*******************/
-  startrece(outfile, argc, argv, rcsid, control);
+  startrece(outfile, argc, argv, "freesurfer flip_4dfp.c", control);
   catrec(imgfile);
   endrec();
 

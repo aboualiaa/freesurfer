@@ -19,9 +19,7 @@ MRI *correct_putamen_pallidum_boundaries(MRI *segmri, MRI *outmri);
 MRI *correct_largestCC_and_fill_holes(MRI *segmri, MRI *outmri);
 MRI *fill_leftover_voxels(MRI *segmri, MRI *inmri, MRI *outmri);
 
-static int  get_option(int argc, char *argv[]);
-static char vcid[] =
-    "$Id: mri_correct_segmentations.c,v 1.1 2015/08/25 01:18:09 lzollei Exp $";
+static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 // int use_orig_value = 0;
@@ -171,8 +169,8 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

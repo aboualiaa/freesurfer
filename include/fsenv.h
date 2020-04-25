@@ -38,11 +38,10 @@ struct FSENV {
   int          desired_bvec_space; // for DWI
 };
 
-const char *FSENVsrcVersion();
-FSENV *     FSENVgetenv();
-int         FSENVprintenv(FILE *fp, FSENV *env);
-int         FSENVsetSUBJECTS_DIR(char *SUBJECTS_DIR);
-char *      FSENVgetSUBJECTS_DIR();
-int         FSENVfree(FSENV **ppenv);
+FSENV *FSENVgetenv(void);
+int    FSENVprintenv(FILE *fp, FSENV *env);
+int    FSENVsetSUBJECTS_DIR(char *SUBJECTS_DIR);
+char * FSENVgetSUBJECTS_DIR(void);
+int    FSENVfree(FSENV **ppenv);
 
 #endif // FSENV_H

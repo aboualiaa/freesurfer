@@ -18,8 +18,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
- *
- * $Id: vtkFlRenderWindowInteractor.cxx,v 1.1 2016/12/02 17:16:12 zkaufman Exp $
+ * 
  */
 
 /*
@@ -381,7 +380,6 @@ int vtkFlRenderWindowInteractor::handle(int event) {
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-static char const rcsid[] = "$Id: vtkFlRenderWindowInteractor.cxx,v 1.1 "
-                            "2016/12/02 17:16:12 zkaufman Exp $";
-
-const char *vtkFlRenderWindowInteractor_rcsid() { return rcsid; }
+const char *vtkFlRenderWindowInteractor_rcsid(void) {
+  return "vtkFlRenderWindowInteractor";
+}

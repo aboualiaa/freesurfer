@@ -63,8 +63,7 @@ typedef struct {
 } MRIGLM;
 /*---------------------------------------------------------*/
 
-const char *fMRISrcVersion();
-MRI *       fMRImatrixMultiply(MRI *inmri, MATRIX *M, MRI *outmri);
+MRI *fMRImatrixMultiply(MRI *inmri, MATRIX *M, MRI *outmri);
 MRI *fMRIcovariance(MRI *fmri, int Lag, float DOFAdjust, MRI *mask, MRI *covar);
 
 MRI *fMRIcomputeT(MRI *ces, MATRIX *X, MATRIX *C, MRI *var, MRI *t);

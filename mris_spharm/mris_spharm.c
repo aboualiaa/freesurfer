@@ -43,9 +43,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// static char vcid[] = "$Id: mris_spharm.c,v 1.7 2011/03/02 00:04:34 nicks Exp
-// $";
-
 int                 main(int argc, char *argv[]);
 static int          get_option(int argc, char *argv[]);
 const char *        Progname;
@@ -71,7 +68,7 @@ int main(int argc, char *argv[]) {
   float phi, d, theta, area;
   Timer then;
   MRIS *mris_in, *mris_out;
-  // MRI_SP        *mrisp ;
+  //MRI_SP        *mrisp ;
   MATRIX *m_Z, *m_V, *m_c, *m_Z_inv, *m_V_new;
   VERTEX *v;
 

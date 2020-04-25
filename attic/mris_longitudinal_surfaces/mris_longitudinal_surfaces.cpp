@@ -42,9 +42,6 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] = "$Id: mris_longitudinal_surfaces.c,v 1.8 2015/11/09 "
-                     "04:18:29 zkaufman Exp $";
-
 int main(int argc, char *argv[]);
 
 #define BRIGHT_LABEL        130
@@ -247,8 +244,8 @@ int          main(int argc, char *argv[]) {
   strcpy(mdir, cp);
 
   // print out version of this program and mrisurf.c
-  printf("%s\n", vcid);
-  printf("%s\n", MRISurfSrcVersion());
+  printf("%s\n", getVersion().c_str());
+  printf("%s\n", getVersion().c_str());
   fflush(stdout);
   sprintf(fname, "%s/%s/surf/mris_make_surfaces.%s.mrisurf.c.version", sdir,
           sname, hemi);
@@ -1254,7 +1251,7 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  fprintf(stderr, "%s\n", vcid);
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

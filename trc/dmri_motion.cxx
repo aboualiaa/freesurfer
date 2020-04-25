@@ -40,7 +40,6 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[]   = "";
 const char *Progname = "dmri_motion";
 
 float T = 100, D = .001;
@@ -550,8 +549,8 @@ static void usage_exit() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  std::cout << vcid << std::endl;
+static void print_version(void) {
+  cout << getVersion() << endl;
   exit(1);
 }
 
@@ -578,20 +577,29 @@ static void check_options() {
 }
 
 static void dump_options() {
-  std::cout << std::endl
-            << vcid << std::endl
-            << "cwd " << cwd << std::endl
-            << "cmdline " << cmdline << std::endl
-            << "sysname  " << uts.sysname << std::endl
-            << "hostname " << uts.nodename << std::endl
-            << "machine  " << uts.machine << std::endl
-            << "user     " << VERuser() << std::endl;
+  cout << endl
+       << getVersion() << endl
+       << "cwd " << cwd << endl
+       << "cmdline " << cmdline << endl
+       << "sysname  " << uts.sysname << endl
+       << "hostname " << uts.nodename << endl
+       << "machine  " << uts.machine << endl
+       << "user     " << VERuser() << endl;
 
-  std::cout << "Output motion measure file: " << outFile << std::endl;
+  cout << "Output motion measure file: " << outFile << endl;
 
-  if (outFrameFile != nullptr) {
-    std::cout << "Output frame-by-frame motion measure file: " << outFrameFile
-              << std::endl;
+  if (outFrameFile)
+    cout << "Output frame-by-frame motion measure file: " << outFrameFile
+         << endl;
+
+  if (inMatFile)
+    cout << "Input transform file: " << inMatFile << endl;
+
+  if (inBvalFile) {
+    cout << "Input DWI file: " << inDwiFile << endl;
+    cout << "Input b-value table: " << inBvalFile << endl;
+    cout << "Low-b image intensity threshold: " << T << endl;
+    cout << "Nominal diffusivity: " << D << endl;
   }
 
   if (inMatFile != nullptr) {

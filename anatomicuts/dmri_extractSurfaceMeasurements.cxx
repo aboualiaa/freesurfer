@@ -69,10 +69,10 @@
 #include <itkMatrixOffsetTransformBase.h>
 
 // HELPER FUNCTIONS
-float       calculate_mean(std::vector<float> n);
-float       calculate_stde(std::vector<float> n, float mean);
-std::string makeCSV(std::string dir, std::string file, std::string extension);
-vtkIdType   which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2);
+float     calculate_mean(vector<float> n);
+float     calculate_stde(vector<float> n, float mean);
+string    makeCSV(string dir, string file, string extension);
+vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2);
 vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf);
 
 int main(int narg, char *arg[]) {
@@ -80,26 +80,25 @@ int main(int narg, char *arg[]) {
 
   // Checking for correct parameters
   if ((num1.size() <= 8) or (num1.search(2, "--help", "-h"))) {
-    std::cerr
-        << "Usage: " << std::endl
-        << arg[0]
-        << " -i streamlineFile.trk -sl surfaceFile_lh.orig -tl "
-           "overlayFile_lh.thickness -cl overlayFile_lh.curv"
-        << std::endl
-        << "-sr surfaceFile_rh.orig -tr overlayFile_rh.thickness -cr "
-           "overlayFile_rh.curv -o outputDirectory"
-        << std::endl
-        << "-rid reference_image (NOTE: only use reference image when FA is "
-           "not used"
-        << std::endl
-        << "-ria reference image for anatomical space (NOTE: when diffusion "
-           "and anatomical spaces are not registered) "
-        << std::endl
-        << "-t transformation from diffusion to anatomical space " << std::endl
-        << "-a annotationFile " << std::endl
-        << "OPTION: -fa <numFiles> <Filename> FA_file.nii.gz ... <Filename> "
-           "<fileAddress>"
-        << std::endl;
+    cerr << "Usage: " << endl
+         << arg[0]
+         << " -i streamlineFile.trk -sl surfaceFile_lh.orig -tl "
+            "overlayFile_lh.thickness -cl overlayFile_lh.curv"
+         << endl
+         << "-sr surfaceFile_rh.orig -tr overlayFile_rh.thickness -cr "
+            "overlayFile_rh.curv -o outputDirectory"
+         << endl
+         << "-rid reference_image (NOTE: only use reference image when FA is "
+            "not used"
+         << endl
+         << "-ria reference image for anatomical space (NOTE: when diffusion "
+            "and anatomical spaces are not registered) "
+         << endl
+         << "-t transformation from diffusion to anatomical space " << endl
+         << "-a annotationFile " << endl
+         << "OPTION: -fa <numFiles> <Filename> FA_file.nii.gz ... <Filename> "
+            "<fileAddress>"
+         << endl;
 
     return EXIT_FAILURE;
   }
@@ -107,12 +106,12 @@ int main(int narg, char *arg[]) {
   // Declaration of Variables for Program to Function
   // TRK file Definitions
   enum { Dimension = 3 };
-  typedef int              PixelType;
-  const unsigned int       PointDimension = 3;
-  typedef std::vector<int> PointDataType;
-  const unsigned int       MaxTopologicalDimension = 3;
-  typedef double           CoordinateType;
-  typedef double           InterpolationWeightType;
+  typedef int         PixelType;
+  const unsigned int  PointDimension = 3;
+  typedef vector<int> PointDataType;
+  const unsigned int  MaxTopologicalDimension = 3;
+  typedef double      CoordinateType;
+  typedef double      InterpolationWeightType;
   typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                        MaxTopologicalDimension, CoordinateType,
                                        InterpolationWeightType, PointDataType>
@@ -137,10 +136,9 @@ int main(int narg, char *arg[]) {
   std::map<long long, int>                  bundlesIndeces;
 
   // Input Parsing
-  std::vector<std::string> TRKFiles;
-  for (std::string inputName = std::string(num1.follow("", 2, "-i", "-I"));
-       access(inputName.c_str(), 0) == 0;
-       inputName = std::string(num1.next("")))
+  vector<string> TRKFiles;
+  for (string inputName = string(num1.follow("", 2, "-i", "-I"));
+       access(inputName.c_str(), 0) == 0; inputName = string(num1.next("")))
     TRKFiles.push_back(inputName);
 
   const char *fileCorr = num1.follow("output.csv", 2, "-p", "-P");
@@ -170,13 +168,15 @@ int main(int narg, char *arg[]) {
   FSENV *fsenv = FSENVgetenv();
   char   tmpstr[2000];
   sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
+  std::cout << " Color table file " << tmpstr << std::endl;
+
   COLOR_TABLE *ct = CTABreadASCII(tmpstr);
 
   // Reading in FA file
-  std::vector<ImageType::Pointer> volumes;
-  std::vector<std::string>        image_fileNames;
-  std::vector<ImageType::Pointer> ref_Image;
-  MRI *                           image;
+  vector<ImageType::Pointer> volumes;
+  vector<string>             image_fileNames;
+  vector<ImageType::Pointer> ref_Image;
+  MRI *                      image;
 
   typedef itk::ImageFileReader<ImageType> ImageReaderType;
   ImageReaderType::Pointer                readerS = ImageReaderType::New();
@@ -196,7 +196,7 @@ int main(int narg, char *arg[]) {
 
   if (FA_FOUND and numFiles > 0) {
     for (int i = 0; i < numFiles; i++) {
-      image_fileNames.push_back(std::string(num1.next("")));
+      image_fileNames.push_back(string(num1.next("")));
       const char *                            inFile = num1.next("");
       typedef itk::ImageFileReader<ImageType> ImageReaderType;
       ImageReaderType::Pointer                readerF = ImageReaderType::New();
@@ -208,36 +208,34 @@ int main(int narg, char *arg[]) {
   }
 
   //Outputting the Files to Ensure the correct files were input
-  std::cerr << std::endl;
+  cerr << endl;
   for (int i = 0; i < TRKFiles.size(); i++) {
-    std::cerr << "TRK File " << i + 1 << ":      " << TRKFiles.at(i)
-              << std::endl;
-    bundlesIndeces[(long long)atoll(makeCSV("", TRKFiles.at(i), "").c_str())] =
-        i;
+    cerr << "TRK File " << i + 1 << ":      " << TRKFiles.at(i) << endl;
+    bundlesIndeces[(long long)atoll(TRKFiles.at(i).c_str())] = i;
   }
 
-  std::cerr << "Left Surface:    " << surfaceFileL << std::endl
-            << "Left Thickness:  " << thickFileL << std::endl
-            << "Left Curvature:  " << curvFileL << std::endl
-            << "Right Surface:   " << surfaceFileR << std::endl
-            << "Right Thickness: " << thickFileR << std::endl
-            << "Right Curvature: " << curvFileR << std::endl
-            << "Output:          " << outputDir << std::endl
-            << "Reference Image: " << refImageDiffusion << std::endl
-            << " Reference Image surface: " << refImageSurface << std::endl
-            << " Transformation diffusion to surface: " << transformationFile
-            << std::endl;
+  cerr << "Left Surface:    " << surfaceFileL << endl
+       << "Left Thickness:  " << thickFileL << endl
+       << "Left Curvature:  " << curvFileL << endl
+       << "Right Surface:   " << surfaceFileR << endl
+       << "Right Thickness: " << thickFileR << endl
+       << "Right Curvature: " << curvFileR << endl
+       << "Output:          " << outputDir << endl
+       << "Reference Image: " << refImageDiffusion << endl
+       << " Reference Image surface: " << refImageSurface << endl
+       << " Transformation diffusion to surface: " << transformationFile
+       << endl;
 
   if (FA_FOUND) {
     for (int i = 0; i < image_fileNames.size(); i++) {
-      std::cerr << "Image " << i + 1 << ":         " << image_fileNames.at(i)
-                << std::endl;
+      cerr << "Image " << i + 1 << ":         " << image_fileNames.at(i)
+           << endl;
     }
   }
 
   // Loading the TRK files into a mesh
-  std::vector<ColorMeshType::Pointer> *     meshes;
-  std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
+  vector<ColorMeshType::Pointer> *     meshes;
+  vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
   clusterTools->GetPolyDatas(TRKFiles, &polydatas, ref_Image.at(0));
@@ -251,11 +249,10 @@ int main(int narg, char *arg[]) {
   SurfType::Pointer surfaceCL = SurfType::New();
   surfaceCL->Load(&*surfCL);
 
-  surfCL     = surfaceCL->GetFSSurface(&*surfCL);
-  surfCL->ct = ct;
+  surfCL = surfaceCL->GetFSSurface(&*surfCL);
   MRISreadCurvature(surfCL, curvFileL);
   MRISreadAnnotation(surfCL, annotationFileL);
-
+  surfCL->ct = ct;
   //Left Thickness
   MRI_SURFACE *surfTL;
   surfTL = MRISread(surfaceFileL);
@@ -274,11 +271,10 @@ int main(int narg, char *arg[]) {
   SurfType::Pointer surfaceCR = SurfType::New();
   surfaceCR->Load(&*surfCR);
 
-  surfCR     = surfaceCR->GetFSSurface(&*surfCR);
-  surfCR->ct = ct;
+  surfCR = surfaceCR->GetFSSurface(&*surfCR);
   MRISreadCurvature(surfCR, curvFileR);
   MRISreadAnnotation(surfCR, annotationFileR);
-
+  surfCR->ct = ct;
   //Right Thickness
   MRI_SURFACE *surfTR;
   surfTR = MRISread(surfaceFileR);
@@ -315,8 +311,8 @@ int main(int narg, char *arg[]) {
   double firstPt_array[3];
   double lastPt_array[3];
 
-  std::ofstream oFile;
-  std::ofstream averageFile;
+  ofstream oFile;
+  ofstream averageFile;
   averageFile.open(makeCSV(outputDir, "surfaceMeasures", ".csv"));
 
   // Adds the headers to the files and has option for finding FA values
@@ -326,7 +322,7 @@ int main(int narg, char *arg[]) {
       averageFile << ", mean" << image_fileNames.at(a) << ", stde"
                   << image_fileNames.at(a);
   }
-  averageFile << std::endl;
+  averageFile << endl;
   system(
       (std::string("mkdir -p ") + std::string(outputDir) + std::string("/surf"))
           .c_str());
@@ -353,7 +349,7 @@ int main(int narg, char *arg[]) {
                        TRKFiles.at(i), ".csv"));
 
     if (not oFile.is_open()) {
-      std::cerr << "Could not open output file" << std::endl;
+      cerr << "Could not open output file" << endl;
       return -1;
     }
 
@@ -365,20 +361,20 @@ int main(int narg, char *arg[]) {
         oFile << ", mean" << image_fileNames.at(a) << ", stde"
               << image_fileNames.at(a);
     }
-    oFile << std::endl;
+    oFile << endl;
 
     // Initialization of a new stream for every TRK files
 
     ColorMeshType::Pointer input =
-        (*meshes)[bundlesIndeces[correspondences[i]]];
+        (*meshes)[i]; //[bundlesIndeces[correspondences[i]]];
     ColorMeshType::CellsContainer::Iterator inputCellIt =
         input->GetCells()->Begin();
 
     // Cycling through the streams
     int counter = 1;
     for (; inputCellIt != input->GetCells()->End(); ++inputCellIt, ++counter) {
-      std::vector<float> meanFA;
-      std::vector<float> stdeFA;
+      vector<float> meanFA;
+      vector<float> stdeFA;
 
       // If there are image files, then find the mean and stde of FA
       if (FA_FOUND) {
@@ -388,7 +384,7 @@ int main(int narg, char *arg[]) {
           input->GetPoint(*it, &firstPt);
 
           // Getting the FA value at all points
-          std::vector<float>   FA_values;
+          vector<float>        FA_values;
           ImageType::IndexType index;
           if (volumes.at(p)->TransformPhysicalPointToIndex(firstPt, index))
             FA_values.push_back(volumes.at(p)->GetPixel(index));
@@ -417,10 +413,11 @@ int main(int narg, char *arg[]) {
 
       // Changing the point to an index, then the index to the surface
       ImageType::IndexType first_index, last_index;
-      if (num1.search("-t")) {
-        //TransformSampleReal2(trans, firstPt[0], firstPt[1], firstPt[2],&auxPt[0],&auxPt[1], &auxPt[2]);
-        //LTAworldToWorld(lta, firstPt[0], firstPt[1], firstPt[2],&auxPt[0],&auxPt[1], &auxPt[2]);
-        /*		       	auxPt.Fill();
+      /*  		if( num1.search("-t"))
+			{
+				//TransformSampleReal2(trans, firstPt[0], firstPt[1], firstPt[2],&auxPt[0],&auxPt[1], &auxPt[2]);
+				//LTAworldToWorld(lta, firstPt[0], firstPt[1], firstPt[2],&auxPt[0],&auxPt[1], &auxPt[2]);
+		       	auxPt.Fill();
 				for(int w=0; w<3;w++)
 				{
 					auxPt[0]+=lta->xforms[0].m_L(0,w) * firstPt[w] ;
@@ -430,10 +427,13 @@ int main(int narg, char *arg[]) {
 				auxPt[0]+=lta->xforms[0]->m_L[0][3] ;
 				auxPt[1]+=lta->xforms[0]->m_L[1][3] ;
 				auxPt[2]+=lta->xforms[0]->m_L[2][3] ;  */
-        /*ref_Image.at(1)->TransformPhysicalPointToIndex(auxPt, first_index);
+      /*ref_Image.at(1)->TransformPhysicalPointToIndex(auxPt, first_index);
 				LTAworldToWorld(lta, lastPt[0], lastPt[1], lastPt[2],&auxPt[0],&auxPt[1], &auxPt[2]);
-				ref_Image.at(1)->TransformPhysicalPointToIndex(auxPt, last_index);*/
-      } else {
+				ref_Image.at(1)->TransformPhysicalPointToIndex(auxPt, last_index);
+                	}
+			else
+			*/
+      {
         ref_Image.at(0)->TransformPhysicalPointToIndex(firstPt, first_index);
         ref_Image.at(0)->TransformPhysicalPointToIndex(lastPt, last_index);
       }
@@ -447,15 +447,15 @@ int main(int narg, char *arg[]) {
       // Finding the vertice number
       double    distL, distR;
       vtkIdType Left_ID1 =
-          surfTreeL->FindClosestPointWithinRadius(1000, firstPt_array, distL);
+          surfTreeL->FindClosestPointWithinRadius(10, firstPt_array, distL);
       vtkIdType Right_ID1 =
-          surfTreeR->FindClosestPointWithinRadius(1000, firstPt_array, distR);
+          surfTreeR->FindClosestPointWithinRadius(10, firstPt_array, distR);
       vtkIdType ID1 = which_ID(distL, distR, Left_ID1, Right_ID1);
 
       vtkIdType Left_ID2 =
-          surfTreeL->FindClosestPointWithinRadius(1000, lastPt_array, distL);
+          surfTreeL->FindClosestPointWithinRadius(10, lastPt_array, distL);
       vtkIdType Right_ID2 =
-          surfTreeR->FindClosestPointWithinRadius(1000, lastPt_array, distR);
+          surfTreeR->FindClosestPointWithinRadius(10, lastPt_array, distR);
       vtkIdType ID2 = which_ID(distL, distR, Left_ID2, Right_ID2);
 
       // Outputting values to the file
@@ -466,39 +466,26 @@ int main(int narg, char *arg[]) {
                            &structure);
         std::cout << ID1 << " " << surfCL->vertices[ID1].annotation << " "
                   << structure << std::endl;
-        if (structure < 10)
-          oFile << 100 << structure << ",";
-        else
-          oFile << 10 << structure << ",";
       } else {
         CTABfindAnnotation(surfCR->ct, surfCR->vertices[ID1].annotation,
                            &structure);
         std::cout << ID1 << " " << surfCR->vertices[ID1].annotation << " "
                   << structure << std::endl;
-        if (structure < 10)
-          oFile << 200 << structure << ",";
-        else
-          oFile << 20 << structure << ",";
       }
+      oFile << structure << ",";
       if (ID2 == Left_ID2) {
         CTABfindAnnotation(surfCL->ct, surfCL->vertices[ID2].annotation,
                            &structure);
         std::cout << ID2 << " " << surfCL->vertices[ID2].annotation << " "
                   << structure << std::endl;
-        if (structure < 10)
-          oFile << 100 << structure << ",";
-        else
-          oFile << 10 << structure << ",";
       } else {
         CTABfindAnnotation(surfCR->ct, surfCR->vertices[ID2].annotation,
                            &structure);
         std::cout << ID2 << " " << surfCR->vertices[ID2].annotation << " "
                   << structure << std::endl;
-        if (structure < 10)
-          oFile << 200 << structure << ",";
-        else
-          oFile << 20 << structure << ",";
       }
+
+      oFile << structure << ",";
 
       if (ID1 == Left_ID1) {
         oFile << surfCL->vertices[ID1].curv << ",";
@@ -537,13 +524,13 @@ int main(int narg, char *arg[]) {
           oFile << "," << meanFA.at(m) << "," << stdeFA.at(m);
       }
 
-      oFile << std::endl;
+      oFile << endl;
     }
 
     averageFile << correspondences[i] << ",";
     for (int m = 0; m < 4; m++)
       averageFile << values[m] / input->GetNumberOfCells() << ",";
-    averageFile << std::endl;
+    averageFile << endl;
 
     oFile.close();
   }

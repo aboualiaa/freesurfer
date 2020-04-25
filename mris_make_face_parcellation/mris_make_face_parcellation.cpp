@@ -28,8 +28,6 @@
 #include "version.h"
 
 #define MAX_PARCEL_VERTICES 10000
-static char vcid[] = "$Id: mris_make_face_parcellation.c,v 1.22 2016/05/06 "
-                     "17:26:14 fischl Exp $";
 
 typedef struct {
   double *cx, *cy, *cz, *energy, energy_num, energy_den;
@@ -100,11 +98,11 @@ static int  allocate_stats(MRI_SURFACE *mris, PARMS *parms, int nparcels,
 static double L1_distance(MRI *mri1, MRI *mri2, int x1, int y1, int z1, int x2,
                           int y2, int z2);
 static int    get_option(int argc, char *argv[]);
-static void   print_usage();
-static void   print_help();
+static void   print_usage(void);
+static void   print_help(void);
 static int    find_parcel_min_timecourses(MRI_SURFACE *mris, MRI *mri_cmatrix,
                                           PARMS *parms);
-static void   print_version();
+static void   print_version(void);
 static int    write_snapshot(MRI_SURFACE *mris, PARMS *parms, int n,
                              MRI *mri_cmatrix);
 static double markov_energy(MRI_SURFACE *mris);
@@ -141,16 +139,16 @@ static int  update_parcellation_statistics(MRI_SURFACE *mris, int vno,
                                            PARMS *parms);
 const char *Progname;
 
-static char *cmatrix_fname = nullptr;
+static char *cmatrix_fname = NULL;
 static MRI * mri_cmatrix;
 static PARMS parms;
-static char *evaluate_fname    = nullptr;
-static char *log_fname         = nullptr;
+static char *evaluate_fname    = NULL;
+static char *log_fname         = NULL;
 static int   randomize         = 0;
 static int   do_vertices       = 1;
-static char *write_corr_fname  = nullptr;
-static char *write_annot_fname = nullptr;
-char *       ctab_fname        = nullptr;
+static char *write_corr_fname  = NULL;
+static char *write_annot_fname = NULL;
+char *       ctab_fname        = NULL;
 int          InflatedOK        = 0;
 
 int main(int argc, char *argv[]) {
@@ -629,8 +627,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 static int adjust_parcellation_boundaries(MRI_SURFACE *mris,

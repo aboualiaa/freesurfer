@@ -18,14 +18,12 @@
 #include "mrisegment.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: histo_compute_joint_density.c,v 1.4 2011/03/02 00:04:09 nicks Exp $";
 const char *Progname;
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 int         main(int argc, char *argv[]);
 
 static int   nbins      = 256;
@@ -212,7 +210,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

@@ -17,12 +17,23 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "cma.h"
 #include "diag.h"
+#include "error.h"
+#include "fio.h"
 #include "gca.h"
-
-static char vcid[] = "$Id: mri_edit_segmentation_with_surfaces.c,v 1.23 "
-                     "2015/03/24 17:57:20 greve Exp $";
+#include "macros.h"
+#include "mri.h"
+#include "mrishash.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "version.h"
 
 int main(int argc, char *argv[]);
 
@@ -390,8 +401,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

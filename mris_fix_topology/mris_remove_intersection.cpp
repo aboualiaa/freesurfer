@@ -23,8 +23,7 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_remove_intersection.c,v 1.6 2011/03/02 00:04:32 nicks Exp $";
+int main(int argc, char *argv[]);
 
 int main(int argc, char *argv[]);
 
@@ -144,7 +143,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

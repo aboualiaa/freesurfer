@@ -13,7 +13,6 @@
  */
 
 // fsglm.c - routines to perform GLM analysis.
-// $Id: fsglm.c,v 1.34 2015/04/15 19:55:39 greve Exp $
 /*
   y = X*beta + n;                      Forward Model
   beta = inv(X'*X)*X'*y;               Fit beta
@@ -134,12 +133,6 @@
 #include "timer.h"
 #include "utils.h"
 #undef X
-
-/* --------------------------------------------- */
-// Return the CVS version of this file.
-const char *GLMSrcVersion() {
-  return ("$Id: fsglm.c,v 1.34 2015/04/15 19:55:39 greve Exp $");
-}
 
 /*------------------------------------------------------------
   GLManalyze() - fill y, X, ncontrasts, and C in the glm

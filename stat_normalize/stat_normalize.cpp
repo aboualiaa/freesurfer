@@ -16,9 +16,6 @@
 #include "stats.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: stat_normalize.c,v 1.14 2011/03/02 00:04:40 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
@@ -247,10 +244,8 @@ static void print_usage() {
   fprintf(stderr, "\t-c float2int - <tkregister>, round\n");
 }
 
-static void print_help() {
-  print_usage();
-  fprintf(stderr, "\nThis program will convert average a sequence of\n");
-  fprintf(stderr, "volume-based statistics in Talairach space:\n\n");
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

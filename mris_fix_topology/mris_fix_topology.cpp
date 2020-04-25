@@ -34,9 +34,6 @@
 #include "tags.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_fix_topology.c,v 1.51 2016/10/27 19:43:58 fischl Exp $";
-
 int main(int argc, char *argv[]);
 
 static int noint = 1;
@@ -157,8 +154,8 @@ int main(int argc, char *argv[]) {
 
   print_parameters();
 
-  printf("%s\n", vcid);
-  printf("  %s\n", MRISurfSrcVersion());
+  printf("%s\n", getVersion().c_str());
+  printf("  %s\n", getVersion().c_str());
   fflush(stdout);
 
 #ifdef HAVE_OPENMP
@@ -658,7 +655,7 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  fprintf(stderr, "%s\n", vcid);
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

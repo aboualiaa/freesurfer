@@ -21,12 +21,11 @@
  */
 
 #include "diag.h"
+#include "icosahedron.h"
+#include "label.h"
 #include "mrisurf.h"
 #include "timer.h"
 #include "version.h"
-
-static char vcid[] =
-    "$Id: mris_thickness.c,v 1.28 2012/11/27 17:41:26 fischl Exp $";
 
 int main(int argc, char *argv[]);
 
@@ -35,10 +34,10 @@ static int fill_thickness_holes(MRI_SURFACE *mris, LABEL *cortex_label,
 int MRISmeasureDistanceBetweenSurfaces(MRI_SURFACE *mris, MRI_SURFACE *mris2,
                                        int signed_dist);
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 const char *Progname;
 static char pial_name[100]  = "pial";
@@ -47,7 +46,7 @@ static int  write_vertices  = 0;
 
 static int               nbhd_size     = 2;
 static float             max_thick     = 5.0;
-static char *            osurf_fname   = nullptr;
+static char *            osurf_fname   = NULL;
 static char *            sphere_name   = "sphere";
 static int               signed_dist   = 0;
 static char              sdir[STRLEN]  = "";
@@ -56,11 +55,13 @@ static float             laplace_res   = 0.5;
 static int               laplace_thick = 0;
 static INTEGRATION_PARMS parms;
 
-static char *long_fname = nullptr;
+static char *long_fname = NULL;
 
-static LABEL *cortex_label    = nullptr;
-static LABEL *fsaverage_label = nullptr;
+static LABEL *cortex_label    = NULL;
+static LABEL *fsaverage_label = NULL;
 
+#include "mrinorm.h"
+#include "voxlist.h"
 int main(int argc, char *argv[]) {
   char *       out_fname, *sname, *cp, fname[STRLEN], *hemi;
   int          nargs, msec;
@@ -601,8 +602,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

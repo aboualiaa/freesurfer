@@ -19,11 +19,17 @@
  *
  */
 
-#include "diag.h"
-#include "mrisurf.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-static char vcid[] =
-    "$Id: hiam_make_template.c,v 1.5 2011/03/02 00:04:08 nicks Exp $";
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mrisurf.h"
+#include "version.h"
 
 int main(int argc, char *argv[]);
 
@@ -336,7 +342,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

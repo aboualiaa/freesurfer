@@ -17,24 +17,21 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_label_mode.c,v 1.6 2011/03/02 00:04:32 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 static int  spherical_coordinate(double x, double y, double z, double *pphi,
                                  double *ptheta);
 static int  parameterization_coordinate(float x, float y, float z, int *pu,
                                         int *pv);
 static void AnnotToParameterization(MRI_SURFACE *mris);
 static void ParameterizationToAnnot(MRI_SURFACE *mris);
-static void UpdateAnnotHist();
-static void GetAnnotMode();
+static void UpdateAnnotHist(void);
+static void GetAnnotMode(void);
 static int  ReadAnnotFile(MRI_SURFACE *mris, char *fname);
 static int  WriteAnnotFile(MRI_SURFACE *mris, char *fname);
 static int  WriteAnnotFreqFile(MRI_SURFACE *mris, char *fname);
@@ -45,7 +42,7 @@ const char *Progname;
 static int   normalize_flag   = 0;
 static int   condition_no     = 0;
 static int   stat_flag        = 0;
-static char *output_surf_name = nullptr;
+static char *output_surf_name = NULL;
 static float sigma            = 0.0f;
 
 static int *  AnnotLabel, *AnnotCount, **AnnotMapLabel, **AnnotMapCount;
@@ -228,8 +225,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

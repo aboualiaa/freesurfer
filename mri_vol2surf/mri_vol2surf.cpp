@@ -67,9 +67,6 @@ static void dump_options(FILE *fp);
 static int  singledash(char *flag);
 int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_vol2surf.c,v 1.68 2014/05/30 20:58:47 greve Exp $";
-
 const char *Progname = nullptr;
 
 static char *defaulttypestring;
@@ -1088,6 +1085,8 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       outfile   = pargv[0];
       nargsused = 1;
+    } else if (!strcmp(option, "--use-new")) {
+      UseOld = 0;
     } else if (!strcmp(option, "--vsm")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -1181,6 +1180,96 @@ static int parse_commandline(int argc, char **argv) {
       printf("freeview -f %s:overlay=%s\n", pargv[0], pargv[5]);
       printf("mri_vol2surf --profile done\n");
       exit(0);
+    } else if (!strcmp(option, "--vol2surf")) {
+      // This is an alternative way to run vol2surf that does not rely on
+      // the recon-all directory structure. It generates the same as the standard
+      // invocation when using --use-new. It does not have all the functionality,
+      // eg, avg or max or mapping xyz.
+      int err;
+      if (nargc < 9) {
+        printf("ERROR: --vol2surf requires 9 args\n");
+        printf("USAGE: --vol2surf vol surf projtype projdist projmap reg vsm "
+               "interp output\n");
+        printf(" projtype 0=frac, 1=absdist (if 1, projmap arg will be "
+               "ignored)\n");
+        printf(" projmap : map to get the values for projection (usually "
+               "thickness)\n");
+        printf(" reg : LTA registration file (or 'regheader', surf must have "
+               "vol geom) \n");
+        printf("   LTA files can go in either direction if surf has a valid "
+               "vol geom\n");
+        printf(" vsm : voxel shift map for B0 correction (or 'novsm')\n");
+        printf(" interp 0=nearest, 1=trilin, 5=cubicbspline\n");
+        exit(1);
+      }
+      MRI *mri = MRIread(pargv[0]);
+      if (mri == NULL)
+        exit(1);
+      MRIS *surf = MRISread(pargv[1]);
+      if (surf == NULL)
+        exit(1);
+      MRI *TargVol = NULL;
+      if (surf->vg.valid)
+        TargVol = MRIallocFromVolGeom(&(surf->vg), MRI_UCHAR, 1, 1);
+      int projtype;
+      sscanf(pargv[2], "%d", &projtype);
+      double projdist;
+      sscanf(pargv[3], "%lf", &projdist);
+      if (projtype == 0) {
+        err = MRISreadCurvatureFile(surf, pargv[4]);
+        if (err)
+          exit(1);
+      }
+      LTA *   lta    = NULL;
+      MATRIX *RegMat = NULL;
+      if (strcmp(pargv[5], "regheader") != 0) {
+        lta = LTAread(pargv[5]);
+        if (lta == NULL)
+          exit(1);
+        LTAchangeType(lta, REGISTER_DAT);
+        if (surf->vg.valid) {
+          // Determine that source and target VGs match that in the LTA and
+          // whether LTA needs to be inverted
+          int invneeded = LTAinversionNeeded(mri, TargVol, lta);
+          if (invneeded != 0 && invneeded != 1)
+            exit(1);
+          if (invneeded) {
+            printf("Inverting LTA\n");
+            LTA *lta2 = LTAinvert(lta, NULL);
+            lta       = lta2;
+          }
+        } else {
+          // Dont have target geom, make sure that src matches
+          VOL_GEOM srcvg;
+          getVolGeom(mri, &srcvg);
+          vg_isEqual_Threshold = 10e-3;
+          if (!vg_isEqual(&srcvg, &(lta->xforms[0].src))) {
+            printf("ERROR: input volume VG does not match LTA source VG\n");
+            exit(1);
+          }
+        }
+        RegMat = lta->xforms[0].m_L;
+      } else {
+        if (!surf->vg.valid) {
+          printf("ERROR: volume geometry of input surface is not valid, cannot "
+                 "use regheader\n");
+          exit(1);
+        }
+        RegMat = MRItkRegMtx(TargVol, mri, NULL);
+      }
+      MRIfree(&TargVol);
+      MRI *vsm = NULL;
+      if (strcmp(pargv[6], "novsm") != 0) {
+        vsm = MRIread(pargv[6]);
+        if (vsm == NULL)
+          exit(1);
+      }
+      int interpmethod = 0;
+      sscanf(pargv[7], "%d", &interpmethod);
+      MRI *sval = MRIvol2surfVSM(mri, RegMat, surf, vsm, interpmethod, NULL,
+                                 projdist, projtype, 1, NULL);
+      err       = MRIwrite(sval, pargv[8]);
+      exit(err);
     } else if (!strcmp(option, "--norm-pointset")) {
       if (nargc < 5) {
         printf("ERROR: --norm-pointset requires 5 args\n");
@@ -1304,7 +1393,27 @@ static void print_usage() {
   printf("   --interp    interpolation method (<nearest> or trilinear)\n");
   printf("   --vg-thresh thrshold : threshold for  'ERROR: LTAconcat(): LTAs 0 "
          "and 1 do not match'\n");
-  printf("%s\n", vcid);
+  printf("\n");
+  printf("   --vol2surf vol surf projtype projdist projmap reg vsm interp "
+         "output\n");
+  printf("    This is an alternative way to run vol2surf that does not rely on "
+         "the recon-all\n");
+  printf("    directory structure. Generates the same output as standard "
+         "invocation as long \n");
+  printf("    as --use-new is added. --vol2surf does not have all the "
+         "functionality. \n");
+  printf(
+      "      projtype 0=frac, 1=absdist (if 1, projmap arg will be ignored)\n");
+  printf("      projmap : map to get the values for projection (usually "
+         "thickness)\n");
+  printf("      reg : LTA registration file (or 'regheader', surf must have "
+         "vol geom) \n");
+  printf("        LTA files can go in either direction if surf has a valid vol "
+         "geom\n");
+  printf("      vsm : voxel shift map for B0 correction (or 'novsm')\n");
+  printf("      interp 0=nearest, 1=trilin, 5=cubicbspline\n");
+  printf("\n");
+  std::cout << getVersion() << std::endl;
   printf("\n");
   // printf("   --src_type  input volume format \n");
 }
@@ -1584,8 +1693,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

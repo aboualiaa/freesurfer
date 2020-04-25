@@ -18,7 +18,6 @@
    Date: 8/24/03
    Purpose: Create a new registration matrix that will map a functional
    to the orig of another subject.
-   $Id: mkxsubjreg.c,v 1.5 2011/03/02 00:04:13 nicks Exp $
 */
 
 #include "diag.h"
@@ -38,8 +37,7 @@ static int  singledash(char *flag);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mkxsubjreg.c,v 1.5 2011/03/02 00:04:13 nicks Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 char *srcregpath   = nullptr;
 char *targregpath  = nullptr;
@@ -263,7 +261,8 @@ static void dump_options(FILE *fp) {
   fprintf(fp, "xfm            %s\n", xfmrname);
   fprintf(fp, "subjects_dir   %s\n", subjects_dir);
   fprintf(fp, "Diag Level     %d\n", Gdiag_no);
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
+  return;
 }
 
 /*---------------------------------------------------------------*/
@@ -278,8 +277,8 @@ static int singledash(char *flag) {
   return (0);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

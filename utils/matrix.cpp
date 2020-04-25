@@ -184,6 +184,11 @@ MATRIX *MatrixCopy(const MATRIX *mIn, MATRIX *mOut) {
   return (mOut);
 }
 
+int MatrixQRdecomposition(const MATRIX *iMatrix, MATRIX *oQ, MATRIX *oR) {
+  int r = OpenQRdecomposition(iMatrix, oQ, oR);
+  return (r);
+}
+
 MATRIX *MatrixInverse(const MATRIX *mIn, MATRIX *mOut) {
   // float **a, **y;
   int     isError, i, j, rows, cols, alloced = 0;

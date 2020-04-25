@@ -237,11 +237,20 @@ function(prevent_in_source_builds_and_installs)
 endfunction()
 
 # project info
-project(freesurfer
-        VERSION ${FS_VERSION_MAJOR}.${FS_VERSION_MINOR}.${FS_VERSION_PATCH}
-        LANGUAGES C CXX Fortran
-        )
-prevent_in_source_builds_and_installs()
+cmake_minimum_required(VERSION 3.9)
+project(freesurfer)
+enable_language(C CXX Fortran)
+
+# a few build options
+option(MINIMAL "Only build core components" OFF)
+option(BUILD_GUIS "Build GUI tools" ON)
+option(BUILD_ATTIC "Build deprecated tools from the attic" OFF)
+option(INFANT_MODULE "Include infant recon-all" OFF)
+option(QATOOLS_MODULE "Install QA tools" ON)
+option(BUILD_DNG "Build Doug's testing tools" OFF)
+option(SUPPRESS_WARNINGS "Suppress some selected warnings" ON)
+option(PROFILING "Complile binaries for profiling with gprof" OFF)
+option(INSTALL_PYTHON_DEPENDENCIES "Install python package dependencies" ON)
 
 if(NOT APPLE)
   cmake_minimum_required(VERSION 3.9)
@@ -841,7 +850,7 @@ add_subdirectories(AntsDenoiseImageFs
 
 # the following program subdirectories aren't required in the standard recon-all stream.
 # they will be built by default, but not if a minimal build is configured
-if(NOT FS_MINIMAL_BUILD)
+if(NOT MINIMAL)
   add_subdirectories(anatomicuts
                      attic
                      BrainstemSS
@@ -870,6 +879,7 @@ if(NOT FS_MINIMAL_BUILD)
                      mri_compile_edits
                      mri_compute_change_map
                      mri_compute_volume_fractions
+                     mri_concatenate_gcam
                      mri_copy_values
                      mri_cor2label
                      mri_correct_segmentations
@@ -1028,7 +1038,7 @@ if(NOT FS_MINIMAL_BUILD)
                      )
 endif()
 
-if(FS_INFANT_MODULE)
+if(INFANT_MODULE)
   add_subdirectory(infant)
   add_subdirectory(sscnn_skullstripping)
 endif()
@@ -1037,6 +1047,10 @@ if(FS_TKTOOLS_MODULE)
   add_subdirectory(tktools)
 endif()
 
-if(FS_BUILD_DNG)
+if(QATOOLS_MODULE)
+  add_subdirectory(qatools)
+endif()
+
+if(BUILD_DNG)
   add_subdirectory(dngtester)
 endif()

@@ -18,9 +18,6 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_multiscale_stats.c,v 1.6 2015/02/05 23:34:41 zkaufman Exp $";
-
 /*-------------------------------- CONSTANTS -----------------------------*/
 
 #define MIN_LABELS 5
@@ -682,8 +679,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

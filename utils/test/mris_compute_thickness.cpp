@@ -48,9 +48,6 @@ typedef struct _double_3d {
 
 static float max_thickness = 10.0;
 
-static char vcid[] =
-    "$Id: mris_compute_thickness.cpp,v 1.5 2016/02/27 20:38:29 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
 int framesave = 0;
@@ -282,7 +279,7 @@ static void print_usage(void) {
   fprintf(stdout, "Options:\n");
   fprintf(stdout, "   -trg_type  %%s output format\n");
   fprintf(stdout, "\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 
@@ -308,7 +305,7 @@ static void print_help(void) {
 
 /* --------------------------------------------- */
 static void print_version(void) {
-  fprintf(stdout, "%s\n", vcid);
+  fprintf(stdout, "%s\n", getVersion().c_str());
   exit(1);
 }
 

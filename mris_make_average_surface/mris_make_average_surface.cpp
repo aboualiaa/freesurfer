@@ -93,9 +93,6 @@ ENDHELP
 #include "mrisutils.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_make_average_surface.c,v 1.30 2013/04/11 20:41:58 greve Exp $";
-
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
@@ -575,7 +572,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  printf("%s\n", getVersion().c_str());
   exit(1);
 }

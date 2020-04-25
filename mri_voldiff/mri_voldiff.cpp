@@ -42,8 +42,7 @@ static void print_version();
 static void dump_options(FILE *fp);
 
 int         main(int argc, char *argv[]);
-static char vcid[] = "$Id: mri_voldiff.c,v 1.6 2011/03/02 00:04:25 nicks Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 char *  vol1File = nullptr, *vol2File = nullptr;
 MRI *   vol1 = nullptr, *vol2 = nullptr;
@@ -88,7 +87,7 @@ int main(int argc, char **argv) {
     return (0);
 
   printf("\n");
-  printf("%s\n", vcid);
+  printf("%s\n", getVersion().c_str());
   printf("cwd %s\n", cwd);
   printf("cmdline %s\n", cmdline);
   printf("sysname  %s\n", uts.sysname);
@@ -254,7 +253,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -278,8 +277,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

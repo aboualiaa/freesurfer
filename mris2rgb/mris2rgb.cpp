@@ -31,8 +31,6 @@
 #include "tiffio.h"
 #include "version.h"
 
-static char vcid[] = "$Id: mris2rgb.c,v 1.38 2011/03/02 00:04:26 nicks Exp $";
-
 /*-------------------------------- CONSTANTS -----------------------------*/
 
 #define MAX_MARKED             20000
@@ -960,8 +958,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

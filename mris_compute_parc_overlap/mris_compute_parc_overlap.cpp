@@ -109,22 +109,20 @@ static void argnerr(char *option, int n);
 static int  singledash(char *flag);
 static void padWhite(char *str, int maxLen);
 
-const char *Progname;
-static char vcid[] =
-    "$Id: mris_compute_parc_overlap.c,v 1.19 2016/03/28 17:20:11 fischl Exp $";
-static char * FREESURFER_HOME  = nullptr;
-static char * SUBJECTS_DIR     = nullptr;
-static char * subject          = nullptr;
-static char * hemi             = nullptr;
-static char * annot1           = nullptr;
-static char * annot2           = nullptr;
+const char *  Progname;
+static char * FREESURFER_HOME  = NULL;
+static char * SUBJECTS_DIR     = NULL;
+static char * subject          = NULL;
+static char * hemi             = NULL;
+static char * annot1           = NULL;
+static char * annot2           = NULL;
 static int    unknown_annot    = 0;
-static char * label1name       = nullptr;
-static char * label2name       = nullptr;
-static LABEL *label1           = nullptr;
-static LABEL *label2           = nullptr;
-static MRIS * surface1         = nullptr;
-static MRIS * surface2         = nullptr;
+static char * label1name       = NULL;
+static char * label2name       = NULL;
+static LABEL *label1           = NULL;
+static LABEL *label2           = NULL;
+static MRIS * surface1         = NULL;
+static MRIS * surface2         = NULL;
 static int    debug_overlap    = 0;
 static int    debug_boundaries = 0;
 static int    debug_labels     = 0;
@@ -134,8 +132,8 @@ static int    check_label1_xyz = 1;
 static int    check_label2_xyz = 1;
 static char   tmpstr[2000];
 static char * labelsfile =
-    nullptr; // optional file containing lists of label to chk
-static FILE *logfile = nullptr;
+    NULL; // optional file containing lists of label to chk
+static FILE *logfile = NULL;
 
 int main(int argc, char *argv[]) {
   char filename[2000];
@@ -1163,8 +1161,8 @@ static void usage(int exit_val) {
 } /*  end usage()  */
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

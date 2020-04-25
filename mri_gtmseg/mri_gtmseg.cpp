@@ -16,7 +16,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-// $Id: mri_gtmseg.c,v 1.10 2016/08/02 21:07:24 greve Exp $
 
 /*
   BEGINHELP
@@ -52,11 +51,10 @@ static void dump_options(FILE *fp);
 int         main(int argc, char *argv[]);
 MRI *       MRIErodeWMSeg(MRI *seg, int nErode3d, MRI *outseg);
 
-static char vcid[] = "$Id: mri_gtmseg.c,v 1.10 2016/08/02 21:07:24 greve Exp $";
-const char *Progname = nullptr;
-char *      cmdline, cwd[2000];
-int         debug         = 0;
-int         checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 GTMSEG *     gtmseg;
@@ -165,7 +163,8 @@ int main(int argc, char *argv[]) {
   printf("tissue type schema %s\n", ct->TissueTypeSchema);
 
   // embed color table in segmentation
-  gtmseg->seg->ct = ct;
+  // commenting out because ctabTissueType binary IO is not yet supported
+  // gtmseg->seg->ct = ct;
 
   sprintf(tmpstr, "%s/%s/mri/%s", SUBJECTS_DIR, gtmseg->subject, OutVolFile);
   printf("Writing output file to %s\n", tmpstr);
@@ -409,7 +408,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /*-----------------------------------------------------------------------------------*/
@@ -420,8 +419,8 @@ static void print_help() {
   exit(1);
 }
 /*-----------------------------------------------------------------------------------*/
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /*-----------------------------------------------------------------------------------*/
@@ -429,7 +428,7 @@ static void check_options() { return; }
 /*-----------------------------------------------------------------------------------*/
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

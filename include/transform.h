@@ -268,4 +268,8 @@ int    TransformCRS2MNI305(const MRI *mri, const double col, const double row,
                            const double slice, const LTA *talxfm, double *R,
                            double *A, double *S);
 
+MATRIX *TranformAffineParams2Matrix(double *p, MATRIX *M);
+double *TranformExtractAffineParams(MATRIX *M, double *p);
+double  TransformAffineParamTest(int niters, double thresh);
+
 #endif

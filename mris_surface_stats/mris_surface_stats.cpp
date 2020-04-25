@@ -68,9 +68,6 @@ static int nSmoothSteps = 0;
 #endif
 #define MAX_SURFACES 200
 
-static char vcid[] =
-    "$Id: mris_surface_stats.c,v 1.10 2011/03/02 00:04:34 nicks Exp $";
-
 int main(int argc, char *argv[]) {
   char ** av, *in_fname;
   int     ac, nargs, i, index, total;
@@ -80,7 +77,7 @@ int main(int argc, char *argv[]) {
   MRI *   mriMean2, *mriStd2, *mriAbsMean2, *mriAbsStd2;
   MRI *   Zscore;
   double  mean, std, scalar, absmean, absstd;
-  LABEL * masklabel = nullptr;
+  LABEL * masklabel = NULL;
   VERTEX *v;
 
   int   msec, minutes, seconds, nsurfaces, nsurfaces_total;
@@ -451,8 +448,8 @@ int main(int argc, char *argv[]) {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  fprintf(stdout, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stdout, "%s\n", getVersion().c_str());
   exit(1);
 }
 

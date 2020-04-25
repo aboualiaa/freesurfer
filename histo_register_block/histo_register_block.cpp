@@ -21,9 +21,6 @@
 
 #define RGB_SIZE 500
 
-static char vcid[] =
-    "$Id: histo_register_block.c,v 1.9 2011/03/02 00:04:09 nicks Exp $";
-
 static int    powell_minimize(MRI *mri_block, MRI *mri_histo, MRI *mri_seg,
                               DENSITY *pdf, MATRIX *mat, int cost_type);
 static double compute_overlap(MRI *mri_src, MRI *mri_dst, MATRIX *m_total);
@@ -377,8 +374,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

@@ -34,16 +34,6 @@
 #include "proto.h"
 #include "timer.h"
 #include "version.h"
-#include <ctype.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-// static char vcid[] = "$Id: mris_spherical_wavelets.c,v 1.5 2011/03/02
-// 00:04:34 nicks Exp $";
 
 int                 main(int argc, char *argv[]);
 static int          get_option(int argc, char *argv[]);

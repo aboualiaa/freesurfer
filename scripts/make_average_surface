@@ -24,7 +24,7 @@
 # uncomment this to increase number of allowable open files to maximum:
 #limit descriptors unlimited
 
-set VERSION = '$Id: make_average_surface,v 1.62 2016/02/16 17:17:20 zkaufman Exp $';
+set VERSION = 'make_average_surface @FS_VERSION@';
 setenv FIX_VERTEX_AREA
 
 set PrintHelp = 0;
@@ -708,7 +708,7 @@ check_params:
   endif
   if($#sdout == 0) set sdout = $SUBJECTS_DIR;
   if($#hemilist == 0) set hemilist = (lh rh)
-  if($#annotlist == 0) set annotlist = (aparc aparc.a2009s)
+  if($#annotlist == 0) set annotlist = (aparc.DKTatlas aparc aparc.a2009s)
   if($#measlist == 0) set measlist = (sulc curv thickness area volume inflated.H)
 goto check_params_return;
 ############--------------##################

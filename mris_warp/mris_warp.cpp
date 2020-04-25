@@ -20,7 +20,15 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
+// nint
+#include "macros.h"
+#include "version.h"
+
 #include "diag.h"
+#include "error.h"
 #include "gcamorph.h"
 #include "mri_identify.h"
 #include "registerio.h"
@@ -40,8 +48,6 @@ static int mris_warp__check_deformation(MRI **, unsigned short int);
 MATRIX *   mris_warp__TkReg2vox(MRI_SURFACE *);
 
 static int debug = 0;
-
-static char vcid[] = "$Id: mris_warp.c,v 1.3 2012/02/29 15:59:46 nicks Exp $";
 
 static char *hemi       = nullptr;
 static char *srcsubject = nullptr;
@@ -555,7 +561,7 @@ static void print_usage() {
   printf("   --help        print out information on how to use this program\n");
   printf("   --version     print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 
@@ -570,8 +576,8 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

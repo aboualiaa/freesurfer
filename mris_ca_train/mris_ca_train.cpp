@@ -38,9 +38,6 @@
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_ca_train.c,v 1.17 2011/03/02 00:04:27 nicks Exp $";
-
 #define MAX_LABELS 1000
 #if 0
 static int write_ptable(char *fname, int *ptable, int nparcs) ;
@@ -467,8 +464,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 

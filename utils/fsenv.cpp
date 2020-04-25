@@ -26,12 +26,6 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 
-/* --------------------------------------------- */
-// Return the CVS version of this file.
-const char *FSENVsrcVersion() {
-  return ("$Id: fsenv.c,v 1.7 2015/04/16 18:49:31 greve Exp $");
-}
-
 FSENV *FSENVgetenv() {
   FSENV *        fsenv;
   char *         pc, tmpstr[2000];

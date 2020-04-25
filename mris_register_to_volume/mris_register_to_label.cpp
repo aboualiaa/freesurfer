@@ -161,9 +161,7 @@ const char *Progname;
 static char    base_name[STRLEN];
 static char *  SUBJECTS_DIR;
 static MATRIX *R0;
-static char    vcid[] =
-    "$Id: mris_register_to_label.c,v 1.3 2013/06/07 18:56:17 fischl Exp $";
-int main(int argc, char **argv) {
+int            main(int argc, char **argv) {
   char   fname[STRLEN];
   MRI *  mri_dist, *mri_src;
   LABEL *area, *ltmp;
@@ -453,9 +451,9 @@ static void print_usage() {
   printf("\n");
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
-  printf("\n%s\n\n", vcid);
+  printf("\n%s\n\n", getVersion().c_str());
   exit(1);
 }
 /* --------------------------------------------- */
@@ -501,8 +499,8 @@ static void dump_options(FILE *fp) {
   return;
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

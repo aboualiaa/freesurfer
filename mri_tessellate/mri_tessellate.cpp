@@ -67,9 +67,6 @@
 #include "tags.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mri_tessellate.c,v 1.39 2016/07/20 21:05:04 zkaufman Exp $";
-
 /////////////////////////////////////////////
 #define MAXV 10000000
 static long MAXVERTICES = MAXV;
@@ -172,8 +169,8 @@ int main(int argc, char *argv[]) {
     all_flag = 1;
   }
 
-  printf("%s\n", vcid);
-  printf("  %s\n", MRISurfSrcVersion());
+  printf("%s\n", getVersion().c_str());
+  printf("  %s\n", getVersion().c_str());
   fflush(stdout);
 
   if (UseMRIStessellate) {

@@ -47,8 +47,7 @@ static void dump_options(FILE *fp);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_concat.c,v 1.67 2017/02/16 19:49:35 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 int         debug    = 0;
 #define NInMAX 400000 // such a large number may break valgrind
 char *inlist[NInMAX];
@@ -983,7 +982,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -1012,8 +1011,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

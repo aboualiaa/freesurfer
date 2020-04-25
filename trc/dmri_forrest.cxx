@@ -41,7 +41,6 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[]   = "";
 const char *Progname = "dmri_forrest";
 
 char *testDir = nullptr, *trainListFile = nullptr, *maskFile = nullptr,
@@ -323,8 +322,8 @@ static void usage_exit() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  std::cout << vcid << std::endl;
+static void print_version(void) {
+  cout << getVersion() << endl;
   exit(1);
 }
 
@@ -351,38 +350,62 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void dump_options() {
-  std::cout << std::endl
-            << vcid << std::endl
-            << "cwd " << cwd << std::endl
-            << "cmdline " << cmdline << std::endl
-            << "sysname  " << uts.sysname << std::endl
-            << "hostname " << uts.nodename << std::endl
-            << "machine  " << uts.machine << std::endl
-            << "user     " << VERuser() << std::endl;
+  cout << endl
+       << getVersion() << endl
+       << "cwd " << cwd << endl
+       << "cmdline " << cmdline << endl
+       << "sysname  " << uts.sysname << endl
+       << "hostname " << uts.nodename << endl
+       << "machine  " << uts.machine << endl
+       << "user     " << VERuser() << endl;
 
-  std::cout << "Test subject directory: " << testDir << std::endl;
+  cout << "Test subject directory: " << testDir << endl;
 
-  std::cout << "Training subject directory list: " << trainListFile
-            << std::endl;
+  cout << "Training subject directory list: " << trainListFile << endl;
 
-  std::cout << "Location of brain masks relative to subject directory: "
-            << maskFile << std::endl;
+  cout << "Location of brain masks relative to subject directory: " << maskFile
+       << endl;
 
-  std::cout << "Location of streamline files relative to subject directory:";
+  cout << "Location of streamline files relative to subject directory:";
 
-  for (auto istr = tractFileList.begin(); istr < tractFileList.end(); istr++) {
-    std::cout << " " << *istr;
-  }
-  std::cout << std::endl;
+  for (vector<char *>::const_iterator istr = tractFileList.begin();
+       istr < tractFileList.end(); istr++)
+    cout << " " << *istr;
+  cout << endl;
 
-  if (asegFile != nullptr) {
-    std::cout << "Location of aparc+aseg's relative to subject directory: "
-              << asegFile << std::endl;
-  }
+  if (asegFile)
+    cout << "Location of aparc+aseg's relative to subject directory: "
+         << asegFile << endl;
 
-  if (orientFile != nullptr) {
-    std::cout
-        << "Location of diffusion orientations relative to subject directory: "
-        << orientFile << std::endl;
-  }
+  if (orientFile)
+    cout << "Location of diffusion orientations relative to subject directory: "
+         << orientFile << endl;
+
+  return;
+}
+
+std::cout << "Test subject directory: " << testDir << std::endl;
+
+std::cout << "Training subject directory list: " << trainListFile << std::endl;
+
+std::cout << "Location of brain masks relative to subject directory: "
+          << maskFile << std::endl;
+
+std::cout << "Location of streamline files relative to subject directory:";
+
+for (auto istr = tractFileList.begin(); istr < tractFileList.end(); istr++) {
+  std::cout << " " << *istr;
+}
+std::cout << std::endl;
+
+if (asegFile != nullptr) {
+  std::cout << "Location of aparc+aseg's relative to subject directory: "
+            << asegFile << std::endl;
+}
+
+if (orientFile != nullptr) {
+  std::cout
+      << "Location of diffusion orientations relative to subject directory: "
+      << orientFile << std::endl;
+}
 }
