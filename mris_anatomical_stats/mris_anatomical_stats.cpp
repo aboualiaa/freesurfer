@@ -47,51 +47,55 @@ int    MRISripVerticesWithMark(MRI_SURFACE *mris, int mark) ;
 int    MRISripVerticesWithoutMark(MRI_SURFACE *mris, int mark) ;
 int    MRISreplaceMarks(MRI_SURFACE *mris, int in_mark, int out_mark) ;
 #endif
-int         MRISripVerticesWithAnnotation(MRI_SURFACE *mris, int annotation);
-int         MRISripVerticesWithoutAnnotation(MRI_SURFACE *mris, int annotation);
-int         MRISreplaceAnnotations(MRI_SURFACE *mris, int in_annotation,
-                                   int out_annotation);
-const char *Progname;
-static double sigma           = 0.0f;
-static float  ignore_below    = 0;
-static float  ignore_above    = 20;
-static char * label_name      = nullptr;
-static char * annotation_name = nullptr;
-static char * thickness_name  = "thickness";
-static int    histo_flag      = 0;
-static char * gray_histo_name;
-static char * mri_name            = "T1";
-static int    noheader            = 0;
-static char * log_file_name       = nullptr;
-static int    tabular_output_flag = 0;
-static char   sdir[STRLEN]        = "";
-static int    MGZ                 = 1; // for use with MGZ format
-static char * tablefile           = nullptr;
-static char * annotctabfile       = nullptr; // for outputing the color table
-static FILE * fp                  = nullptr;
-static int    nsmooth             = 0;
-static char * white_name          = "white";
-static char * pial_name           = "pial";
-static LABEL *cortex_label = nullptr; // limit surface area calc to cortex.label
-static int    crosscheck   = 0;
-static int    DoGlobalStats = 1;
+int    MRISripVerticesWithAnnotation(MRI_SURFACE *mris, int annotation) ;
+int    MRISripVerticesWithoutAnnotation(MRI_SURFACE *mris, int annotation) ;
+int    MRISreplaceAnnotations(MRI_SURFACE *mris,
+                              int in_annotation,
+                              int out_annotation) ;
+const char *Progname ;
+static double sigma = 0.0f ;
+static float ignore_below = 0 ;
+static float ignore_above = 20 ;
+static char *label_name = NULL ;
+static char *annotation_name = NULL ;
+static const char *thickness_name = "thickness" ;
+static int histo_flag = 0 ;
+static char *gray_histo_name ;
+static const char *mri_name = "T1" ;
+static int noheader = 0 ;
+static char *log_file_name = NULL ;
+static int tabular_output_flag = 0;
+static char sdir[STRLEN] = "" ;
+static int MGZ = 1; // for use with MGZ format
+static char *tablefile=NULL;
+static char *annotctabfile=NULL; // for outputing the color table
+static FILE *fp=NULL;
+static int nsmooth = 0;
+static const char *white_name = "white" ;
+static const char *pial_name = "pial" ;
+static LABEL *cortex_label = NULL ; // limit surface area calc to cortex.label
+static int crosscheck = 0;
+static int DoGlobalStats = 1;
 
 #define MAX_INDICES 50000
 static char *names[MAX_INDICES];
-int          UseTH3Vol = 1;
+int UseTH3Vol = 1;
 
-int main(int argc, char *argv[]) {
-  char **        av, *hemi, *sname, *cp, fname[STRLEN], *surf_name;
-  int            ac, nargs, vno, n;
-  MRI_SURFACE *  mris, *mrisw, *mrisp;
-  MRI *          mri_wm, *mri_kernel = nullptr, *mri_orig, *mrisvol = nullptr;
-  double         gray_volume, wm_volume;
-  double         mean_abs_mean_curvature, mean_abs_gaussian_curvature;
-  double         intrinsic_curvature_index, folding_index;
-  FILE *         log_fp = nullptr;
-  VERTEX *       v;
-  HISTOGRAM *    histo_gray;
-  MRI *          SurfaceMap = nullptr;
+int
+main(int argc, char *argv[])
+{
+  char          **av, *hemi, *sname, *cp, fname[STRLEN];
+  const char *surf_name ;
+  int           ac, nargs, vno,n ;
+  MRI_SURFACE   *mris, *mrisw, *mrisp ;
+  MRI           *mri_wm, *mri_kernel = NULL, *mri_orig, *mrisvol=NULL ;
+  double        gray_volume, wm_volume;
+  double        mean_abs_mean_curvature, mean_abs_gaussian_curvature;
+  double        intrinsic_curvature_index, folding_index ;
+  FILE          *log_fp = NULL ;
+  VERTEX        *v ;
+  HISTOGRAM     *histo_gray ;
+  MRI           *SurfaceMap = NULL;
   struct utsname uts;
   char *         cmdline, full_name[STRLEN];
   int            num_cortex_vertices   = 0;

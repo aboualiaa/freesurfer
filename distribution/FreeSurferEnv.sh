@@ -462,6 +462,9 @@ if [ -d $FREESURFER_HOME/tktools ]; then
 fi
 export PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$PATH
 
+# set FREESURFER to match FREESURFER_HOME
+export FREESURFER=$FREESURFER_HOME
+
 # This turns on "fixing" of group surface area. A group subject made
 # with make_average_subject will have a surface area smaller than
 # the average of the subjects. This makes it appear to have a surface

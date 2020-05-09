@@ -443,6 +443,7 @@ protected slots:
   void OnShowColorBar(bool bShow);
   void OnCopy();
   void OnCopyStructure();
+  void OnCopyView();
   void OnPaste();
   void OnToggleShowVolume();
   void OnToggleShowSurface();

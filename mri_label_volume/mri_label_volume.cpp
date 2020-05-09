@@ -22,24 +22,24 @@
 #include "timer.h"
 #include "version.h"
 
-int        main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
 
-const char * Progname;
-static char *log_fname = nullptr;
-static void  usage_exit(int code);
+const char *Progname ;
+static const char *log_fname = NULL ;
+static void usage_exit(int code) ;
 
-static int   quiet          = 0;
-static int   spread_sheet   = 0;
-static int   partial_volume = 0;
-static MRI * mri_vals; /* for use in partial volume calculation */
-static int   in_label     = -1;
-static int   out_label    = -1;
-static char *subject_name = nullptr;
-static int   all_flag     = 0;
-static int   compute_pct  = 0;
-static char *brain_fname  = nullptr;
-static char *icv_fname    = nullptr;
+static int quiet = 0 ;
+static int spread_sheet = 0 ;
+static int partial_volume = 0 ;
+static MRI *mri_vals ;  /* for use in partial volume calculation */
+static int in_label = -1 ;
+static int out_label = -1 ;
+static char  *subject_name = NULL ;
+static int all_flag = 0 ;
+static int compute_pct = 0 ;
+static char *brain_fname = NULL ;
+static char *icv_fname = NULL ;
 #define MAX_COLS 10000
 static char * col_strings[MAX_COLS];
 static int    ncols     = 0;

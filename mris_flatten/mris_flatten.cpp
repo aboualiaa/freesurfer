@@ -22,7 +22,46 @@
 
 #include "diag.h"
 #include "mri2.h"
-#include "version.h"
+#include "mrishash.h"
+
+
+int main(int argc, char *argv[]) ;
+
+
+static int  get_option(int argc, char *argv[]) ;
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
+int MRISscaleUp(MRI_SURFACE *mris) ;
+
+const char *Progname ;
+
+static char *synth_name = NULL ;
+static INTEGRATION_PARMS  parms ;
+#define BASE_DT_SCALE     1.0
+static float base_dt_scale = BASE_DT_SCALE ;
+static char *label_fname = NULL ;
+static int nbrs = 2 ;
+static int do_inflate = 0 ;
+static double disturb = 0 ;
+static int randomly_flatten = 0 ;
+static int   nospring = 0 ;
+static float scale = 3 ;
+static int   max_passes = 1 ;
+
+static int sphere_flag = 0 ;
+static int plane_flag = 0 ;
+static int dilate = 0 ;
+static int dilate_label = 0 ; // how many times to dilate label after reading
+
+static int one_surf_flag = 0 ;
+static const char *original_surf_name = SMOOTH_NAME ;
+static const char *original_unfold_surf_name = ORIG_NAME ;
+static float rescale = 1.0f ;
+
+static MRI *mri_overlay ;  // if "flattening" an overlay with an existing flatmap
+
+static LABEL *label_overlay = NULL ;
 
 int main(int argc, char *argv[]);
 

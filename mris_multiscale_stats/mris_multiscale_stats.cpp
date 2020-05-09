@@ -101,11 +101,11 @@ static int   cond_no2 = 1;
 
 const char *Progname;
 
-static float min_label_area = 30.0f;
-static int   write_flag     = 0;
-static char *output_subject = nullptr;
-static char *label_name     = nullptr;
-static char *prefix         = "";
+static float min_label_area = 30.0f ;
+static int write_flag = 0 ;
+static char *output_subject = NULL ;
+static char *label_name = NULL ;
+static const char *prefix = "" ;
 
 static int max_avgs            = 500;
 static int use_no_distribution = 0;

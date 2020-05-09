@@ -94,6 +94,7 @@
 #include "VolumeFilterWorkerThread.h"
 #include "WindowGroupPlot.h"
 #include "WindowLayerInfo.h"
+#include <QClipboard>
 #include <QDebug>
 #ifdef Q_OS_MAC
 #include "MacHelper.h"
@@ -5962,15 +5963,27 @@ void MainWindow::OnSaveScreenshot() {
   m_dlgSaveScreenshot->raise();
 }
 
-void MainWindow::OnVolumeFilterMean() {
-  LayerMRI *mri = (LayerMRI *)GetActiveLayer("MRI");
-  if (mri) {
-    VolumeFilterMean * filter = new VolumeFilterMean(mri, mri);
-    DialogVolumeFilter dlg(this);
-    dlg.SetFilter(filter);
-    dlg.ShowSigma(false);
-    if (dlg.exec() == QDialog::Accepted) {
-      filter->SetKernelSize(dlg.GetKernelSize());
+void MainWindow::OnCopyView()
+{
+    QString fn = QDir::tempPath() + "/freeview-temp-" + QString::number(QDateTime::currentMSecsSinceEpoch()) + ".png";
+    GetMainView()->SaveScreenShot(fn, m_settingsScreenshot.AntiAliasing, 1.0, m_settingsScreenshot.AutoTrim);
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    if (clipboard)
+        clipboard->setImage(QImage(fn));
+}
+
+void MainWindow::OnVolumeFilterMean()
+{
+  LayerMRI* mri = (LayerMRI*)GetActiveLayer( "MRI" );
+  if ( mri )
+  {
+    VolumeFilterMean* filter = new VolumeFilterMean( mri, mri );
+    DialogVolumeFilter dlg( this );
+    dlg.SetFilter( filter );
+    dlg.ShowSigma( false );
+    if ( dlg.exec() == QDialog::Accepted )
+    {
+      filter->SetKernelSize( dlg.GetKernelSize() );
       m_threadVolumeFilter->ExecuteFilter(filter);
     }
   }

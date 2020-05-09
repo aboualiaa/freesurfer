@@ -61,9 +61,9 @@ char *Log10PVolFile = nullptr;
 char *MaskVolFile   = nullptr;
 int   TwoSided      = 1;
 
-MRI * z, *p, *sig, *mask = nullptr;
-char *featdir = nullptr;
-char *fmt;
+MRI *z,*p,*sig,*mask=NULL;
+char *featdir = NULL;
+const char *fmt;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {

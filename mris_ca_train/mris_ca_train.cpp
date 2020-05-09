@@ -42,42 +42,42 @@
 #if 0
 static int write_ptable(char *fname, int *ptable, int nparcs) ;
 #endif
-static int          find_parc_index(int parc, int *ptable, int nparcs);
-static int          add_to_ptable(MRI_SURFACE *mris, int *ptable, int nparcs);
-static int *        ptable          = nullptr;
-static int          nbrs            = 2;
-static int          navgs           = 5;
-static int          normalize1_flag = 0;
-static int          normalize2_flag = 0;
-static int          normalize3_flag = 0;
-static int          nparcs          = 0;
-static char *       ptable_fname    = nullptr;
-static COLOR_TABLE *ctab            = nullptr;
-static int          which_norm      = NORM_MEAN;
+static int find_parc_index(int parc, int *ptable, int nparcs) ;
+static int add_to_ptable(MRI_SURFACE *mris, int *ptable, int nparcs) ;
+static int *ptable = NULL ;
+static int nbrs = 2 ;
+static int navgs = 5 ;
+static int normalize1_flag = 0 ;
+static int normalize2_flag = 0 ;
+static int normalize3_flag = 0 ;
+static int nparcs = 0 ;
+static char *ptable_fname = NULL ;
+static COLOR_TABLE *ctab = NULL ;
+static int which_norm = NORM_MEAN;
 
-int        main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
 
-const char *Progname;
-static void usage_exit(int code);
-static void print_usage();
-static void print_help();
-static void print_version();
+const char *Progname ;
+static void usage_exit(int code) ;
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
 
-static char *orig_name  = "smoothwm";
-static char *label_name = nullptr;
-static int   label_index;
+static const char *orig_name = "smoothwm" ;
+static char *label_name = NULL ;
+static int label_index ;
 
-static int ninputs          = 1; /* curv and sulc */
-static int icno_priors      = 7;
-static int icno_classifiers = 4;
+static int ninputs = 1 ;  /* curv and sulc */
+static int icno_priors = 7 ;
+static int icno_classifiers = 4 ;
 
 #if 0
 static char *curv_name = "curv" ;
 #endif
-static char *thickness_name = "thickness";
-static char *sulc_name      = "sulc";
-static int   sulconly       = 0;
+static const char *thickness_name = "thickness" ;
+static const char *sulc_name = "sulc" ;
+static int sulconly = 0 ;
 
 static char subjects_dir[STRLEN];
 

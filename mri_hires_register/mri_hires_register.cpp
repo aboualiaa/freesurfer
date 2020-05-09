@@ -48,12 +48,13 @@ static float z_vox      = 0.0;
 
 static int apply_transform = 1;
 
-static int  fix_intensity = 0;
-static MRI *estimate_densities(GCA_MORPH *gcam, MRI *mri_lowres,
-                               MRI *mri_intensity);
-static int  write_snapshot(MRI *mri_lowres, MRI *mri_hires, MATRIX *m_vox_xform,
-                           INTEGRATION_PARMS *parms, int fno, int conform,
-                           char *fname);
+static int fix_intensity = 0 ;
+static MRI *estimate_densities(GCA_MORPH *gcam,
+                               MRI *mri_lowres,
+                               MRI *mri_intensity) ;
+static int write_snapshot(MRI *mri_lowres, MRI *mri_hires,
+                          MATRIX *m_vox_xform, INTEGRATION_PARMS *parms,
+                          int fno, int conform, const char *fname) ;
 
 static double MAX_TRANS = 30;
 static int    regrid    = 0;
@@ -1448,12 +1449,12 @@ static float compute_powell_sse(float *p) {
   return (error);
 }
 
-static int write_snapshot(MRI *mri_lowres, MRI *mri_hires, MATRIX *m_vox_xform,
-                          INTEGRATION_PARMS *parms, int fno, int conform,
-                          char *in_fname) {
-  MRI *mri_aligned;
-  char fname[STRLEN];
-  LTA *lta;
+static int
+write_snapshot(MRI *mri_lowres, MRI *mri_hires, MATRIX *m_vox_xform,
+               INTEGRATION_PARMS *parms, int fno, int conform, const char *in_fname) {
+  MRI *mri_aligned ;
+  char fname[STRLEN] ;
+  LTA  *lta ;
 
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
     printf("hires->lowres vox->vox transform:\n");

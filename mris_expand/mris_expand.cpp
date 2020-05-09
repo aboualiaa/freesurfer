@@ -27,14 +27,14 @@
 int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char *             Progname;
-static void              usage_exit(int code);
-static INTEGRATION_PARMS parms;
-static int               use_thickness  = 0;
-static int               nsurfaces      = 1;
-static char *            thickness_name = "thickness";
-static char *            pial_name      = "pial";
-static int               nbrs           = 2;
+const char *Progname ;
+static void usage_exit(int code) ;
+static INTEGRATION_PARMS parms ;
+static int use_thickness = 0 ;
+static int nsurfaces = 1 ;
+static const char *thickness_name = "thickness" ;
+static const char *pial_name = "pial" ;
+static int nbrs = 2 ;
 
 static char *orig_name = nullptr;
 

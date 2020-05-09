@@ -24,66 +24,66 @@
 #include "mrimorph.h"
 #include "version.h"
 
-typedef struct {
-  int     len;
-  int     whalf;
-  double *vals;
-  int     flags;
-} FEATURE;
+typedef struct
+{
+  int    len ;
+  int    whalf ;
+  double *vals ;
+  int    flags ;
+} FEATURE ;
 
-static int dump_window(MRI *mri, char *fname, int x0, int y0, int z0,
-                       int wsize);
-static int prune_indices(MRI *mri_mask, MRI *histo, short *xind, short *yind,
-                         short *zind, int nind, int use_val, float hthresh);
-int        main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice,
-                     MRI *hsynth, int wsize, int flags, char *fname,
-                     MRI *mri_train_src, MRI *mri_train_dst);
-static int extract_feature_vector(MRI *mri, int x, int y, int z,
-                                  FEATURE *feature);
-static int find_most_similar_location(MRI *mri, FEATURE *fsrc, int z, int *pxd,
-                                      int *pyd, int *pzd, MRI *mri_mask,
-                                      MRI_REGION *box, int flags, short *xind,
-                                      short *yind, short *zind, int nind,
-                                      double tol, int num_notfound, int x0,
-                                      int y0, int z0, double min_dist);
-static double feature_distance(FEATURE *f1, FEATURE *f2, int which);
 
-const char *Progname;
-static void usage_exit(int code);
+static int dump_window(MRI *mri, const char *fname, int x0, int y0, int z0, int wsize)  ;
+static int prune_indices(MRI *mri_mask, MRI *histo, short *xind, short *yind, short *zind, int nind, int use_val, float hthresh) ;
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
+MRI *HISTOsynthesize(MRI *mri, MRI *histo, int test_slice, int train_slice, MRI *hsynth, int wsize, int flags, char *fname, MRI *mri_train_src, MRI *mri_train_dst) ;
+static int extract_feature_vector(MRI *mri, int x, int y, int z, FEATURE *feature) ;
+static int find_most_similar_location(MRI *mri, FEATURE *fsrc, int z, int *pxd, int *pyd,int *pzd,
+                                      MRI *mri_mask, MRI_REGION *box, int flags,
+                                      short *xind, short *yind, short *zind, int nind,
+				      double tol,
+                                      int num_notfound,
+				      int x0, int y0, int z0, double min_dist) ;
+static double feature_distance(FEATURE *f1, FEATURE *f2, int which) ;
 
-static char   base_name[STRLEN] = "";
-static int    crop_width        = 0;
-static int    test_slice        = 20; // in histo coords
-static int    train_slice       = 30; // in MRI coords
-static int    wsize             = 3;
-static int    downsample        = 0;
-static double tol               = 0;
-static int    num_notfound      = 1000; // # of search voxels to terminate after
-static double min_training_dist = 100;
+const char *Progname ;
+static void usage_exit(int code) ;
 
-static char *training_src_fname = nullptr;
-static char *training_dst_fname = nullptr;
+static char base_name[STRLEN] = "" ;
+static int crop_width = 0 ;
+static int test_slice = 20 ;  // in histo coords
+static int train_slice = 30 ; // in MRI coords
+static int wsize = 3 ;
+static int downsample = 0 ;
+static double tol = 0 ;
+static int num_notfound = 1000 ;  // # of search voxels to terminate after
+static double min_training_dist = 100 ;
 
-#define SUBTRACT_CENTER 0x00001
-#define L1_NORM         0x00002
-#define MRI_SPACE       0x00004
-#define TRAINING_PAIR   0x00008
 
-#define L2_NORM_DIST 0
-#define L1_NORM_DIST 1
+static char *training_src_fname  = NULL ;
+static char *training_dst_fname = NULL ;
 
-static int flags = 0;
+#define SUBTRACT_CENTER  0x00001
+#define L1_NORM          0x00002
+#define MRI_SPACE        0x00004
+#define TRAINING_PAIR    0x00008
 
-int main(int argc, char *argv[]) {
-  char **av;
-  int    ac, nargs;
-  int    msec, minutes, seconds;
-  Timer  start;
-  MRI *mri, *histo, *hsynth, *mri_train_src = nullptr, *mri_train_dst = nullptr;
+#define L2_NORM_DIST     0
+#define L1_NORM_DIST     1
 
-  setRandomSeed(-1L);
+
+static int flags = 0 ;
+
+int
+main(int argc, char *argv[]) {
+  char   **av ;
+  int    ac, nargs ;
+  int          msec, minutes, seconds ;
+  Timer start ;
+  MRI          *mri, *histo, *hsynth, *mri_train_src = NULL, *mri_train_dst = NULL ;
+
+  setRandomSeed(-1L) ;
 
   nargs = handleVersionOption(argc, argv, "histo_synthesize");
   if (nargs && argc - nargs == 1)
@@ -724,21 +724,23 @@ static int prune_indices(MRI *mri_mask, MRI *histo, short *xind, short *yind,
   free(zi);
   return (nind);
 }
-static int dump_window(MRI *mri, char *fname, int x0, int y0, int z0,
-                       int wsize) {
-  int   xk, yk, xi, yi, whalf;
-  float val;
-  FILE *fp;
+static int
+dump_window(MRI *mri, const char *fname, int x0, int y0, int z0, int wsize) 
+{
+  int   xk, yk, xi, yi, whalf ;
+  float val ;
+  FILE  *fp ;
 
-  fp = fopen(fname, "w");
-  if (fp == nullptr)
-    ErrorReturn(ERROR_NOFILE,
-                (ERROR_NOFILE, "dump_window(%s): could not open file", fname));
-  whalf = (wsize - 1) / 2;
-  for (yk = -whalf; yk <= whalf; yk++) {
-    for (xk = -whalf; xk <= whalf; xk++) {
-      xi = mri->xi[xk + x0];
-      yi = mri->yi[yk + y0];
+  fp = fopen(fname, "w") ;
+  if (fp == NULL)
+    ErrorReturn(ERROR_NOFILE, (ERROR_NOFILE, "dump_window(%s): could not open file",fname));
+  whalf = (wsize-1)/2 ;
+  for (yk = -whalf ; yk <= whalf ; yk++)
+  {
+    for (xk = -whalf ; xk <= whalf ; xk++)
+    {
+      xi = mri->xi[xk+x0] ;
+      yi = mri->yi[yk+y0] ;
       if (xi >= 0 && yi >= 0 && xi < mri->width && yi < mri->height)
         val = MRIgetVoxVal(mri, xi, yi, z0, 0);
       else

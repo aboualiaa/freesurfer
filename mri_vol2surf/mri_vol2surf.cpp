@@ -70,41 +70,42 @@ int         main(int argc, char *argv[]);
 const char *Progname = nullptr;
 
 static char *defaulttypestring;
-static int   defaulttype = MRI_VOLUME_TYPE_UNKNOWN;
+static int  defaulttype = MRI_VOLUME_TYPE_UNKNOWN;
 
-static char *srcvolid      = nullptr;
-static char *srctypestring = nullptr;
-static int   srctype       = MRI_VOLUME_TYPE_UNKNOWN;
-static char *srcregfile    = nullptr;
-static int   regheader     = 0;
-static char *srcwarp       = nullptr;
-static int   srcoldreg     = 0;
-static char *srcsubject    = nullptr;
-static char *srcsubjectuse = nullptr;
+static char *srcvolid   = NULL;
+static char *srctypestring = NULL;
+static int   srctype = MRI_VOLUME_TYPE_UNKNOWN;
+static char *srcregfile = NULL;
+static int  regheader = 0;
+static char *srcwarp    = NULL;
+static int   srcoldreg  = 0;
+static char *srcsubject = NULL;
+static char *srcsubjectuse = NULL;
 
-static char *ref_vol_name = "orig.mgz";
+static const char *ref_vol_name = "orig.mgz" ;
 
-static char *srchitvolid      = nullptr;
-static char *srchittypestring = nullptr;
-static int   srchittype       = MRI_VOLUME_TYPE_UNKNOWN;
+static char *srchitvolid   = NULL;
+static char *srchittypestring = NULL;
+static int   srchittype = MRI_VOLUME_TYPE_UNKNOWN;
 
-static char *hemi                  = nullptr;
-static char *surfname              = "white";
-static char *trgsubject            = nullptr;
-static int   IcoOrder              = -1;
-static float IcoRadius             = 100;
-static char *surfreg               = "sphere.reg";
-static char *thicknessname         = "thickness";
-static float ProjFrac              = 0;
-static int   ProjOpt               = 0;
-static char *volume_fraction_fname = nullptr;
-static int   ProjDistFlag          = 0;
-static float ProjFracMin = 0.0, ProjFracMax = 0.0, ProjFracDelta = 1.0;
+static char *hemi    = NULL;
+static char const *surfname = "white";
+static char *trgsubject = NULL;
+static int  IcoOrder = -1;
+static float IcoRadius = 100;
+static char const *surfreg = "sphere.reg";
+static char const *thicknessname = "thickness";
+static float ProjFrac = 0;
+static int   ProjOpt = 0 ;
+static char  *volume_fraction_fname = NULL ;
+static int   ProjDistFlag = 0;
+static float ProjFracMin=0.0,ProjFracMax=0.0,ProjFracDelta=1.0;
 
-MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri, MATRIX *m, float din,
-                        float dout, int nsamples, MRI *mri_wm, MRI *mri_gm,
-                        MRI *mri_csf);
-MRI *estimate_gm_values(MRI *mri_wm, MRI *mri_gm, MRI *mri_csf, MRI *SrcVol,
+MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri, MATRIX *m, 
+                        float din, float dout, int nsamples, 
+                        MRI *mri_wm, MRI *mri_gm, MRI *mri_csf);
+MRI *estimate_gm_values(MRI *mri_wm, MRI *mri_gm, MRI *mri_csf,
+                        MRI *SrcVol,
                         MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc, MATRIX *Dsrc,
                         MRI_SURFACE *TrgSurf, int InterpMethod, int float2int,
                         MRI *SrcHitVol);
@@ -122,9 +123,9 @@ static int   outtype       = MRI_VOLUME_TYPE_UNKNOWN;
 static char *srchitfile = nullptr;
 static char *trghitfile = nullptr;
 
-static char *interpmethod_string = "nearest";
-static int   interpmethod        = -1;
-static char *mapmethod           = "nnfr";
+static const char  *interpmethod_string = "nearest";
+static int  interpmethod = -1;
+static const char *mapmethod = "nnfr";
 
 static int debug         = 0;
 static int reshape       = 0;
@@ -147,11 +148,11 @@ static char *nvoxfile = nullptr;
 
 static char tmpstr[2000];
 
-static int   float2int_src;
-static char *float2int_string = "round";
-static int   float2int        = -1;
-static int   fixtkreg         = 0;
-static int   ReverseMapFlag   = 0;
+static int  float2int_src;
+static const char *float2int_string = "round";
+static int  float2int = -1;
+static int  fixtkreg = 0;
+static int ReverseMapFlag = 0;
 
 static int framesave = -1;
 
@@ -1203,78 +1204,66 @@ static int parse_commandline(int argc, char **argv) {
         exit(1);
       }
       MRI *mri = MRIread(pargv[0]);
-      if (mri == NULL)
-        exit(1);
-      MRIS *surf = MRISread(pargv[1]);
-      if (surf == NULL)
-        exit(1);
-      MRI *TargVol = NULL;
-      if (surf->vg.valid)
-        TargVol = MRIallocFromVolGeom(&(surf->vg), MRI_UCHAR, 1, 1);
+      if(mri==NULL) exit(1);
+      MRIS *surf  = MRISread(pargv[1]);
+      if(surf==NULL) exit(1);
       int projtype;
       sscanf(pargv[2], "%d", &projtype);
       double projdist;
-      sscanf(pargv[3], "%lf", &projdist);
-      if (projtype == 0) {
-        err = MRISreadCurvatureFile(surf, pargv[4]);
-        if (err)
-          exit(1);
+      sscanf(pargv[3],"%lf",&projdist);
+      if(projtype == 0){
+	err = MRISreadCurvatureFile(surf, pargv[4]);
+	if(err) exit(1);
       }
-      LTA *   lta    = NULL;
-      MATRIX *RegMat = NULL;
-      if (strcmp(pargv[5], "regheader") != 0) {
-        lta = LTAread(pargv[5]);
-        if (lta == NULL)
-          exit(1);
-        LTAchangeType(lta, REGISTER_DAT);
-        if (surf->vg.valid) {
-          // Determine that source and target VGs match that in the LTA and
-          // whether LTA needs to be inverted
-          int invneeded = LTAinversionNeeded(mri, TargVol, lta);
-          if (invneeded != 0 && invneeded != 1)
-            exit(1);
-          if (invneeded) {
-            printf("Inverting LTA\n");
-            LTA *lta2 = LTAinvert(lta, NULL);
-            lta       = lta2;
-          }
-        } else {
-          // Dont have target geom, make sure that src matches
-          VOL_GEOM srcvg;
-          getVolGeom(mri, &srcvg);
-          vg_isEqual_Threshold = 10e-3;
-          if (!vg_isEqual(&srcvg, &(lta->xforms[0].src))) {
-            printf("ERROR: input volume VG does not match LTA source VG\n");
-            exit(1);
-          }
-        }
-        RegMat = lta->xforms[0].m_L;
-      } else {
-        if (!surf->vg.valid) {
-          printf("ERROR: volume geometry of input surface is not valid, cannot "
-                 "use regheader\n");
-          exit(1);
-        }
-        RegMat = MRItkRegMtx(TargVol, mri, NULL);
+      LTA *lta=NULL;
+      MATRIX *RegMat=NULL;
+      if(strcmp(pargv[5],"regheader") != 0){ // not regheader
+	lta = LTAread(pargv[5]);
+	if(lta==NULL) exit(1);
+	LTAchangeType(lta,REGISTER_DAT);
+	VOL_GEOM srcvg;
+	getVolGeom(mri, &srcvg);
+	vg_isEqual_Threshold = 10e-3;
+	if(!vg_isEqual(&srcvg, &(lta->xforms[0].src))){
+	  if(!vg_isEqual(&srcvg, &(lta->xforms[0].dst))){
+	    printf("ERRRO: input volume VG does not match LTA source or target VG\n");
+	    exit(1);
+	  }
+	  printf("INFO: input volume VG matches LTA target VG, inverting \n");
+	  LTA *lta2 = LTAinvert(lta, NULL);
+	  lta = lta2;
+	}
+	RegMat = lta->xforms[0].m_L;
       }
-      MRIfree(&TargVol);
+      else {
+	if(!surf->vg.valid){
+	  printf("ERROR: volume geometry of input surface is not valid, cannot use regheader\n");
+	  exit(1);
+	}
+	MRI *TargVol=NULL;
+	TargVol = MRIallocFromVolGeom(&(surf->vg), MRI_UCHAR, 1,1);
+	RegMat = MRItkRegMtx(TargVol,mri,NULL);
+	MRIfree(&TargVol);
+      }
       MRI *vsm = NULL;
       if (strcmp(pargv[6], "novsm") != 0) {
         vsm = MRIread(pargv[6]);
         if (vsm == NULL)
           exit(1);
       }
-      int interpmethod = 0;
-      sscanf(pargv[7], "%d", &interpmethod);
-      MRI *sval = MRIvol2surfVSM(mri, RegMat, surf, vsm, interpmethod, NULL,
-                                 projdist, projtype, 1, NULL);
-      err       = MRIwrite(sval, pargv[8]);
+      int interpmethod=0;
+      sscanf(pargv[7],"%d",&interpmethod);
+      MRI *sval = MRIvol2surfVSM(mri, RegMat, surf, vsm, interpmethod, NULL, projdist, projtype, 1,NULL);
+      err = MRIwrite(sval,pargv[8]);
+      printf("mri_vol2surf --volsurf done\n");
       exit(err);
-    } else if (!strcmp(option, "--norm-pointset")) {
-      if (nargc < 5) {
-        printf("ERROR: --norm-pointset requires 5 args\n");
-        printf("USAGE: --norm-pointset surf vtxno dist delta output\n");
-        exit(1);
+      // done with --vol2surf
+    }
+    else if (!strcmp(option, "--norm-pointset")) {
+      if(nargc < 5){
+	printf("ERROR: --norm-pointset requires 5 args\n");
+	printf("USAGE: --norm-pointset surf vtxno dist delta output\n");
+	exit(1);
       }
       MRIS *surf = MRISread(pargv[0]);
       if (surf == nullptr)

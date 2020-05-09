@@ -67,8 +67,8 @@ static int cvector_add_variances(float *c1_var, float *c2_var, int num_class1,
 static int cvector_track_best_snr(float *vsnr, float *vbest_snr,
                                   float *vbest_avgs, int avgs, int num);
 
-static int write_acorr(char *fname, double *acorr, double *counts, int n,
-                       float bin_size);
+static int   write_acorr(const char *fname, double *acorr, double *counts, int n,
+                         float bin_size) ;
 
 static int fill_acorr_holes(double *acorr, double *counts, int nbins);
 
@@ -76,12 +76,12 @@ static int fill_acorr_holes(double *acorr, double *counts, int nbins);
 
 const char *Progname;
 
-static char * output_subject = nullptr;
-static int    navgs          = 0;
-static char * noise_name     = "noise_acorr.dat";
-static char * signal_name    = "signal_acorr.dat";
-static char * label_name;
-static double pthresh = 0.0;
+static char *output_subject = NULL ;
+static int navgs = 0 ;
+static const char *noise_name = "noise_acorr.dat" ;
+static const char *signal_name = "signal_acorr.dat" ;
+static char *label_name ;
+static double pthresh = 0.0 ;
 
 static int max_avgs = 100;
 
@@ -761,10 +761,10 @@ static int cvector_compute_t_test(float *c1_mean, float *c1_var, float *c2_mean,
   return (NO_ERROR);
 }
 
-static int write_acorr(char *fname, double *acorr, double *counts, int nbins,
-                       float bin_size) {
-  int   i;
-  FILE *fp;
+static int
+write_acorr(const char *fname,double *acorr,double *counts,int nbins, float bin_size) {
+  int  i ;
+  FILE *fp ;
 
   fp = fopen(fname, "w");
   if (!fp)

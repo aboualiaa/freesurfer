@@ -105,15 +105,21 @@ static TexGlyphVertexInfo *getTCVI(TexFont *txf, int c) {
   /* NOTREACHED */
 }
 
-static char *lastError;
+static const char *lastError;
 
-char *txfErrorString() { return lastError; }
+const char *
+txfErrorString(void)
+{
+  return lastError;
+}
 
-TexFont *txfLoadFont(char *filename) {
-  TexFont *      txf;
-  FILE *         file;
-  GLfloat        w, h, xstep, ystep;
-  char           fileid[4], tmp;
+TexFont *
+txfLoadFont(const char *filename)
+{
+  TexFont *txf;
+  FILE *file;
+  GLfloat w, h, xstep, ystep;
+  char fileid[4], tmp;
   unsigned char *texbitmap;
   int            min_glyph, max_glyph;
   int            endianness, swap, format, stride, width, height;

@@ -94,11 +94,11 @@ static const COLOR_TABLE miniColorTable = {(CTE **)entries, 2, "miniColorTable",
 #pragma clang diagnostic pop
 #endif
 
-static void addToExcludedLabelsList(COLOR_TABLE *ct, char *labelToExclude);
-static int  isExcludedLabel(int colortabIndex);
-static void addToIncludedLabelsList(COLOR_TABLE *ct, char *labelToInclude);
-static int  isIncludedLabel(int colortabIndex);
-static void calcMeanMinLabelDistances();
+static void addToExcludedLabelsList(COLOR_TABLE *ct, const char *labelToExclude);
+static int isExcludedLabel(int colortabIndex);
+static void addToIncludedLabelsList(COLOR_TABLE *ct, const char *labelToInclude);
+static int isIncludedLabel(int colortabIndex);
+static void calcMeanMinLabelDistances(void);
 static void usage(int exit_val);
 static int  parse_commandline(int argc, char **argv);
 static void check_options();
@@ -655,9 +655,10 @@ int main(int argc, char *argv[]) {
 
 } /*  end main()  */
 
-static int *excludedLabelsList = nullptr;
-static int  numExcludedLabels;
-static void addToExcludedLabelsList(COLOR_TABLE *ct, char *labelToExclude) {
+static int *excludedLabelsList=NULL;
+static int numExcludedLabels;
+static void addToExcludedLabelsList(COLOR_TABLE *ct, const char *labelToExclude)
+{
   // first-time setup
   if (excludedLabelsList == nullptr) {
     excludedLabelsList = (int *)malloc(10000 * sizeof(int));
@@ -693,9 +694,11 @@ static int isExcludedLabel(int colortabIndex) {
   return 0;
 }
 
-static int *includedLabelsList = nullptr;
-static int  numIncludedLabels;
-static void addToIncludedLabelsList(COLOR_TABLE *ct, char *labelToInclude) {
+
+static int *includedLabelsList=NULL;
+static int numIncludedLabels;
+static void addToIncludedLabelsList(COLOR_TABLE *ct, const char *labelToInclude)
+{
   // first-time setup
   if (includedLabelsList == nullptr) {
     includedLabelsList = (int *)malloc(10000 * sizeof(int));

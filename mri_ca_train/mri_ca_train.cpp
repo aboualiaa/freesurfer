@@ -47,55 +47,59 @@
 #include "romp_support.h"
 #endif
 
-int         main(int argc, char *argv[]);
-static int  get_option(int argc, char *argv[]);
-static int  replaceLabels(MRI *mri_seg);
-static void configure_transform(TRANSFORM *transform, MRI *mri, GCA *gca);
-static int  lateralize_hypointensities(MRI *mri_seg);
-static int  check(MRI *mri_seg, char *subjects_dir, char *subject_name);
 
-static int   conform      = 1;
-static int   flash        = 0;
-static int   binarize     = 0;
-static int   binarize_in  = 0;
-static int   binarize_out = 0;
-static char *wmsa_fname   = NULL;
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
+static int replaceLabels(MRI *mri_seg) ;
+static void configure_transform(TRANSFORM *transform, MRI *mri, GCA *gca) ;
+static int lateralize_hypointensities(MRI *mri_seg) ;
+static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) ;
 
-static int gca_flags = GCA_NO_FLAGS;
+static int conform = 1 ;
+static int flash = 0 ;
+static int binarize = 0 ;
+static int binarize_in = 0 ;
+static int binarize_out = 0 ;
+static char *wmsa_fname = NULL ;
 
-static COLOR_TABLE *ctab = NULL;
-const char *        Progname;
-static void         usage_exit(int code);
-static char *       mask_fname   = NULL;
-static char *       insert_fname = NULL;
-static int          insert_label = 0;
-static char *       histo_fname  = NULL;
+static int gca_flags = GCA_NO_FLAGS ;
 
-static float scale        = 0;
-static int   force_inputs = 1;
+static COLOR_TABLE *ctab = NULL ;
+const char *Progname ;
+static void usage_exit(int code) ;
+static char *mask_fname = NULL ;
+static char *insert_fname = NULL ;
+static int  insert_label = 0 ;
+static char *histo_fname = NULL ;
 
-static GCA_PARMS parms;
-static char *    seg_dir = "seg_edited.mgz"; // default name of manual edit file
-static char      T1_name[STRLEN] = "orig";
-static char *    xform_name      = NULL;
-static int       prune           = 0;
-static float     smooth          = -1;
-static int       gca_inputs      = 0;
-static double    TRs[MAX_GCA_INPUTS];
-static double    TEs[MAX_GCA_INPUTS];
-static double    FAs[MAX_GCA_INPUTS];
-static int       map_to_flash = 0;
+static float scale = 0 ;
+static int force_inputs = 1 ;
 
-static int ninputs = 1; /* T1 intensity */
-static int navgs   = 0;
+static GCA_PARMS parms ;
+static const char *seg_dir = "seg_edited.mgz" ; // default name of manual edit file
+static char T1_name[STRLEN] = "orig" ;
+static char *xform_name = NULL;
+static int prune = 0 ;
+static float smooth = -1 ;
+static int gca_inputs = 0 ;
+static double TRs[MAX_GCA_INPUTS] ;
+static double TEs[MAX_GCA_INPUTS] ;
+static double FAs[MAX_GCA_INPUTS] ;
+static int map_to_flash = 0 ;
 
-static char  subjects_dir[STRLEN];
-static char *heq_fname = NULL;
+static int ninputs = 1 ;  /* T1 intensity */
+static int navgs = 0 ;
 
-static char *input_names[MAX_GCA_INPUTS] = {T1_name};
+static char subjects_dir[STRLEN] ;
+static char *heq_fname = NULL ;
 
-static int do_sanity_check            = 0;
-static int do_fix_badsubjs            = 0;
+static char *input_names[MAX_GCA_INPUTS] =
+  {
+    T1_name
+  } ;
+
+static int do_sanity_check = 0;
+static int do_fix_badsubjs = 0;
 static int sanity_check_badsubj_count = 0;
 static int AllowMisMatch              = 0;
 int        DoSym                      = 0;

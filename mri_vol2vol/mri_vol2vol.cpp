@@ -484,7 +484,7 @@ static int  singledash(char *flag);
 static int  isflag(char *flag);
 static int  nth_is_arg(int nargc, char **argv, int nth);
 #include "tags.h"
-static int     istringnmatch(char *str1, char *str2, int n);
+static int istringnmatch(const char *str1, const char *str2, int n);
 static MATRIX *LoadRtal(int talres);
 MATRIX *       LoadRfsl(char *fname);
 
@@ -494,30 +494,30 @@ const char *Progname = NULL;
 
 int debug = 0, gdiagno = -1;
 
-static int  soap_bubble_iters = 0;
-static MRI *mri_soap_ctrl     = nullptr;
+static int soap_bubble_iters = 0 ;
+static MRI *mri_soap_ctrl = NULL ;
 
-char *      movvolfile  = nullptr;
-char *      targvolfile = nullptr;
-int         fstarg      = 0;
-char *      fstargfile  = "orig.mgz";
-char *      outvolfile = nullptr, *outdir = nullptr;
-char *      regfile       = nullptr;
-char *      xfmfile       = nullptr;
-char *      fslregfile    = nullptr;
-char *      tempvolfile   = nullptr;
-int         invert        = 0;
-int         fstal         = 0;
-LTA *       lta           = nullptr;
-int         usedltageom   = 0;
-int         fstalres      = 2; // Can only be 1 or 2
-const char *precision     = "float";
-int         precisioncode = MRI_FLOAT;
-char *      interpmethod  = "trilinear";
-int         interpcode    = 0;
-int         sinchw;
-int         regheader  = 0;
-int         noresample = 0;
+char *movvolfile=NULL;
+char *targvolfile=NULL;
+int  fstarg = 0;
+const char *fstargfile = "orig.mgz";
+char *outvolfile=NULL, *outdir=NULL;
+char *regfile=NULL;
+char *xfmfile=NULL;
+char *fslregfile=NULL;
+char *tempvolfile=NULL;
+int  invert=0;
+int  fstal=0;
+LTA  *lta=NULL;
+int  usedltageom=0;
+int  fstalres = 2; // Can only be 1 or 2
+const char *precision = "float";
+int   precisioncode = MRI_FLOAT;
+const char *interpmethod = "trilinear";
+int   interpcode = 0;
+int   sinchw;
+int   regheader=0;
+int   noresample=0;
 
 MRI *mov, *targ, *out;
 MRI *in, *mri_template;
@@ -530,14 +530,14 @@ MATRIX *Tin, *invTin, *Sin, *invSin;
 MATRIX *Ttemp, *invTtemp, *Stemp, *invStemp;
 MATRIX *Rfsl, *Rfsl2;
 
-char *FSH          = nullptr;
-char *SUBJECTS_DIR = nullptr;
-char *talxfmfile   = "talairach.xfm";
+char *FSH=NULL;
+char *SUBJECTS_DIR=NULL;
+const char *talxfmfile = "talairach.xfm";
 
-char *talsubject     = nullptr;
-char *subject        = nullptr;
-char *MNIsubject     = "21_vc716";
-char *subject_outreg = nullptr;
+char *talsubject = NULL;
+char *subject = NULL;
+const char *MNIsubject = "21_vc716";
+const char *subject_outreg = NULL;
 
 int   dont_irescale = 1;
 float minrescale = 0.0, maxrescale = 255.0;
@@ -560,24 +560,24 @@ GCAM *     MNIgcam;
 char       gcamfile[1000];
 char       MNIgcamfile[1000];
 MRI_REGION region;
-char *     m3zfile = "talairach.m3z";
+const char *m3zfile = "talairach.m3z";
 
-double  angles[3]   = {0, 0, 0};
-MATRIX *Mrot        = nullptr;
-double  xyztrans[3] = {0, 0, 0};
-MATRIX *Mtrans      = nullptr;
-double  shear[3]    = {0, 0, 0};
-MATRIX *Mshear      = nullptr;
+double angles[3] = {0,0,0};
+MATRIX *Mrot = NULL;
+double xyztrans[3] = {0,0,0};
+MATRIX *Mtrans = NULL;
+double shear[3] = {0,0,0};
+MATRIX *Mshear = NULL;
 
-char *SegRegCostFile = nullptr;
-char *fspec;
-MRI * regseg;
-int   CostOnly     = 0;
-char *RegFileFinal = nullptr;
+char *SegRegCostFile = NULL;
+char  *fspec;
+MRI *regseg;
+int CostOnly = 0;
+char *RegFileFinal=NULL;
 
-int    SynthSeed = -1;
-int    synth     = 0;
-int    DoCrop    = 0;
+int SynthSeed = -1;
+int synth = 0;
+int DoCrop = 0;
 double CropScale = 0;
 
 char *DispFile = nullptr;
@@ -589,21 +589,20 @@ int    SliceReverse   = 0;
 int    SliceBias      = 0;
 double SliceBiasAlpha = 1.0;
 
-int   useold     = 1;
-MRI * vsm        = nullptr;
-char *vsmvolfile = nullptr;
+int useold = 1;
+MRI *vsm = NULL;
+char *vsmvolfile=NULL;
 
-int    defM3zPath     = 1; // use deafult path to the m3z file
-int    TargMNI152     = 0;
-int    keepprecision  = 0;
-int    DoFill         = 0;
-int    DoFillConserve = 0;
-int    FillUpsample   = 2;
-MRI *  MRIvol2volGCAM(MRI *src, LTA *srclta, GCA_MORPH *gcam, LTA *dstlta,
-                      MRI *vsm, int sample_type, MRI *dst);
-int    DoMultiply    = 0;
-double MultiplyVal   = 0;
-int    DownSample[3] = {0, 0, 0}; // downsample source
+int defM3zPath = 1; // use default path to the m3z file
+int TargMNI152 = 0;
+int keepprecision = 0;
+int DoFill=0;
+int DoFillConserve=0;
+int FillUpsample=2;
+MRI *MRIvol2volGCAM(MRI *src, LTA *srclta, GCA_MORPH *gcam, LTA *dstlta, MRI *vsm, int sample_type, MRI *dst);
+int DoMultiply=0;
+double MultiplyVal=0;
+int DownSample[3] = {0,0,0}; // downsample source
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
@@ -2388,12 +2387,10 @@ static int nth_is_arg(int nargc, char **argv, int nth) {
   return a 1 if they match (ignoring case), a zero otherwise. If
   n=0, then do a full comparison.
   ------------------------------------------------------------*/
-static int istringnmatch(char *str1, char *str2, int n) {
-  if (n > 0 && !strncasecmp(str1, str2, n))
-    return (1);
-  if (n <= 0 && !strcasecmp(str1, str2))
-    return (1);
-  return (0);
+static int istringnmatch(const char *str1, const char *str2, int n) {
+  if (n > 0  && ! strncasecmp(str1,str2,n)) return(1);
+  if (n <= 0 && ! strcasecmp(str1,str2)) return(1);
+  return(0);
 }
 static MATRIX *LoadRtal(int talres) {
   char *  FSH;

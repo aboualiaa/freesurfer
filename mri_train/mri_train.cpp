@@ -53,33 +53,40 @@ static int    nlong = 0;
 static char * long_names[MAX_LONG];
 static double long_times[MAX_LONG];
 
-static int   nvols               = 0;
-static char *vol_names[MAX_VOLS] = {"norm.mgz"};
+static int nvols = 0 ;
+static const char *vol_names[MAX_VOLS] = 
+{
+  "norm.mgz"
+} ;
 
-static char *seg_name = "wmsa/wmsa.mgz";
+static const char *seg_name = "wmsa/wmsa.mgz" ;
 
-static char *classify_name = nullptr;
-static char *aseg_name     = "aseg.mgz";
+static char *classify_name = NULL ;
+static const char *aseg_name = "aseg.mgz" ;
 
-static char     sdir[STRLEN] = "";
-static RF_PARMS rf_parms;
-static char *   wmsa_class_names[] = {
-    "NOT WM", "WMSA 0", "WMSA 1", "WMSA 2", "WMSA 3",
-    "WMSA 4", "WMSA 5", "WMSA 6", "WMSA 7",
-};
+static char sdir[STRLEN] = "" ;
+static RF_PARMS rf_parms ;
+static const char *wmsa_class_names[] =
+{
+  "NOT WM",
+  "WMSA 0",
+  "WMSA 1",
+  "WMSA 2",
+  "WMSA 3",
+  "WMSA 4",
+  "WMSA 5",
+  "WMSA 6",
+  "WMSA 7",
+} ;
 #if 0
 static int nwmsa_classes = sizeof(wmsa_class_names) / sizeof(wmsa_class_names[0]);
 #endif
 
-static RANDOM_FOREST *train_rforest(char *training_file_name, RF_PARMS *parms,
-                                    int wsize, int nlong, char **long_names,
-                                    int nvols, char **vol_names, char *sdir,
-                                    char *seg_name, double *paccuracy);
+static RANDOM_FOREST *train_rforest(const char *training_file_name, RF_PARMS *parms, int wsize, int nlong, char **long_names, int nvols, const char **vol_names, const char *sdir, const char *seg_name, double *paccuracy) ;
 
-static int classify_subjects(RANDOM_FOREST *rf, char *training_file_name,
-                             int wsize, int nlong, char **long_names, int nvols,
-                             char **vol_names, char *sdir, char *seg_name,
-                             char *classify_name);
+static int classify_subjects(RANDOM_FOREST *rf, const char *training_file_name, int wsize, int nlong, 
+				char **long_names, int nvols, const char **vol_names, const char *sdir, 
+				const char *seg_name, const char *classify_name);
 
 int main(int argc, char *argv[]) {
   MRIC *         mric;
@@ -428,18 +435,19 @@ remove_wmsa_voxels(MRI *mri_mask_src, MRI *mri_mask_dst, MRI **mri_long, int nlo
 }
 #endif
 
-static MRI *make_mask_from_segmentation(char *sdir, char *subject,
-                                        char **long_names, int nlong,
-                                        int min_dist, int max_dist) {
-  MRI *mri_mask, *mri_min_dist, *mri_max_dist, *mri_long_seg[MAX_LONG];
-  int  i, l;
-  char fname[STRLEN];
+static MRI *
+make_mask_from_segmentation(const char *sdir, const char *subject, char **long_names, int nlong, 
+					int min_dist, int max_dist) 
+{
+  MRI *mri_mask, *mri_min_dist, *mri_max_dist, *mri_long_seg[MAX_LONG] ;
+  int i, l ;
+  char fname[STRLEN] ;
 
-  for (l = 0; l < nlong; l++) {
-    sprintf(fname, "%s/%s%s.%s_base/mri/%s", sdir, subject, long_names[l],
-            subject, seg_name);
-    mri_long_seg[l] = MRIread(fname);
-    if (mri_long_seg[l] == nullptr)
+  for (l = 0 ; l < nlong ; l++)
+  {
+    sprintf(fname, "%s/%s%s.%s_base/mri/%s", sdir, subject, long_names[l], subject, seg_name) ;
+    mri_long_seg[l] = MRIread(fname) ;
+    if (mri_long_seg[l] == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load segmentation from %s",
                 Progname, fname);
   }
@@ -468,29 +476,30 @@ static MRI *make_mask_from_segmentation(char *sdir, char *subject,
   return (mri_mask);
 }
 
-#define MIN_WMSA_DIST 1
-#define MAX_WMSA_DIST 2
+#define MIN_WMSA_DIST   1
+#define MAX_WMSA_DIST   2
 
-static RANDOM_FOREST *train_rforest(char *training_file_name, RF_PARMS *parms,
-                                    int wsize, int nlong, char **long_names,
-                                    int nvols, char **vol_names, char *sdir,
-                                    char *seg_name, double *paccuracy) {
-  RANDOM_FOREST *rf;
-  FILE *         fp;
-  double **      training_data;
-  int *          training_classes, x, y, z, x0, y0, z0, xk, yk, zk;
-  int            nsubjects, n, ntraining, l, v, label, whalf, t, tno;
-  char           line[MAX_LINE_LEN], *cp, fname[MAX_LINE_LEN], *subject;
-  MRI *   mri_intensity[MAX_LONG][MAX_VOLS], *mri_int, *mri_training_mask;
-  MATRIX *mX, *mXpinv;
-  VECTOR *vP, *vY;
+static RANDOM_FOREST *
+train_rforest(const char *training_file_name, RF_PARMS *parms, int wsize, int nlong, 
+	      char **long_names, int nvols, const char **vol_names, const char *sdir, 
+	      const char *seg_name, double  *paccuracy)
+{
+  RANDOM_FOREST *rf ;
+  FILE          *fp ;
+  double        **training_data ;
+  int           *training_classes, x, y, z, x0, y0, z0, xk, yk, zk ;
+  int           nsubjects, n, ntraining, l, v, label, whalf, t, tno ;
+  char          line[MAX_LINE_LEN], *cp, fname[MAX_LINE_LEN], *subject ;
+  MRI           *mri_intensity[MAX_LONG][MAX_VOLS],*mri_int,*mri_training_mask;
+  MATRIX        *mX, *mXpinv ;
+  VECTOR        *vP, *vY ;
 
-  mX     = MatrixAlloc(nlong - 1, 2, MATRIX_REAL);
-  vY     = VectorAlloc(nlong - 1, MATRIX_REAL);
-  vP     = VectorAlloc(2, 1); // slope and offset
-  mXpinv = nullptr;
-  for (l = 0; l < nlong - 1; l++)
-    VECTOR_ELT(vY, l + 1) = long_times[l];
+  mX = MatrixAlloc(nlong-1, 2, MATRIX_REAL) ;
+  vY = VectorAlloc(nlong-1, MATRIX_REAL) ;
+  vP = VectorAlloc(2, 1) ;  // slope and offset
+  mXpinv = NULL ;
+  for (l = 0 ; l < nlong-1 ; l++)
+    VECTOR_ELT(vY, l+1) = long_times[l] ;
 
   // use n-1 long intensity volumes to predict wmsa of the nth
   whalf = (wsize - 1) / 2;
@@ -500,9 +509,8 @@ static RANDOM_FOREST *train_rforest(char *training_file_name, RF_PARMS *parms,
   if (nlong > 2)
     parms->nfeatures = wsize * wsize * wsize * (nlong) * (nvols);
   else
-    parms->nfeatures = wsize * wsize * wsize * (nlong - 1) * (nvols);
-  rf = RFalloc(parms->ntrees, parms->nfeatures, nlong + 1, parms->max_depth,
-               wmsa_class_names, parms->nsteps);
+    parms->nfeatures = wsize*wsize*wsize*(nlong-1)*(nvols) ;
+  rf = RFalloc(parms->ntrees, parms->nfeatures, nlong+1, parms->max_depth, const_cast<char**>(wmsa_class_names), parms->nsteps) ;
 
   fp = fopen(training_file_name, "r");
   if (fp == nullptr)
@@ -639,27 +647,27 @@ static RANDOM_FOREST *train_rforest(char *training_file_name, RF_PARMS *parms,
   MatrixFree(&mX);
   return (rf);
 }
-static int classify_subjects(RANDOM_FOREST *rf, char *subject_list_file,
-                             int wsize, int nlong, char **long_names, int nvols,
-                             char **vol_names, char *sdir, char *seg_name,
-                             char *classify_name) {
-  FILE *fp;
-  int   x, y, z, x0, y0, z0, xk, yk, zk, label;
-  int   nsubjects, l, v, whalf, t, classnum;
-  char  line[MAX_LINE_LEN], fname[MAX_LINE_LEN], *subject;
-  MRI * mri_intensity[MAX_LONG][MAX_VOLS], *mri_int, *mri_aseg[MAX_LONG],
-      *mri_labeled;
-  MATRIX *mX, *mXpinv;
-  VECTOR *vP, *vY;
-  double *feature_vec;
+static int
+classify_subjects(RANDOM_FOREST *rf, const char *subject_list_file, int wsize, int nlong, 
+		  char **long_names, int nvols, const char **vol_names, const char *sdir, 
+		  const char *seg_name, const char *classify_name)
+{
+  FILE          *fp ;
+  int           x, y, z, x0, y0, z0, xk, yk, zk, label ;
+  int           nsubjects, l, v, whalf, t, classnum ;
+  char          line[MAX_LINE_LEN], fname[MAX_LINE_LEN], *subject ;
+  MRI           *mri_intensity[MAX_LONG][MAX_VOLS],*mri_int, *mri_aseg[MAX_LONG], *mri_labeled;
+  MATRIX        *mX, *mXpinv ;
+  VECTOR        *vP, *vY ;
+  double        *feature_vec ;
 
-  printf("classifying subjects...\n");
-  mX     = MatrixAlloc(nlong - 1, 2, MATRIX_REAL);
-  vY     = VectorAlloc(nlong - 1, MATRIX_REAL);
-  vP     = VectorAlloc(2, 1); // slope and offset
-  mXpinv = nullptr;
-  for (l = 0; l < nlong - 1; l++)
-    VECTOR_ELT(vY, l + 1) = long_times[l];
+  printf("classifying subjects...\n") ;
+  mX = MatrixAlloc(nlong-1, 2, MATRIX_REAL) ;
+  vY = VectorAlloc(nlong-1, MATRIX_REAL) ;
+  vP = VectorAlloc(2, 1) ;  // slope and offset
+  mXpinv = NULL ;
+  for (l = 0 ; l < nlong-1 ; l++)
+    VECTOR_ELT(vY, l+1) = long_times[l] ;
 
   // use n-1 long intensity volumes to predict wmsa of the nth
   whalf = (wsize - 1) / 2;

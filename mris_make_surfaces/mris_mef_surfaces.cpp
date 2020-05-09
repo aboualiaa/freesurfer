@@ -123,9 +123,10 @@ static int vavgs  = 5;
 static int nwhite = 20 /*5*/;
 static int ngray  = 30 /*45*/;
 
-static int nowhite    = 0;
-static int nbrs       = 2;
-static int write_vals = 0;
+static const char *orig_name = ORIG_NAME ;
+static const char *suffix = "" ;
+static const char *output_suffix = "" ;
+static char *xform_fname = NULL ;
 
 static char *orig_name     = ORIG_NAME;
 static char *suffix        = "";

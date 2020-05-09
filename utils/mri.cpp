@@ -12103,37 +12103,34 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
            "dest_type=%d\n",
            src_min, src_max, N_HIST_BINS, f_low, f_high, dest_type);
     bin_size = (src_max - src_min) / (float)N_HIST_BINS;
+  
+    if (getenv("FS_FORCE_BIN_CHECK") != NULL) {
+      double mn = MRImeanFrameThresh(src, 0, 1e-7);
+      int mn_bin = (int)((mn - src_min) / bin_size);
+      static float bin_threshold = (float)N_HIST_BINS / 5.0;
 
-    double mn            = MRImeanFrameThresh(src, 0, 1e-7);
-    int    mn_bin        = (int)((mn - src_min) / bin_size);
-    float  bin_threshold = (float)N_HIST_BINS / 5.0;
-
-    if (mn_bin < bin_threshold) {
-      float old_bin_size = bin_size;
-      bin_size           = (mn - src_min) / bin_threshold;
-      printf("original bin size %2.2f (max %2.1f) too big for mean/min "
-             "%2.2f/%2.2f, scaling down to %2.2f\n",
-             old_bin_size, src_max, mn, src_min, bin_size);
+      if (mn_bin < bin_threshold) {
+        float old_bin_size = bin_size;
+        bin_size = (mn - src_min) / bin_threshold;
+        printf("MRIchangeType: original bin size %2.2f (max %2.1f) too big for mean/min %2.2f/%2.2f, scaling down to %2.2f\n", old_bin_size, src_max, mn, src_min, bin_size);
+      }
     }
 
-    for (i = 0; i < N_HIST_BINS; i++)
-      hist_bins[i] = 0;
+    for (i = 0; i < N_HIST_BINS; i++) hist_bins[i] = 0;
 
-    fs::mri::new_vox_getter vox_getter =
-        fs::mri::get_typed_new_vox_getter_chunked(src);
-    if (src->ischunked) {
-      for (size_t index{0}; index < src->vox_total; index++) {
-        val = vox_getter(src, index);
-        if (!DZERO(val)) {
-          nonzero++;
-        }
-        bin = (int)((val - src_min) / bin_size);
-        if (bin < 0) {
-          bin = 0;
-        }
-        if (bin >= N_HIST_BINS) {
-          bin = N_HIST_BINS - 1;
-        }
+    for (frame = 0; frame < src->nframes; frame++)
+      for (i = 0; i < src->width; i++)
+        for (j = 0; j < src->height; j++)
+          for (k = 0; k < src->depth; k++) {
+            val = MRIgetVoxVal(src, i, j, k, frame);
+            if (!DZERO(val)) nonzero++;
+            bin = (int)((val - src_min) / bin_size);
+
+            if (bin < 0) bin = 0;
+            if (bin >= N_HIST_BINS) bin = N_HIST_BINS - 1;
+
+            hist_bins[bin]++;
+          }
 
         hist_bins[bin]++;
       }

@@ -1204,8 +1204,10 @@ static double Gx0,
 
 extern void (*powell_iteration_func)(float *p, int nparms);
 
-static void dump_parms(float *p, int nimages, char *name) {
-  int i;
+static void
+dump_parms(float *p, int nimages, const char *name) 
+{
+  int i ;
 
   printf("%s:\n", name);
   printf("image %2.2d: (%2.1f, %2.1f)\n", 0, Gx0, Gy0);

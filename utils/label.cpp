@@ -2106,8 +2106,8 @@ int LabelNormalizeStats(LABEL *area, float norm) {
   MaskSurfLabel() - removes vertices from a label based on the
   value of those vertices in a surface mask.
   -------------------------------------------------------------*/
-LABEL *MaskSurfLabel(LABEL *lbl, MRI *SurfMask, float thresh, char *masksign,
-                     int frame) {
+LABEL *MaskSurfLabel(LABEL *lbl, MRI *SurfMask, float thresh, const char *masksign, int frame)
+{
   LABEL *msklbl;
   int    n, vno, ok, noverlap;
   float  maskval;

@@ -66,24 +66,25 @@ static int  compute_white_matter_density(MRI *mri, MRI *mri_atlas_wm,
 static int  accumulate_white_matter_density(MRI *mri, MRI *mri_mean,
                                             MRI *mri_var);
 static int  add_volume_labels_to_average(MRI *mri, VL ***voxel_labels,
-                                         float resolution, TRANSFORM *transform);
+    float resolution, TRANSFORM *transform);
 
-static int   voxel_to_node(MRI *mri, float resolution, int xv, int yv, int zv,
-                           int *pxn, int *pyn, int *pzn, TRANSFORM *transform);
-static int   voxel_to_node_float(MRI *mri, float resolution, int xv, int yv,
-                                 int zv, float *pxn, float *pyn, float *pzn,
-                                 TRANSFORM *transform);
-static int   node_to_voxel(MRI *mri, float resolution, int xn, int yn, int zn,
-                           int *pxv, int *pyv, int *pzv, TRANSFORM *transform);
-static char *xform_fname = "talairach.lta";
-static MRI * compute_white_matter_statistics(MRI *mri_mean1, MRI *mri_mean2,
-                                             MRI *mri_var1, MRI *mri_var2,
-                                             MRI *mri_stats, int num_class1,
-                                             int num_class2, int stat_type);
-static MRI * compute_voxel_statistics(VL ***voxel_labels_class1,
-                                      VL ***voxel_labels_class2, int width,
-                                      int height, int depth, float resolution,
-                                      int nclass1, int nclass2, MRI *mri_stats);
+static int voxel_to_node(MRI *mri, float resolution, int xv, int yv, int zv,
+                         int *pxn, int *pyn, int *pzn, TRANSFORM *transform) ;
+static int voxel_to_node_float(MRI *mri, float resolution, int xv, int yv, int zv,
+                               float *pxn, float *pyn, float *pzn, TRANSFORM *transform) ;
+static int node_to_voxel(MRI *mri, float resolution, int xn, int yn, int zn,
+                         int *pxv, int *pyv, int *pzv, TRANSFORM *transform) ;
+static const char *xform_fname = "talairach.lta" ;
+static MRI *compute_white_matter_statistics(MRI *mri_mean1, MRI *mri_mean2,
+    MRI *mri_var1, MRI *mri_var2,
+    MRI *mri_stats,
+    int num_class1, int num_class2,
+    int stat_type) ;
+static MRI *compute_voxel_statistics(VL ***voxel_labels_class1,
+                                     VL ***voxel_labels_class2,
+                                     int width, int height,
+                                     int depth, float resolution,
+                                     int nclass1, int nclass2, MRI *mri_stats);
 
 /*-------------------------------- DATA ----------------------------*/
 
@@ -91,13 +92,13 @@ const char *Progname;
 
 static char *read_dir = nullptr;
 
-static char *test_subject = nullptr;
-static char *label_name   = nullptr;
-static char *prefix       = "";
-static char *vl1_name = nullptr, *vl2_name = nullptr;
-static int   output_bfloats = 1;
-static int   bonferroni     = 0;
-static char  subjects_dir[STRLEN];
+static char *test_subject = NULL ;
+static char *label_name = NULL ;
+static const char *prefix = "" ;
+static char *vl1_name = NULL, *vl2_name = NULL ;
+static int output_bfloats = 1 ;
+static int bonferroni = 0 ;
+static char subjects_dir[STRLEN] ;
 
 /*-------------------------------- FUNCTIONS ----------------------------*/
 

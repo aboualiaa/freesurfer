@@ -154,26 +154,26 @@ int            checkoptsonly = 0;
 int            verbose = 1; // print overlap warnings and maxstat overrides
 struct utsname uts;
 
-char         tmpstr[1000];
-char *       subject, *hemi, *SUBJECTS_DIR;
-char *       LabelFiles[1000];
-int          nlabels = 0;
-char *       CTabFile;
-char *       AnnotName = nullptr, *AnnotPath = nullptr;
-MRIS *       mris;
-LABEL *      label;
-COLOR_TABLE *ctab = nullptr, *ctab2 = nullptr;
-MRI *        nhits;
-char *       NHitsFile = nullptr;
-MRI *        maxstat;
-int          maxstatwinner     = 0;
-int          MapUnhitToUnknown = 1;
-char *       labeldir          = nullptr;
-int          labeldirdefault   = 0;
-int          DoLabelThresh     = 0;
-double       LabelThresh       = 0;
-char *       surfname          = "orig";
-int          IndexOffset       = 0;
+char tmpstr[1000];
+char *subject, *hemi, *SUBJECTS_DIR;
+char *LabelFiles[1000];
+int nlabels = 0;
+char *CTabFile;
+char *AnnotName=NULL, *AnnotPath=NULL;
+MRIS *mris;
+LABEL *label;
+COLOR_TABLE *ctab = NULL, *ctab2 = NULL;
+MRI *nhits;
+char *NHitsFile=NULL;
+MRI *maxstat;
+int maxstatwinner=0;
+int MapUnhitToUnknown=1;
+const char *labeldir=NULL;
+int labeldirdefault=0;
+int DoLabelThresh = 0;
+double LabelThresh = 0;
+const char *surfname = "orig";
+int IndexOffset=0;
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
   int nargs, nthlabel, n, vtxno, ano, index, nunhit;

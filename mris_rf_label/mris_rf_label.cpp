@@ -29,35 +29,38 @@
 int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char * Progname;
-static void  usage_exit(int code);
-static char *hemi      = "lh";
-static char *surf_name = "white";
+const char *Progname ;
+static void usage_exit(int code) ;
+static const char *hemi = "lh" ;
+static const char *surf_name = "white" ;
+
+static char sdir[STRLEN] ;
 
 static char sdir[STRLEN];
 
 #define MAX_OVERLAYS 100
 
-static int   ndilates  = 3;
-static int   nbhd_size = 0;
-static MRI * mri_overlays[MAX_OVERLAYS];
-static int   noverlays = 0;
-static char *overlay_names[MAX_OVERLAYS];
+static int ndilates = 3 ;
+static int nbhd_size = 0 ;
+static MRI *mri_overlays[MAX_OVERLAYS] ;
+static int noverlays = 0 ;
+static char *overlay_names[MAX_OVERLAYS] ;
 
-static char *cortex_label_name = "cortex";
-static char *label_name        = "FCD";
+static const char *cortex_label_name = "cortex" ;
+static const char *label_name = "FCD" ;
 
-int main(int argc, char *argv[]) {
-  char **        av, *cp, fname[STRLEN], *subject, *out_fname;
-  int            ac, nargs, msec, minutes, seconds, i, nfeatures, vno;
-  Timer          start;
-  LABEL *        cortex_label, *training_label;
-  RANDOM_FOREST *rf;
-  double *       feature, pval;
-  int            classnum;
-  MRI_SURFACE *  mris;
-  MRI *          mri_labels;
-  VERTEX *       v;
+int
+main(int argc, char *argv[]) {
+  char          **av, *cp, fname[STRLEN], *subject, *out_fname ;
+  int           ac, nargs, msec, minutes, seconds, i, nfeatures, vno ;
+  Timer start ;
+  LABEL         *cortex_label, *training_label ;
+  RANDOM_FOREST *rf ;
+  double        *feature, pval ;
+  int           classnum ;
+  MRI_SURFACE   *mris ;
+  MRI           *mri_labels ;
+  VERTEX        *v ;
 
   nargs = handleVersionOption(argc, argv, "mris_rf_label");
   if (nargs && argc - nargs == 1)

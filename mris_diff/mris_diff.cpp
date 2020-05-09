@@ -75,6 +75,8 @@
 
 // double round(double x);
 #include <sys/utsname.h>
+#include <unistd.h>
+#include <string>
 
 #include "cmdargs.h"
 #include "diag.h"
@@ -423,8 +425,7 @@ int main(int argc, char *argv[]) {
   if (SUBJECTS_DIR2 == nullptr)
     SUBJECTS_DIR2 = SUBJECTS_DIR;
 
-  if (surf1path == nullptr && surfname == nullptr)
-    surfname = "orig";
+  if (surf1path == NULL && surfname == NULL) surfname = const_cast<char*>("orig"); // This is.... nasty
 
   if (surf1path == nullptr) {
     sprintf(tmpstr, "%s/%s/surf/%s.%s", SUBJECTS_DIR1, subject1, hemi,

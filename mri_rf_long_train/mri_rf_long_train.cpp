@@ -47,14 +47,14 @@ static int          insert_label = 0;
 static float scale        = 0;
 static int   force_inputs = 1;
 
-static RFA_PARMS parms;
-static char *    seg_dir = "seg_edited.mgz"; // default name of manual edit file
-static char      T1_name[STRLEN] = "orig";
-static char *    xform_name      = nullptr;
-static float     smooth          = -1;
-static double    TRs[MAX_RFA_INPUTS];
-static double    TEs[MAX_RFA_INPUTS];
-static double    FAs[MAX_RFA_INPUTS];
+static RFA_PARMS parms ;
+static const char *seg_dir = "seg_edited.mgz" ; // default name of manual edit file
+static char T1_name[STRLEN] = "orig" ;
+static char *xform_name = NULL;
+static float smooth = -1 ;
+static double TRs[MAX_RFA_INPUTS] ;
+static double TEs[MAX_RFA_INPUTS] ;
+static double FAs[MAX_RFA_INPUTS] ;
 
 static int ninputs = 1; /* T1 intensity */
 static int navgs   = 0;
@@ -67,15 +67,15 @@ static int do_sanity_check            = 0;
 static int do_fix_badsubjs            = 0;
 static int sanity_check_badsubj_count = 0;
 
-static int single_classifier_flag = 0;
-static int only_nbrs; // only pick voxels that are on borders of a wmsa to train
-static float max_wm_wmsa_ratio = 5.0;
-static int   make_uchar        = 1;
-static char *gca_name          = nullptr;
-static float wm_thresh =
-    .8; // only consider voxels with a prior at least this high
-static int   max_steps                 = 10;
-static char *single_classifier_names[] = {"NOT WMSA", "WMSA", "FUTURE WMSA"};
+static int single_classifier_flag = 0 ;
+static int only_nbrs ;   // only pick voxels that are on borders of a wmsa to train
+static float max_wm_wmsa_ratio = 5.0 ;
+static int make_uchar = 1 ;
+static char *gca_name = NULL ;
+static float wm_thresh = .8 ;  // only consider voxels with a prior at least this high
+static int max_steps = 10 ;
+static const char *single_classifier_names[] = 
+{ "NOT WMSA", "WMSA", "FUTURE WMSA" } ;
 
 #define NCLASSES     3
 #define NOT_WMSA     0
@@ -1149,47 +1149,42 @@ static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) {
 }
 
 static RANDOM_FOREST *
-train_rforest(MRI *      mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS],
-              MRI *      mri_segs[MAX_SUBJECTS][MAX_TIMEPOINTS],
-              TRANSFORM *transforms[MAX_SUBJECTS][MAX_TIMEPOINTS],
-              int nsubjects, GCA *gca, RFA_PARMS *parms, float wm_thresh,
-              int wmsa_whalf, int ntp) {
-  RANDOM_FOREST *rf;
-  int nfeatures, x, y, z, ntraining, n, tvoxel_size, width, height, depth, xt,
-      yt, zt;
-  double     xatlas, yatlas, zatlas;
-  MRI *      mri_in, *mri_seg, *mri_training_voxels, *mri_wmsa_possible;
-  TRANSFORM *transform;
-  double **  training_data;
-  int *      training_classes, i, label, tlabel, nwmsa, nfuture, nnot, correct,
-      label_time1, label_time2;
+train_rforest(MRI *mri_inputs[MAX_SUBJECTS][MAX_TIMEPOINTS], MRI *mri_segs[MAX_SUBJECTS][MAX_TIMEPOINTS], TRANSFORM *transforms[MAX_SUBJECTS][MAX_TIMEPOINTS], 
+	      int nsubjects, GCA *gca, RFA_PARMS *parms, float wm_thresh,
+	      int wmsa_whalf, int ntp) 
+{
+  RANDOM_FOREST  *rf ;
+  int            nfeatures, x, y, z, ntraining, n, tvoxel_size, width, height, depth, xt, yt, zt ;
+  double         xatlas, yatlas, zatlas ;
+  MRI            *mri_in, *mri_seg, *mri_training_voxels, *mri_wmsa_possible ;
+  TRANSFORM      *transform ;
+  double         **training_data ;
+  int            *training_classes, i, label, tlabel, nwmsa, nfuture, nnot, correct, label_time1, label_time2;
 
-  nwmsa = nnot = nfuture = 0;
+  nwmsa = nnot = nfuture = 0 ;
 
-  /*
-    features are:
-    t1 intensity (3 vols)
-    3 priors
-    # of unknown voxels in the nbhd
-    # of neighboring wmsa voxels at t1
-  */
-  nfeatures = parms->wsize * parms->wsize * parms->wsize * parms->nvols + 5;
+/*
+  features are:
+  t1 intensity (3 vols)
+  3 priors
+  # of unknown voxels in the nbhd
+  # of neighboring wmsa voxels at t1
+*/
+  nfeatures = parms->wsize*parms->wsize*parms->wsize*parms->nvols + 5 ; 
 
-  rf = RFalloc(parms->ntrees, nfeatures, NCLASSES, parms->max_depth,
-               single_classifier_names, max_steps);
-  if (rf == nullptr)
-    ErrorExit(ERROR_NOFILE, "%s: could not allocate random forest", Progname);
-  rf->min_step_size = 1;
+  rf = RFalloc(parms->ntrees, nfeatures, NCLASSES, parms->max_depth, const_cast<char**>(single_classifier_names), max_steps) ;
+  if (rf == NULL)
+    ErrorExit(ERROR_NOFILE, "%s: could not allocate random forest", Progname) ;
+  rf->min_step_size = 1 ; 
 
-  tvoxel_size       = 1;
-  width             = (int)ceil((float)mri_segs[0][0]->width / tvoxel_size);
-  height            = (int)ceil((float)mri_segs[0][0]->height / tvoxel_size);
-  depth             = (int)ceil((float)mri_segs[0][0]->depth / tvoxel_size);
-  mri_wmsa_possible = MRIalloc(width, height, depth, MRI_UCHAR);
-  GCAcopyDCToMRI(gca, mri_wmsa_possible);
-  mri_in              = mri_inputs[0][0];
-  mri_training_voxels = MRIallocSequence(mri_in->width, mri_in->height,
-                                         mri_in->depth, MRI_UCHAR, nsubjects);
+  tvoxel_size=1 ;
+  width = (int)ceil((float)mri_segs[0][0]->width/tvoxel_size) ;
+  height = (int)ceil((float)mri_segs[0][0]->height/tvoxel_size) ;
+  depth = (int)ceil((float)mri_segs[0][0]->depth/tvoxel_size) ;
+  mri_wmsa_possible = MRIalloc(width, height, depth, MRI_UCHAR) ;
+  GCAcopyDCToMRI(gca, mri_wmsa_possible) ;
+  mri_in = mri_inputs[0][0] ;
+  mri_training_voxels = MRIallocSequence(mri_in->width,mri_in->height, mri_in->depth,MRI_UCHAR,nsubjects) ;
 
 #if 1
   // update time 1 segmentation based on labels at time1 and time2

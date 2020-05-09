@@ -1717,13 +1717,14 @@ static int MRIfillVolume(MRI *mri_fill, MRI *mri_im, int x_seed, int y_seed,
                          int z_seed, int fill_val);
 static int mriFindBoundingBox(MRI *mri_im);
 MRI *MRIcombineHemispheres(MRI *mri_lh_fill, MRI *mri_rh_fill, MRI *mri_dst,
-                           int wm_lh_x, int wm_lh_y, int wm_lh_z, int wm_rh_x,
-                           int wm_rh_y, int wm_rh_z);
-static MRI *mriReadBinaryProbabilities(char *atlas_name, char *suffix, M3D *m3d,
-                                       char *subject_name, MRI *mri_dst);
-static MRI *mriReadConditionalProbabilities(MRI *mri_T1, char *atlas_name,
-                                            char *suffix, int offset, M3D *m3d,
-                                            MRI *mri_dst);
+                           int wm_lh_x, int wm_lh_y, int wm_lh_z,
+                           int wm_rh_x, int wm_rh_y, int wm_rh_z) ;
+static MRI *mriReadBinaryProbabilities(const char *atlas_name, const char *suffix,
+                                       M3D *m3d, const char *subject_name,
+                                       MRI *mri_dst) ;
+static MRI *mriReadConditionalProbabilities(MRI *mri_T1, const char *atlas_name,
+    const char *suffix, int offset,
+    M3D *m3d, MRI *mri_dst) ;
 static MRI *MRIfillVentricle(MRI *mri_src, MRI *mri_prob, MRI *mri_T1,
                              MRI *mri_dst, float thresh, int out_label,
                              int xmin, int xmax);
@@ -3280,21 +3281,23 @@ static MRI *find_cutting_plane(MRI *mri_tal, double x_tal, double y_tal,
                                int *pyv, int *pzv, int seed_set,
                                const LTA *lta) {
   // here is the limitation on the voxsize being up to .5 mm
-  MRI *mri_slices[MAX_SLICES * 2], *mri_filled[MAX_SLICES * 2],
-      *mri_cut = nullptr, *mri_cut_vol;
-  double dx, dy, dz, x, y, z, aspect, MIN_ASPECT, MAX_ASPECT,
-      aspects[MAX_SLICES * 2];
-  int slice, offset, area[MAX_SLICES * 2], min_area0, min_slice, xo, yo, found,
-      xv, yv, zv, x0, y0, z0, xi, yi, zi, MIN_AREA, MAX_AREA, done, where;
-  FILE *     fp = nullptr; /* for logging pons and cc statistics */
-  char       fname[STRLEN], *name;
-  MRI_REGION region;
-  double     voxsize;
-  int        min_area, max_area, max_slices;
-  int        half_slices, cut_width, half_cut, search_step, max_offset;
-  int        slice_size;
-  int        xoo = 0;
-  int        yoo = 0;
+  MRI        *mri_slices[MAX_SLICES*2], *mri_filled[MAX_SLICES*2],
+             *mri_cut=NULL, *mri_cut_vol ;
+  double     dx, dy, dz, x, y, z, aspect,MIN_ASPECT,MAX_ASPECT,
+             aspects[MAX_SLICES*2] ;
+  int        slice, offset, area[MAX_SLICES*2],
+             min_area0, min_slice,xo,yo,found,
+             xv, yv, zv, x0, y0, z0, xi, yi, zi, MIN_AREA, MAX_AREA, done, where ;
+  FILE       *fp = NULL ;   /* for logging pons and cc statistics */
+  char       fname[STRLEN];
+  const char *name ;
+  MRI_REGION region ;
+  double    voxsize;
+  int min_area, max_area, max_slices;
+  int half_slices, cut_width, half_cut, search_step, max_offset;
+  int slice_size;
+  int xoo=0;
+  int yoo=0;
 
   voxsize = findMinSize(mri_tal);
 
@@ -4690,11 +4693,12 @@ MRI *MRIcombineHemispheres(MRI *mri_lh, MRI *mri_rh, MRI *mri_dst, int wm_lh_x,
   return (mri_dst);
 }
 
-static MRI *mriReadConditionalProbabilities(MRI *mri_T1, char *atlas_name,
-                                            char *suffix, int offset, M3D *m3d,
-                                            MRI *mri_dst) {
-  MRI * mri_mean, *mri_std, *mri_tmp;
-  char *mri_dir, fname[STRLEN];
+static MRI *
+mriReadConditionalProbabilities(MRI *mri_T1, const char *atlas_name, const char *suffix,
+                                int offset, M3D *m3d, MRI *mri_dst)
+{
+  MRI  *mri_mean, *mri_std, *mri_tmp ;
+  char *mri_dir, fname[STRLEN] ;
 
   mri_dir = getenv("FREESURFER_HOME");
   if (!mri_dir)
@@ -4737,10 +4741,13 @@ static MRI *mriReadConditionalProbabilities(MRI *mri_T1, char *atlas_name,
   return (mri_dst);
 }
 
-static MRI *mriReadBinaryProbabilities(char *atlas_name, char *suffix, M3D *m3d,
-                                       char *subject_name, MRI *mri_dst) {
-  MRI *mri_priors, *mri_T1, *mri_on_conditional, *mri_off_conditional, *mri_tmp;
-  char *mri_dir, *subjects_dir, fname[STRLEN];
+static MRI *
+mriReadBinaryProbabilities(const char *atlas_name, const char *suffix, M3D *m3d,
+                           const char *subject_name, MRI *mri_dst)
+{
+  MRI  *mri_priors, *mri_T1, *mri_on_conditional,
+       *mri_off_conditional, *mri_tmp ;
+  char *mri_dir, *subjects_dir, fname[STRLEN] ;
 
   mri_dir = getenv("FREESURFER_HOME");
   if (!mri_dir)

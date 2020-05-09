@@ -31,17 +31,17 @@
 
 typedef struct {
   char *subject;
-  int   USF; // used internally
-  int   OutputUSF;
-  char *apasfile;
-  char *ctxannotfile;
-  int   ctxlhbase, ctxrhbase;
+  int USF; // used internally
+  int OutputUSF; 
+  const char *apasfile;
+  const char *ctxannotfile;
+  int ctxlhbase,ctxrhbase;
   MRIS *lhw, *lhp, *rhw, *rhp;
-  int   KeepHypo;
-  int   KeepCC;
-  int   SubSegWM;
-  char *wmannotfile;
-  int   wmlhbase, wmrhbase;
+  int KeepHypo;
+  int KeepCC;
+  int SubSegWM;
+  const char *wmannotfile;
+  int wmlhbase,wmrhbase;
   float dmax;
   int   nlist, srclist[300], targlist[300];
   MRI * seg;

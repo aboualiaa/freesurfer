@@ -38,11 +38,17 @@ static int do_lh = 1;
 
 static char *surf_name = "white";
 
-int main(int argc, char *argv[]) {
-  char **av, *hemi, fname[STRLEN], *in_aseg_name, *out_aseg_name, *surf_dir;
-  int    ac, nargs, h;
-  MRI_SURFACE *mris;
-  MRI *        mri_aseg;
+static const char *surf_name = "white" ;
+
+int
+main(int argc, char *argv[])
+{
+  char          **av, fname[STRLEN],
+                *in_aseg_name, *out_aseg_name, *surf_dir ;
+  const char* hemi;
+  int           ac, nargs, h ;
+  MRI_SURFACE   *mris ;
+  MRI           *mri_aseg ;
 
   nargs = handleVersionOption(argc, argv, "mri_relabel_hypointensities");
   if (nargs && argc - nargs == 1) {

@@ -28,54 +28,62 @@
 int main(int argc, char *argv[]);
 
 #define INNER_SKULL_OUTER_SKULL_SEPARATION 4
-#define BORDER_VAL                         128
-#define OUTSIDE_BORDER_STEP                16
-#define TARGET_VAL                         (BORDER_VAL - OUTSIDE_BORDER_STEP / 2)
+#define BORDER_VAL           128
+#define OUTSIDE_BORDER_STEP  16
+#define TARGET_VAL           (BORDER_VAL-OUTSIDE_BORDER_STEP/2)
 
-static MRI *pad_volume(MRI_SURFACE *mris, MRI *mri_src, MRI *mri_dst);
+static MRI *pad_volume(MRI_SURFACE *mris, MRI *mri_src, MRI *mri_dst) ;
 
-static int  pad = 40;
-static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
-static MRI *create_brain_volume(MRI *mri_labeled, MRI *mri_brain,
-                                int target_label);
-static MRI *create_skull_volume(MRI *mri_labeled, MRI *mri_brain);
-static MRI *create_skin_volume(MRI *mri_labeled, MRI *mri_brain);
-static int  initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
-                                        int outside);
-static MRI *create_distance_map(MRI *mri_masked, MRI *mri_distance,
-                                int border_val, int outside_border_step);
-static MRI *remove_small_segments(MRI *mri_src, MRI *mri_dst);
+static int pad = 40 ;
+static int  get_option(int argc, char *argv[]) ;
+static void usage_exit(void) ;
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
+static MRI *create_brain_volume(MRI *mri_labeled, 
+                                MRI *mri_brain, 
+                                int target_label) ;
+static MRI *create_skull_volume(MRI *mri_labeled, 
+                                MRI *mri_brain) ;
+static MRI *create_skin_volume(MRI *mri_labeled, 
+                               MRI *mri_brain) ;
+static int initialize_surface_position(MRI_SURFACE *mris, 
+                                       MRI *mri_masked, 
+                                       int outside) ;
+static MRI *create_distance_map(MRI *mri_masked, 
+                                MRI *mri_distance, 
+                                int border_val, 
+                                int outside_border_step) ;
+static MRI *remove_small_segments(MRI  *mri_src, MRI *mri_dst) ;
 
-const char *Progname;
+const char *Progname ;
 
-static INTEGRATION_PARMS parms;
-#define BASE_DT_SCALE 1.0
-static float  base_dt_scale    = BASE_DT_SCALE;
-static int    target_label     = -1;
-static char * suffix           = "";
-static char * output_suffix    = "";
-static double l_tsmooth        = 0.0;
-static double l_surf_repulse   = 5.0;
-static int    smooth           = 5;
-static int    nbrs             = 2;
-static int    ic               = 5;
-static int    inner_skull_only = 0;
-static int    embed            = 0;
+static INTEGRATION_PARMS  parms ;
+#define BASE_DT_SCALE    1.0
+static float base_dt_scale = BASE_DT_SCALE ;
+static int target_label = -1 ;
+static const char *suffix = "" ;
+static const char *output_suffix = "" ;
+static double l_tsmooth = 0.0 ;
+static double l_surf_repulse = 5.0 ;
+static int smooth = 5 ;
+static int nbrs = 2 ;
+static int ic = 5 ;
+static int inner_skull_only = 0;
+static int embed = 0 ;
 
-static float threshold = 0.0;
+static float threshold = 0.0 ;
 
-int main(int argc, char *argv[]) {
-  char **      av, fname[STRLEN], *vol_name, *output_dir, *mdir;
-  int          ac, nargs, msec;
-  MRI_SURFACE *mris;
-  MRI *        mri_labeled, *mri_masked, *mri_masked_smooth, *mri_tmp;
-  MRI *        mri_kernel, *mri_dist;
-  Timer        then;
-  double       l_spring;
+int
+main(int argc, char *argv[])
+{
+  char          **av, fname[STRLEN], *vol_name, *output_dir, *mdir ;
+  int           ac, nargs, msec ;
+  MRI_SURFACE   *mris ;
+  MRI           *mri_labeled, *mri_masked, *mri_masked_smooth, *mri_tmp;
+  MRI           *mri_kernel, *mri_dist ;
+  Timer then ;
+  double        l_spring ;
 
   nargs = handleVersionOption(argc, argv, "mris_shrinkwrap");
   if (nargs && argc - nargs == 1)

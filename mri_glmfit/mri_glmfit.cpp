@@ -592,19 +592,19 @@ int    UseMaskWithSmoothing = 1;
 double ResFWHM;
 
 char voxdumpdir[1000];
-int  voxdump[3];
-int  voxdumpflag = 0;
+int voxdump[3];
+int voxdumpflag = 0;
 
-char *fsgdfile      = nullptr;
-FSGD *fsgd          = nullptr;
-char *gd2mtx_method = "none";
-int   fsgdReScale   = 0;
-int   ReScaleX      = 1;
+char *fsgdfile = NULL;
+FSGD *fsgd=NULL;
+const char  *gd2mtx_method = "none";
+int fsgdReScale = 0; 
+int ReScaleX = 1; 
 
-int    nSelfReg = 0;
-int    crsSelfReg[100][3];
-char * SUBJECTS_DIR;
-int    cmax, rmax, smax;
+int nSelfReg = 0;
+int crsSelfReg[100][3];
+char *SUBJECTS_DIR;
+int cmax, rmax, smax;
 double Fmax, sigmax;
 
 int     pcaSave = 0;
@@ -670,8 +670,8 @@ double asl1val = 1, asl2val = 0;
 
 int useqa = 0;
 
-char *format   = "mgh";
-char *surfname = "white";
+const char *format = "mgh";
+const char *surfname = "white";
 
 int SubSample    = 0;
 int SubSampStart = 0;
@@ -746,9 +746,9 @@ int main(int argc, char **argv) {
   MATRIX *wvect = nullptr, *Mtmp = nullptr, *Xselfreg = nullptr, *Ex = nullptr,
          *XgNew = nullptr;
   MATRIX *Ct, *CCt;
-  FILE *  fp;
-  double  Ccond, dtmp, threshadj, eff;
-  char *  tmpstr2 = nullptr;
+  FILE *fp;
+  double Ccond, dtmp, threshadj, eff;
+  const char *tmpstr2=NULL;
 
   eresfwhm        = -1;
   csd             = CSDalloc();

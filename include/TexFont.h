@@ -65,9 +65,10 @@ typedef struct {
   TexGlyphVertexInfo **lut;
 } TexFont;
 
-extern char *txfErrorString();
+extern const char *txfErrorString(void);
 
-extern TexFont *txfLoadFont(char *filename);
+extern TexFont *txfLoadFont(
+    const char *filename);
 
 extern void txfUnloadFont(TexFont *txf);
 

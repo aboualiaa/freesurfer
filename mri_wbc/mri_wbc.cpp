@@ -1293,16 +1293,17 @@ int WBCnframes(WBC *wbc) {
 
 WBC *WBCtestSynth(WBC *wbc) {
   FSENV *fsenv;
-  double x0, y0, z0, x, y, z, dx, dy, dz, d, volres, *wf, dmax;
-  int    nshort, nlong, t, vno, hemi, voldim, nframes, c0, r0, s0, c2;
-  char   tmpstr[2000], *hemistr;
-  MRIS * surf, *surf2;
-  MRI *  func, *mask;
+  double x0,y0,z0,x,y,z,dx,dy,dz,d,volres,*wf,dmax;
+  int nshort,nlong,t,vno,hemi,voldim,nframes,c0,r0,s0,c2;
+  char tmpstr[2000];
+  const char *hemistr;
+  MRIS *surf,*surf2;
+  MRI *func,*mask;
 
-  fsenv        = FSENVgetenv();
-  volres       = wbc->wbcsynth->volres;
-  voldim       = wbc->wbcsynth->voldim;
-  nframes      = wbc->wbcsynth->nframes;
+  fsenv = FSENVgetenv();
+  volres = wbc->wbcsynth->volres;
+  voldim = wbc->wbcsynth->voldim;
+  nframes = wbc->wbcsynth->nframes;
   wbc->nframes = nframes;
 
   if (wbc->wbcsynth->ForceFail)

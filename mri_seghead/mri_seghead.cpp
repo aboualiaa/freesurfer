@@ -42,10 +42,10 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int  isflag(char *flag);
+static int  isflag(const char *flag);
 static int  singledash(char *flag);
-static int  stringmatch(char *str1, char *str2);
-int         main(int argc, char *argv[]);
+static int  stringmatch(const char *str1, const char *str2);
+int main(int argc, char *argv[]) ;
 
 const char *Progname = NULL;
 int         debug    = 0;
@@ -676,7 +676,7 @@ static int singledash(char *flag) {
   return (0);
 }
 /*---------------------------------------------------------------*/
-static int isflag(char *flag) {
+static int isflag(const char *flag) {
   int len;
   len = strlen(flag);
   if (len < 2)
@@ -686,10 +686,9 @@ static int isflag(char *flag) {
   return (0);
 }
 /*------------------------------------------------------------*/
-static int stringmatch(char *str1, char *str2) {
-  if (!strcmp(str1, str2))
-    return (1);
-  return (0);
+static int stringmatch(const char *str1, const char *str2) {
+  if (! strcmp(str1,str2)) return(1);
+  return(0);
 }
 
 int MakeSkullSurface(char *subject, double *params, char *innername,

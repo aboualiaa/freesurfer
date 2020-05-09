@@ -65,154 +65,144 @@ typedef struct {
   int    which_border;
   double wm_val;
   double infra_granular_val;
-  double supra_granular_val;
-  double stria_val;
-  double outside_val;
-  int    error_type;
-  char   base_name[STRLEN];
-  double ncorr_weight; // for linear combinations
-  int    use_max_grad;
-  int    use_intensity; // position surfaces to intensity targets
-  double max_wm_intensity_offset;
-  double max_sg_intensity_offset;
-  double max_ig_intensity_offset;
-  int    contrast_type;
-  double outside_width;
-  double stria_width;
-  double inside_width;
-  double max_dist;
-  double sigma;           // for gradient calculations
-  double intensity_sigma; // for priors on white matter intensity
-  double max_sg_width;
-  double max_ig_width;
-  double min_sg_width;
-  double min_ig_width;
-  int    fix_intensities;
-  int    dark_csf; // for ex vivo scans
-  double step;
-  int    try_stria_model;
-  int    use_prior;
-  double max_stria_intensity_offset;
-  int    search_multiple_angles;
-} DEFORMATION_PARMS, DP;
+  double supra_granular_val ;
+  double stria_val ;
+  double outside_val ;
+  int    error_type ;
+  char   base_name[STRLEN] ;
+  double ncorr_weight ;   // for linear combinations
+  int    use_max_grad ;
+  int    use_intensity ;  // position surfaces to intensity targets
+  double max_wm_intensity_offset ;
+  double max_sg_intensity_offset ;
+  double max_ig_intensity_offset ;
+  int    contrast_type ;
+  double outside_width ;
+  double stria_width ;
+  double inside_width ;
+  double max_dist ;
+  double sigma ; // for gradient calculations
+  double intensity_sigma ;  // for priors on white matter intensity
+  double max_sg_width ;
+  double max_ig_width ;
+  double min_sg_width ;
+  double min_ig_width ;
+  int    fix_intensities ;
+  int    dark_csf ;  // for ex vivo scans
+  double step ;
+  int    try_stria_model ;
+  int    use_prior ;
+  double max_stria_intensity_offset ;
+  int    search_multiple_angles ;
+} DEFORMATION_PARMS, DP ;
 
-#define WM_INTENSITY_OFFSET 100
-#define SG_INTENSITY_OFFSET 101
-#define IG_INTENSITY_OFFSET 102
-#define RMS                 103
-#define WM_INTENSITY        104
-#define SG_INTENSITY        105
-#define IG_INTENSITY        106
-#define IG_WM_RATIO         107
-#define SG_WM_RATIO         108
-#define SG_IG_RATIO         109
-#define DEEP_RATIO          110
+#define WM_INTENSITY_OFFSET   100
+#define SG_INTENSITY_OFFSET   101
+#define IG_INTENSITY_OFFSET   102
+#define RMS                   103
+#define WM_INTENSITY          104
+#define SG_INTENSITY          105
+#define IG_INTENSITY          106
+#define IG_WM_RATIO           107
+#define SG_WM_RATIO           108
+#define SG_IG_RATIO           109
+#define DEEP_RATIO            110
 
-#define ERROR_FUNC_L1        0
-#define ERROR_FUNC_L2        1
-#define ERROR_FUNC_NORM_CORR 2
-#define ERROR_FUNC_NCORR_L1  3
+#define ERROR_FUNC_L1         0
+#define ERROR_FUNC_L2         1
+#define ERROR_FUNC_NORM_CORR  2
+#define ERROR_FUNC_NCORR_L1   3
 
-#define MAX_DIST            5
-#define MAX_INTENSITY_STEPS 5
+#define MAX_DIST              5
+#define MAX_INTENSITY_STEPS   5
 
-// these shouldn't overlap with the ones like WHITE_VERTICES defined in
-// mrisurf.h
-#define PIAL_TARGETS    100
-#define WHITE_TARGETS   101
-#define LAYERIV_TARGETS 102
-#define SURFACE_NORMALS 103
+// these shouldn't overlap with the ones like WHITE_VERTICES defined in mrisurf.h
+#define PIAL_TARGETS          100
+#define WHITE_TARGETS         101
+#define LAYERIV_TARGETS       102
+#define SURFACE_NORMALS       103
 
-static int   pad_voxels = 2;
-static float threshold  = 0;
-static int   white_only = 0;
+static int pad_voxels = 2 ;
+static float threshold = 0 ;
+static int white_only = 0 ;
 
-static int extract_image_intensities(MRI_SURFACE *mris, MRI *mri,
-                                     double in_dist, double out_dist, double x0,
-                                     double y0, double z0, double nx, double ny,
-                                     double nz, double step, int tsteps,
-                                     double *intensity_profile, char *fname);
-static int rip_dark_vertices(MRI_SURFACE *mris, MRI *mri, float threshold);
-static int rip_vertices_with_no_faces(MRI_SURFACE *mris);
-// static int filter_coords(MRI_SURFACE *mris, int filter_type)  ;
-static int vp_copy_found_from_marked(MRI_SURFACE *mris);
-// static int vp_copy_found_to_marked(MRI_SURFACE *mris) ;
-static int dilate_not_found(MRI_SURFACE *mris, int niter);
-static int compute_laminar_ratios(MRI_SURFACE *mris, MRI *mri, DP *dp);
-static int compute_distances_from_positions(MRI_SURFACE *mris);
-static int filter_vals(MRI_SURFACE *mris, int filter_type);
-static int filter_distances(MRI_SURFACE *mris, int filter_type);
-// static int compute_normal(MRI_SURFACE *mris, int vno, VERTEX_PARMS *vp) ;
-static int    compute_normals(MRI_SURFACE *mris, VERTEX_PARMS *vp);
-static int    compare_doubles(const void *v1, const void *v2);
-static double compute_optimal_intensity(double *iprofile, int i0, int i1,
-                                        int filter_type);
-static int    compute_best_neighborhood_profile(MRI_SURFACE *mris, MRI *mri,
-                                                int vno, DP *dp);
-static double find_min_rms(
-    double *kernel, double *intensity_profile, int profile_len, char *fname,
-    DP *dp, double wm_dist, double wm_offset, double min_gm_offset,
-    double max_gm_offset, double gm_offset_step, int which_profile, int wm_len,
-    int ig_len, int sg_len,
-    double (*profile_error_func)(double *kernel, double *intensity_profile,
-                                 int nsamples, char *fname, double step,
-                                 double wm_dist, double *errors));
-static LABEL *label_v1(MRI_SURFACE *mris, MRI *mri, DP *dp);
-static LABEL *vp_make_v1_label(MRI_SURFACE *mris, double thresh);
-static double vp_mean(MRI_SURFACE *mris, int which);
-static int    vp_set(MRI_SURFACE *mris, int which, double val);
-static int    vp_copy_to_surface_vals(MRI_SURFACE *mris, int which, DP *dp);
-static int    vp_copy_from_surface_vals(MRI_SURFACE *mris, int which, DP *dp);
-static int    vp_copy_dist_to_surface_vals(MRI_SURFACE *mris, int which);
-static int    vp_copy_to_surface_dist(MRI_SURFACE *mris, int which);
-static int    vp_copy_from_surface_dist(MRI_SURFACE *mris, int which);
-static int    vp_copy_from_surface(MRI_SURFACE *mris, int which_src,
-                                   int which_dst);
-static int vp_copy_to_surface(MRI_SURFACE *mris, int which_src, int which_dst);
-static int is_outlier(MRI_SURFACE *mris, int vno, int which);
-static int recompute_target_locations(MRI_SURFACE *mris, MRI *mri_white,
-                                      MRI *mri_l4, MRI *mri_pial, DP *dp);
+static int extract_image_intensities(MRI_SURFACE *mris, MRI *mri, double in_dist, 
+                                     double out_dist, double x0, double y0, double z0,
+                                     double nx, double ny, double nz, double step, 
+                                     int tsteps,double *intensity_profile, const char *fname);
+static int rip_dark_vertices(MRI_SURFACE *mris, MRI *mri, float threshold) ;
+static int rip_vertices_with_no_faces(MRI_SURFACE *mris) ;
+//static int filter_coords(MRI_SURFACE *mris, int filter_type)  ;
+static int vp_copy_found_from_marked(MRI_SURFACE *mris) ;
+//static int vp_copy_found_to_marked(MRI_SURFACE *mris) ;
+static int dilate_not_found(MRI_SURFACE *mris, int niter)  ;
+static int compute_laminar_ratios(MRI_SURFACE *mris, MRI *mri, DP *dp) ;
+static int compute_distances_from_positions(MRI_SURFACE *mris) ;
+static int filter_vals(MRI_SURFACE *mris, int filter_type)  ;
+static int filter_distances(MRI_SURFACE *mris, int filter_type)  ;
+//static int compute_normal(MRI_SURFACE *mris, int vno, VERTEX_PARMS *vp) ;
+static int compute_normals(MRI_SURFACE *mris, VERTEX_PARMS *vp) ;
+static int compare_doubles(const void *v1, const void *v2);
+static double compute_optimal_intensity(double *iprofile, int i0, int i1, int filter_type) ;
+static int compute_best_neighborhood_profile(MRI_SURFACE *mris, MRI *mri,
+                                             int vno, 
+                                             DP *dp) ;
+static double find_min_rms(double *kernel, double *intensity_profile, int profile_len, 
+                           const char *fname, DP *dp, double wm_dist, double wm_offset, 
+                           double min_gm_offset, double max_gm_offset, double gm_offset_step, 
+                           int which_profile, int wm_len, int ig_len, int sg_len,   
+                           double (*profile_error_func)(double *kernel, double *intensity_profile, 
+                                                        int nsamples, const char *fname,double step, 
+                                                        double wm_dist, double *errors));
+static LABEL *label_v1(MRI_SURFACE *mris, MRI *mri, DP *dp) ;
+static LABEL *vp_make_v1_label(MRI_SURFACE *mris, double thresh) ;
+static double vp_mean(MRI_SURFACE *mris, int which) ;
+static int vp_set(MRI_SURFACE *mris, int which, double val) ;
+static int vp_copy_to_surface_vals(MRI_SURFACE *mris, int which, DP *dp) ;
+static int vp_copy_from_surface_vals(MRI_SURFACE *mris, int which, DP *dp) ;
+static int vp_copy_dist_to_surface_vals(MRI_SURFACE *mris, int which) ;
+static int vp_copy_to_surface_dist(MRI_SURFACE *mris, int which) ;
+static int vp_copy_from_surface_dist(MRI_SURFACE *mris, int which) ;
+static int vp_copy_from_surface(MRI_SURFACE *mris, int which_src, int which_dst) ;
+static int vp_copy_to_surface(MRI_SURFACE *mris, int which_src, int which_dst) ;
+static int is_outlier(MRI_SURFACE *mris, int vno, int which) ;
+static int recompute_target_locations(MRI_SURFACE *mris, MRI *mri_white, MRI *mri_l4, 
+                                      MRI *mri_pial, DP *dp) ;
 static double find_optimal_locations(MRI_SURFACE *mris, MRI *mri, int vno,
-                                     double max_inwards, double max_outwards,
-                                     DP *dp, VP *vp, int skip);
-static double compute_linear_combination(double *kernel, double *iprofile,
-                                         int nsamples, char *plot_fname,
-                                         double step, double wm_dist,
+                                     double max_inwards, double max_outwards, DP *dp,
+                                     VP *vp, int skip);
+static double compute_linear_combination(double *kernel, double *iprofile, int nsamples, 
+                                         const char *plot_fname, double step, double wm_dist,
                                          double *errors);
-static double compute_profile_L1(double *kernel, double *iprofile, int nsamples,
-                                 char *plot_fname, double step, double wm_dist,
-                                 double *errors);
-static double compute_profile_L2(double *kernel, double *iprofile, int nsamples,
-                                 char *plot_fname, double step, double wm_dist,
-                                 double *errors);
-static double compute_profile_norm_corr(double *kernel, double *iprofile,
-                                        int nsamples, char *plot_fname,
-                                        double step, double wm_dist,
-                                        double *errors);
-static int
-       construct_model_profile(double *kernel, DP *dp, double wm_intensity_offset,
-                               double ig_intensity_offset, double sg_intensity_offset,
-                               double stria_intensity_offset, int inside_len,
-                               int infra_granular_len, int supra_granular_len,
-                               int out_len, int which);
-double MRISnormalIntensityGradient(MRI_SURFACE *mris, MRI *mri, double xr,
-                                   double yr, double zr, double nx, double ny,
-                                   double zn, double sigma);
-static double compute_targets(MRI_SURFACE *mris, MRI *mri, double sigma, DP *dp,
-                              int skip);
-static int compute_intensity_offsets(MRI_SURFACE *mris, MRI *mri, MRI *mri_dist,
-                                     DP *dp);
+static double compute_profile_L1(double *kernel, double *iprofile, int nsamples, 
+                                 const char *plot_fname, double step, double wm_dist, double *errors);
+static double compute_profile_L2(double *kernel, double *iprofile, int nsamples, 
+                                 const char *plot_fname, double step, double wm_dist, double *errors);
+static double compute_profile_norm_corr(double *kernel, double *iprofile, int nsamples, 
+                                        const char *plot_fname, double step, double wm_dist, double *errors);
+static int construct_model_profile(double *kernel, DP *dp, 
+                                   double wm_intensity_offset, double ig_intensity_offset, 
+                                   double sg_intensity_offset, 
+                                   double stria_intensity_offset, int inside_len,
+                                   int infra_granular_len,int supra_granular_len,int out_len,
+                                   int which);
+double MRISnormalIntensityGradient(MRI_SURFACE *mris, MRI *mri, 
+                                   double xr, double yr, double zr, double nx, double ny, 
+                                   double zn, double sigma) ;
+static double compute_targets(MRI_SURFACE *mris, MRI *mri, double sigma, DP *dp, int skip);
+static int compute_intensity_offsets(MRI_SURFACE *mris, MRI *mri, MRI *mri_dist, DP *dp);
 
-static INTEGRATION_PARMS parms;
-int                      main(int argc, char *argv[]);
-static int               get_option(int argc, char *argv[]);
-static int               fill_aseg(MRI *mri, char *aseg_fname, DP *dp);
+static INTEGRATION_PARMS parms ;
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
+static int fill_aseg(MRI *mri, char *aseg_fname, DP *dp) ;
 
-static int   use_partial_volume_model = 1;
-static int   filter_type              = FILTER_MEAN;
-static char *read_name                = nullptr;
-const char * Progname;
-static void  usage_exit(int code);
+
+static int use_partial_volume_model = 1 ;
+static int filter_type = FILTER_MEAN ;
+static char *read_name = NULL ;
+const char *Progname ;
+static void usage_exit(int code) ;
 
 #define T1 0
 #define T2 1
@@ -1870,33 +1860,28 @@ double MRISnormalIntensityGradient(MRI_SURFACE *mris, MRI *mri, double xr,
   return ((val_outside - val_inside) / (2 * sigma_mm));
 }
 
-static int extract_image_intensities(MRI_SURFACE *mris, MRI *mri,
-                                     double in_dist, double out_dist, double x0,
-                                     double y0, double z0, double nx, double ny,
-                                     double nz, double step, int tsteps,
-                                     double *intensity_profile, char *fname) {
-  double avg_val, val, x, y, z, xv, yv, zv, dx, dy, dz, dist, e1x, e1y, e1z,
-      e2x, e2y, e2z, xt, yt, zt, norm, dxn, dyn, dzn, vstep;
-  int   i, nsamples, u, v, retval = NO_ERROR;
-  FILE *fp = nullptr;
+static int
+extract_image_intensities(MRI_SURFACE *mris, MRI *mri, double in_dist, double out_dist, 
+                          double x0, double y0, double z0,
+                          double nx, double ny, double nz, double step, int tsteps,
+                          double *intensity_profile, const char *fname)
+{
+  double   avg_val, val, x, y, z, xv, yv, zv, dx, dy, dz, dist, e1x, e1y, e1z, e2x, e2y, e2z, xt, yt,zt,
+    norm, dxn, dyn, dzn, vstep ;
+  int      i, nsamples, u, v, retval = NO_ERROR ;
+  FILE     *fp = NULL ;
 
-  if (fname != nullptr)
-    fp = fopen(fname, "w");
+  if (fname != NULL)
+    fp = fopen(fname, "w") ;
 
-  vstep = step / mri->xsize; // voxels/step
-  x     = x0 - in_dist * nx;
-  y     = y0 - in_dist * ny;
-  z     = z0 - in_dist * nz;
-  MRISsurfaceRASToVoxelCached(mris, mri, x, y, z, &xv, &yv, &zv);
-  dx = nx * step;
-  dy = ny * step;
-  dz = nz * step;
-  MRISsurfaceRASToVoxelCached(mris, mri, x + dx, y + dy, z + dz, &dx, &dy, &dz);
-  dx -= xv;
-  dy -= yv;
-  dz -= zv; // (dx, dy, dz) is now (nx, ny, nz) in voxel coords
-  nsamples = nint((out_dist + in_dist) / step);
-  norm     = sqrt(dx * dx + dy * dy + dz * dz);
+  vstep = step / mri->xsize ;  // voxels/step
+  x = x0-in_dist*nx ;  y = y0-in_dist*ny ;  z = z0-in_dist*nz ; 
+  MRISsurfaceRASToVoxelCached(mris, mri, x, y, z, &xv, &yv, &zv) ;
+  dx = nx*step ; dy = ny*step ; dz = nz*step ;
+  MRISsurfaceRASToVoxelCached(mris, mri, x+dx, y+dy, z+dz, &dx, &dy, &dz) ;
+  dx -= xv ; dy -= yv ; dz -= zv ;  // (dx, dy, dz) is now (nx, ny, nz) in voxel coords
+  nsamples = nint((out_dist + in_dist)/step) ;
+  norm = sqrt(dx*dx + dy*dy + dz*dz) ; 
   if (FZERO(norm))
     DiagBreak();
   dxn = dx / norm;
@@ -2154,22 +2139,19 @@ static int smooth_profile(double *src_intensity_profile,
   return (NO_ERROR);
 }
 
-static int mark_sg_index_okay_dark_csf(double *orig_intensity_profile,
-                                       int *sg_index_okay, double step, int len,
-                                       char *fname, int current_index,
-                                       double outside_val, int min_wm_index,
-                                       int *sg_indices, int *pmax_len,
-                                       int current_sg, int max_out) {
-  int    index, i, j, min_index, max_index, pv_len;
-  double valley_val, peak_val, previous_peak_val,
-      intensity_profile[MAX_PROFILE_LEN];
-  int   valley_index, peak_index, previous_peak, whalf;
-  FILE *fp = nullptr;
+static int
+mark_sg_index_okay_dark_csf(double *orig_intensity_profile, int *sg_index_okay, double step, int len, const char *fname, int current_index, double outside_val, int min_wm_index, int *sg_indices, int *pmax_len, int current_sg,
+                   int max_out)
+{
+  int    index, i, j, min_index, max_index, pv_len ;
+  double valley_val, peak_val, previous_peak_val, intensity_profile[MAX_PROFILE_LEN] ;
+  int    valley_index, peak_index, previous_peak, whalf ;
+  FILE   *fp = NULL ;
 
-  pv_len = SMOOTH_LEN - 1 + PV_LEN;
-  smooth_profile(orig_intensity_profile, intensity_profile, len, SMOOTH_LEN);
-
-  whalf = nint(0.5 / step); // valley must be less than everything within 1/2 mm
+  pv_len = SMOOTH_LEN-1 + PV_LEN ;
+  smooth_profile(orig_intensity_profile, intensity_profile, len, SMOOTH_LEN) ;
+  
+  whalf = nint(0.5/step) ;  // valley must be less than everything within 1/2 mm
   if (fname)
     fp = fopen(fname, "w");
 
@@ -2283,13 +2265,16 @@ static int mark_sg_index_okay_dark_csf(double *orig_intensity_profile,
       }
     *pmax_len = nsg;
   }
-  return (NO_ERROR);
-}
-static int mark_sg_index_okay_bright_csf(
-    double *orig_intensity_profile, int *sg_index_okay, double step, int len,
-    char *fname, int current_index, double outside_val, int min_wm_index,
-    int *sg_indices, int *pmax_len, int current_sg, int max_out) {
-  int index, i, j, min_index, max_index, pv_len, whalf;
+  return(NO_ERROR);
+} 
+static int
+mark_sg_index_okay_bright_csf(double *orig_intensity_profile, int *sg_index_okay, 
+                              double step, int len, const char *fname, int current_index, 
+                              double outside_val, int min_wm_index, int *sg_indices, 
+                              int *pmax_len, int current_sg,
+                              int max_out)
+{
+  int    index, i, j, min_index, max_index, pv_len, whalf ;
   //  double valley_val, peak_val, previous_peak_val ;
   double intensity_profile[MAX_PROFILE_LEN];
   //  int    valley_index, peak_index, previous_peak ;
@@ -2419,12 +2404,13 @@ static int mark_sg_index_okay_bright_csf(
   return (NO_ERROR);
 }
 
-static int mark_wm_index_okay(double *intensity_profile, int *wm_index_okay,
-                              int wm_len, double min_wm_intensity,
-                              double max_wm_intensity, int current_index,
-                              int len, char *fname, int max_in) {
-  int   index, inside, wm_samples, wm_start = -1, max_wm_len;
-  FILE *fp = nullptr;
+static int
+mark_wm_index_okay(double *intensity_profile, int *wm_index_okay, 
+                   int wm_len, double min_wm_intensity, double max_wm_intensity,
+                   int current_index, int len, const char *fname, int max_in)
+{
+  int    index, inside, wm_samples, wm_start=-1, max_wm_len ;
+  FILE   *fp = NULL ;
 
   if (fname)
     fp = fopen(fname, "w");
@@ -2524,40 +2510,46 @@ static double find_optimal_locations(MRI_SURFACE *mris, MRI *mri, int vno,
                                      DP *dp, VP *vp, int skip)
 
 {
-  int start_index, current_index, min_gray_matter_len, max_wm_len, filter_type,
-      max_wm_index, csf_len, max_csf_len, max_profile_len, profile_len, wm_len,
-      best_wm_len, best_csf_len, best_start_index,
-      sg_index_okay[MAX_PROFILE_LEN], index, wm_index_okay[MAX_PROFILE_LEN], n,
-      sg_indices[MAX_PROFILE_LEN], nsg, wm_skip = skip;
-  double errors[MAX_PROFILE_LEN], best_wm_dist, prior, kernel[MAX_PROFILE_LEN],
-      nx, ny, nz, base_intensity_profile[MAX_PROFILE_LEN], wm_dist;
-  double wm_val, ig_val, sg_val, *intensity_profile, pdist, wm_profile_val;
-  double step, rms, min_rms, offset;
-  int ig_len, sg_len, best_ig_len = 0, best_sg_len = 0, min_ig_len, max_ig_len,
-                      ico_vno, min_sg_len, max_sg_len,
-                      best_profile = PROFILE_GENERIC, tsteps, min_wm_index,
-                      min_start_index;
-  double best_wm_intensity_offset = 0.0, min_wm_intensity_offset,
-         max_wm_intensity_offset, wm_intensity_offset, min_wm_intensity,
-         max_wm_intensity, best_nx, best_ny, best_nz, best_sg_intensity_offset,
-         sg_intensity_offset, ig_intensity_offset = 0, best_ig_intensity_offset,
-         min_wm_len;
+  int     start_index, current_index, min_gray_matter_len, max_wm_len, filter_type,
+    max_wm_index, csf_len, max_csf_len, max_profile_len, profile_len, wm_len,
+    best_wm_len, best_csf_len, best_start_index, sg_index_okay[MAX_PROFILE_LEN], index,
+    wm_index_okay[MAX_PROFILE_LEN], n, sg_indices[MAX_PROFILE_LEN],nsg,wm_skip = skip ;
+  double errors[MAX_PROFILE_LEN], best_wm_dist, prior,
+    kernel[MAX_PROFILE_LEN], nx, ny, nz, base_intensity_profile[MAX_PROFILE_LEN], wm_dist ;
+  double  wm_val, ig_val, sg_val, *intensity_profile, pdist, wm_profile_val ;
+  double  step, rms, min_rms, offset ;
+  int     ig_len, sg_len, best_ig_len=0, best_sg_len=0, min_ig_len, max_ig_len, ico_vno,
+    min_sg_len, max_sg_len, best_profile = PROFILE_GENERIC, tsteps, min_wm_index,
+    min_start_index ;
+  double  best_wm_intensity_offset=0.0,min_wm_intensity_offset,max_wm_intensity_offset,
+    wm_intensity_offset, min_wm_intensity, max_wm_intensity, best_nx, best_ny, best_nz,
+    best_sg_intensity_offset, sg_intensity_offset, ig_intensity_offset=0,  best_ig_intensity_offset, 
+    min_wm_len ;
+  
+  int error_type = dp->error_type ;
+  double (*profile_error_func)(double *kernel, double *intensity_profile, int nsamples, const char *fname,
+                               double step, double in_dist, double *errors);
+  const char   *fname1, *fname2, *fname3, *fname4 ;
+  double  stria_val, stria_intensity_offset, best_stria_intensity_offset = 0.0 ; 
+  static MRI_SURFACE   *mris_ico = NULL;
 
-  int error_type = dp->error_type;
-  double (*profile_error_func)(double *kernel, double *intensity_profile,
-                               int nsamples, char *fname, double step,
-                               double in_dist, double *errors);
-  char * fname1, *fname2, *fname3, *fname4;
-  double stria_val, stria_intensity_offset, best_stria_intensity_offset = 0.0;
-  static MRI_SURFACE *mris_ico = nullptr;
+  max_profile_len = current_index = min_start_index = min_wm_index = 0 ;
+  pdist = 0.0 ;
 
-  max_profile_len = current_index = min_start_index = min_wm_index = 0;
-  pdist                                                            = 0.0;
+  if (mris_ico == NULL)
+  {
+    mris_ico = ic642_make_surface(0, 0) ;
+    MRISscaleVertexCoordinates(mris_ico, 1.0/100.0) ;
+    MRIScomputeMetricProperties(mris_ico) ;
+  }
 
-  if (mris_ico == nullptr) {
-    mris_ico = ic642_make_surface(0, 0);
-    MRISscaleVertexCoordinates(mris_ico, 1.0 / 100.0);
-    MRIScomputeMetricProperties(mris_ico);
+  intensity_profile = base_intensity_profile ;
+  if (vno == Gdiag_no || deform_debug)
+  {
+    fname1 = "profile.dat" ;
+    fname2 = "intensity.dat" ;
+    fname3 = "sg_okay.dat" ;
+    fname4 = "wm_okay.dat" ;
   }
 
   intensity_profile = base_intensity_profile;
@@ -3333,12 +3325,13 @@ static double compute_optimal_intensity(double *iprofile, int i0, int i1,
   return (optimal_intensity);
 }
 
-static double compute_profile_L1(double *kernel, double *iprofile, int nsamples,
-                                 char *fname, double step, double in_dist,
-                                 double *errors) {
-  double val, kval, L1;
-  int    i;
-  FILE * fp = nullptr;
+static double
+compute_profile_L1(double *kernel, double *iprofile, int nsamples, 
+                   const char *fname, double step, double in_dist, double *errors)
+{
+  double   val, kval, L1 ;
+  int      i ;
+  FILE     *fp = NULL ;
 
   if (fname)
     fp = fopen(fname, "w");
@@ -3356,12 +3349,13 @@ static double compute_profile_L1(double *kernel, double *iprofile, int nsamples,
   return (L1 / nsamples);
 }
 
-static double compute_profile_L2(double *kernel, double *iprofile, int nsamples,
-                                 char *fname, double step, double in_dist,
-                                 double *errors) {
-  double rms, val, kval;
-  int    i;
-  FILE * fp = nullptr;
+static double
+compute_profile_L2(double *kernel, double *iprofile, int nsamples, 
+                   const char *fname, double step, double in_dist, double *errors)
+{
+  double   rms, val, kval ;
+  int      i ;
+  FILE     *fp = NULL ;
 
   if (fname)
     fp = fopen(fname, "w");
@@ -3378,13 +3372,14 @@ static double compute_profile_L2(double *kernel, double *iprofile, int nsamples,
   return (sqrt(rms / nsamples));
 }
 
-static double compute_profile_norm_corr(double *kernel, double *iprofile,
-                                        int nsamples, char *fname, double step,
-                                        double in_dist, double *errors) {
-  double *k, ival, kval, kmean, imean, kstd, istd;
-  int     i, nzero;
-  FILE *  fp = nullptr;
-  double  ncorr;
+static double
+compute_profile_norm_corr(double *kernel, double *iprofile, int nsamples, const char *fname,
+                          double step, double in_dist, double *errors)
+{
+  double   *k, ival, kval, kmean, imean, kstd, istd ;
+  int      i, nzero ;
+  FILE     *fp = NULL ;
+  double   ncorr ;
 
   if (fname)
     fp = fopen(fname, "w");
@@ -3542,11 +3537,11 @@ construct_model_profile(double *kernel, DP *dp, double wm_intensity_offset,
   return (NO_ERROR);
 }
 
-static double compute_linear_combination(double *kernel, double *iprofile,
-                                         int nsamples, char *plot_fname,
-                                         double step, double in_dist,
-                                         double *errors) {
-  double ncorr, L1;
+static double
+compute_linear_combination(double *kernel, double *iprofile, int nsamples, const char *plot_fname,
+                           double step, double in_dist, double *errors)
+{
+  double  ncorr, L1 ;
 
   ncorr = compute_profile_norm_corr(kernel, iprofile, nsamples, plot_fname,
                                     step, in_dist, errors);
@@ -4312,34 +4307,36 @@ static LABEL *label_v1(MRI_SURFACE *mris, MRI *mri, DP *dp) {
   return (v1);
 }
 
-static int compute_best_neighborhood_profile(MRI_SURFACE *mris, MRI *mri,
-                                             int vno, DP *dp) {
-  VP *vp;
-  int best_profile, wm_len, ig_len, sg_len, i, profile_len, n, stria_len, num,
-      tsteps;
-  double kernel[MAX_PROFILE_LEN], nx, ny, nz, wm_intensity_offset,
-      sg_intensity_offset, in_dist, wm_val, intensity_profile[MAX_PROFILE_LEN],
-      norm, ig_dist, sg_dist, v1_rms_total, generic_rms_total, generic_rms,
-      v1_rms;
+static int
+compute_best_neighborhood_profile(MRI_SURFACE *mris, MRI *mri,int vno, DP *dp)
+{
+  VP     *vp ;
+  int    best_profile, wm_len, ig_len, sg_len, i, profile_len, n, stria_len, num, tsteps ;
+  double kernel[MAX_PROFILE_LEN], nx, ny, nz, wm_intensity_offset, sg_intensity_offset, in_dist, wm_val,
+         intensity_profile[MAX_PROFILE_LEN],norm, ig_dist, sg_dist, v1_rms_total, 
+    generic_rms_total, generic_rms, v1_rms ;
 
-  double (*profile_error_func)(double *kernel, double *intensity_profile,
-                               int nsamples, char *fname, double step,
-                               double in_dist, double *errors);
-  char *fname, *fname2;
+  double (*profile_error_func)(double *kernel, double *intensity_profile, 
+                               int nsamples, const char *fname,double step, double in_dist,
+                               double *errors);
+  const char   *fname, *fname2 ;
 
-  wm_val = dp->wm_val; // for compiler warning
-  tsteps = (int)ceil(0.25 / dp->step);
+  wm_val = dp->wm_val ;  // for compiler warning
+  tsteps = (int)ceil(0.25/dp->step) ;
 
-  if (vno == Gdiag_no || deform_debug) {
-    fname  = "profile.dat";
-    fname2 = "intensity.dat";
-  } else
-    fname = fname2 = nullptr;
+  if (vno == Gdiag_no || deform_debug)
+  {
+    fname = "profile.dat" ;
+    fname2 = "intensity.dat" ;
+  }
+  else
+    fname = fname2 = NULL ;
 
-  stria_len = nint((dp->stria_width + STRIA_OFFSET) / dp->step);
-  VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-  VERTEX const *const          v  = &mris->vertices[vno];
-  switch (dp->error_type) {
+  stria_len = nint((dp->stria_width+STRIA_OFFSET) / dp->step) ;
+  VERTEX_TOPOLOGY const * const vt = &mris->vertices_topology[vno];
+  VERTEX          const * const v  = &mris->vertices         [vno];
+  switch (dp->error_type)
+  {
   default:
   case ERROR_FUNC_L1:
     profile_error_func = compute_profile_L1;
@@ -4452,36 +4449,34 @@ static int compute_best_neighborhood_profile(MRI_SURFACE *mris, MRI *mri,
   return (best_profile);
 }
 
-static double find_min_rms(
-    double *kernel, double *intensity_profile, int profile_len, char *fname,
-    DP *dp, double in_dist, double wm_intensity_offset,
-    double min_sg_intensity_offset, double max_sg_offset,
-    double sg_intensity_offset_step, int which_profile, int wm_len, int ig_len,
-    int sg_len,
-    double (*profile_error_func)(double *kernel, double *intensity_profile,
-                                 int nsamples, char *fname, double step,
-                                 double in_dist, double *errors)) {
-  double min_rms, sg_intensity_offset,
-      best_sg_intensity_offset    = 0, rms, ig_intensity_offset,
-      best_ig_intensity_offset    = 0.0, stria_intensity_offset,
-      best_stria_intensity_offset = 0.0;
-  int i, stria_len = nint((dp->stria_width + STRIA_OFFSET) / dp->step);
+static double
+find_min_rms(double *kernel, double *intensity_profile, int profile_len, 
+             const char *fname, DP *dp, double in_dist, double wm_intensity_offset, 
+             double min_sg_intensity_offset, double max_sg_offset, double sg_intensity_offset_step, 
+             int which_profile, int wm_len, int ig_len, int sg_len,   
+             double (*profile_error_func)(double *kernel, double *intensity_profile, 
+                                          int nsamples, const char *fname,double step, 
+                                          double in_dist, double *errors))
+{
+  double    min_rms, sg_intensity_offset, best_sg_intensity_offset = 0, rms, ig_intensity_offset, best_ig_intensity_offset = 0.0,
+    stria_intensity_offset, best_stria_intensity_offset = 0.0 ; 
+  int       i, stria_len = nint((dp->stria_width+STRIA_OFFSET) / dp->step) ;
 
-  min_rms = 1e8;
-  for (stria_intensity_offset = -dp->max_stria_intensity_offset;
-       stria_intensity_offset <= dp->max_stria_intensity_offset;
-       stria_intensity_offset += (dp->max_stria_intensity_offset / 2))
-    for (ig_intensity_offset = -dp->max_ig_intensity_offset;
-         ig_intensity_offset <= dp->max_ig_intensity_offset;
-         ig_intensity_offset += (dp->max_ig_intensity_offset / 2))
-      for (sg_intensity_offset = min_sg_intensity_offset;
-           sg_intensity_offset <= max_sg_offset;
-           sg_intensity_offset += sg_intensity_offset_step) {
-        construct_model_profile(kernel, dp, wm_intensity_offset,
-                                ig_intensity_offset, sg_intensity_offset,
-                                stria_intensity_offset, wm_len, ig_len, sg_len,
-                                0, which_profile);
-        ;
+  min_rms = 1e8 ;
+  for (stria_intensity_offset = -dp->max_stria_intensity_offset ; 
+       stria_intensity_offset <= dp->max_stria_intensity_offset ; 
+       stria_intensity_offset += (dp->max_stria_intensity_offset/2))
+  for (ig_intensity_offset = 
+         -dp->max_ig_intensity_offset ; 
+       ig_intensity_offset <= dp->max_ig_intensity_offset ; 
+       ig_intensity_offset += (dp->max_ig_intensity_offset/2))
+  for (sg_intensity_offset = min_sg_intensity_offset ; 
+       sg_intensity_offset <= max_sg_offset ; 
+       sg_intensity_offset += sg_intensity_offset_step)
+  {
+    construct_model_profile(kernel, dp, wm_intensity_offset, ig_intensity_offset, 
+                            sg_intensity_offset, stria_intensity_offset, wm_len, ig_len, 
+                            sg_len, 0,which_profile) ; ;
 #if 1
         rms = (*profile_error_func)(kernel, intensity_profile, profile_len,
                                     fname, dp->step, in_dist, nullptr);
@@ -4616,35 +4611,26 @@ static int compute_distances_from_positions(MRI_SURFACE *mris) {
   }
   return (NO_ERROR);
 }
-#define WM_DIST 0.5 // how much white matter to include
-static int compute_laminar_ratios(MRI_SURFACE *mris, MRI *mri, DP *dp) {
-  int           vno, tsteps, wm_index, ig_index, sg_index, num_bottom, num_top;
-  VERTEX *      v;
-  VERTEX_PARMS *vp;
-  double intensity_profile[MAX_PROFILE_LEN], pdist, bottom, top, peak_bottom,
-      valley_top;
-  char *fname;
-  int   stria_len      = nint(dp->stria_width / dp->step), stria_index, index,
-      stria_offset_len = nint(
-          STRIA_OFFSET / dp->step); // amount of layerIV superficial to stria
+#define WM_DIST  0.5  // how much white matter to include
+static int
+compute_laminar_ratios(MRI_SURFACE *mris, MRI *mri, DP *dp)
+{
+  int          vno, tsteps, wm_index, ig_index, sg_index, num_bottom, num_top ;
+  VERTEX       *v ;
+  VERTEX_PARMS *vp ;
+  double       intensity_profile[MAX_PROFILE_LEN], pdist, bottom, top, peak_bottom, valley_top;
+  const char         *fname ;
+  int          stria_len = nint(dp->stria_width/dp->step), stria_index, index, 
+    stria_offset_len = nint(STRIA_OFFSET/dp->step) ;  // amount of layerIV superficial to stria
 
-  tsteps = (int)ceil(0.25 / dp->step);
-  for (vno = 0; vno < mris->nvertices; vno++) {
-    v = &mris->vertices[vno];
-    if (vno == Gdiag_no) {
-      fname = "intensity.dat";
-      DiagBreak();
-    } else
-      fname = nullptr;
-    vp    = (VERTEX_PARMS *)(v->vp);
-    pdist = sqrt(SQR(vp->px - vp->wx) + SQR(vp->py - vp->wy) +
-                 SQR(vp->pz - vp->wz));
-    if (extract_image_intensities(
-            mris, mri, WM_DIST, pdist, vp->wx, vp->wy, vp->wz, vp->nx, vp->ny,
-            vp->nz, dp->step, tsteps, intensity_profile, fname) != NO_ERROR) {
-      vp->found      = 0;
-      vp->deep_ratio = 0;
-      continue;
+  tsteps = (int)ceil(0.25/dp->step) ;
+  for (vno = 0 ; vno < mris->nvertices ; vno++)
+  {
+    v = &mris->vertices[vno] ;
+    if (vno == Gdiag_no)
+    {
+      fname = "intensity.dat" ;
+      DiagBreak() ;
     }
     wm_index    = nint(WM_DIST / dp->step);
     ig_index    = nint((WM_DIST + vp->l4_dist) / dp->step);

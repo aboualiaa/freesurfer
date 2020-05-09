@@ -136,53 +136,53 @@ const char *Progname;
 
 static double std_scale = 1.0;
 
-static int   label_cortex      = 1;
-static int   graymid           = 0;
-static int   curvature_avgs    = 10;
-static int   create            = 1;
-static int   smoothwm          = 0;
-static int   overlay           = 0;
-static int   inverted_contrast = 0;
-static char *filled_name       = "filled";
-static char *wm_name           = "wm";
-static int   auto_detect_stats = 1;
-static char *dura_echo_name    = NULL;
-static char *T2_name           = NULL;
-static char *flair_or_T2_name  = NULL;
-static int   nechos            = 0;
-static bool  followGradients   = false;
+static int label_cortex = 1 ;
+static int graymid = 0 ;
+static int curvature_avgs = 10 ;
+static int create = 1 ;
+static int smoothwm = 0 ;
+static int overlay = 0 ;
+static int inverted_contrast = 0 ;
+static const char *filled_name = "filled" ;
+static const char *wm_name = "wm" ;
+static int auto_detect_stats = 1 ;
+static char *dura_echo_name = NULL ;
+static char *T2_name = NULL ;
+static char *flair_or_T2_name = NULL ;
+static int nechos = 0 ;
+static bool followGradients = false ;
 
-static int in_out_in_flag = 0; /* for Arthur (as are most things) */
+static int in_out_in_flag = 0 ;  /* for Arthur (as are most things) */
 
-static int nbhd_size = 20;
+static int nbhd_size = 20 ;
 
-static INTEGRATION_PARMS parms;
-#define BASE_DT_SCALE 1.0
-static float base_dt_scale       = BASE_DT_SCALE;
-static float pial_target_offset  = 0;
-static float white_target_offset = 0;
+static INTEGRATION_PARMS  parms ;
+#define BASE_DT_SCALE    1.0
+static float base_dt_scale = BASE_DT_SCALE ;
+static float pial_target_offset = 0 ;
+static float white_target_offset = 0 ;
 
-static COLOR_TABLE *ctab          = NULL;
-static MRI *        mri_cover_seg = NULL;
-static char *       aseg_name     = "aseg";
-static char *       aparc_name    = "aparc"; // for midline and cortex label
-static MRI *        mri_aseg      = NULL;
-static int          add           = 0;
+static COLOR_TABLE *ctab  = NULL;
+static MRI *mri_cover_seg = NULL ;
+static const char *aseg_name = "aseg" ;
+static const char *aparc_name = "aparc" ;  // for midline and cortex label
+static MRI *mri_aseg = NULL;
+static int add = 0 ;
 
-static double l_tsmooth      = 0.0;
-static double l_surf_repulse = 5.0;
+static double l_tsmooth = 0.0 ;
+static double l_surf_repulse = 5.0 ;
 
-static int smooth_pial = 0;
-static int smooth      = 5;
-static int vavgs       = 5;
-static int nwhite      = 100 /* 25 */ /*5*/;
-static int ngray       = 100 /* 30*/ /*45*/;
+static int smooth_pial = 0 ;
+static int smooth = 5 ;
+static int vavgs = 5 ;
+static int nwhite = 100 /* 25 */ /*5*/ ;
+static int ngray = 100  /* 30*/ /*45*/ ;
 
 // orig_name is the surface that will be read first. It will be
 // smoothed. If orig_white is specified, the smoothed vertex locations
 // will be overwritten by the orig_white surface (which will not be
 // smoothed).
-static char *orig_name = ORIG_NAME; // "orig"
+static const char *orig_name = ORIG_NAME ; // "orig"
 
 static char *AutoDetSurfName = NULL; // surf to use when autodet stats
 
@@ -211,10 +211,10 @@ static int flairwhite = 0;
 static int nbrs       = 2;
 static int write_vals = 0;
 
-static char *suffix        = "";
-static char *output_suffix = "";
-static char *xform_fname   = NULL;
-char *ripfilename = NULL, *whitesigmafilename = NULL, *pialsigmafilename = NULL;
+static const char *suffix = "" ;
+static const char *output_suffix = "" ;
+static char *xform_fname = NULL ;
+char *ripfilename=NULL, *whitesigmafilename=NULL, *pialsigmafilename=NULL;
 
 static char pial_name[STRLEN]         = "pial";
 static char white_matter_name[STRLEN] = WHITE_MATTER_NAME; // "white"

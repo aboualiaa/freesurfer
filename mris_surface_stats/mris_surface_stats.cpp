@@ -51,10 +51,10 @@ static char *mask_fname    = nullptr; /* filename for subcortical mask */
 static char *zscore_fname     = nullptr; /* filename for output stat */
 static int   first_group_size = 0; /* number of subjects for first group */
 
-char *srctypestring = "";
-int   srctype       = MRI_VOLUME_TYPE_UNKNOWN;
-char *trgtypestring = "";
-int   trgtype       = MRI_VOLUME_TYPE_UNKNOWN;
+const char *srctypestring = "";
+int srctype = MRI_VOLUME_TYPE_UNKNOWN;
+const char *trgtypestring = "";
+int trgtype = MRI_VOLUME_TYPE_UNKNOWN;
 
 static void usage_exit(int code);
 

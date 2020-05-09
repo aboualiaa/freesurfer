@@ -32,24 +32,26 @@ static void usage_exit(int code);
 
 static char sdir[STRLEN] = "";
 
-#define EDIT_WM_OFF         1
-#define EDIT_WM_ON          2
-#define EDIT_BRAIN_OFF      3
-#define EDIT_BRAIN_ON       4
-#define EDIT_BM_CHANGED     5 // brainmask.mgz changed
-#define EDIT_FINALSURFS_OFF 6
-#define EDIT_FINALSURFS_ON  7
-#define EDIT_ASEG_CHANGED   8
-#define CTAB_ENTRIES        EDIT_ASEG_CHANGED + 1
+#define EDIT_WM_OFF           1
+#define EDIT_WM_ON            2
+#define EDIT_BRAIN_OFF        3
+#define EDIT_BRAIN_ON         4
+#define EDIT_BM_CHANGED       5 // brainmask.mgz changed
+#define EDIT_FINALSURFS_OFF   6
+#define EDIT_FINALSURFS_ON    7
+#define EDIT_ASEG_CHANGED     8
+#define CTAB_ENTRIES          EDIT_ASEG_CHANGED+1
 
-int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN];
-  int    ac, nargs, i;
-  char * subject, *cp, mdir[STRLEN], *out_fname, *name;
-  int    r, g, b, nedits = 0;
-  MRI *  mri = nullptr, *mri_edits = nullptr, *mri_aseg_auto = nullptr,
-      *mri_bm_auto = nullptr;
-  FILE *ctfp;
+int
+main(int argc, char *argv[])
+{
+  char         **av, fname[STRLEN] ;
+  int          ac, nargs, i ;
+  char         *subject, *cp, mdir[STRLEN], *out_fname;
+  const char *name ;
+  int          r, g, b, nedits = 0 ;
+  MRI          *mri=NULL,*mri_edits=NULL,*mri_aseg_auto=NULL,*mri_bm_auto=NULL;
+  FILE         *ctfp;
 
   // default output file name:
   out_fname = strcpyalloc("edits.mgz");

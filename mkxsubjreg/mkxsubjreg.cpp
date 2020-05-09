@@ -39,12 +39,12 @@ int main(int argc, char *argv[]);
 
 const char *Progname = NULL;
 
-char *srcregpath   = nullptr;
-char *targregpath  = nullptr;
-char *targsubj     = nullptr;
-char *xfmrname     = "talairach.xfm";
-char *subjects_dir = nullptr;
-char *fvolid       = nullptr;
+char *srcregpath  = NULL;
+char *targregpath = NULL;
+const char *targsubj    = NULL;
+const char *xfmrname    = "talairach.xfm";
+char *subjects_dir = NULL;
+char *fvolid = NULL;
 
 MRI *SrcMRI, *TargMRI, *FuncMRI;
 

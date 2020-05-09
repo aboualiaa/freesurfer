@@ -17,41 +17,39 @@
 #include "flash.h"
 #include "gca.h"
 
-static double scale = 1e12;
 
-int main(int argc, char *argv[]);
+static double scale = 1e12 ;
 
-int         GCAscale(GCA *gca_flash, double min_val, double max_val);
-static MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb, int classnum);
-static int  get_option(int argc, char *argv[]);
-static void print_usage(void);
-static void print_help(void);
-static void print_version(void);
-static MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb,
-                                  int classnum);
-static MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb,
-                                  int classnum);
-static MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb,
-                                  int classnum);
+int main(int argc, char *argv[]) ;
 
-const char *Progname;
+int GCAscale(GCA *gca_flash, double min_val, double max_val) ;
+static  MRI *GCAcomputeAmbiguity(GCA *gca, MRI *mri, double *pamb, int classnum) ;
+static int  get_option(int argc, char *argv[]) ;
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
+static  MRI *GCAcompute1DAmbiguity(GCA *gca, MRI *mri, double *pamb, int classnum) ;
+static  MRI *GCAcompute2DAmbiguity(GCA *gca, MRI *mri, double *pamb, int classnum) ;
+static  MRI *GCAcompute3DAmbiguity(GCA *gca, MRI *mri, double *pamb, int classnum) ;
 
-static int    optimize = 0;
-static double lambda   = 100.0;
+const char *Progname ;
 
-static double TR       = 20;
-static double TE       = 3;
-static double MIN_FA1  = 1;
-static double MAX_FA1  = 40;
-static double MIN_FA2  = 1;
-static double MAX_FA2  = 40;
-static double MIN_FA3  = 1;
-static double MAX_FA3  = 40;
-static double FA_STEP  = 1;
-static int    append   = 0;
-static char * fname    = "amb.log";
-static int    left     = 0;
-static int    classnum = -1;
+static int optimize = 0 ;
+static double lambda = 100.0 ;
+
+static double TR = 20;
+static double TE  = 3  ;
+static double MIN_FA1 = 1  ;
+static  double MAX_FA1 = 40 ;
+static double MIN_FA2 = 1  ;
+static  double MAX_FA2 = 40 ;
+static double MIN_FA3 = 1  ;
+static  double MAX_FA3 = 40 ;
+static  double FA_STEP = 1 ;
+static int append = 0 ;
+static const char *fname = "amb.log" ;
+static int left = 0 ;
+static int classnum = -1 ;
 
 #define MAX_FAS 10
 int main(int argc, char *argv[]) {

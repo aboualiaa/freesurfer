@@ -31,37 +31,37 @@
 //#define BRIGHT_LABEL         130
 //#define BRIGHT_BORDER_LABEL  100
 
-static int   extract      = 0;
-static int   verbose      = 0;
-static int   wsize        = 11;
-double       wsizemm      = 0;
-static float pct          = 0.8;
-static float pslope       = 1.0f;
-static float nslope       = 1.0f;
-static float wm_low       = 90;
-static float wm_hi        = 125;
-static float gray_hi      = 100;
-static float gray_low     = 30;
-static int   gray_low_set = 0;
-static int   niter        = 1;
-static int   gray_hi_set  = 0;
-static int   wm_hi_set    = 0;
-static int   wm_low_set   = 0;
+static int extract = 0 ;
+static int  verbose = 0 ;
+static int wsize = 11 ;
+double wsizemm = 0;
+static float pct = 0.8 ;
+static float pslope = 1.0f ;
+static float nslope = 1.0f ;
+static float wm_low = 90 ;
+static float wm_hi = 125 ;
+static float gray_hi = 100 ;
+static float gray_low = 30 ;
+static int gray_low_set = 0 ;
+static int niter = 1 ;
+static int gray_hi_set = 0 ;
+static int wm_hi_set = 0 ;
+static int wm_low_set = 0 ;
 
-static int scan_type       = MRI_UNKNOWN;
-static int thickness       = 4;
-static int thicken         = 1;
-static int nsegments       = 20;
-static int fill_bg         = 0;
-static int fill_ventricles = 0;
+static int scan_type = MRI_UNKNOWN ;
+static int thickness = 4 ;
+static int thicken = 1 ;
+static int nsegments = 20 ;
+static int fill_bg = 0 ;
+static int fill_ventricles = 0 ;
 
-static int keep_edits = 0;
+static int keep_edits = 0 ;
 
-static int  auto_detect_stats = 1;
-static int  no1d_remove       = 0;
-static int  log_stats         = 1;
-static void usage_exit(int code);
-char *      segmentdatfile = "segment.dat";
+static int auto_detect_stats =  1 ;
+static int no1d_remove = 0 ;
+static int log_stats = 1 ;
+static void  usage_exit(int code) ;
+const char *segmentdatfile = "segment.dat";
 
 #define BLUR_SIGMA 0.25f
 static float blur_sigma = BLUR_SIGMA;

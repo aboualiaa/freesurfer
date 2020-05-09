@@ -32,12 +32,14 @@ static int   coordinate_system = TALAIRACH_COORDS;
 static char *hemi;
 static char *surf_name; /* used if in surface-based coordinates */
 
-int main(int argc, char *argv[]) {
-  char *in_prefix, *out_prefix, out_fname[100], name[100], path[100],
-      *coord_name, fname[100], *cp, subjects_dir[100];
-  int          n, nargs, ino, event;
-  SV *         sv, *sv_avg = nullptr;
-  MRI_SURFACE *mris;
+int
+main(int argc, char *argv[]) {
+  char        *in_prefix, *out_prefix, out_fname[100], name[100],
+    path[100], fname[100], *cp, subjects_dir[100] ;
+  const char *coord_name;
+  int         n, nargs, ino, event ;
+  SV          *sv, *sv_avg = NULL ;
+  MRI_SURFACE *mris ;
 
   nargs = handleVersionOption(argc, argv, "stat_normalize");
   if (nargs && argc - nargs == 1)

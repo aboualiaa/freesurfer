@@ -30,100 +30,110 @@
 
 static float sigmas[] = {4.0f, 2.0f, 1.0f, 0.5f};
 
-char *surface_names[] = {"hippocampus"};
 
-static char *curvature_names[] = {
-    "hippocampus.curv",
-};
+static float sigmas[] = {
+                          4.0f, 2.0f, 1.0f, 0.5f
+                        } ;
 
-int main(int argc, char *argv[]);
+const char *surface_names[] = {
+                          "hippocampus"
+                        } ;
 
-static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
-static int  compute_area_ratios(MRI_SURFACE *mris);
+static const char *curvature_names[] = {
+                                   "hippocampus.curv",
+                                 } ;
 
-static int mrisRegister(MRI_SURFACE *mris, MRI_SP *mrisp_template,
-                        INTEGRATION_PARMS *parms, int max_passes);
-static int mrisLogIntegrationParms2(FILE *fp, MRI_SURFACE *mris,
-                                    INTEGRATION_PARMS *parms);
-static int mrisClearMomentum(MRI_SURFACE *mris);
-static int mrisIntegrationEpoch(MRI_SURFACE *mris, INTEGRATION_PARMS *parms,
-                                int base_averages);
 
-static int   which_norm = NORM_MEAN;
-static int   max_passes = 4;
-static int   nbrs       = 1;
-static float scale      = 1.0f;
 
-static int reverse_flag = 0;
+int main(int argc, char *argv[]) ;
 
-static float dalpha = 0.0f;
-static float dbeta  = 0.0f;
-static float dgamma = 0.0f;
+static int  get_option(int argc, char *argv[]) ;
+static void usage_exit(void) ;
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
+static int  compute_area_ratios(MRI_SURFACE *mris) ;
 
-const char * Progname;
-static char  curvature_fname[STRLEN] = "";
-static char *orig_name               = "hippocampus";
-static char *jacobian_fname          = nullptr;
+static int  mrisRegister(MRI_SURFACE *mris, MRI_SP *mrisp_template, INTEGRATION_PARMS *parms, int max_passes) ;
+static int  mrisLogIntegrationParms2(FILE *fp, MRI_SURFACE *mris,INTEGRATION_PARMS *parms);
+static int  mrisClearMomentum(MRI_SURFACE *mris);
+static int  mrisIntegrationEpoch(MRI_SURFACE *mris, INTEGRATION_PARMS *parms,int base_averages);
 
-static int use_defaults = 1;
+static int which_norm = NORM_MEAN;
+static int max_passes = 4 ;
+static int nbrs = 1 ;
+static float scale = 1.0f ;
 
-#define IMAGES_PER_SURFACE 3 /* mean, variance, and dof */
-#define SURFACES           sizeof(curvature_names) / sizeof(curvature_names[0])
-#define NSIGMAS            (sizeof(sigmas) / sizeof(sigmas[0]))
-#define MAX_NBHD_SIZE      200
+static int reverse_flag = 0 ;
 
-static INTEGRATION_PARMS parms;
+static float dalpha = 0.0f ;
+static float dbeta = 0.0f ;
+static float dgamma = 0.0f ;
 
-int main(int argc, char *argv[]) {
-  char **      av, *surf_fname, *template_fname, *out_fname, fname[STRLEN], *cp;
-  int          ac, nargs;
-  MRI_SURFACE *mris;
-  MRI_SP *     mrisp_template;
 
-  Gdiag    = DIAG_SHOW;
-  Progname = argv[0];
-  ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+const char *Progname ;
+static const char curvature_fname[STRLEN] = "" ;
+static const char *orig_name = "hippocampus" ;
+static char *jacobian_fname = NULL ;
 
-  memset(&parms, 0, sizeof(parms));
-  parms.projection = PROJECT_SPHERE;
-  parms.flags |= IP_USE_CURVATURE;
-  parms.tol                = 1e-0 * 10;
-  parms.min_averages       = 0;
-  parms.l_area             = 0.0;
-  parms.l_parea            = 0.2f;
-  parms.l_dist             = 0.1;
-  parms.l_corr             = 1.0f;
-  parms.l_nlarea           = 1;
-  parms.l_pcorr            = 0.0f;
-  parms.niterations        = 25;
-  parms.n_averages         = 256;
-  parms.write_iterations   = 100;
-  parms.dt_increase        = 1.01 /* DT_INCREASE */;
-  parms.dt_decrease        = 0.99 /* DT_DECREASE*/;
-  parms.error_ratio        = 1.03 /*ERROR_RATIO */;
-  parms.dt_increase        = 1.0;
-  parms.dt_decrease        = 1.0;
-  parms.error_ratio        = 1.1 /*ERROR_RATIO */;
-  parms.integration_type   = INTEGRATE_ADAPTIVE;
-  parms.integration_type   = INTEGRATE_MOMENTUM /*INTEGRATE_LINE_MINIMIZE*/;
-  parms.integration_type   = INTEGRATE_LINE_MINIMIZE;
-  parms.dt                 = 0.9;
-  parms.momentum           = 0.95;
-  parms.desired_rms_height = -1.0;
-  parms.nbhd_size          = 0;
-  parms.max_nbrs           = 0;
+static int use_defaults = 1 ;
 
-  ac = argc;
-  av = argv;
-  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
-    nargs = get_option(argc, argv);
-    argc -= nargs;
-    argv += nargs;
+
+#define IMAGES_PER_SURFACE   3   /* mean, variance, and dof */
+#define SURFACES         sizeof(curvature_names) / sizeof(curvature_names[0])
+#define NSIGMAS  (sizeof(sigmas)  / sizeof(sigmas[0]))
+#define MAX_NBHD_SIZE  200
+
+
+static INTEGRATION_PARMS  parms ;
+
+int
+main(int argc, char *argv[]) {
+  char         **av, *surf_fname, *template_fname, *out_fname, fname[STRLEN],*cp;
+  int          ac, nargs ;
+  MRI_SURFACE  *mris ;
+  MRI_SP       *mrisp_template ;
+
+  Gdiag = DIAG_SHOW ;
+  Progname = argv[0] ;
+  ErrorInit(NULL, NULL, NULL) ;
+  DiagInit(NULL, NULL, NULL) ;
+
+  memset(&parms, 0, sizeof(parms)) ;
+  parms.projection = PROJECT_SPHERE ;
+  parms.flags |= IP_USE_CURVATURE ;
+  parms.tol = 1e-0*10 ;
+  parms.min_averages = 0 ;
+  parms.l_area = 0.0 ;
+  parms.l_parea = 0.2f ;
+  parms.l_dist = 0.1 ;
+  parms.l_corr = 1.0f ;
+  parms.l_nlarea = 1 ;
+  parms.l_pcorr = 0.0f ;
+  parms.niterations = 25 ;
+  parms.n_averages = 256 ;
+  parms.write_iterations = 100 ;
+  parms.dt_increase = 1.01 /* DT_INCREASE */;
+  parms.dt_decrease = 0.99 /* DT_DECREASE*/ ;
+  parms.error_ratio = 1.03 /*ERROR_RATIO */;
+  parms.dt_increase = 1.0 ;
+  parms.dt_decrease = 1.0 ;
+  parms.error_ratio = 1.1 /*ERROR_RATIO */;
+  parms.integration_type = INTEGRATE_ADAPTIVE ;
+  parms.integration_type = INTEGRATE_MOMENTUM /*INTEGRATE_LINE_MINIMIZE*/ ;
+  parms.integration_type = INTEGRATE_LINE_MINIMIZE ;
+  parms.dt = 0.9 ;
+  parms.momentum = 0.95 ;
+  parms.desired_rms_height = -1.0 ;
+  parms.nbhd_size = 0 ;
+  parms.max_nbrs = 0 ;
+
+  ac = argc ;
+  av = argv ;
+  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
+    nargs = get_option(argc, argv) ;
+    argc -= nargs ;
+    argv += nargs ;
   }
 
   if (argc < 4)
@@ -336,9 +346,9 @@ static int get_option(int argc, char *argv[]) {
       fprintf(stderr, "momentum = %2.2f\n", (float)parms.momentum);
       break;
     case 'C':
-      strcpy(curvature_fname, argv[2]);
-      nargs = 1;
-      break;
+      strncpy(const_cast<char*>(curvature_fname), argv[2], STRLEN) ; // Well... at least it's strncpy
+      nargs = 1 ;
+      break ;
     case 'A':
       sscanf(argv[2], "%d", &parms.n_averages);
       nargs = 1;
@@ -650,11 +660,12 @@ static int mrisRegister(MRI_SURFACE *mris, MRI_SP *mrisp_template,
             (float)msec / (1000.0f * 60.0f * 60.0f));
   return (NO_ERROR);
 }
-static int mrisIntegrationEpoch(MRI_SURFACE *mris, INTEGRATION_PARMS *parms,
-                                int base_averages) {
-  int   total_steps, done, steps, n_averages, old_averages;
-  char *snum, *sdenom;
-  float ratio, *pdenom, *pnum;
+static int
+mrisIntegrationEpoch(MRI_SURFACE *mris, INTEGRATION_PARMS *parms,int base_averages) {
+  int   total_steps, done, steps, n_averages, old_averages ;
+  const char* snum;
+  const char* sdenom ;
+  float ratio, *pdenom, *pnum ;
 
   if (!FZERO(parms->l_corr)) {
     sdenom = "corr";

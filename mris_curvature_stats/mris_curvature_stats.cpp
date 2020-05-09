@@ -57,8 +57,21 @@ typedef enum _surfaceIntegrals {
 } e_surfaceIntegral;
 
 // Set of possible output curvature files
-char *Gppch[] = {"Raw", "K",  "H",          "k1",     "k2",          "S", "C",
-                 "SI",  "BE", "Normalised", "Scaled", "ScaledTrans", "FI"};
+const char* Gppch[] = {
+  "Raw",
+  "K",
+  "H",
+  "k1",
+  "k2",
+  "S",
+  "C",
+  "SI",
+  "BE",
+  "Normalised",
+  "Scaled",
+  "ScaledTrans",
+  "FI"
+};
 
 // Output file prefixes
 typedef enum _OFSP {
@@ -1167,12 +1180,12 @@ int MRIS_curvatureStats_analyze(MRIS *apmris, e_secondOrderType aesot) {
   //  o Modifies the current global Gf_mean and Gf_sigma
   //
 
-  char pch_text[65536];
-  char pch_minMaxReport[65536];
-  char pch_surfaceIntegralReport[65536];
-  //  char* pch_function  = "MRIS_curvatureStats_analyze";
-  char *pch_unitsmm  = "mm^-1";
-  char *pch_unitsmm2 = "mm^-2";
+  char  pch_text[65536];
+  char  pch_minMaxReport[65536];
+  char  pch_surfaceIntegralReport[65536];
+//  char* pch_function  = "MRIS_curvatureStats_analyze";
+  const char* pch_unitsmm = "mm^-1";
+  const char* pch_unitsmm2  = "mm^-2";
   char  pch_units[256];
 
   //  DebugEnterFunction (( pch_function ));

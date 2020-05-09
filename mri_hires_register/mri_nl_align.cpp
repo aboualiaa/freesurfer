@@ -42,15 +42,16 @@ static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
                           GCA_MORPH_PARMS *parms, int fno, int conform,
                           char *fname);
 
-static int regrid = 0;
-static int nowmsa = 1; // remove all wmsa labels from the atlas
+static int write_snapshot(MRI *mri_target, MRI *mri_source,
+                          MATRIX *m_vox_xform, GCA_MORPH_PARMS *parms,
+                          int fno, int conform, const char *fname) ;
 
 static void usage_exit(int ecode);
 static int  get_option(int argc, char *argv[]);
 
-static char *source_surf = "";
-static char *target_surf = ".toM02100023.resample";
-static char *mask_fname  = nullptr;
+static const char *source_surf = "";
+static const char *target_surf = ".toM02100023.resample";
+static char *mask_fname = NULL ;
 
 const char *Progname;
 
@@ -360,12 +361,15 @@ int main(int argc, char *argv[]) {
     }
     if (use_aseg) {
       if (nowmsa)
-        replace_wmsa(mri_source, mri_source);
-      if (ribbon_name) {
-        char         fname[STRLEN], path[STRLEN], *str, *hemi;
-        int          h, s, label;
-        MRI_SURFACE *mris_white, *mris_pial;
-        MRI *        mri;
+	replace_wmsa(mri_source, mri_source) ;
+      if (ribbon_name)
+      {
+        char fname[STRLEN], path[STRLEN];
+	const char *str;
+	const char *hemi ;
+        int  h, s, label ;
+        MRI_SURFACE *mris_white, *mris_pial ;
+        MRI         *mri ;
 
         for (s = 0; s <= 1; s++) // source and target
         {
@@ -1019,9 +1023,17 @@ static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
   MRI *mri_aligned;
   char fname[STRLEN];
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
-    printf("source->target vox->vox transform:\n");
-    MatrixPrint(stdout, m_vox_xform);
+static int
+write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
+               GCA_MORPH_PARMS *parms, int fno, int conform, const char *in_fname)
+{
+  MRI *mri_aligned ;
+  char fname[STRLEN] ;
+
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+  {
+    printf("source->target vox->vox transform:\n") ;
+    MatrixPrint(stdout, m_vox_xform) ;
   }
   if (true || conform) {
     mri_aligned = MRIalloc(mri_target->width, mri_target->height,

@@ -40,43 +40,40 @@
 #include "transform.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
 
-static int remove_bad_profiles(MRI_SURFACE *mris, MRI *mri_profiles, MRI *mri,
-                               float border_mm);
-static float *mrisComputeWhiteMatterIntensities(MRI_SURFACE *mris, MRI *mri,
-                                                float wsize_mm, float *norm,
-                                                int navgs, MRI *mri_aseg,
-                                                float mm_border);
-MRI *         MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(
-             MRI_SURFACE *mris, MRI *mri, int nbhd_size, float max_thick, int normalize,
-             int curv_thresh, float *norm);
-static MRI *MRIfitPolynomial(MRI *mri_profiles, MRI *mri_poly, int order);
-static MRI *MRIfitQuadratic(MRI *mri_profiles, MRI *mri_quad);
-static int  get_option(int argc, char *argv[]);
-static void usage_exit(void);
-static void print_usage(void);
-static void print_help(void);
-static void print_version(void);
+int main(int argc, char *argv[]) ;
 
-static int               pial_normal_avgs      = 5;
-static char *            read_laplace_name     = NULL;
-static char *            write_surf_name       = NULL;
-static char *            sphere_name           = "sphere";
-static int               fmin_thick            = 0;
-static float             laplace_res           = 0.5;
-static int               laplace_thick         = 0;
-static char *            write_thickness_fname = NULL;
-static INTEGRATION_PARMS parms;
+static int remove_bad_profiles(MRI_SURFACE *mris, MRI *mri_profiles, MRI *mri, float border_mm) ;
+static float *mrisComputeWhiteMatterIntensities(MRI_SURFACE *mris, MRI *mri, float wsize_mm, float *norm, int navgs,
+                                                MRI *mri_aseg, float mm_border) ;
+MRI *MRISfindNearestVerticesAndMeasureCorticalIntensityProfiles(MRI_SURFACE *mris, MRI *mri, int nbhd_size,
+    float max_thick, int normalize, int curv_thresh, float *norm);
+static MRI *MRIfitPolynomial(MRI *mri_profiles, MRI *mri_poly, int order) ;
+static MRI *MRIfitQuadratic(MRI *mri_profiles, MRI *mri_quad) ;
+static int  get_option(int argc, char *argv[]) ;
+static void usage_exit(void) ;
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
 
-const char *  Progname;
-static char * flat_name    = NULL;
-static int    smooth_iters = 1;
-static double flat_res     = 0;
+static int pial_normal_avgs = 5 ;
+static char *read_laplace_name = NULL ;
+static char *write_surf_name = NULL ;
+static const char *sphere_name = "sphere" ;
+static int fmin_thick = 0 ;
+static float laplace_res = 0.5 ;
+static int laplace_thick = 0 ;
+static char *write_thickness_fname = NULL ;
+static INTEGRATION_PARMS parms ;
 
-static int  nbrs            = 1;
-static char pial_name[100]  = "pial";
-static char white_name[100] = WHITE_MATTER_NAME;
+const char *Progname ;
+static char *flat_name = NULL;
+static int smooth_iters = 1 ;
+static double flat_res = 0 ;
+
+static int nbrs = 1 ;
+static char pial_name[100] = "pial" ;
+static char white_name[100] = WHITE_MATTER_NAME ;
 #define MAX_LABELS 10000
 static char *label_names[MAX_LABELS];
 static int   nlabels = 0;

@@ -763,43 +763,17 @@ class SamsegLongitudinal:
                 plt.draw()
 
             if self.saveHistory:
-                self.history["timepointMeansEvolution"].append(
-                    self.timepointModels[timepointNumber].gmm.means
-                )
-                self.history["timepointVariancesEvolution"].append(
-                    self.timepointModels[timepointNumber].gmm.variances
-                )
-                self.history["timepointMixtureWeightsEvolution"].append(
-                    self.timepointModels[timepointNumber].gmm.mixtureWeights
-                )
-                self.history["timepointBiasFieldCoefficientsEvolution"].append(
-                    self.timepointModels[timepointNumber].biasfield.coefficients
-                )
-                self.history["timepointDeformationsEvolution"].append(
-                    self.timepointModels[timepointNumber].deformation
-                )
-                self.history[
-                    "timepointDeformationAtlasFileNamesEvolution"
-                ].append(
-                    self.timepointModels[
-                        timepointNumber
-                    ].deformationAtlasFileName
-                )
-                self.history["latentMeansEvolution"].append(
-                    self.latentMeans.copy()
-                )
-                self.history["latentVariancesEvolution"].append(
-                    self.latentVariances.copy()
-                )
-                self.history["latentMixtureWeightsEvolution"].append(
-                    self.latentMixtureWeights.copy()
-                )
-                self.history["latentDeformationEvolution"].append(
-                    self.latentDeformation.copy()
-                )
-                self.history["latentDeformationAtlasFileNameEvolution"].append(
-                    self.latentDeformationAtlasFileName
-                )
+                self.history["timepointMeansEvolution"].append(self.timepointModels[timepointNumber].gmm.means.copy())
+                self.history["timepointVariancesEvolution"].append(self.timepointModels[timepointNumber].gmm.variances.copy())
+                self.history["timepointMixtureWeightsEvolution"].append(self.timepointModels[timepointNumber].gmm.mixtureWeights.copy())
+                self.history["timepointBiasFieldCoefficientsEvolution"].append(self.timepointModels[timepointNumber].biasField.coefficients.copy())
+                self.history["timepointDeformationsEvolution"].append(self.timepointModels[timepointNumber].deformation)
+                self.history["timepointDeformationAtlasFileNamesEvolution"].append(self.timepointModels[timepointNumber].deformationAtlasFileName)
+                self.history["latentMeansEvolution"].append(self.latentMeans.copy())
+                self.history["latentVariancesEvolution"].append(self.latentVariances.copy())
+                self.history["latentMixtureWeightsEvolution"].append(self.latentMixtureWeights.copy())
+                self.history["latentDeformationEvolution"].append(self.latentDeformation.copy())
+                self.history["latentDeformationAtlasFileNameEvolution"].append(self.latentDeformationAtlasFileName)
 
             if iterationNumber >= (self.numberOfIterations - 1):
                 print("Stopping")

@@ -32,24 +32,25 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static int  singledash(char *flag);
-static int  stringmatch(char *s1, char *s2);
+static int  stringmatch(const char *s1, const char *s2);
 
-char *      imafile      = nullptr;
-char *      typestring   = nullptr;
-int         type         = -1;
-int         typesize     = 1;
-int         offset       = -1;
-int         stringlen    = 1;
-const char *key          = nullptr;
-int         keyno        = -1;
-int         dumpfileinfo = 0;
-int         debug, verbose;
-FILE *      fp;
-char *      attrname;
-int         getattr = 0;
-char *      bstem   = "img";
-short *     pixeldata;
-int         npixels;
+char* imafile = NULL;
+char* typestring = NULL;
+int   type = -1;
+int   typesize = 1;
+int   offset = -1;
+int   stringlen = 1;
+const char  *key = NULL;
+int   keyno = -1;
+int   dumpfileinfo = 0;
+int debug, verbose;
+FILE *fp;
+char *attrname;
+int  getattr = 0;
+
+const char *bstem = "img";
+short *pixeldata;
+int npixels;
 
 #define TMPSTRLEN 10000
 static char tmpstr[TMPSTRLEN];
@@ -577,9 +578,7 @@ static void check_options() {
   }
 }
 /*-------------------------------------------------------------*/
-static int stringmatch(char *s1, char *s2) {
-  if (strcmp(s1, s2) == 0) {
-    return (1);
-  }
-  return (0);
+static int stringmatch(const char *s1, const char *s2) {
+  if (strcmp(s1,s2) == 0) return(1);
+  return(0);
 }

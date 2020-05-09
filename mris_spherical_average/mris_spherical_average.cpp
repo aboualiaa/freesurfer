@@ -25,50 +25,54 @@
 #include "tags.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
 
-static int  get_option(int argc, char *argv[]);
-static void usage_exit(void);
-static void print_usage(void);
-static void print_help(void);
-static void print_version(void);
+int main(int argc, char *argv[]) ;
 
-const char *Progname;
+static int  get_option(int argc, char *argv[]) ;
+static void usage_exit(void) ;
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
 
-static char *surf_dir            = "surf";
-static int   erode               = 0;
-static int   dilate              = 0;
-static float threshold           = 0;
-static int   reassign            = 0;
-static int   normalize_flag      = 0;
-static int   condition_no        = 0;
-static int   stat_flag           = 0;
-static char *output_subject_name = NULL;
-static int   navgs               = 0;
-static char *ohemi               = NULL;
-static char *osurf               = NULL;
-static char *orig_name           = "white";
-static int   segment             = 0; // not implemented yet
-static char *mask_name           = NULL;
+const char *Progname ;
 
-static int    compute_average_label_area = 0;
-static int    which_ic                   = 7;
-static char * sdir                       = NULL;
-static char * osdir                      = NULL;
-static double logodds_slope              = 0.1;
+static const char *surf_dir = "surf" ;
+static int erode = 0 ;
+static int dilate = 0 ;
+static float threshold = 0 ;
+static int reassign = 0 ;
+static int normalize_flag = 0 ;
+static int condition_no = 0 ;
+static int stat_flag = 0 ;
+static char *output_subject_name = NULL ;
+static int navgs = 0 ;
+static char *ohemi = NULL ;
+static char *osurf = NULL ;
+static const char *orig_name = "white" ;
+static int segment = 0 ;  // not implemented yet
+static char *mask_name = NULL ;
 
-static int   spatial_prior_avgs  = 0;
-static char *spatial_prior_fname = NULL;
-static char  dir[STRLEN]         = "";
+static int compute_average_label_area = 0 ;
+static int which_ic = 7 ;
+static char *sdir = NULL ;
+static char *osdir = NULL ;
+static double logodds_slope = 0.1 ;
 
-int main(int argc, char *argv[]) {
-  char **av, *out_fname, *surf_name, fname[STRLEN], *hemi, *cp, *data_fname;
-  int    ac, nargs, i, which, nsubjects;
-  double max_len, mean, sigma;
-  MRI_SURFACE *    mris, *mris_avg;
-  MRIS_HASH_TABLE *mht = NULL;
-  LABEL *          area, *area_avg = NULL;
-  float            average_label_area = 0;
+static int spatial_prior_avgs = 0 ;
+static char *spatial_prior_fname = NULL ;
+static char dir[STRLEN] = "";
+
+int
+main(int argc, char *argv[])
+{
+  char            **av, *out_fname, *surf_name, fname[STRLEN],
+                  *hemi, *cp, *data_fname ;
+  int             ac, nargs, i, which, nsubjects ;
+  double          max_len, mean, sigma ;
+  MRI_SURFACE     *mris, *mris_avg ;
+  MRIS_HASH_TABLE *mht = NULL ;
+  LABEL           *area, *area_avg = NULL ;
+  float           average_label_area = 0 ;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_spherical_average");
 

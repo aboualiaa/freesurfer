@@ -187,11 +187,11 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int  isflag(char *flag);
-static int  singledash(char *flag);
-static int  stringmatch(char *str1, char *str2);
-static int  nth_is_arg(int nargc, char **argv, int nth);
-static int  checkfmt(char *fmt);
+static int isflag(const char *flag);
+static int singledash(char *flag);
+static int stringmatch(const char *str1, const char *str2);
+static int nth_is_arg(int nargc, char **argv, int nth);
+static int checkfmt(char *fmt);
 #ifdef HAVE_TCL_TK_GL
 static int MRItagVol(MRI *mri, float val);
 #endif // HAVE_TCL_TK_GL
@@ -347,11 +347,11 @@ int use_inorm           = 1;
 int use_colornorm       = 0;
 int DoSlicePrescription = 0;
 
-char  subjectid[1000];
-int   subjectidOverride = 0;
-char *mov_vol_id        = nullptr;
-int   mov_vol_fmt       = MRI_VOLUME_TYPE_UNKNOWN;
-char *targ_vol_id;
+char subjectid[1000];
+int subjectidOverride = 0;
+char *mov_vol_id = NULL;
+int   mov_vol_fmt = MRI_VOLUME_TYPE_UNKNOWN;
+const char *targ_vol_id;
 int   targ_vol_fmt = MRI_VOLUME_TYPE_UNKNOWN;
 char  targ_vol_path[1000];
 int   fstarg            = 0;
@@ -392,13 +392,14 @@ MATRIX *Mtc, *invMtc, *Vt2s, *Ttargcor, *invTtargcor;
 MATRIX *Dtargcor, *invDtargcor, *Dtarg, *invDtarg;
 MATRIX *vox2ras_targ = nullptr, *ras2vox_targ = nullptr;
 
-int   LoadSurf = 0, UseSurf = 0;
-char *surfname    = "white", surf_path[2000];
-int   lhsurf_only = 0, rhsurf_only = 0;
-int   fstal = 0, fixxfm = 1;
-char  talxfmfile[2000], talxfmdir[2000];
-char *talxfmname = "talairach.xfm";
-char  tmpstr[2000];
+int LoadSurf = 0, UseSurf=0;
+const char *surfname = "white";
+char surf_path[2000];
+int lhsurf_only = 0,rhsurf_only = 0;
+int fstal=0, fixxfm=1;
+char talxfmfile[2000],talxfmdir[2000];
+const char *talxfmname = "talairach.xfm";
+char tmpstr[2000];
 
 char *mov_ostr  = nullptr; // orientation string for mov
 char *targ_ostr = nullptr; // orientation string for targ
@@ -427,26 +428,26 @@ MATRIX *Ctarg, *invCtarg, *Starg, *Mcras0, *invMcras0;
 
 int DoFMovTarg = 0;
 
-char *     DetFile = nullptr;
-int        AllocBuffs();
-static int istringnmatch(char *str1, char *str2, int n);
+char *DetFile = NULL;
+int AllocBuffs(void);
+static int istringnmatch(const char *str1, const char *str2, int n);
 
-char *       seg_vol_id = nullptr;
-MRI *        seg_vol    = nullptr;
-COLOR_TABLE *ctab       = nullptr;
-char *       ctabfile   = nullptr;
-int          DoASeg = 0, DoAParcASeg = 0, DoWMParc = 0;
-int          ShowSeg         = 0;
-char *       FREESURFER_HOME = nullptr;
-char *       tkregister_tcl  = nullptr;
-char *       fstaltarg       = "mni305.cor.mgz";
-int          SurfRGB[3]      = {0, 255, 0};
-int          invLTAOut       = 0;
-double       angles[3]       = {0, 0, 0};
-MATRIX *     Mrot            = nullptr;
-double       xyztrans[3]     = {0, 0, 0};
-MATRIX *     Mtrans          = nullptr;
-int          conformTarget   = 0;
+char *seg_vol_id = NULL;
+MRI *seg_vol = NULL;
+COLOR_TABLE *ctab = NULL;
+char *ctabfile = NULL;
+int DoASeg=0, DoAParcASeg=0, DoWMParc=0;
+int ShowSeg=0;
+char *FREESURFER_HOME=NULL;
+char *tkregister_tcl = NULL;
+const char *fstaltarg = "mni305.cor.mgz";
+int SurfRGB[3] = {0,255,0};
+int invLTAOut=0;
+double angles[3] = {0,0,0};
+MATRIX *Mrot = NULL;
+double xyztrans[3] = {0,0,0};
+MATRIX *Mtrans = NULL;
+int conformTarget = 0;
 
 /**** ------------------ main() ------------------------------- ****/
 int Register(ClientData clientData, Tcl_Interp *interp, int argc,
@@ -2358,7 +2359,7 @@ static int singledash(char *flag) {
 }
 
 /*---------------------------------------------------------------*/
-static int isflag(char *flag) {
+static int isflag(const char *flag) {
   int len;
   len = strlen(flag);
   if (len < 2)
@@ -2370,10 +2371,9 @@ static int isflag(char *flag) {
 }
 
 /*------------------------------------------------------------*/
-static int stringmatch(char *str1, char *str2) {
-  if (!strcmp(str1, str2))
-    return (1);
-  return (0);
+static int stringmatch(const char *str1, const char *str2) {
+  if (! strcmp(str1,str2)) return(1);
+  return(0);
 }
 
 /*---------------------------------------------------------------*/
@@ -5489,10 +5489,8 @@ int AllocBuffs() {
   }
   return (0);
 }
-static int istringnmatch(char *str1, char *str2, int n) {
-  if (n > 0 && !strncasecmp(str1, str2, n))
-    return (1);
-  if (n <= 0 && !strcasecmp(str1, str2))
-    return (1);
-  return (0);
+static int istringnmatch(const char *str1, const char *str2, int n) {
+  if (n > 0  && ! strncasecmp(str1,str2,n)) return(1);
+  if (n <= 0 && ! strcasecmp(str1,str2)) return(1);
+  return(0);
 }

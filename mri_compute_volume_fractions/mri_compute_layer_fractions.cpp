@@ -32,36 +32,38 @@
 #define NLAYERS 6
 #define NLABELS (nlayers + 3) // wm + cortical layers + csf + subcortical gray
 
-static int   nlayers      = NLAYERS;
-static char *LAMINAR_NAME = "gwdist";
-static char *aseg_name    = "aseg.mgz";
+static int nlayers = NLAYERS ;
+static const char *LAMINAR_NAME = "gwdist";
+static const char *aseg_name = "aseg.mgz" ;
 
-static int   noaseg       = 0;
-static char *subject_name = nullptr;
-static char *hemi         = "lh";
-int          main(int argc, char *argv[]);
-static int   get_option(int argc, char *argv[]);
+static int noaseg = 0 ;
+static char *subject_name = NULL ;
+static const char *hemi = "lh" ;
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
 
-const char *Progname;
-static void usage_exit(int code);
+const char *Progname ;
+static void usage_exit(int code) ;
 
-static int    cortex_only  = 1;
-static char   sdir[STRLEN] = "";
-static double resolution   = .5;
+static int cortex_only = 1 ;
+static char sdir[STRLEN] = "" ;
+static double resolution = .5 ;
 
-static int FS_names = 0;
+static int FS_names = 0 ;
 
-MRI *add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg,
-                                        MRI *mri_dst, int wm_val, int gm_val,
-                                        int csf_val);
-int  MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
-                                      MRI *mri_seg, MRI *mri_fractions);
-int  main(int argc, char *argv[]) {
-  char **av, fname[STRLEN];
-  int    ac, nargs, i;
-  char * subject, *reg_fname, *in_fname, *out_fname, *cp;
-  int    msec, minutes, seconds, nvox, float2int, layer, width, height, depth;
-  Timer  start;
+MRI *add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg, 
+                                        MRI *mri_dst,
+                                       int wm_val, int gm_val, int csf_val) ;
+int MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox, 
+                                     MRI *mri_seg, MRI *mri_fractions) ;
+int
+main(int argc, char *argv[]) 
+{
+  char   **av, fname[STRLEN] ;
+  int    ac, nargs, i ;
+  char   *subject, *reg_fname, *in_fname, *out_fname, *cp ;
+  int    msec, minutes, seconds, nvox, float2int, layer, width, height, depth ;
+  Timer start ;
   MRI_SURFACE *mris;
   MRI *        mri_aseg, *mri_layers, *mri_tmp, *mri_in, *mri_interior_bottom,
       *mri_interior_top, *mri_fractions;
@@ -91,30 +93,31 @@ int  main(int argc, char *argv[]) {
                 Progname);
     strcpy(sdir, cp);
   }
-  reg_fname = argv[1];
-  in_fname  = argv[2];
-  out_fname = argv[3];
-  Progname  = argv[0];
-  ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  reg_fname = argv[1] ; in_fname = argv[2] ;
+  out_fname = argv[3] ; Progname = argv[0] ;
+  ErrorInit(NULL, NULL, NULL) ;
+  DiagInit(NULL, NULL, NULL) ;
 
-  start.reset();
+  start.reset() ;
 
-  printf("reading registration file %s\n", reg_fname);
-  if (stricmp(reg_fname, "identity.nofile") == 0) {
-    printf("using identity transform\n");
-    m_regdat   = nullptr;
-    inplaneres = betplaneres = intensity = 1;
-    float2int                            = 0;
-    subject                              = "unknown";
-  } else {
-    regio_read_register(reg_fname, &subject, &inplaneres, &betplaneres,
-                        &intensity, &m_regdat, &float2int);
+  printf("reading registration file %s\n", reg_fname) ;
+  if (stricmp(reg_fname, "identity.nofile") == 0)
+  {
+    printf("using identity transform\n") ;
+    m_regdat = NULL ;
+    inplaneres = betplaneres = intensity = 1 ;
+    float2int = 0 ;
+    subject = const_cast<char*>("unknown"); // Not nice....
+  }
+  else
+  {
+    regio_read_register(reg_fname, &subject, &inplaneres,
+                        &betplaneres, &intensity,  &m_regdat,
+                        &float2int);
 
-    m_regdat = regio_read_registermat(reg_fname);
-    if (m_regdat == nullptr)
-      ErrorExit(ERROR_NOFILE, "%s: could not load registration file from %s",
-                Progname, reg_fname);
+    m_regdat = regio_read_registermat(reg_fname) ;
+    if (m_regdat == NULL)
+      ErrorExit(ERROR_NOFILE, "%s: could not load registration file from %s", Progname,reg_fname) ;
   }
 
   if (subject_name)

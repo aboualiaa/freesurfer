@@ -593,7 +593,7 @@ uname -a | tee -a $LF
 limit >> $LF
 if (-e /usr/bin/free) then
   echo "" >> $LF
-  /usr/bin/free >> $LF
+  /usr/bin/free --human >> $LF
   echo "" >> $LF
 endif
 if ("`uname -s`" == "Darwin") then
@@ -4181,15 +4181,15 @@ if($DoCortRibbonVolMask) then
   echo "#@# Cortical ribbon mask `date`" \
       |& tee -a $SF|& tee -a $LF|& tee -a $CF
   cd $subjdir/mri > /dev/null
-  set xopts = `fsr-getxopts mris_volmask $XOptsFile $GlobXOptsFile`;
-  set cmd = (mris_volmask $xopts)
-  if ($LHonly) set cmd = ($cmd --lh-only )
-  if ($RHonly) set cmd = ($cmd --rh-only )
-  set cmd = ($cmd \
-    --aseg_name aseg.presurf \
+  set cmd = (mris_volmask --aseg_name aseg.presurf \
     --label_left_white   2 --label_left_ribbon   3 \
     --label_right_white 41 --label_right_ribbon 42 \
     --save_ribbon)
+  if($LHonly) set cmd = ($cmd --lh-only )
+  if($RHonly) set cmd = ($cmd --rh-only )
+  if($OMP_NUM_THREADS > 1) set cmd = ($cmd --parallel) # just hemis
+  set xopts = `fsr-getxopts mris_volmask $XOptsFile $GlobXOptsFile`;
+  set cmd = ($cmd $xopts)
   set cmd = ($cmd $subjid)
   $PWD |& tee -a $LF
   echo "\n $cmd \n"|& tee -a $LF |& tee -a $CF
@@ -7986,8 +7986,6 @@ usage_exit:
   echo "                  and assumes a darker gm."
   echo "  -schwartzya3t-atlas : for tal reg, use special young adult 3T atlas"
   echo ""
-  echo "  -use-gpu : use GPU versions of mri_em_register, mri_ca_register,"
-  echo "             mris_inflate and mris_sphere"
   echo "  -threads num  : set number of threads to use"
   echo ""
   echo " Notification Files (Optional)"
@@ -8468,11 +8466,6 @@ BA45, V1, V2, and V5/MT (and perirhinal) by mapping labels from the
 Based on:
 "Cortical Folding Patterns and Predicting Cytoarchitecture", Fischl et al.,
 Cerebral Cortex 2007.
-
--use-gpu
-
-Use the GPU versions of the binaries mri_em_register, mri_ca_register,
-mris_inflate, and mris_sphere.
 
 -threads num
 -openmp num

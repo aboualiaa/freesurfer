@@ -49,17 +49,16 @@ int main(int argc, char *argv[]);
 
 const char *   Progname = "mris_autodet_gwstats";
 AutoDetGWStats adgws;
-char *         outfile    = nullptr;
-char *         involpath  = nullptr;
-char *         wmvolpath  = nullptr;
-char *         insurfpath = nullptr;
-char *         lhsurfpath = nullptr;
-char *         rhsurfpath = nullptr;
-char *         subject = nullptr, *insurfname = "orig",
-     *involname = "brain.finalsurfs.mgz", *wmvolname = "wm.mgz";
-char  tmpstr[2000];
-char *SUBJECTS_DIR = nullptr;
-int   hemicode     = -1;
+char *outfile = NULL;
+char *involpath=NULL;
+char *wmvolpath=NULL;
+char *insurfpath=NULL;
+char *lhsurfpath=NULL;
+char *rhsurfpath=NULL;
+const char *subject=NULL,*insurfname = "orig",*involname="brain.finalsurfs.mgz", *wmvolname="wm.mgz";
+char tmpstr[2000];
+char *SUBJECTS_DIR=NULL;
+int hemicode = -1;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {

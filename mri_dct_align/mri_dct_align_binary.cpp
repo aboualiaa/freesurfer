@@ -59,45 +59,49 @@ static double compute_global_dct_optimum(DCT *dct, MRI *mri_source,
                                          MRI *mri_target, VOXEL_LIST *vl_source,
                                          VOXEL_LIST *vl_target);
 static double compute_distance_transform_sse(VOXEL_LIST *vl_target,
-                                             VOXEL_LIST *vl_source, DCT *dct);
-static double compute_overlap(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
-                              DCT *dct);
-static double (*pf_overlap)(VOXEL_LIST *vl_target, VOXEL_LIST *vl_source,
-                            DCT *dct) = compute_overlap;
+                                             VOXEL_LIST *vl_source,DCT *dct) ;
+static double compute_overlap(VOXEL_LIST *vl_target,
+                              VOXEL_LIST *vl_source,
+                              DCT *dct) ;
+static double (*pf_overlap)(VOXEL_LIST *vl_target,
+                            VOXEL_LIST *vl_source,
+                            DCT *dct) = compute_overlap ;
 
-static int  write_snapshot(DCT *dct, MRI *mri_source, MRI *mri_target,
-                           char *fname);
-static DCT *find_optimal_dct(DCT *dct, MRI *mri_source, MRI *mri_target,
-                             VOXEL_LIST *vl_source, VOXEL_LIST *vl_target,
-                             int ncoef, int skip);
-int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box);
+static int write_snapshot(DCT *dct, MRI *mri_source, MRI *mri_target, const char *fname) ;
+static DCT *find_optimal_dct(DCT *dct, MRI *mri_source, MRI *mri_target, 
+                             VOXEL_LIST *vl_source, VOXEL_LIST *vl_target, 
+                             int ncoef,int skip) ;
+int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box) ;
 
-static void usage_exit(int ecode);
-static int  get_option(int argc, char *argv[]);
+static void  usage_exit(int ecode) ;
+static int get_option(int argc, char *argv[]) ;
 
-static char *source_intensity_fname = nullptr;
-const char * Progname;
-static int   target_label = 128;
 
-static int    skip     = 2;
-static double distance = 1.0;
+static char *source_intensity_fname = NULL ;
+const char *Progname ;
+static int target_label = 128 ;
 
-static int Gncoef = 10;
+static int skip = 2 ;
+static double distance = 1.0 ;
 
-static int non_artery_labels[] = {Left_Common_IliacV,
-                                  Right_Common_IliacV,
-                                  Left_External_IliacV,
-                                  Right_External_IliacV,
-                                  Left_Internal_IliacV,
-                                  Right_Internal_IliacV,
-                                  Left_ObturatorV,
-                                  Right_ObturatorV,
-                                  Left_Internal_PudendalV,
-                                  Right_Internal_PudendalV,
-                                  Pos_Lymph,
-                                  Neg_Lymph};
-#define NUM_NON_ARTERY_LABELS                                                  \
-  (sizeof(non_artery_labels) / sizeof(non_artery_labels[0]))
+static int Gncoef = 10 ;
+
+static int non_artery_labels[] =
+{
+	Left_Common_IliacV,
+	Right_Common_IliacV,
+	Left_External_IliacV,
+	Right_External_IliacV,
+	Left_Internal_IliacV,
+	Right_Internal_IliacV,
+	Left_ObturatorV,
+	Right_ObturatorV,
+	Left_Internal_PudendalV,
+	Right_Internal_PudendalV,
+	Pos_Lymph,
+	Neg_Lymph
+} ;
+#define NUM_NON_ARTERY_LABELS  (sizeof(non_artery_labels) / sizeof(non_artery_labels[0]))
 
 #if 0
 static int non_hippo_labels[] =
@@ -786,9 +790,10 @@ static DCT *find_optimal_dct(DCT *dct, MRI *mri_source, MRI *mri_target,
   return (dct);
 }
 
-static int write_snapshot(DCT *dct, MRI *mri_source, MRI *mri_target,
-                          char *fname) {
-  MRI *mri_aligned;
+static int
+write_snapshot(DCT *dct, MRI *mri_source, MRI *mri_target, const char *fname)
+{
+  MRI *mri_aligned ;
 
   mri_aligned = DCTapply(dct, mri_source, nullptr, nullptr, SAMPLE_NEAREST);
   printf("writing snapshot to %s\n", fname);

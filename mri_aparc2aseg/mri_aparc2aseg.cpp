@@ -94,27 +94,27 @@ static MHT *   lhwhite_hash, *rhwhite_hash;
 static MHT *   lhpial_hash, *rhpial_hash;
 static int     lhwvtx, lhpvtx, rhwvtx, rhpvtx;
 static MATRIX *Vox2RAS;
-static float   dmaxctx       = 5.0;
-static int     LabelWM       = 0;
-static int     LabelHypoAsWM = 0;
-static int     RipUnknown    = 0;
+static float dmaxctx = 5.0;
+static int LabelWM=0;
+static int LabelHypoAsWM=0;
+static int RipUnknown = 0;
 
-static char  tmpstr[2000];
-static char  annotfile[1000];
-static char *annotname  = "aparc";
-static char *asegname   = "aseg";
-static int   baseoffset = 0;
-static float hashres    = 16;
+static char tmpstr[2000];
+static char annotfile[1000];
+static const char *annotname = "aparc";
+static const char *asegname = "aseg";
+static int baseoffset = 0;
+static float hashres = 16;
 
-static int normal_smoothing_iterations = 10;
-int        crsTest = 0, ctest = 0, rtest = 0, stest = 0;
-int        UseHash = 1;
-int        DoLH = 1, DoRH = 1, LHOnly = 0, RHOnly = 0;
+static int normal_smoothing_iterations = 10 ;
+int crsTest = 0, ctest=0, rtest=0, stest=0;
+int UseHash = 1;
+int DoLH=1, DoRH=1, LHOnly=0, RHOnly=0;
 
-char *CtxSegFile = nullptr;
-MRI * CtxSeg     = nullptr;
+char *CtxSegFile = NULL;
+MRI *CtxSeg = NULL;
 
-int    FixParaHipWM = 1;
+int FixParaHipWM = 1;
 double BRFdotCheck(MRIS *surf, int vtxno, int c, int r, int s, MRI *AParc);
 int    nthreads = 1;
 

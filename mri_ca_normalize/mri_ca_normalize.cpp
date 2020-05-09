@@ -37,76 +37,75 @@ const char *Progname;
 static double extra_norm_range = 0.0;
 
 static int fill_in_sample_means(GCA_SAMPLE *gcas, GCA *gca, int nsamples);
-MRI *      normalizeChannelFromLabel(MRI *mri_in, MRI *mri_dst, MRI *mri_seg,
-                                     double *fas, int input_index);
-MRI *normalizeFromLabel(MRI *mri_in, MRI *mri_dst, MRI *mri_seg, double *fas);
-static MRI *normalize_from_segmentation_volume(MRI *mri_src, MRI *mri_dst,
-                                               MRI *mri_seg, int *structs,
-                                               int nstructs);
+MRI *normalizeChannelFromLabel
+(MRI *mri_in, MRI *mri_dst, MRI *mri_seg, double *fas, int input_index);
+MRI *normalizeFromLabel
+(MRI *mri_in, MRI *mri_dst, MRI *mri_seg, double *fas) ;
+static MRI *normalize_from_segmentation_volume
+(MRI *mri_src, MRI *mri_dst, MRI *mri_seg, int *structs, int nstructs) ;
 
-static int dilate_mask = 0;
+static int dilate_mask = 0 ;
 
-static double TRs[MAX_GCA_INPUTS];
-static double fas[MAX_GCA_INPUTS];
-static double TEs[MAX_GCA_INPUTS];
+static double TRs[MAX_GCA_INPUTS] ;
+static double fas[MAX_GCA_INPUTS] ;
+static double TEs[MAX_GCA_INPUTS] ;
 
-static int noedit            = 0;
-static int remove_cerebellum = 0;
-static int remove_lh         = 0;
-static int remove_rh         = 0;
+static int noedit = 0 ;
+static int remove_cerebellum = 0 ;
+static int remove_lh = 0 ;
+static int remove_rh = 0 ;
 
-static int    file_only                           = 0;
-static char * normalized_transformed_sample_fname = nullptr;
-static char * T2_mask_fname                       = nullptr;
-static double T2_thresh                           = 0;
-static char * aparc_aseg_fname                    = nullptr;
-static char * mask_fname                          = nullptr;
-static char * sample_fname                        = nullptr;
-static char * ctl_point_fname                     = nullptr;
-static int    novar                               = 0;
+static int file_only = 0 ;
+static char *normalized_transformed_sample_fname = NULL ;
+static char *T2_mask_fname = NULL ;
+static double T2_thresh = 0 ;
+static char *aparc_aseg_fname = NULL ;
+static char *mask_fname = NULL ;
+static char *sample_fname = NULL ;
+static char *ctl_point_fname = NULL ;
+static int novar = 0 ;
 
-static double bias_sigma = 4.0;
-static float  min_prior  = 0.6;
-static FILE * diag_fp    = nullptr;
+static double bias_sigma = 4.0 ;
+static float min_prior = 0.6 ;
+static FILE *diag_fp = NULL ;
 
-static void        usage_exit(int code);
-static int         get_option(int argc, char *argv[]);
-static int         copy_ctrl_points_to_volume(GCA_SAMPLE *gcas, int nsamples,
-                                              MRI *mri_ctrl, int frame);
-static GCA_SAMPLE *copy_ctrl_points_from_volume(GCA *gca, TRANSFORM *transform,
-                                                int *pnsamples, MRI *mri_ctrl,
-                                                int frame);
+static void usage_exit(int code) ;
+static int get_option(int argc, char *argv[]) ;
+static int copy_ctrl_points_to_volume(GCA_SAMPLE *gcas, int nsamples,
+                                      MRI *mri_ctrl, int frame) ;
+static GCA_SAMPLE *copy_ctrl_points_from_volume(GCA *gca,TRANSFORM *transform,
+    int *pnsamples, MRI *mri_ctrl,
+    int frame) ;
 
-static MRI * mri_aseg    = nullptr;
-static float aseg_thresh = 0;
+static MRI  *mri_aseg = NULL ;
+static float aseg_thresh = 0 ;
 
-static char *      seg_fname             = nullptr;
-static char *      long_seg_fname        = nullptr;
-static char *      renormalization_fname = nullptr;
-static double      TR = 0.0, TE = 0.0, alpha = 0.0;
-static char *      tissue_parms_fname   = nullptr;
-static char *      example_T1           = nullptr;
-static char *      example_segmentation = nullptr;
-static double      min_region_prior(GCA *gca, int xp, int yp, int zp, int wsize,
-                                    int label);
-static GCA_SAMPLE *find_control_points(GCA *gca, GCA_SAMPLE *gcas,
-                                       int total_nsamples, int *pnorm_samples,
-                                       int nregions, int label, MRI *mri_in,
-                                       TRANSFORM *transform, double min_prior,
-                                       double ctrl_point_pct,
-                                       char * fsample_fname);
+static char *seg_fname = NULL ;
+static char *long_seg_fname = NULL ;
+static char *renormalization_fname = NULL ;
+static double TR = 0.0, TE = 0.0, alpha = 0.0 ;
+static char *tissue_parms_fname = NULL ;
+static char *example_T1 = NULL ;
+static char *example_segmentation = NULL ;
+static double min_region_prior
+(GCA *gca, int xp, int yp, int zp, int wsize, int label) ;
+static GCA_SAMPLE *find_control_points
+(GCA *gca, GCA_SAMPLE *gcas, int total_nsamples,
+ int *pnorm_samples, int nregions, int label,
+ MRI *mri_in, TRANSFORM *transform, double min_prior,
+ double ctrl_point_pct, char *fsample_fname) ;
 
-static GCA_SAMPLE *gcas_concatenate(GCA_SAMPLE *gcas1, GCA_SAMPLE *gcas2,
-                                    int n1, int n2);
-static int         gcas_bounding_box(GCA_SAMPLE *gcas, int nsamples, int *pxmin,
-                                     int *pymin, int *pzmin, int *pxmax, int *pymax,
-                                     int *pzmax, int label);
-static int uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform, int x,
-                          int y, int z, int wsize, GCA_SAMPLE *gcas,
-                          float nsigma);
-static int discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas_struct,
-                                           int struct_samples, MRI *mri_in,
-                                           TRANSFORM *transform, char *name);
+static GCA_SAMPLE *gcas_concatenate
+(GCA_SAMPLE *gcas1, GCA_SAMPLE *gcas2, int n1, int n2);
+static int  gcas_bounding_box
+(GCA_SAMPLE *gcas, int nsamples, int *pxmin, int *pymin, int *pzmin,
+ int *pxmax, int *pymax, int *pzmax, int label) ;
+static int  uniform_region
+(GCA *gca, MRI *mri, TRANSFORM *transform,
+ int x, int y, int z, int wsize, GCA_SAMPLE *gcas, float nsigma) ;
+static int  discard_unlikely_control_points
+(GCA *gca, GCA_SAMPLE *gcas_struct, int struct_samples,
+ MRI *mri_in, TRANSFORM *transform, const char *name) ;
 
 /*
   command line consists of three inputs:
@@ -1353,13 +1352,14 @@ static int uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform, int x,
   return (1);
 }
 
-static int discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas,
-                                           int nsamples, MRI *mri_in,
-                                           TRANSFORM *transform, char *name) {
-  int    i, xv, yv, zv, n, peak, start, end, num;
-  HISTO *h, *hsmooth;
-  float  fmin, fmax;
-  double val, mean_ratio, min_T1, max_T1;
+static int
+discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas, int nsamples,
+                                MRI *mri_in, TRANSFORM *transform, const char *name)
+{
+  int    i, xv, yv, zv, n, peak, start, end, num ;
+  HISTO *h, *hsmooth ;
+  float  fmin, fmax ;
+  double val,  mean_ratio, min_T1, max_T1 ;
 
   if (nsamples == 0)
     return (NO_ERROR);

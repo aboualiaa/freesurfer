@@ -53,16 +53,16 @@ typedef struct {
 // Structure to help create an average surface
 typedef struct {
   char **subjectlist;
-  int    nsubjects;
-  MRIS * targsurfreg;    // an actual surface to use as the target registration
-  int    icoorder;       // only use if targsurfreg not spec
-  char * targsubject;    // only use if targsurfreg and icoorder not spec
-  char * hemi;           // lh or rh
-  char * surfname;       // eg, white
-  char * surfregname;    // eg, sphere.reg
-  char * xform_name;     // eg, talairach.xfm
-  int    ReverseMapFlag; // map unmapped vertices in the source, generally 1
-  int    UseHash;        // use hash table for speed, generally 1
+  int nsubjects;
+  MRIS *targsurfreg; // an actual surface to use as the target registration
+  int  icoorder; // only use if targsurfreg not spec
+  const char *targsubject; // only use if targsurfreg and icoorder not spec
+  const char *hemi; // lh or rh
+  const char *surfname; // eg, white
+  const char *surfregname; // eg, sphere.reg
+  const char *xform_name; // eg, talairach.xfm
+  int ReverseMapFlag; // map unmapped vertices in the source, generally 1
+  int UseHash; // use hash table for speed, generally 1
 } AVERAGE_SURFACE_PARAMS;
 MRIS *                  MakeAverageSurf(AVERAGE_SURFACE_PARAMS *asp);
 AVERAGE_SURFACE_PARAMS *MRISaverageSurfaceParamAlloc(int nsubjects);
@@ -78,15 +78,15 @@ MRI * MRISpeelVolume(MRIS *mris, MRI *mri_src, MRI *mri_dst, int type,
 MRIS *MRISmatchSurfaceToLabel(MRIS *mris, MRI *mri_seg, int label,
                               MRI_REGION *       mri_region,
                               INTEGRATION_PARMS *integration_parms,
-                              int                connectivity);
-MRIS *MRISloadSurfSubject(char *subj, char *hemi, char *surfid,
-                          char *SUBJECTS_DIR);
-int   MRISfdr2vwth(MRIS *surf, double fdr, int signid, int log10flag,
-                   int maskflag, double *vwth);
+                              int connectivity);
+MRIS *MRISloadSurfSubject(const char *subj, const char *hemi, const char *surfid,
+                          const char *SUBJECTS_DIR);
+int MRISfdr2vwth(MRIS *surf, double fdr, int signid,
+                 int log10flag, int maskflag, double *vwth);
 
 int    MRISfwhm2niters(double fwhm, MRIS *surf);
 double MRISniters2fwhm(int niters, MRIS *surf);
-int MRISfwhm2nitersSubj(double fwhm, char *subject, char *hemi, char *surfname);
+int MRISfwhm2nitersSubj(double fwhm, const char *subject, const char *hemi, const char *surfname);
 double MRISfwhmFromAR1(MRIS *surf, double ar1);
 int    MRISseg2annot(MRIS *mris, MRI *surfseg, COLOR_TABLE *ctab);
 MRI *  MRISannotIndex2Seg(MRIS *mris);

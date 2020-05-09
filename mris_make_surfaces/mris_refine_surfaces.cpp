@@ -62,8 +62,8 @@ static LABEL *    hires_label = nullptr;
 static TRANSFORM *hires_xform = nullptr;
 static LTA *      hires_lta   = nullptr;
 
-static char *orig_white = "white";
-static char *orig_pial  = nullptr;
+static const char *orig_white = "white";
+static char *orig_pial = NULL ;
 
 const char *Progname;
 
@@ -99,7 +99,7 @@ static int nowhite    = 0;
 static int nbrs       = 2;
 static int write_vals = 0;
 
-static char *orig_name = ORIG_NAME;
+static const char *orig_name = ORIG_NAME ;
 
 static char output_suffix[STRLEN]     = "hires";
 static char pial_name[STRLEN]         = "pial";

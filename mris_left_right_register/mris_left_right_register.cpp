@@ -33,45 +33,55 @@ static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
-static char *surface_names[]   = {"inflated", "smoothwm", "smoothwm"};
-static char *curvature_names[] = {"inflated.H", "sulc", NULL};
+static const char *surface_names[] =
+{
+  "inflated",
+  "smoothwm",
+  "smoothwm"
+} ;
+static const char *curvature_names[] =
+{
+  "inflated.H",
+  "sulc",
+  NULL
+} ;
 
 #define MAX_SIGMAS 10
-static int   nsigmas = 0;
-static float sigmas[MAX_SIGMAS];
+static int nsigmas=0 ;
+static float sigmas[MAX_SIGMAS] ;
 
-#define IMAGES_PER_SURFACE 3 /* mean, variance, and dof */
-#define SURFACES           sizeof(curvature_names) / sizeof(curvature_names[0])
-#define PARAM_IMAGES       (IMAGES_PER_SURFACE * SURFACES)
+#define IMAGES_PER_SURFACE   3   /* mean, variance, and dof */
+#define SURFACES         sizeof(curvature_names) / sizeof(curvature_names[0])
+#define PARAM_IMAGES         (IMAGES_PER_SURFACE*SURFACES)
 
-static char * starting_reg_fname = nullptr;
-static int    multi_scale        = 0;
-static int    which_norm         = NORM_MEAN;
-static int    single_surf        = 0;
-static double l_ocorr            = 1.0;
-static char * annot_name         = nullptr;
-static int    max_passes         = 4;
-static float  min_degrees        = 0.5;
-static float  max_degrees        = 64.0;
-static int    nangles            = 8;
-static int    nbrs               = 1;
-static float  scale              = 1.0f;
+static char *starting_reg_fname = NULL ;
+static int multi_scale = 0 ;
+static int which_norm = NORM_MEAN ;
+static int single_surf = 0 ;
+static double l_ocorr = 1.0 ;
+static char *annot_name = NULL ;
+static int max_passes = 4 ;
+static float min_degrees = 0.5 ;
+static float max_degrees = 64.0 ;
+static int nangles = 8 ;
+static int nbrs = 1 ;
+static float scale = 1.0f ;
 
-static int target_hemi  = LEFT_HEMISPHERE;
-static int reverse_flag = 0;
+static int target_hemi = LEFT_HEMISPHERE ;
+static int reverse_flag = 0 ;
 
-static float dalpha = 0.0f;
-static float dbeta  = 0.0f;
-static float dgamma = 0.0f;
+static float dalpha = 0.0f ;
+static float dbeta = 0.0f ;
+static float dgamma = 0.0f ;
 
-static int navgs = 0;
+static int navgs = 0 ;
 
-const char * Progname;
-static char  curvature_fname[STRLEN] = "";
-static char *orig_name               = "smoothwm";
-static char *canon_name              = "sphere";
-static char *jacobian_fname          = nullptr;
-static char *inflated_name           = nullptr;
+const char *Progname ;
+static char curvature_fname[STRLEN] = "" ;
+static const char *orig_name = "smoothwm" ;
+static const char *canon_name = "sphere" ;
+static char *jacobian_fname = NULL ;
+static char *inflated_name = NULL ;
 
 #define MAX_LABELS 100
 static int    nlabels = 0;
@@ -192,35 +202,35 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not read rh original properties from %s",
               Progname, orig_name);
   if (MRISreadCanonicalCoordinates(mris_rh, canon_name) != NO_ERROR)
-    ErrorExit(ERROR_BADFILE, "%s: could not read rh canon surface %s", Progname,
-              canon_name);
+    ErrorExit(ERROR_BADFILE, "%s: could not read rh canon surface %s", Progname, canon_name) ;
 
-  if (target_hemi == LEFT_HEMISPHERE) {
-    MRISreverse(mris_rh, REVERSE_X, 1);
-    MRISreverseCoords(mris_rh, REVERSE_X, 0,
-                      CANONICAL_VERTICES); // only reverse faces once
-    MRISreverseCoords(mris_rh, REVERSE_X, 0,
-                      ORIGINAL_VERTICES); // only reverse faces once
-  } else {
-    MRISreverse(mris_lh, REVERSE_X, 1);
-    MRISreverseCoords(mris_lh, REVERSE_X, 0, CANONICAL_VERTICES);
-    MRISreverseCoords(mris_lh, REVERSE_X, 0, ORIGINAL_VERTICES);
-  }
-  for (i = 0; i < 3; i++) {
-    lh_coords[i] = (float *)calloc(mris_lh->nvertices, sizeof(float));
-    if (lh_coords[i] == nullptr)
-      ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d lh coords", Progname,
-                mris_lh->nvertices);
-    rh_coords[i] = (float *)calloc(mris_rh->nvertices, sizeof(float));
-    if (rh_coords[i] == nullptr)
-      ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d rh coords", Progname,
-                mris_rh->nvertices);
-  }
 
-  for (h = LEFT_HEMISPHERE; h <= RIGHT_HEMISPHERE;
-       h++) // register left to right and right to left
+  if (target_hemi == LEFT_HEMISPHERE)
   {
-    char surf_dir[STRLEN], *template_fname, *template_hemi;
+    MRISreverse(mris_rh, REVERSE_X, 1) ;
+    MRISreverseCoords(mris_rh, REVERSE_X, 0, CANONICAL_VERTICES) ;  // only reverse faces once
+    MRISreverseCoords(mris_rh, REVERSE_X, 0, ORIGINAL_VERTICES) ;  // only reverse faces once
+  }
+  else
+  {
+    MRISreverse(mris_lh, REVERSE_X, 1) ;
+    MRISreverseCoords(mris_lh, REVERSE_X, 0, CANONICAL_VERTICES) ;
+    MRISreverseCoords(mris_lh, REVERSE_X, 0, ORIGINAL_VERTICES) ;
+  }
+  for (i = 0 ; i < 3 ; i++)
+  {
+    lh_coords[i] = (float *)calloc(mris_lh->nvertices, sizeof(float)) ;
+    if (lh_coords[i] == NULL)
+      ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d lh coords", Progname, mris_lh->nvertices) ;
+    rh_coords[i] = (float *)calloc(mris_rh->nvertices, sizeof(float)) ;
+    if (rh_coords[i] == NULL)
+      ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d rh coords", Progname, mris_rh->nvertices) ;
+  }
+
+  for (h = LEFT_HEMISPHERE ; h <= RIGHT_HEMISPHERE ; h++)   // register left to right and right to left
+  {
+    char surf_dir[STRLEN], *template_fname;
+    const char *template_hemi ;
 
     mrisp_template = MRISPalloc(scale, PARAM_IMAGES);
     if (h == LEFT_HEMISPHERE) // we are moving the lh
@@ -428,17 +438,20 @@ static int get_option(int argc, char *argv[]) {
     surface_names[0] = argv[2];
     nargs            = 1;
     printf("using %s as inflated surface name, "
-           "and using it for initial alignment\n",
-           inflated_name);
-    sprintf(fname, "%s.H", argv[2]);
-    curvature_names[0] = (char *)calloc(strlen(fname) + 1, sizeof(char));
-    strcpy(curvature_names[0], fname);
-    parms.flags |= IP_USE_INFLATED;
-  } else if (!stricmp(option, "nosulc")) {
-    fprintf(stderr, "disabling initial sulc alignment...\n");
-    parms.flags |= IP_NO_SULC;
-  } else if (!stricmp(option, "sulc")) {
-    curvature_names[1] = argv[2];
+           "and using it for initial alignment\n", inflated_name) ;
+    sprintf(fname, "%s.H", argv[2]) ;
+    curvature_names[0] = (char *)calloc(strlen(fname)+1, sizeof(char)) ;
+    strcpy(const_cast<char*>(curvature_names[0]), fname) ; // strcpy???? And the const_cast is.... ugly
+    parms.flags |= IP_USE_INFLATED ;
+  }
+  else if (!stricmp(option, "nosulc"))
+  {
+    fprintf(stderr, "disabling initial sulc alignment...\n") ;
+    parms.flags |= IP_NO_SULC ;
+  }
+  else if (!stricmp(option, "sulc"))
+  {
+    curvature_names[1] = argv[2] ;
     fprintf(stderr, "using %s to replace 'sulc' alignment\n",
             curvature_names[1]);
     nargs = 1;
@@ -622,9 +635,9 @@ static int get_option(int argc, char *argv[]) {
       printf("setting l_external = %2.1f\n", parms.l_external);
       break;
     case 'C':
-      strcpy(curvature_fname, argv[2]);
-      nargs = 1;
-      break;
+      strncpy(curvature_fname, argv[2], STRLEN) ; // Convert to strncpy at least
+      nargs = 1 ;
+      break ;
     case 'A':
       sscanf(argv[2], "%d", &parms.n_averages);
       nargs = 1;

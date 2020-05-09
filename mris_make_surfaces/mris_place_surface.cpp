@@ -128,21 +128,21 @@ double round(double x);
 
 class RIP_MNGR {
 public:
-  int    RipVertices(void);
-  MRIS * surf;
-  MRI *  seg, *invol;
-  char * hemi;
-  int    RipFreeze = 1;
-  int    RipLesion = 0;
-  int    RipWMSA   = 0;
-  int    nRipSegs  = 0;
-  int    RipSegNo[100];
-  int    RipBG        = 0;
-  int    RipMidline   = 1;
-  char * riplabelfile = NULL;
-  char * ripsurffile  = NULL;
-  MRIS * ripsurf;
-  char * aparcpath = NULL;
+  int RipVertices(void);
+  MRIS *surf;
+  MRI *seg, *invol;
+  const char *hemi;
+  int RipFreeze = 1;
+  int RipLesion = 0;
+  int RipWMSA = 0;
+  int nRipSegs= 0;
+  int RipSegNo[100];
+  int RipBG = 0;
+  int RipMidline = 1;
+  char *riplabelfile = NULL;
+  char *ripsurffile=NULL;
+  MRIS *ripsurf;
+  char *aparcpath=NULL;
   double dmin = -2.0, dmax = +2.0, dstep = 0.5;
 };
 
@@ -168,39 +168,39 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "mris_place_surfaces";
 
-INTEGRATION_PARMS parms, old_parms;
-int               lh_label = LH_LABEL;
-int               rh_label = RH_LABEL;
-double            mid_gray = 67.5;
+INTEGRATION_PARMS parms, old_parms ;
+int lh_label = LH_LABEL ;
+int rh_label = RH_LABEL ;
+double mid_gray = 67.5;
 
-int   max_pial_averages  = 16;
-int   min_pial_averages  = 2;
-int   max_white_averages = 4;
-int   min_white_averages = 0;
-float pial_sigma         = 2.0f;
-float white_sigma        = 2.0f;
-float max_cbv_dist       = 5.0; // same as max_thickness in MMS
-int   vavgs              = 5;
-int   nthreads           = 1;
-int   nbrs               = 2;
-int   nsmoothsurf        = 0;
+int max_pial_averages = 16 ;
+int min_pial_averages = 2 ;
+int max_white_averages = 4 ;
+int min_white_averages = 0 ;
+float pial_sigma = 2.0f ;
+float white_sigma = 2.0f ;
+float max_cbv_dist = 5.0 ; // same as max_thickness in MMS
+int vavgs = 5 ;
+int nthreads = 1;
+int nbrs = 2;
+int nsmoothsurf = 0 ;
 
-char * SUBJECTS_DIR;
-char * insurfpath      = NULL;
-char * blendsurfpath   = NULL;
-double blendweight     = 0;
-char * outsurfpath     = NULL;
-char * involpath       = NULL;
-char * segvolpath      = NULL;
-char * wmvolpath       = NULL;
-char * aparcpath       = NULL;
-char * repulsesurfpath = NULL;
-char * whitesurfpath   = NULL;
+char *SUBJECTS_DIR;
+char *insurfpath = NULL;
+char *blendsurfpath = NULL;
+double blendweight = 0;
+char *outsurfpath = NULL;
+char *involpath=NULL;
+char *segvolpath=NULL;
+char *wmvolpath=NULL;
+char *aparcpath=NULL;
+char *repulsesurfpath = NULL;
+char *whitesurfpath = NULL;
 
-// These are for when using subject
-char *subject = NULL, *hemi = NULL, *insurfname = NULL, *outsurfname = NULL;
-char *involname = "brain.finalsurfs.mgz", *segvolname = "aseg.presurf.mgz",
-     *wmvolname = "wm.mgz", *aparcname = "aparc";
+// These are for when using subject 
+char *subject = NULL, *insurfname = NULL, *outsurfname = NULL;
+const char* hemi = NULL;
+const char *involname="brain.finalsurfs.mgz", *segvolname="aseg.presurf.mgz",*wmvolname="wm.mgz",*aparcname="aparc";
 
 char tmpstr[2000];
 int  err = 0;
@@ -734,9 +734,9 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  if (ripflagout) {
-    printf("Writing ripflagout to %s\n", ripflagout);
-    char *field = "ripflag";
+  if(ripflagout){
+    printf("Writing ripflagout to %s\n",ripflagout);
+    const char *field = "ripflag";    
     MRISwriteField(surf, &field, 1, ripflagout);
   }
 

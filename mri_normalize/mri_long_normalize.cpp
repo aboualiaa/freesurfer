@@ -47,9 +47,9 @@ static float min_intensity = 95 ;
 
 static int intensity_pad = 2;
 
-static char *mask_fname = nullptr;
-static char *aseg_name  = "aseg.mgz";
-static char *brain_name = "brain.mgz";
+static char *mask_fname = NULL ;
+static const char *aseg_name = "aseg.mgz" ;
+static const char *brain_name = "brain.mgz" ;
 
 static char *control_volume_fname = nullptr;
 ;

@@ -31,31 +31,31 @@
 #include "timer.h"
 #include "version.h"
 
-int        main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static int postprocess(GCSA *gcsa, MRI_SURFACE *mris);
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
+static int postprocess(GCSA *gcsa, MRI_SURFACE *mris) ;
 
-const char *Progname;
-static void usage_exit(int code);
-static void print_help(void);
-static void print_version(void);
+const char *Progname ;
+static void usage_exit(int code) ;
+static void print_help(void) ;
+static void print_version(void) ;
 
-static int    which_norm   = NORM_MEAN;
-static double MIN_AREA_PCT = 0.1;
-static char * read_fname   = NULL;
-static char * prob_fname   = NULL;
-static int    nbrs         = 2;
-static int    filter       = 10;
-static char * orig_name    = "smoothwm";
-static MRI *  mri_aseg;
-static char * surf_dir = "surf";
+static int which_norm = NORM_MEAN ;
+static double MIN_AREA_PCT = 0.1 ;
+static char *read_fname = NULL ;
+static char *prob_fname = NULL ;
+static int nbrs = 2 ;
+static int filter = 10 ;
+static const char *orig_name = "smoothwm" ;
+static MRI  *mri_aseg ;
+static const char *surf_dir = "surf" ;
 
 #if 0
 static int normalize_flag = 0 ;
 static int navgs = 5 ;
 static char *curv_name = "curv" ;
-static char *thickness_name = "thickness" ;
-static char *sulc_name = "sulc" ;
+static const char *thickness_name = "thickness" ;
+static const char *sulc_name = "sulc" ;
 #endif
 
 static char  subjects_dir[STRLEN];

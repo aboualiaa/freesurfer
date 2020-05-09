@@ -34,37 +34,40 @@ int main(int argc, char *argv[]);
 
 static int get_option(int argc, char *argv[]);
 /*static void usage_exit(void) ;*/
-static void print_usage();
-static void print_help();
-static void print_version();
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
 
-static int mrisComputeSulcInMM(MRI_SURFACE *mris);
+static int mrisComputeSulcInMM(MRI_SURFACE *mris) ;
 
-const char *Progname;
+const char *Progname ;
 
-static INTEGRATION_PARMS parms;
-static int               talairach_flag     = 0;
-static int               nbrs               = 2;
-static int               navgs              = 0;
-static int               DEFAULT_ITERATIONS = 10;
-static float             DEFAULT_DIST       = 0.1f;
+static INTEGRATION_PARMS  parms ;
+static int talairach_flag = 0 ;
+static int nbrs = 2 ;
+static int navgs = 0 ;
+static int DEFAULT_ITERATIONS = 10;
+static float DEFAULT_DIST = 0.1f;
 
-#define BASE_DT_SCALE 1.0
-static float base_dt_scale = BASE_DT_SCALE;
+#define BASE_DT_SCALE    1.0
+static float base_dt_scale = BASE_DT_SCALE ;
 
-static int   SaveSulc        = 1;
-static int   compute_sulc_mm = 0;
-static int   scale_brain     = 1;
-static char *sulc_name       = "sulc";
-char *       rusage_file     = nullptr;
+static int SaveSulc = 1;
+static int compute_sulc_mm = 0 ;
+static int scale_brain = 1 ;
+static const char *sulc_name = "sulc" ;
+char *rusage_file=NULL;
 
-int main(int argc, char *argv[]) {
-  char **      av, *in_fname, *out_fname, fname[STRLEN], *cp, path[STRLEN];
-  int          ac, nargs;
-  MRI_SURFACE *mris;
-  int          msec;
-  Timer        then;
-  float        radius;
+int
+main(int argc, char *argv[])
+{
+  char         **av, *in_fname, *out_fname, fname[STRLEN], *cp, path[STRLEN] ;
+  int          ac, nargs ;
+  MRI_SURFACE  *mris ;
+  int           msec ;
+  Timer then ;
+  float         radius ;
+
 
   std::string cmdline = getAllInfo(argc, argv, "mris_inflate");
 

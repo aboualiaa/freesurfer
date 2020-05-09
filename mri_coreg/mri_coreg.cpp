@@ -56,16 +56,16 @@ int         checkoptsonly = 0;
 struct utsname uts;
 
 typedef struct {
-  char * mov;
-  char * ref;
-  char * refmask;
-  char * movmask;
-  char * outreg;
-  char * regdat;
-  char * subject;
-  int    DoCoordDither;
-  int    DoIntensityDither;
-  int    dof;
+  char *mov;
+  const char *ref;
+  const char *refmask;
+  char *movmask;
+  char *outreg;
+  char *regdat;
+  char *subject;
+  int DoCoordDither;
+  int DoIntensityDither;
+  int dof;
   double params[12];
   int    nsep, seplist[10];
   int    DoInitCostOnly;
@@ -83,9 +83,9 @@ typedef struct {
   double fwhmc, fwhmr, fwhms;
   int    SmoothRef;
   double SatPct;
-  int    MovOOBFlag;
-  char * rusagefile;
-  int    optschema;
+  int MovOOBFlag;
+  const char *rusagefile;
+  int optschema;
 } CMDARGS;
 
 CMDARGS *cmdargs;
@@ -102,11 +102,10 @@ int      conv1dmatTest();
 double * conv1d(double *v1, int n1, double *v2, int n2, double *vc);
 
 double **AllocDoubleMatrix(int rows, int cols);
-int      FreeDoubleMatrix(double **M, int rows, int cols);
-int WriteDoubleMatrix(char *fname, char *fmt, double **M, int rows, int cols);
-int PrintDoubleMatrix(FILE *fp, char *fmt, double **M, int rows, int cols);
-double *SumVectorDoubleMatrix(double **M, int rows, int cols, int dim,
-                              double *sumvect, int *nv);
+int FreeDoubleMatrix(double **M, int rows, int cols);
+int WriteDoubleMatrix(const char *fname, const char *fmt, double **M, int rows, int cols);
+int PrintDoubleMatrix(FILE *fp, const char *fmt, double **M, int rows, int cols);
+double *SumVectorDoubleMatrix(double **M, int rows, int cols, int dim, double *sumvect, int *nv);
 
 typedef struct {
   MRI *          ref, *mov, *refmask, *movmask;
@@ -1277,13 +1276,38 @@ static int parse_commandline(int argc, char **argv) {
   \fn double **AllocDoubleMatrix(int rows, int cols)
   Just a simple routine to allocate a matrix
 */
-  double **AllocDoubleMatrix(int rows, int cols) {
-    double **M;
-    int      r;
-    M = (double **)calloc(rows, sizeof(double *));
-    for (r = 0; r < rows; r++)
-      M[r] = (double *)calloc(cols, sizeof(double));
-    return (M);
+double **AllocDoubleMatrix(int rows, int cols)
+{
+  double **M;
+  int r;
+  M = (double **) calloc(rows,sizeof(double*));
+  for(r=0; r < rows; r++)
+    M[r] = (double *) calloc(cols,sizeof(double));
+  return(M);
+}
+
+int FreeDoubleMatrix(double **M, int rows, int cols)
+{
+  int r;
+  for(r=0; r < rows; r++) free(M[r]);
+  free(M);
+  return(0);
+}
+int WriteDoubleMatrix(const char *fname, const char *fmt, double **M, int rows, int cols)
+{
+  FILE *fp;
+  fp = fopen(fname,"w");
+  PrintDoubleMatrix(fp, fmt, M, rows, cols);
+  fclose(fp);
+  return(0);
+}
+int PrintDoubleMatrix(FILE *fp, const char *fmt, double **M, int rows, int cols)
+{
+  int r,c;
+  if(fmt==NULL) fmt = "%20.10lf";
+  for(r=0; r < rows; r++){
+    for(c=0; c < cols; c++) fprintf(fp,fmt,M[r][c]);
+    fprintf(fp,"\n");
   }
 
   int FreeDoubleMatrix(double **M, int rows, int cols) {

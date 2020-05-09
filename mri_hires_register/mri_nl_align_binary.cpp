@@ -40,9 +40,9 @@
 
 static int PADVOX = 1;
 
-static int check_angio_labels(MRI *mri_source, MRI *mri_target);
-static int find_gcam_node(GCA_MORPH *gcam, int label, float x_ras, float y_ras,
-                          float z_ras);
+static int check_angio_labels(MRI *mri_source, MRI *mri_target) ;
+static int find_gcam_node(GCA_MORPH *gcam, int label, 
+			  float x_ras, float y_ras, float z_ras) ;
 
 static int   surf_flag          = 0;
 static float smooth_intensities = -1.0;
@@ -62,75 +62,80 @@ int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box);
 #if 0
 static MRI *estimate_densities(GCA_MORPH *gcam, MRI *mri_target, MRI *mri_intensity, MRI *mri_src) ;
 #endif
-static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
-                          GCA_MORPH_PARMS *parms, int fno, int conform,
-                          char *fname);
+static int write_snapshot(MRI *mri_target, MRI *mri_source, 
+			  MATRIX *m_vox_xform, GCA_MORPH_PARMS *parms, 
+			  int fno, int conform, const char *fname) ;
 
-static int regrid = 0;
+static int regrid = 0 ;
 
-static void usage_exit(int ecode);
-static int  get_option(int argc, char *argv[]);
+static void  usage_exit(int ecode) ;
+static int get_option(int argc, char *argv[]) ;
 
-static char *source_intensity_fname = nullptr;
-const char * Progname;
-static int   target_label = 128;
 
-static int    skip     = 2;
-static double distance = 1.0;
+static char *source_intensity_fname = NULL ;
+const char *Progname ;
+static int target_label = 128 ;
 
-static int non_artery_labels[] = {Left_Common_IliacV,
-                                  Right_Common_IliacV,
-                                  Left_External_IliacV,
-                                  Right_External_IliacV,
-                                  Left_Internal_IliacV,
-                                  Right_Internal_IliacV,
-                                  Left_ObturatorV,
-                                  Right_ObturatorV,
-                                  Left_Internal_PudendalV,
-                                  Right_Internal_PudendalV,
-                                  Pos_Lymph,
-                                  Neg_Lymph};
-#define NUM_NON_ARTERY_LABELS                                                  \
-  (sizeof(non_artery_labels) / sizeof(non_artery_labels[0]))
+static int skip = 2 ;
+static double distance = 1.0 ;
 
-static int non_hippo_labels[] = {entorhinal_cortex,
-                                 Amygdala,
-                                 Cerebral_White_Matter,
-                                 Cerebral_Cortex,
-                                 lateral_ventricle,
-                                 Inf_Lat_Vent,
-                                 Left_Cerebral_Cortex,
-                                 Right_Cerebral_Cortex,
-                                 Left_Cerebral_White_Matter,
-                                 Right_Cerebral_White_Matter,
-                                 Left_Inf_Lat_Vent,
-                                 Right_Inf_Lat_Vent,
-                                 Right_Lateral_Ventricle,
-                                 Left_Lateral_Ventricle,
-                                 Left_Thalamus_Proper,
-                                 Right_Thalamus_Proper,
-                                 Left_Thalamus,
-                                 Right_Thalamus,
-                                 Left_choroid_plexus,
-                                 Right_choroid_plexus,
-                                 Left_Amygdala,
-                                 Right_Amygdala,
-                                 Right_Pallidum,
-                                 Left_Pallidum,
-                                 Right_Putamen,
-                                 Left_Putamen,
-                                 Right_VentralDC,
-                                 Left_VentralDC,
-                                 Brain_Stem,
-                                 left_fornix,
-                                 right_fornix};
+static int non_artery_labels[] =
+{
+	Left_Common_IliacV,
+	Right_Common_IliacV,
+	Left_External_IliacV,
+	Right_External_IliacV,
+	Left_Internal_IliacV,
+	Right_Internal_IliacV,
+	Left_ObturatorV,
+	Right_ObturatorV,
+	Left_Internal_PudendalV,
+	Right_Internal_PudendalV,
+	Pos_Lymph,
+	Neg_Lymph
+} ;
+#define NUM_NON_ARTERY_LABELS  (sizeof(non_artery_labels) / sizeof(non_artery_labels[0]))
 
-#define NUM_NON_HIPPO_LABELS                                                   \
-  (sizeof(non_hippo_labels) / sizeof(non_hippo_labels[0]))
-static int target_aseg_label = Right_Hippocampus;
+static int non_hippo_labels[] =
+{
+	entorhinal_cortex,
+	Amygdala,
+	Cerebral_White_Matter,
+	Cerebral_Cortex,
+	lateral_ventricle,
+	Inf_Lat_Vent,
+	Left_Cerebral_Cortex,
+	Right_Cerebral_Cortex,
+	Left_Cerebral_White_Matter,
+	Right_Cerebral_White_Matter,
+	Left_Inf_Lat_Vent,
+	Right_Inf_Lat_Vent,
+	Right_Lateral_Ventricle,
+	Left_Lateral_Ventricle,
+	Left_Thalamus_Proper,
+	Right_Thalamus_Proper,
+	Left_Thalamus,
+	Right_Thalamus,
+	Left_choroid_plexus,
+	Right_choroid_plexus,
+	Left_Amygdala,
+	Right_Amygdala,
+	Right_Pallidum,
+	Left_Pallidum,
+	Right_Putamen,
+	Left_Putamen,
+	Right_VentralDC,
+	Left_VentralDC,
+	Brain_Stem,
+  left_fornix,
+  right_fornix
+} ;
 
-static TRANSFORM *     transform = nullptr;
-static GCA_MORPH_PARMS mp;
+#define NUM_NON_HIPPO_LABELS  (sizeof(non_hippo_labels) / sizeof(non_hippo_labels[0]))
+static int target_aseg_label = Right_Hippocampus ;
+
+static TRANSFORM  *transform = NULL ;
+static GCA_MORPH_PARMS mp ;
 
 #define NONE  0
 #define ANGIO 1
@@ -852,30 +857,39 @@ static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
   MRI *mri_aligned;
   char fname[STRLEN];
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
-    printf("source->target vox->vox transform:\n");
-    MatrixPrint(stdout, m_vox_xform);
-  }
-  if (conform) {
-    mri_aligned = MRIclone(mri_target, nullptr);
-    MRIlinearTransformInterp(mri_source, mri_aligned, m_vox_xform,
-                             SAMPLE_NEAREST);
-  } else {
-    mri_aligned =
-        MRITransformedCenteredMatrix(mri_source, mri_target, m_vox_xform);
-  }
-  if (in_fname)
-    sprintf(fname, "%s_%s", parms->base_name, in_fname);
-  else
-    sprintf(fname, "%s_%03d", parms->base_name, fno);
-  MRIwriteImageViews(mri_aligned, fname, IMAGE_SIZE);
-  if (in_fname)
-    sprintf(fname, "%s_%s.mgz", parms->base_name, in_fname);
-  else
-    sprintf(fname, "%s_%03d.mgz", parms->base_name, fno);
-  printf("writing snapshot to %s...\n", fname);
-  MRIwrite(mri_aligned, fname);
-  MRIfree(&mri_aligned);
+static int
+write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform, 
+	       GCA_MORPH_PARMS *parms, int fno, int conform, const char *in_fname)
+{
+	MRI *mri_aligned ;
+	char fname[STRLEN] ;
+
+	if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+	{
+		printf("source->target vox->vox transform:\n") ;
+		MatrixPrint(stdout, m_vox_xform) ;
+	}
+	if (conform)
+	{
+		mri_aligned = MRIclone(mri_target, NULL) ;
+		MRIlinearTransformInterp(mri_source, mri_aligned, m_vox_xform, SAMPLE_NEAREST);
+	}
+	else
+	{
+		mri_aligned = MRITransformedCenteredMatrix(mri_source, mri_target, m_vox_xform) ;
+	}
+	if (in_fname)
+		sprintf(fname, "%s_%s", parms->base_name, in_fname) ;
+	else
+		sprintf(fname, "%s_%03d", parms->base_name, fno) ;
+	MRIwriteImageViews(mri_aligned, fname, IMAGE_SIZE) ;
+	if (in_fname)
+		sprintf(fname, "%s_%s.mgz", parms->base_name, in_fname) ;
+	else
+		sprintf(fname, "%s_%03d.mgz", parms->base_name, fno) ;
+	printf("writing snapshot to %s...\n", fname) ;
+	MRIwrite(mri_aligned, fname) ;
+	MRIfree(&mri_aligned) ;
 
   {
 #if 0

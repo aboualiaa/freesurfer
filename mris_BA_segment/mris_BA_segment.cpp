@@ -45,13 +45,15 @@ static double MT_radius_std  = 1.13; // mm from Zilles data set
 static LABEL *segment_MT(MRI_SURFACE *mris, MRI *mri, LABEL *lprior,
                          double MT_radius_mean, double MT_radius_std);
 
-static char *white_name = "white";
-int          main(int argc, char *argv[]) {
-  char **      av, *out_name, *surf_name, *profile_name, *prior_name;
-  int          ac, nargs;
-  MRI_SURFACE *mris;
-  LABEL *      lprior, *lout;
-  MRI *        mri;
+static const char *white_name = "white" ;
+int
+main(int argc, char *argv[]) 
+{
+  char          **av, *out_name, *surf_name, *profile_name, *prior_name ;
+  int           ac, nargs ;
+  MRI_SURFACE   *mris ;
+  LABEL         *lprior, *lout ;
+  MRI           *mri ;
 
   nargs = handleVersionOption(argc, argv, "mris_BA_segment");
   if (nargs && argc - nargs == 1)
