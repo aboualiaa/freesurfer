@@ -111,12 +111,12 @@ void LivewireTool::GetLivewirePoints(double *pt1_in, double *pt2_in,
 
   vtkIdType beginVertId = m_imageSlice->FindPoint(pt1_in);
   vtkIdType endVertId   = m_imageSlice->FindPoint(pt2_in);
-  // cout << beginVertId << "  " << endVertId << endl;
+  // std::cout << beginVertId << "  " << endVertId << std::endl;
 
   if (beginVertId == -1 || endVertId == -1) {
-    // cout << "can not find point: " << pt1_in[0] << " " << pt1_in[1] << " " <<
+    // std::cout << "can not find point: " << pt1_in[0] << " " << pt1_in[1] << " " <<
     // pt1_in[2] << ", "
-    //   << pt2_in[0] << " " << pt2_in[1] << " " << pt2_in[2] << endl;
+    //   << pt2_in[0] << " " << pt2_in[1] << " " << pt2_in[2] << std::endl;
     return;
   }
 
@@ -124,19 +124,19 @@ void LivewireTool::GetLivewirePoints(double *pt1_in, double *pt2_in,
   m_path->SetEndVertex(beginVertId);
   m_path->Update();
   // double* pt = m_info->GetOutput()->GetPoint( beginVertId );
-  // cout << pt[0] << " " << pt[1] << " " << pt[2] << endl;
+  // std::cout << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
 
   vtkPolyData *pd   = m_path->GetOutput();
   vtkIdType    npts = 0, *pts = NULL;
   pd->GetLines()->InitTraversal();
   pd->GetLines()->GetNextCell(npts, pts);
-  // cout << npts << endl;
+  // std::cout << npts << std::endl;
   double  offset[3] = {0, 0, 0};
   double *vs        = m_imageData->GetSpacing();
   offset[m_nPlane]  = m_nSlice * vs[m_nPlane];
   for (int i = 0; i < npts; i++) {
     double *p = pd->GetPoint(pts[i]);
-    // cout << p[0] << " " << p[1] << " " << p[2] << endl;
+    // std::cout << p[0] << " " << p[1] << " " << p[2] << std::endl;
     pts_out->InsertNextPoint(p[0] + offset[0], p[1] + offset[1],
                              p[2] + offset[2]);
   }

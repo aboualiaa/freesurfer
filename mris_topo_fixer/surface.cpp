@@ -1344,7 +1344,7 @@ void Surface::IncreaseEuler(int nloops, int maxinitface) {
     } else
       cutting_loop = &loop[0];
 
-    // if(cutting_loop==&loop[0]) cout << "'0'";
+    // if(cutting_loop==&loop[0]) std::cout << "'0'";
 
     Surface *cut_patch = Clone();
     cut_patch->CutLoop(*cutting_loop);

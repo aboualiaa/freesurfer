@@ -46,7 +46,7 @@
 //     //fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share,
 //     &text, &lib, &data*/); fscanf(pf, "%u" , &size);
 //     //DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB mem
-//     used"); cout <<  size / (1024.0) << " MB mem used" << endl; fclose(pf);
+//     used"); std::cout <<  size / (1024.0) << " MB mem used" << std::endl; fclose(pf);
 //   }
 // // while (1)
 // // {
@@ -164,7 +164,7 @@ int getRandomNumber(int start, int end, unsigned int &seed)
 
 int main(int argc, char *argv[]) {
   {
-    cout << getVersion() << endl << endl;
+    std::cout << getVersion() << std::endl << std::endl;
     // set the environment variable
     //  setenv("SURFER_FRONTDOOR","",1) ;
     // to store mri as chunk in memory:
@@ -417,7 +417,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   }
   StrUpper(option);
 
-  // cout << " option: " << option << endl;
+  // std::cout << " option: " << option << std::endl;
 
   if (!strcmp(option, "MOV")) {
     nargs = 0;
@@ -437,7 +437,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   //  {
   //     P.outdir = string(argv[1]);
   //     nargs = 1;
-  //     cout << "--outdir: Using "<< P.outdir << " as output directory." <<
+  //     std::cout << "--outdir: Using "<< P.outdir << " as output directory." <<
   //     endl;
   //  }
   else if (!strcmp(option, "TEMPLATE")) {
@@ -452,7 +452,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
       if (option[0] != '-') {
         nargs++;
         P.nltas.push_back(std::string(argv[nargs]));
-        // cout << "Using "<< P.nltas.back() << " as LTA." << endl;
+        // std::cout << "Using "<< P.nltas.back() << " as LTA." << std::endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
@@ -464,7 +464,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
       if (option[0] != '-') {
         nargs++;
         P.masks.push_back(std::string(argv[nargs]));
-        // cout << "Using "<< P.nltas.back() << " as LTA." << endl;
+        // std::cout << "Using "<< P.nltas.back() << " as LTA." << std::endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
@@ -502,7 +502,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
         nargs++;
 
         P.iltas.push_back(std::string(argv[nargs]));
-        // cout << "Using "<< P.nltas.back() << " as LTA." << endl;
+        // std::cout << "Using "<< P.nltas.back() << " as LTA." << std::endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
@@ -611,7 +611,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
       if (option[0] != '-') {
         nargs++;
         P.nweights.push_back(std::string(argv[nargs]));
-        // cout << "Using "<< P.nweights.back() << " as weights volume." <<
+        // std::cout << "Using "<< P.nweights.back() << " as weights volume." <<
         // endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
@@ -624,7 +624,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
       if (option[0] != '-') {
         nargs++;
         P.nwarps.push_back(std::string(argv[nargs]));
-        // cout << "Using "<< P.nwarps.back() << " as weights volume." << endl;
+        // std::cout << "Using "<< P.nwarps.back() << " as weights volume." << std::endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
@@ -658,7 +658,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   //   {
   //     P.fixvoxel = true;
   //     nargs = 0 ;
-  //     cout << "Will conform images to 256^3 and voxels to 1mm!" << endl;
+  //     std::cout << "Will conform images to 256^3 and voxels to 1mm!" << std::endl;
   //   }
   else if (!strcmp(option, "FLOATTYPE")) {
     P.floattype = true;

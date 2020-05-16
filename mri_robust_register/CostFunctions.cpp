@@ -553,14 +553,14 @@ double CostFunctions::leastSquares(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
     //assert(i1->type == i2->type);
     for (it1.begin(); !it1.isEnd(); it1++)
     {
-      //cout << "it1: " << *it1 << " it2: " << *it2 << endl;
+      //cout << "it1: " << *it1 << " it2: " << *it2 << std::endl;
       dd = (double) (*it1) - (double) (*it2);
       d += dd * dd;
       it2++;
     }
 
   }
-  //cout << " d: " << d << endl;
+  //cout << " d: " << d << std::endl;
   return (float) d;
 }*/
 
@@ -843,11 +843,11 @@ double CostFunctions::tukeyBiweight(MRI *i1, MRI *i2, double sat) {
     it2.begin();
     // assert(i1->type == i2->type);
     for (it1.begin(); !it1.isEnd(); it1++) {
-      // cout << "it1: " << *it1 << " it2: " << *it2 << endl;
+      // std::cout << "it1: " << *it1 << " it2: " << *it2 << std::endl;
       diff[cc] = (*it1) - (*it2);
-      // if (isnan(diff[cc])) cout << "it1: " << *it1 << " it2: " << *it2 <<
+      // if (isnan(diff[cc])) std::cout << "it1: " << *it1 << " it2: " << *it2 <<
       // endl;
-      ////if (diff[cc] != 0.0) cout << "it1: " << *it1 << " it2: " << *it2 <<
+      ////if (diff[cc] != 0.0) std::cout << "it1: " << *it1 << " it2: " << *it2 <<
       /// endl;
       cc++;
       it2++;
@@ -1021,7 +1021,7 @@ double CostFunctions::tukeyBiweight(MRI *mriS, MRI *mriT,
   // float sigma = RobustGaussian<float>::mad(diff, n);
   // if (sigma == 0.0)
   // sigma = 1.4826;
-  // cout << "sigma: " << sigma << endl;
+  // std::cout << "sigma: " << sigma << std::endl;
   // if (sigma < 1.0) sigma = 1;
 
   double d = 0.0;
@@ -1088,7 +1088,7 @@ std::vector<double> CostFunctions::centroid(MRI *i)
 // M_100/M_000 , M_010/M_000 , M_001 / M_000
 // now ignore outside_vals in centroid computation (for white backgrounds)
 {
-  // cout << "CostFunctions::centroid" << endl;
+  // std::cout << "CostFunctions::centroid" << std::endl;
   std::vector<double> dd(3, 0.0);
   double              n = 0;
   double              val;
@@ -1201,16 +1201,16 @@ vnl_matrix_fixed<double, 3, 3> CostFunctions::orientation(MRI *i)
   // double d = MatrixDeterminant(evec);
   double d = vnl_det(evec);
   // vnl_matlab_print(vcl_cerr,evec,"evec",vnl_matlab_print_format_long);
-  // cout << " det = " << d << endl;
+  // std::cout << " det = " << d << std::endl;
   if (d < 0) {
-    // cout << "Orientation: neg. determinant ..  fixing" << endl;
+    // std::cout << "Orientation: neg. determinant ..  fixing" << std::endl;
     for (int r = 0; r < 3; r++)
       evec[r][0] = -evec[r][0];
     // vnl_matlab_print(vcl_cerr,evec,"evec2",vnl_matlab_print_format_long);
   }
 
-  // cout << " evals: " << eval[0] << " " << eval[1] << " " << eval[2] << endl;
-  // cout << " evecs: " << endl;
+  // std::cout << " evals: " << eval[0] << " " << eval[1] << " " << eval[2] << std::endl;
+  // std::cout << " evecs: " << std::endl;
   // MatrixPrintFmt(stdout,"% 2.8f",evec);
 
   // MatrixFree(&cov);

@@ -78,67 +78,69 @@ static int  singledash(char *flag);
 
 int           MRIsegCount(MRI *seg, int id, int frame);
 STATSUMENTRY *LoadStatSumFile(char *fname, int *nsegid);
-int DumpStatSumTable(STATSUMENTRY *StatSumTable, int nsegid);
-int CountEdits(char *subject, char *outfile);
-float *WMAnatStats(const char *subject, const char *volname, int nErodes, float Pct);
+int           DumpStatSumTable(STATSUMENTRY *StatSumTable, int nsegid);
+int           CountEdits(char *subject, char *outfile);
+float *       WMAnatStats(const char *subject, const char *volname, int nErodes,
+                          float Pct);
 
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
-const char *Progname = NULL;
-char *SUBJECTS_DIR = NULL, *FREESURFER_HOME=NULL;
-char *SegVolFile = NULL;
-char *InVolFile = NULL;
-char *InVolRegFile = NULL;
-MATRIX *InVolReg = NULL;
-int InVolRegHeader = 0;
-const char *InIntensityName = "";
+const char *Progname     = NULL;
+char *      SUBJECTS_DIR = NULL, *FREESURFER_HOME = NULL;
+char *      SegVolFile       = NULL;
+char *      InVolFile        = NULL;
+char *      InVolRegFile     = NULL;
+MATRIX *    InVolReg         = NULL;
+int         InVolRegHeader   = 0;
+const char *InIntensityName  = "";
 const char *InIntensityUnits = "unknown";
-char *MaskVolFile = NULL;
-char *PVVolFile = NULL;
-char *BrainMaskFile = NULL;
-char *StatTableFile = NULL;
-char *FrameAvgFile = NULL;
-char *FrameAvgVolFile = NULL;
-char *SpatFrameAvgFile = NULL;
-int DoFrameAvg = 0;
-int DoFrameSum = 0;
-int RmFrameAvgMn = 0;
-int DoAccumulate = 0;
-int frame = 0;
-int synth = 0;
-int debug = 0;
-int dontrun = 0;
-long seed = 0;
-MRI *seg, *invol, *famri, *maskvol, *pvvol, *brainvol, *mri_aseg, *mri_ribbon,*mritmp;
-int nsegid0, *segidlist0;
-int nsegid, *segidlist;
-int NonEmptyOnly = 1;
-int UserSegIdList[1000];
-int nUserSegIdList = 0;
-int nErodeSeg=0;
-int DoExclSegId = 0, nExcl = 0, ExclSegIdList[1000], ExclSegId;
-int DoExclCtxGMWM= 0;
-int DoSurfCtxVol = 0;
-int DoSurfWMVol = 0;
-int DoSupraTent = 0;
+char *      MaskVolFile      = NULL;
+char *      PVVolFile        = NULL;
+char *      BrainMaskFile    = NULL;
+char *      StatTableFile    = NULL;
+char *      FrameAvgFile     = NULL;
+char *      FrameAvgVolFile  = NULL;
+char *      SpatFrameAvgFile = NULL;
+int         DoFrameAvg       = 0;
+int         DoFrameSum       = 0;
+int         RmFrameAvgMn     = 0;
+int         DoAccumulate     = 0;
+int         frame            = 0;
+int         synth            = 0;
+int         debug            = 0;
+int         dontrun          = 0;
+long        seed             = 0;
+MRI *seg, *invol, *famri, *maskvol, *pvvol, *brainvol, *mri_aseg, *mri_ribbon,
+    *mritmp;
+int    nsegid0, *segidlist0;
+int    nsegid, *segidlist;
+int    NonEmptyOnly = 1;
+int    UserSegIdList[1000];
+int    nUserSegIdList = 0;
+int    nErodeSeg      = 0;
+int    DoExclSegId = 0, nExcl = 0, ExclSegIdList[1000], ExclSegId;
+int    DoExclCtxGMWM = 0;
+int    DoSurfCtxVol  = 0;
+int    DoSurfWMVol   = 0;
+int    DoSupraTent   = 0;
 double SupraTentVol, SupraTentVolCor;
 
 char *gcafile = nullptr;
 GCA * gca;
 
-float maskthresh = 0.5;
-int   maskinvert = 0, maskframe = 0;
-const char *masksign=NULL;
-int   maskerode = 0;
-int   nmaskhits;
-int   DoSubCortGrayVol = 0;
-int   DoTotalGrayVol   = 0;
-int   BrainVolFromSeg  = 0;
-int   DoETIV           = 0;
-int   DoETIVonly       = 0;
-int   DoOldETIVonly    = 0;
-char *talxfmfile       = nullptr;
-int   SegFromInput     = 0;
+float       maskthresh = 0.5;
+int         maskinvert = 0, maskframe = 0;
+const char *masksign  = NULL;
+int         maskerode = 0;
+int         nmaskhits;
+int         DoSubCortGrayVol = 0;
+int         DoTotalGrayVol   = 0;
+int         BrainVolFromSeg  = 0;
+int         DoETIV           = 0;
+int         DoETIVonly       = 0;
+int         DoOldETIVonly    = 0;
+char *      talxfmfile       = nullptr;
+int         SegFromInput     = 0;
 
 char *        ctabfile      = nullptr;
 COLOR_TABLE * ctab          = nullptr;
@@ -146,10 +148,10 @@ STATSUMENTRY *StatSumTable  = nullptr;
 STATSUMENTRY *StatSumTable2 = nullptr;
 char *        ctabfileOut   = nullptr;
 
-MRIS *mris;
-char *subject = NULL;
-char *hemi    = NULL;
-char *annot   = NULL;
+MRIS *      mris;
+char *      subject       = NULL;
+char *      hemi          = NULL;
+char *      annot         = NULL;
 const char *whitesurfname = "white";
 
 int Vox[3], DoVox = 0;
@@ -2108,10 +2110,10 @@ int CountEdits(char *subject, char *outfile) {
   return (0);
 }
 
-float *WMAnatStats(const char *subject, const char *volname, int nErodes, float Pct)
-{
-  char sd[4000],tmpstr[4000];
-  float *stats,val;
+float *WMAnatStats(const char *subject, const char *volname, int nErodes,
+                   float Pct) {
+  char    sd[4000], tmpstr[4000];
+  float * stats, val;
   MATRIX *v;
   int     wmids[12] = {2, 41, 7, 46, 251, 252, 253, 254, 255, 77, 78, 79};
   int     nwmids    = 12;

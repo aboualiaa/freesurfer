@@ -60,38 +60,18 @@ static char *long_fname = NULL;
 static LABEL *cortex_label    = NULL;
 static LABEL *fsaverage_label = NULL;
 
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
-static int fill_thickness_holes(MRI_SURFACE *mris, LABEL *cortex_label, LABEL *fsaverage_label) ;
-int  MRISmeasureDistanceBetweenSurfaces(MRI_SURFACE *mris, MRI_SURFACE *mris2, int signed_dist) ;
-static int  get_option(int argc, char *argv[]) ;
-static void usage_exit(void) ;
-static void print_usage(void) ;
-static void print_help(void) ;
-static void print_version(void) ;
+static int fill_thickness_holes(MRI_SURFACE *mris, LABEL *cortex_label,
+                                LABEL *fsaverage_label);
+int MRISmeasureDistanceBetweenSurfaces(MRI_SURFACE *mris, MRI_SURFACE *mris2,
+                                       int signed_dist);
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
-const char *Progname ;
-static char pial_name[100] = "pial" ;
-static char white_name[100] = WHITE_MATTER_NAME ;
-static int write_vertices = 0 ;
-
-static int nbhd_size = 2 ;
-static float max_thick = 5.0 ;
-static char *osurf_fname = NULL ;
-static const char *sphere_name = "sphere" ;
-static int signed_dist = 0 ;
-static char sdir[STRLEN] = "" ;
-static int fmin_thick = 0 ;
-static float laplace_res = 0.5 ;
-static int laplace_thick = 0 ;
-static INTEGRATION_PARMS parms ;
-
-static char *long_fname = NULL ;
-
-static LABEL *cortex_label = NULL ;
-static LABEL *fsaverage_label = NULL ;
-
-#include "voxlist.h"
 #include "mrinorm.h"
 #include "voxlist.h"
 int main(int argc, char *argv[]) {

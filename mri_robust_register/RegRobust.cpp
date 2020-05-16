@@ -150,19 +150,19 @@ void RegRobust::findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit)
     //          // write out wcheck
     //          string fn = getName() + "-wcheck-est.txt";
     //          ofstream f(fn.c_str(),ios::out);
-    //          f << sat << " " << wcheck << endl;
+    //          f << sat << " " << wcheck << std::endl;
     //          f.close();
     //          string fn2 = getName() + "-wchecksqrt-est.txt";
     //          ofstream f2(fn.c_str(),ios::out);
-    //          f2 << sat << " " << wchecksqrt << endl;
+    //          f2 << sat << " " << wchecksqrt << std::endl;
     //          f2.close();
     //        }
     //
     // //        if (wcheck > wlimit)
     // //        {
     // //           sat = sat+0.5;
-    // //           if (verbose > 1) cout << "   - Weight check " << wcheck << "
-    // > "<< wlimit  << " increasing sat: " << sat << endl;
+    // //           if (verbose > 1) std::cout << "   - Weight check " << wcheck << "
+    // > "<< wlimit  << " increasing sat: " << sat << std::endl;
     // //           md.first = firstbackup;
     // //           md.second = scaleinit;
     // //           r = resolution-rstart+1;
@@ -492,7 +492,7 @@ double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
         }
         if (fabs(MRIFvox(Sbl, x, y, z)) < eps &&
             fabs(MRIFvox(Tbl, x, y, z)) < eps) {
-          // if (verbose > 0) cout << " found a zero element !!!" << endl;
+          // if (verbose > 0) std::cout << " found a zero element !!!" << std::endl;
           continue;
         }
         counti++; // start with 1
@@ -512,7 +512,7 @@ double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
                  "sizes ...)"
               << std::endl;
     // cerr << "    Try calling with --noinit (if the original images are well
-    // aligned)" << endl;
+    // aligned)" << std::endl;
     std::cerr
         << "    Maybe use --transform <init.lta> with an approx. alignment"
         << std::endl;
@@ -566,7 +566,7 @@ double RegRobust::estimateIScale(MRI *mriS, MRI *mriT) {
 
         if (fabs(MRIFvox(Sbl, x, y, z)) < eps &&
             fabs(MRIFvox(Tbl, x, y, z)) < eps) {
-          // cout << " found a zero row!!!" << endl;
+          // std::cout << " found a zero row!!!" << std::endl;
           MRILvox(mri_indexing, xp1, yp1, zp1) = -1;
           continue;
         }

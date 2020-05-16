@@ -168,7 +168,7 @@ void Remesher::createEdges() {
   int ecount = 0;
   // got through trias
   for (unsigned int t = 0; t < tria.size(); t++) {
-    // cout << endl << " working on tria : " << t << endl;
+    // std::cout << endl << " working on tria : " << t << std::endl;
     t_to_e[t].resize(tria[t].size());
     if (tria[t].size() != 3) {
       std::cerr << " tria[ " << t << " ] : " << tria[t] << std::endl;
@@ -312,9 +312,9 @@ void Remesher::createQualities(double tmin) const {
     qualities[k] = t;
     if (t < tmin) {
       badcount++;
-      //      cerr << endl;
-      //      cerr << "Warning (bad triangulation) "<< endl;
-      //      cerr << "    Triangle: "<< k << " Quality:"<< t<< endl;
+      //      cerr << std::endl;
+      //      cerr << "Warning (bad triangulation) "<< std::endl;
+      //      cerr << "    Triangle: "<< k << " Quality:"<< t<< std::endl;
     }
     if (t < worstqual)
       worstqual = t;
@@ -335,7 +335,7 @@ void Remesher::createQualities(double tmin) const {
 void Remesher::remeshBK(unsigned int it, double l, bool ridge) {
   //l =  0.355856;
 
-  //cout << " checkStructure: " << checkStructure() << endl;
+  //cout << " checkStructure: " << checkStructure() << std::endl;
   double qual0 = getAverageQuality();
   //  tangentialSmoothing(3,true);
 
@@ -362,10 +362,10 @@ void Remesher::remeshBK(unsigned int it, double l, bool ridge) {
     init(); // v_to_t might be missing
 
     //int cs = checkStructure();
-    //if (verbose > 0) cout << " checkStructure (1): " << cs << endl;
+    //if (verbose > 0) std::cout << " checkStructure (1): " << cs << std::endl;
     //if (cs > 0 ) exit(cs);
     //  if (isnan(computeArea()))
-    //  {cout <<"ERROR: Area is nan (1)!" << endl; exit(1);}
+    //  {cout <<"ERROR: Area is nan (1)!" << std::endl; exit(1);}
     //exportOFF("test-i.off");
     assert(onridge.size() == points3d.size() || onridge.size() == 0);
 
@@ -374,17 +374,17 @@ void Remesher::remeshBK(unsigned int it, double l, bool ridge) {
     while (contractShortEdgesQueue(l * 4.0 / 5.0) > 0) {
     };
     //contractShortEdges(l*4.0/5.0);
-    //if (verbose > 0) cout << " checkStructure (2): " << checkStructure() << endl;
+    //if (verbose > 0) std::cout << " checkStructure (2): " << checkStructure() << std::endl;
     //      if (isnan(computeArea()))
-    //  {cout <<"ERROR: Area is is nan (2)!" << endl; exit(1);}
+    //  {cout <<"ERROR: Area is is nan (2)!" << std::endl; exit(1);}
     //exportOFF("test-ii.off");
     assert(onridge.size() == points3d.size() || onridge.size() == 0);
 
     // 3. Flip edges to optimize valence (6 or 4 on boundary)
     //flipEdges();
-    //if (verbose > 0)  cout << " checkStructure (3): " << checkStructure() << endl;
+    //if (verbose > 0)  std::cout << " checkStructure (3): " << checkStructure() << std::endl;
     //     if (isnan(computeArea()))
-    // {cout <<"ERROR: Area is is nan (3)!" << endl; exit(1);}
+    // {cout <<"ERROR: Area is is nan (3)!" << std::endl; exit(1);}
     //exportOFF("test-iii.off");
 
     //assert(onridge.size() == points3d.size() || onridge.size() == 0);
@@ -392,8 +392,8 @@ void Remesher::remeshBK(unsigned int it, double l, bool ridge) {
     // 4. Tangential Smoothing
     tangentialSmoothing(2, true);
     //     if (isnan(computeArea()))
-    //   {cout <<"ERROR: Area is is nan (4)!" << endl; exit(1);}
-    // if (verbose > 0)   cout << " checkStructure (4): " << checkStructure() << endl;
+    //   {cout <<"ERROR: Area is is nan (4)!" << std::endl; exit(1);}
+    // if (verbose > 0)   std::cout << " checkStructure (4): " << checkStructure() << std::endl;
     //exportOFF("test-iiii.off");
     //while ( contractShortEdgesQueue(l*4.0/5.0) > 0) {};
   }
@@ -460,7 +460,7 @@ void Remesher::remeshBKV(unsigned int it, int vnum, bool ridge) {
               << "points: " << getPointCount() << std::endl;
     std::cout << "Targetl: " << targetl << "  avg l: " << getAverageEdgeLength()
               << std::endl;
-    //cout << " Maxnup: " << maxnup << endl;
+    //cout << " Maxnup: " << maxnup << std::endl;
     //exit(1);
     int n = 100;
     while (n > 0) {
@@ -670,7 +670,7 @@ double Remesher::computeArea(unsigned int tidx) const {
 double Remesher::computeArea() const
 // Computes Surface Area
 {
-  // if (verbose > 0) cout << "Remesher::computeArea " << flush;
+  // if (verbose > 0) std::cout << "Remesher::computeArea " << flush;
   double area = 0;
   Vector cr;
   for (int i = 0; i < (int)tria.size(); i++) {
@@ -678,7 +678,7 @@ double Remesher::computeArea() const
                (points3d[tria[i][2]] - points3d[tria[i][0]]));
     area += cr.norm();
   }
-  // if (verbose > 0) cout << " A = " << area/2.0 << endl;
+  // if (verbose > 0) std::cout << " A = " << area/2.0 << std::endl;
   return area / 2.0;
 }
 
@@ -708,22 +708,22 @@ int Remesher::contractShortEdges(double l, int maxn) {
       continue; // edge was deleted
     v1 = e_to_v[i][0];
     v2 = e_to_v[i][1];
-    // cout << " checking edge: " << i << " v1 : " << v1 << " v2: " << v2 <<
+    // std::cout << " checking edge: " << i << " v1 : " << v1 << " v2: " << v2 <<
     // endl;
     if ((points3d[v1] - points3d[v2]).norm() < l) {
-      // cout << " found short edge: " << i << endl;
-      // cout << " e_to_v[i] " << e_to_v[i] << endl;
+      // std::cout << " found short edge: " << i << std::endl;
+      // std::cout << " e_to_v[i] " << e_to_v[i] << std::endl;
       if (e_to_t[i].size() < 2 || onboundary[v1] || onboundary[v2]) {
-        // cout << " skipping boundary ( e_to_t[i].size: " << e_to_t[i].size()
-        // << " ) " << endl;
+        // std::cout << " skipping boundary ( e_to_t[i].size: " << e_to_t[i].size()
+        // << " ) " << std::endl;
         bskip++;
         continue;
       }
       //       if ( onridge.size() == points3d.size() && ( onridge[v1] ||
       //       onridge[v2] ))
       //       {
-      //         cout << " skipping ridge ( e_to_t[i].size: " <<
-      //         e_to_t[i].size() << " ) " << endl; continue;
+      //         std::cout << " skipping ridge ( e_to_t[i].size: " <<
+      //         e_to_t[i].size() << " ) " << std::endl; continue;
       //       }
 
       // store tria idxs for deletion later
@@ -750,7 +750,7 @@ int Remesher::contractShortEdges(double l, int maxn) {
       //       int cs = checkStructure();
       //       if (cs > 0 || ! ismanifold )
       //        {
-      //          cout << " check: " << cs << endl << endl << endl;
+      //          std::cout << " check: " << cs << endl << endl << std::endl;
       //          exit(cs);
       //       }
       if (en == maxn)
@@ -795,7 +795,7 @@ int Remesher::contractShortEdgesQueue(double l, int maxn) {
     v1 = e_to_v[i][0];
     v2 = e_to_v[i][1];
     if (e_to_t[i].size() < 2 || onboundary[v1] || onboundary[v2]) {
-      //cout << " skipping boundary ( e_to_t[i].size: " << e_to_t[i].size() << " ) " << endl;
+      //cout << " skipping boundary ( e_to_t[i].size: " << e_to_t[i].size() << " ) " << std::endl;
       bskip++;
       continue;
     }
@@ -857,7 +857,7 @@ int Remesher::insertVerticesOnLongEdges(double l, int maxn) {
     if ((points3d[v1] - points3d[v2]).norm() > l) {
       vnum++;
       insertVertexOnEdge(Vector(v1, v2, 0.5));
-      // cout << " check: " << checkStructure() << endl;
+      // std::cout << " check: " << checkStructure() << std::endl;
     }
     if (vnum == maxn)
       break;
@@ -1010,7 +1010,7 @@ std::vector<int> Remesher::get1Ring(unsigned int vn, bool ordered) const {
 
   assert(vn < points3d.size());
 
-  // cout << "Remesher::get1Ring( "<<vn<<" )" << endl;
+  // std::cout << "Remesher::get1Ring( "<<vn<<" )" << std::endl;
 
   // get reference to row (neigbors of vertex vn)
   const std::list<SparseMatrix::entry> &row = v_to_e.getRow(vn);
@@ -1026,7 +1026,7 @@ std::vector<int> Remesher::get1Ring(unsigned int vn, bool ordered) const {
         return ret;
       }
     }
-    // cout << " neigbors: " << ret << endl;
+    // std::cout << " neigbors: " << ret << std::endl;
   } else {
     if (!ismanifold) {
       std::cout << "Remesher::get1Ring: Ordered only possible for Manifolds!"
@@ -1050,9 +1050,9 @@ std::vector<int> Remesher::get1Ring(unsigned int vn, bool ordered) const {
     // move around:
     int j, temp;
     do {
-      // cout << "vc: " << vc <<  "  ec: " << ec<< "  tc: " << tc << endl;
-      // cout << "tria: " << tria[tc] << endl;
-      // cout << "edges: " << t_to_e[tc] << endl;
+      // std::cout << "vc: " << vc <<  "  ec: " << ec<< "  tc: " << tc << std::endl;
+      // std::cout << "tria: " << tria[tc] << std::endl;
+      // std::cout << "edges: " << t_to_e[tc] << std::endl;
       // find next vertex in current triangle:
       for (j = 0; j < 3; j++)
         if (tria[tc][j] != (int)vn && tria[tc][j] != vc)
@@ -1066,7 +1066,7 @@ std::vector<int> Remesher::get1Ring(unsigned int vn, bool ordered) const {
 
       if (e_to_t[ec].size() < 2) {
         // we hit a boundary:
-        // cout << " hit a boundary! " << endl;
+        // std::cout << " hit a boundary! " << std::endl;
         // if this happens for the second time, we are done:
         if (hitborder)
           break;
@@ -1095,8 +1095,8 @@ std::vector<int> Remesher::get1Ring(unsigned int vn, bool ordered) const {
 
     } while (ret[0] != ret.back());
 
-    // cout << "ret: " << ret << endl;
-    // cout << "rowsize: " << row.size() << endl;
+    // std::cout << "ret: " << ret << std::endl;
+    // std::cout << "rowsize: " << row.size() << std::endl;
   }
 
   int rs = ret.size();
@@ -1111,7 +1111,7 @@ std::vector<int> Remesher::get1Ring(unsigned int vn, bool ordered) const {
  to create vertex normals.*/
 void Remesher::createVertexNSimple(bool force) const {
 
-  // cout << "Tria3d.createVertexN()" << endl;
+  // std::cout << "Tria3d.createVertexN()" << std::endl;
   if (vertexn.size() == points3d.size() && !force)
     return;
   // erstellt zuerst Element Normalen fuer alle Elemente
@@ -1125,14 +1125,14 @@ void Remesher::createVertexNSimple(bool force) const {
   // laufe ueber alle Dreiecke und ueber jede Ecke
   for (elem = 0; elem < (int)tria.size(); elem++)
     for (knoten = 0; knoten < 3; knoten++) {
-      // cout << "Element: "<< elem << " Knoten: " << knoten << endl;
+      // std::cout << "Element: "<< elem << " Knoten: " << knoten << std::endl;
       idx = tria[elem][knoten];
 
       //     if (idx == 178)
       //     {
-      //       cout << "Element: "<< elem << " Knoten: " << knoten << endl;
-      //       cout << "   tnormal: " << elementn[elem] << "  angle: " <<
-      //       getAngle(elem,knoten) << endl;
+      //       std::cout << "Element: "<< elem << " Knoten: " << knoten << std::endl;
+      //       std::cout << "   tnormal: " << elementn[elem] << "  angle: " <<
+      //       getAngle(elem,knoten) << std::endl;
       //
       //
       //     }
@@ -1158,15 +1158,15 @@ void Remesher::createVertexNSimple(bool force) const {
       // exit(1);
     }
     vertexn[idx] *= (1.0 / length);
-    // cout << "Vertex normal: " << vertexn[idx] << endl;
-    // cout << "Tangent U = " << getTangentU(vertexn[idx]) << endl ;
-    // cout << "Tangent V = " << getTangentV(vertexn[idx]) << endl;
-    // cout << "U x V = " << cross(getTangentU(vertexn[idx]),
-    // getTangentV(vertexn[idx])) << endl;;
+    // std::cout << "Vertex normal: " << vertexn[idx] << std::endl;
+    // std::cout << "Tangent U = " << getTangentU(vertexn[idx]) << endl ;
+    // std::cout << "Tangent V = " << getTangentV(vertexn[idx]) << std::endl;
+    // std::cout << "U x V = " << cross(getTangentU(vertexn[idx]),
+    // getTangentV(vertexn[idx])) << std::endl;;
   }
 
-  // cout << " points3d: " << endl << points3d << endl;
-  // cout << " Vertex Normals : " << endl << vertexn << endl;
+  // std::cout << " points3d: " << endl << points3d << std::endl;
+  // std::cout << " Vertex Normals : " << endl << vertexn << std::endl;
 }
 
 /** The new vertex will be inserted at w*v1 + (1-w)*v2
@@ -1193,13 +1193,13 @@ int Remesher::insertVertexOnEdge(const Vector &pos) {
   assert((e_to_v[e][0] == v1 && e_to_v[e][1] == v2) ||
          (e_to_v[e][0] == v2 && e_to_v[e][1] == v1));
 
-  // cout << " working on edge: " << e << "  v1: " << v1 << " v2: " << v2 <<
+  // std::cout << " working on edge: " << e << "  v1: " << v1 << " v2: " << v2 <<
   // endl;
 
   // insert new point
   // Vector nv = points3d[v1]*w + points3d[v2]*(1.0-w);
 
-  ////  cout << " new vertex: " << nv << endl;
+  ////  std::cout << " new vertex: " << nv << std::endl;
   //  if (isnan(nv[0])) exit(1);
 
   //  int ni = points3d.size();
@@ -1251,7 +1251,7 @@ int Remesher::insertVertexOnEdge(const Vector &pos) {
   for (int ti = 0; ti < (int)e_to_t[e].size(); ti++) {
     int t = e_to_t[e][ti];
 
-    // cout << "  " << ti<<":   working on tria " << t << endl;
+    // std::cout << "  " << ti<<":   working on tria " << t << std::endl;
 
     // compute local index of other point in this tria:
     int vother = 0;
@@ -1262,8 +1262,8 @@ int Remesher::insertVertexOnEdge(const Vector &pos) {
 
     // keep track of the direction of the edge
     bool reverse = false;
-    // cout << " v1: " << v1 << "  v2: " << v2 << endl;
-    // cout << " tria[t]: " << tria[t] << endl;
+    // std::cout << " v1: " << v1 << "  v2: " << v2 << std::endl;
+    // std::cout << " tria[t]: " << tria[t] << std::endl;
     if (tria[t][(vother + 1) % 3] == v2) {
       assert(tria[t][(vother + 2) % 3] == v1);
       reverse = true;
@@ -1346,7 +1346,7 @@ int Remesher::insertVertexOnEdge(const Vector &pos) {
  cleanup true means that the empty trias are deleted from the tria vector (using
  rmTria).*/
 bool Remesher::contractEdge(int eidx, bool cleanup) {
-  // cout << endl << "Remesher::contractEdge( " << eidx << " )" << endl;
+  // std::cout << endl << "Remesher::contractEdge( " << eidx << " )" << std::endl;
 
   if (e_to_t[eidx].size() == 0) {
     if (verbose > 2)
@@ -1360,7 +1360,7 @@ bool Remesher::contractEdge(int eidx, bool cleanup) {
   // find two vertices at this edge
   int v0 = e_to_v[eidx][0];
   int v1 = e_to_v[eidx][1];
-  // cout << " v0 : " << v0 << "  v1: " << v1 << endl;
+  // std::cout << " v0 : " << v0 << "  v1: " << v1 << std::endl;
   // find two triangles at this edge
   assert(e_to_t[eidx].size() == 2); // boundary edges not allowed
   int t0 = e_to_t[eidx][0];
@@ -1423,16 +1423,16 @@ bool Remesher::contractEdge(int eidx, bool cleanup) {
     assert(tria[tt][lv] == v0);
     int pb = tria[tt][(lv + 1) % 3];
     int pc = tria[tt][(lv + 2) % 3];
-    // cout << " midpoint " << midpoint << " pb " << points3d[pb] << " pc " <<
-    // points3d[pc] << endl;
+    // std::cout << " midpoint " << midpoint << " pb " << points3d[pb] << " pc " <<
+    // points3d[pc] << std::endl;
     Vector a = points3d[pb] - midpoint;
     Vector b = points3d[pc] - midpoint;
-    // cout << " a: "<< a << "  b: " << b << endl;
+    // std::cout << " a: "<< a << "  b: " << b << std::endl;
     Vector tn = cross(a, b);
-    // cout << " cross : " << tn  <<" elementn [" << tt << "] : " <<
+    // std::cout << " cross : " << tn  <<" elementn [" << tt << "] : " <<
     // elementn[tt] <<endl;
     double proj = tn * elementn[tt] / tn.norm();
-    // cout <<  "  proj: " << proj <<endl;
+    // std::cout <<  "  proj: " << proj <<endl;
     if (proj < eps) {
       if (verbose > 2)
         std::cout << " tria: " << tt << " at vertex " << v0
@@ -1475,7 +1475,7 @@ bool Remesher::contractEdge(int eidx, bool cleanup) {
     int tnum = v_to_t[v1][lt];
     int lvid = v_to_lv[v1][lt];
 
-    // cout << " tnum: " << tnum << " lvid: " << lvid << endl;
+    // std::cout << " tnum: " << tnum << " lvid: " << lvid << std::endl;
     tria[tnum][lvid] = v0;
   }
   // tria is up to date now (except for deleting t0 t1) !!!
@@ -1527,14 +1527,14 @@ bool Remesher::contractEdge(int eidx, bool cleanup) {
     nextv = removeCollapsedTrias(nextv, v0);
     if (nextv != -1)
       sp++;
-    // cout << nextv << endl;
+    // std::cout << nextv << std::endl;
   }
   nextv = vt1;
   while (nextv != -1) {
     nextv = removeCollapsedTrias(nextv, v0);
     if (nextv != -1)
       sp++;
-    // cout << nextv << endl;
+    // std::cout << nextv << std::endl;
   }
   if (special > 0 && verbose > 1) {
     std::cout << " special cases in replaceVertexInEdges: " << special
@@ -1574,7 +1574,7 @@ int Remesher::createVertexOnEdge(const Vector &pos) {
 void Remesher::createElementN(bool force) const
 // computes and caches the tria normals
 {
-  // cout << "Tria3d.createElementN()" << endl;
+  // std::cout << "Tria3d.createElementN()" << std::endl;
   if (elementn.size() == tria.size() && !force)
     return;
   unsigned int i;
@@ -1592,7 +1592,7 @@ void Remesher::createElementN(bool force) const
     else
       elementn[i] = (1.0 / n.norm()) * n;
   }
-  // cout << " Element Normals : " << endl << elementn << endl;
+  // std::cout << " Element Normals : " << endl << elementn << std::endl;
 }
 
 /** Removes labeled trias:
@@ -1739,7 +1739,7 @@ bool Remesher::rmTriaInVtoT(int vidx, int tidx) {
   Computes the quality of tria #k
 **/
 double Remesher::computeQuality(int k) const {
-  //  cout << "Remesher::computeQuality("<< k << ")" << endl;
+  //  std::cout << "Remesher::computeQuality("<< k << ")" << std::endl;
 
   Vector p1 = points3d[tria[k][0]];
   Vector p2 = points3d[tria[k][1]];
@@ -1786,9 +1786,9 @@ int Remesher::replaceVertexInEdges(int vold, int vnew, bool simulate, int vtip0,
     }
     int vother = -1;
 
-    // cout << " working edge at v1 ( " << v1 << " ) : " << edge << flush;
-    // cout << "  iter->pos: " << iter->pos << flush;
-    // if (edge > -1) cout << " etov: " << e_to_v[edge] << endl;
+    // std::cout << " working edge at v1 ( " << v1 << " ) : " << edge << flush;
+    // std::cout << "  iter->pos: " << iter->pos << flush;
+    // if (edge > -1) std::cout << " etov: " << e_to_v[edge] << std::endl;
 
     // replace vold with vnew in this edge:
     assert(e_to_v[edge][0] == vold || e_to_v[edge][1] == vold);
@@ -1840,8 +1840,8 @@ int Remesher::replaceVertexInEdges(int vold, int vnew, bool simulate, int vtip0,
       // special case, edge existed       x----x
       // keep the other one, and change this edge to the other in all trias
       // this makes everything non-manifold
-      // cout << " vold: " << vold << " vother: " << vother << " vnew: " << vnew
-      // << endl;
+      // std::cout << " vold: " << vold << " vother: " << vother << " vnew: " << vnew
+      // << std::endl;
       if (verbose > 1)
         std::cout << " special case, found edge : "
                   << (int)v_to_e.getVal(vother, vnew) - 1
@@ -1991,16 +1991,16 @@ int Remesher::removeCollapsedTrias(int vidx, int mididx) {
   mergeEdges(e0, e1);
   // e1 is gone now
   //          int cs = checkStructure();
-  //       cout << " merge edge check: " << cs << " manifold: " << ismanifold <<
-  //       endl << endl << endl; assert(cs <= 0 );
+  //       std::cout << " merge edge check: " << cs << " manifold: " << ismanifold <<
+  //       endl << endl << std::endl; assert(cs <= 0 );
 
   removeTria(t1); // here boundary structres might be destroyed
   removeTria(t0); // now should be OK again
   // can still be non manifold, if nextidx is tip of another collapsing tria
 
   //    int cs = checkStructure();
-  //      cout << "rmTria check: " << cs << " manifold: " << ismanifold << endl
-  //      << endl << endl; assert(cs <= 0 && ismanifold );
+  //      std::cout << "rmTria check: " << cs << " manifold: " << ismanifold << endl
+  //      << endl << std::endl; assert(cs <= 0 && ismanifold );
 
   std::cout << " NEXTIDX : " << nextidx << std::endl;
   return nextidx;
@@ -2013,9 +2013,9 @@ int Remesher::removeCollapsedTrias(int vidx, int mididx) {
  It can happen (if each edge has more than 1 tria) that
  this destroys manifold property.*/
 bool Remesher::mergeEdges(unsigned int etarg, unsigned int edel) {
-  // cout << "Remesher::mergeEdges( " <<etarg << " , " << edel << " )" << endl;
-  // cout << " etarg trias: " << e_to_t[etarg] << endl;
-  // cout << " edel  trias: " << e_to_t[edel] << endl;
+  // std::cout << "Remesher::mergeEdges( " <<etarg << " , " << edel << " )" << std::endl;
+  // std::cout << " etarg trias: " << e_to_t[etarg] << std::endl;
+  // std::cout << " edel  trias: " << e_to_t[edel] << std::endl;
   if (etarg == edel)
     return true;
 
@@ -2042,14 +2042,14 @@ bool Remesher::mergeEdges(unsigned int etarg, unsigned int edel) {
   for (unsigned int t = 0; t < e_to_t[edel].size(); t++) {
     bool found = false;
     int  tidx  = e_to_t[edel][t];
-    // cout << " before tria " << tidx << " has these edges " << t_to_e[tidx] <<
+    // std::cout << " before tria " << tidx << " has these edges " << t_to_e[tidx] <<
     // endl;
     for (unsigned int i = 0; i < 3; i++)
       if (t_to_e[tidx][i] == (int)edel) {
         found           = true;
         t_to_e[tidx][i] = etarg;
       }
-    // cout << " after tria " << tidx << " has these edges " << t_to_e[tidx] <<
+    // std::cout << " after tria " << tidx << " has these edges " << t_to_e[tidx] <<
     // endl;
     assert(found);
   }

@@ -396,7 +396,7 @@ void write_voxel(const std::string &fname, GCAM *gcam) {
 }
 
 int main(int argc, char *argv[]) {
-  cout << getVersion() << endl << endl;
+  std::cout << getVersion() << std::endl << std::endl;
 
   // Default initialization
   int nargs = handleVersionOption(argc, argv, "mri_warp_convert");

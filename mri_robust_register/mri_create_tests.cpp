@@ -1,5 +1,5 @@
 /**
- * @brief Creates a modified image with noise or transformed 
+ * @brief Creates a modified image with noise or transformed
  *
  */
 
@@ -67,14 +67,14 @@ const char *Progname = NULL;
 std::vector<int> get_random(int lowest, int highest, int num = 3) {
 
   unsigned int ttt = time(nullptr);
-  // cout << " seed: " << ttt << endl;
+  // std::cout << " seed: " << ttt << std::endl;
   srand(ttt);
   std::vector<int> ret(num);
   // int lowest=1, highest=10;
   int range = (highest - lowest) + 1;
   for (int index = 0; index < num; index++) {
     int r = rand();
-    // cout << " rand: " << r/(RAND_MAX + 1.0) << endl;
+    // std::cout << " rand: " << r/(RAND_MAX + 1.0) << std::endl;
     ret[index] = lowest + int(range * (r / (RAND_MAX + 1.0)));
   }
   return ret;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
   // testvnl();
 
   { // for valgrind, so that everything is freed
-    cout << getVersion() << endl;
+    std::cout << getVersion() << std::endl;
 
     // Default initialization
     int nargs = handleVersionOption(argc, argv, "mri_create_tests");
@@ -198,15 +198,15 @@ int main(int argc, char *argv[]) {
     } else {
       lta       = LTAalloc(1, mriS);
       lta->type = LINEAR_VOX_TO_VOX;
-      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl
+      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); std::cout << endl
       // <<endl;
     }
 
     if (P.translation) {
       std::vector<int> t = get_random(-100, 100, 3);
       //    vector < int > t(3,4);
-      // cout << " T: " << t[0] << " " << t[1] << " " << t[2] << endl;
-      // cout << " length: " << sqrt(t[0]*t[0] + t[1] * t[1] + t[2] * t[2]) <<
+      // std::cout << " T: " << t[0] << " " << t[1] << " " << t[2] << std::endl;
+      // std::cout << " length: " << sqrt(t[0]*t[0] + t[1] * t[1] + t[2] * t[2]) <<
       // endl;
 
       assert(t.size() == 3);
@@ -216,12 +216,12 @@ int main(int argc, char *argv[]) {
       //      double transdist = 0.05;
       double ff =
           0.5 * P.transdist / sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);
-      // cout << " ff: " << ff << endl;
+      // std::cout << " ff: " << ff << std::endl;
       float t0 = (float)(ff * t[0]);
       float t1 = (float)(ff * t[1]);
       float t2 = (float)(ff * t[2]);
-      // cout << " New length: " << sqrt(t[0]*t[0] + t[1] * t[1] + t[2] * t[2])
-      // << endl;
+      // std::cout << " New length: " << sqrt(t[0]*t[0] + t[1] * t[1] + t[2] * t[2])
+      // << std::endl;
       std::cout << " Random Translation: ( " << 2 * t[0] << " , " << 2 * t[1]
                 << " , " << 2 * t[2] << " )  length: "
                 << 2 * sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2])
@@ -253,12 +253,12 @@ int main(int argc, char *argv[]) {
       std::cout << " Random Rotation: " << std::endl;
       for (int r = 0; r < 3; r++) {
         for (int c = 0; c < 3; c++) {
-          // cout << R[r*3+c] << " " << flush;
+          // std::cout << R[r*3+c] << " " << flush;
           *MATRIX_RELT(lta->xforms[0].m_L, r + 1, c + 1) = R[r * 3 + c];
         }
-        // cout << endl;
+        // std::cout << std::endl;
       }
-      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl
+      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); std::cout << endl
       // <<endl;
 
       // should be around center of the image:
@@ -274,7 +274,7 @@ int main(int argc, char *argv[]) {
           MatrixMultiply(lta->xforms[0].m_L, T1, lta->xforms[0].m_L);
       lta->xforms[0].m_L =
           MatrixMultiply(T2, lta->xforms[0].m_L, lta->xforms[0].m_L);
-      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl
+      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); std::cout << endl
       // <<endl;
 
       MatrixFree(&T1);
@@ -322,12 +322,12 @@ int main(int argc, char *argv[]) {
 
     // outlier
     if (P.outlier > 0) {
-      //     cout << " Setting " << P.outlier << " random voxels to [200...255]"
-      //     << endl; vector <int> p = get_random(0,255,P.outlier*3); vector
+      //     std::cout << " Setting " << P.outlier << " random voxels to [200...255]"
+      //     << std::endl; vector <int> p = get_random(0,255,P.outlier*3); vector
       //     <int> t = get_random(0,255,P.outlier); for (int i =
       //     0;i<P.outlier;i++)
       //        MRIvox(mriT,p[i*3],p[i*3+1],p[i*3+2]) = t[i];
-      //     cout << " Setting " << P.outlier << " random voxel boxes 20^3" <<
+      //     std::cout << " Setting " << P.outlier << " random voxel boxes 20^3" <<
       //     endl;
       int bsize  = 30; // should be even number
       int bsizeh = bsize / 2;
@@ -395,7 +395,7 @@ int main(int argc, char *argv[]) {
 
     //====================== OUTPUT ==========================================
 
-    // cout << " OUTPUT results ... " << endl;
+    // std::cout << " OUTPUT results ... " << std::endl;
 
     // output source and target
     std::cout << " OUTPUT source MRI : " << P.outs << std::endl;
@@ -571,7 +571,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     option = option + 1; // remove second '-'
   StrUpper(option);
 
-  // cout << " option: " << option << endl;
+  // std::cout << " option: " << option << std::endl;
 
   if (!strcmp(option, "IN")) {
     P.in  = std::string(argv[1]);

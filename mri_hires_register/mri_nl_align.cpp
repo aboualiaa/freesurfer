@@ -18,40 +18,55 @@
  *
  */
 
-#ifdef HAVE_OPENMP
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "romp_support.h"
-#endif
+
 #include "cma.h"
 #include "diag.h"
+#include "error.h"
+#include "fastmarching.h"
+#include "gca.h"
 #include "gcamorph.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
 #include "mrimorph.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "timer.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
+#include "voxlist.h"
 
 #define NONMAX 0
 #define PAD    10
 #define PADVOX 1
 
 static int   handle_expanded_ventricles = 0;
-static char *label_ignore_name          = nullptr;
-static char *label_dist_name            = nullptr;
+static char *label_ignore_name          = NULL;
+static char *label_dist_name            = NULL;
 static int   apply_transform            = 1;
 static int   erosions                   = 0;
 static float scale_values               = 1.0;
 
 static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
                           GCA_MORPH_PARMS *parms, int fno, int conform,
-                          char *fname);
+                          const char *fname);
 
-static int write_snapshot(MRI *mri_target, MRI *mri_source,
-                          MATRIX *m_vox_xform, GCA_MORPH_PARMS *parms,
-                          int fno, int conform, const char *fname) ;
+static int regrid = 0;
+static int nowmsa = 1; // remove all wmsa labels from the atlas
 
 static void usage_exit(int ecode);
 static int  get_option(int argc, char *argv[]);
 
 static const char *source_surf = "";
 static const char *target_surf = ".toM02100023.resample";
-static char *mask_fname = NULL ;
+static char *      mask_fname  = NULL;
 
 const char *Progname;
 
@@ -62,14 +77,14 @@ static int    nozero                     = 1;
 static int    match_peak_intensity_ratio = 0;
 static int    match_mean_intensity       = 1;
 
-static char *ribbon_name = nullptr;
+static char *ribbon_name = NULL;
 
-static TRANSFORM *     transform = nullptr;
+static TRANSFORM *     transform = NULL;
 static GCA_MORPH_PARMS mp;
 
 static int  renormalize     = 1;
 static int  rip             = 0;
-static MRI *mri_target_diag = nullptr;
+static MRI *mri_target_diag = NULL;
 
 static MRI *replace_wmsa(MRI *mri_src, MRI *mri_dst) {
   int x, y, z, label, lh, rh, nreplaced;
@@ -144,13 +159,13 @@ int main(int argc, char *argv[]) {
 
   start.reset();
   setRandomSeed(-1L);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   ErrorInit(NULL, NULL, NULL);
 
   Progname    = argv[0];
   ac          = argc;
   av          = argv;
-  mp.mri_diag = nullptr;
+  mp.mri_diag = NULL;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -165,8 +180,7 @@ int main(int argc, char *argv[]) {
   n_omp_threads = omp_get_max_threads();
   printf("%d avail.processors, using %d\n", omp_get_num_procs(),
          omp_get_max_threads());
-  // printf("\n\n ======= NUMBER OF OPENMP THREADS = %d ======= \n",
-  // n_omp_threads);
+  //printf("\n\n ======= NUMBER OF OPENMP THREADS = %d ======= \n", n_omp_threads);
 #else
   n_omp_threads = 1;
 #endif
@@ -197,11 +211,11 @@ int main(int argc, char *argv[]) {
     mri_target = mri_tmp;
   }
 
-  if (mri_target_diag == nullptr)
+  if (mri_target_diag == NULL)
     mri_target_diag = mri_target;
   if (mask_fname) {
     MRI *mri_mask = MRIread(mask_fname);
-    if (mri_mask == nullptr)
+    if (mri_mask == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load mask from %s\n", Progname,
                 mask_fname);
 
@@ -222,7 +236,7 @@ int main(int argc, char *argv[]) {
     MRIscalarMul(mri_target, mri_target, scale_values);
   }
   if (transform && transform->type == MORPH_3D_TYPE) {
-    TransformRas2Vox(transform, mri_source, nullptr);
+    TransformRas2Vox(transform, mri_source, NULL);
   }
   if (use_aseg == 0) {
     if (match_peak_intensity_ratio)
@@ -259,8 +273,8 @@ int main(int argc, char *argv[]) {
     LABEL *area;
     FileNamePath(mri_target->fname, path);
     sprintf(fname, "%s/%s", path, label_ignore_name);
-    area = LabelRead(nullptr, fname);
-    if (area == nullptr) {
+    area = LabelRead(NULL, fname);
+    if (area == NULL) {
       ErrorExit(ERROR_NOFILE, "%s: could not load label from %s", Progname,
                 fname);
     }
@@ -279,13 +293,13 @@ int main(int argc, char *argv[]) {
     LabelFree(&area) ;
 #endif
   }
-  mri_orig_source = MRIcopy(mri_source, nullptr);
+  mri_orig_source = MRIcopy(mri_source, NULL);
 
   mp.max_grad = 0.3 * mri_source->xsize;
   mp.max_grad = .1;
 
-  if (transform == nullptr) {
-    transform = TransformAlloc(LINEAR_VOXEL_TO_VOXEL, nullptr);
+  if (transform == NULL) {
+    transform = TransformAlloc(LINEAR_VOXEL_TO_VOXEL, NULL);
   }
 
   if (transform->type !=
@@ -296,7 +310,7 @@ int main(int argc, char *argv[]) {
     if (lta->type != LINEAR_VOX_TO_VOX) {
       printf("converting ras xform to voxel xform\n");
       m_L = MRIrasXformToVoxelXform(mri_source, mri_target, lta->xforms[0].m_L,
-                                    nullptr);
+                                    NULL);
       MatrixFree(&lta->xforms[0].m_L);
       lta->type = LINEAR_VOX_TO_VOX;
     } else {
@@ -349,8 +363,8 @@ int main(int argc, char *argv[]) {
 
       FileNamePath(mri_target->fname, path);
       sprintf(fname, "%s/%s", path, label_dist_name);
-      area = LabelRead(nullptr, fname);
-      if (area == nullptr) {
+      area = LabelRead(NULL, fname);
+      if (area == NULL) {
         ErrorExit(ERROR_NOFILE, "%s: could not load label from %s", Progname,
                   fname);
       }
@@ -361,15 +375,14 @@ int main(int argc, char *argv[]) {
     }
     if (use_aseg) {
       if (nowmsa)
-	replace_wmsa(mri_source, mri_source) ;
-      if (ribbon_name)
-      {
-        char fname[STRLEN], path[STRLEN];
-	const char *str;
-	const char *hemi ;
-        int  h, s, label ;
-        MRI_SURFACE *mris_white, *mris_pial ;
-        MRI         *mri ;
+        replace_wmsa(mri_source, mri_source);
+      if (ribbon_name) {
+        char         fname[STRLEN], path[STRLEN];
+        const char * str;
+        const char * hemi;
+        int          h, s, label;
+        MRI_SURFACE *mris_white, *mris_pial;
+        MRI *        mri;
 
         for (s = 0; s <= 1; s++) // source and target
         {
@@ -399,14 +412,14 @@ int main(int argc, char *argv[]) {
             }
             sprintf(fname, "%s/%s%s.white", path, hemi, str);
             mris_white = MRISread(fname);
-            if (mris_white == nullptr) {
+            if (mris_white == NULL) {
               ErrorExit(ERROR_NOFILE, "%s: could not read surface %s", Progname,
                         fname);
             }
             MRISsaveVertexPositions(mris_white, WHITE_VERTICES);
             sprintf(fname, "%s/%s%s.pial", path, hemi, str);
             mris_pial = MRISread(fname);
-            if (mris_pial == nullptr) {
+            if (mris_pial == NULL) {
               ErrorExit(ERROR_NOFILE, "%s: could not read surface %s", Progname,
                         fname);
             }
@@ -450,8 +463,8 @@ int main(int argc, char *argv[]) {
 
       FileNamePath(mri_target->fname, path);
       sprintf(fname, "%s/%s", path, label_dist_name);
-      area = LabelRead(nullptr, fname);
-      if (area == nullptr) {
+      area = LabelRead(NULL, fname);
+      if (area == NULL) {
         ErrorExit(ERROR_NOFILE, "%s: could not load label from %s", Progname,
                   fname);
       }
@@ -475,7 +488,7 @@ int main(int argc, char *argv[]) {
               Progname, gcam->width, gcam->height, gcam->depth,
               mri_source->width, mri_source->height, mri_source->depth);
 
-  if (mp.mri_diag == nullptr)
+  if (mp.mri_diag == NULL)
     mp.mri_diag = mri_source;
   mp.diag_morph_from_atlas = 0;
   mp.diag_write_snapshots  = 1;
@@ -501,9 +514,9 @@ int main(int argc, char *argv[]) {
       MRIwriteImageViews(mri_target_diag, fname, IMAGE_SIZE);
     } else {
       if (use_aseg) {
-        mri_gca = GCAMwriteMRI(gcam, nullptr, GCAM_LABEL);
+        mri_gca = GCAMwriteMRI(gcam, NULL, GCAM_LABEL);
       } else {
-        mri_gca = MRIclone(mri_source, nullptr);
+        mri_gca = MRIclone(mri_source, NULL);
         GCAMbuildMostLikelyVolume(gcam, mri_gca);
       }
       printf("writing target volume to %s...\n", fname);
@@ -563,16 +576,15 @@ int main(int argc, char *argv[]) {
 
     FileNameRemoveExtension(out_fname, fname);
     strcat(fname, ".mgz");
-    mri_aligned =
-        GCAMmorphToAtlas(mp.mri, gcam, nullptr, -1, mp.diag_sample_type);
+    mri_aligned = GCAMmorphToAtlas(mp.mri, gcam, NULL, -1, mp.diag_sample_type);
     printf("writing transformed output volume to %s...\n", fname);
     MRIwrite(mri_aligned, fname);
     MRIfree(&mri_aligned);
   }
   printf("writing warp vector field to %s\n", out_fname);
-  // GCAMvoxToRas(gcam) ;
+  //GCAMvoxToRas(gcam) ;
   GCAMwrite(gcam, out_fname);
-  // GCAMrasToVox(gcam, mri_source) ;
+  //GCAMrasToVox(gcam, mri_source) ;
 
   msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
@@ -672,7 +684,7 @@ static int get_option(int argc, char *argv[]) {
     mp.ndtrans       = NDTRANS_LABELS;
   } else if (!stricmp(option, "diag2")) {
     mp.mri_diag2 = MRIread(argv[2]);
-    if (mp.mri_diag2 == nullptr) {
+    if (mp.mri_diag2 == NULL) {
       ErrorExit(ERROR_NOFILE, "%s: could not read diag volume from %s",
                 Progname, argv[2]);
     }
@@ -681,7 +693,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "diag_target") ||
              !stricmp(option, "target_diag")) {
     mri_target_diag = MRIread(argv[2]);
-    if (mri_target_diag == nullptr) {
+    if (mri_target_diag == NULL) {
       ErrorExit(ERROR_NOFILE, "%s: could not read target diag volume from %s",
                 Progname, argv[2]);
     }
@@ -689,7 +701,7 @@ static int get_option(int argc, char *argv[]) {
     printf("writing target image using input volume %s\n", argv[2]);
   } else if (!stricmp(option, "diag")) {
     mp.mri_diag = MRIread(argv[2]);
-    if (mp.mri_diag == nullptr) {
+    if (mp.mri_diag == NULL) {
       ErrorExit(ERROR_NOFILE, "%s: could not read diag volume from %s",
                 Progname, argv[2]);
     }
@@ -849,28 +861,28 @@ static int get_option(int argc, char *argv[]) {
     case 'T':
       printf("reading transform from %s...\n", argv[2]);
       transform = TransformRead(argv[2]);
-      if (transform == nullptr) {
+      if (transform == NULL) {
         ErrorExit(ERROR_NOFILE, "%s: could not read transform from %s\n",
                   Progname, argv[2]);
       }
       nargs = 1;
       if (transform->type == LINEAR_VOX_TO_VOX) {
         printf("converting transform to ras....\n");
-        LTAvoxelToRasXform((LTA *)(transform->xform), nullptr, nullptr);
+        LTAvoxelToRasXform((LTA *)(transform->xform), NULL, NULL);
       }
       break;
     case 'I':
       printf("reading transform from %s...\n", argv[2]);
       transform = TransformRead(argv[2]);
-      if (transform == nullptr) {
+      if (transform == NULL) {
         ErrorExit(ERROR_NOFILE, "%s: could not read transform from %s\n",
                   Progname, argv[2]);
       }
-      TransformInvert(transform, nullptr);
+      TransformInvert(transform, NULL);
       TransformSwapInverse(transform);
       if (transform->type == LINEAR_VOX_TO_VOX) {
         printf("converting transform to ras....\n");
-        LTAvoxelToRasXform((LTA *)(transform->xform), nullptr, nullptr);
+        LTAvoxelToRasXform((LTA *)(transform->xform), NULL, NULL);
       }
       nargs = 1;
       break;
@@ -1019,23 +1031,15 @@ static void usage_exit(int ecode) {
 
 static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
                           GCA_MORPH_PARMS *parms, int fno, int conform,
-                          char *in_fname) {
+                          const char *in_fname) {
   MRI *mri_aligned;
   char fname[STRLEN];
 
-static int
-write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
-               GCA_MORPH_PARMS *parms, int fno, int conform, const char *in_fname)
-{
-  MRI *mri_aligned ;
-  char fname[STRLEN] ;
-
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-  {
-    printf("source->target vox->vox transform:\n") ;
-    MatrixPrint(stdout, m_vox_xform) ;
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
+    printf("source->target vox->vox transform:\n");
+    MatrixPrint(stdout, m_vox_xform);
   }
-  if (true || conform) {
+  if (1 || conform) {
     mri_aligned = MRIalloc(mri_target->width, mri_target->height,
                            mri_target->depth, mri_source->type);
     MRIcopyHeader(mri_target, mri_aligned);

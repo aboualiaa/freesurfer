@@ -856,8 +856,8 @@ VOXEL_LIST *VLSTsplineFit(VOXEL_LIST *vl, int num_control) {
 
   return (vl_spline);
 }
-int VLSTwriteLabel(VOXEL_LIST *vl, const char *fname, MRI_SURFACE *mris, MRI *mri)
-{
+int VLSTwriteLabel(VOXEL_LIST *vl, const char *fname, MRI_SURFACE *mris,
+                   MRI *mri) {
   LABEL *area = VLSTtoLabel(vl, mris, mri);
   LabelWrite(area, fname);
   LabelFree(&area);

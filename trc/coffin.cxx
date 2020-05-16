@@ -1199,10 +1199,10 @@ Coffin::Coffin(const char *OutDir, std::vector<char *> InDirList,
   /*
 std::vector<float> pt(3);
 pt[0] = 75; pt[1] = 55; pt[2] = 51;
-std::cout << "In DWI space: " << pt[0] << " " << pt[1] << " " << pt[2] << endl;
+std::cout << "In DWI space: " << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
 mAffineReg.ApplyXfm(pt, pt.begin());
 mNonlinReg.ApplyXfm(pt, pt.begin());
-std::cout << "In atlas space: " << pt[0] << " " << pt[1] << " " << pt[2] << endl;
+std::cout << "In atlas space: " << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
 exit(1);
   */
 

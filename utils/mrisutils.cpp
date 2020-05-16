@@ -954,8 +954,8 @@ void MRISsmoothSurface2(MRI_SURFACE *mris, int niter, float step, int avrg) {
 }
 
 /*--------------------------------------------------------------------*/
-MRIS *MRISloadSurfSubject(const char *subj, const char *hemi, const char *surfid, const char *SUBJECTS_DIR)
-{
+MRIS *MRISloadSurfSubject(const char *subj, const char *hemi,
+                          const char *surfid, const char *SUBJECTS_DIR) {
   MRIS *Surf;
   char  fname[2000];
 
@@ -1156,8 +1156,8 @@ double MRISniters2fwhm(int niters, MRIS *surf) {
 }
 
 /*---------------------------------------------------------------*/
-int MRISfwhm2nitersSubj(double fwhm, const char *subject, const char *hemi, const char *surfname)
-{
+int MRISfwhm2nitersSubj(double fwhm, const char *subject, const char *hemi,
+                        const char *surfname) {
   char *SUBJECTS_DIR, surfpath[2000];
   MRIS *surf;
   int   niters;

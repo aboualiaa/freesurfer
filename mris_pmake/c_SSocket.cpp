@@ -61,7 +61,7 @@ void c_SSocket::error(std::string astr_msg /* = ""  Error message */,
   std::cerr << "\tCurrent function: " << str_obj << "::" << str_proc_get()
             << "\n";
   std::cerr << "\t" << astr_msg << "\n";
-  // cerr << "\t" << "System errno:\t" << errno << endl;
+  // cerr << "\t" << "System errno:\t" << errno << std::endl;
   perror("Error returned from system");
   print();
   std::cerr << "Throwing exception to (this) with code " << code << "\n\n";

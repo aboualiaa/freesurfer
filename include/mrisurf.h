@@ -578,47 +578,46 @@ int    MRISreadFloatFile(MRI_SURFACE *mris, const char *fname);
 MRI *MRISloadSurfVals(const char *srcvalfile, const char *typestring,
                       MRI_SURFACE *Surf, const char *subject, const char *hemi,
                       const char *subjectsdir);
-int          MRISreadValues(MRI_SURFACE *mris,const  char *fname) ;
-int          MRISreadValuesIntoArray(const char *fname,
-                                     int in_array_size,
-                                     float** out_array) ;
-int          MRISreadAnnotation(MRI_SURFACE *mris,const  char *fname) ;
-int          MRISwriteVertexLocations(MRI_SURFACE *mris, char *fname, int which_vertices) ;
-int          MRISimportVertexCoords(MRI_SURFACE *mris, float *locations[3], int which_vertices);
-int          MRISwriteAnnotation(MRI_SURFACE *mris,const  char *fname) ;
-int          MRISreadAnnotationIntoArray(const char *fname,
-                                         int in_array_size,
-                                         int** out_array);
-int          MRISreadCTABFromAnnotationIfPresent(const char *fname,
-                                                 COLOR_TABLE** out_table);
-int          MRISisCTABPresentInAnnotation(const char *fname, int* present);
-int          MRISreadValuesBak(MRI_SURFACE *mris,const  char *fname) ;
-int          MRISreadImagValues(MRI_SURFACE *mris,const  char *fname) ;
-int          MRIScopyImagValuesToValues(MRI_SURFACE *mris) ;
-int          MRIScopyMarksToAnnotation(MRI_SURFACE *mris) ;
-int          MRIScopyValsToAnnotations(MRI_SURFACE *mris) ;
-int          MRIScopyValuesToImagValues(MRI_SURFACE *mris) ;
-int          MRIScopyStatsToValues(MRI_SURFACE *mris) ;
-int          MRIScopyStatsFromValues(MRI_SURFACE *mris) ;
+int  MRISreadValues(MRI_SURFACE *mris, const char *fname);
+int  MRISreadValuesIntoArray(const char *fname, int in_array_size,
+                             float **out_array);
+int  MRISreadAnnotation(MRI_SURFACE *mris, const char *fname);
+int  MRISwriteVertexLocations(MRI_SURFACE *mris, char *fname,
+                              int which_vertices);
+int  MRISimportVertexCoords(MRI_SURFACE *mris, float *locations[3],
+                            int which_vertices);
+int  MRISwriteAnnotation(MRI_SURFACE *mris, const char *fname);
+int  MRISreadAnnotationIntoArray(const char *fname, int in_array_size,
+                                 int **out_array);
+int  MRISreadCTABFromAnnotationIfPresent(const char *  fname,
+                                         COLOR_TABLE **out_table);
+int  MRISisCTABPresentInAnnotation(const char *fname, int *present);
+int  MRISreadValuesBak(MRI_SURFACE *mris, const char *fname);
+int  MRISreadImagValues(MRI_SURFACE *mris, const char *fname);
+int  MRIScopyImagValuesToValues(MRI_SURFACE *mris);
+int  MRIScopyMarksToAnnotation(MRI_SURFACE *mris);
+int  MRIScopyValsToAnnotations(MRI_SURFACE *mris);
+int  MRIScopyValuesToImagValues(MRI_SURFACE *mris);
+int  MRIScopyStatsToValues(MRI_SURFACE *mris);
+int  MRIScopyStatsFromValues(MRI_SURFACE *mris);
 
+int MRISsetCroppedToZero(MRI_SURFACE *mris);
+int MRIScopyFromCropped(MRI_SURFACE *mris, int which);
+int MRIScopyToCropped(MRI_SURFACE *mris, int which);
+int MRISwriteCropped(MRI_SURFACE *mris, const char *fname);
 
-int MRISsetCroppedToZero(MRI_SURFACE *mris) ;
-int MRIScopyFromCropped(MRI_SURFACE *mris, int which) ;
-int MRIScopyToCropped(MRI_SURFACE *mris, int which) ;
-int MRISwriteCropped(MRI_SURFACE *mris, const char *fname) ;
+int MRIScopyValToVal2(MRI_SURFACE *mris);
+int MRIScopyValToVal2Bak(MRI_SURFACE *mris);
+int MRIScopyValToValBak(MRI_SURFACE *mris);
+int MRISsqrtVal(MRI_SURFACE *mris);
+int MRISmulVal(MRI_SURFACE *mris, float mul);
 
-int          MRIScopyValToVal2(MRI_SURFACE *mris) ;
-int          MRIScopyValToVal2Bak(MRI_SURFACE *mris) ;
-int          MRIScopyValToValBak(MRI_SURFACE *mris) ;
-int          MRISsqrtVal(MRI_SURFACE *mris) ;
-int          MRISmulVal(MRI_SURFACE *mris, float mul) ;
-
-int          MRISwrite(MRI_SURFACE *mris,const  char *fname) ;
-int          MRISwriteAscii(MRI_SURFACE *mris,const  char *fname) ;
-int          MRISwriteWhiteNormals(MRI_SURFACE *mris, const char *fname) ;
-int          MRISwriteNormalsAscii(MRI_SURFACE *mris,const  char *fname) ;
-int          MRISreadNormals(MRI_SURFACE *mris, const char *fname) ;
-int          MRISwriteNormals(MRI_SURFACE *mris,const  char *fname) ;
+int MRISwrite(MRI_SURFACE *mris, const char *fname);
+int MRISwriteAscii(MRI_SURFACE *mris, const char *fname);
+int MRISwriteWhiteNormals(MRI_SURFACE *mris, const char *fname);
+int MRISwriteNormalsAscii(MRI_SURFACE *mris, const char *fname);
+int MRISreadNormals(MRI_SURFACE *mris, const char *fname);
+int MRISwriteNormals(MRI_SURFACE *mris, const char *fname);
 int mrisNormalFace(MRIS *mris, int fac, int n, float norm[]);
 int MRISwritePrincipalDirection(MRI_SURFACE *mris, int dir_index,
                                 const char *fname);
@@ -1265,12 +1264,12 @@ int MRIScountNegativeFaces(MRI_SURFACE *mris);
 int MRISevertSurface(MRI_SURFACE *mris);
 int MRISripDefectiveFaces(MRI_SURFACE *mris);
 int MRISdefects2Seg(MRIS *surf, MRI *defects, int offset, MRI *vol);
-int MRISunrip(MRI_SURFACE *mris) ;
-int MRISdivideLongEdges(MRI_SURFACE *mris, double thresh) ;
-int MRISdivideEdges(MRI_SURFACE *mris, int npoints) ;
-int MRISremoveTriangleLinks(MRI_SURFACE *mris) ;
-int MRISsetOriginalFileName(const char *orig_name) ;
-int MRISsetSulcFileName(const char *sulc_name) ;
+int MRISunrip(MRI_SURFACE *mris);
+int MRISdivideLongEdges(MRI_SURFACE *mris, double thresh);
+int MRISdivideEdges(MRI_SURFACE *mris, int npoints);
+int MRISremoveTriangleLinks(MRI_SURFACE *mris);
+int MRISsetOriginalFileName(const char *orig_name);
+int MRISsetSulcFileName(const char *sulc_name);
 int MRISsetCurvatureName(int nth, const char *name);
 int MRISprintCurvatureNames(FILE *fp);
 int MRISsetInflatedFileName(char *inflated_name);
@@ -1637,105 +1636,49 @@ HISTOGRAM *MRISgetHistogram(MRI_SURFACE *mris, int nbins, int field);
 
 // Discrete Principal Curvature and Related  vvvvvvvvvvvvvvvvvv
 // Column / width for formatted output
-#define		G_LC				50
-#define		G_RC				30
+#define G_LC 50
+#define G_RC 30
 
-int		slprints(
-    char*		apch_txt
-);
+int slprints(char *apch_txt);
 
-void	cprintf(
-	const char*		apch_left,
-	float		af_right
-);
+void cprintf(const char *apch_left, float af_right);
 
-void	cprints(
-	const char*		apch_left,
-	const char*		apch_right
-);
+void cprints(const char *apch_left, const char *apch_right);
 
-void	cprintd(
-	const char*		apch_left,
-	int		a_right
-);
+void cprintd(const char *apch_left, int a_right);
 
-short	FACE_vertexIndex_find(
-    	FACE*			pFace,
-    	int 			avertex 
-);
+short FACE_vertexIndex_find(FACE *pFace, int avertex);
 
-short	VECTOR_elementIndex_findNotEqual(
-	VECTOR*			apV,
-	float			af_searchTerm
-);
+short VECTOR_elementIndex_findNotEqual(VECTOR *apV, float af_searchTerm);
 
-short	VECTOR_elementIndex_find(
-	VECTOR*			apV,
-	float			af_searchTerm
-);
+short VECTOR_elementIndex_find(VECTOR *apV, float af_searchTerm);
 
-short	MRIS_vertexProgress_print(
-    	MRIS*			apmris,
-    	int			avertex,
-    	const char*			apch_message
-);
+short MRIS_vertexProgress_print(MRIS *apmris, int avertex,
+                                const char *apch_message);
 
-int	FACE_vertexIndexAtMask_find(
-	FACE*			apFACE_I,
-	VECTOR*			apv_verticesCommon
-);
+int FACE_vertexIndexAtMask_find(FACE *apFACE_I, VECTOR *apv_verticesCommon);
 
-short	VERTICES_commonInFaces_find(
-	FACE*			apFACE_I,
-	FACE*			apFACE_J,
-	VECTOR*			apv_verticesCommon
-);
+short VERTICES_commonInFaces_find(FACE *apFACE_I, FACE *apFACE_J,
+                                  VECTOR *apv_verticesCommon);
 
-short	FACES_Hcurvature_determineSign(
-    	MRIS*			apmris,
-    	int			apFACE_O_fno,
-    	int			apFACE_I_fno
-);
+short FACES_Hcurvature_determineSign(MRIS *apmris, int apFACE_O_fno,
+                                     int apFACE_I_fno);
 
-int	VERTEX_faceAngles_determine(
-    	MRIS*			apmris,
-    	int			avertex,
-    	VECTOR*			apv_angle
-);
+int VERTEX_faceAngles_determine(MRIS *apmris, int avertex, VECTOR *apv_angle);
 
-int	VERTEX_faceMinMaxAngles_determine(
-    	MRIS*			apmris,
-    	int			avertex,
-    	int*			ap_minIndex,
-    	float*			apf_minAngle,
-    	int*			ap_maxIndex,
-    	float*			apf_maxAngle
-);
+int VERTEX_faceMinMaxAngles_determine(MRIS *apmris, int avertex,
+                                      int *ap_minIndex, float *apf_minAngle,
+                                      int *ap_maxIndex, float *apf_maxAngle);
 
-int	MRIS_facesAtVertices_reorder(
-    	MRIS*			apmris
-);
+int MRIS_facesAtVertices_reorder(MRIS *apmris);
 
-float	FACES_angleNormal_find(
-    	MRIS*			apmris,
-    	int			apFACE_I_fno,
-    	int			apFACE_J_fno
-);
+float FACES_angleNormal_find(MRIS *apmris, int apFACE_I_fno, int apFACE_J_fno);
 
-float	FACES_commonEdgeLength_find(
-    	MRIS*			apmris,
-    	FACE*			apFACE_I,
-    	FACE*			apFACE_J
-);
+float FACES_commonEdgeLength_find(MRIS *apmris, FACE *apFACE_I, FACE *apFACE_J);
 
-short	MRIS_discreteKH_compute(
-	MRIS*			apmris
-);
+short MRIS_discreteKH_compute(MRIS *apmris);
 
-short	MRIS_discretek1k2_compute(
-	MRIS*			apmris,
-	short			ab_signedPrincipals
-);
+short MRIS_discretek1k2_compute(MRIS *apmris, short ab_signedPrincipals);
 
 // The discrete curvature calculations are based on the Gauss-Bonnet Scheme.
 //
@@ -2329,11 +2272,14 @@ static bool mrisVerticesAreNeighbors(MRIS const *const mris, int const vno1,
   return 0 <= mrisVertexNeighborIndex(mris, vno1, vno2);
 }
 
-int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, const char *hemi, int which, int fix_mtl);
-int MRIcomputeLabelNormal(MRI *mri_aseg, int x0, int y0, int z0,int label, int whalf, double *pnx, double *pny,
-			  double *pnz, int use_abs);
+int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain,
+                   const char *hemi, int which, int fix_mtl);
+int MRIcomputeLabelNormal(MRI *mri_aseg, int x0, int y0, int z0, int label,
+                          int whalf, double *pnx, double *pny, double *pnz,
+                          int use_abs);
 int MRISfindExpansionRegions(MRI_SURFACE *mris);
-int MRISwriteField(MRIS *surf, const char **fields, int nfields, const char *outname);
+int MRISwriteField(MRIS *surf, const char **fields, int nfields,
+                   const char *outname);
 
 /**
   class AutoDetGWStats. This class houses functions used to compute
@@ -2344,54 +2290,55 @@ int MRISwriteField(MRIS *surf, const char **fields, int nfields, const char *out
  */
 class AutoDetGWStats {
 public:
-  MRIS *mrisAD, *mrisADlh, *mrisADrh; // surface used to autodetect stats
-  MRI *mri_T1, *mri_wm;
-  const char *wm_name = "wm" ;
+  MRIS *      mrisAD, *mrisADlh, *mrisADrh; // surface used to autodetect stats
+  MRI *       mri_T1, *mri_wm;
+  const char *wm_name   = "wm";
   const char *orig_name = "orig";
   //In mris_make_surfaces, "brain" is the default, but brain.finalsurfs is always used in recon-all
-  const char *T1_name = "brain.finalsurfs"; 
-  int hemicode = 0; //1=left, 2=right
-  int use_mode = 1;
-  float variablesigma = 3.0;
-  double std_scale = 1.0;
-  float adWHITE_MATTER_MEAN = 110;
-  float MAX_WHITE = 120;
-  float MAX_BORDER_WHITE = 105;
-  float MIN_BORDER_WHITE = 85;
-  float MIN_GRAY_AT_WHITE_BORDER = 70;
-  float MAX_GRAY = 95;
-  float MID_GRAY;
-  float MIN_GRAY_AT_CSF_BORDER = 40;
-  float MAX_GRAY_AT_CSF_BORDER = 75;
-  float MIN_CSF = 10;
-  float adMAX_CSF = 40;
-  float white_mean, white_std, gray_mean, gray_std ;
-  float white_mode, gray_mode ;
-  float lh_white_mode, lh_gray_mode, rh_white_mode, rh_gray_mode ;
-  float max_border_white = MAX_BORDER_WHITE;
-  float min_border_white = MIN_BORDER_WHITE;
-  float min_gray_at_white_border = MIN_GRAY_AT_WHITE_BORDER;
-  float max_gray = MAX_GRAY;
-  float max_gray_at_csf_border = MAX_GRAY_AT_CSF_BORDER;
-  float min_gray_at_csf_border = MIN_GRAY_AT_CSF_BORDER;
-  float min_csf = MIN_CSF;
-  float max_csf = adMAX_CSF ;
-  double max_gray_scale = 0.0 ;  
-  double max_scale_down = .2;
-  double white_inside_hi;
-  double white_border_hi;
-  double white_border_low;
-  double white_outside_low;
-  double white_outside_hi;
-  double pial_inside_hi;
-  double pial_border_hi;
-  double pial_border_low;
-  double pial_outside_low;
-  double pial_outside_hi;
+  const char *T1_name                  = "brain.finalsurfs";
+  int         hemicode                 = 0; //1=left, 2=right
+  int         use_mode                 = 1;
+  float       variablesigma            = 3.0;
+  double      std_scale                = 1.0;
+  float       adWHITE_MATTER_MEAN      = 110;
+  float       MAX_WHITE                = 120;
+  float       MAX_BORDER_WHITE         = 105;
+  float       MIN_BORDER_WHITE         = 85;
+  float       MIN_GRAY_AT_WHITE_BORDER = 70;
+  float       MAX_GRAY                 = 95;
+  float       MID_GRAY;
+  float       MIN_GRAY_AT_CSF_BORDER = 40;
+  float       MAX_GRAY_AT_CSF_BORDER = 75;
+  float       MIN_CSF                = 10;
+  float       adMAX_CSF              = 40;
+  float       white_mean, white_std, gray_mean, gray_std;
+  float       white_mode, gray_mode;
+  float       lh_white_mode, lh_gray_mode, rh_white_mode, rh_gray_mode;
+  float       max_border_white         = MAX_BORDER_WHITE;
+  float       min_border_white         = MIN_BORDER_WHITE;
+  float       min_gray_at_white_border = MIN_GRAY_AT_WHITE_BORDER;
+  float       max_gray                 = MAX_GRAY;
+  float       max_gray_at_csf_border   = MAX_GRAY_AT_CSF_BORDER;
+  float       min_gray_at_csf_border   = MIN_GRAY_AT_CSF_BORDER;
+  float       min_csf                  = MIN_CSF;
+  float       max_csf                  = adMAX_CSF;
+  double      max_gray_scale           = 0.0;
+  double      max_scale_down           = .2;
+  double      white_inside_hi;
+  double      white_border_hi;
+  double      white_border_low;
+  double      white_outside_low;
+  double      white_outside_hi;
+  double      pial_inside_hi;
+  double      pial_border_hi;
+  double      pial_border_low;
+  double      pial_outside_low;
+  double      pial_outside_hi;
   // These indicate whether there was a manual override.
-  int  max_border_white_set = 0, min_border_white_set = 0, min_gray_at_white_border_set = 0,
-    max_gray_set = 0,max_gray_at_csf_border_set = 0, min_gray_at_csf_border_set = 0,
-    min_csf_set = 0, max_csf_set = 0 ;
+  int max_border_white_set = 0, min_border_white_set = 0,
+      min_gray_at_white_border_set = 0, max_gray_set = 0,
+      max_gray_at_csf_border_set = 0, min_gray_at_csf_border_set = 0,
+      min_csf_set = 0, max_csf_set = 0;
   int AutoDetectStats(const char *subject, const char *hemistr);
   int AutoDetectStats(void);
   int Write(char *fname);

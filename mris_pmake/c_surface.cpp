@@ -228,14 +228,14 @@ void surface_correlationFunction_do(s_env &st_env) {
       denom++;
       pvertex = &st_env.pMS_secondary->vertices[i];
       if (vertex_ripFlagIsTrue(pvertex, pv_void)) {
-        // cout << i << endl;
+        // std::cout << i << std::endl;
         membership++;
       }
     }
   }
 
-  // cout << "number overlap: " << membership << endl;
-  // cout << "size of source: " << denom << endl;
+  // std::cout << "number overlap: " << membership << std::endl;
+  // std::cout << "size of source: " << denom << std::endl;
 
   if (!denom)
     f_correl = -1;

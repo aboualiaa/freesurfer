@@ -75,37 +75,36 @@ static int    my_mrisComputeTangentPlanes(MRI_SURFACE *mris);
 static int    FindSpikes(MRI_SURFACE *mris, int iter);
 static int    SmoothSpikes(MRI_SURFACE *mris, int niter);
 
-static int      all_flag = 0 ;
-static const char     *suffix = "hippocampus" ;
-static const char     *labelvolume = "mri/aseg" ;
+static int         all_flag    = 0;
+static const char *suffix      = "hippocampus";
+static const char *labelvolume = "mri/aseg";
 //static char     *labelvolume = "mri/aseg_new.mgh" ;
-static const char     *orig_name =  "hippocampus.orig" ;
-static float    weight_Gspring = 0.0 ;
-static double   gaussian_norm = 2.0;
-static int      write_iterations = 0 ;
-static int      niteration = 0 ;
-static int      smooth_spikes = 500;
-static int      nbrs = 3 ;
+static const char *orig_name        = "hippocampus.orig";
+static float       weight_Gspring   = 0.0;
+static double      gaussian_norm    = 2.0;
+static int         write_iterations = 0;
+static int         niteration       = 0;
+static int         smooth_spikes    = 500;
+static int         nbrs             = 3;
 //static float    weight_quadcur = 0.0, weight_label = 1.0, weight_repulse = 0.0, weight_Nspring = 0.1, weight_Tspring = 0.1;
-static float    weight_quadcur = 1.2, weight_label = 1.2, weight_repulse = 3.0, weight_Nspring = 0.5, weight_Tspring = 0.5;
-const char            *Progname ;
-int             t=0;
-int             table[2][20000];
-char            surf[5][10]= {"lh","rh","LA","RA","OTHER"
-                             };
-float           sigma = 2.0f ;
-float           MAX_mag = 2.0, threshold = 0.5 ;
-float           rmax = 10, rmin = 3.3 ;
-float           step_size = 1;
+static float weight_quadcur = 1.2, weight_label = 1.2, weight_repulse = 3.0,
+             weight_Nspring = 0.5, weight_Tspring = 0.5;
+const char *Progname;
+int         t = 0;
+int         table[2][20000];
+char        surf[5][10] = {"lh", "rh", "LA", "RA", "OTHER"};
+float       sigma       = 2.0f;
+float       MAX_mag = 2.0, threshold = 0.5;
+float       rmax = 10, rmin = 3.3;
+float       step_size = 1;
 
+int main(int argc, char *argv[]);
 
-int main(int argc, char *argv[]) ;
-
-int
-main(int argc, char *argv[]) {
-  char          data_dir[400], *cp, ifname[200], ofname[200], labelfilename[200], surftype[10];
-  int           nargs, s, counter=0, i, spikes=1;
-  float         ratio = 1, energy_new = 0, energy_old = 0 ;
+int main(int argc, char *argv[]) {
+  char data_dir[400], *cp, ifname[200], ofname[200], labelfilename[200],
+      surftype[10];
+  int   nargs, s, counter = 0, i, spikes = 1;
+  float ratio = 1, energy_new = 0, energy_old = 0;
   // float         weight_quadcur = 0.2, weight_label = 0.5, weight_repulse = 0.0,
   //            weight_Nspring = 0.3, weight_Tspring = 0.3;
   MRI_SURFACE *mris;

@@ -65,7 +65,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   }
   StrUpper(option);
 
-  // cout << " option: " << option << endl;
+  // std::cout << " option: " << option << std::endl;
 
   if (!strcmp(option, "DIST") || !strcmp(option, "D")) {
     P.disttype = atoi(argv[1]);
@@ -330,10 +330,10 @@ double cornerdiff(LTA *lta1, LTA *lta2, bool vox2vox) {
         double d2 = V3_Y(v_Y1) - V3_Y(v_Y2);
         double d3 = V3_Z(v_Y1) - V3_Z(v_Y2);
         d += sqrt(d1 * d1 + d2 * d2 + d3 * d3);
-        // cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<
-        // V3_Z(v_X) << endl; cout << "   mapped to "<< V3_X(v_Y1) << " , " <<
-        // V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << endl; cout << "   mapped to "<<
-        // V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << endl;
+        // std::cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<
+        // V3_Z(v_X) << std::endl; std::cout << "   mapped to "<< V3_X(v_Y1) << " , " <<
+        // V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << std::endl; std::cout << "   mapped to "<<
+        // V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << std::endl;
       }
     }
   }
@@ -384,14 +384,14 @@ double cornerdiff(LTA *lta1, bool vox2vox) {
         double d2 = V3_Y(v_Y1) - V3_Y(v_X);
         double d3 = V3_Z(v_Y1) - V3_Z(v_X);
         double dd = sqrt(d1 * d1 + d2 * d2 + d3 * d3);
-        // cout << " dd: " << dd << endl;
+        // std::cout << " dd: " << dd << std::endl;
         if (dd > dmax)
           dmax = dd;
         d += dd;
-        // cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<
-        // V3_Z(v_X) << endl; cout << "   mapped to "<< V3_X(v_Y1) << " , " <<
-        // V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << endl; cout << "   mapped to "<<
-        // V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << endl;
+        // std::cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<
+        // V3_Z(v_X) << std::endl; std::cout << "   mapped to "<< V3_X(v_Y1) << " , " <<
+        // V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << std::endl; std::cout << "   mapped to "<<
+        // V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << std::endl;
       }
     }
   }
@@ -406,7 +406,7 @@ double determinant(MATRIX *M1, MATRIX *M2) {
   //   MATRIX* M = MatrixAlloc(4,4,MATRIX_REAL);
   MATRIX *M = MatrixCopy(M1, nullptr);
   if (M2 != nullptr) {
-    // cout << " inverting" << endl;
+    // std::cout << " inverting" << std::endl;
     // M = MatrixInverse(M1,M);
     M = MatrixMultiply(M2, M, M);
   }
@@ -446,7 +446,7 @@ void decompose(MATRIX *M1, MATRIX *M2) {
   vnl_matrix<double> m = MyMatrix::convertMATRIX2VNL(M1);
 
   if (M2 != nullptr) {
-    // cout << " inverting" << endl;
+    // std::cout << " inverting" << std::endl;
     // M = MatrixInverse(M1,M);
     vnl_matrix<double> m2 = MyMatrix::convertMATRIX2VNL(M2);
     m                     = m * m2;
@@ -571,7 +571,7 @@ double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
     }
   }
   davg = davg / counter;
-  //   cout << " max: " << dmax << " min: " << dmin << " avg: " << davg << endl;
+  //   std::cout << " max: " << dmax << " min: " << dmin << " avg: " << davg << std::endl;
   MatrixFree(&M);
   return dmax;
 }
@@ -626,9 +626,9 @@ double interpolationError2D(double angle) {
       xpd = (1.0f - xmd);
       ypd = (1.0f - ymd);
 
-      // cout << "x: " << x << " xm: " << xm << " xp: " << xp << " xmd: " << xmd
-      // << " xpd: " << xpd << endl; cout << "y: " << y <<" ym: " << ym << " yp:
-      // " << yp << " ymd: " << ymd << " ypd: " << ypd << endl; assert(x>=0);
+      // std::cout << "x: " << x << " xm: " << xm << " xp: " << xp << " xmd: " << xmd
+      // << " xpd: " << xpd << std::endl; std::cout << "y: " << y <<" ym: " << ym << " yp:
+      // " << yp << " ymd: " << ymd << " ypd: " << ypd << std::endl; assert(x>=0);
       assert(xmd >= 0 && xpd >= 0);
       assert(ymd >= 0 && ypd >= 0);
 

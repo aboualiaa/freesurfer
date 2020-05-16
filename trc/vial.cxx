@@ -339,19 +339,19 @@ unsigned int zlibBuffer = 5;
 
 std::ifstream xfile(XfmFile, std::ios::in);	// Just to check if file exists
 if (!xfile) {
-std::cout << "ERROR: Could not open " << XfmFile << endl;
+std::cout << "ERROR: Could not open " << XfmFile << std::endl;
 exit(1);
 }
 xfile.close();
 
-std::cout << "Loading non-linear registration from " << XfmFile << endl;
+std::cout << "Loading non-linear registration from " << XfmFile << std::endl;
 mMorph->m_template = OutRefVol;
 
 try {
 mMorph->load(XfmFile, zlibBuffer);
 }
 catch (const char* msg) {
-std::cout << "Exception caught while loading registration: " << msg << endl;
+std::cout << "Exception caught while loading registration: " << msg << std::endl;
 exit(1);
 }
 

@@ -65,7 +65,7 @@
   if (mps_env->pcsm_resultlog)                                                 \
     mps_env->pcsm_resultlog->dump(false, (msg));
 
-#define Cn(msg) cout << (msg) << std::endl;
+#define Cn(msg) std::cout << (msg) << std::endl;
 #define CW(x, msg)                                                             \
   std::cout.width((x));                                                        \
   std::cout << (msg);

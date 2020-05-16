@@ -379,8 +379,8 @@ void Bite::ComputePriorOffPath() {
   auto fjl     = mF.begin() + mPathTract;
   auto thetajl = mTheta.begin() + mPathTract;
 
-  // cout << (*fjl) << " " << log((*fjl - 1) * log(1 - *fjl)) << " "
-  //     << log(((double)*fjl - 1) * log(1 - (double)*fjl)) << endl;
+  // std::cout << (*fjl) << " " << log((*fjl - 1) * log(1 - *fjl)) << " "
+  //     << log(((double)*fjl - 1) * log(1 - (double)*fjl)) << std::endl;
 
   if (1) {
     mPrior0 = log((*fjl - 1) * log(1 - *fjl)) - log(fabs(sin(*thetajl)));

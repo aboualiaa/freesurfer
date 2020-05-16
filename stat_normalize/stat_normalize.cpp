@@ -12,17 +12,27 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "stats.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 const char *Progname;
 
@@ -32,14 +42,13 @@ static int   coordinate_system = TALAIRACH_COORDS;
 static char *hemi;
 static char *surf_name; /* used if in surface-based coordinates */
 
-int
-main(int argc, char *argv[]) {
-  char        *in_prefix, *out_prefix, out_fname[100], name[100],
-    path[100], fname[100], *cp, subjects_dir[100] ;
-  const char *coord_name;
-  int         n, nargs, ino, event ;
-  SV          *sv, *sv_avg = NULL ;
-  MRI_SURFACE *mris ;
+int main(int argc, char *argv[]) {
+  char *in_prefix, *out_prefix, out_fname[100], name[100], path[100],
+      fname[100], *cp, subjects_dir[100];
+  const char * coord_name;
+  int          n, nargs, ino, event;
+  SV *         sv, *sv_avg = NULL;
+  MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "stat_normalize");
   if (nargs && argc - nargs == 1)
@@ -48,7 +57,7 @@ main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   /* print out command-line */
   for (n = 0; n < argc; n++)
@@ -224,12 +233,12 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   fprintf(stderr, "usage: %s [options] <input sv prefix> <output sv prefix>\n",
           Progname);
   fprintf(stderr, "options are:\n");
@@ -246,12 +255,14 @@ static void print_usage() {
   fprintf(stderr, "\t-c float2int - <tkregister>, round\n");
 }
 
-static void print_version(void) {
-  fprintf(stderr, "%s\n", getVersion().c_str());
+static void print_help(void) {
+  print_usage();
+  fprintf(stderr, "\nThis program will convert average a sequence of\n");
+  fprintf(stderr, "volume-based statistics in Talairach space:\n\n");
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

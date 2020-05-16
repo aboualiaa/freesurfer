@@ -203,9 +203,9 @@ int dijkstra(s_env &st_env, float af_maxAllowedCost, bool ab_surfaceCostVoid) {
       goto error;
 
     /* update neighbors */
-    // cout << "neighbors = " << (int) v_c->num << endl;
+    // std::cout << "neighbors = " << (int) v_c->num << std::endl;
     for (j = 0; j < (int)v_ct->vnum; j++) {
-      // cout << "neighbor = " << j << endl;
+      // std::cout << "neighbor = " << j << std::endl;
       vno_n             = v_ct->v[j];
       VERTEX *const v_n = &surf->vertices[vno_n];
 
@@ -236,10 +236,10 @@ int dijkstra(s_env &st_env, float af_maxAllowedCost, bool ab_surfaceCostVoid) {
           marked++;
           v_n->val          = f_pathCost;
           v_n->old_undefval = vno_c;
-          // cout << vno_c << "<---" << vno_n << endl;
+          // std::cout << vno_c << "<---" << vno_n << std::endl;
         }
       }
-      //     cout << "v->marked in dijkstra " << v_n->marked << endl;
+      //     std::cout << "v->marked in dijkstra " << v_n->marked << std::endl;
       if (v_n->marked == DIJK_VIRGIN)
         if (mark(surf, vno_n, DIJK_IN_PLAY) != NO_ERROR)
           goto error;

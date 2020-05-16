@@ -50,7 +50,7 @@ static int relabel_gray_matter(MRI *mri, MRI_SURFACE *mris, int which_edits);
 // static int load_val_vector(VECTOR *v_means, MRI *mri_inputs, int x, int y,
 // int z) ;
 
-static const char *annot_name = "aparc.annot" ;
+static const char *annot_name = "aparc.annot";
 
 #define HYPO_EDITS       0x0001
 #define CEREBELLUM_EDITS 0x0002
@@ -65,38 +65,34 @@ const char *Progname;
 static char *label_name      = nullptr;
 static char *annotation_name = nullptr;
 
-static const char *surf_name = "white" ;
+static const char *surf_name = "white";
 
 static MRI *      mri_vals  = nullptr;
 static GCA *      gca       = nullptr;
 static TRANSFORM *transform = nullptr;
 
 static char *config_file;
-int Halo = 0;
+int          Halo = 0;
 
-int
-main(int argc, char *argv[])
-{
-  char          **av, fname[STRLEN], *in_fname,
-                *in_aseg_name, *out_aseg_name, *surf_dir ;
-  const char* hemi;
-  int           ac, nargs, h, i, ninputs, input, n;
-  MRI_SURFACE   *mris ;
-  MRI           *mri_aseg, *mri_tmp = NULL, *mri_inputs = NULL ;
-  float         *thickness ;
-  WMSA *newWMSA=NULL;
+int main(int argc, char *argv[]) {
+  char **av, fname[STRLEN], *in_fname, *in_aseg_name, *out_aseg_name, *surf_dir;
+  const char * hemi;
+  int          ac, nargs, h, i, ninputs, input, n;
+  MRI_SURFACE *mris;
+  MRI *        mri_aseg, *mri_tmp = NULL, *mri_inputs = NULL;
+  float *      thickness;
+  WMSA *       newWMSA = NULL;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(NULL, NULL, NULL);
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++)
-  {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 4) {

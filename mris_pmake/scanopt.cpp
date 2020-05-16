@@ -278,7 +278,7 @@ void C_scanopt::map_opt_build(e_SCANOPT_tokType e_tokType /*= e_DesTag*/
     for (i = 0; i < argc_get() - 1; i++) {
       str_argvA = *(Lstr_iter);   // read in a pair of options
       str_argvB = *(++Lstr_iter); // that may be a couplet
-      // cout << i << "\t" << argc << "\t" << str_argvA << "\t" << str_argvB <<
+      // std::cout << i << "\t" << argc << "\t" << str_argvA << "\t" << str_argvB <<
       // endl;
       if (str_argvA.find(str_optDes) == b_found) {
         str_argvA.erase(0, str_optDes.length());
@@ -305,8 +305,8 @@ void C_scanopt::map_opt_build(e_SCANOPT_tokType e_tokType /*= e_DesTag*/
       str_argvA = *(Lstr_iter);   // read in three options
       str_Equ   = *(++Lstr_iter); // that may be a couplet
       str_argvB = *(++Lstr_iter); // linked by an equal sign
-      // cout << i << "\t" << argc << "\t" << str_argvA << "\t" << str_Equ <<
-      // "\t" << str_argvB << endl;
+      // std::cout << i << "\t" << argc << "\t" << str_argvA << "\t" << str_Equ <<
+      // "\t" << str_argvB << std::endl;
       if (str_Equ.find(str_equ) == b_found) {
         // Strip the str_optDes tag from the first string (if found)
         if (str_argvA.find(str_optDes) == b_found)
@@ -501,7 +501,7 @@ C_scanopt::C_scanopt(std::string       astr_options,
     for (std::vector<std::string>::iterator i = v_lines.begin();
          i != v_lines.end(); i++) {
       // Now tokenizing each line on the <astr_eq>
-      // cout << "Tokenizing " << *i << endl;
+      // std::cout << "Tokenizing " << *i << std::endl;
       v_option.clear();
       str_token = e_tokType == e_EquLink ? astr_equ : " ";
       if (str_tokenize(*i, v_option, str_token)) {
@@ -516,7 +516,7 @@ C_scanopt::C_scanopt(std::string       astr_options,
         if (b_canPush) {
           for (std::vector<std::string>::iterator j = v_option.begin();
                j != v_option.end(); j++) {
-            // cout << "\tPushing " << *j << endl;
+            // std::cout << "\tPushing " << *j << std::endl;
             Lstr_body.push_back(*j);
             if (j == v_option.begin() && e_tokType == e_EquLink) {
               // Need to explicitly push the astr_equ into the

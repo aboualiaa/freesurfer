@@ -14,7 +14,7 @@ const char *Progname = NULL;
 float       myrand(float f);
 
 int main(int argc, char *argv[]) {
-  cout << getVersion() << endl << endl;
+  std::cout << getVersion() << endl << std::endl;
 
   // Default initialization
   int nargs = handleVersionOption(argc, argv, "cpptester");

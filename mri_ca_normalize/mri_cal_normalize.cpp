@@ -25,57 +25,64 @@
 #include "timer.h"
 #include "version.h"
 
+const char *Progname;
 
-const char *Progname ;
+static int remove_cerebellum = 0;
+static int remove_lh         = 0;
+static int remove_rh         = 0;
 
+static char *ctl_point_fname                     = NULL;
+static char *sample_fname                        = NULL;
+static char *normalized_transformed_sample_fname = NULL;
 
-static int remove_cerebellum = 0 ;
-static int remove_lh = 0 ;
-static int remove_rh = 0 ;
+static int   file_only  = 0;
+static char *mask_fname = NULL;
+static int   novar      = 0;
 
-static char *ctl_point_fname = NULL ;
-static char *sample_fname = NULL ;
-static char *normalized_transformed_sample_fname = NULL ;
+static double bias_sigma = 4.0;
+static float  min_prior  = 0.6;
+static FILE * diag_fp    = NULL;
 
-static int file_only = 0 ;
-static char *mask_fname = NULL ;
-static int novar = 0 ;
-
-static double bias_sigma = 4.0 ;
-static float min_prior = 0.6 ;
-static FILE *diag_fp = NULL ;
-
-static MRI *scale_all_images(MRI *mri_in, MRI *mri_out) ;
-static MRI *normalize_timepoints_with_parzen_window(MRI *mri_in, MRI *mri_out, double cross_time_sigma) ;
+static MRI *scale_all_images(MRI *mri_in, MRI *mri_out);
+static MRI *normalize_timepoints_with_parzen_window(MRI *mri_in, MRI *mri_out,
+                                                    double cross_time_sigma);
 //static int normalize_timepoints_with_samples(MRI *mri, GCA_SAMPLE *gcas, int nsamples, int nsoap) ;
-static int normalize_timepoints(MRI *mri, double thresh, double cross_time_sigma) ;
-static void usage_exit(int code) ;
-static int get_option(int argc, char *argv[]) ;
-static int copy_ctrl_points_to_volume(GCA_SAMPLE *gcas, int nsamples, 
-                                      MRI *mri_ctrl, int frame) ;
-static int discard_control_points_with_different_labels(GCA_SAMPLE *gcas, int nsamples, MRI *mri_aseg) ;
+static int  normalize_timepoints(MRI *mri, double thresh,
+                                 double cross_time_sigma);
+static void usage_exit(int code);
+static int  get_option(int argc, char *argv[]);
+static int  copy_ctrl_points_to_volume(GCA_SAMPLE *gcas, int nsamples,
+                                       MRI *mri_ctrl, int frame);
+static int  discard_control_points_with_different_labels(GCA_SAMPLE *gcas,
+                                                         int         nsamples,
+                                                         MRI *       mri_aseg);
 
-static const char *aseg_fname = "aseg.mgz" ;
-static char *renormalization_fname = NULL ;
-static double TR = 0.0, TE = 0.0, alpha = 0.0 ;
-static char *tissue_parms_fname = NULL ;
-static char *example_T1 = NULL ;
-static char *example_segmentation = NULL ;
-static double min_region_prior
-(GCA *gca, int xp, int yp, int zp, int wsize, int label) ;
-static GCA_SAMPLE *find_control_points
-(GCA *gca, GCA_SAMPLE *gcas, int total_nsamples,
- int *pnorm_samples, int nregions, int label,
- MRI *mri_in, TRANSFORM *transform, double min_prior,
- double ctrl_point_pct) ;
+static const char *aseg_fname            = "aseg.mgz";
+static char *      renormalization_fname = NULL;
+static double      TR = 0.0, TE = 0.0, alpha = 0.0;
+static char *      tissue_parms_fname   = NULL;
+static char *      example_T1           = NULL;
+static char *      example_segmentation = NULL;
+static double      min_region_prior(GCA *gca, int xp, int yp, int zp, int wsize,
+                                    int label);
+static GCA_SAMPLE *find_control_points(GCA *gca, GCA_SAMPLE *gcas,
+                                       int total_nsamples, int *pnorm_samples,
+                                       int nregions, int label, MRI *mri_in,
+                                       TRANSFORM *transform, double min_prior,
+                                       double ctrl_point_pct);
 
-static GCA_SAMPLE *gcas_concatenate(GCA_SAMPLE *gcas1, GCA_SAMPLE *gcas2, int n1, int n2);
-static int  gcas_bounding_box(GCA_SAMPLE *gcas, int nsamples, int *pxmin, int *pymin, int *pzmin,
-                              int *pxmax, int *pymax, int *pzmax, int label) ;
-static int  uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform,
-                           int x, int y, int z, int wsize, GCA_SAMPLE *gcas, float nsigma) ;
-static int  discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas_struct, int struct_samples,
-                                            MRI *mri_in, TRANSFORM *transform, const char *name) ;
+static GCA_SAMPLE *gcas_concatenate(GCA_SAMPLE *gcas1, GCA_SAMPLE *gcas2,
+                                    int n1, int n2);
+static int         gcas_bounding_box(GCA_SAMPLE *gcas, int nsamples, int *pxmin,
+                                     int *pymin, int *pzmin, int *pxmax, int *pymax,
+                                     int *pzmax, int label);
+static int uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform, int x,
+                          int y, int z, int wsize, GCA_SAMPLE *gcas,
+                          float nsigma);
+static int discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas_struct,
+                                           int struct_samples, MRI *mri_in,
+                                           TRANSFORM * transform,
+                                           const char *name);
 
 /*
   command line consists of these inputs:
@@ -921,14 +928,14 @@ static int uniform_region(GCA *gca, MRI *mri, TRANSFORM *transform, int x,
   return (1);
 }
 
-static int
-discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas, int nsamples,
-                                MRI *mri_in, TRANSFORM *transform, const char *name)
-{
-  int    i, xv, yv, zv, n, peak, start, end, num ;
-  HISTO *h, *hsmooth ;
-  float  fmin, fmax ;
-  double val,  mean_ratio ;
+static int discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas,
+                                           int nsamples, MRI *mri_in,
+                                           TRANSFORM * transform,
+                                           const char *name) {
+  int    i, xv, yv, zv, n, peak, start, end, num;
+  HISTO *h, *hsmooth;
+  float  fmin, fmax;
+  double val, mean_ratio;
 
   if (nsamples == 0)
     return (NO_ERROR);

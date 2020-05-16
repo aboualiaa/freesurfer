@@ -32,27 +32,27 @@ static void print_usage();
 static void print_help();
 static void print_version();
 static int  translate_indices_to_annotations(MRI_SURFACE *mris,
-    const char *translation_fname) ;
-static int  fix_label_topology(MRI_SURFACE *mris, int nvertices) ;
-static int  resegment_label(MRI_SURFACE *mris, LABEL *segment) ;
-int MRIsampleParcellationToSurface(MRI_SURFACE *mris, MRI *mri_parc) ;
+                                             const char * translation_fname);
+static int  fix_label_topology(MRI_SURFACE *mris, int nvertices);
+static int  resegment_label(MRI_SURFACE *mris, LABEL *segment);
+int         MRIsampleParcellationToSurface(MRI_SURFACE *mris, MRI *mri_parc);
 
-const char *Progname ;
-static int   avgs = 0 ;
-static int nclose = 0 ;
-static char *color_table_fname = NULL ;
-static LABEL *cortex_label = NULL ; // limit surface area calc to cortex.label
-static int   mode_filter = 0 ;
-static const char *surf_name = WHITE_MATTER_NAME ;
-static const char *thickness_name = "thickness" ;
-static char  sdir[STRLEN] ;
-static const char *translation_fname = "cma_parcellation_colors.txt" ;
-static int   wsize = 7 ;
-static int   unknown_label = -1 ;
-static int   fix_topology = -1 ;  // < 0 means do all
-static float proj_mm = 0.0 ;
-static float proj_frac = 0.5 ;
-static int   replace_label = 0;
+const char *  Progname;
+static int    avgs              = 0;
+static int    nclose            = 0;
+static char * color_table_fname = NULL;
+static LABEL *cortex_label   = NULL; // limit surface area calc to cortex.label
+static int    mode_filter    = 0;
+static const char *surf_name = WHITE_MATTER_NAME;
+static const char *thickness_name = "thickness";
+static char        sdir[STRLEN];
+static const char *translation_fname = "cma_parcellation_colors.txt";
+static int         wsize             = 7;
+static int         unknown_label     = -1;
+static int         fix_topology      = -1; // < 0 means do all
+static float       proj_mm           = 0.0;
+static float       proj_frac         = 0.5;
+static int         replace_label     = 0;
 #define MAX_TRANS 100
 static int ntrans = 0;
 static int trans_in[MAX_TRANS];
@@ -582,10 +582,10 @@ translate_indices_to_annotations(MRI_SURFACE *mris, const char *translation_fnam
   return(NO_ERROR) ;
 }
 #else
-static int
-translate_indices_to_annotations(MRI_SURFACE *mris, const char *translation_fname) {
-  int    vno ;
-  VERTEX *v ;
+static int translate_indices_to_annotations(MRI_SURFACE *mris,
+                                            const char *translation_fname) {
+  int vno;
+  VERTEX *v;
 
   read_named_annotation_table(translation_fname);
 

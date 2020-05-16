@@ -39,9 +39,9 @@ static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
 static int  singledash(char *flag);
-static int isflag(char *flag);
-static int nth_is_arg(int nargc, char **argv, int nth);
-static int istringnmatch(const char *str1, const char *str2, int n);
+static int  isflag(char *flag);
+static int  nth_is_arg(int nargc, char **argv, int nth);
+static int  istringnmatch(const char *str1, const char *str2, int n);
 
 int main(int argc, char *argv[]);
 
@@ -49,19 +49,19 @@ const char *Progname = NULL;
 
 int debug = 0, gdiagno = -1;
 
-char *subjectsdir = NULL;
-char *surfvalpath = NULL;
-char *surfvalfmt = NULL;
-int   surfvalfmtid = 0;
-char *hemi = NULL;
-const char *surfname = "white";
-char *srcsubject = NULL;
-char *subject = NULL; // for overriding
-char *targsubject = NULL;
-float projfrac = 0;
-static int fillribbon = 0 ;
+char *      subjectsdir  = NULL;
+char *      surfvalpath  = NULL;
+char *      surfvalfmt   = NULL;
+int         surfvalfmtid = 0;
+char *      hemi         = NULL;
+const char *surfname     = "white";
+char *      srcsubject   = NULL;
+char *      subject      = NULL; // for overriding
+char *      targsubject  = NULL;
+float       projfrac     = 0;
+static int  fillribbon   = 0;
 
-char *tempvolpath=NULL;
+char *tempvolpath = NULL;
 char *tempvolfmt;
 int   tempvolfmtid = 0;
 char *mergevolpath = nullptr;
@@ -1141,7 +1141,9 @@ static int nth_is_arg(int nargc, char **argv, int nth) {
   n=0, then do a full comparison.
   ------------------------------------------------------------*/
 static int istringnmatch(const char *str1, const char *str2, int n) {
-  if (n > 0  && ! strncasecmp(str1,str2,n)) return(1);
-  if (n <= 0 && ! strcasecmp(str1,str2)) return(1);
-  return(0);
+  if (n > 0 && !strncasecmp(str1, str2, n))
+    return (1);
+  if (n <= 0 && !strcasecmp(str1, str2))
+    return (1);
+  return (0);
 }

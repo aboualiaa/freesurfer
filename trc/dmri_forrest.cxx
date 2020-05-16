@@ -20,21 +20,39 @@
 
 #include "forrest.h"
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options();
 
 int debug = 0, checkoptsonly = 0;
@@ -43,8 +61,8 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_forrest";
 
-char *testDir = nullptr, *trainListFile = nullptr, *maskFile = nullptr,
-     *asegFile = nullptr, *orientFile = nullptr;
+char *testDir = NULL, *trainListFile = NULL, *maskFile = NULL, *asegFile = NULL,
+     *orientFile = NULL;
 std::vector<char *> tractFileList;
 
 struct utsname uts;
@@ -54,12 +72,7 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
-  int nx;
-  int ny;
-  int nz;
-  int ntrain;
+  int nargs, cputime, nx, ny, nz, ntrain;
 
   nargs = handleVersionOption(argc, argv, "dmri_forrest");
   if (nargs && argc - nargs == 1)
@@ -73,17 +86,15 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options();
 
@@ -107,19 +118,17 @@ int main(int argc, char **argv) {
   ntrain = myforrest.GetNumTrain();
 
   for (int k = 0; k < 100; k++) {
-    const int                 ix    = (int)round(drand48() * (nx - 1));
-    const int                 iy    = (int)round(drand48() * (ny - 1));
-    const int                 iz    = (int)round(drand48() * (nz - 1));
-    const int                 isamp = (int)round(drand48() * (ntrain - 1));
+    const int ix    = (int)round(drand48() * (nx - 1)),
+              iy    = (int)round(drand48() * (ny - 1)),
+              iz    = (int)round(drand48() * (nz - 1)),
+              isamp = (int)round(drand48() * (ntrain - 1));
     std::vector<int>          xyz;
-    std::vector<unsigned int> aseg;
-    std::vector<unsigned int> tracts;
+    std::vector<unsigned int> aseg, tracts;
     std::vector<float>        orient;
 
     // Check if this voxel is inside the brain mask of the test subject
-    if (!myforrest.IsInMask(ix, iy, iz)) {
+    if (!myforrest.IsInMask(ix, iy, iz))
       continue;
-    }
 
     // Get anatomical segmentation neighbors for a voxel in the test subject
     aseg = myforrest.GetTestAseg(ix, iy, iz);
@@ -127,9 +136,8 @@ int main(int argc, char **argv) {
       std::cout << "Anatomical segmentation neighbors of voxel (" << ix << ", "
                 << iy << ", " << iz << ")"
                 << " in test subject:";
-      for (unsigned int iseg = 0; iseg < aseg.size(); iseg++) {
+      for (unsigned int iseg = 0; iseg < aseg.size(); iseg++)
         std::cout << " " << aseg[iseg];
-      }
       std::cout << std::endl;
     }
 
@@ -152,9 +160,8 @@ int main(int argc, char **argv) {
     if (!aseg.empty()) { // If anatomical segmentations were provided
       std::cout << "Anatomical segmentation neighbors of training sample "
                 << isamp << ":";
-      for (unsigned int iseg = 0; iseg < aseg.size(); iseg++) {
+      for (unsigned int iseg = 0; iseg < aseg.size(); iseg++)
         std::cout << " " << aseg[iseg];
-      }
       std::cout << std::endl;
     }
 
@@ -169,12 +176,11 @@ int main(int argc, char **argv) {
     // Sample tract membership from the training data
     tracts = myforrest.GetTrainTractIds(isamp);
     std::cout << "Tract membership of training sample " << isamp << ":";
-    if (tracts.empty()) { // If voxel doesn't belong to any tracts
+    if (tracts.empty()) // If voxel doesn't belong to any tracts
       std::cout << " " << 0 << std::endl;
-    } else {
-      for (unsigned int itract = 0; itract < tracts.size(); itract++) {
+    else {
+      for (unsigned int itract = 0; itract < tracts.size(); itract++)
         std::cout << " " << tracts[itract];
-      }
       std::cout << std::endl;
     }
   }
@@ -189,80 +195,69 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int    nargc;
-  int    nargsused;
-  char **pargv;
-  char * option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--test") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--test")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       testDir   = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--train") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--train")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       trainListFile = fio_fullpath(pargv[0]);
       nargsused     = 1;
-    } else if (strcmp(option, "--mask") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--mask")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       maskFile  = pargv[0];
       nargsused = 1;
-    } else if (strcmp(option, "--seg") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--seg")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       asegFile  = pargv[0];
       nargsused = 1;
-    } else if (strcmp(option, "--diff") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--diff")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       orientFile = pargv[0];
       nargsused  = 1;
-    } else if (strcmp(option, "--tract") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--tract")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         tractFileList.push_back(pargv[nargsused]);
         nargsused++;
       }
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -272,7 +267,7 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   std::cout
       << std::endl
       << "USAGE: " << Progname << std::endl
@@ -307,7 +302,7 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
   std::cout << std::endl << "..." << std::endl << std::endl;
@@ -316,28 +311,28 @@ static void print_help() {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
 static void print_version(void) {
-  cout << getVersion() << endl;
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options() {
-  if (testDir == nullptr) {
+static void check_options(void) {
+  if (!testDir) {
     std::cout << "ERROR: Must specify test subject directory" << std::endl;
     exit(1);
   }
-  if (trainListFile == nullptr) {
+  if (!trainListFile) {
     std::cout << "ERROR: Must specify training subject list file" << std::endl;
     exit(1);
   }
-  if (maskFile == nullptr) {
+  if (!maskFile) {
     std::cout << "ERROR: Must specify brain mask volume" << std::endl;
     exit(1);
   }
@@ -346,66 +341,43 @@ static void check_options() {
               << std::endl;
     exit(1);
   }
+  return;
 }
 
 /* --------------------------------------------- */
 static void dump_options() {
-  cout << endl
-       << getVersion() << endl
-       << "cwd " << cwd << endl
-       << "cmdline " << cmdline << endl
-       << "sysname  " << uts.sysname << endl
-       << "hostname " << uts.nodename << endl
-       << "machine  " << uts.machine << endl
-       << "user     " << VERuser() << endl;
+  std::cout << std::endl
+            << getVersion() << std::endl
+            << "cwd " << cwd << std::endl
+            << "cmdline " << cmdline << std::endl
+            << "sysname  " << uts.sysname << std::endl
+            << "hostname " << uts.nodename << std::endl
+            << "machine  " << uts.machine << std::endl
+            << "user     " << VERuser() << std::endl;
 
-  cout << "Test subject directory: " << testDir << endl;
+  std::cout << "Test subject directory: " << testDir << std::endl;
 
-  cout << "Training subject directory list: " << trainListFile << endl;
+  std::cout << "Training subject directory list: " << trainListFile
+            << std::endl;
 
-  cout << "Location of brain masks relative to subject directory: " << maskFile
-       << endl;
+  std::cout << "Location of brain masks relative to subject directory: "
+            << maskFile << std::endl;
 
-  cout << "Location of streamline files relative to subject directory:";
+  std::cout << "Location of streamline files relative to subject directory:";
 
-  for (vector<char *>::const_iterator istr = tractFileList.begin();
+  for (std::vector<char *>::const_iterator istr = tractFileList.begin();
        istr < tractFileList.end(); istr++)
-    cout << " " << *istr;
-  cout << endl;
+    std::cout << " " << *istr;
+  std::cout << std::endl;
 
   if (asegFile)
-    cout << "Location of aparc+aseg's relative to subject directory: "
-         << asegFile << endl;
+    std::cout << "Location of aparc+aseg's relative to subject directory: "
+              << asegFile << std::endl;
 
   if (orientFile)
-    cout << "Location of diffusion orientations relative to subject directory: "
-         << orientFile << endl;
+    std::cout
+        << "Location of diffusion orientations relative to subject directory: "
+        << orientFile << std::endl;
 
   return;
-}
-
-std::cout << "Test subject directory: " << testDir << std::endl;
-
-std::cout << "Training subject directory list: " << trainListFile << std::endl;
-
-std::cout << "Location of brain masks relative to subject directory: "
-          << maskFile << std::endl;
-
-std::cout << "Location of streamline files relative to subject directory:";
-
-for (auto istr = tractFileList.begin(); istr < tractFileList.end(); istr++) {
-  std::cout << " " << *istr;
-}
-std::cout << std::endl;
-
-if (asegFile != nullptr) {
-  std::cout << "Location of aparc+aseg's relative to subject directory: "
-            << asegFile << std::endl;
-}
-
-if (orientFile != nullptr) {
-  std::cout
-      << "Location of diffusion orientations relative to subject directory: "
-      << orientFile << std::endl;
-}
 }

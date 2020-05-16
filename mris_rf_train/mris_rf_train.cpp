@@ -28,23 +28,14 @@
 #include "romp_support.h"
 #endif
 
-static const char *class_names[] = 
-{
-  "Normal Cortex",
-  "Dysplasia"
-} ;
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
+static const char *class_names[] = {"Normal Cortex", "Dysplasia"};
+int                main(int argc, char *argv[]);
+static int         get_option(int argc, char *argv[]);
 
-const char *Progname ;
-static void usage_exit(int code) ;
-static const char *hemi = "lh" ;
-static const char *surf_name = "white" ;
-
-const char * Progname;
-static void  usage_exit(int code);
-static char *hemi      = "lh";
-static char *surf_name = "white";
+const char *       Progname;
+static void        usage_exit(int code);
+static const char *hemi      = "lh";
+static const char *surf_name = "white";
 
 static char sdir[STRLEN];
 
@@ -58,8 +49,8 @@ static MRI_SURFACE *mris[MAX_SUBJECTS];
 static int          noverlays = 0;
 static char *       overlay_names[MAX_OVERLAYS];
 
-static const char *cortex_label_name = "cortex" ;
-static const char *label_name = "FCD" ;
+static const char *cortex_label_name = "cortex";
+static const char *label_name        = "FCD";
 
 static int   ntrees            = 40;
 static int   max_depth         = 12;
@@ -189,13 +180,14 @@ int main(int argc, char *argv[]) {
     LabelFree(&cortex_label);
   }
 
-  nfeatures = noverlays*(nbhd_size+1) ;
-  rf = RFalloc(ntrees, nfeatures, 2, max_depth, const_cast<char**>(class_names), 100) ;
-  rf->feature_names = (char **)calloc(nfeatures, sizeof(char *)) ;
-  for (i = 0 ; i < noverlays ; i++)
-  {
-    rf->feature_names[i] = (char *)calloc(strlen(overlay_names[i])+1, sizeof(char)) ;
-    strcpy(rf->feature_names[i], overlay_names[i]) ;
+  nfeatures         = noverlays * (nbhd_size + 1);
+  rf                = RFalloc(ntrees, nfeatures, 2, max_depth,
+               const_cast<char **>(class_names), 100);
+  rf->feature_names = (char **)calloc(nfeatures, sizeof(char *));
+  for (i = 0; i < noverlays; i++) {
+    rf->feature_names[i] =
+        (char *)calloc(strlen(overlay_names[i]) + 1, sizeof(char));
+    strcpy(rf->feature_names[i], overlay_names[i]);
   }
   assemble_training_data_and_free_mris(mris, mri_overlays, nsubjects, noverlays,
                                        &training_classes, &training_data,

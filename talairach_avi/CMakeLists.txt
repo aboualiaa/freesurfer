@@ -63,9 +63,13 @@ add_definitions(-DHAVE_GFORTRAN)
 if(APPLE)
   get_filename_component(FORTRAN_REALPATH "${CMAKE_Fortran_COMPILER}" REALPATH)
   get_filename_component(FORTRAN_BASE_DIR "${FORTRAN_REALPATH}/../.." REALPATH)
-  file(GLOB_RECURSE STATIC_QUADMATH FOLLOW_SYMLINKS "${FORTRAN_BASE_DIR}/lib/*/libquadmath.a")
+  file(GLOB_RECURSE STATIC_QUADMATH FOLLOW_SYMLINKS
+       "${FORTRAN_BASE_DIR}/lib/*/libquadmath.a"
+       )
   if(STATIC_QUADMATH)
-    set(CMAKE_Fortran_FLAGS "-w -static-libgfortran -lgfortran -lgcc -lgcc_eh -lSystem -nodefaultlibs ${STATIC_QUADMATH} ${CMAKE_Fortran_FLAGS}")
+    set(CMAKE_Fortran_FLAGS
+        "-w -static-libgfortran -lgfortran -lgcc -lgcc_eh -lSystem -nodefaultlibs ${STATIC_QUADMATH} ${CMAKE_Fortran_FLAGS}"
+        )
   else()
     message(WARNING "Not linking FORTRAN executables statically")
   endif()

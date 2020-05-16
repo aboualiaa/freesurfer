@@ -67,8 +67,7 @@ typedef struct {
 
 extern const char *txfErrorString(void);
 
-extern TexFont *txfLoadFont(
-    const char *filename);
+extern TexFont *txfLoadFont(const char *filename);
 
 extern void txfUnloadFont(TexFont *txf);
 

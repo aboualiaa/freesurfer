@@ -16,9 +16,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef HAVE_OPENMP
 #include <omp.h>
@@ -64,7 +64,7 @@ static double normal_01_cdf(double x);
 static double d_min(double x, double y);
 
 // this is needed by mrimorph to essentially subclass
-void (*user_call_func)(float[]) = nullptr;
+void (*user_call_func)(float[]) = NULL;
 
 static void ConvertFromFloatToVNLDouble(const float *       iaSource,
                                         vnl_vector<double> &oDestination,
@@ -944,7 +944,7 @@ void OpenPowell(float iaParams[], float **ioInitialDirection, int icParams,
 
   vnl_matrix<double> initialDirection(icParams, icParams, vnl_matrix_identity);
 
-  if (ioInitialDirection != nullptr) {
+  if (ioInitialDirection != NULL) {
     ConvertFromFloatToVNLDouble(ioInitialDirection, initialDirection, icParams);
   }
 
@@ -995,13 +995,13 @@ int OpenPowell2(float iaParams[], float **ioInitialDirection, int icParams,
 
   vnl_matrix<double> initialDirection(icParams, icParams, vnl_matrix_identity);
 
-  if (ioInitialDirection != nullptr) {
+  if (ioInitialDirection != NULL) {
     ConvertFromFloatToVNLDouble(ioInitialDirection, initialDirection, icParams);
   }
 
   if (Gdiag_no > 0) {
-    minimizer.set_trace(true);
-    minimizer.set_verbose(true);
+    minimizer.set_trace(1);
+    minimizer.set_verbose(1);
   }
   minimizer.set_linmin_xtol(iLinMinTol);
   // minimizer.set_x_tolerance(iLinMinTol);
@@ -1089,7 +1089,7 @@ int OpenLUMatrixInverse(MATRIX *iMatrix, MATRIX *oInverse) {
   \brief Performs QR decomposition on the input matrix. The output
   matricies must be allocated already (Q is nrowsxnows where nrows is
   the number of rows in the input matrix, and R is same size as the
-  input matrix). 
+  input matrix).
  */
 int OpenQRdecomposition(const MATRIX *iMatrix, MATRIX *oQ, MATRIX *oR) {
   if (iMatrix == NULL) {
@@ -1587,7 +1587,7 @@ float *d3_np_fs(int n, float a[], float b[]) {
   //
   for (i = 0; i < n; i++) {
     if (a[1 + i * 3] == 0.0) {
-      return nullptr;
+      return NULL;
     }
   }
 
@@ -1668,8 +1668,7 @@ void free_matrix(float **m, long nrl, long nrh, long ncl, long nch)
 
 /*  AUTHOR : Martin Reuter
     CREATED: 12/28/2009
-    Computes Denman and Beavers square root iteration up to an epsilon in imax
-   steps
+    Computes Denman and Beavers square root iteration up to an epsilon in imax steps
 
     Input: 4x4 affine transformation matrix M
     Algorithm computes sqrt of 3x3 part and then adjusts the translation part
@@ -1691,7 +1690,7 @@ MatrixSqrt(const vnl_matrix_fixed<double, 4, 4> &m) {
   double eps  = 0.00001; // important to be small to guarantee symmetry,
       // but even adding two zeros did not show differences in tests
   double err = 1000;
-  // cout << "using square root iteartion (" << imax << ")"<< endl;
+  // std::cout << "using square root iteartion (" << imax << ")"<< std::endl;
   vnl_matrix_fixed<double, 3, 3> Yn(R);
   vnl_matrix_fixed<double, 3, 3> Zn;
   Zn.set_identity();
@@ -1716,7 +1715,7 @@ MatrixSqrt(const vnl_matrix_fixed<double, 4, 4> &m) {
     Ysq = Yn * Yn;
     Ysq -= R;
     err = Ysq.absolute_value_max();
-    // cout << " iteration " << count << "  err: "<< err << endl;
+    // std::cout << " iteration " << count << "  err: "<< err << std::endl;
   }
 
   if (count > imax) {
@@ -1764,9 +1763,9 @@ MatrixSqrt(const vnl_matrix_fixed<double, 4, 4> &m) {
   //       double sum = ms2.absolute_value_max();
   //       if (sum > eps)
   //       {
-  //          cerr << " Error : " << sum << endl;
-  // 				 cerr << " sqrt(M): " << endl << msqrt << endl;
-  //          cerr << endl;
+  //          cerr << " Error : " << sum << std::endl;
+  // 				 cerr << " sqrt(M): " << endl << msqrt << std::endl;
+  //          cerr << std::endl;
   //          assert(1==2);
   //       }
   //    }
@@ -1789,7 +1788,7 @@ MATRIX *MatrixSqrt(MATRIX *m, MATRIX *sqrtm) {
 
   vnl_matrix_fixed<double, 4, 4> vnl_msqrt = MatrixSqrt(vnl_m);
 
-  if (sqrtm == nullptr)
+  if (sqrtm == NULL)
     sqrtm = MatrixAlloc(4, 4, MATRIX_REAL);
 
   for (i = 0; i < 4; i++)
@@ -1967,7 +1966,7 @@ sc_rng *sc_rng_alloc(const sc_rng_type *T) {
   sc_rng *r;
 
   r = (sc_rng *)malloc(sizeof(sc_rng));
-  if (r == nullptr) {
+  if (r == NULL) {
     sc_err_msg("*sc_rng_alloc(): problem with allocation");
   }
 
@@ -1980,10 +1979,10 @@ sc_rng *sc_rng_alloc(const sc_rng_type *T) {
 }
 
 void sc_rng_free(sc_rng *r) {
-  if (r->status != nullptr)
+  if (r->status != NULL)
     free(r->status);
 
-  if (r != nullptr)
+  if (r != NULL)
     free(r);
 
   return;

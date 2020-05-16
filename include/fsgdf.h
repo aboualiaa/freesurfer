@@ -126,18 +126,18 @@ MATRIX *gdfMatrixDODS(FSGD *gd, MATRIX *X);
 MATRIX *gdfContrastDODS(FSGD *fsgd, float *wClass, float *wCovar);
 MATRIX *gdfContrastDOSS(FSGD *fsgd, float *wClass, float *wCovar);
 MATRIX *gdfMatrix(FSGD *gd, const char *gd2mtx_method, MATRIX *X);
-int     gdfOffsetSlope(FSGD *gd, int classno, int varno,
-                       int c, int r, int s, float *offset, float *slope);
-int gdfCountItemsOnLine(FILE *fp);
-int gdfCountItemsInString(char *str);
-char *gdfGetNthItemFromString(char *str, int nth);
-int gdfClassNo(FSGD *gd, char *class_number);
-int gdfGetVarLabelNo(FSGD *gd, char *LabelName);
-int gdfStringIndex(char *str, char **list, int nlist);
+int     gdfOffsetSlope(FSGD *gd, int classno, int varno, int c, int r, int s,
+                       float *offset, float *slope);
+int     gdfCountItemsOnLine(FILE *fp);
+int     gdfCountItemsInString(char *str);
+char *  gdfGetNthItemFromString(char *str, int nth);
+int     gdfClassNo(FSGD *gd, char *class_number);
+int     gdfGetVarLabelNo(FSGD *gd, char *LabelName);
+int     gdfStringIndex(char *str, char **list, int nlist);
 
-int gdfGetTitle(FSGD *gd, char *title);
-int gdfGetMeasurementName(FSGD *gd, char *name);
-int gdfGetSubjectName(FSGD *gd, char *name);
+int    gdfGetTitle(FSGD *gd, char *title);
+int    gdfGetMeasurementName(FSGD *gd, char *name);
+int    gdfGetSubjectName(FSGD *gd, char *name);
 double gdfGetFWHM(FSGD *gd);
 int    gdfGetLogY(FSGD *gd);
 int    gdfGetDataFileName(FSGD *gd, char *filename);

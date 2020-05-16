@@ -42,28 +42,18 @@ static void   print_version(void);
 static int    compute_area_ratios(MRI_SURFACE *mris);
 static double gcsaSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
 
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
-static int  get_option(int argc, char *argv[]) ;
-static void usage_exit(void) ;
-static void print_usage(void) ;
-static void print_help(void) ;
-static void print_version(void) ;
-static int  compute_area_ratios(MRI_SURFACE *mris) ;
-static double gcsaSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
+static int    get_option(int argc, char *argv[]);
+static void   usage_exit(void);
+static void   print_usage(void);
+static void   print_help(void);
+static void   print_version(void);
+static int    compute_area_ratios(MRI_SURFACE *mris);
+static double gcsaSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
 
-static const char *surface_names[] =
-{
-  "inflated",
-  "smoothwm",
-  "smoothwm"
-} ;
-static const char *curvature_names[] =
-{
-  "inflated.H",
-  "sulc",
-  NULL
-} ;
+static const char *surface_names[]   = {"inflated", "smoothwm", "smoothwm"};
+static const char *curvature_names[] = {"inflated.H", "sulc", NULL};
 
 #define MAX_SIGMAS 10
 static int   nsigmas = 0;
@@ -94,14 +84,14 @@ static float dbeta  = 0.0f;
 static float dgamma = 0.0f;
 
 #define MAX_OVERLAYS 1000
-static int noverlays = 0 ;
-static char *overlays[MAX_OVERLAYS]  ;
-const char *Progname ;
-static char curvature_fname[STRLEN] = "" ;
-static const char *orig_name = "smoothwm" ;
-static const char *canon_name = "sphere" ;
-static char *jacobian_fname = NULL ;
-static char *inflated_name = NULL ;
+static int         noverlays = 0;
+static char *      overlays[MAX_OVERLAYS];
+const char *       Progname;
+static char        curvature_fname[STRLEN] = "";
+static const char *orig_name               = "smoothwm";
+static const char *canon_name              = "sphere";
+static char *      jacobian_fname          = NULL;
+static char *      inflated_name           = NULL;
 
 #define MAX_LABELS 100
 static int    nlabels = 0;
@@ -714,20 +704,18 @@ static int get_option(int argc, char *argv[]) {
     surface_names[0] = argv[2];
     nargs            = 1;
     printf("using %s as inflated surface name, "
-           "and using it for initial alignment\n", inflated_name) ;
-    sprintf(fname, "%s.H", argv[2]) ;
-    curvature_names[0] = (char *)calloc(strlen(fname)+1, sizeof(char)) ;
-    strcpy(const_cast<char*>(curvature_names[0]), fname) ; // strcpy _and_ const_cast in a single line....
-    parms.flags |= IP_USE_INFLATED ;
-  }
-  else if (!stricmp(option, "nosulc"))
-  {
-    fprintf(stderr, "disabling initial sulc alignment...\n") ;
-    parms.flags |= IP_NO_SULC ;
-  }
-  else if (!stricmp(option, "sulc"))
-  {
-    curvature_names[1] = argv[2] ;
+           "and using it for initial alignment\n",
+           inflated_name);
+    sprintf(fname, "%s.H", argv[2]);
+    curvature_names[0] = (char *)calloc(strlen(fname) + 1, sizeof(char));
+    strcpy(const_cast<char *>(curvature_names[0]),
+           fname); // strcpy _and_ const_cast in a single line....
+    parms.flags |= IP_USE_INFLATED;
+  } else if (!stricmp(option, "nosulc")) {
+    fprintf(stderr, "disabling initial sulc alignment...\n");
+    parms.flags |= IP_NO_SULC;
+  } else if (!stricmp(option, "sulc")) {
+    curvature_names[1] = argv[2];
     fprintf(stderr, "using %s to replace 'sulc' alignment\n",
             curvature_names[1]);
     nargs = 1;

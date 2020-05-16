@@ -56,13 +56,13 @@ static int build_label_histograms(MRI *mri_labels, MRI *mri_intensities,
 static MRI_TOPOLOGY_PARMS parms;
 
 static void Error(const char *string);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
 //--------------------------------------------
 /*Error routine*/
 static void Error(const char *string) {
-  fprintf(stderr, "\nError %s\n",string) ;
-  exit(0) ;
+  fprintf(stderr, "\nError %s\n", string);
+  exit(0);
 }
 
 /*get_option routine*/

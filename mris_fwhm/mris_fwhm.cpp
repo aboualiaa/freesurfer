@@ -136,27 +136,27 @@ int            debug         = 0;
 int            checkoptsonly = 0;
 struct utsname uts;
 
-char *subject=NULL, *SUBJECTS_DIR=NULL;
-const char *hemi=NULL;
-const char *surfname="white";
-char *surfpath=NULL;
-char *inpath=NULL;
-char *outpath=NULL;
-char *sumfile=NULL;
-char *datfile=NULL;
-char *ar1datfile=NULL;
-char tmpstr[2000];
-MRI *InVals=NULL;
+char *      subject = NULL, *SUBJECTS_DIR = NULL;
+const char *hemi       = NULL;
+const char *surfname   = "white";
+char *      surfpath   = NULL;
+char *      inpath     = NULL;
+char *      outpath    = NULL;
+char *      sumfile    = NULL;
+char *      datfile    = NULL;
+char *      ar1datfile = NULL;
+char        tmpstr[2000];
+MRI *       InVals = NULL;
 
-char *maskpath=NULL;
-char *labelpath=NULL;
-MRI *mask=NULL;
-LABEL *label=NULL;
-int maskinv = 0;
+char * maskpath  = NULL;
+char * labelpath = NULL;
+MRI *  mask      = NULL;
+LABEL *label     = NULL;
+int    maskinv   = 0;
 
-MRI *mritmp=NULL;
+MRI *mritmp = NULL;
 
-MRIS *surf;
+MRIS * surf;
 double infwhm = 0, ingstd = 0;
 int    synth = 0, nframes = 10;
 int    SynthSeed  = -1;

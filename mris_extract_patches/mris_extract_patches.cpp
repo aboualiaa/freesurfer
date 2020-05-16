@@ -25,38 +25,37 @@
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
+int        main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
 
-const char *Progname ;
-static void usage_exit(int code) ;
-static const char *surf_name = "white" ;
-static const char *sphere_name = "sphere.d1.left_right";
-static const char *hemi_name = "lh" ;
-static const char *ohemi_name = "rh" ;
-static int hemi = LEFT_HEMISPHERE ;
-static int wsize = 32 ; 
-static int nbrs = 3 ;
-static const char *label_name = "FCD";
-static const char *vol_name = "norm.mgz" ;
-static const char *ovol_name = "norm.mgz" ;
-static char sdir[STRLEN] = "" ;
-static float random_patch_pct = 0.0 ;
-static int augment = 0 ;
+const char *       Progname;
+static void        usage_exit(int code);
+static const char *surf_name        = "white";
+static const char *sphere_name      = "sphere.d1.left_right";
+static const char *hemi_name        = "lh";
+static const char *ohemi_name       = "rh";
+static int         hemi             = LEFT_HEMISPHERE;
+static int         wsize            = 32;
+static int         nbrs             = 3;
+static const char *label_name       = "FCD";
+static const char *vol_name         = "norm.mgz";
+static const char *ovol_name        = "norm.mgz";
+static char        sdir[STRLEN]     = "";
+static float       random_patch_pct = 0.0;
+static int         augment          = 0;
 
-MRI *MRISextractVolumeWindow(MRI_SURFACE *mris, MRI *mri, int wsize, int vno, double theta) ;
+MRI *MRISextractVolumeWindow(MRI_SURFACE *mris, MRI *mri, int wsize, int vno,
+                             double theta);
 
-int
-main(int argc, char *argv[])
-{
-  int          nargs, a ;
-  char         *subject, fname[STRLEN], *out_dir, fname_only[STRLEN] ;
-  int          msec, minutes, seconds, n ;
-  Timer start ;
-  MRI_SURFACE  *mris, *mris_ohemi ;
-  MRI          *mri_norm, *mri_patches, *mri_labels, *mri_onorm ;
-  LABEL        *area_tmp, *area ;
-  int          random_patches, npoints, *non_fcd_vertices = NULL, augment_patches ;
+int main(int argc, char *argv[]) {
+  int          nargs, a;
+  char *       subject, fname[STRLEN], *out_dir, fname_only[STRLEN];
+  int          msec, minutes, seconds, n;
+  Timer        start;
+  MRI_SURFACE *mris, *mris_ohemi;
+  MRI *        mri_norm, *mri_patches, *mri_labels, *mri_onorm;
+  LABEL *      area_tmp, *area;
+  int random_patches, npoints, *non_fcd_vertices = NULL, augment_patches;
 
   nargs = handleVersionOption(argc, argv, "mris_extract_patches");
   if (nargs && argc - nargs == 1)

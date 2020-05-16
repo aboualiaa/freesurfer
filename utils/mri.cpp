@@ -123,9 +123,9 @@ MRI::Shape::Shape(const std::vector<int> &shape) {
 MRI::MRI(const std::string &filename) { *this = *MRIread(filename.c_str()); }
 
 /**
-  Constructs an MRI with a given shape and data type. If the `alloc` parameter
-  (defaults to true) is false, the underlying image buffer is not allocated and
-  only the header is initialized.
+  Constructs an MRI with a given shape and data type. If the `alloc` parameter (defaults
+  to true) is false, the underlying image buffer is not allocated and only the header is
+  initialized.
 */
 MRI::MRI(Shape volshape, int dtype, bool alloc) : shape(volshape), type(dtype) {
   // set geometry
@@ -196,9 +196,9 @@ MRI::MRI(Shape volshape, int dtype, bool alloc) : shape(volshape), type(dtype) {
 }
 
 /**
-  Allocates array of slice pointers - this is done regardless of chunking so
-  that we can still support 3D-indexing and not produce any weird issues. This
-  function should only be called once for a single volume.
+  Allocates array of slice pointers - this is done regardless of chunking so that we
+  can still support 3D-indexing and not produce any weird issues. This function should
+  only be called once for a single volume.
 */
 void MRI::initSlices() {
   int nslices = depth * nframes;
@@ -253,9 +253,8 @@ void MRI::initSlices() {
 }
 
 /**
-  Allocates the xi, yi, and zi index arrays to handle boundary conditions. This
-  function should only be called once for a single volume and is separated from
-  the MRI constructor for readability.
+  Allocates the xi, yi, and zi index arrays to handle boundary conditions. This function should
+  only be called once for a single volume and is separated from the MRI constructor for readability.
 */
 void MRI::initIndices() {
   xi = (int *)calloc(width + 2 * MAX_INDEX, sizeof(int));
@@ -273,8 +272,7 @@ void MRI::initIndices() {
     ErrorExit(ERROR_NO_MEMORY, "could not allocate %d elt index array",
               depth + 2 * MAX_INDEX);
 
-  // indexing into these arrays returns valid pixel indices from -MAX_INDEX to
-  // width + MAX_INDEX
+  // indexing into these arrays returns valid pixel indices from -MAX_INDEX to width + MAX_INDEX
   xi += MAX_INDEX;
   yi += MAX_INDEX;
   zi += MAX_INDEX;
@@ -409,27 +407,24 @@ int MRIfree(MRI **pmri) {
 }
 
 /**
-  Allocates an MRI volume with a given shape and type. This function is
-  deprecated; moving foward, the c++ `new` operator should be used instead: `MRI
-  *mri = new MRI({width, height, depth}, type);`
+  Allocates an MRI volume with a given shape and type. This function is deprecated; moving foward, the
+  c++ `new` operator should be used instead: `MRI *mri = new MRI({width, height, depth}, type);`
 */
 MRI *MRIalloc(int width, int height, int depth, int type) {
   return new MRI({width, height, depth}, type);
 }
 
 /**
-  Allocates an MRI volume with a given shape and type. This function is
-  deprecated; moving foward, the c++ `new` operator should be used instead: `MRI
-  *mri = new MRI({width, height, depth, nframes}, type);`
+  Allocates an MRI volume with a given shape and type. This function is deprecated; moving foward, the
+  c++ `new` operator should be used instead: `MRI *mri = new MRI({width, height, depth, nframes}, type);`
 */
 MRI *MRIallocSequence(int width, int height, int depth, int type, int nframes) {
   return new MRI({width, height, depth, nframes}, type);
 }
 
 /**
-  Initializes an MRI struct without allocating the image buffer. This function
-  is deprecated; moving foward, the c++ `new` operator should be used instead:
-  `MRI *mri = new MRI({width, height, depth, nframes}, type, false);`
+  Initializes an MRI struct without allocating the image buffer. This function is deprecated; moving foward,
+  the c++ `new` operator should be used instead: `MRI *mri = new MRI({width, height, depth, nframes}, type, false);`
 */
 MRI *MRIallocHeader(int width, int height, int depth, int type, int nframes) {
   return new MRI({width, height, depth, nframes}, type, false);
@@ -1431,8 +1426,10 @@ void MRIdbl2ptr(double v, void *pmric, int mritype) {
 /*-------------------------------------------------------------------*/
 /*!
   \fn float MRIgetVoxDx(MRI *mri, int c, int r, int s, int f)
-  \brief Returns voxel x derivative as a float regardless of the underlying data
-  type. \param MRI *mri - input MRI \param int c - column \param int r - row
+  \brief Returns voxel x derivative as a float regardless of the underlying data type.
+  \param MRI *mri - input MRI
+  \param int c - column
+  \param int r - row
   \param int s - slice
   \param int f - frame
   \return float intensity x derivative at the given col, row, slice, frame
@@ -1447,8 +1444,10 @@ float MRIgetVoxDx(MRI *mri, int c, int r, int s, int f) {
 /*-------------------------------------------------------------------*/
 /*!
   \fn float MRIgetVoxDy(MRI *mri, int c, int r, int s, int f)
-  \brief Returns voxel y derivative as a float regardless of the underlying data
-  type. \param MRI *mri - input MRI \param int c - column \param int r - row
+  \brief Returns voxel y derivative as a float regardless of the underlying data type.
+  \param MRI *mri - input MRI
+  \param int c - column
+  \param int r - row
   \param int s - slice
   \param int f - frame
   \return float intensity y derivative at the given col, row, slice, frame
@@ -1464,8 +1463,10 @@ float MRIgetVoxDy(MRI *mri, int c, int r, int s, int f) {
 /*-------------------------------------------------------------------*/
 /*!
   \fn float MRIgetVoxDz(MRI *mri, int c, int r, int s, int f)
-  \brief Returns voxel z derivative as a float regardless of the underlying data
-  type. \param MRI *mri - input MRI \param int c - column \param int r - row
+  \brief Returns voxel z derivative as a float regardless of the underlying data type.
+  \param MRI *mri - input MRI
+  \param int c - column
+  \param int r - row
   \param int s - slice
   \param int f - frame
   \return float intensity z derivative at the given col, row, slice, frame
@@ -2517,7 +2518,7 @@ int MRIfindApproximateSkullBoundingBox(MRI *mri, int thresh, MRI_REGION *box) {
   MRIcenterOfMass(mri, means, thresh);
 
 #define MAX_LIGHT                                                              \
-  30 /* don't let there by 3 cm of                                             \
+  30 /* don't let there by 3 cm of \
   bright stuff 'outside' of brain */
 
   /* search for left edge */
@@ -3760,10 +3761,9 @@ MRI *MRIextractRegion(MRI *mri_src, MRI *mri_dst, MRI_REGION *region) {
                          region->dx, region->dy, region->dz, 0, 0, 0));
 }
 /*
-  \fn MRI *MRIinsertRegion(MRI *regionvol, MRI_REGION *region, MRI *temp, MRI
-  *out) \breif Takes an MRI struct that covers the given  region and inserts it
-  into a larger volume from which the region was extracted. See also
-  MRIextractRegion().
+  \fn MRI *MRIinsertRegion(MRI *regionvol, MRI_REGION *region, MRI *temp, MRI *out)
+  \breif Takes an MRI struct that covers the given  region and inserts it into
+  a larger volume from which the region was extracted. See also MRIextractRegion().
  */
 MRI *MRIinsertRegion(MRI *regionvol, MRI_REGION *region, MRI *temp, MRI *out) {
   int    col, row, slc, f;
@@ -5593,10 +5593,11 @@ MRI *MRIclone(const MRI *mri_src, MRI *mri_dst) {
 }
 /*!
   \fn MRI *MRIcloneBySpace(MRI *mri_src, int type, int nframes)
-  \brief Copies mri struct, header, and pulse params, allocs but does not copy
-  pixels \param mri_src - source MRI struct \param type - clone will be of this
-  type (-1 to use source) \param nframes - clone will have this many frames  (-1
-  to use source) \return New MRI struct.
+  \brief Copies mri struct, header, and pulse params, allocs but does not copy pixels
+  \param mri_src - source MRI struct
+  \param type - clone will be of this type (-1 to use source)
+  \param nframes - clone will have this many frames  (-1 to use source)
+  \return New MRI struct.
 
   Does not copy pixel data.
 */
@@ -7118,8 +7119,7 @@ MRI *ImageToMRI(IMAGE *I) {
             // g = (rgb >> 8) & 0x00ff;
             // b = (rgb >> 16) & 0x00ff;
             MRIsetVoxVal(mri, x, y, 0, frames, rgb);
-            //	    MRIseq_vox(mri, x, y, 0, frames) = (0.299*r + 0.587*g +
-            // 0.114*b); ; // standard tv
+            //	    MRIseq_vox(mri, x, y, 0, frames) = (0.299*r + 0.587*g + 0.114*b); ; // standard tv
             // conversion
           }
           break;
@@ -7135,8 +7135,7 @@ MRI *ImageToMRI(IMAGE *I) {
             // g = (rgb >> 8) & 0x00ff;
             // b = (rgb >> 16) & 0x00ff;
             MRIseq_vox(mri, x, y, 0, frames) = rgb;
-            //	    MRIseq_vox(mri, x, y, 0, frames) = (0.299*r + 0.587*g +
-            // 0.114*b); ; // standard tv
+            //	    MRIseq_vox(mri, x, y, 0, frames) = (0.299*r + 0.587*g + 0.114*b); ; // standard tv
             // conversion
           } else
             MRIseq_vox(mri, x, y, 0, frames) =
@@ -7160,8 +7159,7 @@ MRI *ImageToMRI(IMAGE *I) {
             // g = (rgb >> 8) & 0x00ff;
             // b = (rgb >> 16) & 0x00ff;
             MRIseq_vox(mri, x, y, 0, frames) = rgb;
-            //	      MRIseq_vox(mri, x, y, 0, frames) = (0.299*r + 0.587*g +
-            // 0.114*b); ; // standard tv
+            //	      MRIseq_vox(mri, x, y, 0, frames) = (0.299*r + 0.587*g + 0.114*b); ; // standard tv
             // conversion
           } else {
             if (I->pixel_format == PFSHORT)
@@ -7246,8 +7244,8 @@ MRI *MRIextractValues(MRI *mri_src, MRI *mri_dst, float min_val,
 }
 
 /*
-  \fn MRI *MRIresize(MRI *mri, double xsize, double ysize, double zsize, int
-  nframes) \brief Creates a new MRI volume with the given voxel size from the
+  \fn MRI *MRIresize(MRI *mri, double xsize, double ysize, double zsize, int nframes)
+  \brief Creates a new MRI volume with the given voxel size from the
   passed MRI but keeps the direction cosines. The true center of the
   two MRI volumes is the same. The FoV will be approximately the same
   (depending upon whether the new and old voxel sizes are integer
@@ -7652,8 +7650,7 @@ MRI *MRIdownsample2(MRI *mri_src, MRI *mri_dst) {
   VectorFree(&C);
 
   MRIreInitCache(mri_dst);
-  // printf("CRAS new: %2.3f %2.3f
-  // %2.3f\n",mri_dst->c_r,mri_dst->c_a,mri_dst->c_s);
+  // printf("CRAS new: %2.3f %2.3f %2.3f\n",mri_dst->c_r,mri_dst->c_a,mri_dst->c_s);
 
   //  mri_dst->ras_good_flag = 0;
 
@@ -7662,9 +7659,11 @@ MRI *MRIdownsample2(MRI *mri_src, MRI *mri_dst) {
 
 /*-----------------------------------------------------*/
 /*!
-  \fn MRI *MRIdownsampleN(MRI *src, MRI *dst, int Fc, int Fr, int Fs, int
-  KeepType) \brief Downsamples volume \param src - source volume \param dst -
-  destination (may be NULL) \param Fc - downsample factor for columns (width)
+  \fn MRI *MRIdownsampleN(MRI *src, MRI *dst, int Fc, int Fr, int Fs, int KeepType)
+  \brief Downsamples volume
+  \param src - source volume
+  \param dst - destination (may be NULL)
+  \param Fc - downsample factor for columns (width)
   \param Fr - downsample factor for rows (height)
   \param Fs - downsample factor for slices (depth)
   \param KeepType - set to non-0 to keep precision of src, otherwise float
@@ -7843,8 +7842,7 @@ MRI *MRIdownsampleNOld(MRI *mri_src, MRI *mri_dst, int N) {
   VectorFree(&C);
 
   MRIreInitCache(mri_dst);
-  // printf("CRAS new: %2.3f %2.3f
-  // %2.3f\n",mri_dst->c_r,mri_dst->c_a,mri_dst->c_s);
+  // printf("CRAS new: %2.3f %2.3f %2.3f\n",mri_dst->c_r,mri_dst->c_a,mri_dst->c_s);
 
   //  mri_dst->ras_good_flag = 0;
 
@@ -9581,9 +9579,8 @@ int MRIinterpolateIntoVolumeFrame(MRI *mri, double x, double y, double z,
   xpd = (1.0f - xmd);
   ypd = (1.0f - ymd);
   zpd = (1.0f - zmd);
-  //  printf("MRIinterpolateIntoVolume: (xpd, ypd, zpd)%f, %f, %f\n", xpd, ypd,
-  //  zpd) ; //LZ printf("MRIinterpolateIntoVolume: (xmd, ymd, zmd)%f, %f,
-  //  %f\n", xmd, ymd, zmd) ; //LZ
+  //  printf("MRIinterpolateIntoVolume: (xpd, ypd, zpd)%f, %f, %f\n", xpd, ypd, zpd) ; //LZ
+  //  printf("MRIinterpolateIntoVolume: (xmd, ymd, zmd)%f, %f, %f\n", xmd, ymd, zmd) ; //LZ
   switch (mri->type) {
   case MRI_UCHAR:
     MRIseq_vox(mri, xm, ym, zm, frame) += nint(xpd * ypd * zpd * val);
@@ -9757,8 +9754,8 @@ int MRIsampleVolume(const MRI *mri, double x, double y, double z,
 }
 
 /*!
-  \fn DMATRIX *MRIgradTrilinInterp(const MRI *mri, double x, double y, double z,
-  DMATRIX *grad) \brief Compute the gradient of the intensity (as computed by
+  \fn DMATRIX *MRIgradTrilinInterp(const MRI *mri, double x, double y, double z, DMATRIX *grad)
+  \brief Compute the gradient of the intensity (as computed by
   MRIsampleVolume()) wrt the column (x), row (y), and slice (z). grad
   is a 1x3 matrix = [dI/dc dI/dr dI/ds]. Note that trilinear
   interpolation has a discontinous gradient.
@@ -10117,13 +10114,16 @@ int MRIsampleSeqVolumeType(MRI *mri, double x, double y, double z,
 
 /*---------------------------------------------------------------------*/
 /*!
-  \fn double *MRItrilinKernel(MRI *mri, double c, double r, double s, double
-  *kernel) \brief Computes the kernel used for trilinear interpolation \param
-  mri - used to get volume dimensions \param c - column (continuous) \param r -
-  row (continuous) \param s - slice (continuous) \param kernel - array of
-  length 8. Can be NULL. \return kernel - array of length 8. \description
-  Computes the kernel used for trilinear interpolation. See also
-  MRIsampleSeqVolume().
+  \fn double *MRItrilinKernel(MRI *mri, double c, double r, double s, double *kernel)
+  \brief Computes the kernel used for trilinear interpolation
+  \param mri - used to get volume dimensions
+  \param c - column (continuous)
+  \param r - row (continuous)
+  \param s - slice (continuous)
+  \param kernel - array of length 8. Can be NULL.
+  \return kernel - array of length 8.
+  \description Computes the kernel used for trilinear interpolation. See
+  also MRIsampleSeqVolume().
  */
 double *MRItrilinKernel(MRI *mri, double c, double r, double s,
                         double *kernel) {
@@ -10220,19 +10220,19 @@ double MRIgradCubicCoeff(double x, int iter) {
   double gradp;
   switch (iter) {
   case 0:
-    // p = ((2 - x) * x - 1) * x;
+    //p = ((2 - x) * x - 1) * x;
     gradp = 4 * x - 3 * (x * x) - 1;
     break;
   case 1:
-    // p = (3 * x - 5) * x * x + 2;
+    //p = (3 * x - 5) * x * x + 2;
     gradp = 9 * x * x - 10 * x;
     break;
   case 2:
-    // p = ((4 - 3 * x) * x + 1) * x;
+    //p = ((4 - 3 * x) * x + 1) * x;
     gradp = 8 * x - 9 * x * x + 1;
     break;
   case 3:
-    // p = (x - 1) * x * x;
+    //p = (x - 1) * x * x;
     gradp = 3 * x * x - 2 * x;
     break;
   default:
@@ -10393,9 +10393,9 @@ int MRIcubicSampleVolume(const MRI *mri, double x, double y, double z,
 }
 
 /*!
-  \fn DMATRIX *MRIgradCubicInterp(const MRI *mri, double x, double y, double z,
-  DMATRIX *grad) \brief Computes the gradient of the intensity wrt the col (x),
-  row (y), and slice (z). Allocs grad if needed.  grad =
+  \fn DMATRIX *MRIgradCubicInterp(const MRI *mri, double x, double y, double z, DMATRIX *grad)
+  \brief Computes the gradient of the intensity wrt the col (x), row
+  (y), and slice (z). Allocs grad if needed.  grad =
   DMatrixAlloc(1,3,MATRIX_REAL) = [dval/dcol dval/drow
   dval/dslice]. This is mostly just a copy of MRIcubicSampleVolume()
   with the ability to compute the gradient.
@@ -12103,55 +12103,41 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
            "dest_type=%d\n",
            src_min, src_max, N_HIST_BINS, f_low, f_high, dest_type);
     bin_size = (src_max - src_min) / (float)N_HIST_BINS;
-  
+
     if (getenv("FS_FORCE_BIN_CHECK") != NULL) {
-      double mn = MRImeanFrameThresh(src, 0, 1e-7);
-      int mn_bin = (int)((mn - src_min) / bin_size);
+      double       mn            = MRImeanFrameThresh(src, 0, 1e-7);
+      int          mn_bin        = (int)((mn - src_min) / bin_size);
       static float bin_threshold = (float)N_HIST_BINS / 5.0;
 
       if (mn_bin < bin_threshold) {
         float old_bin_size = bin_size;
-        bin_size = (mn - src_min) / bin_threshold;
-        printf("MRIchangeType: original bin size %2.2f (max %2.1f) too big for mean/min %2.2f/%2.2f, scaling down to %2.2f\n", old_bin_size, src_max, mn, src_min, bin_size);
+        bin_size           = (mn - src_min) / bin_threshold;
+        printf("MRIchangeType: original bin size %2.2f (max %2.1f) too big for "
+               "mean/min %2.2f/%2.2f, scaling down to %2.2f\n",
+               old_bin_size, src_max, mn, src_min, bin_size);
       }
     }
 
-    for (i = 0; i < N_HIST_BINS; i++) hist_bins[i] = 0;
+    for (i = 0; i < N_HIST_BINS; i++)
+      hist_bins[i] = 0;
 
     for (frame = 0; frame < src->nframes; frame++)
       for (i = 0; i < src->width; i++)
         for (j = 0; j < src->height; j++)
           for (k = 0; k < src->depth; k++) {
             val = MRIgetVoxVal(src, i, j, k, frame);
-            if (!DZERO(val)) nonzero++;
+            if (!DZERO(val))
+              nonzero++;
             bin = (int)((val - src_min) / bin_size);
 
-            if (bin < 0) bin = 0;
-            if (bin >= N_HIST_BINS) bin = N_HIST_BINS - 1;
+            if (bin < 0)
+              bin = 0;
+            if (bin >= N_HIST_BINS)
+              bin = N_HIST_BINS - 1;
 
             hist_bins[bin]++;
           }
 
-        hist_bins[bin]++;
-      }
-    } else {
-      for (frame = 0; frame < src->nframes; frame++)
-        for (i = 0; i < src->width; i++)
-          for (j = 0; j < src->height; j++)
-            for (k = 0; k < src->depth; k++) {
-              val = MRIgetVoxVal(src, i, j, k, frame);
-              if (!DZERO(val))
-                nonzero++;
-              bin = (int)((val - src_min) / bin_size);
-
-              if (bin < 0)
-                bin = 0;
-              if (bin >= N_HIST_BINS)
-                bin = N_HIST_BINS - 1;
-
-              hist_bins[bin]++;
-            }
-    }
     nth = (int)(f_low * src->width * src->height * src->depth);
     for (n_passed = 0, bin = 0; n_passed < nth && bin < N_HIST_BINS; bin++)
       n_passed += hist_bins[bin];
@@ -12205,6 +12191,9 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
 
     fs::mri::new_vox_setter vox_setter =
         fs::mri::get_typed_new_vox_setter_chunked(dest);
+
+    fs::mri::new_vox_getter vox_getter =
+        fs::mri::get_typed_new_vox_getter_chunked(src);
 
     if (src->ischunked) {
       for (size_t index{0}; index < src->vox_total; index++) {
@@ -14021,10 +14010,11 @@ MRI *MRIlog(MRI *in, MRI *mask, double a, double b, MRI *out) {
 }
 
 /*
-  \fn MRI *MRIrandexp(MRI *mrimean, MRI *binmask, unsigned long int seed, int
-  nreps, MRI *mrirandexp) \brief fills an MRI structure with values sampled from
-  a exponential/poisson distribution with mean at each voxel given mrimean. The
-  frames of mrimean are replicated nreps times, each rep gets different noise
+  \fn MRI *MRIrandexp(MRI *mrimean, MRI *binmask, unsigned long int seed, int nreps, MRI *mrirandexp)
+  \brief fills an MRI structure with values sampled from a
+  exponential/poisson distribution with mean at each voxel given
+  mrimean. The frames of mrimean are replicated nreps times, each rep
+  gets different noise
 */
 MRI *MRIrandexp(MRI *mrimean, MRI *binmask, unsigned long int seed, int nreps,
                 MRI *mrirandexp) {
@@ -16096,8 +16086,7 @@ MRI *MRIextractRegionAndPad(MRI *mri_src, MRI *mri_dst, MRI_REGION *region,
     printf("(box.dx, box.dy, box.dz) = (%d, %d, %d)\n", box.dx, box.dy, box.dz);
   }
   // LZ
-  // printf("(box.dx, box.dy, box.dz) = (%d, %d, %d)\n", box.dx, box.dy, box.dz)
-  // ;
+  // printf("(box.dx, box.dy, box.dz) = (%d, %d, %d)\n", box.dx, box.dy, box.dz) ;
   printf("(region->dx, region->dy, region->dz) = (%d, %d, %d)\n", region->dx,
          region->dy, region->dz);
   mri_dst =
@@ -16105,8 +16094,7 @@ MRI *MRIextractRegionAndPad(MRI *mri_src, MRI *mri_dst, MRI_REGION *region,
                        region->dz + 2 * pad, mri_src->type, mri_src->nframes);
   MRIcopyHeader(mri_src, mri_dst);
   // LZ
-  // printf("(box.dx, box.dy, box.dz) = (%d, %d, %d)\n", box.dx, box.dy, box.dz)
-  // ;
+  // printf("(box.dx, box.dy, box.dz) = (%d, %d, %d)\n", box.dx, box.dy, box.dz) ;
   printf("(region->dx, region->dy, region->dz) = (%d, %d, %d)\n", region->dx,
          region->dy, region->dz);
 
@@ -17622,10 +17610,10 @@ int MRIcomputeVentMeansandCovariances(MRI *mri_inputs, MRI *mri_labeled,
 /*
   build and return a mosaic of images contained in the array mri[nimages]. The
   returned image will have the same ras2vox as mri[0] with a different center.
-  The second frame of the returned image will have the count of the number of
-  input voxels that mapped to each output voxel. If any of the inputs have 2
-  frames, the second frame is assumed to be a count (that is, it was a
-  previously created mosaic.
+  The second frame of the returned image will have the count of the number of input
+  voxels that mapped to each output voxel. If any of the inputs have 2 frames, the
+  second frame is assumed to be a count (that is, it was a previously created
+  mosaic.
 */
 MRI *MRImakeMosaic(MRI **mri, int nimages, int rectify) {
   float   x0, x1, y0, y1, z0, z1, sum, minval;
@@ -17845,10 +17833,9 @@ VOXLIST *MRIcomputeLaplaceStreamline(MRI *mri_laplace, int max_steps, float x0,
                                      float y0, float z0, float source_val,
                                      float target_val, float outside_val);
 /*
-  solve the laplace equation with voxels==source_label clamped to -1 and
-  voxels==target_label clamped to 1, constrained the solution to be in the
-  region specified in mri_interior==1. Voxels that are not in either label and
-  not in the interior will be set to 2.
+  solve the laplace equation with voxels==source_label clamped to -1 and voxels==target_label clamped to 1,
+  constrained the solution to be in the region specified in mri_interior==1. Voxels that are not in either label and not
+  in the interior will be set to 2.
 */
 MRI *MRIsolveLaplaceEquation(MRI *mri_interior, MRI *mri_seg, int source_label,
                              int target_label, float source_val,

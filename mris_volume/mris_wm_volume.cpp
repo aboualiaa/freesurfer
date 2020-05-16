@@ -30,10 +30,10 @@ static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 
-static void usage_exit(int code) ;
-static char sdir[STRLEN] = "" ;
-static const char *white_name = "white" ;
-static const char *aseg_name = "aseg.mgz" ;
+static void        usage_exit(int code);
+static char        sdir[STRLEN] = "";
+static const char *white_name   = "white";
+static const char *aseg_name    = "aseg.mgz";
 
 static double resolution = 1.0 / 4.0;
 

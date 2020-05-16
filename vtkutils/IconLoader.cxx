@@ -150,9 +150,9 @@ int IconLoader::LoadIconsFromFile(const char *ifn) {
 
       // Try to load the icon with the strings that we got.
       try {
-        // cout << "LoadIcon: " << sKey.c_str() << ", "
+        // std::cout << "LoadIcon: " << sKey.c_str() << ", "
         //   << sfnTIFF.c_str() << ", "
-        //   << sfnGIF.c_str() << endl;
+        //   << sfnGIF.c_str() << std::endl;
         errs += LoadIcon(sKey.c_str(), sfnTIFF.c_str(), sfnGIF.c_str());
       } catch (exception &e) {
         std::cerr << "Error reading " << ifn << ", line " << nLine << ": "

@@ -2064,8 +2064,8 @@ findClosestNode(GCSA *gcsa, int vno, int label)
 }
 
 #endif
-int GCSAputInputType(GCSA *gcsa, int type, const char *fname, int navgs, int flags, int ino)
-{
+int GCSAputInputType(GCSA *gcsa, int type, const char *fname, int navgs,
+                     int flags, int ino) {
   if (ino < 0 || ino >= gcsa->ninputs)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM,

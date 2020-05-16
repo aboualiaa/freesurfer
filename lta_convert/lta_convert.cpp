@@ -582,7 +582,7 @@ void writeITK(const std::string &fname, const LTA *lta) {
 }
 
 int main(int argc, char *argv[]) {
-  cout << getVersion() << endl << endl;
+  std::cout << getVersion() << std::endl << std::endl;
 
   // Default initialization
   int nargs = handleVersionOption(argc, argv, "lta_convert");
@@ -715,13 +715,13 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   }
   StrUpper(option);
 
-  // cout << " option: " << option << endl;
+  // std::cout << " option: " << option << std::endl;
 
   //  if (!strcmp(option, "IN") )
   //  {
   //    P.transin = string(argv[1]);
   //    nargs = 1;
-  //    cout << "--in: " << P.transin << " input transform." << endl;
+  //    std::cout << "--in: " << P.transin << " input transform." << std::endl;
   //  }
   if (!strcmp(option, "INLTA")) {
     P.transin = std::string(argv[1]);
@@ -821,10 +821,10 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   //    else if (sit == "REG") P.intype = intypes::REG;
   //    else
   //    {
-  //      cout << "WARNING: intype " << sit << "unknown, will try to detect
-  //      input..." << endl; P.intype = intypes::UNKNOWN;
+  //      std::cout << "WARNING: intype " << sit << "unknown, will try to detect
+  //      input..." << std::endl; P.intype = intypes::UNKNOWN;
   //    }
-  //    cout << "--intype: " << sit << endl;
+  //    std::cout << "--intype: " << sit << std::endl;
   //  }
   else {
     std::cerr << std::endl
@@ -867,7 +867,7 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
     {
       printUsage();
       cerr << endl << endl << "ERROR: Please specify --mov --dst and --lta !  "
-          << endl << endl;
+          << endl << std::endl;
       exit(1);
     }
     bool test2 = (P.satit || P.sat > 0 || P.cost != Registration::ROB
@@ -877,7 +877,7 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
       printUsage();
       cerr << endl << endl
           << "ERROR: Please specify either --satit or --sat <float> !  " << endl
-          << endl;
+          << std::endl;
       exit(1);
     }
     bool test3 = (P.iscaleout == "" || P.iscale);
@@ -887,7 +887,7 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
       cerr << endl << endl
           << "ERROR: Please specify --iscale together with --iscaleout to
     compute and output global intensity scaling! "
-          << endl << endl;
+          << endl << std::endl;
       exit(1);
     }
     bool test4 = (P.warpout == "" || (P.warpout != P.weightsout));
@@ -897,7 +897,7 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
       cerr << endl << endl
           << "ERROR: Resampled input name (--mapmov) cannot be same as --weights
     output!"
-          << endl << endl;
+          << endl << std::endl;
       exit(1);
     }
 

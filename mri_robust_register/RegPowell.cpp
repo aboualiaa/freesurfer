@@ -54,7 +54,7 @@ public:
 };
 
 double RegPowell::costFunction(const vnl_vector<double> &p) {
-  // cout << "RegPowell::costFunction " << flush;
+  // std::cout << "RegPowell::costFunction " << flush;
 
   // transform into matrix and iscale double
   static std::pair<vnl_matrix_fixed<double, 4, 4>, double> Md;
@@ -68,10 +68,10 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
   //     RegistrationStep<double>::convertP2Md(p,tocurrent->iscale,tocurrent->rtype);
   Md = tocurrent->convertP2Md(p);
   //  Md.second = exp(Md.second); // compute full factor (source to target)
-  // cout << endl;
-  // cout << " rtype : " << tocurrent->rtype << endl;
-  // cout << " iscale : " << Md.second << endl;
-  // cout << " trans dof: " << tocurrent->trans->getDOF() << endl;
+  // std::cout << std::endl;
+  // std::cout << " rtype : " << tocurrent->rtype << std::endl;
+  // std::cout << " iscale : " << Md.second << std::endl;
+  // std::cout << " trans dof: " << tocurrent->trans->getDOF() << std::endl;
   //  vnl_matlab_print(std::cerr,p,"p",vnl_matlab_print_format_long);
   //  vnl_matlab_print(std::cerr,Md.first,"M",vnl_matlab_print_format_long);
   // vnl_matlab_print(std::cerr,mh2,"mh2",vnl_matlab_print_format_long);
@@ -100,8 +100,8 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
     mti.set_identity();
   }
   // vnl_matlab_print(std::cerr,mi,"minv",vnl_matlab_print_format_long);
-  // cout << "tcf: " << MRIgetVoxVal(tcf,36,36,36,0) << " scf : " <<
-  // MRIgetVoxVal(scf,36,36,36,0) << endl; static vnl_matrix < double > HM;
+  // std::cout << "tcf: " << MRIgetVoxVal(tcf,36,36,36,0) << " scf : " <<
+  // MRIgetVoxVal(scf,36,36,36,0) << std::endl; static vnl_matrix < double > HM;
   // static vnl_vector_fixed < double, 3 > ss;
   // ss[0] = tocurrent->subsamp; ss[1] = tocurrent->subsamp; ss[2] =
   // tocurrent->subsamp;
@@ -245,7 +245,7 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
   //   // adjust intensity
   //   if (tocurrent->iscale)
   //   {
-  //     //cout << "   - adjusting intensity ( "<< fmd.second << " ) " << endl;
+  //     //cout << "   - adjusting intensity ( "<< fmd.second << " ) " << std::endl;
   //
   //     MyMRI::MRIvalscale(mri_Swarp,mri_Swarp,(1.0+Md.second)*0.5);
   //     MyMRI::MRIvalscale(mri_Twarp,mri_Twarp,(1.0+ 1.0/Md.second)*0.5);
@@ -271,14 +271,14 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
   d = (float)CostFunctions::normalizedMutualInformation(mri_Swarp, mri_Twarp);
   // d = (float) CostFunctions::MutualInformation(mri_Swarp,mri_Twarp);
 
-  // cout << d << endl;
+  // std::cout << d << std::endl;
 
   icount++;
   if (icount % 100 == 0)
     std::cout << "*" << std::flush;
   //    if (icount%20 == 0)
   {
-    // cout << endl << " iteration : " << icount << endl;
+    // std::cout << endl << " iteration : " << icount << std::endl;
     std::cerr << icount << "  |  " << std::setprecision(8) << d << "    "
               << std::flush;
     vnl_matlab_print(std::cerr, p, "p", vnl_matlab_print_format_long);
@@ -415,8 +415,8 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     mh2.set_identity();
   }
 
-  // cout << "M:" << endl << fmd.first << endl;
-  // cout << "m':" << endl << mh2*mh1 << endl;
+  // std::cout << "M:" << endl << fmd.first << std::endl;
+  // std::cout << "m':" << endl << mh2*mh1 << std::endl;
 
   // set static pointers to images:
   scf = mriS;
@@ -556,7 +556,7 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
   }
   // vnl_matlab_print(std::cerr,fmd.first,"M",vnl_matlab_print_format_long);
   // cout
-  // << endl;
+  // << std::endl;
 
   // ISCALECHANGE:
   if (iscale) {

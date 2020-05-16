@@ -30,53 +30,51 @@
 #include "version.h"
 #include "voxlist.h"
 
-#define MAX_CC_ROT      RADIANS(7)
-#define CC_ANGLE_DELTA  RADIANS(.25)
-#define LABEL_IN_CC     128
-#define LABEL_BORDER_CC 64
-#define MAX_CENTRAL_SLICES      500
+#define MAX_CC_ROT         RADIANS(7)
+#define CC_ANGLE_DELTA     RADIANS(.25)
+#define LABEL_IN_CC        128
+#define LABEL_BORDER_CC    64
+#define MAX_CENTRAL_SLICES 500
 
-static int norm_thresh = 40 ;
-static double max_cc_rot = MAX_CC_ROT ;
-static int use_aseg = 1 ;
-static int write_lta = 0 ;
-static int force = 0 ;
-static MRI *find_voxels_close_to_both_hemis(MRI *mri_aseg, int lh_label, int rh_label, int wsize) ;
-int             main(int argc, char *argv[]) ;
-static int      get_option(int argc, char *argv[]) ;
-static void     print_usage();
-static const char     *wmvolume = "mri/wm" ;
-const char            *Progname ;
-static int      dxi=2;  // thickness on either side of midline
-static int      x_edge=0, y_edge=0;
-static int      write_cc = 0 ;
-static double cc_tal_x = 0.0 ;
-static double cc_tal_y = 0.0 ;
-static double cc_tal_z = 27.0 ;
-static int fornix = 0 ;
-static int lh_only = 0 ;
-static int rh_only = 0 ;
-static int skip = 0 ;
-static LTA *lta = 0;
-static char output_fname[STRLEN] = "aseg_with_cc.mgz";
-static char norm_fname[STRLEN] = "norm.mgz" ;
-static char aseg_fname[STRLEN] = "aseg.mgz" ;
-static char lta_fname[STRLEN] = "" ;
-static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) ;
-static int cc_cutting_plane_correct(MRI *mri_aseg,
-                                    double x0, double y0, double z0,
-                                    double dx, double dy, double dz,
-                                    VOXEL_LIST *vl_left_wm,
-                                    VOXEL_LIST *vl_right_wm, int debug);
-static MRI *find_cc_with_aseg(MRI *mri_aseg, MRI *mri_cc, LTA **plta,
-                              double *pxc, double *pyc, double *pzc, int thick,
-                              MRI *mri_norm, MRI *mri_fornix) ;
-static int find_cc_slice(MRI *mri,
-                         double *pccx, double *pccy, double *pccz,
-                         const LTA *lta, MRI *mri_tal_cc) ;
-static int find_corpus_callosum(MRI *mri,
-                                double *ccx, double *ccy, double *ccz,
-                                const LTA *lta, MRI *mri_tal_cc) ;
+static int         norm_thresh = 40;
+static double      max_cc_rot  = MAX_CC_ROT;
+static int         use_aseg    = 1;
+static int         write_lta   = 0;
+static int         force       = 0;
+static MRI *       find_voxels_close_to_both_hemis(MRI *mri_aseg, int lh_label,
+                                                   int rh_label, int wsize);
+int                main(int argc, char *argv[]);
+static int         get_option(int argc, char *argv[]);
+static void        print_usage();
+static const char *wmvolume = "mri/wm";
+const char *       Progname;
+static int         dxi    = 2; // thickness on either side of midline
+static int         x_edge = 0, y_edge = 0;
+static int         write_cc             = 0;
+static double      cc_tal_x             = 0.0;
+static double      cc_tal_y             = 0.0;
+static double      cc_tal_z             = 27.0;
+static int         fornix               = 0;
+static int         lh_only              = 0;
+static int         rh_only              = 0;
+static int         skip                 = 0;
+static LTA *       lta                  = 0;
+static char        output_fname[STRLEN] = "aseg_with_cc.mgz";
+static char        norm_fname[STRLEN]   = "norm.mgz";
+static char        aseg_fname[STRLEN]   = "aseg.mgz";
+static char        lta_fname[STRLEN]    = "";
+static MRI *       remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited);
+static int         cc_cutting_plane_correct(MRI *mri_aseg, double x0, double y0,
+                                            double z0, double dx, double dy, double dz,
+                                            VOXEL_LIST *vl_left_wm,
+                                            VOXEL_LIST *vl_right_wm, int debug);
+static MRI *       find_cc_with_aseg(MRI *mri_aseg, MRI *mri_cc, LTA **plta,
+                                     double *pxc, double *pyc, double *pzc, int thick,
+                                     MRI *mri_norm, MRI *mri_fornix);
+static int find_cc_slice(MRI *mri, double *pccx, double *pccy, double *pccz,
+                         const LTA *lta, MRI *mri_tal_cc);
+static int find_corpus_callosum(MRI *mri, double *ccx, double *ccy, double *ccz,
+                                const LTA *lta, MRI *mri_tal_cc);
 static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv);
 static int  edge_detection(MRI *mri_temp, int edge_count, int signal);
 static int  labels[] = {THICKEN_FILL, NBHD_FILL, VENTRICLE_FILL, DIAGONAL_FILL,

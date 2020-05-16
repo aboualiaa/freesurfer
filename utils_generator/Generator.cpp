@@ -1164,7 +1164,7 @@ struct Generate_abstract_spec_Base : public Generate_Accessor {
 
   virtual void endClass(Phase::T p, std::string const &classId) {
     // indent() << absolutePns(p) << "_" << c.id << " // implementation details"
-    // << endl;
+    // << std::endl;
     depth--;
     indent() << "}; // " << classId << std::endl << std::endl;
   }

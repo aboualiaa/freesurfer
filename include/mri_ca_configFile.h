@@ -107,13 +107,13 @@ private:
     char c;
     ifs.get(c);
     if (debugAid)
-      cout << c;
+      std::cout << c;
     while (ifs.good() && (c != ch) && (c != EOL) && (c != '=') && (c != '[') &&
            (c != '\n')) {
       strDelimitedString.append(1, c);
       ifs.get(c);
       if (debugAid)
-        cout << c;
+        std::cout << c;
     };
 
     if (!ifs.good())
@@ -150,11 +150,11 @@ private:
 
     ifs.get(c);
     if (debugAid)
-      cout << c;
+      std::cout << c;
     while (ifs.good() && (c != ch)) {
       ifs.get(c);
       if (debugAid)
-        cout << c;
+        std::cout << c;
     };
 
     if (ifs.good()) {
@@ -560,7 +560,7 @@ public:
 
   void writeSection(std::string strSectionName, bool bEchoToStdOut = false) {
     if (bEchoToStdOut) {
-      cout << "  [" << strSectionName << "]\n";
+      std::cout << "  [" << strSectionName << "]\n";
     } else {
       fs << "  [" << strSectionName << "]\n";
     }
@@ -571,7 +571,7 @@ public:
   void writeValueName(std::string strValueName, bool bEchoToStdOut = false) {
     if (strValueName != "") {
       if (bEchoToStdOut) {
-        cout << "    " << strValueName << "=";
+        std::cout << "    " << strValueName << "=";
       } else {
         fs << "    " << strValueName << "=";
       }
@@ -585,7 +585,7 @@ public:
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut) {
-      cout << strValue << "\n";
+      std::cout << strValue << "\n";
     } else {
       fs << strValue << "\n";
     }
@@ -613,7 +613,7 @@ public:
   void write(int nValue, std::string strValueName, bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut) {
-      cout << nValue << "\n";
+      std::cout << nValue << "\n";
     } else {
       fs << nValue << "\n";
     }
@@ -642,7 +642,7 @@ public:
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut) {
-      cout << fValue << "\n";
+      std::cout << fValue << "\n";
     } else {
       fs << fValue << "\n";
     }
@@ -670,7 +670,7 @@ public:
              bool bEchoToStdOut = false) {
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut) {
-      cout << dValue << "\n";
+      std::cout << dValue << "\n";
     } else {
       fs << dValue << "\n";
     }
@@ -710,7 +710,7 @@ public:
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
     {
-      cout << strValue << "\n";
+      std::cout << strValue << "\n";
     }
     else
     {
@@ -755,7 +755,7 @@ public:
     {
       writeSection(strSectionName,bEchoToStdOut);
       writeValueName(strValueName, bEchoToStdOut);
-      cout << nValue << "\n";
+      std::cout << nValue << "\n";
     }
     else
     {
@@ -825,7 +825,7 @@ public:
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
     {
-      cout << fValue << "\n";
+      std::cout << fValue << "\n";
     }
     else
     {
@@ -846,7 +846,7 @@ public:
     writeValueName(strValueName, bEchoToStdOut);
     if (bEchoToStdOut)
     {
-      cout << dValue << "\n";
+      std::cout << dValue << "\n";
     }
     else
     {
@@ -889,7 +889,7 @@ public:
   void print() {
     char strMsg[500];
     sprintf(strMsg, "ConfigFilename: %s", strFilepath.c_str());
-    cout << strMsg;
+    std::cout << strMsg;
   }
 
   // retrieve a list of [section names] containing a given prefix
@@ -915,7 +915,7 @@ public:
     int singleInt;
     int singleIntActual = 10;
     get(singleInt, "test", "singleInt");
-    cout << "singleInt = " << singleInt << "\n";
+    std::cout << "singleInt = " << singleInt << "\n";
     if (singleInt != singleIntActual)
       bPassed = false;
 
@@ -927,9 +927,9 @@ public:
     vectorIntActual.push_back(5);
     vectorIntActual.push_back(-345);
     get(vectorInt, "test", "vectorInt");
-    cout << "vectorInt = ";
+    std::cout << "vectorInt = ";
     printType(vectorInt);
-    cout << "\n";
+    std::cout << "\n";
     if (vectorInt != vectorIntActual)
       bPassed = false;
 
@@ -947,11 +947,11 @@ public:
     vectIntRow.push_back(5);
     matrixIntActual.push_back(vectIntRow);
     get(matrixInt, "test", "matrixInt");
-    cout << "matrixInt = ";
+    std::cout << "matrixInt = ";
     printType(matrixInt);
     if (matrixInt != matrixIntActual)
       bPassed = false;
-    cout << "\n";
+    std::cout << "\n";
 
     TypeMatrixInt matrixInt2Actual;
     vectIntRow.erase(vectIntRow.begin(), vectIntRow.end());
@@ -972,9 +972,9 @@ public:
     vectIntRow.push_back(0);
     matrixInt2Actual.push_back(vectIntRow);
     get(matrixInt2, "test", "matrixInt2");
-    cout << "matrixInt2 = ";
+    std::cout << "matrixInt2 = ";
     printType(matrixInt2);
-    cout << "\n";
+    std::cout << "\n";
     if (matrixInt2 != matrixInt2Actual)
       bPassed = false;
 
@@ -985,16 +985,16 @@ public:
     vectStringActual.push_back("yata");
     vectStringActual.push_back("gobba");
     get(vectString, "test", "vectString");
-    cout << "vectString = ";
+    std::cout << "vectString = ";
     printType(vectString);
-    cout << "\n";
+    std::cout << "\n";
     if (vectString != vectStringActual)
       bPassed = false;
 
     double singleDouble;
     double singleDoubleActual = 345.63;
     get(singleDouble, "test", "singleDouble");
-    cout << "singleDouble = " << singleDouble << "\n";
+    std::cout << "singleDouble = " << singleDouble << "\n";
     if (singleDouble != singleDoubleActual)
       bPassed = false;
 
@@ -1012,9 +1012,9 @@ public:
     vectDoubleRow.push_back(-23.0);
     matrixDoubleActual.push_back(vectDoubleRow);
     get(matrixDouble, "test", "matrixDouble");
-    cout << "matrixDouble = ";
+    std::cout << "matrixDouble = ";
     printType(matrixDouble);
-    cout << "\n";
+    std::cout << "\n";
     if (matrixDouble != matrixDoubleActual)
       bPassed = false;
 
@@ -1035,9 +1035,9 @@ public:
      */
 
     if (bPassed) {
-      cout << "Passed all tests.\n";
+      std::cout << "Passed all tests.\n";
     } else {
-      cout << "One or more tests were failed.\n";
+      std::cout << "One or more tests were failed.\n";
     }
     return bPassed;
   }

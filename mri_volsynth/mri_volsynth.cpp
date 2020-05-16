@@ -19,6 +19,7 @@
 
 #include <sys/time.h>
 
+#include "ctrpoints.h"
 #include "diag.h"
 #include "error.h"
 #include "fmriutils.h"
@@ -27,6 +28,7 @@
 #include "mri_identify.h"
 #include "randomfields.h"
 #include "version.h"
+
 double round(double);
 
 MRI *fMRIsqrt(MRI *mri, MRI *mrisqrt);
@@ -62,38 +64,38 @@ char *temp_type;
 int   tempfmtid;
 char *tempfmt = nullptr;
 
-int dim[4];
-float res[4];
-float cras[4];
-float p0[4];
-int usep0 = 0;
-float cdircos[3], rdircos[3], sdircos[3];
-const char *pdfname = "gaussian";
-char *precision=NULL; /* not used yet */
-MRI *mri, *mrism, *mritemp, *mri2;
-long seed = -1; /* < 0 for auto */
-char *seedfile = NULL;
-float fwhm = 0, gstd = 0, gmnnorm = 1;
-int nframes = -1;
-double TR = -1;
-int delta_crsf[4];
-int delta_crsf_speced = 0;
-double delta_value = 1, delta_off_value = 0;
-double gausmean=0, gausstd=1;
-RFS *rfs;
-int rescale = 0;
-int numdof =  2;
-int dendof = 20;
-int AddOffset=0;
-MRI *offset;
-int OffsetFrame=0;
-MRI *mask;
-char *sum2file = NULL;
-int NoOutput = 0;
-MRI_REGION boundingbox;
-double     ValueA    = 1;
-double     ValueB    = 0;
-double     voxradius = -1;
+int         dim[4];
+float       res[4];
+float       cras[4];
+float       p0[4];
+int         usep0 = 0;
+float       cdircos[3], rdircos[3], sdircos[3];
+const char *pdfname   = "gaussian";
+char *      precision = NULL; /* not used yet */
+MRI *       mri, *mrism, *mritemp, *mri2;
+long        seed     = -1; /* < 0 for auto */
+char *      seedfile = NULL;
+float       fwhm = 0, gstd = 0, gmnnorm = 1;
+int         nframes = -1;
+double      TR      = -1;
+int         delta_crsf[4];
+int         delta_crsf_speced = 0;
+double      delta_value = 1, delta_off_value = 0;
+double      gausmean = 0, gausstd = 1;
+RFS *       rfs;
+int         rescale   = 0;
+int         numdof    = 2;
+int         dendof    = 20;
+int         AddOffset = 0;
+MRI *       offset;
+int         OffsetFrame = 0;
+MRI *       mask;
+char *      sum2file = NULL;
+int         NoOutput = 0;
+MRI_REGION  boundingbox;
+double      ValueA    = 1;
+double      ValueB    = 0;
+double      voxradius = -1;
 
 int     UseFFT  = 0;
 int     SpikeTP = -1;

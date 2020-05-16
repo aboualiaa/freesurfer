@@ -171,11 +171,11 @@ LineProf::samplePointsMidline(double offset, double dspacing) {
     if (lastl + dist > lnext) // subsample segment
     {
       double d = (lnext - lastl) / dist;
-      // cout << " d :"<< d << endl;
-      // cout << " x(i-1): "<<rl[i-1][0] << "  x(i): " << rl[i][0] <<endl;
+      // std::cout << " d :"<< d << std::endl;
+      // std::cout << " x(i-1): "<<rl[i-1][0] << "  x(i): " << rl[i][0] <<endl;
       point[0] = rl[i - 1][0] * (1 - d) + rl[i][0] * d;
       point[1] = rl[i - 1][1] * (1 - d) + rl[i][1] * d;
-      // cout << " add point " << point[0] << " " << point[1] << endl;
+      // std::cout << " add point " << point[0] << " " << point[1] << std::endl;
       points.push_back(point);
       lnext += dspacing; // try next point
       i--;               // check this segment again

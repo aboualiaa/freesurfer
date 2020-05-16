@@ -22,7 +22,7 @@ ConfigurationFileForm::ConfigurationFileForm(QDialog *parent)
 void ConfigurationFileForm::loadDefaults(QString fileName) {
   QFileInfo file_info(fileName);
   // QTextStream(stdout) << (file_info.dir()).dirName() << " is the name of the
-  // directory" << endl;
+  // directory" << std::endl;
 
   QDir    parent_directory = file_info.dir();
   QString parent_dir_name  = parent_directory.dirName();
@@ -92,7 +92,7 @@ void ConfigurationFileForm::loadDefaults(QString fileName) {
 void ConfigurationFileForm::loadDefaults2(QString fileName) {
   QFileInfo file_info(fileName);
   // QTextStream(stdout) << (file_info.dir()).dirName() << " is the name of the
-  // directory" << endl;
+  // directory" << std::endl;
   ui.testingLineEdit->setText(fileName);
   QDir temp_directory = file_info.dir();
 
@@ -362,7 +362,7 @@ QString ConfigurationFileForm::bvalSeeker(QFileInfoList list) {
 
 void ConfigurationFileForm::writeFile() {
   QFile file(ui.dtrootLineEdit->text() + "/config.tutorial");
-  // QTextStream(stdout) << "about to start writing the file" << endl;
+  // QTextStream(stdout) << "about to start writing the file" << std::endl;
 
   if (file.open(QIODevice::ReadWrite)) {
     QTextStream stream(&file);

@@ -32,7 +32,9 @@ MC Sim:
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
+#include "MRIio_old.h"
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
@@ -45,7 +47,9 @@ MC Sim:
 #include "mri2.h"
 #include "mri_circulars.h"
 #include "mri_identify.h"
+#include "mrisutils.h"
 #include "pdf.h"
+#include "proto.h"
 #include "resample.h"
 #include "sig.h"
 #include "surfcluster.h"
@@ -56,24 +60,21 @@ MC Sim:
 #undef X
 #endif
 
-static int  parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void);
-static void usage_exit(void);
-static void print_help(void);
-static void print_version(void);
-static void argnerr(char *option, int n);
-static void dump_options(FILE *fp);
-static int  isflag(char *flag);
-static int  nth_is_arg(int nargc, char **argv, int nth);
-static int  singledash(char *flag);
-static int  stringmatch(char *str1, char *str2);
-static int  checkfmt(char *fmt);
-static int  getfmtid(char *fname);
-static int  IsSurfFmt(char *fmt);
-MRIS *      MRISloadSurfSubject(char *subj, char *hemi, char *surfid,
-                                char *SUBJECTS_DIR);
-
+static int   parse_commandline(int argc, char **argv);
+static void  check_options(void);
+static void  print_usage(void);
+static void  usage_exit(void);
+static void  print_help(void);
+static void  print_version(void);
+static void  argnerr(char *option, int n);
+static void  dump_options(FILE *fp);
+static int   isflag(char *flag);
+static int   nth_is_arg(int nargc, char **argv, int nth);
+static int   singledash(char *flag);
+static int   stringmatch(char *str1, char *str2);
+static int   checkfmt(char *fmt);
+static int   getfmtid(char *fname);
+static int   IsSurfFmt(char *fmt);
 int          ReadAsciiMatrixNRows(char *desmtxfname);
 int          ReadAsciiMatrixSize(char *desmtxfname, int *pnrows, int *pncols);
 int          ReadDesignMatrix(char *desmtxfname);
@@ -261,12 +262,12 @@ int main(int argc, char **argv) {
 
   printf("Design Matrix ------------------------------------\n");
   MatrixPrint(stdout, X);
-  // printf("Q ------------------------------------\n");
-  // MatrixPrint(stdout,Q);
-  // printf("T ------------------------------------\n");
-  // MatrixPrint(stdout,T);
-  // printf("R ------------------------------------\n");
-  // MatrixPrint(stdout,R);
+  //printf("Q ------------------------------------\n");
+  //MatrixPrint(stdout,Q);
+  //printf("T ------------------------------------\n");
+  //MatrixPrint(stdout,T);
+  //printf("R ------------------------------------\n");
+  //MatrixPrint(stdout,R);
   printf("Design Covariance Matrix ------------------------------------\n");
   MatrixPrint(stdout, XtX);
   if (C != NULL) {
@@ -320,7 +321,7 @@ int main(int argc, char **argv) {
     if (eresvar_in_fmt != NULL) {
       eresvar = MRISloadSurfVals(eresvar_in_id, eresvar_in_fmt, IcoSurf,
                                  trgsubject, hemi, SUBJECTS_DIR);
-      // eresvar = MRIreadType(eresvar_in_id,eresvar_in_fmtid);
+      //eresvar = MRIreadType(eresvar_in_id,eresvar_in_fmtid);
     } else
       eresvar = MRIread(eresvar_in_id);
     if (eresvar == NULL) {
@@ -360,7 +361,7 @@ int main(int argc, char **argv) {
         exit(1);
       }
       strcpy(SurfReg->subject_name, subject);
-      // SurfReg->hemi = hemi;
+      //SurfReg->hemi = hemi;
 
       if (surfmeasure != NULL) {
         if (stringmatch(inputfmt, "paint") || stringmatch(inputfmt, "w") ||
@@ -562,7 +563,7 @@ int main(int argc, char **argv) {
       if (nthsim == 1)
         printf("INFO: computing var \n");
       fflush(stdout);
-      // eresvar = fMRIvariance(eres,DOF,0,eresvar);
+      //eresvar = fMRIvariance(eres,DOF,0,eresvar);
       eresvar = fMRIcovariance(eres, 0, eres->nframes - DOF, NULL, eresvar);
       if (eresvarid != NULL && MCSim == 0)
         if (MRIwriteAnyFormat(eresvar, eresvarid, eresvarfmt, 0, IcoSurf))
@@ -629,7 +630,7 @@ int main(int argc, char **argv) {
         sig = fMRIsigF(t, DOF, C->rows, sig);
       }
       MRIlog10(sig, NULL, sig, 1);
-      // if(sigfmt != NULL && MCSim == 0){
+      //if(sigfmt != NULL && MCSim == 0){
       if (!MCSim) {
         if (sigid != NULL) {
           if (IsSurfFmt(sigfmt) && IcoSurf == NULL)
@@ -1540,7 +1541,7 @@ static void check_options(void) {
       printf("ERROR: need xmat file with --matonly\n");
       exit(1);
     }
-    // X = gdfMatrix(fsgd,gd2mtx_method,NULL); // X should already exist
+    //X = gdfMatrix(fsgd,gd2mtx_method,NULL); // X should already exist
     MatrixWriteFmt(X, xmatfile, xmatfmt);
     exit(0);
   }
@@ -1784,12 +1785,12 @@ int ReadDesignMatrix(char *desmtxfname) {
     fscanf(fp, "%s", tmpstring);
     subjectlist[r] = (char *)calloc(strlen(tmpstring) + 1, sizeof(char));
     memmove(subjectlist[r], tmpstring, strlen(tmpstring) + 1);
-    // printf("%2d %s\n",r+1,subjectlist[r]);
+    //printf("%2d %s\n",r+1,subjectlist[r]);
 
     for (c = 0; c < ncols - 1; c++)
       fscanf(fp, "%f", &(X->rptr[r + 1][c + 1]));
   }
-  // MatrixPrint(stdout,X);
+  //MatrixPrint(stdout,X);
 
   fclose(fp);
   return (0);

@@ -146,9 +146,9 @@ void vtkFDTensorGlyph::Execute() {
         // 	indexArray[2] = z + extent[4];
         // 	this->VoxelToMeasurementFrameTransform->TransformPoint(indexArray,
         // translate);
-        // cout << "image x: " << x << ", y: " << y << ", z: " << z << endl;
-        // cout << "world x: " << translate[0] << ", y: " << translate[1] << ",
-        // z: " << translate[2] << endl;
+        // std::cout << "image x: " << x << ", y: " << y << ", z: " << z << std::endl;
+        // std::cout << "world x: " << translate[0] << ", y: " << translate[1] << ",
+        // z: " << translate[2] << std::endl;
 
         // this should no longer work:
         // for incorrect dtreg output, uncomment these and swap y and z in
@@ -222,27 +222,27 @@ void vtkFDTensorGlyph::Execute() {
     this->ColorTable->SetNumberOfTableValues(colorCount);
     this->ColorTable->SetTableRange(0, colorCount);
     //     unsigned char *outPtr = this->ColorTable->GetPointer(0);
-    //     //cout << "out: " << outPtr[1500 * 4] << endl;
+    //     //cout << "out: " << outPtr[1500 * 4] << std::endl;
     //     unsigned char *inPtr = colors->GetPointer(0);
-    //     //cout << "in: " << inPtr[1500 * 4] << endl;
+    //     //cout << "in: " << inPtr[1500 * 4] << std::endl;
     //     memmove(outPtr, inPtr, colorCount * 4 - 4);
-    //     //cout << "new out: " << outPtr[1500 * 4] << endl;
+    //     //cout << "new out: " << outPtr[1500 * 4] << std::endl;
     for (int i = 0; i < colorCount; i++) {
       double *tuple = colors->GetTuple(i);
       this->ColorTable->SetTableValue(i, tuple[0] / 255.0, tuple[1] / 255.0,
                                       tuple[2] / 255.0, tuple[3] / 255.0);
     }
-    //     cout << "colors: " << colors->GetComponent(1500, 0) << endl;
-    //     cout << "colortable: " << ((int
-    //     *)(this->ColorTable->MapValue(1500)))[1] << endl; cout <<
+    //     std::cout << "colors: " << colors->GetComponent(1500, 0) << std::endl;
+    //     std::cout << "colortable: " << ((int
+    //     *)(this->ColorTable->MapValue(1500)))[1] << std::endl; std::cout <<
     //     "colortable: " << ((int *)(this->ColorTable->MapValue(1501)))[1] <<
-    //     endl; cout << "colortable: " << ((int
-    //     *)(this->ColorTable->MapValue(1502)))[1] << endl; cout <<
+    //     endl; std::cout << "colortable: " << ((int
+    //     *)(this->ColorTable->MapValue(1502)))[1] << std::endl; std::cout <<
     //     "colortable: " << ((int *)(this->ColorTable->MapValue(1503)))[1] <<
-    //     endl; cout << "colortable: " << ((int
-    //     *)(this->ColorTable->MapValue(1504)))[1] << endl; cout << "table #
-    //     vals: " << this->ColorTable->GetNumberOfTableValues() << endl; cout
-    //     << "table range: " << this->ColorTable->GetRange()[1] << endl;
+    //     endl; std::cout << "colortable: " << ((int
+    //     *)(this->ColorTable->MapValue(1504)))[1] << std::endl; std::cout << "table #
+    //     vals: " << this->ColorTable->GetNumberOfTableValues() << std::endl; cout
+    //     << "table range: " << this->ColorTable->GetRange()[1] << std::endl;
   }
 
   matrix->Delete();

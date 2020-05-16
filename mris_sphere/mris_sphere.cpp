@@ -28,6 +28,10 @@
 #include "timer.h"
 #include "version.h"
 
+#ifdef HAVE_OPENMP
+#include "romp_support.h"
+#endif
+
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[]);
@@ -78,8 +82,8 @@ static float l_spring_norm      = 1.0;
 static float l_sphere           = 0.025;
 #endif
 
-static const char *orig_name = "smoothwm" ;
-static int smooth_avgs = 0 ;
+static const char *orig_name   = "smoothwm";
+static int         smooth_avgs = 0;
 
 static char *xform_fname = nullptr;
 static char *vol_fname   = nullptr;

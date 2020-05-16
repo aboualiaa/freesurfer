@@ -24,7 +24,7 @@ void JointHisto::create(MRI *mri1, MRI *mri2, int d1, int d2, int d3)
 // images are expected to be uchar 0..255 and have uniform voxels and same
 // dimensions
 {
-  // cout << " JointHisto::create " << endl;
+  // std::cout << " JointHisto::create " << std::endl;
 
   int width  = mri1->width;
   int height = mri1->height;
@@ -52,7 +52,7 @@ void JointHisto::create(MRI *mri1, MRI *mri2, int d1, int d2, int d3)
         isum++;
       }
   sum = isum;
-  // cout <<"Sum: " << sum << endl;
+  // std::cout <<"Sum: " << sum << std::endl;
 }
 
 void JointHisto::save(const std::string &fname, const std::string &n) {
@@ -111,12 +111,12 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
                         const vnl_matrix_fixed<double, 4, 4> &Msi,
                         const vnl_matrix_fixed<double, 4, 4> &Mti, int d1,
                         int d2, int d3) {
-  //  cout << " JointHisto::create " << endl;
+  //  std::cout << " JointHisto::create " << std::endl;
   //   vnl_matlab_print(std::cerr,Msi,"Msi",vnl_matlab_print_format_long);std::cerr
   //   << std::endl;
   //   vnl_matlab_print(std::cerr,Mti,"Mti",vnl_matlab_print_format_long);std::cerr
   //   << std::endl;
-  //  cout << " d1: " << d1 << " d2: " << d2 << " d3: " << d3 << endl;
+  //  std::cout << " d1: " << d1 << " d2: " << d2 << " d3: " << d3 << std::endl;
   //   assert (mriS->type == MRI_UCHAR);
   //   assert (mriT->type == MRI_UCHAR);
   // int dim = 4;
@@ -202,7 +202,7 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
   mriS->outside_val = -1;
   mriT->outside_val = -1;
   // int count = 0;
-  //  cout <<" dt " << dt[0] << " " << dt[1] << " " << dt[2] << endl;
+  //  std::cout <<" dt " << dt[0] << " " << dt[1] << " " << dt[2] << std::endl;
   for (z = 0; z < dt[2] - d3 + 1; z += d3) {
     for (y = 0; y < dt[1] - d2 + 1; y += d2) {
       for (x = 0; x < dt[0] - d1 + 1; x += d1) {
@@ -248,7 +248,7 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
           if (dim != 1)
             vt /= dim;
           ivt = (int)floor(vt);
-          // cout << "ivs " << ivs << " ivt " << ivt << endl;
+          // std::cout << "ivs " << ivs << " ivt " << ivt << std::endl;
           if (ivs < 0 || ivt < 0 || ivs >= n || ivt >= n) {
             std::cout << "ERROR at ( " << x << " " << y << " " << z << " ) "
                       << std::endl;
@@ -261,7 +261,7 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
           }
           sdiff = vs - ivs;
           tdiff = vt - ivt;
-          // cout << "ivs " << ivs << " ivt " << ivt << endl;
+          // std::cout << "ivs " << ivs << " ivt " << ivt << std::endl;
           // distribute peak among bins symetrically:
           histo[ivs][ivt] += (1 - sdiff) * (1 - tdiff);
           if (ivs < nm1)
@@ -276,13 +276,13 @@ void JointHisto::create(MRI *mriS, MRI *mriT,
       }
     }
   }
-  // cout << " count: " << count << endl;
+  // std::cout << " count: " << count << std::endl;
   if (sum == 0.0) {
     std::cout
         << " WARNING JointHisto::create : histogram is empty (no overlap?) "
         << std::endl;
-    // cout << " ERROR JointHisto::create : histogram is empty? Writing debug
-    // images. " << endl; MRIwrite(mriS,"mriS_error.mgz");
+    // std::cout << " ERROR JointHisto::create : histogram is empty? Writing debug
+    // images. " << std::endl; MRIwrite(mriS,"mriS_error.mgz");
     // MRIwrite(mriT,"mriT_error.mgz");
     // exit(1);
   }
@@ -379,7 +379,7 @@ MRI *JointHisto::locate(MRI *mriS, MRI *mriT,
   mriS->outside_val = -1;
   mriT->outside_val = -1;
   // int count = 0;
-  // cout <<" df " << df[0] << " " << df[1] << " " << df[2] << endl;
+  // std::cout <<" df " << df[0] << " " << df[1] << " " << df[2] << std::endl;
   for (z = 0; z < dt[2] - d3 + 1; z += d3) {
     for (y = 0; y < dt[1] - d2 + 1; y += d2) {
       for (x = 0; x < dt[0] - d1 + 1; x += d1) {
@@ -472,7 +472,7 @@ MRI *JointHisto::locate(MRI *mriS, MRI *mriT,
       }
     }
   }
-  // cout << " count: " << count << endl;
+  // std::cout << " count: " << count << std::endl;
   if (sum == 0.0) {
     std::cout << " ERROR JointHisto::create : histogram is empty? "
               << std::endl;
@@ -569,7 +569,7 @@ void JointHisto::create(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
   mriS->coeff->outside_val = -1;
   mriT->coeff->outside_val = -1;
   // int count = 0;
-  // cout <<" df " << df[0] << " " << df[1] << " " << df[2] << endl;
+  // std::cout <<" df " << df[0] << " " << df[1] << " " << df[2] << std::endl;
   for (z = 0; z < dt[2] - d3 + 1; z += d3) {
     for (y = 0; y < dt[1] - d2 + 1; y += d2) {
       for (x = 0; x < dt[0] - d1 + 1; x += d1) {
@@ -641,7 +641,7 @@ void JointHisto::create(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
       }
     }
   }
-  // cout << " count: " << count << endl;
+  // std::cout << " count: " << count << std::endl;
   if (sum == 0.0) {
     std::cout << " ERROR JointHisto::create : histogram is empty? "
               << std::endl;
@@ -678,7 +678,7 @@ void JointHisto::smooth(double fwhm) {
   double filter[2 * t + 1];
   double fsum = 0.0;
   double sm2  = -sm * sm;
-  // cout << " sm = " << sm << endl;
+  // std::cout << " sm = " << sm << std::endl;
   for (int i = -t; i <= t; i++) {
     filter[i + t] = exp((i * i) / sm2);
     fsum += filter[i + t];
@@ -686,7 +686,7 @@ void JointHisto::smooth(double fwhm) {
   // normalize
   for (int i = 0; i <= 2 * t; i++) {
     filter[i] /= fsum;
-    // cout << setprecision(16)<< " f[" << i << "]= " << filter[i] << endl;
+    // std::cout << setprecision(16)<< " f[" << i << "]= " << filter[i] << std::endl;
   }
 
   // convolve 2D
@@ -840,7 +840,7 @@ double JointHisto::computeNCC()
     m1 += rowsum[i] * i;
     m2 += colsum[i] * i;
   }
-  // cout << " m1 : " << m1 << "  m2: " << m2 << endl;
+  // std::cout << " m1 : " << m1 << "  m2: " << m2 << std::endl;
 
   double sig1 = 0.0;
   double sig2 = 0.0;
@@ -850,7 +850,7 @@ double JointHisto::computeNCC()
   }
   sig1 = sqrt(sig1);
   sig2 = sqrt(sig2);
-  // cout << " sig1 : " << sig1 << "  sig2: " << sig2 << endl;
+  // std::cout << " sig1 : " << sig1 << "  sig2: " << sig2 << std::endl;
 
   double ncc = 0.0;
   for (i = 0; i < n; i++)
@@ -957,8 +957,8 @@ double JointHisto::computeSCR()
   //   }
   //   double sig1 = s1t1 - s1t2 * s1t2;
   //   double sig2 = s2t1 - s2t2 * s2t2;
-  //   //cout << " sig1: " << sig1 << endl;
-  //   //cout << " sig2: " << sig2 << endl;
+  //   //cout << " sig1: " << sig1 << std::endl;
+  //   //cout << " sig2: " << sig2 << std::endl;
   //
   //
   //   double siga1t1;
@@ -992,8 +992,8 @@ double JointHisto::computeSCR()
   //     }
   //     sum2 += siga2t1 - siga2t2 * siga2t2 / rowsum[i];
   //   }
-  // //cout << " sum1: " << sum1 << endl;
-  // //cout << " sum2: " << sum2 << endl;
+  // //cout << " sum1: " << sum1 << std::endl;
+  // //cout << " sum2: " << sum2 << std::endl;
   //
   //   return 2.0 - (sum1/sig1) - (sum2/sig2);
   //

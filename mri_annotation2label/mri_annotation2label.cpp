@@ -39,10 +39,10 @@ int main(int argc, char *argv[]);
 
 const char *Progname = NULL;
 
-char  *subject   = NULL;
-const char  *annotation = "aparc";
-char  *hemi       = NULL;
-const char  *surfacename = "white";
+char *      subject     = NULL;
+const char *annotation  = "aparc";
+char *      hemi        = NULL;
+const char *surfacename = "white";
 
 char *outdir    = nullptr;
 char *labelbase = nullptr;

@@ -57,46 +57,46 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static int  singledash(char *flag);
-int GetDirective(const char *directivestring);
-int GetDimLength(char *dicomfile, int dimtype);
+int         GetDirective(const char *directivestring);
+int         GetDimLength(char *dicomfile, int dimtype);
 
-#define QRY_FILETYPE        0
-#define QRY_TAG             1
-#define QRY_REPRESENTATION  2
-#define QRY_DESCRIPTION     3
-#define QRY_MULTIPLICITY    4
-#define QRY_LENGTH          5
-#define QRY_VALUE           6
-#define QRY_HAS_PIXEL_DATA  7
-#define QRY_DWI             8
+#define QRY_FILETYPE       0
+#define QRY_TAG            1
+#define QRY_REPRESENTATION 2
+#define QRY_DESCRIPTION    3
+#define QRY_MULTIPLICITY   4
+#define QRY_LENGTH         5
+#define QRY_VALUE          6
+#define QRY_HAS_PIXEL_DATA 7
+#define QRY_DWI            8
 
-char* dicomfile = NULL;
-const char* directivestring = NULL;
-int   directive;
-long  grouptag = -1, elementtag = -1;
-int   debug, verbose;
-char *outputfile       = nullptr;
-int   outputbfile      = 0;
-char *tagname          = nullptr;
-int   GettingPixelData = 0;
-FILE *fp;
-int DisplayImage = 0;
-int DoPartialDump = 1;
-int DoTConvertSec = 0;
+char *      dicomfile       = NULL;
+const char *directivestring = NULL;
+int         directive;
+long        grouptag = -1, elementtag = -1;
+int         debug, verbose;
+char *      outputfile       = nullptr;
+int         outputbfile      = 0;
+char *      tagname          = nullptr;
+int         GettingPixelData = 0;
+FILE *      fp;
+int         DisplayImage  = 0;
+int         DoPartialDump = 1;
+int         DoTConvertSec = 0;
 
 //int AllocElement(DCM_ELEMENT *e);
 //int FreeElement(DCM_ELEMENT *e);
 //DCM_OBJECT *GetObjectFromFile(char *fname, unsigned long options);
-int DumpElement(FILE *fp, DCM_ELEMENT *e);
+int         DumpElement(FILE *fp, DCM_ELEMENT *e);
 const char *RepString(int RepCode);
-int PartialDump(const char *dicomfile, FILE *fp);
-int DumpSiemensASCII(const char *dicomfile, FILE *fpout);
-int DumpSiemensASCIIAlt(const char *dicomfile, FILE *fpout);
+int         PartialDump(const char *dicomfile, FILE *fp);
+int         DumpSiemensASCII(const char *dicomfile, FILE *fpout);
+int         DumpSiemensASCIIAlt(const char *dicomfile, FILE *fpout);
 
 /*size_t RepSize(int RepCode);*/
 const char *ElementValueFormat(DCM_ELEMENT *e);
-int DCMCompare(char *dcmfile1, char *dcmfile2, double thresh);
-double DCMCompareThresh = .00001;
+int         DCMCompare(char *dcmfile1, char *dcmfile2, double thresh);
+double      DCMCompareThresh = .00001;
 
 #define TMPSTRLEN 10000
 static char tmpstr[TMPSTRLEN];
@@ -769,16 +769,24 @@ static void check_options() {
 }
 /* ------------------------------------------------------------ */
 int GetDirective(const char *directivestring) {
-  if (! strcasecmp(directivestring,"filetype")) return(QRY_FILETYPE);
-  if (! strcasecmp(directivestring,"tag")) return(QRY_TAG);
-  if (! strcasecmp(directivestring,"representation")) return(QRY_REPRESENTATION);
-  if (! strcasecmp(directivestring,"description")) return(QRY_DESCRIPTION);
-  if (! strcasecmp(directivestring,"multiplicity")) return(QRY_MULTIPLICITY);
-  if (! strcasecmp(directivestring,"length")) return(QRY_LENGTH);
-  if (! strcasecmp(directivestring,"value")) return(QRY_VALUE);
-  if (! strcasecmp(directivestring,"dwi")) return(QRY_DWI);
-  if (! strcasecmp(directivestring,"haspixel")){
-    grouptag = 0x7FE0;
+  if (!strcasecmp(directivestring, "filetype"))
+    return (QRY_FILETYPE);
+  if (!strcasecmp(directivestring, "tag"))
+    return (QRY_TAG);
+  if (!strcasecmp(directivestring, "representation"))
+    return (QRY_REPRESENTATION);
+  if (!strcasecmp(directivestring, "description"))
+    return (QRY_DESCRIPTION);
+  if (!strcasecmp(directivestring, "multiplicity"))
+    return (QRY_MULTIPLICITY);
+  if (!strcasecmp(directivestring, "length"))
+    return (QRY_LENGTH);
+  if (!strcasecmp(directivestring, "value"))
+    return (QRY_VALUE);
+  if (!strcasecmp(directivestring, "dwi"))
+    return (QRY_DWI);
+  if (!strcasecmp(directivestring, "haspixel")) {
+    grouptag   = 0x7FE0;
     elementtag = 0x10;
     return (QRY_HAS_PIXEL_DATA);
   }
@@ -806,7 +814,7 @@ int DumpElement(FILE *fp, DCM_ELEMENT *e) {
 }
 /*---------------------------------------------------------------*/
 const char *RepString(int RepCode) {
-  const char* repstring=NULL;
+  const char *repstring = NULL;
 
   switch (RepCode) {
 
@@ -928,8 +936,7 @@ int GetDimLength(char *dicomfile, int dimtype) {
   return (dimlength);
 }
 /*---------------------------------------------------------------*/
-int PartialDump(const char *dicomfile, FILE *fp) 
-{
+int PartialDump(const char *dicomfile, FILE *fp) {
   DCM_ELEMENT *e;
 
   e = GetElementFromFile(dicomfile, 0x8, 0x70);
@@ -1257,13 +1264,13 @@ int DumpSiemensASCII(const char *dicomfile, FILE *fpout) {
   DCM_ELEMENT *e;
   FILE *       fp;
   // declared at top of file: char tmpstr[TMPSTRLEN];
-  int   dumpline;
-  int   nthchar;
-  char *rt;
+  int         dumpline;
+  int         nthchar;
+  char *      rt;
   const char *BeginStr;
-  int LenBeginStr;
-  char *TestStr;
-  int   nTest;
+  int         LenBeginStr;
+  char *      TestStr;
+  int         nTest;
 
   e = GetElementFromFile(dicomfile, 0x8, 0x70);
   if (e == nullptr) {
@@ -1354,13 +1361,13 @@ int DumpSiemensASCIIAlt(const char *dicomfile, FILE *fpout) {
   DCM_ELEMENT *e;
   FILE *       fp;
   // declared at top of file: char tmpstr[TMPSTRLEN];
-  int   dumpline;
-  int   nthchar;
-  char *rt;
+  int         dumpline;
+  int         nthchar;
+  char *      rt;
   const char *BeginStr;
-  int LenBeginStr;
-  char *TestStr;
-  int   nTest;
+  int         LenBeginStr;
+  char *      TestStr;
+  int         nTest;
 
   e = GetElementFromFile(dicomfile, 0x8, 0x70);
   if (e == nullptr) {
@@ -1453,7 +1460,7 @@ int DumpSiemensASCIIAlt(const char *dicomfile, FILE *fpout) {
 
 /*---------------------------------------------------------------*/
 const char *ElementValueFormat(DCM_ELEMENT *e) {
-  const char * formatstring;
+  const char *formatstring;
 
   switch (e->representation) {
 
@@ -1649,34 +1656,104 @@ int RenderImage(int argc, char **argv) {
 }
 #endif // HAVE_OPENGL
 
-
-int DCMCompare(char *dcmfile1, char *dcmfile2, double thresh)
-{
+int DCMCompare(char *dcmfile1, char *dcmfile2, double thresh) {
   DCM_ELEMENT *e1, *e2;
-  int tag1[100], tag2[100], type[100];
-  const char *tagname[100];
-  int n, nth, isdiff;
+  int          tag1[100], tag2[100], type[100];
+  const char * tagname[100];
+  int          n, nth, isdiff;
 
-  n = 0;
-  tagname[n] = "Manufacturer";     tag1[n] = 0x8;  tag2[n] = 0x0070; type[n] = 0; n++;
-  tagname[n] = "Model";            tag1[n] = 0x8;  tag2[n] = 0x1090; type[n] = 0; n++;
-  tagname[n] = "Software Version"; tag1[n] = 0x18; tag2[n] = 0x1020; type[n] = 0; n++;
-  tagname[n] = "Institution";      tag1[n] = 0x8;  tag2[n] = 0x0080; type[n] = 0; n++;
+  n          = 0;
+  tagname[n] = "Manufacturer";
+  tag1[n]    = 0x8;
+  tag2[n]    = 0x0070;
+  type[n]    = 0;
+  n++;
+  tagname[n] = "Model";
+  tag1[n]    = 0x8;
+  tag2[n]    = 0x1090;
+  type[n]    = 0;
+  n++;
+  tagname[n] = "Software Version";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x1020;
+  type[n]    = 0;
+  n++;
+  tagname[n] = "Institution";
+  tag1[n]    = 0x8;
+  tag2[n]    = 0x0080;
+  type[n]    = 0;
+  n++;
   //tagname[n] = "Imaging Frequency";tag1[n] = 0x18; tag2[n] = 0x0084; type[n] = 0; n++;
-  tagname[n] = "Pixel Frequency";  tag1[n] = 0x18; tag2[n] = 0x0095; type[n] = 2; n++;
-  tagname[n] = "Field Strength";   tag1[n] = 0x18; tag2[n] = 0x0087; type[n] = 2; n++;
-  tagname[n] = "Pulse Sequence";   tag1[n] = 0x18; tag2[n] = 0x0024; type[n] = 0; n++;
-  tagname[n] = "Transmitting Coil";tag1[n] = 0x18; tag2[n] = 0x1251; type[n] = 0; n++;
-  tagname[n] = "Flip Angle";       tag1[n] = 0x18; tag2[n] = 0x1314; type[n] = 2; n++;
-  tagname[n] = "Echo Time";        tag1[n] = 0x18; tag2[n] = 0x0081; type[n] = 2; n++;
-  tagname[n] = "Inversion Time";   tag1[n] = 0x18; tag2[n] = 0x0082; type[n] = 2; n++;
-  tagname[n] = "Repetition Time";  tag1[n] = 0x18; tag2[n] = 0x0080; type[n] = 2; n++;
-  tagname[n] = "Phase Encode Direction"; tag1[n] = 0x18; tag2[n] = 0x1312; type[n] = 0; n++;
-  tagname[n] = "Pixel Spacing";    tag1[n] = 0x28; tag2[n] = 0x0030; type[n] = 0; n++;
-  tagname[n] = "Rows";             tag1[n] = 0x28; tag2[n] = 0x0010; type[n] = 1; n++;
-  tagname[n] = "Cols";             tag1[n] = 0x28; tag2[n] = 0x0011; type[n] = 1; n++;
-  tagname[n] = "Slice Thickness";  tag1[n] = 0x18; tag2[n] = 0x0050; type[n] = 2; n++;
-  tagname[n] = "Slice Distance";   tag1[n] = 0x18; tag2[n] = 0x0088; type[n] = 2; n++;
+  tagname[n] = "Pixel Frequency";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0095;
+  type[n]    = 2;
+  n++;
+  tagname[n] = "Field Strength";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0087;
+  type[n]    = 2;
+  n++;
+  tagname[n] = "Pulse Sequence";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0024;
+  type[n]    = 0;
+  n++;
+  tagname[n] = "Transmitting Coil";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x1251;
+  type[n]    = 0;
+  n++;
+  tagname[n] = "Flip Angle";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x1314;
+  type[n]    = 2;
+  n++;
+  tagname[n] = "Echo Time";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0081;
+  type[n]    = 2;
+  n++;
+  tagname[n] = "Inversion Time";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0082;
+  type[n]    = 2;
+  n++;
+  tagname[n] = "Repetition Time";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0080;
+  type[n]    = 2;
+  n++;
+  tagname[n] = "Phase Encode Direction";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x1312;
+  type[n]    = 0;
+  n++;
+  tagname[n] = "Pixel Spacing";
+  tag1[n]    = 0x28;
+  tag2[n]    = 0x0030;
+  type[n]    = 0;
+  n++;
+  tagname[n] = "Rows";
+  tag1[n]    = 0x28;
+  tag2[n]    = 0x0010;
+  type[n]    = 1;
+  n++;
+  tagname[n] = "Cols";
+  tag1[n]    = 0x28;
+  tag2[n]    = 0x0011;
+  type[n]    = 1;
+  n++;
+  tagname[n] = "Slice Thickness";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0050;
+  type[n]    = 2;
+  n++;
+  tagname[n] = "Slice Distance";
+  tag1[n]    = 0x18;
+  tag2[n]    = 0x0088;
+  type[n]    = 2;
+  n++;
 
   isdiff = 0;
   for (nth = 0; nth < n; nth++) {

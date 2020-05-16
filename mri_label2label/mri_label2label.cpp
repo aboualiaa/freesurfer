@@ -86,31 +86,31 @@ int main(int argc, char *argv[]);
 
 const char *Progname = NULL;
 
-static int label_erode = 0 ;
-static int label_dilate = 0 ;
-static int label_open = 0 ;
-static int label_close = 0 ;
-static int label_ring = 0;
+static int label_erode  = 0;
+static int label_dilate = 0;
+static int label_open   = 0;
+static int label_close  = 0;
+static int label_ring   = 0;
 
-char  *srclabelfile = NULL;
-static char  *sample_surf_file = NULL ;
-LABEL *srclabel     = NULL;
-LABEL *tmplabel     = NULL;
-char  *srcsubject   = NULL;
-char  *trglabelfile = NULL;
-LABEL *trglabel     = NULL;
-char  *trgsubject   = NULL;
-const char  *trgsurface   = "white";
+char *       srclabelfile     = NULL;
+static char *sample_surf_file = NULL;
+LABEL *      srclabel         = NULL;
+LABEL *      tmplabel         = NULL;
+char *       srcsubject       = NULL;
+char *       trglabelfile     = NULL;
+LABEL *      trglabel         = NULL;
+char *       trgsubject       = NULL;
+const char * trgsurface       = "white";
 
-const char *regmethod  = NULL;
-char *hemi       = NULL;
-char *srchemi    = NULL;
-char *trghemi    = NULL;
-const char *surfreg = "sphere.reg";
-const char *srcsurfreg = NULL;
-const char *trgsurfreg = NULL;
-char *srcsurfregfile = NULL; // just spec the file name with hemi
-char *trgsurfregfile = NULL;
+const char *regmethod      = NULL;
+char *      hemi           = NULL;
+char *      srchemi        = NULL;
+char *      trghemi        = NULL;
+const char *surfreg        = "sphere.reg";
+const char *srcsurfreg     = NULL;
+const char *trgsurfreg     = NULL;
+char *      srcsurfregfile = NULL; // just spec the file name with hemi
+char *      trgsurfregfile = NULL;
 
 int srcicoorder = -1;
 int trgicoorder = -1;
@@ -137,11 +137,11 @@ FILE *fp;
 
 char tmpstr[2000];
 
-char *srcmaskfile, *srcmaskfmt;
-const char* srcmasksign = "abs";
-int srcmaskframe = 0;
-float srcmaskthresh = 0.0;
-MRI * SrcMask;
+char *      srcmaskfile, *srcmaskfmt;
+const char *srcmasksign   = "abs";
+int         srcmaskframe  = 0;
+float       srcmaskthresh = 0.0;
+MRI *       SrcMask;
 
 int   useprojabs = 0, useprojfrac = 0;
 float projabs = 0.0, projfrac = 0.0;

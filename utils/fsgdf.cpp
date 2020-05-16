@@ -1261,10 +1261,9 @@ MATRIX *gdfMatrixDODS(FSGD *gd, MATRIX *X) {
 
 /*---------------------------------------------------*/
 int gdfCheckMatrixMethod(const char *gd2mtx_method) {
-  if ( strcmp(gd2mtx_method,"doss") == 0 ||
-       strcmp(gd2mtx_method,"dods") == 0 ||
-       strcmp(gd2mtx_method,"none") == 0
-    ) return(0);
+  if (strcmp(gd2mtx_method, "doss") == 0 ||
+      strcmp(gd2mtx_method, "dods") == 0 || strcmp(gd2mtx_method, "none") == 0)
+    return (0);
 
   printf("ERROR: gd2mtx method %s unrecoginzied.\n", gd2mtx_method);
   printf("       Legal values are dods, doss, and none.\n");
@@ -1273,7 +1272,8 @@ int gdfCheckMatrixMethod(const char *gd2mtx_method) {
 
 /*---------------------------------------------------*/
 MATRIX *gdfMatrix(FSGD *gd, const char *gd2mtx_method, MATRIX *X) {
-  if (gdfCheckMatrixMethod(gd2mtx_method)) return(NULL);
+  if (gdfCheckMatrixMethod(gd2mtx_method))
+    return (NULL);
 
   if (strcmp(gd2mtx_method, "none") == 0) {
     printf("ERROR: gdfMatrix: cannot create matrix when method is none\n");

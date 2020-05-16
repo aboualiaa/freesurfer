@@ -40,21 +40,25 @@
 #include "DialogSaveVolume.h"
 #include "DialogSetCamera.h"
 #include "DialogSmoothSurface.h"
+#include "DialogThresholdFilter.h"
 #include "DialogThresholdVolume.h"
 #include "DialogTransformVolume.h"
 #include "DialogVolumeFilter.h"
 #include "DialogVolumeSegmentation.h"
 #include "DialogWriteMovieFrames.h"
 #include "FSGroupDescriptor.h"
+#include "FSPointSet.h"
 #include "FloatingStatusBar.h"
 #include "Interactor2DNavigate.h"
 #include "Interactor2DVoxelEdit.h"
 #include "LUTDataHolder.h"
+#include "LayerCollection.h"
 #include "LayerConnectomeMatrix.h"
 #include "LayerDTI.h"
 #include "LayerFCD.h"
 #include "LayerLandmarks.h"
 #include "LayerLineProfile.h"
+#include "LayerMRI.h"
 #include "LayerPLabel.h"
 #include "LayerPointSet.h"
 #include "LayerPropertyFCD.h"
@@ -67,6 +71,7 @@
 #include "LayerSurface.h"
 #include "LayerTrack.h"
 #include "LayerVolumeTrack.h"
+#include "MainApplication.h"
 #include "MyCmdLineParser.h"
 #include "MyUtils.h"
 #include "PanelLayer.h"
@@ -94,8 +99,17 @@
 #include "VolumeFilterWorkerThread.h"
 #include "WindowGroupPlot.h"
 #include "WindowLayerInfo.h"
+#include "WindowQuickReference.h"
+#include "WindowTimeCourse.h"
+#include "ui_MainWindow.h"
 #include <QClipboard>
 #include <QDebug>
+#include <QFileInfo>
+#include <QJsonDocument>
+#include <QMessageBox>
+#include <QProcessEnvironment>
+#include <QtCore>
+#include <QtGui>
 #ifdef Q_OS_MAC
 #include "MacHelper.h"
 #endif
@@ -1132,8 +1146,7 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
     end   = sa[3].toInt(&bOK);
     for (int i = start; i <= end; i++) {
       //    slice[n] = i;
-      //    this->AddScript(QStringList("slice") << QString::number(slice[0]) <<
-      //    QString::number(slice[1]) << QString::number(slice[2]));
+      //    this->AddScript(QStringList("slice") << QString::number(slice[0]) << QString::number(slice[1]) << QString::number(slice[2]));
       this->AddScript(QStringList("writesurfaceintersection")
                       << sa[0] << sa[1].replace("%d", "%1").arg(i)
                       << QString::number(i));
@@ -1270,7 +1283,7 @@ void MainWindow::OnIdle() {
   bool bBusy = IsBusy();
   if (!bBusy && m_scripts.isEmpty() && property("from_cmd").toBool()) {
     setProperty("from_cmd", false);
-    std::cout << "Commands finished" << std::endl;
+    cout << "Commands finished" << endl;
   }
   if (!bBusy && !m_bScriptRunning && !m_scripts.isEmpty()) {
     bool last_one = (m_scripts.size() == 1);
@@ -1357,11 +1370,10 @@ void MainWindow::OnIdle() {
   ui->actionReloadSurface->setEnabled(!bBusy && layerSurface);
   ui->actionCreateOptimalCombinedVolume->setEnabled(
       GetLayerCollection("MRI")->GetNumberOfLayers() > 1);
-  //  ui->actionCycleLayer      ->setEnabled( lc && lc->GetNumberOfLayers() > 1
-  //  ); ui->actionReverseCycleLayer      ->setEnabled( lc &&
-  //  lc->GetNumberOfLayers() > 1 ); ui->actionHideAllLayers   ->setEnabled( lc
-  //  && !lc->IsEmpty() ); ui->actionShowAllLayers   ->setEnabled( lc &&
-  //  !lc->IsEmpty() );
+  //  ui->actionCycleLayer      ->setEnabled( lc && lc->GetNumberOfLayers() > 1 );
+  //  ui->actionReverseCycleLayer      ->setEnabled( lc && lc->GetNumberOfLayers() > 1 );
+  //  ui->actionHideAllLayers   ->setEnabled( lc && !lc->IsEmpty() );
+  //  ui->actionShowAllLayers   ->setEnabled( lc && !lc->IsEmpty() );
   ui->actionLoadDTIVolumes->setEnabled(!bBusy);
   ui->actionLoadVolume->setEnabled(!bBusy);
   ui->actionLoadROI->setEnabled(!bBusy && layerVolume);
@@ -1557,6 +1569,8 @@ void MainWindow::RunScript() {
     CommandLoadDTI(sa);
   } else if (cmd == "loadtrackvolume" || cmd == "loadvolumetrack") {
     CommandLoadVolumeTrack(sa);
+  } else if (cmd == "settrackvolumeframe") {
+    CommandSetVolumeTrackFrame(sa);
   } else if (cmd == "loadsurface") {
     CommandLoadSurface(sa);
   } else if (cmd == "loadsurfacevector") {
@@ -1588,94 +1602,6 @@ void MainWindow::RunScript() {
   } else if (cmd == "loadcontrolpoints") {
     CommandLoadControlPoints(sa);
   } else if (cmd == "loadpvolumes") {
-    CommandLoadPVolumes(sa);
-  } else if (cmd == "loadtrack") {
-    CommandLoadTrack(sa);
-  } else if (cmd == "settrackcolor") {
-    CommandSetTrackColor(sa);
-  } else if (cmd == "settrackrender") {
-    CommandSetTrackRender(sa);
-  } else if (cmd == "screencapture") {
-    CommandScreenCapture(sa);
-  } else if (cmd == "quit" || cmd == "exit") {
-    close();
-  } else if (cmd == "center") {
-    for (int i = 0; i < 3; i++)
-      ((RenderView2D *)m_views[i])->CenterAtCursor();
-    double pos[3];
-    GetLayerCollection("MRI")->GetSlicePosition(pos);
-    m_views[3]->CenterAtWorldPosition(pos);
-  } else if (cmd == "setviewport") {
-    CommandSetViewport(sa);
-  } else if (cmd == "setviewsize") {
-    CommandSetViewSize(sa);
-  } else if (cmd == "zoom") {
-    CommandZoom(sa);
-  } else if (cmd == "setcamera") {
-    CommandSetCamera(sa);
-  } else if (cmd == "ras") {
-    CommandSetRAS(sa);
-  } else if (cmd == "slice") {
-    CommandSetSlice(sa);
-  } else if (cmd == "writesurfaceintersection") {
-    CommandWriteSurfaceIntersection(sa);
-  } else if (cmd == "setcolormap") {
-    CommandSetColorMap(sa);
-  } else if (cmd == "setheatscaleoptions") {
-    CommandSetHeadScaleOptions(sa);
-  } else if (cmd == "setlut") {
-    CommandSetLUT(sa);
-  } else if (cmd == "setopacity") {
-    CommandSetOpacity(sa);
-  } else if (cmd == "setsmoothed") {
-    CommandSetSmoothed(sa);
-  } else if (cmd == "setrgb") {
-    CommandSetRgb(sa);
-  } else if (cmd == "setdisplayoutline") {
-    CommandSetLabelOutline(sa);
-  } else if (cmd == "setdisplayisosurface") {
-    CommandSetDisplayIsoSurface(sa);
-  } else if (cmd == "saveisosurface") {
-    OnSaveIsoSurface(sa.last());
-  } else if (cmd == "setisosurfacecolor") {
-    CommandSetIsoSurfaceColor(sa);
-  } else if (cmd == "setisosurfaceupsample") {
-    CommandSetIsoSurfaceUpsample(sa);
-  } else if (cmd == "setextractallregions") {
-    CommandSetExtractAllRegions(sa);
-  } else if (cmd == "settrackvolumeframe") {
-    CommandSetVolumeTrackFrame(sa);
-  } else if (cmd == "loadsurface") {
-    CommandLoadIsoSurfaceRegion(sa);
-  } else if (cmd == "setsurfaceoverlaymethod") {
-    CommandSetSurfaceOverlayMethod(sa);
-  } else if (cmd == "setsurfaceoverlaycustom") {
-    CommandSetSurfaceOverlayCustom(sa);
-  } else if (cmd == "setsurfaceoverlaycolormap") {
-    CommandSetSurfaceOverlayColormap(sa);
-  } else if (cmd == "setsurfaceoverlayopacity") {
-    CommandSetSurfaceOverlayOpacity(sa);
-  } else if (cmd == "setsurfaceoverlayframe") {
-    CommandSetSurfaceOverlayFrame(sa);
-  } else if (cmd == "setsurfaceoverlaysmooth") {
-    CommandSetSurfaceOverlaySmooth(sa);
-  } else if (cmd == "setsurfaceoverlaymask") {
-    CommandSetSurfaceOverlayMask(sa);
-  } else if (cmd == "setsurfaceoffset") {
-    CommandSetSurfaceOffset(sa);
-  } else if (cmd == "gotosurfacevertex") {
-    CommandGoToSurfaceVertex(sa);
-  } else if (cmd == "setpointsetcolor") {
-    CommandSetPointSetColor(sa);
-  } else if (cmd == "setpointsetradius") {
-    CommandSetPointSetRadius(sa);
-  } else if (cmd == "setpointsetheatmap") {
-    CommandSetPointSetHeatmap(sa);
-  } else if (cmd == "setdisplayvector") {
-    CommandSetDisplayVector(sa);
-  } else if (cmd == "setdisplaytensor") {
-    CommandSetDisplayTensor(sa);
-  } else if (cmd == "setsurfacecolor") {
     CommandLoadPVolumes(sa);
   } else if (cmd == "loadtrack") {
     CommandLoadTrack(sa);
@@ -1850,7 +1776,7 @@ void MainWindow::RunScript() {
   } else if (cmd == "exportlineprofile") {
     CommandExportLineProfileThickness(sa);
   } else {
-    std::cerr << "Command '" << qPrintable(cmd) << "' was not recognized.\n";
+    cerr << "Command '" << qPrintable(cmd) << "' was not recognized.\n";
   }
   m_bScriptRunning = false;
 }
@@ -1863,12 +1789,12 @@ void MainWindow::ClearScripts() {
 
 void MainWindow::CommandLoadCommand(const QStringList &sa) {
   if (sa.size() < 2) {
-    std::cerr << "No filename specified.\n";
+    cerr << "No filename specified.\n";
     return;
   }
   QFile file(sa[1]);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    std::cerr << "Can not open for read: " << qPrintable(sa[1]) << ".\n";
+    cerr << "Can not open for read: " << qPrintable(sa[1]) << ".\n";
     return;
   }
   QStringList lines =
@@ -1888,7 +1814,7 @@ void MainWindow::CommandLoadCommand(const QStringList &sa) {
     }
   }
 
-  std::cout << "Executing commands from " << qPrintable(sa[1]) << std::endl;
+  cout << "Executing commands from " << qPrintable(sa[1]) << endl;
   setProperty("from_cmd", true);
 }
 
@@ -1897,7 +1823,7 @@ void MainWindow::CommandLoadSubject(const QStringList &sa) {
   QString subject_path =
       QProcessEnvironment::systemEnvironment().value("SUBJECTS_DIR");
   if (subject_path.isEmpty()) {
-    std::cerr << "SUBJECTS_DIR is not set. Can not load subject.\n";
+    cerr << "SUBJECTS_DIR is not set. Can not load subject.\n";
     return;
   }
   subject_path += "/" + sa[1];
@@ -1913,18 +1839,16 @@ void MainWindow::CommandLoadSubject(const QStringList &sa) {
           "%1/surf/rh.white "
           "%1/surf/lh.pial:edgecolor=red "
           "%1/surf/rh.pial:edgecolor=red "
-          //                         "%1/surf/lh.orig:edgecolor=green:visible=0
-          //                         "
-          //                         "%1/surf/rh.orig:edgecolor=green:visible=0
-          //                         "
+          //                         "%1/surf/lh.orig:edgecolor=green:visible=0 "
+          //                         "%1/surf/rh.orig:edgecolor=green:visible=0 "
           "%1/surf/lh.inflated:annot=aparc:visible=0 "
           "%1/surf/rh.inflated:annot=aparc:visible=0 "
           "%1/surf/lh.orig.nofix:overlay=%1/surf/"
-          "lh.defect_labels:edgecolor=overlay:overlay_threshold="
-          "0.01,100,percentile:visible=0 "
+          "lh.defect_labels:edgecolor=overlay:overlay_threshold=0.01,100,"
+          "percentile:visible=0 "
           "%1/surf/rh.orig.nofix:overlay=%1/surf/"
-          "rh.defect_labels:edgecolor=overlay:overlay_threshold="
-          "0.01,100,percentile:visible=0 "
+          "rh.defect_labels:edgecolor=overlay:overlay_threshold=0.01,100,"
+          "percentile:visible=0 "
           "-viewport coronal ")
           .arg(subject_path);
   QString control_pt_file = QString("%1/tmp/control.dat").arg(subject_path);
@@ -2001,44 +1925,44 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
       } else if (subOption == "lut") {
         lut_name = subArgu;
         if (lut_name.isEmpty()) {
-          std::cerr << "Missing lut name.\n";
+          cerr << "Missing lut name.\n";
         }
       } else if (subOption == "vector") {
         vector_display = subArgu.toLower();
         if (vector_display.isEmpty()) {
-          std::cerr << "Missing vector display argument.\n";
+          cerr << "Missing vector display argument.\n";
         }
       } else if (subOption == "vector_width") {
         vector_width = subArgu;
         if (vector_width.isEmpty()) {
-          std::cerr << "Missing vector width argument.\n";
+          cerr << "Missing vector width argument.\n";
         }
       } else if (subOption == "vector_norm_threshold") {
         vector_norm_th = subArgu;
         if (vector_norm_th.isEmpty()) {
-          std::cerr << "Missing vector norm threshold argument.\n";
+          cerr << "Missing vector norm threshold argument.\n";
         }
       } else if (subOption == "vector_skip") {
         if (subArgu.isEmpty()) {
-          std::cerr << "Missing vector skip argument.\n";
+          cerr << "Missing vector skip argument.\n";
         } else
           sup_data["VectorSkip"] = subArgu;
       } else if (subOption == "tensor") {
         tensor_display = subArgu.toLower();
         if (tensor_display.isEmpty()) {
-          std::cerr << "Missing tensor display argument.\n";
+          cerr << "Missing tensor display argument.\n";
         }
       } else if (subOption == "inversion" || subOption == "invert") {
         vector_inversion = subArgu.toLower();
         if (vector_inversion.isEmpty()) {
-          std::cerr << "Missing inversion argument.\n";
+          cerr << "Missing inversion argument.\n";
           vector_inversion = "none";
         }
       } else if (subOption == "render") {
         vector_render = subArgu.toLower();
         tensor_render = vector_render;
         if (vector_render.isEmpty()) {
-          std::cerr << "Missing render argument.\n";
+          cerr << "Missing render argument.\n";
           vector_render = "line";
           tensor_render = "boxoid";
         }
@@ -2112,15 +2036,15 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
         if (color.isValid())
           sup_data["BinaryColor"] = color;
         else
-          std::cerr << "Unrecognized color input for :binary_color.\n";
+          cerr << "Unrecognized color input for :binary_color.\n";
       } else if (!subOption.isEmpty()) {
-        std::cerr << "Unrecognized sub-option flag '"
-                  << strg.toLatin1().constData() << "'.\n";
+        cerr << "Unrecognized sub-option flag '" << strg.toLatin1().constData()
+             << "'.\n";
         return;
       }
     } else {
-      std::cerr << "Unrecognized sub-option flag '"
-                << strg.toLatin1().constData() << "'.\n";
+      cerr << "Unrecognized sub-option flag '" << strg.toLatin1().constData()
+           << "'.\n";
       return;
     }
   }
@@ -2185,8 +2109,8 @@ void MainWindow::CommandSetColorMap(const QStringList &sa) {
   } else if (strg == "binary") {
     nColorMap = LayerPropertyMRI::Binary;
   } else if (strg != "grayscale") {
-    std::cerr << "Unrecognized colormap name '" << strg.toLatin1().constData()
-              << "'.\n";
+    cerr << "Unrecognized colormap name '" << strg.toLatin1().constData()
+         << "'.\n";
   }
 
   QList<double> pars;
@@ -2210,7 +2134,7 @@ void MainWindow::CommandSetColorMap(const QStringList &sa) {
       bool   bOK;
       double dValue = sa[i].toDouble(&bOK);
       if (!bOK) {
-        std::cerr << "Invalid color scale value(s). \n";
+        cerr << "Invalid color scale value(s). \n";
         break;
       } else {
         pars << dValue;
@@ -2302,8 +2226,7 @@ void MainWindow::CommandSetDisplayVector(const QStringList &cmd) {
     LayerMRI *mri = (LayerMRI *)GetLayerCollection("MRI")->GetActiveLayer();
     if (mri) {
       if (!mri->IsTypeOf("DTI") && mri->GetNumberOfFrames() < 3) {
-        std::cerr
-            << "Volume has less than 3 frames. Can not display as vectors.\n";
+        cerr << "Volume has less than 3 frames. Can not display as vectors.\n";
       } else {
         mri->GetProperty()->SetDisplayVector(true);
 
@@ -2313,9 +2236,8 @@ void MainWindow::CommandSetDisplayVector(const QStringList &cmd) {
         } else if (cmd[2].toLower() == "bar") {
           mri->GetProperty()->SetVectorRepresentation(LayerPropertyMRI::VR_Bar);
         } else {
-          std::cerr << "Unrecognized argument '"
-                    << cmd[2].toLatin1().constData()
-                    << "' for vector rendering.\n";
+          cerr << "Unrecognized argument '" << cmd[2].toLatin1().constData()
+               << "' for vector rendering.\n";
         }
 
         if (cmd[3].toLower() != "none") {
@@ -2326,8 +2248,8 @@ void MainWindow::CommandSetDisplayVector(const QStringList &cmd) {
           } else if (cmd[3].toLower() == "z") {
             mri->GetProperty()->SetVectorInversion(LayerPropertyMRI::VI_Z);
           } else {
-            std::cerr << "Unknown inversion flag '"
-                      << cmd[2].toLatin1().constData() << "'.\n";
+            cerr << "Unknown inversion flag '" << cmd[2].toLatin1().constData()
+                 << "'.\n";
           }
         }
 
@@ -2336,16 +2258,16 @@ void MainWindow::CommandSetDisplayVector(const QStringList &cmd) {
         if (ok) {
           mri->GetProperty()->SetVectorLineWidth(val);
         } else {
-          std::cerr << "Unknown vector width value '"
-                    << cmd[4].toLatin1().constData() << "'.\n";
+          cerr << "Unknown vector width value '"
+               << cmd[4].toLatin1().constData() << "'.\n";
         }
 
         val = cmd[5].toDouble(&ok);
         if (ok) {
           mri->GetProperty()->SetVectorNormThreshold(val);
         } else {
-          std::cerr << "Unknown vector norm threshold value '"
-                    << cmd[5].toLatin1().constData() << "'.\n";
+          cerr << "Unknown vector norm threshold value '"
+               << cmd[5].toLatin1().constData() << "'.\n";
         }
 
         if (val == 1 && cmd.size() > 6) {
@@ -2376,8 +2298,7 @@ void MainWindow::CommandSetDisplayTensor(const QStringList &cmd) {
     LayerMRI *mri = (LayerMRI *)GetLayerCollection("MRI")->GetActiveLayer();
     if (mri) {
       if (mri->GetNumberOfFrames() < 9) {
-        std::cerr
-            << "Volume has less than 9 frames. Can not display as tensor.\n";
+        cerr << "Volume has less than 9 frames. Can not display as tensor.\n";
       } else {
         mri->GetProperty()->SetDisplayTensor(true);
 
@@ -2388,9 +2309,8 @@ void MainWindow::CommandSetDisplayTensor(const QStringList &cmd) {
           mri->GetProperty()->SetVectorRepresentation(
               LayerPropertyMRI::TR_Ellipsoid);
         } else {
-          std::cerr << "Unrecognized argument '"
-                    << cmd[2].toLatin1().constData()
-                    << "' for tensor rendering.\n";
+          cerr << "Unrecognized argument '" << cmd[2].toLatin1().constData()
+               << "' for tensor rendering.\n";
         }
 
         if (cmd[3].toLower() != "none") {
@@ -2401,8 +2321,8 @@ void MainWindow::CommandSetDisplayTensor(const QStringList &cmd) {
           } else if (cmd[3].toLower() == "z") {
             mri->GetProperty()->SetVectorInversion(LayerPropertyMRI::VI_Z);
           } else {
-            std::cerr << "Unknown inversion flag '"
-                      << cmd[3].toLatin1().constData() << "'.\n";
+            cerr << "Unknown inversion flag '" << cmd[3].toLatin1().constData()
+                 << "'.\n";
           }
         }
 
@@ -2411,8 +2331,8 @@ void MainWindow::CommandSetDisplayTensor(const QStringList &cmd) {
         if (ok) {
           mri->GetProperty()->SetVectorLineWidth(val);
         } else {
-          std::cerr << "Unknown vector width value '"
-                    << cmd[4].toLatin1().constData() << "'.\n";
+          cerr << "Unknown vector width value '"
+               << cmd[4].toLatin1().constData() << "'.\n";
         }
       }
     }
@@ -2434,7 +2354,7 @@ void MainWindow::CommandSetOpacity(const QStringList &sa) {
   bool    bOK;
   double  dValue = val_strg.toDouble(&bOK);
   if (!bOK) {
-    std::cerr << "Opacity value is not valid.\n";
+    cerr << "Opacity value is not valid.\n";
     return;
   }
   if (sa.size() > 2) {
@@ -2481,7 +2401,7 @@ void MainWindow::CommandSetActiveFrame(const QStringList &sa) {
     if (bOK && val >= 0 && val < mri->GetNumberOfFrames()) {
       mri->SetActiveFrame(val);
     } else {
-      std::cerr << "Frame value is not valid.\n";
+      cerr << "Frame value is not valid.\n";
     }
   }
 }
@@ -2496,7 +2416,7 @@ void MainWindow::CommandSetDisplayIsoSurface(const QStringList &sa) {
       if (bOK) {
         mri->GetProperty()->SetContourMinThreshold(dValue);
       } else if (sa[1].toLower() != "on") {
-        std::cerr << "Isosurface threshold value is not valid.\n";
+        cerr << "Isosurface threshold value is not valid.\n";
       }
     }
     if (sa.size() > 2) {
@@ -2504,7 +2424,7 @@ void MainWindow::CommandSetDisplayIsoSurface(const QStringList &sa) {
       if (bOK) {
         mri->GetProperty()->SetContourMaxThreshold(dValue);
       } else {
-        std::cerr << "Isosurface threshold value is not valid.\n";
+        cerr << "Isosurface threshold value is not valid.\n";
       }
     }
     connect(mri, SIGNAL(IsoSurfaceUpdating()), SLOT(SetProcessing()));
@@ -2521,8 +2441,8 @@ void MainWindow::CommandSetIsoSurfaceColor(const QStringList &cmd) {
       mri->GetProperty()->SetContourColor(color.redF(), color.greenF(),
                                           color.blueF());
     } else {
-      std::cerr << "Invalid color name or value "
-                << cmd[1].toLatin1().constData() << ".\n";
+      cerr << "Invalid color name or value " << cmd[1].toLatin1().constData()
+           << ".\n";
     }
   }
 }
@@ -2563,8 +2483,8 @@ void MainWindow::CommandLoadIsoSurfaceRegion(const QStringList &sa) {
   if (mri) {
     if (sa.size() > 1) {
       if (!mri->LoadSurfaceRegions(sa[1])) {
-        std::cerr << "Can not load surfacer region(s) from "
-                  << sa[1].toLatin1().constData() << ".\n";
+        cerr << "Can not load surfacer region(s) from "
+             << sa[1].toLatin1().constData() << ".\n";
       }
     }
   }
@@ -2590,20 +2510,20 @@ void MainWindow::CommandLoadDTI(const QStringList &sa) {
         if (strg.left(n).toLower() == "vector") {
           vector_display = strg.mid(n + 1).toLower();
           if (vector_display.isEmpty()) {
-            std::cerr << "Missing vector display argument.\n";
+            cerr << "Missing vector display argument.\n";
           }
         } else if (strg.left(n).toLower() == "inversion" ||
                    strg.left(n).toLower() == "invert") {
           vector_inversion = strg.mid(n + 1).toLower();
           if (vector_inversion.isEmpty()) {
-            std::cerr << "Missing vector inversion argument.\n";
+            cerr << "Missing vector inversion argument.\n";
             vector_inversion = "none";
           }
         } else if (strg.left(n).toLower() == "render") {
           vector_render = strg.mid(n + 1).toLower();
           {
             if (vector_render.isEmpty()) {
-              std::cerr << "Missing vector render argument.\n";
+              cerr << "Missing vector render argument.\n";
               vector_render = "line";
             }
           }
@@ -2662,8 +2582,8 @@ void MainWindow::CommandLoadPVolumes(const QStringList &cmd) {
     lut             = cmd[3];
     COLOR_TABLE *ct = m_luts->LoadColorTable(lut);
     if (!ct) {
-      std::cerr << "Can not load look up table " << lut.toLatin1().constData()
-                << ".\n";
+      cerr << "Can not load look up table " << lut.toLatin1().constData()
+           << ".\n";
       return;
     }
   }
@@ -2690,8 +2610,8 @@ void MainWindow::CommandLoadConnectomeMatrix(const QStringList &cmd) {
       if (option == "lut") {
         lut = argu;
       } else {
-        std::cerr << "Unrecognized sub-option flag '"
-                  << strg.toLatin1().constData() << "'.\n";
+        cerr << "Unrecognized sub-option flag '" << strg.toLatin1().constData()
+             << "'.\n";
       }
     }
   }
@@ -2756,8 +2676,8 @@ void MainWindow::CommandLoadROI(const QStringList &cmd) {
       } else if (option == "name") {
         args["name"] = argu;
       } else {
-        std::cerr << "Unrecognized sub-option flag '"
-                  << strg.toLatin1().constData() << "'.\n";
+        cerr << "Unrecognized sub-option flag '" << strg.toLatin1().constData()
+             << "'.\n";
       }
     }
   }
@@ -2778,8 +2698,8 @@ void MainWindow::CommandLoadTrack(const QStringList &cmd) {
         else if (sublist[0] == "render")
           m_scripts.insert(0, QStringList("settrackrender") << sublist[1]);
         else
-          std::cerr << "Unrecognized sub-option flag '"
-                    << sublist[0].toLatin1().constData() << "'.\n";
+          cerr << "Unrecognized sub-option flag '"
+               << sublist[0].toLatin1().constData() << "'.\n";
       }
     }
   }
@@ -3107,8 +3027,8 @@ void MainWindow::CommandLoadSurface(const QStringList &cmd) {
             sup_options["ignore_vg"] = true;
           }
         } else if (!valid_overlay_options.contains(subOption)) {
-          std::cerr << "Unrecognized sub-option flag '"
-                    << subOption.toLatin1().constData() << "'.\n";
+          cerr << "Unrecognized sub-option flag '"
+               << subOption.toLatin1().constData() << "'.\n";
           return;
         }
       }
@@ -3180,7 +3100,7 @@ void MainWindow::CommandSetSurfaceOverlayOpacity(const QStringList &cmd) {
         surf->UpdateOverlay(true);
         overlay->EmitDataUpdated();
       } else {
-        std::cerr << "Invalid input for overlay opacity.\n";
+        cerr << "Invalid input for overlay opacity.\n";
       }
     }
   }
@@ -3199,7 +3119,7 @@ void MainWindow::CommandSetSurfaceOverlayFrame(const QStringList &cmd) {
         surf->UpdateOverlay(true);
         overlay->EmitDataUpdated();
       } else {
-        std::cerr << "Invalid input for overlay frame.\n";
+        cerr << "Invalid input for overlay frame.\n";
       }
     }
   }
@@ -3219,7 +3139,7 @@ void MainWindow::CommandSetSurfaceOverlaySmooth(const QStringList &cmd) {
         overlay->UpdateSmooth();
       } else {
         if (!ok)
-          std::cerr << "Invalid input for overlay smoothing.\n";
+          cerr << "Invalid input for overlay smoothing.\n";
       }
     }
   }
@@ -3252,8 +3172,8 @@ void MainWindow::CommandSetSurfaceOverlayMethod(const QStringList &cmd_in) {
       } else if (cmd[1] == "piecewise") {
         nMethod = SurfaceOverlayProperty::CM_Piecewise;
       } else if (cmd[1] != "linearopaque") {
-        std::cerr << "Unrecognized overlay method name '"
-                  << cmd[1].toLatin1().constData() << "'.\n";
+        cerr << "Unrecognized overlay method name '"
+             << cmd[1].toLatin1().constData() << "'.\n";
         return;
       }
 
@@ -3294,7 +3214,7 @@ void MainWindow::CommandSetSurfaceOverlayMethod(const QStringList &cmd_in) {
         overlay->GetProperty()->SetMidPoint(values[1]);
         overlay->GetProperty()->SetMaxPoint(values[2]);
       } else {
-        std::cerr << "Invalid input for overlay threshold.\n";
+        cerr << "Invalid input for overlay threshold.\n";
       }
 
       surf->UpdateOverlay(true);
@@ -3311,7 +3231,7 @@ void MainWindow::CommandSetSurfaceOverlayCustom(const QStringList &cmd_in) {
     SurfaceOverlay *overlay = surf->GetActiveOverlay();
     if (overlay) {
       if (cmd.size() < 2) {
-        std::cerr << "Insufficient overlay_custom argments\n";
+        cerr << "Insufficient overlay_custom argments\n";
         return;
       }
 
@@ -3347,7 +3267,7 @@ void MainWindow::CommandSetSurfaceOverlayCustom(const QStringList &cmd_in) {
       }
 
       if (!bOK || !c.isValid()) {
-        std::cerr << "Invalid input for customized overlay color.\n";
+        cerr << "Invalid input for customized overlay color.\n";
         return;
       }
 
@@ -3423,8 +3343,8 @@ void MainWindow::CommandSetSurfaceColor(const QStringList &cmd) {
       surf->GetProperty()->SetBinaryColor(color.redF(), color.greenF(),
                                           color.blueF());
     } else {
-      std::cerr << "Invalid color name or value "
-                << cmd[1].toLatin1().constData() << ".\n";
+      cerr << "Invalid color name or value " << cmd[1].toLatin1().constData()
+           << ".\n";
     }
   }
 }
@@ -3442,8 +3362,8 @@ void MainWindow::CommandSetSurfaceEdgeColor(const QStringList &cmd) {
         surf->GetProperty()->SetEdgeColor(color.redF(), color.greenF(),
                                           color.blueF());
       } else {
-        std::cerr << "Invalid color name or value "
-                  << cmd[1].toLatin1().constData() << ".\n";
+        cerr << "Invalid color name or value " << cmd[1].toLatin1().constData()
+             << ".\n";
       }
     }
   }
@@ -3456,7 +3376,7 @@ void MainWindow::CommandSetSurfaceEdgeThickness(const QStringList &cmd) {
     bool bOK;
     int  thickness = cmd[1].toInt(&bOK);
     if (!bOK) {
-      std::cerr << "Invalid edge thickness value. Must be a integer.\n";
+      cerr << "Invalid edge thickness value. Must be a integer.\n";
     } else {
       surf->GetProperty()->SetEdgeThickness(thickness);
     }
@@ -3470,7 +3390,7 @@ void MainWindow::CommandSetSurfaceOpacity(const QStringList &cmd) {
     bool   bOK;
     double opacity = cmd[1].toDouble(&bOK);
     if (!bOK || opacity < 0 || opacity > 1) {
-      std::cerr << "Invalid opacity value. Must be between 0 and 1.\n";
+      cerr << "Invalid opacity value. Must be between 0 and 1.\n";
     } else {
       surf->GetProperty()->SetOpacity(opacity);
     }
@@ -3502,7 +3422,7 @@ void MainWindow::CommandGoToSurfaceVertex(const QStringList &cmd) {
     bool bOK;
     int  nVertex = cmd[1].toInt(&bOK);
     if (!bOK) {
-      std::cerr << "Invalid edge thickness value. Must be a integer.\n";
+      cerr << "Invalid edge thickness value. Must be a integer.\n";
     } else {
       double pos[3];
       if (surf->GetTargetAtVertex(nVertex, pos)) {
@@ -3526,8 +3446,8 @@ void MainWindow::CommandSetSurfaceVertexColor(const QStringList &cmd) {
       surf->GetProperty()->SetVertexColor(color.redF(), color.greenF(),
                                           color.blueF());
     } else {
-      std::cerr << "Invalid color name or value "
-                << cmd[1].toLatin1().constData() << ".\n";
+      cerr << "Invalid color name or value " << cmd[1].toLatin1().constData()
+           << ".\n";
     }
   }
 }
@@ -3540,8 +3460,8 @@ void MainWindow::CommandSetSurfaceLabelColor(const QStringList &cmd) {
     if (color.isValid()) {
       surf->SetActiveLabelColor(color);
     } else {
-      std::cerr << "Invalid color name or value "
-                << cmd[1].toLatin1().constData() << ".\n";
+      cerr << "Invalid color name or value " << cmd[1].toLatin1().constData()
+           << ".\n";
     }
   }
 }
@@ -3553,13 +3473,13 @@ void MainWindow::CommandSetSurfaceOffset(const QStringList &cmd) {
     bool   bOK;
     double pos[3];
     if (cmd.size() < 4) {
-      std::cerr << "Invalid surface offset inputs. Need 3 numbers.\n";
+      cerr << "Invalid surface offset inputs. Need 3 numbers.\n";
     } else {
       pos[0] = cmd[1].toDouble(&bOK);
       pos[1] = cmd[2].toDouble(&bOK);
       pos[2] = cmd[3].toDouble(&bOK);
       if (!bOK) {
-        std::cerr << "Invalid surface offset inputs. Need 3 numbers.\n";
+        cerr << "Invalid surface offset inputs. Need 3 numbers.\n";
       } else {
         surf->GetProperty()->SetPosition(pos);
       }
@@ -3595,8 +3515,8 @@ void MainWindow::CommandGoToLabel(const QStringList &cmd) {
       GetLayerCollection("MRI")->SetCursorRASPosition(pos);
       SetSlicePosition(pos);
     } else {
-      std::cerr << "Did not find slice with most structure of "
-                << qPrintable(cmd[1]);
+      cerr << "Did not find slice with most structure of "
+           << qPrintable(cmd[1]);
     }
   }
 }
@@ -3702,8 +3622,8 @@ void MainWindow::CommandLoadWayPoints(const QStringList &cmd) {
       } else if (option == "id")
         args["id"] = argu;
       else {
-        std::cerr << "Unrecognized sub-option flag '"
-                  << strg.toLatin1().constData() << "'.\n";
+        cerr << "Unrecognized sub-option flag '" << strg.toLatin1().constData()
+             << "'.\n";
       }
     }
   }
@@ -3749,8 +3669,8 @@ void MainWindow::CommandLoadControlPoints(const QStringList &cmd) {
       } else if (option == "id")
         args["id"] = argu;
       else {
-        std::cerr << "Unrecognized sub-option flag '"
-                  << strg.toLatin1().constData() << "'.\n";
+        cerr << "Unrecognized sub-option flag '" << strg.toLatin1().constData()
+             << "'.\n";
       }
     }
   }
@@ -3776,8 +3696,8 @@ void MainWindow::CommandSetPointSetColor(const QStringList &cmd) {
         wp->GetProperty()->SetColor(color.redF(), color.greenF(),
                                     color.blueF());
       } else {
-        std::cerr << "Invalid color name or value "
-                  << cmd[1].toLatin1().constData() << ".\n";
+        cerr << "Invalid color name or value " << cmd[1].toLatin1().constData()
+             << ".\n";
       }
     }
 
@@ -3787,8 +3707,8 @@ void MainWindow::CommandSetPointSetColor(const QStringList &cmd) {
         wp->GetProperty()->SetSplineColor(color.redF(), color.greenF(),
                                           color.blueF());
       } else {
-        std::cerr << "Invalid color name or value "
-                  << cmd[2].toLatin1().constData() << ".\n";
+        cerr << "Invalid color name or value " << cmd[2].toLatin1().constData()
+             << ".\n";
       }
     }
   }
@@ -3804,7 +3724,7 @@ void MainWindow::CommandSetPointSetRadius(const QStringList &cmd) {
       if (bOK && dvalue >= 0) {
         wp->GetProperty()->SetRadius(dvalue);
       } else {
-        std::cerr << "Invalid way points radius.\n";
+        cerr << "Invalid way points radius.\n";
       }
     }
 
@@ -3814,7 +3734,7 @@ void MainWindow::CommandSetPointSetRadius(const QStringList &cmd) {
       if (bOK) {
         wp->GetProperty()->SetSplineRadius(dvalue);
       } else {
-        std::cerr << "Invalid spline radius.\n";
+        cerr << "Invalid spline radius.\n";
       }
     }
   }
@@ -3837,8 +3757,8 @@ void MainWindow::CommandSetPointSetHeatmap(const QStringList &cmd) {
         wp->GetProperty()->SetHeatScaleMax(cmd[4].toDouble());
       }
     } else {
-      std::cerr << "Could not load scalar map from file " << qPrintable(cmd[1])
-                << "\n";
+      cerr << "Could not load scalar map from file " << qPrintable(cmd[1])
+           << "\n";
     }
   }
 }
@@ -3858,16 +3778,15 @@ void MainWindow::CommandScreenCapture(const QStringList &cmd) {
   if (!m_views[m_nMainView]->SaveScreenShot(cmd[1],
                                             m_settingsScreenshot.AntiAliasing,
                                             (int)mag_factor, auto_trim)) {
-    std::cerr << "Failed to save screen shot to "
-              << cmd[1].toLatin1().constData() << ".\n";
+    cerr << "Failed to save screen shot to " << cmd[1].toLatin1().constData()
+         << ".\n";
   }
 }
 
 void MainWindow::CommandFlyThrough(const QStringList &cmd) {
   Q_UNUSED(cmd);
   if (GetMainViewId() > 2) {
-    std::cerr
-        << "Can not fly through. Please set main viewport to 2D slice view.\n";
+    cerr << "Can not fly through. Please set main viewport to 2D slice view.\n";
     return;
   }
 }
@@ -3892,7 +3811,7 @@ void MainWindow::CommandSetViewSize(const QStringList &cmd) {
   int  x = cmd[1].toInt(&bOK);
   int  y = cmd[2].toInt(&bOK);
   if (!bOK) {
-    std::cerr << "Invalid view size.\n";
+    cerr << "Invalid view size.\n";
     return;
   }
   SetViewSize(x, y);
@@ -3940,8 +3859,8 @@ void MainWindow::CommandSetCamera(const QStringList &cmd) {
     for (int i = 1; i < cmd.size(); i += 2) {
       double dValue = cmd[i + 1].toDouble(&bOK);
       if (!bOK) {
-        std::cerr << "Invalid input value for " << cmd[i].toLatin1().constData()
-                  << ".\n";
+        cerr << "Invalid input value for " << cmd[i].toLatin1().constData()
+             << ".\n";
         return;
       } else {
         ops << CameraOperation(cmd[i], dValue);
@@ -3982,7 +3901,7 @@ void MainWindow::CommandSetRAS(const QStringList &cmd) {
     SetSlicePosition(ras);
     ((RenderView3D *)m_views[3])->MapToInflatedCoords(ras);
   } else {
-    std::cerr << "Invalid input values for RAS coordinates. \n";
+    cerr << "Invalid input values for RAS coordinates. \n";
   }
 }
 
@@ -4006,10 +3925,10 @@ void MainWindow::CommandSetSlice(const QStringList &cmd) {
       SetSlicePosition(ras);
       ((RenderView3D *)m_views[3])->MapToInflatedCoords(ras);
     } else {
-      std::cerr << "Invalide slice number(s). \n";
+      cerr << "Invalide slice number(s). \n";
     }
   } else {
-    std::cerr << "No volume was loaded. Set slice failed.\n";
+    cerr << "No volume was loaded. Set slice failed.\n";
   }
 }
 
@@ -4536,11 +4455,7 @@ void MainWindow::OnNewVolume() {
     LayerMRI *layer_template = dlg.GetTemplate();
     if (layer_template->IsTransformed()) {
       //   QMessageBox::information(this, "Warning",
-      //                            "New volume is constructed on template that
-      //                            has been rotated/transformed. It is
-      //                            recommended that you save the transformed
-      //                            volume and reload it before creating new
-      //                            volumes.");
+      //                            "New volume is constructed on template that has been rotated/transformed. It is recommended that you save the transformed volume and reload it before creating new volumes.");
     }
     LayerMRI *layer_new = new LayerMRI(layer_template);
 
@@ -4745,8 +4660,7 @@ void MainWindow::LoadROIFile(const QString &fn, const QString &ref_vol,
   LayerMRI *       ref     = NULL;
   LayerCollection *col_mri = GetLayerCollection("MRI");
   if (ref_vol.isEmpty()) {
-    //   cout << "No template volume given, using current volume as template for
-    //   ROI " << fn.toLatin1().constData() << ".\n";
+    //   cout << "No template volume given, using current volume as template for ROI " << fn.toLatin1().constData() << ".\n";
     ref = (LayerMRI *)col_mri->GetActiveLayer();
   } else {
     for (int i = 0; i < col_mri->GetNumberOfLayers(); i++) {
@@ -4759,10 +4673,10 @@ void MainWindow::LoadROIFile(const QString &fn, const QString &ref_vol,
       }
     }
     if (ref == NULL) {
-      std::cerr << "Can not find given template volume: "
-                << ref_vol.toLatin1().constData()
-                << ". Using current volume as template for ROI "
-                << fn.toLatin1().constData() << ".\n";
+      cerr << "Can not find given template volume: "
+           << ref_vol.toLatin1().constData()
+           << ". Using current volume as template for ROI "
+           << fn.toLatin1().constData() << ".\n";
       ref = (LayerMRI *)col_mri->GetActiveLayer();
     }
   }
@@ -5241,7 +5155,7 @@ void MainWindow::OnIOError(Layer *layer, int jobtype) {
   m_bProcessing = false;
   m_layerSettings.clear();
   if (bQuit) {
-    std::cout << qPrintable(msg) << std::endl;
+    cout << qPrintable(msg) << endl;
     close();
   }
 }
@@ -5381,11 +5295,8 @@ void MainWindow::OnIOFinished(Layer *layer, int jobtype) {
 
     if (!sf->HasValidVolumeGeometry()) {
       //  ShowNonModalMessage("Warning",
-      //                      "Either this surface does not contain valid volume
-      //                      geometry information, or freeview failed to read
-      //                      the information. This surface may not align with
-      //                      volumes and other surfaces.");
-      std::cerr << "Did not find any volume info" << std::endl;
+      //                      "Either this surface does not contain valid volume geometry information, or freeview failed to read the information. This surface may not align with volumes and other surfaces.");
+      cerr << "Did not find any volume info" << endl;
     }
 
     m_strLastDir = QFileInfo(layer->GetFileName()).canonicalPath();
@@ -5516,16 +5427,18 @@ bool MainWindow::UpdateSurfaceCorrelation(LayerSurface *layer) {
 void MainWindow::OnCycleLayer() {
   LayerCollection *lc = GetLayerCollection(GetCurrentLayerType());
   if (lc) {
-    lc->CycleLayer(true, true); // ui->viewAxial->GetInteractionMode() ==
-                                // RenderView2D::IM_ReconEdit);
+    lc->CycleLayer(
+        true,
+        true); //ui->viewAxial->GetInteractionMode() == RenderView2D::IM_ReconEdit);
   }
 }
 
 void MainWindow::OnReverseCycleLayer() {
   LayerCollection *lc = GetLayerCollection(GetCurrentLayerType());
   if (lc) {
-    lc->CycleLayer(false, true); // ui->viewAxial->GetInteractionMode() ==
-                                 // RenderView2D::IM_ReconEdit );
+    lc->CycleLayer(
+        false,
+        true); //ui->viewAxial->GetInteractionMode() == RenderView2D::IM_ReconEdit );
   }
 }
 
@@ -5824,7 +5737,7 @@ void MainWindow::SetVolumeColorMap(int nColorMap, int nColorMapScale,
         if (scales.size() >= 2) {
           p->SetMinMaxGrayscaleWindow(scales[0], scales[1]);
         } else if (!scales.empty()) {
-          std::cerr << "Need 2 values for grayscale.\n";
+          cerr << "Need 2 values for grayscale.\n";
         }
         break;
       case LayerPropertyMRI::Heat:
@@ -5838,20 +5751,20 @@ void MainWindow::SetVolumeColorMap(int nColorMap, int nColorMapScale,
           p->SetHeatScaleMinThreshold(scales[0], bMidToMin);
           p->SetHeatScaleMaxThreshold(scales[1], bMidToMin);
         } else if (!scales.empty()) {
-          std::cerr << "Need 2 or 3 values for heatscale.\n";
+          cerr << "Need 2 or 3 values for heatscale.\n";
         }
         break;
       case LayerPropertyMRI::LUT:
         if (scales.size() >= 1) {
         } else if (!scales.empty()) {
-          std::cerr << "Need a value for lut.\n";
+          cerr << "Need a value for lut.\n";
         }
         break;
       default:
         if (scales.size() >= 2) {
           p->SetMinMaxGenericThreshold(scales[0], scales[1]);
         } else if (!scales.empty()) {
-          std::cerr << "Need 2 values for colorscale.\n";
+          cerr << "Need 2 values for colorscale.\n";
         }
         break;
       }
@@ -5861,10 +5774,9 @@ void MainWindow::SetVolumeColorMap(int nColorMap, int nColorMapScale,
 
 void MainWindow::OnTransformVolume() {
   if (!m_dlgTransformVolume->isVisible()) {
-    std::cout
-        << "Warning: Transformation can only apply to volumes for now. If "
-           "your data includes ROI/Surface/Way Points, please do not use this "
-           "feature yet.\n";
+    cout << "Warning: Transformation can only apply to volumes for now. If "
+            "your data includes ROI/Surface/Way Points, please do not use this "
+            "feature yet.\n";
     m_dlgTransformVolume->show();
     m_dlgTransformVolume->raise();
     m_dlgTransformVolume->UpdateUI();
@@ -5963,27 +5875,25 @@ void MainWindow::OnSaveScreenshot() {
   m_dlgSaveScreenshot->raise();
 }
 
-void MainWindow::OnCopyView()
-{
-    QString fn = QDir::tempPath() + "/freeview-temp-" + QString::number(QDateTime::currentMSecsSinceEpoch()) + ".png";
-    GetMainView()->SaveScreenShot(fn, m_settingsScreenshot.AntiAliasing, 1.0, m_settingsScreenshot.AutoTrim);
-    QClipboard *clipboard = QGuiApplication::clipboard();
-    if (clipboard)
-        clipboard->setImage(QImage(fn));
+void MainWindow::OnCopyView() {
+  QString fn = QDir::tempPath() + "/freeview-temp-" +
+               QString::number(QDateTime::currentMSecsSinceEpoch()) + ".png";
+  GetMainView()->SaveScreenShot(fn, m_settingsScreenshot.AntiAliasing, 1.0,
+                                m_settingsScreenshot.AutoTrim);
+  QClipboard *clipboard = QGuiApplication::clipboard();
+  if (clipboard)
+    clipboard->setImage(QImage(fn));
 }
 
-void MainWindow::OnVolumeFilterMean()
-{
-  LayerMRI* mri = (LayerMRI*)GetActiveLayer( "MRI" );
-  if ( mri )
-  {
-    VolumeFilterMean* filter = new VolumeFilterMean( mri, mri );
-    DialogVolumeFilter dlg( this );
-    dlg.SetFilter( filter );
-    dlg.ShowSigma( false );
-    if ( dlg.exec() == QDialog::Accepted )
-    {
-      filter->SetKernelSize( dlg.GetKernelSize() );
+void MainWindow::OnVolumeFilterMean() {
+  LayerMRI *mri = (LayerMRI *)GetActiveLayer("MRI");
+  if (mri) {
+    VolumeFilterMean * filter = new VolumeFilterMean(mri, mri);
+    DialogVolumeFilter dlg(this);
+    dlg.SetFilter(filter);
+    dlg.ShowSigma(false);
+    if (dlg.exec() == QDialog::Accepted) {
+      filter->SetKernelSize(dlg.GetKernelSize());
       m_threadVolumeFilter->ExecuteFilter(filter);
     }
   }
@@ -6475,8 +6385,7 @@ void MainWindow::OnRemoveIntersectionsFromSurface() {
 }
 
 void MainWindow::SaveSurface() {
-  // first check if there is any volume/MRI layer and if the current one is
-  // visible
+  // first check if there is any volume/MRI layer and if the current one is visible
   LayerSurface *layer_surf = (LayerSurface *)GetActiveLayer("Surface");
   if (!layer_surf) {
     return;
@@ -6586,9 +6495,9 @@ void MainWindow::OnPlot() {
 
 void MainWindow::ToggleSplinePicking() {
   m_bSplinePicking = !m_bSplinePicking;
-  std::cout << qPrintable(QString("Surface spline picking %1")
-                              .arg(m_bSplinePicking ? "enabled" : "disabled"))
-            << std::endl;
+  cout << qPrintable(QString("Surface spline picking %1")
+                         .arg(m_bSplinePicking ? "enabled" : "disabled"))
+       << endl;
 }
 
 void MainWindow::SetSplinePicking(bool b) {
@@ -6679,8 +6588,7 @@ void MainWindow::OnReloadROI() {
       //      for (int i = 0; i < sel_layers.size(); i++)
       //      {
       //        LayerROI* roi = qobject_cast<LayerROI*>(sel_layers[i]);
-      //        m_layerSettings[roi->GetID()] =
-      //        roi->GetProperty()->GetFullSettings();
+      //        m_layerSettings[roi->GetID()] = roi->GetProperty()->GetFullSettings();
       //      }
 
       QList<Layer *> all_layers = GetLayers("ROI");
@@ -6739,8 +6647,7 @@ void MainWindow::OnReloadPointSet() {
       //      for (int i = 0; i < sel_layers.size(); i++)
       //      {
       //        LayerROI* roi = qobject_cast<LayerROI*>(sel_layers[i]);
-      //        m_layerSettings[roi->GetID()] =
-      //        roi->GetProperty()->GetFullSettings();
+      //        m_layerSettings[roi->GetID()] = roi->GetProperty()->GetFullSettings();
       //      }
 
       bool           bCloseFirst     = dlg.GetCloseLayerFirst();
@@ -6926,8 +6833,7 @@ void MainWindow::CommandSetVolumeMask(const QStringList &cmd) {
   LayerMRI *mask = qobject_cast<LayerMRI *>(
       GetLayerCollection("MRI")->GetLayerByName(cmd[1]));
   if (!mask) {
-    std::cerr << "Can not find volume by name of " << qPrintable(cmd[1])
-              << std::endl;
+    cerr << "Can not find volume by name of " << qPrintable(cmd[1]) << endl;
     return;
   }
   if (mri && mask) {
@@ -7305,8 +7211,8 @@ void MainWindow::GoToContralateralPoint(LayerSurface *layer_in) {
       CenterAtWorldPosition(pos);
     }
   } else {
-    std::cout << "Did not find any vertex at cursor on "
-              << qPrintable(layer->GetName()) << std::endl;
+    cout << "Did not find any vertex at cursor on "
+         << qPrintable(layer->GetName()) << endl;
   }
 }
 
@@ -7636,8 +7542,8 @@ void MainWindow::CommandExportLineProfileThickness(const QStringList &cmd) {
   }
   QString fn = ar[0];
   if (!ExportLineProfileThickness(fn, opts))
-    std::cerr << "Failed to export line profile thickness to " << qPrintable(fn)
-              << std::endl;
+    cerr << "Failed to export line profile thickness to " << qPrintable(fn)
+         << endl;
 }
 
 bool MainWindow::ExportLineProfileThickness(const QString &    filename,
@@ -7674,11 +7580,11 @@ bool MainWindow::ExportLineProfileThickness(const QString &    filename,
       samples = opts["segments"].toInt();
 
     if (!lp->Solve(spacing, dVoxelSize, resolution, offset)) {
-      std::cerr << "Could not solve line profile\n";
+      cerr << "Could not solve line profile\n";
       lp->deleteLater();
       return false;
     } else if (!lp->ExportThickness(filename, lines, samples)) {
-      std::cerr << "Could not export line profile thickness\n";
+      cerr << "Could not export line profile thickness\n";
       lp->deleteLater();
       return false;
     } else

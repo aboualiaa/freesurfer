@@ -100,13 +100,11 @@ std::vector<int> readAnnotationIntoVector(const std::string &filename) {
   return annotlist;
 }
 
-
-int read_named_annotation_table(const char *name)
-{
-  FILE *fp;
-  char fname[STRLEN], line[STRLEN];
-  const char *cp; 
-  int i;
+int read_named_annotation_table(const char *name) {
+  FILE *      fp;
+  char        fname[STRLEN], line[STRLEN];
+  const char *cp;
+  int         i;
 
   if (num_entries) {
     return (NO_ERROR); /* already read */

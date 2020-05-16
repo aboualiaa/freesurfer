@@ -103,8 +103,8 @@ static void print_version();
 
 static int normalize_area = 1;
 
-static const char *orig_name = "orig" ;
-static const char *xform_name = "talairach.xfm" ;
+static const char *orig_name  = "orig";
+static const char *xform_name = "talairach.xfm";
 
 static int ico_no       = 6;
 int        UseSurf2Surf = 1; // use surf2surf instead of parametric surface

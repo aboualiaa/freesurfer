@@ -67,29 +67,29 @@ int            checkoptsonly = 0;
 struct utsname uts;
 
 char *FieldSignFile = NULL;
-char *CMFFile = NULL;
-char *NNbrFile = NULL;
-char *RVarFile = NULL;
+char *CMFFile       = NULL;
+char *NNbrFile      = NULL;
+char *RVarFile      = NULL;
 
-int DoSFA = 0;
-char *EccenSFAFile=NULL,*PolarSFAFile=NULL;
+int   DoSFA        = 0;
+char *EccenSFAFile = NULL, *PolarSFAFile = NULL;
 
-int DoComplex = 0;
-char *EccenRealFile=NULL, *EccenImagFile=NULL;
-char *PolarRealFile=NULL, *PolarImagFile=NULL;
-char *EccenOut=NULL, *PolarOut=NULL;
+int   DoComplex     = 0;
+char *EccenRealFile = NULL, *EccenImagFile = NULL;
+char *PolarRealFile = NULL, *PolarImagFile = NULL;
+char *EccenOut = NULL, *PolarOut = NULL;
 
-char *subject, *hemi, *SUBJECTS_DIR;
+char *      subject, *hemi, *SUBJECTS_DIR;
 const char *PatchFile = NULL;
-double fwhm = -1;
-int nsmooth = -1;
-char tmpstr[2000];
-int ReverseSign = 0;
-int SFATrue = 0;
-int UseSphere = 0;
-int usenew = 1;
-double EccenRotAngle = 0;
-double PolarRotAngle = 0;
+double      fwhm      = -1;
+int         nsmooth   = -1;
+char        tmpstr[2000];
+int         ReverseSign   = 0;
+int         SFATrue       = 0;
+int         UseSphere     = 0;
+int         usenew        = 1;
+double      EccenRotAngle = 0;
+double      PolarRotAngle = 0;
 
 int RETcompute_fieldsign2(MRIS *mris);
 

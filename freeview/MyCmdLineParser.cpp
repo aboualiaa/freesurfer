@@ -346,7 +346,7 @@ bool MyCmdLineParser::Parse(const string_array &args) {
       }
       if ((int)e.arguments.size() < e.minArguments) {
         bSucceed = false;
-        //  cout << e.arguments.size() << " " << e.minArguments << "\n";
+        //  std::cout << e.arguments.size() << " " << e.minArguments << "\n";
         error_msg += "Argument missing for option '" + strgs[0] + "'.";
       }
     } else if (e.type == CMD_LINE_SWITCH) {

@@ -39,16 +39,16 @@ static char sdir[STRLEN] = "";
 #define CLASSIFY_SIMILARITY   1
 #define CLASSIFY_LABEL_FUSION 2
 
-static int prior_number_of_vertices = 30 ;
-static int nsmooth = 1 ;
-static int nclose = 1 ;
-static int classifier = CLASSIFY_GAUSSIAN ;
-static const char *hemi_name = "lh" ;
+static int         prior_number_of_vertices = 30;
+static int         nsmooth                  = 1;
+static int         nclose                   = 1;
+static int         classifier               = CLASSIFY_GAUSSIAN;
+static const char *hemi_name                = "lh";
 
-static int prior_only = 0 ;
-static double cor_thresh = 0.6 ;
-static double logodds_thresh = .001 ;
-static const char *data_dir = "fmri" ;
+static int         prior_only     = 0;
+static double      cor_thresh     = 0.6;
+static double      logodds_thresh = .001;
+static const char *data_dir       = "fmri";
 
 #define MAX_SUBJECTS 1500
 

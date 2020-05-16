@@ -245,7 +245,7 @@ RegistrationStep<T>::computeRegistrationStep(MRI *mriS, MRI *mriT) {
         for (x = 0; x < mriS->width; x++)
           for (y = 0; y < mriS->height; y++) {
             val = MRILseq_vox(mri_indexing, x, y, z, f);
-            // if (val < 0) std::cout << " val: " << val << endl;
+            // if (val < 0) std::cout << " val: " << val << std::endl;
             if (val < 0)
               MRIFseq_vox(mri_weights, x, y, z, f) =
                   1.0; // anything special set to ignore
@@ -281,11 +281,11 @@ RegistrationStep<T>::computeRegistrationStep(MRI *mriS, MRI *mriT) {
                   gauss * (1.0 - w[val]); //!!!!! historical, better not use the
                                           //! square root (use wcheck)
               // std::cout << " w^2 : "<< wtemp << "  gauss: " << gauss << "
-              // wcheck+= " << gauss * (1.0 - wtemp) << endl;
+              // wcheck+= " << gauss * (1.0 - wtemp) << std::endl;
               count++;
             }
           }
-    // cout << std::endl;
+    // std::cout << std::endl;
     //    MRIwrite(gmri,"mri_gauss.mgz");
     //    MRIwrite(mri_indexing, "mri_indexing.mgz");
     //    MRIwrite(mri_weights, "mri_weights.mgz");
@@ -325,8 +325,8 @@ RegistrationStep<T>::computeRegistrationStep(MRI *mriS, MRI *mriT) {
 
   //   if (mriS->depth ==1 || mriT->depth ==1)
   //   {
-  //     if (mriS->depth != mriT->depth) { cout << " ERROR both src and trg need
-  //     to be 2d or 3d!" << endl; exit(1);} Md =
+  //     if (mriS->depth != mriT->depth) { std::cout << " ERROR both src and trg need
+  //     to be 2d or 3d!" << std::endl; exit(1);} Md =
   //     convertP2Md2(pvec,iscale,rtype);
   //   }
   //   else
@@ -365,7 +365,7 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
   assert(mriS->type == mriT->type);
 
   bool is2d = false;
-  // cout << "Sd: " << mriS->depth << " Td: " << mriT->depth << endl;
+  // std::cout << "Sd: " << mriS->depth << " Td: " << mriT->depth << std::endl;
   if (mriS->depth == 1 || mriT->depth == 1) {
     if (mriT->depth != mriS->depth) {
       std::cout << "ERROR: both source and target need to be 2D or 3D"
@@ -482,8 +482,8 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
     ft = ft1;
   }
 
-  // cout << " size fx : " << fx->width << " , " << fx->height << " , " <<
-  // fx->depth << std::endl; cout << " size src: " << mriS->width << " , " <<
+  // std::cout << " size fx : " << fx->width << " , " << fx->height << " , " <<
+  // fx->depth << std::endl; std::cout << " size src: " << mriS->width << " , " <<
   // mriS->height << " , " << mriS->depth << std::endl;
 
   // compute 'counti': the number of rows needed (zero elements need to be
@@ -610,7 +610,7 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
   int pnum = trans->getDOF();
   if (iscale)
     pnum++;
-  // cout << " pnum: " << pnum << "  counti: " << counti<<  endl;
+  // std::cout << " pnum: " << pnum << "  counti: " << counti<<  endl;
   double amu = ((double)counti * (pnum + 1)) * sizeof(T) /
                (1024.0 * 1024.0); // +1 =  rowpointer vector
   double bmu = (double)counti * sizeof(T) / (1024.0 * 1024.0);
@@ -700,7 +700,7 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
           for (f = 0; f < fxf; f++)
             MRILseq_vox(mri_indexing, xp1, yp1, zp1, f) = outval;
           ocount += fxf;
-          // cout << " " << ocount << flush;
+          // std::cout << " " << ocount << flush;
           continue;
         }
 
@@ -730,8 +730,8 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
 
           MRILseq_vox(mri_indexing, xp1, yp1, zp1, f) = count;
 
-          // cout << "x: " << x << " y: " << y << " z: " << z << " count: "<<
-          // count << std::endl; cout << " " << count << " mrifx: " <<
+          // std::cout << "x: " << x << " y: " << y << " z: " << z << " count: "<<
+          // count << std::endl; std::cout << " " << count << " mrifx: " <<
           // MRIFvox(mri_fx, x, y, z) << " mrifx int: " <<
           // (int)MRIvox(mri_fx,x,y,z) <<endl;
 
@@ -873,8 +873,8 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
           count++; // start with 0 above
         }
       }
-  // cout << " ocount : " << ocount << endl;
-  // cout << " counti: " << counti << " count : " << count<< endl;
+  // std::cout << " ocount : " << ocount << std::endl;
+  // std::cout << " counti: " << counti << " count : " << count<< std::endl;
   assert(counti == count);
 
   //   vnl_matlab_print(vcl_cerr,A,"A",vnl_matlab_print_format_long);std::cerr
@@ -1114,7 +1114,7 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
 // //  else  std::cout << "
 // RegistrationStep<T>::convertP2Md2(p,iscale=false,"<<rtype<<") (p length: " <<
 // p.size() << " )" << std::flush;
-// //  std::cout<< endl;
+// //  std::cout<< std::endl;
 // vnl_matlab_print(vcl_cout,p,"p",vnl_matlab_print_format_long);std::cout <<
 // std::endl;
 //   std::pair < vnl_matrix_fixed <double,4,4 >, double> ret; ret.second = 0.0;
@@ -1304,8 +1304,8 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
 //     {
 //       // first convert rotation to quaternion;
 //       q.importRotVec(0,0,r);
-//       //cout << " r: " << r << endl;
-//       //cout << " q: " << q << endl;
+//       //cout << " r: " << r << std::endl;
+//       //cout << " q: " << q << std::endl;
 //     }
 //     else assert (1==2);
 //     // then to rotation matrix
@@ -1340,7 +1340,7 @@ void RegistrationStep<T>::constructAb(MRI *mriS, MRI *mriT, vnl_matrix<T> &A,
 //     cerr << " transformation neither 6,4,3 nor 2 dof : " << psize <<" ??" <<
 //     std::endl; assert(1==2);
 //   }
-// //  std::cout<< endl;
+// //  std::cout<< std::endl;
 // vnl_matlab_print(vcl_cout,ret.first,"Mt",vnl_matlab_print_format_long);std::cout
 // << std::endl;
 //

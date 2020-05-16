@@ -50,14 +50,14 @@ const char *Progname;
 static int exit_after_diag = 0;
 extern int topology_fixing_exit_after_diag;
 
-static const char *surf_dir = "surf" ;
-static const char *brain_name    = "brain" ;
-static const char *wm_name       = "wm" ;
-static const char *sphere_name   = "qsphere.nofix" ;
-static const char *inflated_name = "inflated.nofix" ;
-static const char *orig_name     = "orig.nofix" ;
-static const char *out_name      = "orig" ;
-const char *defectbasename = "defect";
+static const char *surf_dir       = "surf";
+static const char *brain_name     = "brain";
+static const char *wm_name        = "wm";
+static const char *sphere_name    = "qsphere.nofix";
+static const char *inflated_name  = "inflated.nofix";
+static const char *orig_name      = "orig.nofix";
+static const char *out_name       = "orig";
+const char *       defectbasename = "defect";
 
 static char suffix[STRLEN] = "";
 static int  add            = 1;

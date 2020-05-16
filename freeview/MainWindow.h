@@ -16,6 +16,7 @@
 #define MAINWINDOW_H
 
 #include "CommonDataStruct.h"
+#include <MainWindow.h>
 #include <QMainWindow>
 #include <QStringList>
 #include <QVariantMap>

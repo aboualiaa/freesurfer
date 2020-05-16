@@ -39,12 +39,12 @@ typedef struct {
   MATRIX *yffxvar; // fixed-effects variance of each y
   int     ffxdof;
 
-  int ncontrasts;    // Number of contrasts
-  MATRIX *C[GLMMAT_NCONTRASTS_MAX];    // Contrast matrices
-  const char *Cname[GLMMAT_NCONTRASTS_MAX];    // Contrast names
-  double Ccond[GLMMAT_NCONTRASTS_MAX];    // C condition number
-  int UseGamma0[GLMMAT_NCONTRASTS_MAX];  // Flag
-  MATRIX *gamma0[GLMMAT_NCONTRASTS_MAX];  // Expected value of gamma
+  int         ncontrasts;                       // Number of contrasts
+  MATRIX *    C[GLMMAT_NCONTRASTS_MAX];         // Contrast matrices
+  const char *Cname[GLMMAT_NCONTRASTS_MAX];     // Contrast names
+  double      Ccond[GLMMAT_NCONTRASTS_MAX];     // C condition number
+  int         UseGamma0[GLMMAT_NCONTRASTS_MAX]; // Flag
+  MATRIX *    gamma0[GLMMAT_NCONTRASTS_MAX];    // Expected value of gamma
 
   int     ypmfflag[GLMMAT_NCONTRASTS_MAX]; // flag to compute PMF
   MATRIX *Mpmf[GLMMAT_NCONTRASTS_MAX];     // Contrast PMF matrices
@@ -103,8 +103,8 @@ int GLManalyze(GLMMAT *glm);
 int GLMprofile(int nrows, int ncols, int ncon, int niters);
 
 GLMMAT *GLMsynth(void);
-int GLMdump(const char *dumpdir, GLMMAT *glm);
-int GLMresynthTest(int niters, double *prvar);
+int     GLMdump(const char *dumpdir, GLMMAT *glm);
+int     GLMresynthTest(int niters, double *prvar);
 MATRIX *GLMpmfMatrix(MATRIX *C, double *cond, MATRIX *P);
 int     GLMdof(GLMMAT *glm);
 

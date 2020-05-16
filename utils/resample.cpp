@@ -97,15 +97,18 @@ static int MostHitsInVolVox(ASEGVOLINDEX *avindsorted, int N, int *segidmost,
   interpolation from a string. Returns -1 if the string is
   unrecoginzed.
   ---------------------------------------------------------*/
-int interpolation_code(const char *interpolation_string) { return (MRIinterpCode(interpolation_string)); }
+int interpolation_code(const char *interpolation_string) {
+  return (MRIinterpCode(interpolation_string));
+}
 /*---------------------------------------------------------
   float2int_code(): gets a code that controls the floating
   point to integer conversion method from a string. Returns
   -1 if the string is unrecoginzed.
   ---------------------------------------------------------*/
-int float2int_code(const char *float2int_string)
-{
-  if (!strcasecmp(float2int_string, "round") || !strcasecmp(float2int_string, "rint")) return (FLT2INT_ROUND);
+int float2int_code(const char *float2int_string) {
+  if (!strcasecmp(float2int_string, "round") ||
+      !strcasecmp(float2int_string, "rint"))
+    return (FLT2INT_ROUND);
 
   if (!strcasecmp(float2int_string, "floor"))
     return (FLT2INT_FLOOR);

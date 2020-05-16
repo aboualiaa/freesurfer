@@ -55,7 +55,7 @@ std::string QdecSubject::GetDiscreteFactorValue(const char *isFactorName) {
   ssErr << "ERROR: QdecSubject::GetDiscreteFactor failure: could not find "
            "factor name: "
         << isFactorName << " for subject " << this->GetId();
-  // cerr << ssErr.str() << endl;
+  // cerr << ssErr.str() << std::endl;
   throw std::runtime_error(ssErr.str().c_str());
   return nullptr;
 }
@@ -75,7 +75,7 @@ double QdecSubject::GetContinuousFactorValue(const char *isFactorName) {
   ssErr << "ERROR: QdecSubject::GetContinuousFactor failure: could not find "
            "factor name: "
         << isFactorName << " for subject " << this->GetId();
-  // cerr << ssErr.str() << endl;
+  // cerr << ssErr.str() << std::endl;
   throw std::runtime_error(ssErr.str().c_str());
   return 0.0;
 }
@@ -108,7 +108,7 @@ QdecFactor *QdecSubject::GetFactor(const char *isFactorName) {
   ssErr << "ERROR: QdecSubject::GetFactor failure: could not find "
            "factor name: "
         << isFactorName << " for subject " << this->GetId();
-  // cerr << ssErr.str() << endl;
+  // cerr << ssErr.str() << std::endl;
   throw std::runtime_error(ssErr.str().c_str());
   return nullptr;
 }

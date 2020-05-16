@@ -18,12 +18,11 @@
  */
 #include "RenderView2D.h"
 #include "LayerCollection.h"
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
 #include "LayerLineProfile.h"
 #include "LayerMRI.h"
 #include "LayerSurface.h"
 #include "MainWindow.h"
+#include "ui_MainWindow.h"
 // #undef isfinite
 #include "Annotation2D.h"
 #include "Contour2D.h"
@@ -572,17 +571,15 @@ bool RenderView2D::SetSliceNumber(int nNum) {
   return true;
 }
 
-void RenderView2D::TriggerContextMenu( QMouseEvent* event )
-{
-  QMenu menu;
-  bool bShowBar = this->GetShowScalarBar();
-  MainWindow* mainwnd = MainWindow::GetMainWindow();
-  QList<Layer*> layers = mainwnd->GetLayers("MRI");
-  Region2D* reg = GetRegion(event->x(), event->y());
-  if (reg)
-  {
-    QAction* act = new QAction("Duplicate", this);
-    act->setData(QVariant::fromValue((QObject*)reg));
+void RenderView2D::TriggerContextMenu(QMouseEvent *event) {
+  QMenu          menu;
+  bool           bShowBar = this->GetShowScalarBar();
+  MainWindow *   mainwnd  = MainWindow::GetMainWindow();
+  QList<Layer *> layers   = mainwnd->GetLayers("MRI");
+  Region2D *     reg      = GetRegion(event->x(), event->y());
+  if (reg) {
+    QAction *act = new QAction("Duplicate", this);
+    act->setData(QVariant::fromValue((QObject *)reg));
     connect(act, SIGNAL(triggered()), this, SLOT(OnDuplicateRegion()));
     menu.addAction(act);
   }
@@ -628,9 +625,8 @@ void RenderView2D::TriggerContextMenu( QMouseEvent* event )
     }
   }
 
-  LayerSurface* surf = (LayerSurface*)mainwnd->GetActiveLayer("Surface");
-  if ( surf && surf->IsContralateralPossible())
-  {
+  LayerSurface *surf = (LayerSurface *)mainwnd->GetActiveLayer("Surface");
+  if (surf && surf->IsContralateralPossible()) {
     if (!menu.actions().isEmpty())
       menu.addSeparator();
     QAction *act = new QAction("Go To Contralateral Point", this);
@@ -638,13 +634,12 @@ void RenderView2D::TriggerContextMenu( QMouseEvent* event )
     connect(act, SIGNAL(triggered()), mainwnd, SLOT(GoToContralateralPoint()));
   }
 
-  if (!mainwnd->IsEmpty() && mainwnd->GetMainView() == this)
-  {
-      menu.addSeparator();
-      QAction* action = new QAction("Copy", this);
-      connect(action, SIGNAL(triggered(bool)), mainwnd, SLOT(OnCopyView()));
-      menu.addAction(action);
-      menu.addAction(mainwnd->ui->actionSaveScreenshot);
+  if (!mainwnd->IsEmpty() && mainwnd->GetMainView() == this) {
+    menu.addSeparator();
+    QAction *action = new QAction("Copy", this);
+    connect(action, SIGNAL(triggered(bool)), mainwnd, SLOT(OnCopyView()));
+    menu.addAction(action);
+    menu.addAction(mainwnd->ui->actionSaveScreenshot);
   }
 
   if (!menu.actions().isEmpty())

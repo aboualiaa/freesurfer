@@ -51,55 +51,55 @@ const char *Progname = NULL;
 char *subjectdir = nullptr;
 char *hemi       = nullptr;
 
-char *srcid = NULL;
-const char *srcfmt  = "";
-int   srcfmtid = MRI_VOLUME_TYPE_UNKNOWN;
+char *      srcid     = NULL;
+const char *srcfmt    = "";
+int         srcfmtid  = MRI_VOLUME_TYPE_UNKNOWN;
 const char *srcsurfid = "white";
-char *srcsubjid = NULL;
-int   srcframe = 0;
-double thmin = -1, thmax = -1;
-const char *thsign = NULL;
-int   thsignid = 0;
-float minarea = 0;
-char *annotname = NULL;
+char *      srcsubjid = NULL;
+int         srcframe  = 0;
+double      thmin = -1, thmax = -1;
+const char *thsign    = NULL;
+int         thsignid  = 0;
+float       minarea   = 0;
+char *      annotname = NULL;
 
-char *maskid   = NULL;
-char *maskfmt  = NULL;
-int   maskfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *masksubjid  = NULL;
-const char *masksignstr  = NULL;
-int  masksign  = 0;
-float maskthresh = 0.5; // assume binary
+char *      maskid      = NULL;
+char *      maskfmt     = NULL;
+int         maskfmtid   = MRI_VOLUME_TYPE_UNKNOWN;
+char *      masksubjid  = NULL;
+const char *masksignstr = NULL;
+int         masksign    = 0;
+float       maskthresh  = 0.5; // assume binary
 
 int nth = -1;
 
-char *omaskid = NULL;
-const char *omaskfmt = "paint";
-char *omasksubjid = NULL;
+char *      omaskid     = NULL;
+const char *omaskfmt    = "paint";
+char *      omasksubjid = NULL;
 
 // Constraining label
-char  *clabelfile=NULL;
-char  *maskfile=NULL;
-LABEL *clabel=NULL;
-int   clabelinv = 0;
-int   UseCortexLabel = 0;
+char * clabelfile     = NULL;
+char * maskfile       = NULL;
+LABEL *clabel         = NULL;
+int    clabelinv      = 0;
+int    UseCortexLabel = 0;
 
-char *outid = NULL;
-const char *outfmt = "paint";
-int   outfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *ocnid = NULL;
-const char *ocnfmt = "paint";
-int   ocnfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *ocpvalid = NULL;
-const char *ocpvalfmt = "paint";
-int   ocpvalfmtid = MRI_VOLUME_TYPE_UNKNOWN;
-char *sumfile  = NULL;
-char *pointsetfile  = NULL;
+char *      outid        = NULL;
+const char *outfmt       = "paint";
+int         outfmtid     = MRI_VOLUME_TYPE_UNKNOWN;
+char *      ocnid        = NULL;
+const char *ocnfmt       = "paint";
+int         ocnfmtid     = MRI_VOLUME_TYPE_UNKNOWN;
+char *      ocpvalid     = NULL;
+const char *ocpvalfmt    = "paint";
+int         ocpvalfmtid  = MRI_VOLUME_TYPE_UNKNOWN;
+char *      sumfile      = NULL;
+char *      pointsetfile = NULL;
 
-char *outlabelbase = NULL;
-char outlabelfile[1000];
-int  nthlab = 0;
-LABEL *outlabel;
+char *  outlabelbase = NULL;
+char    outlabelfile[1000];
+int     nthlab = 0;
+LABEL * outlabel;
 VERTEX *v;
 
 char *outannot = nullptr;
@@ -114,9 +114,9 @@ int          reshape = 1;
 int          reshapefactor;
 
 const char *xfmfile = "talairach.xfm";
-char xfmpath[2000];
-MATRIX *XFM;
-int     FixMNI = 1;
+char        xfmpath[2000];
+MATRIX *    XFM;
+int         FixMNI = 1;
 
 SURFCLUSTERSUM *scs, *scs2;
 
@@ -1654,8 +1654,9 @@ static int nth_is_arg(int nargc, char **argv, int nth) {
 }
 /*------------------------------------------------------------*/
 static int stringmatch(const char *str1, const char *str2) {
-  if (! strcmp(str1,str2)) return(1);
-  return(0);
+  if (!strcmp(str1, str2))
+    return (1);
+  return (0);
 }
 /* --------------------------------------------- */
 static void print_version(void) {

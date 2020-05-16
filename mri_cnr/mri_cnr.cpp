@@ -43,14 +43,13 @@ static LABEL *lh_area, *rh_area;
 
 static int only_total = 0;
 
-int
-main(int argc, char *argv[]) {
-  char        **av, *mri_name,  fname[STRLEN],*path ;
-  const char* hemi;
-  int         ac, nargs, i, j ;
-  MRI         *mri, *mri_template = NULL, *mri_tmp ;
-  MRI_SURFACE *mris ;
-  double      cnr_total, cnr = 0.0 ;
+int main(int argc, char *argv[]) {
+  char **      av, *mri_name, fname[STRLEN], *path;
+  const char * hemi;
+  int          ac, nargs, i, j;
+  MRI *        mri, *mri_template = NULL, *mri_tmp;
+  MRI_SURFACE *mris;
+  double       cnr_total, cnr = 0.0;
 
   nargs = handleVersionOption(argc, argv, "mri_cnr");
   if (nargs && argc - nargs == 1)

@@ -1031,7 +1031,7 @@ Loop *FastLoop::FindLoop(int seed) {
 #if PRINT_ERROR_MODE
   std::cout << std::endl << "seed point is : " << seed << " ";
 #endif
-  // cout << " " << seed << ".";
+  // std::cout << " " << seed << ".";
   while (seed >= surface->nfaces || seed < 0) {
     seed = Random(surface->nfaces);
   }
@@ -1219,7 +1219,7 @@ void FastLoop::FindMinimalLoop(Loop &minimal_loop, int max_init_face,
     }
     delete[] loop;
   }
-  // cout << "minimal seed is " << minimal_seed << " avec "
+  // std::cout << "minimal seed is " << minimal_seed << " avec "
   //   << minimal_loop.npoints << " points  et length = " << minimal_length << "
-  //   ("<< wloop << " -" << nfound << ")" << endl;
+  //   ("<< wloop << " -" << nfound << ")" << std::endl;
 }

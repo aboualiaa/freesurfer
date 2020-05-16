@@ -30,25 +30,25 @@
 #endif
 
 typedef struct {
-  char *subject;
-  int USF; // used internally
-  int OutputUSF; 
+  char *      subject;
+  int         USF; // used internally
+  int         OutputUSF;
   const char *apasfile;
   const char *ctxannotfile;
-  int ctxlhbase,ctxrhbase;
-  MRIS *lhw, *lhp, *rhw, *rhp;
-  int KeepHypo;
-  int KeepCC;
-  int SubSegWM;
+  int         ctxlhbase, ctxrhbase;
+  MRIS *      lhw, *lhp, *rhw, *rhp;
+  int         KeepHypo;
+  int         KeepCC;
+  int         SubSegWM;
   const char *wmannotfile;
-  int wmlhbase,wmrhbase;
-  float dmax;
-  int   nlist, srclist[300], targlist[300];
-  MRI * seg;
-  LTA * anat2seg;
-  int   lhmin, lhmax, rhmin, rhmax;
-  int * segidlist, nsegs;
-  MRI * anat; // header of anatomical to get geom
+  int         wmlhbase, wmrhbase;
+  float       dmax;
+  int         nlist, srclist[300], targlist[300];
+  MRI *       seg;
+  LTA *       anat2seg;
+  int         lhmin, lhmax, rhmin, rhmax;
+  int *       segidlist, nsegs;
+  MRI *       anat; // header of anatomical to get geom
 } GTMSEG;
 
 typedef struct {

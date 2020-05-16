@@ -320,7 +320,7 @@ ostream &operator<<(ostream &os, CSparse2DGausDistMatrix &mat) {
       {
         char cstrMsg[500];
         sprintf(cstrMsg, "neg var ");
-        cout << cstrMsg << "\n";
+        std::cout << cstrMsg << "\n";
 
       }
 #endif

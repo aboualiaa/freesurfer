@@ -150,7 +150,7 @@ int QdecDataTable::Load(const char *isFileName, char *osNewSubjDir,
   int   fsidcol = -1;
   char *token   = strtok(tmpstr, WHITESPC); // get first token in this line
   while (token != nullptr) {
-    // cout << token << endl;
+    // std::cout << token << std::endl;
     if (!strcmp(token, "fsid"))
       fsidcol = ncols;
     else if (!strcmp(token, "ID"))
@@ -307,7 +307,7 @@ int QdecDataTable::Load(const char *isFileName, char *osNewSubjDir,
               << tmpstr << std::endl;
     ifsDatFile.close();
     return (-1);
-  } // else cout << "token: %s\n",token);
+  } // else std::cout << "token: %s\n",token);
 
   int nthfactor = 0;
   while ((nthfactor < nFactors) && (token)) {
@@ -319,18 +319,18 @@ int QdecDataTable::Load(const char *isFileName, char *osNewSubjDir,
                   << tmpstr << std::endl;
         ifsDatFile.close();
         return (-1);
-      } // else cout << "token: %s\n",token);
+      } // else std::cout << "token: %s\n",token);
     }
 
     char factor[2048];
     strncpy(factor, token, sizeof(factor));
-    // cout << "factor: " << factor << endl;
+    // std::cout << "factor: " << factor << std::endl;
 
     // determine if this factor should be ignored (by comparing against
     // what we may have read from the ignore.factors file parsed earlier)
     bool bIgnore = false;
     for (unsigned int n = 0; n < sIgnoreFactors.size(); n++) {
-      // cout << this->mIgnoreFactors[n].c_str() << "  " << factor << endl;
+      // std::cout << this->mIgnoreFactors[n].c_str() << "  " << factor << std::endl;
       if (strcmp(sIgnoreFactors[n].c_str(), factor) == 0) {
         bIgnore = true;
       }
@@ -353,7 +353,7 @@ int QdecDataTable::Load(const char *isFileName, char *osNewSubjDir,
     // Build the levels file name.
     std::stringstream fnLevels;
     fnLevels << fnPath << "/" << factor << ".levels";
-    // cout << fnLevels.str().c_str() << endl;
+    // std::cout << fnLevels.str().c_str() << std::endl;
 
     // Try to open the levels file (implicitly means this is discrete)
     std::ifstream ifsLevelFile(fnLevels.str().c_str(), std::ios::in);
@@ -458,7 +458,7 @@ int QdecDataTable::Load(const char *isFileName, char *osNewSubjDir,
                 << std::endl;
       ifsDatFile.close();
       return (-1);
-    } // else cout << "token: " << token << endl;
+    } // else std::cout << "token: " << token << std::endl;
 
     int numContFactors = 0; // these are used for sanity-checking
     int numDiscFactors = 0;
@@ -477,7 +477,7 @@ int QdecDataTable::Load(const char *isFileName, char *osNewSubjDir,
             !this->mFactors[nthfactor]->HaveDotLevelsFile() &&
             !this->mFactors[nthfactor]
                  ->Ignore()) { // yes!  its a continuous factor
-          // cout << "\t" << nthInput << ": " << dtmp << endl;
+          // std::cout << "\t" << nthInput << ": " << dtmp << std::endl;
           QdecFactor *qf = new QdecFactor(
               this->mFactors[nthfactor]->GetFactorName().c_str(),
               QdecFactor::qdecContinuousFactorType, dtmp /* value */);

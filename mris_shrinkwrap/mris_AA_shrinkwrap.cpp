@@ -19,53 +19,60 @@
 #include "timer.h"
 #include "version.h"
 
+static int    MRISrepositionToInnerSkull(MRI_SURFACE *mris, MRI *mri_smooth,
+                                         INTEGRATION_PARMS *parms);
+static double compute_surface_dist_sse(MRI_SURFACE *mris, MRI *mri);
+
 static char vcid[] =
     "$Id: mris_AA_shrinkwrap.c,v 1.6 2015/02/05 23:34:41 zkaufman Exp $";
 
 int main(int argc, char *argv[]);
 
 #define INNER_SKULL_OUTER_SKULL_SEPARATION 4
-#define BORDER_VAL           128
-#define OUTSIDE_BORDER_STEP  16
-#define TARGET_VAL           (BORDER_VAL-OUTSIDE_BORDER_STEP/2)
+#define BORDER_VAL                         128
+#define OUTSIDE_BORDER_STEP                16
+#define TARGET_VAL                         (BORDER_VAL - OUTSIDE_BORDER_STEP / 2)
 
-static int compute_rigid_gradient(MRI_SURFACE *mris, MRI *mri_dist, double *pdx, double *pdy, double *pdz) ;
-static void apply_rigid_gradient(MRI_SURFACE *mris, double dx, double dy, double dz) ;
-static int MRISfindOptimalRigidPosition(MRI_SURFACE *mris, MRI *mri_dist, INTEGRATION_PARMS *parms) ;
-MRI_SURFACE  *MRISprojectOntoTranslatedSphere(MRI_SURFACE *mris_src,
-    MRI_SURFACE *mris_dst, double r,
-    double x0, double y0, double z0) ;
-int MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner, float sample_dist) ;
-static int  get_option(int argc, char *argv[]) ;
-static void usage_exit(void) ;
-static void print_usage(void) ;
-static void print_help(void) ;
-static void print_version(void) ;
-static int initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked, int outside,
-                                       INTEGRATION_PARMS *parms) ;
+static int compute_rigid_gradient(MRI_SURFACE *mris, MRI *mri_dist, double *pdx,
+                                  double *pdy, double *pdz);
+static void  apply_rigid_gradient(MRI_SURFACE *mris, double dx, double dy,
+                                  double dz);
+static int   MRISfindOptimalRigidPosition(MRI_SURFACE *mris, MRI *mri_dist,
+                                          INTEGRATION_PARMS *parms);
+MRI_SURFACE *MRISprojectOntoTranslatedSphere(MRI_SURFACE *mris_src,
+                                             MRI_SURFACE *mris_dst, double r,
+                                             double x0, double y0, double z0);
+int          MRISpositionOptimalSphere(MRI_SURFACE *mris, MRI *mri_inner,
+                                       float sample_dist);
+static int   get_option(int argc, char *argv[]);
+static void  usage_exit(void);
+static void  print_usage(void);
+static void  print_help(void);
+static void  print_version(void);
+static int   initialize_surface_position(MRI_SURFACE *mris, MRI *mri_masked,
+                                         int outside, INTEGRATION_PARMS *parms);
 
-static MRI *MRIfindInnerBoundary(MRI *mri_src, MRI *mri_grad, MRI *mri_dst, float dist) ;
-static double compute_surface_sse(MRI_SURFACE *mris, MRI *mri, float sample_dist) ;
-const char *Progname ;
+static MRI *  MRIfindInnerBoundary(MRI *mri_src, MRI *mri_grad, MRI *mri_dst,
+                                   float dist);
+static double compute_surface_sse(MRI_SURFACE *mris, MRI *mri,
+                                  float sample_dist);
+const char *  Progname;
 
+static INTEGRATION_PARMS parms;
+#define BASE_DT_SCALE 1.0
+static float base_dt_scale = BASE_DT_SCALE;
 
-static INTEGRATION_PARMS  parms ;
-#define BASE_DT_SCALE    1.0
-static float base_dt_scale = BASE_DT_SCALE ;
+static const char *suffix         = "";
+static const char *output_suffix  = "";
+static double      l_tsmooth      = 0.0;
+static double      l_surf_repulse = 5.0;
 
+static int smooth = 5;
 
-static const char *suffix = "" ;
-static const char *output_suffix = "" ;
-static double l_tsmooth = 0.0 ;
-static double l_surf_repulse = 5.0 ;
-
-static int smooth = 5 ;
-
-static int nbrs = 2 ;
-static int ic_init = 3 ;
-static int   finitep(float f) ;
-static int
-finitep(float f) {
+static int nbrs    = 2;
+static int ic_init = 3;
+static int finitep(float f);
+static int finitep(float f) {
 #if 0
   if (!finite(f))
     return(0) ;

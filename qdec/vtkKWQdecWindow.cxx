@@ -4714,7 +4714,7 @@ void vtkKWQdecWindow::ScatterPlotGraphSetUpContextualMenu(const char *isElement,
                      << this->GetApplication()->GetTclName() << " "
                      << "ErrorMessage \"Exec error: "
                      << ssTkmeditCmd.str().c_str() << "\" }";
-    // cout << ssTkmeditCommand.str() << endl;
+    // std::cout << ssTkmeditCommand.str() << std::endl;
     iMenu->AddCommand("Open in tkmedit ", NULL, ssTkmeditCommand.str().c_str());
 
     // tksurfer, left hemi
@@ -4727,7 +4727,7 @@ void vtkKWQdecWindow::ScatterPlotGraphSetUpContextualMenu(const char *isElement,
                   << "-annotation aparc.annot &";
     ssTksurferCommand << "set err [catch { exec " << ssTksurferCmd.str().c_str()
                       << " }] ; ";
-    // cout << ssTksurferCommand.str() << endl;
+    // std::cout << ssTksurferCommand.str() << std::endl;
     iMenu->AddCommand("Open lh in tksurfer ", NULL,
                       ssTksurferCommand.str().c_str());
 
@@ -4740,7 +4740,7 @@ void vtkKWQdecWindow::ScatterPlotGraphSetUpContextualMenu(const char *isElement,
                    << "-annotation aparc.annot &";
     ssTksurferCommand2 << "set err [catch { exec "
                        << ssTksurferCmd2.str().c_str() << " }] ; ";
-    // cout << ssTksurferCommand2.str() << endl;
+    // std::cout << ssTksurferCommand2.str() << std::endl;
     iMenu->AddCommand("Open rh in tksurfer ", NULL,
                       ssTksurferCommand2.str().c_str());
 

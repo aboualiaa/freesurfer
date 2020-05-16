@@ -27,12 +27,12 @@ static int test(MRI *mri1, MRI *mri2, MRI *mri3, MATRIX *m_vol1_to_vol2_ras) ;
 const char *Progname;
 static void usage_exit(int code);
 
-static char *histo_parms = NULL ;
-static int write_flag = 0 ;
-static char *log_fname = NULL ;
-static const char *parc_dir = "parc" ;
-static const char *T1_name = "flash/T1.mgh" ;
-static const char *PD_name = "flash/PD.mgh" ;
+static char *      histo_parms = NULL;
+static int         write_flag  = 0;
+static char *      log_fname   = NULL;
+static const char *parc_dir    = "parc";
+static const char *T1_name     = "flash/T1.mgh";
+static const char *PD_name     = "flash/PD.mgh";
 
 static char *xform_name = nullptr;
 

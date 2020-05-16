@@ -58,40 +58,19 @@ typedef enum _FILETYPE {
   e_FloatArg
 } e_FILETYPE;
 
-const char*   Gppch_filetype[] =
-{
-  "Unknown",
-  "Volume",
-  "Curvature",
-  "Surface",
-  "FloatArg"
-};
+const char *Gppch_filetype[] = {"Unknown", "Volume", "Curvature", "Surface",
+                                "FloatArg"};
 
-const char* Gppch_fileExt[] =
-{
-  "null",
-  "mgz",
-  "crv",
-  "surf",
-  "dummy"
-};
+const char *Gppch_fileExt[] = {"null", "mgz", "crv", "surf", "dummy"};
 
-const char* Gppch_fileDotExt[] =
-{
-  ".null",
-  ".mgz",
-  ".crv",
-  ".surf",
-  ".dummy"
-};
+const char *Gppch_fileDotExt[] = {".null", ".mgz", ".crv", ".surf", ".dummy"};
 
-typedef enum _FILEACCESS
-{
-  e_UNSPECIFIED     = -10,
-  e_WRONGMAGICNUMBER    = -1,
-  e_OK          =  0,
-  e_READACCESSERROR   =  1,
-  e_WRITEACCESSERROR    =  2
+typedef enum _FILEACCESS {
+  e_UNSPECIFIED      = -10,
+  e_WRONGMAGICNUMBER = -1,
+  e_OK               = 0,
+  e_READACCESSERROR  = 1,
+  e_WRITEACCESSERROR = 2
 } e_FILEACCESS;
 
 typedef enum _operation {
@@ -576,12 +555,7 @@ void init() {
   DiagInit(nullptr, nullptr, nullptr);
 }
 
-void
-error_exit(
-  const char*   apch_action,
-  const char*   apch_error,
-  int   exitCode)
-{
+void error_exit(const char *apch_action, const char *apch_error, int exitCode) {
 
   char pch_errorMessage[STRBUF];
   strcpy(pch_errorMessage, "");
@@ -1198,12 +1172,10 @@ static int options_print() {
   return 1;
 }
 
-static int
-options_parse(int argc, char *argv[])
-{
-  int    nargs    = 0;
-  char*  option;
-  const char*  pch_text;
+static int options_parse(int argc, char *argv[]) {
+  int         nargs = 0;
+  char *      option;
+  const char *pch_text;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "-output") || (toupper(*option) == 'O')) {

@@ -134,10 +134,10 @@ static int nowhite    = 0;
 static int nbrs       = 2;
 static int write_vals = 0;
 
-static const char *orig_name = ORIG_NAME ;
-static const char *suffix = "" ;
-static const char *output_suffix = "" ;
-static char *xform_fname = NULL ;
+static const char *orig_name     = ORIG_NAME;
+static const char *suffix        = "";
+static const char *output_suffix = "";
+static char *      xform_fname   = NULL;
 
 static char pial_name[STRLEN]         = "pial";
 static char white_matter_name[STRLEN] = WHITE_MATTER_NAME;

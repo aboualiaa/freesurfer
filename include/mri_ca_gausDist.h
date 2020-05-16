@@ -346,7 +346,7 @@ ostream &operator<<(ostream &os, CGaussianDistribution &gausDist) {
       float d = gausDist.covariance[i][j];
 
       if (d < 0) {
-        //                cout << "Error negative variance\n ";
+        //                std::cout << "Error negative variance\n ";
       }
 
       os.write(&d, sizeof(d));

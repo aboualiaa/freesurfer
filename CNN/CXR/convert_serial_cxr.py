@@ -11,7 +11,7 @@ import scipy.ndimage.morphology as morph
 import freesurfer.deeplearn as fsd
 from freesurfer.deeplearn import utils, pprint
 import freesurfer as fs
-import os,socket
+import os, socket
 from netshape import *
 from dipy.align.reslice import reslice
 import neuron as ne
@@ -21,21 +21,21 @@ from freesurfer import deeplearn as fsd
 from freesurfer.deeplearn.utils import WeightsSaver, ModelSaver
 import imageio, pydicom, gdcm, load_serial_cxr
 
-bdir = '/autofs/cluster/lcnextdata1/CCDS_CXR/CXR-Serial/def_20200413'
+bdir = "/autofs/cluster/lcnextdata1/CCDS_CXR/CXR-Serial/def_20200413"
 
 
 il, sl, sn = load_serial_cxr.load_serial_cxr(bdir)
 
 for sno, ilist in enumerate(il):
-    if len(ilist)>=2:
+    if len(ilist) >= 2:
         date_list = []
         time_list = []
         for ino, im in enumerate(ilist):
             date_list.append(int(im.StudyDate))
-            if hasattr(im, 'SeriesTime'):
-                time_list.append(int(im.SeriesTime.split('.')[0]))
+            if hasattr(im, "SeriesTime"):
+                time_list.append(int(im.SeriesTime.split(".")[0]))
             else:
-                time_list.append(int(im.StudyTime.split('.')[0]))
+                time_list.append(int(im.StudyTime.split(".")[0]))
 
         ind = np.array(date_list).argsort()
         date_list2 = []
@@ -47,6 +47,6 @@ for sno, ilist in enumerate(il):
             ilist2.append(ilist[i])
 
         for ino, im in enumerate(ilist2):
-            tokens = sl[sno][ind[ino]].split('/')
-            fname = '/'.join(tokens[0:-2]) + '/time%2.2d.mgz' % ino
+            tokens = sl[sno][ind[ino]].split("/")
+            fname = "/".join(tokens[0:-2]) + "/time%2.2d.mgz" % ino
             fs.Volume(im.pixel_array.astype(np.float32)).write(fname)

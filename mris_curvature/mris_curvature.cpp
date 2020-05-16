@@ -24,34 +24,33 @@
 #include "mrisurf.h"
 #include "version.h"
 
+int main(int argc, char *argv[]);
 
-int main(int argc, char *argv[]) ;
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 
-static int  get_option(int argc, char *argv[]) ;
-static void usage_exit(void) ;
-static void print_help(void) ;
-static void print_version(void) ;
+const char *Progname;
 
-const char *Progname ;
-
-static char output_type[STRLEN] = "" ;
-static const char *suffix = "" ;
-static int write_flag = 0 ;
-static int nbrs = 2 ;
-static double cthresh = -1.0;
-static int navgs = 0 ;
-static char *param_file = NULL ;
-static int normalize = 0 ;
-static int diff_flag = 0 ;
-static int max_flag = 0 ;
-static int min_flag = 0 ;
-static int stretch_flag = 0 ;
-static int patch_flag = 0 ;
-static int neg_flag = 0 ;
-static int param_no = 0 ;
-static int normalize_param = 0 ;
-static int ratio_flag = 0 ;
-static int contrast_flag = 0 ;
+static char        output_type[STRLEN] = "";
+static const char *suffix              = "";
+static int         write_flag          = 0;
+static int         nbrs                = 2;
+static double      cthresh             = -1.0;
+static int         navgs               = 0;
+static char *      param_file          = NULL;
+static int         normalize           = 0;
+static int         diff_flag           = 0;
+static int         max_flag            = 0;
+static int         min_flag            = 0;
+static int         stretch_flag        = 0;
+static int         patch_flag          = 0;
+static int         neg_flag            = 0;
+static int         param_no            = 0;
+static int         normalize_param     = 0;
+static int         ratio_flag          = 0;
+static int         contrast_flag       = 0;
 
 #define MAX_NBHD_SIZE 5000
 static int   nbhd_size         = 0;

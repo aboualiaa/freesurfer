@@ -185,9 +185,8 @@ static void dump_options(FILE *fp);
 static int  singledash(char *flag);
 #include "tags.h"
 static int istringnmatch(const char *str1, const char *str2, int n);
-double VertexCost(double vctx, double vwm, double slope, 
-		  double center, double sign, double *pct);
-
+double     VertexCost(double vctx, double vwm, double slope, double center,
+                      double sign, double *pct);
 
 int main(int argc, char *argv[]);
 
@@ -202,8 +201,8 @@ char *sumfile    = nullptr;
 char *curregfile = nullptr;
 
 const char *interpmethod = "trilinear";
-int   interpcode = SAMPLE_TRILINEAR;
-int   sinchw;
+int         interpcode   = SAMPLE_TRILINEAR;
+int         sinchw;
 
 MRI *mov, *out;
 
@@ -301,24 +300,24 @@ int    DoWMProjAbs = 1;   // default
 double WMProjAbs   = 2.0; // default
 
 int BruteForce = 0;
-int   regheader=0;
+int regheader  = 0;
 
-int DoAbs = 0;
-MRI *lhcost=NULL, *lhcost0=NULL, *rhcost=NULL, *rhcost0=NULL;
-MRI *lhcostdiff=NULL, *rhcostdiff=NULL;
-MRI *lhcon=NULL, *rhcon=NULL;
+int  DoAbs  = 0;
+MRI *lhcost = NULL, *lhcost0 = NULL, *rhcost = NULL, *rhcost0 = NULL;
+MRI *lhcostdiff = NULL, *rhcostdiff = NULL;
+MRI *lhcon = NULL, *rhcon = NULL;
 
-MRI *lhCortexLabel=NULL, *rhCortexLabel=NULL;
-int UseCortexLabel = 1;
-int nCostEvaluations=0;
-MRI *vsm=NULL;
-char *vsmfile = NULL;
-double angles[3],xyztrans[3],scale[3],shear[3];
-const char *surfname = "white";
-int dof = 6; 
-char *RelCostFile = NULL;
-char *ParamFile = NULL;
-int InitSurfCostOnly=0;
+MRI *       lhCortexLabel = NULL, *rhCortexLabel = NULL;
+int         UseCortexLabel   = 1;
+int         nCostEvaluations = 0;
+MRI *       vsm              = NULL;
+char *      vsmfile          = NULL;
+double      angles[3], xyztrans[3], scale[3], shear[3];
+const char *surfname         = "white";
+int         dof              = 6;
+char *      RelCostFile      = NULL;
+char *      ParamFile        = NULL;
+int         InitSurfCostOnly = 0;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
@@ -1942,9 +1941,11 @@ static int singledash(char *flag) {
   n=0, then do a full comparison.
   ------------------------------------------------------------*/
 static int istringnmatch(const char *str1, const char *str2, int n) {
-  if (n > 0  && ! strncasecmp(str1,str2,n)) return(1);
-  if (n <= 0 && ! strcasecmp(str1,str2)) return(1);
-  return(0);
+  if (n > 0 && !strncasecmp(str1, str2, n))
+    return (1);
+  if (n <= 0 && !strcasecmp(str1, str2))
+    return (1);
+  return (0);
 }
 
 /*---------------------------------------------------------*/

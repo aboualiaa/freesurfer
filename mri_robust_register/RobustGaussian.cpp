@@ -303,7 +303,7 @@ template <class T> std::pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
   if (n % 2 == 1) // odd
   {
     qs = kth_smallestI(t, n, (n + 1) / 2);
-    // cout << " n: " << n << "   " << qs << endl;
+    // std::cout << " n: " << n << "   " << qs << std::endl;
     // free(t);
     return std::pair<T, T>(qs.first, (T)qs.second);
   }
@@ -314,7 +314,7 @@ template <class T> std::pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
   qs = quick_selectI(t, n, n / 2);
   // double qs2 = kth_smallest(t,n,n/2 + 1);
   std::pair<T, int> qs2 = quick_selectI(t, n, n / 2 + 1);
-  // cout << " n: " << n << "   " << qs << "   " << qs2 << endl;
+  // std::cout << " n: " << n << "   " << qs << "   " << qs2 << std::endl;
 
   return std::pair<T, T>(0.5 * (qs.first + qs2.first),
                          0.5 * (qs.second + qs2.second));
@@ -337,7 +337,7 @@ template <class T> T RobustGaussian<T>::median(T t[], int n) {
   q = quick_select(t, n, n / 2);
   // double q2 = kth_smallest(t,n,n/2 + 1);
   T q2 = quick_select(t, n, n / 2 + 1);
-  // cout << " n: " << n << "   " << q << "   " << q2 << endl;
+  // std::cout << " n: " << n << "   " << q << "   " << q2 << std::endl;
 
   return 0.5 * (q + q2);
 }

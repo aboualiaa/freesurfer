@@ -384,18 +384,20 @@ void mris_print_diff(FILE *file, MRIS const *lhs, MRIS const *rhs) {
   v->val2=1 for Lesions when fitting GRAY_CSF
   #FIX
 */
-int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain, const char *hemi, int which, int fix_mtl)
-{
-  int vno, label, contra_wm_label, nvox=0, total_vox=0, adjacent=0;
-  int wm_label, gm_label, nlabels, n, index, annotation, entorhinal_index ;
-  VERTEX   *v ;
-  double   xv, yv, zv, val, xs, ys, zs, d, nx, ny, nz ;
-  LABEL    **labels ;
-  int nmarked, nmarked2, nripped;
+int MRISripMidline(MRI_SURFACE *mris, MRI *mri_aseg, MRI *mri_brain,
+                   const char *hemi, int which, int fix_mtl) {
+  int     vno, label, contra_wm_label, nvox = 0, total_vox = 0, adjacent = 0;
+  int     wm_label, gm_label, nlabels, n, index, annotation, entorhinal_index;
+  VERTEX *v;
+  double  xv, yv, zv, val, xs, ys, zs, d, nx, ny, nz;
+  LABEL **labels;
+  int     nmarked, nmarked2, nripped;
 
-  printf("Entering: MRISripMidline(): inhibiting deformation at non-cortical midline structures...\n") ;
-  printf("  which=%d, fix_mtl=%d, using annot = %d\n",which, fix_mtl, mris->ct != NULL);
-  printf("#FML0# MRISripMidline(): nripped=%d\n",MRIScountRipped(mris));
+  printf("Entering: MRISripMidline(): inhibiting deformation at non-cortical "
+         "midline structures...\n");
+  printf("  which=%d, fix_mtl=%d, using annot = %d\n", which, fix_mtl,
+         mris->ct != NULL);
+  printf("#FML0# MRISripMidline(): nripped=%d\n", MRIScountRipped(mris));
   fflush(stdout);
 
   if (stricmp(hemi, "lh") == 0) {

@@ -527,9 +527,11 @@ static int singledash(char *flag) {
   n=0, then do a full comparison.
   ------------------------------------------------------------*/
 static int istringnmatch(const char *str1, const char *str2, int n) {
-  if (n > 0  && ! strncasecmp(str1,str2,n)) return(1);
-  if (n <= 0 && ! strcasecmp(str1,str2)) return(1);
-  return(0);
+  if (n > 0 && !strncasecmp(str1, str2, n))
+    return (1);
+  if (n <= 0 && !strcasecmp(str1, str2))
+    return (1);
+  return (0);
 }
 
 LABEL *LabelTransformToVoxelCoords(LABEL *lsrc, MRI *mri, MATRIX *R,

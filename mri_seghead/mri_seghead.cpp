@@ -45,7 +45,7 @@ static void dump_options(FILE *fp);
 static int  isflag(const char *flag);
 static int  singledash(char *flag);
 static int  stringmatch(const char *str1, const char *str2);
-int main(int argc, char *argv[]) ;
+int         main(int argc, char *argv[]);
 
 const char *Progname = NULL;
 int         debug    = 0;
@@ -687,8 +687,9 @@ static int isflag(const char *flag) {
 }
 /*------------------------------------------------------------*/
 static int stringmatch(const char *str1, const char *str2) {
-  if (! strcmp(str1,str2)) return(1);
-  return(0);
+  if (!strcmp(str1, str2))
+    return (1);
+  return (0);
 }
 
 int MakeSkullSurface(char *subject, double *params, char *innername,

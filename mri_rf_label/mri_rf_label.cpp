@@ -487,119 +487,127 @@ double compute_conditional_density(MATRIX *m_inv_cov, VECTOR *v_means,
   return (p);
 }
 
+static MRI *label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform,
+                                     GCA *gca, float wm_thresh, MRI *mri_in,
+                                     MRI *mri_labeled, int wmsa_whalf,
+                                     MRI *mri_aseg, MRI **pmri_pvals) {
+  int     x, y, z, wsize, label;
+  double *feature, xatlas, yatlas, zatlas, pval;
+  MRI *   mri_wmsa_possible, *mri_pvals;
 
-static MRI *
-label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform, GCA *gca,
-			 float wm_thresh, MRI *mri_in, MRI *mri_labeled, int wmsa_whalf, MRI *mri_aseg, 
-			 MRI **pmri_pvals)
-{
-  int     x, y, z, wsize, label ;
-  double  *feature, xatlas, yatlas, zatlas, pval ;
-  MRI     *mri_wmsa_possible, *mri_pvals ;
-
-  wsize = nint(pow((rf->nfeatures-3)/mri_in->nframes, 1.0/3)) ;
-  if (mri_labeled == NULL)
-  {
-    mri_labeled = MRIalloc(mri_in->width, mri_in->height, mri_in->depth, MRI_SHORT) ;
-    MRIcopyHeader(mri_in, mri_labeled) ;
+  wsize = nint(pow((rf->nfeatures - 3) / mri_in->nframes, 1.0 / 3));
+  if (mri_labeled == NULL) {
+    mri_labeled =
+        MRIalloc(mri_in->width, mri_in->height, mri_in->depth, MRI_SHORT);
+    MRIcopyHeader(mri_in, mri_labeled);
   }
-  mri_pvals = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth, MRI_FLOAT, 3) ;
-  MRIcopyHeader(mri_in, mri_pvals) ;
-  mri_wmsa_possible = MRIclone(mri_labeled, NULL) ;
-  for (x = 0 ; x < mri_in->width ; x++)
-    for (y = 0 ; y < mri_in->height ; y++)
-      for (z = 0 ; z < mri_in->depth ; z++)
-	if (is_possible_wmsa(gca, mri_in, transform, x, y, z, 0))
-	  MRIsetVoxVal(mri_wmsa_possible, x, y, z, 0, 1) ;
-  for ( ; wmsa_whalf > 0 ; wmsa_whalf--)
-    MRIdilate(mri_wmsa_possible, mri_wmsa_possible) ;
+  mri_pvals = MRIallocSequence(mri_in->width, mri_in->height, mri_in->depth,
+                               MRI_FLOAT, 3);
+  MRIcopyHeader(mri_in, mri_pvals);
+  mri_wmsa_possible = MRIclone(mri_labeled, NULL);
+  for (x = 0; x < mri_in->width; x++)
+    for (y = 0; y < mri_in->height; y++)
+      for (z = 0; z < mri_in->depth; z++)
+        if (is_possible_wmsa(gca, mri_in, transform, x, y, z, 0))
+          MRIsetVoxVal(mri_wmsa_possible, x, y, z, 0, 1);
+  for (; wmsa_whalf > 0; wmsa_whalf--)
+    MRIdilate(mri_wmsa_possible, mri_wmsa_possible);
 
-  feature = (double *)calloc(rf->nfeatures, sizeof(double)) ;
+  feature = (double *)calloc(rf->nfeatures, sizeof(double));
   if (feature == NULL)
-    ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d-len feature vector", rf->nfeatures) ;
+    ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d-len feature vector",
+              rf->nfeatures);
 
-  if (Gx >= 0)    // diagnostics
+  if (Gx >= 0) // diagnostics
   {
-    int whalf = (wsize-1)/2, n, i ;
-    char buf[STRLEN] ;
+    int  whalf = (wsize - 1) / 2, n, i;
+    char buf[STRLEN];
 
-    rf->feature_names = (char **)calloc(rf->nfeatures, sizeof(char *)) ;
-    for (i = 0, x = -whalf ; x <= whalf ; x++)
-      for (y = -whalf ; y <= whalf ; y++)
-	for (z = -whalf ; z <= whalf ; z++)
-	  for (n = 0 ; n < mri_in->nframes ; n++, i++)
-	  {
-	    switch (n)
-	    {
-	    default:
-	    case 0: sprintf(buf, "T1(%d, %d, %d)", x, y, z) ; break ;
-	    case 1: sprintf(buf, "T2(%d, %d, %d)", x, y, z) ; break ;
-	    case 2: sprintf(buf, "PD(%d, %d, %d)", x, y, z) ; break ;
-	    }
-	    rf->feature_names[i] = (char *)calloc(strlen(buf)+1, sizeof(char)) ;
-	    strcpy(rf->feature_names[i], buf) ;
-	  }
-    rf->feature_names[i++] = const_cast<char*>("nonzero count");
-    rf->feature_names[i++] = const_cast<char*>("gm prior");
-    rf->feature_names[i++] = const_cast<char*>("wm prior");
-    rf->feature_names[i++] = const_cast<char*>("csf prior");
+    rf->feature_names = (char **)calloc(rf->nfeatures, sizeof(char *));
+    for (i = 0, x = -whalf; x <= whalf; x++)
+      for (y = -whalf; y <= whalf; y++)
+        for (z = -whalf; z <= whalf; z++)
+          for (n = 0; n < mri_in->nframes; n++, i++) {
+            switch (n) {
+            default:
+            case 0:
+              sprintf(buf, "T1(%d, %d, %d)", x, y, z);
+              break;
+            case 1:
+              sprintf(buf, "T2(%d, %d, %d)", x, y, z);
+              break;
+            case 2:
+              sprintf(buf, "PD(%d, %d, %d)", x, y, z);
+              break;
+            }
+            rf->feature_names[i] =
+                (char *)calloc(strlen(buf) + 1, sizeof(char));
+            strcpy(rf->feature_names[i], buf);
+          }
+    rf->feature_names[i++] = const_cast<char *>("nonzero count");
+    rf->feature_names[i++] = const_cast<char *>("gm prior");
+    rf->feature_names[i++] = const_cast<char *>("wm prior");
+    rf->feature_names[i++] = const_cast<char *>("csf prior");
   }
 
-  for (x = 0 ; x < mri_in->width ; x++)
-    for (y = 0 ; y < mri_in->height ; y++)
-      for (z = 0 ; z < mri_in->depth ; z++)
-      {
-	if (x == Gx && y == Gy && z == Gz)
-	{
-	  printf("voxel (%d, %d, %d); WM prior = %2.2f, cortex prior = %f, wmsa possible = %d\n",
-		 x,y,z, 
-		 wm_prior(gca, mri_in, transform, x, y, z),
-		 cortex_prior(gca, mri_in, transform, x, y, z),
-		 (int)MRIgetVoxVal(mri_wmsa_possible,x,y,z,0));
-	  DiagBreak() ;
-	}
-	MRIsetVoxVal(mri_pvals, x, y, z, 0, wm_prior(gca, mri_in, transform, x, y, z)) ;
-	MRIsetVoxVal(mri_pvals, x, y, z, 1, cortex_prior(gca, mri_in, transform, x, y, z)) ;
-	MRIsetVoxVal(mri_pvals, x, y, z, 2, 1) ; // will be changed later if admissable voxel
-	if (((int)MRIgetVoxVal(mri_wmsa_possible,x,y,z,0) == 0) &&
-	    ((wm_prior(gca, mri_in, transform, x, y, z) < wm_thresh) ||
-	     (cortex_prior(gca, mri_in, transform, x, y, z) > .5)))
-	{
-	  if (x == Gx && y == Gy && z == Gz)
-	    printf("voxel (%d, %d, %d); WM prior = %2.2f, cortex prior = %f\n",
-		   x,y,z, 
-		   wm_prior(gca, mri_in, transform, x, y, z),
-		   cortex_prior(gca, mri_in, transform, x, y, z)) ;
-	  continue ;
-	}
-	TransformSourceVoxelToAtlas(transform, mri_in, x, y, z, &xatlas, &yatlas, &zatlas) ;
-	extract_feature(mri_in, wsize, x, y, z, feature, xatlas, yatlas, zatlas) ;
-	if (mri_aseg)
-	  feature[rf->nfeatures-4] = MRIcountCSFInNbhd(mri_aseg, 5, x, y, z) ;
-	else
-	  feature[rf->nfeatures-4] = 0 ;
-	feature[rf->nfeatures-3] = 100*gm_prior(gca, mri_in, transform, x, y, z) ;
-	feature[rf->nfeatures-2] = 100*wm_prior(gca, mri_in, transform, x, y, z) ;
-	feature[rf->nfeatures-1] = 100*csf_prior(gca, mri_in, transform, x, y, z) ;
-	if (x == Gx && y == Gy && z == Gz)
-	{
-	  int j ;
-	  printf("voxel (%d, %d, %d) ", x, y, z) ;
-	  printf("\nfeature = ") ;
-	  for (j = 0 ; j < rf->nfeatures ; j++)
-	    printf("%.0f ", feature[j]) ;
-	  printf("\n") ;
-	  Gdiag |= DIAG_VERBOSE ;
-	  DiagBreak() ;
-	}
-	label = RFclassify(rf, feature, &pval, -1);
-	if (label > 0)
-	  DiagBreak() ;
-	if (label > 0 && pval > wmsa_thresh)
-	  MRIsetVoxVal(mri_labeled, x, y, z, 0, label) ;
-	MRIsetVoxVal(mri_pvals, x, y, z, 2, pval) ;
-	if (x == Gx && y == Gy && z == Gz)
-	  Gdiag &= ~DIAG_VERBOSE ;
+  for (x = 0; x < mri_in->width; x++)
+    for (y = 0; y < mri_in->height; y++)
+      for (z = 0; z < mri_in->depth; z++) {
+        if (x == Gx && y == Gy && z == Gz) {
+          printf("voxel (%d, %d, %d); WM prior = %2.2f, cortex prior = %f, "
+                 "wmsa possible = %d\n",
+                 x, y, z, wm_prior(gca, mri_in, transform, x, y, z),
+                 cortex_prior(gca, mri_in, transform, x, y, z),
+                 (int)MRIgetVoxVal(mri_wmsa_possible, x, y, z, 0));
+          DiagBreak();
+        }
+        MRIsetVoxVal(mri_pvals, x, y, z, 0,
+                     wm_prior(gca, mri_in, transform, x, y, z));
+        MRIsetVoxVal(mri_pvals, x, y, z, 1,
+                     cortex_prior(gca, mri_in, transform, x, y, z));
+        MRIsetVoxVal(mri_pvals, x, y, z, 2,
+                     1); // will be changed later if admissable voxel
+        if (((int)MRIgetVoxVal(mri_wmsa_possible, x, y, z, 0) == 0) &&
+            ((wm_prior(gca, mri_in, transform, x, y, z) < wm_thresh) ||
+             (cortex_prior(gca, mri_in, transform, x, y, z) > .5))) {
+          if (x == Gx && y == Gy && z == Gz)
+            printf("voxel (%d, %d, %d); WM prior = %2.2f, cortex prior = %f\n",
+                   x, y, z, wm_prior(gca, mri_in, transform, x, y, z),
+                   cortex_prior(gca, mri_in, transform, x, y, z));
+          continue;
+        }
+        TransformSourceVoxelToAtlas(transform, mri_in, x, y, z, &xatlas,
+                                    &yatlas, &zatlas);
+        extract_feature(mri_in, wsize, x, y, z, feature, xatlas, yatlas,
+                        zatlas);
+        if (mri_aseg)
+          feature[rf->nfeatures - 4] = MRIcountCSFInNbhd(mri_aseg, 5, x, y, z);
+        else
+          feature[rf->nfeatures - 4] = 0;
+        feature[rf->nfeatures - 3] =
+            100 * gm_prior(gca, mri_in, transform, x, y, z);
+        feature[rf->nfeatures - 2] =
+            100 * wm_prior(gca, mri_in, transform, x, y, z);
+        feature[rf->nfeatures - 1] =
+            100 * csf_prior(gca, mri_in, transform, x, y, z);
+        if (x == Gx && y == Gy && z == Gz) {
+          int j;
+          printf("voxel (%d, %d, %d) ", x, y, z);
+          printf("\nfeature = ");
+          for (j = 0; j < rf->nfeatures; j++)
+            printf("%.0f ", feature[j]);
+          printf("\n");
+          Gdiag |= DIAG_VERBOSE;
+          DiagBreak();
+        }
+        label = RFclassify(rf, feature, &pval, -1);
+        if (label > 0)
+          DiagBreak();
+        if (label > 0 && pval > wmsa_thresh)
+          MRIsetVoxVal(mri_labeled, x, y, z, 0, label);
+        MRIsetVoxVal(mri_pvals, x, y, z, 2, pval);
+        if (x == Gx && y == Gy && z == Gz)
+          Gdiag &= ~DIAG_VERBOSE;
       }
 
   if (Gx >= 0) {
@@ -614,101 +622,108 @@ label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform, GCA *gca,
   MRIfree(&mri_wmsa_possible);
   return (mri_labeled);
 }
-static MRI *
-relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform, GCA *gca, 
-				     MRI *mri_in, MRI *mri_labeled)
-{
-  int     x, y, z, wsize, label, non, noff, nunchanged = 0, new_label, total ;
-  double  *feature, pval ;
-  MRI     *mri_mask, *mri_orig_labeled ;
+static MRI *relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf,
+                                                 TRANSFORM *transform, GCA *gca,
+                                                 MRI *mri_in,
+                                                 MRI *mri_labeled) {
+  int     x, y, z, wsize, label, non, noff, nunchanged = 0, new_label, total;
+  double *feature, pval;
+  MRI *   mri_mask, *mri_orig_labeled;
 
-  wsize = nint(pow((rf->nfeatures-3)/mri_in->nframes, 1.0/3)) ;
-  if (mri_labeled == NULL)
-  {
-    mri_labeled = MRIalloc(mri_in->width, mri_in->height, mri_in->depth, MRI_SHORT) ;
-    MRIcopyHeader(mri_in, mri_labeled) ;
+  wsize = nint(pow((rf->nfeatures - 3) / mri_in->nframes, 1.0 / 3));
+  if (mri_labeled == NULL) {
+    mri_labeled =
+        MRIalloc(mri_in->width, mri_in->height, mri_in->depth, MRI_SHORT);
+    MRIcopyHeader(mri_in, mri_labeled);
   }
-  mri_orig_labeled = MRIcopy(mri_labeled, NULL) ;
-  mri_mask = MRIcopy(mri_labeled, NULL) ;
-  MRIdilate(mri_mask, mri_mask) ;  // nbrs
+  mri_orig_labeled = MRIcopy(mri_labeled, NULL);
+  mri_mask         = MRIcopy(mri_labeled, NULL);
+  MRIdilate(mri_mask, mri_mask); // nbrs
 
-  feature = (double *)calloc(rf->nfeatures, sizeof(double)) ;
+  feature = (double *)calloc(rf->nfeatures, sizeof(double));
   if (feature == NULL)
-    ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d-len feature vector", rf->nfeatures) ;
+    ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %d-len feature vector",
+              rf->nfeatures);
 
-  if (Gx >= 0)    // diagnostics
+  if (Gx >= 0) // diagnostics
   {
-    int whalf = (wsize-1)/2, n, i ;
-    char buf[STRLEN] ;
+    int  whalf = (wsize - 1) / 2, n, i;
+    char buf[STRLEN];
 
-    rf->feature_names = (char **)calloc(rf->nfeatures, sizeof(char *)) ;
-    for (i = 0, x = -whalf ; x <= whalf ; x++)
-      for (y = -whalf ; y <= whalf ; y++)
-	for (z = -whalf ; z <= whalf ; z++)
-	  for (n = 0 ; n < mri_in->nframes ; n++, i++)
-	  {
-	    switch (n)
-	    {
-	    default:
-	    case 0: sprintf(buf, "T1(%d, %d, %d)", x, y, z) ; break ;
-	    case 1: sprintf(buf, "T2(%d, %d, %d)", x, y, z) ; break ;
-	    case 2: sprintf(buf, "PD(%d, %d, %d)", x, y, z) ; break ;
-	    }
-	    rf->feature_names[i] = (char *)calloc(strlen(buf)+1, sizeof(char)) ;
-	    strcpy(rf->feature_names[i], buf) ;
-	  }
-    rf->feature_names[i++] = const_cast<char*>("gm prior");
-    rf->feature_names[i++] = const_cast<char*>("wm prior");
-    rf->feature_names[i++] = const_cast<char*>("csf prior");
+    rf->feature_names = (char **)calloc(rf->nfeatures, sizeof(char *));
+    for (i = 0, x = -whalf; x <= whalf; x++)
+      for (y = -whalf; y <= whalf; y++)
+        for (z = -whalf; z <= whalf; z++)
+          for (n = 0; n < mri_in->nframes; n++, i++) {
+            switch (n) {
+            default:
+            case 0:
+              sprintf(buf, "T1(%d, %d, %d)", x, y, z);
+              break;
+            case 1:
+              sprintf(buf, "T2(%d, %d, %d)", x, y, z);
+              break;
+            case 2:
+              sprintf(buf, "PD(%d, %d, %d)", x, y, z);
+              break;
+            }
+            rf->feature_names[i] =
+                (char *)calloc(strlen(buf) + 1, sizeof(char));
+            strcpy(rf->feature_names[i], buf);
+          }
+    rf->feature_names[i++] = const_cast<char *>("gm prior");
+    rf->feature_names[i++] = const_cast<char *>("wm prior");
+    rf->feature_names[i++] = const_cast<char *>("csf prior");
   }
 
-  for (non = noff = x = 0 ; x < mri_in->width ; x++)
-    for (y = 0 ; y < mri_in->height ; y++)
-      for (z = 0 ; z < mri_in->depth ; z++)
-      {
-	if (x == Gx && y == Gy && z == Gz)
-	{
-	  printf("voxel (%d, %d, %d); WM prior = %2.2f, cortex prior = %f, mask = %d\n",
-		 x,y,z, 
-		 wm_prior(gca, mri_in, transform, x, y, z),
-		 cortex_prior(gca, mri_in, transform, x, y, z),
-		 (int)MRIgetVoxVal(mri_mask,x,y,z,0));
-	  DiagBreak() ;
-	}
-	label = MRIgetVoxVal(mri_orig_labeled, x, y, z, 0) ;
-	if ((IS_WMSA(label) && MRIneighborsOff(mri_orig_labeled,x,y,z,1) == 0) ||
-	    MRIgetVoxVal(mri_mask, x, y, z, 0) == 0)
-	  continue ;
-	
-	extract_feature(mri_in, wsize, x, y, z, feature, 0, 0, 0) ;
-	feature[rf->nfeatures-3] = 100*gm_prior(gca, mri_in, transform, x, y, z) ;
-	feature[rf->nfeatures-2] = 100*wm_prior(gca, mri_in, transform, x, y, z) ;
-	feature[rf->nfeatures-1] = 100*csf_prior(gca, mri_in, transform, x, y, z) ;
-	if (x == Gx && y == Gy && z == Gz)
-	{
-	  int j ;
-	  printf("voxel (%d, %d, %d) ", x, y, z) ;
-	  printf("\nfeature = ") ;
-	  for (j = 0 ; j < rf->nfeatures ; j++)
-	    printf("%.0f ", feature[j]) ;
-	  printf("\n") ;
-	  Gdiag |= DIAG_VERBOSE ;
-	  DiagBreak() ;
-	}
-	new_label = RFclassify(rf, feature, &pval, -1);
-	if (x == Gx && y == Gy && z == Gz)
-	  printf("\nlabel = %d, pval = %2.2f\n", new_label, pval) ;
-	if (new_label > 0)
-	  DiagBreak() ;
-	MRIsetVoxVal(mri_labeled, x, y, z, 0, new_label) ;
-	if (new_label == label)
-	  nunchanged++ ;
-	else if (new_label > 0)
-	  non++ ;
-	else
-	  noff++ ;
-	if (x == Gx && y == Gy && z == Gz)
-	  Gdiag &= ~DIAG_VERBOSE ;
+  for (non = noff = x = 0; x < mri_in->width; x++)
+    for (y = 0; y < mri_in->height; y++)
+      for (z = 0; z < mri_in->depth; z++) {
+        if (x == Gx && y == Gy && z == Gz) {
+          printf("voxel (%d, %d, %d); WM prior = %2.2f, cortex prior = %f, "
+                 "mask = %d\n",
+                 x, y, z, wm_prior(gca, mri_in, transform, x, y, z),
+                 cortex_prior(gca, mri_in, transform, x, y, z),
+                 (int)MRIgetVoxVal(mri_mask, x, y, z, 0));
+          DiagBreak();
+        }
+        label = MRIgetVoxVal(mri_orig_labeled, x, y, z, 0);
+        if ((IS_WMSA(label) &&
+             MRIneighborsOff(mri_orig_labeled, x, y, z, 1) == 0) ||
+            MRIgetVoxVal(mri_mask, x, y, z, 0) == 0)
+          continue;
+
+        extract_feature(mri_in, wsize, x, y, z, feature, 0, 0, 0);
+        feature[rf->nfeatures - 3] =
+            100 * gm_prior(gca, mri_in, transform, x, y, z);
+        feature[rf->nfeatures - 2] =
+            100 * wm_prior(gca, mri_in, transform, x, y, z);
+        feature[rf->nfeatures - 1] =
+            100 * csf_prior(gca, mri_in, transform, x, y, z);
+        if (x == Gx && y == Gy && z == Gz) {
+          int j;
+          printf("voxel (%d, %d, %d) ", x, y, z);
+          printf("\nfeature = ");
+          for (j = 0; j < rf->nfeatures; j++)
+            printf("%.0f ", feature[j]);
+          printf("\n");
+          Gdiag |= DIAG_VERBOSE;
+          DiagBreak();
+        }
+        new_label = RFclassify(rf, feature, &pval, -1);
+        if (x == Gx && y == Gy && z == Gz)
+          printf("\nlabel = %d, pval = %2.2f\n", new_label, pval);
+        if (new_label > 0)
+          DiagBreak();
+        MRIsetVoxVal(mri_labeled, x, y, z, 0, new_label);
+        if (new_label == label)
+          nunchanged++;
+        else if (new_label > 0)
+          non++;
+        else
+          noff++;
+        if (x == Gx && y == Gy && z == Gz)
+          Gdiag &= ~DIAG_VERBOSE;
       }
 
   total = non + noff + nunchanged;

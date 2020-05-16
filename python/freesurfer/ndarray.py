@@ -289,7 +289,11 @@ class Volume(ArrayContainerTemplate, Transformable):
         )
 
         # get source-to-RAS matrix
-        src2ras = self.affine if self.affine is not None else LIA(src_shape, self.voxsize)
+        src2ras = (
+            self.affine
+            if self.affine is not None
+            else LIA(src_shape, self.voxsize)
+        )
 
         # compute target-to-RAS matrix
         pcrs = np.append(np.array(src_shape) / 2, 1)

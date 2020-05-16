@@ -57,16 +57,16 @@ extern void ztrsen_(char *job, char *compq, int *select, long *n,
 //
 //   char signum[2]={ '+','-'};
 //
-//   cout << " [ ";
+//   std::cout << " [ ";
 //
 //   for (unsigned int r=0;r<M.rows();r++)
 //   {
 //     for (unsigned int c=0;c<M.cols();c++)
-//       cout << " ( " << M[r][c].real() << " " << signum[(M[r][c].imag()<0)]<<
+//       std::cout << " ( " << M[r][c].real() << " " << signum[(M[r][c].imag()<0)]<<
 //       " " << M[r][c].imag() << "i ) " ;
-//     if (r < M.rows() -1 ) cout << " ; " << endl;
+//     if (r < M.rows() -1 ) std::cout << " ; " << std::endl;
 //   }
-//   cout << " ] " << endl;
+//   std::cout << " ] " << std::endl;
 //
 // }
 
@@ -166,7 +166,7 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
                          // but even adding two zeros did not show any
                          // differences in tests
   double err = 1000;
-  // cout << "using square root iteartion (" << imax << ")"<< endl;
+  // std::cout << "using square root iteartion (" << imax << ")"<< std::endl;
   vnl_matrix_fixed<double, 3, 3> Yn(R);
   vnl_matrix_fixed<double, 3, 3> Zn;
   Zn.set_identity();
@@ -191,7 +191,7 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
     Ysq = Yn * Yn;
     Ysq -= R;
     err = Ysq.absolute_value_max();
-    // cout << " iteration " << count << "  err: "<< err << endl;
+    // std::cout << " iteration " << count << "  err: "<< err << std::endl;
   }
   // now Yn is sqrt(R) AND Zn is sqrt(R)^-1
 
@@ -256,9 +256,9 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
   //       double sum = ms2.absolute_value_max();
   //       if (sum > eps)
   //       {
-  //          cerr << " Error : " << sum << endl;
-  //          cerr << " sqrt(M): " << endl << msqrt << endl;
-  //          cerr << endl;
+  //          cerr << " Error : " << sum << std::endl;
+  //          cerr << " sqrt(M): " << endl << msqrt << std::endl;
+  //          cerr << std::endl;
   //          assert(1==2);
   //       }
   //    }
@@ -488,10 +488,10 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
 //   a non-principal logarithm is computed, and a warning message is printed.
 {
 
-  // cout << endl << "======================================================="<<
-  // endl << endl;
+  // std::cout << endl << "======================================================="<<
+  // endl << std::endl;
 
-  // cout<< " MyMatrix::MatrixLog " << endl;
+  // cout<< " MyMatrix::MatrixLog " << std::endl;
 
   assert(A.cols() == A.rows());
   int n = A.cols();
@@ -507,8 +507,8 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
   //    T = A; U = eye(n);
   //  else
   SchurComplex(A, U, T);
-  // cout << " First Schur U: " << U << endl;
-  // cout << " First Schur T: " << T << endl;
+  // std::cout << " First Schur U: " << U << std::endl;
+  // std::cout << " First Schur T: " << T << std::endl;
 
   // Check eigenvalues
   double eps = 0.000000001;
@@ -532,60 +532,60 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
   // Determine reordering of Schur form into block form.
   double           delta = 0.1;
   std::vector<int> ord1(blocking(T, delta));
-  // cout << " ord1: "; Print(ord1);
+  // std::cout << " ord1: "; Print(ord1);
   std::vector<int>              ord;
   std::vector<std::vector<int>> ind;
   swapping(ord1, ord, ind); // Gives the blocking in ord and ind.
-  // cout << " ord: "; Print(ord);
-  // cout << " ind: "<< endl;
+  // std::cout << " ord: "; Print(ord);
+  // std::cout << " ind: "<< std::endl;
   // for (unsigned int iii = 0;iii<ind.size(); iii++)
   //{
-  //  cout << " " << iii << " " ; Print (ind[iii]);
+  //  std::cout << " " << iii << " " ; Print (ind[iii]);
   //}
   // Since ORDSCHUR puts highest index top left.
   int mord = *std::max_element(ord.begin(), ord.end());
-  // cout << " mord : " << mord << endl;
+  // std::cout << " mord : " << mord << std::endl;
   for (unsigned int i = 0; i < ord.size(); i++)
     ord[i] = mord - ord[i];
-  // cout << " ord new: " ; Print(ord);
+  // std::cout << " ord new: " ; Print(ord);
   OrdSchurComplex(U, T, ord, U, T);
 
   // Calculate F(T)
   vnl_matrix<std::complex<double>> F(n, n, 0.0);
   int                              m = ind.size();
   for (int col = 0; col < m; col++) {
-    // cout << "==================col: " << col << endl;
+    // std::cout << "==================col: " << col << std::endl;
     std::vector<int> jj = ind[col];
-    // cout << " jj: "; Print(jj);
+    // std::cout << " jj: "; Print(jj);
     //    if prnt == 2 && max(j) > min(j)
     //       fprintf('Evaluating function of block (%g:%g)\n', min(j), max(j))
     //    end
     //    if isequal(fun,@fun_log)
 
-    // cout << " submatrix t(jj,jj): "<< endl << getSubMatrix(T,jj,jj) << endl;
-    // cout << " mlog_isst: " << endl <<
-    // MatrixLog_isst(getSubMatrix(T,jj,jj),maxlogiter) << endl;
+    // std::cout << " submatrix t(jj,jj): "<< endl << getSubMatrix(T,jj,jj) << std::endl;
+    // std::cout << " mlog_isst: " << endl <<
+    // MatrixLog_isst(getSubMatrix(T,jj,jj),maxlogiter) << std::endl;
     setSubMatrix(F, jj, jj,
                  MatrixLog_isst(getSubMatrix(T, jj, jj), maxlogiter));
-    // cout << " F " << F << endl;
+    // std::cout << " F " << F << std::endl;
     //    else
     //       [F(j,j), terms(col)] = funm_atom(T(j,j),fun,tol,maxterms,prnt>1,...
     //                                        varargin{:});
     //    end
     //
     for (int row = col - 1; row >= 0; row--) {
-      // cout << "=======row : " << row << endl;
+      // std::cout << "=======row : " << row << std::endl;
       std::vector<int> ii = ind[row];
-      // cout << " ii: "; Print(ii);
+      // std::cout << " ii: "; Print(ii);
       if (ii.size() == 1 && jj.size() == 1) {
         // Scalar case.
         int i = ii[0];
         int j = jj[0];
-        // cout << " scalar case ( " << i << " , " << j << " )" << endl;
+        // std::cout << " scalar case ( " << i << " , " << j << " )" << std::endl;
         // k = i+1:j-1;
         //          if (i+1 > j-1)  // empty k below
         //          {
-        //            //cout << " !!! empty k  !! "  << endl;
+        //            //cout << " !!! empty k  !! "  << std::endl;
         //            F[i][j] = (T[i][j]*(F[i][i] - F[j][j]))/(T(i,i)-T(j,j));
         //          }
         //          else
@@ -608,43 +608,43 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
                   (T(i, i) - T(j, j));
 
       } else {
-        // cout << " matrix case  " << endl;
+        // std::cout << " matrix case  " << std::endl;
 
         // concatenate indices: (matlab) k = cat(2,ind{row+1:col-1});
         std::vector<int> kk;
         for (int k = row + 1; k < col; k++)
           kk.insert(kk.end(), ind[k].begin(), ind[k].end());
-        // cout << " kk : " ; Print(kk);
+        // std::cout << " kk : " ; Print(kk);
 
         // rhs = F(i,i)*T(i,j) - T(i,j)*F(j,j) + F(i,k)*T(k,j) - T(i,k)*F(k,j);
         vnl_matrix<std::complex<double>> rhs(getSubMatrix(F, ii, ii) *
                                              getSubMatrix(T, ii, jj));
         rhs -= getSubMatrix(T, ii, jj) * getSubMatrix(F, jj, jj);
-        // cout << " rhs1 : " << rhs << endl;
+        // std::cout << " rhs1 : " << rhs << std::endl;
         if (kk.size() > 0) {
           rhs += getSubMatrix(F, ii, kk) * getSubMatrix(T, kk, jj);
           rhs -= getSubMatrix(T, ii, kk) * getSubMatrix(F, kk, jj);
         }
-        // cout << " rhs2 : " << rhs << endl;
+        // std::cout << " rhs2 : " << rhs << std::endl;
 
         // F(i,j) = sylv_tri(T(i,i),-T(j,j),rhs);
         setSubMatrix(
             F, ii, jj,
             sylv_tri(getSubMatrix(T, ii, ii), -getSubMatrix(T, jj, jj), rhs));
-        // cout << " F " << F << endl;
+        // std::cout << " F " << F << std::endl;
       }
     } // rows in upper triangle
   }
 
-  //      cout << endl;
+  //      std::cout << std::endl;
   //      cout.precision(16);
-  //      cout << " T   = ";PrintComplex(T);
-  //      cout << " F   = ";PrintComplex(F);
+  //      std::cout << " T   = ";PrintComplex(T);
+  //      std::cout << " F   = ";PrintComplex(F);
   //      cout.precision(6);
 
   F = U * F * U.conjugate_transpose();
 
-  // cout << " log(A) ? " << F << endl;
+  // std::cout << " log(A) ? " << F << std::endl;
 
   double eps_matlab = pow(2.0, -52);
   double imagone    = vnl_imag(F).operator_one_norm();
@@ -684,14 +684,14 @@ void MyMatrix::OrdSchurComplexLogical(const vnl_matrix<std::complex<double>> &U,
 //  corresponding right invariant subspace.
 {
 
-  // cout << " MyMatrix::OrdSchurComplex ( logical select )  NOT TESTED
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+  // std::cout << " MyMatrix::OrdSchurComplex ( logical select )  NOT TESTED
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 
   assert(T.rows() == T.cols());
   assert(U.rows() == U.cols());
   assert(U.rows() == T.rows());
 
-  // cout << " T before : " << T << endl;
+  // std::cout << " T before : " << T << std::endl;
 
   int *selecti = new int[select.size()];
   for (unsigned int i = 0; i < select.size(); i++)
@@ -723,8 +723,8 @@ void MyMatrix::OrdSchurComplexLogical(const vnl_matrix<std::complex<double>> &U,
   delete[] selecti;
   TS.inplace_transpose(); // switch back ..
   US.inplace_transpose(); // from fortran ordering
-  // cout << " info: " << info << endl;
-  // cout << " T after " << TS << endl;
+  // std::cout << " info: " << info << std::endl;
+  // std::cout << " T after " << TS << std::endl;
 
   if (info != 0) {
     // These return codes are taken from ztrsen.f:
@@ -766,8 +766,8 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
   assert(U.cols() == T.cols());
   assert(clusters.size() == T.cols());
 
-  // cout << " U " << endl << U << endl;
-  // cout << " T " << endl << T << endl;
+  // std::cout << " U " << endl << U << std::endl;
+  // std::cout << " T " << endl << T << std::endl;
 
   int n = T.cols();
 
@@ -776,7 +776,7 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
 
   int              maxi = *std::max_element(clusters.begin(), clusters.end());
   std::vector<int> myclusters(clusters);
-  // cout << " mycluster before "; Print(myclusters);
+  // std::cout << " mycluster before "; Print(myclusters);
   // bool reorder = false;
   for (int i = 0; i <= maxi; i++) {
 
@@ -793,8 +793,8 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
         select[j] = 0; // don't reorder this one
     }
 
-    // cout << "select " ; Print(select);
-    // cout << "foundi " << foundi << endl;
+    // std::cout << "select " ; Print(select);
+    // std::cout << "foundi " << foundi << std::endl;
 
     if (foundi == 0)
       continue; // if there was a gap in clusters idx, continue with next
@@ -802,11 +802,11 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
     int startvals = 0;
     while (startvals < n && select[startvals])
       startvals++;
-    // cout << "startvals " << startvals << endl;
+    // std::cout << "startvals " << startvals << std::endl;
     if (foundi == startvals)
       continue; // all selected are allready the first values
 
-    // cout << " doing schur reorder... " << endl;
+    // std::cout << " doing schur reorder... " << std::endl;
     // here we have found at least one value to reorder
     // reorder = true;
     OrdSchurComplexLogical(US, TS, select, US, TS);
@@ -829,12 +829,12 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
       }
     }
 
-    // cout << "mycluster after: " ; Print(myclusters);
+    // std::cout << "mycluster after: " ; Print(myclusters);
   }
 
   // returning parameters US and TS
-  // cout << " US " << endl << US << endl;
-  // cout << " TS " << endl << TS << endl;
+  // std::cout << " US " << endl << US << std::endl;
+  // std::cout << " TS " << endl << TS << std::endl;
   // if (reorder)   exit(1);
 }
 
@@ -929,14 +929,14 @@ MyMatrix::MatrixLog_isst(const vnl_matrix<std::complex<double>> &A,
         //           else
         //           for (k=i+1; k<j; k++)
         //           {
-        //             //cout << i << " " << j << " " << k << endl;
+        //             //cout << i << " " << j << " " << k << std::endl;
         //             s = R[i][k]*R[k][j];
         //             R[i][j] = (T[i][j] - s)/(R[i][i] + R[j][j]);
         //           }
 
         std::complex<double> s(0);
         for (k = i + 1; k < j; k++) {
-          // cout << i << " " << j << " " << k << endl;
+          // std::cout << i << " " << j << " " << k << std::endl;
           s += R[i][k] * R[k][j];
         }
         R[i][j] = (T[i][j] - s) / (R[i][i] + R[j][j]);
@@ -945,9 +945,9 @@ MyMatrix::MatrixLog_isst(const vnl_matrix<std::complex<double>> &A,
 
     T = R;
   }
-  // cout << " T in logisst: " << endl << T << endl;
-  // cout << " iter : " << iter << endl;
-  // cout << " log pf : " << MatrixLog_pf(T-I,8) << endl;
+  // std::cout << " T in logisst: " << endl << T << std::endl;
+  // std::cout << " iter : " << iter << std::endl;
+  // std::cout << " log pf : " << MatrixLog_pf(T-I,8) << std::endl;
   return std::complex<double>(pow(2.0, iter), 0) * MatrixLog_pf(T - I, 8);
 }
 
@@ -962,8 +962,8 @@ MyMatrix::MatrixLog_pf(const vnl_matrix<std::complex<double>> &A,
   vnl_vector<double> nodes(n);
   vnl_vector<double> wts(n);
   gauss_legendre(m, nodes, wts);
-  // cout << " nodes   " << nodes << endl;
-  // cout << " weights "  << wts << endl;
+  // std::cout << " nodes   " << nodes << std::endl;
+  // std::cout << " weights "  << wts << std::endl;
 
   // Convert from [-1,1] to [0,1].
   nodes = (nodes + 1) / 2.0;
@@ -1002,11 +1002,11 @@ void MyMatrix::gauss_legendre(int n, vnl_vector<double> &x,
     M[i - 1][i] = d;
     M[i][i - 1] = d;
   }
-  // cout << " offidag : " << M << endl;
+  // std::cout << " offidag : " << M << std::endl;
   vnl_symmetric_eigensystem<double> eigs(M);
 
-  // cout << " V : " << eigs.V << endl;
-  // cout << " D : " << eigs.D << endl;
+  // std::cout << " V : " << eigs.V << std::endl;
+  // std::cout << " D : " << eigs.D << std::endl;
 
   x = eigs.D.diagonal();
   w = eigs.V.get_row(0);
@@ -1039,7 +1039,7 @@ std::vector<int> MyMatrix::blocking(const vnl_matrix<std::complex<double>> &A,
   for (int i = 0; i < n; i++)
     a[i] = A[i][i];
 
-  // cout << " A diag: " << a << endl;
+  // std::cout << " A diag: " << a << std::endl;
 
   std::vector<int> m(n, -1);
   int              maxM = 0;
@@ -1126,15 +1126,15 @@ void MyMatrix::swapping(const std::vector<int> &m, std::vector<int> &mm,
     // g(i) = sum(p)/h(i);
   }
 
-  //   cout << " g(pre): " ; Print(g);
+  //   std::cout << " g(pre): " ; Print(g);
   // [x,y] = sort(g);
   std::sort(g.begin(), g.end());
-  //   cout << " g(post): " ; Print(g);
+  //   std::cout << " g(post): " ; Print(g);
 
   // h = [0 cumsum(h(y))];
   h = cumsum0(h, g);
 
-  // cout << " h " ; Print(h);
+  // std::cout << " h " ; Print(h);
 
   ind.clear();
   ind.resize(mmax);
@@ -1189,24 +1189,24 @@ MyMatrix::sylv_tri(const vnl_matrix<std::complex<double>> &T,
   int m = T.cols();
   int n = U.cols();
 
-  // cout << " sylv_tri " << endl;
-  // cout << " T " << T << endl;
-  // cout << " U " << U << endl;
-  // cout << " B " << B << endl;
+  // std::cout << " sylv_tri " << std::endl;
+  // std::cout << " T " << T << std::endl;
+  // std::cout << " U " << U << std::endl;
+  // std::cout << " B " << B << std::endl;
 
   vnl_matrix<std::complex<double>> M(m, n);
 
   // Forward substitution
   for (int i = 0; i < n; i++) {
-    // cout << " col " << i << endl;
+    // std::cout << " col " << i << std::endl;
 
     vnl_diag_matrix<std::complex<double>> Uii(m, U[i][i]);
     vnl_matrix<std::complex<double>>      A(T + Uii);
-    // cout << " A " << A << endl;
+    // std::cout << " A " << A << std::endl;
     vnl_vector<std::complex<double>> y(B.get_column(i));
     if (i > 0)
       y -= M.get_n_columns(0, i - 1) * U.get_n_rows(0, i - 1).get_column(i);
-    // cout << " y " << Y << endl;
+    // std::cout << " y " << Y << std::endl;
     M.set_column(i, vnl_svd<std::complex<double>>(A).solve(y));
     // matlab:
     // X(:,i) = (T + U[i][i]*Id) \ (B(:,i) - X(:,1:i-1)*U(1:i-1,i));
@@ -1254,18 +1254,18 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
   ////   M[2][0] =  -27; M[2][1] =  -9 ; M[2][2] =  -25;
   //  M[0][3] = 0.09; M[1][3] = 0.19; M[2][3] = 0.47;
 
-  //   //cout << " matrix exponent: " << endl << MatrixExp(M) << endl;
-  //   cout << " matrix Log: " << endl << MatrixLog(M) << endl;
-  //   cout << " matrix Log: " << endl << MatrixPow(M,0.5) << endl;
+  //   //cout << " matrix exponent: " << endl << MatrixExp(M) << std::endl;
+  //   std::cout << " matrix Log: " << endl << MatrixLog(M) << std::endl;
+  //   std::cout << " matrix Log: " << endl << MatrixPow(M,0.5) << std::endl;
   //
   // exit(0);
 
   //   cout.precision(18);
-  // //  cout << "A MATRIX : " <<  A << endl;
-  //   cout << " A = [ " << A.get_row(0) << " ; " << endl;
-  //   cout << "       " << A.get_row(1) << " ; " << endl;
-  //   cout << "       " << A.get_row(2) << " ; " << endl;
-  //   cout << "       " << A.get_row(3) << " ] " << endl;
+  // //  std::cout << "A MATRIX : " <<  A << std::endl;
+  //   std::cout << " A = [ " << A.get_row(0) << " ; " << std::endl;
+  //   std::cout << "       " << A.get_row(1) << " ; " << std::endl;
+  //   std::cout << "       " << A.get_row(2) << " ; " << std::endl;
+  //   std::cout << "       " << A.get_row(3) << " ] " << std::endl;
   //
   //
   //   cout.precision(5);
@@ -1282,7 +1282,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
   vnl_matrix<std::complex<double>> Asqrt(n, n);
 
   if (isDiag(vnl_real(T)) && isDiag(vnl_imag(T))) {
-    // cout << " isDiagonal ! " << endl;
+    // std::cout << " isDiagonal ! " << std::endl;
     vnl_diag_matrix<std::complex<double>> R(n);
     for (int i = 0; i < n; i++)
       R[i] = sqrt(T[i][i]); // Square root always exists.
@@ -1291,7 +1291,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
   } else {
 
     // Compute upper triangular square root R of T, a column at a time.
-    // cout << " upper triangular ! " << endl;
+    // std::cout << " upper triangular ! " << std::endl;
 
     vnl_matrix<std::complex<double>> R(n, n, 0.0);
     // std::complex < double > s;
@@ -1307,18 +1307,18 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
       }
     }
 
-    //     cout << endl;
+    //     std::cout << std::endl;
     //     cout.precision(16);
-    //     cout << " T = ";PrintComplex(T);
-    //     cout << " R = ";PrintComplex(R);
-    //     cout << " R*R = ";PrintComplex(R*R);
-    //     cout << " R*R - T = ";PrintComplex(R*R-T);
-    //     cout << " fro(R*R-T) = " << (R*R-T).frobenius_norm() << endl << endl
+    //     std::cout << " T = ";PrintComplex(T);
+    //     std::cout << " R = ";PrintComplex(R);
+    //     std::cout << " R*R = ";PrintComplex(R*R);
+    //     std::cout << " R*R - T = ";PrintComplex(R*R-T);
+    //     std::cout << " fro(R*R-T) = " << (R*R-T).frobenius_norm() << endl << endl
     //     ; cout.precision(6);
 
     Asqrt = U * R * U.conjugate_transpose();
 
-    // cout << " sqrt " << endl << Asqrt << endl;
+    // std::cout << " sqrt " << endl << Asqrt << std::endl;
   }
 
   bool test = true;
@@ -1353,10 +1353,10 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
       exit(1);
     }
     // double fnorm = vnl_imag(T).frobenius_norm();
-    ////cout << " fnorm (img) = " << fnorm << endl;
+    ////cout << " fnorm (img) = " << fnorm << std::endl;
     // if (fnorm > eps)
     //{
-    //   cout << " Warning complex result?: " << fnorm << endl << vnl_imag(T) <<
+    //   std::cout << " Warning complex result?: " << fnorm << endl << vnl_imag(T) <<
     //   endl;
     //     assert(1==2);
     //  }
@@ -1429,21 +1429,21 @@ vnl_matrix<double> MyMatrix::MatrixSqrtEigs(const vnl_matrix<double> &m) {
       R[rr][cc] = m[rr][cc];
     }
 
-  // cout << endl << endl;
-  // cout << " M: " << endl << m << endl;
-  // cout << " R: " << endl << R << endl;
+  // std::cout << endl << std::endl;
+  // std::cout << " M: " << endl << m << std::endl;
+  // std::cout << " R: " << endl << R << std::endl;
 
   vnl_matrix<double>      rsqrt(3, 3, 0.0);
   vnl_complex_eigensystem esys(R, rsqrt); // complex part is zero
 
-  // cout << " V' " << endl << esys.R << endl;
-  // cout << " D " << endl << esys.W << endl;
+  // std::cout << " V' " << endl << esys.R << std::endl;
+  // std::cout << " D " << endl << esys.W << std::endl;
 
   vnl_diag_matrix<std::complex<double>> Wsqrt(3);
   for (unsigned int i = 0; i < 3; i++) {
     Wsqrt[i] = sqrt(esys.W[i]);
   }
-  // cout << " Wsqrt " << endl << Wsqrt << endl;
+  // std::cout << " Wsqrt " << endl << Wsqrt << std::endl;
 
   vnl_matrix<std::complex<double>> Rcomp(3, 3);
 
@@ -1454,7 +1454,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtEigs(const vnl_matrix<double> &m) {
   Rcomp = QR.solve(Wsqrt * esys.R);
   Rcomp.inplace_transpose();
 
-  // cout << " Rcomp " << endl << Rcomp << endl;
+  // std::cout << " Rcomp " << endl << Rcomp << std::endl;
 
   rsqrt = vnl_real(Rcomp);
 
@@ -1487,13 +1487,13 @@ vnl_matrix<double> MyMatrix::MatrixSqrtEigs(const vnl_matrix<double> &m) {
     for (int r = 0; r < 3; r++)
       msqrt[r][c] = rsqrt[r][c];
 
-  // cout << " msqrt " << endl << msqrt << endl;
+  // std::cout << " msqrt " << endl << msqrt << std::endl;
 
   bool   test = true;
   double eps  = 0.00000000000001;
   if (test) {
     double fnorm = vnl_imag(Rcomp).frobenius_norm();
-    // cout << " fnorm (img) = " << fnorm << endl;
+    // std::cout << " fnorm (img) = " << fnorm << std::endl;
     if (fnorm > eps) {
       std::cout << " Warning complex result?: " << fnorm << std::endl
                 << vnl_imag(Rcomp) << std::endl;
@@ -1504,7 +1504,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtEigs(const vnl_matrix<double> &m) {
     vnl_matrix<double> ms2 = msqrt * msqrt;
     ms2 -= m;
     double sum = ms2.absolute_value_max();
-    // cout << " max = " << sum << endl;
+    // std::cout << " max = " << sum << std::endl;
     if (sum > eps) {
       std::cout << " Warning : " << sum << std::endl;
       std::cout << " sqrt(M): " << std::endl << msqrt << std::endl;
@@ -1592,7 +1592,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
                          // but even adding two zeros did not show any
                          // differences in tests
   double err = 1000;
-  // cout << "using square root iteartion (" << imax << ")"<< endl;
+  // std::cout << "using square root iteartion (" << imax << ")"<< std::endl;
   vnl_matrix_fixed<double, 3, 3> Yn(R);
   vnl_matrix_fixed<double, 3, 3> Zn;
   Zn.set_identity();
@@ -1617,7 +1617,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
     Ysq = Yn * Yn;
     Ysq -= R;
     err = Ysq.absolute_value_max();
-    // cout << " iteration " << count << "  err: "<< err << endl;
+    // std::cout << " iteration " << count << "  err: "<< err << std::endl;
   }
 
   if (count > imax) {
@@ -1664,9 +1664,9 @@ vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
   //       double sum = ms2.absolute_value_max();
   //       if (sum > eps)
   //       {
-  //          cerr << " Error : " << sum << endl;
-  //          cerr << " sqrt(M): " << endl << msqrt << endl;
-  //          cerr << endl;
+  //          cerr << " Error : " << sum << std::endl;
+  //          cerr << " sqrt(M): " << endl << msqrt << std::endl;
+  //          cerr << std::endl;
   //          assert(1==2);
   //       }
   //    }
@@ -1901,7 +1901,7 @@ void MyMatrix::PolarDecomposition(const vnl_matrix<double> &A,
     S = svd.V() * svd.W() * svd.V().transpose();
     // vnl_matlab_print(std::cout,R,"R",vnl_matlab_print_format_long);cout <<
     // endl; vnl_matlab_print(std::cout,S,"S",vnl_matlab_print_format_long);cout
-    // << endl;
+    // << std::endl;
   } else {
     std::cerr << "MyMatrix PolarDecomposition ERROR: SVD not possible?"
               << std::endl;
@@ -1933,7 +1933,7 @@ void MyMatrix::Polar2Decomposition(const vnl_matrix<double> &A,
   // vnl_matlab_print(std::cout,R,"Rot",vnl_matlab_print_format_long);cout <<
   // endl;
   // vnl_matlab_print(std::cout,S,"Shear",vnl_matlab_print_format_long);cout
-  // << endl;
+  // << std::endl;
   // vnl_matlab_print(std::cout,D,"Scale",vnl_matlab_print_format_long);cout <<
   // endl;
 }
@@ -1965,7 +1965,7 @@ double MyMatrix::AffineTransDistSq(const vnl_matrix<double> &a,
   assert(fabs(drigid[3][1]) < 0.000001);
   assert(fabs(drigid[3][2]) < 0.000001);
 
-  // cout << " drigid: " << endl;
+  // std::cout << " drigid: " << std::endl;
   // MatrixPrintFmt(stdout,"% 2.8f",drigid);
 
   // translation norm quadrat:
@@ -1977,7 +1977,7 @@ double MyMatrix::AffineTransDistSq(const vnl_matrix<double> &a,
   }
   drigid[3][3] = 0.0;
 
-  // cout << " trans dist2: " << tdq << endl;
+  // std::cout << " trans dist2: " << tdq << std::endl;
 
   drigid = drigid.transpose() * drigid;
 
@@ -2013,7 +2013,7 @@ double MyMatrix::RigidTransDistSq(const vnl_matrix<double> &a,
   assert(fabs(drigid[3][2]) < 0.000001);
   assert(fabs(drigid[3][3] - 1) < 0.000001);
 
-  // cout << " drigid: " << endl;
+  // std::cout << " drigid: " << std::endl;
   // MatrixPrintFmt(stdout,"% 2.8f",drigid);
 
   // translation norm quadrat:
@@ -2022,11 +2022,11 @@ double MyMatrix::RigidTransDistSq(const vnl_matrix<double> &a,
     tdq += drigid[r][3] * drigid[r][3];
   }
 
-  // cout << " trans dist2: " << tdq << endl;
+  // std::cout << " trans dist2: " << tdq << std::endl;
 
   // rotation norm:
   double rd = RotMatrixLogNorm(drigid);
-  // cout << " rd: " << rd << endl;
+  // std::cout << " rd: " << rd << std::endl;
 
   return rd * rd + tdq;
 }
@@ -2056,7 +2056,7 @@ double MyMatrix::RotMatrixLogNorm(const vnl_matrix_fixed<double, 4, 4> &m) {
 
   // assert we have no stretching only rot (and trans)
   double det = vnl_determinant(m);
-  // cout << " det: " << det << endl;
+  // std::cout << " det: " << det << std::endl;
   if (fabs(det - 1.0) > 0.001) {
     std::cerr << "There is streching! det: " << det << std::endl;
     assert(fabs(det - 1.0) < 0.001);
@@ -2065,13 +2065,13 @@ double MyMatrix::RotMatrixLogNorm(const vnl_matrix_fixed<double, 4, 4> &m) {
   double trace = 0.0;
   for (int n = 0; n < 3; n++)
     trace += m[n][n];
-  // cout << " trace : " << trace << endl;
+  // std::cout << " trace : " << trace << std::endl;
   trace = 0.5 * (trace - 1.0);
   if (trace > 1.0)
     trace = 1.0;
   if (trace < -1.0)
     trace = -1.0;
-  // cout << "  0.5*(trace-1): " << trace << endl;
+  // std::cout << "  0.5*(trace-1): " << trace << std::endl;
   double theta = acos(trace); // gives [0..pi]
 
   return sqrt(2.0) * theta;
@@ -2123,7 +2123,7 @@ double MyMatrix::getResampSmoothing(const LTA *lta) {
   // endl;
   vnl_matrix<double> Vinv = vnl_inverse(V);
   // vnl_matlab_print(std::cout,Vinv,"Vinv",vnl_matlab_print_format_long);cout
-  // << endl;
+  // << std::endl;
 
   assert(Vinv.rows() == 4 && Vinv.cols() == 4);
 
@@ -2148,8 +2148,8 @@ double MyMatrix::getResampSmoothing(const LTA *lta) {
 
         row += fabs(nint(x[0]) - x[0]) + fabs(nint(x[1]) - x[1]) +
                fabs(nint(x[2]) - x[2]);
-        // cout << " Y " << y << " X " << x << endl;
-        // cout << " err " << row << endl;
+        // std::cout << " Y " << y << " X " << x << std::endl;
+        // std::cout << " err " << row << std::endl;
         // exit(1);
       }
       slice += row / width;
@@ -2420,7 +2420,7 @@ double MyMatrix::AffineTransDistSq(MATRIX *a, MATRIX *b, double r)
   assert(fabs(drigid->rptr[4][2]) < 0.000001);
   assert(fabs(drigid->rptr[4][3]) < 0.000001);
 
-  // cout << " drigid: " << endl;
+  // std::cout << " drigid: " << std::endl;
   // MatrixPrintFmt(stdout,"% 2.8f",drigid);
 
   // translation norm quadrat:
@@ -2432,7 +2432,7 @@ double MyMatrix::AffineTransDistSq(MATRIX *a, MATRIX *b, double r)
   }
   drigid->rptr[4][4] = 0.0;
 
-  // cout << " trans dist2: " << tdq << endl;
+  // std::cout << " trans dist2: " << tdq << std::endl;
   MATRIX *dt = MatrixTranspose(drigid, nullptr);
   drigid     = MatrixMultiply(dt, drigid, drigid);
   MatrixFree(&dt);
@@ -2469,7 +2469,7 @@ double MyMatrix::RigidTransDistSq(MATRIX *a, MATRIX *b)
   assert(fabs(drigid->rptr[4][3]) < 0.000001);
   assert(fabs(drigid->rptr[4][4] - 1) < 0.000001);
 
-  // cout << " drigid: " << endl;
+  // std::cout << " drigid: " << std::endl;
   // MatrixPrintFmt(stdout,"% 2.8f",drigid);
 
   // translation norm quadrat:
@@ -2478,11 +2478,11 @@ double MyMatrix::RigidTransDistSq(MATRIX *a, MATRIX *b)
     tdq += drigid->rptr[r][4] * drigid->rptr[r][4];
   }
 
-  // cout << " trans dist2: " << tdq << endl;
+  // std::cout << " trans dist2: " << tdq << std::endl;
 
   // rotation norm:
   double rd = RotMatrixLogNorm(drigid);
-  // cout << " rd: " << rd << endl;
+  // std::cout << " rd: " << rd << std::endl;
 
   MatrixFree(&drigid);
 
@@ -2518,7 +2518,7 @@ MATRIX *MyMatrix::MatrixSqrtIter(MATRIX *m, MATRIX *msqrt) {
   int    imax = 100;
   double eps  = 0.0001;
   double err  = 1000;
-  // cout << "using square root iteartion (" << imax << ")"<< endl;
+  // std::cout << "using square root iteartion (" << imax << ")"<< std::endl;
   MATRIX *Yn    = MatrixCopy(R, nullptr);
   MATRIX *Zn    = MatrixIdentity(3, nullptr);
   MATRIX *Zni   = nullptr;
@@ -2536,9 +2536,9 @@ MATRIX *MyMatrix::MatrixSqrtIter(MATRIX *m, MATRIX *msqrt) {
 
     Yn = MatrixScalarMul(Yn, 0.5, Yn);
     Zn = MatrixScalarMul(Zn, 0.5, Zn);
-    // cout << " matrix " << i << endl;
+    // std::cout << " matrix " << i << std::endl;
     // MatrixPrintFmt(stdout,"% 2.8f",Yn);
-    // cout << endl;
+    // std::cout << std::endl;
 
     Ysq = MatrixMultiply(Yn, Yn, Ysq);
     Ysq = MatrixSubtract(Ysq, R, Ysq);
@@ -2556,9 +2556,9 @@ MATRIX *MyMatrix::MatrixSqrtIter(MATRIX *m, MATRIX *msqrt) {
   }
 
   MATRIX *Rh = Yn;
-  // cout << "rh : " << endl;
+  // std::cout << "rh : " << std::endl;
   // MatrixPrintFmt(stdout,"% 2.8f",Rh);
-  // cout << endl;
+  // std::cout << std::endl;
   MatrixFree(&Zni);
   MatrixFree(&Yni);
   MatrixFree(&Zn);
@@ -2609,9 +2609,9 @@ MATRIX *MyMatrix::MatrixSqrtIter(MATRIX *m, MATRIX *msqrt) {
   //         sum += fabs(*MATRIX_RELT(ms2, r, c)) ;
   //       if (sum > 0.0001)
   //       {
-  //          cerr << " Error : " << sum << endl;
+  //          cerr << " Error : " << sum << std::endl;
   //          //MatrixPrintFmt(stdout,"% 2.8f",ms2);
-  //          cerr << endl;
+  //          cerr << std::endl;
   //   assert(1==2);
   //       }
   //       MatrixFree(&ms2);
@@ -2680,9 +2680,9 @@ MATRIX *MyMatrix::getHalfRT(MATRIX *m, MATRIX *mhalf) {
       *MATRIX_RELT(m, 1, 1), *MATRIX_RELT(m, 1, 2), *MATRIX_RELT(m, 1, 3),
       *MATRIX_RELT(m, 2, 1), *MATRIX_RELT(m, 2, 2), *MATRIX_RELT(m, 2, 3),
       *MATRIX_RELT(m, 3, 1), *MATRIX_RELT(m, 3, 2), *MATRIX_RELT(m, 3, 3));
-  // cout << "q: "<< q << endl;
+  // std::cout << "q: "<< q << std::endl;
   Quaternion qh = q.getHalfRotation();
-  // cout << "qh: " << qh << endl;
+  // std::cout << "qh: " << qh << std::endl;
   mhalf       = getMatrix(qh.getRotMatrix3dh(), 4, 4);
   MATRIX *Rh1 = MatrixIdentity(3, nullptr);
   for (int rr = 1; rr < 4; rr++)
@@ -2695,7 +2695,7 @@ MATRIX *MyMatrix::getHalfRT(MATRIX *m, MATRIX *mhalf) {
   *MATRIX_RELT(T, 2, 1) = *MATRIX_RELT(m, 2, 4);
   *MATRIX_RELT(T, 3, 1) = *MATRIX_RELT(m, 3, 4);
 
-  // cout << " rh1" << endl;
+  // std::cout << " rh1" << std::endl;
   // MatrixPrintFmt(stdout,"% 2.8f",Rh1);
 
   MATRIX *Rh1i = MatrixInverse(Rh1, nullptr);
@@ -2727,7 +2727,7 @@ MATRIX *MyMatrix::getHalfRT(MATRIX *m, MATRIX *mhalf) {
 double MyMatrix::RotMatrixLogNorm(MATRIX *m) {
   // assert we have no stretching only rot (and trans)
   float det = MatrixDeterminant(m);
-  // cout << " det: " << det << endl;
+  // std::cout << " det: " << det << std::endl;
   if (fabs(det - 1.0) > 0.001) {
     std::cerr << "There is streching! det: " << det << std::endl;
     assert(fabs(det - 1.0) < 0.001);
@@ -2736,13 +2736,13 @@ double MyMatrix::RotMatrixLogNorm(MATRIX *m) {
   double trace = 0.0;
   for (int n = 1; n <= 3; n++)
     trace += m->rptr[n][n];
-  // cout << " trace : " << trace << endl;
+  // std::cout << " trace : " << trace << std::endl;
   trace = 0.5 * (trace - 1.0);
   if (trace > 1.0)
     trace = 1.0;
   if (trace < -1.0)
     trace = -1.0;
-  // cout << "  0.5*(trace-1): " << trace << endl;
+  // std::cout << "  0.5*(trace-1): " << trace << std::endl;
   double theta = acos(trace); // gives [0..pi]
 
   return sqrt(2.0) * theta;

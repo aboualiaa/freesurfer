@@ -123,9 +123,9 @@ struct IoParams {
   unsigned char labelRightWhite;
   unsigned char labelRightRibbon;
   unsigned char labelBackground;
-  int DoLH, DoRH;
-  bool bLHOnly, bRHOnly;
-  bool bParallel;
+  int           DoLH, DoRH;
+  bool          bLHOnly, bRHOnly;
+  bool          bParallel;
 
   float capValue;
 
@@ -219,119 +219,105 @@ int main(int ac, char *av[]) {
   MRI *maskRightHemi = nullptr;
 
 #ifdef _OPENMP
-  if (params.bParallel){
+  if (params.bParallel) {
     printf("Running hemis in parallel\n");
     omp_set_num_threads(2);
-  }
-  else{
+  } else {
     printf("Running hemis serially\n");
     omp_set_num_threads(1);
   }
 #endif
 
   int hemi;
-  #ifdef HAVE_OPENMP
-  #pragma omp parallel for 
-  #endif
-  for(hemi=0; hemi < 2; hemi ++){
-    if(hemi == 0 && params.DoLH){
+#ifdef HAVE_OPENMP
+#pragma omp parallel for
+#endif
+  for (hemi = 0; hemi < 2; hemi++) {
+    if (hemi == 0 && params.DoLH) {
       /*  Process LEFT hemisphere */
-      printf("Processing left hemi\n"); fflush(stdout);
-      
+      printf("Processing left hemi\n");
+      fflush(stdout);
+
       //---------------------
       // proces white surface - convert to voxel-space
       //
       // allocate distance
-      MRI* dLeftWhite = MRIalloc( mriTemplate->width,
-				  mriTemplate->height,
-				  mriTemplate->depth,
-				  MRI_FLOAT );
+      MRI *dLeftWhite = MRIalloc(mriTemplate->width, mriTemplate->height,
+                                 mriTemplate->depth, MRI_FLOAT);
       MRIcopyHeader(mriTemplate, dLeftWhite);
-      
+
       // Computes the signed distance to given surface. Sign indicates
       // whether it is on the inside or outside. params.capValue -
       // saturation/clip value for distance.
-      std::cout << "computing distance to left white surface \n" ;
-      ComputeSurfaceDistanceFunction(surfLeftWhite,
-				     dLeftWhite,
-				     params.capValue);
+      std::cout << "computing distance to left white surface \n";
+      ComputeSurfaceDistanceFunction(surfLeftWhite, dLeftWhite,
+                                     params.capValue);
       // if the option is there, output distance
-      if ( params.bSaveDistance )
-	MRIwrite
-	  ( dLeftWhite,
-	    const_cast<char*>( (outputPath / "lh.dwhite." +
-				params.outRoot + ".mgz").c_str() )
-	    );
-      
+      if (params.bSaveDistance)
+        MRIwrite(
+            dLeftWhite,
+            const_cast<char *>(
+                (outputPath / "lh.dwhite." + params.outRoot + ".mgz").c_str()));
+
       //-----------------------
       // process pial surface
-      MRI* dLeftPial = MRIalloc( mriTemplate->width,
-				 mriTemplate->height,
-				 mriTemplate->depth,
-				 MRI_FLOAT);
-      MRIcopyHeader(mriTemplate,dLeftPial);
-      std::cout << "computing distance to left pial surface \n" ;
-      ComputeSurfaceDistanceFunction(surfLeftPial,
-				     dLeftPial,
-				     params.capValue);
-      if ( params.bSaveDistance )
-	MRIwrite
-	  ( dLeftPial,
-	    const_cast<char*>( (outputPath / "lh.dpial." +
-				params.outRoot + ".mgz").c_str() )
-	    );
-      
+      MRI *dLeftPial = MRIalloc(mriTemplate->width, mriTemplate->height,
+                                mriTemplate->depth, MRI_FLOAT);
+      MRIcopyHeader(mriTemplate, dLeftPial);
+      std::cout << "computing distance to left pial surface \n";
+      ComputeSurfaceDistanceFunction(surfLeftPial, dLeftPial, params.capValue);
+      if (params.bSaveDistance)
+        MRIwrite(
+            dLeftPial,
+            const_cast<char *>(
+                (outputPath / "lh.dpial." + params.outRoot + ".mgz").c_str()));
+
       // combine them and create a mask for the left hemi. Must be
       // outside of white and inside pial. Creates labels for WM and Ribbon.
-      maskLeftHemi   = CreateHemiMask(dLeftPial,dLeftWhite,
-				      params.labelLeftWhite,
-				      params.labelLeftRibbon,
-				      params.labelBackground);
+      maskLeftHemi =
+          CreateHemiMask(dLeftPial, dLeftWhite, params.labelLeftWhite,
+                         params.labelLeftRibbon, params.labelBackground);
       // no need for the hemi distances anymore
       MRIfree(&dLeftWhite);
       MRIfree(&dLeftPial);
     }
 
-    if(hemi == 1 && params.DoRH){
+    if (hemi == 1 && params.DoRH) {
       /* Process RIGHT hemi  */
-      printf("Processing right hemi\n"); fflush(stdout);
-      
+      printf("Processing right hemi\n");
+      fflush(stdout);
+
       //-------------------
       // process white
-      MRI* dRightWhite = MRIalloc( mriTemplate->width,
-				   mriTemplate->height,
-				   mriTemplate->depth,
-				   MRI_FLOAT);
+      MRI *dRightWhite = MRIalloc(mriTemplate->width, mriTemplate->height,
+                                  mriTemplate->depth, MRI_FLOAT);
       MRIcopyHeader(mriTemplate, dRightWhite);
-      std::cout << "computing distance to right white surface \n" ;
-      ComputeSurfaceDistanceFunction( surfRightWhite,
-				      dRightWhite,
-				      params.capValue);
-      if ( params.bSaveDistance )
-	MRIwrite
-	  ( dRightWhite,
-	    const_cast<char*>( (outputPath / "rh.dwhite." +
-				params.outRoot + ".mgz").c_str() )
-	    );
-      
+      std::cout << "computing distance to right white surface \n";
+      ComputeSurfaceDistanceFunction(surfRightWhite, dRightWhite,
+                                     params.capValue);
+      if (params.bSaveDistance)
+        MRIwrite(
+            dRightWhite,
+            const_cast<char *>(
+                (outputPath / "rh.dwhite." + params.outRoot + ".mgz").c_str()));
+
       //--------------------
       // process pial
-      MRI* dRightPial = MRIalloc( mriTemplate->width,
-				  mriTemplate->height,
-				  mriTemplate->depth,
-				  MRI_FLOAT);
+      MRI *dRightPial = MRIalloc(mriTemplate->width, mriTemplate->height,
+                                 mriTemplate->depth, MRI_FLOAT);
       MRIcopyHeader(mriTemplate, dRightPial);
-      std::cout << "computing distance to right pial surface \n" ;
-      ComputeSurfaceDistanceFunction(surfRightPial,
-				     dRightPial,
-				     params.capValue);
-      if(params.bSaveDistance )
-	MRIwrite( dRightPial,const_cast<char*>( (outputPath/"rh.dpial."+params.outRoot + ".mgz").c_str() ));
+      std::cout << "computing distance to right pial surface \n";
+      ComputeSurfaceDistanceFunction(surfRightPial, dRightPial,
+                                     params.capValue);
+      if (params.bSaveDistance)
+        MRIwrite(
+            dRightPial,
+            const_cast<char *>(
+                (outputPath / "rh.dpial." + params.outRoot + ".mgz").c_str()));
       // compute hemi mask
-      maskRightHemi = CreateHemiMask(dRightPial, dRightWhite,
-				     params.labelRightWhite,
-				     params.labelRightRibbon,
-				     params.labelBackground);
+      maskRightHemi =
+          CreateHemiMask(dRightPial, dRightWhite, params.labelRightWhite,
+                         params.labelRightRibbon, params.labelBackground);
       // no need for the hemi distances anymore
       MRIfree(&dRightWhite);
       MRIfree(&dRightPial);
@@ -418,16 +404,16 @@ IoParams::IoParams() {
 
   capValue      = 3;
   bSaveDistance = false;
-  bEditAseg = false ;
-  bSaveRibbon = false;
-  bLHOnly = false;
-  bRHOnly = false;
-  bParallel = false;
-  DoLH = 1;
-  DoRH = 1;
+  bEditAseg     = false;
+  bSaveRibbon   = false;
+  bLHOnly       = false;
+  bRHOnly       = false;
+  bParallel     = false;
+  DoLH          = 1;
+  DoRH          = 1;
 
-  outRoot = "ribbon";
-  asegName = "aseg";
+  outRoot       = "ribbon";
+  asegName      = "aseg";
   surfWhiteRoot = "white";
   surfPialRoot  = "pial";
 
@@ -452,77 +438,56 @@ void IoParams::parse(int ac, char *av[]) {
 
   std::string strUse = "surface root name (i.e. <subject>/surf/$hemi.<NAME>";
   CCmdLineInterface interface(av[0]);
-  bool showHelp(false);
+  bool              showHelp(false);
 
-  interface.AddOptionBool
-  ( "help", &showHelp, "display help message");
-  interface.AddOptionBool
-  ( "usage", &showHelp, "display help message");
-  interface.AddOptionString
-  ( (ssurf+sw).c_str(), &surfWhiteRoot,
-    (strUse + " - default value is white").c_str()
-  );
-  interface.AddOptionString
-  ( (ssurf+"pial").c_str(), &surfPialRoot,
-    (strUse + " - default value is pial").c_str()
-  );
-  interface.AddOptionString
-  ( "aseg_name", &asegName,
-    "default value is aseg, allows name override"
-  );
-  interface.AddOptionString
-  ( "out_root", &outRoot,
-    "default value is ribbon - output will then be mri/ribbon.mgz and "
-    "mri/lh.ribbon.mgz and mri/rh.ribbon.mgz "
-    "(last 2 if -save_ribbon is used)"
-  );
-  interface.AddOptionInt
-  ( (slbl+"background").c_str(), &iBackground,
-    "override default value for background label value (0)"
-  );
-  interface.AddOptionInt
-  ( (slbl+sl+sw).c_str(), &iLeftWhite,
-    "override default value for left white matter label - 20"
-  );
-  interface.AddOptionInt
-  ( (slbl+sl+srib).c_str(), &iLeftRibbon,
-    "override default value for left ribbon label - 10"
-  );
-  interface.AddOptionInt
-  ( (slbl+sr+sw).c_str(), &iRightWhite,
-    "override default value for right white matter label - 120"
-  );
-  interface.AddOptionInt
-  ( (slbl+sr+srib).c_str(), &iRightRibbon,
-    "override default value for right ribbon label - 110"
-  );
-  interface.AddOptionFloat
-  ( "cap_distance", &capValue,
-    (char*)"maximum distance up to which the signed distance function "
-    "computation is accurate"
-  );
-  interface.AddOptionBool
-  ( "save_distance", &bSaveDistance,
-    "option to save the signed distance function as ?h.dwhite.mgz "
-    "?h.dpial.mgz in the mri directory"
-  );
-  interface.AddOptionBool( "lh-only", &bLHOnly,"only analyze the left hemi");
-  interface.AddOptionBool( "rh-only", &bRHOnly,"only analyze the right hemi");
-  interface.AddOptionBool( "parallel", &bParallel,"run hemis in parallel");
-  interface.AddOptionBool
-  ( "edit_aseg", &bEditAseg,
-    "option to edit the aseg using the ribbons and save to "
-    "aseg.ribbon.mgz in the mri directory"
-  );
-  interface.AddOptionBool
-  ( "save_ribbon", &bSaveRibbon,
-    "option to save just the ribbon for the hemispheres - "
-    "in the format ?h.ribbon.mgz"
-  );
-  interface.AddOptionString
-  ( "sd", &subjectsDir,
-    "option to specify SUBJECTS_DIR, default is read from enviro"
-  );
+  interface.AddOptionBool("help", &showHelp, "display help message");
+  interface.AddOptionBool("usage", &showHelp, "display help message");
+  interface.AddOptionString((ssurf + sw).c_str(), &surfWhiteRoot,
+                            (strUse + " - default value is white").c_str());
+  interface.AddOptionString((ssurf + "pial").c_str(), &surfPialRoot,
+                            (strUse + " - default value is pial").c_str());
+  interface.AddOptionString("aseg_name", &asegName,
+                            "default value is aseg, allows name override");
+  interface.AddOptionString(
+      "out_root", &outRoot,
+      "default value is ribbon - output will then be mri/ribbon.mgz and "
+      "mri/lh.ribbon.mgz and mri/rh.ribbon.mgz "
+      "(last 2 if -save_ribbon is used)");
+  interface.AddOptionInt(
+      (slbl + "background").c_str(), &iBackground,
+      "override default value for background label value (0)");
+  interface.AddOptionInt(
+      (slbl + sl + sw).c_str(), &iLeftWhite,
+      "override default value for left white matter label - 20");
+  interface.AddOptionInt((slbl + sl + srib).c_str(), &iLeftRibbon,
+                         "override default value for left ribbon label - 10");
+  interface.AddOptionInt(
+      (slbl + sr + sw).c_str(), &iRightWhite,
+      "override default value for right white matter label - 120");
+  interface.AddOptionInt((slbl + sr + srib).c_str(), &iRightRibbon,
+                         "override default value for right ribbon label - 110");
+  interface.AddOptionFloat(
+      "cap_distance", &capValue,
+      (char *)"maximum distance up to which the signed distance function "
+              "computation is accurate");
+  interface.AddOptionBool(
+      "save_distance", &bSaveDistance,
+      "option to save the signed distance function as ?h.dwhite.mgz "
+      "?h.dpial.mgz in the mri directory");
+  interface.AddOptionBool("lh-only", &bLHOnly, "only analyze the left hemi");
+  interface.AddOptionBool("rh-only", &bRHOnly, "only analyze the right hemi");
+  interface.AddOptionBool("parallel", &bParallel, "run hemis in parallel");
+  interface.AddOptionBool(
+      "edit_aseg", &bEditAseg,
+      "option to edit the aseg using the ribbons and save to "
+      "aseg.ribbon.mgz in the mri directory");
+  interface.AddOptionBool(
+      "save_ribbon", &bSaveRibbon,
+      "option to save just the ribbon for the hemispheres - "
+      "in the format ?h.ribbon.mgz");
+  interface.AddOptionString(
+      "sd", &subjectsDir,
+      "option to specify SUBJECTS_DIR, default is read from enviro");
   interface.AddIoItem(&subject, " subject (required param!)");
 
   // if ac == 0, then print complete help

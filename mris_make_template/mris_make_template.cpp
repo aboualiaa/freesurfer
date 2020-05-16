@@ -35,21 +35,7 @@ static char *surf_dir        = "surf";
 static char *annot_name      = nullptr;
 static char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
 
-static const char *surf_dir = "surf" ;
-static char *annot_name = NULL ;
-static const char *surface_names[] =
-  {
-    "inflated",
-    "smoothwm",
-    "smoothwm"
-  } ;
-
-static const char *curvature_names[] =
-  {
-    "inflated.H",
-    "sulc",
-    NULL
-  } ;
+static const char *curvature_names[] = {"inflated.H", "sulc", NULL};
 
 #define IMAGES_PER_SURFACE 3 /* mean, variance, and dof */
 #define SURFACES           sizeof(curvature_names) / sizeof(curvature_names[0])
@@ -68,8 +54,8 @@ static int  base_default = 1; /* using default vector fields */
 static int  atlas_size   = 3;
 
 #define MAX_OVERLAYS 1000
-static int noverlays = 0 ;
-static char *overlays[MAX_OVERLAYS] ;
+static int         noverlays = 0;
+static char *      overlays[MAX_OVERLAYS];
 static const char *overlay_dir = "label";
 
 static int which_norm = NORM_MEAN;
@@ -534,62 +520,47 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
   if (!stricmp(option, "help") || !stricmp(option, "-help"))
     print_help();
   else if (!stricmp(option, "version") || !stricmp(option, "-version"))
-    print_version() ;
-  else if (!stricmp(option, "nbrs"))
-  {
-    nbrs = atoi(argv[2]) ;
-    nargs = 1 ;
-    fprintf(stderr, "using neighborhood size = %d\n", nbrs) ;
-  }
-  else if (!stricmp(option, "sdir"))
-  {
-    strcpy(subjects_dir, argv[2]) ;
-    nargs = 1 ;
-    fprintf(stderr, "using SUBJECTS_DIR=%s\n", subjects_dir) ;
-  }
-  else if (!stricmp(option, "median"))
-  {
-    which_norm = NORM_MEDIAN ;
-    printf("using median normalization\n") ;
-  }
-  else if (!stricmp(option, "nonorm"))
-  {
-    which_norm = NORM_NONE ;
-    printf("not normalizing input data\n") ;
-  }
-  else if (!stricmp(option, "infname"))
-  {
-    char fname[STRLEN] ;
-    surface_names[0] = argv[2] ;
-    nargs = 1 ;
-    printf("using %s instead of inflated\n", argv[2]) ;
-    sprintf(fname, "%s.H", argv[2]) ;
-    curvature_names[0] = (char *)calloc(strlen(fname)+1, sizeof(char)) ;
-    strcpy(const_cast<char*>(curvature_names[0]), fname) ; // const_cast and strcpy
-  }
-  else if (!stricmp(option, "sulc"))
-  {
-    nargs = 1 ;
-    printf("using %s instead of sulc\n", argv[2]) ;
-    curvature_names[1] = (char *)calloc(strlen(argv[2])+1, sizeof(char)) ;
-    strcpy(const_cast<char*>(curvature_names[1]), argv[2]) ; // const_cast and strcpy
-  }
-  else if (!stricmp(option, "norot"))
-  {
-    no_rot = 1 ;
-    fprintf(stderr, "not aligning hemispheres before averaging.\n") ;
-  }
-  else if (!stricmp(option, "rot"))
-  {
-    no_rot = 0 ;
-    fprintf(stderr, "rigidly aligning hemispheres before averaging.\n") ;
-  }
-  else if (!stricmp(option, "nodefault"))
-  {
-    base_default=0;
-    atlas_size = 0;
-    parms->nfields=0;
-    for (n=0;n<3;n++)
+    print_version();
+  else if (!stricmp(option, "nbrs")) {
+    nbrs  = atoi(argv[2]);
+    nargs = 1;
+    fprintf(stderr, "using neighborhood size = %d\n", nbrs);
+  } else if (!stricmp(option, "sdir")) {
+    strcpy(subjects_dir, argv[2]);
+    nargs = 1;
+    fprintf(stderr, "using SUBJECTS_DIR=%s\n", subjects_dir);
+  } else if (!stricmp(option, "median")) {
+    which_norm = NORM_MEDIAN;
+    printf("using median normalization\n");
+  } else if (!stricmp(option, "nonorm")) {
+    which_norm = NORM_NONE;
+    printf("not normalizing input data\n");
+  } else if (!stricmp(option, "infname")) {
+    char fname[STRLEN];
+    surface_names[0] = argv[2];
+    nargs            = 1;
+    printf("using %s instead of inflated\n", argv[2]);
+    sprintf(fname, "%s.H", argv[2]);
+    curvature_names[0] = (char *)calloc(strlen(fname) + 1, sizeof(char));
+    strcpy(const_cast<char *>(curvature_names[0]),
+           fname); // const_cast and strcpy
+  } else if (!stricmp(option, "sulc")) {
+    nargs = 1;
+    printf("using %s instead of sulc\n", argv[2]);
+    curvature_names[1] = (char *)calloc(strlen(argv[2]) + 1, sizeof(char));
+    strcpy(const_cast<char *>(curvature_names[1]),
+           argv[2]); // const_cast and strcpy
+  } else if (!stricmp(option, "norot")) {
+    no_rot = 1;
+    fprintf(stderr, "not aligning hemispheres before averaging.\n");
+  } else if (!stricmp(option, "rot")) {
+    no_rot = 0;
+    fprintf(stderr, "rigidly aligning hemispheres before averaging.\n");
+  } else if (!stricmp(option, "nodefault")) {
+    base_default   = 0;
+    atlas_size     = 0;
+    parms->nfields = 0;
+    for (n = 0; n < 3; n++)
       InitFieldLabel(&parms->fields[n]);
   } else if (!stricmp(option, "size")) {
     int size = atoi(argv[2]);

@@ -484,7 +484,7 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
     MRIwrite(mri_mean, (outdir + "template-it0.mgz").c_str());
   }
 
-  // cout << "template fname: " << mri_mean->fname << endl;
+  // std::cout << "template fname: " << mri_mean->fname << std::endl;
 
   //  int itmax  = 10;
   //  double eps = 0.025;
@@ -539,9 +539,9 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
     std::cout << std::endl
               << "======================================================="
               << std::endl;
-    // cout << "========================================" << endl;
+    // std::cout << "========================================" << std::endl;
     // printmemusage();
-    // cout << "========================================" << endl << endl;
+    // std::cout << "========================================" << endl << std::endl;
 
     if (itcount <= 4 && noxformits[itcount - 1] > 0)
       std::cout << "  noxformits = " << noxformits[itcount - 1] << std::endl;
@@ -710,10 +710,10 @@ bool MultiRegistration::computeTemplate(int itmax, double eps, int iterate,
         mri_weights[i] = MRIcopy(R.getWeights(), mri_weights[i]);
       }
 
-      // cout << " LS difference after: " <<
-      // CF.leastSquares(mri_aligned,P.mri_dst) << endl;
-      // cout << " NC difference after: " <<
-      // CF.normalizedCorrelation(mri_aligned,P.mri_dst) << endl;
+      // std::cout << " LS difference after: " <<
+      // CF.leastSquares(mri_aligned,P.mri_dst) << std::endl;
+      // std::cout << " NC difference after: " <<
+      // CF.normalizedCorrelation(mri_aligned,P.mri_dst) << std::endl;
 
       if (debug) {
 #ifdef HAVE_OPENMP
@@ -897,7 +897,7 @@ bool MultiRegistration::halfWayTemplate(int maxres, int iterate, double epsit,
   LTA *d2hwlta      = LTAalloc(1, mri_mov[1]);
   if (!vox2vox) // do ras to ras
   {
-    // cout << "converting VOX to RAS and saving RAS2RAS..." << endl ;
+    // std::cout << "converting VOX to RAS and saving RAS2RAS..." << endl ;
     // (use geometry of destination space for half-way) WIll NOT WORK FOR
     // nonistorpic due to internal resampling
     m2hwlta->xforms[0].m_L = MyMatrix::convertVNL2MATRIX(maps2weights.first);
@@ -911,7 +911,7 @@ bool MultiRegistration::halfWayTemplate(int maxres, int iterate, double epsit,
     d2hwlta->type = LINEAR_RAS_TO_RAS;
   } else // vox to vox
   {
-    // cout << "saving VOX2VOX..." << endl ;
+    // std::cout << "saving VOX2VOX..." << endl ;
     m2hwlta->xforms[0].m_L =
         MyMatrix::convertVNL2MATRIX(maps2weights.first, m2hwlta->xforms[0].m_L);
     m2hwlta->type          = LINEAR_VOX_TO_VOX;
@@ -1030,9 +1030,9 @@ vnl_matrix_fixed<double, 3, 3> MultiRegistration::getAverageCosines() {
     //    vnl_matrix_fixed<double, 3, 3> v2v = v2rconf.transpose() * cosM[i];
     vnl_matrix_fixed<double, 3, 3> v2v = cosM[0].transpose() * cosM[i];
 
-    // cout << " v2v[" << i << "] = " << endl;
+    // std::cout << " v2v[" << i << "] = " << std::endl;
     // vnl_matlab_print(std::cout,v2v,"v2v",vnl_matlab_print_format_long);
-    // cout << endl;
+    // std::cout << std::endl;
 
     // swap (and possibly invert) axis, so that rotation gets smaller
     int xd = 1;
@@ -1084,9 +1084,9 @@ vnl_matrix_fixed<double, 3, 3> MultiRegistration::getAverageCosines() {
         exit(1);
       }
 
-      // cout << "   Reordering axes in mov "<< i << " to better fit first
+      // std::cout << "   Reordering axes in mov "<< i << " to better fit first
       // mov... ( " << xd << " " << yd
-      //    << " " << zd << " )" << endl;
+      //    << " " << zd << " )" << std::endl;
 
       vnl_matrix_fixed<double, 3, 3> Q(0.0);
       Q[0][abs(xd) - 1] = (xd >= 0 ? 1 : -1);
@@ -1097,9 +1097,9 @@ vnl_matrix_fixed<double, 3, 3> MultiRegistration::getAverageCosines() {
 
     } // end reorder
 
-    // cout << " v2r[" << i << "] = " << endl;
+    // std::cout << " v2r[" << i << "] = " << std::endl;
     // vnl_matlab_print(std::cout,cosM[i],"cosM",vnl_matlab_print_format_long);
-    // cout << endl;
+    // std::cout << std::endl;
 
     // once axes are all ordered the same, we can average cosines
     // by computing the mean and projecting it back to rotation space
@@ -1443,8 +1443,8 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
 
   for (int i = 1; i < nin; i++) {
     int j = index[i];
-    // cout << "  computing coord of TP " << j + 1 << " ( " << mov[j] << " )" <<
-    // endl; cout << "   wrt to TP " << tpi + 1 << " ( " << mov[tpi] << " )" <<
+    // std::cout << "  computing coord of TP " << j + 1 << " ( " << mov[j] << " )" <<
+    // endl; std::cout << "   wrt to TP " << tpi + 1 << " ( " << mov[tpi] << " )" <<
     // endl;
     mras[i] =
         MyMRI::MRIvoxelXformToRasXform(mri_mov[j], mri_mov[tpi], Md[i].first);
@@ -1643,7 +1643,7 @@ std::endl; vnl_matrix<double> R(3, 3), S(3, 3), A(3, 3), I(3, 3);
 
 //         double eps = 0.0000001;
       double fnorm1 = (S - I).frobenius_norm();
-      cout << "   mapping back to rot, err = " << fnorm1 << endl;
+      std::cout << "   mapping back to rot, err = " << fnorm1 << std::endl;
 //         if (fnorm1 > eps)
 //         {
 //           std::cerr << "Internal Error: " << std::endl;
@@ -1861,9 +1861,9 @@ bool MultiRegistration::writeWarps(const std::vector<std::string> &nwarps) {
       // lsavg += ls[i];
     }
     // vnl_matlab_print(std::cout,ls,"tb",vnl_matlab_print_format_long);
-    // cout << endl;
-    // cout << " tbavg: " << lsavg/nwarps.size() << endl;
-    // cout << " tbavga: " << lsavga/count << endl;
+    // std::cout << std::endl;
+    // std::cout << " tbavg: " << lsavg/nwarps.size() << std::endl;
+    // std::cout << " tbavga: " << lsavga/count << std::endl;
   }
   return (error == 0);
 }
@@ -1917,11 +1917,11 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
 
   //    for(uint i = 0;i<set.size();i++)
   //    {
-  //       cout << " TP " << i+1 << endl;
-  //       cout << " mean   : " << CostFunctions::mean(set[i])   << endl;
-  //       cout << " sdev   : " << CostFunctions::sdev(set[i])   << endl;
-  //       cout << " median : " << CostFunctions::median(set[i]) << endl;
-  //       cout << " mad    : " << CostFunctions::mad(set[i])    << endl;
+  //       std::cout << " TP " << i+1 << std::endl;
+  //       std::cout << " mean   : " << CostFunctions::mean(set[i])   << std::endl;
+  //       std::cout << " sdev   : " << CostFunctions::sdev(set[i])   << std::endl;
+  //       std::cout << " median : " << CostFunctions::median(set[i]) << std::endl;
+  //       std::cout << " mad    : " << CostFunctions::mad(set[i])    << std::endl;
   //     }
 
   if (method == 0) {
@@ -1974,20 +1974,20 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
     for (z = 0; z < set[0]->depth; z++)
       for (y = 0; y < set[0]->height; y++)
         for (x = 0; x < set[0]->width; x++) {
-          // cout << " x: " << x << " y: " << y << " z: " <<z << "  size: " <<
+          // std::cout << " x: " << x << " y: " << y << " z: " <<z << "  size: " <<
           // set.size() <<endl;
           for (i = 0; i < (int)set.size(); i++) {
-            // cout << "i: " << i << endl;
+            // std::cout << "i: " << i << std::endl;
             // b->rptr[i+1][1] = MRIgetVoxVal(set[i],x,y,z,0);
             b[i] = MRIgetVoxVal(set[i], x, y, z, 0);
           }
-          // cout << endl << "intgensities at this voxel:" << endl; ;
+          // std::cout << endl << "intgensities at this voxel:" << std::endl; ;
           // MatrixPrintFmt(stdout,"% 2.8f",b);
 
           Regression<float> R(b);
           vnl_vector<float> p = R.getRobustEst(sat);
           // muw = R.getRobustEstW(sat);
-          //    cout << " tukey mean: " << muw.first->rptr[1][1] << endl;
+          //    std::cout << " tukey mean: " << muw.first->rptr[1][1] << std::endl;
           // MRIsetVoxVal(mean,x,y,z,0,muw.first->rptr[1][1]);
           MRIsetVoxVal(mean, x, y, z, 0, p[0]);
           // MatrixFree(&muw.first);
@@ -2018,9 +2018,9 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
       for (z = 0; z < set[0]->depth; z++)
         for (y = 0; y < set[0]->height; y++)
           for (x = 0; x < set[0]->width; x++) {
-            // cout << " x: " << x << " y: " << y << " z: " <<z << "  size: " <<
+            // std::cout << " x: " << x << " y: " << y << " z: " <<z << "  size: " <<
             // set.size() <<endl;
-            // cout << "i: " << i << endl;
+            // std::cout << "i: " << i << std::endl;
             //             b->rptr[pcount*set.size()+i+1][1] =
             //               MRIgetVoxVal(set[i],x,y,z,0);
             //             A->rptr[pcount*set.size()+i+1][pcount+1] = 1;
@@ -2029,13 +2029,13 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
             pcount++;
           }
     }
-    // cout << endl << "intgensities at this voxel:" << endl; ;
+    // std::cout << endl << "intgensities at this voxel:" << std::endl; ;
     // MatrixPrintFmt(stdout,"% 2.8f",b);
 
     Regression<float> R(A, b);
     // muw = R.getRobustEstW(sat);
     vnl_vector<float> p = R.getRobustEst(sat);
-    //    cout << " tukey mean: " << muw.first->rptr[1][1] << endl;
+    //    std::cout << " tukey mean: " << muw.first->rptr[1][1] << std::endl;
     int pcount = 0;
     for (z = 0; z < set[0]->depth; z++)
       for (y = 0; y < set[0]->height; y++)
@@ -2053,11 +2053,11 @@ MRI *MultiRegistration::averageSet(const std::vector<MRI *> &set, MRI *mean,
     std::cerr << " averageSet  method " << method << " unknown" << std::endl;
     exit(1);
   }
-  //       cout << " Average Vol "  << endl;
-  //       cout << " mean   : " << CostFunctions::mean(mean) << endl;
-  //       cout << " sdev   : " << CostFunctions::sdev(mean) << endl;
-  //       cout << " median : " << CostFunctions::median(mean) << endl;
-  //       cout << " mad    : " << CostFunctions::mad(mean)<< endl;
+  //       std::cout << " Average Vol "  << std::endl;
+  //       std::cout << " mean   : " << CostFunctions::mean(mean) << std::endl;
+  //       std::cout << " sdev   : " << CostFunctions::sdev(mean) << std::endl;
+  //       std::cout << " median : " << CostFunctions::median(mean) << std::endl;
+  //       std::cout << " mad    : " << CostFunctions::mad(mean)<< std::endl;
   printf("       -- Template : (%g, %g, %g)mm and (%d, %d, %d) voxels.\n",
          mean->xsize, mean->ysize, mean->zsize, mean->width, mean->height,
          mean->depth);
@@ -2123,8 +2123,8 @@ bool MultiRegistration::initialAverageSet() {
       for (uint ii = 0; ii < 3; ii++)
         centroids[i][ii] = ncenter[ii];
 
-      // cout << " Centroid [ " << i << " ] = " << centroids[i][0] << " " <<
-      // centroids[i][1] << " " << centroids[i][2] << endl;
+      // std::cout << " Centroid [ " << i << " ] = " << centroids[i][0] << " " <<
+      // centroids[i][1] << " " << centroids[i][2] << std::endl;
       centroid[0] += centroids[i][0];
       centroid[1] += centroids[i][1];
       centroid[2] += centroids[i][2];
@@ -2132,8 +2132,8 @@ bool MultiRegistration::initialAverageSet() {
     centroid[0] /= n;
     centroid[1] /= n;
     centroid[2] /= n;
-    // cout << " Centroid : " << centroid[0] << " " << centroid[1] << " " <<
-    // centroid[2]  << endl;
+    // std::cout << " Centroid : " << centroid[0] << " " << centroid[1] << " " <<
+    // centroid[2]  << std::endl;
 
     if (!mri_mean) // default:
     {

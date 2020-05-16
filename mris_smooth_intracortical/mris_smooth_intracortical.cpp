@@ -45,6 +45,8 @@
 
 #include "mrisurf.h"
 #include "tags.h"
+#include "version.h"
+
 #include <glob.h>
 #include <libgen.h>
 
@@ -69,8 +71,6 @@ static void print_version();
 static char vcid[] =
     "$Id: mris_smooth_intracortical.c,v 1.30 2019/02/21 18:48:21 Anna Exp $";
 const char *Progname = nullptr;
-
-const char *Progname = NULL;
 
 char surf_path[STRLEN], over_path[STRLEN], out_path[STRLEN], surf_name[STRLEN],
     over_name[STRLEN], surf_dir[STRLEN], over_dir[STRLEN], out_dir[STRLEN],

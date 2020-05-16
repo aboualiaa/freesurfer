@@ -1136,8 +1136,8 @@ void s_env_scan(s_env &st_env) {
     str_rel2absDirSpec_change(str_surfaceFileName, str_surfaceFileNameAbs);
     str_rel2absDirSpec_change(str_auxSurfaceFileName,
                               str_auxSurfaceFileNameAbs);
-    // cout << "-->" << str_surfaceFileNameAbs << endl;
-    // cout << "-->" << str_auxSurfaceFileNameAbs << endl;
+    // std::cout << "-->" << str_surfaceFileNameAbs << std::endl;
+    // std::cout << "-->" << str_auxSurfaceFileNameAbs << std::endl;
     ULOUT("Reading primary surface mesh...");
     pMS_primary = MRISread((char *)str_surfaceFileNameAbs.c_str());
     if (!pMS_primary) {
@@ -1163,7 +1163,7 @@ void s_env_scan(s_env &st_env) {
   if (str_curvatureFileName != str_curvatureFileNameOld &&
       st_env.b_primaryCurvature) {
     str_rel2absDirSpec_change(str_curvatureFileName, str_curvatureFileNameAbs);
-    // cout << "-->" << str_curvatureFileNameAbs << endl;
+    // std::cout << "-->" << str_curvatureFileNameAbs << std::endl;
     ULOUT("Mapping curvature texture on primary surface...");
     if (MRISreadCurvature(pMS_primary,
                           (char *)str_curvatureFileNameAbs.c_str()) !=
@@ -1179,7 +1179,7 @@ void s_env_scan(s_env &st_env) {
       st_env.b_secondaryCurvature) {
     str_rel2absDirSpec_change(str_secondaryCurvatureFile,
                               str_secondaryCurvatureFileAbs);
-    // cout << "-->" << str_secondaryCurvatureFileAbs << endl;
+    // std::cout << "-->" << str_secondaryCurvatureFileAbs << std::endl;
     ULOUT("Mapping secondary texture on secondary surface...");
     if (MRISreadCurvature(pMS_secondary,
                           (char *)str_secondaryCurvatureFileAbs.c_str()) !=

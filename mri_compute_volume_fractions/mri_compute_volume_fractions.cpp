@@ -47,27 +47,27 @@ int            debug         = 0;
 int            checkoptsonly = 0;
 struct utsname uts;
 
-char *TempVolFile=NULL;
-char *subject, *subjectoverride=NULL, *SUBJECTS_DIR;
-char *regfile=NULL;
-char *outstem=NULL,*stackfile=NULL,*gmfile=NULL;
-int USF=2;
-const char *wsurf = "white";
-const char *psurf = "pial";
-const char *asegfile="aseg.mgz";
-char *outsegfile=NULL,*ttsegfile=NULL,*ttsegctabfile=NULL;
-char *csfmaskfile = NULL;
-COLOR_TABLE *ct=NULL;
-char tmpstr[5000];
-const char *fmt = "mgz";
-LTA *aseg2vol=NULL;
-int regtype;
-int nOptUnknown = 0;
-int UseAseg = 1;
-int FillCSF=1;
-int nDil=3;
-int RegHeader=0;
-double resmm=0;
+char *       TempVolFile = NULL;
+char *       subject, *subjectoverride = NULL, *SUBJECTS_DIR;
+char *       regfile = NULL;
+char *       outstem = NULL, *stackfile = NULL, *gmfile = NULL;
+int          USF        = 2;
+const char * wsurf      = "white";
+const char * psurf      = "pial";
+const char * asegfile   = "aseg.mgz";
+char *       outsegfile = NULL, *ttsegfile = NULL, *ttsegctabfile = NULL;
+char *       csfmaskfile = NULL;
+COLOR_TABLE *ct          = NULL;
+char         tmpstr[5000];
+const char * fmt      = "mgz";
+LTA *        aseg2vol = NULL;
+int          regtype;
+int          nOptUnknown = 0;
+int          UseAseg     = 1;
+int          FillCSF     = 1;
+int          nDil        = 3;
+int          RegHeader   = 0;
+double       resmm       = 0;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {

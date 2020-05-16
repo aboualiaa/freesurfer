@@ -349,34 +349,34 @@ static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
 static int  singledash(char *flag);
-int GetNVtxsFromWFile(const char *wfile);
-int GetICOOrderFromValFile(const char *filename, const char *fmt);
-int GetNVtxsFromValFile(const char *filename, const char *fmt);
-int dump_surf(char *fname, MRIS *surf, MRI *mri);
-MATRIX *MRIleftRightRevMatrix(MRI *mri);
+int         GetNVtxsFromWFile(const char *wfile);
+int         GetICOOrderFromValFile(const char *filename, const char *fmt);
+int         GetNVtxsFromValFile(const char *filename, const char *fmt);
+int         dump_surf(char *fname, MRIS *surf, MRI *mri);
+MATRIX *    MRIleftRightRevMatrix(MRI *mri);
 
 int main(int argc, char *argv[]);
 
 const char *Progname = NULL;
 
 const char *srcsurfregfile = NULL;
-char *srchemi    = NULL;
+char *      srchemi        = NULL;
 const char *trgsurfregfile = NULL;
-char *trghemi    = NULL;
+char *      trghemi        = NULL;
 
-char *srcsubject = NULL;
-char *srcvalfile = NULL;
-const char *srctypestring = "";
-int   srctype = MRI_VOLUME_TYPE_UNKNOWN;
-MRI  *SrcVals, *SrcHits, *SrcDist;
+char *       srcsubject    = NULL;
+char *       srcvalfile    = NULL;
+const char * srctypestring = "";
+int          srctype       = MRI_VOLUME_TYPE_UNKNOWN;
+MRI *        SrcVals, *SrcHits, *SrcDist;
 MRI_SURFACE *SrcSurfReg;
 char *       SrcHitFile  = nullptr;
 char *       SrcDistFile = nullptr;
 int          nSrcVtxs    = 0;
 int          SrcIcoOrder = -1;
 
-int UseSurfSrc=0; // Get source values from surface, eg, xyz
-const char *SurfSrcName=NULL;
+int          UseSurfSrc  = 0; // Get source values from surface, eg, xyz
+const char * SurfSrcName = NULL;
 MRI_SURFACE *SurfSrc, *SurfTrg;
 MATRIX *     XFM = nullptr, *XFMSubtract = nullptr;
 #define SURF_SRC_XYZ     1
@@ -385,15 +385,15 @@ MATRIX *     XFM = nullptr, *XFMSubtract = nullptr;
 #define SURF_SRC_NXYZ    4 // surface normals
 #define SURF_SRC_RIP     5 // rip flag
 #define SURF_SRC_ANNOT   6 // surface annotation
-int UseSurfTarg=0; // Put Src XYZ into a target surface
-int ApplyReg=0;
-char *AnnotFile = NULL;
+int   UseSurfTarg = 0;     // Put Src XYZ into a target surface
+int   ApplyReg    = 0;
+char *AnnotFile   = NULL;
 
-char *trgsubject = NULL;
-char *trgvalfile = NULL;
-const char *trgtypestring = "";
-int   trgtype = MRI_VOLUME_TYPE_UNKNOWN;
-MRI  *TrgVals, *TrgValsSmth, *TrgHits, *TrgDist;
+char *       trgsubject    = NULL;
+char *       trgvalfile    = NULL;
+const char * trgtypestring = "";
+int          trgtype       = MRI_VOLUME_TYPE_UNKNOWN;
+MRI *        TrgVals, *TrgValsSmth, *TrgHits, *TrgDist;
 MRI_SURFACE *TrgSurfReg;
 char *       TrgHitFile  = nullptr;
 char *       TrgDistFile = nullptr;
@@ -1359,40 +1359,39 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[1], "%lf", &ProjDepth);
       UseSurfSrc  = SURF_SRC_XYZ;
       UseSurfTarg = 1;
-      DoProj = 1;
-      nargsused = 2;
-    } 
-    else if (!strcmp(option, "--projfrac")) {
-      if(nargc < 2) {
-        argnerr(option,2);
+      DoProj      = 1;
+      nargsused   = 2;
+    } else if (!strcmp(option, "--projfrac")) {
+      if (nargc < 2) {
+        argnerr(option, 2);
       }
       ProjType    = 2;
       SurfSrcName = pargv[0];
       sscanf(pargv[1], "%lf", &ProjDepth);
       UseSurfSrc  = SURF_SRC_XYZ;
       UseSurfTarg = 1;
-      DoProj = 1;
-      nargsused = 2;
-    } 
-    else if (!strcmp(option, "--proj-norm")) {
+      DoProj      = 1;
+      nargsused   = 2;
+    } else if (!strcmp(option, "--proj-norm")) {
       // --proj-norm sourcesurf projdistmm outsurf
-      if(nargc < 3) argnerr(option,2);
+      if (nargc < 3)
+        argnerr(option, 2);
       MRIS *surf = MRISread(pargv[0]);
-      if(surf == NULL) exit(1);
+      if (surf == NULL)
+        exit(1);
       double dist;
-      sscanf(pargv[1],"%lf",&dist);
+      sscanf(pargv[1], "%lf", &dist);
       int n;
-      for(n=0; n < surf->nvertices; n++) {
-	float x,y,z;
-	ProjNormDist(&x, &y, &z,surf, n, dist);
-	MRISsetXYZ(surf,n, x,y,z);
+      for (n = 0; n < surf->nvertices; n++) {
+        float x, y, z;
+        ProjNormDist(&x, &y, &z, surf, n, dist);
+        MRISsetXYZ(surf, n, x, y, z);
       }
-      int err = MRISwrite(surf,pargv[2]);
+      int err = MRISwrite(surf, pargv[2]);
       exit(err);
-    } 
-    else if (!strcmp(option, "--reshape-factor")) {
-      if(nargc < 1) {
-        argnerr(option,1);
+    } else if (!strcmp(option, "--reshape-factor")) {
+      if (nargc < 1) {
+        argnerr(option, 1);
       }
       sscanf(pargv[0], "%d", &reshapefactortarget);
       reshape   = 1;
@@ -1883,8 +1882,10 @@ static void print_usage() {
   printf("   --prune - remove any voxel that is zero in any time point (for "
          "smoothing)\n");
   printf("   --no-prune - do not prune (default)\n");
-  printf("   --proj-surf surf projmagfile scale outsurf : project vertices by mag*scale at each vertex\n");
-  printf("   --proj-norm sourcesurf distmm outsurf : project vertices by distmm at each vertex\n");
+  printf("   --proj-surf surf projmagfile scale outsurf : project vertices by "
+         "mag*scale at each vertex\n");
+  printf("   --proj-norm sourcesurf distmm outsurf : project vertices by "
+         "distmm at each vertex\n");
   printf("\n");
   printf("   --reg-diff reg2 : subtract reg2 from --reg (primarily for "
          "testing)\n");
@@ -2437,11 +2438,10 @@ static int singledash(char *flag) {
 }
 
 /*---------------------------------------------------------------*/
-int GetNVtxsFromWFile(const char *wfile)
-{
-  FILE *fp;
-  int i,ilat, num, nvertices;
-  int *vtxnum;
+int GetNVtxsFromWFile(const char *wfile) {
+  FILE * fp;
+  int    i, ilat, num, nvertices;
+  int *  vtxnum;
   float *wval;
 
   fp = fopen(wfile, "r");
@@ -2472,11 +2472,10 @@ int GetNVtxsFromWFile(const char *wfile)
 }
 // MRI *MRIreadHeader(char *fname, int type);
 /*---------------------------------------------------------------*/
-int GetNVtxsFromValFile(const char *filename, const char *typestring)
-{
+int GetNVtxsFromValFile(const char *filename, const char *typestring) {
   //int err,nrows, ncols, nslcs, nfrms, endian;
-  int nVtxs=0;
-  int type;
+  int  nVtxs = 0;
+  int  type;
   MRI *mri;
 
   printf("GetNVtxs: %s %s\n", filename, typestring);
@@ -2504,9 +2503,8 @@ int GetNVtxsFromValFile(const char *filename, const char *typestring)
   return (nVtxs);
 }
 /*---------------------------------------------------------------*/
-int GetICOOrderFromValFile(const char *filename, const char *fmt)
-{
-  int nIcoVtxs,IcoOrder;
+int GetICOOrderFromValFile(const char *filename, const char *fmt) {
+  int nIcoVtxs, IcoOrder;
 
   nIcoVtxs = GetNVtxsFromValFile(filename, fmt);
 

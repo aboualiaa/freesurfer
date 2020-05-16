@@ -45,22 +45,19 @@
 
 static MATRIX *LoadMNITransform(char *regfile, int ncols, int nrows,
                                 int nslices, MATRIX **ppCRS2FSA,
-                                MATRIX **ppFSA2Func,
-                                float *colres, float *rowres,
-                                float *sliceres);
+                                MATRIX **ppFSA2Func, float *colres,
+                                float *rowres, float *sliceres);
 
-
-static MRI *MRIsynthUniform(int ncols, int nrows, int nslices,
-                            int nframes, MRI *tvol);
-static MRI *MRIsynthLogUniform(int ncols, int nrows, int nslices,
-                               int nframes, MRI *tvol);
+static MRI *  MRIsynthUniform(int ncols, int nrows, int nslices, int nframes,
+                              MRI *tvol);
+static MRI *  MRIsynthLogUniform(int ncols, int nrows, int nslices, int nframes,
+                                 MRI *tvol);
 static double Gaussian01PDF(void);
-static MRI *MRIsynthGaussian(int ncols, int nrows, int nslices,
-                             int nframes, MRI *tvol);
-static MRI *MRIbinarize01(MRI *vol, float thmin, float thmax,
-                          const char *thsign, int invert,
-                          int lowval, int highval, int *nhits, MRI *binvol);
-
+static MRI *  MRIsynthGaussian(int ncols, int nrows, int nslices, int nframes,
+                               MRI *tvol);
+static MRI *  MRIbinarize01(MRI *vol, float thmin, float thmax,
+                            const char *thsign, int invert, int lowval,
+                            int highval, int *nhits, MRI *binvol);
 
 static int  parse_commandline(int argc, char **argv);
 static void check_options();
@@ -88,13 +85,13 @@ int   frame   = 0;
 int   intype  = MRI_VOLUME_TYPE_UNKNOWN;
 char *intypestring;
 
-char *maskid   = nullptr;
-int   masktype = MRI_VOLUME_TYPE_UNKNOWN;
-char  *masktypestring;
-float maskthresh = 0.5;
-const char  *masksignstring = "abs";
-int   maskinvert = 0;
-int   maskframe  = 0;
+char *      maskid   = nullptr;
+int         masktype = MRI_VOLUME_TYPE_UNKNOWN;
+char *      masktypestring;
+float       maskthresh     = 0.5;
+const char *masksignstring = "abs";
+int         maskinvert     = 0;
+int         maskframe      = 0;
 
 char *outmaskid   = nullptr;
 int   outmasktype = MRI_VOLUME_TYPE_UNKNOWN;
@@ -115,15 +112,15 @@ int   nlabelcluster = -1;
 char *labelfile;
 char *labelbase;
 
-float threshmin  = -1.0;
-float threshmax  = -1.0;
-const char  *signstring = "abs";
-int   threshsign =    0;
-float sizethresh    = 0.0;
-int   sizethreshvox = 0;
-float distthresh    = 0.0;
-int   allowdiag     = 0;
-int   sig2pmax      = 0; // convert max value from -log10(p) to p
+float       threshmin     = -1.0;
+float       threshmax     = -1.0;
+const char *signstring    = "abs";
+int         threshsign    = 0;
+float       sizethresh    = 0.0;
+int         sizethreshvox = 0;
+float       distthresh    = 0.0;
+int         allowdiag     = 0;
+int         sig2pmax      = 0; // convert max value from -log10(p) to p
 
 MRI *        vol, *HitMap, *outvol, *maskvol, *binmask;
 VOLCLUSTER **ClusterList, **ClusterList2;
@@ -1853,11 +1850,11 @@ static double Gaussian01PDF() {
   must have the same dimensions as vol.
   ---------------------------------------------------------------*/
 static MRI *MRIbinarize01(MRI *vol, float thmin, float thmax,
-                          const char *thsign, int invert,
-                          int lowval, int highval, int *nhits, MRI *binvol) {
-  int ncols, nrows, nslices, nframes;
-  int col, row, slice, frame;
-  int ithsign;
+                          const char *thsign, int invert, int lowval,
+                          int highval, int *nhits, MRI *binvol) {
+  int   ncols, nrows, nslices, nframes;
+  int   col, row, slice, frame;
+  int   ithsign;
   short r;
   float val = 0.0;
 

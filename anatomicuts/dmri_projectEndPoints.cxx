@@ -83,7 +83,7 @@ int main(int narg, char *arg[]) {
          << endl
          << "                       -ol left_overlayFile -or right_overlayFile"
          << endl
-         << "		       -ri reference_Image" << endl;
+         << "		       -ri reference_Image" << std::endl;
 
     return EXIT_FAILURE;
   }
@@ -91,12 +91,12 @@ int main(int narg, char *arg[]) {
   // Declaration of Variables for Program to Function
   // TRK file Definition
   enum { Dimension = 3 };
-  typedef int         PixelType;
-  const unsigned int  PointDimension = 3;
-  typedef vector<int> PointDataType;
-  const unsigned int  MaxTopologicalDimension = 3;
-  typedef double      CoordinateType;
-  typedef double      InterpolationWeightType;
+  typedef int              PixelType;
+  const unsigned int       PointDimension = 3;
+  typedef std::vector<int> PointDataType;
+  const unsigned int       MaxTopologicalDimension = 3;
+  typedef double           CoordinateType;
+  typedef double           InterpolationWeightType;
   typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                        MaxTopologicalDimension, CoordinateType,
                                        InterpolationWeightType, PointDataType>
@@ -118,7 +118,7 @@ int main(int narg, char *arg[]) {
   typedef fs::Surface<CoordType, Dimension> SurfType;
 
   // Input Parsing
-  vector<string> TRKFile;
+  std::vector<std::string> TRKFile;
   TRKFile.push_back(gp.follow("Could not find TRK file", "-i"));
   const char *surfaceFileL = gp.follow("Could not find Surface File", "-sl");
   const char *surfaceFileR = gp.follow("Could not find Surface File", "-sr");
@@ -138,17 +138,17 @@ int main(int narg, char *arg[]) {
   MRI *image = MRIread(refImage);
 
   //Outputting the Files to Ensure the correct files were input
-  cerr << endl
-       << "TRK File:           " << TRKFile.at(0) << endl
-       << "Left Surface File:  " << surfaceFileL << endl
-       << "Left Overlay File:  " << overlayFileL << endl
-       << "Right Surface File: " << surfaceFileR << endl
-       << "Right Overlay File: " << overlayFileR << endl
-       << "Reference Image:    " << refImage << endl;
+  std::cerr << std::endl
+            << "TRK File:           " << TRKFile.at(0) << std::endl
+            << "Left Surface File:  " << surfaceFileL << std::endl
+            << "Left Overlay File:  " << overlayFileL << std::endl
+            << "Right Surface File: " << surfaceFileR << std::endl
+            << "Right Overlay File: " << overlayFileR << std::endl
+            << "Reference Image:    " << refImage << std::endl;
 
   // Loading the TRK files into a mesh
-  vector<ColorMeshType::Pointer> *     meshes;
-  vector<vtkSmartPointer<vtkPolyData>> polydatas;
+  std::vector<ColorMeshType::Pointer> *     meshes;
+  std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
   clusterTools->GetPolyDatas(TRKFile, &polydatas, volume);

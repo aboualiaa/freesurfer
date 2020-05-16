@@ -185,7 +185,7 @@ void LayerFCD::InitializeData() {
 #endif
     void *ptr  = m_imageData->GetScalarPointer();
     int * nDim = m_imageData->GetDimensions();
-    // cout << nDim[0] << ", " << nDim[1] << ", " << nDim[2] << endl;
+    // std::cout << nDim[0] << ", " << nDim[1] << ", " << nDim[2] << std::endl;
     memset(ptr, 0,
            ((size_t)m_imageData->GetScalarSize()) * nDim[0] * nDim[1] *
                nDim[2]);

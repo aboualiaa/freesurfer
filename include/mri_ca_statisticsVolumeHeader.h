@@ -451,7 +451,7 @@ public:
               "fTiXNext, fTiXPrev, fTiYNext, fTiYPrev,fTiZNext, fTiZPrev are\n "
               "%f,%f,%f,%f,%f,%f\n",
               fTiXNext, fTiXPrev, fTiYNext, fTiYPrev, fTiZNext, fTiZPrev);
-      cout << cstrMsg;
+      std::cout << cstrMsg;
       sprintf(cstrMsg,
               "fXFractionOfPrev,fXFractionOfNext,fYFractionOfPrev, "
               "fYFractionOfNext,fZFractionOfPrev,fZFractionOfNext are:\n "
@@ -459,8 +459,8 @@ public:
               fXFractionOfPrev, fXFractionOfNext, fYFractionOfPrev,
               fYFractionOfNext, fZFractionOfPrev, fZFractionOfNext);
 
-      cout << cstrMsg;
-      cout << "fInterpolatedValue=" << fInterpolatedValue;
+      std::cout << cstrMsg;
+      std::cout << "fInterpolatedValue=" << fInterpolatedValue;
     }
 
     return fInterpolatedValue;
@@ -557,11 +557,11 @@ public:
 
         sprintf(cstrMsg, "Tal (%f,%f,%f) has the 8 bounding native pts:", fTiX,
                 fTiY, fTiZ);
-        cout << cstrMsg;
+        std::cout << cstrMsg;
         for (int ii = 0; ii < 8; ii++) {
           sprintf(cstrMsg, " (%f,%f,%f) ", arr1DXPoints[ii], arr1DYPoints[ii],
                   arr1DZPoints[ii]);
-          cout << cstrMsg << "\n";
+          std::cout << cstrMsg << "\n";
         }
       }
 
@@ -623,13 +623,13 @@ public:
       }
 
       if (nDebug == 1) {
-        cout << "After adjusting them:\n";
+        std::cout << "After adjusting them:\n";
         for (int ii = 0; ii < 8; ii++) {
           sprintf(cstrMsg, " (%f,%f,%f) ", arr1DXPoints[ii], arr1DYPoints[ii],
                   arr1DZPoints[ii]);
-          cout << cstrMsg << "\n";
+          std::cout << cstrMsg << "\n";
         }
-        cout << "Tal voxel is labeled:\n";
+        std::cout << "Tal voxel is labeled:\n";
       }
 
       int nNumNiVoxelsInTightestBoundingRectanguloid =
@@ -684,8 +684,9 @@ public:
         if (nDebug == 1) {
           int   nLabel            = it->first;
           float fFractionalVolume = it->second.fFractionalArea;
-          cout << "label " << nLabel << " w frac vol " << fFractionalVolume;
-          cout << "\n\n";
+          std::cout << "label " << nLabel << " w frac vol "
+                    << fFractionalVolume;
+          std::cout << "\n\n";
         }
       }
     }

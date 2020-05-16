@@ -158,14 +158,14 @@ bool FSVolume::LoadMRI(const QString &filename, const QString &reg_filename) {
   if ( m_MRI->AutoAlign != NULL )
   {
     MATRIX* M = m_MRI->AutoAlign;
-    cout << M->rptr[1][1] << " " << M->rptr[1][2] << " " << M->rptr[1][3] << " "
+    std::cout << M->rptr[1][1] << " " << M->rptr[1][2] << " " << M->rptr[1][3] << " "
   << M->rptr[1][4] << endl
         << M->rptr[2][1] << " " << M->rptr[2][2] << " " << M->rptr[2][3] << " "
   << M->rptr[2][4] << endl
         << M->rptr[3][1] << " " << M->rptr[3][2] << " " << M->rptr[3][3] << " "
   << M->rptr[3][4] << endl
         << M->rptr[4][1] << " " << M->rptr[4][2] << " " << M->rptr[4][3] << " "
-  << M->rptr[4][4] << endl;
+  << M->rptr[4][4] << std::endl;
   }
   */
 
@@ -1808,13 +1808,13 @@ bool FSVolume::ResizeRotatedImage(MRI *rasMRI, MRI *refTarget,
                     &vox[1], &vox[2]);
   ::MRIworldToVoxel(refTarget, rasPoint[0], rasPoint[1], rasPoint[2], &tvox[0],
                     &tvox[1], &tvox[2]);
-  //  cout << "original: " << origin[0] << " " << origin[1] << " " << origin[2]
-  //  << endl;
+  //  std::cout << "original: " << origin[0] << " " << origin[1] << " " << origin[2]
+  //  << std::endl;
   origin[0] -= (vox[0] * rasMRI->xsize - tvox[0] * refTarget->xsize);
   origin[1] -= (vox[1] * rasMRI->ysize - tvox[1] * refTarget->ysize);
   origin[2] -= (vox[2] * rasMRI->zsize - tvox[2] * refTarget->zsize);
 
-  //  cout << "new: " << origin[0] << " " << origin[1] << " " << origin[2] <<
+  //  std::cout << "new: " << origin[0] << " " << origin[1] << " " << origin[2] <<
   //  endl; fflush(0);
 
   imageData->SetSpacing(rasMRI->xsize, rasMRI->ysize, rasMRI->zsize);
@@ -2371,7 +2371,7 @@ void FSVolume::TargetToRAS(const double *pos_in, double *pos_out) {
   double fpos[3];
   ::MRIvoxelToWorld(m_MRITarget, (float)pos[0], (float)pos[1], (float)pos[2],
                     &fpos[0], &fpos[1], &fpos[2]);
-  //  cout << "out: " << fpos[0] << " " << fpos[1] << " " << fpos[2] << endl;
+  //  std::cout << "out: " << fpos[0] << " " << fpos[1] << " " << fpos[2] << std::endl;
   for (int i = 0; i < 3; i++) {
     pos_out[i] = fpos[i];
   }

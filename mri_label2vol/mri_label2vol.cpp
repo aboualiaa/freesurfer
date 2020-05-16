@@ -77,68 +77,69 @@ int main(int argc, char *argv[]);
 const char *Progname = NULL;
 
 char *LabelList[100];
-int nlabels = 0;
+int   nlabels = 0;
 
-char *TempVolId = NULL;
-char *RegMatFile = NULL;
-int RegHeader = 0; 
-int RegIdentity = 0; 
-int InvertMtx = 0;
-double FillThresh = 0.0;
-double ProjDelta = .1;
-double ProjStart = 0;
-double ProjStop = 0;
-char *ProjType = NULL;
-char *OutVolId = NULL;
-char *HitVolId = NULL;
-char *PVFVolId = NULL;
-char *subject = NULL;
-char *hemi    = NULL;
-char *AnnotFile = NULL;
-char *ASegFSpec = NULL;
-const char *SurfId  = "white";
-char *LabelVolFile = NULL;
+char *      TempVolId    = NULL;
+char *      RegMatFile   = NULL;
+int         RegHeader    = 0;
+int         RegIdentity  = 0;
+int         InvertMtx    = 0;
+double      FillThresh   = 0.0;
+double      ProjDelta    = .1;
+double      ProjStart    = 0;
+double      ProjStop     = 0;
+char *      ProjType     = NULL;
+char *      OutVolId     = NULL;
+char *      HitVolId     = NULL;
+char *      PVFVolId     = NULL;
+char *      subject      = NULL;
+char *      hemi         = NULL;
+char *      AnnotFile    = NULL;
+char *      ASegFSpec    = NULL;
+const char *SurfId       = "white";
+char *      LabelVolFile = NULL;
 
-MRI_SURFACE *Surf=NULL;
-MRI *OutVol=NULL, *TempVol=NULL, *HitVol=NULL, *PVFVol=NULL;
-MRI *ASeg=NULL;
-MRI *LabelStatVol=NULL;
-char *LabelStatVolFSpec=NULL;
-int DoLabelStatVol=0;
+MRI_SURFACE *Surf   = NULL;
+MRI *        OutVol = NULL, *TempVol = NULL, *HitVol = NULL, *PVFVol = NULL;
+MRI *        ASeg              = NULL;
+MRI *        LabelStatVol      = NULL;
+char *       LabelStatVolFSpec = NULL;
+int          DoLabelStatVol    = 0;
 
 int debug;
 
-LABEL * srclabel;
-MATRIX *R, *Tvox2ras, *Tras2vox;
-double ProjDepth;
-int   ProjTypeId;
-int   DoProj = 0;
-int   SurfNeeded = 0;
-char  *SUBJECTS_DIR = NULL;
-const char  *thicknessname = "thickness";
-char  fname[1000];
-double TempVoxVol;
-double LabelVoxVol = 1;
-double nHitsThresh;
-int *ASegLabelList;
-int LabelCode;
-int UseNativeVox2RAS=0;
-int UseNewASeg2Vol=0;
+LABEL *     srclabel;
+MATRIX *    R, *Tvox2ras, *Tras2vox;
+double      ProjDepth;
+int         ProjTypeId;
+int         DoProj        = 0;
+int         SurfNeeded    = 0;
+char *      SUBJECTS_DIR  = NULL;
+const char *thicknessname = "thickness";
+char        fname[1000];
+double      TempVoxVol;
+double      LabelVoxVol = 1;
+double      nHitsThresh;
+int *       ASegLabelList;
+int         LabelCode;
+int         UseNativeVox2RAS = 0;
+int         UseNewASeg2Vol   = 0;
 
-int UseAParcPlusASeg = 0;
-int DoStatThresh = 0;
-double StatThresh = -1;
-int LabelCodeOffset = 0;
-COLOR_TABLE *ctTissueType=NULL;
-int UpsampleFactor = -1;
-double resmm=0;
-int FillRibbon = 0;
-LTA *lta=NULL;
-MRI *ToTkrTemplate=NULL;
+int          UseAParcPlusASeg = 0;
+int          DoStatThresh     = 0;
+double       StatThresh       = -1;
+int          LabelCodeOffset  = 0;
+COLOR_TABLE *ctTissueType     = NULL;
+int          UpsampleFactor   = -1;
+double       resmm            = 0;
+int          FillRibbon       = 0;
+LTA *        lta              = NULL;
+MRI *        ToTkrTemplate    = NULL;
 
-MRI *MRIsurfaceLabel2VolOpt(MRI *ribbon, MRIS *surf, LABEL **labels, int nlabels, LTA *Q, 
-			    int DoStatThresh, double StatThresh, int DoLabelStatVol, 
-			    MRI *vollabel);
+MRI *MRIsurfaceLabel2VolOpt(MRI *ribbon, MRIS *surf, LABEL **labels,
+                            int nlabels, LTA *Q, int DoStatThresh,
+                            double StatThresh, int DoLabelStatVol,
+                            MRI *vollabel);
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {

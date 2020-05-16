@@ -25,21 +25,23 @@ using namespace std;
 const char *Progname = NULL;
 
 void printUsage() {
-  cout << endl;
-  cout << "> mris_label_calc command input1 input2 output" << endl;
-  cout << endl;
-  cout << "   To calculate stuff on surface labels..." << endl;
-  cout << endl;
-  cout << "   commands: " << endl;
-  cout << "      union         union (OR) of both input labels" << endl;
-  cout << "      intersect     intersection (AND) of both input labels" << endl;
-  cout << "      invert        inverse (NOT) of label on surface (input2)"
-       << endl;
-  cout << "      erode <n>     erode  label <n> times on surface (input2)"
-       << endl;
-  cout << "      dilate <n>    dilate label <n> times on surface (input2)"
-       << endl;
-  cout << endl;
+  std::cout << std::endl;
+  std::cout << "> mris_label_calc command input1 input2 output" << std::endl;
+  std::cout << std::endl;
+  std::cout << "   To calculate stuff on surface labels..." << std::endl;
+  std::cout << std::endl;
+  std::cout << "   commands: " << std::endl;
+  std::cout << "      union         union (OR) of both input labels"
+            << std::endl;
+  std::cout << "      intersect     intersection (AND) of both input labels"
+            << std::endl;
+  std::cout << "      invert        inverse (NOT) of label on surface (input2)"
+            << std::endl;
+  std::cout << "      erode <n>     erode  label <n> times on surface (input2)"
+            << std::endl;
+  std::cout << "      dilate <n>    dilate label <n> times on surface (input2)"
+            << std::endl;
+  std::cout << std::endl;
 }
 
 int main(int argc, char *argv[]) {

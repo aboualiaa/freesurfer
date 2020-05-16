@@ -37,12 +37,7 @@ static int variance  = 0;
 static int navgs     = 0;
 static int sqrt_flag = 0;
 
-const static char *surface_names[] =
-{
-  "inflated",
-  "smoothwm",
-  "smoothwm"
-} ;
+const static char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
 
 static int   field_no = -1;
 static char  subjects_dir[STRLEN];

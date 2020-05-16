@@ -107,18 +107,18 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 
-const char *Progname ;
-int main(int argc, char *argv[]) ;
+const char *Progname;
+int         main(int argc, char *argv[]);
 
-char *infile;
-char *labelfile;
-char *volfile;
-int  labelid;
-int DoStat;
-char *hemi, *SUBJECTS_DIR;
+char *      infile;
+char *      labelfile;
+char *      volfile;
+int         labelid;
+int         DoStat;
+char *      hemi, *SUBJECTS_DIR;
 const char *surfname = "white";
-MRI *mri;
-LABEL *lb;
+MRI *       mri;
+LABEL *     lb;
 
 int    xi, yi, zi, c, nlabel;
 float  x, y, z;

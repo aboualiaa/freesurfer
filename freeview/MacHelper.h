@@ -17,6 +17,7 @@ public:
 
   static QIcon InvertIcon(const QIcon &icn_in, const QSize &size = QSize(),
                           bool bTwoStates = false);
+  static bool  IsDarkMode();
 };
 
 #endif // MACHELPER_H

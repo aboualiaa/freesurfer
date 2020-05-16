@@ -49,10 +49,10 @@ int            debug         = 0;
 int            checkoptsonly = 0;
 struct utsname uts;
 
-char *subject=NULL, *hemi=NULL, *SUBJECTS_DIR=NULL;
-const char *surfname="white";
-char *surfpath=NULL;
-char tmpstr[2000];
+char *      subject = NULL, *hemi = NULL, *SUBJECTS_DIR = NULL;
+const char *surfname = "white";
+char *      surfpath = NULL;
+char        tmpstr[2000];
 
 MRIS *surf;
 int   dof       = 100;

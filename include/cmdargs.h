@@ -18,6 +18,8 @@
 #ifndef CMDARGS_H
 #define CMDARGS_H
 
+#include <cstdio>
+
 void CMDargNErr(char *option, int n);
 int  CMDsingleDash(char *flag);
 int  CMDisFlag(char *flag);

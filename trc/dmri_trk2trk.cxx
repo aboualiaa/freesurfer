@@ -1039,7 +1039,7 @@ static void usage_exit() {
 
 /* --------------------------------------------- */
 static void print_version(void) {
-  cout << getVersion() << endl;
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
@@ -1095,17 +1095,17 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
-  cout << endl
-       << getVersion() << endl
-       << "cwd " << cwd << endl
-       << "cmdline " << cmdline << endl
-       << "sysname  " << uts.sysname << endl
-       << "hostname " << uts.nodename << endl
-       << "machine  " << uts.machine << endl
-       << "user     " << VERuser() << endl;
+  std::cout << std::endl
+            << getVersion() << std::endl
+            << "cwd " << cwd << std::endl
+            << "cmdline " << cmdline << std::endl
+            << "sysname  " << uts.sysname << std::endl
+            << "hostname " << uts.nodename << std::endl
+            << "machine  " << uts.machine << std::endl
+            << "user     " << VERuser() << std::endl;
 
   if (inDir)
-    cout << "Input directory: " << inDir << endl;
+    std::cout << "Input directory: " << inDir << std::endl;
   if (!inTrkList.empty()) {
     std::cout << "Input .trk files:";
     for (auto istr = inTrkList.begin(); istr < inTrkList.end(); istr++) {

@@ -55,7 +55,7 @@ vnl_vector<T> Regression<T>::getRobustEst(double sat, double sig) {
 //             &share, &text, &lib, &data*/); fscanf(pf, "%u" , &size);
 //             //DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB
 //             mem used");
-//      cout <<  size / (1024.0) << " MB mem used" << endl;
+//      std::cout <<  size / (1024.0) << " MB mem used" << std::endl;
 //         }
 //         fclose(pf);
 // //while (1)
@@ -107,22 +107,22 @@ double Regression<T>::getRobustEstWB(vnl_vector<T> &w, double sat, double sig) {
   T      sigma;
   double d1, d2, wi;
 
-  // cout << endl<<endl<<" Values: " << endl;
+  // std::cout << endl<<endl<<" Values: " << std::endl;
   // MatrixPrintFmt(stdout,"% 2.8f",B);
 
   while (fabs(muold - mu) > EPS && count < MAXIT) {
     count++;
     muold = mu;
-    // cout << endl << "count " << count << " Myold " << muold << endl;
+    // std::cout << endl << "count " << count << " Myold " << muold << std::endl;
     //     for (int i = 1 ; i<=B->rows; i++)
     //       r->rptr[i][1] = muold - B->rptr[i][1];
     r = muold - *b;
 
-    // cout << " residuals: " << endl;
+    // std::cout << " residuals: " << std::endl;
     //   MatrixPrintFmt(stdout,"% 2.8f",r);
 
     sigma = getSigmaMAD(r);
-    // cout << " sigma: " << sigma << endl;
+    // std::cout << " sigma: " << sigma << std::endl;
     if (sigma < EPS) // if all r are the same (usually zero)
     {
       mu = muold;
@@ -135,12 +135,12 @@ double Regression<T>::getRobustEstWB(vnl_vector<T> &w, double sat, double sig) {
     //    for (int i = 1 ; i<=B->rows; i++)
     //      rdsigma->rptr[i][1] = r->rptr[i][1] / sigma;
     rdsigma = (T)(1.0 / sigma) * r;
-    // cout << " r/sigma: " << endl;
+    // std::cout << " r/sigma: " << std::endl;
     //   MatrixPrintFmt(stdout,"% 2.8f",rdsigma);
 
     getSqrtTukeyDiaWeights(rdsigma, w,
                            sat); // here we get sqrt of weights into w
-    // cout << " weights: " << endl;
+    // std::cout << " weights: " << std::endl;
     //   MatrixPrintFmt(stdout,"% 2.8f",w);
 
     // compute new parameter mu (using weights)
@@ -163,7 +163,7 @@ double Regression<T>::getRobustEstWB(vnl_vector<T> &w, double sat, double sig) {
     }
     mu = muold - (T)d1 / d2;
   }
-  // cout << "!!! final mu :  " << mu << endl;
+  // std::cout << "!!! final mu :  " << mu << std::endl;
   //  MatrixFree(&r);
   //  MatrixFree(&rdsigma);
 
@@ -248,7 +248,7 @@ vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
                 << std::endl;
       w->fill(1.0);
     } else {
-      // cout << "Sigma: " << sigma << endl;
+      // std::cout << "Sigma: " << sigma << std::endl;
       *r *= (1.0 / sigma);
       // here we get sqrt of weights into w
       getSqrtTukeyDiaWeights(*r, *w, sat);
@@ -279,7 +279,7 @@ vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
       swr += t1 * t2;
     }
     err[count] = swr / sw;
-    // cout << "err [ " << count << " ] = " << err[count] << endl;
+    // std::cout << "err [ " << count << " ] = " << err[count] << std::endl;
     if (err[count - 1] <= err[count])
       incr++;
   } while (incr < 1 && count < MAXIT && err[count] > EPS);
@@ -289,7 +289,7 @@ vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
   vnl_vector<T> pfinal;
   if (err[count] > err[count - 1]) {
     // take previous values (since actual values made the error to increase)
-    // cout << " last step was no improvement, taking values : "<<  count-1 <<
+    // std::cout << " last step was no improvement, taking values : "<<  count-1 <<
     // endl;
     pfinal = *lastp;
     wfinal = *lastw;
@@ -442,7 +442,7 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 //   if (! svdMatrix->valid() )
 //   {
 //     cerr << "    Regression<T>::getWeightedLSEst    could not compute pseudo
-//     inverse!" << endl; exit(1);
+//     inverse!" << std::endl; exit(1);
 //   }
 //   wA = svdMatrix->pinverse();
 //   delete (svdMatrix);
@@ -491,7 +491,7 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 //   if (! svdMatrix->valid() )
 //   {
 //     cerr << "    Regression<T>::getWeightedLSEst    could not compute pseudo
-//     inverse!" << endl; exit(1);
+//     inverse!" << std::endl; exit(1);
 //   }
 //   wA = svdMatrix->pinverse();
 //   delete (svdMatrix);
@@ -517,7 +517,7 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 //
 
 template <class T> vnl_vector<T> Regression<T>::getLSEst() {
-  // cout << " Regression<T>::getLSEst " << endl;
+  // std::cout << " Regression<T>::getLSEst " << std::endl;
   lastweight = -1;
   lastzero   = -1;
   if (A == NULL) // LS solution is just the mean of B
@@ -552,7 +552,7 @@ template <class T> vnl_vector<T> Regression<T>::getLSEst() {
   for (rr = 0; rr < n; rr++) {
     serror += R[rr] * R[rr];
   }
-  //  cout << "     squared error: " << serror << endl;
+  //  std::cout << "     squared error: " << serror << std::endl;
   lasterror = serror;
 
   return p;
@@ -611,7 +611,7 @@ double Regression<T>::getTukeyPartialSat(const vnl_vector<T> &r, double sat) {
 template <class T>
 void Regression<T>::getSqrtTukeyDiaWeights(const vnl_vector<T> &r,
                                            vnl_vector<T> &w, double sat) {
-  // cout << " getTukeyDiaWeights  r size: " << r->rows << " , " << r->cols <<
+  // std::cout << " getTukeyDiaWeights  r size: " << r->rows << " , " << r->cols <<
   // endl;
 
   unsigned int n = r.size();
@@ -622,7 +622,7 @@ void Regression<T>::getSqrtTukeyDiaWeights(const vnl_vector<T> &r,
   unsigned int rr;
   // int ocount = 0;
   for (rr = 0; rr < n; rr++) {
-    // cout << " fabs: " << fabs(r->rptr[rr][cc]) << " sat: " << sat << endl;
+    // std::cout << " fabs: " << fabs(r->rptr[rr][cc]) << " sat: " << sat << std::endl;
     if (fabs(r[rr]) >= sat) {
       w(rr) = 0.0;
       // ocount++;
@@ -632,7 +632,7 @@ void Regression<T>::getSqrtTukeyDiaWeights(const vnl_vector<T> &r,
       w(rr) = (T)(1.0 - t1 * t1); // returning sqrt
     }
   }
-  // cout << " over threshold: " << ocount << " times ! " << endl;
+  // std::cout << " over threshold: " << ocount << " times ! " << std::endl;
   // return w;
 }
 
@@ -648,7 +648,7 @@ template <class T> T Regression<T>::VectorMedian(const vnl_vector<T> &v) {
   for (r = 0; r < n; r++) {
     t[r] = v(r);
   }
-  // for (int i = 0;i<n;i++) cout << " " << t[i];  cout << endl;
+  // for (int i = 0;i<n;i++) std::cout << " " << t[i];  std::cout << std::endl;
 
   T qs = RobustGaussian<T>::median(t, n);
   free(t);
@@ -670,7 +670,7 @@ template <class T> T Regression<T>::getSigmaMAD(const vnl_vector<T> &v, T d) {
   for (r = 0; r < n; r++) {
     t[r] = v[r];
   }
-  // for (int i = 0;i<n;i++) cout << " " << t[i];  cout << endl;
+  // for (int i = 0;i<n;i++) std::cout << " " << t[i];  std::cout << std::endl;
 
   T qs = RobustGaussian<T>::mad(t, n, d);
   free(t);

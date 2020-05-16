@@ -78,89 +78,110 @@ static MRI *compute_surface_correlations_in_aseg_label(MRI *mri_aseg, int aseg_l
 static MRI *average_aseg_label(MRI *mri_aseg, int aseg_label, MRI **mri_fvol, MRI **mri_fsurf, int runs, MRI *mri_dst) ;
 #endif
 
-static MRI *sample_fixed(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed, MHT *mht, MRI *mri_stats) ;
-static double compute_error(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed, MHT *mht, MRI *mri_mov_avg, MRI *mri_stats) ;
-static double sample_stats(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed, MHT *mht, MRI *mri_stats, double x, double y, double z, double *pvar) ;
-static double sample_hemi_stats(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed, MHT *mht, MRI *mri_stats, double x, double y, double z, int frame, double *pvar) ;
-static double sample_vertex_error(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_lh_fixed, MRI_SURFACE *mris_rh_fixed, MHT *mht, MRI *mri_stats, MRI *mri_corrmat_mov, MRI *mri_label_avg_mov, int vno, double x, double y, double z);
-static double sample_hemi_vertex_error(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed, MHT *mht, MRI *mri_stats, MRI *mri_target_label, int vno, double x, double y, double z);
-static int compute_warp_gradient(MRI_SURFACE *mris_lh_mov, MRI_SURFACE *mris_rh_mov, MRI_SURFACE *mris_lh_fixed,  MRI_SURFACE *mris_rh_fixed,  MHT *mht_lh, MHT *mht_rh, MRI *mri_cmat_permuted,  MRI *mri_stats, MRI *mri_label_avg, MRI *mri_corrmat_mov, double dt) ;
-static int compute_hemi_warp_gradient(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed,  MHT *mht,  MRI *mri_stats, MRI *mri_label_avg, double dt) ;
-static int warp_hemi(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed, MRI *mri_target_label, MRI *mri_stats, int nsubjects, double tol, double dt)  ;
-static int  warp_surface(MRI_SURFACE *mris_lh_mov, MRI_SURFACE *mris_rh_mov, MRI_SURFACE *mris_lh_fixed, MRI_SURFACE *mris_rh_fixed, MRI *mri_cmat_mov, MRI *mri_stats, double tol, LABEL *area, int offset, double dt) ;
-static int compute_vertex_permutation(MRI_SURFACE *mris_mov_mov, MRI_SURFACE *mris_fixed, MHT *mht,  int *vertices) ;
-static MRI *average_within_label(MRI *mri_cmat, LABEL *area, int offset, MRI *mri_avg) ;
-static int  parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void) ;
-static void usage_exit(void);
-static void print_help(void) ;
-static int write_snapshot(VECTOR *v_weights, MATRIX **m_I, MRI *mri_mask, const char *prefix, int iter, int nsubjects) ;
-static void print_version(void) ;
-static void dump_options(FILE *fp);
-int main(int argc, char *argv[]) ;
-static MRI *compute_mean_and_variance_across_frames(MRI **mri_label_avg, int nsubjects)  ;
-static MRI *compute_mean_and_variance(MRI **mri_label_avg, int nsubjects)  ;
+static MRI *  sample_fixed(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed,
+                           MHT *mht, MRI *mri_stats);
+static double compute_error(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed,
+                            MHT *mht, MRI *mri_mov_avg, MRI *mri_stats);
+static double sample_stats(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed,
+                           MHT *mht, MRI *mri_stats, double x, double y,
+                           double z, double *pvar);
+static double sample_hemi_stats(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed,
+                                MHT *mht, MRI *mri_stats, double x, double y,
+                                double z, int frame, double *pvar);
+static double sample_vertex_error(MRI_SURFACE *mris_mov,
+                                  MRI_SURFACE *mris_lh_fixed,
+                                  MRI_SURFACE *mris_rh_fixed, MHT *mht,
+                                  MRI *mri_stats, MRI *mri_corrmat_mov,
+                                  MRI *mri_label_avg_mov, int vno, double x,
+                                  double y, double z);
+static double sample_hemi_vertex_error(MRI_SURFACE *mris_mov,
+                                       MRI_SURFACE *mris_fixed, MHT *mht,
+                                       MRI *mri_stats, MRI *mri_target_label,
+                                       int vno, double x, double y, double z);
+static int    compute_warp_gradient(MRI_SURFACE *mris_lh_mov,
+                                    MRI_SURFACE *mris_rh_mov,
+                                    MRI_SURFACE *mris_lh_fixed,
+                                    MRI_SURFACE *mris_rh_fixed, MHT *mht_lh,
+                                    MHT *mht_rh, MRI *mri_cmat_permuted,
+                                    MRI *mri_stats, MRI *mri_label_avg,
+                                    MRI *mri_corrmat_mov, double dt);
+static int    compute_hemi_warp_gradient(MRI_SURFACE *mris_mov,
+                                         MRI_SURFACE *mris_fixed, MHT *mht,
+                                         MRI *mri_stats, MRI *mri_label_avg,
+                                         double dt);
+static int    warp_hemi(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed,
+                        MRI *mri_target_label, MRI *mri_stats, int nsubjects,
+                        double tol, double dt);
+static int    warp_surface(MRI_SURFACE *mris_lh_mov, MRI_SURFACE *mris_rh_mov,
+                           MRI_SURFACE *mris_lh_fixed, MRI_SURFACE *mris_rh_fixed,
+                           MRI *mri_cmat_mov, MRI *mri_stats, double tol,
+                           LABEL *area, int offset, double dt);
+static int    compute_vertex_permutation(MRI_SURFACE *mris_mov_mov,
+                                         MRI_SURFACE *mris_fixed, MHT *mht,
+                                         int *vertices);
+static MRI *  average_within_label(MRI *mri_cmat, LABEL *area, int offset,
+                                   MRI *mri_avg);
+static int    parse_commandline(int argc, char **argv);
+static void   check_options(void);
+static void   print_usage(void);
+static void   usage_exit(void);
+static void   print_help(void);
+static int    write_snapshot(VECTOR *v_weights, MATRIX **m_I, MRI *mri_mask,
+                             const char *prefix, int iter, int nsubjects);
+static void   print_version(void);
+static void   dump_options(FILE *fp);
+int           main(int argc, char *argv[]);
+static MRI *  compute_mean_and_variance_across_frames(MRI **mri_label_avg,
+                                                      int   nsubjects);
+static MRI *  compute_mean_and_variance(MRI **mri_label_avg, int nsubjects);
 
-const char *Progname = NULL;
-char *cmdline, cwd[2000];
-int debug=0;
-int checkoptsonly=0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 #define MAX_ITERS 500
 
-static int create_only = 1 ;
-static int ndilate = 0 ;
-static int use_powell = 0 ;    
-static int max_iters = MAX_ITERS ;
-static int max_grad_averages = 16 ;
-static int min_grad_averages = 16 ;
-static MRI *mri_aseg = NULL ;
-static int aseg_label = -1 ;
-static int runs = 1 ;
-static int downsample = 0 ;
-static char *fmri_vol = NULL ;
-static char *fmri_surf = NULL ;
-static int num_maps = 100 ;
+static int   create_only       = 1;
+static int   ndilate           = 0;
+static int   use_powell        = 0;
+static int   max_iters         = MAX_ITERS;
+static int   max_grad_averages = 16;
+static int   min_grad_averages = 16;
+static MRI * mri_aseg          = NULL;
+static int   aseg_label        = -1;
+static int   runs              = 1;
+static int   downsample        = 0;
+static char *fmri_vol          = NULL;
+static char *fmri_surf         = NULL;
+static int   num_maps          = 100;
 
-static char *cmat_name = NULL ;
-static char *trgsubject = NULL ;
-static char  *label_name = NULL ;
-static char *prior_name = NULL ;
-static char *TempVolFile=NULL;
-static char *SUBJECTS_DIR = NULL;
-static char **subjects = NULL ;
-static int nsubjects = 0 ;
-static char *hemi = NULL ;
-static const char *ohemi = NULL ;
-static int offset = 0 ;
-static char *output_name = NULL ;
-static int write_diags = 1 ;
-static double tol = 0.01 ;   // terminate when error func % change is smaller than this
-static double dt = .1 ;
+static char *      cmat_name    = NULL;
+static char *      trgsubject   = NULL;
+static char *      label_name   = NULL;
+static char *      prior_name   = NULL;
+static char *      TempVolFile  = NULL;
+static char *      SUBJECTS_DIR = NULL;
+static char **     subjects     = NULL;
+static int         nsubjects    = 0;
+static char *      hemi         = NULL;
+static const char *ohemi        = NULL;
+static int         offset       = 0;
+static char *      output_name  = NULL;
+static int         write_diags  = 1;
+static double      tol =
+    0.01; // terminate when error func % change is smaller than this
+static double dt = .1;
 
-static int subcortical_labels[] = 
-{
-  Left_Thalamus_Proper,
-  Right_Thalamus_Proper,
-  Left_Putamen,
-  Right_Putamen,
-  Left_Pallidum,
-  Right_Pallidum,
-  Left_Caudate,
-  Right_Caudate,
-  Brain_Stem,
-  Left_VentralDC,
-  Right_VentralDC,
-  Left_Accumbens_area,
-  Right_Accumbens_area,
-  Left_Cerebellum_Cortex,
-  Right_Cerebellum_Cortex
-} ;
-#define SUBCORTICAL_LABEL_COUNT (sizeof(subcortical_labels) / sizeof(subcortical_labels[0]))
-
-
+static int subcortical_labels[] = {
+    Left_Thalamus_Proper, Right_Thalamus_Proper,  Left_Putamen,
+    Right_Putamen,        Left_Pallidum,          Right_Pallidum,
+    Left_Caudate,         Right_Caudate,          Brain_Stem,
+    Left_VentralDC,       Right_VentralDC,        Left_Accumbens_area,
+    Right_Accumbens_area, Left_Cerebellum_Cortex, Right_Cerebellum_Cortex};
+#define SUBCORTICAL_LABEL_COUNT                                                \
+  (sizeof(subcortical_labels) / sizeof(subcortical_labels[0]))
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
@@ -1993,29 +2014,28 @@ static MATRIX *compute_subcortical_map_weights(
   return (v_weights);
 }
 
-static int
-write_snapshot(VECTOR *v_weights, MATRIX **m_I, MRI *mri_mask, const char *prefix, int iter, int nsubjects)
-{
-  MRI         *mri_wts, *mri_surf ;
-  VECTOR      *v_weights_T, *I_map ;
-  char        fname[STRLEN] ;
-  int         n, i ;
-  VOXEL_LIST  *vl ;
+static int write_snapshot(VECTOR *v_weights, MATRIX **m_I, MRI *mri_mask,
+                          const char *prefix, int iter, int nsubjects) {
+  MRI *       mri_wts, *mri_surf;
+  VECTOR *    v_weights_T, *I_map;
+  char        fname[STRLEN];
+  int         n, i;
+  VOXEL_LIST *vl;
 
-  vl = VLSTcreate(mri_mask, .001, 256 , NULL, 0, 0) ;
+  vl = VLSTcreate(mri_mask, .001, 256, NULL, 0, 0);
 
-  mri_wts = MRIclone(mri_mask, NULL);
-  mri_surf = MRIalloc(m_I[0]->cols,  1,  1, MRI_FLOAT) ;
-  
-  v_weights_T = VectorTranspose(v_weights, NULL) ;
-  for (n = 0 ; n <= nsubjects ; n++)
-  {
-    I_map = MatrixMultiply(v_weights_T, m_I[n], NULL) ;
-    for (i = 0 ; i < I_map->cols ; i++)
-      MRIsetVoxVal(mri_surf, i, 0, 0, 0, RVECTOR_ELT(I_map, i+1)) ;
-    sprintf(fname, "%s.%s.%3.3d.map.mgz", prefix, subjects[n], iter) ; printf("writing map to %s\n", fname) ;
-    MRIwrite(mri_surf, fname) ;
-    VectorFree(&I_map) ;
+  mri_wts  = MRIclone(mri_mask, NULL);
+  mri_surf = MRIalloc(m_I[0]->cols, 1, 1, MRI_FLOAT);
+
+  v_weights_T = VectorTranspose(v_weights, NULL);
+  for (n = 0; n <= nsubjects; n++) {
+    I_map = MatrixMultiply(v_weights_T, m_I[n], NULL);
+    for (i = 0; i < I_map->cols; i++)
+      MRIsetVoxVal(mri_surf, i, 0, 0, 0, RVECTOR_ELT(I_map, i + 1));
+    sprintf(fname, "%s.%s.%3.3d.map.mgz", prefix, subjects[n], iter);
+    printf("writing map to %s\n", fname);
+    MRIwrite(mri_surf, fname);
+    VectorFree(&I_map);
   }
 
   for (n = 0; n < m_I[0]->rows; n++)

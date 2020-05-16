@@ -99,8 +99,8 @@ COLOR_TABLE *ctab        = nullptr;
 int          AutoCTab    = 0;
 char *       outctabfile = nullptr;
 MRI_SURFACE *mris;
-MRI *surfseg, *mritmp;
-const char *surfname = "white";
+MRI *        surfseg, *mritmp;
+const char * surfname = "white";
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
