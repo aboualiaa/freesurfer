@@ -1,37 +1,38 @@
 # these are the minimum-required files for a standard recon
-install_symlinks(
-  TYPE files
-  DESTINATION average
-  # gcs
-  lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
-  rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
-  lh.DKTaparc.atlas.acfb40.noaparc.i12.2020-05-13.gcs
-  rh.DKTaparc.atlas.acfb40.noaparc.i12.2020-05-13.gcs
-  lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
-  rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
-  lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
-  rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
-  # gca
-  RB_all_2016-05-10.vc700.gca
-  RB_all_withskull_2016-05-10.vc700.gca
-  RB_all_2019_10_25.talxfm.mni305.gca
-  RB_all_withskull_2019_10_22.talxfm.mni305.gca
-  RB_all_2020-01-02.gca
-  RB_all_withskull_2020_01_02.gca
-  # tiff
-  rigidly_aligned_brain_template.tif
-  lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif
-  rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif
-  # txt
-  colortable_desikan_killiany.txt
-  colortable_BA.txt
-  colortable_vpnl.txt
-  # mgz
-  mni305.cor.mgz
-  mni305.cor.subfov1.mgz
-  mni305.cor.subfov2.mgz
-  mni305.mask.cor.mgz
-)
+install_symlinks(TYPE
+                 files
+                 DESTINATION
+                 average
+                 # gcs
+                 lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
+                 rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
+                 lh.DKTaparc.atlas.acfb40.noaparc.i12.2020-05-13.gcs
+                 rh.DKTaparc.atlas.acfb40.noaparc.i12.2020-05-13.gcs
+                 lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
+                 rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
+                 lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
+                 rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs
+                 # gca
+                 RB_all_2016-05-10.vc700.gca
+                 RB_all_withskull_2016-05-10.vc700.gca
+                 RB_all_2019_10_25.talxfm.mni305.gca
+                 RB_all_withskull_2019_10_22.talxfm.mni305.gca
+                 RB_all_2020-01-02.gca
+                 RB_all_withskull_2020_01_02.gca
+                 # tiff
+                 rigidly_aligned_brain_template.tif
+                 lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif
+                 rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif
+                 # txt
+                 colortable_desikan_killiany.txt
+                 colortable_BA.txt
+                 colortable_vpnl.txt
+                 # mgz
+                 mni305.cor.mgz
+                 mni305.cor.subfov1.mgz
+                 mni305.cor.subfov2.mgz
+                 mni305.mask.cor.mgz
+                 )
 
 # fsaverage
 install_tarball(fsaverage.tar.gz DESTINATION subjects)

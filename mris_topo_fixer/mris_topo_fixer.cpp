@@ -40,13 +40,13 @@ static void freeTopoFixerParameters();
 
 const char *Progname;
 
-static const char *brain_name    = "brain" ;
-static const char *wm_name       = "wm" ;
-static const char *input_name   = "input" ;
-static const char *sphere_name = "qsphere" ;
+static const char *brain_name  = "brain";
+static const char *wm_name     = "wm";
+static const char *input_name  = "input";
+static const char *sphere_name = "qsphere";
 //static const char *defect_name  = "defects" ;
-const char *orig_name = "orig" ;
-const char *out_name = "orig_corrected" ;
+const char *orig_name = "orig";
+const char *out_name  = "orig_corrected";
 
 static char          sdir[STRLEN] = "";
 static TOPOFIX_PARMS parms;
@@ -527,39 +527,40 @@ static int get_option(int argc, char *argv[]) {
     parms.no_self_intersections = 0;
   } else if (!stricmp(option, (char *)"no_intersection")) {
     parms.no_self_intersections = 1;
-    fprintf(stderr,"avoiding self-intersecting patches\n") ;
-  } else if (!stricmp(option, (char*)"minimal")) {
-    parms.minimal_mode=1;
-    parms.nminattempts = 1;
-    parms.nattempts_percent=0.0f;
-    fprintf(stderr,"cuting minimal loop only\n") ;
-  } else if (!stricmp(option, (char*)"loop_pct")) {
-    parms.minimal_loop_percent = atof(argv[2]) ;
-    fprintf
-    (stderr,
-     "setting loop_pct = %2.2f\n",
-     parms.minimal_loop_percent) ;
-    nargs = 1 ;
-  } else if (!stricmp(option, (char*)"smooth")) {
-    parms.smooth = atoi(argv[2]) ;
-    fprintf(stderr,"smoothing defect with mode %d\n", parms.smooth) ;
-    nargs = 1 ;
-  } else if (!stricmp(option, (char*)"match")) {
-    if (atoi(argv[2])) parms.match = 1 ;
-    else  parms.match = 0;
-    fprintf(stderr,"matching mode : %d \n", parms.match) ;
-    nargs = 1 ;
-  } else if (!stricmp(option, (char*)"seed")) {
-    setRandomSeed(atol(argv[2])) ;
-    fprintf(stderr, "setting seed for random number genererator to %d\n", atoi(argv[2])) ;
-    nargs = 1 ;
-  } else if (!stricmp(option, (char*)"out_name")) {
+    fprintf(stderr, "avoiding self-intersecting patches\n");
+  } else if (!stricmp(option, (char *)"minimal")) {
+    parms.minimal_mode      = 1;
+    parms.nminattempts      = 1;
+    parms.nattempts_percent = 0.0f;
+    fprintf(stderr, "cuting minimal loop only\n");
+  } else if (!stricmp(option, (char *)"loop_pct")) {
+    parms.minimal_loop_percent = atof(argv[2]);
+    fprintf(stderr, "setting loop_pct = %2.2f\n", parms.minimal_loop_percent);
+    nargs = 1;
+  } else if (!stricmp(option, (char *)"smooth")) {
+    parms.smooth = atoi(argv[2]);
+    fprintf(stderr, "smoothing defect with mode %d\n", parms.smooth);
+    nargs = 1;
+  } else if (!stricmp(option, (char *)"match")) {
+    if (atoi(argv[2]))
+      parms.match = 1;
+    else
+      parms.match = 0;
+    fprintf(stderr, "matching mode : %d \n", parms.match);
+    nargs = 1;
+  } else if (!stricmp(option, (char *)"seed")) {
+    setRandomSeed(atol(argv[2]));
+    fprintf(stderr, "setting seed for random number genererator to %d\n",
+            atoi(argv[2]));
+    nargs = 1;
+  } else if (!stricmp(option, (char *)"out_name")) {
     out_name = argv[2];
-    nargs = 1 ;
-  } else if (!stricmp(option, (char*)"orig_name")) {
+    nargs    = 1;
+  } else if (!stricmp(option, (char *)"orig_name")) {
     orig_name = argv[2];
-    nargs = 1 ;
-  } else switch (toupper(*option)) {
+    nargs     = 1;
+  } else
+    switch (toupper(*option)) {
     case '?':
     case 'U':
       //      print_usage() ;
