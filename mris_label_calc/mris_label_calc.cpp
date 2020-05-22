@@ -21,7 +21,6 @@
 #include "mrimorph.h"
 #include "version.h"
 
-using namespace std;
 const char *Progname = NULL;
 
 void printUsage() {

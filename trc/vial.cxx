@@ -286,36 +286,32 @@ void AffineReg::PrintRotate() {
 //
 // Return components of affine transform
 //
-std::vector<float> AffineReg::GetTranslate() {
-  if (mTranslate.empty()) {
+std::vector<float>::const_iterator AffineReg::GetTranslate() {
+  if (mTranslate.empty())
     DecomposeXfm();
-  }
 
-  return mTranslate;
+  return mTranslate.begin();
 }
 
-std::vector<float> AffineReg::GetRotate() {
-  if (mRotate.empty()) {
+std::vector<float>::const_iterator AffineReg::GetRotate() {
+  if (mRotate.empty())
     DecomposeXfm();
-  }
 
-  return mRotate;
+  return mRotate.begin();
 }
 
-std::vector<float> AffineReg::GetShear() {
-  if (mShear.empty()) {
+std::vector<float>::const_iterator AffineReg::GetShear() {
+  if (mShear.empty())
     DecomposeXfm();
-  }
 
-  return mShear;
+  return mShear.begin();
 }
 
-std::vector<float> AffineReg::GetScale() {
-  if (mScale.empty()) {
+std::vector<float>::const_iterator AffineReg::GetScale() {
+  if (mScale.empty())
     DecomposeXfm();
-  }
 
-  return mScale;
+  return mScale.begin();
 }
 
 #ifndef NO_CVS_UP_IN_HERE
@@ -362,8 +358,8 @@ mMorph->invert();
 //
 // Apply a non-linear transform to a single point
 //
-void NonlinReg::ApplyXfm(vector<float> &OutPoint,
-                 vector<float>::const_iterator InPoint) {
+void NonlinReg::ApplyXfm(std::vector<float> &OutPoint,
+                 std::vector<float>::const_iterator InPoint) {
 Coords3d inpt, outpt;
 
 for (int k = 0; k < 3; k++)

@@ -39,7 +39,7 @@
 #ifdef _OPENMP
 #include "romp_support.h"
 #endif
-using namespace std;
+
 #undef private
 
 class Surf2VolSeg {
@@ -978,7 +978,7 @@ void Surf2VolSeg::Free(void) {
 
 // This was use during testing. Now the binary just accepts full paths
 int Surf2VolSeg::SetSubjectPaths(char *subject, char *SD) {
-  string SUBJECTS_DIR;
+  std::string SUBJECTS_DIR;
   if (SD == NULL)
     SUBJECTS_DIR = getenv("SUBJECTS_DIR");
   else

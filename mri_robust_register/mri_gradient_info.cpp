@@ -22,7 +22,6 @@
 #include "transform.h"
 #include "version.h"
 
-using namespace std;
 const char *Progname = NULL;
 
 double scanX(MRI *mri_grad, MRI *mri_mask) {

@@ -289,7 +289,7 @@ install_pyscript(long_submit_jobs
                  rca-config2csh
                  )
 
-install(PROGRAMS bbregister DESTINATION bin)
+install(FILES mri_nu_correct.mni.help.xml DESTINATION docs/xml)
 install_append_help(bbregister bbregister.help.xml bin)
 
 install_symlinks(fs_spmreg.glnxa64 irepifitvol.glnx64 TYPE programs DESTINATION bin)

@@ -44,7 +44,6 @@ static void print_version();
 #define TRIANGLE_FILE_MAGIC_NUMBER (-2 & 0x00ffffff)
 #define NEW_QUAD_FILE_MAGIC_NUMBER (-3 & 0x00ffffff)
 
-using namespace std;
 char *surffile = NULL, *outfile = NULL, *curvfile = NULL, *annotfile = NULL;
 char *SUBJECTS_DIR = NULL, *subject = NULL, *hemi = NULL, *surfname = NULL;
 int   debug = 0;
