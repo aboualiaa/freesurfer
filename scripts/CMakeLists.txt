@@ -57,6 +57,7 @@ install_configured(annot2std
                    fsfirst.fsl
                    fs_install_mcr
                    fs_lib_check
+                   fs_run_from_mcr
                    fs_time
                    fs_tutorial_data
                    fs_update

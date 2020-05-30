@@ -173,6 +173,8 @@ bool SurfaceLabel::LoadLabel(const QString &filename) {
       m_dHeatscaleMax = m_label->lv[i].stat;
   }
 
+  MHTfree(&hash);
+
   // create outline
   m_nOutlineIndices = new int[mris->nvertices];
   UpdateOutline();

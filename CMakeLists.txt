@@ -178,7 +178,7 @@ if(POLICY CMP0048) # The project() command manages VERSION variables.
 endif()
 
 if(NOT DEFINED FS_VERSION_MAJOR)
-  set(FS_VERSION_MAJOR 8)
+  set(FS_VERSION_MAJOR 9)
 endif()
 if(NOT DEFINED FS_VERSION_MINOR)
   set(FS_VERSION_MINOR 0)

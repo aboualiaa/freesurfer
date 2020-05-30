@@ -506,6 +506,8 @@ int main(int argc, char *argv[]) {
                    "Hide y slice in 3D view."),
       CmdLineEntry(CMD_LINE_SWITCH, "hide-z-slice", "hide-z-slice", "",
                    "Hide z slice in 3D view."),
+      CmdLineEntry(CMD_LINE_OPTION, "title", "title", "<TITLE>",
+                   "Add title to freeview window caption.", 1, 1),
       CmdLineEntry(CMD_LINE_SWITCH, "auto-load-surf", "auto-load-surf", "",
                    "Do not automatically load sphere or other supplemental "
                    "surface data."),

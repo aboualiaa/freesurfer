@@ -850,6 +850,10 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
   m_bShowTransformWindow = parser->Found("transform-volume");
 
   bool bReverseOrder = parser->Found("rorder");
+  if (parser->Found("title", &sa)) {
+    m_sTitle = sa[0];
+    setWindowTitle("FreeView: " + m_sTitle);
+  }
   if (parser->Found("cmd", &sa)) {
     this->AddScript(QStringList("loadcommand") << sa[0]);
   }
@@ -4100,7 +4104,11 @@ Layer *MainWindow::GetTopVisibleLayer(const QString &strType) {
 }
 
 QList<Layer *> MainWindow::GetLayers(const QString &strType) {
-  return GetLayerCollection(strType)->GetLayers();
+  LayerCollection *lc = GetLayerCollection(strType);
+  if (lc)
+    return lc->GetLayers();
+  else
+    return QList<Layer *>();
 }
 
 void MainWindow::OnSetViewLayout(QAction *action) {
@@ -6263,20 +6271,26 @@ void MainWindow::OnAbout() {
 }
 
 void MainWindow::OnActiveLayerChanged(Layer *layer) {
+  QString title = "FreeView";
+  if (!m_sTitle.isEmpty())
+    title += ": " + m_sTitle;
   if (!layer) {
-    this->setWindowTitle("FreeView");
+    this->setWindowTitle(title);
     m_wndTimeCourse->hide();
   } else {
     QString fn = layer->GetFileName();
     if (layer->IsTypeOf("Tract") && ((LayerTrack *)layer)->IsCluster())
       fn = QFileInfo(fn).absolutePath() + "/*.trk";
-    this->setWindowTitle(QString("FreeView (%1)").arg(fn));
+    this->setWindowTitle(QString("%1 (%2)").arg(title).arg(fn));
     if (layer->IsTypeOf("MRI") && !layer->IsTypeOf("DTI") &&
         !layer->IsTypeOf("PLabel")) {
       if (((LayerMRI *)layer)->GetNumberOfFrames() > 1 &&
           !((LayerMRI *)layer)->GetCorrelationSurface()) {
         connect(layer, SIGNAL(ActiveFrameChanged(int)), m_wndTimeCourse,
                 SLOT(SetCurrentFrame(int)), Qt::UniqueConnection);
+        connect(layer, SIGNAL(ActiveFrameChanged(int)),
+                ui->treeWidgetCursorInfo, SLOT(OnCursorPositionChanged()),
+                Qt::UniqueConnection);
         connect(layer, SIGNAL(ActiveFrameChanged(int)),
                 ui->treeWidgetCursorInfo, SLOT(OnCursorPositionChanged()),
                 Qt::UniqueConnection);
@@ -6947,10 +6961,7 @@ void MainWindow::OnCloseFCD() {
 }
 
 QVariant MainWindow::GetSetting(const QString &key) {
-  if (m_settings.contains(key))
-    return m_settings[key];
-  else
-    return QVariant();
+  return m_settings.value(key);
 }
 
 void MainWindow::SetSetting(const QString &key, const QVariant &value) {
