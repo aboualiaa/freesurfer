@@ -146,6 +146,7 @@ bool SurfaceLabel::LoadLabel(const QString &filename) {
     m_bTkReg = false;
   }
 
+
   // update vno if it is -1
   double max_spacing;
   int    max_vno;

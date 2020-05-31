@@ -850,9 +850,14 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
   m_bShowTransformWindow = parser->Found("transform-volume");
 
   bool bReverseOrder = parser->Found("rorder");
-  if (parser->Found("title", &sa)) {
+  if (parser->Found("title", &sa))
+  {
     m_sTitle = sa[0];
     setWindowTitle("FreeView: " + m_sTitle);
+  }
+  if ( parser->Found("cmd", &sa))
+  {
+    this->AddScript( QStringList("loadcommand") << sa[0]);
   }
   if (parser->Found("cmd", &sa)) {
     this->AddScript(QStringList("loadcommand") << sa[0]);
@@ -4103,12 +4108,13 @@ Layer *MainWindow::GetTopVisibleLayer(const QString &strType) {
   return NULL;
 }
 
-QList<Layer *> MainWindow::GetLayers(const QString &strType) {
-  LayerCollection *lc = GetLayerCollection(strType);
+QList<Layer*> MainWindow::GetLayers(const QString &strType)
+{
+  LayerCollection* lc = GetLayerCollection(strType);
   if (lc)
     return lc->GetLayers();
   else
-    return QList<Layer *>();
+    return QList<Layer*>();
 }
 
 void MainWindow::OnSetViewLayout(QAction *action) {
@@ -6270,24 +6276,26 @@ void MainWindow::OnAbout() {
   dlg.exec();
 }
 
-void MainWindow::OnActiveLayerChanged(Layer *layer) {
+void MainWindow::OnActiveLayerChanged(Layer* layer)
+{
   QString title = "FreeView";
   if (!m_sTitle.isEmpty())
-    title += ": " + m_sTitle;
-  if (!layer) {
+      title += ": " + m_sTitle;
+  if (!layer)
+  {
     this->setWindowTitle(title);
     m_wndTimeCourse->hide();
   } else {
     QString fn = layer->GetFileName();
     if (layer->IsTypeOf("Tract") && ((LayerTrack *)layer)->IsCluster())
       fn = QFileInfo(fn).absolutePath() + "/*.trk";
-    this->setWindowTitle(QString("%1 (%2)").arg(title).arg(fn));
-    if (layer->IsTypeOf("MRI") && !layer->IsTypeOf("DTI") &&
-        !layer->IsTypeOf("PLabel")) {
-      if (((LayerMRI *)layer)->GetNumberOfFrames() > 1 &&
-          !((LayerMRI *)layer)->GetCorrelationSurface()) {
-        connect(layer, SIGNAL(ActiveFrameChanged(int)), m_wndTimeCourse,
-                SLOT(SetCurrentFrame(int)), Qt::UniqueConnection);
+    this->setWindowTitle(QString("%1 (%2)").arg(title)
+                         .arg(fn));
+    if (layer->IsTypeOf("MRI") && !layer->IsTypeOf("DTI") && !layer->IsTypeOf("PLabel"))
+    {
+      if (((LayerMRI*)layer)->GetNumberOfFrames() > 1 && !((LayerMRI*)layer)->GetCorrelationSurface())
+      {
+        connect(layer, SIGNAL(ActiveFrameChanged(int)), m_wndTimeCourse, SLOT(SetCurrentFrame(int)), Qt::UniqueConnection);
         connect(layer, SIGNAL(ActiveFrameChanged(int)),
                 ui->treeWidgetCursorInfo, SLOT(OnCursorPositionChanged()),
                 Qt::UniqueConnection);
@@ -6960,7 +6968,8 @@ void MainWindow::OnCloseFCD() {
   GetLayerCollection("FCD")->RemoveLayer(layer);
 }
 
-QVariant MainWindow::GetSetting(const QString &key) {
+QVariant MainWindow::GetSetting(const QString &key)
+{
   return m_settings.value(key);
 }
 

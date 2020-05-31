@@ -160,15 +160,7 @@ class Freeview:
         flag = "-f " + filename + self._kwargs_to_tags(kwargs)
         self.add_flag(flag)
 
-    def show(
-        self,
-        background=True,
-        title=None,
-        opts="",
-        verbose=False,
-        noclean=False,
-        threads=None,
-    ):
+    def show(self, background=True, title=None, opts='', verbose=False, noclean=False, threads=None):
         '''Opens the configured freeview session.
 
         Args:
@@ -186,6 +178,9 @@ class Freeview:
             opts,
             " ".join(self.flags),
         )
+
+        if title is not None:
+            command += ' -title "%s"' % title.replace('"', '\\"')
 
         if title is not None:
             command += ' -title "%s"' % title.replace('"', '\\"')
@@ -404,9 +399,8 @@ def fv(*args, **kwargs):
         background: Run freeview as a background process. Defaults to True.
         kwargs: kwargs are forwarded to the Freeview.show() call.
     '''
-
-    background = kwargs.pop("background", True)
-    opts = kwargs.pop("opts", "")
+    background = kwargs.pop('background', True)
+    opts = kwargs.pop('opts', '')
 
     # expand any nested lists/tuples within args
     def flatten(deep):
@@ -437,10 +431,8 @@ def fv(*args, **kwargs):
     fv.show(background=background, opts=opts, **kwargs)
 
 
-def fvoverlay(
-    surface, overlay, background=True, opts="", verbose=False, **kwargs
-):
-    """Freeview wrapper to quickly load an overlay onto a surface.
+def fvoverlay(surface, overlay, background=True, opts='', verbose=False, **kwargs):
+    '''Freeview wrapper to quickly load an overlay onto a surface.
 
     Args:
         surface: An existing surface filename.
@@ -448,7 +440,7 @@ def fvoverlay(
         background: Run freeview as a background process. Defaults to True.
         verbose: Print the freeview command before running. Defaults to False.
         kwargs: kwargs are forwarded to the Freeview.show() call.
-    """
+    '''
     fv = Freeview()
     fv.surf(surface, overlay=overlay)
     fv.show(background=background, opts=opts, verbose=verbose, **kwargs)

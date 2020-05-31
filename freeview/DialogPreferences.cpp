@@ -99,40 +99,23 @@ DialogPreferences::DialogPreferences(QWidget *parent)
   ui->groupBoxMac->hide();
 #endif
 
-  connect(ui->colorPickerAnnotation, SIGNAL(colorChanged(QColor)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->colorPickerBackground, SIGNAL(colorChanged(QColor)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->colorPickerCursor, SIGNAL(colorChanged(QColor)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->horizontalSliderSize2D, SIGNAL(valueChanged(int)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->horizontalSliderSize3D, SIGNAL(valueChanged(int)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxRightButtonErase, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxSaveCopy, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxSyncZoom, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->radioButtonThemeDark, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxAutoReorientView, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxDecimalVoxelCoord, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxAutoScaleFont, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxAutoMidToMin, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->spinBoxPrecision, SIGNAL(valueChanged(int)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxComma, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
-  connect(ui->checkBoxClickToLock, SIGNAL(toggled(bool)), mainwnd,
-          SLOT(UpdateSettings()));
+  connect(ui->colorPickerAnnotation, SIGNAL(colorChanged(QColor)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->colorPickerBackground, SIGNAL(colorChanged(QColor)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->colorPickerCursor, SIGNAL(colorChanged(QColor)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->horizontalSliderSize2D, SIGNAL(valueChanged(int)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->horizontalSliderSize3D, SIGNAL(valueChanged(int)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxRightButtonErase, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxSaveCopy, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxSyncZoom, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->radioButtonThemeDark, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxAutoReorientView, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxDecimalVoxelCoord, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxAutoScaleFont, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxAutoMidToMin, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->spinBoxPrecision, SIGNAL(valueChanged(int)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxComma, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
+  connect(ui->checkBoxClickToLock, SIGNAL(toggled(bool)), mainwnd, SLOT(UpdateSettings()));
 
   connect(ui->spinBoxPrecision, SIGNAL(valueChanged(int)), mainwnd,
           SLOT(UpdateInfoPanel()), Qt::QueuedConnection);
@@ -233,9 +216,9 @@ QVariantMap DialogPreferences::GetSettings() {
       ui->comboBoxShortcutToggleSurface->currentText();
   map["TextSize"]      = ui->spinBoxFontSize->value();
   map["AutoScaleText"] = ui->checkBoxAutoScaleFont->isChecked();
-  map["Precision"]     = ui->spinBoxPrecision->value();
-  map["UseComma"]      = ui->checkBoxComma->isChecked();
-  map["ClickToLock"]   = ui->checkBoxClickToLock->isChecked();
+  map["Precision"] = ui->spinBoxPrecision->value();
+  map["UseComma"] = ui->checkBoxComma->isChecked();
+  map["ClickToLock"] = ui->checkBoxClickToLock->isChecked();
   return map;
 }
 
