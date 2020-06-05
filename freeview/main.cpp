@@ -196,6 +196,9 @@ int main(int argc, char *argv[]) {
           "volume's header info. Flag can be '1' or '0' or 'true' or "
           "'false'.\n\n"
           "':frame=number' Set active frame (0 based).\n\n"
+          "':select_label=label_index' When colormap is set as look up table, "
+          "select and show only the given labels. Multiple labels can be given "
+          "separated by comma, such as, '5,10,20'.\n\n"
           "Example:\nfreeview -v "
           "T1.mgz:colormap=heatscale:heatscale=10,100,200\n",
           1, 1000),
@@ -404,11 +407,12 @@ int main(int argc, char *argv[]) {
           "Default value is 100.\n",
           1, 1),
       CmdLineEntry(CMD_LINE_OPTION, "ss", "screenshot",
-                   "<FILE> <MAGIFICATION_FACTOR> <AUTO_TRIM>",
-                   "Take a screen shot of the main viewport and then quit the "
+                   "<FILENAME> <MAGIFICATION_FACTOR> <AUTO_TRIM>",
+                   "Take a screenshot of the main viewport and then quit the "
                    "program. Default value for magnification factor is 1. "
-                   "AUTO_TRIM can be 'autotrim', 'true' or '1'. NOTE: "
-                   "AUTO_TRIM option is only available on Linux.",
+                   "AUTO_TRIM can be 'autotrim', 'true' or '1'. To "
+                   "automatically cycle through all the volumes/surfaces, put "
+                   "'%name' in the filename as the wildcard for layer name.",
                    1, 3),
       //    CmdLineEntry( CMD_LINE_OPTION, "fly", "fly-through", "<START_SLICE_NUMBER> <END_SLICE_NUMBER> <PREFIX>", "Fly through slices and take screenshot of each slice", 1, 3 ),
       CmdLineEntry(
@@ -506,8 +510,8 @@ int main(int argc, char *argv[]) {
                    "Hide y slice in 3D view."),
       CmdLineEntry(CMD_LINE_SWITCH, "hide-z-slice", "hide-z-slice", "",
                    "Hide z slice in 3D view."),
-      CmdLineEntry(CMD_LINE_OPTION, "title", "title", "<TITLE>",
-                   "Add title to freeview window caption.", 1, 1),
+      CmdLineEntry(CMD_LINE_OPTION, "subtitle", "subtitle", "<TEXT>",
+                   "Add subtitle to freeview window caption.", 1, 1),
       CmdLineEntry(CMD_LINE_SWITCH, "auto-load-surf", "auto-load-surf", "",
                    "Do not automatically load sphere or other supplemental "
                    "surface data."),

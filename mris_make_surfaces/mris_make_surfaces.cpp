@@ -34,9 +34,7 @@
 #include "mris_multimodal_refinement.h"
 #include "mrisutils.h"
 #include "surfgrad.h"
-#include "tags.h"
-#include "timer.h"
-#include "version.h"
+#include "utils.h"
 
 #define MAX_HISTO_BINS 1000
 
@@ -274,6 +272,7 @@ static int   white_vnos[MAX_VERTICES];
 
 static int   fill_interior = 0;
 static float check_contrast_direction(MRI_SURFACE *mris, MRI *mri_T1);
+int          UseV6CBV = 0;
 
 int main(int argc, char *argv[]) {
   char *       hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
@@ -922,7 +921,7 @@ int main(int argc, char *argv[]) {
                "deformation\n",
                outside_hi, max_border_white);
 
-      printf("Computing border values \n");
+      printf("Computing border values for white\n");
       printf("  MAX_WHITE  %d, max_border_white %g, min_border_white %g, "
              "min_gray_at_white_border %g\n",
              MAX_WHITE, max_border_white, min_border_white,
@@ -931,13 +930,21 @@ int main(int argc, char *argv[]) {
              "%g\n",
              outside_hi, max_thickness, max_gray_scale, max_gray);
       fflush(stdout);
-      // MRIScomputeBorderValues() will effectively set all v->marked=1 for all
-      // unripped vertices
-      MRIScomputeBorderValues(
-          mris, mri_T1, mri_smooth, MAX_WHITE, max_border_white,
-          min_border_white, min_gray_at_white_border, outside_hi, current_sigma,
-          2 * max_thickness, parms.fp, GRAY_WHITE, NULL, 0, parms.flags,
-          mri_aseg, -1, -1);
+      // MRIScomputeBorderValues() will effectively set all v->marked=1 for all unripped vertices
+      if (UseV6CBV == 0) {
+        MRIScomputeBorderValues(
+            mris, mri_T1, mri_smooth, MAX_WHITE, max_border_white,
+            min_border_white, min_gray_at_white_border, outside_hi,
+            current_sigma, 2 * max_thickness, parms.fp, GRAY_WHITE, NULL, 0,
+            parms.flags, mri_aseg, -1, -1);
+      } else {
+        MRIScomputeBorderValuesV6(
+            mris, mri_T1, mri_smooth, MAX_WHITE, max_border_white,
+            min_border_white, min_gray_at_white_border, outside_hi,
+            current_sigma, 2 * max_thickness, parms.fp, GRAY_WHITE, NULL, 0,
+            parms.flags, mri_aseg, -1, -1);
+      }
+
       printf("Finding expansion regions\n");
       fflush(stdout);
       MRISfindExpansionRegions(mris);
@@ -2236,11 +2243,17 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "no-unitize")) {
     UnitizeNormalFace = 0;
     printf("Turning off face normal unitization\n");
-    nargs = 1;
-  } else if (!stricmp(option, "border-vals-hires")) {
-    BorderValsHiRes = 1;
-    printf("Turning on hires option for MRIScomputeBorderValues_new()\n");
-    nargs = 1;
+    nargs = 0;
+  } else if (!stricmp(option, "first-peak-d1")) {
+    CBVfindFirstPeakD1 = 1;
+    printf("Turning on FindFirstPeakD1 option for "
+           "MRIScomputeBorderValues_new()\n");
+    nargs = 0;
+  } else if (!stricmp(option, "first-peak-d2")) {
+    CBVfindFirstPeakD2 = 1;
+    printf("Turning on FindFirstPeakD2 option for "
+           "MRIScomputeBorderValues_new()\n");
+    nargs = 0;
   } else if (!stricmp(option, "max_gray_scale")) {
     max_gray_scale = atof(argv[2]);
     fprintf(stderr,
@@ -2840,9 +2853,6 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "add")) {
     add = 1;
     fprintf(stderr, "adding vertices to tessellation during deformation.\n");
-  } else if (!stricmp(option, "first_wm_peak")) {
-    parms.flags |= IPFLAG_FIND_FIRST_WM_PEAK;
-    printf("settling WM surface at first peak in intensity profile\n");
   } else if (!stricmp(option, "max") || !stricmp(option, "max_thickness")) {
     max_thickness = atof(argv[2]);
     nargs         = 1;
@@ -2853,6 +2863,10 @@ static int get_option(int argc, char *argv[]) {
     Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
+  } else if (!stricmp(option, "v6-cbv")) {
+    UseV6CBV = 1;
+    printf("Using v6 CBV\n");
+    nargs = 0;
   } else if (!stricmp(option, "save-res")) {
     SaveResidual = 1;
     printf("Saving residual\n");

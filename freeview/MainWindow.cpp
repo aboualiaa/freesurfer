@@ -850,10 +850,6 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
   m_bShowTransformWindow = parser->Found("transform-volume");
 
   bool bReverseOrder = parser->Found("rorder");
-  if (parser->Found("title", &sa)) {
-    m_sTitle = sa[0];
-    setWindowTitle("FreeView: " + m_sTitle);
-  }
   if (parser->Found("cmd", &sa)) {
     this->AddScript(QStringList("loadcommand") << sa[0]);
   }
@@ -1191,19 +1187,6 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
     AddScript(QStringList("center"));
   }
 
-  if (parser->Found("ss", &sa)) {
-    QString mag_factor = "1", auto_trim = "0";
-    if (sa.size() > 1)
-      mag_factor = sa[1];
-    if (sa.size() > 2)
-      auto_trim = sa[2];
-    this->AddScript(QStringList("screencapture")
-                    << sa[0] << mag_factor << auto_trim);
-    if (bAutoQuit && !parser->Found("noquit")) {
-      this->AddScript(QStringList("quit"));
-    }
-  }
-
   if (parser->Found("fly", &sa)) {
   }
 
@@ -1226,14 +1209,34 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
     this->AddScript(QStringList("exportlineprofile") << sa[0]);
   }
 
-  if (parser->Found("quit"))
-    AddScript(QStringList("quit"));
-
   m_bVerbose  = parser->Found("verbose");
   m_bContinue = parser->Found("continue");
 
   if (parser->Found("stdin"))
     m_term->EnableListeningStdin();
+
+  if (parser->Found("subtitle", &sa)) {
+    m_sTitle = sa[0];
+    setWindowTitle("FreeView: " + m_sTitle);
+  }
+
+  if (parser->Found("ss", &sa)) {
+    QString mag_factor = "1", auto_trim = "0";
+    if (sa.size() > 1)
+      mag_factor = sa[1];
+    if (sa.size() > 2)
+      auto_trim = sa[2];
+
+    this->AddScript(QStringList("screenshot")
+                    << sa[0] << mag_factor << auto_trim);
+
+    if (bAutoQuit && !parser->Found("noquit")) {
+      this->AddScript(QStringList("quit"));
+    }
+  }
+
+  if (parser->Found("quit"))
+    AddScript(QStringList("quit"));
 
   return true;
 }
@@ -1616,7 +1619,7 @@ void MainWindow::RunScript() {
     CommandSetTrackColor(sa);
   } else if (cmd == "settrackrender") {
     CommandSetTrackRender(sa);
-  } else if (cmd == "screencapture") {
+  } else if (cmd == "screenshot") {
     CommandScreenCapture(sa);
   } else if (cmd == "quit" || cmd == "exit") {
     close();
@@ -1646,6 +1649,8 @@ void MainWindow::RunScript() {
     CommandSetHeadScaleOptions(sa);
   } else if (cmd == "setlut") {
     CommandSetLUT(sa);
+  } else if (cmd == "setselectedlabels") {
+    CommandSetSelectedLabels(sa);
   } else if (cmd == "setopacity") {
     CommandSetOpacity(sa);
   } else if (cmd == "setsmoothed") {
@@ -1911,6 +1916,7 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
   bool        bConform      = m_bDefaultConform;
   QString     gotoLabelName;
   QVariantMap sup_data;
+  QString     selected_labels;
   for (int i = 1; i < sa_vol.size(); i++) {
     QString strg = sa_vol[i];
     int     n    = strg.indexOf("=");
@@ -2044,6 +2050,8 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
           sup_data["BinaryColor"] = color;
         else
           cerr << "Unrecognized color input for :binary_color.\n";
+      } else if (subOption == "select_label") {
+        selected_labels = subArgu;
       } else if (!subOption.isEmpty()) {
         cerr << "Unrecognized sub-option flag '" << strg.toLatin1().constData()
              << "'.\n";
@@ -2065,6 +2073,10 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
     QStringList script("setcolormap");
     script << colormap << colormap_scale << scales;
     m_scripts.insert(0, script);
+
+    if (colormap == "lut" && !selected_labels.isEmpty()) {
+      m_scripts.insert(1, QStringList("setselectedlabels") << selected_labels);
+    }
   }
 
   if (!lut_name.isEmpty()) {
@@ -2093,6 +2105,7 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
   } else if (orientation == 1) {
     orientation = 0;
   }
+
   LoadVolumeFile(fn, reg_fn, bResample, nSampleMethod, bConform, orientation,
                  gotoLabelName, sup_data);
 }
@@ -2150,6 +2163,18 @@ void MainWindow::CommandSetColorMap(const QStringList &sa) {
   }
 
   SetVolumeColorMap(nColorMap, nColorMapScale, pars);
+}
+
+void MainWindow::CommandSetSelectedLabels(const QStringList &cmd) {
+  if (GetLayerCollection("MRI")->GetActiveLayer()) {
+    LayerPropertyMRI *p =
+        ((LayerMRI *)GetLayerCollection("MRI")->GetActiveLayer())
+            ->GetProperty();
+    QStringList list = cmd[1].split(",");
+    p->SetUnselectAllLabels();
+    foreach (QString str, list) { p->SetSelectLabel(str.toInt(), true); }
+    emit RefreshLookUpTableRequested();
+  }
 }
 
 void MainWindow::CommandSetHeadScaleOptions(const QStringList &sa) {
@@ -3782,7 +3807,29 @@ void MainWindow::CommandScreenCapture(const QStringList &cmd) {
       (cmd[3] == "autotrim" || cmd[3] == "true" || cmd[3] == "1"))
     auto_trim = true;
 
-  if (!m_views[m_nMainView]->SaveScreenShot(cmd[1],
+  if (cmd[1].contains("%name")) {
+    QString type = GetCurrentLayerType();
+    if (type == "MRI" || type == "Surface") {
+      QStringList    files;
+      QList<Layer *> layers = GetLayers(type);
+      for (int n = 0; n < layers.size(); n++) {
+        for (int i = 0; i < layers.size(); i++)
+          layers[i]->SetVisible(i == n);
+
+        GetMainView()->RequestRedraw(true);
+        QString fn = cmd[1];
+        fn.replace("%name", layers[n]->GetName());
+        if (!GetMainView()->SaveScreenShot(
+                fn, m_settingsScreenshot.AntiAliasing, (int)mag_factor)) {
+          cerr << "Failed to save screen shot to " << fn.toLatin1().constData()
+               << ".\n";
+        } else
+          files << fn;
+      }
+      if (auto_trim)
+        GetMainView()->TrimImageFiles(files);
+    }
+  } else if (!GetMainView()->SaveScreenShot(cmd[1],
                                             m_settingsScreenshot.AntiAliasing,
                                             (int)mag_factor, auto_trim)) {
     cerr << "Failed to save screen shot to " << cmd[1].toLatin1().constData()

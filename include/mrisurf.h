@@ -194,7 +194,6 @@ positive areas */
 #define IPFLAG_NOSCALE_TOL        0x8000 // don't scale tol with navgs
 #define IPFLAG_FORCE_GRADIENT_OUT 0x10000
 #define IPFLAG_FORCE_GRADIENT_IN  0x20000
-#define IPFLAG_FIND_FIRST_WM_PEAK 0x40000 // for Matt Glasser/David Van Essen
 
 #define INTEGRATE_LINE_MINIMIZE 0 /* use quadratic fit */
 #define INTEGRATE_MOMENTUM      1
@@ -1068,14 +1067,17 @@ int MRISaccumulateStandardErrorsOnSurface(MRI_SURFACE *mris, int total_dof,
                                           int new_dof);
 #define GRAY_WHITE 1
 #define GRAY_CSF   2
+int MRIScomputeBorderValuesV6(MRI_SURFACE *mris, MRI *mri_brain,
+                              MRI *mri_smooth, double inside_hi,
+                              double border_hi, double border_low,
+                              double outside_low, double outside_hi,
+                              double sigma, float max_thickness, FILE *log_fp,
+                              int which, MRI *mri_mask, double thresh,
+                              int flags, MRI *mri_aseg, int junk1, int junk2);
 int MRIScomputeMaxGradBorderValuesPial(MRI_SURFACE *mris, MRI *mri_brain,
                                        MRI *mri_smooth, double sigma,
                                        float max_thickness, float dir,
-                                       FILE *log_fp, int callno, MRI *mri_mask);
-int MRIScomputeMaxGradBorderValues(MRI_SURFACE *mris, MRI *mri_brain,
-                                   MRI *mri_smooth, double sigma,
-                                   float max_thickness, float dir, FILE *log_fp,
-                                   MRI *mri_wm, int callno);
+                                       FILE *log_fp, MRI *mri_wm, int callno);
 int MRIScomputeInvertedGrayWhiteBorderValues(
     MRI_SURFACE *mris, MRI *mri_brain, MRI *mri_smooth, double inside_hi,
     double border_hi, double border_low, double outside_low, double outside_hi,

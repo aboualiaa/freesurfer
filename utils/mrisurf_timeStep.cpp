@@ -2151,19 +2151,20 @@ int MRISexpandSurface(MRI_SURFACE *mris, float distance,
 }
 
 static int mrisSmoothingTimeStep(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
-int        MRISremoveOverlapWithSmoothing(MRI_SURFACE *      mris,
-                                          INTEGRATION_PARMS *parms) {
+
+int MRISremoveOverlapWithSmoothing(MRI_SURFACE *      mris,
+                                   INTEGRATION_PARMS *parms) {
   int negative, old_neg, same = 0, min_neg, min_neg_iter, last_expand;
 
   parms->dt       = .99;
   parms->max_nbrs = 0;
+  min_neg_iter    = 0;
+  last_expand     = 0;
+  parms->t        = parms->start_t;
   min_neg = negative = MRIScountNegativeTriangles(mris);
-  min_neg_iter       = 0;
-  last_expand        = 0;
-  parms->t           = parms->start_t;
+
   if (Gdiag & DIAG_WRITE) {
     char fname[STRLEN];
-
     if (!parms->fp) {
       sprintf(fname, "%s.%s.out",
               mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
@@ -2174,22 +2175,29 @@ int        MRISremoveOverlapWithSmoothing(MRI_SURFACE *      mris,
                   fname);
     }
   }
-  printf("%03d: dt=%2.4f, %d negative triangles\n", -1, 0.0, negative);
+
+  printf("%03d: dt=%2.4f, %3d negative triangles  VmPeak %d\n", -1, 0.0,
+         negative, GetVmPeak());
   while (negative > 0) {
     old_neg = negative;
 
-    //    if (Gdiag & DIAG_SHOW && (parms->t % 100 == 0) && parms->t > 0)
-    printf("%03d: dt=%2.4f, %d negative triangles\n", parms->t, parms->dt,
-           negative);
     if (parms->fp && parms->t % 100 == 0)
-      fprintf(parms->fp, "%03d: dt=%2.4f, %d negative triangles\n", parms->t,
-              parms->dt, negative);
+      fprintf(parms->fp, "%03d: dt=%2.4f, %d negative triangles  VmPeak %d\n",
+              parms->t, parms->dt, negative, GetVmPeak());
 
+    printf("%03d: dt=%2.4f, %3d negative triangles  LoopVmPeak a %d ", parms->t,
+           parms->dt, negative, GetVmPeak());
     mrisSmoothingTimeStep(mris, parms);
+    printf(" b %d ", GetVmPeak());
     parms->t++; // advance time-step counter
     mrisProjectSurface(mris);
+    printf(" c %d ", GetVmPeak());
     MRIScomputeMetricProperties(mris);
+    printf(" d %d ", GetVmPeak());
     negative = MRIScountNegativeTriangles(mris);
+    printf(" e %d ", GetVmPeak());
+    printf("\n");
+    fflush(stdout);
     if (negative < min_neg) {
       min_neg      = negative;
       min_neg_iter = parms->t;
@@ -2204,7 +2212,6 @@ int        MRISremoveOverlapWithSmoothing(MRI_SURFACE *      mris,
         parms->max_nbrs++;
         printf("expanding nbhd size to %d\n", parms->max_nbrs);
       }
-      //      parms->dt /= 2 ;
       last_expand = parms->t;
       same        = 0;
     }
@@ -2218,40 +2225,11 @@ int        MRISremoveOverlapWithSmoothing(MRI_SURFACE *      mris,
         parms->dt = 0.99;
         printf("expanding nbhd size to %d\n", parms->max_nbrs);
         last_expand = parms->t;
-        //        parms->dt /= 2 ;
-        same = 0;
+        same        = 0;
       }
     } else {
       same = 0;
     }
-#if 0
-    if (parms->t == parms->niterations/4)
-    {
-      parms->max_nbrs++ ;
-      //      parms->dt /= 2 ;
-      last_expand = parms->t ;
-      parms->dt = 0.99 ;
-      printf("expanding nbhd size to %d\n", parms->max_nbrs) ;
-    }
-    if (parms->t == parms->niterations/2)
-    {
-      parms->max_nbrs++ ;
-      //      parms->dt /= 2 ;
-      last_expand = parms->t ;
-      printf("expanding nbhd size to %d\n", parms->max_nbrs) ;
-      parms->dt = 0.99 ;
-    }
-
-    if (parms->t == 3*parms->niterations/4)
-    {
-      last_expand = parms->t ;
-      //      parms->dt /= 2 ;
-      parms->max_nbrs++ ;
-      parms->dt = 0.99 ;
-      printf("expanding nbhd size to %d\n", parms->max_nbrs) ;
-    }
-#endif
-
     if (parms->t - parms->start_t > parms->niterations) {
       break;
     }

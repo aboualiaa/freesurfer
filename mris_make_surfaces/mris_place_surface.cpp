@@ -813,6 +813,14 @@ static int parse_commandline(int argc, char **argv) {
       ripmngr.RipMidline = 0;
     else if (!strcmp(option, "--no-intensity-proc"))
       DoIntensityProc = 0;
+    else if (!strcmp(option, "--first-peak-d1"))
+      CBVfindFirstPeakD1 = 1;
+    else if (!strcmp(option, "--no-first-peak-d1"))
+      CBVfindFirstPeakD1 = 0;
+    else if (!strcmp(option, "--first-peak-d2"))
+      CBVfindFirstPeakD2 = 1;
+    else if (!strcmp(option, "--no-first-peak-d2"))
+      CBVfindFirstPeakD2 = 0;
     else if (!strcmp(option, "--lh"))
       hemi = "lh";
     else if (!strcmp(option, "--rh"))
