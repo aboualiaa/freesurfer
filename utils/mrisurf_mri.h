@@ -35,4 +35,4 @@ int MRIScomputeMaxGradBorderValues(MRI_SURFACE *mris, MRI *mri_brain,
 int MRIScomputeMaxGradBorderValuesPial(MRI_SURFACE *mris, MRI *mri_brain,
                                        MRI *mri_smooth, double sigma,
                                        float max_thickness, float dir,
-                                       FILE *log_fp, MRI *mri_wm, int callno);
+                                       FILE *log_fp, int callno, MRI *mri_mask);

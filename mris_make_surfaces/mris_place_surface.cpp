@@ -126,6 +126,10 @@ double round(double x);
 #include "utils.h"
 #include "version.h"
 
+extern int         CBVfindFirstPeakD1;
+extern int         CBVfindFirstPeakD2;
+extern CBV_OPTIONS CBVO;
+
 class RIP_MNGR {
 public:
   int         RipVertices(void);
@@ -237,8 +241,10 @@ double         Ghisto_right_outside_peak_pct = 0.5;
 int            n_averages                    = 0;
 int            UseMMRefine                   = 0;
 AutoDetGWStats adgws;
-char *         coversegpath  = NULL;
-MRI *          mri_cover_seg = NULL;
+char *         coversegpath      = NULL;
+MRI *          mri_cover_seg     = NULL;
+char *         LocalMaxFoundFile = NULL;
+char *         TargetSurfaceFile = NULL;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
@@ -540,7 +546,8 @@ int main(int argc, char **argv) {
     n_min_averages = min_white_averages;
     inside_hi      = adgws.white_inside_hi;
     border_hi      = adgws.white_border_hi;
-    border_low     = adgws.white_border_low;
+    double f       = adgws.white_border_low_factor;
+    border_low     = f * adgws.gray_mean + (1 - f) * adgws.white_mean;
     outside_low    = adgws.white_outside_low;
     outside_hi     = adgws.white_outside_hi;
   }
@@ -554,6 +561,22 @@ int main(int argc, char **argv) {
     border_low     = adgws.pial_border_low;
     outside_low    = adgws.pial_outside_low;
     outside_hi     = adgws.pial_outside_hi;
+  }
+
+  CBVO.cbvsurf = surf;
+  CBVO.Alloc();
+  if (CBVO.AltBorderLowLabelFile) {
+    // This allows some regions to use a differnt border_low threshold. This
+    // is used to improve the placement of the white surface in high-myelin
+    // areas where the cortex can be much brighter than normal; the surface
+    // often extended too far in these areas.
+    printf("CBVO High Myelin\n");
+    double f          = CBVO.AltBorderLowFactor;
+    CBVO.AltBorderLow = f * adgws.gray_mean + (1 - f) * adgws.white_mean;
+    if (CBVO.ReadAltBorderLowLabel())
+      exit(1);
+    printf("AltBorderLowFactor = %g, AltBorderLow = %g\n",
+           CBVO.AltBorderLowFactor, CBVO.AltBorderLow);
   }
 
   timer.reset();
@@ -740,6 +763,17 @@ int main(int argc, char **argv) {
     printf("Writing ripflagout to %s\n", ripflagout);
     const char *field = "ripflag";
     MRISwriteField(surf, &field, 1, ripflagout);
+  }
+  if (LocalMaxFoundFile) {
+    printf("Writing LocalMaxFoundFlag to %s\n", LocalMaxFoundFile);
+    MRIwrite(CBVO.LocalMaxFound, LocalMaxFoundFile);
+  }
+  if (TargetSurfaceFile) {
+    MRISsaveVertexPositions(surf, TMP_VERTICES);
+    MRISrestoreVertexPositions(surf, TARGET_VERTICES);
+    printf("writing surface targets to %s\n", TargetSurfaceFile);
+    MRISwrite(surf, TargetSurfaceFile);
+    MRISrestoreVertexPositions(surf, TMP_VERTICES);
   }
 
   msec = timer.milliseconds();
@@ -961,6 +995,11 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       adgws.white_border_low = atof(pargv[0]);
       nargsused              = 1;
+    } else if (!strcmp(option, "--white_border_low_factor")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      adgws.white_border_low_factor = atof(pargv[0]);
+      nargsused                     = 1;
     } else if (!strcmp(option, "--white_outside_low")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -1233,6 +1272,22 @@ static int parse_commandline(int argc, char **argv) {
         nthreads = 1;
       omp_set_num_threads(nthreads);
 #endif
+    } else if (!strcasecmp(option, "--alt-border-low")) {
+      if (nargc < 2)
+        CMDargNErr(option, 2);
+      CBVO.AltBorderLowLabelFile = pargv[0];
+      sscanf(pargv[1], "%lf", &CBVO.AltBorderLowFactor);
+      nargsused = 2;
+    } else if (!strcasecmp(option, "--local-max")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      LocalMaxFoundFile = pargv[0];
+      nargsused         = 1;
+    } else if (!strcasecmp(option, "--target")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      TargetSurfaceFile = pargv[0];
+      nargsused         = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))

@@ -39,7 +39,7 @@ static float pct           = 0.8;
 static float pslope        = 1.0f;
 static float nslope        = 1.0f;
 static float wm_low        = 90;
-float        wm_low_factor = 10.0;
+float        wm_low_factor = 0.0;
 static float wm_hi         = 125;
 static float gray_hi       = 100;
 static float gray_low      = 30;
@@ -235,9 +235,14 @@ int main(int argc, char *argv[]) {
         if (FZERO(gray_sigma)) {
           wm_low = (white_mean + gray_mean) / 2;
         } else {
-          printf("using wm_low_factor = %2.1f\n", wm_low_factor);
-          // Set wm_low to one stddev above GM mean
-          wm_low = gray_mean + wm_low_factor * gray_sigma;
+          if (wm_low_factor == 0) {
+            // Set wm_low to one stddev above GM mean
+            wm_low = gray_mean + gray_sigma;
+          } else {
+            printf("using wm_low_factor = %2.1f\n", wm_low_factor);
+            double f = wm_low_factor;
+            wm_low   = (1 - f) * gray_mean + f * white_mean;
+          }
         }
       }
 
@@ -313,8 +318,14 @@ int main(int argc, char *argv[]) {
     MRIfree(&seg);
     MRIfree(&newseg);
     if (!wm_low_set) {
-      // Set wm_low to one stddev above GM mean
-      wm_low = gray_mean + wm_low_factor * gray_sigma;
+      if (wm_low_factor == 0) {
+        // Set wm_low to one stddev above GM mean
+        wm_low = gray_mean + gray_sigma;
+      } else {
+        printf("using wm_low_factor = %2.1f\n", wm_low_factor);
+        double f = wm_low_factor;
+        wm_low   = f * gray_mean + (1 - f) * white_mean;
+      }
     }
     if (!gray_hi_set) {
       // Set gray_hi to two stddevs above GM mean
@@ -534,7 +545,7 @@ static int get_option(int argc, char *argv[]) {
     wm_low_set = 1;
     nargs      = 1;
     fprintf(stderr, "using white lolim = %2.1f\n", wm_low);
-  } else if (!stricmp(option, "wlo") || !stricmp(option, "wm_low_factor")) {
+  } else if (!stricmp(option, "wm_low_factor")) {
     wm_low_factor = atof(argv[2]);
     printf("wm_low_factor set to %2.1f\n", wm_low_factor);
     nargs = 1;

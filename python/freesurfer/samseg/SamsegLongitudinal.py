@@ -116,7 +116,6 @@ class SamsegLongitudinal:
         self.savePosteriors = savePosteriors
 
         # Initialize some objects
-        self.affine = Affine()
         self.probabilisticAtlas = ProbabilisticAtlas()
 
         # Get full model specifications and optimization options (using default unless overridden by user)
@@ -191,12 +190,13 @@ class SamsegLongitudinal:
             self.atlasDir, "atlasForAffineRegistration.txt.gz"
         )
 
-        self.imageToImageTransformMatrix, _ = self.affine.registerAtlas(
-            self.sstFileNames[0],
-            affineRegistrationMeshCollectionFileName,
-            templateFileName,
-            sstDir,
-            visualizer=self.visualizer,
+        affine = Affine(
+            imageFileName=self.sstFileNames[0],
+            meshCollectionFileName=affineRegistrationMeshCollectionFileName,
+            templateFileName=templateFileName,
+        )
+        self.imageToImageTransformMatrix, _ = affine.registerAtlas(
+            saveDir=sstDir, visualizer=self.visualizer
         )
 
     def preProcess(self):

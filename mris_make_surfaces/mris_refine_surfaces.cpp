@@ -25,11 +25,11 @@
 
 #include <ctype.h>
 #include <math.h>
+#include <mrisurf_mri.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "mrisurf_mri.h"
 #include "diag.h"
 #include "error.h"
 #include "label.h"
@@ -786,7 +786,7 @@ int main(int argc, char *argv[]) {
       if (inverted_contrast)
         MRIScomputeMaxGradBorderValuesPial(mris, mri_hires, mri_smooth,
                                            current_sigma, max_thickness, -1,
-                                           parms.fp, mri_mask, i);
+                                           parms.fp, i, mri_mask);
       else
         MRIScomputeBorderValues(mris, mri_hires, mri_smooth, max_gray,
                                 max_gray_at_csf_border, min_gray_at_csf_border,

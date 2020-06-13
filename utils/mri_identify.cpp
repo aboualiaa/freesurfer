@@ -553,30 +553,38 @@ char *IDextensionFromName(const char *name) {
   // Does not do .w
 
   // Try extensions of length 3
-  if (len < 5)
-    return (nullptr); // cant be right
+  if (len < 5) {
+    free(ext);
+    return (NULL);
+  } // cant be right
   ext = strncpy(ext, &(name[len - 3]), 3);
   if (!strcmp(ext, "nii") || !strcmp(ext, "mgz") || !strcmp(ext, "mgh") ||
       !strcmp(ext, "img"))
     return (ext);
 
   // Try extensions of length 4
-  if (len < 6)
-    return (nullptr); // cant be right
+  if (len < 6) {
+    free(ext);
+    return (NULL);
+  } // cant be right
   ext = strncpy(ext, &(name[len - 4]), 4);
   if (!strcmp(ext, "bhdr"))
     return (ext);
 
   // Try extensions of length 6
-  if (len < 8)
-    return (nullptr); // cant be right
+  if (len < 8) {
+    free(ext);
+    return (NULL);
+  } // cant be right
   ext = strncpy(ext, &(name[len - 6]), 6);
   if (!strcmp(ext, "nii.gz"))
     return (ext);
 
   // Try _000.bfloat and _000.short
-  if (len < 12)
-    return (nullptr); // cant be right
+  if (len < 12) {
+    free(ext);
+    return (NULL);
+  } // cant be right
   ext = strncpy(ext, &(name[len - 11]), 11);
   if (!strcmp(ext, "_000.bfloat")) {
     sprintf(ext, "bfloat");
@@ -587,7 +595,8 @@ char *IDextensionFromName(const char *name) {
     return (ext);
   }
 
-  return (nullptr);
+  free(ext);
+  return (NULL);
 }
 
 /*

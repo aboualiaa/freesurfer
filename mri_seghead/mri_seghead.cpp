@@ -63,7 +63,8 @@ int fillslices = 1;
 int fillrows   = 1;
 int fillcols   = 1;
 
-int dilate = 0;
+int dilate              = 0;
+int GetSignalBehindHead = 0;
 
 MRI *invol;
 MRI *HitMap;
@@ -115,6 +116,8 @@ FOUND:
   if (end < 0)
     end = 0;
   int start = end - bdepth;
+  printf("s=%d, cspace=%d, bdepth = %d, end=%d, start = %d\n", s, cspace,
+         bdepth, end, start);
   if (start < 0) {
     printf("WARNING: only %i < %i slices behind head!\n", end, bdepth);
     start = 0;
@@ -403,7 +406,8 @@ int main(int argc, char **argv) {
   }
   backnoise = backnoise / backcount;
 
-  getSignalBehindHead(invol_orig, outvol, outbox);
+  if (GetSignalBehindHead)
+    getSignalBehindHead(invol_orig, outvol, outbox);
 
   printf("N Head Voxels = %d\n", n);
   printf("N Back Voxels = %d\n", backcount);
@@ -459,6 +463,8 @@ static int parse_commandline(int argc, char **argv) {
       fillcols = 1;
     else if (!strcasecmp(option, "--fillslices"))
       fillslices = 1;
+    else if (!strcasecmp(option, "--get-signal-behind-head"))
+      GetSignalBehindHead = 1;
 
     else if (stringmatch(option, "--invol") || stringmatch(option, "--i")) {
       if (nargc < 1)
@@ -569,6 +575,7 @@ static void print_usage() {
   printf("   --thresh    single threshold value for 1 and 2 \n");
   printf("   --nhitsmin  min number of consecutive hits (2) \n");
   printf("   --hvoldat   file : write head volume (mm3) to an ascii file \n");
+  printf("   --get-signal-behind-head  \n");
   printf("\n");
 }
 /* --------------------------------------------- */

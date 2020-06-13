@@ -18,7 +18,7 @@ MutualInformationCostAndGradientCalculator ::
   m_Histogrammer   = Histogrammer::New();
   m_NumberOfVoxels = 0.0;
 
-  // this->SetNumberOfThreads( 1 );
+  //this->SetNumberOfThreads( 1 );
 }
 
 //
@@ -80,13 +80,12 @@ void MutualInformationCostAndGradientCalculator ::Rasterize(
     // Check convergence
     const double previousMinLogLikelihood = minLogLikelihood;
     minLogLikelihood = m_Histogrammer->GetMinLogLikelihood();
-    // std::cout << "minLogLikelihood: " << minLogLikelihood << std::endl;
-    // std::cout << "m_NumberOfVoxels: " << m_NumberOfVoxels << std::endl;
+    //std::cout << "minLogLikelihood: " << minLogLikelihood << std::endl;
+    //std::cout << "m_NumberOfVoxels: " << m_NumberOfVoxels << std::endl;
     const double changeInCostPerVoxel =
         (previousMinLogLikelihood - minLogLikelihood) /
         static_cast<double>(m_NumberOfVoxels);
-    // std::cout << "changeInCostPerVoxel: " << changeInCostPerVoxel <<
-    // std::endl;
+    //std::cout << "changeInCostPerVoxel: " << changeInCostPerVoxel << std::endl;
     if (changeInCostPerVoxel < 1e-3) {
       break;
     }
@@ -94,7 +93,7 @@ void MutualInformationCostAndGradientCalculator ::Rasterize(
   } // End loop over EM iterations
 
   //
-  if (false) {
+  if (0) {
     const Histogrammer::HistogramType &histogram =
         m_Histogrammer->GetHistogram();
 
@@ -117,8 +116,7 @@ void MutualInformationCostAndGradientCalculator ::Rasterize(
     }
   }
 
-  // Now rasterize to get approximate gradients (but actual data cost is
-  // computed separately)
+  // Now rasterize to get approximate gradients (but actual data cost is computed separately)
   Superclass::Rasterize(mesh);
 
   // Compute Mutual Information, and add it to cost from prior
@@ -147,9 +145,12 @@ void MutualInformationCostAndGradientCalculator ::Rasterize(
     negativeMutualInformation +=
         marginalProbabilityOfIntensity * log(marginalProbabilityOfIntensity);
   }
-  // std::cout << "negativeMutualInformation: " << negativeMutualInformation <<
-  // std::endl;
-  m_MinLogLikelihoodTimesPrior += negativeMutualInformation;
+  //std::cout << "negativeMutualInformation: " << negativeMutualInformation << std::endl;
+  //std::cout << "m_NumberOfVoxels: " << m_NumberOfVoxels << std::endl;
+  //std::cout << "priorCost: " << m_MinLogLikelihoodTimesPrior << std::endl;
+  //std::cout << "dataCost: " << m_NumberOfVoxels * negativeMutualInformation << std::endl;
+
+  m_MinLogLikelihoodTimesPrior += m_NumberOfVoxels * negativeMutualInformation;
 }
 
 //
@@ -195,8 +196,7 @@ void MutualInformationCostAndGradientCalculator ::
 #if 1
     for (unsigned int classNumber = 0; classNumber < numberOfClasses;
          classNumber++) {
-      // Get the class-conditional likelihood of this class at the intensity of
-      // this pixel
+      // Get the class-conditional likelihood of this class at the intensity of this pixel
       const double classConditionalLikelihood =
           m_Histogrammer
               ->GetConditionalIntensityDistributions()[classNumber][binNumber];
@@ -222,24 +222,20 @@ void MutualInformationCostAndGradientCalculator ::
 
     for (unsigned int classNumber = 0; classNumber < numberOfClasses;
          classNumber++) {
-      // std::cout << "classNumber: " << classNumber << std::endl;
-      // std::cout << "binNumber: " << binNumber << std::endl;
+      //std::cout << "classNumber: " << classNumber << std::endl;
+      //std::cout << "binNumber: " << binNumber << std::endl;
 
-      // Get the class-conditional likelihood of this class at the intensity of
-      // this pixel
+      // Get the class-conditional likelihood of this class at the intensity of this pixel
       const double classConditionalLikelihood =
           m_Histogrammer
               ->GetConditionalIntensityDistributions()[classNumber][binNumber];
-      // std::cout << "classConditionalLikelihood: " <<
-      // classConditionalLikelihood << std::endl;
+      //std::cout << "classConditionalLikelihood: " << classConditionalLikelihood << std::endl;
       const double logClassConditionalLikelihood =
           log(classConditionalLikelihood + 1e-15);
-      // std::cout << "logClassConditionalLikelihood: " <<
-      // logClassConditionalLikelihood << std::endl;
+      //std::cout << "logClassConditionalLikelihood: " << logClassConditionalLikelihood << std::endl;
 
       // Add contribution of the likelihood
-      // likelihood += classConditionalLikelihood *
-      // it.GetExtraLoadingInterpolatedValue( classNumber );
+      //likelihood += classConditionalLikelihood * it.GetExtraLoadingInterpolatedValue( classNumber );
 
       //
       xGradientBasis += logClassConditionalLikelihood *
@@ -253,9 +249,9 @@ void MutualInformationCostAndGradientCalculator ::
 #endif
 
     //
-    xGradientBasis /= m_NumberOfVoxels;
-    yGradientBasis /= m_NumberOfVoxels;
-    zGradientBasis /= m_NumberOfVoxels;
+    //xGradientBasis /= m_NumberOfVoxels;
+    //yGradientBasis /= m_NumberOfVoxels;
+    //zGradientBasis /= m_NumberOfVoxels;
 
     // Add contribution to gradient in vertex 0
     gradientInVertex0[0] += xGradientBasis * it.GetPi0();

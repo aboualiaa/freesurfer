@@ -5,7 +5,9 @@ add_compile_options(-Wno-deprecated -Wno-overloaded-virtual
                     -Wno-unused-local-typedefs -Wno-reorder
                     )
 
-include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/resurf/Code ${CMAKE_SOURCE_DIR}/utils)
+include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/resurf/Code
+                    ${CMAKE_SOURCE_DIR}/utils
+                    )
 
 add_executable(mris_make_surfaces mris_make_surfaces.cpp)
 add_help(mris_make_surfaces mris_make_surfaces.help.xml)
@@ -22,7 +24,7 @@ add_executable(mris_autodet_gwstats mris_autodet_gwstats.cpp)
 target_link_libraries(mris_autodet_gwstats utils)
 install(TARGETS mris_autodet_gwstats DESTINATION bin)
 
-add_executable(mris_refine_surfaces mris_refine_surfaces.cpp)
+add_executable(mris_refine_surfaces mris_refine_surfaces.cpp ../utils/mrisurf_mri.cpp)
 target_link_libraries(mris_refine_surfaces utils)
 install(TARGETS mris_refine_surfaces DESTINATION bin)
 

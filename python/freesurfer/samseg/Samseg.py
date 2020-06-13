@@ -60,7 +60,13 @@ class Samseg:
         self.modeNames = modeNames
 
         # Initialize some objects
-        self.affine = Affine()
+        self.affine = Affine(
+            imageFileName=self.imageFileNames[0],
+            meshCollectionFileName=os.path.join(
+                self.atlasDir, "atlasForAffineRegistration.txt.gz"
+            ),
+            templateFileName=os.path.join(self.atlasDir, "template.nii"),
+        )
         self.probabilisticAtlas = ProbabilisticAtlas()
 
         # Get full model specifications and optimization options (using default unless overridden by user)
@@ -169,11 +175,6 @@ class Samseg:
             self.imageToImageTransformMatrix,
             optimizationSummary,
         ) = self.affine.registerAtlas(
-            imageFileName=self.imageFileNames[0],
-            meshCollectionFileName=os.path.join(
-                self.atlasDir, "atlasForAffineRegistration.txt.gz"
-            ),
-            templateFileName=os.path.join(self.atlasDir, "template.nii"),
             savePath=self.savePath,
             visualizer=self.visualizer,
             worldToWorldTransformMatrix=worldToWorldTransformMatrix,

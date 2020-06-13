@@ -18,8 +18,8 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-#include "mrisurf_mri.h"
 
+#include "mrisurf_mri.h"
 #include "mrisurf_compute_dxyz.h"
 #include "mrisurf_sseTerms.h"
 #include "mrisurf_timeStep.h"
@@ -28,8 +28,9 @@
 
 #include "mrisurf_base.h"
 
-int CBVfindFirstPeakD1 = 0;
-int CBVfindFirstPeakD2 = 0;
+int         CBVfindFirstPeakD1 = 0;
+int         CBVfindFirstPeakD2 = 0;
+CBV_OPTIONS CBVO;
 
 static void showDtSSeRmsWkr(FILE *file, int n, double dt, double sse,
                             double rms, double last_rms, int line) {
@@ -1621,6 +1622,28 @@ int MRIScomputeBorderValues(MRI_SURFACE *mris, MRI *const mri_brain,
   return result;
 }
 
+int CBV_OPTIONS::Alloc(void) {
+  printf("CBVO Creating mask %d\n", cbvsurf->nvertices);
+  AltBorderLowMask = MRIalloc(cbvsurf->nvertices, 1, 1, MRI_INT);
+  LocalMaxFound    = MRIalloc(cbvsurf->nvertices, 1, 1, MRI_INT);
+  return (0);
+}
+int CBV_OPTIONS::ReadAltBorderLowLabel(void) {
+  printf("CBVO Reading label %s\n", AltBorderLowLabelFile);
+  fflush(stdout);
+  AltBorderLowLabel = LabelRead(NULL, AltBorderLowLabelFile);
+  if (AltBorderLowLabel == NULL)
+    return (1);
+
+  printf("CBVO Creating mask %d\n", cbvsurf->nvertices);
+  int n;
+  for (n = 0; n < AltBorderLowLabel->n_points; n++) {
+    int vno = AltBorderLowLabel->lv[n].vno;
+    MRIsetVoxVal(AltBorderLowMask, vno, 0, 0, 0, 1);
+  }
+  return (0);
+}
+
 /*!
   \fn int MRIScomputeBorderValues_new()
   \brief Computes the distance along the normal to the point of the maximum
@@ -1656,7 +1679,7 @@ int MRIScomputeBorderValues(MRI_SURFACE *mris, MRI *const mri_brain,
   border_hi eg,  115 (max_border_white, MeanWM+1WMSTD)
   border_low eg,  77 (min_border_white, MeanGM)
   outside_low eg, 68 (min_gray_at_white_border, MeanGM-1GMSTD)
-  outside_hi eg, 115 (outside_hi (often same as border_hi), used?)
+  outside_hi eg, 115 (outside_hi (often same as border_hi))
 
   When placing the pial surface  (second variables are from mris_make_surfaces):
   inside_hi = max_gray (eg, 99.05)
@@ -1667,6 +1690,9 @@ int MRIScomputeBorderValues(MRI_SURFACE *mris, MRI *const mri_brain,
 
   border_hi  - determines when a sample is too bright on the inward  loop
   border_low - determines when a sample is too dark   on the outward loop
+
+  outside_low, outside_hi: bracket the allowable intensity when computing
+   the next_val.
 
   The outputs are set in each vertex structure:
       v->val2 = current_sigma; // smoothing level along gradient used to find the target
@@ -1680,21 +1706,26 @@ int MRIScomputeBorderValues(MRI_SURFACE *mris, MRI *const mri_brain,
 */
 static int MRIScomputeBorderValues_new(
     MRI_SURFACE *mris, MRI *const mri_brain, MRI *const mri_smooth,
-    double const inside_hi, double const border_hi, double const border_low,
-    double const outside_low, double const outside_hi, double const sigma,
-    float const max_thickness, FILE *const log_fp, int const which,
-    MRI *const mri_mask, double const thresh, int const flags,
-    MRI *const mri_aseg, int vno_start, int vno_stop) {
-  float const step_size = mri_brain->xsize / 2;
-  Timer       mytimer;
-  int         msec;
-  VERTEX *    vgdiag;
+    double const inside_hi, double const border_hi,
+    double const border_low_global, double const outside_low,
+    double const outside_hi, double const sigma, float const max_thickness,
+    FILE *const log_fp, int const which, MRI *const mri_mask,
+    double const thresh, int const flags, MRI *const mri_aseg, int vno_start,
+    int vno_stop) {
+  float const        step_size = mri_brain->xsize / 2;
+  Timer              mytimer;
+  int                msec;
+  VERTEX *           vgdiag;
+  extern CBV_OPTIONS CBVO;
+  extern int         CBVfindFirstPeakD1;
+  extern int         CBVfindFirstPeakD2;
+
   mytimer.reset();
 
   printf("Entering MRIScomputeBorderValues_new(): \n");
   printf("  inside_hi   = %11.7lf;\n", inside_hi);
   printf("  border_hi   = %11.7lf;\n", border_hi);
-  printf("  border_low  = %11.7lf;\n", border_low);
+  printf("  border_low  = %11.7lf;\n", border_low_global);
   printf("  outside_low = %11.7lf;\n", outside_low);
   printf("  outside_hi  = %11.7lf;\n", outside_hi);
   printf("  sigma = %g;\n", sigma);
@@ -1760,11 +1791,11 @@ static int MRIScomputeBorderValues_new(
     reduction(+:n_sigma_increases,nripped,nFirstPeakD1)
 #endif
       for (vno = vno_start; vno < vno_stop; vno++) {
-    ROMP_PFLB_begin
+    ROMP_PFLB_begin double border_low = border_low_global;
 
-        //VERTEX_TOPOLOGY const * const vt = &mris->vertices_topology[vno];
-        VERTEX *const v        = &mris->vertices[vno];
-    double            next_val = 0;
+    //VERTEX_TOPOLOGY const * const vt = &mris->vertices_topology[vno];
+    VERTEX *const v        = &mris->vertices[vno];
+    double        next_val = 0;
 
     if (vno == Gdiag_no)
       printf("Starting vno=%d\n", vno);
@@ -1780,6 +1811,15 @@ static int MRIScomputeBorderValues_new(
 
     if (vno == Gdiag_no)
       DiagBreak();
+
+    if (CBVO.AltBorderLowMask) {
+      int m = MRIgetVoxVal(CBVO.AltBorderLowMask, vno, 0, 0, 0);
+      if (m > 0.5) {
+        border_low = CBVO.AltBorderLow;
+        if (vno == Gdiag_no)
+          printf("vno=%d setting border_low to %g \n", vno, border_low);
+      }
+    }
 
     // Note: xyz are in mm, xw,yw,zw are in voxels
 
@@ -1898,54 +1938,6 @@ static int MRIScomputeBorderValues_new(
       // This will be +step_size/2 if it did not make it even one step. Otherwise it will
       // be some negative value
       inward_dist = dist + step_size / 2;
-
-      // The if() below creates a lot of problems. In the original
-      // code, it was conditioned on DIAG_VERBOSE_ON being set, which
-      // almost never is, so it was never actually run. In v7, I
-      // removed this condition so that it could be reached; this
-      // caused placement inaccuracies. So now I put a 0 && to
-      // effectively remove it. There are still potential problems
-      // with next_val as described below.
-      // ------------------------------
-      // This if() used to have a "DIAG_VERBOSE_ON &&". This made the
-      // behavior non-deterministic for hires volumes because
-      // "next_val" was used downstream but not set here. This existed
-      // in v6. Also, next_val needs to be defined globally withing
-      // the scope of the vertex loop. There are several places below
-      // (now commented out) where it is redefined.
-      if (0 && CBVfindFirstPeakD1 == 1 && mag >= 0.0) {
-        // This code is supposed to refine inward_dist for hires
-        // volumes. This is similar to the code above except using a
-        // step that is half the size. But it just looks at the value
-        // and not the gradient, so it is not clear how this is
-        // supposed to work. And why only the inward loop?
-        for (dist = inward_dist; dist > -max_thickness; dist -= step_size / 2) {
-          double x, y, z;
-          double xw, yw, zw;
-          double val;
-          //double next_val; // define above with looop scope
-
-          // Sample brain at this distance
-          x = v->x + v->nx * dist;
-          y = v->y + v->ny * dist;
-          z = v->z + v->nz * dist;
-          MRIS_useRAS2VoxelMap(sras2v_map, mri_brain, x, y, z, &xw, &yw, &zw);
-          MRIsampleVolume(mri_brain, xw, yw, zw, &val);
-
-          // Sample brain at this distance + stepsize/2
-          x = v->x + v->nx * (dist + step_size / 2);
-          y = v->y + v->ny * (dist + step_size / 2);
-          z = v->z + v->nz * (dist + step_size / 2);
-          MRIS_useRAS2VoxelMap(sras2v_map, mri_brain, x, y, z, &xw, &yw, &zw);
-          MRIsampleVolume(mri_brain, xw, yw, zw, &next_val);
-
-          if (next_val < val)
-            // There is a decrease in the value, so must be at max inward max
-            // Again, this does not make sense if not sampling the gradient.
-            break; // break from distance loop
-        }          // end loop over distance
-        inward_dist = dist;
-      } // end if(CBVfindFirstPeakD1)
 
       // search outwards
       if (vno == Gdiag_no)
@@ -2161,7 +2153,7 @@ static int MRIScomputeBorderValues_new(
           // This if() did not have "&& (next_val > val)" which was in the "orignial"
           // ie, v6 and before
           if (vno == Gdiag_no)
-            printf("vno=%d breaking because val > prev && nex > val\n", vno);
+            printf("vno=%d breaking because val > prev && next > val\n", vno);
           break; // out of distance loop
         }
 
@@ -2437,9 +2429,10 @@ static int MRIScomputeBorderValues_new(
                    "peak=%2.2f, outside=%2.2f, ratio=%2.2f\n",
                    vno, sample_dists[i], (int)sample_mri[i], peak, outside,
                    peak / outside);
-          max_mag_val  = sample_mri[i];
-          max_mag      = fabs(dm[i]);
-          max_mag_dist = sample_dists[i];
+          max_mag_val     = sample_mri[i];
+          max_mag         = fabs(dm[i]);
+          max_mag_dist    = sample_dists[i];
+          local_max_found = 1; //??
           nFirstPeakD1++;
         } else if (
             CBVfindFirstPeakD2) // not a local max in 1st derivative - try second */
@@ -2500,9 +2493,10 @@ static int MRIScomputeBorderValues_new(
             if (i1 < numberOfSamples)
               i = i1 - 1;
 
-            max_mag_val  = sample_mri[i];
-            max_mag      = fabs(dm[i]);
-            max_mag_dist = sample_dists[i];
+            max_mag_val     = sample_mri[i];
+            max_mag         = fabs(dm[i]);
+            max_mag_dist    = sample_dists[i];
+            local_max_found = 1; //??
           }
         } // IPFLAG
 
@@ -2627,6 +2621,9 @@ static int MRIScomputeBorderValues_new(
              "%2.2f, %s\n",
              vno, v->val, v->mean, v->d,
              local_max_found ? "local max" : max_mag_val > 0 ? "grad" : "min");
+
+    if (CBVO.LocalMaxFound)
+      MRIsetVoxVal(CBVO.LocalMaxFound, vno, 0, 0, 0, local_max_found);
 
     ROMP_PFLB_end
   } // end loop over vertices
@@ -3813,6 +3810,7 @@ int MRIScomputeMaxGradBorderValues(MRI_SURFACE *mris, MRI *mri_brain,
   }
   return (NO_ERROR);
 }
+
 int MRIScomputeMaxGradBorderValuesPial(MRI_SURFACE *mris, MRI *mri_brain,
                                        MRI *mri_smooth, double sigma,
                                        float max_thickness, float dir,
@@ -4958,6 +4956,8 @@ int MRIScopyMRI(MRIS *Surf, MRI *Src, int Frame, const char *Field) {
           Surf->vertices[vtx].val = val;
         } else if (usecurv) {
           Surf->vertices[vtx].curv = val;
+        } else if (!strcmp(Field, "border")) {
+          Surf->vertices[vtx].border = val;
         } else if (!strcmp(Field, "stat")) {
           Surf->vertices[vtx].stat = val;
         } else if (!strcmp(Field, "valbak")) {
@@ -5095,6 +5095,8 @@ MRI *MRIcopyMRIS(MRI *mri, MRIS *surf, int Frame, const char *Field) {
           val = surf->vertices[vtx].val;
         } else if (usecurv) {
           val = surf->vertices[vtx].curv;
+        } else if (!strcmp(Field, "border")) {
+          val = surf->vertices[vtx].border;
         } else if (!strcmp(Field, "marked")) {
           val = surf->vertices[vtx].marked;
         } else if (!strcmp(Field, "marked2")) {
@@ -8858,7 +8860,7 @@ int MRIScomputePialTargetLocationsMultiModal(
 /*!
 \fn MRI *MRIScoverSeg(MRIS *mris, MRI *mri_bin, MRI *mri_cover_seg, int surftype)
 \brief Does something to make sure that surface covers the given segmentation. Good
-for babies and exvivo (?). 
+for babies and exvivo (?).
 surftype = //GRAY_WHITE; // GRAY_CSF
 */
 MRI *MRIScoverSeg(MRIS *mris, MRI *mri_bin, MRI *mri_cover_seg, int surftype) {
