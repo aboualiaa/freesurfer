@@ -28,3 +28,11 @@
 
 int mrisFillFace(MRI_SURFACE *mris, MRI *mri, int fno);
 int mrisHatchFace(MRI_SURFACE *mris, MRI *mri, int fno, int on);
+int MRIScomputeMaxGradBorderValues(MRI_SURFACE *mris, MRI *mri_brain,
+                                   MRI *mri_smooth, double sigma,
+                                   float max_thickness, float dir, FILE *log_fp,
+                                   MRI *mri_wm, int callno);
+int MRIScomputeMaxGradBorderValuesPial(MRI_SURFACE *mris, MRI *mri_brain,
+                                       MRI *mri_smooth, double sigma,
+                                       float max_thickness, float dir,
+                                       FILE *log_fp, MRI *mri_wm, int callno);

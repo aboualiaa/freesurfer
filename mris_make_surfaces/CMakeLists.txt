@@ -5,7 +5,7 @@ add_compile_options(-Wno-deprecated -Wno-overloaded-virtual
                     -Wno-unused-local-typedefs -Wno-reorder
                     )
 
-include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/resurf/Code)
+include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/resurf/Code ${CMAKE_SOURCE_DIR}/utils)
 
 add_executable(mris_make_surfaces mris_make_surfaces.cpp)
 add_help(mris_make_surfaces mris_make_surfaces.help.xml)

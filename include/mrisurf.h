@@ -1074,10 +1074,6 @@ int MRIScomputeBorderValuesV6(MRI_SURFACE *mris, MRI *mri_brain,
                               double sigma, float max_thickness, FILE *log_fp,
                               int which, MRI *mri_mask, double thresh,
                               int flags, MRI *mri_aseg, int junk1, int junk2);
-int MRIScomputeMaxGradBorderValuesPial(MRI_SURFACE *mris, MRI *mri_brain,
-                                       MRI *mri_smooth, double sigma,
-                                       float max_thickness, float dir,
-                                       FILE *log_fp, MRI *mri_wm, int callno);
 int MRIScomputeInvertedGrayWhiteBorderValues(
     MRI_SURFACE *mris, MRI *mri_brain, MRI *mri_smooth, double inside_hi,
     double border_hi, double border_low, double outside_low, double outside_hi,
@@ -1560,7 +1556,7 @@ MRIS * MRISfromVerticesAndFaces(const float *vertices, int nvertices,
 
 #define MRISgetCoords(v, c, vx, vy, vz)                                        \
   MRISvertexCoord2XYZ_float(v, c, vx, vy, vz)
-#if 0 
+#if 0
  switch(c) { \
    case ORIGINAL_VERTICES:  (*vx) = (v)->origx;  (*vy) = (v)->origy;  (*vz) = (v)->origz; break; \
    case TMP_VERTICES:       (*vx) = (v)->tx;     (*vy) = (v)->ty;     (*vz) = (v)->tz; break; \
@@ -2224,7 +2220,7 @@ static CONST_EXCEPT_MRISURF_TOPOLOGY short* pVERTEXvnum(VERTEX_TOPOLOGY CONST_EX
   case 2: return &v->v2num;
   case 3: return &v->v3num;
   default: cheapAssert(false); return NULL;
-  }    
+  }
 }
 #endif
 
@@ -2288,7 +2284,7 @@ int MRISwriteField(MRIS *surf, const char **fields, int nfields,
   intensity limits used in MRIScomputeBorderValues() when placing both
   the white and pial surfaces on a T1w image. This is functionality
   that used to be in mris_make_surfaces.cpp. It has mostly been copied
-  over, which is why it is not very well organized. 
+  over, which is why it is not very well organized.
  */
 class AutoDetGWStats {
 public:
