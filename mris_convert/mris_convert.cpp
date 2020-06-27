@@ -77,7 +77,7 @@ const char *Progname;
 
 static int     center_surface      = 0;
 static int     talairach_flag      = 0;
-static char *  talxfmsubject       = nullptr;
+static char *  talxfmsubject       = NULL;
 static int     patch_flag          = 0;
 static int     read_orig_positions = 0;
 static int     w_file_dst_flag     = 0;
@@ -96,16 +96,17 @@ static int     labelstats_file_flag = 0;
 static char *  labelstats_fname;
 static int     parcstats_file_flag = 0;
 static char *  parcstats_fname;
-static char *  orig_surf_name = nullptr;
+static char *  orig_surf_name = NULL;
 static double  scale          = 0;
 static int     rescale        = 0; // for rescaling group average surfaces
 static int     output_normals = 0;
 static int     PrintXYZOnly   = 0;
-static MATRIX *XFM            = nullptr;
+static MATRIX *XFM            = NULL;
 static int     write_vertex_neighbors = 0;
 static int     combinesurfs_flag      = 0;
 static int     userealras_flag        = 0;
-static MRI *   VolGeomMRI             = nullptr;
+static int     usesurfras_flag        = 0;
+static MRI *   VolGeomMRI             = NULL;
 static int     cras_add               = 0;
 static int     cras_subtract          = 0;
 static int     ToScanner              = 0;
@@ -260,8 +261,12 @@ int main(int argc, char *argv[]) {
   }
 
   if (userealras_flag) {
-    printf("Setting useRealRAS to 1!\n");
+    printf("Setting useRealRAS to 1\n");
     mris->useRealRAS = 1;
+  }
+  if (usesurfras_flag) {
+    printf("Setting useRealRAS to 0\n");
+    mris->useRealRAS = 0;
   }
 
   if (cras_add) {
@@ -627,6 +632,10 @@ static int get_option(int argc, char *argv[]) {
     DeleteCommands = 1;
   } else if (!stricmp(option, "-userealras")) {
     userealras_flag = 1;
+    usesurfras_flag = 0;
+  } else if (!stricmp(option, "-usesurfras")) {
+    userealras_flag = 0;
+    usesurfras_flag = 1;
   } else if (!stricmp(option, "-cras_correction") ||
              !stricmp(option, "-cras_add")) {
     cras_add      = 1;
@@ -734,6 +743,16 @@ static void print_help() {
   printf("  --annot <annot file> input is annotation or gifti label data\n");
   printf("  --parcstats <infile>  infile is name of text file containing\n");
   printf("                    label/val pairs, where label is an annot name\n");
+  printf("\nThis program will convert MRI-surface data formats.\n");
+  printf("\nValid options are:\n");
+  printf("  -p                input is a patch, not a full surface\n");
+  printf("  -c <scalar file>  input is scalar curv overlay file (must still\n"
+         "                    specify surface)\n");
+  printf("  -f <scalar file>  input is functional time-series or other\n"
+         "                    multi-frame data (must specify surface)\n");
+  printf("  --annot <annot file> input is annotation or gifti label data\n");
+  printf("  --parcstats <infile>  infile is name of text file containing\n");
+  printf("                    label/val pairs, where label is an annot name\n");
   printf(
       "                    and val is a value associated with that label.\n");
   printf("                    The output file will be a scalar file.\n");
@@ -764,6 +783,8 @@ static void print_help() {
   printf("  --center : put center of surface at (0,0,0)\n");
   printf(
       "  --userealras : set the useRealRAS flag in the surface file to 1 \n");
+  printf(
+      "  --usesurfras : set the useRealRAS flag in the surface file to 0 \n");
   printf("  --vol-geom MRIVol : use MRIVol to set the volume geometry\n");
   printf("  --to-scanner : convert coordinates from native FS (tkr) coords to "
          "scanner coords\n");

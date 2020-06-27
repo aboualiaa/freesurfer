@@ -126,6 +126,9 @@ MainWindow::MainWindow(QWidget *parent, MyCmdLineParser *cmdParser)
       m_strDefaultColorMapType("grayscale"), m_bDefaultConform(false),
       m_layerVolumeRef(NULL), m_bScriptRunning(false), m_bProcessing(false),
       m_bSplinePicking(true), m_cmdParser(cmdParser), m_bHadError(false) {
+  m_dlgSaveScreenshot = NULL;
+  m_dlgPreferences    = NULL;
+
   m_defaultSettings["no_autoload"] = true; // default no autoload
 
   // must create layer collections first before setupui()
@@ -235,8 +238,6 @@ MainWindow::MainWindow(QWidget *parent, MyCmdLineParser *cmdParser)
           m_dlgCropVolume, SLOT(OnCropBoundChanged(LayerMRI *)));
   connect(m_layerCollections["MRI"], SIGNAL(LayerRemoved(Layer *)),
           m_dlgCropVolume, SLOT(OnLayerRemoved(Layer *)));
-  m_dlgSaveScreenshot = NULL;
-  m_dlgPreferences    = NULL;
 
   m_dlgThresholdVolume = new DialogThresholdVolume(this);
   m_dlgThresholdVolume->hide();
@@ -3325,6 +3326,10 @@ void MainWindow::CommandSetSurfaceOverlayColormap(const QStringList &cmd) {
           overlay->GetProperty()->SetColorInverse(true);
         else if (cmd[i] == "truncate")
           overlay->GetProperty()->SetColorTruncate(true);
+        else if (cmd[i] == "clearlower")
+          overlay->GetProperty()->SetClearLower(true);
+        else if (cmd[i] == "clearhigher")
+          overlay->GetProperty()->SetClearHigher(true);
       }
       surf->UpdateOverlay(true);
     }
@@ -7652,4 +7657,18 @@ bool MainWindow::ExportLineProfileThickness(const QString &    filename,
       lp->deleteLater();
   }
   return true;
+}
+
+void MainWindow::WriteLog(const QString &str_in, const QString &filename,
+                          bool bOverwrite) {
+  QFileInfo fi(QStandardPaths::locate(QStandardPaths::DocumentsLocation, "",
+                                      QStandardPaths::LocateDirectory),
+               filename);
+  QFile     file(fi.absoluteFilePath());
+  file.open(bOverwrite ? QFile::WriteOnly : QFile::Append);
+  QString str = QString("[%1] %2\r\n")
+                    .arg(QDateTime::currentDateTime().toString())
+                    .arg(str_in);
+  file.write(str.toUtf8());
+  file.close();
 }

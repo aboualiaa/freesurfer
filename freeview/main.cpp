@@ -52,6 +52,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context,
       msg.contains("posix collation implementation"))
     return;
 
+  //  MainWindow::WriteLog(msg);
+
   switch ((int)type) {
   case QtDebugMsg:
     fprintf(stdout, "%s\n", qPrintable(msg));
@@ -244,8 +246,11 @@ int main(int argc, char *argv[]) {
           "':overlay_method=method_name' Set overlay method. Valid names are "
           "'linear', 'linearopaque' and 'piecewise'.\n\n"
           "':overlay_color=colorscale,settings' Set overlay color setttings. "
-          "Valid names are 'colorwheel', 'truncate' and 'inverse'. Use comma "
-          "to apply more than one.\n\n"
+          "Valid names are 'colorwheel', 'truncate', 'inverse', 'clearlower' "
+          "and 'clearhigher'. Use comma to apply more than one. "
+          "'clearlower/higher' only works when overlay_custom option is on.\n\n"
+          "':overlay_custom=val,r,g,b,val2,r2,g2,b2...' Set customized overlay "
+          "color.\n\n"
           "':overlay_opacity=opacity' Set opacity of overlay.\n\n"
           "':overlay_threshold=low,(mid,)high(,percentile)' Set overlay "
           "threshold values, separated by comma. When overlay method is linear "

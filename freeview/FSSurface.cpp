@@ -389,6 +389,7 @@ bool FSSurface::LoadOverlay(const QString &filename, const QString &fn_reg,
   //    qDebug() << "mritype " << mritype;
   MRI *mriheader =
       MRIreadHeader(filename.toLatin1().data(), MRI_VOLUME_TYPE_UNKNOWN);
+
   if (mriheader &&
       mriheader->width * mriheader->height * mriheader->depth !=
           m_MRIS->nvertices &&
