@@ -46,6 +46,8 @@ public slots:
   void OnButtonDelete();
   void OnButtonCleanUp();
   void UpdateActions();
+  void OnButtonLoadSegmentation();
+  void OnButtonLoadColorTable();
 
 private:
   void UpdateLabelItem(QTreeWidgetItem *item, int i, const QString &name,

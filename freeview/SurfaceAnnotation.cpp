@@ -25,11 +25,16 @@
 #include "SurfaceAnnotation.h"
 #include "FSSurface.h"
 #include "LayerSurface.h"
+#include "mri.h"
 #include "vtkLookupTable.h"
+#include "vtkMath.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include <QDebug>
 #include <QFileInfo>
 #include <vtkActor.h>
+#include <vtkAppendPolyData.h>
+#include <vtkCellArray.h>
+#include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 
@@ -92,8 +97,7 @@ bool SurfaceAnnotation::LoadAnnotation(const QString &fn) {
       ret = return_code;
     }
     if (ret != 0) {
-      std::cerr << "Could not load annotation from file " << qPrintable(fn)
-                << ".\n";
+      cerr << "Could not load annotation from file " << qPrintable(fn) << ".\n";
       return false;
     } else {
       m_lut = CTABdeepCopy(mris->ct);
@@ -106,6 +110,62 @@ bool SurfaceAnnotation::LoadAnnotation(const QString &fn) {
     }
   }
   return false;
+}
+
+bool SurfaceAnnotation::LoadFromSegmentation(const QString &fn) {
+  MRI *mri = MRIread(fn.toLatin1().data());
+  if (mri->width != m_nIndexSize) {
+    cerr << "Cannot load segmentation file. Wrong dimension size.";
+    MRIfree(&mri);
+    return false;
+  }
+  for (int i = 0; i < m_nIndexSize; i++) {
+    int n = -1;
+    switch (mri->type) {
+    case MRI_UCHAR:
+      n = MRIseq_vox(mri, i, 0, 0, 0);
+      break;
+    case MRI_INT:
+      n = MRIIseq_vox(mri, i, 0, 0, 0);
+      break;
+    case MRI_LONG:
+      n = (int)MRILseq_vox(mri, i, 0, 0, 0);
+      break;
+    case MRI_FLOAT:
+      n = (int)MRIFseq_vox(mri, i, 0, 0, 0);
+      break;
+    case MRI_SHORT:
+      n = MRIseq_vox(mri, i, 0, 0, 0);
+      break;
+    default:
+      break;
+    }
+    int annot = -1;
+    if (CTABannotationAtIndex(m_lut, n, &annot) == 0)
+      m_data[i] = annot;
+  }
+  UpdateData();
+  SetSelectAllLabels();
+  MRIfree(&mri);
+  return true;
+}
+
+bool SurfaceAnnotation::LoadColorTable(const QString &fn) {
+  COLOR_TABLE *lut = CTABreadASCII(fn.toLatin1().data());
+  if (lut) {
+    if (m_lut)
+      CTABfree(&m_lut);
+    m_lut = lut;
+    UpdateColorList();
+    MRIS *mris = m_surface->GetSourceSurface()->GetMRIS();
+    if (mris->ct)
+      CTABfree(&mris->ct);
+    mris->ct = CTABdeepCopy(m_lut);
+    for (int i = 0; i < m_nIndexSize; i++)
+      m_data[i] = mris->vertices[i].annotation;
+    UpdateData();
+  }
+  return (lut != 0);
 }
 
 bool SurfaceAnnotation::InitializeNewAnnotation(const QString &ct_fn) {
@@ -123,8 +183,7 @@ bool SurfaceAnnotation::InitializeNewAnnotation(const QString &ct_fn) {
       SetSelectAllLabels();
       return true;
     } else {
-      std::cerr << "Could not load color table file" << qPrintable(ct_fn)
-                << ".\n";
+      cerr << "Could not load color table file" << qPrintable(ct_fn) << ".\n";
     }
   }
   return false;
@@ -513,7 +572,7 @@ void SurfaceAnnotation::ReassignNewLabel(int nId, int ctab_id,
     CTABisEntryValid(m_lut, ctab_id, &nValid);
   if (!nValid) {
     if (name.isEmpty() || !color.isValid()) {
-      std::cerr << "Invalid index in color table: " << ctab_id << std::endl;
+      cerr << "Invalid index in color table: " << ctab_id << endl;
       return;
     }
     UpdateColorTable(ctab_id, name, color);

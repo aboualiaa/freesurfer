@@ -19,9 +19,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <map>
 #include <vector>
@@ -29,6 +29,7 @@
 #include "colortab.h"
 #include "const.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
 #include "label.h"
 #include "log.h"
@@ -155,7 +156,7 @@ int read_named_annotation_table(const char *name) {
 }
 
 /*-----------------------------------------------*/
-int read_annotation_table() {
+int read_annotation_table(void) {
   FILE *       fp;
   char         fname[STRLEN], line[STRLEN];
   const char * cp;
@@ -171,7 +172,7 @@ int read_annotation_table() {
     cp = ".";
   }
 
-  if (annotation_table_file == nullptr) {
+  if (annotation_table_file == NULL) {
     sprintf(fname, "%s/Simple_surface_labels2009.txt", cp);
   } else {
     sprintf(fname, "%s", annotation_table_file);
@@ -318,7 +319,7 @@ LABEL *annotation2label(int annotid, MRIS *Surf) {
     }
   }
   if (npoints == 0) {
-    return (nullptr);
+    return (NULL);
   }
 
   // Allocate the label
@@ -350,7 +351,7 @@ int set_atable_from_ctable(COLOR_TABLE *pct) {
   CTE *cte;
   int  i;
 
-  if (pct == nullptr) {
+  if (pct == NULL) {
     return (ERROR_BAD_PARM);
   }
 
@@ -368,7 +369,7 @@ int set_atable_from_ctable(COLOR_TABLE *pct) {
   atable = (ATABLE_ELT *)calloc(num_entries, sizeof(ATABLE_ELT));
   for (i = 0; i < num_entries; i++) {
     cte = pct->entries[i];
-    if (nullptr != cte) {
+    if (NULL != cte) {
       atable[i].index = i;
       CTABcopyName(pct, i, atable[i].name, sizeof(atable[i].name));
       CTABrgbAtIndexi(pct, i, &atable[i].r, &atable[i].g, &atable[i].b);
@@ -387,7 +388,7 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits) {
   MRIScomputeMetricProperties(mris);
   MRIScomputeSecondFundamentalForm(mris);
   done = (int *)calloc(mris->ct->nentries, sizeof(int));
-  if (done == nullptr)
+  if (done == NULL)
     ErrorExit(
         ERROR_NOMEMORY,
         "ERROR: MRISdivideAnnotation: could not allocate %d index table\n",
@@ -411,12 +412,6 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits) {
     if (index == Gdiag_no) {
       DiagBreak();
     }
-#if 0
-    if (stricmp("postcentral", mris->ct->entries[index]->name))
-    {
-      continue ;
-    }
-#endif
     num = MRISdivideAnnotationUnit(mris, v->annotation, nunits[index]);
     nadded += (num + 1);
     done[index] = 1 + num;
@@ -429,7 +424,7 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits) {
     if (i == Gdiag_no) {
       DiagBreak();
     }
-    if (mris->ct->entries[i] == nullptr) {
+    if (mris->ct->entries[i] == NULL) {
       continue;
     }
     *(ct->entries[i]) = *(mris->ct->entries[i]);
@@ -437,8 +432,12 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits) {
       int offset, new_index, ri, gi, bi, found;
 
       *(ct->entries[index]) = *(mris->ct->entries[i]);
-      sprintf(ct->entries[index]->name, "%s_div%d", ct->entries[i]->name,
-              j + 1);
+      auto cx = snprintf(ct->entries[index]->name, STRLEN, "%s_div%d",
+                         ct->entries[i]->name, j + 1);
+      if ((cx < 0) || (cx > STRLEN)) {
+        std::cerr << __FUNCTION__ << ": snprintf returned error value"
+                  << std::endl;
+      }
       offset = j;
       found  = 0;
       do {
@@ -526,7 +525,7 @@ int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits) {
   // find vertex in annotation closest to centroid
   min_dist = 100000;
   min_vno  = -1;
-  vc       = nullptr;
+  vc       = NULL;
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     if (v->ripflag || v->annotation != annot) {
@@ -562,9 +561,9 @@ int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits) {
     num++;
   }
 
-  m_obs_T = MatrixTranspose(m_obs, nullptr);
+  m_obs_T = MatrixTranspose(m_obs, NULL);
   m_cov   = MatrixMultiply(m_obs, m_obs_T, NULL);
-  m_eig   = MatrixEigenSystem(m_cov, evalues, nullptr);
+  m_eig   = MatrixEigenSystem(m_cov, evalues, NULL);
   e1x =
       *MATRIX_RELT(m_eig, 1, 1) * vc->e1x + *MATRIX_RELT(m_eig, 2, 1) * vc->e2x;
   e1y =
@@ -986,7 +985,7 @@ double *MRISannotDice(MRIS *surf1, MRIS *surf2, int *nsegs, int **segidlist) {
   if (nsegid1 != nsegid2) {
     printf("ERROR: MRISannotDice(): nsegs do not match %d %d\n", nsegid1,
            nsegid2);
-    return (nullptr);
+    return (NULL);
   }
   // Note: segidlist1 and 2 should be the same too
   printf("MRISannotDice(): found %d segs\n", nsegid1);

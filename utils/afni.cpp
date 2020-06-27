@@ -20,20 +20,29 @@
 // moved out from mriio.c
 //
 
-#include "AFNI.h"
-#include "error.h"
+#include <ctype.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "mri.h"
 
-/* ----- flags for keeping track of what we've gotten from the header ----- */
-// TODO(aboualiaa): use an int
-constexpr auto AFNI_ALL_REQUIRED = 0x0000003f;
+#include "error.h"
+#include "machine.h"
+#include "mghendian.h"
+#include "utils.h"
 
-constexpr auto ORIENT_SPECIFIC_FLAG    = 0x00000001;
-constexpr auto BRICK_TYPES_FLAG        = 0x00000002;
-constexpr auto DATASET_DIMENSIONS_FLAG = 0x00000004;
-constexpr auto DELTA_FLAG              = 0x00000008;
-constexpr auto ORIGIN_FLAG             = 0x00000010;
-constexpr auto BYTEORDER_STRING_FLAG   = 0x00000020;
+#include "AFNI.h"
+
+/* ----- flags for keeping track of what we've gotten from the header ----- */
+#define AFNI_ALL_REQUIRED 0x0000003f
+
+#define ORIENT_SPECIFIC_FLAG    0x00000001
+#define BRICK_TYPES_FLAG        0x00000002
+#define DATASET_DIMENSIONS_FLAG 0x00000004
+#define DELTA_FLAG              0x00000008
+#define ORIGIN_FLAG             0x00000010
+#define BYTEORDER_STRING_FLAG   0x00000020
 
 static float afni_orientations[][3] = {{-1.0, 0.0, 0.0}, {1.0, 0.0, 0.0},
                                        {0.0, 1.0, 0.0},  {0.0, -1.0, 0.0},
@@ -59,28 +68,24 @@ void AFinit(AF *pAF) {
   pAF->delta[1]           = 0.;
   pAF->delta[2]           = 0.;
   pAF->numchars           = 0;
-  pAF->idcode_string      = nullptr;
+  pAF->idcode_string      = 0;
   pAF->numstats           = 0;
-  pAF->brick_stats        = nullptr;
+  pAF->brick_stats        = 0;
   pAF->numtypes           = 0;
-  pAF->brick_types        = nullptr;
+  pAF->brick_types        = 0;
   pAF->numfacs            = 0;
-  pAF->brick_float_facs   = nullptr;
+  pAF->brick_float_facs   = 0;
 }
 
 void AFclean(AF *pAF) {
-  if (pAF->numchars != 0) {
+  if (pAF->numchars)
     free(pAF->idcode_string);
-  }
-  if (pAF->numstats != 0) {
+  if (pAF->numstats)
     free(pAF->brick_stats);
-  }
-  if (pAF->numtypes != 0) {
+  if (pAF->numtypes)
     free(pAF->brick_types);
-  }
-  if (pAF->numfacs != 0) {
+  if (pAF->numfacs)
     free(pAF->brick_float_facs);
-  }
 }
 
 void printAFNIHeader(AF *pAF) {
@@ -102,43 +107,38 @@ void printAFNIHeader(AF *pAF) {
          pAF->delta[2]);
   printf("IDCODE_STRING     : %s\n", pAF->idcode_string);
   printf("BYTEORDER_STRING  : %s\n", pAF->byteorder_string);
-  for (i = 0; i < pAF->numstats; i = i + 2) {
+  for (i = 0; i < pAF->numstats; i = i + 2)
     printf("BRICK_STATS       : min %f\t max %f\n", pAF->brick_stats[i],
            pAF->brick_stats[i + 1]);
-  }
-  for (i = 0; i < pAF->numtypes; ++i) {
+  for (i = 0; i < pAF->numtypes; ++i)
     printf("BRICK_TYPES       : %s\n", types[pAF->brick_types[i]]);
-  }
-  for (i = 0; i < pAF->numfacs; ++i) {
+  for (i = 0; i < pAF->numfacs; ++i)
     printf("BRICK_FLOAT_FACS  : %f\n", pAF->brick_float_facs[i]);
-  }
   printf(
       "====================================================================\n");
 }
 
 static int *get_afni_int(FILE *fp, int count, char *name) {
-  int * buf = nullptr;
+  int * buf = NULL;
   int   i;
   char  line[STRLEN];
   char *c;
   char *e;
   char  blank_flag;
 
-  buf = static_cast<int *>(malloc(count * sizeof(int)));
+  buf = (int *)malloc(count * sizeof(int));
 
   for (i = 0; i < count;) {
-    if ((fgets(line, STRLEN, fp) == nullptr) && (ferror(fp) != 0)) {
+    if (!fgets(line, STRLEN, fp) && ferror(fp)) {
       ErrorPrintf(ERROR_BADFILE, "failed reading file");
     }
 
     blank_flag = 1;
-    for (c = line; *c != '\0'; c++) {
-      if (isspace(*c) == 0) {
+    for (c = line; *c != '\0'; c++)
+      if (!isspace(*c))
         blank_flag = 0;
-      }
-    }
 
-    if (feof(fp) != 0) {
+    if (feof(fp)) {
       free(buf);
       errno = 0;
       ErrorReturn(NULL, (ERROR_BADPARM,
@@ -146,7 +146,7 @@ static int *get_afni_int(FILE *fp, int count, char *name) {
                          count, name));
     }
 
-    if (blank_flag != 0) {
+    if (blank_flag) {
       free(buf);
       errno = 0;
       ErrorReturn(
@@ -166,9 +166,8 @@ static int *get_afni_int(FILE *fp, int count, char *name) {
     }
 
     for (c = line; *c != '\0';) {
-      for (; (isspace(*c) != 0) && *c != '\0'; c++) {
+      for (; isspace(*c) && *c != '\0'; c++)
         ;
-      }
       if (*c != '\0') {
         buf[i] = strtol(c, &e, 10);
         c      = e;
@@ -182,28 +181,26 @@ static int *get_afni_int(FILE *fp, int count, char *name) {
 } /* end get_afni_int() */
 
 static float *get_afni_float(FILE *fp, int count, char *name) {
-  float *buf = nullptr;
+  float *buf = NULL;
   int    i;
   char   line[STRLEN];
   char * c;
   char * e;
   char   blank_flag;
 
-  buf = static_cast<float *>(malloc(count * sizeof(float)));
+  buf = (float *)malloc(count * sizeof(float));
 
   for (i = 0; i < count;) {
-    if ((fgets(line, STRLEN, fp) == nullptr) && (ferror(fp) != 0)) {
+    if (!fgets(line, STRLEN, fp) && ferror(fp)) {
       ErrorPrintf(ERROR_BADFILE, "failed reading file");
     }
 
     blank_flag = 1;
-    for (c = line; *c != '\0'; c++) {
-      if (isspace(*c) == 0) {
+    for (c = line; *c != '\0'; c++)
+      if (!isspace(*c))
         blank_flag = 0;
-      }
-    }
 
-    if (feof(fp) != 0) {
+    if (feof(fp)) {
       free(buf);
       errno = 0;
       ErrorReturn(NULL,
@@ -212,7 +209,7 @@ static float *get_afni_float(FILE *fp, int count, char *name) {
                    count, name));
     }
 
-    if (blank_flag != 0) {
+    if (blank_flag) {
       free(buf);
       errno = 0;
       ErrorReturn(
@@ -233,11 +230,10 @@ static float *get_afni_float(FILE *fp, int count, char *name) {
     }
 
     for (c = line; *c != '\0';) {
-      for (; (isspace(*c) != 0) && *c != '\0'; c++) {
+      for (; isspace(*c) && *c != '\0'; c++)
         ;
-      }
       if (*c != '\0') {
-        buf[i] = static_cast<float>(strtod(c, &e));
+        buf[i] = (float)strtod(c, &e);
         c      = e;
         i++;
       }
@@ -253,7 +249,7 @@ static char *get_afni_string(FILE *fp, int count, char *name) {
   int   i;
   char  c;
 
-  buf = static_cast<char *>(malloc(count + 1));
+  buf = (char *)malloc(count + 1);
 
   c = fgetc(fp);
 
@@ -268,7 +264,7 @@ static char *get_afni_string(FILE *fp, int count, char *name) {
   }
 
   for (i = 0; i < count; i++) {
-    if (feof(fp) != 0) {
+    if (feof(fp)) {
       free(buf);
       errno = 0;
       ErrorReturn(NULL, (ERROR_BADPARM,
@@ -290,21 +286,17 @@ static char *get_afni_string(FILE *fp, int count, char *name) {
 
   buf[count] = '\0';
 
-  for (c = fgetc(fp); c != '\n' && (feof(fp) == 0); c = fgetc(fp)) {
+  for (c = fgetc(fp); c != '\n' && !feof(fp); c = fgetc(fp))
     ;
-  }
 
   return (buf);
 
 } /* end get_afni_string() */
 
 int readAFNIHeader(FILE *fp, AF *pAF) {
-  char   line[STRLEN];
-  char   line2[STRLEN];
-  int    i;
-  int    j;
-  char   type[STRLEN];
-  char   name[STRLEN];
+  char   line[STRLEN], line2[STRLEN];
+  int    i, j;
+  char   type[STRLEN], name[STRLEN];
   int    count;
   char * s;
   float *f;
@@ -315,62 +307,52 @@ int readAFNIHeader(FILE *fp, AF *pAF) {
 
   fseek(fp, 0, SEEK_SET);
 
-  // AFNI header attribute spec
-  // http://afni.nimh.nih.gov/afni/docREADME/README.attributes
-  while (true) // !feof(fp))
+  // AFNI header attribute spec http://afni.nimh.nih.gov/afni/docREADME/README.attributes
+  while (1) // !feof(fp))
   {
-    if ((fgets(line, STRLEN, fp) == nullptr) && (ferror(fp) != 0)) {
+    if (!fgets(line, STRLEN, fp) && ferror(fp)) {
       ErrorPrintf(ERROR_BADFILE, "failed reading file");
     }
-    if (feof(fp) != 0) { // wow.  we read too many.  get out
+    if (feof(fp)) // wow.  we read too many.  get out
       break;
-    }
 
-    if (feof(fp) == 0) {
+    if (!feof(fp)) {
       i = -1;
       j = -1;
       do {
         i++;
         j++;
-        for (; (isspace(line[j]) != 0) && line[j] != '\0'; j++) {
+        for (; isspace(line[j]) && line[j] != '\0'; j++)
           ;
-        }
         line2[i] = line[j];
       } while (line[j] != '\0');
 
-      if (strlen(line2) > 0) {
-        if (line2[strlen(line2) - 1] == '\n') {
+      if (strlen(line2) > 0)
+        if (line2[strlen(line2) - 1] == '\n')
           line2[strlen(line2) - 1] = '\0';
-        }
-      }
 
-      if (strncmp(line2, "type=", 5) == 0) {
+      if (strncmp(line2, "type=", 5) == 0)
         strcpy(type, &line2[5]);
-      }
-      if (strncmp(line2, "name=", 5) == 0) {
+      if (strncmp(line2, "name=", 5) == 0)
         strcpy(name, &line2[5]);
-      }
       if (strncmp(line2, "count=", 5) == 0) {
         count = atoi(&line2[6]);
-        s     = nullptr;
-        f     = nullptr;
-        ip    = nullptr;
+        s     = 0;
+        f     = 0;
+        ip    = 0;
         // depending on the attribute, get the array
         if (strncmp(type, "string-attribute", 16) == 0) {
           s = get_afni_string(fp, count, name);
-          if (s == nullptr) {
+          if (s == 0)
             return (0);
-          }
         } else if (strncmp(type, "float-attribute", 15) == 0) {
           f = get_afni_float(fp, count, name);
-          if (f == nullptr) {
+          if (f == 0)
             return (0);
-          }
         } else if (strncmp(type, "integer-attribute", 17) == 0) {
           ip = get_afni_int(fp, count, name);
-          if (ip == nullptr) {
+          if (ip == 0)
             return (0);
-          }
         } else {
           errno = 0;
           ErrorReturn(
@@ -483,8 +465,7 @@ int readAFNIHeader(FILE *fp, AF *pAF) {
         //// Almost Mandatory Attributes
         ////////////////////////////////////////////////////////////////////
         else if (strcmp(name, "IDCODE_STRING") == 0) {
-          pAF->idcode_string =
-              static_cast<char *>(malloc(sizeof(char) * count));
+          pAF->idcode_string = (char *)malloc(sizeof(char) * count);
           strcpy(pAF->idcode_string, s);
         } else if (strcmp(name, "BYTEORDER_STRING") == 0) {
           if (strncmp(type, "string-attribute", 16) != 0) {
@@ -497,20 +478,17 @@ int readAFNIHeader(FILE *fp, AF *pAF) {
           strcpy(pAF->byteorder_string, s);
           gotten = gotten | BYTEORDER_STRING_FLAG;
         } else if (strcmp(name, "BRICK_STATS") == 0) {
-          pAF->numstats = count;
-          pAF->brick_stats =
-              static_cast<float *>(malloc(sizeof(float) * count));
-          for (i = 0; i < count; ++i) {
+          pAF->numstats    = count;
+          pAF->brick_stats = (float *)malloc(sizeof(float) * count);
+          for (i = 0; i < count; ++i)
             pAF->brick_stats[i] = f[i];
-          }
         } else if (strcmp(name, "BRICK_TYPES") == 0) {
           pAF->numtypes    = count;
-          pAF->brick_types = static_cast<int *>(malloc(sizeof(int) * count));
-          for (i = 0; i < count; ++i) {
+          pAF->brick_types = (int *)malloc(sizeof(int) * count);
+          for (i = 0; i < count; ++i)
             pAF->brick_types[i] = ip[i];
-          }
           // verify all same type
-          if (pAF->brick_types != nullptr) {
+          if (pAF->brick_types) {
             val = pAF->brick_types[0];
             // we can support only one type nframs
             for (i = 1; i < count; ++i) {
@@ -523,25 +501,20 @@ int readAFNIHeader(FILE *fp, AF *pAF) {
         }
         // new adddition
         else if (strcmp(name, "BRICK_FLOAT_FACS") == 0) {
-          pAF->numfacs = count;
-          pAF->brick_float_facs =
-              static_cast<float *>(malloc(sizeof(float) * count));
-          for (i = 0; i < count; ++i) {
+          pAF->numfacs          = count;
+          pAF->brick_float_facs = (float *)malloc(sizeof(float) * count);
+          for (i = 0; i < count; ++i)
             pAF->brick_float_facs[i] = f[i];
-          }
         } else /* ignore unknown variables */
         {
         }
 
-        if (s != nullptr) {
+        if (s != 0)
           free(s);
-        }
-        if (f != nullptr) {
+        if (f != 0)
           free(f);
-        }
-        if (ip != nullptr) {
+        if (ip != 0)
           free(ip);
-        }
       }
     }
   }
@@ -551,24 +524,18 @@ int readAFNIHeader(FILE *fp, AF *pAF) {
     errno = 0;
     ErrorPrintf(ERROR_BADFILE, "missing fields in afni header file");
 
-    if ((gotten & ORIENT_SPECIFIC_FLAG) == 0) {
+    if (!(gotten & ORIENT_SPECIFIC_FLAG))
       ErrorPrintf(ERROR_BADFILE, "  ORIENT_SPECIFIC missing");
-    }
-    if ((gotten & BRICK_TYPES_FLAG) == 0) {
+    if (!(gotten & BRICK_TYPES_FLAG))
       ErrorPrintf(ERROR_BADFILE, "  BRICK_TYPES missing");
-    }
-    if ((gotten & DATASET_DIMENSIONS_FLAG) == 0) {
+    if (!(gotten & DATASET_DIMENSIONS_FLAG))
       ErrorPrintf(ERROR_BADFILE, "  DATASET_DIMENSIONS missing");
-    }
-    if ((gotten & DELTA_FLAG) == 0) {
+    if (!(gotten & DELTA_FLAG))
       ErrorPrintf(ERROR_BADFILE, "  DELTA missing");
-    }
-    if ((gotten & ORIGIN_FLAG) == 0) {
+    if (!(gotten & ORIGIN_FLAG))
       ErrorPrintf(ERROR_BADFILE, "  ORIGIN missing");
-    }
-    if ((gotten & BYTEORDER_STRING_FLAG) == 0) {
+    if (!(gotten & BYTEORDER_STRING_FLAG))
       ErrorPrintf(ERROR_BADFILE, "  BYTEORDER_STRING missing");
-    }
 
     return (0);
   }
@@ -580,16 +547,14 @@ int findMinMaxByte(unsigned char *pS, size_t count, float *fMin, float *fMax) {
   size_t i;
   float  fv;
   // initialize to the first element
-  auto fmin = static_cast<float>(*pS);
-  auto fmax = static_cast<float>(*pS);
+  float fmin = (float)*pS;
+  float fmax = (float)*pS;
   for (i = 0; i < count; ++i, pS++) {
-    fv = static_cast<float>(*pS);
-    if (fv < fmin) {
+    fv = (float)*pS;
+    if (fv < fmin)
       fmin = fv;
-    }
-    if (fv > fmax) {
+    if (fv > fmax)
       fmax = fv;
-    }
   }
   *fMin = fmin;
   *fMax = fmax;
@@ -600,16 +565,14 @@ int findMinMaxShort(short *pS, size_t count, float *fMin, float *fMax) {
   size_t i;
   float  fv;
   // initialize to the first element
-  auto fmin = static_cast<float>(*pS);
-  auto fmax = static_cast<float>(*pS);
+  float fmin = (float)*pS;
+  float fmax = (float)*pS;
   for (i = 0; i < count; ++i, pS++) {
-    fv = static_cast<float>(*pS);
-    if (fv < fmin) {
+    fv = (float)*pS;
+    if (fv < fmin)
       fmin = fv;
-    }
-    if (fv > fmax) {
+    if (fv > fmax)
       fmax = fv;
-    }
   }
   *fMin = fmin;
   *fMax = fmax;
@@ -622,12 +585,10 @@ int findMinMaxFloat(float *pF, size_t count, float *fMin, float *fMax) {
   float fmin = *pF;
   float fmax = *pF;
   for (i = 0; i < count; ++i, pF++) {
-    if (*pF < fmin) {
+    if (*pF < fmin)
       fmin = *pF;
-    }
-    if (*pF > fmax) {
+    if (*pF > fmax)
       fmax = *pF;
-    }
   }
   *fMin = fmin;
   *fMax = fmax;
@@ -639,27 +600,22 @@ MRI *afniRead(const char *fname, int read_volume) {
   FILE *         fp;
   char           header_fname[STRLEN];
   char *         c;
-  MRI *          mri;
-  MRI *          header;
+  MRI *          mri, *header;
   int            big_endian_flag;
   long           brik_file_length;
   long           nvoxels;
   int            bytes_per_voxel;
-  int            i;
-  int            j;
-  int            k;
+  int            i, j, k;
   int            swap_flag;
   AF             af;
   float          scaling = 1.;
-  void *         pmem    = nullptr;
+  void *         pmem    = 0;
   float *        pf;
   short *        ps;
   unsigned char *pc;
 
   float det;
-  float xfov;
-  float yfov;
-  float zfov;
+  float xfov, yfov, zfov;
   float fMin        = 0.;
   float fMax        = 0.;
   float flMin       = 0.;
@@ -671,7 +627,7 @@ MRI *afniRead(const char *fname, int read_volume) {
   strcpy(header_fname, fname);
   c = strrchr(header_fname, '.');
 
-  if (c == nullptr) {
+  if (c == NULL) {
     errno = 0;
     ErrorReturn(NULL, (ERROR_BADPARM, "afniRead(): bad file name %s", fname));
   }
@@ -683,7 +639,7 @@ MRI *afniRead(const char *fname, int read_volume) {
 
   sprintf(c, ".HEAD");
 
-  if ((fp = fopen(header_fname, "re")) == nullptr) {
+  if ((fp = fopen(header_fname, "r")) == NULL) {
     errno = 0;
     ErrorReturn(NULL, (ERROR_BADFILE, "afniRead(): error opening file %s",
                        header_fname));
@@ -693,9 +649,8 @@ MRI *afniRead(const char *fname, int read_volume) {
   AFinit(&af);
 
   // read header file
-  if (readAFNIHeader(fp, &af) == 0) {
-    return (nullptr);
-  }
+  if (!readAFNIHeader(fp, &af))
+    return (NULL);
 
   printAFNIHeader(&af);
 
@@ -703,17 +658,16 @@ MRI *afniRead(const char *fname, int read_volume) {
   if (af.numtypes != 1) // should be the same as af.dataset_rank[1] = subbricks
   {
     errno = 0;
-    // ErrorReturn(NULL, (ERROR_UNSUPPORTED, "afniRead(): nframes = %d (only 1
-    // frame supported)", af.numtypes));
+    // ErrorReturn(NULL, (ERROR_UNSUPPORTED, "afniRead(): nframes = %d (only 1 frame supported)", af.numtypes));
     printf("INFO: number of frames dataset_rank[1] = %d : numtypes = %d \n",
            af.dataset_rank[1], af.numtypes);
   }
   // byteorder_string : required field
-  if (strcmp(af.byteorder_string, "MSB_FIRST") == 0) {
+  if (strcmp(af.byteorder_string, "MSB_FIRST") == 0)
     big_endian_flag = 1;
-  } else if (strcmp(af.byteorder_string, "LSB_FIRST") == 0) {
+  else if (strcmp(af.byteorder_string, "LSB_FIRST") == 0)
     big_endian_flag = 0;
-  } else {
+  else {
     errno = 0;
     ErrorReturn(NULL, (ERROR_BADPARM,
                        "read_afni_header(): unrecognized byte order string %s",
@@ -798,17 +752,14 @@ MRI *afniRead(const char *fname, int read_volume) {
 
   header->ras_good_flag = 1;
 
-  if (header->xsize < 0) {
+  if (header->xsize < 0)
     header->xsize = -header->xsize;
-  }
 
-  if (header->ysize < 0) {
+  if (header->ysize < 0)
     header->ysize = -header->ysize;
-  }
 
-  if (header->zsize < 0) {
+  if (header->zsize < 0)
     header->zsize = -header->zsize;
-  }
 
   header->imnr0 = 1;
   header->imnr1 = header->depth;
@@ -837,7 +788,7 @@ MRI *afniRead(const char *fname, int read_volume) {
   swap_flag = !big_endian_flag;
 #endif
 
-  if ((fp = fopen(fname, "re")) == nullptr) {
+  if ((fp = fopen(fname, "r")) == NULL) {
     MRIfree(&header);
     errno = 0;
     ErrorReturn(NULL, (ERROR_BADFILE, "afniRead(): error opening file %s",
@@ -852,7 +803,7 @@ MRI *afniRead(const char *fname, int read_volume) {
 
   nvoxels = header->width * header->height * header->depth * header->nframes;
 
-  if ((brik_file_length % nvoxels) != 0) {
+  if (brik_file_length % nvoxels) {
     fclose(fp);
     MRIfree(&header);
     errno = 0;
@@ -883,13 +834,13 @@ MRI *afniRead(const char *fname, int read_volume) {
     header->type = MRI_FLOAT;
     scaling      = af.brick_float_facs[0];
   } else {
-    if (bytes_per_voxel == 1) {
+    if (bytes_per_voxel == 1)
       header->type = MRI_UCHAR;
-    } else if (bytes_per_voxel == 2) {
+    else if (bytes_per_voxel == 2)
       header->type = MRI_SHORT;
-    } else if (bytes_per_voxel == 4) {
+    else if (bytes_per_voxel == 4)
       header->type = MRI_FLOAT;
-    } else {
+    else {
       fclose(fp);
       MRIfree(&header);
       errno = 0;
@@ -901,9 +852,8 @@ MRI *afniRead(const char *fname, int read_volume) {
   }
 
   ///////////////////////////////////////////////////////////////////////
-  if (read_volume != 0) {
-    // mri = MRIalloc(header->width, header->height, header->depth,
-    // header->type);
+  if (read_volume) {
+    // mri = MRIalloc(header->width, header->height, header->depth, header->type);
     mri = MRIallocSequence(header->width, header->height, header->depth,
                            header->type, header->nframes);
     MRIcopyHeader(header, mri);
@@ -912,16 +862,15 @@ MRI *afniRead(const char *fname, int read_volume) {
       initialized = 0;
       for (k = 0; k < mri->depth; k++) {
         for (j = 0; j < mri->height; j++) {
-          if (af.brick_float_facs[frame] != 0.0F) {
+          if (af.brick_float_facs[frame])
             scaling = af.brick_float_facs[frame];
-          } else {
+          else
             scaling = 1.;
-          }
           {
-            pmem = malloc(bytes_per_voxel * mri->width);
-            if (pmem != nullptr) {
-              if (static_cast<int>(fread(pmem, bytes_per_voxel, mri->width,
-                                         fp)) != mri->width) {
+            pmem = (void *)malloc(bytes_per_voxel * mri->width);
+            if (pmem) {
+              if ((int)fread(pmem, bytes_per_voxel, mri->width, fp) !=
+                  mri->width) {
                 fclose(fp);
                 MRIfree(&header);
                 errno = 0;
@@ -930,59 +879,54 @@ MRI *afniRead(const char *fname, int read_volume) {
                              "afniRead(): error reading from file %s", fname));
               }
               // swap bytes
-              if (swap_flag != 0) {
+              if (swap_flag) {
                 if (bytes_per_voxel == 2) // short
                 {
-                  swab(pmem, pmem, static_cast<size_t>(mri->width * 2));
+                  std::vector<uint8_t> tmp(bytes_per_voxel * mri->width);
+                  swab(pmem, tmp.data(), (size_t)(mri->width * 2));
+                  memcpy(pmem, tmp.data(), tmp.size());
                 } else if (bytes_per_voxel == 4) // float
                 {
-                  pf = static_cast<float *>(pmem);
-                  for (i = 0; i < mri->width; i++, pf++) {
+                  pf = (float *)pmem;
+                  for (i = 0; i < mri->width; i++, pf++)
                     *pf = swapFloat(*pf);
-                  }
                 }
               }
               // now scaling
               if (bytes_per_voxel == 1) // byte
               {
-                pc = static_cast<unsigned char *>(pmem);
+                pc = (unsigned char *)pmem;
                 for (i = 0; i < mri->width; i++) {
-                  if (scaling == 1.) {
+                  if (scaling == 1.)
                     MRIseq_vox(mri, i, j, k, frame) = *pc;
-                  } else {
-                    MRIFseq_vox(mri, i, j, k, frame) =
-                        (static_cast<float>(*pc)) * scaling;
-                  }
+                  else
+                    MRIFseq_vox(mri, i, j, k, frame) = ((float)(*pc)) * scaling;
                   ++pc;
                 }
-                findMinMaxByte(static_cast<unsigned char *>(pmem), mri->width,
-                               &flMin, &flMax);
+                findMinMaxByte((unsigned char *)pmem, mri->width, &flMin,
+                               &flMax);
               }
               if (bytes_per_voxel == 2) // short
               {
-                ps = static_cast<short *>(pmem);
+                ps = (short *)pmem;
                 for (i = 0; i < mri->width; i++) {
                   // if (*ps != 0)
                   //   printf("%d ", *ps);
-                  if (scaling == 1.) {
+                  if (scaling == 1.)
                     MRISseq_vox(mri, i, j, k, frame) = *ps;
-                  } else {
-                    MRIFseq_vox(mri, i, j, k, frame) =
-                        (static_cast<float>(*ps)) * scaling;
-                  }
+                  else
+                    MRIFseq_vox(mri, i, j, k, frame) = ((float)(*ps)) * scaling;
                   ++ps;
                 }
-                findMinMaxShort(static_cast<short *>(pmem), mri->width, &flMin,
-                                &flMax);
+                findMinMaxShort((short *)pmem, mri->width, &flMin, &flMax);
               } else if (bytes_per_voxel == 4) // float
               {
-                pf = static_cast<float *>(pmem);
+                pf = (float *)pmem;
                 for (i = 0; i < mri->width; i++) {
                   MRIFseq_vox(mri, i, j, k, frame) = (*pf) * scaling;
                   ++pf;
                 }
-                findMinMaxFloat(static_cast<float *>(pmem), mri->width, &flMin,
-                                &flMax);
+                findMinMaxFloat((float *)pmem, mri->width, &flMin, &flMax);
               }
               free(pmem);
               //
@@ -991,14 +935,11 @@ MRI *afniRead(const char *fname, int read_volume) {
                 fMax        = flMax;
                 initialized = 1;
               } else {
-                if (flMin < fMin) {
+                if (flMin < fMin)
                   fMin = flMin;
-                }
-                if (flMax > fMax) {
+                if (flMax > fMax)
                   fMax = flMax;
-                }
-                // printf("\n fmin =%f, fmax = %f, local min = %f, max = %f\n",
-                // fMin, fMax, flMin, flMax);
+                // printf("\n fmin =%f, fmax = %f, local min = %f, max = %f\n", fMin, fMax, flMin, flMax);
               }
             } else {
               fclose(fp);
@@ -1020,10 +961,9 @@ MRI *afniRead(const char *fname, int read_volume) {
         printf("BRICK_STATS max = %f <--> actual max = %f\n",
                af.brick_stats[1 + 2 * frame], fMax * scaling);
       }
-    }      // nframes
-  } else { // not reading volume
-    mri = MRIcopy(header, nullptr);
-  }
+    }    // nframes
+  } else // not reading volume
+    mri = MRIcopy(header, NULL);
 
   strcpy(mri->fname, fname);
 
@@ -1039,13 +979,10 @@ MRI *afniRead(const char *fname, int read_volume) {
 int afniWrite(MRI *mri, const char *fname) {
   char  header_fname[STRLEN];
   FILE *fp;
-  int   i;
-  int   j;
-  int   k;
+  int   i, j, k;
   int   orient_specific[3];
   int   bytes_per_voxel;
-  float max;
-  float min;
+  float max, min;
   int   dest_type;
   short s;
   float f;
@@ -1074,19 +1011,16 @@ int afniWrite(MRI *mri, const char *fname) {
   for (i = 0; i < 6; i++) {
     if (mri->x_r == afni_orientations[i][0] &&
         mri->x_a == afni_orientations[i][1] &&
-        mri->x_s == afni_orientations[i][2]) {
+        mri->x_s == afni_orientations[i][2])
       orient_specific[0] = i;
-    }
     if (mri->y_r == afni_orientations[i][0] &&
         mri->y_a == afni_orientations[i][1] &&
-        mri->y_s == afni_orientations[i][2]) {
+        mri->y_s == afni_orientations[i][2])
       orient_specific[1] = i;
-    }
     if (mri->z_r == afni_orientations[i][0] &&
         mri->z_a == afni_orientations[i][1] &&
-        mri->z_s == afni_orientations[i][2]) {
+        mri->z_s == afni_orientations[i][2])
       orient_specific[2] = i;
-    }
   }
 
   if (orient_specific[0] == -1 || orient_specific[1] == -1 ||
@@ -1105,18 +1039,17 @@ int afniWrite(MRI *mri, const char *fname) {
 
   if (mri->type == MRI_INT || mri->type == MRI_LONG) {
     MRIlimits(mri, &min, &max);
-    if (min > -32768.0 && min < 32768.0 && max > -32768.0 && max < 32768.0) {
+    if (min > -32768.0 && min < 32768.0 && max > -32768.0 && max < 32768.0)
       dest_type = MRI_SHORT;
-    } else {
+    else
       dest_type = MRI_FLOAT;
-    }
-  } else if (mri->type == MRI_UCHAR) {
+  } else if (mri->type == MRI_UCHAR)
     bytes_per_voxel = 1;
-  } else if (mri->type == MRI_SHORT) {
+  else if (mri->type == MRI_SHORT)
     bytes_per_voxel = 2;
-  } else if (mri->type == MRI_FLOAT) {
+  else if (mri->type == MRI_FLOAT)
     bytes_per_voxel = 4;
-  } else {
+  else {
     errno = 0;
     ErrorReturn(
         ERROR_UNSUPPORTED,
@@ -1126,7 +1059,7 @@ int afniWrite(MRI *mri, const char *fname) {
   strcpy(header_fname, fname);
   c = strrchr(header_fname, '.');
 
-  if (c == nullptr) {
+  if (c == NULL) {
     errno = 0;
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "afniRead(): bad file name %s", fname));
@@ -1140,7 +1073,7 @@ int afniWrite(MRI *mri, const char *fname) {
 
   sprintf(c, ".HEAD");
 
-  if ((fp = fopen(header_fname, "we")) == nullptr) {
+  if ((fp = fopen(header_fname, "w")) == NULL) {
     errno = 0;
     ErrorReturn(ERROR_BADFILE,
                 (ERROR_BADFILE, "afniWrite(): can't open file %s for writing",
@@ -1198,7 +1131,7 @@ int afniWrite(MRI *mri, const char *fname) {
 
   fclose(fp);
 
-  if ((fp = fopen(fname, "we")) == nullptr) {
+  if ((fp = fopen(fname, "w")) == NULL) {
     errno = 0;
     ErrorReturn(
         ERROR_BADFILE,
@@ -1210,29 +1143,24 @@ int afniWrite(MRI *mri, const char *fname) {
       if (mri->type == MRI_INT || mri->type == MRI_LONG) {
         for (i = 0; i < mri->width; i++) {
           if (dest_type == MRI_SHORT) {
-            if (mri->type == MRI_INT) {
-              s = static_cast<short> MRIIvox(mri, i, j, k);
-            }
-            if (mri->type == MRI_LONG) {
-              s = static_cast<short> MRILvox(mri, i, j, k);
-            }
+            if (mri->type == MRI_INT)
+              s = (short)MRIIvox(mri, i, j, k);
+            if (mri->type == MRI_LONG)
+              s = (short)MRILvox(mri, i, j, k);
             fwrite(&s, sizeof(short), 1, fp);
           }
           if (dest_type == MRI_FLOAT) {
-            if (mri->type == MRI_INT) {
-              f = static_cast<float> MRIIvox(mri, i, j, k);
-            }
-            if (mri->type == MRI_LONG) {
-              f = static_cast<float> MRILvox(mri, i, j, k);
-            }
+            if (mri->type == MRI_INT)
+              f = (float)MRIIvox(mri, i, j, k);
+            if (mri->type == MRI_LONG)
+              f = (float)MRILvox(mri, i, j, k);
             fwrite(&f, sizeof(float), 1, fp);
           }
         }
       }
 
-      else {
+      else
         fwrite(mri->slices[k][j], bytes_per_voxel, mri->width, fp);
-      }
     }
   }
 

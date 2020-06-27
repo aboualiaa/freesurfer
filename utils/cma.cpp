@@ -23,11 +23,12 @@
 #include "fio.h"
 #include "gtm.h"
 #include "mrisutils.h"
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <errno.h>
 #include <iomanip>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 /* see ch notebook 2 */
 
@@ -49,31 +50,31 @@ int CMAfreeOutlineField(CMAoutlineField **of) {
 
   ofp = *of;
 
-  if (ofp->claim_field != nullptr) {
+  if (ofp->claim_field != NULL) {
     for (i = 0; i < ofp->height; i++) {
-      if (ofp->claim_field[i] != nullptr)
+      if (ofp->claim_field[i] != NULL)
         free(ofp->claim_field[i]);
     }
     free(ofp->claim_field);
   }
 
-  if (ofp->fill_field != nullptr) {
+  if (ofp->fill_field != NULL) {
     for (i = 0; i < ofp->height; i++) {
-      if (ofp->fill_field[i] != nullptr)
+      if (ofp->fill_field[i] != NULL)
         free(ofp->fill_field[i]);
     }
     free(ofp->fill_field);
   }
 
-  if (ofp->outline_points_field != nullptr) {
+  if (ofp->outline_points_field != NULL) {
     for (i = 0; i < ofp->height; i++) {
-      if (ofp->outline_points_field[i] != nullptr)
+      if (ofp->outline_points_field[i] != NULL)
         free(ofp->outline_points_field[i]);
     }
     free(ofp->outline_points_field);
   }
 
-  *of = nullptr;
+  *of = NULL;
 
   return (NO_ERROR);
 
@@ -84,29 +85,28 @@ CMAoutlineField *CMAoutlineFieldAlloc(int width, int height) {
   int              i;
 
   of = (CMAoutlineField *)malloc(sizeof(CMAoutlineField));
-  if (of == nullptr)
+  if (of == NULL)
     ErrorReturn(NULL, (ERROR_NOMEMORY,
                        "CMAoutlineFieldAlloc(): error allocating structure"));
 
-  of->claim_field          = nullptr;
-  of->fill_field           = nullptr;
-  of->outline_points_field = nullptr;
+  of->claim_field          = NULL;
+  of->fill_field           = NULL;
+  of->outline_points_field = NULL;
   of->width                = width;
   of->height               = height;
 
   of->claim_field =
       (CMAoutlineClaim **)malloc(height * sizeof(CMAoutlineClaim *));
-  if (of->claim_field == nullptr) {
+  if (of->claim_field == NULL) {
     CMAfreeOutlineField(&of);
     ErrorReturn(NULL, (ERROR_NOMEMORY,
                        "CMAoutlineFieldAlloc(): error allocating claim field"));
   }
   memset(of->claim_field, 0x00, height * sizeof(CMAoutlineClaim *));
 
-  // of->fill_field = (unsigned char **)malloc(height * sizeof(unsigned char
-  // *));
+  // of->fill_field = (unsigned char **)malloc(height * sizeof(unsigned char *));
   of->fill_field = (short **)malloc(height * sizeof(short *));
-  if (of->fill_field == nullptr) {
+  if (of->fill_field == NULL) {
     CMAfreeOutlineField(&of);
     ErrorReturn(NULL, (ERROR_NOMEMORY,
                        "CMAoutlineFieldAlloc(): error allocating fill field"));
@@ -116,7 +116,7 @@ CMAoutlineField *CMAoutlineFieldAlloc(int width, int height) {
 
   of->outline_points_field =
       (unsigned char **)malloc(height * sizeof(unsigned char *));
-  if (of->outline_points_field == nullptr) {
+  if (of->outline_points_field == NULL) {
     CMAfreeOutlineField(&of);
     ErrorReturn(
         NULL,
@@ -128,7 +128,7 @@ CMAoutlineField *CMAoutlineFieldAlloc(int width, int height) {
   for (i = 0; i < height; i++) {
     of->claim_field[i] =
         (CMAoutlineClaim *)malloc(width * sizeof(CMAoutlineClaim));
-    if (of->claim_field[i] == nullptr) {
+    if (of->claim_field[i] == NULL) {
       CMAfreeOutlineField(&of);
       ErrorReturn(NULL,
                   (ERROR_NOMEMORY,
@@ -136,10 +136,9 @@ CMAoutlineField *CMAoutlineFieldAlloc(int width, int height) {
     }
     memset(of->claim_field[i], 0x00, width * sizeof(CMAoutlineClaim));
 
-    // of->fill_field[i] = (unsigned char *)malloc(width * sizeof(unsigned
-    // char));
+    // of->fill_field[i] = (unsigned char *)malloc(width * sizeof(unsigned char));
     of->fill_field[i] = (short *)malloc(width * sizeof(short));
-    if (of->fill_field[i] == nullptr) {
+    if (of->fill_field[i] == NULL) {
       CMAfreeOutlineField(&of);
       ErrorReturn(NULL,
                   (ERROR_NOMEMORY,
@@ -150,7 +149,7 @@ CMAoutlineField *CMAoutlineFieldAlloc(int width, int height) {
 
     of->outline_points_field[i] =
         (unsigned char *)malloc(width * sizeof(unsigned char));
-    if (of->outline_points_field[i] == nullptr) {
+    if (of->outline_points_field[i] == NULL) {
       CMAfreeOutlineField(&of);
       ErrorReturn(
           NULL,
@@ -425,8 +424,8 @@ int insert_ribbon_into_aseg(MRI *mri_src_aseg, MRI *mri_aseg,
   wm_label = hemi == LEFT_HEMISPHERE ? Left_Cerebral_White_Matter
                                      : Right_Cerebral_White_Matter;
 
-  mri_white  = MRIclone(mri_aseg, nullptr);
-  mri_ribbon = MRISribbon(mris_white, mris_pial, mri_aseg, nullptr);
+  mri_white  = MRIclone(mri_aseg, NULL);
+  mri_ribbon = MRISribbon(mris_white, mris_pial, mri_aseg, NULL);
   MRISfillInterior(mris_white, mri_aseg->xsize, mri_white);
 
   for (x = 0; x < mri_aseg->width; x++)
@@ -708,8 +707,7 @@ double CorticalGMVolCorrection(MRI *aseg, MRI *ribbon, int hemi) {
         // but assumes that the aseg cortex label always correctly
         // declares cortex to be cortex.
 
-        // This uses method 1 (for testing) - gives very similar value as method
-        // 2
+        // This uses method 1 (for testing) - gives very similar value as method 2
         if (SegId != 3 && SegId != 42 && SegId != 2 && SegId != 41 &&
             SegId != 0)
           vol2 += VoxSize;
@@ -1106,7 +1104,7 @@ MRI *MRIlrswapAseg(MRI *aseg) {
   MRI *asegswap;
   int  c, r, s, id, id2;
 
-  asegswap = MRIclone(aseg, nullptr);
+  asegswap = MRIclone(aseg, NULL);
 
   for (c = 0; c < aseg->width; c++) {
     for (r = 0; r < aseg->height; r++) {
@@ -1452,7 +1450,7 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
     ribbon = MRIread(fname.c_str());
     if (!ribbon)
       fs::fatal() << "cannot compute vol stats without " << fname;
-    asegfixed  = MRIfixAsegWithRibbon(aseg, ribbon, nullptr);
+    asegfixed  = MRIfixAsegWithRibbon(aseg, ribbon, NULL);
     ribbonRead = 1;
   } else {
     fs::warning()
@@ -1496,15 +1494,13 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
         if (asegid == 251 || asegid == 252 || asegid == 253 || asegid == 254 ||
             asegid == 255)
           CCVol += VoxelVol;
-        // Correct CtxGM by anything in the ribbon that is not GM, WM, or Unkown
-        // in the aseg
+        // Correct CtxGM by anything in the ribbon that is not GM, WM, or Unkown in the aseg
         if (ribbonid == 3 && asegid != 3 && asegid != 2 && asegid != 0)
           lhCtxGMCor += VoxelVol;
         if (ribbonid == 42 && asegid != 42 && asegid != 41 && asegid != 0)
           rhCtxGMCor += VoxelVol;
-        // Correct CtxWM by anything in the WMribbon that is not WM, eg, GM
-        // structures. Does not use PVC for subcort GM. Make sure to include
-        // hypointensities (77)
+        // Correct CtxWM by anything in the WMribbon that is not WM, eg, GM structures.
+        // Does not use PVC for subcort GM. Make sure to include hypointensities (77)
         if (ribbonid == 2 && asegfixedid != 2 && asegfixedid != 77 &&
             asegfixedid != 251 && asegfixedid != 252 && asegfixedid != 253 &&
             asegfixedid != 254 && asegfixedid != 255)
@@ -1557,8 +1553,7 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
         if (asegfixedid == 42)
           rhCtxGMCount += VoxelVol;
         // For CtxWM, include hypointensities. The hypos are not lateralized,
-        // so just lateralize them based on column (not perfect, but it is only
-        // a check)
+        // so just lateralize them based on column (not perfect, but it is only a check)
         if (asegfixedid == 2 || asegfixedid == 78 ||
             (asegfixedid == 77 && c < 128))
           lhCtxWMCount += VoxelVol;
@@ -1589,8 +1584,7 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
   double SupraTentVolNotVent = SupraTentVol - VentChorVol;
   // Estimated STV based - should these be exactly the same? Might depend on how
   // much of CSF and OptChiasm are in or out of the surface.
-  // eSTV = lhCtxGM + rhCtxGM + lhCtxWM + rhCtxWM + SubCortGMVol + VentChorVol +
-  // VesselVol;
+  // eSTV = lhCtxGM + rhCtxGM + lhCtxWM + rhCtxWM + SubCortGMVol + VentChorVol + VesselVol;
   double eSTV = lhCtxGMCount + rhCtxGMCount + lhCtxWMCount + rhCtxWMCount +
                 SubCortGMVol + VentChorVol + VesselVol;
   double eSTVnv = lhCtxGMCount + rhCtxGMCount + lhCtxWMCount + rhCtxWMCount +
@@ -1665,10 +1659,9 @@ std::vector<double> ComputeBrainVolumeStats(const std::string &subject,
 static const std::string brainVolumeStatsFilename = "stats/brainvol.stats";
 
 /*!
-  Caches brain volume stats, as computed by `ComputeBrainVolumeStats()`, in a
-  stats file so that these values can be easily queried in `mri_segstats` and
-  `mris_anatomical_stats` without having to recompute them every time (it's a
-  bit time consuming).
+  Caches brain volume stats, as computed by `ComputeBrainVolumeStats()`, in a stats file so that
+  these values can be easily queried in `mri_segstats` and `mris_anatomical_stats` without having
+  to recompute them every time (it's a bit time consuming).
 */
 void CacheBrainVolumeStats(const std::vector<double> &stats,
                            const std::string &        subject,
@@ -1730,8 +1723,8 @@ void CacheBrainVolumeStats(const std::vector<double> &stats,
 }
 
 /*!
-  Reads cached brain volume stats computed by `ComputeBrainVolumeStats()`. If
-  the file if not found, the values are computed and cached.
+  Reads cached brain volume stats computed by `ComputeBrainVolumeStats()`. If the file if not found,
+  the values are computed and cached.
 */
 std::vector<double> ReadCachedBrainVolumeStats(const std::string &subject,
                                                const std::string &subjdir) {
@@ -1805,9 +1798,9 @@ std::vector<double> ReadCachedBrainVolumeStats(const std::string &subject,
 MRI *MRIseg2TissueType(MRI *seg, COLOR_TABLE *ct, MRI *tt) {
   int c, r, s, segid;
 
-  if (ct->ctabTissueType == nullptr) {
+  if (ct->ctabTissueType == NULL) {
     printf("ERROR: MRIseg2TissueType() ctab tissue type not set\n");
-    return (nullptr);
+    return (NULL);
   }
 
   tt = MRIcopy(seg, tt);
@@ -1817,14 +1810,14 @@ MRI *MRIseg2TissueType(MRI *seg, COLOR_TABLE *ct, MRI *tt) {
     for (r = 0; r < seg->height; r++) {
       for (s = 0; s < seg->depth; s++) {
         segid = MRIgetVoxVal(seg, c, r, s, 0);
-        if (ct->entries[segid] == nullptr) {
+        if (ct->entries[segid] == NULL) {
           printf("ERROR: MRIseg2TTypeMap() no entry for seg %d\n", segid);
-          return (nullptr);
+          return (NULL);
         }
         if (ct->entries[segid]->TissueType < 0) {
           printf("ERROR: MRIseg2TTypeMap() tissue type for seg %d %s not set\n",
                  segid, ct->entries[segid]->name);
-          return (nullptr);
+          return (NULL);
         }
         MRIsetVoxVal(tt, c, r, s, 0, ct->entries[segid]->TissueType);
       }
@@ -1842,15 +1835,15 @@ MRI *MRIseg2TissueType(MRI *seg, COLOR_TABLE *ct, MRI *tt) {
 MRI *MRIextractTissueTypeSeg(MRI *seg, COLOR_TABLE *ct, int tt, MRI *ttseg) {
   int c, r, s, segid;
 
-  if (ct->ctabTissueType == nullptr) {
+  if (ct->ctabTissueType == NULL) {
     printf("ERROR: MRIextractTissueTypeSeg() ctab tissue type not set\n");
-    return (nullptr);
+    return (NULL);
   }
   if (tt >= ct->ctabTissueType->nentries) {
     printf("ERROR: MRIextractTissueTypeSeg() tissue type %d exceeds or equals "
            "number of tissue types %d\n",
            tt, ct->ctabTissueType->nentries);
-    return (nullptr);
+    return (NULL);
   }
   ttseg = MRIcopy(seg, ttseg);
   MRIclear(ttseg);
@@ -1859,14 +1852,14 @@ MRI *MRIextractTissueTypeSeg(MRI *seg, COLOR_TABLE *ct, int tt, MRI *ttseg) {
     for (r = 0; r < seg->height; r++) {
       for (s = 0; s < seg->depth; s++) {
         segid = MRIgetVoxVal(seg, c, r, s, 0);
-        if (ct->entries[segid] == nullptr) {
+        if (ct->entries[segid] == NULL) {
           printf("ERROR: MRIseg2TTypeMap() no entry for seg %d\n", segid);
-          return (nullptr);
+          return (NULL);
         }
         if (ct->entries[segid]->TissueType < 0) {
           printf("ERROR: MRIseg2TTypeMap() tissue type for seg %d %s not set\n",
                  segid, ct->entries[segid]->name);
-          return (nullptr);
+          return (NULL);
         }
         if (ct->entries[segid]->TissueType == tt)
           MRIsetVoxVal(ttseg, c, r, s, 0, segid);
@@ -1887,7 +1880,7 @@ int CheckSegTissueType(MRI *seg, COLOR_TABLE *ct) {
   int c, r, s, n, segid, err;
 
   err = 1;
-  if (ct->ctabTissueType == nullptr) {
+  if (ct->ctabTissueType == NULL) {
     printf("ERROR: CheckSegTissueType() ctab tissue type not set\n");
     return (err);
   }
@@ -1900,7 +1893,7 @@ int CheckSegTissueType(MRI *seg, COLOR_TABLE *ct) {
     for (r = 0; r < seg->height; r++) {
       for (s = 0; s < seg->depth; s++) {
         segid = MRIgetVoxVal(seg, c, r, s, 0);
-        if (ct->entries[segid] == nullptr) {
+        if (ct->entries[segid] == NULL) {
           printf("ERROR: CheckSegTissueType() no entry for seg %d\n", segid);
           return (err);
         }
@@ -1927,26 +1920,25 @@ int CheckSegTissueType(MRI *seg, COLOR_TABLE *ct) {
   is used for GTM partial volume correction. Tissue type info in the ctab.
 */
 MRI **MRIdilateSegWithinTT(MRI *seg, int nDils, COLOR_TABLE *ct, MRI **r) {
-  MRI *segtt = nullptr;
+  MRI *segtt = NULL;
   int  nc, tt;
   // char tmpstr[1000];
 
-  if (ct->ctabTissueType == nullptr) {
+  if (ct->ctabTissueType == NULL) {
     printf("ERROR: MRIdilateSegWithinTT() ctab tissue type not set\n");
-    return (nullptr);
+    return (NULL);
   }
 
-  if (r == nullptr)
+  if (r == NULL)
     r = (MRI **)calloc(sizeof(MRI *), ct->ctabTissueType->nentries - 1);
   for (tt = 1; tt < ct->ctabTissueType->nentries; tt++) {
     // printf("tt = %d\n",tt);
     segtt = MRIextractTissueTypeSeg(seg, ct, tt, segtt);
-    if (segtt == nullptr)
-      return (nullptr);
-    r[tt - 1] =
-        MRIdilateSegmentation(segtt, nullptr, nDils, nullptr, 0, 0, &nc);
-    if (r[tt - 1] == nullptr)
-      return (nullptr);
+    if (segtt == NULL)
+      return (NULL);
+    r[tt - 1] = MRIdilateSegmentation(segtt, NULL, nDils, NULL, 0, 0, &nc);
+    if (r[tt - 1] == NULL)
+      return (NULL);
     // sprintf(tmpstr,"seg.dil%d.tt%d.mgh",nDils,tt);
     // MRIwrite(r[tt-1],tmpstr);
   }
@@ -1977,14 +1969,13 @@ int Seg2NbrNonBrainWrapper(char *subject, char *segname, COLOR_TABLE *ctab,
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
   sprintf(tmpstr, "%s/%s/mri/%s", SUBJECTS_DIR, subject, segname);
   seg = MRIread(tmpstr);
-  if (seg == nullptr)
+  if (seg == NULL)
     exit(1);
 
   printf("Replacing\n");
   fflush(stdout);
   GTMdefaultSegReplacmentList(&nReplace, &SrcReplace[0], &TrgReplace[0]);
-  mritmp =
-      MRIreplaceList(seg, SrcReplace, TrgReplace, nReplace, nullptr, nullptr);
+  mritmp = MRIreplaceList(seg, SrcReplace, TrgReplace, nReplace, NULL, NULL);
   MRIfree(&seg);
   seg = mritmp;
 
@@ -2029,8 +2020,8 @@ SEGSTAT *Seg2NbrNonBrain(MRI *seg, COLOR_TABLE *ctab, double threshmm) {
   MRI *    hitmap;
 
   FreeCTab = 0;
-  if (ctab == nullptr) {
-    ctab     = TissueTypeSchema(nullptr, "default-jan-2014+head");
+  if (ctab == NULL) {
+    ctab     = TissueTypeSchema(NULL, "default-jan-2014+head");
     FreeCTab = 1;
   }
 
@@ -2051,7 +2042,7 @@ SEGSTAT *Seg2NbrNonBrain(MRI *seg, COLOR_TABLE *ctab, double threshmm) {
   fflush(stdout);
   hitmap =
       MRIallocSequence(seg->width, seg->height, seg->depth, MRI_UCHAR, nsegs);
-  if (hitmap == nullptr)
+  if (hitmap == NULL)
     exit(1);
   printf("Copying header\n");
   fflush(stdout);
@@ -2136,7 +2127,12 @@ SEGSTAT *Seg2NbrNonBrain(MRI *seg, COLOR_TABLE *ctab, double threshmm) {
     segno = segnolist[nthseg];
     // printf("%3d %4d %d %-25s
     // %5d\n",nthseg,segno,ctab->entries[segno]->TissueType,ctab->entries[segno]->name,count[nthseg]);
-    sprintf(segstat->entry[nthseg].name, "%s", ctab->entries[segno]->name);
+    auto cx = snprintf(segstat->entry[nthseg].name, 999, "%s",
+                       ctab->entries[segno]->name);
+    if ((cx < 0) || (cx > STRLEN)) {
+      std::cerr << __FUNCTION__ << ": snprintf returned error on line "
+                << __LINE__ << std::endl;
+    }
     segstat->entry[nthseg].id    = segno;
     segstat->entry[nthseg].nhits = count[nthseg];
     segstat->entry[nthseg].vol   = count[nthseg] * voxsize;

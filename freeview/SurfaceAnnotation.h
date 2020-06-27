@@ -81,6 +81,10 @@ public:
 
   bool LoadAnnotation(const QString &fn);
 
+  bool LoadFromSegmentation(const QString &fn);
+
+  bool LoadColorTable(const QString &fn);
+
   bool InitializeNewAnnotation(const QString &ctab_fn);
 
   int *GetIndices() {
@@ -132,9 +136,9 @@ public:
                         const QColor &color = QColor());
 
   QMap<int, NewAnnotationLabel> GetNewLabels() { return m_mapNewLabels; }
-  void                          UpdateLabelInfo(int i, const QString &name,
 
-                                                const QColor &color = QColor());
+  void UpdateLabelInfo(int i, const QString &name,
+                       const QColor &color = QColor());
 
   bool HasColor(const QColor &color) { return m_listColors.contains(color); }
 

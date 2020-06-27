@@ -22,9 +22,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "cma.h"
 #include "colortab.h"
@@ -70,13 +70,13 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
 
   /* Try to open the file. */
   fp = fopen(fname, "r");
-  if (fp == nullptr)
+  if (fp == NULL)
     ErrorReturn(
         NULL, (ERROR_NOFILE, "CTABreadASCII(%s): could not open file", fname));
 
   /* Scan through the file and see what our max entry number is. */
   max_structure = -1;
-  while ((cp = fgetl(line, STRLEN, fp)) != nullptr) {
+  while ((cp = fgetl(line, STRLEN, fp)) != NULL) {
     /* See if this line is in the right format. If not, it's
     probably just a comment and we can ignore it. */
     if (sscanf(line, "%d %s %d %d %d %d", &structure, name, &r, &g, &b, &t) ==
@@ -95,7 +95,7 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
 
   /* Allocate our table. */
   ct = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
-  if (ct == nullptr)
+  if (ct == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadASCII(%s): could not allocate table", fname));
 
@@ -103,13 +103,13 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
   ct->nentries = max_structure + 1;
   ct->entries =
       (COLOR_TABLE_ENTRY **)calloc(ct->nentries, sizeof(COLOR_TABLE_ENTRY *));
-  if (ct->entries == nullptr)
+  if (ct->entries == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadASCII(%s): could not allocate %d entries",
                        fname, ct->nentries));
 
   /* Copy in the file name. */
-  strncpy(ct->fname, fname, sizeof(ct->fname));
+  strncpy(ct->fname, fname, sizeof(ct->fname) - 1);
 
   /* We'll write this version if we write to binary. */
   ct->version = CTAB_VERSION_TO_WRITE;
@@ -120,7 +120,7 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
   line_num       = 1;
   ctabDuplicates = 0;
   rewind(fp);
-  while ((cp = fgets(line, STRLEN, fp)) != nullptr) {
+  while ((cp = fgets(line, STRLEN, fp)) != NULL) {
     nscan = sscanf(line, "%d %s %d %d %d %d %d", &structure, name, &r, &g, &b,
                    &t, &tt);
     if (nscan != 7)
@@ -128,7 +128,7 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
     if (nscan >= 6) {
       /* If this entry already exists, there's a duplicate entry
          in the file. Warn, but then continue on.*/
-      if (ct->entries[structure] != nullptr) {
+      if (ct->entries[structure] != NULL) {
         printf("CTABreadASCII(%s): Line %d: Duplicate structure "
                "index %d, was %s %d %d %d %d\n",
                fname, line_num, structure, ct->entries[structure]->name,
@@ -138,7 +138,7 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
       } else {
         /* Try to create a new entry.*/
         ct->entries[structure] = (CTE *)malloc(sizeof(CTE));
-        if (nullptr == ct->entries[structure]) {
+        if (NULL == ct->entries[structure]) {
           fclose(fp);
           CTABfree(&ct);
           ErrorReturn(
@@ -189,7 +189,7 @@ COLOR_TABLE *CTABreadASCII2(const char *fname, int checkDuplicateNames) {
  */
 COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
   FILE *       fp;
-  COLOR_TABLE *ct = nullptr;
+  COLOR_TABLE *ct = NULL;
   int          nct, ni, segid, segidmax;
   char *       cp, *str, line[5000];
   int          structure;
@@ -197,15 +197,15 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
   int          r, g, b, t;
 
   fp = fopen(fname, "r");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: CTABreadASCIItt(): cannot open %s\n", fname);
-    return (nullptr);
+    return (NULL);
   }
 
   segidmax = -1;
   nct      = 0;
   cp       = (char *)1;
-  while (cp != nullptr) {
+  while (cp != NULL) {
     cp = fgets(line, STRLEN, fp);
     ni = CountItemsInString(line);
     if (ni == 0)
@@ -225,7 +225,7 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
   }
   // printf("nct = %d, segidmax %d\n",nct,segidmax);
   if (nct == 0)
-    return (nullptr);
+    return (NULL);
 
   ct           = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
   ct->nentries = segidmax + 1;
@@ -236,7 +236,7 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
 
   nct = 0;
   cp  = (char *)1;
-  while (cp != nullptr) {
+  while (cp != NULL) {
     cp = fgets(line, STRLEN, fp);
     ni = CountItemsInString(line);
     if (ni == 0)
@@ -250,7 +250,7 @@ COLOR_TABLE *CTABreadASCIIttHeader(const char *fname) {
     sscanf(line, "%*s %d %s  %d %d %d  %d", &structure, name, &r, &g, &b, &t);
     ct->entries[structure] =
         (COLOR_TABLE_ENTRY *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
-    strncpy(ct->entries[structure]->name, name, strlen(name) + 1);
+    strncpy(ct->entries[structure]->name, name, STRLEN);
     ct->entries[structure]->ri         = r;
     ct->entries[structure]->gi         = g;
     ct->entries[structure]->bi         = b;
@@ -269,16 +269,16 @@ int CTABfree(COLOR_TABLE **pct) {
   int          i;
   COLOR_TABLE *ct;
 
-  if (nullptr == pct)
+  if (NULL == pct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABfree: pct was NULL"));
-  if (nullptr == *pct)
+  if (NULL == *pct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABfree: *pct was NULL"));
 
   ct = *pct;
 
   /* Free all the entries. */
   for (i = 0; i < ct->nentries; i++)
-    if (nullptr != ct->entries[i])
+    if (NULL != ct->entries[i])
       free(ct->entries[i]);
 
   free(ct->entries);
@@ -288,7 +288,7 @@ int CTABfree(COLOR_TABLE **pct) {
     CTABfree(&ct->ctabTissueType);
 
   /* Set argument to null */
-  *pct = nullptr;
+  *pct = NULL;
 
   return (NO_ERROR);
 }
@@ -299,12 +299,12 @@ COLOR_TABLE *CTABdeepCopy(COLOR_TABLE *ct) {
   COLOR_TABLE *copy;
   int          structure;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(NULL, (ERROR_BADPARM, "CTABdeepCopy: ct was NULL"));
 
   /* Make a copy of the table. Allocate our table. */
   copy = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
-  if (copy == nullptr)
+  if (copy == NULL)
     ErrorReturn(NULL,
                 (ERROR_NO_MEMORY, "CTABdeepCopy: could not allocate table"));
 
@@ -312,7 +312,7 @@ COLOR_TABLE *CTABdeepCopy(COLOR_TABLE *ct) {
   copy->nentries = ct->nentries;
   copy->entries =
       (COLOR_TABLE_ENTRY **)calloc(copy->nentries, sizeof(COLOR_TABLE_ENTRY *));
-  if (copy->entries == nullptr)
+  if (copy->entries == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABdeepCopy: could not allocate "
                        "%d entries",
@@ -325,10 +325,10 @@ COLOR_TABLE *CTABdeepCopy(COLOR_TABLE *ct) {
   /* Go through the table. For each entry we find, allocate a CTE in
      the copy.*/
   for (structure = 0; structure < ct->nentries; structure++) {
-    if (ct->entries[structure] != nullptr) {
+    if (ct->entries[structure] != NULL) {
       /* Try to create a new entry.*/
       copy->entries[structure] = (CTE *)malloc(sizeof(CTE));
-      if (nullptr == copy->entries[structure]) {
+      if (NULL == copy->entries[structure]) {
         CTABfree(&copy);
         ErrorReturn(NULL, (ERROR_NO_MEMORY,
                            "CTABdeepCopy: could not "
@@ -363,7 +363,7 @@ COLOR_TABLE *CTABreadFromBinary(FILE *fp) {
   COLOR_TABLE *ct;
   int          version;
 
-  if (nullptr == fp)
+  if (NULL == fp)
     ErrorReturn(NULL, (ERROR_BADPARM, "CTABreadFromBinary: fp was NULL"));
 
   /* Our goal here is to see what vesion we're reading/writing. Look
@@ -372,7 +372,7 @@ COLOR_TABLE *CTABreadFromBinary(FILE *fp) {
      new format, and is the negative version number. */
   version = freadInt(fp);
 
-  ct = nullptr;
+  ct = NULL;
   if (version > 0) {
     /* With v1, we pass in the "version" number we just got, as it's
     the number of entries. */
@@ -398,10 +398,10 @@ COLOR_TABLE *CTABreadFromBinary(FILE *fp) {
 int CTABwriteIntoBinary(COLOR_TABLE *ct, FILE *fp) {
   int result;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinary: ct was NULL"));
-  if (nullptr == fp)
+  if (NULL == fp)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinary: fp was NULL"));
 
@@ -438,7 +438,7 @@ COLOR_TABLE *CTABalloc(int nentries) {
 
   /* Allocate our table. */
   ct = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
-  if (ct == nullptr)
+  if (ct == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABalloc(%d): could not "
                        "allocate table",
@@ -448,7 +448,7 @@ COLOR_TABLE *CTABalloc(int nentries) {
   ct->nentries = nentries;
   ct->entries =
       (COLOR_TABLE_ENTRY **)calloc(ct->nentries, sizeof(COLOR_TABLE_ENTRY *));
-  if (ct->entries == nullptr) {
+  if (ct->entries == NULL) {
     CTABfree(&ct);
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABalloc: could not "
@@ -466,7 +466,7 @@ COLOR_TABLE *CTABalloc(int nentries) {
   for (structure = 0; structure < ct->nentries; structure++) {
     /* Try to create a new entry.*/
     ct->entries[structure] = (CTE *)malloc(sizeof(CTE));
-    if (nullptr == ct->entries[structure]) {
+    if (NULL == ct->entries[structure]) {
       CTABfree(&ct);
       ErrorReturn(NULL, (ERROR_NO_MEMORY,
                          "CTABalloc: could not allocate "
@@ -534,7 +534,7 @@ int CTABcountRepeats(COLOR_TABLE *ct, int break_after_found) {
       if (ct->entries[i]->rf == ct->entries[j]->rf &&
           ct->entries[i]->gf == ct->entries[j]->gf &&
           ct->entries[i]->bf == ct->entries[j]->bf) {
-        // printf("Entries %d and %d have the same RGB\n",i,j);
+        //printf("Entries %d and %d have the same RGB\n",i,j);
         nrepeats++;
         if (break_after_found)
           break;
@@ -581,7 +581,7 @@ COLOR_TABLE *CTABreadFromBinaryV1(FILE *fp, int nentries) {
 
   /* Allocate our table. */
   ct = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
-  if (ct == nullptr)
+  if (ct == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadFromBinaryV1: could not allocate table"));
 
@@ -589,7 +589,7 @@ COLOR_TABLE *CTABreadFromBinaryV1(FILE *fp, int nentries) {
   ct->nentries = nentries;
   ct->entries =
       (COLOR_TABLE_ENTRY **)calloc(ct->nentries, sizeof(COLOR_TABLE_ENTRY *));
-  if (ct->entries == nullptr) {
+  if (ct->entries == NULL) {
     CTABfree(&ct);
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadFromBinaryV1: could not "
@@ -615,14 +615,14 @@ COLOR_TABLE *CTABreadFromBinaryV1(FILE *fp, int nentries) {
     ErrorPrintf(ERROR_BADFILE,
                 "CTABreadFromBinaryV1: could not read parameter(s)");
   }
-  strncpy(ct->fname, name, sizeof(ct->fname));
+  strncpy(ct->fname, name, STRLEN - 1);
   free(name);
 
   /* For each entry, read in the info. We assume these have sequential
      structure indices. */
   for (structure = 0; structure < ct->nentries; structure++) {
     ct->entries[structure] = (CTE *)malloc(sizeof(CTE));
-    if (nullptr == ct->entries[structure]) {
+    if (NULL == ct->entries[structure]) {
       CTABfree(&ct);
       ErrorReturn(NULL, (ERROR_NO_MEMORY,
                          "CTABreadFromBinaryV1: could "
@@ -644,8 +644,7 @@ COLOR_TABLE *CTABreadFromBinaryV1(FILE *fp, int nentries) {
       ErrorPrintf(ERROR_BADFILE,
                   "CTABreadFromBinaryV1: could not read parameter(s)");
     }
-    strncpy(ct->entries[structure]->name, name,
-            sizeof(ct->entries[structure]->name));
+    strncpy(ct->entries[structure]->name, name, STRLEN - 1);
     ct->entries[structure]->name[len] = 0;
 
     ct->entries[structure]->ri = freadInt(fp);
@@ -670,10 +669,10 @@ int CTABwriteIntoBinaryV1(COLOR_TABLE *ct, FILE *fp) {
   int i;
   int t;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinaryV1: ct was NULL"));
-  if (nullptr == fp)
+  if (NULL == fp)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinaryV1: fp was NULL"));
 
@@ -692,7 +691,7 @@ int CTABwriteIntoBinaryV1(COLOR_TABLE *ct, FILE *fp) {
      order. Note that this doesn't save structure indecies if there
      are skipped entries properly, but that's a feature of v1. */
   for (i = 0; i < ct->nentries; i++) {
-    if (nullptr != ct->entries[i]) {
+    if (NULL != ct->entries[i]) {
       fwriteInt(strlen(ct->entries[i]->name) + 1, fp);
       fwrite(ct->entries[i]->name, sizeof(char),
              strlen(ct->entries[i]->name) + 1, fp);
@@ -726,7 +725,7 @@ COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp) {
 
   /* Allocate our table. */
   ct = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
-  if (ct == nullptr)
+  if (ct == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadFromBinaryV2: could not allocate table"));
 
@@ -734,7 +733,7 @@ COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp) {
   ct->nentries = nentries;
   ct->entries =
       (COLOR_TABLE_ENTRY **)calloc(ct->nentries, sizeof(COLOR_TABLE_ENTRY *));
-  if (ct->entries == nullptr)
+  if (ct->entries == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadFromBinaryV2: could not "
                        "allocate %d entries",
@@ -756,7 +755,7 @@ COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp) {
     ErrorPrintf(ERROR_BADFILE,
                 "CTABreadFromBinaryV1: could not read parameter(s)");
   }
-  strncpy(ct->fname, name, sizeof(ct->fname));
+  strncpy(ct->fname, name, STRLEN - 1);
   free(name);
 
   /* Read the number of entries to read. */
@@ -775,7 +774,7 @@ COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp) {
     }
 
     /* See if we already have an entry here. */
-    if (nullptr != ct->entries[structure]) {
+    if (NULL != ct->entries[structure]) {
       CTABfree(&ct);
       ErrorReturn(NULL, (ERROR_BADFILE,
                          "CTABreadFromBinaryV2: Duplicate "
@@ -785,7 +784,7 @@ COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp) {
 
     /* Create the entry */
     ct->entries[structure] = (CTE *)malloc(sizeof(CTE));
-    if (nullptr == ct->entries[structure])
+    if (NULL == ct->entries[structure])
       ErrorReturn(
           NULL,
           (ERROR_NO_MEMORY,
@@ -806,8 +805,7 @@ COLOR_TABLE *CTABreadFromBinaryV2(FILE *fp) {
       ErrorPrintf(ERROR_BADFILE,
                   "CTABreadFromBinaryV1: could not read parameter(s)");
     }
-    strncpy(ct->entries[structure]->name, name,
-            sizeof(ct->entries[structure]->name));
+    strncpy(ct->entries[structure]->name, name, STRLEN - 1);
 
     /* Read in the color. */
     ct->entries[structure]->ri = freadInt(fp);
@@ -833,10 +831,10 @@ int CTABwriteIntoBinaryV2(COLOR_TABLE *ct, FILE *fp) {
   int i, t;
   int num_entries_to_write;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinaryV2: ct was NULL"));
-  if (nullptr == fp)
+  if (NULL == fp)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinaryV2: fp was NULL"));
 
@@ -857,13 +855,13 @@ int CTABwriteIntoBinaryV2(COLOR_TABLE *ct, FILE *fp) {
      entries. */
   num_entries_to_write = 0;
   for (i = 0; i < ct->nentries; i++)
-    if (nullptr != ct->entries[i])
+    if (NULL != ct->entries[i])
       num_entries_to_write++;
   fwriteInt(num_entries_to_write, fp);
 
   /* Now for each bin, if it's not null, write it to the stream. */
   for (structure = 0; structure < ct->nentries; structure++) {
-    if (nullptr != ct->entries[structure]) {
+    if (NULL != ct->entries[structure]) {
       /* Write the structure number, then name, then color
          info. */
       fwriteInt(structure, fp);
@@ -898,7 +896,7 @@ COLOR_TABLE *znzCTABreadFromBinary(znzFile fp) {
   new format, and is the negative version number. */
   version = znzreadInt(fp);
 
-  ct = nullptr;
+  ct = NULL;
   if (version > 0) {
     /* With v1, we pass in the "version" number we just got, as it's
     the number of entries. */
@@ -924,7 +922,7 @@ COLOR_TABLE *znzCTABreadFromBinary(znzFile fp) {
 int znzCTABwriteIntoBinary(COLOR_TABLE *ct, znzFile fp) {
   int result;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinary: ct was NULL"));
   if (znz_isnull(fp))
@@ -961,7 +959,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV1(znzFile fp, int nentries) {
 
   /* Allocate our table. */
   ct = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
-  if (ct == nullptr)
+  if (ct == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadFromBinaryV1: could not allocate table"));
 
@@ -969,7 +967,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV1(znzFile fp, int nentries) {
   ct->nentries = nentries;
   ct->entries =
       (COLOR_TABLE_ENTRY **)calloc(ct->nentries, sizeof(COLOR_TABLE_ENTRY *));
-  if (ct->entries == nullptr) {
+  if (ct->entries == NULL) {
     CTABfree(&ct);
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadFromBinaryV1: could not "
@@ -992,14 +990,14 @@ COLOR_TABLE *znzCTABreadFromBinaryV1(znzFile fp, int nentries) {
   }
   name = (char *)malloc(len + 1);
   znzread(name, sizeof(char), len, fp);
-  strncpy(ct->fname, name, sizeof(ct->fname));
+  strncpy(ct->fname, name, sizeof(ct->fname) - 1);
   free(name);
 
   /* For each entry, read in the info. We assume these have sequential
   structure indices. */
   for (structure = 0; structure < ct->nentries; structure++) {
     ct->entries[structure] = (CTE *)malloc(sizeof(CTE));
-    if (nullptr == ct->entries[structure]) {
+    if (NULL == ct->entries[structure]) {
       CTABfree(&ct);
       ErrorReturn(NULL, (ERROR_NO_MEMORY,
                          "CTABreadFromBinaryV1: could "
@@ -1019,7 +1017,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV1(znzFile fp, int nentries) {
     name = (char *)malloc(len + 1);
     znzread(name, sizeof(char), len, fp);
     strncpy(ct->entries[structure]->name, name,
-            sizeof(ct->entries[structure]->name));
+            sizeof(ct->entries[structure]->name) - 1);
     ct->entries[structure]->name[len] = 0;
 
     ct->entries[structure]->ri = znzreadInt(fp);
@@ -1044,7 +1042,7 @@ int znzCTABwriteIntoBinaryV1(COLOR_TABLE *ct, znzFile fp) {
   int i;
   int t;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinaryV1: ct was NULL"));
   if (znz_isnull(fp))
@@ -1066,7 +1064,7 @@ int znzCTABwriteIntoBinaryV1(COLOR_TABLE *ct, znzFile fp) {
   order. Note that this doesn't save structure indecies if there
   are skipped entries properly, but that's a feature of v1. */
   for (i = 0; i < ct->nentries; i++) {
-    if (nullptr != ct->entries[i]) {
+    if (NULL != ct->entries[i]) {
       znzwriteInt(strlen(ct->entries[i]->name) + 1, fp);
       znzwrite(ct->entries[i]->name, sizeof(char),
                strlen(ct->entries[i]->name) + 1, fp);
@@ -1100,7 +1098,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp) {
 
   /* Allocate our table. */
   ct = (COLOR_TABLE *)calloc(1, sizeof(COLOR_TABLE));
-  if (ct == nullptr)
+  if (ct == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadFromBinaryV2: could not allocate table"));
 
@@ -1108,7 +1106,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp) {
   ct->nentries = nentries;
   ct->entries =
       (COLOR_TABLE_ENTRY **)calloc(ct->nentries, sizeof(COLOR_TABLE_ENTRY *));
-  if (ct->entries == nullptr)
+  if (ct->entries == NULL)
     ErrorReturn(NULL, (ERROR_NO_MEMORY,
                        "CTABreadFromBinaryV2: could not "
                        "allocate %d entries",
@@ -1127,7 +1125,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp) {
                        len));
   name = (char *)malloc(len + 1);
   znzread(name, sizeof(char), len, fp);
-  strncpy(ct->fname, name, sizeof(ct->fname));
+  strncpy(ct->fname, name, STRLEN - 1);
   free(name);
 
   /* Read the number of entries to read. */
@@ -1146,7 +1144,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp) {
     }
 
     /* See if we already have an entry here. */
-    if (nullptr != ct->entries[structure]) {
+    if (NULL != ct->entries[structure]) {
       CTABfree(&ct);
       ErrorReturn(NULL, (ERROR_BADFILE,
                          "CTABreadFromBinaryV2: Duplicate "
@@ -1156,7 +1154,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp) {
 
     /* Create the entry */
     ct->entries[structure] = (CTE *)malloc(sizeof(CTE));
-    if (nullptr == ct->entries[structure])
+    if (NULL == ct->entries[structure])
       ErrorReturn(
           NULL,
           (ERROR_NO_MEMORY,
@@ -1174,8 +1172,7 @@ COLOR_TABLE *znzCTABreadFromBinaryV2(znzFile fp) {
     }
     name = (char *)malloc(len + 1);
     znzread(name, sizeof(char), len, fp);
-    strncpy(ct->entries[structure]->name, name,
-            sizeof(ct->entries[structure]->name));
+    strncpy(ct->entries[structure]->name, name, STRLEN - 1);
 
     /* Read in the color. */
     ct->entries[structure]->ri = znzreadInt(fp);
@@ -1201,7 +1198,7 @@ int znzCTABwriteIntoBinaryV2(COLOR_TABLE *ct, znzFile fp) {
   int i, t;
   int num_entries_to_write;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteIntoBinaryV2: ct was NULL"));
   if (znz_isnull(fp))
@@ -1225,13 +1222,13 @@ int znzCTABwriteIntoBinaryV2(COLOR_TABLE *ct, znzFile fp) {
   entries. */
   num_entries_to_write = 0;
   for (i = 0; i < ct->nentries; i++)
-    if (nullptr != ct->entries[i])
+    if (NULL != ct->entries[i])
       num_entries_to_write++;
   znzwriteInt(num_entries_to_write, fp);
 
   /* Now for each bin, if it's not null, write it to the stream. */
   for (structure = 0; structure < ct->nentries; structure++) {
-    if (nullptr != ct->entries[structure]) {
+    if (NULL != ct->entries[structure]) {
       /* Write the structure number, then name, then color
       info. */
       znzwriteInt(structure, fp);
@@ -1261,9 +1258,9 @@ COLOR_TABLE *CTABreadDefault() {
 /*-------------------------------------------------------------------
   ----------------------------------------------------------------*/
 int CTABcopyFileName(COLOR_TABLE *ct, char *name, size_t name_len) {
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABcopyName: ct was NULL"));
-  if (nullptr == name)
+  if (NULL == name)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABcopyName: output parameter was NULL"));
 
@@ -1278,17 +1275,17 @@ int CTABgetNumberOfValidEntries(COLOR_TABLE *ct, int *num) {
   int valid_entries;
   int structure;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABgetNumberOfValidEntries: ct was NULL"));
-  if (nullptr == num)
+  if (NULL == num)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABgetNumberOfValidEntries: num was NULL"));
 
   /* Count the non-NULL entries. */
   valid_entries = 0;
   for (structure = 0; structure < ct->nentries; structure++)
-    if (nullptr != ct->entries[structure])
+    if (NULL != ct->entries[structure])
       valid_entries++;
 
   *num = valid_entries;
@@ -1298,10 +1295,10 @@ int CTABgetNumberOfValidEntries(COLOR_TABLE *ct, int *num) {
 /*-------------------------------------------------------------------
   ----------------------------------------------------------------*/
 int CTABgetNumberOfTotalEntries(COLOR_TABLE *ct, int *num) {
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABgetNumberOfTotalEntries: ct was NULL"));
-  if (nullptr == num)
+  if (NULL == num)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABgetNumberOfTotalEntries: num was NULL"));
 
@@ -1312,18 +1309,18 @@ int CTABgetNumberOfTotalEntries(COLOR_TABLE *ct, int *num) {
 /*-------------------------------------------------------------------
   ----------------------------------------------------------------*/
 int CTABisEntryValid(COLOR_TABLE *ct, int index, int *valid) {
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABisEntryValid: ct was NULL"));
   if (index < 0 || index >= ct->nentries)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABisEntryValid: index %d was OOB", index));
-  if (nullptr == valid)
+  if (NULL == valid)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABisEntryValid: valid was NULL"));
 
   /* Return whether or not this entry is not NULL. */
-  *valid = (nullptr != ct->entries[index]);
+  *valid = (NULL != ct->entries[index]);
 
   return (NO_ERROR);
 }
@@ -1331,16 +1328,16 @@ int CTABisEntryValid(COLOR_TABLE *ct, int index, int *valid) {
 /*-------------------------------------------------------------------
   ----------------------------------------------------------------*/
 int CTABrgbAtIndexi(COLOR_TABLE *ct, int index, int *r, int *g, int *b) {
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABrgbAtIndexi: ct was NULL"));
   if (index < 0 || index >= ct->nentries)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbAtIndexi: index %d was OOB", index));
-  if (nullptr == r || nullptr == g || nullptr == b)
+  if (NULL == r || NULL == g || NULL == b)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbAtIndexi: output parameter was NULL"));
 
-  if (nullptr == ct->entries[index])
+  if (NULL == ct->entries[index])
     return (ERROR_BADPARM);
 
   *r = ct->entries[index]->ri;
@@ -1353,16 +1350,16 @@ int CTABrgbAtIndexi(COLOR_TABLE *ct, int index, int *r, int *g, int *b) {
 /*-------------------------------------------------------------------
   ----------------------------------------------------------------*/
 int CTABrgbAtIndexf(COLOR_TABLE *ct, int index, float *r, float *g, float *b) {
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABrgbAtIndexf: ct was NULL"));
   if (index < 0 || index >= ct->nentries)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbAtIndexf: index %d was OOB", index));
-  if (nullptr == r || nullptr == g || nullptr == b)
+  if (NULL == r || NULL == g || NULL == b)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbAtIndexf: output parameter was NULL"));
 
-  if (nullptr == ct->entries[index])
+  if (NULL == ct->entries[index])
     return (ERROR_BADPARM);
 
   *r = ct->entries[index]->rf;
@@ -1376,17 +1373,17 @@ int CTABrgbAtIndexf(COLOR_TABLE *ct, int index, float *r, float *g, float *b) {
   ----------------------------------------------------------------*/
 int CTABrgbaAtIndexi(COLOR_TABLE *ct, int index, int *r, int *g, int *b,
                      int *a) {
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbaAtIndexi: ct was NULL"));
   if (index < 0 || index >= ct->nentries)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbaAtIndexi: index %d was OOB", index));
-  if (nullptr == r || nullptr == g || nullptr == b || nullptr == a)
+  if (NULL == r || NULL == g || NULL == b || NULL == a)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbaAtIndexi: output parameter was NULL"));
 
-  if (nullptr == ct->entries[index])
+  if (NULL == ct->entries[index])
     return (ERROR_BADPARM);
 
   *r = ct->entries[index]->ri;
@@ -1401,17 +1398,17 @@ int CTABrgbaAtIndexi(COLOR_TABLE *ct, int index, int *r, int *g, int *b,
   ----------------------------------------------------------------*/
 int CTABrgbaAtIndexf(COLOR_TABLE *ct, int index, float *r, float *g, float *b,
                      float *a) {
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbaAtIndexf: ct was NULL"));
   if (index < 0 || index >= ct->nentries)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbaAtIndexf: index %d was OOB", index));
-  if (nullptr == r || nullptr == g || nullptr == b || nullptr == a)
+  if (NULL == r || NULL == g || NULL == b || NULL == a)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABrgbaAtIndexf: output parameter was NULL"));
 
-  if (nullptr == ct->entries[index])
+  if (NULL == ct->entries[index])
     return (ERROR_BADPARM);
 
   *r = ct->entries[index]->rf;
@@ -1425,16 +1422,16 @@ int CTABrgbaAtIndexf(COLOR_TABLE *ct, int index, float *r, float *g, float *b,
 /*-------------------------------------------------------------------
   ----------------------------------------------------------------*/
 int CTABcopyName(COLOR_TABLE *ct, int index, char *name, size_t name_len) {
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABcopyName: ct was NULL"));
   if (index < 0 || index >= ct->nentries)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABcopyName: index %d was OOB", index));
-  if (nullptr == name)
+  if (NULL == name)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABcopyName: output parameter was NULL"));
 
-  if (nullptr == ct->entries[index])
+  if (NULL == ct->entries[index])
     return (ERROR_BADPARM);
 
   strncpy(name, ct->entries[index]->name, name_len);
@@ -1463,7 +1460,7 @@ int CTABentryNameToIndex(const char *EntryName, COLOR_TABLE *ct) {
   for (i = 0; i < ct->nentries; i++) {
     cte = ct->entries[i];
     // cte might be NULL, so this check is essential.
-    if (cte != nullptr) {
+    if (cte != NULL) {
       if (!strcmp(cte->name, EntryName))
         return (i);
     }
@@ -1492,21 +1489,21 @@ int CTABannotationAtIndex(COLOR_TABLE *ct, int index, int *annot) {
   CTE *e;
   int  annotation;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABannotationAtIndex: ct was NULL"));
   if (index < 0 || index >= ct->nentries)
     ErrorReturn(
         ERROR_BADPARM,
         (ERROR_BADPARM, "CTABannotationAtIndex: index %d was OOB", index));
-  if (nullptr == annot)
+  if (NULL == annot)
     ErrorReturn(
         ERROR_BADPARM,
         (ERROR_BADPARM, "CTABannotationAtIndex: output parameter was NULL"));
 
   /* Shift the values over into a single integer. */
   e = ct->entries[index];
-  if (nullptr == ct->entries[index])
+  if (NULL == ct->entries[index])
     return (ERROR_BADPARM);
 
   // This should give the same, but have not tested it
@@ -1527,10 +1524,10 @@ int CTABfindAnnotation(COLOR_TABLE *ct, int annotation, int *index) {
   int r, g, b;
   int result;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABfindAnnotation: ct was NULL"));
-  if (nullptr == index)
+  if (NULL == index)
     ErrorReturn(
         ERROR_BADPARM,
         (ERROR_BADPARM, "CTABfindAnnotation: output parameter was NULL"));
@@ -1554,7 +1551,7 @@ const char *CTABgetAnnotationName(COLOR_TABLE *ct, int annotation) {
   int r, g, b;
   int index = -1;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorExit(ERROR_BADPARM, "CTABfindAnnotationName: ct was NULL");
 
   /* Separate the annotation into colors and then find the color. */
@@ -1577,11 +1574,11 @@ int CTABfindDuplicateAnnotations(COLOR_TABLE *ct) {
   int idx2;
   int dupCount = 0;
   for (idx1 = 0; idx1 < ct->nentries; idx1++) {
-    if (nullptr != ct->entries[idx1]) {
+    if (NULL != ct->entries[idx1]) {
       int annot1 = 0;
       CTABannotationAtIndex(ct, idx1, &annot1);
       for (idx2 = 0; idx2 < ct->nentries; idx2++) {
-        if ((nullptr != ct->entries[idx2]) && (idx1 != idx2)) {
+        if ((NULL != ct->entries[idx2]) && (idx1 != idx2)) {
           int annot2 = 0;
           CTABannotationAtIndex(ct, idx2, &annot2);
           if (annot1 == annot2) {
@@ -1610,9 +1607,9 @@ int CTABfindDuplicateNames(COLOR_TABLE *ct) {
   int idx2;
   int dupCount = 0;
   for (idx1 = 0; idx1 < ct->nentries; idx1++) {
-    if (nullptr != ct->entries[idx1]) {
+    if (NULL != ct->entries[idx1]) {
       for (idx2 = 0; idx2 < ct->nentries; idx2++) {
-        if ((nullptr != ct->entries[idx2]) && (idx1 != idx2)) {
+        if ((NULL != ct->entries[idx2]) && (idx1 != idx2)) {
           char *name1 = ct->entries[idx1]->name;
           char *name2 = ct->entries[idx2]->name;
           if (strcmp(name1, name2) == 0) {
@@ -1644,17 +1641,17 @@ int CTABfindIndexFromAnnotation(COLOR_TABLE *ct, int annot, int *index) {
 int CTABfindRGBi(COLOR_TABLE *ct, int r, int g, int b, int *index) {
   int structure;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABfindRGBi: ct was NULL"));
   if (r < 0 || r >= 256 || g < 0 || g >= 256 || b < 0 || b >= 256)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABfindRGBi: rgb was invalid"));
-  if (nullptr == index)
+  if (NULL == index)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABfindRGBi: output parameter was NULL"));
 
   for (structure = 0; structure < ct->nentries; structure++) {
-    if (nullptr != ct->entries[structure]) {
+    if (NULL != ct->entries[structure]) {
       if (ct->entries[structure]->ri == r && ct->entries[structure]->gi == g &&
           ct->entries[structure]->bi == b) {
         *index = structure;
@@ -1676,16 +1673,16 @@ int CTABfindRGBi(COLOR_TABLE *ct, int r, int g, int b, int *index) {
 int CTABfindName(COLOR_TABLE *ct, const char *name, int *index) {
   int structure;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABfindName: ct was NULL"));
-  if (nullptr == name)
+  if (NULL == name)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABfindName: name was NULL"));
-  if (nullptr == index)
+  if (NULL == index)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABfindName: output parameter was NULL"));
 
   for (structure = 0; structure < ct->nentries; structure++) {
-    if (nullptr != ct->entries[structure]) {
+    if (NULL != ct->entries[structure]) {
       if (stricmp(name, ct->entries[structure]->name) == 0) {
         *index = structure;
         return (NO_ERROR);
@@ -1705,17 +1702,17 @@ int CTABfindName(COLOR_TABLE *ct, const char *name, int *index) {
 int CTABfindEntryByName(COLOR_TABLE *ct, const char *name, int *nEntry) {
   int structure;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABfindName: ct was NULL"));
-  if (nullptr == name)
+  if (NULL == name)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABfindName: name was NULL"));
-  if (nullptr == nEntry)
+  if (NULL == nEntry)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABfindName: output parameter was NULL"));
 
   int n = 0;
   for (structure = 0; structure < ct->nentries; structure++) {
-    if (nullptr != ct->entries[structure]) {
+    if (NULL != ct->entries[structure]) {
       if (stricmp(name, ct->entries[structure]->name) == 0) {
         *nEntry = n;
         return (NO_ERROR);
@@ -1734,13 +1731,13 @@ int CTABprintASCII(COLOR_TABLE *ct, FILE *fp) {
   int   structure;
   char *tmpstr;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABprintASCII: ct was NULL"));
-  if (nullptr == fp)
+  if (NULL == fp)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "CTABprintASCII: fp was NULL"));
 
   for (structure = 0; structure < ct->nentries; structure++) {
-    if (nullptr != ct->entries[structure]) {
+    if (NULL != ct->entries[structure]) {
       tmpstr = deblank(ct->entries[structure]->name);
       fprintf(fp, "%3d  %-30s  %3d %3d %3d  %3d\n", structure + ct->idbase,
               tmpstr, ct->entries[structure]->ri, ct->entries[structure]->gi,
@@ -1758,15 +1755,15 @@ int CTABwriteFileASCII(COLOR_TABLE *ct, const char *fname) {
   FILE *fp;
   int   result;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteFileASCII: ct was NULL"));
-  if (nullptr == fname)
+  if (NULL == fname)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABwriteFileASCII: fname was NULL"));
 
   fp = fopen(fname, "w");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     ErrorReturn(ERROR_NOFILE,
                 (ERROR_NOFILE,
                  "CTABwriteFileASCII(%s): could not open for writing\n",
@@ -1830,7 +1827,7 @@ COLOR_TABLE *TissueTypeSchema(COLOR_TABLE *ct, const char *schema) {
     return (ct);
   }
   printf("ERROR: tissue type schema %s unrecognized\n", schema);
-  return (nullptr);
+  return (NULL);
 }
 
 /*!
@@ -1851,7 +1848,7 @@ COLOR_TABLE *TissueTypeSchemaDefault(COLOR_TABLE *ct) {
   TTWM       = 3;
   TTCSF      = 4;
 
-  if (ct == nullptr) {
+  if (ct == NULL) {
     fsenv = FSENVgetenv();
     sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
     ct = CTABreadASCII(tmpstr);
@@ -1887,7 +1884,7 @@ COLOR_TABLE *TissueTypeSchemaDefault(COLOR_TABLE *ct) {
 
   for (n = 0; n < ct->nentries; n++) {
     cte = ct->entries[n];
-    if (cte == nullptr)
+    if (cte == NULL)
       continue;
 
     TT = -1;
@@ -2055,7 +2052,7 @@ COLOR_TABLE *TissueTypeSchemaDefaultHead(COLOR_TABLE *ct) {
 
   for (n = 0; n < ct->nentries; n++) {
     cte = ct->entries[n];
-    if (cte == nullptr)
+    if (cte == NULL)
       continue;
 
     TT = -1;
@@ -2196,7 +2193,7 @@ COLOR_TABLE *TissueTypeSchemaDefaultHead(COLOR_TABLE *ct) {
 /*!
 \fn COLOR_TABLE *TissueTypeSchemaLat(COLOR_TABLE *ct)
 \brief Adds tissue type information to a color table using the
-default FreeSurfer schema including a Head tissue type.
+default FreeSurfer schema including a Head tissue type. 
 Creates lateralized tissue types.
 \param ct - color table with tissue type info (if null then
 uses FreeSurferColorLUT.txt)
@@ -2217,7 +2214,7 @@ COLOR_TABLE *TissueTypeSchemaLat(COLOR_TABLE *ct) {
   TTCSF         = 7;
   TTHead        = 8;
 
-  if (ct == nullptr) {
+  if (ct == NULL) {
     fsenv = FSENVgetenv();
     sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
     ct = CTABreadASCII(tmpstr);
@@ -2273,7 +2270,7 @@ COLOR_TABLE *TissueTypeSchemaLat(COLOR_TABLE *ct) {
 
   for (n = 0; n < ct->nentries; n++) {
     cte = ct->entries[n];
-    if (cte == nullptr)
+    if (cte == NULL)
       continue;
 
     TT = -1;
@@ -2429,21 +2426,21 @@ int CTABprintASCIItt(COLOR_TABLE *ct, FILE *fp) {
   char *             tmpstr;
   COLOR_TABLE_ENTRY *cte;
 
-  if (nullptr == ct)
+  if (NULL == ct)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABprintASCIItt: ct was NULL"));
-  if (nullptr == fp)
+  if (NULL == fp)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABprintASCIItt: fp was NULL"));
 
-  if (ct->ctabTissueType == nullptr)
+  if (ct->ctabTissueType == NULL)
     ErrorReturn(ERROR_BADPARM,
                 (ERROR_BADPARM, "CTABprintASCIItt: tissue type ctab was NULL"));
 
   fprintf(fp, "# TissueTypeSchema %s\n", ct->TissueTypeSchema);
   for (structure = 0; structure < ct->ctabTissueType->nentries; structure++) {
     cte = ct->ctabTissueType->entries[structure];
-    if (cte == nullptr)
+    if (cte == NULL)
       continue;
     tmpstr = deblank(cte->name);
     fprintf(fp, "#ctTType %3d  %-30s  %3d %3d %3d  %3d\n",
@@ -2454,7 +2451,7 @@ int CTABprintASCIItt(COLOR_TABLE *ct, FILE *fp) {
 
   for (structure = 0; structure < ct->nentries; structure++) {
     cte = ct->entries[structure];
-    if (cte == nullptr)
+    if (cte == NULL)
       continue;
     // if(cte->TissueType == -1) continue;
     tmpstr = deblank(cte->name);
@@ -2474,7 +2471,7 @@ with ribbon values if the aseg is CtxGM or CtxWM or unknown.
 */
 int CTABwriteFileASCIItt(COLOR_TABLE *ct, const char *fname) {
   FILE *fp = fopen(fname, "w");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: could not open %s for writing\n", fname);
     return (1);
   }
@@ -2496,10 +2493,10 @@ int CTABmerge(COLOR_TABLE *ct, const COLOR_TABLE *merge) {
 
   for (n = 0; n < merge->nentries; n++) {
     cte = merge->entries[n];
-    if (cte == nullptr)
+    if (cte == NULL)
       continue;
     cte0 = ct->entries[n];
-    if (cte0 == nullptr) {
+    if (cte0 == NULL) {
       cte0           = (CTE *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
       ct->entries[n] = cte0;
     }
@@ -2512,7 +2509,7 @@ static int ctabMinDist(COLOR_TABLE *ct, int r, int g, int b) {
   int i, dist, min_dist = 3 * 256;
 
   for (i = 0; i < ct->nentries; i++) {
-    if (ct->entries[i] == nullptr)
+    if (ct->entries[i] == NULL)
       continue;
     dist = abs(ct->entries[i]->ri - r) + abs(ct->entries[i]->gi - g) +
            abs(ct->entries[i]->bi - b);
@@ -2552,7 +2549,7 @@ int CTABaddUniqueEntry(COLOR_TABLE *ct, char *name, int min_dist) {
     return (-1);
 
   for (i = 0; i < ct->nentries; i++) // see if there are any unused slots
-    if (ct->entries[i] == nullptr) {
+    if (ct->entries[i] == NULL) {
       ct->entries[i] =
           (COLOR_TABLE_ENTRY *)calloc(1, sizeof(COLOR_TABLE_ENTRY));
       break;
@@ -2561,8 +2558,15 @@ int CTABaddUniqueEntry(COLOR_TABLE *ct, char *name, int min_dist) {
   if (i >= ct->nentries) // allocate and copy over new table
   {
     pcte = ct->entries;
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Walloc-size-larger-than="
+#endif
     ct->entries =
         (COLOR_TABLE_ENTRY **)calloc(ct->nentries, sizeof(COLOR_TABLE_ENTRY *));
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic pop
+#endif
     for (i = 0; i < ct->nentries; i++) {
       ct->entries[i] =
           (COLOR_TABLE_ENTRY *)calloc(1, sizeof(COLOR_TABLE_ENTRY));

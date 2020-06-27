@@ -21,15 +21,17 @@
 #include <gnu/libc-version.h>
 #endif
 
-#include <cerrno>
+#include <chklc.h>
 #include <const.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <errno.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
-#include "chklc.h"
 #include "diag.h"
 
 extern char *crypt(const char *, const char *);
@@ -88,10 +90,9 @@ static const char *isdir_msg =
     "--------------------------------------------------------------------------"
     "-\n";
 
-void chklc() {
-  return;
+void chklc(void) {
   char       dirname[STRLEN], *cp, *alt;
-  FILE *     lfile = nullptr;
+  FILE *     lfile = NULL;
   char *     email;
   char *     magic;
   char *     key;
@@ -103,11 +104,11 @@ void chklc() {
   static int first_time = 1;
 
   sprintf(str, "S%sER%sRONT%sOR", "URF", "_F", "DO");
-  if (getenv(str) != nullptr)
+  if (getenv(str) != NULL)
     return;
 
   cp = getenv("FREESURFER_HOME");
-  if (cp == nullptr) {
+  if (cp == NULL) {
     fprintf(stderr, "%s", errmsg);
 #ifdef Darwin
     fprintf(stderr, "\n");
@@ -118,7 +119,7 @@ void chklc() {
     exit(-1);
 #endif
   } else {
-    strncpy(dirname, cp, STRLEN);
+    strncpy(dirname, cp, STRLEN - 1);
   }
 
   lfilename = (char *)calloc(1, 512);
@@ -130,12 +131,12 @@ void chklc() {
 
   // check if alternative license path is provided:
   alt = getenv("FS_LICENSE");
-  if (alt != nullptr) {
+  if (alt != NULL) {
     strncpy(lfilename, alt, 511); // leave a nul on the end
     if (Gdiag_no > 0 && first_time)
       printf("Trying license file %s\n", lfilename);
     lfile = fopen(lfilename, "r");
-    if (lfile == nullptr) {
+    if (lfile == NULL) {
       if (errno == EACCES) {
         printf(permission_msg, lfilename, lfilename);
         exit(-1);
@@ -154,23 +155,31 @@ void chklc() {
   }
 
   // check for license in FREESURFER_HOME:
-  if (lfile == nullptr) {
-    sprintf(lfilename, "%s/lic%s", dirname, "ense.txt");
+  if (lfile == NULL) {
+    auto cx = snprintf(lfilename, 511, "%s/lic%s", dirname, "ense.txt");
+    if ((cx < 0) || (cx > 511)) {
+      std::cerr << __FUNCTION__ << ": snprintf returned error on line "
+                << __LINE__ << std::endl;
+    }
     if (Gdiag_no > 0 && first_time)
       printf("Trying license file %s\n", lfilename);
     lfile = fopen(lfilename, "r");
   }
-  if (lfile == nullptr) {
+  if (lfile == NULL) {
     if (errno == EACCES) {
       printf(permission_msg, lfilename, lfilename);
       exit(-1);
     }
-    sprintf(lfilename, "%s/.lic%s", dirname, "ense");
+    auto cx = snprintf(lfilename, 511, "%s/.lic%s", dirname, "ense");
+    if ((cx < 0) || (cx > 511)) {
+      std::cerr << __FUNCTION__ << ": snprintf returned error on line "
+                << __LINE__ << std::endl;
+    }
     if (Gdiag_no > 0 && first_time)
       printf("Now trying license file %s\n", lfilename);
     lfile = fopen(lfilename, "r");
   }
-  if (lfile == nullptr) {
+  if (lfile == NULL) {
     if (errno == EACCES) {
       printf(permission_msg, lfilename, lfilename);
       exit(-1);
@@ -206,7 +215,7 @@ void chklc() {
       printf("4 line license file\n");
     strcpy(key, key2);
     crypt_gkey = crypt(gkey, "FS");
-    if (crypt_gkey == nullptr) {
+    if (crypt_gkey == NULL) {
       printf("ERROR: crypt() returned null with 4-line file\n");
       exit(1);
     }
@@ -256,18 +265,17 @@ void chklc() {
 //  checking code for freeview. The first scares me, so Im going with the
 //  latter.
 //
-//  Also there are difference with the way the FREESURFER_HOME environment
-//  variable is handled. It doesnt need to be defined for freeview to operate.
-//  So perhaps this somewhat redundant code is a tad more justified.
+//  Also there are difference with the way the FREESURFER_HOME environment variable
+//  is handled. It doesnt need to be defined for freeview to operate. So perhaps
+//  this somewhat redundant code is a tad more justified.
 //
 //  return value:   0 - failed
 //                  1 - passed
 //
-//  if failed, error msg will be returned in msg. make sure msg is pre-allocated
-//  with enough space
+//  if failed, error msg will be returned in msg. make sure msg is pre-allocated with enough space
 int chklc2(char *msg) {
   char  dirname[STRLEN], *cp, *alt;
-  FILE *lfile = nullptr;
+  FILE *lfile = NULL;
   char *email;
   char *magic;
   char *key;
@@ -278,11 +286,11 @@ int chklc2(char *msg) {
   char *crypt_gkey;
 
   sprintf(str, "S%sER%sRONT%sOR", "URF", "_F", "DO");
-  if (getenv(str) != nullptr)
+  if (getenv(str) != NULL)
     return 1;
 
   cp = getenv("FREESURFER_HOME");
-  if (cp == nullptr) {
+  if (cp == NULL) {
     fprintf(stderr, "%s", errmsg);
 #ifdef Darwin
     fprintf(stderr, "\n");
@@ -293,7 +301,7 @@ int chklc2(char *msg) {
     exit(-1);
 #endif
   } else {
-    strncpy(dirname, cp, STRLEN);
+    strncpy(dirname, cp, STRLEN - 1);
   }
 
   lfilename = (char *)calloc(1, 512);
@@ -305,10 +313,10 @@ int chklc2(char *msg) {
 
   // check if alternative license path is provided:
   alt = getenv("FS_LICENSE");
-  if (alt != nullptr) {
+  if (alt != NULL) {
     strncpy(lfilename, alt, 511); // leave a nul on the end
     lfile = fopen(lfilename, "r");
-    if (lfile == nullptr) {
+    if (lfile == NULL) {
       if (errno == EACCES) {
         fprintf(stderr, permission_msg, lfilename, lfilename);
         if (msg)
@@ -323,21 +331,29 @@ int chklc2(char *msg) {
   }
 
   // check for license in FREESURFER_HOME:
-  if (lfile == nullptr) {
-    sprintf(lfilename, "%s/.lic%s", dirname, "ense");
+  if (lfile == NULL) {
+    auto cx = snprintf(lfilename, 511, "%s/.lic%s", dirname, "ense");
+    if ((cx < 0) || (cx > 511)) {
+      std::cerr << __FUNCTION__ << ": snprintf returned error on line "
+                << __LINE__ << std::endl;
+    }
     lfile = fopen(lfilename, "r");
   }
-  if (lfile == nullptr) {
+  if (lfile == NULL) {
     if (errno == EACCES) {
       fprintf(stderr, permission_msg, lfilename, lfilename);
       if (msg)
         sprintf(msg, permission_msg, lfilename, lfilename);
       return 0;
     }
-    sprintf(lfilename, "%s/lic%s", dirname, "ense.txt");
+    auto cx = snprintf(lfilename, 511, "%s/lic%s", dirname, "ense.txt");
+    if ((cx < 0) || (cx > 511)) {
+      std::cerr << __FUNCTION__ << ": snprintf returned error on line "
+                << __LINE__ << std::endl;
+    }
     lfile = fopen(lfilename, "r");
   }
-  if (lfile == nullptr) {
+  if (lfile == NULL) {
     if (errno == EACCES) {
       fprintf(stderr, permission_msg, lfilename, lfilename);
       if (msg)

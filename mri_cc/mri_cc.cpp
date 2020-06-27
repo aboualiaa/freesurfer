@@ -21,14 +21,30 @@
  */
 
 #include "cma.h"
+#include "const.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mriTransform.h"
+#include "mrimorph.h"
 #include "mrinorm.h"
 #include "mrisegment.h"
+#include "proto.h"
 #include "talairachex.h"
 #include "timer.h"
+#include "transform.h"
 #include "tritri.h"
 #include "version.h"
 #include "voxlist.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define MAX_CC_ROT         RADIANS(7)
 #define CC_ANGLE_DELTA     RADIANS(.25)
@@ -261,11 +277,11 @@ int main(int argc, char *argv[]) {
       MRIwrite(mri_tal, ofname);
     }
 
-    // find the transform matrix
+    //find the transform matrix
     mtrans = MatrixAlloc(4, 4, MATRIX_REAL);
     mrot   = MatrixAlloc(4, 4, MATRIX_REAL);
 
-    // try method 2 to get the rotation matrix
+    //try method 2 to get the rotation matrix
     sprintf(ifname, "%s/%s/mri/transforms/talairach.xfm", data_dir, argv[1]);
     lta2   = LTAreadEx(ifname);
     mtrans = lta2->xforms[0].m_L;
@@ -275,7 +291,7 @@ int main(int argc, char *argv[]) {
     *MATRIX_RELT(mrot, 3, 4) = mtrans->rptr[3][4];
     lta2->xforms[0].m_L      = mrot;
 
-    // rotation wm volume to be upright, using cc volume temporarily
+    //rotation wm volume to be upright, using cc volume temporarily
     mri_header = MRIallocHeader(mri_wm->width, mri_wm->height, mri_wm->depth,
                                 mri_wm->type, 1);
     MRIcopyHeader(mri_wm, mri_header);
@@ -293,12 +309,12 @@ int main(int argc, char *argv[]) {
       MRIwrite(mri_cc, ofname);
     }
 
-    // now start cc segmentation in talairach space
+    //now start cc segmentation in talairach space
     mri_cc_tal = MRIcopy(mri_tal, NULL);
     MRIcopyHeader(mri_talheader, mri_cc_tal);
     MRIvalueFill(mri_cc_tal, 0);
 
-    // most of the work is done in find_corpus_callosum function
+    //most of the work is done in find_corpus_callosum function
     find_corpus_callosum(mri_tal, &cc_tal_x, &cc_tal_y, &cc_tal_z, lta,
                          mri_cc_tal);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
@@ -307,9 +323,9 @@ int main(int argc, char *argv[]) {
       MRIwrite(mri_cc_tal, ofname);
     }
 
-    // starting the volume measurement
+    //starting the volume measurement
 
-    // transform cc volume from talairach space to normal space
+    //transform cc volume from talairach space to normal space
     MRIfromTalairachEx(mri_cc_tal, mri_wm, lta);
     // binalize the rotated cc volume (mri_wm)
     MRIbinarize(mri_wm, mri_wm, CC_VAL / 2 - 1, 0, 100);
@@ -318,12 +334,12 @@ int main(int argc, char *argv[]) {
             ofname);
     MRIwrite(mri_wm, ofname);
 
-    // trying to find the position of mid-sagital plane
+    //trying to find the position of mid-sagital plane
     MRIcopyHeader(mri_talheader, mri_cc_tal);
     MRItalairachVoxelToVoxelEx(mri_cc_tal, cc_tal_x, cc_tal_y, cc_tal_z, &xv,
                                &yv, &zv, lta);
 
-    // rotate the cc volume by the rotation matrix calculated above
+    //rotate the cc volume by the rotation matrix calculated above
     MRIcopyHeader(mri_header, mri_cc);
     MRItoTalairachEx(mri_wm, mri_cc, lta2);
     // binalize the rotated cc volume (mri_cc)
@@ -332,11 +348,11 @@ int main(int argc, char *argv[]) {
     MRIvoxelToTalairachVoxelEx(mri_cc, xv, yv, zv, &xc, &yc, &zc, lta2);
   }
 
-  // find the mid-sagital plane there
+  //find the mid-sagital plane there
   xi = nint(xc);
   fprintf(stdout, "cc center is found at %d %d %d\n", xi, nint(yc), nint(zc));
 
-  // count the number if equally segmented five parts
+  //count the number if equally segmented five parts
   m_evectors = MatrixAlloc(3, 3, MATRIX_REAL);
   MRIprincipleComponents(mri_cc, m_evectors, evalues, means, 1);
   printf("eigenvectors:\n");
@@ -360,7 +376,7 @@ int main(int argc, char *argv[]) {
   }
   MatrixFree(&m_evectors);
 
-  // find the bounding box
+  //find the bounding box
   for (y = 0; y < mri_cc->height; y++) {
     for (z = 0; z < mri_cc->depth; z++) {
       if (nint(MRIgetVoxVal(mri_cc, xi, y, z, 0))) {
@@ -574,6 +590,9 @@ int main(int argc, char *argv[]) {
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     fclose(fp);
   }
+  printf("#VMPC# mri_cc VmPeak  %d\n", GetVmPeak());
+  printf("mri_cc done\n");
+
   exit(0);
   return (0);
 }
@@ -748,8 +767,8 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
       }
     } else {
       flag[slice] = 1;
-      // if (offset>=-5&&offset<0) left++;
-      // else if (offset<=5&&offset>0) right++;
+      //if (offset>=-5&&offset<0) left++;
+      //else if (offset<=5&&offset>0) right++;
     }
 
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
@@ -805,7 +824,7 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
   offset = floor((min_slice - half_slices) / 2);
   fprintf(stdout, "find offset as %d using area\n", offset);
 
-  // another way to move the central slice
+  //another way to move the central slice
   for (slice = 0; slice < max_slices; slice++) {
     if ((slice - (half_slices + offset) >= -6) &&
         (slice < half_slices + offset) && flag[slice] == 1) {
@@ -910,10 +929,10 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
 
   sprintf(fname,
           "/space/neo/2/recon/buckner/001015_vc5442/mri/cc_dilation.mgz");
-  // MRIwrite(mri_temp1, fname) ;
+  //MRIwrite(mri_temp1, fname) ;
   mri_filled = MRIcopy(mri_temp2, NULL);
   sprintf(fname, "/space/neo/2/recon/buckner/001015_vc5442/mri/cc_filled.mgz");
-  // MRIwrite(mri_temp2, fname) ;
+  //MRIwrite(mri_temp2, fname) ;
 
   /*find the first edge of the spike */
 
@@ -947,7 +966,7 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
         }
 
         if (length <= 1 || y_edge < yv - 3) {
-          // for (y=y_edge+1; y>0; y--)
+          //for (y=y_edge+1; y>0; y--)
           // MRIvox(mri_filled, x_edge, y, 0) =0;
           edge_count -= 1;
         } else if (length > 2 && x_edge > xi_low + 15 && x_edge < zv + 17) {
@@ -970,14 +989,14 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
     }
     old_temp = temp;
   }
-  // fprintf(stdout, "first point found at %d %d \n", x1, y1);
+  //fprintf(stdout, "first point found at %d %d \n", x1, y1);
   x_edge = 0;
   y_edge = 0;
 
   /*the second edge of the spike */
 
   flag = 0;
-  // for (y_edge=yi_high-nint((yi_high-yi_low)/3); y_edge>=yi_low+4; y_edge--)
+  //for (y_edge=yi_high-nint((yi_high-yi_low)/3); y_edge>=yi_low+4; y_edge--)
   for (y_edge = yv + 20; y_edge >= yv; y_edge--) {
     edge_count  = 0;
     x_edge      = 0;
@@ -1022,7 +1041,7 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
       old_temp = temp;
     }
   }
-  // fprintf(stdout, "second point found at %d %d \n", x2, y2);
+  //fprintf(stdout, "second point found at %d %d \n", x2, y2);
 
   if (x2 > 0 && x1 > xi_low + 8 && x1 > x2 && x1 < zv + 5) {
     if (x2 < x1) {
@@ -1841,8 +1860,10 @@ static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
     mri_slice_edited = MRIclone(mri_slice, NULL);
   }
 
+  // This was just xmin = mri_slice->width, but can cause an error
+  xmin = mri_slice->width - 1;
+
   // find posterior/anterior extent of the cc
-  xmin = mri_slice->width;
   ymax = xmax = 0;
   for (x = 0; x < mri_slice->width; x++) {
     for (y = 0; y < mri_slice->height; y++) {
