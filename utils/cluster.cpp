@@ -25,9 +25,9 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <math.h>
 #include <memory.h>
 
 #include "cluster.h"

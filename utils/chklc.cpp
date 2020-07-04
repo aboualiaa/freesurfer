@@ -21,13 +21,13 @@
 #include <gnu/libc-version.h>
 #endif
 
+#include <cerrno>
 #include <chklc.h>
 #include <const.h>
-#include <errno.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>

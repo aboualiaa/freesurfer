@@ -17,9 +17,9 @@
 
 #include <cstdio>
 
-#ifndef UCHAR
-#define UCHAR unsigned char
-#endif
+// #ifndef UCHAR
+// #define UCHAR unsigned char
+// #endif
 
 #define MAX_BINS 10000
 typedef struct {

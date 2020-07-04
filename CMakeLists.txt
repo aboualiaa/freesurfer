@@ -821,7 +821,6 @@ add_subdirectories(AntsDenoiseImageFs
                    mris_convert
                    mris_curvature
                    mris_curvature_stats
-                   mris_decimate
                    mris_defects_pointset
                    mris_diff
                    mris_divide_parcellation

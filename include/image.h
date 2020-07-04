@@ -24,9 +24,9 @@
 
 #include "matrix.h"
 
-#ifndef UCHAR
-#define UCHAR unsigned char
-#endif
+//#ifndef UCHAR
+//#define UCHAR unsigned char
+//#endif
 
 #include "hips.h"
 
