@@ -16,9 +16,10 @@
 #define LAYERTREEWIDGET_H
 
 #include <QItemDelegate>
-#include <QTreeWidget>
+#include <QList>
 
 class Layer;
+class LayerMRI;
 class QDropEvent;
 
 class MyItemDelegate : public QItemDelegate {
@@ -46,6 +47,11 @@ public:
   void mouseMoveEvent(QMouseEvent *event);
   void mouseReleaseEvent(QMouseEvent *event);
 
+  QList<LayerMRI*> GetLinkedVolumes()
+  {
+      return m_linkedVolumes;
+  }
+
 signals:
   void ToReorderLayers(const QList<Layer *> &newlist);
 
@@ -66,17 +72,19 @@ public slots:
   void SelectAll();
   void selectAll() { SelectAll(); }
   void DeselectAll();
-  void SetSelectedLayers(const QList<int> &layer_ids);
+  void SetSelectedLayers(const QList<int>& layer_ids);
+  void OnLinkVolumes();
+  void OnUnlinkVolumes();
 
 protected:
-  bool         event(QEvent *e);
-  void         drawRow(QPainter *painter, const QStyleOptionViewItem &option,
-                       const QModelIndex &index) const;
-  virtual void dropEvent(QDropEvent *event);
+  bool event(QEvent* e);
+  void drawRow ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+  virtual void dropEvent(QDropEvent * event);
 
-  MyItemDelegate *m_itemDelegate;
-  QRect           rectCheckbox;
-  bool            m_bCheckBoxClicked;
+  MyItemDelegate* m_itemDelegate;
+  QRect         rectCheckbox;
+  bool          m_bCheckBoxClicked;
+  QList<LayerMRI*>  m_linkedVolumes;
 };
 
 #endif // LAYERTREEWIDGET_H

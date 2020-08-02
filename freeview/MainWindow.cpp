@@ -176,6 +176,10 @@ MainWindow::MainWindow(QWidget *parent, MyCmdLineParser *cmdParser)
 
   addAction(ui->actionNextLabelPoint);
 
+#ifdef DISABLE_LINEPROF
+  ui->actionLineProfile->setVisible(false);
+#endif
+
   m_statusBar = new FloatingStatusBar(this);
   m_statusBar->hide();
 
@@ -565,10 +569,24 @@ MainWindow::MainWindow(QWidget *parent, MyCmdLineParser *cmdParser)
   connect(ui->actionViewLayerInfo, SIGNAL(triggered(bool)),
           SLOT(OnViewLayerInfo()));
 
+  m_widgetFloatControlPanel = new QWidget(this, Qt::Tool | Qt::WindowTitleHint | Qt::CustomizeWindowHint );
+  QVBoxLayout* layout = new QVBoxLayout;
+  layout->setMargin(0);
+  m_widgetFloatControlPanel->setLayout(layout);
+  m_widgetFloatControlPanel->hide();
+  m_widgetFloatControlPanel->setWindowTitle("Layers");
+
+  m_widgetFloatInfoPanel = new QWidget(this, Qt::Tool | Qt::WindowTitleHint | Qt::CustomizeWindowHint );
+  layout = new QVBoxLayout;
+  layout->setMargin(0);
+  m_widgetFloatInfoPanel->setLayout(layout);
+  m_widgetFloatInfoPanel->hide();
+  m_widgetFloatInfoPanel->setWindowTitle("Info");
+
 #ifdef Q_OS_MAC
-  if (MacHelper::IsDarkMode()) {
-    ui->actionShowCoordinateAnnotation->setIcon(MacHelper::InvertIcon(
-        ui->actionShowCoordinateAnnotation->icon(), QSize(), true));
+  if (MacHelper::IsDarkMode())
+  {
+    ui->actionShowCoordinateAnnotation->setIcon(MacHelper::InvertIcon(ui->actionShowCoordinateAnnotation->icon(), QSize(), true));
   }
 #endif
 }
@@ -662,44 +680,26 @@ void MainWindow::LoadSettings() {
   //  OnPreferences();
   //  m_dlgPreferences->hide();
 
-  for (int i = 0; i < 4; i++) {
-    m_views[i]->SetBackgroundColor(
-        m_settings["BackgroundColor"].value<QColor>());
-    if (i < 3) {
-      ((RenderView2D *)m_views[i])
-          ->GetCursor2D()
-          ->SetColor(m_settings["CursorColor"].value<QColor>());
-      ((RenderView2D *)m_views[i])
-          ->GetCursor2D()
-          ->SetSize(m_settings["CursorSize"].toInt());
-      ((RenderView2D *)m_views[i])
-          ->GetCursor2D()
-          ->SetThickness(m_settings["CursorThickness"].toInt());
-      ((RenderView2D *)m_views[i])
-          ->SetAutoScaleText(m_settings["AutoScaleText"].toBool());
-      ((RenderView2D *)m_views[i])->SetTextSize(m_settings["TextSize"].toInt());
-      ((RenderView2D *)m_views[i])
-          ->GetAnnotation2D()
-          ->SetColor(m_settings["AnnotationColor"].value<QColor>());
-    } else {
-      ((RenderView3D *)m_views[i])
-          ->GetCursor3D()
-          ->SetColor(m_settings["CursorColor"].value<QColor>());
-      ((RenderView3D *)m_views[i])
-          ->GetInflatedSurfCursor()
-          ->SetColor(m_settings["CursorColor"].value<QColor>());
-      ((RenderView3D *)m_views[i])
-          ->GetCursor3D()
-          ->SetSize(m_settings["CursorSize3D"].toInt());
-      ((RenderView3D *)m_views[i])
-          ->GetInflatedSurfCursor()
-          ->SetSize(m_settings["CursorSize3D"].toInt());
-      ((RenderView3D *)m_views[i])
-          ->GetCursor3D()
-          ->SetThickness(m_settings["CursorThickness3D"].toInt());
-      ((RenderView3D *)m_views[i])
-          ->GetInflatedSurfCursor()
-          ->SetThickness(m_settings["CursorThickness3D"].toInt());
+  for (int i = 0; i < 4; i++)
+  {
+    m_views[i]->SetBackgroundColor(m_settings["BackgroundColor"].value<QColor>());
+    if ( i < 3 )
+    {
+      ((RenderView2D*)m_views[i])->GetCursor2D()->SetColor(m_settings["CursorColor"].value<QColor>());
+      ((RenderView2D*)m_views[i])->GetCursor2D()->SetSize(m_settings["CursorSize"].toInt());
+      ((RenderView2D*)m_views[i])->GetCursor2D()->SetThickness(m_settings["CursorThickness"].toInt());
+      ((RenderView2D*)m_views[i])->SetAutoScaleText(m_settings["AutoScaleText"].toBool());
+      ((RenderView2D*)m_views[i])->SetTextSize(m_settings["TextSize"].toInt());
+      ((RenderView2D*)m_views[i])->GetAnnotation2D()->SetColor(m_settings["AnnotationColor"].value<QColor>());
+    }
+    else
+    {
+      ((RenderView3D*)m_views[i])->GetCursor3D()->SetColor(m_settings["CursorColor"].value<QColor>());
+      ((RenderView3D*)m_views[i])->GetInflatedSurfCursor()->SetColor(m_settings["CursorColor"].value<QColor>());
+      ((RenderView3D*)m_views[i])->GetCursor3D()->SetSize(m_settings["CursorSize3D"].toInt());
+      ((RenderView3D*)m_views[i])->GetInflatedSurfCursor()->SetSize(m_settings["CursorSize3D"].toInt());
+      ((RenderView3D*)m_views[i])->GetCursor3D()->SetThickness(m_settings["CursorThickness3D"].toInt());
+      ((RenderView3D*)m_views[i])->GetInflatedSurfCursor()->SetThickness(m_settings["CursorThickness3D"].toInt());
     }
   }
   SyncZoom(m_settings["SyncZoom"].toBool());
@@ -733,14 +733,6 @@ void MainWindow::SaveSettings() {
   if (m_dlgPreferences) {
     settings.setValue("Settings/General", m_dlgPreferences->GetSettings());
   }
-  /*
-  QStringList tabs;
-  for (int i = 0; i < ui->tabWidgetControlPanel->count(); i++)
-  {
-    tabs << ui->tabWidgetControlPanel->widget(i)->objectName();
-  }
-  settings.setValue("ControlPanel/TabOrder", tabs);
-  */
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -922,7 +914,9 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
         QStringList   sublist = floatingArgs[i].split(":");
         QFileInfoList fi_list = QDir().entryInfoList(QStringList(sublist[0]));
         //  qDebug() << fi_list;
-      } else {
+      }
+      else
+      {
         fn_list << floatingArgs[i];
       }
       for (int j = 0; j < fn_list.size(); j++) {
@@ -2075,7 +2069,8 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
     script << colormap << colormap_scale << scales;
     m_scripts.insert(0, script);
 
-    if (colormap == "lut" && !selected_labels.isEmpty()) {
+    if (colormap == "lut" && !selected_labels.isEmpty())
+    {
       m_scripts.insert(1, QStringList("setselectedlabels") << selected_labels);
     }
   }
@@ -2593,13 +2588,16 @@ void MainWindow::CommandLoadVolumeTrack(const QStringList &sa) {
   this->LoadVolumeTrackFile(list[0], bResample);
 }
 
-void MainWindow::CommandSetVolumeTrackFrame(const QStringList &cmd) {
-  Layer *layer = GetActiveLayer("MRI");
-  if (layer && layer->IsTypeOf("VolumeTrack")) {
-    LayerVolumeTrack *vt     = (LayerVolumeTrack *)layer;
-    QStringList       frames = cmd[1].split(",");
+void MainWindow::CommandSetVolumeTrackFrame(const QStringList &cmd)
+{
+  Layer* layer = GetActiveLayer("MRI");
+  if (layer && layer->IsTypeOf("VolumeTrack"))
+  {
+    LayerVolumeTrack* vt = (LayerVolumeTrack*)layer;
+    QStringList frames = cmd[1].split(",");
     vt->ShowAllLabels(false);
-    for (int i = 0; i < frames.size(); i++) {
+    for (int i = 0; i < frames.size(); i++)
+    {
       int nFrame = frames[i].toInt();
       if (nFrame >= 0)
         vt->SetFrameVisible(nFrame, true);
@@ -3267,45 +3265,56 @@ void MainWindow::CommandSetSurfaceOverlayCustom(const QStringList &cmd_in) {
         cerr << "Insufficient overlay_custom argments\n";
         return;
       }
+      else if (cmd.size() == 2)
+      {
+        overlay->GetProperty()->LoadCustomColorScale(cmd[1]);
+      }
+      else
+      {
+        QGradientStops stops;
+        QColor c;
+        bool bOK;
+        for (int i = 1; i < cmd.size(); i++)
+        {
+          double dval = cmd[i].toDouble(&bOK);
+          if (!bOK)
+            break;
 
-      QGradientStops stops;
-      QColor         c;
-      bool           bOK;
-      for (int i = 1; i < cmd.size(); i++) {
-        double dval = cmd[i].toDouble(&bOK);
-        if (!bOK)
-          break;
-
-        c = QColor(cmd[i + 1]);
-        if (c.isValid()) {
-          i++;
-        } else {
-          int r, g, b;
-          r = cmd[i + 1].toInt(&bOK);
-          if (!bOK)
-            break;
-          g = cmd[i + 2].toInt(&bOK);
-          if (!bOK)
-            break;
-          b = cmd[i + 3].toInt(&bOK);
-          if (!bOK)
-            break;
-          c = QColor(r, g, b);
-          if (!c.isValid())
-            break;
+          c = QColor(cmd[i+1]);
+          if (c.isValid())
+          {
+            i++;
+          }
           else
-            i += 3;
+          {
+            int r,g,b;
+            r = cmd[i+1].toInt(&bOK);
+            if (!bOK)
+              break;
+            g = cmd[i+2].toInt(&bOK);
+            if (!bOK)
+              break;
+            b = cmd[i+3].toInt(&bOK);
+            if (!bOK)
+              break;
+            c = QColor(r,g,b);
+            if (!c.isValid())
+              break;
+            else
+              i+=3;
+          }
+          stops << QGradientStop(dval, c);
         }
-        stops << QGradientStop(dval, c);
+
+        if (!bOK || !c.isValid())
+        {
+          cerr << "Invalid input for customized overlay color.\n";
+          return;
+        }
+        overlay->GetProperty()->SetColorScale(SurfaceOverlayProperty::CS_Custom);
+        overlay->GetProperty()->SetCustomColorScale(stops);
       }
 
-      if (!bOK || !c.isValid()) {
-        cerr << "Invalid input for customized overlay color.\n";
-        return;
-      }
-
-      overlay->GetProperty()->SetColorScale(SurfaceOverlayProperty::CS_Custom);
-      overlay->GetProperty()->SetCustomColorScale(stops);
       surf->UpdateOverlay(true);
       overlay->EmitDataUpdated();
     }
@@ -3824,21 +3833,23 @@ void MainWindow::CommandScreenCapture(const QStringList &cmd) {
         GetMainView()->RequestRedraw(true);
         QString fn = cmd[1];
         fn.replace("%name", layers[n]->GetName());
-        if (!GetMainView()->SaveScreenShot(
-                fn, m_settingsScreenshot.AntiAliasing, (int)mag_factor)) {
-          cerr << "Failed to save screen shot to " << fn.toLatin1().constData()
-               << ".\n";
-        } else
+        if (!GetMainView()->SaveScreenShot( fn, m_settingsScreenshot.AntiAliasing,
+                                            (int)mag_factor))
+        {
+          cerr << "Failed to save screen shot to " << fn.toLatin1().constData() << ".\n";
+        }
+        else
           files << fn;
       }
       if (auto_trim)
         GetMainView()->TrimImageFiles(files);
     }
-  } else if (!GetMainView()->SaveScreenShot(cmd[1],
-                                            m_settingsScreenshot.AntiAliasing,
-                                            (int)mag_factor, auto_trim)) {
-    cerr << "Failed to save screen shot to " << cmd[1].toLatin1().constData()
-         << ".\n";
+  }
+  else if (!GetMainView()->SaveScreenShot( cmd[1],
+                                           m_settingsScreenshot.AntiAliasing,
+                                           (int)mag_factor, auto_trim))
+  {
+    cerr << "Failed to save screen shot to " << cmd[1].toLatin1().constData() << ".\n";
   }
 }
 
@@ -4765,9 +4776,10 @@ void MainWindow::LoadROIFile(const QString &fn, const QString &ref_vol,
     }
     col_roi->AddLayer(roi);
 
-    m_strLastDir = QFileInfo(fn).canonicalPath();
-    //  ui->tabWidgetControlPanel->setCurrentWidget( ui->tabROI );
-  } else {
+    m_strLastDir = QFileInfo( fn ).canonicalPath();
+  }
+  else
+  {
     delete roi;
     QMessageBox::warning(this, "Error",
                          QString("Can not load ROI from %1").arg(fn));
@@ -5101,7 +5113,8 @@ void MainWindow::LoadSurfaceFile(const QString &    filename,
   QStringList sup_files = sup_files_in;
   if (sup_options.value("no_autoload").toBool()) {
     layer->SetSphereFileName("");
-    if (fi.fileName().contains("inflated")) {
+    if (fi.fileName().contains("inflated"))
+    {
       QString fn = fi.absoluteFilePath();
       fn.replace(".inflated", ".white");
       if (QFile::exists(fn) && !sup_files.contains("white"))
@@ -5284,10 +5297,10 @@ void MainWindow::OnIOFinished(Layer *layer, int jobtype) {
       ConnectMRILayer(mri);
     }
 
-    m_strLastDir = QFileInfo(layer->GetFileName()).canonicalPath();
-    SetCurrentFile(layer->GetFileName(), 0);
-    //    ui->tabWidgetControlPanel->setCurrentWidget( ui->tabVolume );
-    if (m_layerSettings.contains(layer->GetID())) {
+    m_strLastDir = QFileInfo( layer->GetFileName() ).canonicalPath();
+    SetCurrentFile( layer->GetFileName(), 0 );
+    if (m_layerSettings.contains(layer->GetID()))
+    {
       QVariantMap settings = m_layerSettings[layer->GetID()];
       if (settings.contains("name"))
         mri->SetName(settings["name"].toString());
@@ -5362,10 +5375,10 @@ void MainWindow::OnIOFinished(Layer *layer, int jobtype) {
       cerr << "Did not find any volume info" << endl;
     }
 
-    m_strLastDir = QFileInfo(layer->GetFileName()).canonicalPath();
-    SetCurrentFile(layer->GetFileName(), 1);
-    //    ui->tabWidgetControlPanel->setCurrentWidget( ui->tabSurface );
-    if (m_layerSettings.contains(layer->GetID())) {
+    m_strLastDir = QFileInfo( layer->GetFileName() ).canonicalPath();
+    SetCurrentFile( layer->GetFileName(), 1 );
+    if (m_layerSettings.contains(layer->GetID()))
+    {
       QVariantMap settings = m_layerSettings[layer->GetID()];
       sf->GetProperty()->RestoreFullSettings(settings);
       m_layerSettings.remove(layer->GetID());
@@ -5383,13 +5396,14 @@ void MainWindow::OnIOFinished(Layer *layer, int jobtype) {
         QFileInfo(((LayerSurface *)layer)->GetActiveOverlay()->GetFileName())
             .absolutePath();
     emit SlicePositionChanged(true);
-  } else if (jobtype == ThreadIOWorker::JT_LoadTrack &&
-             layer->IsTypeOf("Tract")) {
-    LayerTrack *track = qobject_cast<LayerTrack *>(layer);
-    lc_track->AddLayer(track);
-    m_strLastDir = QFileInfo(layer->GetFileName()).canonicalPath();
-    //    ui->tabWidgetControlPanel->setCurrentWidget( ui->tabTrack );
-    if (lc_surface->IsEmpty() && lc_mri->IsEmpty()) {
+  }
+  else if ( jobtype == ThreadIOWorker::JT_LoadTrack && layer->IsTypeOf("Tract"))
+  {
+    LayerTrack* track = qobject_cast<LayerTrack*>( layer );
+    lc_track->AddLayer( track );
+    m_strLastDir = QFileInfo( layer->GetFileName() ).canonicalPath();
+    if (lc_surface->IsEmpty() && lc_mri->IsEmpty())
+    {
       double worigin[3], wsize[3];
       track->GetWorldOrigin(worigin);
       track->GetWorldSize(wsize);
@@ -5938,25 +5952,27 @@ void MainWindow::OnSaveScreenshot() {
   m_dlgSaveScreenshot->raise();
 }
 
-void MainWindow::OnCopyView() {
-  QString fn = QDir::tempPath() + "/freeview-temp-" +
-               QString::number(QDateTime::currentMSecsSinceEpoch()) + ".png";
-  GetMainView()->SaveScreenShot(fn, m_settingsScreenshot.AntiAliasing, 1.0,
-                                m_settingsScreenshot.AutoTrim);
+void MainWindow::OnCopyView()
+{
+  QString fn = QDir::tempPath() + "/freeview-temp-" + QString::number(QDateTime::currentMSecsSinceEpoch()) + ".png";
+  GetMainView()->SaveScreenShot(fn, m_settingsScreenshot.AntiAliasing, 1.0, m_settingsScreenshot.AutoTrim);
   QClipboard *clipboard = QGuiApplication::clipboard();
   if (clipboard)
     clipboard->setImage(QImage(fn));
 }
 
-void MainWindow::OnVolumeFilterMean() {
-  LayerMRI *mri = (LayerMRI *)GetActiveLayer("MRI");
-  if (mri) {
-    VolumeFilterMean * filter = new VolumeFilterMean(mri, mri);
-    DialogVolumeFilter dlg(this);
-    dlg.SetFilter(filter);
-    dlg.ShowSigma(false);
-    if (dlg.exec() == QDialog::Accepted) {
-      filter->SetKernelSize(dlg.GetKernelSize());
+void MainWindow::OnVolumeFilterMean()
+{
+  LayerMRI* mri = (LayerMRI*)GetActiveLayer( "MRI" );
+  if ( mri )
+  {
+    VolumeFilterMean* filter = new VolumeFilterMean( mri, mri );
+    DialogVolumeFilter dlg( this );
+    dlg.SetFilter( filter );
+    dlg.ShowSigma( false );
+    if ( dlg.exec() == QDialog::Accepted )
+    {
+      filter->SetKernelSize( dlg.GetKernelSize() );
       m_threadVolumeFilter->ExecuteFilter(filter);
     }
   }
@@ -6329,7 +6345,8 @@ void MainWindow::OnActiveLayerChanged(Layer *layer) {
   QString title = "FreeView";
   if (!m_sTitle.isEmpty())
     title += ": " + m_sTitle;
-  if (!layer) {
+  if (!layer)
+  {
     this->setWindowTitle(title);
     m_wndTimeCourse->hide();
   } else {
@@ -7670,5 +7687,52 @@ void MainWindow::WriteLog(const QString &str_in, const QString &filename,
                     .arg(QDateTime::currentDateTime().toString())
                     .arg(str_in);
   file.write(str.toUtf8());
+  file.flush();
   file.close();
+}
+
+void MainWindow::OnShowControlPanel(bool bShow)
+{
+  if (ui->widgetControlPanel->parentWidget() == ui->widgetControlPanelHolder)
+    ui->widgetControlPanelHolder->setVisible(bShow);
+  else
+    m_widgetFloatControlPanel->setVisible(bShow);
+}
+
+void MainWindow::OnFloatPanels(bool bFloat)
+{
+  static QByteArray geometryControlPanel = ui->widgetControlPanelHolder->saveGeometry();
+  static QByteArray geometryInfoPanel = ui->widgetInfoPanelHolder->saveGeometry();
+  if (bFloat)
+  {
+    ui->widgetControlPanelHolder->hide();
+    ui->layoutControlPanelHolder->removeWidget(ui->widgetControlPanel);
+    m_widgetFloatControlPanel->show();
+    m_widgetFloatControlPanel->layout()->addWidget(ui->widgetControlPanel);
+    ui->widgetControlPanel->show();
+    m_widgetFloatControlPanel->restoreGeometry(geometryControlPanel);
+
+    ui->widgetInfoPanelHolder->hide();
+    ui->layoutInfoPanelHolder->removeWidget(ui->widgetInfoPanel);
+    m_widgetFloatInfoPanel->show();
+    m_widgetFloatInfoPanel->layout()->addWidget(ui->widgetInfoPanel);
+    ui->widgetInfoPanel->show();
+    m_widgetFloatInfoPanel->restoreGeometry(geometryInfoPanel);
+  }
+  else
+  {
+    geometryControlPanel = m_widgetFloatControlPanel->saveGeometry();
+    ui->widgetControlPanelHolder->show();
+    m_widgetFloatControlPanel->layout()->removeWidget(ui->widgetControlPanel);
+    ui->widgetControlPanel->show();
+    ui->layoutControlPanelHolder->addWidget(ui->widgetControlPanel);
+    m_widgetFloatControlPanel->hide();
+
+    geometryInfoPanel = m_widgetFloatInfoPanel->saveGeometry();
+    ui->widgetInfoPanelHolder->show();
+    m_widgetFloatInfoPanel->layout()->removeWidget(ui->widgetInfoPanel);
+    ui->widgetInfoPanel->show();
+    ui->layoutInfoPanelHolder->addWidget(ui->widgetInfoPanel);
+    m_widgetFloatInfoPanel->hide();
+  }
 }

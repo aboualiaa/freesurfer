@@ -191,7 +191,7 @@ class Freeview:
             command += ' -title "%s"' % title.replace('"', '\\"')
 
         if title is not None:
-            command += ' -title "%s"' % title.replace('"', '\\"')
+            command += ' -subtitle "%s"' % title.replace('"', '\\"')
 
         # be sure to remove the temporary directory (if it exists) after freeview closes
         if self.tempdir and not noclean:

@@ -240,6 +240,10 @@ if(FS_BUILD_GUIS
                       -Wno-deprecated-declarations
                       )
 
+  if(NOT FREEVIEW_LINEPROF)
+    add_definitions(-DDISABLE_LINEPROF)
+  endif()
+
   set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
 
   if(APPLE)

@@ -39,6 +39,8 @@ static int    fromFile = 0;
 
 const char *Progname;
 
+static int use_vox = 0 ;
+
 #define MAX_VOLUMES 100
 
 static int    binarize        = 0;
@@ -78,64 +80,76 @@ int main(int argc, char *argv[]) {
     argc -= nargs;
     argv += nargs;
   }
-  out_fname = argv[argc - 1];
+  out_fname = argv[argc-1] ;
 
-  if (fromFile) {
-    list_fname = argv[1];
-    if (!FileExists(list_fname))
-      ErrorExit(Gerror, "%s: fopen(%s) for input volume filelist failed",
-                Progname, list_fname);
-    else {
-      FILE *fp;
-      fprintf(stderr, "reading input volume filenames from %s...\n",
-              list_fname);
-      fp = fopen(list_fname, "r");
-      if (!fp)
-        ErrorExit(Gerror, "Volumelist file cannot be opened\n");
+  if(fromFile)
+    {
+      list_fname = argv[1] ;
+      if (! FileExists(list_fname))
+	ErrorExit(Gerror, "%s: fopen(%s) for input volume filelist failed", Progname, list_fname) ;
+      else 
+	{ 
+	  FILE           *fp ;
+	  fprintf(stderr, "reading input volume filenames from %s...\n", list_fname) ;
+	  fp = fopen(list_fname, "r") ;
+	  if (!fp)
+	    ErrorExit(Gerror, "Volumelist file cannot be opened\n") ;
+	  
+	  filecount = 0;
+	  while (fscanf(fp,"%s",in_fname) != EOF)
+	    {
+	      filecount ++;
+	    }
+          fclose(fp);
+	  nvolumes = filecount;
+	  if (nvolumes < 2)
+	    usage_exit() ;
+	  if (nvolumes < 2)
+	    ErrorExit(ERROR_BADPARM, "%s: must specify at least 2 input volumes and an output text file",
+		      Progname);
 
-      filecount = 0;
-      while (fscanf(fp, "%s", in_fname) != EOF) {
-        filecount++;
-      }
-      fclose(fp);
-      nvolumes = filecount;
-      if (nvolumes < 2)
-        usage_exit();
-      if (nvolumes < 2)
-        ErrorExit(
-            ERROR_BADPARM,
-            "%s: must specify at least 2 input volumes and an output text file",
-            Progname);
-
-      fprintf(stderr, "processing %d volumes and writing output to %s\n",
-              nvolumes, out_fname);
-      fflush(stderr);
-      /*Similar to original loop below*/
-      fp = fopen(list_fname, "r");
-      for (n = 0; n < nvolumes; n++) {
-        fscanf(fp, "%s", in_fname);
-        fprintf(stderr, "reading input volume %d from %s\n", n + 1, in_fname);
-        mri_tmp = MRIread(in_fname);
-        if (mri_tmp == nullptr)
-          ErrorExit(ERROR_BADPARM,
-                    "%s: could not read %dth input volume from %s", Progname, n,
-                    in_fname);
-        if (mri_tmp->type != MRI_FLOAT) {
-          MRI *m;
-          m = MRIchangeType(mri_tmp, MRI_FLOAT, 0, 1, 1);
-          MRIfree(&mri_tmp);
-          mri_tmp = m;
-        }
-        if (blur_sigma > 0) {
-          MRI *mri_kernel, *mri_smooth;
-          mri_kernel = MRIgaussian1d(blur_sigma, 100);
-          mri_smooth = MRIconvolveGaussian(mri_tmp, nullptr, mri_kernel);
-          MRIfree(&mri_kernel);
-          MRIfree(&mri_tmp);
-          mri_tmp = mri_smooth;
-        }
-
-        sprintf(fname, "d%d.mgz", n);
+	  fprintf(stderr, "processing %d volumes and writing output to %s\n", nvolumes, out_fname) ;
+	  fflush(stderr) ;
+	  /*Similar to original loop below*/
+	  fp = fopen(list_fname, "r") ;
+	  for (n = 0 ; n < nvolumes ; n++)
+	    {
+	      fscanf(fp,"%s",in_fname); 
+	      fprintf(stderr, "reading input volume %d from %s\n", n+1, in_fname) ;
+	      mri_tmp = MRIread(in_fname) ;
+	      if (mri_tmp == NULL)
+		ErrorExit(ERROR_BADPARM, "%s: could not read %dth input volume from %s", Progname,n,in_fname);
+	      if (mri_tmp->depth == 1)
+	      {
+		MRI_REGION reg ;
+		MRI *mri_tmp2 ;
+		reg.x = reg.y = reg.z = 0 ;
+		reg.dx = mri_tmp->width ;
+		reg.dy = mri_tmp->height ;
+		reg.dz = mri_tmp->depth ;
+		mri_tmp2 = MRIextractRegionAndPad(mri_tmp, NULL, &reg, 1);
+		MRIfree(&mri_tmp) ;
+		mri_tmp = mri_tmp2 ;
+	      }
+	      if (use_vox)
+		mri_tmp->xsize = mri_tmp->ysize = mri_tmp->zsize = 1 ;
+		  
+	      if (mri_tmp->type != MRI_FLOAT)
+		{
+		  MRI *m ;
+		  m = MRIchangeType(mri_tmp, MRI_FLOAT, 0, 1, 1) ;
+		  MRIfree(&mri_tmp) ; mri_tmp = m ;
+		}
+	      if (blur_sigma > 0)
+		{
+		  MRI *mri_kernel, *mri_smooth ; 
+		  mri_kernel = MRIgaussian1d(blur_sigma, 100) ;
+		  mri_smooth = MRIconvolveGaussian(mri_tmp, NULL, mri_kernel) ;
+		  MRIfree(&mri_kernel) ; MRIfree(&mri_tmp) ;
+		  mri_tmp = mri_smooth ;
+		}
+	      
+	      sprintf(fname, "d%d.mgz", n) ;
 #define USE_DISTANCE_TRANSFORM 1
 #if USE_DISTANCE_TRANSFORM
         if (binarize) {
@@ -158,43 +172,56 @@ int main(int argc, char *argv[]) {
       fclose(fp);
       /*End similar of the original loop*/
     }
-  } else {
-    nvolumes = argc - 2; // last argument is output file name
-    if (nvolumes < 2)
-      usage_exit();
-    if (nvolumes < 2)
-      ErrorExit(
-          ERROR_BADPARM,
-          "%s: must specify at least 2 input volumes and an output text file",
-          Progname);
-    //      out_fname = argv[nvolumes+1] ;
-    fprintf(stderr, "processing %d volumes and writing output to %s\n",
-            nvolumes, out_fname);
-    fflush(stderr);
+  else
+   {
+      nvolumes = argc-2 ;  // last argument is output file name
+      if (nvolumes < 2)
+	usage_exit() ;
+      if (nvolumes < 2)
+	ErrorExit(ERROR_BADPARM, "%s: must specify at least 2 input volumes and an output text file",
+		  Progname);
+      //      out_fname = argv[nvolumes+1] ;
+      fprintf(stderr, "processing %d volumes and writing output to %s\n", nvolumes, out_fname) ;
+      fflush(stderr) ;
 
-    for (n = 0; n < nvolumes; n++) {
-      name = argv[n + 1];
-      fprintf(stderr, "reading input volume %d from %s\n", n + 1, name);
-      mri_tmp = MRIread(name);
-      if (mri_tmp == nullptr)
-        ErrorExit(ERROR_BADPARM, "%s: could not read %dth input volume from %s",
-                  Progname, n, name);
-      if (mri_tmp->type != MRI_FLOAT) {
-        MRI *m;
-        m = MRIchangeType(mri_tmp, MRI_FLOAT, 0, 1, 1);
-        MRIfree(&mri_tmp);
-        mri_tmp = m;
-      }
-      if (blur_sigma > 0) {
-        MRI *mri_kernel, *mri_smooth;
-        mri_kernel = MRIgaussian1d(blur_sigma, 100);
-        mri_smooth = MRIconvolveGaussian(mri_tmp, nullptr, mri_kernel);
-        MRIfree(&mri_kernel);
-        MRIfree(&mri_tmp);
-        mri_tmp = mri_smooth;
-      }
+      for (n = 0 ; n < nvolumes ; n++)
+	{
+	  name = argv[n+1] ;
+	  fprintf(stderr, "reading input volume %d from %s\n", n+1, name) ;
+	  mri_tmp = MRIread(name) ;
+	  if (mri_tmp == NULL)
+	    ErrorExit(ERROR_BADPARM, "%s: could not read %dth input volume from %s", Progname,n,name);
+	  if (mri_tmp->depth == 1)
+	  {
+	    MRI_REGION reg ;
+	    MRI *mri_tmp2 ;
+	    reg.x = reg.y = reg.z = 0 ;
+	    reg.dx = mri_tmp->width ;
+	    reg.dy = mri_tmp->height ;
+	    reg.dz = mri_tmp->depth ;
+	    mri_tmp2 = MRIextractRegionAndPad(mri_tmp, NULL, &reg, 1);
+	    MRIfree(&mri_tmp) ;
+	    mri_tmp = mri_tmp2 ;
+	  }
+		  
+	  if (use_vox)
+	    mri_tmp->xsize = mri_tmp->ysize = mri_tmp->zsize = 1 ;
+	  if (mri_tmp->type != MRI_FLOAT)
+	    {
+	      MRI *m ;
+	      m = MRIchangeType(mri_tmp, MRI_FLOAT, 0, 1, 1) ;
+	      MRIfree(&mri_tmp) ; mri_tmp = m ;
+	    }
+	  if (blur_sigma > 0)
+	    {
+	      MRI *mri_kernel, *mri_smooth ; 
+	      mri_kernel = MRIgaussian1d(blur_sigma, 100) ;
+	      mri_smooth = MRIconvolveGaussian(mri_tmp, NULL, mri_kernel) ;
+	      MRIfree(&mri_kernel) ; MRIfree(&mri_tmp) ;
+	      mri_tmp = mri_smooth ;
+	    }
 
-      sprintf(fname, "d%d.mgz", n);
+	  sprintf(fname, "d%d.mgz", n) ;
 #define USE_DISTANCE_TRANSFORM 1
 #if USE_DISTANCE_TRANSFORM
       if (binarize) {
@@ -436,44 +463,48 @@ static int get_option(int argc, char *argv[]) {
   if (!stricmp(option, "-help"))
     print_help();
   else if (!stricmp(option, "-version"))
-    print_version();
-  else if (!stricmp(option, "max")) {
-    printf("using max of min distances\n");
-    which = MAX_HDIST;
-  } else
-    switch (toupper(*option)) {
-    case 'G':
-      blur_sigma = atof(argv[2]);
-      nargs      = 1;
-      printf("blurring input image with sigma = %2.2f\n", blur_sigma);
-      break;
-    case 'L':
-      target_label = atoi(argv[2]);
-      printf("using %d (%s) as target label\n", target_label,
-             cma_label_to_name(target_label));
-      nargs = 1;
-      break;
-    case 'B':
-      binarize        = 1;
-      binarize_thresh = atof(argv[2]);
-      printf("binarizing input data with threshold %2.2f\n", binarize_thresh);
-      nargs = 1;
-      break;
-    case 'F':
-      fromFile = 1;
-      printf("read input volumes from file\n");
-      break;
-    case '?':
-    case 'U':
-      print_usage();
-      exit(1);
-      break;
-    default:
-      fprintf(stderr, "unknown option %s\n", argv[1]);
-      exit(1);
-      break;
-    }
-  return (nargs);
+    print_version() ;
+  else if (!stricmp(option, "max"))
+  {
+    printf("using max of min distances\n") ;
+    which = MAX_HDIST ;
+  } else switch (toupper(*option)) {
+  case 'G':
+    blur_sigma = atof(argv[2]) ;
+    nargs = 1 ;
+    printf("blurring input image with sigma = %2.2f\n", blur_sigma) ;
+    break ;
+  case 'L':
+    target_label = atoi(argv[2]) ;
+    printf("using %d (%s) as target label\n", target_label,
+           cma_label_to_name(target_label)) ;
+    nargs = 1 ;
+    break ;
+  case 'B':
+    binarize = 1 ;
+    binarize_thresh = atof(argv[2]) ;
+    printf("binarizing input data with threshold %2.2f\n", binarize_thresh) ;
+    nargs = 1 ;
+    break ;
+  case 'F':
+    fromFile = 1 ;
+    printf("read input volumes from file\n") ;
+    break ;
+  case '?':
+  case 'U':
+    print_usage() ;
+    exit(1) ;
+    break ;
+  case 'V':
+    use_vox = 1 ;
+    printf("ignoring voxel sizes to compute distances in voxel coords") ;
+    break;
+  default:
+    fprintf(stderr, "unknown option %s\n", argv[1]) ;
+    exit(1) ;
+    break ;
+  }
+  return(nargs) ;
 }
 static void print_version(void) {
   fprintf(stderr, "%s\n", getVersion().c_str());

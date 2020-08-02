@@ -13,55 +13,20 @@ eps = np.finfo(float).eps
 
 
 class SamsegLesion(Samseg):
-    def __init__(
-        self,
-        imageFileNames,
-        atlasDir,
-        savePath,
-        userModelSpecifications={},
-        userOptimizationOptions={},
-        imageToImageTransformMatrix=None,
-        visualizer=None,
-        saveHistory=None,
-        savePosteriors=None,
-        saveWarp=None,
-        saveMesh=None,
-        threshold=0.3,
-        thresholdSearchString="Lesion",
-        targetIntensity=None,
-        targetSearchStrings=None,
-        modeNames=None,
-        pallidumAsWM=True,
-        saveModelProbabilities=False,
-        numberOfSamplingSteps=50,
-        numberOfBurnInSteps=50,
-        numberOfPseudoSamplesMean=500,
-        numberOfPseudoSamplesVariance=500,
-        rho=50,
-        intensityMaskingPattern=None,
-        intensityMaskingSearchString="Cortex",
-    ):
-        Samseg.__init__(
-            self,
-            imageFileNames,
-            atlasDir,
-            savePath,
-            userModelSpecifications,
-            userOptimizationOptions,
-            imageToImageTransformMatrix,
-            visualizer,
-            saveHistory,
-            savePosteriors,
-            saveWarp,
-            saveMesh,
-            threshold,
-            thresholdSearchString,
-            targetIntensity,
-            targetSearchStrings,
-            modeNames,
-            pallidumAsWM=pallidumAsWM,
-            saveModelProbabilities=saveModelProbabilities,
-        )
+    def __init__(self, imageFileNames, atlasDir, savePath, userModelSpecifications={}, userOptimizationOptions={},
+                 imageToImageTransformMatrix=None, visualizer=None, saveHistory=None, savePosteriors=None,
+                 saveWarp=None, saveMesh=None, threshold=0.3, thresholdSearchString='Lesion',
+                 targetIntensity=None, targetSearchStrings=None, modeNames=None, pallidumAsWM=True,
+                 saveModelProbabilities=False,
+                 numberOfSamplingSteps=50, numberOfBurnInSteps=50,
+                 numberOfPseudoSamplesMean=500, numberOfPseudoSamplesVariance=500, rho=50,
+                 intensityMaskingPattern=None, intensityMaskingSearchString='Cortex', gmmFileName=None
+                 ):
+        Samseg.__init__(self, imageFileNames, atlasDir, savePath, userModelSpecifications, userOptimizationOptions,
+                 imageToImageTransformMatrix, visualizer, saveHistory, savePosteriors,
+                 saveWarp, saveMesh, threshold, thresholdSearchString,
+                 targetIntensity, targetSearchStrings, modeNames, pallidumAsWM=pallidumAsWM,
+                 saveModelProbabilities=saveModelProbabilities, gmmFileName=gmmFileName)
         self.numberOfSamplingSteps = numberOfSamplingSteps
         self.numberOfBurnInSteps = numberOfBurnInSteps
         self.numberOfPseudoSamplesMean = numberOfPseudoSamplesMean

@@ -32,18 +32,29 @@
 #include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include <QDateTime>
-#include <QDebug>
-
 #include "utils.h"
 
-SurfaceOverlay::SurfaceOverlay(LayerSurface *surf)
-    : QObject(), m_fData(NULL), m_fDataRaw(NULL), m_fDataUnsmoothed(NULL),
-      m_dMaxValue(0), m_dMinValue(0), m_dNonZeroMinValue(0), m_dRawMaxValue(0),
-      m_dRawMinValue(0), m_surface(surf), m_bCorrelationData(false),
-      m_mriCorrelation(NULL), m_overlayPaired(NULL), m_nActiveFrame(0),
-      m_nNumOfFrames(1), m_bComputeCorrelation(false),
-      m_volumeCorrelationSource(NULL), m_fCorrelationSourceData(NULL),
-      m_fCorrelationDataBuffer(NULL) {
+SurfaceOverlay::SurfaceOverlay ( LayerSurface* surf ) :
+  QObject(),
+  m_fData( NULL ),
+  m_fDataRaw( NULL ),
+  m_fDataUnsmoothed(NULL),
+  m_dMaxValue(0),
+  m_dMinValue(0),
+  m_dNonZeroMinValue(0),
+  m_dRawMaxValue(0),
+  m_dRawMinValue(0),
+  m_surface( surf ),
+  m_bCorrelationData( false ),
+  m_mriCorrelation(NULL),
+  m_overlayPaired(NULL),
+  m_nActiveFrame(0),
+  m_nNumOfFrames(1),
+  m_bComputeCorrelation(false),
+  m_volumeCorrelationSource(NULL),
+  m_fCorrelationSourceData(NULL),
+  m_fCorrelationDataBuffer(NULL)
+{
   InitializeData();
 
   m_nID = QDateTime::currentMSecsSinceEpoch();

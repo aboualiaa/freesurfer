@@ -249,6 +249,10 @@ public slots:
   bool ExportLineProfileThickness(const QString &    filename,
                                   const QVariantMap &options);
 
+  void OnShowControlPanel(bool bShow);
+
+  void OnFloatPanels(bool bFloat);
+
 protected:
   void closeEvent(QCloseEvent *event);
   void resizeEvent(QResizeEvent *event);
@@ -559,69 +563,71 @@ public:
 private:
   RenderView *m_views[4];
   //  LayerCollectionManager*   m_layerCollectionManager;
-  QMap<QString, LayerCollection *> m_layerCollections;
-  BrushProperty *                  m_propertyBrush;
-  bool                             m_bResampleToRAS;
-  int                              m_nDefaultSampleMethod;
-  bool                             m_bDefaultConform;
-  QString                          m_strDefaultColorMapType;
-  LayerMRI *                       m_layerVolumeRef;
-  LUTDataHolder *                  m_luts;
-  ThreadIOWorker *                 m_threadIOWorker;
-  bool                             m_bProcessing;
-  VolumeCropper *                  m_volumeCropper;
+  QMap<QString, LayerCollection*> m_layerCollections;
+  BrushProperty*    m_propertyBrush;
+  bool              m_bResampleToRAS;
+  int               m_nDefaultSampleMethod;
+  bool              m_bDefaultConform;
+  QString           m_strDefaultColorMapType;
+  LayerMRI*         m_layerVolumeRef;
+  LUTDataHolder*    m_luts;
+  ThreadIOWorker*   m_threadIOWorker;
+  bool              m_bProcessing;
+  VolumeCropper*    m_volumeCropper;
 
-  QString          m_strLastDir;
-  QString          m_strLastFsgdDir;
-  QList<QAction *> m_actionRecentVolumes;
-  QList<QAction *> m_actionRecentSurfaces;
+  QString           m_strLastDir;
+  QString           m_strLastFsgdDir;
+  QList<QAction*>   m_actionRecentVolumes;
+  QList<QAction*>   m_actionRecentSurfaces;
 
-  QList<QStringList> m_scripts;
-  bool               m_bScriptRunning;
+  QList<QStringList>  m_scripts;
+  bool              m_bScriptRunning;
 
-  bool m_bSplinePicking;
+  bool              m_bSplinePicking;
 
-  MyCmdLineParser *m_cmdParser;
+  MyCmdLineParser*  m_cmdParser;
 
-  ToolWindowEdit *          m_toolWindowEdit;
-  ToolWindowMeasure *       m_toolWindowMeasure;
-  ToolWindowROIEdit *       m_toolWindowROIEdit;
-  DialogTransformVolume *   m_dlgTransformVolume;
-  DialogCropVolume *        m_dlgCropVolume;
-  DialogSaveScreenshot *    m_dlgSaveScreenshot;
-  DialogWriteMovieFrames *  m_dlgWriteMovieFrames;
-  DialogPreferences *       m_dlgPreferences;
-  DialogRepositionSurface * m_dlgRepositionSurface;
-  DialogSmoothSurface *     m_dlgSmoothSurface;
-  FloatingStatusBar *       m_statusBar;
-  TermWidget *              m_term;
-  WindowGroupPlot *         m_wndGroupPlot;
-  DialogLabelStats *        m_dlgLabelStats;
-  DialogLineProfile *       m_dlgLineProfile;
-  DialogSetCamera *         m_dlgSetCamera;
-  DialogThresholdVolume *   m_dlgThresholdVolume;
-  DialogVolumeSegmentation *m_dlgVolumeSegmentation;
-  BinaryTreeView *          m_wndTractCluster;
-  WindowQuickReference *    m_wndQuickRef;
-  WindowTimeCourse *        m_wndTimeCourse;
-  WindowLayerInfo *         m_wndLayerInfo;
+  ToolWindowEdit*       m_toolWindowEdit;
+  ToolWindowMeasure*    m_toolWindowMeasure;
+  ToolWindowROIEdit*    m_toolWindowROIEdit;
+  DialogTransformVolume*    m_dlgTransformVolume;
+  DialogCropVolume*     m_dlgCropVolume;
+  DialogSaveScreenshot* m_dlgSaveScreenshot;
+  DialogWriteMovieFrames*   m_dlgWriteMovieFrames;
+  DialogPreferences*    m_dlgPreferences;
+  DialogRepositionSurface*  m_dlgRepositionSurface;
+  DialogSmoothSurface*  m_dlgSmoothSurface;
+  FloatingStatusBar*    m_statusBar;
+  TermWidget*           m_term;
+  WindowGroupPlot*      m_wndGroupPlot;
+  DialogLabelStats*     m_dlgLabelStats;
+  DialogLineProfile*    m_dlgLineProfile;
+  DialogSetCamera*      m_dlgSetCamera;
+  DialogThresholdVolume* m_dlgThresholdVolume;
+  DialogVolumeSegmentation* m_dlgVolumeSegmentation;
+  BinaryTreeView*       m_wndTractCluster;
+  WindowQuickReference* m_wndQuickRef;
+  WindowTimeCourse*     m_wndTimeCourse;
+  WindowLayerInfo*      m_wndLayerInfo;
+  QWidget*              m_widgetFloatControlPanel;
+  QWidget*              m_widgetFloatInfoPanel;
 
-  VolumeFilterWorkerThread *m_threadVolumeFilter;
+  VolumeFilterWorkerThread* m_threadVolumeFilter;
 
-  SettingsScreenshot m_settingsScreenshot;
-  QVariantMap        m_settings;
-  QPoint             m_ptBackUpPos; // for X11 geometry hack
-  QMessageBox *      m_dlgMessage;
+  SettingsScreenshot    m_settingsScreenshot;
+  QVariantMap           m_settings;
+  QPoint                m_ptBackUpPos;      // for X11 geometry hack
+  QMessageBox*          m_dlgMessage;
 
-  QMap<int, QVariantMap> m_layerSettings;
-  QVariantMap            m_defaultSettings;
-  bool                   m_bShowTransformWindow;
+  QMap<int, QVariantMap>  m_layerSettings;
+  QVariantMap           m_defaultSettings;
+  bool                  m_bShowTransformWindow;
 
-  bool m_bVerbose;
-  bool m_bContinue;
+  bool                  m_bVerbose;
+  bool                  m_bContinue;
 
-  bool    m_bHadError;
-  QString m_sTitle;
+  bool                  m_bHadError;
+  QString               m_sTitle;
 };
 
 #endif // MAINWINDOW_H

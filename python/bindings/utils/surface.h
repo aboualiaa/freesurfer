@@ -44,8 +44,9 @@ void computeTangents(Bridge surf);
 int  computeEulerNumber(Bridge surf);
 
 // parameterization
-py::array parameterize(Bridge surf, const arrayf<float> &overlay);
-py::array sampleParameterization(Bridge surf, const arrayf<float> &image);
+py::array parameterize(Bridge surf, const arrayf<float>& overlay, int scale);
+py::array sampleParameterization(Bridge surf, const arrayf<float>& image);
+
 
 // surface submodule binding
 inline void bind(py::module &m) {
