@@ -723,9 +723,19 @@ static int parse_commandline(int argc, char **argv) {
       printf("\n");
       nargsused = 1;
       exit(0);
-    } else if (!strcasecmp(option, "--par2mat")) {
-      if (nargc < 12)
-        CMDargNErr(option, 15);
+    } 
+    else if (!strcasecmp(option, "--mat2rot")) {
+      if(nargc < 2) CMDargNErr(option,2);
+      LTA *lta;
+      lta = LTAread(pargv[0]);
+      if(lta==NULL) exit(1);
+      LTAmat2RotMat(lta);
+      int err = LTAwrite(lta,pargv[1]);
+      nargsused = 2;
+      exit(err);
+    } 
+    else if (!strcasecmp(option, "--par2mat")) {
+      if(nargc < 12) CMDargNErr(option,15);
       double par[12];
       int    k;
       for (k = 0; k < 12; k++)
@@ -940,6 +950,7 @@ static void print_usage(void) {
   printf("   --no-mov-oob : do not count mov voxels that are out-of-bounds as "
          "0 (default)\n");
   printf("   --mat2par reg.lta : extract parameters out of registration\n");
+  printf("   --mat2rot reg.lta rotreg.lta: convert registration to a pure rotation\n");
   printf("   --par2mat par1-par12 srcvol trgvol reg.lta : convert parameters to a  registration\n");
   printf("   --rms radius filename reg1 reg2 : compute RMS diff between two registrations using MJ's method (rad ~= 50mm)\n");
   printf("      The rms will be written to filename; if filename == nofile, then no file is created\n");

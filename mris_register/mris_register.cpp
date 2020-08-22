@@ -109,9 +109,10 @@ static void initParms(void);
 
 static int use_defaults = 1;
 
-static INTEGRATION_PARMS parms;
-static int               remove_negative = 1;
-char *                   rusage_file     = NULL;
+static INTEGRATION_PARMS  parms ;
+static int remove_negative = 1 ;
+char *rusage_file=NULL;
+char *regfile = NULL;
 
 int main(int argc, char *argv[]) {
   char **      av, *surf_fname, *template_fname, *out_fname, fname[STRLEN], *cp;
@@ -211,9 +212,24 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
               surf_fname);
 
-  if (parms.var_smoothness) {
-    parms.vsmoothness = (float *)calloc(mris->nvertices, sizeof(float));
-    if (parms.vsmoothness == NULL) {
+  if(regfile){
+    printf("Reading in reg file %s\n",regfile);
+    LTA *lta = LTAread(regfile);
+    if(lta==NULL) exit(1);
+    printf("Extracting rotational components\n");
+    LTAmat2RotMat(lta);
+    printf("Applying rotation matrix to surface\n");
+    //MatrixPrint(stdout,lta->xforms[0].m_L);
+    int err = MRISltaMultiply(mris, lta);
+    if(err) exit(1);
+    LTAfree(&lta);
+  }
+
+  if (parms.var_smoothness)
+  {
+    parms.vsmoothness = (float *)calloc(mris->nvertices, sizeof(float)) ;
+    if (parms.vsmoothness == NULL)
+    {
       ErrorExit(ERROR_NOMEMORY, "%s: could not allocate vsmoothness array",
                 Progname);
     }
@@ -641,68 +657,104 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "topology")) {
     parms.flags |= IPFLAG_PRESERVE_SPHERICAL_POSITIVE_AREA;
     fprintf(stderr, "preserving the topology of positive area triangles\n");
-  } else if (!stricmp(option, "vnum") || !stricmp(option, "distances")) {
-    parms.nbhd_size = atof(argv[2]);
-    parms.max_nbrs  = atof(argv[3]);
-    nargs           = 2;
-    fprintf(stderr, "nbr size = %d, max neighbors = %d\n", parms.nbhd_size,
-            parms.max_nbrs);
-  } else if (!stricmp(option, "rotate")) {
-    dalpha = atof(argv[2]);
-    dbeta  = atof(argv[3]);
-    dgamma = atof(argv[4]);
-    fprintf(stderr, "rotating brain by (%2.2f, %2.2f, %2.2f)\n", dalpha, dbeta,
-            dgamma);
-    nargs = 3;
-  } else if (!stricmp(option, "reverse")) {
-    reverse_flag = 1;
-    fprintf(stderr, "mirror image reversing brain before morphing...\n");
-  } else if (!stricmp(option, "min_degrees")) {
-    min_degrees = atof(argv[2]);
-    fprintf(stderr, "setting min angle for search to %2.2f degrees\n",
-            min_degrees);
-    nargs = 1;
-  } else if (!stricmp(option, "max_degrees")) {
-    max_degrees = atof(argv[2]);
-    fprintf(stderr, "setting max angle for search to %2.2f degrees\n",
-            max_degrees);
-    nargs = 1;
-  } else if (!stricmp(option, "nangles")) {
-    nangles = atoi(argv[2]);
-    fprintf(stderr, "setting # of angles/search per scale to %d\n", nangles);
-    nargs = 1;
-  } else if (!stricmp(option, "jacobian")) {
-    jacobian_fname = argv[2];
-    nargs          = 1;
-    printf("writing out jacobian of mapping to %s\n", jacobian_fname);
-  } else if (!stricmp(option, "dist")) {
-    sscanf(argv[2], "%f", &parms.l_dist);
-    nargs        = 1;
-    use_defaults = 0;
-    fprintf(stderr, "l_dist = %2.3f\n", parms.l_dist);
-  } else if (!stricmp(option, "norot")) {
-    fprintf(stderr, "disabling initial rigid alignment...\n");
-    parms.flags |= IP_NO_RIGID_ALIGN;
-  } else if (!stricmp(option, "inflated")) {
-    fprintf(stderr, "using inflated surface for initial alignment\n");
-    parms.flags |= IP_USE_INFLATED;
-  } else if (!stricmp(option, "noinflated")) {
-    fprintf(stderr, "using inflated surface for initial alignment\n");
-    parms.flags &= ~IP_USE_INFLATED;
-  } else if (!stricmp(option, "multi_scale")) {
-    multi_scale = atoi(argv[2]);
-    fprintf(stderr, "using %d scales for morphing\n", multi_scale);
-    nargs = 1;
-  } else if (!stricmp(option, "nsurfaces")) {
-    parms.nsurfaces = atoi(argv[2]);
-    nargs           = 1;
-    fprintf(stderr, "using %d surfaces/curvatures for alignment\n",
-            parms.nsurfaces);
-  } else if (!stricmp(option, "infname")) {
-    char fname[STRLEN];
-    inflated_name    = argv[2];
-    surface_names[0] = argv[2];
-    nargs            = 1;
+  }
+  else if (!stricmp(option, "vnum") || !stricmp(option, "distances"))
+  {
+    parms.nbhd_size = atof(argv[2]) ;
+    parms.max_nbrs = atof(argv[3]) ;
+    nargs = 2 ;
+    fprintf(stderr, "nbr size = %d, max neighbors = %d\n",
+            parms.nbhd_size, parms.max_nbrs) ;
+  }
+  else if (!stricmp(option, "rotate"))
+  {
+    dalpha = atof(argv[2]) ;
+    dbeta = atof(argv[3]) ;
+    dgamma = atof(argv[4]) ;
+    fprintf(stderr, "rotating brain by (%2.2f, %2.2f, %2.2f)\n",
+            dalpha, dbeta, dgamma) ;
+    nargs = 3 ;
+  }
+  else if (!stricmp(option, "reg"))
+  {
+    regfile = argv[2];
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "reverse"))
+  {
+    reverse_flag = 1 ;
+    fprintf(stderr, "mirror image reversing brain before morphing...\n") ;
+  }
+  else if (!stricmp(option, "min_degrees"))
+  {
+    min_degrees = atof(argv[2]) ;
+    fprintf(stderr,
+            "setting min angle for search to %2.2f degrees\n",
+            min_degrees) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "max_degrees"))
+  {
+    max_degrees = atof(argv[2]) ;
+    fprintf(stderr,
+            "setting max angle for search to %2.2f degrees\n",
+            max_degrees) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "nangles"))
+  {
+    nangles = atoi(argv[2]) ;
+    fprintf(stderr, "setting # of angles/search per scale to %d\n", nangles) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "jacobian"))
+  {
+    jacobian_fname = argv[2] ;
+    nargs = 1 ;
+    printf("writing out jacobian of mapping to %s\n", jacobian_fname) ;
+  }
+  else if (!stricmp(option, "dist"))
+  {
+    sscanf(argv[2], "%f", &parms.l_dist) ;
+    nargs = 1 ;
+    use_defaults = 0 ;
+    fprintf(stderr, "l_dist = %2.3f\n", parms.l_dist) ;
+  }
+  else if (!stricmp(option, "norot"))
+  {
+    fprintf(stderr, "disabling initial rigid alignment...\n") ;
+    parms.flags |= IP_NO_RIGID_ALIGN ;
+  }
+  else if (!stricmp(option, "inflated"))
+  {
+    fprintf(stderr, "using inflated surface for initial alignment\n") ;
+    parms.flags |= IP_USE_INFLATED ;
+  }
+  else if (!stricmp(option, "noinflated"))
+  {
+    fprintf(stderr, "using inflated surface for initial alignment\n") ;
+    parms.flags &= ~IP_USE_INFLATED ;
+  }
+  else if (!stricmp(option, "multi_scale"))
+  {
+    multi_scale = atoi(argv[2]) ;
+    fprintf(stderr, "using %d scales for morphing\n", multi_scale) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "nsurfaces"))
+  {
+    parms.nsurfaces = atoi(argv[2]) ;
+    nargs = 1 ;
+    fprintf(stderr,
+            "using %d surfaces/curvatures for alignment\n",
+            parms.nsurfaces) ;
+  }
+  else if (!stricmp(option, "infname"))
+  {
+    char fname[STRLEN] ;
+    inflated_name = argv[2] ;
+    surface_names[0] = argv[2] ;
+    nargs = 1 ;
     printf("using %s as inflated surface name, "
            "and using it for initial alignment\n",
            inflated_name);

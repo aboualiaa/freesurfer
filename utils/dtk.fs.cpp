@@ -35,12 +35,13 @@ double trkvisOffset = 0.5;
 /*----------------------------------------------------------------*/
 DTK_TRACK_SET *DTKloadTrackSet(char *trkfile, char *mrifile) {
   DTK_TRACK_SET *dtkset;
-  FILE *         fp;
-  size_t         nread;
-  int            nthtrk;
-  char           stem[2000], *fname;
-  MRI *          mri = nullptr;
-  float          dc, dr, ds;
+  FILE *fp;
+  size_t nread;
+  int nthtrk;
+  std::string stem;
+  char *fname;
+  MRI *mri = NULL;
+  float dc, dr, ds;
 
   // Open the track file
   fp = fopen(trkfile, "r");
@@ -50,13 +51,12 @@ DTK_TRACK_SET *DTKloadTrackSet(char *trkfile, char *mrifile) {
   }
 
   // Read in template MRI to get geometry
-  if (mrifile == nullptr) {
-    strncpy(stem, trkfile, strlen(trkfile) - 4);
-    fname = IDnameFromStem(stem);
-    if (fname == nullptr) {
-      printf(
-          "WARNING: DTKloadTrackSet(): cannot find matching MRI file for %s\n",
-          trkfile);
+  if (mrifile == NULL) {
+    stem = trkfile;
+    stem.erase(stem.size()-4);
+    fname = IDnameFromStem(stem.c_str());
+    if (fname == NULL) {
+      printf("WARNING: DTKloadTrackSet(): cannot find matching MRI file for %s\n", trkfile);
     }
   } else
     fname = mrifile;
