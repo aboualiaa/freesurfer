@@ -316,8 +316,9 @@ int main(int argc, char **argv) {
 
   if (surftype == GRAY_CSF) {
     // Pial
-    parms.l_repulse      = 0.0;
-    parms.l_surf_repulse = 5.0;
+    parms.l_repulse = 0.0;
+    if(parms.l_surf_repulse == 0) // has not been change on cmd line
+      parms.l_surf_repulse = 5.0;
   }
 
   // print out version of this program and mrisurf.c
@@ -333,8 +334,8 @@ int main(int argc, char **argv) {
   if (adgwsinfile == NULL) {
     // Note: in long stream orig = orig_white
     err = adgws.AutoDetectStats(subject, hemi);
-    if (err)
-      exit(1);
+    if(err) exit(1);
+    adgws.white_border_low_factor = -10.0;
   }
   if (adgwsoutfile) {
     err = adgws.Write(adgwsoutfile);
@@ -528,28 +529,25 @@ int main(int argc, char **argv) {
   }
 
   // Print out to help determine what is what
-  VERTEX *vv = &surf->vertices[(int)round(surf->nvertices / 2.0)];
-  printf("vertex %d: xyz = (%g,%g,%g) oxyz = (%g,%g,%g) wxzy = (%g,%g,%g) pxyz "
-         "= (%g,%g,%g) \n",
-         (int)round(surf->nvertices / 2.0), vv->x, vv->y, vv->z, vv->origx,
-         vv->origy, vv->origz, vv->whitex, vv->whitey, vv->whitez, vv->pialx,
-         vv->pialy, vv->pialz);
-  fflush(stdout);
+  VERTEX *vv = &surf->vertices[(int)round(surf->nvertices/2.0)];
+  printf("vertex %d: xyz = (%g,%g,%g) oxyz = (%g,%g,%g) wxzy = (%g,%g,%g) pxyz = (%g,%g,%g) \n",
+	 (int)round(surf->nvertices/2.0),vv->x,vv->y,vv->z, vv->origx,vv->origy,vv->origz, 
+	 vv->whitex,vv->whitey,vv->whitez,vv->pialx,vv->pialy,vv->pialz); fflush(stdout);
 
-  double inside_hi = 0, border_hi = 0, border_low = 0, outside_low = 0,
-         outside_hi = 0, current_sigma = 0;
-  int n_min_averages = 0;
-  if (surftype == GRAY_WHITE) {
-    current_sigma = white_sigma;
-    if (n_averages == 0)
-      n_averages = max_white_averages;
-    n_min_averages = min_white_averages;
-    inside_hi      = adgws.white_inside_hi;
-    border_hi      = adgws.white_border_hi;
-    double f       = adgws.white_border_low_factor;
-    border_low     = f * adgws.gray_mean + (1 - f) * adgws.white_mean;
-    outside_low    = adgws.white_outside_low;
-    outside_hi     = adgws.white_outside_hi;
+  double inside_hi=0, border_hi=0, border_low=0, outside_low=0, outside_hi=0,current_sigma=0;
+  int n_min_averages=0;
+  if(surftype == GRAY_WHITE){
+    current_sigma = white_sigma ;
+    if(n_averages == 0) n_averages = max_white_averages;     
+    n_min_averages = min_white_averages; 
+    inside_hi = adgws.white_inside_hi;
+    border_hi = adgws.white_border_hi;
+    if(adgws.white_border_low_factor > -9){
+      double f = adgws.white_border_low_factor;
+      border_low = f*adgws.gray_mean + (1-f)*adgws.white_mean;
+    }
+    outside_low = adgws.white_outside_low;
+    outside_hi = adgws.white_outside_hi;
   }
   if (surftype == GRAY_CSF) {
     current_sigma = pial_sigma;
@@ -1104,6 +1102,11 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!stricmp(option, "--repulse")) {
       sscanf(pargv[0], "%f", &parms.l_repulse);
       printf("l_repulse = %2.3f\n", parms.l_repulse);
+      nargsused = 1;
+    }
+    else if (!stricmp(option, "--location")){
+      sscanf(pargv[0],"%f",&parms.l_location);
+      printf("l_location = %2.3f\n", parms.l_location) ;
       nargsused = 1;
     }
     // ======== End Cost function weights ================

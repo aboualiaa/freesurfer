@@ -43,9 +43,8 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_spline";
 
-bool  showControls = false;
-char *inFile = nullptr, *maskFile = nullptr, *outVolFile = nullptr,
-     *outTextFile = nullptr, *outVecBase = nullptr;
+bool showControls = false;
+std::string inFile, outVolFile, outVecBase, maskFile, outTextFile;
 
 struct utsname uts;
 char *         cmdline, cwd[2000];
@@ -83,7 +82,7 @@ int main(int argc, char **argv) {
 
   dump_options();
 
-  Spline myspline(inFile, maskFile);
+  Spline myspline(inFile.c_str(), maskFile.c_str());
 
   printf("Computing spline...\n");
   cputimer.reset();
@@ -93,16 +92,16 @@ int main(int argc, char **argv) {
   cputime = cputimer.milliseconds();
   printf("Done in %g sec.\n", cputime / 1000.0);
 
-  if (outVolFile != nullptr) {
-    myspline.WriteVolume(outVolFile, showControls);
+  if (!outVolFile.empty() ) {
+    myspline.WriteVolume(outVolFile.c_str(), showControls);
   }
 
-  if (outTextFile != nullptr) {
-    myspline.WriteAllPoints(outTextFile);
+  if (!outTextFile.empty()) {
+    myspline.WriteAllPoints(outTextFile.c_str());
   }
 
-  if (outVecBase != nullptr) {
-    char fname[PATH_MAX];
+  if (!outVecBase.empty()) {
+    std::string fname;
 
     printf("Computing analytical tangent, normal, and curvature...\n");
     cputimer.reset();
@@ -115,12 +114,12 @@ int main(int argc, char **argv) {
     printf("Done in %g sec.\n", cputime / 1000.0);
 
     // Write tangent, normal, and curvature (analytical) to text files
-    sprintf(fname, "%s_tang.txt", outVecBase);
-    myspline.WriteTangent(fname);
-    sprintf(fname, "%s_norm.txt", outVecBase);
-    myspline.WriteNormal(fname);
-    sprintf(fname, "%s_curv.txt", outVecBase);
-    myspline.WriteCurvature(fname);
+    fname = outVecBase + "_tang.txt";
+    myspline.WriteTangent(fname.c_str());
+    fname = outVecBase + "_norm.txt";
+    myspline.WriteNormal(fname.c_str());
+    fname = outVecBase + "_curv.txt";
+    myspline.WriteCurvature(fname.c_str());
 
     printf("Computing discrete tangent, normal, and curvature...\n");
     cputimer.reset();
@@ -133,12 +132,12 @@ int main(int argc, char **argv) {
     printf("Done in %g sec.\n", cputime / 1000.0);
 
     // Write tangent, normal, and curvature (discrete) to text files
-    sprintf(fname, "%s_tang_diff.txt", outVecBase);
-    myspline.WriteTangent(fname);
-    sprintf(fname, "%s_norm_diff.txt", outVecBase);
-    myspline.WriteNormal(fname);
-    sprintf(fname, "%s_curv_diff.txt", outVecBase);
-    myspline.WriteCurvature(fname);
+    fname = outVecBase + "_tang_diff.txt";
+    myspline.WriteTangent(fname.c_str());
+    fname = outVecBase + "_norm_diff.txt";
+    myspline.WriteNormal(fname.c_str());
+    fname = outVecBase + "_curv_diff.txt";
+    myspline.WriteCurvature(fname.c_str());
   }
 
   printf("dmri_spline done\n");
@@ -286,38 +285,44 @@ static void print_version(void) {
 }
 
 /* --------------------------------------------- */
-static void check_options() {
-  if (inFile == nullptr) {
-    std::cout << "ERROR: Must specify input text file" << std::endl;
+static void check_options(void) {
+  if(inFile.size() == 0) {
+    cout << "ERROR: Must specify input text file" << endl;
     exit(1);
   }
-  if (maskFile == nullptr) {
-    std::cout << "ERROR: Must specify mask volume" << std::endl;
+  if(maskFile.size() == 0) {
+    cout << "ERROR: Must specify mask volume" << endl;
     exit(1);
   }
-  if ((outVolFile == nullptr) && (outTextFile == nullptr) &&
-      (outVecBase == nullptr)) {
-    std::cout << "ERROR: Must specify at least one type of output file"
-              << std::endl;
+  if((outVolFile.size() + outTextFile.size() + outVecBase.size()) == 0) {
+    cout << "ERROR: Must specify at least one type of output file" << endl;
     exit(1);
   }
 }
 
 /* --------------------------------------------- */
 static void dump_options() {
-  std::cout << std::endl
-            << getVersion() << std::endl
-            << "cwd " << cwd << std::endl
-            << "cmdline " << cmdline << std::endl
-            << "sysname  " << uts.sysname << std::endl
-            << "hostname " << uts.nodename << std::endl
-            << "machine  " << uts.machine << std::endl
-            << "user     " << VERuser() << std::endl;
+  cout << endl
+       << getVersion() << endl
+       << "cwd " << cwd << endl
+       << "cmdline " << cmdline << endl
+       << "sysname  " << uts.sysname << endl
+       << "hostname " << uts.nodename << endl
+       << "machine  " << uts.machine << endl
+       << "user     " << VERuser() << endl;
 
-  std::cout << "Control points: " << inFile << std::endl;
-  std::cout << "Mask volume: " << maskFile << std::endl;
-  if (outVolFile) {
-    std::cout << "Output volume: " << outVolFile << std::endl
-              << "Show controls: " << showControls << std::endl;
+  cout << "Control points: " << inFile << endl;
+  cout << "Mask volume: " << maskFile << endl;
+  if (outVolFile.size() != 0) {
+    cout << "Output volume: " << outVolFile << endl
+         << "Show controls: " << showControls << endl;
   }
+  if (outTextFile.size() != 0) {
+    cout << "Output text file: " << outTextFile << endl;
+  }
+  if (outVecBase.size() != 0 ) {
+    cout << "Output tangent vector file base name: " << outVecBase << endl;
+  }
+
+  return;
 }

@@ -44,7 +44,7 @@ const char *Progname = "dmri_group";
 
 int nSection = 0;
 
-char *inListFile = nullptr, *outRefFile = nullptr, *outBase = nullptr;
+std::string inListFile, outRefFile, outBase;
 
 struct utsname uts;
 char *         cmdline, cwd[2000];
@@ -133,12 +133,11 @@ int main(int argc, char **argv) {
   cputimer.reset();
 
   // Read output reference volume
-  if (outRefFile != nullptr) {
-    std::cout << "Loading output reference volume from " << outRefFile
-              << std::endl;
-    outref = MRIread(outRefFile);
-    if (outref == nullptr) {
-      std::cout << "ERROR: Could not read " << outRefFile << std::endl;
+  if (!outRefFile.empty()) {
+    cout << "Loading output reference volume from " << outRefFile << endl;
+    outref = MRIread(outRefFile.c_str());
+    if (!outref) {
+      cout << "ERROR: Could not read " << outRefFile << endl;
       exit(1);
     }
 
@@ -901,13 +900,13 @@ static void print_version(void) {
 }
 
 /* --------------------------------------------- */
-static void check_options() {
-  if (outBase == nullptr) {
-    std::cout << "ERROR: must specify base name for output files" << std::endl;
+static void check_options(void) {
+  if (outBase.empty()) {
+    cout << "ERROR: must specify base name for output files" << endl;
     exit(1);
   }
-  if (inListFile == nullptr) {
-    std::cout << "ERROR: must specify input list file" << std::endl;
+  if (inListFile.empty()) {
+    cout << "ERROR: must specify input list file" << endl;
     exit(1);
   }
 }

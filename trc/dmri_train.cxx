@@ -42,15 +42,14 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_train";
 
-bool                          useTrunc = false, excludeStr = false;
-std::vector<float>            trainMaskLabel;
-std::vector<std::vector<int>> nControl;
-std::vector<char *> outBase, trainTrkList, trainRoi1List, trainRoi2List,
-    testMaskList, testFaList, testBaseXfmList;
-char *outDir = nullptr, *outTestDir = nullptr, *trainListFile = nullptr,
-     *trainAsegFile = nullptr, *trainMaskFile = nullptr,
-     *testAffineXfmFile = nullptr, *testNonlinXfmFile = nullptr,
-     *testNonlinRefFile = nullptr, *testBaseMaskFile = nullptr;
+bool useTrunc = false, excludeStr = false;
+vector<float> trainMaskLabel;
+vector<vector<int>> nControl;
+vector<std::string> outBase, trainTrkList, trainRoi1List, trainRoi2List,
+               testMaskList, testFaList, testBaseXfmList;
+std::string outDir, outTestDir, trainListFile,
+  trainAsegFile, trainMaskFile, testAffineXfmFile,
+  testNonlinXfmFile, testNonlinRefFile, testBaseMaskFile;
 
 struct utsname uts;
 char *         cmdline, cwd[2000];
@@ -59,10 +58,8 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int  nargs;
-  int  cputime;
-  char excfile[PATH_MAX];
-  char fbase[PATH_MAX];
+  int nargs, cputime;
+  std::string excfile, fbase;
 
   nargs = handleVersionOption(argc, argv, "dmri_train");
   if (nargs && argc - nargs == 1)
@@ -91,30 +88,33 @@ int main(int argc, char **argv) {
   dump_options();
 
   if (excludeStr) {
-    if (outDir != nullptr) {
-      sprintf(excfile, "%s/%s_cpts_all.bad.txt", outDir, outBase[0]);
+    if (!outDir.empty()) {
+      excfile = outDir + '/' + outBase.at(0) + "_cpts_all.bad.txt";
     } else {
-      sprintf(excfile, "%s_cpts_all.bad.txt", outBase[0]);
+      excfile = outBase.at(0) + "_cpts_all.bad.txt";
     }
   }
-
-  Blood myblood(
-      trainListFile, trainTrkList[0],
-      trainRoi1List.size() != 0u ? trainRoi1List[0] : nullptr,
-      trainRoi2List.size() != 0u ? trainRoi2List[0] : nullptr, trainAsegFile,
-      trainMaskFile, trainMaskLabel.size() != 0u ? trainMaskLabel[0] : 0,
-      excludeStr ? excfile : nullptr, testMaskList, testFaList,
-      testAffineXfmFile, testNonlinXfmFile, testNonlinRefFile, testBaseXfmList,
-      testBaseMaskFile, useTrunc, nControl[0], debug != 0);
+  
+  Blood myblood(trainListFile, trainTrkList[0],
+                trainRoi1List.size() ? trainRoi1List[0] : std::string(),
+                trainRoi2List.size() ? trainRoi2List[0] : std::string(),
+                trainAsegFile, trainMaskFile,
+                trainMaskLabel.size() ? trainMaskLabel[0] : 0.0f,
+                excludeStr ? excfile : std::string(),
+                testMaskList, testFaList,
+                testAffineXfmFile, testNonlinXfmFile, testNonlinRefFile,
+                testBaseXfmList, testBaseMaskFile,
+                useTrunc, nControl[0],
+                debug);
 
   for (unsigned int itrk = 0; itrk < trainTrkList.size(); itrk++) {
     if (itrk > 0) {
       if (excludeStr) {
-        if (outDir != nullptr) {
-          sprintf(excfile, "%s/%s_cpts_all.bad.txt", outDir, outBase[itrk]);
+        if (!outDir.empty()) {
+	  excfile = outDir + '/' + outBase.at(itrk) + "_cpts_all.bad.txt";
         } else {
-          sprintf(excfile, "%s_cpts_all.bad.txt", outBase[itrk]);
-        }
+	  excfile = outBase.at(itrk) + "_cpts_all.bad.txt";
+	}
       }
 
       if (nControl.size() > 1) { // Variable number of controls
@@ -135,20 +135,20 @@ int main(int argc, char **argv) {
 
     myblood.ComputePriors();
 
-    if (outDir != nullptr) {
-      sprintf(fbase, "%s/%s", outDir, outBase[itrk]);
+    if (!outDir.empty()) {
+      fbase = outDir + '/' + outBase.at(itrk);
     } else {
-      strcpy(fbase, outBase[itrk]);
+      fbase = outBase.at(itrk);
     }
 
-    if (outTestDir != nullptr) {
-      char ftbase[PATH_MAX];
+    if (!outTestDir.empty()) {
+      std::string ftbase;
 
-      sprintf(ftbase, "%s/%s", outTestDir, outBase[itrk]);
-
-      myblood.WriteOutputs(fbase, ftbase);
-    } else {
-      myblood.WriteOutputs(fbase);
+      ftbase = outTestDir + outBase.at(itrk);
+      myblood.WriteOutputs(fbase.c_str(), ftbase.c_str());
+    }
+    else {
+      myblood.WriteOutputs(fbase.c_str());
     }
 
     cputime = cputimer.milliseconds();
@@ -440,8 +440,8 @@ static void check_options() {
     std::cout << "ERROR: Must specify at least one output name" << std::endl;
     exit(1);
   }
-  if (trainListFile == nullptr) {
-    std::cout << "ERROR: Must specify training subject list file" << std::endl;
+  if (trainListFile.empty()) {
+    cout << "ERROR: Must specify training subject list file" << endl;
     exit(1);
   }
   if (trainTrkList.empty()) {
@@ -455,14 +455,12 @@ static void check_options() {
         << std::endl;
     exit(1);
   }
-  if (trainAsegFile == nullptr) {
-    std::cout << "ERROR: Must specify location of aparc+aseg volume"
-              << std::endl;
+  if (trainAsegFile.empty()) {
+    cout << "ERROR: Must specify location of aparc+aseg volume" << endl;
     exit(1);
   }
-  if (trainMaskFile == nullptr) {
-    std::cout << "ERROR: Must specify location of cortex mask volume"
-              << std::endl;
+  if (trainMaskFile.empty()) {
+    cout << "ERROR: Must specify location of cortex mask volume" << endl;
     exit(1);
   }
   if (!trainRoi1List.empty() && trainRoi1List.size() != trainTrkList.size()) {
@@ -504,15 +502,13 @@ static void check_options() {
         << std::endl;
     exit(1);
   }
-  if ((testNonlinXfmFile != nullptr) && (testNonlinRefFile == nullptr)) {
-    std::cout
-        << "ERROR: Must specify source reference volume for nonlinear warp"
-        << std::endl;
+  if ((!testNonlinXfmFile.empty()) && testNonlinRefFile.empty()) {
+    cout << "ERROR: Must specify source reference volume for nonlinear warp"
+         << endl;
     exit(1);
   }
-  if (!testBaseXfmList.empty() && (testBaseMaskFile == nullptr)) {
-    std::cout << "ERROR: Must specify reference volume for base space"
-              << std::endl;
+  if (!testBaseXfmList.empty() && testBaseMaskFile.empty()) {
+    cout << "ERROR: Must specify reference volume for base space" << endl;
     exit(1);
   }
   if (!testBaseXfmList.empty() &&
@@ -525,7 +521,7 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void dump_options() {
-  std::vector<char *>::const_iterator istr;
+  vector<std::string>::const_iterator istr;
 
   std::cout << std::endl
             << getVersion() << std::endl
@@ -536,101 +532,111 @@ static void dump_options() {
             << "machine  " << uts.machine << std::endl
             << "user     " << VERuser() << std::endl;
 
-  if (outDir)
-    std::cout << "Output directory: " << outDir << std::endl;
-
-  if (outTestDir != nullptr) {
-    std::cout << "Output directory in test subject's space: " << outTestDir
-              << std::endl;
+  if (!outDir.empty()) {
+    cout << "Output directory: " << outDir << endl;
   }
 
-  std::cout << "Output base:";
+  if (!outTestDir.empty()) {
+    cout << "Output directory in test subject's space: " << outTestDir << endl;
+  }
+
+  cout << "Output base:";
   for (istr = outBase.begin(); istr < outBase.end(); istr++) {
-    std::cout << " " << *istr;
+    cout << " " << *istr;
   }
-  std::cout << std::endl;
+  cout << endl;
 
   std::cout << "Training subject directory list: " << trainListFile
             << std::endl;
 
-  std::cout << "Location of streamline files relative to base:";
+  cout << "Location of streamline files relative to base:";
   for (istr = trainTrkList.begin(); istr < trainTrkList.end(); istr++) {
-    std::cout << " " << *istr;
+    cout << " " << *istr;
   }
-  std::cout << std::endl;
+  cout << endl;
 
   if (!trainRoi1List.empty()) {
-    std::cout << "Location of start ROI files relative to base:";
+    cout << "Location of start ROI files relative to base:";
     for (istr = trainRoi1List.begin(); istr < trainRoi1List.end(); istr++) {
-      std::cout << " " << *istr;
+      cout << " " << *istr;
     }
-    std::cout << std::endl;
+    cout << endl;
 
-    std::cout << "Location of end ROI files relative to base:";
+    cout << "Location of end ROI files relative to base:";
     for (istr = trainRoi2List.begin(); istr < trainRoi2List.end(); istr++) {
-      std::cout << " " << *istr;
+      cout << " " << *istr;
     }
-    std::cout << std::endl;
+    cout << endl;
   }
 
   std::cout << "Location of cortex masks relative to base: " << trainMaskFile
             << std::endl;
 
   if (!trainMaskLabel.empty()) {
-    std::cout << "Label ID's from aparc+aseg to add to cortex mask:";
-    for (auto ilab = trainMaskLabel.begin(); ilab < trainMaskLabel.end();
-         ilab++) {
-      std::cout << " " << static_cast<int>(*ilab);
+    cout << "Label ID's from aparc+aseg to add to cortex mask:";
+    for (vector<float>::const_iterator ilab = trainMaskLabel.begin();
+	 ilab < trainMaskLabel.end(); ilab++) {
+      cout << " " << (int) *ilab;
     }
-    std::cout << std::endl;
+    cout << endl;
   }
 
   std::cout << "Location of aparc+aseg's relative to base: " << trainAsegFile
             << std::endl;
 
-  std::cout << "Brain mask for output subject:";
-  for (auto ifile = testMaskList.begin(); ifile < testMaskList.end(); ifile++) {
-    std::cout << " " << *ifile;
+  cout << "Brain mask for output subject:";
+  for (auto ifile = testMaskList.begin();
+       ifile < testMaskList.end(); ifile++) {
+    cout << " " << *ifile;
   }
-  std::cout << std::endl;
+  cout << endl;
 
   if (!testFaList.empty()) {
-    std::cout << "FA map for output subject:";
-    for (auto ifile = testFaList.begin(); ifile < testFaList.end(); ifile++) {
-      std::cout << " " << *ifile;
+    cout << "FA map for output subject:";
+    for (auto ifile = testFaList.begin();
+	 ifile < testFaList.end(); ifile++) {
+      cout << " " << *ifile;
     }
-    std::cout << std::endl;
+    cout << endl;
   }
 
-  if (testAffineXfmFile != nullptr) {
-    std::cout << "Affine registration from atlas to base for output subject: "
-              << testAffineXfmFile << std::endl;
+  if (!testAffineXfmFile.empty()) {
+    cout << "Affine registration from atlas to base for output subject: "
+         << testAffineXfmFile << endl;
   }
 
-  if (testNonlinXfmFile != nullptr) {
-    std::cout
-        << "Nonlinear registration from atlas to base for output subject: "
-        << testNonlinXfmFile << std::endl;
+  if (!testNonlinXfmFile.empty()) {
+    cout << "Nonlinear registration from atlas to base for output subject: "
+         << testNonlinXfmFile << endl;
   }
 
-  if (testNonlinRefFile != nullptr) {
-    std::cout << "Nonlinear registration source reference for output subject: "
-              << testNonlinRefFile << std::endl;
+  if (!testNonlinRefFile.empty()) {
+    cout << "Nonlinear registration source reference for output subject: "
+         << testNonlinRefFile << endl;
   }
 
   if (!testBaseXfmList.empty()) {
-    std::cout << "Affine registration from base to FA map for output subject:";
-    for (auto ifile = testBaseXfmList.begin(); ifile < testBaseXfmList.end();
-         ifile++) {
-      std::cout << " " << *ifile;
+    cout << "Affine registration from base to FA map for output subject:";
+    for (auto ifile = testBaseXfmList.begin();
+	 ifile < testBaseXfmList.end(); ifile++) {
+      cout << " " << *ifile;
     }
-    std::cout << std::endl;
+    cout << endl;
   }
 
-  if (testBaseMaskFile != nullptr) {
-    std::cout << "Base mask for output subject: " << testBaseMaskFile
-              << std::endl;
+  if (!testBaseMaskFile.c_str()) {
+    cout << "Base mask for output subject: " << testBaseMaskFile << endl;
   }
+
+  cout << "Number of control points for initial spline:";
+  for (vector< vector<int> >::const_iterator inlist = nControl.begin();
+       inlist < nControl.end(); inlist++) {
+    for (vector<int>::const_iterator inum = inlist->begin();
+	 inum < inlist->end(); inum++) {
+      cout << " " << *inum;
+    }
+  }
+  cout << endl;
 
   std::cout << "Number of control points for initial spline:";
   for (auto inlist = nControl.begin(); inlist < nControl.end(); inlist++) {

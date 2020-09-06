@@ -61,9 +61,8 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_forrest";
 
-char *testDir = NULL, *trainListFile = NULL, *maskFile = NULL, *asegFile = NULL,
-     *orientFile = NULL;
-std::vector<char *> tractFileList;
+std::string testDir, trainListFile, maskFile, asegFile, orientFile;
+vector<char *> tractFileList;
 
 struct utsname uts;
 char *         cmdline, cwd[2000];
@@ -102,16 +101,16 @@ int main(int argc, char **argv) {
 
   cputimer.reset();
 
-  std::cout << "Reading test subject data..." << std::endl;
-  myforrest.ReadTestSubject(testDir, maskFile, asegFile, orientFile);
+  cout << "Reading test subject data..." << endl;
+  myforrest.ReadTestSubject(testDir.c_str(), maskFile.c_str(), asegFile.c_str(), orientFile.c_str());
 
   // Get volume dimensions from test subject
   nx = myforrest.GetNx();
   ny = myforrest.GetNy();
   nz = myforrest.GetNz();
 
-  std::cout << "Reading training subject data..." << std::endl;
-  myforrest.ReadTrainingSubjects(trainListFile, maskFile, asegFile, orientFile,
+  cout << "Reading training subject data..." << endl;
+  myforrest.ReadTrainingSubjects(trainListFile.c_str(), maskFile.c_str(), asegFile.c_str(), orientFile.c_str(),
                                  tractFileList);
 
   // Get total number of training samples
@@ -324,16 +323,16 @@ static void print_version(void) {
 
 /* --------------------------------------------- */
 static void check_options(void) {
-  if (!testDir) {
-    std::cout << "ERROR: Must specify test subject directory" << std::endl;
+  if (testDir.empty()) {
+    cout << "ERROR: Must specify test subject directory" << endl;
     exit(1);
   }
-  if (!trainListFile) {
-    std::cout << "ERROR: Must specify training subject list file" << std::endl;
+  if (trainListFile.empty()) {
+    cout << "ERROR: Must specify training subject list file" << endl;
     exit(1);
   }
-  if (!maskFile) {
-    std::cout << "ERROR: Must specify brain mask volume" << std::endl;
+  if (maskFile.empty()) {
+    cout << "ERROR: Must specify brain mask volume" << endl;
     exit(1);
   }
   if (tractFileList.empty()) {
@@ -370,14 +369,15 @@ static void dump_options() {
     std::cout << " " << *istr;
   std::cout << std::endl;
 
-  if (asegFile)
-    std::cout << "Location of aparc+aseg's relative to subject directory: "
-              << asegFile << std::endl;
+  if (!asegFile.empty()) {
+    cout << "Location of aparc+aseg's relative to subject directory: "
+         << asegFile << endl;
+  }
 
-  if (orientFile)
-    std::cout
-        << "Location of diffusion orientations relative to subject directory: "
-        << orientFile << std::endl;
+  if (!orientFile.empty()) {
+    cout << "Location of diffusion orientations relative to subject directory: "
+         << orientFile << endl;
+  }
 
   return;
 }

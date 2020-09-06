@@ -44,9 +44,9 @@ static void dump_options(FILE *fp);
 int         main(int argc, char *argv[]);
 const char *Progname = NULL;
 
-char *  vol1File = nullptr, *vol2File = nullptr;
-MRI *   vol1 = nullptr, *vol2 = nullptr;
-MATRIX *vox2ras1, *vox2ras2;
+std::string vol1File, vol2File;
+MRI *vol1=NULL, *vol2=NULL;
+MATRIX *vox2ras1,*vox2ras2;
 
 int  debug = 0, checkoptsonly = 0;
 char tmpstr[2000];
@@ -96,12 +96,10 @@ int main(int argc, char **argv) {
 
   dump_options(stdout);
 
-  vol1 = MRIread(vol1File);
-  if (vol1 == nullptr)
-    exit(1);
-  vol2 = MRIread(vol2File);
-  if (vol2 == nullptr)
-    exit(1);
+  vol1 = MRIread(vol1File.c_str());
+  if (vol1 == NULL) exit(1);
+  vol2 = MRIread(vol2File.c_str());
+  if (vol2 == NULL) exit(1);
 
   vox2ras1 = MRIxfmCRS2XYZ(vol1, 0);
   vox2ras2 = MRIxfmCRS2XYZ(vol2, 0);
@@ -282,12 +280,12 @@ static void print_version(void) {
   exit(1);
 }
 /* --------------------------------------------- */
-static void check_options() {
-  if (vol1File == nullptr) {
+static void check_options(void) {
+  if (vol1File.size() == 0) {
     printf("ERROR: must specify a vol1 file\n");
     exit(1);
   }
-  if (vol2File == nullptr) {
+  if (vol2File.size() == 0) {
     printf("ERROR: must specify a vol2 file\n");
     exit(1);
   }
@@ -296,10 +294,10 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
-  fprintf(fp, "vol1    %s\n", vol1File);
-  fprintf(fp, "vol2    %s\n", vol2File);
-  fprintf(fp, "pix thresh  %g\n", pixdiff_thresh);
-  fprintf(fp, "vox2ras thresh %g\n", vox2ras_thresh);
+  fprintf(fp,"vol1    %s\n",vol1File.c_str());
+  fprintf(fp,"vol2    %s\n",vol2File.c_str());
+  fprintf(fp,"pix thresh  %g\n",pixdiff_thresh);
+  fprintf(fp,"vox2ras thresh %g\n",vox2ras_thresh);
   return;
 }
 

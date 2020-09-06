@@ -12,6 +12,8 @@
  *
  */
 
+#include <string>
+
 #ifndef FIO_H
 #define FIO_H
 
@@ -82,11 +84,11 @@ int   fio_FileExistsReadable(const char *fname);
 int   fio_IsDirectory(const char *fname);
 int   fio_NLines(const char *fname);
 
-int   fio_pushd(const char *dir);
-int   fio_popd();
-char *fio_fullpath(const char *fname);
-int   fio_mkdirp(const char *path, mode_t mode);
-int   fio_FileHasCarriageReturn(char *fname);
+int fio_pushd(const char *dir);
+int fio_popd(void);
+std::string fio_fullpath(const char *fname);
+int fio_mkdirp(const char *path, mode_t mode);
+int fio_FileHasCarriageReturn(const char *fname);
 
 //#define fwriteLong(l, fp)   fwrite4((int)l, fp)
 

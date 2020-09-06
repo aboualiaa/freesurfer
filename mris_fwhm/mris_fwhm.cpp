@@ -136,27 +136,27 @@ int            debug         = 0;
 int            checkoptsonly = 0;
 struct utsname uts;
 
-char *      subject = NULL, *SUBJECTS_DIR = NULL;
-const char *hemi       = NULL;
-const char *surfname   = "white";
-char *      surfpath   = NULL;
-char *      inpath     = NULL;
-char *      outpath    = NULL;
-char *      sumfile    = NULL;
-char *      datfile    = NULL;
-char *      ar1datfile = NULL;
-char        tmpstr[2000];
-MRI *       InVals = NULL;
+char *subject=NULL, *SUBJECTS_DIR=NULL;
+const char *hemi=NULL;
+const char *surfname="white";
+char *surfpath=NULL;
+char *inpath=NULL;
+char *outpath=NULL;
+char *sumfile=NULL;
+char *datfile=NULL;
+char *ar1datfile=NULL;
+char tmpstr[2000];
+MRI *InVals=NULL;
 
-char * maskpath  = NULL;
-char * labelpath = NULL;
-MRI *  mask      = NULL;
-LABEL *label     = NULL;
-int    maskinv   = 0;
+char *maskpath=NULL;
+std::string labelpath;
+MRI *mask=NULL;
+LABEL *label=NULL;
+int maskinv = 0;
 
-MRI *mritmp = NULL;
+MRI *mritmp=NULL;
 
-MRIS * surf;
+MRIS *surf;
 double infwhm = 0, ingstd = 0;
 int    synth = 0, nframes = 10;
 int    SynthSeed  = -1;
@@ -291,10 +291,10 @@ int main(int argc, char *argv[]) {
     MRIsquare(InVals, nullptr, InVals);
   }
 
-  if (labelpath) {
-    label = LabelRead(subject, labelpath);
-    if (label == nullptr) {
-      printf("ERROR reading %s\n", labelpath);
+  if(labelpath.size() != 0 ) {
+    label = LabelRead(subject, labelpath.c_str());
+    if (label == NULL) {
+      printf("ERROR reading %s\n",labelpath.c_str());
       exit(1);
     }
     mask   = MRISlabel2Mask(surf, label, nullptr);
@@ -589,7 +589,17 @@ static int parse_commandline(int argc, char **argv) {
       else
         labelpath = pargv[0];
       nargsused = 1;
-    } else if (!strcasecmp(option, "--cortex")) {
+    } 
+    else if (!strcasecmp(option, "--label")) {
+      if (nargc < 1) CMDargNErr(option,1);
+      if(fio_FileExistsReadable(pargv[0])) {
+	labelpath = fio_fullpath(pargv[0]); // defeat LabelRead()
+      } else {
+	labelpath = pargv[0];
+      }
+      nargsused = 1;
+    } 
+    else if (!strcasecmp(option, "--cortex")) {
       UseCortexLabel = 1;
     } else if (!strcasecmp(option, "--sum")) {
       if (nargc < 1)
@@ -900,7 +910,7 @@ static void check_options() {
     printf("ERROR: need to specify --in or --synth\n");
     exit(1);
   }
-  if (maskpath && labelpath) {
+  if (maskpath && (labelpath.size() != 0 )) {
     printf("ERROR: cannot specify both --label and --mask\n");
     exit(1);
   }
@@ -923,13 +933,12 @@ static void check_options() {
     printf("ERROR: SUBJECTS_DIR not defined in environment\n");
     exit(1);
   }
-  if (UseCortexLabel) {
-    if (labelpath != nullptr) {
+  if(UseCortexLabel){
+    if(labelpath.size() != 0){
       printf("ERROR: cannot spec --label and --cortex\n");
       exit(1);
     }
-    sprintf(tmpstr, "%s/%s/label/%s.cortex.label", SUBJECTS_DIR, subject, hemi);
-    labelpath = strcpyalloc(tmpstr);
+    labelpath = std::string(SUBJECTS_DIR) + '/' + std::string(subject) + "/label/" + std::string(hemi) + ".cortex.label";
   }
   return;
 }

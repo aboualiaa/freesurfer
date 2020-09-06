@@ -40,61 +40,62 @@
 
 #include "TrackIO.h"
 
-class Aeon { // One point in time
-public:
-  Aeon();
-  ~Aeon();
-  static void                SetBaseMask(MRI *BaseMask);
-  static void                SavePathPriors(std::vector<float> &Priors);
-  static void                SaveBasePath(std::vector<int> &PathPoints);
-  static void                SetPathMap(unsigned int PathIndex);
-  void                       ReadData(const char *RootDir, const char *DwiFile,
-                                      const char *GradientFile, const char *BvalueFile,
-                                      const char *MaskFile, const char *BedpostDir, int NumTract,
-                                      float FminPath, const char *BaseXfmFile);
-  [[nodiscard]] MRI *        GetMask() const;
-  [[nodiscard]] MRI *        GetBaseMask() const;
-  [[nodiscard]] float        GetDx() const;
-  [[nodiscard]] float        GetDy() const;
-  [[nodiscard]] float        GetDz() const;
-  [[nodiscard]] unsigned int GetNumSample() const;
-  void                       FreeMask();
-  void                       SetOutputDir(const char *OutDir);
-  [[nodiscard]] const std::string &GetOutputDir() const;
-  void                             ClearPath();
-  bool                             MapPathFromBase(Spline &BaseSpline);
-  void FindDuplicatePathPoints(std::vector<bool> &IsDuplicate);
-  void RemovePathPoints(std::vector<bool> &DoRemove, unsigned int NewSize = 0);
-  void ProposeDiffusionParameters();
-  bool ComputePathDataFit();
-  int  FindErrorSegment(Spline &BaseSpline);
-  void UpdatePath();
-  void SavePathDataFit(bool IsPathAccepted);
-  void SavePath();
-  void WriteOutputs();
-  [[nodiscard]] unsigned int       GetNumFZerosNew() const;
-  [[nodiscard]] unsigned int       GetNumFZeros() const;
-  [[nodiscard]] bool               RejectF() const;
-  [[nodiscard]] bool               AcceptF() const;
-  [[nodiscard]] bool               RejectTheta() const;
-  [[nodiscard]] bool               AcceptTheta() const;
-  [[nodiscard]] const std::string &GetLog() const;
-  [[nodiscard]] unsigned int       GetPathLengthNew() const;
-  [[nodiscard]] unsigned int       GetPathLength() const;
-  [[nodiscard]] double             GetLikelihoodOffPathNew() const;
-  [[nodiscard]] double             GetLikelihoodOffPath() const;
-  [[nodiscard]] double             GetLikelihoodOnPathNew() const;
-  [[nodiscard]] double             GetLikelihoodOnPath() const;
-  [[nodiscard]] double             GetPriorOffPathNew() const;
-  [[nodiscard]] double             GetPriorOffPath() const;
-  [[nodiscard]] double             GetPriorOnPathNew() const;
-  [[nodiscard]] double             GetPriorOnPath() const;
-  [[nodiscard]] double             GetPosteriorOffPathNew() const;
-  [[nodiscard]] double             GetPosteriorOffPath() const;
-  [[nodiscard]] double             GetPosteriorOnPathNew() const;
-  [[nodiscard]] double             GetPosteriorOnPath() const;
-  [[nodiscard]] double             GetDataFitNew() const;
-  [[nodiscard]] double             GetDataFit() const;
+class Aeon {		// One point in time
+  public:
+    Aeon();
+    ~Aeon();
+    static void SetBaseMask(MRI *BaseMask);
+    static void SavePathPriors(std::vector<float> &Priors);
+    static void SaveBasePath(std::vector<int> &PathPoints);
+    static void SetPathMap(unsigned int PathIndex);
+    void ReadData(const std::string RootDir, const std::string DwiFile,
+                  const std::string GradientFile, const std::string BvalueFile,
+                  const std::string MaskFile, const std::string BedpostDir,
+                  const int NumTract, const float FminPath,
+                  const std::string BaseXfmFile);
+    MRI *GetMask() const;
+    MRI *GetBaseMask() const;
+    float GetDx() const;
+    float GetDy() const;
+    float GetDz() const;
+    unsigned int GetNumSample() const;
+    void FreeMask();
+    void SetOutputDir(const std::string OutDir);
+    const string &GetOutputDir() const;
+    void ClearPath();
+    bool MapPathFromBase(Spline &BaseSpline);
+    void FindDuplicatePathPoints(std::vector<bool> &IsDuplicate);
+    void RemovePathPoints(std::vector<bool> &DoRemove, unsigned int NewSize=0);
+    void ProposeDiffusionParameters();
+    bool ComputePathDataFit();
+    int FindErrorSegment(Spline &BaseSpline);
+    void UpdatePath();
+    void SavePathDataFit(bool IsPathAccepted);
+    void SavePath();
+    void WriteOutputs();
+    unsigned int GetNumFZerosNew() const;
+    unsigned int GetNumFZeros() const;
+    bool RejectF() const;
+    bool AcceptF() const;
+    bool RejectTheta() const;
+    bool AcceptTheta() const;
+    const string &GetLog() const;
+    unsigned int GetPathLengthNew() const;
+    unsigned int GetPathLength() const;
+    double GetLikelihoodOffPathNew() const;
+    double GetLikelihoodOffPath() const;
+    double GetLikelihoodOnPathNew() const;
+    double GetLikelihoodOnPath() const;
+    double GetPriorOffPathNew() const;
+    double GetPriorOffPath() const;
+    double GetPriorOnPathNew() const;
+    double GetPriorOnPath() const;
+    double GetPosteriorOffPathNew() const;
+    double GetPosteriorOffPath() const;
+    double GetPosteriorOnPathNew() const;
+    double GetPosteriorOnPath() const;
+    double GetDataFitNew() const;
+    double GetDataFit() const;
 
 private:
   static const unsigned int            mDiffStep;
@@ -130,38 +131,46 @@ private:
                               std::vector<int> &PathLengths, MRI *PathHisto);
 };
 
-class Coffin { // The main container
-public:
-  Coffin(const char *OutDir, std::vector<char *> InDirList, const char *DwiFile,
-         const char *GradientFile, const char *BvalueFile, const char *MaskFile,
-         const char *BedpostDir, int NumTract, float FminPath,
-         const char *BaseXfmFile, const char *BaseMaskFile,
-         const char *InitFile, const char *RoiFile1, const char *RoiFile2,
-         const char *RoiMeshFile1, const char *RoiMeshFile2,
-         const char *RoiRefFile1, const char *RoiRefFile2,
-         const char *XyzPriorFile0, const char *XyzPriorFile1,
-         const char *TangPriorFile, const char *CurvPriorFile,
-         const char *NeighPriorFile, const char *NeighIdFile, int NeighPriorSet,
-         const char *LocalPriorFile, const char *LocalIdFile, int LocalPriorSet,
-         std::vector<char *> AsegList, const char *AffineXfmFile,
-         const char *NonlinXfmFile, int NumBurnIn, int NumSample,
-         int KeepSampleNth, int UpdatePropNth, const char *PropStdFile,
-         bool Debug = false);
-  ~Coffin();
-  void SetOutputDir(const char *OutDir);
-  void SetPathway(const char *InitFile, const char *RoiFile1,
-                  const char *RoiFile2, const char *RoiMeshFile1,
-                  const char *RoiMeshFile2, const char *RoiRefFile1,
-                  const char *RoiRefFile2, const char *XyzPriorFile0,
-                  const char *XyzPriorFile1, const char *TangPriorFile,
-                  const char *CurvPriorFile, const char *NeighPriorFile,
-                  const char *NeighIdFile, const char *LocalPriorFile,
-                  const char *LocalIdFile);
-  void SetMcmcParameters(int NumBurnIn, int NumSample, int KeepSampleNth,
-                         int UpdatePropNth, const char *PropStdFile);
-  bool RunMcmcFull();
-  bool RunMcmcSingle();
-  void WriteOutputs();
+class Coffin {		// The main container
+ public:
+  Coffin(const std::string OutDir, std::vector<std::string> InDirList,
+	 const std::string DwiFile,
+	 const std::string GradientFile, const std::string BvalueFile,
+	 const std::string MaskFile, const std::string BedpostDir,
+	 const int NumTract, const float FminPath,
+	 const std::string BaseXfmFile, const std::string BaseMaskFile,
+	 const std::string InitFile,
+	 const std::string RoiFile1, const std::string RoiFile2,
+	 const std::string RoiMeshFile1, const std::string RoiMeshFile2,
+	 const std::string RoiRefFile1, const std::string RoiRefFile2,
+	 const std::string XyzPriorFile0, const std::string XyzPriorFile1,
+	 const std::string angPriorFile, const std::string CurvPriorFile,
+	 const std::string NeighPriorFile, const std::string NeighIdFile,
+	 const int NeighPriorSet,
+	 const std::string LocalPriorFile, const std::string LocalIdFile,
+	 const int LocalPriorSet,
+	 const std::vector<std::string> AsegList,
+	 const std::string AffineXfmFile, const std::string NonlinXfmFile,
+	 const int NumBurnIn, const int NumSample,
+	 const int KeepSampleNth, const int UpdatePropNth,
+	 const std::string PropStdFile,
+	 const bool Debug=false);
+    ~Coffin();
+    void SetOutputDir(const std::string OutDir);
+    void SetPathway(const std::string InitFile,
+                    const std::string RoiFile1, const std::string RoiFile2,
+                    const std::string RoiMeshFile1, const std::string RoiMeshFile2,
+                    const std::string RoiRefFile1, const std::string RoiRefFile2,
+                    const std::string XyzPriorFile0, const std::string XyzPriorFile1,
+                    const std::string TangPriorFile, const std::string CurvPriorFile,
+                    const std::string NeighPriorFile, const std::string NeighIdFile,
+                    const std::string LocalPriorFile, const std::string LocalIdFile);
+    void SetMcmcParameters(const int NumBurnIn, const int NumSample,
+                           const int KeepSampleNth, const int UpdatePropNth,
+                           const std::string PropStdFile);
+    bool RunMcmcFull();
+    bool RunMcmcSingle();
+    void WriteOutputs();
 
 private:
   static const unsigned int mMaxTryMask, mMaxTryWhite, mDiffStep;
@@ -203,33 +212,33 @@ private:
   std::vector<MRI *> mAseg;
   std::vector<Aeon>  mDwi;
 
-  void   ReadControlPoints(const char *ControlPointFile);
-  void   ReadProposalStds(const char *PropStdFile);
-  bool   InitializeMcmc();
-  bool   InitializeFixOffMask(int FailSegment);
-  bool   InitializeFixOffWhite(int FailSegment);
-  int    FindErrorSegment();
-  bool   JumpMcmcFull();
-  bool   JumpMcmcSingle(int ControlIndex);
-  bool   ProposePathFull();
-  bool   ProposePathSingle(int ControlIndex);
-  void   ProposeDiffusionParameters();
-  bool   AcceptPath(bool UsePriorOnly = false);
-  double ComputeXyzPriorOffPath(std::vector<int> &PathAtlasPoints);
-  double ComputeXyzPriorOnPath(std::vector<int> &PathAtlasPoints);
-  double ComputeAnatomicalPrior(std::vector<int> &PathAtlasPoints);
-  double ComputeShapePrior(std::vector<int> &PathAtlasPoints);
-  void   UpdatePath();
-  void   UpdateAcceptanceRateFull();
-  void   UpdateRejectionRateFull();
-  void   UpdateAcceptRejectRateSingle();
-  void   UpdateProposalStd();
-  void   SavePathPosterior(bool IsPathAccepted);
-  void   SavePath();
-  void   RemoveDuplicatePathPoints();
-  bool   IsInMask(std::vector<int>::const_iterator Point);
-  bool   IsInRoi(std::vector<int>::const_iterator Point, MRI *Roi);
-  bool   IsZigZag(std::vector<int> &               ControlPoints,
+    void ReadControlPoints(const std::string ControlPointFile);
+    void ReadProposalStds(const std::string PropStdFile);
+    bool InitializeMcmc();
+    bool InitializeFixOffMask(int FailSegment);
+    bool InitializeFixOffWhite(int FailSegment);
+    int FindErrorSegment();
+    bool JumpMcmcFull();
+    bool JumpMcmcSingle(int ControlIndex);
+    bool ProposePathFull();
+    bool ProposePathSingle(int ControlIndex);
+    void ProposeDiffusionParameters();
+    bool AcceptPath(bool UsePriorOnly=false);
+    double ComputeXyzPriorOffPath(std::vector<int> &PathAtlasPoints);
+    double ComputeXyzPriorOnPath(std::vector<int> &PathAtlasPoints);
+    double ComputeAnatomicalPrior(std::vector<int> &PathAtlasPoints);
+    double ComputeShapePrior(std::vector<int> &PathAtlasPoints);
+    void UpdatePath();
+    void UpdateAcceptanceRateFull();
+    void UpdateRejectionRateFull();
+    void UpdateAcceptRejectRateSingle();
+    void UpdateProposalStd();
+    void SavePathPosterior(bool IsPathAccepted);
+    void SavePath();
+    void RemoveDuplicatePathPoints();
+    bool IsInMask(std::vector<int>::const_iterator Point);
+    bool IsInRoi(std::vector<int>::const_iterator Point, MRI *Roi);
+    bool IsZigZag(std::vector<int> &ControlPoints,
                   std::vector<int>::const_iterator FirstPerturbedPoint,
                   std::vector<int>::const_iterator LastPerturbedPoint);
   void   MapPointToAtlas(std::vector<int>::iterator       OutPoint,

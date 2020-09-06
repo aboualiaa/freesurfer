@@ -1393,6 +1393,7 @@ static void check_options() {
     }
     printf("Merging CSD files\n");
     err = CSDwrite(csdoutfile, csd);
+    if(err) exit(1);
   }
 
   if (csdpdffile) {

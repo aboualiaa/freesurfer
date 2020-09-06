@@ -66,8 +66,8 @@ const char *Progname = "dmri_motion";
 
 float T = 100, D = .001;
 
-std::vector<char *> inDwiList, inBvalList;
-char *              inMatFile = NULL, *outFile = NULL, *outFrameFile = NULL;
+vector<std::string> inDwiList, inBvalList;
+std::string inMatFile, outFile, outFrameFile;
 
 MRI *dwi;
 
@@ -125,9 +125,8 @@ int main(int argc, char **argv) {
       std::ifstream                      infile;
 
       // Read DWI volume series
-      std::cout << "Loading DWI volume series from " << inDwiList[irun]
-                << std::endl;
-      dwi = MRIread(inDwiList[irun]);
+      cout << "Loading DWI volume series from " << inDwiList[irun] << endl;
+      dwi = MRIread(inDwiList[irun].c_str());
       if (!dwi) {
         std::cout << "ERROR: Could not read " << inDwiList[irun] << std::endl;
         exit(1);
@@ -248,12 +247,12 @@ int main(int argc, char **argv) {
       score = 1;
   }
 
-  if (inMatFile) { // Estimate between-volume motion
-    bool               isMat;
-    int                nframe = 0;
-    std::vector<float> xform, tr(3, 0), ro(3, 0), tr0(3, 0), ro0(3, 0),
-        dtr(3, 0), dro(3, 0), trtot(3, 0), rotot(3, 0);
-    std::ifstream infile;
+  if (!inMatFile.empty()) {		// Estimate between-volume motion
+    bool isMat;
+    int nframe = 0;
+    vector<float> xform, tr(3,0), ro(3,0), tr0(3,0), ro0(3,0),
+                  dtr(3,0), dro(3,0), trtot(3,0), rotot(3,0);
+    ifstream infile;
 
     std::cout << "Loading volume-to-baseline affine transformations"
               << std::endl;
@@ -382,8 +381,8 @@ int main(int argc, char **argv) {
   outfile.close();
 
   // Write frame-by-frame measures to file
-  if (outFrameFile) {
-    std::vector<float>::const_iterator itr, iro, iscore;
+  if (!outFrameFile.empty()) {
+    vector<float>::const_iterator itr, iro, iscore;
 
     if (trframe.empty())
       trframe.insert(trframe.begin(), nbadframe.size() * 3, 0.0);
@@ -603,8 +602,8 @@ static void print_version(void) {
 
 /* --------------------------------------------- */
 static void check_options(void) {
-  if (!outFile) {
-    std::cout << "ERROR: must specify output file" << std::endl;
+  if (outFile.empty()) {
+    cout << "ERROR: must specify output file" << endl;
     exit(1);
   }
   if (inDwiList.size() != inBvalList.size()) {
@@ -612,9 +611,9 @@ static void check_options(void) {
               << std::endl;
     exit(1);
   }
-  if (inBvalList.empty() && !inMatFile) {
-    std::cout << "ERROR: must specify inputs for between-volume and/or "
-              << "within-volume motion measures" << std::endl;
+  if (inBvalList.empty() && inMatFile.empty()) {
+    cout << "ERROR: must specify inputs for between-volume and/or "
+         << "within-volume motion measures" << endl;
     exit(1);
   }
   if (D < 0) {
@@ -636,28 +635,30 @@ static void dump_options() {
 
   std::cout << "Output motion measure file: " << outFile << std::endl;
 
-  if (outFrameFile)
-    std::cout << "Output frame-by-frame motion measure file: " << outFrameFile
-              << std::endl;
+  if (!outFrameFile.empty()) {
+    cout << "Output frame-by-frame motion measure file: " << outFrameFile
+         << endl;
+  }
 
-  if (inMatFile)
-    std::cout << "Input transform file: " << inMatFile << std::endl;
+  if (!inMatFile.empty()) {
+    cout << "Input transform file: " << inMatFile << endl;
+  }
 
   if (!inDwiList.empty()) {
-    std::cout << "Input DWI file(s):";
-    for (std::vector<char *>::const_iterator ifile = inDwiList.begin();
-         ifile < inDwiList.end(); ifile++)
-      std::cout << " " << *ifile;
-    std::cout << std::endl;
+    cout << "Input DWI file(s):";
+    for (auto ifile = inDwiList.begin(); ifile < inDwiList.end(); ifile++) {
+      cout << " " << *ifile;
+    }
+    cout << endl;
 
-    std::cout << "Input b-value table(s):";
-    for (std::vector<char *>::const_iterator ifile = inBvalList.begin();
-         ifile < inBvalList.end(); ifile++)
-      std::cout << " " << *ifile;
-    std::cout << std::endl;
+    cout << "Input b-value table(s):";
+    for (auto ifile = inBvalList.begin(); ifile < inBvalList.end(); ifile++) {
+      cout << " " << *ifile;
+    }
+    cout << endl;
 
-    std::cout << "Low-b image intensity threshold: " << T << std::endl;
-    std::cout << "Nominal diffusivity: " << D << std::endl;
+    cout << "Low-b image intensity threshold: " << T << endl;
+    cout << "Nominal diffusivity: " << D << endl;
   }
 
   return;

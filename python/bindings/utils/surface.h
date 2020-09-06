@@ -1,8 +1,7 @@
 #pragma once
 
 #include "log.h"
-#include "mrisurf.h"
-#include "numpy.h"
+#include "volume.h"
 
 namespace surf {
 
@@ -43,9 +42,10 @@ void computeNormals(Bridge surf);
 void computeTangents(Bridge surf);
 int  computeEulerNumber(Bridge surf);
 
-// parameterization
+// overlay utils
 py::array parameterize(Bridge surf, const arrayf<float>& overlay, int scale);
 py::array sampleParameterization(Bridge surf, const arrayf<float>& image);
+py::object smoothOverlay(Bridge surf, vol::Bridge overlay, int steps);
 
 
 // surface submodule binding
@@ -60,6 +60,7 @@ inline void bind(py::module &m) {
   m.def("compute_euler", &computeEulerNumber);
   m.def("parameterize", &parameterize);
   m.def("sample_parameterization", &sampleParameterization);
+  m.def("smooth_overlay", &smoothOverlay);
   // m.def("read_directly", &read_directly);
 }
 

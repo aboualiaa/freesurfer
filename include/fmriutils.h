@@ -79,15 +79,15 @@ MRI *fMRIinsertFrame(MRI *srcmri, int srcframe, MRI *fmri, int frame);
 MATRIX *MRItoMatrix(MRI *mri, int c, int r, int s, int Mrows, int Mcols,
                     MATRIX *M);
 MATRIX *MRItoSymMatrix(MRI *mri, int c, int r, int s, MATRIX *M);
-int     MRIfromMatrix(MRI *mri, int c, int r, int s, MATRIX *M, MRI *FrameMask);
-int     MRIfromSymMatrix(MRI *mri, int c, int r, int s, MATRIX *M);
-MRI *   MRInormWeights(MRI *w, int sqrtFlag, int invFlag, MRI *mask, MRI *wn);
+int MRIfromMatrix(MRI *mri, int c, int r, int s, MATRIX *M, MRI *FrameMask);
+int MRIfromSymMatrix(MRI *mri, int c, int r, int s, MATRIX *M);
+MRI *MRInormWeights(MRI *w, int sqrtFlag, int invFlag, MRI *mask, MRI *wn);
 
-int     MRIglmFitAndTest(MRIGLM *mriglm);
-int     MRIglmFit(MRIGLM *glmmri);
-int     MRIglmTest(MRIGLM *mriglm);
-int     MRIglmLoadVox(MRIGLM *mriglm, int c, int r, int s, int LoadBeta);
-int     MRIglmNRegTot(MRIGLM *mriglm);
+int MRIglmFitAndTest(MRIGLM *mriglm);
+int MRIglmFit(MRIGLM *glmmri);
+int MRIglmTest(MRIGLM *mriglm);
+int MRIglmLoadVox(MRIGLM *mriglm, int c, int r, int s, int LoadBeta, GLMMAT *glm);
+int MRIglmNRegTot(MRIGLM *mriglm);
 VECTOR *MRItoVector(MRI *mri, int c, int r, int s, VECTOR *v);
 int     MRIsetSign(MRI *invol, MRI *signvol, int frame);
 MRI *   MRIvolMax(MRI *invol, MRI *out);

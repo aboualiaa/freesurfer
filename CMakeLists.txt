@@ -429,15 +429,9 @@ add_definitions(-DHAVE_ZLIB)
 # -------- gfortran/blas/lapack --------
 if(NOT APPLE)
   find_library(GFORTRAN_LIBRARIES
-               HINTS /usr/lib/gcc/*/*/
-               NAMES libgfortran.a gfortran
-               )
-  # LineProfTest and mri_robust_register need this library
-  find_library(QUADMATH_LIB
-               HINTS /usr/lib/gcc/*/*/
-               NAMES libquadmath.a quadmath
-               )
-  find_library(BLAS_LIBRARIES NAMES libblas.a)
+    HINTS /usr/lib/gcc/*/*/
+    NAMES libgfortran.a gfortran)
+  find_library(BLAS_LIBRARIES NAMES libblas.a libopenblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
 endif()
 

@@ -43,7 +43,8 @@ const char *Progname = "dmri_mergepaths";
 
 int   nframe     = 0;
 float dispThresh = 0;
-char *inDir = nullptr, *inFile[100], *outFile = nullptr, *ctabFile = nullptr;
+std::string inDir, outFile, ctabFile;
+std::vector<std::string> inFile;
 
 struct utsname uts;
 char *         cmdline, cwd[2000];
@@ -52,11 +53,9 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int  nargs;
-  int  cputime;
-  char fname[PATH_MAX];
-  MRI *invol  = 0;
-  MRI *outvol = 0;
+  int nargs, cputime;
+  std::string fname;
+  MRI *invol = 0, *outvol = 0;
 
   nargs = handleVersionOption(argc, argv, "dmri_mergepaths");
   if (nargs && argc - nargs == 1)
@@ -93,13 +92,13 @@ int main(int argc, char **argv) {
               << std::endl;
 
     // Read input volume
-    if (inDir != nullptr) {
-      sprintf(fname, "%s/%s", inDir, inFile[iframe]);
+    if (!inDir.empty()) {
+      fname = inDir + "/" + inFile.at(iframe);
     } else {
-      strcpy(fname, inFile[iframe]);
+      fname = inFile.at(iframe);
     }
 
-    invol = MRIread(fname);
+    invol = MRIread(fname.c_str());
 
     if (invol != nullptr) {
       if (outvol == nullptr) {
@@ -107,14 +106,13 @@ int main(int argc, char **argv) {
         outvol = MRIcloneBySpace(invol, invol->type, nframe);
 
         // Read color table
-        outvol->ct = CTABreadASCII(ctabFile);
+        outvol->ct = CTABreadASCII(ctabFile.c_str());
       }
 
       MRIcopyFrame(invol, outvol, 0, iframe);
 
       if (dispThresh > 0) {
-        inmax =
-            static_cast<float>(MRIfindPercentile(invol, .99, 0)); // Robust max
+        inmax = (float) MRIfindPercentile(invol, .99, 0);	// Robust max
       }
     }
 
@@ -125,7 +123,7 @@ int main(int argc, char **argv) {
     for (int ict = outvol->ct->nentries; ict > 0; ict--) {
       CTE *cte = outvol->ct->entries[ict];
 
-      if (cte != nullptr && (strstr(inFile[iframe], cte->name) != nullptr)) {
+      if (cte != NULL && strstr(inFile.at(iframe).c_str(), cte->name)) {
         outvol->frames[iframe].label = ict;
         strcpy(outvol->frames[iframe].name, cma_label_to_name(ict));
 
@@ -138,10 +136,10 @@ int main(int argc, char **argv) {
   }
 
   // Write output file
-  if (outvol != nullptr) {
-    MRIwrite(outvol, outFile);
+  if (outvol) {
+    MRIwrite(outvol, outFile.c_str());
   } else {
-    std::cout << "ERROR: could not open any of the input files" << std::endl;
+    cout << "ERROR: could not open any of the input files" << endl;
     exit(1);
   }
 
@@ -197,8 +195,8 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
-        inFile[nframe] = pargv[nargsused];
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
+        inFile.push_back( std::string(pargv[nargsused]) );
         nargsused++;
         nframe++;
       }
@@ -286,11 +284,11 @@ static void check_options() {
     printf("ERROR: must specify input volume(s)\n");
     exit(1);
   }
-  if (outFile == nullptr) {
+  if(outFile.empty()) {
     printf("ERROR: must specify output volume\n");
     exit(1);
   }
-  if (ctabFile == nullptr) {
+  if(ctabFile.empty()) {
     printf("ERROR: must specify color table file\n");
     exit(1);
   }
@@ -302,24 +300,24 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
-  fprintf(fp, "\n");
-  fprintf(fp, "%s\n", getVersion().c_str());
-  fprintf(fp, "cwd %s\n", cwd);
-  fprintf(fp, "cmdline %s\n", cmdline);
-  fprintf(fp, "sysname  %s\n", uts.sysname);
-  fprintf(fp, "hostname %s\n", uts.nodename);
-  fprintf(fp, "machine  %s\n", uts.machine);
-  fprintf(fp, "user     %s\n", VERuser());
+  fprintf(fp,"\n");
+  fprintf(fp,"%s\n", getVersion().c_str());
+  fprintf(fp,"cwd %s\n",cwd);
+  fprintf(fp,"cmdline %s\n",cmdline);
+  fprintf(fp,"sysname  %s\n",uts.sysname);
+  fprintf(fp,"hostname %s\n",uts.nodename);
+  fprintf(fp,"machine  %s\n",uts.machine);
+  fprintf(fp,"user     %s\n",VERuser());
 
-  if (inDir) {
-    fprintf(fp, "Input directory: %s\n", inDir);
+  if (!inDir.empty()) {
+    fprintf(fp, "Input directory: %s\n", inDir.c_str());
   }
   fprintf(fp, "Input files:");
   for (int k = 0; k < nframe; k++) {
-    fprintf(fp, " %s", inFile[k]);
+    fprintf(fp, " %s", inFile[k].c_str());
   }
   fprintf(fp, "\n");
-  fprintf(fp, "Output file: %s\n", outFile);
-  fprintf(fp, "Color table file: %s\n", ctabFile);
+  fprintf(fp, "Output file: %s\n", outFile.c_str());
+  fprintf(fp, "Color table file: %s\n", ctabFile.c_str());
   fprintf(fp, "Lower threshold for display: %f\n", dispThresh);
 }
