@@ -3698,7 +3698,22 @@ void MainWindow::CommandLoadControlPoints(const QStringList &cmd) {
   QString     color   = "null";
   QString     radius  = "0";
   QVariantMap args;
-  for (int i = 1; i < options.size(); i++) {
+  bool bCreateNew = false;
+  QString name;
+  if (options.contains("new", Qt::CaseInsensitive))
+  {
+    options.removeAll("new");
+    bCreateNew = true;
+    if (QFileInfo::exists(fn))
+    {
+      cerr << "File exists: " << qPrintable(fn) << "\n"
+           << "Please enter a different filename\n";
+      return;
+    }
+    name = QFileInfo(fn).completeBaseName();
+  }
+  for ( int i = 1; i < options.size(); i++ )
+  {
     QString strg = options[i];
     int     n    = strg.indexOf("=");
     if (n != -1) {
@@ -3728,7 +3743,18 @@ void MainWindow::CommandLoadControlPoints(const QStringList &cmd) {
   if (radius != "0") {
     m_scripts.insert(0, QStringList("setpointsetradius") << radius);
   }
-  LoadControlPointsFile(fn, args);
+  if (bCreateNew)
+  {
+    OnNewPointSet(true);
+    LayerPointSet* ps = (LayerPointSet*)GetActiveLayer("PointSet");
+    ps->SetFileName(fn);
+    if (args.contains("id"))
+      ps->SetID(args["id"].toInt());
+    if (!name.isEmpty())
+      ps->SetName(name);
+  }
+  else
+    LoadControlPointsFile( fn, args );
 }
 
 void MainWindow::CommandSetPointSetColor(const QStringList &cmd) {
@@ -4865,21 +4891,20 @@ void MainWindow::OnCloseROI(const QList<Layer *> &layers_in) {
   OnSetModeNavigate();
 }
 
-void MainWindow::OnNewPointSet() {
-  LayerCollection *col_mri   = GetLayerCollection("MRI");
-  LayerMRI *       layer_mri = (LayerMRI *)col_mri->GetActiveLayer();
-  if (!layer_mri) {
-    QMessageBox::warning(this, "Error",
-                         "Can not create new ROI without volume template.");
+void MainWindow::OnNewPointSet(bool bSilent)
+{
+  LayerCollection* col_mri = GetLayerCollection( "MRI" );
+  LayerMRI* layer_mri = ( LayerMRI* )col_mri->GetActiveLayer();
+  if ( !layer_mri)
+  {
+    QMessageBox::warning( this, "Error", "Can not create new ROI without volume template.");
     return;
   }
 
-  // enter the name of the new point set
-  DialogNewPointSet dlg(this);
-  dlg.SetPointSetName(
-      tr("New Point Set %1")
-          .arg(GetLayerCollection("PointSet")->GetNumberOfLayers()));
-  if (dlg.exec() == QDialog::Accepted) {
+  DialogNewPointSet dlg( this );
+  dlg.SetPointSetName( tr("New Point Set %1").arg(GetLayerCollection("PointSet")->GetNumberOfLayers()));
+  if (bSilent || dlg.exec() == QDialog::Accepted )
+  {
     // finally we are about to create new point set.
     LayerCollection *col_wp = GetLayerCollection("PointSet");
     if (col_wp->IsEmpty()) {
@@ -4888,10 +4913,11 @@ void MainWindow::OnNewPointSet() {
       col_wp->SetWorldVoxelSize(col_mri->GetWorldVoxelSize());
       col_wp->SetSlicePosition(col_mri->GetSlicePosition());
     }
-    LayerPointSet *layer_wp =
-        new LayerPointSet(dlg.GetTemplate(), dlg.GetType());
-    layer_wp->SetName(dlg.GetPointSetName());
-    col_wp->AddLayer(layer_wp);
+    LayerPointSet* layer_wp = new LayerPointSet( bSilent? ((LayerMRI*)GetActiveLayer("MRI")) : dlg.GetTemplate(),
+                                                 bSilent? LayerPropertyPointSet::Enhanced : dlg.GetType() );
+    if (!bSilent)
+      layer_wp->SetName( dlg.GetPointSetName() );
+    col_wp->AddLayer( layer_wp );
 
     SetMode(RenderView::IM_PointSetEdit);
   }
@@ -5008,14 +5034,15 @@ void MainWindow::OnSavePointSetAs() {
   if (fn.isEmpty())
     fn = layer->GetName();
   int nType = layer->GetProperty()->GetType();
-  if (layer->IsEnhanced())
+  if (layer->IsEnhanced() || nType == LayerPropertyPointSet::ControlPoint)
     nType = LayerPropertyPointSet::Enhanced;
   dlg.SetFileName(fn, nType);
   dlg.SetType(nType);
   dlg.SetLastDir(m_strLastDir);
-  if (dlg.exec() == QDialog::Accepted) {
-    layer->SetFileName(dlg.GetFileName());
-    layer->GetProperty()->SetType(dlg.GetType());
+  if (dlg.exec() == QDialog::Accepted)
+  {
+    layer->SetFileName( dlg.GetFileName() );
+    layer->GetProperty()->SetType( dlg.GetType() );
     OnSavePointSet(true);
     ui->widgetAllLayers->UpdateWidgets();
   }

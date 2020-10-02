@@ -18,18 +18,14 @@
  *
  */
 
-#include <sstream>
-#include <iomanip>
 
 #include <coffin.h>
 #include <random>
 
-const unsigned int            Aeon::mDiffStep = 3;
-int                           Aeon::mMaxAPosterioriPath;
-unsigned int                  Aeon::mMaxAPosterioriPath0;
-std::vector<float>            Aeon::mPriorSamples;
-std::vector<std::vector<int>> Aeon::mBasePathPointSamples;
-MRI *                         Aeon::mBaseMask;
+#include <sstream>
+#include <iomanip>
+
+using namespace std;
 
 const unsigned int Coffin::mMaxTryMask = 100, Coffin::mMaxTryWhite = 10,
                    Coffin::mDiffStep = 3;
@@ -1527,13 +1523,13 @@ void Coffin::SetPathway(const std::string InitFile,
 
       prfile.open(prname.str(), ios::in);
       if (!prfile) {
-        std::cout << "ERROR: Could not open " << prname << std::endl;
+        cout << "ERROR: Could not open " << prname.str() << endl;
         exit(1);
       }
 
       idfile.open(idname.str(), ios::in);
       if (!idfile) {
-        std::cout << "ERROR: Could not open " << idname << std::endl;
+        cout << "ERROR: Could not open " << idname.str() << endl;
         exit(1);
       }
 
@@ -1551,9 +1547,9 @@ void Coffin::SetPathway(const std::string InitFile,
           idlist.push_back(id);
 
         if (prior.size() != idlist.size() + 1) {
-          std::cout << "ERROR: Line length mismatch between " << prname << " ("
-                    << prline << ") and " << idname << " (" << idline << ")"
-                    << std::endl;
+          cout << "ERROR: Line length mismatch between "
+               << prname.str() << " (" << prline << ") and "
+               << idname.str() << " (" << idline << ")" << endl;
           exit(1);
         }
 
@@ -1609,13 +1605,13 @@ void Coffin::SetPathway(const std::string InitFile,
 
       prfile.open(prname.str(), ios::in);
       if (!prfile) {
-        std::cout << "ERROR: Could not open " << prname << std::endl;
+        cout << "ERROR: Could not open " << prname.str() << endl;
         exit(1);
       }
 
       idfile.open(idname.str(), ios::in);
       if (!idfile) {
-        std::cout << "ERROR: Could not open " << idname << std::endl;
+        cout << "ERROR: Could not open " << idname.str() << endl;
         exit(1);
       }
 

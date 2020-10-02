@@ -165,12 +165,13 @@ int            FixMNI = 1;
 MATRIX *       vox2vox;
 int            UseFSAverage = 0;
 struct utsname uts;
-char *         cmdline, cwd[2000];
-char *         segctabfile   = nullptr;
-COLOR_TABLE *  segctab       = nullptr;
-int            Bonferroni    = 0;
-int            BonferroniMax = 0;
-int            regheader     = 0;
+char *cmdline, cwd[2000];
+char *segctabfile = NULL;
+COLOR_TABLE *segctab = NULL;
+int Bonferroni = 0;
+int BonferroniMax = 0;
+int regheader = 0;
+char *pointset = NULL;
 
 /*--------------------------------------------------------------*/
 /*--------------------- MAIN -----------------------------------*/
@@ -651,6 +652,25 @@ int main(int argc, char **argv) {
   if (sumfile != nullptr)
     fclose(fpsum);
 
+  if(pointset != NULL){
+    fp = fopen(pointset,"w");
+    MATRIX *vox2ras = MRIxfmCRS2XYZ(vol,0);
+    MATRIX *crs = MatrixAlloc(4,1,MATRIX_REAL);
+    MATRIX *xyz=NULL;
+    crs->rptr[4][1] = 1;
+    for (n = 0; n < nclusters; n++) {
+      crs->rptr[1][1] = ClusterList[n]->col[ClusterList[n]->maxmember];
+      crs->rptr[2][1] = ClusterList[n]->row[ClusterList[n]->maxmember];
+      crs->rptr[3][1] = ClusterList[n]->slc[ClusterList[n]->maxmember];
+      xyz = MatrixMultiply(vox2ras,crs,xyz);
+      fprintf(fp,"%7.4f %7.4f %7.4f\n",xyz->rptr[1][1],xyz->rptr[2][1],xyz->rptr[3][1]);
+    }
+    fprintf(fp,"info\n");
+    fprintf(fp,"numpoints %d\n",nclusters);
+    fprintf(fp,"UseRealRAS 1\n");
+    fclose(fp);
+  }
+
   /* Write clusters values to a volume */
   if (outid != nullptr) {
     outvol = clustClusterList2Vol(ClusterList, nclusters, vol, frame, 1);
@@ -681,19 +701,21 @@ int main(int argc, char **argv) {
   }
 
   /* Write clusters numbers to a volume, include color LUT */
-  if (outcnid != nullptr) {
-    outvol = clustClusterList2Vol(ClusterList, nclusters, vol, frame, 0);
-    printf("INFO: writing OCN to %s\n", outcnid);
-    MRIwrite(outvol, outcnid);
-    // MRIwriteType(outvol,outcnid,outcntype);
-    MRIfree(&outvol);
-    ct = CTABalloc(nclusters + 1);
-    strcpy(ct->entries[0]->name, "Unknown");
+  if (outcnid != 0) {
+    ct = CTABalloc(nclusters+1);
+    strcpy(ct->entries[0]->name,"Unknown");
     for (n = 0; n < nclusters; n++)
       sprintf(ct->entries[n + 1]->name, "Cluster-%03d", n + 1);
     stem = IDstemFromName(outcnid);
     sprintf(tmpstr, "%s.lut", stem);
     CTABwriteFileASCII(ct, tmpstr);
+    outvol = clustClusterList2Vol(ClusterList, nclusters, vol,frame, 0);
+    if(outvol->ct) CTABfree(&outvol->ct);
+    outvol->ct = ct;
+    printf("INFO: writing OCN to %s\n",outcnid);
+    MRIwrite(outvol,outcnid);
+    //MRIwriteType(outvol,outcnid,outcntype);
+    MRIfree(&outvol);
     CTABfree(&ct);
     free(stem);
   }
@@ -1081,18 +1103,23 @@ static int parse_commandline(int argc, char **argv) {
               getenv("FREESURFER_HOME"));
       regfile   = strcpyalloc(tmpstr);
       nargsused = 0;
-    } else if (!strcmp(option, "--fwhm")) {
-      if (nargc < 1)
-        argnerr(option, 1);
-      sscanf(pargv[0], "%lf", &fwhm);
+    }
+    else if (!strcmp(option, "--pointset")) {
+      if (nargc < 1) argnerr(option,1);
+      pointset = pargv[0];
       nargsused = 1;
-    } else if (!strcmp(option, "--fwhmdat")) {
-      if (nargc < 1)
-        argnerr(option, 1);
-      fp = fopen(pargv[0], "r");
-      if (fp == nullptr) {
-        printf("ERROR: opening %s\n", pargv[0]);
-        exit(1);
+    } 
+    else if (!strcmp(option, "--fwhm")) {
+      if (nargc < 1) argnerr(option,1);
+      sscanf(pargv[0],"%lf",&fwhm);
+      nargsused = 1;
+    } 
+    else if (!strcmp(option, "--fwhmdat")) {
+      if(nargc < 1) argnerr(option,1);
+      fp = fopen(pargv[0],"r");
+      if(fp == NULL){
+	printf("ERROR: opening %s\n",pargv[0]);
+	exit(1);
       }
       fscanf(fp, "%lf", &fwhm);
       fclose(fp);
@@ -1123,6 +1150,7 @@ static void print_usage() {
   printf("   --out      output volid \n");
   printf("   --ocn      output cluster number volid \n");
   printf("   --cwsig    clusterwise sig volid \n");
+  printf("   --pointset pointset.dat : create a freeview pointset of the clusters\n");
   printf("\n");
   printf("   --thmin   minthresh : minimum intensity threshold\n");
   printf("   --thmax   maxthresh : maximum intensity threshold\n");

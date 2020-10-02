@@ -15,8 +15,8 @@
 #include "version_info.h"
 
 // set the platform
-#if defined(Linux) || defined(linux) || defined(__linux)
-#define PLATFORM "Linux"
+#ifdef __linux__
+  #define PLATFORM "Linux"
 #endif
 #if defined(Darwin) || defined(__MACOSX__) || defined(__APPLE__)
 #define PLATFORM "Darwin"

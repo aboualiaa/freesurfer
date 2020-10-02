@@ -79,11 +79,12 @@ LayerPointSet::LayerPointSet(LayerMRI *ref, int nType, QObject *parent)
 
   m_mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 
-  if (nType == LayerPropertyPointSet::ControlPoint) {
-    GetProperty()->SetShowSpline(false);
-    GetProperty()->SetRadius(0.5);
-    GetProperty()->SetSnapToVoxelCenter(true);
-    GetProperty()->SetColor(0, 1, 0);
+  if ( nType == LayerPropertyPointSet::ControlPoint || nType == LayerPropertyPointSet::Enhanced)
+  {
+    GetProperty()->SetShowSpline( false );
+    GetProperty()->SetRadius ( 0.5 );
+    GetProperty()->SetSnapToVoxelCenter( true );
+    GetProperty()->SetColor( 0, 1, 0 );
   }
 
   LayerPropertyPointSet *p = GetProperty();

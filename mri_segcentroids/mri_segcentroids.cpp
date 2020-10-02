@@ -19,9 +19,9 @@ struct Centroid {
 // command line inpute parser
 class InputParser {
 public:
-  std::string segfile, weightsfile, ltafile, outfile, ctabfile;
-  bool        include_zero;
-  int         precision;
+  std::string segfile, weightsfile, ltafile, outfile, pointset,ctabfile;
+  bool include_zero;
+  int precision;
 
   InputParser(int &argc, char **argv) {
     include_zero  = false;
@@ -52,6 +52,17 @@ public:
           exit(1);
         }
         outfile = argv[i];
+      }
+      // -----------------------
+      //           --p
+      // -----------------------
+      else if (opt == "--p") {
+        i++;
+        if ((i >= argc) || (ISOPTION(*argv[i]))) {
+          std::cerr << "ERROR: must specify pointset filename with '--p'\n";
+          exit(1);
+        }
+        pointset = argv[i];
       }
       // -----------------------
       //       --weights
@@ -322,6 +333,20 @@ int main(int argc, char **argv) {
   }
 
   tablefile.close();
+
+  // pointset
+  if(!input.pointset.empty()) {
+    FILE *fp = fopen(input.pointset.c_str(),"w");
+    for (it = centroids.begin(); it != centroids.end(); it++) {
+      Centroid c = it->second;
+      fprintf(fp,"%7.4f %7.4f %7.4f\n",c.x,c.y,c.z);
+    }
+    fprintf(fp,"info\n");
+    fprintf(fp,"numpoints %d\n",(int)centroids.size());
+    fprintf(fp,"UseRealRAS 1\n");
+    fclose(fp);
+  }
+
 
   std::cout << "mri_segcentroids done" << std::endl;
 

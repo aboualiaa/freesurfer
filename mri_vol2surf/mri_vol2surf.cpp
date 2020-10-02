@@ -1186,21 +1186,16 @@ static int parse_commandline(int argc, char **argv) {
       // invocation when using --use-new. It does not have all the functionality,
       // eg, avg or max or mapping xyz.
       int err;
-      if (nargc < 9) {
-        printf("ERROR: --vol2surf requires 9 args\n");
-        printf("USAGE: --vol2surf vol surf projtype projdist projmap reg vsm "
-               "interp output\n");
-        printf(" projtype 0=frac, 1=absdist (if 1, projmap arg will be "
-               "ignored)\n");
-        printf(" projmap : map to get the values for projection (usually "
-               "thickness)\n");
-        printf(" reg : LTA registration file (or 'regheader', surf must have "
-               "vol geom) \n");
-        printf("   LTA files can go in either direction if surf has a valid "
-               "vol geom\n");
-        printf(" vsm : voxel shift map for B0 correction (or 'novsm')\n");
-        printf(" interp 0=nearest, 1=trilin, 5=cubicbspline\n");
-        exit(1);
+      if(nargc < 9){
+	printf("ERROR: --vol2surf requires 9 args\n");
+	printf("USAGE: --vol2surf vol surf projtype projdist projmap reg vsm interp output\n");
+	printf(" projtype 0=absdist, 1=frac (if 0, projmap arg will be ignored)\n");
+	printf(" projmap : map to get the values for projection (usually thickness)\n");
+	printf(" reg : LTA registration file (or 'regheader', surf must have vol geom) \n");
+	printf("   LTA files can go in either direction if surf has a valid vol geom\n");
+	printf(" vsm : voxel shift map for B0 correction (or 'novsm')\n");
+	printf(" interp 0=nearest, 1=trilin, 5=cubicbspline\n");
+	exit(1);
       }
       MRI *mri = MRIread(pargv[0]);
       if (mri == NULL)
@@ -1211,11 +1206,30 @@ static int parse_commandline(int argc, char **argv) {
       int projtype;
       sscanf(pargv[2], "%d", &projtype);
       double projdist;
-      sscanf(pargv[3], "%lf", &projdist);
-      if (projtype == 0) {
-        err = MRISreadCurvatureFile(surf, pargv[4]);
-        if (err)
-          exit(1);
+      sscanf(pargv[3],"%lf",&projdist);
+      if(projtype == 1){
+	err = MRISreadCurvatureFile(surf, pargv[4]);
+	if(err) exit(1);
+      }
+      LTA *lta=NULL;
+      MATRIX *RegMat=NULL;
+      if(strcmp(pargv[5],"regheader") != 0){ // not regheader
+	lta = LTAread(pargv[5]);
+	if(lta==NULL) exit(1);
+	LTAchangeType(lta,REGISTER_DAT);
+	VOL_GEOM srcvg;
+	getVolGeom(mri, &srcvg);
+	vg_isEqual_Threshold = 10e-3;
+	if(!vg_isEqual(&srcvg, &(lta->xforms[0].src))){
+	  if(!vg_isEqual(&srcvg, &(lta->xforms[0].dst))){
+	    printf("ERRRO: input volume VG does not match LTA source or target VG\n");
+	    exit(1);
+	  }
+	  printf("INFO: input volume VG matches LTA target VG, inverting \n");
+	  LTA *lta2 = LTAinvert(lta, NULL);
+	  lta = lta2;
+	}
+	RegMat = lta->xforms[0].m_L;
       }
       LTA *   lta    = NULL;
       MATRIX *RegMat = NULL;
@@ -1255,11 +1269,11 @@ static int parse_commandline(int argc, char **argv) {
         if (vsm == NULL)
           exit(1);
       }
-      int interpmethod = 0;
-      sscanf(pargv[7], "%d", &interpmethod);
-      MRI *sval = MRIvol2surfVSM(mri, RegMat, surf, vsm, interpmethod, NULL,
-                                 projdist, projtype, 1, NULL);
-      err       = MRIwrite(sval, pargv[8]);
+      int interpmethod=0;
+      sscanf(pargv[7],"%d",&interpmethod);
+      printf("projtype %d, projdist %g, interp %d\n",projtype,projdist,interpmethod);
+      MRI *sval = MRIvol2surfVSM(mri, RegMat, surf, vsm, interpmethod, NULL, projdist, projtype, 1,NULL);
+      err = MRIwrite(sval,pargv[8]);
       printf("mri_vol2surf --volsurf done\n");
       exit(err);
       // done with --vol2surf
@@ -1387,22 +1401,14 @@ static void print_usage() {
   printf("   --vg-thresh thrshold : threshold for  'ERROR: LTAconcat(): LTAs 0 "
          "and 1 do not match'\n");
   printf("\n");
-  printf("   --vol2surf vol surf projtype projdist projmap reg vsm interp "
-         "output\n");
-  printf("    This is an alternative way to run vol2surf that does not rely on "
-         "the recon-all\n");
-  printf("    directory structure. Generates the same output as standard "
-         "invocation as long \n");
-  printf("    as --use-new is added. --vol2surf does not have all the "
-         "functionality. \n");
-  printf(
-      "      projtype 0=frac, 1=absdist (if 1, projmap arg will be ignored)\n");
-  printf("      projmap : map to get the values for projection (usually "
-         "thickness)\n");
-  printf("      reg : LTA registration file (or 'regheader', surf must have "
-         "vol geom) \n");
-  printf("        LTA files can go in either direction if surf has a valid vol "
-         "geom\n");
+  printf("   --vol2surf vol surf projtype projdist projmap reg vsm interp output\n");
+  printf("    This is an alternative way to run vol2surf that does not rely on the recon-all\n");
+  printf("    directory structure. Generates the same output as standard invocation as long \n");
+  printf("    as --use-new is added. --vol2surf does not have all the functionality. \n");
+  printf("      projtype 0=absdist, 1=frac (if 0, projmap arg will be ignored)\n");
+  printf("      projmap : map to get the values for projection (usually thickness)\n");
+  printf("      reg : LTA registration file (or 'regheader', surf must have vol geom) \n");
+  printf("        LTA files can go in either direction if surf has a valid vol geom\n");
   printf("      vsm : voxel shift map for B0 correction (or 'novsm')\n");
   printf("      interp 0=nearest, 1=trilin, 5=cubicbspline\n");
   printf("\n");

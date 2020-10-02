@@ -179,7 +179,7 @@ class GMM:
         )
         return gaussianLikelihoods.T
 
-    def getGaussianPosteriors(self, data, classPriors):
+    def getGaussianPosteriors(self, data, classPriors, dataWeight=1, priorWeight=1 ):
 
         #
         numberOfVoxels = data.shape[0]
@@ -198,12 +198,9 @@ class GMM:
                 mean = np.expand_dims(self.means[gaussianNumber, :], 1)
                 variance = self.variances[gaussianNumber, :, :]
 
-                gaussianLikelihoods = self.getGaussianLikelihoods(
-                    data, mean, variance
-                )
-                gaussianPosteriors[:, gaussianNumber] = gaussianLikelihoods * (
-                    self.mixtureWeights[gaussianNumber] * classPrior
-                )
+                gaussianLikelihoods = self.getGaussianLikelihoods(data, mean, variance)
+                gaussianPosteriors[:, gaussianNumber] = gaussianLikelihoods**dataWeight \
+                                        * ( self.mixtureWeights[gaussianNumber] * classPrior )**priorWeight
         normalizer = np.sum(gaussianPosteriors, axis=1) + eps
         gaussianPosteriors = gaussianPosteriors / np.expand_dims(normalizer, 1)
 
@@ -497,15 +494,13 @@ class GMM:
 
     def tiedGaussiansFit(self, data, gaussianPosteriors):
 
-        posterior_1 = gaussianPosteriors[:, self.gaussNumber1Tied].reshape(
-            -1, 1
-        )
-        hyperMean_1 = np.expand_dims(
-            self.hyperMeans[self.gaussNumber1Tied, :], 1
-        )
-        hyperMeanNumberOfMeasurements_1 = self.hyperMeansNumberOfMeasurements[
-            self.gaussNumber1Tied
-        ]
+        if self.previousVariances is None:
+            self.previousVariances = self.variances.copy()
+            return
+
+        posterior_1 = gaussianPosteriors[:, self.gaussNumber1Tied].reshape(-1, 1)
+        hyperMean_1 = np.expand_dims(self.hyperMeans[self.gaussNumber1Tied, :], 1)
+        hyperMeanNumberOfMeasurements_1 = self.hyperMeansNumberOfMeasurements[self.gaussNumber1Tied]
         hyperVariance_1 = self.hyperVariances[self.gaussNumber1Tied, :, :]
         hyperVarianceNumberOfMeasurements_1 = self.hyperVariancesNumberOfMeasurements[
             self.gaussNumber1Tied

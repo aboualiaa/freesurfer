@@ -2104,24 +2104,36 @@ int MRImakeVox2VoxReg(MRI *targ, MRI *mov, int regtype, char *regname,
   /* Now we build the ARAS->BRAS matrix, which is the
      registration. Switch on our registration type. */
   switch (regtype) {
-  case VOX2VOXREGTYPE_FILE:
-  case VOX2VOXREGTYPE_FIND:
+    case VOX2VOXREGTYPE_FILE:
+    case VOX2VOXREGTYPE_FIND:
 
-    /* If we're reading a file, copy the file from the input or
-    generate one from our data file location. */
-    if (VOX2VOXREGTYPE_FILE == regtype) {
-      strncpy(fullregname, regname, sizeof(fullregname));
-    } else if (VOX2VOXREGTYPE_FIND == regtype) {
-      /* Copy the movable volume name and find the last / in the
-         file name. From there, copy in "register.dat" for our file
-         name. */
-      strncpy(regpath, mov->fname, sizeof(regpath));
-      cur_char = regpath;
-      base_end = regpath;
-      while (nullptr != cur_char && '\0' != *cur_char) {
-        if ('/' == *cur_char)
-          base_end = cur_char;
-        cur_char++;
+      /* If we're reading a file, copy the file from the input or
+      generate one from our data file location. */
+      if (VOX2VOXREGTYPE_FILE == regtype) {
+	int written = snprintf(fullregname, 1000-1, "%s", regname);
+	if( written == (1000-1)) {
+	  std::cerr << __FUNCTION__ << ": Truncation writing fullregname" << std::endl;
+	}
+      }
+      else if (VOX2VOXREGTYPE_FIND == regtype) {
+        /* Copy the movable volume name and find the last / in the
+           file name. From there, copy in "register.dat" for our file
+           name. */
+	int written = snprintf(regpath, 1000-1, "%s", mov->fname);
+	if( written == (1000-1)) {
+	  std::cerr << __FUNCTION__ << ": Truncation writing regpath" << std::endl;
+	}
+        cur_char = regpath;
+        base_end = regpath;
+        while (NULL != cur_char && '\0' != *cur_char) {
+          if ('/' == *cur_char) base_end = cur_char;
+          cur_char++;
+        }
+        *base_end = '\0';
+        written = snprintf(fullregname, sizeof(fullregname), "%s/%s", regpath, "register.dat");
+	if( written == sizeof(fullregname) ) {
+	  std::cerr << __FUNCTION__ << ": Truncation writing fullregname (with regpath)" << std::endl;
+	}
       }
       *base_end = '\0';
       snprintf(fullregname, sizeof(fullregname), "%s/%s", regpath,

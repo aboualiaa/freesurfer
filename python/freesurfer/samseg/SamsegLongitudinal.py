@@ -190,33 +190,15 @@ class SamsegLongitudinal:
             self.atlasDir, "atlasForAffineRegistration.txt.gz"
         )
 
-        affine = Affine(
-            imageFileName=self.sstFileNames[0],
-            meshCollectionFileName=affineRegistrationMeshCollectionFileName,
-            templateFileName=templateFileName,
-        )
-        self.imageToImageTransformMatrix, _ = affine.registerAtlas(
-            saveDir=sstDir, visualizer=self.visualizer
-        )
+        affine = Affine(imageFileName=self.sstFileNames[0],
+                         meshCollectionFileName=affineRegistrationMeshCollectionFileName,
+                         templateFileName=templateFileName)
+        self.imageToImageTransformMatrix, _ = affine.registerAtlas(savePath=sstDir, visualizer=self.visualizer)
 
     def preProcess(self):
 
-        sstDir, _ = os.path.split(self.sstFileNames[0])
-
-        self.sstModel = Samseg(
-            imageFileNames=self.sstFileNames,
-            atlasDir=self.atlasDir,
-            savePath=sstDir,
-            imageToImageTransformMatrix=self.imageToImageTransformMatrix,
-            userModelSpecifications=self.userModelSpecifications,
-            userOptimizationOptions=self.userOptimizationOptions,
-            visualizer=self.visualizer,
-            saveHistory=True,
-            targetIntensity=self.targetIntensity,
-            targetSearchStrings=self.targetSearchStrings,
-            modeNames=self.modeNames,
-            pallidumAsWM=self.pallidumAsWM,
-        )
+        # construct sstModel
+        self.constructSstModel()
 
         # =======================================================================================
         #
@@ -279,48 +261,13 @@ class SamsegLongitudinal:
             ..., 0:numberOfContrasts
         ]
         for timepointNumber in range(self.numberOfTimepoints):
-            self.imageBuffersList[timepointNumber] = combinedImageBuffers[
-                ...,
-                (timepointNumber + 1)
-                * numberOfContrasts : (timepointNumber + 2)
-                * numberOfContrasts,
-            ]
-        self.timepointModels = []
+            self.imageBuffersList[timepointNumber] = combinedImageBuffers[..., (timepointNumber + 1) * numberOfContrasts:
+                                                                          (timepointNumber + 2) * numberOfContrasts]
 
-        # Construction of the cross sectional model for each timepoint
-        for timepointNumber in range(self.numberOfTimepoints):
-            self.timepointModels.append(
-                Samseg(
-                    imageFileNames=self.imageFileNamesList[timepointNumber],
-                    atlasDir=self.atlasDir,
-                    savePath=self.savePath,
-                    imageToImageTransformMatrix=self.imageToImageTransformMatrix,
-                    userModelSpecifications=self.userModelSpecifications,
-                    userOptimizationOptions=self.userOptimizationOptions,
-                    visualizer=self.visualizer,
-                    saveHistory=True,
-                    targetIntensity=self.targetIntensity,
-                    targetSearchStrings=self.targetSearchStrings,
-                    modeNames=self.modeNames,
-                    pallidumAsWM=self.pallidumAsWM,
-                    savePosteriors=self.savePosteriors,
-                )
-            )
-            self.timepointModels[timepointNumber].mask = self.sstModel.mask
-            self.timepointModels[
-                timepointNumber
-            ].imageBuffers = self.imageBuffersList[timepointNumber]
-            self.timepointModels[
-                timepointNumber
-            ].voxelSpacing = self.sstModel.voxelSpacing
-            self.timepointModels[
-                timepointNumber
-            ].transform = self.sstModel.transform
-            self.timepointModels[
-                timepointNumber
-            ].cropping = self.sstModel.cropping
+        # construct timepoint models
+        self.constructTimepointModels()
 
-        self.visualizer.show(images=self.sstModel.imageBuffers, title="sst")
+        self.visualizer.show(images=self.sstModel.imageBuffers, title='sst')
         for timepointNumber in range(self.numberOfTimepoints):
             self.visualizer.show(
                 images=self.imageBuffersList[timepointNumber],
@@ -1112,3 +1059,49 @@ class SamsegLongitudinal:
 
         #
         return sstFileNames
+
+    def constructSstModel(self):
+
+        sstDir, _ = os.path.split(self.sstFileNames[0])
+
+        self.sstModel = Samseg(
+            imageFileNames=self.sstFileNames,
+            atlasDir=self.atlasDir,
+            savePath=sstDir,
+            imageToImageTransformMatrix=self.imageToImageTransformMatrix,
+            userModelSpecifications=self.userModelSpecifications,
+            userOptimizationOptions=self.userOptimizationOptions,
+            visualizer=self.visualizer,
+            saveHistory=True,
+            targetIntensity=self.targetIntensity,
+            targetSearchStrings=self.targetSearchStrings,
+            modeNames=self.modeNames,
+            pallidumAsWM=self.pallidumAsWM
+        )
+
+    def constructTimepointModels(self):
+
+        self.timepointModels = []
+
+        # Construction of the cross sectional model for each time point
+        for timepointNumber in range(self.numberOfTimepoints):
+            self.timepointModels.append(Samseg(
+                imageFileNames=self.imageFileNamesList[timepointNumber],
+                atlasDir=self.atlasDir,
+                savePath=self.savePath,
+                imageToImageTransformMatrix=self.imageToImageTransformMatrix,
+                userModelSpecifications=self.userModelSpecifications,
+                userOptimizationOptions=self.userOptimizationOptions,
+                visualizer=self.visualizer,
+                saveHistory=True,
+                targetIntensity=self.targetIntensity,
+                targetSearchStrings=self.targetSearchStrings,
+                modeNames=self.modeNames,
+                pallidumAsWM=self.pallidumAsWM,
+                savePosteriors=self.savePosteriors
+            ))
+            self.timepointModels[timepointNumber].mask = self.sstModel.mask
+            self.timepointModels[timepointNumber].imageBuffers = self.imageBuffersList[timepointNumber]
+            self.timepointModels[timepointNumber].voxelSpacing = self.sstModel.voxelSpacing
+            self.timepointModels[timepointNumber].transform = self.sstModel.transform
+            self.timepointModels[timepointNumber].cropping = self.sstModel.cropping

@@ -903,11 +903,18 @@ static IMAGE *TiffReadImage(const char *fname, int frame0) {
     case 8:
       type = PFBYTE;
       break;
-    case 16:
-      type = PFSHORT;
-      break;
-    case 32:
-      type = PFFLOAT;
+    case 4:
+      // The lack of break is deliberate and the 'fall through' comment is recognised by GCC
+      // extra_samples = 1;
+      nsamples = 3;
+      // fall through
+    case 3:
+      switch (bits_per_sample) {
+        default:
+        case 8:
+          type = PFRGB;
+          break;
+      }
       break;
     case 64:
       type = PFDOUBLE;

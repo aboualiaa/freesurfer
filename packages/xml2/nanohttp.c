@@ -1118,31 +1118,34 @@ static int xmlNanoHTTPConnectHost(const char *host, int port) {
  * extraction code. it work on Linux, if it work on your platform
  * and one want to enable it, send me the defined(foobar) needed
  */
-#if defined(HAVE_NETDB_H) && defined(HOST_NOT_FOUND) && defined(linux)
-      const char *h_err_txt = "";
+#if defined(HAVE_NETDB_H) && defined(HOST_NOT_FOUND) && defined(__linux__)
+	    const char *h_err_txt = "";
 
-      switch (h_errno) {
-      case HOST_NOT_FOUND:
-        h_err_txt = "Authoritive host not found";
-        break;
+	    switch (h_errno) {
+		case HOST_NOT_FOUND:
+		    h_err_txt = "Authoritive host not found";
+		    break;
 
-      case TRY_AGAIN:
-        h_err_txt = "Non-authoritive host not found or server failure.";
-        break;
+		case TRY_AGAIN:
+		    h_err_txt =
+			"Non-authoritive host not found or server failure.";
+		    break;
 
-      case NO_RECOVERY:
-        h_err_txt = "Non-recoverable errors:  FORMERR, REFUSED, or NOTIMP.";
-        break;
+		case NO_RECOVERY:
+		    h_err_txt =
+			"Non-recoverable errors:  FORMERR, REFUSED, or NOTIMP.";
+		    break;
 
-      case NO_ADDRESS:
-        h_err_txt = "Valid name, no data record of requested type.";
-        break;
+		case NO_ADDRESS:
+		    h_err_txt =
+			"Valid name, no data record of requested type.";
+		    break;
 
-      default:
-        h_err_txt = "No error text defined.";
-        break;
-      }
-      __xmlIOErr(XML_FROM_HTTP, 0, h_err_txt);
+		default:
+		    h_err_txt = "No error text defined.";
+		    break;
+	    }
+	    __xmlIOErr(XML_FROM_HTTP, 0, h_err_txt);
 #else
       __xmlIOErr(XML_FROM_HTTP, 0, "Failed to resolve host");
 #endif

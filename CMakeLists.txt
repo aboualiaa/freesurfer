@@ -238,8 +238,27 @@ endfunction()
 
 # project info
 cmake_minimum_required(VERSION 3.9)
-project(freesurfer)
-enable_language(C CXX Fortran)
+
+# requiring at least c++11 standard
+if(CMAKE_CXX_STANDARD EQUAL "98" )
+   message(FATAL_ERROR "CMAKE_CXX_STANDARD:STRING=98 is not supported in.")
+endif()
+
+# set the default language dialect settings (This must be done BEFORE the project call)
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+if(NOT CMAKE_CXX_STANDARD_REQUIRED)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+if(NOT CMAKE_CXX_EXTENSIONS)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
+
+project(freesurfer 
+  DESCRIPTION "An open source software suite for processing and analyzing (human) brain MRI images."
+  LANGUAGES C CXX Fortran
+)
 
 # a few build options
 option(MINIMAL "Only build core components" OFF)
@@ -251,6 +270,12 @@ option(BUILD_DNG "Build Doug's testing tools" OFF)
 option(FREEVIEW_LINEPROF "Build FreeView with lineprof enabled" OFF)
 option(PROFILING "Complile binaries for profiling with gprof" OFF)
 option(INSTALL_PYTHON_DEPENDENCIES "Install python package dependencies" ON)
+#  Modern compilers on new platforms often provide many more warnings than older compilers
+#  for example the gcc 7.5.0 compiler warnings about falling through switch statements
+#  without explicit breaks on every case.  This desired fallthrough behavior causes false
+#  compiler errors with "-Werror" turned on.  The WARNING_AS_ERROR option allows temporarily
+#  disabling warnings as errors to allow a more gradual move to supporting new compilers.
+option(WARNING_AS_ERROR "Convert build warnings to errors" ON)
 
 if(NOT APPLE)
   cmake_minimum_required(VERSION 3.9)
@@ -429,7 +454,7 @@ add_definitions(-DHAVE_ZLIB)
 # -------- gfortran/blas/lapack --------
 if(NOT APPLE)
   find_library(GFORTRAN_LIBRARIES
-    HINTS /usr/lib/gcc/*/*/
+    HINTS /usr/lib64 /usr/lib /usr/lib/gcc/*/*/
     NAMES libgfortran.a gfortran)
   find_library(BLAS_LIBRARIES NAMES libblas.a libopenblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
@@ -686,7 +711,10 @@ endif()
 
 # warnings
 if(NOT NO_CXX_WARN)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-sign-compare -Wno-unused-result -Wno-unused-parameter")
+  if(WARNING_AS_ERROR)
+    set(WARN_AS_ERROR_FLAG "-Werror")
+  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra ${WARN_AS_ERROR_FLAG} -Wno-sign-compare -Wno-unused-result -Wno-unused-parameter")
 else ()
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-deprecated-declarations -fpermissive") 
 endif()
@@ -862,191 +890,193 @@ add_subdirectories(AntsDenoiseImageFs
 # the following program subdirectories aren't required in the standard recon-all stream.
 # they will be built by default, but not if a minimal build is configured
 if(NOT MINIMAL)
-  add_subdirectories(anatomicuts
-                     attic
-                     BrainstemSS
-                     diffusion_tool
-                     dummy
-                     freeview
-                     fsfast
-                     fslutils
-                     hiam_make_surfaces
-                     hiam_make_template
-                     hiam_register
-                     HippoSF
-                     histo_compute_joint_density
-                     histo_register_block
-                     histo_synthesize
-                     label2flat
-                     label2patch
-                     mkxsubjreg
-                     matlab
-                     mri_average
-                     mri_bias
-                     mri_ca_tissue_parms
-                     mri_ca_train
-                     mri_cal_renormalize_gca
-                     mri_cnr
-                     mri_compile_edits
-                     mri_compute_change_map
-                     mri_compute_volume_fractions
-                     mri_concatenate_gcam
-                     mri_copy_values
-                     mri_cor2label
-                     mri_correct_segmentations
-                     mri_cvs_register
-                     mri_dct_align
-                     mri_distance_transform
-                     mri_dist_surf_label
-                     mri_evaluate_morph
-                     mri_extract
-                     mri_extract_fcd_features
-                     mri_extract_label
-                     mri_fdr
-                     mri_fieldsign
-                     mri_fit_bias
-                     mri_fslmat_to_lta
-                     mri_fuse_intensity_images
-                     mri_gca_ambiguous
-                     mri_glmfit
-                     mri_gtmpvc
-                     mri_gtmseg
-                     mri_hausdorff_dist
-                     mri_head
-                     mri_hires_register
-                     mri_histo_eq
-                     mri_jacobian
-                     mri_joint_density
-                     mri_label_histo
-                     mri_label_vals
-                     mri_label_volume
-                     mri_linear_register
-                     mri_map_cpdat
-                     mri_mark_temporal_lobe
-                     mri_mcsim
-                     mri_mi
-                     mri_modify
-                     mri_morphology
-                     mri_ms_fitparms
-                     mri_nlfilter
-                     mri_otl
-                     mri_paint
-                     mri_parse_sdcmdir
-                     mri_path2label
-                     mri_polv
-                     mri_probe_ima
-                     mri_reduce
-                     mri_rf_label
-                     mri_rf_long_train
-                     mri_rf_train
-                     mri_ribbon
-                     mri_rigid_register
-                     mri_sbbr
-                     mri_segcentroids
-                     mri_seghead
-                     mri_strip_nonwhite
-                     mri_strip_subject_info
-                     mri_surfacemask
-                     mri_synthesize
-                     mri_topologycorrection
-                     mri_train
-                     mri_transform
-                     mri_twoclass
-                     mri_volcluster
-                     mri_volsynth
-                     mri_warp_convert
-                     mri_wbc
-                     mri_xvolavg
-                     mri_z2p
-                     mris2rgb
-                     mris_annot_to_segmentation
-                     mris_apply_reg
-                     mris_average_curvature
-                     mris_BA_segment
-                     mris_ca_train
-                     mris_compute_acorr
-                     mris_compute_lgi
-                     mris_compute_overlap
-                     mris_compute_parc_overlap
-                     mris_compute_volume_fractions
-                     mris_congeal
-                     mris_copy_header
-                     mris_deform
-                     mris_distance_map
-                     mris_distance_to_label
-                     mris_distance_transform
-                     mris_entropy
-                     mris_errors
-                     mris_expand
-                     mris_extract_patches
-                     mris_fill
-                     mris_find_flat_regions
-                     mris_flatten
-                     mris_fwhm
-                     mris_hausdorff_dist
-                     mris_init_global_tractography
-                     mris_interpolate_warp
-                     mris_label_area
-                     mris_label_calc
-                     mris_label_mode
-                     mris_make_average_surface
-                     mris_make_face_parcellation
-                     mris_make_template
-                     mris_map_cuts
-                     mris_merge_parcellations
-                     mris_mesh_subdivide
-                     mris_morph_stats
-                     mris_ms_refine
-                     mris_multiscale_stats
-                     mris_niters2fwhm
-                     mris_parcellate_connectivity
-                     mris_pmake
-                     mris_register_label_map
-                     mris_register_to_volume
-                     mris_remove_variance
-                     mris_remesh
-                     mris_resample
-                     mris_rescale
-                     mris_reverse
-                     mris_rf_label
-                     mris_rf_train
-                     mris_rotate
-                     mris_sample_label
-                     mris_sample_parc
-                     mris_seg2annot
-                     mris_segment
-                     mris_segment_vals
-                     mris_segmentation_stats
-                     mris_shrinkwrap
-                     mris_simulate_atrophy
-                     mris_smooth_intracortical
-                     mris_spherical_average
-                     mris_surface_to_vol_distances
-                     mris_talairach
-                     mris_thickness_comparison
-                     mris_transform
-                     mris_translate_annotation
-                     mris_transmantle_dysplasia_paths
-                     mris_volume
-                     mris_warp
-                     mris_watershed
-                     mrisp_write
-                     nmovie_qt
-                     oct_register_mosaic
-                     optseq2
-                     qdecproject
-                     qdec_glmfit
-                     resurf
-                     spline3
-                     stat_normalize
-                     stim_polar
-                     swi_processing
-                     template
-                     test_makevol
-                     ThalamicNuclei
-                     trc
-                     tridec
-                     )
+  add_subdirectories(
+    anatomicuts
+    attic
+    BrainstemSS
+    diffusion_tool
+    dummy
+    freeview
+    fsfast
+    fslutils
+    hiam_make_surfaces
+    hiam_make_template
+    hiam_register
+    HippoSF
+    histo_compute_joint_density
+    histo_register_block
+    histo_synthesize
+    label2flat
+    label2patch
+    mkxsubjreg
+    matlab
+    mri_average
+    mri_bias
+    mri_ca_tissue_parms
+    mri_ca_train
+    mri_cal_renormalize_gca
+    mri_cnr
+    mri_compile_edits
+    mri_compute_change_map
+    mri_compute_volume_fractions
+    mri_concatenate_gcam
+    mri_copy_values
+    mri_cor2label
+    mri_correct_segmentations
+    mri_cvs_register
+    mri_dct_align
+    mri_distance_transform
+    mri_dist_surf_label
+    mri_evaluate_morph
+    mri_extract
+    mri_extract_fcd_features
+    mri_extract_label
+    mri_fdr
+    mri_fieldsign
+    mri_fit_bias
+    mri_fslmat_to_lta
+    mri_fuse_intensity_images
+    mri_gca_ambiguous
+    mri_glmfit
+    mri_gtmpvc
+    mri_gtmseg
+    mri_hausdorff_dist
+    mri_head
+    mri_hires_register
+    mri_histo_eq
+    mri_jacobian
+    mri_joint_density
+    mri_label_histo
+    mri_label_vals
+    mri_label_volume
+    mri_linear_register
+    mri_map_cpdat
+    mri_mark_temporal_lobe
+    mri_mcsim
+    mri_mi
+    mri_modify
+    mri_morphology
+    mri_ms_fitparms
+    mri_nlfilter
+    mri_otl
+    mri_paint
+    mri_parse_sdcmdir
+    mri_path2label
+    mri_polv
+    mri_probe_ima
+    mri_reduce
+    mri_rf_label
+    mri_rf_long_train
+    mri_rf_train
+    mri_ribbon
+    mri_rigid_register
+    mri_sbbr
+    mri_segcentroids
+    mri_seghead
+    mri_segment_hypothalamic_subunits
+    mri_strip_nonwhite
+    mri_strip_subject_info
+    mri_surfacemask
+    mri_synthesize
+    mri_topologycorrection
+    mri_train
+    mri_transform
+    mri_twoclass
+    mri_volcluster
+    mri_volsynth
+    mri_warp_convert
+    mri_wbc
+    mri_xvolavg
+    mri_z2p
+    mris2rgb
+    mris_annot_to_segmentation
+    mris_apply_reg
+    mris_average_curvature
+    mris_BA_segment
+    mris_ca_train
+    mris_compute_acorr
+    mris_compute_lgi
+    mris_compute_overlap
+    mris_compute_parc_overlap
+    mris_compute_volume_fractions
+    mris_congeal
+    mris_copy_header
+    mris_deform
+    mris_distance_map
+    mris_distance_to_label
+    mris_distance_transform
+    mris_entropy
+    mris_errors
+    mris_expand
+    mris_extract_patches
+    mris_fill
+    mris_find_flat_regions
+    mris_flatten
+    mris_fwhm
+    mris_hausdorff_dist
+    mris_init_global_tractography
+    mris_interpolate_warp
+    mris_label_area
+    mris_label_calc
+    mris_label_mode
+    mris_make_average_surface
+    mris_make_face_parcellation
+    mris_make_template
+    mris_map_cuts
+    mris_merge_parcellations
+    mris_mesh_subdivide
+    mris_morph_stats
+    mris_ms_refine
+    mris_multiscale_stats
+    mris_niters2fwhm
+    mris_parcellate_connectivity
+    mris_pmake
+    mris_register_label_map
+    mris_register_to_volume
+    mris_remove_variance
+    mris_remesh
+    mris_resample
+    mris_rescale
+    mris_reverse
+    mris_rf_label
+    mris_rf_train
+    mris_rotate
+    mris_sample_label
+    mris_sample_parc
+    mris_seg2annot
+    mris_segment
+    mris_segment_vals
+    mris_segmentation_stats
+    mris_shrinkwrap
+    mris_simulate_atrophy
+    mris_smooth_intracortical
+    mris_spherical_average
+    mris_surface_to_vol_distances
+    mris_talairach
+    mris_thickness_comparison
+    mris_transform
+    mris_translate_annotation
+    mris_transmantle_dysplasia_paths
+    mris_volume
+    mris_warp
+    mris_watershed
+    mrisp_write
+    nmovie_qt
+    oct_register_mosaic
+    optseq2
+    qdecproject
+    qdec_glmfit
+    resurf
+    spline3
+    stat_normalize
+    stim_polar
+    swi_processing
+    template
+    test_makevol
+    ThalamicNuclei
+    trc
+    tridec
+  )
 endif()
 
 if(INFANT_MODULE)

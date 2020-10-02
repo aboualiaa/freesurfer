@@ -406,8 +406,8 @@ protected slots:
   void OnLoadROI();
   void OnSaveROI();
   void OnSaveROIAs();
-  void OnCloseROI(const QList<Layer *> &layers = QList<Layer *>());
-  void OnNewPointSet();
+  void OnCloseROI(const QList<Layer*>& layers = QList<Layer*>());
+  void OnNewPointSet(bool bSilent = false);
   void OnLoadPointSet();
   void OnSavePointSet(bool bForce = false);
   void OnSavePointSetAs();

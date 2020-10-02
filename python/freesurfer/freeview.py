@@ -29,6 +29,14 @@ class Freeview:
             self.threshold = threshold
             self.opacity = opacity
 
+    class AnnotTag:
+        '''Configuration for annotation tags. See surf() for usage.'''
+        def __init__(self, data, lut=None, name=None):
+            self.data = Overlay(data.squeeze()) if isinstance(data, np.ndarray) else data
+            if lut is not None:
+                self.data.lut = lut
+            self.name = name
+
     class MRISPTag:
         """Configuration for mrisp tags. See surf() for usage."""
 
@@ -70,16 +78,8 @@ class Freeview:
         flag = "-v " + filename + self._kwargs_to_tags(kwargs)
         self.add_flag(flag)
 
-    def surf(
-        self,
-        surface,
-        overlay=None,
-        mrisp=None,
-        sphere=None,
-        curvature=None,
-        **kwargs
-    ):
-        """
+    def surf(self, surface, overlay=None, annot=None, mrisp=None, sphere=None, curvature=None, **kwargs):
+        '''
         Loads a surface in the freeview session. If the surface provided is not
         a filepath, then the input will be saved in a temporary directory. Any
         key/value tags allowed on the command line can be provided as arguments.
@@ -99,6 +99,8 @@ class Freeview:
             surface: An existing filename or Surface instance.
             overlay: A file, array, Overlay, or OverlayTag instance to project onto the surface. Multiple overlays can
                 be provided with a list.
+            annot: An Overlay or AnnotTag instance to annotate the surface. Multiple
+                annotations can be provided with a list. Overlays must have embedded lookup tables.
             mrisp: A file, array, Image, or MRISPTag to project onto the surface. Multiple parameterizations can
                 be provided with a list.
             curvature: A file, array, or Overlay instance to load as the surface curvature.
@@ -137,6 +139,18 @@ class Freeview:
                 if config.opacity is not None:
                     tag += ":overlay_opacity=%f" % config.opacity
                 kwargs["opts"] = tag + kwargs.get("opts", "")
+
+        # configure (potentially multiple) annots
+        if annot is not None:
+            annot = list(annot) if isinstance(annot, (list, tuple)) else [annot]
+            for an in annot:
+                config = an if isinstance(an, Freeview.AnnotTag) else Freeview.AnnotTag(an)
+                if config.name is None:
+                    config.name = 'annotation'
+                annot_filename = self._vol_to_file(config.data, name=config.name, force=Overlay, ext='annot')
+                if annot_filename is not None:
+                    tag = ':annot=%s' % annot_filename
+                    kwargs['opts'] = tag + kwargs.get('opts', '')
 
         # configure (potentially multiple) mrisps
         if mrisp is not None:
@@ -232,8 +246,8 @@ class Freeview:
 
         return tags + extra_tags
 
-    def _vol_to_file(self, volume, name=None, force=None):
-        """
+    def _vol_to_file(self, volume, name=None, force=None, ext='mgz'):
+        '''
         Converts an unknown volume type (whether it's a filename, array, or
         other object) into a valid file.
         """
@@ -260,13 +274,18 @@ class Freeview:
         # configure filename
         if not name:
             if isinstance(volume, Overlay):
-                filename = self._unique_filename("overlay.mgz")
+                filename = self._unique_filename('overlay.%s' % ext)
             elif isinstance(volume, Image):
-                filename = self._unique_filename("image.mgz")
+                filename = self._unique_filename('image.%s' % ext)
             else:
-                filename = self._unique_filename("volume.mgz")
+                filename = self._unique_filename('volume.%s' % ext)
         else:
-            filename = self._unique_filename(name.replace(" ", "-") + ".mgz")
+            filename = self._unique_filename(name.replace(' ', '-') + '.' + ext)
+
+        # ensure annotations were provided lookup tables
+        if ext == 'annot' and volume.lut is None:
+            error('cannot save annotation without embedded lookup table')
+            return None
 
         # check if fs array container
         if isinstance(volume, (Overlay, Image, Volume)):
@@ -362,7 +381,7 @@ class Freeview:
         name = name_ext[0]
         ext = "." + name_ext[1] if len(name_ext) == 2 else ""
         for n in range(2, 10000):
-            fullpath = os.path.join(directory, "%s-%d%s" % (name, n, ext))
+            fullpath = os.path.join(directory, '%s-%02d%s' % (name, n, ext))
             if not os.path.exists(fullpath):
                 return fullpath
         raise RuntimeError(
