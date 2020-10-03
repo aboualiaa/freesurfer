@@ -622,7 +622,10 @@ class MRIDeepNet(object):
                             ),
                             validation_steps=validation_steps,
                             steps_per_epoch=steps_per_epoch,
-                            callbacks=[callback, reduce_lr,],
+                            callbacks=[
+                                callback,
+                                reduce_lr,
+                            ],
                             verbose=1,
                             max_queue_size=100,
                         )
@@ -637,7 +640,10 @@ class MRIDeepNet(object):
                             ),
                             validation_steps=validation_steps,
                             steps_per_epoch=steps_per_epoch,
-                            callbacks=[callback, reduce_lr,],
+                            callbacks=[
+                                callback,
+                                reduce_lr,
+                            ],
                             verbose=1,
                             max_queue_size=100,
                         )
@@ -653,7 +659,10 @@ class MRIDeepNet(object):
                             ),
                             validation_steps=validation_steps,
                             steps_per_epoch=steps_per_epoch,
-                            callbacks=[callback, reduce_lr,],
+                            callbacks=[
+                                callback,
+                                reduce_lr,
+                            ],
                             verbose=1,
                             max_queue_size=100,
                         )
@@ -669,7 +678,10 @@ class MRIDeepNet(object):
                             ),
                             validation_steps=validation_steps,
                             steps_per_epoch=steps_per_epoch,
-                            callbacks=[callback, reduce_lr,],
+                            callbacks=[
+                                callback,
+                                reduce_lr,
+                            ],
                             verbose=1,
                             max_queue_size=100,
                         )
@@ -689,7 +701,10 @@ class MRIDeepNet(object):
                     ),
                     validation_steps=validation_steps,
                     steps_per_epoch=steps_per_epoch,
-                    callbacks=[callback, reduce_lr,],
+                    callbacks=[
+                        callback,
+                        reduce_lr,
+                    ],
                     verbose=1,
                     max_queue_size=1000,
                 )
@@ -718,7 +733,10 @@ class MRIDeepNet(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=10,
                     )
@@ -733,7 +751,10 @@ class MRIDeepNet(object):
                         ),
                         epochs=epochs,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=10,
                     )
@@ -753,7 +774,10 @@ class MRIDeepNet(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=100,
                     )
@@ -774,7 +798,10 @@ class MRIDeepNet(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=100,
                     )
@@ -790,7 +817,10 @@ class MRIDeepNet(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=100,
                     )
@@ -805,7 +835,10 @@ class MRIDeepNet(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=100,
                     )
@@ -823,7 +856,10 @@ class MRIDeepNet(object):
                     ),
                     validation_steps=validation_steps,
                     steps_per_epoch=steps_per_epoch,
-                    callbacks=[callback, reduce_lr,],
+                    callbacks=[
+                        callback,
+                        reduce_lr,
+                    ],
                     verbose=1,
                     max_queue_size=100,
                 )
@@ -840,7 +876,10 @@ class MRIDeepNet(object):
                 ),
                 validation_steps=validation_steps,
                 steps_per_epoch=steps_per_epoch,
-                callbacks=[callback, reduce_lr,],
+                callbacks=[
+                    callback,
+                    reduce_lr,
+                ],
                 verbose=1,
                 max_queue_size=100,
             )
@@ -3354,7 +3393,15 @@ class FeatureGenerator(object):
             xflash = self.apply_flash(
                 curr_theta_flash, xflash_pd, xflash_t1, xflash_t2
             )
-            xflash_feat = np.stack((xflash, x_talx, x_taly, x_talz,), axis=-2)
+            xflash_feat = np.stack(
+                (
+                    xflash,
+                    x_talx,
+                    x_taly,
+                    x_talz,
+                ),
+                axis=-2,
+            )
             xflash_feat = xflash_feat.reshape(xflash_feat.shape[:-1])
 
             # print(time.time() - t3)
@@ -3451,7 +3498,15 @@ class FeatureGenerator(object):
             xflash = self.apply_flash(
                 curr_theta_flash, xflash_pd, xflash_t1, xflash_t2
             )
-            xflash_feat = np.stack((xflash, x_talx, x_taly, x_talz,), axis=-2)
+            xflash_feat = np.stack(
+                (
+                    xflash,
+                    x_talx,
+                    x_taly,
+                    x_talz,
+                ),
+                axis=-2,
+            )
             xflash_feat = xflash_feat.reshape(xflash_feat.shape[:-1])
 
             # print(time.time() - t3)

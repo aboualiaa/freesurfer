@@ -190,10 +190,14 @@ class SamsegLongitudinal:
             self.atlasDir, "atlasForAffineRegistration.txt.gz"
         )
 
-        affine = Affine(imageFileName=self.sstFileNames[0],
-                         meshCollectionFileName=affineRegistrationMeshCollectionFileName,
-                         templateFileName=templateFileName)
-        self.imageToImageTransformMatrix, _ = affine.registerAtlas(savePath=sstDir, visualizer=self.visualizer)
+        affine = Affine(
+            imageFileName=self.sstFileNames[0],
+            meshCollectionFileName=affineRegistrationMeshCollectionFileName,
+            templateFileName=templateFileName,
+        )
+        self.imageToImageTransformMatrix, _ = affine.registerAtlas(
+            savePath=sstDir, visualizer=self.visualizer
+        )
 
     def preProcess(self):
 
@@ -261,13 +265,17 @@ class SamsegLongitudinal:
             ..., 0:numberOfContrasts
         ]
         for timepointNumber in range(self.numberOfTimepoints):
-            self.imageBuffersList[timepointNumber] = combinedImageBuffers[..., (timepointNumber + 1) * numberOfContrasts:
-                                                                          (timepointNumber + 2) * numberOfContrasts]
+            self.imageBuffersList[timepointNumber] = combinedImageBuffers[
+                ...,
+                (timepointNumber + 1)
+                * numberOfContrasts : (timepointNumber + 2)
+                * numberOfContrasts,
+            ]
 
         # construct timepoint models
         self.constructTimepointModels()
 
-        self.visualizer.show(images=self.sstModel.imageBuffers, title='sst')
+        self.visualizer.show(images=self.sstModel.imageBuffers, title="sst")
         for timepointNumber in range(self.numberOfTimepoints):
             self.visualizer.show(
                 images=self.imageBuffersList[timepointNumber],
@@ -838,11 +846,15 @@ class SamsegLongitudinal:
             )
 
             #
-            nodePositionsBeforeDeformation = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-                nodePositionsBeforeDeformation, transformUsedForEstimation
+            nodePositionsBeforeDeformation = (
+                self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                    nodePositionsBeforeDeformation, transformUsedForEstimation
+                )
             )
-            nodePositionsAfterDeformation = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-                nodePositionsAfterDeformation, transformUsedForEstimation
+            nodePositionsAfterDeformation = (
+                self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                    nodePositionsAfterDeformation, transformUsedForEstimation
+                )
             )
             estimatedUpdate = (
                 nodePositionsAfterDeformation - nodePositionsBeforeDeformation
@@ -898,9 +910,9 @@ class SamsegLongitudinal:
                     averagePrecision += np.linalg.inv(variance)
                 averagePrecision /= self.numberOfTimepoints
 
-                latentVarianceNumberOfMeasurements = self.latentVariancesNumberOfMeasurements[
-                    gaussianNumber
-                ]
+                latentVarianceNumberOfMeasurements = (
+                    self.latentVariancesNumberOfMeasurements[gaussianNumber]
+                )
                 latentVariance = (
                     np.linalg.inv(averagePrecision)
                     * (
@@ -916,9 +928,9 @@ class SamsegLongitudinal:
         if self.updateLatentMixtureWeights:
             numberOfClasses = len(self.sstModel.gmm.numberOfGaussiansPerClass)
             for classNumber in range(numberOfClasses):
-                numberOfComponents = self.sstModel.gmm.numberOfGaussiansPerClass[
-                    classNumber
-                ]
+                numberOfComponents = (
+                    self.sstModel.gmm.numberOfGaussiansPerClass[classNumber]
+                )
                 averageInLogDomain = np.zeros(numberOfComponents)
                 for componentNumber in range(numberOfComponents):
                     gaussianNumber = (
@@ -1076,7 +1088,7 @@ class SamsegLongitudinal:
             targetIntensity=self.targetIntensity,
             targetSearchStrings=self.targetSearchStrings,
             modeNames=self.modeNames,
-            pallidumAsWM=self.pallidumAsWM
+            pallidumAsWM=self.pallidumAsWM,
         )
 
     def constructTimepointModels(self):
@@ -1085,23 +1097,33 @@ class SamsegLongitudinal:
 
         # Construction of the cross sectional model for each time point
         for timepointNumber in range(self.numberOfTimepoints):
-            self.timepointModels.append(Samseg(
-                imageFileNames=self.imageFileNamesList[timepointNumber],
-                atlasDir=self.atlasDir,
-                savePath=self.savePath,
-                imageToImageTransformMatrix=self.imageToImageTransformMatrix,
-                userModelSpecifications=self.userModelSpecifications,
-                userOptimizationOptions=self.userOptimizationOptions,
-                visualizer=self.visualizer,
-                saveHistory=True,
-                targetIntensity=self.targetIntensity,
-                targetSearchStrings=self.targetSearchStrings,
-                modeNames=self.modeNames,
-                pallidumAsWM=self.pallidumAsWM,
-                savePosteriors=self.savePosteriors
-            ))
+            self.timepointModels.append(
+                Samseg(
+                    imageFileNames=self.imageFileNamesList[timepointNumber],
+                    atlasDir=self.atlasDir,
+                    savePath=self.savePath,
+                    imageToImageTransformMatrix=self.imageToImageTransformMatrix,
+                    userModelSpecifications=self.userModelSpecifications,
+                    userOptimizationOptions=self.userOptimizationOptions,
+                    visualizer=self.visualizer,
+                    saveHistory=True,
+                    targetIntensity=self.targetIntensity,
+                    targetSearchStrings=self.targetSearchStrings,
+                    modeNames=self.modeNames,
+                    pallidumAsWM=self.pallidumAsWM,
+                    savePosteriors=self.savePosteriors,
+                )
+            )
             self.timepointModels[timepointNumber].mask = self.sstModel.mask
-            self.timepointModels[timepointNumber].imageBuffers = self.imageBuffersList[timepointNumber]
-            self.timepointModels[timepointNumber].voxelSpacing = self.sstModel.voxelSpacing
-            self.timepointModels[timepointNumber].transform = self.sstModel.transform
-            self.timepointModels[timepointNumber].cropping = self.sstModel.cropping
+            self.timepointModels[
+                timepointNumber
+            ].imageBuffers = self.imageBuffersList[timepointNumber]
+            self.timepointModels[
+                timepointNumber
+            ].voxelSpacing = self.sstModel.voxelSpacing
+            self.timepointModels[
+                timepointNumber
+            ].transform = self.sstModel.transform
+            self.timepointModels[
+                timepointNumber
+            ].cropping = self.sstModel.cropping

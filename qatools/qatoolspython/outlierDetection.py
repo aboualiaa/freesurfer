@@ -176,7 +176,7 @@ def readAsegStats(path_aseg_stats):
 
 def outlierTable():
     """
-    A function to provide normative values for Freesurfer segmentations and 
+    A function to provide normative values for Freesurfer segmentations and
     parcellations.
 
     """

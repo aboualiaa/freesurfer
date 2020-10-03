@@ -61,7 +61,7 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_forrest";
 
-std::string testDir, trainListFile, maskFile, asegFile, orientFile;
+std::string    testDir, trainListFile, maskFile, asegFile, orientFile;
 vector<char *> tractFileList;
 
 struct utsname uts;
@@ -102,7 +102,8 @@ int main(int argc, char **argv) {
   cputimer.reset();
 
   cout << "Reading test subject data..." << endl;
-  myforrest.ReadTestSubject(testDir.c_str(), maskFile.c_str(), asegFile.c_str(), orientFile.c_str());
+  myforrest.ReadTestSubject(testDir.c_str(), maskFile.c_str(), asegFile.c_str(),
+                            orientFile.c_str());
 
   // Get volume dimensions from test subject
   nx = myforrest.GetNx();
@@ -110,7 +111,8 @@ int main(int argc, char **argv) {
   nz = myforrest.GetNz();
 
   cout << "Reading training subject data..." << endl;
-  myforrest.ReadTrainingSubjects(trainListFile.c_str(), maskFile.c_str(), asegFile.c_str(), orientFile.c_str(),
+  myforrest.ReadTrainingSubjects(trainListFile.c_str(), maskFile.c_str(),
+                                 asegFile.c_str(), orientFile.c_str(),
                                  tractFileList);
 
   // Get total number of training samples

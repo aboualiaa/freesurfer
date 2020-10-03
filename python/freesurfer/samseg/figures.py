@@ -210,7 +210,12 @@ class ShowFigures:
                 top_alpha=alpha,
             )
         return [
-            {"name": name, "data": image, "visible": visibility, "cmap": cmap,}
+            {
+                "name": name,
+                "data": image,
+                "visible": visibility,
+                "cmap": cmap,
+            }
             for name, image in zip(names, image_list)
         ]
 
@@ -291,7 +296,7 @@ class ShowFigures:
         if self.movie_flag:
             layer_sequence = self.movies.get(window_id)
             if layer_sequence:
-                #layers = layer_sequence.rewind()
+                # layers = layer_sequence.rewind()
                 layers = layer_sequence.skip_to_end()
                 title = layer_sequence.title
                 self.hdav_view(layers, window_id, title)

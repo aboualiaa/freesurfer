@@ -14,7 +14,7 @@ class VecInt(Layer):
     def __init__(self, indexing="ij", method="ode", int_steps=7, **kwargs):
         """
         Vector Integration Layer
-        
+
         Parameters:
             method can be any of the methods in neuron.utils.integrate_vec
         """
@@ -64,27 +64,27 @@ class SpatialTransformer(Layer):
     """
     N-D Spatial Transformer Tensorflow / Keras Layer
 
-    The Layer can handle both affine and dense transforms. 
+    The Layer can handle both affine and dense transforms.
     Both transforms are meant to give a 'shift' from the current position.
     Therefore, a dense transform gives displacements (not absolute locations) at each voxel,
-    and an affine transform gives the *difference* of the affine matrix from 
+    and an affine transform gives the *difference* of the affine matrix from
     the identity matrix.
 
 
-    Originally, this code was based on voxelmorph code, which 
-    was in turn transformed to be dense with the help of (affine) STN code 
+    Originally, this code was based on voxelmorph code, which
+    was in turn transformed to be dense with the help of (affine) STN code
     via https://github.com/kevinzakka/spatial-transformer-network
 
-    Since then, we've re-written the code to be generalized to any 
+    Since then, we've re-written the code to be generalized to any
     dimensions, and along the way wrote grid and interpolation functions
     """
 
     def __init__(self, interp_method="linear", indexing="ij", **kwargs):
         """
-        Parameters: 
+        Parameters:
             interp_method: 'linear' or 'nearest'
             indexing (default: 'ij'): 'ij' (matrix) or 'xy' (cartesian)
-                'xy' indexing will have the first two entries of the flow 
+                'xy' indexing will have the first two entries of the flow
                 (along last axis) flipped compared to 'ij' indexing
         """
         self.interp_method = interp_method
@@ -207,9 +207,9 @@ class SpatialTransformer(Layer):
 
 
 class LocalBiasLayer(Layer):
-    """ 
+    """
     local bias layer
-    
+
     A layer with an additive bias at each volume element
     """
 
@@ -237,7 +237,7 @@ class LocalBiasLayer(Layer):
 
 
 class LocalLinearLayer(Layer):
-    """ 
+    """
     local linear layer
     """
 

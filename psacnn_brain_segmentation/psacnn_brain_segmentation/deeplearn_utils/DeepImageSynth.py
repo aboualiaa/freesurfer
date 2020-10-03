@@ -129,7 +129,7 @@ class DeepImageSynthCallback(Callback):
 def fetch_training_data_files(
     fs_dir, subjects_dir, img_input_type, training_subject_idxs
 ):
-    """ assumes a freesurfer directory structure
+    """assumes a freesurfer directory structure
     # Arguments
     :param fs_dir: directory with all the scanner freesurfer results stored
     :param src_scanner: scanner directory name from which we want to extract training images
@@ -715,7 +715,10 @@ class DeepImageSynth(object):
                             ),
                             validation_steps=validation_steps,
                             steps_per_epoch=steps_per_epoch,
-                            callbacks=[callback, reduce_lr,],
+                            callbacks=[
+                                callback,
+                                reduce_lr,
+                            ],
                             verbose=1,
                             max_queue_size=100,
                         )
@@ -730,7 +733,10 @@ class DeepImageSynth(object):
                             ),
                             validation_steps=validation_steps,
                             steps_per_epoch=steps_per_epoch,
-                            callbacks=[callback, reduce_lr,],
+                            callbacks=[
+                                callback,
+                                reduce_lr,
+                            ],
                             verbose=1,
                             max_queue_size=100,
                         )
@@ -746,7 +752,10 @@ class DeepImageSynth(object):
                             ),
                             validation_steps=validation_steps,
                             steps_per_epoch=steps_per_epoch,
-                            callbacks=[callback, reduce_lr,],
+                            callbacks=[
+                                callback,
+                                reduce_lr,
+                            ],
                             verbose=1,
                             max_queue_size=100,
                         )
@@ -762,7 +771,10 @@ class DeepImageSynth(object):
                             ),
                             validation_steps=validation_steps,
                             steps_per_epoch=steps_per_epoch,
-                            callbacks=[callback, reduce_lr,],
+                            callbacks=[
+                                callback,
+                                reduce_lr,
+                            ],
                             verbose=1,
                             max_queue_size=100,
                         )
@@ -782,7 +794,10 @@ class DeepImageSynth(object):
                     ),
                     validation_steps=validation_steps,
                     steps_per_epoch=steps_per_epoch,
-                    callbacks=[callback, reduce_lr,],
+                    callbacks=[
+                        callback,
+                        reduce_lr,
+                    ],
                     verbose=1,
                     max_queue_size=1000,
                 )
@@ -811,7 +826,10 @@ class DeepImageSynth(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=10,
                     )
@@ -826,7 +844,10 @@ class DeepImageSynth(object):
                         ),
                         epochs=epochs,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=10,
                     )
@@ -846,7 +867,10 @@ class DeepImageSynth(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=100,
                     )
@@ -867,7 +891,10 @@ class DeepImageSynth(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=100,
                     )
@@ -883,7 +910,10 @@ class DeepImageSynth(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=100,
                     )
@@ -898,7 +928,10 @@ class DeepImageSynth(object):
                         ),
                         validation_steps=validation_steps,
                         steps_per_epoch=steps_per_epoch,
-                        callbacks=[callback, reduce_lr,],
+                        callbacks=[
+                            callback,
+                            reduce_lr,
+                        ],
                         verbose=1,
                         max_queue_size=100,
                     )
@@ -916,7 +949,10 @@ class DeepImageSynth(object):
                     ),
                     validation_steps=validation_steps,
                     steps_per_epoch=steps_per_epoch,
-                    callbacks=[callback, reduce_lr,],
+                    callbacks=[
+                        callback,
+                        reduce_lr,
+                    ],
                     verbose=1,
                     max_queue_size=100,
                 )
@@ -933,7 +969,10 @@ class DeepImageSynth(object):
                 ),
                 validation_steps=validation_steps,
                 steps_per_epoch=steps_per_epoch,
-                callbacks=[callback, reduce_lr,],
+                callbacks=[
+                    callback,
+                    reduce_lr,
+                ],
                 verbose=1,
                 max_queue_size=100,
             )
@@ -2147,17 +2186,23 @@ class FeatureGenerator(object):
                     if self.rob_standardize == True:
                         # print('robnorm True wmp true')
 
-                        in_img_data = intensity_standardize_utils.robust_normalize(
-                            in_img_data
+                        in_img_data = (
+                            intensity_standardize_utils.robust_normalize(
+                                in_img_data
+                            )
                         )
-                        in_img_data = intensity_standardize_utils.wm_peak_normalize(
-                            (in_img_data)
+                        in_img_data = (
+                            intensity_standardize_utils.wm_peak_normalize(
+                                (in_img_data)
+                            )
                         )
 
                     else:
                         # print('robnorm False wmp true')
-                        in_img_data = intensity_standardize_utils.wm_peak_normalize(
-                            (in_img_data)
+                        in_img_data = (
+                            intensity_standardize_utils.wm_peak_normalize(
+                                (in_img_data)
+                            )
                         )
                 else:
                     # print('robnorm true, wmp false')
@@ -2508,17 +2553,23 @@ class FeatureGenerator(object):
                     if self.rob_standardize == True:
                         # print('robnorm True wmp true')
 
-                        in_img_data = intensity_standardize_utils.robust_normalize(
-                            in_img_data
+                        in_img_data = (
+                            intensity_standardize_utils.robust_normalize(
+                                in_img_data
+                            )
                         )
-                        in_img_data = intensity_standardize_utils.wm_peak_normalize(
-                            (in_img_data)
+                        in_img_data = (
+                            intensity_standardize_utils.wm_peak_normalize(
+                                (in_img_data)
+                            )
                         )
 
                     else:
                         # print('robnorm False wmp true')
-                        in_img_data = intensity_standardize_utils.wm_peak_normalize(
-                            (in_img_data)
+                        in_img_data = (
+                            intensity_standardize_utils.wm_peak_normalize(
+                                (in_img_data)
+                            )
                         )
                 else:
                     # print('robnorm true, wmp false')
@@ -2693,17 +2744,23 @@ class FeatureGenerator(object):
                     if robnorm == True:
                         # print('robnorm True wmp true')
 
-                        in_img_data = intensity_standardize_utils.robust_normalize(
-                            in_img_data
+                        in_img_data = (
+                            intensity_standardize_utils.robust_normalize(
+                                in_img_data
+                            )
                         )
-                        in_img_data = intensity_standardize_utils.wm_peak_normalize(
-                            (in_img_data)
+                        in_img_data = (
+                            intensity_standardize_utils.wm_peak_normalize(
+                                (in_img_data)
+                            )
                         )
 
                     else:
                         # print('robnorm False wmp true')
-                        in_img_data = intensity_standardize_utils.wm_peak_normalize(
-                            (in_img_data)
+                        in_img_data = (
+                            intensity_standardize_utils.wm_peak_normalize(
+                                (in_img_data)
+                            )
                         )
                 else:
                     # print('robnorm true, wmp false')
@@ -5879,7 +5936,15 @@ class FeatureGenerator(object):
             xflash = self.apply_flash(
                 curr_theta_flash, xflash_pd, xflash_t1, xflash_t2
             )
-            xflash_feat = np.stack((xflash, x_talx, x_taly, x_talz,), axis=-2)
+            xflash_feat = np.stack(
+                (
+                    xflash,
+                    x_talx,
+                    x_taly,
+                    x_talz,
+                ),
+                axis=-2,
+            )
             xflash_feat = xflash_feat.reshape(xflash_feat.shape[:-1])
 
             # print(time.time() - t3)
@@ -5983,7 +6048,15 @@ class FeatureGenerator(object):
             xflash = self.apply_flash(
                 curr_theta_flash, xflash_pd, xflash_t1, xflash_t2
             )
-            xflash_feat = np.stack((xflash, x_talx, x_taly, x_talz,), axis=-2)
+            xflash_feat = np.stack(
+                (
+                    xflash,
+                    x_talx,
+                    x_taly,
+                    x_talz,
+                ),
+                axis=-2,
+            )
             xflash_feat = xflash_feat.reshape(xflash_feat.shape[:-1])
 
             # print(time.time() - t3)
@@ -6414,7 +6487,7 @@ if __name__ == "__main__":
         prefix="",
         extension=".mgz",
     ):
-        """ assumes a freesurfer directory structure
+        """assumes a freesurfer directory structure
         # Arguments
         :param fs_dir: directory with all the scanner freesurfer results stored
         :param src_scanner: scanner directory name from which we want to extract training images
@@ -6440,7 +6513,7 @@ if __name__ == "__main__":
     def fetch_training_data_files(
         subjects_dir, img_input_type, training_subject_idxs
     ):
-        """ assumes a freesurfer directory structure
+        """assumes a freesurfer directory structure
         # Arguments
         :param fs_dir: directory with all the scanner freesurfer results stored
         :param src_scanner: scanner directory name from which we want to extract training images

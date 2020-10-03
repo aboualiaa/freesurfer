@@ -55,9 +55,11 @@ def quilt(
     assert (
         patches.ndim == 2 or patches.ndim == 3
     ), "patches should be [NxV] or [NxVxK]"
-    assert patches.shape[1] == np.prod(patch_size), (
-        "patches V (%d) does not match patch size V (%d)"
-        % (patches.shape[1], np.prod(patch_size))
+    assert patches.shape[1] == np.prod(
+        patch_size
+    ), "patches V (%d) does not match patch size V (%d)" % (
+        patches.shape[1],
+        np.prod(patch_size),
     )
     nb_dims = len(patch_size)
 
@@ -422,13 +424,17 @@ def patch_gen(vol, patch_size, stride=1, nargout=1, rand=False, rand_seed=None):
     # some parameter checking
     if isinstance(stride, int):
         stride = [stride for f in patch_size]
-    assert len(vol.shape) == len(patch_size), (
-        "vol shape %s and patch size %s do not match dimensions"
-        % (pformat(vol.shape), pformat(patch_size))
+    assert len(vol.shape) == len(
+        patch_size
+    ), "vol shape %s and patch size %s do not match dimensions" % (
+        pformat(vol.shape),
+        pformat(patch_size),
     )
-    assert len(vol.shape) == len(stride), (
-        "vol shape %s and patch stride %s do not match dimensions"
-        % (pformat(vol.shape), pformat(stride))
+    assert len(vol.shape) == len(
+        stride
+    ), "vol shape %s and patch stride %s do not match dimensions" % (
+        pformat(vol.shape),
+        pformat(stride),
     )
 
     cropped_vol_size = np.array(vol.shape) - np.array(patch_size) + 1

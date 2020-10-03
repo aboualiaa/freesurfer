@@ -831,12 +831,11 @@ int fio_popd() {
   by pushing into the file dir, getting the cwd, appending the file
   basename to the cwd to get the full path, then popping the stack.
   -------------------------------------------------------------------*/
-std::string fio_fullpath(const char *fname)
-{
+std::string fio_fullpath(const char *fname) {
   static char cwd[1000];
-  char *dirname, *basename;
+  char *      dirname, *basename;
   std::string fullpath;
-  int err;
+  int         err;
 
   basename = fio_basename(fname, nullptr);
   dirname  = fio_dirname(fname);
@@ -861,12 +860,11 @@ std::string fio_fullpath(const char *fname)
 }
 
 // Replicates mkdir -p
-int fio_mkdirp(const char *path, mode_t mode)
-{
-  int nthseg, err;
+int fio_mkdirp(const char *path, mode_t mode) {
+  int         nthseg, err;
   std::string seg, path2;
-  size_t n;
-  
+  size_t      n;
+
   const size_t l = strlen(path);
 
   n      = 0;
@@ -905,8 +903,7 @@ int fio_mkdirp(const char *path, mode_t mode)
   The CRs can be replaced with a new line with
     cat file | sed 's/\r/\n/g' > newfile
  */
-int fio_FileHasCarriageReturn(const char *fname)
-{
+int fio_FileHasCarriageReturn(const char *fname) {
   FILE *fp;
   char  c;
   int   n;

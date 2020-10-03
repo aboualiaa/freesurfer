@@ -151,11 +151,7 @@ void MutualInformationCostAndGradientCalculator ::Rasterize(
   //std::cout << "dataCost: " << m_NumberOfVoxels * negativeMutualInformation << std::endl;
 
   m_MinLogLikelihoodTimesPrior += negativeMutualInformation;
-    
-}    
-  
-    
- 
+}
 
 //
 //

@@ -53,7 +53,7 @@ class DeepImageSynthCallback(Callback):
 def fetch_training_data_files(
     fs_dir, subjects_dir, img_input_type, training_subject_idxs
 ):
-    """ assumes a freesurfer directory structure
+    """assumes a freesurfer directory structure
     # Arguments
     :param fs_dir: directory with all the scanner freesurfer results stored
     :param src_scanner: scanner directory name from which we want to extract training images

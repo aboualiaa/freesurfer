@@ -13,19 +13,34 @@ import scipy.ndimage  # For center-of-mass calculation
 
 
 class initializationOptions:
-    def __init__( self,
-                  pitchAngles=np.array( [ 0 ] ) / 180.0 * np.pi, # in radians
-                  scales=[ 1.0 ],  
-                  horizontalTableShifts=[ 40.0, 20.0, 0.0, -20.0, -40.0 ], # in mm, in template space
-                  verticalTableShifts=[ 0.0 ], # in mm, in template space
-                  tryCenterOfGravity=True,
-                  searchForTableShiftsSeparately=False,
-                  pitchCenter=[ 0.0, 0.0, 0.0 ], # in mm, in template space - anterior commissure
-                  scalingCenter=[ 0.0, 120.0, 0.0 ], # in mm, in template space - back of the head
-                  initialPitchAngle=-10.0/180.0*np.pi, # in radians
-                  initialScale=0.9, 
-                  initialTableShift=[ 0.0, 0.0, 0.0 ] # in mm, in template space
-                ):
+    def __init__(
+        self,
+        pitchAngles=np.array([0]) / 180.0 * np.pi,  # in radians
+        scales=[1.0],
+        horizontalTableShifts=[
+            40.0,
+            20.0,
+            0.0,
+            -20.0,
+            -40.0,
+        ],  # in mm, in template space
+        verticalTableShifts=[0.0],  # in mm, in template space
+        tryCenterOfGravity=True,
+        searchForTableShiftsSeparately=False,
+        pitchCenter=[
+            0.0,
+            0.0,
+            0.0,
+        ],  # in mm, in template space - anterior commissure
+        scalingCenter=[
+            0.0,
+            120.0,
+            0.0,
+        ],  # in mm, in template space - back of the head
+        initialPitchAngle=-10.0 / 180.0 * np.pi,  # in radians
+        initialScale=0.9,
+        initialTableShift=[0.0, 0.0, 0.0],  # in mm, in template space
+    ):
         self.pitchAngles = pitchAngles
         self.scales = scales
         self.horizontalTableShifts = horizontalTableShifts
@@ -45,18 +60,20 @@ class Affine:
         self.meshCollectionFileName = meshCollectionFileName
         self.templateFileName = templateFileName
 
-    def registerAtlas( self,
-            savePath,
-            worldToWorldTransformMatrix=None,
-            initTransform=None,
-            Ks=[ 20.0, 10.0, 5.0 ],
-            initializationOptions = initializationOptions(),
-            targetDownsampledVoxelSpacing=3.0,
-            maximalDeformationStopCriterion=0.005,
-            visualizer=None ):
+    def registerAtlas(
+        self,
+        savePath,
+        worldToWorldTransformMatrix=None,
+        initTransform=None,
+        Ks=[20.0, 10.0, 5.0],
+        initializationOptions=initializationOptions(),
+        targetDownsampledVoxelSpacing=3.0,
+        maximalDeformationStopCriterion=0.005,
+        visualizer=None,
+    ):
 
-        # ------ Set up ------ 
-        self.setUp( initTransform, targetDownsampledVoxelSpacing, visualizer )
+        # ------ Set up ------
+        self.setUp(initTransform, targetDownsampledVoxelSpacing, visualizer)
 
         # ------ Register mesh to image ------
         (
@@ -76,24 +93,30 @@ class Affine:
         )
 
         return imageToImageTransformMatrix, optimizationSummary
-     
-     
-    #          
-    def optimizeTransformation( self, 
-                                initialImageToImageTransformMatrix,
-                                K, maximalDeformationStopCriterion ):
-        
+
+    #
+    def optimizeTransformation(
+        self,
+        initialImageToImageTransformMatrix,
+        K,
+        maximalDeformationStopCriterion,
+    ):
+
         # In our models the mesh stiffness (scaling the log-prior) is relative to the log-likelihood,
         # which scales with the number of voxels being modeled. But for MI the log-likelihood
         # is normalized, so we need to divide the mesh stiffness by the (expected) number of voxels
         # covered in order to compensate.
         Keffective = K / self.expectedNumberOfVoxelsCovered
-          
+
         # Get the mesh
-        initialImageToImageTransform = gems.KvlTransform( requireNumpyArray( initialImageToImageTransformMatrix ) )
-        mesh = ProbabilisticAtlas().getMesh( self.meshCollectionFileName, 
-                                              transform=initialImageToImageTransform,
-                                              K=Keffective )
+        initialImageToImageTransform = gems.KvlTransform(
+            requireNumpyArray(initialImageToImageTransformMatrix)
+        )
+        mesh = ProbabilisticAtlas().getMesh(
+            self.meshCollectionFileName,
+            transform=initialImageToImageTransform,
+            K=Keffective,
+        )
         originalNodePositions = mesh.points
 
         # Get a registration cost  and stick it in an optimizer
@@ -288,12 +311,14 @@ class Affine:
                     for verticalTableShift in verticalTableShifts:
                         for pitchAngle in pitchAngles:
                             # Compute image-to-image transform
-                            worldToWorldTransformMatrix = self.getTransformMatrix(
-                                pitchAngle=pitchAngle,
-                                scale=scale,
-                                horizontalTableShift=horizontalTableShift,
-                                verticalTableShift=verticalTableShift,
-                                initialTableShift=initialTableShift,
+                            worldToWorldTransformMatrix = (
+                                self.getTransformMatrix(
+                                    pitchAngle=pitchAngle,
+                                    scale=scale,
+                                    horizontalTableShift=horizontalTableShift,
+                                    verticalTableShift=verticalTableShift,
+                                    initialTableShift=initialTableShift,
+                                )
                             )
                             imageToImageTransformMatrix = np.linalg.solve(
                                 self.imageToWorldTransformMatrix,
@@ -340,11 +365,13 @@ class Affine:
                                 )
 
         # Show the winner
-        mesh.points = ProbabilisticAtlas().mapPositionsFromTemplateToSubjectSpace(
-            positionsInTemplateSpace,
-            gems.KvlTransform(
-                requireNumpyArray(bestImageToImageTransformMatrix)
-            ),
+        mesh.points = (
+            ProbabilisticAtlas().mapPositionsFromTemplateToSubjectSpace(
+                positionsInTemplateSpace,
+                gems.KvlTransform(
+                    requireNumpyArray(bestImageToImageTransformMatrix)
+                ),
+            )
         )
         self.visualizer.show(
             images=self.image.getImageBuffer(),
@@ -385,8 +412,10 @@ class Affine:
         mesh = ProbabilisticAtlas().getMesh(
             self.meshCollectionFileName, transform=imageToImageTransform, K=0.0
         )
-        positionsInTemplateSpace = ProbabilisticAtlas().mapPositionsFromSubjectToTemplateSpace(
-            mesh.points, imageToImageTransform
+        positionsInTemplateSpace = (
+            ProbabilisticAtlas().mapPositionsFromSubjectToTemplateSpace(
+                mesh.points, imageToImageTransform
+            )
         )
 
         #
@@ -420,14 +449,17 @@ class Affine:
             centeringTableShift = centerOfGravityImage - centerOfGravityTemplate
 
             # Try which one is best
-            initialTableShifts = [ initializationOptions.initialTableShift, centeringTableShift ]
-            _, _, _, _, bestInitialTableShift, _ = \
-                                    self.gridSearch( mesh,
-                                                     positionsInTemplateSpace,
-                                                     initialTableShifts=initialTableShifts,
-                                                     visualizerTitle='Affine grid search center of gravity' )
-            
-            
+            initialTableShifts = [
+                initializationOptions.initialTableShift,
+                centeringTableShift,
+            ]
+            _, _, _, _, bestInitialTableShift, _ = self.gridSearch(
+                mesh,
+                positionsInTemplateSpace,
+                initialTableShifts=initialTableShifts,
+                visualizerTitle="Affine grid search center of gravity",
+            )
+
         if initializationOptions.searchForTableShiftsSeparately:
             # Perform grid search for intialization (done separately for translation and scaling/rotation to limit the
             # number of combinations to be tested)
@@ -541,9 +573,9 @@ class Affine:
             originalImageToWorldTransformMatrix
         )
         self.upSamplingTranformMatrix = upSamplingTranformMatrix
-        self.expectedNumberOfVoxelsCovered = np.prod( template.getImageBuffer().shape )
-         
-         
+        self.expectedNumberOfVoxelsCovered = np.prod(
+            template.getImageBuffer().shape
+        )
 
     def registerMeshToImage(
         self,

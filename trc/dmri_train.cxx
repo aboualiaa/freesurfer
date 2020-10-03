@@ -42,14 +42,13 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_train";
 
-bool useTrunc = false, excludeStr = false;
-vector<float> trainMaskLabel;
+bool                useTrunc = false, excludeStr = false;
+vector<float>       trainMaskLabel;
 vector<vector<int>> nControl;
 vector<std::string> outBase, trainTrkList, trainRoi1List, trainRoi2List,
-               testMaskList, testFaList, testBaseXfmList;
-std::string outDir, outTestDir, trainListFile,
-  trainAsegFile, trainMaskFile, testAffineXfmFile,
-  testNonlinXfmFile, testNonlinRefFile, testBaseMaskFile;
+    testMaskList, testFaList, testBaseXfmList;
+std::string outDir, outTestDir, trainListFile, trainAsegFile, trainMaskFile,
+    testAffineXfmFile, testNonlinXfmFile, testNonlinRefFile, testBaseMaskFile;
 
 struct utsname uts;
 char *         cmdline, cwd[2000];
@@ -58,7 +57,7 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, cputime;
+  int         nargs, cputime;
   std::string excfile, fbase;
 
   nargs = handleVersionOption(argc, argv, "dmri_train");
@@ -94,27 +93,24 @@ int main(int argc, char **argv) {
       excfile = outBase.at(0) + "_cpts_all.bad.txt";
     }
   }
-  
-  Blood myblood(trainListFile, trainTrkList[0],
-                trainRoi1List.size() ? trainRoi1List[0] : std::string(),
-                trainRoi2List.size() ? trainRoi2List[0] : std::string(),
-                trainAsegFile, trainMaskFile,
-                trainMaskLabel.size() ? trainMaskLabel[0] : 0.0f,
-                excludeStr ? excfile : std::string(),
-                testMaskList, testFaList,
-                testAffineXfmFile, testNonlinXfmFile, testNonlinRefFile,
-                testBaseXfmList, testBaseMaskFile,
-                useTrunc, nControl[0],
-                debug);
+
+  Blood myblood(
+      trainListFile, trainTrkList[0],
+      trainRoi1List.size() ? trainRoi1List[0] : std::string(),
+      trainRoi2List.size() ? trainRoi2List[0] : std::string(), trainAsegFile,
+      trainMaskFile, trainMaskLabel.size() ? trainMaskLabel[0] : 0.0f,
+      excludeStr ? excfile : std::string(), testMaskList, testFaList,
+      testAffineXfmFile, testNonlinXfmFile, testNonlinRefFile, testBaseXfmList,
+      testBaseMaskFile, useTrunc, nControl[0], debug);
 
   for (unsigned int itrk = 0; itrk < trainTrkList.size(); itrk++) {
     if (itrk > 0) {
       if (excludeStr) {
         if (!outDir.empty()) {
-	  excfile = outDir + '/' + outBase.at(itrk) + "_cpts_all.bad.txt";
+          excfile = outDir + '/' + outBase.at(itrk) + "_cpts_all.bad.txt";
         } else {
-	  excfile = outBase.at(itrk) + "_cpts_all.bad.txt";
-	}
+          excfile = outBase.at(itrk) + "_cpts_all.bad.txt";
+        }
       }
 
       if (nControl.size() > 1) { // Variable number of controls
@@ -146,8 +142,7 @@ int main(int argc, char **argv) {
 
       ftbase = outTestDir + outBase.at(itrk);
       myblood.WriteOutputs(fbase.c_str(), ftbase.c_str());
-    }
-    else {
+    } else {
       myblood.WriteOutputs(fbase.c_str());
     }
 
@@ -575,8 +570,8 @@ static void dump_options() {
   if (!trainMaskLabel.empty()) {
     cout << "Label ID's from aparc+aseg to add to cortex mask:";
     for (vector<float>::const_iterator ilab = trainMaskLabel.begin();
-	 ilab < trainMaskLabel.end(); ilab++) {
-      cout << " " << (int) *ilab;
+         ilab < trainMaskLabel.end(); ilab++) {
+      cout << " " << (int)*ilab;
     }
     cout << endl;
   }
@@ -585,16 +580,14 @@ static void dump_options() {
             << std::endl;
 
   cout << "Brain mask for output subject:";
-  for (auto ifile = testMaskList.begin();
-       ifile < testMaskList.end(); ifile++) {
+  for (auto ifile = testMaskList.begin(); ifile < testMaskList.end(); ifile++) {
     cout << " " << *ifile;
   }
   cout << endl;
 
   if (!testFaList.empty()) {
     cout << "FA map for output subject:";
-    for (auto ifile = testFaList.begin();
-	 ifile < testFaList.end(); ifile++) {
+    for (auto ifile = testFaList.begin(); ifile < testFaList.end(); ifile++) {
       cout << " " << *ifile;
     }
     cout << endl;
@@ -617,8 +610,8 @@ static void dump_options() {
 
   if (!testBaseXfmList.empty()) {
     cout << "Affine registration from base to FA map for output subject:";
-    for (auto ifile = testBaseXfmList.begin();
-	 ifile < testBaseXfmList.end(); ifile++) {
+    for (auto ifile = testBaseXfmList.begin(); ifile < testBaseXfmList.end();
+         ifile++) {
       cout << " " << *ifile;
     }
     cout << endl;
@@ -629,10 +622,10 @@ static void dump_options() {
   }
 
   cout << "Number of control points for initial spline:";
-  for (vector< vector<int> >::const_iterator inlist = nControl.begin();
+  for (vector<vector<int>>::const_iterator inlist = nControl.begin();
        inlist < nControl.end(); inlist++) {
     for (vector<int>::const_iterator inum = inlist->begin();
-	 inum < inlist->end(); inum++) {
+         inum < inlist->end(); inum++) {
       cout << " " << *inum;
     }
   }

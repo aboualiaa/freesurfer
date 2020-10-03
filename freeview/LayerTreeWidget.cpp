@@ -273,22 +273,19 @@ void LayerTreeWidget::contextMenuEvent(QContextMenuEvent *e) {
     connect(act, SIGNAL(triggered()), this, SLOT(OnUnlockOthers()));
     menu->addAction(act);
 
-    if (layers[0]->IsTypeOf("MRI"))
-    {
-        menu->addSeparator();
-        if (layers.size() > 1)
-        {
-            act = new QAction("Link Volumes", this );
-            connect(act, SIGNAL(triggered()), this, SLOT(OnLinkVolumes()));
-            menu->addAction(act);
-        }
-        act = new QAction("Unlink Volumes", this );
-        connect(act, SIGNAL(triggered()), this, SLOT(OnUnlinkVolumes()));
+    if (layers[0]->IsTypeOf("MRI")) {
+      menu->addSeparator();
+      if (layers.size() > 1) {
+        act = new QAction("Link Volumes", this);
+        connect(act, SIGNAL(triggered()), this, SLOT(OnLinkVolumes()));
         menu->addAction(act);
+      }
+      act = new QAction("Unlink Volumes", this);
+      connect(act, SIGNAL(triggered()), this, SLOT(OnUnlinkVolumes()));
+      menu->addAction(act);
     }
 
-    if (layers[0]->IsTypeOf("MRI") || layers[0]->IsTypeOf("Surface"))
-    {
+    if (layers[0]->IsTypeOf("MRI") || layers[0]->IsTypeOf("Surface")) {
       menu->addSeparator();
       act = new QAction(
           layers.size() > 1 ? "Show All in Info Panel" : "Show Info", this);
@@ -640,21 +637,16 @@ void LayerTreeWidget::dropEvent(QDropEvent *event) {
   //    QTreeWidget::dropEvent(event);
 }
 
-
-void LayerTreeWidget::OnLinkVolumes()
-{
-  QList<QTreeWidgetItem*> items = this->selectedItems();
+void LayerTreeWidget::OnLinkVolumes() {
+  QList<QTreeWidgetItem *> items = this->selectedItems();
   m_linkedVolumes.clear();
-  foreach (QTreeWidgetItem* item, items)
-  {
-    Layer* layer = reinterpret_cast<Layer*>( item->data(0, Qt::UserRole ).value<quintptr>() );
-    LayerMRI* mri = qobject_cast<LayerMRI*>(layer);
+  foreach (QTreeWidgetItem *item, items) {
+    Layer *layer = reinterpret_cast<Layer *>(
+        item->data(0, Qt::UserRole).value<quintptr>());
+    LayerMRI *mri = qobject_cast<LayerMRI *>(layer);
     if (mri)
       m_linkedVolumes << mri;
   }
 }
 
-void LayerTreeWidget::OnUnlinkVolumes()
-{
-    m_linkedVolumes.clear();
-}
+void LayerTreeWidget::OnUnlinkVolumes() { m_linkedVolumes.clear(); }

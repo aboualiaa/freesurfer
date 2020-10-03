@@ -186,7 +186,12 @@ class TestMeshCollection:
 
     def test_transform_mesh_collection(self, single_mesh_collection):
         initial_transform = np.array(
-            [[2, 0, 0, 20], [0, 3, 0, 30], [0, 0, 5, 40], [0, 0, 0, 1],],
+            [
+                [2, 0, 0, 20],
+                [0, 3, 0, 30],
+                [0, 0, 5, 40],
+                [0, 0, 0, 1],
+            ],
             dtype=np.double,
             order="F",
         )

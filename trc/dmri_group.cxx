@@ -28,6 +28,8 @@
 #include "timer.h"
 #include "version.h"
 
+using namespace std;
+
 static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();

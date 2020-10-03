@@ -1,5 +1,5 @@
-#include "surface.h"
 #include "mrisp.h"
+#include "surface.h"
 
 namespace surf {
 
@@ -7,15 +7,15 @@ namespace surf {
   Parameterizes an nvertices-length overlay to an image. Interp methods can be 'nearest' or
   'barycentric'.
 */
-py::array parameterize(Bridge surf, const arrayf<float>& overlay, int scale, std::string interp)
-{
+py::array parameterize(Bridge surf, const arrayf<float> &overlay, int scale,
+                       std::string interp) {
   // get frames and allocate mrisp
-  int nframes = (overlay.ndim() == 2) ? overlay.shape(1) : 1;
-  MRI_SP *mrisp = MRISPalloc(scale, nframes);
+  int     nframes = (overlay.ndim() == 2) ? overlay.shape(1) : 1;
+  MRI_SP *mrisp   = MRISPalloc(scale, nframes);
 
   // configure projector
-  MRIS *mris = surf.mris();
-  SphericalProjector projector = SphericalProjector(mris, mrisp);
+  MRIS *                           mris      = surf.mris();
+  SphericalProjector               projector = SphericalProjector(mris, mrisp);
   SphericalProjector::InterpMethod interpmethod;
   if (interp == "nearest") {
     interpmethod = SphericalProjector::Nearest;
@@ -26,14 +26,14 @@ py::array parameterize(Bridge surf, const arrayf<float>& overlay, int scale, std
   }
 
   // parameterize the overlay
-  for (int frame = 0; frame < nframes ; frame++) {
-    const float * array = overlay.data() + frame * overlay.shape(0);
+  for (int frame = 0; frame < nframes; frame++) {
+    const float *array = overlay.data() + frame * overlay.shape(0);
     projector.parameterizeOverlay(array, frame, interpmethod);
   }
 
   // convert MRISP to numpy array
-  int udim = U_DIM(mrisp);
-  int vdim = V_DIM(mrisp);
+  int          udim   = U_DIM(mrisp);
+  int          vdim   = V_DIM(mrisp);
   float *const buffer = new float[udim * vdim * nframes];
   float *      ptr    = buffer;
   for (int f = 0; f < nframes; f++) {
@@ -52,8 +52,8 @@ py::array parameterize(Bridge surf, const arrayf<float>& overlay, int scale, std
   Samples a parameterization into an nvertices-length overlay. Interp methods can be 'nearest' or
   'barycentric'.
 */
-py::array sampleParameterization(Bridge surf, const arrayf<float>& image, std::string interp)
-{
+py::array sampleParameterization(Bridge surf, const arrayf<float> &image,
+                                 std::string interp) {
   // extract number of frames
   int nframes = (image.ndim() == 3) ? image.shape(2) : 1;
 
@@ -76,8 +76,8 @@ py::array sampleParameterization(Bridge surf, const arrayf<float>& image, std::s
   }
 
   // init spherical projector
-  MRIS *mris = surf.mris();
-  SphericalProjector projector = SphericalProjector(mris, mrisp);
+  MRIS *                           mris      = surf.mris();
+  SphericalProjector               projector = SphericalProjector(mris, mrisp);
   SphericalProjector::InterpMethod interpmethod;
   if (interp == "nearest") {
     interpmethod = SphericalProjector::Nearest;
@@ -89,8 +89,8 @@ py::array sampleParameterization(Bridge surf, const arrayf<float>& image, std::s
 
   // sample MRISP
   float *const buffer = new float[mris->nvertices * nframes];
-  float *vptr = buffer;
-  for (int frame = 0; frame < nframes ; frame++) {
+  float *      vptr   = buffer;
+  for (int frame = 0; frame < nframes; frame++) {
     projector.sampleParameterization(vptr, frame, interpmethod);
     vptr += mris->nvertices;
   }

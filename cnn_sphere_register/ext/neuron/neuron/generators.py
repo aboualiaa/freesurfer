@@ -44,7 +44,10 @@ class Vol(object):
         nb_files = len(volfiles)
         assert (
             nb_files > 0
-        ), "Could not find any files at %s with extension %s" % (volpath, ext,)
+        ), "Could not find any files at %s with extension %s" % (
+            volpath,
+            ext,
+        )
 
         # set up restart cycle for volume files --
         # i.e. after how many volumes do we restart
@@ -68,9 +71,13 @@ class Vol(object):
                 pl.gridsize(vol_data.shape, patch_size, patch_stride)
             )
 
-        assert nb_restart_cycle <= (nb_files * nb_patches_per_vol), (
-            "%s restart cycle (%s) too big (%s) in %s"
-            % (name, nb_restart_cycle, nb_files * nb_patches_per_vol, volpath)
+        assert nb_restart_cycle <= (
+            nb_files * nb_patches_per_vol
+        ), "%s restart cycle (%s) too big (%s) in %s" % (
+            name,
+            nb_restart_cycle,
+            nb_files * nb_patches_per_vol,
+            volpath,
         )
 
 
@@ -133,9 +140,11 @@ def vol(
             patch_size = [*patch_size, vol_data.shape[-1]]
             patch_stride = [f for f in patch_stride]
             patch_stride = [*patch_stride, vol_data.shape[-1]]
-        assert len(vol_data.shape) == len(patch_size), (
-            "Vol dims %d are  not equal to patch dims %d"
-            % (len(vol_data.shape), len(patch_size))
+        assert len(vol_data.shape) == len(
+            patch_size
+        ), "Vol dims %d are  not equal to patch dims %d" % (
+            len(vol_data.shape),
+            len(patch_size),
         )
         nb_patches_per_vol = np.prod(
             pl.gridsize(vol_data.shape, patch_size, patch_stride)
@@ -144,16 +153,22 @@ def vol(
         print("setting restart cycle to", nb_files)
         nb_restart_cycle = nb_files
 
-    assert nb_restart_cycle <= (nb_files * nb_patches_per_vol), (
-        "%s restart cycle (%s) too big (%s) in %s"
-        % (name, nb_restart_cycle, nb_files * nb_patches_per_vol, volpath)
+    assert nb_restart_cycle <= (
+        nb_files * nb_patches_per_vol
+    ), "%s restart cycle (%s) too big (%s) in %s" % (
+        name,
+        nb_restart_cycle,
+        nb_files * nb_patches_per_vol,
+        volpath,
     )
 
     # check the number of files matches expected (if passed)
     if expected_nb_files >= 0:
-        assert nb_files == expected_nb_files, (
-            "number of files do not match: %d, %d"
-            % (nb_files, expected_nb_files,)
+        assert (
+            nb_files == expected_nb_files
+        ), "number of files do not match: %d, %d" % (
+            nb_files,
+            expected_nb_files,
         )
     if expected_files is not None:
         if not (volfiles == expected_files):
@@ -859,9 +874,7 @@ def vol_prior_hack(
     vol_rand_seed=None,
     **kwargs
 ):
-    """
-
-    """
+    """"""
     # prepare the vol_seg
     gen = vol_seg_hack(
         *args,
@@ -1206,9 +1219,11 @@ def ext_data(
 
     # check the number of files matches expected (if passed)
     if expected_nb_files >= 0:
-        assert nb_files == expected_nb_files, (
-            "number of files do not match: %d, %d"
-            % (nb_files, expected_nb_files,)
+        assert (
+            nb_files == expected_nb_files
+        ), "number of files do not match: %d, %d" % (
+            nb_files,
+            expected_nb_files,
         )
     if expected_files is not None:
         if not (volfiles == expected_files):

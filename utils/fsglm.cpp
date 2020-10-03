@@ -120,9 +120,9 @@
 
 */
 
-#include <string>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+#include <string>
 
 #include <float.h>
 #include <math.h>
@@ -800,14 +800,13 @@ int GLMresynthTest(int niters, double *prvar) {
   GLMdump() - saves a lot of the stuff from the GLMMAT
   struct into ascii files in the given directory.
   ---------------------------------------------------------*/
-int GLMdump(const char *dumpdir, GLMMAT *glm)
-{
+int GLMdump(const char *dumpdir, GLMMAT *glm) {
   std::string fname;
-  FILE *fp;
-  int   c;
+  FILE *      fp;
+  int         c;
 
   mkdir(dumpdir, 0777);
-  
+
   const std::string dds = std::string(dumpdir) + "/";
 
   fname = dds + "y.dat";
@@ -817,12 +816,12 @@ int GLMdump(const char *dumpdir, GLMMAT *glm)
   MatrixWriteTxt(fname.c_str(), glm->X);
 
   fname = dds + "dof.dat";
-  fp = fopen(fname.c_str(), "w");
+  fp    = fopen(fname.c_str(), "w");
   fprintf(fp, "%lf\n", glm->dof);
   fclose(fp);
 
   fname = dds + "ill_cond_flag.dat";
-  fp = fopen(fname.c_str(), "w");
+  fp    = fopen(fname.c_str(), "w");
   fprintf(fp, "%d\n", glm->ill_cond_flag);
   fclose(fp);
   if (glm->ill_cond_flag)
@@ -838,12 +837,12 @@ int GLMdump(const char *dumpdir, GLMMAT *glm)
   MatrixWriteTxt(fname.c_str(), glm->eres);
 
   fname = dds + "rvar.dat";
-  fp = fopen(fname.c_str(), "w");
+  fp    = fopen(fname.c_str(), "w");
   fprintf(fp, "%lf\n", glm->rvar);
   fclose(fp);
 
   fname = dds + "ncontrasts.dat";
-  fp = fopen(fname.c_str(), "w");
+  fp    = fopen(fname.c_str(), "w");
   fprintf(fp, "%d\n", glm->ncontrasts);
   fclose(fp);
 
@@ -853,7 +852,7 @@ int GLMdump(const char *dumpdir, GLMMAT *glm)
       condir = dds + glm->Cname[c];
     } else {
       std::stringstream tmp;
-      tmp << "contrast" << std::setw(3) << std::setfill('0') << (c+1);
+      tmp << "contrast" << std::setw(3) << std::setfill('0') << (c + 1);
       condir = dds + tmp.str();
     }
     mkdir(condir.c_str(), 0777);
@@ -863,7 +862,7 @@ int GLMdump(const char *dumpdir, GLMMAT *glm)
     MatrixWriteTxt(fname.c_str(), glm->C[c]);
 
     fname = condir + "Ccond.dat";
-    fp = fopen(fname.c_str(), "w");
+    fp    = fopen(fname.c_str(), "w");
     fprintf(fp, "%f\n", glm->Ccond[c]);
     fclose(fp);
 
@@ -878,12 +877,12 @@ int GLMdump(const char *dumpdir, GLMMAT *glm)
     }
 
     fname = condir + "F.dat";
-    fp = fopen(fname.c_str(), "w");
+    fp    = fopen(fname.c_str(), "w");
     fprintf(fp, "%lf\n", glm->F[c]);
     fclose(fp);
 
     fname = condir + "p.dat";
-    fp = fopen(fname.c_str(), "w");
+    fp    = fopen(fname.c_str(), "w");
     fprintf(fp, "%le\n", glm->p[c]);
     fclose(fp);
 

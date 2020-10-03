@@ -43,7 +43,7 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_spline";
 
-bool showControls = false;
+bool        showControls = false;
 std::string inFile, outVolFile, outVecBase, maskFile, outTextFile;
 
 struct utsname uts;
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
   cputime = cputimer.milliseconds();
   printf("Done in %g sec.\n", cputime / 1000.0);
 
-  if (!outVolFile.empty() ) {
+  if (!outVolFile.empty()) {
     myspline.WriteVolume(outVolFile.c_str(), showControls);
   }
 
@@ -286,15 +286,15 @@ static void print_version(void) {
 
 /* --------------------------------------------- */
 static void check_options(void) {
-  if(inFile.size() == 0) {
+  if (inFile.size() == 0) {
     cout << "ERROR: Must specify input text file" << endl;
     exit(1);
   }
-  if(maskFile.size() == 0) {
+  if (maskFile.size() == 0) {
     cout << "ERROR: Must specify mask volume" << endl;
     exit(1);
   }
-  if((outVolFile.size() + outTextFile.size() + outVecBase.size()) == 0) {
+  if ((outVolFile.size() + outTextFile.size() + outVecBase.size()) == 0) {
     cout << "ERROR: Must specify at least one type of output file" << endl;
     exit(1);
   }
@@ -320,7 +320,7 @@ static void dump_options() {
   if (outTextFile.size() != 0) {
     cout << "Output text file: " << outTextFile << endl;
   }
-  if (outVecBase.size() != 0 ) {
+  if (outVecBase.size() != 0) {
     cout << "Output tangent vector file base name: " << outVecBase << endl;
   }
 

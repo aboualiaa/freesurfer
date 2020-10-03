@@ -10,7 +10,7 @@ def checkTopology(subjects_dir, subject):
     """
     A function to check the topology of left and right surfaces.
 
-    This scripts extract the information about the number of holes and defects 
+    This scripts extract the information about the number of holes and defects
     in the left and right hemisphere, and also returns topological fixing time.
 
     Required arguments:
@@ -20,7 +20,7 @@ def checkTopology(subjects_dir, subject):
     Returns:
         - lh_holes, rh_holes, lh_defects, rh_defects, topo_time_lh, topo_time_rh
 
-    Requires valid scripts/recon-all.log file. If not found, NaNs will be 
+    Requires valid scripts/recon-all.log file. If not found, NaNs will be
     returned.
 
     """

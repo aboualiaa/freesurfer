@@ -130,7 +130,7 @@ public:
 
   qint64 GetID() { return m_nID; }
 
-  void UpdateMaxHistCount(double* range, int nBins);
+  void UpdateMaxHistCount(double *range, int nBins);
 
 signals:
   void DataUpdated();

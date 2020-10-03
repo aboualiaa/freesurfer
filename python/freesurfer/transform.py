@@ -63,8 +63,13 @@ class LinearTransform:
         )
 
     def inverse(self):
-        '''Computes the inverse linear transform.'''
-        return LinearTransform(np.linalg.inv(self.matrix), source=self.target, target=self.source, type=self.type)
+        """Computes the inverse linear transform."""
+        return LinearTransform(
+            np.linalg.inv(self.matrix),
+            source=self.target,
+            target=self.source,
+            type=self.type,
+        )
 
     def as_ras(self):
         """Converts affine matrix to a RAS to RAS transform."""
@@ -149,7 +154,7 @@ class Geometry:
 
     @staticmethod
     def is_equal(a, b, thresh=1e-3, require_affine=True):
-        '''Compare geometries within some threshold.'''
+        """Compare geometries within some threshold."""
 
         differ = lambda a, b: not np.allclose(a, b, rtol=0.0, atol=thresh)
 

@@ -179,7 +179,9 @@ class GMM:
         )
         return gaussianLikelihoods.T
 
-    def getGaussianPosteriors(self, data, classPriors, dataWeight=1, priorWeight=1 ):
+    def getGaussianPosteriors(
+        self, data, classPriors, dataWeight=1, priorWeight=1
+    ):
 
         #
         numberOfVoxels = data.shape[0]
@@ -198,9 +200,14 @@ class GMM:
                 mean = np.expand_dims(self.means[gaussianNumber, :], 1)
                 variance = self.variances[gaussianNumber, :, :]
 
-                gaussianLikelihoods = self.getGaussianLikelihoods(data, mean, variance)
-                gaussianPosteriors[:, gaussianNumber] = gaussianLikelihoods**dataWeight \
-                                        * ( self.mixtureWeights[gaussianNumber] * classPrior )**priorWeight
+                gaussianLikelihoods = self.getGaussianLikelihoods(
+                    data, mean, variance
+                )
+                gaussianPosteriors[:, gaussianNumber] = (
+                    gaussianLikelihoods ** dataWeight
+                    * (self.mixtureWeights[gaussianNumber] * classPrior)
+                    ** priorWeight
+                )
         normalizer = np.sum(gaussianPosteriors, axis=1) + eps
         gaussianPosteriors = gaussianPosteriors / np.expand_dims(normalizer, 1)
 
@@ -267,9 +274,9 @@ class GMM:
                 gaussianNumber
             ]
             hyperVariance = self.hyperVariances[gaussianNumber, :, :]
-            hyperVarianceNumberOfMeasurements = self.hyperVariancesNumberOfMeasurements[
-                gaussianNumber
-            ]
+            hyperVarianceNumberOfMeasurements = (
+                self.hyperVariancesNumberOfMeasurements[gaussianNumber]
+            )
 
             mean = (
                 data.T @ posterior + hyperMean * hyperMeanNumberOfMeasurements
@@ -353,9 +360,9 @@ class GMM:
                 gaussianNumber
             ]
             hyperVariance = self.hyperVariances[gaussianNumber, :, :]
-            hyperVarianceNumberOfMeasurements = self.hyperVariancesNumberOfMeasurements[
-                gaussianNumber
-            ]
+            hyperVarianceNumberOfMeasurements = (
+                self.hyperVariancesNumberOfMeasurements[gaussianNumber]
+            )
 
             mean = (
                 data.T @ posterior + hyperMean * hyperMeanNumberOfMeasurements
@@ -407,9 +414,9 @@ class GMM:
                 gaussianNumber
             ]
             hyperVariance = self.hyperVariances[gaussianNumber, :, :]
-            hyperVarianceNumberOfMeasurements = self.hyperVariancesNumberOfMeasurements[
-                gaussianNumber
-            ]
+            hyperVarianceNumberOfMeasurements = (
+                self.hyperVariancesNumberOfMeasurements[gaussianNumber]
+            )
 
             # -log N( mean | hyperMean, variance / hyperMeanNumberOfMeasurements )
             L = np.linalg.cholesky(variance)  # variance = L @ L.T
@@ -442,9 +449,9 @@ class GMM:
 
         for classNumber in range(self.numberOfClasses):
             # -log Dir( weights | hyperMixtureWeights * hyperMixtureWeightNumberOfMeasurements + 1 )
-            hyperMixtureWeightNumberOfMeasurements = self.hyperMixtureWeightsNumberOfMeasurements[
-                classNumber
-            ]
+            hyperMixtureWeightNumberOfMeasurements = (
+                self.hyperMixtureWeightsNumberOfMeasurements[classNumber]
+            )
             numberOfComponents = self.numberOfGaussiansPerClass[classNumber]
             for componentNumber in range(numberOfComponents):
                 gaussianNumber = (
@@ -498,13 +505,19 @@ class GMM:
             self.previousVariances = self.variances.copy()
             return
 
-        posterior_1 = gaussianPosteriors[:, self.gaussNumber1Tied].reshape(-1, 1)
-        hyperMean_1 = np.expand_dims(self.hyperMeans[self.gaussNumber1Tied, :], 1)
-        hyperMeanNumberOfMeasurements_1 = self.hyperMeansNumberOfMeasurements[self.gaussNumber1Tied]
-        hyperVariance_1 = self.hyperVariances[self.gaussNumber1Tied, :, :]
-        hyperVarianceNumberOfMeasurements_1 = self.hyperVariancesNumberOfMeasurements[
+        posterior_1 = gaussianPosteriors[:, self.gaussNumber1Tied].reshape(
+            -1, 1
+        )
+        hyperMean_1 = np.expand_dims(
+            self.hyperMeans[self.gaussNumber1Tied, :], 1
+        )
+        hyperMeanNumberOfMeasurements_1 = self.hyperMeansNumberOfMeasurements[
             self.gaussNumber1Tied
         ]
+        hyperVariance_1 = self.hyperVariances[self.gaussNumber1Tied, :, :]
+        hyperVarianceNumberOfMeasurements_1 = (
+            self.hyperVariancesNumberOfMeasurements[self.gaussNumber1Tied]
+        )
         variance_1_previous = self.previousVariances[self.gaussNumber1Tied]
 
         posterior_2 = gaussianPosteriors[:, self.gaussNumber2Tied].reshape(
@@ -517,9 +530,9 @@ class GMM:
             self.gaussNumber2Tied
         ]
         hyperVariance_2 = self.hyperVariances[self.gaussNumber2Tied, :, :]
-        hyperVarianceNumberOfMeasurements_2 = self.hyperVariancesNumberOfMeasurements[
-            self.gaussNumber2Tied
-        ]
+        hyperVarianceNumberOfMeasurements_2 = (
+            self.hyperVariancesNumberOfMeasurements[self.gaussNumber2Tied]
+        )
         variance_2_previous = self.previousVariances[self.gaussNumber2Tied]
 
         # Define some temporary variables

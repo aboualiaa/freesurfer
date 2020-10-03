@@ -128,9 +128,9 @@ public:
 
   void SetMaskInverse(bool b);
 
-  bool LoadCustomColorScale(const QString& filename);
+  bool LoadCustomColorScale(const QString &filename);
 
-  bool SaveCustomColorScale(const QString& filename);
+  bool SaveCustomColorScale(const QString &filename);
 
 signals:
   void ColorMapChanged();

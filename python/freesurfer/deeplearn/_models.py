@@ -290,9 +290,11 @@ def unet(
     else:
         is_seg_network = False
 
-    assert unet_depth <= np.log2(np.array(input_shape[0:-1]).min()), (
-        "unet too deep (%d) for min input patch shape %d"
-        % (unet_depth, np.array(input_shape[0:-1]).min())
+    assert unet_depth <= np.log2(
+        np.array(input_shape[0:-1]).min()
+    ), "unet too deep (%d) for min input patch shape %d" % (
+        unet_depth,
+        np.array(input_shape[0:-1]).min(),
     )
 
     dim = len(input_shape)

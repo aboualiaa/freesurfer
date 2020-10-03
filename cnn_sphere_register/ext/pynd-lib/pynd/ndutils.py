@@ -176,9 +176,11 @@ def bw_sphere(volshape, rad, loc=None):
     # if the location is not given, use the center of the volume.
     if loc is None:
         loc = 1.0 * (np.array(volshape) - 1) / 2
-    assert len(loc) == len(volshape), (
-        "Location (%d) and volume dimensions (%d) do not match"
-        % (len(loc), len(volshape))
+    assert len(loc) == len(
+        volshape
+    ), "Location (%d) and volume dimensions (%d) do not match" % (
+        len(loc),
+        len(volshape),
     )
 
     # compute distances between each location in the volume and ``loc``

@@ -77,18 +77,29 @@ void PanelPointSet::ConnectLayer(Layer *layer_in) {
     return;
   }
 
-  LayerPropertyPointSet* p = layer->GetProperty();
-  connect( p, SIGNAL(PropertyChanged()), this, SLOT(UpdateWidgets()), Qt::QueuedConnection );
-  connect( layer, SIGNAL(PointAdded(int)), this, SLOT(UpdateWidgets()), Qt::QueuedConnection);
-  connect( layer, SIGNAL(PointRemoved(int)), this, SLOT(UpdateWidgets()), Qt::QueuedConnection);
-  connect( layer, SIGNAL(PointAdded(int)), this, SLOT(SetCurrentPoint(int)), Qt::QueuedConnection);
-  connect( layer, SIGNAL(PointRemoved(int)), this, SLOT(SetCurrentPoint(int)), Qt::QueuedConnection);
-  connect( ui->doubleSpinBoxOpacity, SIGNAL(valueChanged(double)), p, SLOT(SetOpacity(double)) );
-  connect( ui->checkBoxShowSpline, SIGNAL(toggled(bool)), p, SLOT(SetShowSpline(bool)) );
-  connect( ui->checkBoxSnapToCenter, SIGNAL(toggled(bool)), p, SLOT(SetSnapToVoxelCenter(bool)));
-  connect( ui->colorpickerPointColor, SIGNAL(colorChanged(QColor)), p, SLOT(SetColor(QColor)));
-  connect( ui->colorpickerSplineColor, SIGNAL(colorChanged(QColor)), p, SLOT(SetSplineColor(QColor)));
-  connect( ui->comboBoxSplineColor, SIGNAL(currentIndexChanged(int)), p, SLOT(SetColorMap(int)));
+  LayerPropertyPointSet *p = layer->GetProperty();
+  connect(p, SIGNAL(PropertyChanged()), this, SLOT(UpdateWidgets()),
+          Qt::QueuedConnection);
+  connect(layer, SIGNAL(PointAdded(int)), this, SLOT(UpdateWidgets()),
+          Qt::QueuedConnection);
+  connect(layer, SIGNAL(PointRemoved(int)), this, SLOT(UpdateWidgets()),
+          Qt::QueuedConnection);
+  connect(layer, SIGNAL(PointAdded(int)), this, SLOT(SetCurrentPoint(int)),
+          Qt::QueuedConnection);
+  connect(layer, SIGNAL(PointRemoved(int)), this, SLOT(SetCurrentPoint(int)),
+          Qt::QueuedConnection);
+  connect(ui->doubleSpinBoxOpacity, SIGNAL(valueChanged(double)), p,
+          SLOT(SetOpacity(double)));
+  connect(ui->checkBoxShowSpline, SIGNAL(toggled(bool)), p,
+          SLOT(SetShowSpline(bool)));
+  connect(ui->checkBoxSnapToCenter, SIGNAL(toggled(bool)), p,
+          SLOT(SetSnapToVoxelCenter(bool)));
+  connect(ui->colorpickerPointColor, SIGNAL(colorChanged(QColor)), p,
+          SLOT(SetColor(QColor)));
+  connect(ui->colorpickerSplineColor, SIGNAL(colorChanged(QColor)), p,
+          SLOT(SetSplineColor(QColor)));
+  connect(ui->comboBoxSplineColor, SIGNAL(currentIndexChanged(int)), p,
+          SLOT(SetColorMap(int)));
 }
 
 void PanelPointSet::DoIdle() {
@@ -360,11 +371,11 @@ void PanelPointSet::SetCurrentPoint(int nIndex) {
   LayerPointSet *layer = GetCurrentLayer<LayerPointSet *>();
   if (layer) {
     if (nIndex >= layer->GetNumberOfPoints())
-      nIndex = layer->GetNumberOfPoints()-1;
-    if (nIndex+1 > ui->spinBoxGoToPoint->maximum())
-      ui->spinBoxGoToPoint->setMaximum(nIndex+1);
+      nIndex = layer->GetNumberOfPoints() - 1;
+    if (nIndex + 1 > ui->spinBoxGoToPoint->maximum())
+      ui->spinBoxGoToPoint->setMaximum(nIndex + 1);
     ui->spinBoxGoToPoint->blockSignals(true);
-    ui->spinBoxGoToPoint->setValue(nIndex+1);
+    ui->spinBoxGoToPoint->setValue(nIndex + 1);
     ui->spinBoxGoToPoint->blockSignals(false);
     DoUpdateWidgets();
   }

@@ -910,10 +910,10 @@ static IMAGE *TiffReadImage(const char *fname, int frame0) {
       // fall through
     case 3:
       switch (bits_per_sample) {
-        default:
-        case 8:
-          type = PFRGB;
-          break;
+      default:
+      case 8:
+        type = PFRGB;
+        break;
       }
       break;
     case 64:

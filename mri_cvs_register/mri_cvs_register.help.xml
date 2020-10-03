@@ -45,10 +45,8 @@
       <explanation>Name of the output directory where all the registration results are written. The default is $SUBJECTS_DIR/$subjid/cvs, where subjid is the subject id of the moving subject. The final output directory is going to be ~.6G, but make sure that there is around double that amount of space available for the computations.</explanation>
       <argument>--asegfname fname</argument>
       <explanation>Name of the segmentation volume that should be used in order to guide the volumetric registration step. The default value is aseg. Note that both the template and the moving subject needs to have this file if you want to use this option. Also, do not use the file extension of the volume that you are including with this flag!</explanation>
-
       <argument>--voltype voltype</argument>
       <explanation>Changes the input from norm.mgz to voltype.mgz</explanation>
-
       <intro>Partial run of the registration</intro>
       <argument>--step1</argument>
       <explanation>Only do step 1 (spherical registration).</explanation>

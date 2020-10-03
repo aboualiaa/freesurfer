@@ -24,8 +24,8 @@
   -------------------------------------------------------*/
 #define _MRIIO_SRC
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 #include <vector>
 
 #include <ctype.h>
@@ -436,8 +436,7 @@ int mriio_command_line(int argc, char *argv[]) {
 
 } /* end mriio_command_line() */
 
-void mriio_set_gdf_crop_flag(int new_gdf_crop_flag)
-{
+void mriio_set_gdf_crop_flag(int new_gdf_crop_flag) {
   gdf_crop_flag = new_gdf_crop_flag;
 
   return;
@@ -1523,8 +1522,9 @@ static MRI *corRead(const char *fname, int read_volume) {
       strcpy(mri->transform_fname, xform);
     } else {
       int req = snprintf(mri->transform_fname, STRLEN, "%s/%s", fname, xform);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
     }
 
@@ -2170,15 +2170,17 @@ static MRI *siemensRead(const char *fname, int read_volume_flag) {
              (char *)&MRISvox(mri_raw, 0, i, file_n - n_low),
              sizeof(short) * cols);
 #else
-	{
-	  std::vector<short> temp(cols);
-	  // Note:
-	  // void swab(const void *from, void *to, ssize_t n);
-	  // void *memcpy(void *dest, const void *src, size_t n);
-	  // Because consistency is the hobgoblin of small minds...
-	  swab(&MRISvox(mri_raw, 0, i, file_n - n_low), temp.data(), sizeof(short)*cols );
-	  memcpy(&MRISvox(mri_raw, 0, i, file_n - n_low), temp.data(), sizeof(short)*cols );
-	}
+        {
+          std::vector<short> temp(cols);
+          // Note:
+          // void swab(const void *from, void *to, ssize_t n);
+          // void *memcpy(void *dest, const void *src, size_t n);
+          // Because consistency is the hobgoblin of small minds...
+          swab(&MRISvox(mri_raw, 0, i, file_n - n_low), temp.data(),
+               sizeof(short) * cols);
+          memcpy(&MRISvox(mri_raw, 0, i, file_n - n_low), temp.data(),
+                 sizeof(short) * cols);
+        }
 #endif
 #endif
       }
@@ -2618,29 +2620,29 @@ static int mincWrite(MRI *mri, const char *fname) {
   bvolumeWrite() - replaces bshortWrite and bfloatWrite.
   Bug: fname_passed must the the stem, not the full file name.
   -----------------------------------------------------------------*/
-static int bvolumeWrite(MRI *vol, const char *fname_passed, int type)
-{
-  int i, j, t;
-  std::string fname;;
-  short *bufshort;
-  float *buffloat;
-  FILE *fp;
-  int result;
-  MRI *subject_info = NULL;
-  char subject_volume_dir[STRLEN];
-  char *subjects_dir;
-  char *sn;
-  char analyse_fname[STRLEN], register_fname[STRLEN];
-  char output_dir[STRLEN];
-  char *c;
-  int od_length;
-  char t1_path[STRLEN];
-  MATRIX *cf, *bf, *ibf, *af, *iaf, *as, *bs, *cs, *ics, *r;
-  MATRIX *r1, *r2, *r3, *r4;
-  float det;
-  int bad_flag;
-  int l;
-  char stem[STRLEN];
+static int bvolumeWrite(MRI *vol, const char *fname_passed, int type) {
+  int         i, j, t;
+  std::string fname;
+  ;
+  short *     bufshort;
+  float *     buffloat;
+  FILE *      fp;
+  int         result;
+  MRI *       subject_info = NULL;
+  char        subject_volume_dir[STRLEN];
+  char *      subjects_dir;
+  char *      sn;
+  char        analyse_fname[STRLEN], register_fname[STRLEN];
+  char        output_dir[STRLEN];
+  char *      c;
+  int         od_length;
+  char        t1_path[STRLEN];
+  MATRIX *    cf, *bf, *ibf, *af, *iaf, *as, *bs, *cs, *ics, *r;
+  MATRIX *    r1, *r2, *r3, *r4;
+  float       det;
+  int         bad_flag;
+  int         l;
+  char        stem[STRLEN];
   const char *c1, *c2, *c3;
   struct stat stat_buf;
   char        subject_dir[STRLEN];
@@ -2736,12 +2738,13 @@ static int bvolumeWrite(MRI *vol, const char *fname_passed, int type)
     output_dir[od_length + 1] = '\0';
   }
 
-  int needed = snprintf(analyse_fname, STRLEN, "%s%s", output_dir, "analyse.dat");
-  if( needed >= STRLEN ) {
+  int needed =
+      snprintf(analyse_fname, STRLEN, "%s%s", output_dir, "analyse.dat");
+  if (needed >= STRLEN) {
     std::cerr << __FUNCTION__ << ": analyse_fname truncated" << std::endl;
   }
   needed = snprintf(register_fname, STRLEN, "%s%s", output_dir, "register.dat");
-  if( needed >= STRLEN ) {
+  if (needed >= STRLEN) {
     std::cerr << __FUNCTION__ << ": register_fname truncated" << std::endl;
   }
 
@@ -2781,11 +2784,14 @@ static int bvolumeWrite(MRI *vol, const char *fname_passed, int type)
     tmp << stem << '_' << std::setw(3) << std::setfill('0') << i << ".hdr";
     fname = tmp.str();
     if ((fp = fopen(fname.c_str(), "w")) == NULL) {
-      if (dealloc) MRIfree(&mri);
+      if (dealloc)
+        MRIfree(&mri);
       free(bufshort);
       free(buffloat);
       errno = 0;
-      ErrorReturn(ERROR_BADFILE, (ERROR_BADFILE, "bvolumeWrite(): can't open file %s", fname.c_str()));
+      ErrorReturn(
+          ERROR_BADFILE,
+          (ERROR_BADFILE, "bvolumeWrite(): can't open file %s", fname.c_str()));
     }
     fprintf(fp, "%d %d %d %d\n", mri->height, mri->width, mri->nframes, endian);
     fclose(fp);
@@ -2795,11 +2801,14 @@ static int bvolumeWrite(MRI *vol, const char *fname_passed, int type)
     tmp << stem << '_' << std::setw(3) << std::setfill('0') << i << '.' << ext;
     fname = tmp.str();
     if ((fp = fopen(fname.c_str(), "w")) == NULL) {
-      if (dealloc) MRIfree(&mri);
+      if (dealloc)
+        MRIfree(&mri);
       free(bufshort);
       free(buffloat);
       errno = 0;
-      ErrorReturn(ERROR_BADFILE, (ERROR_BADFILE, "bvolumeWrite(): can't open file %s", fname.c_str()));
+      ErrorReturn(
+          ERROR_BADFILE,
+          (ERROR_BADFILE, "bvolumeWrite(): can't open file %s", fname.c_str()));
     }
 
     for (t = 0; t < mri->nframes; t++) {
@@ -2830,38 +2839,43 @@ static int bvolumeWrite(MRI *vol, const char *fname_passed, int type)
   if (sn != NULL) {
     if ((subjects_dir = getenv("SUBJECTS_DIR")) == NULL) {
       errno = 0;
-      ErrorPrintf(ERROR_BADPARM, "bvolumeWrite(): environment variable SUBJECTS_DIR unset");
-      if (dealloc) MRIfree(&mri);
-    }
-    else {
+      ErrorPrintf(ERROR_BADPARM,
+                  "bvolumeWrite(): environment variable SUBJECTS_DIR unset");
+      if (dealloc)
+        MRIfree(&mri);
+    } else {
       int req = snprintf(subject_dir, STRLEN, "%s/%s", subjects_dir, sn);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
       if (stat(subject_dir, &stat_buf) < 0) {
         fprintf(stderr, "can't stat %s; writing to bhdr instead\n",
                 subject_dir);
       } else {
         if (!S_ISDIR(stat_buf.st_mode)) {
-          fprintf(stderr, "%s is not a directory; writing to bhdr instead\n", subject_dir);
-        }
-        else {
-          int needed = snprintf(subject_volume_dir, STRLEN, "%s/mri/T1", subject_dir);
-	  if( needed >= STRLEN ) {
-	    std::cerr << __FUNCTION__ << ": subject_volume_dir truncated" << std::endl;
-	  }
+          fprintf(stderr, "%s is not a directory; writing to bhdr instead\n",
+                  subject_dir);
+        } else {
+          int needed =
+              snprintf(subject_volume_dir, STRLEN, "%s/mri/T1", subject_dir);
+          if (needed >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": subject_volume_dir truncated"
+                      << std::endl;
+          }
           subject_info = MRIreadInfo(subject_volume_dir);
           if (subject_info == NULL) {
-            int needed = snprintf(subject_volume_dir, STRLEN, "%s/mri/orig", subject_dir);
-	    if( needed >= STRLEN ) {
-	      std::cerr << __FUNCTION__ << ": subject_volume_dir truncated" << std::endl;
-	    }
+            int needed = snprintf(subject_volume_dir, STRLEN, "%s/mri/orig",
+                                  subject_dir);
+            if (needed >= STRLEN) {
+              std::cerr << __FUNCTION__ << ": subject_volume_dir truncated"
+                        << std::endl;
+            }
             subject_info = MRIreadInfo(subject_volume_dir);
             if (subject_info == NULL) {
-              fprintf(stderr,
-                      "can't read the subject's orig or T1 volumes; "
-                      "writing to bhdr instead\n");
-	    }
+              fprintf(stderr, "can't read the subject's orig or T1 volumes; "
+                              "writing to bhdr instead\n");
+            }
           }
         }
       }
@@ -3156,9 +3170,12 @@ static int bvolumeWrite(MRI *vol, const char *fname_passed, int type)
   if (subject_info == NULL) {
     fname = std::string(stem) + ".hdr";
     if ((fp = fopen(fname.c_str(), "w")) == NULL) {
-      if (dealloc) MRIfree(&mri);
+      if (dealloc)
+        MRIfree(&mri);
       errno = 0;
-      ErrorReturn(ERROR_BADFILE, (ERROR_BADFILE, "bvolumeWrite(): can't open file %s", fname.c_str()));
+      ErrorReturn(
+          ERROR_BADFILE,
+          (ERROR_BADFILE, "bvolumeWrite(): can't open file %s", fname.c_str()));
     }
 
     result = write_bhdr(mri, fp);
@@ -3210,13 +3227,13 @@ static MRI *get_b_info(const char *fname_passed, int read_volume,
 
   /* ----- try to read the stem.bhdr ----- */
   int required = snprintf(bhdr_name, STRLEN, "%s/%s.bhdr", directory, stem);
-  if( required >= STRLEN ) {
+  if (required >= STRLEN) {
     std::cerr << __FUNCTION__ << ": bhdr_name truncated" << std::endl;
   }
   if ((fp = fopen(bhdr_name, "r")) != NULL) {
     read_bhdr(mri, fp);
     int required = snprintf(fname, STRLEN, "%s/%s_000.hdr", directory, stem);
-    if( required >= STRLEN ) {
+    if (required >= STRLEN) {
       std::cerr << __FUNCTION__ << ": fname truncated" << std::endl;
     }
     if ((fp = fopen(fname, "r")) == NULL) {
@@ -3243,16 +3260,18 @@ static MRI *get_b_info(const char *fname_passed, int read_volume,
   } else {
     /* ----- get defaults ----- */
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-      fprintf(stderr,
-              "-----------------------------------------------------------------\n"
-              "Could not find the direction cosine information.\n"
-              "Will use the CORONAL orientation.\n"
-              "If not suitable, please provide the information in %s file\n"
-              "-----------------------------------------------------------------\n",
-              bhdr_name);
+      fprintf(
+          stderr,
+          "-----------------------------------------------------------------\n"
+          "Could not find the direction cosine information.\n"
+          "Will use the CORONAL orientation.\n"
+          "If not suitable, please provide the information in %s file\n"
+          "-----------------------------------------------------------------\n",
+          bhdr_name);
     int required = snprintf(fname, STRLEN, "%s/%s_000.hdr", directory, stem);
-    if( required >= STRLEN ) {
-      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+    if (required >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
     }
     if ((fp = fopen(fname, "r")) == NULL) {
       MRIfree(&mri);
@@ -3268,9 +3287,11 @@ static MRI *get_b_info(const char *fname_passed, int read_volume,
     fclose(fp);
 
     /* --- get the number of slices --- */
-    int req = snprintf(fname, STRLEN, "%s/%s_000.%s", directory, stem, extension);
-    if( req >= STRLEN ) {
-      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+    int req =
+        snprintf(fname, STRLEN, "%s/%s_000.%s", directory, stem, extension);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
     }
     if (!FileExists(fname)) {
       MRIfree(&mri);
@@ -3281,9 +3302,11 @@ static MRI *get_b_info(const char *fname_passed, int read_volume,
                          fname));
     }
     for (nslices = 0; FileExists(fname); nslices++) {
-      int req = snprintf(fname, STRLEN, "%s/%s_%03d.%s", directory, stem, nslices, extension);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      int req = snprintf(fname, STRLEN, "%s/%s_%03d.%s", directory, stem,
+                         nslices, extension);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
     }
     nslices--;
@@ -3339,16 +3362,15 @@ static MRI *get_b_info(const char *fname_passed, int read_volume,
 /*-------------------------------------------------------------------
   bvolumeRead() - this replaces bshortRead and bfloatRead.
   -------------------------------------------------------------------*/
-static MRI *bvolumeRead(const char *fname_passed, int read_volume, int type)
-{
-  MRI *mri;
-  FILE *fp;
+static MRI *bvolumeRead(const char *fname_passed, int read_volume, int type) {
+  MRI *       mri;
+  FILE *      fp;
   std::string fname;
-  char directory[STRLEN];
-  char stem[STRLEN];
-  int swap_bytes_flag;
-  int slice, frame, row, k;
-  int nread;
+  char        directory[STRLEN];
+  char        stem[STRLEN];
+  int         swap_bytes_flag;
+  int         slice, frame, row, k;
+  int         nread;
   const char *ext;
   int         size;
   float       min, max;
@@ -3382,12 +3404,12 @@ static MRI *bvolumeRead(const char *fname_passed, int read_volume, int type)
 
   /* Read in the header of the first slice to get the endianness */
   std::stringstream tmp;
-  tmp << directory << '/' << stem << '_'
-      << std::setw(3) << std::setfill('0') << 0
-      << ".hdr";
+  tmp << directory << '/' << stem << '_' << std::setw(3) << std::setfill('0')
+      << 0 << ".hdr";
   fname = tmp.str();
   if ((fp = fopen(fname.c_str(), "r")) == NULL) {
-    fprintf(stderr, "ERROR: can't open file %s; assuming big-endian bvolume\n", fname.c_str());
+    fprintf(stderr, "ERROR: can't open file %s; assuming big-endian bvolume\n",
+            fname.c_str());
     swap_bytes_flag = 0;
   } else {
     if (fscanf(fp, "%*d %*d %*d %d", &swap_bytes_flag) != 1) {
@@ -3403,14 +3425,14 @@ static MRI *bvolumeRead(const char *fname_passed, int read_volume, int type)
   for (slice = 0; slice < mri->depth; slice++) {
     /* Open the file for this slice */
     std::stringstream tmp;
-    tmp << directory << '/' << stem << '_'
-	<< std::setw(3) << std::setfill('0') << slice
-	<< '.' << ext;
+    tmp << directory << '/' << stem << '_' << std::setw(3) << std::setfill('0')
+        << slice << '.' << ext;
     fname = tmp.str();
     if ((fp = fopen(fname.c_str(), "r")) == NULL) {
       MRIfree(&mri);
       errno = 0;
-      ErrorReturn(NULL, (ERROR_BADFILE, "bvolumeRead(): error opening file %s", fname.c_str()));
+      ErrorReturn(NULL, (ERROR_BADFILE, "bvolumeRead(): error opening file %s",
+                         fname.c_str()));
     }
     // fprintf(stderr, "Reading %s ... \n", fname);
     /* Loop through the frames */
@@ -3425,25 +3447,25 @@ static MRI *bvolumeRead(const char *fname_passed, int read_volume, int type)
           fclose(fp);
           MRIfree(&mri);
           errno = 0;
-          ErrorReturn(NULL,
-                      (ERROR_BADFILE,
-                       "bvolumeRead(): "
-                       "error reading from file %s",
-                       fname.c_str()));
+          ErrorReturn(NULL, (ERROR_BADFILE,
+                             "bvolumeRead(): "
+                             "error reading from file %s",
+                             fname.c_str()));
         }
 
         if (swap_bytes_flag) {
           if (type == MRI_SHORT) {
-	    std::vector<short> temp(mri->width);
-	    // Note:
-	    // void swab(const void *from, void *to, ssize_t n);
-	    // void *memcpy(void *dest, const void *src, size_t n);
-	    // Because consistency is the hobgoblin of small minds...
-	    swab(mri->slices[k][row], temp.data(), (size_t)(mri->width * size));
-	    memcpy(mri->slices[k][row], temp.data(), (size_t)(mri->width * size));
+            std::vector<short> temp(mri->width);
+            // Note:
+            // void swab(const void *from, void *to, ssize_t n);
+            // void *memcpy(void *dest, const void *src, size_t n);
+            // Because consistency is the hobgoblin of small minds...
+            swab(mri->slices[k][row], temp.data(), (size_t)(mri->width * size));
+            memcpy(mri->slices[k][row], temp.data(),
+                   (size_t)(mri->width * size));
           } else {
             byteswapbuffloat((void *)mri->slices[k][row], size * mri->width);
-	  }
+          }
         }
       } /* row loop */
     }   /* frame loop */
@@ -3867,15 +3889,16 @@ static MRI *genesisRead(const char *fname, int read_volume) {
       // this is too quick to assume of this type
       // another type %s%%03d.MR" must be examined
       int req = snprintf(fname_format, STRLEN, "%s%%d.MR", fname_base);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
       req = snprintf(fname_format2, STRLEN, "%s%%03d.MR", fname_base);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
-    }
-    else {
+    } else {
       errno = 0;
       ErrorReturn(NULL,
                   (ERROR_BADPARM,
@@ -3892,16 +3915,18 @@ static MRI *genesisRead(const char *fname, int read_volume) {
   if (strlen(fname_format) != 0) {
     strcpy(temp_string, fname_format);
     int req = snprintf(fname_format, STRLEN, "%s%s", fname_dir, temp_string);
-    if( req >= STRLEN ) {
-      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
     }
     printf("fname_format  : %s\n", fname_format);
   }
   if (strlen(fname_format2) != 0) {
     strcpy(temp_string, fname_format2);
     int req = snprintf(fname_format2, STRLEN, "%s%s", fname_dir, temp_string);
-    if( req >= STRLEN ) {
-      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
     }
     printf("fname_format2 : %s\n", fname_format2);
   }
@@ -4214,14 +4239,16 @@ static MRI *genesisRead(const char *fname, int read_volume) {
              sizeof(short) * mri->width);
 #else
         {
-	  std::vector<short> temp(mri->width);
-	  // Note:
-	  // void swab(const void *from, void *to, ssize_t n);
-	  // void *memcpy(void *dest, const void *src, size_t n);
-	  // Because consistency is the hobgoblin of small minds...
-	  swab(&MRISseq_vox(mri, 0, y, slice, frame), temp.data(), sizeof(short) * mri->width);
-	  memcpy(&MRISseq_vox(mri, 0, y, slice, frame), temp.data(), sizeof(short) * mri->width);
-	}
+          std::vector<short> temp(mri->width);
+          // Note:
+          // void swab(const void *from, void *to, ssize_t n);
+          // void *memcpy(void *dest, const void *src, size_t n);
+          // Because consistency is the hobgoblin of small minds...
+          swab(&MRISseq_vox(mri, 0, y, slice, frame), temp.data(),
+               sizeof(short) * mri->width);
+          memcpy(&MRISseq_vox(mri, 0, y, slice, frame), temp.data(),
+                 sizeof(short) * mri->width);
+        }
 #endif
 #endif
       }
@@ -4296,13 +4323,13 @@ static MRI *gelxRead(const char *fname, int read_volume) {
   if (good_flag && ecount == 1 && scount == 1 && icount == 1) {
     c       = strrchr(fname_base, 'i');
     im_init = atoi(c + 1);
-    *c = '\0';
+    *c      = '\0';
     int req = snprintf(fname_format, STRLEN, "%si%%d", fname_base);
-    if( req >= STRLEN ) {
-      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
     }
-  }
-  else {
+  } else {
     errno = 0;
     ErrorReturn(NULL, (ERROR_BADPARM,
                        "genesisRead(): can't determine file name format for %s",
@@ -4310,12 +4337,14 @@ static MRI *gelxRead(const char *fname, int read_volume) {
   }
 
   int req = snprintf(temp_string, STRLEN, "%s", fname_format);
-  if( req >= STRLEN ) {
-    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
   }
   req = snprintf(fname_format, STRLEN, "%s%s", fname_dir, temp_string);
-  if( req >= STRLEN ) {
-    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
   }
 
   /* ----- find the low and high files ----- */
@@ -4525,15 +4554,17 @@ static MRI *gelxRead(const char *fname, int read_volume) {
                              fname_use));
         }
 #if (BYTE_ORDER == LITTLE_ENDIAN)
-	{
-	  std::vector<short> temp(2*mri->width);
-	  // Note:
-	  // void swab(const void *from, void *to, ssize_t n);
-	  // void *memcpy(void *dest, const void *src, size_t n);
-	  // Because consistency is the hobgoblin of small minds...
-	  swab(mri->slices[i - im_low][y], temp.data(), (size_t)(2 * mri->width));
-	  memcpy(mri->slices[i - im_low][y], temp.data(), (size_t)(2 * mri->width));
-	}
+        {
+          std::vector<short> temp(2 * mri->width);
+          // Note:
+          // void swab(const void *from, void *to, ssize_t n);
+          // void *memcpy(void *dest, const void *src, size_t n);
+          // Because consistency is the hobgoblin of small minds...
+          swab(mri->slices[i - im_low][y], temp.data(),
+               (size_t)(2 * mri->width));
+          memcpy(mri->slices[i - im_low][y], temp.data(),
+                 (size_t)(2 * mri->width));
+        }
 #endif
       }
 
@@ -5989,9 +6020,11 @@ static MRI *gdfRead(const char *fname, int read_volume) {
   n_files = 0;
   do {
     n_files++;
-    int req = snprintf(fname_use, STRLEN, "%s%d%s", file_path_1, n_files, file_path_2);
-    if( req >= STRLEN ) {
-      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+    int req = snprintf(fname_use, STRLEN, "%s%d%s", file_path_1, n_files,
+                       file_path_2);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
     }
   } while (FileExists(fname_use));
 
@@ -6002,9 +6035,11 @@ static MRI *gdfRead(const char *fname, int read_volume) {
     n_files = 0;
     do {
       n_files++;
-      int req = snprintf(fname_use, STRLEN, "%s%03d%s", file_path_1, n_files, file_path_2);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      int req = snprintf(fname_use, STRLEN, "%s%03d%s", file_path_1, n_files,
+                         file_path_2);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
     } while (FileExists(fname_use));
 
@@ -6113,14 +6148,18 @@ static MRI *gdfRead(const char *fname, int read_volume) {
 
   for (i = 1; i <= n_files; i++) {
     if (pad_zeros_flag) {
-      int req = snprintf(fname_use, STRLEN, "%s%03d%s", file_path_1, i, file_path_2);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      int req =
+          snprintf(fname_use, STRLEN, "%s%03d%s", file_path_1, i, file_path_2);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
     } else {
-      int req = snprintf(fname_use, STRLEN, "%s%d%s", file_path_1, i, file_path_2);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      int req =
+          snprintf(fname_use, STRLEN, "%s%d%s", file_path_1, i, file_path_2);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
     }
 
@@ -6247,11 +6286,10 @@ static MRI *gdfRead(const char *fname, int read_volume) {
 
 } /* end gdfRead() */
 
-static int gdfWrite(MRI *mri, const char *fname)
-{
-  FILE *fp;
-  int i, j;
-  std::string im_fname;
+static int gdfWrite(MRI *mri, const char *fname) {
+  FILE *         fp;
+  int            i, j;
+  std::string    im_fname;
   unsigned char *buf;
   int            buf_size = 0;
 
@@ -6300,12 +6338,15 @@ static int gdfWrite(MRI *mri, const char *fname)
   }
 
   for (i = 0; i < mri->depth; i++) {
-    im_fname = std::string(mri->gdf_image_stem) + '_' + std::to_string(i+1) + ".img";
+    im_fname =
+        std::string(mri->gdf_image_stem) + '_' + std::to_string(i + 1) + ".img";
     fp = fopen(im_fname.c_str(), "w");
     if (fp == NULL) {
       free(buf);
       errno = 0;
-      ErrorReturn(ERROR_BADFILE, (ERROR_BADFILE, "gdfWrite(): error opening file %s", im_fname.c_str()));
+      ErrorReturn(ERROR_BADFILE,
+                  (ERROR_BADFILE, "gdfWrite(): error opening file %s",
+                   im_fname.c_str()));
     }
 
     for (j = 0; j < mri->height; j++) {
@@ -6686,13 +6727,13 @@ static int read_otl_file(FILE *fp, MRI *mri, int slice, COLOR_TABLE *ctab,
       swab((const char *)points, (char *)points, 2 * n_rows * sizeof(short));
 #else
       {
-	std::vector<short> tmp(2*n_rows);
-	// Note:
-	// void swab(const void *from, void *to, ssize_t n);
-	// void *memcpy(void *dest, const void *src, size_t n);
-	// Because consistency is the hobgoblin of small minds...
-	swab(points, tmp.data(), 2 * n_rows * sizeof(short));
-	memcpy(points, tmp.data(), 2 * n_rows * sizeof(short));
+        std::vector<short> tmp(2 * n_rows);
+        // Note:
+        // void swab(const void *from, void *to, ssize_t n);
+        // void *memcpy(void *dest, const void *src, size_t n);
+        // Because consistency is the hobgoblin of small minds...
+        swab(points, tmp.data(), 2 * n_rows * sizeof(short));
+        memcpy(points, tmp.data(), 2 * n_rows * sizeof(short));
       }
 #endif
 #endif
@@ -7041,13 +7082,13 @@ int list_labels_in_otl_file(FILE *fp) {
       swab((const char *)points, (char *)points, 2 * n_rows * sizeof(short));
 #else
       {
-	std::vector<short> tmp(2*n_rows);
-	// Note:
-	// void swab(const void *from, void *to, ssize_t n);
-	// void *memcpy(void *dest, const void *src, size_t n);
-	// Because consistency is the hobgoblin of small minds...
-	swab(points, tmp.data(), 2 * n_rows * sizeof(short));
-	memcpy(points, tmp.data(), 2 * n_rows * sizeof(short));
+        std::vector<short> tmp(2 * n_rows);
+        // Note:
+        // void swab(const void *from, void *to, ssize_t n);
+        // void *memcpy(void *dest, const void *src, size_t n);
+        // Because consistency is the hobgoblin of small minds...
+        swab(points, tmp.data(), 2 * n_rows * sizeof(short));
+        memcpy(points, tmp.data(), 2 * n_rows * sizeof(short));
       }
 #endif
 #endif
@@ -7278,13 +7319,13 @@ static MRI *ximgRead(const char *fname, int read_volume) {
         ;
       c++;
       im_init = atoi(c);
-      *c = '\0';
+      *c      = '\0';
       int req = snprintf(fname_format, STRLEN, "%s%%d.MR", fname_base);
-      if( req >= STRLEN ) {
-	std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
-    }
-    else {
+    } else {
       errno = 0;
       ErrorReturn(NULL,
                   (ERROR_BADPARM,
@@ -7299,12 +7340,14 @@ static MRI *ximgRead(const char *fname, int read_volume) {
   }
 
   int req = snprintf(temp_string, STRLEN, "%s", fname_format);
-  if( req >= STRLEN ) {
-    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
   }
   req = snprintf(fname_format, STRLEN, "%s%s", fname_dir, temp_string);
-  if( req >= STRLEN ) {
-    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
   }
 
   /* ----- find the low and high files ----- */
@@ -7563,15 +7606,17 @@ static MRI *ximgRead(const char *fname, int read_volume) {
                              fname_use));
         }
 #if (BYTE_ORDER == LITTLE_ENDIAN)
-	{
-	  std::vector<short> tmp(2*mri->width);
-	  // Note:
-	  // void swab(const void *from, void *to, ssize_t n);
-	  // void *memcpy(void *dest, const void *src, size_t n);
-	  // Because consistency is the hobgoblin of small minds...
-	  swab(mri->slices[i - im_low][y], tmp.data(), (size_t)(2 * mri->width));
-	  memcpy(mri->slices[i - im_low][y], tmp.data(), (size_t)(2 * mri->width));
-	}
+        {
+          std::vector<short> tmp(2 * mri->width);
+          // Note:
+          // void swab(const void *from, void *to, ssize_t n);
+          // void *memcpy(void *dest, const void *src, size_t n);
+          // Because consistency is the hobgoblin of small minds...
+          swab(mri->slices[i - im_low][y], tmp.data(),
+               (size_t)(2 * mri->width));
+          memcpy(mri->slices[i - im_low][y], tmp.data(),
+                 (size_t)(2 * mri->width));
+        }
 #endif
       }
 
@@ -7658,12 +7703,14 @@ static MRI *nifti1Read(const char *fname, int read_volume) {
       *dot = '\0';
 
   int req = snprintf(hdr_fname, STRLEN, "%s.hdr", fname_stem);
-  if( req >= STRLEN ) {
-    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
   }
   req = snprintf(img_fname, STRLEN, "%s.img", fname_stem);
-  if( req >= STRLEN ) {
-    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
   }
 
   fp = fopen(hdr_fname, "r");
@@ -8311,11 +8358,11 @@ static int nifti1Write(MRI *mri0, const char *fname) {
       *dot = '\0';
 
   int needed = snprintf(hdr_fname, STRLEN, "%s.hdr", fname_stem);
-  if( needed >= STRLEN ) {
+  if (needed >= STRLEN) {
     std::cerr << __FUNCTION__ << ": Truncation of hdr_fname" << std::endl;
   }
   needed = snprintf(img_fname, STRLEN, "%s.img", fname_stem);
-  if( needed >= STRLEN ) {
+  if (needed >= STRLEN) {
     std::cerr << __FUNCTION__ << ": Truncation of img_fname" << std::endl;
   }
 
@@ -9805,16 +9852,16 @@ static void swap_nifti_1_header(struct nifti_1_header *hdr) {
 } /* end swap_nifti_1_header */
 
 MRI *MRIreadGeRoi(const char *fname, int n_slices) {
-  MRI * mri;
-  int   i;
-  char  prefix[STRLEN], postfix[STRLEN];
-  int   n_digits;
-  FILE *fp;
-  int width, height;
+  MRI *       mri;
+  int         i;
+  char        prefix[STRLEN], postfix[STRLEN];
+  int         n_digits;
+  FILE *      fp;
+  int         width, height;
   std::string fname_use;
-  int read_one_flag;
-  int pixel_data_offset;
-  int y;
+  int         read_one_flag;
+  int         pixel_data_offset;
+  int         y;
 
   if ((fp = fopen(fname, "r")) == NULL) {
     errno = 0;
@@ -9889,18 +9936,20 @@ MRI *MRIreadGeRoi(const char *fname, int n_slices) {
           fclose(fp);
           MRIfree(&mri);
           errno = 0;
-          ErrorReturn(NULL, (ERROR_BADFILE, "MRIreadGeRoi(): error reading from file file %s", fname_use.c_str()));
+          ErrorReturn(NULL, (ERROR_BADFILE,
+                             "MRIreadGeRoi(): error reading from file file %s",
+                             fname_use.c_str()));
         }
 #if (BYTE_ORDER == LITTLE_ENDIAN)
-	{
-	  std::vector<short> tmp(2*mri->width);
-	  // Note:
-	  // void swab(const void *from, void *to, ssize_t n);
-	  // void *memcpy(void *dest, const void *src, size_t n);
-	  // Because consistency is the hobgoblin of small minds...
-	  swab(mri->slices[i][y], tmp.data(), (size_t)(2 * mri->width));
-	  memcpy(mri->slices[i][y], tmp.data(), (size_t)(2 * mri->width));
-	}
+        {
+          std::vector<short> tmp(2 * mri->width);
+          // Note:
+          // void swab(const void *from, void *to, ssize_t n);
+          // void *memcpy(void *dest, const void *src, size_t n);
+          // Because consistency is the hobgoblin of small minds...
+          swab(mri->slices[i][y], tmp.data(), (size_t)(2 * mri->width));
+          memcpy(mri->slices[i][y], tmp.data(), (size_t)(2 * mri->width));
+        }
 #endif
       }
 

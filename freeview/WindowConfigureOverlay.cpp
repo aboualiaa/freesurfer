@@ -45,35 +45,45 @@ WindowConfigureOverlay::WindowConfigureOverlay(QWidget *parent)
   ui->widgetColorPicker->setCurrentColor(Qt::green);
   m_rangeOverall[0] = 0;
   m_rangeOverall[1] = 1;
-  m_nMaxHistCount = 1;
-  connect(ui->widgetHistogram, SIGNAL(MarkerChanged()), this, SLOT(OnHistogramMarkerChanged()));
-  connect(ui->checkBoxAutoApply, SIGNAL(toggled(bool)), this, SLOT(CheckApply(bool)));
-  connect(ui->checkBoxApplyToAll, SIGNAL(toggled(bool)), this, SLOT(CheckApply(bool)));
-  connect(ui->checkBoxAutoFrame, SIGNAL(toggled(bool)), this, SLOT(OnCheckAutoFrameByVertex(bool)));
+  m_nMaxHistCount   = 1;
+  connect(ui->widgetHistogram, SIGNAL(MarkerChanged()), this,
+          SLOT(OnHistogramMarkerChanged()));
+  connect(ui->checkBoxAutoApply, SIGNAL(toggled(bool)), this,
+          SLOT(CheckApply(bool)));
+  connect(ui->checkBoxApplyToAll, SIGNAL(toggled(bool)), this,
+          SLOT(CheckApply(bool)));
+  connect(ui->checkBoxAutoFrame, SIGNAL(toggled(bool)), this,
+          SLOT(OnCheckAutoFrameByVertex(bool)));
   connect(ui->pushButtonApply, SIGNAL(clicked(bool)), SLOT(OnButtonClicked()));
   connect(ui->pushButtonCancel, SIGNAL(clicked(bool)), SLOT(OnButtonClicked()));
   connect(ui->pushButtonScreenshot, SIGNAL(clicked(bool)),
           SLOT(OnButtonClicked()));
   connect(ui->pushButtonHelp, SIGNAL(clicked(bool)), SLOT(OnButtonClicked()));
-  connect(ui->checkBoxFixedXAxis, SIGNAL(toggled(bool)), SLOT(OnCheckFixedAxes()));
-  connect(ui->checkBoxFixedYAxis, SIGNAL(toggled(bool)), SLOT(OnCheckFixedAxes()));
-  connect(ui->pushButtonLoadCustom, SIGNAL(clicked(bool)), SLOT(OnButtonLoadCustom()));
-  connect(ui->pushButtonSaveCustom, SIGNAL(clicked(bool)), SLOT(OnButtonSaveCustom()));
+  connect(ui->checkBoxFixedXAxis, SIGNAL(toggled(bool)),
+          SLOT(OnCheckFixedAxes()));
+  connect(ui->checkBoxFixedYAxis, SIGNAL(toggled(bool)),
+          SLOT(OnCheckFixedAxes()));
+  connect(ui->pushButtonLoadCustom, SIGNAL(clicked(bool)),
+          SLOT(OnButtonLoadCustom()));
+  connect(ui->pushButtonSaveCustom, SIGNAL(clicked(bool)),
+          SLOT(OnButtonSaveCustom()));
 
   m_layerSurface = NULL;
   QSettings settings;
-  QVariant v = settings.value("WindowConfigureOverlay/Geometry");
-  if (v.isValid())
-  {
+  QVariant  v = settings.value("WindowConfigureOverlay/Geometry");
+  if (v.isValid()) {
     this->restoreGeometry(v.toByteArray());
   }
   v = settings.value("WindowConfigureOverlay/AutoApply");
   if (!v.isValid())
     v = true;
   ui->checkBoxAutoApply->setChecked(v.toBool());
-  ui->checkBoxAutoFrame->setChecked(settings.value("WindowConfigureOverlay/AutoFrame").toBool());
-  ui->checkBoxFixedXAxis->setChecked(settings.value("WindowConfigureOverlay/FixedXAxis", true).toBool());
-  ui->checkBoxFixedYAxis->setChecked(settings.value("WindowConfigureOverlay/FixedYAxis", false).toBool());
+  ui->checkBoxAutoFrame->setChecked(
+      settings.value("WindowConfigureOverlay/AutoFrame").toBool());
+  ui->checkBoxFixedXAxis->setChecked(
+      settings.value("WindowConfigureOverlay/FixedXAxis", true).toBool());
+  ui->checkBoxFixedYAxis->setChecked(
+      settings.value("WindowConfigureOverlay/FixedYAxis", false).toBool());
 
   LayerCollection *lc = MainWindow::GetMainWindow()->GetLayerCollection("MRI");
   connect(lc, SIGNAL(LayerAdded(Layer *)), this, SLOT(UpdateUI()));
@@ -92,10 +102,14 @@ WindowConfigureOverlay::~WindowConfigureOverlay() {
 
   QSettings settings;
   settings.setValue("WindowConfigureOverlay/Geometry", this->saveGeometry());
-  settings.setValue("WindowConfigureOverlay/AutoApply", ui->checkBoxAutoApply->isChecked());
-  settings.setValue("WindowConfigureOverlay/AutoFrame", ui->checkBoxAutoFrame->isChecked());
-  settings.setValue("WindowConfigureOverlay/FixedXAxis", ui->checkBoxFixedXAxis->isChecked());
-  settings.setValue("WindowConfigureOverlay/FixedYAxis", ui->checkBoxFixedYAxis->isChecked());
+  settings.setValue("WindowConfigureOverlay/AutoApply",
+                    ui->checkBoxAutoApply->isChecked());
+  settings.setValue("WindowConfigureOverlay/AutoFrame",
+                    ui->checkBoxAutoFrame->isChecked());
+  settings.setValue("WindowConfigureOverlay/FixedXAxis",
+                    ui->checkBoxFixedXAxis->isChecked());
+  settings.setValue("WindowConfigureOverlay/FixedYAxis",
+                    ui->checkBoxFixedYAxis->isChecked());
 
   delete ui;
 }
@@ -328,15 +342,14 @@ void WindowConfigureOverlay::OnApply() {
       m_layerSurface->GetActiveOverlay()->UpdateSmooth();
     else
       p->EmitColorMapChanged();
-    if (ui->checkBoxApplyToAll->isChecked())
-    {
-      for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++)
-      {
-        SurfaceOverlay* so = m_layerSurface->GetOverlay(i);
-        if (so != m_layerSurface->GetActiveOverlay())
-        {
-          smooth_changed = (so->GetProperty()->GetSmooth() != ui->checkBoxEnableSmooth->isChecked() ||
-              so->GetProperty()->GetSmoothSteps() != ui->spinBoxSmoothSteps->value() );
+    if (ui->checkBoxApplyToAll->isChecked()) {
+      for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++) {
+        SurfaceOverlay *so = m_layerSurface->GetOverlay(i);
+        if (so != m_layerSurface->GetActiveOverlay()) {
+          smooth_changed = (so->GetProperty()->GetSmooth() !=
+                                ui->checkBoxEnableSmooth->isChecked() ||
+                            so->GetProperty()->GetSmoothSteps() !=
+                                ui->spinBoxSmoothSteps->value());
           so->GetProperty()->Copy(p);
           if (smooth_changed)
             so->UpdateSmooth();
@@ -441,8 +454,7 @@ void WindowConfigureOverlay::UpdateGraph(bool bApply) {
     SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
     if (overlay) {
       double range[2];
-      if (ui->checkBoxFixedXAxis->isChecked())
-      {
+      if (ui->checkBoxFixedXAxis->isChecked()) {
         range[0] = m_rangeOverall[0];
         range[1] = m_rangeOverall[1];
       } else
@@ -451,10 +463,11 @@ void WindowConfigureOverlay::UpdateGraph(bool bApply) {
         return;
       }
 
-      ui->widgetHistogram->SetFixedMaxCount(ui->checkBoxFixedYAxis->isChecked()?m_nMaxHistCount:0);
+      ui->widgetHistogram->SetFixedMaxCount(
+          ui->checkBoxFixedYAxis->isChecked() ? m_nMaxHistCount : 0);
 
-      SurfaceOverlayProperty* p = new SurfaceOverlayProperty( overlay );
-      UpdateOverlayProperty( p );
+      SurfaceOverlayProperty *p = new SurfaceOverlayProperty(overlay);
+      UpdateOverlayProperty(p);
       if (m_fDataCache)
         ui->widgetHistogram->SetInputData(m_fDataCache, overlay->GetDataSize(),
                                           range);
@@ -837,8 +850,7 @@ void WindowConfigureOverlay::OnComboMask(int n) {
   }
 }
 
-void WindowConfigureOverlay::LoadLabelMask(const QString& fn)
-{
+void WindowConfigureOverlay::LoadLabelMask(const QString &fn) {
   setProperty("wait_for_label", true);
   emit MaskLoadRequested(fn);
 }
@@ -880,18 +892,15 @@ void WindowConfigureOverlay::OnCycleOverlay() {
   }
 }
 
-void WindowConfigureOverlay::OnCheckFixedAxes(bool bUpdateGraph)
-{
+void WindowConfigureOverlay::OnCheckFixedAxes(bool bUpdateGraph) {
   bool bFixedX = ui->checkBoxFixedXAxis->isChecked();
   bool bFixedY = ui->checkBoxFixedYAxis->isChecked();
-  if (bFixedX && m_layerSurface)
-  {
+  if (bFixedX && m_layerSurface) {
     m_rangeOverall[0] = 1e10;
     m_rangeOverall[1] = -1e10;
-    for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++)
-    {
-      SurfaceOverlay* ol = m_layerSurface->GetOverlay(i);
-      double range[2];
+    for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++) {
+      SurfaceOverlay *ol = m_layerSurface->GetOverlay(i);
+      double          range[2];
       ol->GetDisplayRange(range);
       if (range[0] < m_rangeOverall[0])
         m_rangeOverall[0] = range[0];
@@ -900,18 +909,17 @@ void WindowConfigureOverlay::OnCheckFixedAxes(bool bUpdateGraph)
     }
   }
 
-  if (bFixedY && m_layerSurface)
-  {
+  if (bFixedY && m_layerSurface) {
     double range[2] = {m_rangeOverall[0], m_rangeOverall[1]};
     m_nMaxHistCount = 1;
-    for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++)
-    {
-      SurfaceOverlay* ol = m_layerSurface->GetOverlay(i);
+    for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++) {
+      SurfaceOverlay *ol = m_layerSurface->GetOverlay(i);
       if (!bFixedX)
         ol->GetDisplayRange(range);
 
-      if (ol->property("HistBins").toInt() != ui->widgetHistogram->GetNumberOfBins() || qAbs(ol->property("HistRange").toDouble()-range[0]) > 1e-6)
-      {
+      if (ol->property("HistBins").toInt() !=
+              ui->widgetHistogram->GetNumberOfBins() ||
+          qAbs(ol->property("HistRange").toDouble() - range[0]) > 1e-6) {
         ol->UpdateMaxHistCount(range, ui->widgetHistogram->GetNumberOfBins());
       }
       int nMaxCnt = ol->property("HistMaxCount").toInt();
@@ -924,31 +932,30 @@ void WindowConfigureOverlay::OnCheckFixedAxes(bool bUpdateGraph)
     UpdateGraph();
 }
 
-void WindowConfigureOverlay::OnButtonSaveCustom()
-{
-  QString filename = QFileDialog::getSaveFileName( this, "Save Color Scale",
-                                                   MainWindow::GetMainWindow()->AutoSelectLastDir( "surf" ),
-                                                   "All files (*)");
-  if ( !filename.isEmpty() && m_layerSurface && m_layerSurface->GetActiveOverlay() )
-  {
-    SurfaceOverlay* overlay = m_layerSurface->GetActiveOverlay();
+void WindowConfigureOverlay::OnButtonSaveCustom() {
+  QString filename = QFileDialog::getSaveFileName(
+      this, "Save Color Scale",
+      MainWindow::GetMainWindow()->AutoSelectLastDir("surf"), "All files (*)");
+  if (!filename.isEmpty() && m_layerSurface &&
+      m_layerSurface->GetActiveOverlay()) {
+    SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
     if (!overlay->GetProperty()->SaveCustomColorScale(filename))
-      QMessageBox::warning(this, "Error", "Failed to save color scale to " + filename);
+      QMessageBox::warning(this, "Error",
+                           "Failed to save color scale to " + filename);
   }
 }
 
-void WindowConfigureOverlay::OnButtonLoadCustom()
-{
-  QString filename = QFileDialog::getOpenFileName( this, "Load Color Scale",
-                                                   MainWindow::GetMainWindow()->AutoSelectLastDir( "surf" ),
-                                                   "All files (*)");
-  if ( !filename.isEmpty() && m_layerSurface && m_layerSurface->GetActiveOverlay() )
-  {
-    SurfaceOverlay* overlay = m_layerSurface->GetActiveOverlay();
+void WindowConfigureOverlay::OnButtonLoadCustom() {
+  QString filename = QFileDialog::getOpenFileName(
+      this, "Load Color Scale",
+      MainWindow::GetMainWindow()->AutoSelectLastDir("surf"), "All files (*)");
+  if (!filename.isEmpty() && m_layerSurface &&
+      m_layerSurface->GetActiveOverlay()) {
+    SurfaceOverlay *overlay = m_layerSurface->GetActiveOverlay();
     if (!overlay->GetProperty()->LoadCustomColorScale(filename))
-      QMessageBox::warning(this, "Error", "Failed to load color scale from " + filename);
-    else
-    {
+      QMessageBox::warning(this, "Error",
+                           "Failed to load color scale from " + filename);
+    else {
       m_layerSurface->UpdateOverlay(true);
       overlay->EmitDataUpdated();
     }

@@ -301,12 +301,16 @@ class SamsegTumor(Samseg):
                 + ")",
             )
 
-            maximumNumberOfIterations = optimizationOptions.multiResolutionSpecification[
-                multiResolutionLevel
-            ].maximumNumberOfIterations
-            estimateBiasField = optimizationOptions.multiResolutionSpecification[
-                multiResolutionLevel
-            ].estimateBiasField
+            maximumNumberOfIterations = (
+                optimizationOptions.multiResolutionSpecification[
+                    multiResolutionLevel
+                ].maximumNumberOfIterations
+            )
+            estimateBiasField = (
+                optimizationOptions.multiResolutionSpecification[
+                    multiResolutionLevel
+                ].estimateBiasField
+            )
             historyOfCost = [1 / eps]
             logger.debug(
                 "maximumNumberOfIterations: %d", maximumNumberOfIterations
@@ -343,8 +347,10 @@ class SamsegTumor(Samseg):
 
             # Save initial position at the start of this multi-resolution level
             initialNodePositions = downSampledMesh.points
-            initialNodePositionsInTemplateSpace = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-                initialNodePositions, downSampledTransform
+            initialNodePositionsInTemplateSpace = (
+                self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                    initialNodePositions, downSampledTransform
+                )
             )
 
             # Set priors in mesh to the merged (super-structure) ones
@@ -844,8 +850,10 @@ class SamsegTumor(Samseg):
             finalNodePositions = downSampledMesh.points
 
             # Transform back in template space (i.e., undoing the affine registration that we applied), and save for later usage
-            finalNodePositionsInTemplateSpace = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-                finalNodePositions, downSampledTransform
+            finalNodePositionsInTemplateSpace = (
+                self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                    finalNodePositions, downSampledTransform
+                )
             )
 
             # Record deformation delta here in lieu of maintaining history
@@ -854,9 +862,11 @@ class SamsegTumor(Samseg):
                 - initialNodePositionsInTemplateSpace
                 + downSampledInitialDeformationApplied
             )
-            self.deformationAtlasFileName = optimizationOptions.multiResolutionSpecification[
-                multiResolutionLevel
-            ].atlasFileName
+            self.deformationAtlasFileName = (
+                optimizationOptions.multiResolutionSpecification[
+                    multiResolutionLevel
+                ].atlasFileName
+            )
 
             # Save history of the estimation
             if self.saveHistory:
@@ -1175,8 +1185,10 @@ class SamsegTumor(Samseg):
             )
             atlasPriors = priors
 
-        estimatedNodePositions = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-            mesh.points, self.transform
+        estimatedNodePositions = (
+            self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                mesh.points, self.transform
+            )
         )
         return (
             posteriors,

@@ -41,8 +41,10 @@ class ProbabilisticAtlas:
 
             # Get the mesh node positions transformed back into template space (i.e., undoing the affine registration that we applied)
             nodePositions = mesh.points
-            nodePositionsInTemplateSpace = self.mapPositionsFromSubjectToTemplateSpace(
-                nodePositions, transform
+            nodePositionsInTemplateSpace = (
+                self.mapPositionsFromSubjectToTemplateSpace(
+                    nodePositions, transform
+                )
             )
 
             # Get the estimated warp in template space

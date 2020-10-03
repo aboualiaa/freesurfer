@@ -72,8 +72,8 @@ public:
   ~SphericalInterpolator() { MHTfree(&mht); }
 
   float interp(double phi, double theta);
-  void setOverlay(const float *array);
-  bool nearestneighbor = false;
+  void  setOverlay(const float *array);
+  bool  nearestneighbor = false;
 
 private:
   MRIS *           mris;

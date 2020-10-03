@@ -161,32 +161,22 @@ ToolWindowEdit::ToolWindowEdit(QWidget *parent)
                    << ui->lineEditContourValue << ui->colorPickerContour
                    << ui->labelTipsContour;
 
-  m_widgetsGeoSeg  << ui->labelGeoLambda
-                   << ui->labelGeoMaxDistance
-                   << ui->checkBoxMaxForegroundDistance
-                   << ui->lineEditGeoMaxForegroundDistance
-                   << ui->labelGeoWsize
-                   << ui->lineEditGeoLambda
-                   << ui->spinBoxGeoWsize
-                   << ui->lineEditGeoMaxDistance
-                   << ui->pushButtonGeoGo
-                   << ui->pushButtonGeoClear
-                   << ui->pushButtonGeoClearFilling
-                   << ui->widgetGeoColors
-                   << ui->sliderGeoOpacity
-                   << ui->pushButtonGeoApply
-                   << ui->pushButtonGeoUndo
-                   << ui->labelTipsGeoS
-                   << ui->widgetBusyIndicator
-                   << ui->checkBoxApplySmoothing
-                   << ui->lineEditSmoothingStd
-                   << ui->pushButtonAbort
-                   << ui->checkBoxGeoSegOverwrite
-                   << ui->labelGeoMessage;
+  m_widgetsGeoSeg << ui->labelGeoLambda << ui->labelGeoMaxDistance
+                  << ui->checkBoxMaxForegroundDistance
+                  << ui->lineEditGeoMaxForegroundDistance << ui->labelGeoWsize
+                  << ui->lineEditGeoLambda << ui->spinBoxGeoWsize
+                  << ui->lineEditGeoMaxDistance << ui->pushButtonGeoGo
+                  << ui->pushButtonGeoClear << ui->pushButtonGeoClearFilling
+                  << ui->widgetGeoColors << ui->sliderGeoOpacity
+                  << ui->pushButtonGeoApply << ui->pushButtonGeoUndo
+                  << ui->labelTipsGeoS << ui->widgetBusyIndicator
+                  << ui->checkBoxApplySmoothing << ui->lineEditSmoothingStd
+                  << ui->pushButtonAbort << ui->checkBoxGeoSegOverwrite
+                  << ui->labelGeoMessage;
 
-  QTimer* timer = new QTimer( this );
-  connect( timer, SIGNAL(timeout()), this, SLOT(OnIdle()) );
-  timer->start( 50 );
+  QTimer *timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(OnIdle()));
+  timer->start(50);
 
 #ifdef Q_OS_MAC
   ui->labelTips->setText(ui->labelTips->text().replace("Ctrl +", "Cmd +"));
@@ -617,7 +607,8 @@ void ToolWindowEdit::OnButtonGeoSegGo() {
     if (mri_draw && mri_fill) {
       double lambda   = ui->lineEditGeoLambda->text().trimmed().toDouble();
       double max_dist = ui->lineEditGeoMaxDistance->text().trimmed().toDouble();
-      double max_foreground_dist = ui->lineEditGeoMaxForegroundDistance->text().trimmed().toDouble();
+      double max_foreground_dist =
+          ui->lineEditGeoMaxForegroundDistance->text().trimmed().toDouble();
       if (!ui->checkBoxMaxForegroundDistance->isChecked())
         max_foreground_dist = 0;
       int wsize = ui->spinBoxGeoWsize->value();
@@ -626,11 +617,17 @@ void ToolWindowEdit::OnButtonGeoSegGo() {
       double std = 0;
       if (ui->checkBoxApplySmoothing->isChecked())
         std = ui->lineEditSmoothingStd->text().toDouble(&ok);
-      mri_fill->GeodesicSegmentation(mri_draw, lambda, wsize, max_dist, ok?std:0,
-                                     ui->checkBoxGeoSegOverwrite->isChecked() ? NULL : ((LayerMRI*)MainWindow::GetMainWindow()->GetActiveLayer("MRI")),
-                                     max_foreground_dist);
-      connect(mri_fill, SIGNAL(GeodesicSegmentationFinished(double)), this, SLOT(OnGeoSegFinished(double)), Qt::UniqueConnection);
-      connect(mri_fill, SIGNAL(GeodesicSegmentationProgress(double)), this, SLOT(OnGeoSegProgress(double)), Qt::UniqueConnection);
+      mri_fill->GeodesicSegmentation(
+          mri_draw, lambda, wsize, max_dist, ok ? std : 0,
+          ui->checkBoxGeoSegOverwrite->isChecked()
+              ? NULL
+              : ((LayerMRI *)MainWindow::GetMainWindow()->GetActiveLayer(
+                    "MRI")),
+          max_foreground_dist);
+      connect(mri_fill, SIGNAL(GeodesicSegmentationFinished(double)), this,
+              SLOT(OnGeoSegFinished(double)), Qt::UniqueConnection);
+      connect(mri_fill, SIGNAL(GeodesicSegmentationProgress(double)), this,
+              SLOT(OnGeoSegProgress(double)), Qt::UniqueConnection);
       ui->pushButtonGeoGo->setEnabled(false);
       ui->pushButtonGeoApply->setEnabled(false);
       //      ui->widgetBusyIndicator->show();

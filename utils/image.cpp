@@ -1287,10 +1287,10 @@ IMAGE *ImageRescale(IMAGE *inImage, IMAGE *outImage, float scale) {
            Description:
 ----------------------------------------------------------------------*/
 int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
-  int    inRow, inCol, outRow, outCol, inCols, inRows, outRows, outCols, frame;
+  int inRow, inCol, outRow, outCol, inCols, inRows, outRows, outCols, frame;
   unsigned char *outPix;
-  hips_byte *in_image, *out_image;
-  float *    foutPix;
+  hips_byte *    in_image, *out_image;
+  float *        foutPix;
 
   if (!ImageCheckSize(inImage, outImage, nint((float)inImage->rows * scale),
                       nint((float)inImage->cols * scale), inImage->num_frame))
@@ -1417,10 +1417,10 @@ int ImageScaleDown(IMAGE *inImage, IMAGE *outImage, float scale) {
 int ImageScaleUp(IMAGE *inImage, IMAGE *outImage, float scale) {
   int inRow, inCol, outRow, outCol, inCols, inRows, endCol, endRow, outRows,
       outCols, frame;
-  unsigned char *    inPix, *outPix;
-  unsigned int *     inIPix, *outIPix;
-  float *    finPix, *foutPix;
-  hips_byte *in_image, *out_image;
+  unsigned char *inPix, *outPix;
+  unsigned int * inIPix, *outIPix;
+  float *        finPix, *foutPix;
+  hips_byte *    in_image, *out_image;
 
   if (!ImageCheckSize(inImage, outImage, nint(inImage->rows * scale),
                       nint(inImage->cols * scale), inImage->num_frame))
@@ -1587,10 +1587,10 @@ IMAGE *ImageDifferentialScale(IMAGE *Isrc, IMAGE *Iout, int outRows,
 ----------------------------------------------------------------------*/
 int ImageDifferentialScaleDown(IMAGE *Isrc, IMAGE *Iout, int outRows,
                                int outCols) {
-  int        inRow, inCol, outRow, outCol, inCols, inRows, frame;
-  unsigned char *    outPix;
-  hips_byte *in_image, *out_image;
-  float *    foutPix, xscale, yscale;
+  int            inRow, inCol, outRow, outCol, inCols, inRows, frame;
+  unsigned char *outPix;
+  hips_byte *    in_image, *out_image;
+  float *        foutPix, xscale, yscale;
 
   if (!ImageCheckSize(Isrc, Iout, outRows, outCols, Isrc->num_frame))
     ErrorReturn(-1,
@@ -1705,11 +1705,11 @@ int ImageDifferentialScaleDown(IMAGE *Isrc, IMAGE *Iout, int outRows,
 ----------------------------------------------------------------------*/
 int ImageDifferentialScaleUp(IMAGE *Isrc, IMAGE *Iout, int outRows,
                              int outCols) {
-  int    inRow, inCol, outRow, outCol, inCols, inRows, endCol, endRow, frame;
+  int inRow, inCol, outRow, outCol, inCols, inRows, endCol, endRow, frame;
   unsigned char *inPix, *outPix;
   unsigned int * inIPix, *outIPix;
-  float *finPix, *foutPix, xscale, yscale;
-  hips_byte *in_image, *out_image;
+  float *        finPix, *foutPix, xscale, yscale;
+  hips_byte *    in_image, *out_image;
 
   if (!ImageCheckSize(Isrc, Iout, outRows, outCols, Isrc->num_frame))
     ErrorReturn(ERROR_NO_MEMORY,
@@ -2392,8 +2392,8 @@ int ImageCmp(IMAGE *Isrc, IMAGE *Idst) {
 IMAGE *ImageAbs(IMAGE *inImage, IMAGE *outImage) {
   unsigned char *cIn, *cOut;
   unsigned int * iIn, *iOut;
-  float *fIn, *fOut;
-  int    size, nframes, frameno, pix_per_frame, rows, cols;
+  float *        fIn, *fOut;
+  int            size, nframes, frameno, pix_per_frame, rows, cols;
 
   rows = inImage->rows;
   cols = inImage->cols;
@@ -2505,11 +2505,11 @@ IMAGE *ImageSubtract(IMAGE *Is1, IMAGE *Is2, IMAGE *Idst) {
 ----------------------------------------------------------------------*/
 IMAGE *ImageExtractInto(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx,
                         int dy, int xdst, int ydst) {
-  CPIX *  cpsrc, *cpdst;
-  unsigned char * csrc, *cdst;
-  float * fsrc, *fdst;
-  double *dsrc, *ddst;
-  int     xin, yin, yout, x1, y1, yend, xend;
+  CPIX *         cpsrc, *cpdst;
+  unsigned char *csrc, *cdst;
+  float *        fsrc, *fdst;
+  double *       dsrc, *ddst;
+  int            xin, yin, yout, x1, y1, yend, xend;
 
   if ((dx <= 0) || (dy <= 0))
     ErrorReturn(NULL, (ERROR_BADPARM,
@@ -2595,8 +2595,8 @@ IMAGE *ImageExtractInto(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx,
 ----------------------------------------------------------------------*/
 IMAGE *ImageExtract(IMAGE *Isrc, IMAGE *Idst, int x0, int y0, int dx, int dy) {
   unsigned char *csrc, *cdst;
-  float *fsrc, *fdst;
-  int    xin, yin, xout, yout, x1, y1, yend, xend;
+  float *        fsrc, *fdst;
+  int            xin, yin, xout, yout, x1, y1, yend, xend;
 
   if ((dx <= 0) || (dy <= 0))
     ErrorReturn(NULL, (ERROR_BADPARM, "ImageExtract: invalid dx or dy (%d, %d)",
@@ -2867,7 +2867,8 @@ IMAGE *ImagePrincipalComponents(IMAGE *image, int nterms, IMAGE **pcoefImage) {
   evalues       = (float *)calloc((unsigned int)nevalues, sizeof(float));
   pix_per_frame = image->rows * image->cols;
   eigen_values  = (EVALUE *)calloc((unsigned int)nevalues, sizeof(EIGEN_VALUE));
-  evectors = (float *)calloc((unsigned int)(nevalues * pix_per_frame), sizeof(float));
+  evectors =
+      (float *)calloc((unsigned int)(nevalues * pix_per_frame), sizeof(float));
 
   /* 2 extra frames - 1 for mean vector, and one for eigenvalues */
   pcImage = ImageAlloc(image->rows, image->cols, PFFLOAT, nterms + 2);

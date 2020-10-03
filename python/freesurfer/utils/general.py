@@ -84,9 +84,11 @@ class LookupTable(dict):
         col2 = max([len(elt.name) for elt in self.values()]) + 2
         lines = []
         for idx, elt in self.items():
-            colorstr = '(' + ' '.join([str(c).ljust(3) for c in elt.color]) + ')'
+            colorstr = (
+                "(" + " ".join([str(c).ljust(3) for c in elt.color]) + ")"
+            )
             lines.append(str(idx).ljust(col1) + elt.name.ljust(col2) + colorstr)
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def add(self, index, name, color):
         self[index] = LookupTable.Element(name, color)

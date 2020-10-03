@@ -21,7 +21,7 @@ def createScreenshots(
 
     """
     function createScreenshots()
-    
+
     Requires FREESURFER_HOME environment variable
 
     BASE, VIEWS must be lists, can be ["default"]

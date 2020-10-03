@@ -404,7 +404,7 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits) {
     if (vno == Gdiag_no) {
       DiagBreak();
     }
-    
+
     CTABfindAnnotation(mris->ct, v->annotation, &index);
     if (index <= 0 || done[index]) // don't do unknown (index = 0)
     {
@@ -461,23 +461,23 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits) {
 
           CTABannotationAtIndex(ct, i, &annot);
           CTABannotationAtIndex(ct, index, &new_annot);
-	  CTABfindAnnotation(mris->ct, new_annot, &old_index);
-	  if (old_index >= 0)
-	    continue ;  // not unique
+          CTABfindAnnotation(mris->ct, new_annot, &old_index);
+          if (old_index >= 0)
+            continue; // not unique
           found = 1;
 
           // translate old annotations to new ones
           for (vno = 0; vno < mris->nvertices; vno++) {
-	    if (vno == Gdiag_no)
-	      DiagBreak() ;
+            if (vno == Gdiag_no)
+              DiagBreak();
             v = &mris->vertices[vno];
             if (v->ripflag || v->marked != j || v->annotation != annot) {
               continue;
             }
-	    if (vno == Gdiag_no)
-	      DiagBreak() ;
+            if (vno == Gdiag_no)
+              DiagBreak();
             v->annotation = new_annot;
-	    v->marked = -1 ;   // don't process it again
+            v->marked     = -1; // don't process it again
           }
         } else {
           offset++;

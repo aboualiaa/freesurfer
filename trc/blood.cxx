@@ -33,31 +33,16 @@ Blood::Blood(const std::string TrainListFile, const std::string TrainTrkFile,
              float TrainMaskLabel, const std::string ExcludeFile,
              const vector<std::string> &TestMaskList,
              const vector<std::string> &TestFaList,
-             const std::string TestAffineXfmFile,
-             const std::string TestNonlinXfmFile,
-             const std::string TestNonlinRefFile,
+             const std::string          TestAffineXfmFile,
+             const std::string          TestNonlinXfmFile,
+             const std::string          TestNonlinRefFile,
              const vector<std::string> &TestBaseXfmList,
-             const std::string TestBaseMaskFile,
-             bool UseTruncated, vector<int> &NumControls,
-             bool Debug) :
-             mDebug(Debug),
-             mUseTruncated(UseTruncated),
-             mMaskLabel(TrainMaskLabel) {
-  int dirs[45] = { 0,  0,  0,
-                   1,  0,  0,
-                  -1,  0,  0,
-                   0,  1,  0,
-                   0, -1,  0,
-                   0,  0,  1,
-                   0,  0, -1,
-                   1,  1,  1,
-                  -1,  1,  1,
-                   1, -1,  1,
-                  -1, -1,  1,
-                   1,  1, -1,
-                  -1,  1, -1,
-                   1, -1, -1,
-                  -1, -1, -1 };
+             const std::string TestBaseMaskFile, bool UseTruncated,
+             vector<int> &NumControls, bool Debug)
+    : mDebug(Debug), mUseTruncated(UseTruncated), mMaskLabel(TrainMaskLabel) {
+  int  dirs[45] = {0,  0,  0, 1, 0, 0,  -1, 0, 0,  0,  1,  0,  0,  -1, 0,
+                  0,  0,  1, 0, 0, -1, 1,  1, 1,  -1, 1,  1,  1,  -1, 1,
+                  -1, -1, 1, 1, 1, -1, -1, 1, -1, 1,  -1, -1, -1, -1, -1};
   MRI *testvol;
 
   // Directions in which to look for neighboring labels
@@ -68,8 +53,7 @@ Blood::Blood(const std::string TrainListFile, const std::string TrainTrkFile,
   mDirNear.insert(mDirNear.begin(), dirs + 3, dirs + 45);
 
   // Read brain mask
-  for (auto ifile = TestMaskList.begin();
-       ifile < TestMaskList.end(); ifile++) {
+  for (auto ifile = TestMaskList.begin(); ifile < TestMaskList.end(); ifile++) {
     cout << "Loading brain mask of output subject from " << *ifile << endl;
     testvol = MRIread((*ifile).c_str());
     if (!testvol) {
@@ -88,8 +72,7 @@ Blood::Blood(const std::string TrainListFile, const std::string TrainTrkFile,
   mDx = mTestMask[0]->xsize;
 
   // Read FA map
-  for (auto ifile = TestFaList.begin();
-       ifile < TestFaList.end(); ifile++) {
+  for (auto ifile = TestFaList.begin(); ifile < TestFaList.end(); ifile++) {
     cout << "Loading FA map of output subject from " << *ifile << endl;
     testvol = MRIread((*ifile).c_str());
     if (!testvol) {
@@ -114,14 +97,14 @@ Blood::Blood(const std::string TrainListFile, const std::string TrainTrkFile,
     mTestBaseMask = mTestMask[0];
   }
 
-    // Read atlas-to-base registration files
+  // Read atlas-to-base registration files
 #ifndef NO_CVS_UP_IN_HERE
   if (!TestNonlinXfmFile.empty()) {
     mTestNonlinReg.ReadXfm(TestNonlinXfmFile.c_str(), mTestMask[0]);
 
     if (!TestAffineXfmFile.empty()) {
       MRI *refvol;
-      
+
       cout << "Loading non-linear registration source for output subject from "
            << TestNonlinRefFile << endl;
       refvol = MRIread(TestNonlinRefFile.c_str());
@@ -135,15 +118,16 @@ Blood::Blood(const std::string TrainListFile, const std::string TrainTrkFile,
   } else {
 #endif
     if (!TestAffineXfmFile.empty()) {
-      mTestAffineReg.ReadXfm(TestAffineXfmFile.c_str(), mTestMask[0], mTestBaseMask);
+      mTestAffineReg.ReadXfm(TestAffineXfmFile.c_str(), mTestMask[0],
+                             mTestBaseMask);
     }
 #ifndef NO_CVS_UP_IN_HERE
   }
 #endif
 
   // Read base-to-DWI registration files
-  for (auto ifile = TestBaseXfmList.begin();
-       ifile < TestBaseXfmList.end(); ifile++) {
+  for (auto ifile = TestBaseXfmList.begin(); ifile < TestBaseXfmList.end();
+       ifile++) {
     const unsigned int iframe = ifile - TestBaseXfmList.begin();
     AffineReg          basereg;
 
@@ -166,12 +150,9 @@ Blood::Blood(const std::string TrainListFile, const std::string TrainTrkFile,
   mHistoSubj = MRIclone(mTestMask[0], NULL);
 }
 
-Blood::Blood(const std::string TrainTrkFile,
-             const std::string TrainRoi1File, const std::string TrainRoi2File,
-             bool Debug) : 
-             mDebug(Debug),
-             mUseTruncated(false),
-             mNx(0), mNy(0), mNz(0) {
+Blood::Blood(const std::string TrainTrkFile, const std::string TrainRoi1File,
+             const std::string TrainRoi2File, bool Debug)
+    : mDebug(Debug), mUseTruncated(false), mNx(0), mNy(0), mNz(0) {
   // Read single input streamline file
   ReadStreamlines(0, TrainTrkFile, TrainRoi1File, TrainRoi2File, 0, 0);
 
@@ -234,14 +215,14 @@ void Blood::ReadStreamlines(const std::string TrainListFile,
                             const std::string TrainTrkFile,
                             const std::string TrainRoi1File,
                             const std::string TrainRoi2File,
-                            float TrainMaskLabel,
+                            float             TrainMaskLabel,
                             const std::string ExcludeFile) {
-  int nrejmask = 0, nrejrev = 0;
-  vector<string> dirlist;
+  int                     nrejmask = 0, nrejrev = 0;
+  vector<string>          dirlist;
   vector<MRI *>::iterator ivol;
 
-  if (!TrainListFile.empty()) {		// Read multiple inputs from a list
-    string dirname;
+  if (!TrainListFile.empty()) { // Read multiple inputs from a list
+    string   dirname;
     ifstream listfile(TrainListFile, ios::in);
 
     if (!listfile) {
@@ -652,7 +633,7 @@ void Blood::ReadStreamlines(const std::string TrainListFile,
 // Read list of streamlines to be excluded from search for center streamline
 //
 void Blood::ReadExcludedStreamlines(const std::string ExcludeFile) {
-  string excline;
+  string   excline;
   ifstream excfile;
 
   mExcludedStreamlines.clear();
@@ -940,13 +921,14 @@ bool Blood::IsInCortex(std::vector<int>::const_iterator Point, MRI *Mask,
 //
 // Read segmentations and cortical masks of training subjects
 //
-void Blood::ReadAnatomy(const std::string TrainListFile, const std::string TrainAsegFile,
-			const std::string TrainMaskFile) {
-  vector<string> dirlist;
+void Blood::ReadAnatomy(const std::string TrainListFile,
+                        const std::string TrainAsegFile,
+                        const std::string TrainMaskFile) {
+  vector<string>          dirlist;
   vector<MRI *>::iterator ivol;
 
-  if (!TrainListFile.empty()) {		// Read multiple inputs from a list
-    string dirname;
+  if (!TrainListFile.empty()) { // Read multiple inputs from a list
+    string   dirname;
     ifstream listfile(TrainListFile, ios::in);
 
     if (!listfile) {
@@ -3785,7 +3767,7 @@ void Blood::WritePriors(const char *OutBase, bool UseTruncated) {
 //
 void Blood::WriteCenterStreamline(const std::string CenterTrkFile,
                                   const std::string RefTrkFile) {
-  float *icent, *centpts = new float[mCenterStreamline.size()];
+  float *      icent, *centpts = new float[mCenterStreamline.size()];
   CTrackReader trkreader;
   CTrackWriter trkwriter;
   TRACK_HEADER trkheadin, trkheadout;
@@ -3827,12 +3809,12 @@ void Blood::WriteCenterStreamline(const std::string CenterTrkFile,
 // Save streamline end points to volumes
 //
 void Blood::WriteEndPoints(const std::string OutBase, MRI *RefVol) {
-  std::string fname;
+  std::string                  fname;
   vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
                                ivalid2 = mIsInEnd2.begin();
-  vector< vector<int> >::const_iterator istr;
-  MRI *out1 = MRIclone(RefVol, NULL);
-  MRI *out2 = MRIclone(RefVol, NULL);
+  vector<vector<int>>::const_iterator istr;
+  MRI *                               out1 = MRIclone(RefVol, NULL);
+  MRI *                               out2 = MRIclone(RefVol, NULL);
 
   // Write end ROIs to volumes
   for (istr = mStreamlines.begin(); istr != mStreamlines.end(); istr++) {
@@ -4054,11 +4036,11 @@ std::vector<float> Blood::ComputeAvgCenter(std::vector<MRI *> &ValueVolumes) {
 //
 // Write values of input volumes point-wise along streamlines
 //
-void Blood::WriteValuesPointwise(vector<MRI *> &ValueVolumes,
+void Blood::WriteValuesPointwise(vector<MRI *> &   ValueVolumes,
                                  const std::string TextFile) {
-  vector<float> valsum(ValueVolumes.size());
+  vector<float>           valsum(ValueVolumes.size());
   vector<float>::iterator ivalsum;
-  ofstream outfile(TextFile, ios::app);
+  ofstream                outfile(TextFile, ios::app);
   if (!outfile) {
     std::cout << "ERROR: Could not open " << TextFile << " for writing"
               << std::endl;

@@ -135,8 +135,8 @@ int main(int argc, char *argv[]) {
     printf("Scaling first surface by %g\n", SourceSurfRegScale);
     ApplyScaleSurf(SurfReg[0], SourceSurfRegScale);
   }
-  if(TargetSurfRegScale > 0){
-    printf("Scaling second surface by %g\n",TargetSurfRegScale);
+  if (TargetSurfRegScale > 0) {
+    printf("Scaling second surface by %g\n", TargetSurfRegScale);
     ApplyScaleSurf(SurfReg[1], TargetSurfRegScale);
   }
 
@@ -346,17 +346,18 @@ static int parse_commandline(int argc, char **argv) {
       // have a radius of 1.
       sscanf(pargv[0], "%lf", &SourceSurfRegScale);
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--trg-reg-scale")){
-      if(nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--trg-reg-scale")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       // Scale the coords of the first surface by TargetSurfRegScale. This
       // was implemented to make it easier to use CAT reg surfaces which
       // have a radius of 1.
-      sscanf(pargv[0],"%lf",&TargetSurfRegScale);
+      sscanf(pargv[0], "%lf", &TargetSurfRegScale);
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--sval-label") || !strcasecmp(option, "--src-label")){
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--sval-label") ||
+               !strcasecmp(option, "--src-label")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       LabelFile = pargv[0];
       if (!fio_FileExistsReadable(LabelFile)) {
         printf("ERROR: %s does not exist or is not readable by you\n",

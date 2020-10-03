@@ -750,9 +750,11 @@ def single_ae(
 
     else:  # convolution
         # convolve then resize. enc_size should be [nb_dim1, nb_dim2, ..., nb_feats]
-        assert len(enc_size) == len(input_shape), (
-            "encoding size does not match input shape %d %d"
-            % (len(enc_size), len(input_shape))
+        assert len(enc_size) == len(
+            input_shape
+        ), "encoding size does not match input shape %d %d" % (
+            len(enc_size),
+            len(input_shape),
         )
 
         if (

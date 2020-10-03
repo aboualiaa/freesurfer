@@ -23,31 +23,29 @@ def switch_execution_mode(mode):
     ctx.is_eager = mode == EAGER_MODE
 
 
-
 def configure(gpu=0):
     """
     Configures the appropriate TF device from a cuda device integer.
     """
     gpuid = str(gpu)
-    if gpuid is not None and (gpuid != '-1'):
-        device = '/gpu:' + gpuid
-        os.environ['CUDA_VISIBLE_DEVICES'] = gpuid
+    if gpuid is not None and (gpuid != "-1"):
+        device = "/gpu:" + gpuid
+        os.environ["CUDA_VISIBLE_DEVICES"] = gpuid
         # GPU memory configuration differs between TF 1 and 2
-        if hasattr(tf, 'ConfigProto'):
+        if hasattr(tf, "ConfigProto"):
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
             config.allow_soft_placement = True
             tf.keras.backend.set_session(tf.Session(config=config))
         else:
             tf.config.set_soft_device_placement(True)
-            for pd in tf.config.list_physical_devices('GPU'):
+            for pd in tf.config.list_physical_devices("GPU"):
                 tf.config.experimental.set_memory_growth(pd, True)
     else:
-        device = '/cpu:0'
-        os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-    
-    return device
+        device = "/cpu:0"
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
+    return device
 
 
 class LoopingIterator:
@@ -292,8 +290,9 @@ class WeightsSaver(Callback):
                 copyfile(name, cpname)
         self.batch += 1
 
+
 class ModelSaver(Callback):
-    def __init__(self, model, N, name, cp_iters = 0):
+    def __init__(self, model, N, name, cp_iters=0):
         self.model = model
         self.N = N
         self.batch = 0
@@ -303,15 +302,16 @@ class ModelSaver(Callback):
 
     def on_batch_end(self, batch, logs={}):
         if self.batch % self.N == 0:
-#            name = '%s.%08d.h5' % (self.name,self.batch)
+            #            name = '%s.%08d.h5' % (self.name,self.batch)
             name = self.name
             self.model.save(name)
             self.iters += 1
-            if (self.cp_iters > 0 and self.iters >= self.cp_iters):
-                fname,ext = os.path.splitext(name)
+            if self.cp_iters > 0 and self.iters >= self.cp_iters:
+                fname, ext = os.path.splitext(name)
                 cpname = fname + ".cp" + ext
                 copyfile(name, cpname)
         self.batch += 1
+
 
 def MRIStoVoxel(mris, mri):
     vox2ras = mri.get_header().get_vox2ras_tkr()
@@ -930,29 +930,27 @@ def histo_norm_intensities(
     b = y1 - m * x1
 
 
-  
 def pprint(A):
-    if A.ndim==1:
+    if A.ndim == 1:
         print(A)
     else:
-        w = max([len(str(s)) for s in A]) 
-        print(u'\u250c'+u'\u2500'*w+u'\u2510') 
+        w = max([len(str(s)) for s in A])
+        print(u"\u250c" + u"\u2500" * w + u"\u2510")
         for AA in A:
-            print(' ', end='')
-            print('[', end='')
-            for i,AAA in enumerate(AA[:-1]):
-                w1=max([len(str(s)) for s in A[:,i]])
-                print(str(AAA)+' '*(w1-len(str(AAA))+1),end='')
-            w1=max([len(str(s)) for s in A[:,-1]])
-            print(str(AA[-1])+' '*(w1-len(str(AA[-1]))),end='')
-            print(']')
-        print(u'\u2514'+u'\u2500'*w+u'\u2518')  
+            print(" ", end="")
+            print("[", end="")
+            for i, AAA in enumerate(AA[:-1]):
+                w1 = max([len(str(s)) for s in A[:, i]])
+                print(str(AAA) + " " * (w1 - len(str(AAA)) + 1), end="")
+            w1 = max([len(str(s)) for s in A[:, -1]])
+            print(str(AA[-1]) + " " * (w1 - len(str(AA[-1]))), end="")
+            print("]")
+        print(u"\u2514" + u"\u2500" * w + u"\u2518")
 
 
 def set_trainable(model, trainable):
-    model.trainable=trainable
+    model.trainable = trainable
     for l in model.layers:
-        if hasattr(l, 'layers'):
+        if hasattr(l, "layers"):
             set_trainable(l, trainable)
         l.trainable = trainable
-    

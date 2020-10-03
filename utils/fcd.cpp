@@ -17,14 +17,14 @@
  *
  */
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
-#include "fcd.h"
 #include "cma.h"
 #include "const.h"
 #include "diag.h"
 #include "error.h"
+#include "fcd.h"
 #include "label.h"
 #include "macros.h"
 #include "mrisegment.h"
@@ -67,17 +67,18 @@ static int most_frequent_label(MRI *mri_seg, MRI_SEGMENT *mseg) {
 #define DIST_SPACING .5
 
 FCD_DATA *FCDloadData(char *sdir, char *subject, char *suffix_in) {
-  FCD_DATA *fcd;
-  MRI *mri_interior, *mri_dist, *mri_int_lh, *mri_int_rh, *mri_pvals;
+  FCD_DATA *  fcd;
+  MRI *       mri_interior, *mri_dist, *mri_int_lh, *mri_int_rh, *mri_pvals;
   std::string fname, suffix;
-  if( suffix_in != nullptr ) {
+  if (suffix_in != nullptr) {
     suffix = std::string(suffix_in);
     suffix.insert(suffix.begin(), '.');
   }
 
   fcd = (FCD_DATA *)calloc(1, sizeof(FCD_DATA));
 
-  std::string baseName = std::string(sdir) + "/" + std::string(subject) + "/surf/";
+  std::string baseName =
+      std::string(sdir) + "/" + std::string(subject) + "/surf/";
   fname = baseName + "lh.white" + suffix;
   if (!FileExists(fname.c_str())) {
     fname = baseName + "lh.white";
@@ -94,7 +95,7 @@ FCD_DATA *FCDloadData(char *sdir, char *subject, char *suffix_in) {
   }
   fname = baseName + "lh.pial" + suffix;
   if (!FileExists(fname.c_str())) {
-    fname = baseName + "lh.pial";
+    fname    = baseName + "lh.pial";
     pialname = "pial";
   }
   if (MRISreadPialCoordinates(fcd->mris_lh, pialname.c_str()) != NO_ERROR) {
@@ -131,7 +132,7 @@ FCD_DATA *FCDloadData(char *sdir, char *subject, char *suffix_in) {
   }
   fname = baseName + "rh.pial" + suffix;
   if (!FileExists(fname.c_str())) {
-    fname = baseName + "rh.pial";
+    fname    = baseName + "rh.pial";
     pialname = "pial";
   }
   if (MRISreadPialCoordinates(fcd->mris_rh, pialname.c_str()) != NO_ERROR) {
@@ -153,7 +154,8 @@ FCD_DATA *FCDloadData(char *sdir, char *subject, char *suffix_in) {
   }
 
   exec_progress_callback(2, 12, 0, 1);
-  std::string mriBaseName = std::string(sdir) + "/" + std::string(subject) + "/mri/";
+  std::string mriBaseName =
+      std::string(sdir) + "/" + std::string(subject) + "/mri/";
   fname = mriBaseName + "aseg" + suffix + ".mgz";
   if (!FileExists(fname.c_str())) {
     fname = mriBaseName + "aseg.mgz";
@@ -175,35 +177,35 @@ FCD_DATA *FCDloadData(char *sdir, char *subject, char *suffix_in) {
 
   exec_progress_callback(4, 12, 0, 1);
   fcd->mri_flair = NULL;
-  fname = mriBaseName + "flair.reg.norm" + suffix + ".mgz";
+  fname          = mriBaseName + "flair.reg.norm" + suffix + ".mgz";
   if (!FileExists(fname.c_str())) {
     fname = mriBaseName + "FLAIR" + suffix + ".mgz";
     if (!FileExists(fname.c_str())) {
       fname = mriBaseName + "FLAIRax" + suffix + ".mgz";
       if (!FileExists(fname.c_str())) {
-	fname = mriBaseName + "FLAIRcor" + suffix + ".mgz";
+        fname = mriBaseName + "FLAIRcor" + suffix + ".mgz";
         if (!FileExists(fname.c_str())) {
-	  fname = " ";
+          fname = " ";
         }
       }
     }
   }
-  if ( fname.size() <= 1) {
+  if (fname.size() <= 1) {
     fname = mriBaseName + "flair.reg.norm.mgz";
     if (!FileExists(fname.c_str())) {
       fname = mriBaseName + "FLAIR.mgz";
       if (!FileExists(fname.c_str())) {
-	fname = mriBaseName + "FLAIRax.mgz";
+        fname = mriBaseName + "FLAIRax.mgz";
         if (!FileExists(fname.c_str())) {
-	  fname = mriBaseName + "FLAIRcor.mgz";
+          fname = mriBaseName + "FLAIRcor.mgz";
           if (!FileExists(fname.c_str())) {
-	    fname = " ";
+            fname = " ";
           }
         }
       }
     }
   }
-  if ( fname.size() > 1) {
+  if (fname.size() > 1) {
     fcd->mri_flair = MRIread(fname.c_str());
     if (fcd->mri_flair == NULL) {
       ErrorExit(ERROR_NOFILE, "FCDloadData: couldn't load $s", fname.c_str());
@@ -211,29 +213,29 @@ FCD_DATA *FCDloadData(char *sdir, char *subject, char *suffix_in) {
   }
 
   fcd->mri_t2 = NULL;
-  fname = mriBaseName + "T2" + suffix + ".mgz";
+  fname       = mriBaseName + "T2" + suffix + ".mgz";
   if (!FileExists(fname.c_str())) {
     fname = mriBaseName + "T2ax" + suffix + ".mgz";
     if (!FileExists(fname.c_str())) {
       fname = mriBaseName + "T2cor" + suffix + ".mgz";
       if (!FileExists(fname.c_str())) {
-	fname = " ";
+        fname = " ";
       }
     }
   }
-  if ( fname.size() <= 1) {
+  if (fname.size() <= 1) {
     fname = mriBaseName + "T2.mgz";
     if (!FileExists(fname.c_str())) {
       fname = mriBaseName + "T2ax.mgz";
       if (!FileExists(fname.c_str())) {
-	fname = mriBaseName + "T2cor.mgz";
+        fname = mriBaseName + "T2cor.mgz";
         if (!FileExists(fname.c_str())) {
-	  fname = " ";
+          fname = " ";
         }
       }
     }
   }
-  if ( fname.size() > 1) {
+  if (fname.size() > 1) {
     fcd->mri_t2 = MRIread(fname.c_str());
     if (fcd->mri_t2 == NULL) {
       ErrorExit(ERROR_NOFILE, "FCDloadData: couldn't load $s", fname.c_str());
@@ -576,16 +578,14 @@ int FCDcomputeThicknessLabels(FCD_DATA *fcd, double thickness_thresh,
   return (fcd->nlabels);
 }
 
-int FCDwriteLabels(FCD_DATA *fcd, char *dir)
-{
-  int s;
+int FCDwriteLabels(FCD_DATA *fcd, char *dir) {
+  int               s;
   std::stringstream label_name;
 
   for (s = 0; s < fcd->nlabels; s++) {
     if (fcd->labels[s]) {
-      label_name << dir << "/fcd"
-		 << std::setw(2) << std::setfill('0') << s
-		 << "_" << fcd->labels[s]->name;
+      label_name << dir << "/fcd" << std::setw(2) << std::setfill('0') << s
+                 << "_" << fcd->labels[s]->name;
       LabelWrite(fcd->labels[s], label_name.str().c_str());
     }
   }

@@ -55,17 +55,9 @@
  *
  */
 
-#include <string>
 #include <locale>
+#include <string>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <float.h>
-#include "mri2.h"
 #include "fio.h"
 #include "fsenv.h"
 #include "matfile.h"
@@ -77,6 +69,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctype.h>
+#include <float.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #define FSGDF_SRC
 #include "fsgdf.h"
@@ -90,12 +89,12 @@ int isblank(int c);
 #endif
 
 static FSGD *gdfReadV1(const char *gdfname);
-static int gdfPrintV1(FILE *fp, FSGD *gd);
-static int gdfCheckVarRep(FSGD *gd);
-static int gdfCheckClassRep(FSGD *gd);
-static int gdfCheckAllClassesUsed(FSGD *gd);
-static int gdfCheckSubjRep(FSGD *gd);
-static int gdfGetDefVarLabelNo(FSGD *gd);
+static int   gdfPrintV1(FILE *fp, FSGD *gd);
+static int   gdfCheckVarRep(FSGD *gd);
+static int   gdfCheckClassRep(FSGD *gd);
+static int   gdfCheckAllClassesUsed(FSGD *gd);
+static int   gdfCheckSubjRep(FSGD *gd);
+static int   gdfGetDefVarLabelNo(FSGD *gd);
 
 /* RKT - hack to get the .so to have Progname declared. I hate this. */
 #ifdef DECLARE_PROGNAME
@@ -255,17 +254,17 @@ static int gdfPrintV1(FILE *fp, FSGD *gd) {
 
 /*--------------------------------------------------*/
 FSGD *gdfRead(const char *gdfname, int LoadData) {
-  FSGD *gd;
-  FILE *fp;
-  char tmpstr[1000];
-  int version=0;
-  int nv;
-  MRI *mritmp;
-  char *dirname, *basename;
+  FSGD *      gd;
+  FILE *      fp;
+  char        tmpstr[1000];
+  int         version = 0;
+  int         nv;
+  MRI *       mritmp;
+  char *      dirname, *basename;
   std::string datafilename;
-  MATRIX *Xt,*XtX,*iXtX;
+  MATRIX *    Xt, *XtX, *iXtX;
 
-  printf("gdfRead(): reading %s\n",gdfname);
+  printf("gdfRead(): reading %s\n", gdfname);
 
   nv = fio_FileHasCarriageReturn(gdfname);
   if (nv == -1)
@@ -323,22 +322,23 @@ FSGD *gdfRead(const char *gdfname, int LoadData) {
        directory from the gdf file. */
     datafilename = gd->DesignMatFile;
     if (!fio_FileExistsReadable(datafilename.c_str())) {
-      datafilename = std::string(dirname) + "/" + std::string(gd->DesignMatFile);
+      datafilename =
+          std::string(dirname) + "/" + std::string(gd->DesignMatFile);
       if (!fio_FileExistsReadable(datafilename.c_str())) {
 
         /* If that doesn't work, try the path from the GDF file and the
            base of the file name. */
-        basename = fio_basename(gd->DesignMatFile,NULL);
-	datafilename = std::string(dirname) + "/" + std::string(basename);
+        basename     = fio_basename(gd->DesignMatFile, NULL);
+        datafilename = std::string(dirname) + "/" + std::string(basename);
         free(basename);
       }
 
       if (!fio_FileExistsReadable(datafilename.c_str())) {
-        printf("ERROR: gdfRead: could not find file %s\n",gd->DesignMatFile);
-        return(NULL);
+        printf("ERROR: gdfRead: could not find file %s\n", gd->DesignMatFile);
+        return (NULL);
       }
     }
-    gd->X = ReadMatlabFileVariable(datafilename.c_str(),"X");
+    gd->X = ReadMatlabFileVariable(datafilename.c_str(), "X");
     if (gd->X == NULL) {
       printf("ERROR: gdfRead: could not read variable X from %s\n",
              gd->DesignMatFile);
@@ -365,26 +365,25 @@ FSGD *gdfRead(const char *gdfname, int LoadData) {
 
     if (fio_FileExistsReadable(gd->datafile)) {
       datafilename = gd->datafile;
-    }
-    else {
+    } else {
       /* Construct the path of the data file by concat the
          path from the GDF file and the data file name */
       if (NULL != dirname) {
-	datafilename = std::string(dirname) + "/" + std::string(gd->datafile);
+        datafilename = std::string(dirname) + "/" + std::string(gd->datafile);
       }
 
       /* If that doesn't work, try the path from the GDF file and the
          base of the file name. */
       if (!fio_FileExistsReadable(datafilename.c_str())) {
-        basename = fio_basename(gd->datafile,NULL);
-	datafilename = std::string(dirname) + "/" + std::string(basename);
+        basename     = fio_basename(gd->datafile, NULL);
+        datafilename = std::string(dirname) + "/" + std::string(basename);
         free(basename);
       }
     }
 
     gd->data = MRIread(datafilename.c_str());
     if (NULL == gd->data) {
-      printf("ERROR: gdfRead: Couldn't read raw data at %s \n",gd->datafile);
+      printf("ERROR: gdfRead: Couldn't read raw data at %s \n", gd->datafile);
       gdfFree(&gd);
       return (nullptr);
     }
@@ -410,7 +409,7 @@ FSGD *gdfRead(const char *gdfname, int LoadData) {
 
 /*--------------------------------------------------*/
 static FSGD *gdfReadV1(const char *gdfname) {
-  FSGD *gd;
+  FSGD * gd;
   FSENV *env;
   FILE * fp;
   char * cp, tag[1000], tmpstr[1000], class_name[100];
@@ -846,8 +845,8 @@ formaterror:
   file. This is only the header info, not the data.
   --------------------------------------------------*/
 MRI *gdfReadDataInfo(const char *gdfname) {
-  FSGD *gd=NULL;
-  MRI *info=NULL;
+  FSGD *gd   = NULL;
+  MRI * info = NULL;
 
   /* Read this header file but don't load the data. */
   gd = gdfRead(gdfname, 0);
@@ -921,7 +920,7 @@ int gdfCountItemsInString(const char *str) {
   ------------------------------------------------------------------*/
 char *gdfGetNthItemFromString(const char *str, const int nth) {
   char *item;
-  int nitems;
+  int   nitems;
 
   nitems = gdfCountItemsInString(str);
   if (nth >= nitems) {
@@ -930,18 +929,18 @@ char *gdfGetNthItemFromString(const char *str, const int nth) {
     return (nullptr);
   }
 
-  const std::string src(str);
+  const std::string        src(str);
   std::vector<std::string> items;
-  std::string tmpstr;
-  bool inItem = !std::isspace(src.at(0));
-  for(auto it=src.begin(); it!=src.end(); ++it ) {
-    if( std::isspace(*it) ) {
-      if( inItem ) {
-	// We've just completed the next item
-	items.push_back(tmpstr);
-	tmpstr.clear();
+  std::string              tmpstr;
+  bool                     inItem = !std::isspace(src.at(0));
+  for (auto it = src.begin(); it != src.end(); ++it) {
+    if (std::isspace(*it)) {
+      if (inItem) {
+        // We've just completed the next item
+        items.push_back(tmpstr);
+        tmpstr.clear();
       } else {
-	// Nothing to do; we're just consuming blanks
+        // Nothing to do; we're just consuming blanks
       }
       inItem = false;
     } else {
@@ -951,25 +950,24 @@ char *gdfGetNthItemFromString(const char *str, const int nth) {
     }
   }
 
-  if( items.size() != static_cast<size_t>(nitems) ) {
-    std::cerr << __FUNCTION__
-	      << ": Length of items vector did not match nitems"
-	      << std::endl;
+  if (items.size() != static_cast<size_t>(nitems)) {
+    std::cerr << __FUNCTION__ << ": Length of items vector did not match nitems"
+              << std::endl;
     std::cerr << "str: '" << str << std::endl;
     std::cerr << "items: ";
-    for( auto it=items.begin(); it!=items.end(); ++it ) {
+    for (auto it = items.begin(); it != items.end(); ++it) {
       std::cerr << (*it) << " -|- ";
     }
     std::cerr << std::endl;
     throw std::logic_error("Incorrect item count");
   }
-  
-  if( nth < 0 ) {
+
+  if (nth < 0) {
     item = strcpyalloc(items.back().c_str());
   } else {
     item = strcpyalloc(items.at(nth).c_str());
   }
-  return(item);
+  return (item);
 }
 
 /*--------------------------------------------------

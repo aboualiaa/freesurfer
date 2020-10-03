@@ -57,8 +57,8 @@ def check_subjdirs():
 
 class Ddict(dict):
     """
-    This datastructure is used to store 2d Table 
-    Mainly for a*stats2table 
+    This datastructure is used to store 2d Table
+    Mainly for a*stats2table
     Usage:
     >>> tb = Ddict( dict )
     >>> tb['bert']['putamen'] = .05
@@ -81,7 +81,7 @@ class Ddict(dict):
 class TableWriter:
     """
     This class writes a 2d Table of type Ddict(dict) to a file. Some essential
-    things needs to be set for this class 
+    things needs to be set for this class
     rows - a sequence of text which go in the first column
     columns - a sequence of text which go in the first row
     table - a Ddict(dict) object which has *exactly* len(columns) x len(rows) elements
@@ -1004,7 +1004,8 @@ class LongQdecTable:
                     self.cross = False
                     self.variables = strlst[2:]  # 0 is tpid, 1 is templateid
             elif strlst[0].startswith("Measure:") or strlst[0].startswith(
-                "h.aparc", 1,
+                "h.aparc",
+                1,
             ):
                 print(
                     "Input is probably stats table, reading it as cross sectional...\n"

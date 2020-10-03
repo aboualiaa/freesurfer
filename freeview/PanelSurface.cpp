@@ -1419,9 +1419,8 @@ void PanelSurface::OnCustomFillTriggered(const QVariantMap &options_in) {
     if (options["UseAllPoints"].toBool())
       verts = surf->GetAllMarks();
 
-    if (m_wndEditAnnotation->isVisible() && surf->GetActiveAnnotation())
-    {
-      options["AsAnnotation"] = true;
+    if (m_wndEditAnnotation->isVisible() && surf->GetActiveAnnotation()) {
+      options["AsAnnotation"]        = true;
       options["FillAnnotationIndex"] = m_wndEditAnnotation->GetCurrentIndex();
     }
 

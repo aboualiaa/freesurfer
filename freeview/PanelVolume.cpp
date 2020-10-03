@@ -21,6 +21,7 @@
 #include "LayerPropertyDTI.h"
 #include "LayerPropertyMRI.h"
 #include "LayerSurface.h"
+#include "LayerTreeWidget.h"
 #include "LayerVolumeTrack.h"
 #include "MainWindow.h"
 #include "MyUtils.h"
@@ -33,8 +34,6 @@
 #include <QStringList>
 #include <QToolBar>
 #include <QToolTip>
-#include <QColorDialog>
-#include "LayerTreeWidget.h"
 
 #define FS_VOLUME_SETTING_ID "freesurfer/volume-setting"
 
@@ -1501,19 +1500,16 @@ void PanelVolume::OnActiveFrameChanged(int nFrame) {
         return;
       }
     }
-  }
-  else
-  {
-      LayerMRI* mri = qobject_cast<LayerMRI*>(sender());
-      QList<LayerMRI*> linked_mri = qobject_cast<LayerTreeWidget*>(treeWidgetLayers)->GetLinkedVolumes();
-      if (mri && linked_mri.contains(mri))
-      {
-          foreach (LayerMRI* lm, linked_mri)
-          {
-              if (lm != mri)
-                  lm->SetActiveFrame(qMin(lm->GetNumberOfFrames()-1, nFrame));
-          }
+  } else {
+    LayerMRI *        mri = qobject_cast<LayerMRI *>(sender());
+    QList<LayerMRI *> linked_mri =
+        qobject_cast<LayerTreeWidget *>(treeWidgetLayers)->GetLinkedVolumes();
+    if (mri && linked_mri.contains(mri)) {
+      foreach (LayerMRI *lm, linked_mri) {
+        if (lm != mri)
+          lm->SetActiveFrame(qMin(lm->GetNumberOfFrames() - 1, nFrame));
       }
+    }
   }
 }
 

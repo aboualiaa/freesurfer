@@ -28,7 +28,7 @@ def checkSNR(subjects_dir, subject, nb_erode=3, ref_image="norm.mgz"):
     Returns:
         - wm_snr, gm_snr
 
-    Requires valid mri/norm.mgz, mri/aseg.mgz, and mri/aparc+aseg.mgz files. 
+    Requires valid mri/norm.mgz, mri/aseg.mgz, and mri/aparc+aseg.mgz files.
     If not found, NaNs will be returned.
 
     """

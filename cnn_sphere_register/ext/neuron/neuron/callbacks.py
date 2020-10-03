@@ -33,7 +33,7 @@ import neuron.utils as nrn_utils
 
 class ModelWeightCheck(keras.callbacks.Callback):
     """
-        check model weights for nan and infinite entries
+    check model weights for nan and infinite entries
     """
 
     def __init__(
@@ -94,7 +94,7 @@ class ModelWeightCheck(keras.callbacks.Callback):
 
 class CheckLossTrend(keras.callbacks.Callback):
     """
-        check model weights for nan and infinite entries
+    check model weights for nan and infinite entries
     """
 
     def __init__(
@@ -542,9 +542,9 @@ class ModelCheckpoint(keras.callbacks.Callback):
 
 class ModelCheckpointParallel(keras.callbacks.Callback):
     """
-    
+
     borrow from: https://github.com/rmkemker/main/blob/master/machine_learning/model_checkpoint_parallel.py
-    
+
     Save the model after every epoch.
     `filepath` can contain named formatting options,
     which will be filled the value of `epoch` and

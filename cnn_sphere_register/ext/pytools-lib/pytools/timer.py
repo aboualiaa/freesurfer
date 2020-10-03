@@ -12,7 +12,7 @@ class Timer(object):
     with Timer('foo_stuff'):
     # do some foo
     # do some stuff
-    as an alternative to 
+    as an alternative to
     t = time.time()
     # do stuff
     elapsed = time.time() - t

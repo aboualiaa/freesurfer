@@ -29,11 +29,11 @@
 #include "macros.h"
 #include "mri_identify.h"
 #include "mrishash.h"
+#include "mrisp.h"
 #include "mrisurf.h"
 #include "mrisurf_sphere_interp.h"
 #include "proto.h"
 #include "romp_support.h"
-#include "mrisp.h"
 
 /*---------------------------- STRUCTURES -------------------------*/
 
@@ -3608,18 +3608,15 @@ float MRISPsample(MRI_SP *mrisp, float x, float y, float z, int fno) {
   return (retval);
 }
 
-
 /*
   Constructs a projector that associates a surface and a parameterization.
   The vertex->uv mapping is computed and cached here.
 */
-SphericalProjector::SphericalProjector(MRIS *surf, MRI_SP *param) :
-  mris(surf),
-  mrisp(param)
-{
+SphericalProjector::SphericalProjector(MRIS *surf, MRI_SP *param)
+    : mris(surf), mrisp(param) {
   // cache input surface
-  original = mris;
-  mris = makeCenteredSphere(mris);
+  original     = mris;
+  mris         = makeCenteredSphere(mris);
   interpolator = new SphericalInterpolator(mris);
 
   // image dimensions
@@ -3627,13 +3624,13 @@ SphericalProjector::SphericalProjector(MRIS *surf, MRI_SP *param) :
   vdim = V_DIM(mrisp);
 
   // image maps
-  nearest = ImageArray<int>(udim, vdim, -1);
-  hits = ImageArray<int>(udim, vdim, 0);
+  nearest  = ImageArray<int>(udim, vdim, -1);
+  hits     = ImageArray<int>(udim, vdim, 0);
   distance = ImageArray<float>(udim, vdim, 5);
 
   // vertex maps
-  vertex_u = std::vector<int>(mris->nvertices);
-  vertex_v = std::vector<int>(mris->nvertices);
+  vertex_u  = std::vector<int>(mris->nvertices);
+  vertex_v  = std::vector<int>(mris->nvertices);
   vertex_uf = std::vector<float>(mris->nvertices);
   vertex_vf = std::vector<float>(mris->nvertices);
 
@@ -3643,64 +3640,67 @@ SphericalProjector::SphericalProjector(MRIS *surf, MRI_SP *param) :
   for (int vno = 0; vno < mris->nvertices; vno++) {
 
     VERTEX *vertex = &mris->vertices[vno];
-    float x = vertex->x;
-    float y = vertex->y;
-    float z = vertex->z;
+    float   x      = vertex->x;
+    float   y      = vertex->y;
+    float   z      = vertex->z;
 
     // translate xyz to spherical coordinates
     float theta = atan2(y / radius, x / radius);
-    if (theta < 0.0f) theta = 2 * M_PI + theta;  // make it 0 -> 2PI
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; // make it 0 -> 2PI
     float d = radius * radius - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     float phi = atan2(sqrt(d), z);
 
     // translate to image coordinates
     float uf = udim * phi / PHI_MAX;
     float vf = vdim * theta / THETA_MAX;
-    int u = nint(uf);
-    int v = nint(vf);
+    int   u  = nint(uf);
+    int   v  = nint(vf);
 
     // get distance to coordinate
-    float du = uf - u;
-    float dv = vf - v;
+    float du   = uf - u;
+    float dv   = vf - v;
     float dist = std::sqrt(du * du + dv * dv);
 
     // enforce spherical topology
-    if (u < 0) u = -u;
-    if (u >= udim) u = udim - (u - udim + 1);
-    if (v < 0) v += vdim;
-    if (v >= vdim) v -= vdim;
+    if (u < 0)
+      u = -u;
+    if (u >= udim)
+      u = udim - (u - udim + 1);
+    if (v < 0)
+      v += vdim;
+    if (v >= vdim)
+      v -= vdim;
 
     // cache vertex uv values
     vertex_uf[vno] = uf;
     vertex_vf[vno] = vf;
-    vertex_u[vno] = u;
-    vertex_v[vno] = v;
+    vertex_u[vno]  = u;
+    vertex_v[vno]  = v;
 
     // keep track of total # of vertices
     hits.item(u, v) += 1;
 
     // check if it's the closest point so far
     if (dist < distance.item(u, v)) {
-      nearest.item(u, v) = vno;
+      nearest.item(u, v)  = vno;
       distance.item(u, v) = dist;
     }
   }
 }
 
-
-SphericalProjector::~SphericalProjector()
-{
+SphericalProjector::~SphericalProjector() {
   resetCenteredSphere(original, mris);
   delete interpolator;
 }
 
-
 /*
   Projects an overlay array (of size nvertices) into the parameterization at the given frame index.
 */
-void SphericalProjector::parameterizeOverlay(const float *overlay, int frameno, InterpMethod interp)
-{
+void SphericalProjector::parameterizeOverlay(const float *overlay, int frameno,
+                                             InterpMethod interp) {
   // sample overlay values
   ImageClearArea(mrisp->Ip, -1, -1, -1, -1, 0, frameno);
 
@@ -3709,12 +3709,13 @@ void SphericalProjector::parameterizeOverlay(const float *overlay, int frameno, 
     for (int vno = 0; vno < mris->nvertices; vno++) {
       int u = vertex_u[vno];
       int v = vertex_v[vno];
-      *IMAGEFseq_pix(mrisp->Ip, u, v, frameno) += overlay[vno] / hits.item(u, v);
+      *IMAGEFseq_pix(mrisp->Ip, u, v, frameno) +=
+          overlay[vno] / hits.item(u, v);
     }
   }
   // nearest neighbor sampling
   else if (interp == Nearest) {
-    for (int u = 0; u < udim; u++)  {
+    for (int u = 0; u < udim; u++) {
       for (int v = 0; v < vdim; v++) {
         *IMAGEFseq_pix(mrisp->Ip, u, v, frameno) = overlay[nearest.item(u, v)];
       }
@@ -3725,51 +3726,61 @@ void SphericalProjector::parameterizeOverlay(const float *overlay, int frameno, 
   interpolator->setOverlay(overlay);
   interpolator->nearestneighbor = (interp == Nearest);
 
-  for (int u = 0; u < udim; u++)  {
+  for (int u = 0; u < udim; u++) {
     for (int v = 0; v < vdim; v++) {
       if (hits.item(u, v) == 0) {
-        double phi = u * PHI_MAX / udim;
+        double phi   = u * PHI_MAX / udim;
         double theta = v * THETA_MAX / vdim;
-        *IMAGEFseq_pix(mrisp->Ip, u, v, frameno) = interpolator->interp(phi, theta);
+        *IMAGEFseq_pix(mrisp->Ip, u, v, frameno) =
+            interpolator->interp(phi, theta);
       }
     }
   }
 }
 
-
 /*
   Samples a parameterization (at the given frame index) into an overlay (of size nvertices).
 */
-void SphericalProjector::sampleParameterization(float *overlay, int frameno, InterpMethod interp)
-{
+void SphericalProjector::sampleParameterization(float *overlay, int frameno,
+                                                InterpMethod interp) {
   // barycentric sampling
   if (interp == Barycentric) {
 
     for (int vno = 0; vno < mris->nvertices; vno++) {
       float uf = vertex_uf[vno];
       float vf = vertex_vf[vno];
-      int u0 = floor(uf);
-      int u1 = ceil(uf);
-      int v0 = floor(vf);
-      int v1 = ceil(vf);
+      int   u0 = floor(uf);
+      int   u1 = ceil(uf);
+      int   v0 = floor(vf);
+      int   v1 = ceil(vf);
       float du = uf - float(u0);
       float dv = vf - float(v0);
 
       // enforce spherical topology
-      if (u0 < 0) u0 = -u0;
-      if (u0 >= udim) u0 = udim - (u0 - udim + 1);
-      if (u1 < 0) u1 = -u1;
-      if (u1 >= udim) u1 = udim - (u1 - udim + 1);
-      if (v0 < 0) v0 += vdim;
-      if (v0 >= vdim) v0 -= vdim;
-      if (v1 < 0) v1 += vdim;
-      if (v1 >= vdim) v1 -= vdim;
+      if (u0 < 0)
+        u0 = -u0;
+      if (u0 >= udim)
+        u0 = udim - (u0 - udim + 1);
+      if (u1 < 0)
+        u1 = -u1;
+      if (u1 >= udim)
+        u1 = udim - (u1 - udim + 1);
+      if (v0 < 0)
+        v0 += vdim;
+      if (v0 >= vdim)
+        v0 -= vdim;
+      if (v1 < 0)
+        v1 += vdim;
+      if (v1 >= vdim)
+        v1 -= vdim;
 
       // interpolate
-      overlay[vno] =  du  *         dv  * *IMAGEFseq_pix(mrisp->Ip, u1, v1, frameno) +
-              (1.0f - du) *         dv  * *IMAGEFseq_pix(mrisp->Ip, u0, v1, frameno) +
-              (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, frameno) +
-                      du  * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, frameno);
+      overlay[vno] =
+          du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, frameno) +
+          (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, frameno) +
+          (1.0f - du) * (1.0f - dv) *
+              *IMAGEFseq_pix(mrisp->Ip, u0, v0, frameno) +
+          du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, frameno);
     }
 
   }
@@ -3777,10 +3788,9 @@ void SphericalProjector::sampleParameterization(float *overlay, int frameno, Int
   else if (interp == Nearest) {
 
     for (int vno = 0; vno < mris->nvertices; vno++) {
-      int u = vertex_u[vno];
-      int v = vertex_v[vno];
+      int u        = vertex_u[vno];
+      int v        = vertex_v[vno];
       overlay[vno] = *IMAGEFseq_pix(mrisp->Ip, u, v, frameno);
     }
-
   }
 }

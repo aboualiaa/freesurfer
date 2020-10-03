@@ -69,10 +69,7 @@ public:
 
   void SetFixedMaxCount(int cnt);
 
-  LineMarkers GetMarkers()
-  {
-    return m_markers;
-  }
+  LineMarkers GetMarkers() { return m_markers; }
 
   void GetInputRange(double *range) {
     range[0] = m_dInputRange[0];
@@ -120,9 +117,9 @@ protected:
   double *       m_dOutputArea;
   unsigned char *m_nColorTable; // color table for histogram drawing as RGBA
 
-  double      m_dBinWidth;
-  int         m_nMaxCount;
-  int         m_nFixedMaxCount;
+  double m_dBinWidth;
+  int    m_nMaxCount;
+  int    m_nFixedMaxCount;
 
   QColor m_colorBackground;
   QColor m_colorForeground;

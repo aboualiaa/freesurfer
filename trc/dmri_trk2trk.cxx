@@ -48,10 +48,10 @@ const char *Progname = "dmri_trk2trk";
 int doInvNonlin = 0, doFill = 0, doMean = 0, doNth = 0, strNum = -1,
     lengthMin = -1, lengthMax = -1;
 unsigned int nTract = 0;
-std::string inDir, outDir, inRefFile, outRefFile, affineXfmFile, nonlinXfmFile;
+std::string  inDir, outDir, inRefFile, outRefFile, affineXfmFile, nonlinXfmFile;
 vector<std::string> inTrkList, inAscList, outTrkList, outAscList, outVolList,
-               incMaskList, excMaskList;
-vector<MRI *>  incMask, excMask;
+    incMaskList, excMaskList;
+vector<MRI *> incMask, excMask;
 
 struct utsname uts;
 char *         cmdline, cwd[2000];
@@ -60,13 +60,13 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, cputime;
-  char outorient[4];
-  std::string fname;
+  int           nargs, cputime;
+  char          outorient[4];
+  std::string   fname;
   vector<float> point(3), step(3, 0);
-  MATRIX *outv2r;
-  MRI *inref = 0, *outref = 0, *outvol = 0;
-  AffineReg affinereg;
+  MATRIX *      outv2r;
+  MRI *         inref = 0, *outref = 0, *outvol = 0;
+  AffineReg     affinereg;
 #ifndef NO_CVS_UP_IN_HERE
   NonlinReg nonlinreg;
 #endif
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
   dump_options(stdout);
 
   // Read reference volumes
-  inref = MRIread(inRefFile.c_str());
+  inref  = MRIread(inRefFile.c_str());
   outref = MRIread(outRefFile.c_str());
 
   if (!outVolList.empty()) {
@@ -126,14 +126,12 @@ int main(int argc, char **argv) {
 #endif
 
   // Read inclusion masks
-  for (auto imask = incMaskList.begin();
-       imask < incMaskList.end(); imask++) {
+  for (auto imask = incMaskList.begin(); imask < incMaskList.end(); imask++) {
     incMask.push_back(MRIread((*imask).c_str()));
   }
 
   // Read exclusion masks
-  for (auto imask = excMaskList.begin();
-       imask < excMaskList.end(); imask++) {
+  for (auto imask = excMaskList.begin(); imask < excMaskList.end(); imask++) {
     excMask.push_back(MRIread((*imask).c_str()));
   }
 
@@ -148,11 +146,11 @@ int main(int argc, char **argv) {
               << "..." << std::endl;
     cputimer.reset();
 
-    if (!inTrkList.empty()) {		// Read streamlines from .trk file
+    if (!inTrkList.empty()) { // Read streamlines from .trk file
       if (!inDir.empty()) {
-	fname = inDir + "/" + inTrkList.at(itract);
+        fname = inDir + "/" + inTrkList.at(itract);
       } else {
-	fname = inTrkList.at(itract);
+        fname = inTrkList.at(itract);
       }
 
       if (!trkreader.Open(fname.c_str(), &trkheadin)) {
@@ -199,9 +197,9 @@ int main(int argc, char **argv) {
       std::vector<float> newpts;
 
       if (!inDir.empty()) {
-	fname = inDir + '/' + inAscList.at(itract);
+        fname = inDir + '/' + inAscList.at(itract);
       } else {
-	fname = inAscList.at(itract);
+        fname = inAscList.at(itract);
       }
 
       infile.open(fname, std::ios::in);
@@ -604,9 +602,9 @@ int main(int argc, char **argv) {
     // Write transformed streamlines to volume
     if (!outVolList.empty()) {
       if (!outDir.empty()) {
-	fname = outDir + "/" + outVolList.at(itract);
+        fname = outDir + "/" + outVolList.at(itract);
       } else {
-	fname = outVolList.at(itract);
+        fname = outVolList.at(itract);
       }
 
       MRIclear(outvol);
@@ -649,9 +647,9 @@ int main(int argc, char **argv) {
       std::ofstream outfile;
 
       if (!outDir.empty()) {
-	fname = outDir + "/" + outAscList.at(itract);
+        fname = outDir + "/" + outAscList.at(itract);
       } else {
-	fname = outAscList.at(itract);
+        fname = outAscList.at(itract);
       }
 
       outfile.open(fname, std::ios::out);
@@ -661,14 +659,10 @@ int main(int argc, char **argv) {
         exit(1);
       }
 
-      for (auto istr = streamlines.begin();
-	   istr < streamlines.end();
-	   istr++) {
-        for (auto ipt = istr->begin();
-                                           ipt < istr->end(); ipt += 3)
-          outfile << (int) round(ipt[0]) << " "
-                  << (int) round(ipt[1]) << " "
-                  << (int) round(ipt[2]) << endl;
+      for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
+        for (auto ipt = istr->begin(); ipt < istr->end(); ipt += 3)
+          outfile << (int)round(ipt[0]) << " " << (int)round(ipt[1]) << " "
+                  << (int)round(ipt[2]) << endl;
 
         outfile << std::endl;
       }
@@ -702,8 +696,8 @@ int main(int argc, char **argv) {
 
       for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-          trkheadout.vox_to_ras[i][j] = outv2r->rptr[i+1][j+1];
-	}
+          trkheadout.vox_to_ras[i][j] = outv2r->rptr[i + 1][j + 1];
+        }
       }
 
       strcpy(trkheadout.voxel_order, outorient);
@@ -728,9 +722,9 @@ int main(int argc, char **argv) {
 
       // Open output .trk file
       if (!outDir.empty()) {
-	fname = outDir + "/" + outTrkList.at(itract);
+        fname = outDir + "/" + outTrkList.at(itract);
       } else {
-	fname = outTrkList.at(itract);
+        fname = outTrkList.at(itract);
       }
 
       if (!trkwriter.Initialize(fname.c_str(), trkheadout)) {

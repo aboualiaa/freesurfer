@@ -67,9 +67,12 @@ int main(int argc, char **argv) {
   // convergence options
   // set number of iterations (default is 50x50x50x50)
   std::vector<int> numIters = {50, 50, 50, 50};
-  if (parser.exists("iters")) numIters = parser.retrieve<std::vector<int>>("iters");
-  CorrecterType::VariableSizeArrayType maximumNumberOfIterations(numIters.size());
-  for (unsigned int d = 0; d < numIters.size(); d++) maximumNumberOfIterations[d] = numIters[d];
+  if (parser.exists("iters"))
+    numIters = parser.retrieve<std::vector<int>>("iters");
+  CorrecterType::VariableSizeArrayType maximumNumberOfIterations(
+      numIters.size());
+  for (unsigned int d = 0; d < numIters.size(); d++)
+    maximumNumberOfIterations[d] = numIters[d];
   correcter->SetMaximumNumberOfIterations(maximumNumberOfIterations);
   correcter->SetNumberOfFittingLevels(numIters.size());
   correcter->SetConvergenceThreshold(0.0);

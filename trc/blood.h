@@ -39,56 +39,57 @@
 #include "spline.h"
 
 class Blood {
-  public:
+public:
   Blood(const std::string TrainListFile, const std::string TrainTrkFile,
-	const std::string TrainRoi1File, const std::string TrainRoi2File,
-	const std::string TrainAsegFile, const std::string TrainMaskFile,
-	float TrainMaskLabel, const std::string ExcludeFile,
-	const std::vector<std::string> &TestMaskList,
-	const std::vector<std::string> &TestFaList,
-	const std::string TestAffineXfmFile,
-	const std::string TestNonlinXfmFile,
-	const std::string TestNonlinRefFile,
-	const std::vector<std::string> &TestBaseXfmList,
-	const std::string TestBaseMaskFile,
-	bool UseTruncated, std::vector<int> &NumControls,
-	bool Debug=false);
-  Blood(const std::string TrainTrkFile,
-	const std::string TrainRoi1File, const std::string TrainRoi2File,
-	bool Debug=false);
+        const std::string TrainRoi1File, const std::string TrainRoi2File,
+        const std::string TrainAsegFile, const std::string TrainMaskFile,
+        float TrainMaskLabel, const std::string ExcludeFile,
+        const std::vector<std::string> &TestMaskList,
+        const std::vector<std::string> &TestFaList,
+        const std::string               TestAffineXfmFile,
+        const std::string               TestNonlinXfmFile,
+        const std::string               TestNonlinRefFile,
+        const std::vector<std::string> &TestBaseXfmList,
+        const std::string TestBaseMaskFile, bool UseTruncated,
+        std::vector<int> &NumControls, bool Debug = false);
+  Blood(const std::string TrainTrkFile, const std::string TrainRoi1File,
+        const std::string TrainRoi2File, bool Debug = false);
   ~Blood();
   void SetNumControls(std::vector<int> &NumControls);
-  void ReadStreamlines(const std::string TrainListFile, const std::string TrainTrkFile,
-		       const std::string TrainRoi1File, const std::string TrainRoi2File,
-		       float TrainMaskLabel, const std::string ExcludeFile);
-  void ReadAnatomy(const std::string TrainListFile, const std::string TrainAsegFile,
-		   const std::string TrainMaskFile);
-    void RemoveLengthOutliers();
-    void MatchStreamlineEnds();
-    void ComputeHistogram();
-    void ComputePriors();
-    void FindCenterStreamline(bool CheckOverlap=true, bool CheckDeviation=true,
-                                                      bool CheckFa=true);
-    void WriteOutputs(const char *OutTrainBase, const char *OutTestBase=NULL);
-    void WriteCenterStreamline(const std::string CenterTrkFile,
-                               const std::string RefTrkFile);
-    void WriteEndPoints(const std::string OutBase, MRI *RefVol);
-    void PrintStreamline(int SubjIndex, int LineIndex);
-    std::vector<float> ComputeAvgPath(std::vector<MRI *> &ValueVolumes);
-    std::vector<float> ComputeWeightAvgPath(std::vector<MRI *> &ValueVolumes);
-    std::vector<float> ComputeAvgCenter(std::vector<MRI *> &ValueVolumes);
-    void WriteValuesPointwise(std::vector<MRI *> &ValueVolumes,
-                              const std::string TextFile);
-    int GetVolume();
-    int GetNumStr();
-    int GetLengthMin();
-    int GetLengthMax();
-    float GetLengthAvg();
-    int GetNumStrEnds();
-    int GetLengthMinEnds();
-    int GetLengthMaxEnds();
-    float GetLengthAvgEnds();
-    int GetLengthCenter();
+  void ReadStreamlines(const std::string TrainListFile,
+                       const std::string TrainTrkFile,
+                       const std::string TrainRoi1File,
+                       const std::string TrainRoi2File, float TrainMaskLabel,
+                       const std::string ExcludeFile);
+  void ReadAnatomy(const std::string TrainListFile,
+                   const std::string TrainAsegFile,
+                   const std::string TrainMaskFile);
+  void RemoveLengthOutliers();
+  void MatchStreamlineEnds();
+  void ComputeHistogram();
+  void ComputePriors();
+  void FindCenterStreamline(bool CheckOverlap   = true,
+                            bool CheckDeviation = true, bool CheckFa = true);
+  void WriteOutputs(const char *OutTrainBase, const char *OutTestBase = NULL);
+  void WriteCenterStreamline(const std::string CenterTrkFile,
+                             const std::string RefTrkFile);
+  void WriteEndPoints(const std::string OutBase, MRI *RefVol);
+  void PrintStreamline(int SubjIndex, int LineIndex);
+  std::vector<float> ComputeAvgPath(std::vector<MRI *> &ValueVolumes);
+  std::vector<float> ComputeWeightAvgPath(std::vector<MRI *> &ValueVolumes);
+  std::vector<float> ComputeAvgCenter(std::vector<MRI *> &ValueVolumes);
+  void               WriteValuesPointwise(std::vector<MRI *> &ValueVolumes,
+                                          const std::string   TextFile);
+  int                GetVolume();
+  int                GetNumStr();
+  int                GetLengthMin();
+  int                GetLengthMax();
+  float              GetLengthAvg();
+  int                GetNumStrEnds();
+  int                GetLengthMinEnds();
+  int                GetLengthMaxEnds();
+  float              GetLengthAvgEnds();
+  int                GetLengthCenter();
 
 private:
   static const int          mDistThresh, mEndDilation;
@@ -124,15 +125,14 @@ private:
   std::vector<AffineReg> mTestBaseReg;
   MRI *                  mHistoStr, *mHistoSubj, *mTestBaseMask;
 
-    void ReadExcludedStreamlines(const std::string ExcludeFile);
-    void ComputeStats();
-    void ComputeStatsEnds();
-    void ComputeEndPointCoM();
-    bool IsInMask(std::vector<int>::const_iterator Point);
-    bool IsInMask(float *Point);
-    bool IsInRoi(std::vector<int>::const_iterator Point, MRI *Roi);
-    bool IsInCortex(std::vector<int>::const_iterator Point,
-                    MRI *Mask, MRI *Aseg);
+  void ReadExcludedStreamlines(const std::string ExcludeFile);
+  void ComputeStats();
+  void ComputeStatsEnds();
+  void ComputeEndPointCoM();
+  bool IsInMask(std::vector<int>::const_iterator Point);
+  bool IsInMask(float *Point);
+  bool IsInRoi(std::vector<int>::const_iterator Point, MRI *Roi);
+  bool IsInCortex(std::vector<int>::const_iterator Point, MRI *Mask, MRI *Aseg);
   bool IsEnd2InMask(std::vector<std::vector<int>>::iterator Streamline,
                     MRI *Mask, MRI *Aseg);
   bool MapPointToBase(std::vector<int>::iterator       OutPoint,

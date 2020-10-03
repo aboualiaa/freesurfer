@@ -38,7 +38,7 @@ class Samseg:
         pallidumAsWM=True,
         saveModelProbabilities=False,
         gmmFileName=None,
-        ):
+    ):
 
         # Store input parameters as class variables
         self.imageFileNames = imageFileNames
@@ -71,14 +71,16 @@ class Samseg:
         self.probabilisticAtlas = ProbabilisticAtlas()
 
         # Get full model specifications and optimization options (using default unless overridden by user)
-        self.optimizationOptions = getOptimizationOptions(atlasDir, userOptimizationOptions)
+        self.optimizationOptions = getOptimizationOptions(
+            atlasDir, userOptimizationOptions
+        )
         self.modelSpecifications = getModelSpecifications(
             atlasDir,
             userModelSpecifications,
             pallidumAsWM=pallidumAsWM,
-            gmmFileName=gmmFileName
+            gmmFileName=gmmFileName,
         )
-        
+
         # Set image-to-image matrix if provided
         self.imageToImageTransformMatrix = imageToImageTransformMatrix
 
@@ -150,19 +152,34 @@ class Samseg:
         if trf.source is None and trf.target is None:
             return trf
 
-        equal = lambda a, b: fs.Geometry.is_equal(a, b, thresh=1e-2, require_affine=False)
+        equal = lambda a, b: fs.Geometry.is_equal(
+            a, b, thresh=1e-2, require_affine=False
+        )
 
         # Make sure at least the source or target geometries match
-        if (trf.source is None or equal(trf.source, src)) and (trf.target is None or equal(trf.target, trg)):
+        if (trf.source is None or equal(trf.source, src)) and (
+            trf.target is None or equal(trf.target, trg)
+        ):
             return trf
 
         # The only remaining possibility is that the transform is inverted (input->template)
-        if (trf.source is None or equal(trf.source, trg)) and (trf.target is None or equal(trf.target, src)):
+        if (trf.source is None or equal(trf.source, trg)) and (
+            trf.target is None or equal(trf.target, src)
+        ):
             return trf.inverse()
 
-        fs.fatal('provided transform does not match input or template geometries')
+        fs.fatal(
+            "provided transform does not match input or template geometries"
+        )
 
-    def segment(self, costfile=None, timer=None, reg_only=False, transformFile=None, initTransformFile=None):
+    def segment(
+        self,
+        costfile=None,
+        timer=None,
+        reg_only=False,
+        transformFile=None,
+        initTransformFile=None,
+    ):
         # =======================================================================================
         #
         # Main function that runs the whole segmentation pipeline
@@ -172,17 +189,25 @@ class Samseg:
         # Initialization transform for registration
         initTransform = None
         if initTransformFile:
-            trg = self.validateTransform(fs.LinearTransform.read(initTransformFile))
+            trg = self.validateTransform(
+                fs.LinearTransform.read(initTransformFile)
+            )
             initTransform = convertRASTransformToLPS(trg.as_ras().matrix)
 
         # Affine transform used to skip registration
         worldToWorldTransformMatrix = None
         if transformFile:
-            if transformFile.endswith('.mat'):
-                worldToWorldTransformMatrix = scipy.io.loadmat(transformFile).get('worldToWorldTransformMatrix')
+            if transformFile.endswith(".mat"):
+                worldToWorldTransformMatrix = scipy.io.loadmat(
+                    transformFile
+                ).get("worldToWorldTransformMatrix")
             else:
-                trf = self.validateTransform(fs.LinearTransform.read(transformFile))
-                worldToWorldTransformMatrix = convertRASTransformToLPS(trf.as_ras().matrix)
+                trf = self.validateTransform(
+                    fs.LinearTransform.read(transformFile)
+                )
+                worldToWorldTransformMatrix = convertRASTransformToLPS(
+                    trf.as_ras().matrix
+                )
 
         # Register to template
         if self.imageToImageTransformMatrix is None:
@@ -360,15 +385,21 @@ class Samseg:
 
         # Save the final mesh collection
         if self.saveMesh:
-            print('Saving the final mesh in template space')
-            deformedAtlasFileName = os.path.join(self.savePath, 'mesh.txt')
-            self.probabilisticAtlas.saveDeformedAtlas(self.modelSpecifications.atlasFileName, deformedAtlasFileName, nodePositions)
-            
+            print("Saving the final mesh in template space")
+            deformedAtlasFileName = os.path.join(self.savePath, "mesh.txt")
+            self.probabilisticAtlas.saveDeformedAtlas(
+                self.modelSpecifications.atlasFileName,
+                deformedAtlasFileName,
+                nodePositions,
+            )
+
         # Save the Gaussian priors, (normalized) likelihoods and posteriors
         if self.saveModelProbabilities:
-            self.saveGaussianProbabilities( os.path.join(self.savePath, 'probabilities') )
- 
-       # Save the history of the parameter estimation process
+            self.saveGaussianProbabilities(
+                os.path.join(self.savePath, "probabilities")
+            )
+
+        # Save the history of the parameter estimation process
         if self.saveHistory:
             history = {
                 "input": {
@@ -388,7 +419,6 @@ class Samseg:
             }
             with open(os.path.join(self.savePath, "history.p"), "wb") as file:
                 pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
-                                
 
         return (
             self.modelSpecifications.FreeSurferLabels,
@@ -586,21 +616,25 @@ class Samseg:
         coordmap[~invalid, :] += [slc.start for slc in self.cropping]
 
         # write the warp file
-        fs.Warp(coordmap, source=imageGeom, target=templateGeom, affine=matrix).write(filename)
-        
-        
-    def saveGaussianProbabilities( self, probabilitiesPath ):
+        fs.Warp(
+            coordmap, source=imageGeom, target=templateGeom, affine=matrix
+        ).write(filename)
+
+    def saveGaussianProbabilities(self, probabilitiesPath):
         # Make output directory
         os.makedirs(probabilitiesPath, exist_ok=True)
-          
+
         # Get the class priors as dictated by the current mesh position
-        mesh = self.probabilisticAtlas.getMesh(self.modelSpecifications.atlasFileName, self.transform,
-                                              initialDeformation=self.deformation,
-                                              initialDeformationMeshCollectionFileName=self.deformationAtlasFileName)
-        mergedAlphas = kvlMergeAlphas( mesh.alphas, self.classFractions )
+        mesh = self.probabilisticAtlas.getMesh(
+            self.modelSpecifications.atlasFileName,
+            self.transform,
+            initialDeformation=self.deformation,
+            initialDeformationMeshCollectionFileName=self.deformationAtlasFileName,
+        )
+        mergedAlphas = kvlMergeAlphas(mesh.alphas, self.classFractions)
         mesh.alphas = mergedAlphas
         classPriors = mesh.rasterize(self.imageBuffers.shape[0:3], -1)
-        classPriors = classPriors[self.mask, :] / ( 2**16 - 1 )
+        classPriors = classPriors[self.mask, :] / (2 ** 16 - 1)
 
         # Get bias field corrected data
         self.biasField.downSampleBasisFunctions([1, 1, 1])
@@ -608,41 +642,67 @@ class Samseg:
         data = self.imageBuffers[self.mask, :] - biasFields[self.mask, :]
 
         # Compute gaussian priors, (normalized) likelihoods and posteriors
-        gaussianPosteriors, _ = self.gmm.getGaussianPosteriors( data, classPriors )
-        gaussianLikelihoods, _ = self.gmm.getGaussianPosteriors( data, classPriors, priorWeight=0 )
-        gaussianPriors, _ = self.gmm.getGaussianPosteriors( data, classPriors, dataWeight=0 )
+        gaussianPosteriors, _ = self.gmm.getGaussianPosteriors(
+            data, classPriors
+        )
+        gaussianLikelihoods, _ = self.gmm.getGaussianPosteriors(
+            data, classPriors, priorWeight=0
+        )
+        gaussianPriors, _ = self.gmm.getGaussianPosteriors(
+            data, classPriors, dataWeight=0
+        )
 
         # Open gaussians file
-        file = open(os.path.join(probabilitiesPath, 'gaussians.txt'), 'w')
+        file = open(os.path.join(probabilitiesPath, "gaussians.txt"), "w")
 
         # Cycle through gaussians and write volumes and means/variances
-        classNames = [param.mergedName for param in self.modelSpecifications.sharedGMMParameters]
-        numberOfGaussiansPerClass = [param.numberOfComponents for param in self.modelSpecifications.sharedGMMParameters]
+        classNames = [
+            param.mergedName
+            for param in self.modelSpecifications.sharedGMMParameters
+        ]
+        numberOfGaussiansPerClass = [
+            param.numberOfComponents
+            for param in self.modelSpecifications.sharedGMMParameters
+        ]
         maxNameSize = len(max(classNames, key=len)) + 2
         for classNumber, className in enumerate(classNames):
             numComponents = numberOfGaussiansPerClass[classNumber]
             for componentNumber in range(numComponents):
-                # 
-                gaussianNumber = int(np.sum(numberOfGaussiansPerClass[:classNumber])) + componentNumber
-                
+                #
+                gaussianNumber = (
+                    int(np.sum(numberOfGaussiansPerClass[:classNumber]))
+                    + componentNumber
+                )
+
                 # Write volume
-                probabilities = np.zeros( ( *( self.imageBuffers.shape[:3] ), 3 ), dtype=np.float32 )
-                probabilities[ self.mask, 0 ] = gaussianPosteriors[ :, gaussianNumber ]
-                probabilities[ self.mask, 1 ] = gaussianPriors[ :, gaussianNumber ]
-                probabilities[ self.mask, 2 ] = gaussianLikelihoods[ :, gaussianNumber ]
+                probabilities = np.zeros(
+                    (*(self.imageBuffers.shape[:3]), 3), dtype=np.float32
+                )
+                probabilities[self.mask, 0] = gaussianPosteriors[
+                    :, gaussianNumber
+                ]
+                probabilities[self.mask, 1] = gaussianPriors[:, gaussianNumber]
+                probabilities[self.mask, 2] = gaussianLikelihoods[
+                    :, gaussianNumber
+                ]
                 basename = className
                 if numComponents > 1:
-                    basename += '-%d' % (componentNumber + 1)
-                self.writeImage(probabilities, os.path.join(probabilitiesPath, basename + '.mgz'))
+                    basename += "-%d" % (componentNumber + 1)
+                self.writeImage(
+                    probabilities,
+                    os.path.join(probabilitiesPath, basename + ".mgz"),
+                )
 
                 # write gaussian information
                 mean = self.gmm.means[gaussianNumber]
                 var = self.gmm.variances[gaussianNumber]
                 weight = self.gmm.mixtureWeights[gaussianNumber]
-                file.write('%s %.4f %.4f %.4f\n' % (basename.ljust(maxNameSize), mean, var, weight))
+                file.write(
+                    "%s %.4f %.4f %.4f\n"
+                    % (basename.ljust(maxNameSize), mean, var, weight)
+                )
 
         file.close()
-        
 
     def getDownSampledModel(self, atlasFileName, downSamplingFactors):
 
@@ -801,12 +861,16 @@ class Samseg:
                 + ")",
             )
 
-            maximumNumberOfIterations = optimizationOptions.multiResolutionSpecification[
-                multiResolutionLevel
-            ].maximumNumberOfIterations
-            estimateBiasField = optimizationOptions.multiResolutionSpecification[
-                multiResolutionLevel
-            ].estimateBiasField
+            maximumNumberOfIterations = (
+                optimizationOptions.multiResolutionSpecification[
+                    multiResolutionLevel
+                ].maximumNumberOfIterations
+            )
+            estimateBiasField = (
+                optimizationOptions.multiResolutionSpecification[
+                    multiResolutionLevel
+                ].estimateBiasField
+            )
             historyOfCost = [1 / eps]
             logger.debug(
                 "maximumNumberOfIterations: %d", maximumNumberOfIterations
@@ -842,8 +906,10 @@ class Samseg:
 
             # Save initial position at the start of this multi-resolution level
             initialNodePositions = downSampledMesh.points
-            initialNodePositionsInTemplateSpace = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-                initialNodePositions, downSampledTransform
+            initialNodePositionsInTemplateSpace = (
+                self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                    initialNodePositions, downSampledTransform
+                )
             )
 
             # Set priors in mesh to the merged (super-structure) ones
@@ -1113,8 +1179,10 @@ class Samseg:
             finalNodePositions = downSampledMesh.points
 
             # Transform back in template space (i.e., undoing the affine registration that we applied), and save for later usage
-            finalNodePositionsInTemplateSpace = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-                finalNodePositions, downSampledTransform
+            finalNodePositionsInTemplateSpace = (
+                self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                    finalNodePositions, downSampledTransform
+                )
             )
 
             # Record deformation delta here in lieu of maintaining history
@@ -1123,9 +1191,11 @@ class Samseg:
                 - initialNodePositionsInTemplateSpace
                 + downSampledInitialDeformationApplied
             )
-            self.deformationAtlasFileName = optimizationOptions.multiResolutionSpecification[
-                multiResolutionLevel
-            ].atlasFileName
+            self.deformationAtlasFileName = (
+                optimizationOptions.multiResolutionSpecification[
+                    multiResolutionLevel
+                ].atlasFileName
+            )
 
             # Save history of the estimation
             if self.saveHistory:
@@ -1152,7 +1222,6 @@ class Samseg:
 
         # End resolution level loop
 
-
     def computeFinalSegmentation(self):
         # Get the final mesh
         mesh = self.probabilisticAtlas.getMesh(
@@ -1177,8 +1246,10 @@ class Samseg:
         posteriors = self.gmm.getPosteriors(data, priors, self.classFractions)
 
         #
-        estimatedNodePositions = self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
-            mesh.points, self.transform
+        estimatedNodePositions = (
+            self.probabilisticAtlas.mapPositionsFromSubjectToTemplateSpace(
+                mesh.points, self.transform
+            )
         )
 
         #

@@ -27,9 +27,9 @@ else
     shift
   done
 
-  RANDOMNUMBER=$(od -vAn -N4 -tu4 < /dev/urandom) ;
-  MCR_CACHE_ROOT=$( echo "/tmp/MCR_${RANDOMNUMBER}/" | tr -d ' ' ) ;
-  export MCR_CACHE_ROOT;
+  RANDOMNUMBER=$(od -vAn -N4 -tu4 </dev/urandom)
+  MCR_CACHE_ROOT=$(echo "/tmp/MCR_${RANDOMNUMBER}/" | tr -d ' ')
+  export MCR_CACHE_ROOT
   eval "${exe_dir}/segmentSubject.app/Contents/MacOS/segmentSubject $args"
   returnVal=$?
   rm -rf $MCR_CACHE_ROOT

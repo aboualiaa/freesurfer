@@ -17,15 +17,15 @@ def evaluateFornixSegmentation(
     """
     A function to evaluate potential missegmentation of the fornix.
 
-    This script evaluates potential missegmentation of the fornix, which may 
+    This script evaluates potential missegmentation of the fornix, which may
     erroneously be attached to the 'corpus collosum' label.
 
-    It will run Freesurfer's 'mri_convert' script to apply the cc_up.lta 
-    transform to the norm.mgz and the aseg files, and create a binary corpus 
+    It will run Freesurfer's 'mri_convert' script to apply the cc_up.lta
+    transform to the norm.mgz and the aseg files, and create a binary corpus
     callosum mask and surface. Resulting files are saved to subject-specific
     directories witin the 'fornix' subdirectory of the output directory.
 
-    If the corresponding arguments are set to 'True', the script will also 
+    If the corresponding arguments are set to 'True', the script will also
     create screenshots and run a shape analysis of the corpus callosum surface.
     Resulting files will be saved to the same directory as indicated above.
 
@@ -45,7 +45,7 @@ def evaluateFornixSegmentation(
         - mri/norm.mgz
 
     Returns:
-        - a numpy array of N_EIGEN eigenvalues if RUN_SHAPEDNA is True, 
+        - a numpy array of N_EIGEN eigenvalues if RUN_SHAPEDNA is True,
           otherwise a numpy array of NaNs of the same dimension
 
     """

@@ -10,20 +10,24 @@ from .utilities import requireNumpyArray
 from . import gemsbindings as gems
 
 
-def getModelSpecifications(atlasDir, userModelSpecifications={}, pallidumAsWM=True, gmmFileName=None):
+def getModelSpecifications(
+    atlasDir, userModelSpecifications={}, pallidumAsWM=True, gmmFileName=None
+):
 
     # Create default model specifications as a dictionary
-    FreeSurferLabels, names, colors = kvlReadCompressionLookupTable(os.path.join(atlasDir, 'compressionLookupTable.txt'))
+    FreeSurferLabels, names, colors = kvlReadCompressionLookupTable(
+        os.path.join(atlasDir, "compressionLookupTable.txt")
+    )
 
     # Use default sharedGMMParameters.txt file in the atlas directory if no custom file is provided
     if gmmFileName is None:
-        gmmFileName = os.path.join(atlasDir, 'sharedGMMParameters.txt')
+        gmmFileName = os.path.join(atlasDir, "sharedGMMParameters.txt")
     else:
         # If the custom GMM file does not exist in the working dir, assume it exists in the atlas dir
         if not os.path.isfile(gmmFileName):
             gmmFileName = os.path.join(atlasDir, gmmFileName)
     if not os.path.isfile(gmmFileName):
-        fs.fatal('GMM parameter file does not exist at %s' % gmmFileName)
+        fs.fatal("GMM parameter file does not exist at %s" % gmmFileName)
 
     sharedGMMParameters = kvlReadSharedGMMParameters(gmmFileName)
 

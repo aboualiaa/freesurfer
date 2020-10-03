@@ -128,32 +128,28 @@ static int no1d      = 0;
 static int file_only = 0;
 
 #define MAX_NORM_SURFACES 10
-static int nsurfs = 0 ;
-static char *surface_fnames[MAX_NORM_SURFACES]  ;
-static TRANSFORM *surface_xforms[MAX_NORM_SURFACES] ;
-static char *surface_xform_fnames[MAX_NORM_SURFACES] ;
-static float grad_thresh = -1 ;
-static MRI *mri_not_control = NULL;
+static int        nsurfs = 0;
+static char *     surface_fnames[MAX_NORM_SURFACES];
+static TRANSFORM *surface_xforms[MAX_NORM_SURFACES];
+static char *     surface_xform_fnames[MAX_NORM_SURFACES];
+static float      grad_thresh     = -1;
+static MRI *      mri_not_control = NULL;
 
-static LABEL *control_point_label = NULL ;
-char *output_control_points_vol;
-int DoGentleCPFile = 1;
+static LABEL *control_point_label = NULL;
+char *        output_control_points_vol;
+int           DoGentleCPFile = 1;
 
-static int nonmax_suppress = 1 ;
-static int erode = 0 ;
-static int remove_nonwm_voxels(MRI *mri_ctrl_src,
-                               MRI *mri_aseg,
-                               MRI *mri_ctrl_dst) ;
+static int nonmax_suppress = 1;
+static int erode           = 0;
+static int remove_nonwm_voxels(MRI *mri_ctrl_src, MRI *mri_aseg,
+                               MRI *mri_ctrl_dst);
 
-int
-main(int argc, char *argv[])
-{
-  int    nargs, n ;
-  MRI    *mri_src, *mri_dst = NULL, *mri_bias, *mri_orig, *mri_aseg = NULL ;
-  char   *in_fname, *out_fname ;
-  int          msec, minutes, seconds ;
-  Timer start ;
-
+int main(int argc, char *argv[]) {
+  int   nargs, n;
+  MRI * mri_src, *mri_dst = NULL, *mri_bias, *mri_orig, *mri_aseg = NULL;
+  char *in_fname, *out_fname;
+  int   msec, minutes, seconds;
+  Timer start;
 
   std::string cmdline = getAllInfo(argc, argv, "mri_normalize");
   nargs               = handleVersionOption(argc, argv, "mri_normalize");
@@ -629,28 +625,23 @@ main(int argc, char *argv[])
 
   /* first do a gentle normalization to get
      things in the right intensity range */
-  if(long_flag == 0)   // if long, then this will already have been done with base control points
+  if (long_flag ==
+      0) // if long, then this will already have been done with base control points
   {
-    if(DoGentleCPFile && (control_point_fname != NULL || control_point_label != NULL) ){
+    if (DoGentleCPFile &&
+        (control_point_fname != NULL || control_point_label != NULL)) {
       /* do one pass with only file control points first */
       /* Note: this can cause effects far away from the control points
 	 because it will affect intensities across the entire
 	 image. This effect is multiplied because it affects the
 	 selection of other points */
       printf("Doing gentle normalization with control points/label\n");
-      mri_dst =
-        MRI3dGentleNormalize(mri_src,
-                             NULL,
-                             DEFAULT_DESIRED_WHITE_MATTER_VALUE,
-                             NULL,
-                             intensity_above,
-                             intensity_below/2,1,
-                             bias_sigma, mri_not_control);
-    }
-    else
-    {
+      mri_dst = MRI3dGentleNormalize(
+          mri_src, NULL, DEFAULT_DESIRED_WHITE_MATTER_VALUE, NULL,
+          intensity_above, intensity_below / 2, 1, bias_sigma, mri_not_control);
+    } else {
       printf("NOT doing gentle normalization with control points/label\n");
-      mri_dst = MRIcopy(mri_src, NULL) ;
+      mri_dst = MRIcopy(mri_src, NULL);
     }
   }
   fflush(stdout);
@@ -710,12 +701,13 @@ main(int argc, char *argv[])
       fflush(stdout);
       fflush(stderr);
     }
-    if(output_control_points_vol){
-      printf("Writing output control points volume to %s\n", output_control_points_vol);
-      MRIwrite(mri_ctrl,output_control_points_vol);
+    if (output_control_points_vol) {
+      printf("Writing output control points volume to %s\n",
+             output_control_points_vol);
+      MRIwrite(mri_ctrl, output_control_points_vol);
     }
-    MRIfree(&mri_ctrl) ;
-    MRIfree(&mri_aseg) ;
+    MRIfree(&mri_ctrl);
+    MRIfree(&mri_aseg);
     printf("Applying bias correction\n");
     mri_dst = MRIapplyBiasCorrectionSameGeometry(
         mri_dst, mri_bias, mri_dst, DEFAULT_DESIRED_WHITE_MATTER_VALUE);
@@ -922,45 +914,38 @@ static int get_option(int argc, char *argv[]) {
            argv[2], argv[3], brain_distance);
     nargs = 3;
     if (!gca || !xform)
-      ErrorExit(ERROR_NOFILE, "%s: could not read gca (%s) or transform (%s)\n", Progname, argv[2], argv[3]) ;
-  }
-  else if (!stricmp(option, "C"))
-  {
-    output_control_points_vol = argv[2] ;
-    nargs = 1 ;
-    printf("Writing output control points volume to %s\n", output_control_points_vol);
-  }
-  else if (!stricmp(option, "MASK"))
-  {
-    mask_fname = argv[2] ;
-    nargs = 1 ;
-    printf("using MR volume %s to mask input volume...\n", mask_fname) ;
-  }
-  else if (!stricmp(option, "NOSKULL"))
-  {
-    noskull = 1 ;
-    printf("assuming input volume has been skull stripped\n") ;
-  }
-  else if (!stricmp(option, "GRAD"))
-  {
-    grad_thresh = atof(argv[2]) ;
-    nargs = 1 ;
-    printf("using gradient volume thresholded at %2.1f to prevent control points from crossing edges...\n", grad_thresh) ;
-  }
-  else if (!stricmp(option, "MASK_SIGMA"))
-  {
-    mask_sigma = atof(argv[2]) ;
-    mask_thresh = atof(argv[3]) ;
-    nargs = 1 ;
-    printf("smoothing input volume with sigma = %2.3f mm and thresholding at %2.0f for mask\n",
-           mask_sigma, mask_thresh) ;
-    nargs = 2 ;
-  }
-  else if (!stricmp(option, "MASK_ORIG"))
-  {
-    mask_orig_fname = argv[2] ;
-    mask_orig_thresh = atof(argv[3]) ;
-    nargs = 1 ;
+      ErrorExit(ERROR_NOFILE, "%s: could not read gca (%s) or transform (%s)\n",
+                Progname, argv[2], argv[3]);
+  } else if (!stricmp(option, "C")) {
+    output_control_points_vol = argv[2];
+    nargs                     = 1;
+    printf("Writing output control points volume to %s\n",
+           output_control_points_vol);
+  } else if (!stricmp(option, "MASK")) {
+    mask_fname = argv[2];
+    nargs      = 1;
+    printf("using MR volume %s to mask input volume...\n", mask_fname);
+  } else if (!stricmp(option, "NOSKULL")) {
+    noskull = 1;
+    printf("assuming input volume has been skull stripped\n");
+  } else if (!stricmp(option, "GRAD")) {
+    grad_thresh = atof(argv[2]);
+    nargs       = 1;
+    printf("using gradient volume thresholded at %2.1f to prevent control "
+           "points from crossing edges...\n",
+           grad_thresh);
+  } else if (!stricmp(option, "MASK_SIGMA")) {
+    mask_sigma  = atof(argv[2]);
+    mask_thresh = atof(argv[3]);
+    nargs       = 1;
+    printf("smoothing input volume with sigma = %2.3f mm and thresholding at "
+           "%2.0f for mask\n",
+           mask_sigma, mask_thresh);
+    nargs = 2;
+  } else if (!stricmp(option, "MASK_ORIG")) {
+    mask_orig_fname  = argv[2];
+    mask_orig_thresh = atof(argv[3]);
+    nargs            = 1;
     printf("removing control points that are below %2.3f in %s\n",
            mask_orig_thresh, mask_orig_fname);
     nargs = 2;
@@ -1002,94 +987,67 @@ static int get_option(int argc, char *argv[]) {
     num_3d_iter = 1;
     printf("disabling 1D normalization and "
            "setting niter=1, make sure to use "
-           "-f to specify control points\n") ;
-  }
-  else if (!stricmp(option, "nosnr"))
-  {
-    nosnr = 1 ;
-    printf("disabling SNR normalization\n") ;
-  }
-  else if (!stricmp(option, "snr"))
-  {
-    nosnr = 0 ;
-    printf("enabling SNR normalization\n") ;
-  }
-  else if (!stricmp(option, "sigma"))
-  {
-    bias_sigma = atof(argv[2]) ;
-    nargs = 1 ;
-    printf("using Gaussian smoothing of bias field, sigma=%2.3f\n",
-           bias_sigma) ;
-  }
-  else if (!stricmp(option, "no-gentle-cp")) DoGentleCPFile = 0;
-  else if (!stricmp(option, "gentle-cp"))    DoGentleCPFile = 1;
-  else if (!stricmp(option, "conform"))
-  {
-    conform = 1 ;
-    printf(
-      "%sinterpolating and embedding volume to be 256^3...\n",
-      conform ? "": "not ") ;
-  }
-  else if (!stricmp(option, "noconform"))
-  {
-    conform = 0 ;
-    printf(
-      "%sinterpolating and embedding volume to be 256^3...\n",
-      conform ? "": "not ") ;
-  }
-  else if (!stricmp(option, "aseg") || !stricmp(option, "segmentation"))
-  {
-    aseg_fname = argv[2] ;
-    nargs = 1  ;
-    printf(
-      "using segmentation for initial intensity normalization\n") ;
-  }
-  else if (!stricmp(option, "gentle"))
-  {
-    gentle_flag = 1 ;
-    printf( "performing kinder gentler normalization...\n") ;
-  }
-  else if (!stricmp(option, "label"))
-  {
-    printf( "reading control points from label file %s\n", argv[2]) ;
-    control_point_label = LabelRead(NULL, argv[2]) ;
+           "-f to specify control points\n");
+  } else if (!stricmp(option, "nosnr")) {
+    nosnr = 1;
+    printf("disabling SNR normalization\n");
+  } else if (!stricmp(option, "snr")) {
+    nosnr = 0;
+    printf("enabling SNR normalization\n");
+  } else if (!stricmp(option, "sigma")) {
+    bias_sigma = atof(argv[2]);
+    nargs      = 1;
+    printf("using Gaussian smoothing of bias field, sigma=%2.3f\n", bias_sigma);
+  } else if (!stricmp(option, "no-gentle-cp"))
+    DoGentleCPFile = 0;
+  else if (!stricmp(option, "gentle-cp"))
+    DoGentleCPFile = 1;
+  else if (!stricmp(option, "conform")) {
+    conform = 1;
+    printf("%sinterpolating and embedding volume to be 256^3...\n",
+           conform ? "" : "not ");
+  } else if (!stricmp(option, "noconform")) {
+    conform = 0;
+    printf("%sinterpolating and embedding volume to be 256^3...\n",
+           conform ? "" : "not ");
+  } else if (!stricmp(option, "aseg") || !stricmp(option, "segmentation")) {
+    aseg_fname = argv[2];
+    nargs      = 1;
+    printf("using segmentation for initial intensity normalization\n");
+  } else if (!stricmp(option, "gentle")) {
+    gentle_flag = 1;
+    printf("performing kinder gentler normalization...\n");
+  } else if (!stricmp(option, "label")) {
+    printf("reading control points from label file %s\n", argv[2]);
+    control_point_label = LabelRead(NULL, argv[2]);
     if (control_point_label == NULL)
-      ErrorExit(ERROR_NOFILE, "%s: could not read label from %s", Progname, argv[2]) ;
-    nargs = 1 ;
-  }
-  else if (!stricmp(option, "lonly") ||
-           !stricmp(option, "label_only") ||
-           !stricmp(option, "labelonly"))
-  {
-    printf( "only applying control points from label file %s\n", argv[2]) ;
-    control_point_label = LabelRead(NULL, argv[2]) ;
+      ErrorExit(ERROR_NOFILE, "%s: could not read label from %s", Progname,
+                argv[2]);
+    nargs = 1;
+  } else if (!stricmp(option, "lonly") || !stricmp(option, "label_only") ||
+             !stricmp(option, "labelonly")) {
+    printf("only applying control points from label file %s\n", argv[2]);
+    control_point_label = LabelRead(NULL, argv[2]);
     if (control_point_label == NULL)
-      ErrorExit(ERROR_NOFILE, "%s: could not read label from %s", Progname, argv[2]) ;
-    nargs = 1 ;
-    file_only = 1 ;
-    no1d = 1 ;
-  }
-  else if (!stricmp(option, "file_only") ||
-           !stricmp(option, "fonly") ||
-           !stricmp(option, "fileonly"))
-  {
-    file_only = 1 ;
-    control_point_fname = argv[2] ;
-    no1d = 1 ;
-    nargs = 1 ;
-    printf( "using control points from file %s...\n",
-            control_point_fname) ;
-    printf( "only using file control points...\n") ;
-  }
-  else if (!stricmp(option, "seed"))
-  {
-    setRandomSeed(atol(argv[2])) ;
-    printf("setting seed for random number genererator to %d\n",
-            atoi(argv[2])) ;
-    nargs = 1 ;
-  }
-  else switch (toupper(*option))
-    {
+      ErrorExit(ERROR_NOFILE, "%s: could not read label from %s", Progname,
+                argv[2]);
+    nargs     = 1;
+    file_only = 1;
+    no1d      = 1;
+  } else if (!stricmp(option, "file_only") || !stricmp(option, "fonly") ||
+             !stricmp(option, "fileonly")) {
+    file_only           = 1;
+    control_point_fname = argv[2];
+    no1d                = 1;
+    nargs               = 1;
+    printf("using control points from file %s...\n", control_point_fname);
+    printf("only using file control points...\n");
+  } else if (!stricmp(option, "seed")) {
+    setRandomSeed(atol(argv[2]));
+    printf("setting seed for random number genererator to %d\n", atoi(argv[2]));
+    nargs = 1;
+  } else
+    switch (toupper(*option)) {
     case 'D':
       Gx    = atoi(argv[2]);
       Gy    = atoi(argv[3]);

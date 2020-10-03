@@ -86,17 +86,17 @@ MRI *sdcmLoadVolume(const char *dcmfile, int LoadVolume, int nthonly) {
   int             err, OutOfBounds, IsMosaic;
   int             row, col, slice, frame, fid;
   unsigned short *pixeldata;
-  MRI *vol, *voltmp;
-  char **SeriesList;
-  char *tmpstring;
-  int Maj, Min, MinMin;
-  double xs, ys, zs, xe, ye, ze, d, MinSliceScaleFactor, val;
-  int nnlist;
-  int vol_datatype;
-  FSENV *env;
-  std::string tmpfilestdout, cmd, tmpfile, FileNameUse;
-  int IsCompressed, IsDWI;
-  extern int sliceDirCosPresent;  // set when no ascii header
+  MRI *           vol, *voltmp;
+  char **         SeriesList;
+  char *          tmpstring;
+  int             Maj, Min, MinMin;
+  double          xs, ys, zs, xe, ye, ze, d, MinSliceScaleFactor, val;
+  int             nnlist;
+  int             vol_datatype;
+  FSENV *         env;
+  std::string     tmpfilestdout, cmd, tmpfile, FileNameUse;
+  int             IsCompressed, IsDWI;
+  extern int      sliceDirCosPresent; // set when no ascii header
 
   xs = ys = zs = xe = ye = ze = d = 0.; /* to avoid compiler warnings */
   slice                           = 0;
@@ -407,12 +407,16 @@ MRI *sdcmLoadVolume(const char *dcmfile, int LoadVolume, int nthonly) {
       // setenv DCMDICTPATH
       // /usr/pubsw/packages/dcmtk/current/share/dcmtk/dicom.dic???
       IsCompressed = 1;
-      tmpfile = std::string(env->tmpdir) + "/" + std::string(env->user) + ".tmp.decompressed.dcm.XXXXXX";
+      tmpfile      = std::string(env->tmpdir) + "/" + std::string(env->user) +
+                ".tmp.decompressed.dcm.XXXXXX";
       std::vector<char> tmpfilechars(tmpfile.begin(), tmpfile.end());
       tmpfilechars.push_back(0); // Null terminate
-      fid = mkstemp(tmpfilechars.data()); // mkstemp updates the "XXXXXX" at the end
-      tmpfilechars.pop_back(); // Don't need the null terminator
-      tmpfile = std::string(tmpfilechars.begin(), tmpfilechars.end()); // Copy back the modified string
+      fid = mkstemp(
+          tmpfilechars.data()); // mkstemp updates the "XXXXXX" at the end
+      tmpfilechars.pop_back();  // Don't need the null terminator
+      tmpfile =
+          std::string(tmpfilechars.begin(),
+                      tmpfilechars.end()); // Copy back the modified string
       if (fid == -1) {
         printf("ERROR: could not create temp file for decompression %d\n", fid);
         exit(1);
@@ -420,28 +424,30 @@ MRI *sdcmLoadVolume(const char *dcmfile, int LoadVolume, int nthonly) {
       close(fid);
       if (strncmp(sdfi->TransferSyntaxUID, jpegCompressed_UID, 19) == 0) {
         printf("JPEG compressed, decompressing\n");
-	tmpfilestdout = tmpfile+".dcmdjpeg.out";
-	cmd = std::string("fsdcmdecompress --i ")
-	  + std::string(sdfi->FileName) + " --o " + tmpfile + " --jpeg >& " + tmpfilestdout;
+        tmpfilestdout = tmpfile + ".dcmdjpeg.out";
+        cmd           = std::string("fsdcmdecompress --i ") +
+              std::string(sdfi->FileName) + " --o " + tmpfile + " --jpeg >& " +
+              tmpfilestdout;
       }
       if (strncmp(sdfi->TransferSyntaxUID, rllEncoded_UID, 19) == 0) {
         printf("RLE compressed, decompressing\n");
-	tmpfilestdout = tmpfile + ".dcmdlrf.out";
-	cmd = std::string("fsdcmdecompress --i ")
-	  + std::string(sdfi->FileName) + " --o " + tmpfile + " --rle >& " + tmpfilestdout;
+        tmpfilestdout = tmpfile + ".dcmdlrf.out";
+        cmd           = std::string("fsdcmdecompress --i ") +
+              std::string(sdfi->FileName) + " --o " + tmpfile + " --rle >& " +
+              tmpfilestdout;
       }
       printf("cd %s\n", env->cwd);
       printf("%s\n", cmd.c_str());
       err = system(cmd.c_str()); // Gulp
       if (err == -1) {
-        printf("ERROR: %d, see %s for more details\n", err, tmpfilestdout.c_str());
+        printf("ERROR: %d, see %s for more details\n", err,
+               tmpfilestdout.c_str());
         exit(1);
       }
       FileNameUse = tmpfile; // Hmmmm
-    }
-    else {
+    } else {
       IsCompressed = 0;
-      FileNameUse = std::string(sdfi->FileName);
+      FileNameUse  = std::string(sdfi->FileName);
     }
 
     /* Get the pixel data */
@@ -1319,77 +1325,78 @@ int AllocElementData(DCM_ELEMENT *e) {
 char *ElementValueString(DCM_ELEMENT *e, int DoBackslash) {
   char *       evstring = nullptr;
   unsigned int n, len;
-  std::string tmpstr;
-  std::string tmpstr2;
+  std::string  tmpstr;
+  std::string  tmpstr2;
 
   memset(&tmpstr[0], 0, 2000);
 
   switch (e->representation) {
-    case DCM_AE:
-    case DCM_AS:
-    case DCM_CS:
-    case DCM_DA:
-    case DCM_DS:
-    case DCM_DT:
-    case DCM_IS:
-    case DCM_LO:
-    case DCM_LT:
-    case DCM_OW:
-    case DCM_PN:
-    case DCM_SH:
-    case DCM_UN:  // unknown
-    case DCM_ST:
-    case DCM_TM:
-    case DCM_UI:
-      tmpstr = e->d.string;
-      break;
-    case DCM_OB:
-      evstring = (char *) calloc(sizeof(char),e->length+1);
-      len = e->length;
-      for (n = 0; n < e->length; n++) {
-        if (isprint(e->d.string[n]))
-          evstring[n] = e->d.string[n];
-        else if (e->d.string[n] == '\r' || e->d.string[n] == '\n' || e->d.string[n] == '\v')
-          evstring[n] = '\n';
-        else
-          evstring[n] = ' ';
-      }
-      // printf("%s\n",tmpstr);
-      break;
-    case DCM_SS:
-      tmpstr = std::to_string(static_cast<int>(*(e->d.ss)));
-      break;
-    case DCM_SL:
-      tmpstr = std::to_string(static_cast<long>(*(e->d.sl)));
-      break;
-    case DCM_UL:
-      tmpstr = std::to_string(static_cast<long>(*(e->d.ul)));
-      break;
-    case DCM_US:
-      tmpstr = std::to_string(static_cast<int>(*(e->d.us)));
-      break;
-    case DCM_AT:
-      tmpstr = std::to_string(static_cast<long>(*(e->d.at)));
-      break;
-    case DCM_FL:
-      tmpstr = std::to_string(static_cast<float>(e->d.fd[0]));
-      for (n = 1; n < e->multiplicity; n++) {
-	tmpstr += " " + std::to_string(static_cast<float>(e->d.fd[n]));
-      }
-      break;
-    case DCM_FD:
-      tmpstr = std::to_string(static_cast<double>(e->d.fd[0]));
-      for (n = 1; n < e->multiplicity; n++) {
-	tmpstr += " " + std::to_string(static_cast<double>(e->d.fd[n]));
-      }
-      break;
-    default:
-      fprintf(stderr, "ElementValueString: %d unrecognized", e->representation);
-      return (NULL);
+  case DCM_AE:
+  case DCM_AS:
+  case DCM_CS:
+  case DCM_DA:
+  case DCM_DS:
+  case DCM_DT:
+  case DCM_IS:
+  case DCM_LO:
+  case DCM_LT:
+  case DCM_OW:
+  case DCM_PN:
+  case DCM_SH:
+  case DCM_UN: // unknown
+  case DCM_ST:
+  case DCM_TM:
+  case DCM_UI:
+    tmpstr = e->d.string;
+    break;
+  case DCM_OB:
+    evstring = (char *)calloc(sizeof(char), e->length + 1);
+    len      = e->length;
+    for (n = 0; n < e->length; n++) {
+      if (isprint(e->d.string[n]))
+        evstring[n] = e->d.string[n];
+      else if (e->d.string[n] == '\r' || e->d.string[n] == '\n' ||
+               e->d.string[n] == '\v')
+        evstring[n] = '\n';
+      else
+        evstring[n] = ' ';
+    }
+    // printf("%s\n",tmpstr);
+    break;
+  case DCM_SS:
+    tmpstr = std::to_string(static_cast<int>(*(e->d.ss)));
+    break;
+  case DCM_SL:
+    tmpstr = std::to_string(static_cast<long>(*(e->d.sl)));
+    break;
+  case DCM_UL:
+    tmpstr = std::to_string(static_cast<long>(*(e->d.ul)));
+    break;
+  case DCM_US:
+    tmpstr = std::to_string(static_cast<int>(*(e->d.us)));
+    break;
+  case DCM_AT:
+    tmpstr = std::to_string(static_cast<long>(*(e->d.at)));
+    break;
+  case DCM_FL:
+    tmpstr = std::to_string(static_cast<float>(e->d.fd[0]));
+    for (n = 1; n < e->multiplicity; n++) {
+      tmpstr += " " + std::to_string(static_cast<float>(e->d.fd[n]));
+    }
+    break;
+  case DCM_FD:
+    tmpstr = std::to_string(static_cast<double>(e->d.fd[0]));
+    for (n = 1; n < e->multiplicity; n++) {
+      tmpstr += " " + std::to_string(static_cast<double>(e->d.fd[n]));
+    }
+    break;
+  default:
+    fprintf(stderr, "ElementValueString: %d unrecognized", e->representation);
+    return (NULL);
   }
 
-  if(evstring==NULL){
-    len = tmpstr.size();
+  if (evstring == NULL) {
+    len      = tmpstr.size();
     evstring = (char *)calloc(len + 1, sizeof(char));
     memmove(evstring, tmpstr.data(), len + 1);
   }
@@ -4482,7 +4489,7 @@ CONDITION GetDICOMInfo(const char *fname, DICOMInfo *dcminfo, BOOL ReadImage,
   // It can be converted to non-jpeg with
   // setenv DCMDICTPATH /usr/pubsw/packages/dcmtk/current/share/dcmtk/dicom.dic
   // dcmdjpeg +te jpgdicom newdicom
-  strncpy(uid_buf, dcminfo->TransferSyntaxUID, sizeof(uid_buf)-1);
+  strncpy(uid_buf, dcminfo->TransferSyntaxUID, sizeof(uid_buf) - 1);
   uid_buf[strlen(jpegCompressed_UID)] = 0;
   if (strcmp(uid_buf, jpegCompressed_UID) == 0) {
     // Don't do anything about this until pixel data are loaded
@@ -4492,7 +4499,7 @@ CONDITION GetDICOMInfo(const char *fname, DICOMInfo *dcminfo, BOOL ReadImage,
     // only to read the header and not the pixel data. exit(1);
   }
   // RLL encoded data is *not* supported by freesurfer
-  strncpy(uid_buf, dcminfo->TransferSyntaxUID, sizeof(uid_buf)-1);
+  strncpy(uid_buf, dcminfo->TransferSyntaxUID, sizeof(uid_buf) - 1);
   uid_buf[strlen(rllEncoded_UID)] = 0;
   if (strcmp(uid_buf, rllEncoded_UID) == 0) {
     printf("ERROR: RLL-encoded image data not supported!\n");
@@ -5452,20 +5459,19 @@ int alphasort(const void *a, const void *b) {
   use this for everything but siemens mosaics. There is a
   siemens specific reader called sdcmLoadVolume().
   --------------------------------------------------------------*/
-MRI *DICOMRead2(const char *dcmfile, int LoadVolume)
-{
-  char **FileNames, *dcmdir;
-  DICOMInfo RefDCMInfo, TmpDCMInfo, **dcminfo;
-  int nfiles, nframes, nslices, r, c, s, f, err, fid;
-  int ndcmfiles, nthfile, mritype = 0, IsDWI, IsPhilipsDWI;
+MRI *DICOMRead2(const char *dcmfile, int LoadVolume) {
+  char **         FileNames, *dcmdir;
+  DICOMInfo       RefDCMInfo, TmpDCMInfo, **dcminfo;
+  int             nfiles, nframes, nslices, r, c, s, f, err, fid;
+  int             ndcmfiles, nthfile, mritype = 0, IsDWI, IsPhilipsDWI;
   unsigned short *v16 = NULL;
-  unsigned char *v08 = NULL;
-  DCM_ELEMENT *element;
-  double r0, a0, s0, val;
-  MRI *mri;
-  FSENV *env;
-  std::string tmpfile, tmpfilestdout, FileNameUse, cmd;
-  int IsCompressed;
+  unsigned char * v08 = NULL;
+  DCM_ELEMENT *   element;
+  double          r0, a0, s0, val;
+  MRI *           mri;
+  FSENV *         env;
+  std::string     tmpfile, tmpfilestdout, FileNameUse, cmd;
+  int             IsCompressed;
 
   printf("Starting DICOMRead2()\n");
 
@@ -5773,12 +5779,16 @@ MRI *DICOMRead2(const char *dcmfile, int LoadVolume)
           // setenv DCMDICTPATH
           // /usr/pubsw/packages/dcmtk/current/share/dcmtk/dicom.dic???
           IsCompressed = 1;
-	  tmpfile = std::string(env->tmpdir) + "/" + std::string(env->user) + ".tmp.decompressed.dcm.XXXXXX";
-	  std::vector<char> tmpfilechars(tmpfile.begin(), tmpfile.end());
-	  tmpfilechars.push_back(0); // Null terminate
-	  fid = mkstemp(tmpfilechars.data()); // mkstemp updates the "XXXXXX" at the end
-	  tmpfilechars.pop_back(); // Don't need the null terminator
-	  tmpfile = std::string(tmpfilechars.begin(), tmpfilechars.end()); // Copy back the modified string
+          tmpfile = std::string(env->tmpdir) + "/" + std::string(env->user) +
+                    ".tmp.decompressed.dcm.XXXXXX";
+          std::vector<char> tmpfilechars(tmpfile.begin(), tmpfile.end());
+          tmpfilechars.push_back(0); // Null terminate
+          fid = mkstemp(
+              tmpfilechars.data()); // mkstemp updates the "XXXXXX" at the end
+          tmpfilechars.pop_back();  // Don't need the null terminator
+          tmpfile =
+              std::string(tmpfilechars.begin(),
+                          tmpfilechars.end()); // Copy back the modified string
           if (fid == -1) {
             printf("ERROR: could not create temp file for decompression %d\n",
                    fid);
@@ -5788,34 +5798,38 @@ MRI *DICOMRead2(const char *dcmfile, int LoadVolume)
           if (strncmp(dcminfo[nthfile]->TransferSyntaxUID, jpegCompressed_UID,
                       19) == 0) {
             printf("JPEG compressed, decompressing\n");
-	    tmpfilestdout = tmpfile + ".dcmdjpeg.out";
-	    cmd = std::string("fsdcmdecompress --i ")
-	      + std::string(dcminfo[nthfile]->FileName) + " --o " + tmpfile + " --jpeg >& " + tmpfilestdout;
+            tmpfilestdout = tmpfile + ".dcmdjpeg.out";
+            cmd           = std::string("fsdcmdecompress --i ") +
+                  std::string(dcminfo[nthfile]->FileName) + " --o " + tmpfile +
+                  " --jpeg >& " + tmpfilestdout;
           }
           if (strncmp(dcminfo[nthfile]->TransferSyntaxUID, rllEncoded_UID,
                       19) == 0) {
             printf("RLE compressed, decompressing\n");
-	    tmpfilestdout = tmpfile + ".dcmdlrf.out";
-	    cmd = std::string("fsdcmdecompress --i ")
-	      + std::string(dcminfo[nthfile]->FileName) + " --o " + tmpfile + " --rle >& " + tmpfilestdout;
+            tmpfilestdout = tmpfile + ".dcmdlrf.out";
+            cmd           = std::string("fsdcmdecompress --i ") +
+                  std::string(dcminfo[nthfile]->FileName) + " --o " + tmpfile +
+                  " --rle >& " + tmpfilestdout;
           }
           printf("cd %s\n", env->cwd);
           printf("%s\n", cmd.c_str());
           err = system(cmd.c_str());
           if (err != 0) {
-            printf("ERROR: %d, see %s for more details\n", err, tmpfilestdout.c_str());
+            printf("ERROR: %d, see %s for more details\n", err,
+                   tmpfilestdout.c_str());
             // Should stream tmpfilestdout to terminal
             exit(1);
           }
           FileNameUse = tmpfile;
         } else {
           IsCompressed = 0;
-          FileNameUse = std::string(dcminfo[nthfile]->FileName);
+          FileNameUse  = std::string(dcminfo[nthfile]->FileName);
         }
 
         element = GetElementFromFile(FileNameUse.c_str(), 0x7FE0, 0x10);
         if (element == NULL) {
-          printf("ERROR: reading pixel data from %s\n", dcminfo[nthfile]->FileName);
+          printf("ERROR: reading pixel data from %s\n",
+                 dcminfo[nthfile]->FileName);
           MRIfree(&mri);
           exit(1);
         }

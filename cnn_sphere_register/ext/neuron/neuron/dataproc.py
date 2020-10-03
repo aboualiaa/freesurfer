@@ -38,7 +38,7 @@ reload(nd)
 
 
 def proc_mgh_vols(inpath, outpath, ext=".mgz", label_idx=None, **kwargs):
-    """ process mgh data from mgz format and save to numpy format
+    """process mgh data from mgz format and save to numpy format
 
     1. load file
     2. normalize intensity

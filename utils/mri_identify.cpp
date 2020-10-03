@@ -1133,20 +1133,20 @@ int is_otl(const char *fname) {
 
 int is_ximg(const char *fname) { return (FALSE); } /* end is_ximg() */
 
-int is_nifti1(const char *fname)
-{
-  char fname_stem[STRLEN];
+int is_nifti1(const char *fname) {
+  char        fname_stem[STRLEN];
   std::string hdr_fname;
-  char *dot;
-  FILE *fp;
-  char  magic[4];
+  char *      dot;
+  FILE *      fp;
+  char        magic[4];
 
   // printf("Checking NIFTI1\n");
 
   strcpy(fname_stem, fname);
   dot = strrchr(fname_stem, '.');
   if (dot != NULL) {
-    if (strcmp(dot, ".img") == 0 || strcmp(dot, ".hdr") == 0) *dot = '\0';
+    if (strcmp(dot, ".img") == 0 || strcmp(dot, ".hdr") == 0)
+      *dot = '\0';
   }
   hdr_fname = std::string(fname_stem) + ".hdr";
 

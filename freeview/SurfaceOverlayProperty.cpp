@@ -30,8 +30,8 @@
 #include "vtkMath.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include <QDebug>
-#include <QJsonDocument>
 #include <QFile>
+#include <QJsonDocument>
 
 SurfaceOverlayProperty::SurfaceOverlayProperty(SurfaceOverlay *overlay)
     : QObject(), m_dOpacity(1), m_bColorInverse(false), m_bColorTruncate(false),
@@ -99,8 +99,8 @@ void SurfaceOverlayProperty::Reset() {
     m_dMaxPoint = m_overlay->PercentileToPosition(99);
     if (m_dMinPoint < 0 && m_dMaxPoint > fabs(m_dMinPoint))
       m_dMinPoint = fabs(m_dMinPoint);
-    m_dMidPoint = ( m_dMinPoint + m_dMaxPoint ) / 2;
-    m_dOffset = 0;
+    m_dMidPoint = (m_dMinPoint + m_dMaxPoint) / 2;
+    m_dOffset   = 0;
     m_customScale.clear();
     m_customScale << QGradientStop(m_dMinPoint, Qt::red);
     m_dMinStop = m_dMinPoint;
@@ -623,25 +623,22 @@ void SurfaceOverlayProperty::OnLabelMaskDestroyed(QObject *label) {
   }
 }
 
-bool SurfaceOverlayProperty::LoadCustomColorScale(const QString &filename)
-{
+bool SurfaceOverlayProperty::LoadCustomColorScale(const QString &filename) {
   QFile file(filename);
   file.open(QIODevice::ReadOnly);
-  QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-  QVariantList list = doc.toVariant().toList();
+  QJsonDocument doc  = QJsonDocument::fromJson(file.readAll());
+  QVariantList  list = doc.toVariant().toList();
   file.close();
-  if (list.isEmpty())
-  {
+  if (list.isEmpty()) {
     qDebug() << "Unable to load color scale from " << filename;
     return false;
-  }
-  else
-  {
+  } else {
     QGradientStops stops;
-    foreach (QVariant v, list)
-    {
+    foreach (QVariant v, list) {
       QVariantMap map = v.toMap();
-      stops << QGradientStop(map["val"].toDouble(), QColor(map["r"].toInt(), map["g"].toInt(), map["b"].toInt()));
+      stops << QGradientStop(
+          map["val"].toDouble(),
+          QColor(map["r"].toInt(), map["g"].toInt(), map["b"].toInt()));
     }
     SetColorScale(CS_Custom);
     SetCustomColorScale(stops);
@@ -649,26 +646,21 @@ bool SurfaceOverlayProperty::LoadCustomColorScale(const QString &filename)
   }
 }
 
-bool SurfaceOverlayProperty::SaveCustomColorScale(const QString &filename)
-{
+bool SurfaceOverlayProperty::SaveCustomColorScale(const QString &filename) {
   QFile file(filename);
-  if (file.open(QIODevice::WriteOnly | QIODevice::Text))
-  {
+  if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QVariantList list;
-    foreach (QGradientStop stop, m_customScale)
-    {
+    foreach (QGradientStop stop, m_customScale) {
       QVariantMap map;
       map["val"] = stop.first;
-      map["r"] = stop.second.red();
-      map["g"] = stop.second.green();
-      map["b"] = stop.second.blue();
+      map["r"]   = stop.second.red();
+      map["g"]   = stop.second.green();
+      map["b"]   = stop.second.blue();
       list << map;
     }
     file.write(QJsonDocument::fromVariant(list).toJson());
     return true;
-  }
-  else
-  {
+  } else {
     qDebug() << "Unable to save color scale to " << filename;
     return false;
   }

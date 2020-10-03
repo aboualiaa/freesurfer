@@ -6,7 +6,7 @@ from scipy.spatial.distance import cdist
 def dice(a, b, labels=None):
     """
     Computes dice coefficients for each label between two hard segmentations.
-    
+
         dice = 2 * |A ∩ B| / |A| + |B|
 
     If labels are not provided, all unique integers are used except for 0.
@@ -30,7 +30,7 @@ def dice(a, b, labels=None):
 def jaccard(a, b, labels=None):
     """
     Computes jaccard coefficients for each label between two hard segmentations.
-    
+
         jaccard = |A ∩ B| / |A ∪ B|
 
     If labels are not provided, all unique integers are used except for 0.

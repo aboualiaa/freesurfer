@@ -41,9 +41,9 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_mergepaths";
 
-int   nframe     = 0;
-float dispThresh = 0;
-std::string inDir, outFile, ctabFile;
+int                      nframe     = 0;
+float                    dispThresh = 0;
+std::string              inDir, outFile, ctabFile;
 std::vector<std::string> inFile;
 
 struct utsname uts;
@@ -53,9 +53,9 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, cputime;
+  int         nargs, cputime;
   std::string fname;
-  MRI *invol = 0, *outvol = 0;
+  MRI *       invol = 0, *outvol = 0;
 
   nargs = handleVersionOption(argc, argv, "dmri_mergepaths");
   if (nargs && argc - nargs == 1)
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
       MRIcopyFrame(invol, outvol, 0, iframe);
 
       if (dispThresh > 0) {
-        inmax = (float) MRIfindPercentile(invol, .99, 0);	// Robust max
+        inmax = (float)MRIfindPercentile(invol, .99, 0); // Robust max
       }
     }
 
@@ -196,7 +196,7 @@ static int parse_commandline(int argc, char **argv) {
       }
       nargsused = 0;
       while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
-        inFile.push_back( std::string(pargv[nargsused]) );
+        inFile.push_back(std::string(pargv[nargsused]));
         nargsused++;
         nframe++;
       }
@@ -284,11 +284,11 @@ static void check_options() {
     printf("ERROR: must specify input volume(s)\n");
     exit(1);
   }
-  if(outFile.empty()) {
+  if (outFile.empty()) {
     printf("ERROR: must specify output volume\n");
     exit(1);
   }
-  if(ctabFile.empty()) {
+  if (ctabFile.empty()) {
     printf("ERROR: must specify color table file\n");
     exit(1);
   }
@@ -300,14 +300,14 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
-  fprintf(fp,"\n");
-  fprintf(fp,"%s\n", getVersion().c_str());
-  fprintf(fp,"cwd %s\n",cwd);
-  fprintf(fp,"cmdline %s\n",cmdline);
-  fprintf(fp,"sysname  %s\n",uts.sysname);
-  fprintf(fp,"hostname %s\n",uts.nodename);
-  fprintf(fp,"machine  %s\n",uts.machine);
-  fprintf(fp,"user     %s\n",VERuser());
+  fprintf(fp, "\n");
+  fprintf(fp, "%s\n", getVersion().c_str());
+  fprintf(fp, "cwd %s\n", cwd);
+  fprintf(fp, "cmdline %s\n", cmdline);
+  fprintf(fp, "sysname  %s\n", uts.sysname);
+  fprintf(fp, "hostname %s\n", uts.nodename);
+  fprintf(fp, "machine  %s\n", uts.machine);
+  fprintf(fp, "user     %s\n", VERuser());
 
   if (!inDir.empty()) {
     fprintf(fp, "Input directory: %s\n", inDir.c_str());

@@ -88,13 +88,13 @@ protected slots:
 private:
   Ui::WindowConfigureOverlay *ui;
 
-  LineMarkers   m_markers;    // custom gradient markers
-  LayerSurface* m_layerSurface;
-  float*        m_fDataCache;
-  double        m_dSavedOffset;
-  double        m_rangeOverall[2];
-  int           m_nMaxHistCount;
-  DialogScreenshotOverlay*  m_dlgScreenshot;
+  LineMarkers              m_markers; // custom gradient markers
+  LayerSurface *           m_layerSurface;
+  float *                  m_fDataCache;
+  double                   m_dSavedOffset;
+  double                   m_rangeOverall[2];
+  int                      m_nMaxHistCount;
+  DialogScreenshotOverlay *m_dlgScreenshot;
 };
 
 #endif // WINDOWCONFIGUREOVERLAY_H

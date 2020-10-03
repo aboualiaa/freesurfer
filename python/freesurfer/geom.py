@@ -122,15 +122,15 @@ def resample(
 
 def sample_into_volume(volume, weights, coords, values):
     """
-      Interpolates and adds values at given coordinates into a volume and corresponding
-      weights array. Since this function performs in-place modification of the volume and
-      weights arrays, they MUST be double or float precision to avoid being copied.
+    Interpolates and adds values at given coordinates into a volume and corresponding
+    weights array. Since this function performs in-place modification of the volume and
+    weights arrays, they MUST be double or float precision to avoid being copied.
 
-      Parameters:
-        volume: Float or double array to add sampled values into.
-        weights: Float or double array to add sampling weights into.
-        coords: List of volume sampling coordinates. 
-        values: List of values at each coordinate.
+    Parameters:
+      volume: Float or double array to add sampled values into.
+      weights: Float or double array to add sampling weights into.
+      coords: List of volume sampling coordinates.
+      values: List of values at each coordinate.
     """
     if volume.ndim > 4:
         raise ValueError(

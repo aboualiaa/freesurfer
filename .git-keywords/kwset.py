@@ -19,8 +19,7 @@ import sys
 
 
 def main():
-    """Main program.
-    """
+    """Main program."""
     dre = re.compile("".join([r"\$", r"Date:?\$"]))
     rre = re.compile("".join([r"\$", r"Revision:?\$"]))
     currp = os.getcwd()
@@ -36,8 +35,7 @@ def main():
 
 
 def gitdate():
-    """Get the date from the latest commit in ISO8601 format.
-    """
+    """Get the date from the latest commit in ISO8601 format."""
     args = ["git", "log", "-1", "--date=iso"]
     outdata = subprocess.check_output(args, universal_newlines=True)
     outlines = outdata.splitlines()

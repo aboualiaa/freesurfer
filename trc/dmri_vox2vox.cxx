@@ -42,7 +42,7 @@ int main(int argc, char *argv[]);
 
 const char *Progname = "dmri_vox2vox";
 
-int doInvNonlin = 0, nin = 0, nout = 0;
+int         doInvNonlin = 0, nin = 0, nout = 0;
 std::string inDir, outDir, inRefFile, outRefFile, affineXfmFile, nonlinXfmFile;
 std::vector<std::string> inFile, outFile;
 
@@ -53,11 +53,11 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, cputime;
-  std::string fname;
+  int           nargs, cputime;
+  std::string   fname;
   vector<float> point(3);
-  MRI *inref = 0, *outref = 0;
-  AffineReg affinereg;
+  MRI *         inref = 0, *outref = 0;
+  AffineReg     affinereg;
 #ifndef NO_CVS_UP_IN_HERE
   NonlinReg nonlinreg;
 #endif
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
   dump_options(stdout);
 
   // Read reference volumes
-  inref = MRIread(inRefFile.c_str());
+  inref  = MRIread(inRefFile.c_str());
   outref = MRIread(outRefFile.c_str());
 
   // Read transform files
@@ -373,11 +373,11 @@ static void check_options() {
     printf("ERROR: must specify as many output text files as input files\n");
     exit(1);
   }
-  if(inRefFile.empty()) {
+  if (inRefFile.empty()) {
     printf("ERROR: must specify input reference volume\n");
     exit(1);
   }
-  if(outRefFile.empty()) {
+  if (outRefFile.empty()) {
     printf("ERROR: must specify output reference volume\n");
     exit(1);
   }
@@ -385,14 +385,14 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
-  fprintf(fp,"\n");
-  fprintf(fp,"%s\n", getVersion().c_str());
-  fprintf(fp,"cwd %s\n",cwd);
-  fprintf(fp,"cmdline %s\n",cmdline);
-  fprintf(fp,"sysname  %s\n",uts.sysname);
-  fprintf(fp,"hostname %s\n",uts.nodename);
-  fprintf(fp,"machine  %s\n",uts.machine);
-  fprintf(fp,"user     %s\n",VERuser());
+  fprintf(fp, "\n");
+  fprintf(fp, "%s\n", getVersion().c_str());
+  fprintf(fp, "cwd %s\n", cwd);
+  fprintf(fp, "cmdline %s\n", cmdline);
+  fprintf(fp, "sysname  %s\n", uts.sysname);
+  fprintf(fp, "hostname %s\n", uts.nodename);
+  fprintf(fp, "machine  %s\n", uts.machine);
+  fprintf(fp, "user     %s\n", VERuser());
 
   if (!inDir.empty()) {
     fprintf(fp, "Input directory: %s\n", inDir.c_str());

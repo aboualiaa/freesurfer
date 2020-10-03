@@ -288,23 +288,19 @@ bool Interactor2D::ProcessKeyDownEvent(QKeyEvent * event,
   RenderView2D *view = (RenderView2D *)renderview;
 
   int nKeyCode = event->key();
-  if (nKeyCode == Qt::Key_Escape)
-  {
-    m_bWindowLevel = false;
-    m_bChangeSlice = false;
+  if (nKeyCode == Qt::Key_Escape) {
+    m_bWindowLevel  = false;
+    m_bChangeSlice  = false;
     m_bMovingCursor = false;
-    m_bSelecting = false;
+    m_bSelecting    = false;
   }
 
-  if ( MainWindow::GetMainWindow()->IsEmpty() )
-  {
-    return Interactor::ProcessKeyDownEvent( event, renderview );
+  if (MainWindow::GetMainWindow()->IsEmpty()) {
+    return Interactor::ProcessKeyDownEvent(event, renderview);
   }
 
-  if ( event->modifiers() & Qt::ShiftModifier )
-  {
-    if ( nKeyCode == Qt::Key_Up )
-    {
+  if (event->modifiers() & Qt::ShiftModifier) {
+    if (nKeyCode == Qt::Key_Up) {
       view->Zoom(1.05);
     } else if (nKeyCode == Qt::Key_Down) {
       view->Zoom(0.95);

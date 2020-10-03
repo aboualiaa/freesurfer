@@ -92,15 +92,9 @@ public:
   void         set_mesh(tMesh *pmesh) { m_pmesh = pmesh; }
   const tMesh *get_mesh() const { return m_pmesh; }
 
-  void set_displayLevel(int level)
-  {
-    m_displayLevel = level;
-  }
+  void set_displayLevel(int level) { m_displayLevel = level; }
 
-  int get_displayLevel() const
-  {
-    return m_displayLevel;
-  }
+  int get_displayLevel() const { return m_displayLevel; }
 
   void setThreshold(double dval) {
     m_bcThreshold  = dval;

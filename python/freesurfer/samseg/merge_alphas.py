@@ -15,7 +15,7 @@ def meshValidityTest(alphas, name):
 
 
 def kvlGetMergingFractionsTable(names, mergeOptions):
-    """Computes a numerOfClasses x numberOfStructures matrix where each column indicates the fractions 
+    """Computes a numerOfClasses x numberOfStructures matrix where each column indicates the fractions
     of the various classes (super-structures) in the corresponding structure. So each column sums to 1."""
 
     #

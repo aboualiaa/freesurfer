@@ -260,18 +260,18 @@ class PSACNNOutputSpec(TraitedSpec):
 class PSACNN(BaseInterface):
 
     """
-    Runs PSACNN via the psacnn_segment function.
+     Runs PSACNN via the psacnn_segment function.
 
-    Examples:
-    ---------
-    'run psacnn_segment.py -i t1.nii.gz -o output_dir/psacnn -gpu 0 -c 't2w' -p 96
-   '
-    >>> psacnn = PSACNN()
-    >>> psacnn.inputs.input_image = 't1.nii.gz'
-    >>> psacnn.inputs. = 'output_dir'
-    >>> psacnn.inputs.contrast = 't1w'
-    >>> robex.cmdline
-    'runROBEX.sh t1.nii.gz t1_stripped.nii.gz t1_mask.nii.gz'
+     Examples:
+     ---------
+     'run psacnn_segment.py -i t1.nii.gz -o output_dir/psacnn -gpu 0 -c 't2w' -p 96
+    '
+     >>> psacnn = PSACNN()
+     >>> psacnn.inputs.input_image = 't1.nii.gz'
+     >>> psacnn.inputs. = 'output_dir'
+     >>> psacnn.inputs.contrast = 't1w'
+     >>> robex.cmdline
+     'runROBEX.sh t1.nii.gz t1_stripped.nii.gz t1_mask.nii.gz'
     """
 
     input_spec = PSACNNInputSpec

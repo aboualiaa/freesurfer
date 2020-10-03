@@ -399,7 +399,7 @@ class WGAN_GP(object):
 
 
 class Nonbg(object):
-    """ UNTESTED
+    """UNTESTED
     class to modify output on operating only on the non-bg class
 
     All data is aggregated and the (passed) metric is called on flattened true and

@@ -146,17 +146,16 @@ public:
   int get_neighboring_elts(unsigned int i, int radius,
                            ElementIndexContainer &eltIndex) const;
 
-  template<class In> void remove_elts(In begin, In end) /*throw(gmpErr)*/;
-  bool check_elt_id() const;
+  template <class In> void remove_elts(In begin, In end) /*throw(gmpErr)*/;
+  bool                     check_elt_id() const;
   //---------------------------
 
   // Mapping functionality
   // if signalTopology is true and the element has a topological defect,
   //    an invalid point will be returned
-  tCoords        dir_img(const tCoords&,
-                         bool signalTopology = false) const /*throw(gmpErr) */;
-  void           get_dst_box(tCoords& cmin,
-                             tCoords& cmax) const;
+  tCoords dir_img(const tCoords &, bool signalTopology = false) const
+      /*throw(gmpErr) */;
+  void get_dst_box(tCoords &cmin, tCoords &cmax) const;
   //----------------------------
 
   void get_src_box(tCoords &cmin, tCoords &cmax) const {
@@ -892,10 +891,9 @@ template <class Cstr, int n> struct FunctorUpdateNodesFromElements {
   }
 };
 
-template<class Cstr, int n>
-template<class In>
-void
-TMesh<Cstr,n>::remove_elts(In begin, In end) /*throw(gmpErr)*/
+template <class Cstr, int n>
+template <class In>
+void TMesh<Cstr, n>::remove_elts(In begin, In end) /*throw(gmpErr)*/
 {
   bool bdbg = false;
   if (bdbg)
@@ -1035,15 +1033,15 @@ template <int n> bool positive(const TCoords<int, n> &pt) {
 // proposed strategy for the direct image
 //
 // use the closest_node method -> it should do the trick most of the times
-template<class Cstr, int n>
-TCoords<double,n>
-TMesh<Cstr,n>::dir_img(const tCoords& c_src,
-                       bool signalTopology) const /*throw(gmpErr) */
+template <class Cstr, int n>
+TCoords<double, n>
+TMesh<Cstr, n>::dir_img(const tCoords &c_src,
+                        bool           signalTopology) const /*throw(gmpErr) */
 {
-  tCoords img;
-  const tElement* pelt = this->element_at_point( c_src );
+  tCoords         img;
+  const tElement *pelt = this->element_at_point(c_src);
 
-  if ( !pelt )
+  if (!pelt)
     img.status() = cOutOfBounds;
   else if (pelt->orientation_pb())
     img.invalidate();

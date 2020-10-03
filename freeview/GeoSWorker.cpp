@@ -7,8 +7,8 @@
 #include "vtkExtractVOI.h"
 #include "vtkImageCast.h"
 #include "vtkImageData.h"
-#include "vtkImageGaussianSmooth.h"
 #include "vtkImageExtractComponents.h"
+#include "vtkImageGaussianSmooth.h"
 #include "vtkImageThreshold.h"
 #include <QElapsedTimer>
 #include <QFile>
@@ -29,13 +29,14 @@ GeoSWorker::~GeoSWorker() {
   m_geos->deleteLater();
 }
 
-void GeoSWorker::Compute(LayerMRI *mri, LayerMRI* seg, LayerMRI* seeds, int max_distance, double smoothing, LayerMRI* mask, double fill_val, int max_foreground_dist)
-{
-  m_mri = mri;
-  m_seg = seg;
-  m_seeds = seeds;
-  m_dSmoothing = smoothing;
-  m_mask = mask;
+void GeoSWorker::Compute(LayerMRI *mri, LayerMRI *seg, LayerMRI *seeds,
+                         int max_distance, double smoothing, LayerMRI *mask,
+                         double fill_val, int max_foreground_dist) {
+  m_mri                    = mri;
+  m_seg                    = seg;
+  m_seeds                  = seeds;
+  m_dSmoothing             = smoothing;
+  m_mask                   = mask;
   m_nMaxForegroundDistance = max_foreground_dist;
   if (max_distance > 0)
     m_nMaxDistance = max_distance;
@@ -242,11 +243,11 @@ void GeoSWorker::DoCompute() {
     }
   }
 
-  unsigned char* fg_mask_ptr = NULL;
+  unsigned char *               fg_mask_ptr = NULL;
   vtkSmartPointer<vtkImageData> fg_mask_image;
-  if (m_nMaxForegroundDistance > 0)
-  {
-    vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+  if (m_nMaxForegroundDistance > 0) {
+    vtkSmartPointer<vtkImageThreshold> threshold =
+        vtkSmartPointer<vtkImageThreshold>::New();
     threshold->ThresholdBetween(1, 1);
     threshold->SetInValue(1);
     threshold->SetOutValue(0);
@@ -257,33 +258,36 @@ void GeoSWorker::DoCompute() {
 #else
     threshold->SetInput(seeds);
 #endif
-    vtkSmartPointer<vtkImageDilateErode3D> dilate = vtkSmartPointer<vtkImageDilateErode3D>::New();
+    vtkSmartPointer<vtkImageDilateErode3D> dilate =
+        vtkSmartPointer<vtkImageDilateErode3D>::New();
     dilate->SetInputConnection(threshold->GetOutputPort());
-    dilate->SetKernelSize(m_nMaxForegroundDistance*2, m_nMaxForegroundDistance*2, m_nMaxForegroundDistance*2);
+    dilate->SetKernelSize(m_nMaxForegroundDistance * 2,
+                          m_nMaxForegroundDistance * 2,
+                          m_nMaxForegroundDistance * 2);
     dilate->SetDilateValue(1);
     dilate->SetErodeValue(0);
     dilate->Update();
     fg_mask_image = dilate->GetOutput();
-    fg_mask_ptr = (unsigned char*)fg_mask_image->GetScalarPointer();
+    fg_mask_ptr   = (unsigned char *)fg_mask_image->GetScalarPointer();
   }
 
-  double scale[3] = {1,1,1};
-  bool bSuccess = m_geos->ComputeWithBinning(dim_new, scale, (double*)mri->GetScalarPointer(), mri_range, seed_ptr, label_list, seeds_out);
-  if (bSuccess)
-  {
-    void* p = m_seg->GetImageData()->GetScalarPointer();
-    int nDataType = m_seg->GetImageData()->GetScalarType();
+  double scale[3] = {1, 1, 1};
+  bool   bSuccess = m_geos->ComputeWithBinning(
+      dim_new, scale, (double *)mri->GetScalarPointer(), mri_range, seed_ptr,
+      label_list, seeds_out);
+  if (bSuccess) {
+    void * p         = m_seg->GetImageData()->GetScalarPointer();
+    int    nDataType = m_seg->GetImageData()->GetScalarType();
     double fillValue = m_seg->GetFillValue();
-    for (size_t n = 0; n < vol_size; n++)
-    {
-      if (seeds_out[n] > 0)
-      {
-        size_t i = (n%dim_new[0]), j = ((n/dim_new[0])%dim_new[1]), k = n/(dim_new[0]*dim_new[1]);
-        i = (i+bound[0]) + (j+bound[2])*dim[0] + (k+bound[4])*dim[0]*dim[1];
-        if ((!mask_ptr || mask_ptr[i] == 0) && (!fg_mask_ptr || fg_mask_ptr[n] > 0))
-        {
-          switch (nDataType)
-          {
+    for (size_t n = 0; n < vol_size; n++) {
+      if (seeds_out[n] > 0) {
+        size_t i = (n % dim_new[0]), j = ((n / dim_new[0]) % dim_new[1]),
+               k = n / (dim_new[0] * dim_new[1]);
+        i        = (i + bound[0]) + (j + bound[2]) * dim[0] +
+            (k + bound[4]) * dim[0] * dim[1];
+        if ((!mask_ptr || mask_ptr[i] == 0) &&
+            (!fg_mask_ptr || fg_mask_ptr[n] > 0)) {
+          switch (nDataType) {
           case VTK_INT:
             ((int *)p)[i] = (int)fillValue;
             break;

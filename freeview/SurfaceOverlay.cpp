@@ -29,32 +29,19 @@
 #include "MyUtils.h"
 #include "ProgressCallback.h"
 #include "SurfaceOverlayProperty.h"
+#include "utils.h"
 #include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include <QDateTime>
-#include "utils.h"
 
-SurfaceOverlay::SurfaceOverlay ( LayerSurface* surf ) :
-  QObject(),
-  m_fData( NULL ),
-  m_fDataRaw( NULL ),
-  m_fDataUnsmoothed(NULL),
-  m_dMaxValue(0),
-  m_dMinValue(0),
-  m_dNonZeroMinValue(0),
-  m_dRawMaxValue(0),
-  m_dRawMinValue(0),
-  m_surface( surf ),
-  m_bCorrelationData( false ),
-  m_mriCorrelation(NULL),
-  m_overlayPaired(NULL),
-  m_nActiveFrame(0),
-  m_nNumOfFrames(1),
-  m_bComputeCorrelation(false),
-  m_volumeCorrelationSource(NULL),
-  m_fCorrelationSourceData(NULL),
-  m_fCorrelationDataBuffer(NULL)
-{
+SurfaceOverlay::SurfaceOverlay(LayerSurface *surf)
+    : QObject(), m_fData(NULL), m_fDataRaw(NULL), m_fDataUnsmoothed(NULL),
+      m_dMaxValue(0), m_dMinValue(0), m_dNonZeroMinValue(0), m_dRawMaxValue(0),
+      m_dRawMinValue(0), m_surface(surf), m_bCorrelationData(false),
+      m_mriCorrelation(NULL), m_overlayPaired(NULL), m_nActiveFrame(0),
+      m_nNumOfFrames(1), m_bComputeCorrelation(false),
+      m_volumeCorrelationSource(NULL), m_fCorrelationSourceData(NULL),
+      m_fCorrelationDataBuffer(NULL) {
   InitializeData();
 
   m_nID = QDateTime::currentMSecsSinceEpoch();
@@ -588,27 +575,22 @@ double SurfaceOverlay::PositionToPercentile(double pos, bool bIgnoreZeros) {
   return 100 * dArea / m_dOutputTotalArea;
 }
 
-void SurfaceOverlay::UpdateMaxHistCount(double* range, int nBins)
-{
-  int* CntData = new int[nBins];
-  memset( CntData, 0, nBins * sizeof( int ) );
-  double binWidth = ( range[1] - range[0] ) / nBins;
-  for ( long i = 0; i < m_nDataSize; i++ )
-  {
-    int n = (int)( ( m_fData[i] - range[0] ) / binWidth );
-    if ( n >= 0 && n < nBins )
-    {
-      CntData[n] ++;
+void SurfaceOverlay::UpdateMaxHistCount(double *range, int nBins) {
+  int *CntData = new int[nBins];
+  memset(CntData, 0, nBins * sizeof(int));
+  double binWidth = (range[1] - range[0]) / nBins;
+  for (long i = 0; i < m_nDataSize; i++) {
+    int n = (int)((m_fData[i] - range[0]) / binWidth);
+    if (n >= 0 && n < nBins) {
+      CntData[n]++;
     }
   }
 
   // find max and second max
   int nMaxCount = 0;
-  for ( int i = 0; i < nBins; i++ )
-  {
-    if ( nMaxCount < CntData[i] )
-    {
-      nMaxCount  = CntData[i];
+  for (int i = 0; i < nBins; i++) {
+    if (nMaxCount < CntData[i]) {
+      nMaxCount = CntData[i];
     }
   }
 

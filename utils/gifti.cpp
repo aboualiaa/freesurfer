@@ -400,8 +400,8 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
       return nullptr;
     }
     // memset(ct->entries,0,sizeof(ct->entries)); // original
-    memset(ct->entries, 0, sizeof(*ct->entries));  // changed by dng
-    strncpy(ct->fname, fname, sizeof(ct->fname)-1);
+    memset(ct->entries, 0, sizeof(*ct->entries)); // changed by dng
+    strncpy(ct->fname, fname, sizeof(ct->fname) - 1);
 
     float *rgba = image->labeltable.rgba;
     if (nullptr == rgba) {
@@ -438,10 +438,9 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
         gifti_free_image(image);
         return nullptr;
       }
-      strncpy(
-          ct->entries[label_index]->name,
-	  image->labeltable.label[label_index],
-	  sizeof(ct->entries[label_index]->name)-1);
+      strncpy(ct->entries[label_index]->name,
+              image->labeltable.label[label_index],
+              sizeof(ct->entries[label_index]->name) - 1);
 
       ct->entries[label_index]->rf = rgba[0];
       ct->entries[label_index]->ri = floor((rgba[0]) * 256);

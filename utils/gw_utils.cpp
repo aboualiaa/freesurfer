@@ -265,8 +265,7 @@ int gw_log_init(char *AProgname, char *AProgversion, char *ALogfilepath,
 }
 
 //------------------------------
-void gw_log_message(const char *msg)
-{
+void gw_log_message(const char *msg) {
   //------------------------------
   FILE *afile;
   afile = fopen(local_Logfilepath, "a");
@@ -290,13 +289,12 @@ static void nowstr(char *buf) {
 //------------------------------
 void gw_log_timestamp(const char *label) {
   //------------------------------
-  char datestr[100];
+  char              datestr[100];
   std::stringstream msg;
 
   nowstr(datestr);
-  msg << "---[" << label << "]--- "
-      << local_Progname << " version " << local_Progversion
-      << " at " << datestr;
+  msg << "---[" << label << "]--- " << local_Progname << " version "
+      << local_Progversion << " at " << datestr;
   gw_log_message(msg.str().c_str());
 }
 

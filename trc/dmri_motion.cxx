@@ -67,7 +67,7 @@ const char *Progname = "dmri_motion";
 float T = 100, D = .001;
 
 vector<std::string> inDwiList, inBvalList;
-std::string inMatFile, outFile, outFrameFile;
+std::string         inMatFile, outFile, outFrameFile;
 
 MRI *dwi;
 
@@ -247,11 +247,11 @@ int main(int argc, char **argv) {
       score = 1;
   }
 
-  if (!inMatFile.empty()) {		// Estimate between-volume motion
-    bool isMat;
-    int nframe = 0;
-    vector<float> xform, tr(3,0), ro(3,0), tr0(3,0), ro0(3,0),
-                  dtr(3,0), dro(3,0), trtot(3,0), rotot(3,0);
+  if (!inMatFile.empty()) { // Estimate between-volume motion
+    bool          isMat;
+    int           nframe = 0;
+    vector<float> xform, tr(3, 0), ro(3, 0), tr0(3, 0), ro0(3, 0), dtr(3, 0),
+        dro(3, 0), trtot(3, 0), rotot(3, 0);
     ifstream infile;
 
     std::cout << "Loading volume-to-baseline affine transformations"

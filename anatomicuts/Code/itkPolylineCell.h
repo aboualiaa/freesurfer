@@ -59,7 +59,9 @@ public:
   enum { CellDimension = 1 };
 
   /** Implement the standard CellInterface. */
-  virtual CellGeometry     GetType() const { return Superclass::POLYGON_CELL; }
+  virtual CommonEnums::CellGeometry GetType() const {
+    return Superclass::POLYGON_CELL;
+  }
   virtual void             MakeCopy(CellAutoPointer &) const;
   virtual unsigned int     GetDimension() const;
   virtual unsigned int     GetNumberOfPoints() const;

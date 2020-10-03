@@ -6829,7 +6829,8 @@ IMAGE *MRItoImageView(MRI *mri, IMAGE *I, int slice, int view, int frame) {
       if (format == PFBYTE)
         *IMAGEpix(I, x, yp) = (hips_byte)(255.0 * (val - fmin) / (fmax - fmin));
       else
-        *IMAGEFpix(I, x, yp) = (hips_byte)(255.0 * (val - fmin) / (fmax - fmin));
+        *IMAGEFpix(I, x, yp) =
+            (hips_byte)(255.0 * (val - fmin) / (fmax - fmin));
     }
   }
 
@@ -15274,8 +15275,8 @@ int MRIorientationStringToDircos(MRI *mri, const char *ostr) {
    it encountered.
    ---------------------------------------------------------------*/
 char *MRIcheckOrientationString(const char *ostr) {
-  int  c, nsag = 0, ncor = 0, nax = 0, err;
-  char errstr[1000], *errstrret = NULL;
+  int         c, nsag = 0, ncor = 0, nax = 0, err;
+  char        errstr[1000], *errstrret = NULL;
   std::string tmpstr;
 
   errstr[0] = '\0';
@@ -15303,9 +15304,9 @@ char *MRIcheckOrientationString(const char *ostr) {
       nax++;
       break;
     default:
-      tmpstr = std::string(errstr) + std::string("Character ") + ostr[c]
-	+ std::string(" in position ") + std::to_string(c+1)
-	+ std::string(" is invalid.\n");
+      tmpstr = std::string(errstr) + std::string("Character ") + ostr[c] +
+               std::string(" in position ") + std::to_string(c + 1) +
+               std::string(" is invalid.\n");
       strncpy(errstr, tmpstr.c_str(), 999);
       err = 1;
       break;
@@ -16594,7 +16595,9 @@ int MRIfindSliceWithMostStructure(MRI *mri_aseg, int slice_direction,
   for (max_vox = max_slice = i = 0; i < MAX_VOX; i++) {
     switch (slice_direction) {
     default:
-      ErrorExit(ERROR_UNSUPPORTED, "MRIfindSliceWithMostStructure: unknown slice direction %d", slice_direction);
+      ErrorExit(ERROR_UNSUPPORTED,
+                "MRIfindSliceWithMostStructure: unknown slice direction %d",
+                slice_direction);
       break; // Kill off a 'fall through' warning
     case MRI_CORONAL:
       vox = cor_vox[i];

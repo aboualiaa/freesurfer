@@ -77,19 +77,19 @@ def computeAB(v, t):
     """
     computeAB(v,t) computes the two sparse symmetric matrices representing
            the Laplace Beltrami Operator for a given triangle mesh using
-           the linear finite element method (assuming a closed mesh or 
+           the linear finite element method (assuming a closed mesh or
            the Neumann boundary condition).
 
     Inputs:   v - vertices : list of lists of 3 floats
               t - triangles: list of lists of 3 int of indices (>=0) into v array
 
-    Outputs:  A - sparse sym. (n x n) positive semi definite numpy matrix 
+    Outputs:  A - sparse sym. (n x n) positive semi definite numpy matrix
               B - sparse sym. (n x n) positive definite numpy matrix (inner product)
 
     Can be used to solve sparse generalized Eigenvalue problem: A x = lambda B x
     or to solve Poisson equation: A x = B f (where f is function on mesh vertices)
     or to solve Laplace equation: A x = 0
-    or to model the operator's action on a vector x:   y = B\(Ax) 
+    or to model the operator's action on a vector x:   y = B\(Ax)
     """
     v = np.array(v)
     t = np.array(t)
@@ -171,9 +171,9 @@ def sphericalProject(v, t):
     spherical(v,t) computes the first three non-constant eigenfunctions
            and then projects the spectral embedding onto a sphere. This works
            when the first functions have a single closed zero level set,
-           splitting the mesh into two domains each. Depending on the original 
-           shape triangles could get inverted. We also flip the functions 
-           according to the axes that they are aligned with for the special 
+           splitting the mesh into two domains each. Depending on the original
+           shape triangles could get inverted. We also flip the functions
+           according to the axes that they are aligned with for the special
            case of brain surfaces in FreeSurfer coordiates.
 
     Inputs:   v - vertices : list of lists of 3 floats
@@ -241,7 +241,7 @@ def sphericalProject(v, t):
 
 
 def spherically_project_surface(insurf, outsurf):
-    """ (string) -> None
+    """(string) -> None
     takes path to insurf, spherically projects it, outputs it to outsurf
     """
     surf = fs.read_geometry(insurf, read_metadata=True)

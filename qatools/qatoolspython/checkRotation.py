@@ -11,7 +11,7 @@ def checkRotation(subjects_dir, subject):
     A function to determine the rotation angles of the Talairach transform.
 
     This function determines the rotation angles of the Talairach transform.
-    It relies on the 'transforms3d' package by Matthew Brett 
+    It relies on the 'transforms3d' package by Matthew Brett
     (https://matthew-brett.github.io/transforms3d).
 
     Required arguments:
@@ -19,12 +19,12 @@ def checkRotation(subjects_dir, subject):
         - subject : subject ID
 
     Returns:
-        - rot_tal_x, rot_tal_y, rot_tal_z 
+        - rot_tal_x, rot_tal_y, rot_tal_z
 
-    Note: 
+    Note:
         - unit of rotations is radians
 
-    Requires valid mri/transforms/talairach.lta file and the 'transforms3d' 
+    Requires valid mri/transforms/talairach.lta file and the 'transforms3d'
     python packge. If not found, NaNs will be returned.
 
     """

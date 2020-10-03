@@ -10,10 +10,10 @@ def checkContrast(subjects_dir, subject):
     """
     A function to compute the WM/GM contrast SNR.
 
-    This function computes the WM/GM contrast SNR based on the output of the 
-    pctsurfcon function. 
+    This function computes the WM/GM contrast SNR based on the output of the
+    pctsurfcon function.
 
-    Required arguments: 
+    Required arguments:
         - Subjects directory
         - Subject
 
@@ -21,7 +21,7 @@ def checkContrast(subjects_dir, subject):
         - con_lh_snr
         - con_rh_snr
 
-    Requires surf/[lr]h.w-g.pct.mgh and label/[lr]h.cortex.label. If not found, 
+    Requires surf/[lr]h.w-g.pct.mgh and label/[lr]h.cortex.label. If not found,
     NaNs will be returned.
 
     """
