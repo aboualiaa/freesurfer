@@ -255,7 +255,7 @@ if(NOT CMAKE_CXX_EXTENSIONS)
   set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
 
-project(freesurfer 
+project(freesurfer
   DESCRIPTION "An open source software suite for processing and analyzing (human) brain MRI images."
   LANGUAGES C CXX Fortran
 )
@@ -477,6 +477,7 @@ find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework files
 # -------- itk --------
 find_package(ITK HINTS ${ITK_DIR})
 mark_as_advanced(ITK_DIR)
+list(REMOVE_ITEM ITK_INCLUDE_DIRS "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include")
 
 # -------- ann --------
 # ANN is only used by mris_resample
@@ -716,7 +717,7 @@ if(NOT NO_CXX_WARN)
   endif()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra ${WARN_AS_ERROR_FLAG} -Wno-sign-compare -Wno-unused-result -Wno-unused-parameter")
 else ()
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-deprecated-declarations -fpermissive") 
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-deprecated-declarations -fpermissive")
 endif()
 
 # clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable

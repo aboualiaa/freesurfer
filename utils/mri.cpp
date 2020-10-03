@@ -6827,9 +6827,9 @@ IMAGE *MRItoImageView(MRI *mri, IMAGE *I, int slice, int view, int frame) {
       MRIsampleVolumeFrame(mri, xm, ym, zm, frame, &val);
       yp = h - (y + 1); /* hips coordinate system is inverted */
       if (format == PFBYTE)
-        *IMAGEpix(I, x, yp) = (byte)(255.0 * (val - fmin) / (fmax - fmin));
+        *IMAGEpix(I, x, yp) = (hips_byte)(255.0 * (val - fmin) / (fmax - fmin));
       else
-        *IMAGEFpix(I, x, yp) = (byte)(255.0 * (val - fmin) / (fmax - fmin));
+        *IMAGEFpix(I, x, yp) = (hips_byte)(255.0 * (val - fmin) / (fmax - fmin));
     }
   }
 
@@ -15304,7 +15304,7 @@ char *MRIcheckOrientationString(const char *ostr) {
       break;
     default:
       tmpstr = std::string(errstr) + std::string("Character ") + ostr[c]
-	+ std::string(" in position ") + std::to_string(c+1) 
+	+ std::string(" in position ") + std::to_string(c+1)
 	+ std::string(" is invalid.\n");
       strncpy(errstr, tmpstr.c_str(), 999);
       err = 1;
@@ -17781,8 +17781,8 @@ VOXLIST *MRIcomputeLaplaceStreamline(MRI *mri_laplace, int max_steps, float x0,
   \fn int MRIclipBrightWM(MRI *mri_T1, const MRI *mri_wm)
   \brief If a voxels is in the mri_wm mask (wm>=WM_MIN_VAL) but its
   mri_T1 value is > DEFAULT_DESIRED_WHITE_MATTER_VALUE, the the mri_T1
-  value is replaced with DEFAULT_DESIRED_WHITE_MATTER_VALUE=110.  This 
-  function was called MRIsmoothBrightWM(), but it did not smooth so 
+  value is replaced with DEFAULT_DESIRED_WHITE_MATTER_VALUE=110.  This
+  function was called MRIsmoothBrightWM(), but it did not smooth so
   changed the name.
 */
 int MRIclipBrightWM(MRI *mri_T1, const MRI *mri_wm) {

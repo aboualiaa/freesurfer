@@ -1653,7 +1653,7 @@ MATRIX *MatrixCalculateEigenSystemHelper(MATRIX *m, float *evalues,
     return nullptr;
 
   nevalues     = m->rows;
-  eigen_values = (EVALUE *)calloc((UINT)nevalues, sizeof(EIGEN_VALUE));
+  eigen_values = (EVALUE *)calloc((unsigned int)nevalues, sizeof(EIGEN_VALUE));
   if (!m_evectors)
     m_evectors = MatrixAlloc(m->rows, m->cols, MATRIX_REAL);
 
@@ -1829,7 +1829,7 @@ float MatrixSVDEigenValues(MATRIX *m, float *evalues) {
   if (OpenSvdcmp(m_U, v_w, m_V) != NO_ERROR)
     return (Gerror);
 
-  eigen_values = (EVALUE *)calloc((UINT)nevalues, sizeof(EIGEN_VALUE));
+  eigen_values = (EVALUE *)calloc((unsigned int)nevalues, sizeof(EIGEN_VALUE));
   for (i = 0; i < nevalues; i++) {
     eigen_values[i].eno    = i;
     eigen_values[i].evalue = RVECTOR_ELT(v_w, i + 1);

@@ -3401,7 +3401,7 @@ static MRI *bvolumeRead(const char *fname_passed, int read_volume, int type)
 
   /* Go through each slice */
   for (slice = 0; slice < mri->depth; slice++) {
-    /* Open the file for this slice */ 
+    /* Open the file for this slice */
     std::stringstream tmp;
     tmp << directory << '/' << stem << '_'
 	<< std::setw(3) << std::setfill('0') << slice
@@ -11825,3 +11825,22 @@ static int niiPrintHdr(FILE *fp, struct nifti_1_header *hdr) {
   // fprintf(fp,"          %d \n",hdr->);
   return (0);
 }
+
+// MARK: - fs namespace
+namespace fs::mri::io {
+auto getVolumeName(std::string const string) -> std::string const {
+
+  auto name_only = string;
+  if (auto atSign = name_only.find('@'); atSign != std::string::npos) {
+    name_only = name_only.substr(atSign);
+  }
+
+  if (MRIIO_Strip_Pound == 1) {
+    if (auto poundSign = name_only.find('#'); poundSign != std::string::npos) {
+      name_only = name_only.substr(poundSign);
+    }
+  }
+
+  return name_only;
+}
+} // namespace fs::mri::io
