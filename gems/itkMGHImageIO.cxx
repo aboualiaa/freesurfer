@@ -105,9 +105,9 @@ MGHImageIO::MGHImageIO() {
   m_Dimensions[2]          = uzero;
 
   if (ByteSwapper<int>::SystemIsBigEndian())
-    m_ByteOrder = BigEndian;
+    m_ByteOrder = CommonEnums::IOByteOrder::BigEndian;
   else
-    m_ByteOrder = LittleEndian;
+    m_ByteOrder = CommonEnums::IOByteOrder::LittleEndian;
 }
 
 MGHImageIO::~MGHImageIO() {}

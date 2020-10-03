@@ -22,6 +22,7 @@
 
 #include <iomanip>
 #include <sstream>
+#include <random>
 #include <algorithm>
 
 using namespace std;
@@ -2061,6 +2062,10 @@ bool Coffin::RunMcmcSingle() {
     mSpline.WriteVolume(fname.c_str(), true);
   }
 
+
+  std::random_device rd;
+  std::mt19937 g(rd());
+
   cout << "Running MCMC burn-in jumps" << endl;
   mLog << "Running MCMC burn-in jumps" << endl;
   iprop = 1;
@@ -2069,7 +2074,7 @@ bool Coffin::RunMcmcSingle() {
     for (int k = 0; k < mNumControl; k++) {
       cptorder[k] = k;
     }
-    random_shuffle(cptorder.begin(), cptorder.end());
+    std::shuffle(cptorder.begin(), cptorder.end(), g);
 
     fill(mRejectControl.begin(), mRejectControl.end(), false);
 
@@ -2125,7 +2130,7 @@ bool Coffin::RunMcmcSingle() {
     // Perturb control points in random order
     for (int k = 0; k < mNumControl; k++)
       cptorder[k] = k;
-    random_shuffle(cptorder.begin(), cptorder.end());
+    std::shuffle(cptorder.begin(), cptorder.end(), g);
 
     fill(mRejectControl.begin(), mRejectControl.end(), false);
 
