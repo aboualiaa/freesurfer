@@ -25,7 +25,7 @@ public:
     typedef typename ImageType::PixelType PixelType;
     mxClassID                             mxclass = mxT<PixelType>();
     if (mxGetClassID(matlabObject) != mxclass) {
-      return nullptr;
+      return 0;
     }
 
     // Determine the size of the image to be created
@@ -33,7 +33,7 @@ public:
     SizeType                             imageSize;
     for (int i = 0; i < 3; i++) {
       imageSize[i] = mxGetDimensions(matlabObject)[i];
-      // std::cout << "imageSize[ i ]: " << imageSize[ i ] << std::endl;
+      //std::cout << "imageSize[ i ]: " << imageSize[ i ] << std::endl;
     }
 
     // Construct an ITK image
@@ -42,7 +42,7 @@ public:
     image->Allocate();
 
     // Loop over all voxels and copy contents
-    auto *data = static_cast<PixelType *>(mxGetData(matlabObject));
+    PixelType *data = static_cast<PixelType *>(mxGetData(matlabObject));
     itk::ImageRegionIterator<ImageType> it(image, image->GetBufferedRegion());
     for (; !it.IsAtEnd(); ++it, ++data) {
       it.Value() = *data;
@@ -56,9 +56,9 @@ public:
     // Check if we can handle this object
     // if ( typeid( *itkObject ) != typeid( ImageType ) )
     if (strcmp(typeid(*itkObject).name(),
-               typeid(ImageType).name()) != 0) // Eugenio: MAC compatibility
+               typeid(ImageType).name())) // Eugenio: MAC compatibility
     {
-      return nullptr;
+      return 0;
     }
 
     typedef typename ImageType::PixelType PixelType;
@@ -74,9 +74,9 @@ public:
     }
 
     // Create the correct Matlab matrix type
-    mxClassID mxclass      = mxT<PixelType>();
-    mxArray * matlabObject = mxCreateNumericArray(3, dims, mxclass, mxREAL);
-    auto *    data         = static_cast<PixelType *>(mxGetData(matlabObject));
+    mxClassID  mxclass      = mxT<PixelType>();
+    mxArray *  matlabObject = mxCreateNumericArray(3, dims, mxclass, mxREAL);
+    PixelType *data         = static_cast<PixelType *>(mxGetData(matlabObject));
 
     // Loop over all voxels and copy contents
     itk::ImageRegionConstIterator<ImageType> it(image,

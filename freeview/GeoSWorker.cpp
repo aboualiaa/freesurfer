@@ -10,8 +10,10 @@
 #include "vtkImageExtractComponents.h"
 #include "vtkImageGaussianSmooth.h"
 #include "vtkImageThreshold.h"
+#include "vtkPointData.h"
 #include <QElapsedTimer>
 #include <QFile>
+#include <vtkImageDilateErode3D.h>
 
 GeoSWorker::GeoSWorker(QObject *parent) : QObject(parent) {
   m_geos = new GeodesicMatting;

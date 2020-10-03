@@ -14,8 +14,8 @@ namespace kvl {
 Histogrammer ::Histogrammer() {
 
   m_MinLogLikelihood = 0;
-  m_Image            = nullptr;
-  m_BinnedImage      = nullptr;
+  m_Image            = 0;
+  m_BinnedImage      = 0;
   m_NumberOfBins     = 0;
 }
 

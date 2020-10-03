@@ -60,8 +60,7 @@ int main(int argc, char *argv[]) {
   filter->SetInput(mesh);
   filter->UpdateLargestPossibleRegion();
 
-  //  std::cout << " region before write " <<
-  //  filter->GetOutput()->GetLargestPossibleRegion() << std::endl;
+  //  std::cout << " region before write " << filter->GetOutput()->GetLargestPossibleRegion() << std::endl;
   WriterType::Pointer writer = WriterType::New();
   writer->SetFileName((argv[3]));
   writer->SetInput(filter->GetOutput());

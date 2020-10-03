@@ -1,6 +1,4 @@
 #include <iostream>
-#include <set>
-#include <string>
 
 #include "itkImage.h"
 #include "itkMesh.h"
@@ -10,6 +8,7 @@
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 
+#include "GetPot.h"
 #include "HierarchicalClusteringPruner.h"
 #include "PolylineMeshToVTKPolyDataFilter.h"
 #include "TrkVTKPolyDataFilter.txx"
@@ -17,22 +16,21 @@
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "vtkSplineFilter.h"
-
-#include "GetPot.h"
-
-using PointDataType                        = std::vector<int>;
-using PixelType                            = float;
-const unsigned int PointDimension          = 3;
-const unsigned int MaxTopologicalDimension = 3;
-using CoordinateType                       = double;
-using InterpolationWeightType              = double;
-using MeshType          = itk::Mesh<PixelType, PointDimension>;
-using CellType          = MeshType::CellType;
-using CellAutoPointer   = CellType::CellAutoPointer;
-using VTKConverterType  = PolylineMeshToVTKPolyDataFilter<MeshType>;
-using MeshConverterType = VTKPolyDataToPolylineMeshFilter<MeshType>;
-using ImageType         = itk::Image<double, 3>;
-using IndexType         = ImageType::IndexType;
+#include <set>
+#include <string>
+typedef std::vector<int>                          PointDataType;
+typedef float                                     PixelType;
+const unsigned int                                PointDimension          = 3;
+const unsigned int                                MaxTopologicalDimension = 3;
+typedef double                                    CoordinateType;
+typedef double                                    InterpolationWeightType;
+typedef itk::Mesh<PixelType, PointDimension>      MeshType;
+typedef MeshType::CellType                        CellType;
+typedef CellType::CellAutoPointer                 CellAutoPointer;
+typedef PolylineMeshToVTKPolyDataFilter<MeshType> VTKConverterType;
+typedef VTKPolyDataToPolylineMeshFilter<MeshType> MeshConverterType;
+typedef itk::Image<double, 3>                     ImageType;
+typedef ImageType::IndexType                      IndexType;
 
 std::vector<MeshType::Pointer>
 FixSampleClusters(std::vector<vtkSmartPointer<vtkPolyData>> polydatas) {
@@ -82,9 +80,9 @@ int main(int narg, char *arg[]) {
   int                             numMeasures = cl.follow(0, "-m");
   for (int i = 0; i < numMeasures; i++) {
     measuresNames.push_back(std::string(cl.next("")));
-    const char *imFile               = cl.next("");
-    using ImageReaderType            = itk::ImageFileReader<ImageType>;
-    ImageReaderType::Pointer readerS = ImageReaderType::New();
+    const char *                            imFile = cl.next("");
+    typedef itk::ImageFileReader<ImageType> ImageReaderType;
+    ImageReaderType::Pointer                readerS = ImageReaderType::New();
     readerS->SetFileName(imFile);
     readerS->Update();
     ImageType::Pointer image = readerS->GetOutput();
@@ -158,11 +156,10 @@ int main(int narg, char *arg[]) {
         double                                dist     = 0.0;
         double                                dist_inv = 0.0;
         int                                   j        = 0;
-        // std::cout << " num points " << cells.Value()->GetNumberOfPoints() <<
-        // std::endl;
+        //std::cout << " num points " << cells.Value()->GetNumberOfPoints() << std::endl;
         for (pointIdIt = cells.Value()->PointIdsBegin();
              pointIdIt != cells.Value()->PointIdsEnd(); pointIdIt++, j++) {
-          // std::cout<< j<< std::endl;
+          //std::cout<< j<< std::endl;
           MeshType::PointType pt = 0;
           mesh->GetPoint(*pointIdIt, &pt);
           dist += avgPoints[j].EuclideanDistanceTo(pt);
@@ -193,7 +190,7 @@ int main(int narg, char *arg[]) {
         if (measures[m]->TransformPhysicalPointToIndex(avgPoints[i], index)) {
           float val = measures[m]->GetPixel(index);
           meanFA += val;
-          // std::cout <<  val << std::endl;
+          //std::cout <<  val << std::endl;
           FAs.push_back(val);
         }
       }

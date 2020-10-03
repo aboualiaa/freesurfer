@@ -8,10 +8,10 @@ namespace kvl {
 class AtlasMeshSmoother : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshSmoother;
-  using Superclass   = itk::Object;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshSmoother             Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -58,8 +58,8 @@ protected:
   void PrintSelf(std::ostream &os, itk::Indent indent) const;
 
 private:
-  AtlasMeshSmoother(const Self &); // purposely not implemented
-  void operator=(const Self &);    // purposely not implemented
+  AtlasMeshSmoother(const Self &); //purposely not implemented
+  void operator=(const Self &);    //purposely not implemented
 
   // Data members
   AtlasMeshCollection::Pointer m_MeshCollection;

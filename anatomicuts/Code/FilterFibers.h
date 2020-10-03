@@ -2,6 +2,7 @@
 #define _FilterFibers_h_
 
 #include "itkMeshToMeshFilter.h"
+using namespace itk;
 
 template <class TInputMesh, class TOutputMesh>
 class FilterFibers : public MeshToMeshFilter<TInputMesh, TOutputMesh> {

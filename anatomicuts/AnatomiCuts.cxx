@@ -1,8 +1,10 @@
 #include "GetPot.h"
+#include "itkConstNeighborhoodIterator.h"
 #include "itkDefaultStaticMeshTraits.h"
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkMesh.h"
+#include "itkMinimumMaximumImageCalculator.h"
 #include "itkPolylineCell.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
@@ -10,13 +12,20 @@
 #include <iostream>
 #include <map>
 #include <queue>
+#include <sparse/spMatrix.h>
 #include <string>
+#include <type_traits>
+#include <typeinfo>
+#include <vnl/vnl_matrix.h>
+#include <vnl/vnl_vector.h>
+#include <vnl/vnl_vector_ref.h>
 #define PI 3.14159265
 #include "EuclideanMembershipFunction.h"
 #include "HausdorffMembershipFunction.h"
 #include "LabelPerPointMembershipFunction.h"
 #include "LabelPerPointVariableLengthVector.h"
 #include "LabelsEntropyAndIntersectionMembershipFunction.h"
+#include "LabelsHistogramMembershipFunction.h"
 #include "LabelsPointToPointMembershipFunction.h"
 #include "NormalizedCutsFilter.h"
 #include "PolylineMeshToVTKPolyDataFilter.h"
@@ -27,7 +36,7 @@
 #include "itkRigid3DTransform.h"
 #include "vtkDirectory.h"
 #include "vtkSplineFilter.h"
-#include <ctime>
+#include <time.h>
 
 typedef struct {
   unsigned char r;
@@ -35,16 +44,16 @@ typedef struct {
   unsigned char b;
 } color_triplet2;
 
-using Node        = std::pair<int, int>;
-using Adjacencies = std::vector<Node>;
-using Graph       = std::vector<Node>;
+typedef std::pair<int, int> Node;
+typedef std::vector<Node>   Adjacencies;
+typedef std::vector<Node>   Graph;
 
 int main(int narg, char *arg[]) {
   enum { Dimension = 3 };
-  using PixelType = int;
-  using ImageType = itk::Image<PixelType, Dimension>;
-  using IndexType = ImageType::IndexType;
-  // typedef itk::MinimumMaximumImageCalculator<ImageType> MinMaxCalculatorType;
+  typedef int                              PixelType;
+  typedef itk::Image<PixelType, Dimension> ImageType;
+  typedef ImageType::IndexType             IndexType;
+  // typedef itk::MinimumMaximumImageCalculator<ImageType>   MinMaxCalculatorType;
 
   GetPot cl(narg, const_cast<char **>(arg));
   if (cl.size() == 1 || cl.search(2, "--help", "-h")) {
@@ -72,20 +81,20 @@ int main(int narg, char *arg[]) {
   const unsigned int PointDimension = 3;
   {
 
-    using PointDataType                        = std::vector<int>;
-    const unsigned int MaxTopologicalDimension = 3;
-    using CoordinateType                       = double;
-    using InterpolationWeightType              = double;
-    using MeshTraits =
-        itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
-                                     MaxTopologicalDimension, CoordinateType,
-                                     InterpolationWeightType, PointDataType>;
-    using MeshType = itk::Mesh<PixelType, PointDimension, MeshTraits>;
+    typedef std::vector<int> PointDataType;
+    const unsigned int       MaxTopologicalDimension = 3;
+    typedef double           CoordinateType;
+    typedef double           InterpolationWeightType;
+    typedef itk::DefaultStaticMeshTraits<
+        PointDataType, PointDimension, MaxTopologicalDimension, CoordinateType,
+        InterpolationWeightType, PointDataType>
+                                                             MeshTraits;
+    typedef itk::Mesh<PixelType, PointDimension, MeshTraits> MeshType;
 
-    std::vector<IndexType> direcciones;
-    using TransformType = itk::Rigid3DTransform<double>;
-    std::vector<TransformType::Pointer> rotaciones;
-    // bool normal=false;
+    std::vector<IndexType>                direcciones;
+    typedef itk::Rigid3DTransform<double> TransformType;
+    std::vector<TransformType::Pointer>   rotaciones;
+    //bool normal=false;
     std::cout << "neighbors" << neighbors << std::endl;
     int possibles[3] = {0, 1, -1};
     for (int i = 0; i < 3; i++) {
@@ -118,17 +127,17 @@ int main(int narg, char *arg[]) {
 
     MeshType::Pointer mesh = MeshType::New();
     mesh->SetCellsAllocationMethod(
-        MeshType::CellsAllocatedDynamicallyCellByCell);
-    // Copy meshes
+        itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
+    //Copy meshes
     {
-      using ImageReaderType           = itk::ImageFileReader<ImageType>;
-      ImageReaderType::Pointer reader = ImageReaderType::New();
+      typedef itk::ImageFileReader<ImageType> ImageReaderType;
+      ImageReaderType::Pointer                reader = ImageReaderType::New();
       reader->SetFileName(segFile);
       reader->Update();
       segmentation = reader->GetOutput();
 
-      // write a filter
-      using DuplicatorType               = itk::ImageDuplicator<ImageType>;
+      //write a filter
+      typedef itk::ImageDuplicator<ImageType> DuplicatorType;
       DuplicatorType::Pointer duplicator = DuplicatorType::New();
       duplicator->SetInputImage(segmentation);
       duplicator->Update();
@@ -139,8 +148,7 @@ int main(int narg, char *arg[]) {
       int leftWrongPixels = 1;
       int iteration       = 0;
       while (leftWrongPixels > 0 && iteration < 10) {
-        // std::cout << " iteration " << iteration <<" leftWrongPixels "<<
-        // leftWrongPixels << std::endl;
+        //std::cout << " iteration " << iteration <<" leftWrongPixels "<<  leftWrongPixels << std::endl;
         leftWrongPixels = 0;
         itk::NeighborhoodIterator<ImageType> iter(
             radius, segmentation, segmentation->GetLargestPossibleRegion());
@@ -172,11 +180,11 @@ int main(int narg, char *arg[]) {
 
         iteration++;
       }
-      // end write a filter
+      //end write a filter
 
-      using MeshBasicType = itk::Mesh<PixelType, PointDimension>;
+      typedef itk::Mesh<PixelType, PointDimension> MeshBasicType;
 
-      using MeshConverterType = VTKPolyDataToPolylineMeshFilter<MeshBasicType>;
+      typedef VTKPolyDataToPolylineMeshFilter<MeshBasicType> MeshConverterType;
       MeshConverterType::Pointer converter = MeshConverterType::New();
 
       if (std::string(fiberFile).find(std::string(".trk")) !=
@@ -186,7 +194,7 @@ int main(int narg, char *arg[]) {
         itk::SmartPointer<TrkVTKPolyDataFilter<ImageType>> trkReader =
             TrkVTKPolyDataFilter<ImageType>::New();
         trkReader->SetTrkFileName(fiberFile);
-        // trkReader->SetReferenceImage(segmentation);
+        //trkReader->SetReferenceImage(segmentation);
         trkReader->TrkToVTK();
 
         vtkSmartPointer<vtkSplineFilter> spline =
@@ -200,7 +208,7 @@ int main(int narg, char *arg[]) {
         spline->Update();
         converter->SetVTKPolyData(spline->GetOutput());
 
-        // converter->SetVTKPolyData ( trkReader->GetOutputPolyData() );
+        //converter->SetVTKPolyData ( trkReader->GetOutputPolyData() );
       } else {
         vtkSmartPointer<vtkPolyDataReader> vtkReader = vtkPolyDataReader::New();
         std::cout << " reading file: " << fiberFile << std::endl;
@@ -217,35 +225,33 @@ int main(int narg, char *arg[]) {
         spline->SetNumberOfSubdivisions(numberOfPoints);
         spline->Update();
         converter->SetVTKPolyData(spline->GetOutput());
-        // converter->SetVTKPolyData ( vtkReader->GetOutput() );
+        //converter->SetVTKPolyData ( vtkReader->GetOutput() );
       }
 
-      // const unsigned int PointDimension = 3;
+      //const unsigned int PointDimension = 3;
 
       converter->Update();
 
       MeshBasicType::Pointer basicMesh = converter->GetOutput();
-      // std::cout << "number of fibers" <<  basicMesh->GetNumberOfCells()<<
-      // std::endl;
-      /*typedef itk::FixedVTKSamplingFilter<MeshBasicType,MeshBasicType>
-      SamplingFilterType;
+      //std::cout << "number of fibers" <<  basicMesh->GetNumberOfCells()<< std::endl;
+      /*typedef itk::FixedVTKSamplingFilter<MeshBasicType,MeshBasicType> SamplingFilterType;
 
-      SamplingFilterType::Pointer samplingFilter =  SamplingFilterType::New();
-      samplingFilter->SetInput(basicMesh);
-      //std::cout <<  "sampling " << std::endl;
-      samplingFilter->SetSampling(numberOfPoints);
-      basicMesh->GetCells()->Begin();
-      samplingFilter->Update();
-      basicMesh = samplingFilter->GetOutput();
-      */
-      // std::cout << " finish sampling "<< std::endl;
+			SamplingFilterType::Pointer samplingFilter =  SamplingFilterType::New();
+			samplingFilter->SetInput(basicMesh);
+			//std::cout <<  "sampling " << std::endl;
+			samplingFilter->SetSampling(numberOfPoints);
+			basicMesh->GetCells()->Begin();
+			samplingFilter->Update();
+			basicMesh = samplingFilter->GetOutput();
+			*/
+      //std::cout << " finish sampling "<< std::endl;
 
-      using CellIterator = MeshBasicType::CellsContainer::ConstIterator;
-      int globalIndex    = 0;
-      int indexCell      = 0;
+      typedef MeshBasicType::CellsContainer::ConstIterator CellIterator;
+      int                                                  globalIndex = 0;
+      int                                                  indexCell   = 0;
       // typedef MeshType::PointIdentifier PointIdentifier;
-      using PointDataContainerType = MeshType::PointDataContainer;
-      // int outsidePoints = 0;
+      typedef MeshType::PointDataContainer PointDataContainerType;
+      //int outsidePoints = 0;
       int numCellsPase = 0;
 
       for (CellIterator cellIt = basicMesh->GetCells()->Begin();
@@ -348,37 +354,36 @@ int main(int narg, char *arg[]) {
           mesh->SetPoint(globalIndex, ptyz);
           line->SetPointId(withinIndex, globalIndex);
         } else {
-          // to force dist(x,y)=0 <-> x=y
+          //to force dist(x,y)=0 <-> x=y
           mesh->SetPoint(globalIndex, pt);
           line->SetPointId(withinIndex, globalIndex);
           PointDataType *pointData = new PointDataType();
-          // for(int i=0;i<direcciones.size();i++)
+          //for(int i=0;i<direcciones.size();i++)
           //	pointData->push_back(-indexCell-1);
           mesh->SetPointData(globalIndex, *pointData);
         }
         globalIndex++;
-        // end to force dist(x,y)=0 <-> x=y
+        //end to force dist(x,y)=0 <-> x=y
 
         mesh->SetCell(indexCell, line);
         indexCell++;
       }
 
-      // std::cout << " points mesh " << mesh->GetNumberOfPoints()  << "  basic
-      // mesh " << basicMesh->GetNumberOfPoints() <<std::endl; std::cout << "
-      // number of fibers " << mesh->GetNumberOfCells()  << std::endl;
+      //std::cout << " points mesh " << mesh->GetNumberOfPoints()  << "  basic mesh " << basicMesh->GetNumberOfPoints() <<std::endl;
+      //std::cout << " number of fibers " << mesh->GetNumberOfCells()  << std::endl;
     }
-    using MeasurementVectorType =
-        LabelPerPointVariableLengthVector<float, MeshType>;
+    typedef LabelPerPointVariableLengthVector<float, MeshType>
+        MeasurementVectorType;
     int numMem = numberOfFibers;
 
-    using MembershipFunctionBaseType =
-        LabelPerPointMembershipFunction<MeasurementVectorType>;
+    typedef LabelPerPointMembershipFunction<MeasurementVectorType>
+                                                     MembershipFunctionBaseType;
     std::vector<MembershipFunctionBaseType::Pointer> functionList;
 
     for (int i = 0; i < numMem; i++) {
       if (cl.search(1, "-labelsPTPNN") || cl.search(1, "-labelsPTP")) {
-        using MembershipFunctionType =
-            LabelsPointToPointMembershipFunction<MeasurementVectorType>;
+        typedef LabelsPointToPointMembershipFunction<MeasurementVectorType>
+                                        MembershipFunctionType;
         MembershipFunctionType::Pointer function2 =
             MembershipFunctionType::New();
         if (cl.search(1, "-labelsPTP"))
@@ -391,9 +396,9 @@ int main(int narg, char *arg[]) {
                 function2.GetPointer());
         functionList.push_back(function);
       } else if (cl.search(1, "-euclid")) {
-        // std::cout << "-euclid" << std::endl;
-        using MembershipFunctionType =
-            EuclideanMembershipFunction<MeasurementVectorType>;
+        //std::cout << "-euclid" << std::endl;
+        typedef EuclideanMembershipFunction<MeasurementVectorType>
+                                        MembershipFunctionType;
         MembershipFunctionType::Pointer function2 =
             MembershipFunctionType::New();
         function2->WithCosine(false);
@@ -402,8 +407,8 @@ int main(int narg, char *arg[]) {
                 function2.GetPointer());
         functionList.push_back(function);
       } else if (cl.search(1, "-hausdorff")) {
-        using MembershipFunctionType =
-            HausdorffMembershipFunction<MeasurementVectorType>;
+        typedef HausdorffMembershipFunction<MeasurementVectorType>
+                                        MembershipFunctionType;
         MembershipFunctionType::Pointer function2 =
             MembershipFunctionType::New();
         function2->WithCosine(false);
@@ -412,18 +417,17 @@ int main(int narg, char *arg[]) {
                 function2.GetPointer());
         functionList.push_back(function);
         /*}else if(cl.search(1,"-gaussian"))
-        {
-                typedef GaussianKernelMembershipFunction<MeasurementVectorType>
-        MembershipFunctionType; MembershipFunctionType::Pointer function2 =
-        MembershipFunctionType::New(); function2->WithCosine(false);
-                MembershipFunctionBaseType::Pointer function=
-        static_cast<MembershipFunctionBaseType::Pointer>(function2.GetPointer());
-                functionList.push_back(function);
-        */
+			{
+				typedef GaussianKernelMembershipFunction<MeasurementVectorType> MembershipFunctionType;
+				MembershipFunctionType::Pointer function2 = MembershipFunctionType::New();
+				function2->WithCosine(false);
+				MembershipFunctionBaseType::Pointer function= static_cast<MembershipFunctionBaseType::Pointer>(function2.GetPointer());
+				functionList.push_back(function);
+			*/
       } else {
-        using MembershipFunctionType =
-            LabelsEntropyAndIntersectionMembershipFunction<
-                MeasurementVectorType>;
+        typedef LabelsEntropyAndIntersectionMembershipFunction<
+            MeasurementVectorType>
+                                        MembershipFunctionType;
         MembershipFunctionType::Pointer function2 =
             MembershipFunctionType::New();
         function2->SetIntersection(cl.search(1, "-intersection"));
@@ -452,15 +456,15 @@ int main(int narg, char *arg[]) {
         functionList.push_back(function);
       }
     }
-    // std::cout << " NormalizedCuts " << std::endl;
-    // clock_t t = clock();
+    //std::cout << " NormalizedCuts " << std::endl;
+    //clock_t t = clock();
     time_t timer1, timer2;
     double seconds;
 
     time(&timer1); /* get current time; same as: timer = time(NULL)  */
 
-    using NormalizeCutsType =
-        NormalizedCutsFilter<MeshType, MembershipFunctionBaseType>;
+    typedef NormalizedCutsFilter<MeshType, MembershipFunctionBaseType>
+                               NormalizeCutsType;
     NormalizeCutsType::Pointer normalizeCuts = NormalizeCutsType::New();
     normalizeCuts->SetNumberOfClusters(numberOfClusters);
     normalizeCuts->SetMembershipFunctionVector(&functionList);
@@ -472,23 +476,23 @@ int main(int narg, char *arg[]) {
     clusterIdHierarchy = normalizeCuts->GetClusterIdHierarchy();
     time(&timer2); /* get current time; same as: timer = time(NULL)  */
     seconds = difftime(timer1, timer2);
-    // t = clock() - t;
+    //t = clock() - t;
     std::cout << "Execution time: " << seconds / 60.0 << " mins" << std::endl;
   }
-  using MeshBasicType = itk::Mesh<PixelType, PointDimension>;
+  typedef itk::Mesh<PixelType, PointDimension> MeshBasicType;
 
-  using MeshConverterType = VTKPolyDataToPolylineMeshFilter<MeshBasicType>;
+  typedef VTKPolyDataToPolylineMeshFilter<MeshBasicType> MeshConverterType;
   MeshConverterType::Pointer converter = MeshConverterType::New();
   if (std::string(fiberFile).find(std::string(".trk")) != std::string::npos) {
     itk::SmartPointer<TrkVTKPolyDataFilter<ImageType>> trkReader =
         TrkVTKPolyDataFilter<ImageType>::New();
     trkReader->SetTrkFileName(fiberFile);
-    // trkReader->SetReferenceImage(segmentation);
+    //trkReader->SetReferenceImage(segmentation);
     trkReader->TrkToVTK();
     converter->SetVTKPolyData(trkReader->GetOutputPolyData());
   } else {
     vtkSmartPointer<vtkPolyDataReader> vtkReader = vtkPolyDataReader::New();
-    // std::cout <<" reading file: "<<  fiberFile << std::endl;
+    //std::cout <<" reading file: "<<  fiberFile << std::endl;
     vtkReader->SetFileName(fiberFile);
     vtkReader->Update();
     converter->SetVTKPolyData(vtkReader->GetOutput());
@@ -500,9 +504,9 @@ int main(int narg, char *arg[]) {
   std::map<std::string, MeshBasicType::Pointer>         newMeshes;
   std::map<std::string, MeshBasicType::PointIdentifier> pointIndices;
   std::map<std::string, MeshBasicType::CellIdentifier>  cellIndices;
-  // int noClusterFibers=0;
+  //int noClusterFibers=0;
 
-  // typedef itk::PolylineCell<MeshBasicType::CellType> PolylineCellType;
+  // typedef itk::PolylineCell<MeshBasicType::CellType>                      PolylineCellType;
   for (unsigned int i = 0; i < labels.size(); i++) {
     MeshBasicType::CellAutoPointer line;
     line.TakeOwnership(new itk::PolylineCell<MeshBasicType::CellType>);
@@ -515,7 +519,7 @@ int main(int narg, char *arg[]) {
     if (newMeshes.count(labels[i]) == 0) {
       MeshBasicType::Pointer om = MeshBasicType::New();
       om->SetCellsAllocationMethod(
-          MeshBasicType::CellsAllocatedDynamicallyCellByCell);
+          itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
 
       newMeshes[labels[i]]    = om;
       pointIndices[labels[i]] = 0;
@@ -538,12 +542,12 @@ int main(int narg, char *arg[]) {
     newMeshes[labels[i]]->SetCellData(cellIndices[labels[i]], pixelType);
 
     cellIndices[labels[i]]++;
-    // if( labels[i] >=  numberOfClusters)
+    //if( labels[i] >=  numberOfClusters)
     //{
     //	noClusterFibers++;
     //}
   }
-  // std::cout << " Fibers without clusters  " << noClusterFibers <<std::endl;
+  //std::cout << " Fibers without clusters  " << noClusterFibers <<std::endl;
 
   int            i;
   int            red, green, blue;
@@ -575,12 +579,12 @@ int main(int narg, char *arg[]) {
        it != newMeshes.end(); ++it) {
     int index = ((int)47. * ((i % newMeshes.size()) % (150))) % 197 + 5;
     index     = (int)(13 * (i % newMeshes.size())) % 150 + 65;
-    // std::cout << "index " << index << std::endl;
+    //std::cout << "index " << index << std::endl;
     unsigned char color[3] = {table[index].r, table[index].g, table[index].b};
-    // std::cout << color[0] << " " <<color[1] << " "<<color[2] <<std::endl;
+    //std::cout << color[0] << " " <<color[1] << " "<<color[2] <<std::endl;
     MeshBasicType::Pointer mesh = it->second;
     if (mesh->GetNumberOfPoints() > 0) {
-      using VTKConverterType = PolylineMeshToVTKPolyDataFilter<MeshBasicType>;
+      typedef PolylineMeshToVTKPolyDataFilter<MeshBasicType> VTKConverterType;
 
       VTKConverterType::Pointer vtkConverter = VTKConverterType::New();
       vtkConverter->SetColor(color);
@@ -598,12 +602,12 @@ int main(int narg, char *arg[]) {
 #endif
       writerFixed->SetFileTypeToBinary();
       writerFixed->Update();
-      // std::cout << " saving file " << meshName2 << std::endl;
+      //std::cout << " saving file " << meshName2 << std::endl;
 
       itk::SmartPointer<TrkVTKPolyDataFilter<ImageType>> trkReader =
           TrkVTKPolyDataFilter<ImageType>::New();
       trkReader->SetInput(vtkConverter->GetOutputPolyData());
-      // trkReader->SetReferenceImage(segmentation);
+      //trkReader->SetReferenceImage(segmentation);
       trkReader->SetReferenceTrack(fiberFile);
       trkReader->SetColor(color);
       sprintf(meshName2, "%s/%s.trk", outputFolder, it->first.c_str());

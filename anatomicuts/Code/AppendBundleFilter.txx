@@ -12,7 +12,7 @@ typedef struct {
 
 void AppendBundleFilter::Update() {
 
-  // std::cout << "AppendBundleFilter::Update()" << std::endl;
+  //std::cout << "AppendBundleFilter::Update()" << std::endl;
   int           i;
   int           red, green, blue;
   color_triplet table[256] = {{0, 0, 0}}; /* Initialize to all black */
@@ -49,7 +49,7 @@ void AppendBundleFilter::Update() {
   allBundles->Allocate();
 
   int currentLabel = 0;
-  // double val[3];
+  //double val[3];
 
   vtkSmartPointer<vtkIntArray> intArrayRepresentativesWeights =
       vtkIntArray::New();
@@ -58,12 +58,11 @@ void AppendBundleFilter::Update() {
 
     vtkSmartPointer<vtkPolyData> bundle = bundleList[i];
 
-    // vtkSmartPointer<vtkPolyData> *bundle = bundleList[i];
+    //vtkSmartPointer<vtkPolyData> *bundle = bundleList[i];
     vtkCellArray *lines = bundle->GetLines();
     lines->InitTraversal();
 
-    //  int index =((int)(
-    //  100./(bundle->GetNumberOfLines()))*((i%colorNumber)%(150)))%201;
+    //  int index =((int)( 100./(bundle->GetNumberOfLines()))*((i%colorNumber)%(150)))%201;
     int index = ((int)47. * ((i % colorNumber) % (150))) % 197 + 5;
     index     = (int)(13 * (i % colorNumber)) % 150 + 65;
     //  std::cout << "index " << index << std::endl;
@@ -72,9 +71,8 @@ void AppendBundleFilter::Update() {
     vtkIdType pointCount = 0, *pointBuf = 0;
     if (rep) {
       vtkFieldData *fieldData = bundle->GetFieldData();
-      // this is not fine, i knoww 0 will be the representatives index, or
-      // weight of fibers vtkIntArray *arrayCellData = (vtkIntArray*)
-      // fieldData->GetArray("RepresentativeIndex");
+      //this is not fine, i knoww 0 will be the representatives index, or weight of fibers
+      //vtkIntArray *arrayCellData = (vtkIntArray*) fieldData->GetArray("RepresentativeIndex");
       vtkIntArray *arrayCellData = (vtkIntArray *)fieldData->GetArray(0);
 
       if (arrayCellData != NULL) {
@@ -104,24 +102,22 @@ void AppendBundleFilter::Update() {
       }
     } else {
       /*if( bundle->GetFieldData())
-        {
-        std::cout << bundle->GetFieldData() << std::endl ;
-        vtkFieldData *fieldData = bundle->GetFieldData();
-      //this is not fine, i knoww 0 will be the representatives index, or weight
-      of fibers vtkIntArray *arrayCellData = (vtkIntArray*)
-      fieldData->GetArray(0);
+			  {
+			  std::cout << bundle->GetFieldData() << std::endl ;
+			  vtkFieldData *fieldData = bundle->GetFieldData();
+			//this is not fine, i knoww 0 will be the representatives index, or weight of fibers
+			vtkIntArray *arrayCellData = (vtkIntArray*) fieldData->GetArray(0);
 
-      if(arrayCellData != NULL &&  arrayCellData->GetNumberOfTuples() ==
-      bundle->GetNumberOfLines() )
-      {
-      //        std::cout << " adding weights to file " << std::endl;
-      for (int i=0;i<arrayCellData->GetNumberOfTuples();i++)
-      {
-      intArrayRepresentativesWeights->InsertNextValue(arrayCellData->GetValue(i));
-      }
-      }
-      }
-      */
+			if(arrayCellData != NULL &&  arrayCellData->GetNumberOfTuples() ==  bundle->GetNumberOfLines() )
+			{
+			//        std::cout << " adding weights to file " << std::endl;
+			for (int i=0;i<arrayCellData->GetNumberOfTuples();i++)
+			{
+			intArrayRepresentativesWeights->InsertNextValue(arrayCellData->GetValue(i));
+			}
+			}
+			}
+			*/
       while (lines->GetNextCell(pointCount, pointBuf)) {
         for (vtkIdType k = 0; k < pointCount; k++) {
           pointBuf[k] =
@@ -145,16 +141,16 @@ void AppendBundleFilter::Update() {
   //  vtkXMLPolyDataWriter *writer = vtkXMLPolyDataWriter::New();
 
   /*
-     vtkPolyDataWriter* writer = vtkPolyDataWriter::New();
-  //  writer->SetFileTypeToBinary();
-  writer->SetInput (allBundles);
-  writer->SetFileName(output);
-  writer->Update();
+	   vtkPolyDataWriter* writer = vtkPolyDataWriter::New();
+	//  writer->SetFileTypeToBinary();
+	writer->SetInput (allBundles);
+	writer->SetFileName(output);
+	writer->Update();
 
-  allBundles->Delete();
-  allPoints->Delete();
-  allColors->Delete();
-  allLabels->Delete();
-  writer->Delete();
-  */
+	allBundles->Delete();
+	allPoints->Delete();
+	allColors->Delete();
+	allLabels->Delete();
+	writer->Delete();
+	*/
 }

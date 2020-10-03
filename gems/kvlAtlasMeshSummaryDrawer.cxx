@@ -8,8 +8,8 @@ namespace kvl {
 //
 //
 AtlasMeshSummaryDrawer ::AtlasMeshSummaryDrawer() {
-  m_Image                  = nullptr;
-  m_CompressionLookupTable = nullptr;
+  m_Image                  = 0;
+  m_CompressionLookupTable = 0;
 }
 
 //
@@ -65,7 +65,7 @@ bool AtlasMeshSummaryDrawer ::RasterizeTetrahedron(
     const double g = m_CompressionLookupTable->GetColor(classNumber)[1];
     const double b = m_CompressionLookupTable->GetColor(classNumber)[2];
     const double a = m_CompressionLookupTable->GetColor(classNumber)[3];
-    // std::cout << r << " " << g << " " << b << " " << a << std::endl;
+    //std::cout << r << " " << g << " " << b << " " << a << std::endl;
 
     const double weight0 = alphasInVertex0[classNumber];
     colorInVertex0[0] += (a / 255) * r * weight0;
@@ -101,12 +101,11 @@ bool AtlasMeshSummaryDrawer ::RasterizeTetrahedron(
   }
   for (; !it.IsAtEnd(); ++it) {
     for (int colorNumber = 0; colorNumber < 4; colorNumber++) {
-      // std::cout << it.GetExtraLoadingInterpolatedValue( colorNumber ) << " "
-      // << std::flush;
+      //std::cout << it.GetExtraLoadingInterpolatedValue( colorNumber ) << " " << std::flush;
       it.Value()[colorNumber] = static_cast<unsigned char>(
           it.GetExtraLoadingInterpolatedValue(colorNumber) + 0.5);
     }
-    // std::cout << std::endl;
+    //std::cout << std::endl;
   }
 
   return true;

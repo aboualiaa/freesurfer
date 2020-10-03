@@ -184,10 +184,8 @@ public:
   inline virtual MRI *transformLTA(MRI *mri_dst, LTA *lta) const {
     return LTAtransformBSpline(bspline, mri_dst, lta);
   };
-  //  inline virtual MRI * downsample(MRI *mri_dst) const {return
-  //  MRIdownsample2BSpline(bspline,mri_dst);}; inline virtual MRI *
-  //  upsample(MRI *mri_dst) const {return
-  //  MRIupsample2BSpline(bspline,mri_dst);};
+  //  inline virtual MRI * downsample(MRI *mri_dst) const {return MRIdownsample2BSpline(bspline,mri_dst);};
+  //  inline virtual MRI * upsample(MRI *mri_dst) const {return MRIupsample2BSpline(bspline,mri_dst);};
 
 private:
   MRI_BSPLINE *bspline;

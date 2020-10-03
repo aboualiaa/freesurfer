@@ -52,8 +52,8 @@ public:
     m_VertexNeighborhood.clear();
   }
 
-  // Get the atlas mesh collection that was used to calculate the cost the last
-  // time GetValue() was called
+  // Get the atlas mesh collection that was used to calculate the cost the last time GetValue()
+  // was called
   const AtlasMeshCollection *GetCostCalculationMeshCollection() const {
     return m_CostCalculationMeshCollection;
   }
@@ -70,8 +70,8 @@ protected:
 
 private:
   AtlasMeshCollectionFastReferencePositionCost(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   // Data members
   AtlasParameterEstimator::Pointer m_Estimator;

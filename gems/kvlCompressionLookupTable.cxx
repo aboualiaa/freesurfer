@@ -116,8 +116,7 @@ void CompressionLookupTable ::Construct(
 
   } // End loop over all collapsed labels
 
-  // Also loop over all pixels of all images, and create a new entry for every
-  // new intensity encountered
+  // Also loop over all pixels of all images, and create a new entry for every new intensity encountered
   for (std::vector<ImageType::ConstPointer>::const_iterator it = images.begin();
        it != images.end(); ++it) {
 
@@ -153,7 +152,7 @@ void CompressionLookupTable ::Construct(
           (buffer[0] ==
            13)) // '\n' corresponds to 10 or 13, depending on platform
       {
-        // std::cout << "    skipping the line: " << buffer << std::endl;
+        //std::cout << "    skipping the line: " << buffer << std::endl;
         continue;
       }
 
@@ -171,18 +170,14 @@ void CompressionLookupTable ::Construct(
         A = 0;
       }
 
-      // If this label is one that is present in our images, add it with its
-      // labelString and color to our lookup tables (unless it's a virtual,
-      // collapsed label)
+      // If this label is one that is present in our images, add it with its labelString and color to our lookup tables (unless it's a virtual, collapsed label)
       if (m_CompressionLookupTable.find(labelNumber) !=
           m_CompressionLookupTable.end()) {
         if (collapsedLabels.find(labelNumber) == collapsedLabels.end()) {
-          // We can't have "/" in our strings as FLTK interprets this is a
-          // submenu in our pulldown menu...
+          // We can't have "/" in our strings as FLTK interprets this is a submenu in our pulldown menu...
           std::string::size_type loc = labelString.find("/", 0);
           if (loc != std::string::npos) {
-            // std::cout << "Found a / symbol. Replacing it with a - symbol" <<
-            // std::endl;
+            //std::cout << "Found a / symbol. Replacing it with a - symbol" << std::endl;
             labelString.replace(loc, 1, "-");
           }
 

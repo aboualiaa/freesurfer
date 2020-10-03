@@ -1,13 +1,12 @@
 #include "kvlAtlasMeshBuilder.h"
-#include "kvlAtlasMeshCollectionFastReferencePositionCost.h"
-#include "kvlParameterOrderPowellOptimizer.h"
-#include "unistd.h"
 
-#include "itk_5_4_map.h"
+#include "kvlAtlasMeshCollectionFastReferencePositionCost.h"
+#include "kvlAtlasMeshCollectionModelLikelihoodCalculator.h"
+#include "kvlParameterOrderPowellOptimizer.h"
 
 namespace kvl {
 
-// itk::SimpleFastMutexLock  mutex;
+//itk::SimpleFastMutexLock  mutex;
 AtlasMeshBuilderMutexLock mutex;
 
 //
@@ -114,8 +113,8 @@ void AtlasMeshBuilder ::Build(AtlasMeshCollection *explicitStartCollection,
 
   // Now start simplifying the result
   this->InvokeEvent(itk::StartEvent());
-  itk::MultiThreaderBase::Pointer threader = itk::MultiThreaderBase::New();
-  int numberOfThreads                      = threader->GetNumberOfWorkUnits();
+  itk::MultiThreader::Pointer threader        = itk::MultiThreader::New();
+  int                         numberOfThreads = threader->GetNumberOfThreads();
   std::cout << "Using " << numberOfThreads << " threads" << std::endl;
 
   // ICM-like algorithm
@@ -128,11 +127,10 @@ void AtlasMeshBuilder ::Build(AtlasMeshCollection *explicitStartCollection,
 
     std::cout << "Iteration " << m_IterationNumber << std::endl;
 
-    // Make a container with all the edges to analyze. The threads will remove
-    // the first one that's independent of the edges other threads are currently
-    // working on, and analyze that. In order to keep track of what edges are or
-    // are not independent, we keep score, for every node, if how many threads
-    // are currently working on a related edge.
+    // Make a container with all the edges to analyze. The threads will remove the first one that's
+    // independent of the edges other threads are currently working on, and analyze that. In order to
+    // keep track of what edges are or are not independent, we keep score, for every node, if how many
+    // threads are currently working on a related edge.
     std::set<AtlasMesh::CellIdentifier> edges = this->GetRandomizedEdgesAsSet();
     std::map<AtlasMesh::PointIdentifier, int> pointOccupancies;
     for (AtlasMesh::PointsContainer::ConstIterator it =
@@ -152,12 +150,11 @@ void AtlasMeshBuilder ::Build(AtlasMeshCollection *explicitStartCollection,
 
     //
     // std::ostringstream  outFileNameStream;
-    // outFileNameStream << "builderMeshCollection_ThreadedIteration" <<
-    // m_IterationNumber << ".txt"; m_Current->Write(
-    // outFileNameStream.str().c_str() );
+    // outFileNameStream << "builderMeshCollection_ThreadedIteration" << m_IterationNumber << ".txt";
+    // m_Current->Write( outFileNameStream.str().c_str() );
 
     std::cout << "Just finished one iteration" << std::endl;
-    // this->DebugOn();
+    //this->DebugOn();
   } // End ICM iterations
 
   this->InvokeEvent(itk::EndEvent());
@@ -214,16 +211,15 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToCollapseFast(
     const AtlasMeshCollection *miniCollection, AtlasMesh::CellIdentifier edgeId,
     double &miniDataCost, double &miniAlphasCost, double &miniPositionCost,
     std::set<AtlasMesh::CellIdentifier> &disappearingCells) const {
-  // std::cout << "\n\n\n\n\n=================================================="
-  // << std::endl; std::cout << "Trying to collapse edge " << edgeId <<
-  // std::endl;
+  //std::cout << "\n\n\n\n\n==================================================" << std::endl;
+  //std::cout << "Trying to collapse edge " << edgeId << std::endl;
 
   // Get the mesh with the edge collapsed.
   AtlasMesh::CellIdentifier    unifiedVertexId;
   AtlasMeshCollection::Pointer child;
   if (!miniCollection->GetCollapsed(edgeId, child, disappearingCells,
                                     unifiedVertexId)) {
-    return nullptr;
+    return 0;
   }
 
   const AtlasMesh::PointIdentifier unifiedPointId =
@@ -244,8 +240,7 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToCollapseFast(
   // things while taking valuable time
   bool optimizeUnifiedPointReferencePosition = false;
 
-  // Look up the label with the highest alpha in the first point of the
-  // miniCollection
+  // Look up the label with the highest alpha in the first point of the miniCollection
   AtlasMesh::PointDataContainer::ConstIterator pointParamIt =
       miniCollection->GetPointParameters()->Begin();
   int    maximumAlphaLabelNumber = 0;
@@ -313,11 +308,10 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToCollapseFast(
         parameterOrder[2] = 0;
       }
 
-      // std::cout << "parameterOrder: " << parameterOrder << std::endl;
+      //std::cout << "parameterOrder: " << parameterOrder << std::endl;
 
       // Optimize the reference position
-      // std::cout << "Optimizing the position of the unified point " <<
-      // unifiedPointId << std::endl;
+      //std::cout << "Optimizing the position of the unified point " << unifiedPointId << std::endl;
       ParameterOrderPowellOptimizer::Pointer optimizer =
           ParameterOrderPowellOptimizer::New();
       optimizer->SetCostFunction(costFunction);
@@ -331,12 +325,10 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToCollapseFast(
       // Retrieve the optimal reference position
       if (optimizer->GetCurrentCost() != itk::NumericTraits<double>::max()) {
         optimalPosition = optimizer->GetCurrentPosition();
-        // std::cout << "Changed reference position for the unified point " <<
-        // unifiedPointId
-        //          << " from " << initialPosition << " to " << optimalPosition
-        //          << std::endl;
+        //std::cout << "Changed reference position for the unified point " << unifiedPointId
+        //          << " from " << initialPosition << " to " << optimalPosition << std::endl;
       } else {
-        return nullptr;
+        return 0;
       }
 
     } // End test if point can move
@@ -344,21 +336,20 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToCollapseFast(
   } // End test if we are going to optimize position
 
   // Get the cost at the optimal position
-  // std::cout << "Getting cost at optimal position " << optimalPosition << ":
-  // ";
+  //std::cout << "Getting cost at optimal position " << optimalPosition << ": ";
   if (!costFunction->GetValue(optimalPosition, miniDataCost, miniAlphasCost,
                               miniPositionCost)) {
-    // std::cout << "not possible" << std::endl;
-    return nullptr;
+    //std::cout << "not possible" << std::endl;
+    return 0;
   }
-  // std::cout << "       miniDataCost     : " << miniDataCost << std::endl;
-  // std::cout << "       miniAlphasCost   : " << miniAlphasCost << std::endl;
-  // std::cout << "       miniPositionCost : " << miniPositionCost << std::endl;
+  //std::cout << "       miniDataCost     : " << miniDataCost << std::endl;
+  //std::cout << "       miniAlphasCost   : " << miniAlphasCost << std::endl;
+  //std::cout << "       miniPositionCost : " << miniPositionCost << std::endl;
 
   // Return
   if (std::isnan(miniDataCost + miniAlphasCost + miniPositionCost) ||
       std::isinf(miniDataCost + miniAlphasCost + miniPositionCost)) {
-    return nullptr;
+    return 0;
   } else {
     return const_cast<AtlasMeshCollection *>(
         costFunction->GetCostCalculationMeshCollection());
@@ -373,8 +364,8 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToRetainFast(
     AtlasMesh::CellIdentifier edgeId, double &miniDataCost,
     double &miniAlphasCost, double &miniPositionCost) {
 
-  // std::cout << "\n\n\n\n\n=================================================="
-  // << std::endl; std::cout << "Trying to retain edge " << edgeId << std::endl;
+  //std::cout << "\n\n\n\n\n==================================================" << std::endl;
+  //std::cout << "Trying to retain edge " << edgeId << std::endl;
 
   AtlasMeshCollection::Pointer miniCollection =
       this->GetFakeCopy(miniCollectionConst);
@@ -386,8 +377,8 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToRetainFast(
   ++pointIt;
   const AtlasMesh::PointIdentifier point1Id = *pointIt;
 
-  // Retrieve the vertex ids of the vertices of this edge, by looping over all
-  // vertex cells and checking their point id
+  // Retrieve the vertex ids of the vertices of this edge, by looping over all vertex cells and
+  // checking their point id
   AtlasMesh::CellIdentifier vertex0Id;
   AtlasMesh::CellIdentifier vertex1Id;
   for (AtlasMesh::CellsContainer::ConstIterator cellIt =
@@ -400,20 +391,20 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToRetainFast(
 
     if (*(cell->PointIdsBegin()) == point0Id) {
       vertex0Id = cellIt.Index();
-      // std::cout << "vertex0Id: " << vertex0Id << std::endl;
+      //std::cout << "vertex0Id: " << vertex0Id << std::endl;
     } else if (*(cell->PointIdsBegin()) == point1Id) {
       vertex1Id = cellIt.Index();
-      // std::cout << "vertex1Id: " << vertex1Id << std::endl;
+      //std::cout << "vertex1Id: " << vertex1Id << std::endl;
     }
   }
 
   // Optimize position of vertices.
   // TODO: should be iterated!
   if (!this->OptimizeReferencePositionFast(miniCollection, vertex0Id, false)) {
-    return nullptr;
+    return 0;
   }
   if (!this->OptimizeReferencePositionFast(miniCollection, vertex1Id, false)) {
-    return nullptr;
+    return 0;
   }
 
   // Measure the cost after optimization
@@ -423,7 +414,7 @@ AtlasMeshCollection::Pointer AtlasMeshBuilder ::TryToRetainFast(
   // Return
   if ((std::isnan(miniDataCost + miniAlphasCost + miniPositionCost)) ||
       (std::isinf(miniDataCost + miniAlphasCost + miniPositionCost))) {
-    return nullptr;
+    return 0;
   } else {
     return miniCollection;
   }
@@ -495,8 +486,7 @@ bool AtlasMeshBuilder ::OptimizeReferencePositionFast(
     // std::cout << "parameterOrder: " << parameterOrder << std::endl;
 
     // Optimize the reference position
-    // std::cout << "Optimizing the position of the unified point " << pointId
-    // << std::endl;
+    // std::cout << "Optimizing the position of the unified point " << pointId << std::endl;
     ParameterOrderPowellOptimizer::Pointer optimizer =
         ParameterOrderPowellOptimizer::New();
     optimizer->SetCostFunction(costFunction);
@@ -510,14 +500,11 @@ bool AtlasMeshBuilder ::OptimizeReferencePositionFast(
     // Retrieve the optimal reference position
     if (optimizer->GetCurrentCost() != itk::NumericTraits<double>::max()) {
       optimalPosition = optimizer->GetCurrentPosition();
-      // std::cout << "                               Changed reference position
-      // for the point " << pointId
-      //           << " from " << initialPosition << " to " << optimalPosition
-      //           << std::endl;
+      // std::cout << "                               Changed reference position for the point " << pointId
+      //           << " from " << initialPosition << " to " << optimalPosition << std::endl;
       // const double  initialCost = costFunction->GetValue( initialPosition );
       // const double  optimalCost = costFunction->GetValue( optimalPosition );
-      // std::cout << "                                   " << initialCost << "
-      // ->  " << optimalCost << std::endl;
+      // std::cout << "                                   " << initialCost << "  ->  " << optimalCost << std::endl;
     } else {
       return false;
     }
@@ -647,19 +634,18 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     std::set<AtlasMesh::CellIdentifier> &      edges,
     std::map<AtlasMesh::PointIdentifier, int> &pointOccupancies, int threadId) {
 
-#if 0
+#if 0  
   mutex.Lock();
 #else
   AtlasMeshBuilderHelper helper(mutex, pointOccupancies);
 #endif
-  // std::ostringstream  descriptionStream;
-  // descriptionStream << "    [THREAD " << threadId << "] locked mutex because
-  // trying to find edge to analyze"; mutex.DescriptiveLock(
-  // descriptionStream.str() );
+  //std::ostringstream  descriptionStream;
+  //descriptionStream << "    [THREAD " << threadId << "] locked mutex because trying to find edge to analyze";
+  //mutex.DescriptiveLock( descriptionStream.str() );
 
   // Check if there is anything left to do
   if (edges.size() == 0) {
-#if 0
+#if 0      
     mutex.Unlock();
     //mutex.DescriptiveUnlock();
 #endif
@@ -667,15 +653,13 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
   }
 
   // Look for the first edge that can be safely worked on
-  // std::cout << "    [THREAD " << threadId << "] " << " looking for the first
-  // edge that can be safely worked on" << std::endl;
+  // std::cout << "    [THREAD " << threadId << "] " << " looking for the first edge that can be safely worked on" << std::endl;
   AtlasMesh::CellIdentifier edgeId =
       itk::NumericTraits<AtlasMesh::CellIdentifier>::max();
   std::vector<AtlasMesh::CellIdentifier> nonExistingEdgesEncountered;
   for (std::set<AtlasMesh::CellIdentifier>::const_iterator it = edges.begin();
        it != edges.end(); ++it) {
-    // Test if the edge actually still exists in the mesh. If not, let's tag it
-    // for removal
+    // Test if the edge actually still exists in the mesh. If not, let's tag it for removal
     if (!m_Current->GetCells()->IndexExists(*it)) {
       nonExistingEdgesEncountered.push_back(*it);
       continue;
@@ -694,8 +678,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
       break;
     }
 
-    // std::cout << "    [THREAD " << threadId << "] " << " Hmm... edge " << *it
-    // << " is protected" << std::endl;
+    //std::cout << "    [THREAD " << threadId << "] " << " Hmm... edge " << *it << " is protected" << std::endl;
   } // End loop over all edges
 
   // Remove the non-existing edges we're encountered
@@ -711,8 +694,8 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
   }
 
   if (edgeId == itk::NumericTraits<AtlasMesh::CellIdentifier>::max()) {
-    // There were edges to be analyzed, but can't work on them at this time
-    // cause others or working on it
+    // There were edges to be analyzed, but can't work on them at this time cause others or
+    // working on it
     if (m_Verbose) {
       std::cout << "    [THREAD " << threadId << "] "
                 << "There are still " << edges.size()
@@ -720,10 +703,9 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
                 << std::endl;
     }
 
-    m_StuckCount++; // This is not actually thread-safe, but we don't care if
-                    // this count goes up a bit slower than you'd expect (in the
-                    // unlikely event that two threads try to increase this
-                    // count at exactly the same time)
+    m_StuckCount++; // This is not actually thread-safe, but we don't care if this count goes up a bit
+        // slower than you'd expect (in the unlikely event that two threads try to increase
+        // this count at exactly the same time)
     const double averageNumberOfSecondsToSleep = 60.0;
     const int    stuckCountToGiveUpAt =
         30 * 20; // If every thread sleeps 1min on average, and 20 threads
@@ -738,10 +720,10 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
       stuckStream << "threadsNeverReturning";
       m_Current->Write(stuckStream.str().c_str());
       exit(-1);
-      // itkExceptionMacro( << "Error: threads never returning" );
+      //itkExceptionMacro( << "Error: threads never returning" );
     }
 
-#if 0
+#if 0      
     mutex.Unlock();
     //mutex.DescriptiveUnlock();
 #else
@@ -790,12 +772,11 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
   for (AtlasMesh::PointsContainer::ConstIterator refPosIt =
            miniCollection->GetReferencePosition()->Begin();
        refPosIt != miniCollection->GetReferencePosition()->End(); ++refPosIt) {
-    // std::set's insert only inserts if element doesn't exist already, so no
-    // worries about double entries
+    // std::set's insert only inserts if element doesn't exist already, so no worries about double entries
     affectedPoints.push_back(refPosIt.Index());
   }
 
-#if 0
+#if 0    
   // Indicate that we are working on them
   for ( std::vector< AtlasMesh::PointIdentifier >::const_iterator  it = affectedPoints.begin();
         it != affectedPoints.end(); ++it )
@@ -879,28 +860,27 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
   }
 
   // timeProbe.Stop();
-  // std::cout << "    [THREAD " << threadId << "] took " <<
-  // timeProbe.GetMeanTime() << " seconds to evaluate moves" << std::endl;
+  // std::cout << "    [THREAD " << threadId << "] took " << timeProbe.GetMeanTime() << " seconds to evaluate moves" << std::endl;
 
   if (minTotalCostIndex == -1) {
-#if 0
+#if 0      
     mutex.Lock();
 #else
     helper.Lock();
 #endif
-    // descriptionStream << "    [THREAD " << threadId << "] locked mutex
-    // because impossible configuration encountered"; std::ostringstream
-    // descriptionStream; mutex.DescriptiveLock( descriptionStream.str() );
+    // descriptionStream << "    [THREAD " << threadId << "] locked mutex because impossible configuration encountered";
+    // std::ostringstream  descriptionStream;
+    // mutex.DescriptiveLock( descriptionStream.str() );
 
     std::cout << "    [THREAD " << threadId << "] "
               << "Impossible configuration encountered at eget with id "
               << edgeId << std::endl;
-    // std::ostringstream  impossibleStream;
-    // impossibleStream << "impossible_" << edgeId;
-    // m_Current->Write( impossibleStream.str().c_str() );
-    // minTotalCostIndex = 0;
+    //std::ostringstream  impossibleStream;
+    //impossibleStream << "impossible_" << edgeId;
+    //m_Current->Write( impossibleStream.str().c_str() );
+    //minTotalCostIndex = 0;
 
-#if 0
+#if 0    
     // Now "un-protect" the points we flagged as being worked on
     for ( std::vector< AtlasMesh::PointIdentifier >::const_iterator  it = affectedPoints.begin();
           it != affectedPoints.end(); ++it )
@@ -916,7 +896,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     return true;
   }
 
-#if 0
+#if 0    
   mutex.Lock();
   // std::ostringstream  descriptionStream;
   // descriptionStream << "    [THREAD " << threadId << "] locked mutex because applying best move to the global mesh";
@@ -939,15 +919,13 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     ++pointIt;
     const AtlasMesh::PointIdentifier edgePoint1Id = *pointIt;
 
-    // Copy the reference position of each of the two points from the min mesh
-    // to the full mesh
+    // Copy the reference position of each of the two points from the min mesh to the full mesh
     m_Current->GetReferencePosition()->ElementAt(edgePoint0Id) =
         retainedMiniCollection->GetReferencePosition()->ElementAt(edgePoint0Id);
     m_Current->GetReferencePosition()->ElementAt(edgePoint1Id) =
         retainedMiniCollection->GetReferencePosition()->ElementAt(edgePoint1Id);
 
-    // Copy the positions of each of the two points from the mini mesh to the
-    // full mesh
+    // Copy the positions of each of the two points from the mini mesh to the full mesh
     for (unsigned int meshNumber = 0;
          meshNumber < m_Current->GetNumberOfMeshes(); meshNumber++) {
       m_Current->GetPositions()[meshNumber]->ElementAt(edgePoint0Id) =
@@ -958,16 +936,14 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
               edgePoint1Id);
     }
 
-    // Copy the point parameters of each of the two points from the mini mesh to
-    // the full mesh
+    // Copy the point parameters of each of the two points from the mini mesh to the full mesh
     m_Current->GetPointParameters()->ElementAt(edgePoint0Id) =
         retainedMiniCollection->GetPointParameters()->ElementAt(edgePoint0Id);
     m_Current->GetPointParameters()->ElementAt(edgePoint1Id) =
         retainedMiniCollection->GetPointParameters()->ElementAt(edgePoint1Id);
 
-    // You manually modified the reference position; make sure the
-    // ReferenceTetrahedronInfos is modified manually as well so things are
-    // up-to-date
+    // You manually modified the reference position; make sure the ReferenceTetrahedronInfos is modified manually
+    // as well so things are up-to-date
     for (AtlasMesh::CellDataContainer::ConstIterator infoIt =
              retainedMiniCollection->GetReferenceTetrahedronInfos()->Begin();
          infoIt !=
@@ -991,15 +967,14 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     ++pointIt;
     const AtlasMesh::PointIdentifier edgePoint1Id = *pointIt;
 
-    // Let's quickly collapse a little bit bigger mesh, and get its cell links.
-    // The cell links belonging to the inner points, i.e. the points of our
-    // miniCollection, will be copied later on
+    // Let's quickly collapse a little bit bigger mesh, and get its cell links. The cell links belonging to the
+    // inner points, i.e. the points of our miniCollection, will be copied later on
     AtlasMeshCollection::ConstPointer biggerMiniCollection =
         m_Current->GetRegionGrown(edgeId, 2).GetPointer();
     if (!biggerMiniCollection) {
       std::cout << "    [THREAD " << threadId << "] "
                 << "Ouch!" << std::endl;
-      // exit( -1 );
+      //exit( -1 );
       itkExceptionMacro(<< "Ouch!");
     }
     AtlasMeshCollection::Pointer        collapsedBiggerMiniCollection;
@@ -1012,14 +987,12 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
         collapsedBiggerMiniCollectionCellLinks =
             collapsedBiggerMiniCollection->GetCellLinks();
 
-    // Do the basic mesh surgery: loop over all cells in the original mini mesh,
-    // and look for them in the collapsed mini mesh. If it is found there,
-    // delete the corresponding cell in the global mesh, put its pointer to the
-    // cell in the collapsed mini mesh, and remove the cell from the collapsed
-    // mini mesh (the latter step is necessary as the destructor of the
-    // collapsed mini mesh will call delete on the pointer). If it is not found,
-    // the cell has disappeared due to the edge collapse, so delete the
-    // corresponding cell from the global mesh
+    // Do the basic mesh surgery: loop over all cells in the original mini mesh, and look for them
+    // in the collapsed mini mesh. If it is found there, delete the corresponding cell in the global mesh,
+    // put its pointer to the cell in the collapsed mini mesh, and remove the cell from the collapsed mini mesh
+    // (the latter step is necessary as the destructor of the collapsed mini mesh will call delete on the pointer).
+    // If it is not found, the cell has disappeared due to the edge collapse, so delete the corresponding cell from
+    // the global mesh
     for (AtlasMesh::CellsContainer::ConstIterator cellIt =
              miniCollection->GetCells()->Begin();
          cellIt != miniCollection->GetCells()->End(); ++cellIt) {
@@ -1027,13 +1000,12 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
         // Delete the cell object to which we're currently pointing
         delete m_Current->GetCells()->ElementAt(cellIt.Index());
 
-        // Instead point to the (corrected) cell object in the collapsed mini
-        // mesh
+        // Instead point to the (corrected) cell object in the collapsed mini mesh
         m_Current->GetCells()->ElementAt(cellIt.Index()) =
             collapsedMiniCollection->GetCells()->ElementAt(cellIt.Index());
 
-        // Make sure the destructor of the collapsed mini mesh won't find this
-        // cell and delete it!
+        // Make sure the destructor of the collapsed mini mesh won't find this cell
+        // and delete it!
         collapsedMiniCollection->GetCells()->DeleteIndex(cellIt.Index());
       } else {
         // Delete the cell object to which we're currently pointing
@@ -1042,9 +1014,8 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
         // Remove the index from the container
         m_Current->GetCells()->DeleteIndex(cellIt.Index());
 
-        // If this cell is a disappearing tetrahedron, also remove it from the
-        // ReferenceTetrahedronInfos. We don't have to test if it actually
-        // exists or not: std::map::erase() is fool-proof
+        // If this cell is a disappearing tetrahedron, also remove it from the ReferenceTetrahedronInfos.
+        // We don't have to test if it actually exists or not: std::map::erase() is fool-proof
         const_cast<AtlasMesh::CellDataContainer *>(
             m_Current->GetReferenceTetrahedronInfos())
             ->DeleteIndex(cellIt.Index());
@@ -1052,20 +1023,17 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
 
     } // End loop over all cells that need removal or surgery
 
-    // We've altered the mesh connnectivity, so make sure the cell links are
-    // up-to-date by copying them from the collapsed mesh. Note: the second
-    // point on the edge is actually disappearing; we'll take take care of that
-    // later
+    // We've altered the mesh connnectivity, so make sure the cell links are up-to-date by copying them
+    // from the collapsed mesh. Note: the second point on the edge is actually disappearing; we'll take
+    // take care of that later
     for (AtlasMesh::PointsContainer::ConstIterator pointIt =
              miniCollection->GetReferencePosition()->Begin();
          pointIt != miniCollection->GetReferencePosition()->End(); ++pointIt) {
       m_Current->GetCellLinks()->ElementAt(pointIt.Index()) =
           collapsedBiggerMiniCollectionCellLinks->ElementAt(pointIt.Index());
 
-      // std::cout << "    [THREAD " << threadId << "] " << pointIt.Index() <<
-      // ": copied "
-      //           << m_Current->GetCellLinks()->ElementAt( pointIt.Index()
-      //           ).size()
+      // std::cout << "    [THREAD " << threadId << "] " << pointIt.Index() << ": copied "
+      //           << m_Current->GetCellLinks()->ElementAt( pointIt.Index() ).size()
       //           << " cell indices from mini " << std::endl;
     }
 
@@ -1078,14 +1046,12 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     m_Current->GetPointParameters()->DeleteIndex(edgePoint1Id);
     m_Current->GetCellLinks()->DeleteIndex(edgePoint1Id);
 
-    // Copy the reference position of the unified point from the mini collection
-    // to the global collection
+    // Copy the reference position of the unified point from the mini collection to the global collection
     m_Current->GetReferencePosition()->ElementAt(edgePoint0Id) =
         collapsedMiniCollection->GetReferencePosition()->ElementAt(
             edgePoint0Id);
 
-    // Copy the positions of the unified point from the mini collection to the
-    // global collection
+    // Copy the positions of the unified point from the mini collection to the global collection
     for (unsigned int meshNumber = 0;
          meshNumber < m_Current->GetNumberOfMeshes(); meshNumber++) {
       m_Current->GetPositions()[meshNumber]->ElementAt(edgePoint0Id) =
@@ -1093,14 +1059,12 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
               edgePoint0Id);
     }
 
-    // Copy the point parameters of the unified point from the mini collection
-    // to the global collection
+    // Copy the point parameters of the unified point from the mini collection to the global collection
     m_Current->GetPointParameters()->ElementAt(edgePoint0Id) =
         collapsedMiniCollection->GetPointParameters()->ElementAt(edgePoint0Id);
 
-    // You manually modified the reference position; make sure the
-    // ReferenceTetrahedronInfos is modified manually as well so things are
-    // up-to-date
+    // You manually modified the reference position; make sure the ReferenceTetrahedronInfos is modified manually
+    // as well so things are up-to-date
     for (AtlasMesh::CellDataContainer::ConstIterator infoIt =
              collapsedMiniCollection->GetReferenceTetrahedronInfos()->Begin();
          infoIt !=
@@ -1113,7 +1077,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
 
   } // End deciding what the best operation is for this edge
 
-#if 0
+#if 0    
   // Now "un-protect" the points we flagged as being worked on
   for ( std::vector< AtlasMesh::PointIdentifier >::const_iterator  it = affectedPoints.begin();
         it != affectedPoints.end(); ++it )
@@ -1126,7 +1090,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     {
     std::cout << "    [THREAD " << threadId << "] " << "Done with edge " << edgeId << std::endl;
     }
-
+  
   mutex.Unlock();
   //mutex.DescriptiveUnlock();
 #endif
@@ -1183,13 +1147,12 @@ AtlasMeshBuilder ::LoadBalancedThreaderCallback(void *arg) {
 
   // Retrieve the input arguments
   const int threadId =
-      ((itk::MultiThreaderBase::WorkUnitInfo *)(arg))->WorkUnitID;
-  // const int  threadCount = ((itk::MultiThreader::ThreadInfoStruct
-  // *)(arg))->NumberOfThreads;
+      ((itk::MultiThreader::ThreadInfoStruct *)(arg))->ThreadID;
+  //const int  threadCount = ((itk::MultiThreader::ThreadInfoStruct *)(arg))->NumberOfThreads;
 
   LoadBalancedThreadStruct *str =
       (LoadBalancedThreadStruct
-           *)(((itk::MultiThreaderBase::WorkUnitInfo *)(arg))->UserData);
+           *)(((itk::MultiThreader::ThreadInfoStruct *)(arg))->UserData);
 
   const int numberOfEdgesToAnalyze = str->m_Edges.size();
   int       numberOfEdgesAnalyzed  = 0;
@@ -1206,8 +1169,8 @@ AtlasMeshBuilder ::LoadBalancedThreaderCallback(void *arg) {
         break;
       }
     } catch (itk::ExceptionObject &e) {
-      // Apparently somewhere an exception was thrown. We'll just catch it,
-      // display what the problem was, and move on
+      // Apparently somewhere an exception was thrown. We'll just catch it, display what the problem was,
+      // and move on
       std::cout << "Exception === Exception === Exception === Exception === "
                    "Exception === Exception"
                 << std::endl;
@@ -1222,9 +1185,8 @@ AtlasMeshBuilder ::LoadBalancedThreaderCallback(void *arg) {
     numberOfEdgesAnalyzed++;
 
     if ((threadId == 0) && (numberOfEdgesAnalyzed % 10 == 0)) {
-      // std::cout << "numberOfEdgesAnalyzed: " << numberOfEdgesAnalyzed <<
-      // std::endl; std::cout << ( numberOfEdgesAnalyzed % 10 == 0 ) <<
-      // std::endl;
+      //std::cout << "numberOfEdgesAnalyzed: " << numberOfEdgesAnalyzed << std::endl;
+      //std::cout << ( numberOfEdgesAnalyzed % 10 == 0 ) << std::endl;
 
       const double progress =
           1 - static_cast<double>(str->m_Edges.size()) /
@@ -1234,7 +1196,7 @@ AtlasMeshBuilder ::LoadBalancedThreaderCallback(void *arg) {
     }
   }
 
-  return ITK_THREAD_RETURN_DEFAULT_VALUE;
+  return ITK_THREAD_RETURN_VALUE;
 }
 
 } // end namespace kvl

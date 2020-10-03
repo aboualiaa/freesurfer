@@ -15,7 +15,7 @@ double HausdorffMembershipFunction<TVector>::Evaluate(
   //	std::cout << " hausdorff " << std::endl;
   typedef typename MeasurementVectorType::CellType CellType;
   const std::vector<CellType> *                    labels1 = m1->GetLabels();
-  // const std::vector<CellType>* labels2 =m2->GetLabels();
+  //const std::vector<CellType>* labels2 =m2->GetLabels();
   double max1 = 0.0, max2 = 0.0;
   int    numPoints = labels1->size() - 1;
   for (int i = 0; i < numPoints; i++) {

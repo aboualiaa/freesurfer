@@ -58,11 +58,11 @@ void OrientationPlanesFromParcellationFilter<TInputImage,
     }
   }
   /*	std::cout <<  pointsCC_3V->GetNumberOfPoints() << std::endl;
-          std::cout <<  pointsCC1->GetNumberOfPoints() << std::endl;
-          std::cout <<  pointsCC5->GetNumberOfPoints() << std::endl;
-          std::cout <<  rhThalamus->GetNumberOfPoints() << std::endl;
-          std::cout <<  lhThalamus->GetNumberOfPoints() << std::endl;
-  */
+	std::cout <<  pointsCC1->GetNumberOfPoints() << std::endl;
+	std::cout <<  pointsCC5->GetNumberOfPoints() << std::endl;
+	std::cout <<  rhThalamus->GetNumberOfPoints() << std::endl;
+	std::cout <<  lhThalamus->GetNumberOfPoints() << std::endl;
+*/
   vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
   polydata->SetPoints(pointsCC_3V);
 
@@ -130,7 +130,7 @@ void OrientationPlanesFromParcellationFilter<TInputImage,
   normal[2] = eigvec[2][2];
   std::cout << normal[0] << normal[1] << normal[2] << std::endl;
 
-  // orient the normal of the sagital plane from left to right
+  //orient the normal of the sagital plane from left to right
   centerOfMassFilter = vtkSmartPointer<vtkCenterOfMass>::New();
   polydata->SetPoints(lhThalamus);
 #if VTK_MAJOR_VERSION > 5
@@ -168,7 +168,7 @@ void OrientationPlanesFromParcellationFilter<TInputImage,
     }
   }
 
-  // find axial plane
+  //find axial plane
   centerOfMassFilter = vtkSmartPointer<vtkCenterOfMass>::New();
   polydata->SetPoints(pointsCC1);
 #if VTK_MAJOR_VERSION > 5
@@ -210,7 +210,7 @@ void OrientationPlanesFromParcellationFilter<TInputImage,
       vtkSmartPointer<vtkPlaneSource>::New();
   axial->SetPoint1(projCC1);
   axial->SetPoint2(projCC5);
-  // axial->SetPoint3(thirdPoint);
+  //axial->SetPoint3(thirdPoint);
   axial->SetOrigin(thirdPoint);
   axial->Update();
 
@@ -244,7 +244,7 @@ void OrientationPlanesFromParcellationFilter<TInputImage,
       this->GetOutput()->SetPixel(index, 155);
     }
   }
-  // orient the axial plane from down to up
+  //orient the axial plane from down to up
   centerOfMassFilter = vtkSmartPointer<vtkCenterOfMass>::New();
   polydata->SetPoints(pointsCCmid);
 #if VTK_MAJOR_VERSION > 5

@@ -7,40 +7,40 @@
 enum FiberFormat { VTK = 0, TRK = 1 };
 
 template <class TOutputMesh, class TImageType>
-class HierarchicalClusteringPruner : public itk::MeshSource<TOutputMesh> {
+class HierarchicalClusteringPruner : public MeshSource<TOutputMesh> {
 public:
-  using Self         = HierarchicalClusteringPruner<TOutputMesh, TImageType>;
-  using Superclass   = itk::MeshSource<TOutputMesh>;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef HierarchicalClusteringPruner Self;
+  typedef MeshSource<TOutputMesh>      Superclass;
+  typedef SmartPointer<Self>           Pointer;
+  typedef SmartPointer<const Self>     ConstPointer;
 
   itkNewMacro(Self);
   itkTypeMacro(HierarchicalClusteringPruner, MeshSource);
 
-  using ImageType        = TImageType;
-  using OutputMeshType   = TOutputMesh;
-  using OutputMeshTraits = typename OutputMeshType::MeshTraits;
-  using OutputPointType  = typename OutputMeshType::PointType;
-  using OutputPixelType  = typename OutputMeshType::PixelType;
+  typedef TImageType                          ImageType;
+  typedef TOutputMesh                         OutputMeshType;
+  typedef typename OutputMeshType::MeshTraits OutputMeshTraits;
+  typedef typename OutputMeshType::PointType  OutputPointType;
+  typedef typename OutputMeshType::PixelType  OutputPixelType;
 
   /** Some convenient typedefs. */
-  using OutputMeshPointer     = typename OutputMeshType::Pointer;
-  using OutputCellTraits      = typename OutputMeshType::CellTraits;
-  using OutputCellIdentifier  = typename OutputMeshType::CellIdentifier;
-  using OutputCellType        = typename OutputMeshType::CellType;
-  using OutputCellAutoPointer = typename OutputMeshType::CellAutoPointer;
-  using OutputPointIdentifier = typename OutputMeshType::PointIdentifier;
-  using OutputPointIdIterator = typename OutputCellTraits::PointIdIterator;
+  typedef typename OutputMeshType::Pointer           OutputMeshPointer;
+  typedef typename OutputMeshType::CellTraits        OutputCellTraits;
+  typedef typename OutputMeshType::CellIdentifier    OutputCellIdentifier;
+  typedef typename OutputMeshType::CellType          OutputCellType;
+  typedef typename OutputMeshType::CellAutoPointer   OutputCellAutoPointer;
+  typedef typename OutputMeshType::PointIdentifier   OutputPointIdentifier;
+  typedef typename OutputCellTraits::PointIdIterator OutputPointIdIterator;
 
-  using OutputPointsContainerPointer =
-      typename OutputMeshType::PointsContainerPointer;
+  typedef typename OutputMeshType::PointsContainerPointer
+      OutputPointsContainerPointer;
 
-  using OutputPointsContainer = typename OutputMeshType::PointsContainer;
+  typedef typename OutputMeshType::PointsContainer OutputPointsContainer;
 
-  using OutputCellsContainer = typename OutputMeshType::CellsContainer;
+  typedef typename OutputMeshType::CellsContainer OutputCellsContainer;
 
-  using OutputCellsContainerPointer =
-      typename OutputMeshType::CellsContainerPointer;
+  typedef typename OutputMeshType::CellsContainerPointer
+      OutputCellsContainerPointer;
 
   using PolylineCellType = int;
 
@@ -68,7 +68,7 @@ protected:
   HierarchicalClusteringPruner();
   ~HierarchicalClusteringPruner(){};
 
-  virtual void GenerateData();
+  virtual void GenerateData(void);
 
 private:
   int                                       m_numberOfClusters;

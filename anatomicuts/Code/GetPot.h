@@ -40,7 +40,7 @@ extern "C" {
 #include <stdio.h>
 }
 #include <algorithm>
-#include <cstring>
+#include <string.h>
 #include <string> // added both string and string.h in order to compile
 #include <vector>
 
@@ -48,7 +48,7 @@ extern "C" {
 #include <iostream> // not every compiler distribution includes <iostream>
 //                  // with <fstream>
 
-using STRING_VECTOR = std::vector<std::string>;
+typedef std::vector<std::string> STRING_VECTOR;
 
 #define victorate(TYPE, VARIABLE, ITERATOR)                                    \
   std::vector<TYPE>::const_iterator ITERATOR = (VARIABLE).begin();             \
@@ -63,10 +63,9 @@ public:
   inline GetPot();
   inline GetPot(const GetPot &);
   inline GetPot(const int argc_, char **argv_,
-                const char *FieldSeparator = nullptr);
-  inline GetPot(const char *FileName, const char *CommentStart = nullptr,
-                const char *CommentEnd     = nullptr,
-                const char *FieldSeparator = nullptr);
+                const char *FieldSeparator = 0x0);
+  inline GetPot(const char *FileName, const char *CommentStart = 0x0,
+                const char *CommentEnd = 0x0, const char *FieldSeparator = 0x0);
   inline ~GetPot();
   inline GetPot &operator=(const GetPot &);
 
@@ -215,8 +214,7 @@ private:
     std::string   original; // value of variable as given on command line
   };
 
-  // (*) member variables
-  // --------------------------------------------------------------
+  // (*) member variables --------------------------------------------------------------
   std::string   prefix;       // prefix automatically added in queries
   std::string   section;      // (for dollar bracket parsing)
   STRING_VECTOR section_list; // list of all parsed sections
@@ -226,8 +224,7 @@ private:
   bool          search_loop_f; // shall search start at beginning after
   //                                     // reaching end of arg array ?
   bool search_failed_f; // flag indicating a failed search() operation
-  //                                     // (e.g. next() functions react with
-  //                                     'missed')
+  //                                     // (e.g. next() functions react with 'missed')
 
   //     --  nominus vector
   int                   nominus_cursor; // cursor for nominus_pointers
@@ -244,14 +241,11 @@ private:
   //     -- field separator (separating elements of a vector)
   std::string _field_separator;
 
-  //     -- some functions return a char pointer to a temporarily existing
-  //     string
-  //        this container makes them 'available' until the getpot object is
-  //        destroyed.
+  //     -- some functions return a char pointer to a temporarily existing string
+  //        this container makes them 'available' until the getpot object is destroyed.
   std::vector<char *> __internal_string_container;
 
-  //     -- keeping track about arguments that are requested, so that the UFO
-  //     detection
+  //     -- keeping track about arguments that are requested, so that the UFO detection
   //        can be simplified
   STRING_VECTOR _requested_arguments;
   STRING_VECTOR _requested_variables;
@@ -259,8 +253,7 @@ private:
 
   bool request_recording_f; // speed: request recording can be turned off
 
-  //     -- if an argument is requested record it and the 'tag' the section
-  //     branch to which
+  //     -- if an argument is requested record it and the 'tag' the section branch to which
   //        it belongs. Caution: both functions mark the sections as 'tagged'.
   void __record_argument_request(const std::string &Arg);
   void __record_variable_request(const std::string &Arg);
@@ -294,8 +287,7 @@ private:
                                      const std::string &  Str) const;
 
   //     -- helpers to parse input file
-  //        create an argument vector based on data found in an input file,
-  //        i.e.:
+  //        create an argument vector based on data found in an input file, i.e.:
   //           1) delete comments (in between '_comment_start' '_comment_end')
   //           2) contract assignment expressions, such as
   //                   my-variable   =    '007 J. B.'
@@ -346,8 +338,7 @@ private:
   }
 
   STRING_VECTOR __get_section_tree(const std::string &FullPath) {
-    // -- cuts a variable name into a tree of sub-sections. this is requested
-    // for recording
+    // -- cuts a variable name into a tree of sub-sections. this is requested for recording
     //    requested sections when dealing with 'ufo' detection.
     STRING_VECTOR result;
     const char *  Start = FullPath.c_str();
@@ -408,12 +399,10 @@ inline GetPot::GetPot(const int argc_, char **argv_,
 
   // -- make an internal copy of the argument list:
   STRING_VECTOR _apriori_argv;
-  // -- for the sake of clarity: we do want to include the first argument in the
-  // argument vector !
-  //    it will not be a nominus argument, though. This gives us a minimun
-  //    vector size of one which facilitates error checking in many functions.
-  //    Also the user will be able to retrieve the name of his application by
-  //    "get[0]"
+  // -- for the sake of clarity: we do want to include the first argument in the argument vector !
+  //    it will not be a nominus argument, though. This gives us a minimun vector size of one
+  //    which facilitates error checking in many functions. Also the user will be able to
+  //    retrieve the name of his application by "get[0]"
   _apriori_argv.push_back(std::string(argv_[0]));
   int i = 1;
   for (; i < argc_; i++) {
@@ -507,8 +496,7 @@ inline void GetPot::__parse_argument_vector(const STRING_VECTOR &ARGV) {
 
   section = "";
 
-  // -- do not parse the first argument, so that it is not interpreted a s a
-  // nominus or so.
+  // -- do not parse the first argument, so that it is not interpreted a s a nominus or so.
   argv.push_back(*it);
   it++;
 
@@ -550,9 +538,9 @@ inline void GetPot::__parse_argument_vector(const STRING_VECTOR &ARGV) {
     for (; *p; p++) {
       if (*p == '=') {
         // (*) record for later ufo detection
-        //     arguments carriying variables are always treated as 'requested'
-        //     arguments. unrequested variables have to be detected with the
-        //     ufo-variable detection routine.
+        //     arguments carriying variables are always treated as 'requested' arguments.
+        //     unrequested variables have to be detected with the ufo-variable
+        //     detection routine.
         if (request_recording_f)
           _requested_arguments.push_back(arg);
 
@@ -923,7 +911,7 @@ inline void GetPot::init_multiple_occurrence() {
 //.............................................................................
 //
 inline const char *GetPot::operator[](unsigned idx) const {
-  return idx < argv.size() ? argv[idx].c_str() : nullptr;
+  return idx < argv.size() ? argv[idx].c_str() : 0;
 }
 
 inline int GetPot::get(unsigned Idx, int Default) const {
@@ -1017,24 +1005,21 @@ inline const char *GetPot::next(const char *Default) {
 //     -- follow() function group
 //        distinct option to be searched for
 inline int GetPot::follow(int Default, const char *Option) {
-  // (*) record requested of argument is entirely handled in 'search()' and
-  // 'next()'
+  // (*) record requested of argument is entirely handled in 'search()' and 'next()'
   if (search(Option) == false)
     return Default;
   return next(Default);
 }
 
 inline double GetPot::follow(const double &Default, const char *Option) {
-  // (*) record requested of argument is entirely handled in 'search()' and
-  // 'next()'
+  // (*) record requested of argument is entirely handled in 'search()' and 'next()'
   if (search(Option) == false)
     return Default;
   return next(Default);
 }
 
 inline const char *GetPot::follow(const char *Default, const char *Option) {
-  // (*) record requested of argument is entirely handled in 'search()' and
-  // 'next()'
+  // (*) record requested of argument is entirely handled in 'search()' and 'next()'
   if (search(Option) == false)
     return Default;
   return next(Default);
@@ -1043,8 +1028,7 @@ inline const char *GetPot::follow(const char *Default, const char *Option) {
 //     -- second follow() function group
 //        multiple option to be searched for
 inline int GetPot::follow(int Default, unsigned No, const char *P, ...) {
-  // (*) record requested of argument is entirely handled in 'search()' and
-  // 'next()'
+  // (*) record requested of argument is entirely handled in 'search()' and 'next()'
   if (No == 0)
     return Default;
   if (search(P) == true)
@@ -1066,8 +1050,7 @@ inline int GetPot::follow(int Default, unsigned No, const char *P, ...) {
 
 inline double GetPot::follow(const double &Default, unsigned No, const char *P,
                              ...) {
-  // (*) record requested of argument is entirely handled in 'search()' and
-  // 'next()'
+  // (*) record requested of argument is entirely handled in 'search()' and 'next()'
   if (No == 0)
     return Default;
   if (search(P) == true)
@@ -1088,8 +1071,7 @@ inline double GetPot::follow(const double &Default, unsigned No, const char *P,
 
 inline const char *GetPot::follow(const char *Default, unsigned No,
                                   const char *P, ...) {
-  // (*) record requested of argument is entirely handled in 'search()' and
-  // 'next()'
+  // (*) record requested of argument is entirely handled in 'search()' and 'next()'
   if (No == 0)
     return Default;
   if (search(P) == true)
@@ -1118,7 +1100,7 @@ inline int GetPot::direct_follow(int Default, const char *Option) {
   // (*) record requested of argument for later ufo-detection
   __record_argument_request(std::string(Option) + FollowStr);
 
-  if (FollowStr == nullptr)
+  if (FollowStr == 0)
     return Default;
   if (++cursor >= argv.size())
     cursor = argv.size();
@@ -1131,7 +1113,7 @@ inline double GetPot::direct_follow(const double &Default, const char *Option) {
   // (*) record requested of argument for later ufo-detection
   __record_argument_request(std::string(Option) + FollowStr);
 
-  if (FollowStr == nullptr)
+  if (FollowStr == 0)
     return Default;
   if (++cursor >= argv.size())
     cursor = argv.size();
@@ -1147,7 +1129,7 @@ inline const char *GetPot::direct_follow(const char *Default,
   // (*) record requested of argument for later ufo-detection
   __record_argument_request(std::string(Option) + FollowStr);
 
-  if (FollowStr == nullptr)
+  if (FollowStr == 0)
     return Default;
   if (++cursor >= argv.size())
     cursor = argv.size();
@@ -1176,7 +1158,7 @@ inline const char *GetPot::__match_starting_string(const char *StartString)
     }
   }
 
-  // if( ! search_loop_f ) return false;
+  //if( ! search_loop_f ) return false;
   if (search_loop_f) {
     // (*) second loop from 0 to old cursor position
     for (c = 1; c < OldCursor; c++) {
@@ -1187,7 +1169,7 @@ inline const char *GetPot::__match_starting_string(const char *StartString)
       }
     }
   }
-  return nullptr;
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1258,8 +1240,8 @@ inline STRING_VECTOR GetPot::nominus_vector() const
     nv.push_back(argv[*it]);
 
     // (*) record for later ufo-detection
-    //     when a nominus vector is requested, the entire set of nominus
-    //     arguments are tagged as 'requested'
+    //     when a nominus vector is requested, the entire set of nominus arguments are
+    //     tagged as 'requested'
     ((GetPot *)this)->__record_argument_request(argv[*it]);
   }
   return nv;
@@ -1274,7 +1256,7 @@ inline const char *GetPot::next_nominus() {
 
     return Tmp.c_str();
   }
-  return nullptr;
+  return 0;
 }
 
 inline void GetPot::reset_nominus_cursor() { nominus_cursor = -1; }
@@ -1285,7 +1267,7 @@ inline void GetPot::reset_nominus_cursor() { nominus_cursor = -1; }
 inline int GetPot::operator()(const char *VarName, int Default) const {
   // (*) recording of requested variables happens in '__find_variable()'
   const variable *sv = __find_variable(VarName);
-  if (sv == nullptr)
+  if (sv == 0)
     return Default;
   return __convert_to_type(sv->original, Default);
 }
@@ -1294,7 +1276,7 @@ inline double GetPot::operator()(const char *  VarName,
                                  const double &Default) const {
   // (*) recording of requested variables happens in '__find_variable()'
   const variable *sv = __find_variable(VarName);
-  if (sv == nullptr)
+  if (sv == 0)
     return Default;
   return __convert_to_type(sv->original, Default);
 }
@@ -1303,7 +1285,7 @@ inline const char *GetPot::operator()(const char *VarName,
                                       const char *Default) const {
   // (*) recording of requested variables happens in '__find_variable()'
   const variable *sv = __find_variable(VarName);
-  if (sv == nullptr)
+  if (sv == 0)
     return Default;
   return sv->original.c_str();
 }
@@ -1312,10 +1294,10 @@ inline int GetPot::operator()(const char *VarName, int Default,
                               unsigned Idx) const {
   // (*) recording of requested variables happens in '__find_variable()'
   const variable *sv = __find_variable(VarName);
-  if (sv == nullptr)
+  if (sv == 0)
     return Default;
   const std::string *element = sv->get_element(Idx);
-  if (element == nullptr)
+  if (element == 0)
     return Default;
   return __convert_to_type(*element, Default);
 }
@@ -1324,10 +1306,10 @@ inline double GetPot::operator()(const char *VarName, const double &Default,
                                  unsigned Idx) const {
   // (*) recording of requested variables happens in '__find_variable()'
   const variable *sv = __find_variable(VarName);
-  if (sv == nullptr)
+  if (sv == 0)
     return Default;
   const std::string *element = sv->get_element(Idx);
-  if (element == nullptr)
+  if (element == 0)
     return Default;
   return __convert_to_type(*element, Default);
 }
@@ -1336,10 +1318,10 @@ inline const char *GetPot::operator()(const char *VarName, const char *Default,
                                       unsigned Idx) const {
   // (*) recording of requested variables happens in '__find_variable()'
   const variable *sv = __find_variable(VarName);
-  if (sv == nullptr)
+  if (sv == 0)
     return Default;
   const std::string *element = sv->get_element(Idx);
-  if (element == nullptr)
+  if (element == 0)
     return Default;
   return element->c_str();
 }
@@ -1376,13 +1358,11 @@ inline void GetPot::__record_variable_request(const std::string &Name) {
       _requested_sections.push_back(*it);
 }
 
-// (*) following functions are to be used from 'outside', after getpot has
-// parsed its
-//     arguments => append an argument in the argument vector that reflects the
-//     addition
+// (*) following functions are to be used from 'outside', after getpot has parsed its
+//     arguments => append an argument in the argument vector that reflects the addition
 inline void GetPot::__set_variable(const char *VarName, const char *Value) {
   const GetPot::variable *Var = __find_variable(VarName);
-  if (Var == nullptr)
+  if (Var == 0)
     variables.push_back(variable(VarName, Value, _field_separator.c_str()));
   else
     ((GetPot::variable *)Var)->take(Value, _field_separator.c_str());
@@ -1413,7 +1393,7 @@ inline void GetPot::set(const char *VarName, const int Value,
 
 inline unsigned GetPot::vector_variable_size(const char *VarName) const {
   const variable *sv = __find_variable(VarName);
-  if (sv == nullptr)
+  if (sv == 0)
     return 0;
   return sv->value.size();
 }
@@ -1443,7 +1423,7 @@ GetPot::__find_variable(const char *VarName) const {
     if ((*it).name == Name)
       return &(*it);
   }
-  return nullptr;
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1497,8 +1477,7 @@ inline int GetPot::print() const {
 //
 //           builds a vector of unbracketed whitespace separated strings, i.e.
 //
-//           "  ${Number}.a ${: Das Marmorbild} AB-${& Author=
-//           ${Eichendorf}-1870}"
+//           "  ${Number}.a ${: Das Marmorbild} AB-${& Author= ${Eichendorf}-1870}"
 //
 //           is split into a vector
 //
@@ -1618,7 +1597,7 @@ inline const GetPot::variable *GetPot::__DBE_get_variable(std::string VarName) {
   prefix = section;
   // (1) first search in currently active section
   const GetPot::variable *var = __find_variable(VarName.c_str());
-  if (var != nullptr) {
+  if (var != 0) {
     prefix = secure_Prefix;
     return var;
   }
@@ -1626,7 +1605,7 @@ inline const GetPot::variable *GetPot::__DBE_get_variable(std::string VarName) {
   // (2) search in root name space
   prefix = "";
   var    = __find_variable(VarName.c_str());
-  if (var != nullptr) {
+  if (var != 0) {
     prefix = secure_Prefix;
     return var;
   }
@@ -1959,8 +1938,7 @@ inline STRING_VECTOR GetPot::unidentified_options() const {
   // -- every option is an argument.
   // -- the set of requested arguments contains the set of requested options.
   // -- IF the set of requested arguments contains unrequested options,
-  //    THEN they were requested as 'follow' and 'next' arguments and not as
-  //    real options.
+  //    THEN they were requested as 'follow' and 'next' arguments and not as real options.
   //
   // => it is not necessary to separate requested options from the list
   return unidentified_arguments(_requested_arguments);
@@ -2166,8 +2144,7 @@ inline STRING_VECTOR GetPot::unidentified_nominuses() const {
   // -- every nominus is an argument.
   // -- the set of requested arguments contains the set of requested nominuss.
   // -- IF the set of requested arguments contains unrequested nominuss,
-  //    THEN they were requested as 'follow' and 'next' arguments and not as
-  //    real nominuses.
+  //    THEN they were requested as 'follow' and 'next' arguments and not as real nominuses.
   //
   // => it is not necessary to separate requested nominus from the list
 
@@ -2236,7 +2213,7 @@ inline GetPot::variable::variable(const char *Name, const char *Value,
 
 inline const std::string *GetPot::variable::get_element(unsigned Idx) const {
   if (Idx >= value.size())
-    return nullptr;
+    return 0;
   else
     return &(value[Idx]);
 }
@@ -2247,16 +2224,16 @@ inline void GetPot::variable::take(const char *Value,
 
   // separate string by white space delimiters using 'strtok'
   // thread safe usage of strtok (no static members)
-  char *spt = nullptr;
+  char *spt = 0;
   // make a copy of the 'Value'
   char *copy = new char[strlen(Value) + 1];
   strcpy(copy, Value);
   char *follow_token = strtok_r(copy, FieldSeparator, &spt);
   if (value.size() != 0)
     value.erase(value.begin(), value.end());
-  while (follow_token != nullptr) {
+  while (follow_token != 0) {
     value.push_back(std::string(follow_token));
-    follow_token = strtok_r(nullptr, FieldSeparator, &spt);
+    follow_token = strtok_r(NULL, FieldSeparator, &spt);
   }
 
   delete[] copy;

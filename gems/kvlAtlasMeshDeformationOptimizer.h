@@ -19,18 +19,18 @@ itkEventMacro(DeformationEndEvent, itk::UserEvent);
  * especially Chapter 3 for the line search implemented here,
  * Chapter 5 for the conjugate gradient subclass, and Chapter 9 for
  * the limited-memory BFGS subclass.
- *
+ * 
  */
 class AtlasMeshDeformationOptimizer : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshDeformationOptimizer;
-  using Superclass   = itk::Object;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshDeformationOptimizer Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
-  // itkNewMacro( Self );
+  //itkNewMacro( Self );
 
   /** Run-time type information (and related methods). */
   itkTypeMacro(AtlasMeshDeformationOptimizer, itk::Object);
@@ -175,8 +175,8 @@ protected:
   AtlasPositionGradientContainerType::Pointer m_Gradient;
 
 private:
-  AtlasMeshDeformationOptimizer(const Self &); // purposely not implemented
-  void operator=(const Self &);                // purposely not implemented
+  AtlasMeshDeformationOptimizer(const Self &); //purposely not implemented
+  void operator=(const Self &);                //purposely not implemented
 
   //
   int m_IterationNumber;

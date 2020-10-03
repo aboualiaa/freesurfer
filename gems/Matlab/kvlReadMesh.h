@@ -24,8 +24,7 @@ public:
     std::cout << "I am " << this->GetNameOfClass() << " and I'm running! "
               << std::endl;
 
-    // mesh = kvlReadMesh( meshCollectionFileName, transform,
-    // startingMeshNumber, K )
+    // mesh = kvlReadMesh( meshCollectionFileName, transform, startingMeshNumber, K )
 
     // Retrieve the input arguments
     if (nrhs < 1) {
@@ -117,9 +116,8 @@ public:
             continue;
           }
 
-          // Swap points assigned to first two vertices. This will readily turn
-          // negative tetrahedra
-          // into positives ones.
+          // Swap points assigned to first two vertices. This will readily turn negative tetrahedra
+          //into positives ones.
           kvl::AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
           const kvl::AtlasMesh::PointIdentifier     p0Id = *pit;
           ++pit;
@@ -159,8 +157,8 @@ protected:
   ReadMesh(){};
   virtual ~ReadMesh(){};
 
-  ReadMesh(const Self &);       // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  ReadMesh(const Self &);       //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

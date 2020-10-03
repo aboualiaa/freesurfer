@@ -1,6 +1,3 @@
-#ifndef _GEMS2_MATLAB_KVLCREATEMESHCOLLECTION_H
-#define _GEMS2_MATLAB_KVLCREATEMESHCOLLECTION_H
-
 #include "itkImage.h"
 #include "itkImageRegionIterator.h"
 #include "kvlAtlasMeshCollection.h"
@@ -9,13 +6,14 @@
 #include "kvlMatlabRunner.h"
 
 namespace kvl {
+
 class CreateMeshCollection : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  using Self         = CreateMeshCollection;
-  using Superclass   = itk::Object;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef CreateMeshCollection          Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -23,13 +21,11 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(CreateMeshCollection, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // meshCollection = kvlCreateMeshCollection( multiAlphaImageBuffer, meshSize
-    // )
+    // meshCollection = kvlCreateMeshCollection( multiAlphaImageBuffer, meshSize )
 
     // Make sure input arguments are correct
     if ((nrhs != 2) || (nlhs != 1) || (mxGetNumberOfDimensions(prhs[0]) != 4) ||
@@ -38,10 +34,10 @@ public:
     }
 
     // Determine the size of the image to be created
-    using ProbabilityImageType =
-        AtlasMeshProbabilityImageStatisticsCollector::ProbabilityImageType;
-    using SizeType = ProbabilityImageType::SizeType;
-    SizeType imageSize;
+    typedef AtlasMeshProbabilityImageStatisticsCollector::ProbabilityImageType
+                                           ProbabilityImageType;
+    typedef ProbabilityImageType::SizeType SizeType;
+    SizeType                               imageSize;
     for (int i = 0; i < 3; i++) {
       imageSize[i] = mxGetDimensions(prhs[0])[i];
       std::cout << "imageSize[ i ]: " << imageSize[i] << std::endl;
@@ -55,11 +51,11 @@ public:
     probabilityImage->SetRegions(imageSize);
     probabilityImage->Allocate();
     ProbabilityImageType::PixelType emptyEntry(numberOfClasses);
-    emptyEntry.Fill(0.0F);
+    emptyEntry.Fill(0.0f);
     probabilityImage->FillBuffer(emptyEntry);
 
     // Fill in
-    auto *data = static_cast<unsigned short *>(mxGetData(prhs[0]));
+    unsigned short *data = static_cast<unsigned short *>(mxGetData(prhs[0]));
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
       // Loop over all voxels
       itk::ImageRegionIterator<ProbabilityImageType> it(
@@ -92,7 +88,7 @@ public:
     std::cout << "Created a mesh collection" << std::endl;
 
     // EM estimation of the mesh node alphas that best fit the probabilityImage
-    // meshCollection->FlattenAlphas(); // Initialization to flat alphas
+    //meshCollection->FlattenAlphas(); // Initialization to flat alphas
     std::cout << "Estimating mesh collection alphas using EM" << std::endl;
     for (int iterationNumber = 0; iterationNumber < 10; iterationNumber++) {
       // E-step
@@ -134,17 +130,13 @@ public:
   }
 
 protected:
-  CreateMeshCollection() = default;
-  ;
-  ~CreateMeshCollection() override = default;
-  ;
+  CreateMeshCollection(){};
+  virtual ~CreateMeshCollection(){};
 
-  CreateMeshCollection(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  CreateMeshCollection(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 private:
 };
 
 } // end namespace kvl
-
-#endif

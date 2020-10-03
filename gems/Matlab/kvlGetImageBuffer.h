@@ -21,7 +21,7 @@ public:
   itkTypeMacro(GetImageBuffer, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // imageBuffer = kvlGetImageBuffer( image )
@@ -42,24 +42,24 @@ public:
     mwSize dims[1];
     dims[0] = 1;
 
-    mxArray *matlabObject = nullptr;
-    if (matlabObject == nullptr) {
+    mxArray *matlabObject = 0;
+    if (!matlabObject) {
       ImageConverter<itk::Image<unsigned char, 3>> converter;
       matlabObject = converter.Convert(object.GetPointer());
     }
-    if (matlabObject == nullptr) {
+    if (!matlabObject) {
       ImageConverter<itk::Image<unsigned short, 3>> converter;
       matlabObject = converter.Convert(object.GetPointer());
     }
-    if (matlabObject == nullptr) {
+    if (!matlabObject) {
       ImageConverter<itk::Image<short, 3>> converter;
       matlabObject = converter.Convert(object.GetPointer());
     }
-    if (matlabObject == nullptr) {
+    if (!matlabObject) {
       ImageConverter<itk::Image<float, 3>> converter;
       matlabObject = converter.Convert(object.GetPointer());
     }
-    if (matlabObject == nullptr) {
+    if (!matlabObject) {
       mexErrMsgTxt("Unsupported pixel type");
     }
 
@@ -67,13 +67,11 @@ public:
   }
 
 protected:
-  GetImageBuffer() = default;
-  ;
-  ~GetImageBuffer() override = default;
-  ;
+  GetImageBuffer(){};
+  virtual ~GetImageBuffer(){};
 
-  GetImageBuffer(const Self &); // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  GetImageBuffer(const Self &); //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

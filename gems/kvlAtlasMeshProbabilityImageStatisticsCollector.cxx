@@ -10,7 +10,7 @@ namespace kvl {
 AtlasMeshProbabilityImageStatisticsCollector ::
     AtlasMeshProbabilityImageStatisticsCollector() {
 
-  m_ProbabilityImage = nullptr;
+  m_ProbabilityImage = 0;
 }
 
 //

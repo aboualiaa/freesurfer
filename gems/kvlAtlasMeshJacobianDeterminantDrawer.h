@@ -9,10 +9,10 @@ namespace kvl {
 class AtlasMeshJacobianDeterminantDrawer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshJacobianDeterminantDrawer;
-  using Superclass   = AtlasMeshRasterizor;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshJacobianDeterminantDrawer Self;
+  typedef AtlasMeshRasterizor                Superclass;
+  typedef itk::SmartPointer<Self>            Pointer;
+  typedef itk::SmartPointer<const Self>      ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -21,7 +21,7 @@ public:
   itkTypeMacro(AtlasMeshJacobianDeterminantDrawer, itk::Object);
 
   /** Some typedefs */
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
   /** */
   void SetRegions(const ImageType::RegionType &region) {
@@ -44,8 +44,8 @@ protected:
                             int                       threadNumber);
 
 private:
-  AtlasMeshJacobianDeterminantDrawer(const Self &); // purposely not implemented
-  void operator=(const Self &);                     // purposely not implemented
+  AtlasMeshJacobianDeterminantDrawer(const Self &); //purposely not implemented
+  void operator=(const Self &);                     //purposely not implemented
 
   //
   ImageType::Pointer m_Image;

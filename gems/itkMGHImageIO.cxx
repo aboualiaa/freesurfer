@@ -1,4 +1,12 @@
+
+#include <fstream>
+
 #include "itkMGHImageIO.h"
+
+#include <cmath>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 //-------------------------------
 //
@@ -29,7 +37,7 @@ static std::string GetExtension(const std::string &filename) {
 class STLWrapper {
 public:
   explicit STLWrapper(std::ofstream *p_ofs) : m_ptrOfs(p_ofs), m_own(false) {}
-  explicit STLWrapper(const char *fname) : m_ptrOfs(nullptr), m_own(true) {
+  explicit STLWrapper(const char *fname) : m_ptrOfs(NULL), m_own(true) {
     m_ptrOfs = new std::ofstream(fname, std::ios::out | std::ios::binary);
   }
   virtual ~STLWrapper() {
@@ -57,7 +65,7 @@ private:
 class GZWrapper {
 public:
   explicit GZWrapper(gzFile of) : m_ofs(of), m_own(false) {}
-  explicit GZWrapper(const char *fname) : m_ofs(nullptr), m_own(true) {
+  explicit GZWrapper(const char *fname) : m_ofs(NULL), m_own(true) {
     m_ofs = gzopen(fname, "wb");
   }
   virtual ~GZWrapper() {
@@ -182,25 +190,25 @@ void MGHImageIO::ReadVolumeHeader(gzFile fp) {
   // Convert type to an ITK type
   switch (type) {
   case fs::MRI_UCHAR:
-    m_ComponentType = UCHAR;
+    m_ComponentType = CommonEnums::IOComponent::UCHAR;
     break;
   case fs::MRI_INT:
-    m_ComponentType = INT;
+    m_ComponentType = CommonEnums::IOComponent::INT;
     break;
   case fs::MRI_FLOAT:
-    m_ComponentType = FLOAT;
+    m_ComponentType = CommonEnums::IOComponent::FLOAT;
     break;
   case fs::MRI_SHORT:
-    m_ComponentType = SHORT;
+    m_ComponentType = CommonEnums::IOComponent::SHORT;
     break;
   case fs::MRI_TENSOR:
-    m_ComponentType      = FLOAT;
+    m_ComponentType      = CommonEnums::IOComponent::FLOAT;
     m_NumberOfComponents = 9;
     break;
   default:
     itkExceptionMacro(<< " Unknown data type " << type
                       << " using float by default.");
-    m_ComponentType = FLOAT;
+    m_ComponentType = CommonEnums::IOComponent::FLOAT;
   }
 
   // Next short says whether RAS registration information is good.
@@ -213,30 +221,30 @@ void MGHImageIO::ReadVolumeHeader(gzFile fp) {
       m_Spacing[nSpacing] = spacing;
     }
     /*
-      From http://www.nmr.mgh.harvard.edu/~tosa/#coords:
-      To go from freesurfer voxel coordinates to RAS coordinates, they use:
-      translation:  t_r, t_a, t_s is defined using c_r, c_a, c_s centre voxel
-      position in RAS rotation: direction cosines x_(r,a,s), y_(r,a,s),
-      z_(r,a,s) voxel size for scale: s_x, s_y, s_z
+	  From http://www.nmr.mgh.harvard.edu/~tosa/#coords:
+	  To go from freesurfer voxel coordinates to RAS coordinates, they use:
+	  translation:  t_r, t_a, t_s is defined using c_r, c_a, c_s centre voxel position in RAS
+	  rotation: direction cosines x_(r,a,s), y_(r,a,s), z_(r,a,s)
+	  voxel size for scale: s_x, s_y, s_z
 
-      [ x_r y_r z_r t_r][s_x  0   0  0]
-      [ x_a y_a z_a t_a][0   s_y  0  0]
-      [ x_s y_s z_s t_s][0    0  s_z 0]
-      [  0   0   0   1 ][0    0   0  1]
-      Voxel center is a column matrix, multipled from the right
-      [v_x]
-      [v_y]
-      [v_z]
-      [ 1 ]
+	  [ x_r y_r z_r t_r][s_x  0   0  0]
+	  [ x_a y_a z_a t_a][0   s_y  0  0]
+	  [ x_s y_s z_s t_s][0    0  s_z 0]
+	  [  0   0   0   1 ][0    0   0  1]
+	  Voxel center is a column matrix, multipled from the right
+	  [v_x]
+	  [v_y]
+	  [v_z]
+	  [ 1 ]
 
-      In the MGH header, they hold:
-      x_r x_a x_s
-      y_r y_a y_s
-      z_r z_a z_s
-      c_r c_a c_s
-    */
-    using MatrixType = itk::Matrix<double>;
-    MatrixType matrix;
+	  In the MGH header, they hold:
+	  x_r x_a x_s
+	  y_r y_a y_s
+	  z_r z_a z_s
+	  c_r c_a c_s
+	*/
+    typedef itk::Matrix<double> MatrixType;
+    MatrixType                  matrix;
 
     float fBuffer;
     float c[3];
@@ -372,19 +380,19 @@ void MGHImageIO::SwapBytesIfNecessary(void *        buffer,
   // SwapFromSystemToBigEndian.
 
   switch (m_ComponentType) {
-  case UCHAR:
+  case CommonEnums::IOComponent::UCHAR:
     ByteSwapper<unsigned char>::SwapRangeFromSystemToBigEndian(
         (unsigned char *)buffer, numberOfPixels);
     break;
-  case SHORT:
+  case CommonEnums::IOComponent::SHORT:
     ByteSwapper<short>::SwapRangeFromSystemToBigEndian((short *)buffer,
                                                        numberOfPixels);
     break;
-  case INT:
+  case CommonEnums::IOComponent::INT:
     ByteSwapper<int>::SwapRangeFromSystemToBigEndian((int *)buffer,
                                                      numberOfPixels);
     break;
-  case FLOAT:
+  case CommonEnums::IOComponent::FLOAT:
     ByteSwapper<float>::SwapRangeFromSystemToBigEndian((float *)buffer,
                                                        numberOfPixels);
     break;
@@ -477,27 +485,27 @@ void MGHImageIO::PermuteFrameValues(const void *buffer, char *tempmemory) {
 unsigned int MGHImageIO::GetComponentSize() const {
   unsigned int returnValue = 0;
   switch (m_ComponentType) {
-  case UCHAR:
+  case CommonEnums::IOComponent::UCHAR:
     returnValue = sizeof(unsigned char);
     break;
-  case SHORT:
+  case CommonEnums::IOComponent::SHORT:
     returnValue = sizeof(short);
     break;
-  case INT:
+  case CommonEnums::IOComponent::INT:
     returnValue = sizeof(int);
     break;
-  case FLOAT:
+  case CommonEnums::IOComponent::FLOAT:
     returnValue = sizeof(float);
     break;
 
   // DJ -- added this in to get the compiler to shut up
-  case UNKNOWNCOMPONENTTYPE:
-  case CHAR:
-  case USHORT:
-  case UINT:
-  case ULONG:
-  case LONG:
-  case DOUBLE:
+  case CommonEnums::IOComponent::UNKNOWNCOMPONENTTYPE:
+  case CommonEnums::IOComponent::CHAR:
+  case CommonEnums::IOComponent::USHORT:
+  case CommonEnums::IOComponent::UINT:
+  case CommonEnums::IOComponent::ULONG:
+  case CommonEnums::IOComponent::LONG:
+  case CommonEnums::IOComponent::DOUBLE:
     break;
   }
   return returnValue;

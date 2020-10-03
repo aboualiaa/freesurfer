@@ -558,10 +558,10 @@ IMAGE *ImageApplyOffset(IMAGE *Isrc, IMAGE *Ioffset, IMAGE *Idst) {
               use an offset vector field to specify edge locations.
 ----------------------------------------------------------------------*/
 IMAGE *ImageOffsetMedialAxis(IMAGE *Ioffset, IMAGE *Iedge) {
-  int    x, y, rows, cols, dx, dy;
-  float *dx_pix, *dy_pix;
-  UCHAR *edge;
-  IMAGE *Iout;
+  int            x, y, rows, cols, dx, dy;
+  float *        dx_pix, *dy_pix;
+  unsigned char *edge;
+  IMAGE *        Iout;
 
   rows = Ioffset->rows;
   cols = Ioffset->cols;

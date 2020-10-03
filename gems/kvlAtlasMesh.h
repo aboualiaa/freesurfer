@@ -32,7 +32,7 @@ struct ReferenceTetrahedronInfo {
   double m_Z43;
 };
 
-using AtlasAlphasType = itk::Array<float>;
+typedef itk::Array<float> AtlasAlphasType;
 
 struct PointParameters {
   AtlasAlphasType m_Alphas;
@@ -44,24 +44,25 @@ struct PointParameters {
 
 // Some typedefs
 #ifndef USE_DYNAMIC_MESH
-using AtlasMeshTraits =
-    itk::DefaultStaticMeshTraits<PointParameters, 3, 3, double, double,
-                                 ReferenceTetrahedronInfo>;
+typedef itk::DefaultStaticMeshTraits<PointParameters, 3, 3, double, double,
+                                     ReferenceTetrahedronInfo>
+    AtlasMeshTraits;
 #else
 typedef itk::DefaultDynamicMeshTraits<PointParameters, 3, 3, double, double,
                                       ReferenceTetrahedronInfo>
     AtlasMeshTraits;
 #endif
 
-using AtlasMesh = itk::Mesh<PointParameters, 3, AtlasMeshTraits>;
+typedef itk::Mesh<PointParameters, 3, AtlasMeshTraits> AtlasMesh;
 
-using AtlasPositionGradientType = itk::Vector<double, 3>;
+typedef itk::Vector<double, 3> AtlasPositionGradientType;
 #ifndef USE_DYNAMIC_MESH
-using AtlasPositionGradientContainerType =
-    itk::VectorContainer<AtlasMesh::PointIdentifier, AtlasPositionGradientType>;
+typedef itk::VectorContainer<AtlasMesh::PointIdentifier,
+                             AtlasPositionGradientType>
+    AtlasPositionGradientContainerType;
 #else
-using AtlasPositionGradientContainerType =
-    itk::MapContainer<AtlasMesh::PointIdentifier, AtlasPositionGradientType>;
+typedef itk::MapContainer<AtlasMesh::PointIdentifier, AtlasPositionGradientType>
+    AtlasPositionGradientContainerType;
 #endif
 struct Curvature {
   float m_Curvature_dxdx;
@@ -100,8 +101,8 @@ struct Curvature {
 };
 
 #ifndef USE_DYNAMIC_MESH
-using AtlasPositionCurvatureContainerType =
-    itk::VectorContainer<AtlasMesh::PointIdentifier, Curvature>;
+typedef itk::VectorContainer<AtlasMesh::PointIdentifier, Curvature>
+    AtlasPositionCurvatureContainerType;
 #else
 typedef itk::MapContainer<AtlasMesh::PointIdentifier, Curvature>
     AtlasPositionCurvatureContainerType;

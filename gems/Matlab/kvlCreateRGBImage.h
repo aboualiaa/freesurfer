@@ -21,9 +21,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(CreateRGBImage, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // image = kvlCreateImage( r,g,b,a )
@@ -54,10 +53,10 @@ public:
 
     // Loop over all voxels and copy contents
 
-    auto *data1 = static_cast<unsigned char *>(mxGetData(prhs[0]));
-    auto *data2 = static_cast<unsigned char *>(mxGetData(prhs[1]));
-    auto *data3 = static_cast<unsigned char *>(mxGetData(prhs[2]));
-    auto *data4 = static_cast<unsigned char *>(mxGetData(prhs[3]));
+    unsigned char *data1 = static_cast<unsigned char *>(mxGetData(prhs[0]));
+    unsigned char *data2 = static_cast<unsigned char *>(mxGetData(prhs[1]));
+    unsigned char *data3 = static_cast<unsigned char *>(mxGetData(prhs[2]));
+    unsigned char *data4 = static_cast<unsigned char *>(mxGetData(prhs[3]));
     itk::ImageRegionIterator<RGBAImageType> it(RGBAImage,
                                                RGBAImage->GetBufferedRegion());
     RGBAPixelType                           pixel;
@@ -90,13 +89,11 @@ public:
   }
 
 protected:
-  CreateRGBImage() = default;
-  ;
-  ~CreateRGBImage() override = default;
-  ;
+  CreateRGBImage(){};
+  virtual ~CreateRGBImage(){};
 
-  CreateRGBImage(const Self &); // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  CreateRGBImage(const Self &); //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

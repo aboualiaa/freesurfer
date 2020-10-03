@@ -12,11 +12,11 @@ public:
   ~AtlasMeshValueDrawer() {}
 
   // standard class typedefs
-  using Self            = AtlasMeshValueDrawer;
-  using Superclass      = AtlasMeshRasterizor;
-  using AtlasValuesType = itk::Array<double>;
-  using Pointer         = itk::SmartPointer<Self>;
-  using ConstPointer    = itk::SmartPointer<const Self>;
+  typedef AtlasMeshValueDrawer          Self;
+  typedef AtlasMeshRasterizor           Superclass;
+  typedef itk::Array<double>            AtlasValuesType;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   // method for creation through the object factory
   itkNewMacro(Self);
@@ -25,7 +25,7 @@ public:
   itkTypeMacro(AtlasMeshValueDrawer, itk::Object);
 
   // image type
-  using ImageType = itk::Image<AtlasValuesType, 3>;
+  typedef itk::Image<AtlasValuesType, 3> ImageType;
 
   // set image region
   void SetRegions(const ImageType::RegionType &region, int nframes) {
@@ -57,7 +57,7 @@ private:
   void operator=(const Self &);       // purposely not implemented
 
   int                m_NumFrames = 0;
-  double const *     m_Values    = nullptr;
+  double const *     m_Values    = 0;
   ImageType::Pointer m_Image     = nullptr;
 };
 

@@ -9,10 +9,10 @@ namespace kvl {
 class Histogrammer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self         = Histogrammer;
-  using Superclass   = AtlasMeshRasterizor;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef Histogrammer                  Self;
+  typedef AtlasMeshRasterizor           Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -21,15 +21,15 @@ public:
   itkTypeMacro(Histogrammer, itk::Object);
 
   /** Some typedefs */
-  using ImageType                            = itk::Image<float, 3>;
-  using BinnedImageType                      = itk::Image<int, 3>;
-  using HistogramType                        = std::vector<std::vector<double>>;
-  using ConditionalIntensityDistributionType = std::vector<double>;
+  typedef itk::Image<float, 3>             ImageType;
+  typedef itk::Image<int, 3>               BinnedImageType;
+  typedef std::vector<std::vector<double>> HistogramType;
+  typedef std::vector<double>              ConditionalIntensityDistributionType;
 
   /** */
   void SetImage(const ImageType *image) {
     m_Image        = image;
-    m_BinnedImage  = nullptr;
+    m_BinnedImage  = 0;
     m_NumberOfBins = 0;
   }
 
@@ -43,7 +43,7 @@ public:
     if (m_BinnedImage) {
       // Check if number of bins has changed. If so, forgot cached binned image
       if (conditionalIntensityDistributions[0].size() != m_NumberOfBins) {
-        m_BinnedImage  = nullptr;
+        m_BinnedImage  = 0;
         m_NumberOfBins = 0;
       }
     }
@@ -79,8 +79,8 @@ protected:
                             int                       threadNumber);
 
 private:
-  Histogrammer(const Self &);   // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  Histogrammer(const Self &);   //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   void ComputeRobustRange(const ImageType *image, double &robustMin,

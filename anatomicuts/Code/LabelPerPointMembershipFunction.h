@@ -9,10 +9,10 @@ class LabelPerPointMembershipFunction
     : public itk::Statistics::MembershipFunctionBase<TVector> {
 public:
   /** Standard class typedefs */
-  using Self         = LabelPerPointMembershipFunction<TVector>;
-  using Superclass   = itk::Statistics::MembershipFunctionBase<TVector>;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef LabelPerPointMembershipFunction                  Self;
+  typedef itk::Statistics::MembershipFunctionBase<TVector> Superclass;
+  typedef itk::SmartPointer<Self>                          Pointer;
+  typedef itk::SmartPointer<const Self>                    ConstPointer;
 
   /** Strandard macros */
   itkTypeMacro(LabelPerPointMembershipFunction,
@@ -20,12 +20,12 @@ public:
   //	itkNewMacro(Self);
 
   /** Typedef alias for the measurement vectors */
-  using MeasurementVectorType = TVector;
-  using CentroidType          = TVector;
+  typedef TVector MeasurementVectorType;
+  typedef TVector CentroidType;
 
   /** Typedef to represent the length of measurement vectors */
-  using MeasurementVectorSizeType =
-      typename Superclass::MeasurementVectorSizeType;
+  typedef
+      typename Superclass::MeasurementVectorSizeType MeasurementVectorSizeType;
 
   void SetCentroid(const MeasurementVectorType *c) { this->m_Centroid = c; }
   const MeasurementVectorType *GetCentroid() const { return this->m_Centroid; }
@@ -37,8 +37,8 @@ public:
   double GetVariance() { return this->m_Variance / this->childs.size(); }
 
   /**
-   * Method to get probability of an instance. The return value is the
-   * value of the density function, not probability. */
+		 * Method to get probability of an instance. The return value is the
+		 * value of the density function, not probability. */
   double Evaluate(const MeasurementVectorType *measurement) const {
     return this->Evaluate(this->GetCentroid(), measurement);
   }
@@ -67,8 +67,8 @@ public:
   }
 
 protected:
-  LabelPerPointMembershipFunction();
-  inline virtual ~LabelPerPointMembershipFunction() {}
+  LabelPerPointMembershipFunction(void);
+  inline virtual ~LabelPerPointMembershipFunction(void) {}
   void PrintSelf(std::ostream &os, itk::Indent indent) const;
 
 private:

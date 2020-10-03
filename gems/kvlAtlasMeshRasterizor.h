@@ -3,20 +3,20 @@
 
 #include "kvlAtlasMesh.h"
 
-#include "itk_5_4_map.h"
+using namespace itk;
 
 namespace kvl {
 
 class AtlasMeshRasterizor : public itk::Object {
 public:
   /** Standard class typedefs. */
-  using Self         = AtlasMeshRasterizor;
-  using Superclass   = itk::Object;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshRasterizor           Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
-  // itkNewMacro( Self );
+  //itkNewMacro( Self );
 
   /** Run-time type information (and related methods). */
   itkTypeMacro(AtlasMeshRasterizor, itk::Object);
@@ -47,18 +47,17 @@ protected:
    * control to ThreadedGenerateData(). */
   static ITK_THREAD_RETURN_TYPE ThreaderCallback(void *arg);
 
-  /** Internal structure used for passing information to the threading library
-   */
+  /** Internal structure used for passing information to the threading library */
   struct ThreadStruct {
     Pointer                                m_Rasterizor;
     AtlasMesh::ConstPointer                m_Mesh;
     std::vector<AtlasMesh::CellIdentifier> m_TetrahedronIds;
-    // std::set< AtlasMesh::CellIdentifier >  m_TetrahedronIds;
+    //std::set< AtlasMesh::CellIdentifier >  m_TetrahedronIds;
   };
 
 private:
-  AtlasMeshRasterizor(const Self &); // purposely not implemented
-  void operator=(const Self &);      // purposely not implemented
+  AtlasMeshRasterizor(const Self &); //purposely not implemented
+  void operator=(const Self &);      //purposely not implemented
 
   int m_NumberOfThreads;
 };

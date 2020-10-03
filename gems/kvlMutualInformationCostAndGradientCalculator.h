@@ -8,35 +8,32 @@ namespace kvl {
 
 /**
  *
- * Implementation of the D'Agostino MICCAI 2004 flavor of
- * probabilistic-atlas-based Mutual Information, with some useful tricks/hacks
- * happily borrowed from John Ashburner's spm_maff8.m implementation in SPM12,
- * including:
- *
- *    1. Iterative estimation of the class-conditional distributions with EM.
- * Standard "partial volume interpolation" (PVI) based Mutual Information
- * implementations (cf. Maes TMI 1997) effectively only do a single iteration of
- * this
- *
- *   2. (Very) approximate gradients that completely ignore the effect of
- * changing the registration position on the class-conditional distributions; of
- * voxels entering/leaving the overlapping regions in which the histogram is
- * computed; and even of non-smooth entering/leaving of such voxels (which is
- *       what the PVI thing was originally all about, if I recall correctly)
- *
- * The implementation could be sped up by moving the EM stuff into the
- * kvlHistogrammer class, so that the priors need to be rasterized only once
- * (using existing classes); however I'm really too lazy for that now.
- *
+ * Implementation of the D'Agostino MICCAI 2004 flavor of probabilistic-atlas-based Mutual Information, 
+ * with some useful tricks/hacks happily borrowed from John Ashburner's spm_maff8.m implementation in
+ * SPM12, including:
+ * 
+ *    1. Iterative estimation of the class-conditional distributions with EM. Standard "partial volume
+ *       interpolation" (PVI) based Mutual Information implementations (cf. Maes TMI 1997) effectively only
+ *       do a single iteration of this
+ * 
+ *   2. (Very) approximate gradients that completely ignore the effect of changing the registration position
+ *       on the class-conditional distributions; of voxels entering/leaving the overlapping regions in
+ *       which the histogram is computed; and even of non-smooth entering/leaving of such voxels (which is
+ *       what the PVI thing was originally all about, if I recall correctly) 
+ * 
+ * The implementation could be sped up by moving the EM stuff into the kvlHistogrammer class, so that 
+ * the priors need to be rasterized only once (using existing classes); however I'm really too lazy for 
+ * that now.
+ * 
  */
 class MutualInformationCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self         = MutualInformationCostAndGradientCalculator;
-  using Superclass   = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef MutualInformationCostAndGradientCalculator Self;
+  typedef AtlasMeshPositionCostAndGradientCalculator Superclass;
+  typedef itk::SmartPointer<Self>                    Pointer;
+  typedef itk::SmartPointer<const Self>              ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -46,7 +43,7 @@ public:
                AtlasMeshPositionCostAndGradientCalculator);
 
   /** Some typedefs */
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
   /** */
   void SetImage(const ImageType *image);
@@ -72,8 +69,8 @@ protected:
 
 private:
   MutualInformationCostAndGradientCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   Histogrammer::Pointer m_Histogrammer;

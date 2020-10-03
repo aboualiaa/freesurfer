@@ -11,10 +11,10 @@ namespace kvl {
 class AtlasMeshSummaryDrawer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshSummaryDrawer;
-  using Superclass   = AtlasMeshRasterizor;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshSummaryDrawer        Self;
+  typedef AtlasMeshRasterizor           Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -23,7 +23,7 @@ public:
   itkTypeMacro(AtlasMeshSummaryDrawer, itk::Object);
 
   /** Some typedefs */
-  using ImageType = itk::Image<itk::RGBAPixel<unsigned char>, 3>;
+  typedef itk::Image<itk::RGBAPixel<unsigned char>, 3> ImageType;
 
   /** */
   void SetRegions(const ImageType::RegionType &region) {
@@ -50,8 +50,8 @@ protected:
                             int                       threadNumber);
 
 private:
-  AtlasMeshSummaryDrawer(const Self &); // purposely not implemented
-  void operator=(const Self &);         // purposely not implemented
+  AtlasMeshSummaryDrawer(const Self &); //purposely not implemented
+  void operator=(const Self &);         //purposely not implemented
 
   ImageType::Pointer                   m_Image;
   CompressionLookupTable::ConstPointer m_CompressionLookupTable;

@@ -1,4 +1,6 @@
 #include "kvlAtlasMeshRasterizor.h"
+#include "itkPlatformMultiThreader.h"
+
 #include <mutex>
 
 static std::mutex rasterizorMutex;
@@ -24,9 +26,9 @@ void AtlasMeshRasterizor ::Rasterize(const AtlasMesh *mesh) {
   for (AtlasMesh::CellsContainer::ConstIterator cellIt =
            mesh->GetCells()->Begin();
        cellIt != mesh->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() == AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    if (cellIt.Value()->GetType() == itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       str.m_TetrahedronIds.push_back(cellIt.Index());
-      // str.m_TetrahedronIds.insert( cellIt.Index() );
+      //str.m_TetrahedronIds.insert( cellIt.Index() );
     }
   }
 
@@ -43,7 +45,8 @@ void AtlasMeshRasterizor ::Rasterize(const AtlasMesh *mesh) {
 //
 //
 //
-ITK_THREAD_RETURN_TYPE AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
+ITK_THREAD_RETURN_TYPE
+AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
 
   // Retrieve the input arguments
   const int threadNumber =
@@ -55,11 +58,10 @@ ITK_THREAD_RETURN_TYPE AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
                            ->UserData);
 
 #if 1
-  // Compute up-front which tetrahedra this thread should be responsible for.
-  // This isn't a particularly good way of load-balancing, but it does allow us
-  // to get the exact same round-off errors (by adding many floating-point
-  // contributions) every single time we repeat the same computation on the same
-  // computer with the same number of threads.
+  // Compute up-front which tetrahedra this thread should be responsible for. This isn't a
+  // particularly good way of load-balancing, but it does allow us to get the exact same
+  // round-off errors (by adding many floating-point contributions) every single time we
+  // repeat the same computation on the same computer with the same number of threads.
   const int numberOfTetrahedra = str->m_TetrahedronIds.size();
 #if 0
   const int  numberOfTetrahedraPerThread =

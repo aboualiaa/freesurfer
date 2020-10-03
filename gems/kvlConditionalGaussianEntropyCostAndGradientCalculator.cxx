@@ -2,6 +2,7 @@
 
 #include "kvlTetrahedronInteriorConstIterator.h"
 #include <itkMath.h>
+// #include "itkTimeProbe.h"
 
 #define SUBTRACT_MARGINAL_ENTROPY 0
 
@@ -13,7 +14,7 @@ namespace kvl {
 ConditionalGaussianEntropyCostAndGradientCalculator ::
     ConditionalGaussianEntropyCostAndGradientCalculator() {
 
-  m_Image = nullptr;
+  m_Image = 0;
 }
 
 //
@@ -37,8 +38,8 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::SetImage(
 void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
     const AtlasMesh *mesh) {
   //
-  // itk::TimeProbe clock;
-  // clock.Start();
+  //itk::TimeProbe clock;
+  //clock.Start();
 
   // Clean up any previous mess
   m_Abort = false;
@@ -51,22 +52,21 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
   // m_ThreadSpecificPriorCosts.clear();
   // m_ThreadSpecificPriorGradients.clear();
 
-  // Make sure thread-specific, class-specific quantities we're going to collect
-  // are defined and initialized to zero
+  // Make sure thread-specific, class-specific quantities we're going to collect are defined and
+  // initialized to zero
   const int numberOfClasses =
       mesh->GetPointData()->Begin().Value().m_Alphas.Size();
   AtlasPositionGradientType zeroEntry(0.0f);
 
-  // std::cout << "Preparing..." << std::flush;
+  //std::cout << "Preparing..." << std::flush;
   const bool memoryAlreadyAllocated = (m_ThreadSpecificNs.size() > 0);
-  // std::cout << "memoryAlreadyAllocated: " << memoryAlreadyAllocated <<
-  // std::endl;
+  //std::cout << "memoryAlreadyAllocated: " << memoryAlreadyAllocated << std::endl;
 
   for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
        threadNumber++) {
     if (!m_OnlyDeformationPrior) {
       if (!memoryAlreadyAllocated) {
-        // std::cout << "Allocating memory" << std::endl;
+        //std::cout << "Allocating memory" << std::endl;
         std::vector<double> Ns;
         std::vector<double> Ls;
         std::vector<double> Qs;
@@ -113,7 +113,7 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
         m_ThreadSpecificQGradients.push_back(QGradients);
 
       } else {
-        // std::cout << "zeroing existing memory" << std::endl;
+        //std::cout << "zeroing existing memory" << std::endl;
 
         // Memory already allocated; just zero out the values
         m_ThreadSpecificNs[threadNumber].assign(numberOfClasses, 0.0);
@@ -142,7 +142,7 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
     if (!m_IgnoreDeformationPrior) {
       if (!memoryAlreadyAllocated) {
-        // std::cout << "Allocating memory" << std::endl;
+        //std::cout << "Allocating memory" << std::endl;
 
         //
         m_ThreadSpecificPriorCosts.push_back(0.0);
@@ -155,7 +155,7 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
         }
         m_ThreadSpecificPriorGradients.push_back(priorGradient);
       } else {
-        // std::cout << "Zeroing out memory" << std::endl;
+        //std::cout << "Zeroing out memory" << std::endl;
 
         m_ThreadSpecificPriorCosts[threadNumber] = 0.0;
         for (AtlasPositionGradientContainerType::Iterator priorGradientIt =
@@ -170,20 +170,18 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
   } // End loop over threads
 
-  // clock.Stop();
-  // std::cout << "Time taken by initialization: " << clock.GetMean() <<
-  // std::endl;
+  //clock.Stop();
+  //std::cout << "Time taken by initialization: " << clock.GetMean() << std::endl;
 
   // Now rasterize
-  // clock.Reset();
-  // clock.Start();
+  //clock.Reset();
+  //clock.Start();
   AtlasMeshRasterizor::Rasterize(mesh);
-  // clock.Stop();
-  // std::cout << "Time taken by rasterization: " << clock.GetMean() <<
-  // std::endl;
+  //clock.Stop();
+  //std::cout << "Time taken by rasterization: " << clock.GetMean() << std::endl;
 
-  // clock.Reset();
-  // clock.Start();
+  //clock.Reset();
+  //clock.Start();
 
   // Initialize gradient-to-return to zero
   m_PositionGradient = AtlasPositionGradientContainerType::New();
@@ -226,10 +224,9 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
     } // End loop over threads
   }
-  // std::cout << "priorCost: " << priorCost << std::endl;
+  //std::cout << "priorCost: " << priorCost << std::endl;
 
-  // Stitch together the results based on thread-specific, class-specific
-  // quantities
+  // Stitch together the results based on thread-specific, class-specific quantities
   double dataCost = 0.0;
 
   if (!m_OnlyDeformationPrior) {
@@ -264,10 +261,9 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
       marginalQ += Q;
 #endif
       // //
-      // std::cout << "variance[ " << classNumber << " ]: " << variance <<
-      // std::endl; std::cout << "N[ " << classNumber << " ]: " << N <<
-      // std::endl; std::cout << "entropy[ " << classNumber << " ]: " << entropy
-      // << std::endl;
+      // std::cout << "variance[ " << classNumber << " ]: " << variance << std::endl;
+      // std::cout << "N[ " << classNumber << " ]: " << N << std::endl;
+      // std::cout << "entropy[ " << classNumber << " ]: " << entropy << std::endl;
 
     } // End loop over classes
     dataCost /= marginalN;
@@ -282,8 +278,8 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 #endif
 
     //
-    // std::cout << "marginalN: " << marginalN << std::endl;
-    // std::cout << "dataCost: " << dataCost << std::endl;
+    //std::cout << "marginalN: " << marginalN << std::endl;
+    //std::cout << "dataCost: " << dataCost << std::endl;
 
     // Add the various contributions to the gradient
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
@@ -317,13 +313,13 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
       const double Qweight = (1 / variance) / marginalN;
 #endif
 
-      // std::cout << "N[ " << classNumber << " ]: " << N << std::endl;
-      // std::cout << "L[ " << classNumber << " ]: " << L << std::endl;
-      // std::cout << "Q[ " << classNumber << " ]: " << Q << std::endl;
-      // std::cout << "Nweight[ " << classNumber << " ]: " << Nweight <<
-      // std::endl; std::cout << "Lweight[ " << classNumber << " ]: " << Lweight
-      // << std::endl; std::cout << "Qweight[ " << classNumber << " ]: " <<
-      // Qweight << std::endl; std::cout << std::endl;
+      //std::cout << "N[ " << classNumber << " ]: " << N << std::endl;
+      //std::cout << "L[ " << classNumber << " ]: " << L << std::endl;
+      //std::cout << "Q[ " << classNumber << " ]: " << Q << std::endl;
+      //std::cout << "Nweight[ " << classNumber << " ]: " << Nweight << std::endl;
+      //std::cout << "Lweight[ " << classNumber << " ]: " << Lweight << std::endl;
+      //std::cout << "Qweight[ " << classNumber << " ]: " << Qweight << std::endl;
+      //std::cout << std::endl;
 
       for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
            threadNumber++) {
@@ -346,20 +342,18 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
     } // End loop over classes
 
-    // std::cout << "- and done" << std::endl;
+    //std::cout << "- and done" << std::endl;
 #if SUBTRACT_MARGINAL_ENTROPY
-    // std::cout << "dataCost - marginalEntropy: " << dataCost << " - " <<
-    // marginalEntropy << std::endl;
+    // std::cout << "dataCost - marginalEntropy: " << dataCost << " - " << marginalEntropy << std::endl;
 
     dataCost -= marginalEntropy;
 #endif
   }
 
-  // std::cout << "dataCost: " << dataCost << std::endl;
+  //std::cout << "dataCost: " << dataCost << std::endl;
 
-  // clock.Stop();
-  // std::cout << "Time taken by results gathering: " << clock.GetMean() <<
-  // std::endl;
+  //clock.Stop();
+  //std::cout << "Time taken by results gathering: " << clock.GetMean() << std::endl;
 
   //
   m_MinLogLikelihoodTimesPrior = dataCost + priorCost;
@@ -367,22 +361,22 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
   // Take care of the desired boundary conditions
   switch (m_BoundaryCondition) {
   case SLIDING: {
-    // std::cout << "SLIDING" << std::endl;
+    //std::cout << "SLIDING" << std::endl;
     this->ImposeSlidingBoundaryConditions(mesh);
     break;
   }
   case AFFINE: {
-    // std::cout << "AFFINE" << std::endl;
+    //std::cout << "AFFINE" << std::endl;
     this->ImposeAffineBoundaryConditions(mesh);
     break;
   }
   case TRANSLATION: {
-    // std::cout << "TRANSLATION" << std::endl;
+    //std::cout << "TRANSLATION" << std::endl;
     this->ImposeTranslationBoundaryConditions(mesh);
     break;
   }
   default: {
-    // std::cout << "NONE" << std::endl;
+    //std::cout << "NONE" << std::endl;
     break;
   }
   }
@@ -475,7 +469,7 @@ bool ConditionalGaussianEntropyCostAndGradientCalculator ::RasterizeTetrahedron(
     for (; !it.IsAtEnd(); ++it) {
       // Skip voxels with zero intensity
       if (it.Value() == 0) {
-        // std::cout << "Skipping: " << it.Value() << std::endl;
+        //std::cout << "Skipping: " << it.Value() << std::endl;
         continue;
       }
 

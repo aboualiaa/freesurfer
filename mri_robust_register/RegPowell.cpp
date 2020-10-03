@@ -17,16 +17,31 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
-#include <iomanip>
-
-#include "CostFunctions.h"
 #include "RegPowell.h"
-#include "fs_vnl/fs_powell.h"
+#include "CostFunctions.h"
+#include "MyMRI.h"
+#include "MyMatrix.h"
 
-RegPowell *                    RegPowell::tocurrent = nullptr;
-MRI *                          RegPowell::scf       = nullptr;
-MRI *                          RegPowell::tcf       = nullptr;
+#include "numerics.h"
+
+#include "MyMatrix.h"
+#include "RegistrationStep.h"
+#include "fs_vnl/fs_cost_function.h"
+#include "fs_vnl/fs_powell.h"
+#include <cassert>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <vnl/algo/vnl_powell.h>
+#include <vnl/vnl_cost_function.h>
+#include <vnl/vnl_inverse.h>
+
+using namespace std;
+
+RegPowell *                    RegPowell::tocurrent = NULL;
+MRI *                          RegPowell::scf       = NULL;
+MRI *                          RegPowell::tcf       = NULL;
 int                            RegPowell::pcount    = 0;
 vnl_matrix_fixed<double, 4, 4> RegPowell::mh1 =
     vnl_matrix_fixed<double, 4, 4>();
@@ -37,60 +52,56 @@ int  RegPowell::subsamp = 1;
 bool RegPowell::is2d    = false;
 
 class my_cost_function : public fs_cost_function
-// class my_cost_function : public vnl_cost_function
+//class my_cost_function : public vnl_cost_function
 {
 private:
   double (*mFunction)(const vnl_vector<double> &);
 
 public:
   my_cost_function(double (*function)(const vnl_vector<double> &), int pdim)
-      : fs_cost_function(nullptr), mFunction(function) {
+      : fs_cost_function(NULL), mFunction(function) {
     set_number_of_unknowns(pdim);
   }
 
-  //  my_cost_function( double (*function)(const vnl_vector<double> &), int pdim
-  //  ):vnl_cost_function(pdim),mFunction(function){};
+  //  my_cost_function( double (*function)(const vnl_vector<double> &), int pdim ):vnl_cost_function(pdim),mFunction(function){};
   virtual double f(const vnl_vector<double> &p) { return (*mFunction)(p); }
 };
 
 double RegPowell::costFunction(const vnl_vector<double> &p) {
-  // std::cout << "RegPowell::costFunction " << flush;
+  //cout << "RegPowell::costFunction " << flush;
 
   // transform into matrix and iscale double
-  static std::pair<vnl_matrix_fixed<double, 4, 4>, double> Md;
+  static pair<vnl_matrix_fixed<double, 4, 4>, double> Md;
   //   if (tocurrent->is2d)
   //   {
-  //     Md =
-  //     RegistrationStep<double>::convertP2Md2(p,tocurrent->iscale,tocurrent->rtype);
+  //     Md = RegistrationStep<double>::convertP2Md2(p,tocurrent->iscale,tocurrent->rtype);
   //   }
   //   else
-  //     Md =
-  //     RegistrationStep<double>::convertP2Md(p,tocurrent->iscale,tocurrent->rtype);
+  //     Md = RegistrationStep<double>::convertP2Md(p,tocurrent->iscale,tocurrent->rtype);
   Md = tocurrent->convertP2Md(p);
   //  Md.second = exp(Md.second); // compute full factor (source to target)
-  // std::cout << std::endl;
-  // std::cout << " rtype : " << tocurrent->rtype << std::endl;
-  // std::cout << " iscale : " << Md.second << std::endl;
-  // std::cout << " trans dof: " << tocurrent->trans->getDOF() << std::endl;
-  //  vnl_matlab_print(std::cerr,p,"p",vnl_matlab_print_format_long);
-  //  vnl_matlab_print(std::cerr,Md.first,"M",vnl_matlab_print_format_long);
-  // vnl_matlab_print(std::cerr,mh2,"mh2",vnl_matlab_print_format_long);
-  // vnl_matlab_print(std::cerr,mh1,"mh1",vnl_matlab_print_format_long);
+  //cout << endl;
+  //cout << " rtype : " << tocurrent->rtype << endl;
+  //cout << " iscale : " << Md.second << endl;
+  //cout << " trans dof: " << tocurrent->trans->getDOF() << endl;
+  //  vnl_matlab_print(vcl_cerr,p,"p",vnl_matlab_print_format_long);
+  //  vnl_matlab_print(vcl_cerr,Md.first,"M",vnl_matlab_print_format_long);
+  //vnl_matlab_print(vcl_cerr,mh2,"mh2",vnl_matlab_print_format_long);
+  //vnl_matlab_print(vcl_cerr,mh1,"mh1",vnl_matlab_print_format_long);
 
   // new full M = mh2 * cm * mh1
   Md.first = mh2 * Md.first * mh1;
 
-  // vnl_matlab_print(std::cerr,Md.first,"Madj",vnl_matlab_print_format_long);
-  // exit(1);
-  // maps from half way space (or target if not sym) back to source and to
-  // target
+  //vnl_matlab_print(vcl_cerr,Md.first,"Madj",vnl_matlab_print_format_long);
+  //exit(1);
+  // maps from half way space (or target if not sym) back to source and to target
   static vnl_matrix_fixed<double, 4, 4> msi;
   static vnl_matrix_fixed<double, 4, 4> mti;
 
   if (tocurrent->symmetry) {
     // compute new half way maps and here assign to mti (hwspace to target)
     mti = MyMatrix::MatrixSqrt(Md.first);
-    // vnl_matlab_print(std::cerr,mti,"Mti",vnl_matlab_print_format_long);
+    //vnl_matlab_print(vcl_cerr,mti,"Mti",vnl_matlab_print_format_long);
     // do not just assume m = mti*mti, rather m = mti * mh2
     // for sampling source we need mh2^-1 = m^-1 * mti
     msi = vnl_inverse(Md.first) * mti;
@@ -99,17 +110,15 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
     msi = vnl_inverse(Md.first);
     mti.set_identity();
   }
-  // vnl_matlab_print(std::cerr,mi,"minv",vnl_matlab_print_format_long);
-  // std::cout << "tcf: " << MRIgetVoxVal(tcf,36,36,36,0) << " scf : " <<
-  // MRIgetVoxVal(scf,36,36,36,0) << std::endl; static vnl_matrix < double > HM;
-  // static vnl_vector_fixed < double, 3 > ss;
-  // ss[0] = tocurrent->subsamp; ss[1] = tocurrent->subsamp; ss[2] =
-  // tocurrent->subsamp;
+  //vnl_matlab_print(vcl_cerr,mi,"minv",vnl_matlab_print_format_long);
+  //cout << "tcf: " << MRIgetVoxVal(tcf,36,36,36,0) << " scf : " << MRIgetVoxVal(scf,36,36,36,0) << endl;
+  //static vnl_matrix < double > HM;
+  //static vnl_vector_fixed < double, 3 > ss;
+  //ss[0] = tocurrent->subsamp; ss[1] = tocurrent->subsamp; ss[2] = tocurrent->subsamp;
   ////cout <<  ss[0]<< " " << flush;
-  // hist2(HM, msi,mti,scf,tcf,ss);
-  // hist2(HM,
-  // msi,mti,scf,tcf,tocurrent->subsamp,tocurrent->subsamp,tocurrent->subsamp);
-  ////vnl_matlab_print(std::cerr,HM,"HM",vnl_matlab_print_format_long);
+  //hist2(HM, msi,mti,scf,tcf,ss);
+  //hist2(HM, msi,mti,scf,tcf,tocurrent->subsamp,tocurrent->subsamp,tocurrent->subsamp);
+  ////vnl_matlab_print(vcl_cerr,HM,"HM",vnl_matlab_print_format_long);
 
   // special case for sum of squared differences:
   if (tocurrent->costfun == LS || tocurrent->costfun == TB ||
@@ -127,23 +136,19 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
     }
     switch (tocurrent->costfun) {
     case LS:
-      // if (tocurrent->iscale)
+      //if (tocurrent->iscale)
       dd = CostFunctions::leastSquares(scf, tcf, msi, mti, tocurrent->subsamp,
                                        tocurrent->subsamp, tocurrent->subsamp,
                                        si, sii);
-      // else // this will not really be much faster (maybe a second):
-      //  dd =
-      //  CostFunctions::leastSquares(scf,tcf,msi,mti,tocurrent->subsamp,tocurrent->subsamp,
-      //  tocurrent->subsamp);
+      //else // this will not really be much faster (maybe a second):
+      //  dd = CostFunctions::leastSquares(scf,tcf,msi,mti,tocurrent->subsamp,tocurrent->subsamp, tocurrent->subsamp);
       break;
     case TB:
       dd = CostFunctions::tukeyBiweight(scf, tcf, msi, mti, tocurrent->subsamp,
                                         tocurrent->subsamp, tocurrent->subsamp);
       break;
     case LNCC:
-      // dd =
-      // CostFunctions::localNCC(scf,tcf,msi,mti,tocurrent->subsamp,tocurrent->subsamp,
-      // tocurrent->subsamp);
+      //dd = CostFunctions::localNCC(scf,tcf,msi,mti,tocurrent->subsamp,tocurrent->subsamp, tocurrent->subsamp);
       dd = -CostFunctions::localNCC(scf, tcf, msi, mti, 5, 5, 5);
       break;
     case NCC:
@@ -156,9 +161,8 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
                                   sii);
       break;
     default:
-      std::cout
-          << " RegPowell::costFunction ERROR cannot deal with cost function "
-          << tocurrent->costfun << " ! " << std::endl;
+      cout << " RegPowell::costFunction ERROR cannot deal with cost function "
+           << tocurrent->costfun << " ! " << endl;
       exit(1);
     }
 
@@ -170,11 +174,11 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
   static JointHisto H;
   H.create(scf, tcf, msi, mti, tocurrent->subsamp, tocurrent->subsamp,
            tocurrent->subsamp);
-  // H.set(HM);
-  // H.print();
-  // exit(1);
+  //H.set(HM);
+  //H.print();
+  //exit(1);
 
-  // H.clip(0.000001);
+  //H.clip(0.000001);
 
   H.smooth(7);
   double dd;
@@ -191,31 +195,28 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
   case NCC:
     dd = -H.computeNCC();
     break;
-  // case LS:
+  //case LS:
   //  dd = H.computeLS();
   //  break;
   case SCR:
     dd = -H.computeSCR();
     break;
   default:
-    std::cout
-        << " RegPowell::costFunction ERROR cannot deal with cost function "
-        << tocurrent->costfun << " ! " << std::endl;
+    cout << " RegPowell::costFunction ERROR cannot deal with cost function "
+         << tocurrent->costfun << " ! " << endl;
     exit(1);
   }
 
   // report eval:
   if (tocurrent->debug) {
-    std::cout.setf(std::ios::fixed,
-                   std::ios::floatfield); // floatfield set to fixed
-    std::cout << " e = " << std::setprecision(14) << dd << "  @  "
-              << std::flush;
-    vnl_matlab_print(std::cerr, p, "p", vnl_matlab_print_format_long);
+    cout.setf(ios::fixed, ios::floatfield); // floatfield set to fixed
+    cout << " e = " << setprecision(14) << dd << "  @  " << flush;
+    vnl_matlab_print(cerr, p, "p", vnl_matlab_print_format_long);
     if (icount == 0) {
-      MRI *mri_Swarp = MRIclone(tcf, nullptr);
+      MRI *mri_Swarp = MRIclone(tcf, NULL);
       mri_Swarp = MyMRI::MRIlinearTransform(scf, mri_Swarp, vnl_inverse(msi));
       MRI *mri_Twarp = MRIclone(
-          tcf, nullptr); // bring them to same space (just use dst geometry)
+          tcf, NULL); // bring them to same space (just use dst geometry)
       mri_Twarp = MyMRI::MRIlinearTransform(tcf, mri_Twarp, vnl_inverse(mti));
       MRIwrite(mri_Swarp, "shw.mgz");
       MRIwrite(mri_Twarp, "thw.mgz");
@@ -226,7 +227,7 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
   }
   icount++;
 
-  // exit(1);
+  //exit(1);
   return dd;
 
   //   // compute new half way maps
@@ -238,14 +239,13 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
   //   // map both to half way
   //   MRI* mri_Swarp = MRIclone(scf,NULL);
   //   mri_Swarp = MyMRI::MRIlinearTransform(scf,mri_Swarp, mh);
-  //   MRI* mri_Twarp = MRIclone(scf,NULL); // bring them to same space (just
-  //   use src geometry) mri_Twarp = MyMRI::MRIlinearTransform(tcf,mri_Twarp,
-  //   mhi);
+  //   MRI* mri_Twarp = MRIclone(scf,NULL); // bring them to same space (just use src geometry)
+  //   mri_Twarp = MyMRI::MRIlinearTransform(tcf,mri_Twarp, mhi);
   //
   //   // adjust intensity
   //   if (tocurrent->iscale)
   //   {
-  //     //cout << "   - adjusting intensity ( "<< fmd.second << " ) " << std::endl;
+  //     //cout << "   - adjusting intensity ( "<< fmd.second << " ) " << endl;
   //
   //     MyMRI::MRIvalscale(mri_Swarp,mri_Swarp,(1.0+Md.second)*0.5);
   //     MyMRI::MRIvalscale(mri_Twarp,mri_Twarp,(1.0+ 1.0/Md.second)*0.5);
@@ -253,8 +253,8 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
 
   vnl_matrix_fixed<double, 4, 4> mh;
   vnl_matrix_fixed<double, 4, 4> mhi;
-  MRI *                          mri_Swarp = nullptr;
-  MRI *                          mri_Twarp = nullptr;
+  MRI *                          mri_Swarp = NULL;
+  MRI *                          mri_Twarp = NULL;
   tocurrent->mapToNewSpace(Md.first, Md.second, scf, tcf, mri_Swarp, mri_Twarp,
                            mh, mhi);
   if (icount == 0) {
@@ -264,24 +264,22 @@ double RegPowell::costFunction(const vnl_vector<double> &p) {
 
   // compute error
   float d;
-  //  if (tocurrent->robust) d = (float)
-  //  CostFunctions::tukeyBiweight(mri_Swarp,mri_Twarp,tocurrent->sat); else d =
-  //  (float) CostFunctions::leastSquares(mri_Swarp,mri_Twarp);
+  //  if (tocurrent->robust) d = (float) CostFunctions::tukeyBiweight(mri_Swarp,mri_Twarp,tocurrent->sat);
+  //  else d = (float) CostFunctions::leastSquares(mri_Swarp,mri_Twarp);
 
   d = (float)CostFunctions::normalizedMutualInformation(mri_Swarp, mri_Twarp);
-  // d = (float) CostFunctions::MutualInformation(mri_Swarp,mri_Twarp);
+  //d = (float) CostFunctions::MutualInformation(mri_Swarp,mri_Twarp);
 
-  // std::cout << d << std::endl;
+  //cout << d << endl;
 
   icount++;
   if (icount % 100 == 0)
-    std::cout << "*" << std::flush;
+    cout << "*" << flush;
   //    if (icount%20 == 0)
   {
-    // std::cout << endl << " iteration : " << icount << std::endl;
-    std::cerr << icount << "  |  " << std::setprecision(8) << d << "    "
-              << std::flush;
-    vnl_matlab_print(std::cerr, p, "p", vnl_matlab_print_format_long);
+    //cout << endl << " iteration : " << icount << endl;
+    cerr << icount << "  |  " << setprecision(8) << d << "    " << flush;
+    vnl_matlab_print(cerr, p, "p", vnl_matlab_print_format_long);
     //       int ii = icount / 20;
     //       std::stringstream out;
     //       out << ii;
@@ -303,8 +301,8 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
                                                  MRI *mriS, MRI *mriT,
                                                  const vnl_matrix<double> &m,
                                                  double scaleinit) {
-  std::cout << "RegPowell::computeIterativeRegistrationFull" << std::endl;
-  std::cout << " sym: " << symmetry << std::endl;
+  cout << "RegPowell::computeIterativeRegistrationFull" << endl;
+  cout << " sym: " << symmetry << endl;
 
   if (!mriS)
     mriS = mri_source;
@@ -316,8 +314,7 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
   is2d = false;
   if (mriS->depth == 1 || mriT->depth == 1) {
     if (mriT->depth != mriS->depth) {
-      std::cout << "ERROR: both source and target need to be 2D or 3D"
-                << std::endl;
+      cout << "ERROR: both source and target need to be 2D or 3D" << endl;
       exit(1);
     }
     is2d = true;
@@ -330,13 +327,13 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     printf("changing data type from %d to %d (noscale = %d)...\n", mriS->type,
            MRI_UCHAR, no_scale_flag);
     mriS = MRISeqchangeType(mriS, MRI_UCHAR, 0.0, 0.999, no_scale_flag);
-    if (mriS == nullptr) {
+    if (mriS == NULL) {
       printf("ERROR: MRISeqchangeType\n");
       exit(1);
     }
-    // cleanupS = true;
+    //cleanupS = true;
   } else
-    mriS = MRIcopy(mriS, nullptr);
+    mriS = MRIcopy(mriS, NULL);
   MyMRI::MRInorm255(mriS, mriS);
   mriS->outside_val = outsideval;
 
@@ -348,35 +345,35 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
            MRI_UCHAR, no_scale_flag);
 
     mriT = MRISeqchangeType(mriT, MRI_UCHAR, 0.0, 0.999, no_scale_flag);
-    if (mriT == nullptr) {
+    if (mriT == NULL) {
       printf("ERROR: MRISeqchangeType\n");
       exit(1);
     }
-    // cleanupT = true;
+    //cleanupT = true;
   } else
-    mriT = MRIcopy(mriT, nullptr);
+    mriT = MRIcopy(mriT, NULL);
   MyMRI::MRInorm255(mriT, mriT);
   mriT->outside_val = outsideval;
 
   tocurrent = this; // so that we can access this from static cost function
-  // rtype = 2;
+  //rtype = 2;
 
-  std::pair<vnl_matrix_fixed<double, 4, 4>, double> fmd(
-      vnl_matrix_fixed<double, 4, 4>(), 0.0);
+  pair<vnl_matrix<double>, double> fmd(
+      vnl_matrix<double>(), 0.0);
 
   // check if mi (inital transform) is passed
   if (!m.empty()) {
     fmd.first = m;
     if (verbose > 1)
-      std::cout << "     initial M passed ... " << std::endl;
+      cout << "     initial M passed ... " << endl;
   } else if (!Minit.empty()) {
     fmd.first = getMinitResampled();
     if (verbose > 1)
-      std::cout << "     initial M from resample ... " << std::endl;
+      cout << "     initial M from resample ... " << endl;
   } else {
     fmd.first = initializeTransform(mriS, mriT);
     if (verbose > 1)
-      std::cout << "     initialize transform M ... " << std::endl;
+      cout << "     initialize transform M ... " << endl;
   }
   vnl_matrix<double> initialM = fmd.first;
 
@@ -408,15 +405,15 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     // for transforming target we need mh2^-1 = mh * m^-1
     vnl_matrix_fixed<double, 4, 4> mhi = mh1 * vnl_inverse(fmd.first);
 
-    // set static
+    //set static
     mh2 = vnl_inverse(mhi); // M = mh2 * mh1
   } else {
     mh1 = fmd.first;
     mh2.set_identity();
   }
 
-  // std::cout << "M:" << endl << fmd.first << std::endl;
-  // std::cout << "m':" << endl << mh2*mh1 << std::endl;
+  //cout << "M:" << endl << fmd.first << endl;
+  //cout << "m':" << endl << mh2*mh1 << endl;
 
   // set static pointers to images:
   scf = mriS;
@@ -445,12 +442,11 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     subsamplesize = 150;
   if (subsamplesize > 0 && mriT->width > subsamplesize &&
       mriT->height > subsamplesize && mriT->depth > subsamplesize) {
-    std::cout << "   - subsampling this resolution ... " << std::endl;
+    cout << "   - subsampling this resolution ... " << endl;
     subsamp = 2;
   }
   // compute Registration
-  std::cout << "   - compute new registration ( " << pcount << " params )"
-            << std::endl;
+  cout << "   - compute new registration ( " << pcount << " params )" << endl;
 
   // initial parameters
   trans->setIdentity();
@@ -460,14 +456,14 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     p[i] = pid[i];
 
   // //  double tols[6] = { 0.01, 0.01, 0.01, 0.001, 0.001 ,0.001};
-  //   double tols[13] = { 0.02, 0.02, 0.02, 0.001, 0.001 ,0.001, 0.01, 0.01,
-  //   0.01, 0.001, 0.001, 0.001,0.001}; if (is2d)
+  //   double tols[13] = { 0.02, 0.02, 0.02, 0.001, 0.001 ,0.001, 0.01, 0.01, 0.01, 0.001, 0.001, 0.001,0.001};
+  //   if (is2d)
   //   {
   //     // rigid pcount = 3 (transx, transy, rot) init with zero (above)
   //
   //     tols[2] = tols[3];
-  //     // affine 6 (transx, transy, rot, scalex, scaley, shear), init scaling
-  //     with 1 if (pcount >= 6)
+  //     // affine 6 (transx, transy, rot, scalex, scaley, shear), init scaling with 1
+  //     if (pcount >= 6)
   //     {
   //       p[3] = 1.0;
   //       p[4] = 1.0;
@@ -487,34 +483,33 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     xi[i][i] = steps[i];
 
   if (iscale) {
-    //    p[pcount - 1] = iscaleinit; // or are the images already
-    //    pre-scaled????
+    //    p[pcount - 1] = iscaleinit; // or are the images already pre-scaled????
     p[pcount - 1] = fmd.second; // or are the images already pre-scaled????
     xi[pcount - 1][pcount - 1] = 20 * 0.001;
   }
 
   double min_sse = costFunction(p);
-  std::cout << "   - initial cost: " << min_sse << std::endl;
+  cout << "   - initial cost: " << min_sse << endl;
 
   icount = 0;
-  std::cout << " START POWELL" << std::endl;
+  cout << " START POWELL" << endl;
   my_cost_function myCostFunction(&costFunction, pcount);
   fs_powell        minimizer(&myCostFunction);
-  // vnl_powell minimizer( &myCostFunction );
+  //vnl_powell minimizer( &myCostFunction );
   // double tol = 1e-4; //-8
-  // int maxiter = 5;
-  // minimizer.set_linmin_xtol(tol);
-  // double tol = 1e-4; //
-  // double tol = 1e-5; //
+  //int maxiter = 5;
+  //minimizer.set_linmin_xtol(tol);
+  //double tol = 1e-4; //
+  //double tol = 1e-5; //
   minimizer.set_x_tolerance(xtol);
   minimizer.set_f_tolerance(ftol);
-  // minimizer.set_max_function_evals(maxiter);
+  //minimizer.set_max_function_evals(maxiter);
 
-  // minimizer.set_trace(0);
-  // minimizer.set_verbose(1);
+  //minimizer.set_trace(0);
+  //minimizer.set_verbose(1);
 
   int returnCode = minimizer.minimize(p, &xi);
-  // int returnCode = minimizer.minimize( p );
+  //int returnCode = minimizer.minimize( p );
 
   // exit if failure
   if (returnCode == vnl_nonlinear_minimizer::FAILED_TOO_MANY_ITERATIONS) {
@@ -527,11 +522,11 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     ErrorExit(ERROR_BADPARM, "powell error.");
   } else {
     // success
-    std::cout << " iter: " << minimizer.get_num_iterations() << std::endl;
-    std::cout << " final e = " << std::setprecision(14)
-              << minimizer.get_end_error() << std::endl;
-    vnl_matlab_print(std::cout, p, "p", vnl_matlab_print_format_long);
-    std::cout << std::endl;
+    cout << " iter: " << minimizer.get_num_iterations() << endl;
+    cout << " final e = " << setprecision(14) << minimizer.get_end_error()
+         << endl;
+    vnl_matlab_print(cout, p, "p", vnl_matlab_print_format_long);
+    cout << endl;
   }
 
   fmd = convertP2Md(p);
@@ -542,11 +537,11 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     // adjust half way maps to new midpoint based on final transform
     if (verbose > 1)
       std::cout << "     -- adjusting half-way maps " << std::endl;
-    vnl_matrix_fixed<double, 4, 4> ch = MyMatrix::MatrixSqrt(fmd.first);
+    vnl_matrix<double> ch = MyMatrix::MatrixSqrt(fmd.first);
     // do not just assume c = ch*ch, rather c = ch2 * ch
     // for transforming target we need ch2^-1 = ch * c^-1
-    vnl_matrix_fixed<double, 4, 4> ci  = vnl_inverse(fmd.first);
-    vnl_matrix_fixed<double, 4, 4> chi = ch * ci;
+    vnl_matrix<double> ci  = vnl_inverse(fmd.first);
+    vnl_matrix<double> chi = ch * ci;
     mov2weights                        = ch;
     dst2weights                        = chi;
   } else {
@@ -554,23 +549,20 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     mov2weights = fmd.first;
     dst2weights.set_identity();
   }
-  // vnl_matlab_print(std::cerr,fmd.first,"M",vnl_matlab_print_format_long);
-  // cout
-  // << std::endl;
+  //vnl_matlab_print(vcl_cerr,fmd.first,"M",vnl_matlab_print_format_long); cout << endl;
 
   // ISCALECHANGE:
   if (iscale) {
     iscalefinal = exp(fmd.second); // compute full factor (source to target)
-    // idiff = fabs(cmd.second);
-    // std::ostringstream istar;
-    // if (idiff <= ieps) istar << " <= " << ieps << "  :-)" ;
-    // if (verbose >0 ) std::cout << "     -- intensity log diff: abs(" <<
-    // cmd.second << ") " << istar.str() << std::endl;
+    //idiff = fabs(cmd.second);
+    //std::ostringstream istar;
+    //if (idiff <= ieps) istar << " <= " << ieps << "  :-)" ;
+    //if (verbose >0 ) std::cout << "     -- intensity log diff: abs(" << cmd.second << ") " << istar.str() << std::endl;
   }
 
   Mfinal = fmd.first;
 
-  std::cout << std::endl << " DONE " << std::endl;
+  cout << endl << " DONE " << endl;
 
   if (cleanupS)
     MRIfree(&mriS);

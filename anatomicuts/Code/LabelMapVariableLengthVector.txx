@@ -14,27 +14,24 @@ void LabelMapVariableLengthVector<TValueType, TMesh>::SetCell(
   CellAutoPointerType cellAutoPointer;
   mesh->GetCell(cellId, cellAutoPointer);
 
-  // CellType labels;
+  //CellType labels;
 
   typedef typename MeshType::CellPixelType CellType;
-  // std::vector<int> labels;
+  //std::vector<int> labels;
   CellType labels;
   mesh->GetCellData(cellId, &labels);
-  //	std::cout << " begin " << labels.begin()->first <<  " " <<
-  //labels.begin()->second << " " << labels.size() <<std::endl;
+  //	std::cout << " begin " << labels.begin()->first <<  " " << labels.begin()->second << " " << labels.size() <<std::endl;
   //	this->SetSize(0); //labels.size());
   /*for(unsigned int i=0;i<labels.size();i++)
-  {
-          (*this)[i]=labels[i];
-  }*/
+	{
+		(*this)[i]=labels[i];
+	}*/
   this->m_labels = labels;
 
   /*	CellType directions;
-          mesh->GetCellData(2, &directions);
-          this->m_directions = directions;*/
-  //	std::cout << " begin " << this->GetLabels()->begin()->first <<  " " <<
-  //this->GetLabels()->begin()->second <<  " " << this->GetLabels()->size() <<
-  //std::endl;
+	mesh->GetCellData(2, &directions);
+	this->m_directions = directions;*/
+  //	std::cout << " begin " << this->GetLabels()->begin()->first <<  " " << this->GetLabels()->begin()->second <<  " " << this->GetLabels()->size() << std::endl;
 }
 
 #endif

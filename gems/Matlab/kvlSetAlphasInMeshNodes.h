@@ -19,7 +19,7 @@ public:
   itkTypeMacro(SetAlphasInMeshNodes, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSetAlphasInMeshNodes( mesh, alphas )
@@ -36,8 +36,7 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
@@ -69,13 +68,11 @@ public:
   }
 
 protected:
-  SetAlphasInMeshNodes() = default;
-  ;
-  ~SetAlphasInMeshNodes() override = default;
-  ;
+  SetAlphasInMeshNodes(){};
+  virtual ~SetAlphasInMeshNodes(){};
 
-  SetAlphasInMeshNodes(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  SetAlphasInMeshNodes(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 private:
 };

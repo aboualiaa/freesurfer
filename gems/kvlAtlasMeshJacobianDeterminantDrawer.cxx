@@ -8,7 +8,7 @@ namespace kvl {
 //
 //
 AtlasMeshJacobianDeterminantDrawer ::AtlasMeshJacobianDeterminantDrawer() {
-  m_Image = nullptr;
+  m_Image = 0;
 }
 
 //
@@ -52,8 +52,7 @@ bool AtlasMeshJacobianDeterminantDrawer ::RasterizeTetrahedron(
   //
   // Compute the Jacobian determinant of this tetrahedron
   //
-  // Z is inv( [ p0 p1 p2 p3; 1 1 1 1 ] ) of the tetrahedron in reference
-  // position
+  // Z is inv( [ p0 p1 p2 p3; 1 1 1 1 ] ) of the tetrahedron in reference position
   const double z11 = info.m_Z11;
   const double z21 = info.m_Z21;
   const double z31 = info.m_Z31;

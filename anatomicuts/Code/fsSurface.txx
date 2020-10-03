@@ -3,7 +3,7 @@
 
 template <typename TValueType, unsigned int VDimension>
 void fs::Surface<TValueType, VDimension>::Load(MRI_SURFACE *surf) {
-  // typename Surface::Pointer mesh = Self::New();
+  //typename Surface::Pointer mesh = Self::New();
   typename PointsContainer::Pointer points = PointsContainer::New();
   points->Reserve(surf->nvertices);
 
@@ -17,7 +17,7 @@ void fs::Surface<TValueType, VDimension>::Load(MRI_SURFACE *surf) {
 
   this->SetPoints(points);
   CellPointer cellpointer;
-  // typedef typename CellType::CellAutoPointer CellPointer;
+  //typedef typename CellType::CellAutoPointer CellPointer;
 
   for (int i = 0; i < surf->nfaces; i++) {
     cellpointer.TakeOwnership(new TriangleType);
@@ -33,23 +33,22 @@ void fs::Surface<TValueType, VDimension>::Load(MRI_SURFACE *surf) {
     this->AddEdge(surf->faces[i].v[2], surf->faces[i].v[0]);
   }
   /*for( int i=0;i<surf->nedges; i++)
-  {
-          // int vtxno[4]; // vertex numbers of 2 ends + 2 opposites
-          std::cout << surf->edges[i].vtxno[0] << " " <<surf->edges[i].vtxno[1]
-  <<std::endl; this->AddEdge(surf->edges[i].vtxno[0],surf->edges[i].vtxno[1]);
-  }*/
-  // std::cout<< surf->nvertices << " " << surf->nfaces << "  "<< surf->nedges
-  // <<std::endl;
+	{
+		// int vtxno[4]; // vertex numbers of 2 ends + 2 opposites
+		std::cout << surf->edges[i].vtxno[0] << " " <<surf->edges[i].vtxno[1] <<std::endl;
+		this->AddEdge(surf->edges[i].vtxno[0],surf->edges[i].vtxno[1]);
+	}*/
+  //std::cout<< surf->nvertices << " " << surf->nfaces << "  "<< surf->nedges <<std::endl;
 }
 
 template <typename TValueType, unsigned int VDimension>
 MRI_SURFACE *
 fs::Surface<TValueType, VDimension>::GetFSSurface(MRI_SURFACE *surf) {
-  // MRI_SURFACE *surf;
+  //MRI_SURFACE *surf;
   for (int i = 0; i < this->GetNumberOfPoints(); i++) {
     typename Self::PointType p;
     if (this->GetPoint(i, &p)) {
-      // std::cout << "point "<< p[0]+1 << std::endl;
+      //std::cout << "point "<< p[0]+1 << std::endl;
       surf->vertices[i].x = p[0];
       surf->vertices[i].y = p[1];
       surf->vertices[i].z = p[2];

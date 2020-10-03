@@ -37,8 +37,8 @@ int main(int argc, char *argv[]) {
   //
   // ===================================================
 
-  // Rasterize the mesh, simply linearly interpolating a probabilistic atlas
-  // across the volume of each tetrahedron
+  // Rasterize the mesh, simply linearly interpolating a probabilistic atlas across the
+  // volume of each tetrahedron
   kvl::AtlasMeshAlphaDrawer::Pointer alphaDrawer =
       kvl::AtlasMeshAlphaDrawer::New();
   alphaDrawer->SetRegions(image->GetLargestPossibleRegion());
@@ -203,9 +203,8 @@ int main(int argc, char *argv[]) {
   std::cout << "Time taken for first call of gradient calculator: "
             << clock.GetMean() << std::endl;
 
-  // Let's do the timing also for subsequent iterations. This should be faster
-  // because an internal ITK filter doesn't require updating until new
-  // images/means/precisions are set
+  // Let's do the timing also for subsequent iterations. This should be faster because an internal
+  // ITK filter doesn't require updating until new images/means/precisions are set
   clock.Reset();
   for (int testRunNumber = 0; testRunNumber < 10; testRunNumber++) {
     clock.Start();
@@ -227,14 +226,13 @@ int main(int argc, char *argv[]) {
   clock.Reset();
   clock.Start();
   referenceGradientCalculator->Rasterize(mesh);
-  // referenceGradientCalculator->SetNumberOfThreads( 2 );
+  //referenceGradientCalculator->SetNumberOfThreads( 2 );
   clock.Stop();
   std::cout << "Time taken for first call of reference gradient calculator: "
             << clock.GetMean() << std::endl;
 
-  // Let's do the timing also for subsequent iterations. This should be faster
-  // because an internal ITK filter doesn't require updating until new
-  // images/means/precisions are set
+  // Let's do the timing also for subsequent iterations. This should be faster because an internal
+  // ITK filter doesn't require updating until new images/means/precisions are set
   clock.Reset();
   for (int testRunNumber = 0; testRunNumber < 10; testRunNumber++) {
     clock.Start();

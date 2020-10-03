@@ -185,10 +185,10 @@ public:
     auto tmpExtent = this->GetCudaExtent();
 
     /*
-      This is not nice, but unfortunately the cudaMemcpy3D API
-      doesn't allow us to do it in a nicer way. If there were
-      a const_cudaPitchedPtr, the cast wouldn't be necessary
-    */
+	  This is not nice, but unfortunately the cudaMemcpy3D API
+	  doesn't allow us to do it in a nicer way. If there were
+	  a const_cudaPitchedPtr, the cast wouldn't be necessary
+	*/
     res.ptr = const_cast<ElementType *>(&(target.at(0)));
 
     res.pitch = tmpExtent.width;

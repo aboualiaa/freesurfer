@@ -20,11 +20,10 @@ public:
   itkTypeMacro(UndoCropping, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // [ image ] = kvlReadCroppedImage( imageFileName, boundingFileName,
-    // croppedBuffer )
+    // [ image ] = kvlReadCroppedImage( imageFileName, boundingFileName, croppedBuffer )
 
     // Make sure input arguments are correct
     if ((nrhs != 1) || !mxIsChar(prhs[0]) || !mxIsChar(prhs[1]) ||
@@ -41,12 +40,12 @@ public:
     reader->SetExtraFraction(0.1);
     reader->Read(imageFileName.c_str(), boundingFileName.c_str());
 
-    // Get the cropping information here
+    //Get the cropping information here
 
-    // Then create a new image with the size of the original image and set the
+    //Then create a new image with the size of the original image and set the
     // info in the cropped image into there
 
-    // Finally set the original world-to-image transformation here, and return
+    //Finally set the original world-to-image transformation here, and return
 
     // Convert the image to float
     typedef itk::Image<float, 3> ImageType;
@@ -76,8 +75,8 @@ protected:
   ReadCroppedImage(){};
   virtual ~ReadCroppedImage(){};
 
-  ReadCroppedImage(const Self &); // purposely not implemented
-  void operator=(const Self &);   // purposely not implemented
+  ReadCroppedImage(const Self &); //purposely not implemented
+  void operator=(const Self &);   //purposely not implemented
 
 private:
 };

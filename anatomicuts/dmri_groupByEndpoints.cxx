@@ -3,16 +3,15 @@
  * dmri_groupingByEndpoints.cxx
  * July 2019
  *
- * A trk file with many streamlines is filtered based on if the starting and
- * ending points of each streamline lie in the same structure. They are placed
- * into separate trk files based on an inputted image that acts as a reference
- * for the structures the streamlines start and end at.
+ * A trk file with many streamlines is filtered based on if the starting and ending points of each
+ * streamline lie in the same structure. They are placed into separate trk files based on an inputted
+ * image that acts as a reference for the structures the streamlines start and end at.
  */
 
-#include <cctype>
-#include <cstdio>
+#include <ctype.h>
 #include <iostream>
 #include <map>
+#include <stdio.h>
 #include <string>
 
 #include <itkImage.h>
@@ -30,104 +29,104 @@
 #include <vtkPolyDataReader.h>
 #include <vtkPolyDataWriter.h>
 
-bool check_string(std::string ref);
-bool compare_strings(std::string ref, std::string s);
+using namespace std;
+
+bool check_string(string ref);
+bool compare_strings(string ref, string s);
 
 int main(int narg, char *arg[]) {
-  // Receive inputs
+  //Receive inputs
   GetPot c1(narg, const_cast<char **>(arg));
 
-  // Usage error
+  //Usage error
   if (c1.size() == 4 || c1.search(2, "--help", "-h")) {
-    std::cout << "Usage: " << std::endl;
-    std::cout << arg[0] << " -s streamlineFile -i imageFile -d outputDirectory"
-              << std::endl;
+    cout << "Usage: " << endl;
+    cout << arg[0] << " -s streamlineFile -i imageFile -d outputDirectory"
+         << endl;
     return -1;
   }
 
-  // Take in information
+  //Take in information
   const char *image_file = c1.follow("image_file.nii.gz", "-i");
   const char *output     = c1.follow("output_directory", "-d");
 
-  std::vector<std::string> inputFiles;
-  for (std::string inputName = std::string(c1.follow("", 2, "-s", "-S"));
-       access(inputName.c_str(), 0) == 0;
-       inputName = std::string(c1.next(""))) {
+  vector<string> inputFiles;
+  for (string inputName = string(c1.follow("", 2, "-s", "-S"));
+       access(inputName.c_str(), 0) == 0; inputName = string(c1.next(""))) {
     inputFiles.push_back(inputName);
   }
 
-  // Variable definitions
+  //Variable definitions
   enum { Dimension = 3 };
-  using PixelType                            = float;
-  const unsigned int PointDimension          = 3;
-  using PointDataType                        = std::vector<int>;
-  const unsigned int MaxTopologicalDimension = 3;
-  using CoordinateType                       = double;
-  using InterpolationWeightType              = double;
-  using MeshTraits =
-      itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
-                                   MaxTopologicalDimension, CoordinateType,
-                                   InterpolationWeightType, PointDataType>;
-  using HistogramMeshType = itk::Mesh<PixelType, PointDimension, MeshTraits>;
+  typedef float            PixelType;
+  const unsigned int       PointDimension = 3;
+  typedef std::vector<int> PointDataType;
+  const unsigned int       MaxTopologicalDimension = 3;
+  typedef double           CoordinateType;
+  typedef double           InterpolationWeightType;
+  typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
+                                       MaxTopologicalDimension, CoordinateType,
+                                       InterpolationWeightType, PointDataType>
+                                                           MeshTraits;
+  typedef itk::Mesh<PixelType, PointDimension, MeshTraits> HistogramMeshType;
 
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
-  using ColorMeshType    = itk::Mesh<PixelType, PointDimension>;
-  using PointType        = ColorMeshType::PointType;
-  using CellType         = ColorMeshType::CellType;
-  using PolylineCellType = itk::PolylineCell<CellType>;
-  using CellAutoPointer  = ColorMeshType::CellAutoPointer;
+  typedef itk::Mesh<PixelType, PointDimension> ColorMeshType;
+  typedef ColorMeshType::PointType             PointType;
+  typedef ColorMeshType::CellType              CellType;
+  typedef itk::PolylineCell<CellType>          PolylineCellType;
+  typedef ColorMeshType::CellAutoPointer       CellAutoPointer;
 
-  std::vector<ColorMeshType::Pointer> *     meshes;
-  std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
-  ImageType::Pointer                        inputImage;
+  vector<ColorMeshType::Pointer> *     meshes;
+  vector<vtkSmartPointer<vtkPolyData>> polydatas;
+  ImageType::Pointer                   inputImage;
 
-  // Variable to read in the image file
-  using ImageReaderType           = itk::ImageFileReader<ImageType>;
-  ImageReaderType::Pointer reader = ImageReaderType::New();
+  //Variable to read in the image file
+  typedef ImageFileReader<ImageType> ImageReaderType;
+  ImageReaderType::Pointer           reader = ImageReaderType::New();
   reader->SetFileName(c1.next(""));
   reader->Update();
   inputImage = reader->GetOutput();
 
-  // Create polydata
-  using ClusterToolsType =
-      ClusterTools<ColorMeshType, ImageType, HistogramMeshType>;
+  //Create polydata
+  typedef ClusterTools<ColorMeshType, ImageType, HistogramMeshType>
+                            ClusterToolsType;
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
 
   clusterTools->GetPolyDatas(inputFiles, &polydatas, inputImage);
 
-  // Take in input trk file
+  //Take in input trk file
   meshes = clusterTools->PolydataToMesh(polydatas);
   ColorMeshType::Pointer                  input = (*meshes)[0];
   ColorMeshType::CellsContainer::Iterator inputCellIt =
       input->GetCells()->Begin();
 
-  // Variables to hold the start and end values of a streamline
+  //Variables to hold the start and end values of a streamline
   int val1, val2;
 
-  // Map of the region values to their corresponding meshes and other
-  // information
-  std::map<int, ColorMeshType::Pointer> sorted_meshes;
-  // Holds the number of points for each mesh
-  std::map<int, int> pointIndices;
-  // Holds the number of streamlines for each mesh
-  std::map<int, int> cellIndices;
+  //Map of the region values to their corresponding meshes and other information
+  map<int, ColorMeshType::Pointer> sorted_meshes;
+  //Holds the number of points for each mesh
+  map<int, int> pointIndices;
+  //Holds the number of streamlines for each mesh
+  map<int, int> cellIndices;
 
-  // Create a color table
+  //Create a color table
   typedef struct {
     unsigned char r;
     unsigned char g;
     unsigned char b;
   } color_triplet2;
 
-  // Code to help extract the name of the structure based on the value
+  //Code to help extract the name of the structure based on the value
   COLOR_TABLE *ct;
   FSENV *      fsenv = FSENVgetenv();
   char         tmpstr[2000];
   sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
   ct = CTABreadASCII(tmpstr);
 
-  // Cycles through each streamline
+  //Cycles through each streamline
   for (int cellId = 0; inputCellIt != input->GetCells()->End();
        ++inputCellIt, cellId++) {
     val1 = 0, val2 = 0;
@@ -137,10 +136,10 @@ int main(int narg, char *arg[]) {
     end.Fill(0);
     before_end.Fill(0);
 
-    // Make a variable to iterate thru one stream at a time
+    //Make a variable to iterate thru one stream at a time
     CellType::PointIdIterator it = inputCellIt.Value()->PointIdsBegin();
 
-    // Goes through each point in a streamline
+    //Goes through each point in a streamline
     for (; it != inputCellIt.Value()->PointIdsEnd(); it++) {
       PointType pt;
       pt.Fill(0);
@@ -149,13 +148,11 @@ int main(int narg, char *arg[]) {
       ImageType::IndexType index;
       int                  value = 0;
 
-      // Find the first and last nonzero values based on the transformation of
-      // the point
+      //Find the first and last nonzero values based on the transformation of the point
       if (inputImage->TransformPhysicalPointToIndex(pt, index)) {
         value = inputImage->GetPixel(index);
 
-        // Find the first nonzero valued point, and store that point and the one
-        // after it
+        // Find the first nonzero valued point, and store that point and the one after it
         if (val1 == 0 and value != 0) {
           val1 = value;
           input->GetPoint(*it, &start);
@@ -174,15 +171,14 @@ int main(int narg, char *arg[]) {
     // Check if the endpoints are within the white matter of a structure
     int new_val1, new_val2;
 
-    std::string str1 = std::string(ct->entries[val1]->name);
-    std::string str_mod1;
+    string str1 = string(ct->entries[val1]->name);
+    string str_mod1;
 
     // Store the vector difference between the first and second points
     PointType estimate = start;
     PointType vector   = start - second;
 
-    // Check 3 times if any predicted points beyond the first reach the cortical
-    // structure
+    // Check 3 times if any predicted points beyond the first reach the cortical structure
     for (int i = 0; i < 3; i++) {
       // If the structure name involves white matter
       if (check_string(str1)) {
@@ -193,10 +189,10 @@ int main(int narg, char *arg[]) {
 
         ImageType::IndexType test_index;
 
-        // Extract the value of the predictions and hold that value's structure
+        //Extract the value of the predictions and hold that value's structure
         if (inputImage->TransformPhysicalPointToIndex(estimate, test_index)) {
           new_val1 = inputImage->GetPixel(test_index);
-          str_mod1 = std::string(ct->entries[new_val1]->name);
+          str_mod1 = string(ct->entries[new_val1]->name);
         }
       }
 
@@ -218,9 +214,9 @@ int main(int narg, char *arg[]) {
 
     // Only bother checking end point if first one is valid
     if (val1 != 0) {
-      // Same code as above, but predicts points past the last point
-      std::string str2 = std::string(ct->entries[val2]->name);
-      std::string str_mod2;
+      //Same code as above, but predicts points past the last point
+      string str2 = string(ct->entries[val2]->name);
+      string str_mod2;
 
       estimate = end;
       vector   = end - before_end;
@@ -235,7 +231,7 @@ int main(int narg, char *arg[]) {
 
           if (inputImage->TransformPhysicalPointToIndex(estimate, test_index)) {
             new_val2 = inputImage->GetPixel(test_index);
-            str_mod2 = std::string(ct->entries[new_val2]->name);
+            str_mod2 = string(ct->entries[new_val2]->name);
           }
         }
 
@@ -252,32 +248,32 @@ int main(int narg, char *arg[]) {
       }
     }
 
-    // If start and end values match, take in that cell Id
+    //If start and end values match, take in that cell Id
     if (val1 != 0 and val1 == val2) {
-      // Obtain the mesh and related information associated with the value
+      //Obtain the mesh and related information associated with the value
       if (sorted_meshes.count(val1) == 0) {
         ColorMeshType::Pointer om = ColorMeshType::New();
         om->SetCellsAllocationMethod(
-            ColorMeshType::CellsAllocatedDynamicallyCellByCell);
+            itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
         sorted_meshes.insert(std::pair<int, ColorMeshType::Pointer>(val1, om));
       }
-      std::map<int, ColorMeshType::Pointer>::iterator iter =
+      map<int, ColorMeshType::Pointer>::iterator iter =
           sorted_meshes.find(val1);
-      // ColorMeshType::Pointer target_mesh = iter->second;
+      //ColorMeshType::Pointer target_mesh = iter->second;
 
       if (pointIndices.count(val1) == 0) {
-        pointIndices.insert(std::pair<int, int>(val1, 0));
+        pointIndices.insert(pair<int, int>(val1, 0));
       }
 
-      // Allocates and can release the cell's memory
+      //Allocates and can release the cell's memory
       CellAutoPointer line;
       line.TakeOwnership(new PolylineCellType);
 
-      // Holds an index number for each unique point per streamline
+      //Holds an index number for each unique point per streamline
       int                       k   = 0;
       CellType::PointIdIterator it2 = inputCellIt.Value()->PointIdsBegin();
 
-      // Copy over the points of the streamlines that are going to be outputted
+      //Copy over the points of the streamlines that are going to be outputted
       for (; it2 != inputCellIt.Value()->PointIdsEnd(); it2++) {
         PointType pt;
         input->GetPoint(*it2, &pt);
@@ -290,10 +286,10 @@ int main(int narg, char *arg[]) {
       }
 
       if (cellIndices.count(val1) == 0) {
-        cellIndices.insert(std::pair<int, int>(val1, 0));
+        cellIndices.insert(pair<int, int>(val1, 0));
       }
 
-      // Cell is inserted into the mesh
+      //Cell is inserted into the mesh
       sorted_meshes.at(val1)->SetCell(cellIndices.at(val1), line);
       ColorMeshType::CellPixelType cellData;
       input->GetCellData(cellId, &cellData);
@@ -302,7 +298,7 @@ int main(int narg, char *arg[]) {
     }
   }
 
-  // Initiate the color table to give output meshes unique colors
+  //Initiate the color table to give output meshes unique colors
   int            i;
   int            red, green, blue;
   color_triplet2 table[256] = {{0, 0, 0}};
@@ -329,32 +325,30 @@ int main(int narg, char *arg[]) {
 
   i = 0;
 
-  // Print out the output trk file for each mesh with a unique key
-  for (std::map<int, ColorMeshType::Pointer>::iterator iter =
-           sorted_meshes.begin();
+  //Print out the output trk file for each mesh with a unique key
+  for (map<int, ColorMeshType::Pointer>::iterator iter = sorted_meshes.begin();
        iter != sorted_meshes.end(); iter++) {
-    std::string outputName;
+    string outputName;
 
-    // Name the output trk file based on the structure name associated with its
-    // value
-    std::string str = std::string(ct->entries[iter->first]->name);
+    //Name the output trk file based on the structure name associated with its value
+    string str = string(ct->entries[iter->first]->name);
 
-    std::string filename = str + ".trk";
-    outputName           = std::string(output) + "/" + filename;
+    string filename = str + ".trk";
+    outputName      = string(output) + "/" + filename;
 
-    // Assign the unique color to each mesh
+    //Assign the unique color to each mesh
     int index = ((int)47. * ((i % sorted_meshes.size()) % (150))) % 197 + 5;
     index     = (int)(13 * (i % sorted_meshes.size())) % 150 + 65;
 
     unsigned char color[3] = {table[index].r, table[index].g, table[index].b};
 
-    // Create the output trk
-    using VTKConverterType = PolylineMeshToVTKPolyDataFilter<ColorMeshType>;
+    //Create the output trk
+    typedef PolylineMeshToVTKPolyDataFilter<ColorMeshType> VTKConverterType;
     typename VTKConverterType::Pointer vtkConverter = VTKConverterType::New();
     vtkConverter->SetInput(iter->second);
     vtkConverter->Update();
 
-    itk::SmartPointer<TrkVTKPolyDataFilter<ImageType>> trkReader =
+    SmartPointer<TrkVTKPolyDataFilter<ImageType>> trkReader =
         TrkVTKPolyDataFilter<ImageType>::New();
     trkReader->SetInput(vtkConverter->GetOutputPolyData());
     trkReader->SetReferenceTrack(inputFiles[0]);
@@ -365,7 +359,7 @@ int main(int narg, char *arg[]) {
     i++;
   }
 
-  // Clear associated memory
+  //Clear associated memory
   delete meshes;
   sorted_meshes.clear();
   pointIndices.clear();
@@ -378,7 +372,7 @@ int main(int narg, char *arg[]) {
 // Inputs: a string
 // Returns: a boolean
 // Does: checks if the inputted string contains "wm" or "White"
-bool check_string(std::string ref) {
+bool check_string(string ref) {
   // Find the index of 'w' if it exists
   int w_pos = ref.find_first_of('w');
   if (w_pos == -1)
@@ -405,9 +399,8 @@ bool check_string(std::string ref) {
 // compare_strings
 // Inputs: a reference structure and another strucutre s
 // Returns: a boolean of whether the strucutres match
-// Does: whether the two structures match in hemisphere and region as well as if
-// the nonreference structure is cortical
-bool compare_strings(std::string ref, std::string s) {
+// Does: whether the two structures match in hemisphere and region as well as if the nonreference structure is cortical
+bool compare_strings(string ref, string s) {
   // checks if the structure is cortical
   if ((s.find("ctx") == -1) and (s.find("Cortex") == -1)) {
     return false;
@@ -434,7 +427,7 @@ bool compare_strings(std::string ref, std::string s) {
     return false;
 
   // isolating the ref string structure
-  std::string ref_struct, structure;
+  string ref_struct, structure;
 
   if (ref_left) {
     if (ref.find("lh") != -1)

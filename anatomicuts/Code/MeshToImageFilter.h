@@ -12,14 +12,16 @@
 #include "itkKdTreeGenerator.h"
 #include "itkListSample.h"
 
+using namespace itk;
+
 template <class TInputMesh, class TOutputImage>
-class ITK_EXPORT MeshToImageFilter : public itk::ImageSource<TOutputImage> {
+class ITK_EXPORT MeshToImageFilter : public ImageSource<TOutputImage> {
 
 public:
-  using Self         = MeshToImageFilter<TInputMesh, TOutputImage>;
-  using Superclass   = itk::ImageSource<TOutputImage>;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef MeshToImageFilter         Self;
+  typedef ImageSource<TOutputImage> Superclass;
+  typedef SmartPointer<Self>        Pointer;
+  typedef SmartPointer<const Self>  ConstPointer;
 
   itkNewMacro(Self);
   itkTypeMacro(MeshToImageFilter, ImageSource);
@@ -27,21 +29,21 @@ public:
   itkStaticConstMacro(ImageDimension, unsigned int,
                       TOutputImage::ImageDimension);
 
-  using MeshType        = TInputMesh;
-  using MeshTypePointer = typename MeshType::Pointer;
+  typedef TInputMesh                 MeshType;
+  typedef typename MeshType::Pointer MeshTypePointer;
 
   /** Image typedefs */
-  using OutputImageType       = TOutputImage;
-  using OutputPixelType       = typename OutputImageType::PixelType;
-  using OutputImageRegionType = typename OutputImageType::RegionType;
-  using PointType             = typename OutputImageType::PointType;
-  using IndexType             = typename OutputImageType::IndexType;
-  using SpacingType           = typename OutputImageType::SpacingType;
-  using SizeType              = typename OutputImageType::SizeType;
-  using DirectionType         = typename OutputImageType::DirectionType;
+  typedef TOutputImage                            OutputImageType;
+  typedef typename OutputImageType::PixelType     OutputPixelType;
+  typedef typename OutputImageType::RegionType    OutputImageRegionType;
+  typedef typename OutputImageType::PointType     PointType;
+  typedef typename OutputImageType::IndexType     IndexType;
+  typedef typename OutputImageType::SpacingType   SpacingType;
+  typedef typename OutputImageType::SizeType      SizeType;
+  typedef typename OutputImageType::DirectionType DirectionType;
 
   /** Typedefs for base image. */
-  using ImageBaseType = itk::ImageBase<(Self::ImageDimension)>;
+  typedef ImageBase<itkGetStaticConstMacro(ImageDimension)> ImageBaseType;
 
   /** Set the size of the output image. */
   virtual void SetOutputSize(const SizeType &size);
@@ -49,8 +51,8 @@ public:
   /** Get the size of the output image. */
   virtual const SizeType &GetOutputSize();
 
-  /** Set the start index of the output largest possible region.
-   * The default is an index of all zeros. */
+  /** Set the start index of the output largest possible region. 
+     * The default is an index of all zeros. */
   virtual void SetOutputIndex(const IndexType &index);
 
   /** Get the start index of the output largest possible region. */
@@ -84,7 +86,7 @@ public:
   void SetOutputParametersFromImage(const ImageBaseType *image);
 
   /** TransformToVelocityFieldSource produces a vector image. */
-  virtual void GenerateOutputInformation();
+  virtual void GenerateOutputInformation(void);
 
   /** Set/Get the vector of positions */
   void            SetInput(MeshTypePointer mesh) { m_Input = mesh; }
@@ -99,7 +101,7 @@ protected:
   /** Threaded implementation */
   void GenerateData();
 
-  void PrintSelf(std::ostream &os, itk::Indent indent) const {
+  void PrintSelf(std::ostream &os, Indent indent) const {
     Superclass::PrintSelf(os, indent);
   }
 

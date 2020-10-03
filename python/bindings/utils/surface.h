@@ -2,6 +2,8 @@
 
 #include "log.h"
 #include "volume.h"
+#include <mrisurf.h>
+#include <mrisurf_MRIS.h>
 
 namespace surf {
 

@@ -10,10 +10,10 @@ class AtlasMeshLabelImageStatisticsCollector
     : public AtlasMeshStatisticsCollector {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshLabelImageStatisticsCollector;
-  using Superclass   = AtlasMeshStatisticsCollector;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshLabelImageStatisticsCollector Self;
+  typedef AtlasMeshStatisticsCollector           Superclass;
+  typedef itk::SmartPointer<Self>                Pointer;
+  typedef itk::SmartPointer<const Self>          ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -22,7 +22,7 @@ public:
   itkTypeMacro(AtlasMeshLabelImageStatisticsCollector, itk::Object);
 
   /** Some typedefs */
-  using LabelImageType = CompressionLookupTable::ImageType;
+  typedef CompressionLookupTable::ImageType LabelImageType;
 
   /** */
   void SetLabelImage(const LabelImageType *        labelImage,
@@ -49,8 +49,8 @@ protected:
 
 private:
   AtlasMeshLabelImageStatisticsCollector(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   LabelImageType::ConstPointer         m_LabelImage;

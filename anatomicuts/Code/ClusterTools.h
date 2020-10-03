@@ -1,8 +1,6 @@
 #ifndef _ClusterTools_h__
 #define _ClusterTools_h__
 
-#include "TrkVTKPolyDataFilter.txx"
-
 #include "LabelPerPointVariableLengthVector.h"
 #include "LabelsEntropyAndIntersectionMembershipFunction.h"
 #include "OrientationPlanesFromParcellationFilter.h"
@@ -18,6 +16,8 @@
 #include "colortab.h"
 #include "fsenv.h"
 
+#include "TrkVTKPolyDataFilter.txx"
+
 #include "itkPolylineCell.h"
 #include "vtkCellData.h"
 
@@ -26,6 +26,8 @@
 #include <vtkFieldData.h>
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
+
+using namespace itk;
 
 enum DirectionsType { ALL = 0, DIAGONAL = 1, STRAIGHT = 2 };
 
@@ -92,7 +94,7 @@ public:
                              int                  averageStreamlineIndex);
   float GetDistance(HistogramMeshPointer mesh, int index_i, int index_j);
 
-  // typedef std::vector<int>                  PointDataType;
+  //typedef std::vector<int>                  PointDataType;
 
   void SaveMesh(ColorMeshPointer mesh, ImagePointer image,
                 std::string outputFilename, std::string refFiber);
@@ -110,5 +112,4 @@ private:
 };
 
 #include "ClusterTools.txx"
-
 #endif

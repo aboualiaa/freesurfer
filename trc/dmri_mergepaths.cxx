@@ -18,21 +18,43 @@
  *
  */
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "cma.h"
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
+using namespace std;
+
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options(FILE *fp);
 
 int debug = 0, checkoptsonly = 0;
@@ -69,17 +91,15 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options(stdout);
 
@@ -88,8 +108,8 @@ int main(int argc, char **argv) {
   for (int iframe = 0; iframe < nframe; iframe++) {
     float inmax = 0;
 
-    std::cout << "Merging volume " << iframe + 1 << " of " << nframe << "... "
-              << std::endl;
+    cout << "Merging volume " << iframe + 1 << " of " << nframe << "... "
+         << endl;
 
     // Read input volume
     if (!inDir.empty()) {
@@ -100,8 +120,8 @@ int main(int argc, char **argv) {
 
     invol = MRIread(fname.c_str());
 
-    if (invol != nullptr) {
-      if (outvol == nullptr) {
+    if (invol) {
+      if (!outvol) {
         // Allocate output 4D volume
         outvol = MRIcloneBySpace(invol, invol->type, nframe);
 
@@ -131,8 +151,8 @@ int main(int argc, char **argv) {
       }
     }
 
-    std::cout << "Threshold: " << outvol->frames[iframe].thresh
-              << " Name: " << outvol->frames[iframe].name << std::endl;
+    cout << "Threshold: " << outvol->frames[iframe].thresh
+         << " Name: " << outvol->frames[iframe].name << endl;
   }
 
   // Write output file
@@ -153,76 +173,66 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int    nargc;
-  int    nargsused;
-  char **pargv;
-  char * option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--indir") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--indir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       inDir     = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--in") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--in")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
       while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         inFile.push_back(std::string(pargv[nargsused]));
         nargsused++;
         nframe++;
       }
-    } else if (strcmp(option, "--out") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--out")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       outFile   = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--ctab") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--ctab")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       ctabFile  = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--thresh") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--thresh")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%f", &dispThresh);
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -232,7 +242,7 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("\n");
   printf("USAGE: ./dmri_mergepaths\n");
   printf("\n");
@@ -258,7 +268,7 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\n");
   printf("...\n");
@@ -267,7 +277,7 @@ static void print_help() {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
@@ -279,7 +289,7 @@ static void print_version(void) {
 }
 
 /* --------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   if (nframe == 0) {
     printf("ERROR: must specify input volume(s)\n");
     exit(1);
@@ -296,6 +306,7 @@ static void check_options() {
     printf("ERROR: display threshold must a number between 0 and 1\n");
     exit(1);
   }
+  return;
 }
 
 /* --------------------------------------------- */
@@ -320,4 +331,6 @@ static void dump_options(FILE *fp) {
   fprintf(fp, "Output file: %s\n", outFile.c_str());
   fprintf(fp, "Color table file: %s\n", ctabFile.c_str());
   fprintf(fp, "Lower threshold for display: %f\n", dispThresh);
+
+  return;
 }

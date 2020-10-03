@@ -33,7 +33,7 @@
 
 void CurveFiniteDifferences(std::vector<float> &      DiffPoints,
                             const std::vector<float> &CurvePoints,
-                            unsigned int              DiffStep);
+                            const unsigned int        DiffStep);
 
 void CurveSmooth(std::vector<float> &    SmoothPoints,
                  const std::vector<int> &DiscretePoints);
@@ -44,25 +44,25 @@ class Spline {
 public:
   Spline(const char *ControlPointFile, const char *MaskFile);
   Spline(const std::vector<int> &ControlPoints, MRI *Mask);
-  Spline(int NumControl, MRI *Mask);
+  Spline(const int NumControl, MRI *Mask);
   Spline();
   ~Spline();
   bool         IsDegenerate();
   bool         InterpolateSpline();
   bool         FitControlPoints(const std::vector<int> &InputPoints);
   unsigned int PointToSegment(unsigned int PointIndex);
-  void         ComputeTangent(bool DoAnalytical = true);
-  void         ComputeNormal(bool DoAnalytical = true);
-  void         ComputeCurvature(bool DoAnalytical = true);
+  void         ComputeTangent(const bool DoAnalytical = true);
+  void         ComputeNormal(const bool DoAnalytical = true);
+  void         ComputeCurvature(const bool DoAnalytical = true);
   void         ReadControlPoints(const char *ControlPointFile);
   void         ReadMask(const char *MaskFile);
   void         SetControlPoints(const std::vector<int> &ControlPoints);
   void         SetMask(MRI *Mask);
-  void         WriteVolume(const char *VolumeFile, bool ShowControls = false);
-  void         WriteAllPoints(const char *TextFile);
-  void         WriteTangent(const char *TextFile);
-  void         WriteNormal(const char *TextFile);
-  void         WriteCurvature(const char *TextFile);
+  void WriteVolume(const char *VolumeFile, const bool ShowControls = false);
+  void WriteAllPoints(const char *TextFile);
+  void WriteTangent(const char *TextFile);
+  void WriteNormal(const char *TextFile);
+  void WriteCurvature(const char *TextFile);
   void WriteValues(std::vector<MRI *> &ValueVolumes, const char *TextFile);
   std::vector<float>               ComputeAvg(std::vector<MRI *> &ValueVolumes);
   void                             PrintControlPoints();
@@ -88,17 +88,19 @@ private:
       mFiniteDifference2, mTangent, mNormal, mCurvature;
   MRI *mMask, *mVolume;
 
-  void CatmullRomInterpolate(std::vector<int> &InterpPoint, float t,
+  void CatmullRomInterpolate(std::vector<int> &InterpPoint, const float t,
                              std::vector<int>::const_iterator ControlPoint1,
                              std::vector<int>::const_iterator ControlPoint2,
                              std::vector<int>::const_iterator ControlPoint3,
                              std::vector<int>::const_iterator ControlPoint4);
-  void CatmullRomDerivative1(std::vector<float> &InterpDerivative, float t,
+  void CatmullRomDerivative1(std::vector<float> &             InterpDerivative,
+                             const float                      t,
                              std::vector<int>::const_iterator ControlPoint1,
                              std::vector<int>::const_iterator ControlPoint2,
                              std::vector<int>::const_iterator ControlPoint3,
                              std::vector<int>::const_iterator ControlPoint4);
-  void CatmullRomDerivative2(std::vector<float> &InterpDerivative, float t,
+  void CatmullRomDerivative2(std::vector<float> &             InterpDerivative,
+                             const float                      t,
                              std::vector<int>::const_iterator ControlPoint1,
                              std::vector<int>::const_iterator ControlPoint2,
                              std::vector<int>::const_iterator ControlPoint3,

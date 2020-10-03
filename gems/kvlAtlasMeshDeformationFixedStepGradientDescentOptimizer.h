@@ -9,10 +9,10 @@ class AtlasMeshDeformationFixedStepGradientDescentOptimizer
     : public AtlasMeshDeformationOptimizer {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshDeformationFixedStepGradientDescentOptimizer;
-  using Superclass   = AtlasMeshDeformationOptimizer;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshDeformationFixedStepGradientDescentOptimizer Self;
+  typedef AtlasMeshDeformationOptimizer                         Superclass;
+  typedef itk::SmartPointer<Self>                               Pointer;
+  typedef itk::SmartPointer<const Self>                         ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -34,8 +34,8 @@ protected:
 
 private:
   AtlasMeshDeformationFixedStepGradientDescentOptimizer(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   double m_StepSize;
   double m_LineSearchStopCriterion;

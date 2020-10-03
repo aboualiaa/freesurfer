@@ -8,10 +8,10 @@ class LabelsEntropyAndIntersectionMembershipFunction
     : public LabelPerPointMembershipFunction<TVector> {
 public:
   /** Standard class typedefs */
-  using Self         = LabelsEntropyAndIntersectionMembershipFunction<TVector>;
-  using Superclass   = LabelPerPointMembershipFunction<TVector>;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef LabelsEntropyAndIntersectionMembershipFunction Self;
+  typedef LabelPerPointMembershipFunction<TVector>       Superclass;
+  typedef itk::SmartPointer<Self>                        Pointer;
+  typedef itk::SmartPointer<const Self>                  ConstPointer;
 
   /** Strandard macros */
   itkTypeMacro(LabelsEntropyAndIntersectionMembershipFunction,
@@ -19,12 +19,12 @@ public:
   itkNewMacro(Self);
 
   /** Typedef alias for the measurement vectors */
-  using MeasurementVectorType = TVector;
-  using CentroidType          = TVector;
+  typedef TVector MeasurementVectorType;
+  typedef TVector CentroidType;
 
   /** Typedef to represent the length of measurement vectors */
-  using MeasurementVectorSizeType =
-      typename Superclass::MeasurementVectorSizeType;
+  typedef
+      typename Superclass::MeasurementVectorSizeType MeasurementVectorSizeType;
 
   virtual double Evaluate(const MeasurementVectorType *m1,
                           const MeasurementVectorType *m2) const;
@@ -49,7 +49,7 @@ public:
   void SetMeanAndCovGaussian(bool m) { this->m_meanAndCovGaussian = m; }
 
 protected:
-  LabelsEntropyAndIntersectionMembershipFunction() : Superclass() {
+  LabelsEntropyAndIntersectionMembershipFunction(void) : Superclass() {
     this->m_intersection             = false;
     this->m_entropy                  = false;
     this->m_labels                   = false;
@@ -66,7 +66,7 @@ protected:
     this->m_meanClosestPointGaussian = false;
     this->m_meanAndCovGaussian       = false;
   }
-  virtual ~LabelsEntropyAndIntersectionMembershipFunction() {}
+  virtual ~LabelsEntropyAndIntersectionMembershipFunction(void) {}
 
 private:
   bool m_intersection;

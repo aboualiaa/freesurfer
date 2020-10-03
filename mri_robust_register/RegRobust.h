@@ -39,8 +39,8 @@ class RegRobust : public Registration {
 
 public:
   RegRobust()
-      : Registration(), sat(-1), wlimit(0.16), mri_weights(nullptr),
-        mri_hweights(nullptr), mri_indexing(nullptr) {}
+      : Registration(), sat(-1), wlimit(0.16), mri_weights(NULL),
+        mri_hweights(NULL), mri_indexing(NULL) {}
 
   virtual ~RegRobust();
   virtual MRI *getHalfWayGeom() { return mri_weights; }
@@ -50,8 +50,7 @@ public:
   virtual MRI *getWeights() { return mri_weights; }
 
   double estimateIScale(MRI *mriS, MRI *mriT);
-  //! Estimate saturation parameter (higher sensitivity to outliers if sat
-  //! small)
+  //! Estimate saturation parameter (higher sensitivity to outliers if sat small)
   double findSaturation();
   //! Set saturation parameter
   void setSaturation(double d) { sat = d; }
@@ -104,10 +103,10 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
   assert(mriS && mriT);
   assert(nmax > 0);
 
-  std::pair<vnl_matrix_fixed<double, 4, 4>, double> cmd(
-      vnl_matrix_fixed<double, 4, 4>(), 0.0);
-  std::pair<vnl_matrix_fixed<double, 4, 4>, double> fmd(
-      vnl_matrix_fixed<double, 4, 4>(), 0.0);
+  std::pair<vnl_matrix<double>, double> cmd(
+      vnl_matrix<double>(), 0.0);
+  std::pair<vnl_matrix<double>, double> fmd(
+      vnl_matrix<double>(), 0.0);
 
   // check if mi (inital transform) is passed
   if (!m.empty())
@@ -132,14 +131,14 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
   if (verbose > 1) {
     std::cout << "   - initial iscale: " << iscalefinal << std::endl;
     std::cout << "   - initial transform:\n";
-    vnl_matlab_print(std::cout, fmd.first, "Minit",
+    vnl_matlab_print(cout, fmd.first, "Minit",
                      vnl_matlab_print_format_long);
     std::cout << std::endl;
   }
 
-  // std::cout << "mris width " << mriS->width << std::endl;
-  MRI *                          mri_Swarp = nullptr;
-  MRI *                          mri_Twarp = nullptr;
+  //std::cout << "mris width " << mriS->width << std::endl;
+  MRI *                          mri_Swarp = NULL;
+  MRI *                          mri_Twarp = NULL;
   vnl_matrix_fixed<double, 4, 4> mh2;
   vnl_matrix_fixed<double, 4, 4> mh;
   vnl_matrix_fixed<double, 4, 4> mhi;
@@ -201,11 +200,11 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
     // store M and d
     if (verbose > 1) {
       std::cout << "   - recieved matrix update " << std::endl;
-      vnl_matlab_print(std::cout, cmd.first, "Mupdate",
+      vnl_matlab_print(cout, cmd.first, "Mupdate",
                        vnl_matlab_print_format_long);
       std::cout << std::endl;
       std::cout << "   - store old transform" << std::endl;
-      vnl_matlab_print(std::cout, fmd.first, "Mold",
+      vnl_matlab_print(cout, fmd.first, "Mold",
                        vnl_matlab_print_format_long);
       std::cout << std::endl;
     }
@@ -218,7 +217,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
       fmd.first = cmd.first * fmd.first; // was '* mh' which should be the same
     if (verbose > 1) {
       std::cout << "   - updated full transform" << std::endl;
-      vnl_matlab_print(std::cout, fmd.first, "Mnew",
+      vnl_matlab_print(cout, fmd.first, "Mnew",
                        vnl_matlab_print_format_long);
       std::cout << std::endl;
     }
@@ -252,7 +251,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
     if (verbose > 0)
       std::cout << "     -- diff. to prev. transform: " << diff << star.str()
                 << std::endl;
-    // std::cout << " intens: " << fmd.second << std::endl;
+    //std::cout << " intens: " << fmd.second << std::endl;
     i++;
     converged = (diff <= epsit && idiff <= ieps);
 
@@ -289,7 +288,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
 
     MRIwrite(mri_Swarp, (name + "-mriS-mapped.mgz").c_str());
     MRIwrite(mri_Twarp, (name + "-mriT-mapped.mgz").c_str());
-    MRI *salign = MRIclone(mriS, nullptr);
+    MRI *salign = MRIclone(mriS, NULL);
     salign      = MyMRI::MRIlinearTransform(mri_Swarp, salign, cmd.first);
     MRIwrite(salign, (name + "-mriS-align.mgz").c_str());
     MRIfree(&salign);
@@ -306,12 +305,12 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
     }
     // remove negative weights (markers) set to 1
     /* int x, y, z;
-     for (z = 0; z < mri_hweights->depth; z++)
-       for (x = 0; x < mri_hweights->width; x++)
-         for (y = 0; y < mri_hweights->height; y++)
-         {
-           if (MRIFvox(mri_hweights,x,y,z) < 0) MRIFvox(mri_hweights,x,y,z) = 1;
-         }*/
+    for (z = 0; z < mri_hweights->depth; z++)
+      for (x = 0; x < mri_hweights->width; x++)
+        for (y = 0; y < mri_hweights->height; y++)
+        {
+          if (MRIFvox(mri_hweights,x,y,z) < 0) MRIFvox(mri_hweights,x,y,z) = 1;
+        }*/
 
     mri_weights = MRIalloc(mriT->width, mriT->height, mriT->depth, MRI_FLOAT);
     MRIcopyHeader(mriT, mri_weights);
@@ -323,30 +322,24 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
       mri_weights = MRIcopy(mri_hweights, mri_weights);
   }
 
-  // vnl_matlab_print(std::cerr,fmd.first,"fmd",vnl_matlab_print_format_long);std::cerr
-  // << std::endl;
-  // vnl_matlab_print(std::cerr,cmd.first,"cmd",vnl_matlab_print_format_long);std::cerr
-  // << std::endl;
-  // vnl_matlab_print(std::cerr,mh,"mov1hw",vnl_matlab_print_format_long);std::cerr
-  // << std::endl;
-  // vnl_matlab_print(std::cerr,mhi,"dst1hw",vnl_matlab_print_format_long);std::cerr
-  // << std::endl;
+  vnl_matlab_print(cerr,fmd.first,"fmd",vnl_matlab_print_format_long);std::cerr << std::endl;
+  vnl_matlab_print(cerr,cmd.first,"cmd",vnl_matlab_print_format_long);std::cerr << std::endl;
+  vnl_matlab_print(cerr,mh,"mov1hw",vnl_matlab_print_format_long);std::cerr << std::endl;
+  vnl_matlab_print(cerr,mhi,"dst1hw",vnl_matlab_print_format_long);std::cerr << std::endl;
 
   // adjust half way maps to new midpoint based on final transform
   if (verbose > 1)
     std::cout << "     -- adjusting half-way maps " << std::endl;
-  vnl_matrix_fixed<double, 4, 4> ch = MyMatrix::MatrixSqrt(fmd.first);
+  vnl_matrix<double> ch = MyMatrix::MatrixSqrt(fmd.first);
   // do not just assume c = ch*ch, rather c = ch2 * ch
   // for transforming target we need ch2^-1 = ch * c^-1
-  vnl_matrix_fixed<double, 4, 4> ci  = vnl_inverse(fmd.first);
-  vnl_matrix_fixed<double, 4, 4> chi = ch * ci;
+  vnl_matrix<double> ci  = vnl_inverse(fmd.first);
+  vnl_matrix<double> chi = ch * ci;
   mov2weights                        = ch;
   dst2weights                        = chi;
 
-  // vnl_matlab_print(std::cerr,mov2weights,"mov2hw",vnl_matlab_print_format_long);std::cerr
-  // << std::endl;
-  // vnl_matlab_print(std::cerr,dst2weights,"dst2hw",vnl_matlab_print_format_long);std::cerr
-  // << std::endl;
+  vnl_matlab_print(cerr,mov2weights,"mov2hw",vnl_matlab_print_format_long);std::cerr << std::endl;
+  vnl_matlab_print(cerr,dst2weights,"dst2hw",vnl_matlab_print_format_long);std::cerr << std::endl;
 
   MRIfree(&mri_Twarp);
   MRIfree(&mri_Swarp);

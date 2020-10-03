@@ -6,6 +6,7 @@
 #include "itkMGHImageIO.h"
 #include "itkShrinkImageFilter.h"
 #include "vnl/vnl_matlab_read.h"
+#include "vnl/vnl_matrix.h"
 
 namespace kvl {
 
@@ -13,7 +14,7 @@ namespace kvl {
 //
 //
 CroppedImageReader ::CroppedImageReader() {
-  m_Image                 = nullptr;
+  m_Image                 = 0;
   m_Transform             = TransformType::New();
   m_WorldToImageTransform = TransformType::New();
 
@@ -115,7 +116,7 @@ CroppedImageReader ::GetTransformOfFileName(const std::string &filename) {
 
   // Get someone who can read this file format
   itk::ImageIOBase::Pointer io = itk::ImageIOFactory::CreateImageIO(
-      filename.c_str(), itk::ImageIOFactory::ReadMode);
+      filename.c_str(), itk::IOFileModeEnum::ReadMode);
   if (io) {
     std::cout
         << "Constructing image-to-world transform from header information ("
@@ -141,7 +142,7 @@ CroppedImageReader ::GetTransformOfFileName(const std::string &filename) {
     transform->SetMatrix(direction * scale);
     transform->SetOffset(offset);
 
-    // std::cout << "io->GetOrigin(): [ "
+    //std::cout << "io->GetOrigin(): [ "
     //          << io->GetOrigin( 0 ) << ", "
     //          << io->GetOrigin( 1 ) << ", "
     //          << io->GetOrigin( 2 ) << " ]" << std::endl;
@@ -168,8 +169,8 @@ CroppedImageReader ::GetTransformOfFileName(const std::string &filename) {
 
 #endif
 
-  // std::cout << "Returning the following transform: " << std::endl;
-  // transform->Print( std::cout );
+  //std::cout << "Returning the following transform: " << std::endl;
+  //transform->Print( std::cout );
 
   return transform;
 }
@@ -181,8 +182,8 @@ void CroppedImageReader ::Read(const char *fileName,
                                const char *boundingFileName) {
 
   // Read the first image
-  using ReaderType           = itk::ImageFileReader<ImageType>;
-  ReaderType::Pointer reader = ReaderType::New();
+  typedef itk::ImageFileReader<ImageType> ReaderType;
+  ReaderType::Pointer                     reader = ReaderType::New();
   reader->SetFileName(fileName);
   reader->Update();
 
@@ -205,8 +206,8 @@ void CroppedImageReader ::Read(const char *fileName,
     TransformType::Pointer transform = TransformType::New();
     this->GetTransformOfFileName(fileName)->GetInverse(transform);
     m_WorldToImageTransform->Compose(transform);
-    // std::cout << "WorldToImageTransform before cropping: " << std::endl;
-    // m_WorldToImageTransform->Print( std::cout );
+    //std::cout << "WorldToImageTransform before cropping: " << std::endl;
+    //m_WorldToImageTransform->Print( std::cout );
   } else {
 
     // The transformation is obtained from the image-to-world transforms of
@@ -215,8 +216,8 @@ void CroppedImageReader ::Read(const char *fileName,
     this->GetTransformOfFileName(fileName)->GetInverse(transform);
     m_Transform = this->GetTransformOfFileName(boundingFileName);
     m_Transform->Compose(transform);
-    // std::cout << "Transform before cropping: " << std::endl;
-    // m_Transform->Print( std::cout );
+    //std::cout << "Transform before cropping: " << std::endl;
+    //m_Transform->Print( std::cout );
 
 #if 0
     // Shift the inverse transform above by one voxel to map SPM's (1,1,1)-origin
@@ -231,13 +232,13 @@ void CroppedImageReader ::Read(const char *fileName,
     m_WorldToImageTransform->Print( std::cout );
 #else
     m_WorldToImageTransform->Compose(transform);
-    // std::cout << "WorldToImageTransform before cropping: " << std::endl;
-    // m_WorldToImageTransform->Print( std::cout );
+    //std::cout << "WorldToImageTransform before cropping: " << std::endl;
+    //m_WorldToImageTransform->Print( std::cout );
 #endif
 
     // Obtain the bounding box size
     itk::ImageIOBase::Pointer imageIO = itk::ImageIOFactory::CreateImageIO(
-        boundingFileName, itk::ImageIOFactory::ReadMode);
+        boundingFileName, itk::IOFileModeEnum::ReadMode);
     if (imageIO.IsNull()) {
       itkExceptionMacro(<< "Can't find a suitable filter to import image "
                         << boundingFileName);
@@ -249,8 +250,7 @@ void CroppedImageReader ::Read(const char *fileName,
     }
     // std::cout << " m_BoundingBoxSize: [" << m_BoundingBoxSize[ 0 ] << ", "
     //                                   << m_BoundingBoxSize[ 1 ] << ","
-    //                                   << m_BoundingBoxSize[ 2 ] << "]" <<
-    //                                   std::endl;
+    //                                   << m_BoundingBoxSize[ 2 ] << "]" << std::endl;
 
     // Map each of the corners of the bounding box, and record minima and maxima
     double minimalMappedCoordinate[3];
@@ -304,19 +304,13 @@ void CroppedImageReader ::Read(const char *fileName,
       }
     }
 
-    // std::cout << " minimalMappedCoordinate: [" << minimalMappedCoordinate[ 0
-    // ] << ", "
-    //                                           << minimalMappedCoordinate[ 1 ]
-    //                                           << ","
-    //                                           << minimalMappedCoordinate[ 2 ]
-    //                                           << "]" << std::endl;
+    // std::cout << " minimalMappedCoordinate: [" << minimalMappedCoordinate[ 0 ] << ", "
+    //                                           << minimalMappedCoordinate[ 1 ] << ","
+    //                                           << minimalMappedCoordinate[ 2 ] << "]" << std::endl;
     //
-    // std::cout << " maximalMappedCoordinate: [" << maximalMappedCoordinate[ 0
-    // ] << ", "
-    //                                           << maximalMappedCoordinate[ 1 ]
-    //                                           << ","
-    //                                           << maximalMappedCoordinate[ 2 ]
-    //                                           << "]" << std::endl;
+    // std::cout << " maximalMappedCoordinate: [" << maximalMappedCoordinate[ 0 ] << ", "
+    //                                           << maximalMappedCoordinate[ 1 ] << ","
+    //                                           << maximalMappedCoordinate[ 2 ] << "]" << std::endl;
 
     // Given the boundaries, crop the original image obtained from the reader
     // Loop over the image, and find the bounding box with content
@@ -329,8 +323,8 @@ void CroppedImageReader ::Read(const char *fileName,
       max[i] = static_cast<int>(maximalMappedCoordinate[i] + 1);
     }
 
-    // Add some margin as a fraction of the found bounding box, and make sure
-    // we're not going outside of the image area
+    // Add some margin as a fraction of the found bounding box, and make sure we're not going
+    // outside of the image area
     for (int i = 0; i < 3; i++) {
       const int margin = static_cast<int>(m_ExtraFraction * (max[i] - min[i]));
 
@@ -347,9 +341,8 @@ void CroppedImageReader ::Read(const char *fileName,
       }
     }
 
-    // std::cout << "Cropping with min [" << min[ 0 ] << "  " << min[ 1 ] << "
-    // " << min[ 2 ] << "]" << std::endl; std::cout << "          and max [" <<
-    // max[ 0 ] << "  " << max[ 1 ] << "  " << max[ 2 ] << "]" << std::endl;
+    // std::cout << "Cropping with min [" << min[ 0 ] << "  " << min[ 1 ] << "  " << min[ 2 ] << "]" << std::endl;
+    // std::cout << "          and max [" << max[ 0 ] << "  " << max[ 1 ] << "  " << max[ 2 ] << "]" << std::endl;
 
     // Gets the image regions
     ImageType::IndexType originalImageIndex = {{min[0], min[1], min[2]}};
@@ -398,7 +391,7 @@ void CroppedImageReader ::Read(const char *fileName,
   // Downsample image if necessary
   if (m_DownSamplingFactor != 1) {
     // Downsample image
-    using ShrinkerType = itk::ShrinkImageFilter<ImageType, ImageType>;
+    typedef itk::ShrinkImageFilter<ImageType, ImageType> ShrinkerType;
     ShrinkerType::Pointer shrinker = ShrinkerType::New();
     shrinker->SetInput(m_Image);
     shrinker->SetShrinkFactors(m_DownSamplingFactor);

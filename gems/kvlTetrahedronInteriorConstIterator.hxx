@@ -18,9 +18,8 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
 
   // ============================================================================================
   //
-  // Part I: Compute a valid bounding box around the tethradron specified by
-  // vertices (p0,p1,p2,p3). If the tetradron falls outside the buffered image
-  // region, the bounding box is clipped accordingly
+  // Part I: Compute a valid bounding box around the tethradron specified by vertices (p0,p1,p2,p3).
+  // If the tetradron falls outside the buffered image region, the bounding box is clipped accordingly
   //
   // ============================================================================================
   typedef typename ImageType::RegionType     RegionType;
@@ -29,8 +28,7 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
   typedef typename RegionType::SizeType      SizeType;
   typedef typename SizeType::SizeValueType   SizeValueType;
 
-  // Compute the coordinates of the lower corner of the bounding box around the
-  // tetradron
+  // Compute the coordinates of the lower corner of the bounding box around the tetradron
   PointType lowerCorner = p0;
   for (int i = 0; i < 3; i++) {
     if (p1[i] < lowerCorner[i]) {
@@ -43,10 +41,9 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
       lowerCorner[i] = p3[i];
     }
   }
-  // std::cout << "lowerCorner: " << lowerCorner << std::endl;
+  //std::cout << "lowerCorner: " << lowerCorner << std::endl;
 
-  // Compute the coordinates of the upper corner of the bounding box around the
-  // tetradron
+  // Compute the coordinates of the upper corner of the bounding box around the tetradron
   PointType upperCorner = p0;
   for (int i = 0; i < 3; i++) {
     if (p1[i] > upperCorner[i]) {
@@ -59,7 +56,7 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
       upperCorner[i] = p3[i];
     }
   }
-  // std::cout << "upperCorner: " << upperCorner << std::endl;
+  //std::cout << "upperCorner: " << upperCorner << std::endl;
 
   // Compute the lower cornder index, while clipping to the buffered region
   IndexType lowerCornerIndex = ptr->GetBufferedRegion().GetIndex();
@@ -74,7 +71,7 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
       lowerCornerIndex[i] = ptr->GetBufferedRegion().GetUpperIndex()[i] + 1;
     }
   }
-  // std::cout << "lowerCornerIndex: " << lowerCornerIndex << std::endl;
+  //std::cout << "lowerCornerIndex: " << lowerCornerIndex << std::endl;
 
   // Compute the upper cornder index, while clipping to the buffered region
   IndexType upperCornerIndex = ptr->GetBufferedRegion().GetUpperIndex();
@@ -89,7 +86,7 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
       upperCornerIndex[i] = ptr->GetBufferedRegion().GetIndex()[i] - 1;
     }
   }
-  // std::cout << "upperCornerIndex: " << upperCornerIndex << std::endl;
+  //std::cout << "upperCornerIndex: " << upperCornerIndex << std::endl;
 
   // ============================================================================================
   //
@@ -99,7 +96,7 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
   RegionType region;
   region.SetIndex(lowerCornerIndex);
   region.SetUpperIndex(upperCornerIndex);
-  // std::cout << "region: " << region << std::endl;
+  //std::cout << "region: " << region << std::endl;
   Superclass::operator=(Superclass(
       ptr, region)); // Workaround for non-existing this->SetRegion( region )
 
@@ -108,10 +105,9 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
 
   // ============================================================================================
   //
-  // Part III: Precompute some matrices that will allow us to map a 3x1 vector
-  // of Eucledian coordinates
-  // ("y") into baricentric ones (pi0,pi1,pi2,pi3). Given vertex coordinates p0,
-  // p1, p2, and p3, this accomplished by doing
+  // Part III: Precompute some matrices that will allow us to map a 3x1 vector of Eucledian coordinates
+  // ("y") into baricentric ones (pi0,pi1,pi2,pi3). Given vertex coordinates p0, p1, p2, and p3, this
+  // accomplished by doing
   //
   //   x = M * ( y - t );
   //   pi1 = x(1);
@@ -127,9 +123,9 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
   //
   //   t = p0;
   //
-  // To see why this is the case, consider the opposite direction: a tetradron
-  // with vertices (0,0,0), (1,0,0), (0,1,0), and (0,0,1) will be mapped onto
-  // one with vertices p0, p1, p2, and p3 by doing
+  // To see why this is the case, consider the opposite direction: a tetradron with vertices
+  // (0,0,0), (1,0,0), (0,1,0), and (0,0,1) will be mapped onto one with vertices p0, p1, p2, and p3
+  // by doing
   //
   //  y =  [ p1-p0 p2-p0 p3-p0 ] * x + p0;
   //
@@ -143,8 +139,7 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
   // M = inv( [ p1-p0 p2-p0 p3-p0 ] )
   // where the inversion of a 3x3 matrix is given by:
   //
-  // (cf.
-  // https://en.wikipedia.org/wiki/Invertible_matrix#Inversion_of_3.C3.973_matrices)
+  // (cf.  https://en.wikipedia.org/wiki/Invertible_matrix#Inversion_of_3.C3.973_matrices)
   const double a = p1[0] - p0[0];
   const double b = p2[0] - p0[0];
   const double c = p3[0] - p0[0];
@@ -179,8 +174,8 @@ TetrahedronInteriorConstIterator<TPixel>::TetrahedronInteriorConstIterator(
 
   // ============================================================================================
   //
-  // Part IV: Precompute the baricentric coordinates of the first voxel of the
-  // first column in the first slice (i.e, the one we're currently pointing to)
+  // Part IV: Precompute the baricentric coordinates of the first voxel of the first column in
+  // the first slice (i.e, the one we're currently pointing to)
   //
   // ============================================================================================
   const double YminT1 = this->GetIndex()[0] - t1;
@@ -298,15 +293,14 @@ void TetrahedronInteriorConstIterator<TPixel>::MoveOnePixel() {
   //
   //   x = M * ( y - t )
   //
-  // However, since our y's are nicely ordered on an image grid, we can save a
-  // lot of multiplications by noticing that
+  // However, since our y's are nicely ordered on an image grid, we can save a lot of
+  // multiplications by noticing that
   //
   //  M * ( ( y + delta ) - t ) = M * ( y - t ) + M * delta
   //
-  // where delta is typically (1,0,0) (so that M * delta is just the first
-  // column of M), although sometimes (when we're at the end of our span) it
-  // will be (0,1,0) (second column of M), and even more less frequently (0,0,1)
-  // (third column of M)
+  // where delta is typically (1,0,0) (so that M * delta is just the first column of M),
+  // although sometimes (when we're at the end of our span) it will be (0,1,0) (second column of M),
+  // and even more less frequently (0,0,1) (third column of M)
 
   const int numberOfLoadings = m_InterpolatedValues.size();
   if (this->m_PositionIndex[0] < (this->m_EndIndex[0] - 1)) {
@@ -319,11 +313,9 @@ void TetrahedronInteriorConstIterator<TPixel>::MoveOnePixel() {
     this->m_Position++;
 
     //  Update the baricentric coordinates
-    // for ( int loadingNumber = 0; loadingNumber < numberOfLoadings;
-    // loadingNumber++ )
+    // for ( int loadingNumber = 0; loadingNumber < numberOfLoadings; loadingNumber++ )
     //   {
-    //   m_InterpolatedValues[ loadingNumber ] += m_NextRowAdditions[
-    //   loadingNumber ];
+    //   m_InterpolatedValues[ loadingNumber ] += m_NextRowAdditions[ loadingNumber ];
     //   }
     for (int loadingNumber = 0; loadingNumber < numberOfLoadings;
          loadingNumber++) {
@@ -399,16 +391,15 @@ bool TetrahedronInteriorConstIterator<TPixel>::IsOutsideTetrahdron() const {
   // Similar to the "top-left rule" for rasterizing triangles, we can come up
   // with similar rules for tetrahedra. The philosophy is that if a baricentric
   // coordinate is exactly zero, we (virtually) shift the voxel a tiny fraction
-  // to the right; if this changes the baricentric coordinate to become
-  // positive, the voxel will be considered inside. This will happen if the
-  // corresponding element in the first column of the M matrix is positive. Of
-  // course it is possible that this elememt is exactly zero; if this is the
-  // case (meaning that we're lying on a face that is parellell with the
-  // x-axis), we can test for the second direction (second column of M) --
-  // virtually pushing the point, "up"; and if also that element is zero (which
-  // means the face is perpendicular to the z-axis) we look at the element in
-  // the third column of M (virtually pushing the point along the z-axis by a
-  // tiny fraction)
+  // to the right; if this changes the baricentric coordinate to become positive,
+  // the voxel will be considered inside. This will happen if the corresponding
+  // element in the first column of the M matrix is positive. Of course it is
+  // possible that this elememt is exactly zero; if this is the case (meaning
+  // that we're lying on a face that is parellell with the x-axis), we can test
+  // for the second direction (second column of M) -- virtually pushing the point,
+  // "up"; and if also that element is zero (which means the face is perpendicular
+  // to the z-axis) we look at the element in the third column of M (virtually
+  // pushing the point along the z-axis by a tiny fraction)
   //
   // For a nice drawing of the "top-left rule" for triangles, see
   //   https://msdn.microsoft.com/en-us/library/windows/desktop/cc627092%28v=vs.85%29.aspx#Triangle
@@ -422,7 +413,7 @@ bool TetrahedronInteriorConstIterator<TPixel>::IsOutsideTetrahdron() const {
 
   // Obvious culling first
   if ((pi0 < 0) || (pi1 < 0) || (pi2 < 0) || (pi3 < 0)) {
-    // std::cout << "pix < 0 kill" << std::endl;
+    //std::cout << "pix < 0 kill" << std::endl;
     return true;
   }
 

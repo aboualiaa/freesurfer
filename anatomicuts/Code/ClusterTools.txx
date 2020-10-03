@@ -145,19 +145,18 @@ ClusterTools<TColorMesh, TImage, THistogramMesh>::ColorMeshToHistogramMesh(
 
           withinIndex++;
           globalIndex++;
-          // std::cout << globalIndex << " "<< std::endl;
+          //std::cout << globalIndex << " "<< std::endl;
         }
 
         mesh->SetCell(indexCell, line);
         indexCell++;
       } else {
         out++;
-        //	std::cout << "right " << right << " left " << left << " remove
-        //"<< removeInterHemispheric << std::endl;
+        //	std::cout << "right " << right << " left " << left << " remove "<< removeInterHemispheric << std::endl;
       }
     }
     float val = (float)out / ((float)indexCell + out);
-    // std::cout << " val " << val << std::endl;
+    //std::cout << " val " << val << std::endl;
     if (val > 0.20) {
       meshes->push_back(HistogramMeshType::New());
     } else {
@@ -175,8 +174,7 @@ void ClusterTools<TColorMesh, TImage, THistogramMesh>::SetDirectionalNeighbors(
   std::vector<MeasurementVectorType> measurements;
   for (unsigned int i = 0; i < meshes->size(); i++) {
     int pointId = 0;
-    // ColorMeshType::CellTraits::PointIdIterator  pointIdEnd
-    // =meshes[i]->GetNumberOfPoints();
+    //ColorMeshType::CellTraits::PointIdIterator  pointIdEnd =meshes[i]->GetNumberOfPoints();
     int pointIdEnd = (*meshes)[i]->GetNumberOfPoints();
     int numPoints  = (*meshes)[i]->GetNumberOfPoints();
 
@@ -198,7 +196,7 @@ void ClusterTools<TColorMesh, TImage, THistogramMesh>::SetDirectionalNeighbors(
           typename ImageType::PixelType  vecino          = labelOrig;
           itk::ContinuousIndex<float, 3> continuousIndex = index;
           HistogramPointType             point           = pt1;
-          // std::cout << direcciones[k] << std::endl;
+          //std::cout << direcciones[k] << std::endl;
           typename ImageType::IndexType roundedIndex;
           while (vecino == labelOrig) {
             for (unsigned int j = 0; j < 3; j++)
@@ -331,7 +329,7 @@ ClusterTools<TColorMesh, TImage, THistogramMesh>::FixSampleClusters(
 template <class TColorMesh, class TImage, class THistogramMesh>
 int ClusterTools<TColorMesh, TImage, THistogramMesh>::GetAverageStreamline(
     typename TColorMesh::Pointer mesh) {
-  // typename ColorMeshType::Pointer mesh =  mesh;
+  //typename ColorMeshType::Pointer mesh =  mesh;
 
   typename ColorMeshType::CellsContainer::ConstIterator cells =
       mesh->GetCells()->Begin();
@@ -400,7 +398,7 @@ float ClusterTools<TColorMesh, TImage, THistogramMesh>::GetStandardDeviation(
   typename MembershipFunctionType::Pointer function =
       MembershipFunctionType::New();
   function->SetMeanEuclidean(true);
-  // function->SetLabels(true);
+  //function->SetLabels(true);
   typename HistogramMeshType::CellsContainer::ConstIterator cells =
       mesh->GetCells()->Begin();
   int numberOfPoints = cells.Value()->GetNumberOfPoints();
@@ -411,9 +409,9 @@ float ClusterTools<TColorMesh, TImage, THistogramMesh>::GetStandardDeviation(
   for (int j = 0; cells != mesh->GetCells()->End(); cells++, j++) {
     MeasurementVectorType mv(numberOfPoints * 3);
     mv.SetCell(mesh, j);
-    // std::cout << function->Evaluate(&mv, &average) << std::endl;
+    //std::cout << function->Evaluate(&mv, &average) << std::endl;
     distance += pow(1.0 / function->Evaluate(&mv, &average) - 1, 2);
-    // distance +=pow( function->Evaluate(&mv,&average),2);
+    //distance +=pow( function->Evaluate(&mv,&average),2);
   }
   return std::sqrt(distance / (mesh->GetNumberOfCells() - 1));
 }
@@ -423,7 +421,7 @@ float ClusterTools<TColorMesh, TImage, THistogramMesh>::GetDistance(
   typename MembershipFunctionType::Pointer function =
       MembershipFunctionType::New();
   function->SetMeanEuclidean(true);
-  // function->SetLabels(true);
+  //function->SetLabels(true);
   typename HistogramMeshType::CellsContainer::ConstIterator cells =
       mesh->GetCells()->Begin();
   int numberOfPoints = cells.Value()->GetNumberOfPoints();
@@ -434,7 +432,7 @@ float ClusterTools<TColorMesh, TImage, THistogramMesh>::GetDistance(
   MeasurementVectorType mv(numberOfPoints * 3);
   mv.SetCell(mesh, cellId);
   float distance = pow(1.0 / function->Evaluate(&mv, &average) - 1, 2);
-  // float distance =pow( function->Evaluate(&mv,&average),2);
+  //float distance =pow( function->Evaluate(&mv,&average),2);
   return distance;
 }
 

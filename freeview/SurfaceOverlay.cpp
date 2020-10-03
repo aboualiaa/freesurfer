@@ -33,6 +33,7 @@
 #include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include <QDateTime>
+#include "qdebug.h"
 
 SurfaceOverlay::SurfaceOverlay(LayerSurface *surf)
     : QObject(), m_fData(NULL), m_fDataRaw(NULL), m_fDataUnsmoothed(NULL),

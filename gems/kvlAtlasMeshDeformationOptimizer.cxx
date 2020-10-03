@@ -6,19 +6,19 @@ namespace kvl {
 //
 //
 AtlasMeshDeformationOptimizer ::AtlasMeshDeformationOptimizer() {
-  m_Mesh = nullptr;
+  m_Mesh = 0;
 
   m_IterationNumber = 0;
   m_MaximumNumberOfIterations =
       1000 /* itk::NumericTraits< unsigned int >::max() */;
   m_IterationEventResolution        = 10;
   m_Verbose                         = false;
-  m_Calculator                      = nullptr;
+  m_Calculator                      = 0;
   m_MaximalDeformationStopCriterion = 0.05;
 
   m_Cost     = 0;
-  m_Position = nullptr;
-  m_Gradient = nullptr;
+  m_Position = 0;
+  m_Gradient = 0;
 
   m_LineSearchMaximalDeformationLimit = 50.0; // Measured in voxels
   m_LineSearchMaximalDeformationIntervalStopCriterion =
@@ -74,8 +74,7 @@ bool AtlasMeshDeformationOptimizer ::Go() {
 //
 double AtlasMeshDeformationOptimizer ::Step() {
 
-  // If this is the first iteration, make sure to initialize some relevant
-  // variables
+  // If this is the first iteration, make sure to initialize some relevant variables
   if (m_IterationNumber == 0) {
     this->Initialize();
   }
@@ -311,17 +310,12 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
 
     //
     // Check what sort of solution we have:
-    //   * aweful (good news because then we can stop bracketing and move on to
-    //   zooming);
-    //   * excellent (good news because then we have found a minimum even
-    //   without zooming);
-    //   * OK but with a positive directional derivative (good news because then
-    //   we can stop
+    //   * aweful (good news because then we can stop bracketing and move on to zooming);
+    //   * excellent (good news because then we have found a minimum even without zooming);
+    //   * OK but with a positive directional derivative (good news because then we can stop
     //     bracketing and move on to zooming);
-    //   * simply OK (bad news because then our bracket is not yet large enough
-    //   -- i.e., minimum
-    //     might lie farther away then what we've tested so far -- so we need to
-    //     keep bracketing)
+    //   * simply OK (bad news because then our bracket is not yet large enough -- i.e., minimum
+    //     might lie farther away then what we've tested so far -- so we need to keep bracketing)
     //
     if ((cost > (initialCost + c1 * alpha * initialDirectionalDerivative)) ||
         ((cost >= previousCost) && (bracketingIterationNumber > 0))) {
@@ -346,8 +340,7 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
     }
 
     if (fabsf(directionalDerivative) <= (-c2 * initialDirectionalDerivative)) {
-      // Found an excellent solution that we can simply return -- no need for
-      // zooming
+      // Found an excellent solution that we can simply return -- no need for zooming
       newPosition = position;
       newCost     = cost;
       newGradient = gradient;
@@ -362,8 +355,8 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
     }
 
     if (directionalDerivative > 0) {
-      // Neither excellent nor aweful soution; however directional deriviate is
-      // uphill here so we can start zooming
+      // Neither excellent nor aweful soution; however directional deriviate is uphill here so
+      // we can start zooming
       if (m_Verbose) {
         std::cout << "[BRACKETING] Found an OK solution that is sufficiently "
                      "bad for zooming: "
@@ -382,8 +375,8 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
       break;
     }
 
-    // If we're here, it means our solution isn't sufficiently bad yet for
-    // zooming - expand in an effort to get something worse
+    // If we're here, it means our solution isn't sufficiently bad yet for zooming -
+    // expand in an effort to get something worse
     if (alpha >= alphaMax) {
       if (m_Verbose) {
         std::cout << "[BRACKETING] Would need to expand but can't anymore"
@@ -401,13 +394,13 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
                 << std::endl;
     }
 
-    // If a fitted cubic polynomial has a minimum ("cubic interpolation") use
-    // it, but make sure to expand sufficiently to reach alphaMax within
-    // maximumOfBracketingIterations iterations (and never beyond alphaMax
+    // If a fitted cubic polynomial has a minimum ("cubic interpolation") use it,
+    // but make sure to expand sufficiently to reach alphaMax within maximumOfBracketingIterations
+    // iterations (and never beyond alphaMax
 #if 0
-    const double  allowableRangeMin = exp( log( startAlpha ) + 
+    const double  allowableRangeMin = exp( log( startAlpha ) +
                                            ( log( alphaMax ) - log( startAlpha ) ) /
-                                           maximumOfBracketingIterations * 
+                                           maximumOfBracketingIterations *
                                            ( bracketingIterationNumber + 1 ) );
 #else
     const double allowableRangeMin =
@@ -422,8 +415,7 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
         pow(d1, 2) - previousDirectionalDerivative * directionalDerivative;
     double newAlpha = 0.0;
     if (d2Square > 0) {
-      // Interpolation seems to be possible -- use it unless it's too big or too
-      // small
+      // Interpolation seems to be possible -- use it unless it's too big or too small
       const double d2 = sqrt(d2Square);
       newAlpha =
           alpha -
@@ -502,8 +494,7 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
   }
 
   while (true) {
-    // If possibly use minimum of cubic polynomial approximation of function;
-    // otherwise bisect
+    // If possibly use minimum of cubic polynomial approximation of function; otherwise bisect
     double leftAlpha                 = 0.0;
     double leftCost                  = 0.0;
     double leftDirectionalDerivative = 0.0;
@@ -555,8 +546,7 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
       }
     }
 
-    // Make sure alpha is clipped to area well within [ lowAlpha, highAlpha ]
-    // range
+    // Make sure alpha is clipped to area well within [ lowAlpha, highAlpha ] range
     double acceptableRangeMin = 0.0;
     double acceptableRangeMax = 0.0;
     if (highAlpha > lowAlpha) {
@@ -567,24 +557,24 @@ void AtlasMeshDeformationOptimizer ::DoLineSearch(
       acceptableRangeMax = lowAlpha - 0.1 * (lowAlpha - highAlpha);
     }
 
-#if 0      
+#if 0
     if ( alpha < acceptableRangeMin )
       {
       alpha = ( acceptableRangeMin + acceptableRangeMax ) / 2;
-      std::cout << "    Too small for current range [" 
-                << leftAlpha * maximalDeformationOfSearchDirection 
-                << " " 
-                << rightAlpha * maximalDeformationOfSearchDirection 
+      std::cout << "    Too small for current range ["
+                << leftAlpha * maximalDeformationOfSearchDirection
+                << " "
+                << rightAlpha * maximalDeformationOfSearchDirection
                 << "]; using middle instead: "
                 << alpha * maximalDeformationOfSearchDirection << std::endl;
       }
     else if ( alpha > acceptableRangeMax )
       {
       alpha = ( acceptableRangeMin + acceptableRangeMax ) / 2;
-      std::cout << "    Too big for current range [" 
-                << leftAlpha * maximalDeformationOfSearchDirection 
-                << " " 
-                << rightAlpha * maximalDeformationOfSearchDirection 
+      std::cout << "    Too big for current range ["
+                << leftAlpha * maximalDeformationOfSearchDirection
+                << " "
+                << rightAlpha * maximalDeformationOfSearchDirection
                 << "]; using middle instead: "
                 << alpha * maximalDeformationOfSearchDirection << std::endl;
       }

@@ -51,6 +51,8 @@ double round(double x);
 
 #include "TrackIO.h"
 
+using namespace std;
+
 static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
@@ -81,11 +83,11 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int                nargs, cputime, count, volume, lenmin, lenmax, lencent;
-  float              lenavg;
-  std::vector<float> avg, wavg, cavg;
-  std::vector<MRI *> meas;
-  std::ofstream      fout;
+  int           nargs, cputime, count, volume, lenmin, lenmax, lencent;
+  float         lenavg;
+  vector<float> avg, wavg, cavg;
+  vector<MRI *> meas;
+  ofstream      fout;
 
   nargs = handleVersionOption(argc, argv, "dmri_pathstats");
   if (nargs && argc - nargs == 1)
@@ -140,9 +142,9 @@ int main(int argc, char **argv) {
   if (!outVoxFile.c_str()) {
     WriteHeader(outVoxFile);
 
-    std::ofstream fvox(outVoxFile, std::ios::app);
-    fvox << "# pathway start" << std::endl
-         << "x y z AD RD MD FA AD_Avg RD_Avg MD_Avg FA_Avg" << std::endl;
+    ofstream fvox(outVoxFile, ios::app);
+    fvox << "# pathway start" << endl
+         << "x y z AD RD MD FA AD_Avg RD_Avg MD_Avg FA_Avg" << endl;
     fvox.close();
   }
 
@@ -159,8 +161,7 @@ int main(int argc, char **argv) {
     fname = inTrcDir + "/length.samples.txt";
     lenfile.open(fname, ios::in);
     if (!lenfile) {
-      std::cout << "ERROR: Could not open " << fname << " for reading"
-                << std::endl;
+      cout << "ERROR: Could not open " << fname << " for reading" << endl;
       exit(1);
     }
 
@@ -205,7 +206,7 @@ int main(int argc, char **argv) {
             iavg  = avg.begin();
             iwavg = wavg.begin();
 
-            for (std::vector<MRI *>::const_iterator ivol = meas.begin();
+            for (vector<MRI *>::const_iterator ivol = meas.begin();
                  ivol < meas.end(); ivol++) {
               *iavg += MRIgetVoxVal(*ivol, ix, iy, iz, 0);
               *iwavg += h * MRIgetVoxVal(*ivol, ix, iy, iz, 0);
@@ -235,14 +236,13 @@ int main(int argc, char **argv) {
     fname = inTrcDir + '/' + inVoxFile;
     infile.open(fname, ios::in);
     if (!infile) {
-      std::cout << "ERROR: Could not open " << fname << " for reading"
-                << std::endl;
+      cout << "ERROR: Could not open " << fname << " for reading" << endl;
       exit(1);
     }
 
     while (getline(infile, pathline)) {
-      float              coord;
-      std::istringstream pathstr(pathline);
+      float         coord;
+      istringstream pathstr(pathline);
 
       for (int k = 0; k < 3; k++)
         if (pathstr >> coord)
@@ -254,8 +254,7 @@ int main(int argc, char **argv) {
     }
 
     if (!basepathmap.empty() && basepathmap.size() != pathmap.size()) {
-      std::cout << "ERROR: Unexpected number of coordinates in " << fname
-                << std::endl;
+      cout << "ERROR: Unexpected number of coordinates in " << fname << endl;
       exit(1);
     }
 
@@ -273,11 +272,11 @@ int main(int argc, char **argv) {
       cavg.resize(meas.size());
       fill(cavg.begin(), cavg.end(), 0.0);
 
-      for (std::vector<int>::const_iterator ipt = pathmap.begin();
+      for (vector<int>::const_iterator ipt = pathmap.begin();
            ipt < pathmap.end(); ipt += 3) {
         iavg = cavg.begin();
 
-        for (std::vector<MRI *>::const_iterator ivol = meas.begin();
+        for (vector<MRI *>::const_iterator ivol = meas.begin();
              ivol < meas.end(); ivol++) {
           *iavg += MRIgetVoxVal(*ivol, ipt[0], ipt[1], ipt[2], 0);
           iavg++;
@@ -300,8 +299,8 @@ int main(int argc, char **argv) {
       ofstream                    outfile(outVoxFile, ios::app);
 
       if (!outfile) {
-        std::cout << "ERROR: Could not open " << outVoxFile << " for writing"
-                  << std::endl;
+        cout << "ERROR: Could not open " << outVoxFile << " for writing"
+             << endl;
         exit(1);
       }
 
@@ -315,9 +314,9 @@ int main(int argc, char **argv) {
       }
 
       while (trkreader.GetNextPointCount(&npts)) {
-        float *                    iraw, *rawpts = new float[npts * 3];
-        std::vector<int>           coords(npts * 3);
-        std::vector<int>::iterator icoord = coords.begin();
+        float *               iraw, *rawpts = new float[npts * 3];
+        vector<int>           coords(npts * 3);
+        vector<int>::iterator icoord = coords.begin();
 
         // Read a streamline from input file
         trkreader.GetNextTrackData(npts, rawpts);
@@ -339,7 +338,7 @@ int main(int argc, char **argv) {
       if (!basepathmap.empty())
         iptbase = basepathmap.begin();
 
-      for (std::vector<int>::const_iterator ipt = pathmap.begin();
+      for (vector<int>::const_iterator ipt = pathmap.begin();
            ipt < pathmap.end(); ipt += 3) {
         int nsamp = 0;
 
@@ -350,20 +349,19 @@ int main(int argc, char **argv) {
           outfile << ipt[0] << " " << ipt[1] << " " << ipt[2];
 
         // Write value of each diffusion measure at this point
-        for (std::vector<MRI *>::const_iterator ivol = meas.begin();
+        for (vector<MRI *>::const_iterator ivol = meas.begin();
              ivol < meas.end(); ivol++)
           outfile << " " << MRIgetVoxVal(*ivol, ipt[0], ipt[1], ipt[2], 0);
 
         // Find closest point on each sample path
         fill(valsum.begin(), valsum.end(), 0.0);
 
-        for (std::vector<std::vector<int>>::const_iterator ipath =
-                 pathsamples.begin();
+        for (vector<vector<int>>::const_iterator ipath = pathsamples.begin();
              ipath < pathsamples.end(); ipath++) {
-          int                              dmin   = 1000000;
-          std::vector<int>::const_iterator iptmin = ipath->begin();
+          int                         dmin   = 1000000;
+          vector<int>::const_iterator iptmin = ipath->begin();
 
-          for (std::vector<int>::const_iterator ipathpt = ipath->begin();
+          for (vector<int>::const_iterator ipathpt = ipath->begin();
                ipathpt < ipath->end(); ipathpt += 3) {
             int dist = 0;
 
@@ -392,7 +390,7 @@ int main(int argc, char **argv) {
 
           ivalsum = valsum.begin();
 
-          for (std::vector<MRI *>::const_iterator ivol = meas.begin();
+          for (vector<MRI *>::const_iterator ivol = meas.begin();
                ivol < meas.end(); ivol++) {
             *ivalsum += MRIgetVoxVal(*ivol, iptmin[0], iptmin[1], iptmin[2], 0);
             ivalsum++;
@@ -402,13 +400,13 @@ int main(int argc, char **argv) {
         // Write average value of each diffusion measure around this point
         ivalsum = valsum.begin();
 
-        for (std::vector<MRI *>::const_iterator ivol = meas.begin();
+        for (vector<MRI *>::const_iterator ivol = meas.begin();
              ivol < meas.end(); ivol++) {
           outfile << " " << *ivalsum / nsamp;
           ivalsum++;
         }
 
-        outfile << std::endl;
+        outfile << endl;
 
         if (!basepathmap.empty())
           iptbase += 3;
@@ -463,14 +461,14 @@ int main(int argc, char **argv) {
   if (!outFile.empty()) {
     WriteHeader(outFile);
 
-    fout.open(outFile, std::ios::app);
+    fout.open(outFile, ios::app);
 
-    fout << "Count " << count << std::endl
-         << "Volume " << volume << std::endl
-         << "Len_Min " << lenmin << std::endl
-         << "Len_Max " << lenmax << std::endl
-         << "Len_Avg " << lenavg << std::endl
-         << "Len_Center " << lencent << std::endl;
+    fout << "Count " << count << endl
+         << "Volume " << volume << endl
+         << "Len_Min " << lenmin << endl
+         << "Len_Max " << lenmax << endl
+         << "Len_Avg " << lenavg << endl
+         << "Len_Center " << lencent << endl;
 
     if (!dtBase.empty())
       fout << "AD_Avg " << avg[0] << endl

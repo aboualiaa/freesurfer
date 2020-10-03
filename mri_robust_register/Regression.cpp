@@ -24,13 +24,23 @@
 
 #include "Regression.h"
 #include "RobustGaussian.h"
+#include <cassert>
 #include <fstream>
+#include <iostream>
+#include <limits>
+#include <math.h>
 #include <vector>
 
 #define export // obsolete feature 'export template' used in these headers
 #include <vnl/algo/vnl_qr.h>
 #include <vnl/algo/vnl_svd.h>
 #undef export
+
+#include "error.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace std;
 
 template <class T>
 vnl_vector<T> Regression<T>::getRobustEst(double sat, double sig) {
@@ -51,11 +61,10 @@ vnl_vector<T> Regression<T>::getRobustEst(double sat, double sig) {
 //             //unsigned lib;//        library
 //             //unsigned data;//       data/stack
 //             //unsigned dt;//         dirty pages (unused in Linux 2.6)
-//             //fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident,
-//             &share, &text, &lib, &data*/); fscanf(pf, "%u" , &size);
-//             //DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB
-//             mem used");
-//      std::cout <<  size / (1024.0) << " MB mem used" << std::endl;
+//             //fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
+//             fscanf(pf, "%u" , &size);
+//             //DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB mem used");
+//      cout <<  size / (1024.0) << " MB mem used" << endl;
 //         }
 //         fclose(pf);
 // //while (1)
@@ -78,7 +87,7 @@ template <class T>
 double Regression<T>::getRobustEstWB(vnl_vector<T> &w, double sat, double sig) {
   // constants
   int MAXIT = 20;
-  // double EPS = 2e-12;
+  //double EPS = 2e-12;
   double EPS = 2e-6;
 
   T muold = 0;
@@ -107,22 +116,22 @@ double Regression<T>::getRobustEstWB(vnl_vector<T> &w, double sat, double sig) {
   T      sigma;
   double d1, d2, wi;
 
-  // std::cout << endl<<endl<<" Values: " << std::endl;
-  // MatrixPrintFmt(stdout,"% 2.8f",B);
+  //cout << endl<<endl<<" Values: " << endl;
+  //MatrixPrintFmt(stdout,"% 2.8f",B);
 
   while (fabs(muold - mu) > EPS && count < MAXIT) {
     count++;
     muold = mu;
-    // std::cout << endl << "count " << count << " Myold " << muold << std::endl;
+    //cout << endl << "count " << count << " Myold " << muold << endl;
     //     for (int i = 1 ; i<=B->rows; i++)
     //       r->rptr[i][1] = muold - B->rptr[i][1];
     r = muold - *b;
 
-    // std::cout << " residuals: " << std::endl;
+    //cout << " residuals: " << endl;
     //   MatrixPrintFmt(stdout,"% 2.8f",r);
 
     sigma = getSigmaMAD(r);
-    // std::cout << " sigma: " << sigma << std::endl;
+    //cout << " sigma: " << sigma << endl;
     if (sigma < EPS) // if all r are the same (usually zero)
     {
       mu = muold;
@@ -135,12 +144,12 @@ double Regression<T>::getRobustEstWB(vnl_vector<T> &w, double sat, double sig) {
     //    for (int i = 1 ; i<=B->rows; i++)
     //      rdsigma->rptr[i][1] = r->rptr[i][1] / sigma;
     rdsigma = (T)(1.0 / sigma) * r;
-    // std::cout << " r/sigma: " << std::endl;
+    //cout << " r/sigma: " << endl;
     //   MatrixPrintFmt(stdout,"% 2.8f",rdsigma);
 
     getSqrtTukeyDiaWeights(rdsigma, w,
                            sat); // here we get sqrt of weights into w
-    // std::cout << " weights: " << std::endl;
+    //cout << " weights: " << endl;
     //   MatrixPrintFmt(stdout,"% 2.8f",w);
 
     // compute new parameter mu (using weights)
@@ -149,8 +158,7 @@ double Regression<T>::getRobustEstWB(vnl_vector<T> &w, double sat, double sig) {
     // d3 = 0;
     for (unsigned int i = 0; i < b->size(); i++) {
       wi = w[i] * w[i];
-      // d1 += wi * r[i];  not sure if this is right, think it should be b (see
-      // next line)
+      // d1 += wi * r[i];  not sure if this is right, think it should be b (see next line)
       d1 += wi * b->operator[](i);
       d2 += wi;
       // d3 += wi * r[i] * r[i];
@@ -163,7 +171,7 @@ double Regression<T>::getRobustEstWB(vnl_vector<T> &w, double sat, double sig) {
     }
     mu = muold - (T)d1 / d2;
   }
-  // std::cout << "!!! final mu :  " << mu << std::endl;
+  //cout << "!!! final mu :  " << mu << endl;
   //  MatrixFree(&r);
   //  MatrixFree(&rdsigma);
 
@@ -180,51 +188,49 @@ template <class T>
 vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
                                              double sig) {
   if (verbose > 1) {
-    std::cout << "  Regression<T>::getRobustEstWAB( " << sat << " , " << sig
-              << " ) ";
+    cout << "  Regression<T>::getRobustEstWAB( " << sat << " , " << sig
+         << " ) ";
     if (floatsvd)
-      std::cout << "  FLOAT version ";
+      cout << "  FLOAT version ";
     else
-      std::cout << "  DOUBLE version ";
-    std::cout << std::endl;
+      cout << "  DOUBLE version ";
+    cout << endl;
   }
 
   // constants
   int MAXIT = 20;
-  // double EPS = 2e-16;
+  //double EPS = 2e-16;
   double EPS = 2e-12;
 
   // variables
   std::vector<T> err(MAXIT + 1);
-  err[0] = std::numeric_limits<T>::infinity();
+  err[0] = numeric_limits<T>::infinity();
   err[1] = 1e20;
   double sigma;
 
   int arows = A->rows(); // large (voxels)
   int acols = A->cols(); // small (parameters)
 
-  // pre-alocate vectors
+  //pre-alocate vectors
   // init residuals (based on zero p, so r := b )
   vnl_vector<T> *r = new vnl_vector<T>(*b);
   vnl_vector<T> *p = new vnl_vector<T>(acols);
   vnl_vector<T> *w = new vnl_vector<T>(arows);
 
   //  if (! w.valid() || ! r.valid() || !p.valild())
-  //     ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getRobustEstWAB could not
-  //     allocate memory for w,r,p") ;
+  //     ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getRobustEstWAB could not allocate memory for w,r,p") ;
 
   vnl_vector<T> *lastp = new vnl_vector<T>(acols);
   vnl_vector<T> *lastw = new vnl_vector<T>(arows);
   //  if (! lastw.valid() || !lastr.valid() || !lastp.valid())
-  //     ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getRobustEstWAB could not
-  //     allocate memory for lastw,lastr,lastp") ;
+  //     ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getRobustEstWAB could not allocate memory for lastw,lastr,lastp") ;
   vnl_vector<T> *vtmp = NULL;
 
   int count = 0;
   int incr  = 0;
   // iteration until we increase the error, we reach maxit or we have no error
   do {
-    count++; // first = 1
+    count++; //first = 1
 
     if (count > 1) {
       // store lastp (not necessary in first run)
@@ -244,17 +250,15 @@ vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
     sigma = getSigmaMAD(*r);
     if (sigma < EPS) // e.g. if images are identical
     {
-      std::cout << "  Sigma too small: " << sigma << " (identical images?)"
-                << std::endl;
+      cout << "  Sigma too small: " << sigma << " (identical images?)" << endl;
       w->fill(1.0);
     } else {
-      // std::cout << "Sigma: " << sigma << std::endl;
+      //cout << "Sigma: " << sigma << endl;
       *r *= (1.0 / sigma);
       // here we get sqrt of weights into w
       getSqrtTukeyDiaWeights(*r, *w, sat);
     }
-    // free residuals (to reduce max memory load) seems to have no effect on
-    // speed
+    // free residuals (to reduce max memory load) seems to have no effect on speed
     r->clear();
 
     // compute weighted least squares
@@ -279,7 +283,7 @@ vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
       swr += t1 * t2;
     }
     err[count] = swr / sw;
-    // std::cout << "err [ " << count << " ] = " << err[count] << std::endl;
+    //cout << "err [ " << count << " ] = " << err[count] << endl;
     if (err[count - 1] <= err[count])
       incr++;
   } while (incr < 1 && count < MAXIT && err[count] > EPS);
@@ -289,20 +293,17 @@ vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
   vnl_vector<T> pfinal;
   if (err[count] > err[count - 1]) {
     // take previous values (since actual values made the error to increase)
-    // std::cout << " last step was no improvement, taking values : "<<  count-1 <<
-    // endl;
+    // cout << " last step was no improvement, taking values : "<<  count-1 << endl;
     pfinal = *lastp;
     wfinal = *lastw;
     if (verbose > 1)
-      std::cout << "     Step: " << count - 2 << " ERR: " << err[count - 1]
-                << std::endl;
+      cout << "     Step: " << count - 2 << " ERR: " << err[count - 1] << endl;
     lasterror = err[count - 1];
   } else {
     pfinal = *p;
     wfinal = *w;
     if (verbose > 1)
-      std::cout << "     Step: " << count - 1 << " ERR: " << err[count]
-                << std::endl;
+      cout << "     Step: " << count - 1 << " ERR: " << err[count] << endl;
     lasterror = err[count];
   }
   delete (p);
@@ -329,8 +330,8 @@ vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
   d /= wfinal.size();
   dd /= ddcount;
   if (verbose > 1)
-    std::cout << "          weights average: " << dd
-              << "  zero: " << (double)zcount / ddcount << std::flush;
+    cout << "          weights average: " << dd
+         << "  zero: " << (double)zcount / ddcount << flush;
   //"  on significant b vals ( " << ddcount << " ): " << dd <<endl;
   lastweight = dd;
   lastzero   = (double)zcount / ddcount;
@@ -338,11 +339,11 @@ vnl_vector<T> Regression<T>::getRobustEstWAB(vnl_vector<T> &wfinal, double sat,
   return pfinal;
 }
 
-/** Solving \f$ p = [A^T W A]^{-1} A^T W b\f$     (with \f$ W = diag(w_i^2) \f$
- ) done by computing \f$ M := \sqrt{W} A\f$ and  \f$ v := \sqrt{W} b\f$ then we
- have \f$ p = [ M^T M ]^{-1} M^T v  \f$ or \f$ M p = v \f$, this we solve with
- QR decomposition (faster than svd). \param w vector representing a diagnoal
- matrix with the sqrt of the weights as elements
+/** Solving \f$ p = [A^T W A]^{-1} A^T W b\f$     (with \f$ W = diag(w_i^2) \f$ )
+ done by computing \f$ M := \sqrt{W} A\f$ and  \f$ v := \sqrt{W} b\f$
+ then we have \f$ p = [ M^T M ]^{-1} M^T v  \f$
+ or \f$ M p = v \f$, this we solve with QR decomposition (faster than svd).
+ \param w vector representing a diagnoal matrix with the sqrt of the weights as elements
  */
 template <class T>
 vnl_vector<T> Regression<T>::getWeightedLSEst(const vnl_vector<T> &w) {
@@ -361,8 +362,7 @@ vnl_vector<T> Regression<T>::getWeightedLSEst(const vnl_vector<T> &w) {
 
   // compute wb:
   vnl_vector<T> wb(b->size());
-  // if (!wb.valid()) ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getWeightedLSEst
-  // could not allocate memory for wb") ;
+  //if (!wb.valid()) ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getWeightedLSEst could not allocate memory for wb") ;
   for (rr = 0; rr < b->size(); rr++)
     wb[rr] = b->operator[](rr) * w[rr];
 
@@ -379,8 +379,7 @@ vnl_vector<T> Regression<T>::getWeightedLSEst(const vnl_vector<T> &w) {
  done by computing \f$ M := \sqrt{W} A\f$ and  \f$ v := \sqrt{W} b\f$
  then we have \f$ p = [ M^T M ]^{-1} M^T v  \f$
  or \f$ M p = v \f$, this we solve with QR decomposition (faster than svd).
- \param w vector representing a diagnoal matrix with the sqrt of the weights as
- elements
+ \param w vector representing a diagnoal matrix with the sqrt of the weights as elements
  */
 template <class T>
 vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
@@ -399,8 +398,7 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 
   // compute wb:
   vnl_vector<float> wb(b->size());
-  // if (!wb.valid()) ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getWeightedLSEst
-  // could not allocate memory for wb") ;
+  //if (!wb.valid()) ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getWeightedLSEst could not allocate memory for wb") ;
   for (rr = 0; rr < b->size(); rr++)
     wb[rr] = b->operator[](rr) * w[rr];
 
@@ -418,12 +416,10 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 
 // template <class T>
 // vnl_vector< T >  Regression<T>::getWeightedLSEst(const vnl_vector< T > & w)
-// // w is a vector representing a diagnoal matrix with the sqrt of the weights
-// as elements
+// // w is a vector representing a diagnoal matrix with the sqrt of the weights as elements
 // // solving p = [A^T W A]^{-1} A^T W b     (with W = diag(w_i^2) )
 // // done by computing M := Sqrt(W) A and and  wb := sqrt(W) b
-// // then we have p = [ M^T M ]^{-1} M^T wb    which is solved by computing the
-// pseudo inverse
+// // then we have p = [ M^T M ]^{-1} M^T wb    which is solved by computing the pseudo inverse
 // // of psdi(M) and then p = psdi(M) * wb
 // {
 //   unsigned int rr, cc;
@@ -441,8 +437,8 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 //   vnl_svd< T >* svdMatrix = new vnl_svd< T >( wA );
 //   if (! svdMatrix->valid() )
 //   {
-//     cerr << "    Regression<T>::getWeightedLSEst    could not compute pseudo
-//     inverse!" << std::endl; exit(1);
+//     cerr << "    Regression<T>::getWeightedLSEst    could not compute pseudo inverse!" << endl;
+//     exit(1);
 //   }
 //   wA = svdMatrix->pinverse();
 //   delete (svdMatrix);
@@ -450,9 +446,8 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 //
 //   // compute wb:
 //   vnl_vector < T > wb(b->size());
-//   //if (!wb.valid())
-//   ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getWeightedLSEst could not
-//   allocate memory for wb") ; for (rr = 0;rr<b->size();rr++)
+//   //if (!wb.valid()) ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getWeightedLSEst could not allocate memory for wb") ;
+//   for (rr = 0;rr<b->size();rr++)
 //     wb[rr] = b->operator[](rr) * w[rr];
 //
 //   // compute wAi * wb
@@ -462,15 +457,12 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 // }
 
 // template <class T>
-// vnl_vector< T >  Regression<T>::getWeightedLSEstFloat(const vnl_vector< T > &
-// w)
+// vnl_vector< T >  Regression<T>::getWeightedLSEstFloat(const vnl_vector< T > & w)
 // // uses FLOAT internaly
-// // w is a vector representing a diagnoal matrix with the sqrt of the weights
-// as elements
+// // w is a vector representing a diagnoal matrix with the sqrt of the weights as elements
 // // solving p = [A^T W A]^{-1} A^T W b     (with W = diag(w_i^2) )
 // // done by computing M := Sqrt(W) A and and  wb := sqrt(W) b
-// // then we have p = [ M^T M ]^{-1} M^T wb    which is solved by computing the
-// pseudo inverse
+// // then we have p = [ M^T M ]^{-1} M^T wb    which is solved by computing the pseudo inverse
 // // of psdi(M) and then p = psdi(M) * wb
 // {
 //   unsigned int rr, cc;
@@ -484,14 +476,13 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 //       wA(rr,cc) = (float)(A->operator()(rr,cc) * w(rr));
 //
 //   // compute pseudoInverse of wA:
-//   // uses a LOT of memory!!! for a 520MB double matrix A it will be close to
-//   2Gig
+//   // uses a LOT of memory!!! for a 520MB double matrix A it will be close to 2Gig
 //   // therefore using float should reduce the max memory usage by 1 gig
 //   vnl_svd< float >* svdMatrix = new vnl_svd< float >( wA );
 //   if (! svdMatrix->valid() )
 //   {
-//     cerr << "    Regression<T>::getWeightedLSEst    could not compute pseudo
-//     inverse!" << std::endl; exit(1);
+//     cerr << "    Regression<T>::getWeightedLSEst    could not compute pseudo inverse!" << endl;
+//     exit(1);
 //   }
 //   wA = svdMatrix->pinverse();
 //   delete (svdMatrix);
@@ -499,9 +490,8 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 //
 //   // compute wb:
 //   vnl_vector <float > wb(b->size());
-//   //if (!wb.valid())
-//   ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getWeightedLSEst could not
-//   allocate memory for wb") ; for (rr = 0;rr<b->size();rr++)
+//   //if (!wb.valid()) ErrorExit(ERROR_NO_MEMORY,"Regression<T>::getWeightedLSEst could not allocate memory for wb") ;
+//   for (rr = 0;rr<b->size();rr++)
 //     wb[rr] = b->operator[](rr) * w[rr];
 //
 //   // compute wAi * wb
@@ -517,7 +507,7 @@ vnl_vector<T> Regression<T>::getWeightedLSEstFloat(const vnl_vector<T> &w) {
 //
 
 template <class T> vnl_vector<T> Regression<T>::getLSEst() {
-  // std::cout << " Regression<T>::getLSEst " << std::endl;
+  //cout << " Regression<T>::getLSEst " << endl;
   lastweight = -1;
   lastzero   = -1;
   if (A == NULL) // LS solution is just the mean of B
@@ -535,9 +525,8 @@ template <class T> vnl_vector<T> Regression<T>::getLSEst() {
   //    vnl_matrix< float > vnlX( ioA->data, ioA->rows, ioA->cols );
   vnl_svd<T> svdMatrix(*A);
   if (!svdMatrix.valid()) {
-    std::cerr
-        << "    Regression<T>::getLSEst   could not compute pseudo inverse!"
-        << std::endl;
+    cerr << "    Regression<T>::getLSEst   could not compute pseudo inverse!"
+         << endl;
     exit(1);
   }
   vnl_matrix<T> *Ai = new vnl_matrix<T>(svdMatrix.pinverse());
@@ -552,7 +541,7 @@ template <class T> vnl_vector<T> Regression<T>::getLSEst() {
   for (rr = 0; rr < n; rr++) {
     serror += R[rr] * R[rr];
   }
-  //  std::cout << "     squared error: " << serror << std::endl;
+  //  cout << "     squared error: " << serror << endl;
   lasterror = serror;
 
   return p;
@@ -574,7 +563,7 @@ void getTukeyBiweight(const vnl_vector<T> &r, vnl_vector<T> &w, double sat) {
       w[i] = (T)((sat * sat / 2.0) * (1.0 - bb * bb * bb));
     }
   }
-  // return w;
+  //return w;
 }
 
 /** Computes sum of partial derivatives d_rho/d_sat(r_i)
@@ -611,29 +600,28 @@ double Regression<T>::getTukeyPartialSat(const vnl_vector<T> &r, double sat) {
 template <class T>
 void Regression<T>::getSqrtTukeyDiaWeights(const vnl_vector<T> &r,
                                            vnl_vector<T> &w, double sat) {
-  // std::cout << " getTukeyDiaWeights  r size: " << r->rows << " , " << r->cols <<
-  // endl;
+  //cout << " getTukeyDiaWeights  r size: " << r->rows << " , " << r->cols << endl;
 
   unsigned int n = r.size();
   assert(n == w.size());
 
   double t1;
-  // double t2;
+  //double t2;
   unsigned int rr;
-  // int ocount = 0;
+  //int ocount = 0;
   for (rr = 0; rr < n; rr++) {
-    // std::cout << " fabs: " << fabs(r->rptr[rr][cc]) << " sat: " << sat << std::endl;
+    // cout << " fabs: " << fabs(r->rptr[rr][cc]) << " sat: " << sat << endl;
     if (fabs(r[rr]) >= sat) {
       w(rr) = 0.0;
-      // ocount++;
+      //ocount++;
     } else {
       t1 = r[rr] / sat;
-      // t2 = 1.0 - t1 * t1;
+      //t2 = 1.0 - t1 * t1;
       w(rr) = (T)(1.0 - t1 * t1); // returning sqrt
     }
   }
-  // std::cout << " over threshold: " << ocount << " times ! " << std::endl;
-  // return w;
+  //cout << " over threshold: " << ocount << " times ! " << endl;
+  //return w;
 }
 
 template <class T> T Regression<T>::VectorMedian(const vnl_vector<T> &v) {
@@ -648,7 +636,7 @@ template <class T> T Regression<T>::VectorMedian(const vnl_vector<T> &v) {
   for (r = 0; r < n; r++) {
     t[r] = v(r);
   }
-  // for (int i = 0;i<n;i++) std::cout << " " << t[i];  std::cout << std::endl;
+  //for (int i = 0;i<n;i++) cout << " " << t[i];  cout << endl;
 
   T qs = RobustGaussian<T>::median(t, n);
   free(t);
@@ -670,7 +658,7 @@ template <class T> T Regression<T>::getSigmaMAD(const vnl_vector<T> &v, T d) {
   for (r = 0; r < n; r++) {
     t[r] = v[r];
   }
-  // for (int i = 0;i<n;i++) std::cout << " " << t[i];  std::cout << std::endl;
+  //for (int i = 0;i<n;i++) cout << " " << t[i];  cout << endl;
 
   T qs = RobustGaussian<T>::mad(t, n, d);
   free(t);
@@ -686,27 +674,27 @@ void Regression<T>::plotPartialSat(const std::string &fname) {
   // residual is B (as b-Ap = b since p = 0 initially)
 
   // plot diffs
-  std::string nbase = fname;
-  int         rf    = nbase.rfind("/");
+  string nbase = fname;
+  int    rf    = nbase.rfind("/");
   if (rf != -1) {
     nbase = nbase.substr(rf + 1, nbase.length());
   }
-  std::string   fn = fname + ".plot";
-  std::ofstream ofile(fn.c_str(), std::ios::out);
-  bool          png = false;
+  string   fn = fname + ".plot";
+  ofstream ofile(fn.c_str(), ios::out);
+  bool     png = false;
   if (png)
-    ofile << "set terminal png medium size 800,600" << std::endl;
+    ofile << "set terminal png medium size 800,600" << endl;
   else
-    ofile << "set terminal postscript eps color" << std::endl;
+    ofile << "set terminal postscript eps color" << endl;
   if (png)
-    ofile << "set output \"" << nbase << ".png\"" << std::endl;
+    ofile << "set output \"" << nbase << ".png\"" << endl;
   else
-    ofile << "set output \"" << nbase << ".eps\"" << std::endl;
+    ofile << "set output \"" << nbase << ".eps\"" << endl;
   ofile << "plot ";
-  ofile << " \"-\" notitle with lines 1" << std::endl;
+  ofile << " \"-\" notitle with lines 1" << endl;
   for (int j = 1; j <= 30; j++) {
-    ofile << j << " " << getTukeyPartialSat(*b, j) << std::endl;
+    ofile << j << " " << getTukeyPartialSat(*b, j) << endl;
   }
-  ofile << "e" << std::endl;
+  ofile << "e" << endl;
   ofile.close();
 }

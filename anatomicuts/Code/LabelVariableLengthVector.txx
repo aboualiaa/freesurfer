@@ -14,10 +14,10 @@ void LabelVariableLengthVector<TValueType, TMesh>::SetCell(MeshPointerType mesh,
   CellAutoPointerType cellAutoPointer;
   mesh->GetCell(cellId, cellAutoPointer);
 
-  // CellType labels;
+  //CellType labels;
 
   typedef typename MeshType::CellPixelType CellType;
-  // std::vector<int> labels;
+  //std::vector<int> labels;
   CellType labels;
   mesh->GetCellData(cellId, &labels);
   this->SetSize(labels.size());

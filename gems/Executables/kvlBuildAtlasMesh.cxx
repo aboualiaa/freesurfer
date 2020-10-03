@@ -1,7 +1,9 @@
+#include "itkCommand.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkMGHImageIOFactory.h"
 #include "kvlAtlasMeshBuilder.h"
+#include "kvlCompressionLookupTable.h"
 
 namespace kvl {
 
@@ -93,8 +95,8 @@ protected:
   virtual ~BuilderCommand() {}
 
 private:
-  BuilderCommand(const Self &); // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  BuilderCommand(const Self &); //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   std::string m_LogDirectory;
 };
@@ -113,9 +115,8 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  // Add support for MGH file format to ITK. An alternative way to add this by
-  // default would be to edit ITK's itkImageIOFactory.cxx and explicitly adding
-  // it in the code there.
+  // Add support for MGH file format to ITK. An alternative way to add this by default would be
+  // to edit ITK's itkImageIOFactory.cxx and explicitly adding it in the code there.
   itk::ObjectFactoryBase::RegisterFactory(itk::MGHImageIOFactory::New());
 
   // Retrieve the input parameters
@@ -144,8 +145,7 @@ int main(int argc, char **argv) {
     reader->Update();
     LabelImageType::ConstPointer labelImage = reader->GetOutput();
 
-    // Over-ride the spacing and origin since at this point we can't deal with
-    // that
+    // Over-ride the spacing and origin since at this point we can't deal with that
     const double spacing[] = {1, 1, 1};
     const double origin[]  = {0, 0, 0};
     const_cast<LabelImageType *>(labelImage.GetPointer())->SetSpacing(spacing);
@@ -155,12 +155,12 @@ int main(int argc, char **argv) {
     labelImages.push_back(labelImage);
   }
 
-  // Build a lookup table that maps the original intensities onto class numbers
-  // starting at 0 and densely packed
+  // Build a lookup table that maps the original intensities onto class numbers starting
+  // at 0 and densely packed
   kvl::CompressionLookupTable::Pointer lookupTable =
       kvl::CompressionLookupTable::New();
   lookupTable->Construct(labelImages);
-  // lookupTable->Write( "compressionLookupTable.txt" );
+  //lookupTable->Write( "compressionLookupTable.txt" );
 
   // Set up the builder
   kvl::AtlasMeshBuilder::Pointer builder = kvl::AtlasMeshBuilder::New();
@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
       << std::endl;
 
   // If explicitStartCollection exists in the current directory, use it
-  kvl::AtlasMeshCollection::Pointer explicitStartCollection = nullptr;
+  kvl::AtlasMeshCollection::Pointer explicitStartCollection = 0;
   const std::string                 explicitStartCollectionFileName =
       "explicitStartCollection.gz";
   if (itksys::SystemTools::FileExists(explicitStartCollectionFileName.c_str(),
@@ -243,13 +243,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  // If edgeCollapseEncouragmentFactor.txt exists in the current directory, read
-  // it's content
+  // If edgeCollapseEncouragmentFactor.txt exists in the current directory, read it's content
   double            edgeCollapseEncouragmentFactor = 1.0;
   const std::string edgeCollapseEncouragmentFactorFileName =
       "edgeCollapseEncouragmentFactor.txt";
-  // if ( itksys::SystemTools::FileExists(
-  // edgeCollapseEncouragmentFactorFileName.c_str(), true ) )
+  //if ( itksys::SystemTools::FileExists( edgeCollapseEncouragmentFactorFileName.c_str(), true ) )
   //  {
   std::ifstream fs(edgeCollapseEncouragmentFactorFileName.c_str());
   if (!(fs.fail())) {
@@ -258,9 +256,9 @@ int main(int argc, char **argv) {
 
     std::string line;
     if (std::getline(fs, line)) {
-      // std::ostringstream  inputParserStream;
-      // inputParserStream << line;
-      // std::istringstream  inputStream( inputParserStream.str().c_str() );
+      //std::ostringstream  inputParserStream;
+      //inputParserStream << line;
+      //std::istringstream  inputStream( inputParserStream.str().c_str() );
       std::istringstream inputStream(line.c_str());
       inputStream >> edgeCollapseEncouragmentFactor;
       std::cout << "Using edgeCollapseEncouragmentFactor: "

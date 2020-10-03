@@ -17,6 +17,10 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <vector>
 
 #ifdef HAVE_OPENMP
 #include <omp.h>
@@ -26,6 +30,14 @@
 #include "MyMRI.h"
 #include "MyMatrix.h"
 #include "RobustGaussian.h"
+
+#include "error.h"
+#include "histo.h"
+#include "limits.h"
+#include "macros.h"
+#include "mrimorph.h"
+
+using namespace std;
 
 MRI *MyMRI::MRInorm255(MRI *mri_src, MRI *mri_dst)
 // normalizes so that min =0 and max=255
@@ -40,7 +52,7 @@ MRI *MyMRI::MRIvalscale(MRI *mri_src, MRI *mri_dst, double s, double b)
 {
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   int width, height, depth, nf, x, y, z, f;
   width  = mri_src->width;
@@ -201,7 +213,7 @@ MRI *MyMRI::subSample(MRI *mri_src, MRI *mri_dst, bool fixheader, int randpos)
     mri_dst->ps    = mri_src->ps * 2;
 
     // adjust cras
-    // printf("COMPUTING new CRAS\n") ;
+    //printf("COMPUTING new CRAS\n") ;
     VECTOR *C        = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(C, 1) = mri_src->width / 2 + 0.5;
     VECTOR_ELT(C, 2) = mri_src->height / 2 + 0.5;
@@ -232,12 +244,11 @@ MRI *MyMRI::getBlur(MRI *mriS, MRI *mriT) {
 bool MyMRI::getPartials(MRI *mri, MRI *&outfx, MRI *&outfy, MRI *&outfz,
                         MRI *&outblur) {
 
-  assert(outfx == nullptr && outfy == nullptr && outfz == nullptr &&
-         outblur == nullptr);
+  assert(outfx == NULL && outfy == NULL && outfz == NULL && outblur == NULL);
 
-  // double size = mri->width *mri->height * mri->depth *sizeof(float) / (1024.0
-  // * 1024.0); cout.precision(4); std::cout << " MyMRI::getPartials allocation  max:
-  // " << 5 * size << " Mb  return = " << 4*size << " Mb" << std::endl;
+  //double size = mri->width *mri->height * mri->depth *sizeof(float) / (1024.0 * 1024.0);
+  //cout.precision(4);
+  //cout << " MyMRI::getPartials allocation  max: " << 5 * size << " Mb  return = " << 4*size << " Mb" << endl;
 
   // construct convolution masks:
   MRI *mri_prefilter = getPrefilter();
@@ -246,18 +257,18 @@ bool MyMRI::getPartials(MRI *mri, MRI *&outfx, MRI *&outfy, MRI *&outfz,
   int  whd[3]        = {MRI_WIDTH, MRI_HEIGHT, MRI_DEPTH};
   bool is2d          = (mri->depth == 1);
 
-  outfx = MRIclone(mri, nullptr);
-  outfy = MRIclone(mri, nullptr);
+  outfx = MRIclone(mri, NULL);
+  outfy = MRIclone(mri, NULL);
   if (!is2d)
-    outfz = MRIclone(mri, nullptr);
+    outfz = MRIclone(mri, NULL);
   else
-    outfz = nullptr;
-  outblur = MRIclone(mri, nullptr);
+    outfz = NULL;
+  outblur = MRIclone(mri, NULL);
   for (int f = 0; f < mri->nframes; f++) {
     // compute outfx
-    MRI *mdx   = MRIconvolve1d(mri, nullptr, &MRIFvox(mri_derfilter, 0, 0, 0),
-                             klen, whd[1 - 1], f, 0);
-    MRI *mdxby = MRIconvolve1d(mdx, nullptr, &MRIFvox(mri_prefilter, 0, 0, 0),
+    MRI *mdx = MRIconvolve1d(mri, NULL, &MRIFvox(mri_derfilter, 0, 0, 0), klen,
+                             whd[1 - 1], f, 0);
+    MRI *mdxby = MRIconvolve1d(mdx, NULL, &MRIFvox(mri_prefilter, 0, 0, 0),
                                klen, whd[2 - 1], 0, 0);
     MRIfree(&mdx);
     if (is2d)
@@ -268,11 +279,11 @@ bool MyMRI::getPartials(MRI *mri, MRI *&outfx, MRI *&outfy, MRI *&outfz,
     MRIfree(&mdxby);
 
     // compute outfy
-    MRI *mbx   = MRIconvolve1d(mri, nullptr, &MRIFvox(mri_prefilter, 0, 0, 0),
-                             klen, whd[1 - 1], f, 0);
-    MRI *mbxdy = MRIconvolve1d(mbx, nullptr, &MRIFvox(mri_derfilter, 0, 0, 0),
+    MRI *mbx = MRIconvolve1d(mri, NULL, &MRIFvox(mri_prefilter, 0, 0, 0), klen,
+                             whd[1 - 1], f, 0);
+    MRI *mbxdy = MRIconvolve1d(mbx, NULL, &MRIFvox(mri_derfilter, 0, 0, 0),
                                klen, whd[2 - 1], 0, 0);
-    MRI *mbxby = MRIconvolve1d(mbx, nullptr, &MRIFvox(mri_prefilter, 0, 0, 0),
+    MRI *mbxby = MRIconvolve1d(mbx, NULL, &MRIFvox(mri_prefilter, 0, 0, 0),
                                klen, whd[2 - 1], 0, 0);
     MRIfree(&mbx);
     if (is2d)
@@ -300,12 +311,10 @@ bool MyMRI::getPartials(MRI *mri, MRI *&outfx, MRI *&outfy, MRI *&outfz,
   //   MRI* mbz;
   //   if (mri->depth > 1)
   //   {
-  //     mdz =  MRIconvolve1d(mri, NULL, &MRIFvox(mri_derfilter, 0, 0, 0), klen,
-  //     whd[3-1], 0, 0) ;
+  //     mdz =  MRIconvolve1d(mri, NULL, &MRIFvox(mri_derfilter, 0, 0, 0), klen, whd[3-1], 0, 0) ;
   //     //MRI* mdz   = convolute(mri,mri_derfilter,3);
   //
-  //     mbz =  MRIconvolve1d(mri, NULL, &MRIFvox(mri_prefilter, 0, 0, 0), klen,
-  //     whd[3-1], 0, 0) ;
+  //     mbz =  MRIconvolve1d(mri, NULL, &MRIFvox(mri_prefilter, 0, 0, 0), klen, whd[3-1], 0, 0) ;
   //     //MRI* mbz   = convolute(mri,mri_prefilter,3);
   //   }
   //   else
@@ -314,38 +323,30 @@ bool MyMRI::getPartials(MRI *mri, MRI *&outfx, MRI *&outfy, MRI *&outfz,
   //     mbz = MRIcopy(mri,NULL);
   //   }
   //
-  //   MRI* mdzby = MRIconvolve1d(mdz, NULL, &MRIFvox(mri_prefilter, 0, 0, 0),
-  //   klen, whd[2-1], 0, 0) ;
+  //   MRI* mdzby = MRIconvolve1d(mdz, NULL, &MRIFvox(mri_prefilter, 0, 0, 0), klen, whd[2-1], 0, 0) ;
   //   //MRI* mdzby = convolute(mdz,mri_prefilter,2);
   //
   //   MRIfree(&mdz);
-  //   outfz = MRIconvolve1d(mdzby, NULL, &MRIFvox(mri_prefilter, 0, 0, 0),
-  //   klen, whd[1-1], 0, 0) ;
+  //   outfz = MRIconvolve1d(mdzby, NULL, &MRIFvox(mri_prefilter, 0, 0, 0), klen, whd[1-1], 0, 0) ;
   //   //outfz = convolute(mdzby,mri_prefilter,1);
   //   MRIfree(&mdzby);
   //
-  //   MRI* mbzby = MRIconvolve1d(mbz, NULL, &MRIFvox(mri_prefilter, 0, 0, 0),
-  //   klen, whd[2-1], 0, 0) ;
+  //   MRI* mbzby = MRIconvolve1d(mbz, NULL, &MRIFvox(mri_prefilter, 0, 0, 0), klen, whd[2-1], 0, 0) ;
   //   //MRI* mbzby = convolute(mbz,mri_prefilter,2);
-  //   MRI* mbzdy = MRIconvolve1d(mbz, NULL, &MRIFvox(mri_derfilter, 0, 0, 0),
-  //   klen, whd[2-1], 0, 0) ;
+  //   MRI* mbzdy = MRIconvolve1d(mbz, NULL, &MRIFvox(mri_derfilter, 0, 0, 0), klen, whd[2-1], 0, 0) ;
   //   //MRI* mbzdy = convolute(mbz,mri_derfilter,2);
   //   MRIfree(&mbz);
-  //   outfy = MRIconvolve1d(mbzdy, NULL, &MRIFvox(mri_prefilter, 0, 0, 0),
-  //   klen, whd[1-1], 0, 0) ;
+  //   outfy = MRIconvolve1d(mbzdy, NULL, &MRIFvox(mri_prefilter, 0, 0, 0), klen, whd[1-1], 0, 0) ;
   //   //outfy = convolute(mbzdy,mri_prefilter,1);
   //   MRIfree(&mbzdy);
   //
-  //   outfx = MRIconvolve1d(mbzby, NULL, &MRIFvox(mri_derfilter, 0, 0, 0),
-  //   klen, whd[1-1], 0, 0) ;
+  //   outfx = MRIconvolve1d(mbzby, NULL, &MRIFvox(mri_derfilter, 0, 0, 0), klen, whd[1-1], 0, 0) ;
   //   //outfx = convolute(mbzby,mri_derfilter,1);
-  //   outblur = MRIconvolve1d(mbzby, NULL, &MRIFvox(mri_prefilter, 0, 0, 0),
-  //   klen, whd[1-1], 0, 0) ;
+  //   outblur = MRIconvolve1d(mbzby, NULL, &MRIFvox(mri_prefilter, 0, 0, 0), klen, whd[1-1], 0, 0) ;
   //   //outblur = convolute(mbzby,mri_prefilter,1);
   //   MRIfree(&mbzby);
 
-  // std::cout << " size fx: " << outfx->width << " " << outfx->height << " " <<
-  // outfx->depth << std::endl;
+  //cout << " size fx: " << outfx->width << " " << outfx->height << " " << outfx->depth << endl;
 
   MRIfree(&mri_prefilter);
   MRIfree(&mri_derfilter);
@@ -355,13 +356,11 @@ bool MyMRI::getPartials(MRI *mri, MRI *&outfx, MRI *&outfy, MRI *&outfz,
 
 std::vector<int> MyMRI::findRightSize(MRI *mri, float conform_size,
                                       bool conform)
-// determines width, height, depth to cover mri with conform_size isotropic
-// voxels
+// determines width, height, depth to cover mri with conform_size isotropic voxels
 //  bool conform makes cube image (w=h=d) and adjust to min of 256
 {
-  // string s = ""; if (conform) s = " , 256-conform" ;
-  // std::cout << " MyMRI::findRightSize(mri, target_voxel_size=" << conform_size <<
-  // s << " )" << std::endl;
+  //string s = ""; if (conform) s = " , 256-conform" ;
+  //cout << " MyMRI::findRightSize(mri, target_voxel_size=" << conform_size << s << " )" << endl;
   double xsize, ysize, zsize;
   double fwidth, fheight, fdepth, fmax;
   int    conform_width;
@@ -376,11 +375,11 @@ std::vector<int> MyMRI::findRightSize(MRI *mri, float conform_size,
   fheight = ysize * mri->height;
   fdepth  = zsize * mri->depth;
 
-  // std::cout << "in: " <<mri->width << " " << mri->height << " " << mri->depth <<
-  // endl; std::cout << "out: " << fwidth << " " << fheight << " " << fdepth << std::endl;
+  //cout << "in: " <<mri->width << " " << mri->height << " " << mri->depth << endl;
+  //cout << "out: " << fwidth << " " << fheight << " " << fdepth << endl;
 
-  std::vector<int> ret(3);
-  double           eps =
+  vector<int> ret(3);
+  double      eps =
       0.0001; // to prevent ceil(2.0*64 / 2.0) = ceil(64.000000000001) = 65
   ret[0] = (int)ceil((fwidth / conform_size) - eps);
   ret[1] = (int)ceil((fheight / conform_size) - eps);
@@ -388,8 +387,7 @@ std::vector<int> MyMRI::findRightSize(MRI *mri, float conform_size,
   if (mri->depth == 1)
     ret[2] = 1; // 2d image
 
-  // std::cout << " zsize: " << zsize << " depth: " << mri->depth << " fdepth: " <<
-  // fdepth << " new depth: " << ret[2] << std::endl;
+  //cout << " zsize: " << zsize << " depth: " << mri->depth << " fdepth: " << fdepth << " new depth: " << ret[2] << endl;
 
   if (!conform)
     return ret;
@@ -428,8 +426,7 @@ std::vector<int> MyMRI::findRightSize(MRI *mri, float conform_size,
   // //     fprintf(stderr, "=================================================="
   // //             "++++++++++++++++++++++++"
   // //             "===============\n\n");
-  //       std::cout << " ... Will not fit into 256^3 volume, will have " <<
-  //       conform_width << " slices" << std::endl;
+  //       cout << " ... Will not fit into 256^3 volume, will have " << conform_width << " slices" << endl;
   //   }
 
   ret[0] = conform_width;
@@ -477,7 +474,7 @@ MATRIX *MyMRI::MRIgetZslice(MRI *mri, int slice, int frame)
 
 MRI *MyMRI::MRIlinearTransform(MRI *mriS, MRI *mriT,
                                const vnl_matrix_fixed<double, 4, 4> &m) {
-  MATRIX *mm = MyMatrix::convertVNL2MATRIX(m, nullptr);
+  MATRIX *mm = MyMatrix::convertVNL2MATRIX(m, NULL);
   mriT       = ::MRIlinearTransform(mriS, mriT, mm);
   MatrixFree(&mm);
   return mriT;
@@ -494,8 +491,8 @@ MyMRI::MRIvoxelXformToRasXform(MRI *mri_src, MRI *mri_dst,
   m_ras_to_voxel = MRIgetRasToVoxelXform(mri_src);
   m_voxel_to_ras = MRIgetVoxelToRasXform(mri_dst);
 
-  // m_tmp = MatrixMultiply(m_voxel_xform, m_ras_to_voxel, NULL) ;
-  // m_ras_xform = MatrixMultiply(m_voxel_to_ras, m_tmp, m_ras_xform) ;
+  //m_tmp = MatrixMultiply(m_voxel_xform, m_ras_to_voxel, NULL) ;
+  //m_ras_xform = MatrixMultiply(m_voxel_to_ras, m_tmp, m_ras_xform) ;
 
   vnl_matrix_fixed<double, 4, 4> m_ras =
       MyMatrix::convertMATRIX2VNL(m_voxel_to_ras) * m_vox *
@@ -509,8 +506,8 @@ MyMRI::MRIvoxelXformToRasXform(MRI *mri_src, MRI *mri_dst,
 
 MRI *MyMRI::gaussianCube(int size) {
   double sigma = size / (4 * sqrt(2 * log(2)));
-  std::cout << "MyMRI::gaussianCube( size: " << size << " )  sigma: " << sigma
-            << std::endl;
+  cout << "MyMRI::gaussianCube( size: " << size << " )  sigma: " << sigma
+       << endl;
 
   MRI *  g = MRIalloc(size, size, size, MRI_FLOAT);
   int    x, y, z;
@@ -549,7 +546,7 @@ MRI *MyMRI::setTypeUCHAR(MRI *mri) {
          mri->type, MRI_UCHAR, no_scale_flag);
   // not sure what happens if mri is already UCHAR?
   MRI *mri2 = MRISeqchangeType(mri, MRI_UCHAR, 0.0, 0.999, no_scale_flag);
-  if (mri2 == nullptr) {
+  if (mri2 == NULL) {
     printf("ERROR: MRISeqchangeType in MyMRI::setTypeUCHAR\n");
     exit(1);
   }
@@ -604,8 +601,7 @@ float MyMRI::getBackground(MRI *mri)
       }
     }
   }
-  // std::cout << "min: " << minval << " (# " << mins<<" ),   max: " << maxval
-  // << " (# " <<maxs<<" ) " << std::endl;
+  //std::cout << "min: " << minval << " (# " << mins<<" ),   max: " << maxval << " (# " <<maxs<<" ) " << std::endl;
   if (mins > maxs)
     return minval;
   else
@@ -616,9 +612,9 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
                            MRI *kernel, bool ball)
 // expects uchar image between 0..(nbins-1) intensity values
 {
-  // int width  = mri->width;
-  // int height = mri->height;
-  // int depth  = mri->depth;
+  //int width  = mri->width;
+  //int height = mri->height;
+  //int depth  = mri->depth;
 
   // compute neighborhood bounds
   int xMin = x - radius;
@@ -627,10 +623,10 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
   int yMax = y + radius;
   int zMin = z - radius;
   int zMax = z + radius;
-  // int xr = xMin;
-  // int yr = yMin;
-  // int zr = zMin;
-  // if (xMin < 0) xMin = 0;
+  //int xr = xMin;
+  //int yr = yMin;
+  //int zr = zMin;
+  //if (xMin < 0) xMin = 0;
   // if (xMax > width - 1) xMax = width - 1;
   // if (yMin < 0) yMin = 0;
   // if (yMax > height - 1) yMax = height - 1;
@@ -646,12 +642,11 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
   int    maxI = minI;
   int    index, dx, dy, dz, zp, yp, xp;
   double r2 = radius * radius;
-  // std::cout << " minI: " << minI << " maxI: " << maxI << " float: " <<
-  // MRIgetVoxVal(mri,x,y,z,0) << std::endl;
+  //cout << " minI: " << minI << " maxI: " << maxI << " float: " << MRIgetVoxVal(mri,x,y,z,0) << endl;
   for (zp = zMin; zp <= zMax; zp++) {
     for (yp = yMin; yp <= yMax; yp++) {
       for (xp = xMin; xp <= xMax; xp++) {
-        // std::cout <<  xp << " " << yp << " " << zp << std::endl;
+        //cout <<  xp << " " << yp << " " << zp << endl;
         dx = xp - xMin - radius;
         dy = yp - yMin - radius;
         dz = zp - zMin - radius;
@@ -664,8 +659,8 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
           minI = index;
         if (index > maxI)
           maxI = index;
-        // assert(index>=0);
-        // assert(index<nbins);
+        //assert(index>=0);
+        //assert(index<nbins);
         histo[index] += MRIFvox(kernel, dx, dy, dz);
       }
     }
@@ -673,7 +668,7 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
 
   // empty or all same value:
   if (minI == maxI) {
-    // std::cout << " minI == maxI == " << minI << std::endl;
+    //cout << " minI == maxI == " << minI << endl;
     // HISTOfree(&h) ;
     return 0.0;
   }
@@ -710,20 +705,20 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
 
   double entropy = 0.0, temp;
   for (int b = 0; b < nbins; b++) {
-    // if (h->counts[b] > 0)
+    //if (h->counts[b] > 0)
     if (histo[b] > 0) {
-      // temp = (double)hs->counts[b]/alltotal ;
+      //temp = (double)hs->counts[b]/alltotal ;
       temp = (double)histo[b] / alltotal;
       // shannon
       entropy -= temp * log(temp);
       // burg
-      // entropy += log(temp);
+      //entropy += log(temp);
       // Renyi, alpha = 2 : ent = - log( sum(histo(idx).^2) );
-      // entropy += temp*temp;
+      //entropy += temp*temp;
     }
   }
   // Renyi
-  // entropy = -log(entropy);
+  //entropy = -log(entropy);
 
   return entropy;
 }
@@ -759,7 +754,7 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
 //
 //   // scale factor for image to fit bin size (0...(nbins-1))
 //   float factor = nbins/256.0;
-//   //cout << "factor :  " << factor << std::endl;
+//   //cout << "factor :  " << factor << endl;
 //   int x,y,z;
 //   for (z=0;z<depth;z++)
 //     for (y=0;y<height;y++)
@@ -789,16 +784,15 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
 //   int zmax = depth-radius-1;
 //   for (z=0;z<depth;z++)
 //   {
-//     if ((z+1)%zinterval == 0) std::cout << (z+1)/zinterval << flush;
-//     else  if ((z+1)%zinterval2 ==0) std::cout << "." << flush;
+//     if ((z+1)%zinterval == 0) cout << (z+1)/zinterval << flush;
+//     else  if ((z+1)%zinterval2 ==0) cout << "." << flush;
 //
 //     for (y=0;y<height;y++)
 //     {
 //       for (x=0;x<width;x++)
 //       {
 //           //zero padding
-//           if (x < radius || y< radius || z<radius || x>xmax || y>ymax ||
-//           z>zmax)
+//           if (x < radius || y< radius || z<radius || x>xmax || y>ymax || z>zmax)
 //           {
 //             MRIsetVoxVal(entI,x,y,z,0,0.0);
 //             continue;
@@ -808,8 +802,7 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
 //           e = (float) entropyPatch(mriIn,x,y,z,radius,nbins,kernel);
 //           if (e<0 || isnan(e) )
 //           {
-//              cerr<< " ERROR in MyMRI::entropyImage: entropy is negative or
-//              nan ? " << std::endl;
+//              cerr<< " ERROR in MyMRI::entropyImage: entropy is negative or nan ? " << endl;
 //           }
 //           MRIsetVoxVal(entI,x,y,z,0,e);
 //           if (e < minEntropy)
@@ -820,13 +813,11 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
 //     }
 //   }
 //
-//   std::cout << endl << " Min Entropy: " << minEntropy << "  Max Entropy: " <<
-//   maxEntropy << std::endl;
+//   cout << endl << " Min Entropy: " << minEntropy << "  Max Entropy: " << maxEntropy << endl;
 //
 //   // scale entropy image to 0..255 and make uchar
 // //  int no_scale_flag = FALSE;
-// //  MRI* mriEnt = MRISeqchangeType(entI, MRI_UCHAR, 0.0, 0.999,
-// no_scale_flag);
+// //  MRI* mriEnt = MRISeqchangeType(entI, MRI_UCHAR, 0.0, 0.999, no_scale_flag);
 // //  if (mriEnt == NULL)
 // //  {
 // //    printf("ERROR: MRISeqchangeType\n");
@@ -845,7 +836,7 @@ double MyMRI::entropyPatch(MRI *mri, int x, int y, int z, int radius, int nbins,
 // }
 
 double MyMRI::noiseVar(MRI *mri) {
-  std::cout << "MyMRI::noiseVar : " << std::flush;
+  cout << "MyMRI::noiseVar : " << flush;
   int width  = mri->width - 1;
   int height = mri->height - 1;
   int depth  = mri->depth - 1;
@@ -878,8 +869,8 @@ double MyMRI::noiseVar(MRI *mri) {
 
   double sum = 0.0;
   for (z = 1; z < depth; z++) {
-    // if ((z+1)%zinterval == 0) std::cout << (z+1)/zinterval << flush;
-    // else  if ((z+1)%zinterval2 ==0) std::cout << "." << flush;
+    //if ((z+1)%zinterval == 0) cout << (z+1)/zinterval << flush;
+    //else  if ((z+1)%zinterval2 ==0) cout << "." << flush;
     for (y = 1; y < height; y++) {
       for (x = 1; x < width; x++) {
         epsi = MRIgetVoxVal(mri, x - 1, y, z, 0) +
@@ -898,15 +889,14 @@ double MyMRI::noiseVar(MRI *mri) {
   //    MRIfree(&mrifloat);
 
   sum = (sum / insize) * (6.0 / 7.0);
-  std::cout.precision(12);
-  std::cout << sum << std::endl;
+  cout.precision(12);
+  cout << sum << endl;
   return sum;
 }
 
 MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
   if (mri->nframes > 1) {
-    std::cerr << "MyMRI::entropyImage multiple frames not supported!"
-              << std::endl;
+    cerr << "MyMRI::entropyImage multiple frames not supported!" << endl;
     exit(1);
   }
 
@@ -914,7 +904,7 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
   int height = mri->height;
   int depth  = mri->depth;
   int x = 0, y = 0, z = 0, xx = 0, yy = 0, zz = 0, xxx = 0, yyy = 0, zzz = 0;
-  // int insize = width*height*depth;
+  //int insize = width*height*depth;
 
   // allocate non-local shape descriptor image
   MRI *nlsdI  = MRIalloc(width, height, depth, MRI_FLOAT);
@@ -935,7 +925,7 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
 
   double nvar   = noiseVar(mri);
   double sigma2 = sqrt(2) * nvar; // needs to be estimated from full image
-  // double s2 = sqrt(2);
+  //double s2 = sqrt(2);
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for firstprivate(y, x, val, zz, yy, xx, zzz, yyy, xxx, d, \
@@ -946,13 +936,13 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
   for (z = 0; z < depth; z++) {
 
     if (z % 10 == 0) {
-      std::cout << "." << std::flush;
+      cout << "." << flush;
     }
-    // if ((z+1)%zinterval == 0) std::cout << (z+1)/zinterval << flush;
-    // else  if ((z+1)%zinterval2 ==0) std::cout << "." << flush;
+    //if ((z+1)%zinterval == 0) cout << (z+1)/zinterval << flush;
+    //else  if ((z+1)%zinterval2 ==0) cout << "." << flush;
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
-        // zero padding at boarder:
+        //zero padding at boarder:
         if (x < radius || y < radius || z < radius || x > xmax || y > ymax ||
             z > zmax) {
           MRIsetVoxVal(nlsdI, x, y, z, 0, 0.0);
@@ -995,7 +985,7 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
       }
     }
   }
-  std::cout << std::endl;
+  cout << endl;
   return nlsdI;
 }
 
@@ -1028,8 +1018,8 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
 //     mritmps[tid] =  MRIalloc(width,height,depth, MRI_FLOAT);
 //     if (mritmps[tid] == NULL)
 //     {
-//       printf("ERROR MyMRI::nlsdImage: mritmp allocation failed (memory
-//       overflow)!\n"); exit(1);
+//       printf("ERROR MyMRI::nlsdImage: mritmp allocation failed (memory overflow)!\n");
+//       exit(1);
 //     }
 //   }
 //   tid = 0;
@@ -1064,9 +1054,8 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
 //   // run over neighborhood offsets (single loop for better paralellization)
 //   tid = 0;
 // #ifdef HAVE_OPENMP
-// #pragma omp parallel for firstprivate(tid,z,y,x,zz,yy,xx,val)
-// shared(depth,height,width,nxoffset,nyoffset,nzoffset,nlsdI)
-// schedule(static,1) #endif
+// #pragma omp parallel for firstprivate(tid,z,y,x,zz,yy,xx,val) shared(depth,height,width,nxoffset,nyoffset,nzoffset,nlsdI) schedule(static,1)
+// #endif
 //   for (count = 0; count < nsize; count++)
 //   {
 // #ifdef HAVE_OPENMP
@@ -1076,9 +1065,9 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
 // #ifdef HAVE_OPENMP
 //   #pragma omp critical
 // #endif
-//     std::cout << " " << count << " ( " << tid << " ) " << std::endl;
-//     // 1. subtract shifted image from original at current neighbor hood
-//     offset for (z=0; z < depth;  z++)
+//     cout << " " << count << " ( " << tid << " ) " << endl;
+//     // 1. subtract shifted image from original at current neighbor hood offset
+//     for (z=0; z < depth;  z++)
 //     {
 //       zz = nzoffset[count] +z;
 //       for (y=0; y < height; y++)
@@ -1088,8 +1077,7 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
 //         {
 //           xx = nxoffset[count] + x;
 //           val = MRIgetVoxVal(mri,x,y,z,0);
-//           if ( xx >= 0 && yy >= 0 && zz >= 0 && xx < width && yy < height &&
-//           zz < depth)
+//           if ( xx >= 0 && yy >= 0 && zz >= 0 && xx < width && yy < height && zz < depth)
 //             val -= MRIgetVoxVal(mri,xx,yy,zz,0);
 //           // 2. compute pointwise square
 //           MRIsetVoxVal(mritmps[tid],x,y,z,0,val*val);
@@ -1100,8 +1088,9 @@ MRI *MyMRI::nlsdImage(MRI *mri, int prad, int nrad) {
 //     // 3. filter with average filter in patch box
 //     MRI * mrit2 = MRIconvolveGaussian(mritmps[tid],NULL,avg_filter);
 //
-//     // 4. compute (fixed j offset)  wij = exp ( - sum(squared differences) /
-//     (sqrt(2) sigma^2) for (z=0; z < depth;  z++) for (y=0; y < height; y++)
+//     // 4. compute (fixed j offset)  wij = exp ( - sum(squared differences) / (sqrt(2) sigma^2)
+//     for (z=0; z < depth;  z++)
+//     for (y=0; y < height; y++)
 //     for (x=0; x < width;  x++)
 //     {
 //       val = exp( MRIgetVoxVal(mrit2,x,y,z,0) / sigma2);
@@ -1125,22 +1114,19 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
                          MRI *mask) {
 
   if (mri->nframes > 1) {
-    std::cerr << "MyMRI::entropyImage multiple frames not supported!"
-              << std::endl;
+    cerr << "MyMRI::entropyImage multiple frames not supported!" << endl;
     exit(1);
   }
 
   if (correction && radius > 1) {
-    std::cout
-        << "WARNING: using correction mode with radius > 1 may take a very "
-           "long time !"
-        << std::endl;
-    std::cout
-        << "         Correction usually allows small radis (e.g. 1 in 3D)."
-        << std::endl;
+    cout << "WARNING: using correction mode with radius > 1 may take a very "
+            "long time !"
+         << endl;
+    cout << "         Correction usually allows small radis (e.g. 1 in 3D)."
+         << endl;
   }
 
-  // int nbins = 64;
+  //int nbins = 64;
   int nbins = 256;
 
   int  width  = mri->width;
@@ -1152,21 +1138,20 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
   int            insize = width * height * depth;
   unsigned char *mriIn  = new unsigned char[insize];
   if (!mriIn) {
-    std::cout << "ERROR: Memory Overflow for mriIn in myMRI::entropyImage"
-              << std::endl;
+    cout << "ERROR: Memory Overflow for mriIn in myMRI::entropyImage" << endl;
     exit(1);
   }
-  unsigned char *mriMask   = nullptr;
-  MRI *          localMask = nullptr;
+  unsigned char *mriMask   = NULL;
+  MRI *          localMask = NULL;
   if (mask) {
     mriMask = new unsigned char[insize];
     if (!mriMask) {
-      std::cout << "ERROR: Memory Overflow for mriMask in myMRI::entropyImage"
-                << std::endl;
+      cout << "ERROR: Memory Overflow for mriMask in myMRI::entropyImage"
+           << endl;
       exit(1);
     }
     MATRIX *m = MRIgetVoxelToVoxelXform(mask, mri);
-    localMask = MRIcopy(mri, nullptr);
+    localMask = MRIcopy(mri, NULL);
     localMask = MRIlinearTransformInterp(mask, localMask, m, SAMPLE_NEAREST);
     MatrixFree(&m);
   }
@@ -1199,13 +1184,13 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
 
   // -------------------------------------------------------------------------------------
   // convert to uchar (0..255)
-  MRI *mriuchar = nullptr;
+  MRI *mriuchar = NULL;
   if (mri->type != MRI_UCHAR) {
     int no_scale_flag = FALSE;
     printf("  - changing data type from %d to %d (noscale = %d)...\n",
            mri->type, MRI_UCHAR, no_scale_flag);
     mriuchar = MRISeqchangeType(mri, MRI_UCHAR, 0.0, 0.999, no_scale_flag);
-    if (mriuchar == nullptr) {
+    if (mriuchar == NULL) {
       printf("ERROR: MRISeqchangeType\n");
       exit(1);
     }
@@ -1217,7 +1202,7 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
   double factor = nbins / 256.0;
   double temp;
   int    count = 0;
-  // std::cout << "factor :  " << factor << std::endl;
+  //cout << "factor :  " << factor << endl;
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
       for (x = 0; x < width; x++) {
@@ -1245,16 +1230,15 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
   // get gaussian kernel
   int    ssize = 2 * radius + 1;
   double sigma = ssize / (4 * sqrt(2 * log(2)));
-  std::cout << "  - compute Gaussian cube( size: " << ssize
-            << " )  sigma: " << sigma << std::endl;
+  cout << "  - compute Gaussian cube( size: " << ssize << " )  sigma: " << sigma
+       << endl;
   int zssize = ssize;
   if (is2d)
     zssize = 1;
   int     gsize = ssize * ssize * zssize;
   double *g     = new double[gsize];
   if (!g) {
-    std::cout << "ERROR: Memory Overflow for g in myMRI::entropyImage"
-              << std::endl;
+    cout << "ERROR: Memory Overflow for g in myMRI::entropyImage" << endl;
     exit(1);
   }
   double sum = 0.0;
@@ -1274,7 +1258,7 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
         xs   = x - radius;
         xs   = xs * xs / sigma;
         dtmp = exp(-xs - ys - zs);
-        // assert(count < gsize);
+        //assert(count < gsize);
         g[count] = dtmp;
         count++;
         sum += dtmp;
@@ -1290,10 +1274,10 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
   entI       = MRIcopyHeader(mri, entI);
   entI->type = MRI_FLOAT;
 
-  // double minEntropy = 1000000;
-  // double maxEntropy = 0;
-  // int zinterval = depth/10;
-  // int zinterval2 = depth/50;
+  //double minEntropy = 1000000;
+  //double maxEntropy = 0;
+  //int zinterval = depth/10;
+  //int zinterval2 = depth/50;
   int xmax = width - radius - 1;
   int ymax = height - radius - 1;
   int zmax = depth - radius - 1;
@@ -1314,17 +1298,17 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
   y           = 0;
   int r2      = radius * radius;
   int wtimesh = width * height;
-  // std::cout << depth << " " << height << " " << width << std::endl;
+  //cout << depth << " " << height << " " << width << endl;
   int Nthreads = 1;
 #ifdef HAVE_OPENMP
   Nthreads = omp_get_max_threads();
 #endif
   if (correction)
-    std::cout << "  - compute entropy image now with correction (threads="
-              << Nthreads << ")... " << std::endl;
+    cout << "  - compute entropy image now with correction (threads="
+         << Nthreads << ")... " << endl;
   else
-    std::cout << "  - compute entropy image now (threads=" << Nthreads
-              << ")... " << std::endl;
+    cout << "  - compute entropy image now (threads=" << Nthreads << ")... "
+         << endl;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for firstprivate(y, x, o, histo, count, zz, yy, xx, pos,  \
@@ -1333,12 +1317,12 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
            mriIn, g) schedule(static, 1)
 #endif
   for (z = 0; z < depth; z++) {
-    // if ((z+1)%zinterval == 0) std::cout << (z+1)/zinterval << flush;
-    // else  if ((z+1)%zinterval2 ==0) std::cout << "." << flush;
+    //if ((z+1)%zinterval == 0) cout << (z+1)/zinterval << flush;
+    //else  if ((z+1)%zinterval2 ==0) cout << "." << flush;
 
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
-        // zero padding at boarder:
+        //zero padding at boarder:
         if (depth > 1) {
           if (x < radius || y < radius || z < radius || x > xmax || y > ymax ||
               z > zmax) {
@@ -1374,7 +1358,7 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
         int zend   = radius + 1;
         int z2 = 0, y2 = 0, x2 = 0;
         int yp = 0, zp = 0;
-        if (depth == 1) // is2d
+        if (depth == 1) //is2d
         {
           zstart = 0;
           zend   = 1;
@@ -1391,8 +1375,7 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
               if (ball) {
                 x2 = y2 + xx * xx;
                 if (x2 > 0) {
-                  // std::cout << " continue : " << zz << " " << yy << " " << xx << "
-                  // " << radius << " " << x2 << std::endl;
+                  //cout << " continue : " << zz << " " << yy << " " << xx << " " << radius << " " << x2 << endl;
                   count++;
                   continue;
                 }
@@ -1449,26 +1432,24 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
           }
 
         if (entropy < 0 || std::isnan(entropy)) {
-          std::cerr
-              << " ERROR in MyMRI::entropyImage: entropy is negative or nan ? "
-              << std::endl;
+          cerr << " ERROR in MyMRI::entropyImage: entropy is negative or nan ? "
+               << endl;
         }
         MRIsetVoxVal(entI, x, y, z, 0, (float)entropy);
-        // if (entropy < minEntropy)
+        //if (entropy < minEntropy)
         //  minEntropy = entropy;
-        // if (entropy > maxEntropy)
+        //if (entropy > maxEntropy)
         //  maxEntropy = entropy;
       }
     }
   }
 
-  // std::cout << endl << " Min Entropy: " << minEntropy << "  Max Entropy: " <<
-  // maxEntropy << std::endl;
+  //cout << endl << " Min Entropy: " << minEntropy << "  Max Entropy: " << maxEntropy << endl;
 
   // scale entropy image to 0..255 and make uchar
   //  int no_scale_flag = FALSE;
-  //  MRI* mriEnt = MRISeqchangeType(entI, MRI_UCHAR, 0.0, 0.999,
-  //  no_scale_flag); if (mriEnt == NULL)
+  //  MRI* mriEnt = MRISeqchangeType(entI, MRI_UCHAR, 0.0, 0.999, no_scale_flag);
+  //  if (mriEnt == NULL)
   //  {
   //    printf("ERROR: MRISeqchangeType\n");
   //    exit(1);
@@ -1487,11 +1468,11 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
 
   if (correction) {
     // correct for half voxel shift (half voxel or half mm?)
-    MATRIX *T1             = MatrixIdentity(4, nullptr);
+    MATRIX *T1             = MatrixIdentity(4, NULL);
     *MATRIX_RELT(T1, 1, 4) = 0.5;
     *MATRIX_RELT(T1, 2, 4) = 0.5;
     *MATRIX_RELT(T1, 3, 4) = 0.5;
-    entI = MRIlinearTransformInterp(entI, nullptr, T1, SAMPLE_CUBIC_BSPLINE);
+    entI = MRIlinearTransformInterp(entI, NULL, T1, SAMPLE_CUBIC_BSPLINE);
     MatrixFree(&T1);
   }
 
@@ -1501,20 +1482,20 @@ MRI *MyMRI::entropyImage(MRI *mri, int radius, bool ball, bool correction,
 void MyMRI::get3Dcorrection(double *histo, unsigned int v1, unsigned int v2,
                             unsigned int v3, unsigned int v4,
                             unsigned int intRange) {
-  unsigned int              vals[] = {v1, v2, v3, v4};
-  std::vector<unsigned int> vect(vals, vals + 4);
+  unsigned int         vals[] = {v1, v2, v3, v4};
+  vector<unsigned int> vect(vals, vals + 4);
   sort(vect.begin(), vect.end());
-  unsigned int        I3 = vect[0];
-  unsigned int        I2 = vect[1];
-  unsigned int        I1 = vect[2];
-  unsigned int        I0 = vect[3];
-  unsigned int        d  = I3;
-  unsigned int        c  = I2 - d;
-  unsigned int        b  = I1 - d;
-  unsigned int        a  = I0 - d;
-  std::vector<double> tempPDF(intRange, 0.0);
-  unsigned int        i;
-  unsigned int        vecLen;
+  unsigned int   I3 = vect[0];
+  unsigned int   I2 = vect[1];
+  unsigned int   I1 = vect[2];
+  unsigned int   I0 = vect[3];
+  unsigned int   d  = I3;
+  unsigned int   c  = I2 - d;
+  unsigned int   b  = I1 - d;
+  unsigned int   a  = I0 - d;
+  vector<double> tempPDF(intRange, 0.0);
+  unsigned int   i;
+  unsigned int   vecLen;
 
   if (a == 0 && b == 0 && c == 0) {
     tempPDF[I3] = 1;
@@ -1522,7 +1503,7 @@ void MyMRI::get3Dcorrection(double *histo, unsigned int v1, unsigned int v2,
 
     if (I3 != I2) {
       vecLen = I2 - I3 + 1;
-      std::vector<double> tempVec(vecLen, 0.0);
+      vector<double> tempVec(vecLen, 0.0);
       for (i = 0; i < vecLen; i++)
         tempVec[i] = I3 + i;
       tempVec[0]          = tempVec[0] + 0.25;
@@ -1540,7 +1521,7 @@ void MyMRI::get3Dcorrection(double *histo, unsigned int v1, unsigned int v2,
 
     if (I2 != I1) {
       vecLen = I1 - I2 + 1;
-      std::vector<double> tempVec(vecLen, 0.0);
+      vector<double> tempVec(vecLen, 0.0);
       for (i = 0; i < vecLen; i++)
         tempVec[i] = I2 + i;
       tempVec[0]          = tempVec[0] + 0.25;
@@ -1561,7 +1542,7 @@ void MyMRI::get3Dcorrection(double *histo, unsigned int v1, unsigned int v2,
 
     if (I1 != I0) {
       vecLen = I0 - I1 + 1;
-      std::vector<double> tempVec(vecLen, 0.0);
+      vector<double> tempVec(vecLen, 0.0);
       for (i = 0; i < vecLen; i++)
         tempVec[i] = I1 + i;
       tempVec[0]          = tempVec[0] + 0.25;
@@ -1797,7 +1778,7 @@ MRI *MyMRI::medianFilter(MRI *mri, int blockradius) {
   MRI *mriN = MRIallocSequence(mri->width, mri->height, mri->depth, mri->type,
                                mri->nframes);
   MRIcopyHeader(mri, mriN);
-  // mriN->type = MRI_FLOAT;
+  //mriN->type = MRI_FLOAT;
 
   int bw           = 2 * blockradius + 1;
   int bw3          = bw * bw * bw;

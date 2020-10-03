@@ -20,7 +20,7 @@ public:
   itkTypeMacro(ReadImage, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // [ image, transform ] = kvlReadImage( imageFileName )
@@ -64,13 +64,11 @@ public:
   }
 
 protected:
-  ReadImage() = default;
-  ;
-  ~ReadImage() override = default;
-  ;
+  ReadImage(){};
+  virtual ~ReadImage(){};
 
-  ReadImage(const Self &);      // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  ReadImage(const Self &);      //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

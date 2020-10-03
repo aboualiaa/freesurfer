@@ -18,8 +18,8 @@ BOOST_AUTO_TEST_CASE(Interpolation) {
   // Set up a timer
   itk::TimeProbe clock;
 
-  // Rasterize the mesh, simply linearly interpolating a probabilistic atlas
-  // across the volume of each tetrahedron
+  // Rasterize the mesh, simply linearly interpolating a probabilistic atlas across the
+  // volume of each tetrahedron
   kvl::AtlasMeshAlphaDrawer::Pointer alphaDrawer =
       kvl::AtlasMeshAlphaDrawer::New();
   alphaDrawer->SetRegions(image->GetLargestPossibleRegion());
@@ -182,9 +182,8 @@ BOOST_AUTO_TEST_CASE(DeformationGradients) {
   BOOST_TEST_MESSAGE(
       "Time taken for first call of gradient calculator: " << clock.GetMean());
 
-  // Let's do the timing also for subsequent iterations. This should be faster
-  // because an internal ITK filter doesn't require updating until new
-  // images/means/precisions are set
+  // Let's do the timing also for subsequent iterations. This should be faster because an internal
+  // ITK filter doesn't require updating until new images/means/precisions are set
   clock.Reset();
   for (int testRunNumber = 0; testRunNumber < 10; testRunNumber++) {
     clock.Start();
@@ -206,15 +205,14 @@ BOOST_AUTO_TEST_CASE(DeformationGradients) {
   clock.Reset();
   clock.Start();
   referenceGradientCalculator->Rasterize(mesh);
-  // referenceGradientCalculator->SetNumberOfThreads( 2 );
+  //referenceGradientCalculator->SetNumberOfThreads( 2 );
   clock.Stop();
   BOOST_TEST_MESSAGE(
       "Time taken for first call of reference gradient calculator: "
       << clock.GetMean());
 
-  // Let's do the timing also for subsequent iterations. This should be faster
-  // because an internal ITK filter doesn't require updating until new
-  // images/means/precisions are set
+  // Let's do the timing also for subsequent iterations. This should be faster because an internal
+  // ITK filter doesn't require updating until new images/means/precisions are set
   clock.Reset();
   for (int testRunNumber = 0; testRunNumber < 10; testRunNumber++) {
     clock.Start();

@@ -10,8 +10,8 @@ namespace kvl {
 AtlasMeshLabelImageStatisticsCollector ::
     AtlasMeshLabelImageStatisticsCollector() {
 
-  m_LabelImage             = nullptr;
-  m_CompressionLookupTable = nullptr;
+  m_LabelImage             = 0;
+  m_CompressionLookupTable = 0;
 }
 
 //

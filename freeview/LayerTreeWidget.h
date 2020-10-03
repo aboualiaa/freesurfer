@@ -17,6 +17,7 @@
 
 #include <QItemDelegate>
 #include <QList>
+#include <QTreeWidget>
 
 class Layer;
 class LayerMRI;

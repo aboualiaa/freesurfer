@@ -18,13 +18,11 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SetMeshCollectionPositions, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // kvlSetMeshCollectionPositions( meshCollection, referencePosition,
-    // position0, position1, ... )
+    // kvlSetMeshCollectionPositions( meshCollection, referencePosition, position0, position1, ... )
 
     // Make sure input arguments are correct
     if ((nrhs < 3) || !mxIsInt64(prhs[0]) || !mxIsDouble(prhs[1]) ||
@@ -99,10 +97,9 @@ public:
 
 #else
 
-    // Loop over all input position matrices, copy their content into the
-    // correct format, and save
-    AtlasMeshCollection::PointsContainerType::Pointer referencePosition =
-        nullptr;
+    // Loop over all input position matrices, copy their content into the correct format,
+    // and save
+    AtlasMeshCollection::PointsContainerType::Pointer referencePosition = 0;
     std::vector<AtlasMeshCollection::PointsContainerType::Pointer> positions;
     for (int meshNumber = -1; meshNumber < (nrhs - 2); ++meshNumber) {
       // Get pointer to the Matlab data
@@ -113,8 +110,7 @@ public:
       const double *data =
           static_cast<double *>(mxGetData(prhs[meshNumber + 2]));
 
-      // Copy the coordinates from the Matlab matrix into a mesh node position
-      // container
+      // Copy the coordinates from the Matlab matrix into a mesh node position container
       AtlasMeshCollection::PointsContainerType::Pointer position =
           AtlasMeshCollection::PointsContainerType::New();
 
@@ -146,13 +142,11 @@ public:
   }
 
 protected:
-  SetMeshCollectionPositions() = default;
-  ;
-  ~SetMeshCollectionPositions() override = default;
-  ;
+  SetMeshCollectionPositions(){};
+  virtual ~SetMeshCollectionPositions(){};
 
-  SetMeshCollectionPositions(const Self &); // purposely not implemented
-  void operator=(const Self &);             // purposely not implemented
+  SetMeshCollectionPositions(const Self &); //purposely not implemented
+  void operator=(const Self &);             //purposely not implemented
 
 private:
 };

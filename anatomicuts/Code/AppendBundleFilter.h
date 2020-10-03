@@ -6,12 +6,14 @@
 
 #include "itkObject.h"
 
-class AppendBundleFilter : public itk::Object {
+using namespace itk;
+
+class AppendBundleFilter : public Object {
 public:
-  using Self         = AppendBundleFilter;
-  using Superclass   = Object;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AppendBundleFilter       Self;
+  typedef Object                   Superclass;
+  typedef SmartPointer<Self>       Pointer;
+  typedef SmartPointer<const Self> ConstPointer;
 
   itkNewMacro(Self);
   itkTypeMacro(AppendBundleFilter, Object);

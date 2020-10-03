@@ -22,13 +22,11 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(GetCostAndGradientCalculator, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // calculator = kvlGetCostAndGradientCalculator( typeName, image(s),
-    // boundaryCondition, transform )
+    // calculator = kvlGetCostAndGradientCalculator( typeName, image(s), boundaryCondition, transform )
 
     // Make sure input arguments are correct
     const std::string usageString =
@@ -59,7 +57,7 @@ public:
 
     mexPrintf("numberOfContrasts = %d\n", numberOfContrasts);
     std::vector<ImageType::ConstPointer> images;
-    auto *imagesHandle = static_cast<uint64_T *>(mxGetData(prhs[1]));
+    uint64_T *imagesHandle = static_cast<uint64_T *>(mxGetData(prhs[1]));
     for (int imageNummber = 0; imageNummber < numberOfContrasts;
          imageNummber++, imagesHandle++) {
       const int handle = *(imagesHandle);
@@ -68,20 +66,19 @@ public:
           kvl::MatlabObjectArray::GetInstance()->GetObject(handle);
       // if ( typeid( *(object) ) != typeid( ImageType ) )
       if (strcmp(typeid(*object).name(),
-                 typeid(ImageType).name()) != 0) // Eugenio: MAC compatibility
+                 typeid(ImageType).name())) // Eugenio: MAC compatibility
       {
         mexErrMsgTxt("image doesn't refer to the correct ITK object type");
       }
       ImageType::ConstPointer constImage =
           static_cast<const ImageType *>(object.GetPointer());
-      // ImageType::Pointer image = const_cast< ImageType* >(
-      // constImage.GetPointer() );
+      //ImageType::Pointer image = const_cast< ImageType* >( constImage.GetPointer() );
       images.push_back(constImage);
     }
 
     // Retrieve transform if one is provided
     typedef CroppedImageReader::TransformType TransformType;
-    TransformType::ConstPointer               constTransform = nullptr;
+    TransformType::ConstPointer               constTransform = 0;
     if (nrhs > 3) {
       // Sanity check
       if (!mxIsInt64(prhs[3])) {
@@ -93,8 +90,7 @@ public:
           kvl::MatlabObjectArray::GetInstance()->GetObject(transformHandle);
       // if ( typeid( *object ) != typeid( TransformType ) )
       if (strcmp(typeid(*object).name(),
-                 typeid(TransformType).name()) !=
-          0) // Eugenio: MAC compatibility
+                 typeid(TransformType).name())) // Eugenio: MAC compatibility
       {
         mexErrMsgTxt("transform doesn't refer to the correct ITK object type");
       }
@@ -112,8 +108,8 @@ public:
       //
       const int numberOfGaussians = mxGetDimensions(prhs[4])[0];
       const int numberOfContrasts = mxGetDimensions(prhs[4])[1];
-      // mexPrintf("numberOfGaussians = %d\n",numberOfGaussians);
-      // mexPrintf("numberOfContrasts = %d\n",numberOfContrasts);
+      //mexPrintf("numberOfGaussians = %d\n",numberOfGaussians);
+      //mexPrintf("numberOfContrasts = %d\n",numberOfContrasts);
       for (int gaussianNumber = 0; gaussianNumber < numberOfGaussians;
            gaussianNumber++) {
         vnl_vector<double> mean(numberOfContrasts, 0.0f);
@@ -150,11 +146,11 @@ public:
       //
       const int numberOfGaussians = mxGetDimensions(prhs[4])[0];
       const int numberOfContrasts = mxGetDimensions(prhs[4])[1];
-      // mexPrintf("numberOfGaussians = %d\n",numberOfGaussians);
-      // mexPrintf("numberOfContrasts = %d\n",numberOfContrasts);
+      //mexPrintf("numberOfGaussians = %d\n",numberOfGaussians);
+      //mexPrintf("numberOfContrasts = %d\n",numberOfContrasts);
 
-      // Does not really matter which way you read these in, because the
-      // variances are symmetric matrices transpose won't do any harm.
+      // Does not really matter which way you read these in, because the variances are symmetric matrices
+      // transpose won't do any harm.
       for (unsigned int gaussianNumber = 0; gaussianNumber < numberOfGaussians;
            gaussianNumber++) {
         vnl_matrix<double> variance(numberOfContrasts, numberOfContrasts, 0.0f);
@@ -273,7 +269,7 @@ public:
     } // End test if targetPoints are provided
 
     // Construct the correct type of calculator
-    AtlasMeshPositionCostAndGradientCalculator::Pointer calculator = nullptr;
+    AtlasMeshPositionCostAndGradientCalculator::Pointer calculator = 0;
     const std::string typeName = mxArrayToString(prhs[0]);
     switch (typeName[0]) {
     case 'A': {
@@ -365,13 +361,11 @@ public:
   }
 
 protected:
-  GetCostAndGradientCalculator() = default;
-  ;
-  ~GetCostAndGradientCalculator() override = default;
-  ;
+  GetCostAndGradientCalculator(){};
+  virtual ~GetCostAndGradientCalculator(){};
 
-  GetCostAndGradientCalculator(const Self &); // purposely not implemented
-  void operator=(const Self &);               // purposely not implemented
+  GetCostAndGradientCalculator(const Self &); //purposely not implemented
+  void operator=(const Self &);               //purposely not implemented
 
 private:
 };

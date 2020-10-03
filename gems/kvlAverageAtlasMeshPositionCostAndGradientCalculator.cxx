@@ -23,7 +23,7 @@ void AverageAtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     const AtlasMesh *mesh) {
 
   //
-  // std::cout << "Starting rasterization" << std::endl;
+  //std::cout << "Starting rasterization" << std::endl;
 
   // Sanity check
   if ((m_Positions.size() == 0) || (m_Ks.size() != m_Positions.size())) {
@@ -32,7 +32,7 @@ void AverageAtlasMeshPositionCostAndGradientCalculator ::Rasterize(
   }
 
   // Initialize from a clean slate
-  // std::cout << "Initializing" << std::endl;
+  //std::cout << "Initializing" << std::endl;
   m_MinLogLikelihoodTimesPrior = 0;
   m_PositionGradient           = AtlasPositionGradientContainerType::New();
   AtlasPositionGradientType zeroEntry(0.0f);
@@ -42,14 +42,13 @@ void AverageAtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     m_PositionGradient->InsertElement(pointIt.Index(), zeroEntry);
   }
 
-  // For each positon/K pair, generate a mesh of which we're only ever going to
-  // change a pointer to its position container. For efficiency purposes we'll
-  // cache these since computing each mesh's ReferenceTetrahedronInfo's
-  // (cellData) takes some time
+  // For each positon/K pair, generate a mesh of which we're only ever going to change
+  // a pointer to its position container. For efficiency purposes we'll cache these since
+  // computing each mesh's ReferenceTetrahedronInfo's (cellData) takes some time
   if (m_CachedInternalMeshes.size() == 0) {
-    // std::cout << "Building internal meshes" << std::endl;
+    //std::cout << "Building internal meshes" << std::endl;
     for (int meshNumber = 0; meshNumber < m_Positions.size(); meshNumber++) {
-      // std::cout << "  meshNumber: " << meshNumber << std::endl;
+      //std::cout << "  meshNumber: " << meshNumber << std::endl;
       AtlasMeshCollection::Pointer helper = AtlasMeshCollection::New();
       helper->GenerateFromSingleMesh(const_cast<AtlasMesh *>(mesh), 0,
                                      m_Ks[meshNumber]);
@@ -60,13 +59,12 @@ void AverageAtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     }
   }
 
-  // Now loop over all meshes, each time setting the mesh's position to the
-  // current one, and then computing the cost and gradient of only the
-  // deformation prior
-  // std::cout << "Rasterizing internal meshes" << std::endl;
+  // Now loop over all meshes, each time setting the mesh's position to the current one, and then computing the cost
+  // and gradient of only the deformation prior
+  //std::cout << "Rasterizing internal meshes" << std::endl;
   for (int meshNumber = 0; meshNumber < m_CachedInternalMeshes.size();
        meshNumber++) {
-    // std::cout << "  meshNumber: " << meshNumber << std::endl;
+    //std::cout << "  meshNumber: " << meshNumber << std::endl;
 
     // Set up mesh to rasterize
     AtlasMesh::Pointer internalMesh = m_CachedInternalMeshes[meshNumber];
@@ -83,7 +81,7 @@ void AverageAtlasMeshPositionCostAndGradientCalculator ::Rasterize(
         calculator->GetMinLogLikelihoodTimesPrior();
     if (minLogLikelihoodContribution == itk::NumericTraits<double>::max()) {
       // Problem with this mesh - abort
-      // std::cout << "Aborting" << std::endl;
+      //std::cout << "Aborting" << std::endl;
       m_MinLogLikelihoodTimesPrior = itk::NumericTraits<double>::max();
       return;
     } else {

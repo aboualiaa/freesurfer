@@ -8,8 +8,8 @@ namespace kvl {
 AtlasMeshDeformationLBFGSOptimizer ::AtlasMeshDeformationLBFGSOptimizer() {
 
   m_OldCost            = 0;
-  m_OldGradient        = nullptr;
-  m_OldSearchDirection = nullptr;
+  m_OldGradient        = 0;
+  m_OldSearchDirection = 0;
   m_AlphaUsedLastTime  = 0.0;
 
   m_StartDistance = 1.0; // Measured in voxels
@@ -28,8 +28,8 @@ AtlasMeshDeformationLBFGSOptimizer ::~AtlasMeshDeformationLBFGSOptimizer() {}
 void AtlasMeshDeformationLBFGSOptimizer ::Initialize() {
 
   m_OldCost            = 0;
-  m_OldGradient        = nullptr;
-  m_OldSearchDirection = nullptr;
+  m_OldGradient        = 0;
+  m_OldSearchDirection = 0;
 
   m_Ss.clear();
   m_Ys.clear();
@@ -55,7 +55,7 @@ AtlasMeshDeformationLBFGSOptimizer ::FindAndOptimizeNewSearchDirection() {
     // by distance provided by user (first iteration means
     // p = -gradient, and alpha1 of line search is always 1.0
     // for L-BFGS
-    // gamma = initialAlpha1Distance / max( abs( gradient ) );
+    //gamma = initialAlpha1Distance / max( abs( gradient ) );
     gamma = m_StartDistance / this->ComputeMaximalDeformation(m_Gradient);
   } else {
     // Update S and Y in L-BFGS
@@ -99,7 +99,7 @@ AtlasMeshDeformationLBFGSOptimizer ::FindAndOptimizeNewSearchDirection() {
   AtlasPositionGradientContainerType::Pointer q =
       this->ScaleDeformation(m_Gradient, 1.0);
   const int memoryLength = m_Ss.size();
-  // std::cout << "memoryLength: " << memoryLength << std::endl;
+  //std::cout << "memoryLength: " << memoryLength << std::endl;
 
   std::vector<double> alps(memoryLength, 0.0);
   for (int i = 0; i < memoryLength; i++) {
@@ -150,14 +150,13 @@ AtlasMeshDeformationLBFGSOptimizer ::FindAndOptimizeNewSearchDirection() {
   m_OldCost            = m_Cost;
   m_OldGradient        = m_Gradient;
   m_OldSearchDirection = searchDirection;
-  // [ x, cost, gradient, alphaUsed ] = tryLineSearch( x, cost, gradient, p,
-  // alpha1, c1, c2 );
+  // [ x, cost, gradient, alphaUsed ] = tryLineSearch( x, cost, gradient, p, alpha1, c1, c2 );
   double alphaUsed = 0.0;
   this->DoLineSearch(m_Position, m_Cost, m_Gradient, searchDirection,
                      startAlpha, c1, c2, m_Position, m_Cost, m_Gradient,
                      alphaUsed);
 
-  // std::cout << "m_Cost: " << m_Cost << std::endl;
+  //std::cout << "m_Cost: " << m_Cost << std::endl;
 
   // Some book keeping
   const double maximalDeformation =

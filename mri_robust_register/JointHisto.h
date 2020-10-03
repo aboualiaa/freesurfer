@@ -33,6 +33,9 @@
 #undef export
 
 #include <iostream>
+#include <vcl_compiler.h>
+
+using namespace std;
 
 class JointHisto {
 public:
@@ -61,7 +64,7 @@ public:
   void set(const vnl_matrix<double> &histo);
   void smooth(double fwhm1 = 7.0);
   void print(const std::string &n = "H") {
-    vnl_matlab_print(std::cout, histo, n.c_str());
+    vnl_matlab_print(cout, histo, n.c_str());
     std::cout << std::endl;
   };
   void   save(const std::string &fname, const std::string &n = "H");

@@ -4,8 +4,7 @@
  * Name: dmri_projectEndPoints.cxx
  *
  * Description:
- * Changes the endpoints of a streamline to a different value and save it to a
- * new overlay file
+ * Changes the endpoints of a streamline to a different value and save it to a new overlay file
  *
  */
 
@@ -67,6 +66,8 @@ const int ENDPOINT_VALUE = 1;
 #include "vtkDelaunay3D.h"
 #include "vtkKdTreePointLocator.h"
 
+using namespace std;
+
 // Helper Functions
 vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2);
 vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf);
@@ -83,7 +84,7 @@ int main(int narg, char *arg[]) {
          << endl
          << "                       -ol left_overlayFile -or right_overlayFile"
          << endl
-         << "		       -ri reference_Image" << std::endl;
+         << "		       -ri reference_Image" << endl;
 
     return EXIT_FAILURE;
   }
@@ -91,12 +92,12 @@ int main(int narg, char *arg[]) {
   // Declaration of Variables for Program to Function
   // TRK file Definition
   enum { Dimension = 3 };
-  typedef int              PixelType;
-  const unsigned int       PointDimension = 3;
-  typedef std::vector<int> PointDataType;
-  const unsigned int       MaxTopologicalDimension = 3;
-  typedef double           CoordinateType;
-  typedef double           InterpolationWeightType;
+  typedef int         PixelType;
+  const unsigned int  PointDimension = 3;
+  typedef vector<int> PointDataType;
+  const unsigned int  MaxTopologicalDimension = 3;
+  typedef double      CoordinateType;
+  typedef double      InterpolationWeightType;
   typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                        MaxTopologicalDimension, CoordinateType,
                                        InterpolationWeightType, PointDataType>
@@ -118,7 +119,7 @@ int main(int narg, char *arg[]) {
   typedef fs::Surface<CoordType, Dimension> SurfType;
 
   // Input Parsing
-  std::vector<std::string> TRKFile;
+  vector<string> TRKFile;
   TRKFile.push_back(gp.follow("Could not find TRK file", "-i"));
   const char *surfaceFileL = gp.follow("Could not find Surface File", "-sl");
   const char *surfaceFileR = gp.follow("Could not find Surface File", "-sr");
@@ -138,17 +139,17 @@ int main(int narg, char *arg[]) {
   MRI *image = MRIread(refImage);
 
   //Outputting the Files to Ensure the correct files were input
-  std::cerr << std::endl
-            << "TRK File:           " << TRKFile.at(0) << std::endl
-            << "Left Surface File:  " << surfaceFileL << std::endl
-            << "Left Overlay File:  " << overlayFileL << std::endl
-            << "Right Surface File: " << surfaceFileR << std::endl
-            << "Right Overlay File: " << overlayFileR << std::endl
-            << "Reference Image:    " << refImage << std::endl;
+  cerr << endl
+       << "TRK File:           " << TRKFile.at(0) << endl
+       << "Left Surface File:  " << surfaceFileL << endl
+       << "Left Overlay File:  " << overlayFileL << endl
+       << "Right Surface File: " << surfaceFileR << endl
+       << "Right Overlay File: " << overlayFileR << endl
+       << "Reference Image:    " << refImage << endl;
 
   // Loading the TRK files into a mesh
-  std::vector<ColorMeshType::Pointer> *     meshes;
-  std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
+  vector<ColorMeshType::Pointer> *     meshes;
+  vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
   clusterTools->GetPolyDatas(TRKFile, &polydatas, volume);
@@ -269,8 +270,7 @@ vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf) {
 /* Function: which_ID
  * Input: the two distances and the two vertice IDs
  * Return: whichever vertice is closer to the point
- * Does: Compares the two distances and returns the vertice of the shorter
- * distance
+ * Does: Compares the two distances and returns the vertice of the shorter distance
  */
 vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2) {
   if (n1 < n2)

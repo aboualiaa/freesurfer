@@ -48,8 +48,7 @@ public:
       : A(&Ap), b(&bp), lasterror(-1), lastweight(-1), lastzero(-1), verbose(1),
         floatsvd(false) {}
 
-  //! Constructor initializing b (for simple case where x is single variable and
-  //! A is (...1...)^T
+  //! Constructor initializing b (for simple case where x is single variable and A is (...1...)^T
   Regression(vnl_vector<T> &bp)
       : A(NULL), b(&bp), lasterror(-1), lastweight(-1), lastzero(-1),
         verbose(1), floatsvd(false) {}

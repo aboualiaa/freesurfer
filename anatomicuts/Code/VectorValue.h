@@ -1,8 +1,7 @@
 #ifndef _VectorValue_h_
 #define _VectorValue_h_
 
-template <class T, unsigned int Z = 3>
-class VectorValue : public std::vector<T, Z> {
+template <class T, unsigned int Z = 3> class VectorValue : public Vector<T, Z> {
 private:
   itk::Vector<T, Z> insideValue;
 
@@ -11,7 +10,7 @@ public:
   itk::Vector<T, Z> GetValue() { return this->insideValue; }
 };
 template <class W, class T, unsigned int Z = 3>
-class VectorWeighted : public std::vector<T, Z> {
+class VectorWeighted : public Vector<T, Z> {
 
   typedef W ValueType;
 

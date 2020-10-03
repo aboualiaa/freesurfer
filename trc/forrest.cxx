@@ -20,6 +20,8 @@
 
 #include <forrest.h>
 
+using namespace std;
+
 const int Forrest::mSampleStep = 2;
 
 Forrest::Forrest()
@@ -51,16 +53,16 @@ Forrest::~Forrest() {
 //
 void Forrest::ReadTestSubject(const char *TestDir, const char *MaskFile,
                               const char *AsegFile, const char *OrientFile) {
-  std::string dirname = std::string(TestDir) + "/", fname;
+  string dirname = string(TestDir) + "/", fname;
 
   if (mMask)
     MRIfree(&mMask);
 
   fname = dirname + MaskFile;
-  std::cout << "Loading test brain mask from " << fname << std::endl;
+  cout << "Loading test brain mask from " << fname << endl;
   mMask = MRIread(fname.c_str());
   if (!mMask) {
-    std::cout << "ERROR: Could not read " << fname << std::endl;
+    cout << "ERROR: Could not read " << fname << endl;
     exit(1);
   }
 
@@ -73,11 +75,10 @@ void Forrest::ReadTestSubject(const char *TestDir, const char *MaskFile,
 
   if (AsegFile) {
     fname = dirname + AsegFile;
-    std::cout << "Loading test anatomical segmentation from " << fname
-              << std::endl;
+    cout << "Loading test anatomical segmentation from " << fname << endl;
     mAseg = MRIread(fname.c_str());
     if (!mAseg) {
-      std::cout << "ERROR: Could not read " << fname << std::endl;
+      cout << "ERROR: Could not read " << fname << endl;
       exit(1);
     }
   }
@@ -87,11 +88,10 @@ void Forrest::ReadTestSubject(const char *TestDir, const char *MaskFile,
 
   if (OrientFile) {
     fname = dirname + OrientFile;
-    std::cout << "Loading test diffusion orientations from " << fname
-              << std::endl;
+    cout << "Loading test diffusion orientations from " << fname << endl;
     mOrient = MRIread(fname.c_str());
     if (!mOrient) {
-      std::cout << "ERROR: Could not read " << fname << std::endl;
+      cout << "ERROR: Could not read " << fname << endl;
       exit(1);
     }
   }
@@ -102,14 +102,14 @@ void Forrest::ReadTestSubject(const char *TestDir, const char *MaskFile,
 //
 void Forrest::ReadTrainingSubjects(const char *TrainListFile,
                                    const char *MaskFile, const char *AsegFile,
-                                   const char *        OrientFile,
-                                   std::vector<char *> TractFileList) {
-  std::string              dirname;
-  std::vector<std::string> dirlist;
-  std::ifstream            listfile(TrainListFile, std::ios::in);
+                                   const char *   OrientFile,
+                                   vector<char *> TractFileList) {
+  string         dirname;
+  vector<string> dirlist;
+  ifstream       listfile(TrainListFile, ios::in);
 
   if (!listfile) {
-    std::cout << "ERROR: Could not open " << TrainListFile << std::endl;
+    cout << "ERROR: Could not open " << TrainListFile << endl;
     exit(1);
   }
 
@@ -118,55 +118,53 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
 
   mNumTrain = 0;
 
-  for (std::vector<std::string>::const_iterator idir = dirlist.begin();
+  for (vector<string>::const_iterator idir = dirlist.begin();
        idir < dirlist.end(); idir++) {
-    int                nx, ny, nz;
-    MRI *              maskvol = NULL, *asegvol = NULL, *orientvol = NULL;
-    std::vector<MRI *> tractvols;
-    std::string        fname;
+    int           nx, ny, nz;
+    MRI *         maskvol = NULL, *asegvol = NULL, *orientvol = NULL;
+    vector<MRI *> tractvols;
+    string        fname;
 
     //
     // Read volumes
     //
     fname = *idir + MaskFile;
-    std::cout << "Loading training brain mask from " << fname << std::endl;
+    cout << "Loading training brain mask from " << fname << endl;
     maskvol = MRIread(fname.c_str());
     if (!maskvol) {
-      std::cout << "ERROR: Could not read " << fname << std::endl;
+      cout << "ERROR: Could not read " << fname << endl;
       exit(1);
     }
 
     if (AsegFile) {
       fname = *idir + AsegFile;
-      std::cout << "Loading training anatomical segmentation from " << fname
-                << std::endl;
+      cout << "Loading training anatomical segmentation from " << fname << endl;
       asegvol = MRIread(fname.c_str());
       if (!asegvol) {
-        std::cout << "ERROR: Could not read " << fname << std::endl;
+        cout << "ERROR: Could not read " << fname << endl;
         exit(1);
       }
     }
 
     if (OrientFile) {
       fname = *idir + OrientFile;
-      std::cout << "Loading training diffusion orientations from " << fname
-                << std::endl;
+      cout << "Loading training diffusion orientations from " << fname << endl;
       orientvol = MRIread(fname.c_str());
       if (!orientvol) {
-        std::cout << "ERROR: Could not read " << fname << std::endl;
+        cout << "ERROR: Could not read " << fname << endl;
         exit(1);
       }
     }
 
-    for (std::vector<char *>::const_iterator ifile = TractFileList.begin();
+    for (vector<char *>::const_iterator ifile = TractFileList.begin();
          ifile < TractFileList.end(); ifile++) {
       MRI *tractvol;
 
       fname = *idir + *ifile;
-      std::cout << "Loading training tract label from " << fname << std::endl;
+      cout << "Loading training tract label from " << fname << endl;
       tractvol = MRIread(fname.c_str());
       if (!tractvol) {
-        std::cout << "ERROR: Could not read " << fname << std::endl;
+        cout << "ERROR: Could not read " << fname << endl;
         exit(1);
       }
 
@@ -184,7 +182,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
       for (int iy0 = 0; iy0 < ny; iy0 += mSampleStep)
         for (int ix0 = 0; ix0 < nx; ix0 += mSampleStep)
           if (MRIgetVoxVal(maskvol, ix0, iy0, iz0, 0) > 0) {
-            std::vector<unsigned int> tractids;
+            vector<unsigned int> tractids;
 
             mNumTrain++;
 
@@ -198,7 +196,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
               const float seg0 = MRIgetVoxVal(asegvol, ix0, iy0, iz0, 0);
 
               // Save local neighbor labels
-              for (std::vector<int>::const_iterator idir = mDirLocal.begin();
+              for (vector<int>::const_iterator idir = mDirLocal.begin();
                    idir < mDirLocal.end(); idir += 3) {
                 const int ix = ix0 + idir[0], iy = iy0 + idir[1],
                           iz = iz0 + idir[2];
@@ -211,7 +209,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
               }
 
               // Save nearest neighbor labels
-              for (std::vector<int>::const_iterator idir = mDirNear.begin();
+              for (vector<int>::const_iterator idir = mDirNear.begin();
                    idir < mDirNear.end(); idir += 3) {
                 int dist = 0, ix = ix0 + idir[0], iy = iy0 + idir[1],
                     iz    = iz0 + idir[2];
@@ -228,7 +226,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
                 }
 
                 mTrainAsegIdsNear.push_back((unsigned int)seg);
-                // mTrainAsegDist.push_back(dist);
+                //mTrainAsegDist.push_back(dist);
               }
             }
 
@@ -240,7 +238,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
             }
 
             // Does this voxel belong to any tracts?
-            for (std::vector<MRI *>::const_iterator ivol = tractvols.begin();
+            for (vector<MRI *>::const_iterator ivol = tractvols.begin();
                  ivol < tractvols.end(); ivol++)
               if (MRIgetVoxVal(*ivol, ix0, iy0, iz0, 0) > 0)
                 tractids.push_back(ivol - tractvols.begin() + 1);
@@ -259,8 +257,8 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
     if (orientvol)
       MRIfree(&orientvol);
 
-    std::cout << "bla" << std::endl;
-    for (std::vector<MRI *>::iterator ivol = tractvols.begin();
+    cout << "bla" << endl;
+    for (vector<MRI *>::iterator ivol = tractvols.begin();
          ivol < tractvols.end(); ivol++)
       MRIfree(&(*ivol));
   }
@@ -292,15 +290,14 @@ bool Forrest::IsInMask(int CoordX, int CoordY, int CoordZ) {
 //
 // Return feature from test subject: Anatomical segmentation
 //
-std::vector<unsigned int> Forrest::GetTestAseg(int CoordX, int CoordY,
-                                               int CoordZ) {
-  std::vector<unsigned int> testaseg;
+vector<unsigned int> Forrest::GetTestAseg(int CoordX, int CoordY, int CoordZ) {
+  vector<unsigned int> testaseg;
 
   if (mAseg) {
     const float seg0 = MRIgetVoxVal(mAseg, CoordX, CoordY, CoordZ, 0);
 
     // Save local neighbor labels
-    for (std::vector<int>::const_iterator idir = mDirLocal.begin();
+    for (vector<int>::const_iterator idir = mDirLocal.begin();
          idir < mDirLocal.end(); idir += 3) {
       const int ix = CoordX + idir[0], iy = CoordY + idir[1],
                 iz = CoordZ + idir[2];
@@ -313,7 +310,7 @@ std::vector<unsigned int> Forrest::GetTestAseg(int CoordX, int CoordY,
     }
 
     // Save nearest neighbor labels
-    for (std::vector<int>::const_iterator idir = mDirNear.begin();
+    for (vector<int>::const_iterator idir = mDirNear.begin();
          idir < mDirNear.end(); idir += 3) {
       int dist = 0, ix = CoordX + idir[0], iy = CoordY + idir[1],
           iz    = CoordZ + idir[2];
@@ -339,8 +336,8 @@ std::vector<unsigned int> Forrest::GetTestAseg(int CoordX, int CoordY,
 //
 // Return feature from test subject: Diffusion orientation
 //
-std::vector<float> Forrest::GetTestOrient(int CoordX, int CoordY, int CoordZ) {
-  std::vector<float> testorient;
+vector<float> Forrest::GetTestOrient(int CoordX, int CoordY, int CoordZ) {
+  vector<float> testorient;
 
   if (mOrient) {
     testorient.push_back(MRIgetVoxVal(mOrient, CoordX, CoordY, CoordZ, 0));
@@ -354,13 +351,13 @@ std::vector<float> Forrest::GetTestOrient(int CoordX, int CoordY, int CoordZ) {
 //
 // Return a training sample of a feature: Spatial location
 //
-std::vector<int> Forrest::GetTrainXyz(int SampleIndex) {
-  std::vector<int>::const_iterator itrain;
-  std::vector<int>                 sample;
+vector<int> Forrest::GetTrainXyz(int SampleIndex) {
+  vector<int>::const_iterator itrain;
+  vector<int>                 sample;
 
   if (SampleIndex >= mNumTrain || SampleIndex < 0) {
-    std::cout << "ERROR: Cannot access sample " << SampleIndex
-              << " out of a total of " << mNumTrain << std::endl;
+    cout << "ERROR: Cannot access sample " << SampleIndex
+         << " out of a total of " << mNumTrain << endl;
     exit(1);
   }
 
@@ -373,13 +370,13 @@ std::vector<int> Forrest::GetTrainXyz(int SampleIndex) {
 //
 // Return a training sample of a feature: Anatomical segmentation
 //
-std::vector<unsigned int> Forrest::GetTrainAseg(int SampleIndex) {
-  std::vector<unsigned int>::const_iterator itrain;
-  std::vector<unsigned int>                 sample;
+vector<unsigned int> Forrest::GetTrainAseg(int SampleIndex) {
+  vector<unsigned int>::const_iterator itrain;
+  vector<unsigned int>                 sample;
 
   if (SampleIndex >= mNumTrain || SampleIndex < 0) {
-    std::cout << "ERROR: Cannot access sample " << SampleIndex
-              << " out of a total of " << mNumTrain << std::endl;
+    cout << "ERROR: Cannot access sample " << SampleIndex
+         << " out of a total of " << mNumTrain << endl;
     exit(1);
   }
 
@@ -399,13 +396,13 @@ std::vector<unsigned int> Forrest::GetTrainAseg(int SampleIndex) {
 //
 // Return a training sample of a feature: Diffusion orientation
 //
-std::vector<float> Forrest::GetTrainOrient(int SampleIndex) {
-  std::vector<float>::const_iterator itrain;
-  std::vector<float>                 sample;
+vector<float> Forrest::GetTrainOrient(int SampleIndex) {
+  vector<float>::const_iterator itrain;
+  vector<float>                 sample;
 
   if (SampleIndex >= mNumTrain || SampleIndex < 0) {
-    std::cout << "ERROR: Cannot access sample " << SampleIndex
-              << " out of a total of " << mNumTrain << std::endl;
+    cout << "ERROR: Cannot access sample " << SampleIndex
+         << " out of a total of " << mNumTrain << endl;
     exit(1);
   }
 
@@ -420,10 +417,10 @@ std::vector<float> Forrest::GetTrainOrient(int SampleIndex) {
 //
 // Return tract membership for a training sample
 //
-std::vector<unsigned int> Forrest::GetTrainTractIds(int SampleIndex) {
+vector<unsigned int> Forrest::GetTrainTractIds(int SampleIndex) {
   if (SampleIndex >= mNumTrain || SampleIndex < 0) {
-    std::cout << "ERROR: Cannot access sample " << SampleIndex
-              << " out of a total of " << mNumTrain << std::endl;
+    cout << "ERROR: Cannot access sample " << SampleIndex
+         << " out of a total of " << mNumTrain << endl;
     exit(1);
   }
 

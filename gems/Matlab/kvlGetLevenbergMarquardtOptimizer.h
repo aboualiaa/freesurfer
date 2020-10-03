@@ -19,7 +19,7 @@ public:
   itkTypeMacro(GetLevenbergMarquardtOptimizer, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // optimizer = kvlGetLevenbergMarquardtOptimizer( mesh, image, transform )
@@ -98,9 +98,9 @@ public:
         const_cast<TransformType *>(constTransform.GetPointer());
 
     // Show what we have so far
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
-    // std::cout << "image: " << image.GetPointer() << std::endl;
-    // std::cout << "transform: " << transform.GetPointer() << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "image: " << image.GetPointer() << std::endl;
+    //std::cout << "transform: " << transform.GetPointer() << std::endl;
 
     // Set up the optimizer accordingly
     AtlasMeshDeformationLevenbergMarquardtOptimizer::Pointer optimizer =
@@ -124,8 +124,8 @@ protected:
   GetLevenbergMarquardtOptimizer(){};
   virtual ~GetLevenbergMarquardtOptimizer(){};
 
-  GetLevenbergMarquardtOptimizer(const Self &); // purposely not implemented
-  void operator=(const Self &);                 // purposely not implemented
+  GetLevenbergMarquardtOptimizer(const Self &); //purposely not implemented
+  void operator=(const Self &);                 //purposely not implemented
 
 private:
 };

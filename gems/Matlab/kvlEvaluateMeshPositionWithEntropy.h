@@ -18,9 +18,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(EvaluateMeshPositionWithEntropy, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // [ cost gradient ] = kvlEvaluateMeshPositionWithEntropy( mesh, image )
@@ -36,15 +35,13 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
     kvl::AtlasMesh::ConstPointer constMesh =
         static_cast<const kvl::AtlasMesh *>(object.GetPointer());
-    // kvl::AtlasMesh::Pointer mesh = const_cast< kvl::AtlasMesh* >(
-    // constMesh.GetPointer() );
+    //kvl::AtlasMesh::Pointer mesh = const_cast< kvl::AtlasMesh* >( constMesh.GetPointer() );
 
     // Retrieve input image
     typedef ConditionalGaussianEntropyCostAndGradientCalculator::ImageType
@@ -53,18 +50,17 @@ public:
     object = kvl::MatlabObjectArray::GetInstance()->GetObject(imageHandle);
     // if ( typeid( *(object) ) != typeid( ImageType ) )
     if (strcmp(typeid(*object).name(),
-               typeid(ImageType).name()) != 0) // Eugenio: MAC compatibility
+               typeid(ImageType).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("image doesn't refer to the correct ITK object type");
     }
     ImageType::ConstPointer constImage =
         static_cast<const ImageType *>(object.GetPointer());
-    // ImageType::Pointer image = const_cast< ImageType* >(
-    // constImage.GetPointer() );
+    //ImageType::Pointer image = const_cast< ImageType* >( constImage.GetPointer() );
 
     // Show what we have so far
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
-    // std::cout << "image: " << image.GetPointer() << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "image: " << image.GetPointer() << std::endl;
 
     // Set up the calculator
     ConditionalGaussianEntropyCostAndGradientCalculator::Pointer calculator =
@@ -85,12 +81,12 @@ public:
     plhs[0] = mxCreateDoubleScalar(cost);
 
     const int numberOfNodes = gradient->Size();
-    // std::cout << "numberOfNodes :" << numberOfNodes << std::endl;
+    //std::cout << "numberOfNodes :" << numberOfNodes << std::endl;
     mwSize dims[2];
-    dims[0]    = numberOfNodes;
-    dims[1]    = 3;
-    plhs[1]    = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-    auto *data = static_cast<double *>(mxGetData(plhs[1]));
+    dims[0]      = numberOfNodes;
+    dims[1]      = 3;
+    plhs[1]      = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+    double *data = static_cast<double *>(mxGetData(plhs[1]));
 
     for (AtlasPositionGradientContainerType::ConstIterator it =
              gradient->Begin();
@@ -103,13 +99,11 @@ public:
   }
 
 protected:
-  EvaluateMeshPositionWithEntropy() = default;
-  ;
-  ~EvaluateMeshPositionWithEntropy() override = default;
-  ;
+  EvaluateMeshPositionWithEntropy(){};
+  virtual ~EvaluateMeshPositionWithEntropy(){};
 
-  EvaluateMeshPositionWithEntropy(const Self &); // purposely not implemented
-  void operator=(const Self &);                  // purposely not implemented
+  EvaluateMeshPositionWithEntropy(const Self &); //purposely not implemented
+  void operator=(const Self &);                  //purposely not implemented
 
 private:
 };

@@ -1,4 +1,5 @@
 #include "surface.h"
+#include "mrisurf.h"
 #include "mrisurf_base.h"
 #include "xform.h"
 

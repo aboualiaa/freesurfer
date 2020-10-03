@@ -20,9 +20,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(DrawJacobianDeterminant, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // jacobianDeterminantBuffer = kvlDrawJacobianDeterminant( mesh, DIM )
@@ -52,8 +51,8 @@ public:
       imageSize[i] = static_cast<int>(*tmp);
     }
 
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
-    // std::cout << "imageSize: " << imageSize << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "imageSize: " << imageSize << std::endl;
 
     // Rasterize
     kvl::AtlasMeshJacobianDeterminantDrawer::Pointer drawer =
@@ -66,10 +65,10 @@ public:
     for (int i = 0; i < 3; i++) {
       dims[i] = imageSize[i];
     }
-    // plhs[ 0 ] = mxCreateNumericArray( 3, dims, mxSINGLE_CLASS, mxREAL );
-    // float*  data = static_cast< float* >( mxGetData( plhs[ 0 ] ) );
-    plhs[0]    = mxCreateNumericArray(3, dims, mxSINGLE_CLASS, mxREAL);
-    auto *data = static_cast<float *>(mxGetData(plhs[0]));
+    //plhs[ 0 ] = mxCreateNumericArray( 3, dims, mxSINGLE_CLASS, mxREAL );
+    //float*  data = static_cast< float* >( mxGetData( plhs[ 0 ] ) );
+    plhs[0]     = mxCreateNumericArray(3, dims, mxSINGLE_CLASS, mxREAL);
+    float *data = static_cast<float *>(mxGetData(plhs[0]));
 
     itk::ImageRegionConstIterator<JacobianDeterminantImageType> it(
         drawer->GetImage(), drawer->GetImage()->GetBufferedRegion());
@@ -79,13 +78,11 @@ public:
   }
 
 protected:
-  DrawJacobianDeterminant() = default;
-  ;
-  ~DrawJacobianDeterminant() override = default;
-  ;
+  DrawJacobianDeterminant(){};
+  virtual ~DrawJacobianDeterminant(){};
 
-  DrawJacobianDeterminant(const Self &); // purposely not implemented
-  void operator=(const Self &);          // purposely not implemented
+  DrawJacobianDeterminant(const Self &); //purposely not implemented
+  void operator=(const Self &);          //purposely not implemented
 
 private:
 };

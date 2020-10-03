@@ -47,6 +47,8 @@ double round(double x);
 #include "timer.h"
 #include "version.h"
 
+using namespace std;
+
 static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
@@ -123,9 +125,9 @@ int main(int argc, char **argv) {
               iy    = (int)round(drand48() * (ny - 1)),
               iz    = (int)round(drand48() * (nz - 1)),
               isamp = (int)round(drand48() * (ntrain - 1));
-    std::vector<int>          xyz;
-    std::vector<unsigned int> aseg, tracts;
-    std::vector<float>        orient;
+    vector<int>          xyz;
+    vector<unsigned int> aseg, tracts;
+    vector<float>        orient;
 
     // Check if this voxel is inside the brain mask of the test subject
     if (!myforrest.IsInMask(ix, iy, iz))
@@ -134,62 +136,61 @@ int main(int argc, char **argv) {
     // Get anatomical segmentation neighbors for a voxel in the test subject
     aseg = myforrest.GetTestAseg(ix, iy, iz);
     if (!aseg.empty()) { // If anatomical segmentations were provided
-      std::cout << "Anatomical segmentation neighbors of voxel (" << ix << ", "
-                << iy << ", " << iz << ")"
-                << " in test subject:";
+      cout << "Anatomical segmentation neighbors of voxel (" << ix << ", " << iy
+           << ", " << iz << ")"
+           << " in test subject:";
       for (unsigned int iseg = 0; iseg < aseg.size(); iseg++)
-        std::cout << " " << aseg[iseg];
-      std::cout << std::endl;
+        cout << " " << aseg[iseg];
+      cout << endl;
     }
 
     // Get diffusion orientation for a voxel in the test subject
     orient = myforrest.GetTestOrient(ix, iy, iz);
     if (!orient.empty()) { // If diffusion orientations were provided
-      std::cout << "Diffusion orientation at voxel (" << ix << ", " << iy
-                << ", " << iz << ")"
-                << " in test subject: " << orient[0] << " " << orient[1] << " "
-                << orient[2] << std::endl;
+      cout << "Diffusion orientation at voxel (" << ix << ", " << iy << ", "
+           << iz << ")"
+           << " in test subject: " << orient[0] << " " << orient[1] << " "
+           << orient[2] << endl;
     }
 
     // Sample spatial location from the training data
     xyz = myforrest.GetTrainXyz(isamp);
-    std::cout << "Spatial coordinates of training sample " << isamp << ": "
-              << xyz[0] << " " << xyz[1] << " " << xyz[2] << std::endl;
+    cout << "Spatial coordinates of training sample " << isamp << ": " << xyz[0]
+         << " " << xyz[1] << " " << xyz[2] << endl;
 
     // Sample anatomical segmentation neighbors from the training data
     aseg = myforrest.GetTrainAseg(isamp);
     if (!aseg.empty()) { // If anatomical segmentations were provided
-      std::cout << "Anatomical segmentation neighbors of training sample "
-                << isamp << ":";
+      cout << "Anatomical segmentation neighbors of training sample " << isamp
+           << ":";
       for (unsigned int iseg = 0; iseg < aseg.size(); iseg++)
-        std::cout << " " << aseg[iseg];
-      std::cout << std::endl;
+        cout << " " << aseg[iseg];
+      cout << endl;
     }
 
     // Sample diffusion orientation from the training data
     orient = myforrest.GetTrainOrient(isamp);
     if (!orient.empty()) { // If diffusion orientations were provided
-      std::cout << "Diffusion orientation of training sample " << isamp << ": "
-                << orient[0] << " " << orient[1] << " " << orient[2]
-                << std::endl;
+      cout << "Diffusion orientation of training sample " << isamp << ": "
+           << orient[0] << " " << orient[1] << " " << orient[2] << endl;
     }
 
     // Sample tract membership from the training data
     tracts = myforrest.GetTrainTractIds(isamp);
-    std::cout << "Tract membership of training sample " << isamp << ":";
+    cout << "Tract membership of training sample " << isamp << ":";
     if (tracts.empty()) // If voxel doesn't belong to any tracts
-      std::cout << " " << 0 << std::endl;
+      cout << " " << 0 << endl;
     else {
       for (unsigned int itract = 0; itract < tracts.size(); itract++)
-        std::cout << " " << tracts[itract];
-      std::cout << std::endl;
+        cout << " " << tracts[itract];
+      cout << endl;
     }
   }
 
   cputime = cputimer.milliseconds();
-  std::cout << "Done in " << cputime / 1000.0 << " sec." << std::endl;
+  cout << "Done in " << cputime / 1000.0 << " sec." << endl;
 
-  std::cout << "dmri_forrest done" << std::endl;
+  cout << "dmri_forrest done" << endl;
   return (0);
   exit(0);
 }
@@ -269,44 +270,42 @@ static int parse_commandline(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static void print_usage(void) {
-  std::cout
-      << std::endl
-      << "USAGE: " << Progname << std::endl
-      << std::endl
-      << "Basic inputs (all files must be in common space)" << std::endl
-      << "   --test <dir>:" << std::endl
-      << "     Test subject directory" << std::endl
-      << "   --train <file>:" << std::endl
-      << "     Text file with list of training subject directories" << std::endl
-      << "   --mask <file>:" << std::endl
-      << "     Name of input brain mask volume" << std::endl
-      << "     (Name relative to test/training subject directory)" << std::endl
-      << "   --tract <file> [...]:" << std::endl
-      << "     Name(s) of input tract label volume(s)" << std::endl
-      << "     (Names relative to test/training subject directory)" << std::endl
-      << "   --seg <file>:" << std::endl
-      << "     Name of input aparc+aseg volume (optional)" << std::endl
-      << "     (Name relative to test/training subject directory)" << std::endl
-      << "   --diff <file>:" << std::endl
-      << "     Name of input diffusion orientation volume (optional)"
-      << std::endl
-      << "     (Name relative to test/training subject directory)" << std::endl
-      << std::endl
-      << "Other options" << std::endl
-      << "   --debug:     turn on debugging" << std::endl
-      << "   --checkopts: don't run anything, just check options and exit"
-      << std::endl
-      << "   --help:      print out information on how to use this program"
-      << std::endl
-      << "   --version:   print out version and exit" << std::endl
-      << std::endl;
+  cout << endl
+       << "USAGE: " << Progname << endl
+       << endl
+       << "Basic inputs (all files must be in common space)" << endl
+       << "   --test <dir>:" << endl
+       << "     Test subject directory" << endl
+       << "   --train <file>:" << endl
+       << "     Text file with list of training subject directories" << endl
+       << "   --mask <file>:" << endl
+       << "     Name of input brain mask volume" << endl
+       << "     (Name relative to test/training subject directory)" << endl
+       << "   --tract <file> [...]:" << endl
+       << "     Name(s) of input tract label volume(s)" << endl
+       << "     (Names relative to test/training subject directory)" << endl
+       << "   --seg <file>:" << endl
+       << "     Name of input aparc+aseg volume (optional)" << endl
+       << "     (Name relative to test/training subject directory)" << endl
+       << "   --diff <file>:" << endl
+       << "     Name of input diffusion orientation volume (optional)" << endl
+       << "     (Name relative to test/training subject directory)" << endl
+       << endl
+       << "Other options" << endl
+       << "   --debug:     turn on debugging" << endl
+       << "   --checkopts: don't run anything, just check options and exit"
+       << endl
+       << "   --help:      print out information on how to use this program"
+       << endl
+       << "   --version:   print out version and exit" << endl
+       << endl;
 }
 
 /* --------------------------------------------- */
 static void print_help(void) {
   print_usage();
 
-  std::cout << std::endl << "..." << std::endl << std::endl;
+  cout << endl << "..." << endl << endl;
 
   exit(1);
 }
@@ -319,7 +318,7 @@ static void usage_exit(void) {
 
 /* --------------------------------------------- */
 static void print_version(void) {
-  std::cout << getVersion() << std::endl;
+  cout << getVersion() << endl;
   exit(1);
 }
 
@@ -338,8 +337,7 @@ static void check_options(void) {
     exit(1);
   }
   if (tractFileList.empty()) {
-    std::cout << "ERROR: Must specify at least one tract label volume"
-              << std::endl;
+    cout << "ERROR: Must specify at least one tract label volume" << endl;
     exit(1);
   }
   return;
@@ -347,29 +345,28 @@ static void check_options(void) {
 
 /* --------------------------------------------- */
 static void dump_options() {
-  std::cout << std::endl
-            << getVersion() << std::endl
-            << "cwd " << cwd << std::endl
-            << "cmdline " << cmdline << std::endl
-            << "sysname  " << uts.sysname << std::endl
-            << "hostname " << uts.nodename << std::endl
-            << "machine  " << uts.machine << std::endl
-            << "user     " << VERuser() << std::endl;
+  cout << endl
+       << getVersion() << endl
+       << "cwd " << cwd << endl
+       << "cmdline " << cmdline << endl
+       << "sysname  " << uts.sysname << endl
+       << "hostname " << uts.nodename << endl
+       << "machine  " << uts.machine << endl
+       << "user     " << VERuser() << endl;
 
-  std::cout << "Test subject directory: " << testDir << std::endl;
+  cout << "Test subject directory: " << testDir << endl;
 
-  std::cout << "Training subject directory list: " << trainListFile
-            << std::endl;
+  cout << "Training subject directory list: " << trainListFile << endl;
 
-  std::cout << "Location of brain masks relative to subject directory: "
-            << maskFile << std::endl;
+  cout << "Location of brain masks relative to subject directory: " << maskFile
+       << endl;
 
-  std::cout << "Location of streamline files relative to subject directory:";
+  cout << "Location of streamline files relative to subject directory:";
 
-  for (std::vector<char *>::const_iterator istr = tractFileList.begin();
+  for (vector<char *>::const_iterator istr = tractFileList.begin();
        istr < tractFileList.end(); istr++)
-    std::cout << " " << *istr;
-  std::cout << std::endl;
+    cout << " " << *istr;
+  cout << endl;
 
   if (!asegFile.empty()) {
     cout << "Location of aparc+aseg's relative to subject directory: "

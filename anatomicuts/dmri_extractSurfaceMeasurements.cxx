@@ -1,4 +1,4 @@
-/*
+/* 
  * Author: Viviana Siless
  * Name: dmri_extractSurfaceMeasurements.cxx
  *
@@ -6,7 +6,7 @@
  *
  */
 
-// Libraries
+//Libraries
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -68,11 +68,13 @@
 #include "vtkKdTreePointLocator.h"
 #include <itkMatrixOffsetTransformBase.h>
 
+using namespace std;
+
 // HELPER FUNCTIONS
-float       calculate_mean(std::vector<float> n);
-float       calculate_stde(std::vector<float> n, float mean);
-std::string makeCSV(std::string dir, std::string file, std::string extension);
-vtkIdType   which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2);
+float     calculate_mean(vector<float> n);
+float     calculate_stde(vector<float> n, float mean);
+string    makeCSV(string dir, string file, string extension);
+vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2);
 vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf);
 
 int main(int narg, char *arg[]) {
@@ -98,7 +100,7 @@ int main(int narg, char *arg[]) {
          << "-a annotationFile " << endl
          << "OPTION: -fa <numFiles> <Filename> FA_file.nii.gz ... <Filename> "
             "<fileAddress>"
-         << std::endl;
+         << endl;
 
     return EXIT_FAILURE;
   }
@@ -106,12 +108,12 @@ int main(int narg, char *arg[]) {
   // Declaration of Variables for Program to Function
   // TRK file Definitions
   enum { Dimension = 3 };
-  typedef int              PixelType;
-  const unsigned int       PointDimension = 3;
-  typedef std::vector<int> PointDataType;
-  const unsigned int       MaxTopologicalDimension = 3;
-  typedef double           CoordinateType;
-  typedef double           InterpolationWeightType;
+  typedef int         PixelType;
+  const unsigned int  PointDimension = 3;
+  typedef vector<int> PointDataType;
+  const unsigned int  MaxTopologicalDimension = 3;
+  typedef double      CoordinateType;
+  typedef double      InterpolationWeightType;
   typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
                                        MaxTopologicalDimension, CoordinateType,
                                        InterpolationWeightType, PointDataType>
@@ -136,10 +138,9 @@ int main(int narg, char *arg[]) {
   std::map<long long, int>                  bundlesIndeces;
 
   // Input Parsing
-  std::vector<std::string> TRKFiles;
-  for (std::string inputName = std::string(num1.follow("", 2, "-i", "-I"));
-       access(inputName.c_str(), 0) == 0;
-       inputName = std::string(num1.next("")))
+  vector<string> TRKFiles;
+  for (string inputName = string(num1.follow("", 2, "-i", "-I"));
+       access(inputName.c_str(), 0) == 0; inputName = string(num1.next("")))
     TRKFiles.push_back(inputName);
 
   const char *fileCorr = num1.follow("output.csv", 2, "-p", "-P");
@@ -174,10 +175,10 @@ int main(int narg, char *arg[]) {
   COLOR_TABLE *ct = CTABreadASCII(tmpstr);
 
   // Reading in FA file
-  std::vector<ImageType::Pointer> volumes;
-  std::vector<std::string>        image_fileNames;
-  std::vector<ImageType::Pointer> ref_Image;
-  MRI *                           image;
+  vector<ImageType::Pointer> volumes;
+  vector<string>             image_fileNames;
+  vector<ImageType::Pointer> ref_Image;
+  MRI *                      image;
 
   typedef itk::ImageFileReader<ImageType> ImageReaderType;
   ImageReaderType::Pointer                readerS = ImageReaderType::New();
@@ -197,7 +198,7 @@ int main(int narg, char *arg[]) {
 
   if (FA_FOUND and numFiles > 0) {
     for (int i = 0; i < numFiles; i++) {
-      image_fileNames.push_back(std::string(num1.next("")));
+      image_fileNames.push_back(string(num1.next("")));
       const char *                            inFile = num1.next("");
       typedef itk::ImageFileReader<ImageType> ImageReaderType;
       ImageReaderType::Pointer                readerF = ImageReaderType::New();
@@ -209,34 +210,34 @@ int main(int narg, char *arg[]) {
   }
 
   //Outputting the Files to Ensure the correct files were input
-  cerr << std::endl;
+  cerr << endl;
   for (int i = 0; i < TRKFiles.size(); i++) {
-    cerr << "TRK File " << i + 1 << ":      " << TRKFiles.at(i) << std::endl;
+    cerr << "TRK File " << i + 1 << ":      " << TRKFiles.at(i) << endl;
     bundlesIndeces[(long long)atoll(TRKFiles.at(i).c_str())] = i;
   }
 
-  std::cerr << "Left Surface:    " << surfaceFileL << std::endl
-            << "Left Thickness:  " << thickFileL << std::endl
-            << "Left Curvature:  " << curvFileL << std::endl
-            << "Right Surface:   " << surfaceFileR << std::endl
-            << "Right Thickness: " << thickFileR << std::endl
-            << "Right Curvature: " << curvFileR << std::endl
-            << "Output:          " << outputDir << std::endl
-            << "Reference Image: " << refImageDiffusion << std::endl
-            << " Reference Image surface: " << refImageSurface << std::endl
-            << " Transformation diffusion to surface: " << transformationFile
-            << std::endl;
+  cerr << "Left Surface:    " << surfaceFileL << endl
+       << "Left Thickness:  " << thickFileL << endl
+       << "Left Curvature:  " << curvFileL << endl
+       << "Right Surface:   " << surfaceFileR << endl
+       << "Right Thickness: " << thickFileR << endl
+       << "Right Curvature: " << curvFileR << endl
+       << "Output:          " << outputDir << endl
+       << "Reference Image: " << refImageDiffusion << endl
+       << " Reference Image surface: " << refImageSurface << endl
+       << " Transformation diffusion to surface: " << transformationFile
+       << endl;
 
   if (FA_FOUND) {
     for (int i = 0; i < image_fileNames.size(); i++) {
       cerr << "Image " << i + 1 << ":         " << image_fileNames.at(i)
-           << std::endl;
+           << endl;
     }
   }
 
   // Loading the TRK files into a mesh
-  std::vector<ColorMeshType::Pointer> *     meshes;
-  std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
+  vector<ColorMeshType::Pointer> *     meshes;
+  vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
   clusterTools->GetPolyDatas(TRKFiles, &polydatas, ref_Image.at(0));
@@ -323,7 +324,7 @@ int main(int narg, char *arg[]) {
       averageFile << ", mean" << image_fileNames.at(a) << ", stde"
                   << image_fileNames.at(a);
   }
-  averageFile << std::endl;
+  averageFile << endl;
   system(
       (std::string("mkdir -p ") + std::string(outputDir) + std::string("/surf"))
           .c_str());
@@ -350,7 +351,7 @@ int main(int narg, char *arg[]) {
                        TRKFiles.at(i), ".csv"));
 
     if (not oFile.is_open()) {
-      cerr << "Could not open output file" << std::endl;
+      cerr << "Could not open output file" << endl;
       return -1;
     }
 
@@ -362,7 +363,7 @@ int main(int narg, char *arg[]) {
         oFile << ", mean" << image_fileNames.at(a) << ", stde"
               << image_fileNames.at(a);
     }
-    oFile << std::endl;
+    oFile << endl;
 
     // Initialization of a new stream for every TRK files
 
@@ -374,8 +375,8 @@ int main(int narg, char *arg[]) {
     // Cycling through the streams
     int counter = 1;
     for (; inputCellIt != input->GetCells()->End(); ++inputCellIt, ++counter) {
-      std::vector<float> meanFA;
-      std::vector<float> stdeFA;
+      vector<float> meanFA;
+      vector<float> stdeFA;
 
       // If there are image files, then find the mean and stde of FA
       if (FA_FOUND) {
@@ -385,7 +386,7 @@ int main(int narg, char *arg[]) {
           input->GetPoint(*it, &firstPt);
 
           // Getting the FA value at all points
-          std::vector<float>   FA_values;
+          vector<float>        FA_values;
           ImageType::IndexType index;
           if (volumes.at(p)->TransformPhysicalPointToIndex(firstPt, index))
             FA_values.push_back(volumes.at(p)->GetPixel(index));
@@ -421,12 +422,12 @@ int main(int narg, char *arg[]) {
 		       	auxPt.Fill();
 				for(int w=0; w<3;w++)
 				{
-					auxPt[0]+=lta->xforms[0].m_L(0,w) * firstPt[w] ;
-					auxPt[1]+=lta->xforms[0]->m_L[1][w] * firstPt[w] ;
-					auxPt[2]+=lta->xforms[0]->m_L[2][w] * firstPt[w] ;
+					auxPt[0]+=lta->xforms[0].m_L(0,w) * firstPt[w] ;  
+					auxPt[1]+=lta->xforms[0]->m_L[1][w] * firstPt[w] ;  
+					auxPt[2]+=lta->xforms[0]->m_L[2][w] * firstPt[w] ;  
 				}
-				auxPt[0]+=lta->xforms[0]->m_L[0][3] ;
-				auxPt[1]+=lta->xforms[0]->m_L[1][3] ;
+				auxPt[0]+=lta->xforms[0]->m_L[0][3] ;  
+				auxPt[1]+=lta->xforms[0]->m_L[1][3] ;  
 				auxPt[2]+=lta->xforms[0]->m_L[2][3] ;  */
       /*ref_Image.at(1)->TransformPhysicalPointToIndex(auxPt, first_index);
 				LTAworldToWorld(lta, lastPt[0], lastPt[1], lastPt[2],&auxPt[0],&auxPt[1], &auxPt[2]);
@@ -525,13 +526,13 @@ int main(int narg, char *arg[]) {
           oFile << "," << meanFA.at(m) << "," << stdeFA.at(m);
       }
 
-      oFile << std::endl;
+      oFile << endl;
     }
 
     averageFile << correspondences[i] << ",";
     for (int m = 0; m < 4; m++)
       averageFile << values[m] / input->GetNumberOfCells() << ",";
-    averageFile << std::endl;
+    averageFile << endl;
 
     oFile.close();
   }
@@ -548,7 +549,7 @@ int main(int narg, char *arg[]) {
  * 	 of the file
  * NOTE: used in conjunction with the creating new CSV files and opening them
  */
-std::string makeCSV(std::string dir, std::string file, std::string extension) {
+string makeCSV(string dir, string file, string extension) {
   int front = file.find_last_of("/");
   int back  = file.find_last_of(".");
   if (dir.size() > 0)
@@ -564,7 +565,7 @@ std::string makeCSV(std::string dir, std::string file, std::string extension) {
  * Return: the mean
  * Does: takes all the values and calculates the mean
  */
-float calculate_mean(std::vector<float> n) {
+float calculate_mean(vector<float> n) {
   float mean = 0;
 
   for (int i = 0; i < n.size(); i++)
@@ -578,7 +579,7 @@ float calculate_mean(std::vector<float> n) {
  * Return: the standard deviation
  * Does: takes all the values and calculates the standard deviation
  */
-float calculate_stde(std::vector<float> n, float mean) {
+float calculate_stde(vector<float> n, float mean) {
   float SD = 0;
 
   for (int i = 0; i < n.size(); i++)
@@ -590,8 +591,7 @@ float calculate_stde(std::vector<float> n, float mean) {
 /* Function: which_ID
  * Input: the two distances and the two vertice IDs
  * Return: whichever vertice is closer to the point
- * Does: Compares the two distances and returns the vertice of the shorter
- * distance
+ * Does: Compares the two distances and returns the vertice of the shorter distance
  */
 vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2) {
   if (n1 < n2)

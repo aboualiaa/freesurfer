@@ -64,4 +64,5 @@ private:
 };
 
 #include "VTKPolyDataToPolylineMeshFilter.txx"
+
 #endif

@@ -7,7 +7,7 @@ namespace kvl {
 //
 //
 //
-AtlasMeshMultiAlphaDrawer ::AtlasMeshMultiAlphaDrawer() { m_Image = nullptr; }
+AtlasMeshMultiAlphaDrawer ::AtlasMeshMultiAlphaDrawer() { m_Image = 0; }
 
 //
 //
@@ -18,8 +18,7 @@ AtlasMeshMultiAlphaDrawer ::~AtlasMeshMultiAlphaDrawer() {}
 //
 //
 void AtlasMeshMultiAlphaDrawer ::Rasterize(const AtlasMesh *mesh) {
-  // Fill image with empty result (needed because area outside of the mesh will
-  // never be visited)
+  // Fill image with empty result (needed because area outside of the mesh will never be visited)
   const int numberOfClasses =
       mesh->GetPointData()->Begin().Value().m_Alphas.Size();
   AtlasAlphasType emptyEntry(numberOfClasses);

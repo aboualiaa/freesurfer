@@ -14,7 +14,7 @@ public:
   AtlasMeshViewingConsole();
 
   //
-  //  virtual ~AtlasMeshViewingConsole();
+  virtual ~AtlasMeshViewingConsole();
 
   //
   void LoadMeshCollection(
@@ -25,29 +25,28 @@ public:
   void Show();
 
   //
-  void ShowSelectedView() override;
+  void ShowSelectedView();
 
   //
-  void GetScreenShot() override;
+  void GetScreenShot();
 
   //
-  void GetScreenShotSeries() override;
+  void GetScreenShotSeries();
 
   //
-  void DumpImage() override;
+  void DumpImage();
 
   //
-  void GetScreenShotSeries(int directionNumber) override;
+  void GetScreenShotSeries(int directionNumber);
 
 protected:
   //
-  void Draw() override;
+  void Draw();
 
-  void SelectTriangleContainingPoint(float, float) override{};
-
+  //
   void SetSliceLocation(unsigned int sagittalSliceNumber,
                         unsigned int coronalSliceNumber,
-                        unsigned int axialSliceNumber) override;
+                        unsigned int axialSliceNumber);
 
   //
   typedef kvl::ImageViewer::ImageType ImageType;
@@ -56,7 +55,7 @@ protected:
 
 private:
   AtlasMeshCollection::Pointer m_MeshCollection;
-  // AtlasMesh::CellIdentifier  m_EdgeIdToHighlight;
+  //AtlasMesh::CellIdentifier  m_EdgeIdToHighlight;
   ImageType::Pointer m_BackgroundImage;
 
   CompressionLookupTable::Pointer m_Compressor;

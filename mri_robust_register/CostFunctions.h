@@ -41,8 +41,7 @@
 #include "JointHisto.h"
 
 /** \class CostFunctions
- * \brief Static class implementing several cost functions and other image
- * statistics
+ * \brief Static class implementing several cost functions and other image statistics
  */
 class CostFunctions {
 public:
@@ -100,7 +99,7 @@ public:
                               const vnl_matrix_fixed<double, 4, 4> &Mti, int d1,
                               int d2, int d3, double sat = 4.6851);
   //! never really tested (old)
-  static double tukeyBiweight(MRI *i1, MRI *i2 = nullptr, double sat = 4.6851);
+  static double tukeyBiweight(MRI *i1, MRI *i2 = NULL, double sat = 4.6851);
   //! never really tested
   static double normalizedCorrelation(MRI *i1, MRI *i2);
 
@@ -146,7 +145,7 @@ public:
   }
 
   //! not implemented and not sure where they are from? Flirt?
-  static float woods(MRI *i1, MRI *i2 = nullptr);
+  static float woods(MRI *i1, MRI *i2 = NULL);
   //! not implemented and not sure where they are from? Flirt?
   static float correlationRatio(MRI *i1, MRI *i2);
 
@@ -186,11 +185,11 @@ public:
   float operator*();
 
 protected:
-  float fromUCHAR();
-  float fromSHORT();
-  float fromINT();
-  float fromLONG();
-  float fromFLOAT();
+  float fromUCHAR(void);
+  float fromSHORT(void);
+  float fromINT(void);
+  float fromLONG(void);
+  float fromFLOAT(void);
 
   MRIiterator &opincchunk(int);
   MRIiterator &opincnochunk(int);
@@ -198,7 +197,7 @@ protected:
   MRI *          img;
   unsigned char *pos;
   unsigned char *end;
-  float (MRIiterator::*getVal)();
+  float (MRIiterator::*getVal)(void);
   MRIiterator &(MRIiterator::*opinc)(int);
   int x, y, z;
   int bytes_per_voxel;
@@ -248,7 +247,7 @@ inline void MRIiterator::begin()
     y     = 0;
     z     = 0;
     pos   = (unsigned char *)img->slices[0][0];
-    end   = nullptr;
+    end   = NULL;
     opinc = &MRIiterator::opincnochunk;
   }
 }
@@ -280,7 +279,7 @@ inline MRIiterator &MRIiterator::opincnochunk(int) {
       z++;
       if (z == img->depth) {
         z   = 0;
-        pos = nullptr;
+        pos = NULL;
         return *this;
       }
     }

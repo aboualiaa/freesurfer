@@ -162,6 +162,8 @@ Save output file in 'uchar' format.
 #include "region.h"
 #include "romp_support.h"
 
+#include "version.h"
+
 static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();

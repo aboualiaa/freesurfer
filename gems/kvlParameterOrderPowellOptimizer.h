@@ -30,8 +30,7 @@ public:
 
   //
   virtual MeasureType GetValue(const ParametersType &parameters) const {
-    // Translate the (short) parameters into (long) parameters the cost function
-    // understands
+    // Translate the (short) parameters into (long) parameters the cost function understands
     ParametersType costFunctionParameters = m_DefaultCostFunctionParameters;
     for (unsigned int i = 0; i < m_ParameterOrder.Size(); i++) {
       if (m_ParameterOrder[i]) {
@@ -72,8 +71,8 @@ protected:
   virtual ~WrappedSingleValuedCostFunction() {}
 
 private:
-  WrappedSingleValuedCostFunction(const Self &); // purposely not implemented
-  void operator=(const Self &);                  // purposely not implemented
+  WrappedSingleValuedCostFunction(const Self &); //purposely not implemented
+  void operator=(const Self &);                  //purposely not implemented
 
   itk::SingleValuedCostFunction::Pointer m_CostFunction;
   ParametersType                         m_DefaultCostFunctionParameters;
@@ -112,8 +111,7 @@ public:
       return Superclass::GetCurrentPosition();
     }
 
-    // Translate the (short) parameters into (long) parameters the cost function
-    // understands
+    // Translate the (short) parameters into (long) parameters the cost function understands
     ParametersType currentPosition = this->GetInitialPosition();
     for (unsigned int i = 0; i < m_ParameterOrder.Size(); i++) {
       if (m_ParameterOrder[i]) {
@@ -243,8 +241,8 @@ protected:
   virtual ~ParameterOrderPowellOptimizer(){};
 
 private:
-  ParameterOrderPowellOptimizer(const Self &); // purposely not implemented
-  void operator=(const Self &);                // purposely not implemented
+  ParameterOrderPowellOptimizer(const Self &); //purposely not implemented
+  void operator=(const Self &);                //purposely not implemented
 
   ParameterOrderType            m_ParameterOrder;
   itk::PowellOptimizer::Pointer m_WrappedOptimizer;

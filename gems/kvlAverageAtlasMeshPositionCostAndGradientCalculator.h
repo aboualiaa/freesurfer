@@ -9,10 +9,10 @@ class AverageAtlasMeshPositionCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self         = AverageAtlasMeshPositionCostAndGradientCalculator;
-  using Superclass   = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AverageAtlasMeshPositionCostAndGradientCalculator Self;
+  typedef AtlasMeshPositionCostAndGradientCalculator        Superclass;
+  typedef itk::SmartPointer<Self>                           Pointer;
+  typedef itk::SmartPointer<const Self>                     ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -39,8 +39,8 @@ protected:
 
 private:
   AverageAtlasMeshPositionCostAndGradientCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   std::vector<AtlasMesh::PointsContainer::ConstPointer> m_Positions;

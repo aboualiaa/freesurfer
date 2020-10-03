@@ -104,8 +104,8 @@ protected:
 
 private:
   //
-  MultiResolutionAtlasMesher(const Self &); // purposely not implemented
-  void operator=(const Self &);             // purposely not implemented
+  MultiResolutionAtlasMesher(const Self &); //purposely not implemented
+  void operator=(const Self &);             //purposely not implemented
 
 #ifdef USE_TETGEN
   //

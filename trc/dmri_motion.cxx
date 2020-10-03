@@ -50,6 +50,8 @@ double round(double x);
 #include "timer.h"
 #include "version.h"
 
+using namespace std;
+
 static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
@@ -78,12 +80,12 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int                nargs, cputime;
-  float              travg = 0, roavg = 0, score = 0, pbad = 0;
-  std::vector<int>   runstart(1, 0), nbadframe;
-  std::vector<float> trframe, roframe, scoreframe;
-  std::string        matline;
-  std::ofstream      outfile;
+  int           nargs, cputime;
+  float         travg = 0, roavg = 0, score = 0, pbad = 0;
+  vector<int>   runstart(1, 0), nbadframe;
+  vector<float> trframe, roframe, scoreframe;
+  string        matline;
+  ofstream      outfile;
 
   nargs = handleVersionOption(argc, argv, "dmri_motion");
   if (nargs && argc - nargs == 1)
@@ -116,19 +118,19 @@ int main(int argc, char **argv) {
     const unsigned int nrun = inDwiList.size();
 
     for (unsigned int irun = 0; irun < nrun; irun++) {
-      int                                nx, ny, nz, nd, nxy;
-      float                              minvox, b;
-      std::vector<int>                   r, r1;
-      std::vector<int>::const_iterator   ir1;
-      std::vector<float>                 bvals;
-      std::vector<float>::const_iterator ibval;
-      std::ifstream                      infile;
+      int                           nx, ny, nz, nd, nxy;
+      float                         minvox, b;
+      vector<int>                   r, r1;
+      vector<int>::const_iterator   ir1;
+      vector<float>                 bvals;
+      vector<float>::const_iterator ibval;
+      ifstream                      infile;
 
       // Read DWI volume series
       cout << "Loading DWI volume series from " << inDwiList[irun] << endl;
       dwi = MRIread(inDwiList[irun].c_str());
       if (!dwi) {
-        std::cout << "ERROR: Could not read " << inDwiList[irun] << std::endl;
+        cout << "ERROR: Could not read " << inDwiList[irun] << endl;
         exit(1);
       }
 
@@ -146,12 +148,11 @@ int main(int argc, char **argv) {
       scoreframe.insert(scoreframe.end(), nd, 0.0);
 
       // Read b-value table
-      std::cout << "Loading b-value table from " << inBvalList[irun]
-                << std::endl;
-      infile.open(inBvalList[irun], std::ios::in);
+      cout << "Loading b-value table from " << inBvalList[irun] << endl;
+      infile.open(inBvalList[irun], ios::in);
       if (!infile) {
-        std::cout << "ERROR: Could not open " << inBvalList[irun]
-                  << " for reading" << std::endl;
+        cout << "ERROR: Could not open " << inBvalList[irun] << " for reading"
+             << endl;
         exit(1);
       }
 
@@ -161,23 +162,23 @@ int main(int argc, char **argv) {
       infile.close();
 
       if (bvals.size() != (unsigned int)nd) {
-        std::cout << "ERROR: Number of b-values (" << bvals.size() << ") in "
-                  << inBvalList[irun] << " and number of volumes (" << nd
-                  << ") in " << inDwiList[irun] << " do not match" << std::endl;
+        cout << "ERROR: Number of b-values (" << bvals.size() << ") in "
+             << inBvalList[irun] << " and number of volumes (" << nd << ") in "
+             << inDwiList[irun] << " do not match" << endl;
         exit(1);
       }
 
-      std::cout << "Computing within-volume head motion measures" << std::endl;
+      cout << "Computing within-volume head motion measures" << endl;
 
       // Find unique b-values
-      std::set<float> blist(bvals.begin(), bvals.end());
+      set<float> blist(bvals.begin(), bvals.end());
 
       // Compare frames acquired with each b-value separately
-      for (std::set<float>::const_iterator ib = blist.begin();
-           ib != blist.end(); ib++) {
-        const float                  thresh = T * exp(-(*ib) * D);
-        std::vector<int>::iterator   inbad  = nbadframe.end() - nd;
-        std::vector<float>::iterator iscore = scoreframe.end() - nd;
+      for (set<float>::const_iterator ib = blist.begin(); ib != blist.end();
+           ib++) {
+        const float             thresh = T * exp(-(*ib) * D);
+        vector<int>::iterator   inbad  = nbadframe.end() - nd;
+        vector<float>::iterator iscore = scoreframe.end() - nd;
 
         r1.clear();
         ibval = bvals.begin();
@@ -203,7 +204,7 @@ int main(int argc, char **argv) {
 
             // Motion score (from Benner et al MRM 2011)
             ir1 = r1.begin();
-            for (std::vector<int>::const_iterator ir = r.begin(); ir < r.end();
+            for (vector<int>::const_iterator ir = r.begin(); ir < r.end();
                  ir++) {
               if (*ir >= minvox) { // Do not count empty slices
                 const float S = 2 - *ir / (0.7 * (*ir1));
@@ -254,20 +255,18 @@ int main(int argc, char **argv) {
         dro(3, 0), trtot(3, 0), rotot(3, 0);
     ifstream infile;
 
-    std::cout << "Loading volume-to-baseline affine transformations"
-              << std::endl;
-    infile.open(inMatFile, std::ios::in);
+    cout << "Loading volume-to-baseline affine transformations" << endl;
+    infile.open(inMatFile, ios::in);
     if (!infile) {
-      std::cout << "ERROR: Could not open " << inMatFile << " for reading"
-                << std::endl;
+      cout << "ERROR: Could not open " << inMatFile << " for reading" << endl;
       exit(1);
     }
 
     // Determine if file contains transformation matrices or parameters
     while (getline(infile, matline))
       if (!matline.empty() && !isalpha(matline[0])) {
-        float              xval;
-        std::istringstream matstr(matline);
+        float         xval;
+        istringstream matstr(matline);
 
         while (matstr >> xval)
           xform.push_back(xval);
@@ -280,21 +279,21 @@ int main(int argc, char **argv) {
     else if (xform.size() == 16)
       isMat = false;
     else {
-      std::cout << "ERROR: Unexpected number of entries per line ("
-                << xform.size() << ") in  " << inMatFile << std::endl;
+      cout << "ERROR: Unexpected number of entries per line (" << xform.size()
+           << ") in  " << inMatFile << endl;
       exit(1);
     }
 
     xform.clear();
     infile.clear();
-    infile.seekg(0, std::ios::beg);
+    infile.seekg(0, ios::beg);
 
-    std::cout << "Computing between-volume head motion measures" << std::endl;
+    cout << "Computing between-volume head motion measures" << endl;
 
     while (getline(infile, matline))
       if (!matline.empty() && !isalpha(matline[0])) {
-        float              xval;
-        std::istringstream matstr(matline);
+        float         xval;
+        istringstream matstr(matline);
 
         if (isMat) { // Read matrix from file and compute parameters
           while (matstr >> xval)
@@ -364,8 +363,7 @@ int main(int argc, char **argv) {
 
     infile.close();
 
-    std::cout << "INFO: Processed transforms for " << nframe << " volumes"
-              << std::endl;
+    cout << "INFO: Processed transforms for " << nframe << " volumes" << endl;
 
     travg =
         sqrt(trtot[0] * trtot[0] + trtot[1] * trtot[1] + trtot[2] * trtot[2]) /
@@ -374,10 +372,10 @@ int main(int argc, char **argv) {
   }
 
   // Write overall measures to file
-  outfile.open(outFile, std::ios::out);
+  outfile.open(outFile, ios::out);
   outfile << "AvgTranslation AvgRotation PercentBadSlices AvgDropoutScore"
-          << std::endl
-          << travg << " " << roavg << " " << pbad << " " << score << std::endl;
+          << endl
+          << travg << " " << roavg << " " << pbad << " " << score << endl;
   outfile.close();
 
   // Write frame-by-frame measures to file
@@ -387,58 +385,54 @@ int main(int argc, char **argv) {
     if (trframe.empty())
       trframe.insert(trframe.begin(), nbadframe.size() * 3, 0.0);
     else if (trframe.size() != nbadframe.size() * 3) {
-      std::cout << "ERROR: inconsistent number of frames for "
-                << "between-volume (" << trframe.size() / 3 << ") and "
-                << "within-volume (" << nbadframe.size() << ") measures"
-                << std::endl;
+      cout << "ERROR: inconsistent number of frames for "
+           << "between-volume (" << trframe.size() / 3 << ") and "
+           << "within-volume (" << nbadframe.size() << ") measures" << endl;
       exit(1);
     }
 
     if (roframe.empty())
       roframe.insert(roframe.begin(), nbadframe.size() * 3, 0.0);
     else if (roframe.size() != nbadframe.size() * 3) {
-      std::cout << "ERROR: inconsistent number of frames for "
-                << "between-volume (" << roframe.size() / 3 << ") and "
-                << "within-volume (" << nbadframe.size() << ") measures"
-                << std::endl;
+      cout << "ERROR: inconsistent number of frames for "
+           << "between-volume (" << roframe.size() / 3 << ") and "
+           << "within-volume (" << nbadframe.size() << ") measures" << endl;
       exit(1);
     }
 
     if (nbadframe.empty())
       nbadframe.insert(nbadframe.begin(), trframe.size() / 3, 0);
     else if (nbadframe.size() != trframe.size() / 3) {
-      std::cout << "ERROR: inconsistent number of frames for "
-                << "between-volume (" << trframe.size() / 3 << ") and "
-                << "within-volume (" << nbadframe.size() << ") measures"
-                << std::endl;
+      cout << "ERROR: inconsistent number of frames for "
+           << "between-volume (" << trframe.size() / 3 << ") and "
+           << "within-volume (" << nbadframe.size() << ") measures" << endl;
       exit(1);
     }
 
     if (scoreframe.empty())
       scoreframe.insert(scoreframe.begin(), trframe.size() / 3, 0.0);
     else if (scoreframe.size() != trframe.size() / 3) {
-      std::cout << "ERROR: inconsistent number of frames for "
-                << "between-volume (" << trframe.size() / 3 << ") and "
-                << "within-volume (" << scoreframe.size() << ") measures"
-                << std::endl;
+      cout << "ERROR: inconsistent number of frames for "
+           << "between-volume (" << trframe.size() / 3 << ") and "
+           << "within-volume (" << scoreframe.size() << ") measures" << endl;
       exit(1);
     }
 
-    outfile.open(outFrameFile, std::ios::out);
+    outfile.open(outFrameFile, ios::out);
     outfile << "TranslationX TranslationY TranslationZ "
             << "RotationX RotationY RotationZ "
-            << "PercentBadSlices AvgDropoutScore" << std::endl;
+            << "PercentBadSlices AvgDropoutScore" << endl;
 
     itr    = trframe.begin();
     iro    = roframe.begin();
     iscore = scoreframe.begin();
 
-    for (std::vector<int>::const_iterator inbad = nbadframe.begin();
+    for (vector<int>::const_iterator inbad = nbadframe.begin();
          inbad < nbadframe.end(); inbad++) {
 
       outfile << itr[0] << " " << itr[1] << " " << itr[2] << " " << iro[0]
               << " " << iro[1] << " " << iro[2] << " " << *inbad << " "
-              << *iscore << std::endl;
+              << *iscore << endl;
 
       itr += 3;
       iro += 3;
@@ -449,9 +443,9 @@ int main(int argc, char **argv) {
   }
 
   cputime = cputimer.milliseconds();
-  std::cout << "Done in " << cputime / 1000.0 << " sec." << std::endl;
+  cout << "Done in " << cputime / 1000.0 << " sec." << endl;
 
-  std::cout << "dmri_motion done" << std::endl;
+  cout << "dmri_motion done" << endl;
   return (0);
   exit(0);
 }
@@ -538,52 +532,51 @@ static int parse_commandline(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static void print_usage(void) {
-  std::cout
-      << std::endl
-      << "USAGE: " << Progname << std::endl
-      << std::endl
-      << "Required arguments" << std::endl
-      << "   --out <file>:" << std::endl
-      << "     Output text file of motion measures" << std::endl
-      << std::endl
-      << "Optional arguments" << std::endl
-      << "   --outf <file>:" << std::endl
-      << "     Output text file of frame-by-frame motion measures" << std::endl
-      << std::endl
-      << "Arguments needed for between-volume motion measures" << std::endl
-      << "   --mat <file>:" << std::endl
-      << "     Input text file of volume-to-baseline affine transformations"
-      << std::endl
-      << "     Can be transformation matrices (e.g., from eddy_correct) or"
-      << std::endl
-      << "     transformation parameters (e.g., from eddy)" << std::endl
-      << std::endl
-      << "Arguments needed for within-volume motion measures" << std::endl
-      << "(see Benner et al MRM 2011):" << std::endl
-      << "   --dwi <file> [...]:" << std::endl
-      << "     Input DWI scan(s), unprocessed" << std::endl
-      << "   --bval <file> [...]:" << std::endl
-      << "     Input b-value table(s), one per scan" << std::endl
-      << "   --T <num>:" << std::endl
-      << "     Low-b image intensity threshold (default: 100)" << std::endl
-      << "   --D <num>:" << std::endl
-      << "     Nominal diffusivity (default: .001)" << std::endl
-      << std::endl
-      << "Other options" << std::endl
-      << "   --debug:     turn on debugging" << std::endl
-      << "   --checkopts: don't run anything, just check options and exit"
-      << std::endl
-      << "   --help:      print out information on how to use this program"
-      << std::endl
-      << "   --version:   print out version and exit" << std::endl
-      << std::endl;
+  cout << endl
+       << "USAGE: " << Progname << endl
+       << endl
+       << "Required arguments" << endl
+       << "   --out <file>:" << endl
+       << "     Output text file of motion measures" << endl
+       << endl
+       << "Optional arguments" << endl
+       << "   --outf <file>:" << endl
+       << "     Output text file of frame-by-frame motion measures" << endl
+       << endl
+       << "Arguments needed for between-volume motion measures" << endl
+       << "   --mat <file>:" << endl
+       << "     Input text file of volume-to-baseline affine transformations"
+       << endl
+       << "     Can be transformation matrices (e.g., from eddy_correct) or"
+       << endl
+       << "     transformation parameters (e.g., from eddy)" << endl
+       << endl
+       << "Arguments needed for within-volume motion measures" << endl
+       << "(see Benner et al MRM 2011):" << endl
+       << "   --dwi <file> [...]:" << endl
+       << "     Input DWI scan(s), unprocessed" << endl
+       << "   --bval <file> [...]:" << endl
+       << "     Input b-value table(s), one per scan" << endl
+       << "   --T <num>:" << endl
+       << "     Low-b image intensity threshold (default: 100)" << endl
+       << "   --D <num>:" << endl
+       << "     Nominal diffusivity (default: .001)" << endl
+       << endl
+       << "Other options" << endl
+       << "   --debug:     turn on debugging" << endl
+       << "   --checkopts: don't run anything, just check options and exit"
+       << endl
+       << "   --help:      print out information on how to use this program"
+       << endl
+       << "   --version:   print out version and exit" << endl
+       << endl;
 }
 
 /* --------------------------------------------- */
 static void print_help(void) {
   print_usage();
 
-  std::cout << std::endl << "..." << std::endl << std::endl;
+  cout << endl << "..." << endl << endl;
 
   exit(1);
 }
@@ -596,7 +589,7 @@ static void usage_exit(void) {
 
 /* --------------------------------------------- */
 static void print_version(void) {
-  std::cout << getVersion() << std::endl;
+  cout << getVersion() << endl;
   exit(1);
 }
 
@@ -607,8 +600,8 @@ static void check_options(void) {
     exit(1);
   }
   if (inDwiList.size() != inBvalList.size()) {
-    std::cout << "ERROR: must specify equal numbers of DWI and b-value files"
-              << std::endl;
+    cout << "ERROR: must specify equal numbers of DWI and b-value files"
+         << endl;
     exit(1);
   }
   if (inBvalList.empty() && inMatFile.empty()) {
@@ -617,23 +610,23 @@ static void check_options(void) {
     exit(1);
   }
   if (D < 0) {
-    std::cout << "ERROR: diffusivity must be positive" << std::endl;
+    cout << "ERROR: diffusivity must be positive" << endl;
     exit(1);
   }
   return;
 }
 
 static void dump_options() {
-  std::cout << std::endl
-            << getVersion() << std::endl
-            << "cwd " << cwd << std::endl
-            << "cmdline " << cmdline << std::endl
-            << "sysname  " << uts.sysname << std::endl
-            << "hostname " << uts.nodename << std::endl
-            << "machine  " << uts.machine << std::endl
-            << "user     " << VERuser() << std::endl;
+  cout << endl
+       << getVersion() << endl
+       << "cwd " << cwd << endl
+       << "cmdline " << cmdline << endl
+       << "sysname  " << uts.sysname << endl
+       << "hostname " << uts.nodename << endl
+       << "machine  " << uts.machine << endl
+       << "user     " << VERuser() << endl;
 
-  std::cout << "Output motion measure file: " << outFile << std::endl;
+  cout << "Output motion measure file: " << outFile << endl;
 
   if (!outFrameFile.empty()) {
     cout << "Output frame-by-frame motion measure file: " << outFrameFile

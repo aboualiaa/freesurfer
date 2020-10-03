@@ -7,7 +7,7 @@ namespace kvl {
 //
 //
 //
-AtlasMeshVisitCounter ::AtlasMeshVisitCounter() { m_Image = nullptr; }
+AtlasMeshVisitCounter ::AtlasMeshVisitCounter() { m_Image = 0; }
 
 //
 //

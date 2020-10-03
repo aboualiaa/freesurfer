@@ -3,6 +3,7 @@
 
 #include "itkImage.h"
 #include "itkRGBAPixel.h"
+#include "itkVTKImageExport.h"
 #include "kvlAtlasMesh.h"
 #include "vtkActor.h"
 #include "vtkCamera.h"
@@ -18,12 +19,6 @@
 #include "vtkSmartPointer.h"
 #include "vtkUnstructuredGrid.h"
 
-#ifndef FS_ITK_LEGACY_REMOVE
-#include "itkVTKImageExport.h"
-#else
-#include "vtkImageExport.h"
-#endif
-
 class vtkImageImport;
 
 namespace kvl {
@@ -35,11 +30,11 @@ public:
   typedef itk::Image<itk::RGBAPixel<unsigned char>, 3> RGBAImageType;
 
   ImageViewer(int x, int y, int w, int h, const char *l = 0);
-  ~ImageViewer() override;
+  ~ImageViewer();
 
   void SetImage(const ImageBaseType *image);
 
-  [[nodiscard]] const ImageBaseType *GetImage() const { return m_Image; }
+  const ImageBaseType *GetImage() const { return m_Image; }
 
   void SetScale(float scale);
 
@@ -47,9 +42,7 @@ public:
 
   void SetOverlayImage(const ImageBaseType *overlayImage);
 
-  [[nodiscard]] const ImageBaseType *GetOverlayImage() const {
-    return m_OverlayImage;
-  }
+  const ImageBaseType *GetOverlayImage() const { return m_OverlayImage; }
 
   void SetOverlayScale(float overlayScale);
 
@@ -57,11 +50,11 @@ public:
 
   void SetOverlayAlpha(float overlayAlpha);
 
-  [[nodiscard]] float GetOverlayAlpha() const { return m_OverlayAlpha; }
+  float GetOverlayAlpha() const { return m_OverlayAlpha; }
 
   void SetMesh(const AtlasMesh *mesh);
 
-  [[nodiscard]] const AtlasMesh *GetMesh() const { return m_Mesh; }
+  const AtlasMesh *GetMesh() const { return m_Mesh; }
 
   void SetSliceLocation(unsigned int sagittalSliceNumber,
                         unsigned int coronalSliceNumber,
@@ -75,9 +68,7 @@ public:
     axialSliceNumber    = m_AxialSliceNumber;
   }
 
-  [[nodiscard]] const int *GetMaximumImageIndex() const {
-    return m_MaximumImageIndex;
-  }
+  const int *GetMaximumImageIndex() const { return m_MaximumImageIndex; }
 
   void SetPositionGradient(
       const AtlasPositionGradientContainerType *positionGradient) {}

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <sstream>
 
 #include <boost/mpl/list.hpp>
 #include <boost/test/data/monomorphic.hpp>
@@ -301,8 +302,7 @@ void UpperCornerExact(kvl::interfaces::AtlasMeshVisitCounter *visitCounter) {
 void GenerateSpecificCornerTetrahedron(float verts[nVertices][nDims],
                                        const unsigned char corner,
                                        const float         scale) {
-  // Generate a 'corner' tetrahedron, where the apex is specified by the bits of
-  // the 'corner' argument
+  // Generate a 'corner' tetrahedron, where the apex is specified by the bits of the 'corner' argument
 
   // Separate out the bits specifying the corner
   unsigned char mask = 4;
@@ -366,7 +366,7 @@ void CheckVisitCounterWithPermutations(
     const ImageType *targetImage, const float tetrahedron[nVertices][nDims]) {
   // Start by getting the 'standard' answers
   BOOST_TEST_CHECKPOINT("Starting CheckVisitCounterWithPermutations");
-  ImageType::ConstPointer standardVisit = nullptr;
+  ImageType::ConstPointer standardVisit = NULL;
   {
     kvl::AtlasMeshVisitCounterCPUWrapper origVisitCounter;
     BOOST_TEST_CHECKPOINT("Created reference VisitCounter");
@@ -402,7 +402,7 @@ void CheckVisitCounterWithPermutations(
           kvl::Testing::CreateSingleTetrahedronMesh(permTet, nAlphas);
       BOOST_TEST_CHECKPOINT("Permuted mesh created");
 
-      ImageType::ConstPointer currVisit = nullptr;
+      ImageType::ConstPointer currVisit = NULL;
       currVisit = ApplyVisitCounterToMesh(visitCounter, targetImage, mesh);
       BOOST_TEST_CHECKPOINT("Created currVisit image");
 

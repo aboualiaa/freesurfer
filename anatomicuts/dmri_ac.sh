@@ -333,8 +333,6 @@ function SurfaceMeasures() {
   annot=${SUBJECTS_DIR}/${subject}/label/
   mri=${SUBJECTS_DIR}/${subject}/mri/
 
-  #lta_convert  --infsl ${diff}/xfms/fa2brain.mat --outlta ${diff}/xfms/diff2anat.bbr.lta --trg ${mri}/brain.mgz  --src ${diff}/DTI/dti_FA.nii.gz
-
   ${FREESURFER_HOME}/bin/dmri_extractSurfaceMeasurements -i ${anatomicuts}/*trk -sl ${surf}/lh.pial -tl ${surf}/lh.thickness -cl ${surf}/lh.curv.pial -sr ${surf}/rh.pial -tr ${surf}/rh.thickness -cr ${surf}/rh.curv.pial -rid ${mri}/brain.nii.gz -ria ${mri}/brain.nii.gz -al ${annot}/lh.aparc.annot -ar ${annot}/rh.aparc.annot -o ${anatomicutsdiff}/measures/ -p ${anatomicutsdiff}/match/${targetSubject}_${subject}_c200_hungarian.csv
 
 }

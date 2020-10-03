@@ -16,11 +16,11 @@ FixedVTKSamplingFilter<TInputMesh, TOutputMesh>::FixedVTKSamplingFilter() {
 template <class TInputMesh, class TOutputMesh>
 void FixedVTKSamplingFilter<TInputMesh, TOutputMesh>::GenerateData() {
   typedef typename TInputMesh::CellsContainer CellsContainer;
-  // std::cout << this->GetInput()->GetNumberOfCells() << std::endl;
+  //std::cout << this->GetInput()->GetNumberOfCells() << std::endl;
   this->GetInput()->GetCells()->Begin();
   typename CellsContainer::ConstIterator cellIt =
       this->GetInput()->GetCells()->Begin();
-  // initializing output mesh
+  //initializing output mesh
   typename OutputMeshType::Pointer outputMesh = this->GetOutput();
   outputMesh->SetCellsAllocationMethod(
       OutputMeshType::CellsAllocatedDynamicallyCellByCell);
@@ -28,10 +28,8 @@ void FixedVTKSamplingFilter<TInputMesh, TOutputMesh>::GenerateData() {
     outputMesh->GetPoints()->Reserve(this->GetInput()->GetNumberOfCells() *
                                      this->GetSampling());
   }
-  //      std::cout << " number of cells " <<
-  //      this->GetInput()->GetNumberOfCells() << std::endl;
-  //			std::cout << " sampling " << this->GetSampling() <<
-  //std::endl;
+  //      std::cout << " number of cells " << this->GetInput()->GetNumberOfCells() << std::endl;
+  //			std::cout << " sampling " << this->GetSampling() << std::endl;
   OutputPointIdentifier index     = 0;
   OutputCellIdentifier  indexCell = 0;
   for (; cellIt != this->GetInput()->GetCells()->End(); ++cellIt) {

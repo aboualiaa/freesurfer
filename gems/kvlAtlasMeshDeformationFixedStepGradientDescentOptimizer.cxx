@@ -30,8 +30,7 @@ double AtlasMeshDeformationFixedStepGradientDescentOptimizer ::
     return 0.0;
   }
 
-  // Try to add the scaled gradient to the current position to obtain the trial
-  // position
+  // Try to add the scaled gradient to the current position to obtain the trial position
   const double alpha              = -(m_StepSize / maximumGradientMagnitude);
   double       maximalDeformation = 0.0;
   AtlasMesh::PointsContainer::Pointer trialPosition = nullptr;

@@ -51,15 +51,13 @@ void GMMLikelihoodImageFilter<TInputImage>::SetParameters(
   m_NumberOfGaussiansPerClass = numberOfGaussiansPerClass;
 
   // Now the variances -- we compute and store precisions instead of variances.
-  // In addition, we allow for certain contrasts to be present and others not in
-  // a single pixel -- we precompute (and store) everything that's need to
-  // efficiently evaluate the GMM likelihood in such cases
+  // In addition, we allow for certain contrasts to be present and others not in a single pixel --
+  // we precompute (and store) everything that's need to efficiently evaluate the GMM likelihood in
+  // such cases
   m_Precisions.resize(numberOfGaussians);
 
-  // We are going to compute 1/sqrt(det(COV)) for all possible covariances given
-  // all possible combinations of available channels We use a binary
-  // representation for this. For instance, 6 = [1 1 0] means that we have
-  // channel 1 not available, but channels 2 and 3 available.
+  // We are going to compute 1/sqrt(det(COV)) for all possible covariances given all possible combinations of available channels
+  // We use a binary representation for this. For instance, 6 = [1 1 0] means that we have channel 1 not available, but channels 2 and 3 available.
   m_OneOverSqrtDetCov.resize(numberOfGaussians);
   int               nCombos = (int)(pow(2, numberOfContrasts));
   std::vector<bool> presentChannels(numberOfContrasts);
@@ -108,8 +106,7 @@ void GMMLikelihoodImageFilter<TInputImage>::SetParameters(
     }
   }
 
-  // We also compute the constant term for number of channels from 0 to
-  // numberOfContrasts
+  // We also compute the constant term for number of channels from 0 to numberOfContrasts
   m_piTermMultiv.resize(numberOfContrasts + 1);
   for (int i = 0; i <= numberOfContrasts; i++) {
     m_piTermMultiv[i] = pow(2 * itk::Math::pi, -0.5 * i);
@@ -178,8 +175,7 @@ void GMMLikelihoodImageFilter<TInputImage>::BeforeThreadedGenerateData() {
 template <typename TInputImage>
 void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
     const RegionType &outputRegionForThread, itk::ThreadIdType threadId) {
-  // std::cout << "Executing GMMLikelihoodImageFilter::ThreadedGenerateData()"
-  // << std::endl;
+  //std::cout << "Executing GMMLikelihoodImageFilter::ThreadedGenerateData()" << std::endl;
 
   //
   const int numberOfGaussians = m_Means.size();
@@ -217,9 +213,8 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
 
   // Now loop over all pixels
   while (!oit.IsAtEnd()) {
-    // Retrieve the input intensity. At the same time, detect the number and
-    // pattern of zeroes (interpreted as missing intensities) in the various
-    // input channels
+    // Retrieve the input intensity. At the same time, detect the number and pattern of
+    // zeroes (interpreted as missing intensities) in the various input channels
     std::vector<bool>          isThere(numberOfContrasts);
     int                        nPresent = 0;
     int                        index    = 0;
@@ -241,11 +236,11 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
       aux = aux << 1;
     } // End loop over all contrasts
 
-    // If none of the contrast has any intensity available, fill in the output
-    // with some sentinel value, and move on to the next pixel
+    // If none of the contrast has any intensity available, fill in the output with
+    // some sentinel value, and move on to the next pixel
     if (nPresent == 0) {
       // Set output pixel and move on to the next pixel
-      // std::cout << "Nothing present: " << oit.Value().Size() << std::endl;
+      //std::cout << "Nothing present: " << oit.Value().Size() << std::endl;
       ++oit;
       progress.CompletedPixel();
       continue;
@@ -256,8 +251,7 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
     vnl_vector<InputPixelType> intensity_v = aux_v.extract(nPresent);
     int                        shift       = 0;
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
-      // Evaluate the Gaussian mixture model likelihood of this class at the
-      // intensity of this pixel
+      // Evaluate the Gaussian mixture model likelihood of this class at the intensity of this pixel
       double    likelihood         = 0.0;
       const int numberOfComponents = m_NumberOfGaussiansPerClass[classNumber];
       for (int componentNumber = 0; componentNumber < numberOfComponents;
@@ -312,7 +306,7 @@ void GMMLikelihoodImageFilter<TInputImage>::ThreadedGenerateData(
     } // End loop over classes
 
     // Fill in the output pixel and move on
-    // std::cout << "pix: " << pix << std::endl;
+    //std::cout << "pix: " << pix << std::endl;
     oit.Value() = pix;
     ++oit;
     progress.CompletedPixel();

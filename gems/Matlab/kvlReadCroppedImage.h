@@ -19,13 +19,11 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(ReadCroppedImage, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // [ image, transform, nonCroppedImageSize, croppingOffset ] =
-    // kvlReadCroppedImage( imageFileName, boundingFileName )
+    // [ image, transform, nonCroppedImageSize, croppingOffset ] = kvlReadCroppedImage( imageFileName, boundingFileName )
 
     // Make sure input arguments are correct
     if ((nrhs != 2) || !mxIsChar(prhs[0]) || !mxIsChar(prhs[1]) || (nlhs > 4)) {
@@ -38,7 +36,7 @@ public:
 
     // Read the image
     kvl::CroppedImageReader::Pointer reader = kvl::CroppedImageReader::New();
-    // reader->SetExtraFraction( 0.1 );
+    //reader->SetExtraFraction( 0.1 );
     reader->SetExtraFraction(0.0);
     reader->Read(imageFileName.c_str(), boundingFileName.c_str());
 
@@ -65,13 +63,12 @@ public:
     plhs[1] = mxCreateNumericArray(1, dims, mxINT64_CLASS, mxREAL);
     *(static_cast<int *>(mxGetData(plhs[1]))) = transformHandle;
 
-    // Also return the size of image if it hadn't been cropped, and the offset
-    // of the cropping region
+    // Also return the size of image if it hadn't been cropped, and the offset of the cropping region
     mwSize dims2[2];
-    dims2[0]   = 1;
-    dims2[1]   = 3;
-    plhs[2]    = mxCreateNumericArray(2, dims2, mxDOUBLE_CLASS, mxREAL);
-    auto *data = static_cast<double *>(mxGetData(plhs[2]));
+    dims2[0]     = 1;
+    dims2[1]     = 3;
+    plhs[2]      = mxCreateNumericArray(2, dims2, mxDOUBLE_CLASS, mxREAL);
+    double *data = static_cast<double *>(mxGetData(plhs[2]));
     for (int i = 0; i < 3; i++, data++) {
       *data = reader->GetOriginalImageOriginalRegion().GetSize(i);
     }
@@ -85,13 +82,11 @@ public:
   }
 
 protected:
-  ReadCroppedImage() = default;
-  ;
-  ~ReadCroppedImage() override = default;
-  ;
+  ReadCroppedImage(){};
+  virtual ~ReadCroppedImage(){};
 
-  ReadCroppedImage(const Self &); // purposely not implemented
-  void operator=(const Self &);   // purposely not implemented
+  ReadCroppedImage(const Self &); //purposely not implemented
+  void operator=(const Self &);   //purposely not implemented
 
 private:
 };

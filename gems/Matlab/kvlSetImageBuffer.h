@@ -12,7 +12,7 @@ public:
                                 itk::Object *  imageObject) {
     itk::Object::Pointer itkObject =
         ImageConverter<ImageType>::Convert(matlabObject);
-    if (itkObject == nullptr) {
+    if (!itkObject) {
       return false;
     }
 
@@ -41,9 +41,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SetImageBuffer, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSetImageBuffer( image, imageBuffer )
@@ -86,13 +85,11 @@ public:
   }
 
 protected:
-  SetImageBuffer() = default;
-  ;
-  ~SetImageBuffer() override = default;
-  ;
+  SetImageBuffer(){};
+  virtual ~SetImageBuffer(){};
 
-  SetImageBuffer(const Self &); // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  SetImageBuffer(const Self &); //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

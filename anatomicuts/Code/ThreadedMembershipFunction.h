@@ -19,10 +19,10 @@ public:
 
   using DomainType = typename Superclass::DomainType;
   itkNewMacro(Self);
-  using MembershipFunctionType = TMembershipFunctionType;
-  using MeasurementVectorType =
-      typename TMembershipFunctionType::MeasurementVectorType;
-  using SampleType = itk::Statistics::ListSample<MeasurementVectorType>;
+  typedef TMembershipFunctionType MembershipFunctionType;
+  typedef typename TMembershipFunctionType::MeasurementVectorType
+                                                             MeasurementVectorType;
+  typedef itk::Statistics::ListSample<MeasurementVectorType> SampleType;
 
   void SetStuff(typename SampleType::Pointer             samples,
                 std::vector<std::pair<int, int>>         indeces,
@@ -46,7 +46,7 @@ private:
   typename SampleType::Pointer     m_samples;
   std::vector<std::pair<int, int>> m_indeces;
   std::vector<std::pair<int, int>> m_outIndeces;
-  // std::vector<vnl_sparse_matrix<double>*> m_results;
+  //std::vector<vnl_sparse_matrix<double>*> m_results;
   std::vector<std::vector<int>>            m_maxIndex;
   std::vector<std::vector<double>>         m_maxValue;
   int *                                    m_results2;

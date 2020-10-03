@@ -19,10 +19,14 @@
  */
 #include "RobustGaussian.h"
 
-#include <cmath>
 #include <iostream>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "error.h"
+
+using namespace std;
 
 #define ELEM_SWAPD(a, b)                                                       \
   {                                                                            \
@@ -40,23 +44,23 @@
  This Quickselect routine is based on the algorithm described in
  "Numerical recipes in C", Second Edition,
  Cambridge University Press, 1992, Section 8.5, ISBN 0-521-43108-5 .
-
- This code is based on code by Nicolas Devillard - 1998. Public domain.
+ 
+ This code is based on code by Nicolas Devillard - 1998. Public domain.  
  See also http://ndevilla.free.fr/median/median.pdf
  or http://ndevilla.free.fr/median/median/index.html .
 
- Modifications:
+ Modifications: 
  - instead of only selecting the median, select the k-th smallest
  - additionally keep track of the index in the original array
  */
 template <class T>
-std::pair<T, int> RobustGaussian<T>::quick_selectI(T arr[], int n, int k) {
+pair<T, int> RobustGaussian<T>::quick_selectI(T arr[], int n, int k) {
   int low, high;
   int median;
   int middle, ll, hh;
 
   int *pos = (int *)calloc(n, sizeof(int));
-  if (pos == nullptr)
+  if (pos == NULL)
     ErrorExit(
         ERROR_NO_MEMORY,
         "RobustGaussian<T>::quick_selectI could not allocate memory for pos");
@@ -71,7 +75,7 @@ std::pair<T, int> RobustGaussian<T>::quick_selectI(T arr[], int n, int k) {
     {
       int pp = pos[median];
       free(pos);
-      return std::pair<T, int>(arr[median], pp);
+      return pair<T, int>(arr[median], pp);
     }
     if (high == low + 1) { /* Two elements only */
       if (arr[low] > arr[high]) {
@@ -80,7 +84,7 @@ std::pair<T, int> RobustGaussian<T>::quick_selectI(T arr[], int n, int k) {
       }
       int pp = pos[median];
       free(pos);
-      return std::pair<T, int>(arr[median], pp);
+      return pair<T, int>(arr[median], pp);
     }
     /* Find median of low, middle and high items; swap into position low */
     middle = (low + high) / 2;
@@ -130,12 +134,12 @@ std::pair<T, int> RobustGaussian<T>::quick_selectI(T arr[], int n, int k) {
  This Quickselect routine is based on the algorithm described in
  "Numerical recipes in C", Second Edition,
  Cambridge University Press, 1992, Section 8.5, ISBN 0-521-43108-5 .
-
- This code is based on code by Nicolas Devillard - 1998. Public domain.
+ 
+ This code is based on code by Nicolas Devillard - 1998. Public domain.  
  See also http://ndevilla.free.fr/median/median.pdf
  or http://ndevilla.free.fr/median/median/index.html .
 
- Modifications:
+ Modifications: 
  - instead of only selecting the median, select the k-th smallest
  */
 template <class T> T RobustGaussian<T>::quick_select(T arr[], int n, int k) {
@@ -197,8 +201,7 @@ template <class T> T RobustGaussian<T>::quick_select(T arr[], int n, int k) {
 
 /**
  Find the kth smallest element in the array.
- Reorders a[] (of length n) and returns k_th smallest and original position in
- array.
+ Reorders a[] (of length n) and returns k_th smallest and original position in array.
 
  Reference:
  Niklaus Wirth, Algorithms + data structures = programs, Prentice-Hall, 1976
@@ -206,8 +209,7 @@ template <class T> T RobustGaussian<T>::quick_select(T arr[], int n, int k) {
  Implementation based on code by N.Devillard. Public Domain.
 
  Modification:
- - we keep track of the position inside the original array of the k_th smallest
- element.
+ - we keep track of the position inside the original array of the k_th smallest element.
  */
 template <class T>
 std::pair<T, int> RobustGaussian<T>::kth_smallestI(T a[], int n, int k) {
@@ -216,7 +218,7 @@ std::pair<T, int> RobustGaussian<T>::kth_smallestI(T a[], int n, int k) {
   T   x;
 
   int *pos = (int *)calloc(n, sizeof(int));
-  if (pos == nullptr)
+  if (pos == NULL)
     ErrorExit(
         ERROR_NO_MEMORY,
         "RobustGaussian<T>::kth_smallestI could not allocate memory for pos");
@@ -248,7 +250,7 @@ std::pair<T, int> RobustGaussian<T>::kth_smallestI(T a[], int n, int k) {
   }
   int pp = pos[kk];
   free(pos);
-  return std::pair<T, int>(a[kk], pp);
+  return pair<T, int>(a[kk], pp);
 }
 
 /**
@@ -294,18 +296,17 @@ template <class T> T RobustGaussian<T>::kth_smallest(T a[], int n, int k) {
 #undef ELEM_SWAPI
 
 /** Compute median in situ, t will be reordered.
- The index (return.second ) is type double or float because with even number of
- elements, we will lie between two indices.
+ The index (return.second ) is type double or float because with even number of elements, we will lie between two indices.
  */
-template <class T> std::pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
+template <class T> pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
 
-  std::pair<T, int> qs;
-  if (n % 2 == 1) // odd
+  pair<T, int> qs;
+  if (n % 2 == 1) //odd
   {
     qs = kth_smallestI(t, n, (n + 1) / 2);
-    // std::cout << " n: " << n << "   " << qs << std::endl;
-    // free(t);
-    return std::pair<T, T>(qs.first, (T)qs.second);
+    //cout << " n: " << n << "   " << qs << endl;
+    //free(t);
+    return pair<T, T>(qs.first, (T)qs.second);
   }
 
   //  else even:
@@ -313,11 +314,11 @@ template <class T> std::pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
   //  qs = kth_smallest(t,n,n/2);
   qs = quick_selectI(t, n, n / 2);
   // double qs2 = kth_smallest(t,n,n/2 + 1);
-  std::pair<T, int> qs2 = quick_selectI(t, n, n / 2 + 1);
-  // std::cout << " n: " << n << "   " << qs << "   " << qs2 << std::endl;
+  pair<T, int> qs2 = quick_selectI(t, n, n / 2 + 1);
+  //cout << " n: " << n << "   " << qs << "   " << qs2 << endl;
 
-  return std::pair<T, T>(0.5 * (qs.first + qs2.first),
-                         0.5 * (qs.second + qs2.second));
+  return pair<T, T>(0.5 * (qs.first + qs2.first),
+                    0.5 * (qs.second + qs2.second));
 }
 
 /** Compute median in situ, t will be reordered.
@@ -325,7 +326,7 @@ template <class T> std::pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
 template <class T> T RobustGaussian<T>::median(T t[], int n) {
 
   T q;
-  if (n % 2 == 1) // odd
+  if (n % 2 == 1) //odd
   {
     q = kth_smallest(t, n, (n + 1) / 2);
     return q;
@@ -337,7 +338,7 @@ template <class T> T RobustGaussian<T>::median(T t[], int n) {
   q = quick_select(t, n, n / 2);
   // double q2 = kth_smallest(t,n,n/2 + 1);
   T q2 = quick_select(t, n, n / 2 + 1);
-  // std::cout << " n: " << n << "   " << q << "   " << q2 << std::endl;
+  //cout << " n: " << n << "   " << q << "   " << q2 << endl;
 
   return 0.5 * (q + q2);
 }
@@ -357,8 +358,7 @@ template <class T> void mmm(T a[], int n) {
     mean += a[i];
   }
   mean /= n;
-  std::cout << " min: " << min << "  max: " << max << "  mean: " << mean
-            << std::endl;
+  cout << " min: " << min << "  max: " << max << "  mean: " << mean << endl;
 }
 
 /**

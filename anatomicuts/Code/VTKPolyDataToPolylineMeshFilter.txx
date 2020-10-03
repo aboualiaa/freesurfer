@@ -3,6 +3,8 @@
 
 #include "VTKPolyDataToPolylineMeshFilter.h"
 
+#include "itkMesh.h"
+
 #include <vtkCellArray.h>
 #include <vtkCellData.h>
 #include <vtkFieldData.h>
@@ -64,7 +66,7 @@ void VTKPolyDataToPolylineMeshFilter<TImage>::GenerateData2() {
 
   typename OutputMeshType::Pointer outputMesh = this->GetOutput();
   outputMesh->SetCellsAllocationMethod(
-      OutputMeshType::CellsAllocatedDynamicallyCellByCell);
+      itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
 
   outputMesh->GetPoints()->Reserve(m_VTKPolyData->GetNumberOfPoints());
 
@@ -97,8 +99,8 @@ void VTKPolyDataToPolylineMeshFilter<TImage>::GenerateData2() {
 }
 
 template <class TImage>
-void VTKPolyDataToPolylineMeshFilter<TImage>::PrintSelf(
-    std::ostream &os, itk::Indent indent) const {
+void VTKPolyDataToPolylineMeshFilter<TImage>::PrintSelf(std::ostream &os,
+                                                        Indent indent) const {
   Superclass::PrintSelf(os, indent);
 
   os << indent << "VTK PolyData: " << *m_VTKPolyData << std::endl;

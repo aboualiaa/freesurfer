@@ -21,21 +21,19 @@
 #ifndef VIAL_H
 #define VIAL_H
 
-// define NO_CVS_UP_IN_HERE
+//define NO_CVS_UP_IN_HERE
 
 #ifndef NO_CVS_UP_IN_HERE
 // Needed for CVS - these must be included first or else they don't compile
 #include <cmath>
-//#undef SEEK_SET
-//#undef SEEK_END
-//#undef SEEK_CUR
-
-#include <mpi.h>
-
+#undef SEEK_SET
+#undef SEEK_END
+#undef SEEK_CUR
 #include "../fem_elastic/morph.h"
 #include "../fem_elastic/morph_utils.h"
 #include "../fem_elastic/surf_utils.h"
 #include "gcamorph.h"
+#include <mpi.h>
 #endif
 
 #include "mri.h"

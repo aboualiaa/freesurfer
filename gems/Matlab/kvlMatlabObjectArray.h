@@ -6,12 +6,12 @@
 namespace kvl {
 
 /**
- * Object to hold an array of ITK objects in Matlab.
- *
- * This class is a so-called Singleton, i.e. it is intelligent enough to
- * ensure that only one single instance of it can be created.
- *
- */
+  * Object to hold an array of ITK objects in Matlab.
+  *
+  * This class is a so-called Singleton, i.e. it is intelligent enough to 
+  * ensure that only one single instance of it can be created.
+  *
+  */
 
 class MatlabObjectArray : public itk::Object {
 public:
@@ -24,8 +24,7 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(MatlabObjectArray, itk::Object);
 
-  /** Intercept calls to create new instances to ensure that we have a Singleton
-   */
+  /** Intercept calls to create new instances to ensure that we have a Singleton */
   static Pointer New();
 
   /** Return the singleton instance. */
@@ -52,13 +51,11 @@ public:
   void Clear() { m_Array.clear(); }
 
 protected:
-  MatlabObjectArray() = default;
-  ;
-  ~MatlabObjectArray() override = default;
-  ;
+  MatlabObjectArray(){};
+  virtual ~MatlabObjectArray(){};
 
-  MatlabObjectArray(const Self &); // purposely not implemented
-  void operator=(const Self &);    // purposely not implemented
+  MatlabObjectArray(const Self &); //purposely not implemented
+  void operator=(const Self &);    //purposely not implemented
 
 private:
   std::map<int, itk::Object::Pointer> m_Array;

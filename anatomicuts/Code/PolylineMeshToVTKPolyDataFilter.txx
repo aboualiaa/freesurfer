@@ -8,7 +8,7 @@
 template <class TMesh>
 PolylineMeshToVTKPolyDataFilter<TMesh>::PolylineMeshToVTKPolyDataFilter() {
   m_Output = vtkPolyData::New();
-  // this->SetNumberOfInputs (1);
+  //this->SetNumberOfInputs (1);
   unsigned char color[3] = {219, 112, 147};
   this->m_color          = color;
 }
@@ -39,13 +39,13 @@ void PolylineMeshToVTKPolyDataFilter<TMesh>::GenerateData() {
   vtkSmartPointer<vtkPoints> points = vtkPoints::New();
 
   /*    for (unsigned int i=0; i<input->GetNumberOfPoints(); i++)
-        {
-        PointType pt;
-        pt.Fill (0.0);
-        input->GetPoint (i, &pt);
-        points->InsertNextPoint ( pt[0], pt[1], pt[2] );
-        }
-        */
+			      {
+			      PointType pt;
+			      pt.Fill (0.0);
+			      input->GetPoint (i, &pt);
+			      points->InsertNextPoint ( pt[0], pt[1], pt[2] );
+			      }
+			      */
   typedef typename MeshType::CellsContainer::ConstIterator ConstCellIterator;
   ConstCellIterator itCell = input->GetCells()->Begin();
   while (itCell != input->GetCells()->End()) {
@@ -76,7 +76,7 @@ void PolylineMeshToVTKPolyDataFilter<TMesh>::GenerateData() {
   vtkSmartPointer<vtkIntArray> intArrayCellData = vtkIntArray::New();
   typedef typename MeshType::CellDataContainer CellDataContainer;
   if (input->GetCellData() != 0) {
-    // std::cout << " o " << input->GetCellData()->Begin() << std::endl;
+    //std::cout << " o " << input->GetCellData()->Begin() << std::endl;
 
     typename CellDataContainer::ConstIterator cellData =
         input->GetCellData()->Begin();
@@ -92,12 +92,11 @@ void PolylineMeshToVTKPolyDataFilter<TMesh>::GenerateData() {
     fieldData->AddArray(intArrayCellData);
     m_Output->SetFieldData(fieldData);
 
-    // vtkSmartPointer<vtkIntArray> hola =
-    // (vtkIntArray*)m_Output->GetFieldData()->GetArray(0);
+    //vtkSmartPointer<vtkIntArray> hola = (vtkIntArray*)m_Output->GetFieldData()->GetArray(0);
     //  std::cout << "  get value " <<hola->GetValue(0) << std::endl;
-    // int v;
-    // hola->GetTupleValue(0,&v) ;
-    // std::cout << " get v " << v << std::endl;
+    //int v;
+    //hola->GetTupleValue(0,&v) ;
+    //std::cout << " get v " << v << std::endl;
   }
   m_Output->SetPoints(points);
   m_Output->GetCellData()->SetScalars(allColors);

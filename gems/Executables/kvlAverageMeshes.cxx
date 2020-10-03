@@ -73,15 +73,15 @@ int main(int argc, char **argv) {
     optimizer->Initialize();
     optimizer->SetInitialMeshCollection(initialCollection);
     /*
-       optimizer =   kvl::AtlasMeshAveragingConjugateGradientOptimizer::New();
-       optimizer->SetInitialMeshCollection(initialCollection);
-       optimizer->SetInputMeshCollection(inputCollection);
-    //    optimizer->SetMaximalDeformationStopCriterion( 0.00001 );
-    //  optimizer->SetMeshToImageTransform( transform );
-       optimizer->SetKatlas(Katlas);
-       optimizer->SetKtimePoints(KtimePoints);
-       optimizer->SetVerbose(true);
-    */
+   optimizer =   kvl::AtlasMeshAveragingConjugateGradientOptimizer::New();
+   optimizer->SetInitialMeshCollection(initialCollection); 
+   optimizer->SetInputMeshCollection(inputCollection);
+//    optimizer->SetMaximalDeformationStopCriterion( 0.00001 );
+//  optimizer->SetMeshToImageTransform( transform );
+   optimizer->SetKatlas(Katlas);
+   optimizer->SetKtimePoints(KtimePoints);
+   optimizer->SetVerbose(true);
+*/
   }
 
   // Write the result out

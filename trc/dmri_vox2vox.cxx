@@ -20,20 +20,41 @@
 
 #include "vial.h" // Needs to be included first because of CVS libs
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
+using namespace std;
+
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options(FILE *fp);
 
 int debug = 0, checkoptsonly = 0;
@@ -74,17 +95,15 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options(stdout);
 
@@ -109,10 +128,10 @@ int main(int argc, char **argv) {
 #endif
 
   for (int k = 0; k < nout; k++) {
-    float              coord;
-    std::ifstream      infile;
-    std::ofstream      outfile;
-    std::vector<float> inpts;
+    float         coord;
+    ifstream      infile;
+    ofstream      outfile;
+    vector<float> inpts;
 
     printf("Processing coordinate file %d of %d...\n", k + 1, nout);
     cputimer.reset();
@@ -124,42 +143,39 @@ int main(int argc, char **argv) {
       fname = inFile.at(k);
     }
 
-    infile.open(fname, std::ios::in);
+    infile.open(fname, ios::in);
     if (!infile) {
-      std::cout << "ERROR: Could not open " << fname << " for reading"
-                << std::endl;
+      cout << "ERROR: Could not open " << fname << " for reading" << endl;
       exit(1);
     }
 
     inpts.clear();
-    while (infile >> coord) {
+    while (infile >> coord)
       inpts.push_back(coord);
-    }
 
     if (inpts.size() % 3 != 0) {
-      std::cout << "ERROR: File " << fname
-                << " must contain triplets of coordinates" << std::endl;
+      cout << "ERROR: File " << fname << " must contain triplets of coordinates"
+           << endl;
       exit(1);
     }
 
     infile.close();
 
-    for (auto ipt = inpts.begin(); ipt < inpts.end(); ipt += 3) {
+    for (vector<float>::iterator ipt = inpts.begin(); ipt < inpts.end();
+         ipt += 3) {
       copy(ipt, ipt + 3, point.begin());
 
       // Apply affine transform
-      if (!affinereg.IsEmpty()) {
+      if (!affinereg.IsEmpty())
         affinereg.ApplyXfm(point, point.begin());
-      }
 
 #ifndef NO_CVS_UP_IN_HERE
       // Apply nonlinear transform
       if (!nonlinreg.IsEmpty()) {
-        if (doInvNonlin != 0) {
+        if (doInvNonlin)
           nonlinreg.ApplyXfmInv(point, point.begin());
-        } else {
+        else
           nonlinreg.ApplyXfm(point, point.begin());
-        }
       }
 #endif
 
@@ -173,16 +189,15 @@ int main(int argc, char **argv) {
       fname = outFile.at(k);
     }
 
-    outfile.open(fname, std::ios::out);
+    outfile.open(fname, ios::out);
     if (!outfile) {
-      std::cout << "ERROR: Could not open " << fname << " for writing"
-                << std::endl;
+      cout << "ERROR: Could not open " << fname << " for writing" << endl;
       exit(1);
     }
 
-    for (auto ipt = inpts.begin(); ipt < inpts.end(); ipt += 3) {
-      outfile << ipt[0] << " " << ipt[1] << " " << ipt[2] << std::endl;
-    }
+    for (vector<float>::const_iterator ipt = inpts.begin(); ipt < inpts.end();
+         ipt += 3)
+      outfile << ipt[0] << " " << ipt[1] << " " << ipt[2] << endl;
 
     outfile.close();
 
@@ -200,100 +215,87 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int    nargc;
-  int    nargsused;
-  char **pargv;
-  char * option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--indir") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--indir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       inDir     = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--in") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--in")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
       while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         inFile.push_back(pargv[nargsused]);
         nargsused++;
         nin++;
       }
-    } else if (strcmp(option, "--outdir") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outdir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       outDir    = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--out") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--out")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
       while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         outFile.push_back(pargv[nargsused]);
         nargsused++;
         nout++;
       }
-    } else if (strcmp(option, "--inref") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--inref")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       inRefFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--outref") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outref")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       outRefFile = fio_fullpath(pargv[0]);
       nargsused  = 1;
-    } else if (strcmp(option, "--reg") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--reg")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       affineXfmFile = fio_fullpath(pargv[0]);
       nargsused     = 1;
-    } else if (strcmp(option, "--regnl") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--regnl")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nonlinXfmFile = fio_fullpath(pargv[0]);
       nargsused     = 1;
-    } else if (strcasecmp(option, "--invnl") == 0) {
+    } else if (!strcasecmp(option, "--invnl"))
       doInvNonlin = 1;
-    } else {
+    else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -303,7 +305,7 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("\n");
   printf("USAGE: ./dmri_vox2vox\n");
   printf("\n");
@@ -339,7 +341,7 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\n");
   printf("...\n");
@@ -348,7 +350,7 @@ static void print_help() {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
@@ -360,7 +362,7 @@ static void print_version(void) {
 }
 
 /* --------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   if (nin == 0) {
     printf("ERROR: must specify input text file(s)\n");
     exit(1);
@@ -381,6 +383,7 @@ static void check_options() {
     printf("ERROR: must specify output reference volume\n");
     exit(1);
   }
+  return;
 }
 
 /* --------------------------------------------- */
@@ -421,4 +424,6 @@ static void dump_options(FILE *fp) {
     fprintf(fp, "Nonlinear registration: %s\n", nonlinXfmFile.c_str());
     fprintf(fp, "Invert nonlinear morph: %d\n", doInvNonlin);
   }
+
+  return;
 }

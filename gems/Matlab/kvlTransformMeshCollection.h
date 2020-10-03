@@ -20,9 +20,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(TransformMeshCollection, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlTransformMeshCollection( meshCollection, transform )
@@ -38,8 +37,8 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshCollectionHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMeshCollection ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMeshCollection).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMeshCollection)
+                   .name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("Not an atlas mesh collection object");
     }
@@ -55,19 +54,18 @@ public:
     object = kvl::MatlabObjectArray::GetInstance()->GetObject(transformHandle);
     // if ( typeid( *object ) != typeid( TransformType ) )
     if (strcmp(typeid(*object).name(),
-               typeid(TransformType).name()) != 0) // Eugenio: MAC compatibility
+               typeid(TransformType).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("transform doesn't refer to the correct ITK object type");
     }
     TransformType::ConstPointer transform =
         static_cast<const TransformType *>(object.GetPointer());
 
-    // std::cout << "meshCollection: " << meshCollection.GetPointer() <<
-    // std::endl; std::cout << "transform: " << transform.GetPointer() <<
-    // std::endl;
+    //std::cout << "meshCollection: " << meshCollection.GetPointer() << std::endl;
+    //std::cout << "transform: " << transform.GetPointer() << std::endl;
 
     // Apply the transform
-    // std::cout << "Applying transform: " << std::endl;
+    //std::cout << "Applying transform: " << std::endl;
     meshCollection->Transform(-1, transform);
     for (unsigned int i = 0; i < meshCollection->GetNumberOfMeshes(); i++) {
       meshCollection->Transform(i, transform);
@@ -75,11 +73,10 @@ public:
 
     const float determinant = vnl_det(transform->GetMatrix().GetVnlMatrix());
     if (determinant < 0) {
-      // std::cout << "Careful here: the applied transformation will turn
-      // positive tetrahedra into negative ones." << std::endl; std::cout <<
-      // transform->GetMatrix().GetVnlMatrix() << std::endl; std::cout << "
-      // determinant: " << determinant << std::endl; std::cout << "Starting to
-      // swap the point assignments of each tetrahedron..." << std::endl;
+      //std::cout << "Careful here: the applied transformation will turn positive tetrahedra into negative ones." << std::endl;
+      //std::cout << transform->GetMatrix().GetVnlMatrix() << std::endl;
+      //std::cout << " determinant: " << determinant << std::endl;
+      //std::cout << "Starting to swap the point assignments of each tetrahedron..." << std::endl;
 
       for (kvl::AtlasMesh::CellsContainer::Iterator cellIt =
                meshCollection->GetCells()->Begin();
@@ -90,9 +87,8 @@ public:
           continue;
         }
 
-        // Swap points assigned to first two vertices. This will readily turn
-        // negative tetrahedra
-        // into positives ones.
+        // Swap points assigned to first two vertices. This will readily turn negative tetrahedra
+        //into positives ones.
         kvl::AtlasMesh::CellType::PointIdIterator pit  = cell->PointIdsBegin();
         const kvl::AtlasMesh::PointIdentifier     p0Id = *pit;
         ++pit;
@@ -106,17 +102,15 @@ public:
 
     } // End test if determinant < 0
 
-    // std::cout << "...done!" << std::endl;
+    //std::cout << "...done!" << std::endl;
   }
 
 protected:
-  TransformMeshCollection() = default;
-  ;
-  ~TransformMeshCollection() override = default;
-  ;
+  TransformMeshCollection(){};
+  virtual ~TransformMeshCollection(){};
 
-  TransformMeshCollection(const Self &); // purposely not implemented
-  void operator=(const Self &);          // purposely not implemented
+  TransformMeshCollection(const Self &); //purposely not implemented
+  void operator=(const Self &);          //purposely not implemented
 
 private:
 };

@@ -41,10 +41,9 @@
 //				while (reader.GetNextPointCount(&cnt))
 //				{
 //					float* pts = new float[cnt*3];
-//					float* scalars = new
-//float[cnt*header.n_scalars]; 					float* properties = new
-//float[header.n_properties]; 					reader.GetNextTrackData(cnt, pts, scalars,
-//properties);
+//					float* scalars = new float[cnt*header.n_scalars];
+//					float* properties = new float[header.n_properties];
+//					reader.GetNextTrackData(cnt, pts, scalars, properties);
 //					...
 //		            process_point_and_scalar_data_etc.(...);
 //					...
@@ -88,10 +87,11 @@ struct TRACK_HEADER {
   short int n_properties;          // number of properties
   char      property_name[10][20]; // name of the properties
 
-  float vox_to_ras[4][4]; // voxel to ras (ijk to xyz) matrix, this is used for
-                          // coordinate transformation if vox_to_ras[3][3] is 0,
-                          // it means v2r matrix is not recorded this field is
-                          // added from version 2.
+  float vox_to_ras
+      [4]
+      [4]; // voxel to ras (ijk to xyz) matrix, this is used for coordinate transformation
+      // if vox_to_ras[3][3] is 0, it means v2r matrix is not recorded
+      // this field is added from version 2.
   char reserved[444];
   char voxel_order[4]; // voxel order for this track space
                        // if there was no reorientation, this should be the same
@@ -111,8 +111,8 @@ struct TRACK_HEADER {
   unsigned char swap_xy;
   unsigned char swap_yz;
   unsigned char swap_zx;
-  int n_count;  // total number of tracks. if 0, number of tracks was not
-                // recorded. call GetNumberOfTracks(...) to get it
+  int n_count; // total number of tracks. if 0, number of tracks was not recorded.
+               // call GetNumberOfTracks(...) to get it
   int version;  // version number
   int hdr_size; // size of the header. used to determine byte swap
 
@@ -147,9 +147,8 @@ struct TRACK_HEADER {
     SWAP_SHORT(n_scalars);
     SWAP_SHORT(n_properties);
     SWAP_FLOAT(image_orientation_patient, 6);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++)
       SWAP_FLOAT(vox_to_ras[i], 4);
-    }
     SWAP_INT(version);
     SWAP_INT(n_count);
     SWAP_INT(hdr_size);
@@ -174,7 +173,7 @@ class CTrackIO {
 public:
   CTrackIO() {
     m_nErrorCode = 0;
-    m_pFile      = nullptr;
+    m_pFile      = 0;
   }
   virtual ~CTrackIO() { Close(); }
 
@@ -194,12 +193,12 @@ class CTrackReader : public CTrackIO {
 public:
   CTrackReader();
 
-  bool Open(const char *filename, TRACK_HEADER *header = nullptr);
+  bool Open(const char *filename, TRACK_HEADER *header = NULL);
   bool Open(const char *filename, int *dim, float *voxel_size);
   bool GetNextPointCount(int *ncount);
   bool GetNextRawData(int ncount, float *data);
-  bool GetNextTrackData(int nCount, float *pt_data, float *scalars = nullptr,
-                        float *properties = nullptr);
+  bool GetNextTrackData(int nCount, float *pt_data, float *scalars = NULL,
+                        float *properties = NULL);
   int  GetProgress();
   int  GetNumberOfTracks();
   bool GetNumberOfTracks(int *cnt);
@@ -219,16 +218,16 @@ protected:
 class CTrackWriter : public CTrackIO {
 public:
   bool Initialize(const char *filename, short int *dim, float *voxel_size,
-                  float *origin = nullptr, short int n_scalars = 0);
+                  float *origin = NULL, short int n_scalars = 0);
   bool Initialize(const char *filename, int *dim, float *voxel_size,
-                  float *origin = nullptr, short int n_scalars = 0);
+                  float *origin = NULL, short int n_scalars = 0);
   bool Initialize(const char *filename, TRACK_HEADER header);
   bool WriteNextTrack(int ncount, float *data);
   bool WriteNextTrack(int ncount, float *pts, float *scalars,
                       float *properties);
   bool UpdateHeader(TRACK_HEADER header);
 
-  bool Close() override;
+  virtual bool Close();
 
   static bool UpdateHeader(const char *filename, TRACK_HEADER header);
 };

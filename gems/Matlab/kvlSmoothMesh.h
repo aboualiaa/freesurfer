@@ -19,9 +19,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SmoothMesh, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSmoothMesh( mesh, sigma(s) )
@@ -37,8 +36,7 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("Not an atlas mesh object");
     }
@@ -51,8 +49,8 @@ public:
     double *  tmp             = mxGetPr(prhs[1]);
     const int numberOfRows    = *(mxGetDimensions(prhs[1]));
     const int numberOfColumns = *(mxGetDimensions(prhs[1]) + 1);
-    // std::cout << "numberOfRows: " << numberOfRows << std::endl;
-    // std::cout << "numberOfColumns: " << numberOfColumns << std::endl;
+    //std::cout << "numberOfRows: " << numberOfRows << std::endl;
+    //std::cout << "numberOfColumns: " << numberOfColumns << std::endl;
     if ((numberOfRows * numberOfColumns) == 1) {
       for (int i = 0; i < 3; i++) {
         sigmas[i] = *tmp;
@@ -66,7 +64,7 @@ public:
       mexErrMsgTxt("Sigma(s) must be 1- or 3-dimensional");
     }
 
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
 
     // Construct a tempory mesh collection
     kvl::AtlasMeshCollection::Pointer collection =
@@ -86,13 +84,11 @@ public:
   }
 
 protected:
-  SmoothMesh() = default;
-  ;
-  ~SmoothMesh() override = default;
-  ;
+  SmoothMesh(){};
+  virtual ~SmoothMesh(){};
 
-  SmoothMesh(const Self &);     // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  SmoothMesh(const Self &);     //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

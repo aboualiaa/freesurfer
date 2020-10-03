@@ -9,10 +9,10 @@ namespace kvl {
 class AtlasMeshAlphaDrawer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshAlphaDrawer;
-  using Superclass   = AtlasMeshRasterizor;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshAlphaDrawer          Self;
+  typedef AtlasMeshRasterizor           Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -21,7 +21,7 @@ public:
   itkTypeMacro(AtlasMeshAlphaDrawer, itk::Object);
 
   /** Some typedefs */
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
   /** */
   void SetClassNumber(int classNumber) { m_ClassNumber = classNumber; }
@@ -47,8 +47,8 @@ protected:
                             int                       threadNumber);
 
 private:
-  AtlasMeshAlphaDrawer(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  AtlasMeshAlphaDrawer(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
   //
   int                m_ClassNumber;

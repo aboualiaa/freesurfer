@@ -7,16 +7,16 @@
    ((x) >> 24))
 
 inline void SWAP_SHORT(short &x) {
-  (*reinterpret_cast<unsigned short *>(&(x)) = SWAP_2(*(unsigned short *)&(x)));
+  (*(unsigned short *)&(x) = SWAP_2(*(unsigned short *)&(x)));
 }
 inline void SWAP_INT(int &x) {
-  (*reinterpret_cast<unsigned int *>(&(x)) = SWAP_4(*(unsigned int *)&(x)));
+  (*(unsigned int *)&(x) = SWAP_4(*(unsigned int *)&(x)));
 }
-inline void SWAP_FLOAT(float &x) { SWAP_INT((*reinterpret_cast<int *>(&(x)))); }
+inline void SWAP_FLOAT(float &x) { SWAP_INT((*(int *)&(x))); }
 inline void SWAP_DOUBLE(double &x) {
   double retVal;
-  char * p = reinterpret_cast<char *>(&retVal);
-  char * i = reinterpret_cast<char *>(&x);
+  char * p = (char *)&retVal;
+  char * i = (char *)&x;
   p[0]     = i[7];
   p[1]     = i[6];
   p[2]     = i[5];
@@ -31,32 +31,28 @@ inline void SWAP_DOUBLE(double &x) {
 }
 
 inline void SWAP_SHORT(short *x, long nSize) {
-  for (int i = 0; i < nSize; i++) {
+  for (int i = 0; i < nSize; i++)
     SWAP_SHORT(x[i]);
-  }
 }
 
 inline void SWAP_INT(int *x, long nSize) {
-  for (int i = 0; i < nSize; i++) {
+  for (int i = 0; i < nSize; i++)
     SWAP_INT(x[i]);
-  }
 }
 
 inline void SWAP_FLOAT(float *x, long nSize) {
-  for (int i = 0; i < nSize; i++) {
+  for (int i = 0; i < nSize; i++)
     SWAP_FLOAT(x[i]);
-  }
 }
 
 inline void SWAP_DOUBLE(double *x, long nSize) {
-  for (int i = 0; i < nSize; i++) {
+  for (int i = 0; i < nSize; i++)
     SWAP_DOUBLE(x[i]);
-  }
 }
 
 inline bool IS_BIG_ENDIAN() {
-  unsigned char ch[2] = {0, 1};
-  auto *        a     = reinterpret_cast<unsigned short *>(ch);
+  unsigned char   ch[2] = {0, 1};
+  unsigned short *a     = (unsigned short *)ch;
 
   return *a == 1;
 }

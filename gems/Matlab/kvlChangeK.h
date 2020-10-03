@@ -1,21 +1,17 @@
-#ifndef _GEMS2_MATLAB_KVLCHANGEK_H
-#define _GEMS2_MATLAB_KVLCHANGEK_H
-
 #include "kvlAtlasMesh.h"
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
 #include "mex.h"
-#include <cstring>
 
 namespace kvl {
 
 class ChangeK : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  using Self         = ChangeK;
-  using Superclass   = itk::Object;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef ChangeK                       Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -23,9 +19,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(ChangeK, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlChangeK( mesh, scaleFactor,label )
@@ -42,13 +37,12 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("Not an atlas mesh object");
     }
     kvl::AtlasMesh::ConstPointer constMesh =
-        dynamic_cast<const kvl::AtlasMesh *>(object.GetPointer());
+        static_cast<const kvl::AtlasMesh *>(object.GetPointer());
     kvl::AtlasMesh::Pointer mesh =
         const_cast<kvl::AtlasMesh *>(constMesh.GetPointer());
 
@@ -65,11 +59,11 @@ public:
       scaleFactor = 1;
     }
 
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
-    // std::cout << "scaleFactor: " << scaleFactor << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "scaleFactor: " << scaleFactor << std::endl;
 
-    // Get the alpha from each tetrahedra node corresponding to the given label
-    // and scale the K by the scaling factor times the probability
+    // Get the alpha from each tetrahedra node corresponding to the given label and
+    // scale the K by the scaling factor times the probability
     for (AtlasMesh::CellsContainer::Iterator cellIt = mesh->GetCells()->Begin();
          cellIt != mesh->GetCells()->End(); ++cellIt) {
 
@@ -100,17 +94,13 @@ public:
   }
 
 protected:
-  ChangeK() = default;
-  ;
-  ~ChangeK() override = default;
-  ;
+  ChangeK(){};
+  virtual ~ChangeK(){};
 
-  ChangeK(const Self &);        // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  ChangeK(const Self &);        //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };
 
 } // end namespace kvl
-
-#endif

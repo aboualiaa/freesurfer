@@ -8,22 +8,21 @@ namespace kvl {
 
 /**
  *
- * Given two filenames, this class will read in a cropped version of the first
- * filename. It does this by reading an affine transformation describing the
- * mapping from image grid onto world coordinates in SPM99's way (*.mat file)
- * for each of the two images, computing the outer limits of the bounding box of
- * the second image in the first image (after calculating the mapping from the
- * second image's image grid coordinate system onto the first image's image grid
- * using the affine matrices), and cropping the first image accordingly.
+ * Given two filenames, this class will read in a cropped version of the first filename. It does this
+ * by reading an affine transformation describing the mapping from image grid onto world coordinates
+ * in SPM99's way (*.mat file) for each of the two images, computing the outer limits of the bounding
+ * box of the second image in the first image (after calculating the mapping from the second image's
+ * image grid coordinate system onto the first image's image grid using the affine matrices), and
+ * cropping the first image accordingly.
  *
  */
 class CroppedImageReader : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self         = CroppedImageReader;
-  using Superclass   = itk::Object;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef CroppedImageReader            Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -32,12 +31,12 @@ public:
   itkTypeMacro(CroppedImageReader, itk::Object);
 
   /** Some typedefs */
-  // typedef itk::Image< unsigned short, 3 >  ImageType;
-  using ImageType     = itk::Image<float, 3>;
-  using TransformType = itk::AffineTransform<double, 3>;
+  //typedef itk::Image< unsigned short, 3 >  ImageType;
+  typedef itk::Image<float, 3>            ImageType;
+  typedef itk::AffineTransform<double, 3> TransformType;
 
   // Read
-  void Read(const char *fileName, const char *boundingFileName = nullptr);
+  void Read(const char *fileName, const char *boundingFileName = 0);
 
   // Get image
   const ImageType *GetImage() const { return m_Image; }
@@ -91,8 +90,8 @@ protected:
   virtual ~CroppedImageReader();
 
 private:
-  CroppedImageReader(const Self &); // purposely not implemented
-  void operator=(const Self &);     // purposely not implemented
+  CroppedImageReader(const Self &); //purposely not implemented
+  void operator=(const Self &);     //purposely not implemented
 
   static TransformType::Pointer
   GetTransformOfFileName(const std::string &filename);

@@ -10,10 +10,10 @@ class AtlasMeshToLabelImageCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshToLabelImageCostAndGradientCalculator;
-  using Superclass   = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshToLabelImageCostAndGradientCalculator Self;
+  typedef AtlasMeshPositionCostAndGradientCalculator     Superclass;
+  typedef itk::SmartPointer<Self>                        Pointer;
+  typedef itk::SmartPointer<const Self>                  ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -23,7 +23,7 @@ public:
                AtlasMeshPositionCostAndGradientCalculator);
 
   // Some typedefs
-  using LabelImageType = CompressionLookupTable::ImageType;
+  typedef CompressionLookupTable::ImageType LabelImageType;
 
   // Set label image
   void SetLabelImage(const LabelImageType *        labelImage,
@@ -47,8 +47,8 @@ protected:
 
 private:
   AtlasMeshToLabelImageCostAndGradientCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   LabelImageType::ConstPointer         m_LabelImage;

@@ -67,8 +67,7 @@ public:
 
   // Get Routines
 
-  //! Returns the matrix representation of the quaternion (not a rotation
-  //! matrix)
+  //! Returns the matrix representation of the quaternion (not a rotation matrix)
   inline std::vector<double> getMatrix4d() const;
 
   //! Rotation Matrix (3x3) as 9 values (row by row)
@@ -263,13 +262,12 @@ inline double Quaternion::getRotAngle() const {
 }
 
 inline Quaternion Quaternion::getHalfRotation() const {
-  // std::cout << " Quaternion::getHalfRotation" << std::endl;
-  // if (normed)   std::cout << " is normed " << std::endl;
-  // else std::cout << " is not normed " << std::endl;
+  //std::cout << " Quaternion::getHalfRotation" << std::endl;
+  //if (normed)   std::cout << " is normed " << std::endl;
+  //else std::cout << " is not normed " << std::endl;
   double              angle = .5 * getRotAngle();
   std::vector<double> v     = getRotAxis();
-  // std::cout << " angle: " << angle << " v: " << v[0] << " " << v[1] << " "
-  // <<v[2] << std::endl;
+  //std::cout << " angle: " << angle << " v: " << v[0] << " " << v[1] << " " <<v[2] << std::endl;
   Quaternion q;
   q.importRotVec(angle, v[0], v[1], v[2]);
   return q;
@@ -282,7 +280,7 @@ inline std::vector<double> Quaternion::getRotAxis() const {
   v[2]     = d;
   double l = sqrt(b * b + c * c + d * d);
   l        = 1.0 / l;
-  // std::cout << " l : " << l << std::endl;
+  //std::cout << " l : " << l << std::endl;
   v[0] *= l;
   v[1] *= l;
   v[2] *= l;
@@ -327,7 +325,7 @@ inline Quaternion &Quaternion::importRotVec(double v1, double v2, double v3) {
 inline Quaternion &Quaternion::importRotVec(double alpha, double v1, double v2,
                                             double v3) {
   normed = true;
-  // std::cout << alpha << " " << v1 << " " << v2 << " " << v3 << std::endl;
+  //std::cout << alpha << " " << v1 << " " << v2 << " " << v3 << std::endl;
   double l = sqrt(v1 * v1 + v2 * v2 + v3 * v3); // make sure vec is normalized
   if (l < 0.000001) {
     a = 1;
@@ -618,6 +616,6 @@ Quaternion operator*(const double &scalar, const Quaternion &vect);
 
 std::ostream &operator<<(std::ostream &os, const Quaternion &q);
 
-// std::istream& operator>>(std::istream& is, Quaternion& q);
+//std::istream& operator>>(std::istream& is, Quaternion& q);
 
 #endif

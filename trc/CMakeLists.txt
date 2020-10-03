@@ -1,22 +1,16 @@
 project(trc)
 
-# TODO: remove APPLE condition after solving fem_elastic build issues on linux
-if(PETSC_FOUND
-   AND APPLE
-   AND NOT DEFINED FS_GCC_PATH
-   )
+if(PETSC_FOUND)
 
-  find_package(MPI REQUIRED)
-
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                      ${FS_INCLUDE_DIRS}
-                      ${CMAKE_SOURCE_DIR}/fem_elastic
-                      SYSTEM
-                      ${CMAKE_SOURCE_DIR}/packages/tetgen
-                      ${ITK_INCLUDE_DIRS}
-                      ${PETSC_INCLUDE_DIR}
-                      ${MPI_CXX_HEADER_DIR}
-                      )
+  include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${FS_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/fem_elastic
+    SYSTEM
+    ${CMAKE_SOURCE_DIR}/packages/tetgen
+    ${ITK_INCLUDE_DIRS}
+    ${PETSC_INCLUDE_DIR}
+  )
 
   # dmri_spline
   add_executable(dmri_spline dmri_spline.cxx spline.cxx)
@@ -49,16 +43,12 @@ if(PETSC_FOUND
   install(TARGETS dmri_train DESTINATION bin)
 
   # dmri_paths
-  add_executable(dmri_paths dmri_paths.cxx coffin.cxx bite.cxx spline.cxx vial.cxx
-                            TrackIO.cxx
-                 )
+  add_executable(dmri_paths dmri_paths.cxx coffin.cxx bite.cxx spline.cxx vial.cxx TrackIO.cxx)
   target_link_libraries(dmri_paths utils fem_elastic tetgen)
   install(TARGETS dmri_paths DESTINATION bin)
 
   # dmri_pathstats
-  add_executable(dmri_pathstats dmri_pathstats.cxx spline.cxx blood.cxx vial.cxx
-                                TrackIO.cxx
-                 )
+  add_executable(dmri_pathstats dmri_pathstats.cxx spline.cxx blood.cxx vial.cxx TrackIO.cxx)
   target_link_libraries(dmri_pathstats utils fem_elastic tetgen)
   install(TARGETS dmri_pathstats DESTINATION bin)
 

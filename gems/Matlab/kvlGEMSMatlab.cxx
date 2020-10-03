@@ -1,5 +1,6 @@
 #include "itkMGHImageIOFactory.h"
 #include "kvlMatlabRunnerArray.h"
+#include "mex.h"
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
@@ -12,9 +13,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   const std::string runnerName = mxArrayToString(prhs[0]);
 
   try {
-    // Add support for MGH file format to ITK. An alternative way to add this by
-    // default would be to edit ITK's itkImageIOFactory.cxx and explicitly
-    // adding it in the code there.
+    // Add support for MGH file format to ITK. An alternative way to add this by default would be
+    // to edit ITK's itkImageIOFactory.cxx and explicitly adding it in the code there.
     itk::ObjectFactoryBase::RegisterFactory(itk::MGHImageIOFactory::New());
 
     // Try to run

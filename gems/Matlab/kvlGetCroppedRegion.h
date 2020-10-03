@@ -20,13 +20,11 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(GetCroppedRegion, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // [origIndex croppedIndex croppedSize origSize] = kvlGetCroppedRange(
-    // imageFileName, boundingFileName )
+    // [origIndex croppedIndex croppedSize origSize] = kvlGetCroppedRange( imageFileName, boundingFileName )
 
     // Make sure input arguments are correct
     if ((nrhs != 2) || !mxIsChar(prhs[0]) || !mxIsChar(prhs[1]) ||
@@ -40,15 +38,15 @@ public:
 
     // Read the image
     kvl::CroppedImageReader::Pointer reader = kvl::CroppedImageReader::New();
-    // reader->SetExtraFraction( 0.1 );
+    //reader->SetExtraFraction( 0.1 );
     reader->SetExtraFraction(0.0);
     reader->Read(imageFileName.c_str(), boundingFileName.c_str());
 
-    // Get the cropped region in the original image
+    //Get the cropped region in the original image
     ImageType::RegionType originalImageOriginalRegion;
     originalImageOriginalRegion = reader->GetOriginalImageOriginalRegion();
-    // ImageType::IndexType origRegionIndex;
-    // origRegionIndex = originalImageOriginalRegion.GetIndex();
+    //ImageType::IndexType origRegionIndex;
+    //origRegionIndex = originalImageOriginalRegion.GetIndex();
 
     ImageType::SizeType origArea;
     origArea = originalImageOriginalRegion.GetSize();
@@ -100,13 +98,11 @@ public:
   }
 
 protected:
-  GetCroppedRegion() = default;
-  ;
-  ~GetCroppedRegion() override = default;
-  ;
+  GetCroppedRegion(){};
+  virtual ~GetCroppedRegion(){};
 
-  GetCroppedRegion(const Self &); // purposely not implemented
-  void operator=(const Self &);   // purposely not implemented
+  GetCroppedRegion(const Self &); //purposely not implemented
+  void operator=(const Self &);   //purposely not implemented
 
 private:
 };

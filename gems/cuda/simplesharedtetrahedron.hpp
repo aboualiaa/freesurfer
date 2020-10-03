@@ -142,8 +142,7 @@ public:
     } else {
       // Have to handle case where one of the barycentric co-ordinates is zero
 
-      // This comes down to seeing what would happen if the voxel were moved a
-      // little to the right, or up etc.
+      // This comes down to seeing what would happen if the voxel were moved a little to the right, or up etc.
       ArgType nxtRowAdd[nVertices];
       nxtRowAdd[0] =
           -(this->transf[(0 * nDims) + 0] + this->transf[(1 * nDims) + 0] +

@@ -10,10 +10,10 @@ class AtlasMeshProbabilityImageStatisticsCollector
     : public AtlasMeshStatisticsCollector {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshProbabilityImageStatisticsCollector;
-  using Superclass   = AtlasMeshStatisticsCollector;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshProbabilityImageStatisticsCollector Self;
+  typedef AtlasMeshStatisticsCollector                 Superclass;
+  typedef itk::SmartPointer<Self>                      Pointer;
+  typedef itk::SmartPointer<const Self>                ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -22,7 +22,7 @@ public:
   itkTypeMacro(AtlasMeshProbabilityImageStatisticsCollector, itk::Object);
 
   /** Some typedefs */
-  using ProbabilityImageType = itk::Image<AtlasAlphasType, 3>;
+  typedef itk::Image<AtlasAlphasType, 3> ProbabilityImageType;
 
   /** */
   void SetProbabilityImage(const ProbabilityImageType *probabilityImage) {
@@ -50,8 +50,8 @@ protected:
 
 private:
   AtlasMeshProbabilityImageStatisticsCollector(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   ProbabilityImageType::ConstPointer m_ProbabilityImage;

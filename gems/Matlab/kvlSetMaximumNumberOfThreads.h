@@ -1,4 +1,4 @@
-#include "itk_5_4_map.h"
+#include "itkMultiThreader.h"
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
 
@@ -18,9 +18,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SetMaximumNumberOfThreads, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSetMaximumNumberOfThreads( maximumNumberOfThreads )
@@ -32,20 +31,16 @@ public:
 
     // Retrieve input
     const int maximumNumberOfThreads = static_cast<int>(*mxGetPr(prhs[0]));
-    // std::cout << "maximumNumberOfThreads: " << maximumNumberOfThreads <<
-    // std::endl;
-    itk::MultiThreaderBase::SetGlobalDefaultNumberOfThreads(
-        maximumNumberOfThreads);
+    //std::cout << "maximumNumberOfThreads: " << maximumNumberOfThreads << std::endl;
+    itk::MultiThreader::SetGlobalDefaultNumberOfThreads(maximumNumberOfThreads);
   }
 
 protected:
-  SetMaximumNumberOfThreads() = default;
-  ;
-  ~SetMaximumNumberOfThreads() override = default;
-  ;
+  SetMaximumNumberOfThreads(){};
+  virtual ~SetMaximumNumberOfThreads(){};
 
-  SetMaximumNumberOfThreads(const Self &); // purposely not implemented
-  void operator=(const Self &);            // purposely not implemented
+  SetMaximumNumberOfThreads(const Self &); //purposely not implemented
+  void operator=(const Self &);            //purposely not implemented
 
 private:
 };

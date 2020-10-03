@@ -5,21 +5,18 @@
 #include "kvlCompressionLookupTable.h"
 #include "kvlMultiResolutionAtlasMesher.h"
 #include "vnl/vnl_sample.h"
-#include <mutex>
-
-#include "itk_5_4_map.h"
 
 namespace kvl {
 
-class AtlasMeshBuilderMutexLock : public std::mutex {
+class AtlasMeshBuilderMutexLock : public itk::SimpleFastMutexLock {
 public:
   /** Standard class typedefs.  */
   typedef AtlasMeshBuilderMutexLock Self;
-  typedef std::mutex                Superclass;
+  typedef itk::SimpleFastMutexLock  Superclass;
 
   /** Lock access. */
   void DescriptiveLock(const std::string &description) {
-    Superclass::lock();
+    Superclass::Lock();
     m_TimeProbe.Start();
     m_Description = description;
   }
@@ -29,7 +26,7 @@ public:
     m_TimeProbe.Stop();
     std::cout << m_Description << ": unlocking mutex after "
               << m_TimeProbe.GetMean() << " seconds" << std::endl;
-    Superclass::unlock();
+    Superclass::Unlock();
   }
 
 protected:
@@ -38,12 +35,11 @@ protected:
 };
 
 //
-// Let's define a helper class for multithreading that holds a mutex that is (1)
-// automatically locked at construction time; (2) automatically unlocked at
-// destruction time so that even when exceptions are thrown things get wound
-// down properly; (3) also allows for manually locking and unlocking. In
-// addition, this class can also holds a shared (among threads) resource that is
-// added and subtracted to in a similar exception-safe way
+// Let's define a helper class for multithreading that holds a mutex that is (1) automatically locked
+// at construction time; (2) automatically unlocked at destruction time so that even when exceptions
+// are thrown things get wound down properly; (3) also allows for manually locking and unlocking. In
+// addition, this class can also holds a shared (among threads) resource that is added and subtracted
+// to in a similar exception-safe way
 //
 class AtlasMeshBuilderHelper {
 public:
@@ -54,7 +50,7 @@ public:
       std::map<AtlasMesh::PointIdentifier, int> &pointOccupancies)
       : m_Mutex(mutex), m_MutexIsLocked(true),
         m_PointOccupancies(pointOccupancies) {
-    m_Mutex.lock();
+    m_Mutex.Lock();
   }
 
   ~AtlasMeshBuilderHelper() {
@@ -66,14 +62,14 @@ public:
   void Lock() {
     if (!m_MutexIsLocked) {
       m_MutexIsLocked = true;
-      m_Mutex.lock();
+      m_Mutex.Lock();
     }
   }
 
   void Unlock() {
     if (m_MutexIsLocked) {
       m_MutexIsLocked = false;
-      m_Mutex.unlock();
+      m_Mutex.Unlock();
     }
   }
 
@@ -117,8 +113,8 @@ protected:
   }
 
 private:
-  AtlasMeshBuilderHelper(const Self &) ITK_DELETED_FUNCTION;
-  void operator=(const Self &) ITK_DELETED_FUNCTION;
+  AtlasMeshBuilderHelper(const Self &) ITK_DELETE_FUNCTION;
+  void operator=(const Self &) ITK_DELETE_FUNCTION;
 };
 
 // Events generated
@@ -278,18 +274,17 @@ protected:
    * control to ThreadedGenerateData(). */
   static ITK_THREAD_RETURN_TYPE LoadBalancedThreaderCallback(void *arg);
 
-  /** Internal structure used for passing image data into the threading library
-   */
+  /** Internal structure used for passing image data into the threading library */
   struct LoadBalancedThreadStruct {
-    // Pointer  m_Builder;
+    //Pointer  m_Builder;
     Self *                                    m_Builder;
     std::set<AtlasMesh::CellIdentifier>       m_Edges;
     std::map<AtlasMesh::PointIdentifier, int> m_PointOccupancies;
   };
 
 private:
-  AtlasMeshBuilder(const Self &); // purposely not implemented
-  void operator=(const Self &);   // purposely not implemented
+  AtlasMeshBuilder(const Self &); //purposely not implemented
+  void operator=(const Self &);   //purposely not implemented
 
   int m_StuckCount;
 

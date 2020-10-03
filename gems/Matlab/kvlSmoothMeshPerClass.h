@@ -20,7 +20,7 @@ public:
   itkTypeMacro(SmoothMesh, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSmoothMesh( mesh, sigma, classesToSmooth )
@@ -56,8 +56,8 @@ public:
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
       classesToSmooth.push_back((mxGetPr(prhs[2]))[classNumber]);
     }
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
-    // std::cout << "sigma: " << sigma << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "sigma: " << sigma << std::endl;
 
     // Construct a tempory mesh collection
     kvl::AtlasMeshCollection::Pointer collection =
@@ -88,8 +88,8 @@ protected:
   SmoothMesh(){};
   virtual ~SmoothMesh(){};
 
-  SmoothMesh(const Self &);     // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  SmoothMesh(const Self &);     //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

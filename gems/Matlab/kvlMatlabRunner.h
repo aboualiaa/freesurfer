@@ -8,10 +8,10 @@
 namespace kvl {
 
 /**
- * Base class that defines the interface that
- * our Mex function can call to get work done
- *
- */
+  * Base class that defines the interface that
+  * our Mex function can call to get work done
+  *
+  */
 
 class MatlabRunner : public itk::Object {
 public:
@@ -37,11 +37,11 @@ public:
   }
 
 protected:
-  MatlabRunner()           = default;
-  ~MatlabRunner() override = default;
+  MatlabRunner(){};
+  virtual ~MatlabRunner(){};
 
-  MatlabRunner(const Self &);   // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  MatlabRunner(const Self &);   //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

@@ -56,8 +56,8 @@ protected:
 
 private:
   AtlasMeshCollectionModelLikelihoodCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   AtlasMeshCollection::ConstPointer m_MeshCollection;

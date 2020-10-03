@@ -9,7 +9,7 @@ namespace kvl {
 //
 AtlasMeshAlphaDrawer ::AtlasMeshAlphaDrawer() {
   m_ClassNumber = 0;
-  m_Image       = nullptr;
+  m_Image       = 0;
 }
 
 //

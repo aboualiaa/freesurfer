@@ -2,9 +2,9 @@
 #define _ThreadedMembershipFunction_txx
 
 #include "ThreadedMembershipFunction.h"
-#include "itk_5_4_map.h"
 #include "vnl/vnl_matrix.h"
 #include <iostream>
+#include <stdlib.h>
 
 template <class TMembershipFunctionType>
 void ThreadedMembershipFunction<
@@ -18,8 +18,7 @@ void ThreadedMembershipFunction<
   for (itk::ThreadIdType ii = 0; ii < numberOfThreads; ++ii) {
     this->m_maxIndex[ii].resize(m_matrixDim, 0);
     this->m_maxValue[ii].resize(m_matrixDim, 0);
-    //		this->m_results[ii] = new vnl_sparse_matrix<double>(m_matrixDim,
-    // m_matrixDim);
+    //		this->m_results[ii] = new vnl_sparse_matrix<double>(m_matrixDim, m_matrixDim);
   }
   this->m_results2 = new int[m_indeces.size()];
 }
@@ -40,7 +39,7 @@ void ThreadedMembershipFunction<TMembershipFunctionType>::ThreadedExecution(
       m_maxValue[threadId][i] = val;
       m_maxIndex[threadId][i] = j;
     }
-    // m_results2[j * m_matrixDim +i]= val;
+    //m_results2[j * m_matrixDim +i]= val;
   }
 }
 
@@ -66,23 +65,23 @@ ThreadedMembershipFunction<TMembershipFunctionType>::GetMaxIndeces() {
 template <class TMembershipFunctionType>
 vnl_sparse_matrix<double> *
 ThreadedMembershipFunction<TMembershipFunctionType>::GetResults() {
-  // std::cout << " get results start " << std::endl;
+  //std::cout << " get results start " << std::endl;
   vnl_sparse_matrix<double> *res =
       new vnl_sparse_matrix<double>(m_matrixDim, m_matrixDim);
-  // const itk::ThreadIdType numberOfThreads = this->GetNumberOfThreadsUsed();
-  // this->m_results.resize( numberOfThreads );
+  //const itk::ThreadIdType numberOfThreads = this->GetNumberOfThreadsUsed();
+  //this->m_results.resize( numberOfThreads );
   /*for( itk::ThreadIdType ii = 0; ii < numberOfThreads; ++ii )
-  {
-          (*res)+= (*m_results[ii]);
-          delete m_results[ii];
-  }*/
+	{
+		(*res)+= (*m_results[ii]);
+		delete m_results[ii];
+	}*/
 
   for (int k = 0; k < m_indeces.size(); k++) {
     int i        = m_outIndeces[k].first;
     int j        = m_outIndeces[k].second;
     (*res)(i, j) = (*res)(j, i) = this->m_results2[k];
   }
-  // std::cout << " get results end" << std::endl;
+  //std::cout << " get results end" << std::endl;
   return res;
 }
 

@@ -8,32 +8,31 @@
 
 #include "itkImageFileReader.h"
 #include "vtkCellData.h"
-#include "vtkPolyData.h"
 
-// class vtkPolyData;
+//class vtkPolyData;
 
 template <class TImage> class TrkVTKPolyDataFilter : public itk::ProcessObject {
 public:
-  using Self         = TrkVTKPolyDataFilter<TImage>;
-  using Superclass   = itk::ProcessObject;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef TrkVTKPolyDataFilter          Self;
+  typedef itk::ProcessObject            Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   itkNewMacro(Self);
   itkTypeMacro(TrkVTKPolyDataFilter, itk::ProcessObject);
 
-  using ImageType    = TImage;
-  using ImagePointer = typename ImageType::Pointer;
+  typedef TImage                      ImageType;
+  typedef typename ImageType::Pointer ImagePointer;
 
-  using ImageReaderType = typename itk::ImageFileReader<ImageType>;
+  typedef typename itk::ImageFileReader<ImageType> ImageReaderType;
 
   void SetInput(vtkSmartPointer<vtkPolyData> inputVTK) {
     this->m_vtk = inputVTK;
   }
 
-  vtkSmartPointer<vtkPolyData> GetOutputPolyData() { return m_vtk; }
+  vtkSmartPointer<vtkPolyData> GetOutputPolyData(void) { return m_vtk; }
 
-  virtual void Update() { this->GenerateData(); }
+  virtual void Update(void) { this->GenerateData(); }
   void         SetColor(unsigned char *color) { this->m_color = color; }
   void         SetReferenceTrack(std::string trackref) {
     CTrackReader trkreader;
@@ -49,7 +48,7 @@ public:
   ~TrkVTKPolyDataFilter();
 
 protected:
-  virtual void GenerateData();
+  virtual void GenerateData(void);
 
 private:
   TrkVTKPolyDataFilter(const Self &);
@@ -83,66 +82,65 @@ class vtkPolyData;
 template <class TImage>
 class TrkVTKPolyDataFilter : public itk::ProcessObject
 {
-        public:
-                typedef TrkVTKPolyDataFilter Self;
-                typedef itk::ProcessObject      Superclass;
-                typedef itk::SmartPointer<Self>       Pointer;
-                typedef itk::SmartPointer<const Self> ConstPointer;
+	public:
+		typedef TrkVTKPolyDataFilter Self;
+		typedef itk::ProcessObject      Superclass;
+		typedef itk::SmartPointer<Self>       Pointer;
+		typedef itk::SmartPointer<const Self> ConstPointer;
 
-                itkNewMacro  (Self);
-                itkTypeMacro (TrkVTKPolyDataFilter, itk::ProcessObject);
+		itkNewMacro  (Self);
+		itkTypeMacro (TrkVTKPolyDataFilter, itk::ProcessObject);
 
-                typedef TImage    ImageType;
-                typedef typename ImageType::Pointer ImagePointer;
+		typedef TImage    ImageType;
+		typedef typename ImageType::Pointer ImagePointer;
 
-                typedef typename itk::ImageFileReader<ImageType>
-ImageReaderType;
+    		typedef typename itk::ImageFileReader<ImageType> ImageReaderType;
 
-                void SetInput (vtkSmartPointer<vtkPolyData> inputVTK)
-                {
-                        this->m_vtk = inputVTK;
-                }
+		void SetInput (vtkSmartPointer<vtkPolyData> inputVTK)
+		{
+			this->m_vtk = inputVTK;
+		}
 
-                vtkSmartPointer<vtkPolyData> GetOutputPolyData (void)
-                { return m_vtk; }
+		vtkSmartPointer<vtkPolyData> GetOutputPolyData (void)
+		{ return m_vtk; }
 
-                virtual void Update (void)
-                { this->GenerateData(); }
-                void SetColor ( unsigned char* color)
-                {
-                        this->m_color = color;
-                }
-                void SetReferenceTrack(std::string trackref)
-                {
-                        CTrackReader trkreader;
-                        trkreader.Open(trackref.c_str(), &this->m_refHeader);
+		virtual void Update (void)
+		{ this->GenerateData(); }
+		void SetColor ( unsigned char* color)
+		{
+			this->m_color = color;
+		}
+		void SetReferenceTrack(std::string trackref)
+		{
+			CTrackReader trkreader;
+			trkreader.Open(trackref.c_str(), &this->m_refHeader);
+	
+		}
+		void SetReferenceImage(ImagePointer image)
+		{
+			this->m_refImage = image;
+		}
+		void SetTrkFileName(std::string filename)
+		{
+			this->m_trkFileName = filename;
+		}
+			
+		void TrkToVTK();
+		void VTKToTrk(std::string outputName);
+		TrkVTKPolyDataFilter();
+		~TrkVTKPolyDataFilter();
+	protected:
 
-                }
-                void SetReferenceImage(ImagePointer image)
-                {
-                        this->m_refImage = image;
-                }
-                void SetTrkFileName(std::string filename)
-                {
-                        this->m_trkFileName = filename;
-                }
+		virtual void GenerateData (void);
 
-                void TrkToVTK();
-                void VTKToTrk(std::string outputName);
-                TrkVTKPolyDataFilter();
-                ~TrkVTKPolyDataFilter();
-        protected:
-
-                virtual void GenerateData (void);
-
-        private:
-                TrkVTKPolyDataFilter (const Self&);
-                void operator= (const Self&);
-                unsigned char* m_color;
-                vtkSmartPointer<vtkPolyData> m_vtk;
-                std::string m_trkFileName;
-                ImagePointer m_refImage;
-                TRACK_HEADER m_refHeader;
+	private:
+		TrkVTKPolyDataFilter (const Self&);
+		void operator= (const Self&);
+		unsigned char* m_color;
+		vtkSmartPointer<vtkPolyData> m_vtk;
+		std::string m_trkFileName;
+		ImagePointer m_refImage;
+		TRACK_HEADER m_refHeader;
 };
 
 

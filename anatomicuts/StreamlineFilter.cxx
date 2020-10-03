@@ -1,3 +1,4 @@
+
 #include <fstream>
 #include <iostream>
 
@@ -6,6 +7,7 @@
 
 #include "ClusterTools.h"
 #include "EuclideanMembershipFunction.h"
+#include "GetPot.h"
 #include "LabelPerPointVariableLengthVector.h"
 #include "PolylineMeshToVTKPolyDataFilter.h"
 #include "TrkVTKPolyDataFilter.txx"
@@ -13,38 +15,36 @@
 #include "itkDefaultStaticMeshTraits.h"
 #include "itkImage.h"
 #include "itkPolylineCell.h"
-
+#include <cmath>
 #include <vtkCellArray.h>
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataReader.h>
 #include <vtkPolyDataWriter.h>
 
-#include "GetPot.h"
-
 int main(int argc, char *argv[]) {
   enum { Dimension = 3 };
-  using PixelType                            = int;
-  const unsigned int PointDimension          = 3;
-  using PointDataType                        = std::vector<int>;
-  const unsigned int MaxTopologicalDimension = 3;
-  using CoordinateType                       = double;
-  using InterpolationWeightType              = double;
-  using MeshTraits =
-      itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
-                                   MaxTopologicalDimension, CoordinateType,
-                                   InterpolationWeightType, PointDataType>;
-  using HistogramMeshType = itk::Mesh<PixelType, PointDimension, MeshTraits>;
+  typedef int              PixelType;
+  const unsigned int       PointDimension = 3;
+  typedef std::vector<int> PointDataType;
+  const unsigned int       MaxTopologicalDimension = 3;
+  typedef double           CoordinateType;
+  typedef double           InterpolationWeightType;
+  typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
+                                       MaxTopologicalDimension, CoordinateType,
+                                       InterpolationWeightType, PointDataType>
+                                                           MeshTraits;
+  typedef itk::Mesh<PixelType, PointDimension, MeshTraits> HistogramMeshType;
 
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
-  using ColorMeshType    = itk::Mesh<PixelType, PointDimension>;
-  using PointType        = ColorMeshType::PointType;
-  using CellType         = ColorMeshType::CellType;
-  using PolylineCellType = itk::PolylineCell<CellType>;
-  // typedef VTKPolyDataToPolylineMeshFilter<MeshType> MeshConverterType;
+  typedef itk::Mesh<PixelType, PointDimension> ColorMeshType;
+  typedef ColorMeshType::PointType             PointType;
+  typedef ColorMeshType::CellType              CellType;
+  typedef itk::PolylineCell<CellType>          PolylineCellType;
+  //typedef VTKPolyDataToPolylineMeshFilter<MeshType> MeshConverterType;
   // typedef MeshType::CellsContainer::ConstIterator CellIteratorType;
-  using CellAutoPointer = ColorMeshType::CellAutoPointer;
+  typedef ColorMeshType::CellAutoPointer CellAutoPointer;
 
   GetPot cl(argc, const_cast<char **>(argv));
   if (cl.size() == 1 || cl.search(2, "--help", "-h")) {
@@ -68,8 +68,8 @@ int main(int argc, char *argv[]) {
   ImageType::Pointer mask;
 
   if (cl.search(2, "-m", "-M")) {
-    using ImageReaderType           = itk::ImageFileReader<ImageType>;
-    ImageReaderType::Pointer reader = ImageReaderType::New();
+    typedef itk::ImageFileReader<ImageType> ImageReaderType;
+    ImageReaderType::Pointer                reader = ImageReaderType::New();
     reader->SetFileName(cl.next(""));
     reader->Update();
     mask = reader->GetOutput();
@@ -92,8 +92,8 @@ int main(int argc, char *argv[]) {
   std::vector<ColorMeshType::Pointer> *     fixMeshes;
   std::vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
-  using ClusterToolsType =
-      ClusterTools<ColorMeshType, ImageType, HistogramMeshType>;
+  typedef ClusterTools<ColorMeshType, ImageType, HistogramMeshType>
+                            ClusterToolsType;
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
 
   std::vector<HistogramMeshType::Pointer> *histoMeshes;
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
           float                value = 0;
           if (mask->TransformPhysicalPointToIndex(firstPt, index)) {
             value = mask->GetPixel(index);
-            // std::cout <<  value << std::endl;
+            //std::cout <<  value << std::endl;
             if (val1 == 0 && value != 0)
               val1 = value;
 
@@ -172,8 +172,7 @@ int main(int argc, char *argv[]) {
       float dist = clean ? clusterTools->GetDistance((*histoMeshes)[i],
                                                      averageId, cellId)
                          : 0;
-      //			std::cout << dist << " " << stdCluster <<
-      // std::endl;
+      //			std::cout << dist << " " << stdCluster << std::endl;
       if (lenghtSoFar >= minLenght && lenghtSoFar <= maxLenght &&
           cellId % offset == 0 && (val1 != val2 || !filterUShape) &&
           (val1 != 0 || !maskFibers) && (dist <= stdCluster)) {
@@ -184,7 +183,7 @@ int main(int argc, char *argv[]) {
 
     ColorMeshType::Pointer om = ColorMeshType::New();
     om->SetCellsAllocationMethod(
-        ColorMeshType::CellsAllocatedDynamicallyCellByCell);
+        itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
 
     inputCellIt = input->GetCells()->Begin();
     for (int cellId = 0; inputCellIt != input->GetCells()->End();

@@ -22,11 +22,23 @@
 #include "CostFunctions.h"
 
 #include "RobustGaussian.h"
+#include <cassert>
+#include <fstream>
+#include <sstream>
+
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mrimorph.h"
 
 #define export // obsolete feature
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
 #include <vnl/vnl_det.h>
+#include <vnl/vnl_matrix.h>
+#include <vnl/vnl_matrix_fixed.h>
 #undef export
+
+using namespace std;
 
 std::pair<float, float> CostFunctions::minmax(MRI *i) {
   MRIiterator it1(i);
@@ -44,19 +56,19 @@ std::pair<float, float> CostFunctions::minmax(MRI *i) {
 
 double CostFunctions::mean(MRI *mri, int frame) {
   /*  int count = 0;
-    double d = 0.0;
-    MRIiterator it1(mri);
-    for (it1.begin(); !it1.isEnd(); it1++)
-    {
-      d += (*it1);
-      count++;
-    }
-    return (float) (d / count);*/
+  double d = 0.0;
+  MRIiterator it1(mri);
+  for (it1.begin(); !it1.isEnd(); it1++)
+  {
+    d += (*it1);
+    count++;
+  }
+  return (float) (d / count);*/
 
   // currently only for one frame at a time
   // future, return vector < double > for all frames and do
-  // mapping only once, then each process needs it's own vector < double >
-  // finally sum across processess (basically reduction on a vector)
+  // mapping only once, then each process needs it's own vector < double > finally
+  // sum across processess (basically reduction on a vector)
 
   double       d      = 0.0;
   unsigned int ocount = 0;
@@ -71,7 +83,7 @@ double CostFunctions::mean(MRI *mri, int frame) {
     double v;
     for (y = 0; y < mri->height; y++) {
       for (x = 0; x < mri->width; x++) {
-        // MRIsampleVolumeFrame(mri, x, y, z, frame, &v);
+        //MRIsampleVolumeFrame(mri, x, y, z, frame, &v);
         v = MRIgetVoxVal(mri, x, y, z, frame);
         if (v == -1) {
 #ifdef HAVE_OPENMP
@@ -106,8 +118,8 @@ double CostFunctions::mean(MRI *mri, const vnl_matrix_fixed<double, 4, 4> &Mi,
                            int xmax, int ymin, int ymax, int zmin, int zmax) {
   // currently only for one frame at a time
   // future, return vector < double > for all frames and do
-  // mapping only once, then each process needs it's own vector < double >
-  // finally sum across processess (basically reduction on a vector)
+  // mapping only once, then each process needs it's own vector < double > finally
+  // sum across processess (basically reduction on a vector)
 
   mri->outside_val = -1;
   if (frame < 0 || frame >= mri->nframes) {
@@ -148,7 +160,7 @@ double CostFunctions::mean(MRI *mri, const vnl_matrix_fixed<double, 4, 4> &Mi,
         yx = Mi[1][0] * x + yy;
         zx = Mi[2][0] * x + zy;
 
-        // for (f = 0; f < dt[3]; f++)
+        //for (f = 0; f < dt[3]; f++)
         //{
         MRIsampleVolumeFrame(mri, xx, yx, zx, frame, &v);
         if (v == -1) {
@@ -258,9 +270,9 @@ float CostFunctions::mad(MRI *i, float d) {
           if (vs == -1) continue;
           MRIsampleVolumeFrame(mriT, xt, yt, zt, f, &vt);
           if (vt == -1) continue;
-
+        
           dd = vs-vt;
-          d += dd*dd;
+          d += dd*dd;  
         }
       }
     }
@@ -356,8 +368,8 @@ double CostFunctions::leastSquares(MRI *mriS, MRI *mriT,
 
   int    z;
   double d = 0.0;
-  // double oepss = sout / 255.0;
-  // double oepst = tout / 255.0;
+  //double oepss = sout / 255.0;
+  //double oepst = tout / 255.0;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) reduction(+ : d)
 #endif
@@ -396,12 +408,12 @@ double CostFunctions::leastSquares(MRI *mriS, MRI *mriT,
           MRIsampleVolumeFrame(mriS, xs, ys, zs, f, &vs);
           if (vs == -1)
             continue;
-          // if (fabs (vs -sout) < oepss) continue;
+          //if (fabs (vs -sout) < oepss) continue;
           MRIsampleVolumeFrame(mriT, xt, yt, zt, f, &vt);
           if (vt == -1)
             continue;
-          // if (fabs (vs -sout) < oepss) vs = 0;
-          // if (fabs(vt -tout) < oepst) vt= 0;
+          //if (fabs (vs -sout) < oepss) vs = 0;
+          //if (fabs(vt -tout) < oepst) vt= 0;
 
           dd = (s1 * vs) - (s2 * vt);
           d += dd * dd;
@@ -553,14 +565,14 @@ double CostFunctions::leastSquares(MRI_BSPLINE *mriS, MRI_BSPLINE *mriT,
     //assert(i1->type == i2->type);
     for (it1.begin(); !it1.isEnd(); it1++)
     {
-      //cout << "it1: " << *it1 << " it2: " << *it2 << std::endl;
+      //cout << "it1: " << *it1 << " it2: " << *it2 << endl;
       dd = (double) (*it1) - (double) (*it2);
       d += dd * dd;
       it2++;
     }
 
   }
-  //cout << " d: " << d << std::endl;
+  //cout << " d: " << d << endl;
   return (float) d;
 }*/
 
@@ -570,8 +582,8 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
                                int d1, int d2, int d3) {
   int blockradius = 2;
   int bw          = 2 * blockradius + 1;
-  // int bw2 = bw*bw;
-  // int bw3 = bw*bw2;
+  //int bw2 = bw*bw;
+  //int bw3 = bw*bw2;
 
   mriS->outside_val = -1;
   mriT->outside_val = -1;
@@ -596,8 +608,8 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
   for (z = blockradius; z < dt[2]; z += d3) {
     int    x, y, f, i, j, k;
     double dd;
-    // double xs, ys, zs;
-    // double xt, yt, zt;
+    //double xs, ys, zs;
+    //double xt, yt, zt;
     double vs, vt;
 
     // precompute xyz coords for all z in block (include translation)
@@ -623,20 +635,18 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
           for (i = nz; i < nzm; i++)
             for (j = ny; j < nym; j++)
               for (k = nx; k < nxm; k++) {
-                // MRIsampleVolumeFrame(mriS, xsx[k]+xsy[j]+xsz[i],
-                // ysx[k]+ysy[j]+ysz[i], zsx[k]+zsy[j]+zsz[i], f, &vs);
+                //MRIsampleVolumeFrame(mriS, xsx[k]+xsy[j]+xsz[i], ysx[k]+ysy[j]+ysz[i], zsx[k]+zsy[j]+zsz[i], f, &vs);
                 vs = MRIgetVoxVal(nmriS, k, j, i, f);
                 if (vs == -1)
                   goto nextcoord;
-                // MRIsampleVolumeFrame(mriT, xtx[k]+xty[j]+xtz[i],
-                // ytx[k]+yty[j]+ytz[i], ztx[k]+zty[j]+ztz[i], f, &vt);
+                //MRIsampleVolumeFrame(mriT, xtx[k]+xty[j]+xtz[i], ytx[k]+yty[j]+ytz[i], ztx[k]+zty[j]+ztz[i], f, &vt);
                 vt = MRIgetVoxVal(nmriT, k, j, i, f);
                 if (vt == -1)
                   goto nextcoord;
                 tmean += vt;
                 smean += vs;
-                // tdata[counter]= vt;
-                // sdata[counter]= vs;
+                //tdata[counter]= vt;
+                //sdata[counter]= vs;
                 counter++;
               }
           tmean /= counter;
@@ -652,8 +662,7 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
                 vs = MRIgetVoxVal(nmriS, k, j, i, f);
                 if (vs == -1)
                   goto nextcoord;
-                // MRIsampleVolumeFrame(mriT, xtx[k]+xty[j]+xtz[i],
-                // ytx[k]+yty[j]+ytz[i], ztx[k]+zty[j]+ztz[i], f, &vt);
+                //MRIsampleVolumeFrame(mriT, xtx[k]+xty[j]+xtz[i], ytx[k]+yty[j]+ytz[i], ztx[k]+zty[j]+ztz[i], f, &vt);
                 vt = MRIgetVoxVal(nmriT, k, j, i, f);
                 if (vt == -1)
                   goto nextcoord;
@@ -663,10 +672,10 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
                 svar += tdd * tdd;
                 tvar += sdd * sdd;
               }
-          // svar /= bw3;
-          // tvar /= bw3;
+          //svar /= bw3;
+          //tvar /= bw3;
 
-          // d += dd / (bw3 * svar * tvar);
+          //d += dd / (bw3 * svar * tvar);
           if (svar == 0 || tvar == 0)
             goto nextcoord;
           svar = sqrt(svar);
@@ -674,8 +683,7 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
           d += fabs(dd / (svar * tvar));
 
           if (std::isnan(d)) {
-            std::cout << "d is nan " << dd << " " << svar << " " << tvar
-                      << std::endl;
+            cout << "d is nan " << dd << " " << svar << " " << tvar << endl;
             exit(1);
           }
 
@@ -684,8 +692,7 @@ double CostFunctions::localNCC(MRI *mriS, MRI *mriT,
 #endif
           dcount++;
         }
-      // I hate goto's but this is the easiest to break out of all the nested
-      // loops above
+      // I hate goto's but this is the easiest to break out of all the nested loops above
       nextcoord:
         i = 0; // needs something here
       }
@@ -758,8 +765,8 @@ double CostFunctions::NCC(MRI *mriS, MRI *mriT,
   MRI *nmriT = mapMRI(mriT, Mti, d1, d2, d3);
 
   // compute means for each frame
-  std::vector<double> meanS(mriS->nframes);
-  std::vector<double> meanT(mriT->nframes);
+  vector<double> meanS(mriS->nframes);
+  vector<double> meanT(mriT->nframes);
   assert(mriS->nframes == mriT->nframes);
   for (int f = 0; f < mriT->nframes; f++) {
     meanS[f] = mean(nmriS, f);
@@ -784,11 +791,11 @@ double CostFunctions::NCC(MRI *mriS, MRI *mriT,
       for (x = 0; x < nmriT->width; x++) {
 
         for (f = 0; f < nmriT->nframes; f++) {
-          // MRIsampleVolumeFrame(nmriS, x, y, z, f, &vs);
+          //MRIsampleVolumeFrame(nmriS, x, y, z, f, &vs);
           vs = MRIgetVoxVal(nmriS, x, y, z, f);
           if (vs == -1)
             continue;
-          // MRIsampleVolumeFrame(nmriT, x, y, z, f, &vt);
+          //MRIsampleVolumeFrame(nmriT, x, y, z, f, &vt);
           vt = MRIgetVoxVal(nmriT, x, y, z, f);
           if (vt == -1)
             continue;
@@ -820,7 +827,7 @@ double CostFunctions::NCC(MRI *mriS, MRI *mriT,
 }
 
 double CostFunctions::tukeyBiweight(MRI *i1, MRI *i2, double sat) {
-  assert(i1 != nullptr);
+  assert(i1 != NULL);
 
   if (i2) {
     assert(i1->width == i2->width);
@@ -832,7 +839,7 @@ double CostFunctions::tukeyBiweight(MRI *i1, MRI *i2, double sat) {
   float *diff = (float *)calloc(n, sizeof(float));
 
   int cc = 0;
-  if (i2 == nullptr) {
+  if (i2 == NULL) {
     MRIiterator it1(i1);
     for (it1.begin(); !it1.isEnd(); it1++)
       diff[cc] = (*it1);
@@ -841,14 +848,12 @@ double CostFunctions::tukeyBiweight(MRI *i1, MRI *i2, double sat) {
     MRIiterator it1(i1);
     MRIiterator it2(i2);
     it2.begin();
-    // assert(i1->type == i2->type);
+    //assert(i1->type == i2->type);
     for (it1.begin(); !it1.isEnd(); it1++) {
-      // std::cout << "it1: " << *it1 << " it2: " << *it2 << std::endl;
+      //cout << "it1: " << *it1 << " it2: " << *it2 << endl;
       diff[cc] = (*it1) - (*it2);
-      // if (isnan(diff[cc])) std::cout << "it1: " << *it1 << " it2: " << *it2 <<
-      // endl;
-      ////if (diff[cc] != 0.0) std::cout << "it1: " << *it1 << " it2: " << *it2 <<
-      /// endl;
+      //if (isnan(diff[cc])) cout << "it1: " << *it1 << " it2: " << *it2 << endl;
+      ////if (diff[cc] != 0.0) cout << "it1: " << *it1 << " it2: " << *it2 << endl;
       cc++;
       it2++;
     }
@@ -863,22 +868,21 @@ double CostFunctions::tukeyBiweight(MRI *i1, MRI *i2, double sat) {
   exit(1);
 
   float sigma = RobustGaussian<float>::mad(diff, n);
-  // if (sigma == 0.0)
+  //if (sigma == 0.0)
   sigma = 1.4826;
-  std::cout << "sigma: " << sigma << std::endl;
+  cout << "sigma: " << sigma << endl;
   double d = 0;
   for (int i = 0; i < n; i++)
     d += rhoTukeyBiweight(diff[i] / sigma, sat);
 
   free(diff);
-  std::cout << " d: " << d << std::endl;
+  cout << " d: " << d << endl;
   return d;
 }
 
 /*double CostFunctions::tukeyBiweight(MRI *mriS, MRI* mriT,
     const vnl_matrix_fixed<double, 4, 4>& Msi,
-    const vnl_matrix_fixed<double, 4, 4>& Mti, int d1, int d2, int d3, double
-sat)
+    const vnl_matrix_fixed<double, 4, 4>& Mti, int d1, int d2, int d3, double sat)
 {
   mriS->outside_val = -1;
   mriT->outside_val = -1;
@@ -891,7 +895,7 @@ sat)
   double d = 0.0;
 
 #ifdef HAVE_OPENMP
-#pragma omp parallel for schedule(static)  reduction(+:d)
+#pragma omp parallel for schedule(static)  reduction(+:d) 
 #endif
   for (z = 0; z < dt[2]; z += d3)
   {
@@ -902,7 +906,7 @@ sat)
     double vs, vt;
     double xtz,ytz,ztz,xsz,ysz,zsz;
     double xty,yty,zty,xsy,ysy,zsy;
-
+  
     xtz = Mti[0][2] * z + Mti[0][3];
     ytz = Mti[1][2] * z + Mti[1][3];
     ztz = Mti[2][2] * z + Mti[2][3];
@@ -933,9 +937,9 @@ sat)
           if (vs == -1) continue;
           MRIsampleVolumeFrame(mriT, xt, yt, zt, f, &vt);
           if (vt == -1) continue;
-
+        
           dd = vs-vt;
-          d += rhoTukeyBiweight(dd,sat);
+          d += rhoTukeyBiweight(dd,sat);  
         }
       }
     }
@@ -1010,7 +1014,7 @@ double CostFunctions::tukeyBiweight(MRI *mriS, MRI *mriT,
             continue;
 
           dd = vs - vt;
-          // d += rhoTukeyBiweight(dd,sat);
+          //d += rhoTukeyBiweight(dd,sat);
           diff[zpos + count] = (float)dd;
           count++;
         }
@@ -1019,10 +1023,10 @@ double CostFunctions::tukeyBiweight(MRI *mriS, MRI *mriT,
   }
 
   // float sigma = RobustGaussian<float>::mad(diff, n);
-  // if (sigma == 0.0)
-  // sigma = 1.4826;
-  // std::cout << "sigma: " << sigma << std::endl;
-  // if (sigma < 1.0) sigma = 1;
+  //if (sigma == 0.0)
+  //sigma = 1.4826;
+  //cout << "sigma: " << sigma << endl;
+  //if (sigma < 1.0) sigma = 1;
 
   double d = 0.0;
 #ifdef HAVE_OPENMP
@@ -1088,7 +1092,7 @@ std::vector<double> CostFunctions::centroid(MRI *i)
 // M_100/M_000 , M_010/M_000 , M_001 / M_000
 // now ignore outside_vals in centroid computation (for white backgrounds)
 {
-  // std::cout << "CostFunctions::centroid" << std::endl;
+  //cout << "CostFunctions::centroid" << endl;
   std::vector<double> dd(3, 0.0);
   double              n = 0;
   double              val;
@@ -1108,8 +1112,8 @@ std::vector<double> CostFunctions::centroid(MRI *i)
   dd[1] = dd[1] / n;
   dd[2] = dd[2] / n;
   if (std::isnan(dd[0] + dd[1] + dd[2])) {
-    std::cerr << "CostFunctions::centroid is NAN (empty image? n = " << n
-              << " )" << std::endl;
+    cerr << "CostFunctions::centroid is NAN (empty image? n = " << n << " )"
+         << endl;
     exit(1);
   }
 
@@ -1198,21 +1202,21 @@ vnl_matrix_fixed<double, 3, 3> CostFunctions::orientation(MRI *i)
   //   assert(eval[1] >= eval[2]);
 
   // make det positive:
-  // double d = MatrixDeterminant(evec);
+  //double d = MatrixDeterminant(evec);
   double d = vnl_det(evec);
-  // vnl_matlab_print(vcl_cerr,evec,"evec",vnl_matlab_print_format_long);
-  // std::cout << " det = " << d << std::endl;
+  //vnl_matlab_print(vcl_cerr,evec,"evec",vnl_matlab_print_format_long);
+  //cout << " det = " << d << endl;
   if (d < 0) {
-    // std::cout << "Orientation: neg. determinant ..  fixing" << std::endl;
+    //cout << "Orientation: neg. determinant ..  fixing" << endl;
     for (int r = 0; r < 3; r++)
       evec[r][0] = -evec[r][0];
-    // vnl_matlab_print(vcl_cerr,evec,"evec2",vnl_matlab_print_format_long);
+    //vnl_matlab_print(vcl_cerr,evec,"evec2",vnl_matlab_print_format_long);
   }
 
-  // std::cout << " evals: " << eval[0] << " " << eval[1] << " " << eval[2] << std::endl;
-  // std::cout << " evecs: " << std::endl;
+  //cout << " evals: " << eval[0] << " " << eval[1] << " " << eval[2] << endl;
+  //cout << " evecs: " << endl;
   // MatrixPrintFmt(stdout,"% 2.8f",evec);
 
-  // MatrixFree(&cov);
+  //MatrixFree(&cov);
   return evec;
 }

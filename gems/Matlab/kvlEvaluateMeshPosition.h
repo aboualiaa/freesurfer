@@ -18,9 +18,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(EvaluateMeshPosition, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // [ cost gradient ] = kvlEvaluateMeshPosition( calculator, mesh )
@@ -37,23 +36,18 @@ public:
     const int calculatorHandle = *(static_cast<int *>(mxGetData(prhs[0])));
     itk::Object::ConstPointer object =
         kvl::MatlabObjectArray::GetInstance()->GetObject(calculatorHandle);
-    // if ( typeid( *object ) != typeid(
-    // kvl::AtlasMeshPositionCostAndGradientCalculator ) )
+    // if ( typeid( *object ) != typeid( kvl::AtlasMeshPositionCostAndGradientCalculator ) )
     //   {
     //   std::cout << "typeid: " << typeid( *object ).name() << std::endl;
-    //   mexErrMsgTxt( "calculator doesn't refer to the correct ITK object type"
-    //   );
+    //   mexErrMsgTxt( "calculator doesn't refer to the correct ITK object type" );
     //   }
-    // kvl::AtlasMeshPositionCostAndGradientCalculator::ConstPointer
-    // constCalculator
-    //                 = static_cast< const
-    //                 kvl::AtlasMeshPositionCostAndGradientCalculator* >(
-    //                 object.GetPointer() );
+    // kvl::AtlasMeshPositionCostAndGradientCalculator::ConstPointer  constCalculator
+    //                 = static_cast< const kvl::AtlasMeshPositionCostAndGradientCalculator* >( object.GetPointer() );
     kvl::AtlasMeshPositionCostAndGradientCalculator::ConstPointer
         constCalculator = dynamic_cast<
             const kvl::AtlasMeshPositionCostAndGradientCalculator *>(
             object.GetPointer());
-    if (constCalculator.GetPointer() == nullptr) {
+    if (!constCalculator.GetPointer()) {
       std::cout << "typeid: " << typeid(*object).name() << std::endl;
       mexErrMsgTxt("calculator doesn't refer to the correct ITK object type");
     }
@@ -66,15 +60,13 @@ public:
     object = kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
     kvl::AtlasMesh::ConstPointer constMesh =
         static_cast<const kvl::AtlasMesh *>(object.GetPointer());
-    // kvl::AtlasMesh::Pointer mesh = const_cast< kvl::AtlasMesh* >(
-    // constMesh.GetPointer() );
+    //kvl::AtlasMesh::Pointer mesh = const_cast< kvl::AtlasMesh* >( constMesh.GetPointer() );
 
     // Let the beast go
     calculator->Rasterize(constMesh);
@@ -88,12 +80,12 @@ public:
     plhs[0] = mxCreateDoubleScalar(cost);
 
     const int numberOfNodes = gradient->Size();
-    // std::cout << "numberOfNodes :" << numberOfNodes << std::endl;
+    //std::cout << "numberOfNodes :" << numberOfNodes << std::endl;
     mwSize dims[2];
-    dims[0]    = numberOfNodes;
-    dims[1]    = 3;
-    plhs[1]    = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-    auto *data = static_cast<double *>(mxGetData(plhs[1]));
+    dims[0]      = numberOfNodes;
+    dims[1]      = 3;
+    plhs[1]      = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+    double *data = static_cast<double *>(mxGetData(plhs[1]));
 
     for (AtlasPositionGradientContainerType::ConstIterator it =
              gradient->Begin();
@@ -106,13 +98,11 @@ public:
   }
 
 protected:
-  EvaluateMeshPosition() = default;
-  ;
-  ~EvaluateMeshPosition() override = default;
-  ;
+  EvaluateMeshPosition(){};
+  virtual ~EvaluateMeshPosition(){};
 
-  EvaluateMeshPosition(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  EvaluateMeshPosition(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 private:
 };

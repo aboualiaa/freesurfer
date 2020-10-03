@@ -11,10 +11,10 @@ class AtlasMeshToIntensityImageCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshToIntensityImageCostAndGradientCalculator;
-  using Superclass   = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshToIntensityImageCostAndGradientCalculator Self;
+  typedef AtlasMeshPositionCostAndGradientCalculator         Superclass;
+  typedef itk::SmartPointer<Self>                            Pointer;
+  typedef itk::SmartPointer<const Self>                      ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -24,7 +24,7 @@ public:
                AtlasMeshPositionCostAndGradientCalculator);
 
   /** Some typedefs */
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
   /** */
   void SetImages(const std::vector<ImageType::ConstPointer> &images);
@@ -56,12 +56,12 @@ protected:
 
 private:
   AtlasMeshToIntensityImageCostAndGradientCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
-  using LikelihoodFilterType = GMMLikelihoodImageFilter<ImageType>;
-  LikelihoodFilterType::Pointer m_LikelihoodFilter;
+  typedef GMMLikelihoodImageFilter<ImageType> LikelihoodFilterType;
+  LikelihoodFilterType::Pointer               m_LikelihoodFilter;
 };
 
 } // end namespace kvl

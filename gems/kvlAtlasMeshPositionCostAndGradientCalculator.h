@@ -15,10 +15,10 @@ namespace kvl {
 class AtlasMeshPositionCostAndGradientCalculator : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasMeshPositionCostAndGradientCalculator;
-  using Superclass   = AtlasMeshRasterizor;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshPositionCostAndGradientCalculator Self;
+  typedef AtlasMeshRasterizor                        Superclass;
+  typedef itk::SmartPointer<Self>                    Pointer;
+  typedef itk::SmartPointer<const Self>              ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -27,7 +27,7 @@ public:
   itkTypeMacro(AtlasMeshPositionCostAndGradientCalculator, AtlasMeshRasterizor);
 
   /** Some typedefs */
-  using TransformType = itk::AffineTransform<double, 3>;
+  typedef itk::AffineTransform<double, 3> TransformType;
 
   /** */
   void SetMeshToImageTransform(const TransformType *meshToImageTransform);
@@ -105,8 +105,7 @@ protected:
       AtlasPositionGradientType &gradientInVertex2,
       AtlasPositionGradientType &gradientInVertex3);
 
-  // Let's provide a "hook" for adding non-tetrahdron-based cost and gradient
-  // contributions
+  // Let's provide a "hook" for adding non-tetrahdron-based cost and gradient contributions
   virtual void PostProcessCostAndGradient(const AtlasMesh *mesh) {}
 
   //
@@ -134,11 +133,11 @@ protected:
 
 private:
   AtlasMeshPositionCostAndGradientCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
-  using SlidingBoundaryCorrectionMatrixType = itk::Matrix<double>;
+  typedef itk::Matrix<double>         SlidingBoundaryCorrectionMatrixType;
   SlidingBoundaryCorrectionMatrixType m_SlidingBoundaryCorrectionMatrices[8];
 
   //

@@ -18,9 +18,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(GetMeshNodePositions, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // positions = kvlGetMeshNodePositions( mesh )
@@ -36,8 +35,7 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
@@ -46,12 +44,12 @@ public:
 
     // Copy the alphas in the mesh nodes into a Matlab matrix
     const int numberOfNodes = mesh->GetPoints()->Size();
-    // std::cout << "numberOfNodes :" << numberOfNodes << std::endl;
+    //std::cout << "numberOfNodes :" << numberOfNodes << std::endl;
     mwSize dims[2];
-    dims[0]    = numberOfNodes;
-    dims[1]    = 3;
-    plhs[0]    = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-    auto *data = static_cast<double *>(mxGetData(plhs[0]));
+    dims[0]      = numberOfNodes;
+    dims[1]      = 3;
+    plhs[0]      = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+    double *data = static_cast<double *>(mxGetData(plhs[0]));
 
     for (AtlasMesh::PointsContainer::ConstIterator it =
              mesh->GetPoints()->Begin();
@@ -64,13 +62,11 @@ public:
   }
 
 protected:
-  GetMeshNodePositions() = default;
-  ;
-  ~GetMeshNodePositions() override = default;
-  ;
+  GetMeshNodePositions(){};
+  virtual ~GetMeshNodePositions(){};
 
-  GetMeshNodePositions(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  GetMeshNodePositions(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 private:
 };

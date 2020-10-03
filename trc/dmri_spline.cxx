@@ -18,23 +18,44 @@
  *
  */
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
 #include "spline.h"
 
+using namespace std;
+
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options();
 
 int debug = 0, checkoptsonly = 0;
@@ -53,8 +74,7 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
+  int nargs, cputime;
 
   nargs = handleVersionOption(argc, argv, "dmri_spline");
   if (nargs && argc - nargs == 1)
@@ -68,17 +88,15 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options();
 
@@ -147,74 +165,64 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int    nargc;
-  int    nargsused;
-  char **pargv;
-  char * option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--cpts") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--cpts")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       inFile    = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--out") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--out")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       outVolFile = fio_fullpath(pargv[0]);
       nargsused  = 1;
-    } else if (strcmp(option, "--outpts") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outpts")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       outTextFile = fio_fullpath(pargv[0]);
       nargsused   = 1;
-    } else if (strcmp(option, "--outvec") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outvec")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       outVecBase = fio_fullpath(pargv[0]);
       nargsused  = 1;
-    } else if (strcmp(option, "--mask") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--mask")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       maskFile  = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--show") == 0) {
+    } else if (!strcmp(option, "--show"))
       showControls = true;
-    } else {
+    else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -224,63 +232,59 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
-  std::cout
-      << std::endl
-      << "USAGE: " << Progname << std::endl
-      << std::endl
-      << "Basic inputs" << std::endl
-      << "   --cpts <file>:" << std::endl
-      << "     Input text file containing control points" << std::endl
-      << "   --mask <file>:" << std::endl
-      << "     Input mask volume (spline is not allowed to stray off mask)"
-      << std::endl
-      << std::endl
-      << "Outputs (at least one output type must be specified)" << std::endl
-      << "   --out <file>:" << std::endl
-      << "     Output volume of the interpolated spline" << std::endl
-      << "   --show:" << std::endl
-      << "     Highlight control points in output volume (default: no)"
-      << std::endl
-      << "   --outpts <file>:" << std::endl
-      << "     Output text file containing all interpolated spline points"
-      << std::endl
-      << "   --outvec <base>:" << std::endl
-      << "     Base name of output text files containing tangent vectors,"
-      << std::endl
-      << "     normal vectors, and curvatures at every point along the"
-      << std::endl
-      << "     spline (both analytical and finite-difference versions)"
-      << std::endl
-      << std::endl
-      << "Other options" << std::endl
-      << "   --debug:     turn on debugging" << std::endl
-      << "   --checkopts: don't run anything, just check options and exit"
-      << std::endl
-      << "   --help:      print out information on how to use this program"
-      << std::endl
-      << "   --version:   print out version and exit" << std::endl
-      << std::endl;
+static void print_usage(void) {
+  cout << endl
+       << "USAGE: " << Progname << endl
+       << endl
+       << "Basic inputs" << endl
+       << "   --cpts <file>:" << endl
+       << "     Input text file containing control points" << endl
+       << "   --mask <file>:" << endl
+       << "     Input mask volume (spline is not allowed to stray off mask)"
+       << endl
+       << endl
+       << "Outputs (at least one output type must be specified)" << endl
+       << "   --out <file>:" << endl
+       << "     Output volume of the interpolated spline" << endl
+       << "   --show:" << endl
+       << "     Highlight control points in output volume (default: no)" << endl
+       << "   --outpts <file>:" << endl
+       << "     Output text file containing all interpolated spline points"
+       << endl
+       << "   --outvec <base>:" << endl
+       << "     Base name of output text files containing tangent vectors,"
+       << endl
+       << "     normal vectors, and curvatures at every point along the" << endl
+       << "     spline (both analytical and finite-difference versions)" << endl
+       << endl
+       << "Other options" << endl
+       << "   --debug:     turn on debugging" << endl
+       << "   --checkopts: don't run anything, just check options and exit"
+       << endl
+       << "   --help:      print out information on how to use this program"
+       << endl
+       << "   --version:   print out version and exit" << endl
+       << endl;
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
-  std::cout << std::endl << "..." << std::endl << std::endl;
+  cout << endl << "..." << endl << endl;
 
   exit(1);
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
 static void print_version(void) {
-  std::cout << getVersion() << std::endl;
+  cout << getVersion() << endl;
   exit(1);
 }
 
@@ -298,6 +302,7 @@ static void check_options(void) {
     cout << "ERROR: Must specify at least one type of output file" << endl;
     exit(1);
   }
+  return;
 }
 
 /* --------------------------------------------- */

@@ -44,20 +44,22 @@
 #undef export
 
 #include <complex>
+#include <vcl_compiler.h>
+
+using namespace std;
 
 /** \class MyMatrix
- * \brief A static class with Matrix operations (conversion, sqrt,
- * decomposition, distances etc.)
+ * \brief A static class with Matrix operations (conversion, sqrt, decomposition, distances etc.)
  */
 class MyMatrix {
 public:
   //! Convert VNL vector to FS MATRIX
   static MATRIX *convertVNL2MATRIX(const vnl_vector<double> &v,
-                                   MATRIX *                  outM = nullptr);
+                                   MATRIX *                  outM = NULL);
 
   //! Convert VNL matrix to FS MATRIX
   static MATRIX *convertVNL2MATRIX(const vnl_matrix<double> &v,
-                                   MATRIX *                  outM = nullptr);
+                                   MATRIX *                  outM = NULL);
 
   //! Convert FS VECTOR to VNL vector
   static vnl_vector<double> convertVECTOR2VNL(VECTOR *m);
@@ -65,8 +67,7 @@ public:
   //! Convert FS MATRIX to VNL matrix
   static vnl_matrix<double> convertMATRIX2VNL(MATRIX *m);
 
-  //======== VNL MATRIX STUFF
-  //===========================================================================
+  //======== VNL MATRIX STUFF ===========================================================================
 
   //! Matrix Square Root (Denman and Beavers)
   static vnl_matrix<double> MatrixSqrtIter(const vnl_matrix<double> &m);
@@ -105,16 +106,15 @@ public:
   static void PolarDecomposition(const vnl_matrix<double> &A,
                                  vnl_matrix<double> &R, vnl_matrix<double> &S);
 
-  //! Advanced Polar Decomposition A = Rot * Shear * Scale  (where scale is
-  //! diag)
+  //! Advanced Polar Decomposition A = Rot * Shear * Scale  (where scale is diag)
   static void Polar2Decomposition(const vnl_matrix<double> &A,
                                   vnl_matrix<double> &R, vnl_matrix<double> &S,
                                   vnl_diag_matrix<double> &D);
 
   //! Complex Schur Decomposition
-  static void SchurComplex(const vnl_matrix<double> &        A,
-                           vnl_matrix<std::complex<double>> &U,
-                           vnl_matrix<std::complex<double>> &T);
+  static void SchurComplex(const vnl_matrix<double> &   A,
+                           vnl_matrix<complex<double>> &U,
+                           vnl_matrix<complex<double>> &T);
 
   //! Test if diagonal (eps)
   static bool isDiag(const vnl_matrix<double> &A,
@@ -178,29 +178,27 @@ public:
   getMfromRT(const vnl_matrix_fixed<double, 3, 3> &r,
              const vnl_vector_fixed<double, 3> &   t);
 
-  //========= FS MATRIX STUFF
-  //========================================================================
+  //========= FS MATRIX STUFF ========================================================================
 
   //! (FS MATRIX) Squared distance based on rigid transformation
-  static double RigidTransDistSq(MATRIX *a, MATRIX *b = nullptr);
+  static double RigidTransDistSq(MATRIX *a, MATRIX *b = NULL);
 
   //! (FS MATRIX) Squared distance based on affine transformation
-  static double AffineTransDistSq(MATRIX *a, MATRIX *b = nullptr,
-                                  double r = 100);
+  static double AffineTransDistSq(MATRIX *a, MATRIX *b = NULL, double r = 100);
 
   //! (FS MATRIX) Distance based on frobenius norm
   static double getFrobeniusDiff(MATRIX *m1, MATRIX *m2);
 
   //! (FS MATRIX) Matrix Square Root (Denman and Beavers)
-  static MATRIX *MatrixSqrtIter(MATRIX *m, MATRIX *sqrtm = nullptr);
+  static MATRIX *MatrixSqrtIter(MATRIX *m, MATRIX *sqrtm = NULL);
 
   // conversions
   static MATRIX *getMatrix(std::vector<double> d, int r, int c = -1,
-                           MATRIX *m = nullptr);
+                           MATRIX *m = NULL);
   static MATRIX *aff2mat(MATRIX *aff, MATRIX *outM);
-  static MATRIX *getHalfRT(MATRIX *m, MATRIX *mhalf = nullptr);
+  static MATRIX *getHalfRT(MATRIX *m, MATRIX *mhalf = NULL);
   static double  RotMatrixLogNorm(MATRIX *m);
-  static double  RotMatrixGeoDist(MATRIX *a, MATRIX *b = nullptr);
+  static double  RotMatrixGeoDist(MATRIX *a, MATRIX *b = NULL);
   static std::pair<MATRIX *, VECTOR *> getRTfromM(MATRIX *M, MATRIX *R,
                                                   VECTOR *T);
   static MATRIX *getMfromRT(MATRIX *R, VECTOR *T, MATRIX *M);
@@ -219,38 +217,37 @@ private:
   // helpers for log
   static void gauss_legendre(int n, vnl_vector<double> &x,
                              vnl_vector<double> &w);
-  static vnl_matrix<std::complex<double>>
-  MatrixLog_pf(const vnl_matrix<std::complex<double>> &A, unsigned int m);
-  static vnl_matrix<std::complex<double>>
-                          MatrixLog_isst(const vnl_matrix<std::complex<double>> &A,
-                                         int                                     maxlogiter = 100);
-  static std::vector<int> blocking(const vnl_matrix<std::complex<double>> &A,
+  static vnl_matrix<complex<double>>
+  MatrixLog_pf(const vnl_matrix<complex<double>> &A, unsigned int m);
+  static vnl_matrix<complex<double>>
+                          MatrixLog_isst(const vnl_matrix<complex<double>> &A, int maxlogiter = 100);
+  static std::vector<int> blocking(const vnl_matrix<complex<double>> &A,
                                    double delta = 0.1);
   static void swapping(const std::vector<int> &m, std::vector<int> &mm,
                        std::vector<std::vector<int>> &ind);
   static std::vector<int> cumsum0(const std::vector<int> &                   v,
                                   const std::vector<std::pair<double, int>> &w);
-  static vnl_matrix<std::complex<double>>
-  sylv_tri(const vnl_matrix<std::complex<double>> &T,
-           const vnl_matrix<std::complex<double>> &U,
-           const vnl_matrix<std::complex<double>> &B);
-  static vnl_matrix<std::complex<double>>
-              getSubMatrix(const vnl_matrix<std::complex<double>> &A,
+  static vnl_matrix<complex<double>>
+  sylv_tri(const vnl_matrix<complex<double>> &T,
+           const vnl_matrix<complex<double>> &U,
+           const vnl_matrix<complex<double>> &B);
+  static vnl_matrix<complex<double>>
+              getSubMatrix(const vnl_matrix<complex<double>> &A,
                            const std::vector<int> &rows, const std::vector<int> &cols);
-  static void setSubMatrix(vnl_matrix<std::complex<double>> &      A,
-                           const std::vector<int> &                rows,
-                           const std::vector<int> &                cols,
-                           const vnl_matrix<std::complex<double>> &B);
-  static void OrdSchurComplexLogical(const vnl_matrix<std::complex<double>> &U,
-                                     const vnl_matrix<std::complex<double>> &T,
-                                     const std::vector<int> &          select,
-                                     vnl_matrix<std::complex<double>> &US,
-                                     vnl_matrix<std::complex<double>> &TS);
-  static void OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
-                              const vnl_matrix<std::complex<double>> &T,
-                              const std::vector<int> &                clusters,
-                              vnl_matrix<std::complex<double>> &      US,
-                              vnl_matrix<std::complex<double>> &      TS);
+  static void setSubMatrix(vnl_matrix<complex<double>> &      A,
+                           const std::vector<int> &           rows,
+                           const std::vector<int> &           cols,
+                           const vnl_matrix<complex<double>> &B);
+  static void OrdSchurComplexLogical(const vnl_matrix<complex<double>> &U,
+                                     const vnl_matrix<complex<double>> &T,
+                                     const std::vector<int> &           select,
+                                     vnl_matrix<complex<double>> &      US,
+                                     vnl_matrix<complex<double>> &      TS);
+  static void OrdSchurComplex(const vnl_matrix<complex<double>> &U,
+                              const vnl_matrix<complex<double>> &T,
+                              const std::vector<int> &           clusters,
+                              vnl_matrix<complex<double>> &      US,
+                              vnl_matrix<complex<double>> &      TS);
 };
 
 // // helper code to print vectors for debugging
@@ -264,8 +261,7 @@ private:
 //    std::cout << "]" << std::endl << std::endl;
 // }
 //
-// template <class T, class U> void Print(std::vector<std::pair < T, U > > &
-// Vec)
+// template <class T, class U> void Print(std::vector<std::pair < T, U > > & Vec)
 // {
 //    typename std::vector< std::pair < T,U> >::iterator p;
 //

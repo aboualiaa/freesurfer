@@ -18,8 +18,7 @@ void FilterFibers<TInputMesh, TOutputMesh>::GenerateData() {
   typedef std::mt19937 generator;
   //	typedef std::tr1::mt19937 eng;
   //			std::default_random_engine generator;
-  //			std::uniform_real_distribution<float> uniform(0,
-  //this->GetInput()->GetNumberOfCells());
+  //			std::uniform_real_distribution<float> uniform(0, this->GetInput()->GetNumberOfCells());
   std::uniform_int<double> uniform(0, this->GetInput()->GetNumberOfCells());
   //	 std::tr1::uniform_int<int> unif(1, 52);
 

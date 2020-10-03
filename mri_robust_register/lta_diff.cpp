@@ -17,25 +17,46 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
+#include <cassert>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <vcl_iostream.h>
+#include <vector>
 
 #define export // obsolete feature 'export template' used in these headers
 #include <vnl/algo/vnl_determinant.h>
+#include <vnl/vnl_matlab_print.h>
+#include <vnl/vnl_matrix.h>
 #undef export
 
+#include "MyMatrix.h"
 #include "Registration.h"
 
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mrimorph.h"
+#include "timer.h"
+#include "transform.h"
 #include "version.h"
 
+using namespace std;
+
 struct Parameters {
-  std::string progname;
-  std::string t1name;
-  std::string t2name;
-  int         disttype;
-  double      normdiv;
-  bool        invert1;
-  bool        invert2;
-  bool        vox2vox;
-  double      radius;
+  string progname;
+  string t1name;
+  string t2name;
+  int    disttype;
+  double normdiv;
+  bool   invert1;
+  bool   invert2;
+  bool   vox2vox;
+  double radius;
 };
 
 static struct Parameters P = {"", "", "", 2, 1.0, false, false, false, 100.0};
@@ -43,7 +64,7 @@ static struct Parameters P = {"", "", "", 2, 1.0, false, false, false, 100.0};
 /*----------------------------------------------------------------------
  ----------------------------------------------------------------------*/
 #include "lta_diff.help.xml.h"
-static void printUsage() {
+static void printUsage(void) {
   outputHelpXml(lta_diff_help_xml, lta_diff_help_xml_len);
 }
 
@@ -65,45 +86,42 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   }
   StrUpper(option);
 
-  // std::cout << " option: " << option << std::endl;
+  //cout << " option: " << option << endl;
 
   if (!strcmp(option, "DIST") || !strcmp(option, "D")) {
     P.disttype = atoi(argv[1]);
     nargs      = 1;
-    std::cout << "--dist: Computing distance type: " << P.disttype << " ."
-              << std::endl;
+    cout << "--dist: Computing distance type: " << P.disttype << " ." << endl;
   } else if (!strcmp(option, "NORMDIV")) {
     P.normdiv = atof(argv[1]);
     nargs     = 1;
-    std::cout << "--normdiv: divide final distance by " << P.normdiv << " ."
-              << std::endl;
+    cout << "--normdiv: divide final distance by " << P.normdiv << " ." << endl;
   } else if (!strcmp(option, "RADIUS")) {
     P.radius = atof(argv[1]);
     nargs    = 1;
-    std::cout << "--radius: use RMS radius " << P.radius << "mm." << std::endl;
+    cout << "--radius: use RMS radius " << P.radius << "mm." << endl;
   } else if (!strcmp(option, "INVERT1")) {
     P.invert1 = true;
     nargs     = 0;
-    std::cout << "--invert1: inverting first transform. " << std::endl;
+    cout << "--invert1: inverting first transform. " << endl;
   } else if (!strcmp(option, "INVERT2")) {
     P.invert2 = true;
     nargs     = 0;
-    std::cout << "--invert2: inverting second transform. " << std::endl;
+    cout << "--invert2: inverting second transform. " << endl;
   } else if (!strcmp(option, "VOX")) {
     P.vox2vox = true;
     nargs     = 0;
-    std::cout
-        << "--vox: analysing VOX to VOX transform (after correcting for voxel "
-           "size). "
-        << std::endl;
+    cout << "--vox: analysing VOX to VOX transform (after correcting for voxel "
+            "size). "
+         << endl;
   } else if (!strcmp(option, "HELP") || !strcmp(option, "H")) {
     printUsage();
     exit(1);
   } else {
-    std::cerr << std::endl
-              << std::endl
-              << "ERROR: Option: " << argv[0] << " unknown !! " << std::endl
-              << std::endl;
+    cerr << endl
+         << endl
+         << "ERROR: Option: " << argv[0] << " unknown !! " << endl
+         << endl;
     exit(1);
   }
 
@@ -140,14 +158,14 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
     exit(1);
   }
 
-  std::cout << std::endl;
+  cout << endl;
   // Read positional arguments
   if (ISOPTION(*argv[0])) {
     printUsage();
-    std::cerr << std::endl
-              << std::endl
-              << "ERROR: Please specify a transform file first !  " << std::endl
-              << std::endl;
+    cerr << endl
+         << endl
+         << "ERROR: Please specify a transform file first !  " << endl
+         << endl;
 
     exit(1);
   }
@@ -156,19 +174,18 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
   P.t1name = argv[0];
   argc--;
   argv++;
-  std::cout << "First transform is " << P.t1name << std::endl;
+  cout << "First transform is " << P.t1name << endl;
 
   // read second transform if passed
   if (argc > 0 && !ISOPTION(*argv[0])) {
     P.t2name = argv[0];
     if (P.t2name == "identity.nofile") {
       P.t2name = "";
-      std::cout
-          << "No need to pass identity.nofile as 2nd, omitting it will work "
-             "the same."
-          << std::endl;
+      cout << "No need to pass identity.nofile as 2nd, omitting it will work "
+              "the same."
+           << endl;
     } else
-      std::cout << "Second transform is " << P.t2name << std::endl;
+      cout << "Second transform is " << P.t2name << endl;
 
     argc--;
     argv++;
@@ -178,20 +195,19 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
   if (argc > 0 && !ISOPTION(*argv[0])) {
     P.disttype = atoi(argv[0]);
     if (P.disttype == 0) {
-      std::cerr << "ERROR: --dist: \"" << P.disttype
-                << "\" not valid, expecting <int> 1... !" << std::endl;
+      cerr << "ERROR: --dist: \"" << P.disttype
+           << "\" not valid, expecting <int> 1... !" << endl;
       exit(1);
     }
-    std::cout << "Using distance " << P.disttype << " ..." << std::endl;
+    cout << "Using distance " << P.disttype << " ..." << endl;
     argc--;
     argv++;
-    std::cout
-        << std::endl
-        << "WARNING: passing 'distance type' as positional 3rd argument is "
-           "deprecated and will be removed in future versions! Use --dist "
-           "<int> ..."
-        << std::endl
-        << std::endl;
+    cout << endl
+         << "WARNING: passing 'distance type' as positional 3rd argument is "
+            "deprecated and will be removed in future versions! Use --dist "
+            "<int> ..."
+         << endl
+         << endl;
   }
 
   // read normdiv if passed as positional (to be backward compatible)
@@ -199,14 +215,13 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
     P.normdiv = atof(argv[0]);
     argc--;
     argv++;
-    std::cout << "Using normdiv " << P.normdiv << " ..." << std::endl;
-    std::cout
-        << std::endl
-        << "WARNING: passing 'normdiv' as positional 4th argument is "
-           "deprecated and will be removed in future versions! Use --normdiv "
-           "<float> ..."
-        << std::endl
-        << std::endl;
+    cout << "Using normdiv " << P.normdiv << " ..." << endl;
+    cout << endl
+         << "WARNING: passing 'normdiv' as positional 4th argument is "
+            "deprecated and will be removed in future versions! Use --normdiv "
+            "<float> ..."
+         << endl
+         << endl;
   }
 
   // read invert if passed as positional (to be backward compatible)
@@ -214,21 +229,20 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
     int invert = atoi(argv[0]);
     if (invert == 1) {
       P.invert1 = true;
-      std::cout << "Will invert first transform ..." << std::endl;
+      cout << "Will invert first transform ..." << endl;
     }
     if (invert == 2) {
       P.invert2 = true;
-      std::cout << "Will invert second transform ..." << std::endl;
+      cout << "Will invert second transform ..." << endl;
     }
     argc--;
     argv++;
-    std::cout
-        << std::endl
-        << "WARNING: passing 'invert' as positional 5th argument is "
-           "deprecated and will be removed in future versions! Use --invert1 "
-           "or --invert2 ..."
-        << std::endl
-        << std::endl;
+    cout << endl
+         << "WARNING: passing 'invert' as positional 5th argument is "
+            "deprecated and will be removed in future versions! Use --invert1 "
+            "or --invert2 ..."
+         << endl
+         << endl;
   }
 
   for (; argc > 0 && ISOPTION(*argv[0]); argc--, argv++) {
@@ -240,42 +254,39 @@ static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
   bool test1 = (!P.invert2 || P.t2name != "");
   if (!test1) {
     printUsage();
-    std::cerr << std::endl
-              << std::endl
-              << "ERROR: Please specify second transform with --invert2 !  "
-              << std::endl
-              << std::endl;
+    cerr << endl
+         << endl
+         << "ERROR: Please specify second transform with --invert2 !  " << endl
+         << endl;
     exit(1);
   }
 
   if (P.t2name != "" && P.disttype == 6) {
-    std::cerr
-        << std::endl
-        << std::endl
-        << "ERROR: distance type 6 (interpolation) can only take a single "
-           "transform."
-        << std::endl
-        << std::endl;
+    cerr << endl
+         << endl
+         << "ERROR: distance type 6 (interpolation) can only take a single "
+            "transform."
+         << endl
+         << endl;
     exit(1);
   }
 
   if (P.vox2vox && P.disttype == 6) {
-    std::cerr
-        << std::endl
-        << std::endl
-        << "WARNING: distance type 6 (interpolation) is independent of VOX or "
-           "RAS coords."
-        << std::endl
-        << std::endl;
+    cerr << endl
+         << endl
+         << "WARNING: distance type 6 (interpolation) is independent of VOX or "
+            "RAS coords."
+         << endl
+         << endl;
   }
 
   return test1;
 }
 
 void writeVox2Vox(LTA *lta) {
-  std::cout << " convet to vox 2 vox" << std::endl;
+  cout << " convet to vox 2 vox" << endl;
   LTAchangeType(lta, LINEAR_VOX_TO_VOX);
-  std::cout << " writing" << std::endl;
+  cout << " writing" << endl;
   LTAwrite(lta, "test-vox2vox.lta");
 }
 
@@ -330,10 +341,9 @@ double cornerdiff(LTA *lta1, LTA *lta2, bool vox2vox) {
         double d2 = V3_Y(v_Y1) - V3_Y(v_Y2);
         double d3 = V3_Z(v_Y1) - V3_Z(v_Y2);
         d += sqrt(d1 * d1 + d2 * d2 + d3 * d3);
-        // std::cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<
-        // V3_Z(v_X) << std::endl; std::cout << "   mapped to "<< V3_X(v_Y1) << " , " <<
-        // V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << std::endl; std::cout << "   mapped to "<<
-        // V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << std::endl;
+        //cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<  V3_Z(v_X) << endl;
+        //cout << "   mapped to "<< V3_X(v_Y1) << " , " <<  V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << endl;
+        //cout << "   mapped to "<< V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << endl;
       }
     }
   }
@@ -373,7 +383,7 @@ double cornerdiff(LTA *lta1, bool vox2vox) {
         if (vox2vox)
           MatrixMultiply(lta1->xforms[0].m_L, v_X, v_Y1);
         else {
-          // map corner to ras, map it with Ras2ras and compute distance
+          //map corner to ras, map it with Ras2ras and compute distance
           MATRIX *mv2r = vg_i_to_r(&lta1->xforms[0].src);
           MatrixMultiply(mv2r, v_X, v_X);
           MatrixMultiply(lta1->xforms[0].m_L, v_X, v_Y1);
@@ -384,30 +394,29 @@ double cornerdiff(LTA *lta1, bool vox2vox) {
         double d2 = V3_Y(v_Y1) - V3_Y(v_X);
         double d3 = V3_Z(v_Y1) - V3_Z(v_X);
         double dd = sqrt(d1 * d1 + d2 * d2 + d3 * d3);
-        // std::cout << " dd: " << dd << std::endl;
+        //cout << " dd: " << dd << endl;
         if (dd > dmax)
           dmax = dd;
         d += dd;
-        // std::cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<
-        // V3_Z(v_X) << std::endl; std::cout << "   mapped to "<< V3_X(v_Y1) << " , " <<
-        // V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << std::endl; std::cout << "   mapped to "<<
-        // V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << std::endl;
+        //cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<  V3_Z(v_X) << endl;
+        //cout << "   mapped to "<< V3_X(v_Y1) << " , " <<  V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << endl;
+        //cout << "   mapped to "<< V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << endl;
       }
     }
   }
   VectorFree(&v_X);
   VectorFree(&v_Y1);
-  std::cout << " dmax: " << dmax << std::endl;
+  cout << " dmax: " << dmax << endl;
   return d / 8.0;
 }
 
 double determinant(MATRIX *M1, MATRIX *M2) {
 
   //   MATRIX* M = MatrixAlloc(4,4,MATRIX_REAL);
-  MATRIX *M = MatrixCopy(M1, nullptr);
-  if (M2 != nullptr) {
-    // std::cout << " inverting" << std::endl;
-    // M = MatrixInverse(M1,M);
+  MATRIX *M = MatrixCopy(M1, NULL);
+  if (M2 != NULL) {
+    //cout << " inverting" << endl;
+    //M = MatrixInverse(M1,M);
     M = MatrixMultiply(M2, M, M);
   }
 
@@ -421,23 +430,22 @@ void testQuaternion(const vnl_matrix<double> &Rot) {
   Quaternion Q;
   Q.importMatrix(Rot[0][0], Rot[0][1], Rot[0][2], Rot[1][0], Rot[1][1],
                  Rot[1][2], Rot[2][0], Rot[2][1], Rot[2][2]);
-  std::cout << "Quaternion: " << Q << std::endl;
+  cout << "Quaternion: " << Q << endl;
 
   vnl_vector<double> v(3);
   v[0] = 1.2;
   v[1] = -0.5;
   v[2] = .7;
-  std::cout << " v    :  " << v << std::endl;
-  std::cout << " v rot:  " << Rot * v << std::endl;
+  cout << " v    :  " << v << endl;
+  cout << " v rot:  " << Rot * v << endl;
 
   std::vector<double> v1 = Q.rotate(v[0], v[1], v[2]);
-  std::cout << " v rotQ: " << v1[0] << " " << v1[1] << " " << v1[2]
-            << std::endl;
+  cout << " v rotQ: " << v1[0] << " " << v1[1] << " " << v1[2] << endl;
 
   std::vector<double> m = Q.getRotMatrix3d();
-  std::cout << " M = [ " << m[0] << " " << m[1] << " " << m[2] << std::endl
-            << m[3] << " " << m[4] << " " << m[5] << std::endl
-            << m[6] << " " << m[7] << " " << m[8] << " ]" << std::endl;
+  cout << " M = [ " << m[0] << " " << m[1] << " " << m[2] << endl
+       << m[3] << " " << m[4] << " " << m[5] << endl
+       << m[6] << " " << m[7] << " " << m[8] << " ]" << endl;
 
   exit(1);
 }
@@ -445,16 +453,14 @@ void testQuaternion(const vnl_matrix<double> &Rot) {
 void decompose(MATRIX *M1, MATRIX *M2) {
   vnl_matrix<double> m = MyMatrix::convertMATRIX2VNL(M1);
 
-  if (M2 != nullptr) {
-    // std::cout << " inverting" << std::endl;
-    // M = MatrixInverse(M1,M);
+  if (M2 != NULL) {
+    //cout << " inverting" << endl;
+    //M = MatrixInverse(M1,M);
     vnl_matrix<double> m2 = MyMatrix::convertMATRIX2VNL(M2);
     m                     = m * m2;
   }
 
-  std::cout << " Decompose M1*M2 into Rot * Shear * Scale + Trans: "
-            << std::endl
-            << std::endl;
+  cout << " Decompose M1*M2 into Rot * Shear * Scale + Trans: " << endl << endl;
 
   vnl_matrix<double>      Rot, Shear;
   vnl_diag_matrix<double> Scale;
@@ -466,12 +472,11 @@ void decompose(MATRIX *M1, MATRIX *M2) {
   Q.importMatrix(Rot[0][0], Rot[0][1], Rot[0][2], Rot[1][0], Rot[1][1],
                  Rot[1][2], Rot[2][0], Rot[2][1], Rot[2][2]);
   std::vector<double> v = Q.getRotVec();
-  std::cout << "RotVec = [ " << v[0] << " " << v[1] << " " << v[2] << " ] "
-            << std::endl;
-  std::cout << std::endl;
+  cout << "RotVec = [ " << v[0] << " " << v[1] << " " << v[2] << " ] " << endl;
+  cout << endl;
 
-  std::cout << "RotAngle = " << Q.getRotAngle() << std::endl;
-  std::cout << std::endl;
+  cout << "RotAngle = " << Q.getRotAngle() << endl;
+  cout << endl;
 
   vnl_matlab_print(std::cout, Shear, "Shear", vnl_matlab_print_format_long);
   std::cout << std::endl;
@@ -483,16 +488,16 @@ void decompose(MATRIX *M1, MATRIX *M2) {
   vnl_matlab_print(std::cout, t, "Trans", vnl_matlab_print_format_long);
   std::cout << std::endl;
 
-  std::cout << "AbsTrans = " << t.two_norm() << std::endl;
-  std::cout << std::endl;
+  cout << "AbsTrans = " << t.two_norm() << endl;
+  cout << endl;
 
-  std::cout << "Determinant = " << vnl_determinant(m) << std::endl << std::endl;
+  cout << "Determinant = " << vnl_determinant(m) << endl << endl;
 }
 
 double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
 
   MATRIX *M = MatrixAlloc(4, 4, MATRIX_REAL);
-  if (M2 == nullptr)
+  if (M2 == NULL)
     M = MatrixCopy(M1, M);
   else {
     M = MatrixInverse(M1, M);
@@ -549,8 +554,7 @@ double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
     // radius:
     double r1 = cos(angle1);
     double h  = sin(angle1);
-    // circumference is 2pi *r1, we want 4*max samples at aequator (where r=1
-    // and cc 2pi)
+    // circumference is 2pi *r1, we want 4*max samples at aequator (where r=1 and cc 2pi)
     int max2 = int(4.0 * max * r1);
     for (int j = 0; j < max2; j++) {
       double angle2 = (2.0 * M_PI * j) / max2; // from 0 to 2pi
@@ -571,24 +575,24 @@ double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
     }
   }
   davg = davg / counter;
-  //   std::cout << " max: " << dmax << " min: " << dmin << " avg: " << davg << std::endl;
+  //   cout << " max: " << dmax << " min: " << dmin << " avg: " << davg << endl;
   MatrixFree(&M);
   return dmax;
 }
 
 void testSphereDiff() {
 
-  MATRIX *T     = MatrixIdentity(4, nullptr);
+  MATRIX *T     = MatrixIdentity(4, NULL);
   T->rptr[1][4] = 10.0;
-  std::cout << sphereDiff(T, NULL, 100) << std::endl;
+  cout << sphereDiff(T, NULL, 100) << endl;
 
   // rotation 90degree around z axis
-  MATRIX *R     = MatrixIdentity(4, nullptr);
+  MATRIX *R     = MatrixIdentity(4, NULL);
   R->rptr[1][1] = 0;
   R->rptr[1][2] = -1;
   R->rptr[2][1] = 1;
   R->rptr[2][2] = 0;
-  std::cout << sphereDiff(R, NULL, 100) << std::endl;
+  cout << sphereDiff(R, NULL, 100) << endl;
 
   exit(1);
 }
@@ -596,7 +600,7 @@ void testSphereDiff() {
 double interpolationError2D(double angle) {
   int side = 256;
 
-  // MRI* mri_error = MRIalloc(side, side,1,MRI_FLOAT);
+  //MRI* mri_error = MRIalloc(side, side,1,MRI_FLOAT);
   MATRIX *a = MatrixAllocRotation(3, angle, Z_ROTATION);
 
   VECTOR *v_X = VectorAlloc(3, MATRIX_REAL); // input (src) coordinates
@@ -626,9 +630,9 @@ double interpolationError2D(double angle) {
       xpd = (1.0f - xmd);
       ypd = (1.0f - ymd);
 
-      // std::cout << "x: " << x << " xm: " << xm << " xp: " << xp << " xmd: " << xmd
-      // << " xpd: " << xpd << std::endl; std::cout << "y: " << y <<" ym: " << ym << " yp:
-      // " << yp << " ymd: " << ymd << " ypd: " << ypd << std::endl; assert(x>=0);
+      //cout << "x: " << x << " xm: " << xm << " xp: " << xp << " xmd: " << xmd << " xpd: " << xpd << endl;
+      //cout << "y: " << y <<" ym: " << ym << " yp: " << yp << " ymd: " << ymd << " ypd: " << ypd << endl;
+      //assert(x>=0);
       assert(xmd >= 0 && xpd >= 0);
       assert(ymd >= 0 && ypd >= 0);
 
@@ -641,11 +645,11 @@ double interpolationError2D(double angle) {
         val += ymd;
       else
         val += ypd;
-      // MRIFvox(mri_error,y1,y2,0) = (float)(val) ;
+      //MRIFvox(mri_error,y1,y2,0) = (float)(val) ;
       errorsum += val;
     }
-  // MRIwrite(mri_error,"mri_error.mgz");
-  // MRIfree(&mri_error);
+  //MRIwrite(mri_error,"mri_error.mgz");
+  //MRIfree(&mri_error);
   return errorsum;
 }
 
@@ -654,7 +658,7 @@ double interpolationError(LTA *lta) {
   LTAchangeType(lta, LINEAR_VOX_TO_VOX);
 
   // sample from dst back to src
-  MATRIX *mAinv = MatrixInverse(lta->xforms[0].m_L, nullptr);
+  MATRIX *mAinv = MatrixInverse(lta->xforms[0].m_L, NULL);
   if (!mAinv)
     ErrorExit(ERROR_BADPARM, "interpolationError: xform is singular");
   int     width  = lta->xforms[0].dst.width;
@@ -721,12 +725,9 @@ MATRIX *getIsoVOX(LTA *lta) {
   LT *lt = &lta->xforms[0];
 
   if (lt->dst.valid == 0 || lt->src.valid == 0) {
-    std::cerr
-        << "ERROR:********************************************************\n";
-    std::cerr
-        << "ERROR: dst or src info invalid - cannot get voxel information.\n";
-    std::cerr
-        << "ERROR:********************************************************\n";
+    cerr << "ERROR:********************************************************\n";
+    cerr << "ERROR: dst or src info invalid - cannot get voxel information.\n";
+    cerr << "ERROR:********************************************************\n";
     exit(1);
   }
 
@@ -743,7 +744,7 @@ MATRIX *getIsoVOX(LTA *lta) {
   Mt->rptr[4][4] = 1;
 
   LTAchangeType(lta, LINEAR_VOX_TO_VOX);
-  MATRIX *VOX = MatrixCopy(lt->m_L, nullptr);
+  MATRIX *VOX = MatrixCopy(lt->m_L, NULL);
   VOX         = MatrixMultiply(Mt, VOX, VOX);
   VOX         = MatrixMultiply(VOX, Ms, VOX);
 
@@ -757,67 +758,62 @@ int main(int argc, char *argv[]) {
     exit(1);
 
   if (P.disttype == 100) {
-    int                 steps = 200;
-    double              div   = 16.0;
-    std::vector<double> theta(steps);
-    std::vector<double> err(steps);
+    int            steps = 200;
+    double         div   = 16.0;
+    vector<double> theta(steps);
+    vector<double> err(steps);
     for (int i = 0; i < steps; i++) {
       // 0.. PI/div in 20 steps
       // -PI/div ..0 is symmetric
       theta[i] = M_PI * (i + 1) / ((steps)*div);
       err[i]   = interpolationError2D(theta[i]);
     }
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "interror-rot16";
-    std::string   fn = ss.str() + ".plot";
-    std::ofstream f(fn.c_str(), std::ios::out);
+    string   fn = ss.str() + ".plot";
+    ofstream f(fn.c_str(), ios::out);
 
-    f << "set terminal postscript eps color" << std::endl;
-    f << "set title \"Interpolation error when rotating \"" << std::endl;
-    f << "set output \"" << ss.str() << ".eps\"" << std::endl;
-    f << "plot  \"-\" notitle with lines 1" << std::endl;
+    f << "set terminal postscript eps color" << endl;
+    f << "set title \"Interpolation error when rotating \"" << endl;
+    f << "set output \"" << ss.str() << ".eps\"" << endl;
+    f << "plot  \"-\" notitle with lines 1" << endl;
     for (int i = 0; i < steps; i++) {
-      std::cout << theta[i] << " " << err[i] << std::endl;
-      f << theta[i] << " " << err[i] << std::endl;
+      cout << theta[i] << " " << err[i] << endl;
+      f << theta[i] << " " << err[i] << endl;
     }
-    f << "e" << std::endl;
+    f << "e" << endl;
     exit(0);
   }
 
   LTA *lta1 = LTAreadEx(P.t1name.c_str());
   if (!lta1) {
-    std::cerr << "Could not open the first input file: " << P.t1name
-              << std::endl;
+    cerr << "Could not open the first input file: " << P.t1name << endl;
     exit(1);
   }
-  LTA *lta2 = nullptr;
+  LTA *lta2 = NULL;
   if (P.t2name != "") {
     lta2 = LTAreadEx(P.t2name.c_str());
     if (!lta2) {
-      std::cerr << "Could not open the second input file: " << P.t2name
-                << std::endl;
+      cerr << "Could not open the second input file: " << P.t2name << endl;
       exit(1);
     }
   }
-  // else
+  //else
   //  lta2 = LTAreadEx("identity.nofile");
 
   if (P.invert1) {
     VOL_GEOM vgtmp;
     LT *     lt;
     MATRIX * m_tmp      = lta1->xforms[0].m_L;
-    lta1->xforms[0].m_L = MatrixInverse(lta1->xforms[0].m_L, nullptr);
+    lta1->xforms[0].m_L = MatrixInverse(lta1->xforms[0].m_L, NULL);
     MatrixFree(&m_tmp);
     lt = &lta1->xforms[0];
     if (lt->dst.valid == 0 || lt->src.valid == 0) {
-      std::cerr
-          << "WARNING:********************************************************"
-             "\n";
-      std::cerr
-          << "WARNING: dst or src volume is invalid.  Inverse likely wrong.\n";
-      std::cerr
-          << "WARNING:********************************************************"
-             "\n";
+      cerr << "WARNING:********************************************************"
+              "\n";
+      cerr << "WARNING: dst or src volume is invalid.  Inverse likely wrong.\n";
+      cerr << "WARNING:********************************************************"
+              "\n";
     }
     copyVolGeom(&lt->dst, &vgtmp);
     copyVolGeom(&lt->src, &lt->dst);
@@ -825,50 +821,47 @@ int main(int argc, char *argv[]) {
   }
   if (P.invert2) {
     if (!lta2) {
-      std::cerr << "ERROR: cannot invert 2nd transform, as it is not given or "
-                   "identity!\n";
+      cerr << "ERROR: cannot invert 2nd transform, as it is not given or "
+              "identity!\n";
       exit(1);
     }
 
     VOL_GEOM vgtmp;
     LT *     lt;
     MATRIX * m_tmp      = lta2->xforms[0].m_L;
-    lta2->xforms[0].m_L = MatrixInverse(lta2->xforms[0].m_L, nullptr);
+    lta2->xforms[0].m_L = MatrixInverse(lta2->xforms[0].m_L, NULL);
     MatrixFree(&m_tmp);
     lt = &lta2->xforms[0];
     if (lt->dst.valid == 0 || lt->src.valid == 0) {
-      std::cerr
-          << "WARNING:********************************************************"
-             "\n";
-      std::cerr
-          << "WARNING:dst or src volume is invalid.  Inverse likely wrong.\n";
-      std::cerr
-          << "WARNING:********************************************************"
-             "\n";
+      cerr << "WARNING:********************************************************"
+              "\n";
+      cerr << "WARNING:dst or src volume is invalid.  Inverse likely wrong.\n";
+      cerr << "WARNING:********************************************************"
+              "\n";
     }
     copyVolGeom(&lt->dst, &vgtmp);
     copyVolGeom(&lt->src, &lt->dst);
     copyVolGeom(&vgtmp, &lt->src);
   }
 
-  // LTAchangeType(lta1,LINEAR_VOX_TO_VOX);
-  // MATRIX* VOX1 = MatrixCopy(lta1->xforms[0].m_L,NULL);
+  //LTAchangeType(lta1,LINEAR_VOX_TO_VOX);
+  //MATRIX* VOX1 = MatrixCopy(lta1->xforms[0].m_L,NULL);
   MATRIX *VOX1 = getIsoVOX(lta1);
   LTAchangeType(lta1, LINEAR_RAS_TO_RAS);
-  MATRIX *RAS1 = MatrixCopy(lta1->xforms[0].m_L, nullptr);
+  MATRIX *RAS1 = MatrixCopy(lta1->xforms[0].m_L, NULL);
   MATRIX *M1   = RAS1;
   if (P.vox2vox)
     M1 = VOX1;
 
-  MATRIX *RAS2 = nullptr;
-  MATRIX *VOX2 = nullptr;
-  MATRIX *M2   = nullptr;
+  MATRIX *RAS2 = NULL;
+  MATRIX *VOX2 = NULL;
+  MATRIX *M2   = NULL;
   if (lta2) {
-    // LTAchangeType(lta2,LINEAR_VOX_TO_VOX);
-    // VOX2 = MatrixCopy(lta2->xforms[0].m_L,NULL);
+    //LTAchangeType(lta2,LINEAR_VOX_TO_VOX);
+    //VOX2 = MatrixCopy(lta2->xforms[0].m_L,NULL);
     VOX2 = getIsoVOX(lta2);
     LTAchangeType(lta2, LINEAR_RAS_TO_RAS);
-    RAS2 = MatrixCopy(lta2->xforms[0].m_L, nullptr);
+    RAS2 = MatrixCopy(lta2->xforms[0].m_L, NULL);
     M2   = RAS2;
     if (P.vox2vox)
       M2 = VOX2;
@@ -895,20 +888,19 @@ int main(int argc, char *argv[]) {
     dist = determinant(M1, M2);
     break;
   case 6:
-    dist = MyMatrix::getResampSmoothing(lta1); // independent of vox or ras
+    dist = MyMatrix::getResampSmoothing(lta1); //independent of vox or ras
     break;
   case 7:
     decompose(M1, M2);
     exit(0);
     break;
   default:
-    std::cerr << "ERROR: distance type " << P.disttype << " unknown!"
-              << std::endl;
+    cerr << "ERROR: distance type " << P.disttype << " unknown!" << endl;
     exit(1);
     break;
   }
   if (P.disttype < 7)
-    std::cout << dist / P.normdiv << std::endl;
+    cout << dist / P.normdiv << endl;
 
   MatrixFree(&VOX1);
   MatrixFree(&RAS1);

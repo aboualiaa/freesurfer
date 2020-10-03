@@ -18,10 +18,10 @@ itkEventMacro(PositionEstimationEndEvent, itk::UserEvent);
 class AtlasParameterEstimator : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self         = AtlasParameterEstimator;
-  using Superclass   = itk::Object;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasParameterEstimator       Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -30,7 +30,7 @@ public:
   itkTypeMacro(AtlasParameterEstimator, itk::Object);
 
   // Some typedefs
-  using LabelImageType = CompressionLookupTable::ImageType;
+  typedef CompressionLookupTable::ImageType LabelImageType;
 
   // Set label images.
   void
@@ -206,20 +206,20 @@ protected:
   void HandleOptimizerEvent(itk::Object *object, const itk::EventObject &event);
 
 private:
-  AtlasParameterEstimator(const Self &); // purposely not implemented
-  void operator=(const Self &);          // purposely not implemented
+  AtlasParameterEstimator(const Self &); //purposely not implemented
+  void operator=(const Self &);          //purposely not implemented
 
   // Some typedefs
-  using PointsContainerType    = AtlasMesh::PointsContainer;
-  using PointIdentifierType    = AtlasMesh::PointIdentifier;
-  using PointType              = AtlasMesh::PointType;
-  using PointDataContainerType = AtlasMesh::PointDataContainer;
-  using AlphasType             = AtlasMesh::PixelType;
+  typedef AtlasMesh::PointsContainer    PointsContainerType;
+  typedef AtlasMesh::PointIdentifier    PointIdentifierType;
+  typedef AtlasMesh::PointType          PointType;
+  typedef AtlasMesh::PointDataContainer PointDataContainerType;
+  typedef AtlasMesh::PixelType          AlphasType;
 
-  using CellsContainerType    = AtlasMesh::CellsContainer;
-  using CellIdentifierType    = AtlasMesh::CellIdentifier;
-  using CellType              = AtlasMesh::CellType;
-  using CellDataContainerType = AtlasMesh::CellDataContainer;
+  typedef AtlasMesh::CellsContainer    CellsContainerType;
+  typedef AtlasMesh::CellIdentifier    CellIdentifierType;
+  typedef AtlasMesh::CellType          CellType;
+  typedef AtlasMesh::CellDataContainer CellDataContainerType;
 
   // Data members
   AtlasMeshCollection::Pointer m_MeshCollection;

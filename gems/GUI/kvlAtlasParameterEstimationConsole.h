@@ -16,7 +16,7 @@ public:
   AtlasParameterEstimationConsole();
 
   //
-  //  ~AtlasParameterEstimationConsole() override = default;;
+  virtual ~AtlasParameterEstimationConsole();
 
   //
   void SetLabelImages(const std::vector<std::string> &fileNames);
@@ -25,33 +25,30 @@ public:
   void Show();
 
   //
-  void Estimate() override;
+  void Estimate();
 
   //
   void HandleEstimatorEvent(itk::Object *object, const itk::EventObject &event);
 
 protected:
   //
-  void DisplayLabelImage(unsigned int labelImageNumber) override;
+  void DisplayLabelImage(unsigned int labelImageNumber);
 
   //
-  void InitializeMesh() override;
-
-  void SelectTriangleContainingPoint(float /*unused*/,
-                                     float /*unused*/) override{};
+  void InitializeMesh();
 
   //
-  void Step() override;
+  void Step();
 
   //
-  void Interrupt() override;
+  void Interrupt();
 
   //
-  void Continue() override;
+  void Continue();
 
   //
-  void SetPositionEstimationResolution(
-      unsigned int positionEstimationResolution) override;
+  void
+  SetPositionEstimationResolution(unsigned int positionEstimationResolution);
 
 private:
   AtlasParameterEstimator::Pointer m_Estimator;

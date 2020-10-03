@@ -2,14 +2,14 @@
 
 namespace kvl {
 
-MatlabObjectArray::Pointer MatlabObjectArray::m_Instance = nullptr;
+MatlabObjectArray::Pointer MatlabObjectArray::m_Instance = 0;
 
 //
 // Return the single instance of the MatlabObjectArray
 //
 MatlabObjectArray::Pointer MatlabObjectArray ::New() {
 
-  if (MatlabObjectArray::m_Instance == nullptr) {
+  if (!MatlabObjectArray::m_Instance) {
     MatlabObjectArray::m_Instance = new MatlabObjectArray;
 
     // Remove extra reference from construction.
@@ -29,7 +29,7 @@ int MatlabObjectArray ::AddObject(itk::Object *object) {
     number++;
   }
 
-  // std::cout << "     found available number: " << number << std::endl;
+  //std::cout << "     found available number: " << number << std::endl;
   m_Array[number] = object;
 
   return number;
@@ -53,7 +53,7 @@ void MatlabObjectArray ::RemoveObject(int number) {
 //
 itk::Object *MatlabObjectArray ::GetObject(int number) {
 
-  auto it = m_Array.find(number);
+  std::map<int, itk::Object::Pointer>::const_iterator it = m_Array.find(number);
   if (it == m_Array.end()) {
     itkExceptionMacro(<< "Trying to access non-existing object (" << number
                       << ")");

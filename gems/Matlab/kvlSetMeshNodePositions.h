@@ -19,7 +19,7 @@ public:
   itkTypeMacro(SetMeshNodePositions, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSetMeshNodePositions( mesh, positions )
@@ -36,8 +36,7 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
@@ -65,13 +64,11 @@ public:
   }
 
 protected:
-  SetMeshNodePositions() = default;
-  ;
-  ~SetMeshNodePositions() override = default;
-  ;
+  SetMeshNodePositions(){};
+  virtual ~SetMeshNodePositions(){};
 
-  SetMeshNodePositions(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  SetMeshNodePositions(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 private:
 };

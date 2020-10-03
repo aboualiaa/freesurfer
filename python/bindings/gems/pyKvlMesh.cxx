@@ -165,7 +165,8 @@ void ReverseTetrahedronSidedness(MeshCollectionPointer meshCollection) {
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
     kvl::AtlasMesh::CellType *cell = cellIt.Value();
 
-    if (cell->GetType() != kvl::AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    // TODO: solve without undefining itk_legacy_eremove
+    if (cell->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       continue;
     }
 

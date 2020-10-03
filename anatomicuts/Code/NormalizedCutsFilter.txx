@@ -2,15 +2,26 @@
 #define _NormalizedCutsFilter_txx
 
 #include "NormalizedCutsFilter.h"
-#include "ThreadedMembershipFunction.h"
 #include "itkDecisionRule.h"
+#include "itkDistanceToCentroidMembershipFunction.h"
 #include "itkKdTree.h"
+#include "itkKdTreeBasedKmeansEstimator.h"
 #include "itkListSample.h"
-#include "itkNormalVariateGenerator.h"
 #include "itkVector.h"
+#include "itkWeightedCentroidKdTreeGenerator.h"
+//#include "itkCurrentsToCentroidMembershipFunction.h"
+//#include "itkEuclideanToCentroidMembershipFunction.h"
+//#include "itkKMeansClassifierFilter.h"
+#include "itkNormalVariateGenerator.h"
+#include <iostream>
+#include <limits>
+//#include <utility>
+#include "ThreadedMembershipFunction.h"
+#include "math.h"
+#include "vnl/vnl_math.h"
 #include "vnl/vnl_matrix.h"
 #include <algorithm>
-#include <iostream>
+#include <set>
 #include <stdlib.h>
 #include <vnl/algo/vnl_sparse_symmetric_eigensystem.h>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
@@ -46,10 +57,10 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
   labels.resize(this->GetInput()->GetNumberOfCells());
 
   typename SampleType::Pointer sample = SampleType::New();
-  // itk 3
+  //itk 3
   for (unsigned int i = 0; i < this->GetInput()->GetNumberOfCells(); i++) {
     MeasurementVectorType mv(numberOfPoints * 3);
-    mv.SetCell(this->GetInput(), i); // inputCellIt.Value());
+    mv.SetCell(this->GetInput(), i); //inputCellIt.Value());
     sample->PushBack(mv);
   }
   std::string                                   lastLabel = "1";
@@ -68,7 +79,7 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
     typename SampleType::Pointer sampleNegatives = SampleType::New();
 
     if (sample->Size() > this->GetNumberOfFibersForEigenDecomposition()) {
-      // Multi-thread
+      //Multi-thread
       std::vector<std::pair<int, int>> inIndeces;
       std::vector<std::pair<int, int>> outIndeces;
 
@@ -89,9 +100,8 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
       threadedMembershipFunction->SetStuff(sample, inIndeces, outIndeces, hola,
                                            sample->Size());
       threadedMembershipFunction->Execute(hola, domain);
-      // vnl_sparse_matrix<double>* ms=
-      // threadedMembershipFunction->GetResults(); std::cout << " finding maximum
-      // start " << std::endl;
+      //vnl_sparse_matrix<double>* ms= threadedMembershipFunction->GetResults();
+      //std::cout << " finding maximum start " << std::endl;
       std::vector<int> maxvals = threadedMembershipFunction->GetMaxIndeces();
       for (int j = 0; j < sample->Size(); j++) {
         int argmax = 0; //, maxVal=0;
@@ -105,7 +115,7 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
           sampleNegatives->PushBack(sample->GetMeasurementVector(j));
         }
       }
-      // std::cout << " finding maximum end " << std::endl;
+      //std::cout << " finding maximum end " << std::endl;
     } else {
       typename SampleType::ConstIterator iter = sample->Begin();
       int                                i    = 0;
@@ -142,7 +152,7 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
       std::cin.get();
       throw std::runtime_error("Gak!");
     }
-    // lastLabel+=2;
+    //lastLabel+=2;
   }
   this->SetLabels(labels);
 }
@@ -166,7 +176,7 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroidsParallel(
   for (unsigned i = 0; i < n; i++) {
     selected.push_back(i * offset);
   }
-  // int zeros =0;
+  //int zeros =0;
   std::vector<std::pair<int, int>> inIndeces;
   std::vector<std::pair<int, int>> outIndeces;
   for (unsigned i = 0; i < n; i++) {
@@ -181,7 +191,7 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroidsParallel(
   typename ThreadedMembershipFunctionType::DomainType domain;
   domain[0] = 0;
   domain[1] = inIndeces.size() - 1;
-  // std::cout <<  "domain "<< domain[1] << std::endl;
+  //std::cout <<  "domain "<< domain[1] << std::endl;
   typename MembershipFunctionType::Pointer hola =
       (*this->GetMembershipFunctionVector())[0];
   threadedMembershipFunction->SetStuff(samples, inIndeces, outIndeces, hola, n);
@@ -189,11 +199,10 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroidsParallel(
   vnl_sparse_matrix<double> *ms = threadedMembershipFunction->GetResults();
   for (unsigned i = 0; i < n; i++) {
 
-    // for (unsigned j=i; j<n; j++)
+    //for (unsigned j=i; j<n; j++)
     //{
-    //	double val =
-    //membershipFunction->Evaluate(&samples->GetMeasurementVector(selected[i]),
-    //&samples->GetMeasurementVector(selected[j])); 	ms(i,j) = ms(j,i) =  val;
+    //	double val = membershipFunction->Evaluate(&samples->GetMeasurementVector(selected[i]), &samples->GetMeasurementVector(selected[j]));
+    //	ms(i,j) = ms(j,i) =  val;
     //}
     diagonal(i, i) = ms->sum_row(i);
     identity(i, i) = 1;
@@ -203,7 +212,7 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroidsParallel(
 
   vnl_sparse_symmetric_eigensystem es;
   int res = es.CalculateNPairs(prod, diagonal, n - 1, 0.0000001, 0, true, true,
-                               1000000, -1); // this->GetNumberOfClusters());
+                               1000000, -1); //this->GetNumberOfClusters());
   if (res < 0)
     std::cout << " ERROR " << std::endl;
 
@@ -214,11 +223,11 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroidsParallel(
     vector = es.get_eigenvector(0);
   else
     vector = es.get_eigenvector(1);
-  // double in=0,out=0,maximum=0;
-  // int k_i=0;
+  //double in=0,out=0,maximum=0;
+  //int k_i=0;
   int positivos = 0, negativos = 0;
   for (int i = 0; i < n; i++) {
-    if (vector(i) > 0) // vector(k_i))
+    if (vector(i) > 0) //vector(k_i))
     {
       positivos++;
       indices.push_back(std::pair<int, int>(0, selected[i]));
@@ -248,7 +257,7 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroids(
   vnl_sparse_matrix<double> ms(n, n);
   vnl_sparse_matrix<double> identity(n, n);
   vnl_sparse_matrix<double> diagonal(n, n);
-  bool                      random = false; // true;
+  bool                      random = false; //true;
   int offset = (samples->Size() > n) ? samples->Size() / n : 1;
   for (unsigned i = 0; i < n; i++) {
     if (random)
@@ -259,9 +268,7 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroids(
   int zeros = 0;
   for (unsigned i = 0; i < n; i++) {
 
-    // double diag =
-    // membershipFunction->Evaluate(&samples->GetMeasurementVector(selected[i]),
-    // &samples->GetMeasurementVector(selected[i]));
+    //double diag =  membershipFunction->Evaluate(&samples->GetMeasurementVector(selected[i]), &samples->GetMeasurementVector(selected[i]));
 
     for (unsigned j = i; j < n; j++) {
       double val = membershipFunction->Evaluate(
@@ -287,23 +294,20 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroids(
   //	vnl_symmetric_eigensystem<double> ed(md);
   vnl_sparse_symmetric_eigensystem es;
   //	std::cout << " before CalculateNPairs " <<  std::endl;
-  // int res = es.CalculateNPairs(prod, diagonal, 2,
-  // 0,0,true,true,1000,0.1);//this->GetNumberOfClusters());
+  //int res = es.CalculateNPairs(prod, diagonal, 2, 0,0,true,true,1000,0.1);//this->GetNumberOfClusters());
   int res = es.CalculateNPairs(prod, diagonal, n - 1, 0.0000001, 0, true, true,
-                               1000000, -1); // this->GetNumberOfClusters());
+                               1000000, -1); //this->GetNumberOfClusters());
   //	std::cout << " CalculateNPairs " << res<<  std::endl;
   if (res < 0)
     std::cout << " ERROR " << std::endl;
 
-  //	TEST("vnl_sparse_symmetric_eigensystem::CalculateNPairs() succeeded",
-  //es.CalculateNPairs(ms,nvals), 0);
-  /*	   if( es.get_eigenvalue(0) > 0.3 && es.get_eigenvalue(1)
-     -es.get_eigenvalue(0) <0.01 )// 0.001
-             {
-             std::cout << es.get_eigenvalue(1) - es.get_eigenvalue(0) <<
-     std::endl; return indices;
-             }
-             */
+  //	TEST("vnl_sparse_symmetric_eigensystem::CalculateNPairs() succeeded",			es.CalculateNPairs(ms,nvals), 0);
+  /*	   if( es.get_eigenvalue(0) > 0.3 && es.get_eigenvalue(1) -es.get_eigenvalue(0) <0.01 )// 0.001
+	   {
+	   std::cout << es.get_eigenvalue(1) - es.get_eigenvalue(0) << std::endl;
+	   return indices;
+	   }
+	   */
   vnl_vector<double> vector;
   std::cout << "e0 " << es.get_eigenvalue(0) << "e1 " << es.get_eigenvalue(1)
             << std::endl;
@@ -316,51 +320,51 @@ NormalizedCutsFilter<TMesh, TMembershipFunctionType>::SelectCentroids(
   int    positivos = 0, negativos = 0;
   for (int i = 0; i < n; i++) {
     //	std::cout << " - " <<vector(i);;
-    if (vector(i) > 0) // vector(k_i))
+    if (vector(i) > 0) //vector(k_i))
     {
       positivos++;
       indices.push_back(std::pair<int, int>(0, selected[i]));
-      // indices.push_back(  std::pair<int, int>(0, i*offset));
-      // indices.push_back(  std::pair<int, int>(0, all[i*offset]));
+      //indices.push_back(  std::pair<int, int>(0, i*offset));
+      //indices.push_back(  std::pair<int, int>(0, all[i*offset]));
     } else {
       negativos++;
       indices.push_back(std::pair<int, int>(1, selected[i]));
-      // indices.push_back(  std::pair<int, int >(1, i*offset));
-      // indices.push_back(  std::pair<int, int >(1, all[i*offset]));
+      //indices.push_back(  std::pair<int, int >(1, i*offset));
+      //indices.push_back(  std::pair<int, int >(1, all[i*offset]));
     }
   }
   std::cout << " positivos " << positivos << " negativos " << negativos
             << std::endl;
   return indices;
   /*
-  // Report 'em.
-  std::set<int> ind_rep;
-  for (unsigned i=0; i<this->GetNumberOfClusters() &&
-  indices.size()<this->GetNumberOfClusters(); i++)
-  {
-  vnl_vector< double > vector  = es.get_eigenvector(i);
-  std::cout <<  vector <<  std::endl;
-  double min_dist = std::numeric_limits<double>::max();
-  int min_index=0;
+	// Report 'em.
+	std::set<int> ind_rep;
+	for (unsigned i=0; i<this->GetNumberOfClusters() && indices.size()<this->GetNumberOfClusters(); i++)
+	{
+	vnl_vector< double > vector  = es.get_eigenvector(i);
+	std::cout <<  vector <<  std::endl;
+	double min_dist = std::numeric_limits<double>::max();
+	int min_index=0;
 
-  for(int j=0;j<n;j++)
-  {
-  double dist = 0;
-  for(int k=0;k<n;k++)
-  {
-  dist += pow(vector(k)- ms(j,k),2);
-  }
-  if(dist < min_dist)
-  {
-  std::cout << " dist " << dist << " " << "min_dist " << min_dist << " "   <<
-  min_index << std::endl; min_dist = dist; min_index=  j*offset;
+	for(int j=0;j<n;j++)
+	{
+	double dist = 0;
+	for(int k=0;k<n;k++)
+	{
+	dist += pow(vector(k)- ms(j,k),2);
+	}
+	if(dist < min_dist)
+	{
+	std::cout << " dist " << dist << " " << "min_dist " << min_dist << " "   << min_index << std::endl;
+	min_dist = dist;
+	min_index=  j*offset;
 
-  }
-  }
-  if(ind_rep.count(min_index)==0)
-  indices.push_back(min_index);
+	}
+	}
+	if(ind_rep.count(min_index)==0)
+	indices.push_back(min_index);
 
-  }
-  return indices;*/
+	}
+	return indices;*/
 }
 #endif

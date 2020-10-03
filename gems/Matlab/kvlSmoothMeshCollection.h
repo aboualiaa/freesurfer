@@ -19,9 +19,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SmoothMeshCollection, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // smoothedMeshCollection = kvlSmoothMeshCollection( meshCollection, sigma )
@@ -37,8 +36,8 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshCollectionHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMeshCollection ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMeshCollection).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMeshCollection)
+                   .name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("Not an atlas mesh collection object");
     }
@@ -47,8 +46,8 @@ public:
 
     const double sigma = *(mxGetPr(prhs[1]));
 
-    // std::cout << "meshCollection: " << meshCollection.GetPointer() <<
-    // std::endl; std::cout << "sigma: " << sigma << std::endl;
+    //std::cout << "meshCollection: " << meshCollection.GetPointer() << std::endl;
+    //std::cout << "sigma: " << sigma << std::endl;
 
     //
     kvl::AtlasMeshSmoother::Pointer smoother = kvl::AtlasMeshSmoother::New();
@@ -71,13 +70,11 @@ public:
   }
 
 protected:
-  SmoothMeshCollection() = default;
-  ;
-  ~SmoothMeshCollection() override = default;
-  ;
+  SmoothMeshCollection(){};
+  virtual ~SmoothMeshCollection(){};
 
-  SmoothMeshCollection(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  SmoothMeshCollection(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 private:
 };

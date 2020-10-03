@@ -25,8 +25,7 @@ public:
     if (m_mapCompToComp == 0) // no collapsed labels
     {
 
-      // Calculate the numerator of the Labelification weights W0, W1, and W2 in
-      // this point
+      // Calculate the numerator of the Labelification weights W0, W1, and W2 in this point
       float W0 = m_AlphasInVertex0[*m_SourcePointer] * pi0;
       float W1 = m_AlphasInVertex1[*m_SourcePointer] * pi1;
       float W2 = m_AlphasInVertex2[*m_SourcePointer] * pi2;
@@ -41,8 +40,7 @@ public:
       for (int ind = 0; ind < m_mapCompToComp[*m_SourcePointer].size(); ind++) {
         const unsigned char k = m_mapCompToComp[*m_SourcePointer][ind];
 
-        // // std::cout << " ammllc " << ((int) *m_SourcePointer) << " " <<
-        // ((int) k) << std::endl;
+        // // std::cout << " ammllc " << ((int) *m_SourcePointer) << " " << ((int) k) << std::endl;
 
         float W0 = m_AlphasInVertex0[k] * pi0;
         float W1 = m_AlphasInVertex1[k] * pi1;
@@ -156,9 +154,8 @@ protected:
   virtual ~AtlasMeshMinLogLikelihoodCalculator(){};
 
 private:
-  AtlasMeshMinLogLikelihoodCalculator(const Self &); // purposely not
-                                                     // implemented
-  void operator=(const Self &); // purposely not implemented
+  AtlasMeshMinLogLikelihoodCalculator(const Self &); //purposely not implemented
+  void operator=(const Self &);                      //purposely not implemented
 };
 
 } // end namespace kvl

@@ -1,9 +1,11 @@
 #include "kvlAtlasMeshViewingConsole.h"
 
+#include "FL/Fl.H"
 #include "FL/fl_ask.H"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkIntensityWindowingImageFilter.h"
+#include "itkMinimumMaximumImageCalculator.h"
 #include "kvlAtlasMeshAlphaDrawer.h"
 #include "kvlAtlasMeshSummaryDrawer.h"
 
@@ -18,6 +20,11 @@ AtlasMeshViewingConsole ::AtlasMeshViewingConsole() {
   m_BackgroundImage = 0;
   m_Compressor      = 0;
 }
+
+//
+//
+//
+AtlasMeshViewingConsole ::~AtlasMeshViewingConsole() {}
 
 //
 //
@@ -103,8 +110,7 @@ void AtlasMeshViewingConsole ::LoadMeshCollection(
   }
   m_MeshNumber->value(1);
 
-  // Try to read the label strings from a lookup table, and fill in the GUI
-  // accordingly
+  // Try to read the label strings from a lookup table, and fill in the GUI accordingly
   m_Compressor = CompressionLookupTable::New();
   if (m_Compressor->Read("compressionLookupTable.txt")) {
     std::cout << "Read compressionLookupTable.txt" << std::endl;
@@ -196,7 +202,7 @@ void AtlasMeshViewingConsole ::Draw() {
   // Show the mesh overlaid
   if (m_ShowMesh->value()) {
     m_ImageViewer->SetMesh(mesh);
-    // m_ImageViewer->SetEdgeIdToHighlight( m_EdgeIdToHighlight );
+    //m_ImageViewer->SetEdgeIdToHighlight( m_EdgeIdToHighlight );
   } else {
     m_ImageViewer->SetMesh(0);
   }
@@ -216,7 +222,7 @@ void AtlasMeshViewingConsole ::SetSliceLocation(
   m_ImageViewer->SetSliceLocation(sagittalSliceNumber, coronalSliceNumber,
                                   axialSliceNumber);
 
-  // this->Draw();
+  //this->Draw();
   // Redraw
   m_ImageViewer->redraw();
   Fl::check();

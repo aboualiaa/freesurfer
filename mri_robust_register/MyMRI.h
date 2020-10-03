@@ -50,13 +50,13 @@ public:
   //! Get blurred image
   static MRI *getBlur(MRI *mriS, MRI *mriT);
   //! Subsample the image
-  static MRI *subSample(MRI *mri_src, MRI *mri_dst = nullptr,
+  static MRI *subSample(MRI *mri_src, MRI *mri_dst = NULL,
                         bool fixheader = true, int randpos = 0);
   //! Get Entropy image (old)
   static MRI *entropyImage(MRI *mri, int radius, int sigma);
   //! Get Entropy image using box or ball
   static MRI *entropyImage(MRI *mri, int radius, bool ball = false,
-                           bool correction = false, MRI *mask = nullptr);
+                           bool correction = false, MRI *mask = NULL);
   //! NLSD not tested
   static MRI *nlsdImage(MRI *mri, int prad, int nrad);
 

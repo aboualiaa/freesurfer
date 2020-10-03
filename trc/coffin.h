@@ -113,7 +113,7 @@ private:
       mLikelihoodOffPath, mPriorOffPath, mPosteriorOffPath,
       mLikelihoodOffPathNew, mPriorOffPathNew, mPosteriorOffPathNew;
   MRI *              mMask;
-  std::string        mRootDir, mOutDir, mLog;
+  string             mRootDir, mOutDir, mLog;
   std::vector<int>   mPathPoints, mPathPointsNew, mErrorPoint;
   std::vector<float> mPathPhi, mPathPhiNew, mPathTheta, mPathThetaNew,
       mDataFitSamples;
@@ -241,7 +241,7 @@ private:
   void   MapPointToAtlas(std::vector<int>::iterator       OutPoint,
                          std::vector<int>::const_iterator InPoint);
   void   LogObjective();
-  void   LogObjectiveNaN(unsigned int NumValiData);
+  void   LogObjectiveNaN(const unsigned int NumValiData);
 };
 
 #endif

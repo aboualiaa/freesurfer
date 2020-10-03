@@ -19,13 +19,11 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(StepOptimizer, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // [ minLogLikelihoodTimesPrior, maximalDeformation ] = kvlStepOptimizer(
-    // optimizer )
+    // [ minLogLikelihoodTimesPrior, maximalDeformation ] = kvlStepOptimizer( optimizer )
 
     // Make sure input arguments are correct
     if ((nrhs < 1) || !mxIsInt64(prhs[0])) {
@@ -39,7 +37,7 @@ public:
     kvl::AtlasMeshDeformationOptimizer::ConstPointer constOptimizer =
         dynamic_cast<const kvl::AtlasMeshDeformationOptimizer *>(
             object.GetPointer());
-    if (constOptimizer.GetPointer() == nullptr) {
+    if (!constOptimizer.GetPointer()) {
       std::cout << "typeid: " << typeid(*object).name() << std::endl;
       mexErrMsgTxt("optimizer doesn't refer to the correct ITK object type");
     }
@@ -58,13 +56,11 @@ public:
   }
 
 protected:
-  StepOptimizer() = default;
-  ;
-  ~StepOptimizer() override = default;
-  ;
+  StepOptimizer(){};
+  virtual ~StepOptimizer(){};
 
-  StepOptimizer(const Self &);  // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  StepOptimizer(const Self &);  //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

@@ -5,64 +5,72 @@
 #include <map>
 #include <vnl/vnl_hungarian_algorithm.h>
 #include <vnl/vnl_matrix.h>
+#include <vnl/vnl_vector.h>
+#include <vnl/vnl_vector_ref.h>
 
+#include "itkImage.h"
+#include "itkMesh.h"
 #include "itkVector.h"
 #include <limits>
+#include <vnl/vnl_matrix.h>
 
+#include "itkDefaultStaticMeshTraits.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 
-#include "GetPot.h"
-#include "HierarchicalClusteringPruner.h"
-#include "LabelPerPointVariableLengthVector.h"
-#include "LabelsEntropyAndIntersectionMembershipFunction.h"
 #include "PolylineMeshToVTKPolyDataFilter.h"
 #include "VTKPolyDataToPolylineMeshFilter.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
-#include <string>
-//#include <ITK-5.0/vcl_compiler.h>
+//#include "AppendBundleFilter.h"
+#include "LabelVariableLengthVector.h"
+//#include "FixedVTKSamplingFilter.h"
+#include "GetPot.h"
+#include "HierarchicalClusteringPruner.h"
+#include "LabelPerPointVariableLengthVector.h"
+#include "LabelsEntropyAndIntersectionMembershipFunction.h"
 #include "OrientationPlanesFromParcellationFilter.h"
 #include "vtkSplineFilter.h"
+#include <set>
+#include <string>
 
 #include "colortab.h"
 #include "fsenv.h"
-#define vcl_vector std::vector
 
-using PointDataType                        = std::vector<int>;
-using PixelType                            = float;
-const unsigned int PointDimension          = 3;
-const unsigned int MaxTopologicalDimension = 3;
-using CoordinateType                       = double;
-using InterpolationWeightType              = double;
-using MeshTraits =
-    itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
-                                 MaxTopologicalDimension, CoordinateType,
-                                 InterpolationWeightType, PointDataType>;
-using MeshType          = itk::Mesh<PixelType, PointDimension, MeshTraits>;
-using BasicMeshType     = itk::Mesh<PixelType, PointDimension>;
-using CellType          = MeshType::CellType;
-using CellAutoPointer   = CellType::CellAutoPointer;
-using VTKConverterType  = PolylineMeshToVTKPolyDataFilter<MeshType>;
-using MeshConverterType = VTKPolyDataToPolylineMeshFilter<BasicMeshType>;
-using ImageType         = itk::Image<double, 3>;
-using IndexType         = ImageType::IndexType;
-using MeasurementVectorType =
-    LabelPerPointVariableLengthVector<float, MeshType>;
-using MembershipFunctionType =
-    LabelsEntropyAndIntersectionMembershipFunction<MeasurementVectorType>;
+typedef std::vector<int> PointDataType;
+typedef float            PixelType;
+const unsigned int       PointDimension          = 3;
+const unsigned int       MaxTopologicalDimension = 3;
+typedef double           CoordinateType;
+typedef double           InterpolationWeightType;
+typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
+                                     MaxTopologicalDimension, CoordinateType,
+                                     InterpolationWeightType, PointDataType>
+                                                         MeshTraits;
+typedef itk::Mesh<PixelType, PointDimension, MeshTraits> MeshType;
+typedef itk::Mesh<PixelType, PointDimension>             BasicMeshType;
+typedef MeshType::CellType                               CellType;
+typedef CellType::CellAutoPointer                        CellAutoPointer;
+typedef PolylineMeshToVTKPolyDataFilter<MeshType>        VTKConverterType;
+typedef VTKPolyDataToPolylineMeshFilter<BasicMeshType>   MeshConverterType;
+typedef itk::Image<double, 3>                            ImageType;
+typedef ImageType::IndexType                             IndexType;
+typedef LabelPerPointVariableLengthVector<float, MeshType>
+    MeasurementVectorType;
+typedef LabelsEntropyAndIntersectionMembershipFunction<MeasurementVectorType>
+    MembershipFunctionType;
 
 static std::string LEFT   = "Left";
 static std::string RIGHT  = "Right";
 static std::string LEFT2  = "lh";
 static std::string RIGHT2 = "rh";
 
-COLOR_TABLE *ct = nullptr;
+COLOR_TABLE *ct = NULL;
 
 int SymmetricLabelId(int id) {
 
-  if (ct == nullptr) {
+  if (ct == NULL) {
     FSENV *fsenv = FSENVgetenv();
     char   tmpstr[2000];
     sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
@@ -75,7 +83,7 @@ int SymmetricLabelId(int id) {
     char *hola =
         (char *)str.replace(str.find(LEFT), LEFT.length(), RIGHT).c_str();
     symId = CTABentryNameToIndex(hola, ct);
-    // std::cout << sval << std::endl;
+    //std::cout << sval << std::endl;
   } else if (str.find(LEFT2) != std::string::npos) {
     char *hola =
         (char *)str.replace(str.find(LEFT2), LEFT2.length(), RIGHT2).c_str();
@@ -85,7 +93,7 @@ int SymmetricLabelId(int id) {
     char *hola =
         (char *)str.replace(str.find(RIGHT), RIGHT.length(), LEFT).c_str();
     symId = CTABentryNameToIndex(hola, ct);
-    // std::cout << sval << std::endl;
+    //std::cout << sval << std::endl;
   } else if (str.find(RIGHT2) != std::string::npos) {
     char *hola =
         (char *)str.replace(str.find(RIGHT2), RIGHT2.length(), LEFT2).c_str();
@@ -93,9 +101,9 @@ int SymmetricLabelId(int id) {
   }
 
   /*if( id == symId && id!=0 && id !=5001 && id != 5002)
-    {
-    std::cout << "label " << id << std::endl;
-    }*/
+	  {
+	  std::cout << "label " << id << std::endl;
+	  }*/
   return symId;
 }
 std::vector<MeshType::Pointer>
@@ -161,19 +169,18 @@ BasicMeshToMesh(std::vector<BasicMeshType::Pointer> basicMeshes,
 
           withinIndex++;
           globalIndex++;
-          // std::cout << globalIndex << " "<< std::endl;
+          //std::cout << globalIndex << " "<< std::endl;
         }
 
         mesh->SetCell(indexCell, line);
         indexCell++;
       } else {
         out++;
-        //	std::cout << "right " << right << " left " << left << " remove
-        //"<< removeInterHemispheric << std::endl;
+        //	std::cout << "right " << right << " left " << left << " remove "<< removeInterHemispheric << std::endl;
       }
     }
     float val = (float)out / ((float)indexCell + out);
-    // std::cout << " val " << val << std::endl;
+    //std::cout << " val " << val << std::endl;
     if (val > interHemiThreshold) {
       meshes.push_back(MeshType::New());
     } else {
@@ -187,12 +194,11 @@ std::vector<MeasurementVectorType> SetDirectionalNeighbors(
     std::vector<MeshType::Pointer> meshes,
     std::vector<int> clusterCentroidsIndex, ImageType::Pointer segmentation,
     std::vector<itk::Vector<float>> direcciones, bool symmetry) {
-  // std::cout << " symmetry " << symmetry << std::endl;
+  //std::cout << " symmetry " << symmetry << std::endl;
   std::vector<MeasurementVectorType> measurements;
   for (unsigned int i = 0; i < meshes.size(); i++) {
     int pointId = 0;
-    // MeshType::CellTraits::PointIdIterator  pointIdEnd
-    // =meshes[i]->GetNumberOfPoints();
+    //MeshType::CellTraits::PointIdIterator  pointIdEnd =meshes[i]->GetNumberOfPoints();
     int pointIdEnd = meshes[i]->GetNumberOfPoints();
     int numPoints  = meshes[i]->GetNumberOfPoints();
     if (clusterCentroidsIndex[i] > -1) {
@@ -214,9 +220,7 @@ std::vector<MeasurementVectorType> SetDirectionalNeighbors(
         PixelType      label     = labelOrig;
         if (symmetry) {
           label = SymmetricLabelId(labelOrig);
-          //					std::cout << " labeled " <<
-          // labelOrig
-          //<< " mirrowed label " << label << std::endl;
+          //					std::cout << " labeled " << labelOrig  << " mirrowed label " << label << std::endl;
         }
 
         pointData->push_back(label);
@@ -225,7 +229,7 @@ std::vector<MeasurementVectorType> SetDirectionalNeighbors(
           PixelType                      vecino          = labelOrig;
           itk::ContinuousIndex<float, 3> continuousIndex = index;
           MeshType::PointType            point           = pt1;
-          // std::cout << direcciones[k] << std::endl;
+          //std::cout << direcciones[k] << std::endl;
           IndexType roundedIndex;
           while (vecino == labelOrig) {
             for (unsigned int j = 0; j < 3; j++)
@@ -296,7 +300,7 @@ std::vector<int> GetCentroidIndices(std::vector<MeshType::Pointer> meshes) {
         }
       }
     }
-    // clusterCentroids.push_back(avgPoints);
+    //clusterCentroids.push_back(avgPoints);
     cells          = meshes[i]->GetCells()->Begin();
     float min_dist = std::numeric_limits<float>::max();
     cell_i         = 0;
@@ -354,7 +358,7 @@ void GetMeshes(GetPot cl, const char *find1, const char *find2,
 
     MeshConverterType::Pointer converter = MeshConverterType::New();
     converter->SetVTKPolyData(spline->GetOutput());
-    // converter->SetVTKPolyData ( reader->GetOutput() );
+    //converter->SetVTKPolyData ( reader->GetOutput() );
     reader->Delete();
     //		converter->Update();
     converter->GenerateData2();
@@ -455,10 +459,10 @@ int main(int narg, char *arg[]) {
 
     std::vector<long long> meshes2Files = hierarchyPruner->GetClustersIds();
     /*GetMeshes(cl, "-f1" , "-F1", &meshes1,&meshes1Files);
-      std::cout << " meshses 1  size " << meshes1.size() << std::endl;
-      GetMeshes(cl, "-f2" , "-F2", &meshes2, &meshes2Files);
-      std::cout << " meshses 2  size " << meshes2.size() << std::endl;
-      */
+		  std::cout << " meshses 1  size " << meshes1.size() << std::endl;
+		  GetMeshes(cl, "-f2" , "-F2", &meshes2, &meshes2Files);
+		  std::cout << " meshses 2  size " << meshes2.size() << std::endl;
+		  */
 
     std::vector<int> clusterCentroidsIndex1 =
         std::vector<int>(meshes1.size(), -1);
@@ -532,14 +536,10 @@ int main(int narg, char *arg[]) {
       orientations2.push_back(orientationFilter2->GetFrontBack());
       orientations2.push_back(orientationFilter2->GetLeftRight());
 
-      // std::cout << orientationFilter1->GetUpDown() << " " <<
-      // orientationFilter1->GetFrontBack() << " " <<
-      // orientationFilter1->GetLeftRight() << std::endl; std::cout <<
-      // orientationFilter2->GetUpDown() << " " <<
-      // orientationFilter2->GetFrontBack() << " " <<
-      // orientationFilter2->GetLeftRight() << std::endl;
+      //std::cout << orientationFilter1->GetUpDown() << " " << orientationFilter1->GetFrontBack() << " " << orientationFilter1->GetLeftRight() << std::endl;
+      //std::cout << orientationFilter2->GetUpDown() << " " << orientationFilter2->GetFrontBack() << " " << orientationFilter2->GetLeftRight() << std::endl;
 
-      // typedef ImageType::IndexType IndexType;
+      //typedef ImageType::IndexType IndexType;
       std::vector<itk::Vector<float>> direcciones1;
       std::vector<itk::Vector<float>> direcciones2;
       int                             possibles[3] = {0, 1, -1};
@@ -547,15 +547,15 @@ int main(int narg, char *arg[]) {
         for (unsigned int k = 0; k < 3; k++) {
           for (unsigned int j = 0; j < 3; j++) {
             /*IndexType index1;
-              index1[0] = possibles[i] * orientations1[0];
-              index1[1] = possibles[j] * orientations1[1];
-              index1[2] = possibles[k] * orientations1[2];
-              */
+						  index1[0] = possibles[i] * orientations1[0];
+						  index1[1] = possibles[j] * orientations1[1];
+						  index1[2] = possibles[k] * orientations1[2];
+						  */
             /*IndexType index2;
-              index2[0] = possibles[i] * orientations2[0];
-              index2[1] = possibles[j] * orientations2[1];
-              index2[2] = possibles[k] * orientations2[2];
-              */
+						  index2[0] = possibles[i] * orientations2[0];
+						  index2[1] = possibles[j] * orientations2[1];
+						  index2[2] = possibles[k] * orientations2[2];
+						  */
             itk::Vector<float> dir1;
             itk::Vector<float> dir2;
             for (int w = 0; w < 3; w++) {
@@ -610,20 +610,20 @@ int main(int narg, char *arg[]) {
             aff_max            = aff;
             correspondances[i] = j;
           }
-          // distances(i,j)= (1-aff)*100;
+          //distances(i,j)= (1-aff)*100;
           distances(i, j) = (1 / (aff + 0.01));
 
-          // distances(i,j)= aff;
+          //distances(i,j)= aff;
         }
       }
     }
-    // if(cl.search(1,"-hungarian"))
+    //if(cl.search(1,"-hungarian"))
     {
-      // std::cout << " distances " << distances << std::endl;
-      vcl_vector<unsigned int> assign =
+      //std::cout << " distances " << distances << std::endl;
+      std::vector<unsigned int> assign =
           vnl_hungarian_algorithm<double>(distances); //.GetAssignmentVector();
-      // std::cout << " assign size" << assign.size() << std::endl;
-      // std::cout << assign[0] << " " << assign[199] << std::endl;
+      //std::cout << " assign size" << assign.size() << std::endl;
+      //std::cout << assign[0] << " " << assign[199] << std::endl;
       for (unsigned int i = 0; i < assign.size(); i++)
         correspondances[i] = assign[i];
     }
@@ -636,8 +636,7 @@ int main(int narg, char *arg[]) {
 
     csv_file << "Subject A,Subject B , " << std::endl;
 
-    // for (std::map<int,std::vector<int>>::iterator it=correspondances.begin();
-    // it!=correspondances.end(); ++it)
+    //for (std::map<int,std::vector<int>>::iterator it=correspondances.begin(); it!=correspondances.end(); ++it)
     for (std::map<long long, long long>::iterator it = correspondances.begin();
          it != correspondances.end(); ++it) {
       csv_file << meshes1Files[it->first] << "," << meshes2Files[it->second]
@@ -726,11 +725,11 @@ for(unsigned int i=0;i<distances.rows();i++)
 for(unsigned int j=0;j<distances.cols();j++)
 {
 if(coveredCols[j])
-        distances(i,j)+=minimum;
+	distances(i,j)+=minimum;
 if(coveredRows[i])
-        distances(i,j)+=minimum;
+	distances(i,j)+=minimum;
 
-        }
+	}
 }
 
 //subtract minimum to every uncoivered row
@@ -743,15 +742,15 @@ std::cout << "getting possible solutions "<< std::endl;
 std::map<int, std::set<int>> solution;
 for(unsigned int i=0;i<distances.rows();i++)
 {
-        for(unsigned int j=0;j<distances.cols();j++)
-        {
-                if(distances(i,j)<=0)
-                {
-                        if(solution.count(i)==0)
-                                solution[i]= std::set<int>();
-                        solution[i].insert(j);
-                }
-        }
+	for(unsigned int j=0;j<distances.cols();j++)
+	{
+		if(distances(i,j)<=0)
+		{
+			if(solution.count(i)==0)
+				solution[i]= std::set<int>();
+			solution[i].insert(j);
+		}
+	}
 }
 std::cout << "removing restrictions "<< std::endl;
 bool foundSolution = false;
@@ -759,38 +758,37 @@ bool changed = true;
 //remove options when other row needs it
 while(changed)
 {
-        changed=false;
-        for(unsigned int i=0;i<distances.rows();i++)
-        {
-                if(solution[i].size()==1)
-                {
-                        correspondances[i]=*solution[i].begin();
-                        for(int j=0;j<distances.cols();j++)
-                        {	if(i!=j &&
-solution[j].count(*solution[i].begin())>0)
-                                {
-                                        solution[j].erase(*solution[i].begin());
-                                        changed=true;
-                                }
-                        }
-                }
-        }
+	changed=false;
+	for(unsigned int i=0;i<distances.rows();i++)
+	{
+		if(solution[i].size()==1)
+		{
+			correspondances[i]=*solution[i].begin();
+			for(int j=0;j<distances.cols();j++)
+			{	if(i!=j && solution[j].count(*solution[i].begin())>0)
+				{
+					solution[j].erase(*solution[i].begin());
+					changed=true;
+				}
+			}
+		}
+	}
 }
 //delete options
 std::cout << "getting final solution" <<std::endl;
 for(unsigned int i=0;i<distances.rows();i++)
 {
-        auto it = solution[i].begin();
-        correspondances[i]=*it;
-        if(solution[i].size()>1)
-        {
-                for(unsigned int j=0;j<distances.cols();j++)
-                {	if(i!=j && solution[j].count(*it)>0)
-                        {
-                                solution[j].erase(*it);
-                        }
-                }
-        }
+	auto it = solution[i].begin();
+	correspondances[i]=*it;
+	if(solution[i].size()>1)
+	{
+		for(unsigned int j=0;j<distances.cols();j++)
+		{	if(i!=j && solution[j].count(*it)>0)
+			{
+				solution[j].erase(*it);
+			}
+		}
+	}
 }
 
 std::cout << "finish hungarian algorithm "<< std::endl;

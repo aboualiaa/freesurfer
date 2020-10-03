@@ -1,5 +1,4 @@
 #include "kvlAverageAtlasMeshPositionCostAndGradientCalculator.h"
-#include "kvlCroppedImageReader.h"
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
 
@@ -21,13 +20,11 @@ public:
   itkTypeMacro(GetAverageAtlasMeshPositionCostAndGradientCalculator,
                itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // calculator = kvlGetAverageAtlasMeshPositionCostAndGradientCalculator(
-    // meshCollection, K0, K1, transform )
+    // calculator = kvlGetAverageAtlasMeshPositionCostAndGradientCalculator( meshCollection, K0, K1, transform )
 
     // Make sure input arguments are correct
     const std::string usageString =
@@ -56,10 +53,10 @@ public:
             constMeshCollection.GetPointer());
 
     // Retrieve K0
-    const auto K0 = static_cast<float>(*(mxGetPr(prhs[1])));
+    const float K0 = static_cast<float>(*(mxGetPr(prhs[1])));
 
     // Retrieve K1
-    const auto K1 = static_cast<float>(*(mxGetPr(prhs[2])));
+    const float K1 = static_cast<float>(*(mxGetPr(prhs[2])));
 
     // Retrieve transform
     typedef CroppedImageReader::TransformType TransformType;
@@ -67,7 +64,7 @@ public:
     object = kvl::MatlabObjectArray::GetInstance()->GetObject(transformHandle);
     // if ( typeid( *object ) != typeid( TransformType ) )
     if (strcmp(typeid(*object).name(),
-               typeid(TransformType).name()) != 0) // Eugenio: MAC compatibility
+               typeid(TransformType).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("transform doesn't refer to the correct ITK object type");
     }
@@ -104,14 +101,12 @@ public:
   }
 
 protected:
-  GetAverageAtlasMeshPositionCostAndGradientCalculator() = default;
-  ;
-  ~GetAverageAtlasMeshPositionCostAndGradientCalculator() override = default;
-  ;
+  GetAverageAtlasMeshPositionCostAndGradientCalculator(){};
+  virtual ~GetAverageAtlasMeshPositionCostAndGradientCalculator(){};
 
   GetAverageAtlasMeshPositionCostAndGradientCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

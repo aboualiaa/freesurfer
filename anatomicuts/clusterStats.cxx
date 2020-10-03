@@ -113,8 +113,7 @@ int main(int narg, char *arg[]) {
         ImageType::IndexType index;
         if (fa->TransformPhysicalPointToIndex(avgPoints[i], index)) {
           meanFA += fa->GetPixel(index);
-          // std::cout << index << " " << pt <<" " <<fa->GetPixel(index)<<
-          // std::endl;
+          //std::cout << index << " " << pt <<" " <<fa->GetPixel(index)<< std::endl;
           fas.push_back(fa->GetPixel(index));
         }
       }
@@ -127,8 +126,8 @@ int main(int narg, char *arg[]) {
 
       csv_file << " , " << sqrt(stde / fas.size()) << " , "
                << sqrt(stde) / fas.size() << std::endl;
-      //			std::cout << reader->GetFileName()<< " "<<
-      //meanFA << std::endl; if( meanFA > 0)
+      //			std::cout << reader->GetFileName()<< " "<< meanFA << std::endl;
+      //if( meanFA > 0)
       {
         faAvg += meanFA;
         semAvg += sqrt(stde) / fas.size();

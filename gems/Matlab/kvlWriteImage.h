@@ -41,8 +41,7 @@ public:
     typedef itk::Image<float, 3> FloatImageType;
     // if ( typeid( *object ) != typeid( FloatImageType ) )
     if (strcmp(typeid(*object).name(),
-               typeid(FloatImageType).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(FloatImageType).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("image doesn't refer to the correct ITK object type");
     }
@@ -61,8 +60,7 @@ public:
           kvl::MatlabObjectArray::GetInstance()->GetObject(transformHandle);
       // if ( typeid( *object ) != typeid( TransformType ) )
       if (strcmp(typeid(*object).name(),
-                 typeid(TransformType).name()) !=
-          0) // Eugenio: MAC compatibility
+                 typeid(TransformType).name())) // Eugenio: MAC compatibility
       {
         mexErrMsgTxt("transform doesn't refer to the correct ITK object type");
       }
@@ -89,10 +87,9 @@ public:
         }
 #endif
 
-      // In order not to modify the original image, we create a new one. The
-      // proper way of doing this would be to only copy the header information
-      // and of course not the pixel intensities, but I'm too lazy now to figure
-      // out how to do it in ITK
+      // In order not to modify the original image, we create a new one. The proper way of doing this
+      // would be to only copy the header information and of course not the pixel intensities, but I'm
+      // too lazy now to figure out how to do it in ITK
       typedef itk::CastImageFilter<FloatImageType, FloatImageType> CasterType;
       CasterType::Pointer caster = CasterType::New();
       caster->SetInput(image);
@@ -107,8 +104,7 @@ public:
         // Offset part
         newOrigin[i] = transform->GetOffset()[i];
 
-        // For every column, determine norm (which will be voxel spacing), and
-        // normalize direction
+        // For every column, determine norm (which will be voxel spacing), and normalize direction
         double normOfColumn = 0.0;
         for (int j = 0; j < 3; j++) {
           normOfColumn += pow(transform->GetMatrix()[j][i], 2);
@@ -135,13 +131,11 @@ public:
   }
 
 protected:
-  WriteImage() = default;
-  ;
-  ~WriteImage() override = default;
-  ;
+  WriteImage(){};
+  virtual ~WriteImage(){};
 
-  WriteImage(const Self &);     // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  WriteImage(const Self &);     //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

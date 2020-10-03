@@ -18,9 +18,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(ScaleMesh, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlScaleMesh( mesh, scaleFactor(s) )
@@ -36,8 +35,7 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) !=
-        0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("Not an atlas mesh object");
     }
@@ -45,7 +43,7 @@ public:
         static_cast<const kvl::AtlasMesh *>(object.GetPointer());
     kvl::AtlasMesh::Pointer mesh =
         const_cast<kvl::AtlasMesh *>(constMesh.GetPointer());
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
 
     double    scaling[3];
     double *  tmp             = mxGetPr(prhs[1]);
@@ -74,26 +72,24 @@ public:
       }
     }
 
-    // Also the reference position of the mesh has changed. Note, however, that
-    // we don't actually have access to the original reference position, only
-    // some sufficient statistics calculated from it. In particular, we have
-    // only the three first columns of the matrix Z = inv( X ) = inv( [ p0 p1 p2
-    // p3; 1 1 1 1 ] ). The transformed position Xtrans is given by
+    // Also the reference position of the mesh has changed. Note, however, that we don't
+    // actually have access to the original reference position, only some sufficient
+    // statistics calculated from it. In particular, we have only the three first columns
+    // of the matrix Z = inv( X ) = inv( [ p0 p1 p2 p3; 1 1 1 1 ] ). The transformed
+    // position Xtrans is given by
     //
-    //     Xtrans = diag( scaling[0] scaling[ 1 ] scaling[ 2 ] 1 ) * X + [
-    //     translation[ 0 ] translation[ 1 ] translation[ 2 ] 1 ]'
+    //     Xtrans = diag( scaling[0] scaling[ 1 ] scaling[ 2 ] 1 ) * X + [ translation[ 0 ] translation[ 1 ] translation[ 2 ] 1 ]'
     //
-    // but since we'll also end up calculating the upper 3x3 matrix of Ytrans *
-    // Ztrans (with Y the equivalent of X but in the deformed mesh) to evaluate
-    // the deformation penatly, we can safely drop the translation part. In
-    // short, we will calculate the first 3 columns of the matrix
+    // but since we'll also end up calculating the upper 3x3 matrix of Ytrans * Ztrans
+    // (with Y the equivalent of X but in the deformed mesh)
+    // to evaluate the deformation penatly, we can safely drop the translation part.
+    // In short, we will calculate the first 3 columns of the matrix
     //
     //    Ztrans = inv( diag( scaling[0] scaling[ 1 ] scaling[ 2 ] 1 ) * X )
     //
     //           = Z * diag( 1/scaling[0] 1/scaling[1] 1/scaling[2] 1 )
     //
-    // which is given by multiplying each column i of Z with a factor
-    // 1/scaling[i]
+    // which is given by multiplying each column i of Z with a factor 1/scaling[i]
     //
     for (AtlasMesh::CellDataContainer::Iterator it =
              mesh->GetCellData()->Begin();
@@ -119,13 +115,11 @@ public:
   }
 
 protected:
-  ScaleMesh() = default;
-  ;
-  ~ScaleMesh() override = default;
-  ;
+  ScaleMesh(){};
+  virtual ~ScaleMesh(){};
 
-  ScaleMesh(const Self &);      // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  ScaleMesh(const Self &);      //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

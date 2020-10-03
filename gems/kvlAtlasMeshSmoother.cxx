@@ -10,7 +10,7 @@ namespace kvl {
 //
 //
 AtlasMeshSmoother ::AtlasMeshSmoother() {
-  m_MeshCollection = nullptr;
+  m_MeshCollection = 0;
   m_Sigma0         = 1.0f;
   m_Sigma1         = 1.0f;
   m_Sigma2         = 1.0f;
@@ -37,8 +37,7 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
     itkExceptionMacro(<< "No mesh collection set!");
   }
 
-  //  std::cout << "Smoothing mesh collection with sigma = " << m_Sigma << "..."
-  //  << std::flush;
+  //  std::cout << "Smoothing mesh collection with sigma = " << m_Sigma << "..." << std::flush;
 
   // Construct container to hold smoothed alphas
   AtlasMesh::PointDataContainer::Pointer smoothedParameters = nullptr;
@@ -57,9 +56,9 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
     //
 
     // First determine size of template image for the alpha rasterizor
-    using MultiAlphasImageType = AtlasMeshMultiAlphaDrawer::ImageType;
-    using SizeType             = MultiAlphasImageType::SizeType;
-    SizeType size;
+    typedef AtlasMeshMultiAlphaDrawer::ImageType MultiAlphasImageType;
+    typedef MultiAlphasImageType::SizeType       SizeType;
+    SizeType                                     size;
     size[0] = 0;
     size[1] = 0;
     size[2] = 0;
@@ -91,17 +90,15 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
         const_cast<MultiAlphasImageType *>(alphasImage.GetPointer());
 
     // Create an image holding one component of the probability vector image
-    using ComponentImageType                   = itk::Image<float, 3>;
-    ComponentImageType::Pointer componentImage = ComponentImageType::New();
+    typedef itk::Image<float, 3> ComponentImageType;
+    ComponentImageType::Pointer  componentImage = ComponentImageType::New();
     componentImage->SetRegions(size);
     componentImage->Allocate();
 
     // Smooth by smoothing each component individually
-    // const int  numberOfClasses =
-    // m_MeshCollection->GetPointParameters()->Begin().Value().m_Alphas.Size();
-    // for(int classNumber = 0; classNumber < numberOfClasses; classNumber++ )
-    // Loop only through the classes we explicitly want to smooth - unless the
-    // vector is empty; in that case, we do all of them (Eugenio added this)
+    //const int  numberOfClasses = m_MeshCollection->GetPointParameters()->Begin().Value().m_Alphas.Size();
+    //for(int classNumber = 0; classNumber < numberOfClasses; classNumber++ )
+    //Loop only through the classes we explicitly want to smooth - unless the vector is empty; in that case, we do all of them (Eugenio added this)
     std::vector<int> classesToSmooth;
     if (m_ClassesToSmooth.size() > 0) {
       classesToSmooth = m_ClassesToSmooth;
@@ -120,8 +117,8 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
 
       std::cout << "Smoothing class: " << *(classIt) << std::endl;
       // Extract the probability image
-      using ComponentImageType                   = itk::Image<float, 3>;
-      ComponentImageType::Pointer componentImage = ComponentImageType::New();
+      typedef itk::Image<float, 3> ComponentImageType;
+      ComponentImageType::Pointer  componentImage = ComponentImageType::New();
       componentImage->SetRegions(size);
       componentImage->Allocate();
 
@@ -134,8 +131,9 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
       }
 
       // Smooth it
-      using SmootherType = itk::DiscreteGaussianImageFilter<ComponentImageType,
-                                                            ComponentImageType>;
+      typedef itk::DiscreteGaussianImageFilter<ComponentImageType,
+                                               ComponentImageType>
+                            SmootherType;
       SmootherType::Pointer smoother = SmootherType::New();
       smoother->SetInput(componentImage);
       smoother->SetMaximumError(0.1);
@@ -161,8 +159,7 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
     } // End loop over classes
 
     //
-    // Part III: Do EM estimation of the mesh node alphas that best fit the
-    // smoothed probability vectors
+    // Part III: Do EM estimation of the mesh node alphas that best fit the smoothed probability vectors
     //
 
     // Get unnormalized counts
@@ -175,8 +172,7 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
       statisticsCollector->SetProbabilityImage(smoothedAlphasImage);
       statisticsCollector->Rasterize(m_MeshCollection->GetReferenceMesh());
       cost = statisticsCollector->GetMinLogLikelihood();
-      // std::cout << "   EM iteration " << iterationNumber << " -> " << cost <<
-      // std::endl;
+      //std::cout << "   EM iteration " << iterationNumber << " -> " << cost << std::endl;
 
       // Normalize and assign to the meshCollection's alpha vectors
       smoothedParameters = m_MeshCollection->GetPointParameters();
@@ -206,8 +202,8 @@ AtlasMeshCollection::Pointer AtlasMeshSmoother ::GetSmoothedMeshCollection() {
   result->SetPositions(m_MeshCollection->GetPositions());
 
   //  std::cout << "done!" << std::endl;
-  //  m_MeshCollection->Write( "/tmp/original.txt" );  Eugenio: actually,
-  //  original.txt will be smoothed too... result->Write( "/tmp/smoothed.txt" );
+  //  m_MeshCollection->Write( "/tmp/original.txt" );  Eugenio: actually, original.txt will be smoothed too...
+  //  result->Write( "/tmp/smoothed.txt" );
 
   return result;
 }

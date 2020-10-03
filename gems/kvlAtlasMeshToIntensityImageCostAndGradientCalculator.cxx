@@ -52,7 +52,7 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::Rasterize(
     const AtlasMesh *mesh) {
 
   // Make sure the likelihoods are up-to-date
-  // m_LikelihoodFilter->SetNumberOfThreads( 1 );
+  //m_LikelihoodFilter->SetNumberOfThreads( 1 );
   m_LikelihoodFilter->Update();
 
   // Now rasterize
@@ -89,7 +89,7 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::
   for (; !it.IsAtEnd(); ++it) {
     // Skip voxels for which nothing is known
     if (it.Value().Size() == 0) {
-      // std::cout << "Skipping: " << it.Value().Size() << std::endl;
+      //std::cout << "Skipping: " << it.Value().Size() << std::endl;
       continue;
     }
 
@@ -100,8 +100,7 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::
     double zGradientBasis = 0.0;
     for (unsigned int classNumber = 0; classNumber < numberOfClasses;
          classNumber++) {
-      // Get the Gaussian mixture model likelihood of this class at the
-      // intensity of this pixel
+      // Get the Gaussian mixture model likelihood of this class at the intensity of this pixel
       const double mixture = it.Value()[classNumber];
 
       // Add contribution of the likelihood
@@ -117,7 +116,7 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::
     } // End loop over all classes
 
     //  Add contribution to log-likelihood
-    likelihood = likelihood + 1e-15; // dont want to divide by zero
+    likelihood = likelihood + 1e-15; //dont want to divide by zero
     priorPlusDataCost -= log(likelihood);
 
     //

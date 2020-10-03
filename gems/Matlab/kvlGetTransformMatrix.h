@@ -20,9 +20,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(GetTransformMatrix, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // transformMatrix = kvlGetTransformMatrix( transform )
@@ -33,13 +32,13 @@ public:
     }
 
     // Retrieve the tranform
-    typedef itk::AffineTransform<double, 3> TransformType; // double here!
+    typedef itk::AffineTransform<double, 3> TransformType; //double here!
     const int transformHandle = *(static_cast<int *>(mxGetData(prhs[0])));
     itk::Object::ConstPointer object =
         kvl::MatlabObjectArray::GetInstance()->GetObject(transformHandle);
     // if ( typeid( *object ) != typeid( TransformType ) )
     if (strcmp(typeid(*object).name(),
-               typeid(TransformType).name()) != 0) // Eugenio: MAC compatibility
+               typeid(TransformType).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("transform doesn't refer to the correct ITK object type");
     }
@@ -48,10 +47,10 @@ public:
 
     // Create a Matlab matrix and fill in
     mwSize dims[2];
-    dims[0]    = 4;
-    dims[1]    = 4;
-    plhs[0]    = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-    auto *data = static_cast<double *>(mxGetData(plhs[0]));
+    dims[0]      = 4;
+    dims[1]      = 4;
+    plhs[0]      = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+    double *data = static_cast<double *>(mxGetData(plhs[0]));
     TransformType::ParametersType parameters = transform->GetParameters();
 
     for (unsigned int row = 0; row < 3; row++) {
@@ -67,13 +66,11 @@ public:
   }
 
 protected:
-  GetTransformMatrix() = default;
-  ;
-  ~GetTransformMatrix() override = default;
-  ;
+  GetTransformMatrix(){};
+  virtual ~GetTransformMatrix(){};
 
-  GetTransformMatrix(const Self &); // purposely not implemented
-  void operator=(const Self &);     // purposely not implemented
+  GetTransformMatrix(const Self &); //purposely not implemented
+  void operator=(const Self &);     //purposely not implemented
 
 private:
 };

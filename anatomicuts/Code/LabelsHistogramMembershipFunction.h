@@ -8,29 +8,29 @@ class LabelsHistogramMembershipFunction
     : public LabelPerPointMembershipFunction<TVector> {
 public:
   /** Standard class typedefs */
-  using Self         = LabelsHistogramMembershipFunction<TVector>;
-  using Superclass   = LabelPerPointMembershipFunction<TVector>;
-  using Pointer      = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef LabelsHistogramMembershipFunction        Self;
+  typedef LabelPerPointMembershipFunction<TVector> Superclass;
+  typedef itk::SmartPointer<Self>                  Pointer;
+  typedef itk::SmartPointer<const Self>            ConstPointer;
 
   /** Strandard macros */
   itkTypeMacro(LabelsHistogramMembershipFunction, MembershipFunctionBase);
   itkNewMacro(Self);
 
   /** Typedef alias for the measurement vectors */
-  using MeasurementVectorType = TVector;
-  using CentroidType          = TVector;
+  typedef TVector MeasurementVectorType;
+  typedef TVector CentroidType;
 
   /** Typedef to represent the length of measurement vectors */
-  using MeasurementVectorSizeType =
-      typename Superclass::MeasurementVectorSizeType;
+  typedef
+      typename Superclass::MeasurementVectorSizeType MeasurementVectorSizeType;
 
   virtual double Evaluate(const MeasurementVectorType *m1,
                           const MeasurementVectorType *m2) const;
 
 protected:
-  LabelsHistogramMembershipFunction() : Superclass(){};
-  virtual ~LabelsHistogramMembershipFunction() {}
+  LabelsHistogramMembershipFunction(void) : Superclass(){};
+  virtual ~LabelsHistogramMembershipFunction(void) {}
 
 private:
 };

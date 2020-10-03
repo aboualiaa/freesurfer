@@ -15,10 +15,8 @@ public:
   typedef T                             ScalarType;
   typedef Fiber                         Self;
   typedef Point<ScalarType, NDimension> PointType;
-  // typedef Tensor<TTensorCoord, NDimension> TensorType;
-  // typedef std::conditional<NDimension== 3,
-  // itk::DiffusionTensor3D<TTensorCoord>,itk::SymmetricSecondRankTensor<TTensorCoord>>::type
-  // TensorType;
+  //typedef Tensor<TTensorCoord, NDimension> TensorType;
+  //typedef std::conditional<NDimension== 3, itk::DiffusionTensor3D<TTensorCoord>,itk::SymmetricSecondRankTensor<TTensorCoord>>::type TensorType;
   //    typedef DiffusionTensor3D<TTensorCoord> TensorType;
   typedef itk::SymmetricSecondRankTensor<TTensorCoord, NDimension> TensorType;
   struct FiberPoint {

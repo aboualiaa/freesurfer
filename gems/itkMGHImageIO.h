@@ -3,13 +3,10 @@
 #ifndef H_ITK_IMAGE_IO_H
 #define H_ITK_IMAGE_IO_H
 
-// STL includes
-
 // ITK includes
+#include "itkByteSwapper.h"
 #include "itkIOCommon.h"
 #include "itkImageIOBase.h"
-//#include "itkExceptionObject.h"
-#include "itkByteSwapper.h"
 #include "itkMacro.h"
 #include "itkMatrix.h"
 #include "itkMetaDataObject.h"
@@ -21,7 +18,7 @@
 #include <itk_zlib.h>
 
 #define KVL_ORIENTATION_HACK                                                   \
-  1 // This MGH reader/writer IO class seems to swap x and y-axis compared   \
+  1   // This MGH reader/writer IO class seems to swap x and y-axis compared   \
       // to NIFTI. Hard-coded a correction here; this really should be         \
       // investigated further.
 
@@ -50,9 +47,9 @@ class OutputStreamWrapper;
 
 class ITK_EXPORT MGHImageIO : public ImageIOBase {
 public:
-  using Self       = MGHImageIO;
-  using Superclass = ImageIOBase;
-  using Pointer    = SmartPointer<Self>;
+  typedef MGHImageIO         Self;
+  typedef ImageIOBase        Superclass;
+  typedef SmartPointer<Self> Pointer;
 
   /** Method for creation through the object factory **/
   itkNewMacro(Self);
@@ -85,7 +82,7 @@ private:
   // processes the actual data buffer
   void SwapBytesIfNecessary(void *buffer, unsigned long numberOfPixels);
   // examines the direction cosines and creates encapsulation data
-  // void MriDirCos();
+  //void MriDirCos();
 
   template <class Writer> void WriteHeader(Writer &writer);
 
@@ -117,29 +114,29 @@ template <class Writer> void MGHImageIO::WriteHeader(Writer &writer) {
 
   // type
   switch (m_ComponentType) {
-  case UCHAR:
+  case CommonEnums::IOComponent::UCHAR:
     writer.Write(fs::MRI_UCHAR);
     break;
-  case USHORT:
+  case CommonEnums::IOComponent::USHORT:
     itkWarningMacro(<< " Casting from USHORT to INT!!!");
-  case INT:
+  case CommonEnums::IOComponent::INT:
     writer.Write(fs::MRI_INT);
     break;
-  case DOUBLE:
+  case CommonEnums::IOComponent::DOUBLE:
     itkWarningMacro(<< " Casting from DOUBLE to INT!!!");
-  case FLOAT:
+  case CommonEnums::IOComponent::FLOAT:
     writer.Write(fs::MRI_FLOAT);
     break;
-  case SHORT:
+  case CommonEnums::IOComponent::SHORT:
     writer.Write(fs::MRI_SHORT);
     break;
 
   // DJ -- added these cases to make the compiler shut up
-  case UNKNOWNCOMPONENTTYPE:
-  case CHAR:
-  case UINT:
-  case ULONG:
-  case LONG:
+  case CommonEnums::IOComponent::UNKNOWNCOMPONENTTYPE:
+  case CommonEnums::IOComponent::CHAR:
+  case CommonEnums::IOComponent::UINT:
+  case CommonEnums::IOComponent::ULONG:
+  case CommonEnums::IOComponent::LONG:
     break;
   }
 

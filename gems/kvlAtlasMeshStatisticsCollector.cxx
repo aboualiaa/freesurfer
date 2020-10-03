@@ -23,7 +23,7 @@ AtlasMeshStatisticsCollector ::~AtlasMeshStatisticsCollector() {}
 void AtlasMeshStatisticsCollector ::Rasterize(const AtlasMesh *mesh) {
 
   // Initialize from a clean slate
-  m_LabelStatistics  = nullptr;
+  m_LabelStatistics  = 0;
   m_MinLogLikelihood = 0;
   m_ThreadSpecificLabelStatistics.clear();
   m_ThreadSpecificMinLogLikelihoods.clear();
@@ -39,8 +39,7 @@ void AtlasMeshStatisticsCollector ::Rasterize(const AtlasMesh *mesh) {
     // Initialize cost to zero for this thread
     m_ThreadSpecificMinLogLikelihoods.push_back(0.0);
 
-    // Create a container to hold the label statistics of this thread, and
-    // initialize to zero
+    // Create a container to hold the label statistics of this thread, and initialize to zero
     StatisticsContainerType::Pointer labelStatistics =
         StatisticsContainerType::New();
     for (AtlasMesh::PointDataContainer::ConstIterator it =

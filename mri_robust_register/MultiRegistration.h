@@ -2,7 +2,7 @@
  * @brief A class to handle registration of multiple files
  *
  * MultiRegistration is a class to compute a robust registration
- *  of several images. It makes use routines from Registration
+ *  of several images. It makes use routines from Registration 
  *
  * written by Martin Reuter
  *  Aug. 12th ,2009
@@ -49,15 +49,14 @@ public:
         satit(false), debug(0), iscale(false), iscaleonly(false),
         nomulti(false), subsamplesize(-1), highit(-1), fixvoxel(false),
         keeptype(false), average(1), doubleprec(false), backupweights(false),
-        sampletype(SAMPLE_CUBIC_BSPLINE), crascenter(false), mri_mean(nullptr) {
-  }
+        sampletype(SAMPLE_CUBIC_BSPLINE), crascenter(false), mri_mean(NULL) {}
 
   MultiRegistration(const std::vector<std::string> mov)
       : outdir("./"), transonly(false), rigid(true), robust(true), sat(4.685),
         satit(false), debug(0), iscale(false), iscaleonly(false),
         nomulti(false), subsamplesize(-1), highit(-1), fixvoxel(false),
         keeptype(false), average(1), doubleprec(false), backupweights(false),
-        sampletype(SAMPLE_CUBIC_BSPLINE), crascenter(false), mri_mean(nullptr) {
+        sampletype(SAMPLE_CUBIC_BSPLINE), crascenter(false), mri_mean(NULL) {
     loadMovables(mov);
   }
 
@@ -217,7 +216,7 @@ public:
                          double sat);
 
 private:
-  void normalizeIntensities();
+  void normalizeIntensities(void);
 
   void initRegistration(RegRobust &R);
 

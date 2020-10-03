@@ -12,8 +12,8 @@
 
 #include <blitz/array.h>
 #include <blitz/tinyvec-et.h>
-
 using namespace blitz;
+using namespace itk;
 
 template <typename TValueType, class TMesh>
 class LabelMapVariableLengthVector : public VariableLengthVector<TValueType> {

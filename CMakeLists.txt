@@ -779,7 +779,7 @@ if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_
                                                           MATCHES "(Apple)?[Cc]lang"
    )
   if(APPLE)
-    add_subdirectory(fem_elastic)
+	  add_subdirectory(fem_elastic)
   endif()
 endif()
 

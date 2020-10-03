@@ -1,32 +1,30 @@
-#include <iostream>
-#include <set>
-#include <string>
-
 #include "itkImage.h"
 #include "itkMesh.h"
 #include "itkVector.h"
+#include <iostream>
 
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 
+#include "GetPot.h"
+#include "OrientationPlanesFromParcellationFilter.h"
 #include "PolylineMeshToVTKPolyDataFilter.h"
 #include "TrkVTKPolyDataFilter.txx"
 #include "VTKPolyDataToPolylineMeshFilter.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "vtkSplineFilter.h"
-
-#include "GetPot.h"
-#include "OrientationPlanesFromParcellationFilter.h"
+#include <set>
+#include <string>
 
 int main(int narg, char *arg[]) {
 
   enum { Dimension = 3 };
-  using PixelType = double;
-  using ImageType = itk::Image<PixelType, Dimension>;
+  typedef double                           PixelType;
+  typedef itk::Image<PixelType, Dimension> ImageType;
 
-  using IndexType = ImageType::IndexType;
+  typedef ImageType::IndexType IndexType;
 
   GetPot cl(narg, const_cast<char **>(arg));
   GetPot cl2(narg, const_cast<char **>(arg));
@@ -38,10 +36,10 @@ int main(int narg, char *arg[]) {
               << std::endl;
     return -1;
   }
-  const unsigned int PointDimension = 3;
-  using MeshType                    = itk::Mesh<PixelType, PointDimension>;
-  // typedef PolylineMeshToVTKPolyDataFilter<MeshType> VTKConverterType;
-  using MeshConverterType = VTKPolyDataToPolylineMeshFilter<MeshType>;
+  const unsigned int                           PointDimension = 3;
+  typedef itk::Mesh<PixelType, PointDimension> MeshType;
+  //typedef PolylineMeshToVTKPolyDataFilter<MeshType> VTKConverterType;
+  typedef VTKPolyDataToPolylineMeshFilter<MeshType> MeshConverterType;
 
   const char *filename = cl.follow("histograms.csv", 2, "-O", "-o");
   std::cout << "Output histogram file " << filename << std::endl;
@@ -50,8 +48,8 @@ int main(int narg, char *arg[]) {
   bool        bb      = cl.search("-bb");
   const char *segFile = cl2.follow("", "-p");
 
-  using ImageReaderType            = itk::ImageFileReader<ImageType>;
-  ImageReaderType::Pointer readerS = ImageReaderType::New();
+  typedef itk::ImageFileReader<ImageType> ImageReaderType;
+  ImageReaderType::Pointer                readerS = ImageReaderType::New();
   readerS->SetFileName(segFile);
   readerS->Update();
   ImageType::Pointer segmentation = readerS->GetOutput();
@@ -113,7 +111,7 @@ int main(int narg, char *arg[]) {
       itk::SmartPointer<TrkVTKPolyDataFilter<ImageType>> trkReader =
           TrkVTKPolyDataFilter<ImageType>::New();
       trkReader->SetTrkFileName(fiberFile);
-      // if(segmentation.IsNotNull())
+      //if(segmentation.IsNotNull())
       trkReader->SetReferenceImage(segmentation);
       trkReader->TrkToVTK();
 #if VTK_MAJOR_VERSION > 5
@@ -138,7 +136,7 @@ int main(int narg, char *arg[]) {
     MeshType::Pointer mesh = converter->GetOutput();
 
     MeshType::CellsContainer::ConstIterator itCell = mesh->GetCells()->Begin();
-    // int cellId = 0;
+    //int cellId = 0;
 
     std::vector<std::map<int, int>> histograms;
     for (unsigned int i = 0; i < direcciones.size(); i++)

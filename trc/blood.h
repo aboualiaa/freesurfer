@@ -133,6 +133,21 @@ private:
   bool IsInMask(float *Point);
   bool IsInRoi(std::vector<int>::const_iterator Point, MRI *Roi);
   bool IsInCortex(std::vector<int>::const_iterator Point, MRI *Mask, MRI *Aseg);
+  void SetArcSegments();
+  void ComputeAnatomyPrior(bool UseTruncated);
+  void ComputeShapePrior(bool UseTruncated);
+  void FindPointsOnStreamline(std::vector<int> &Streamline, int NumPoints);
+  bool FindPointsOnStreamlineLS(std::vector<int> &Streamline, int NumPoints);
+  bool FindPointsOnStreamlineComb(std::vector<int> &Streamline, int NumPoints);
+  void
+       TryControlPoint(double &HausDistMin, int IndexPoint, int SearchLag,
+                       std::vector<int> &ControlPointsMax,
+                       std::vector<std::vector<int>::const_iterator> &ControlPoints,
+                       Spline &TrySpline, std::vector<int> &Streamline);
+  void ComputeStreamlineSpread(std::vector<int> &ControlPoints);
+  void FlipStreamline(std::vector<std::vector<int>>::iterator Streamline);
+  bool IsEnd1InMask(std::vector<std::vector<int>>::iterator Streamline,
+                    MRI *Mask, MRI *Aseg);
   bool IsEnd2InMask(std::vector<std::vector<int>>::iterator Streamline,
                     MRI *Mask, MRI *Aseg);
   bool MapPointToBase(std::vector<int>::iterator       OutPoint,

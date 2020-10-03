@@ -1,7 +1,11 @@
 #include "kvlImageViewer.h"
+
 #include "itkMinimumMaximumImageCalculator.h"
+#include "vtkCellArray.h"
 #include "vtkClipPolyData.h"
+#include "vtkImageData.h"
 #include "vtkImageImport.h"
+#include "vtkImageMapToColors.h"
 #include "vtkInteractorStyleSwitch.h"
 #include "vtkPNGWriter.h"
 #include "vtkPolyDataMapper.h"
@@ -23,8 +27,8 @@ void ConnectPipelines(ITK_Exporter exporter, VTK_Importer importer) {
   importer->SetPipelineModifiedCallback(
       exporter->GetPipelineModifiedCallback());
   importer->SetWholeExtentCallback(exporter->GetWholeExtentCallback());
-  // importer->SetSpacingCallback(exporter->GetSpacingCallback());
-  // importer->SetOriginCallback(exporter->GetOriginCallback());
+  //importer->SetSpacingCallback(exporter->GetSpacingCallback());
+  //importer->SetOriginCallback(exporter->GetOriginCallback());
   importer->SetScalarTypeCallback(exporter->GetScalarTypeCallback());
   importer->SetNumberOfComponentsCallback(
       exporter->GetNumberOfComponentsCallback());
@@ -41,9 +45,9 @@ void ConnectPipelines(ITK_Exporter exporter, VTK_Importer importer) {
 //
 ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
     : vtkFlRenderWindowInteractor(x, y, w, h, l) {
-  m_Image        = nullptr;
-  m_OverlayImage = nullptr;
-  m_Mesh         = nullptr;
+  m_Image        = 0;
+  m_OverlayImage = 0;
+  m_Mesh         = 0;
 
   m_OverlayColor[0] = 0.3;
   m_OverlayColor[1] = 0.3;
@@ -58,10 +62,10 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   m_AxialSliceNumber    = 0;
   m_CoronalSliceNumber  = 0;
 
-  m_ImageExporter            = nullptr;
-  m_RGBAImageExporter        = nullptr;
-  m_OverlayImageExporter     = nullptr;
-  m_RGBAOverlayImageExporter = nullptr;
+  m_ImageExporter            = 0;
+  m_RGBAImageExporter        = 0;
+  m_OverlayImageExporter     = 0;
+  m_RGBAOverlayImageExporter = 0;
 
   // Create points of connection to VTK pipelines
   m_OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
@@ -74,8 +78,7 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   m_ImageLookupTable->SetHueRange(0, 0);
   m_ImageLookupTable->SetValueRange(0, 1);
   m_ImageLookupTable->Build();
-  // m_ImageLookupTable->SetTableValue( 0, 0.0, 0.0, 0.0, 0.0 ); // Make black
-  // voxels transparent
+  //m_ImageLookupTable->SetTableValue( 0, 0.0, 0.0, 0.0, 0.0 ); // Make black voxels transparent
 
   m_OverlayImageLookupTable = vtkSmartPointer<vtkLookupTable>::New();
   m_OverlayImageLookupTable->SetTableRange(0, 255);
@@ -99,29 +102,17 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   m_Importer = vtkSmartPointer<vtkImageImport>::New();
 
   m_SagittalColors = vtkSmartPointer<vtkImageMapToColors>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_SagittalColors->SetInput(m_Importer->GetOutput());
-#else
-  m_SagittalColors->SetInputData(m_Importer->GetOutput());
-#endif
   m_SagittalColors->SetLookupTable(m_ImageLookupTable);
   m_SagittalColors->PassAlphaToOutputOn();
 
   m_CoronalColors = vtkSmartPointer<vtkImageMapToColors>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_CoronalColors->SetInput(m_Importer->GetOutput());
-#else
-  m_CoronalColors->SetInputData(m_Importer->GetOutput());
-#endif
   m_CoronalColors->SetLookupTable(m_ImageLookupTable);
   m_CoronalColors->PassAlphaToOutputOn();
 
   m_AxialColors = vtkSmartPointer<vtkImageMapToColors>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_AxialColors->SetInput(m_Importer->GetOutput());
-#else
-  m_AxialColors->SetInputData(m_Importer->GetOutput());
-#endif
   m_AxialColors->SetLookupTable(m_ImageLookupTable);
   m_AxialColors->PassAlphaToOutputOn();
 
@@ -129,30 +120,18 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   m_OverlayImporter = vtkSmartPointer<vtkImageImport>::New();
 
   m_SagittalOverlayColors = vtkSmartPointer<vtkImageMapToColors>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_SagittalOverlayColors->SetInput(m_OverlayImporter->GetOutput());
-#else
-  m_SagittalOverlayColors->SetInputData(m_OverlayImporter->GetOutput());
-#endif
-  // m_SagittalOverlayColors->SetLookupTable( m_OverlayImageLookupTable );
+  //m_SagittalOverlayColors->SetLookupTable( m_OverlayImageLookupTable );
   m_SagittalOverlayColors->PassAlphaToOutputOn();
 
   m_CoronalOverlayColors = vtkSmartPointer<vtkImageMapToColors>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_CoronalOverlayColors->SetInput(m_OverlayImporter->GetOutput());
-#else
-  m_CoronalOverlayColors->SetInputData(m_OverlayImporter->GetOutput());
-#endif
-  // m_CoronalOverlayColors->SetLookupTable( m_OverlayImageLookupTable );
+  //m_CoronalOverlayColors->SetLookupTable( m_OverlayImageLookupTable );
   m_CoronalOverlayColors->PassAlphaToOutputOn();
 
   m_AxialOverlayColors = vtkSmartPointer<vtkImageMapToColors>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_AxialOverlayColors->SetInput(m_OverlayImporter->GetOutput());
-#else
-  m_AxialOverlayColors->SetInputData(m_OverlayImporter->GetOutput());
-#endif
-  // m_AxialOverlayColors->SetLookupTable( m_OverlayImageLookupTable );
+  //m_AxialOverlayColors->SetLookupTable( m_OverlayImageLookupTable );
   m_AxialOverlayColors->PassAlphaToOutputOn();
 
   this->SetOverlayImageLookupTable(m_OverlayImageLookupTable);
@@ -160,39 +139,23 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   // Set up VTK pipeline for the blended m_Image and m_ImageOverlay
   m_SagittalBlender = vtkSmartPointer<vtkImageBlend>::New();
   m_SagittalActor   = vtkSmartPointer<vtkImageActor>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_SagittalActor->SetInput(m_SagittalBlender->GetOutput());
-#else
-  m_SagittalActor->SetInputData(m_SagittalBlender->GetOutput());
-#endif
   m_SagittalActor->InterpolateOff();
 
   m_CoronalBlender = vtkSmartPointer<vtkImageBlend>::New();
   m_CoronalActor   = vtkSmartPointer<vtkImageActor>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_CoronalActor->SetInput(m_CoronalBlender->GetOutput());
-#else
-  m_CoronalActor->SetInputData(m_CoronalBlender->GetOutput());
-#endif
   m_CoronalActor->InterpolateOff();
 
   m_AxialBlender = vtkSmartPointer<vtkImageBlend>::New();
   m_AxialActor   = vtkSmartPointer<vtkImageActor>::New();
-#if VTK_MAJOR_VERSION <= 5
   m_AxialActor->SetInput(m_AxialBlender->GetOutput());
-#else
-  m_AxialActor->SetInputData(m_AxialBlender->GetOutput());
-#endif
   m_AxialActor->InterpolateOff();
 
   // Set up VTK pipeline for the m_Mesh: outline
   vtkSmartPointer<vtkPolyDataMapper> outlineMapper =
       vtkSmartPointer<vtkPolyDataMapper>::New();
-#if VTK_MAJOR_VERSION <= 5
   outlineMapper->SetInput(m_OutlineFilter->GetOutput());
-#else
-  outlineMapper->SetInputData(m_OutlineFilter->GetOutput());
-#endif
 
   m_OutlineActor = vtkSmartPointer<vtkActor>::New();
   m_OutlineActor->SetMapper(outlineMapper);
@@ -201,31 +164,19 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   // Set up VTK pipeline for the m_Mesh: extract edges to display
   vtkSmartPointer<vtkClipPolyData> axialEdgeClipper =
       vtkSmartPointer<vtkClipPolyData>::New();
-#if VTK_MAJOR_VERSION <= 5
   axialEdgeClipper->SetInput(m_EdgeExtracter->GetOutput());
-#else
-  axialEdgeClipper->SetInputData(m_EdgeExtracter->GetOutput());
-#endif
   axialEdgeClipper->SetClipFunction(m_AxialPlane);
   axialEdgeClipper->SetValue(0.0f);
 
   vtkSmartPointer<vtkTubeFilter> axialEdgeTuber =
       vtkSmartPointer<vtkTubeFilter>::New();
-#if VTK_MAJOR_VERSION <= 5
   axialEdgeTuber->SetInput(axialEdgeClipper->GetOutput());
-#else
-  axialEdgeTuber->SetInputData(axialEdgeClipper->GetOutput());
-#endif
   axialEdgeTuber->SetRadius(0.1f);
   axialEdgeTuber->SetNumberOfSides(6);
 
   vtkSmartPointer<vtkPolyDataMapper> axialEdgeMapper =
       vtkSmartPointer<vtkPolyDataMapper>::New();
-#if VTK_MAJOR_VERSION <= 5
   axialEdgeMapper->SetInput(axialEdgeTuber->GetOutput());
-#else
-  axialEdgeMapper->SetInputData(axialEdgeTuber->GetOutput());
-#endif
   m_AxialEdgeActor = vtkSmartPointer<vtkActor>::New();
   m_AxialEdgeActor->SetMapper(axialEdgeMapper);
   m_AxialEdgeActor->GetProperty()->SetColor(1, 0, 0);
@@ -241,11 +192,7 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
 
   vtkSmartPointer<vtkPolyDataMapper> sagittalCutMapper =
       vtkSmartPointer<vtkPolyDataMapper>::New();
-#if VTK_MAJOR_VERSION <= 5
   sagittalCutMapper->SetInput(m_SagittalCutter->GetOutput());
-#else
-  sagittalCutMapper->SetInputData(m_SagittalCutter->GetOutput());
-#endif
 
   m_SagittalCutActor = vtkSmartPointer<vtkActor>::New();
   m_SagittalCutActor->SetMapper(sagittalCutMapper);
@@ -261,11 +208,7 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
 
   vtkSmartPointer<vtkPolyDataMapper> coronalCutMapper =
       vtkSmartPointer<vtkPolyDataMapper>::New();
-#if VTK_MAJOR_VERSION <= 5
   coronalCutMapper->SetInput(m_CoronalCutter->GetOutput());
-#else
-  coronalCutMapper->SetInputData(m_CoronalCutter->GetOutput());
-#endif
 
   m_CoronalCutActor = vtkSmartPointer<vtkActor>::New();
   m_CoronalCutActor->SetMapper(coronalCutMapper);
@@ -281,11 +224,7 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
 
   vtkSmartPointer<vtkPolyDataMapper> axialCutMapper =
       vtkSmartPointer<vtkPolyDataMapper>::New();
-#if VTK_MAJOR_VERSION <= 5
   axialCutMapper->SetInput(m_AxialCutter->GetOutput());
-#else
-  axialCutMapper->SetInputData(m_AxialCutter->GetOutput());
-#endif
 
   m_AxialCutActor = vtkSmartPointer<vtkActor>::New();
   m_AxialCutActor->SetMapper(axialCutMapper);
@@ -366,15 +305,14 @@ ImageViewer ::ImageViewer(int x, int y, int w, int h, const char *l)
   this->Initialize();
 
   // Set to the correct initial location, set the correct overlay value etc
-  // this->SetSliceLocation( m_SagittalSliceNumber, m_CoronalSliceNumber,
-  // m_AxialSliceNumber );
+  //this->SetSliceLocation( m_SagittalSliceNumber, m_CoronalSliceNumber, m_AxialSliceNumber );
   this->SetOverlayAlpha(m_OverlayAlpha);
 }
 
 //
 //
 //
-ImageViewer ::~ImageViewer() = default;
+ImageViewer ::~ImageViewer() {}
 
 //
 //
@@ -390,7 +328,7 @@ void ImageViewer ::SetImage(const ImageBaseType *image) {
 
   m_Image = image;
 
-  if (m_Image == nullptr) {
+  if (!m_Image) {
     // Remove the actors and return
     m_ThreeDRenderer->RemoveActor(m_SagittalActor);
     m_ThreeDRenderer->RemoveActor(m_AxialActor);
@@ -404,7 +342,7 @@ void ImageViewer ::SetImage(const ImageBaseType *image) {
   }
 
   // Connect the VTK pipeline bits and pieces
-  if (dynamic_cast<const ImageType *>(m_Image.GetPointer()) != nullptr) {
+  if (dynamic_cast<const ImageType *>(m_Image.GetPointer())) {
     ImageType::ConstPointer castImage =
         static_cast<const ImageType *>(m_Image.GetPointer());
     m_ImageExporter = ExporterType::New();
@@ -414,31 +352,25 @@ void ImageViewer ::SetImage(const ImageBaseType *image) {
     m_SagittalColors->SetLookupTable(m_ImageLookupTable);
     m_CoronalColors->SetLookupTable(m_ImageLookupTable);
     m_AxialColors->SetLookupTable(m_ImageLookupTable);
-  } else if (dynamic_cast<const RGBAImageType *>(m_Image.GetPointer()) !=
-             nullptr) {
+  } else if (dynamic_cast<const RGBAImageType *>(m_Image.GetPointer())) {
     RGBAImageType::ConstPointer castImage =
         static_cast<const RGBAImageType *>(m_Image.GetPointer());
     m_RGBAImageExporter = RGBAExporterType::New();
     m_RGBAImageExporter->SetInput(castImage);
     ConnectPipelines(m_RGBAImageExporter, m_Importer);
 
-    m_SagittalColors->SetLookupTable(nullptr);
-    m_CoronalColors->SetLookupTable(nullptr);
-    m_AxialColors->SetLookupTable(nullptr);
+    m_SagittalColors->SetLookupTable(0);
+    m_CoronalColors->SetLookupTable(0);
+    m_AxialColors->SetLookupTable(0);
   } else {
     std::cerr << "Unsupported image type" << std::endl;
     return;
   }
 
-#if VTK_MAJOR_VERSION <= 5
   m_SagittalBlender->SetInput(0, m_SagittalColors->GetOutput());
   m_CoronalBlender->SetInput(0, m_CoronalColors->GetOutput());
   m_AxialBlender->SetInput(0, m_AxialColors->GetOutput());
-#else
-  m_SagittalBlender->SetInputData(0, m_SagittalColors->GetOutput());
-  m_CoronalBlender->SetInputData(0, m_CoronalColors->GetOutput());
-  m_AxialBlender->SetInputData(0, m_AxialColors->GetOutput());
-#endif
+
   m_ThreeDRenderer->AddActor(m_SagittalActor);
   m_ThreeDRenderer->AddActor(m_AxialActor);
   m_ThreeDRenderer->AddActor(m_CoronalActor);
@@ -453,11 +385,11 @@ void ImageViewer ::SetImage(const ImageBaseType *image) {
         m_Image->GetLargestPossibleRegion().GetSize()[i] - 1;
   }
 
-  auto sagittalSliceNumber = static_cast<unsigned int>(
+  unsigned int sagittalSliceNumber = static_cast<unsigned int>(
       (m_Image->GetLargestPossibleRegion().GetSize()[0] - 1) / 2.0f);
-  auto coronalSliceNumber = static_cast<unsigned int>(
+  unsigned int coronalSliceNumber = static_cast<unsigned int>(
       (m_Image->GetLargestPossibleRegion().GetSize()[1] - 1) / 2.0f);
-  auto axialSliceNumber = static_cast<unsigned int>(
+  unsigned int axialSliceNumber = static_cast<unsigned int>(
       (m_Image->GetLargestPossibleRegion().GetSize()[2] - 1) / 2.0f);
   this->SetSliceLocation(sagittalSliceNumber, coronalSliceNumber,
                          axialSliceNumber);
@@ -474,9 +406,8 @@ void ImageViewer ::SetImage(const ImageBaseType *image) {
   m_ThreeDRenderer->GetActiveCamera()->SetViewUp(0, 0, 1);
 
   /*  if ( reset3DCamera )
-      {*/
-  // Reset the camera for the 3D renderer: this automatically sets up the camera
-  // based on the visible actors.
+    {*/
+  // Reset the camera for the 3D renderer: this automatically sets up the camera based on the visible actors.
   m_ThreeDRenderer->ResetCamera();
   //     }
 }
@@ -484,14 +415,14 @@ void ImageViewer ::SetImage(const ImageBaseType *image) {
 //
 void ImageViewer ::SetOverlayImage(const ImageBaseType *overlayImage) {
   // Can't have an overlay image without an image
-  if (m_Image == nullptr) {
+  if (!m_Image) {
     return;
   }
 
   m_OverlayImage = overlayImage;
 
   // Connect the VTK pipeline bits and pieces
-  if (dynamic_cast<const ImageType *>(m_OverlayImage.GetPointer()) != nullptr) {
+  if (dynamic_cast<const ImageType *>(m_OverlayImage.GetPointer())) {
     ImageType::ConstPointer castOverlayImage =
         static_cast<const ImageType *>(m_OverlayImage.GetPointer());
     m_OverlayImageExporter = ExporterType::New();
@@ -500,28 +431,22 @@ void ImageViewer ::SetOverlayImage(const ImageBaseType *overlayImage) {
 
     this->SetOverlayImageLookupTable(m_OverlayImageLookupTable);
 
-  } else if (dynamic_cast<const RGBAImageType *>(m_OverlayImage.GetPointer()) !=
-             nullptr) {
+  } else if (dynamic_cast<const RGBAImageType *>(m_OverlayImage.GetPointer())) {
     RGBAImageType::ConstPointer castOverlayImage =
         static_cast<const RGBAImageType *>(m_OverlayImage.GetPointer());
     m_RGBAOverlayImageExporter = RGBAExporterType::New();
     m_RGBAOverlayImageExporter->SetInput(castOverlayImage);
     ConnectPipelines(m_RGBAOverlayImageExporter, m_OverlayImporter);
 
-    this->SetOverlayImageLookupTable(nullptr);
+    this->SetOverlayImageLookupTable(0);
   } else {
     std::cerr << "Unsupported image type" << std::endl;
     return;
   }
-#if VTK_MAJOR_VERSION <= 5
+
   m_SagittalBlender->SetInput(1, m_SagittalOverlayColors->GetOutput());
   m_CoronalBlender->SetInput(1, m_CoronalOverlayColors->GetOutput());
   m_AxialBlender->SetInput(1, m_AxialOverlayColors->GetOutput());
-#else
-  m_SagittalBlender->SetInputData(1, m_SagittalOverlayColors->GetOutput());
-  m_CoronalBlender->SetInputData(1, m_CoronalOverlayColors->GetOutput());
-  m_AxialBlender->SetInputData(1, m_AxialOverlayColors->GetOutput());
-#endif
 }
 
 //
@@ -530,7 +455,7 @@ void ImageViewer ::SetOverlayImage(const ImageBaseType *overlayImage) {
 void ImageViewer ::SetMesh(const AtlasMesh *mesh) {
   m_Mesh = mesh;
 
-  if (m_Mesh == nullptr) {
+  if (!m_Mesh) {
     m_ThreeDRenderer->RemoveActor(m_OutlineActor);
 
     m_ThreeDRenderer->RemoveActor(m_SagittalCutActor);
@@ -551,20 +476,14 @@ void ImageViewer ::SetMesh(const AtlasMesh *mesh) {
       this->GetVTKUnstructedGrid(m_Mesh);
 
   // Connect the VTK pipeline bits and pieces
-#if VTK_MAJOR_VERSION <= 5
   m_OutlineFilter->SetInput(vGrid);
   m_EdgeExtracter->SetInput(vGrid);
+
   m_SagittalCutter->SetInput(vGrid);
   m_CoronalCutter->SetInput(vGrid);
   m_AxialCutter->SetInput(vGrid);
-#else
-  m_OutlineFilter->SetInputData(vGrid);
-  m_EdgeExtracter->SetInputData(vGrid);
-  m_SagittalCutter->SetInputData(vGrid);
-  m_CoronalCutter->SetInputData(vGrid);
-  m_AxialCutter->SetInputData(vGrid);
-#endif
-  // m_ThreeDRenderer->AddActor( m_OutlineActor );
+
+  //m_ThreeDRenderer->AddActor( m_OutlineActor );
   m_ThreeDRenderer->AddActor(m_AxialCutActor);
   m_ThreeDRenderer->AddActor(m_AxialEdgeActor);
 
@@ -594,7 +513,7 @@ void ImageViewer ::SetSliceLocation(unsigned int sagittalSliceNumber,
   m_CoronalSliceNumber  = coronalSliceNumber;
   m_AxialSliceNumber    = axialSliceNumber;
 
-  if (m_Image == nullptr) {
+  if (!m_Image) {
     return;
   }
 
@@ -614,23 +533,20 @@ void ImageViewer ::SetSliceLocation(unsigned int sagittalSliceNumber,
                              0);
   m_CoronalPlane->SetOrigin(0, coronalSliceNumber * m_Image->GetSpacing()[1],
                             0);
-  // m_AxialPlane->SetOrigin( 0, 0, axialSliceNumber * m_Image->GetSpacing()[ 2
-  // ] );
+  //m_AxialPlane->SetOrigin( 0, 0, axialSliceNumber * m_Image->GetSpacing()[ 2 ] );
   m_AxialPlane->SetOrigin(0, 0,
                           (axialSliceNumber + 0.1) * m_Image->GetSpacing()[2]);
 
-  const float scale = std::max(
-      std::max(m_MaximumImageIndex[0] / 2.0, m_MaximumImageIndex[1] / 2.0),
+  const float scale = vnl_math_max(
+      vnl_math_max(m_MaximumImageIndex[0] / 2.0, m_MaximumImageIndex[1] / 2.0),
       m_MaximumImageIndex[2] / 2.0);
   m_SagittalCamera->SetFocalPoint(m_SagittalSliceNumber,
                                   m_MaximumImageIndex[1] / 2.0,
                                   m_MaximumImageIndex[2] / 2.0);
   m_SagittalCamera->ParallelProjectionOn();
-  // m_SagittalCamera->SetParallelScale( itk::Math::max( m_MaximumImageIndex[ 1
-  // ] / 2.0, m_MaximumImageIndex[ 2 ] / 2.0 ) );
+  //m_SagittalCamera->SetParallelScale( vnl_math_max( m_MaximumImageIndex[ 1 ] / 2.0, m_MaximumImageIndex[ 2 ] / 2.0 ) );
   m_SagittalCamera->SetParallelScale(scale);
-  // m_SagittalCamera->SetPosition( 0, m_MaximumImageIndex[ 1 ] / 2.0,
-  // m_MaximumImageIndex[ 2 ] / 2.0 );
+  //m_SagittalCamera->SetPosition( 0, m_MaximumImageIndex[ 1 ] / 2.0, m_MaximumImageIndex[ 2 ] / 2.0 );
   m_SagittalCamera->SetPosition(m_MaximumImageIndex[0],
                                 m_MaximumImageIndex[1] / 2.0,
                                 m_MaximumImageIndex[2] / 2.0);
@@ -639,8 +555,7 @@ void ImageViewer ::SetSliceLocation(unsigned int sagittalSliceNumber,
                                  m_CoronalSliceNumber,
                                  m_MaximumImageIndex[2] / 2.0);
   m_CoronalCamera->ParallelProjectionOn();
-  // m_CoronalCamera->SetParallelScale( itk::Math::max( m_MaximumImageIndex[ 0 ]
-  // / 2.0, m_MaximumImageIndex[ 2 ] / 2.0 ) );
+  //m_CoronalCamera->SetParallelScale( vnl_math_max( m_MaximumImageIndex[ 0 ] / 2.0, m_MaximumImageIndex[ 2 ] / 2.0 ) );
   m_CoronalCamera->SetParallelScale(scale);
   m_CoronalCamera->SetPosition(m_MaximumImageIndex[0] / 2.0, 0,
                                m_MaximumImageIndex[2] / 2.0);
@@ -649,21 +564,18 @@ void ImageViewer ::SetSliceLocation(unsigned int sagittalSliceNumber,
                                m_MaximumImageIndex[1] / 2.0,
                                m_AxialSliceNumber);
   m_AxialCamera->ParallelProjectionOn();
-  // m_AxialCamera->SetParallelScale( itk::Math::max( m_MaximumImageIndex[ 0 ]
-  // / 2.0, m_MaximumImageIndex[ 1 ] / 2.0 ) );
+  //m_AxialCamera->SetParallelScale( vnl_math_max( m_MaximumImageIndex[ 0 ] / 2.0, m_MaximumImageIndex[ 1 ] / 2.0 ) );
   m_AxialCamera->SetParallelScale(scale);
   m_AxialCamera->SetPosition(m_MaximumImageIndex[0] / 2.0,
                              m_MaximumImageIndex[1] / 2.0, 0);
-  // m_AxialCamera->SetPosition( m_MaximumImageIndex[ 0 ] / 2.0,
-  // m_MaximumImageIndex[ 1 ] / 2.0, m_MaximumImageIndex[ 2 ] + 1 );
+  //m_AxialCamera->SetPosition( m_MaximumImageIndex[ 0 ] / 2.0, m_MaximumImageIndex[ 1 ] / 2.0, m_MaximumImageIndex[ 2 ] + 1 );
 }
 
 //
 //
 //
 void ImageViewer ::SetScale(float scale) {
-  // std::cout << "Setting imageLookupTable table range: 0 -> " << 255.0f /
-  // scale << std::endl;
+  //std::cout << "Setting imageLookupTable table range: 0 -> " << 255.0f / scale << std::endl;
   m_ImageLookupTable->SetTableRange(0, 255.0f / scale);
 }
 
@@ -680,11 +592,10 @@ void ImageViewer ::SetOverlayScale(float overlayScale) {
 //
 void ImageViewer ::SetScaleToFillRange() {
 
-  if (m_Image == nullptr) {
+  if (!m_Image)
     return;
-  }
 
-  if (dynamic_cast<const ImageType *>(m_Image.GetPointer()) != nullptr) {
+  if (dynamic_cast<const ImageType *>(m_Image.GetPointer())) {
     ImageType::ConstPointer castImage =
         static_cast<const ImageType *>(m_Image.GetPointer());
     this->SetScale(255.0f / this->CalculateMaximum(castImage));
@@ -696,11 +607,10 @@ void ImageViewer ::SetScaleToFillRange() {
 //
 void ImageViewer ::SetOverlayScaleToFillRange() {
 
-  if (m_OverlayImage == nullptr) {
+  if (!m_OverlayImage)
     return;
-  }
 
-  if (dynamic_cast<const ImageType *>(m_OverlayImage.GetPointer()) != nullptr) {
+  if (dynamic_cast<const ImageType *>(m_OverlayImage.GetPointer())) {
     ImageType::ConstPointer castOverlayImage =
         static_cast<const ImageType *>(m_OverlayImage.GetPointer());
 
@@ -726,16 +636,15 @@ float ImageViewer ::CalculateMaximum(const ImageType *image) const {
 vtkSmartPointer<vtkUnstructuredGrid>
 ImageViewer ::GetVTKUnstructedGrid(const kvl::AtlasMesh *mesh) const {
   // Construct a VTK points container
-  // VTK is not as smart as ITK. As a result, we have to allocate a point
-  // container as big as the largest index in ITK, even if some (or even most)
-  // of the intermediate indices don't exist because of our mesh operations...
+  // VTK is not as smart as ITK. As a result, we have to allocate a point container
+  // as big as the largest index in ITK, even if some (or even most) of the intermediate
+  // indices don't exist because of our mesh operations...
   vtkSmartPointer<vtkPoints> vPoints = vtkSmartPointer<vtkPoints>::New();
-  // vPoints->SetNumberOfPoints( mesh->GetNumberOfPoints() );
+  //vPoints->SetNumberOfPoints( mesh->GetNumberOfPoints() );
   kvl::AtlasMesh::PointsContainer::ConstIterator endIt =
       mesh->GetPoints()->End();
   --endIt;
-  // std::cout << "Highest index in point container: " << endIt->Index() <<
-  // std::endl;
+  //std::cout << "Highest index in point container: " << endIt->Index() << std::endl;
   vPoints->SetNumberOfPoints(endIt->Index() + 1);
   for (kvl::AtlasMesh::PointsContainer::ConstIterator it =
            mesh->GetPoints()->Begin();
@@ -743,10 +652,9 @@ ImageViewer ::GetVTKUnstructedGrid(const kvl::AtlasMesh *mesh) const {
     vPoints->SetPoint(it->Index(), it->Value().GetDataPointer());
   }
 
-  // std::cout << "Converted points" << std::endl;
+  //std::cout << "Converted points" << std::endl;
 
-  // std::cout << "mesh->GetNumberOfCells(): " << mesh->GetNumberOfCells() <<
-  // std::endl;
+  //std::cout << "mesh->GetNumberOfCells(): " << mesh->GetNumberOfCells() << std::endl;
 
   // Construct a VTK type array and cell array
   int *                         vTypes = new int[mesh->GetNumberOfCells()];
@@ -763,10 +671,8 @@ ImageViewer ::GetVTKUnstructedGrid(const kvl::AtlasMesh *mesh) const {
     }
 
     // Insert a triangle cell
-    // vCells->InsertNextCell( 3,  static_cast< vtkIdType* >(
-    // cell->PointIdsBegin() ) );
-    vCells->InsertNextCell(
-        3, reinterpret_cast<vtkIdType *>(cell->PointIdsBegin()));
+    //vCells->InsertNextCell( 3,  static_cast< vtkIdType* >( cell->PointIdsBegin() ) );
+    vCells->InsertNextCell(3, (vtkIdType *)cell->PointIdsBegin());
     vTypes[vCellCount] = VTK_TRIANGLE;
     vCellCount++;
 
@@ -783,8 +689,7 @@ ImageViewer ::GetVTKUnstructedGrid(const kvl::AtlasMesh *mesh) const {
     }
 
     // Insert a line cell
-    // vCells->InsertNextCell( 3,  static_cast< vtkIdType* >(
-    // cell->PointIdsBegin() ) );
+    //vCells->InsertNextCell( 3,  static_cast< vtkIdType* >( cell->PointIdsBegin() ) );
     vCells->InsertNextCell(2, (vtkIdType *)cell->PointIdsBegin());
     vTypes[vCellCount] = VTK_LINE;
     vCellCount++;
@@ -792,7 +697,7 @@ ImageViewer ::GetVTKUnstructedGrid(const kvl::AtlasMesh *mesh) const {
   } // End loop over all cells in the mesh
 #endif
 
-  // std::cout << "Converted cells and types" << std::endl;
+  //std::cout << "Converted cells and types" << std::endl;
 
   // Put everything together into a VTK unstructed grid
   vtkSmartPointer<vtkUnstructuredGrid> vGrid =
@@ -800,7 +705,7 @@ ImageViewer ::GetVTKUnstructedGrid(const kvl::AtlasMesh *mesh) const {
   vGrid->SetPoints(vPoints);
   vGrid->SetCells(vTypes, vCells);
 
-  // std::cout << "Put everything" << std::endl;
+  //std::cout << "Put everything" << std::endl;
   delete[] vTypes;
 
   return vGrid;
@@ -881,11 +786,7 @@ void ImageViewer ::WriteScreenShot(const std::string &fileName) {
   windowToImage->SetInput(this->GetRenderWindow());
 
   vtkSmartPointer<vtkPNGWriter> writer = vtkPNGWriter::New();
-#if VTK_MAJOR_VERSION <= 5
   writer->SetInput(windowToImage->GetOutput());
-#else
-  writer->SetInputData(windowToImage->GetOutput());
-#endif
   writer->SetFileName(fileName.c_str());
   writer->Write();
 
