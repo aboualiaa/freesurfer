@@ -49,7 +49,8 @@ bool AtlasMeshCollectionValidator ::Validate(
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
+    if (cellIt.Value()->GetType() !=
+        itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       continue;
     }
 
@@ -84,7 +85,8 @@ bool AtlasMeshCollectionValidator ::Validate(
       }
 
       if (allThePointsAreGood) {
-        if (cellIt2.Value()->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
+        if (cellIt2.Value()->GetType() ==
+            itk::CommonEnums::CellGeometry::VERTEX_CELL) {
           numberOfVerticesFound++;
         } else if (cellIt2.Value()->GetType() ==
                    itk::CommonEnums::CellGeometry::LINE_CELL) {
@@ -122,7 +124,8 @@ bool AtlasMeshCollectionValidator ::Validate(
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() != itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
+    if (cellIt.Value()->GetType() !=
+        itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
       continue;
     }
 
@@ -153,7 +156,8 @@ bool AtlasMeshCollectionValidator ::Validate(
       }
 
       if (allThePointsAreGood) {
-        if (cellIt2.Value()->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
+        if (cellIt2.Value()->GetType() ==
+            itk::CommonEnums::CellGeometry::VERTEX_CELL) {
           numberOfVerticesFound++;
         } else if (cellIt2.Value()->GetType() ==
                    itk::CommonEnums::CellGeometry::LINE_CELL) {
@@ -182,7 +186,8 @@ bool AtlasMeshCollectionValidator ::Validate(
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() != itk::CommonEnums::CellGeometry::LINE_CELL) {
+    if (cellIt.Value()->GetType() !=
+        itk::CommonEnums::CellGeometry::LINE_CELL) {
       continue;
     }
 
@@ -210,7 +215,8 @@ bool AtlasMeshCollectionValidator ::Validate(
       }
 
       if (allThePointsAreGood) {
-        if (cellIt2.Value()->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
+        if (cellIt2.Value()->GetType() ==
+            itk::CommonEnums::CellGeometry::VERTEX_CELL) {
           numberOfVerticesFound++;
         }
       }
@@ -255,7 +261,8 @@ bool AtlasMeshCollectionValidator ::Validate(
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
+    if (cellIt.Value()->GetType() !=
+        itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       continue;
     }
 

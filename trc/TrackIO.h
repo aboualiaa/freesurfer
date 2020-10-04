@@ -90,8 +90,8 @@ struct TRACK_HEADER {
   float vox_to_ras
       [4]
       [4]; // voxel to ras (ijk to xyz) matrix, this is used for coordinate transformation
-      // if vox_to_ras[3][3] is 0, it means v2r matrix is not recorded
-      // this field is added from version 2.
+  // if vox_to_ras[3][3] is 0, it means v2r matrix is not recorded
+  // this field is added from version 2.
   char reserved[444];
   char voxel_order[4]; // voxel order for this track space
                        // if there was no reorientation, this should be the same

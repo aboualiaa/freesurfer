@@ -127,7 +127,8 @@ int main(int narg, char *arg[]) {
 
     MeshType::Pointer mesh = MeshType::New();
     mesh->SetCellsAllocationMethod(
-        itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
+        itk::MeshEnums::MeshClassCellsAllocationMethod::
+            CellsAllocatedDynamicallyCellByCell);
     //Copy meshes
     {
       typedef itk::ImageFileReader<ImageType> ImageReaderType;
@@ -519,7 +520,8 @@ int main(int narg, char *arg[]) {
     if (newMeshes.count(labels[i]) == 0) {
       MeshBasicType::Pointer om = MeshBasicType::New();
       om->SetCellsAllocationMethod(
-          itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
+          itk::MeshEnums::MeshClassCellsAllocationMethod::
+              CellsAllocatedDynamicallyCellByCell);
 
       newMeshes[labels[i]]    = om;
       pointIndices[labels[i]] = 0;

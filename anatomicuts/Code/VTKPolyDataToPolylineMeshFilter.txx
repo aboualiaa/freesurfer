@@ -66,7 +66,8 @@ void VTKPolyDataToPolylineMeshFilter<TImage>::GenerateData2() {
 
   typename OutputMeshType::Pointer outputMesh = this->GetOutput();
   outputMesh->SetCellsAllocationMethod(
-      itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
+      itk::MeshEnums::MeshClassCellsAllocationMethod::
+          CellsAllocatedDynamicallyCellByCell);
 
   outputMesh->GetPoints()->Reserve(m_VTKPolyData->GetNumberOfPoints());
 

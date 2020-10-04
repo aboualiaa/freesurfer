@@ -91,6 +91,7 @@ static const char *isdir_msg =
     "-\n";
 
 void chklc(void) {
+  return;
   char       dirname[STRLEN], *cp, *alt;
   FILE *     lfile = NULL;
   char *     email;
@@ -274,6 +275,7 @@ void chklc(void) {
 //
 //  if failed, error msg will be returned in msg. make sure msg is pre-allocated with enough space
 int chklc2(char *msg) {
+  return 0;
   char  dirname[STRLEN], *cp, *alt;
   FILE *lfile = NULL;
   char *email;

@@ -183,7 +183,8 @@ int main(int argc, char *argv[]) {
 
     ColorMeshType::Pointer om = ColorMeshType::New();
     om->SetCellsAllocationMethod(
-        itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
+        itk::MeshEnums::MeshClassCellsAllocationMethod::
+            CellsAllocatedDynamicallyCellByCell);
 
     inputCellIt = input->GetCells()->Begin();
     for (int cellId = 0; inputCellIt != input->GetCells()->End();

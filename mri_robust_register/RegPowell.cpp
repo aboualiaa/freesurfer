@@ -358,8 +358,7 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
   tocurrent = this; // so that we can access this from static cost function
   //rtype = 2;
 
-  pair<vnl_matrix<double>, double> fmd(
-      vnl_matrix<double>(), 0.0);
+  pair<vnl_matrix<double>, double> fmd(vnl_matrix<double>(), 0.0);
 
   // check if mi (inital transform) is passed
   if (!m.empty()) {
@@ -542,8 +541,8 @@ void RegPowell::computeIterativeRegistrationFull(int nmax, double epsit,
     // for transforming target we need ch2^-1 = ch * c^-1
     vnl_matrix<double> ci  = vnl_inverse(fmd.first);
     vnl_matrix<double> chi = ch * ci;
-    mov2weights                        = ch;
-    dst2weights                        = chi;
+    mov2weights            = ch;
+    dst2weights            = chi;
   } else {
     fmd.first   = fmd.first * initialM;
     mov2weights = fmd.first;

@@ -103,10 +103,8 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
   assert(mriS && mriT);
   assert(nmax > 0);
 
-  std::pair<vnl_matrix<double>, double> cmd(
-      vnl_matrix<double>(), 0.0);
-  std::pair<vnl_matrix<double>, double> fmd(
-      vnl_matrix<double>(), 0.0);
+  std::pair<vnl_matrix<double>, double> cmd(vnl_matrix<double>(), 0.0);
+  std::pair<vnl_matrix<double>, double> fmd(vnl_matrix<double>(), 0.0);
 
   // check if mi (inital transform) is passed
   if (!m.empty())
@@ -131,8 +129,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
   if (verbose > 1) {
     std::cout << "   - initial iscale: " << iscalefinal << std::endl;
     std::cout << "   - initial transform:\n";
-    vnl_matlab_print(cout, fmd.first, "Minit",
-                     vnl_matlab_print_format_long);
+    vnl_matlab_print(cout, fmd.first, "Minit", vnl_matlab_print_format_long);
     std::cout << std::endl;
   }
 
@@ -204,8 +201,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
                        vnl_matlab_print_format_long);
       std::cout << std::endl;
       std::cout << "   - store old transform" << std::endl;
-      vnl_matlab_print(cout, fmd.first, "Mold",
-                       vnl_matlab_print_format_long);
+      vnl_matlab_print(cout, fmd.first, "Mold", vnl_matlab_print_format_long);
       std::cout << std::endl;
     }
     vnl_matrix_fixed<double, 4, 4> fmdtmp(fmd.first);
@@ -217,8 +213,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
       fmd.first = cmd.first * fmd.first; // was '* mh' which should be the same
     if (verbose > 1) {
       std::cout << "   - updated full transform" << std::endl;
-      vnl_matlab_print(cout, fmd.first, "Mnew",
-                       vnl_matlab_print_format_long);
+      vnl_matlab_print(cout, fmd.first, "Mnew", vnl_matlab_print_format_long);
       std::cout << std::endl;
     }
 
@@ -322,10 +317,14 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
       mri_weights = MRIcopy(mri_hweights, mri_weights);
   }
 
-  vnl_matlab_print(cerr,fmd.first,"fmd",vnl_matlab_print_format_long);std::cerr << std::endl;
-  vnl_matlab_print(cerr,cmd.first,"cmd",vnl_matlab_print_format_long);std::cerr << std::endl;
-  vnl_matlab_print(cerr,mh,"mov1hw",vnl_matlab_print_format_long);std::cerr << std::endl;
-  vnl_matlab_print(cerr,mhi,"dst1hw",vnl_matlab_print_format_long);std::cerr << std::endl;
+  vnl_matlab_print(cerr, fmd.first, "fmd", vnl_matlab_print_format_long);
+  std::cerr << std::endl;
+  vnl_matlab_print(cerr, cmd.first, "cmd", vnl_matlab_print_format_long);
+  std::cerr << std::endl;
+  vnl_matlab_print(cerr, mh, "mov1hw", vnl_matlab_print_format_long);
+  std::cerr << std::endl;
+  vnl_matlab_print(cerr, mhi, "dst1hw", vnl_matlab_print_format_long);
+  std::cerr << std::endl;
 
   // adjust half way maps to new midpoint based on final transform
   if (verbose > 1)
@@ -335,11 +334,13 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
   // for transforming target we need ch2^-1 = ch * c^-1
   vnl_matrix<double> ci  = vnl_inverse(fmd.first);
   vnl_matrix<double> chi = ch * ci;
-  mov2weights                        = ch;
-  dst2weights                        = chi;
+  mov2weights            = ch;
+  dst2weights            = chi;
 
-  vnl_matlab_print(cerr,mov2weights,"mov2hw",vnl_matlab_print_format_long);std::cerr << std::endl;
-  vnl_matlab_print(cerr,dst2weights,"dst2hw",vnl_matlab_print_format_long);std::cerr << std::endl;
+  vnl_matlab_print(cerr, mov2weights, "mov2hw", vnl_matlab_print_format_long);
+  std::cerr << std::endl;
+  vnl_matlab_print(cerr, dst2weights, "dst2hw", vnl_matlab_print_format_long);
+  std::cerr << std::endl;
 
   MRIfree(&mri_Twarp);
   MRIfree(&mri_Swarp);

@@ -26,7 +26,8 @@ void AtlasMeshRasterizor ::Rasterize(const AtlasMesh *mesh) {
   for (AtlasMesh::CellsContainer::ConstIterator cellIt =
            mesh->GetCells()->Begin();
        cellIt != mesh->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() == itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
+    if (cellIt.Value()->GetType() ==
+        itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       str.m_TetrahedronIds.push_back(cellIt.Index());
       //str.m_TetrahedronIds.insert( cellIt.Index() );
     }

@@ -1,5 +1,5 @@
 project(fspython)
-
+set(CMAKE_CXX_STANDARD 17)
 add_subdirectories(bindings)
 
 # run 'pip install' and direct package installs to freesurfer/python/packages

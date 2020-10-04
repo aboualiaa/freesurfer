@@ -254,7 +254,8 @@ int main(int narg, char *arg[]) {
       if (sorted_meshes.count(val1) == 0) {
         ColorMeshType::Pointer om = ColorMeshType::New();
         om->SetCellsAllocationMethod(
-            itk::MeshEnums::MeshClassCellsAllocationMethod::CellsAllocatedDynamicallyCellByCell);
+            itk::MeshEnums::MeshClassCellsAllocationMethod::
+                CellsAllocatedDynamicallyCellByCell);
         sorted_meshes.insert(std::pair<int, ColorMeshType::Pointer>(val1, om));
       }
       map<int, ColorMeshType::Pointer>::iterator iter =

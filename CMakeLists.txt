@@ -5,7 +5,7 @@ if(FS_BUILD_MATRIX)
   set(CONF_MATRIX
       "coverage;profile;Debug;Release;RelWithDebInfo;MinSizeRel;asan;lsan;ubsan;tsan;cfisan;msan;thinlto;fulllto"
       )
-  set(COMPILER_MATRIX "gcc09;clang09;clang10;clang11;appleclang")
+  set(COMPILER_MATRIX "gcc09;gcc10;clang09;clang10;clang11;clang12;appleclang")
   foreach(Z_COMPILER IN LISTS COMPILER_MATRIX)
     foreach(TYPE IN LISTS CONF_MATRIX)
 
@@ -21,8 +21,14 @@ if(FS_BUILD_MATRIX)
         set(COMPILER_PROXY_OPTION
             "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-11/bin"
             )
+      elseif(Z_COMPILER STREQUAL "clang12")
+        set(COMPILER_PROXY_OPTION
+            "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-12/bin"
+            )
       elseif(Z_COMPILER STREQUAL "gcc09")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/opt/gcc/")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0")
+      elseif(Z_COMPILER STREQUAL "gcc10")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc@9/9.3.0")
       elseif(Z_COMPILER STREQUAL "appleclang")
         set(COMPILER_PROXY_OPTION "")
       endif()
@@ -63,23 +69,23 @@ if(FS_BUILD_MATRIX)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_MKDIR ALL
                         COMMAND bash -c \" mkdir -p
-                                ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
-                                \"
+                        ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
+                        \"
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ALL
                         COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev
-                                ${COMPILER_PROXY_OPTION} -DCMAKE_BUILD_TYPE=${TYPE} -C
-                                ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
-                                -S ${CMAKE_SOURCE_DIR} -B
-                                ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
-                                \"
+                        ${COMPILER_PROXY_OPTION} -DCMAKE_BUILD_TYPE=${TYPE} -C
+                        ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
+                        -S ${CMAKE_SOURCE_DIR} -B
+                        ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
+                        \"
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE
                         COMMAND bash -c \" ninja -k 0 -C
-                                ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/
-                                \"
+                        ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/
+                        \"
                         )
 
       add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CMAKE
@@ -106,7 +112,7 @@ if(FS_BUILD_MATRIX)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
                         COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit
-                                --progress \"
+                        --progress \"
                         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
                         )
 
@@ -143,11 +149,17 @@ if(UNIX AND NOT APPLE)
 elseif(APPLE)
   set(CMAKE_Fortran_COMPILER "/usr/local/bin/gfortran")
   if(DEFINED FS_USE_GCC AND NOT FS_USE_GCC STREQUAL "")
-    set(CMAKE_C_COMPILER "${FS_USE_GCC}/bin/gcc-9")
-    set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-9")
-    set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-9")
-    set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-9")
-    set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-9")
+    if(FS_USE_GCC MATCHES "10")
+      set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-10")
+      set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-10")
+      set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-10")
+      set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-10")
+    else()
+      set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-9")
+      set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-9")
+      set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-9")
+      set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-9")
+    endif()
     add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
     set(ITK_DIR "/Users/aboualiaa/Downloads/packages/itk/4.13.0")
     set(VTK_DIR "/Users/aboualiaa/Downloads/packages/vtk/5.10.1")
@@ -240,13 +252,13 @@ endfunction()
 cmake_minimum_required(VERSION 3.9)
 
 # requiring at least c++11 standard
-if(CMAKE_CXX_STANDARD EQUAL "98" )
-   message(FATAL_ERROR "CMAKE_CXX_STANDARD:STRING=98 is not supported in.")
+if(CMAKE_CXX_STANDARD EQUAL "98")
+  message(FATAL_ERROR "CMAKE_CXX_STANDARD:STRING=98 is not supported in.")
 endif()
 
 # set the default language dialect settings (This must be done BEFORE the project call)
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD 20)
 endif()
 if(NOT CMAKE_CXX_STANDARD_REQUIRED)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -256,9 +268,9 @@ if(NOT CMAKE_CXX_EXTENSIONS)
 endif()
 
 project(freesurfer
-  DESCRIPTION "An open source software suite for processing and analyzing (human) brain MRI images."
-  LANGUAGES C CXX Fortran
-)
+        DESCRIPTION "An open source software suite for processing and analyzing (human) brain MRI images."
+        LANGUAGES C CXX Fortran
+        )
 
 # a few build options
 option(MINIMAL "Only build core components" OFF)
@@ -329,7 +341,7 @@ if(CMAKE_CONFIGURATION_TYPES AND FS_EXP_BUILD_CONFIGURATIONS)
     list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "msan")
   endif()
   if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}"
-                                                           MATCHES "(Apple)[Cc]lang"
+     MATCHES "(Apple)[Cc]lang"
      )
     list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "lsan")
   endif()
@@ -398,7 +410,7 @@ endif()
 
 # create a custom target "make install-nmr" to only install nmr-component files
 add_custom_target(install-nmr COMMAND ${CMAKE_COMMAND} -D COMPONENT=nmr -P
-                                      cmake_install.cmake
+                  cmake_install.cmake
                   )
 
 # --------------------------------------------------
@@ -454,8 +466,8 @@ add_definitions(-DHAVE_ZLIB)
 # -------- gfortran/blas/lapack --------
 if(NOT APPLE)
   find_library(GFORTRAN_LIBRARIES
-    HINTS /usr/lib64 /usr/lib /usr/lib/gcc/*/*/
-    NAMES libgfortran.a gfortran)
+               HINTS /usr/lib64 /usr/lib /usr/lib/gcc/*/*/
+               NAMES libgfortran.a gfortran)
   find_library(BLAS_LIBRARIES NAMES libblas.a libopenblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
 endif()
@@ -471,7 +483,7 @@ find_package(PETSC)
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED TRUE)
 find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log
-                                       atomic
+             atomic
              )
 
 # -------- itk --------
@@ -716,8 +728,8 @@ if(NOT NO_CXX_WARN)
     set(WARN_AS_ERROR_FLAG "-Werror")
   endif()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra ${WARN_AS_ERROR_FLAG} -Wno-sign-compare -Wno-unused-result -Wno-unused-parameter")
-else ()
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-deprecated-declarations -fpermissive")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-deprecated-declarations -fpermissive")
 endif()
 
 # clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable
@@ -776,10 +788,10 @@ add_subdirectories(vtkutils lineprof)
 # TODO: solve build issues on linux/gcc: looser throw spec...
 # the fem elastic subdir also builds a library, so it should be added first
 if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}"
-                                                          MATCHES "(Apple)?[Cc]lang"
+   MATCHES "(Apple)?[Cc]lang"
    )
   if(APPLE)
-	  add_subdirectory(fem_elastic)
+    add_subdirectory(fem_elastic)
   endif()
 endif()
 

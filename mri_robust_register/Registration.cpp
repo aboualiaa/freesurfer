@@ -29,9 +29,9 @@
 
 #include <cassert>
 #include <fstream>
+#include <iostream>
 #include <limits>
 #include <sstream>
-#include <iostream>
 #include <vnl/algo/vnl_determinant.h>
 #include <vnl/algo/vnl_matrix_inverse.h>
 #include <vnl/vnl_inverse.h>
@@ -692,8 +692,7 @@ void Registration::computeMultiresRegistration(int stopres, int n,
 
   // variables to store matrix m and scaling factor d:
   pair<vnl_matrix<double>, double> cmd;
-  pair<vnl_matrix<double>, double> md(
-      vnl_matrix<double>(), iscaleinit);
+  pair<vnl_matrix<double>, double> md(vnl_matrix<double>(), iscaleinit);
 
   // check if mi (inital transform) is passed
   // if (!mi.empty()) md.first =mi;
@@ -3121,8 +3120,7 @@ void Registration::saveGaussianPyramid(std::vector<MRI *> &p,
 
 // ---------------------- Initial Transform using Moments -----------------------------
 
-vnl_matrix<double> Registration::initializeTransform(MRI *mriS,
-                                                                 MRI *mriT) {
+vnl_matrix<double> Registration::initializeTransform(MRI *mriS, MRI *mriT) {
   if (verbose > 0)
     cout << "   - computing centroids \n";
 
@@ -4471,7 +4469,7 @@ void Registration::mapToNewSpace(const vnl_matrix_fixed<double, 4, 4> &M,
         rigid &&
             Minit
                 .empty()); // if minit was passed, it might be an affine initialization
-        // also in old code for affine we checked fmd.first (here M) instead of mh (bug??)
+    // also in old code for affine we checked fmd.first (here M) instead of mh (bug??)
 
     // do not just assume m = mh*mh, rather m = mh2 * mh
     // for transforming target we need mh2^-1 = mh * m^-1

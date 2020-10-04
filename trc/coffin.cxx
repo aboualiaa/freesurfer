@@ -20,10 +20,10 @@
 
 #include <coffin.h>
 
-#include <iomanip>
-#include <sstream>
-#include <random>
 #include <algorithm>
+#include <iomanip>
+#include <random>
+#include <sstream>
 
 using namespace std;
 
@@ -2062,9 +2062,8 @@ bool Coffin::RunMcmcSingle() {
     mSpline.WriteVolume(fname.c_str(), true);
   }
 
-
   std::random_device rd;
-  std::mt19937 g(rd());
+  std::mt19937       g(rd());
 
   cout << "Running MCMC burn-in jumps" << endl;
   mLog << "Running MCMC burn-in jumps" << endl;

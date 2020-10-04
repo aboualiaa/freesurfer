@@ -2,6 +2,7 @@
 
 #include "itkCommand.h"
 #include "itkImageRegionConstIterator.h"
+#include "itkPlatformMultiThreader.h"
 #include "kvlAtlasMeshDeformationConjugateGradientOptimizer.h"
 #include "kvlAtlasMeshDeformationFixedStepGradientDescentOptimizer.h"
 #include "kvlAtlasMeshDeformationGradientDescentOptimizer.h"
@@ -9,7 +10,6 @@
 #include "kvlAtlasMeshLabelImageStatisticsCollector.h"
 #include "kvlAtlasMeshSmoother.h"
 #include "kvlAtlasMeshToLabelImageCostAndGradientCalculator.h"
-#include "itkPlatformMultiThreader.h"
 
 namespace kvl {
 

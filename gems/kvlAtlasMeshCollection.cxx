@@ -340,9 +340,11 @@ bool AtlasMeshCollection ::Write(const char *fileName) const {
       out << "VERTEX   ";
     } else if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
       out << "LINE   ";
-    } else if (cell->GetType() == itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
+    } else if (cell->GetType() ==
+               itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
       out << "TRIANGLE   ";
-    } else if (cell->GetType() == itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
+    } else if (cell->GetType() ==
+               itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       out << "TETRAHEDRON   ";
     } else {
       itkExceptionMacro("Mesh collection may only contain vertices, lines, "
@@ -935,7 +937,8 @@ bool AtlasMeshCollection ::GetCollapsed(
   if (!m_Cells->IndexExists(edgeId))
     return false;
 
-  if (m_Cells->ElementAt(edgeId)->GetType() != itk::CommonEnums::CellGeometry::LINE_CELL)
+  if (m_Cells->ElementAt(edgeId)->GetType() !=
+      itk::CommonEnums::CellGeometry::LINE_CELL)
     return false;
 
   // Retrieve the id's of the two vertices of the edge to be collapsed
@@ -1417,7 +1420,7 @@ bool AtlasMeshCollection ::GetCollapsed(
   // disappears, and first point, which gets the previously determined new position
   //std::cout << "Creating positions" << std::endl;
   std::vector<PointsContainerType::Pointer> collapsedPositions;
-  PointsContainerType::Pointer              collapsedReferencePosition = nullptr;
+  PointsContainerType::Pointer collapsedReferencePosition = nullptr;
   for (unsigned int meshNumber = 0; meshNumber < this->GetNumberOfMeshes() + 1;
        meshNumber++) {
     PointsContainerType::Pointer thisPosition;
@@ -1592,7 +1595,8 @@ bool AtlasMeshCollection ::GetCollapsed(
       } else if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
         // Create a new line cell
         newCell.TakeOwnership(new LineCell);
-      } else if (cell->GetType() == itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
+      } else if (cell->GetType() ==
+                 itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
         // Create a new triangle cell
         newCell.TakeOwnership(new TriangleCell);
       } else {
@@ -1727,7 +1731,8 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
       } else if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
         // Create a new line cell
         newCell.TakeOwnership(new LineCell);
-      } else if (cell->GetType() == itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
+      } else if (cell->GetType() ==
+                 itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
         // Create a new triangle cell
         newCell.TakeOwnership(new TriangleCell);
       } else {
@@ -1807,10 +1812,12 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
           }
           //std::cout << " to the outer points." << std::endl;
 
-        } else if (cell->GetType() == itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
+        } else if (cell->GetType() ==
+                   itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
           // Create a new triangle cell
           newCell.TakeOwnership(new TriangleCell);
-        } else if (cell->GetType() == itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
+        } else if (cell->GetType() ==
+                   itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
           // Create a new tetrahedron cell
           newCell.TakeOwnership(new TetrahedronCell);
         }
@@ -1854,7 +1861,8 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
           regionGrownCells->InsertElement(*neighborIt,
                                           newCell.ReleaseOwnership());
 
-        } else if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
+        } else if (cell->GetType() ==
+                   itk::CommonEnums::CellGeometry::LINE_CELL) {
           // Retrieve the other point of this line
           AtlasMesh::CellType::PointIdConstIterator pointIt =
               cell->PointIdsBegin();
@@ -1888,7 +1896,8 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
             }
           }
 
-        } else if (cell->GetType() == itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
+        } else if (cell->GetType() ==
+                   itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
           // Retrieve the other two points of this triangle
           AtlasMesh::CellType::PointIdConstIterator pointIt =
               cell->PointIdsBegin();
@@ -2072,8 +2081,8 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
 
   // Loop over all meshes, including reference
   std::vector<PointsContainerType::Pointer> upsampledPositions;
-  PointsContainerType::Pointer              upsampledReferencePosition = nullptr;
-  CellsContainerType::Pointer               upsampledCells;
+  PointsContainerType::Pointer upsampledReferencePosition = nullptr;
+  CellsContainerType::Pointer  upsampledCells;
   for (unsigned int meshNumber = 0; meshNumber < this->GetNumberOfMeshes() + 1;
        meshNumber++) {
     //

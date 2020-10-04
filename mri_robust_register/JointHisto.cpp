@@ -19,8 +19,8 @@
  */
 
 #include "JointHisto.h"
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <vnl/vnl_matlab_print.h>
 

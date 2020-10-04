@@ -18,7 +18,7 @@
 #include <itk_zlib.h>
 
 #define KVL_ORIENTATION_HACK                                                   \
-  1   // This MGH reader/writer IO class seems to swap x and y-axis compared   \
+  1 // This MGH reader/writer IO class seems to swap x and y-axis compared   \
       // to NIFTI. Hard-coded a correction here; this really should be         \
       // investigated further.
 
