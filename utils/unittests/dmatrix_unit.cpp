@@ -8,7 +8,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 
-TEST(dmatrix_test, constat_value) { // NOLINT
+TEST(dmatrix_unit, constat_value) { // NOLINT
   DMATRIX *md;
   MATRIX * mf;
   double   v;
@@ -40,7 +40,7 @@ TEST(dmatrix_test, constat_value) { // NOLINT
   DMatrixFree(&md);
 }
 
-TEST(dmatrix_test, dmatrix_add) { // NOLINT
+TEST(dmatrix_unit, dmatrix_add) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md;
@@ -62,7 +62,7 @@ TEST(dmatrix_test, dmatrix_add) { // NOLINT
   EXPECT_LT(v, .0001);
 }
 
-TEST(dmatrix_test, dmatrix_subtract) { // NOLINT
+TEST(dmatrix_unit, dmatrix_subtract) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md;
@@ -84,7 +84,7 @@ TEST(dmatrix_test, dmatrix_subtract) { // NOLINT
   EXPECT_LT(v, .0001);
 }
 
-TEST(dmatrix_test, dmatrix_scalar_mult) { // NOLINT
+TEST(dmatrix_unit, dmatrix_scalar_mult) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *md;
   MATRIX * m1f;
@@ -104,7 +104,7 @@ TEST(dmatrix_test, dmatrix_scalar_mult) { // NOLINT
   EXPECT_LT(v, .0001);
 }
 
-TEST(dmatrix_test, dmatrix_multiply) { // NOLINT
+TEST(dmatrix_unit, dmatrix_multiply) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md;
@@ -125,7 +125,7 @@ TEST(dmatrix_test, dmatrix_multiply) { // NOLINT
   EXPECT_LT(v, .0001);
 }
 
-TEST(dmatrix_test, dmatrix_transpose) { // NOLINT
+TEST(dmatrix_unit, dmatrix_transpose) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md = nullptr;
@@ -157,7 +157,7 @@ TEST(dmatrix_test, dmatrix_transpose) { // NOLINT
   EXPECT_LT(v, .0001);
 }
 
-TEST(dmatrix_test, dmatrix_vector_cross) { // NOLINT
+TEST(dmatrix_unit, dmatrix_vector_cross) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   DMATRIX *md;
@@ -194,7 +194,7 @@ TEST(dmatrix_test, dmatrix_vector_cross) { // NOLINT
   EXPECT_LT(v, .0001);
 }
 
-TEST(dmatrix_test, dmatrix_vector_dot) { // NOLINT
+TEST(dmatrix_unit, dmatrix_vector_dot) { // NOLINT
   DMATRIX *m1d;
   DMATRIX *m2d;
   MATRIX * m1f;
@@ -215,7 +215,7 @@ TEST(dmatrix_test, dmatrix_vector_dot) { // NOLINT
   EXPECT_LT(v, .0001);
 }
 
-TEST(dmatrix_test, dmatrix_vector_length) { // NOLINT
+TEST(dmatrix_unit, dmatrix_vector_length) { // NOLINT
   DMATRIX *m1d;
   MATRIX * m1f;
   double   v;
@@ -233,14 +233,14 @@ TEST(dmatrix_test, dmatrix_vector_length) { // NOLINT
   EXPECT_LT(v, .0001);
 }
 
-TEST(dmatrix_test, dmatrix_free_null) { // NOLINT
+TEST(dmatrix_unit, dmatrix_free_null) { // NOLINT
   DMATRIX *temp;
   temp = nullptr;
   EXPECT_EQ(DMatrixFree(nullptr), ERROR_BADPARM);
   EXPECT_EQ(DMatrixFree(&temp), 0);
 }
 
-TEST(dmatrix_test, dmatrix_check_dims) { // NOLINT
+TEST(dmatrix_unit, dmatrix_check_dims) { // NOLINT
   DMATRIX *temp;
   DMATRIX *temp1;
   MATRIX * m1f;
@@ -274,7 +274,7 @@ TEST(dmatrix_test, dmatrix_check_dims) { // NOLINT
   EXPECT_EQ(res, 1);
 }
 
-TEST(dmatrix_test, dmatrix_alloc) { // NOLINT
+TEST(dmatrix_unit, dmatrix_alloc) { // NOLINT
   EXPECT_EQ(DMatrixAlloc(3, 3, MATRIX_COMPLEX), nullptr);
   EXPECT_NE(DMatrixAlloc(3, 3, MATRIX_REAL), nullptr);
   EXPECT_EQ(DMatrixAlloc(3, 3, 3), nullptr);
