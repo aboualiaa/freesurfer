@@ -52,7 +52,7 @@ TEST(mrisurf_unit, mrisUpdateTargetLocations) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(, MRISclearWhichAndVal2) { // NOLINT
+TEST(mrisurf_unit, MRISclearWhichAndVal2) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }

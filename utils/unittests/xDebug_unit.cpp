@@ -56,7 +56,7 @@ TEST(xDebug_unit, xDbg_SetCurrentNote) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(, xDbg_GetCurrentNote) { // NOLINT
+TEST(xDebug_unit, xDbg_GetCurrentNote) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
