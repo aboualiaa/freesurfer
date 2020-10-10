@@ -459,6 +459,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 find_package(ArrayFire)
 mark_as_advanced(ArrayFire_DIR)
 
+find_package(MPI REQUIRED)
+
 # -------- zlib --------
 find_package(ZLIB REQUIRED)
 add_definitions(-DHAVE_ZLIB)
@@ -477,7 +479,7 @@ find_package(Armadillo)
 mark_as_advanced(ARMADILLO_LIBRARIES ARMADILLO_LIBRARIES ARMADILLO_INCLUDE_DIRS)
 
 # -------- petsc --------
-find_package(PETSC)
+find_package(PETSC REQUIRED)
 
 # --- boost ---
 set(Boost_NO_BOOST_CMAKE ON)

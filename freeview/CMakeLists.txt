@@ -5,7 +5,6 @@ if(FS_BUILD_GUIS
    AND PETSC_FOUND
    AND TARGET vtkutils
    )
-  find_package(MPI REQUIRED)
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                       ${FS_INCLUDE_DIRS}
