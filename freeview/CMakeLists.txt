@@ -239,7 +239,7 @@ if(FS_BUILD_GUIS
                       -Wno-deprecated-declarations
                       )
 
-  if(NOT FREEVIEW_LINEPROF)
+  if(NOT FS_FREEVIEW_LINEPROF)
     add_definitions(-DDISABLE_LINEPROF)
   endif()
 

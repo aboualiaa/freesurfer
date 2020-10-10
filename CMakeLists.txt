@@ -272,23 +272,6 @@ project(freesurfer
         LANGUAGES C CXX Fortran
         )
 
-# a few build options
-option(MINIMAL "Only build core components" OFF)
-option(BUILD_GUIS "Build GUI tools" ON)
-option(BUILD_ATTIC "Build deprecated tools from the attic" OFF)
-option(INFANT_MODULE "Include infant recon-all" OFF)
-option(QATOOLS_MODULE "Install QA tools" ON)
-option(BUILD_DNG "Build Doug's testing tools" OFF)
-option(FREEVIEW_LINEPROF "Build FreeView with lineprof enabled" OFF)
-option(PROFILING "Complile binaries for profiling with gprof" OFF)
-option(INSTALL_PYTHON_DEPENDENCIES "Install python package dependencies" ON)
-#  Modern compilers on new platforms often provide many more warnings than older compilers
-#  for example the gcc 7.5.0 compiler warnings about falling through switch statements
-#  without explicit breaks on every case.  This desired fallthrough behavior causes false
-#  compiler errors with "-Werror" turned on.  The WARNING_AS_ERROR option allows temporarily
-#  disabling warnings as errors to allow a more gradual move to supporting new compilers.
-option(WARNING_AS_ERROR "Convert build warnings to errors" ON)
-
 if(NOT APPLE)
   cmake_minimum_required(VERSION 3.9)
   set(HOST_OS $ENV{HOSTING_OS})
@@ -685,15 +668,6 @@ endif()
 #                    setup python
 # --------------------------------------------------
 
-# Unfortunately, the python version used to run pybind c-libraries must be equivalent to
-# the version used to build the libraries. The easiest and least intrusive way of making freesurfer
-# python scripts run out-of-the-box (and to help guarantee reproducibility) requires
-# distributing a minimal, custom python installation called fspython. This fspython package
-# will get installed to "freesurfer/python", but an external python can be used instead when the
-# FS_DISTRIBUTE_FSPYTHON option is turned off. Turning this off will create a freesurfer/bin/fspythonlink
-# symlink during install that points to the external python executable located by pybind
-option(FS_DISTRIBUTE_FSPYTHON "Include the fspython distribution in the installation" OFF)
-
 if(FS_DISTRIBUTE_FSPYTHON)
   set(FSPYTHON_DIR ${FS_PACKAGES_DIR}/fspython/3.6)
   if(EXISTS ${FSPYTHON_DIR}/bin/python3)
@@ -723,25 +697,6 @@ endif()
 # --------------------------------------------------
 #             freesurfer build settings
 # --------------------------------------------------
-
-# warnings
-if(NOT NO_CXX_WARN)
-  if(WARNING_AS_ERROR)
-    set(WARN_AS_ERROR_FLAG "-Werror")
-  endif()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra ${WARN_AS_ERROR_FLAG} -Wno-sign-compare -Wno-unused-result -Wno-unused-parameter")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-deprecated-declarations -fpermissive")
-endif()
-
-# clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-const-variable -Wno-inconsistent-missing-override -Wno-self-assign-field")
-else()
-  if(NOT NO_CXX_WARN)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-variable")
-  endif()
-endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
@@ -904,7 +859,7 @@ add_subdirectories(AntsDenoiseImageFs
 
 # the following program subdirectories aren't required in the standard recon-all stream.
 # they will be built by default, but not if a minimal build is configured
-if(NOT MINIMAL)
+if(NOT FS_MINIMAL_BUILD)
   add_subdirectories(
     anatomicuts
     attic
@@ -1094,7 +1049,7 @@ if(NOT MINIMAL)
   )
 endif()
 
-if(INFANT_MODULE)
+if(FS_INFANT_MODULE)
   add_subdirectory(infant)
   add_subdirectory(sscnn_skullstripping)
 endif()
@@ -1103,10 +1058,10 @@ if(FS_TKTOOLS_MODULE)
   add_subdirectory(tktools)
 endif()
 
-if(QATOOLS_MODULE)
+if(FS_QATOOLS_MODULE)
   add_subdirectory(qatools)
 endif()
 
-if(BUILD_DNG)
+if(FS_BUILD_DNG)
   add_subdirectory(dngtester)
 endif()

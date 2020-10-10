@@ -1,6 +1,6 @@
 project(qatools)
 
-if(NOT INSTALL_PYTHON_DEPENDENCIES)
+if(NOT FS_INSTALL_PYTHON_DEPS)
   set(PIP_FLAGS "--no-dependencies")
 endif()
 
@@ -17,8 +17,8 @@ install(CODE "
 install_pyscript(qatools.py)
 
 # install any package requirements
-if(INSTALL_PYTHON_DEPENDENCIES)
-  if(NOT DISTRIBUTE_FSPYTHON)
+if(FS_INSTALL_PYTHON_DEPS)
+  if(NOT FS_DISTRIBUTE_FSPYTHON)
     set(PKG_TARGET "--target=${CMAKE_INSTALL_PREFIX}/python/packages")
   endif()
   install(CODE "

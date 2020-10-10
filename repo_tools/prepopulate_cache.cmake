@@ -52,9 +52,18 @@ set(FS_BUILD_TESTING
     ON
     CACHE BOOL "build test targets"
     )
+
+
+# Unfortunately, the python version used to run pybind c-libraries must be equivalent to
+# the version used to build the libraries. The easiest and least intrusive way of making freesurfer
+# python scripts run out-of-the-box (and to help guarantee reproducibility) requires
+# distributing a minimal, custom python installation called fspython. This fspython package
+# will get installed to "freesurfer/python", but an external python can be used instead when the
+# FS_DISTRIBUTE_FSPYTHON option is turned off. Turning this off will create a freesurfer/bin/fspythonlink
+# symlink during install that points to the external python executable located by pybind
 set(FS_DISTRIBUTE_FSPYTHON
     OFF
-    CACHE BOOL ""
+    CACHE BOOL "Include the fspython distribution in the installation"
     )
 set(FS_COVERAGE_STYLE
     "gcov"
@@ -81,6 +90,14 @@ set(FS_ENABLE_LTO
 set(FS_INFANT_MODULE
     ON
     CACHE BOOL "Include infant recon-all"
+    )
+set(FS_QATOOLS_MODULE
+    ON
+    CACHE BOOL "Include quality assurance tools"
+    )
+set(FS_FREEVIEW_LINEPROF
+    OFF
+    CACHE BOOL "Include quality assurance tools"
     )
 set(FS_INSTALL_PYTHON_DEPS
     ON
