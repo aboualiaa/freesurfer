@@ -1,0 +1,24 @@
+the math header problme:
+
+comes from itk_include_dirs because they contain sdk headers from a specific version of mac os before the injected compiler headers, solution is at cmakelists.txt at commit from 03.10.20
+
+qt5 problem:
+-DCMAKE_PREFIX_PATH=$(brew --prefix qt5)
+export PATH=/usr/local/opt/qt5/bin:$PATH
+
+
+expensive recon_all steps:
+splines_mooth
+evaluate_field
+mri_binarize
+mri_segstats
+mris_calc
+mri_make_uchar
+mri_normalize
+mri_em_register
+mri_ca_normalize
+mri_ca_register
+mri_ca_label
+
+
+
