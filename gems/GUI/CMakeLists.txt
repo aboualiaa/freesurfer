@@ -14,28 +14,22 @@ include_directories(${GEMS_BINARY_DIR}/GUI)
 
 # add libary
 add_library(kvlGEMSGUI vtkFlRenderWindowInteractor.cxx kvlImageViewer.cxx)
-target_link_libraries(kvlGEMSGUI
-  ${ITK_LIBRARIES}
-  ${VTK_LIBRARIES}
-  ${FLTK_LIBRARIES}
-)
+target_link_libraries(kvlGEMSGUI ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${FLTK_LIBRARIES})
 
 # add an executable
 fltk_wrap_ui(kvlEstimateAtlasParameters kvlAtlasParameterEstimationConsoleGUI.fl)
 
 add_executable(kvlEstimateAtlasParameters
-  ${kvlEstimateAtlasParameters_FLTK_UI_SRCS}
-  kvlEstimateAtlasParameters.cxx
-  kvlAtlasParameterEstimationConsole.cxx
-)
+               ${kvlEstimateAtlasParameters_FLTK_UI_SRCS} kvlEstimateAtlasParameters.cxx
+               kvlAtlasParameterEstimationConsole.cxx
+               )
 target_link_libraries(kvlEstimateAtlasParameters kvlGEMSCommon kvlGEMSGUI)
 
 # add executable
 fltk_wrap_ui(kvlViewMeshCollectionWithGUI kvlAtlasMeshViewingConsoleGUI.fl)
 
 add_executable(kvlViewMeshCollectionWithGUI
-  ${kvlViewMeshCollectionWithGUI_FLTK_UI_SRCS}
-  kvlViewMeshCollectionWithGUI.cxx
-  kvlAtlasMeshViewingConsole.cxx
-)
+               ${kvlViewMeshCollectionWithGUI_FLTK_UI_SRCS}
+               kvlViewMeshCollectionWithGUI.cxx kvlAtlasMeshViewingConsole.cxx
+               )
 target_link_libraries(kvlViewMeshCollectionWithGUI kvlGEMSCommon kvlGEMSGUI)

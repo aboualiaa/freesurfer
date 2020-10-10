@@ -78,7 +78,7 @@ else()
     message(WARNING "Not linking FORTRAN executables with static libgfortran")
   else()
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgfortran")
-  endif() 
+  endif()
 endif()
 
 add_executable(gauss_4dfp gauss_4dfp.c cgauss3dd.c conc.c ${TRX_SOURCES} ${RMS_SOURCES})

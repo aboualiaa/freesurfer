@@ -31,5 +31,5 @@ if(FS_INSTALL_PYTHON_DEPS)
     if(NOT \${retcode} STREQUAL 0)
       message(FATAL_ERROR \"Could not remove pip-installed scripts\")
     endif()"
-  )
+          )
 endif()

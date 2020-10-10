@@ -53,7 +53,6 @@ set(FS_BUILD_TESTING
     CACHE BOOL "build test targets"
     )
 
-
 # Unfortunately, the python version used to run pybind c-libraries must be equivalent to
 # the version used to build the libraries. The easiest and least intrusive way of making freesurfer
 # python scripts run out-of-the-box (and to help guarantee reproducibility) requires
