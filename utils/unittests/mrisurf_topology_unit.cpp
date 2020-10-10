@@ -16,7 +16,8 @@ TEST(mrisurf_topology_unit, MRIS_VertexNeighbourInfo_check) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_topology_unit, MRIS_VertexNeighbourInfo_load_from_VERTEX) { // NOLINT
+TEST(mrisurf_topology_unit,
+     MRIS_VertexNeighbourInfo_load_from_VERTEX) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }

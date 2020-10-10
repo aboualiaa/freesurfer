@@ -989,8 +989,8 @@ int afniWrite(MRI *mri, const char *fname) {
   char *c;
 
   errno = 0;
-//  ErrorReturn(ERROR_UNSUPPORTED,
-//              (ERROR_UNSUPPORTED, "AFNI BRIK write unsupported"));
+  //  ErrorReturn(ERROR_UNSUPPORTED,
+  //              (ERROR_UNSUPPORTED, "AFNI BRIK write unsupported"));
 
   /* ----- keep compiler quiet ----- */
   bytes_per_voxel = 0;

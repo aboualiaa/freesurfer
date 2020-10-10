@@ -101,7 +101,7 @@ TEST(afni_unit, printAFNIHeader) { // NOLINT
   EXPECT_EQ(strcmp(afni_header_out, out.c_str()), 0);
 }
 
-auto main(int /*argc*/, char ** /*argv*/) -> int {
+auto main(int /*argc*/, char * * /*argv*/) -> int {
 
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();

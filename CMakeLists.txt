@@ -25,9 +25,9 @@ if(FS_BUILD_MATRIX)
         set(COMPILER_PROXY_OPTION
             "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-12/bin"
             )
-      elseif(Z_COMPILER STREQUAL "gcc09")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0")
       elseif(Z_COMPILER STREQUAL "gcc10")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0")
+      elseif(Z_COMPILER STREQUAL "gcc09")
         set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc@9/9.3.0")
       elseif(Z_COMPILER STREQUAL "appleclang")
         set(COMPILER_PROXY_OPTION "")
@@ -69,7 +69,7 @@ if(FS_BUILD_MATRIX)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_MKDIR ALL
                         COMMAND bash -c \" mkdir -p
-                        ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
+                        /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
                         \"
                         )
 
@@ -78,13 +78,13 @@ if(FS_BUILD_MATRIX)
                         ${COMPILER_PROXY_OPTION} -DCMAKE_BUILD_TYPE=${TYPE} -C
                         ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
                         -S ${CMAKE_SOURCE_DIR} -B
-                        ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
+                        /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
                         \"
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE
                         COMMAND bash -c \" ninja -k 0 -C
-                        ${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/
+                        /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/
                         \"
                         )
 
@@ -113,12 +113,12 @@ if(FS_BUILD_MATRIX)
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
                         COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit
                         --progress \"
-                        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
+                        WORKING_DIRECTORY "/Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
                         )
 
       add_test(${Z_COMPILER}_${TYPE}_BUILD_TEST
                COMMAND ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress
-               WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
+               WORKING_DIRECTORY "/Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
                )
 
       if(NOT TARGET check-${Z_COMPILER})
@@ -151,11 +151,13 @@ elseif(APPLE)
   if(DEFINED FS_USE_GCC AND NOT FS_USE_GCC STREQUAL "")
     if(FS_USE_GCC MATCHES "10")
       set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-10")
+      set(CMAKE_C_COMPILER "${FS_USE_GCC}/bin/gcc-10")
       set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-10")
       set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-10")
       set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-10")
     else()
       set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-9")
+      set(CMAKE_C_COMPILER "${FS_USE_GCC}/bin/gcc-9")
       set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-9")
       set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-9")
       set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-9")
@@ -697,8 +699,6 @@ endif()
 # --------------------------------------------------
 #             freesurfer build settings
 # --------------------------------------------------
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 # linker options
 if(APPLE)

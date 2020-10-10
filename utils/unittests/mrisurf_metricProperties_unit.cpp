@@ -36,11 +36,13 @@ TEST(mrisurf_metricProperties_unit, updateDistanceElt) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_metricProperties_unit, updateDistanceEltFromSignArgAndSquareLockNeeded) { // NOLINT
+TEST(mrisurf_metricProperties_unit,
+     updateDistanceEltFromSignArgAndSquareLockNeeded) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_metricProperties_unit, updateDistanceEltFromSignArgAndSquareNoLockNeeded) { // NOLINT
+TEST(mrisurf_metricProperties_unit,
+     updateDistanceEltFromSignArgAndSquareNoLockNeeded) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -141,11 +143,13 @@ TEST(mrisurf_metricProperties_unit, mrisComputeCurvatureMinMax) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_metricProperties_unit, mrisComputeNormalDotDistribution) { // NOLINT
+TEST(mrisurf_metricProperties_unit,
+     mrisComputeNormalDotDistribution) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_metricProperties_unit, mrisComputePrincipalCurvatureDistributions) { // NOLINT
+TEST(mrisurf_metricProperties_unit,
+     mrisComputePrincipalCurvatureDistributions) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -153,11 +157,13 @@ TEST(mrisurf_metricProperties_unit, mrisDefectFaceMRILogLikelihood) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_metricProperties_unit, mrisDefectVertexMRILogLikelihood) { // NOLINT
+TEST(mrisurf_metricProperties_unit,
+     mrisDefectVertexMRILogLikelihood) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_metricProperties_unit, mrisSampleAshburnerTriangleEnergy) { // NOLINT
+TEST(mrisurf_metricProperties_unit,
+     mrisSampleAshburnerTriangleEnergy) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -165,7 +171,8 @@ TEST(mrisurf_metricProperties_unit, mrisSampleMinimizationEnergy) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_metricProperties_unit, mrisSampleParallelEnergyAtVertex) { // NOLINT
+TEST(mrisurf_metricProperties_unit,
+     mrisSampleParallelEnergyAtVertex) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -205,7 +212,8 @@ TEST(mrisurf_metricProperties_unit, MRIScomputeMetricProperties) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_metricProperties_unit, MRIScomputeMetricPropertiesFaster) { // NOLINT
+TEST(mrisurf_metricProperties_unit,
+     MRIScomputeMetricPropertiesFaster) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }

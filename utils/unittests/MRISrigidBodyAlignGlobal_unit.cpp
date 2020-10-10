@@ -4,7 +4,8 @@
 
 #include <gtest/gtest.h>
 
-TEST(MRISrigidBodyAlignGlobal_unit, MRISrigidBodyAlignGlobal_findMinSSE) { // NOLINT
+TEST(MRISrigidBodyAlignGlobal_unit,
+     MRISrigidBodyAlignGlobal_findMinSSE) { // NOLINT
   EXPECT_EQ(1, 0);
 }
 auto main(int /*argc*/, char * * /*argv*/) -> int {

@@ -56,7 +56,8 @@ TEST(mrisurf_base_unit, mrisDirectionTriangleIntersection) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_base_unit, mrisAllNormalDirectionCurrentTriangleIntersections) { // NOLINT
+TEST(mrisurf_base_unit,
+     mrisAllNormalDirectionCurrentTriangleIntersections) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -136,7 +137,8 @@ TEST(mrisurf_base_unit, noteVnoMovedInActiveRealmTrees) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_base_unit, notifyActiveRealmTreesChangedNFacesNVertices) { // NOLINT
+TEST(mrisurf_base_unit,
+     notifyActiveRealmTreesChangedNFacesNVertices) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }

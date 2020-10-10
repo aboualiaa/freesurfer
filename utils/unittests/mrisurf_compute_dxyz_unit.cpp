@@ -72,7 +72,8 @@ TEST(mrisurf_compute_dxyz_unit, mrisComputeNonlinearSpringTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_compute_dxyz_unit, mrisComputeNonlinearTangentialSpringTerm) { // NOLINT
+TEST(mrisurf_compute_dxyz_unit,
+     mrisComputeNonlinearTangentialSpringTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -88,7 +89,8 @@ TEST(mrisurf_compute_dxyz_unit, mrisComputePolarCorrelationTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_compute_dxyz_unit, mrisComputePolarVectorCorrelationTerm) { // NOLINT
+TEST(mrisurf_compute_dxyz_unit,
+     mrisComputePolarVectorCorrelationTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -120,7 +122,8 @@ TEST(mrisurf_compute_dxyz_unit, mrisComputeSphereTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_compute_dxyz_unit, mrisComputeSurfaceNormalIntersectionTerm) { // NOLINT
+TEST(mrisurf_compute_dxyz_unit,
+     mrisComputeSurfaceNormalIntersectionTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -132,7 +135,8 @@ TEST(mrisurf_compute_dxyz_unit, mrisComputeTargetLocationTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_compute_dxyz_unit, mrisComputeThicknessMinimizationTerm) { // NOLINT
+TEST(mrisurf_compute_dxyz_unit,
+     mrisComputeThicknessMinimizationTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
@@ -156,7 +160,8 @@ TEST(mrisurf_compute_dxyz_unit, mrisComputeVectorCorrelationTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
-TEST(mrisurf_compute_dxyz_unit, mrisComputeWhichSurfaceRepulsionTerm) { // NOLINT
+TEST(mrisurf_compute_dxyz_unit,
+     mrisComputeWhichSurfaceRepulsionTerm) { // NOLINT
 
   EXPECT_EQ(1, 0);
 }
