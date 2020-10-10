@@ -15,6 +15,8 @@
 #ifndef BOX_H
 #define BOX_H
 
+#include <cstdio>
+
 typedef struct {
   int x0;
   int y0;

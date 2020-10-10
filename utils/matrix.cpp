@@ -409,9 +409,16 @@ static MATRIX *MatrixAlloc_new(const int rows, const int cols, const int type,
 
   // Calculate the storage size, to get in one allocation
   // (1) to reduce the calls to malloc by 3x, since it is an important part of
-  // mris_fix_topology (2) to prepare to have a stack buffer that the MATRIX can
+  // mris_fix_topology
+  // (2) to prepare to have a stack buffer that the MATRIX can
   // be in, to reduce the calls to malloc for 2x2 3x3 matrices
   //
+
+  if (buf == nullptr) {
+    fprintf(stderr, "MatrixBuffer invalid\n");
+    exit(1);
+  }
+
   size_t size_needed = sizeof(MATRIX);
   size_needed        = (size_needed + 63) & ~63; // round up
 
@@ -549,10 +556,19 @@ MATRIX *MatrixAlloc_wkr(const int rows, const int cols, const int type,
 
   noteMatrixAlloced(callSiteFile, callSiteLine, rows, cols);
 
-  if (use_new_MatricAlloc())
-    return MatrixAlloc_new(rows, cols, type, nullptr);
-  else
-    return MatrixAlloc_old(rows, cols, type);
+  // TODO: what's the difference between old and new?
+
+  // as per commits c610bdedfe2b10d6894487e9623db79f98d5fddb and
+  // 4639f138d82f4dcdb7533c7962c9142ca346c19f the new function reduces time
+  // inside malloc etc but actual time is not reduced so benefit is not really
+  // clear
+
+  // TODO: passing a nullptr to the new one produces ub
+
+  //  if (use_new_MatricAlloc())
+  //    return MatrixAlloc_new(rows, cols, type, nullptr);
+  //  else
+  return MatrixAlloc_old(rows, cols, type);
 }
 
 MATRIX *MatrixAlloc2_wkr(const int rows, const int cols, const int type,
