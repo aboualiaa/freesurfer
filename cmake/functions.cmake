@@ -174,11 +174,9 @@ function(add_test_script)
                    )
   endif()
   cmake_parse_arguments(TEST "" "NAME;SCRIPT" "DEPENDS" ${ARGN})
-  foreach(TARGET ${TEST_DEPENDS})
-    set(TEST_CMD
-        "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&"
-        )
-  endforeach()
+  # foreach(TARGET ${TEST_DEPENDS})
+  #  set(TEST_CMD "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
+  # endforeach()
 
   if(CMAKE_CONFIGURATION_TYPES)
     foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)

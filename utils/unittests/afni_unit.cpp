@@ -60,7 +60,7 @@ TEST(afni_unit, readAFNIHeader) { // NOLINT
 }
 
 TEST(afni_unit, AFinit) { // NOLINT
-  AF af;
+  AF              af;
   gsl::span<char> wow = af.typestring;
   AFinit(&af);
   EXPECT_EQ(strcmp(wow.data(), ""), 0);
@@ -111,7 +111,7 @@ TEST(afni_unit, printAFNIHeader) { // NOLINT
   EXPECT_EQ(strcmp(afni_header_out, out.c_str()), 0);
 }
 
-auto main(int /*argc*/, char ** /*argv*/) -> int {
+auto main(int /*argc*/, char * * /*argv*/) -> int {
 
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();

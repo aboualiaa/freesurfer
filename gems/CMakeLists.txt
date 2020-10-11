@@ -28,9 +28,9 @@ add_compile_options(-Wno-inconsistent-missing-override -Wno-self-assign-field)
 if(FS_GEMS_BUILD_EXECUTABLES OR FS_GEMS_BUILD_GUI)
   add_definitions(-DUSE_DYNAMIC_MESH)
   message(STATUS "Since you're building executables to compute meshes, ITK dynamic meshes will"
-                  "be used (internally using std::map instead of std::vector to store lists of points, cells, etc)."
-                  "Everything will still work, but anything that only uses existing meshes will be"
-                  "slower than it could be (up to 100% slower)"
+                 "be used (internally using std::map instead of std::vector to store lists of points, cells, etc)."
+                 "Everything will still work, but anything that only uses existing meshes will be"
+                 "slower than it could be (up to 100% slower)"
           )
 endif()
 
