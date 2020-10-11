@@ -800,6 +800,7 @@ add_subdirectories(AntsDenoiseImageFs
                    mri_label2label
                    mri_label2vol
                    mri_log_likelihood
+                   mri_make_bem_surfaces
                    mri_mask
                    mri_matrix_multiply
                    mri_mc

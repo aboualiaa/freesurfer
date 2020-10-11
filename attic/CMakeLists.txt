@@ -119,7 +119,6 @@ else()
                      mri_ibmc
                      mri_interpolate
                      mri_label_accuracy
-                     mri_make_bem_surfaces
                      mri_make_density_map
                      mri_make_labels
                      mri_make_register
