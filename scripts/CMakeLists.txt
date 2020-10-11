@@ -18,7 +18,7 @@ install_configured(annot2std
                    cblumwmgyri
                    check_recons.sh
                    check_subject
-                   checkMCR.sh
+                   checkMCR.tcsh
                    clear_fs_env.csh
                    compute_interrater_variability.csh
                    compute_label_vals.csh
