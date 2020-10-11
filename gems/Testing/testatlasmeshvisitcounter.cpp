@@ -22,9 +22,9 @@
 
 #include "imageutils.hpp"
 #include "testfileloader.hpp"
-#include "testiosupport.hpp"
 
 #ifdef CUDA_FOUND
+#include "testiosupport.hpp"
 #ifdef GPU_ALL_PRECISIONS
 typedef boost::mpl::list<kvl::cuda::VisitCounterSimple<float, float>,
                          kvl::cuda::VisitCounterSimple<double, double>,
@@ -107,8 +107,9 @@ void CheckVisitCounter(kvl::interfaces::AtlasMeshVisitCounter *visitCounter,
 
 typedef kvl::interfaces::AtlasMeshVisitCounter::ImageType ImageType;
 typedef itk::AutomaticTopologyMeshSource<kvl::AtlasMesh>  MeshSource;
-typedef MeshSource::IdentifierType                        IdentifierType;
-typedef kvl::AtlasMesh                                    Mesh;
+typedef itk::AutomaticTopologyMeshSource<kvl::AtlasMesh>::IdentifierType
+                       IdentifierType;
+typedef kvl::AtlasMesh Mesh;
 
 // ----------------------------
 
@@ -125,7 +126,7 @@ void SingleTetrahedronUnitMesh(
       kvl::Testing::CreateImageCube<ImageType>(imageSize, 0);
   BOOST_TEST_CHECKPOINT("Image created");
 
-  Mesh::Pointer mesh =
+  kvl::AtlasMesh::Pointer mesh =
       kvl::Testing::CreateSingleTetrahedronMesh(vertices, nAlphas);
   BOOST_TEST_CHECKPOINT("Mesh created");
 
@@ -337,7 +338,7 @@ void GenerateSpecificCornerTetrahedron(float verts[nVertices][nDims],
 ImageType::ConstPointer
 ApplyVisitCounterToMesh(kvl::interfaces::AtlasMeshVisitCounter *visitCounter,
                         const ImageType *                       targetImage,
-                        Mesh::Pointer                           targetMesh) {
+                        kvl::AtlasMesh::Pointer                 targetMesh) {
   visitCounter->SetRegions(targetImage->GetLargestPossibleRegion());
   visitCounter->VisitCount(targetMesh);
   BOOST_TEST_CHECKPOINT("VisitCount run");
@@ -366,11 +367,11 @@ void CheckVisitCounterWithPermutations(
     const ImageType *targetImage, const float tetrahedron[nVertices][nDims]) {
   // Start by getting the 'standard' answers
   BOOST_TEST_CHECKPOINT("Starting CheckVisitCounterWithPermutations");
-  ImageType::ConstPointer standardVisit = NULL;
+  ImageType::ConstPointer standardVisit = nullptr;
   {
     kvl::AtlasMeshVisitCounterCPUWrapper origVisitCounter;
     BOOST_TEST_CHECKPOINT("Created reference VisitCounter");
-    Mesh::Pointer baseMesh =
+    kvl::AtlasMesh::Pointer baseMesh =
         kvl::Testing::CreateSingleTetrahedronMesh(tetrahedron, nAlphas);
     BOOST_TEST_CHECKPOINT("baseMesh Created");
     standardVisit =
@@ -398,11 +399,11 @@ void CheckVisitCounterWithPermutations(
 
     BOOST_TEST_CONTEXT("Tetrahedron : " << TetrahedronToString(permTet)) {
       // Generate the result image
-      Mesh::Pointer mesh =
+      kvl::AtlasMesh::Pointer mesh =
           kvl::Testing::CreateSingleTetrahedronMesh(permTet, nAlphas);
       BOOST_TEST_CHECKPOINT("Permuted mesh created");
 
-      ImageType::ConstPointer currVisit = NULL;
+      ImageType::ConstPointer currVisit = nullptr;
       currVisit = ApplyVisitCounterToMesh(visitCounter, targetImage, mesh);
       BOOST_TEST_CHECKPOINT("Created currVisit image");
 
@@ -580,9 +581,9 @@ BOOST_DATA_TEST_CASE(ConsistencyCheck, boost::unit_test::data::xrange(1, 2),
   GenerateSpecificCornerTetrahedron(scaleVertices, 0, scale);
   BOOST_TEST_CHECKPOINT("Created tetrahedra");
 
-  Mesh::Pointer unitMesh =
+  kvl::AtlasMesh::Pointer unitMesh =
       kvl::Testing::CreateSingleTetrahedronMesh(unitVertices, nAlphas);
-  Mesh::Pointer scaleMesh =
+  kvl::AtlasMesh::Pointer scaleMesh =
       kvl::Testing::CreateSingleTetrahedronMesh(scaleVertices, nAlphas);
   BOOST_TEST_CHECKPOINT("Created meshes");
 
@@ -635,8 +636,8 @@ BOOST_AUTO_TEST_CASE(ReferenceImpl) {
   // Note that image and mesh are supplied by TestFileLoader
   CheckVisitCounter(&visitCounter, image, mesh);
 
-  BOOST_TEST_MESSAGE("SetRegions Time  : " << visitCounter.tSetRegions);
-  BOOST_TEST_MESSAGE("VisitCounter Time: " << visitCounter.tVisitCount);
+  //  BOOST_TEST_MESSAGE("SetRegions Time  : " << visitCounter.tSetRegions);
+  //  BOOST_TEST_MESSAGE("VisitCounter Time: " << visitCounter.tVisitCount);
 }
 
 #ifdef CUDA_FOUND

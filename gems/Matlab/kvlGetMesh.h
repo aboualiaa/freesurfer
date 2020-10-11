@@ -52,7 +52,7 @@ public:
     //std::cout << "meshNumber: " << meshNumber << std::endl;
 
     // Now get the correct mesh
-    kvl::AtlasMesh::ConstPointer mesh = 0;
+    kvl::AtlasMesh::ConstPointer mesh = nullptr;
     if (meshNumber == -1) {
       //std::cout << "Getting reference mesh" << std::endl;
       mesh = meshCollection->GetReferenceMesh();

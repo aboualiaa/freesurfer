@@ -8,15 +8,15 @@
 
 namespace kvl {
 
-class AtlasMeshBuilderMutexLock : public itk::SimpleFastMutexLock {
+class AtlasMeshBuilderMutexLock : public std::mutex {
 public:
   /** Standard class typedefs.  */
   typedef AtlasMeshBuilderMutexLock Self;
-  typedef itk::SimpleFastMutexLock  Superclass;
+  typedef std::mutex                Superclass;
 
   /** Lock access. */
   void DescriptiveLock(const std::string &description) {
-    Superclass::Lock();
+    Superclass::lock();
     m_TimeProbe.Start();
     m_Description = description;
   }
@@ -26,7 +26,7 @@ public:
     m_TimeProbe.Stop();
     std::cout << m_Description << ": unlocking mutex after "
               << m_TimeProbe.GetMean() << " seconds" << std::endl;
-    Superclass::Unlock();
+    Superclass::unlock();
   }
 
 protected:
@@ -50,7 +50,7 @@ public:
       std::map<AtlasMesh::PointIdentifier, int> &pointOccupancies)
       : m_Mutex(mutex), m_MutexIsLocked(true),
         m_PointOccupancies(pointOccupancies) {
-    m_Mutex.Lock();
+    m_Mutex.lock();
   }
 
   ~AtlasMeshBuilderHelper() {
@@ -62,14 +62,14 @@ public:
   void Lock() {
     if (!m_MutexIsLocked) {
       m_MutexIsLocked = true;
-      m_Mutex.Lock();
+      m_Mutex.lock();
     }
   }
 
   void Unlock() {
     if (m_MutexIsLocked) {
       m_MutexIsLocked = false;
-      m_Mutex.Unlock();
+      m_Mutex.unlock();
     }
   }
 
@@ -113,8 +113,8 @@ protected:
   }
 
 private:
-  AtlasMeshBuilderHelper(const Self &) ITK_DELETE_FUNCTION;
-  void operator=(const Self &) ITK_DELETE_FUNCTION;
+  AtlasMeshBuilderHelper(const Self &) = delete;
+  void operator=(const Self &) = delete;
 };
 
 // Events generated
@@ -272,7 +272,7 @@ protected:
   /** Static function used as a "callback" by the MultiThreader.  The threading
    * library will call this routine for each thread, which will delegate the
    * control to ThreadedGenerateData(). */
-  static ITK_THREAD_RETURN_TYPE LoadBalancedThreaderCallback(void *arg);
+  static itk::ITK_THREAD_RETURN_TYPE LoadBalancedThreaderCallback(void *arg);
 
   /** Internal structure used for passing image data into the threading library */
   struct LoadBalancedThreadStruct {

@@ -1,6 +1,4 @@
-option(GEMS_MAKE_SPARSE_INITIAL_MESHES "Make sparse initial meshes" OFF)
-
-if(MAKE_SPARSE_INITIAL_MESHES)
+if(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES)
   message(WARNING "Since you're opting to make sparse (i.e., irregular) initial meshes, the TetGen library will be included, which has a restrictive license."
           )
   if(NOT Tetgen_FOUND)
@@ -18,6 +16,6 @@ add_executable(kvlBuildAtlasMesh
                kvlMultiResolutionAtlasMesher.cxx
                )
 target_link_libraries(kvlBuildAtlasMesh kvlGEMSCommon)
-if(MAKE_SPARSE_INITIAL_MESHES)
+if(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES)
   target_link_libraries(kvlBuildAtlasMesh ${Tetgen_LIBRARIES})
 endif()

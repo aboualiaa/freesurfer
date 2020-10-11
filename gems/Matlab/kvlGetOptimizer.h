@@ -65,7 +65,7 @@ public:
             constCalculator.GetPointer());
 
     // Construct the correct type of optimizer
-    AtlasMeshDeformationOptimizer::Pointer optimizer = 0;
+    AtlasMeshDeformationOptimizer::Pointer optimizer = nullptr;
     const std::string                      typeName  = mxArrayToString(prhs[0]);
     switch (typeName[0]) {
     case 'F': {

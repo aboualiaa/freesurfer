@@ -40,7 +40,7 @@ public:
     //  }
 
     //
-    itk::Object::Pointer itkObject = 0;
+    itk::Object::Pointer itkObject = nullptr;
 
     if (mxGetNumberOfDimensions(prhs[0]) == 3) {
       if (!itkObject) {

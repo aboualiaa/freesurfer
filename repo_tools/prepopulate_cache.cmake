@@ -140,7 +140,7 @@ set(FS_VERSION
 if(NOT APPLE)
   set(FS_GEMS_BUILD_CUDA
       OFF
-      CACHE BOOL ""
+      CACHE BOOL "Build CUDA stuff"
       )
   set(FS_TKTOOLS_MODULE
       OFF
@@ -150,7 +150,7 @@ endif()
 
 set(FS_GEMS_BUILD_EXECUTABLES
     ON
-    CACHE BOOL ""
+    CACHE BOOL "Build command line executables"
     )
 set(FS_GEMS_BUILD_GUI
     ON
@@ -166,15 +166,15 @@ set(FS_GEMS_BUILD_PYTHON
     )
 set(FS_GEMS_BUILD_SHARED_LIBS
     ON
-    CACHE BOOL ""
+    CACHE BOOL "Build GEMS with shared libraries"
     )
 set(FS_GEMS_BUILD_TESTING
     ON
-    CACHE BOOL ""
+    CACHE BOOL "Build tests"
     )
 set(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES
     OFF
-    CACHE BOOL ""
+    CACHE BOOL "Make sparse initial meshes"
     )
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${FS_EXP_BUILD_CONFIGURATIONS})

@@ -47,17 +47,17 @@ public:
         const_cast<kvl::AtlasMeshCollection *>(
             constMeshCollection.GetPointer());
 
-#if 0    
+#if 0
     // Make sure we're not trying to write positions of non-existing meshes in the collection
     if ( meshCollection->GetNumberOfMeshes() < ( nrhs-2 ) )
       {
       mexErrMsgTxt( "More positions than there are meshes in the mesh collection" );
       }
-    
+
     // Loop over all positions
     for ( int meshNumber = -1; meshNumber < ( nrhs-2 ); ++meshNumber )
       {
-        
+
       // Get pointer to the correct ITK position container
       AtlasMeshCollection::PointsContainerType::Pointer  position = 0;
       if ( meshNumber < 0 )
@@ -67,8 +67,8 @@ public:
       else
         {
         position = meshCollection->GetPositions()[ meshNumber ];
-        }  
-        
+        }
+
 
       // Get pointer to the Matlab data
       const int  numberOfNodes = mxGetDimensions( prhs[ meshNumber+2 ] )[ 0 ];
@@ -76,30 +76,31 @@ public:
         {
         mexErrMsgTxt( "Number of nodes don't match" );
         }
-      const double*  data = static_cast< double* >( mxGetData( prhs[ meshNumber+2 ] ) ); 
+      const double*  data = static_cast< double* >( mxGetData( prhs[ meshNumber+2 ] ) );
 
-      
+
       // Copy the alphas from the Matlab matrix into the mesh nodes
-      for ( AtlasMesh::PointsContainer::Iterator  it = position->Begin(); 
+      for ( AtlasMesh::PointsContainer::Iterator  it = position->Begin();
             it != position->End(); ++it, ++data )
         {
         AtlasMesh::PointType  point;
         for ( int i = 0; i < 3; i++ )
           {
-          point[ i ] = *( data + i * numberOfNodes );  
+          point[ i ] = *( data + i * numberOfNodes );
           } // End loop over x,y,z directions
 
         it.Value() = point;
 
         } // End loop over all points
-        
+
       } // End loop over all positions
 
 #else
 
     // Loop over all input position matrices, copy their content into the correct format,
     // and save
-    AtlasMeshCollection::PointsContainerType::Pointer referencePosition = 0;
+    AtlasMeshCollection::PointsContainerType::Pointer referencePosition =
+        nullptr;
     std::vector<AtlasMeshCollection::PointsContainerType::Pointer> positions;
     for (int meshNumber = -1; meshNumber < (nrhs - 2); ++meshNumber) {
       // Get pointer to the Matlab data

@@ -83,7 +83,8 @@ public:
            cellIt != meshCollection->GetCells()->End(); ++cellIt) {
         kvl::AtlasMesh::CellType *cell = cellIt.Value();
 
-        if (cell->GetType() != kvl::AtlasMesh::CellType::TETRAHEDRON_CELL) {
+        if (cell->GetType() !=
+            itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
           continue;
         }
 

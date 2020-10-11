@@ -15,13 +15,6 @@ if(NOT ZBLIB_FOUND)
   find_package(ZLIB REQUIRED)
 endif()
 
-option(GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" OFF)
-option(GEMS_BUILD_EXECUTABLES "Build command line executables" OFF)
-option(GEMS_BUILD_TESTING "Build tests" OFF)
-option(GEMS_BUILD_GUI "Build GUI components (requires FLTK and VTK)" OFF)
-option(GEMS_BUILD_MATLAB "Build Matlab wrappers" OFF)
-option(GEMS_BUILD_CUDA "Build CUDA stuff" OFF)
-
 set(GEMS_RUNTIME_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
@@ -32,7 +25,7 @@ set(CMAKE_CXX_FLAGS "-fPIC -fpermissive -msse2 -mfpmath=sse")
 
 add_compile_options(-Wno-inconsistent-missing-override -Wno-self-assign-field)
 
-if(GEMS_BUILD_EXECUTABLES OR GEMS_BUILD_GUI)
+if(FS_GEMS_BUILD_EXECUTABLES OR FS_GEMS_BUILD_GUI)
   add_definitions(-DUSE_DYNAMIC_MESH)
   message(WARNING "Since you're building executables to compute meshes, ITK dynamic meshes will"
                   "be used (internally using std::map instead of std::vector to store lists of points, cells, etc)."
@@ -41,7 +34,7 @@ if(GEMS_BUILD_EXECUTABLES OR GEMS_BUILD_GUI)
           )
 endif()
 
-if(GEMS_BUILD_CUDA)
+if(FS_GEMS_BUILD_CUDA)
   find_package(CUDA REQUIRED)
   set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS} -std=c++11")
   include_directories(${CUDA_INCLUDE_DIRS})
@@ -91,21 +84,21 @@ add_library(kvlGEMSCommon ${SOURCES})
 target_link_libraries(kvlGEMSCommon ${ITK_LIBRARIES} ${ZLIB_LIBRARIES})
 
 # build command line executables
-if(GEMS_BUILD_EXECUTABLES)
+if(FS_GEMS_BUILD_EXECUTABLES)
   add_subdirectory(Executables)
 endif()
 
 # build tests
-if(GEMS_BUILD_TESTING)
+if(FS_GEMS_BUILD_TESTING)
   add_subdirectory(Testing)
 endif()
 
 # build GUI
-if(GEMS_BUILD_GUI)
+if(FS_GEMS_BUILD_GUI)
   add_subdirectory(GUI)
 endif()
 
 # build Matlab wrappers
-if(GEMS_BUILD_MATLAB)
+if(FS_GEMS_BUILD_MATLAB)
   add_subdirectory(Matlab)
 endif()

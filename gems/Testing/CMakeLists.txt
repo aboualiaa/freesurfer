@@ -17,12 +17,12 @@ if(Boost_FOUND)
   list(APPEND testsrcs atlasmeshalphadrawercpuwrapper.cpp)
   list(APPEND testsrcs testatlasmeshvisitcounter.cpp)
   list(APPEND testsrcs testatlasmeshalphadrawer.cpp)
-  list(APPEND testsrcs testdimensioncuda.cpp)
   list(APPEND testsrcs teststopwatch.cpp)
 
   list(APPEND testsrcs imageutils.cpp)
 
   if(CUDA_FOUND)
+    list(APPEND testsrcs testdimensioncuda.cpp)
     list(APPEND testsrcs testcudaimage.cpp)
     list(APPEND testsrcs cudaglobalfixture.cpp)
     list(APPEND testsrcs cudaimagetests.cu)

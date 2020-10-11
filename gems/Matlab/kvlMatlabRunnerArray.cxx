@@ -40,7 +40,7 @@
 
 namespace kvl {
 
-MatlabRunnerArray::Pointer MatlabRunnerArray::m_Instance = 0;
+MatlabRunnerArray::Pointer MatlabRunnerArray::m_Instance = nullptr;
 
 //
 //

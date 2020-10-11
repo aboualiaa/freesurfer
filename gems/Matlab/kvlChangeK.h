@@ -68,7 +68,7 @@ public:
          cellIt != mesh->GetCells()->End(); ++cellIt) {
 
       AtlasMesh::CellType *cell = cellIt.Value();
-      if (cell->GetType() == AtlasMesh::CellType::TETRAHEDRON_CELL) {
+      if (cell->GetType() == itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
 
         AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
         AtlasAlphasType                      alphas0 =

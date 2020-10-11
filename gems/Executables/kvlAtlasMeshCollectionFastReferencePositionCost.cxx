@@ -83,7 +83,7 @@ void AtlasMeshCollectionFastReferencePositionCost ::
   while (cellIt != m_Cells->End()) {
     const AtlasMesh::CellType *cell = cellIt.Value();
 
-    if (cell->GetType() != AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    if (cell->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       ++cellIt;
       continue;
     }

@@ -2,7 +2,7 @@
 
 namespace kvl {
 
-MatlabObjectArray::Pointer MatlabObjectArray::m_Instance = 0;
+MatlabObjectArray::Pointer MatlabObjectArray::m_Instance = nullptr;
 
 //
 // Return the single instance of the MatlabObjectArray

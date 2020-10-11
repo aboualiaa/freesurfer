@@ -25,7 +25,7 @@ public:
     typedef typename ImageType::PixelType PixelType;
     mxClassID                             mxclass = mxT<PixelType>();
     if (mxGetClassID(matlabObject) != mxclass) {
-      return 0;
+      return nullptr;
     }
 
     // Determine the size of the image to be created

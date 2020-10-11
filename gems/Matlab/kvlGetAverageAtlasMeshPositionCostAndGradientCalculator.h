@@ -1,6 +1,7 @@
 #include "kvlAverageAtlasMeshPositionCostAndGradientCalculator.h"
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
+#include <kvlCroppedImageReader.h>
 
 namespace kvl {
 

@@ -71,7 +71,7 @@ if(APPLE)
         "-w -static-libgfortran -lgfortran -lgcc -lgcc_eh -lSystem -nodefaultlibs ${STATIC_QUADMATH} ${CMAKE_Fortran_FLAGS}"
         )
   else()
-    message(WARNING "Not linking FORTRAN executables with static libquadmath")
+    message(STATUS "Not linking FORTRAN executables with static libquadmath")
   endif()
 else()
   if(NO_STATIC_GFORTRAN)

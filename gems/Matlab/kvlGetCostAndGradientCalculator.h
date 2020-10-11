@@ -5,6 +5,7 @@
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
 #include "kvlMutualInformationCostAndGradientCalculator.h"
+#include <kvlCroppedImageReader.h>
 
 namespace kvl {
 
@@ -78,7 +79,7 @@ public:
 
     // Retrieve transform if one is provided
     typedef CroppedImageReader::TransformType TransformType;
-    TransformType::ConstPointer               constTransform = 0;
+    TransformType::ConstPointer               constTransform = nullptr;
     if (nrhs > 3) {
       // Sanity check
       if (!mxIsInt64(prhs[3])) {
@@ -269,7 +270,7 @@ public:
     } // End test if targetPoints are provided
 
     // Construct the correct type of calculator
-    AtlasMeshPositionCostAndGradientCalculator::Pointer calculator = 0;
+    AtlasMeshPositionCostAndGradientCalculator::Pointer calculator = nullptr;
     const std::string typeName = mxArrayToString(prhs[0]);
     switch (typeName[0]) {
     case 'A': {

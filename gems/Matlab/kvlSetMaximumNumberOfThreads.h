@@ -1,4 +1,4 @@
-#include "itkMultiThreader.h"
+#include "itkPlatformMultiThreader.h"
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
 
@@ -32,7 +32,8 @@ public:
     // Retrieve input
     const int maximumNumberOfThreads = static_cast<int>(*mxGetPr(prhs[0]));
     //std::cout << "maximumNumberOfThreads: " << maximumNumberOfThreads << std::endl;
-    itk::MultiThreader::SetGlobalDefaultNumberOfThreads(maximumNumberOfThreads);
+    itk::MultiThreaderBase::SetGlobalDefaultNumberOfThreads(
+        maximumNumberOfThreads);
   }
 
 protected:

@@ -146,10 +146,10 @@ public:
   virtual void DisplayLabelImage(unsigned int labelImageNumber) = 0;
   virtual void InitializeMesh()                                 = 0;
   virtual void Estimate()                                       = 0;
-  virtual void SelectTriangleContainingPoint(float, float)      = 0;
-  virtual void Interrupt()                                      = 0;
-  virtual void Step()                                           = 0;
-  virtual void Continue()                                       = 0;
-  virtual void SetPositionEstimationResolution(unsigned int)    = 0;
+  //  virtual void SelectTriangleContainingPoint(float, float)      = 0;
+  virtual void Interrupt()                                   = 0;
+  virtual void Step()                                        = 0;
+  virtual void Continue()                                    = 0;
+  virtual void SetPositionEstimationResolution(unsigned int) = 0;
 };
 #endif

@@ -36,7 +36,7 @@ public:
     const std::string meshCollectionFileName = mxArrayToString(prhs[0]);
 
     typedef CroppedImageReader::TransformType TransformType;
-    TransformType::ConstPointer               transform = 0;
+    TransformType::ConstPointer               transform = nullptr;
     float                                     K         = -1.0f;
 
     if (nrhs > 1) {
@@ -101,7 +101,8 @@ public:
              cellIt != meshCollection->GetCells()->End(); ++cellIt) {
           kvl::AtlasMesh::CellType *cell = cellIt.Value();
 
-          if (cell->GetType() != kvl::AtlasMesh::CellType::TETRAHEDRON_CELL) {
+          if (cell->GetType() !=
+              itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
             continue;
           }
 

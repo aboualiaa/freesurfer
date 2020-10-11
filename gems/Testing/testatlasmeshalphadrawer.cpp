@@ -12,11 +12,11 @@
 #ifdef CUDA_FOUND
 #include "atlasmeshalphadrawercuda.hpp"
 #include "cudaimage.hpp"
+#include "testiosupport.hpp"
 #endif
 
 #include "imageutils.hpp"
 #include "testfileloader.hpp"
-#include "testiosupport.hpp"
 
 // ----------------------------------------------
 
@@ -88,7 +88,7 @@ void SingleConstantTetrahedronContainedCube(
   float verts[nVertices][nDims] = {
       {-1, -1, -1}, {4 * d, -1, -1}, {-1, 4 * d, -1}, {-1, -1, 4 * d}};
 
-  Mesh::Pointer mesh =
+  kvl::AtlasMesh::Pointer mesh =
       kvl::Testing::CreateSingleTetrahedronMesh(verts, nAlphas);
   BOOST_TEST_CHECKPOINT("Mesh created");
 
@@ -170,12 +170,12 @@ BOOST_AUTO_TEST_CASE(ReferenceImpl) {
   // Note that image and mesh are supplied by TestFileLoader
   CheckAlphaDrawer(&ad, image, mesh, classNumber, percentTolerance);
 
-  BOOST_TEST_MESSAGE("SetRegions Time           : " << ad.tSetRegions);
-  BOOST_TEST_MESSAGE("Interpolate Time          : " << ad.tInterpolate);
+  //  BOOST_TEST_MESSAGE("SetRegions Time           : " << ad.tSetRegions);
+  //  BOOST_TEST_MESSAGE("Interpolate Time          : " << ad.tInterpolate);
   ad.tInterpolate.Reset();
 
   CheckAlphaDrawer(&ad, image, mesh, classNumber, percentTolerance);
-  BOOST_TEST_MESSAGE("Interpolate Time (repeat) : " << ad.tInterpolate);
+  //  BOOST_TEST_MESSAGE("Interpolate Time (repeat) : " << ad.tInterpolate);
 }
 
 #ifdef CUDA_FOUND
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(MeshInformation) {
   for (auto cellIt = mesh->GetCells()->Begin();
        cellIt != mesh->GetCells()->End(); ++cellIt) {
     if (cellIt.Value()->GetType() ==
-        kvl::AtlasMesh::CellType::TETRAHEDRON_CELL) {
+        itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       tetrahedronIds.push_back(cellIt.Index());
     } else {
       nOther++;
