@@ -3,17 +3,22 @@
 //
 
 #include "AFNI.h"
-#include "gtest/gtest.h"
+
+#include "gsl/gsl"
+#include <gtest/gtest.h>
 
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 
 namespace gtest = testing::internal;
 
-char *filename         = "/Users/aboualiaa/Downloads/sample96/anat+orig.BRIK";
-char *header           = "/Users/aboualiaa/Downloads/sample96/anat+orig.HEAD";
-char *invalid_filename = "/Users/aboualiaa/Downloads/sample96/invalid.BRIK";
-char *output_filename  = "/Users/aboualiaa/Downloads/sample96/testResult.BRIK";
-char *afni_header_out =
+const char *const filename =
+    "/Users/aboualiaa/Downloads/sample96/anat+orig.BRIK";
+const char *const header = "/Users/aboualiaa/Downloads/sample96/anat+orig.HEAD";
+const char *const invalid_filename =
+    "/Users/aboualiaa/Downloads/sample96/invalid.BRIK";
+const char *const output_filename =
+    "/Users/aboualiaa/Downloads/sample96/testResult.BRIK";
+const char *const afni_header_out =
     "AFNI Header Information ============================================\n"
     "DATASET_RANK      : spatial dims 3, sub-bricks 1\n"
     "DATASET_DIMENSIONS: (256, 256, 124)\n"
@@ -28,10 +33,7 @@ char *afni_header_out =
     "BRICK_FLOAT_FACS  : 0.000000\n"
     "====================================================================\n";
 
-AF af;
-
 TEST(afni_unit, afniRead) { // NOLINT
-
   gtest::CaptureStderr();
   gtest::CaptureStdout();
   auto *mri         = afniRead(filename, 1);
@@ -43,20 +45,25 @@ TEST(afni_unit, afniRead) { // NOLINT
 }
 
 TEST(afni_unit, afniWrite) { // NOLINT
+  gtest::CaptureStdout();
   auto *mri = afniRead(filename, 1);
   EXPECT_EQ(afniWrite(mri, output_filename), 0);
+  auto out = gtest::GetCapturedStdout();
 }
 
 TEST(afni_unit, readAFNIHeader) { // NOLINT
-  auto *fp = fopen(header, "r");
+  AF                 af;
+  gsl::owner<FILE *> fp = fopen(header, "re");
   EXPECT_NE(fp, nullptr);
   auto res = readAFNIHeader(fp, &af);
   EXPECT_EQ(res, 1);
 }
 
 TEST(afni_unit, AFinit) { // NOLINT
+  AF af;
+  gsl::span<char> wow = af.typestring;
   AFinit(&af);
-  EXPECT_EQ(strcmp(af.typestring, ""), 0);
+  EXPECT_EQ(strcmp(wow.data(), ""), 0);
   EXPECT_EQ(af.dataset_rank[0], 0);
   EXPECT_EQ(af.dataset_rank[1], 0);
   EXPECT_EQ(af.dataset_dimensions[0], 0);
@@ -85,6 +92,8 @@ TEST(afni_unit, AFinit) { // NOLINT
 }
 
 TEST(afni_unit, AFclean) { // NOLINT
+  AF af;
+  AFinit(&af);
   AFclean(&af);
   EXPECT_EQ(af.idcode_string, nullptr);
   EXPECT_EQ(af.brick_stats, nullptr);
@@ -93,15 +102,16 @@ TEST(afni_unit, AFclean) { // NOLINT
 }
 
 TEST(afni_unit, printAFNIHeader) { // NOLINT
-  auto *fp  = fopen(header, "r");
-  auto  res = readAFNIHeader(fp, &af);
+  AF                    af;
+  gsl::owner<FILE *>    fp  = fopen(header, "re");
+  [[maybe_unused]] auto res = readAFNIHeader(fp, &af);
   gtest::CaptureStdout();
   printAFNIHeader(&af);
   auto out = gtest::GetCapturedStdout();
   EXPECT_EQ(strcmp(afni_header_out, out.c_str()), 0);
 }
 
-auto main(int /*argc*/, char * * /*argv*/) -> int {
+auto main(int /*argc*/, char ** /*argv*/) -> int {
 
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();
