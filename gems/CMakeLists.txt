@@ -20,11 +20,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-fPIC -fpermissive -msse2 -mfpmath=sse")
-
-add_compile_options(-Wno-inconsistent-missing-override -Wno-self-assign-field)
-
 if(FS_GEMS_BUILD_EXECUTABLES OR FS_GEMS_BUILD_GUI)
   add_definitions(-DUSE_DYNAMIC_MESH)
   message(STATUS "Since you're building executables to compute meshes, ITK dynamic meshes will"
