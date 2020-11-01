@@ -13,8 +13,6 @@ if(ITK_FOUND
 
   set(SOURCES Tracer.cpp Preprocessor.cpp PetscSolver.cpp LineProf.cpp)
 
-  add_compile_options(-Wno-deprecated)
-
   add_library(lineprof STATIC ${SOURCES})
 
   if(APPLE)
@@ -33,7 +31,6 @@ if(ITK_FOUND
                         ${LAPACK_LIBRARIES}
                         ${BLAS_LIBRARIES}
                         ${GFORTRAN_LIBRARIES}
-                        ${ITK_LIBRARIES}
                         ${MPI_LIBRARIES}
                         )
 

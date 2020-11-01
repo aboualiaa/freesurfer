@@ -1578,26 +1578,24 @@ int slprints(char *apch_txt) {
   //              <date> <hostname> <apch_txt>
   //
 
-  struct tm *ptm_local;
-  time_t     t;
-  char       pch_hostname[255];
-  size_t     len_hostname;
-  char *     pch_timeMon = nullptr;
-  char *     pch_time    = nullptr;
-  char       pch_output[65536];
+  struct tm * ptm_local;
+  time_t      t;
+  char        pch_hostname[255];
+  size_t      len_hostname;
+  char *      pch_timeMon = NULL;
+  char *      pch_time    = NULL;
+  std::string pch_output;
 
-  t            = time(nullptr);
+  t            = time(NULL);
   len_hostname = 255;
   gethostname(pch_hostname, len_hostname);
   strcpy(pch_hostname, strtok(pch_hostname, "."));
-  strcpy(pch_output, "");
   ptm_local   = localtime(&t);
   pch_timeMon = strtok(asctime(ptm_local), "\n");
   pch_time    = strdup(pch_timeMon + 4);
-  sprintf(pch_output, "%s %s", pch_time, pch_hostname);
-  sprintf(pch_output, "%s %s", pch_output, apch_txt);
-  printf("%s", pch_output);
-  return strlen(pch_output);
+  pch_output  = std::string(pch_time) + std::string(pch_hostname) + apch_txt;
+  printf("%s", pch_output.c_str());
+  return pch_output.size();
 }
 
 void cprints(const char *apch_left, const char *apch_right) {

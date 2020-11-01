@@ -1,6 +1,34 @@
 # This file defines a few custom cmake utility functions to
 # simplify the freesurfer build process
 
+# Use the common linux file /etc/os-release to save the OS
+# name in a common variable e.g., test HOST_OS in a lower
+# level CMakeLists.txt to selectively exclude running
+# tests on some platforms
+function(host_os)
+  set(HOST_OS undefined)
+  if(EXISTS "/etc/os-release")
+    execute_process(COMMAND grep PRETTY_NAME \/etc\/os\-release OUTPUT_VARIABLE OS_IDENT)
+    string(STRIP ${OS_IDENT} OS_IDENT)
+    if(OS_IDENT MATCHES "CentOS Linux 8")
+      set(HOST_OS CentOS8)
+    elseif(OS_IDENT MATCHES "CentOS Linux 7")
+      set(HOST_OS CentOS7)
+    elseif(OS_IDENT MATCHES "CentOS Linux 6")
+      set(HOST_OS CentOS6)
+    elseif(OS_IDENT MATCHES "Ubuntu 18")
+      set(HOST_OS Ubuntu18)
+    elseif(OS_IDENT MATCHES "Ubuntu 20")
+      set(HOST_OS Ubuntu20)
+    endif()
+  endif()
+  # message(STATUS "FROM functions.cmake building on host running ${HOST_OS}")
+  set(HOST_OS
+      ${HOST_OS}
+      PARENT_SCOPE
+      )
+endfunction()
+
 # add_subdirectories(<subdirs>)
 # Simple utility to add multiple subdirectories at once
 function(add_subdirectories)
@@ -174,60 +202,61 @@ function(add_test_script)
                    )
   endif()
   cmake_parse_arguments(TEST "" "NAME;SCRIPT" "DEPENDS" ${ARGN})
-  # foreach(TARGET ${TEST_DEPENDS})
-  #  set(TEST_CMD "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
-  # endforeach()
+  foreach(TARGET ${TEST_DEPENDS})
+    set(TEST_CMD
+        "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&"
+        )
+  endforeach()
+  add_test(${TEST_NAME} bash -c "${TEST_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT}")
+endfunction()
 
-  if(CMAKE_CONFIGURATION_TYPES)
-    foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
-      add_test(${TEST_NAME}_${X} bash -c
-               "${CMAKE_CURRENT_BINARY_DIR}/${X}/${TEST_SCRIPT}"
-               )
-      set_property(TEST ${TEST_NAME}_${X} PROPERTY LABELS Integration)
-      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh
-                     ${CMAKE_CURRENT_BINARY_DIR}/${X}/test.sh COPYONLY
-                     )
-      configure_file(${CMAKE_SOURCE_DIR}/test_${X}.sh
-                     ${CMAKE_CURRENT_BINARY_DIR}/${X}/test_main.sh COPYONLY
-                     )
-    endforeach()
-  else()
-    add_test(${TEST_NAME} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
-    set_property(TEST ${TEST_NAME} PROPERTY LABELS Integration)
+if(CMAKE_CONFIGURATION_TYPES)
+  foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
+    add_test(${TEST_NAME}_${X} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${X}/${TEST_SCRIPT}")
+    set_property(TEST ${TEST_NAME}_${X} PROPERTY LABELS Integration)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh
-                   ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY
+                   ${CMAKE_CURRENT_BINARY_DIR}/${X}/test.sh COPYONLY
                    )
-  endif()
+    configure_file(${CMAKE_SOURCE_DIR}/test_${X}.sh
+                   ${CMAKE_CURRENT_BINARY_DIR}/${X}/test_main.sh COPYONLY
+                   )
+  endforeach()
+else()
+  add_test(${TEST_NAME} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
+  set_property(TEST ${TEST_NAME} PROPERTY LABELS Integration)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh
+                 COPYONLY
+                 )
+endif()
 
-  # testdata
-  if(BUILD_TESTING AND FS_INTEGRATION_TESTING)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
-      if(CMAKE_CONFIGURATION_TYPES)
-        foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
-          if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz")
-            message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/${X}/testdata.tar.gz"
-                    )
-            execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
-                                    "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
-                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                            RESULT_VARIABLE WHATEVER
-                            )
-          endif()
-        endforeach()
-      else()
-        if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${TEMP_BUILD_DIR}testdata.tar.gz")
-          message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
+# testdata
+if(BUILD_TESTING AND FS_INTEGRATION_TESTING)
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
+    if(CMAKE_CONFIGURATION_TYPES)
+      foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
+        if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz")
+          message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/${X}/testdata.tar.gz"
+                  )
           execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
                                   "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
                           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                           RESULT_VARIABLE WHATEVER
                           )
-          #          configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz ${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz COPYONLY)
         endif()
+      endforeach()
+    else()
+      if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${TEMP_BUILD_DIR}testdata.tar.gz")
+        message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
+        execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
+                                "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE WHATEVER
+                        )
+        #          configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz ${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz COPYONLY)
       endif()
     endif()
   endif()
-endfunction()
+endif()
 
 # add_test_executable(<target> <sources>)
 # Adds an executable to the test framework that only gets built by the test target.

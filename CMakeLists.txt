@@ -1052,6 +1052,37 @@ if(NOT FS_MINIMAL_BUILD)
                      )
 endif()
 
+# # Only build some old subdirectories if they exist
+# # AND the build host is a certain version of Cent/Redhat OS
+# if(EXISTS "/etc/redhat-release")
+#    execute_process(COMMAND cat \/etc\/redhat\-release OUTPUT_VARIABLE REDHAT_VERSION)
+#    string(STRIP ${REDHAT_VERSION} REDHAT_VERSION)
+#    # message(STATUS "Host is ${REDHAT_VERSION}")
+#    if(EXISTS "./mri_make_bem_surfaces")
+#       if(REDHAT_VERSION MATCHES "release 7")
+#          add_subdirectories(mri_make_bem_surfaces)
+#       elseif(REDHAT_VERSION MATCHES "release 8")
+#          add_subdirectories(mri_make_bem_surfaces)
+#       endif()
+#    endif()
+# endif()
+
+host_os()
+# message(STATUS "FROM top level CMakeLists.txt HOST_OS=${HOST_OS}")
+message(STATUS "Building on host OS ${HOST_OS}")
+
+# Only build some old subdirectories if they exist
+# AND the build host is a certain version of Cent/Redhat OS
+if(EXISTS "./mri_make_bem_surfaces")
+  if(HOST_OS MATCHES "CentOS7")
+    add_subdirectories(mri_make_bem_surfaces)
+    message(STATUS "Adding mri_make_bem_surfaces to build on ${HOST_OS}")
+  elseif(HOST_OS MATCHES "CentOS8")
+    add_subdirectories(mri_make_bem_surfaces)
+    message(STATUS "Adding mri_make_bem_surfaces to build on ${HOST_OS}")
+  endif()
+endif()
+
 if(FS_INFANT_MODULE)
   add_subdirectory(infant)
   add_subdirectory(sscnn_skullstripping)
