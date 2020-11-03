@@ -207,7 +207,7 @@ typedef struct dirent {
   char d_name[NAME_MAX + 1];
 
   /*** Operating system specific part ***/
-#if defined(DIRENT_WIN32_INTERFACE)   /*WIN32*/
+#if defined(DIRENT_WIN32_INTERFACE) /*WIN32*/
   WIN32_FIND_DATA data;
 #elif defined(DIRENT_MSDOS_INTERFACE) /*MSDOS*/
 #if defined(DIRENT_USE_FFBLK)

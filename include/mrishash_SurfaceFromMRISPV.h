@@ -19,7 +19,7 @@
 #include "mrisurf_SurfaceFromMRISPV_generated.h"
 
 MRIS_HASH_TABLE *
-                 MHTcreateFaceTable(SurfaceFromMRISPV::XYZPositionConsequences::Surface surface);
+MHTcreateFaceTable(SurfaceFromMRISPV::XYZPositionConsequences::Surface surface);
 MRIS_HASH_TABLE *MHTcreateFaceTable_Resolution(
     SurfaceFromMRISPV::XYZPositionConsequences::Surface surface, int which,
     float res);

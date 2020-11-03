@@ -457,7 +457,8 @@ int main(int argc, char *argv[]) {
     fprintf(fp, "# hemi %s\n", hemi);
     fprintf(fp, "# AnnotationFile %s\n",
             annotation_name ? annotation_name
-                            : label_name ? label_name : mris->fname);
+            : label_name    ? label_name
+                            : mris->fname);
     fprintf(fp, "# AnnotationFileTimeStamp %s\n",
             (annotation_name || label_name) ? VERfileTimeStamp(full_name)
                                             : VERfileTimeStamp(mris->fname));

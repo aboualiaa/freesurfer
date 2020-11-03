@@ -11349,9 +11349,9 @@ int MRIwriteInfo(MRI *mri, const char *fpref) {
   fprintf(fp, "%s %d\n", "imnr1", mri->imnr1);
   slice_direction = getSliceDirection(mri);
   fprintf(fp, "%s %d\n", "ptype",
-          slice_direction == MRI_CORONAL
-              ? 2
-              : slice_direction == MRI_HORIZONTAL ? 0 : 1);
+          slice_direction == MRI_CORONAL      ? 2
+          : slice_direction == MRI_HORIZONTAL ? 0
+                                              : 1);
   fprintf(fp, "%s %d\n", "x", mri->width);
   fprintf(fp, "%s %d\n", "y", mri->height);
   fprintf(fp, "%s %f\n", "fov", mri->fov / MM_PER_METER);

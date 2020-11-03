@@ -21,7 +21,7 @@ public:
   itkNewMacro(Self);
   typedef TMembershipFunctionType MembershipFunctionType;
   typedef typename TMembershipFunctionType::MeasurementVectorType
-                                                             MeasurementVectorType;
+      MeasurementVectorType;
   typedef itk::Statistics::ListSample<MeasurementVectorType> SampleType;
 
   void SetStuff(typename SampleType::Pointer             samples,

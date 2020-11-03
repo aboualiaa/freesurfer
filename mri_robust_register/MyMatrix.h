@@ -220,7 +220,7 @@ private:
   static vnl_matrix<complex<double>>
   MatrixLog_pf(const vnl_matrix<complex<double>> &A, unsigned int m);
   static vnl_matrix<complex<double>>
-                          MatrixLog_isst(const vnl_matrix<complex<double>> &A, int maxlogiter = 100);
+  MatrixLog_isst(const vnl_matrix<complex<double>> &A, int maxlogiter = 100);
   static std::vector<int> blocking(const vnl_matrix<complex<double>> &A,
                                    double delta = 0.1);
   static void swapping(const std::vector<int> &m, std::vector<int> &mm,

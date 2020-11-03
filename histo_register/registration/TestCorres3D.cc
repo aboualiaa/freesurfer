@@ -56,12 +56,12 @@ void initTestSequence(Array<ImageGrayU> &seq, int width, int height,
     int zCent = length > 2 ? randomInt(radius + border,
                                        smallLength - radius - border - 1)
                            : 0;
-    int xMin = bound(xCent - radius, 0, width - 1);
-    int xMax = bound(xCent + radius, 0, width - 1);
-    int yMin = bound(yCent - radius, 0, height - 1);
-    int yMax = bound(yCent + radius, 0, height - 1);
-    int zMin = bound(zCent - radius, 0, length - 1);
-    int zMax = bound(zCent + radius, 0, length - 1);
+    int xMin  = bound(xCent - radius, 0, width - 1);
+    int xMax  = bound(xCent + radius, 0, width - 1);
+    int yMin  = bound(yCent - radius, 0, height - 1);
+    int yMax  = bound(yCent + radius, 0, height - 1);
+    int zMin  = bound(zCent - radius, 0, length - 1);
+    int zMax  = bound(zCent + radius, 0, length - 1);
     for (int z = zMin; z <= zMax; z++) {
       for (int y = yMin; y <= yMax; y++) {
         for (int x = xMin; x <= xMax; x++) {
@@ -99,19 +99,19 @@ void initCorresComponent(Array<ImageGrayF> &seq, int width, int height,
     int xCent =
         width > 2 ? randomInt(radius + border, smallWidth - radius - border - 1)
                   : 0;
-    int yCent = height > 2 ? randomInt(radius + border,
+    int   yCent = height > 2 ? randomInt(radius + border,
                                        smallHeight - radius - border - 1)
-                           : 0;
-    int zCent = length > 2 ? randomInt(radius + border,
+                             : 0;
+    int   zCent = length > 2 ? randomInt(radius + border,
                                        smallLength - radius - border - 1)
-                           : 0;
-    float v    = randomFloat(-maxMag, maxMag);
-    int   xMin = bound(xCent - radius, 0, width - 1);
-    int   xMax = bound(xCent + radius, 0, width - 1);
-    int   yMin = bound(yCent - radius, 0, height - 1);
-    int   yMax = bound(yCent + radius, 0, height - 1);
-    int   zMin = bound(zCent - radius, 0, length - 1);
-    int   zMax = bound(zCent + radius, 0, length - 1);
+                             : 0;
+    float v     = randomFloat(-maxMag, maxMag);
+    int   xMin  = bound(xCent - radius, 0, width - 1);
+    int   xMax  = bound(xCent + radius, 0, width - 1);
+    int   yMin  = bound(yCent - radius, 0, height - 1);
+    int   yMax  = bound(yCent + radius, 0, height - 1);
+    int   zMin  = bound(zCent - radius, 0, length - 1);
+    int   zMax  = bound(zCent + radius, 0, length - 1);
     for (int z = zMin; z <= zMax; z++) {
       for (int y = yMin; y <= yMax; y++) {
         for (int x = xMin; x <= xMax; x++) {

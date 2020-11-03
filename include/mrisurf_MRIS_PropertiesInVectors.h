@@ -18,7 +18,7 @@ struct MRISPV {
   //  reduce size the whole fits in much less than one cache line, so further
   //  ordering is no use
   pSeveralInt *
-                 v_f; // size() is num.    array[v->num] the fno's of the neighboring faces
+      v_f; // size() is num.    array[v->num] the fno's of the neighboring faces
   pSeveralUchar *v_n; // size() is num.    array[v->num] the face.v[*] index for
                       // this vertex
   pSeveralInt *v_e;   //  edge state for neighboring vertices

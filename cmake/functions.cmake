@@ -8,7 +8,9 @@
 function(host_os)
   set(HOST_OS undefined)
   if(EXISTS "/etc/os-release")
-    execute_process(COMMAND grep PRETTY_NAME \/etc\/os\-release OUTPUT_VARIABLE OS_IDENT)
+    execute_process(COMMAND grep PRETTY_NAME \/etc\/os\-release
+                    OUTPUT_VARIABLE OS_IDENT
+                    )
     string(STRIP ${OS_IDENT} OS_IDENT)
     if(OS_IDENT MATCHES "CentOS Linux 8")
       set(HOST_OS CentOS8)
@@ -107,7 +109,9 @@ function(mac_deploy_qt)
   install(FILES ${APP_PLIST} DESTINATION ${APP_BUNDLE}/Contents)
   # install the resources
   if(APP_ICONS)
-    install_symlinks(${APP_ICONS} TYPE files DESTINATION ${APP_BUNDLE}/Contents/Resources)
+    install_symlinks(${APP_ICONS} TYPE files DESTINATION
+                     ${APP_BUNDLE}/Contents/Resources
+                     )
   endif()
   # run the qt deployment script
   install(CODE "
@@ -124,7 +128,8 @@ endfunction()
 # Link an xml helptext to a target binary. This will create a target dependency on
 # the help file and will run xxd to create the xml header during the build
 function(add_help BINARY HELPTEXT)
-  add_custom_command(COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && xxd -i ${HELPTEXT}
+  add_custom_command(COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && xxd -i
+                             ${HELPTEXT}
                              ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h
                      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h
                      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}
@@ -197,8 +202,8 @@ endfunction()
 # should be specified with DEPENDS to guarantee it gets built beforehand
 function(add_test_script)
   if(CMAKE_CONFIGURATION_TYPES)
-    configure_file(${CMAKE_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh
-                   COPYONLY
+    configure_file(${CMAKE_SOURCE_DIR}/test_proxy.sh
+                   ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY
                    )
   endif()
   cmake_parse_arguments(TEST "" "NAME;SCRIPT" "DEPENDS" ${ARGN})
@@ -207,12 +212,16 @@ function(add_test_script)
         "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&"
         )
   endforeach()
-  add_test(${TEST_NAME} bash -c "${TEST_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT}")
+  add_test(${TEST_NAME} bash -c
+           "${TEST_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT}"
+           )
 endfunction()
 
 if(CMAKE_CONFIGURATION_TYPES)
   foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
-    add_test(${TEST_NAME}_${X} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${X}/${TEST_SCRIPT}")
+    add_test(${TEST_NAME}_${X} bash -c
+             "${CMAKE_CURRENT_BINARY_DIR}/${X}/${TEST_SCRIPT}"
+             )
     set_property(TEST ${TEST_NAME}_${X} PROPERTY LABELS Integration)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh
                    ${CMAKE_CURRENT_BINARY_DIR}/${X}/test.sh COPYONLY
@@ -224,8 +233,8 @@ if(CMAKE_CONFIGURATION_TYPES)
 else()
   add_test(${TEST_NAME} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
   set_property(TEST ${TEST_NAME} PROPERTY LABELS Integration)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh
-                 COPYONLY
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh
+                 ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY
                  )
 endif()
 
@@ -237,7 +246,8 @@ if(BUILD_TESTING AND FS_INTEGRATION_TESTING)
         if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz")
           message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/${X}/testdata.tar.gz"
                   )
-          execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
+          execute_process(COMMAND ln -s
+                                  "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
                                   "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
                           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                           RESULT_VARIABLE WHATEVER
@@ -245,9 +255,13 @@ if(BUILD_TESTING AND FS_INTEGRATION_TESTING)
         endif()
       endforeach()
     else()
-      if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${TEMP_BUILD_DIR}testdata.tar.gz")
-        message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
-        execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
+      if(NOT EXISTS
+         "${CMAKE_CURRENT_BINARY_DIR}/${TEMP_BUILD_DIR}testdata.tar.gz"
+         )
+        message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
+                )
+        execute_process(COMMAND ln -s
+                                "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
                                 "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         RESULT_VARIABLE WHATEVER

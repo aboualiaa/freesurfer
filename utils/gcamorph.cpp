@@ -4613,7 +4613,9 @@ int log_integration_parms(FILE *fp, GCA_MORPH_PARMS *parms) {
           parms->tol, parms->dt, parms->exp_k, parms->momentum, parms->levels,
           parms->niterations, parms->label_dist, parms->navgs, parms->sigma,
           parms->integration_type, parms->relabel,
-          parms->noneg > 0 ? "no" : parms->noneg == 0 ? "yes" : "yes+");
+          parms->noneg > 0    ? "no"
+          : parms->noneg == 0 ? "yes"
+                              : "yes+");
   return (NO_ERROR);
 }
 

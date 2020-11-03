@@ -359,10 +359,10 @@ int         mkheaderreg       = 0;
 int         mkheaderregCenter = 0;
 #ifdef HAVE_TCL_TK_GL
 int noedit = 0; // false by default, if gui
-#endif          // HAVE_TCL_TK_GL
+#endif // HAVE_TCL_TK_GL
 #ifndef HAVE_TCL_TK_GL
 int noedit = 1; // true by default, if without gui
-#endif          // HAVE_TCL_TK_GL
+#endif // HAVE_TCL_TK_GL
 
 int fixtkreg = 1, fixonly = 0;
 int identityreg = 0;

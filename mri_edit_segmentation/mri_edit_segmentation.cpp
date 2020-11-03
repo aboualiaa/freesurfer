@@ -337,8 +337,8 @@ static MRI *edit_hippocampus(MRI *mri_in_labeled, MRI *mri_T1,
                                     left ? Left_Hippocampus : Right_Hippocampus,
                                     x, y, z, 0, -1, 0, 2);
             if (dup <= 1) {
-              label = left ? Left_Cerebral_White_Matter
-                           : Right_Cerebral_White_Matter;
+              label                    = left ? Left_Cerebral_White_Matter
+                                              : Right_Cerebral_White_Matter;
               MRIvox(mri_tmp, x, y, z) = label;
               nchanged++;
               continue;
@@ -392,7 +392,7 @@ static MRI *edit_hippocampus(MRI *mri_in_labeled, MRI *mri_T1,
 
             dleft  = distance_to_label(mri_out_labeled,
                                       left ? Left_Cerebral_White_Matter
-                                           : Right_Cerebral_White_Matter,
+                                            : Right_Cerebral_White_Matter,
                                       x, y, z, -1, 0, 0, 3);
             dright = distance_to_label(mri_out_labeled,
                                        left ? Left_Cerebral_White_Matter
@@ -402,8 +402,8 @@ static MRI *edit_hippocampus(MRI *mri_in_labeled, MRI *mri_T1,
                                     left ? Left_Hippocampus : Right_Hippocampus,
                                     x, y, z, 0, -1, 0, 2);
             if (dleft <= 2 && dright <= 2 && dup <= 1) {
-              label = left ? Left_Cerebral_White_Matter
-                           : Right_Cerebral_White_Matter;
+              label                    = left ? Left_Cerebral_White_Matter
+                                              : Right_Cerebral_White_Matter;
               MRIvox(mri_tmp, x, y, z) = label;
               nchanged++;
               continue;
@@ -423,7 +423,7 @@ static MRI *edit_hippocampus(MRI *mri_in_labeled, MRI *mri_T1,
 
             dleft  = distance_to_label(mri_out_labeled,
                                       left ? Left_Cerebral_White_Matter
-                                           : Right_Cerebral_White_Matter,
+                                            : Right_Cerebral_White_Matter,
                                       x, y, z, -1, 0, 0, 3);
             dright = distance_to_label(
                 mri_out_labeled, left ? Left_Hippocampus : Right_Hippocampus, x,
@@ -593,8 +593,8 @@ static MRI *edit_amygdala(MRI *mri_in_labeled, MRI *mri_T1,
                                            : Right_Cerebral_White_Matter,
                                       x, y, z, 0, 1, 0, 3);
             if (dup <= 1 && ddown <= 1) {
-              label = left ? Left_Cerebral_White_Matter
-                           : Right_Cerebral_White_Matter;
+              label                    = left ? Left_Cerebral_White_Matter
+                                              : Right_Cerebral_White_Matter;
               MRIvox(mri_tmp, x, y, z) = label;
               nchanged++;
               continue;
@@ -647,8 +647,8 @@ static MRI *edit_caudate(MRI *mri_in_labeled, MRI *mri_T1,
               change = 1;
 
             if (change) {
-              label = left ? Left_Cerebral_White_Matter
-                           : Right_Cerebral_White_Matter;
+              label                    = left ? Left_Cerebral_White_Matter
+                                              : Right_Cerebral_White_Matter;
               MRIvox(mri_tmp, x, y, z) = label;
               nchanged++;
               continue;
@@ -726,7 +726,7 @@ static int change_label(MRI *mri_T1, MRI *mri_labeled, int x, int y, int z,
   val        = (float)MRIvox(mri_T1, x, y, z);
   wm_mean    = label_mean(mri_T1, mri_labeled, x, y, z, wsize,
                        left ? Left_Cerebral_White_Matter
-                            : Right_Cerebral_White_Matter);
+                               : Right_Cerebral_White_Matter);
   hippo_mean = label_mean(mri_T1, mri_labeled, x, y, z, wsize,
                           left ? Left_Hippocampus : Right_Hippocampus);
   if (fabs(wm_mean - val) < fabs(hippo_mean - val))
@@ -810,8 +810,8 @@ static MRI *edit_cortical_gray_matter(MRI *mri_in_labeled, MRI *mri_T1,
                      sagittalNeighbors(mri_tmp, x, y, z, 3,
                                        Right_Cerebral_White_Matter);
 
-              label = left ? Left_Cerebral_White_Matter
-                           : Right_Cerebral_White_Matter;
+              label                    = left ? Left_Cerebral_White_Matter
+                                              : Right_Cerebral_White_Matter;
               MRIvox(mri_tmp, x, y, z) = label;
               nchanged++;
               continue;

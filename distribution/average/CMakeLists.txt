@@ -48,8 +48,8 @@ endif()
 # the following data isn't required for recon-all, but will be installed by default
 if(NOT FS_MINIMAL_BUILD)
 
-  add_subdirectories(surf Yeo_JNeurophysiol11_MNI152 Buckner_JNeurophysiol11_MNI152
-                     Choi_JNeurophysiol12_MNI152
+  add_subdirectories(surf Yeo_JNeurophysiol11_MNI152
+                     Buckner_JNeurophysiol11_MNI152 Choi_JNeurophysiol12_MNI152
                      )
 
   install_symlinks(TYPE

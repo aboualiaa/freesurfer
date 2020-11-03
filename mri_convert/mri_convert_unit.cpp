@@ -273,7 +273,7 @@ TEST(test_mri_remove_nans, old_vs_new_vox_getter) { // NOLINT
 TEST(test_mri_read, old_vs_new_vox_getter) { // NOLINT
 }
 
-auto main(int /*argc*/, char * * /*argv*/) -> int {
+auto main(int /*argc*/, char ** /*argv*/) -> int {
 
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();

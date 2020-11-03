@@ -332,9 +332,9 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter,
       *(kptr + 1) = 0.0f ;
       *(kptr + 2) = -1.0f/(float)KSIZE ;
 #else
-      *kptr               = 1.0f;
-      *(kptr + 1)         = 0.0f;
-      *(kptr + 2)         = -1.0f;
+      *kptr       = 1.0f;
+      *(kptr + 1) = 0.0f;
+      *(kptr + 2) = -1.0f;
 #endif
     }
   }

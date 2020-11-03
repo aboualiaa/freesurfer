@@ -190,11 +190,11 @@ static double compute_profile_norm_corr(double *kernel, double *iprofile,
                                         double step, double wm_dist,
                                         double *errors);
 static int
-       construct_model_profile(double *kernel, DP *dp, double wm_intensity_offset,
-                               double ig_intensity_offset, double sg_intensity_offset,
-                               double stria_intensity_offset, int inside_len,
-                               int infra_granular_len, int supra_granular_len,
-                               int out_len, int which);
+construct_model_profile(double *kernel, DP *dp, double wm_intensity_offset,
+                        double ig_intensity_offset, double sg_intensity_offset,
+                        double stria_intensity_offset, int inside_len,
+                        int infra_granular_len, int supra_granular_len,
+                        int out_len, int which);
 double MRISnormalIntensityGradient(MRI_SURFACE *mris, MRI *mri, double xr,
                                    double yr, double zr, double nx, double ny,
                                    double zn, double sigma);

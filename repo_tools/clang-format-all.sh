@@ -19,4 +19,4 @@ find . \
   -o -name '*.txx' \
   -o -name '*.tpp' \
   -o -name '*.hpp' \) |
-  parallel -j +2 --eta --bar --max-args=1 /Users/aboualiaa/Desktop/.temp/install/llvm-10/bin/clang-format -i '{}'
+  parallel -j +2 --eta --bar --max-args=1 clang-format -i '{}'

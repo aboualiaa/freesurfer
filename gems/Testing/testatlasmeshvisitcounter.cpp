@@ -263,9 +263,7 @@ void NoVertices(kvl::interfaces::AtlasMeshVisitCounter *visitCounter) {
                                    {0.5f, 0.5f - delta, 0.5f},
                                    {0.5f, 0.5f, -delta}};
 
-  auto expectedCount = [](int i, int j, int k) {
-    return 0;
-  };
+  auto expectedCount = [](int i, int j, int k) { return 0; };
 
   SingleTetrahedronUnitMesh(visitCounter, verts, expectedCount);
 }
@@ -291,9 +289,7 @@ void UpperCornerExact(kvl::interfaces::AtlasMeshVisitCounter *visitCounter) {
   // This is to go after some of the edge cases
   float verts[nVertices][nDims] = {{1, 1, 1}, {0, 1, 1}, {1, 0, 1}, {1, 1, 0}};
 
-  auto expectedCount = [](int i, int j, int k) {
-    return 0;
-  };
+  auto expectedCount = [](int i, int j, int k) { return 0; };
 
   SingleTetrahedronUnitMesh(visitCounter, verts, expectedCount);
 }

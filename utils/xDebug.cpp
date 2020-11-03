@@ -103,11 +103,10 @@ void xDbg_ShutDown() {
 void xDbg_PrintStatus() {
   fprintf(stderr, "output = %d\n", (int)xDbg_gbOutput);
   fprintf(stderr, "type = %s\n",
-          (xDbg_gType == xDebug_Nothing)
-              ? "nothing"
-              : (xDbg_gType == xDebug_Print)
-                    ? "print"
-                    : (xDbg_gType == xDebug_File) ? "file" : "");
+          (xDbg_gType == xDebug_Nothing) ? "nothing"
+          : (xDbg_gType == xDebug_Print) ? "print"
+          : (xDbg_gType == xDebug_File)  ? "file"
+                                         : "");
   fprintf(stderr, "env var = %s\n",
           (xDbg_gsRequest != nullptr) ? xDbg_gsRequest : "undefined");
   if (xDbg_gStream == stderr)

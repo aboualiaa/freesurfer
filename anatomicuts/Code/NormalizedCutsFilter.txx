@@ -91,7 +91,7 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
         }
       }
       typename ThreadedMembershipFunctionType::Pointer
-                                                          threadedMembershipFunction = ThreadedMembershipFunctionType::New();
+          threadedMembershipFunction = ThreadedMembershipFunctionType::New();
       typename ThreadedMembershipFunctionType::DomainType domain;
       domain[0] = 0;
       domain[1] = inIndeces.size() - 1;

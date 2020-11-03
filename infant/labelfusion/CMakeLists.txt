@@ -7,6 +7,7 @@ pybind11_add_module(labelfusion numpy.cpp python.cpp cmf3d_ml.cpp fib.cpp
                     )
 
 # make sure the labelfusion library gets built into the repository even in out-of-source builds
-set_target_properties(labelfusion PROPERTIES LIBRARY_OUTPUT_DIRECTORY
-                                             ${CMAKE_SOURCE_DIR}/python/freesurfer
+set_target_properties(labelfusion
+                      PROPERTIES LIBRARY_OUTPUT_DIRECTORY
+                                 ${CMAKE_SOURCE_DIR}/python/freesurfer
                       )

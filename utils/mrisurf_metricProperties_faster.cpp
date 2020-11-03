@@ -454,11 +454,11 @@ void MetricPropertiesCalculator::computeNormalsAreasAndAngles() {
 void MetricPropertiesCalculator::moveVertexRandomly(int vno, int trial,
                                                     int *random_counter) {
   float random[3];
-  random[0] = fnv_hash(trial, vno, random_counter, -rand_dist, rand_dist);
-  random[1] = fnv_hash(trial, vno, random_counter, -rand_dist, rand_dist);
-  random[2] = surf_is_3d
-                  ? fnv_hash(trial, vno, random_counter, -rand_dist, rand_dist)
-                  : 0.0;
+  random[0]  = fnv_hash(trial, vno, random_counter, -rand_dist, rand_dist);
+  random[1]  = fnv_hash(trial, vno, random_counter, -rand_dist, rand_dist);
+  random[2]  = surf_is_3d
+                   ? fnv_hash(trial, vno, random_counter, -rand_dist, rand_dist)
+                   : 0.0;
   float *pos = vec_get(vertices, vno);
   vec_add(pos, random);
 }

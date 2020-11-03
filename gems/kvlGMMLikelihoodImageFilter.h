@@ -41,8 +41,8 @@ public:
                                               OutputImageType;
   typedef typename OutputImageType::PixelType OutputPixelType;
   typedef typename itk::NumericTraits<OutputPixelType>::ValueType
-                                                                   OutputPixelValueType;
-  typedef typename InputImageType::RegionType                      RegionType;
+                                              OutputPixelValueType;
+  typedef typename InputImageType::RegionType RegionType;
   typedef itk::ImageToImageFilter<InputImageType, OutputImageType> Superclass;
 
   /** */

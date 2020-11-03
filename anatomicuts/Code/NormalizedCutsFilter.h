@@ -130,9 +130,9 @@ protected:
   SelectCentroids(typename SampleType::Pointer samples,
                   const typename MembershipFunctionType::Pointer);
   std::vector<std::pair<int, int>>
-                              SelectCentroidsParallel(typename SampleType::Pointer samples,
-                                                      const typename MembershipFunctionType::Pointer);
-  MeshPointerType             input;
+                  SelectCentroidsParallel(typename SampleType::Pointer samples,
+                                          const typename MembershipFunctionType::Pointer);
+  MeshPointerType input;
   std::vector<std::string>    labels;
   ListOfOutputMeshTypePointer m_Output;
   int                         numberOfClusters;

@@ -3238,7 +3238,7 @@ int MRISsampleAtEachDistance(MRI_SURFACE *mris, int nbhd_size,
   ------------------------------------------------------*/
 #define MAX_V                        5000 /* max for any one node, actually way too big */
 #define TRIANGLE_DISTANCE_CORRECTION 1.09f /*1.1f*/
-/*1.066f*/ /*1.12578*/ /* 1.13105f*/       /*1.1501f  (1.1364f)*/
+/*1.066f*/ /*1.12578*/ /* 1.13105f*/ /*1.1501f  (1.1364f)*/
 #define QUADRANGLE_DISTANCE_CORRECTION ((1 + sqrt(2)) / 2) /* 1.2071  */
 
 static int MRISsampleDistances_new(MRI_SURFACE *mris, int *nbrs, int max_nbhd,

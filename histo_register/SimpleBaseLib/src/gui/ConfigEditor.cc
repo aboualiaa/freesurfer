@@ -23,9 +23,9 @@ ConfigEntryEditor::ConfigEntryEditor(wxWindow *parent, wxWindowID id,
   SetSizer(sizer);
 
   // add label
-  String desc = configEntry.type == CONFIG_ENTRY_SECTION
-                    ? configEntry.name
-                    : descriptionFromName(configEntry.name);
+  String        desc  = configEntry.type == CONFIG_ENTRY_SECTION
+                            ? configEntry.name
+                            : descriptionFromName(configEntry.name);
   wxStaticText *label = new wxStaticText(
       this, -1, desc.c_str(), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
   if (configEntry.type == CONFIG_ENTRY_SECTION) {

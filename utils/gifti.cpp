@@ -1304,7 +1304,7 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     coords->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    coords->endian  = GIFTI_ENDIAN_BIG;
+    coords->endian = GIFTI_ENDIAN_BIG;
 #endif
 
     coords->coordsys = nullptr; // empty, unless we find something here...
@@ -1392,7 +1392,7 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     faces->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    faces->endian   = GIFTI_ENDIAN_BIG;
+    faces->endian = GIFTI_ENDIAN_BIG;
 #endif
     faces->coordsys = nullptr;
     faces->nvals    = gifti_darray_nvals(faces);
@@ -1592,7 +1592,7 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     shape->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    shape->endian   = GIFTI_ENDIAN_BIG;
+    shape->endian = GIFTI_ENDIAN_BIG;
 #endif
     shape->coordsys = nullptr;
     shape->nvals    = gifti_darray_nvals(shape);
@@ -1748,7 +1748,7 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     labels->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    labels->endian  = GIFTI_ENDIAN_BIG;
+    labels->endian = GIFTI_ENDIAN_BIG;
 #endif
     labels->coordsys = nullptr;
     labels->nvals    = gifti_darray_nvals(labels);
@@ -1832,7 +1832,7 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     stats->endian = GIFTI_ENDIAN_LITTLE;
 #else
-    stats->endian   = GIFTI_ENDIAN_BIG;
+    stats->endian = GIFTI_ENDIAN_BIG;
 #endif
     stats->coordsys = nullptr;
     stats->nvals    = gifti_darray_nvals(stats);

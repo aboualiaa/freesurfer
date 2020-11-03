@@ -3266,7 +3266,7 @@ static void print_help() {
 #define MAX_OFFSET  50
 
 /* aspect ratios are dy/dx */
-#define MIN_CC_AREA   350  /* smallest I've seen is 389 */
+#define MIN_CC_AREA   350 /* smallest I've seen is 389 */
 #define MAX_CC_AREA   1400 /* biggest I've seen is 1154 */
 #define MIN_CC_ASPECT 0.1
 #define MAX_CC_ASPECT 0.75
@@ -4998,7 +4998,7 @@ static int fillDiagonals(MRI *mri, int fillval);
 #pragma GCC diagnostic push
 #endif
 #pragma GCC diagnostic ignored "-Wstrict-overflow"
-static int             MRIfillDegenerateLocations(MRI *mri, int fillval) {
+static int MRIfillDegenerateLocations(MRI *mri, int fillval) {
   int nfilled, total_filled;
 
   total_filled = 0;

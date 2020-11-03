@@ -22,9 +22,7 @@ public:
 
 private:
   void setmri(MRI *m) {
-    p_mri = std::shared_ptr<MRI>(m, [](MRI *ptr) {
-      MRIfree(&ptr);
-    });
+    p_mri = std::shared_ptr<MRI>(m, [](MRI *ptr) { MRIfree(&ptr); });
   }
   py::object python();
   void       transferParameters(py::object &pyobj);

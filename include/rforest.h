@@ -73,8 +73,8 @@ typedef struct {
   int    max_steps;
   char **feature_names; // for diags
   double
-          max_class_ratio; // don't let there be way more of one class than another
-  double *pvals;           // classification probabilities
+      max_class_ratio; // don't let there be way more of one class than another
+  double *pvals;       // classification probabilities
 } RANDOM_FOREST, RF;
 
 RANDOM_FOREST *RFalloc(int ntrees, int nfeatures, int nclasses, int max_depth,

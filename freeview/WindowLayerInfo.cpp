@@ -73,24 +73,16 @@ void WindowLayerInfo::UpdateInfo(Layer *layer) {
                                 .arg(mri->ysize, 0, 'f', 6)
                                 .arg(mri->zsize, 0, 'f', 6));
     AddLine("number of frames:", QString("%1 ").arg(mri->nframes));
-    AddLine("type:",
-            QString("%1 (%2)")
-                .arg(mri->type == MRI_UCHAR
-                         ? "UCHAR"
-                         : mri->type == MRI_SHORT
-                               ? "SHORT"
-                               : mri->type == MRI_INT
-                                     ? "INT"
-                                     : mri->type == MRI_LONG
-                                           ? "LONG"
-                                           : mri->type == MRI_BITMAP
-                                                 ? "BITMAP"
-                                                 : mri->type == MRI_TENSOR
-                                                       ? "TENSOR"
-                                                       : mri->type == MRI_FLOAT
-                                                             ? "FLOAT"
-                                                             : "UNKNOWN")
-                .arg(mri->type));
+    AddLine("type:", QString("%1 (%2)")
+                         .arg(mri->type == MRI_UCHAR    ? "UCHAR"
+                              : mri->type == MRI_SHORT  ? "SHORT"
+                              : mri->type == MRI_INT    ? "INT"
+                              : mri->type == MRI_LONG   ? "LONG"
+                              : mri->type == MRI_BITMAP ? "BITMAP"
+                              : mri->type == MRI_TENSOR ? "TENSOR"
+                              : mri->type == MRI_FLOAT  ? "FLOAT"
+                                                        : "UNKNOWN")
+                         .arg(mri->type));
     AddLine("TR:", QString("%1 msec").arg(mri->tr));
     AddLine("TE:", QString("%1 msec").arg(mri->te));
     AddLine("TI:", QString("%1 msec").arg(mri->ti));

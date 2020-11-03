@@ -89,7 +89,7 @@ private:
 
   //! Cache (computed from x in preCacheX and subfunctions)
   std::vector<T>
-                 xc; // size n   (allocated and set in preCacheX as copy of input x)
+      xc; // size n   (allocated and set in preCacheX as copy of input x)
   std::vector<T> h;  // size n-1 (allocated and set in computeHi)
   std::vector<T> hi; // size n-1 (allocated and set in computeHi)
   std::vector<T> M0; // size n   (allocated and set in computeM)
@@ -107,8 +107,8 @@ private:
   //! Cache (computed from xnew in preCacheXnew)
   unsigned int m;
   std::vector<unsigned int>
-                 intervals; // size m=length(xnew) (allocated and set in preCacheXnew)
-  std::vector<T> d;         // size m  (allocated and set in preCacheXnew)
+      intervals;    // size m=length(xnew) (allocated and set in preCacheXnew)
+  std::vector<T> d; // size m  (allocated and set in preCacheXnew)
   std::vector<T> ynew; // size m  (allocated empty in preCacheXnew)
 };
 

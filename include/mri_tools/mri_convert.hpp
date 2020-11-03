@@ -586,9 +586,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("conform-dc",
 
        po::value(&cmdargs->conf_keep_dc) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->conform_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->conform_flag = true; }),
 
        "conform-dc")
 
@@ -744,9 +743,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("conform_size,cs",
 
        po::value(&cmdargs->conform_size) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->conform_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->conform_flag = true; }),
 
        "conform to the size given in mm")
 
@@ -975,9 +973,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("upsample",
 
        po::value(&cmdargs->upsample_factor) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->upsample_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->upsample_flag = true; }),
 
        "Reduce voxel size by a factor of N in all dimensions")
 
@@ -1125,9 +1122,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("erode-seg",
 
        po::value(&cmdargs->n_erode_seg) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->erode_seg_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->erode_seg_flag = true; }),
 
        "Erode segmentation boundaries Nerode times (based on 6 nearest "
        "neighbors)")
@@ -1137,9 +1133,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("dil-seg",
 
        po::value(&cmdargs->n_dil_seg) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->dil_seg_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->dil_seg_flag = true; }),
 
        "Dilate segmentation boundaries Ndilate times (based on 6 nearest "
        "neighbors) to fill seg=0 voxels")
@@ -1149,9 +1144,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("cutends",
 
        po::value(&cmdargs->ncutends) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->cutends_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->cutends_flag = true; }),
 
        "Remove ncut slices from the ends")
 
@@ -1160,9 +1154,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_i_count,oni,oic",
 
        po::value(&cmdargs->out_n_i) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->out_n_i_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->out_n_i_flag = true; }),
 
        "out_i_count")
 
@@ -1171,9 +1164,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_j_count,onj,ojc",
 
        po::value(&cmdargs->out_n_j) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->out_n_j_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->out_n_j_flag = true; }),
 
        "out_i_count")
 
@@ -1182,9 +1174,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_k_count,onk,okc",
 
        po::value(&cmdargs->out_n_k) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->out_n_k_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->out_n_k_flag = true; }),
 
        "out_i_count")
 
@@ -1201,9 +1192,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_i_count,ini,iic",
 
        po::value(&cmdargs->in_n_i) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->in_n_i_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->in_n_i_flag = true; }),
 
        "in_i_count")
 
@@ -1212,9 +1202,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_j_count,inj,ijc",
 
        po::value(&cmdargs->in_n_j) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->in_n_j_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->in_n_j_flag = true; }),
 
        "in_j_count")
 
@@ -1223,9 +1212,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_k_count,ink,ikc",
 
        po::value(&cmdargs->in_n_k) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->in_n_k_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->in_n_k_flag = true; }),
 
        "in_k_count")
 
@@ -1234,9 +1222,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("tr",
 
        po::value(&cmdargs->in_tr) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->in_tr_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->in_tr_flag = true; }),
 
        "TR in msec")
 
@@ -1245,9 +1232,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("TI",
 
        po::value(&cmdargs->in_ti) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->in_ti_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->in_ti_flag = true; }),
 
        "TI in msec (note uppercase flag)")
 
@@ -1256,9 +1242,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("te",
 
        po::value(&cmdargs->in_te) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->in_te_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->in_te_flag = true; }),
 
        "TE in msec")
 
@@ -1687,9 +1672,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("slice-bias",
 
        po::value(&cmdargs->SliceBiasAlpha) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->SliceBias = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->SliceBias = true; }),
 
        "Apply half-cosine bias field")
 
@@ -1698,9 +1682,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_like,il",
 
        po::value(&cmdargs->in_like_name) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->in_like_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->in_like_flag = true; }),
 
        "in_like")
 
@@ -1709,9 +1692,8 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("color_file,cf",
 
        po::value(&cmdargs->color_file_name) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->color_file_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->color_file_flag = true; }),
 
        "color_file")
 
@@ -1968,9 +1950,8 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::value(&cmdargs->frames) //
            ->multitoken()
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->frame_flag = true;
-           }),
+           ->notifier(
+               [cmdargs](auto /*unused*/) { cmdargs->frame_flag = true; }),
 
        "Keep only 0-based frame number(s)")
 

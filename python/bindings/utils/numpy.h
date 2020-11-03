@@ -26,9 +26,7 @@ py::array_t<T> makeArray(std::vector<ssize_t> shape,
                          bool free = true) {
   py::capsule capsule;
   if (free) {
-    capsule = py::capsule(data, [](void *d) {
-      delete[](T *) d;
-    });
+    capsule = py::capsule(data, [](void *d) { delete[](T *) d; });
   } else {
     capsule = py::capsule(data);
   }

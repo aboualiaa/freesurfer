@@ -42,12 +42,12 @@ struct Vertex : public Repr_Elt {
   dist_orig(size_t i) const; // size() is vtotal.    distance to neighboring
                              // vertices based on origxyz
   inline int
-               dist_capacity() const; //  -- should contain at least vtx_vtotal elements
-  inline float x() const;             //  current coordinates
-  inline float y() const;             //  use MRISsetXYZ() to set
+  dist_capacity() const;  //  -- should contain at least vtx_vtotal elements
+  inline float x() const; //  current coordinates
+  inline float y() const; //  use MRISsetXYZ() to set
   inline float z() const;
   inline float
-               origx() const; //  original coordinates, see also MRIS::origxyz_status
+  origx() const; //  original coordinates, see also MRIS::origxyz_status
   inline float origy() const; //  use MRISsetOriginalXYZ(,
   inline float origz() const; //  or MRISsetOriginalXYZfromXYZ to set
   inline float nx() const;
@@ -118,7 +118,7 @@ struct Surface : public Repr_Elt {
   inline float                 total_area() const;
   inline double                avg_vertex_area() const;
   inline double
-                avg_vertex_dist() const; //  set by MRIScomputeAvgInterVertexDist
+  avg_vertex_dist() const; //  set by MRIScomputeAvgInterVertexDist
   inline double std_vertex_dist() const;
   inline float  orig_area() const;
   inline float  neg_area() const;

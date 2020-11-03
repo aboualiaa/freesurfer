@@ -1144,10 +1144,10 @@ void asynchEvent_process(s_env &st_env, std::string str_event) {
     else {
       str_optionsArg = str_event.substr(pos + 4);
 
-      pos      = str_optionsArg.rfind("/");
-      str_path = (pos == (unsigned)std::string::npos)
-                     ? "./"
-                     : str_optionsArg.substr(0, pos);
+      pos             = str_optionsArg.rfind("/");
+      str_path        = (pos == (unsigned)std::string::npos)
+                            ? "./"
+                            : str_optionsArg.substr(0, pos);
       str_optionsFile = (pos == (unsigned)std::string::npos)
                             ? str_optionsArg
                             : str_optionsArg.substr(pos + 1);

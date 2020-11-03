@@ -38,7 +38,7 @@ double evalImageTransform(const ImageTransform &transform,
             (destMask == NULL || destMask->data(xDestInt, yDestInt))) {
           int vDest = interp ? (int)dest.interp(xDest, yDest)
                              : dest.data(xDestInt, yDestInt);
-          int diff = src.data(x, y) - vDest;
+          int diff  = src.data(x, y) - vDest;
           if (diff < 0)
             diff = -diff;
           sumDiff += (float)diff;

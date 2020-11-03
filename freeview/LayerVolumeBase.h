@@ -144,7 +144,7 @@ protected:
     char *data;
     int   frame;
     QString
-                cache_filename; // if not empty, ignore data and read from cache file.
+        cache_filename; // if not empty, ignore data and read from cache file.
     QVariantMap mri_settings;
   };
 

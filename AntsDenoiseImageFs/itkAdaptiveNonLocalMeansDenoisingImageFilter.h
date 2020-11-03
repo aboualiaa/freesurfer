@@ -82,7 +82,7 @@ public:
   typedef typename Superclass::IndexType        IndexType;
 
   typedef typename Superclass::ConstNeighborhoodIteratorType
-                                                      ConstNeighborhoodIteratorType;
+      ConstNeighborhoodIteratorType;
   typedef typename Superclass::NeighborhoodRadiusType NeighborhoodRadiusType;
   typedef typename Superclass::NeighborhoodOffsetType NeighborhoodOffsetType;
   typedef typename Superclass::NeighborhoodOffsetListType

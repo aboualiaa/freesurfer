@@ -22,7 +22,7 @@ class ArrayContainerTemplate:
     basedims = None
 
     def __init__(self, data, lut=None):
-        '''
+        """
         Contructs the container object from an array. The input data is not copied, and
         the array should have ndims equal to the subclass' basedims (or basedims + 1).
         Any extra dimension is assumed to represent data frames.
@@ -130,8 +130,8 @@ class Overlay(ArrayContainerTemplate):
     basedims = 1
 
     def __init__(self, data, lut=None):
-        '''Contructs an overlay from a 1D or 2D data array. The 2nd dimension is
-        always assumed to be the number of frames.'''
+        """Contructs an overlay from a 1D or 2D data array. The 2nd dimension is
+        always assumed to be the number of frames."""
         super().__init__(data, lut=lut)
 
 
@@ -141,8 +141,8 @@ class Image(ArrayContainerTemplate, Transformable):
     basedims = 2
 
     def __init__(self, data, affine=None, pixsize=None, lut=None):
-        '''Contructs an image from a 2D or 3D data array. The 3rd dimension is
-        always assumed to be the number of frames.'''
+        """Contructs an image from a 2D or 3D data array. The 3rd dimension is
+        always assumed to be the number of frames."""
         ArrayContainerTemplate.__init__(self, data, lut=lut)
         self.affine = affine
         self.pixsize = pixsize if pixsize is not None else (1.0, 1.0)
@@ -203,7 +203,7 @@ class Image(ArrayContainerTemplate, Transformable):
 class Volume(ArrayContainerTemplate, Transformable):
     """
     3D volume with specific geometry.
-    
+
     Attributes:
         data: Pointer to internal 3D (or 4D) array.
         image: Alias to data member (legacy).
@@ -221,7 +221,7 @@ class Volume(ArrayContainerTemplate, Transformable):
     basedims = 3
 
     def __init__(self, data, affine=None, voxsize=None, lut=None):
-        '''
+        """
         Contructs a volume from a 3D or 4D data array. The 4th dimension is
         always assumed to be the number of frames.
         """

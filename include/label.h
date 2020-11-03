@@ -57,7 +57,7 @@ struct LABEL {
   char              space[100]; /* space description of the coords */
   double            avg_stat;
   int *
-        vertex_label_ind; // mris->nvertices long - < 0 means it isn't in the label
+      vertex_label_ind; // mris->nvertices long - < 0 means it isn't in the label
   MRI * mri_template;
   MHT * mht;
   MRIS *mris;

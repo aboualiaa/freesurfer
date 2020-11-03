@@ -157,7 +157,7 @@ public:
   inline STRING_VECTOR unidentified_arguments(unsigned    Number,
                                               const char *Known, ...) const;
   inline STRING_VECTOR
-                       unidentified_arguments(const STRING_VECTOR &Knowns) const;
+  unidentified_arguments(const STRING_VECTOR &Knowns) const;
   inline STRING_VECTOR unidentified_arguments() const;
 
   inline STRING_VECTOR unidentified_options(unsigned Number, const char *Known,
@@ -171,7 +171,7 @@ public:
   inline STRING_VECTOR unidentified_variables(unsigned    Number,
                                               const char *Known, ...) const;
   inline STRING_VECTOR
-                       unidentified_variables(const STRING_VECTOR &Knowns) const;
+  unidentified_variables(const STRING_VECTOR &Knowns) const;
   inline STRING_VECTOR unidentified_variables() const;
 
   inline STRING_VECTOR unidentified_sections(unsigned Number, const char *Known,
@@ -182,7 +182,7 @@ public:
   inline STRING_VECTOR unidentified_nominuses(unsigned    Number,
                                               const char *Known, ...) const;
   inline STRING_VECTOR
-                       unidentified_nominuses(const STRING_VECTOR &Knowns) const;
+  unidentified_nominuses(const STRING_VECTOR &Knowns) const;
   inline STRING_VECTOR unidentified_nominuses() const;
 
   // (*) output --------------------------------------------------------------

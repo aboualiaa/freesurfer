@@ -24,7 +24,7 @@ struct VERTEX_TOPOLOGY {
   pSeveralInt
       f; // size() is num.    array[v->num] the fno's of the neighboring faces
   pSeveralUchar
-              n; // size() is num.    array[v->num] the face.v[*] index for this vertex
+      n; // size() is num.    array[v->num] the face.v[*] index for this vertex
   pSeveralInt e; //  edge state for neighboring vertices
   pSeveralInt v; // size() is vtotal.    array[v->vtotal or more] of vno, head
                  // sorted by hops
@@ -394,7 +394,7 @@ struct MRIS {
                                                     ELTT(int, fixedval) SEP     \
                                                     ELTT(float, fieldsign) SEP  \
                                                     ELTT(float, fsmask) SEP     \
-                                                    ELTT(float, d) SEP // end of macro
+  ELTT(float, d) SEP // end of macro
 
 #define LIST_OF_VERTEX_ELTS_5                                                  \
   ELTT(int, annotation)                                                        \
@@ -464,7 +464,7 @@ struct MRIS {
                                               ELTT(float, neg_orig_area) SEP     \
                                               ELTT(int, zeros) SEP               \
                                               ELTT(int, hemisphere) SEP          \
-                                              ELTT(int, initialized) SEP // end of macro
+                                  ELTT(int, initialized) SEP // end of macro
 
 #define LIST_OF_MRIS_ELTS_3                                                    \
   ELTP(LTA, lta)                                                               \

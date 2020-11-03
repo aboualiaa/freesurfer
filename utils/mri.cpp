@@ -6854,11 +6854,10 @@ IMAGE *MRItoImage(MRI *mri, IMAGE *I, int slice) {
 
   if (!I) {
     I = ImageAlloc(height, width,
-                   mri->type == MRI_UCHAR
-                       ? PFBYTE
-                       : mri->type == MRI_INT
-                             ? PFINT
-                             : mri->type == MRI_FLOAT ? PFFLOAT : PFBYTE,
+                   mri->type == MRI_UCHAR   ? PFBYTE
+                   : mri->type == MRI_INT   ? PFINT
+                   : mri->type == MRI_FLOAT ? PFFLOAT
+                                            : PFBYTE,
                    1);
   }
 
@@ -6950,8 +6949,8 @@ MRI *ImageToMRI(IMAGE *I) {
   mri->zend   = mri->depth * mri->zsize / 2.0;
   mri->zstart = -mri->zend;
   mri->fov    = ((mri->xend - mri->xstart) > (mri->yend - mri->ystart)
-                  ? (mri->xend - mri->xstart)
-                  : (mri->yend - mri->ystart));
+                     ? (mri->xend - mri->xstart)
+                     : (mri->yend - mri->ystart));
   // set orientation to be coronal
   mri->x_r = -1;
   mri->y_r = 0;

@@ -65,7 +65,7 @@ struct Surface : public Repr_Elt {
   inline float               canon_area() const;
   inline int noscale() const; //  don't scale by surface area if true
   inline float
-                      dx2(size_t i) const; //  an extra set of gradient (not always alloced)
+  dx2(size_t i) const; //  an extra set of gradient (not always alloced)
   inline float        dy2(size_t i) const;
   inline float        dz2(size_t i) const;
   inline PCOLOR_TABLE ct() const;
@@ -77,7 +77,7 @@ struct Surface : public Repr_Elt {
   inline MRIS_cmdlines_t cmdlines() const;
   inline int             ncmds() const;
   inline float
-             group_avg_surface_area() const; //  average of total surface area for group
+  group_avg_surface_area() const; //  average of total surface area for group
   inline int group_avg_vtxarea_loaded()
       const; //  average vertex area for group at each vertex
   inline int    triangle_links_removed() const; //  for quad surfaces

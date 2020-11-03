@@ -2443,7 +2443,7 @@ int MHTfindClosestVertexNo2(
         * mht,  // the result will be a vno in the mris used to create this
     MRIS *mris, // this mris should be the one used to create the mht
     MRIS *
-                  mris_for_v, // this may not be the one for mht nor the one for the result
+        mris_for_v, // this may not be the one for mht nor the one for the result
     VERTEX const *v, // but this is looked up in it
     float *       pmin_dist) {
   int vno = v - mris_for_v->vertices;
@@ -2458,7 +2458,7 @@ int MHTfindClosestVertexNo2(
 VERTEX *MHTfindClosestVertex2(
     MRIS_HASH_TABLE *mht, MRIS *mris,
     MRIS *
-                  mris_for_v, // this may not be the one for mht nor the one for the result
+        mris_for_v, // this may not be the one for mht nor the one for the result
     VERTEX const *v, // but this must be in it
     float *       pmin_dist) {
   int closest_vno =

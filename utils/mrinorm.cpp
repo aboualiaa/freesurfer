@@ -49,9 +49,9 @@
 static float find_tissue_intensities(MRI *mri_src, MRI *mri_ctrl, float *pwm,
                                      float *pgm, float *pcsf);
 static int
-             remove_gray_matter_control_points(MRI *mri_ctrl, MRI *mri_src, float wm_target,
-                                               float intensity_above, float intensity_below,
-                                               int scan_type, MRI *mri_not_control);
+remove_gray_matter_control_points(MRI *mri_ctrl, MRI *mri_src, float wm_target,
+                                  float intensity_above, float intensity_below,
+                                  int scan_type, MRI *mri_not_control);
 static float csf_in_window(MRI *mri, int x0, int y0, int z0, float max_dist,
                            float csf);
 #if 0

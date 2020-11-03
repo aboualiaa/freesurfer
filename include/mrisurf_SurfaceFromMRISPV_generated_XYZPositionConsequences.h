@@ -52,13 +52,13 @@ struct Vertex : public Repr_Elt {
   inline Vertex v(size_t i) const; // size() is vtotal.    array[v->vtotal or
                                    // more] of vno, head sorted by hops
   inline short
-               vnum() const; //  number of 1-hop neighbors    should use [p]VERTEXvnum(i)
+  vnum() const; //  number of 1-hop neighbors    should use [p]VERTEXvnum(i)
   inline short v2num() const;  //  number of 1, or 2-hop neighbors
   inline short v3num() const;  //  number of 1,2,or 3-hop neighbors
   inline short vtotal() const; //  total # of neighbors. copy of vnum.nsizeCur
   inline short nsizeMaxClock() const; //  copy of mris->nsizeMaxClock when v#num
   inline uchar
-               nsizeMax() const; //  the max nsize that was used to fill in vnum etc
+  nsizeMax() const; //  the max nsize that was used to fill in vnum etc
   inline uchar nsizeCur() const; //  index of the current v#num in vtotal
   inline uchar num() const;      //  number of neighboring faces
   // managed by MRISfreeDists[_orig] and MRISmakeDists[_orig]
@@ -77,7 +77,7 @@ struct Vertex : public Repr_Elt {
   inline float z() const;
   //
   inline float
-               origx() const; //  original coordinates, see also MRIS::origxyz_status
+  origx() const; //  original coordinates, see also MRIS::origxyz_status
   inline float origy() const; //  use MRISsetOriginalXYZ(,
   inline float origz() const; //  or MRISsetOriginalXYZfromXYZ to set
   //
@@ -169,7 +169,7 @@ struct Surface : public Repr_Elt {
   inline float  total_area() const;
   inline double avg_vertex_area() const;
   inline double
-                 avg_vertex_dist() const; //  set by MRIScomputeAvgInterVertexDist
+  avg_vertex_dist() const; //  set by MRIScomputeAvgInterVertexDist
   inline double  std_vertex_dist() const;
   inline float   orig_area() const;
   inline float   neg_area() const;
@@ -214,7 +214,7 @@ struct Surface : public Repr_Elt {
   inline float               canon_area() const;
   inline int noscale() const; //  don't scale by surface area if true
   inline float
-                      dx2(size_t i) const; //  an extra set of gradient (not always alloced)
+  dx2(size_t i) const; //  an extra set of gradient (not always alloced)
   inline float        dy2(size_t i) const;
   inline float        dz2(size_t i) const;
   inline PCOLOR_TABLE ct() const;
@@ -226,7 +226,7 @@ struct Surface : public Repr_Elt {
   inline MRIS_cmdlines_t cmdlines() const;
   inline int             ncmds() const;
   inline float
-             group_avg_surface_area() const; //  average of total surface area for group
+  group_avg_surface_area() const; //  average of total surface area for group
   inline int group_avg_vtxarea_loaded()
       const; //  average vertex area for group at each vertex
   inline int    triangle_links_removed() const; //  for quad surfaces
@@ -265,11 +265,11 @@ struct Surface : public Repr_Elt {
   inline void set_Ktotal(double to);  //  total Gaussian curvature
   inline void set_nlabels(int to);
   inline void
-              set_labels(PMRIS_AREA_LABEL to); //  nlabels of these (may be null)
-  inline void set_vp(p_void to);               //  for misc. use
-  inline void set_alpha(float to);             //  rotation around z-axis
-  inline void set_beta(float to);              //  rotation around y-axis
-  inline void set_gamma(float to);             //  rotation around x-axis
+  set_labels(PMRIS_AREA_LABEL to); //  nlabels of these (may be null)
+  inline void set_vp(p_void to);   //  for misc. use
+  inline void set_alpha(float to); //  rotation around z-axis
+  inline void set_beta(float to);  //  rotation around y-axis
+  inline void set_gamma(float to); //  rotation around x-axis
   inline void set_da(float to);
   inline void set_db(float to);
   inline void set_dg(float to); //  old deltas

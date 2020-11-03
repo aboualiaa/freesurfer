@@ -74,10 +74,11 @@ if(FS_BUILD_MATRIX)
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ALL
-                        COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev
-                                ${COMPILER_PROXY_OPTION} -DCMAKE_BUILD_TYPE=${TYPE} -C
-                                ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
-                                -S ${CMAKE_SOURCE_DIR} -B
+                        COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE
+                                -Wno-dev ${COMPILER_PROXY_OPTION}
+                                -DCMAKE_BUILD_TYPE=${TYPE} -C
+                                ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake
+                                -G Ninja -S ${CMAKE_SOURCE_DIR} -B
                                 /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
                                 \"
                         )
@@ -111,8 +112,8 @@ if(FS_BUILD_MATRIX)
       add_dependencies(compile-all compile-${TYPE})
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
-                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit
-                                --progress \"
+                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L
+                                Unit --progress \"
                         WORKING_DIRECTORY "/Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
                         )
 
@@ -220,12 +221,18 @@ endif()
 if(APPLE)
   if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)[Cc]lang")
     set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-    set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+    set(CMAKE_CXX_ARCHIVE_CREATE
+        "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>"
+        )
+    set(CMAKE_C_ARCHIVE_FINISH
+        "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>"
+        )
+    set(CMAKE_CXX_ARCHIVE_FINISH
+        "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>"
+        )
   endif()
-  mark_as_advanced(CMAKE_OSX_SYSROOT CMAKE_OSX_DEPLOYMENT_TARGET CMAKE_OSX_ARCHITECTURES
-                   CMAKE_EXECUTABLE_FORMAT
+  mark_as_advanced(CMAKE_OSX_SYSROOT CMAKE_OSX_DEPLOYMENT_TARGET
+                   CMAKE_OSX_ARCHITECTURES CMAKE_EXECUTABLE_FORMAT
                    )
 endif()
 
@@ -281,7 +288,8 @@ if(NOT APPLE)
   if(HOST_OS STREQUAL "trusty")
     add_definitions(-DFS_ITK_LEGACY_REMOVE)
   endif()
-  add_definitions(-DVCL_GCC_80) # trick itk 4 into believing the compiler is gcc 8
+  add_definitions(-DVCL_GCC_80
+                  )# trick itk 4 into believing the compiler is gcc 8
   add_definitions(-DVXL_FULLCXX11SUPPORT)
 else()
   cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
@@ -325,8 +333,8 @@ if(CMAKE_CONFIGURATION_TYPES AND FS_EXP_BUILD_CONFIGURATIONS)
   if(NOT LINUX)
     list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "msan")
   endif()
-  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}"
-                                                           MATCHES "(Apple)[Cc]lang"
+  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)[Cc]lang"
+     OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)[Cc]lang"
      )
     list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "lsan")
   endif()
@@ -335,8 +343,8 @@ endif()
 
 if(FS_BUILD_TESTING)
   include(CTest)
-  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh
-                 COPYONLY
+  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh
+                 ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY
                  )
   configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh
                  ${CMAKE_CURRENT_BINARY_DIR}/attic/test.sh COPYONLY
@@ -382,7 +390,8 @@ set(BUILD_STAMP
     "freesurfer-local-build-${TODAY}"
     CACHE STRING "Distribution build stamp"
     )
-install(CODE "file (WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n) ")
+install(CODE "file (WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n) "
+        )
 
 # set the default build type to 'Release' for optimization purposes
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -470,8 +479,8 @@ find_package(PETSC REQUIRED)
 # --- boost ---
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED TRUE)
-find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log
-                                       atomic
+find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework
+                                       filesystem log atomic
              )
 
 # -------- itk --------
@@ -583,6 +592,7 @@ if(VTK_FOUND AND VTK_BUILD_SHARED_LIBS)
     set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/vtk:${CMAKE_INSTALL_RPATH}")
   endif()
 endif()
+list(REMOVE_ITEM VTK_LIBRARIES "/usr/lib/libxml2.dylib")
 
 # --------------------------------------------------
 #              global system information
@@ -680,7 +690,8 @@ if(FS_DISTRIBUTE_FSPYTHON)
     set(PYTHON_EXECUTABLE ${FSPYTHON_DIR}/bin/python3)
     set(PYTHON_LIBRARY ${FSPYTHON_DIR}/lib/libpython3.6m)
     # install the barebones python distribution
-    install(DIRECTORY ${FSPYTHON_DIR}/bin ${FSPYTHON_DIR}/lib ${FSPYTHON_DIR}/include
+    install(DIRECTORY ${FSPYTHON_DIR}/bin ${FSPYTHON_DIR}/lib
+                      ${FSPYTHON_DIR}/include
             DESTINATION ${CMAKE_INSTALL_PREFIX}/python
             USE_SOURCE_PERMISSIONS
             )
@@ -747,8 +758,8 @@ add_subdirectories(vtkutils lineprof)
 
 # TODO: solve build issues on linux/gcc: looser throw spec...
 # the fem elastic subdir also builds a library, so it should be added first
-if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}"
-                                                          MATCHES "(Apple)?[Cc]lang"
+if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
+   OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
    )
   if(APPLE)
     add_subdirectory(fem_elastic)

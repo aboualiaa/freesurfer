@@ -55,9 +55,7 @@ py::object Bridge::python() {
     std::vector<ssize_t> strides = fstrides(shape, p_mri->bytes_per_vox);
 
     // wrap a numpy array around the chunked MRI data
-    py::capsule capsule(p_mri->chunk, [](void *p) {
-      free(p);
-    });
+    py::capsule capsule(p_mri->chunk, [](void *p) { free(p); });
     mri_buffer = py::array(dtype, shape, strides, p_mri->chunk, capsule);
 
     // the above array is now fully responsible for managing the chunk data,

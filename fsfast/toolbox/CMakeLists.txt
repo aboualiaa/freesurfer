@@ -558,7 +558,9 @@ install_configured(afni2bvol.m
                    fsfast/toolbox
                    )
 
-install(FILES mkanalysis_gui.fig univarlab.fig rawplot.fig DESTINATION fsfast/toolbox)
+install(FILES mkanalysis_gui.fig univarlab.fig rawplot.fig
+        DESTINATION fsfast/toolbox
+        )
 
 install(FILES tdr_b1map2d.m
               tdr_deghost.m

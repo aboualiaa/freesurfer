@@ -117,7 +117,7 @@ struct TRACK_HEADER {
   unsigned char
       invert_x; // inversion/rotation flags used to generate this track file
   unsigned char
-                invert_y; // value is 0 or 1. can be ignored (for private use only).
+      invert_y; // value is 0 or 1. can be ignored (for private use only).
   unsigned char invert_z;
   unsigned char swap_xy;
   unsigned char swap_yz;

@@ -1886,13 +1886,13 @@ static void get_origxyz(VERTEX const *vertex, float *x, float *y, float *z) {
 static double mrisComputeDefectMRILogUnlikelihood_wkr(
     ComputeDefectContext *computeDefectContext,
     MRI_SURFACE *const
-                        mris_nonconst, // various subcomponents of these structures get updated
+        mris_nonconst, // various subcomponents of these structures get updated
     DEFECT_PATCH *const dp_nonconst, HISTOGRAM *const h_border_nonconst);
 
 double mrisComputeDefectMRILogUnlikelihood(
     ComputeDefectContext *computeDefectContext,
     MRI_SURFACE *const
-                        mris_nonconst, // various subcomponents of these structures get updated
+        mris_nonconst, // various subcomponents of these structures get updated
     DEFECT_PATCH *const dp_nonconst, HISTOGRAM *const h_border_nonconst) {
 
   static int once;
@@ -2117,7 +2117,7 @@ useComputeDefectContextRealmTree(ComputeDefectContext *computeDefectContext,
 static double mrisComputeDefectMRILogUnlikelihood_wkr(
     ComputeDefectContext *computeDefectContext,
     MRI_SURFACE *const
-                        mris_nonconst, // various subcomponents of these structures get updated
+        mris_nonconst, // various subcomponents of these structures get updated
     DEFECT_PATCH *const dp_nonconst, HISTOGRAM *const h_border_nonconst) {
 #if 1
   // The tests themselves are expensive, so eliminate them except when
@@ -2952,10 +2952,10 @@ static double mrisComputeDefectMRILogUnlikelihood_wkr(
         kToZMap[k - kmin] = zSURF(mri_defect, k);
 
       long  kToDoBuffer[128];
-      long *kToDo = (kToZMapSize <= 128)
-                        ? kToDoBuffer
-                        : (long *)malloc(kToZMapSize * sizeof(long));
-      long kToDoSize = kToZMapSize;
+      long *kToDo     = (kToZMapSize <= 128)
+                            ? kToDoBuffer
+                            : (long *)malloc(kToZMapSize * sizeof(long));
+      long  kToDoSize = kToZMapSize;
 
       for (k = kmin; k <= kmax; k++)
         kToDo[k - kmin] = k;
@@ -9314,7 +9314,7 @@ MRI_SURFACE *MRIScorrectTopology(MRI_SURFACE *mris, MRI *mri, MRI *mri_wm,
       if (!validate) {
         /* restore the vertex state */
         mrisRestoreVertexState(mris_corrected, dvs);
-#else  // #if TESTING_OPTIMAL
+#else // #if TESTING_OPTIMAL
       {
 #endif // #if TESTING_OPTIMAL
         /* generation of optimal mappings */

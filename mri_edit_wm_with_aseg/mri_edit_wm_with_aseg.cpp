@@ -386,8 +386,8 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
           }
         case Left_Inf_Lat_Vent:
         case Right_Inf_Lat_Vent:
-          xi = (label == Left_Inf_Lat_Vent) ? mri_wm->xi[x + 1]
-                                            : mri_wm->xi[x - 1]; // lateral
+          xi     = (label == Left_Inf_Lat_Vent) ? mri_wm->xi[x + 1]
+                                                : mri_wm->xi[x - 1]; // lateral
           olabel = MRIgetVoxVal(mri_seg, xi, y, z, 0);
 
           /* don't allow cortex to be directly lateral to inf-lat-vent - should
@@ -484,8 +484,8 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
           {
             int xi;
 
-            xi = label == Left_Inf_Lat_Vent ? mri_wm->xi[x - 1]
-                                            : mri_wm->xi[x + 1];
+            xi     = label == Left_Inf_Lat_Vent ? mri_wm->xi[x - 1]
+                                                : mri_wm->xi[x + 1];
             olabel = MRIgetVoxVal(mri_seg, xi, y, z, 0);
 #if 0 // no longer needed with path stuff
             /* voxel lateral to this one is not hippocampus   */
@@ -573,8 +573,8 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
             continue;
           }
 
-          xi = label == Right_Hippocampus ? mri_wm->xi[x - 1]
-                                          : mri_wm->xi[x + 1];
+          xi     = label == Right_Hippocampus ? mri_wm->xi[x - 1]
+                                              : mri_wm->xi[x + 1];
           yi     = mri_wm->yi[y + 1];
           olabel = MRIgetVoxVal(mri_seg, xi, y, z, 0);
           /* voxel lateral to this one is not hippocampus, and not

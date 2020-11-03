@@ -622,7 +622,7 @@ MRI *MRIorder(MRI *mri_src, MRI *mri_dst, int wsize, float pct);
 MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct,
                     int use_all);
 #else
-MRI *      MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct);
+MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct);
 #endif
 
 MRI *MRInormalizeFrameVectorLength(MRI *mri_src, MRI *mri_dst);

@@ -8,7 +8,8 @@ host_os()
 # message(STATUS "FROM AntsN4BiasFieldCorrectionFs HOST_OS=${HOST_OS}")
 
 if(HOST_OS MATCHES "Ubuntu18")
-  message(STATUS "AntsN4BiasFieldCorrectionFs test will be skipped on ${HOST_OS}")
+  message(STATUS "AntsN4BiasFieldCorrectionFs test will be skipped on ${HOST_OS}"
+          )
 else()
   add_test_script(NAME AntsN4BiasFieldCorrectionFs_test SCRIPT test.sh DEPENDS
                   AntsN4BiasFieldCorrectionFs

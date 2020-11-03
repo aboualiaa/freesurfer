@@ -40,7 +40,9 @@ if(OpenCV_FOUND)
       )
 
   add_executable(histo_register.bin ${SOURCES})
-  target_link_libraries(histo_register.bin ${OpenCV_LIBRARIES} sbl pvl ${ZLIB_LIBRARIES})
+  target_link_libraries(histo_register.bin ${OpenCV_LIBRARIES} sbl pvl
+                        ${ZLIB_LIBRARIES}
+                        )
 
   install(PROGRAMS histo_register_wrapper
           DESTINATION bin

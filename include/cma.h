@@ -638,8 +638,9 @@ std::vector<double> ReadCachedBrainVolumeStats(const std::string &subject,
    ((l) == hippocampal_fissure))
 
 #define IS_CLASS(l, c)                                                         \
-  (c == CSF_CLASS ? IS_CSF_CLASS(l)                                            \
-                  : c == GM_CLASS ? IS_GRAY_CLASS(l) : IS_WHITE_CLASS(l))
+  (c == CSF_CLASS  ? IS_CSF_CLASS(l)                                           \
+   : c == GM_CLASS ? IS_GRAY_CLASS(l)                                          \
+                   : IS_WHITE_CLASS(l))
 
 #include "mrisurf.h"
 int      insert_ribbon_into_aseg(MRI *mri_src_aseg, MRI *mri_aseg,

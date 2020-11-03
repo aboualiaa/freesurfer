@@ -266,18 +266,18 @@ private:
 
     // On prend le minimum de chaque paire de voisins
     // One takes the minimum of each pair of neighbors
-    float A = (x == 0) ? sign * _GetValue(x + 1, y, z)
-                       : (x == width - 1) ? sign * _GetValue(x - 1, y, z)
-                                          : MIN(sign * _GetValue(x + 1, y, z),
-                                                sign * _GetValue(x - 1, y, z));
-    float B = (y == 0) ? sign * _GetValue(x, y + 1, z)
-                       : (y == height - 1) ? sign * _GetValue(x, y - 1, z)
-                                           : MIN(sign * _GetValue(x, y + 1, z),
-                                                 sign * _GetValue(x, y - 1, z));
-    float C = (z == 0) ? sign * _GetValue(x, y, z + 1)
-                       : (z == depth - 1) ? sign * _GetValue(x, y, z - 1)
-                                          : MIN(sign * _GetValue(x, y, z + 1),
-                                                sign * _GetValue(x, y, z - 1));
+    float A = (x == 0)           ? sign * _GetValue(x + 1, y, z)
+              : (x == width - 1) ? sign * _GetValue(x - 1, y, z)
+                                 : MIN(sign * _GetValue(x + 1, y, z),
+                                       sign * _GetValue(x - 1, y, z));
+    float B = (y == 0)            ? sign * _GetValue(x, y + 1, z)
+              : (y == height - 1) ? sign * _GetValue(x, y - 1, z)
+                                  : MIN(sign * _GetValue(x, y + 1, z),
+                                        sign * _GetValue(x, y - 1, z));
+    float C = (z == 0)           ? sign * _GetValue(x, y, z + 1)
+              : (z == depth - 1) ? sign * _GetValue(x, y, z - 1)
+                                 : MIN(sign * _GetValue(x, y, z + 1),
+                                       sign * _GetValue(x, y, z - 1));
 
     // On reordonne les valeurs pour avoir C>=B>=A
     // One reorders the values to have C>=B>=A

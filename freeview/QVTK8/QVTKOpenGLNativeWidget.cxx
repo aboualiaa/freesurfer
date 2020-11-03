@@ -655,9 +655,7 @@ bool QVTKOpenGLNativeWidget::event(QEvent *evt) {
   case QEvent::WindowActivate:
   case QEvent::PolishRequest: {
     QWidget *window = this->window();
-    QTimer::singleShot(1, [window]() {
-      ::QVTKOpenGLWidgetMacOSCheck(window);
-    });
+    QTimer::singleShot(1, [window]() { ::QVTKOpenGLWidgetMacOSCheck(window); });
   } break;
 #endif // __APPLE__
 

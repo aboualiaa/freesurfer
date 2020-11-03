@@ -46,7 +46,7 @@ static RBF_PARMS rbf_parms = {
     {NCLUSTERS / 2, NCLUSTERS, NCLUSTERS, NCLUSTERS, NCLUSTERS, NCLUSTERS / 2}};
 
 #define MAX_LONG 1000 // max # of timepoints
-#define MAX_VOLS 10   // max # of input volumes
+#define MAX_VOLS 10 // max # of input volumes
 
 static int    wsize = 1; // use intensities in a 3x3x3 window around each point
 static int    nlong = 0;

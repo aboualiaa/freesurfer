@@ -270,7 +270,7 @@ bool Tracer::StepTangent(const PointType &pt, PointType &returnedPoint,
 
 Tracer::PointType Tracer::GetClosestPoint(double val) const {
   typedef itk::ImageRegionConstIteratorWithIndex<ImageType>
-                                                       ImageConstIteratorWithIndex;
+      ImageConstIteratorWithIndex;
   typedef itk::ImageRegionConstIterator<MaskImageType> ImageConstIterator;
   ImageConstIteratorWithIndex                          cit(data->GetImage(),
                                   data->GetImage()->GetRequestedRegion());

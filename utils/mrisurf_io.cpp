@@ -5837,16 +5837,16 @@ int MRISbuildFileName(MRI_SURFACE *mris, const char *sname, char *fname) {
         if (getenv("FS_POSIX")) {
       // PW 2017/05/15: If FS_POSIX is set, write to cwd (as per POSIX:4.11)
       sprintf(fname, "./%s.%s",
-              mris->hemisphere == LEFT_HEMISPHERE
-                  ? "lh"
-                  : mris->hemisphere == BOTH_HEMISPHERES ? "both" : "rh",
+              mris->hemisphere == LEFT_HEMISPHERE    ? "lh"
+              : mris->hemisphere == BOTH_HEMISPHERES ? "both"
+                                                     : "rh",
               sname);
     } else {
       // PW 2017/05/15: Legacy behaviour
       sprintf(fname, "%s/%s.%s", path,
-              mris->hemisphere == LEFT_HEMISPHERE
-                  ? "lh"
-                  : mris->hemisphere == BOTH_HEMISPHERES ? "both" : "rh",
+              mris->hemisphere == LEFT_HEMISPHERE    ? "lh"
+              : mris->hemisphere == BOTH_HEMISPHERES ? "both"
+                                                     : "rh",
               sname);
     }
   } else {

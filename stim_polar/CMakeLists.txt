@@ -7,7 +7,9 @@ if(OPENGL_FOUND)
                       )
 
   add_executable(stim_polar stim_polar.cpp)
-  target_link_libraries(stim_polar utils ${OPENGL_LIBRARIES} glut ${X11_LIBRARIES})
+  target_link_libraries(stim_polar utils ${OPENGL_LIBRARIES} glut
+                        ${X11_LIBRARIES}
+                        )
   install(TARGETS stim_polar DESTINATION bin)
 
 endif()

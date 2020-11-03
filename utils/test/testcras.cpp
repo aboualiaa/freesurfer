@@ -57,20 +57,14 @@ void printInfo(MRI *mri) {
   printf("   voxel sizes: %6.4f, %6.4f, %6.4f\n", mri->xsize, mri->ysize,
          mri->zsize);
   printf("          type: %s (%d)\n",
-         mri->type == MRI_UCHAR
-             ? "UCHAR"
-             : mri->type == MRI_SHORT
-                   ? "SHORT"
-                   : mri->type == MRI_INT
-                         ? "INT"
-                         : mri->type == MRI_LONG
-                               ? "LONG"
-                               : mri->type == MRI_BITMAP
-                                     ? "BITMAP"
-                                     : mri->type == MRI_TENSOR
-                                           ? "TENSOR"
-                                           : mri->type == MRI_FLOAT ? "FLOAT"
-                                                                    : "UNKNOWN",
+         mri->type == MRI_UCHAR    ? "UCHAR"
+         : mri->type == MRI_SHORT  ? "SHORT"
+         : mri->type == MRI_INT    ? "INT"
+         : mri->type == MRI_LONG   ? "LONG"
+         : mri->type == MRI_BITMAP ? "BITMAP"
+         : mri->type == MRI_TENSOR ? "TENSOR"
+         : mri->type == MRI_FLOAT  ? "FLOAT"
+                                   : "UNKNOWN",
          mri->type);
   printf("           fov: %2.3f\n", mri->fov);
   printf("        xstart: %2.1f, xend: %2.1f\n", mri->xstart * mri->xsize,

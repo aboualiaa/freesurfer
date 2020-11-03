@@ -187,7 +187,7 @@ preserving gradient */
 that preserve
 positive areas */
 #define IPFLAG_MAXIMIZE_SPHERICAL_POSITIVE_AREA                                \
-  0x4000                                 /* apply  gradients
+  0x4000 /* apply  gradients
 that will
 maximize the
 positive areas */
@@ -247,7 +247,7 @@ typedef struct {
 } MRI_SURFACE_PARAMETERIZATION, MRI_SP;
 
 #define L_ANGLE              0.25f /*was 0.01*/ /* coefficient of angle term */
-#define L_AREA               1.0f               /* coefficient of angle term */
+#define L_AREA               1.0f /* coefficient of angle term */
 #define N_AVERAGES           4096
 #define WRITE_ITERATIONS     10
 #define NITERATIONS          1
@@ -282,7 +282,7 @@ public:
   float
       l_thick_spring; // coefficient to keep vector field spaced on pial surface
   float
-        l_ashburner_triangle; // coefficient for (Ashburner, 1999) invertibility term
+      l_ashburner_triangle; // coefficient for (Ashburner, 1999) invertibility term
   float l_ashburner_lambda; // amount of regularization
   float l_corr;             /* coefficient of correlation term */
   float l_ocorr;            // overlay correlation weight
@@ -322,14 +322,14 @@ public:
   float l_osurf_repulse; /* repulsive outer surface (for layer IV) */
   float l_external;      /* external (user-defined) coefficient */
   float
-        l_thick_parallel; // term that encourages thickness vectors to be parallel
-  float l_thick_min;  // term that encourages thickness vectors to be minimal
-  float l_shrinkwrap; /* move in if MRI=0 and out otherwise */
-  float l_expandwrap; /* move out */
-  float l_unfold;     /* move inwards along normal */
-  float l_dura;       // move away from dura
+      l_thick_parallel; // term that encourages thickness vectors to be parallel
+  float l_thick_min;    // term that encourages thickness vectors to be minimal
+  float l_shrinkwrap;   /* move in if MRI=0 and out otherwise */
+  float l_expandwrap;   /* move out */
+  float l_unfold;       /* move inwards along normal */
+  float l_dura;         // move away from dura
   float
-         l_histo; // increase the likelihood of the entire volume given the surfaces
+      l_histo; // increase the likelihood of the entire volume given the surfaces
   double l_map;   // for MAP deformation
   double l_map2d; // for 2D MAP deformation (intensity x distance)
   double dura_thresh;

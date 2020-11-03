@@ -657,7 +657,7 @@ struct RealmTreeNode {
 #define maxVnosSizeLog2  20 // only support 1M vno's
 #define vnosBuffSize                                                           \
   ((sizeof(RealmTreeNode *) * childrenSize / sizeof(int)) -                    \
-   2)        // 2 for vnosSize and vnosCapacity
+   2) // 2 for vnosSize and vnosCapacity
   int *vnos; // NULL for non-leaf nodes, either &vnosBuff or
   union {
     RealmTreeNode *childIfPresent[childrenSize];
@@ -2710,11 +2710,10 @@ static bool possiblyIntersectingCell(
           (*callback)(callbackCtx, set->keys[index], &approachOldAnswer);
     }
 
-    bool const definitiveAnswer =
-        approachOldDone ? approachOldAnswer
-                        : approachOneDone ? approachOneAnswer
-                                          : approachTwoDone ? approachTwoAnswer
-                                                            : *(bool *)(-1);
+    bool const definitiveAnswer = approachOldDone   ? approachOldAnswer
+                                  : approachOneDone ? approachOneAnswer
+                                  : approachTwoDone ? approachTwoAnswer
+                                                    : *(bool *)(-1);
 
     // Compare the old code and the new code
     //

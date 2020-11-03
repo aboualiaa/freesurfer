@@ -91,7 +91,7 @@ TEST(cma_unit, Seg2NbrNonBrain) { // NOLINT
 TEST(cma_unit, Seg2NbrNonBrainWrapper) { // NOLINT
   EXPECT_EQ(1, 0);
 }
-auto main(int /*argc*/, char * * /*argv*/) -> int {
+auto main(int /*argc*/, char ** /*argv*/) -> int {
 
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();

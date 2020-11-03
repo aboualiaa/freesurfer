@@ -224,8 +224,8 @@ using json = basic_json<>;
 
 // #include <nlohmann/detail/meta/cpp_future.hpp>
 
-#include <ciso646>     // not
-#include <cstddef>     // size_t
+#include <ciso646> // not
+#include <cstddef> // size_t
 #include <type_traits> // conditional, enable_if, false_type, integral_constant, is_constructible, is_integral, is_same, remove_cv, remove_reference, true_type
 
 namespace nlohmann {
@@ -277,7 +277,7 @@ template <typename T> constexpr T static_const<T>::value;
 // #include <nlohmann/detail/meta/type_traits.hpp>
 
 #include <ciso646> // not
-#include <limits>  // numeric_limits
+#include <limits> // numeric_limits
 #include <type_traits> // false_type, is_constructible, is_integral, is_same, true_type
 #include <utility> // declval
 
@@ -553,7 +553,7 @@ struct is_compatible_type
 
 #include <exception> // exception
 #include <stdexcept> // runtime_error
-#include <string>    // to_string
+#include <string> // to_string
 
 namespace nlohmann {
 namespace detail {
@@ -955,7 +955,7 @@ private:
 
 // #include <nlohmann/detail/value_t.hpp>
 
-#include <array>   // array
+#include <array> // array
 #include <ciso646> // and
 #include <cstddef> // size_t
 #include <cstdint> // uint8_t
@@ -1028,18 +1028,18 @@ inline bool operator<(const value_t lhs, const value_t rhs) noexcept {
 
 // #include <nlohmann/detail/conversions/from_json.hpp>
 
-#include <algorithm>    // transform
-#include <array>        // array
-#include <ciso646>      // and, not
+#include <algorithm> // transform
+#include <array> // array
+#include <ciso646> // and, not
 #include <forward_list> // forward_list
-#include <iterator>     // inserter, front_inserter, end
-#include <map>          // map
-#include <string>       // string
-#include <tuple>        // tuple, make_tuple
+#include <iterator> // inserter, front_inserter, end
+#include <map> // map
+#include <string> // string
+#include <tuple> // tuple, make_tuple
 #include <type_traits> // is_arithmetic, is_same, is_enum, underlying_type, is_convertible
 #include <unordered_map> // unordered_map
-#include <utility>       // pair, declval
-#include <valarray>      // valarray
+#include <utility> // pair, declval
+#include <valarray> // valarray
 
 // #include <nlohmann/detail/exceptions.hpp>
 
@@ -1163,9 +1163,7 @@ void from_json(const BasicJsonType &j, std::forward_list<T, Allocator> &l) {
                                            std::string(j.type_name())));
   }
   std::transform(j.rbegin(), j.rend(), std::front_inserter(l),
-                 [](const BasicJsonType &i) {
-                   return i.template get<T>();
-                 });
+                 [](const BasicJsonType &i) { return i.template get<T>(); });
 }
 
 // valarray doesn't have an insert method
@@ -1399,13 +1397,13 @@ constexpr const auto &from_json =
 
 // #include <nlohmann/detail/conversions/to_json.hpp>
 
-#include <ciso646>  // or, and, not
+#include <ciso646> // or, and, not
 #include <iterator> // begin, end
-#include <tuple>    // tuple, get
+#include <tuple> // tuple, get
 #include <type_traits> // is_same, is_constructible, is_floating_point, is_enum, underlying_type
-#include <utility>  // move, forward, declval, pair
+#include <utility> // move, forward, declval, pair
 #include <valarray> // valarray
-#include <vector>   // vector
+#include <vector> // vector
 
 // #include <nlohmann/detail/meta/cpp_future.hpp>
 
@@ -1415,9 +1413,9 @@ constexpr const auto &from_json =
 
 // #include <nlohmann/detail/iterators/iteration_proxy.hpp>
 
-#include <cstddef>  // size_t
+#include <cstddef> // size_t
 #include <iterator> // input_iterator_tag
-#include <string>   // string, to_string
+#include <string> // string, to_string
 
 // #include <nlohmann/detail/value_t.hpp>
 
@@ -1848,9 +1846,9 @@ constexpr const auto &to_json = detail::static_const<detail::to_json_fn>::value;
 #include <cstring> // strlen
 #include <istream> // istream
 #include <iterator> // begin, end, iterator_traits, random_access_iterator_tag, distance, next
-#include <memory>  // shared_ptr, make_shared, addressof
+#include <memory> // shared_ptr, make_shared, addressof
 #include <numeric> // accumulate
-#include <string>  // string, char_traits
+#include <string> // string, char_traits
 #include <type_traits> // enable_if, is_base_of, is_pointer, is_integral, remove_pointer
 #include <utility> // pair, declval
 
@@ -2181,13 +2179,13 @@ private:
 
 // #include <nlohmann/detail/input/lexer.hpp>
 
-#include <clocale>          // localeconv
-#include <cstddef>          // size_t
-#include <cstdio>           // snprintf
-#include <cstdlib>          // strtof, strtod, strtold, strtoll, strtoull
+#include <clocale> // localeconv
+#include <cstddef> // size_t
+#include <cstdio> // snprintf
+#include <cstdlib> // strtof, strtod, strtold, strtoll, strtoull
 #include <initializer_list> // initializer_list
-#include <string>           // char_traits, string
-#include <vector>           // vector
+#include <string> // char_traits, string
+#include <vector> // vector
 
 // #include <nlohmann/detail/macro_scope.hpp>
 
@@ -3385,12 +3383,12 @@ private:
 
 // #include <nlohmann/detail/input/parser.hpp>
 
-#include <cassert>    // assert
-#include <cstdint>    // uint8_t
+#include <cassert> // assert
+#include <cstdint> // uint8_t
 #include <functional> // function
-#include <math.h>     // isfinite
-#include <string>     // string
-#include <utility>    // move
+#include <math.h> // isfinite
+#include <string> // string
+#include <utility> // move
 
 // #include <nlohmann/detail/exceptions.hpp>
 
@@ -4558,7 +4556,7 @@ private:
 // #include <nlohmann/detail/iterators/primitive_iterator.hpp>
 
 #include <cstddef> // ptrdiff_t
-#include <limits>  // numeric_limits
+#include <limits> // numeric_limits
 
 namespace nlohmann {
 namespace detail {
@@ -4677,7 +4675,7 @@ template <typename BasicJsonType> struct internal_iterator {
 
 // #include <nlohmann/detail/iterators/iter_impl.hpp>
 
-#include <ciso646>  // not
+#include <ciso646> // not
 #include <iterator> // iterator, random_access_iterator_tag, bidirectional_iterator_tag, advance, next
 #include <type_traits> // conditional, is_const, remove_const
 
@@ -5237,9 +5235,9 @@ private:
 
 // #include <nlohmann/detail/iterators/json_reverse_iterator.hpp>
 
-#include <cstddef>  // ptrdiff_t
+#include <cstddef> // ptrdiff_t
 #include <iterator> // reverse_iterator
-#include <utility>  // declval
+#include <utility> // declval
 
 namespace nlohmann {
 namespace detail {
@@ -5346,13 +5344,13 @@ public:
 // #include <nlohmann/detail/output/output_adapters.hpp>
 
 #include <algorithm> // copy
-#include <cstddef>   // size_t
-#include <ios>       // streamsize
-#include <iterator>  // back_inserter
-#include <memory>    // shared_ptr, make_shared
-#include <ostream>   // basic_ostream
-#include <string>    // basic_string
-#include <vector>    // vector
+#include <cstddef> // size_t
+#include <ios> // streamsize
+#include <iterator> // back_inserter
+#include <memory> // shared_ptr, make_shared
+#include <ostream> // basic_ostream
+#include <string> // basic_string
+#include <vector> // vector
 
 namespace nlohmann {
 namespace detail {
@@ -5438,17 +5436,17 @@ private:
 // #include <nlohmann/detail/input/binary_reader.hpp>
 
 #include <algorithm> // generate_n
-#include <array>     // array
-#include <cassert>   // assert
-#include <cstddef>   // size_t
-#include <cstdint>   // uint8_t, uint16_t, uint32_t, uint64_t
-#include <cstdio>    // snprintf
-#include <cstring>   // memcpy
-#include <iterator>  // back_inserter
-#include <limits>    // numeric_limits
-#include <math.h>    // ldexp
-#include <string>    // char_traits, string
-#include <utility>   // make_pair, move
+#include <array> // array
+#include <cassert> // assert
+#include <cstddef> // size_t
+#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+#include <cstdio> // snprintf
+#include <cstring> // memcpy
+#include <iterator> // back_inserter
+#include <limits> // numeric_limits
+#include <math.h> // ldexp
+#include <string> // char_traits, string
+#include <utility> // make_pair, move
 
 // #include <nlohmann/detail/input/input_adapters.hpp>
 
@@ -5854,7 +5852,7 @@ private:
           return std::ldexp(mant, -24);
         case 31:
           return (mant == 0) ? std::numeric_limits<double>::infinity()
-                             : std::numeric_limits<double>::quiet_NaN();
+                              : std::numeric_limits<double>::quiet_NaN();
         default:
           return std::ldexp(mant + 1024, exp - 25);
         }
@@ -7045,10 +7043,10 @@ private:
 // #include <nlohmann/detail/output/binary_writer.hpp>
 
 #include <algorithm> // reverse
-#include <array>     // array
-#include <cstdint>   // uint8_t, uint16_t, uint32_t, uint64_t
-#include <cstring>   // memcpy
-#include <limits>    // numeric_limits
+#include <array> // array
+#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+#include <cstring> // memcpy
+#include <limits> // numeric_limits
 
 // #include <nlohmann/detail/input/binary_reader.hpp>
 
@@ -7827,17 +7825,17 @@ private:
 
 // #include <nlohmann/detail/output/serializer.hpp>
 
-#include <algorithm>   // reverse, remove, fill, find, none_of
-#include <array>       // array
-#include <cassert>     // assert
-#include <ciso646>     // and, or
-#include <clocale>     // localeconv, lconv
-#include <cstddef>     // size_t, ptrdiff_t
-#include <cstdint>     // uint8_t
-#include <cstdio>      // snprintf
-#include <limits>      // numeric_limits
-#include <math.h>      // labs, isfinite, isnan, signbit
-#include <string>      // string
+#include <algorithm> // reverse, remove, fill, find, none_of
+#include <array> // array
+#include <cassert> // assert
+#include <ciso646> // and, or
+#include <clocale> // localeconv, lconv
+#include <cstddef> // size_t, ptrdiff_t
+#include <cstdint> // uint8_t
+#include <cstdio> // snprintf
+#include <limits> // numeric_limits
+#include <math.h> // labs, isfinite, isnan, signbit
+#include <string> // string
 #include <type_traits> // is_same
 
 // #include <nlohmann/detail/exceptions.hpp>
@@ -7848,7 +7846,7 @@ private:
 #include <ciso646> // or, and, not
 #include <cstdint> // intN_t, uintN_t
 #include <cstring> // memcpy, memmove
-#include <math.h>  // signbit, isfinite
+#include <math.h> // signbit, isfinite
 
 namespace nlohmann {
 namespace detail {
@@ -8043,8 +8041,8 @@ template <typename FloatType> boundaries compute_boundaries(FloatType value) {
 
   const bool  is_denormal = (E == 0);
   const diyfp v           = is_denormal
-                      ? diyfp(F, kMinExp)
-                      : diyfp(F + kHiddenBit, static_cast<int>(E) - kBias);
+                                ? diyfp(F, kMinExp)
+                                : diyfp(F + kHiddenBit, static_cast<int>(E) - kBias);
 
   // Compute the boundaries m- and m+ of the floating-point value
   // v = f * 2^e.
@@ -8070,8 +8068,8 @@ template <typename FloatType> boundaries compute_boundaries(FloatType value) {
   const bool  lower_boundary_is_closer = (F == 0 and E > 1);
   const diyfp m_plus                   = diyfp(2 * v.f + 1, v.e - 1);
   const diyfp m_minus                  = lower_boundary_is_closer
-                            ? diyfp(4 * v.f - 1, v.e - 2)  // (B)
-                            : diyfp(2 * v.f - 1, v.e - 1); // (A)
+                                             ? diyfp(4 * v.f - 1, v.e - 2) // (B)
+                                             : diyfp(2 * v.f - 1, v.e - 1); // (A)
 
   // Determine the normalized w+ = m+.
   const diyfp w_plus = diyfp::normalize(m_plus);
@@ -9345,10 +9343,9 @@ private:
     o->write_characters(number_buffer.data(), static_cast<std::size_t>(len));
 
     // determine if need to append ".0"
-    const bool value_is_int_like = std::none_of(
-        number_buffer.begin(), number_buffer.begin() + len + 1, [](char c) {
-          return (c == '.' or c == 'e');
-        });
+    const bool value_is_int_like =
+        std::none_of(number_buffer.begin(), number_buffer.begin() + len + 1,
+                     [](char c) { return (c == '.' or c == 'e'); });
 
     if (value_is_int_like) {
       o->write_characters(".0", 2);
@@ -9477,7 +9474,7 @@ public:
       : owned_value(init), value_ref(&owned_value), is_rvalue(true) {}
 
   template <class... Args>
-  json_ref(Args &&... args)
+  json_ref(Args &&...args)
       : owned_value(std::forward<Args>(args)...), value_ref(&owned_value),
         is_rvalue(true) {}
 
@@ -9513,8 +9510,8 @@ private:
 
 #include <cassert> // assert
 #include <numeric> // accumulate
-#include <string>  // string
-#include <vector>  // vector
+#include <string> // string
+#include <vector> // vector
 
 // #include <nlohmann/detail/macro_scope.hpp>
 
@@ -9715,10 +9712,9 @@ private:
       // convert null values to arrays or objects before continuing
       if (ptr->m_type == detail::value_t::null) {
         // check if reference token is a number
-        const bool nums = std::all_of(reference_token.begin(),
-                                      reference_token.end(), [](const char x) {
-                                        return (x >= '0' and x <= '9');
-                                      });
+        const bool nums =
+            std::all_of(reference_token.begin(), reference_token.end(),
+                        [](const char x) { return (x >= '0' and x <= '9'); });
 
         // change value to array for numbers or "-" or to object otherwise
         *ptr = (nums or reference_token == "-") ? detail::value_t::array
@@ -10938,7 +10934,7 @@ public:
 
 private:
   /// helper for exception-safe object creation
-  template <typename T, typename... Args> static T *create(Args &&... args) {
+  template <typename T, typename... Args> static T *create(Args &&...args) {
     AllocatorType<T> alloc;
     using AllocatorTraits = std::allocator_traits<AllocatorType<T>>;
 
@@ -14792,7 +14788,7 @@ public:
 
   @since version 2.0.8
   */
-  template <class... Args> void emplace_back(Args &&... args) {
+  template <class... Args> void emplace_back(Args &&...args) {
     // emplace_back only works for null objects or arrays
     if (JSON_UNLIKELY(not(is_null() or is_array()))) {
       JSON_THROW(type_error::create(311, "cannot use emplace_back() with " +
@@ -14837,7 +14833,7 @@ public:
 
   @since version 2.0.8
   */
-  template <class... Args> std::pair<iterator, bool> emplace(Args &&... args) {
+  template <class... Args> std::pair<iterator, bool> emplace(Args &&...args) {
     // emplace only works for null objects or arrays
     if (JSON_UNLIKELY(not(is_null() or is_object()))) {
       JSON_THROW(type_error::create(311, "cannot use emplace() with " +

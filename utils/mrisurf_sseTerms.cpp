@@ -71,16 +71,13 @@ struct SseTerms_DistortedSurfaces : public SseTermsBase {
                                      : // it is weird that this doesn't have all
                                        // the alternatives the dist has
                        (surface.orig_area() / (surface.total_area()))),
-        dist_scale(
-            (surface.patch())
-                ? 1.0
-                : (surface.status() == MRIS_PARAMETERIZED_SPHERE)
-                      ? sqrt(surface.orig_area() / (surface.total_area()))
-                      : (surface.neg_area() < surface.total_area())
-                            ? sqrt(surface.orig_area() /
-                                   (surface.total_area() - surface.neg_area()))
-                            : sqrt(surface.orig_area() /
-                                   (surface.total_area()))),
+        dist_scale((surface.patch()) ? 1.0
+                   : (surface.status() == MRIS_PARAMETERIZED_SPHERE)
+                       ? sqrt(surface.orig_area() / (surface.total_area()))
+                   : (surface.neg_area() < surface.total_area())
+                       ? sqrt(surface.orig_area() /
+                              (surface.total_area() - surface.neg_area()))
+                       : sqrt(surface.orig_area() / (surface.total_area()))),
 #endif
         vnoBegin(selector >= 0 ? selector : 0),
         vnoEnd(selector >= 0 ? selector + 1 : surface.nvertices()),

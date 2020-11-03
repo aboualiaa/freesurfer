@@ -5002,9 +5002,9 @@ int mrisComputePosterior2DTerm(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
 
     FileNamePath(mris->fname, path);
     sprintf(fname, "%s/%s.%d.dist.mgz", path,
-            mris->hemisphere == LEFT_HEMISPHERE
-                ? "lh"
-                : mris->hemisphere == BOTH_HEMISPHERES ? "both" : "rh",
+            mris->hemisphere == LEFT_HEMISPHERE    ? "lh"
+            : mris->hemisphere == BOTH_HEMISPHERES ? "both"
+                                                   : "rh",
             parms->t);
     MRISwriteD(mris, fname);
     DiagBreak();

@@ -190,7 +190,7 @@ class Sphere {
                                                             ELT(float, tdz) SEP  \
                                                             ELT(float, mean) SEP \
                                                             ELT(float, val) SEP  \
-                                                            ELT(float, curv) // end of macro
+  ELT(float, curv) // end of macro
 
 public:
   Sphere(MRIS *mris)

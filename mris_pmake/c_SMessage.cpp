@@ -427,9 +427,8 @@ void C_SMessage::dump(bool ab_syslogPrepend, std::string astr_outOfBand) {
 
   std::string   str_syslogPrepend = "";
   std::ostream &sout              = (b_fileSpecified) ? ofs_out
-                                         : (str_filename == "stdout")
-                                               ? (std::ostream &)std::cout
-                                               : (std::ostream &)std::cerr;
+                                    : (str_filename == "stdout") ? (std::ostream &)std::cout
+                                                                 : (std::ostream &)std::cerr;
 
   if (e_format_get() != eSM_devnull) {
     if (ab_syslogPrepend)

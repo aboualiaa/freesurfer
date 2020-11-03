@@ -1355,7 +1355,7 @@ static int mriLinearAlignPyramidLevel(MRI *mri_in, MRI *mri_ref,
   if (mri_in->thick <= 4.0)
     dt /= 2.0 ;
 #else
-  dt   = parms->dt;
+  dt = parms->dt;
 #endif
 
   m_L     = parms->lta->xforms[0].m_L;

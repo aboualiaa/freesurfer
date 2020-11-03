@@ -10046,10 +10046,10 @@ int MRISaverageGradients(MRIS *mris, int num_avgs) {
           // but could be enabled by making all these nodes go into the high end
           // of the initial datas_inp vector
         } else {
-          int new_index = MRISaverageGradients_old2new_indexMap
-                              ? MRISaverageGradients_old2new_indexMap[old_index]
-                              : old_index;
-          Data *d = datas_inp + new_index;
+          int   new_index = MRISaverageGradients_old2new_indexMap
+                                ? MRISaverageGradients_old2new_indexMap[old_index]
+                                : old_index;
+          Data *d         = datas_inp + new_index;
           if (!closeEnough(d->dx, v->dx) || !closeEnough(d->dy, v->dy) ||
               !closeEnough(d->dz, v->dz)) {
             errors++;
@@ -13841,11 +13841,10 @@ int MRISprintVertexStats(MRIS *mris, int vno, FILE *fp, int which_vertices) {
   VERTEX *const          v  = &mris->vertices[vno];
   MRISvertexCoord2XYZ_float(v, which_vertices, &x0, &y0, &z0);
   printf("vertex %d spacing for %s surface\n", vno,
-         which_vertices == ORIGINAL_VERTICES
-             ? "orig"
-             : which_vertices == CURRENT_VERTICES
-                   ? "current"
-                   : which_vertices == WHITE_VERTICES ? "white" : "unknown");
+         which_vertices == ORIGINAL_VERTICES  ? "orig"
+         : which_vertices == CURRENT_VERTICES ? "current"
+         : which_vertices == WHITE_VERTICES   ? "white"
+                                              : "unknown");
   for (mn = 0.0, num = n = 0; n < vt->vnum; n++) {
     VERTEX *const vn = &mris->vertices[vt->v[n]];
     if (vn->ripflag) {

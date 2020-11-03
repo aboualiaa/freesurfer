@@ -181,7 +181,7 @@ private:
     QJsonObject *o;
   };
   uint is_object : 1;
-  uint index : 31;
+  uint index     : 31;
 };
 
 #if !defined(QT_NO_DEBUG_STREAM) && !defined(QT_JSON_READONLY)

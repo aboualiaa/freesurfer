@@ -89,7 +89,7 @@ typedef struct {
       automask_thresh; // Use this FWHM instead of PSF when computing mask
   int reduce_fov;      // Flag: reduce PET FoV to be tight to mask.
   MRI_REGION *
-         automaskRegion; // Keep reduction region in case reinstate at original FoV
+      automaskRegion; // Keep reduction region in case reinstate at original FoV
   MRI *  yvol_full_fov; // Used to keep header of original FoV source data
   double PadThresh;     // Used to dilate mask based on automask_fwhm
   int    nPad;          // Actual amount of dilation
@@ -153,7 +153,7 @@ typedef struct {
   int  DoMeltzerPVC; // Meltzer method
   MRI *meltzer;      // MG output volume
   double
-         MeltzerBinThresh; // Binarize GM+WM PVF before smoothing, 0 turns off bin
+      MeltzerBinThresh; // Binarize GM+WM PVF before smoothing, 0 turns off bin
   double MeltzerMaskThresh; // Post-smoothing GM+WM PVF mask threshold
   int    MeltzerNDil;       // Dilate binarized mask
   MRI *  mzseg;             // means of MZ over each seg

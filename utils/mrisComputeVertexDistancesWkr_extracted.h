@@ -63,7 +63,7 @@ static bool FUNCTION_NAME(
       if (mris->v_ripflag[vno])
         continue;
       float const vx = mris->INPUT_X[vno], vy = mris->INPUT_Y[vno],
-                  vz           = mris->INPUT_Z[vno];
+                  vz = mris->INPUT_Z[vno];
 #endif
 
       if (!check)
@@ -138,7 +138,7 @@ static bool FUNCTION_NAME(
 #else
           char const v_ripflag = (char)mris->v_ripflag[vno];
       float const    vx = mris->INPUT_X[vno], vy = mris->INPUT_Y[vno],
-                  vz           = mris->INPUT_Z[vno];
+                  vz = mris->INPUT_Z[vno];
 #endif
       vertexInfo[vno].ripped             = v_ripflag;
       vertexInfo[vno].rippedOrZeroLength = v_ripflag;

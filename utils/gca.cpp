@@ -11460,7 +11460,7 @@ int    GCAhistoScaleImageIntensities(GCA *gca, MRI *mri, int noskull) {
   left_wm  = MRIvoxelsInLabel(mri_seg, Left_Cerebral_White_Matter);
   right_wm = MRIvoxelsInLabel(mri_seg, Right_Cerebral_White_Matter);
   label    = (left_wm > 2 * right_wm) ? Left_Cerebral_White_Matter
-                                   : Right_Cerebral_White_Matter;
+                                      : Right_Cerebral_White_Matter;
   printf("finding center of left hemi white matter\n");
   MRIfree(&mri_seg);
 
@@ -11501,9 +11501,9 @@ int    GCAhistoScaleImageIntensities(GCA *gca, MRI *mri, int noskull) {
     if (gca->ninputs == 1 ||
         r == max_T1_weighted_image) /* assume it is T1-weighted */
     {
-#define MIN_CONFORMED_WM_VAL 50  // assume wm greater than this
+#define MIN_CONFORMED_WM_VAL 50 // assume wm greater than this
 #define MAX_CONFORMED_WM_VAL 240 // assume wm than this
-      if (mriConformed(mri))     // use strong priors on where wm should be
+      if (mriConformed(mri)) // use strong priors on where wm should be
       {
         HISTOclearBins(h_mri, h_mri, 0, MIN_CONFORMED_WM_VAL);
         HISTOclearBins(h_mri, h_mri, MAX_CONFORMED_WM_VAL + 1, 255);
@@ -11729,9 +11729,9 @@ int GCAhistoScaleImageIntensitiesLongitudinal(GCA *gca, MRI *mri, int noskull) {
     HISTOclearZeroBin(h_mri);
     if (gca->ninputs == 1) /* assume it is T1-weighted */
     {
-#define MIN_CONFORMED_WM_VAL 50  // assume wm greater than this
+#define MIN_CONFORMED_WM_VAL 50 // assume wm greater than this
 #define MAX_CONFORMED_WM_VAL 240 // assume wm than this
-      if (mriConformed(mri))     // use strong priors on where wm should be
+      if (mriConformed(mri)) // use strong priors on where wm should be
       {
         HISTOclearBins(h_mri, h_mri, 0, MIN_CONFORMED_WM_VAL);
         HISTOclearBins(h_mri, h_mri, MAX_CONFORMED_WM_VAL + 1, 255);
@@ -12905,7 +12905,7 @@ double covariance_determinant(const GC1D *gc, const int ninputs) {
 #ifdef HAVE_OPENMP
   tid = omp_get_thread_num();
 #else
-  tid     = 0;
+  tid = 0;
 #endif
   if (m_cov[tid] &&
       (m_cov[tid]->rows != ninputs || m_cov[tid]->cols != ninputs)) {
@@ -17422,8 +17422,10 @@ int GCAmapRenormalizeByClass(GCA *gca, MRI *mri, TRANSFORM *transform) {
       GCAclassMode(gca, c, modes);
       class_modes[c] = modes[frame];
       printf("%s (%d): mode = %2.2f\n",
-             c == CSF_CLASS ? "CSF" : c == GM_CLASS ? "GM" : "WM", c,
-             class_modes[c]);
+             c == CSF_CLASS  ? "CSF"
+             : c == GM_CLASS ? "GM"
+                             : "WM",
+             c, class_modes[c]);
       if (c == Gdiag_no) {
         DiagBreak();
       }
@@ -17524,8 +17526,10 @@ int GCAmapRenormalizeByClass(GCA *gca, MRI *mri, TRANSFORM *transform) {
       class_scales[c] = (float)smooth_peak / class_modes[c];
       printf("%s (%d): peak at %2.2f, smooth at %2.2f (%d voxels), "
              "scaling by %2.2f\n",
-             c == CSF_CLASS ? "CSF" : c == GM_CLASS ? "GM" : "WM", c, peak,
-             smooth_peak, num, class_scales[c]);
+             c == CSF_CLASS  ? "CSF"
+             : c == GM_CLASS ? "GM"
+                             : "WM",
+             c, peak, smooth_peak, num, class_scales[c]);
       if (c == Gdiag_no) {
         DiagBreak();
       }

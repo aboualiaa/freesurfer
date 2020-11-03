@@ -97,8 +97,8 @@ QVector<int> LayerVolumeBase::SetVoxelByIndex(int *n_in, int nPlane, bool bAdd,
   int     nActiveComp = GetActiveFrame();
   double *draw_range =
       bAdd ? m_propertyBrush->GetDrawRange() : m_propertyBrush->GetEraseRange();
-  double *exclude_range = bAdd ? m_propertyBrush->GetExcludeRange()
-                               : m_propertyBrush->GetEraseExcludeRange();
+  double *         exclude_range  = bAdd ? m_propertyBrush->GetExcludeRange()
+                                         : m_propertyBrush->GetEraseExcludeRange();
   LayerVolumeBase *ref_layer      = m_propertyBrush->GetReferenceLayer();
   vtkImageData *   ref            = m_imageData;
   int              nActiveCompRef = 0;

@@ -282,7 +282,7 @@ TEST(dmatrix_unit, dmatrix_alloc) { // NOLINT
   // and test for memory allocation errors
 }
 
-auto main(int /*argc*/, char * * /*argv*/) -> int {
+auto main(int /*argc*/, char ** /*argv*/) -> int {
 
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();

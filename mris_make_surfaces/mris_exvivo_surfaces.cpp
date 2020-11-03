@@ -1492,8 +1492,9 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
               "v %d, target value = 30:%2.1f, 5:%2.1f, mag = %2.1f, dist = "
               "%2.2f, %s\n",
               Gdiag_no, v->val, v->valbak, v->mean, v->d,
-              local_max_found ? "local max"
-                              : max_mag_val30 > 0 ? "grad" : "min");
+              local_max_found     ? "local max"
+              : max_mag_val30 > 0 ? "grad"
+                                  : "min");
   }
 
   mean_dist /= (float)(total_vertices - nmissing);
@@ -1838,7 +1839,9 @@ int MRIScomputeBorderValues_PD_WHITE(MRI_SURFACE *mris, MRI *mri_PD,
       fprintf(stdout,
               "v %d, target value = %2.1f, mag = %2.1f, dist = %2.2f, %s\n",
               Gdiag_no, v->val, v->mean, v->d,
-              local_max_found ? "local max" : max_mag_val > 0 ? "grad" : "min");
+              local_max_found   ? "local max"
+              : max_mag_val > 0 ? "grad"
+                                : "min");
   }
 
   mean_dist /= (float)(total_vertices - nmissing);

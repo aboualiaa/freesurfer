@@ -24,9 +24,7 @@ public:
 
 private:
   void setmris(MRIS *m) {
-    p_mris = std::shared_ptr<MRIS>(m, [](MRIS *ptr) {
-      MRISfree(&ptr);
-    });
+    p_mris = std::shared_ptr<MRIS>(m, [](MRIS *ptr) { MRISfree(&ptr); });
   }
   py::object python();
   void       transferParameters(py::object &pyobj);

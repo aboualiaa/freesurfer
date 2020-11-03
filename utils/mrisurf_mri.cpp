@@ -489,9 +489,9 @@ int MRISpositionSurface(MRI_SURFACE *mris, MRI *mri_brain, MRI *mri_smooth,
 
     if (!parms->fp) {
       sprintf(fname, "%s.%s.out",
-              mris->hemisphere == RIGHT_HEMISPHERE
-                  ? "rh"
-                  : mris->hemisphere == BOTH_HEMISPHERES ? "both" : "lh",
+              mris->hemisphere == RIGHT_HEMISPHERE   ? "rh"
+              : mris->hemisphere == BOTH_HEMISPHERES ? "both"
+                                                     : "lh",
               parms->base_name);
       if (!parms->start_t) {
         INTEGRATION_PARMS_openFp(parms, fname, "w");
@@ -2620,7 +2620,9 @@ static int MRIScomputeBorderValues_new(
       printf("vno=%d finished: target value = %2.1f, mag = %2.1f, dist = "
              "%2.2f, %s\n",
              vno, v->val, v->mean, v->d,
-             local_max_found ? "local max" : max_mag_val > 0 ? "grad" : "min");
+             local_max_found   ? "local max"
+             : max_mag_val > 0 ? "grad"
+                               : "min");
 
     if (CBVO.LocalMaxFound)
       MRIsetVoxVal(CBVO.LocalMaxFound, vno, 0, 0, 0, local_max_found);
@@ -3402,7 +3404,9 @@ static int MRIScomputeBorderValues_old(
       fprintf(stdout,
               "v %d, target value = %2.1f, mag = %2.1f, dist = %2.2f, %s\n",
               Gdiag_no, v->val, v->mean, v->d,
-              local_max_found ? "local max" : max_mag_val > 0 ? "grad" : "min");
+              local_max_found   ? "local max"
+              : max_mag_val > 0 ? "grad"
+                                : "min");
 #if 0
     if (vno == 44289 || vno == 91080 || vno == 92286 || vno == 46922)
       fprintf(stdout, "v %d, target value = %2.1f, mag = %2.1f, dist=%2.2f\n",
@@ -9621,7 +9625,9 @@ int MRIScomputeBorderValuesV6(MRI_SURFACE *mris, MRI *mri_brain,
       printf("vno=%d finished: target value = %2.1f, mag = %2.1f, dist = "
              "%2.2f, %s\n",
              vno, v->val, v->mean, v->d,
-             local_max_found ? "local max" : max_mag_val > 0 ? "grad" : "min");
+             local_max_found   ? "local max"
+             : max_mag_val > 0 ? "grad"
+                               : "min");
   }
   printf("#SI# sigma=%g had to be increased for %d vertices, nripped=%d\n",
          sigma, n_sigma_increases, nripped);
