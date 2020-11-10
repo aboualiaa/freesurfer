@@ -343,15 +343,6 @@ endif()
 
 if(FS_BUILD_TESTING)
   include(CTest)
-  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh
-                 ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY
-                 )
-  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh
-                 ${CMAKE_CURRENT_BINARY_DIR}/attic/test.sh COPYONLY
-                 )
-  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh
-                 ${CMAKE_CURRENT_BINARY_DIR}/utils/test.sh COPYONLY
-                 )
 endif()
 
 include(cmake/functions.cmake)
