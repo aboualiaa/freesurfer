@@ -202,7 +202,7 @@ if(NOT DEFINED FS_VERSION_PATCH)
   set(FS_VERSION_PATCH 0)
 endif()
 if(NOT DEFINED FS_VERSION_SUFFIX)
-  set(FS_VERSION_SUFFIX git)
+  set(FS_VERSION_SUFFIX "")
 endif()
 
 if(NOT PACKAGE_VERSION)
@@ -242,7 +242,7 @@ if(CCACHE_PROGRAM
    AND FS_USE_CCACHE
    AND NOT CMAKE_BUILD_TYPE STREQUAL "coverage"
    )
-  message(STATUS "using ccache")
+  message(STATUS "Using ccache at ${CCACHE_PROGRAM}")
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 endif()
 
@@ -276,7 +276,7 @@ if(NOT CMAKE_CXX_EXTENSIONS)
   set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
 
-project(freesurfer
+project(freesurfer VERSION ${PACKAGE_VERSION}
         DESCRIPTION "An open source software suite for processing and analyzing (human) brain MRI images."
         LANGUAGES C CXX Fortran
         )
@@ -320,8 +320,6 @@ if(FS_SUPRESS_WARNINGS)
   endif()
   add_link_options(-w)
 endif()
-
-add_compile_options(-fPIC)
 
 if(CMAKE_CONFIGURATION_TYPES AND FS_EXP_BUILD_CONFIGURATIONS)
   if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
@@ -507,7 +505,7 @@ mark_as_advanced(Matlab_ROOT_DIR)
 # -------- hpx --------
 set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
 set(HPX_IGNORE_CMAKE_BUILD_TYPE_COMPATIBILITY OFF FORCE)
-find_package(HPX)
+find_package(HPX HINTS "/Users/aboualiaa/Desktop/.temp/install/hpx/")
 mark_as_advanced(HPX_GIT_COMMIT
                  HPX_Fortran_COMPILER_VERSION
                  HPX_Fortran_COMPILER_ID
@@ -607,6 +605,15 @@ set(BENCHMARK_ENABLE_TESTING
     CACHE BOOL "Suppressing benchmark's tests" FORCE
     )
 
+find_package(jpeg REQUIRED)
+find_package(expat REQUIRED)
+find_package(tiff REQUIRED)
+find_package(libxml2 REQUIRED)
+find_package(fmt REQUIRED HINTS "/usr/local/opt/fmt")
+find_package(spdlog REQUIRED HINTS "/usr/local/opt/spdlog")
+find_package(Microsoft.GSL REQUIRED HINTS "/usr/local/opt/cpp-gsl")
+find_package(gtest REQUIRED)
+find_package(benchmark REQUIRED)
 add_subdirectory(packages)
 
 #if(APPLE)
@@ -1054,36 +1061,9 @@ if(NOT FS_MINIMAL_BUILD)
                      )
 endif()
 
-# # Only build some old subdirectories if they exist
-# # AND the build host is a certain version of Cent/Redhat OS
-# if(EXISTS "/etc/redhat-release")
-#    execute_process(COMMAND cat \/etc\/redhat\-release OUTPUT_VARIABLE REDHAT_VERSION)
-#    string(STRIP ${REDHAT_VERSION} REDHAT_VERSION)
-#    # message(STATUS "Host is ${REDHAT_VERSION}")
-#    if(EXISTS "./mri_make_bem_surfaces")
-#       if(REDHAT_VERSION MATCHES "release 7")
-#          add_subdirectories(mri_make_bem_surfaces)
-#       elseif(REDHAT_VERSION MATCHES "release 8")
-#          add_subdirectories(mri_make_bem_surfaces)
-#       endif()
-#    endif()
-# endif()
-
 host_os()
-# message(STATUS "FROM top level CMakeLists.txt HOST_OS=${HOST_OS}")
-message(STATUS "Building on host OS ${HOST_OS}")
 
-# Only build some old subdirectories if they exist
-# AND the build host is a certain version of Cent/Redhat OS
-if(EXISTS "./mri_make_bem_surfaces")
-  if(HOST_OS MATCHES "CentOS7")
-    add_subdirectories(mri_make_bem_surfaces)
-    message(STATUS "Adding mri_make_bem_surfaces to build on ${HOST_OS}")
-  elseif(HOST_OS MATCHES "CentOS8")
-    add_subdirectories(mri_make_bem_surfaces)
-    message(STATUS "Adding mri_make_bem_surfaces to build on ${HOST_OS}")
-  endif()
-endif()
+message(STATUS "Building on host OS ${HOST_OS}")
 
 if(FS_INFANT_MODULE)
   add_subdirectory(infant)

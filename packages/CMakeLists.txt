@@ -3,24 +3,16 @@ project(packages)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_subdirectories(
-  jpeg
-  expat
-  tiff
+  netcdf
   glut
-  xml2
   minc
   dicom
   cephes
-  netcdf
   tetgen
   nrrdio
   nifti
   gifti
   svm
-  googletest
-  benchmark
-  GSL
-  fmt
 )
 
 mark_as_advanced(GSL_TEST

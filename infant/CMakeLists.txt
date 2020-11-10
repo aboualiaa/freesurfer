@@ -16,7 +16,7 @@ install(PROGRAMS atlassubjects.csh
         )
 
 install(PROGRAMS infant_recon_all DESTINATION bin)
-install_append_help(infant_recon_all infant_recon_all.help.xml bin)
+#install_append_help(infant_recon_all infant_recon_all.help.xml bin)
 
 install_pyscript(mri_label_fusion)
 add_subdirectory(labelfusion)

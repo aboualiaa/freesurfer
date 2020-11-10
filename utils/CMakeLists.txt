@@ -24,12 +24,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${ITK_INCLUDE_DIRS}
                     )
 
-if(CMAKE_BUILD_TYPE STREQUAL "cfisan"
-   OR CMAKE_BUILD_TYPE STREQUAL "fulllto"
-   OR CMAKE_BUILD_TYPE STREQUAL "thinlto"
-   OR CMAKE_BUILD_TYPE STREQUAL "asan"
-   OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
-   )
+set(INCOMPATIBLE_BUILD_TYPES "cfisan;fulllto;thinlto;asan")
+if (CMAKE_BUILD_TYPE IN_LIST INCOMPATIBLE_BUILD_TYPES)
   set(UTILS_BUILD_TYPE "STATIC")
 else()
   set(UTILS_BUILD_TYPE "SHARED")
@@ -219,17 +215,17 @@ add_library(utils
             )
 
 target_link_libraries(utils
-                      jpeg
-                      tiff
-                      xml2
-                      minc
+                      ${JPEG_LIBRARIES}
+                      ${TIFF_LIBRARIES}
+                      ${LIBXML2_LIBRARIES}
+                      ${EXPAT_LIBRARIES}
                       netcdf
+                      minc
                       nrrdio
                       dicom
                       cephes
                       nifti
                       gifti
-                      expat
                       ${ZLIB_LIBRARIES}
                       ${ITK_LIBRARIES}
                       )

@@ -11,14 +11,14 @@
 
 namespace gtest = testing::internal;
 
-const char *const filename =
+char const *const filename =
     "/Users/aboualiaa/Downloads/sample96/anat+orig.BRIK";
-const char *const header = "/Users/aboualiaa/Downloads/sample96/anat+orig.HEAD";
-const char *const invalid_filename =
+char const *const header = "/Users/aboualiaa/Downloads/sample96/anat+orig.HEAD";
+char const *const invalid_filename =
     "/Users/aboualiaa/Downloads/sample96/invalid.BRIK";
-const char *const output_filename =
+char const *const output_filename =
     "/Users/aboualiaa/Downloads/sample96/testResult.BRIK";
-const char *const afni_header_out =
+char const *const afni_header_out =
     "AFNI Header Information ============================================\n"
     "DATASET_RANK      : spatial dims 3, sub-bricks 1\n"
     "DATASET_DIMENSIONS: (256, 256, 124)\n"

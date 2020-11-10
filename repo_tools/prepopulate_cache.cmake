@@ -32,10 +32,6 @@ set(FS_BUILD_ATTIC
     ON
     CACHE BOOL "Build deprecated tools from the attic"
     )
-set(FS_BUILD_BOOST_TESTS
-    ON
-    CACHE BOOL "Unimplemented"
-    )
 set(FS_BUILD_DNG
     ON
     CACHE BOOL "Build Doug's testing tools"
@@ -91,7 +87,7 @@ set(FS_INFANT_MODULE
     CACHE BOOL "Include infant recon-all"
     )
 set(FS_QATOOLS_MODULE
-    ON
+    OFF
     CACHE BOOL "Include quality assurance tools"
     )
 set(FS_FREEVIEW_LINEPROF

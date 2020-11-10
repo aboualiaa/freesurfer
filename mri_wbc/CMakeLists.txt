@@ -4,7 +4,7 @@ include_directories(${FS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 add_executable(mri_wbc mri_wbc.cpp)
 target_link_libraries(mri_wbc utils Boost::program_options Boost::filesystem
-                      benchmark fmt
+                      benchmark::benchmark ${FMT_LIBRARIES}
                       )
 #target_link_libraries(mri_wbc utils ${Boost_LIBRARIES} benchmark fmt)
 install(TARGETS mri_wbc DESTINATION bin)

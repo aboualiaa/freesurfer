@@ -7,7 +7,8 @@ else()
 endif()
 
 add_library(mri_convert_lib STATIC EXCLUDE_FROM_ALL mri_convert_lib.cpp)
-set(COMMON_LIBS utils mri_convert_lib Boost::program_options benchmark fmt)
+set(COMMON_LIBS utils mri_convert_lib Boost::program_options benchmark::benchmark fmt::fmt
+        ${SPDLOG_LIBRARIES})
 
 target_include_directories(mri_convert_lib
                            PUBLIC ${FS_INCLUDE_DIRS}
@@ -38,7 +39,7 @@ if(BUILD_TESTING)
   add_executable(mri_convert_unit mri_convert_unit.cpp)
   add_help(mri_convert_unit mri_convert.help.xml)
   target_link_libraries(mri_convert_unit ${COMMON_LIBS} ${GTEST_LIBRARIES}
-                        gtest ${ARMADILLO_LIBRARIES}
+                        ${ARMADILLO_LIBRARIES}
                         )
 
   if(CMAKE_CONFIGURATION_TYPES)
@@ -54,6 +55,6 @@ if(BUILD_TESTING)
   add_executable(mri_convert_bench mri_convert_bench.cpp)
   add_help(mri_convert_bench mri_convert.help.xml)
   target_link_libraries(mri_convert_bench ${COMMON_LIBS} ${GTEST_LIBRARIES}
-                        gtest ${ARMADILLO_LIBRARIES}
+                        ${ARMADILLO_LIBRARIES}
                         )
 endif()
