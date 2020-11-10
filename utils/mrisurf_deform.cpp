@@ -1785,11 +1785,16 @@ int mrisComputePosteriorTerm(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
     char fname[STRLEN], path[STRLEN];
 
     FileNamePath(mris->fname, path);
-    sprintf(fname, "%s/%s.%d.dist.mgz", path,
-            mris->hemisphere == LEFT_HEMISPHERE    ? "lh"
-            : mris->hemisphere == BOTH_HEMISPHERES ? "both"
-                                                   : "rh",
-            parms->t);
+    int req = snprintf(fname, STRLEN, "%s/%s.%d.dist.mgz", path,
+                       mris->hemisphere == LEFT_HEMISPHERE    ? "lh"
+                       : mris->hemisphere == BOTH_HEMISPHERES ? "both"
+                                                              : "rh",
+                       parms->t);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     MRISwriteD(mris, fname);
     DiagBreak();
   }
@@ -1957,9 +1962,13 @@ int mrisRemoveNegativeArea(MRI_SURFACE *mris, INTEGRATION_PARMS *parms,
   if (Gdiag & DIAG_WRITE && parms->fp == NULL) {
     char fname[STRLEN];
 
-    sprintf(fname, "%s.%s.out",
-            mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
-            parms->base_name);
+    int req = snprintf(fname, STRLEN, "%s.%s.out",
+                       mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
+                       parms->base_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if (!parms->start_t) {
       INTEGRATION_PARMS_openFp(parms, fname, "w");
     } else {
@@ -4167,7 +4176,6 @@ int MRISrepositionSurface(MRI_SURFACE *mris, MRI *mri, int *target_vnos,
 
   printf("flags = %x, size = %ld\n", flags, (long)sizeof(flags));
 
-  memset(&parms, 0, sizeof(parms));
   parms.fill_interior = 0;
   parms.projection    = NO_PROJECTION;
   parms.tol           = 1e-4;
@@ -4240,7 +4248,6 @@ int MRISrepositionSurfaceToCoordinate(MRI_SURFACE *mris, MRI *mri,
 
   printf("MRISrepositionSurfaceToCoordinate(%d, %f, %f, %f, %d, %f, %x)\n",
          target_vno, tx, ty, tz, nsize, sigma, flags);
-  memset(&parms, 0, sizeof(parms));
   parms.fill_interior = 0;
   parms.projection    = NO_PROJECTION;
   parms.tol           = 1e-4;
@@ -4605,9 +4612,8 @@ int MRISrigidBodyAlignLocal(MRI_SURFACE *mris, INTEGRATION_PARMS *old_parms) {
   INTEGRATION_PARMS parms;
 
   /* dx,dy,dz interpreted as rotations in applyGradient when status is rigid */
-  auto const old_status = mris->status; /* okay, okay, this is a hack too... */
-  mris->status          = MRIS_RIGID_BODY;
-  memset(&parms, 0, sizeof(parms));
+  auto const old_status  = mris->status; /* okay, okay, this is a hack too... */
+  mris->status           = MRIS_RIGID_BODY;
   parms.integration_type = INTEGRATE_LM_SEARCH;
   parms.integration_type = INTEGRATE_LINE_MINIMIZE;
 
@@ -4650,9 +4656,8 @@ int MRISrigidBodyAlignVectorLocal(MRI_SURFACE *      mris,
   INTEGRATION_PARMS parms;
 
   /* dx,dy,dz interpreted as rotations in applyGradient when status is rigid */
-  auto const old_status = mris->status; /* okay, okay, this is a hack too... */
-  mris->status          = MRIS_RIGID_BODY;
-  memset(&parms, 0, sizeof(parms));
+  auto const old_status  = mris->status; /* okay, okay, this is a hack too... */
+  mris->status           = MRIS_RIGID_BODY;
   parms.integration_type = INTEGRATE_LM_SEARCH;
   parms.integration_type = INTEGRATE_LINE_MINIMIZE;
 

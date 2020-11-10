@@ -26,16 +26,16 @@
   HEADERS
   ------------------------------------------------------------------------*/
 
-#include <cctype>
-#include <cerrno>
-#include <cmath>
-
-#include <cstdio>
-#include <cstdlib>
-#include <ctime> /* msvc (dng) */
+#include <ctype.h>
+#include <errno.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/param.h>
 #include <sys/resource.h>
 #include <sys/types.h>
+#include <time.h> /* msvc (dng) */
 #include <unistd.h>
 
 /* This should be in ctype.h, but the compiler complains */
@@ -74,12 +74,12 @@ int setRandomSeed(long seed) {
 
   // seed vnl_random thingy
   if (idum == seed) {
-    /* If you want to reseed it to the same seed you had before, you have to run
-       OpenRan1() with a different seed, then run it again with the same seed as
-       before, otherwise it does not restart the generator.  This change was
-       made by DNG on March 21, 2014. It might break automatic tests that try to
-       test with the same seed. This code is called by MRIScomputeNormals() when
-       there is a degenerate vertex where the average normal is 0.*/
+    /* If you want to reseed it to the same seed you had before, you have to run OpenRan1()
+       with a different seed, then run it again with the same seed as before, otherwise
+       it does not restart the generator.  This change was made by DNG on March 21, 2014.
+       It might break automatic tests that try to test with the same seed. This code
+       is called by MRIScomputeNormals() when there is a degenerate vertex where the
+       average normal is 0.*/
     long idummy = seed - 1;
     OpenRan1(&idummy);
   }
@@ -92,8 +92,8 @@ int setRandomSeed(long seed) {
   return (NO_ERROR);
 }
 
-long getRandomSeed() { return (idum); }
-long getRandomCalls() { return (nrgcalls); }
+long getRandomSeed(void) { return (idum); }
+long getRandomCalls(void) { return (nrgcalls); }
 
 double randomNumber(double low, double hi) {
   double val, range;
@@ -106,7 +106,7 @@ double randomNumber(double low, double hi) {
 
   if (idum == 0L) /* change seed from run to run */
   {
-    if (true) {
+    if (1) {
       static int laterTime = 0;
       if (!laterTime) {
         laterTime = 1;
@@ -129,7 +129,7 @@ double randomNumber(double low, double hi) {
                 commBuffer);
       }
     }
-    idum = -1L * (long)(abs((int)time(nullptr)));
+    idum = -1L * (long)(abs((int)time(NULL)));
   }
 
   range = hi - low;
@@ -274,7 +274,7 @@ char *fgetl(char *s, int n, FILE *fp) {
   do {
     cp = fgets(s, n, fp);
     if (!cp)
-      return (nullptr);
+      return (NULL);
 
     while (isspace((int)*cp))
       cp++;
@@ -442,7 +442,7 @@ int FileExists(const char *fname) {
   else
     errno = old_errno;
 
-  return (fp != nullptr);
+  return (fp != NULL);
 }
 
 /*------------------------------------------------------------------------
@@ -920,10 +920,6 @@ union ieee754_float {
 #endif
 
 int devIsinf(float value) {
-  if (-value == std::numeric_limits<float>::infinity())
-    return -1;
-  else
-    return std::isinf(value);
   unsigned int s, e, f;
 
   union ieee754_float v;
@@ -943,7 +939,6 @@ int devIsinf(float value) {
 
 /* isnan non-zero if NaN, 0 otherwise */
 int devIsnan(float value) {
-  return std::isnan(value);
   unsigned int e, f;
   //  unsigned int s;
 
@@ -998,8 +993,8 @@ char *FileNameFromWildcard(const char *inStr, char *outStr) {
   if (inStr != outStr)
     strcpy(outStr, inStr);
   cp = strchr(inStr, '*');
-  if (nullptr != cp) {
-    if (glob(inStr, 0, nullptr, &gbuf) == 0 && gbuf.gl_pathc > 0)
+  if (NULL != cp) {
+    if (glob(inStr, 0, NULL, &gbuf) == 0 && gbuf.gl_pathc > 0)
       strcpy(outStr, gbuf.gl_pathv[0]);
   }
 
@@ -1088,7 +1083,7 @@ int ItemsInString(const char *str) {
   }
 
   // Scroll through the rest of the string
-  while (true) {
+  while (1) {
     items++;
     while (!isspace(str[nthchar])) {
       // scroll thru chars in the item = nonwhitespace
@@ -1137,7 +1132,7 @@ char *deblank(const char *str) {
 char *str_toupper(char *str) {
   for (unsigned int n = 0; n < strlen(str); n++)
     str[n] = toupper(str[n]);
-  return (nullptr);
+  return (0);
 }
 
 /*
@@ -1146,11 +1141,11 @@ char *str_toupper(char *str) {
  * routines are declared here (instead of trying to guess how long to quad
  * should be implemented)...
  */
-void __ltoq() {
+void __ltoq(void) {
   printf("ERROR: Attempting usage of '__ltoq' routine!\n");
   exit(1);
 }
-void __qtol() {
+void __qtol(void) {
   printf("ERROR: Attempting usage of '__qtol' routine!\n");
   exit(1);
 }
@@ -1324,12 +1319,28 @@ char *GetNthItemFromString(const char *str, int nth) {
   if (nth >= nitems) {
     printf("ERROR: asking for item %d, only %d items in string\n", nth, nitems);
     printf("%s\n", str);
-    return (nullptr);
+    return (NULL);
   }
 
-  for (n = 0; n < nth; n++)
-    sprintf(fmt, "%s %%*s", fmt);
-  sprintf(fmt, "%s %%s", fmt);
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wrestrict"
+#endif
+  for (n = 0; n < nth; n++) {
+    int req = snprintf(fmt, 2000, "%s %%*s", fmt);
+    if (req >= 2000) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  }
+  int req = snprintf(fmt, 2000, "%s %%s", fmt);
+  if (req >= 2000) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic pop
+#endif
   // printf("fmt %s\n",fmt);
   sscanf(str, fmt, tmpstr);
 
@@ -1352,9 +1363,9 @@ char *GetNthItemFromString(const char *str, int nth) {
                   Series: Prentice-Hall Series in Automatic Computation
 
 
-                                                                        reorders
- a[] (of length n) returns k_th smallest in array can be used to compute the
- median
+                                                                        reorders a[] (of length n)
+                  returns k_th smallest in array
+                  can be used to compute the median
 
  ---------------------------------------------------------------------------*/
 float kth_smallest(float a[], int n, int k) {
@@ -1510,7 +1521,7 @@ float mad(float a[], int n) {
 
   medi = median(a, n);
 
-  if (t == nullptr)
+  if (t == NULL)
     ErrorExit(ERROR_NO_MEMORY,
               "utils.c mad(...) could not allocate memory for t");
 
@@ -1538,7 +1549,7 @@ int nint2(const double f) {
   return (f < 0 ? ((int)(f - 0.5)) : ((int)(f + 0.49999999)));
 }
 
-void (*progress_callback)(int) = nullptr;
+void (*progress_callback)(int) = 0;
 int global_progress_range[2]   = {0, 100};
 
 /*---------------------------------------------------------------------------
@@ -1575,9 +1586,9 @@ void exec_progress_callback(int slice, int total_slices, int frame,
 int *compute_permutation(int num, int *vec) {
   int n, index, tmp;
 
-  if (vec == nullptr)
+  if (vec == NULL)
     vec = (int *)calloc(num, sizeof(vec[0]));
-  if (vec == nullptr)
+  if (vec == NULL)
     ErrorExit(ERROR_NOMEMORY, "compute_permutation(%d): calloc failed", num);
 
   for (n = 0; n < num; n++)
@@ -1597,9 +1608,9 @@ int *compute_permutation(int num, int *vec) {
   \brief returns Vm Peak by reading
   /proc/self/status. Note that it is only as accurate as
   /proc/self/status which is a file that needs to be updated by the
-  OS; not sure how often that happens.
+  OS; not sure how often that happens. 
 */
-int GetVmPeak() {
+int GetVmPeak(void) {
   static int u[5];
   GetMemUsage(u);
   return (u[1]);
@@ -1611,7 +1622,7 @@ int GetVmPeak() {
   only as accurate as /proc/self/status which is a file that needs to
   be updated by the OS; not sure how often that happens.
 */
-int GetVmSize() {
+int GetVmSize(void) {
   static int u[5];
   GetMemUsage(u);
   return (u[0]);
@@ -1630,13 +1641,13 @@ int *GetMemUsage(int *u) {
   static char tag[500];
   int         r;
 
-  if (u == nullptr)
+  if (u == NULL)
     u = (int *)calloc(sizeof(int), 5);
   fp = fopen("/proc/self/status", "r");
-  if (fp == nullptr)
+  if (fp == NULL)
     return (u); // not there on MAC
 
-  while (true) {
+  while (1) {
     r = fscanf(fp, "%s", tag);
     if (r == EOF)
       break;
@@ -1724,7 +1735,7 @@ int WriteRUsage(int who, const char *pre, char *fname) {
   int   err;
   FILE *fp;
   fp = fopen(fname, "w");
-  if (fp == nullptr)
+  if (fp == NULL)
     return (1);
   err = PrintRUsage(who, pre, fp);
   return (err);
@@ -1884,14 +1895,14 @@ double *DListStats(double *dlist, int nlist, double *stats) {
   double      mean, min, max, stddev;
   if (nlist <= 0) {
     printf("ERROR: DListStats() nlist = %d\n", nlist);
-    return (nullptr);
+    return (NULL);
   }
-  if (dlist == nullptr) {
+  if (dlist == NULL) {
     printf("ERROR: DListStats() dlist is NULL\n");
-    return (nullptr);
+    return (NULL);
   }
 
-  if (stats == nullptr)
+  if (stats == NULL)
     stats = (double *)calloc(sizeof(double), 5);
   sum  = 0;
   sum2 = 0;

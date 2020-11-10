@@ -21,8 +21,7 @@
 
 #include "mrisurf_base.h"
 
-// MRIS code dealing with the existence and connectedness of the vertices,
-// edges, and faces
+// MRIS code dealing with the existence and connectedness of the vertices, edges, and faces
 //                   and with their partitioning into sets (ripped, marked, ...)
 //                   but not with their placement in the xyz coordinate space
 
@@ -213,7 +212,7 @@ void MRIScheckIsPolyhedron(MRIS *mris, const char *file, int line) {
   Edges *edges = (Edges *)malloc(nvertices * sizeof(Edges));
 
   size_t hiVnosCapacity = 0;
-  int *  hiVnos         = nullptr;
+  int *  hiVnos         = NULL;
   size_t hiVnosSize     = 0;
 
   // Record all the edges - defined by 1-hop neighbours
@@ -615,7 +614,7 @@ int MRIStopologicalDefectIndex(MRIS *mris) {
 // MRI_EDGE support
 
 /*
-  Allocates and assigns edge structures.
+  Allocates and assigns edge structures. 
   I think the corner values are not correct.
 */
 int MRISedges(MRIS *surf) {
@@ -624,8 +623,7 @@ int MRISedges(MRIS *surf) {
 
   surf->nedges = MRIScountEdges(surf);
   surf->edges  = (MRI_EDGE *)calloc(surf->nedges, sizeof(MRI_EDGE));
-  // printf("MRISedges(): nv=%d, nf=%d,
-  // ne=%d\n",surf->nvertices,surf->nfaces,surf->nedges);
+  //printf("MRISedges(): nv=%d, nf=%d, ne=%d\n",surf->nvertices,surf->nfaces,surf->nedges);
 
   // This is not thread safe and cannot be made thread safe
   for (vtxno0 = 0; vtxno0 < surf->nvertices; vtxno0++) {
@@ -677,8 +675,8 @@ int MRISedges(MRIS *surf) {
         }
       }
 
-      // Now find the two vertices of the faces that are not common between the
-      // faces; these are the 3rd corner for the two triangles
+      // Now find the two vertices of the faces that are not common between the faces;
+      // these are the 3rd corner for the two triangles
       {
         int k;
         for (k = 0; k < 2; k++) { // go thru the two faces
@@ -764,13 +762,13 @@ int MRIScorners(MRIS *surf) {
   if (surf->corners)
     return (0);
 
-  // printf("Building triangle corner toplology\n");
+  //printf("Building triangle corner toplology\n");
   if (!surf->edges)
     MRISedges(surf);
 
   surf->ncorners = 3 * surf->nfaces;
   surf->corners  = (MRI_CORNER *)calloc(sizeof(MRI_CORNER), surf->ncorners);
-  // printf("MRIScorners(): nv=%d, nf=%d, ne=%d, nc=%d\n",
+  //printf("MRIScorners(): nv=%d, nf=%d, ne=%d, nc=%d\n",
   //	 surf->nvertices,surf->nfaces,surf->nedges,surf->ncorners);
 
   // First assign vertices to each corner
@@ -806,8 +804,7 @@ int MRIScorners(MRIS *surf) {
       for (k = 0; k < v->vtotal; k++) {
         // If this vertex neighbor is the same vertex as this corner neighbor
         if (v->v[k] == c->vtxno[nthedge + 1]) {
-          // Set the edgeno for this edge to the edgeno connecting central
-          // vertex with neighbor
+          // Set the edgeno for this edge to the edgeno connecting central vertex with neighbor
           c->edgeno[nthedge] = v->e[k];
           // Determine the direction of the edge. If the first vertex
           // of the edge is the same as the center vertex of the
@@ -836,14 +833,12 @@ int MRIScorners(MRIS *surf) {
 //=============================================================================
 // Neighbourhoods
 //
-// These are the vertexs that can be reached by following vno =
-// mris->vertex_topology[vno]->v[<all>] nsize hops. They are stored, sorted, in
-// the v->v vector with the vnum, v2num, and v3num storing where the hop count
-// changes.
+// These are the vertexs that can be reached by following vno = mris->vertex_topology[vno]->v[<all>] nsize hops.
+// They are stored, sorted, in the v->v vector with the vnum, v2num, and v3num storing where the hop count changes.
 //
 // Obviously adding or removing edges invalids v2num and v3num.
-//      mris->nsizeMaxClock changes to help detect this bug, but it wraps so is
-//      not a guarantee. Here it is checked to assert vtotal is valid.
+//      mris->nsizeMaxClock changes to help detect this bug, but it wraps so is not a guarantee.
+//      Here it is checked to assert vtotal is valid.
 //
 void MRIS_setNsizeCur(MRIS *mris, int vno, int nsize) {
   VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
@@ -890,8 +885,7 @@ static void resizeVertexV(MRIS *mris, int vno, int newSize, int oldSize) {
   VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
   VERTEX *const          v  = &mris->vertices[vno];
 
-  // allocating zero is a free: keep the pointers around to optimize growing
-  // them again
+  // allocating zero is a free: keep the pointers around to optimize growing them again
   //           non-zero:        change to the new size
 
   if (newSize > 0) {
@@ -1037,10 +1031,10 @@ int MRISresetNeighborhoodSize(MRI_SURFACE *mris, int nsize) {
 
 void MRISgetNeighborsBeginEnd(
     MRIS const *mris, int vno, size_t inner_nbhd_size, size_t outer_nbhd_size,
-    size_t *neighborsIndexBegin, // set so VERTEX v[*neighborsIndexBegin] is the
-    // first in this list with inner <= links <= outer
-    size_t *neighborsIndexEnd) { // set so VERTEX v[*neighborsIndexEnd]   is the
-                                 // first in this list with outer < links
+    size_t *
+        neighborsIndexBegin, // set so VERTEX v[*neighborsIndexBegin] is the first in this list with inner <= links <= outer
+    size_t *
+        neighborsIndexEnd) { // set so VERTEX v[*neighborsIndexEnd]   is the first in this list with outer < links
 
   VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
 
@@ -1101,6 +1095,10 @@ void MRIS_VertexNeighbourInfo_load_from_VERTEX(MRIS_VertexNeighbourInfo *info,
                                                MRIS *mris, int vno) {
   VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
   info->hops                      = vt->nsizeMax;
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
   switch (info->hops) {
   default:
     cheapAssert(false);
@@ -1113,6 +1111,9 @@ void MRIS_VertexNeighbourInfo_load_from_VERTEX(MRIS_VertexNeighbourInfo *info,
   case 0:
     info->vnum[0] = 1;
   }
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic pop
+#endif
   int i;
   for (i = 0; i < info->vnum[info->hops]; i++)
     info->v[i] = vt->v[i];
@@ -1134,12 +1135,10 @@ void MRIS_VertexNeighbourInfo_load_from_vlist(MRIS_VertexNeighbourInfo *info,
 
 void MRIS_VertexNeighbourInfo_load_by_algorithm(MRIS_VertexNeighbourInfo *info,
                                                 MRIS *mris, int vno) {
-  // This algorithm is deliberately simple since it needs to be definitive and
-  // is not performance critical
+  // This algorithm is deliberately simple since it needs to be definitive and is not performance critical
 }
 
-// Fills the vlist parameter with the indices of the vertices up to and include
-// nlinks hops along edges.
+// Fills the vlist parameter with the indices of the vertices up to and include nlinks hops along edges.
 //
 // assumes mris->vertices[*].mark are all zero
 // leaves them zero
@@ -1172,7 +1171,7 @@ int MRISfindNeighborsAtVertex(MRIS *mris, int vno, int nlinks,
                                  mris, vno, nlinks, listCapacity, vlist, hops)
                            : 0;
 
-  int *vlistTmp = nullptr, *hopsTmp = nullptr;
+  int *vlistTmp = NULL, *hopsTmp = NULL;
   if (use_old && use_new) {
     vlistTmp = (int *)malloc(MAX_NEIGHBORS * sizeof(int));
     hopsTmp  = (int *)malloc(MAX_NEIGHBORS * sizeof(int));
@@ -1279,24 +1278,21 @@ static int MRISfindNeighborsAtVertex_newWkr(MRIS *mris, int vno, int nlinks,
                                             int *hops, bool noCache,
                                             bool debug = false) {
   /*
-    Fills in v, vnum, v2num, v3num, etc. in the vertex.
-    However nlinks may be much higher than these.
+  Fills in v, vnum, v2num, v3num, etc. in the vertex.
+  However nlinks may be much higher than these.
 
-    There are two issues here
-      1) adding or removing an edge should invalidate the cached vertex.v#num
-    info 2) changing a ripflag should invalidate the cached vertex.v#num info
-
-    The old code did not detect either case and used the invalid cache entry for
-    the answer.
-
-    The new code usually asserts in when the edges have changed, and always
-    asserts if a ripped vertex is encountered. In the future it may need to
-    recompute if a ripped vertex is encountered.
-  */
+  There are two issues here
+    1) adding or removing an edge should invalidate the cached vertex.v#num info
+    2) changing a ripflag should invalidate the cached vertex.v#num info
+    
+  The old code did not detect either case and used the invalid cache entry for the answer.
+  
+  The new code usually asserts in when the edges have changed, and always asserts if a ripped vertex is encountered.
+    In the future it may need to recompute if a ripped vertex is encountered.
+*/
 
   // Get an empty set
-  // Note: This code always clears the temp it uses after use, is quick since it
-  // knows which ones it set
+  // Note: This code always clears the temp it uses after use, is quick since it knows which ones it set
   //
   unsigned char const Status_notInSet = 0; // assumed to be 0 below
   unsigned char const Status_inSet    = 1;
@@ -1368,9 +1364,9 @@ static int MRISfindNeighborsAtVertex_newWkr(MRIS *mris, int vno, int nlinks,
       // TODO cope with added edges
 
       if (vCandidate->ripflag) {
-        nsize = ringLinks; // cause this ring to get rewritten and no further
-                           // rings to be used
-        continue;          // other vCandidates in this ring are still okay
+        nsize =
+            ringLinks; // cause this ring to get rewritten and no further rings to be used
+        continue; // other vCandidates in this ring are still okay
       }
 
       temp->status[vnoCandidate] = Status_inSet;
@@ -1434,8 +1430,8 @@ static int MRISfindNeighborsAtVertex_newWkr(MRIS *mris, int vno, int nlinks,
 
   // Make nsize the highest current valid vt->nsizeCur
   //
-  // nsize is the number of valid rings, which is 1 more than the last valid
-  // index it might be 1 when there is a ripped immediate neighbour
+  // nsize is the number of valid rings, which is 1 more than the last valid index
+  // it might be 1 when there is a ripped immediate neighbour
   //
   cheapAssert(nsize > 0);
   nsize -= 1;
@@ -1522,7 +1518,7 @@ static int MRISfindNeighborsAtVertex_old(MRIS *mris, int vno, int nlinks,
   if (v->ripflag)
     return (0);
 
-  if (true) {
+  if (1) {
     static bool laterTime = false;
     if (!laterTime) {
       laterTime = true;
@@ -1704,8 +1700,7 @@ static int mrisInitializeNeighborhood(MRI_SURFACE *mris, int vno) {
 }
 
 // Another implementation is found in
-// utils/mrisurf_vals.c:int MRISsampleDistances(MRI_SURFACE *mris, int *nbrs,
-// int max_nbhd) {
+// utils/mrisurf_vals.c:int MRISsampleDistances(MRI_SURFACE *mris, int *nbrs, int max_nbhd) {
 
 //=============================================================================
 // Faces
@@ -2205,11 +2200,9 @@ static void mrisAttachFaceWkr(MRIS *mris, int fno, int vno0, int vno1, int vno2,
 
   cheapAssert(mrisCanAttachFaceToVertices(mris, vno0, vno1, vno2));
   //
-  // This assertion was seen when a triangular tesselation written as a quad
-  // file did so by creating quad with two identical vertices which then might
-  // be read back as two triangles, one of which has identical vertices!  This
-  // would ruin euler calculations as well as create huge numbers of zero-area
-  // badly-defined-norm FACE.
+  // This assertion was seen when a triangular tesselation written as a quad file did so by creating quad with two identical vertices
+  // which then might be read back as two triangles, one of which has identical vertices!  This would ruin euler
+  // calculations as well as create huge numbers of zero-area badly-defined-norm FACE.
 
   int vno[4];
   vno[0] = vno0;
@@ -2254,8 +2247,7 @@ void mrisAttachFaceToVertices(MRIS *mris, int fno, int vno1, int vno2,
                               int vno3) {
   //
   // This is the preferred way to build a surface.
-  // Create the vertices, attach the faces, and let this code create the
-  // necessary edges
+  // Create the vertices, attach the faces, and let this code create the necessary edges
   //
   mrisAttachFaceWkr(mris, fno, vno1, vno2, vno3, false);
 }
@@ -2511,7 +2503,7 @@ int mrisDivideEdgeTopologically(MRIS *const mris, int const vno1,
     }
     vnewt->vtotal = vnewt->vnum;
   }
-  if (false && Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
+  if (0 && Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
     fprintf(stdout, "%d edges and %d faces.\n", vnewt->vnum, vnewt->num);
   }
 
@@ -2632,8 +2624,7 @@ static void mrisDivideFace(MRIS *mris, int fno, int vno1, int vno2,
             f2->v[2]);
   }
 
-  // MRISfindNeighborsAtVertex needs to be called on all the vertices within
-  // some extended neighborhood of the added vertex
+  // MRISfindNeighborsAtVertex needs to be called on all the vertices within some extended neighborhood of the added vertex
   //
   mrisInitializeNeighborhood(mris, vno3);
 }
@@ -2893,8 +2884,8 @@ static void removeRippedVertices(MRI_SURFACE *mris) {
       DiagBreak();
     if (v->ripflag) {
       nvertices--;
-      out_vnos[vno] = -1; // mark it as ripped - fixes boundary condition when
-                          // coming to end of array
+      out_vnos[vno] =
+          -1; // mark it as ripped - fixes boundary condition when coming to end of array
     } else {
       if (out_vno == Gdiag_no)
         DiagBreak();
@@ -2970,7 +2961,7 @@ void MRISrenumberRemovingRippedFacesAndVertices(MRIS *mris) {
 }
 
 /*-----------------------------------------------------
-  Remove ripped vertices and faces from the
+  Remove ripped vertices and faces from the 
   v->v and the v->f arrays
   ------------------------------------------------------*/
 void MRISremoveRipped(MRIS *mris) {
@@ -3021,8 +3012,7 @@ void MRISremoveRipped(MRIS *mris) {
   }
   int const startOfRippedTail = headAffectedVnosPlus2;
 
-  // Grow the affected neighbours set to include all that are within
-  // largestNsizeMax
+  // Grow the affected neighbours set to include all that are within largestNsizeMax
   //
   int nsize;
   int endOfList = 1;
@@ -3077,10 +3067,10 @@ void MRISremoveRipped(MRIS *mris) {
       // to simply strip the ripped nodes out of the v list, because that
       // might keep the neighbour at the wrong distance.
       //
-      // Also must preserve the non-ripped nodes after old_nsizeMax up to vtotal
-      // because these are the sampled ones, and the same sample must be used to
-      // keep their dist and distOrig valid.  These can not have moved closer
-      // because removing nodes just increases hops.
+      // Also must preserve the non-ripped nodes after old_nsizeMax up to vtotal because
+      // these are the sampled ones, and the same sample must be used to keep their
+      // dist and distOrig valid.  These can not have moved closer because removing
+      // nodes just increases hops.
       //
       int i;
       if (v->dist)
@@ -3092,8 +3082,8 @@ void MRISremoveRipped(MRIS *mris) {
 
       MRISfindNeighborsAtVertex_new(mris, vno, old_nsizeMax, MAX_NEIGHBORS,
                                     vlist, hops, false);
-      // Note: this code copes with ripped and removes them, even out of the
-      // vnum portion! Fortunately it doesn't realloc v->v
+      // Note: this code copes with ripped and removes them, even out of the vnum portion!
+      // Fortunately it doesn't realloc v->v
 
       MRIS_setNsizeCur(mris, vno, old_nsizeCur);
 
@@ -3142,9 +3132,8 @@ void MRISremoveRipped(MRIS *mris) {
   cheapAssert(headAffectedVnosPlus2 == 1);
 
   // For all the ripped faces
-  //    create a set of their vertices, including their ripped ones (so don't
-  //    need to read the VERTEX in this loop) delete all their knowledge of
-  //    their vertices
+  //    create a set of their vertices, including their ripped ones (so don't need to read the VERTEX in this loop)
+  //    delete all their knowledge of their vertices
   //
   int fno;
   for (fno = 0; fno < mris->nfaces; fno++) {
@@ -3236,7 +3225,7 @@ int computeOrientation(MRIS *mris, int f, int v0, int v1) {
 }
 
 /*!
-  Reverse order of the vertices in each face.
+  Reverse order of the vertices in each face. 
   This is needed when changing the sign of the x surface coord.
 */
 void MRISreverseFaceOrder(MRIS *mris) {
@@ -3336,8 +3325,9 @@ int MRIS_facesAtVertices_reorder(MRIS *apmris) {
     VectorFree(&pv_logicalOrderFace);
   }
 
-  MRISdilateMarked(apmris, 1); // neighbors of vertices we couldn't process are
-                               // also suspect and should be skipped
+  MRISdilateMarked(
+      apmris,
+      1); // neighbors of vertices we couldn't process are also suspect and should be skipped
 
   xDbg_PopStack();
 
@@ -3379,7 +3369,7 @@ static short FACES_aroundVertex_reorder(MRIS *apmris, int avertex,
 
   const char *pch_function = "FACES_aroundVertex_reorder";
   int         nfaces       = 0;
-  int *       pFaceIndex   = nullptr;
+  int *       pFaceIndex   = NULL;
   int         packedCount  = 1;
   int         i            = 0;
   int         I            = 0;
@@ -3387,7 +3377,7 @@ static short FACES_aroundVertex_reorder(MRIS *apmris, int avertex,
   int         k            = 0;
   FACE *      pFACE_I;
   FACE *      pFACE_J;
-  VECTOR *    pv_commonVertices = nullptr; // Vector housing vertices that
+  VECTOR *    pv_commonVertices = NULL; // Vector housing vertices that
   // are common between two
   // neighbouring faces.
   int commonVertices = 0; // number of vertices in common

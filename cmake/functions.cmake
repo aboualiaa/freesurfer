@@ -1,13 +1,19 @@
 # This file defines a few custom cmake utility functions to
 # simplify the freesurfer build process
 
-# Use the common linux file /etc/os-release to save the OS
-# name in a common variable e.g., test HOST_OS in a lower
-# level CMakeLists.txt to selectively exclude running
-# tests on some platforms
+# Create an OS name and resvision for systems we build and test on,
+# e.g., CentOS6, CentOS7, CentOS8, Ubuntu18, MacOS-10.14.6
+# Call host_os() in CMakeLists.txt to test value of HOST_OS
+#
+# For Mac use the sw_vers command
+# For linux, use the mostly common /etc/os-release file
 function(host_os)
   set(HOST_OS undefined)
-  if(EXISTS "/etc/os-release")
+  if(EXISTS "/usr/bin/sw_vers")
+    execute_process(COMMAND sw_vers \-productVersion OUTPUT_VARIABLE OS_IDENT)
+    string(STRIP ${OS_IDENT} OS_IDENT)
+    set(HOST_OS "MacOS-${OS_IDENT}")
+  elseif(EXISTS "/etc/os-release")
     execute_process(COMMAND grep PRETTY_NAME \/etc\/os\-release
                     OUTPUT_VARIABLE OS_IDENT
                     )
@@ -123,7 +129,7 @@ function(mac_deploy_qt)
   # run the qt deployment script
   install(CODE "
     message(STATUS \"Deploying ${APP_BUNDLE}\")
-    execute_process(COMMAND bash -c \"${CMAKE_SOURCE_DIR}/qt/mac_deploy ${Qt5_INSTALL_DIR} ${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE} ${CMAKE_INSTALL_PREFIX}\" RESULT_VARIABLE retcode)
+    execute_process(COMMAND bash -c \"${CMAKE_SOURCE_DIR}/qt/mac_deploy ${Qt5_INSTALL_DIR} ${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE}\" RESULT_VARIABLE retcode)
     if(NOT \${retcode} STREQUAL 0)
       # message(FATAL_ERROR \"Could not deploy ${APP_TARGET}\")
       message(SEND_ERROR \"Could not deploy ${APP_TARGET}\")
@@ -145,7 +151,9 @@ function(add_help BINARY HELPTEXT)
   target_sources(${BINARY} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h)
   install(FILES ${HELPTEXT} DESTINATION docs/xml)
   # make sure to validate the xml as well
-  #  add_test(${BINARY}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
+  add_test(${BINARY}_help_test bash -c
+           "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}"
+           )
 endfunction(add_help)
 
 # install_append_help(<script> <xml> <destination>)
@@ -169,7 +177,9 @@ function(install_append_help SCRIPT HELPTEXT DESTINATION)
           )
   install(FILES ${HELPTEXT} DESTINATION docs/xml)
   # make sure to validate the xml as well
-  #  add_test(${SCRIPT}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
+  add_test(${SCRIPT}_help_test bash -c
+           "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}"
+           )
 endfunction()
 
 # install_osx_app(<app>)
@@ -208,11 +218,6 @@ endfunction()
 # Adds a script to the test framework. If the script calls a freesurfer binary, it
 # should be specified with DEPENDS to guarantee it gets built beforehand
 function(add_test_script)
-  if(CMAKE_CONFIGURATION_TYPES)
-    configure_file(${CMAKE_SOURCE_DIR}/test_proxy.sh
-                   ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY
-                   )
-  endif()
   cmake_parse_arguments(TEST "" "NAME;SCRIPT" "DEPENDS" ${ARGN})
   foreach(TARGET ${TEST_DEPENDS})
     set(TEST_CMD
@@ -224,61 +229,6 @@ function(add_test_script)
            )
 endfunction()
 
-if(CMAKE_CONFIGURATION_TYPES)
-  foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
-    add_test(${TEST_NAME}_${X} bash -c
-             "${CMAKE_CURRENT_BINARY_DIR}/${X}/${TEST_SCRIPT}"
-             )
-    set_property(TEST ${TEST_NAME}_${X} PROPERTY LABELS Integration)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh
-                   ${CMAKE_CURRENT_BINARY_DIR}/${X}/test.sh COPYONLY
-                   )
-    configure_file(${CMAKE_SOURCE_DIR}/test_${X}.sh
-                   ${CMAKE_CURRENT_BINARY_DIR}/${X}/test_main.sh COPYONLY
-                   )
-  endforeach()
-else()
-  add_test(${TEST_NAME} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
-  set_property(TEST ${TEST_NAME} PROPERTY LABELS Integration)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh
-                 ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY
-                 )
-endif()
-
-# testdata
-if(BUILD_TESTING AND FS_INTEGRATION_TESTING)
-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
-    if(CMAKE_CONFIGURATION_TYPES)
-      foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
-        if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz")
-          message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/${X}/testdata.tar.gz"
-                  )
-          execute_process(COMMAND ln -s
-                                  "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
-                                  "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
-                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                          RESULT_VARIABLE WHATEVER
-                          )
-        endif()
-      endforeach()
-    else()
-      if(NOT EXISTS
-         "${CMAKE_CURRENT_BINARY_DIR}/${TEMP_BUILD_DIR}testdata.tar.gz"
-         )
-        message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
-                )
-        execute_process(COMMAND ln -s
-                                "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
-                                "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        RESULT_VARIABLE WHATEVER
-                        )
-        #          configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz ${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz COPYONLY)
-      endif()
-    endif()
-  endif()
-endif()
-
 # add_test_executable(<target> <sources>)
 # Adds an executable to the test framework that only gets built by the test target.
 # This function takes the same input as add_executable()
@@ -289,7 +239,9 @@ function(add_test_executable)
   set(TEST_CMD
       "${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&"
       )
-  add_test(${TARGET} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}")
+  add_test(${TARGET} bash -c
+           "${TEST_CMD} ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
+           )
 endfunction()
 
 # library_paths(NAME <var> LIBDIR <library-dir> LIBRARIES <libs>)

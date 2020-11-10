@@ -1,7 +1,7 @@
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "rgb.h"
@@ -9,7 +9,7 @@
 #define OPEN_GL_CODE 1
 
 void isetname(RGB_IMAGE *image, const char *name) {
-  strncpy(image->name, name, 80);
+  strncpy(image->name, name, 80 - 1);
 }
 
 void isetcolormap(RGB_IMAGE *image, int colormap) {
@@ -52,17 +52,17 @@ int iclose(RGB_IMAGE *image) {
   }
   if (image->base) {
     free(image->base);
-    image->base = nullptr;
+    image->base = 0;
   }
   if (image->tmpbuf) {
     free(image->tmpbuf);
-    image->tmpbuf = nullptr;
+    image->tmpbuf = 0;
   }
   if (ISRLE(image->type)) {
     free(image->rowstart);
-    image->rowstart = nullptr;
+    image->rowstart = 0;
     free(image->rowsize);
-    image->rowsize = nullptr;
+    image->rowsize = 0;
   }
   ret = close(image->file);
   if (ret != 0)
@@ -74,7 +74,7 @@ int iclose(RGB_IMAGE *image) {
 int iflush(RGB_IMAGE *image) {
   unsigned short *base;
 
-  if ((image->flags & _IOWRT) && (base = image->base) != nullptr &&
+  if ((image->flags & _IOWRT) && (base = image->base) != NULL &&
       (image->ptr - base) > 0) {
     if (putrow(image, base, image->y, image->z) != image->xsize) {
       image->flags |= _IOERR;
@@ -89,9 +89,9 @@ int ifilbuf(RGB_IMAGE *image) {
 
   if ((image->flags & _IOREAD) == 0)
     return (EOF);
-  if (image->base == nullptr) {
+  if (image->base == NULL) {
     size = IBUFSIZE(image->xsize);
-    if ((image->base = ibufalloc(image)) == nullptr) {
+    if ((image->base = ibufalloc(image)) == NULL) {
       i_errhdlr("can't alloc image buffer\n", 0, 0, 0, 0);
       return EOF;
     }
@@ -126,9 +126,9 @@ unsigned int iflsbuf(RGB_IMAGE *image, unsigned int c) {
 
   if ((image->flags & _IOWRT) == 0)
     return (EOF);
-  if ((base = image->base) == nullptr) {
+  if ((base = image->base) == NULL) {
     size = IBUFSIZE(image->xsize);
-    if ((image->base = base = ibufalloc(image)) == nullptr) {
+    if ((image->base = base = ibufalloc(image)) == NULL) {
       i_errhdlr("flsbuf: error on buf alloc\n", 0, 0, 0, 0);
       return EOF;
     }
@@ -441,10 +441,14 @@ int putrow_uc(RGB_IMAGE *image, unsigned char *buffer, unsigned int y,
       if (img_write(image, (char *)(image->tmpbuf), cnt) != cnt) {
         i_errhdlr("putrow: error on write of row\n", 0, 0, 0, 0);
         return -1;
-      } else
+      } else {
         return cnt;
+      }
     case 2:
       printf("ERROR: this rgb save function BPP=2 is not implemented\n");
+#if __GNUC__ >= 8
+      [[gnu::fallthrough]];
+#endif
     default:
       i_errhdlr("putrow: weird bpp\n", 0, 0, 0, 0);
     }
@@ -685,7 +689,7 @@ RGB_IMAGE *iopen(const char *file, const char *mode, unsigned int type,
 
 RGB_IMAGE *fiopen(int f, const char *mode, unsigned int type, unsigned int dim,
                   unsigned int xsize, unsigned int ysize, unsigned int zsize) {
-  return (imgopen(f, nullptr, mode, type, dim, xsize, ysize, zsize));
+  return (imgopen(f, 0, mode, type, dim, xsize, ysize, zsize));
 }
 
 RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
@@ -699,12 +703,12 @@ RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
   image = (RGB_IMAGE *)calloc(1, sizeof(RGB_IMAGE));
   if (!image) {
     i_errhdlr("iopen: error on image struct alloc\n", 0, 0, 0, 0);
-    return nullptr;
+    return NULL;
   }
   rw = mode[1] == '+';
   if (rw) {
     i_errhdlr("iopen: read/write mode not supported\n", 0, 0, 0, 0);
-    return nullptr;
+    return NULL;
   }
   if (*mode == 'w') {
     if (file) {
@@ -716,7 +720,7 @@ RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
     }
     if (f < 0) {
       i_errhdlr("iopen: can't open output file %s\n", 0, 0, 0, 0);
-      return nullptr;
+      return NULL;
     }
     image->imagic = IMAGIC;
     image->type   = type;
@@ -742,17 +746,17 @@ RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
     swapImage(image);
     if (write(f, image, sizeof(RGB_IMAGE)) != sizeof(RGB_IMAGE)) {
       i_errhdlr("iopen: error on write of image header\n", 0, 0, 0, 0);
-      return nullptr;
+      return NULL;
     }
     swapImage(image);
   } else {
     if (file)
       f = open(file, rw ? 2 : 0);
     if (f < 0)
-      return (nullptr);
+      return (NULL);
     if (read(f, image, sizeof(RGB_IMAGE)) != sizeof(RGB_IMAGE)) {
       i_errhdlr("iopen: error on read of image header\n", 0, 0, 0, 0);
-      return nullptr;
+      return NULL;
     }
     if (((image->imagic >> 8) | ((image->imagic & 0xff) << 8)) == IMAGIC) {
       image->dorev = 1;
@@ -761,7 +765,7 @@ RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
       image->dorev = 0;
     if (image->imagic != IMAGIC) {
       i_errhdlr("iopen: bad magic in image file %x\n", image->imagic, 0, 0, 0);
-      return nullptr;
+      return NULL;
     }
   }
   if (rw)
@@ -774,9 +778,9 @@ RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
     tablesize       = image->ysize * image->zsize * sizeof(long);
     image->rowstart = (unsigned int *)malloc(tablesize);
     image->rowsize  = (int *)malloc(tablesize);
-    if (image->rowstart == nullptr || image->rowsize == nullptr) {
+    if (image->rowstart == 0 || image->rowsize == 0) {
       i_errhdlr("iopen: error on table alloc\n", 0, 0, 0, 0);
-      return nullptr;
+      return NULL;
     }
     image->rleend = 512L + 2 * tablesize;
     if (*mode == 'w') {
@@ -790,24 +794,24 @@ RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
       lseek(f, 512L, 0);
       if (read(f, image->rowstart, tablesize) != tablesize) {
         i_errhdlr("iopen: error on read of rowstart\n", 0, 0, 0, 0);
-        return nullptr;
+        return NULL;
       }
       if (image->dorev)
         cvtlongs((long *)image->rowstart, tablesize);
       if (read(f, image->rowsize, tablesize) != tablesize) {
         i_errhdlr("iopen: error on read of rowsize\n", 0, 0, 0, 0);
-        return nullptr;
+        return NULL;
       }
       if (image->dorev)
         cvtlongs((long *)image->rowsize, tablesize);
     }
   }
   image->cnt  = 0;
-  image->ptr  = nullptr;
-  image->base = nullptr;
-  if ((image->tmpbuf = ibufalloc(image)) == nullptr) {
+  image->ptr  = 0;
+  image->base = 0;
+  if ((image->tmpbuf = ibufalloc(image)) == 0) {
     i_errhdlr("iopen: error on tmpbuf alloc %d\n", image->xsize, 0, 0, 0);
-    return nullptr;
+    return NULL;
   }
   image->x = image->y = image->z = 0;
   image->file                    = f;
@@ -867,8 +871,8 @@ static void (*i_errfunc)(char *ebuf);
 void i_errhdlr(const char *fmt, int a1, int a2, int a3, int a4) {
   if (i_errfunc) {
     char ebuf[2048]; /* be generous; if an error includes a
-                                        pathname, the maxlen is 1024, so we
-                        shouldn't ever overflow this! */
+                                         pathname, the maxlen is 1024, so we shouldn't ever
+                                         overflow this! */
     sprintf(ebuf, fmt, a1, a2, a3, a4);
     (*i_errfunc)(ebuf);
     return;

@@ -79,12 +79,12 @@ int mrisComputeThicknessSmoothnessTerm(MRI_SURFACE *mris, double l_tsmooth,
 }
 
 /*!
-  \fn int mrisComputeRepulsiveTerm(MRI_SURFACE *mris, double l_repulse, MHT
-  *mht, MHT *mht_faces) \brief The repulsive term causes vertices to push away
-  from each other based on the distance in 3D space (does not apply to nearest
+  \fn int mrisComputeRepulsiveTerm(MRI_SURFACE *mris, double l_repulse, MHT *mht, MHT *mht_faces)
+  \brief The repulsive term causes vertices to push away from each
+  other based on the distance in 3D space (does not apply to nearest
   neighbors). This helps to prevent self-intersection. The force is
   inversely proportional to the distance to the 7th power (hidden
-  parameter). Sets v->{dx,dy,dz}.
+  parameter). Sets v->{dx,dy,dz}. 
   Hidden parameters:
     REPULSE_K - scaling term
     REPULSE_E - sets minimum distance
@@ -585,8 +585,7 @@ int mrisComputeAngleAreaTerms(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
         }
 #endif
 
-        // for pangle term don't penalize angles that are wider, just narrower
-        // ones to avoid pinching
+        // for pangle term don't penalize angles that are wider, just narrower ones to avoid pinching
         if (FZERO(parms->l_angle) && !FZERO(parms->l_pangle) && delta < 0)
           delta = 0.0;
 
@@ -828,8 +827,7 @@ int mrisComputeSurfaceRepulsionTerm(MRI_SURFACE *mris, double l_repulse,
     if (vno == Gdiag_no) {
       DiagBreak();
     }
-    if (v->cropped) // turn off this term for vertices that are intersecting so
-                    // they don't drive their neighbors crazy
+    if (v->cropped) // turn off this term for vertices that are intersecting so they don't drive their neighbors crazy
       continue;
 
     x = v->x;
@@ -1622,8 +1620,7 @@ int mrisComputeLinkTerm(MRI_SURFACE *mris, double l_link, int pial) {
   return (NO_ERROR);
 }
 
-//  these versions use a full 2D fit y = a x^2 + b y^2 + c x + d y + e, then use
-//  e as the error term
+//  these versions use a full 2D fit y = a x^2 + b y^2 + c x + d y + e, then use e as the error term
 
 /*-----------------------------------------------------
   Description
@@ -1728,7 +1725,7 @@ int mrisComputeQuadraticCurvatureTerm(
     }
 
     v_P = MatrixMultiply(m_X_inv, v_Y, v_P);
-    // oat a = VECTOR_ELT(v_P, 1);
+    //oat a = VECTOR_ELT(v_P, 1);
     float e = VECTOR_ELT(v_P, 5);
     e *= l_curv;
 
@@ -1993,8 +1990,7 @@ int mrisComputeIntensityTerm(MRI_SURFACE *mris, double l_intensity,
     ny = v->ny;
     nz = v->nz;
 
-    /* compute intensity gradient along the normal. Only used to get the right
-     * sign */
+    /* compute intensity gradient along the normal. Only used to get the right sign */
     if (parms->grad_dir == 0) {
       double dist, val, step_size;
       int    n;
@@ -5001,11 +4997,15 @@ int mrisComputePosterior2DTerm(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
     char fname[STRLEN], path[STRLEN];
 
     FileNamePath(mris->fname, path);
-    sprintf(fname, "%s/%s.%d.dist.mgz", path,
-            mris->hemisphere == LEFT_HEMISPHERE    ? "lh"
-            : mris->hemisphere == BOTH_HEMISPHERES ? "both"
-                                                   : "rh",
-            parms->t);
+    int req = snprintf(fname, STRLEN, "%s/%s.%d.dist.mgz", path,
+                       mris->hemisphere == LEFT_HEMISPHERE    ? "lh"
+                       : mris->hemisphere == BOTH_HEMISPHERES ? "both"
+                                                              : "rh",
+                       parms->t);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRISwriteD(mris, fname);
     DiagBreak();
   }

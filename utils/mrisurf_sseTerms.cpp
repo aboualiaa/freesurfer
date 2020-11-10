@@ -1216,8 +1216,13 @@ double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
 
   if (Gdiag & DIAG_WRITE) {
     char fname[STRLEN];
-    mri_ll = MRIcloneDifferentType(mri, MRI_FLOAT);
-    sprintf(fname, "%s.vfrac.%4.4d.mgz", parms->base_name, parms->t);
+    mri_ll  = MRIcloneDifferentType(mri, MRI_FLOAT);
+    int req = snprintf(fname, STRLEN, "%s.vfrac.%4.4d.mgz", parms->base_name,
+                       parms->t);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRIwrite(parms->mri_volume_fractions, fname);
   }
 
@@ -1263,9 +1268,19 @@ double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
     HISTOmakePDF(hout, hout);
     if (Gdiag & DIAG_WRITE) {
       char fname[STRLEN];
-      sprintf(fname, "hin.%s.%3.3d.plt", parms->base_name, parms->t);
+      int  req = snprintf(fname, STRLEN, "hin.%s.%3.3d.plt", parms->base_name,
+                         parms->t);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       HISTOplot(hin, fname);
-      sprintf(fname, "hout.%s.%3.3d.plt", parms->base_name, parms->t);
+      req = snprintf(fname, STRLEN, "hout.%s.%3.3d.plt", parms->base_name,
+                     parms->t);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       HISTOplot(hout, fname);
     }
   } else // use previously computed ones
@@ -1322,7 +1337,12 @@ double SseTerms_MRIS::NegativeLogPosterior(INTEGRATION_PARMS *parms,
     DiagBreak();
   if (mri_ll) {
     char fname[STRLEN];
-    sprintf(fname, "%s.ll.%4.4d.mgz", parms->base_name, parms->t);
+    int  req =
+        snprintf(fname, STRLEN, "%s.ll.%4.4d.mgz", parms->base_name, parms->t);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("writing log likelihood volume to %s\n", fname);
     MRIwrite(mri_ll, fname);
     MRIfree(&mri_ll);
@@ -1377,8 +1397,13 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
 
   if (Gdiag & DIAG_WRITE) {
     char fname[STRLEN];
-    mri_ll = MRIcloneDifferentType(mri, MRI_FLOAT);
-    sprintf(fname, "%s.vfrac.%4.4d.mgz", parms->base_name, parms->t);
+    mri_ll  = MRIcloneDifferentType(mri, MRI_FLOAT);
+    int req = snprintf(fname, STRLEN, "%s.vfrac.%4.4d.mgz", parms->base_name,
+                       parms->t);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRIwrite(parms->mri_volume_fractions, fname);
   }
 
@@ -1452,7 +1477,12 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
     if (Gdiag & DIAG_WRITE) {
       char fname[STRLEN];
 
-      sprintf(fname, "h.%s.%3.3d.plt", parms->base_name, parms->t);
+      int req =
+          snprintf(fname, STRLEN, "h.%s.%3.3d.plt", parms->base_name, parms->t);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("writing histogram %s\n", fname);
       HISTO2Dwrite(parms->h2d, fname);
     }
@@ -1461,7 +1491,12 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
     hs = HISTO2DmakePDF(parms->h2d, nullptr);
     if (Gdiag & DIAG_WRITE) {
       char fname[STRLEN];
-      sprintf(fname, "h.%s.%3.3d.pdf.plt", parms->base_name, parms->t);
+      int  req = snprintf(fname, STRLEN, "h.%s.%3.3d.pdf.plt", parms->base_name,
+                         parms->t);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("writing histogram %s\n", fname);
       HISTO2Dwrite(hs, fname);
     }
@@ -1473,7 +1508,12 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
     HISTO2DmakePDF(parms->h2d_out, hs);
     if (Gdiag & DIAG_WRITE) {
       char fname[STRLEN];
-      sprintf(fname, "h.%s.%3.3d.pdf.smooth.plt", parms->base_name, parms->t);
+      int  req = snprintf(fname, STRLEN, "h.%s.%3.3d.pdf.smooth.plt",
+                         parms->base_name, parms->t);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("writing histogram %s\n", fname);
       HISTO2Dwrite(hs, fname);
     }
@@ -1565,7 +1605,12 @@ double SseTerms_MRIS::NegativeLogPosterior2D(INTEGRATION_PARMS *parms,
     DiagBreak();
   if (mri_ll) {
     char fname[STRLEN];
-    sprintf(fname, "%s.ll.%4.4d.mgz", parms->base_name, parms->t);
+    int  req =
+        snprintf(fname, STRLEN, "%s.ll.%4.4d.mgz", parms->base_name, parms->t);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("writing log likelihood volume to %s\n", fname);
     MRIwrite(mri_ll, fname);
     MRIfree(&mri_ll);
@@ -1817,7 +1862,6 @@ double MRIScomputeCorrelationError(MRI_SURFACE *mris, MRI_SP *mrisp_template,
     return (0.0);
   }
 
-  memset(&parms, 0, sizeof(parms));
   parms.mrisp_template = mrisp_template;
   parms.l_corr         = 1.0f;
   parms.frame_no       = fno;
@@ -2019,7 +2063,6 @@ double SseTerms_MRIS::RmsDistanceError() {
   INTEGRATION_PARMS parms;
   double            rms;
 
-  memset(&parms, 0, sizeof(parms));
   parms.l_location = 1;
   rms              = mrisComputeTargetLocationError(mris, &parms);
   return (sqrt(rms / MRISvalidVertices(mris)));

@@ -20,6 +20,7 @@
 #include "mrisurf_MRISPV.h"
 #include "mrisurf_MRIS_MP.h"
 
+#include "mrisurf_SurfaceFromMRISPV_generated.h"
 #include "mrisurf_SurfaceFromMRIS_MP_generated.h"
 #include "mrisurf_SurfaceFromMRIS_generated.h"
 
@@ -36,15 +37,13 @@ static int int_compare(const void *lhs_ptr, const void *rhs_ptr) {
 }
 
 //==================================================================================================================
-// Support code that accelerates finding the vertices and faces needed during
-// defect correction.
+// Support code that accelerates finding the vertices and faces needed during defect correction.
 //
 int mrisurf_activeRealmTreesSize;
 int mrisurf_orig_clock;
 // To do this, it must be able to tell when vertex orig[xyz] are changed.
-// Such changes, when relevant, need to be reported via
-// noteVnoMovedInActiveRealmTrees. To test it is correct, the code can scan all
-// vertices of an mris and verify their origxyz are what was expected.
+// Such changes, when relevant, need to be reported via noteVnoMovedInActiveRealmTrees.
+// To test it is correct, the code can scan all vertices of an mris and verify their origxyz are what was expected.
 
 //==================================================================================================================
 // Simple properties
@@ -343,10 +342,9 @@ int MRISimportVertexCoords(MRIS *const mris, float *locations[3],
 
 /*-----------------------------------------------------*/
 /*!
-  \fn int MRISreverseCoords(MRIS *mris, int which_reverse, int
-  reverse_face_order, int which_coords) \brief Reverse sign of one of the
-  dimensions of the surface coords. If reversing X, the order of the verticies
-  is also reversed.
+  \fn int MRISreverseCoords(MRIS *mris, int which_reverse, int reverse_face_order, int which_coords)
+  \brief Reverse sign of one of the dimensions of the surface coords.
+  If reversing X, the order of the verticies is also reversed.
 */
 int MRISreverseCoords(MRIS *mris, int which_direction, int reverse_face_order,
                       int which_coords) {
@@ -548,8 +546,7 @@ void MRISscaleThenTranslate(MRIS *mris, double sx, double sy, double sz,
 
   //
   // This uses double because mri_brain_volume was using double,
-  // and because the combined scaling and adding could be much less accurate in
-  // float.
+  // and because the combined scaling and adding could be much less accurate in float.
   //
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1008,8 +1005,7 @@ void MRISblendXYZandTXYZ(MRIS *mris, float xyzScale, float txyzScale) {
     v->z      = xyzScale * v->z + txyzScale * v->tz;
   }
 
-  // current only user did not have this, but did immediately call
-  // MRIScomputeMetricProperties(mris)
+  // current only user did not have this, but did immediately call MRIScomputeMetricProperties(mris)
   //
   // mrisComputeSurfaceDimensions(mris);
 }
@@ -1334,7 +1330,7 @@ void MRISsmoothSurface(MRIS *mris, int niter, float step) {
 }
 
 /* Center the surface mris at location (cx,cy,cz) with a radius r
-   such the energy sum((x-cx)^2+(y-cy)^2+(z-cz)^2-r^2)^2 is minimized
+   such the energy sum((x-cx)^2+(y-cy)^2+(z-cz)^2-r^2)^2 is minimized 
 */
 
 #define DEBUG_CENTER_SURFACE 0
@@ -1649,8 +1645,7 @@ void MRISrecenter(MRIS *mris, int which_move, int which_target) {
 // Distances
 //
 //      Note:   dist_orig is the distance between the origxyz of the vertices,
-//              which may not be the same as the distance between xyz when they
-//              were copied to origxyz, because
+//              which may not be the same as the distance between xyz when they were copied to origxyz, because
 //                  origxyz may have changed
 //                  dist    might not have been calculated then
 //                  nsize   might have changed since then
@@ -1744,11 +1739,9 @@ void mrisComputeOriginalVertexDistancesIfNecessaryWkr(MRIS *      mris,
     useOldBehaviour = false;
   }
 
-  // The old code did not compute this distance, but instead had zero's loaded
-  // into the already allocated dist_orig Computing it here may change the
-  // result, so the default is to zero the values after computing them
-  //    thereby allocating the correct size, checking the calculation, but
-  //    reverting to the old behaviour
+  // The old code did not compute this distance, but instead had zero's loaded into the already allocated dist_orig
+  // Computing it here may change the result, so the default is to zero the values after computing them
+  //    thereby allocating the correct size, checking the calculation, but reverting to the old behaviour
   //
   mrisComputeOriginalVertexDistances(mris);
 
@@ -2160,8 +2153,8 @@ int MRISscaleBrainArea(MRIS *mris) {
   Automatically determines which direction the LTA goes by looking
   at the volume geometries of the LTA and the surface. The vol
   geometry of the surface is changed to that of the LTA destination
-  (keeping in mind that the LTA might have been reversed). The
-  LTA itself is not changed.
+  (keeping in mind that the LTA might have been reversed). The 
+  LTA itself is not changed. 
   See also:   MRISmatrixMultiply() and MRIStransform().
 */
 int MRISltaMultiply(MRIS *surf, const LTA *lta) {
@@ -2190,8 +2183,7 @@ int MRISltaMultiply(MRIS *surf, const LTA *lta) {
       }
     }
     if (!IsIdentity) {
-      // Only print out a warning if if they are the same and the reg is not
-      // identity.
+      // Only print out a warning if if they are the same and the reg is not identity.
       printf("\nINFO: MRISltaMultiply(): LTA src and dst vg's are the same and "
              "reg is not identity.\n");
       printf("  Make sure you have the direction correct!\n\n");
@@ -3173,8 +3165,7 @@ int MRISstoreMetricProperties(MRIS *mris) {
       if (!v->dist_orig)
         MRISmakeDistOrig(mris, vno);
 
-      // Used to only go to vtotal, but that is v[nsizeCur]num, and the code can
-      // go to to v[nsizeMax]num
+      // Used to only go to vtotal, but that is v[nsizeCur]num, and the code can go to to v[nsizeMax]num
       int const vsize = mrisVertexVSize(mris, vno);
       for (n = 0; n < vsize; n++) {
         v->dist_orig[n] = v->dist[n];
@@ -3231,8 +3222,7 @@ int MRISrestoreMetricProperties(MRIS *mris) {
 
 // Two ways of saving and restoring the VERTEX:xyz values
 //
-// The push/pop is preferable to using VERTEX members because it uses all the
-// entries in a cache line
+// The push/pop is preferable to using VERTEX members because it uses all the entries in a cache line
 //
 struct MRISsavedXYZ {
   int       nvertices;
@@ -3278,7 +3268,7 @@ void MRISpopXYZ(MRIS *mris, MRISsavedXYZ **ppMRISsavedXYZ) {
 
 /*-----------------------------------------------------
     These functions abuse the ORIGINAL_VERTICES and other fields
-    using them as temp storage.  This abuse is especially bad for the
+    using them as temp storage.  This abuse is especially bad for the 
     orig_xyz because these are input the two different dist_orig algorithms
     so putting other values into there is especially bad.
   ------------------------------------------------------*/
@@ -3747,8 +3737,7 @@ int mrisComputeOptimalPlane(MRIS *mris, int *vertices, int nvertices,
   }
   MatrixEigenSystem(M, evalues, m_evectors);
 
-  // evalues are distance squared to plane, so use smallest one, which is in 3rd
-  // col
+  // evalues are distance squared to plane, so use smallest one, which is in 3rd col
   a    = *MATRIX_RELT(m_evectors, 1, 3);
   b    = *MATRIX_RELT(m_evectors, 2, 3);
   c    = *MATRIX_RELT(m_evectors, 3, 3);
@@ -5449,8 +5438,8 @@ int MRISdisturbOriginalDistances(MRIS *mris, double max_pct) {
 }
 
 /*
-  use MARS code from Mert and Thomas to compute the distance at each point on
-  the surface to the boundary of a label.
+  use MARS code from Mert and Thomas to compute the distance at each point on the surface
+  to the boundary of a label.
 
   The distances will be returned in the vertex->val field.
 */
@@ -5842,11 +5831,11 @@ int StuffFaceCoords(MRIS *surf, int faceno, int cornerno, double p[3]) {
   return (0);
 }
 /*!
-  \bf double MinDistToTriangleBF(double p1[3], double p2[3], double p3[3],
-  double ptest[3], double pmin[3], double dL) \brief Compute the RMS distance
-  from a given point (ptest) to the triangle defined by points (p1,p2,p3). The
-  closest point is returned in pmin. Uses brute force (BF) by barycentrically
-  tessellating the triangle into dL spaced points. It is possible to do this
+  \bf double MinDistToTriangleBF(double p1[3], double p2[3], double p3[3], double ptest[3], double pmin[3], double dL)
+  \brief Compute the RMS distance from a given point (ptest) to the
+  triangle defined by points (p1,p2,p3). The closest point is returned
+  in pmin. Uses brute force (BF) by barycentrically tessellating the
+  triangle into dL spaced points. It is possible to do this
   analytically, but this was easy.
 */
 double MinDistToTriangleBF(double p1[3], double p2[3], double p3[3],
@@ -5865,7 +5854,7 @@ double MinDistToTriangleBF(double p1[3], double p2[3], double p3[3],
       for (k = 0; k < 3; k++) {
         r[k] = l1 * p1[k] + l2 * p2[k] +
                l3 * p3[k];       // location of barycentric point
-        pr[k] = ptest[k] - r[k]; // dist to test point for this k
+        pr[k] = ptest[k] - r[k]; //dist to test point for this k
         d += (pr[k] * pr[k]);    // accumulate
       }
       d = sqrt(d);
@@ -5895,7 +5884,7 @@ double MinDistToTriangleBF(double p1[3], double p2[3], double p3[3],
   assure that the closest point is in the normal direction. Currently
   is not truly "exact" in that the faces are tessellated into 25
   points controlled by dL), and the distance is computed as the
-  closest of those 25. An exact solution is possible, just harder
+  closest of those 25. An exact solution is possible, just harder 
   to program. The difference is put in to the curv field of surf1.
   The closest point is put into targ{xyz}
 */
@@ -5947,8 +5936,7 @@ int MRISdistanceBetweenSurfacesExact(MRIS *surf1, MRIS *surf2) {
           pmin[k] = pmin0[k];
       }
     }
-    // if(vno1 == Gdiag_no || vno2 == Gdiag_no) printf("%6d %6d  %6.4f
-    // %6.4f\n",vno1,vno2,dminv,dmin);
+    //if(vno1 == Gdiag_no || vno2 == Gdiag_no) printf("%6d %6d  %6.4f %6.4f\n",vno1,vno2,dminv,dmin);
 
     v1->curv  = dmin;
     v1->targx = pmin[0];
@@ -6143,8 +6131,8 @@ int VERTEX_faceAngles_determine(MRIS *apmris, int avertex, VECTOR *apv_angle) {
 }
 
 float FACES_angleNormal_find(MRIS *apmris, int apFACE_I_fno, int apFACE_J_fno) {
-  // FACE * const apFACE_I = &apmris->faces[apFACE_I_fno];
-  // FACE * const apFACE_J = &apmris->faces[apFACE_J_fno];
+  //FACE * const apFACE_I = &apmris->faces[apFACE_I_fno];
+  //FACE * const apFACE_J = &apmris->faces[apFACE_J_fno];
 
   FaceNormCacheEntry const *const apFNorm_I = getFaceNorm(apmris, apFACE_I_fno);
   FaceNormCacheEntry const *const apFNorm_J = getFaceNorm(apmris, apFACE_J_fno);
@@ -6351,8 +6339,8 @@ short MRIS_discreteKH_compute(MRIS *apmris) {
 
     VERTEX_TOPOLOGY const *const pVertext = &apmris->vertices_topology[vertex];
     VERTEX const *const          pVertex  = &apmris->vertices[vertex];
-    if (pVertex->marked) // couldn't find geometrical packing of faces - can't
-                         // process this vertex
+    if (pVertex
+            ->marked) // couldn't find geometrical packing of faces - can't process this vertex
     {
       apmris->vertices[vertex].K = 0;
       apmris->vertices[vertex].H = 0;
@@ -7003,8 +6991,7 @@ int MRISfindClosestOrigVertices(MRIS *mris, int nbhd_size) {
 }
 /*
   find the closest pial vertex and use it's spherical coords to initialize
-  the thickness minimization. Put the v->c[xyz] coords of the nearest pial
-  vertex into v->[xyz] of each vertex.
+  the thickness minimization. Put the v->c[xyz] coords of the nearest pial vertex into v->[xyz] of each vertex.
 */
 int MRISfindClosestPialVerticesCanonicalCoords(MRIS *mris, int nbhd_size) {
   int vno, n, vlist[100000], vtotal, ns, i, vnum, nbr_count[100], min_n,
@@ -7625,15 +7612,15 @@ int MRIScomputeNormal(MRIS *mris, int which, int vno, double *pnx, double *pny,
 
 /*-----------------------------------------------------
     Support deferring the calculation of face norms until needed
-
+    
     These values in computeDefectFaceNormal are the ones we are trying to avoid
     since calling that is an expensive part of mris_fix_topology
-
-    The solution is to simply mark it as needing computation, and to compute it
-  only when getFaceNorm is called.
-
+    
+    The solution is to simply mark it as needing computation, and to compute it only 
+    when getFaceNorm is called.
+    
     To test this is working, there is an option for computing it immediately...
-
+    
   ------------------------------------------------------*/
 
 //#define CHECK_DEFERED_NORMS
@@ -7670,8 +7657,7 @@ void computeDefectFaceNormal_calculate_template(Surface surface, int const fno,
   float len = sqrtf(nx * nx + ny * ny + nz * nz);
   if (FZERO(len)) {
     // TO BE CHECKED
-    //          fprintf(WHICH_OUTPUT,"face with a null normal (%f,%f,%f) -
-    //          (%f,%f,%f) -
+    //          fprintf(WHICH_OUTPUT,"face with a null normal (%f,%f,%f) - (%f,%f,%f) -
     //          (%f,%f,%f)",v1->origx,v1->origy,v1->origz,v2->origx,v2->origy,v2->origz,v3->origx,v3->origy,v3->origz);
     /* try another dot product */
     a[0] = 100.0 * (v3.origx() - v2.origx());
@@ -7766,8 +7752,7 @@ template <class SOME_MRIS>
 FaceNormCacheEntry const *getFaceNorm_template(SOME_MRIS const *const mris,
                                                int                    fno) {
 
-  // volatile to stop the compiler from reordering the stores of the
-  // nx,ny,nz,orig with the stores of the deferred
+  // volatile to stop the compiler from reordering the stores of the nx,ny,nz,orig with the stores of the deferred
   //
   FaceNormCacheEntry volatile *   fNorm = &mris->faceNormCacheEntries[fno];
   FaceNormDeferredEntry volatile *fNormDeferred =
@@ -7779,8 +7764,7 @@ FaceNormCacheEntry const *getFaceNorm_template(SOME_MRIS const *const mris,
     //
     computeDefectFaceNormal_calculate(mris, fno, &nx, &ny, &nz, &orig_area);
 
-    // Just lock the update, since multiple threads would have got equally
-    // acceptable answers
+    // Just lock the update, since multiple threads would have got equally acceptable answers
     //
 #ifdef HAVE_OMP
 #pragma omp critical
@@ -7990,8 +7974,7 @@ int MRIScomputeAllDistances(MRIS *mris) {
 
   LABEL *area = LabelAlloc(1, NULL, NULL);
 
-  // this for loop can't be parallelized due to the use of MRISdistanceTransform
-  // and of marked
+  // this for loop can't be parallelized due to the use of MRISdistanceTransform and of marked
   //
   int done = 0;
   int vno;
@@ -8716,9 +8699,8 @@ int MRISwhiteVertexToVoxel(MRIS *mris, VERTEX *v, MRI *mri, double *pxv,
 }
 
 /*
-  on calling, the white, pial and spherical locations must all be loaded, where
-  the current coordinates (v->[xyz]) indicate the correspondence between white
-  and pial, and the canonical spherical ones v->c[xyz] have the ?h.sphere in
+  on calling, the white, pial and spherical locations must all be loaded, where the current coordinates (v->[xyz])
+  indicate the correspondence between white and pial, and the canonical spherical ones v->c[xyz] have the ?h.sphere in
   them.
 */
 int MRISmeasureThicknessFromCorrespondence(MRIS *mris, MHT *mht,
@@ -9072,7 +9054,14 @@ static int get_face_axes(MRIS *mris, FACE *face, float *pe1x, float *pe1y,
 //
 void INTEGRATION_PARMS_copy(INTEGRATION_PARMS *      dst,
                             INTEGRATION_PARMS const *src) {
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
   memcpy(dst, src, sizeof(*src)); // note: copies the const fp et. al.!
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic pop
+#endif
 }
 
 void INTEGRATION_PARMS_setFp(INTEGRATION_PARMS *parms, FILE *file) {
@@ -9521,9 +9510,8 @@ static int *MRISaverageGradients_old2new_indexMap;
 
 // optimizing the program
 //  There are two things that can be done to optimize the code
-//  (a) put those that have the same numNeighbors together, to avoid the branch
-//  mispredicts (b) keep the locality of reference by reordering only nearby
-//  indices
+//  (a) put those that have the same numNeighbors together, to avoid the branch mispredicts
+//  (b) keep the locality of reference by reordering only nearby indices
 // both are important...
 
 static bool MRISaverageGradients_index_le(int lhs, int rhs) {
@@ -9702,8 +9690,7 @@ int MRISaverageGradients(MRIS *mris, int num_avgs) {
     MRISPfree(&mrisp);
     MRISPfree(&mrisp_blur);
   } else {
-    // This code shows the num_avgs typically is repeated 1-4 times as 1024,
-    // 256, 64, 16, 4, and then 1
+    // This code shows the num_avgs typically is repeated 1-4 times as 1024, 256, 64, 16, 4, and then 1
     if (0) {
       static int num_avgs_being_counted = 0;
       static int count                  = 0;
@@ -9727,8 +9714,8 @@ int MRISaverageGradients(MRIS *mris, int num_avgs) {
       count++;
     }
 
-    // Since the num_avgs is so high there are far more efficient ways to
-    // iterate. The following implementation is one of them.
+    // Since the num_avgs is so high there are far more efficient ways to iterate.
+    // The following implementation is one of them.
 
     // The following code supports three ways of doing the two algorithms
     // - only the old algorithm
@@ -9809,9 +9796,8 @@ int MRISaverageGradients(MRIS *mris, int num_avgs) {
         }
       }
 
-      // For each vertex that will change, fill in the index of the vertices it
-      // must average with. There could be many of them, so this array vector
-      // grows as needed.
+      // For each vertex that will change, fill in the index of the vertices it must average with.
+      // There could be many of them, so this array vector grows as needed.
       neighbors_capacity = 6 * index_to_vno_size;
       neighbors_size     = 0;
       neighbors          = (int *)malloc(sizeof(int) * neighbors_capacity);
@@ -9888,8 +9874,7 @@ int MRISaverageGradients(MRIS *mris, int num_avgs) {
         }
       }
 
-      // Choose chunk size assuming should evenly distribute the number of
-      // neighbors to process
+      // Choose chunk size assuming should evenly distribute the number of neighbors to process
       //
       typedef struct Chunk {
         int indexLo;
@@ -10043,8 +10028,7 @@ int MRISaverageGradients(MRIS *mris, int num_avgs) {
         int     old_index = vno_to_index[vno];
         if (old_index == -1) {
           // check has not changed - but this is not currently possible
-          // but could be enabled by making all these nodes go into the high end
-          // of the initial datas_inp vector
+          // but could be enabled by making all these nodes go into the high end of the initial datas_inp vector
         } else {
           int   new_index = MRISaverageGradients_old2new_indexMap
                                 ? MRISaverageGradients_old2new_indexMap[old_index]
@@ -11407,8 +11391,8 @@ void updateDistanceElt(volatile float *f, float distance, bool lockNeeded) {
 #endif
 
   // There was a reproducibility problem here.
-  // If the smallest positive distance and the smallest negative distance is the
-  // same fabs() then this code would randomly choose between them.
+  // If the smallest positive distance and the smallest negative distance is the same fabs()
+  // then this code would randomly choose between them.
   //
   // The solution is to have the positive be the preferred of two equal values.
   //
@@ -11426,9 +11410,8 @@ void updateDistanceEltFromSignArgAndSquareLockNeeded(volatile float *f,
                                                      float distanceSquared) {
   // Avoid calculating the sqrt unless definitely needed
   //
-  // The obvious test has problems if sqrtf(distanceSquared) == f and
-  // distanceSign is positive, because this would reject that solution when the
-  // above code would prefer it.  Hence the 1.01f margin of error.
+  // The obvious test has problems if sqrtf(distanceSquared) == f and distanceSign is positive, because this would reject that solution
+  // when the above code would prefer it.  Hence the 1.01f margin of error.
   //
   // if (squaref(*f) < distanceSquared) return;
   //
@@ -11441,14 +11424,12 @@ void updateDistanceEltFromSignArgAndSquareLockNeeded(volatile float *f,
 void updateDistanceEltFromSignArgAndSquareNoLockNeeded(
     volatile float *f, float distanceSignArg, float distanceSquared,
     float sqrtfDistanceSquared) {
-  // This function is performance-critical for mris_fix_topology, hence
-  // hand-optimized
+  // This function is performance-critical for mris_fix_topology, hence hand-optimized
   //
   // Avoid waiting for the sqrt unless definitely needed
   //
-  // The obvious test has problems if sqrtf(distanceSquared) == f and
-  // distanceSign is positive, because this would reject that solution when the
-  // above code would prefer it.  Hence the 1.01f margin of error.
+  // The obvious test has problems if sqrtf(distanceSquared) == f and distanceSign is positive, because this would reject that solution
+  // when the above code would prefer it.  Hence the 1.01f margin of error.
   //
   // if (squaref(*f) < distanceSquared) return;
   //
@@ -11854,7 +11835,7 @@ double MRISaverageRadius(MRIS *mris) {
    MRISrescaleMetricProperties() - rescale metric properties (area,
    dist) of group surfaces so that they match that of the average of
    the input set. Does not change the vertex xyz. Requires that
-   TBD() has been run. Returns the distance scaling factor.
+   TBD() has been run. Returns the distance scaling factor. 
    Has no effect if surface is not a group surface.
    -------------------------------------------------------------------- */
 double MRISrescaleMetricProperties(MRIS *surf) {
@@ -13171,8 +13152,7 @@ MRI *MRISsmoothKernel(MRIS *surf, MRI *src, MRI *mask, MRI *mrikern,
           // fabs() wont make diff if low pass filter
           if (frame == 0)
             ksum += fabs(kern[nthhop]);
-          // if(vtx==1031) printf("%d %d %d %g %g
-          // %g\n",nnbrs_actual,vtx,nbrvtx,vtxval,kern[nthhop],kvsum);
+          // if(vtx==1031) printf("%d %d %d %g %g %g\n",nnbrs_actual,vtx,nbrvtx,vtxval,kern[nthhop],kvsum);
           nnbrs_actual++;
         } /* end loop over hop neighborhood */
       }   /* end loop over hop */
@@ -13520,13 +13500,13 @@ MRI *MRIcomputeLaminarVolumeFractions(MRIS *mris, double resolution,
   mri_layers->y_r = mri_src->y_r ; mri_layers->y_a = mri_src->y_a ; mri_layers->y_s = mri_src->y_s ;
   mri_layers->z_r = mri_src->z_r ; mri_layers->z_a = mri_src->z_a ; mri_layers->z_s = mri_src->z_s ;
   mri_layers->c_r = mri_src->c_r ; mri_layers->c_a = mri_src->c_a ; mri_layers->c_s = mri_src->c_s ;
-  MRIreInitCache(mri_layers) ;
+  MRIreInitCache(mri_layers) ; 
   // compute vox2ras for highres by vox2vox low->high and vox2ras of low
   m_vox2vox = MRIgetVoxelToVoxelXform(mri_src, mri_layers) ;  // v2v low->high
   trans[0] = (nvox-1.0)/2.0 ; trans[1] = (nvox-1.0)/2.0 ; trans[2] = (nvox-1.0)/2.0 ;
   m_trans = MatrixAllocTranslation(4, trans) ;
   m_tmp = MatrixMultiply(m_trans, m_vox2vox, NULL) ;   // correct vox2vox low->high
-  MatrixFree(&m_vox2vox) ; m_vox2vox = MatrixInverse(m_tmp, NULL) ;
+  MatrixFree(&m_vox2vox) ; m_vox2vox = MatrixInverse(m_tmp, NULL) ; 
   if (Gdiag & DIAG_VERBOSE_ON)
   {
     printf("correct high->low vox2vox\n") ;
@@ -13652,9 +13632,9 @@ MRIS *MRISunion(MRIS const *mris, MRIS const *mris2) {
 
 MRIS *MRISclone(MRIS const *mris_src) {
   // Cloning could be a copy the input data and recompute the derived,
-  // but it is quicker to copy the derived data also which means the derived
-  // data must be written, which means placing this where the writing functions
-  // are visible, which means not in mrisurf_base.c
+  // but it is quicker to copy the derived data also which means the derived data must be written,
+  // which means placing this where the writing functions are visible,
+  // which means not in mrisurf_base.c
   //
   mrisCheckVertexFaceTopology(mris_src);
 
@@ -13699,8 +13679,7 @@ MRIS *MRISclone(MRIS const *mris_src) {
   mris_dst->SRASToTalSRAS_ = mris_src->SRASToTalSRAS_;
   mris_dst->TalSRASToSRAS_ = mris_src->TalSRASToSRAS_;
   mris_dst->free_transform = 0; // mark not to try to free them
-  //                             // BUG - THE mris_src may still free them!
-  //                             reference counting needed.
+  //                             // BUG - THE mris_src may still free them!  reference counting needed.
   /////////////////////////////////////////////////////////////
 
   if (mris_src->v_frontal_pole)
@@ -13873,7 +13852,7 @@ int MRISprintVertexStats(MRIS *mris, int vno, FILE *fp, int which_vertices) {
   (3) Distance to the vertex neighbor (mm)
   (4) "Area" of the neighbor vertex (mm2)
   (5) Face index number of nth face neighbor
-  (6) Area of face
+  (6) Area of face 
   See also int MRISprintVertexStats()
  */
 int MRISprintVertexInfo(FILE *fp, MRIS *surf, int vertexno) {

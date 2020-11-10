@@ -19,8 +19,8 @@
 
 #define _STATS_SRC
 
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "const.h"
@@ -29,6 +29,7 @@
 #include "fsgdf.h"
 #include "machine.h"
 #include "matrix.h"
+#include "mghendian.h"
 #include "mri.h"
 #include "mri_identify.h"
 #include "mrinorm.h"
@@ -55,9 +56,9 @@ STAT_TABLE *LoadStatTable(const char *statfile) {
   int         r, c, n;
 
   fp = fopen(statfile, "r");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: could not open %s\n", statfile);
-    return (nullptr);
+    return (NULL);
   }
 
   st           = (STAT_TABLE *)calloc(sizeof(STAT_TABLE), 1);
@@ -68,13 +69,13 @@ STAT_TABLE *LoadStatTable(const char *statfile) {
   st->ncols = gdfCountItemsInString(tmpstr) - 1;
   if (st->ncols < 1) {
     printf("ERROR: format:  %s\n", statfile);
-    return (nullptr);
+    return (NULL);
   }
   printf("Found %d data colums\n", st->ncols);
 
   // Count the number of rows
   st->nrows = 0;
-  while (fgets(tmpstr, 100000, fp) != nullptr)
+  while (fgets(tmpstr, 100000, fp) != NULL)
     st->nrows++;
   printf("Found %d data rows\n", st->nrows);
   fclose(fp);
@@ -108,7 +109,7 @@ STAT_TABLE *LoadStatTable(const char *statfile) {
       n = fscanf(fp, "%lf", &(st->data[r][c]));
       if (n != 1) {
         printf("ERROR: format: %s at row %d, col %d\n", statfile, r, c);
-        return (nullptr);
+        return (NULL);
       }
     }
     // printf("%s %lf\n",st->rownames[r],st->data[r][st->ncols-1]);
@@ -159,7 +160,7 @@ int WriteStatTable(const char *fname, STAT_TABLE *st) {
   int   err;
 
   fp = fopen(fname, "w");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: cannot open %s\n", fname);
     exit(1);
   }
@@ -185,28 +186,27 @@ int PrintStatTable(FILE *fp, STAT_TABLE *st) {
 
 STAT_TABLE *InitStatTableFromMRI(MRI *mri_in, const char *tablefile)
 // sets data from mri
-// also (if passed) reads in cols, rows and measure from tablefile (but not the
-// data)
+// also (if passed) reads in cols, rows and measure from tablefile (but not the data)
 {
   int   r, c, ncols, nrows;
   FILE *fp;
   char  tmpstr[100000];
 
   STAT_TABLE *st = AllocStatTable(mri_in->nframes, mri_in->width);
-  st->mri        = MRIcopy(mri_in, nullptr);
+  st->mri        = MRIcopy(mri_in, NULL);
 
   for (r = 0; r < st->nrows; r++)
     for (c = 0; c < st->ncols; c++)
       st->data[r][c] = MRIgetVoxVal(st->mri, c, 0, 0, r);
 
-  if (tablefile == nullptr || strcmp(tablefile, "") == 0)
+  if (tablefile == NULL || strcmp(tablefile, "") == 0)
     return st;
 
   // Process template table file:
   fp = fopen(tablefile, "r");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: could not open %s\n", tablefile);
-    return (nullptr);
+    return (NULL);
   }
   // Read in the first line
   fgets(tmpstr, 100000, fp);
@@ -214,17 +214,17 @@ STAT_TABLE *InitStatTableFromMRI(MRI *mri_in, const char *tablefile)
   printf("Found %d data colums\n", ncols);
   if (ncols != st->ncols) {
     printf("ERROR: Col numbers do not agree in MRI and:  %s\n", tablefile);
-    return (nullptr);
+    return (NULL);
   }
 
   // Count the number of rows
   nrows = 0;
-  while (fgets(tmpstr, 100000, fp) != nullptr)
+  while (fgets(tmpstr, 100000, fp) != NULL)
     nrows++;
   printf("Found %d data rows\n", nrows);
   if (nrows < st->nrows) {
     printf("ERROR: Not enough row headers for MRI in:  %s\n", tablefile);
-    return (nullptr);
+    return (NULL);
   }
   if (nrows > st->nrows) {
     printf("WARNING: Too many row headers for MRI in:  %s, will crop ...\n",
@@ -270,10 +270,14 @@ fMRI_REG *StatReadRegistration(const char *fname) {
                             &reg->slice_thickness, &reg->brightness_scale,
                             &reg->mri2fmri, &float2int);
   if (err)
-    return (nullptr);
-  sprintf(reg->name, "%s", subject);
+    return (NULL);
+  int req = snprintf(reg->name, 100, "%s", subject);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   free(subject);
-  reg->fmri2mri = MatrixInverse(reg->mri2fmri, nullptr);
+  reg->fmri2mri = MatrixInverse(reg->mri2fmri, NULL);
   return (reg);
 }
 
@@ -286,7 +290,7 @@ int StatFreeRegistration(fMRI_REG **preg) {
   MatrixFree(&reg->fmri2mri);
   MatrixFree(&reg->mri2fmri);
   free(reg);
-  reg = nullptr; // yes, this leaks a small amount of memory
+  reg = NULL; // yes, this leaks a small amount of memory
   return (NO_ERROR);
 }
 
@@ -302,7 +306,7 @@ SV *StatReadVolume(const char *prefix) {
   float *buf, fval;
   int    DatVersion, DOF;
   float  TER;
-  char * regfile = nullptr;
+  char * regfile = NULL;
 
   FileNamePath(prefix, path);
   sv = (SV *)calloc(1, sizeof(SV));
@@ -311,17 +315,30 @@ SV *StatReadVolume(const char *prefix) {
               prefix);
 
   /* read in register.dat */
-  if (regfile != nullptr)
-    sprintf(fname, "%s", regfile);
-  else
-    sprintf(fname, "%s/register.dat", path);
+  if (regfile != NULL) {
+    int req = snprintf(fname, STRLEN, "%s", regfile);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  } else {
+    int req = snprintf(fname, STRLEN, "%s/register.dat", path);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  }
 
   sv->reg = StatReadRegistration(fname);
   if (!sv->reg)
-    return (nullptr);
+    return (NULL);
 
   /* read the selavg/selxavg dat file, if it exists */
-  sprintf(fname, "%s.dat", prefix);
+  int req = snprintf(fname, STRLEN, "%s.dat", prefix);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fp          = fopen(fname, "r");
   which_alloc = ALLOC_MEANS;
   if (fp) /* means there are time points and means and sigmas */
@@ -369,7 +386,7 @@ SV *StatReadVolume(const char *prefix) {
     sprintf(fname, "%s_000.dof", prefix);
     fp = fopen(fname, "r");
     if (fp) {
-      while ((cp = fgetl(line, MAX_LINE_LEN - 1, fp)) != nullptr) {
+      while ((cp = fgetl(line, MAX_LINE_LEN - 1, fp)) != NULL) {
         sscanf(cp, "%d %d %d", &event_number, &dof_mean, &dof_sigma);
         sv->mean_dofs[event_number] = (float)dof_mean;
         sv->std_dofs[event_number]  = (float)dof_sigma;
@@ -566,7 +583,7 @@ SV *StatReadVolume2(const char *prefix) {
   int          event_number, which_alloc, nframes, t;
   int          event, x, y, z, f, DatVersion, DOF;
   float        fval, TER;
-  char *       regfile = nullptr, *hfile = nullptr;
+  char *       regfile = NULL, *hfile = NULL;
   MRI *        h;
 
   FileNamePath(prefix, path);
@@ -576,14 +593,23 @@ SV *StatReadVolume2(const char *prefix) {
               prefix);
 
   /* read in register.dat */
-  if (regfile != nullptr)
-    sprintf(fname, "%s", regfile);
-  else
-    sprintf(fname, "%s/register.dat", path);
+  if (regfile != NULL) {
+    int req = snprintf(fname, STRLEN, "%s", regfile);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  } else {
+    int req = snprintf(fname, STRLEN, "%s/register.dat", path);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  }
 
   sv->reg = StatReadRegistration(fname);
   if (!sv->reg)
-    return (nullptr);
+    return (NULL);
 
   /* read the selavg/selxavg dat file, if it exists */
   sprintf(fname, "%s.dat", prefix);
@@ -591,7 +617,7 @@ SV *StatReadVolume2(const char *prefix) {
   which_alloc = ALLOC_MEANS | ALLOC_STDS;
   if (!fp) {
     printf("ERROR: could not open %s\n", fname);
-    return (nullptr);
+    return (NULL);
   }
   fgetl(line, MAX_LINE_LEN - 1, fp);
   sscanf(line, "%*s %f", &sv->tr);
@@ -627,11 +653,11 @@ SV *StatReadVolume2(const char *prefix) {
   }
 
   hfile = IDnameFromStem(prefix);
-  if (hfile == nullptr)
-    return (nullptr);
+  if (hfile == NULL)
+    return (NULL);
   h = MRIread(hfile);
-  if (h == nullptr)
-    return (nullptr);
+  if (h == NULL)
+    return (NULL);
 
   sv->nslices = h->depth;
 
@@ -696,7 +722,7 @@ int StatFree(SV **psv) {
   int event, width, height, nslices;
 
   sv   = *psv;
-  *psv = nullptr;
+  *psv = NULL;
 
   width   = sv->slice_width;
   height  = sv->slice_height;
@@ -748,8 +774,8 @@ STAT_VOLUME *StatAllocVolume(SV *sv, int nevents, int width, int height,
     sv->reg               = (fMRI_REG *)calloc(1, sizeof(fMRI_REG));
     sv->reg->in_plane_res = sv->reg->slice_thickness = 1.0f;
     strcpy(sv->reg->name, "none");
-    sv->reg->fmri2mri  = MatrixIdentity(4, nullptr);
-    sv->reg->mri2fmri  = MatrixIdentity(4, nullptr);
+    sv->reg->fmri2mri  = MatrixIdentity(4, NULL);
+    sv->reg->mri2fmri  = MatrixIdentity(4, NULL);
     sv->time_per_event = time_points;
     sv->nevents        = nevents;
   }
@@ -796,7 +822,7 @@ SV *StatAllocStructuralVolume(SV *sv, float fov, float resolution,
   int width, height, depth, event;
 
   width = height = depth = nint(fov / resolution);
-  sv_tal = StatAllocVolume(nullptr, sv->nevents, width, height, depth,
+  sv_tal = StatAllocVolume(NULL, sv->nevents, width, height, depth,
                            sv->time_per_event,
                            ALLOC_MEANS | ALLOC_STDS | ALLOC_DOFS);
 
@@ -1096,8 +1122,8 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
     printf("INFO: devolving talairach.xfm\n");
     DevolveXFM(sv->reg->name, Mcor2tal, stats_talxfm);
   }
-  Mtal2cor  = MatrixInverse(Mcor2tal, nullptr);
-  Vtal2func = MatrixInverse(Tfunc, nullptr);
+  Mtal2cor  = MatrixInverse(Mcor2tal, NULL);
+  Vtal2func = MatrixInverse(Tfunc, NULL);
   MatrixMultiply(Vtal2func, sv->reg->mri2fmri, Vtal2func);
   MatrixMultiply(Vtal2func, Mtal2cor, Vtal2func);
   MatrixMultiply(Vtal2func, Ttal, Vtal2func);
@@ -1223,13 +1249,22 @@ int StatWriteVolume(SV *sv, const char *prefix) {
   height  = sv->slice_height;
   nslices = sv->nslices;
   FileNamePath(prefix, path);
-  sprintf(fname, "%s/register.dat", path);
+  int req = snprintf(fname, STRLEN, "%s/register.dat", path);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   StatWriteRegistration(sv->reg, fname);
 
   if (sv->voltype != 0) /* not a raw stats file (sel averaged) */
   {
     /* write the global header file */
-    sprintf(fname, "%s.dat", prefix);
+    int req = snprintf(fname, STRLEN, "%s.dat", prefix);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fp = fopen(fname, "w");
     if (!fp)
       ErrorReturn(
@@ -1424,12 +1459,17 @@ int StatReadTransform(STAT_VOLUME *sv, const char *name) {
 
   /* read in the Talairach transform file */
   sd = getenv("SUBJECTS_DIR");
-  if (sd == nullptr) {
+  if (sd == NULL) {
     printf("ERROR: SUBJECTS_DIR not defined\n");
     exit(1);
   }
   strcpy(subjects, sd);
-  sprintf(fname, "%s/%s/mri/transforms/talairach.xfm", subjects, name);
+  int req = snprintf(fname, STRLEN, "%s/%s/mri/transforms/talairach.xfm",
+                     subjects, name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   if (input_transform_file(fname, &sv->transform) != OK)
     ErrorPrintf(ERROR_NO_FILE, "%s: could not read xform file '%s'\n", Progname,
@@ -1451,7 +1491,11 @@ int StatVolumeExists(const char *prefix) {
   char  fname[STRLEN];
   FILE *fp;
 
-  sprintf(fname, "%s_%3.3d.bfloat", prefix, 0);
+  int req = snprintf(fname, STRLEN, "%s_%3.3d.bfloat", prefix, 0);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fp = fopen(fname, "r");
   if (!fp)
     return (0);
@@ -1471,14 +1515,20 @@ MATRIX *StatLoadTalairachXFM(const char *subjid, const char *xfmfile) {
   FILE *  fp;
 
   cp = getenv("SUBJECTS_DIR");
-  if (cp)
+  if (cp) {
     strcpy(subjects, cp);
-  else
+  } else {
     strcpy(subjects, "~inverse/subjects");
-  sprintf(fname, "%s/%s/mri/transforms/%s", subjects, subjid, xfmfile);
+  }
+  int req = snprintf(fname, STRLEN, "%s/%s/mri/transforms/%s", subjects, subjid,
+                     xfmfile);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   fp = fopen(fname, "r");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: could not open %s for reading \n", fname);
     exit(1);
   }
@@ -1499,13 +1549,13 @@ FS_STATS *FSstatsRead(char *fname) {
   int       n;
 
   fp = fopen(fname, "r");
-  if (fp == nullptr)
+  if (fp == NULL)
     ErrorReturn(NULL,
                 (ERROR_NOFILE, "FSstatsRead(%s): could not open file", fname));
 
   stats = (FS_STATS *)calloc(1, sizeof(FS_STATS));
 
-  while ((cp = fgetl(line, MAX_LINE_LEN, fp)) != nullptr)
+  while ((cp = fgetl(line, MAX_LINE_LEN, fp)) != NULL)
     stats->nlabels++;
   rewind(fp);
   stats->labels = (FS_STAT *)calloc(stats->nlabels, sizeof(FS_STAT));

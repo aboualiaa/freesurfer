@@ -18,8 +18,8 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 #include "mrisurf_mri.h"
+
 #include "mrisurf_compute_dxyz.h"
 #include "mrisurf_sseTerms.h"
 #include "mrisurf_timeStep.h"
@@ -131,9 +131,13 @@ int MRISpositionSurfaces(MRI_SURFACE *mris, MRI **mri_flash, int nvolumes,
     char fname[STRLEN];
 
     if (!parms->fp) {
-      sprintf(fname, "%s.%s.out",
-              mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
-              parms->base_name);
+      int req = snprintf(fname, STRLEN, "%s.%s.out",
+                         mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
+                         parms->base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (!parms->start_t) {
         INTEGRATION_PARMS_openFp(parms, fname, "w");
       } else {
@@ -488,11 +492,15 @@ int MRISpositionSurface(MRI_SURFACE *mris, MRI *mri_brain, MRI *mri_smooth,
     char fname[STRLEN];
 
     if (!parms->fp) {
-      sprintf(fname, "%s.%s.out",
-              mris->hemisphere == RIGHT_HEMISPHERE   ? "rh"
-              : mris->hemisphere == BOTH_HEMISPHERES ? "both"
-                                                     : "lh",
-              parms->base_name);
+      int req = snprintf(fname, STRLEN, "%s.%s.out",
+                         mris->hemisphere == RIGHT_HEMISPHERE   ? "rh"
+                         : mris->hemisphere == BOTH_HEMISPHERES ? "both"
+                                                                : "lh",
+                         parms->base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (!parms->start_t) {
         INTEGRATION_PARMS_openFp(parms, fname, "w");
       } else {
@@ -941,9 +949,13 @@ int MRISpositionSurface_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5,
     char fname[STRLEN];
 
     if (!parms->fp) {
-      sprintf(fname, "%s.%s.out",
-              mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
-              parms->base_name);
+      int req = snprintf(fname, STRLEN, "%s.%s.out",
+                         mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
+                         parms->base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (!parms->start_t) {
         INTEGRATION_PARMS_openFp(parms, fname, "w");
       } else {
@@ -1134,9 +1146,13 @@ int MRISmoveSurface(MRI_SURFACE *mris, MRI *mri_brain, MRI *mri_smooth,
     char fname[STRLEN];
 
     if (!parms->fp) {
-      sprintf(fname, "%s.%s.out",
-              mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
-              parms->base_name);
+      int req = snprintf(fname, STRLEN, "%s.%s.out",
+                         mris->hemisphere == RIGHT_HEMISPHERE ? "rh" : "lh",
+                         parms->base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (!parms->start_t) {
         INTEGRATION_PARMS_openFp(parms, fname, "w");
       } else {
@@ -1651,7 +1667,7 @@ int CBV_OPTIONS::ReadAltBorderLowLabel(void) {
   intensity will be used as a target intensity when placing the surface.
   There are lots of rules employed to make sure that the point is not
   in a crazy place (mostly that the value must be between border_low
-  and border_hi).
+  and border_hi). 
   \param mris surface (could be white or pial)
     v->{x,y,z} is the current vertex coordinate
     v->{nx,ny,nz} is the normal to the current vertex
@@ -1662,7 +1678,7 @@ int CBV_OPTIONS::ReadAltBorderLowLabel(void) {
   \param max_thickness - (eg, 10mm) not really a thickness but a
     threshold in mm that limits how far away a target point can be
     respect to orig{xyz}
-  \param which = GRAY_WHITE or GRAY_CSF, gray/white surface or pial
+  \param which = GRAY_WHITE or GRAY_CSF, gray/white surface or pial 
   \param thresh eg, 0. Mask value must be > thresh to be in the mask
   \param mri_aseg - use to check whether a voxel is in the contralat hemi
 
@@ -1670,7 +1686,7 @@ int CBV_OPTIONS::ReadAltBorderLowLabel(void) {
 
   Note: STEP_SIZE (all caps) is #defined. It controls the step size when searching
    through the normal after having found the distance range.
-  Hidden Parameter: 1mm
+  Hidden Parameter: 1mm 
   The step size of the in/out search is determined by mri_brain->xsize/2
   It does not appear that the annot is used in this function or its children
 
@@ -1692,7 +1708,7 @@ int CBV_OPTIONS::ReadAltBorderLowLabel(void) {
   border_low - determines when a sample is too dark   on the outward loop
 
   outside_low, outside_hi: bracket the allowable intensity when computing
-   the next_val.
+   the next_val. 
 
   The outputs are set in each vertex structure:
       v->val2 = current_sigma; // smoothing level along gradient used to find the target
@@ -3087,7 +3103,7 @@ static int MRIScomputeBorderValues_old(
             local_max_found = 1;
             max_mag_dist    = dist;
             max_mag         = fabs(mag);
-            max_mag_val     = val;
+            max_mag_val     = val;         
           }
         } else {
           /*
@@ -3814,7 +3830,6 @@ int MRIScomputeMaxGradBorderValues(MRI_SURFACE *mris, MRI *mri_brain,
   }
   return (NO_ERROR);
 }
-
 int MRIScomputeMaxGradBorderValuesPial(MRI_SURFACE *mris, MRI *mri_brain,
                                        MRI *mri_smooth, double sigma,
                                        float max_thickness, float dir,
@@ -7283,7 +7298,7 @@ static int MRISsurfaceRASToVoxelCached_old(MRI_SURFACE *mris, MRI *mri,
   \param mri - defines target voxel space
   \param r, a, s - surface coordinates
   \param px, py, pz - pointers to col, rowl, and slice in mri (output)
-  Note: keeps a copy of the mri header and sras2vox. When an MRI with
+  Note: keeps a copy of the mri header and sras2vox. When an MRI with 
   a different geometry is passed, if frees the MRI header and sras2vox,
   and copies the new one in. This can make it inefficient if switching
   back and forth between different MRIs (eg, mris_make_surfaces)
@@ -8033,6 +8048,7 @@ int AutoDetGWStats::Read(char *fname) { // from file name
   return (0);
 }
 
+// was compute_pial_target_locations()
 int MRIScomputePialTargetLocationsMultiModal(
     MRI_SURFACE *mris, MRI *mri_T2, LABEL **labels, int nlabels,
     int contrast_type, MRI *mri_aseg, double T2_min_inside,
@@ -8051,11 +8067,12 @@ int MRIScomputePialTargetLocationsMultiModal(
   //  double last_pial ;
   MRI *mri_filled, *mri_filled_pial, *mri_tmp, *mri_dist_lh, *mri_dist_rh,
       *mri_dist_white, *mri_dist_pial;
-  Timer then;
+  Timer  then;
+  double CPTL_SAMPLE_DIST = 0.1;
 
   printf("starting MRIScomputePialTargetLocationsMultiModal()\n");
   pix_size    = (mri_T2->xsize + mri_T2->ysize + mri_T2->zsize) / 3;
-  sample_dist = MIN(SAMPLE_DIST, mri_T2->xsize / 2);
+  sample_dist = MIN(CPTL_SAMPLE_DIST, mri_T2->xsize / 2);
   printf("max_outward_dist = %g, sample_dist = %g, pix_size = %g, whalf = %d\n",
          max_outward_dist, sample_dist, pix_size, nint(7.0 / pix_size));
   printf("T2_min_inside = %g, T2_max_inside %g, T2_min_outside = %g, "
@@ -8124,6 +8141,8 @@ int MRIScomputePialTargetLocationsMultiModal(
   MRISrestoreVertexPositions(mris, TMP2_VERTICES);
   MRIfree(&mri_filled);
 
+  printf("Creating pial distance volumes t=%g\n", then.minutes());
+  fflush(stdout);
   MRISrestoreVertexPositions(mris, TMP2_VERTICES);
   MRISaverageVertexPositions(mris, 2); // smooth pial surface?
   MRIScomputeMetricProperties(mris);
@@ -8696,7 +8715,8 @@ int MRIScomputePialTargetLocationsMultiModal(
               hemi_dist  = dright;
             }
             if (ohemi_dist <=
-                (hemi_dist + SAMPLE_DIST)) // keep them from crossing each other
+                (hemi_dist +
+                 CPTL_SAMPLE_DIST)) // keep them from crossing each other
             {
               if (vno == Gdiag_no)
                 printf("v %d: terminating search at distance %2.2f due to "
@@ -8864,7 +8884,7 @@ int MRIScomputePialTargetLocationsMultiModal(
 /*!
 \fn MRI *MRIScoverSeg(MRIS *mris, MRI *mri_bin, MRI *mri_cover_seg, int surftype)
 \brief Does something to make sure that surface covers the given segmentation. Good
-for babies and exvivo (?).
+for babies and exvivo (?). 
 surftype = //GRAY_WHITE; // GRAY_CSF
 */
 MRI *MRIScoverSeg(MRIS *mris, MRI *mri_bin, MRI *mri_cover_seg, int surftype) {
