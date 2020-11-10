@@ -275,7 +275,7 @@ void chklc(void) {
 //
 //  if failed, error msg will be returned in msg. make sure msg is pre-allocated with enough space
 int chklc2(char *msg) {
-  return 0;
+  return 1;
   char  dirname[STRLEN], *cp, *alt;
   FILE *lfile = NULL;
   char *email;
