@@ -1,10 +1,5 @@
 project(mris_make_surfaces)
 
-add_compile_options(-Wno-deprecated -Wno-overloaded-virtual
-                    -Wno-inconsistent-missing-override -Wno-unused-variable
-                    -Wno-unused-local-typedefs -Wno-reorder
-                    )
-
 include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/resurf/Code
                     ${CMAKE_SOURCE_DIR}/utils
                     )

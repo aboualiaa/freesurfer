@@ -485,8 +485,6 @@ set(ANN_DIR "${FS_PACKAGES_DIR}/ann/1.1.2/")
 find_package(ANN)
 
 # -------- gts --------
-# only used by mris_decimate (not available on mac)
-#if(NOT APPLE)
 find_package(GTS)
 mark_as_advanced(ICONV_LIBRARY)
 

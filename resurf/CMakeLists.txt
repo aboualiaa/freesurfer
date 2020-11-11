@@ -5,10 +5,6 @@ if(ITK_FOUND AND VTK_FOUND)
   include(${ITK_USE_FILE})
   include(${VTK_USE_FILE})
 
-  add_compile_options(-Wno-deprecated -Wno-overloaded-virtual
-                      -Wno-inconsistent-missing-override -Wno-unused-variable
-                      -Wno-unused-local-typedefs -Wno-reorder
-                      )
   include_directories(${FS_INCLUDE_DIRS}
                       ${CMAKE_CURRENT_SOURCE_DIR}/Code
                       ${CMAKE_SOURCE_DIR}/anatomicuts/Code

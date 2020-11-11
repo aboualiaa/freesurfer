@@ -1,6 +1,5 @@
 project(mris_pmake)
 
-add_compile_options(-fpermissive)
 include_directories(${FS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(OpenCL_FOUND)

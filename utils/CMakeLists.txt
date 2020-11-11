@@ -1,8 +1,5 @@
 project(utils)
 
-# ATH: temporarily turning off this warning in mrisurf_defect.cpp
-add_compile_options(-Wno-for-loop-analysis)
-
 # configure cmake version macros
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 configure_file(version_info.h.in version_info.h)

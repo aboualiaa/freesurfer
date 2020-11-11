@@ -2,8 +2,6 @@ project(mris_volmask)
 
 include_directories(${FS_INCLUDE_DIRS})
 
-add_compile_options(-Wno-deprecated)
-
 add_executable(mris_volmask mris_volmask.cpp cmd_line_interface.cpp)
 target_compile_definitions(mris_volmask PRIVATE NO_VTK)
 add_help(mris_volmask mris_volmask.help.xml)

@@ -229,16 +229,6 @@ if(FS_BUILD_GUIS
     set(SOURCES ${SOURCES} MacHelper.mm)
   endif()
 
-  add_compile_options(-Wno-deprecated
-                      -Wno-reorder
-                      -Wno-uninitialized
-                      -Wno-unused-variable
-                      -Wno-sign-compare
-                      -Wno-overloaded-virtual
-                      -Wno-inconsistent-missing-override
-                      -Wno-deprecated-declarations
-                      )
-
   if(NOT FS_FREEVIEW_LINEPROF)
     add_definitions(-DDISABLE_LINEPROF)
   endif()
