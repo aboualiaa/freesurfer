@@ -3,16 +3,16 @@ project(packages)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_subdirectories(
-  netcdf
+  cephes
+  dicom
+  gifti
   glut
   minc
-  dicom
-  cephes
-  tetgen
-  nrrdio
+  netcdf
   nifti
-  gifti
+  nrrdio
   svm
+  tetgen
 )
 
 mark_as_advanced(GSL_TEST
