@@ -6,7 +6,6 @@ configure_file(version_info.h.in version_info.h)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_SOURCE_DIR}/include
-                    ${CMAKE_SOURCE_DIR}/packages/jpeg
                     ${CMAKE_SOURCE_DIR}/packages/tiff
                     ${CMAKE_SOURCE_DIR}/packages/xml2
                     ${CMAKE_SOURCE_DIR}/packages/minc
@@ -19,6 +18,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${FS_INCLUDE_DIRS}
                     SYSTEM
                     ${ITK_INCLUDE_DIRS}
+                    ${JPEG_INCLUDE_DIR}
                     )
 
 set(INCOMPATIBLE_BUILD_TYPES "cfisan;fulllto;thinlto;asan")

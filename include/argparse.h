@@ -271,4 +271,21 @@ private:
   unsigned int         helptextsize = 0;
 };
 
+static std::string verifyOption(const std::string &name);
+static std::string strip(const std::string &name);
+static bool        stob(const std::string &str);
+void                   ArgumentParser::Argument::validate();
+ArgumentParser::String ArgumentParser::Argument::canonicalName() const;
+ArgumentParser::String ArgumentParser::Argument::typeName() const;
+void ArgumentParser::addArgument(const ArgumentParser::String &name, char nargs,
+                                 ArgType argtype, bool required);
+void ArgumentParser::addArgument(const ArgumentParser::String &short_name,
+                                 const ArgumentParser::String &name, char nargs,
+                                 ArgType argtype, bool required);
+void ArgumentParser::addHelp(const unsigned char *text, unsigned int size);
+void ArgumentParser::parse(size_t ac, char **av);
+ArgumentParser::String ArgumentParser::unstrip(const std::string &name);
+bool                   ArgumentParser::exists(const std::string &name);
+void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg);
+
 #endif
