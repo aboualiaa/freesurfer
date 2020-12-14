@@ -34,18 +34,36 @@
  *
  */
 
-#ifdef HAVE_OPENMP
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/resource.h>
+#include <sys/time.h>
+
 #include "romp_support.h"
-#endif
 
 #include "cma.h"
 #include "ctrpoints.h"
 #include "diag.h"
+#include "error.h"
+#include "fsinit.h"
+#include "gca.h"
 #include "gcamorph.h"
+#include "gcamorphtestutils.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
 #include "mri2.h"
 #include "mri_ca_register.help.xml.h"
 #include "mrimorph.h"
+#include "mrinorm.h"
 #include "mrisegment.h"
+#include "proto.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
 #include "version.h"
 
 static int nozero = 0;
@@ -72,11 +90,11 @@ static int   insert_whalf[MAX_INSERTIONS];
 
 static int    avgs              = 0; /* for smoothing conditional densities */
 static int    read_lta          = 0;
-static char * T2_mask_fname     = nullptr;
+static char * T2_mask_fname     = NULL;
 static double T2_thresh         = 0;
-static char * aparc_aseg_fname  = nullptr;
-static char * mask_fname        = nullptr;
-static char * norm_fname        = nullptr;
+static char * aparc_aseg_fname  = NULL;
+static char * mask_fname        = NULL;
+static char * norm_fname        = NULL;
 static int    renormalize       = 0;
 static int    renormalize_new   = 0;
 static int    renormalize_align = 0;
@@ -84,28 +102,28 @@ static int    renormalize_align_after = 0;
 
 static int renorm_with_histos = 0;
 
-static char *long_reg_fname = nullptr;
-// static int inverted_xform = 0 ;
+static char *long_reg_fname = NULL;
+//static int inverted_xform = 0 ;
 
-static char *write_gca_fname      = nullptr;
+static char *write_gca_fname      = NULL;
 static float regularize           = 0;
 static float regularize_mean      = 0;
-static char *example_T1           = nullptr;
-static char *example_segmentation = nullptr;
+static char *example_T1           = NULL;
+static char *example_segmentation = NULL;
 static int   register_wm_flag     = 0;
 
 static double TR       = -1;
 static double alpha    = -1;
 static double TE       = -1;
-static char * tl_fname = nullptr;
+static char * tl_fname = NULL;
 
 #define MAX_READS 100
 static int   nreads = 0;
 static char *read_intensity_fname[MAX_READS];
-static char *sample_fname                        = nullptr;
-static char *transformed_sample_fname            = nullptr;
-static char *normalized_transformed_sample_fname = nullptr;
-static char *ctl_point_fname                     = nullptr;
+static char *sample_fname                        = NULL;
+static char *transformed_sample_fname            = NULL;
+static char *normalized_transformed_sample_fname = NULL;
+static char *ctl_point_fname                     = NULL;
 static int   novar                               = 1;
 static int   reinit                              = 0;
 
@@ -113,26 +131,26 @@ static int   use_contrast = 0;
 static float min_prior    = MIN_PRIOR;
 static int   reset        = 0;
 
-static FILE *diag_fp = nullptr;
+static FILE *diag_fp = NULL;
 
 static int  translation_only = 0;
 static int  get_option(int argc, char *argv[]);
 static int  write_vector_field(MRI *mri, GCA_MORPH *gcam, char *vf_fname);
 static int  remove_bright_stuff(MRI *mri, GCA *gca, TRANSFORM *transform);
-static void print_help();
+static void print_help(void);
 
 static char *twm_fname =
-    nullptr; // file with manually specified temporal lobe white matter points
-static char *     renormalization_fname = nullptr;
-static char *     tissue_parms_fname    = nullptr;
+    NULL; // file with manually specified temporal lobe white matter points
+static char *     renormalization_fname = NULL;
+static char *     tissue_parms_fname    = NULL;
 static int        center                = 1;
 static int        nreductions           = 1;
-static char *     xform_name            = nullptr;
+static char *     xform_name            = NULL;
 static int        noscale               = 0;
 static int        transform_loaded      = 0;
-static char *     gca_mean_fname        = nullptr;
-static TRANSFORM *transform             = nullptr;
-static char *     vf_fname              = nullptr;
+static char *     gca_mean_fname        = NULL;
+static TRANSFORM *transform             = NULL;
+static char *     vf_fname              = NULL;
 
 static double blur_sigma = 0.0f;
 
@@ -154,24 +172,19 @@ static int do_secondpass_renorm = 0;
 #define DEFAULT_CTL_POINT_PCT .25
 static double ctl_point_pct = DEFAULT_CTL_POINT_PCT;
 
-char *rusage_file = nullptr;
+char *rusage_file = NULL;
 int   n_omp_threads;
 
 int main(int argc, char *argv[]) {
-#ifdef HAVE_OPENMP
   ROMP_main
-#endif
 
       char *gca_fname,
       *in_fname, *out_fname, fname[STRLEN], **av;
-  MRI *mri_inputs, *mri_tmp;
-  GCA *gca /*, *gca_tmp, *gca_reduced*/;
-  int  ac, nargs, ninputs, input, extra = 0;
-  int  msec, hours, minutes, seconds /*, iter*/;
-#ifdef HAVE_OPENMP
-  Timer start, mytimer;
-#endif
-
+  MRI *      mri_inputs, *mri_tmp;
+  GCA *      gca /*, *gca_tmp, *gca_reduced*/;
+  int        ac, nargs, ninputs, input, extra = 0;
+  int        msec, hours, minutes, seconds /*, iter*/;
+  Timer      start, mytimer;
   GCA_MORPH *gcam;
 
   // for GCA Renormalization with Alignment (if called sequentially)
@@ -256,9 +269,7 @@ int main(int argc, char *argv[]) {
   //  Gdiag |= DIAG_WRITE ;
   printf("logging results to %s.log\n", parms.base_name);
 
-#ifdef HAVE_OPENMP
   start.reset();
-#endif
 
   // build frames from ninputs ////////////////////////////////
   for (input = 0; input < ninputs; input++) {
@@ -273,12 +284,6 @@ int main(int argc, char *argv[]) {
     TRs[input] = mri_tmp->tr;
     fas[input] = mri_tmp->flip_angle;
     TEs[input] = mri_tmp->te;
-#if 0
-    if (mri_tmp->type == MRI_FLOAT)
-    {
-      MRIchangeType(mri_tmp, MRI_SHORT, 0, 10000,  1) ;
-    }
-#endif
 
     // -mask option
     if (mask_fname) {
@@ -305,7 +310,7 @@ int main(int argc, char *argv[]) {
       if (aparc_aseg_fname) // use T2 and aparc+aseg to remove non-brain stuff
       {
         mri_aparc_aseg = MRIread(aparc_aseg_fname);
-        if (mri_aparc_aseg == nullptr)
+        if (mri_aparc_aseg == NULL)
           ErrorExit(ERROR_NOFILE, "%s: could not open aparc+aseg volume %s.\n",
                     Progname, aparc_aseg_fname);
       }
@@ -338,7 +343,7 @@ int main(int argc, char *argv[]) {
   printf("reading GCA '%s'...\n", gca_fname);
   fflush(stdout);
   gca = GCAread(gca_fname);
-  if (gca == nullptr)
+  if (gca == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not open GCA %s.\n", Progname,
               gca_fname);
   if (remove_lh) {
@@ -570,7 +575,7 @@ int main(int argc, char *argv[]) {
   // assumed to be vox-to-vox
   if (!transform_loaded) /* wasn't preloaded */
   {
-    transform = TransformAlloc(LINEAR_VOX_TO_VOX, nullptr);
+    transform = TransformAlloc(LINEAR_VOX_TO_VOX, NULL);
   } else
   // calculate inverse and cache it
   {
@@ -591,7 +596,7 @@ int main(int argc, char *argv[]) {
     MRI *mri_kernel, *mri_smooth, *mri_grad, *mri_tmp;
 
     mri_kernel = MRIgaussian1d(1.0, 30);
-    mri_smooth = MRIconvolveGaussian(mri_inputs, nullptr, mri_kernel);
+    mri_smooth = MRIconvolveGaussian(mri_inputs, NULL, mri_kernel);
 
     if (mri_inputs->type != MRI_FLOAT) {
       // change data to float
@@ -602,7 +607,7 @@ int main(int argc, char *argv[]) {
     start = ninputs;
     if (gca->flags & GCA_XGRAD) {
       for (i = 0; i < ninputs; i++) {
-        mri_grad = MRIxSobel(mri_smooth, nullptr, i);
+        mri_grad = MRIxSobel(mri_smooth, NULL, i);
         MRIcopyFrame(mri_grad, mri_inputs, 0, start + i);
         MRIfree(&mri_grad);
       }
@@ -610,7 +615,7 @@ int main(int argc, char *argv[]) {
     }
     if (gca->flags & GCA_YGRAD) {
       for (i = 0; i < ninputs; i++) {
-        mri_grad = MRIySobel(mri_smooth, nullptr, i);
+        mri_grad = MRIySobel(mri_smooth, NULL, i);
         MRIcopyFrame(mri_grad, mri_inputs, 0, start + i);
         MRIfree(&mri_grad);
       }
@@ -618,7 +623,7 @@ int main(int argc, char *argv[]) {
     }
     if (gca->flags & GCA_ZGRAD) {
       for (i = 0; i < ninputs; i++) {
-        mri_grad = MRIzSobel(mri_smooth, nullptr, i);
+        mri_grad = MRIzSobel(mri_smooth, NULL, i);
         MRIcopyFrame(mri_grad, mri_inputs, 0, start + i);
         MRIfree(&mri_grad);
       }
@@ -641,7 +646,7 @@ int main(int argc, char *argv[]) {
     MRI *mri_tmp, *mri_kernel;
 
     mri_kernel = MRIgaussian1d(blur_sigma, 100);
-    mri_tmp    = MRIconvolveGaussian(mri_inputs, nullptr, mri_kernel);
+    mri_tmp    = MRIconvolveGaussian(mri_inputs, NULL, mri_kernel);
     MRIfree(&mri_inputs);
     mri_inputs = mri_tmp;
   }
@@ -663,7 +668,7 @@ int main(int argc, char *argv[]) {
       TRANSFORM *transform_long;
 
       transform_long = TransformRead(long_reg_fname);
-      if (transform_long == nullptr)
+      if (transform_long == NULL)
         ErrorExit(ERROR_NOFILE,
                   "%s: could not read longitudinal registration file %s",
                   Progname, long_reg_fname);
@@ -674,13 +679,21 @@ int main(int argc, char *argv[]) {
     {
       char fname[STRLEN];
       MRI *mri;
-      sprintf(fname, "%s.invalid.mgz", parms.base_name);
-      mri = GCAMwriteMRI(gcam, nullptr, GCAM_INVALID);
+      int  req = snprintf(fname, STRLEN, "%s.invalid.mgz", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+      mri = GCAMwriteMRI(gcam, NULL, GCAM_INVALID);
       printf("writing %s\n", fname);
       MRIwrite(mri, fname);
       MRIfree(&mri);
-      sprintf(fname, "%s.status.mgz", parms.base_name);
-      mri = GCAMwriteMRI(gcam, nullptr, GCAM_STATUS);
+      req = snprintf(fname, STRLEN, "%s.status.mgz", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+      mri = GCAMwriteMRI(gcam, NULL, GCAM_STATUS);
       printf("writing %s\n", fname);
       MRIwrite(mri, fname);
       MRIfree(&mri);
@@ -733,17 +746,25 @@ int main(int argc, char *argv[]) {
     if (parms.write_iterations != 0) {
       char fname[STRLEN];
       MRI *mri_gca, *mri_tmp;
-      mri_gca = MRIclone(mri_inputs, nullptr);
+      mri_gca = MRIclone(mri_inputs, NULL);
       GCAMbuildMostLikelyVolume(gcam, mri_gca);
       if (mri_gca->nframes > 1) {
         printf("careg: extracting %dth frame\n", mri_gca->nframes - 1);
-        mri_tmp = MRIcopyFrame(mri_gca, nullptr, mri_gca->nframes - 1, 0);
+        mri_tmp = MRIcopyFrame(mri_gca, NULL, mri_gca->nframes - 1, 0);
         MRIfree(&mri_gca);
         mri_gca = mri_tmp;
       }
-      sprintf(fname, "%s_target", parms.base_name);
+      int req = snprintf(fname, STRLEN, "%s_target", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       MRIwriteImageViews(mri_gca, fname, IMAGE_SIZE);
-      sprintf(fname, "%s_target.mgz", parms.base_name);
+      req = snprintf(fname, STRLEN, "%s_target.mgz", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("writing target volume to %s...\n", fname);
       MRIwrite(mri_gca, fname);
       MRIfree(&mri_gca);
@@ -829,27 +850,45 @@ int main(int argc, char *argv[]) {
     GCAmapRenormalizeWithHistograms(gcam->gca, mri_inputs, transform,
                                     parms.log_fp, parms.base_name, label_scales,
                                     label_offsets, label_peaks, label_computed);
-    if (parms.write_iterations != 0 && false) {
+    if (parms.write_iterations != 0 && 0) {
       char fname[STRLEN];
       MRI *mri_gca, *mri_tmp;
       if (parms.diag_morph_from_atlas) {
-        sprintf(fname, "%s_target", parms.base_name);
+        int req = snprintf(fname, STRLEN, "%s_target", parms.base_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
         MRIwriteImageViews(mri_inputs, fname, IMAGE_SIZE);
-        sprintf(fname, "%s_target.mgz", parms.base_name);
+        req = snprintf(fname, STRLEN, "%s_target.mgz", parms.base_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
         printf("writing target volume to %s...\n", fname);
         MRIwrite(mri_inputs, fname);
       } else {
-        mri_gca = MRIclone(mri_inputs, nullptr);
+        mri_gca = MRIclone(mri_inputs, NULL);
         GCAMbuildMostLikelyVolume(gcam, mri_gca);
         if (mri_gca->nframes > 1) {
           printf("careg: extracting %dth frame\n", mri_gca->nframes - 1);
-          mri_tmp = MRIcopyFrame(mri_gca, nullptr, mri_gca->nframes - 1, 0);
+          mri_tmp = MRIcopyFrame(mri_gca, NULL, mri_gca->nframes - 1, 0);
           MRIfree(&mri_gca);
           mri_gca = mri_tmp;
         }
-        sprintf(fname, "%s_target_after_histo", parms.base_name);
+        int req =
+            snprintf(fname, STRLEN, "%s_target_after_histo", parms.base_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
         MRIwriteImageViews(mri_gca, fname, IMAGE_SIZE);
-        sprintf(fname, "%s_target_after_histo.mgz", parms.base_name);
+        req = snprintf(fname, STRLEN, "%s_target_after_histo.mgz",
+                       parms.base_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
         printf("writing target volume to %s...\n", fname);
         MRIwrite(mri_gca, fname);
         MRIfree(&mri_gca);
@@ -859,7 +898,7 @@ int main(int argc, char *argv[]) {
 
   ///////////////////////////////////////////////////////////////////
   // -wm option (default = 0)
-  if (tl_fname == nullptr && register_wm_flag) {
+  if (tl_fname == NULL && register_wm_flag) {
     GCAMsetStatus(gcam, GCAM_IGNORE_LIKELIHOOD); /* disable everything */
     GCAMsetLabelStatus(gcam, Left_Cerebral_White_Matter, GCAM_USE_LIKELIHOOD);
     GCAMsetLabelStatus(gcam, Right_Cerebral_White_Matter, GCAM_USE_LIKELIHOOD);
@@ -874,7 +913,7 @@ int main(int argc, char *argv[]) {
            "full registration...\n");
   }
 
-  // note that transform is meaningless when -L option is used! A bug! -xh
+  //note that transform is meaningless when -L option is used! A bug! -xh
   //  if (renormalize)
   //  GCAmapRenormalize(gcam->gca, mri_inputs, transform) ;
   if (renormalize) {
@@ -888,8 +927,8 @@ int main(int argc, char *argv[]) {
       //      GCAmapRenormalize(gcam->gca, mri_inputs, trans) ;
       TransformInvert(trans, mri_inputs);
       GCAcomputeRenormalizationWithAlignment(
-          gcam->gca, mri_inputs, trans, parms.log_fp, parms.base_name, nullptr,
-          0, label_scales, label_offsets, label_peaks, label_computed);
+          gcam->gca, mri_inputs, trans, parms.log_fp, parms.base_name, NULL, 0,
+          label_scales, label_offsets, label_peaks, label_computed);
       free(trans);
     }
   } else if (renormalize_new) {
@@ -907,41 +946,24 @@ int main(int argc, char *argv[]) {
     LTA _lta, *lta = &_lta;
 
     lta->num_xforms = 0;
-#if 0
-    sprintf(fname, "%s.gca", parms.base_name) ;
-    gca = GCAread(fname) ;
-    sprintf(fname, "%s.lta", parms.base_name) ;
-    lta = LTAread(fname) ;
-
-    if (Gdiag & DIAG_WRITE)
-    {
-      char fname[STRLEN] ;
-      sprintf(fname, "%s.log", parms.base_name) ;
-      parms.log_fp = fopen(fname, "w") ;
-    }
-    {
-      MRI *mri_seg, *mri_aligned ;
-      int l ;
-      mri_seg = MRIclone(mri_inputs, NULL) ;
-      l = lta->xforms[0].label ;
-      GCAbuildMostLikelyVolumeForStructure(gca, mri_seg, l, 0, transform,NULL);
-      mri_aligned = MRIlinearTransform(mri_seg, NULL, lta->xforms[0].m_L) ;
-      MRIwrite(mri_seg, "s.mgz")  ;
-      MRIwrite(mri_aligned, "a.mgz") ;
-      MRIfree(&mri_seg) ;
-      MRIfree(&mri_aligned) ;
-    }
-#else
     if (Gdiag & DIAG_WRITE) {
       char fname[STRLEN];
-      sprintf(fname, "%s.log", parms.base_name);
+      int  req = snprintf(fname, STRLEN, "%s.log", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       parms.log_fp = fopen(fname, "w");
     }
     if (read_lta) {
-      sprintf(fname, "%s_array.lta", parms.base_name);
+      int req = snprintf(fname, STRLEN, "%s_array.lta", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       lta = LTAread(fname);
     } else {
-      lta = nullptr;
+      lta = NULL;
     }
     if (!xform_name) // normal (cross-sectional) processing
     {
@@ -956,20 +978,7 @@ int main(int argc, char *argv[]) {
           Gdiag &= ~DIAG_WRITE;
         }
 
-#if 0
-        {
-          parms.tol *= 10 ;
-          parms.l_smoothness *= 10 ;
-          printf("---------------- doing initial registration ----------------------\n") ;
-          GCAMregister(gcam, mri_inputs, &parms) ;
-          parms.tol /= 10 ;
-          parms.l_smoothness /= 10 ;
-          mri_morphed = GCAMmorphToAtlas(mri_inputs, gcam, NULL, -1) ;
-          printf("---------------- initial registration complete ----------------------\n") ;
-        }
-#else
         mri_morphed = mri_inputs;
-#endif
 
         // GCA Renormalization with Alignment:
         if (!do_secondpass_renorm) // just run it once
@@ -987,7 +996,7 @@ int main(int argc, char *argv[]) {
           // not passing lta
           GCAcomputeRenormalizationWithAlignment(
               gcam->gca, mri_morphed, transform, parms.log_fp, parms.base_name,
-              nullptr, 0, label_scales, label_offsets, label_peaks,
+              NULL, 0, label_scales, label_offsets, label_peaks,
               label_computed);
 
           // sequential call gets passed the results from first call
@@ -1028,15 +1037,13 @@ int main(int argc, char *argv[]) {
             gcam->gca, mri_inputs, trans, parms.log_fp, parms.base_name, &lta,
             0, label_scales, label_offsets, label_peaks, label_computed);
         got_scales = 1;
-      } else // run it twice (ensure correct output of label intensities in
-             // sequential run)
+      } else // run it twice (ensure correct output of label intensities in sequential run)
       {
         // initial call (returning the label_* infos)
         // not passing lta
         GCAcomputeRenormalizationWithAlignment(
-            gcam->gca, mri_inputs, trans, parms.log_fp, parms.base_name,
-            nullptr, 0, label_scales, label_offsets, label_peaks,
-            label_computed);
+            gcam->gca, mri_inputs, trans, parms.log_fp, parms.base_name, NULL,
+            0, label_scales, label_offsets, label_peaks, label_computed);
 
         // sequential call gets passed the results from first call
         // will overwrite the intensity.txt file with combinded results
@@ -1051,12 +1058,20 @@ int main(int argc, char *argv[]) {
       free(trans);
     }
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      sprintf(fname, "%s.gca", parms.base_name);
+      int req = snprintf(fname, STRLEN, "%s.gca", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("writing gca to %s...\n", fname);
       GCAwrite(gca, fname);
     }
     if (lta && !read_lta) {
-      sprintf(fname, "%s_array.lta", parms.base_name);
+      int req = snprintf(fname, STRLEN, "%s_array.lta", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
 
       // should put volume geometry into file,
       // and probably change to RAS->RAS xform
@@ -1066,28 +1081,25 @@ int main(int argc, char *argv[]) {
       MRI *mri_seg, *mri_aligned;
       int  l;
       lta     = LTAread("gcam.lta");
-      mri_seg = MRIclone(mri_inputs, nullptr);
+      mri_seg = MRIclone(mri_inputs, NULL);
       l       = lta->xforms[0].label;
-      GCAbuildMostLikelyVolumeForStructure(gca, mri_seg, l, 0, transform,
-                                           nullptr);
+      GCAbuildMostLikelyVolumeForStructure(gca, mri_seg, l, 0, transform, NULL);
       LTAfillInverse(lta);
-      mri_aligned = MRIlinearTransform(mri_seg, nullptr, lta->xforms[0].m_L);
+      mri_aligned = MRIlinearTransform(mri_seg, NULL, lta->xforms[0].m_L);
       MRIwrite(mri_seg, "s.mgz");
       MRIwrite(mri_aligned, "a.mgz");
       MRIfree(&mri_seg);
       MRIfree(&mri_aligned);
     }
-#endif
-    if (reinit && (xform_name == nullptr) && (lta != nullptr)) {
+    if (reinit && (xform_name == NULL) && (lta != NULL)) {
       GCAMreinitWithLTA(gcam, lta, mri_inputs, &parms);
     }
     if (DIAG_VERBOSE_ON) {
       MRI *mri_seg;
       int  l;
       l       = lta->xforms[0].label;
-      mri_seg = MRIclone(mri_inputs, nullptr);
-      GCAbuildMostLikelyVolumeForStructure(gca, mri_seg, l, 0, transform,
-                                           nullptr);
+      mri_seg = MRIclone(mri_inputs, NULL);
+      GCAbuildMostLikelyVolumeForStructure(gca, mri_seg, l, 0, transform, NULL);
       MRIwrite(mri_seg, "sa.mgz");
       MRIfree(&mri_seg);
     }
@@ -1104,9 +1116,17 @@ int main(int argc, char *argv[]) {
     char fname[STRLEN];
 
     if (parms.diag_morph_from_atlas) {
-      sprintf(fname, "%s_target", parms.base_name);
+      int req = snprintf(fname, STRLEN, "%s_target", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       MRIwriteImageViews(mri_inputs, fname, IMAGE_SIZE);
-      sprintf(fname, "%s_target.mgz", parms.base_name);
+      req = snprintf(fname, STRLEN, "%s_target.mgz", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("writing target volume to %s...\n", fname);
       MRIwrite(mri_inputs, fname);
     } else {
@@ -1116,19 +1136,17 @@ int main(int argc, char *argv[]) {
                          gcam->atlas.depth, MRI_FLOAT);
       MRIcopyHeader(mri_inputs, mri_gca);
       GCAMbuildMostLikelyVolume(gcam, mri_gca);
-#if 0
-      if (mri_gca->nframes > 1)
-      {
-	 MRI *mri_tmp ;
-        printf("careg: extracting %dth frame\n", mri_gca->nframes-1) ;
-        mri_tmp = MRIcopyFrame(mri_gca, NULL, mri_gca->nframes-1, 0) ;
-        MRIfree(&mri_gca) ;
-        mri_gca = mri_tmp ;
+      int req = snprintf(fname, STRLEN, "%s_target", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
       }
-#endif
-      sprintf(fname, "%s_target", parms.base_name);
       MRIwriteImageViews(mri_gca, fname, IMAGE_SIZE);
-      sprintf(fname, "%s_target.mgz", parms.base_name);
+      req = snprintf(fname, STRLEN, "%s_target.mgz", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("writing target volume to %s...\n", fname);
       MRIwrite(mri_gca, fname);
       MRIfree(&mri_gca);
@@ -1250,8 +1268,8 @@ int main(int argc, char *argv[]) {
   gcamComputeMetricProperties(gcam);
   //  GCAMremoveNegativeNodes(gcam, mri_inputs, &parms) ;
 
-  // printf("--------- Integration params =========\n");
-  // log_integration_parms(stdout,parms);
+  //printf("--------- Integration params =========\n");
+  //log_integration_parms(stdout,parms);
   GCAMregister(gcam, mri_inputs, &parms);
   //  printf("registration complete, removing remaining folds if any exist\n") ;
   //  GCAMremoveNegativeNodes(gcam, mri_inputs, &parms) ;
@@ -1269,7 +1287,11 @@ int main(int argc, char *argv[]) {
 
     if (Gdiag & DIAG_WRITE) {
       char fname[STRLEN];
-      sprintf(fname, "%s.log", parms.base_name);
+      int  req = snprintf(fname, STRLEN, "%s.log", parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       parms.log_fp = fopen(fname, "a");
     }
 
@@ -1279,24 +1301,27 @@ int main(int argc, char *argv[]) {
       // this is the first (and also last) call
       // do not bother passing or receiving scales info
       printf("Starting GCAmapRenormalizeWithAlignment() without scales\n");
-#ifdef HAVE_OPENMP
       mytimer.reset();
-#endif
-
       GCAmapRenormalizeWithAlignment(gcam->gca, mri_inputs, transform,
-                                     parms.log_fp, parms.base_name, nullptr, 0);
-#ifdef HAVE_OPENMP
+                                     parms.log_fp, parms.base_name, NULL, 0);
       printf("GCAmapRenormalizeWithAlignment() took %g min\n",
              (mytimer.milliseconds() / 1000.0) / 60.0);
-#endif
 
       if (parms.write_iterations != 0) {
         char fname[STRLEN];
         MRI *mri_gca, *mri_tmp;
         if (parms.diag_morph_from_atlas) {
-          sprintf(fname, "%s_target", parms.base_name);
+          int req = snprintf(fname, STRLEN, "%s_target", parms.base_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           MRIwriteImageViews(mri_inputs, fname, IMAGE_SIZE);
-          sprintf(fname, "%s_target.mgz", parms.base_name);
+          req = snprintf(fname, STRLEN, "%s_target.mgz", parms.base_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           printf("writing target volume to %s...\n", fname);
           MRIwrite(mri_inputs, fname);
         } else {
@@ -1306,13 +1331,21 @@ int main(int argc, char *argv[]) {
           GCAMbuildMostLikelyVolume(gcam, mri_gca);
           if (mri_gca->nframes > 1) {
             printf("careg: extracting %dth frame\n", mri_gca->nframes - 1);
-            mri_tmp = MRIcopyFrame(mri_gca, nullptr, mri_gca->nframes - 1, 0);
+            mri_tmp = MRIcopyFrame(mri_gca, NULL, mri_gca->nframes - 1, 0);
             MRIfree(&mri_gca);
             mri_gca = mri_tmp;
           }
-          sprintf(fname, "%s_target", parms.base_name);
+          int req = snprintf(fname, STRLEN, "%s_target", parms.base_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           MRIwriteImageViews(mri_gca, fname, IMAGE_SIZE);
-          sprintf(fname, "%s_target1.mgz", parms.base_name);
+          req = snprintf(fname, STRLEN, "%s_target1.mgz", parms.base_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           printf("writing target volume to %s...\n", fname);
           MRIwrite(mri_gca, fname);
           MRIfree(&mri_gca);
@@ -1323,8 +1356,8 @@ int main(int argc, char *argv[]) {
       // this is a sequential call, pass scales..
       printf("Starting GCAseqRenormalizeWithAlignment() with scales\n");
       GCAseqRenormalizeWithAlignment(
-          gcam->gca, mri_inputs, transform, parms.log_fp, parms.base_name,
-          nullptr, 0, label_scales, label_offsets, label_peaks, label_computed);
+          gcam->gca, mri_inputs, transform, parms.log_fp, parms.base_name, NULL,
+          0, label_scales, label_offsets, label_peaks, label_computed);
     }
 
     got_scales = 1;
@@ -1353,7 +1386,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (false && handle_expanded_ventricles) { // one more less-restrictive morph
+  if (0 && handle_expanded_ventricles) { // one more less-restrictive morph
     GCA_MORPH_PARMS old_parms;
     int             start_t;
     TRANSFORM       _transform, *transform = &_transform;
@@ -1402,26 +1435,7 @@ int main(int argc, char *argv[]) {
     GCAMregister(gcam, mri_inputs, &parms);
   }
 
-#if 0
-  for (iter = 0 ; iter < 3 ; iter++)
-  {
-    parms.relabel_avgs = 1 ;
-    GCAMcopyNodePositions(gcam, CURRENT_POSITIONS, ORIGINAL_POSITIONS) ;
-    GCAMstoreMetricProperties(gcam) ;
-    parms.levels = 2 ;
-    parms.navgs = 1 ;
-    GCAMregister(gcam, mri_inputs, &parms) ;
-  }
-#endif
-
-#if 0
-  parms.l_distance = 0 ;
-  parms.relabel = 1 ;
-  GCAMcomputeLabels(mri_inputs, gcam) ;
-  GCAMregister(gcam, mri_inputs, &parms) ;
-#endif
-
-  // record GCA filename to gcam
+  //record GCA filename to gcam
   strcpy(gcam->atlas.fname, gca_fname);
   printf("writing output transformation to %s...\n", out_fname);
   if (vf_fname) {
@@ -1432,12 +1446,6 @@ int main(int argc, char *argv[]) {
     ErrorExit(Gerror, "%s: GCAMwrite(%s) failed", Progname, out_fname);
   }
 
-#if 0
-  if (gca)
-  {
-    GCAfree(&gca) ;
-  }
-#endif
   GCAMfree(&gcam);
   if (mri_inputs) {
     MRIfree(&mri_inputs);
@@ -1469,10 +1477,8 @@ int main(int argc, char *argv[]) {
   printf("Calls to gcamComputeMetricProperties    %d tmin = %g\n",
          gcamComputeMetricProperties_nCalls,
          gcamComputeMetricProperties_tsec / 60.0);
-#ifdef HAVE_OPENMP
-  msec = start.milliseconds();
-#endif
 
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   hours   = minutes / (60);
@@ -1482,8 +1488,8 @@ int main(int argc, char *argv[]) {
          minutes, seconds);
 
   // Print usage stats to the terminal (and a file is specified)
-  // PrintRUsage(RUSAGE_SELF, "mri_ca_register ", stdout);
-  // if(rusage_file) WriteRUsage(RUSAGE_SELF, "", rusage_file);
+  //PrintRUsage(RUSAGE_SELF, "mri_ca_register ", stdout);
+  //if(rusage_file) WriteRUsage(RUSAGE_SELF, "", rusage_file);
 
   // Output formatted so it can be easily grepped
   printf("#VMPC# mri_ca_register VmPeak  %d\n", GetVmPeak());
@@ -1884,7 +1890,7 @@ static int get_option(int argc, char *argv[]) {
 
   } else if (!stricmp(option, "no-re-init") || !stricmp(option, "no-reinit") ||
              !stricmp(option, "no_re_init")) {
-    reinit = 0; // donot reinitialize GCAM with the multiple linear registration
+    reinit = 0; //donot reinitialize GCAM with the multiple linear registration
   } else if (!stricmp(option, "cross-sequence-new") ||
              !stricmp(option, "cross_sequence_new")) {
     regularize      = .5;
@@ -1904,7 +1910,7 @@ static int get_option(int argc, char *argv[]) {
            parms.ratio_thresh);
   } else if (!stricmp(option, "invert-and-save")) {
     printf("Loading, Inverting, Saving, Exiting ...\n");
-    err = GCAMwriteInverse(argv[2], nullptr);
+    err = GCAMwriteInverse(argv[2], NULL);
     exit(err);
   } else if (!stricmp(option, "histo-norm")) {
     printf("using prior subject histograms for initial GCA renormalization\n");
@@ -1912,13 +1918,13 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "")) {
     printf("using histogram matching of prior subjects for initial gca "
            "renormalization\n");
-    err = GCAMwriteInverse(argv[2], nullptr);
+    err = GCAMwriteInverse(argv[2], NULL);
     exit(err);
   } else
     switch (toupper(*option)) {
     case 'L': /* for longitudinal analysis */
       xform_name = argv[2];
-      // invert is not needed if REG is from tp1 to current subject! -xh
+      //invert is not needed if REG is from tp1 to current subject! -xh
       //   inverted_xform = 1 ;
       long_reg_fname = argv[3];
       nargs          = 2;
@@ -2021,7 +2027,7 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void print_help() {
+static void print_help(void) {
   outputHelpXml(mri_ca_register_help_xml, mri_ca_register_help_xml_len);
 }
 
@@ -2092,7 +2098,7 @@ static int remove_bright_stuff(MRI *mri, GCA *gca, TRANSFORM *transform) {
   MRIclear(mri_tmp);
   h            = MRIhistogram(mri, 0);
   h->counts[0] = 0;
-  hs           = HISTOsmooth(h, nullptr, 2);
+  hs           = HISTOsmooth(h, NULL, 2);
 
   peak    = HISTOfindLastPeak(hs, 5, 0.1);
   end     = HISTOfindEndOfPeak(hs, peak, 0.01);
@@ -2122,7 +2128,7 @@ static int remove_bright_stuff(MRI *mri, GCA *gca, TRANSFORM *transform) {
   */
   end      = HISTOfindStartOfPeak(hs, peak, 0.1);
   thresh   = hs->bins[end];
-  mri_tmp2 = MRIcopy(mri_tmp, nullptr);
+  mri_tmp2 = MRIcopy(mri_tmp, NULL);
   for (x = 0; x < mri->width; x++) {
     for (y = 0; y < mri->height; y++) {
       for (z = 0; z < mri->depth; z++) {

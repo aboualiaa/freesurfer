@@ -114,12 +114,11 @@ bool LayerPointSet::LoadFromFile(const QString &filename) {
       if (!m_pointSetSource->ReadAsControlPoints(filename)) {
         return false;
       } else {
-        std::cout
-            << "Warning: Coordinate of control points has been converted to "
-               "realRAS in "
-            << qPrintable(filename) << " and will be saved in that way."
-            << std::endl
-            << std::endl;
+        cout << "Warning: Coordinate of control points has been converted to "
+                "realRAS in "
+             << qPrintable(filename) << " and will be saved in that way."
+             << endl
+             << endl;
       }
     } else {
       if (!m_pointSetSource->ReadAsLabel(filename)) {
@@ -141,7 +140,7 @@ bool LayerPointSet::LoadFromFile(const QString &filename) {
 bool LayerPointSet::LoadFromJsonFile(const QString &filename) {
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    std::cerr << qPrintable(file.errorString()) << "\n";
+    cerr << qPrintable(file.errorString()) << "\n";
     ;
     return false;
   }
@@ -151,7 +150,7 @@ bool LayerPointSet::LoadFromJsonFile(const QString &filename) {
     return false;
 
   if (m_mapEnhancedData.value("data_type").toString() != "fs_pointset") {
-    std::cerr << "Not a freesurfer pointset file\n";
+    cerr << "Not a freesurfer pointset file\n";
     return false;
   }
 
@@ -244,9 +243,9 @@ bool LayerPointSet::SaveAsJson(const QString &filename) {
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QString strg = file.errorString();
     if (strg.isEmpty())
-      std::cerr << "Can not open file for writing\n";
+      cerr << "Can not open file for writing\n";
     else
-      std::cerr << qPrintable(strg) << "\n";
+      cerr << qPrintable(strg) << "\n";
     return false;
   }
 
@@ -682,6 +681,9 @@ bool LayerPointSet::RemovePoint(int nIndex) {
 }
 
 void LayerPointSet::UpdatePoint(int nIndex, double *ras, bool rebuildActor) {
+  if (m_points.size() <= nIndex)
+    return;
+
   if (GetProperty()->GetSnapToVoxelCenter()) {
     m_layerRef->SnapToVoxelCenter(ras, m_points[nIndex].pt);
   } else {

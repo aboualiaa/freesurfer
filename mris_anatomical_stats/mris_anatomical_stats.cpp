@@ -17,12 +17,23 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/utsname.h>
 
 #include "cma.h"
+#include "colortab.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
 #include "mrisutils.h"
+#include "proto.h"
 #include "version.h"
 
 int         main(int argc, char *argv[]);
@@ -112,7 +123,7 @@ int main(int argc, char *argv[]) {
   mean_abs_mean_curvature = mean_abs_gaussian_curvature = gray_volume = 0.0;
   Progname                                                            = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -151,7 +162,12 @@ int main(int argc, char *argv[]) {
   if (sigma > 0.0) {
     mri_kernel = MRIgaussian1d(sigma, 100);
   }
-  sprintf(fname, "%s/%s/mri/wm", sdir, sname);
+  int req = snprintf(fname, STRLEN, "%s/%s/mri/wm", sdir, sname);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   if (MGZ) {
     strcat(fname, ".mgz");
   }
@@ -176,7 +192,12 @@ int main(int argc, char *argv[]) {
     MRIfree(&mri_kernel);
   }
 
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, surf_name);
+  req =
+      snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi, surf_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "reading input surface %s...\n", fname);
   mris = MRISread(fname);
   if (!mris)
@@ -197,24 +218,37 @@ int main(int argc, char *argv[]) {
     LABEL *label;
     double totvol;
     printf("Using TH3 vertex volume calc\n");
-    sprintf(fname, "%s/%s/surf/%s.white", sdir, sname, hemi);
+    int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.white", sdir, sname, hemi);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     mrisw = MRISread(fname);
     if (!mrisw)
       exit(1);
-    sprintf(fname, "%s/%s/surf/%s.pial", sdir, sname, hemi);
+    req = snprintf(fname, STRLEN, "%s/%s/surf/%s.pial", sdir, sname, hemi);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     mrisp = MRISread(fname);
     if (!mrisp)
       exit(1);
-    sprintf(fname, "%s/%s/label/%s.cortex.label", sdir, sname, hemi);
-    label = LabelRead(nullptr, fname);
-    if (label == nullptr)
+    req = snprintf(fname, STRLEN, "%s/%s/label/%s.cortex.label", sdir, sname,
+                   hemi);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+    label = LabelRead(NULL, fname);
+    if (label == NULL)
       exit(1);
-    ctxmask = MRISlabel2Mask(mrisw, label, nullptr);
-    if (ctxmask == nullptr)
+    ctxmask = MRISlabel2Mask(mrisw, label, NULL);
+    if (ctxmask == NULL)
       exit(1);
     LabelFree(&label);
-    mrisvol = MRISvolumeTH3(mrisw, mrisp, nullptr, ctxmask, &totvol);
-    if (mrisvol == nullptr)
+    mrisvol = MRISvolumeTH3(mrisw, mrisp, NULL, ctxmask, &totvol);
+    if (mrisvol == NULL)
       exit(1);
     MRISfree(&mrisw);
     MRISfree(&mrisp);
@@ -224,13 +258,23 @@ int main(int argc, char *argv[]) {
   MRISsaveVertexPositions(mris, ORIGINAL_VERTICES);
   // read in white and pial surfaces
   MRISsaveVertexPositions(mris, TMP_VERTICES);
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, pial_name);
+  req =
+      snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi, pial_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "reading input pial surface %s...\n", fname);
   if (MRISreadVertexPositions(mris, fname) != NO_ERROR)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
               fname);
   MRISsaveVertexPositions(mris, PIAL_VERTICES);
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, white_name);
+  req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi,
+                 white_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "reading input white surface %s...\n", fname);
   if (MRISreadVertexPositions(mris, fname) != NO_ERROR)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
@@ -251,19 +295,19 @@ int main(int argc, char *argv[]) {
   if (nsmooth > 0) {
     printf("Smooth thickness and area map with %d iterations on surface\n",
            nsmooth);
-    SurfaceMap = MRIcopyMRIS(nullptr, mris, 0, "curv");
-    if (SurfaceMap == nullptr) {
+    SurfaceMap = MRIcopyMRIS(NULL, mris, 0, "curv");
+    if (SurfaceMap == NULL) {
       printf("Unable to copy thickness data to an MRI volume \n");
     } else {
-      MRISsmoothMRI(mris, SurfaceMap, nsmooth, nullptr, SurfaceMap);
+      MRISsmoothMRI(mris, SurfaceMap, nsmooth, NULL, SurfaceMap);
       MRIScopyMRI(mris, SurfaceMap, 0, "curv");
       MRIfree(&SurfaceMap);
     }
-    SurfaceMap = MRIcopyMRIS(nullptr, mris, 0, "area");
-    if (SurfaceMap == nullptr) {
+    SurfaceMap = MRIcopyMRIS(NULL, mris, 0, "area");
+    if (SurfaceMap == NULL) {
       printf("Unable to copy thickness data to an  MRI volume \n");
     } else {
-      MRISsmoothMRI(mris, SurfaceMap, nsmooth, nullptr, SurfaceMap);
+      MRISsmoothMRI(mris, SurfaceMap, nsmooth, NULL, SurfaceMap);
       MRIScopyMRI(mris, SurfaceMap, 0, "area");
       MRIfree(&SurfaceMap);
     }
@@ -284,14 +328,18 @@ int main(int argc, char *argv[]) {
     if (MRISreadAnnotation(mris, annotation_name) != NO_ERROR)
       ErrorExit(ERROR_NOFILE, "%s:  could  not read annotation file %s",
                 Progname, annotation_name);
-    if (annotctabfile != nullptr && mris->ct != nullptr) {
+    if (annotctabfile != NULL && mris->ct != NULL) {
       printf("Saving annotation colortable %s\n", annotctabfile);
       CTABwriteFileASCII(mris->ct, annotctabfile);
     }
   }
 
   if (histo_flag) {
-    sprintf(fname, "%s/%s/mri/%s", sdir, sname, mri_name);
+    int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, mri_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if (MGZ) {
       strcat(fname, ".mgz");
     }
@@ -302,8 +350,8 @@ int main(int argc, char *argv[]) {
                 fname);
     histo_gray = HISTOalloc(256);
   } else {
-    histo_gray = nullptr;
-    mri_orig   = nullptr;
+    histo_gray = NULL;
+    mri_orig   = NULL;
   }
 
   if (log_file_name) {
@@ -327,13 +375,22 @@ int main(int argc, char *argv[]) {
     LABEL *area;
     char   fname[STRLEN];
 
-    sprintf(fname, "%s/%s/label/%s", sdir, sname, label_name);
+    int req =
+        snprintf(fname, STRLEN, "%s/%s/label/%s", sdir, sname, label_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     // If that does not exist, use label_name as absolute path.
     if (!fio_FileExistsReadable(fname)) {
-      sprintf(fname, "%s", label_name);
+      int req = snprintf(fname, STRLEN, "%s", label_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
     }
 
-    area = LabelRead(nullptr, fname);
+    area = LabelRead(NULL, fname);
     if (!area) {
       ErrorExit(ERROR_NOFILE, "%s: could not read label file %s\n", sname,
                 fname);
@@ -355,16 +412,26 @@ int main(int argc, char *argv[]) {
     LabelFree(&area);
     MRIScomputeMetricProperties(mris);
     names[1] = label_name;
-    names[0] = nullptr;
+    names[0] = NULL;
     if ((label_name[0] == '/') || !strncmp(label_name, "./", 2)) // a full path
     {
       strcpy(full_name, label_name);
     } else {
       // build the full path string
-      if (strstr(label_name, ".label") == nullptr) {
-        sprintf(full_name, "%s/%s/label/%s.label", sdir, sname, label_name);
+      if (strstr(label_name, ".label") == NULL) {
+        int req = snprintf(full_name, STRLEN, "%s/%s/label/%s.label", sdir,
+                           sname, label_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
       } else {
-        sprintf(full_name, "%s/%s/label/%s", sdir, sname, label_name);
+        int req = snprintf(full_name, STRLEN, "%s/%s/label/%s", sdir, sname,
+                           label_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
       }
     }
     if (!fio_FileExistsReadable(full_name)) {
@@ -381,21 +448,44 @@ int main(int argc, char *argv[]) {
     } else // build the full path string
     {
       char tmp[STRLEN];
-      sprintf(tmp, "%s.", hemi);
-      if (strstr(annotation_name, tmp) == nullptr) // no hemi in string
+      int  req = snprintf(tmp, STRLEN, "%s.", hemi);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+      if (strstr(annotation_name, tmp) == NULL) // no hemi in string
       {
-        if (strstr(annotation_name, ".annot") == nullptr)
-          sprintf(full_name, "%s/%s/label/%s.%s.annot", sdir, sname, hemi,
-                  annotation_name);
-        else
-          sprintf(full_name, "%s/%s/label/%s.%s", sdir, sname, hemi,
-                  annotation_name);
+        if (strstr(annotation_name, ".annot") == NULL) {
+          int req = snprintf(full_name, STRLEN, "%s/%s/label/%s.%s.annot", sdir,
+                             sname, hemi, annotation_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+        } else {
+          int req = snprintf(full_name, STRLEN, "%s/%s/label/%s.%s", sdir,
+                             sname, hemi, annotation_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+        }
       } else {
-        if (strstr(annotation_name, ".annot") == nullptr)
-          sprintf(full_name, "%s/%s/label/%s.annot", sdir, sname,
-                  annotation_name);
-        else
-          sprintf(full_name, "%s/%s/label/%s", sdir, sname, annotation_name);
+        if (strstr(annotation_name, ".annot") == NULL) {
+          int req = snprintf(full_name, STRLEN, "%s/%s/label/%s.annot", sdir,
+                             sname, annotation_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+        } else {
+          int req = snprintf(full_name, STRLEN, "%s/%s/label/%s", sdir, sname,
+                             annotation_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+        }
       }
     }
     for (vno = 0; vno < mris->nvertices; vno++) {
@@ -409,7 +499,7 @@ int main(int argc, char *argv[]) {
         continue;
       }
       names[index] = mris->ct->entries[index]->name;
-      // printf("idx=%d, name=%s\n",index,names[index]);
+      //printf("idx=%d, name=%s\n",index,names[index]);
     }
   } else // do all of surface
   {
@@ -433,9 +523,9 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "\n");
   }
 
-  if (tablefile != nullptr) {
+  if (tablefile != NULL) {
     fp = fopen(tablefile, "w");
-    if (fp == nullptr) {
+    if (fp == NULL) {
       ErrorExit(ERROR_NOFILE, "%s: couldn't open file %s", Progname, tablefile);
     }
     fprintf(fp, "# Table of FreeSurfer cortical "
@@ -769,7 +859,7 @@ int main(int argc, char *argv[]) {
     float areas_total = 0.0f;
 
     for (i = 0; i < MAX_INDICES; i++) {
-      if (dofs[i] == 0 || names[i] == nullptr) {
+      if (dofs[i] == 0 || names[i] == NULL) {
         continue;
       }
 
@@ -827,9 +917,9 @@ int main(int argc, char *argv[]) {
 
       /* output */
 
-      if (tablefile != nullptr) {
+      if (tablefile != NULL) {
         fp = fopen(tablefile, "a");
-        fprintf(fp, "%-40s", fio_basename(names[i], nullptr));
+        fprintf(fp, "%-40s", fio_basename(names[i], NULL));
         fprintf(fp, "%5d", dofs[i]);
         fprintf(fp, "  %5.0f", areas[i]);
         fprintf(fp, "  %5.0f", volumes[i]);
@@ -855,7 +945,7 @@ int main(int argc, char *argv[]) {
         fprintf(stdout, "  %s", names[i]);
         fprintf(stdout, "\n");
       } else {
-        if (annotation_name && mris->ct == nullptr)
+        if (annotation_name && mris->ct == NULL)
           ErrorExit(ERROR_BADFILE,
                     "%s: no color table loaded - cannot translate annot  file",
                     Progname);
@@ -1011,8 +1101,13 @@ static int get_option(int argc, char *argv[]) {
     char str[STRLEN];
     strcpy(sdir, argv[2]);
     printf("using  %s as  SUBJECTS_DIR...\n", sdir);
-    nargs = 1;
-    sprintf(str, "SUBJECTS_DIR=%s", sdir);
+    nargs   = 1;
+    int req = snprintf(str, STRLEN, "SUBJECTS_DIR=%s", sdir);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     putenv(str);
   } else if (!stricmp(option, "mgz")) {
     MGZ = 1;
@@ -1021,8 +1116,8 @@ static int get_option(int argc, char *argv[]) {
     MGZ = 0;
     printf("INFO: assuming COR format for volumes.\n");
   } else if (!stricmp(option, "cortex")) {
-    cortex_label = LabelRead(nullptr, argv[2]);
-    if (cortex_label == nullptr) {
+    cortex_label = LabelRead(NULL, argv[2]);
+    if (cortex_label == NULL) {
       ErrorExit(ERROR_NOFILE, "");
     }
     nargs = 1;
@@ -1111,19 +1206,19 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_help();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   fprintf(stderr,
           "usage: %s [options] <subject name> <hemi> [<surface name>]\n",
           Progname);
 }
 
 #include "mris_anatomical_stats.help.xml.h"
-static void print_help() {
+static void print_help(void) {
   outputHelpXml(mris_anatomical_stats_help_xml,
                 mris_anatomical_stats_help_xml_len);
   exit(1);

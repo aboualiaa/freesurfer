@@ -64,9 +64,11 @@ bool Interactor2DPointSetEdit::ProcessMouseDownEvent(QMouseEvent *event,
         m_nCurrentIndex = wp->FindPoint(ras);
         if (m_nCurrentIndex < 0) {
           m_nCurrentIndex = wp->AddPoint(ras);
+          m_bEditing      = false;
         }
-      } else {
-        wp->RemovePoint(ras);
+      } else if (wp->RemovePoint(ras)) {
+        m_nCurrentIndex = wp->GetNumberOfPoints() - 1;
+        m_bEditing      = false;
       }
     }
 

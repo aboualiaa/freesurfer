@@ -32,10 +32,25 @@
  *
  */
 
-#include "diag.h"
-#include "gcsa.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "macros.h"
+
+#include "mri.h"
+#include "mrisurf.h"
 #include "mrisurf_project.h"
+
+#include "diag.h"
+#include "error.h"
+#include "gcsa.h"
+#include "label.h"
+#include "proto.h"
 #include "timer.h"
+#include "transform.h"
+#include "utils.h"
 #include "version.h"
 
 #define MAX_LABELS 1000
@@ -99,7 +114,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
@@ -178,8 +193,12 @@ int main(int argc, char *argv[]) {
       subject_name = argv[i + 4];
       printf("processing subject %s, %d of %d...\n", subject_name, i + 1,
              nsubjects);
-      sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
-              orig_name);
+      int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", subjects_dir,
+                         subject_name, hemi, orig_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (DIAG_VERBOSE_ON)
         printf("reading surface from %s...\n", fname);
       mris = MRISread(fname);
@@ -194,10 +213,15 @@ int main(int argc, char *argv[]) {
         int     i;
         VERTEX *v;
 
-        sprintf(fname, "%s/%s/label/%s.%s", subjects_dir, subject_name, hemi,
-                annot_name);
+        int req = snprintf(fname, STRLEN, "%s/%s/label/%s.%s", subjects_dir,
+                           subject_name, hemi, annot_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
+
         area = LabelRead(subject_name, fname);
-        if (area == nullptr)
+        if (area == NULL)
           ErrorExit(ERROR_NOFILE, "%s: could not read label file %s for %s",
                     Progname, fname, subject_name);
         for (i = 0; i < area->n_points; i++) {
@@ -387,7 +411,7 @@ static int get_option(int argc, char *argv[]) {
 
   Description:
   ----------------------------------------------------------------------*/
-static void print_usage() {
+static void print_usage(void) {
   fprintf(stderr,
           "Usage:\n"
           "------\n"
@@ -401,7 +425,7 @@ static void usage_exit(int code) {
   exit(code);
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   fprintf(stderr,
           "\n"

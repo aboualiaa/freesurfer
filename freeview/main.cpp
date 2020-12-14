@@ -21,12 +21,17 @@
 #include "MainApplication.h"
 #include "MainWindow.h"
 #include "MyCmdLineParser.h"
+#include "MyUtils.h"
 #include "vtkObject.h"
 #include <QDateTime>
 #include <QDebug>
+#include <QDir>
+#include <QFile>
 #include <QMessageBox>
 #include <QStringList>
+#include <QStyleFactory>
 #include <QSurfaceFormat>
+#include <fenv.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -187,6 +192,8 @@ int main(int argc, char *argv[]) {
           "':name=display_name' Set the display name of the volume.\n\n"
           "':lock=lock_status' Lock the volume layer so it will not be moved "
           "in the layer stack. Status can be '1' or 'true'.\n\n"
+          "':linked=flag' Link the volume layer with other linked volumes. "
+          "Flag can be '1' or 'true'.\n\n"
           "':visible=visibility' Set the initial visibility of the volume. "
           "Visibility can be '1' or '0' or 'true' or 'false'.\n\n"
           "':smoothed=flag' Set smoothed display for the volume. Flag can be "

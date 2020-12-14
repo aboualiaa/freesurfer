@@ -17,9 +17,22 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "const.h"
 #include "diag.h"
+#include "error.h"
+#include "label.h"
+#include "macros.h"
+#include "mri.h"
 #include "mri2.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "timer.h"
+#include "utils.h"
 #include "version.h"
 
 int        main(int argc, char *argv[]);
@@ -55,7 +68,7 @@ static const char *data_dir       = "fmri";
 VECTOR *VectorFromMRIcol(MRI *mri_cmat, VECTOR *v, int col, int frame) {
   int row;
 
-  if (v == nullptr) {
+  if (v == NULL) {
     v = VectorAlloc(mri_cmat->height, MATRIX_REAL);
   }
 
@@ -68,7 +81,7 @@ VECTOR *VectorFromMRIcol(MRI *mri_cmat, VECTOR *v, int col, int frame) {
 MATRIX *MatrixFromMRI(MRI *mri_cmat, MATRIX *cmat, int frame) {
   int r, c;
 
-  if (cmat == nullptr) {
+  if (cmat == NULL) {
     cmat = MatrixAlloc(mri_cmat->height, mri_cmat->width, MATRIX_REAL);
   }
 
@@ -84,7 +97,7 @@ MATRIX *MatrixFromMRI(MRI *mri_cmat, MATRIX *cmat, int frame) {
 MRI *MatrixToMRI(MATRIX *cmat, MRI *mri_cmat, int frame) {
   int r, c;
 
-  if (mri_cmat == nullptr) {
+  if (mri_cmat == NULL) {
     mri_cmat = MRIalloc(cmat->cols, cmat->rows, 1, MATRIX_REAL);
   }
 
@@ -101,7 +114,7 @@ VECTOR *MRIcmatDotProductFrames(MRI *mri1, int frame1, MRI *mri2, int frame2,
   int    r1, c1;
   double dot;
 
-  if (v_dot == nullptr) {
+  if (v_dot == NULL) {
     v_dot = VectorAlloc(mri1->height, MATRIX_REAL);
   }
 
@@ -153,7 +166,7 @@ VECTOR *MatrixRowNorm(MATRIX *cmat, VECTOR *v_norm) {
   double norm, val;
   int    r, c;
 
-  if (v_norm == nullptr) {
+  if (v_norm == NULL) {
     v_norm = VectorAlloc(cmat->cols, MATRIX_REAL);
   }
 
@@ -197,7 +210,7 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
   int start_index, end_index, sno, vno, ind, vno2, nvertices, nevals, nin, nout,
       *in_label[MAX_SUBJECTS];
   MRI *   mri_out;
-  MATRIX *m_train = nullptr, *m_trains[MAX_SUBJECTS];
+  MATRIX *m_train = NULL, *m_trains[MAX_SUBJECTS];
   double  dot, max_dot, val = 0.0, val2, ll_in, ll_out, prior;
   VECTOR *v_test, *v_in_vars, *v_in_means, *v_out_means, *v_out_vars;
   VERTEX *v;
@@ -297,7 +310,7 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
       for (ind = 0; ind < labels[sno]->n_points; ind++) {
         in_label[sno][labels[sno]->lv[ind].vno] = 1;
       }
-      m_trains[sno] = MatrixFromMRI(mri_cmat, nullptr, sno);
+      m_trains[sno] = MatrixFromMRI(mri_cmat, NULL, sno);
     }
   }
 
@@ -318,8 +331,7 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
     nevals++;
 
     // extract correlation pattern for test subject at this vertex
-    v_test =
-        VectorFromMRIcol(mri_cmat, nullptr, vno + start_index, nsubjects - 1);
+    v_test = VectorFromMRIcol(mri_cmat, NULL, vno + start_index, nsubjects - 1);
 
     // use gaussian classifier for in and out of area
     if (classifier == CLASSIFY_GAUSSIAN) {
@@ -420,7 +432,7 @@ static LABEL *segment_area(MRI_SURFACE *mris, MRI *mri, LABEL *area,
   double        max_p, p;
   LABEL_VERTEX *lv;
 
-  area = LabelAlloc(nvertices, nullptr, "segmented area");
+  area = LabelAlloc(nvertices, NULL, "segmented area");
 
   max_p   = MRIgetVoxVal(mri, 0, 0, 0, 0);
   max_vno = 0;
@@ -495,7 +507,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
@@ -513,7 +525,7 @@ int main(int argc, char *argv[]) {
 
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
-    if (cp == nullptr)
+    if (cp == NULL)
       ErrorExit(ERROR_UNSUPPORTED, "%s: must define SUBJECTS_DIR in env",
                 Progname);
     strcpy(sdir, cp);
@@ -523,16 +535,26 @@ int main(int argc, char *argv[]) {
   printf("processing %d subjects and writing output to %s\n", nsubjects,
          out_fname);
 
-  sprintf(fname, "%s/fsaverage%d/surf/%s.inflated", sdir, ico_no, hemi_name);
+  int req = snprintf(fname, STRLEN, "%s/fsaverage%d/surf/%s.inflated", sdir,
+                     ico_no, hemi_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mris = MRISread(fname);
-  if (mris == nullptr) {
+  if (mris == NULL) {
     ErrorExit(ERROR_NOFILE, "%s: could not load surface %s", Progname, fname);
   }
-  mri = nullptr; // get rid of compiler warning
+  mri = NULL; // get rid of compiler warning
   for (sno = 0; sno < nsubjects; sno++) {
     subject = argv[sno + 1];
     printf("processing subject %s, %d of %d\n", subject, sno + 1, nsubjects);
-    sprintf(fname, "%s/%s/%s/%s", sdir, subject, data_dir, data_name);
+    int req = snprintf(fname, STRLEN, "%s/%s/%s/%s", sdir, subject, data_dir,
+                       data_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if (prior_only <= 0) {
       mri_frame = MRIread(fname);
     } else {
@@ -540,7 +562,7 @@ int main(int argc, char *argv[]) {
           MRIalloc(2 * mris->nvertices, 2 * mris->nvertices, 1, MRI_FLOAT);
       MRIsetValues(mri_frame, .5); // 0 and 1 are used as indicator values
     }
-    if (mri_frame == nullptr)
+    if (mri_frame == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load correlation matrix from %s",
                 Progname, fname);
     if (mri_frame->height == 1 && mri_frame->nframes == mri_frame->width) {
@@ -553,7 +575,7 @@ int main(int argc, char *argv[]) {
     if (sno == 0) {
       mri = MRIallocSequence(mri_frame->width, mri_frame->height,
                              mri_frame->depth, mri_frame->type, nsubjects);
-      if (mri == nullptr)
+      if (mri == NULL)
         ErrorExit(
             ERROR_NOMEMORY, "%s: could not allocate (%d x %d x %d x %d) array",
             mri_frame->width, mri_frame->height, mri_frame->depth, nsubjects);
@@ -567,16 +589,26 @@ int main(int argc, char *argv[]) {
     MRIcopyFrame(mri_frame, mri, 0, sno);
     MRIfree(&mri_frame);
 
-    sprintf(fname, "%s/%s/label/%s.%s", sdir, subject, hemi_name, label_name);
-    labels[sno] = LabelRead(nullptr, fname);
-    if (labels[sno] == nullptr)
+    req = snprintf(fname, STRLEN, "%s/%s/label/%s.%s", sdir, subject, hemi_name,
+                   label_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+    labels[sno] = LabelRead(NULL, fname);
+    if (labels[sno] == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load label from %s", Progname,
                 fname);
   }
-  sprintf(fname, "%s/fsaverage%d/label/%s.%s", sdir, ico_no, hemi_name,
-          prior_name);
+  req = snprintf(fname, STRLEN, "%s/fsaverage%d/label/%s.%s", sdir, ico_no,
+                 hemi_name, prior_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   mri_prior = MRIread(fname);
-  if (mri_prior == nullptr) {
+  if (mri_prior == NULL) {
     ErrorExit(ERROR_NOFILE, "%s: could not load prior from %s", Progname,
               fname);
   }
@@ -584,8 +616,8 @@ int main(int argc, char *argv[]) {
                               cor_thresh, prior_only);
   printf("writing output to %s\n", out_fname);
   MRIwrite(mri_out, out_fname);
-  MRISsmoothMRI(mris, mri_out, nsmooth, nullptr, mri_out);
-  area = segment_area(mris, mri_out, nullptr, prior_number_of_vertices);
+  MRISsmoothMRI(mris, mri_out, nsmooth, NULL, mri_out);
+  area = segment_area(mris, mri_out, NULL, prior_number_of_vertices);
   LabelDilate(area, mris, nclose, CURRENT_VERTICES);
   LabelErode(area, mris, nclose);
   FileNameRemoveExtension(out_fname, out_fname);

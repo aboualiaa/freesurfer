@@ -17,10 +17,20 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "MARS_DT_Boundary.h"
 #include "diag.h"
+#include "error.h"
 #include "label.h"
+#include "macros.h"
+#include "mri.h"
 #include "mrisurf.h"
+#include "proto.h"
 #include "timer.h"
 #include "version.h"
 
@@ -52,7 +62,7 @@ int main(int argc, char *argv[]) {
   Gdiag |= DIAG_SHOW;
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -68,14 +78,18 @@ int main(int argc, char *argv[]) {
 
   if (strlen(fsdir) == 0) {
     cp = getenv("FREESURFER_HOME");
-    if (cp == nullptr)
+    if (cp == NULL)
       ErrorExit(ERROR_BADPARM,
                 "FRESURFER_HOME must be defined in the environment");
     strcpy(fsdir, cp);
   }
-  sprintf(fname, "%s/FreeSurferColorLUT.txt", fsdir);
+  int req = snprintf(fname, STRLEN, "%s/FreeSurferColorLUT.txt", fsdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   ct = CTABreadASCII(fname);
-  if (ct == nullptr)
+  if (ct == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read color table from %s", Progname,
               fname);
 
@@ -85,31 +99,35 @@ int main(int argc, char *argv[]) {
   FileNamePath(parc1, path);
   FileNameOnly(parc1, fname);
   cp = strstr(fname, "h.");
-  if (cp == nullptr)
+  if (cp == NULL)
     ErrorExit(ERROR_UNSUPPORTED, "%s: could not scan hemisphere from fname %s",
               Progname, fname);
   strncpy(hemi, cp - 1, 2);
   hemi[2] = 0;
-  sprintf(surf_name, "%s/../surf/%s.orig", path, hemi);
+  req     = snprintf(surf_name, STRLEN, "%s/../surf/%s.orig", path, hemi);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mris1 = MRISread(surf_name);
-  if (mris1 == nullptr)
+  if (mris1 == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface %s", Progname,
               surf_name);
   if (MRISreadAnnotation(mris1, parc1) != NO_ERROR)
     ErrorExit(ERROR_BADFILE, "%s:could not open annotation %s", Progname,
               parc1);
-  if (mris1->ct == nullptr)
+  if (mris1->ct == NULL)
     ErrorExit(ERROR_BADFILE, "Annotation %s does not contain a color table",
               parc1);
 
   mris2 = MRISread(surf_name);
-  if (mris2 == nullptr)
+  if (mris2 == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface %s", Progname,
               surf_name);
   if (MRISreadAnnotation(mris2, parc2) != NO_ERROR)
     ErrorExit(ERROR_BADFILE, "%s:could not open annotation %s", Progname,
               parc2);
-  if (mris2->ct == nullptr)
+  if (mris2->ct == NULL)
     ErrorExit(ERROR_BADFILE, "Annotation %s does not contain a color table",
               parc2);
 
@@ -163,17 +181,17 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   printf("usage: %s [options] <surface> <label1> <label2>\n", Progname);
   printf("\t-a <annot name>    compute pairwise HD between all annotations\n");
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   fprintf(stderr,
           "This program computes the Hausdorff distance between two labels on "
@@ -190,8 +208,7 @@ static void print_version(void) {
 
 /*
   these are actually the same surface, the 1st one has Rahul's parcellation, the
-  2nd one Christophe's. Grab the cingulate subdivisions from Rahul's and put
-  them in Christophe's.
+  2nd one Christophe's. Grab the cingulate subdivisions from Rahul's and put them in Christophe's.
 */
 static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
                              MRI_SURFACE *mris2, MRI_SURFACE *mris) {
@@ -390,8 +407,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
     v->annotation = annot;
   }
 
-  // now diffuse cing sulcal labels into the rest of the cingulate sulcus in
-  // Christophe's labels
+  // now diffuse cing sulcal labels into the rest of the cingulate sulcus in Christophe's labels
   if (Gdiag_no >= 0) {
     int index;
     CTABfindAnnotation(mris1->ct, mris1->vertices[Gdiag_no].annotation, &index);
@@ -435,8 +451,8 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
           else
             continue;
 
-          v->marked = -1; // marked in this cycle - don't use it until done with
-                          // this iter
+          v->marked =
+              -1; // marked in this cycle - don't use it until done with this iter
           filled++;
           break;
         }
@@ -518,8 +534,8 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
           else
             continue;
 
-          v->marked = -1; // marked in this cycle - don't use it until done with
-                          // this iter
+          v->marked =
+              -1; // marked in this cycle - don't use it until done with this iter
           filled++;
           break;
         }
@@ -548,7 +564,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
 
     for (i = 0; i < mris->ct->nentries; i++) {
       cte = mris->ct->entries[i];
-      if (cte == nullptr)
+      if (cte == NULL)
         continue;
       if ((strncmp(cte->name, "ctx-lh-", 7) == 0) ||
           (strncmp(cte->name, "ctx-rh-", 7) == 0)) {

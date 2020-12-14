@@ -19,28 +19,33 @@
  *
  */
 
-#include "diag.h"
-#include "gcsa.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/resource.h>
+#include <sys/time.h>
+#include <unistd.h>
+
+#include "macros.h"
+
+#include "mri.h"
+#include "mrisurf.h"
 #include "mrisurf_project.h"
+
+#include "romp_support.h"
+
+#include "diag.h"
+#include "error.h"
+#include "gcsa.h"
+#include "macros.h"
+#include "proto.h"
 #include "tags.h"
 #include "timer.h"
 #include "version.h"
 
-#ifdef HAVE_OPENMP
-#include "romp_support.h"
-#endif
-
 #define PARAM_IMAGES (IMAGES_PER_SURFACE * SURFACES)
-
-int main(int argc, char *argv[]);
-
-static int    get_option(int argc, char *argv[]);
-static void   usage_exit(void);
-static void   print_usage(void);
-static void   print_help(void);
-static void   print_version(void);
-static int    compute_area_ratios(MRI_SURFACE *mris);
-static double gcsaSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
 
 int main(int argc, char *argv[]);
 
@@ -138,7 +143,6 @@ int main(int argc, char *argv[]) {
   printf("\ncwd %s\n", cwd);
   printf("cmdline %s\n\n", cmdline2);
 
-  memset(&parms, 0, sizeof(parms));
   parms.projection = PROJECT_SPHERE;
   parms.flags |= IP_USE_CURVATURE;
   parms.trinarize_thresh    = 0.0; // disabled by default
@@ -306,7 +310,12 @@ int main(int argc, char *argv[]) {
     if (noverlays > 0) {
       mrisp_template = MRISPalloc(scale, IMAGES_PER_SURFACE * noverlays);
       for (sno = 0; sno < noverlays; sno++) {
-        sprintf(fname, "%s/../label/%s.%s", surf_dir, hemi, overlays[sno]);
+        int req = snprintf(fname, STRLEN, "%s/../label/%s.%s", surf_dir, hemi,
+                           overlays[sno]);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
         if (MRISreadValues(mris_template, fname) != NO_ERROR)
           ErrorExit(ERROR_NOFILE, "%s: could not read overlay from %s",
                     Progname, fname);
@@ -323,7 +332,12 @@ int main(int argc, char *argv[]) {
       for (sno = 0; sno < SURFACES; sno++) {
         if (curvature_names[sno]) /* read in precomputed curvature file */
         {
-          sprintf(fname, "%s/%s.%s", surf_dir, hemi, curvature_names[sno]);
+          int req = snprintf(fname, STRLEN, "%s/%s.%s", surf_dir, hemi,
+                             curvature_names[sno]);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           if (MRISreadCurvatureFile(mris_template, fname) != NO_ERROR)
             ErrorExit(Gerror, "%s: could not read curvature file '%s'\n",
                       Progname, fname);
@@ -333,7 +347,12 @@ int main(int argc, char *argv[]) {
           MRISnormalizeCurvature(mris_template, which_norm);
         } else /* compute curvature of surface */
         {
-          sprintf(fname, "%s/%s.%s", surf_dir, hemi, surface_names[sno]);
+          int req = snprintf(fname, STRLEN, "%s/%s.%s", surf_dir, hemi,
+                             surface_names[sno]);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           if (MRISreadVertexPositions(mris_template, fname) != NO_ERROR)
             ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s",
                       Progname, fname);

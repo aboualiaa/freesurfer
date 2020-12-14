@@ -12,9 +12,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "const.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrishash.h"
 #include "mrisurf.h"
+#include "proto.h"
 #include "timer.h"
+#include "utils.h"
 #include "version.h"
 
 int        main(int argc, char *argv[]);
@@ -44,7 +56,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
@@ -71,7 +83,12 @@ int main(int argc, char *argv[]) {
     hemi[2] = 0;
   } else
     strcpy(hemi, "lh");
-  sprintf(in_surf_fname, "%s/%s.%s", path, hemi, orig_surf_name);
+  int req =
+      snprintf(in_surf_fname, STRLEN, "%s/%s.%s", path, hemi, orig_surf_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   FileNamePath(out_patch_fname, path);
   cp = strrchr(out_patch_fname, '/');
@@ -83,7 +100,12 @@ int main(int argc, char *argv[]) {
     hemi[2] = 0;
   } else
     strcpy(hemi, "lh");
-  sprintf(out_surf_fname, "%s/%s.%s", path, hemi, orig_surf_name);
+  req =
+      snprintf(out_surf_fname, STRLEN, "%s/%s.%s", path, hemi, orig_surf_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   mris_in  = MRISread(in_surf_fname);
   mris_out = MRISread(out_surf_fname);
@@ -163,7 +185,7 @@ static void usage_exit(int code) {
 }
 
 /*
-  expects the two surfaces to have the CANONICAL_VERTICES field set to the
+  expects the two surfaces to have the CANONICAL_VERTICES field set to the 
   sphere.reg positions.
 */
 int MRISmapCuts(MRI_SURFACE *mris_in, MRI_SURFACE *mris_out) {
@@ -252,7 +274,7 @@ int MRISmapCuts(MRI_SURFACE *mris_in, MRI_SURFACE *mris_out) {
 
     f_out = &mris_out->faces[fno_out] ;
     ripflag = 0 ;
-
+    
     cx = cy = cz = 0.0 ;
     for (n = 0 ; n < VERTICES_PER_FACE ; n++)
     {
@@ -296,7 +318,7 @@ int MRISmapCuts(MRI_SURFACE *mris_in, MRI_SURFACE *mris_out) {
         VERTEX const *const v_in = MHTfindClosestVertexInTable(
             mht_in, mris_in, v_out->cx + dx * d, v_out->cy + dy * d,
             v_out->cz + dz * d, 1);
-        if (v_in == nullptr)
+        if (v_in == NULL)
           DiagBreak();
         else if (v_in->oripflag) {
           v_out->ripflag = 1;

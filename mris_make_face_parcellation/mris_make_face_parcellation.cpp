@@ -1,9 +1,9 @@
 /**
  * @brief create a parcellation of equal areas
  *
- * make a parcellation where each unit is assigned based on the face
+ * make a parcellation where each unit is assigned based on the face 
  * it maps to in a specified spherical surface (usually an icosahedral one)
- *
+ * 
  */
 /*
  * Original Author: Bruce Fischl
@@ -20,9 +20,21 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "colortab.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrishash.h"
 #include "mrisurf.h"
+#include "proto.h"
 #include "tags.h"
 #include "timer.h"
 #include "version.h"
@@ -186,7 +198,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -205,8 +217,8 @@ int main(int argc, char *argv[]) {
   FileNamePath(out_fname, path);
   FileNameOnly(ico_fname, ico_name);
 
-  if (strcmp("lh.inflated", fio_basename(in_fname, nullptr)) == 0 ||
-      strcmp("rh.inflated", fio_basename(in_fname, nullptr)) == 0) {
+  if (strcmp("lh.inflated", fio_basename(in_fname, NULL)) == 0 ||
+      strcmp("rh.inflated", fio_basename(in_fname, NULL)) == 0) {
     if (InflatedOK == 0) {
       printf("ERROR: do not use the inflated surface for this function\n");
       printf(" You probably want to use sphere or sphere.reg\n");
@@ -238,12 +250,11 @@ int main(int argc, char *argv[]) {
   MRIScomputeMetricProperties(mris_ico);
   MRISsaveVertexPositions(mris_ico, CANONICAL_VERTICES);
 
-  if (cmatrix_fname) // read in a correlation matrix for refining the
-                     // parcellation
+  if (cmatrix_fname) // read in a correlation matrix for refining the parcellation
   {
     double max_dist;
     mri_cmatrix = MRIread(cmatrix_fname);
-    if (mri_cmatrix == nullptr)
+    if (mri_cmatrix == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not read correlation file %s\n",
                 Progname, cmatrix_fname);
 
@@ -254,10 +265,9 @@ int main(int argc, char *argv[]) {
     max_dist = 10 * radius / (mris_ico->nvertices);
     if (parms.energy_type == ENERGY_SIMILARITY)
       mri_smatrix =
-          compute_similarity_matrix(mris, mri_cmatrix, nullptr, 0, max_dist);
+          compute_similarity_matrix(mris, mri_cmatrix, NULL, 0, max_dist);
     else if (parms.energy_type == ENERGY_ETA)
-      mri_smatrix =
-          compute_eta_matrix(mris, mri_cmatrix, nullptr, 0.3, max_dist);
+      mri_smatrix = compute_eta_matrix(mris, mri_cmatrix, NULL, 0.3, max_dist);
   }
 
   if (write_annot_fname) {
@@ -269,8 +279,7 @@ int main(int argc, char *argv[]) {
     write_annot_correlations(mris, mri_cmatrix, &parms, write_corr_fname);
     exit(0);
   }
-  if (evaluate_fname) // load  a previously computed annotation and compute it's
-                      // energy
+  if (evaluate_fname) // load  a previously computed annotation and compute it's energy
   {
     MRI *  mri_stats, *mri_means, *mri_vars;
     double energy, penergy;
@@ -320,10 +329,10 @@ int main(int argc, char *argv[]) {
         for (vno = 0; vno < mris->nvertices; vno++)
           mris->vertices[vno].marked = mris->vertices[vnos[vno]].marked2;
 #if 0
-        mri_rand = MRIdrand48(mri_cmatrix->width, mri_cmatrix->height, mri_cmatrix->depth,
+        mri_rand = MRIdrand48(mri_cmatrix->width, mri_cmatrix->height, mri_cmatrix->depth, 
                               mri_cmatrix->nframes, 0, 1, NULL) ;
 #else
-        mri_rand = nullptr;
+        mri_rand = NULL;
 #endif
 
         if (parms.energy_type == ENERGY_VARIANCE)
@@ -366,11 +375,17 @@ int main(int argc, char *argv[]) {
   }
   printf("parcellating hemisphere into %d units\n", mris->ct->nentries);
   strcpy(mris->ct->fname, ico_fname);
-  for (vno = 0; vno < mris_ico->nvertices; vno++)
-    sprintf(mris->ct->entries[vno]->name, "%s_vertex_%d", ico_name, vno);
-  // Note: there was logic here that attempted to assure that nearby patches did
-  // not have similar color, but it caused some patches to have the same color,
-  // and so resolve to the same ROI. Now just uses random ctab
+  for (vno = 0; vno < mris_ico->nvertices; vno++) {
+    int req = snprintf(mris->ct->entries[vno]->name, STRLEN, "%s_vertex_%d",
+                       ico_name, vno);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  }
+  // Note: there was logic here that attempted to assure that nearby patches did not
+  // have similar color, but it caused some patches to have the same color, and so
+  // resolve to the same ROI. Now just uses random ctab
   if (ctab_fname)
     CTABwriteFileASCII(mris->ct, ctab_fname);
 
@@ -385,7 +400,7 @@ int main(int argc, char *argv[]) {
       if ((((vno % (mris->nvertices / 10))) == 0) && DIAG_VERBOSE_ON)
         printf("%2.1f%% done\n", 100.0 * (float)vno / mris->nvertices);
       v   = &mris->vertices[vno];
-      fno = MRISfindClosestVertex(mris_ico, v->cx, v->cy, v->cz, nullptr,
+      fno = MRISfindClosestVertex(mris_ico, v->cx, v->cy, v->cz, NULL,
                                   CURRENT_VERTICES);
       CTABannotationAtIndex(mris->ct, fno, &annot);
       v->annotation = annot;
@@ -413,7 +428,7 @@ int main(int argc, char *argv[]) {
           mris_ico->avg_vertex_dist / 10, 0, &face, &fno, &fdist);
       if (fno < 0) {
         fno = MHTBruteForceClosestFace(mris_ico, v->x, v->y, v->z,
-                                       CURRENT_VERTICES, nullptr);
+                                       CURRENT_VERTICES, NULL);
         if (fno < 0) {
           printf("warning: v %d not found in MHT\n", vno);
           continue;
@@ -601,7 +616,7 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   printf("usage: %s [options] <input surface> <ico file> <output annot>\n\n"
          "example: %s lh.sphere.reg $FREESURFER_HOME/lib/bem/ic3.tri "
          "./lh.ic3.annot\n",
@@ -617,7 +632,7 @@ static void print_usage() {
   printf("  \n");
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\nThis generates a parcellation based on which icosahedral face each "
          "vertex maps to.\n"
@@ -652,7 +667,7 @@ static int adjust_parcellation_boundaries(MRI_SURFACE *mris,
 
   nbrs               = (int *)calloc(nparcels, sizeof(int));
   vertex_permutation = (int *)calloc(mris->nvertices, sizeof(int));
-  if (vertex_permutation == nullptr)
+  if (vertex_permutation == NULL)
     ErrorExit(
         ERROR_NOMEMORY,
         "adjust_parcellation_boundaries: could not allocated permutation");
@@ -703,7 +718,7 @@ static int adjust_parcellation_boundaries(MRI_SURFACE *mris,
           nbrs[vn->marked] = 1; // only do it once
           energy_change    = compute_parcellation_energy_change(
               mris, parms, mri_cmatrix, mri_means, mri_vars, vno, vn->marked,
-              nullptr, nullptr, nullptr, nullptr);
+              NULL, NULL, NULL, NULL);
           if (energy_change < best_energy_change) {
             best_energy_change = energy_change;
             min_parcel         = vn->marked;
@@ -738,8 +753,7 @@ static int adjust_parcellation_boundaries(MRI_SURFACE *mris,
           DiagBreak();
         }
       }
-      //      energy = compute_parcellation_energy(mris, mri_stats, parms,
-      //      &parc_energy, mri_means, mri_vars, mri_cmatrix) ;
+      //      energy = compute_parcellation_energy(mris, mri_stats, parms, &parc_energy, mri_means, mri_vars, mri_cmatrix) ;
     }
     last_energy  = energy;
     last_penergy = parc_energy;
@@ -837,15 +851,13 @@ static double compute_distance_energy(MRI_SURFACE *mris, PARMS *parms,
     if (v->ripflag)
       continue;
     parcel = v->marked;
-    //      dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse,
-    //      vno, 0, 0, parcel, 0, 0) ;
+    //      dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse, vno, 0, 0, parcel, 0, 0) ;
     dist =
         MRIgetVoxVal(parms->mri_dmat, vno, parms->stats.min_vno[parcel], 0, 0);
     dist_within += dist;
     for (dist_between = 0.0, n_nbrs = n = 0; n < nparcels; n++)
       if (n != parcel && parms->stats.nbrs[parcel][n] > 0) {
-        //          dist = L1_distance(mri_cmatrix,
-        //          parms->stats.mri_min_timecourse, vno, 0, 0, n, 0, 0) ;
+        //          dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse, vno, 0, 0, n, 0, 0) ;
         dist =
             MRIgetVoxVal(parms->mri_dmat, vno, parms->stats.min_vno[n], 0, 0);
         dist_between += dist;
@@ -936,8 +948,8 @@ static int compute_parcellation_statistics(MRI_SURFACE *mris, MRI *mri_cmatrix,
     norm = sqrt(SQR(parms->stats.cx[parcel]) + SQR(parms->stats.cy[parcel]) +
                 SQR(parms->stats.cz[parcel]));
 #if 0
-    parms->stats.cx[parcel] /= norm ;
-    parms->stats.cy[parcel] /= norm ;
+    parms->stats.cx[parcel] /= norm ; 
+    parms->stats.cy[parcel] /= norm ; 
     parms->stats.cz[parcel] /= norm ;
 #endif
   }
@@ -1030,17 +1042,22 @@ static int compute_parcellation_statistics(MRI_SURFACE *mris, MRI *mri_cmatrix,
 static int write_snapshot(MRI_SURFACE *mris, PARMS *parms, int n,
                           MRI *mri_cmatrix) {
   char        fname[STRLEN];
-  static MRI *mri_timecourses = nullptr;
+  static MRI *mri_timecourses = NULL;
   int         vno, parcel, frame, nframes, min_vno;
   double      val;
 
-  sprintf(fname, "%s.%3.3d.annot", parms->base_name, n);
+  int req = snprintf(fname, STRLEN, "%s.%3.3d.annot", parms->base_name, n);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   printf("writing snapshot to %s\n", fname);
   MRISwriteAnnotation(mris, fname);
 
   if (DIAG_VERBOSE_ON) {
     nframes = mri_cmatrix->nframes;
-    if (mri_timecourses == nullptr)
+    if (mri_timecourses == NULL)
       mri_timecourses =
           MRIallocSequence(mris->nvertices, 1, 1, MRI_FLOAT, nframes);
     for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1051,7 +1068,11 @@ static int write_snapshot(MRI_SURFACE *mris, PARMS *parms, int n,
         MRIsetVoxVal(mri_timecourses, frame, 0, 0, vno, val);
       }
     }
-    sprintf(fname, "%s.%3.3d.mgz", parms->base_name, n);
+    int req = snprintf(fname, STRLEN, "%s.%3.3d.mgz", parms->base_name, n);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRIwrite(mri_timecourses, fname);
   }
   return (NO_ERROR);
@@ -1314,8 +1335,7 @@ static int find_parcel_min_timecourses(MRI_SURFACE *mris, MRI *mri_cmatrix,
       for (n2 = n1 + 1; n2 < nvertices; n2++) {
         vno1 = vertices[n1];
         vno2 = vertices[n2];
-        //        dist = L1_distance(mri_cmatrix, mri_cmatrix, vno1, 0,0, vno2,
-        //        0, 0) ;
+        //        dist = L1_distance(mri_cmatrix, mri_cmatrix, vno1, 0,0, vno2, 0, 0) ;
         dist         = MRIgetVoxVal(parms->mri_dmat, vno1, vno2, 0, 0);
         dmat[n1][n2] = dist;
         dmat[n2][n1] = dist;
@@ -1354,7 +1374,7 @@ static int allocate_stats(MRI_SURFACE *mris, PARMS *parms, int nparcels,
   for (parcel = 0; parcel < nparcels; parcel++)
     parms->stats.nbrs[parcel] = (int *)calloc(nparcels, sizeof(int));
   parms->mri_dmat = MRIalloc(mris->nvertices, mris->nvertices, 1, MRI_FLOAT);
-  if (parms->mri_dmat == nullptr)
+  if (parms->mri_dmat == NULL)
     ErrorExit(ERROR_NOMEMORY, "%s: could not allocate complete distance matrix",
               Progname);
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1373,10 +1393,10 @@ static int allocate_stats(MRI_SURFACE *mris, PARMS *parms, int nparcels,
 
   if (parms->energy_type == ENERGY_VARIANCE) {
     parms->stats.var_within = (double *)calloc(nparcels, sizeof(double));
-    if (parms->stats.var_within == nullptr)
+    if (parms->stats.var_within == NULL)
       ErrorExit(ERROR_NOMEMORY, "%s: could not allocate var within", Progname);
     parms->stats.var_between = (double *)calloc(nparcels, sizeof(double));
-    if (parms->stats.var_between == nullptr)
+    if (parms->stats.var_between == NULL)
       ErrorExit(ERROR_NOMEMORY, "%s: could not allocate var within", Progname);
   }
 
@@ -1385,11 +1405,11 @@ static int allocate_stats(MRI_SURFACE *mris, PARMS *parms, int nparcels,
     double norm1, norm2;
 
     parms->mri_dmat = MRIread(parms->dmat_read_fname);
-    if (parms->mri_dmat == nullptr)
+    if (parms->mri_dmat == NULL)
       ErrorExit(ERROR_NOFILE,
                 "%s: could not read distance matrix volume from %s", Progname,
                 parms->dmat_read_fname);
-    mri_norm = MRIcomputeFrameVectorLength(mri_cmatrix, nullptr);
+    mri_norm = MRIcomputeFrameVectorLength(mri_cmatrix, NULL);
     for (vno = 0; vno < mris->nvertices; vno++) {
       for (vno2 = vno + 1; vno2 < mris->nvertices; vno2++) {
         L1_dist = MRIgetVoxVal(parms->mri_dmat, vno, vno2, 0, 0);
@@ -1481,7 +1501,7 @@ static double compute_parcellation_energy_change(MRI_SURFACE *mris,
         MRIsetVoxVal(mri_var, parcel_to_move_to, 0, 0, var + (val*val)) ;
       }
 
-
+      
 
       // compute new means and vars for these two parcels
       for (frame = 0 ; frame < nframes ; frame++)
@@ -1544,16 +1564,14 @@ static double compute_parcellation_energy_change(MRI_SURFACE *mris,
     } else if (parms->energy_type == ENERGY_DISTANCE) {
 
       // compute energy for this vertex in current parcel
-      //    dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse,
-      //    vno, 0, 0, parcel, 0, 0) ;
+      //    dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse, vno, 0, 0, parcel, 0, 0) ;
       dist = MRIgetVoxVal(parms->mri_dmat, vno, parms->stats.min_vno[parcel], 0,
                           0);
       dist_within_old = dist;
 
       for (dist_between = 0.0, n_nbrs = n = 0; n < nparcels; n++)
         if (n != parcel && parms->stats.nbrs[parcel][n] > 0) {
-          //        dist = L1_distance(mri_cmatrix,
-          //        parms->stats.mri_min_timecourse, vno, 0, 0, n, 0, 0) ;
+          //        dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse, vno, 0, 0, n, 0, 0) ;
           dist =
               MRIgetVoxVal(parms->mri_dmat, vno, parms->stats.min_vno[n], 0, 0);
           dist_between += dist;
@@ -1564,8 +1582,7 @@ static double compute_parcellation_energy_change(MRI_SURFACE *mris,
       energy_old       = dist_within_old / dist_between_old;
 
       // compute energy for this vertex in new parcel
-      //    dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse,
-      //    vno, 0, 0, parcel_to_move_to, 0, 0) ;
+      //    dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse, vno, 0, 0, parcel_to_move_to, 0, 0) ;
       dist            = MRIgetVoxVal(parms->mri_dmat, vno,
                           parms->stats.min_vno[parcel_to_move_to], 0, 0);
       dist_within_new = dist;
@@ -1573,8 +1590,7 @@ static double compute_parcellation_energy_change(MRI_SURFACE *mris,
       for (dist_between = 0.0, n_nbrs = n = 0; n < nparcels; n++)
         if (n != parcel_to_move_to &&
             parms->stats.nbrs[parcel_to_move_to][n] > 0) {
-          //        dist = L1_distance(mri_cmatrix,
-          //        parms->stats.mri_min_timecourse, vno, 0, 0, n, 0, 0) ;
+          //        dist = L1_distance(mri_cmatrix, parms->stats.mri_min_timecourse, vno, 0, 0, n, 0, 0) ;
           dist =
               MRIgetVoxVal(parms->mri_dmat, vno, parms->stats.min_vno[n], 0, 0);
           dist_between += dist;
@@ -1714,7 +1730,7 @@ static MRI *compute_eta_matrix(MRI_SURFACE *mris, MRI *mri_cmatrix,
   MRI *   mri_mean;
 
   printf("computing eta matrix...\n");
-  mri_mean = MRImeanTimecourse(mri_cmatrix, nullptr);
+  mri_mean = MRImeanTimecourse(mri_cmatrix, NULL);
 
   mri_ematrix = MRIclone(mri_cmatrix, mri_ematrix);
   for (vno = 0; vno < mris->nvertices; vno++) {

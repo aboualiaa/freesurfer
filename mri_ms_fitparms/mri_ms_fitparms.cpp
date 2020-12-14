@@ -30,14 +30,27 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "diag.h"
 #include "error.h"
+#include "label.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
 #include "mri_conform.h"
+#include "mrimorph.h"
 #include "mrinorm.h"
 #include "mrisegment.h"
+#include "proto.h"
 #include "tags.h"
 #include "timer.h"
+#include "transform.h"
 #include "tukey.h"
+#include "utils.h"
 #include "version.h"
 
 static int check_finite(double val) {
@@ -48,7 +61,7 @@ static int check_finite(double val) {
   return (1);
 }
 
-// E/ Maybe should update these three to not demand MRI_SHORT -
+//E/ Maybe should update these three to not demand MRI_SHORT -
 // but they're never called.
 MRI *MRIsadd(MRI *mri1, MRI *mri2, MRI *mri_dst);
 MRI *MRIsscalarMul(MRI *mri_src, MRI *mri_dst, float scalar);
@@ -58,7 +71,7 @@ int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 static int    use_tukey        = 0;
-static LTA *  Glta             = nullptr;
+static LTA *  Glta             = NULL;
 static int    invert_flag      = 0;
 static double scale            = 1;
 static double sigma            = 4;
@@ -78,7 +91,7 @@ const char *Progname;
 
 static void usage_exit(int code);
 
-static MRI * mri_faf    = nullptr;
+static MRI * mri_faf    = NULL;
 static int   faf_smooth = -1;
 static float faf_thresh = 0;
 
@@ -97,7 +110,7 @@ static char compress_char  = 'z';
 static int  InterpMethod   = SAMPLE_TRILINEAR; /*E* prev default behavior */
 static int  sinchalfwindow = 3;
 
-static char *residual_name = nullptr;
+static char *residual_name = NULL;
 
 #define MAX_IMAGES 500
 
@@ -150,7 +163,7 @@ static void estimate_rigid_regmatrix(MRI *mri_source, MRI *mri_traget,
 static float tr = 0, te = 0, fa = 0;
 
 static int   use_outside_reg    = 0;
-static char *outside_xfm_fname  = nullptr; // asume all echos need same xform
+static char *outside_xfm_fname  = NULL; //asume all echos need same xform
 static int   invert_outside_xfm = 0;
 
 static int write_iterations = 0;
@@ -173,12 +186,12 @@ static int resetTRTEFA(MRI *mri, float tr, float te, double fa);
 
 static int dx = -1, dy, dz, xo, yo, zo;
 
-static MRI *mri_mask = nullptr;
+static MRI *mri_mask = NULL;
 
 int main(int argc, char *argv[]) {
   char **  av, fname[STRLEN];
   int      ac, nargs, i;
-  MRI *    mri_T1 = nullptr, *mri_PD = nullptr, *mri_sse, *mri_T2star;
+  MRI *    mri_T1 = NULL, *mri_PD = NULL, *mri_sse, *mri_T2star;
   char *   in_fname, *out_dir;
   int      msec, minutes, seconds, nvolumes, nvolumes_total;
   Timer    start;
@@ -196,7 +209,7 @@ int main(int argc, char *argv[]) {
   /* The following variables are just for finding the brain mask */
   HISTOGRAM *       histo;
   MRI_SEGMENTATION *mriseg;
-  MRI *             mri_tmp = nullptr;
+  MRI *             mri_tmp = NULL;
   float             thresh;
   int               b, segno;
 
@@ -212,7 +225,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
@@ -237,11 +250,11 @@ int main(int argc, char *argv[]) {
   M_reg_orig      = (MATRIX **)malloc(sizeof(mri_flash) * MAX_IMAGES);
 
   for (i = 0; i < MAX_IMAGES; i++) {
-    mri_flash[i]       = nullptr;
-    mri_flash_synth[i] = nullptr;
-    mri_all_flash[i]   = nullptr;
-    M_reg[i]           = nullptr;
-    M_reg_orig[i]      = nullptr;
+    mri_flash[i]       = NULL;
+    mri_flash_synth[i] = NULL;
+    mri_all_flash[i]   = NULL;
+    M_reg[i]           = NULL;
+    M_reg_orig[i]      = NULL;
   }
 
   /////////////////////////////////////////////////////////////////////
@@ -272,13 +285,13 @@ int main(int argc, char *argv[]) {
     printf("reading %s...", in_fname);
 
     mri_flash[nvolumes] = MRIread(in_fname);
-    if (mri_flash[nvolumes] == nullptr)
+    if (mri_flash[nvolumes] == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not read volume %s", Progname,
                 in_fname);
     if (mri_mask) {
       MRI *mri_tmp;
 
-      mri_tmp = MRImask(mri_flash[nvolumes], mri_mask, nullptr, 0, 0);
+      mri_tmp = MRImask(mri_flash[nvolumes], mri_mask, NULL, 0, 0);
       MRIfree(&mri_flash[nvolumes]);
       mri_flash[nvolumes] = mri_tmp;
     }
@@ -286,7 +299,7 @@ int main(int argc, char *argv[]) {
     if (dx > 0) // extract subimage
     {
       MRI *mri_tmp =
-          MRIextract(mri_flash[nvolumes], nullptr, xo, yo, zo, dx, dy, dz);
+          MRIextract(mri_flash[nvolumes], NULL, xo, yo, zo, dx, dy, dz);
       MRIfree(&mri_flash[nvolumes]);
       mri_flash[nvolumes] = mri_tmp;
     }
@@ -325,11 +338,11 @@ int main(int argc, char *argv[]) {
            mri_flash[nvolumes]->te, mri_flash[nvolumes]->tr,
            DEGREES(mri_flash[nvolumes]->flip_angle));
 
-    if (outside_xfm_fname != nullptr) {
-      // read in xform and store it in M_reg_orig[i]
+    if (outside_xfm_fname != NULL) {
+      //read in xform and store it in M_reg_orig[i]
 
       int  transform_type = TransformFileNameType(outside_xfm_fname);
-      LTA *lta            = nullptr;
+      LTA *lta            = 0;
 
       if (transform_type == MNI_TRANSFORM_TYPE ||
           transform_type == TRANSFORM_ARRAY_TYPE ||
@@ -341,7 +354,7 @@ int main(int argc, char *argv[]) {
                     Progname, outside_xfm_fname);
 
         if (transform_type == FSLREG_TYPE) {
-          // currently unsupported, otherwise the usage would be a mess
+          //currently unsupported, otherwise the usage would be a mess
           // if(mri == 0 || mri_dst == 0){
           //  fprintf(stderr, "ERROR: fslmat does not have information
           // on the src and dst volumes\n");
@@ -362,23 +375,23 @@ int main(int argc, char *argv[]) {
                                  "Register.dat, nor FSLMAT type");
       }
 
-      // change LTA to LINEAR_RAS_TO_RAS type
+      //change LTA to LINEAR_RAS_TO_RAS type
       if (lta->type != LINEAR_RAS_TO_RAS) {
         LTAchangeType(lta, LINEAR_RAS_TO_RAS);
       }
 
       if (invert_outside_xfm == 0) {
-        // note need a registration matrix from parameter map to input image
-        // thus need to apply inverse when using -at
-        M_reg_orig[nvolumes] = MatrixInverse(lta->xforms[0].m_L, nullptr);
+        //note need a registration matrix from parameter map to input image
+        //thus need to apply inverse when using -at
+        M_reg_orig[nvolumes] = MatrixInverse(lta->xforms[0].m_L, NULL);
       } else {
-        M_reg_orig[nvolumes] = MatrixCopy(lta->xforms[0].m_L, nullptr);
-        invert_outside_xfm   = 0; // reset
+        M_reg_orig[nvolumes] = MatrixCopy(lta->xforms[0].m_L, NULL);
+        invert_outside_xfm   = 0; //reset
       }
       if (lta) {
         LTAfree(&lta);
       }
-      outside_xfm_fname = nullptr; // clear it
+      outside_xfm_fname = NULL; //clear it
     }
 
     if (conform) {
@@ -409,20 +422,19 @@ int main(int argc, char *argv[]) {
 
   if (faf_smooth > 0) {
     MRI *mri_mask, *mri_tmp;
-    if (mri_faf == nullptr)
+    if (mri_faf == NULL)
       ErrorExit(ERROR_BADPARM,
                 "%s: -fsmooth only applies if FAF image is specified",
                 Progname);
-    mri_mask =
-        MRIbinarize(mri_flash[0], nullptr, faf_thresh, 0, CONTROL_MARKED);
-    mri_tmp = MRIchangeType(mri_mask, MRI_UCHAR, 0, 255, 1);
+    mri_mask = MRIbinarize(mri_flash[0], NULL, faf_thresh, 0, CONTROL_MARKED);
+    mri_tmp  = MRIchangeType(mri_mask, MRI_UCHAR, 0, 255, 1);
     MRIfree(&mri_mask);
     mri_mask = mri_tmp;
     if (Gdiag & DIAG_WRITE) {
       MRIwrite(mri_mask, "m.mgz");
     }
-    mri_tmp = MRIsoapBubbleLabel(mri_faf, mri_mask, nullptr, CONTROL_MARKED,
-                                 faf_smooth);
+    mri_tmp =
+        MRIsoapBubbleLabel(mri_faf, mri_mask, NULL, CONTROL_MARKED, faf_smooth);
     MRIwrite(mri_tmp, "faf_smooth.mgz");
     MRIfree(&mri_faf);
     mri_faf = mri_tmp;
@@ -441,15 +453,15 @@ int main(int argc, char *argv[]) {
   if (nvolumes <= 2) {
     niter = 0;
   } /* don't bother motion-correcting when
-                   we only have 2 volumes */
+                    we only have 2 volumes */
   if (synth_flag > 0) {
     for (i = 0; i < nvolumes; i++) {
-      mri_flash_synth[i]               = MRIclone(mri_flash[i], nullptr);
+      mri_flash_synth[i]               = MRIclone(mri_flash[i], NULL);
       mri_flash_synth[i]->register_mat = MRIgetVoxelToRasXform(mri_flash[i]);
     }
   } else {
     for (i = 0; i < nvolumes; i++) {
-      mri_flash_synth[i] = nullptr;
+      mri_flash_synth[i] = NULL;
     }
   }
 
@@ -480,7 +492,7 @@ int main(int argc, char *argv[]) {
       MATRIX *m;
 
       printf("inverting transform...\n");
-      m = MatrixInverse(Glta->xforms[0].m_L, nullptr);
+      m = MatrixInverse(Glta->xforms[0].m_L, NULL);
       MatrixCopy(m, Glta->xforms[0].m_L);
       MatrixFree(&m);
     }
@@ -491,7 +503,7 @@ int main(int argc, char *argv[]) {
 
     if (use_outside_reg == 0) {
       for (j = 0; j < nvolumes; j++) {
-        M_reg[j] = MatrixIdentity(4, (MATRIX *)nullptr);
+        M_reg[j] = MatrixIdentity(4, (MATRIX *)NULL);
       }
     }
   }
@@ -511,19 +523,19 @@ int main(int argc, char *argv[]) {
 
     if (use_outside_reg == 0) {
       for (j = 0; j < nvolumes; j++) {
-        M_reg[j] = MatrixIdentity(4, (MATRIX *)nullptr);
+        M_reg[j] = MatrixIdentity(4, (MATRIX *)NULL);
       }
     }
 
     if (niter == 0) {
       if (mri_faf)
         rms = estimate_ms_params_with_faf(
-            mri_flash, synth_flag ? mri_flash_synth : nullptr, nvolumes, mri_T1,
+            mri_flash, synth_flag ? mri_flash_synth : NULL, nvolumes, mri_T1,
             mri_PD, mri_sse, M_reg, mri_faf);
       else
-        rms = estimate_ms_params(
-            mri_flash, synth_flag ? mri_flash_synth : nullptr, nvolumes, mri_T1,
-            mri_PD, mri_sse, M_reg, nullptr);
+        rms =
+            estimate_ms_params(mri_flash, synth_flag ? mri_flash_synth : NULL,
+                               nvolumes, mri_T1, mri_PD, mri_sse, M_reg, NULL);
       printf("parameter rms = %2.3f\n", rms);
     }
 
@@ -537,7 +549,7 @@ int main(int argc, char *argv[]) {
                                           mri_faf);
       else
         rms = estimate_ms_params(mri_flash, mri_flash_synth, nvolumes, mri_T1,
-                                 mri_PD, mri_sse, M_reg, nullptr);
+                                 mri_PD, mri_sse, M_reg, NULL);
       printf("parameter rms = %2.3f\n", rms);
 
       if (use_brain_mask) {
@@ -550,10 +562,10 @@ int main(int argc, char *argv[]) {
         thresh  = histo->bins[b] * .25;
         mriseg  = MRIsegment(mri_PD, thresh, histo->bins[b]);
         segno   = MRIfindMaxSegmentNumber(mriseg);
-        mri_tmp = MRIsegmentToImage(mri_PD, nullptr, mriseg, segno);
+        mri_tmp = MRIsegmentToImage(mri_PD, NULL, mriseg, segno);
         MRIsegmentFree(&mriseg);
         MRIerode(mri_tmp, mri_tmp);
-        mri_mask = MRIbinarize(mri_tmp, nullptr, 1, 0, 1);
+        mri_mask = MRIbinarize(mri_tmp, NULL, 1, 0, 1);
         mri_tmp  = MRIchangeType(mri_mask, MRI_UCHAR, 0, 1, 1);
         MRIfree(&mri_mask);
         mri_mask = mri_tmp;
@@ -606,7 +618,7 @@ int main(int argc, char *argv[]) {
           MRIwrite(mri_flash_synth[j], fname);
           sprintf(fname, "%s/vol%d-%d.lta", out_dir, j, iter);
           printf("writing regisration matrix to %s...\n", fname);
-          lta = LTAalloc(1, nullptr);
+          lta = LTAalloc(1, NULL);
           MatrixCopy(M_reg[j], lta->xforms[0].m_L);
           // add src and dst information
           getVolGeom(mri_flash_synth[j], &lta->xforms[0].src);
@@ -616,10 +628,9 @@ int main(int argc, char *argv[]) {
         }
       }
     } // iterations end here
-    if (Glta != nullptr)
-      rms =
-          estimate_ms_params(mri_flash, synth_flag ? mri_flash_synth : nullptr,
-                             nvolumes, mri_T1, mri_PD, mri_sse, M_reg, Glta);
+    if (Glta != NULL)
+      rms = estimate_ms_params(mri_flash, synth_flag ? mri_flash_synth : NULL,
+                               nvolumes, mri_T1, mri_PD, mri_sse, M_reg, Glta);
 #if 0
     if (nfaf >  0)
     {
@@ -736,7 +747,7 @@ int main(int argc, char *argv[]) {
                 nint(DEGREES(mri_flash_synth[j]->flip_angle)));
 #endif
         printf("writing registration matrix to %s...\n", fname);
-        lta = LTAalloc(1, nullptr);
+        lta = LTAalloc(1, NULL);
         MatrixCopy(M_reg[j], lta->xforms[0].m_L);
         // add src and dst information
         getVolGeom(mri_flash_synth[j], &lta->xforms[0].src);
@@ -771,10 +782,10 @@ int main(int argc, char *argv[]) {
   }
 
   for (i = 0; i < MAX_IMAGES; i++) {
-    if (M_reg[i] != nullptr) {
+    if (M_reg[i] != NULL) {
       MatrixFree(&M_reg[i]);
     }
-    if (M_reg_orig[i] != nullptr) {
+    if (M_reg_orig[i] != NULL) {
       MatrixFree(&M_reg_orig[i]);
     }
   }
@@ -874,7 +885,7 @@ static int get_option(int argc, char *argv[]) {
     nargs        = 1;
     if (InterpMethod == SAMPLE_SINC) {
       if ((argc < 4) || !strncmp(argv[3], "-", 1)) /*E* i.e. no sinchalfwindow
-                                                     value supplied */
+                                     value supplied */
       {
         printf("using sinc interpolation (default windowwidth is 6)\n");
       } else {
@@ -887,8 +898,8 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "sinc")) {
     InterpMethod = SAMPLE_SINC;
     if ((argc < 3) || !strncmp(argv[2], "-", 1)) /*E* i.e. no
-                                                   sinchalfwindow value
-                                                   supplied */
+                                               sinchalfwindow value
+                                               supplied */
     {
       printf("using sinc interpolation (default windowwidth is 6)\n");
     } else {
@@ -1029,7 +1040,7 @@ static int get_option(int argc, char *argv[]) {
         MRIerode(mri_ctrl, mri_ctrl);
       }
     }
-    mri_v = MRIbuildVoronoiDiagram(mri_faf, mri_ctrl, nullptr);
+    mri_v = MRIbuildVoronoiDiagram(mri_faf, mri_ctrl, NULL);
 #if 0
     MRIsoapBubble(mri_v, mri_ctrl, mri_faf, 25, 1) ;
 #else
@@ -1099,7 +1110,7 @@ static int get_option(int argc, char *argv[]) {
       printf("applying transform %s to output volumes...\n", argv[2]);
       printf("reading output volume geometry from %s...\n", argv[3]);
       mri = MRIread(argv[3]);
-      if (mri == nullptr)
+      if (mri == NULL)
         ErrorExit(ERROR_NOFILE,
                   "%s: could not read volume %s for "
                   "output volume settings",
@@ -1172,23 +1183,23 @@ static double estimate_ms_params(MRI **mri_flash, MRI **mri_flash_synth,
       nvalues   = MAX_NVALS, nevals, total_dof;
   int     nstep = 11, step[11] = {1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1};
   MRI *   mri;
-  MATRIX *voxvec1, *voxvec2, *rasvec1, *rasvec2, *m_xform = nullptr;
+  MATRIX *voxvec1, *voxvec2, *rasvec1, *rasvec2, *m_xform = NULL;
 
   if (lta) {
-    m_xform = MatrixInverse(lta->xforms[0].m_L, nullptr);
+    m_xform = MatrixInverse(lta->xforms[0].m_L, NULL);
     printf("using matrix for resampling data:\n");
     MatrixPrint(stdout, m_xform);
   }
 
   voxvec1             = MatrixAlloc(4, 1, MATRIX_REAL);
   voxvec1->rptr[4][1] = 1.0;
-  voxvec2             = MatrixCopy(voxvec1, nullptr);
-  rasvec1             = MatrixCopy(voxvec1, nullptr);
-  rasvec2             = MatrixCopy(voxvec1, nullptr);
+  voxvec2             = MatrixCopy(voxvec1, NULL);
+  rasvec1             = MatrixCopy(voxvec1, NULL);
+  rasvec2             = MatrixCopy(voxvec1, NULL);
 
   for (total_dof = j = 0; j < nvolumes; j++) {
-    vox2ras[j] = MatrixCopy(mri_flash[j]->register_mat, nullptr);
-    ras2vox[j] = MatrixInverse(vox2ras[j], nullptr);
+    vox2ras[j] = MatrixCopy(mri_flash[j]->register_mat, NULL);
+    ras2vox[j] = MatrixInverse(vox2ras[j], NULL);
     total_dof += mri_flash[j]->dof;
   }
 
@@ -1383,13 +1394,13 @@ static double estimate_ms_params_with_faf(MRI **mri_flash,
   w0z                 = M_PI / z0;
   voxvec1             = MatrixAlloc(4, 1, MATRIX_REAL);
   voxvec1->rptr[4][1] = 1.0;
-  voxvec2             = MatrixCopy(voxvec1, nullptr);
-  rasvec1             = MatrixCopy(voxvec1, nullptr);
-  rasvec2             = MatrixCopy(voxvec1, nullptr);
+  voxvec2             = MatrixCopy(voxvec1, NULL);
+  rasvec1             = MatrixCopy(voxvec1, NULL);
+  rasvec2             = MatrixCopy(voxvec1, NULL);
   for (total_dof = j = 0; j < nvolumes; j++) {
     total_dof += mri_flash[j]->dof;
-    vox2ras[j] = MatrixCopy(mri_flash[j]->register_mat, nullptr);
-    ras2vox[j] = MatrixInverse(vox2ras[j], nullptr);
+    vox2ras[j] = MatrixCopy(mri_flash[j]->register_mat, NULL);
+    ras2vox[j] = MatrixInverse(vox2ras[j], NULL);
   }
 
   total_sse = 0;
@@ -2070,13 +2081,13 @@ static void estimate_rigid_regmatrix(MRI *mri_source, MRI *mri_target,
   MATRIX *voxmat1, *voxmat2;
   double *voxval1, *voxval2, tukey_thresh = 100;
 
-  vox2ras_source = MatrixCopy(mri_source->register_mat, nullptr);
-  vox2ras_target = MatrixCopy(mri_target->register_mat, nullptr);
-  ras2vox_source = MatrixInverse(vox2ras_source, nullptr);
-  ras2vox_target = MatrixInverse(vox2ras_target, nullptr);
-  vox_s2vox_t    = MatrixIdentity(4, nullptr);
+  vox2ras_source = MatrixCopy(mri_source->register_mat, NULL);
+  vox2ras_target = MatrixCopy(mri_target->register_mat, NULL);
+  ras2vox_source = MatrixInverse(vox2ras_source, NULL);
+  ras2vox_target = MatrixInverse(vox2ras_target, NULL);
+  vox_s2vox_t    = MatrixIdentity(4, NULL);
 
-  if (use_brain_mask && mri_mask != nullptr) {
+  if (use_brain_mask && mri_mask != NULL) {
     /* Only count voxels fall within brain mask
        so reduce sampling steps
     */
@@ -2087,7 +2098,7 @@ static void estimate_rigid_regmatrix(MRI *mri_source, MRI *mri_target,
 
   nvalues = 0;
 
-  if (use_brain_mask && mri_mask != nullptr) {
+  if (use_brain_mask && mri_mask != NULL) {
     /* Only count voxels fall within brain mask
        so reduce sampling steps
     */
@@ -2113,7 +2124,7 @@ static void estimate_rigid_regmatrix(MRI *mri_source, MRI *mri_target,
   }
 
   voxmat1 = MatrixAlloc(4, nvalues, MATRIX_REAL);
-  voxmat2 = MatrixCopy(voxmat1, nullptr);
+  voxmat2 = MatrixCopy(voxmat1, NULL);
   voxval1 = (double *)calloc(nvalues + 1, sizeof(double *));
   voxval2 = (double *)calloc(nvalues + 1, sizeof(double *));
   if (!voxmat1 || !voxmat2 || !voxval1 || !voxval2)
@@ -2122,7 +2133,7 @@ static void estimate_rigid_regmatrix(MRI *mri_source, MRI *mri_target,
 
   indx = 0;
 
-  if (use_brain_mask && mri_mask != nullptr) {
+  if (use_brain_mask && mri_mask != NULL) {
     for (z = 0; z < depth; z++)
       for (y = 0; y < height; y++)
         for (x = 0; x < width; x++) {
@@ -2152,17 +2163,17 @@ static void estimate_rigid_regmatrix(MRI *mri_source, MRI *mri_target,
         }
   }
 
-  M_delta  = MatrixIdentity(4, nullptr);
-  M_delta1 = MatrixIdentity(4, nullptr);
-  M_delta2 = MatrixIdentity(4, nullptr);
-  M_delta3 = MatrixIdentity(4, nullptr);
-  M_delta4 = MatrixIdentity(4, nullptr);
-  M_delta5 = MatrixIdentity(4, nullptr);
-  M_delta6 = MatrixIdentity(4, nullptr);
+  M_delta  = MatrixIdentity(4, NULL);
+  M_delta1 = MatrixIdentity(4, NULL);
+  M_delta2 = MatrixIdentity(4, NULL);
+  M_delta3 = MatrixIdentity(4, NULL);
+  M_delta4 = MatrixIdentity(4, NULL);
+  M_delta5 = MatrixIdentity(4, NULL);
+  M_delta6 = MatrixIdentity(4, NULL);
 
-  M_reg_opt = MatrixCopy(M_reg, nullptr);
-  M_reg_bak = MatrixCopy(M_reg_opt, nullptr);
-  M_tmp     = MatrixCopy(M_reg, nullptr);
+  M_reg_opt = MatrixCopy(M_reg, NULL);
+  M_reg_bak = MatrixCopy(M_reg_opt, NULL);
+  M_tmp     = MatrixCopy(M_reg, NULL);
 
   if (use_tukey) {
     double total_error;
@@ -2309,7 +2320,7 @@ MRI *MRIssqrt(MRI *mri_src, MRI *mri_dst) {
   height = mri_src->height;
   depth  = mri_src->depth;
   if (!mri_dst) {
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
   }
 
   for (frame = 0; frame < mri_src->nframes; frame++) {
@@ -2348,7 +2359,7 @@ MRI *MRIsscalarMul(MRI *mri_src, MRI *mri_dst, float scalar) {
   height = mri_src->height;
   depth  = mri_src->depth;
   if (!mri_dst) {
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
   }
 
   for (frame = 0; frame < mri_src->nframes; frame++) {
@@ -2422,7 +2433,7 @@ static int average_volumes_with_different_echo_times(MRI **mri_flash,
       continue;
     }
     averaged[i]           = 1;
-    mri_avg               = MRIcopy(mri_all_flash[i], nullptr);
+    mri_avg               = MRIcopy(mri_all_flash[i], NULL);
     mri_avg->register_mat = MRIgetVoxelToRasXform(mri_all_flash[nvolumes]);
     mri_avg->dof          = 1;
     navgs                 = 1;
@@ -2461,10 +2472,10 @@ static int average_volumes_with_different_echo_times_and_set_Mreg(
   if (all_tes_equal) {
     for (i = 0; i < nvolumes_total; i++) {
       mri_flash[i] = mri_all_flash[i];
-      if (M_reg_orig[i] == nullptr) {
-        M_reg[i] = MatrixIdentity(4, (MATRIX *)nullptr);
+      if (M_reg_orig[i] == NULL) {
+        M_reg[i] = MatrixIdentity(4, (MATRIX *)NULL);
       } else {
-        M_reg[i] = MatrixCopy(M_reg_orig[i], (MATRIX *)nullptr);
+        M_reg[i] = MatrixCopy(M_reg_orig[i], (MATRIX *)NULL);
       }
     }
     return (nvolumes_total);
@@ -2475,11 +2486,11 @@ static int average_volumes_with_different_echo_times_and_set_Mreg(
       continue;
     }
     averaged[i] = 1;
-    mri_avg     = MRIcopy(mri_all_flash[i], nullptr);
-    if (M_reg_orig[i] == nullptr) {
-      M_reg[nvolumes] = MatrixIdentity(4, (MATRIX *)nullptr);
+    mri_avg     = MRIcopy(mri_all_flash[i], NULL);
+    if (M_reg_orig[i] == NULL) {
+      M_reg[nvolumes] = MatrixIdentity(4, (MATRIX *)NULL);
     } else {
-      M_reg[nvolumes] = MatrixCopy(M_reg_orig[i], (MATRIX *)nullptr);
+      M_reg[nvolumes] = MatrixCopy(M_reg_orig[i], (MATRIX *)NULL);
     }
 
     mri_avg->register_mat = MRIgetVoxelToRasXform(mri_all_flash[nvolumes]);
@@ -2494,9 +2505,9 @@ static int average_volumes_with_different_echo_times_and_set_Mreg(
       }
       MRIaverage(mri_all_flash[j], navgs, mri_avg);
 
-      // the following shouldn't happen, user should assign xform
-      // to the first echo
-      if (M_reg_orig[j] != nullptr) {
+      //the following shouldn't happen, user should assign xform
+      //to the first echo
+      if (M_reg_orig[j] != NULL) {
         M_reg[nvolumes] = MatrixCopy(M_reg_orig[j], M_reg[nvolumes]);
       }
 
@@ -2514,7 +2525,7 @@ static MRI *estimate_T2star(MRI **mri_flash, int nvolumes, MRI *mri_PD,
                             MATRIX **Mreg, LTA *lta, MRI *mri_T1) {
   int i, j, nechoes, processed[MAX_IMAGES], nprocessed, x, y, z, different_te,
       width, depth, height, unique_te;
-  MRI *  mri_T2star = nullptr;
+  MRI *  mri_T2star = NULL;
   double T2star;
   double PD = 10;
 
@@ -2533,7 +2544,7 @@ static MRI *estimate_T2star(MRI **mri_flash, int nvolumes, MRI *mri_PD,
     }
   }
   if (different_te <= 1) {
-    return (nullptr); /* can't estimate T2* */
+    return (NULL); /* can't estimate T2* */
   }
 
   memset(processed, 0, sizeof(processed));
@@ -2564,7 +2575,7 @@ static MRI *estimate_T2star(MRI **mri_flash, int nvolumes, MRI *mri_PD,
   /* now update PD map to take out T2* component */
   if (correct_PD) {
     VECTOR *v1, *v2;
-    MATRIX *m_vox2vox;
+    MATRIX *m_vox2vox = NULL;
     double  T1, faf_scale, xf, yf, zf, S, K;
     MRI *   mri;
     int     i;
@@ -2596,7 +2607,7 @@ static MRI *estimate_T2star(MRI **mri_flash, int nvolumes, MRI *mri_PD,
           }
 
           T1 = MRIgetVoxVal(mri_T1, x, y, z, 0);
-          if (mri_faf == nullptr) {
+          if (mri_faf == NULL) {
             faf_scale = 1.0;
           } else {
             V3_X(v1) = x;
@@ -2641,7 +2652,8 @@ static MRI *estimate_T2star(MRI **mri_flash, int nvolumes, MRI *mri_PD,
     MRIremoveNaNs(mri_PD, mri_PD);
     VectorFree(&v1);
     VectorFree(&v2);
-    MatrixFree(&m_vox2vox);
+    if (m_vox2vox)
+      MatrixFree(&m_vox2vox);
   }
 
   return (mri_T2star);
@@ -2649,8 +2661,8 @@ static MRI *estimate_T2star(MRI **mri_flash, int nvolumes, MRI *mri_PD,
 
 static MRI *compute_T2star_map(MRI **mri_flash, int nvolumes, int *scan_types,
                                MATRIX **Mreg, LTA *lta) {
-  MATRIX *mX, *mXpinv = nullptr, *m_xform;
-  VECTOR *vY, *vParms = nullptr, *v_src, *v_dst, *rasvec1, *rasvec2;
+  MATRIX *mX, *mXpinv = NULL, *m_xform;
+  VECTOR *vY, *vParms = NULL, *v_src, *v_dst, *rasvec1, *rasvec2;
 
   int    x, y, z, e, width, height, depth, nscans, i;
   MRI *  mri_T2star;
@@ -2658,9 +2670,9 @@ static MRI *compute_T2star_map(MRI **mri_flash, int nvolumes, int *scan_types,
   double val, xf, yf, zf;
 
   if (lta) {
-    m_xform = MatrixInverse(lta->xforms[0].m_L, nullptr);
+    m_xform = MatrixInverse(lta->xforms[0].m_L, NULL);
   } else {
-    m_xform = nullptr;
+    m_xform = NULL;
   }
 
   v_src             = VectorAlloc(4, MATRIX_REAL);
@@ -2668,16 +2680,16 @@ static MRI *compute_T2star_map(MRI **mri_flash, int nvolumes, int *scan_types,
   v_src->rptr[4][1] = 1.0;
   v_dst->rptr[4][1] = 1.0;
 
-  rasvec1 = MatrixCopy(v_src, nullptr);
-  rasvec2 = MatrixCopy(v_src, nullptr);
+  rasvec1 = MatrixCopy(v_src, NULL);
+  rasvec2 = MatrixCopy(v_src, NULL);
 
   for (i = nscans = 0; i < nvolumes; i++) {
     if (scan_types[i] > nscans) {
       nscans = scan_types[i];
     }
 
-    vox2ras[i] = MatrixCopy(mri_flash[i]->register_mat, nullptr);
-    ras2vox[i] = MatrixInverse(vox2ras[i], nullptr);
+    vox2ras[i] = MatrixCopy(mri_flash[i]->register_mat, NULL);
+    ras2vox[i] = MatrixInverse(vox2ras[i], NULL);
 
     //    printf("volume %d belongs to volume %d\n", i, scan_types[i]-1);
     //    printf("registration matrix for it is:\n");
@@ -2699,7 +2711,7 @@ static MRI *compute_T2star_map(MRI **mri_flash, int nvolumes, int *scan_types,
   for (e = 0; e < nvolumes; e++) {
     *MATRIX_RELT(mX, e + 1, 1) = -mri_flash[e]->te;
     for (i = 1; i <= nscans; i++) /* which multi-echo set
-                                     does this volume belong to */
+                                        does this volume belong to */
     {
       if (scan_types[e] == i) {
         *MATRIX_RELT(mX, e + 1, i + 1) = 1;
@@ -3190,8 +3202,8 @@ static int findUniqueTETRFA(MRI *mri[], int numvolumes, float *ptr, float *pte,
   FA = mri[0]->flip_angle;
 
   // note that flag = 4 will always overwrite flag =1,2
-  // if the last volume has different FA than the first one;
-  // anyway, it's not important -xh
+  //if the last volume has different FA than the first one;
+  //anyway, it's not important -xh
   for (i = 1; i < numvolumes; ++i) {
     if (!FZERO(TR - mri[i]->tr)) {
       fprintf(stderr, "non-equal TR found for the volume %d.\n", i);

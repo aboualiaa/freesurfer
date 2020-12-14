@@ -18,8 +18,18 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "mrisurf.h"
+#include "proto.h"
 #include "tags.h"
 #include "version.h"
 
@@ -76,7 +86,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -301,13 +311,24 @@ int main(int argc, char *argv[]) {
   if (normalize_flag) {
     MRISnormalizeCurvature(mris, which_norm);
   }
-  sprintf(fname, "%s.%s", mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh",
-          curvature_fname);
+  int req = snprintf(fname, STRLEN, "%s.%s",
+                     mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh",
+                     curvature_fname);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   if (no_write == 0) {
     fprintf(stderr, "writing smoothed curvature to %s/%s\n", path, fname);
     MRISwriteCurvature(mris, fname);
-    sprintf(fname, "%s.%s", mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh",
-            area_fname);
+    int req =
+        snprintf(fname, STRLEN, "%s.%s",
+                 mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh", area_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stderr, "writing smoothed area to %s/%s\n", path, fname);
     MRISwriteArea(mris, fname);
   }
@@ -431,11 +452,11 @@ static int get_option(int argc, char *argv[]) {
 }
 
 #include "mris_smooth.help.xml.h"
-static void print_usage() {
+static void print_usage(void) {
   outputHelpXml(mris_smooth_help_xml, mris_smooth_help_xml_len);
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   exit(1);
 }
@@ -482,7 +503,7 @@ double MRISfindCurvatureThreshold(MRI_SURFACE *mris, double pct) {
     HISTOaddSample(h, K, 0, 0);
   }
 
-  hcdf    = HISTOmakeCDF(h, nullptr);
+  hcdf    = HISTOmakeCDF(h, NULL);
   bin     = HISTOfindBinWithCount(hcdf, pct);
   kthresh = hcdf->bins[bin];
   return (kthresh);

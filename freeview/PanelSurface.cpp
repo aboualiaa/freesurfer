@@ -35,6 +35,9 @@
 #include "ui_WindowEditAnnotation.h"
 #include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QToolBar>
+#include <QToolButton>
 #ifdef Q_OS_MAC
 #include "MacHelper.h"
 #endif
@@ -173,6 +176,8 @@ PanelSurface::PanelSurface(QWidget *parent)
           SLOT(UpdateWidgets()));
   connect(mainwnd, SIGNAL(OverlayMaskRequested(QString)), m_wndConfigureOverlay,
           SLOT(LoadLabelMask(QString)));
+  connect(mainwnd, SIGNAL(CycleAnnotationRequested()), this,
+          SLOT(OnCycleAnnotation()));
 
   m_wndEditAnnotation = new WindowEditAnnotation(this);
   m_wndEditAnnotation->hide();
@@ -346,9 +351,8 @@ void PanelSurface::ConnectLayer(Layer *layer_in) {
 
 void PanelSurface::DisconnectAllLayers() {
   PanelLayer::DisconnectAllLayers();
-  //    LayerCollection* lc =
-  //    MainWindow::GetMainWindow()->GetLayerCollection("Surface"); for ( int i
-  //    = 0; i < lc->GetNumberOfLayers(); i++ )
+  //    LayerCollection* lc = MainWindow::GetMainWindow()->GetLayerCollection("Surface");
+  //    for ( int i = 0; i < lc->GetNumberOfLayers(); i++ )
   //    {
   //      LayerSurface* layer = (LayerSurface*)lc->GetLayer(i);
   //      for ( int j = 0; j < allWidgets.size(); j++ )
@@ -437,11 +441,10 @@ void PanelSurface::DoUpdateWidgets() {
   for ( int i = 0; i < ui->treeWidgetLayers->topLevelItemCount(); i++ )
   {
     QTreeWidgetItem* item = ui->treeWidgetLayers->topLevelItem( i );
-    Layer* layer = qobject_cast<Layer*>( item->data(0,
-  Qt::UserRole).value<QObject*>() ); if ( layer )
+    Layer* layer = qobject_cast<Layer*>( item->data(0, Qt::UserRole).value<QObject*>() );
+    if ( layer )
     {
-      item->setCheckState( 0, (layer->IsVisible() ? Qt::Checked : Qt::Unchecked)
-  );
+      item->setCheckState( 0, (layer->IsVisible() ? Qt::Checked : Qt::Unchecked) );
     }
   }
   */
@@ -465,13 +468,8 @@ void PanelSurface::DoUpdateWidgets() {
     ui->checkBoxHideIn3DView->setChecked(!layer->GetVisibleIn3D());
 
     surf = layer->GetSourceSurface();
-    //    ui->toolbarSurfaces->setVisible(surf->IsSurfaceLoaded(
-    //    FSSurface::SurfaceOriginal ) || surf->IsSurfaceLoaded(
-    //    FSSurface::SurfaceInflated ) ||
-    //                             surf->IsSurfaceLoaded(
-    //                             FSSurface::SurfaceWhite ) ||
-    //                             surf->IsSurfaceLoaded( FSSurface::SurfacePial
-    //                             ) );
+    //    ui->toolbarSurfaces->setVisible(surf->IsSurfaceLoaded( FSSurface::SurfaceOriginal ) || surf->IsSurfaceLoaded( FSSurface::SurfaceInflated ) ||
+    //                             surf->IsSurfaceLoaded( FSSurface::SurfaceWhite ) || surf->IsSurfaceLoaded( FSSurface::SurfacePial ) );
     ui->sliderOpacity->setValue(
         (int)(layer->GetProperty()->GetOpacity() * 100));
     ChangeDoubleSpinBoxValue(ui->doubleSpinBoxOpacity,
@@ -561,8 +559,8 @@ void PanelSurface::DoUpdateWidgets() {
   //      ui->comboBoxSplineDisplay->addItem(spline->GetName());
   //  }
   //  ui->comboBoxSplineDisplay->addItem("Load spline data...");
-  //  ui->comboBoxSplineDisplay->setCurrentIndex((spline && spline->IsValid() &&
-  //  spline->IsVisible())?1:0); if (spline)
+  //  ui->comboBoxSplineDisplay->setCurrentIndex((spline && spline->IsValid() && spline->IsVisible())?1:0);
+  //  if (spline)
   //  {
   //    ui->colorpickerSplineColor->setCurrentColor(spline->GetColor());
   //    ui->checkBoxSplineProjection->setChecked(spline->GetProjection());
@@ -905,6 +903,16 @@ void PanelSurface::OnComboAnnotation(int nSel_in) {
   }
 }
 
+void PanelSurface::OnCycleAnnotation() {
+  LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
+  if (surf && surf->GetNumberOfAnnotations() > 1) {
+    int n = ui->comboBoxAnnotation->currentIndex() + 1;
+    if (n > surf->GetNumberOfAnnotations())
+      n = 1;
+    ui->comboBoxAnnotation->setCurrentIndex(n);
+  }
+}
+
 void PanelSurface::OnButtonLoadLabel() {
   MainWindow::GetMainWindow()->LoadSurfaceLabel();
   UpdateWidgets();
@@ -1044,8 +1052,7 @@ void PanelSurface::OnEditPositionOffset() {
     if (bOK) {
       layer->GetProperty()->SetPosition(pos);
     } else {
-      //  QMessageBox::information(this, "Error", "Please enter 3 values for
-      //  position offset.");
+      //  QMessageBox::information(this, "Error", "Please enter 3 values for position offset.");
     }
   }
 }
@@ -1518,8 +1525,7 @@ void PanelSurface::OnButtonSaveAnnotation() {
     }
     if (!fn.isEmpty()) {
       if (!annot->SaveToFile(fn)) {
-        std::cerr << "Failed to save annotation file at " << qPrintable(fn)
-                  << "\n";
+        cerr << "Failed to save annotation file at " << qPrintable(fn) << "\n";
       }
     }
   }

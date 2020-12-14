@@ -1059,9 +1059,9 @@ long COREGvolIndex(int ncols, int nrows, int nslices, int c, int r, int s) {
 }
 
 /*!
-  \fn double COREGsamp(unsigned char *f, const double c, const double r, const double s,
+  \fn double COREGsamp(unsigned char *f, const double c, const double r, const double s, 
                        const int ncols, const int nrows, const int nslices)
-  \brief Trilinear interpolation
+  \brief Trilinear interpolation		       
  */
 double COREGsamp(unsigned char *f, const double c, const double r,
                  const double s, const int ncols, const int nrows,
@@ -1637,7 +1637,7 @@ double *COREGoptSchema2MatrixPar(COREG *coreg, double *par) {
     par[6] = par[7] = par[8] = 1;                // scaling
     par[0]                   = coreg->params[0]; // x trans
     par[1]                   = coreg->params[1]; // y trans
-    par[5]                   = coreg->params[2]; // rotation about z
+    par[5]                   = coreg->params[5]; // rotation about z
     break;
   }
   return (par);
@@ -1801,6 +1801,9 @@ int COREGMinPowell() {
   pPowel = vector(1, dof);
   for (n = 0; n < dof; n++)
     pPowel[n + 1] = coreg->params[n];
+  for (n = 0; n < dof; n++)
+    printf("%f ", coreg->params[n]);
+  printf("\n");
 
   xi = matrix(1, dof, 1, dof);
   for (r = 1; r <= dof; r++) {

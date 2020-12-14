@@ -36,25 +36,32 @@
   ENDUSAGE
 */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/utsname.h>
+#include <unistd.h>
 
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
 #include "gcamorph.h"
 #include "icosahedron.h"
+#include "macros.h"
 #include "mri2.h"
+#include "mrisurf.h"
 #include "mrisutils.h"
 #include "pdf.h"
 #include "resample.h"
+#include "utils.h"
 #include "version.h"
 
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options(FILE *fp);
 void        usage_message(FILE *stream);
 void        usage(FILE *stream);
@@ -67,19 +74,21 @@ int            debug         = 0;
 int            checkoptsonly = 0;
 struct utsname uts;
 
-char * SrcValFile = nullptr;
-char * TrgValFile = nullptr;
+char * SrcValFile = NULL;
+char * TrgValFile = NULL;
 char * SurfRegFile[100];
+char * SurfPatchFile[100];
 int    ReverseMapFlag   = 1;
 int    DoJac            = 0;
 int    UseHash          = 1;
 int    nsurfs           = 0;
+int    npatches         = 0;
 int    DoSynthRand      = 0;
 int    DoSynthOnes      = 0;
 int    SynthSeed        = -1;
-char * AnnotFile        = nullptr;
-char * LabelFile        = nullptr;
-char * SurfXYZFile      = nullptr;
+char * AnnotFile        = NULL;
+char * LabelFile        = NULL;
+char * SurfXYZFile      = NULL;
 int    OutputCurvFormat = 0;
 LABEL *MRISmask2Label(MRIS *surf, MRI *mask, int frame, double thresh);
 int    ApplyScaleSurf(MRIS *surf, const double scale);
@@ -92,7 +101,7 @@ int main(int argc, char *argv[]) {
   MRIS *       SurfReg[100], *SurfSrc;
   MRI *        SrcVal, *TrgVal;
   char *       base;
-  COLOR_TABLE *ctab = nullptr;
+  COLOR_TABLE *ctab = NULL;
 
   nargs = handleVersionOption(argc, argv, "mris_apply_reg");
   if (nargs && argc - nargs == 1)
@@ -106,7 +115,7 @@ int main(int argc, char *argv[]) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   if (argc == 0)
     usage_exit();
   parse_commandline(argc, argv);
@@ -120,15 +129,18 @@ int main(int argc, char *argv[]) {
     printf("%d Loading %s\n", n + 1, SurfRegFile[n]);
     base = fio_basename(SurfRegFile[n], ".tri");
     if (strcmp(base, "ic7") == 0) {
-      // Have to do it this way to rescale. Need to find a better more robust
-      // way.
+      // Have to do it this way to rescale. Need to find a better more robust way.
       printf("   reading as ico 7, rescaling radius to 100\n");
       SurfReg[n] = ReadIcoByOrder(7, 100);
     } else
       SurfReg[n] = MRISread(SurfRegFile[n]);
     free(base);
-    if (SurfReg[n] == nullptr)
+    if (SurfReg[n] == NULL)
       exit(1);
+    if (npatches > 0) {
+      printf("Loading patch %s\n", SurfPatchFile[n]);
+      MRISreadPatch(SurfReg[n], SurfPatchFile[n]);
+    }
   }
 
   if (SourceSurfRegScale > 0) {
@@ -141,7 +153,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Load in source data
-  SrcVal = nullptr;
+  SrcVal = NULL;
   if (DoSynthRand) {
     if (SynthSeed < 0)
       SynthSeed = PDFtodSeed();
@@ -163,35 +175,35 @@ int main(int argc, char *argv[]) {
   } else if (SurfXYZFile) {
     printf("Loading surface xyz %s\n", SurfXYZFile);
     SurfSrc = MRISread(SurfXYZFile);
-    if (SurfSrc == nullptr)
+    if (SurfSrc == NULL)
       exit(1);
-    SrcVal = MRIcopyMRIS(nullptr, SurfSrc, 2, "z"); // start at z to autoalloc
+    SrcVal = MRIcopyMRIS(NULL, SurfSrc, 2, "z"); // start at z to autoalloc
     MRIcopyMRIS(SrcVal, SurfSrc, 0, "x");
     MRIcopyMRIS(SrcVal, SurfSrc, 1, "y");
   } else if (LabelFile) {
     LABEL *srclabel;
     printf("Loading label %s\n", LabelFile);
-    srclabel = LabelRead(nullptr, LabelFile);
-    if (srclabel == nullptr)
+    srclabel = LabelRead(NULL, LabelFile);
+    if (srclabel == NULL)
       exit(1);
-    SrcVal = MRISlabel2Mask(SurfReg[0], srclabel, nullptr);
+    SrcVal = MRISlabel2Mask(SurfReg[0], srclabel, NULL);
     printf("   %d points in input label\n", srclabel->n_points);
     LabelFree(&srclabel);
   } else {
     printf("Loading %s\n", SrcValFile);
     SrcVal = MRIread(SrcValFile);
-    if (SrcVal == nullptr)
+    if (SrcVal == NULL)
       exit(1);
     MRI *tmpmri;
-    tmpmri = MRIreshape1d(SrcVal, nullptr);
-    if (tmpmri == nullptr)
+    tmpmri = MRIreshape1d(SrcVal, NULL);
+    if (tmpmri == NULL)
       exit(1);
     MRIfree(&SrcVal);
     SrcVal = tmpmri;
     if (SrcVal->type != MRI_FLOAT) {
       printf("Converting source to float\n");
       tmpmri = MRISeqchangeType(SrcVal, MRI_FLOAT, 0, 0, 0);
-      if (tmpmri == nullptr) {
+      if (tmpmri == NULL) {
         printf("ERROR: could change type\n");
         exit(1);
       }
@@ -203,7 +215,7 @@ int main(int argc, char *argv[]) {
   // Apply registration to source
   TrgVal =
       MRISapplyReg(SrcVal, SurfReg, nsurfs, ReverseMapFlag, DoJac, UseHash);
-  if (TrgVal == nullptr)
+  if (TrgVal == NULL)
     exit(1);
 
   // Save output
@@ -381,16 +393,24 @@ static int parse_commandline(int argc, char **argv) {
       SurfRegFile[nsurfs] = pargv[1];
       nsurfs++;
       nargsused = 2;
+    } else if (!strcasecmp(option, "--patch")) {
+      if (nargc < 2)
+        CMDargNErr(option, 2);
+      SurfPatchFile[npatches] = pargv[0];
+      npatches++;
+      SurfPatchFile[npatches] = pargv[1];
+      npatches++;
+      nargsused = 2;
     } else if (!strcasecmp(option, "--lta")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
       printf("Reading in %s\n", pargv[0]);
       MRIS *ltasurf = MRISread(pargv[0]);
-      if (ltasurf == nullptr)
+      if (ltasurf == NULL)
         exit(1);
       printf("Reading in %s\n", pargv[1]);
       LTA *lta = LTAread(pargv[1]);
-      if (lta == nullptr)
+      if (lta == NULL)
         exit(1);
       int err = MRISltaMultiply(ltasurf, lta);
       if (err)
@@ -404,17 +424,63 @@ static int parse_commandline(int argc, char **argv) {
       nargsused = 3;
       printf("mris_apply_reg done\n");
       exit(0);
+    } else if (!strcasecmp(option, "--lta-patch")) {
+      if (nargc < 4)
+        CMDargNErr(option, 4);
+      printf("Reading in %s\n", pargv[0]);
+      MRIS *ltasurf = MRISread(pargv[0]);
+      if (ltasurf == NULL)
+        exit(1);
+      ltasurf->vg.valid = 0; // needed for ltaMult
+      printf("Reading in %s\n", pargv[1]);
+      MRISreadPatch(ltasurf, pargv[1]);
+      printf("Reading in %s\n", pargv[2]);
+      LTA *lta = LTAread(pargv[2]);
+      if (lta == NULL)
+        exit(1);
+      lta->type = REGISTER_DAT; // hack, needed for ltaMult
+      int err   = MRISltaMultiply(ltasurf, lta);
+      if (err)
+        exit(1);
+      if (center_surface)
+        MRIScenter(ltasurf, ltasurf);
+      printf("Writing patch to %s\n", pargv[3]);
+      err = MRISwritePatch(ltasurf, pargv[3]);
+      if (err)
+        exit(1);
+      nargsused = 4;
+      printf("mris_apply_reg done\n");
+      exit(0);
+    } else if (!strcasecmp(option, "--reverse")) {
+      if (nargc < 3)
+        CMDargNErr(option, 3);
+      MRIS *revsurf = MRISread(pargv[0]);
+      if (revsurf == NULL)
+        exit(1);
+      if (strcmp(pargv[1], "nopatch") != 0)
+        MRISreadPatch(revsurf, pargv[1]);
+      MRISreverse(revsurf, REVERSE_X, 1);
+      int err;
+      if (strcmp(pargv[1], "nopatch") != 0)
+        err = MRISwritePatch(revsurf, pargv[2]);
+      else
+        err = MRISwrite(revsurf, pargv[2]);
+      if (err)
+        exit(1);
+      nargsused = 3;
+      printf("mris_apply_reg done\n");
+      exit(0);
     } else if (!strcasecmp(option, "--m3z")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
       printf("Reading in %s\n", pargv[0]);
       MRIS *m3zsurf = MRISread(pargv[0]);
-      if (m3zsurf == nullptr)
+      if (m3zsurf == NULL)
         exit(1);
       printf("Reading in %s\n", pargv[1]);
       GCA_MORPH *gcam;
       gcam = GCAMread(pargv[1]);
-      if (gcam == nullptr)
+      if (gcam == NULL)
         exit(1);
       printf("Inverting GCAM\n");
       MRI *mri_tmp;
@@ -447,12 +513,12 @@ static int parse_commandline(int argc, char **argv) {
   return (0);
 }
 /*--------------------------------------------------------------*/
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 /*--------------------------------------------------------------*/
-static void print_usage() {
+static void print_usage(void) {
   printf("USAGE: %s \n", Progname);
   printf("\n");
   printf(" Input specifcation (pick one):\n");
@@ -480,6 +546,12 @@ static void print_usage() {
   printf("\n");
   printf("   --lta source-surf ltafile output-surf : apply LTA transform\n");
   printf("     other options do not apply to --lta\n");
+  printf("   --lta-patch source-surf surfpatch ltafile output-patch : apply "
+         "LTA transform to patch\n");
+  printf("   --reverse surf patchopt output : LR reverse suface. "
+         "patchopt=patchfile or nopatch\n");
+  printf(
+      "   --patch srcregNpatch trgregNpatch : patches, one for each --streg\n");
   printf("\n");
   printf("   --m3z source-surf m3zfile output-surf : apply m3z transform\n");
   printf("     other options do not apply to --m3z\n");
@@ -495,7 +567,7 @@ static void print_usage() {
   printf("\n");
 }
 /*--------------------------------------------------------------*/
-static void print_help() {
+static void print_help(void) {
   print_usage();
   usage(stdout);
   exit(1);
@@ -506,10 +578,10 @@ static void print_version(void) {
   exit(1);
 }
 /*--------------------------------------------------------------*/
-static void check_options() {
+static void check_options(void) {
   int n;
-  if (SrcValFile == nullptr && AnnotFile == nullptr && LabelFile == nullptr &&
-      SurfXYZFile == nullptr) {
+  if (SrcValFile == NULL && AnnotFile == NULL && LabelFile == NULL &&
+      SurfXYZFile == NULL) {
     printf("ERROR: need to specify source value file\n");
     exit(1);
   }
@@ -533,7 +605,7 @@ static void check_options() {
     printf("ERROR: cannot spec both --src and --src-xyz\n");
     exit(1);
   }
-  if (TrgValFile == nullptr) {
+  if (TrgValFile == NULL) {
     printf("ERROR: need to specify target value file\n");
     exit(1);
   }
@@ -548,6 +620,10 @@ static void check_options() {
              SurfRegFile[n]);
       exit(1);
     }
+  }
+  if (npatches > 0 && npatches != nsurfs) {
+    printf("ERROR: number of patches must match number of surfaces\n");
+    exit(1);
   }
   return;
 }
@@ -602,7 +678,7 @@ LABEL *MRISmask2Label(MRIS *surf, MRI *mask, int frame, double thresh) {
   }
 
   // Alloc
-  label           = LabelAlloc(n, surf->subject_name, nullptr);
+  label           = LabelAlloc(n, surf->subject_name, NULL);
   label->n_points = n;
 
   // Asign values

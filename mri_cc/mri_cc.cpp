@@ -188,7 +188,12 @@ int main(int argc, char *argv[]) {
   strcpy(data_dir, sdir);
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-    sprintf(ifname, "%s/%s/mri/cc_volume_%d.txt", data_dir, argv[1], dxi);
+    int req = snprintf(ifname, STRLEN, "%s/%s/mri/cc_volume_%d.txt", data_dir,
+                       argv[1], dxi);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if ((fp = fopen(ifname, "a")) == NULL) {
       ErrorReturn(ERROR_BADFILE,
                   (ERROR_BADFILE,
@@ -200,14 +205,25 @@ int main(int argc, char *argv[]) {
   if (use_aseg) {
     MRI *mri_norm;
 
-    sprintf(ifname, "%s/%s/mri/%s", data_dir, argv[1], aseg_fname);
+    int req =
+        snprintf(ifname, STRLEN, "%s/%s/mri/%s", data_dir, argv[1], aseg_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     printf("reading aseg from %s\n", ifname);
     mri_aseg = MRIread(ifname);
     if (mri_aseg == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not read aseg volume from %s",
                 Progname, ifname);
     if (lh_only || rh_only) {
-      sprintf(ofname, "%s/%s/mri/%s", data_dir, argv[1], output_fname);
+      int req = snprintf(ofname, STRLEN, "%s/%s/mri/%s", data_dir, argv[1],
+                         output_fname);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       fprintf(stdout, "copying aseg WITHOUT callosum to %s...\n", ofname);
       MRIwrite(mri_aseg, ofname);
       exit(0);
@@ -224,7 +240,12 @@ int main(int argc, char *argv[]) {
       // need to replace the cc labels with either lh or rh wm here...
     }
 
-    sprintf(ifname, "%s/%s/mri/%s", data_dir, argv[1], norm_fname);
+    req =
+        snprintf(ifname, STRLEN, "%s/%s/mri/%s", data_dir, argv[1], norm_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading norm from %s\n", ifname);
     mri_norm = MRIread(ifname);
     if (mri_norm == NULL)
@@ -237,11 +258,20 @@ int main(int argc, char *argv[]) {
 
     // set cc center in xc, yc, zc
   } else {
-    sprintf(ifname, "%s/%s/%s", data_dir, argv[1], wmvolume);
+    int req = snprintf(ifname, STRLEN, "%s/%s/%s", data_dir, argv[1], wmvolume);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading white matter volume from %s\n", ifname);
     mri_wm = MRIread(ifname);
 
-    sprintf(ifname, "%s/%s/mri/transforms/talairach.xfm", data_dir, argv[1]);
+    req = snprintf(ifname, STRLEN, "%s/%s/mri/transforms/talairach.xfm",
+                   data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     lta = LTAreadEx(ifname);
     if (lta == 0) {
       ErrorExit(ERROR_BADPARM, "ERROR: cound not load lta from %s.\n", ifname);
@@ -270,7 +300,12 @@ int main(int argc, char *argv[]) {
                 110);
 
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      sprintf(ofname, "%s/%s/mri/wm_tal.mgz", data_dir, argv[1]);
+      int req =
+          snprintf(ofname, STRLEN, "%s/%s/mri/wm_tal.mgz", data_dir, argv[1]);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       fprintf(stdout,
               "writing talairach transformed white matter volume to %s...\n",
               ofname);
@@ -282,7 +317,12 @@ int main(int argc, char *argv[]) {
     mrot   = MatrixAlloc(4, 4, MATRIX_REAL);
 
     //try method 2 to get the rotation matrix
-    sprintf(ifname, "%s/%s/mri/transforms/talairach.xfm", data_dir, argv[1]);
+    req = snprintf(ifname, STRLEN, "%s/%s/mri/transforms/talairach.xfm",
+                   data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     lta2   = LTAreadEx(ifname);
     mtrans = lta2->xforms[0].m_L;
     Trns_ExtractRotationMatrix(mtrans, mrot);
@@ -304,7 +344,12 @@ int main(int argc, char *argv[]) {
                 110);
 
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      sprintf(ofname, "%s/%s/mri/wm.mgz", data_dir, argv[1]);
+      int req = snprintf(ofname, STRLEN, "%s/%s/mri/wm.mgz", data_dir, argv[1]);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+
       fprintf(stdout, "writing rotated white matter volume to %s...\n", ofname);
       MRIwrite(mri_cc, ofname);
     }
@@ -318,7 +363,12 @@ int main(int argc, char *argv[]) {
     find_corpus_callosum(mri_tal, &cc_tal_x, &cc_tal_y, &cc_tal_z, lta,
                          mri_cc_tal);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      sprintf(ofname, "%s/%s/mri/cc_tal.mgz", data_dir, argv[1]);
+      int req =
+          snprintf(ofname, STRLEN, "%s/%s/mri/cc_tal.mgz", data_dir, argv[1]);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       fprintf(stdout, "writing output to %s...\n", ofname);
       MRIwrite(mri_cc_tal, ofname);
     }
@@ -329,7 +379,11 @@ int main(int argc, char *argv[]) {
     MRIfromTalairachEx(mri_cc_tal, mri_wm, lta);
     // binalize the rotated cc volume (mri_wm)
     MRIbinarize(mri_wm, mri_wm, CC_VAL / 2 - 1, 0, 100);
-    sprintf(ofname, "%s/%s/mri/cc_org.mgz", data_dir, argv[1]);
+    req = snprintf(ofname, STRLEN, "%s/%s/mri/cc_org.mgz", data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stdout, "writing corpus callosum in original space to %s...\n",
             ofname);
     MRIwrite(mri_wm, ofname);
@@ -538,7 +592,12 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    sprintf(ofname, "%s/%s/mri/%s", data_dir, argv[1], output_fname);
+    int req = snprintf(ofname, STRLEN, "%s/%s/mri/%s", data_dir, argv[1],
+                       output_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stdout, "writing aseg with callosum to %s...\n", ofname);
     MRIwrite(mri_aseg, ofname);
   }
@@ -551,13 +610,23 @@ int main(int argc, char *argv[]) {
   }
 
   if (write_cc) {
-    sprintf(ofname, "%s/%s/mri/cc_new.mgz", data_dir, argv[1]);
+    int req =
+        snprintf(ofname, STRLEN, "%s/%s/mri/cc_new.mgz", data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stdout, "writing corpus callosum output to %s...\n", ofname);
     MRIwrite(mri_cc, ofname);
   }
 
   if (mri_fornix && fornix) {
-    sprintf(ofname, "%s/%s/mri/fornix.mgz", data_dir, argv[1]);
+    int req =
+        snprintf(ofname, STRLEN, "%s/%s/mri/fornix.mgz", data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stdout, "writing fornix to to %s...\n", ofname);
     MRIwrite(mri_fornix, ofname);
   }

@@ -17,20 +17,33 @@
  *
  */
 
+#include <errno.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utsname.h>
+#include <unistd.h>
 
+#include "MRIio_old.h"
 #include "annotation.h"
 #include "cma.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "label.h"
+#include "mri.h"
+#include "mrisurf.h"
 #include "version.h"
 
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
 static int  singledash(char *flag);
@@ -44,15 +57,15 @@ const char *annotation  = "aparc";
 char *      hemi        = NULL;
 const char *surfacename = "white";
 
-char *outdir    = nullptr;
-char *labelbase = nullptr;
+char *outdir    = NULL;
+char *labelbase = NULL;
 
 MRI_SURFACE *Surf;
-LABEL *      label = nullptr;
+LABEL *      label = NULL;
 
 int debug = 0;
 
-char *SUBJECTS_DIR = nullptr;
+char *SUBJECTS_DIR = NULL;
 FILE *fp;
 
 char tmpstr[2000];
@@ -60,16 +73,16 @@ char annotfile[1000];
 char labelfile[1000];
 int  nperannot[1000];
 
-char *segfile = nullptr;
+char *segfile = NULL;
 MRI * seg;
 int   segbase  = -1000;
-char *ctabfile = nullptr;
+char *ctabfile = NULL;
 
-char *     borderfile      = nullptr;
-char *     BorderAnnotFile = nullptr;
-char *     LobesFile       = nullptr;
-char *     StatFile        = nullptr;
-MRI *      Stat            = nullptr;
+char *     borderfile      = NULL;
+char *     BorderAnnotFile = NULL;
+char *     LobesFile       = NULL;
+char *     StatFile        = NULL;
+MRI *      Stat            = NULL;
 static int label_index     = -1; // if >= 0 only extract this label
 
 // The global 'gi_lobarDivision'
@@ -98,7 +111,7 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   if (argc == 0) {
     usage_exit();
@@ -108,20 +121,20 @@ int main(int argc, char **argv) {
   check_options();
   dump_options(stdout);
 
-  if (outdir != nullptr) {
+  if (outdir != NULL) {
     // Create the output directory
     err = mkdir(outdir, 0777);
     if (err != 0 && errno != EEXIST) {
       printf("ERROR: creating directory %s\n", outdir);
-      perror(nullptr);
+      perror(NULL);
       return (1);
     }
   }
 
   /*--- Get environment variables ------*/
-  if (SUBJECTS_DIR == nullptr) { // otherwise specified on cmdline
+  if (SUBJECTS_DIR == NULL) { // otherwise specified on cmdline
     SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-    if (SUBJECTS_DIR == nullptr) {
+    if (SUBJECTS_DIR == NULL) {
       fprintf(stderr, "ERROR: SUBJECTS_DIR not defined in environment\n");
       exit(1);
     }
@@ -131,7 +144,7 @@ int main(int argc, char **argv) {
   sprintf(tmpstr, "%s/%s/surf/%s.%s", SUBJECTS_DIR, subject, hemi, surfacename);
   printf("Reading surface \n %s\n", tmpstr);
   Surf = MRISread(tmpstr);
-  if (Surf == nullptr) {
+  if (Surf == NULL) {
     fprintf(stderr, "ERROR: could not read %s\n", tmpstr);
     exit(1);
   }
@@ -156,7 +169,7 @@ int main(int argc, char **argv) {
     }
     printf("OK, that worked.\n");
   }
-  if (Surf->ct == nullptr) {
+  if (Surf->ct == NULL) {
     printf("ERROR: cannot find embedded color table\n");
     exit(1);
   }
@@ -190,13 +203,13 @@ int main(int argc, char **argv) {
   if (LobesFile) {
     MRISaparc2lobes(Surf, (int)Ge_lobarDivision);
     MRISwriteAnnotation(Surf, LobesFile);
-    if (ctabfile != nullptr) {
+    if (ctabfile != NULL) {
       Surf->ct->idbase = segbase;
       CTABwriteFileASCII(Surf->ct, ctabfile);
     }
     exit(0);
   }
-  if (ctabfile != nullptr) {
+  if (ctabfile != NULL) {
     Surf->ct->idbase = segbase;
     CTABwriteFileASCII(Surf->ct, ctabfile);
   }
@@ -228,7 +241,7 @@ int main(int argc, char **argv) {
     exit(0);
   }
 
-  if (segfile != nullptr) {
+  if (segfile != NULL) {
     printf("Converting to a segmentation\n");
     seg = MRISannot2seg(Surf, segbase);
     MRIwrite(seg, segfile);
@@ -254,7 +267,7 @@ int main(int argc, char **argv) {
   if (StatFile) {
     printf("Loading stat file %s\n", StatFile);
     Stat = MRIread(StatFile);
-    if (Stat == nullptr) {
+    if (Stat == NULL) {
       exit(1);
     }
     if (Stat->width != Surf->nvertices) {
@@ -275,16 +288,21 @@ int main(int argc, char **argv) {
       continue;
     }
 
-    if (labelbase != nullptr) {
+    if (labelbase != NULL) {
       sprintf(labelfile, "%s-%03d.label", labelbase, ani);
     }
-    if (outdir != nullptr)
-      sprintf(labelfile, "%s/%s.%s.label", outdir, hemi,
-              Surf->ct->entries[ani]->name);
+    if (outdir != NULL) {
+      int req = snprintf(labelfile, 1000, "%s/%s.%s.label", outdir, hemi,
+                         Surf->ct->entries[ani]->name);
+      if (req >= 1000) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+    }
 
     printf("%3d  %5d %s\n", ani, nperannot[ani], labelfile);
     label = annotation2label(ani, Surf);
-    if (label == nullptr) {
+    if (label == NULL) {
       ErrorPrintf(ERROR_BADPARM,
                   "index %d not found, cannot write %s - skipping", ani,
                   labelfile);
@@ -468,12 +486,12 @@ static int parse_commandline(int argc, char **argv) {
   return (0);
 }
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("USAGE: %s \n", Progname);
   printf("\n");
   printf("   --subject    source subject\n");
@@ -540,7 +558,7 @@ static void dump_options(FILE *fp) {
   return;
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("This program will convert an annotation into multiple label files\n");
   printf("or into a segmentaion 'volume'. It can also create a border "
@@ -658,8 +676,8 @@ static void print_help() {
       "       [Load the label]\n"
       "      [Goto the point saved from step 1] \n\n\n");
 
-  // printf("Annotation Key\n");
-  // print_annotation_table(stdout);
+  //printf("Annotation Key\n");
+  //print_annotation_table(stdout);
 
   exit(1);
 }
@@ -678,21 +696,21 @@ static void argnerr(char *option, int n) {
   exit(-1);
 }
 /* --------------------------------------------- */
-static void check_options() {
-  if (subject == nullptr) {
+static void check_options(void) {
+  if (subject == NULL) {
     fprintf(stderr, "ERROR: no source subject specified\n");
     exit(1);
   }
-  if (hemi == nullptr) {
+  if (hemi == NULL) {
     fprintf(stderr, "ERROR: No hemisphere specified\n");
     exit(1);
   }
-  if (outdir == nullptr && labelbase == nullptr && segfile == nullptr &&
-      borderfile == nullptr && LobesFile == nullptr && ctabfile == nullptr) {
+  if (outdir == NULL && labelbase == NULL && segfile == NULL &&
+      borderfile == NULL && LobesFile == NULL && ctabfile == NULL) {
     fprintf(stderr, "ERROR: no output specified\n");
     exit(1);
   }
-  if (outdir != nullptr && labelbase != nullptr) {
+  if (outdir != NULL && labelbase != NULL) {
     fprintf(stderr, "ERROR: cannot specify both --outdir and --labelbase\n");
     exit(1);
   }

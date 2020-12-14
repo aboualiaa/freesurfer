@@ -17,23 +17,33 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);
 
 static int  get_option(int argc, char *argv[], INTEGRATION_PARMS *parms);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 const char *Progname;
 
-static char *surf_dir        = "surf";
-static char *annot_name      = nullptr;
-static char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
+static const char *surf_dir        = "surf";
+static char *      annot_name      = NULL;
+static const char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
 
 static const char *curvature_names[] = {"inflated.H", "sulc", NULL};
 
@@ -75,10 +85,9 @@ int main(int argc, char *argv[]) {
     exit(0);
   argc -= nargs;
 
-  memset(&parms, 0, sizeof(parms));
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   /* setting default values for vectorial registration */
   setParms(&parms);
 
@@ -142,8 +151,12 @@ int main(int argc, char *argv[]) {
     subject = argv[ino];
     fprintf(stderr, "\nprocessing subject %s (%d of %d)\n", subject, ino + 1,
             argc - 1);
-    sprintf(surf_fname, "%s/%s/%s/%s.%s", subjects_dir, subject, surf_dir, hemi,
-            sphere_name);
+    int req = snprintf(surf_fname, STRLEN, "%s/%s/%s/%s.%s", subjects_dir,
+                       subject, surf_dir, hemi, sphere_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stderr, "reading spherical surface %s...\n", surf_fname);
     mris = MRISread(surf_fname);
     if (!mris) {
@@ -176,7 +189,11 @@ int main(int argc, char *argv[]) {
           strcpy(parms.base_name, cp + 1);
       } else
         strcpy(parms.base_name, "template");
-      sprintf(fname, "%s.%s.out", hemi, parms.base_name);
+      int req = snprintf(fname, STRLEN, "%s.%s.out", hemi, parms.base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       INTEGRATION_PARMS_openFp(&parms, fname, "w");
       printf("writing output to '%s'\n", fname);
     }
@@ -186,23 +203,27 @@ int main(int argc, char *argv[]) {
       nfields = parms.nfields;
 
       for (n = 0; n < mris->nvertices; n++) /* allocate the VALS_VP
-                                                               structure */
+                                                                 structure */
       {
         v             = &mris->vertices[n];
         vp            = (VALS_VP *)calloc(1, sizeof(VALS_VP));
         vp->nvals     = nfields;
         vp->orig_vals = (float *)malloc(nfields * sizeof(float)); /* before
-                                                                     blurring */
+                                                                blurring */
         vp->vals = (float *)malloc(nfields * sizeof(float)); /* values used by
-                                                                MRISintegrate */
+                                                               MRISintegrate */
         v->vp    = (void *)vp;
       }
 
       /* load the different fields */
       for (n = 0; n < parms.nfields; n++) {
-        if (parms.fields[n].name != nullptr) {
-          sprintf(surf_fname, "%s/%s/%s/%s.%s", subjects_dir, subject,
-                  overlay_dir, hemi, parms.fields[n].name);
+        if (parms.fields[n].name != NULL) {
+          int req = snprintf(surf_fname, STRLEN, "%s/%s/%s/%s.%s", subjects_dir,
+                             subject, overlay_dir, hemi, parms.fields[n].name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           printf("reading overlay file %s...\n", surf_fname);
           if (MRISreadValues(mris, surf_fname) != NO_ERROR)
             ErrorExit(ERROR_BADPARM, "%s: could not read overlay file %s",
@@ -210,10 +231,14 @@ int main(int argc, char *argv[]) {
           MRIScopyValuesToCurvature(mris);
         } else if (ReturnFieldName(parms.fields[n].field)) {
           /* read in precomputed curvature file */
-          sprintf(surf_fname, "%s/%s/%s/%s.%s", subjects_dir, subject, surf_dir,
-                  hemi, ReturnFieldName(parms.fields[n].field));
-          // fprintf(stderr,"\nreading field %d from
-          // %s(type=%d,frame=%d)\n",parms.fields[n].field,surf_fname,parms.fields[n].type,parms.fields[n].frame);
+          int req = snprintf(surf_fname, STRLEN, "%s/%s/%s/%s.%s", subjects_dir,
+                             subject, surf_dir, hemi,
+                             ReturnFieldName(parms.fields[n].field));
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+          // fprintf(stderr,"\nreading field %d from %s(type=%d,frame=%d)\n",parms.fields[n].field,surf_fname,parms.fields[n].type,parms.fields[n].frame);
           if (MRISreadCurvatureFile(mris, surf_fname) != NO_ERROR) {
             fprintf(stderr, "\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
             fprintf(stderr, "%s: could not read curvature file '%s'\n",
@@ -222,14 +247,18 @@ int main(int argc, char *argv[]) {
             break;
           }
         } else { /* compute curvature of surface */
-          sprintf(surf_fname, "%s/%s/%s/%s.%s", subjects_dir, subject, surf_dir,
-                  hemi, surface_names[parms.fields[n].field]);
+          int req = snprintf(surf_fname, STRLEN, "%s/%s/%s/%s.%s", subjects_dir,
+                             subject, surf_dir, hemi,
+                             surface_names[parms.fields[n].field]);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           /*if(parms.fields[n].field==0)
            sprintf(fname, "inflated") ;
            else
            sprintf(fname, "smoothwm") ;*/
-          // fprintf(stderr,"\ngenerating field %d(type=%d,frame=%d) (from
-          // %s)\n",parms.fields[n].field,parms.fields[n].type,parms.fields[n].frame,surf_fname);
+          //fprintf(stderr,"\ngenerating field %d(type=%d,frame=%d) (from %s)\n",parms.fields[n].field,parms.fields[n].type,parms.fields[n].frame,surf_fname);
           //     MRISsaveVertexPositions(mris, TMP_VERTICES) ;
           if (MRISreadVertexPositions(mris, surf_fname) != NO_ERROR) {
             fprintf(stderr, "\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
@@ -267,7 +296,7 @@ int main(int argc, char *argv[]) {
           free(vp->orig_vals);
           free(vp->vals);
           free(vp);
-          v->vp = nullptr;
+          v->vp = NULL;
         }
         /* free surface */
         MRISfree(&mris);
@@ -280,7 +309,7 @@ int main(int argc, char *argv[]) {
       parms.frame_no = 3; /* don't use single field correlation functions */
       parms.l_corr = parms.l_pcorr = 0.0f;
 
-      parms.mrisp          = MRIStoParameterization(mris, nullptr, scale, 0);
+      parms.mrisp          = MRIStoParameterization(mris, NULL, scale, 0);
       parms.mrisp_template = mrisp_template;
 
       MRISrigidBodyAlignVectorGlobal(mris, &parms, 1.0, 64.0, 8);
@@ -293,8 +322,12 @@ int main(int argc, char *argv[]) {
       MRISsaveVertexPositions(mris, CANONICAL_VERTICES);
     };
     if ((!multiframes) && (!no_rot) && ino > 0) { /* rigid body alignment */
-      sprintf(surf_fname, "%s/%s/%s/%s.%s", subjects_dir, subject, surf_dir,
-              hemi, "sulc");
+      int req = snprintf(surf_fname, STRLEN, "%s/%s/%s/%s.%s", subjects_dir,
+                         subject, surf_dir, hemi, "sulc");
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (MRISreadCurvatureFile(mris, surf_fname) != NO_ERROR) {
         ErrorPrintf(Gerror, "%s: could not read curvature file '%s'\n",
                     Progname, surf_fname);
@@ -303,7 +336,7 @@ int main(int argc, char *argv[]) {
         continue;
       }
       parms.frame_no       = 3; /* use sulc for rigid registration */
-      parms.mrisp          = MRIStoParameterization(mris, nullptr, scale, 0);
+      parms.mrisp          = MRIStoParameterization(mris, NULL, scale, 0);
       parms.mrisp_template = mrisp_template;
       parms.l_corr         = 1.0f;
 
@@ -321,7 +354,7 @@ int main(int argc, char *argv[]) {
       for (n = 0; n < parms.nfields; n++) {
         MRISsetOrigValuesToCurvatures(mris, n);
         MRISaverageCurvatures(mris, parms.fields[n].navgs);
-        mrisp = MRIStoParameterization(mris, nullptr, scale, 0);
+        mrisp = MRIStoParameterization(mris, NULL, scale, 0);
         MRISPcombine(mrisp, mrisp_template,
                      parms.fields[n].frame * IMAGES_PER_SURFACE);
         MRISPfree(&mrisp);
@@ -333,15 +366,19 @@ int main(int argc, char *argv[]) {
         free(vp->orig_vals);
         free(vp->vals);
         free(vp);
-        v->vp = nullptr;
+        v->vp = NULL;
       }
       MRISfree(&mris);
     } else {
       for (sno = 0; sno < SURFACES; sno++) {
         if (curvature_names[sno]) /* read in precomputed curvature file */
         {
-          sprintf(surf_fname, "%s/%s/%s/%s.%s", subjects_dir, subject, surf_dir,
-                  hemi, curvature_names[sno]);
+          int req = snprintf(surf_fname, STRLEN, "%s/%s/%s/%s.%s", subjects_dir,
+                             subject, surf_dir, hemi, curvature_names[sno]);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           if (MRISreadCurvatureFile(mris, surf_fname) != NO_ERROR) {
             nbad++;
             ErrorPrintf(Gerror, "%s: could not read curvature file '%s'\n",
@@ -354,8 +391,12 @@ int main(int argc, char *argv[]) {
           MRISnormalizeCurvature(mris, which_norm);
         } else /* compute curvature of surface */
         {
-          sprintf(surf_fname, "%s/%s/%s/%s.%s", subjects_dir, subject, surf_dir,
-                  hemi, surface_names[sno]);
+          int req = snprintf(surf_fname, STRLEN, "%s/%s/%s/%s.%s", subjects_dir,
+                             subject, surf_dir, hemi, surface_names[sno]);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           if (MRISreadVertexPositions(mris, surf_fname) != NO_ERROR) {
             ErrorPrintf(ERROR_NOFILE, "%s: could not read surface file %s",
                         Progname, surf_fname);
@@ -379,7 +420,7 @@ int main(int argc, char *argv[]) {
           continue;
           MRISfree(&mris);
         }
-        mrisp = MRIStoParameterization(mris, nullptr, scale, 0);
+        mrisp = MRIStoParameterization(mris, NULL, scale, 0);
         MRISPcombine(mrisp, mrisp_template, sno * 3);
         MRISPfree(&mrisp);
       }
@@ -690,12 +731,12 @@ static int get_option(int argc, char *argv[], INTEGRATION_PARMS *parms) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   printf("%s [options] <hemi> <surface name> <subject> <subject> ... "
          "<output name>\n",
          Progname);
@@ -715,7 +756,7 @@ static void print_usage() {
   printf("\n");
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("This program will add a template into an average surface.\n");
   exit(1);

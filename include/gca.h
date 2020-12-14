@@ -32,10 +32,6 @@
 
 #include "affine.h"
 
-#if 0
-extern double MIN_PRIOR_FACTOR, MAX_PRIOR_FACTOR, PRIOR_FACTOR ;   // sorry, too hard to propagate this everywhere for now
-#endif
-
 #define GCA_RESTART      1
 #define GCA_RESTART_ONCE 2
 
@@ -49,8 +45,7 @@ extern double MIN_PRIOR_FACTOR, MAX_PRIOR_FACTOR, PRIOR_FACTOR ;   // sorry, too
 #define GCA_UNKNOWN 99 // what ???
 
 #define DEFAULT_CLAMP                                                          \
-  6 // anything more negative than -DEFAULT_CLAMP is set to -DEFAULT_CLAMP in  \
-      // logSample stuff
+  6 // anything more negative than -DEFAULT_CLAMP is set to -DEFAULT_CLAMP in logSample stuff
 
 // somehow these were in here and not in tags.h. For backwards compatibility
 // have to keep using them
@@ -116,12 +111,11 @@ typedef struct {
 
 #else
 
-// Calculating log(prior) was a major part of the execution time in
-// mri_em_register and it was being repeatedly calculated for the same
-// GCA_SAMPLE, so it is more efficient to calculate it when the prior is set
-// rather than later.  These macros, and the change of name from 'prior' to
-// 'prior_access_via_setGetPrior', make sure that the places where it is being
-// set also set the prior_log.
+// Calculating log(prior) was a major part of the execution time in mri_em_register
+// and it was being repeatedly calculated for the same GCA_SAMPLE, so it is more efficient
+// to calculate it when the prior is set rather than later.  These macros, and the change of name
+// from 'prior' to 'prior_access_via_setGetPrior', make sure that the places where it is being set
+// also set the prior_log.
 //
 #define gcas_setPrior(GCAS, TO)                                                \
   {                                                                            \
@@ -224,16 +218,16 @@ typedef struct {
   // reference tissue seg IDs (eg, WM, vent, and caudate)
   int  nreftissues;
   int *reftissues;
-  // re:thresholds. We want 2 thresholds for each ref tissue
-  // hardthresh (if dont care about how many WMSA neighbors)
-  // softthresh (if we care about WMSA neighbors)
-  // these threshs are compared to MD so not modality spec
+  //re:thresholds. We want 2 thresholds for each ref tissue
+  //hardthresh (if dont care about how many WMSA neighbors)
+  //softthresh (if we care about WMSA neighbors)
+  //these threshs are compared to MD so not modality spec
   double *hardthresh;
   double *softthresh;
   int     nbrthresh; // min number of nbrs to use softthresh (3)
   int     nbrwhalf;  // look within +/- whalf voxels for neighboring WMSA (3)
   MRI *   seg;       // updated label
-  // need to add registration file, not sure what type this is
+  //need to add registration file, not sure what type this is
 } WMSA;
 
 typedef struct {
@@ -335,11 +329,6 @@ int GCAnodeToSourceVoxel(GCA *gca, MRI *mri, TRANSFORM *transform, int xv,
 int GCAnodeToSourceVoxelFloat(GCA *gca, MRI *mri, TRANSFORM *transform, int xv,
                               int yv, int zv, float *pxn, float *pyn,
                               float *pzn);
-#if 0
-int    GCAsampleStats(GCA *gca, MRI *mri, TRANSFORM *transform, int class,
-                      double x, double y, double z,
-                      double *pmean, double *pvar, double *pprior) ;
-#endif
 
 MRI *       GCAannealUnlikelyVoxels(MRI *mri_inputs, GCA *gca, MRI *mri_dst,
                                     TRANSFORM *transform, int max_iter, MRI *mri_fixed,

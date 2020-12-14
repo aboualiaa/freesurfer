@@ -254,15 +254,29 @@ int main(int argc, char **argv) {
     double etiv_scale_factor = 1948.106;
     if (talxfmfile) {
       // path to talairach.xfm file spec'd on the command line
-      sprintf(tmpstr, "%s", talxfmfile);
+      int req = snprintf(tmpstr, 1000, "%s", talxfmfile);
+      if (req >= 1000) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+
     } else {
-      sprintf(tmpstr, "%s/%s/mri/transforms/talairach.xfm", SUBJECTS_DIR,
-              subject);
+      int req = snprintf(tmpstr, 1000, "%s/%s/mri/transforms/talairach.xfm",
+                         SUBJECTS_DIR, subject);
+      if (req >= 1000) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
     }
     if (DoOldETIVonly) {
       // back-door way to get the old way of calculating etiv, for debug
-      sprintf(tmpstr, "%s/%s/mri/transforms/talairach_with_skull.lta",
-              SUBJECTS_DIR, subject);
+      int req = snprintf(tmpstr, 1000,
+                         "%s/%s/mri/transforms/talairach_with_skull.lta",
+                         SUBJECTS_DIR, subject);
+      if (req >= 1000) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       etiv_scale_factor = 2150;
     }
     double determinant = 0;
@@ -299,12 +313,22 @@ int main(int argc, char **argv) {
   }
 
   if (DoEuler) {
-    sprintf(tmpstr, "%s/%s/surf/lh.orig.nofix", SUBJECTS_DIR, subject);
+    int req = snprintf(tmpstr, 1000, "%s/%s/surf/lh.orig.nofix", SUBJECTS_DIR,
+                       subject);
+    if (req >= 1000) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if (!fio_FileExistsReadable(tmpstr)) {
       printf("Warning: cannot find %s, not computing euler number\n", tmpstr);
       DoEuler = 0;
     }
-    sprintf(tmpstr, "%s/%s/surf/rh.orig.nofix", SUBJECTS_DIR, subject);
+    req = snprintf(tmpstr, 1000, "%s/%s/surf/rh.orig.nofix", SUBJECTS_DIR,
+                   subject);
+    if (req >= 1000) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if (!fio_FileExistsReadable(tmpstr)) {
       printf("Warning: cannot find %s, not computing euler number\n", tmpstr);
       DoEuler = 0;
@@ -312,7 +336,12 @@ int main(int argc, char **argv) {
   }
   if (DoEuler) {
     int nvertices, nfaces, nedges;
-    sprintf(tmpstr, "%s/%s/surf/lh.orig.nofix", SUBJECTS_DIR, subject);
+    int req = snprintf(tmpstr, 1000, "%s/%s/surf/lh.orig.nofix", SUBJECTS_DIR,
+                       subject);
+    if (req >= 1000) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("Computing euler number\n");
     mris = MRISread(tmpstr);
     if (mris == NULL)
@@ -1991,14 +2020,22 @@ int CountEdits(char *subject, char *outfile) {
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
   sprintf(sd, "%s/%s", SUBJECTS_DIR, subject);
 
-  sprintf(tmpstr, "%s/tmp/control.dat", sd);
+  int req = snprintf(tmpstr, STRLEN, "%s/tmp/control.dat", sd);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   count = 0;
   if (fio_FileExistsReadable(tmpstr)) {
     pArray = MRIreadControlPoints(tmpstr, &count, &useRealRAS);
     free(pArray);
   }
 
-  sprintf(tmpstr, "%s/mri/wm.mgz", sd);
+  req = snprintf(tmpstr, STRLEN, "%s/mri/wm.mgz", sd);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(tmpstr);
   if (mri == NULL)
     return (1);
@@ -2017,11 +2054,19 @@ int CountEdits(char *subject, char *outfile) {
   }
   MRIfree(&mri);
 
-  sprintf(tmpstr, "%s/mri/brainmask.mgz", sd);
+  req = snprintf(tmpstr, STRLEN, "%s/mri/brainmask.mgz", sd);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(tmpstr);
   if (mri == NULL)
     return (1);
-  sprintf(tmpstr, "%s/mri/brainmask.auto.mgz", sd);
+  req = snprintf(tmpstr, STRLEN, "%s/mri/brainmask.auto.mgz", sd);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri2 = MRIread(tmpstr);
   if (mri2 == NULL)
     return (1);
@@ -2044,11 +2089,19 @@ int CountEdits(char *subject, char *outfile) {
   MRIfree(&mri);
   MRIfree(&mri2);
 
-  sprintf(tmpstr, "%s/mri/aseg.mgz", sd);
+  req = snprintf(tmpstr, STRLEN, "%s/mri/aseg.mgz", sd);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(tmpstr);
   if (mri == NULL)
     return (1);
-  sprintf(tmpstr, "%s/mri/aseg.auto.mgz", sd);
+  req = snprintf(tmpstr, STRLEN, "%s/mri/aseg.auto.mgz", sd);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri2 = MRIread(tmpstr);
   if (mri2 == NULL)
     return (1);

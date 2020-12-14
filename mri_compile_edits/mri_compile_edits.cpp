@@ -19,9 +19,20 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "colortab.h"
+#include "const.h"
 #include "diag.h"
 #include "error.h"
+#include "macros.h"
 #include "mri.h"
+#include "proto.h"
+#include "timer.h"
+#include "utils.h"
 #include "version.h"
 
 int        main(int argc, char *argv[]);
@@ -62,7 +73,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -77,7 +88,7 @@ int main(int argc, char *argv[]) {
 
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
-    if (cp == nullptr)
+    if (cp == NULL)
       ErrorExit(ERROR_BADPARM,
                 "%s: SUBJECTS_DIR must be defined in the env or on cmdline "
                 "with -sdir",
@@ -91,16 +102,25 @@ int main(int argc, char *argv[]) {
   printf("Compiling volume edits for subject %s...\n", subject);
   fflush(stdout);
 
-  sprintf(mdir, "%s/%s/mri", sdir, subject);
+  int req = snprintf(mdir, STRLEN, "%s/%s/mri", sdir, subject);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   /*
    * brain.mgz
    */
-  sprintf(fname, "%s/brain.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/brain.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
     int edits = MRIsetVoxelsWithValue(mri, mri_edits, WM_EDITED_OFF_VAL,
                                       EDIT_BRAIN_OFF);
     if (edits)
@@ -118,11 +138,15 @@ int main(int argc, char *argv[]) {
   /*
    * wm.mgz
    */
-  sprintf(fname, "%s/wm.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/wm.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
     int edits =
         MRIsetVoxelsWithValue(mri, mri_edits, WM_EDITED_OFF_VAL, EDIT_WM_OFF);
     if (edits)
@@ -139,12 +163,21 @@ int main(int argc, char *argv[]) {
   /*
    * brainmask.mgz
    */
-  sprintf(fname, "%s/brainmask.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/brainmask.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
-    sprintf(fname, "%s/brainmask.auto.mgz", mdir);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
+    int req = snprintf(fname, STRLEN, "%s/brainmask.auto.mgz", mdir);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     mri_bm_auto = MRIread(fname);
     if (mri_bm_auto) {
       int edits = MRIsetDifferentVoxelsWithValue(mri, mri_bm_auto, mri_edits,
@@ -161,11 +194,15 @@ int main(int argc, char *argv[]) {
   /*
    * brain.finalsurfs.mgz
    */
-  sprintf(fname, "%s/brain.finalsurfs.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/brain.finalsurfs.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
     int edits = MRIsetVoxelsWithValue(mri, mri_edits, WM_EDITED_OFF_VAL,
                                       EDIT_FINALSURFS_OFF);
     if (edits)
@@ -183,12 +220,20 @@ int main(int argc, char *argv[]) {
   /*
    * aseg.mgz
    */
-  sprintf(fname, "%s/aseg.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/aseg.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
-    sprintf(fname, "%s/aseg.auto.mgz", mdir);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
+    int req = snprintf(fname, STRLEN, "%s/aseg.auto.mgz", mdir);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     mri_aseg_auto = MRIread(fname);
     if (mri_aseg_auto) {
       int edits = MRIsetDifferentVoxelsWithValue(mri, mri_aseg_auto, mri_edits,
@@ -288,7 +333,11 @@ int main(int argc, char *argv[]) {
            out_fname);
     MRIwrite(mri_edits, out_fname);
     if (mri_edits->ct) {
-      sprintf(fname, "%s/mri_compile_edits_LUT", mdir);
+      int req = snprintf(fname, STRLEN, "%s/mri_compile_edits_LUT", mdir);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("Colortable saved to %s :\n", fname);
       CTABprintASCII(mri_edits->ct, stdout);
       ctfp = fopen(fname, "w");

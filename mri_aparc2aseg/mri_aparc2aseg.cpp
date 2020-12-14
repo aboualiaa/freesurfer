@@ -124,8 +124,8 @@ int main(int argc, char **argv) {
   int        annotid;
   int        nbrute    = 0;
   MRI *      mri_fixed = NULL, *mri_lh_dist, *mri_rh_dist, *mri_dist = NULL;
-  TRANSFORM *xform = nullptr;
-  GCA *      gca   = nullptr;
+  TRANSFORM *xform = NULL;
+  GCA *      gca   = NULL;
 
   nargs = handleVersionOption(argc, argv, "mri_aparc2aseg");
   if (nargs && argc - nargs == 1) {
@@ -137,14 +137,14 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   if (argc == 0) {
     usage_exit();
   }
 
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-  if (SUBJECTS_DIR == nullptr) {
+  if (SUBJECTS_DIR == NULL) {
     printf("ERROR: SUBJECTS_DIR not defined in environment\n");
     exit(1);
   }
@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
     sprintf(tmpstr, "%s/%s/surf/lh.white", SUBJECTS_DIR, subject);
     printf("\nReading lh white surface \n %s\n", tmpstr);
     lhwhite = MRISread(tmpstr);
-    if (lhwhite == nullptr) {
+    if (lhwhite == NULL) {
       fprintf(stderr, "ERROR: could not read %s\n", tmpstr);
       exit(1);
     }
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
     sprintf(tmpstr, "%s/%s/surf/lh.pial", SUBJECTS_DIR, subject);
     printf("\nReading lh pial surface \n %s\n", tmpstr);
     lhpial = MRISread(tmpstr);
-    if (lhpial == nullptr) {
+    if (lhpial == NULL) {
       fprintf(stderr, "ERROR: could not read %s\n", tmpstr);
       exit(1);
     }
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
       sprintf(tmpstr, "%s/%s/mri/lh.ribbon.mgz", SUBJECTS_DIR, subject);
       printf("Loading lh ribbon mask from %s\n", tmpstr);
       lhRibbon = MRIread(tmpstr);
-      if (lhRibbon == nullptr) {
+      if (lhRibbon == NULL) {
         printf("ERROR: loading %s\n", tmpstr);
         exit(1);
       }
@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
     sprintf(tmpstr, "%s/%s/surf/rh.white", SUBJECTS_DIR, subject);
     printf("\nReading rh white surface \n %s\n", tmpstr);
     rhwhite = MRISread(tmpstr);
-    if (rhwhite == nullptr) {
+    if (rhwhite == NULL) {
       fprintf(stderr, "ERROR: could not read %s\n", tmpstr);
       exit(1);
     }
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
     sprintf(tmpstr, "%s/%s/surf/rh.pial", SUBJECTS_DIR, subject);
     printf("\nReading rh pial surface \n %s\n", tmpstr);
     rhpial = MRISread(tmpstr);
-    if (rhpial == nullptr) {
+    if (rhpial == NULL) {
       fprintf(stderr, "ERROR: could not read %s\n", tmpstr);
       exit(1);
     }
@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
       sprintf(tmpstr, "%s/%s/mri/rh.ribbon.mgz", SUBJECTS_DIR, subject);
       printf("Loading rh ribbon mask from %s\n", tmpstr);
       rhRibbon = MRIread(tmpstr);
-      if (rhRibbon == nullptr) {
+      if (rhRibbon == NULL) {
         printf("ERROR: loading  %s\n", tmpstr);
         exit(1);
       }
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
     sprintf(tmpstr, "%s/%s/mri/ribbon.mgz", SUBJECTS_DIR, subject);
     printf("Loading ribbon segmentation from %s\n", tmpstr);
     RibbonSeg = MRIread(tmpstr);
-    if (RibbonSeg == nullptr) {
+    if (RibbonSeg == NULL) {
       printf("ERROR: loading %s\n", tmpstr);
       exit(1);
     }
@@ -314,14 +314,14 @@ int main(int argc, char **argv) {
     sprintf(tmpstr, "%s/%s/mri/ribbon.mgz", SUBJECTS_DIR, subject);
     printf("Loading filled from %s\n", tmpstr);
     filled = MRIread(tmpstr);
-    if (filled == nullptr) {
+    if (filled == NULL) {
       printf("ERROR: loading filled %s\n", tmpstr);
       exit(1);
     }
     int MatchList[2];
     MatchList[0] = 2;
     MatchList[1] = 41;
-    mritmp       = MRIbinarizeMatch(filled, MatchList, 2, 0, nullptr);
+    mritmp       = MRIbinarizeMatch(filled, MatchList, 2, 0, NULL);
     MRIfree(&filled);
     filled = mritmp;
   }
@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
 
   printf("\nLoading aseg from %s\n", tmpstr);
   ASeg = MRIread(tmpstr);
-  if (ASeg == nullptr) {
+  if (ASeg == NULL) {
     printf("ERROR: loading aseg %s\n", tmpstr);
     exit(1);
   }
@@ -368,7 +368,7 @@ int main(int argc, char **argv) {
       mri_dist = mri_rh_dist;
   }
   if (DoLH && DoRH) {
-    mri_dist = MRImin(mri_lh_dist, mri_rh_dist, nullptr);
+    mri_dist = MRImin(mri_lh_dist, mri_rh_dist, NULL);
     MRIfree(&mri_lh_dist);
     MRIfree(&mri_rh_dist);
   }
@@ -380,16 +380,16 @@ int main(int argc, char **argv) {
   if (CtxSegFile) {
     printf("Loading Ctx Seg File %s\n", CtxSegFile);
     CtxSeg = MRIread(CtxSegFile);
-    if (CtxSeg == nullptr) {
+    if (CtxSeg == NULL) {
       exit(1);
     }
   }
 
-  AParc = MRIclone(ASeg, nullptr);
-  if (OutDistFile != nullptr) {
-    Dist   = MRIclone(ASeg, nullptr);
+  AParc = MRIclone(ASeg, NULL);
+  if (OutDistFile != NULL) {
+    Dist   = MRIclone(ASeg, NULL);
     mritmp = MRIchangeType(Dist, MRI_FLOAT, 0, 0, 0);
-    if (mritmp == nullptr) {
+    if (mritmp == NULL) {
       printf("ERROR: could change type\n");
       exit(1);
     }
@@ -428,7 +428,7 @@ int main(int argc, char **argv) {
   }
 
   if (relabel_gca_name !=
-      nullptr) // reclassify voxels interior to white that are likely to be something else
+      NULL) // reclassify voxels interior to white that are likely to be something else
   {
     MRI *  mri_norm;
     FILE * fp;
@@ -439,7 +439,7 @@ int main(int argc, char **argv) {
     printf("relabeling unlikely voxels in interior of white matter\n");
 
     mri_norm = MRIread(relabel_norm_name);
-    if (mri_norm == nullptr)
+    if (mri_norm == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load norm volume from %s\n",
                 relabel_norm_name);
 
@@ -449,12 +449,12 @@ int main(int argc, char **argv) {
     MRI    *mri_rh_dist, *mri_lh_dist, *mri_dist;
     if(DoLH){
       mri_lh_dist = MRIcloneDifferentType(mri_norm, MRI_FLOAT) ;
-      MRIScomputeDistanceToSurface(lhwhite, mri_lh_dist, mri_lh_dist->xsize) ;
+      MRIScomputeDistanceToSurface(lhwhite, mri_lh_dist, mri_lh_dist->xsize) ; 
       if(LHOnly) mri_dist = mri_lh_dist;
     }
     if(DoRH){
       mri_rh_dist = MRIcloneDifferentType(mri_norm, MRI_FLOAT) ;
-      MRIScomputeDistanceToSurface(rhwhite, mri_rh_dist, mri_rh_dist->xsize) ;
+      MRIScomputeDistanceToSurface(rhwhite, mri_rh_dist, mri_rh_dist->xsize) ; 
       if(RHOnly) mri_dist = mri_rh_dist;
     }
     if(DoLH && DoRH){
@@ -464,12 +464,12 @@ int main(int argc, char **argv) {
 #endif
 
     xform = TransformRead(relabel_xform_name);
-    if (xform == nullptr)
+    if (xform == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load transform from %s\n",
                 relabel_xform_name);
 
     gca = GCAread(relabel_gca_name);
-    if (gca == nullptr)
+    if (gca == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load gca from %s\n",
                 relabel_gca_name);
 
@@ -516,7 +516,7 @@ int main(int argc, char **argv) {
             if (MRIgetVoxVal(mri_fixed, x, y, z, 0) > 0)
               continue;
             gcap = getGCAP(gca, mri_norm, xform, x, y, z);
-            if (gcap == nullptr)
+            if (gcap == NULL)
               continue;
             for (n = 0; n < gcap->nlabels; n++)
               if (IS_CORTEX(gcap->labels[n])) {
@@ -636,7 +636,7 @@ int main(int argc, char **argv) {
         else
           dthresh = 0.5;
         dist = MRIgetVoxVal(mri_dist, c, r, s, 0);
-        if (IsWM && (asegid == 0 || asegid == CSF) && mri_fixed != nullptr &&
+        if (IsWM && (asegid == 0 || asegid == CSF) && mri_fixed != NULL &&
             dist < dthresh) // interior to white matter but labeled unknown
           MRIsetVoxVal(mri_fixed, c, r, s, 0,
                        0); // allow it to be relabeled below
@@ -934,7 +934,7 @@ int main(int argc, char **argv) {
 
         MRIsetVoxVal(ASeg, c, r, s, 0, segval);
         MRIsetVoxVal(AParc, c, r, s, 0, annot);
-        if (OutDistFile != nullptr)
+        if (OutDistFile != NULL)
           MRIsetVoxVal(Dist, c, r, s, 0, dmin);
 
         if (debug || annotid == -1) {
@@ -984,7 +984,7 @@ int main(int argc, char **argv) {
   printf("Used brute-force search on %d voxels\n", nbrute);
 
   if (relabel_gca_name !=
-      nullptr) // reclassify voxels interior to white that are likely to be something else
+      NULL) // reclassify voxels interior to white that are likely to be something else
   {
     MRI *mri_norm;
     int  nchanged = 0;
@@ -992,7 +992,7 @@ int main(int argc, char **argv) {
     printf("relabeling unlikely voxels in interior of white matter\n");
 
     mri_norm = MRIread(relabel_norm_name);
-    if (mri_norm == nullptr)
+    if (mri_norm == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load norm volume from %s\n",
                 relabel_norm_name);
 
@@ -1000,14 +1000,14 @@ int main(int argc, char **argv) {
       int  x, y, z, i;
       MRI *mri_tmp = NULL, *mri_aseg_orig = NULL;
 
-      mri_aseg_orig = MRIcopy(ASeg, nullptr);
+      mri_aseg_orig = MRIcopy(ASeg, NULL);
       Ggca_x        = Gx;
       Ggca_y        = Gy;
       Ggca_z        = Gz; // diagnostics
       GCAregularizeCovariance(
           gca, 1.0); // don't use covariances for this classification
       GCAreclassifyUsingGibbsPriors(mri_norm, gca, ASeg, xform, 10, mri_fixed,
-                                    GCA_RESTART_ONCE, nullptr, 0.5, 0.5);
+                                    GCA_RESTART_ONCE, NULL, 0.5, 0.5);
       for (i = 0; i < 2; i++) {
         mri_tmp = MRIcopy(ASeg, mri_tmp);
         for (x = 0; x < mri_norm->width; x++)
@@ -1091,7 +1091,11 @@ int main(int argc, char **argv) {
         if (Gdiag & DIAG_WRITE) {
           char fname[STRLEN], fonly[STRLEN];
           FileNameRemoveExtension(OutASegFile, fonly);
-          sprintf(fname, "%s.%3.3d.mgz", fonly, i);
+          int req = snprintf(fname, STRLEN, "%s.%3.3d.mgz", fonly, i);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           printf("writing iter %d to %s\n", i, fname);
           MRIwrite(ASeg, fname);
         }
@@ -1193,7 +1197,11 @@ int main(int argc, char **argv) {
         if (Gdiag & DIAG_WRITE) {
           char fname[STRLEN], fonly[STRLEN];
           FileNameRemoveExtension(OutASegFile, fonly);
-          sprintf(fname, "%s.%3.3d.mgz", fonly, i);
+          int req = snprintf(fname, STRLEN, "%s.%3.3d.mgz", fonly, i);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           printf("writing iter %d to %s\n", i, fname);
           MRIwrite(ASeg, fname);
         }
@@ -1269,11 +1277,11 @@ int main(int argc, char **argv) {
   printf("Writing output aseg to %s\n", OutASegFile);
   MRIwrite(ASeg, OutASegFile);
 
-  if (OutAParcFile != nullptr) {
+  if (OutAParcFile != NULL) {
     printf("Writing output aparc to %s\n", OutAParcFile);
     MRIwrite(AParc, OutAParcFile);
   }
-  if (OutDistFile != nullptr) {
+  if (OutDistFile != NULL) {
     printf("Writing output dist file to %s\n", OutDistFile);
     MRIwrite(Dist, OutDistFile);
   }
@@ -1337,10 +1345,10 @@ static int parse_commandline(int argc, char **argv) {
              relabel_label_intensities_name);
       nargsused = 4;
     } else if (!strcasecmp(option, "--no-relabel")) {
-      relabel_norm_name              = nullptr;
-      relabel_xform_name             = nullptr;
-      relabel_gca_name               = nullptr;
-      relabel_label_intensities_name = nullptr;
+      relabel_norm_name              = NULL;
+      relabel_xform_name             = NULL;
+      relabel_gca_name               = NULL;
+      relabel_label_intensities_name = NULL;
     } else if (!strcasecmp(option, "--debug_voxel")) {
       if (nargc < 3) {
         argnerr(option, 3);
@@ -1519,11 +1527,11 @@ static void argnerr(char *option, int n) {
 }
 /* --------------------------------------------- */
 static void check_options(void) {
-  if (subject == nullptr) {
+  if (subject == NULL) {
     printf("ERROR: must specify a subject\n");
     exit(1);
   }
-  if (OutASegFile == nullptr) {
+  if (OutASegFile == NULL) {
     sprintf(tmpstr, "%s/%s/mri/%s+aseg.mgz", SUBJECTS_DIR, subject, annotname);
     OutASegFile = strcpyalloc(tmpstr);
   }
@@ -1592,13 +1600,13 @@ int FindClosestLRWPVertexNo(int c, int r, int s, int *lhwvtx, int *lhpvtx,
                             MRIS *lhwite, MRIS *lhpial, MRIS *rhwhite,
                             MRIS *rhpial, MHT *lhwhite_hash, MHT *lhpial_hash,
                             MHT *rhwhite_hash, MHT *rhpial_hash) {
-  static MATRIX *CRS = nullptr;
-  static MATRIX *RAS = nullptr;
+  static MATRIX *CRS = NULL;
+  static MATRIX *RAS = NULL;
   static struct { float x, y, z; } vtx;
   static float dlhw, dlhp, drhw, drhp, dmin;
   int          annot, hemi, annotid;
 
-  if (CRS == nullptr) {
+  if (CRS == NULL) {
     CRS             = MatrixAlloc(4, 1, MATRIX_REAL);
     CRS->rptr[4][1] = 1;
     RAS             = MatrixAlloc(4, 1, MATRIX_REAL);

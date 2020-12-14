@@ -46,6 +46,8 @@ PanelAllLayers::PanelAllLayers(QWidget *parent)
   ui->stackedWidget->hide();
   connect(ui->treeWidgetLayers, SIGNAL(ToReorderLayers(QList<Layer *>)), this,
           SIGNAL(ToReorderLayers(QList<Layer *>)));
+  connect(wnd, SIGNAL(LinkVolumeRequested(LayerMRI *)), ui->treeWidgetLayers,
+          SLOT(LinkVolume(LayerMRI *)));
 
   for (int i = 0; i < ui->stackedWidget->count(); i++) {
     PanelLayer *panel =
@@ -230,8 +232,7 @@ void PanelAllLayers::OnLayerRemoved(Layer *removed_layer) {
         }
         ui->treeWidgetLayers->blockSignals(false);
         if (topItem ==
-            NULL) // removed the last layer in the layer collection, now switch
-                  // selection to another layer collection if existed.
+            NULL) // removed the last layer in the layer collection, now switch selection to another layer collection if existed.
         {
           if (ui->treeWidgetLayers->topLevelItemCount() > 0) {
             topItem = ui->treeWidgetLayers->topLevelItem(0);

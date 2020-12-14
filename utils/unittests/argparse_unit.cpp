@@ -10,10 +10,10 @@
 
 namespace gtest = testing::internal;
 
-ArgumentParser parser;
-std::vector<char *> av{"wow", "yes"};
-unsigned char const * wow = reinterpret_cast<const unsigned char *>("help");
-int            ac = 1;
+ArgumentParser       parser;
+std::vector<char *>  av{"wow", "yes"};
+unsigned char const *wow = reinterpret_cast<const unsigned char *>("help");
+int                  ac  = 1;
 
 auto setup() {
   static bool done = false;

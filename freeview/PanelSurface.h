@@ -113,6 +113,7 @@ protected slots:
   void OnButtonLabelDown();
   void SetOverlayFrame(int nFrame);
   void OnButtonSaveAnnotation();
+  void OnCycleAnnotation();
 
 private:
   QList<SurfaceLabel *>  GetSelectedLabels();

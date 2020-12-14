@@ -252,9 +252,10 @@ class SamsegLongitudinal:
             self.combinedImageBuffers,
             self.sstModel.modelSpecifications.atlasFileName,
             self.sstModel.transform,
-            self.sstModel.modelSpecifications.brainMaskingSmoothingSigma,
-            self.sstModel.modelSpecifications.brainMaskingThreshold,
+            self.sstModel.modelSpecifications.maskingProbabilityThreshold,
+            self.sstModel.modelSpecifications.maskingDistance,
             self.probabilisticAtlas,
+            self.sstModel.voxelSpacing,
         )
         combinedImageBuffers = logTransform(
             self.combinedImageBuffers, self.sstModel.mask

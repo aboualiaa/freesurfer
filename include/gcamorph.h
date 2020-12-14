@@ -2,12 +2,12 @@
  * @brief morph is a dense vector field uniformly distributed in the atlas
  *
  *
- * The morph is a dense vector field uniformly distributed in the atlas
- * coordinate system. A "forward" morph is a retraction into the atlas coords,
- * and an "inverse" morph is a numerical mapping back to the image or source
+ * The morph is a dense vector field uniformly distributed in the atlas 
+ * coordinate system. A "forward" morph is a retraction into the atlas coords, 
+ * and an "inverse" morph is a numerical mapping back to the image or source 
  * coords.
  *
- * When the morph is image to image, the "atlas" is the target image and
+ * When the morph is image to image, the "atlas" is the target image and 
  * the vectors move through the source image.
  */
 /*
@@ -86,8 +86,7 @@ extern double gcamComputeMetricProperties_tsec;
 #endif
 
 typedef struct {
-  // gcamorph uses these fields in its hottest function so put them together to
-  // reduce cache misses
+  // gcamorph uses these fields in its hottest function so put them together to reduce cache misses
   char   invalid; /* if invalid = 1, then don't use this structure */
   int    label;
   double x; //  updated original src voxel position
@@ -125,12 +124,12 @@ typedef struct {
   int    status;     /* ignore likelihood term */
   float  label_dist; /* for computing label dist */
   float  last_se;
-  float  predicted_val; /* weighted average of all class
-                          means in a ball around this node */
+  float  predicted_val; /* weighted average of all class 
+                            means in a ball around this node */
   double sum_ci_vi_ui;
   double sum_ci_vi;
-  float  target_dist; /* target distance to move towards for
-                        label matching with distance xform */
+  float  target_dist; /* target distance to move towards for 
+                            label matching with distance xform */
 } GCA_MORPH_NODE, GMN;
 
 typedef struct {
@@ -203,7 +202,7 @@ typedef struct {
   double l_area_smoothness;
   double l_dtrans;      // distance transform coefficient
   double l_multiscale;  // marginalize over smoothness scale
-  double l_subcortical; // for energy: subcortical connection
+  double l_subcortical; //for energy: subcortical connection
   //  double l_diff ; // diffusion information coefficient
   double             tol;
   int                levels;
@@ -219,8 +218,8 @@ typedef struct {
   double             ratio_thresh;
   int                integration_type;
   int                nsmall;
-  int                relabel;      /* are we relabeling (i.e. using MAP label,
-                       or just max prior label) */
+  int                relabel;      /* are we relabeling (i.e. using MAP label, 
+                         or just max prior label) */
   int                relabel_avgs; /* what level to start relabeling at */
   int                reset_avgs; /* what level to reset metric properties at */
   MRI *              mri_binary;
@@ -232,16 +231,15 @@ typedef struct {
   int                uncompress; // remove lattice compression each time step
   MRI *              mri_diag;
   int                diag_morph_from_atlas;
-  int  diag_mode_filter; // # of iterations of mode filter to apply
-  int  diag_volume;      // volume to write in write_snapshot e.g. GCAM_MEANS
-  int  npasses;          // # of times to go through all levels
-  MRI *mri_dist_map; // distance to non-zero binary values or labels in source
-                     // image
-  MRI *mri_atlas_dist_map; // distance to various labels in target/atlas image
-  int  constrain_jacobian;
-  int  diag_write_snapshots;
-  int  scale_smoothness; // scale down smoothness coef at larger gradient
-                         // smoothing scales
+  int diag_mode_filter; // # of iterations of mode filter to apply
+  int diag_volume;      // volume to write in write_snapshot e.g. GCAM_MEANS
+  int npasses;          // # of times to go through all levels
+  MRI *
+      mri_dist_map; // distance to non-zero binary values or labels in source image
+  MRI *  mri_atlas_dist_map; // distance to various labels in target/atlas image
+  int    constrain_jacobian;
+  int    diag_write_snapshots;
+  int    scale_smoothness; // scale down smoothness coef at larger gradient smoothing scales
   int    target_label;
   int    min_avgs;
   int    diag_sample_type;
@@ -254,13 +252,13 @@ typedef struct {
   double lame_mu;
   double lame_lambda;
   /*
-    E = Young's Modulus
-    v = Poisson Ratio
-    mu = G = shear modulus
-  lambda = E v / ((1+v) (1-2v))
-  mu = G = E / (2 ( 1+v))
+  E = Young's Modulus
+  v = Poisson Ratio
+  mu = G = shear modulus
+lambda = E v / ((1+v) (1-2v))
+mu = G = E / (2 ( 1+v))
 
-   */
+ */
   MRI *mri_twm;            // for manually specified temporal lobe white matter
   int  enable_zero_passes; // re-enable zero nodes after this many passes
 } GCA_MORPH_PARMS, GMP;
@@ -313,8 +311,7 @@ int  GCAMmorphPlistFromAtlas(int N, float *points_in, GCA_MORPH *gcam,
                              float *points_out);
 int  GCAMmorphPlistToSource(int N, float *points_in, GCA_MORPH *gcam,
                             float *points_out);
-// int       GCAMmorphPointlistFromAtlas(float *points_in, int N, GCA_MORPH
-// *gcam, float *points_out, float thickness) ;
+//int       GCAMmorphPointlistFromAtlas(float *points_in, int N, GCA_MORPH *gcam, float *points_out, float thickness) ;
 MRI_SUBCORTCONN *SubcortConn_alloc(int nLHLines, int nLHConnections,
                                    int nRHLines, int nRHConnections);
 
@@ -336,8 +333,7 @@ int  GCAMregisterWithSubcorticalConnections(GCA_MORPH *gcam, MRI *mri,
                                             GCA_MORPH_PARMS *parms,
                                             MRI_SUBCORTCONN *mri_source_subcort,
                                             MRI_SUBCORTCONN *mri_target_subcort);
-// int       GCAMregister_wdiff(GCA_MORPH *gcam, MRI *mri, MRI *diff_mri,
-// GCA_MORPH_PARMS *parms) ;
+//int       GCAMregister_wdiff(GCA_MORPH *gcam, MRI *mri, MRI *diff_mri, GCA_MORPH_PARMS *parms) ;
 int GCAMdemonsRegister(GCA_MORPH *gcam, MRI *mri_source_labels,
                        MRI *mri_atlas_labels, GCA_MORPH_PARMS *parms,
                        double max_dist, MRI *mri_pvals,
@@ -347,7 +343,7 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
 int GCAMregisterWithSubcorticalConnectionsLevel(
     GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARMS *parms,
     MRI_SUBCORTCONN *mri_source_subcort, MRI_SUBCORTCONN *mri_target_subcort);
-// int       GCAMregisterLevel_wdiff(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+//int       GCAMregisterLevel_wdiff(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
 //                                  MRI *diff_mri, GCA_MORPH_PARMS *parms);
 
 int GCAMsampleMorph(const GCA_MORPH *gcam, float x, float y, float z,
@@ -436,13 +432,6 @@ int  GCAMnormalizeIntensities(GCA_MORPH *gcam, MRI *mr_target);
 MRI *GCAMcreateDistanceTransforms(MRI *mri_source, MRI *mri_target,
                                   MRI *mri_all_dtrans, float max_dist,
                                   GCA_MORPH *gcam, MRI **pmri_atlas_dist_map);
-#if 0
-MRI *GCAMcreateDistanceTransforms(GCA_MORPH *gcam,
-                                  MRI *mri_target,
-                                  MRI *mri_all_dtrans, 
-                                  MRI **pmri_atlas_dtrans,
-                                  float max_dist);
-#endif
 
 #define MAX_LTT_LABELS 1000
 typedef struct {

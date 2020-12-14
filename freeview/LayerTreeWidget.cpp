@@ -22,6 +22,7 @@
 #include "ui_MainWindow.h"
 #include <QContextMenuEvent>
 #include <QDebug>
+#include <QDropEvent>
 #include <QMenu>
 #include <QPainter>
 
@@ -621,8 +622,7 @@ void LayerTreeWidget::dropEvent(QDropEvent *event) {
     }
 
     //        QTreeWidgetItem* itemFrom = NULL;
-    //        QByteArray encoded =
-    //        event->mimeData()->data("application/x-qabstractitemmodeldatalist");
+    //        QByteArray encoded = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
     //        QDataStream stream(&encoded, QIODevice::ReadOnly);
     //        if (!stream.atEnd())
     //        {
@@ -647,6 +647,11 @@ void LayerTreeWidget::OnLinkVolumes() {
     if (mri)
       m_linkedVolumes << mri;
   }
+}
+
+void LayerTreeWidget::LinkVolume(LayerMRI *vol) {
+  if (!m_linkedVolumes.contains(vol))
+    m_linkedVolumes << vol;
 }
 
 void LayerTreeWidget::OnUnlinkVolumes() { m_linkedVolumes.clear(); }

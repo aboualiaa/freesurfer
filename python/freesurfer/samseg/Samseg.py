@@ -312,9 +312,10 @@ class Samseg:
             self.imageBuffers,
             self.modelSpecifications.atlasFileName,
             self.transform,
-            self.modelSpecifications.brainMaskingSmoothingSigma,
-            self.modelSpecifications.brainMaskingThreshold,
+            self.modelSpecifications.maskingProbabilityThreshold,
+            self.modelSpecifications.maskingDistance,
             self.probabilisticAtlas,
+            self.voxelSpacing,
         )
 
         # Let's prepare for the bias field correction that is part of the imaging model. It assumes

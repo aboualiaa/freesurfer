@@ -565,6 +565,10 @@ MainWindow::MainWindow(QWidget *parent, MyCmdLineParser *cmdParser)
   connect(ui->actionCycleOverlay, SIGNAL(triggered()),
           SIGNAL(CycleOverlayRequested()));
 
+  addAction(ui->actionCycleAnnotation);
+  connect(ui->actionCycleAnnotation, SIGNAL(triggered()),
+          SIGNAL(CycleAnnotationRequested()));
+
   addAction(ui->actionViewLayerInfo);
   connect(ui->actionViewLayerInfo, SIGNAL(triggered(bool)),
           SLOT(OnViewLayerInfo()));
@@ -877,9 +881,6 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
   m_bShowTransformWindow = parser->Found("transform-volume");
 
   bool bReverseOrder = parser->Found("rorder");
-  if (parser->Found("cmd", &sa)) {
-    this->AddScript(QStringList("loadcommand") << sa[0]);
-  }
   if (parser->Found("cmd", &sa)) {
     this->AddScript(QStringList("loadcommand") << sa[0]);
   }
@@ -1762,6 +1763,8 @@ void MainWindow::RunScript() {
     CommandLockLayer(sa);
   } else if (cmd == "showlayer") {
     CommandShowLayer(sa);
+  } else if (cmd == "linkmri") {
+    CommandLinkVolume(sa);
   } else if (cmd == "gotolabel" || cmd == "gotostructure") {
     CommandGoToLabel(sa);
   } else if (cmd == "showcolorscale") {
@@ -2050,6 +2053,8 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
         m_scripts.insert(0, QStringList("setlayername") << "MRI" << subArgu);
       } else if (subOption == "lock" || subOption == "locked") {
         m_scripts.insert(0, QStringList("locklayer") << "MRI" << subArgu);
+      } else if (subOption == "link" || subOption == "linked") {
+        m_scripts.insert(0, QStringList("linkmri") << subArgu);
       } else if (subOption == "visible") {
         m_scripts.insert(0, QStringList("showlayer") << "MRI" << subArgu);
       } else if (subOption == "gotolabel" || subOption == "structure") {
@@ -5405,10 +5410,10 @@ void MainWindow::OnIOFinished(Layer *layer, int jobtype) {
       lc_surface->AddLayer(layer);
     }
 
-    if (!sf->HasValidVolumeGeometry()) {
+    if (!sf->HasValidVolumeGeometry() && !sf->property("IgnoreVG").toBool()) {
       //  ShowNonModalMessage("Warning",
       //                      "Either this surface does not contain valid volume geometry information, or freeview failed to read the information. This surface may not align with volumes and other surfaces.");
-      cerr << "Did not find any volume info" << endl;
+      cout << "Did not find any volume info" << endl;
     }
 
     m_strLastDir = QFileInfo(layer->GetFileName()).canonicalPath();
@@ -6388,9 +6393,6 @@ void MainWindow::OnActiveLayerChanged(Layer *layer) {
           !((LayerMRI *)layer)->GetCorrelationSurface()) {
         connect(layer, SIGNAL(ActiveFrameChanged(int)), m_wndTimeCourse,
                 SLOT(SetCurrentFrame(int)), Qt::UniqueConnection);
-        connect(layer, SIGNAL(ActiveFrameChanged(int)),
-                ui->treeWidgetCursorInfo, SLOT(OnCursorPositionChanged()),
-                Qt::UniqueConnection);
         connect(layer, SIGNAL(ActiveFrameChanged(int)),
                 ui->treeWidgetCursorInfo, SLOT(OnCursorPositionChanged()),
                 Qt::UniqueConnection);
@@ -7759,5 +7761,15 @@ void MainWindow::OnFloatPanels(bool bFloat) {
     ui->widgetInfoPanel->show();
     ui->layoutInfoPanelHolder->addWidget(ui->widgetInfoPanel);
     m_widgetFloatInfoPanel->hide();
+  }
+}
+
+void MainWindow::CommandLinkVolume(const QStringList &cmd) {
+  if (cmd.size() > 1) {
+    LayerMRI *mri = qobject_cast<LayerMRI *>(GetActiveLayer("MRI"));
+    if (mri) {
+      if (cmd[1] == "1" || cmd[1].toLower() == "true")
+        emit LinkVolumeRequested(mri);
+    }
   }
 }

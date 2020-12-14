@@ -12,7 +12,8 @@ static std::string verifyOption(const std::string &name) {
   if (name.empty())
     fs::fatal()
         << "invalid argument configuration. Argument names must not be empty";
-  if ((name.size() == 2 && name[0] != '-') || (name.size() == 3) && name[0] != '-')
+  if ((name.size() == 2 && name[0] != '-') ||
+      (name.size() == 3) && name[0] != '-')
     fs::fatal() << "invalid argument configuration for '" << name
                 << "'. Short names must begin with '-'";
   if (name.size() > 3 && (name[0] != '-' || name[1] != '-'))

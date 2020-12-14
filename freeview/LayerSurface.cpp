@@ -25,6 +25,7 @@
 #include "LayerPropertySurface.h"
 #include "LayerROI.h"
 #include "MainWindow.h"
+#include "MyUtils.h"
 #include "SurfaceAnnotation.h"
 #include "SurfaceLabel.h"
 #include "SurfaceOverlay.h"
@@ -43,8 +44,11 @@
 #include "vtkImageActor.h"
 #include "vtkImageMapToColors.h"
 #include "vtkImageReslice.h"
+#include "vtkLODActor.h"
 #include "vtkLookupTable.h"
+#include "vtkMapperCollection.h"
 #include "vtkMaskPoints.h"
+#include "vtkMatrix4x4.h"
 #include "vtkPlane.h"
 #include "vtkPointData.h"
 #include "vtkPolyDataMapper.h"
@@ -61,6 +65,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QSet>
+#include <QSharedPointer>
 #include <QTextStream>
 
 LayerSurface::LayerSurface(LayerMRI *ref, QObject *parent)
@@ -196,6 +201,7 @@ bool LayerSurface::LoadSurfaceFromFile(bool bIgnoreVG) {
   m_surfaceSource =
       new FSSurface(m_volumeRef ? m_volumeRef->GetSourceVolume() : NULL);
   m_surfaceSource->SetIgnoreVolumeGeometry(bIgnoreVG);
+  setProperty("IgnoreVG", bIgnoreVG);
   if (!m_surfaceSource->MRISRead(m_sFilename, m_sVectorFilename,
                                  m_sPatchFilename, m_sTargetFilename,
                                  m_sSphereFilename, m_listSupFiles)) {
@@ -238,8 +244,8 @@ bool LayerSurface::CreateFromMRIS(void *mris_ptr) {
 
 bool LayerSurface::SaveSurface(const QString &filename) {
   if (!m_surfaceSource->MRISWrite(filename)) {
-    std::cerr << "MRISWrite failed: Unable to write to " << qPrintable(filename)
-              << ".\n";
+    cerr << "MRISWrite failed: Unable to write to " << qPrintable(filename)
+         << ".\n";
     return false;
   } else {
     ResetModified();
@@ -271,7 +277,7 @@ bool LayerSurface::SaveSurfaceAsSTL(const QString &fn) {
 
 bool LayerSurface::SaveSurface() {
   if (m_sFilename.size() == 0) {
-    std::cerr << "No filename provided to save surface.\n";
+    cerr << "No filename provided to save surface.\n";
     return false;
   }
 
@@ -293,7 +299,7 @@ bool LayerSurface::WriteIntersection(const QString &filename, int nPlane,
   if (lines && points) {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-      std::cerr << "Cannot write file " << qPrintable(filename) << std::endl;
+      cerr << "Cannot write file " << qPrintable(filename) << endl;
       return false;
     }
     QTextStream out(&file);
@@ -314,8 +320,7 @@ bool LayerSurface::WriteIntersection(const QString &filename, int nPlane,
         out << pts[i] << " ";
       out << "\n";
     }
-    std::cout << "Intersection data written to " << qPrintable(filename)
-              << "\n";
+    cout << "Intersection data written to " << qPrintable(filename) << "\n";
   }
   return true;
 }
@@ -719,16 +724,14 @@ void LayerSurface::InitializeActors() {
     ratio = MainWindow::GetMainWindow()->devicePixelRatio();
 #endif
     m_sliceActor2D[i]->SetMapper(mapper);
-    //  m_sliceActor2D[i]->SetBackfaceProperty(
-    //  m_sliceActor2D[i]->MakeProperty() );
+    //  m_sliceActor2D[i]->SetBackfaceProperty( m_sliceActor2D[i]->MakeProperty() );
     //  m_sliceActor2D[i]->GetBackfaceProperty()->BackfaceCullingOff();
     m_sliceActor2D[i]->SetProperty(m_sliceActor2D[i]->MakeProperty());
     m_sliceActor2D[i]->GetProperty()->SetInterpolationToFlat();
     m_sliceActor2D[i]->GetProperty()->SetLineWidth(line_w * ratio);
 
     m_sliceActor3D[i]->SetMapper(mapper2);
-    //  m_sliceActor3D[i]->SetBackfaceProperty(
-    //  m_sliceActor3D[i]->MakeProperty() );
+    //  m_sliceActor3D[i]->SetBackfaceProperty( m_sliceActor3D[i]->MakeProperty() );
     //  m_sliceActor3D[i]->GetBackfaceProperty()->BackfaceCullingOff();
     m_sliceActor3D[i]->SetProperty(m_sliceActor3D[i]->MakeProperty());
     m_sliceActor3D[i]->GetProperty()->SetLineWidth(line_w * ratio);
@@ -891,8 +894,8 @@ void LayerSurface::Append3DProps(vtkRenderer *renderer,
 /*
 void LayerSurface::SetSliceNumber( int* sliceNumber )
 {
- if ( sliceNumber[0] != m_nSliceNumber[0] || sliceNumber[1] != m_nSliceNumber[1]
-|| sliceNumber[2] != m_nSliceNumber[2] )
+ if ( sliceNumber[0] != m_nSliceNumber[0] || sliceNumber[1] != m_nSliceNumber[1] ||
+   sliceNumber[2] != m_nSliceNumber[2] )
  {
   m_nSliceNumber[0] = sliceNumber[0];
   m_nSliceNumber[1] = sliceNumber[1];
@@ -1183,7 +1186,7 @@ bool LayerSurface::GetTargetAtVertex(int nVertex, double *ras) {
 
   bool bRet = m_surfaceSource->GetRASAtVertex(nVertex, ras);
   if (bRet) {
-    // m_volumeRef->RASToTarget( ras, ras );
+    //m_volumeRef->RASToTarget( ras, ras );
     m_surfaceSource->ConvertRASToTarget(ras, ras);
   }
 
@@ -2050,7 +2053,7 @@ bool LayerSurface::LoadRGBFromFile(const QString &filename) {
       }
     }
     if (map.data.size() != GetNumberOfVertices() * 3) {
-      std::cout << "data size does not match" << std::endl;
+      cout << "data size does not match" << endl;
       return false;
     }
   } else {
@@ -2058,7 +2061,7 @@ bool LayerSurface::LoadRGBFromFile(const QString &filename) {
     if (!mri)
       return false;
     else if (mri->width != GetNumberOfVertices() || mri->height != 3) {
-      std::cout << "data size does not match" << std::endl;
+      cout << "data size does not match" << endl;
       MRIfree(&mri);
       return false;
     }
@@ -2642,7 +2645,7 @@ bool LayerSurface::FillPath(int nvo, const QVariantMap &options) {
   bool         bAsAnnotation = options["AsAnnotation"].toBool();
   QVector<int> verts         = FloodFillFromSeed(nvo, options);
   if (verts.size() == 0) {
-    std::cout << "Did not fill/remove any vertices" << std::endl;
+    cout << "Did not fill/remove any vertices" << endl;
     return false;
   }
 
@@ -2741,7 +2744,7 @@ bool LayerSurface::LoadCoordsFromParameterization(const QString &filename) {
     emit ActorUpdated();
     return true;
   } else {
-    std::cerr << "Failed to load " << qUtf8Printable(filename) << std::endl;
+    cerr << "Failed to load " << qUtf8Printable(filename) << endl;
     return false;
   }
 }

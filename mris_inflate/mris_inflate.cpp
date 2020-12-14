@@ -22,10 +22,20 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/resource.h>
+#include <sys/time.h>
 
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "mrisurf.h"
+#include "proto.h"
 #include "tags.h"
 #include "timer.h"
 #include "version.h"
@@ -75,10 +85,10 @@ int main(int argc, char *argv[]) {
   argc -= nargs;
 
   then.reset();
-  // Gdiag |= DIAG_SHOW ;
+  //Gdiag |= DIAG_SHOW ;
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   parms.base_name[0]       = 0;
   parms.projection         = NO_PROJECTION;
@@ -207,8 +217,13 @@ int main(int argc, char *argv[]) {
   if (SaveSulc) {
     // disable this for now
     // if (compute_sulc_mm) mrisComputeSulcInMM(mris);
-    sprintf(fname, "%s/%s.%s", path,
-            mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh", sulc_name);
+    int req =
+        snprintf(fname, STRLEN, "%s/%s.%s", path,
+                 mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh", sulc_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stderr, "writing sulcal depths to %s\n", fname);
     MRISwriteCurvature(mris, fname);
   } else {
@@ -532,11 +547,11 @@ usage_exit(void)
 #endif
 
 #include "mris_inflate.help.xml.h"
-static void print_usage() {
+static void print_usage(void) {
   outputHelpXml(mris_inflate_help_xml, mris_inflate_help_xml_len);
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   exit(1);
 }

@@ -254,7 +254,12 @@ int main(int argc, char *argv[]) {
           continue;
         }
         // reading this subject segmentation
-        sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, seg_dir);
+        int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                           subject_name, seg_dir);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
         if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
           fprintf(stderr, "Reading segmentation from %s...\n", fname);
         mri_seg = MRIread(fname);
@@ -272,8 +277,12 @@ int main(int argc, char *argv[]) {
 
         if (wmsa_fname) {
           MRI *mri_wmsa;
-          sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                  wmsa_fname);
+          int  req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                             subject_name, wmsa_fname);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           printf("reading WMSA labels from %s...\n", fname);
           mri_wmsa = MRIread(fname);
           if (mri_wmsa == NULL)
@@ -283,8 +292,12 @@ int main(int argc, char *argv[]) {
           lateralize_hypointensities(mri_seg);
           if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
             char s[STRLEN];
-            sprintf(s, "%s/%s/mri/seg_%s", subjects_dir, subject_name,
-                    wmsa_fname);
+            int  req = snprintf(s, STRLEN, "%s/%s/mri/seg_%s", subjects_dir,
+                               subject_name, wmsa_fname);
+            if (req >= STRLEN) {
+              std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                        << std::endl;
+            }
             MRIwrite(mri_seg, s);
           }
         }
@@ -300,8 +313,12 @@ int main(int argc, char *argv[]) {
         if (insert_fname) {
           MRI *mri_insert;
 
-          sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                  insert_fname);
+          int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                             subject_name, insert_fname);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           mri_insert = MRIread(fname);
           if (mri_insert == NULL)
             ErrorExit(ERROR_NOFILE,
@@ -321,12 +338,17 @@ int main(int argc, char *argv[]) {
                       reorder it to be in the same order as 1st */
         {
           // initialize the flag array
-          for (input = 0; input < ninputs; input++)
+          for (input = 0; input < ninputs; input++) {
             used[input] = 0;
+          }
 
           for (input = 0; input < ninputs; input++) {
-            sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                    input_names[input]);
+            int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                               subject_name, input_names[input]);
+            if (req >= STRLEN) {
+              std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                        << std::endl;
+            }
             mri_tmp = MRIreadInfo(fname);
             if (!mri_tmp)
               ErrorExit(ERROR_NOFILE, "%s: could not read image from file %s",
@@ -405,8 +427,12 @@ int main(int argc, char *argv[]) {
           // thus we cannot allow flash data training.
           ////////////////////////////////////////////////////////////
 
-          sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                  input_names[ordering[input]]);
+          int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                             subject_name, input_names[ordering[input]]);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           if (DIAG_VERBOSE_ON)
             printf("reading co-registered input from %s...\n", fname);
           fprintf(stderr, "   reading input %d: %s\n", input, fname);
@@ -469,8 +495,13 @@ int main(int argc, char *argv[]) {
           if (mask_fname) {
             MRI *mri_mask;
 
-            sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                    mask_fname);
+            int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                               subject_name, mask_fname);
+            if (req >= STRLEN) {
+              std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                        << std::endl;
+            }
+
             printf("reading volume %s for masking...\n", fname);
             mri_mask = MRIread(fname);
             if (!mri_mask)
@@ -504,8 +535,12 @@ int main(int argc, char *argv[]) {
         /////////////////////////////////////////////////////////
         if (xform_name) {
           // we read talairach.xfm which is a RAS-to-RAS
-          sprintf(fname, "%s/%s/mri/transforms/%s", subjects_dir, subject_name,
-                  xform_name);
+          int req = snprintf(fname, STRLEN, "%s/%s/mri/transforms/%s",
+                             subjects_dir, subject_name, xform_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
             printf("INFO: reading transform file %s...\n", fname);
           if (!FileExists(fname)) {
@@ -664,7 +699,12 @@ int main(int argc, char *argv[]) {
         }
         printf("computing covariances for subject %s, %d of %d...\n",
                subject_name, i + 1 - nargs, nsubjects);
-        sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, seg_dir);
+        int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                           subject_name, seg_dir);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
         if (DIAG_VERBOSE_ON)
           printf("reading segmentation from %s...\n", fname);
         // seg volume
@@ -675,8 +715,12 @@ int main(int argc, char *argv[]) {
                     Progname, fname);
         if (wmsa_fname) {
           MRI *mri_wmsa;
-          sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                  wmsa_fname);
+          int  req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                             subject_name, wmsa_fname);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           printf("reading WMSA labels from %s...\n", fname);
           mri_wmsa = MRIread(fname);
           if (mri_wmsa == NULL)
@@ -686,16 +730,24 @@ int main(int argc, char *argv[]) {
           lateralize_hypointensities(mri_seg);
           if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
             char s[STRLEN];
-            sprintf(s, "%s/%s/mri/seg_%s", subjects_dir, subject_name,
-                    wmsa_fname);
+            int  req = snprintf(s, STRLEN, "%s/%s/mri/seg_%s", subjects_dir,
+                               subject_name, wmsa_fname);
+            if (req >= STRLEN) {
+              std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                        << std::endl;
+            }
             MRIwrite(mri_seg, s);
           }
         }
         if (insert_fname) {
           MRI *mri_insert;
 
-          sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                  insert_fname);
+          int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                             subject_name, insert_fname);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           mri_insert = MRIread(fname);
           if (mri_insert == NULL)
             ErrorExit(ERROR_NOFILE,
@@ -714,8 +766,12 @@ int main(int argc, char *argv[]) {
         /////////////////////////////////
         // inputs are T1, PD, .... per subject
         for (input = 0; input < ninputs; input++) {
-          sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                  input_names[ordering[input]]);
+          int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                             subject_name, input_names[ordering[input]]);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           if (DIAG_VERBOSE_ON)
             printf("reading co-registered input from %s...\n", fname);
           mri_tmp = MRIread(fname);
@@ -760,8 +816,12 @@ int main(int argc, char *argv[]) {
           if (mask_fname) {
             MRI *mri_mask;
 
-            sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                    mask_fname);
+            int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", subjects_dir,
+                               subject_name, mask_fname);
+            if (req >= STRLEN) {
+              std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                        << std::endl;
+            }
             printf("reading volume %s for masking...\n", fname);
             mri_mask = MRIread(fname);
             if (!mri_mask)
@@ -782,8 +842,12 @@ int main(int argc, char *argv[]) {
         } // end of building inputs
         ///////////////////////////////////////////////////////////
         if (xform_name) {
-          sprintf(fname, "%s/%s/mri/transforms/%s", subjects_dir, subject_name,
-                  xform_name);
+          int req = snprintf(fname, STRLEN, "%s/%s/mri/transforms/%s",
+                             subjects_dir, subject_name, xform_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
           if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
             printf("reading transform from %s...\n", fname);
           transform = TransformRead(fname);
@@ -1474,6 +1538,9 @@ static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) {
               errors++;
             }
             // no break (check xt)
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
 
           case Left_Caudate:
           case Left_Amygdala:
@@ -1511,6 +1578,9 @@ static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) {
               errors++;
             }
             // no break (check xt)
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
 
           case Right_Caudate:
           case Right_Amygdala:
@@ -1620,7 +1690,12 @@ static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) {
 
   if (do_fix_badsubjs && errors) {
     char fname[STRLEN];
-    sprintf(fname, "%s/%s/mri/seg_fixed.mgz", subjects_dir, subject_name);
+    int  req = snprintf(fname, STRLEN, "%s/%s/mri/seg_fixed.mgz", subjects_dir,
+                       subject_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("Writing corrected volume to %s\n", fname);
     MRIwrite(mri_fixed, fname);
     MRIfree(&mri_fixed);

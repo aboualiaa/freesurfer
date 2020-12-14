@@ -276,7 +276,8 @@ if(NOT CMAKE_CXX_EXTENSIONS)
   set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
 
-project(freesurfer VERSION ${PACKAGE_VERSION}
+project(freesurfer
+        VERSION ${PACKAGE_VERSION}
         DESCRIPTION "An open source software suite for processing and analyzing (human) brain MRI images."
         LANGUAGES C CXX Fortran
         )

@@ -23,12 +23,27 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "macros.h"
+
+#include "mri.h"
+#include "mrisurf.h"
+#include "mrisurf_project.h"
+
 #include "annotation.h"
+#include "cma.h"
 #include "diag.h"
+#include "error.h"
 #include "gcsa.h"
 #include "icosahedron.h"
-#include "mrisurf_project.h"
+#include "proto.h"
 #include "timer.h"
+#include "transform.h"
+#include "utils.h"
 #include "version.h"
 
 int        main(int argc, char *argv[]);
@@ -65,7 +80,7 @@ extern int   gcsa_write_iterations;
 static int novar  = 0;
 static int refine = 0;
 
-static LABEL *cortex_label = nullptr;
+static LABEL *cortex_label = NULL;
 static int    relabel_unknowns_with_cortex_label(GCSA *gcsa, MRI_SURFACE *mris,
                                                  LABEL *cortex_label);
 
@@ -86,7 +101,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
@@ -125,8 +140,12 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not read classifier from %s", Progname,
               argv[4]);
 
-  sprintf(fname, "%s/%s/%s/%s.%s", subjects_dir, subject_name, surf_dir, hemi,
-          orig_name);
+  int req = snprintf(fname, STRLEN, "%s/%s/%s/%s.%s", subjects_dir,
+                     subject_name, surf_dir, hemi, orig_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   if (DIAG_VERBOSE_ON) {
     printf("reading surface from %s...\n", fname);
   }
@@ -136,9 +155,9 @@ int main(int argc, char *argv[]) {
               Progname, fname, subject_name);
   MRISresetNeighborhoodSize(mris, nbrs);
   mris->ct = gcsa->ct; /* hack so that color table
-                                      will get written into annot file */
+                                       will get written into annot file */
 
-  // set annotation table from the colortable
+  //set annotation table from the colortable
   set_atable_from_ctable(gcsa->ct);
 
   // read colortable from the gcsa if not already done
@@ -219,7 +238,7 @@ int main(int argc, char *argv[]) {
     GCSAlabel(gcsa, mris);
     if (Gdiag_no >= 0)
       printf("vertex %d: label %s\n", Gdiag_no,
-             annotation_to_name(mris->vertices[Gdiag_no].annotation, nullptr));
+             annotation_to_name(mris->vertices[Gdiag_no].annotation, NULL));
     if (mri_aseg) {
       GCSArelabelWithAseg(gcsa, mris, mri_aseg);
     }
@@ -227,14 +246,14 @@ int main(int argc, char *argv[]) {
     GCSAreclassifyUsingGibbsPriors(gcsa, mris);
     if (Gdiag_no >= 0)
       printf("vertex %d: label %s\n", Gdiag_no,
-             annotation_to_name(mris->vertices[Gdiag_no].annotation, nullptr));
+             annotation_to_name(mris->vertices[Gdiag_no].annotation, NULL));
     if (mri_aseg) {
       GCSArelabelWithAseg(gcsa, mris, mri_aseg);
     }
     postprocess(gcsa, mris);
     if (Gdiag_no >= 0)
       printf("vertex %d: label %s\n", Gdiag_no,
-             annotation_to_name(mris->vertices[Gdiag_no].annotation, nullptr));
+             annotation_to_name(mris->vertices[Gdiag_no].annotation, NULL));
     if (gcsa_write_iterations != 0) {
       char fname[STRLEN];
       sprintf(fname, "%s_post.annot", gcsa_write_fname);
@@ -246,14 +265,12 @@ int main(int argc, char *argv[]) {
     if (refine != 0) {
       GCSAreclassifyUsingGibbsPriors(gcsa, mris);
       if (Gdiag_no >= 0)
-        printf(
-            "vertex %d: label %s\n", Gdiag_no,
-            annotation_to_name(mris->vertices[Gdiag_no].annotation, nullptr));
+        printf("vertex %d: label %s\n", Gdiag_no,
+               annotation_to_name(mris->vertices[Gdiag_no].annotation, NULL));
       postprocess(gcsa, mris);
       if (Gdiag_no >= 0)
-        printf(
-            "vertex %d: label %s\n", Gdiag_no,
-            annotation_to_name(mris->vertices[Gdiag_no].annotation, nullptr));
+        printf("vertex %d: label %s\n", Gdiag_no,
+               annotation_to_name(mris->vertices[Gdiag_no].annotation, NULL));
       if (gcsa_write_iterations != 0) {
         char fname[STRLEN];
         sprintf(fname, "%s_post.annot", gcsa_write_fname);
@@ -266,7 +283,7 @@ int main(int argc, char *argv[]) {
   MRISmodeFilterAnnotations(mris, filter);
   if (Gdiag_no >= 0)
     printf("vertex %d: label %s\n", Gdiag_no,
-           annotation_to_name(mris->vertices[Gdiag_no].annotation, nullptr));
+           annotation_to_name(mris->vertices[Gdiag_no].annotation, NULL));
 
   if (cortex_label) {
     relabel_unknowns_with_cortex_label(gcsa, mris, cortex_label);
@@ -277,7 +294,7 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not write annot file %s for %s",
               Progname, out_fname, subject_name);
 
-  if (nullptr != prob_fname) {
+  if (NULL != prob_fname) {
     MRI *prob_image = MRIalloc(mris->nvertices, 1, 1, MRI_FLOAT);
     for (i = 0; i < mris->nvertices; i++) {
       MRIsetVoxVal(prob_image, i, 0, 0, 0, mris->vertices[i].val);
@@ -326,19 +343,19 @@ static int get_option(int argc, char *argv[]) {
       exit(1);
     }
     gcsfile = argv[2];                /* rel to FREESURFER_HOME/average,
-                                         ?h.curvature.buckner40.filled.desikan_killiany.gcs */
+                       ?h.curvature.buckner40.filled.desikan_killiany.gcs */
     sscanf(argv[3], "%d", &icoorder); // usually 7
     outannot = argv[4];               // absolute path to output
     printf("ML Label: %s %d %s\n", gcsfile, icoorder, outannot);
     ico = ReadIcoByOrder(icoorder, 100);
-    if (ico == nullptr) {
+    if (ico == NULL) {
       exit(1);
     }
     fsh = getenv("FREESURFER_HOME");
     sprintf(tmpstr, "%s/average/%s", fsh, gcsfile);
     printf("Reading gcsa from %s\n", tmpstr);
     gcsa = GCSAread(tmpstr);
-    if (gcsa == nullptr) {
+    if (gcsa == NULL) {
       exit(1);
     }
     ico->ct = gcsa->ct;
@@ -360,7 +377,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "aseg")) {
     mri_aseg = MRIread(argv[2]);
     nargs    = 1;
-    if (mri_aseg == nullptr) {
+    if (mri_aseg == NULL) {
       ErrorExit(ERROR_BADFILE, "%s: could not open %s", Progname, argv[2]);
     }
     printf("using %s aseg volume to correct midline\n", argv[2]);
@@ -422,8 +439,8 @@ static int get_option(int argc, char *argv[]) {
       printf("applying mode filter %d times before writing...\n", filter);
       break;
     case 'L':
-      cortex_label = LabelRead(nullptr, argv[2]);
-      if (cortex_label == nullptr) {
+      cortex_label = LabelRead(NULL, argv[2]);
+      if (cortex_label == NULL) {
         ErrorExit(ERROR_NOFILE, "");
       }
       nargs = 1;
@@ -481,7 +498,7 @@ static void usage_exit(int code) {
 }
 
 #include "mris_ca_label.help.xml.h"
-static void print_help() {
+static void print_help(void) {
   outputHelpXml(mris_ca_label_help_xml, mris_ca_label_help_xml_len);
   exit(1);
 }

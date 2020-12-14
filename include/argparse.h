@@ -233,7 +233,7 @@ public:
     // try to cast the arguments
     try {
       retrieved = variables[N].castTo<T>();
-    } catch (std::bad_cast) {
+    } catch (std::bad_cast &) {
       // if casting fails, print out a VERY detailed debug message
       String fulltype, sentence_starter;
       if (arguments[N].fixed && (arguments[N].fixed_nargs <= 1)) {
@@ -271,9 +271,9 @@ private:
   unsigned int         helptextsize = 0;
 };
 
-static std::string verifyOption(const std::string &name);
-static std::string strip(const std::string &name);
-static bool        stob(const std::string &str);
+static std::string     verifyOption(const std::string &name);
+static std::string     strip(const std::string &name);
+static bool            stob(const std::string &str);
 void                   ArgumentParser::Argument::validate();
 ArgumentParser::String ArgumentParser::Argument::canonicalName() const;
 ArgumentParser::String ArgumentParser::Argument::typeName() const;
