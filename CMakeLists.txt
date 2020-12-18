@@ -604,7 +604,6 @@ set(BENCHMARK_ENABLE_TESTING
     CACHE BOOL "Suppressing benchmark's tests" FORCE
     )
 
-find_package(jpeg REQUIRED)
 find_package(expat REQUIRED)
 find_package(tiff REQUIRED)
 find_package(libxml2 REQUIRED)
@@ -959,6 +958,7 @@ if(NOT FS_MINIMAL_BUILD)
                      mri_strip_subject_info
                      mri_surfacemask
                      mri_synthesize
+                     mri_threshold
                      mri_topologycorrection
                      mri_train
                      mri_transform

@@ -9,7 +9,7 @@ if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
       )
 else()
   set(CMAKE_Fortran_FLAGS
-      "${CMAKE_Fortran_FLAGS} -w -ffixed-line-length-132 -fno-second-underscore"
+      "${CMAKE_Fortran_FLAGS} -w -ffixed-line-length-132 -fno-second-underscore -fallow-invalid-boz"
       )
 endif()
 

@@ -136,7 +136,6 @@ else()
                      mri_segment_tumor
                      mri_segment_wm_damage
                      mri_simulate_atrophy
-                     mri_threshold
                      mri_train_autoencoder
                      mri_transform_to_COR
                      mri_update_gca

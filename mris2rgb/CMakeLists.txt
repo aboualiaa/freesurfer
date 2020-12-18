@@ -2,7 +2,7 @@ project(mris2rgb)
 
 if(OPENGL_FOUND)
 
-  include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/tiff
+  include_directories(${FS_INCLUDE_DIRS} ${TIFF_INCLUDE_DIR}
                       ${CMAKE_SOURCE_DIR}/packages/glut ${X11_INCLUDE_DIR}
                       )
 
