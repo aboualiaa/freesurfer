@@ -1836,7 +1836,7 @@ static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
 
       } else {
         klen = MAX_LEN * cart_klen;
-            /* arbitrary max length */ // happens when u is 0
+        /* arbitrary max length */ // happens when u is 0
       }
 
       if (klen >= U_DIM(mrisp_src))

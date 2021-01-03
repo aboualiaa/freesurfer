@@ -88,7 +88,7 @@ class LinearTransform:
             matrix,
             source=self.source,
             target=self.target,
-            type=LinearTransform.Type.vox,
+            type=LinearTransform.Type.ras,
         )
 
     def as_vox(self):
@@ -102,13 +102,13 @@ class LinearTransform:
             return self
         # exclude source/target RAS information
         matrix = (
-            self.target.affine @ self.matrix @ np.linalg.inv(self.source.affine)
+            np.linalg.inv(self.source.affine) @ self.matrix @ self.target.affine
         )
         return LinearTransform(
             matrix,
             source=self.source,
             target=self.target,
-            type=LinearTransform.Type.ras,
+            type=LinearTransform.Type.vox,
         )
 
     def write(self, filename):

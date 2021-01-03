@@ -57,6 +57,7 @@ class DialogThresholdVolume;
 class DialogVolumeSegmentation;
 class BinaryTreeView;
 class WindowLayerInfo;
+class QFileSystemWatcher;
 
 #define MAX_RECENT_FILES 10
 
@@ -534,6 +535,12 @@ protected slots:
 
   void UpdateLayerInfo(Layer *layer);
 
+  void OnSyncInstances(bool bChecked);
+
+  void OnSyncFileChanged(const QString &fn);
+
+  void UpdateSyncFile();
+
 private:
   bool DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit);
   void SaveSettings();
@@ -630,6 +637,9 @@ private:
 
   bool    m_bHadError;
   QString m_sTitle;
+
+  QFileSystemWatcher *m_syncFileWatcher;
+  QString             m_sSyncFilePath;
 };
 
 #endif // MAINWINDOW_H

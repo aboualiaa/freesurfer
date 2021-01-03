@@ -105,6 +105,7 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QFileInfo>
+#include <QFileSystemWatcher>
 #include <QJsonDocument>
 #include <QMessageBox>
 #include <QProcessEnvironment>
@@ -128,6 +129,8 @@ MainWindow::MainWindow(QWidget *parent, MyCmdLineParser *cmdParser)
       m_bSplinePicking(true), m_cmdParser(cmdParser), m_bHadError(false) {
   m_dlgSaveScreenshot = NULL;
   m_dlgPreferences    = NULL;
+  m_syncFileWatcher   = new QFileSystemWatcher(this);
+  m_sSyncFilePath     = "/tmp/freeview_coord_sync.json";
 
   m_defaultSettings["no_autoload"] = true; // default no autoload
 
@@ -1265,6 +1268,12 @@ bool MainWindow::DoParseCommand(MyCmdLineParser *parser, bool bAutoQuit) {
 
   if (parser->Found("quit"))
     AddScript(QStringList("quit"));
+
+  if (parser->Found("sync", &sa)) {
+    if (sa.size() > 0)
+      m_sSyncFilePath = sa[0];
+    ui->actionSyncInstances->setChecked(true);
+  }
 
   return true;
 }
@@ -7771,5 +7780,63 @@ void MainWindow::CommandLinkVolume(const QStringList &cmd) {
       if (cmd[1] == "1" || cmd[1].toLower() == "true")
         emit LinkVolumeRequested(mri);
     }
+  }
+}
+
+void MainWindow::OnSyncInstances(bool bChecked) {
+  if (bChecked) {
+    m_syncFileWatcher->addPath(m_sSyncFilePath);
+    connect(m_syncFileWatcher, SIGNAL(fileChanged(QString)),
+            SLOT(OnSyncFileChanged(QString)), Qt::UniqueConnection);
+    connect(this, SIGNAL(SlicePositionChanged()), SLOT(UpdateSyncFile()),
+            Qt::ConnectionType(Qt::QueuedConnection | Qt::UniqueConnection));
+  } else {
+    m_syncFileWatcher->removePath(m_sSyncFilePath);
+    disconnect(m_syncFileWatcher, SIGNAL(fileChanged(QString)), this,
+               SLOT(OnSyncFileChanged(QString)));
+    disconnect(this, SIGNAL(SlicePositionChanged()), this,
+               SLOT(UpdateSyncFile()));
+  }
+}
+
+void MainWindow::UpdateSyncFile() {
+  QVariantMap map, ras;
+  double      pos[3];
+  GetLayerCollection("MRI")->GetSlicePosition(pos);
+  ras["x"]           = pos[0];
+  ras["y"]           = pos[1];
+  ras["z"]           = pos[2];
+  map["ras"]         = ras;
+  map["instance_id"] = qApp->applicationPid();
+
+  QFile file(m_sSyncFilePath);
+  if (file.open(QIODevice::WriteOnly)) {
+    file.write(QJsonDocument::fromVariant(map).toJson());
+    file.flush();
+    file.close();
+  } else {
+    qWarning() << "Can not write to sync file " << m_sSyncFilePath;
+  }
+}
+
+void MainWindow::OnSyncFileChanged(const QString &fn) {
+  QFile file(fn);
+  if (file.open(QIODevice::ReadOnly)) {
+    QVariantMap map =
+        QJsonDocument::fromJson(file.readAll()).toVariant().toMap();
+    file.close();
+    if (map["instance_id"].toLongLong() != qApp->applicationPid()) {
+      double pos[3];
+      pos[0] = map["ras"].toMap().value("x").toDouble();
+      pos[1] = map["ras"].toMap().value("y").toDouble();
+      pos[2] = map["ras"].toMap().value("z").toDouble();
+      disconnect(this, SIGNAL(SlicePositionChanged()), this,
+                 SLOT(UpdateSyncFile()));
+      SetSlicePosition(pos);
+      connect(this, SIGNAL(SlicePositionChanged()), SLOT(UpdateSyncFile()),
+              Qt::ConnectionType(Qt::QueuedConnection | Qt::UniqueConnection));
+    }
+  } else {
+    qWarning() << "Can not open sync file " << fn;
   }
 }

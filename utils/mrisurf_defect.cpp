@@ -3036,7 +3036,7 @@ static double mrisComputeDefectMRILogUnlikelihood_wkr(
                     ijkDistanceElt, new_distanceSignArg, new_distanceSquared,
                     sqrtf(
                         new_distanceSquared)); // start this as soon as possible - the unit is idle, and the result
-                    // is discarded if not needed
+              // is discarded if not needed
 
             } else {
               updateDistanceElt(ijkDistanceElt,

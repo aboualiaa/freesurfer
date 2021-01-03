@@ -295,11 +295,28 @@ bool Interactor2D::ProcessKeyDownEvent(QKeyEvent * event,
     m_bSelecting    = false;
   }
 
-  if (MainWindow::GetMainWindow()->IsEmpty()) {
+  MainWindow *mainwnd = MainWindow::GetMainWindow();
+  if (mainwnd->IsEmpty()) {
     return Interactor::ProcessKeyDownEvent(event, renderview);
   }
 
-  if (event->modifiers() & Qt::ShiftModifier) {
+  if (nKeyCode == Qt::Key_Plus) {
+    LayerMRI *mri = (LayerMRI *)mainwnd->GetActiveLayer("MRI");
+    if (mri && mri->GetNumberOfFrames() > 1) {
+      int n = mri->GetActiveFrame() + 1;
+      if (n >= mri->GetNumberOfFrames())
+        n = 0;
+      mri->SetActiveFrame(n);
+    }
+  } else if (nKeyCode == Qt::Key_Minus) {
+    LayerMRI *mri = (LayerMRI *)mainwnd->GetActiveLayer("MRI");
+    if (mri && mri->GetNumberOfFrames() > 1) {
+      int n = mri->GetActiveFrame() - 1;
+      if (n < 0)
+        n = mri->GetNumberOfFrames() - 1;
+      mri->SetActiveFrame(n);
+    }
+  } else if (event->modifiers() & Qt::ShiftModifier) {
     if (nKeyCode == Qt::Key_Up) {
       view->Zoom(1.05);
     } else if (nKeyCode == Qt::Key_Down) {

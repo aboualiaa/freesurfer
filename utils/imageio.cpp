@@ -24,14 +24,16 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <cstdio>
-#include <cstdlib>
 #include <fcntl.h>
 #include <math.h>
 #include <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h> /* for SEEK_ constants */
 
 #include "hips.h"
+#include "hmem.h"
 
 #include "diag.h"
 #include "error.h"
@@ -70,7 +72,7 @@ static IMAGE *   PPMReadImage(const char *fname);
 static IMAGE *   PPMReadHeader(FILE *fp, IMAGE *);
 static IMAGE *   PBMReadImage(const char *fname);
 static IMAGE *   PBMReadHeader(FILE *fp, IMAGE *);
-static hips_byte FindMachineEndian();
+static hips_byte FindMachineEndian(void);
 static void      ImageSwapEndian(IMAGE *I);
 
 static hips_byte endian = END_UNDEF;
@@ -99,7 +101,7 @@ int ImageWrite(IMAGE *I, const char *fname) {
   return (0);
 }
 
-static hips_byte FindMachineEndian() {
+static hips_byte FindMachineEndian(void) {
   short int word = 0x0001;
   char *    bite = (char *)&word;
   return (bite[0] ? END_SMALL : END_BIG);
@@ -115,11 +117,11 @@ static hips_byte FindMachineEndian() {
 int ImageFWrite(IMAGE *I, FILE *fp, const char *fname) {
   hips_byte *image;
   int        ecode, type, frame;
-  char       buf[100];
+  char *     buf;
 
   if (!fname)
     fname = "ImageFWrite";
-
+  buf = (char *)malloc(strlen(fname) + 1);
   strcpy(buf, fname); /* don't destroy callers string */
 
   ImageUnpackFileName(buf, &frame, &type, buf);
@@ -166,6 +168,8 @@ int ImageFWrite(IMAGE *I, FILE *fp, const char *fname) {
     I->image = image;
     break;
   }
+
+  free(buf);
   return (0);
 }
 
@@ -328,11 +332,12 @@ IMAGE *ImageReadFrames(const char *fname, int start, int nframes) {
         Description
 ------------------------------------------------------*/
 IMAGE *ImageReadHeader(const char *fname) {
-  IMAGE *I = nullptr;
+  IMAGE *I = NULL;
   FILE * fp;
   int    type, frame;
-  char   buf[100];
+  char * buf;
 
+  buf = (char *)malloc(strlen(fname) + 1);
   strcpy(buf, fname); /* don't destroy callers string */
 
   ImageUnpackFileName(buf, &frame, &type, buf);
@@ -345,6 +350,7 @@ IMAGE *ImageReadHeader(const char *fname) {
   I = ImageFReadHeader(fp, buf);
   fclose(fp);
 
+  free(buf);
   return (I);
 }
 /*-----------------------------------------------------
@@ -355,11 +361,12 @@ IMAGE *ImageReadHeader(const char *fname) {
         Description
 ------------------------------------------------------*/
 IMAGE *ImageFReadHeader(FILE *fp, const char *fname) {
-  IMAGE *I = nullptr;
+  IMAGE *I = NULL;
   int    ecode;
   int    type, frame;
-  char   buf[100];
+  char * buf;
 
+  buf = (char *)malloc(strlen(fname) + 1);
   strcpy(buf, fname); /* don't destroy callers string */
 
   ImageUnpackFileName(buf, &frame, &type, buf);
@@ -370,8 +377,8 @@ IMAGE *ImageFReadHeader(FILE *fp, const char *fname) {
 
   switch (type) {
   case TIFF_IMAGE:
-    if (TiffReadHeader(buf, I) == nullptr)
-      return (nullptr);
+    if (TiffReadHeader(buf, I) == NULL)
+      return (NULL);
     break;
   case RGBI_IMAGE:
     RGBReadHeader(buf, I);
@@ -407,6 +414,7 @@ IMAGE *ImageFReadHeader(FILE *fp, const char *fname) {
     break;
   }
 
+  free(buf);
   return (I);
 }
 /*-----------------------------------------------------
@@ -443,12 +451,13 @@ IMAGE *ImageReadType(const char *fname, int pixel_format) {
         Description
 ------------------------------------------------------*/
 IMAGE *ImageRead(const char *fname) {
-  IMAGE * I = nullptr;
+  IMAGE * I = NULL;
   MATRIX *mat;
   FILE *  fp;
   int     type, frame;
-  char    buf[STRLEN];
+  char *  buf;
 
+  buf = (char *)malloc(strlen(fname) + 1);
   strcpy(buf, fname); /* don't destroy callers string */
 
   ImageUnpackFileName(buf, &frame, &type, buf);
@@ -456,8 +465,8 @@ IMAGE *ImageRead(const char *fname) {
   switch (type) {
   case TIFF_IMAGE:
     I = TiffReadImage(buf, frame);
-    if (I == nullptr)
-      return (nullptr);
+    if (I == NULL)
+      return (NULL);
     break;
   case MATLAB_IMAGE:
     DiagPrintf(DIAG_WRITE, "ImageRead: buf=%s, frame=%d, type=%d (M=%d,H=%d)\n",
@@ -465,7 +474,7 @@ IMAGE *ImageRead(const char *fname) {
     mat = MatlabRead(buf);
     if (!mat)
       ErrorReturn(NULL, (ERROR_NO_FILE, "ImageRead(%s) failed\n", buf));
-    I = ImageFromMatrix(mat, nullptr);
+    I = ImageFromMatrix(mat, NULL);
     ImageInvert(I, I);
     MatrixFree(&mat);
     break;
@@ -494,6 +503,8 @@ IMAGE *ImageRead(const char *fname) {
   default:
     break;
   }
+
+  free(buf);
   return (I);
 }
 /*-----------------------------------------------------
@@ -504,8 +515,9 @@ IMAGE *ImageRead(const char *fname) {
         Description
 ------------------------------------------------------*/
 int ImageType(const char *fname) {
-  char *dot, buf[200];
+  char *dot, *buf;
 
+  buf = (char *)malloc(strlen(fname) + 1);
   strcpy(buf, fname);
   dot = strrchr(buf, '.');
 
@@ -515,6 +527,7 @@ int ImageType(const char *fname) {
       return (MATLAB_IMAGE);
   }
 
+  free(buf);
   return (HIPS_IMAGE);
 }
 /*-----------------------------------------------------
@@ -525,9 +538,10 @@ int ImageType(const char *fname) {
         Description
 ------------------------------------------------------*/
 int ImageFrame(const char *fname) {
-  char *number, buf[200];
+  char *number, *buf;
   int   frame;
 
+  buf = (char *)malloc(strlen(fname) + 1);
   strcpy(buf, fname);
   number = strrchr(buf, '#');
 
@@ -537,6 +551,7 @@ int ImageFrame(const char *fname) {
   } else
     frame = 0;
 
+  free(buf);
   return (frame);
 }
 /*----------------------------------------------------------------------
@@ -595,8 +610,9 @@ int ImageWriteFrames(IMAGE *image, const char *fname, int start, int nframes) {
 ----------------------------------------------------------------------*/
 int ImageUnpackFileName(const char *inFname, int *pframe, int *ptype,
                         char *outFname) {
-  char *number, *dot, buf[STRLEN];
+  char *number, *dot, *buf;
 
+  buf = (char *)malloc(strlen(inFname) + strlen(outFname) + 1);
   if (inFname != outFname)
     strcpy(outFname, inFname);
   number = strrchr(outFname, '#');
@@ -631,6 +647,7 @@ int ImageUnpackFileName(const char *inFname, int *pframe, int *ptype,
   } else
     *ptype = HIPS_IMAGE;
 
+  free(buf);
   return (NO_ERROR);
 }
 /*----------------------------------------------------------------------
@@ -643,7 +660,9 @@ int ImageNumFrames(const char *fname) {
   IMAGE I;
   FILE *fp;
   int   frame, type, ecode, nframes;
-  char  buf[100];
+  char *buf;
+
+  buf = (char *)malloc(strlen(fname) + 1);
 
   ImageUnpackFileName(fname, &frame, &type, buf);
   fname = buf;
@@ -665,6 +684,7 @@ int ImageNumFrames(const char *fname) {
   nframes = I.num_frame;
   fclose(fp);
   free_hdrcon(&I);
+  free(buf);
   return (nframes);
 }
 /*----------------------------------------------------------------------
@@ -678,7 +698,9 @@ int ImageAppend(IMAGE *I, const char *fname) {
   FILE *fp;
   int   ecode, frame = 0, nframes;
   IMAGE Iheader, *Iframe;
-  char  tmpname[200];
+  // PW 2020/12/18 not ideal, but won't cause an overflow as long string size
+  // here matches with `char *FileTmpName(const char *basename)` @ utils.cpp:629
+  char tmpname[STR_LEN];
 
   fp = fopen(fname, "r+b");
 #if 0
@@ -699,7 +721,7 @@ int ImageAppend(IMAGE *I, const char *fname) {
   if (nframes == 10 || nframes == 100 || nframes == 1000) {
     /* header size will grow by 1 byte, must copy whole file (ughhh) */
     fclose(fp);
-    strcpy(tmpname, FileTmpName(nullptr));
+    strcpy(tmpname, FileTmpName(NULL));
     FileRename(fname, tmpname);
 
     /* write out new header */
@@ -785,7 +807,7 @@ static IMAGE *TiffReadImage(const char *fname, int frame0) {
   float        xres, yres, res;
 
   if (!tif)
-    return (nullptr);
+    return (NULL);
 
   /* Find out how many frames we have */
   nframe = 1; // note that TIFFOpen reads the 1st directory
@@ -903,18 +925,11 @@ static IMAGE *TiffReadImage(const char *fname, int frame0) {
     case 8:
       type = PFBYTE;
       break;
-    case 4:
-      // The lack of break is deliberate and the 'fall through' comment is recognised by GCC
-      // extra_samples = 1;
-      nsamples = 3;
-      // fall through
-    case 3:
-      switch (bits_per_sample) {
-      default:
-      case 8:
-        type = PFRGB;
-        break;
-      }
+    case 16:
+      type = PFSHORT;
+      break;
+    case 32:
+      type = PFFLOAT;
       break;
     case 64:
       type = PFDOUBLE;
@@ -922,9 +937,10 @@ static IMAGE *TiffReadImage(const char *fname, int frame0) {
     }
     break;
   case 4:
+    // The lack of break is deliberate and the 'fall through' comment is recognised by GCC
     // extra_samples = 1;
     nsamples = 3;
-  // no break
+    // fall through
   case 3:
     switch (bits_per_sample) {
     default:
@@ -1169,7 +1185,7 @@ static IMAGE *TiffReadHeader(const char *fname, IMAGE *I) {
   short nsamples;
   int   type = PFBYTE; // just make compiler happy
   if (!tif)
-    return (nullptr);
+    return (NULL);
 
   TIFFGetFieldDefaulted(tif, TIFFTAG_IMAGEWIDTH, &width);
   TIFFGetFieldDefaulted(tif, TIFFTAG_IMAGELENGTH, &height);
@@ -1232,7 +1248,7 @@ static int TiffWriteImage(IMAGE *I, const char *fname, int frame) {
   tdata_t *  buf;
 
   out = TIFFOpen(fname, "w");
-  if (out == nullptr)
+  if (out == NULL)
     return (ERROR_NOFILE);
 
   switch (I->pixel_format) {
@@ -1559,7 +1575,7 @@ static IMAGE *JPEGReadImage(const char *fname) {
   cinfo.err = jpeg_std_error(&jerr);
   jpeg_create_decompress(&cinfo);
 
-  if ((infile = fopen(fname, "rb")) == nullptr)
+  if ((infile = fopen(fname, "rb")) == NULL)
     ErrorExit(ERROR_NO_FILE, "JPEGReadImage:  Input file does not exist\n");
 
   jpeg_stdio_src(&cinfo, infile);
@@ -1619,7 +1635,7 @@ static int JPEGWriteImage(IMAGE *I, const char *fname, int frame) {
   cinfo.err = jpeg_std_error(&jerr);
   jpeg_create_compress(&cinfo);
 
-  if ((outf = fopen(fname, "wb")) == nullptr)
+  if ((outf = fopen(fname, "wb")) == NULL)
     ErrorExit(ERROR_BAD_FILE, "JPEGWriteImage:  Could not open file");
 
   jpeg_stdio_dest(&cinfo, outf);
@@ -1678,13 +1694,13 @@ static IMAGE *RGBReadImage(char *fname) {
 
   I = ImageAlloc(rows, cols, PFRGB, 1);
 
-  if ((r = (unsigned short *)malloc(sizeof(unsigned short) * cols)) == nullptr)
+  if ((r = (unsigned short *)malloc(sizeof(unsigned short) * cols)) == NULL)
     ErrorExit(ERROR_NO_MEMORY, "Failed to allocate color buffer\n");
 
-  if ((g = (unsigned short *)malloc(sizeof(unsigned short) * cols)) == nullptr)
+  if ((g = (unsigned short *)malloc(sizeof(unsigned short) * cols)) == NULL)
     ErrorExit(ERROR_NO_MEMORY, "Failed to allocate color buffer\n");
 
-  if ((b = (unsigned short *)malloc(sizeof(unsigned short) * cols)) == nullptr)
+  if ((b = (unsigned short *)malloc(sizeof(unsigned short) * cols)) == NULL)
     ErrorExit(ERROR_NO_MEMORY, "Failed to allocate color buffer\n");
 
   iptr = I->image;

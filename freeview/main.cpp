@@ -530,6 +530,8 @@ int main(int argc, char *argv[]) {
       CmdLineEntry(CMD_LINE_SWITCH, "auto-load-surf", "auto-load-surf", "",
                    "Do not automatically load sphere or other supplemental "
                    "surface data."),
+      CmdLineEntry(CMD_LINE_OPTION, "sync", "sync-cursor", "",
+                   "Sync cursor position across freeview instances.", 0, 1),
       CmdLineEntry(CMD_LINE_SWITCH, "quit", "quit", "",
                    "Quit freeview. Useful for scripting or loading comands by "
                    "-cmd option."),
