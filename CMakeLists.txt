@@ -26,7 +26,7 @@ if(FS_BUILD_MATRIX)
             "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-12/bin"
             )
       elseif(Z_COMPILER STREQUAL "gcc10")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0_1")
       elseif(Z_COMPILER STREQUAL "gcc09")
         set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc@9/9.3.0")
       elseif(Z_COMPILER STREQUAL "appleclang")
