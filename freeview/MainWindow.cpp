@@ -5998,6 +5998,8 @@ void MainWindow::OnSaveScreenshot() {
 }
 
 void MainWindow::OnCopyView() {
+  if (m_dlgSaveScreenshot)
+    SetScreenShotSettings(m_dlgSaveScreenshot->GetSettings());
   QString fn = QDir::tempPath() + "/freeview-temp-" +
                QString::number(QDateTime::currentMSecsSinceEpoch()) + ".png";
   GetMainView()->SaveScreenShot(fn, m_settingsScreenshot.AntiAliasing, 1.0,
