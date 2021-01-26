@@ -2553,9 +2553,9 @@ MRI *LTAtransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst, LTA *lta)
 //
 //--------------------------------------------------------------------------------
 
-#define MAXF        200L /* Maximum size of the filter */
-#define SPLINE      "Spline" /* Spline filter (l2-norm) */
-#define SPLINE_L2   "Spline L2" /* Spline filter (L2-norm) */
+#define MAXF        200L              /* Maximum size of the filter */
+#define SPLINE      "Spline"          /* Spline filter (l2-norm) */
+#define SPLINE_L2   "Spline L2"       /* Spline filter (L2-norm) */
 #define SPLINE_CENT "Centered Spline" /* Centered Spline filter (l2-norm) */
 #define SPLINE_CENT_L2                                                         \
   "Centered Spline L2" /* Centered Spline filter (L2-norm) */

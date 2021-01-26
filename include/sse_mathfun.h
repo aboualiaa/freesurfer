@@ -174,7 +174,7 @@ v4sf log_ps(v4sf x) {
   mm0 = _mm_srli_pi32(mm0, 23);
   mm1 = _mm_srli_pi32(mm1, 23);
 #else
-  emm0 = _mm_srli_epi32(_mm_castps_si128(x), 23);
+  emm0   = _mm_srli_epi32(_mm_castps_si128(x), 23);
 #endif
   /* keep only the fractional part */
   x = _mm_and_ps(x, *(v4sf *)_ps_inv_mant_mask);
@@ -280,8 +280,8 @@ v4sf exp_ps(v4sf x) {
   /* step 2 : cast back to float */
   tmp = _mm_cvtpi32x2_ps(mm0, mm1);
 #else
-  emm0 = _mm_cvttps_epi32(fx);
-  tmp  = _mm_cvtepi32_ps(emm0);
+  emm0       = _mm_cvttps_epi32(fx);
+  tmp        = _mm_cvtepi32_ps(emm0);
 #endif
   /* if greater, substract 1 */
   v4sf mask = _mm_cmpgt_ps(tmp, fx);

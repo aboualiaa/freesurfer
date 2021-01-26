@@ -187,7 +187,7 @@ preserving gradient */
 that preserve
 positive areas */
 #define IPFLAG_MAXIMIZE_SPHERICAL_POSITIVE_AREA                                \
-  0x4000 /* apply  gradients
+  0x4000                                 /* apply  gradients
 that will
 maximize the
 positive areas */
@@ -241,7 +241,7 @@ typedef struct {
 } MRI_SURFACE_PARAMETERIZATION, MRI_SP;
 
 #define L_ANGLE              0.25f /*was 0.01*/ /* coefficient of angle term */
-#define L_AREA               1.0f /* coefficient of angle term */
+#define L_AREA               1.0f               /* coefficient of angle term */
 #define N_AVERAGES           4096
 #define WRITE_ITERATIONS     10
 #define NITERATIONS          1

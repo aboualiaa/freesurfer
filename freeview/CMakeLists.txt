@@ -1,6 +1,6 @@
 project(freeview)
 
-if(FS_BUILD_GUIS
+if(BUILD_GUIS
    AND VTK_FOUND
    AND PETSC_FOUND
    AND TARGET vtkutils
@@ -198,11 +198,11 @@ if(FS_BUILD_GUIS
       WindowEditAnnotation.cpp
       DialogNewAnnotation.cpp
       DialogScreenshotOverlay.cpp
+      DialogControlPointComment.cpp
       freeview.qrc
       )
 
   # build the QVTKWidget utilities
-  #  if(${VTK_MAJOR_VERSION} LESS 8 AND NOT EXISTS ${VTK_INCLUDE_DIRS}/QVTKWidget.h)
   if(${VTK_MAJOR_VERSION} LESS 7)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/QVTK5)
     set(SOURCES ${SOURCES} QVTK5/QVTKWidget.cxx QVTK5/QVTKPaintEngine.cxx)
@@ -229,7 +229,17 @@ if(FS_BUILD_GUIS
     set(SOURCES ${SOURCES} MacHelper.mm)
   endif()
 
-  if(NOT FS_FREEVIEW_LINEPROF)
+  add_compile_options(-Wno-deprecated
+                      -Wno-reorder
+                      -Wno-uninitialized
+                      -Wno-unused-variable
+                      -Wno-sign-compare
+                      -Wno-overloaded-virtual
+                      -Wno-inconsistent-missing-override
+                      -Wno-deprecated-declarations
+                      )
+
+  if(NOT FREEVIEW_LINEPROF)
     add_definitions(-DDISABLE_LINEPROF)
   endif()
 
@@ -256,7 +266,6 @@ if(FS_BUILD_GUIS
                         ${LAPACK_LIBRARIES}
                         ${BLAS_LIBRARIES}
                         ${GFORTRAN_LIBRARIES}
-                        ${MPI_CXX_LIBRARIES}
                         )
 
   if(NOT APPLE)

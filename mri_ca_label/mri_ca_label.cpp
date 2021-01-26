@@ -1061,11 +1061,13 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-
+  // TODO(aboualiaa): this condition is always false, is this code at all necessary
+#if 0
   if (read_fname == NULL && 0) {
     GCAmaxLikelihoodBorders(gca, mri_inputs, mri_labeled, mri_labeled,
                             transform, mle_niter, 5.0);
   }
+#endif
   if (expand_ventricle_flag) {
     GCAexpandVentricle(gca, mri_inputs, mri_labeled, mri_labeled, transform,
                        Left_Lateral_Ventricle);

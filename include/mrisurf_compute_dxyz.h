@@ -24,33 +24,34 @@
 //
 #include "mrisurf_metricProperties.h"
 
-int mrisComputeAngleAreaTerms(MRIS *mris, INTEGRATION_PARMS *parms);
-int mrisComputeAshburnerTriangleTerm(MRIS *mris, double l_ashburner_triangle,
-                                     INTEGRATION_PARMS *parms);
-int mrisComputeBorderTerm(MRIS *mris, double l_border);
-int mrisComputeConvexityTerm(MRIS *mris, double l_convex);
-int mrisComputeCorrelationTerm(MRIS *mris, INTEGRATION_PARMS *parms);
-int mrisComputeDistanceTerm(MRIS *mris, INTEGRATION_PARMS *parms);
-int mrisComputeExpandwrapTerm(MRIS *mris, MRI *mri_brain, double l_expandwrap);
-int mrisComputeExpansionTerm(MRIS *mris, double l_expand);
-int mrisComputeHistoTerm(MRIS *mris, INTEGRATION_PARMS *parms);
-int mrisComputeIntensityGradientTerm(MRIS *mris, double l_grad, MRI *mri_brain,
-                                     MRI *mri_smooth);
-int mrisComputeIntensityTerm(MRIS *mris, double l_intensity, MRI *mri_brain,
-                             MRI *mri_smooth, double sigma,
-                             INTEGRATION_PARMS *parms);
-int mrisComputeLaplacianTerm(MRIS *mris, double l_lap);
-int mrisComputeLinkTerm(MRIS *mris, double l_link, int pial);
-int mrisComputeMaxSpringTerm(MRIS *mris, double l_max_spring);
-int mrisComputeNonlinearAreaTerm(MRIS *mris, INTEGRATION_PARMS *parms);
-int mrisComputeNonlinearDistanceTerm(MRIS *mris, INTEGRATION_PARMS *parms);
-int mrisComputeNonlinearSpringTerm(MRIS *mris, double l_nlspring,
-                                   INTEGRATION_PARMS *parms);
-int mrisComputeNonlinearTangentialSpringTerm(MRIS *mris, double l_spring,
-                                             double min_dist);
-int mrisComputeNormalizedSpringTerm(MRIS *mris, double const l_spring);
-int mrisComputePlaneTerm(MRIS *mris, double l_plane, double l_spacing);
-int mrisComputePolarCorrelationTerm(MRIS *mris, INTEGRATION_PARMS *parms);
+void mrisDxyzSetLocationMoveLen(double newval);
+int  mrisComputeAngleAreaTerms(MRIS *mris, INTEGRATION_PARMS *parms);
+int  mrisComputeAshburnerTriangleTerm(MRIS *mris, double l_ashburner_triangle,
+                                      INTEGRATION_PARMS *parms);
+int  mrisComputeBorderTerm(MRIS *mris, double l_border);
+int  mrisComputeConvexityTerm(MRIS *mris, double l_convex);
+int  mrisComputeCorrelationTerm(MRIS *mris, INTEGRATION_PARMS *parms);
+int  mrisComputeDistanceTerm(MRIS *mris, INTEGRATION_PARMS *parms);
+int  mrisComputeExpandwrapTerm(MRIS *mris, MRI *mri_brain, double l_expandwrap);
+int  mrisComputeExpansionTerm(MRIS *mris, double l_expand);
+int  mrisComputeHistoTerm(MRIS *mris, INTEGRATION_PARMS *parms);
+int  mrisComputeIntensityGradientTerm(MRIS *mris, double l_grad, MRI *mri_brain,
+                                      MRI *mri_smooth);
+int  mrisComputeIntensityTerm(MRIS *mris, double l_intensity, MRI *mri_brain,
+                              MRI *mri_smooth, double sigma,
+                              INTEGRATION_PARMS *parms);
+int  mrisComputeLaplacianTerm(MRIS *mris, double l_lap);
+int  mrisComputeLinkTerm(MRIS *mris, double l_link, int pial);
+int  mrisComputeMaxSpringTerm(MRIS *mris, double l_max_spring);
+int  mrisComputeNonlinearAreaTerm(MRIS *mris, INTEGRATION_PARMS *parms);
+int  mrisComputeNonlinearDistanceTerm(MRIS *mris, INTEGRATION_PARMS *parms);
+int  mrisComputeNonlinearSpringTerm(MRIS *mris, double l_nlspring,
+                                    INTEGRATION_PARMS *parms);
+int  mrisComputeNonlinearTangentialSpringTerm(MRIS *mris, double l_spring,
+                                              double min_dist);
+int  mrisComputeNormalizedSpringTerm(MRIS *mris, double const l_spring);
+int  mrisComputePlaneTerm(MRIS *mris, double l_plane, double l_spacing);
+int  mrisComputePolarCorrelationTerm(MRIS *mris, INTEGRATION_PARMS *parms);
 int mrisComputePolarVectorCorrelationTerm(MRIS *mris, INTEGRATION_PARMS *parms);
 int mrisComputePosterior2DTerm(MRIS *mris, INTEGRATION_PARMS *parms);
 int mrisComputePosteriorTerm(MRIS *mris, INTEGRATION_PARMS *parms);

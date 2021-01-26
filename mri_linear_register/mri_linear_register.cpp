@@ -470,7 +470,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "setting threshold to %d\n", thresh_low);
     nargs = 1;
 #else
-    thresh_hi = atoi(argv[3]);
+    thresh_hi    = atoi(argv[3]);
     fprintf(stderr, "thresholds set to %d --> %d\n", thresh_low, thresh_hi);
     nargs = 2;
 #endif

@@ -45,6 +45,7 @@
 #include "mrinorm.h"
 #include "mris_multimodal_refinement.h"
 #include "mrisurf.h"
+#include "mrisurf_compute_dxyz.h"
 #include "mrisutils.h"
 #include "proto.h"
 #include "surfgrad.h"
@@ -1711,8 +1712,9 @@ int main(int argc, char *argv[]) {
           MRIS_MultimodalRefinement *refine   = new MRIS_MultimodalRefinement();
           MRI *                      whiteMR  = MRIcopy(mri_T1_pial, NULL);
           MRI *                      vesselMR = MRIcopy(mri_T1_pial, NULL);
-          refine->SegmentWM(mri_T1_pial, mri_flair, whiteMR);
-          refine->SegmentVessel(mri_T1_pial, mri_flair, vesselMR);
+          refine->SegmentWM(mri_T1_pial, mri_flair, whiteMR, contrast_type);
+          refine->SegmentVessel(mri_T1_pial, mri_flair, vesselMR,
+                                contrast_type);
 
           refine->SetStep(.4);
           refine->SetNumberOfSteps(8);
@@ -2945,6 +2947,13 @@ static int get_option(int argc, char *argv[]) {
     // This is the full file name, so you need to add lh/rh, suffix, etc
     ripfilename = argv[2];
     printf("saving ripflag to %s\n", ripfilename);
+    nargs = 1;
+  } else if (!stricmp(option, "location-mov-len")) {
+    double locationmovlen;
+    sscanf(argv[2], "%lf", &locationmovlen);
+    mrisDxyzSetLocationMoveLen(locationmovlen);
+    printf("Setting LOCATION_MOVE_LEN to %g\n", locationmovlen);
+    // Used in mrisComputeTargetLocationTerm()
     nargs = 1;
   } else if (!stricmp(option, "sigma-white")) {
     // This is the full file name, so you need to add lh/rh, suffix, etc

@@ -11501,9 +11501,9 @@ int    GCAhistoScaleImageIntensities(GCA *gca, MRI *mri, int noskull) {
     if (gca->ninputs == 1 ||
         r == max_T1_weighted_image) /* assume it is T1-weighted */
     {
-#define MIN_CONFORMED_WM_VAL 50 // assume wm greater than this
+#define MIN_CONFORMED_WM_VAL 50  // assume wm greater than this
 #define MAX_CONFORMED_WM_VAL 240 // assume wm than this
-      if (mriConformed(mri)) // use strong priors on where wm should be
+      if (mriConformed(mri))     // use strong priors on where wm should be
       {
         HISTOclearBins(h_mri, h_mri, 0, MIN_CONFORMED_WM_VAL);
         HISTOclearBins(h_mri, h_mri, MAX_CONFORMED_WM_VAL + 1, 255);
@@ -11729,9 +11729,9 @@ int GCAhistoScaleImageIntensitiesLongitudinal(GCA *gca, MRI *mri, int noskull) {
     HISTOclearZeroBin(h_mri);
     if (gca->ninputs == 1) /* assume it is T1-weighted */
     {
-#define MIN_CONFORMED_WM_VAL 50 // assume wm greater than this
+#define MIN_CONFORMED_WM_VAL 50  // assume wm greater than this
 #define MAX_CONFORMED_WM_VAL 240 // assume wm than this
-      if (mriConformed(mri)) // use strong priors on where wm should be
+      if (mriConformed(mri))     // use strong priors on where wm should be
       {
         HISTOclearBins(h_mri, h_mri, 0, MIN_CONFORMED_WM_VAL);
         HISTOclearBins(h_mri, h_mri, MAX_CONFORMED_WM_VAL + 1, 255);
@@ -12905,7 +12905,7 @@ double covariance_determinant(const GC1D *gc, const int ninputs) {
 #ifdef HAVE_OPENMP
   tid = omp_get_thread_num();
 #else
-  tid = 0;
+  tid     = 0;
 #endif
   if (m_cov[tid] &&
       (m_cov[tid]->rows != ninputs || m_cov[tid]->cols != ninputs)) {

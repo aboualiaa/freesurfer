@@ -21,7 +21,7 @@ class ArrayContainerTemplate:
 
     basedims = None
 
-    def __init__(self, data, lut=None):
+    def __init__(self, data, lut=None, swap_batch_dim=False):
         """
         Contructs the container object from an array. The input data is not copied, and
         the array should have ndims equal to the subclass' basedims (or basedims + 1).
@@ -42,6 +42,10 @@ class ArrayContainerTemplate:
                 "if loading from file, use the %s.read() class method"
                 % classname
             )
+
+        # swap frame dimension from first axis to last
+        if swap_batch_dim and data.ndim > self.basedims:
+            data = np.moveaxis(data, 0, -1)
 
         self.data = np.array(data, copy=False)
         # extra dim is assumed to represent data frames
@@ -129,10 +133,10 @@ class Overlay(ArrayContainerTemplate):
 
     basedims = 1
 
-    def __init__(self, data, lut=None):
+    def __init__(self, data, lut=None, **kwargs):
         """Contructs an overlay from a 1D or 2D data array. The 2nd dimension is
         always assumed to be the number of frames."""
-        super().__init__(data, lut=lut)
+        super().__init__(data, lut=lut, **kwargs)
 
 
 class Image(ArrayContainerTemplate, Transformable):
@@ -140,10 +144,10 @@ class Image(ArrayContainerTemplate, Transformable):
 
     basedims = 2
 
-    def __init__(self, data, affine=None, pixsize=None, lut=None):
+    def __init__(self, data, affine=None, pixsize=None, lut=None, **kwargs):
         """Contructs an image from a 2D or 3D data array. The 3rd dimension is
         always assumed to be the number of frames."""
-        ArrayContainerTemplate.__init__(self, data, lut=lut)
+        ArrayContainerTemplate.__init__(self, data, lut=lut, **kwargs)
         self.affine = affine
         self.pixsize = pixsize if pixsize is not None else (1.0, 1.0)
 
@@ -220,7 +224,7 @@ class Volume(ArrayContainerTemplate, Transformable):
 
     basedims = 3
 
-    def __init__(self, data, affine=None, voxsize=None, lut=None):
+    def __init__(self, data, affine=None, voxsize=None, lut=None, **kwargs):
         """
         Contructs a volume from a 3D or 4D data array. The 4th dimension is
         always assumed to be the number of frames.
@@ -240,7 +244,7 @@ class Volume(ArrayContainerTemplate, Transformable):
             newaxes = [1] * (3 - data.ndim)
             data = data.reshape(*data.shape, *newaxes)
 
-        ArrayContainerTemplate.__init__(self, data, lut=lut)
+        ArrayContainerTemplate.__init__(self, data, lut=lut, **kwargs)
         self.affine = affine
         self.voxsize = voxsize if voxsize is not None else (1.0, 1.0, 1.0)
 
@@ -379,9 +383,9 @@ class Volume(ArrayContainerTemplate, Transformable):
         cropped_vol.copy_metadata(self)
         return cropped_vol
 
-    def conform_to_shape(self, shape):
+    def fit_to_shape(self, shape):
         """
-        Returns a volume conformed to a given shape. Image will be
+        Returns a volume fit to a given shape. Image will be
         centered in the conformed volume.
 
         TODO: Enable multi-frame support.
@@ -389,7 +393,7 @@ class Volume(ArrayContainerTemplate, Transformable):
 
         if self.nframes > 1:
             raise NotImplementedError(
-                "multiframe volumes not support yet for conforming"
+                "multiframe volumes not support yet for shape refit"
             )
 
         delta = (np.array(shape) - np.array(self.shape[:3])) / 2
@@ -400,8 +404,9 @@ class Volume(ArrayContainerTemplate, Transformable):
         c_high = np.clip(high, 0, None)
         conformed_data = np.pad(self.data.squeeze(), list(zip(c_low, c_high)))
 
-        c_low = np.clip(-low, 0, None)
-        c_high = conformed_data.shape[:3] - np.clip(-high, 0, None)
+        # note: low and high are intentionally swapped here
+        c_low = np.clip(-high, 0, None)
+        c_high = conformed_data.shape[:3] - np.clip(-low, 0, None)
         cropping = tuple([slice(a, b) for a, b in zip(c_low, c_high)])
         conformed_data = conformed_data[cropping]
 
@@ -409,7 +414,8 @@ class Volume(ArrayContainerTemplate, Transformable):
         if self.affine is not None:
             matrix = np.eye(4)
             matrix[:3, :3] = self.affine[:3, :3]
-            p0 = self.vox2ras().transform(-low)
+            p0crs = np.clip(-high, 0, None) - np.clip(low, 0, None)
+            p0 = self.vox2ras().transform(p0crs)
             matrix[:3, 3] = p0
             pcrs = np.append(np.array(conformed_data.shape[:3]) / 2, 1)
             cras = np.matmul(matrix, pcrs)[:3]

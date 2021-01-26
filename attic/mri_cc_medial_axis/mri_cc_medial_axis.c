@@ -119,7 +119,7 @@ static int labels[] = {THICKEN_FILL, NBHD_FILL, VENTRICLE_FILL, DIAGONAL_FILL,
 #define CC_VAL      100
 
 /* aspect ratios are dy/dx */
-#define MIN_CC_AREA   350 /* smallest I've seen is 389 */
+#define MIN_CC_AREA   350  /* smallest I've seen is 389 */
 #define MAX_CC_AREA   1400 /* biggest I've seen is 1154 */
 #define MIN_CC_ASPECT 0.1
 #define MAX_CC_ASPECT 0.75

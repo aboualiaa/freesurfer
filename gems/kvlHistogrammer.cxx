@@ -182,6 +182,13 @@ void Histogrammer ::Rasterize(const AtlasMesh *mesh) {
   m_ThreadSpecificHistograms.clear();
   m_ThreadSpecificMinLogLikelihoods.clear();
 
+  // Initialize thread-specific histogram from a clean slate
+  HistogramThreadAccumType emptyThreadHistogram;
+  for (int classNumber = 0; classNumber < numberOfClasses; ++classNumber) {
+    emptyThreadHistogram.push_back(
+        std::vector<ThreadAccumDataType>(m_NumberOfBins, 0.0));
+  }
+
   // For each thread, create an empty histogram and cost so that
   // different threads never interfere with one another
   for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
@@ -190,28 +197,36 @@ void Histogrammer ::Rasterize(const AtlasMesh *mesh) {
     m_ThreadSpecificMinLogLikelihoods.push_back(0.0);
 
     // Initialize to zero-filled histogram
-    m_ThreadSpecificHistograms.push_back(emptyHistogram);
+    m_ThreadSpecificHistograms.push_back(emptyThreadHistogram);
   } // End loop over threads
 
   // Now rasterize
   Superclass::Rasterize(mesh);
 
-  // Collect the results of all the threads
-  for (std::vector<double>::const_iterator it =
-           m_ThreadSpecificMinLogLikelihoods.begin();
-       it != m_ThreadSpecificMinLogLikelihoods.end(); ++it) {
-    m_MinLogLikelihood += *it;
+  // Collect the results of all threads and copy to final MinLogLikelihood
+  for (int i = 1; i < m_ThreadSpecificMinLogLikelihoods.size(); i++) {
+    m_ThreadSpecificMinLogLikelihoods[0] +=
+        m_ThreadSpecificMinLogLikelihoods[i];
   }
+  m_MinLogLikelihood = m_ThreadSpecificMinLogLikelihoods[0];
 
-  for (std::vector<HistogramType>::const_iterator it =
-           m_ThreadSpecificHistograms.begin();
-       it != m_ThreadSpecificHistograms.end(); ++it) {
+  // Collect the results of all the histogram threads
+  for (int i = 1; i < m_ThreadSpecificHistograms.size(); i++) {
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
       for (int binNumber = 0; binNumber < m_NumberOfBins; binNumber++) {
-        m_Histogram[classNumber][binNumber] += (*it)[classNumber][binNumber];
+        m_ThreadSpecificHistograms[0][classNumber][binNumber] +=
+            m_ThreadSpecificHistograms[i][classNumber][binNumber];
       }
     }
-  } // End loop over all threads
+  }
+
+  // Copy to final histogram
+  for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
+    for (int binNumber = 0; binNumber < m_NumberOfBins; binNumber++) {
+      m_Histogram[classNumber][binNumber] =
+          m_ThreadSpecificHistograms[0][classNumber][binNumber];
+    }
+  }
 }
 
 //

@@ -26,6 +26,7 @@
 #include "ui_ToolWindowEdit.h"
 #include <QDebug>
 #include <QSettings>
+#include <QTimer>
 #ifdef Q_OS_MAC
 #include "MacHelper.h"
 #endif
@@ -180,8 +181,7 @@ ToolWindowEdit::ToolWindowEdit(QWidget *parent)
 
 #ifdef Q_OS_MAC
   ui->labelTips->setText(ui->labelTips->text().replace("Ctrl +", "Cmd +"));
-  ui->labelTipsContour->setText(
-      ui->labelTips->text().replace("Ctrl +", "Cmd +"));
+  //  ui->labelTipsContour->setText(ui->labelTipsContour->text().replace("Ctrl +", "Cmd +"));
   if (MacHelper::IsDarkMode()) {
     ui->actionFreeHand->setIcon(
         MacHelper::InvertIcon(ui->actionFreeHand->icon(), QSize(), true));
@@ -325,10 +325,8 @@ void ToolWindowEdit::OnIdle() {
               nAction != Interactor2DVoxelEdit::EM_Contour &&
                   nAction != Interactor2DVoxelEdit::EM_ColorPicker &&
                   nAction != Interactor2DVoxelEdit::EM_Fill);
-  //  ShowWidgets( m_widgetsReference, nAction == Interactor2DVoxelEdit::EM_Fill
-  //  ||
-  //                                   nAction ==
-  //                                   Interactor2DVoxelEdit::EM_Contour );
+  //  ShowWidgets( m_widgetsReference, nAction == Interactor2DVoxelEdit::EM_Fill ||
+  //                                   nAction == Interactor2DVoxelEdit::EM_Contour );
   ShowWidgets(m_widgetsTolerance, nAction == Interactor2DVoxelEdit::EM_Fill);
   ShowWidgets(m_widgetsConstrain,
               nAction != Interactor2DVoxelEdit::EM_ColorPicker &&
@@ -336,8 +334,7 @@ void ToolWindowEdit::OnIdle() {
   ShowWidgets(m_widgetsSmooth, nAction == Interactor2DVoxelEdit::EM_Contour);
   ShowWidgets(m_widgetsContour, nAction == Interactor2DVoxelEdit::EM_Contour);
   ShowWidgets(m_widgetsGeoSeg, nAction == Interactor2DVoxelEdit::EM_GeoSeg);
-  //  ui->widgetBusyIndicator->setVisible(ui->pushButtonGeoGo->isVisible() &&
-  //  !ui->pushButtonGeoGo->isEnabled());
+  //  ui->widgetBusyIndicator->setVisible(ui->pushButtonGeoGo->isVisible() && !ui->pushButtonGeoGo->isEnabled());
   ui->widgetBusyIndicator->hide();
 
   ui->labelGeoLambda->hide();

@@ -39,7 +39,7 @@ int TAGskip(FILE *fp, int tag, long long len) {
   free(buf);
   return (ret);
 #else
-  return (fseek(fp, len, SEEK_CUR)); // doesn't work for gzipped files
+  return (fseek(fp, len, SEEK_CUR));   // doesn't work for gzipped files
 #endif
 }
 

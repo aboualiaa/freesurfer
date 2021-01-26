@@ -385,7 +385,7 @@ MATRIX *     XFM = nullptr, *XFMSubtract = nullptr;
 #define SURF_SRC_NXYZ    4 // surface normals
 #define SURF_SRC_RIP     5 // rip flag
 #define SURF_SRC_ANNOT   6 // surface annotation
-int   UseSurfTarg = 0; // Put Src XYZ into a target surface
+int   UseSurfTarg = 0;     // Put Src XYZ into a target surface
 int   ApplyReg    = 0;
 char *AnnotFile   = NULL;
 

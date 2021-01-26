@@ -1,6 +1,6 @@
 /**
  * @brief Places surface based on an intensity input image. This is meant to provide
- * replacement functionality for mris_make_surfaces in a form that is easier to
+ * replacement functionality for mris_make_surfaces in a form that is easier to 
  * maintain.
  */
 /*
@@ -85,11 +85,11 @@ mris_make_surfaces -c -cortex 0 -output .redo -orig_white white -orig_pial woT2.
   -aseg ../mri/aseg.presurf -nowhite -mgz -T1 brain.finalsurfs -T2 ../mri/T2 \
   -nsigma_above 2 -nsigma_below 5 dev.hrdecremdn.996782 rh
 # This does not give an exact replication, but it is close
-mris_place_surface --adgws-in autodetstats.lh.dat
-  --seg ../mri/aseg.presurf.mgz --wm ../mri/wm.mgz --invol ../mri/brain.finalsurfs.mgz
-  --lh --i lh.woT2.pial --init lh.woT2.pial --o lh.T2.pial
+mris_place_surface --adgws-in autodetstats.lh.dat 
+  --seg ../mri/aseg.presurf.mgz --wm ../mri/wm.mgz --invol ../mri/brain.finalsurfs.mgz 
+  --lh --i lh.woT2.pial --init lh.woT2.pial --o lh.T2.pial 
   --pial --nsmooth 0 --rip-label ../label/lh.cortex.label
-  --aparc ../label/lh.aparc.annot --repulse-surf lh.white
+  --aparc ../label/lh.aparc.annot --repulse-surf lh.white 
   --mmvol--mmvol ../mri/T2.mgz T2 --white-surf lh.white
 # The role of the input (--i) vs init (--init) surface needs to be clarified
 
@@ -120,6 +120,7 @@ double round(double x);
 #include "mri2.h"
 #include "mris_multimodal_refinement.h"
 #include "mrisurf.h"
+#include "mrisurf_compute_dxyz.h"
 #include "mrisutils.h"
 #include "romp_support.h"
 #include "surfgrad.h"
@@ -223,14 +224,15 @@ int      DoIntensityProc = 1;
 
 double shrinkThresh = -1;
 
-int    mm_contrast_type = -1;
-char * mmvolpath        = NULL;
-MRI *  mmvol            = NULL;
-float  T2_min_inside    = 110;
-float  T2_max_inside    = 300;
-double T2_min_outside   = 130;
-double T2_max_outside   = 300;
-double max_outward_dist =
+int                  mm_contrast_type = -1;
+char *               mmvolpath        = NULL;
+MRI *                mmvol            = NULL;
+std::map<int, MRI *> mmvols;
+float                T2_min_inside  = 110;
+float                T2_max_inside  = 300;
+double               T2_min_outside = 130;
+double               T2_max_outside = 300;
+double               max_outward_dist =
     1; // for normal cases, for pathology might be much larger
 double wm_weight =
     3; // threshold for finding gm outliers: thresh = (wt*wm + gm )/(wt+1)
@@ -240,6 +242,8 @@ double         Ghisto_left_outside_peak_pct  = 0.5;
 double         Ghisto_right_outside_peak_pct = 0.5;
 int            n_averages                    = 0;
 int            UseMMRefine                   = 0;
+float          MMRefineMinPGrey              = 20;
+int            UseMMRefineWeights            = 0;
 AutoDetGWStats adgws;
 char *         coversegpath      = NULL;
 MRI *          mri_cover_seg     = NULL;
@@ -506,7 +510,10 @@ int main(int argc, char **argv) {
     mmvol = MRIread(mmvolpath);
     if (mmvol == NULL)
       exit(1);
-    // should check that the dimensions, resolution are the same
+  }
+  // should check that the dimensions, resolution are the same
+  if (mmvolpath || UseMMRefine || UseMMRefineWeights || mmvols.size() > 0) {
+    std::cout << " using multi modal weights " << std::endl;
     parms.l_intensity = 0.000;
     parms.l_location  = 0.500;
     parms.l_repulse   = 0.025;
@@ -619,7 +626,7 @@ int main(int argc, char **argv) {
     parms.n_averages = n_averages;
 
     INTEGRATION_PARMS_copy(&old_parms, &parms);
-    if (mmvol == NULL) {
+    if (mmvol == NULL && mmvols.size() == 0 && !UseMMRefine) {
       // Compute the target intensity value (l_intensity)
       printf("Computing target border values \n");
       // The outputs are set in each vertex structure:
@@ -673,19 +680,38 @@ int main(int argc, char **argv) {
             Ghisto_left_outside_peak_pct, Ghisto_right_outside_peak_pct,
             wm_weight, pial_sigma, invol);
       } else {
-        printf("UseMMRefine\n");
+        std::cout << "UseMMRefine, num vols" << mmvols.size() << std::endl;
         MRIS_MultimodalRefinement *refine   = new MRIS_MultimodalRefinement();
         MRI *                      whiteMR  = MRIcopy(invol, NULL);
         MRI *                      vesselMR = MRIcopy(invol, NULL);
-        refine->SegmentWM(invol, mmvol, whiteMR);
-        refine->SegmentVessel(invol, mmvol, vesselMR);
+        if (mmvols.count(CONTRAST_T2) == 0 &&
+            mmvols.count(CONTRAST_FLAIR) == 0) {
+          refine->SegmentWM(mmvols[CONTRAST_T1], seg, whiteMR, -1);
+          refine->SegmentVessel(mmvols[CONTRAST_T1], seg, vesselMR, -1);
+        } else if (mmvols.count(CONTRAST_T1) == 0) {
+          int contrast =
+              mmvols.count(CONTRAST_T2) > 0 ? CONTRAST_T2 : CONTRAST_FLAIR;
+          refine->SegmentWM(invol, mmvols[contrast], whiteMR, contrast);
+          refine->SegmentVessel(invol, mmvols[contrast], vesselMR, contrast);
+        } else {
+          int contrast =
+              mmvols.count(CONTRAST_T2) > 0 ? CONTRAST_T2 : CONTRAST_FLAIR;
+          refine->SegmentWM(mmvols[CONTRAST_T1], mmvols[contrast], whiteMR,
+                            contrast);
+          refine->SegmentVessel(mmvols[CONTRAST_T1], mmvols[contrast], vesselMR,
+                                contrast);
+        }
         refine->SetStep(.4);
         refine->SetNumberOfSteps(12);
         refine->SetGradientSigma(.3);
         refine->SetSegmentation(seg);
-        refine->FindMaximumGradient(mm_contrast_type == CONTRAST_T2);
-        refine->addImage(invol);
-        refine->addImage(mmvol);
+        refine->SetMinPGrey(MMRefineMinPGrey);
+        //refine->FindMaximumGradient(mm_contrast_type == CONTRAST_T2);
+        //refine->addImage(invol);
+        for (auto &x : mmvols) {
+          std::cout << x.first << std::endl;
+          refine->addImage(x.second);
+        }
         refine->SetWhiteMR(whiteMR);
         refine->SetVesselMR(vesselMR);
         refine->getTarget(surf); //, debugVertex);
@@ -914,9 +940,36 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       coversegpath = pargv[0];
       nargsused    = 1;
-    } else if (!strcasecmp(option, "--mm-refine"))
-      UseMMRefine = 1;
-    else if (!strcmp(option, "--i")) {
+    } else if (!strcasecmp(option, "--mm-min-p-grey")) {
+      MMRefineMinPGrey = atof(pargv[0]);
+      nargsused        = 1;
+    } else if (!strcasecmp(option, "--mm-weights")) {
+
+      UseMMRefineWeights = 1;
+    } else if (!strcasecmp(option, "--mm-refine")) {
+      UseMMRefine   = 1;
+      int numImages = atoi(pargv[0]);
+
+      for (int i = 0; i < numImages; i++) {
+        if (!stricmp(pargv[i * 2 + 1], "t2")) {
+          std::cout << CONTRAST_T2 << " T2 " << pargv[i * 2 + 2] << std::endl;
+          mmvols[CONTRAST_T2] = MRIread(pargv[i * 2 + 2]);
+        } else if (!stricmp(pargv[i * 2 + 1], "flair")) {
+          std::cout << CONTRAST_FLAIR << " FLAIR " << pargv[i * 2 + 2]
+                    << std::endl;
+          mmvols[CONTRAST_FLAIR] = MRIread(pargv[i * 2 + 2]);
+        } else if (!stricmp(pargv[i * 2 + 1], "t1")) {
+          std::cout << CONTRAST_T1 << " T1 " << pargv[i * 2 + 2] << std::endl;
+          mmvols[CONTRAST_T1] = MRIread(pargv[i * 2 + 2]);
+        } else {
+          printf("ERROR: mmvol must be either t2 or flair weighted\n");
+          exit(1);
+        }
+      }
+      surftype  = GRAY_CSF;
+      nargsused = numImages * 2 + 1;
+
+    } else if (!strcmp(option, "--i")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       insurfpath      = pargv[0];
@@ -1115,7 +1168,14 @@ static int parse_commandline(int argc, char **argv) {
       nargsused = 1;
     }
     // ======== End Cost function weights ================
-    else if (!stricmp(option, "--n_averages")) {
+    else if (!stricmp(option, "--location-mov-len")) {
+      double locationmovlen;
+      sscanf(pargv[0], "%lf", &locationmovlen);
+      mrisDxyzSetLocationMoveLen(locationmovlen);
+      printf("Setting LOCATION_MOVE_LEN to %g\n", locationmovlen);
+      // Used in mrisComputeTargetLocationTerm()
+      nargsused = 1;
+    } else if (!stricmp(option, "--n_averages")) {
       sscanf(pargv[0], "%d", &n_averages);
       nargsused = 1;
     } else if (!stricmp(option, "--shrink")) {

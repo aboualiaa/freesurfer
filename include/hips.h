@@ -26,33 +26,33 @@ using h_boolean  = int;
 #define CPLX_RVI0 1 /* real part = value, imaginary = 0 */
 #define CPLX_R0IV 2 /* real part = 0, imaginary = value */
 
-#define PFBYTE      0 /* Bytes interpreted as unsigned integers */
-#define PFSHORT     1 /* Short integers (2 bytes) */
-#define PFINT       2 /* Integers (4 bytes) */
-#define PFFLOAT     3 /* Float's (4 bytes)*/
-#define PFCOMPLEX   4 /* 2 Float's interpreted as (real,imaginary) */
-#define PFASCII     5 /* ASCII rep, with linefeeds after each row */
-#define PFDOUBLE    6 /* Double's (8 byte floats) */
-#define PFDBLCOM    7 /* Double complex's (2 Double's) */
-#define PFQUAD      10 /* quad-tree encoding (Mimaging) */
-#define PFQUAD1     11 /* quad-tree encoding */
-#define PFHIST      12 /* histogram of an image (using ints) */
-#define PFSPAN      13 /* spanning tree format */
-#define PLOT3D      24 /* plot-3d format */
-#define PFMSBF      30 /* packed, most-significant-bit first */
-#define PFLSBF      31 /* packed, least-significant-bit first */
-#define PFSBYTE     32 /* signed bytes */
-#define PFUSHORT    33 /* unsigned shorts */
-#define PFUINT      34 /* unsigned ints */
-#define PFRGB       35 /* RGB RGB RGB bytes */
-#define PFRGBZ      36 /* RGB0 RGB0 RGB0 bytes */
-#define PFZRGB      37 /* 0RGB 0RGB 0RGB bytes */
-#define PFMIXED     40 /* multiple frames in different pixel formats */
-#define PFBGR       41 /* BGR BGR BGR bytes */
-#define PFBGRZ      42 /* BGR0 BGR0 BGR0 bytes */
-#define PFZBGR      43 /* 0BGR 0BGR 0BGR bytes */
-#define PFINTPYR    50 /* integer pyramid */
-#define PFFLOATPYR  51 /* float pyramid */
+#define PFBYTE      0   /* Bytes interpreted as unsigned integers */
+#define PFSHORT     1   /* Short integers (2 bytes) */
+#define PFINT       2   /* Integers (4 bytes) */
+#define PFFLOAT     3   /* Float's (4 bytes)*/
+#define PFCOMPLEX   4   /* 2 Float's interpreted as (real,imaginary) */
+#define PFASCII     5   /* ASCII rep, with linefeeds after each row */
+#define PFDOUBLE    6   /* Double's (8 byte floats) */
+#define PFDBLCOM    7   /* Double complex's (2 Double's) */
+#define PFQUAD      10  /* quad-tree encoding (Mimaging) */
+#define PFQUAD1     11  /* quad-tree encoding */
+#define PFHIST      12  /* histogram of an image (using ints) */
+#define PFSPAN      13  /* spanning tree format */
+#define PLOT3D      24  /* plot-3d format */
+#define PFMSBF      30  /* packed, most-significant-bit first */
+#define PFLSBF      31  /* packed, least-significant-bit first */
+#define PFSBYTE     32  /* signed bytes */
+#define PFUSHORT    33  /* unsigned shorts */
+#define PFUINT      34  /* unsigned ints */
+#define PFRGB       35  /* RGB RGB RGB bytes */
+#define PFRGBZ      36  /* RGB0 RGB0 RGB0 bytes */
+#define PFZRGB      37  /* 0RGB 0RGB 0RGB bytes */
+#define PFMIXED     40  /* multiple frames in different pixel formats */
+#define PFBGR       41  /* BGR BGR BGR bytes */
+#define PFBGRZ      42  /* BGR0 BGR0 BGR0 bytes */
+#define PFZBGR      43  /* 0BGR 0BGR 0BGR bytes */
+#define PFINTPYR    50  /* integer pyramid */
+#define PFFLOATPYR  51  /* float pyramid */
 #define PFPOLYLINE  100 /* 2D points */
 #define PFCOLVEC    101 /* Set of RGB triplets defining colours */
 #define PFUKOOA     102 /* Data in standard UKOOA format */
@@ -82,10 +82,10 @@ using h_boolean  = int;
 #define PFDVVFFT3D  706 /* double 3D VVFFT in separated planes */
 
 #define HIPS_ERROR (-1) /* error-return from hips routines */
-#define HIPS_OK    0 /* one possible nonerror-return value */
+#define HIPS_OK    0    /* one possible nonerror-return value */
 
 #define FBUFLIMIT  30000 /* increase this if you use large PLOT3D files */
-#define LINELENGTH 200 /* max characters per line in header vars */
+#define LINELENGTH 200   /* max characters per line in header vars */
 #define NULLPAR    ((struct extpar *)0)
 
 // ------ math macros ------

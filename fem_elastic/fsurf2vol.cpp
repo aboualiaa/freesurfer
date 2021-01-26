@@ -722,9 +722,9 @@ static int do_vol_deformation(PointsContainerType &container, tSolver &solver,
 
 #undef __FUNCT__
 #define __FUNCT__ "do_vol_deformation"
-static int do_vol_deformation(PointsContainerType &container, tSolver &solver,
-                              tDblCoords cmin, tDblCoords cmax,
-                              const Transform3Spointer ptransform, int step) {
+static int  do_vol_deformation(PointsContainerType &container, tSolver &solver,
+                               tDblCoords cmin, tDblCoords cmax,
+                               const Transform3Spointer ptransform, int step) {
   tDblCoords pt, delta;
 
   // pin down volume corners to make sure the matrix is positive definite

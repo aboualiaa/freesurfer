@@ -107,7 +107,7 @@ int FUNCTION_NAME(MRIS *mris)
   VERTEX const *v0 = &mris->vertices[vno0], *v1 = &mris->vertices[vno1],
                *v2 = &mris->vertices[vno2];
 #else
-  FloatXYZ v0xyz;
+  FloatXYZ             v0xyz;
   v0xyz.x = mris->v_x[vno0];
   v0xyz.y = mris->v_y[vno0];
   v0xyz.z = mris->v_z[vno0];

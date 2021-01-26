@@ -54,9 +54,9 @@ void AtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     m_ThreadSpecificMinLogLikelihoodTimesPriors.push_back(0.0);
 
     // Create a container to hold the position gradient of this thread, and initialize to zero
-    AtlasPositionGradientContainerType::Pointer positionGradient =
-        AtlasPositionGradientContainerType::New();
-    AtlasPositionGradientType zeroEntry(0.0f);
+    AtlasPositionGradientThreadAccumContainerType::Pointer positionGradient =
+        AtlasPositionGradientThreadAccumContainerType::New();
+    AtlasPositionGradientThreadAccumType zeroEntry(0.0f);
     for (AtlasMesh::PointsContainer::ConstIterator pointIt =
              mesh->GetPoints()->Begin();
          pointIt != mesh->GetPoints()->End(); ++pointIt) {
@@ -126,30 +126,47 @@ void AtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     return;
   }
 
-  // Collect the results of all the threads
-  for (std::vector<double>::const_iterator it =
-           m_ThreadSpecificMinLogLikelihoodTimesPriors.begin();
-       it != m_ThreadSpecificMinLogLikelihoodTimesPriors.end(); ++it) {
-    if (std::isnan(*it) || std::isinf(*it)) {
+  // Collect MinLogLikelihoodTimesPrior across all threads
+  ThreadAccumDataType totalThreadMinLogLikelihoodTimesPrior = 0;
+  for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
+       threadNumber++) {
+    const double typedValue =
+        double(m_ThreadSpecificMinLogLikelihoodTimesPriors[threadNumber]);
+    if (std::isnan(typedValue) || std::isinf(typedValue)) {
       // Something has gone wrong
       m_MinLogLikelihoodTimesPrior = itk::NumericTraits<double>::max();
       return;
     }
 
-    m_MinLogLikelihoodTimesPrior += *it;
+    totalThreadMinLogLikelihoodTimesPrior +=
+        m_ThreadSpecificMinLogLikelihoodTimesPriors[threadNumber];
   }
 
-  for (std::vector<AtlasPositionGradientContainerType::Pointer>::const_iterator
-           it = m_ThreadSpecificPositionGradients.begin();
-       it != m_ThreadSpecificPositionGradients.end(); ++it) {
-    AtlasPositionGradientContainerType::Iterator sourceIt = (*it)->Begin();
-    AtlasPositionGradientContainerType::Iterator targetIt =
-        m_PositionGradient->Begin();
-    for (; targetIt != m_PositionGradient->End(); ++sourceIt, ++targetIt) {
-      targetIt.Value() += sourceIt.Value();
-    }
+  // Copy accumulator value to final MinLogLikelihoodTimesPrior
+  m_MinLogLikelihoodTimesPrior = totalThreadMinLogLikelihoodTimesPrior;
 
-  } // End loop over all threads
+  // Accumulate PositionGradient across all threads
+  for (int threadNumber = 1; threadNumber < this->GetNumberOfThreads();
+       threadNumber++) {
+    AtlasPositionGradientThreadAccumContainerType::ConstIterator threadIt =
+        m_ThreadSpecificPositionGradients[threadNumber]->Begin();
+    AtlasPositionGradientThreadAccumContainerType::Iterator firstThreadIt =
+        m_ThreadSpecificPositionGradients[0]->Begin();
+    for (; firstThreadIt != m_ThreadSpecificPositionGradients[0]->End();
+         ++threadIt, ++firstThreadIt) {
+      firstThreadIt.Value() += threadIt.Value();
+    }
+  }
+
+  // Copy accumulated values to final PositionGradients
+  AtlasPositionGradientThreadAccumContainerType::Iterator
+      firstThreadGradientIt = m_ThreadSpecificPositionGradients[0]->Begin();
+  AtlasPositionGradientContainerType::Iterator finalGradientIt =
+      m_PositionGradient->Begin();
+  for (; finalGradientIt != m_PositionGradient->End();
+       ++firstThreadGradientIt, ++finalGradientIt) {
+    finalGradientIt.Value() = firstThreadGradientIt.Value();
+  }
 
 #if KVL_ENABLE_TIME_PROBE
   clock.Stop();
@@ -289,18 +306,18 @@ bool AtlasMeshPositionCostAndGradientCalculator ::RasterizeTetrahedron(
   m_ThreadSpecificOtherRasterizationTimers[threadNumber].Start();
 #endif
 
-#if 0
-  // We start with an empty gradient vector in each
+#if 0  
+  // We start with an empty gradient vector in each 
   AtlasPositionGradientType  gradientInVertex0( 0.0 );
   AtlasPositionGradientType  gradientInVertex1( 0.0 );
   AtlasPositionGradientType  gradientInVertex2( 0.0 );
   AtlasPositionGradientType  gradientInVertex3( 0.0 );
   double  priorPlusDataCost = 0.0;
-
+  
   // Cache relevant things about the tetrahedron
   ReferenceTetrahedronInfo  info;
   mesh->GetCellData( tetrahedronId, &info );
-
+ 
   AtlasMesh::CellAutoPointer  cell;
   mesh->GetCell( tetrahedronId, cell );
 
@@ -312,7 +329,7 @@ bool AtlasMeshPositionCostAndGradientCalculator ::RasterizeTetrahedron(
   const AtlasMesh::PointIdentifier  id2 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier  id3 = *pit;
-
+  
   AtlasMesh::PointType p0;
   AtlasMesh::PointType p1;
   AtlasMesh::PointType p2;
@@ -364,16 +381,16 @@ bool AtlasMeshPositionCostAndGradientCalculator ::RasterizeTetrahedron(
   const AtlasMesh::PointType &p2 = mesh->GetPoints()->ElementAt(id2);
   const AtlasMesh::PointType &p3 = mesh->GetPoints()->ElementAt(id3);
 
-  double &priorPlusDataCost =
+  ThreadAccumDataType &priorPlusDataCost =
       m_ThreadSpecificMinLogLikelihoodTimesPriors[threadNumber];
 
-  AtlasPositionGradientType &gradientInVertex0 =
+  AtlasPositionGradientThreadAccumType &gradientInVertex0 =
       m_ThreadSpecificPositionGradients[threadNumber]->ElementAt(id0);
-  AtlasPositionGradientType &gradientInVertex1 =
+  AtlasPositionGradientThreadAccumType &gradientInVertex1 =
       m_ThreadSpecificPositionGradients[threadNumber]->ElementAt(id1);
-  AtlasPositionGradientType &gradientInVertex2 =
+  AtlasPositionGradientThreadAccumType &gradientInVertex2 =
       m_ThreadSpecificPositionGradients[threadNumber]->ElementAt(id2);
-  AtlasPositionGradientType &gradientInVertex3 =
+  AtlasPositionGradientThreadAccumType &gradientInVertex3 =
       m_ThreadSpecificPositionGradients[threadNumber]->ElementAt(id3);
 
 #endif
@@ -436,11 +453,12 @@ bool AtlasMeshPositionCostAndGradientCalculator ::
     AddPriorContributionOfTetrahedron(
         const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
         const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
-        const ReferenceTetrahedronInfo &info, double &priorPlusDataCost,
-        AtlasPositionGradientType &gradientInVertex0,
-        AtlasPositionGradientType &gradientInVertex1,
-        AtlasPositionGradientType &gradientInVertex2,
-        AtlasPositionGradientType &gradientInVertex3) {
+        const ReferenceTetrahedronInfo &      info,
+        ThreadAccumDataType &                 priorPlusDataCost,
+        AtlasPositionGradientThreadAccumType &gradientInVertex0,
+        AtlasPositionGradientThreadAccumType &gradientInVertex1,
+        AtlasPositionGradientThreadAccumType &gradientInVertex2,
+        AtlasPositionGradientThreadAccumType &gradientInVertex3) {
   // Z is inv( [ p0 p1 p2 p3; 1 1 1 1 ] ) of the tetrahedron in reference position
   const double referenceVolumeTimesK = info.m_ReferenceVolumeTimesK;
 

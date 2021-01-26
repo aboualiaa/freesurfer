@@ -936,7 +936,7 @@ HISTOGRAM *MRIhistogramLabel(MRI *mri, MRI *mri_labeled, int label, int nbins) {
   Remove small inconsistincies in the labelling of a volume.
   ------------------------------------------------------*/
 #define MIN_VOXELS_PCT  0.15 /* peak must average 15% of max count */
-#define PEAK_SEPARATION 11 /* min width of peak */
+#define PEAK_SEPARATION 11   /* min width of peak */
 #define VALLEY_WIDTH    3
 #define GRAY_LOW        65 /* lowest interesting gray matter */
 

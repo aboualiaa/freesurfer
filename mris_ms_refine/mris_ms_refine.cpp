@@ -1643,7 +1643,7 @@ static int compute_maximal_distances(
 #if 0
     v_pial = &mris->vertices[nearest_pial_vertices[vno]] ;
 #else
-    v_pial = v_white;
+    v_pial  = v_white;
 #endif
     if (v_white->ripflag)
       continue;
@@ -2589,7 +2589,7 @@ static double compute_optimal_parameters(MRI_SURFACE *mris, int vno,
 #if 0
   pial_vno = ep->nearest_pial_vertices[vno] ;
 #else
-  pial_vno = vno;
+  pial_vno     = vno;
 #endif
   v_white = &mris->vertices[white_vno];
   v_pial  = &mris->vertices[pial_vno];
@@ -3336,7 +3336,7 @@ static double compute_optimal_vertex_positions(MRI_SURFACE *mris, int vno,
 #if 0
   pial_vno = ep->nearest_pial_vertices[vno] ;
 #else
-  pial_vno = vno;
+  pial_vno        = vno;
 #endif
   v_white = &mris->vertices[white_vno];
   v_pial  = &mris->vertices[pial_vno];
@@ -3344,8 +3344,8 @@ static double compute_optimal_vertex_positions(MRI_SURFACE *mris, int vno,
   inward_dist  = ep->cv_inward_dists[white_vno];
   outward_dist = ep->cv_outward_dists[white_vno];
 #else
-  inward_dist  = ep->max_dist;
-  outward_dist = ep->max_dist;
+  inward_dist     = ep->max_dist;
+  outward_dist    = ep->max_dist;
 #endif
   sigma = ep->current_sigma;
 

@@ -33,6 +33,8 @@
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QMenu>
+#include <QMouseEvent>
+#include <QShowEvent>
 #include <QTreeWidgetItem>
 
 InfoTreeWidget::InfoTreeWidget(QWidget *parent)
@@ -153,14 +155,8 @@ void InfoTreeWidget::UpdateAll() {
       //      if (layer->IsModified() || layer->GetCorrelationSurface())
       dvalue = layer->GetVoxelValue(m_dRAS);
       //      else
-      //        dvalue = layer->GetVoxelValueByOriginalIndex(nIndex[0]+0.5,
-      //        nIndex[1]+0.5, nIndex[2]+0.5);
+      //        dvalue = layer->GetVoxelValueByOriginalIndex(nIndex[0]+0.5, nIndex[1]+0.5, nIndex[2]+0.5);
       QString valueStrg = MyUtils::RealToNumber(dvalue, nPrecision);
-      //      while (valueStrg[valueStrg.size()-1] != '.' &&
-      //      valueStrg[valueStrg.size()-1] == '0')
-      //        valueStrg.resize(valueStrg.size()-1);
-      //      if (valueStrg[valueStrg.size()-1] == '.')
-      //        valueStrg.resize(valueStrg.size()-1);
       if (layer->GetNumberOfFrames() > 1 && layer->GetNumberOfFrames() <= 6) {
         QList<double> values = layer->GetVoxelValueByOriginalIndexAllFrames(
             (int)(fIndex[0] + 0.5), (int)(fIndex[1] + 0.5),
@@ -172,8 +168,13 @@ void InfoTreeWidget::UpdateAll() {
                  << ((nval >> 16) & 0x00ff);
         }
         QStringList strgs;
-        foreach (double value, values)
-          strgs << MyUtils::RealToNumber(value, nPrecision);
+        for (int n = 0; n < values.size(); n++) {
+          if (n == layer->GetActiveFrame())
+            strgs << QString("*%1*").arg(
+                MyUtils::RealToNumber(values[n], nPrecision));
+          else
+            strgs << MyUtils::RealToNumber(values[n], nPrecision);
+        }
         valueStrg = strgs.join(bComma ? ", " : " ");
         if (values.size() == 6) {
           valueStrg = "(" + strgs.mid(0, 3).join(bComma ? ", " : " ") + ") (" +

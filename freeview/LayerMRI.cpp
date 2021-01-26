@@ -19,44 +19,38 @@
  */
 
 #include "LayerMRI.h"
-#include "BrushProperty.h"
-#include "Contour2D.h"
 #include "FSVolume.h"
-#include "GeoSWorker.h"
-#include "LayerMRIWorkerThread.h"
 #include "LayerPropertyMRI.h"
-#include "LayerROI.h"
-#include "LayerSurface.h"
 #include "MainWindow.h"
 #include "MyUtils.h"
 #include "MyVTKUtils.h"
-#include "ProgressCallback.h"
-#include "SurfaceRegion.h"
-#include "SurfaceRegionGroups.h"
-#include "ThreadBuildContour.h"
 #include "vtkActor.h"
 #include "vtkAppendPolyData.h"
 #include "vtkCellArray.h"
+#include "vtkContourFilter.h"
 #include "vtkCubeSource.h"
+#include "vtkFreesurferLookupTable.h"
 #include "vtkImageActor.h"
 #include "vtkImageCast.h"
-#include "vtkImageExtractComponents.h"
 #include "vtkImageMapToColors.h"
 #include "vtkImageMapper3D.h"
 #include "vtkImageMask.h"
+#include "vtkImageResample.h"
 #include "vtkImageReslice.h"
+#include "vtkImageShiftScale.h"
+#include "vtkImageStencil.h"
 #include "vtkImageThreshold.h"
 #include "vtkLookupTable.h"
-#include "vtkMaskPoints.h"
+#include "vtkMarchingSquares.h"
 #include "vtkMath.h"
 #include "vtkMatrix4x4.h"
 #include "vtkPointData.h"
 #include "vtkPolyDataMapper.h"
+#include "vtkPolyDataToImageStencil.h"
 #include "vtkPolyDataWriter.h"
 #include "vtkProperty.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include "vtkRenderer.h"
-#include "vtkSTLWriter.h"
 #include "vtkSimpleLabelEdgeFilter.h"
 #include "vtkSmartPointer.h"
 #include "vtkSphereSource.h"
@@ -64,9 +58,27 @@
 #include "vtkTransformPolyDataFilter.h"
 #include "vtkTubeFilter.h"
 #include "vtkVolume.h"
+//#include "BuildContourThread.h"
+#include "BrushProperty.h"
+#include "Contour2D.h"
+#include "GeoSWorker.h"
+#include "LayerMRIWorkerThread.h"
+#include "LayerROI.h"
+#include "LayerSurface.h"
+#include "ProgressCallback.h"
+#include "SurfaceRegion.h"
+#include "SurfaceRegionGroups.h"
+#include "ThreadBuildContour.h"
+#include "vtkImageExtractComponents.h"
+#include "vtkImageFlip.h"
+#include "vtkImageResample.h"
+#include "vtkImageResliceMapper.h"
+#include "vtkMaskPoints.h"
+#include "vtkSTLWriter.h"
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
+#include <QVariantMap>
 #include <QtGlobal>
 
 #include "geos.h"
@@ -222,8 +234,7 @@ void LayerMRI::ConnectProperty() {
   connect(p, SIGNAL(LabelOutlineChanged(bool)), this,
           SLOT(UpdateLabelOutline()));
   connect(p, SIGNAL(OpacityChanged(double)), this, SLOT(UpdateOpacity()));
-  //  connect( p, SIGNAL(ResliceInterpolationChanged()), this,
-  //  SLOT(UpdateResliceInterpolation()) );
+  //  connect( p, SIGNAL(ResliceInterpolationChanged()), this, SLOT(UpdateResliceInterpolation()) );
   connect(p, SIGNAL(TextureSmoothingChanged()), this,
           SLOT(UpdateTextureSmoothing()));
   connect(p, SIGNAL(UpSampleMethodChanged(int)), this,
@@ -359,8 +370,8 @@ void LayerMRI::UpdateNiftiHeader() {
 
 bool LayerMRI::LoadVolumeTransform() {
   if (!m_volumeSource->LoadRegistrationMatrix(m_sRegFilename)) {
-    std::cerr << "Could not load transformation from "
-              << qPrintable(m_sRegFilename) << std::endl;
+    cerr << "Could not load transformation from " << qPrintable(m_sRegFilename)
+         << endl;
     return false;
   }
   m_volumeSource->MapMRIToImage();
@@ -471,8 +482,8 @@ bool LayerMRI::Create(LayerMRI *mri, bool bCopyVoxelData, int data_type,
         {
           for (int k = 0; k < dim[2]; k++)
           {
-            double val = m_imageDataRef->GetScalarComponentAsDouble(i, j, k,
-      mri->GetActiveFrame()); if (val >= dMin && val <= dMax)
+            double val = m_imageDataRef->GetScalarComponentAsDouble(i, j, k, mri->GetActiveFrame());
+            if (val >= dMin && val <= dMax)
               m_imageData->SetScalarComponentFromDouble(i, j, k, 0, 1);
           }
         }
@@ -811,9 +822,8 @@ void LayerMRI::InitializeVolume() {
   m_dWorldSize[2] =
       ((int)((RASBounds[5] - RASBounds[4]) / m_dWorldVoxelSize[2])) *
       m_dWorldVoxelSize[2];
-  //  qDebug() << RASBounds[0] << RASBounds[1] << RASBounds[2] << RASBounds[3]
-  //  << RASBounds[4] << RASBounds[5]; qDebug() << m_dWorldSize[0] <<
-  //  m_dWorldSize[1] << m_dWorldSize[2];
+  //  qDebug() << RASBounds[0] << RASBounds[1] << RASBounds[2] << RASBounds[3] << RASBounds[4] << RASBounds[5];
+  //  qDebug() << m_dWorldSize[0] << m_dWorldSize[1] << m_dWorldSize[2];
 
   m_imageData = source->GetImageOutput();
 }
@@ -964,10 +974,9 @@ void LayerMRI::UpdateContour(int nSegValue) {
 }
 
 void LayerMRI::UpdateContourActor(int nSegValue) {
-  // Generate a new thread id before creating the thread. so that mainwindow
-  // will be able to determine if a build contour result is already expired, by
-  // comparing the returned id and current id. If they are different, it means a
-  // new thread is rebuilding the contour
+  // Generate a new thread id before creating the thread. so that mainwindow will be able to determine
+  // if a build contour result is already expired, by comparing the returned id and current id. If they
+  // are different, it means a new thread is rebuilding the contour
   m_nThreadID++;
   ThreadBuildContour *thread = new ThreadBuildContour(this);
   connect(thread, SIGNAL(Finished(int)), this,
@@ -1187,7 +1196,19 @@ void LayerMRI::UpdateDisplayMode() {
     }
     if (GetProperty()->GetDisplayRGB()) {
       vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
-      cast->SetInputConnection(mReslice[i]->GetOutputPort());
+      vtkSmartPointer<vtkImageThreshold> upper =
+          vtkSmartPointer<vtkImageThreshold>::New();
+      upper->ThresholdByUpper(0);
+      upper->SetOutValue(0);
+      upper->SetReplaceOut(1);
+      upper->SetInputConnection(mReslice[i]->GetOutputPort());
+      vtkSmartPointer<vtkImageThreshold> lower =
+          vtkSmartPointer<vtkImageThreshold>::New();
+      lower->ThresholdByLower(255);
+      lower->SetOutValue(255);
+      lower->SetReplaceOut(1);
+      lower->SetInputConnection(upper->GetOutputPort());
+      cast->SetInputConnection(lower->GetOutputPort());
       cast->SetOutputScalarTypeToUnsignedChar();
       m_sliceActor2D[i]->GetMapper()->SetInputConnection(cast->GetOutputPort());
       m_sliceActor3D[i]->GetMapper()->SetInputConnection(cast->GetOutputPort());
@@ -1534,8 +1555,7 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
     n[i] = (int)((pos[i] - orig[i]) / voxel_size[i] + 0.5);
   }
 
-  //  vtkPolyData* polydata = vtkPolyDataMapper::SafeDownCast(
-  //  m_vectorActor2D[nPlane]->GetMapper() )->GetInput();
+  //  vtkPolyData* polydata = vtkPolyDataMapper::SafeDownCast( m_vectorActor2D[nPlane]->GetMapper() )->GetInput();
   vtkSmartPointer<vtkPolyData>  polydata = vtkSmartPointer<vtkPolyData>::New();
   vtkSmartPointer<vtkPoints>    points   = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> lines    = vtkSmartPointer<vtkCellArray>::New();
@@ -2387,8 +2407,7 @@ bool LayerMRI::GetVoxelStatsByTargetRAS(QVector<float> &coords,
   return GetVoxelStats(indices, mean_out, sd_out);
 }
 
-// memory allocated for indice_out and value_out need to be freed outside of
-// this function!
+// memory allocated for indice_out and value_out need to be freed outside of this function!
 bool LayerMRI::GetVoxelsOnLine(const double *pt0, const double *pt1, int nPlane,
                                int *&indice_out, double *&value_out,
                                int *cnt_out) {
@@ -2519,10 +2538,9 @@ void LayerMRI::UpdateLabelOutline() {
           ->GetShowLabelOutline()) {
     double *vsize = m_imageData->GetSpacing();
     for (int i = 0; i < 3; i++) {
-      //      mResample[i]->SetAxisMagnificationFactor( 0, IMAGE_RESAMPLE_FACTOR
-      //      ); mResample[i]->SetAxisMagnificationFactor( 1,
-      //      IMAGE_RESAMPLE_FACTOR ); mResample[i]->SetAxisMagnificationFactor(
-      //      2, IMAGE_RESAMPLE_FACTOR );
+      //      mResample[i]->SetAxisMagnificationFactor( 0, IMAGE_RESAMPLE_FACTOR );
+      //      mResample[i]->SetAxisMagnificationFactor( 1, IMAGE_RESAMPLE_FACTOR );
+      //      mResample[i]->SetAxisMagnificationFactor( 2, IMAGE_RESAMPLE_FACTOR );
       double pos[3] = {vsize[0] / IMAGE_RESAMPLE_FACTOR / 2,
                        vsize[1] / IMAGE_RESAMPLE_FACTOR / 2,
                        vsize[2] / IMAGE_RESAMPLE_FACTOR / 2};
@@ -2579,12 +2597,9 @@ void LayerMRI::UpdateUpSampleMethod() {
       mResample[i]->SetInputConnection(mReslice[i]->GetOutputPort());
       mColorMap[i]->SetInputConnection(mResample[i]->GetOutputPort());
       if (!GetProperty()->GetShowLabelOutline()) {
-        //        mResample[i]->SetAxisMagnificationFactor( 0,
-        //        IMAGE_RESAMPLE_FACTOR/2 );
-        //        mResample[i]->SetAxisMagnificationFactor( 1,
-        //        IMAGE_RESAMPLE_FACTOR/2 );
-        //        mResample[i]->SetAxisMagnificationFactor( 2,
-        //        IMAGE_RESAMPLE_FACTOR/2 );
+        //        mResample[i]->SetAxisMagnificationFactor( 0, IMAGE_RESAMPLE_FACTOR/2 );
+        //        mResample[i]->SetAxisMagnificationFactor( 1, IMAGE_RESAMPLE_FACTOR/2 );
+        //        mResample[i]->SetAxisMagnificationFactor( 2, IMAGE_RESAMPLE_FACTOR/2 );
       }
     }
   }
@@ -2656,8 +2671,11 @@ vtkImageData *LayerMRI::GetSliceImageData(int nPlane) {
 }
 
 bool LayerMRI::FloodFillByContour2D(double *ras, Contour2D *c2d) {
-  int           nPlane         = c2d->GetPlane();
-  vtkImageData *image          = c2d->GetThresholdedImage();
+  int           nPlane = c2d->GetPlane();
+  vtkImageData *image  = c2d->GetThresholdedImage();
+  if (!image)
+    return false;
+
   vtkImageData *original_image = GetSliceImageData(nPlane);
   int *         nDim           = image->GetDimensions(); // 2D image
   int           n[3];
@@ -2852,7 +2870,7 @@ bool LayerMRI::SaveAllSurfaceRegions(const QString &fn) {
   }
 
   if (m_surfaceRegions.size() == 0) {
-    std::cerr << "No surface regions to save.\n";
+    cerr << "No surface regions to save.\n";
     return false;
   }
 
@@ -2869,7 +2887,7 @@ bool LayerMRI::SaveAllSurfaceRegions(const QString &fn) {
 bool LayerMRI::LoadSurfaceRegions(const QString &fn) {
   FILE *fp = fopen(fn.toLatin1().data(), "r");
   if (!fp) {
-    std::cerr << "Can not open file " << qPrintable(fn) << std::endl;
+    cerr << "Can not open file " << qPrintable(fn) << endl;
     return false;
   }
   int   nNum = 0;
@@ -3100,7 +3118,7 @@ int LayerMRI::GoToLabel(int orientation, const QString &label_name) {
     if (ctab) {
       CTABfindName(ctab, qPrintable(label_name), &nLabel);
     } else {
-      std::cerr << "Did not find the label name in the color table.";
+      cerr << "Did not find the label name in the color table.";
       return -1;
     }
   }
@@ -3294,14 +3312,12 @@ void LayerMRI::SetMaskLayer(LayerMRI *layer_mask) {
     double *origin = source->GetOrigin();
     double *spacing = source->GetSpacing();
     int *ext = source->GetExtent();
-    qDebug() << origin[0] << origin[1] << origin[2] << spacing[0] << spacing[1]
-    << spacing[2]
+    qDebug() << origin[0] << origin[1] << origin[2] << spacing[0] << spacing[1] << spacing[2]
                 << ext[0] << ext[1] << ext[2] << ext[3] << ext[4] << ext[5];
     origin = mask->GetOrigin();
     spacing = mask->GetSpacing();
     ext = mask->GetExtent();
-    qDebug() << origin[0] << origin[1] << origin[2] << spacing[0] << spacing[1]
-    << spacing[2]
+    qDebug() << origin[0] << origin[1] << origin[2] << spacing[0] << spacing[1] << spacing[2]
                 << ext[0] << ext[1] << ext[2] << ext[3] << ext[4] << ext[5];
     */
 

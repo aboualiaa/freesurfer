@@ -1,13 +1,24 @@
 #include "GetPot.h"
+#include "itkBinaryBallStructuringElement.h"
+#include "itkBinaryImageToLabelMapFilter.h"
 #include "itkBinaryImageToShapeLabelMapFilter.h"
 #include "itkBinaryThresholdImageFilter.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
+#include "itkInvertIntensityImageFilter.h"
+#include "itkLabelImageToShapeLabelMapFilter.h"
 #include "itkLabelOverlayImageFilter.h"
+#include "itkRescaleIntensityImageFilter.h"
+#include "itkSubtractImageFilter.h"
 #include "itkThresholdMaximumConnectedComponentsImageFilter.h"
 #include "mris_multimodal_refinement.h"
+#include <iostream>
+#include <string>
 
 #include "cma.h"
+#include "fsenv.h"
+#include "mri.h"
+#include "mrisurf.h"
 
 int main(int narg, char *arg[]) {
   GetPot cl(narg, const_cast<char **>(arg));
@@ -35,7 +46,7 @@ int main(int narg, char *arg[]) {
     MRI *vesselMR = MRIcopy(imageT1, NULL);
     //MRI *whiteMR=  MRIcopy(imageT1, NULL) ;
     MRIS_MultimodalRefinement refinement;
-    refinement.SegmentVessel(imageT1, imageT2, vesselMR);
+    refinement.SegmentVessel(imageT1, imageT2, vesselMR, 0);
 
     MRIwrite(vesselMR, outputName);
     MRIfree(&imageT1);

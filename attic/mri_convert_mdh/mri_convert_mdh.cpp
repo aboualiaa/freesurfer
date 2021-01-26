@@ -104,7 +104,7 @@ typedef struct tagMDH {
 #define MDH_37
 #define MDH_38
 #define MDH_39
-#define MDH_FIRST_SCAN_IN_BLADE (1 << 9) // Marks the first line of a blade
+#define MDH_FIRST_SCAN_IN_BLADE (1 << 9)  // Marks the first line of a blade
 #define MDH_LAST_SCAN_IN_BLADE  (1 << 10) // Marks the last line of a blade
 #define MDH_LAST_BLADE_IN_TR                                                   \
   (1 << 11) // Set for all lines of the last BLADE in each TR interval

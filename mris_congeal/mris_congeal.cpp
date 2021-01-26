@@ -734,7 +734,7 @@ void initParms() {
   }
 }
 #define IMAGES_PER_SURFACE 3 /* mean, variance, and dof */
-static int nsurfaces = 3; // inflated.h, sulc, curv
+static int nsurfaces = 3;    // inflated.h, sulc, curv
 
 static int mrisLogStatus(MRI_SURFACE *mris, INTEGRATION_PARMS *parms, FILE *fp,
                          float dt);

@@ -117,8 +117,8 @@ int OGLUinit(MRI_SURFACE *mris, long frame_xdim, long frame_ydim) {
 
 #define LIGHT0_BR 0.4 /* was 0.2 */
 #define LIGHT1_BR 0.0
-#define LIGHT2_BR 0.6 /* was 0.3 */
-#define LIGHT3_BR 0.2 /* was 0.1 */
+#define LIGHT2_BR 0.6  /* was 0.3 */
+#define LIGHT3_BR 0.2  /* was 0.1 */
 #define OFFSET    0.25 /* was 0.15 */
 void OGLUsetLightingModel(float lite0, float lite1, float lite2, float lite3,
                           float newoffset) {

@@ -8615,7 +8615,7 @@ MRI_SURFACE *MRIScorrectTopology(MRI_SURFACE *mris, MRI *mri, MRI *mri_wm,
       if (!validate) {
         /* restore the vertex state */
         mrisRestoreVertexState(mris_corrected, dvs);
-#else // #if TESTING_OPTIMAL
+#else  // #if TESTING_OPTIMAL
       {
 #endif // #if TESTING_OPTIMAL
         /* generation of optimal mappings */

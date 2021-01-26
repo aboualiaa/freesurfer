@@ -2226,9 +2226,9 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
         for (curv = 0.0f, i = -whalf; i <= whalf; i++) {
           if (!i)
             continue;
-          dx = (float)i * nx;
-          dy = (float)i * ny;
-          dz = (float)i * nz;
+          dx  = (float)i * nx;
+          dy  = (float)i * ny;
+          dz  = (float)i * nz;
 #if 0
           xi = pxi[x+nint(dx)] ;
           yi = pyi[y+nint(dy)] ;

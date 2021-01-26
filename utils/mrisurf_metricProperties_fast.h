@@ -142,7 +142,7 @@ void MRISMP_copy(MRIS_MP *dst, MRIS_MP *src, bool only_inputs,
   int vno;
   for (vno = 0; vno < src->nvertices; vno++) {
 #define SEP
-#define ELTX(C, T, N) // these are the special cases dealt with here
+#define ELTX(C, T, N)   // these are the special cases dealt with here
     v_dist[vno] = NULL; // will make when needed
 #define ELT(C, T, N) v_##N[vno] = src->v_##N[vno];
     if (!no_need_to_copy_xyz) {

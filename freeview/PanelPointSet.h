@@ -63,7 +63,7 @@ protected slots:
   void SetCurrentPoint(int nIndex);
 
 private:
-  QLabel *         MakeCommentItem(const QVariantMap &map);
+  QLabel *MakeCommentItem(const QVariantMap &map, QLabel *label_in = NULL);
   QTreeWidgetItem *AddStatItem(const QString &name, double value);
 
   Ui::PanelPointSet *ui;

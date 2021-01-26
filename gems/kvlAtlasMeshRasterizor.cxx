@@ -46,8 +46,7 @@ void AtlasMeshRasterizor ::Rasterize(const AtlasMesh *mesh) {
 //
 //
 //
-ITK_THREAD_RETURN_TYPE
-AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
+itk::ITK_THREAD_RETURN_TYPE AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
 
   // Retrieve the input arguments
   const int threadNumber =

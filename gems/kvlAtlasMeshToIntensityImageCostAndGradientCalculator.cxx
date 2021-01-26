@@ -66,14 +66,15 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::
     AddDataContributionOfTetrahedron(
         const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
         const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
-        const AtlasAlphasType &alphasInVertex0,
-        const AtlasAlphasType &alphasInVertex1,
-        const AtlasAlphasType &alphasInVertex2,
-        const AtlasAlphasType &alphasInVertex3, double &priorPlusDataCost,
-        AtlasPositionGradientType &gradientInVertex0,
-        AtlasPositionGradientType &gradientInVertex1,
-        AtlasPositionGradientType &gradientInVertex2,
-        AtlasPositionGradientType &gradientInVertex3) {
+        const AtlasAlphasType &               alphasInVertex0,
+        const AtlasAlphasType &               alphasInVertex1,
+        const AtlasAlphasType &               alphasInVertex2,
+        const AtlasAlphasType &               alphasInVertex3,
+        ThreadAccumDataType &                 priorPlusDataCost,
+        AtlasPositionGradientThreadAccumType &gradientInVertex0,
+        AtlasPositionGradientThreadAccumType &gradientInVertex1,
+        AtlasPositionGradientThreadAccumType &gradientInVertex2,
+        AtlasPositionGradientThreadAccumType &gradientInVertex3) {
 
   // Loop over all voxels within the tetrahedron and do The Right Thing
   const int numberOfClasses = alphasInVertex0.Size();

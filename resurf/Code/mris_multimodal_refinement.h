@@ -29,10 +29,11 @@ public:
                  double *z);
   std::vector<std::pair<float, float>> GetMeanAndVariance(MRIS *surf,
                                                           MRI * image);
-  void                                 SegmentWM(MRI *t1, MRI *t2, MRI *output);
-  void  SegmentVessel(MRI *t1, MRI *t2, MRI *output);
+  void  SegmentWM(MRI *t1, MRI *t2, MRI *output, int contrast_type);
+  void  SegmentVessel(MRI *t1, MRI *t2, MRI *output, int contrast_type);
   void  GeneratePlanes();
   float DistanceToMidline(double x, double y, double z);
+  void  SetMinPGrey(float p) { this->minPGrey = p; }
 
 private:
   MRIS * white;
@@ -55,12 +56,16 @@ private:
   double             center[3];
   double             normal[3];
   float              GetVentricleIntensity();
+  float              minPGrey = 20;
 };
 void MRIS_MultimodalRefinement::getTarget(MRIS *surf) {
   std::cout << " getTarget " << std::endl;
   std::cout << " number of steps " << this->numberOfSteps << std::endl;
   std::cout << " step " << step << std::endl;
   std::cout << " gradient sigma " << this->gradientSigma << std::endl;
+  std::cout << " Min P Grey  " << this->minPGrey << std::endl;
+  std::cout << " min p " << 1.0 / pow(10, this->minPGrey) << " "
+            << 1.0 / pow(10, this->minPGrey / 3) << std::endl;
   //std::map<std::tuple<int,int,int>, int> priors =getPs(surf);
 
   MRIS_HASH_TABLE *mht;
@@ -70,7 +75,7 @@ void MRIS_MultimodalRefinement::getTarget(MRIS *surf) {
   //this->GeneratePlanes();
   std::vector<float> intensities(this->numberOfSteps * 5 + 1, 0);
   std::vector<float> magnitudes(this->numberOfSteps * 5 + 1, 0);
-  std::vector<float> ps(this->numberOfSteps * 5 + 1, 0);
+  std::vector<float> ps(this->numberOfSteps * 5 + 1, 1);
   std::vector<float> masks(this->numberOfSteps * 5 + 1, 0);
   std::vector<float> masksW(this->numberOfSteps * 5 + 1, 0);
   std::vector<float> segs(this->numberOfSteps * 5 + 1, 0);
@@ -171,8 +176,9 @@ void MRIS_MultimodalRefinement::getTarget(MRIS *surf) {
     bool   count    = false;
     int    counting = 0;
     for (int t = -this->numberOfSteps;
-         (t <= this->numberOfSteps || (ps[t + numberOfSteps - 1] > 1.0e-20 &&
-                                       t + numberOfSteps < ps.size()));
+         (t <= this->numberOfSteps ||
+          (ps[t + numberOfSteps - 1] > (1.0 / pow(10, this->minPGrey)) &&
+           t + numberOfSteps < ps.size()));
          t++) {
       //ps[t+numberOfSteps] =1;
 
@@ -202,7 +208,7 @@ void MRIS_MultimodalRefinement::getTarget(MRIS *surf) {
 
         magnitudes[t + numberOfSteps] += fabs(mag) / images.size();
         intensities[t + numberOfSteps] += val / images.size();
-        ps[t + numberOfSteps] += (1 - whiteIntensity) * p / images.size();
+        ps[t + numberOfSteps] += (1 - whiteIntensity) * p; ///images.size();
       }
       if (vertexDebug == j) {
         std::cout << "distance from ori " << t * step << " "
@@ -238,7 +244,8 @@ void MRIS_MultimodalRefinement::getTarget(MRIS *surf) {
       bool  good             = true;
       int   zeroLabel        = 0;
       for (int i = 1;
-           (i < numberOfSteps + 1 || (ps[i - 1] > 1e-15 && i < ps.size() - 1));
+           (i < numberOfSteps + 1 ||
+            (ps[i - 1] > (1.0 / pow(10, this->minPGrey)) && i < ps.size() - 1));
            i++) {
         if (vertexDebug == j)
           std::cout << " opt mag " << opt_mag << " mag " << magnitudes[i] << " "
@@ -280,21 +287,25 @@ void MRIS_MultimodalRefinement::getTarget(MRIS *surf) {
           std::cout << lastCortexLabel << " " << segs[i + 1] << " "
                     << touchedStructure << std::endl;
         //label = (label>.5)?1:0;
-        if ((fabs(magnitudes[i]) > opt_mag && ps[i] > 1e-15) ||
+        if ((fabs(magnitudes[i]) > opt_mag &&
+             ps[i] > (1.0 / pow(10, this->minPGrey))) ||
             touchedStructure > 0 ||
             (changeHemis > 0 && fabs(magnitudes[i]) * 1.5 > opt_mag) ||
             (changeHemisAseg > 0 && zeroLabel < 3 && opt_mag < 5)) {
 
           int w = i;
           good  = true;
-          for (; w > 0 && good && (ps[w - 1] < 1e-05 || fabs(i - w) < 1); w--) {
+          for (; w > 0 && good &&
+                 (ps[w - 1] < (1.0 / pow(10, this->minPGrey / 3.0)) ||
+                  fabs(i - w) < 1);
+               w--) {
             good = ps[w - 1] >= ps[w] && masks[w] < .1;
             if (vertexDebug == j)
               std::cout << ps[w - 1] << " " << ps[w] << " " << w << " "
                         << masks[w] << std::endl;
           }
-          if ((((ps[w - 1] > 1e-05) || good) ||
-               (touchedStructure > 0 && ps[i - 1] > 1e-1)) &&
+          if ((((ps[w - 1] > (1.0 / pow(10, this->minPGrey / 3.0))) || good) ||
+               (touchedStructure > 0 && ps[i - 1] > 0.0001)) &&
               label != 41 && label != 2) {
             opt_mag                 = fabs(magnitudes[i]);
             opt_val                 = intensities[i];
@@ -657,16 +668,24 @@ MRIS_MultimodalRefinement::GetMeanAndVariance(MRIS *surf, MRI *image) {
   std::cout << " hi " << std::endl;
   return mean_variance;
 }
-void MRIS_MultimodalRefinement::SegmentWM(MRI *t1, MRI *t2, MRI *output) {
+void MRIS_MultimodalRefinement::SegmentWM(MRI *t1, MRI *t2, MRI *output,
+                                          int contrast_type) {
   for (int x = 0; x < t1->width; x++) {
     for (int y = 0; y < t1->height; y++) {
       for (int z = 0; z < t1->depth; z++) {
         //int label =(imageAseg)? MRIgetVoxVal(imageAseg, x, y, z, 0) :0;
         float T1val = MRIgetVoxVal(t1, x, y, z, 0);
         float T2val = MRIgetVoxVal(t2, x, y, z, 0);
-        int   val   = 0;
-        if (1.3 * T1val > T2val && (T1val + T2val) >= 180 && T1val > 80 &&
-            T2val > 80) {
+
+        int val = 0;
+        if (contrast_type < 0) {
+          double label;
+          MRIsampleVolumeFrameType(t2, x, y, z, 0, SAMPLE_NEAREST, &label);
+          if (label == 2 || label == 41) {
+            val = 1;
+          }
+        } else if (1.3 * T1val > T2val && (T1val + T2val) >= 180 &&
+                   T1val > 80 && T2val > 80) {
           val = 1;
         }
 
@@ -675,7 +694,18 @@ void MRIS_MultimodalRefinement::SegmentWM(MRI *t1, MRI *t2, MRI *output) {
     }
   }
 }
-void MRIS_MultimodalRefinement::SegmentVessel(MRI *t1, MRI *t2, MRI *output) {
+void MRIS_MultimodalRefinement::SegmentVessel(MRI *t1, MRI *t2, MRI *output,
+                                              int contrast_type) {
+
+  int   sum  = 180;
+  int   max  = 80;
+  int   min  = 110;
+  float mult = 1.4;
+  std::cout << contrast_type << " " << CONTRAST_FLAIR << " flair" << std::endl;
+  if (contrast_type == CONTRAST_FLAIR) {
+    mult = 1;
+    max  = 50;
+  }
   for (int x = 0; x < t1->width; x++) {
     for (int y = 0; y < t1->height; y++) {
       for (int z = 0; z < t1->depth; z++) {
@@ -683,8 +713,17 @@ void MRIS_MultimodalRefinement::SegmentVessel(MRI *t1, MRI *t2, MRI *output) {
         float T1val = MRIgetVoxVal(t1, x, y, z, 0);
         float T2val = MRIgetVoxVal(t2, x, y, z, 0);
         int   val   = 0;
-        if ((1.4 * T1val > T2val && (T1val + T2val < 180)) ||
-            (T1val < 80 && T2val < 80) || (T1val > 110 && T2val > 110)) {
+        if (contrast_type < 0) {
+          double label;
+          MRIsampleVolumeFrameType(t2, x, y, z, 0, SAMPLE_NEAREST, &label);
+          /*if(label==0)
+					{
+						val=1;
+					}*/
+
+        } else if ((mult * T1val > T2val && (T1val + T2val < sum)) ||
+                   (T1val < max && T2val < max) ||
+                   (T1val > min && T2val > min)) {
           val = 1;
         }
 

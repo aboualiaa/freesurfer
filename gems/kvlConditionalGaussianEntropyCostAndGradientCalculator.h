@@ -167,21 +167,24 @@ private:
   std::vector< AtlasPositionGradientContainerType::Pointer >  m_QGradients;
 #else
   //
-  std::vector<std::vector<double>> m_ThreadSpecificNs;
-  std::vector<std::vector<double>> m_ThreadSpecificLs;
-  std::vector<std::vector<double>> m_ThreadSpecificQs;
+  std::vector<std::vector<ThreadAccumDataType>> m_ThreadSpecificNs;
+  std::vector<std::vector<ThreadAccumDataType>> m_ThreadSpecificLs;
+  std::vector<std::vector<ThreadAccumDataType>> m_ThreadSpecificQs;
 
   //
-  std::vector<std::vector<AtlasPositionGradientContainerType::Pointer>>
+  std::vector<
+      std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>>
       m_ThreadSpecificNGradients;
-  std::vector<std::vector<AtlasPositionGradientContainerType::Pointer>>
+  std::vector<
+      std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>>
       m_ThreadSpecificLGradients;
-  std::vector<std::vector<AtlasPositionGradientContainerType::Pointer>>
+  std::vector<
+      std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>>
       m_ThreadSpecificQGradients;
 
   //
-  std::vector<double> m_ThreadSpecificPriorCosts;
-  std::vector<AtlasPositionGradientContainerType::Pointer>
+  std::vector<ThreadAccumDataType> m_ThreadSpecificPriorCosts;
+  std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>
       m_ThreadSpecificPriorGradients;
 
 #endif

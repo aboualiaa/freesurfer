@@ -3737,12 +3737,7 @@ void MainWindow::CommandLoadControlPoints(const QStringList &cmd) {
   if (options.contains("new", Qt::CaseInsensitive)) {
     options.removeAll("new");
     bCreateNew = true;
-    if (QFileInfo::exists(fn)) {
-      cerr << "File exists: " << qPrintable(fn) << "\n"
-           << "Please enter a different filename\n";
-      return;
-    }
-    name = QFileInfo(fn).completeBaseName();
+    name       = QFileInfo(fn).completeBaseName();
   }
   for (int i = 1; i < options.size(); i++) {
     QString strg = options[i];
@@ -3774,7 +3769,9 @@ void MainWindow::CommandLoadControlPoints(const QStringList &cmd) {
   if (radius != "0") {
     m_scripts.insert(0, QStringList("setpointsetradius") << radius);
   }
-  if (bCreateNew) {
+  if (QFile::exists(fn) || !bCreateNew)
+    LoadControlPointsFile(fn, args);
+  else if (bCreateNew) {
     OnNewPointSet(true);
     LayerPointSet *ps = (LayerPointSet *)GetActiveLayer("PointSet");
     ps->SetFileName(fn);
@@ -3782,8 +3779,7 @@ void MainWindow::CommandLoadControlPoints(const QStringList &cmd) {
       ps->SetID(args["id"].toInt());
     if (!name.isEmpty())
       ps->SetName(name);
-  } else
-    LoadControlPointsFile(fn, args);
+  }
 }
 
 void MainWindow::CommandSetPointSetColor(const QStringList &cmd) {

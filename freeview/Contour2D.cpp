@@ -87,7 +87,10 @@ vtkImageData *Contour2D::GetInputImage() { return m_imageInput; }
 void Contour2D::Reset() { m_imageInput = NULL; }
 
 vtkImageData *Contour2D::GetThresholdedImage() {
-  return m_filterMask->GetOutput();
+  if (m_filterMask->GetInput())
+    return m_filterMask->GetOutput();
+  else
+    return NULL;
 }
 
 void Contour2D::SetInput(vtkImageData *imagedata, double dContourValue,
