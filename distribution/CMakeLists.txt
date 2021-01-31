@@ -11,9 +11,7 @@ install(FILES ASegStatsLUT.txt
 
 install_configured(FreeSurferEnv.csh FreeSurferEnv.sh DESTINATION .)
 
-install(PROGRAMS SetUpFreeSurfer.csh SetUpFreeSurfer.sh sources.csh sources.sh
-        DESTINATION .
-        )
+install(PROGRAMS SetUpFreeSurfer.csh SetUpFreeSurfer.sh sources.csh sources.sh DESTINATION .)
 
 add_subdirectories(average docs fsafd subjects etc)
 

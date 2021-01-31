@@ -37,23 +37,17 @@ if(PETSC_FOUND)
   install(TARGETS dmri_vox2vox DESTINATION bin)
 
   # dmri_train
-  add_executable(dmri_train dmri_train.cxx blood.cxx spline.cxx vial.cxx
-                            TrackIO.cxx
-                 )
+  add_executable(dmri_train dmri_train.cxx blood.cxx spline.cxx vial.cxx TrackIO.cxx)
   target_link_libraries(dmri_train utils fem_elastic tetgen)
   install(TARGETS dmri_train DESTINATION bin)
 
   # dmri_paths
-  add_executable(dmri_paths dmri_paths.cxx coffin.cxx bite.cxx spline.cxx
-                            vial.cxx TrackIO.cxx
-                 )
+  add_executable(dmri_paths dmri_paths.cxx coffin.cxx bite.cxx spline.cxx vial.cxx TrackIO.cxx)
   target_link_libraries(dmri_paths utils fem_elastic tetgen)
   install(TARGETS dmri_paths DESTINATION bin)
 
   # dmri_pathstats
-  add_executable(dmri_pathstats dmri_pathstats.cxx spline.cxx blood.cxx
-                                vial.cxx TrackIO.cxx
-                 )
+  add_executable(dmri_pathstats dmri_pathstats.cxx spline.cxx blood.cxx vial.cxx TrackIO.cxx)
   target_link_libraries(dmri_pathstats utils fem_elastic tetgen)
   install(TARGETS dmri_pathstats DESTINATION bin)
 

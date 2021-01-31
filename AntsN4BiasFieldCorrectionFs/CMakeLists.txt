@@ -4,12 +4,9 @@ include_directories(${FS_INCLUDE_DIRS})
 
 host_os()
 if(HOST_OS MATCHES "Ubuntu18" OR HOST_OS MATCHES "CentOS8")
-  message(STATUS "AntsN4BiasFieldCorrectionFs test will be skipped on ${HOST_OS}"
-          )
+  message(STATUS "AntsN4BiasFieldCorrectionFs test will be skipped on ${HOST_OS}")
 else()
-  add_test_script(NAME AntsN4BiasFieldCorrectionFs_test SCRIPT test.sh DEPENDS
-                  AntsN4BiasFieldCorrectionFs
-                  )
+  add_test_script(NAME AntsN4BiasFieldCorrectionFs_test SCRIPT test.sh DEPENDS AntsN4BiasFieldCorrectionFs)
 endif()
 
 add_executable(AntsN4BiasFieldCorrectionFs AntsN4BiasFieldCorrectionFs.cpp)

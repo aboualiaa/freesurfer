@@ -9,11 +9,8 @@ if(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES)
 endif()
 
 add_executable(kvlBuildAtlasMesh
-               kvlBuildAtlasMesh.cxx
-               kvlAtlasMeshBuilder.cxx
-               kvlAtlasMeshCollectionFastReferencePositionCost.cxx
-               kvlAtlasMeshCollectionModelLikelihoodCalculator.cxx
-               kvlMultiResolutionAtlasMesher.cxx
+               kvlBuildAtlasMesh.cxx kvlAtlasMeshBuilder.cxx kvlAtlasMeshCollectionFastReferencePositionCost.cxx
+               kvlAtlasMeshCollectionModelLikelihoodCalculator.cxx kvlMultiResolutionAtlasMesher.cxx
                )
 target_link_libraries(kvlBuildAtlasMesh kvlGEMSCommon)
 if(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES)

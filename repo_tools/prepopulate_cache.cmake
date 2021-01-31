@@ -153,11 +153,11 @@ set(FS_GEMS_BUILD_GUI
     CACHE BOOL "build gems guis"
     )
 set(FS_GEMS_BUILD_MATLAB
-    OFF
+    ON
     CACHE BOOL "build matlab wrappers"
     )
 set(FS_GEMS_BUILD_PYTHON
-    OFF
+    ON
     CACHE BOOL ""
     )
 set(FS_GEMS_BUILD_SHARED_LIBS
@@ -173,20 +173,12 @@ set(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES
     CACHE BOOL "Make sparse initial meshes"
     )
 
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-                                             ${FS_EXP_BUILD_CONFIGURATIONS}
-             )
-set_property(CACHE CMAKE_GENERATOR
-             PROPERTY STRINGS "Ninja;Unix Makefiles;Xcode;Ninja Multi-Config"
-             )
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${FS_EXP_BUILD_CONFIGURATIONS})
+set_property(CACHE CMAKE_GENERATOR PROPERTY STRINGS "Ninja;Unix Makefiles;Xcode;Ninja Multi-Config")
 set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "20;17;14;11")
-set_property(CACHE FS_REPO_ENVIRONMENT
-             PROPERTY STRINGS "develop;travis;azure;cirrus;deploy;martinos"
-             )
+set_property(CACHE FS_REPO_ENVIRONMENT PROPERTY STRINGS "develop;travis;azure;cirrus;deploy;martinos")
 set_property(CACHE FS_DOCS_FORMAT PROPERTY STRINGS "html;md;yaml;man;dash;all")
-set_property(CACHE FS_DOCS_GENERATOR PROPERTY STRINGS
-                                              "doxygen;sphinx;clang-doc;all"
-             )
+set_property(CACHE FS_DOCS_GENERATOR PROPERTY STRINGS "doxygen;sphinx;clang-doc;all")
 set_property(CACHE FS_ENABLE_LTO PROPERTY STRINGS "Off;Thin;Full")
 set_property(CACHE FS_COVERAGE_STYLE PROPERTY STRINGS "gcov;clang")
 

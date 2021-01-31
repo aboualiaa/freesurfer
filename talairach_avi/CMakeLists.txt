@@ -4,9 +4,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
   set(ICC_LIBRARIES irc svml imf)
-  set(CMAKE_Fortran_FLAGS
-      "${CMAKE_Fortran_FLAGS} -ax=CORE-AVX512 -qopenmp -132 -nofor_main"
-      )
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ax=CORE-AVX512 -qopenmp -132 -nofor_main")
 else()
   set(CMAKE_Fortran_FLAGS
       "${CMAKE_Fortran_FLAGS} -w -ffixed-line-length-132 -fno-second-underscore -fallow-invalid-boz"
@@ -63,9 +61,7 @@ add_definitions(-DHAVE_GFORTRAN)
 if(APPLE)
   get_filename_component(FORTRAN_REALPATH "${CMAKE_Fortran_COMPILER}" REALPATH)
   get_filename_component(FORTRAN_BASE_DIR "${FORTRAN_REALPATH}/../.." REALPATH)
-  file(GLOB_RECURSE STATIC_QUADMATH FOLLOW_SYMLINKS
-       "${FORTRAN_BASE_DIR}/lib/*/libquadmath.a"
-       )
+  file(GLOB_RECURSE STATIC_QUADMATH FOLLOW_SYMLINKS "${FORTRAN_BASE_DIR}/lib/*/libquadmath.a")
   if(STATIC_QUADMATH)
     set(CMAKE_Fortran_FLAGS
         "-w -static-libgfortran -lgfortran -lgcc -lgcc_eh -lSystem -nodefaultlibs ${STATIC_QUADMATH} ${CMAKE_Fortran_FLAGS}"
@@ -81,18 +77,14 @@ else()
   endif()
 endif()
 
-add_executable(gauss_4dfp gauss_4dfp.c cgauss3dd.c conc.c ${TRX_SOURCES}
-                          ${RMS_SOURCES}
-               )
+add_executable(gauss_4dfp gauss_4dfp.c cgauss3dd.c conc.c ${TRX_SOURCES} ${RMS_SOURCES})
 target_link_libraries(gauss_4dfp ${ICC_LIBRARIES})
 install(TARGETS gauss_4dfp DESTINATION bin)
 
 set(LIN_SOURCES t4_sub.f t4scale.c)
 set(IMG_SOURCES fimgreg.f imgvalm.f90 imgvalx.f90 ffind.f)
 
-add_executable(imgreg_4dfp imgreg_4dfp.c ${TRX_SOURCES} ${RMS_SOURCES}
-                           ${LIN_SOURCES} ${IMG_SOURCES} cflip.c
-               )
+add_executable(imgreg_4dfp imgreg_4dfp.c ${TRX_SOURCES} ${RMS_SOURCES} ${LIN_SOURCES} ${IMG_SOURCES} cflip.c)
 target_link_libraries(imgreg_4dfp ${ICC_LIBRARIES})
 install(TARGETS imgreg_4dfp DESTINATION bin)
 

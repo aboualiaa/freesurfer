@@ -14,9 +14,7 @@ function(host_os)
     string(STRIP ${OS_IDENT} OS_IDENT)
     set(HOST_OS "MacOS-${OS_IDENT}")
   elseif(EXISTS "/etc/os-release")
-    execute_process(COMMAND grep PRETTY_NAME \/etc\/os\-release
-                    OUTPUT_VARIABLE OS_IDENT
-                    )
+    execute_process(COMMAND grep PRETTY_NAME \/etc\/os\-release OUTPUT_VARIABLE OS_IDENT)
     string(STRIP ${OS_IDENT} OS_IDENT)
     if(OS_IDENT MATCHES "CentOS Linux 8")
       set(HOST_OS CentOS8)
@@ -29,9 +27,7 @@ function(host_os)
     endif()
     # CentOS6 too old to use os-release
   elseif(EXISTS "/etc/redhat-release")
-    execute_process(COMMAND cat \/etc\/redhat\-release
-                    OUTPUT_VARIABLE REDHAT_VERSION
-                    )
+    execute_process(COMMAND cat \/etc\/redhat\-release OUTPUT_VARIABLE REDHAT_VERSION)
     string(STRIP ${REDHAT_VERSION} REDHAT_VERSION)
     if(REDHAT_VERSION MATCHES "release 6")
       set(HOST_OS CentOS6)
@@ -122,9 +118,7 @@ function(mac_deploy_qt)
   install(FILES ${APP_PLIST} DESTINATION ${APP_BUNDLE}/Contents)
   # install the resources
   if(APP_ICONS)
-    install_symlinks(${APP_ICONS} TYPE files DESTINATION
-                     ${APP_BUNDLE}/Contents/Resources
-                     )
+    install_symlinks(${APP_ICONS} TYPE files DESTINATION ${APP_BUNDLE}/Contents/Resources)
   endif()
   # run the qt deployment script
   install(CODE "
@@ -141,8 +135,7 @@ endfunction()
 # Link an xml helptext to a target binary. This will create a target dependency on
 # the help file and will run xxd to create the xml header during the build
 function(add_help BINARY HELPTEXT)
-  add_custom_command(COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && xxd -i
-                             ${HELPTEXT}
+  add_custom_command(COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && xxd -i ${HELPTEXT}
                              ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h
                      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h
                      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}
@@ -151,9 +144,7 @@ function(add_help BINARY HELPTEXT)
   target_sources(${BINARY} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h)
   install(FILES ${HELPTEXT} DESTINATION docs/xml)
   # make sure to validate the xml as well
-  add_test(${BINARY}_help_test bash -c
-           "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}"
-           )
+  add_test(${BINARY}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
 endfunction(add_help)
 
 # install_append_help(<script> <xml> <destination>)
@@ -177,9 +168,7 @@ function(install_append_help SCRIPT HELPTEXT DESTINATION)
           )
   install(FILES ${HELPTEXT} DESTINATION docs/xml)
   # make sure to validate the xml as well
-  add_test(${SCRIPT}_help_test bash -c
-           "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}"
-           )
+  add_test(${SCRIPT}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
 endfunction()
 
 # install_osx_app(<app>)
@@ -220,13 +209,9 @@ endfunction()
 function(add_test_script)
   cmake_parse_arguments(TEST "" "NAME;SCRIPT" "DEPENDS" ${ARGN})
   foreach(TARGET ${TEST_DEPENDS})
-    set(TEST_CMD
-        "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&"
-        )
+    set(TEST_CMD "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
   endforeach()
-  add_test(${TEST_NAME} bash -c
-           "${TEST_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT}"
-           )
+  add_test(${TEST_NAME} bash -c "${TEST_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT}")
 endfunction()
 
 # add_test_executable(<target> <sources>)
@@ -236,12 +221,8 @@ function(add_test_executable)
   set(TARGET ${ARGV0})
   list(REMOVE_AT ARGV 0)
   add_executable(${TARGET} EXCLUDE_FROM_ALL ${ARGV})
-  set(TEST_CMD
-      "${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&"
-      )
-  add_test(${TARGET} bash -c
-           "${TEST_CMD} ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
-           )
+  set(TEST_CMD "${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
+  add_test(${TARGET} bash -c "${TEST_CMD} ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}")
 endfunction()
 
 # library_paths(NAME <var> LIBDIR <library-dir> LIBRARIES <libs>)

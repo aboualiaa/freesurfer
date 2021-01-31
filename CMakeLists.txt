@@ -10,25 +10,17 @@ if(FS_BUILD_MATRIX)
     foreach(TYPE IN LISTS CONF_MATRIX)
 
       if(Z_COMPILER STREQUAL "clang10")
-        set(COMPILER_PROXY_OPTION
-            "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-10/bin"
-            )
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-10/bin")
       elseif(Z_COMPILER STREQUAL "clang09")
-        set(COMPILER_PROXY_OPTION
-            "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-09/bin"
-            )
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-09/bin")
       elseif(Z_COMPILER STREQUAL "clang11")
-        set(COMPILER_PROXY_OPTION
-            "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-11/bin"
-            )
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-11/bin")
       elseif(Z_COMPILER STREQUAL "clang12")
-        set(COMPILER_PROXY_OPTION
-            "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-12/bin"
-            )
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-12/bin")
       elseif(Z_COMPILER STREQUAL "gcc10")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0_1")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0_3")
       elseif(Z_COMPILER STREQUAL "gcc09")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc@9/9.3.0")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc@9/9.3.0_1")
       elseif(Z_COMPILER STREQUAL "appleclang")
         set(COMPILER_PROXY_OPTION "")
       endif()
@@ -69,29 +61,22 @@ if(FS_BUILD_MATRIX)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_MKDIR ALL
                         COMMAND bash -c \" mkdir -p
-                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
-                                \"
+                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER} \"
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ALL
-                        COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE
-                                -Wno-dev ${COMPILER_PROXY_OPTION}
-                                -DCMAKE_BUILD_TYPE=${TYPE} -C
-                                ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake
-                                -G Ninja -S ${CMAKE_SOURCE_DIR} -B
-                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}
-                                \"
+                        COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev ${COMPILER_PROXY_OPTION}
+                                -DCMAKE_BUILD_TYPE=${TYPE} -C ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
+                                -S ${CMAKE_SOURCE_DIR} -B
+                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER} \"
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE
                         COMMAND bash -c \" ninja -k 0 -C
-                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/
-                                \"
+                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/ \"
                         )
 
-      add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CMAKE
-                       ${Z_COMPILER}_${TYPE}_BUILD_MKDIR
-                       )
+      add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ${Z_COMPILER}_${TYPE}_BUILD_MKDIR)
 
       if(NOT TARGET compile-${Z_COMPILER})
         add_custom_target(compile-${Z_COMPILER})
@@ -112,8 +97,7 @@ if(FS_BUILD_MATRIX)
       add_dependencies(compile-all compile-${TYPE})
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
-                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L
-                                Unit --progress \"
+                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress \"
                         WORKING_DIRECTORY "/Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
                         )
 
@@ -206,9 +190,7 @@ if(NOT DEFINED FS_VERSION_SUFFIX)
 endif()
 
 if(NOT PACKAGE_VERSION)
-  set(PACKAGE_VERSION
-      "${FS_VERSION_MAJOR}.${FS_VERSION_MINOR}.${FS_VERSION_PATCH}${FS_VERSION_SUFFIX}"
-      )
+  set(PACKAGE_VERSION "${FS_VERSION_MAJOR}.${FS_VERSION_MINOR}.${FS_VERSION_PATCH}${FS_VERSION_SUFFIX}")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang"
@@ -221,19 +203,11 @@ endif()
 if(APPLE)
   if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)[Cc]lang")
     set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_CXX_ARCHIVE_CREATE
-        "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>"
-        )
-    set(CMAKE_C_ARCHIVE_FINISH
-        "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>"
-        )
-    set(CMAKE_CXX_ARCHIVE_FINISH
-        "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>"
-        )
+    set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+    set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
   endif()
-  mark_as_advanced(CMAKE_OSX_SYSROOT CMAKE_OSX_DEPLOYMENT_TARGET
-                   CMAKE_OSX_ARCHITECTURES CMAKE_EXECUTABLE_FORMAT
-                   )
+  mark_as_advanced(CMAKE_OSX_SYSROOT CMAKE_OSX_DEPLOYMENT_TARGET CMAKE_OSX_ARCHITECTURES CMAKE_EXECUTABLE_FORMAT)
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
@@ -252,8 +226,7 @@ function(prevent_in_source_builds_and_installs)
 
   # disallow in-source builds
   if("${SRCDIR}" STREQUAL "${BINDIR}")
-    message(FATAL_ERROR "In-source builds/installs are disallowed. source dir: ${SRCDIR}; build dir: ${BINDIR}"
-            )
+    message(FATAL_ERROR "In-source builds/installs are disallowed. source dir: ${SRCDIR}; build dir: ${BINDIR}")
   endif()
 endfunction()
 
@@ -289,8 +262,7 @@ if(NOT APPLE)
   if(HOST_OS STREQUAL "trusty")
     add_definitions(-DFS_ITK_LEGACY_REMOVE)
   endif()
-  add_definitions(-DVCL_GCC_80
-                  )# trick itk 4 into believing the compiler is gcc 8
+  add_definitions(-DVCL_GCC_80) # trick itk 4 into believing the compiler is gcc 8
   add_definitions(-DVXL_FULLCXX11SUPPORT)
 else()
   cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
@@ -299,9 +271,7 @@ endif()
 if(APPLE AND NOT TRAVIS)
   set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
 else()
-  set(FS_PACKAGES_DIR
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-$ENV{HOSTING_OS}/prebuilt_packages"
-      )
+  set(FS_PACKAGES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-$ENV{HOSTING_OS}/prebuilt_packages")
   message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
   set(VTK_DIR
       ${FS_PACKAGES_DIR}/vtk/
@@ -332,9 +302,7 @@ if(CMAKE_CONFIGURATION_TYPES AND FS_EXP_BUILD_CONFIGURATIONS)
   if(NOT LINUX)
     list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "msan")
   endif()
-  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)[Cc]lang"
-     OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)[Cc]lang"
-     )
+  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)[Cc]lang")
     list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "lsan")
   endif()
   set(CMAKE_CONFIGURATION_TYPES ${FS_EXP_BUILD_CONFIGURATIONS})
@@ -380,8 +348,7 @@ set(BUILD_STAMP
     "freesurfer-local-build-${TODAY}"
     CACHE STRING "Distribution build stamp"
     )
-install(CODE "file (WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n) "
-        )
+install(CODE "file (WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n) ")
 
 # set the default build type to 'Release' for optimization purposes
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -393,9 +360,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # create a custom target "make install-nmr" to only install nmr-component files
-add_custom_target(install-nmr COMMAND ${CMAKE_COMMAND} -D COMPONENT=nmr -P
-                                      cmake_install.cmake
-                  )
+add_custom_target(install-nmr COMMAND ${CMAKE_COMMAND} -D COMPONENT=nmr -P cmake_install.cmake)
 
 # --------------------------------------------------
 #               external dependencies
@@ -469,16 +434,12 @@ find_package(PETSC REQUIRED)
 # --- boost ---
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED TRUE)
-find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework
-                                       filesystem log atomic
-             )
+find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log atomic)
 
 # -------- itk --------
 find_package(ITK HINTS ${ITK_DIR})
 mark_as_advanced(ITK_DIR)
-list(REMOVE_ITEM ITK_INCLUDE_DIRS
-     "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include"
-     )
+list(REMOVE_ITEM ITK_INCLUDE_DIRS "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include")
 
 # -------- ann --------
 # ANN is only used by mris_resample
@@ -496,7 +457,7 @@ if(UNIX AND NOT APPLE)
   set(Matlab_ROOT_DIR /usr/local/MATLAB/MATLAB_Compiler_Runtime/v84)
   find_package(MATLAB)
 else()
-  set(Matlab_ROOT_DIR /Applications/MATLAB/Matlab.app)
+  set(Matlab_ROOT_DIR /Applications/Polyspace/MATLAB.app)
   find_package(MATLAB)
 endif()
 mark_as_advanced(Matlab_ROOT_DIR)
@@ -526,9 +487,7 @@ endif()
 
 # -------- X11 ---------
 find_package(X11)
-mark_as_advanced(XT_LIBRARY XMU_LIBRARY X11_LIBRARY X11_INCLUDE_DIR GL_LIBRARY
-                 GLU_LIBRARY
-                 )
+mark_as_advanced(XT_LIBRARY XMU_LIBRARY X11_LIBRARY X11_INCLUDE_DIR GL_LIBRARY GLU_LIBRARY)
 
 # search for GUI libraries
 if(FS_BUILD_GUIS)
@@ -560,15 +519,11 @@ if(VTK_FOUND AND VTK_BUILD_SHARED_LIBS)
   else()
     foreach(_vtk_module ${VTK_MODULES_ENABLED})
       foreach(_vtk_library ${${_vtk_module}_LIBRARIES})
-        file(GLOB _found_library
-             "${${_vtk_module}_RUNTIME_LIBRARY_DIRS}/lib${_vtk_library}*.so*"
-             )
+        file(GLOB _found_library "${${_vtk_module}_RUNTIME_LIBRARY_DIRS}/lib${_vtk_library}*.so*")
         list(APPEND _vtk_library_list ${_found_library})
       endforeach()
       foreach(_vtk_library ${${_vtk_module}_DEPENDS})
-        file(GLOB _found_library
-             "${${_vtk_module}_RUNTIME_LIBRARY_DIRS}/lib${_vtk_library}*.so*"
-             )
+        file(GLOB _found_library "${${_vtk_module}_RUNTIME_LIBRARY_DIRS}/lib${_vtk_library}*.so*")
         list(APPEND _vtk_library_list ${_found_library})
       endforeach()
     endforeach()
@@ -638,9 +593,7 @@ add_subdirectory(packages)
 if(APPLE)
   if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     set(OpenMP_C "${CMAKE_C_COMPILER}")
-    set(OpenMP_C_FLAGS
-        "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include"
-        )
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
     set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
     set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
     set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
@@ -686,8 +639,7 @@ if(FS_DISTRIBUTE_FSPYTHON)
     set(PYTHON_EXECUTABLE ${FSPYTHON_DIR}/bin/python3)
     set(PYTHON_LIBRARY ${FSPYTHON_DIR}/lib/libpython3.6m)
     # install the barebones python distribution
-    install(DIRECTORY ${FSPYTHON_DIR}/bin ${FSPYTHON_DIR}/lib
-                      ${FSPYTHON_DIR}/include
+    install(DIRECTORY ${FSPYTHON_DIR}/bin ${FSPYTHON_DIR}/lib ${FSPYTHON_DIR}/include
             DESTINATION ${CMAKE_INSTALL_PREFIX}/python
             USE_SOURCE_PERMISSIONS
             )
@@ -719,9 +671,7 @@ if(APPLE)
 else()
   set(STRIP_FLAGS "-fdata-sections -ffunction-sections -Wl,--gc-sections")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STRIP_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS
-      "${CMAKE_EXE_LINKER_FLAGS} ${STRIP_FLAGS} -Wl,-Map,ld_map.txt -Wl,--no-demangle"
-      )
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${STRIP_FLAGS} -Wl,-Map,ld_map.txt -Wl,--no-demangle")
 endif()
 
 # --------------------------------------------------
@@ -754,9 +704,7 @@ add_subdirectories(vtkutils lineprof)
 
 # TODO: solve build issues on linux/gcc: looser throw spec...
 # the fem elastic subdir also builds a library, so it should be added first
-if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
-   OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
-   )
+if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
   if(APPLE)
     add_subdirectory(fem_elastic)
   endif()

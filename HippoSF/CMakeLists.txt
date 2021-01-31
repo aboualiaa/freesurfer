@@ -2,10 +2,8 @@ project(HippoSF)
 
 if(APPLE)
   set(BIN_PROGRAMS
-      mac_osx/run_segmentSubjectT1_autoEstimateAlveusML.sh
-      mac_osx/run_segmentSubjectT1T2_autoEstimateAlveusML.sh
-      mac_osx/run_segmentSubjectT2_autoEstimateAlveusML.sh
-      mac_osx/run_SegmentSubfieldsT1Longitudinal.sh
+      mac_osx/run_segmentSubjectT1_autoEstimateAlveusML.sh mac_osx/run_segmentSubjectT1T2_autoEstimateAlveusML.sh
+      mac_osx/run_segmentSubjectT2_autoEstimateAlveusML.sh mac_osx/run_SegmentSubfieldsT1Longitudinal.sh
       )
   install_osx_app(mac_osx/SegmentSubfieldsT1Longitudinal.app)
   install_osx_app(mac_osx/segmentSubjectT1_autoEstimateAlveusML.app)

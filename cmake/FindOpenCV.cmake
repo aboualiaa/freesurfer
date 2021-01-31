@@ -24,6 +24,4 @@ foreach(LIB opencv_core opencv_imgproc opencv_highgui opencv_ml)
   # this is necessary for find_library to work (plus it clears it from the cache)
 endforeach()
 
-find_package_handle_standard_args(
-  OpenCV DEFAULT_MSG OpenCV_INCLUDE_DIR OpenCV_LIBRARIES
-  )
+find_package_handle_standard_args(OpenCV DEFAULT_MSG OpenCV_INCLUDE_DIR OpenCV_LIBRARIES)

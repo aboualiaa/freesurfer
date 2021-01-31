@@ -1,7 +1,6 @@
 project(fem_elastic)
 
-include_directories(${FS_INCLUDE_DIRS} SYSTEM
-                    ${CMAKE_SOURCE_DIR}/packages/tetgen ${PETSC_INCLUDE_DIR}
+include_directories(${FS_INCLUDE_DIRS} SYSTEM ${CMAKE_SOURCE_DIR}/packages/tetgen ${PETSC_INCLUDE_DIR}
                     ${ITK_INCLUDE_DIRS} ${MPI_CXX_HEADER_DIR}
                     )
 
@@ -65,9 +64,7 @@ target_link_libraries(surf2vol
 install(TARGETS surf2vol DESTINATION bin)
 
 # fem_elastic library
-add_library(fem_elastic STATIC fcreateMorph.cpp fapplyMorph.cpp
-                               ${COMMON3D_SOURCES}
-            )
+add_library(fem_elastic STATIC fcreateMorph.cpp fapplyMorph.cpp ${COMMON3D_SOURCES})
 add_help(fem_elastic applyMorph.help.xml)
 add_help(fem_elastic createMorph.help.xml)
 #target_link_libraries(fem_elastic)

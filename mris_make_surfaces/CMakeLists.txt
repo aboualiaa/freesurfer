@@ -1,8 +1,6 @@
 project(mris_make_surfaces)
 
-include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/resurf/Code
-                    ${CMAKE_SOURCE_DIR}/utils
-                    )
+include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/resurf/Code ${CMAKE_SOURCE_DIR}/utils)
 
 add_executable(mris_make_surfaces mris_make_surfaces.cpp)
 add_help(mris_make_surfaces mris_make_surfaces.help.xml)
@@ -15,16 +13,10 @@ if(NOT APPLE)
     message(STATUS "mris_make_surfaces test will be skipped on ${HOST_OS}")
     message(STATUS "mris_place_surface test will be skipped on ${HOST_OS}")
   else()
-    add_test_script(NAME mris_make_surfaces_test SCRIPT test.sh DEPENDS
-                    mris_make_surfaces
-                    )
-    add_test_script(NAME mris_place_surface_test SCRIPT test.sh DEPENDS
-                    mris_place_surface
-                    )
+    add_test_script(NAME mris_make_surfaces_test SCRIPT test.sh DEPENDS mris_make_surfaces)
+    add_test_script(NAME mris_place_surface_test SCRIPT test.sh DEPENDS mris_place_surface)
     # commands in the same subdir that can share the same input/output files should not run in ||
-    set_tests_properties(mris_make_surfaces_test mris_place_surface_test
-                         PROPERTIES RUN_SERIAL TRUE
-                         )
+    set_tests_properties(mris_make_surfaces_test mris_place_surface_test PROPERTIES RUN_SERIAL TRUE)
   endif()
   # test commands exit with non-zero status from too many vertex differences on MacOS
 else()

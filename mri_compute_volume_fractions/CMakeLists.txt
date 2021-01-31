@@ -6,9 +6,7 @@ add_executable(mri_compute_volume_fractions mri_compute_volume_fractions.cpp)
 target_link_libraries(mri_compute_volume_fractions utils)
 install(TARGETS mri_compute_volume_fractions DESTINATION bin)
 
-add_executable(mri_compute_volume_intensities
-               mri_compute_volume_intensities.cpp
-               )
+add_executable(mri_compute_volume_intensities mri_compute_volume_intensities.cpp)
 target_link_libraries(mri_compute_volume_intensities utils)
 install(TARGETS mri_compute_volume_intensities DESTINATION bin)
 
@@ -16,8 +14,6 @@ add_executable(mri_compute_layer_fractions mri_compute_layer_fractions.cpp)
 target_link_libraries(mri_compute_layer_fractions utils)
 install(TARGETS mri_compute_layer_fractions DESTINATION bin)
 
-add_executable(mris_compute_layer_intensities
-               mris_compute_layer_intensities.cpp
-               )
+add_executable(mris_compute_layer_intensities mris_compute_layer_intensities.cpp)
 target_link_libraries(mris_compute_layer_intensities utils)
 install(TARGETS mris_compute_layer_intensities DESTINATION bin)

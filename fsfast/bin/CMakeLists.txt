@@ -1,6 +1,4 @@
-install_symlinks(fast_selxavg3b.glnxa64 mkcontrast2m.glnxa64 TYPE programs
-                 DESTINATION fsfast/bin
-                 )
+install_symlinks(fast_selxavg3b.glnxa64 mkcontrast2m.glnxa64 TYPE programs DESTINATION fsfast/bin)
 
 install_configured(acfseg-sess
                    acorfunc-sess

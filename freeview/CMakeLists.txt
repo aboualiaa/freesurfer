@@ -246,9 +246,7 @@ if(BUILD_GUIS
   set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
 
   if(APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS
-        "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework IOKit -framework Accelerate"
-        )
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework IOKit -framework Accelerate")
   else()
     set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::X11Extras)
   endif()

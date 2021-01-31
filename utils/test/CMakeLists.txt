@@ -41,6 +41,4 @@ add_test_script(NAME
                 sse_mathfun_test
                 )
 
-add_subdirectories(mriBuildVoronoiDiagramFloat MRIScomputeBorderValues mrishash
-                   mriSoapBubbleFloat
-                   )
+add_subdirectories(mriBuildVoronoiDiagramFloat MRIScomputeBorderValues mrishash mriSoapBubbleFloat)

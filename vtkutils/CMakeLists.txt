@@ -2,9 +2,8 @@ project(vtkutils)
 
 if(VTK_FOUND)
 
-  include_directories(${FS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}
-                      ${CMAKE_SOURCE_DIR}/packages/tiff ${VTK_INCLUDE_DIRS}
-                      ${X11_INCLUDE_DIR}
+  include_directories(${FS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/packages/tiff
+                      ${VTK_INCLUDE_DIRS} ${X11_INCLUDE_DIR}
                       )
 
   set(SOURCES

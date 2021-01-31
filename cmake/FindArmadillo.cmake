@@ -14,6 +14,4 @@ find_library(ARMADILLO_LIBRARIES
              NAMES armadillo
              PATH_SUFFIXES lib64 lib
              )
-find_package_handle_standard_args(
-  ARMADILLO DEFAULT_MSG ARMADILLO_INCLUDE_DIRS ARMADILLO_LIBRARIES
-  )
+find_package_handle_standard_args(ARMADILLO DEFAULT_MSG ARMADILLO_INCLUDE_DIRS ARMADILLO_LIBRARIES)

@@ -23,17 +23,14 @@ if(ITK_FOUND AND VTK_FOUND)
   install(TARGETS mris_multimodal DESTINATION bin)
 
   add_executable(mris_profileClustering mris_profileClustering.cxx)
-  target_link_libraries(mris_profileClustering utils ${OPENGL_LIBRARIES}
-                        ${ITK_LIBRARIES} ${VTK_LIBRARIES}
-                        )
+  target_link_libraries(mris_profileClustering utils ${OPENGL_LIBRARIES} ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_profileClustering DESTINATION bin)
 
   add_executable(mris_surf2vtk mris_surf2vtk.cxx)
   target_link_libraries(mris_surf2vtk utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_surf2vtk DESTINATION bin)
 
-  add_executable(mris_image2vtk mris_image2vtk.cxx
-                 )# Code/vtkNIFTIImageReader.cxx)
+  add_executable(mris_image2vtk mris_image2vtk.cxx) # Code/vtkNIFTIImageReader.cxx)
   target_link_libraries(mris_image2vtk utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_image2vtk DESTINATION bin)
 
@@ -43,29 +40,19 @@ if(ITK_FOUND AND VTK_FOUND)
   #install(TARGETS sigmoidFit DESTINATION bin)
 
   add_executable(mri_vessel_segment mri_vessel_segment.cxx)
-  target_link_libraries(mri_vessel_segment utils ${ITK_LIBRARIES}
-                        ${VTK_LIBRARIES}
-                        )
+  target_link_libraries(mri_vessel_segment utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mri_vessel_segment DESTINATION bin)
 
-  add_executable(mris_multimodal_surface_placement
-                 mris_multimodal_surface_placement.cxx ${TRACKIO}
-                 )
-  target_link_libraries(mris_multimodal_surface_placement utils
-                        ${ITK_LIBRARIES} ${VTK_LIBRARIES}
-                        )
+  add_executable(mris_multimodal_surface_placement mris_multimodal_surface_placement.cxx ${TRACKIO})
+  target_link_libraries(mris_multimodal_surface_placement utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_multimodal_surface_placement DESTINATION bin)
 
   add_executable(mris_curvature2image mris_curvature2image.cxx)
-  target_link_libraries(mris_curvature2image utils ${ITK_LIBRARIES}
-                        ${VTK_LIBRARIES}
-                        )
+  target_link_libraries(mris_curvature2image utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_curvature2image DESTINATION bin)
 
   add_executable(mris_extract_values mris_extract_values.cxx)
-  target_link_libraries(mris_extract_values utils ${ITK_LIBRARIES}
-                        ${VTK_LIBRARIES}
-                        )
+  target_link_libraries(mris_extract_values utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_extract_values DESTINATION bin)
 
 endif()

@@ -195,9 +195,7 @@ install(FILES lme/geodesic/geodesic_license.txt
         DESTINATION matlab/lme/geodesic
         )
 
-install_symlinks(lme/geodesic/geodesic_src.tar.gz TYPE files DESTINATION
-                 matlab/lme/geodesic
-                 )
+install_symlinks(lme/geodesic/geodesic_src.tar.gz TYPE files DESTINATION matlab/lme/geodesic)
 
 # lme univariate
 install(FILES lme/univariate/lme_EI.m
