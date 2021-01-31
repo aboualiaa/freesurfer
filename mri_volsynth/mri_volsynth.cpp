@@ -636,6 +636,19 @@ static int parse_commandline(int argc, char **argv) {
         sscanf(pargv[i], "%d", &dim[i]);
       nargsused = 4;
       dimSpeced = 1;
+    } else if (!strcmp(option, "--dim-surf")) {
+      if (nargc < 1)
+        argnerr(option, 1);
+      MRIS *surf = MRISread(pargv[0]);
+      if (surf == NULL)
+        exit(1);
+      for (i = 0; i < 3; i++)
+        dim[i] = 1;
+      dim[0] = surf->nvertices;
+      if (dim[3] == 0)
+        dim[3] = 1;
+      nargsused = 1;
+      dimSpeced = 1;
     } else if (!strcmp(option, "--nframes")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -899,6 +912,7 @@ static void print_usage() {
   printf("   --fwhm fwhm_mm : smooth by FWHM mm\n");
   printf("   --sum2 fname   : save sum vol^2 into fname (implies "
          "delta,nf=1,no-output)\n");
+  printf("   --dim-surf : set dim to nvertices x 1 x 1 \n");
   printf("\n");
 }
 /* --------------------------------------------- */

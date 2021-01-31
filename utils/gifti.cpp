@@ -357,6 +357,12 @@ MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum) {
     return nullptr;
   }
 
+  // make sure version is recoded before validation
+  if (!strcmp(image->version, "1")) {
+    free(image->version);
+    image->version = strcpyalloc(GIFTI_XML_VERSION);
+  }
+
   /*
    * check for compliance
    */
@@ -1101,6 +1107,12 @@ MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume) {
   if (nullptr == image) {
     fprintf(stderr, "MRISreadGiftiAsMRI: gifti_read_image() returned NULL\n");
     return nullptr;
+  }
+
+  // make sure version is recoded before validation
+  if (!strcmp(image->version, "1")) {
+    free(image->version);
+    image->version = strcpyalloc(GIFTI_XML_VERSION);
   }
 
   /* check for compliance */
@@ -1868,6 +1880,12 @@ int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
     }
   } // end of if NIFTI_INTENT_<stats>
 
+  // make sure version is recoded before validation
+  if (!strcmp(image->version, "1")) {
+    free(image->version);
+    image->version = strcpyalloc(GIFTI_XML_VERSION);
+  }
+
   /* check for compliance */
   int valid = gifti_valid_gifti_image(image, 1);
   if (valid == 0) {
@@ -1970,6 +1988,12 @@ int mriWriteGifti(MRI *mri, const char *out_fname) {
     }
 
     // next frame
+  }
+
+  // make sure version is recoded before validation
+  if (!strcmp(image->version, "1")) {
+    free(image->version);
+    image->version = strcpyalloc(GIFTI_XML_VERSION);
   }
 
   /* check for compliance */

@@ -205,6 +205,12 @@ typedef struct {
 
 } SDCMFILEINFO;
 
+#ifdef _DICOMRead_SRC
+char DICOMReadFirstDicomFile[5000];
+#else
+extern char  DICOMReadFirstDicomFile[5000];
+#endif
+
 void      PrintDICOMInfo(DICOMInfo *dcminfo);
 CONDITION GetString(DCM_OBJECT **object, DCM_TAG tag, char **st);
 CONDITION GetUSFromString(DCM_OBJECT **object, DCM_TAG tag, unsigned short *us);

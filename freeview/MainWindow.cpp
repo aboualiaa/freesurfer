@@ -1851,6 +1851,9 @@ void MainWindow::CommandLoadCommand(const QStringList &sa) {
   QStringList lines =
       QString(file.readAll()).trimmed().split("\n", QString::SkipEmptyParts);
   foreach (QString line, lines) {
+    if (line.trimmed().indexOf("#") == 0)
+      continue;
+
     QStringList args =
         line.trimmed().split(QRegExp("\\s+"), QString::SkipEmptyParts);
     if (args.size() > 0 &&

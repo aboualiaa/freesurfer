@@ -147,7 +147,7 @@ bool Interactor2DVolumeEdit::ProcessMouseDownEvent(QMouseEvent *event,
   if (event->button() == Qt::LeftButton ||
       (event->button() == Qt::RightButton &&
        (event->buttons() & Qt::LeftButton))) {
-    if ((event->modifiers() & CONTROL_MODIFIER) &&
+    if ((event->modifiers() & Qt::ControlModifier) &&
         (event->modifiers() & Qt::ShiftModifier)) {
       if (event->button() == Qt::LeftButton) {
         view->UpdateCursorRASPosition(event->x(), event->y());
