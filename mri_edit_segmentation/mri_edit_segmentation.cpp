@@ -238,6 +238,9 @@ static MRI *edit_hippocampus(MRI *mri_in_labeled, MRI *mri_T1,
           switch (label) {
           case Left_Cerebral_White_Matter:
             left = 1;
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
           case Right_Cerebral_White_Matter:
             dgray = distance_to_label(mri_out_labeled,
                                       left ? Left_Cerebral_Cortex
@@ -260,8 +263,14 @@ static MRI *edit_hippocampus(MRI *mri_in_labeled, MRI *mri_T1,
                         left ? Left_Cerebral_White_Matter
                              : Right_Cerebral_White_Matter);
             }
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
           case Left_Hippocampus:
             left = 1;
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
           case Right_Hippocampus:
             dgray = distance_to_label(mri_out_labeled,
                                       left ? Left_Cerebral_Cortex
@@ -332,6 +341,9 @@ static MRI *edit_hippocampus(MRI *mri_in_labeled, MRI *mri_T1,
           }
           case Left_Cerebral_Cortex:
             left = 1;
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
           case Right_Cerebral_Cortex:
             dup = distance_to_label(mri_out_labeled,
                                     left ? Left_Hippocampus : Right_Hippocampus,
@@ -584,6 +596,9 @@ static MRI *edit_amygdala(MRI *mri_in_labeled, MRI *mri_T1,
           switch (label) {
           case Left_Cerebral_Cortex:
             left = 1;
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
           case Right_Cerebral_Cortex:
             dup   = distance_to_label(mri_out_labeled,
                                     left ? Left_Amygdala : Right_Amygdala, x, y,
@@ -859,6 +874,9 @@ static MRI *edit_lateral_ventricles(MRI *mri_in_labeled, MRI *mri_T1,
           switch (label) {
           case Left_Inf_Lat_Vent:
             left = 1;
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
           case Right_Inf_Lat_Vent:
             dwhite = distance_to_label(mri_out_labeled,
                                        left ? Left_Cerebral_White_Matter

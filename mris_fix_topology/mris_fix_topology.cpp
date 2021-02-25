@@ -172,7 +172,12 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
 
-  sprintf(fname, "%s/%s/%s/%s.%s", sdir, sname, surf_dir, hemi, sphere_name);
+  int req = snprintf(fname, STRLEN, "%s/%s/%s/%s.%s", sdir, sname, surf_dir,
+                     hemi, sphere_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   printf("reading input surface %s...\n", fname);
   mris = MRISreadOverAlloc(fname, nVFMultiplier);
   if (!mris)
@@ -193,7 +198,11 @@ int main(int argc, char *argv[]) {
   /* at this point : canonical vertices */
   MRISsaveVertexPositions(mris, CANONICAL_VERTICES);
 
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, brain_name);
+  req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, brain_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   if (MGZ) {
     strcat(fname, ".mgz");
   }
@@ -211,7 +220,11 @@ int main(int argc, char *argv[]) {
       MRIscalarMul(mri, mri, 255 / fmax);
     }
   }
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, wm_name);
+  req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, wm_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   if (MGZ) {
     strcat(fname, ".mgz");
   }
@@ -270,16 +283,24 @@ int main(int argc, char *argv[]) {
   MRIScopyVolGeomFromMRI(mris_corrected, mri_wm);
   if (write_inflated) {
     MRISrestoreVertexPositions(mris_corrected, TMP_VERTICES);
-    sprintf(fname, "%s/%s/%s/%s.%s%s", sdir, sname, surf_dir, hemi,
-            inflated_name, suffix);
+    int req = snprintf(fname, STRLEN, "%s/%s/%s/%s.%s%s", sdir, sname, surf_dir,
+                       hemi, inflated_name, suffix);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stderr, "writing corrected surface to %s...\n", fname);
     MRISwrite(mris_corrected, fname);
   }
 
   MRISrestoreVertexPositions(mris_corrected, ORIGINAL_VERTICES);
   /* at this point : smoothed corrected orig vertices = solution */
-  sprintf(fname, "%s/%s/%s/%s.%s%s", sdir, sname, surf_dir, hemi, out_name,
-          suffix);
+  req = snprintf(fname, STRLEN, "%s/%s/%s/%s.%s%s", sdir, sname, surf_dir, hemi,
+                 out_name, suffix);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "writing corrected surface to %s...\n", fname);
   MRISwrite(mris_corrected, fname);
 
@@ -287,7 +308,10 @@ int main(int argc, char *argv[]) {
   MRISmarkOrientationChanges(mris_corrected);
 
   /*
-    sprintf(fname, "%s/%s/%s/%s.%s", sdir, sname, surf_dir, hemi, "ico_geo") ;
+    int req = snprintf(fname, STRLEN, "%s/%s/%s/%s.%s", sdir, sname, surf_dir, hemi, "ico_geo") ;
+    if( req >= STRLEN ) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__ << std::endl;
+    }
     fprintf(stderr, "writing output surface to %s...\n", fname) ;
     MRISwrite(mris_corrected, fname) ;
   */
@@ -572,7 +596,11 @@ static int get_option(int argc, char *argv[]) {
     add = 0;
   } else if (!stricmp(option, "openmp") || !stricmp(option, "threads")) {
     char str[STRLEN];
-    sprintf(str, "OMP_NUM_THREADS=%d", atoi(argv[2]));
+    int  req = snprintf(str, STRLEN, "OMP_NUM_THREADS=%d", atoi(argv[2]));
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncatqion on line " << __LINE__
+                << std::endl;
+    }
     putenv(str);
 #ifdef HAVE_OPENMP
     omp_set_num_threads(atoi(argv[2]));

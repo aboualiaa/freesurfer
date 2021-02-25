@@ -190,7 +190,12 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
 
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, orig_name);
+  int req =
+      snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi, orig_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   printf("reading input surface %s...\n", fname);
   mris = MRISreadOverAlloc(fname, pct_over);
   if (!mris)
@@ -277,7 +282,12 @@ int main(int argc, char *argv[]) {
   }
   MRISsaveVertexPositions(mris, ORIGINAL_VERTICES);
 
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, input_name);
+  req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi,
+                 input_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   MRISwrite(mris, fname);
 
   // number of loops
@@ -293,12 +303,17 @@ int main(int argc, char *argv[]) {
   //  }else {
   if (sphere) {
     if (did_extract_main_component == 0) {
-      // read the spherical coordinates
-      sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, sphere_name);
+      //read the spherical coordinates
+      req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi,
+                     sphere_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (MRISreadVertexPositions(mris, (char *)sphere_name) != NO_ERROR)
         ErrorExit(ERROR_NOFILE, "%s: could not read original surface %s",
                   Progname, orig_name);
-    } else // surface already extracted
+    } else //surface already extracted
       MRISrestoreVertexPositions(mris, CANONICAL_VERTICES);
   } else
     MRISmapOntoSphere(mris);
@@ -315,19 +330,31 @@ int main(int argc, char *argv[]) {
   MRISsaveVertexPositions(mris, CANONICAL_VERTICES);
   //  }
 
-  // read the mri volume
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, brain_name);
-  if (MGZ)
-    sprintf(fname, "%s.mgz", fname);
+  //read the mri volume
+  if (MGZ) {
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s.mgz", sdir, sname, brain_name);
+  } else {
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, brain_name);
+  }
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   printf("reading brain volume from %s...\n", brain_name);
   parms.mri = MRIread(fname);
   if (!parms.mri)
     ErrorExit(ERROR_NOFILE, "%s: could not read brain volume from %s", Progname,
               fname);
 
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, wm_name);
-  if (MGZ)
-    sprintf(fname, "%s.mgz", fname);
+  if (MGZ) {
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s.mgz", sdir, sname, wm_name);
+  } else {
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, wm_name);
+  }
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   printf("reading wm segmentation from %s...\n", wm_name);
   parms.mri_wm = MRIread(fname);
   if (!parms.mri_wm)
@@ -351,7 +378,11 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  sprintf(fname, "%s/%s/surf/%s.defects", sdir, sname, hemi);
+  req = snprintf(fname, STRLEN, "%s/%s/surf/%s.defects", sdir, sname, hemi);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   MRISwriteCurvature(mris, fname);
 
   mris_corrected       = MRISduplicateOver(mris);
@@ -432,10 +463,20 @@ int main(int argc, char *argv[]) {
   MRISmarkOrientationChanges(mris_corrected);
 
   if (asc) {
-    sprintf(fname, "%s/%s/surf/%s.%s.asc", sdir, sname, hemi, out_name);
+    req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s.asc", sdir, sname, hemi,
+                   out_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRISwrite(mris_corrected, fname);
   } else {
-    sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, out_name);
+    req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi,
+                   out_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRISwrite(mris_corrected, fname);
   }
 

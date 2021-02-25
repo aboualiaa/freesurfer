@@ -251,19 +251,19 @@ int znzTAGwriteCommandLine(znzFile fp, char *cmd_line) {
 }
 
 #define MATRIX_STRLEN (4 * 4 * 100)
-int znzWriteMatrix(znzFile fp, MATRIX *M) {
+int znzWriteMatrix(znzFile fp, MATRIX *M, int tag) {
   long long here, len;
   char      buf[MATRIX_STRLEN];
 
   bzero(buf, MATRIX_STRLEN);
   sprintf(buf,
-          "AutoAlign %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf "
-          "%10lf %10lf %10lf %10lf %10lf %10lf %10lf",
+          "Matrix %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf "
+          "%10lf %10lf %10lf %10lf %10lf %10lf",
           M->rptr[1][1], M->rptr[1][2], M->rptr[1][3], M->rptr[1][4],
           M->rptr[2][1], M->rptr[2][2], M->rptr[2][3], M->rptr[2][4],
           M->rptr[3][1], M->rptr[3][2], M->rptr[3][3], M->rptr[3][4],
           M->rptr[4][1], M->rptr[4][2], M->rptr[4][3], M->rptr[4][4]);
-  znzTAGwriteStart(fp, TAG_AUTO_ALIGN, &len, MATRIX_STRLEN);
+  znzTAGwriteStart(fp, tag, &len, MATRIX_STRLEN);
   here = znztell(fp);
   znzwrite(buf, sizeof(char), MATRIX_STRLEN, fp);
   here = znztell(fp);

@@ -102,7 +102,7 @@ class LinearTransform:
             return self
         # exclude source/target RAS information
         matrix = (
-            np.linalg.inv(self.source.affine) @ self.matrix @ self.target.affine
+            np.linalg.inv(self.target.affine) @ self.matrix @ self.source.affine
         )
         return LinearTransform(
             matrix,

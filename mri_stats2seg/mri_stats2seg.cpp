@@ -468,13 +468,17 @@ int LoadSuesTable(char *fname, int col1, int log10flag, int **pplutindex,
 
   fp     = fopen(fname, "r");
   nitems = 0;
-  while (true) {
-    if (fgets(tmpstr, 2000 - 1, fp) == nullptr)
+  while (1) {
+    if (fgets(tmpstr, 2000 - 1, fp) == NULL)
       break;
     memset(tmpstr2, '\0', 2000);
     sscanf(tmpstr, "%s", tmpstr2);
     memcpy(hemi, tmpstr2, 2);
-    sprintf(segname, "ctx-%2s-%s", hemi, &(tmpstr2[3]));
+    int req = snprintf(segname, 2000, "ctx-%2s-%s", hemi, &(tmpstr2[3]));
+    if (req >= 2000) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     CTABfindName(fsenv->ctab, segname, &segindex);
     if (segindex < 0) {
       printf("ERROR: reading %s, cannot find %s in color table\n", fname,

@@ -523,13 +523,11 @@ static void synopsis_show() {
 void simpleSynopsis_show() {
   char pch_errorMessage[STRBUF];
 
-  sprintf(pch_errorMessage, "Insufficient number of arguments.");
-  sprintf(
-      pch_errorMessage,
-      "%s\nYou should specify '<input1> <ACTION> [<input2> | <floatNumber>]'",
-      pch_errorMessage);
-  sprintf(pch_errorMessage, "%s\nUse a '-u' for full usage instructions.",
-          pch_errorMessage);
+  sprintf(pch_errorMessage,
+          "Insufficient number of arguments.\n"
+          "You should specify '<input1> <ACTION> [<input2> | <floatNumber>]'\n"
+          "Use a '-u' for full usage instructions.");
+
   ErrorExit(10, "%s: %s", G_pch_progname, pch_errorMessage);
 }
 
@@ -560,12 +558,12 @@ void error_exit(const char *apch_action, const char *apch_error, int exitCode) {
   char pch_errorMessage[STRBUF];
   strcpy(pch_errorMessage, "");
 
-  sprintf(pch_errorMessage, "\n%s:", G_pch_progname);
   sprintf(pch_errorMessage,
-          "%s\n\tSorry, but I seem to have encountered an error.",
-          pch_errorMessage);
-  sprintf(pch_errorMessage, "%s\n\tWhile %s,", pch_errorMessage, apch_action);
-  sprintf(pch_errorMessage, "%s\n\t%s\n", pch_errorMessage, apch_error);
+          "\n%s:\n"
+          "\tSorry, but I seem to have encountered an error.\n"
+          "\tWhile %s,\n"
+          "\t%s\n",
+          G_pch_progname, apch_action, apch_error);
 
   fprintf(stderr, "%s", pch_errorMessage);
   fprintf(stderr, "\n");

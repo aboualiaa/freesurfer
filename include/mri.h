@@ -243,13 +243,14 @@ public:
   MRI_REGION   roi;
 
   // ---- scan parameters ----
-  float  tr            = 0;       // time to recovery
-  float  te            = 0;       // time to echo
-  float  ti            = 0;       // time to inversion
-  double flip_angle    = 0;       // flip angle in radians
-  float  FieldStrength = 0;       // field strength
-  char * pedir         = nullptr; // phase enc direction: ROW, COL, etc
-  float  location      = 0;       // NOT USED
+  float   tr            = 0;       // time to recovery
+  float   te            = 0;       // time to echo
+  float   ti            = 0;       // time to inversion
+  double  flip_angle    = 0;       // flip angle in radians
+  float   FieldStrength = 0;       // field strength
+  char *  pedir         = nullptr; // phase enc direction: ROW, COL, etc
+  MATRIX *origRas2Vox   = nullptr; // to get to original voxel grid from ras
+  float   location      = 0;       // NOT USED
 
   // ---- DTI ----
   int     bvec_space = 0; // 0: unknown, 1: scanner, 2: voxel

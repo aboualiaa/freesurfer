@@ -160,9 +160,14 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
 
-  sprintf(fname, "%s/%s/surf/%s.sphere", sdir, subject, hemi);
+  int req =
+      snprintf(fname, STRLEN, "%s/%s/surf/%s.sphere", sdir, subject, hemi);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mris = MRISread(fname);
-  if (mris == nullptr)
+  if (mris == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface from %s", Progname,
               fname);
   if (MRISreadAnnotation(mris, annot_name) != NO_ERROR)

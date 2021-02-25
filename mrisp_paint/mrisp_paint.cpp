@@ -152,16 +152,24 @@ int main(int argc, char *argv[]) {
     /* reading or generating the field */
     if (ReturnFieldName(field_no)) /* read in precomputed curvature file */
     {
-      sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
-              ReturnFieldName(field_no));
+      int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", subjects_dir,
+                         subject_name, hemi, ReturnFieldName(field_no));
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (MRISreadCurvatureFile(mris_var, fname) != NO_ERROR) {
         MRISfree(&mris_var);
         ErrorExit(ERROR_BADPARM, "%s: could not load file %s\n", fname);
       }
     } else /* compute curvature of surface */
     {
-      sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
-              surface_names[field_no]);
+      int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", subjects_dir,
+                         subject_name, hemi, surface_names[field_no]);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       /*    if(parms->fields[n].field==0) */
       /*     sprintf(fname, "inflated") ; */
       /*    else */

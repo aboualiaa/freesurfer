@@ -424,6 +424,13 @@ if(NOT APPLE)
                )
   find_library(BLAS_LIBRARIES NAMES libblas.a libopenblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
+  find_library(QUADMATH_LIBRARIES
+               HINTS /usr/lib64 /usr/lib /usr/lib/gcc/*/*/
+               NAMES libquadmath.a libquadmath.so libquadmath.so.0
+               )
+  if(NOT QUADMATH_LIBRARIES)
+    set(QUADMATH_LIBRARIES "")
+  endif()
 endif()
 
 # -------- armadillo --------

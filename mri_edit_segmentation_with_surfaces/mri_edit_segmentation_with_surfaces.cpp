@@ -530,32 +530,33 @@ static int relabel_hypointensities(MRI *mri, MRI *mri_inputs, MRI_SURFACE *mris,
                                          : Left_Cerebral_White_Matter;
 
             /*for (n = 0 ; n < gcap->nlabels ; n++)
-                {
+            {
 
-                   if (x == Gx && y == Gy && z == Gz)
-                    {
-                    printf("inside gray/white boundary, "
-                         "changing to hypointensity...\n") ;
-                    }
-                    changed++ ;
-                    MRIvox(mri, x, y, z) = right ? Right_WM_hypointensities :
-               Left_WM_hypointensities ;
-                  }*/
+               if (x == Gx && y == Gy && z == Gz)
+            	{
+              	printf("inside gray/white boundary, "
+                     "changing to hypointensity...\n") ;
+            	}
+           	changed++ ;
+            	MRIvox(mri, x, y, z) = right ? Right_WM_hypointensities : Left_WM_hypointensities ;
+              }*/
 
-            // nwmsa = MRIlabelsInNbhd(mri, x, y, z,3, wmsa_label) ;
+            //nwmsa = MRIlabelsInNbhd(mri, x, y, z,3, wmsa_label) ;
 
             /*if(GCAdistWMvWMSA(mri_inputs, x, y, z, right, gca))
-                  {
-                    MRIvox(mri, x, y, z) = right ? Right_WM_hypointensities :
-            Left_WM_hypointensities ; changed++ ;
-                  }
+		{
+	    	  MRIvox(mri, x, y, z) = right ? Right_WM_hypointensities : Left_WM_hypointensities ;
+		   changed++ ;
+		}
 
-            else
-                    MRIvox(mri,x,y,z) = right ? Right_Cerebral_White_Matter :
-            Left_Cerebral_White_Matter ;
-                   */
+	  else
+		  MRIvox(mri,x,y,z) = right ? Right_Cerebral_White_Matter : Left_Cerebral_White_Matter ;
+	    	 */
             break;
           }
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Left_WM_hypointensities:
         case Right_WM_hypointensities: // check to see if it's outside ribbon
                                        // and change it to gm

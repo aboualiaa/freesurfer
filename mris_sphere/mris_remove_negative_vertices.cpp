@@ -49,9 +49,8 @@ int main(int argc, char *argv[]) {
   then.reset();
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  memset(&parms, 0, sizeof(parms));
   parms.dt           = 1;
   parms.tol          = .5 /*1e-1*/;
   parms.min_averages = 0;

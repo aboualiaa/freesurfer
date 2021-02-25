@@ -6,7 +6,6 @@ from . import term
 
 
 class HelpFormatter(argparse.HelpFormatter):
-
     # set default indent to 4 spaces
     def __init__(self, indent_increment=4, *args, **kwargs):
         super(HelpFormatter, self).__init__(

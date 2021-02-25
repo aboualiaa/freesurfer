@@ -95,18 +95,18 @@ int main(int argc, char *argv[]) {
   printf("reading time point file %s with %d timepoints\n", tp_fname, ntps);
 
   fp = fopen(tp_fname, "r");
-  if (ntps <= 0 || fp == nullptr)
+  if (ntps <= 0 || fp == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read base tp file %s", Progname,
               tp_fname);
 
   FileNamePath(tp_fname, bdir);
   bname = strrchr(bdir, '/') + 1;
-  if (bname == nullptr)
+  if (bname == NULL)
     ErrorExit(ERROR_BADPARM, "%s: could not parse base name from %s", Progname,
               bdir);
   strcpy(sdir, bdir);
   cp = strrchr(sdir, '/');
-  if (cp == nullptr)
+  if (cp == NULL)
     ErrorExit(ERROR_BADPARM, "%s: could not parse SUBJECTS_DIR from %s",
               Progname, sdir);
   *cp = 0;
@@ -118,11 +118,16 @@ int main(int argc, char *argv[]) {
     tp_names[t] = (char *)calloc(strlen(cp) + 1, sizeof(char));
     strcpy(tp_names[t], cp);
 
-    sprintf(fname, "%s/%s.long.%s/mri/%s", sdir, cp, bname, in_fname);
+    int req = snprintf(fname, STRLEN, "%s/%s.long.%s/mri/%s", sdir, cp, bname,
+                       in_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading input volume %s\n", fname);
     mri_tmp = MRIread(fname);
-    if (mri_tmp == nullptr)
-      ErrorExit(Gerror, nullptr);
+    if (mri_tmp == NULL)
+      ErrorExit(Gerror, NULL);
     if (t == 0) {
       mri_norm = MRIallocSequence(mri_tmp->width, mri_tmp->height,
                                   mri_tmp->depth, mri_tmp->type, ntps);
@@ -131,36 +136,50 @@ int main(int argc, char *argv[]) {
     MRIcopyFrame(mri_tmp, mri_norm, 0, t);
     MRIfree(&mri_tmp);
 
-    sprintf(fname, "%s/%s/mri/%s", sdir, cp, brain_name);
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, cp, brain_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading input volume %s\n", fname);
     mri_tmp = MRIread(fname);
-    if (mri_tmp == nullptr)
-      ErrorExit(Gerror, nullptr);
+    if (mri_tmp == NULL)
+      ErrorExit(Gerror, NULL);
     if (t == 0) {
       mri_brain = MRIallocSequence(mri_tmp->width, mri_tmp->height,
                                    mri_tmp->depth, mri_tmp->type, ntps);
       MRIcopyHeader(mri_tmp, mri_brain);
     }
 
-    sprintf(fname, "%s/mri/transforms/%s_to_%s.lta", bdir, bname, tp_names[t]);
+    req = snprintf(fname, STRLEN, "%s/mri/transforms/%s_to_%s.lta", bdir, bname,
+                   tp_names[t]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     printf("reading input transform %s\n", fname);
     ltas[t] = LTAread(fname);
-    if (ltas[t] == nullptr)
-      ErrorExit(Gerror, nullptr);
+    if (ltas[t] == NULL)
+      ErrorExit(Gerror, NULL);
     if (ltas[t]->type != LINEAR_VOX_TO_VOX)
       ErrorExit(ERROR_UNSUPPORTED, "%s: transforms must be linear vox to vox",
                 Progname);
-    mri_tmp2 =
-        MRIinverseLinearTransform(mri_tmp, nullptr, ltas[t]->xforms[0].m_L);
+    mri_tmp2 = MRIinverseLinearTransform(mri_tmp, NULL, ltas[t]->xforms[0].m_L);
     MRIcopyFrame(mri_tmp2, mri_brain, 0, t);
     MRIfree(&mri_tmp);
     MRIfree(&mri_tmp2);
 
-    sprintf(fname, "%s/%s.long.%s/mri/%s", sdir, cp, bname, aseg_name);
+    req = snprintf(fname, STRLEN, "%s/%s.long.%s/mri/%s", sdir, cp, bname,
+                   aseg_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading input volume %s\n", fname);
     mri_tmp = MRIread(fname);
-    if (mri_tmp == nullptr)
-      ErrorExit(Gerror, nullptr);
+    if (mri_tmp == NULL)
+      ErrorExit(Gerror, NULL);
     if (t == 0) {
       mri_aseg = MRIallocSequence(mri_tmp->width, mri_tmp->height,
                                   mri_tmp->depth, mri_tmp->type, ntps);
@@ -194,13 +213,18 @@ int main(int argc, char *argv[]) {
   //  remove_absolute_outliers(mri_norm, mri_ctrl, mri_ctrl, min_intensity) ;
   printf("using %d final control points\n", MRIcountNonzero(mri_ctrl));
   for (t = 0; t < ntps; t++) {
-    MRI *mri_tmp = nullptr;
+    MRI *mri_tmp = NULL;
 
     mri_tmp  = MRIcopyFrame(mri_norm, mri_tmp, t, 0);
-    mri_bias = MRIbuildBiasImage(mri_tmp, mri_ctrl, nullptr, bias_sigma);
+    mri_bias = MRIbuildBiasImage(mri_tmp, mri_ctrl, NULL, bias_sigma);
     mri_dst  = MRIapplyBiasCorrectionSameGeometry(
-        mri_tmp, mri_bias, nullptr, DEFAULT_DESIRED_WHITE_MATTER_VALUE);
-    sprintf(fname, "%s/%s.long.%s/mri/%s", sdir, tp_names[t], bname, out_fname);
+        mri_tmp, mri_bias, NULL, DEFAULT_DESIRED_WHITE_MATTER_VALUE);
+    int req = snprintf(fname, STRLEN, "%s/%s.long.%s/mri/%s", sdir, tp_names[t],
+                       bname, out_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("writing output to %s\n", fname);
     MRIwrite(mri_dst, fname);
   }

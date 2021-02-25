@@ -120,7 +120,6 @@ int main(int argc, char *argv[]) {
   ErrorInit(NULL, NULL, NULL);
   DiagInit(NULL, NULL, NULL);
 
-  memset(&parms, 0, sizeof(parms));
   parms.dt               = .05;
   parms.projection       = PROJECT_ELLIPSOID;
   parms.tol              = .5 /*1e-1*/;
@@ -308,7 +307,6 @@ int main(int argc, char *argv[]) {
     INTEGRATION_PARMS inflation_parms;
 
     MRIScenter(mris, mris);
-    memset(&inflation_parms, 0, sizeof(INTEGRATION_PARMS));
     strcpy(inflation_parms.base_name, parms.base_name);
     inflation_parms.write_iterations = parms.write_iterations;
     inflation_parms.niterations      = inflate_iterations;

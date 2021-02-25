@@ -172,8 +172,8 @@ Set OPEN MP threads
 
 --inorm
 
-Spatial intensity normalization. Subtract the in-mask mean and divide by the
-in-mask stddev.
+Spatial intensity normalization. Subtract the in-mask mean and divide by the in-mask 
+stddev. 
 
 EXAMPLES:
 
@@ -201,22 +201,35 @@ EXAMPLES:
 ENDHELP
 */
 
-// double round(double x);
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
 
+#include "annotation.h"
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
+#include "fio.h"
 #include "fmriutils.h"
+#include "icosahedron.h"
+#include "macros.h"
 #include "matfile.h"
+#include "mri.h"
 #include "mri2.h"
+#include "mrisurf.h"
 #include "mrisutils.h"
 #include "pdf.h"
 #include "randomfields.h"
+#include "timer.h"
+#include "utils.h"
 #include "version.h"
 
-#ifdef HAVE_OPENMP
 #include "romp_support.h"
-#endif
 
 MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
                                int nitersmax, double *pByFWHM,
@@ -230,11 +243,11 @@ MRI *MRIbinarize2(MRI *mri_src, MRI *mri_dst, double threshold, double low_val,
                   double hi_val);
 
 static int  parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options(FILE *fp);
 int         main(int argc, char *argv[]);
 
@@ -244,40 +257,40 @@ int            debug         = 0;
 int            checkoptsonly = 0;
 struct utsname uts;
 
-char *inpath     = nullptr;
-char *outpath    = nullptr;
-char *sumfile    = nullptr;
-char *datfile    = nullptr;
-MRI * InVals     = nullptr;
-MRI * InValsCopy = nullptr;
+char *inpath     = NULL;
+char *outpath    = NULL;
+char *sumfile    = NULL;
+char *datfile    = NULL;
+MRI * InVals     = NULL;
+MRI * InValsCopy = NULL;
 int   InValsType = MRI_VOLUME_TYPE_UNKNOWN;
 
-char * maskpath    = nullptr;
-MRI *  mask        = nullptr;
+char * maskpath    = NULL;
+MRI *  mask        = NULL;
 int    maskinv     = 0;
 double maskthresh  = 0.5;
-char * outmaskpath = nullptr;
+char * outmaskpath = NULL;
 
-MRI *mritmp = nullptr;
+MRI *mritmp = NULL;
 char tmpstr[2000];
 
 MRI * ar1;
-char *ar1path = nullptr;
+char *ar1path = NULL;
 
 double infwhm = 0, ingstd = 0;
 double infwhmc = 0, infwhmr = 0, infwhms = 0;
 double ingstdc = 0, ingstdr = 0, ingstds = 0;
 double byfwhm;
 double bygstd;
-char * tofwhmfile = nullptr;
+char * tofwhmfile = NULL;
 double tofwhm, togstd, tofwhmact, tofwhmtol = 0.5;
 int    tofwhmnitersmax = 20;
 int    tofwhmniters;
 int    synth = 0, nframes = -1;
 int    SynthSeed = -1;
 
-char *  Xfile          = nullptr;
-MATRIX *X              = nullptr;
+char *  Xfile          = NULL;
+MATRIX *X              = NULL;
 int     DetrendOrder   = -1;
 int     SaveDetrended  = 0;
 int     SaveUnmasked   = 0;
@@ -289,8 +302,8 @@ int     nframesmin     = 10;
 int     DoSqr          = 0; // take square of input before smoothing
 int     DoMedian = 0, MedianWidth = 0;
 
-char *sum2file = nullptr;
-char *arNfname = nullptr;
+char *sum2file = NULL;
+char *arNfname = NULL;
 int   arNlags;
 
 int DoAR2;
@@ -298,7 +311,7 @@ int DoAR2;
 double TR    = 0.0;
 int    SetTR = 0;
 
-MB2D *mb2drad = nullptr, *mb2dtan = nullptr;
+MB2D *mb2drad = NULL, *mb2dtan = NULL;
 int   DoSpatialINorm = 0;
 
 /*---------------------------------------------------------------*/
@@ -325,7 +338,7 @@ int main(int argc, char *argv[]) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   if (argc == 0)
     usage_exit();
   parse_commandline(argc, argv);
@@ -340,7 +353,7 @@ int main(int argc, char *argv[]) {
 
   // ------------- load or synthesize input ---------------------
   InVals = MRIreadType(inpath, InValsType);
-  if (InVals == nullptr)
+  if (InVals == NULL)
     exit(1);
   if (SetTR) {
     printf("Setting TR to %g ms\n", TR);
@@ -370,14 +383,14 @@ int main(int argc, char *argv[]) {
 
   if (DoSqr) {
     printf("Computing square of input\n");
-    MRIsquare(InVals, nullptr, InVals);
+    MRIsquare(InVals, NULL, InVals);
   }
 
   // -------------------- handle masking ------------------------
   if (maskpath) {
     printf("Loading mask %s\n", maskpath);
     mask = MRIread(maskpath);
-    if (mask == nullptr)
+    if (mask == NULL)
       exit(1);
     if (MRIdimMismatch(mask, InVals, 0)) {
       printf("ERROR: dimension mismatch between mask and input\n");
@@ -386,14 +399,14 @@ int main(int argc, char *argv[]) {
     MRIbinarize2(mask, mask, maskthresh, 0, 1);
   }
   if (automask) {
-    RFglobalStats(InVals, nullptr, &gmean, &gstd, &gmax);
+    RFglobalStats(InVals, NULL, &gmean, &gstd, &gmax);
     maskthresh = gmean * automaskthresh;
     printf(
         "Computing mask, relative threshold = %g, gmean = %g, absthresh = %g\n",
         automaskthresh, gmean, maskthresh);
-    mritmp = MRIframeMean(InVals, nullptr);
-    // MRIwrite(mritmp,"fmean.mgh");
-    mask = MRIbinarize2(mritmp, nullptr, maskthresh, 0, 1);
+    mritmp = MRIframeMean(InVals, NULL);
+    //MRIwrite(mritmp,"fmean.mgh");
+    mask = MRIbinarize2(mritmp, NULL, maskthresh, 0, 1);
     MRIfree(&mritmp);
   }
   if (mask) {
@@ -431,7 +444,7 @@ int main(int argc, char *argv[]) {
          mb2dtan) &&
         SmoothOnly) {
       if (SaveUnmasked)
-        mritmp = nullptr;
+        mritmp = NULL;
       else
         mritmp = mask;
       if (infwhm > 0) {
@@ -448,7 +461,7 @@ int main(int argc, char *argv[]) {
         mb2drad->DeltaD = InVals->xsize / 2.0;
         mb2drad->c0     = InVals->width / 2.0;  // center of volume
         mb2drad->r0     = InVals->height / 2.0; // center of volume
-        mritmp          = MRImotionBlur2D(InVals, mb2drad, nullptr);
+        mritmp          = MRImotionBlur2D(InVals, mb2drad, NULL);
         MRIfree(&InVals);
         InVals = mritmp;
       }
@@ -457,12 +470,12 @@ int main(int argc, char *argv[]) {
         mb2dtan->DeltaD = InVals->xsize / 2.0;
         mb2dtan->c0     = InVals->width / 2.0;  // center of volume
         mb2dtan->r0     = InVals->height / 2.0; // center of volume
-        mritmp          = MRImotionBlur2D(InVals, mb2dtan, nullptr);
+        mritmp          = MRImotionBlur2D(InVals, mb2dtan, NULL);
         MRIfree(&InVals);
         InVals = mritmp;
       }
       if (DoSpatialINorm) {
-        mritmp = SpatialINorm(InVals, mask, nullptr);
+        mritmp = SpatialINorm(InVals, mask, NULL);
         MRIfree(&InVals);
         InVals = mritmp;
       }
@@ -473,7 +486,7 @@ int main(int argc, char *argv[]) {
     }
   } else {
     printf("Running median filter %d\n", MedianWidth);
-    mritmp = MRImedian(InVals, nullptr, MedianWidth, nullptr);
+    mritmp = MRImedian(InVals, NULL, MedianWidth, NULL);
     MRIfree(&InVals);
     InVals = mritmp;
     if (SmoothOnly) {
@@ -486,13 +499,13 @@ int main(int argc, char *argv[]) {
 
   // Make a copy, if needed, prior to doing anything to data
   if (outpath)
-    InValsCopy = MRIcopy(InVals, nullptr);
+    InValsCopy = MRIcopy(InVals, NULL);
 
   // Compute variance reduction factor -------------------
   if (sum2file) {
     ftmp = MRIsum2All(InVals);
     fp   = fopen(sum2file, "w");
-    if (fp == nullptr) {
+    if (fp == NULL) {
       printf("ERROR: opening %s\n", sum2file);
       exit(1);
     }
@@ -524,7 +537,7 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     mritmp = fMRIdetrend(InVals, X);
-    if (mritmp == nullptr)
+    if (mritmp == NULL)
       exit(1);
     MRIfree(&InVals);
     InVals = mritmp;
@@ -535,8 +548,7 @@ int main(int argc, char *argv[]) {
     printf("Smoothing input by fwhm=%lf, gstd=%lf\n", infwhm, ingstd);
     MRImaskedGaussianSmooth(InVals, mask, ingstd, InVals);
   }
-  // ------------ Smooth Input nonisotropically BY infwhm
-  // -------------------------
+  // ------------ Smooth Input nonisotropically BY infwhm -------------------------
   if (infwhmc > 0 || infwhmr > 0 || infwhms > 0) {
     printf("Smoothing input by fwhm=(%lf,%lf,%lf) gstd=(%lf,%lf,%lf)\n",
            infwhmc, infwhmr, infwhms, ingstdc, ingstdr, ingstds);
@@ -544,13 +556,13 @@ int main(int argc, char *argv[]) {
   }
   if (mb2drad) {
     printf("Applying radial motion blur\n");
-    mritmp = MRImotionBlur2D(InVals, mb2drad, nullptr);
+    mritmp = MRImotionBlur2D(InVals, mb2drad, NULL);
     MRIfree(&InVals);
     InVals = mritmp;
   }
   if (mb2dtan) {
     printf("Applying tangential motion blur\n");
-    mritmp = MRImotionBlur2D(InVals, mb2dtan, nullptr);
+    mritmp = MRImotionBlur2D(InVals, mb2dtan, NULL);
     MRIfree(&InVals);
     InVals = mritmp;
   }
@@ -562,7 +574,7 @@ int main(int argc, char *argv[]) {
     mritmp = MRImaskedGaussianSmoothTo(InVals, mask, tofwhm, tofwhmtol,
                                        tofwhmnitersmax, &byfwhm, &tofwhmact,
                                        &tofwhmniters, InVals);
-    if (mritmp == nullptr)
+    if (mritmp == NULL)
       exit(1);
     printf("Smoothed by %g to %g in %d iterations\n", byfwhm, tofwhmact,
            tofwhmniters);
@@ -591,13 +603,13 @@ int main(int argc, char *argv[]) {
     // Smoothed output will not be masked
     if (SaveDetrended && X) {
       mritmp = fMRIdetrend(InValsCopy, X);
-      if (mritmp == nullptr)
+      if (mritmp == NULL)
         exit(1);
       MRIfree(&InValsCopy);
       InValsCopy = mritmp;
     }
     if (SaveUnmasked)
-      mritmp = nullptr;
+      mritmp = NULL;
     else
       mritmp = mask;
     if (infwhm > 0)
@@ -610,13 +622,13 @@ int main(int argc, char *argv[]) {
     }
     if (mb2drad) {
       printf("Applying radial motion blur\n");
-      mritmp = MRImotionBlur2D(InValsCopy, mb2drad, nullptr);
+      mritmp = MRImotionBlur2D(InValsCopy, mb2drad, NULL);
       MRIfree(&InValsCopy);
       InValsCopy = mritmp;
     }
     if (mb2dtan) {
       printf("Applying tangential motion blur\n");
-      mritmp = MRImotionBlur2D(InValsCopy, mb2dtan, nullptr);
+      mritmp = MRImotionBlur2D(InValsCopy, mb2dtan, NULL);
       MRIfree(&InValsCopy);
       InValsCopy = mritmp;
     }
@@ -627,16 +639,16 @@ int main(int argc, char *argv[]) {
 
   if (arNfname) {
     printf("Computing spatial ARN %d in volume.\n", arNlags);
-    ar1 = fMRIspatialARN(InVals, mask, arNlags, nullptr);
-    if (ar1 == nullptr)
+    ar1 = fMRIspatialARN(InVals, mask, arNlags, NULL);
+    if (ar1 == NULL)
       exit(1);
     MRIwrite(ar1, arNfname);
   }
 
   // ----------- Compute smoothness -----------------------------
   printf("Computing spatial AR1 in volume.\n");
-  ar1 = fMRIspatialAR1(InVals, mask, nullptr);
-  if (ar1 == nullptr)
+  ar1 = fMRIspatialAR1(InVals, mask, NULL);
+  if (ar1 == NULL)
     exit(1);
   fMRIspatialAR1Mean(ar1, mask, &car1mn, &rar1mn, &sar1mn);
 
@@ -671,7 +683,7 @@ int main(int argc, char *argv[]) {
   // ---------- Save summary file ---------------------
   if (sumfile) {
     fp = fopen(sumfile, "w");
-    if (fp == nullptr) {
+    if (fp == NULL) {
       printf("ERROR: opening %s\n", sumfile);
       exit(1);
     }
@@ -695,7 +707,7 @@ int main(int argc, char *argv[]) {
 
   if (datfile) {
     fp = fopen(datfile, "w");
-    if (fp == nullptr) {
+    if (fp == NULL) {
       printf("ERROR: opening %s\n", datfile);
       exit(1);
     }
@@ -936,9 +948,9 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       Xfile = pargv[0];
-      // X = MatrixReadTxt(Xfile, NULL);
+      //X = MatrixReadTxt(Xfile, NULL);
       X = MatlabRead(Xfile);
-      if (X == nullptr) {
+      if (X == NULL) {
         printf("ERROR: reading %s\n", Xfile);
         exit(1);
       }
@@ -980,12 +992,12 @@ static int parse_commandline(int argc, char **argv) {
   return (0);
 }
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("USAGE: %s\n", Progname);
   printf("\n");
   printf("   --i inputvol  : input volume\n");
@@ -1034,7 +1046,7 @@ static void print_usage() {
   printf("\n");
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\n");
   printf(
@@ -1257,8 +1269,8 @@ static void print_version(void) {
   exit(1);
 }
 /* --------------------------------------------- */
-static void check_options() {
-  if (inpath == nullptr && !synth) {
+static void check_options(void) {
+  if (inpath == NULL && !synth) {
     printf("ERROR: need to specify --in or --synth\n");
     exit(1);
   }
@@ -1267,13 +1279,13 @@ static void check_options() {
     exit(1);
   }
   // At least remove the mean
-  if (Xfile == nullptr && DetrendOrder < 0)
+  if (Xfile == NULL && DetrendOrder < 0)
     DetrendOrder = 0;
   if (maskpath && automask) {
     printf("ERROR: cannot use --mask and --auto-mask\n");
     exit(1);
   }
-  if (outmaskpath && maskpath == nullptr && !automask) {
+  if (outmaskpath && maskpath == NULL && !automask) {
     printf("ERROR: cannot use --outmask without --mask or --auto-mask\n");
     exit(1);
   }
@@ -1342,7 +1354,7 @@ MRI *MRIbinarize2(MRI *mri_src, MRI *mri_dst, double threshold, double low_val,
   double val;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   width  = mri_src->width;
   height = mri_src->height;
@@ -1370,7 +1382,7 @@ MRI *MRIbinarize2(MRI *mri_src, MRI *mri_dst, double threshold, double low_val,
 double EvalFWHM(MRI *vol, MRI *mask) {
   double      car1mn, rar1mn, sar1mn;
   double      cfwhm, rfwhm, sfwhm, fwhm;
-  static MRI *ar1 = nullptr;
+  static MRI *ar1 = NULL;
   ar1             = fMRIspatialAR1(vol, mask, ar1);
   fMRIspatialAR1Mean(ar1, mask, &car1mn, &rar1mn, &sar1mn);
   cfwhm = RFar1ToFWHM(car1mn, vol->xsize);
@@ -1403,7 +1415,7 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
     printf("amount that you want to smooth it to (%gmm). It is impossible\n",
            ToFWHM);
     printf("to 'unsmooth' the data.\n");
-    return (nullptr);
+    return (NULL);
   }
   xa = 0;
   ya = SrcFWHM;
@@ -1417,7 +1429,7 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
     return (outvol);
   }
 
-  volsm = MRIcopy(invol, nullptr); // allocate
+  volsm = MRIcopy(invol, NULL); // allocate
 
   // First point in the bracket
 
@@ -1461,7 +1473,7 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
   if (yc < ToFWHM) {
     // Did not step far enough out
     printf("ERROR: did not step far enough out\n");
-    return (nullptr);
+    return (NULL);
   }
 
   // ok, we've brackated the min, now chase it down like a scared rabbit
@@ -1476,7 +1488,7 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
     if (nth > nitersmax) {
       printf("ERROR: searched timed out at niters=%d\n", nth);
       MRIfree(&volsm);
-      return (nullptr);
+      return (NULL);
     }
     printf("n=%d by=(%4.2lf,%4.2lf,%4.2lf) to=(%4.2lf,%4.2lf,%4.2lf) err=%g\n",
            nth, xa, xb, xc, ya, yb, yc, err);
@@ -1497,7 +1509,7 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
         xb = xn;
         yb = yn;
       } else {
-        xa = xn; // a replaced by new
+        xa = xn; //a replaced by new
         ya = yn;
         // b and c stay the same
       }
@@ -1510,13 +1522,13 @@ MRI *MRImaskedGaussianSmoothTo(MRI *invol, MRI *mask, double ToFWHM, double tol,
       yn = EvalFWHM(volsm, mask);
       printf("results in actual fwhm of %g\n", yn);
       if (fabs(yn - ToFWHM) < fabs(ToFWHM - yb)) {
-        xa = xb; // a replaced by  b
+        xa = xb; //a replaced by  b
         ya = yb;
-        xb = xn; // b replace by new
+        xb = xn; //b replace by new
         yb = yn;
         // c stays the same
       } else {
-        xc = xn; // c replaced by new
+        xc = xn; //c replaced by new
         yc = yn;
         // a and b stay the same
       }

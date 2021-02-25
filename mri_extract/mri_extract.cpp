@@ -63,14 +63,17 @@ int main(int argc, char *argv[]) {
   if (mri_like != NULL) {
     if (argc < 2)
       ErrorExit(ERROR_BADPARM,
-                "usage: %s <src volume> x0 y0 z0 dx dy dz <dst volume>",
+                "usage: %s -like <template vol> <src volume>  <dst volume>",
                 Progname);
 
   } else {
-    if (argc < 8)
-      ErrorExit(ERROR_BADPARM,
-                "usage: %s <src volume> x0 y0 z0 dx dy dz <dst volume>",
-                Progname);
+    if (argc < 8) {
+      printf("usage: %s -like <template vol> <src volume>  <dst volume>\n",
+             Progname);
+      printf("\nor\n\n");
+      printf("usage: %s <src volume> x0 y0 z0 dx dy dz <dst volume>", Progname);
+      ErrorExit(ERROR_BADPARM, "", Progname);
+    }
 
     if (sscanf(argv[2], "%d", &x0) != 1)
       ErrorExit(ERROR_BADPARM, "%s: could not scan x0 from '%s'", Progname,
@@ -190,9 +193,13 @@ static int get_option(int argc, char *argv[]) {
       fprintf(stderr, "reducing %d times\n", reductions);
       nargs = 1;
       break;
+    case 'H':
     case '?':
     case 'U':
-      printf("usage: %s [input directory] [output directory]\n", argv[0]);
+      printf("usage: %s -like <template vol> <src volume>  <dst volume>\n",
+             Progname);
+      printf("\nor\n\n");
+      printf("usage: %s <src volume> x0 y0 z0 dx dy dz <dst volume>", Progname);
       exit(1);
       break;
     default:

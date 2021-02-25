@@ -280,8 +280,10 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
             break;
           }
 
-          /* !!! no break - erase unknown if it is surrounded by only  unknowns
-           */
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
+          /* !!! no break - erase unknown if it is surrounded by only  unknowns */
 
           /* erase these  labels */
         case Left_Cerebellum_White_Matter:
@@ -321,6 +323,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
         case Right_non_WM_hypointensities:
           if (fcd)
             break;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Left_Lesion:
         case Right_Lesion:
         case WM_hypointensities:
@@ -384,6 +389,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
             MRIvox(mri_filled, x, y, z) = AUTO_FILL;
             non++;
           }
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Left_Inf_Lat_Vent:
         case Right_Inf_Lat_Vent:
           xi     = (label == Left_Inf_Lat_Vent) ? mri_wm->xi[x + 1]
@@ -532,6 +540,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
           break;
         case Left_Hippocampus:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Hippocampus: {
           int xi;
 
@@ -712,6 +723,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
 
         case Left_Lateral_Ventricle:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Lateral_Ventricle:
           olabel =
               left ? Left_Cerebral_White_Matter : Right_Cerebral_White_Matter;
@@ -789,6 +803,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
         switch (label) {
         case Left_Cerebral_Cortex:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Cerebral_Cortex:
         case Unknown:
           // look for voxels that are lateral to amygdala, and inf to wm. Should
@@ -925,6 +942,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
           case Left_Hippocampus:
           case Left_Amygdala:
             left = 1;
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
           case Right_Inf_Lat_Vent:
           case Right_Hippocampus:
           case Right_Amygdala:
@@ -1107,6 +1127,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
         switch (label) {
         case Left_Cerebral_Cortex:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Cerebral_Cortex:
           if (MRIvox(mri_wm, x, y, z) >= MIN_WM_VAL) {
             continue;
@@ -1316,6 +1339,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
         switch (label) {
         case Left_Cerebral_Cortex:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Cerebral_Cortex:
           // make sure we aren't on the medial edge of hippo
 #if 0
@@ -1387,6 +1413,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
         switch (label) {
         case Left_Cerebral_Cortex:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Cerebral_Cortex:
           // make sure we aren't on the medial edge of hippo
 #if 0
@@ -1650,6 +1679,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
         switch (label) {
         case Left_Cerebral_White_Matter:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Cerebral_White_Matter:
           hlabel = left ? Left_Hippocampus : Right_Hippocampus;
           // if there is any hippo superior to this label, turn it on
@@ -1690,6 +1722,9 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
         case Left_Hippocampus:
         case Left_Amygdala:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Hippocampus:
         case Right_Amygdala:
         case Right_Inf_Lat_Vent:

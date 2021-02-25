@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
   int      voxel_size_flag;
   int      nochange_flag;
   int      conform_flag;
+  int      store_orig_ras2vox_flag = 0;
   int      conform_min; // conform to the smallest dimension
   int      conform_width;
   int      conform_width_256_flag;
@@ -141,6 +142,7 @@ int main(int argc, char *argv[]) {
   MRI *    mritmp          = NULL;
   int      transform_type  = -1;
   MATRIX * inverse_transform_matrix;
+  MATRIX * m_origRas2Vox = NULL;
   int      smooth_parcellation_flag, smooth_parcellation_count;
   int      in_like_flag;
   char     in_like_name[STRLEN];
@@ -429,6 +431,12 @@ int main(int argc, char *argv[]) {
       AutoAlign = MatrixReadTxt(AutoAlignFile, NULL);
       printf("Auto Align Matrix\n");
       MatrixPrint(stdout, AutoAlign);
+    } else if (strcmp(argv[i], "-nc") == 0 ||
+               strcmp(argv[i], "--nochange") == 0) {
+      nochange_flag = TRUE;
+    } else if (strcmp(argv[i], "-so") == 0 ||
+               strcmp(argv[i], "--store_orig_ras2vox") == 0) {
+      store_orig_ras2vox_flag = TRUE;
     } else if (strcmp(argv[i], "-nc") == 0 ||
                strcmp(argv[i], "--nochange") == 0) {
       nochange_flag = TRUE;
@@ -1846,6 +1854,11 @@ int main(int argc, char *argv[]) {
     MRIscalarMul(mri, mri, rescale_factor / globalmean);
   }
 
+  if (store_orig_ras2vox_flag) {
+    printf("copying original vox2ras\n");
+    m_origRas2Vox = MRIgetRasToVoxelXform(mri);
+  }
+
   MRIaddCommandLine(mri, cmdline);
   if (!FEQUAL(scale_factor, 1.0)) {
     printf("scaling input volume by %2.3f\n", scale_factor);
@@ -2894,6 +2907,12 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
   if (!no_write_flag) {
+    mri->origRas2Vox = m_origRas2Vox;
+    if (m_origRas2Vox) {
+      printf("orig ras2vox:\n");
+      MatrixPrint(stdout, m_origRas2Vox);
+    }
+
     if (!SplitFrames) {
       printf("writing to %s...\n", out_name);
       if (force_out_type_flag) {

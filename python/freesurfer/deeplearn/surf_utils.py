@@ -549,6 +549,7 @@ def parc_gen(mrisps_geom, mrisps_annot, batch_size=8, use_rand=True):
     nlabels = mrisps_annot[0].shape[-1]
     batch_outputs = np.zeros((batch_size, *mrisp_shape, nlabels))
 
+    ind = 0
     while True:
         for bno in range(batch_size):
             if use_rand:
@@ -893,7 +894,7 @@ class LearnedUnPatches(Layer):
         return output_shape
 
 
-from voxelmorph.tf.modelio import LoadableModel, store_config_args
+from neurite.tf.modelio import LoadableModel, store_config_args
 
 
 class PatchModel2D(LoadableModel):
@@ -955,7 +956,9 @@ class PatchModel2D(LoadableModel):
         self.references.linear_output = image_linear
 
 
-def normCurvature(curvFileName, which_norm="Median", norm_percentile=97):
+def normCurvature(
+    curvFileName, which_norm="Median", norm_percentile=97, std_thresh=3
+):
 
     if isinstance(curvFileName, str):
         curv = fs.Overlay.read(curvFileName).data
@@ -965,7 +968,12 @@ def normCurvature(curvFileName, which_norm="Median", norm_percentile=97):
     if which_norm == "Percentile":
         normed = np.clip(curv / np.percentile(curv, norm_percentile), 0, 1)
     elif which_norm == "Median":
-        normed = (curv - np.median(curv)) / np.std(curv)
+        min_clip = np.percentile(curv, 100 - norm_percentile)
+        max_clip = np.percentile(curv, norm_percentile)
+        st = np.std(np.clip(curv, min_clip, max_clip))
+        normed = np.clip(
+            ((curv - np.median(curv)) / st), -std_thresh, std_thresh
+        )
     else:
         normed = (curv - curv.mean()) / np.std(curv)
 

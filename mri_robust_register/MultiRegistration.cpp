@@ -1457,9 +1457,10 @@ bool MultiRegistration::initialXforms(int tpi, bool fixtp, int maxres,
   }
   //average translation
   meant = (1.0 / nin) * meant;
-  if (debug)
+  if (debug) {
     vnl_matlab_print(std::cout, meant, "meant", vnl_matlab_print_format_long);
-  std::cout << std::endl;
+    std::cout << std::endl;
+  }
 
   // find mean rotation or linear map (in RAS coordinates)
   vnl_matrix_fixed<double, 3, 3> meanr;

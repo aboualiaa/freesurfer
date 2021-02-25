@@ -15073,8 +15073,15 @@ int MRISsegmentAnnotated(MRI_SURFACE *mris, LABEL ***plabel_array,
   } while (nfound > 0);
 
   /* crunch label array down to a reasonable size */
-  tmp         = label_array;
+  tmp = label_array;
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Walloc-size-larger-than="
+#endif
   label_array = (LABEL **)calloc(mris->nvertices, sizeof(LABEL *));
+#if GCC_VERSION > 80000
+#pragma GCC diagnostic pop
+#endif
   if (!label_array)
     ErrorExit(ERROR_NOMEMORY,
               "%s: MRISsegmentAnnotated could not allocate tmp storage",

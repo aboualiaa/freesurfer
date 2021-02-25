@@ -6021,6 +6021,9 @@ MRI *MRIcopyHeader(const MRI *mri_src, MRI *mri_dst) {
   if (mri_src->AutoAlign != NULL) {
     mri_dst->AutoAlign = MatrixCopy(mri_src->AutoAlign, NULL);
   }
+  if (mri_src->origRas2Vox != NULL) {
+    mri_dst->origRas2Vox = MatrixCopy(mri_src->origRas2Vox, NULL);
+  }
 
   for (i = 0; i < mri_dst->ncmds; i++)
     free(mri_dst->cmdlines[i]);
