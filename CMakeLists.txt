@@ -568,14 +568,14 @@ set(BENCHMARK_ENABLE_TESTING
     CACHE BOOL "Suppressing benchmark's tests" FORCE
     )
 
-find_package(expat REQUIRED)
-find_package(tiff REQUIRED)
-find_package(libxml2 REQUIRED)
+#find_package(expat REQUIRED)
+#find_package(tiff REQUIRED)
+#find_package(libxml2 REQUIRED)
 find_package(fmt REQUIRED HINTS "/usr/local/opt/fmt")
 find_package(spdlog REQUIRED HINTS "/usr/local/opt/spdlog")
-find_package(Microsoft.GSL REQUIRED HINTS "/usr/local/opt/cpp-gsl")
-find_package(gtest REQUIRED)
-find_package(benchmark REQUIRED)
+#find_package(Microsoft.GSL REQUIRED HINTS "/usr/local/opt/cpp-gsl")
+#find_package(gtest REQUIRED)
+#find_package(benchmark REQUIRED)
 add_subdirectory(packages)
 
 #if(APPLE)
@@ -703,6 +703,7 @@ set(FS_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/packages/fmt/include/
     ${CMAKE_SOURCE_DIR}/packages/GSL/include
     ${CMAKE_SOURCE_DIR}/packages/spdlog/include
+    ${CMAKE_SOURCE_DIR}/packages/xml2/
     )
 
 # build the freesurfer static libraries
