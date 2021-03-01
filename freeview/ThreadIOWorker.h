@@ -36,6 +36,7 @@ public:
     JT_LoadTrack,
     JT_LoadConnectome,
     JT_LoadFCD,
+    JT_LoadODF,
     JT_TransformVolume
   };
 
@@ -49,6 +50,7 @@ public:
   void LoadConnectomeMatrix(Layer *            layer,
                             const QVariantMap &args = QVariantMap());
   void LoadFCD(Layer *layer, const QVariantMap &args = QVariantMap());
+  void LoadODF(Layer *layer, const QVariantMap &args = QVariantMap());
   void TransformVolume(Layer *layer, const QVariantMap &args = QVariantMap());
 
 signals:

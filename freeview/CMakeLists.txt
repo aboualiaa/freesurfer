@@ -199,6 +199,9 @@ if(BUILD_GUIS
       DialogNewAnnotation.cpp
       DialogScreenshotOverlay.cpp
       DialogControlPointComment.cpp
+      LayerODF.cpp
+      LayerPropertyODF.cpp
+      PanelODF.cpp
       freeview.qrc
       )
 

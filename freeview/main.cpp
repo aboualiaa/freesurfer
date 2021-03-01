@@ -403,6 +403,8 @@ int main(int argc, char *argv[]) {
                    "Load one or more tract files.\n\n", 1, 1000),
       CmdLineEntry(CMD_LINE_OPTION, "tc", "tract-cluster", "<DIRECTORY>",
                    "Load tract cluster data from given directory.\n", 1, 1),
+      CmdLineEntry(CMD_LINE_OPTION, "odf", "odf", "<FILE>...",
+                   "Load ODF data. \n", 1, 100),
       CmdLineEntry(CMD_LINE_OPTION, "recon", "recon", "<SUBJECT_NAME>...",
                    "Load a series of pre-defined volumes and surfaces of given "
                    "subject(s).\n",

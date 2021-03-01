@@ -58,8 +58,6 @@ LayerFCD::LayerFCD(LayerMRI *layerMRI, QObject *parent)
     m_sliceActor3D[i]->InterpolateOff();
   }
 
-  mProperty = new LayerPropertyFCD(this);
-
   m_layerSource = layerMRI;
   if (m_layerSource) {
     InitializeData();
@@ -218,7 +216,7 @@ bool LayerFCD::LoadFromFile() {
 
   if (m_fcd) {
     if (!m_fcd->mri_norm) {
-      std::cerr << "Did not find norm volume for FCD data" << std::endl;
+      cerr << "Did not find norm volume for FCD data" << endl;
       return false;
     }
     ::SetProgressCallback(ProgressCallback, 50, 70);

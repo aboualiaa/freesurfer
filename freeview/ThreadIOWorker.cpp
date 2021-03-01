@@ -17,6 +17,7 @@
 #include "LayerDTI.h"
 #include "LayerFCD.h"
 #include "LayerMRI.h"
+#include "LayerODF.h"
 #include "LayerPLabel.h"
 #include "LayerSurface.h"
 #include "LayerTrack.h"
@@ -87,6 +88,13 @@ void ThreadIOWorker::LoadConnectomeMatrix(Layer *            layer,
 void ThreadIOWorker::LoadFCD(Layer *layer, const QVariantMap &args) {
   m_layer    = layer;
   m_nJobType = JT_LoadFCD;
+  m_args     = args;
+  start();
+}
+
+void ThreadIOWorker::LoadODF(Layer *layer, const QVariantMap &args) {
+  m_layer    = layer;
+  m_nJobType = JT_LoadODF;
   m_args     = args;
   start();
 }
@@ -228,6 +236,15 @@ void ThreadIOWorker::run() {
       emit Error(m_layer, m_nJobType);
     } else {
       emit FCDLoadFinished(layer);
+    }
+  } else if (m_nJobType == JT_LoadODF) {
+    LayerODF *layer = qobject_cast<LayerODF *>(m_layer);
+    if (!layer)
+      return;
+    if (!layer->Load(m_args["Filename"].toString())) {
+      emit Error(m_layer, m_nJobType);
+    } else {
+      emit Finished(m_layer, m_nJobType);
     }
   }
   disconnect(qApp, SIGNAL(GlobalProgress(int)), this, SIGNAL(Progress(int)));

@@ -148,7 +148,8 @@ int    BonferroniMax  = 0;
 int    ReportCentroid = 0;
 int    sig2pmax       = 0; // convert max value from -log10(p) to p
 
-MRI *fwhmmap = nullptr; // map of vertex-wise FWHM for non-stationary correction
+MRI * fwhmmap = NULL; // map of vertex-wise FWHM for non-stationary correction
+char *maxareafile = NULL;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
@@ -632,7 +633,13 @@ int main(int argc, char **argv) {
     fclose(fp);
   }
 
-  if (ocpvalid != nullptr) {
+  if (maxareafile) {
+    fp = fopen(maxareafile, "w");
+    fprintf(fp, "%10.4f\n", scs[0].area); // assuming 0 is max
+    fclose(fp);
+  }
+
+  if (ocpvalid != NULL) {
     merged = MRIallocSequence(srcsurf->nvertices, 1, 1, MRI_FLOAT, 4);
     // frame 0 will be filled in below with cluster-wise pval
     MRIcopyMRIS(merged, srcsurf, 1, "val"); // original data
@@ -952,6 +959,11 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       sumfile   = pargv[0];
       nargsused = 1;
+    } else if (!strcmp(option, "--maxareafile")) {
+      if (nargc < 1)
+        argnerr(option, 1);
+      maxareafile = pargv[0];
+      nargsused   = 1;
     } else if (!strcmp(option, "--pointset")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -1114,6 +1126,7 @@ static void print_usage() {
   printf("   --sum sumfile     : text summary file\n");
   printf("   --pointset pointsetfile : file that can be read into freeview "
          "with -c\n");
+  printf("   --maxareafile file : write area of largest cluster to file\n");
   printf("   --o outid        : input with non-clusters set to 0\n");
   printf("   --ocn ocnid      : value is cluster number \n");
   printf("   --olab labelbase : output clusters as labels \n");

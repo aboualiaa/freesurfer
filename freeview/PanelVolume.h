@@ -21,6 +21,8 @@
 
 #include "colortab.h"
 
+class LayerMRI;
+
 namespace Ui {
 class PanelVolume;
 }
@@ -49,6 +51,8 @@ public:
   ~PanelVolume();
 
   bool eventFilter(QObject *watched, QEvent *event);
+
+  QList<LayerMRI *> GetLinkedVolumes();
 
 protected slots:
   void OnCheckShowContour(bool bShow);

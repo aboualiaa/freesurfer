@@ -23,6 +23,7 @@ PanelAllLayers::PanelAllLayers(QWidget *parent)
               << "PointSet"
               << "CMAT"
               << "Tract"
+              << "ODF"
               << "FCD";
   foreach (QString type, layer_types) {
     connect(wnd->GetLayerCollection(type), SIGNAL(LayerAdded(Layer *)), this,
@@ -146,6 +147,8 @@ void PanelAllLayers::RefreshLayerList(const QList<Layer *> &selectedLayers_in,
   AddLayers(wnd->GetLayers("CMAT"), "CMAT", wnd->GetActiveLayer("CMAT"),
             selectedLayers, layer);
   AddLayers(wnd->GetLayers("Tract"), "Tract", wnd->GetActiveLayer("Tract"),
+            selectedLayers, layer);
+  AddLayers(wnd->GetLayers("ODF"), "ODFs", wnd->GetActiveLayer("ODF"),
             selectedLayers, layer);
   AddLayers(wnd->GetLayers("FCD"), "FCD", wnd->GetActiveLayer("FCD"),
             selectedLayers, layer);
@@ -403,6 +406,7 @@ QString PanelAllLayers::GetCurrentLayerType() {
                   << "PointSet"
                   << "CMAT"
                   << "Tract"
+                  << "ODF"
                   << "FCD";
       foreach (QString type, layer_types) {
         if (layer->IsTypeOf(type)) {
@@ -454,4 +458,8 @@ PanelLayer *PanelAllLayers::GetPanel(const QString &layer_type) {
     }
   }
   return NULL;
+}
+
+QList<LayerMRI *> PanelAllLayers::GetLinkedVolumes() {
+  return ui->pageVolume->GetLinkedVolumes();
 }

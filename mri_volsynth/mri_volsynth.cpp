@@ -653,6 +653,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%d", &nframes);
+      dim[3]    = nframes;
       nargsused = 1;
     } else if (!strcmp(option, "--TR") || !strcmp(option, "--tr")) {
       if (nargc < 1)
