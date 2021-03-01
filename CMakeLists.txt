@@ -270,21 +270,6 @@ else()
   cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
 endif()
 
-if(APPLE AND NOT TRAVIS)
-  set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
-else()
-  set(FS_PACKAGES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-$ENV{HOSTING_OS}/prebuilt_packages")
-  message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
-  set(VTK_DIR
-      ${FS_PACKAGES_DIR}/vtk/
-      CACHE PATH "VTK install directory"
-      )
-  set(ITK_DIR
-      ${FS_PACKAGES_DIR}/itk/
-      CACHE PATH "ITK install directory"
-      )
-endif()
-
 if(FS_SUPRESS_WARNINGS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wno-everything)
@@ -407,9 +392,10 @@ endif()
 # all custom find-modules are stored in the cmake subdir
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-find_package(ArrayFire)
-mark_as_advanced(ArrayFire_DIR)
-
+if(FS_USE_ARRAYFIRE)
+  find_package(ArrayFire)
+  mark_as_advanced(ArrayFire_DIR)
+endif()
 find_package(MPI REQUIRED)
 
 # -------- zlib --------
@@ -448,7 +434,10 @@ find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework files
 # -------- itk --------
 find_package(ITK HINTS ${ITK_DIR})
 mark_as_advanced(ITK_DIR)
+
+if(APPLE)
 list(REMOVE_ITEM ITK_INCLUDE_DIRS "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include")
+endif()
 
 # -------- ann --------
 # ANN is only used by mris_resample
@@ -462,6 +451,7 @@ mark_as_advanced(ICONV_LIBRARY)
 #endif()
 
 # -------- matlab --------
+if (FS_BUILD_MATLAB)
 if(UNIX AND NOT APPLE)
   set(Matlab_ROOT_DIR /usr/local/MATLAB/MATLAB_Compiler_Runtime/v84)
   find_package(MATLAB)
@@ -470,8 +460,9 @@ else()
   find_package(MATLAB)
 endif()
 mark_as_advanced(Matlab_ROOT_DIR)
-
+endif()
 # -------- hpx --------
+if(FS_USE_HPX)
 set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
 set(HPX_IGNORE_CMAKE_BUILD_TYPE_COMPATIBILITY OFF FORCE)
 find_package(HPX HINTS "/Users/aboualiaa/Desktop/.temp/install/hpx/")
@@ -488,6 +479,7 @@ mark_as_advanced(HPX_GIT_COMMIT
                  HPX_CXX_COMPILER
                  LLVM_FILECHECK_EXE
                  )
+endif()
 
 # -------- openCV --------
 if(NOT APPLE)
