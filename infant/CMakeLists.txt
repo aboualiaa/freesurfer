@@ -47,7 +47,7 @@ foreach(MODEL ax_sscnn.h5 cor_sscnn.h5 sag_sscnn.h5)
 endforeach()
 
 # install any package requirements
-if(INSTALL_PYTHON_DEPENDENCIES)
+if(FS_INSTALL_PYTHON_DEPS)
   set(PY_PKGS "numpy==1.16 tensorflow==1.5.0 keras==2.2.2 h5py==2.10.0 sklearn scikit-image tables psutil nibabel")
   if(NOT DISTRIBUTE_FSPYTHON)
     set(PKG_TARGET "--target=${CMAKE_INSTALL_PREFIX}/python/packages")

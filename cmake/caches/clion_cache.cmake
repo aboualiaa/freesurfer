@@ -1,4 +1,4 @@
-include(${CMAKE_SOURCE_DIR}/repo_tools/prepopulate_cache.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/caches/prepopulate_cache.cmake)
 
 set(CMAKE_GENERATOR
     "Ninja"

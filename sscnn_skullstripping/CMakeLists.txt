@@ -1,4 +1,4 @@
-if(INFANT_MODULE)
+if(FS_INFANT_MODULE)
   project(sscnn_skullstripping)
   install_pyscript(sscnn_skullstrip)
   install(DIRECTORY sscnn_skullstripping DESTINATION ${CMAKE_INSTALL_PREFIX}/python/packages)

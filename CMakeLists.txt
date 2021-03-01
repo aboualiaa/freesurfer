@@ -168,7 +168,7 @@ elseif(APPLE)
   endif()
 endif()
 
-include(repo_tools/prepare_build_types.cmake)
+include(cmake/caches/prepare_build_types.cmake)
 
 if(POLICY CMP0025) # AppleClang and Clang are different compilers.
   cmake_policy(SET CMP0025 NEW)

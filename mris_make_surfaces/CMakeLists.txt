@@ -41,7 +41,7 @@ add_executable(mris_mef_surfaces mris_mef_surfaces.cpp)
 target_link_libraries(mris_mef_surfaces utils)
 install(TARGETS mris_mef_surfaces DESTINATION bin)
 
-if(NOT MINIMAL)
+if(NOT FS_MINIMAL_BUILD)
   add_executable(mris_exvivo_surfaces mris_exvivo_surfaces.cpp)
   target_link_libraries(mris_exvivo_surfaces utils)
   install(TARGETS mris_exvivo_surfaces DESTINATION bin)
