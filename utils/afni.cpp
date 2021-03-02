@@ -78,14 +78,14 @@ void AFinit(AF *pAF) {
 }
 
 void AFclean(AF *pAF) {
-  if (pAF->numchars)
-    free(pAF->idcode_string);
-  if (pAF->numstats)
-    free(pAF->brick_stats);
-  if (pAF->numtypes)
-    free(pAF->brick_types);
-  if (pAF->numfacs)
-    free(pAF->brick_float_facs);
+  free(pAF->idcode_string);
+  pAF->idcode_string = nullptr;
+  free(pAF->brick_stats);
+  pAF->brick_stats = nullptr;
+  free(pAF->brick_types);
+  pAF->brick_types = nullptr;
+  free(pAF->brick_float_facs);
+  pAF->brick_float_facs = nullptr;
 }
 
 void printAFNIHeader(AF *pAF) {
@@ -989,8 +989,9 @@ int afniWrite(MRI *mri, const char *fname) {
   char *c;
 
   errno = 0;
-  //  ErrorReturn(ERROR_UNSUPPORTED,
-  //              (ERROR_UNSUPPORTED, "AFNI BRIK write unsupported"));
+  // TODO: implement then remove this error
+  ErrorReturn(ERROR_UNSUPPORTED,
+              (ERROR_UNSUPPORTED, "AFNI BRIK write unsupported"));
 
   /* ----- keep compiler quiet ----- */
   bytes_per_voxel = 0;
@@ -1166,7 +1167,6 @@ int afniWrite(MRI *mri, const char *fname) {
 
   fclose(fp);
 
-  printf("no afni write\n");
   return (0);
 
 } /* end afniWrite() */
