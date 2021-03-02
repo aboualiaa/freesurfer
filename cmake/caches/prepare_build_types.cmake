@@ -64,6 +64,16 @@ set(CMAKE_C_FLAGS_CFISAN
     CACHE STRING "" FORCE
     )
 
+set(CMAKE_CXX_FLAGS_SSSAN
+    "-fsanitize=safe-stack"
+    CACHE STRING "" FORCE
+    )
+
+set(CMAKE_C_FLAGS_SSSAN
+    "-fsanitize=safe-stack"
+    CACHE STRING "" FORCE
+    )
+
 set(CMAKE_CXX_FLAGS_COVERAGE
     "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
     CACHE STRING "" FORCE

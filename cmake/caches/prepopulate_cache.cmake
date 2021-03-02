@@ -2,13 +2,19 @@ set(CMAKE_INSTALL_PREFIX
     "/Users/aboualiaa/Desktop/.temp/install/fs/"
     CACHE STRING "install prefix"
     )
+
+set(CMAKE_MESSAGE_LOG_LEVEL
+    "WARNING"
+    CACHE STRING ""
+    )
+
 set(CMAKE_BUILD_TYPE
     "Release"
     CACHE STRING "Default: Release"
     )
 set(CMAKE_GENERATOR
     "Ninja Multi-Config"
-    CACHE STRING "Ninja, Unix Makefiles, Xcode"
+    CACHE STRING "Ninja, Unix Makefiles, Xcode, Ninja Multi-Config"
     )
 string(TIMESTAMP TODAY "%Y%m%d")
 set(BUILD_STAMP
@@ -97,7 +103,7 @@ set(FS_QATOOLS_MODULE
     )
 set(FS_FREEVIEW_LINEPROF
     OFF
-    CACHE BOOL "Include quality assurance tools"
+    CACHE BOOL "Enable Lineprof"
     )
 set(FS_INSTALL_PYTHON_DEPS
     ON
@@ -190,6 +196,7 @@ set(FS_USE_HPX
     ON
     CACHE BOOL "Use Arrayfire for parallelism"
     )
+
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${FS_EXP_BUILD_CONFIGURATIONS})
 set_property(CACHE CMAKE_GENERATOR PROPERTY STRINGS "Ninja;Unix Makefiles;Xcode;Ninja Multi-Config")
 set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "20;17;14;11")

@@ -1,26 +1,40 @@
 if(FS_BUILD_MATRIX)
+  if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+  endif()
   unset(FS_BUILD_MATRIX)
   project(freesurfer_super)
   include(CTest)
   set(CONF_MATRIX
-      "coverage;profile;Debug;Release;RelWithDebInfo;MinSizeRel;asan;lsan;ubsan;tsan;cfisan;msan;thinlto;fulllto"
+      "coverage;profile;Debug;Release;RelWithDebInfo;MinSizeRel;asan;lsan;ubsan;tsan;cfisan;msan;sssan;thinlto;fulllto"
       )
-  set(COMPILER_MATRIX "gcc09;gcc10;clang09;clang10;clang11;clang12;clang13;appleclang")
+  set(COMPILER_MATRIX "clang09;clang10;clang11;clang12")
+  if(APPLE)
+    list(APPEND COMPILER_MATRIX "appleclang;clang13;gcc09;gcc10")
+    set(FS_LLVM_PREFIX "/Users/aboualiaa/Desktop/.temp/install")
+    set(FS_MATRIX_CACHE "${CMAKE_SOURCE_DIR}/cmake/caches/clion_cache.cmake")
+    set(CMAKE_YARD_PREFIX "/Users/aboualiaa/Desktop/.temp/scratch/cmake-build-yard")
+  else()
+    set(FS_LLVM_PREFIX "/media/psf/Home/Desktop/.temp/install/ubuntu")
+    set(FS_MATRIX_CACHE "${CMAKE_SOURCE_DIR}/cmake/caches/focal_cache.cmake")
+    set(CMAKE_YARD_PREFIX "/media/psf/Home/Desktop/.temp/scratch/cmake-build-yard")
+  endif()
+
   foreach(Z_COMPILER IN LISTS COMPILER_MATRIX)
     foreach(TYPE IN LISTS CONF_MATRIX)
 
       if(Z_COMPILER STREQUAL "clang09")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-09/bin")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-09/bin")
       elseif(Z_COMPILER STREQUAL "clang10")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-10/bin")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-10/bin")
       elseif(Z_COMPILER STREQUAL "clang11")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-11/bin")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-11/bin")
       elseif(Z_COMPILER STREQUAL "clang12")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-12/bin")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-12/bin")
       elseif(Z_COMPILER STREQUAL "clang13")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=/Users/aboualiaa/Desktop/.temp/install/llvm-13/bin")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-13/bin")
       elseif(Z_COMPILER STREQUAL "gcc10")
-        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0_3")
+        set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0_4")
       elseif(Z_COMPILER STREQUAL "gcc09")
         set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc@9/9.3.0_1")
       elseif(Z_COMPILER STREQUAL "appleclang")
@@ -54,6 +68,11 @@ if(FS_BUILD_MATRIX)
         continue()
       endif()
 
+      if(NOT LINUX AND TYPE STREQUAL "sssan")
+        message(NOTICE "skipping sssan build with on non linux os")
+        continue()
+      endif()
+
       if(Z_COMPILER STREQUAL "appleclang" AND TYPE STREQUAL "lsan")
         message(NOTICE "skipping lsan build with apple clang")
         continue()
@@ -63,19 +82,21 @@ if(FS_BUILD_MATRIX)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_MKDIR ALL
                         COMMAND bash -c \" mkdir -p
-                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER} \"
+                                ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}
+                                \"
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ALL
                         COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev ${COMPILER_PROXY_OPTION}
-                                -DCMAKE_BUILD_TYPE=${TYPE} -C ${CMAKE_SOURCE_DIR}/repo_tools/clion_cache.cmake -G Ninja
-                                -S ${CMAKE_SOURCE_DIR} -B
-                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER} \"
+                                -DCMAKE_BUILD_TYPE=${TYPE} -C ${FS_MATRIX_CACHE} -G Ninja -S ${CMAKE_SOURCE_DIR} -B
+                                ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}
+                                \"
                         )
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE
                         COMMAND bash -c \" ninja -k 0 -C
-                                /Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}/ \"
+                                ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}/
+                                \"
                         )
 
       add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ${Z_COMPILER}_${TYPE}_BUILD_MKDIR)
@@ -100,12 +121,12 @@ if(FS_BUILD_MATRIX)
 
       add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
                         COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress \"
-                        WORKING_DIRECTORY "/Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
+                        WORKING_DIRECTORY "${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}"
                         )
 
       add_test(${Z_COMPILER}_${TYPE}_BUILD_TEST
                COMMAND ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress
-               WORKING_DIRECTORY "/Users/aboualiaa/Desktop/.temp/scratch/fs/cmake-build-${FOLDER_NAME}-${Z_COMPILER}"
+               WORKING_DIRECTORY "${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}"
                )
 
       if(NOT TARGET check-${Z_COMPILER})
@@ -135,37 +156,37 @@ if(UNIX AND NOT APPLE)
   set(CMAKE_Fortran_COMPILER "/usr/bin/gfortran")
 elseif(APPLE)
   set(CMAKE_Fortran_COMPILER "/usr/local/bin/gfortran")
-  if(DEFINED FS_USE_GCC AND NOT FS_USE_GCC STREQUAL "")
-    if(FS_USE_GCC MATCHES "10")
-      set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-10")
-      set(CMAKE_C_COMPILER "${FS_USE_GCC}/bin/gcc-10")
-      set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-10")
-      set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-10")
-      set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-10")
-    else()
-      set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-9")
-      set(CMAKE_C_COMPILER "${FS_USE_GCC}/bin/gcc-9")
-      set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-9")
-      set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-9")
-      set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-9")
-    endif()
-    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-    set(ITK_DIR "/Users/aboualiaa/Downloads/packages/itk/4.13.0")
-    set(VTK_DIR "/Users/aboualiaa/Downloads/packages/vtk/5.10.1")
-    add_definitions(-DFS_ITK_LEGACY_REMOVE)
+endif()
+if(DEFINED FS_USE_GCC AND NOT FS_USE_GCC STREQUAL "")
+  if(FS_USE_GCC MATCHES "10")
+    set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-10")
+    set(CMAKE_C_COMPILER "${FS_USE_GCC}/bin/gcc-10")
+    set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-10")
+    set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-10")
+    set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-10")
+  else()
+    set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-9")
+    set(CMAKE_C_COMPILER "${FS_USE_GCC}/bin/gcc-9")
+    set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-9")
+    set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-9")
+    set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-9")
   endif()
-  if(DEFINED FS_USE_LLVM AND NOT FS_USE_LLVM STREQUAL "")
-    unset(CMAKE_C_COMPILER CACHE)
-    unset(CMAKE_CXX_COMPILER CACHE)
-    unset(CMAKE_AR CACHE)
-    unset(CMAKE_NM CACHE)
-    unset(CMAKE_RANLIB CACHE)
-    set(CMAKE_C_COMPILER "${FS_USE_LLVM}/clang")
-    set(CMAKE_CXX_COMPILER "${FS_USE_LLVM}/clang++")
-    set(CMAKE_AR "${FS_USE_LLVM}/llvm-ar")
-    set(CMAKE_NM "${FS_USE_LLVM}/llvm-nm")
-    set(CMAKE_RANLIB "${FS_USE_LLVM}/llvm-ranlib")
-  endif()
+  #    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+  #    set(ITK_DIR "/Users/aboualiaa/Downloads/packages/itk/4.13.0")
+  #    set(VTK_DIR "/Users/aboualiaa/Downloads/packages/vtk/5.10.1")
+  #    add_definitions(-DFS_ITK_LEGACY_REMOVE)
+endif()
+if(DEFINED FS_USE_LLVM AND NOT FS_USE_LLVM STREQUAL "")
+  unset(CMAKE_C_COMPILER CACHE)
+  unset(CMAKE_CXX_COMPILER CACHE)
+  unset(CMAKE_AR CACHE)
+  unset(CMAKE_NM CACHE)
+  unset(CMAKE_RANLIB CACHE)
+  set(CMAKE_C_COMPILER "${FS_USE_LLVM}/clang")
+  set(CMAKE_CXX_COMPILER "${FS_USE_LLVM}/clang++")
+  set(CMAKE_AR "${FS_USE_LLVM}/llvm-ar")
+  set(CMAKE_NM "${FS_USE_LLVM}/llvm-nm")
+  set(CMAKE_RANLIB "${FS_USE_LLVM}/llvm-ranlib")
 endif()
 
 include(cmake/caches/prepare_build_types.cmake)
