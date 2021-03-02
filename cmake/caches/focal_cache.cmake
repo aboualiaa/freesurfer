@@ -16,7 +16,7 @@ set(BUILD_STAMP
     CACHE STRING "Distribution build stamp"
     )
 set(CMAKE_EXPORT_COMPILE_COMMANDS
-	OFF
+    OFF
     CACHE BOOL "create a json database of compile commands for tooling"
     )
 set(CMAKE_CXX_STANDARD
@@ -49,17 +49,17 @@ set(FS_BUILD_TESTING
     CACHE BOOL "build test targets"
     )
 set(FS_PACKAGES_DIR
-	"/media/psf/Home/Downloads/prebuilt_packages"
-	CACHE STRING ""
-	)
-  set(VTK_DIR
-      ${FS_PACKAGES_DIR}/vtk/
-      CACHE PATH "VTK install directory"
-      )
-  set(ITK_DIR
-      ${FS_PACKAGES_DIR}/itk/
-      CACHE PATH "ITK install directory"
-      )
+    "/media/psf/Home/Downloads/prebuilt_packages"
+    CACHE STRING ""
+    )
+set(VTK_DIR
+    ${FS_PACKAGES_DIR}/vtk/
+    CACHE PATH "VTK install directory"
+    )
+set(ITK_DIR
+    ${FS_PACKAGES_DIR}/itk/
+    CACHE PATH "ITK install directory"
+    )
 # Unfortunately, the python version used to run pybind c-libraries must be equivalent to
 # the version used to build the libraries. The easiest and least intrusive way of making freesurfer
 # python scripts run out-of-the-box (and to help guarantee reproducibility) requires
@@ -190,11 +190,13 @@ set(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES
     CACHE BOOL "Make sparse initial meshes"
     )
 set(FS_USE_ARRAYFIRE
-	OFF
-	CACHE BOOL "Use Arrayfire for parallelism")
+    OFF
+    CACHE BOOL "Use Arrayfire for parallelism"
+    )
 set(FS_USE_HPX
-	OFF
-	CACHE BOOL "Use Arrayfire for parallelism")
+    OFF
+    CACHE BOOL "Use Arrayfire for parallelism"
+    )
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${FS_EXP_BUILD_CONFIGURATIONS})
 set_property(CACHE CMAKE_GENERATOR PROPERTY STRINGS "Ninja;Unix Makefiles;Xcode;Ninja Multi-Config")
@@ -206,3 +208,4 @@ set_property(CACHE FS_ENABLE_LTO PROPERTY STRINGS "Off;Thin;Full")
 set_property(CACHE FS_COVERAGE_STYLE PROPERTY STRINGS "gcov;clang")
 
 #set(CMAKE_CONFIGURATION_TYPES ${FS_EXP_BUILD_CONFIGURATIONS} CACHE STRING "")
+add_definitions(-DFS_ITK_LEGACY_REMOVE)

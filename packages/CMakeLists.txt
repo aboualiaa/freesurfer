@@ -5,7 +5,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_subdirectories(
         expat
         tiff
-        xml2
         GSL
         googletest
         benchmark
@@ -21,6 +20,10 @@ add_subdirectories(
         svm
         tetgen
 )
+
+if (NOT APPLE)
+    add_subdirectory(xml2)
+endif ()
 
 mark_as_advanced(GSL_TEST
         GSL_CXX_STANDARD)

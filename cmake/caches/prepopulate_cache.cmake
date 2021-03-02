@@ -48,8 +48,10 @@ set(FS_BUILD_TESTING
     ON
     CACHE BOOL "build test targets"
     )
- set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages"
-	 CACHE STRING "")
+set(FS_PACKAGES_DIR
+    "/Users/aboualiaa/Downloads/packages"
+    CACHE STRING ""
+    )
 # Unfortunately, the python version used to run pybind c-libraries must be equivalent to
 # the version used to build the libraries. The easiest and least intrusive way of making freesurfer
 # python scripts run out-of-the-box (and to help guarantee reproducibility) requires
@@ -180,12 +182,14 @@ set(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES
     CACHE BOOL "Make sparse initial meshes"
     )
 set(FS_USE_ARRAYFIRE
-	ON
-	CACHE BOOL "Use Arrayfire for parallelism")
+    ON
+    CACHE BOOL "Use Arrayfire for parallelism"
+    )
 
 set(FS_USE_HPX
-	ON
-	CACHE BOOL "Use Arrayfire for parallelism")
+    ON
+    CACHE BOOL "Use Arrayfire for parallelism"
+    )
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${FS_EXP_BUILD_CONFIGURATIONS})
 set_property(CACHE CMAKE_GENERATOR PROPERTY STRINGS "Ninja;Unix Makefiles;Xcode;Ninja Multi-Config")
 set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "20;17;14;11")

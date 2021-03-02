@@ -436,7 +436,7 @@ find_package(ITK HINTS ${ITK_DIR})
 mark_as_advanced(ITK_DIR)
 
 if(APPLE)
-list(REMOVE_ITEM ITK_INCLUDE_DIRS "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include")
+  list(REMOVE_ITEM ITK_INCLUDE_DIRS "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include")
 endif()
 
 # -------- ann --------
@@ -451,34 +451,34 @@ mark_as_advanced(ICONV_LIBRARY)
 #endif()
 
 # -------- matlab --------
-if (FS_BUILD_MATLAB)
-if(UNIX AND NOT APPLE)
-  set(Matlab_ROOT_DIR /usr/local/MATLAB/MATLAB_Compiler_Runtime/v84)
-  find_package(MATLAB)
-else()
-  set(Matlab_ROOT_DIR /Applications/Polyspace/MATLAB.app)
-  find_package(MATLAB)
-endif()
-mark_as_advanced(Matlab_ROOT_DIR)
+if(FS_BUILD_MATLAB)
+  if(UNIX AND NOT APPLE)
+    set(Matlab_ROOT_DIR /usr/local/MATLAB/MATLAB_Compiler_Runtime/v84)
+    find_package(MATLAB)
+  else()
+    set(Matlab_ROOT_DIR /Applications/Polyspace/MATLAB.app)
+    find_package(MATLAB)
+  endif()
+  mark_as_advanced(Matlab_ROOT_DIR)
 endif()
 # -------- hpx --------
 if(FS_USE_HPX)
-set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
-set(HPX_IGNORE_CMAKE_BUILD_TYPE_COMPATIBILITY OFF FORCE)
-find_package(HPX HINTS "/Users/aboualiaa/Desktop/.temp/install/hpx/")
-mark_as_advanced(HPX_GIT_COMMIT
-                 HPX_Fortran_COMPILER_VERSION
-                 HPX_Fortran_COMPILER_ID
-                 HPX_Fortran_COMPILER
-                 HPX_DIR
-                 HPX_C_COMPILER_VERSION
-                 HPX_C_COMPILER_ID
-                 HPX_C_COMPILER
-                 HPX_CXX_COMPILER_VERSION
-                 HPX_CXX_COMPILER_ID
-                 HPX_CXX_COMPILER
-                 LLVM_FILECHECK_EXE
-                 )
+  set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
+  set(HPX_IGNORE_CMAKE_BUILD_TYPE_COMPATIBILITY OFF FORCE)
+  find_package(HPX HINTS "/Users/aboualiaa/Desktop/.temp/install/hpx/")
+  mark_as_advanced(HPX_GIT_COMMIT
+                   HPX_Fortran_COMPILER_VERSION
+                   HPX_Fortran_COMPILER_ID
+                   HPX_Fortran_COMPILER
+                   HPX_DIR
+                   HPX_C_COMPILER_VERSION
+                   HPX_C_COMPILER_ID
+                   HPX_C_COMPILER
+                   HPX_CXX_COMPILER_VERSION
+                   HPX_CXX_COMPILER_ID
+                   HPX_CXX_COMPILER
+                   LLVM_FILECHECK_EXE
+                   )
 endif()
 
 # -------- openCV --------
@@ -562,7 +562,9 @@ set(BENCHMARK_ENABLE_TESTING
 
 #find_package(expat REQUIRED)
 #find_package(tiff REQUIRED)
-#find_package(libxml2 REQUIRED)
+if(APPLE)
+  find_package(libxml2 REQUIRED)
+endif()
 find_package(fmt REQUIRED HINTS "/usr/local/opt/fmt")
 find_package(spdlog REQUIRED HINTS "/usr/local/opt/spdlog")
 #find_package(Microsoft.GSL REQUIRED HINTS "/usr/local/opt/cpp-gsl")
@@ -695,9 +697,12 @@ set(FS_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/packages/fmt/include/
     ${CMAKE_SOURCE_DIR}/packages/GSL/include
     ${CMAKE_SOURCE_DIR}/packages/spdlog/include
-    ${CMAKE_SOURCE_DIR}/packages/xml2/
+    ${CMAKE_SOURCE_DIR}/packages/tiff/
     )
 
+if(NOT APPLE)
+  set(FS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/packages/xml2/)
+endif()
 # build the freesurfer static libraries
 add_subdirectory(utils)
 
