@@ -1632,15 +1632,21 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
   }
 
   QString orient         = GetOrientationString();
-  bool    flip[3]        = {false, false, false};
-  QString default_orient = "RAS";
+  int     flag_assign[3] = {0, 1, 2};
+  int     flag_sign[3]   = {1, 1, 1};
+  QString default_orient = "RASLPI";
   for (int i = 0; i < 3; i++) {
-    flip[i] = (orient[i] != default_orient[i]);
+    for (int j = 0; j < 3; j++) {
+      if (orient[i] == default_orient[j] ||
+          orient[i] == default_orient[j + 3]) {
+        flag_assign[i] = j;
+        flag_sign[i]   = (orient[i] == default_orient[j] ? 1 : -1);
+      }
+    }
   }
 
   unsigned char c[4]  = {0, 0, 0, 255};
   double        scale = scale_overall;
-  //  if (!bNormalizeVector)
   scale *= GetProperty()->GetVectorDisplayScale();
   scale_overall = scale;
 
@@ -1675,7 +1681,7 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
   case 0:
     for (int i = 0; i < dim[1]; i += nSkip) {
       for (int j = 0; j < dim[2]; j += nSkip) {
-        double  v[3], v2[3] = {0}, vn[3];
+        double  v[3], v2[3] = {0}, vn[3], v_temp[3], v_temp2[3];
         double *vp = v;
         double  pt[3];
         v[0] = MyVTKUtils::GetImageDataComponent(ptr, dim, nFrames, n[0], i, j,
@@ -1709,12 +1715,6 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
           if (bNormalizeVector)
             vtkMath::Normalize(v);
 
-          for (int k = 0; k < 3; k++) {
-            if (flip[k]) {
-              v[k]  = -v[k];
-              v2[k] = -v2[k];
-            }
-          }
           if (GetProperty()->GetVectorInversion() == LayerPropertyMRI::VI_X) {
             v[0]  = -v[0];
             v2[0] = -v2[0];
@@ -1726,6 +1726,15 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
                      LayerPropertyMRI::VI_Z) {
             v[2]  = -v[2];
             v2[2] = -v2[2];
+          }
+
+          for (int k = 0; k < 3; k++) {
+            v_temp[k]  = v[k];
+            v_temp2[k] = v2[k];
+          }
+          for (int k = 0; k < 3; k++) {
+            v[flag_assign[k]]  = v_temp[k] * flag_sign[k];
+            v2[flag_assign[k]] = v_temp2[k] * flag_sign[k];
           }
 
           pt[0] = orig[0] + voxel_size[0] * n[0];
@@ -1772,7 +1781,7 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
                             mask_ptr, dim, mask_frames, i, n[1], j, 0,
                             mask_scalar_type) < m_dMaskThreshold)
           continue;
-        double  v[3], v2[3] = {0}, vn[3];
+        double  v[3], v2[3] = {0}, vn[3], v_temp[3], v_temp2[3];
         double *vp = v;
         double  pt[3];
         v[0] = MyVTKUtils::GetImageDataComponent(ptr, dim, nFrames, i, n[1], j,
@@ -1806,12 +1815,6 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
           if (bNormalizeVector)
             vtkMath::Normalize(v);
 
-          for (int k = 0; k < 3; k++) {
-            if (flip[k]) {
-              v[k]  = -v[k];
-              v2[k] = -v2[k];
-            }
-          }
           if (GetProperty()->GetVectorInversion() == LayerPropertyMRI::VI_X) {
             v[0]  = -v[0];
             v2[0] = -v2[0];
@@ -1823,6 +1826,15 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
                      LayerPropertyMRI::VI_Z) {
             v[2]  = -v[2];
             v2[2] = -v2[2];
+          }
+
+          for (int k = 0; k < 3; k++) {
+            v_temp[k]  = v[k];
+            v_temp2[k] = v2[k];
+          }
+          for (int k = 0; k < 3; k++) {
+            v[flag_assign[k]]  = v_temp[k] * flag_sign[k];
+            v2[flag_assign[k]] = v_temp2[k] * flag_sign[k];
           }
 
           pt[0] = orig[0] + voxel_size[0] * i;
@@ -1869,7 +1881,7 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
                             mask_ptr, dim, mask_frames, i, j, n[2], 0,
                             mask_scalar_type) < m_dMaskThreshold)
           continue;
-        double  v[3], v2[3] = {0}, vn[3];
+        double  v[3], v2[3] = {0}, vn[3], v_temp[3], v_temp2[3];
         double *vp = v;
         double  pt[3];
         v[0] = MyVTKUtils::GetImageDataComponent(ptr, dim, nFrames, i, j, n[2],
@@ -1903,12 +1915,6 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
           if (bNormalizeVector)
             vtkMath::Normalize(v);
 
-          for (int k = 0; k < 3; k++) {
-            if (flip[k]) {
-              v[k]  = -v[k];
-              v2[k] = -v2[k];
-            }
-          }
           if (GetProperty()->GetVectorInversion() == LayerPropertyMRI::VI_X) {
             v[0]  = -v[0];
             v2[0] = -v2[0];
@@ -1920,6 +1926,15 @@ void LayerMRI::UpdateVectorActor(int nPlane, vtkImageData *imagedata,
                      LayerPropertyMRI::VI_Z) {
             v[2]  = -v[2];
             v2[2] = -v2[2];
+          }
+
+          for (int k = 0; k < 3; k++) {
+            v_temp[k]  = v[k];
+            v_temp2[k] = v2[k];
+          }
+          for (int k = 0; k < 3; k++) {
+            v[flag_assign[k]]  = v_temp[k] * flag_sign[k];
+            v2[flag_assign[k]] = v_temp2[k] * flag_sign[k];
           }
 
           pt[0] = orig[0] + voxel_size[0] * i;

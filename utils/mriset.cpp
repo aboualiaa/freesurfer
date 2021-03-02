@@ -2495,17 +2495,18 @@ MRI *MRImask(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int mask,
   float    val;
   VOL_GEOM vg_src, vg_mask;
 
-  // If the geometries differ, then MRImask() will do a header registration.
-  // This is not what one want to do all the time (eg, with surfaces). Rather
-  // than add another argument and change the millions of calls ot MRImask(),
-  // the caller can set an env variable to turn off this capability, eg, setenv
-  // FS_MRIMASK_ALLOW_DIFF_GEOM 0 If this variable is not defined, then it will
-  // potentially change geom
+  // If the geometries differ, then MRImask() will do a header registration. This
+  // is not what one want to do all the time (eg, with surfaces). Rather than
+  // add another argument and change the millions of calls ot MRImask(), the caller
+  // can set an env variable to turn off this capability, eg,
+  // setenv FS_MRIMASK_ALLOW_DIFF_GEOM 0
+  // If this variable is not defined, then it will potentially change geom
   int   AllowDiffGeom = 1;
   char *pstr          = getenv("FS_MRIMASK_ALLOW_DIFF_GEOM");
-  if (pstr != nullptr)
+  if (pstr != NULL)
     sscanf(pstr, "%d", &AllowDiffGeom);
-  printf("MRImask(): AllowDiffGeom = %d\n", AllowDiffGeom);
+  if (Gdiag > 0)
+    printf("MRImask(): AllowDiffGeom = %d\n", AllowDiffGeom);
 
   getVolGeom(mri_src, &vg_src);
   getVolGeom(mri_mask, &vg_mask);

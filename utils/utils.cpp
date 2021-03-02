@@ -96,7 +96,7 @@ long getRandomSeed(void) { return (idum); }
 long getRandomCalls(void) { return (nrgcalls); }
 
 double randomNumber(double low, double hi) {
-  double val, range;
+  double val;
 
   if (low > hi) {
     val = low;
@@ -104,9 +104,16 @@ double randomNumber(double low, double hi) {
     hi  = val;
   }
 
-  if (idum == 0L) /* change seed from run to run */
-  {
-    if (1) {
+  // check if seed not set
+  if (idum == 0L) {
+    std::string seed = getEnvironVar("FREESURFER_SEED");
+    if (!seed.empty()) {
+      // set seed from env variable
+      std::cout << "Setting seed for random number genererator to " << seed
+                << std::endl;
+      setRandomSeed(std::stol(seed));
+    } else {
+      // set seed by random time
       static int laterTime = 0;
       if (!laterTime) {
         laterTime = 1;
@@ -117,8 +124,7 @@ double randomNumber(double low, double hi) {
           commSize = fread(commBuffer, 1, 1023, commFile);
           if (commSize > 0)
             commSize -= 1; // drop the \n
-          int i = 0;
-          for (i = 0; i < commSize; i++) {
+          for (int i = 0; i < commSize; i++) {
             if (commBuffer[i] == '/')
               commBuffer[i] = '@';
           }
@@ -128,17 +134,17 @@ double randomNumber(double low, double hi) {
         fprintf(stderr, "%s supposed to be reproducible but seed not set\n",
                 commBuffer);
       }
+      idum = -1L * (long)(abs((int)time(NULL)));
     }
-    idum = -1L * (long)(abs((int)time(NULL)));
   }
 
-  range = hi - low;
-  val   = OpenRan1(&idum) * range + low;
-  // printf("randomcall %3ld %12.10lf\n",nrgcalls,val);
+  double range = hi - low;
+  val          = OpenRan1(&idum) * range + low;
   nrgcalls++;
-  if ((val < low) || (val > hi))
+  if ((val < low) || (val > hi)) {
     ErrorPrintf(ERROR_BADPARM, "randomNumber(%2.1f, %2.1f) - %2.1f\n",
                 (float)low, (float)hi, (float)val);
+  }
 
   return (val);
 }
@@ -1934,4 +1940,13 @@ bool stringEndsWith(const std::string &value, const std::string &ending) {
     return false;
   return (0 == value.compare(value.length() - ending.length(), ending.length(),
                              ending));
+}
+
+/*!
+  /brief Returns environment variable value as string. If the variable does not
+  exist, an empty string is returned. 
+*/
+std::string getEnvironVar(std::string const &key) {
+  char *val = getenv(key.c_str());
+  return val == NULL ? std::string("") : std::string(val);
 }
