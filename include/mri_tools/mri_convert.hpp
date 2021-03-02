@@ -55,8 +55,6 @@ public:
   std::vector<int>                        reorder4_vals{};
   std::string         left_right_mirror_hemi{}; // which half to mirror (lh, rh)
   std::string         left_right_keep_hemi{};
-  std::string         input_volume{};  //?
-  std::string         output_volume{}; //?
   std::string         new_transform_fname{};
   std::string         autoalign_file{};
   std::string         transform_fname{};
@@ -558,19 +556,24 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       //
 
-      ("input_volume,i",
+      ("in_name,i",
 
-       po::value(&cmdargs->input_volume),
+       po::value(&cmdargs->in_name),
 
-       "input_volume")
+       "input volume name")
 
       //
 
-      ("output_volume,o",
+      ("out_name,o",
 
-       po::value(&cmdargs->output_volume),
+       po::value(&cmdargs->out_name) //
+           ->notifier([cmdargs](auto v) {
+             auto adder = cli::addConflicts({"read_only", "no_write"},
+                                            "out_name", cmdargs);
+             adder(v);
+           }),
 
-       "output_volume")
+       "output volume name")
 
       //
 
@@ -1257,25 +1260,6 @@ void initArgDesc(boost::program_options::options_description *desc,
            }),
 
        "Angle in radians")
-
-      //
-
-      ("in_name",
-
-       po::value(&cmdargs->in_name)->required(), "in_name")
-
-      //
-
-      ("out_name",
-
-       po::value(&cmdargs->out_name) //
-           ->notifier([cmdargs](auto v) {
-             auto adder = cli::addConflicts({"read_only", "no_write"},
-                                            "out_name", cmdargs);
-             adder(v);
-           }),
-
-       "out_name")
 
       //
 
