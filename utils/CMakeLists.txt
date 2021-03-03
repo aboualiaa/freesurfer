@@ -28,7 +28,7 @@ endif()
 
 add_library(utils
             ${UTILS_BUILD_TYPE}
-            afni.cpp
+            afni_exec.cpp
             annotation.cpp
             argparse.cpp
             autoencoder.cpp
@@ -223,6 +223,7 @@ target_link_libraries(utils
                       gifti
                       ${ZLIB_LIBRARIES}
                       ${ITK_LIBRARIES}
+                      fmt::fmt
                       )
 
 if(NOT APPLE)
