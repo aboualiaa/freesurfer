@@ -80,38 +80,43 @@ if(FS_BUILD_MATRIX)
 
       message(NOTICE "configuring ${TYPE} build with ${Z_COMPILER}")
 
-      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_MKDIR ALL
+      add_custom_target(mkdir-${Z_COMPILER}-${TYPE}
                         COMMAND bash -c \" mkdir -p
                                 ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}
                                 \"
                         )
 
-      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ALL
+      add_custom_target(cmake-${Z_COMPILER}-${TYPE} ALL
                         COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev ${COMPILER_PROXY_OPTION}
                                 -DCMAKE_BUILD_TYPE=${TYPE} -C ${FS_MATRIX_CACHE} -G Ninja -S ${CMAKE_SOURCE_DIR} -B
                                 ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}
                                 \"
                         )
 
-      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_CREATE
-                        COMMAND bash -c \" ninja -k 0 -C
+      add_custom_target(ninja-${Z_COMPILER}-${TYPE}
+                        COMMAND bash -c \" ninja -k 0 -l 10 -C
                                 ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}/
                                 \"
                         )
 
-      add_dependencies(${Z_COMPILER}_${TYPE}_BUILD_CMAKE ${Z_COMPILER}_${TYPE}_BUILD_MKDIR)
+      add_dependencies(cmake-${Z_COMPILER}-${TYPE} mkdir-${Z_COMPILER}-${TYPE})
 
       if(NOT TARGET compile-${Z_COMPILER})
         add_custom_target(compile-${Z_COMPILER})
       endif()
 
-      add_dependencies(compile-${Z_COMPILER} ${Z_COMPILER}_${TYPE}_BUILD_CREATE)
+      if(NOT TARGET compile-${Z_COMPILER}-${TYPE})
+        add_custom_target(compile-${Z_COMPILER}-${TYPE})
+      endif()
+
+      add_dependencies(compile-${Z_COMPILER} ninja-${Z_COMPILER}-${TYPE})
+      add_dependencies(compile-${Z_COMPILER}-${TYPE} ninja-${Z_COMPILER}-${TYPE})
 
       if(NOT TARGET compile-${TYPE})
         add_custom_target(compile-${TYPE})
       endif()
 
-      add_dependencies(compile-${TYPE} ${Z_COMPILER}_${TYPE}_BUILD_CREATE)
+      add_dependencies(compile-${TYPE} ninja-${Z_COMPILER}-${TYPE})
 
       if(NOT TARGET compile-all)
         add_custom_target(compile-all)
@@ -119,13 +124,13 @@ if(FS_BUILD_MATRIX)
 
       add_dependencies(compile-all compile-${TYPE})
 
-      add_custom_target(${Z_COMPILER}_${TYPE}_BUILD_TEST
-                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress \"
+      add_custom_target(ctest-${Z_COMPILER}-${TYPE}
+                        COMMAND bash -c \" ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress --test-load 10 \"
                         WORKING_DIRECTORY "${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}"
                         )
 
-      add_test(${Z_COMPILER}_${TYPE}_BUILD_TEST
-               COMMAND ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress
+      add_test(ctest-${Z_COMPILER}-${TYPE}
+               COMMAND ${CMAKE_CTEST_COMMAND} -T Test -L Unit --progress --test-load 10
                WORKING_DIRECTORY "${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}"
                )
 
@@ -133,13 +138,14 @@ if(FS_BUILD_MATRIX)
         add_custom_target(check-${Z_COMPILER})
       endif()
 
-      add_dependencies(check-${Z_COMPILER} ${Z_COMPILER}_${TYPE}_BUILD_TEST)
+      add_dependencies(ctest-${Z_COMPILER}-${TYPE} ninja-${Z_COMPILER}-${TYPE})
+      add_dependencies(check-${Z_COMPILER} ctest-${Z_COMPILER}-${TYPE})
 
       if(NOT TARGET check-${TYPE})
         add_custom_target(check-${TYPE})
       endif()
 
-      add_dependencies(check-${TYPE} ${Z_COMPILER}_${TYPE}_BUILD_TEST)
+      add_dependencies(check-${TYPE} ctest-${Z_COMPILER}-${TYPE})
 
       if(NOT TARGET check-all)
         add_custom_target(check-all)
@@ -373,6 +379,13 @@ add_custom_target(install-nmr COMMAND ${CMAKE_COMMAND} -D COMPONENT=nmr -P cmake
 # --------------------------------------------------
 #               external dependencies
 # --------------------------------------------------
+
+set(ABSL_RUN_TESTS OFF)
+if(BUILD_TESTING)
+  set(BUILD_TESTING OFF)
+endif()
+add_subdirectory(packages/abseil-cpp)
+set(BUILD_TESTING ${_BUILD_TESTING})
 
 # xxd is used to generate the helptext headers
 find_program(XXD xxd)

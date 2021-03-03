@@ -12,23 +12,29 @@ set(CMAKE_BUILD_TYPE
     "Release"
     CACHE STRING "Default: Release"
     )
+
 set(CMAKE_GENERATOR
     "Ninja Multi-Config"
     CACHE STRING "Ninja, Unix Makefiles, Xcode, Ninja Multi-Config"
     )
+
 string(TIMESTAMP TODAY "%Y%m%d")
+
 set(BUILD_STAMP
     "freesurfer-local-build-${TODAY}"
     CACHE STRING "Distribution build stamp"
     )
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
     CACHE BOOL "create a json database of compile commands for tooling"
     )
+
 set(CMAKE_CXX_STANDARD
     20
     CACHE STRING "20;17;14;11"
     )
+
 set(CMAKE_POSITION_INDEPENDENT_CODE
     ON
     CACHE BOOL ""
@@ -38,26 +44,32 @@ set(FS_BUILD_ATTIC
     ON
     CACHE BOOL "Build deprecated tools from the attic"
     )
+
 set(FS_BUILD_DNG
     ON
     CACHE BOOL "Build Doug's testing tools"
     )
+
 set(FS_BUILD_GUIS
     ON
     CACHE BOOL "Build GUI tools"
     )
+
 set(FS_BUILD_DOCS
     ON
     CACHE BOOL "Build Documentation"
     )
+
 set(FS_BUILD_TESTING
     ON
     CACHE BOOL "build test targets"
     )
+
 set(FS_PACKAGES_DIR
     "/Users/aboualiaa/Downloads/packages"
     CACHE STRING ""
     )
+
 # Unfortunately, the python version used to run pybind c-libraries must be equivalent to
 # the version used to build the libraries. The easiest and least intrusive way of making freesurfer
 # python scripts run out-of-the-box (and to help guarantee reproducibility) requires
@@ -69,21 +81,24 @@ set(FS_DISTRIBUTE_FSPYTHON
     OFF
     CACHE BOOL "Include the fspython distribution in the installation"
     )
+
 set(FS_COVERAGE_STYLE
     "gcov"
     CACHE STRING ""
     )
+
 set(FS_DOCS_FORMAT
     "all"
     CACHE STRING ""
     )
+
 set(FS_DOCS_GENERATOR
     "all"
     CACHE STRING ""
     )
 
 set(FS_EXP_BUILD_CONFIGURATIONS
-    "Release;Debug;RelWithDebInfo;MinSizeRel;asan;ubsan;tsan;msan;cfisan;coverage;profile;lsan;thinlto;fulllto"
+    "Release;Debug;RelWithDebInfo;MinSizeRel;asan;ubsan;tsan;msan;sssan;cfisan;coverage;profile;lsan;thinlto;fulllto"
     CACHE STRING ""
     )
 
@@ -93,38 +108,47 @@ set(FS_ENABLE_LTO
     "Full"
     CACHE STRING "off thin full"
     )
+
 set(FS_INFANT_MODULE
     ON
     CACHE BOOL "Include infant recon-all"
     )
+
 set(FS_QATOOLS_MODULE
     OFF
     CACHE BOOL "Include quality assurance tools"
     )
+
 set(FS_FREEVIEW_LINEPROF
     OFF
     CACHE BOOL "Enable Lineprof"
     )
+
 set(FS_INSTALL_PYTHON_DEPS
     ON
     CACHE BOOL "python deps"
     )
+
 set(FS_INTEGRATION_TESTING
     ON
     CACHE BOOL "Copy files for integration tests"
     )
+
 set(FS_MINIMAL_BUILD
     OFF
     CACHE BOOL "Only build core components"
     )
+
 set(FS_REPO_ENVIRONMENT
     "develop"
     CACHE STRING ""
     )
+
 set(FS_SUPRESS_WARNINGS
     ON
     CACHE BOOL "Suppress some selected warnings"
     )
+
 set(FS_USE_CCACHE
     ON
     CACHE BOOL "Use ccache (if present) to reduce build times"
@@ -134,6 +158,7 @@ set(FS_USE_GCC
     ""
     CACHE STRING ""
     )
+
 set(FS_USE_LLVM
     ""
     CACHE STRING ""
@@ -145,48 +170,59 @@ set(FS_VERSION
     )
 
 if(NOT APPLE)
+
   set(FS_GEMS_BUILD_CUDA
       OFF
       CACHE BOOL "Build CUDA stuff"
       )
+
   set(FS_TKTOOLS_MODULE
       OFF
       CACHE BOOL "Install old Linux TK GUIs"
       )
+
 endif()
 
 set(FS_BUILD_MATLAB
     ON
     CACHE BOOL "build matlab"
     )
+
 set(FS_GEMS_BUILD_EXECUTABLES
     ON
     CACHE BOOL "Build command line executables"
     )
+
 set(FS_GEMS_BUILD_GUI
     ON
     CACHE BOOL "build gems guis"
     )
+
 set(FS_GEMS_BUILD_MATLAB
     ON
     CACHE BOOL "build matlab wrappers"
     )
+
 set(FS_GEMS_BUILD_PYTHON
     ON
     CACHE BOOL ""
     )
+
 set(FS_GEMS_BUILD_SHARED_LIBS
     ON
     CACHE BOOL "Build GEMS with shared libraries"
     )
+
 set(FS_GEMS_BUILD_TESTING
     ON
     CACHE BOOL "Build tests"
     )
+
 set(FS_GEMS_MAKE_SPARSE_INITIAL_MESHES
     OFF
     CACHE BOOL "Make sparse initial meshes"
     )
+
 set(FS_USE_ARRAYFIRE
     ON
     CACHE BOOL "Use Arrayfire for parallelism"

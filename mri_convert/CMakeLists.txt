@@ -7,7 +7,15 @@ else()
 endif()
 
 add_library(mri_convert_lib STATIC EXCLUDE_FROM_ALL mri_convert_lib.cpp)
-set(COMMON_LIBS utils mri_convert_lib Boost::program_options benchmark::benchmark fmt::fmt ${SPDLOG_LIBRARIES})
+set(COMMON_LIBS
+    utils
+    mri_convert_lib
+    Boost::program_options
+    benchmark::benchmark
+    fmt::fmt
+    ${SPDLOG_LIBRARIES}
+    absl::strings
+    )
 
 target_include_directories(mri_convert_lib
                            PUBLIC ${FS_INCLUDE_DIRS}

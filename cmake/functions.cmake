@@ -206,7 +206,36 @@ function(add_test_script)
   foreach(TARGET ${TEST_DEPENDS})
     set(TEST_CMD "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
   endforeach()
-  add_test(${TEST_NAME} bash -c "${TEST_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT}")
+
+  foreach(config ${CMAKE_CONFIGURATION_TYPES})
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}/${config}/${TEST_SCRIPT}
+                   COPYONLY
+                   )
+    if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz")
+      message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
+      execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
+                              "${CMAKE_CURRENT_BINARY_DIR}/${config}/testdata.tar.gz"
+                      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                      RESULT_VARIABLE WHATEVER
+                      )
+      configure_file(${CMAKE_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/${config}/test_main.sh COPYONLY)
+    endif()
+    add_test(${TEST_NAME} bash -c
+             "cd ${CMAKE_CURRENT_BINARY_DIR} && ${CMAKE_CURRENT_BINARY_DIR}/${config}/${TEST_SCRIPT}"
+             )
+  endforeach(config)
+
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT} COPYONLY)
+  if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz")
+    message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
+    execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz"
+                            "${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                    RESULT_VARIABLE WHATEVER
+                    )
+    configure_file(${CMAKE_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/test_main.sh COPYONLY)
+  endif()
+  add_test(${TEST_NAME} bash -c "cd ${CMAKE_CURRENT_BINARY_DIR} && ${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
 endfunction()
 
 # add_test_executable(<target> <sources>)
