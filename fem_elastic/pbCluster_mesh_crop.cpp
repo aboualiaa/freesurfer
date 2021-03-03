@@ -139,8 +139,8 @@ template <class Container> struct RemoveIfAndCopy {
 };
 
 TopologySolver::IndexVectorPointer
-do_union(TopologySolver::IndexVectorPointer &v1,
-         TopologySolver::IndexVectorPointer &v2) {
+do_union(const TopologySolver::IndexVectorPointer &v1,
+         const TopologySolver::IndexVectorPointer &v2) {
   TopologySolver::IndexVectorPointer v3(new TopologySolver::IndexVectorType);
 
   std::set_union(v1->begin(), v1->end(), v2->begin(), v2->end(),
