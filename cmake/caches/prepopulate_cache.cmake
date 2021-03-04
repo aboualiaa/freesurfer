@@ -83,7 +83,7 @@ set(FS_DISTRIBUTE_FSPYTHON
     )
 
 set(FS_COVERAGE_STYLE
-    "gcov"
+    "all"
     CACHE STRING ""
     )
 
@@ -240,6 +240,6 @@ set_property(CACHE FS_REPO_ENVIRONMENT PROPERTY STRINGS "develop;travis;azure;ci
 set_property(CACHE FS_DOCS_FORMAT PROPERTY STRINGS "html;md;yaml;man;dash;all")
 set_property(CACHE FS_DOCS_GENERATOR PROPERTY STRINGS "doxygen;sphinx;clang-doc;all")
 set_property(CACHE FS_ENABLE_LTO PROPERTY STRINGS "Off;Thin;Full")
-set_property(CACHE FS_COVERAGE_STYLE PROPERTY STRINGS "gcov;clang")
+set_property(CACHE FS_COVERAGE_STYLE PROPERTY STRINGS "gcov;llvm;all")
 
 #set(CMAKE_CONFIGURATION_TYPES ${FS_EXP_BUILD_CONFIGURATIONS} CACHE STRING "")

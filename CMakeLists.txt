@@ -241,9 +241,7 @@ endif()
 
 find_program(CCACHE_PROGRAM ccache)
 mark_as_advanced(CCACHE_PROGRAM)
-if(CCACHE_PROGRAM
-   AND FS_USE_CCACHE
-   AND NOT CMAKE_BUILD_TYPE STREQUAL "coverage"
+if(CCACHE_PROGRAM AND FS_USE_CCACHE #   AND NOT CMAKE_BUILD_TYPE STREQUAL "coverage"
    )
   message(STATUS "Using ccache at ${CCACHE_PROGRAM}")
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
@@ -1068,4 +1066,43 @@ endif()
 
 if(FS_BUILD_DNG)
   add_subdirectory(dngtester)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "coverage")
+  add_custom_target(check-all
+                    COMMAND bash -c \" ctest -T Test -j 12 --schedule-random -L Unit || true \"
+                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+                    )
+
+  if(FS_COVERAGE_STYLE STREQUAL "gcov" OR FS_COVERAGE_STYLE STREQUAL "all")
+    add_custom_target(generate-gcov-coverage-report
+                      COMMAND bash -c \" lcov --capture --directory ${CMAKE_BINARY_DIR} --output-file
+                              ${CMAKE_BINARY_DIR}/coverage.info && genhtml ${CMAKE_BINARY_DIR}/coverage.info
+                              --output-directory ${CMAKE_BINARY_DIR}/gcov-report \"
+                      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+                      )
+
+    add_dependencies(generate-gcov-coverage-report check-all)
+
+  endif()
+
+  if(FS_COVERAGE_STYLE STREQUAL "llvm" OR FS_COVERAGE_STYLE STREQUAL "all")
+    get_filename_component(CMAKE_CXX_COMPILER_PATH ${CMAKE_CXX_COMPILER} DIRECTORY)
+    set(FS_LLVM_COV_PATH "${CMAKE_CXX_COMPILER_PATH}/llvm-cov")
+    if(EXISTS "${FS_LLVM_COV_PATH}")
+      add_custom_target(generate-llvm-coverage-report
+                        COMMAND bash -c \" /bin/ls -1 -d ${CMAKE_BINARY_DIR}/profiles/* >>
+                                ${CMAKE_BINARY_DIR}/profiles.manifest && ${CMAKE_CXX_COMPILER_PATH}/llvm-profdata merge
+                                -sparse -f ${CMAKE_BINARY_DIR}/profiles.manifest -o ${CMAKE_BINARY_DIR}/merged.profdata
+                                && ${CMAKE_CXX_COMPILER_PATH}/llvm-cov show ${CMAKE_BINARY_DIR}/utils/libutils.dylib
+                                -format html -instr-profile ${CMAKE_BINARY_DIR}/merged.profdata -o
+                                ${CMAKE_BINARY_DIR}/llvm-cov-report -show-line-counts-or-regions -Xdemangler c++filt \"
+                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+                        )
+
+      add_dependencies(generate-llvm-coverage-report check-all)
+    else()
+      message(WARNING "compiler ${CMAKE_CXX_COMPILER} doesn't support clang style source based coverage")
+    endif()
+  endif()
 endif()

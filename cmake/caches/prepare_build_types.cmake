@@ -75,12 +75,12 @@ set(CMAKE_C_FLAGS_SSSAN
     )
 
 set(CMAKE_CXX_FLAGS_COVERAGE
-    "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
+    "-fprofile-instr-generate=\"${CMAKE_BINARY_DIR}/profiles/%4m.profraw\" -fcoverage-mapping --coverage -g -O0"
     CACHE STRING "" FORCE
     )
 
 set(CMAKE_C_FLAGS_COVERAGE
-    "-fprofile-instr-generate -fcoverage-mapping --coverage -g -O0"
+    "-fprofile-instr-generate=\"${CMAKE_BINARY_DIR}/profiles/4m.profraw\" -fcoverage-mapping --coverage -g -O0"
     CACHE STRING "" FORCE
     )
 
