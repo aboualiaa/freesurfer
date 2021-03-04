@@ -19,4 +19,4 @@ find . \
   -o -name '*.txx' \
   -o -name '*.tpp' \
   -o -name '*.hpp' \) |
-  parallel -j +2 --eta --bar --max-args=1 clang-format -i '{}'
+  parallel -j $(nproc) --eta --bar --max-args=1 clang-format -i '{}'

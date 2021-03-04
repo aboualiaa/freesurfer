@@ -6,4 +6,4 @@ find . \
   -not \( -path ./packages -prune \) \
   -not \( -path "./cmake-build-*" -prune \) \
   \( -name '*.py' \) |
-  parallel -j +2 --eta --bar --max-args=1 black -q -l 80 {}
+  parallel -j $(nproc) --eta --bar --max-args=1 black -q -l 80 {}
