@@ -13,4 +13,12 @@ foreach(filename ${files})
 
   add_test(${name} ${name})
   set_property(TEST ${name} PROPERTY LABELS Unit)
+
+  if(CMAKE_BUILD_TYPE STREQUAL "coverage")
+    set_property(TARGET ${name}
+                 PROPERTY ADDITIONAL_CLEAN_FILES
+                          "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${name}.dir/${name}.cpp.gcno;${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${name}.dir/${name}.cpp.gcda"
+                 )
+
+  endif()
 endforeach()

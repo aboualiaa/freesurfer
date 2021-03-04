@@ -1069,10 +1069,13 @@ if(FS_BUILD_DNG)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "coverage")
+
   add_custom_target(check-all
                     COMMAND bash -c \" ctest -T Test -j 12 --schedule-random -L Unit || true \"
                     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
                     )
+
+  add_custom_target(generate-coverage-reports)
 
   if(FS_COVERAGE_STYLE STREQUAL "gcov" OR FS_COVERAGE_STYLE STREQUAL "all")
     add_custom_target(generate-gcov-coverage-report
@@ -1083,6 +1086,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "coverage")
                       )
 
     add_dependencies(generate-gcov-coverage-report check-all)
+    add_dependencies(generate-coverage-reports generate-gcov-coverage-report)
+
+    set_property(DIRECTORY ${CMAKE_BINARY_DIR} PROPERTY ADDITIONAL_CLEAN_FILES "coverage.info;gcov-report")
 
   endif()
 
@@ -1091,16 +1097,22 @@ if(CMAKE_BUILD_TYPE STREQUAL "coverage")
     set(FS_LLVM_COV_PATH "${CMAKE_CXX_COMPILER_PATH}/llvm-cov")
     if(EXISTS "${FS_LLVM_COV_PATH}")
       add_custom_target(generate-llvm-coverage-report
-                        COMMAND bash -c \" /bin/ls -1 -d ${CMAKE_BINARY_DIR}/profiles/* >>
+                        COMMAND bash -c \" /bin/ls -1 -d ${CMAKE_BINARY_DIR}/profiles/* >
                                 ${CMAKE_BINARY_DIR}/profiles.manifest && ${CMAKE_CXX_COMPILER_PATH}/llvm-profdata merge
                                 -sparse -f ${CMAKE_BINARY_DIR}/profiles.manifest -o ${CMAKE_BINARY_DIR}/merged.profdata
                                 && ${CMAKE_CXX_COMPILER_PATH}/llvm-cov show ${CMAKE_BINARY_DIR}/utils/libutils.dylib
                                 -format html -instr-profile ${CMAKE_BINARY_DIR}/merged.profdata -o
-                                ${CMAKE_BINARY_DIR}/llvm-cov-report -show-line-counts-or-regions -Xdemangler c++filt \"
+                                ${CMAKE_BINARY_DIR}/llvm-cov-report -show-line-counts-or-regions -Xdemangler c++filt
+                                --ignore-filename-regex="${CMAKE_SOURCE_DIR}/packages/*" \"
                         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
                         )
 
       add_dependencies(generate-llvm-coverage-report check-all)
+      add_dependencies(generate-coverage-reports generate-llvm-coverage-report)
+
+      set_property(DIRECTORY ${CMAKE_BINARY_DIR} PROPERTY ADDITIONAL_CLEAN_FILES
+                                                          "profiles.manifest;profiles;merged.profdata;llvm-cov-report"
+                   )
     else()
       message(WARNING "compiler ${CMAKE_CXX_COMPILER} doesn't support clang style source based coverage")
     endif()
