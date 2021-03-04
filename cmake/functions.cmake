@@ -203,9 +203,6 @@ endfunction()
 # should be specified with DEPENDS to guarantee it gets built beforehand
 function(add_test_script)
   cmake_parse_arguments(TEST "" "NAME;SCRIPT" "DEPENDS" ${ARGN})
-  foreach(TARGET ${TEST_DEPENDS})
-    set(TEST_CMD "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
-  endforeach()
 
   foreach(config ${CMAKE_CONFIGURATION_TYPES})
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}/${config}/${TEST_SCRIPT}
@@ -223,6 +220,10 @@ function(add_test_script)
     add_test(${TEST_NAME} bash -c
              "cd ${CMAKE_CURRENT_BINARY_DIR} && ${CMAKE_CURRENT_BINARY_DIR}/${config}/${TEST_SCRIPT}"
              )
+    set_property(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${config}"
+                 PROPERTY ADDITIONAL_CLEAN_FILES
+                          "${CMAKE_CURRENT_BINARY_DIR}/${config}/testdata;test.sh;test_main.sh;testdata.tar.gz"
+                 )
   endforeach(config)
 
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT} COPYONLY)
@@ -235,7 +236,16 @@ function(add_test_script)
                     )
     configure_file(${CMAKE_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/test_main.sh COPYONLY)
   endif()
+
+  add_custom_target(${TEST_NAME})
   add_test(${TEST_NAME} bash -c "cd ${CMAKE_CURRENT_BINARY_DIR} && ${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
+  foreach(DEPENDENCY ${TEST_DEPENDS})
+    add_dependencies(${TEST_NAME} "${DEPENDENCY}")
+  endforeach()
+
+  set_property(TARGET ${TEST_NAME} PROPERTY ADDITIONAL_CLEAN_FILES
+                                            "testdata;Testing;test.sh;test_main.sh;testdata.tar.gz"
+               )
 endfunction()
 
 # add_test_executable(<target> <sources>)

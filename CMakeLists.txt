@@ -153,6 +153,50 @@ if(FS_BUILD_MATRIX)
 
       add_dependencies(check-all check-${TYPE})
 
+      if(NOT TARGET freshstart)
+        add_custom_target(freshstart)
+      endif()
+
+      if(NOT TARGET freshstart-${Z_COMPILER})
+        add_custom_target(freshstart-${Z_COMPILER})
+      endif()
+
+      if(NOT TARGET freshstart-${TYPE})
+        add_custom_target(freshstart-${TYPE})
+      endif()
+
+      add_custom_target(freshstart-${Z_COMPILER}-${TYPE}
+                        COMMAND bash -c \" rm -rf
+                                ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${TYPE}-${Z_COMPILER}
+                                \"
+                        )
+
+      add_dependencies(freshstart-${Z_COMPILER} freshstart-${Z_COMPILER}-${TYPE})
+      add_dependencies(freshstart-${TYPE} freshstart-${Z_COMPILER}-${TYPE})
+      add_dependencies(freshstart freshstart-${Z_COMPILER} freshstart-${TYPE})
+
+      if(NOT TARGET clean-${Z_COMPILER})
+        add_custom_target(clean-${Z_COMPILER})
+      endif()
+
+      if(NOT TARGET clean-${TYPE})
+        add_custom_target(clean-${TYPE})
+      endif()
+
+      if(NOT TARGET clean-all)
+        add_custom_target(clean-all)
+      endif()
+
+      add_custom_target(clean-${Z_COMPILER}-${TYPE}
+                        COMMAND bash -c \" ninja -C
+                                ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}
+                                clean || true \"
+                        )
+
+      add_dependencies(clean-${Z_COMPILER} clean-${Z_COMPILER}-${TYPE})
+      add_dependencies(clean-${TYPE} clean-${Z_COMPILER}-${TYPE})
+      add_dependencies(clean-all clean-${Z_COMPILER}-${TYPE})
+
     endforeach()
   endforeach()
   return()
