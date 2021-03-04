@@ -2,10 +2,10 @@
 // Created by Ahmed Abou-Aliaa on 05.10.20.
 //
 
-#include "AFNI.h"
-
-#include "gsl/gsl"
+#include <gsl/gsl>
 #include <gtest/gtest.h>
+
+#include "utils/afni.hpp"
 
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 
@@ -42,8 +42,8 @@ char const *const afni_read_suffix =
 TEST(afni_unit, afniRead) { // NOLINT
   gtest::CaptureStderr();
   gtest::CaptureStdout();
-  auto *      mri         = afniRead(filename, 1);
-  auto *      invalid_mri = afniRead(invalid_filename, 1);
+  auto *      mri         = fs::utils::afniRead(filename, 1);
+  auto *      invalid_mri = fs::utils::afniRead(invalid_filename, 1);
   std::string output{afni_header_out};
   output.append(afni_read_suffix);
   auto wow    = gtest::GetCapturedStderr();
@@ -55,14 +55,14 @@ TEST(afni_unit, afniRead) { // NOLINT
 
 TEST(afni_unit, afniWrite) { // NOLINT
   gtest::CaptureStdout();
-  auto *mri = afniRead(filename, 1);
-  EXPECT_EQ(afniWrite(mri, output_filename), 0);
+  auto *mri = fs::utils::afniRead(filename, 1);
+  EXPECT_EQ(fs::utils::afniWrite(mri, output_filename), 0);
   auto out = gtest::GetCapturedStdout();
 }
 
 TEST(afni_unit, readAFNIHeader) { // NOLINT
-  AF af;
-  AFinit(&af);
+  fs::utils::AF af;
+  AFinit(af);
   gsl::owner<FILE *> fp = fopen(header, "re");
   EXPECT_NE(fp, nullptr);
   auto               res = readAFNIHeader(fp, &af);
@@ -108,9 +108,9 @@ TEST(afni_unit, readAFNIHeader) { // NOLINT
 }
 
 TEST(afni_unit, AFinit) { // NOLINT
-  AF              af;
+  fs::utils::AF   af;
   gsl::span<char> wow = af.typestring;
-  AFinit(&af);
+  AFinit(af);
   EXPECT_EQ(strcmp(wow.data(), ""), 0);
   EXPECT_EQ(af.dataset_rank[0], 0);
   EXPECT_EQ(af.dataset_rank[1], 0);
@@ -140,8 +140,8 @@ TEST(afni_unit, AFinit) { // NOLINT
 }
 
 TEST(afni_unit, AFclean) { // NOLINT
-  AF af;
-  AFinit(&af);
+  fs::utils::AF af;
+  AFinit(af);
   gsl::owner<FILE *> fp = fopen(header, "re");
   EXPECT_NE(fp, nullptr);
   [[maybe_unused]] auto res = readAFNIHeader(fp, &af);
@@ -153,11 +153,11 @@ TEST(afni_unit, AFclean) { // NOLINT
 }
 
 TEST(afni_unit, printAFNIHeader) { // NOLINT
-  AF                    af;
+  fs::utils::AF         af;
   gsl::owner<FILE *>    fp  = fopen(header, "re");
   [[maybe_unused]] auto res = readAFNIHeader(fp, &af);
   gtest::CaptureStdout();
-  printAFNIHeader(&af);
+  printAFNIHeader(af);
   auto out = gtest::GetCapturedStdout();
   EXPECT_EQ(afni_header_out, out);
 }

@@ -34,7 +34,7 @@
 #include "mri.h"
 #include "utils.h"
 
-#include "AFNI.h"
+#include "utils/afni.hpp"
 
 /* ----- flags for keeping track of what we've gotten from the header ----- */
 #define AFNI_ALL_REQUIRED 0x0000003f
@@ -46,37 +46,42 @@
 #define ORIGIN_FLAG             0x00000010
 #define BYTEORDER_STRING_FLAG   0x00000020
 
-static float const afni_orientations[][3] = {
-    {-1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0},
-    {0.0, -1.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, -1.0}};
+namespace fs::utils {
 
-void AFinit(AF *pAF) {
-  pAF->dataset_rank[0]       = 0;
-  pAF->dataset_rank[1]       = 0;
-  pAF->dataset_dimensions[0] = 0;
-  pAF->dataset_dimensions[1] = 0;
-  pAF->dataset_dimensions[2] = 0;
-  strcpy(pAF->typestring, "");
-  pAF->scene_data[0]      = 0;
-  pAF->scene_data[1]      = 0;
-  pAF->scene_data[2]      = 0;
-  pAF->orient_specific[0] = 0;
-  pAF->orient_specific[1] = 0;
-  pAF->orient_specific[2] = 0;
-  pAF->origin[0]          = 0.;
-  pAF->origin[1]          = 0.;
-  pAF->origin[2]          = 0.;
-  pAF->delta[0]           = 0.;
-  pAF->delta[1]           = 0.;
-  pAF->delta[2]           = 0.;
-  pAF->numchars           = 0;
-  pAF->idcode_string      = nullptr;
-  pAF->numstats           = 0;
-  pAF->brick_stats        = nullptr;
-  pAF->numtypes           = 0;
-  pAF->brick_types        = nullptr;
-  pAF->numfacs            = 0;
-  pAF->brick_float_facs   = nullptr;
+auto afni_orientations() -> std::vector<std::vector<float>> & {
+  static std::vector<std::vector<float>> afni_orientations = {
+      {-1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0},
+      {0.0, -1.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, -1.0}};
+  return afni_orientations;
+}
+
+void AFinit(AF &pAF) {
+  pAF.dataset_rank[0]       = 0;
+  pAF.dataset_rank[1]       = 0;
+  pAF.dataset_dimensions[0] = 0;
+  pAF.dataset_dimensions[1] = 0;
+  pAF.dataset_dimensions[2] = 0;
+  strcpy(pAF.typestring, "");
+  pAF.scene_data[0]      = 0;
+  pAF.scene_data[1]      = 0;
+  pAF.scene_data[2]      = 0;
+  pAF.orient_specific[0] = 0;
+  pAF.orient_specific[1] = 0;
+  pAF.orient_specific[2] = 0;
+  pAF.origin[0]          = 0.;
+  pAF.origin[1]          = 0.;
+  pAF.origin[2]          = 0.;
+  pAF.delta[0]           = 0.;
+  pAF.delta[1]           = 0.;
+  pAF.delta[2]           = 0.;
+  pAF.numchars           = 0;
+  pAF.idcode_string      = nullptr;
+  pAF.numstats           = 0;
+  pAF.brick_stats        = nullptr;
+  pAF.numtypes           = 0;
+  pAF.brick_types        = nullptr;
+  pAF.numfacs            = 0;
+  pAF.brick_float_facs   = nullptr;
 }
 
 void AFclean(AF *pAF) {
@@ -90,34 +95,35 @@ void AFclean(AF *pAF) {
   pAF->brick_float_facs = nullptr;
 }
 
-void printAFNIHeader(AF *pAF) {
-  char types[][8] = {"byte", "short", "float", "complex"};
+void printAFNIHeader(AF &pAF) {
+  std::vector<std::string> types = {"byte", "short", "float", "complex"};
+  //char types[][8] = {"byte", "short", "float", "complex"};
 
   int i = 0;
   fmt::print(
       "AFNI Header Information ============================================\n");
   fmt::print("DATASET_RANK      : spatial dims {}, sub-bricks {}\n",
-             pAF->dataset_rank[0], pAF->dataset_rank[1]);
-  fmt::print("DATASET_DIMENSIONS: ({}, {}, {})\n", pAF->dataset_dimensions[0],
-             pAF->dataset_dimensions[1], pAF->dataset_dimensions[2]);
-  fmt::print("TYPESTRING        : {}\n", pAF->typestring);
+             pAF.dataset_rank[0], pAF.dataset_rank[1]);
+  fmt::print("DATASET_DIMENSIONS: ({}, {}, {})\n", pAF.dataset_dimensions[0],
+             pAF.dataset_dimensions[1], pAF.dataset_dimensions[2]);
+  fmt::print("TYPESTRING        : {}\n", pAF.typestring);
   fmt::print("SCENE_DATA        : view type {}, func type {}, verify {}\n",
-             pAF->scene_data[0], pAF->scene_data[1], pAF->scene_data[2]);
-  fmt::print("ORIGIN            : ({:f}, {:f}, {:f})\n", pAF->origin[0],
-             pAF->origin[1], pAF->origin[2]);
-  fmt::print("DELTA             : ({:f}, {:f}, {:f})\n", pAF->delta[0],
-             pAF->delta[1], pAF->delta[2]);
-  fmt::print("IDCODE_STRING     : {:s}\n", pAF->idcode_string);
-  fmt::print("BYTEORDER_STRING  : {:s}\n", pAF->byteorder_string);
-  for (i = 0; i < pAF->numstats; i = i + 2) {
-    fmt::print("BRICK_STATS       : min {:f}\t max {:f}\n", pAF->brick_stats[i],
-               pAF->brick_stats[i + 1]);
+             pAF.scene_data[0], pAF.scene_data[1], pAF.scene_data[2]);
+  fmt::print("ORIGIN            : ({:f}, {:f}, {:f})\n", pAF.origin[0],
+             pAF.origin[1], pAF.origin[2]);
+  fmt::print("DELTA             : ({:f}, {:f}, {:f})\n", pAF.delta[0],
+             pAF.delta[1], pAF.delta[2]);
+  fmt::print("IDCODE_STRING     : {:s}\n", pAF.idcode_string);
+  fmt::print("BYTEORDER_STRING  : {:s}\n", pAF.byteorder_string);
+  for (i = 0; i < pAF.numstats; i = i + 2) {
+    fmt::print("BRICK_STATS       : min {:f}\t max {:f}\n", pAF.brick_stats[i],
+               pAF.brick_stats[i + 1]);
   }
-  for (i = 0; i < pAF->numtypes; ++i) {
-    fmt::print("BRICK_TYPES       : {:s}\n", types[pAF->brick_types[i]]);
+  for (i = 0; i < pAF.numtypes; ++i) {
+    fmt::print("BRICK_TYPES       : {:s}\n", types[pAF.brick_types[i]]);
   }
-  for (i = 0; i < pAF->numfacs; ++i) {
-    fmt::print("BRICK_FLOAT_FACS  : {:f}\n", pAF->brick_float_facs[i]);
+  for (i = 0; i < pAF.numfacs; ++i) {
+    fmt::print("BRICK_FLOAT_FACS  : {:f}\n", pAF.brick_float_facs[i]);
   }
   fmt::print(
       "====================================================================\n");
@@ -697,14 +703,14 @@ auto afniRead(const char *fname, int read_volume) -> MRI * {
   }
 
   // initialize AFNI structure
-  AFinit(&af);
+  AFinit(af);
 
   // read header file
   if (readAFNIHeader(fp, &af) == 0) {
     return (nullptr);
   }
 
-  printAFNIHeader(&af);
+  printAFNIHeader(af);
 
   // well, we don't have time
   if (af.numtypes != 1) // should be the same as af.dataset_rank[1] = subbricks
@@ -747,15 +753,15 @@ auto afniRead(const char *fname, int read_volume) -> MRI * {
 
   // direction cosines (use orient_specific)
   // orient_specific : required field
-  header->x_r = afni_orientations[af.orient_specific[0]][0];
-  header->x_a = afni_orientations[af.orient_specific[0]][1];
-  header->x_s = afni_orientations[af.orient_specific[0]][2];
-  header->y_r = afni_orientations[af.orient_specific[1]][0];
-  header->y_a = afni_orientations[af.orient_specific[1]][1];
-  header->y_s = afni_orientations[af.orient_specific[1]][2];
-  header->z_r = afni_orientations[af.orient_specific[2]][0];
-  header->z_a = afni_orientations[af.orient_specific[2]][1];
-  header->z_s = afni_orientations[af.orient_specific[2]][2];
+  header->x_r = afni_orientations()[af.orient_specific[0]][0];
+  header->x_a = afni_orientations()[af.orient_specific[0]][1];
+  header->x_s = afni_orientations()[af.orient_specific[0]][2];
+  header->y_r = afni_orientations()[af.orient_specific[1]][0];
+  header->y_a = afni_orientations()[af.orient_specific[1]][1];
+  header->y_s = afni_orientations()[af.orient_specific[1]][2];
+  header->z_r = afni_orientations()[af.orient_specific[2]][0];
+  header->z_a = afni_orientations()[af.orient_specific[2]][1];
+  header->z_s = afni_orientations()[af.orient_specific[2]][2];
 
   /* --- quick determinant check --- */
   det = +header->x_r * (header->y_a * header->z_s - header->z_a * header->y_s) -
@@ -1080,19 +1086,19 @@ auto afniWrite(MRI *mri, const char *fname) -> int {
   orient_specific[2] = -1;
 
   for (i = 0; i < 6; i++) {
-    if (mri->x_r == afni_orientations[i][0] &&
-        mri->x_a == afni_orientations[i][1] &&
-        mri->x_s == afni_orientations[i][2]) {
+    if (mri->x_r == afni_orientations()[i][0] &&
+        mri->x_a == afni_orientations()[i][1] &&
+        mri->x_s == afni_orientations()[i][2]) {
       orient_specific[0] = i;
     }
-    if (mri->y_r == afni_orientations[i][0] &&
-        mri->y_a == afni_orientations[i][1] &&
-        mri->y_s == afni_orientations[i][2]) {
+    if (mri->y_r == afni_orientations()[i][0] &&
+        mri->y_a == afni_orientations()[i][1] &&
+        mri->y_s == afni_orientations()[i][2]) {
       orient_specific[1] = i;
     }
-    if (mri->z_r == afni_orientations[i][0] &&
-        mri->z_a == afni_orientations[i][1] &&
-        mri->z_s == afni_orientations[i][2]) {
+    if (mri->z_r == afni_orientations()[i][0] &&
+        mri->z_a == afni_orientations()[i][1] &&
+        mri->z_s == afni_orientations()[i][2]) {
       orient_specific[2] = i;
     }
   }
@@ -1249,3 +1255,14 @@ auto afniWrite(MRI *mri, const char *fname) -> int {
   return (0);
 
 } /* end afniWrite() */
+} // namespace fs::utils
+
+// expose to rest of freesurfer
+// TODO(aboualiaa): delete once migration is complete
+auto afniWrite(MRI *mri, const char *fname) -> int {
+  fs::utils::afniWrite(mri, fname);
+}
+
+auto afniRead(const char *fname, int read_volume) -> MRI * {
+  return fs::utils::afniRead(fname, read_volume);
+}
