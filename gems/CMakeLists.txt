@@ -6,7 +6,7 @@ include_directories(interfaces)
 
 # find ITK if we're building independently of freesurfer
 if(NOT ITK_FOUND)
-  find_package(ITK REQUIRED)
+  find_package(ITK REQUIRED HINTS ${ITK_DIR})
 endif()
 include(${ITK_USE_FILE})
 

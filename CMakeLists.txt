@@ -8,9 +8,9 @@ if(FS_BUILD_MATRIX)
   set(CONF_MATRIX
       "coverage;profile;Debug;Release;RelWithDebInfo;MinSizeRel;asan;lsan;ubsan;tsan;cfisan;msan;sssan;thinlto;fulllto"
       )
-  set(COMPILER_MATRIX "clang09;clang10;clang11;clang12")
+  set(COMPILER_MATRIX "clang09;clang10;clang11;clang12;clang13;gcc09;gcc10")
   if(APPLE)
-    list(APPEND COMPILER_MATRIX "appleclang;clang13;gcc09;gcc10")
+    list(APPEND COMPILER_MATRIX "appleclang")
     set(FS_LLVM_PREFIX "/Users/aboualiaa/Desktop/.temp/install")
     set(FS_MATRIX_CACHE "${CMAKE_SOURCE_DIR}/cmake/caches/clion_cache.cmake")
     set(CMAKE_YARD_PREFIX "/Users/aboualiaa/Desktop/.temp/scratch/cmake-build-yard")
@@ -23,20 +23,48 @@ if(FS_BUILD_MATRIX)
   foreach(Z_COMPILER IN LISTS COMPILER_MATRIX)
     foreach(TYPE IN LISTS CONF_MATRIX)
 
-      if(Z_COMPILER STREQUAL "clang09")
+      if(Z_COMPILER STREQUAL "clang09" AND APPLE)
         set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-09/bin")
-      elseif(Z_COMPILER STREQUAL "clang10")
+      elseif(Z_COMPILER STREQUAL "clang09")
+        set(COMPILER_PROXY_OPTION "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-9")
+        set(COMPILER_C_PROXY_OPTION "-DCMAKE_C_COMPILER=/usr/bin/clang-9")
+
+      elseif(Z_COMPILER STREQUAL "clang10" AND APPLE)
         set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-10/bin")
-      elseif(Z_COMPILER STREQUAL "clang11")
+      elseif(Z_COMPILER STREQUAL "clang10")
+        set(COMPILER_PROXY_OPTION "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-10")
+        set(COMPILER_C_PROXY_OPTION "-DCMAKE_C_COMPILER=/usr/bin/clang-10")
+
+      elseif(Z_COMPILER STREQUAL "clang11" AND APPLE)
         set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-11/bin")
-      elseif(Z_COMPILER STREQUAL "clang12")
+      elseif(Z_COMPILER STREQUAL "clang11")
+        set(COMPILER_PROXY_OPTION "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-11")
+        set(COMPILER_C_PROXY_OPTION "-DCMAKE_C_COMPILER=/usr/bin/clang-11")
+
+      elseif(Z_COMPILER STREQUAL "clang12" AND APPLE)
         set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-12/bin")
-      elseif(Z_COMPILER STREQUAL "clang13")
+      elseif(Z_COMPILER STREQUAL "clang12" AND APPLE)
+        set(COMPILER_PROXY_OPTION "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-12")
+        set(COMPILER_C_PROXY_OPTION "-DCMAKE_C_COMPILER=/usr/bin/clang-12")
+
+      elseif(Z_COMPILER STREQUAL "clang13" AND APPLE)
         set(COMPILER_PROXY_OPTION "-DFS_USE_LLVM=${FS_LLVM_PREFIX}/llvm-13/bin")
-      elseif(Z_COMPILER STREQUAL "gcc10")
+      elseif(Z_COMPILER STREQUAL "clang13")
+        set(COMPILER_PROXY_OPTION "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-13")
+        set(COMPILER_C_PROXY_OPTION "-DCMAKE_C_COMPILER=/usr/bin/clang-13")
+
+      elseif(Z_COMPILER STREQUAL "gcc10" AND APPLE)
         set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc/10.2.0_4")
-      elseif(Z_COMPILER STREQUAL "gcc09")
+      elseif(Z_COMPILER STREQUAL "gcc10")
+        set(COMPILER_PROXY_OPTION "-DCMAKE_CXX_COMPILER=/usr/bin/g++-10")
+        set(COMPILER_C_PROXY_OPTION "-DCMAKE_C_COMPILER=/usr/bin/gcc-10")
+
+      elseif(Z_COMPILER STREQUAL "gcc09" AND APPLE)
         set(COMPILER_PROXY_OPTION "-DFS_USE_GCC=/usr/local/Cellar/gcc@9/9.3.0_1")
+      elseif(Z_COMPILER STREQUAL "gcc09")
+        set(COMPILER_PROXY_OPTION "-DCMAKE_CXX_COMPILER=/usr/bin/g++-9")
+        set(COMPILER_C_PROXY_OPTION "-DCMAKE_C_COMPILER=/usr/bin/gcc-9")
+
       elseif(Z_COMPILER STREQUAL "appleclang")
         set(COMPILER_PROXY_OPTION "")
       endif()
@@ -87,7 +115,7 @@ if(FS_BUILD_MATRIX)
                         )
 
       add_custom_target(cmake-${Z_COMPILER}-${TYPE} ALL
-                        COMMAND bash -c \" ${CMAKE_COMMAND} --log-level=NOTICE -Wno-dev ${COMPILER_PROXY_OPTION}
+                        COMMAND bash -c \" ${CMAKE_COMMAND} -Wno-dev ${COMPILER_PROXY_OPTION} ${COMPILER_C_PROXY_OPTION}
                                 -DCMAKE_BUILD_TYPE=${TYPE} -C ${FS_MATRIX_CACHE} -G Ninja -S ${CMAKE_SOURCE_DIR} -B
                                 ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}
                                 \"
@@ -226,7 +254,7 @@ if(DEFINED FS_USE_GCC AND NOT FS_USE_GCC STREQUAL "")
   #    set(VTK_DIR "/Users/aboualiaa/Downloads/packages/vtk/5.10.1")
   #    add_definitions(-DFS_ITK_LEGACY_REMOVE)
 endif()
-if(DEFINED FS_USE_LLVM AND NOT FS_USE_LLVM STREQUAL "")
+if(DEFINED FS_USE_LLVM AND NOT FS_USE_LLVM STREQUAL "" AND APPLE)
   unset(CMAKE_C_COMPILER CACHE)
   unset(CMAKE_CXX_COMPILER CACHE)
   unset(CMAKE_AR CACHE)
@@ -250,7 +278,7 @@ if(POLICY CMP0048) # The project() command manages VERSION variables.
 endif()
 
 if(NOT DEFINED FS_VERSION_MAJOR)
-  set(FS_VERSION_MAJOR 9)
+   set(FS_VERSION_MAJOR 9)
 endif()
 if(NOT DEFINED FS_VERSION_MINOR)
   set(FS_VERSION_MINOR 0)
@@ -508,7 +536,7 @@ set(Boost_USE_MULTITHREADED TRUE)
 find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log atomic)
 
 # -------- itk --------
-find_package(ITK HINTS ${ITK_DIR})
+find_package(ITK HINTS ${ITK_DIR} REQUIRED)
 mark_as_advanced(ITK_DIR)
 
 if(APPLE)
@@ -636,10 +664,15 @@ set(BENCHMARK_ENABLE_TESTING
     CACHE BOOL "Suppressing benchmark's tests" FORCE
     )
 
-#find_package(expat REQUIRED)
-#find_package(tiff REQUIRED)
 if(APPLE)
+  find_package(expat REQUIRED)
   find_package(libxml2 REQUIRED)
+endif()
+#find_package(tiff REQUIRED)
+if(UNIX AND NOT APPLE)
+  set(EXPAT_LIBRARIES "/usr/lib/x86_64-linux-gnu/libexpat.so")
+  set(LibXml2_DIR "/usr/lib/x86_64-linux-gnu")
+  find_package(LibXml2 REQUIRED)
 endif()
 find_package(fmt REQUIRED HINTS "/usr/local/opt/fmt")
 find_package(spdlog REQUIRED HINTS "/usr/local/opt/spdlog")
@@ -777,7 +810,7 @@ set(FS_INCLUDE_DIRS
     )
 
 if(NOT APPLE)
-  set(FS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/packages/xml2/)
+  set(FS_INCLUDE_DIRS ${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/xml2/)
 endif()
 # build the freesurfer static libraries
 add_subdirectory(utils)

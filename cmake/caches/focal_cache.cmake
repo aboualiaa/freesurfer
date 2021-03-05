@@ -26,12 +26,12 @@ set(FS_PACKAGES_DIR
     )
 
 set(VTK_DIR
-    "${FS_PACKAGES_DIR}/vtk/5.10.1"
+    "${FS_PACKAGES_DIR}/vtk"
     CACHE PATH "" FORCE
     )
 
 set(ITK_DIR
-    "${FS_PACKAGES_DIR}/itk/4.13.0"
+    "${FS_PACKAGES_DIR}/itk"
     CACHE PATH "" FORCE
     )
 

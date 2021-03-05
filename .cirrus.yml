@@ -1,0 +1,4 @@
+docker_builder:
+  cpu: 8
+  memory: 24G
+  build_script: git submodule init && git submodule update && docker build --tag freesurfer:latest -f repo.dockerfile .

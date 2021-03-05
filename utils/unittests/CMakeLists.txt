@@ -8,8 +8,8 @@ foreach(filename ${files})
 
   add_executable(${name} ${stripped_filename})
   add_dependencies(utils_unittests ${name})
-  target_include_directories(${name} PUBLIC ${gtest_SOURCE_DIR}/include)
-  target_link_libraries(${name} utils gtest)
+  target_include_directories(${name} PUBLIC ${gtest_SOURCE_DIR}/include ${FS_INCLUDE_DIRS})
+  target_link_libraries(${name} utils gtest xml2)
 
   add_test(${name} ${name})
   set_property(TEST ${name} PROPERTY LABELS Unit)

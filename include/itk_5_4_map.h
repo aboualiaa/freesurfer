@@ -1,4 +1,3 @@
-
 #ifndef FS_ITK_LEGACY_REMOVE
 #include "itkPlatformMultiThreader.h"
 #define ITK_THREAD_RETURN_TYPE          itk::ITK_THREAD_RETURN_TYPE
