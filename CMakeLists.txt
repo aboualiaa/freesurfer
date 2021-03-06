@@ -115,8 +115,9 @@ if(FS_BUILD_MATRIX)
                         )
 
       add_custom_target(cmake-${Z_COMPILER}-${TYPE} ALL
-                        COMMAND bash -c \" ${CMAKE_COMMAND} -Wno-dev ${COMPILER_PROXY_OPTION} ${COMPILER_C_PROXY_OPTION}
-                                -DCMAKE_BUILD_TYPE=${TYPE} -C ${FS_MATRIX_CACHE} -G Ninja -S ${CMAKE_SOURCE_DIR} -B
+                        COMMAND bash -c \" ${CMAKE_COMMAND} -Wno-dev ${COMPILER_PROXY_OPTION}
+                                ${COMPILER_C_PROXY_OPTION} -DCMAKE_BUILD_TYPE=${TYPE} -C ${FS_MATRIX_CACHE} -G Ninja -S
+                                ${CMAKE_SOURCE_DIR} -B
                                 ${CMAKE_YARD_PREFIX}/freesurfer-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}-${FOLDER_NAME}-${Z_COMPILER}
                                 \"
                         )
@@ -224,7 +225,7 @@ if(FS_BUILD_MATRIX)
       add_dependencies(clean-${Z_COMPILER} clean-${Z_COMPILER}-${TYPE})
       add_dependencies(clean-${TYPE} clean-${Z_COMPILER}-${TYPE})
       add_dependencies(clean-all clean-${Z_COMPILER}-${TYPE})
-   endforeach()
+    endforeach()
   endforeach()
   return()
 endif()
@@ -252,7 +253,10 @@ if(DEFINED FS_USE_GCC AND NOT FS_USE_GCC STREQUAL "")
   #    set(VTK_DIR "/Users/aboualiaa/Downloads/packages/vtk/5.10.1")
   #    add_definitions(-DFS_ITK_LEGACY_REMOVE)
 endif()
-if(DEFINED FS_USE_LLVM AND NOT FS_USE_LLVM STREQUAL "" AND APPLE)
+if(DEFINED FS_USE_LLVM
+   AND NOT FS_USE_LLVM STREQUAL ""
+   AND APPLE
+   )
   unset(CMAKE_C_COMPILER CACHE)
   unset(CMAKE_CXX_COMPILER CACHE)
   unset(CMAKE_AR CACHE)
@@ -276,7 +280,7 @@ if(POLICY CMP0048) # The project() command manages VERSION variables.
 endif()
 
 if(NOT DEFINED FS_VERSION_MAJOR)
-   set(FS_VERSION_MAJOR 9)
+  set(FS_VERSION_MAJOR 9)
 endif()
 if(NOT DEFINED FS_VERSION_MINOR)
   set(FS_VERSION_MINOR 0)

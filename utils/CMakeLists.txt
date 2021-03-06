@@ -4,19 +4,21 @@ project(utils)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 configure_file(version_info.h.in version_info.h)
 
-set(COMMON_LIBS ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/packages/jpeg
-        ${CMAKE_SOURCE_DIR}/packages/minc
-        ${CMAKE_SOURCE_DIR}/packages/netcdf
-        ${CMAKE_SOURCE_DIR}/packages/nrrdio
-        ${CMAKE_SOURCE_DIR}/packages/dicom
-        ${CMAKE_SOURCE_DIR}/packages/cephes
-        ${CMAKE_SOURCE_DIR}/packages/nifti
-        ${CMAKE_SOURCE_DIR}/packages/gifti
-        ${FS_INCLUDE_DIRS}
-        SYSTEM
-        ${ITK_INCLUDE_DIRS})
+set(COMMON_LIBS
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/packages/jpeg
+    ${CMAKE_SOURCE_DIR}/packages/minc
+    ${CMAKE_SOURCE_DIR}/packages/netcdf
+    ${CMAKE_SOURCE_DIR}/packages/nrrdio
+    ${CMAKE_SOURCE_DIR}/packages/dicom
+    ${CMAKE_SOURCE_DIR}/packages/cephes
+    ${CMAKE_SOURCE_DIR}/packages/nifti
+    ${CMAKE_SOURCE_DIR}/packages/gifti
+    ${FS_INCLUDE_DIRS}
+    SYSTEM
+    ${ITK_INCLUDE_DIRS}
+    )
 
 set(INCOMPATIBLE_BUILD_TYPES "cfisan;fulllto;thinlto;asan")
 if(CMAKE_BUILD_TYPE IN_LIST INCOMPATIBLE_BUILD_TYPES)

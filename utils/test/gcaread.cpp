@@ -18,12 +18,10 @@
 
 #include <iostream>
 
-extern "C" {
 #include "gca.h"
 #include "mri.h"
 
-char *Progname = "gcaread";
-}
+const char *Progname = "gcaread";
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {

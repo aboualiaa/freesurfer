@@ -21,12 +21,12 @@
 #include <sstream>
 #include <stdexcept>
 
-extern "C" {
 #include "NrrdIO.h"
 #include "mri.h"
-}
 
 const char *Progname = NULL;
+
+using namespace std;
 
 #define Assert(x, s)                                                           \
   if (!(x)) {                                                                  \

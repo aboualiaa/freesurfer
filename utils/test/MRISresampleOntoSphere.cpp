@@ -17,9 +17,8 @@
  *
  */
 
-#include "ANN.h"
+#include "ANN/ANN.h"
 
-extern "C" {
 #include "cma.h"
 #include "const.h"
 #include "diag.h"
@@ -40,7 +39,6 @@ extern "C" {
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-}
 
 #define VERTEX_EDGE(vec, v0, v1)                                               \
   VECTOR_LOAD(vec, v1->x - v0->x, v1->y - v0->y, v1->z - v0->z)
@@ -152,7 +150,7 @@ int main(int argc, char *argv[]) {
 
     mris_out = ReadIcoByOrder(order, 100);
     for (i = 0; i < mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize = 1;
+      mris_out->vertices_topology[i].nsizeCur = 1;
     sample_origcurvature(mris_in, mris_out);
     MRISwriteCurvature(mris_out, argv[4]);
     fprintf(stdout, "Writing sampled curvature of original surface to %s\n",
@@ -274,11 +272,12 @@ static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
 
 static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
                                         MRI_SURFACE *mris_dst) {
-  int           index, fno, fnum = 0, i;
-  VERTEX *      vertex;
-  double        nearest, dist, r, s, t;
-  double        a, b, c, p;
-  ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
+  int              index, fno, fnum = 0, i;
+  VERTEX *         vertex;
+  VERTEX_TOPOLOGY *vertex_top;
+  double           nearest, dist, r, s, t;
+  double           a, b, c, p;
+  ANNpointArray    pa = annAllocPts(mris_src->nvertices, 3);
 
   for (index = 0; index < mris_src->nvertices; index++) {
     pa[index][0] = mris_src->vertices[index].x;
@@ -315,8 +314,8 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
 #if 1
     vertex  = &mris_src->vertices[annIndex[0]];
     nearest = 100000;
-    for (i = 0; i < vertex->num; i++) {
-      fno  = vertex->f[i];
+    for (i = 0; i < vertex_top->num; i++) {
+      fno  = vertex_top->f[i];
       dist = v_to_f_distance(&mris_dst->vertices[index], mris_src, fno, 0);
       if (dist < nearest) {
         nearest = dist;
@@ -445,11 +444,12 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
 
 static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
                                          MRI_SURFACE *mris_dst) {
-  int           index, fno, fnum = 0, i;
-  VERTEX *      vertex;
-  double        nearest, dist, r, s, t;
-  double        a, b, c, p;
-  ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
+  int              index, fno, fnum = 0, i;
+  VERTEX *         vertex;
+  VERTEX_TOPOLOGY *vertex_top;
+  double           nearest, dist, r, s, t;
+  double           a, b, c, p;
+  ANNpointArray    pa = annAllocPts(mris_src->nvertices, 3);
 
   for (index = 0; index < mris_src->nvertices; index++) {
     pa[index][0] = mris_src->vertices[index].x;
@@ -486,8 +486,8 @@ static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
 #if 1
     vertex  = &mris_src->vertices[annIndex[0]];
     nearest = 100000;
-    for (i = 0; i < vertex->num; i++) {
-      fno  = vertex->f[i];
+    for (i = 0; i < vertex_top->num; i++) {
+      fno  = vertex_top->f[i];
       dist = v_to_f_distance(&mris_dst->vertices[index], mris_src, fno, 0);
       if (dist < nearest) {
         nearest = dist;

@@ -20,13 +20,12 @@
 #include <iomanip>
 #include <iostream>
 
-extern "C" {
 #include "matrix.h"
 #include "mri.h"
+#include "mrisurf.h"
 #include "transform.h"
 
 const char *Progname = "surf2surf";
-}
 
 #define V4_LOAD(v, x, y, z, r)                                                 \
   (VECTOR_ELT(v, 1) = x, VECTOR_ELT(v, 2) = y, VECTOR_ELT(v, 3) = z,           \
@@ -56,7 +55,7 @@ int main(int argc, char *argv[]) {
   MRIS *mrisDst = MRISclone(mris);
   // build src volume
   MRI *src = MRIallocHeader(mris->vg.width, mris->vg.height, mris->vg.depth,
-                            MRI_VOLUME_TYPE_UNKNOWN);
+                            MRI_VOLUME_TYPE_UNKNOWN, 1);
   useVolGeomToMRI(&mris->vg, src);
 
   std::cout << "Reading dstvol  from " << argv[2] << std::endl;

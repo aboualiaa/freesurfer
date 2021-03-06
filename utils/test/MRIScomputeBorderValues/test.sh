@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../../../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 for threads in 1 8; do
   export OMP_NUM_THREADS=$threads

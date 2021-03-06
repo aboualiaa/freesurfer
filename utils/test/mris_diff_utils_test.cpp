@@ -20,11 +20,10 @@
  * atlas. That is, to separate true thickness difference from noise caused
  * by sphere-morphing.
  */
-#include "ANN.h"
+#include "ANN/ANN.h"
 #include <fstream>
 #include <iostream>
 
-extern "C" {
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -43,7 +42,6 @@ extern "C" {
 #include "mrisurf.h"
 #include "proto.h"
 #include "version.h"
-}
 
 #define MAX_DATA_NUMBERS 200
 #define DEBUG            0
@@ -127,9 +125,9 @@ MRI *        mri_dst     = 0;
 static int   invert      = 0;
 static char *xform_fname = NULL;
 
-static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
-double     v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
-                           int debug, double *sopt, double *topt);
+//static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
+double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
+                       int debug, double *sopt, double *topt);
 
 int main(int argc, char *argv[]) {
   char **av, *surf1_name, *surf2_name;
@@ -148,7 +146,7 @@ int main(int argc, char *argv[]) {
   FACE *       face;
   VERTEX *     vertex, *vertex2;
   double       cx, cy, cz;
-  Real         vx, vy, vz;
+  double       vx, vy, vz;
 
   MRI *mri_distance = NULL;
   MRI *mri_tmp      = NULL;
@@ -156,8 +154,8 @@ int main(int argc, char *argv[]) {
   MRI *mri_map      = NULL;
   int  fno, vno0, vno1, vno2;
 
-  LTA *lta = 0;
-  int  transform_type;
+  LTA *      lta       = 0;
+  TRANSFORM *transform = 0;
 
   label      = 0;
   annotation = 0;
@@ -261,7 +259,7 @@ int main(int argc, char *argv[]) {
 
   if (nSmoothSteps > 0) {
     printf("Smooth input data 2 by %d steps\n", nSmoothSteps);
-    MRISsmoothMRI(Surf2, SrcVal2, nSmoothSteps, SrcVal2);
+    MRISsmoothMRI(Surf2, SrcVal2, nSmoothSteps, SrcVal2, NULL);
   }
 
   /* added for allowing using faces; maybe unnecessary */
@@ -304,18 +302,21 @@ int main(int argc, char *argv[]) {
     printf("Apply the given LTA xfrom to align input surface 1 to surface 2 \n "
            "...");
     // read transform
-    transform_type = TransformFileNameType(xform_fname);
 
-    if (transform_type == MNI_TRANSFORM_TYPE ||
-        transform_type == TRANSFORM_ARRAY_TYPE ||
-        transform_type == REGISTER_DAT || transform_type == FSLREG_TYPE) {
+    transform = TransformRead(xform_fname);
+    if (!transform)
+      ErrorExit(ERROR_NOFILE, "%s: could not read transform file %s", Progname,
+                xform_fname);
+    if (transform->type == MNI_TRANSFORM_TYPE ||
+        transform->type == TRANSFORM_ARRAY_TYPE ||
+        transform->type == REGISTER_DAT || transform->type == FSLREG_TYPE) {
       printf("Reading transform ...\n");
-      lta = LTAreadEx(xform_fname);
+      lta = (LTA *)(transform->xform);
       if (!lta)
         ErrorExit(ERROR_NOFILE, "%s: could not read transform file %s",
                   Progname, xform_fname);
 
-      if (transform_type == FSLREG_TYPE) {
+      if (transform->type == FSLREG_TYPE) {
         if (mri == 0 || mri_dst == 0) {
           fprintf(stderr, "ERROR: fslmat does not have information on the src "
                           "and dst volumes\n");
@@ -383,7 +384,7 @@ int main(int argc, char *argv[]) {
 
     /* save the original cooridnates into orig */
     MRISsaveVertexPositions(Surf1, ORIGINAL_VERTICES);
-    MRIStransform(Surf1, mri, lta, mri_dst);
+    MRIStransform(Surf1, mri, transform, mri_dst);
 
     if (mri)
       MRIfree(&mri);
@@ -463,7 +464,7 @@ int main(int argc, char *argv[]) {
     MRISreadAnnotation(Surf1, annotation_fname);
     printf("mask out vertices not have annotation %d\n", annotation);
     // CTABindexToAnnotation(Surf1->ct, annotation_index, &annotation);
-    annotation = CTABnameToAnnotation(Surf1->ct, annotation_name);
+    annotation = CTABentryNameToAnnotation(annotation_name, Surf1->ct);
     for (index = 0; index < Surf1->nvertices; index++) {
       vertex = &Surf1->vertices[index];
       if (vertex->annotation != annotation)
@@ -1040,10 +1041,10 @@ MRI *ComputeDifferenceNew(MRI_SURFACE *Mesh1, MRI *mri_data1,
      * interpolation */
     distance    = 1e30;
     closestface = 0;
-    for (k = 0; k < Mesh2->vertices[annIndex[0]].num; k++) {
+    for (k = 0; k < Mesh2->vertices_topology[annIndex[0]].num; k++) {
 
-      facenumber =
-          Mesh2->vertices[annIndex[0]].f[k]; /* index of the k-th face */
+      facenumber = Mesh2->vertices_topology[annIndex[0]]
+                       .f[k]; /* index of the k-th face */
       if (facenumber < 0 || facenumber >= Mesh2->nfaces)
         continue;
       value = v_to_f_distance(vertex, Mesh2, facenumber, 0, &tmps, &tmpt);
@@ -1773,26 +1774,26 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot)
           Search the face for vno and set the v->n[] field
           appropriately.
 ------------------------------------------------------*/
-static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
-  VERTEX *v;
-  FACE *  f;
-  int     n, i;
-
-  v = &mris->vertices[vno];
-  f = &mris->faces[fno];
-
-  for (n = 0; n < VERTICES_PER_FACE; n++) {
-    if (f->v[n] == vno)
-      break;
-  }
-  if (n >= VERTICES_PER_FACE)
-    return (ERROR_BADPARM);
-
-  for (i = 0; i < v->num; i++)
-    if (v->f[i] == fno)
-      v->n[i] = n;
-
-  return (n);
-}
+//static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
+//  VERTEX *v;
+//  FACE *  f;
+//  int     n, i;
+//
+//  v = &mris->vertices[vno];
+//  f = &mris->faces[fno];
+//
+//  for (n = 0; n < VERTICES_PER_FACE; n++) {
+//    if (f->v[n] == vno)
+//      break;
+//  }
+//  if (n >= VERTICES_PER_FACE)
+//    return (ERROR_BADPARM);
+//
+//  for (i = 0; i < v->num; i++)
+//    if (v->f[i] == fno)
+//      v->n[i] = n;
+//
+//  return (n);
+//}
 
 #undef ROTATE

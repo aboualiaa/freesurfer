@@ -12,14 +12,6 @@
  *
  */
 
-//
-// afni.c
-//
-// Warning: Do not edit the following four lines.  CVS maintains them.
-//
-// moved out from mriio.c
-//
-
 #include <cctype>
 #include <cerrno>
 #include <cmath>

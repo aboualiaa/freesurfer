@@ -24,14 +24,14 @@
 #endif
 #include <string>
 
-extern "C" {
 #include "error.h"
 #include "gcamorph.h"
 #include "mri.h"
 #include "transform.h"
 #include "utils.h"
 const char *Progname = "testm3d";
-}
+
+using namespace std;
 
 int main(int argc, char *argv[]) {
   std::cout << "m3d file: ";

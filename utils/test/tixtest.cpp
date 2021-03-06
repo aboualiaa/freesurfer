@@ -20,7 +20,7 @@
 #include <stdlib.h>
 
 #include <tcl.h>
-#include <tix.h>
+//#include <tix.h>
 #include <tk.h>
 
 extern int Tix_Init(Tcl_Interp *interp);

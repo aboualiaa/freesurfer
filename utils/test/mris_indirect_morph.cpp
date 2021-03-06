@@ -20,11 +20,10 @@
  *
  */
 
-#include "ANN.h"
+#include "ANN/ANN.h"
 #include <fstream>
 #include <iostream>
 
-extern "C" {
 #include "diag.h"
 #include "error.h"
 #include "fmarching3dnband.h"
@@ -42,7 +41,6 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-}
 
 #define MAX_DATA_NUMBERS 200
 #define DEBUG            0
@@ -89,14 +87,14 @@ int register_flag = 0;
 
 const char *Progname;
 
-double     transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
-                      double shift[3]);
-void       FindClosest(MRI_SURFACE *TrueMesh, ANNkd_tree *annkdTree,
-                       MRI_SURFACE *EstMesh, double3d *closest);
-double     v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
-                           int debug, double *sopt, double *topt);
-void       register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2);
-static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
+double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
+                  double shift[3]);
+void   FindClosest(MRI_SURFACE *TrueMesh, ANNkd_tree *annkdTree,
+                   MRI_SURFACE *EstMesh, double3d *closest);
+double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
+                       int debug, double *sopt, double *topt);
+void   register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2);
+//static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
 
 /* the following two are used when applying a lta transform to the surface */
 MRI *mri     = 0;
@@ -295,7 +293,8 @@ int main(int argc, char *argv[]) {
       copyVolGeom(&vgtmp, &lt->src);
     }
 
-    MRIStransform(mris, mri, lta, mri_dst);
+    // TODO: uncomment
+    //    MRIStransform(mris, mri, lta, mri_dst);
 
     if (mri)
       MRIfree(&mri);
@@ -667,9 +666,9 @@ void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
     /* Now need to find the closest face in order to perform linear
      * interpolation */
     distance = 1000.0;
-    for (k = 0; k < mris_template->vertices[annIndex[0]].num; k++) {
+    for (k = 0; k < mris_template->vertices_topology[annIndex[0]].num; k++) {
 
-      facenumber = mris_template->vertices[annIndex[0]]
+      facenumber = mris_template->vertices_topology[annIndex[0]]
                        .f[k]; /* index of the k-th face */
       if (facenumber < 0 || facenumber >= mris_template->nfaces)
         continue;
@@ -1303,26 +1302,26 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot)
           Search the face for vno and set the v->n[] field
           appropriately.
 ------------------------------------------------------*/
-static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
-  VERTEX *v;
-  FACE *  f;
-  int     n, i;
-
-  v = &mris->vertices[vno];
-  f = &mris->faces[fno];
-
-  for (n = 0; n < VERTICES_PER_FACE; n++) {
-    if (f->v[n] == vno)
-      break;
-  }
-  if (n >= VERTICES_PER_FACE)
-    return (ERROR_BADPARM);
-
-  for (i = 0; i < v->num; i++)
-    if (v->f[i] == fno)
-      v->n[i] = n;
-
-  return (n);
-}
+//static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
+//  VERTEX *v;
+//  FACE *  f;
+//  int     n, i;
+//
+//  v = &mris->vertices[vno];
+//  f = &mris->faces[fno];
+//
+//  for (n = 0; n < VERTICES_PER_FACE; n++) {
+//    if (f->v[n] == vno)
+//      break;
+//  }
+//  if (n >= VERTICES_PER_FACE)
+//    return (ERROR_BADPARM);
+//
+//  for (i = 0; i < v->num; i++)
+//    if (v->f[i] == fno)
+//      v->n[i] = n;
+//
+//  return (n);
+//}
 
 #undef ROTATE

@@ -19,14 +19,12 @@
 
 #include <fstream>
 #include <iostream>
-#include <mcheck.h>
 
-extern "C" {
 #include "label.h"
+#include "mcheck.h"
 #include "transform.h"
 #include "vlabels.h"
 const char *Progname = "vltest";
-}
 
 int main(int, char **) {
   VLI *         pVli = 0;

@@ -25,16 +25,8 @@
 #include <stdlib.h>
 #include <string>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <matrix.h>
 #include <mri.h>
-
-#ifdef __cplusplus
-}
-#endif
 
 // libutils needs Progname defined
 const char *Progname = "i2rtest";

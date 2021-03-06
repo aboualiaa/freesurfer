@@ -23,11 +23,11 @@
 #endif
 #include <string>
 
-extern "C" {
 #include "mri.h"
 
-char *Progname = "difftool";
-}
+const char *Progname = "difftool";
+
+using namespace std;
 
 int main(int argc, char *argv[]) {
   std::string f1;

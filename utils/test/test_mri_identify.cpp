@@ -21,12 +21,12 @@
 #include <sstream>
 #include <stdexcept>
 
-extern "C" {
 #include "mri.h"
 #include "mri_identify.h"
-}
 
 const char *Progname = NULL;
+
+using namespace std;
 
 #define Assert(x, s)                                                           \
   if (!(x)) {                                                                  \

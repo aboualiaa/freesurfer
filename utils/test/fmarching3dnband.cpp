@@ -376,8 +376,9 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
           MRIsetVoxVal(T, newj, newi, newd, 0, newvalue);
           //   printf("(x,y,z)=(%d,%d,%d)\n", newj, newi, newd);
           // printf("%p\n", &MRIIvox(BackPointer, newj, newi, newd));
-          xhInsert(newvalue, newj, newi, newd,
-                   &MRIIvox(BackPointer, newj, newi, newd), H);
+          // TODO: unncomment
+          //          xhInsert(newvalue, newj, newi, newd,
+          //                   &MRIIvox(BackPointer, newj, newi, newd), H);
         }
       }
     }
@@ -396,9 +397,10 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
                     NarrowBand points as ALIVE */
 
     /* Put the smallest heap element to ALIVE */
-    d = he.z;
-    i = he.y;
-    j = he.x;
+    // TODO: uncomment
+    //d = he.z;
+    //i = he.y;
+    //j = he.x;
 
     if (he.value > Thred)
       break;
@@ -484,9 +486,9 @@ void fmarching3d(MRI *Ori, MRI *T, float Thred) {
       if (MRIseq_vox(label, newj, newi, newd, 0) == (unsigned char)NBAND)
         xhChangeValue(MRIIvox(BackPointer, newj, newi, newd), newvalue, H);
       else {
-
-        xhInsert(newvalue, newj, newi, newd,
-                 &(MRIIvox(BackPointer, newj, newi, newd)), H);
+        // TODO: uncomment
+        //        xhInsert(newvalue, newj, newi, newd,
+        //                 &(MRIIvox(BackPointer, newj, newi, newd)), H);
         MRIvox(label, newj, newi, newd) = (unsigned char)NBAND;
       }
     } /* End of updating 6 neighbours */

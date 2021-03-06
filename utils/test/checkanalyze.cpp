@@ -25,13 +25,11 @@
 #endif
 #include <string>
 
-extern "C" {
 #include "affine.h"
 #include "matrix.h"
 #include "mri.h"
 
 const char *Progname = "checkanalyze";
-}
 
 #define V4_LOAD(v, x, y, z, r)                                                 \
   (VECTOR_ELT(v, 1) = x, VECTOR_ELT(v, 2) = y, VECTOR_ELT(v, 3) = z,           \

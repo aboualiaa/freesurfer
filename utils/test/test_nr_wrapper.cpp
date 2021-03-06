@@ -17,8 +17,8 @@
  *
  */
 
+#include <cmath>
 #include <iostream>
-#include <math.h>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -31,11 +31,9 @@
 
 #include "numerics.h"
 
-extern "C" {
 #include "error.h"
 #include "matrix.h"
 #include "stdlib.h"
-}
 
 const char *Progname = "test_nr_wrapper";
 

@@ -20,7 +20,7 @@
 #ifndef FMARCHING3D
 #define FMARCHING3D
 
-#include "heap_vol.h"
+#include "heap_mesh.h"
 #include "mri.h"
 #include <math.h>
 #define ALIVE 1

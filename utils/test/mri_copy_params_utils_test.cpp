@@ -27,10 +27,8 @@
 #endif
 #include <string>
 
-extern "C" {
 #include "mri.h"
-char *Progname = "mri_copy_params";
-}
+const char *Progname = "mri_copy_params";
 
 int main(int argc, char *argv[]) {
   if (argc < 3) {

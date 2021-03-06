@@ -27,10 +27,9 @@
 #include <sstream>
 #include <string>
 
-extern "C" {
 #include <mrisurf.h>
 const char *Progname = "icotest";
-}
+using namespace std;
 
 int main() {
   MRIS *      mris;

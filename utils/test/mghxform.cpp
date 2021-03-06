@@ -20,13 +20,11 @@
 
 #include <iostream>
 
-extern "C" {
 #include "matrix.h"
 #include "mri.h"
 #include "tags.h"
 
 const char *Progname = "mghxform";
-}
 
 void printLinearTransform(MRI *mri) {
   MATRIX *mat = MatrixAlloc(4, 4, MATRIX_REAL);

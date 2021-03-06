@@ -14,11 +14,10 @@
 
 /* Given a white and pial surface, compute the thickness are every point
  */
-#include "ANN.h"
+#include "ANN/ANN.h"
 #include <fstream>
 #include <iostream>
 
-extern "C" {
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -35,7 +34,6 @@ extern "C" {
 #include "mrisurf.h"
 #include "proto.h"
 #include "version.h"
-}
 
 #define MAX_DATA_NUMBERS 200
 #define DEBUG            0
@@ -58,7 +56,7 @@ static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
-static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
+//static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
 
 double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
                        int debug);
@@ -406,9 +404,9 @@ MRI *ComputeThickness(MRI_SURFACE *Mesh1, MRI_SURFACE *Mesh2, MRI *mri_res) {
       distance = sqrt(distance);
     } else { /* compute vertex-to-face distance */
       distance = 1000.0;
-      for (k = 0; k < Mesh2->vertices[annIndex[0]].num; k++) {
-        facenumber =
-            Mesh2->vertices[annIndex[0]].f[k]; /* index of the k-th face */
+      for (k = 0; k < Mesh2->vertices_topology[annIndex[0]].num; k++) {
+        facenumber = Mesh2->vertices_topology[annIndex[0]]
+                         .f[k]; /* index of the k-th face */
         if (facenumber < 0 || facenumber >= Mesh2->nfaces)
           continue;
         value = v_to_f_distance(&vertex, Mesh2, facenumber, 0);
@@ -585,24 +583,24 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
           Search the face for vno and set the v->n[] field
           appropriately.
 ------------------------------------------------------*/
-static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
-  VERTEX *v;
-  FACE *  f;
-  int     n, i;
-
-  v = &mris->vertices[vno];
-  f = &mris->faces[fno];
-
-  for (n = 0; n < VERTICES_PER_FACE; n++) {
-    if (f->v[n] == vno)
-      break;
-  }
-  if (n >= VERTICES_PER_FACE)
-    return (ERROR_BADPARM);
-
-  for (i = 0; i < v->num; i++)
-    if (v->f[i] == fno)
-      v->n[i] = n;
-
-  return (n);
-}
+//int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
+//  VERTEX *v;
+//  FACE *  f;
+//  int     n, i;
+//
+//  v = &mris->vertices[vno];
+//  f = &mris->faces[fno];
+//
+//  for (n = 0; n < VERTICES_PER_FACE; n++) {
+//    if (f->v[n] == vno)
+//      break;
+//  }
+//  if (n >= VERTICES_PER_FACE)
+//    return (ERROR_BADPARM);
+//
+//  for (i = 0; i < v->num; i++)
+//    if (v->f[i] == fno)
+//      v->n[i] = n;
+//
+//  return (n);
+//}

@@ -18,11 +18,9 @@
 
 #include <iostream>
 
-extern "C" {
 #include "mri.h"
 #include "version.h"
-char *Progname = "mri_remove";
-}
+const char *Progname = "mri_remove";
 
 int get_option(int argc, char *argv[], int *yval) {
   int   nargs = 0;

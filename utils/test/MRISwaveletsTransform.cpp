@@ -17,9 +17,8 @@
  *
  */
 
-#include "ANN.h"
+#include "ANN/ANN.h"
 
-extern "C" {
 #include "cma.h"
 #include "const.h"
 #include "diag.h"
@@ -40,7 +39,6 @@ extern "C" {
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-}
 
 #define VERTEX_EDGE(vec, v0, v1)                                               \
   VECTOR_LOAD(vec, v1->x - v0->x, v1->y - v0->y, v1->z - v0->z)
@@ -242,7 +240,8 @@ int main(int argc, char *argv[]) {
                   "transform is not of MNI, nor Register.dat, nor FSLMAT type");
       }
 
-      MRIStransform(mris_in, mri, lta, mri_dst);
+      // TODO: uncomment
+      //      MRIStransform(mris_in, mri, lta, mri_dst);
 
       if (mri)
         MRIfree(&mri);
@@ -299,7 +298,7 @@ int main(int argc, char *argv[]) {
     MRISsaveVertexPositions(mris_out, ORIGINAL_VERTICES);
     MRISrestoreVertexPositions(mris_out, TMP_VERTICES);
     for (i = 0; i < mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize = 1;
+      mris_out->vertices_topology[i].nsizeCur = 1;
     MRISupdateSurface(mris_out);
 
     /* wavelet analysis of origx, origy, origz */
@@ -342,8 +341,9 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "Reading input from %s\n", argv[2]);
 
     mris_out = ReadIcoByOrder(order, 100);
+
     for (i = 0; i < mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize = 1;
+      mris_out->vertices_topology[i].nsizeCur = 1;
     sample_origcurvature(mris_in, mris_out);
     if (SAMPLE_OUT)
       MRISwriteCurvature(mris_out, outs_fname);
@@ -382,7 +382,7 @@ int main(int argc, char *argv[]) {
     sample_origposition(mris_in, mris_out);
 
     for (i = 0; i < mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize = 1;
+      mris_out->vertices_topology[i].nsizeCur = 1;
     MRISsaveVertexPositions(mris_out, TMP_VERTICES);
     MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
     center_brain(mris_out, mris_out);
@@ -447,7 +447,7 @@ int main(int argc, char *argv[]) {
     }
 #endif
     for (i = 0; i < mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize = 1;
+      mris_out->vertices_topology[i].nsizeCur = 1;
     MRISupdateSurface(mris_out);
     volume = brain_volume(mris_out);
     fprintf(stderr, "brain volume becomes %f\n", volume);
@@ -496,7 +496,7 @@ int main(int argc, char *argv[]) {
 #endif
     fprintf(stdout, "Reading wavelet coefficients from %s\n", argv[1]);
     for (i = 0; i < mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize = 1;
+      mris_out->vertices_topology[i].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_out, 3);
 
     fprintf(stdout, "Recover the surface using %s order coefficients\n",
@@ -617,7 +617,7 @@ int main(int argc, char *argv[]) {
     MRISreadCurvatureFile(mris_out, argv[1]);
     fprintf(stdout, "Reading wavelet coefficients from %s\n", argv[1]);
     for (i = 0; i < mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize = 1;
+      mris_out->vertices_topology[i].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_out, 3);
 
     fprintf(stdout, "Recover the surface using %s order coefficients\n",
@@ -659,7 +659,7 @@ int main(int argc, char *argv[]) {
     MRISreadCurvatureFile(mris_out, argv[1]);
     fprintf(stdout, "Reading wavelet coefficients from %s\n", argv[1]);
     for (i = 0; i < mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize = 1;
+      mris_out->vertices_topology[i].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_out, 3);
 
     fprintf(stdout, "Recover the surface using %s order coefficients\n",
@@ -763,10 +763,11 @@ int main(int argc, char *argv[]) {
 }
 
 static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
-  int     i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
-  MRIS *  mris_high;
-  VERTEX *vm_out, *vm_high, *v;
-  double  s_jkm;
+  int              i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *           mris_high;
+  VERTEX *         vm_out, *vm_high, *v;
+  VERTEX_TOPOLOGY *vt, *vm_high_top, *vm_out_top;
+  double           s_jkm;
 
   /* Initialize Ij,k*/
   for (vno = 0; vno < mris_out->nvertices; vno++) {
@@ -778,24 +779,27 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
   for (i = order; i > 0; i--) {
     mris_high = ReadIcoByOrder(i, 100); // higher order surface
     for (m = 0; m < mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize = 1;
+      mris_high->vertices_topology[m].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     for (m = number; m < mris_high->nvertices; m++) {
-      vm_out  = &mris_out->vertices[m];
-      vm_high = &mris_high->vertices[m];
-      flag    = 0;
-      for (nnum = 0; nnum < vm_high->vnum; nnum++)
-        if (vm_high->v[nnum] < number) // A(j,m)
+      vm_out      = &mris_out->vertices[m];
+      vm_high     = &mris_high->vertices[m];
+      vm_out_top  = &mris_out->vertices_topology[m];
+      vm_high_top = &mris_high->vertices_topology[m];
+      flag        = 0;
+      for (nnum = 0; nnum < vm_high_top->vnum; nnum++)
+        if (vm_high_top->v[nnum] < number) // A(j,m)
         {
-          k = vm_high->v[nnum];
-          v = &mris_out->vertices[k];
+          k  = vm_high_top->v[nnum];
+          v  = &mris_out->vertices[k];
+          vt = &mris_out->vertices_topology[k];
           v->val += 0.5 * vm_out->val;
         }
-      for (; nnum < vm_high->v2num; nnum++)
-        if (vm_high->v[nnum] < number) // B(j,m)
+      for (; nnum < vm_high_top->v2num; nnum++)
+        if (vm_high_top->v[nnum] < number) // B(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           if (flag == 0)
             b1 = k;
           else
@@ -804,18 +808,18 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
           v = &mris_out->vertices[k];
           v->val += 0.125 * vm_out->val;
         }
-      for (; nnum < vm_high->v3num; nnum++)
-        if (vm_high->v[nnum] < number) // C(j,m)
+      for (; nnum < vm_high_top->v3num; nnum++)
+        if (vm_high_top->v[nnum] < number) // C(j,m)
         {
-          k    = vm_high->v[nnum];
+          k    = vm_high_top->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
-          for (cno = mris_high->vertices[b1].vnum;
-               cno < mris_high->vertices[b1].v2num; cno++)
-            if (mris_high->vertices[b1].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b1].vnum;
+               cno < mris_high->vertices_topology[b1].v2num; cno++)
+            if (mris_high->vertices_topology[b1].v[cno] == k)
               flag = 1;
-          for (cno = mris_high->vertices[b2].vnum;
-               cno < mris_high->vertices[b2].v2num; cno++)
-            if (mris_high->vertices[b2].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b2].vnum;
+               cno < mris_high->vertices_topology[b2].v2num; cno++)
+            if (mris_high->vertices_topology[b2].v[cno] == k)
               flag = 1;
           if (flag) {
             v = &mris_out->vertices[k];
@@ -829,7 +833,7 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
   for (i = order; i > 0; i--) {
     mris_high = ReadIcoByOrder(i, 100); // higher order surface
     for (m = 0; m < mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize = 1;
+      mris_high->vertices_topology[m].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
 
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
@@ -838,19 +842,20 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       flag    = 0;
-      for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
-        if (vm_high->v[nnum] < number)             // neighbor A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum;
+           nnum++)                         // first order neighborhood
+        if (vm_high_top->v[nnum] < number) // neighbor A(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           v = &mris_out->vertices[k];
           vm_out->curv -= 0.5 * v->curv;
           // if(m==67770) fprintf(stdout, "%f, %d, %f\n", v->curv, k,
           // vm_out->curv);
         }
-      for (; nnum < vm_high->v2num; nnum++) // second order neighborhood
-        if (vm_high->v[nnum] < number)      // neighbor B(j,m)
+      for (; nnum < vm_high_top->v2num; nnum++) // second order neighborhood
+        if (vm_high_top->v[nnum] < number)      // neighbor B(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           if (flag == 0)
             b1 = k;
           else
@@ -861,18 +866,18 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
           // if(m==67770) fprintf(stdout, "%f, %d, %f\n", v->curv, k,
           // vm_out->curv);
         }
-      for (; nnum < vm_high->v3num; nnum++)
-        if (vm_high->v[nnum] < number) // neighbor C(j,m)
+      for (; nnum < vm_high_top->v3num; nnum++)
+        if (vm_high_top->v[nnum] < number) // neighbor C(j,m)
         {
-          k    = vm_high->v[nnum];
+          k    = vm_high_top->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
-          for (cno = mris_high->vertices[b1].vnum;
-               cno < mris_high->vertices[b1].v2num; cno++)
-            if (mris_high->vertices[b1].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b1].vnum;
+               cno < mris_high->vertices_topology[b1].v2num; cno++)
+            if (mris_high->vertices_topology[b1].v[cno] == k)
               flag = 1;
-          for (cno = mris_high->vertices[b2].vnum;
-               cno < mris_high->vertices[b2].v2num; cno++)
-            if (mris_high->vertices[b2].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b2].vnum;
+               cno < mris_high->vertices_topology[b2].v2num; cno++)
+            if (mris_high->vertices_topology[b2].v[cno] == k)
               flag = 1;
           if (flag) {
             v = &mris_out->vertices[k];
@@ -888,10 +893,10 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
     for (m = number; m < mris_high->nvertices; m++) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      for (nnum = 0; nnum < vm_high->vnum; nnum++)
-        if (vm_high->v[nnum] < number) // A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum; nnum++)
+        if (vm_high_top->v[nnum] < number) // A(j,m)
         {
-          k     = vm_high->v[nnum];
+          k     = vm_high_top->v[nnum];
           v     = &mris_out->vertices[k];
           s_jkm = vm_out->val / 2 / v->val;
           // if(k==6642) fprintf(stdout, "%f, %f, %f, %f, %d\n", vm_out->val,
@@ -905,10 +910,11 @@ static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
 }
 
 static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
-  int     i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
-  MRIS *  mris_high;
-  VERTEX *vm_out, *vm_high, *v;
-  double  s_jkm;
+  int              i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *           mris_high;
+  VERTEX *         vm_out, *vm_high, *v;
+  VERTEX_TOPOLOGY *vm_out_top, *vm_high_top, *vt;
+  double           s_jkm;
 
   /* Initialize Ij,k*/
   for (vno = 0; vno < mris_out->nvertices; vno++) {
@@ -920,24 +926,24 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
   for (i = order; i > 0; i--) {
     mris_high = ReadIcoByOrder(i, 100); // higher order surface
     for (m = 0; m < mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize = 1;
+      mris_high->vertices_topology[m].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     for (m = number; m < mris_high->nvertices; m++) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       flag    = 0;
-      for (nnum = 0; nnum < vm_high->vnum; nnum++)
-        if (vm_high->v[nnum] < number) // A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum; nnum++)
+        if (vm_high_top->v[nnum] < number) // A(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           v = &mris_out->vertices[k];
           v->val += 0.5 * vm_out->val;
         }
-      for (; nnum < vm_high->v2num; nnum++)
-        if (vm_high->v[nnum] < number) // B(j,m)
+      for (; nnum < vm_high_top->v2num; nnum++)
+        if (vm_high_top->v[nnum] < number) // B(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           if (flag == 0)
             b1 = k;
           else
@@ -946,18 +952,18 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
           v = &mris_out->vertices[k];
           v->val += 0.125 * vm_out->val;
         }
-      for (; nnum < vm_high->v3num; nnum++)
-        if (vm_high->v[nnum] < number) // C(j,m)
+      for (; nnum < vm_high_top->v3num; nnum++)
+        if (vm_high_top->v[nnum] < number) // C(j,m)
         {
-          k    = vm_high->v[nnum];
+          k    = vm_high_top->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
-          for (cno = mris_high->vertices[b1].vnum;
-               cno < mris_high->vertices[b1].v2num; cno++)
-            if (mris_high->vertices[b1].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b1].vnum;
+               cno < mris_high->vertices_topology[b1].v2num; cno++)
+            if (mris_high->vertices_topology[b1].v[cno] == k)
               flag = 1;
-          for (cno = mris_high->vertices[b2].vnum;
-               cno < mris_high->vertices[b2].v2num; cno++)
-            if (mris_high->vertices[b2].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b2].vnum;
+               cno < mris_high->vertices_topology[b2].v2num; cno++)
+            if (mris_high->vertices_topology[b2].v[cno] == k)
               flag = 1;
           if (flag) {
             v = &mris_out->vertices[k];
@@ -971,7 +977,7 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
   for (i = order; i > 0; i--) {
     mris_high = ReadIcoByOrder(i, 100); // higher order surface
     for (m = 0; m < mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize = 1;
+      mris_high->vertices_topology[m].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
 
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
@@ -980,19 +986,20 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       flag    = 0;
-      for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
-        if (vm_high->v[nnum] < number)             // neighbor A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum;
+           nnum++)                         // first order neighborhood
+        if (vm_high_top->v[nnum] < number) // neighbor A(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           v = &mris_out->vertices[k];
           vm_out->origx -= 0.5 * v->origx;
           vm_out->origy -= 0.5 * v->origy;
           vm_out->origz -= 0.5 * v->origz;
         }
-      for (; nnum < vm_high->v2num; nnum++) // second order neighborhood
-        if (vm_high->v[nnum] < number)      // neighbor B(j,m)
+      for (; nnum < vm_high_top->v2num; nnum++) // second order neighborhood
+        if (vm_high_top->v[nnum] < number)      // neighbor B(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           if (flag == 0)
             b1 = k;
           else
@@ -1003,18 +1010,18 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
           vm_out->origy -= 0.125 * v->origy;
           vm_out->origz -= 0.125 * v->origz;
         }
-      for (; nnum < vm_high->v3num; nnum++)
-        if (vm_high->v[nnum] < number) // neighbor C(j,m)
+      for (; nnum < vm_high_top->v3num; nnum++)
+        if (vm_high_top->v[nnum] < number) // neighbor C(j,m)
         {
-          k    = vm_high->v[nnum];
+          k    = vm_high_top->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
-          for (cno = mris_high->vertices[b1].vnum;
-               cno < mris_high->vertices[b1].v2num; cno++)
-            if (mris_high->vertices[b1].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b1].vnum;
+               cno < mris_high->vertices_topology[b1].v2num; cno++)
+            if (mris_high->vertices_topology[b1].v[cno] == k)
               flag = 1;
-          for (cno = mris_high->vertices[b2].vnum;
-               cno < mris_high->vertices[b2].v2num; cno++)
-            if (mris_high->vertices[b2].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b2].vnum;
+               cno < mris_high->vertices_topology[b2].v2num; cno++)
+            if (mris_high->vertices_topology[b2].v[cno] == k)
               flag = 1;
           if (flag) {
             v = &mris_out->vertices[k];
@@ -1030,10 +1037,10 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
     for (m = number; m < mris_high->nvertices; m++) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      for (nnum = 0; nnum < vm_high->vnum; nnum++)
-        if (vm_high->v[nnum] < number) // A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum; nnum++)
+        if (vm_high_top->v[nnum] < number) // A(j,m)
         {
-          k     = vm_high->v[nnum];
+          k     = vm_high_top->v[nnum];
           v     = &mris_out->vertices[k];
           s_jkm = vm_out->val / 2 / v->val;
           v->origx += s_jkm * vm_out->origx;
@@ -1047,10 +1054,11 @@ static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
 }
 
 static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
-  int     i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
-  MRIS *  mris_high;
-  VERTEX *vm_out, *vm_high, *v;
-  double  s_jkm;
+  int              i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *           mris_high;
+  VERTEX *         vm_out, *vm_high, *v;
+  VERTEX_TOPOLOGY *vm_out_top, *vm_high_top, *vt;
+  double           s_jkm;
 
   /*Initialize Ij,k*/
   for (vno = 0; vno < mris_out->nvertices; vno++) {
@@ -1062,24 +1070,24 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
   for (i = order; i > 0; i--) {
     mris_high = ReadIcoByOrder(i, 100); // higher order surface
     for (m = 0; m < mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize = 1;
+      mris_high->vertices_topology[m].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     for (m = number; m < mris_high->nvertices; m++) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       flag    = 0;
-      for (nnum = 0; nnum < vm_high->vnum; nnum++)
-        if (vm_high->v[nnum] < number) // A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum; nnum++)
+        if (vm_high_top->v[nnum] < number) // A(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           v = &mris_out->vertices[k];
           v->val += 0.5 * vm_out->val;
         }
-      for (; nnum < vm_high->v2num; nnum++)
-        if (vm_high->v[nnum] < number) // B(j,m)
+      for (; nnum < vm_high_top->v2num; nnum++)
+        if (vm_high_top->v[nnum] < number) // B(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           if (flag == 0)
             b1 = k;
           else
@@ -1088,18 +1096,18 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
           v = &mris_out->vertices[k];
           v->val += 0.125 * vm_out->val;
         }
-      for (; nnum < vm_high->v3num; nnum++)
-        if (vm_high->v[nnum] < number) // C(j,m)
+      for (; nnum < vm_high_top->v3num; nnum++)
+        if (vm_high_top->v[nnum] < number) // C(j,m)
         {
-          k    = vm_high->v[nnum];
+          k    = vm_high_top->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
-          for (cno = mris_high->vertices[b1].vnum;
-               cno < mris_high->vertices[b1].v2num; cno++)
-            if (mris_high->vertices[b1].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b1].vnum;
+               cno < mris_high->vertices_topology[b1].v2num; cno++)
+            if (mris_high->vertices_topology[b1].v[cno] == k)
               flag = 1;
-          for (cno = mris_high->vertices[b2].vnum;
-               cno < mris_high->vertices[b2].v2num; cno++)
-            if (mris_high->vertices[b2].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b2].vnum;
+               cno < mris_high->vertices_topology[b2].v2num; cno++)
+            if (mris_high->vertices_topology[b2].v[cno] == k)
               flag = 1;
           if (flag) {
             v = &mris_out->vertices[k];
@@ -1112,7 +1120,7 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
   for (i = 1; i <= order; i++) {
     mris_high = ReadIcoByOrder(i, 100); // higher order surface
     for (m = 0; m < mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize = 1;
+      mris_high->vertices_topology[m].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
 
@@ -1121,10 +1129,10 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
     for (m = number; m < mris_high->nvertices; m++) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      for (nnum = 0; nnum < vm_high->vnum; nnum++)
-        if (vm_high->v[nnum] < number) // A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum; nnum++)
+        if (vm_high_top->v[nnum] < number) // A(j,m)
         {
-          k     = vm_high->v[nnum];
+          k     = vm_high_top->v[nnum];
           v     = &mris_out->vertices[k];
           s_jkm = vm_out->val / 2 / v->val;
           v->curv -= s_jkm * vm_out->curv;
@@ -1136,17 +1144,18 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       flag    = 0;
-      for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
-        if (vm_high->v[nnum] < number)             // neighbor A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum;
+           nnum++)                         // first order neighborhood
+        if (vm_high_top->v[nnum] < number) // neighbor A(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           v = &mris_out->vertices[k];
           vm_out->curv += 0.5 * v->curv;
         }
-      for (; nnum < vm_high->v2num; nnum++) // second order neighborhood
-        if (vm_high->v[nnum] < number)      // neighbor B(j,m)
+      for (; nnum < vm_high_top->v2num; nnum++) // second order neighborhood
+        if (vm_high_top->v[nnum] < number)      // neighbor B(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           if (flag == 0)
             b1 = k;
           else
@@ -1155,18 +1164,18 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
           v = &mris_out->vertices[k];
           vm_out->curv += 0.125 * v->curv;
         }
-      for (; nnum < vm_high->v3num; nnum++) // third order neighborhood
-        if (vm_high->v[nnum] < number)      // neighbor C(j,m)
+      for (; nnum < vm_high_top->v3num; nnum++) // third order neighborhood
+        if (vm_high_top->v[nnum] < number)      // neighbor C(j,m)
         {
-          k    = vm_high->v[nnum];
+          k    = vm_high_top->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
-          for (cno = mris_high->vertices[b1].vnum;
-               cno < mris_high->vertices[b1].v2num; cno++)
-            if (mris_high->vertices[b1].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b1].vnum;
+               cno < mris_high->vertices_topology[b1].v2num; cno++)
+            if (mris_high->vertices_topology[b1].v[cno] == k)
               flag = 1;
-          for (cno = mris_high->vertices[b2].vnum;
-               cno < mris_high->vertices[b2].v2num; cno++)
-            if (mris_high->vertices[b2].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b2].vnum;
+               cno < mris_high->vertices_topology[b2].v2num; cno++)
+            if (mris_high->vertices_topology[b2].v[cno] == k)
               flag = 1;
           if (flag) {
             v = &mris_out->vertices[k];
@@ -1180,10 +1189,11 @@ static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
 }
 
 static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
-  int     i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
-  MRIS *  mris_high;
-  VERTEX *vm_out, *vm_high, *v;
-  double  s_jkm;
+  int              i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *           mris_high;
+  VERTEX *         vm_out, *vm_high, *v;
+  VERTEX_TOPOLOGY *vm_out_top, *vm_high_top, *vt;
+  double           s_jkm;
 
   /*Initialize Ij,k*/
   for (vno = 0; vno < mris_out->nvertices; vno++) {
@@ -1195,24 +1205,24 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
   for (i = order; i > 0; i--) {
     mris_high = ReadIcoByOrder(i, 100); // higher order surface
     for (m = 0; m < mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize = 1;
+      mris_high->vertices_topology[m].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     for (m = number; m < mris_high->nvertices; m++) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       flag    = 0;
-      for (nnum = 0; nnum < vm_high->vnum; nnum++)
-        if (vm_high->v[nnum] < number) // A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum; nnum++)
+        if (vm_high_top->v[nnum] < number) // A(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           v = &mris_out->vertices[k];
           v->val += 0.5 * vm_out->val;
         }
-      for (; nnum < vm_high->v2num; nnum++)
-        if (vm_high->v[nnum] < number) // B(j,m)
+      for (; nnum < vm_high_top->v2num; nnum++)
+        if (vm_high_top->v[nnum] < number) // B(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           if (flag == 0)
             b1 = k;
           else
@@ -1221,18 +1231,18 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
           v = &mris_out->vertices[k];
           v->val += 0.125 * vm_out->val;
         }
-      for (; nnum < vm_high->v3num; nnum++)
-        if (vm_high->v[nnum] < number) // C(j,m)
+      for (; nnum < vm_high_top->v3num; nnum++)
+        if (vm_high_top->v[nnum] < number) // C(j,m)
         {
-          k    = vm_high->v[nnum];
+          k    = vm_high_top->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
-          for (cno = mris_high->vertices[b1].vnum;
-               cno < mris_high->vertices[b1].v2num; cno++)
-            if (mris_high->vertices[b1].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b1].vnum;
+               cno < mris_high->vertices_topology[b1].v2num; cno++)
+            if (mris_high->vertices_topology[b1].v[cno] == k)
               flag = 1;
-          for (cno = mris_high->vertices[b2].vnum;
-               cno < mris_high->vertices[b2].v2num; cno++)
-            if (mris_high->vertices[b2].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b2].vnum;
+               cno < mris_high->vertices_topology[b2].v2num; cno++)
+            if (mris_high->vertices_topology[b2].v[cno] == k)
               flag = 1;
           if (flag) {
             v = &mris_out->vertices[k];
@@ -1245,7 +1255,7 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
   for (i = 1; i <= order; i++) {
     mris_high = ReadIcoByOrder(i, 100); // higher order surface
     for (m = 0; m < mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize = 1;
+      mris_high->vertices_topology[m].nsizeCur = 1;
     MRISsetNeighborhoodSizeAndDist(mris_high, 3);
     number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
 
@@ -1254,10 +1264,10 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
     for (m = number; m < mris_high->nvertices; m++) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      for (nnum = 0; nnum < vm_high->vnum; nnum++)
-        if (vm_high->v[nnum] < number) // A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum; nnum++)
+        if (vm_high_top->v[nnum] < number) // A(j,m)
         {
-          k     = vm_high->v[nnum];
+          k     = vm_high_top->v[nnum];
           v     = &mris_out->vertices[k];
           s_jkm = vm_out->val / 2 / v->val;
           v->origx -= s_jkm * vm_out->origx;
@@ -1271,19 +1281,20 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
       vm_out  = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
       flag    = 0;
-      for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
-        if (vm_high->v[nnum] < number)             // neighbor A(j,m)
+      for (nnum = 0; nnum < vm_high_top->vnum;
+           nnum++)                         // first order neighborhood
+        if (vm_high_top->v[nnum] < number) // neighbor A(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           v = &mris_out->vertices[k];
           vm_out->origx += 0.5 * v->origx;
           vm_out->origy += 0.5 * v->origy;
           vm_out->origz += 0.5 * v->origz;
         }
-      for (; nnum < vm_high->v2num; nnum++) // second order neighborhood
-        if (vm_high->v[nnum] < number)      // neighbor B(j,m)
+      for (; nnum < vm_high_top->v2num; nnum++) // second order neighborhood
+        if (vm_high_top->v[nnum] < number)      // neighbor B(j,m)
         {
-          k = vm_high->v[nnum];
+          k = vm_high_top->v[nnum];
           if (flag == 0)
             b1 = k;
           else
@@ -1294,18 +1305,18 @@ static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
           vm_out->origy += 0.125 * v->origy;
           vm_out->origz += 0.125 * v->origz;
         }
-      for (; nnum < vm_high->v3num; nnum++) // third order neighborhood
-        if (vm_high->v[nnum] < number)      // neighbor C(j,m)
+      for (; nnum < vm_high_top->v3num; nnum++) // third order neighborhood
+        if (vm_high_top->v[nnum] < number)      // neighbor C(j,m)
         {
-          k    = vm_high->v[nnum];
+          k    = vm_high_top->v[nnum];
           flag = 0; // C has to be a second-order neighbor of B
-          for (cno = mris_high->vertices[b1].vnum;
-               cno < mris_high->vertices[b1].v2num; cno++)
-            if (mris_high->vertices[b1].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b1].vnum;
+               cno < mris_high->vertices_topology[b1].v2num; cno++)
+            if (mris_high->vertices_topology[b1].v[cno] == k)
               flag = 1;
-          for (cno = mris_high->vertices[b2].vnum;
-               cno < mris_high->vertices[b2].v2num; cno++)
-            if (mris_high->vertices[b2].v[cno] == k)
+          for (cno = mris_high->vertices_topology[b2].vnum;
+               cno < mris_high->vertices_topology[b2].v2num; cno++)
+            if (mris_high->vertices_topology[b2].v[cno] == k)
               flag = 1;
           if (flag) {
             v = &mris_out->vertices[k];
@@ -1425,11 +1436,12 @@ static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
 
 static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
                                         MRI_SURFACE *mris_dst) {
-  int           index, fno, fnum = 0, i;
-  VERTEX *      vertex;
-  double        nearest, dist, r, s, t;
-  double        a, b, c, p;
-  ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
+  int              index, fno, fnum = 0, i;
+  VERTEX *         vertex;
+  VERTEX_TOPOLOGY *vertex_top;
+  double           nearest, dist, r, s, t;
+  double           a, b, c, p;
+  ANNpointArray    pa = annAllocPts(mris_src->nvertices, 3);
 
   for (index = 0; index < mris_src->nvertices; index++) {
     pa[index][0] = mris_src->vertices[index].x;
@@ -1466,8 +1478,8 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
 #if 1
     vertex  = &mris_src->vertices[annIndex[0]];
     nearest = 100000;
-    for (i = 0; i < vertex->num; i++) {
-      fno  = vertex->f[i];
+    for (i = 0; i < vertex_top->num; i++) {
+      fno  = vertex_top->f[i];
       dist = v_to_f_distance(&mris_dst->vertices[index], mris_src, fno, 0);
       if (dist < nearest) {
         nearest = dist;
@@ -1596,11 +1608,12 @@ static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
 
 static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
                                          MRI_SURFACE *mris_dst) {
-  int           index, fno, fnum = 0, i;
-  VERTEX *      vertex;
-  double        nearest, dist, r, s, t;
-  double        a, b, c, p;
-  ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
+  int              index, fno, fnum = 0, i;
+  VERTEX *         vertex;
+  VERTEX_TOPOLOGY *vertex_top;
+  double           nearest, dist, r, s, t;
+  double           a, b, c, p;
+  ANNpointArray    pa = annAllocPts(mris_src->nvertices, 3);
 
   for (index = 0; index < mris_src->nvertices; index++) {
     pa[index][0] = mris_src->vertices[index].x;
@@ -1637,8 +1650,8 @@ static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
 #if 1
     vertex  = &mris_src->vertices[annIndex[0]];
     nearest = 100000;
-    for (i = 0; i < vertex->num; i++) {
-      fno  = vertex->f[i];
+    for (i = 0; i < vertex_top->num; i++) {
+      fno  = vertex_top->f[i];
       dist = v_to_f_distance(&mris_dst->vertices[index], mris_src, fno, 0);
       if (dist < nearest) {
         nearest = dist;

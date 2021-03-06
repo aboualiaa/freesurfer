@@ -20,14 +20,11 @@
 #include <iomanip>
 #include <iostream>
 
-extern "C" {
-
 #include "macros.h"
 #include "matrix.h"
 #include "transform.h"
 
 const char *Progname = "mnitest";
-}
 
 bool isEqual(MATRIX *m1, MATRIX *m2) {
   for (int j = 1; j < 5; ++j)
@@ -39,7 +36,7 @@ bool isEqual(MATRIX *m1, MATRIX *m2) {
         return false;
       }
     }
-  cout.flush();
+  std::cout.flush();
   return true;
 }
 

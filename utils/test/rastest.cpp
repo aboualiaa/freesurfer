@@ -20,10 +20,10 @@
 #include <iomanip>
 #include <iostream>
 
-extern "C" {
 #include "mri.h"
 const char *Progname = "rastest";
-}
+
+using namespace std;
 
 double t = 0.000001;
 

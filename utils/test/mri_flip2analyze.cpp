@@ -24,11 +24,9 @@
 #include <iomanip>
 #include <iostream>
 
-extern "C" {
 #include "mri.h"
 
-char *Progname = "mri_flip2analyze";
-}
+const char *Progname = "mri_flip2analyze";
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {

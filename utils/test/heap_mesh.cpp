@@ -17,7 +17,7 @@
  *
  */
 
-#include "heap.h"
+#include "heap_mesh.h"
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>

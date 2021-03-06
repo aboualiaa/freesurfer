@@ -21,13 +21,10 @@
 #include <iomanip>
 #include <iostream>
 
-extern "C" {
-
 #include "error.h"
 #include "mri.h"
 
 const char *Progname = "testcras";
-}
 
 int PrettyMatrixPrint(MATRIX *mat) {
   int row;
@@ -89,7 +86,9 @@ void printInfo(MRI *mri) {
       mri->x_s, mri->y_s, mri->z_s, mri->c_s);
 
   printf("\nvoxel to ras transform:\n");
-  PrettyMatrixPrint(mri->i_to_r__);
+
+  /// TODO: uncomment
+  //  PrettyMatrixPrint(mri->i_to_r__);
   printf("\nras to voxel transform:\n");
   PrettyMatrixPrint(mri->r_to_i__);
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../../test.sh"
+source "$(dirname $0)/test_main.sh"
 
 test_command testcolortab ${FREESURFER_HOME}/FreeSurferColorLUT.txt
 test_command test_c_nr_wrapper

@@ -20,14 +20,14 @@
 #include <iomanip>
 #include <iostream>
 
-extern "C" {
 #include "error.h"
 #include "matrix.h"
 #include "mri.h"
 const char *Progname = "surftest";
-}
 
 #include "transform.h"
+
+using namespace std;
 
 #define V4_LOAD(v, x, y, z, r)                                                 \
   (VECTOR_ELT(v, 1) = x, VECTOR_ELT(v, 2) = y, VECTOR_ELT(v, 3) = z,           \

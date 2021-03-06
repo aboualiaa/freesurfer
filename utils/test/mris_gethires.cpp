@@ -20,13 +20,11 @@
 #include <iomanip>
 #include <iostream>
 
-extern "C" {
 #include "error.h"
 #include "mri.h"
 #include "mrisurf.h"
 
 const char *Progname = "mris_gethires";
-}
 
 int main(int argc, char *argv[]) {
   MRI *src = 0;

@@ -21,11 +21,9 @@
 #include <iomanip>
 #include <iostream>
 
-extern "C" {
 #include "mri.h"
 
 const char *Progname = "mri_uchar";
-}
 
 int main(int argc, char *argv[]) {
   if (argc < 1) {
